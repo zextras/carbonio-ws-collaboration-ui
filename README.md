@@ -34,6 +34,18 @@ npm install
 npm run build
 ```
 
+#### Tests
+
+```
+npm run test
+```
+
+#### Lint
+
+```
+npm run lint
+```
+
 ## License
 Carbonio Chats UI - Web client for Zextras Carbonio Chats module
 
