@@ -10,8 +10,11 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import { getRoomNameSelector } from '../../store/selectors/RoomsSelectors';
+import { getCapability } from '../../store/selectors/SessionSelectors';
 import useStore from '../../store/Store';
+import { CapabilityType } from '../../types/store/SessionTypes';
 import useMediaQueryCheck from '../../utils/useMediaQueryCheck';
+import ConversationHeaderMeetingButton from './ConversationHeaderMeetingButton';
 
 type ConversationHeaderProps = {
 	roomId: string;
@@ -31,6 +34,8 @@ const ConversationHeader = ({
 	const [t] = useTranslation();
 	const infoTooltip = t('conversationInfo.info', 'Info');
 	const roomName = useStore((state) => getRoomNameSelector(state, roomId)) || '';
+	const canVideoCall = useStore((store) => getCapability(store, CapabilityType.CAN_VIDEO_CALL));
+
 	const isDesktopView = useMediaQueryCheck();
 
 	const toggleInfoPanel = useCallback(() => {
@@ -53,6 +58,9 @@ const ConversationHeader = ({
 					</DSText>
 				</Container>
 				<Container orientation="horizontal" width="fit" style={{ minWidth: 'fit-content' }}>
+					{!canVideoCall && ( // TODO change check in canVideoCall &&
+						<ConversationHeaderMeetingButton roomId={roomId} />
+					)}
 					{!isDesktopView && (
 						<Tooltip label={infoTooltip}>
 							<IconButton

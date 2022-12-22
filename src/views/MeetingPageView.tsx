@@ -3,17 +3,37 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import React, { ReactElement } from 'react';
+
+import { Button, Container, Padding } from '@zextras/carbonio-design-system';
+import React, { ReactElement, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 
-import useRouting from '../hooks/useRouting';
+import useRouting, { PAGE_INFO_TYPE } from '../hooks/useRouting';
+import { MeetingsApi } from '../network';
 
 const MeetingPageView = (): ReactElement => {
-	const { goToWaitingPage } = useRouting();
+	const { goToInfoPage } = useRouting();
 	const { meetingId }: any = useParams();
-	console.log(meetingId);
-	setTimeout(() => goToWaitingPage('roomId', 'roomName'), 5000);
-	return <div>meeting page</div>;
+
+	const leaveMeeting = useCallback(() => {
+		MeetingsApi.leaveMeeting(meetingId)
+			.then(() => goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED))
+			.catch(() => console.log('Error on leave'));
+	}, [meetingId, goToInfoPage]);
+
+	const deleteMeeting = useCallback(() => {
+		MeetingsApi.deleteMeeting(meetingId)
+			.then(() => goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED))
+			.catch(() => console.log('Error on leave'));
+	}, [meetingId, goToInfoPage]);
+
+	return (
+		<Container>
+			<Button label="Leave meeting" onClick={leaveMeeting} color="error" size="large" />
+			<Padding />
+			<Button label="Delete meeting" onClick={deleteMeeting} color="error" size="large" />
+		</Container>
+	);
 };
 
 export default MeetingPageView;

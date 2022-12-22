@@ -4,19 +4,18 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { ReactElement, useEffect } from 'react';
+import { Container } from '@zextras/carbonio-design-system';
+import React, { ReactElement, useMemo } from 'react';
 
-import useRouting from '../hooks/useRouting';
+import AccessMeetingModal from '../components/meeting/AccessMeetingModal';
 
 const AccessMeetingPageView = (): ReactElement => {
-	const { goToMeetingPage } = useRouting();
-	useEffect(() => {
-		setTimeout(() => {
-			goToMeetingPage('123456');
-		}, 5000);
-	}, [goToMeetingPage]);
+	// Retrieve room information
+	const roomId: string = useMemo(() => document.location.pathname.split('external/')[1], []);
 
-	return <div>Access meeting page</div>;
+	return (
+		<Container background={'gray0'}>{roomId && <AccessMeetingModal roomId={roomId} />}</Container>
+	);
 };
 
 export default AccessMeetingPageView;

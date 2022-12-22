@@ -20,11 +20,11 @@ import SecondaryBarSingleGroupsView from './components/secondaryBar/SecondaryBar
 import { CHATS_ROUTE_TEST, PRODUCT_NAME } from './constants/appConstants';
 import useRegisterCreationButton from './hooks/useRegisterCreationButton';
 import useSnackbarManager from './hooks/useSnackbarManager';
-import { RoomsApi, SessionApi } from './network';
+import { MeetingsApi, RoomsApi, SessionApi } from './network';
 import { WebSocketClient } from './network/websocket/WebSocketClient';
 import XMPPClient from './network/xmpp/XMPPClient';
 import useStore from './store/Store';
-import AccessMeetingView from './views/AccessMeetingView';
+import ExternalMainView from './views/ExternalMain';
 import ShimmeringConversationView from './views/shimmerViews/ShimmeringConversationView';
 import ShimmeringInfoPanelView from './views/shimmerViews/ShimmeringInfoPanelView';
 
@@ -72,6 +72,7 @@ const initApp = () => {
 		.then((resp) => {
 			// CHATS BE: get all rooms list
 			RoomsApi.listRooms(true, true);
+			MeetingsApi.listMeetings();
 
 			// XMPP: connection to Mongoose Instant Messaging platform
 			const xmppClient = new XMPPClient();
@@ -107,7 +108,7 @@ export default function App() {
 			visible: false,
 			label: PRODUCT_NAME,
 			primaryBar: 'coffee',
-			appView: () => <AccessMeetingView />,
+			appView: () => <ExternalMainView />,
 			standalone: {
 				hidePrimaryBar: true,
 				hideShellHeader: true,

@@ -15,6 +15,10 @@ export function wsEventsHandler(event: WsEvent): void {
 	const eventArrivesFromAnotherSession = event.sessionId !== useStore.getState().session.sessionId;
 
 	switch (event.type) {
+		case WsEventType.INITIALIZATION: {
+			state.setSessionId(event.sessionId);
+			break;
+		}
 		case WsEventType.ROOM_CREATED: {
 			if (eventArrivesFromAnotherSession) {
 				RoomsApi.getRoom(event.roomId)
@@ -83,14 +87,6 @@ export function wsEventsHandler(event: WsEvent): void {
 			}
 			break;
 		}
-		case WsEventType.ATTACHMENT_ADDED: {
-			// TODO handle
-			break;
-		}
-		case WsEventType.ATTACHMENT_REMOVED: {
-			// TODO handle
-			break;
-		}
 		case WsEventType.ROOM_MUTED: {
 			if (eventArrivesFromAnotherSession) {
 				state.setRoomMuted(event.roomId);
@@ -101,6 +97,20 @@ export function wsEventsHandler(event: WsEvent): void {
 			if (eventArrivesFromAnotherSession) {
 				state.setRoomUnmuted(event.roomId);
 			}
+			break;
+		}
+		case WsEventType.ROOM_HISTORY_CLEARED: {
+			if (eventArrivesFromAnotherSession) {
+				state.setClearedAt(event.roomId, event.clearedAt);
+			}
+			break;
+		}
+		case WsEventType.ATTACHMENT_ADDED: {
+			// TODO handle
+			break;
+		}
+		case WsEventType.ATTACHMENT_REMOVED: {
+			// TODO handle
 			break;
 		}
 		case WsEventType.USER_PICTURE_CHANGED: {
@@ -115,10 +125,36 @@ export function wsEventsHandler(event: WsEvent): void {
 			}
 			break;
 		}
-		case WsEventType.ROOM_HISTORY_CLEARED: {
+		case WsEventType.MEETING_CREATED: {
 			if (eventArrivesFromAnotherSession) {
-				state.setClearedAt(event.roomId, event.clearedAt);
+				state.addMeeting({
+					id: event.meetingId,
+					roomId: event.roomId,
+					participants: [],
+					createdAt: event.sentDate
+				});
 			}
+			break;
+		}
+		case WsEventType.MEETING_JOINED: {
+			if (eventArrivesFromAnotherSession) {
+				state.addParticipant(event.meetingId, {
+					sessionId: event.sessionId,
+					userId: event.from,
+					hasMicrophoneOn: false,
+					hasCameraOn: false
+				});
+			}
+			break;
+		}
+		case WsEventType.MEETING_LEFT: {
+			if (eventArrivesFromAnotherSession) {
+				state.removeParticipant(event.meetingId, event.sessionId);
+			}
+			break;
+		}
+		case WsEventType.MEETING_DELETED: {
+			state.deleteMeeting(event.meetingId);
 			break;
 		}
 		default:

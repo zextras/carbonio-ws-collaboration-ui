@@ -14,7 +14,7 @@ import InfoPage from './InfoPage';
 import MeetingPageView from './MeetingPageView';
 import WaitingRoomPageView from './WaitingRoomPageView';
 
-const AccessMeetingView = (): ReactElement => {
+const ExternalMainView = (): ReactElement => {
 	const history = createMemoryHistory();
 
 	return (
@@ -29,4 +29,4 @@ const AccessMeetingView = (): ReactElement => {
 	);
 };
 
-export default AccessMeetingView;
+export default ExternalMainView;
