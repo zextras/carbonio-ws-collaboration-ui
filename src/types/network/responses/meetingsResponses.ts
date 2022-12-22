@@ -15,3 +15,15 @@ export type JoinMeetingResponse = MeetingBe;
 export type LeaveMeetingResponse = Response;
 
 export type DeleteMeetingResponse = Response;
+
+export type OpenVideoStreamResponse = Response;
+
+export type CloseVideoStreamResponse = Response;
+
+export type OpenAudioStreamResponse = Response;
+
+export type CloseAudioStreamResponse = Response;
+
+export type OpenScreenShareStreamResponse = Response;
+
+export type CloseScreenShareStreamResponse = Response;

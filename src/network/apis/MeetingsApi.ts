@@ -9,11 +9,17 @@ import { RequestType } from '../../types/network/apis/IBaseAPI';
 import IMeetingsApi from '../../types/network/apis/IMeetingsApi';
 import { JoinSettings } from '../../types/network/models/meetingBeTypes';
 import {
+	CloseAudioStreamResponse,
+	CloseScreenShareStreamResponse,
+	CloseVideoStreamResponse,
 	DeleteMeetingResponse,
 	GetMeetingResponse,
 	JoinMeetingResponse,
 	LeaveMeetingResponse,
-	ListMeetingsResponse
+	ListMeetingsResponse,
+	OpenAudioStreamResponse,
+	OpenScreenShareStreamResponse,
+	OpenVideoStreamResponse
 } from '../../types/network/responses/meetingsResponses';
 import BaseAPI from './BaseAPI';
 
@@ -61,6 +67,33 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 
 	public deleteMeeting(meetingId: string): Promise<DeleteMeetingResponse> {
 		return this.fetchAPI(`meetings/${meetingId}`, RequestType.DELETE);
+	}
+
+	public openVideoStream(meetingId: string): Promise<OpenVideoStreamResponse> {
+		return this.fetchAPI(`meetings/${meetingId}/video`, RequestType.PUT);
+	}
+
+	public closeVideoStream(meetingId: string, sessionId: string): Promise<CloseVideoStreamResponse> {
+		return this.fetchAPI(`meetings/${meetingId}/sessions/${sessionId}/video`, RequestType.DELETE);
+	}
+
+	public openAudioStream(meetingId: string): Promise<OpenAudioStreamResponse> {
+		return this.fetchAPI(`meetings/${meetingId}/audio`, RequestType.PUT);
+	}
+
+	public closeAudioStream(meetingId: string, sessionId: string): Promise<CloseAudioStreamResponse> {
+		return this.fetchAPI(`meetings/${meetingId}/sessions/${sessionId}/audio`, RequestType.DELETE);
+	}
+
+	public openScreenShareStream(meetingId: string): Promise<OpenScreenShareStreamResponse> {
+		return this.fetchAPI(`meetings/${meetingId}/screen`, RequestType.PUT);
+	}
+
+	public closeScreenShareStream(
+		meetingId: string,
+		sessionId: string
+	): Promise<CloseScreenShareStreamResponse> {
+		return this.fetchAPI(`meetings/${meetingId}/sessions/${sessionId}/screen`, RequestType.DELETE);
 	}
 }
 
