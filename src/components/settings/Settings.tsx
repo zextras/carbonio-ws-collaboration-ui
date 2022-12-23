@@ -7,6 +7,7 @@
 import {
 	Container,
 	CreateSnackbarFn,
+	Padding,
 	SnackbarManagerContext
 } from '@zextras/carbonio-design-system';
 import {
@@ -14,13 +15,14 @@ import {
 	// @ts-ignore
 	SettingsHeader
 } from '@zextras/carbonio-shell-ui';
-import React, { FC, useCallback, useContext, useMemo, useState } from 'react';
+import React, { FC, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { UsersApi } from '../../network';
 import { getCapability } from '../../store/selectors/SessionSelectors';
 import useStore from '../../store/Store';
 import { CapabilityType } from '../../types/store/SessionTypes';
+import NotificationsSettings from './NotificationsSettings';
 import ProfileSettings from './ProfileSettings';
 
 type CreateSnackbarFn = typeof CreateSnackbarFn;
@@ -59,10 +61,41 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 
 	const createSnackbar: CreateSnackbarFn = useContext(SnackbarManagerContext);
 
-	const [picture, setPicture] = useState<false | File>(false);
-	const [deletePicture, setDeletePicture] = useState(false);
+	const notificationsStorage = JSON.parse(
+		window.parent.localStorage.getItem('notificationsSettings') || '{}'
+	);
 
-	const isEnabled = useMemo(() => !!picture || deletePicture, [deletePicture, picture]);
+	const [picture, setPicture] = useState<false | File>(false);
+	const [deletePicture, setDeletePicture] = useState<boolean>(false);
+	const [desktopNotifications, setDesktopNotifications] = useState<boolean>(
+		notificationsStorage ? notificationsStorage.DesktopNotifications : true
+	);
+
+	useEffect(() => {
+		if (notificationsStorage === '{}') {
+			window.parent.localStorage.setItem(
+				'notificationsSettings',
+				JSON.stringify({
+					DesktopNotifications: desktopNotifications
+				})
+			);
+		}
+	}, [desktopNotifications, notificationsStorage]);
+
+	const isEnabled = useMemo(
+		() =>
+			!!picture ||
+			deletePicture ||
+			(notificationsStorage && notificationsStorage.DesktopNotifications !== desktopNotifications),
+		[deletePicture, desktopNotifications, notificationsStorage, picture]
+	);
+
+	// sets all the values that has been changed to false
+	const onClose = useCallback(() => {
+		setPicture(false);
+		setDeletePicture(false);
+		setDesktopNotifications(notificationsStorage.DesktopNotifications);
+	}, [notificationsStorage.DesktopNotifications]);
 
 	// saves the elements that have been modified
 	const saveSettings = useCallback(() => {
@@ -78,7 +111,7 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 						hideButton: true,
 						autoHideTimeout: 5000
 					});
-					setPicture(false);
+					onClose();
 				})
 				.catch(() => {
 					createSnackbar({
@@ -103,7 +136,7 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 						hideButton: true,
 						autoHideTimeout: 5000
 					});
-					setDeletePicture(false);
+					onClose();
 				})
 				.catch(() => {
 					createSnackbar({
@@ -115,24 +148,30 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 					});
 				});
 		}
+
+		// if a user turn off/on the desktopNotifications
+		if (notificationsStorage.DesktopNotifications !== desktopNotifications) {
+			localStorage.setItem(
+				'notificationsSettings',
+				JSON.stringify({ DesktopNotifications: desktopNotifications })
+			);
+			onClose();
+		}
 	}, [
 		picture,
 		deletePicture,
+		notificationsStorage.DesktopNotifications,
+		desktopNotifications,
 		id,
 		setUserPictureUpdated,
 		createSnackbar,
 		updatedImageSnackbar,
+		onClose,
 		imageSizeTooLargeSnackbar,
 		setUserPictureDeleted,
 		deletedImageSnackbar,
 		errorDeleteImageSnackbar
 	]);
-
-	// sets all the values that has been changed to false
-	const onClose = useCallback(() => {
-		setPicture(false);
-		setDeletePicture(false);
-	}, []);
 
 	return (
 		<Container
@@ -158,6 +197,11 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 					sessionId={id}
 					setToDelete={setDeletePicture}
 					toDelete={deletePicture}
+				/>
+				<Padding bottom="large" />
+				<NotificationsSettings
+					desktopNotifications={desktopNotifications}
+					setDesktopNotifications={setDesktopNotifications}
 				/>
 			</Container>
 		</Container>

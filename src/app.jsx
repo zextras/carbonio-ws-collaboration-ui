@@ -68,6 +68,19 @@ const initApp = () => {
 		? store.setUserPrefTimezone(settings?.prefs?.zimbraPrefTimeZoneId)
 		: store.setUserPrefTimezone(moment.tz.guess());
 
+	// set localStorage for settings
+	const notificationManager = JSON.parse(
+		window.parent.localStorage.getItem('notificationsSettings') || '{}'
+	);
+	if (notificationManager === '{}') {
+		window.parent.localStorage.setItem(
+			'notificationsSettings',
+			JSON.stringify({
+				DesktopNotifications: true
+			})
+		);
+	}
+
 	Promise.all([SessionApi.getToken(), SessionApi.getCapabilities()])
 		.then((resp) => {
 			// CHATS BE: get all rooms list

@@ -50,12 +50,28 @@ export function onNewMessageStanza(this: IXMPPClient, message: Element): true {
 				store.activeConversations[newMessage.roomId].inputHasFocus;
 			const room = store.rooms[newMessage.roomId];
 
+			let notificationManager = JSON.parse(
+				window.parent.localStorage.getItem('notificationsSettings') || '{}'
+			);
+			if (notificationManager === '{}') {
+				window.parent.localStorage.setItem(
+					'notificationsSettings',
+					JSON.stringify({
+						DesktopNotifications: true
+					})
+				);
+				notificationManager = JSON.parse(
+					window.parent.localStorage.getItem('notificationsSettings') || '{}'
+				);
+			}
+
 			if (
 				messageIdFromOtherUser &&
 				typeMessageIsPermitted &&
 				!inputIsFocused &&
 				room &&
-				!room?.userSettings?.muted
+				!room?.userSettings?.muted &&
+				notificationManager.DesktopNotifications
 			) {
 				const sender = store.users[newMessage.from];
 				const title =
