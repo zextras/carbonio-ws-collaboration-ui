@@ -77,4 +77,14 @@ describe('Settings view', () => {
 		expect(backgroundContainer).toBeInTheDocument();
 		expect(resetButton).not.toBeEnabled();
 	});
+
+	test('toggle notification checkbox', async () => {
+		const store: RootStore = useStore.getState();
+		store.setUserInfo(userWithImage);
+		store.setLoginInfo(userWithImage.id, userWithImage.name, userWithImage.name);
+		const { user } = setup(<SettingsView />);
+		expect(screen.getByTestId('icon: Square'));
+		await user.click(screen.getByTestId('checkbox'));
+		expect(screen.getByTestId('icon: CheckmarkSquare'));
+	});
 });

@@ -37,7 +37,11 @@ const NotificationsSettings: FC<NotificationsSettingsProps> = ({
 	};
 
 	return (
-		<Container background={'gray6'} padding={{ horizontal: 'medium', bottom: 'medium' }}>
+		<Container
+			background={'gray6'}
+			padding={{ horizontal: 'medium', bottom: 'medium' }}
+			data-testid="notification_container"
+		>
 			<Container crossAlignment="flex-start">
 				<Padding top="large" bottom="medium">
 					<Text weight="bold">{sectionTitle}</Text>
@@ -51,6 +55,7 @@ const NotificationsSettings: FC<NotificationsSettingsProps> = ({
 						defaultChecked={desktopNotifications}
 						onClick={onChangeNotificationCheckbox}
 						label={notificationsCheckboxLabel}
+						data-testid="checkbox"
 					/>
 				</Container>
 			</Container>
