@@ -34,6 +34,7 @@ const ReferenceMessageView: React.FC<ReferenceMessageViewProps> = ({ roomId }) =
 				mainAlignment="flex-start"
 				background="gray5"
 				padding={{ vertical: 'medium', left: 'medium' }}
+				data-testid="reference_message"
 			>
 				<MessageReferenceDisplayed referenceMessage={referenceMessage} />
 				<Tooltip label={closeTooltip} placement="right">

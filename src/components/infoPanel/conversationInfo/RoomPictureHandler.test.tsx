@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { act, screen } from '@testing-library/react';
+import { act, prettyDOM, screen } from '@testing-library/react';
 import React from 'react';
 import { setup } from 'test-utils';
 
@@ -26,7 +26,8 @@ const user2Info: User = {
 	id: 'otherId',
 	email: 'user2@domain.com',
 	name: 'User 2',
-	pictureUpdatedAt: '2022-08-25T17:24:28.961+02:00'
+	pictureUpdatedAt: '2022-08-25T17:24:28.961+02:00',
+	last_activity: 1642818965849
 };
 
 const testRoom: RoomBe = createMockRoom({
@@ -211,5 +212,40 @@ describe('Room Picture Handler - one_to_one', () => {
 		const userName = screen.getByText(new RegExp(`${user2Info.name}`, 'i'));
 
 		expect(userName).toBeInTheDocument();
+	});
+	test('label should show "Last seen" phrase if last_activity is present', () => {
+		const store: RootStore = useStore.getState();
+		store.addRoom(testRoom3);
+		store.setUserInfo(user1Info);
+		store.setUserInfo(user2Info);
+		store.setLoginInfo(user1Info.id, user1Info.name);
+		act(() => store.setUserLastActivity(user2Info.id, 1642818617000));
+		setup(
+			<RoomPictureHandler
+				roomId={testRoom3.id}
+				memberId={user2Info.id}
+				roomType={RoomType.ONE_TO_ONE}
+			/>
+		);
+
+		// last activity is 2022/01/22 at 03:30:17
+		expect(screen.getByText(/Last seen 01\/22\/2022/i)).toBeInTheDocument();
+	});
+	test('label should show ""Online', () => {
+		const store: RootStore = useStore.getState();
+		store.addRoom(testRoom3);
+		store.setUserInfo(user1Info);
+		store.setUserInfo(user2Info);
+		store.setLoginInfo(user1Info.id, user1Info.name);
+		act(() => store.setUserPresence(user2Info.id, true));
+		setup(
+			<RoomPictureHandler
+				roomId={testRoom3.id}
+				memberId={user2Info.id}
+				roomType={RoomType.ONE_TO_ONE}
+			/>
+		);
+		expect(screen.getByTestId('user_presence_dot')).toBeInTheDocument();
+		console.log(prettyDOM(screen.getByTestId('user_presence_dot')));
 	});
 });

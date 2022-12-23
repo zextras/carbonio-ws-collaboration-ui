@@ -337,6 +337,7 @@ const ProfileSettings: FC<ProfileSettingsProps> = ({
 								orientation="horizontal"
 								mainAlignment="flex-start"
 								crossAlignment="flex-start"
+								data-testid="test"
 							>
 								<Tooltip
 									placement="bottom"

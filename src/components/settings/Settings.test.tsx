@@ -11,7 +11,8 @@ import { setup } from 'test-utils';
 import useStore from '../../store/Store';
 import { UserBe } from '../../types/network/models/userBeTypes';
 import { RootStore } from '../../types/store/StoreTypes';
-import SettingsView from '../../views/SettingsView';
+import NotificationsSettings from './NotificationsSettings';
+import Settings from './Settings';
 
 const userWithoutImage: UserBe = {
 	id: 'user1',
@@ -35,7 +36,7 @@ describe('Settings view', () => {
 		const store: RootStore = useStore.getState();
 		store.setUserInfo(userWithoutImage);
 		store.setLoginInfo(userWithoutImage.id, userWithoutImage.name, userWithoutImage.name);
-		setup(<SettingsView />);
+		setup(<Settings id={userWithoutImage.id} />);
 		const background = screen.getByTestId('background_container');
 		expect(background).toBeInTheDocument();
 		const uploadButton = screen.getByTestId('upload_button');
@@ -50,7 +51,7 @@ describe('Settings view', () => {
 		store.setUserInfo(userWithImage);
 		store.setUserPictureUpdated(userWithImage.id, '2022-08-25T17:24:28.961+02:00');
 		store.setLoginInfo(userWithImage.id, userWithImage.name, userWithImage.name);
-		setup(<SettingsView />);
+		setup(<Settings id={userWithImage.id} />);
 
 		const background = screen.getByTestId('picture_container');
 		expect(background).toBeInTheDocument();
@@ -67,7 +68,7 @@ describe('Settings view', () => {
 		store.setUserInfo(userWithImage);
 		store.setUserPictureUpdated(userWithImage.id, '2022-08-25T17:24:28.961+02:00');
 		store.setLoginInfo(userWithImage.id, userWithImage.name, userWithImage.name);
-		const { user } = setup(<SettingsView />);
+		const { user } = setup(<Settings id={userWithImage.id} />);
 		const pictureContainer = screen.getByTestId('picture_container');
 		expect(pictureContainer).toBeInTheDocument();
 		const resetButton = screen.getByTestId('reset_button');
@@ -82,9 +83,22 @@ describe('Settings view', () => {
 		const store: RootStore = useStore.getState();
 		store.setUserInfo(userWithImage);
 		store.setLoginInfo(userWithImage.id, userWithImage.name, userWithImage.name);
-		const { user } = setup(<SettingsView />);
+		const { user } = setup(
+			<NotificationsSettings desktopNotifications={false} setDesktopNotifications={jest.fn()} />
+		);
 		expect(screen.getByTestId('icon: Square'));
 		await user.click(screen.getByTestId('checkbox'));
 		expect(screen.getByTestId('icon: CheckmarkSquare'));
+	});
+	test('uncheck notification checkbox', async () => {
+		const store: RootStore = useStore.getState();
+		store.setUserInfo(userWithImage);
+		store.setLoginInfo(userWithImage.id, userWithImage.name, userWithImage.name);
+		const { user } = setup(
+			<NotificationsSettings desktopNotifications setDesktopNotifications={jest.fn()} />
+		);
+		expect(screen.getByTestId('icon: CheckmarkSquare'));
+		await user.click(screen.getByTestId('checkbox'));
+		expect(screen.getByTestId('icon: Square'));
 	});
 });
