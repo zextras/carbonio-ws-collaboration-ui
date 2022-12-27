@@ -19,11 +19,11 @@ import {
 	getDraftMessage,
 	getInputHasFocus,
 	getReferenceMessageView
-} from '../../store/selectors/ActiveConversationsSelectors';
-import { getXmppClient } from '../../store/selectors/ConnectionSelector';
-import { getRoomUnreadsSelector } from '../../store/selectors/UnreadsCounterSelectors';
-import useStore from '../../store/Store';
-import { Emoji } from '../../types/generics';
+} from '../../../store/selectors/ActiveConversationsSelectors';
+import { getXmppClient } from '../../../store/selectors/ConnectionSelector';
+import { getRoomUnreadsSelector } from '../../../store/selectors/UnreadsCounterSelectors';
+import useStore from '../../../store/Store';
+import { Emoji } from '../../../types/generics';
 import EmojiPicker from './EmojiPicker';
 import MessageArea from './MessageArea';
 
@@ -56,10 +56,8 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 	const emojiButtonRef = useRef<HTMLButtonElement>();
 	const timeoutRef = useRef<ReturnType<typeof setTimeout>>();
 
-	const sendDisabled = useMemo(
-		() => textMessage === '' && !referenceMessage,
-		[referenceMessage, textMessage]
-	);
+	// Disable if textMessage is composed only by spaces, tabs or line breaks
+	const sendDisabled = useMemo(() => !/\S/.test(textMessage), [textMessage]);
 
 	const checkMaxLengthAndSetMessage = useCallback(
 		(textareaValue: string): void => {
@@ -116,20 +114,22 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 
 	const handleKeyUp = useCallback(
 		(e: KeyboardEvent) => {
-			if (e.key === 'Enter' && !e.shiftKey) {
-				if (showEmojiPicker) setShowEmojiPicker(false);
-				sendMessage();
-			}
-			if (!isWriting) {
-				if (timeoutRef.current) clearTimeout(timeoutRef.current);
-				timeoutRef.current = setTimeout(() => {
-					setIsWriting(false);
-					xmppClient.sendPaused(roomId);
-				}, 3000);
-				xmppClient.sendIsWriting(roomId);
+			if (!sendDisabled) {
+				if (e.key === 'Enter' && !e.shiftKey) {
+					if (showEmojiPicker) setShowEmojiPicker(false);
+					sendMessage();
+				}
+				if (!isWriting) {
+					if (timeoutRef.current) clearTimeout(timeoutRef.current);
+					timeoutRef.current = setTimeout(() => {
+						setIsWriting(false);
+						xmppClient.sendPaused(roomId);
+					}, 3000);
+					xmppClient.sendIsWriting(roomId);
+				}
 			}
 		},
-		[isWriting, roomId, xmppClient, sendMessage, showEmojiPicker, timeoutRef]
+		[sendDisabled, isWriting, showEmojiPicker, sendMessage, xmppClient, roomId]
 	);
 
 	const toggleEmojiSelectorView = (): void => setShowEmojiPicker((prevState) => !prevState);

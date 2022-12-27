@@ -13,8 +13,8 @@ import papyrus from '../../assets/papyrus.png';
 import { ConversationProps } from '../../types/store/RoomTypes';
 import useMediaQueryCheck from '../../utils/useMediaQueryCheck';
 import ConversationInfoPanel from '../infoPanel/ConversationInfoPanel';
-import ConversationFooter from './ConversationFooter';
 import ConversationHeader from './ConversationHeader';
+import ConversationFooter from './footer/ConversationFooter';
 import MessagesList from './MessagesList';
 
 const ConversationWrapper = styled(Container)`
