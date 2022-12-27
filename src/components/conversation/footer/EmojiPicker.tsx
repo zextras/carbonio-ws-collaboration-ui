@@ -51,7 +51,7 @@ const EmojiPicker: React.FC<EmojiPickerProps> = (props) => {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
-	return <PickerWrapper ref={ref} />;
+	return <PickerWrapper ref={ref} data-testid="emojiPicker" />;
 };
 
 export default EmojiPicker;
