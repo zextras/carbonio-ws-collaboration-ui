@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { MeetingBe, MeetingParticipantBe } from '../network/models/meetingBeTypes';
 import { MemberBe, RoomBe } from '../network/models/roomBeTypes';
 import { UserBe } from '../network/models/userBeTypes';
 import IWebSocketClient from '../network/websocket/IWebSocketClient';
@@ -11,6 +12,7 @@ import IXMPPClient from '../network/xmpp/IXMPPClient';
 import { ActiveConversationsMap, messageActionType } from './ActiveConversationTypes';
 import { Connections } from './ConnectionsTypes';
 import { Marker, MarkersMap } from './MarkersTypes';
+import { MeetingsMap } from './MeetingTypes';
 import { MessageMap, Message, TextMessage } from './MessageTypes';
 import { RoomsMap } from './RoomTypes';
 import { CapabilityList, Session } from './SessionTypes';
@@ -109,6 +111,15 @@ export type UnreadsCounterSlice = {
 	updateUnreadCount: (roomId: string) => void;
 };
 
+export type MeetingsSlice = {
+	meetings: MeetingsMap;
+	setMeetings: (meetings: MeetingBe[]) => void;
+	addMeeting: (meeting: MeetingBe) => void;
+	deleteMeeting: (meetingId: string) => void;
+	addParticipant: (meetingId: string, participant: MeetingParticipantBe) => void;
+	removeParticipant: (meetingId: string, sessionId: string) => void;
+};
+
 export type RootStore = UsersStoreSlice &
 	RoomsStoreSlice &
 	MessagesStoreSlice &
@@ -116,4 +127,5 @@ export type RootStore = UsersStoreSlice &
 	MarkersStoreSlice &
 	ActiveConversationsSlice &
 	ConnectionsStoreSlice &
-	UnreadsCounterSlice;
+	UnreadsCounterSlice &
+	MeetingsSlice;

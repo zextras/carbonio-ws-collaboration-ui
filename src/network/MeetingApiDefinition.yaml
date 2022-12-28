@@ -1,0 +1,236 @@
+openapi: 3.0.3
+info:
+  title: Zextras Carbonio Chats CE Meeting Api
+  description: Zextras Carbonio Chats CE Meeting HTTP APIs definition.
+  version: 0.2.0
+  contact:
+    email: smokybeans@zextras.com
+servers:
+  - url: http://localhost:10000
+tags:
+  - name: Meetings
+paths:
+  /meetings:
+    get:
+      tags:
+        - Meetings
+      summary: Retrieves a list of every meeting the user has access to
+      operationId: listMeeting
+      responses:
+        200:
+          $ref: '#/components/responses/200ListMeetingResponse'
+  /meetings/{meetingId}:
+    get:
+      tags:
+        - Meetings
+      summary: Retrieves the requested meeting
+      operationId: getMeeting
+      parameters:
+        - $ref: '#/components/parameters/pathMeetingId'
+      responses:
+        200:
+          $ref: '#/components/responses/200GetMeetingResponse'
+        401:
+          $ref: '#/components/responses/401UnauthorizedResponse'
+        403:
+          $ref: '#/components/responses/403ForbiddenResponse'
+        404:
+          $ref: '#/components/responses/404NotFoundResponse'
+    delete:
+      tags:
+        - Meetings
+      summary: Deletes the requested meeting
+      operationId: deleteMeeting
+      parameters:
+        - $ref: '#/components/parameters/pathMeetingId'
+      responses:
+        204:
+          $ref: '#/components/responses/204DeleteMeetingResponse'
+        401:
+          $ref: '#/components/responses/401UnauthorizedResponse'
+        403:
+          $ref: '#/components/responses/403ForbiddenResponse'
+        404:
+          $ref: '#/components/responses/404NotFoundResponse'
+  /meetings/{meetingId}/join:
+    put:
+      tags:
+        - Meetings
+      summary: adds the current user to the specified meeting
+      operationId: joinMeeting
+      parameters:
+        - $ref: '#/components/parameters/pathMeetingId'
+      requestBody:
+        $ref: '#/components/requestBodies/JoinMeetingRequest'
+      responses:
+        204:
+          $ref: '#/components/responses/204JoinMeetingResponse'
+        401:
+          $ref: '#/components/responses/401UnauthorizedResponse'
+        403:
+          $ref: '#/components/responses/403ForbiddenResponse'
+        404:
+          $ref: '#/components/responses/404NotFoundResponse'
+  /meetings/{meetingId}/leave:
+    put:
+      tags:
+        - Meetings
+      summary: remove the current user to the specified meeting
+      operationId: leaveMeeting
+      parameters:
+        - $ref: '#/components/parameters/pathMeetingId'
+      responses:
+        204:
+          $ref: '#/components/responses/204LeaveMeetingResponse'
+        401:
+          $ref: '#/components/responses/401UnauthorizedResponse'
+        403:
+          $ref: '#/components/responses/403ForbiddenResponse'
+        404:
+          $ref: '#/components/responses/404NotFoundResponse'
+components:
+  parameters:
+    pathMeetingId:
+      in: path
+      name: meetingId
+      description: meeting identifier
+      schema:
+        type: string
+        format: uuid
+      required: true
+      allowEmptyValue: false
+    pathRoomId:
+      in: path
+      name: roomId
+      description: room identifier
+      schema:
+        type: string
+        format: uuid
+      required: true
+      allowEmptyValue: false
+
+  requestBodies:
+    JoinMeetingRequest:
+      description: user settings to participate
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/JoinSettings'
+
+  responses:
+    200ListMeetingResponse:
+      description: List of every meeting that the user has access to
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Meeting'
+    200GetMeetingResponse:
+      description: Gets the requested meeting data
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Meeting'
+    201CreateMeetingResponse:
+      description: Meeting was created successfully
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Meeting'
+    204DeleteMeetingResponse:
+      description: The meeting was deleted successfully
+    204JoinMeetingResponse:
+      description: The user joined the meeting successfully
+    204LeaveMeetingResponse:
+      description: The user exited the meeting successfully
+
+    400BadRequestResponse:
+      description: The request had wrong or missing parameters
+    401UnauthorizedResponse:
+      description: User not authorized
+    403ForbiddenResponse:
+      description: The requester could not access the resource
+    404NotFoundResponse:
+      description: The requested resource was not found
+    409Conflict:
+      description: The request conflict with the current state
+
+  schemas:
+    Room:
+      type: object
+      description: Room data for a meeting
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+          description: room identifier
+        type:
+          $ref: "../chats/chats-api.yaml#/components/schemas/RoomType"
+        name:
+          type: string
+          readOnly: true
+          description: room name
+        description:
+          type: string
+          description: room description
+          readOnly: true
+    Participant:
+      type: object
+      description: Meeting participant data
+      properties:
+        userId:
+          type: string
+          format: uuid
+          readOnly: true
+          description: user identifier
+        sessionId:
+          type: string
+          readOnly: true
+          description: VideoServer session id
+        hasMicrophoneOn:
+          type: boolean
+          readOnly: true
+          description: indicates if the microphone is on
+        hasCameraOn:
+          type: boolean
+          readOnly: true
+          description: indicates if the camera is on
+    Meeting:
+      type: object
+      description: Meeting data
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+          description: meesting identifier
+        roomId:
+          type: string
+          format: uuid
+          readOnly: true
+          description: meesting identifier
+        participants:
+          type: array
+          items:
+            $ref: '#/components/schemas/Participant'
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+          description: entity creation date
+    JoinSettings:
+      type: object
+      description: user settings to participate
+      properties:
+        microphoneOn:
+          type: boolean
+          readOnly: true
+          description: indicates if the microphone is on
+        cameraOn:
+          type: boolean
+          readOnly: true
+          description: indicates if the camera is on
+      required: [ microphoneOn, cameraOn ]
