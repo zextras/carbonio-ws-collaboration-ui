@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { act, prettyDOM, screen } from '@testing-library/react';
+import { act, screen } from '@testing-library/react';
 import React from 'react';
 import { setup } from 'test-utils';
 
@@ -246,6 +246,5 @@ describe('Room Picture Handler - one_to_one', () => {
 			/>
 		);
 		expect(screen.getByTestId('user_presence_dot')).toBeInTheDocument();
-		console.log(prettyDOM(screen.getByTestId('user_presence_dot')));
 	});
 });
