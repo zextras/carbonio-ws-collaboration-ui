@@ -29,7 +29,7 @@ describe('Conversation info panel', () => {
 			<ConversationInfoPanel
 				roomId={testRoom.id}
 				infoPanelOpen={true}
-				setInfoPanelOpen={(): null => null}
+				setInfoPanelOpen={jest.fn()}
 			/>
 		);
 		const conversationInfoPanel = screen.getByTestId('conversationInfoPanelOpen');
@@ -41,7 +41,7 @@ describe('Conversation info panel', () => {
 			<ConversationInfoPanel
 				roomId={testRoom.id}
 				infoPanelOpen={false}
-				setInfoPanelOpen={(): null => null}
+				setInfoPanelOpen={jest.fn()}
 			/>
 		);
 		const conversationInfoPanelCollapsed = screen.getByTestId('conversationInfoPanelCollapsed');
