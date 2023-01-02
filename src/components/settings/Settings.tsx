@@ -15,7 +15,7 @@ import {
 	// @ts-ignore
 	SettingsHeader
 } from '@zextras/carbonio-shell-ui';
-import React, { FC, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { FC, useCallback, useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { UsersApi } from '../../network';
@@ -70,7 +70,9 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 	const [desktopNotifications, setDesktopNotifications] = useState<boolean>(
 		notificationsStorage ? notificationsStorage.DesktopNotifications : true
 	);
+	const [isEnabled, setIsEnabled] = useState<boolean>(false);
 
+	// set the local Storage if there's no one saved
 	useEffect(() => {
 		if (notificationsStorage === '{}') {
 			window.parent.localStorage.setItem(
@@ -82,15 +84,20 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 		}
 	}, [desktopNotifications, notificationsStorage]);
 
-	const isEnabled = useMemo(
-		() =>
+	// set the isEnabled value when changed
+	useEffect(() => {
+		if (
 			!!picture ||
 			deletePicture ||
-			(notificationsStorage && notificationsStorage.DesktopNotifications !== desktopNotifications),
-		[deletePicture, desktopNotifications, notificationsStorage, picture]
-	);
+			notificationsStorage.DesktopNotifications !== desktopNotifications
+		) {
+			setIsEnabled(true);
+		} else {
+			setIsEnabled(false);
+		}
+	}, [deletePicture, desktopNotifications, notificationsStorage, picture]);
 
-	// sets all the values that has been changed to false
+	// sets all the values that has been changed to false and set the default values to the localStorage ones
 	const onClose = useCallback(() => {
 		setPicture(false);
 		setDeletePicture(false);
@@ -111,7 +118,7 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 						hideButton: true,
 						autoHideTimeout: 5000
 					});
-					onClose();
+					setPicture(false);
 				})
 				.catch(() => {
 					createSnackbar({
@@ -136,7 +143,7 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 						hideButton: true,
 						autoHideTimeout: 5000
 					});
-					onClose();
+					setDeletePicture(false);
 				})
 				.catch(() => {
 					createSnackbar({
@@ -155,8 +162,8 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 				'notificationsSettings',
 				JSON.stringify({ DesktopNotifications: desktopNotifications })
 			);
-			onClose();
 		}
+		setIsEnabled(false);
 	}, [
 		picture,
 		deletePicture,
@@ -166,7 +173,6 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 		setUserPictureUpdated,
 		createSnackbar,
 		updatedImageSnackbar,
-		onClose,
 		imageSizeTooLargeSnackbar,
 		setUserPictureDeleted,
 		deletedImageSnackbar,
