@@ -95,7 +95,7 @@ const Bubble: FC<BubbleProps> = ({
 		centerMessageOfList={prevMessageIsFromSameSender && nextMessageIsFromSameSender}
 		lastMessageOfList={prevMessageIsFromSameSender && !nextMessageIsFromSameSender}
 	>
-		<DropDownWrapper padding={{ top: '0.25rem' }}>
+		<DropDownWrapper padding={{ all: 'none' }}>
 			{message.type === 'text' && (
 				<BubbleContextualMenuDropDown message={message} isMyMessage={isMyMessage} />
 			)}
