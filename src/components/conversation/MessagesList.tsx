@@ -5,7 +5,8 @@
  */
 
 import { Container } from '@zextras/carbonio-design-system';
-import { debounce, map, find } from 'lodash';
+import { debounce, map, find, groupBy } from 'lodash';
+import moment from 'moment-timezone';
 import React, {
 	ForwardedRef,
 	useEffect,
@@ -28,6 +29,7 @@ import {
 import { getXmppClient } from '../../store/selectors/ConnectionSelector';
 import { getMyLastMarkerOfConversation } from '../../store/selectors/MarkersSelectors';
 import { getMessagesSelector } from '../../store/selectors/MessagesSelectors';
+import { getPrefTimezoneSelector } from '../../store/selectors/SessionSelectors';
 import useStore from '../../store/Store';
 import { Message, TextMessage } from '../../types/store/MessageTypes';
 import { isBefore, now } from '../../utils/dateUtil';
@@ -70,6 +72,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 	const setInputHasFocus = useStore((store) => store.setInputHasFocus);
 	const mySessionId = useStore((store) => store.session.id);
 	const myLastMarker = useStore((store) => getMyLastMarkerOfConversation(store, roomId));
+	const timezone = useStore(getPrefTimezoneSelector);
 
 	const [showScrollButton, setShowScrollButton] = useState(false);
 	const [isLoadedFirstTime, setIsLoadedFirstTime] = useState(true);
@@ -288,9 +291,15 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [roomId]);
 
-	const messages = useMemo(
-		() =>
-			map(roomMessages, (message: Message, index) => {
+	const dateMessageWrapped = useMemo(
+		() => groupBy(roomMessages, (message) => moment.tz(message.date, timezone).format('YYMMDD')),
+		[roomMessages, timezone]
+	);
+
+	const messagesWrapped = useMemo(() => {
+		const list: JSX.Element[] = [];
+		map(dateMessageWrapped, (wrapper) => {
+			const messageList = map(wrapper, (message: Message, index) => {
 				const messageRef = React.createRef<HTMLElement>();
 				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 				// @ts-ignore
@@ -298,14 +307,14 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 				let prevMessageIsFromSameSender;
 				let nextMessageIsFromSameSender;
 
-				const prevMessage = roomMessages[index - 1];
+				const prevMessage = wrapper[index - 1];
 				if (message.type === 'text' && prevMessage?.type === 'text') {
 					prevMessageIsFromSameSender = (prevMessage as TextMessage).from === message.from;
 				} else {
 					prevMessageIsFromSameSender = false;
 				}
 
-				const nextMessage = roomMessages[index + 1];
+				const nextMessage = wrapper[index + 1];
 				if (message.type === 'text' && nextMessage?.type === 'text') {
 					nextMessageIsFromSameSender = nextMessage.from === message.from;
 				} else {
@@ -322,10 +331,22 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 						messageRef={messageRef}
 					/>
 				);
-			}),
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[roomMessages.length, roomId]
-	);
+			});
+			list.push(
+				<Container
+					key={`messageList-${Math.random()}`}
+					mainAlignment={'flex-start'}
+					crossAlignment={'flex-start'}
+					height={'fit'}
+				>
+					{messageList}
+				</Container>
+			);
+		});
+		return list;
+	}, [dateMessageWrapped]);
+
+	// intorno a ogni raggruppamento mettere un container
 
 	const handleClickScrollButton = useCallback(() => {
 		MessagesListWrapperRef?.current &&
@@ -354,7 +375,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 				{!hasMoreMessageToLoad && (
 					<MessageHistoryLoader messageHistoryLoaderRef={messageHistoryLoaderRef} />
 				)}
-				{messages}
+				{messagesWrapped}
 				{usersWritingList && <WritingBubble writingListNames={usersWritingList} />}
 			</MessagesListWrapper>
 			{showScrollButton && <ScrollButton roomId={roomId} onClickCb={handleClickScrollButton} />}

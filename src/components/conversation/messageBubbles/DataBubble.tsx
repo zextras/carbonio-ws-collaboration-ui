@@ -4,9 +4,10 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Text } from '@zextras/carbonio-design-system';
+import { Container, Text } from '@zextras/carbonio-design-system';
 import React, { FC, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 
 import { getPrefTimezoneSelector } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
@@ -19,6 +20,12 @@ type DateMsgProps = {
 	refEl: React.RefObject<HTMLElement>;
 };
 
+const CustomMessageWrapper = styled(Container)`
+	position: sticky;
+	position: -webkit-sticky;
+	top: 0;
+`;
+
 const DateBubble: FC<DateMsgProps> = ({ message, refEl }) => {
 	const [t] = useTranslation();
 	const timezone = useStore(getPrefTimezoneSelector);
@@ -29,17 +36,19 @@ const DateBubble: FC<DateMsgProps> = ({ message, refEl }) => {
 		return date;
 	}, [message, t, timezone]);
 	return (
-		<CustomMessage
-			ref={refEl}
-			id={`message-${message.id}`}
-			mainAlignment={'flex-start'}
-			crossAlignment={'flex-start'}
-			key={message.id}
-			dateMessage
-			data-testid={`data_msg-${message.id}`}
-		>
-			<Text color={'gray1'}>{dateLabel}</Text>
-		</CustomMessage>
+		<CustomMessageWrapper>
+			<CustomMessage
+				ref={refEl}
+				id={`message-${message.id}`}
+				mainAlignment={'flex-start'}
+				crossAlignment={'flex-start'}
+				key={message.id}
+				dateMessage
+				data-testid={`data_msg-${message.id}`}
+			>
+				<Text color={'gray1'}>{dateLabel}</Text>
+			</CustomMessage>
+		</CustomMessageWrapper>
 	);
 };
 
