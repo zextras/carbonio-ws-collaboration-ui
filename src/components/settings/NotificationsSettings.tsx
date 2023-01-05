@@ -36,6 +36,8 @@ const NotificationsSettings: FC<NotificationsSettingsProps> = ({
 		}
 	};
 
+	console.log(desktopNotifications);
+
 	return (
 		<Container
 			background={'gray6'}

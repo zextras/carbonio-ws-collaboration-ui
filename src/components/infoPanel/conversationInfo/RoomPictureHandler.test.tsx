@@ -231,7 +231,7 @@ describe('Room Picture Handler - one_to_one', () => {
 		// last activity is 2022/01/22 at 03:30:17
 		expect(screen.getByText(/Last seen 01\/22\/2022/i)).toBeInTheDocument();
 	});
-	test('label should show ""Online', () => {
+	test('label should show "Online"', () => {
 		const store: RootStore = useStore.getState();
 		store.addRoom(testRoom3);
 		store.setUserInfo(user1Info);

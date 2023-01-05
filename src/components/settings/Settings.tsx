@@ -18,6 +18,7 @@ import {
 import React, { FC, useCallback, useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import useLocalStorage from '../../hooks/useLocalStorage';
 import { UsersApi } from '../../network';
 import { getCapability } from '../../store/selectors/SessionSelectors';
 import useStore from '../../store/Store';
@@ -61,9 +62,11 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 
 	const createSnackbar: CreateSnackbarFn = useContext(SnackbarManagerContext);
 
-	const notificationsStorage = JSON.parse(
-		window.parent.localStorage.getItem('notificationsSettings') || '{}'
-	);
+	const [notificationsStorage, setNotificationsStorage] = useLocalStorage<
+		{ DesktopNotifications: boolean } | undefined
+	>('notificationsSettings', {
+		DesktopNotifications: true
+	});
 
 	const [picture, setPicture] = useState<false | File>(false);
 	const [deletePicture, setDeletePicture] = useState<boolean>(false);
@@ -72,24 +75,12 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 	);
 	const [isEnabled, setIsEnabled] = useState<boolean>(false);
 
-	// set the local Storage if there's no one saved
-	useEffect(() => {
-		if (notificationsStorage === '{}') {
-			window.parent.localStorage.setItem(
-				'notificationsSettings',
-				JSON.stringify({
-					DesktopNotifications: desktopNotifications
-				})
-			);
-		}
-	}, [desktopNotifications, notificationsStorage]);
-
 	// set the isEnabled value when changed
 	useEffect(() => {
 		if (
 			!!picture ||
 			deletePicture ||
-			notificationsStorage.DesktopNotifications !== desktopNotifications
+			(notificationsStorage && notificationsStorage.DesktopNotifications !== desktopNotifications)
 		) {
 			setIsEnabled(true);
 		} else {
@@ -101,8 +92,10 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 	const onClose = useCallback(() => {
 		setPicture(false);
 		setDeletePicture(false);
-		setDesktopNotifications(notificationsStorage.DesktopNotifications);
-	}, [notificationsStorage.DesktopNotifications]);
+		setDesktopNotifications(
+			(notificationsStorage && notificationsStorage.DesktopNotifications) || true
+		);
+	}, [notificationsStorage]);
 
 	// saves the elements that have been modified
 	const saveSettings = useCallback(() => {
@@ -157,17 +150,21 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 		}
 
 		// if a user turn off/on the desktopNotifications
-		if (notificationsStorage.DesktopNotifications !== desktopNotifications) {
+		if (
+			notificationsStorage &&
+			notificationsStorage.DesktopNotifications !== desktopNotifications
+		) {
 			localStorage.setItem(
 				'notificationsSettings',
 				JSON.stringify({ DesktopNotifications: desktopNotifications })
 			);
+			setNotificationsStorage({ DesktopNotifications: desktopNotifications });
 		}
 		setIsEnabled(false);
 	}, [
 		picture,
 		deletePicture,
-		notificationsStorage.DesktopNotifications,
+		notificationsStorage,
 		desktopNotifications,
 		id,
 		setUserPictureUpdated,
@@ -176,7 +173,8 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 		imageSizeTooLargeSnackbar,
 		setUserPictureDeleted,
 		deletedImageSnackbar,
-		errorDeleteImageSnackbar
+		errorDeleteImageSnackbar,
+		setNotificationsStorage
 	]);
 
 	return (
