@@ -74,5 +74,7 @@ export const ParticipantsAccordion: FC<ParticipantsAccordionProps> = ({ roomId }
 		];
 	}, [accordionStatus, participantsAccordionTitle, roomId, toggleAccordionStatus]);
 
-	return <CustomAccordion items={infoDetails} borderRadius="none" />;
+	return (
+		<CustomAccordion data-testid="participantAccordion" items={infoDetails} borderRadius="none" />
+	);
 };

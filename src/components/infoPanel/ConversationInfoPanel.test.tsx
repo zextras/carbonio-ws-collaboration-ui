@@ -22,6 +22,11 @@ const testRoom: RoomBe = createMockRoom({
 	userSettings: { muted: false }
 });
 
+const oneToOneRoom: RoomBe = createMockRoom({
+	type: RoomType.ONE_TO_ONE,
+	members: [createMockMember({ userId: 'myId' })]
+});
+
 describe('Conversation info panel', () => {
 	test('Display info panel opened', async () => {
 		useStore.getState().addRoom(testRoom);
@@ -46,5 +51,28 @@ describe('Conversation info panel', () => {
 		);
 		const conversationInfoPanelCollapsed = screen.getByTestId('conversationInfoPanelCollapsed');
 		expect(conversationInfoPanelCollapsed).toBeInTheDocument();
+	});
+	test('Display list of participant accordion in a group room', async () => {
+		useStore.getState().addRoom(testRoom);
+		setup(
+			<ConversationInfoPanel
+				roomId={testRoom.id}
+				infoPanelOpen={false}
+				setInfoPanelOpen={jest.fn()}
+			/>
+		);
+		const participantAccordion = screen.getByTestId('participantAccordion');
+		expect(participantAccordion).toBeInTheDocument();
+	});
+	test('Check that participant list is not present in the info panel of a one to one room', async () => {
+		useStore.getState().addRoom(oneToOneRoom);
+		setup(
+			<ConversationInfoPanel
+				roomId={oneToOneRoom.id}
+				infoPanelOpen={false}
+				setInfoPanelOpen={jest.fn()}
+			/>
+		);
+		expect(screen.queryByTestId('participantAccordion')).not.toBeInTheDocument();
 	});
 });
