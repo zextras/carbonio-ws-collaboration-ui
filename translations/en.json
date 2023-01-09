@@ -114,6 +114,7 @@
             "pictureSizeTooLarge": "Something went wrong, remember that the maximum size for a group’s avatar image is {{size}}kb",
             "updatedPictureCorrectly": "New avatar has been successfully uploaded"
         },
+        "save": "Edits saved correctly",
         "title": "Chats Alpha"
     },
     "status": {

@@ -79,26 +79,20 @@ describe('Settings view', () => {
 		expect(resetButton).not.toBeEnabled();
 	});
 
-	test('toggle notification checkbox', async () => {
+	test('notification checkbox active', async () => {
 		const store: RootStore = useStore.getState();
 		store.setUserInfo(userWithImage);
 		store.setLoginInfo(userWithImage.id, userWithImage.name, userWithImage.name);
-		const { user } = setup(
+		setup(
 			<NotificationsSettings desktopNotifications={false} setDesktopNotifications={jest.fn()} />
 		);
-		expect(screen.getByTestId('icon: Square'));
-		await user.click(screen.getByTestId('checkbox'));
-		expect(screen.getByTestId('icon: CheckmarkSquare'));
+		expect(screen.getByTestId('icon: Square')).toBeInTheDocument();
 	});
-	test('uncheck notification checkbox', async () => {
+	test('notification checkbox not active', async () => {
 		const store: RootStore = useStore.getState();
 		store.setUserInfo(userWithImage);
 		store.setLoginInfo(userWithImage.id, userWithImage.name, userWithImage.name);
-		const { user } = setup(
-			<NotificationsSettings desktopNotifications setDesktopNotifications={jest.fn()} />
-		);
-		expect(screen.getByTestId('icon: CheckmarkSquare'));
-		await user.click(screen.getByTestId('checkbox'));
-		expect(screen.getByTestId('icon: Square'));
+		setup(<NotificationsSettings desktopNotifications setDesktopNotifications={jest.fn()} />);
+		expect(screen.getByTestId('icon: CheckmarkSquare')).toBeInTheDocument();
 	});
 });

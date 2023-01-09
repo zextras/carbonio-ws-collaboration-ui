@@ -20,9 +20,7 @@ import { useTranslation } from 'react-i18next';
 
 import useLocalStorage from '../../hooks/useLocalStorage';
 import { UsersApi } from '../../network';
-import { getCapability } from '../../store/selectors/SessionSelectors';
 import useStore from '../../store/Store';
-import { CapabilityType } from '../../types/store/SessionTypes';
 import NotificationsSettings from './NotificationsSettings';
 import ProfileSettings from './ProfileSettings';
 
@@ -33,28 +31,12 @@ type SettingsProps = {
 };
 
 const Settings: FC<SettingsProps> = ({ id }) => {
-	const maxRoomImageSize = useStore((store) =>
-		getCapability(store, CapabilityType.MAX_ROOM_IMAGE_SIZE)
-	);
-
 	const [t] = useTranslation();
 	const settingsTitle = t('settings.title', 'Chats Alpha - for testing purpose only');
-	const updatedImageSnackbar = t(
-		'settings.profile.updatedPictureCorrectly',
-		'New avatar has been successfully uploaded'
-	);
-	const imageSizeTooLargeSnackbar = t(
-		'settings.profile.pictureSizeTooLarge',
-		`Something went wrong, remember that the maximum size for an avatar image is ${maxRoomImageSize}kb`,
-		{ size: maxRoomImageSize }
-	);
+	const saveSettingsSnackbar = t('settings.save', 'Edits saved correctly');
 	const errorDeleteImageSnackbar = t(
 		'settings.profile.errorGenericResponse',
 		'Something went Wrong. Please Retry'
-	);
-	const deletedImageSnackbar = t(
-		'settings.profile.deletedUserImageCorrectly',
-		'Avatar has been successfully reset to the original one'
 	);
 
 	const setUserPictureUpdated = useStore((state) => state.setUserPictureUpdated);
@@ -64,7 +46,7 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 
 	const [notificationsStorage, setNotificationsStorage] = useLocalStorage<
 		{ DesktopNotifications: boolean } | undefined
-	>('notificationsSettings', {
+	>('ChatsNotificationsSettings', {
 		DesktopNotifications: true
 	});
 
@@ -107,17 +89,18 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 					createSnackbar({
 						key: new Date().toLocaleString(),
 						type: 'info',
-						label: updatedImageSnackbar,
+						label: saveSettingsSnackbar,
 						hideButton: true,
 						autoHideTimeout: 5000
 					});
 					setPicture(false);
+					setIsEnabled(false);
 				})
 				.catch(() => {
 					createSnackbar({
 						key: new Date().toLocaleString(),
 						type: 'error',
-						label: imageSizeTooLargeSnackbar,
+						label: errorDeleteImageSnackbar,
 						hideButton: true,
 						autoHideTimeout: 5000
 					});
@@ -132,11 +115,12 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 					createSnackbar({
 						key: new Date().toLocaleString(),
 						type: 'info',
-						label: deletedImageSnackbar,
+						label: saveSettingsSnackbar,
 						hideButton: true,
 						autoHideTimeout: 5000
 					});
 					setDeletePicture(false);
+					setIsEnabled(false);
 				})
 				.catch(() => {
 					createSnackbar({
@@ -155,24 +139,29 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 			notificationsStorage.DesktopNotifications !== desktopNotifications
 		) {
 			localStorage.setItem(
-				'notificationsSettings',
+				'ChatsNotificationsSettings',
 				JSON.stringify({ DesktopNotifications: desktopNotifications })
 			);
+			createSnackbar({
+				key: new Date().toLocaleString(),
+				type: 'info',
+				label: saveSettingsSnackbar,
+				hideButton: true,
+				autoHideTimeout: 5000
+			});
 			setNotificationsStorage({ DesktopNotifications: desktopNotifications });
+			setIsEnabled(false);
 		}
-		setIsEnabled(false);
 	}, [
 		picture,
 		deletePicture,
 		notificationsStorage,
 		desktopNotifications,
+		createSnackbar,
+		saveSettingsSnackbar,
 		id,
 		setUserPictureUpdated,
-		createSnackbar,
-		updatedImageSnackbar,
-		imageSizeTooLargeSnackbar,
 		setUserPictureDeleted,
-		deletedImageSnackbar,
 		errorDeleteImageSnackbar,
 		setNotificationsStorage
 	]);

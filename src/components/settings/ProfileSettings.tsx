@@ -13,13 +13,16 @@ import {
 	FileLoader,
 	Shimmer,
 	Tooltip,
-	IconButton
+	IconButton,
+	SnackbarManagerContext,
+	CreateSnackbarFn
 } from '@zextras/carbonio-design-system';
 import React, {
 	Dispatch,
 	FC,
 	SetStateAction,
 	useCallback,
+	useContext,
 	useEffect,
 	useMemo,
 	useState
@@ -45,6 +48,8 @@ type ProfileSettingsProps = {
 	setToDelete: Dispatch<SetStateAction<boolean>>;
 	toDelete: boolean;
 };
+
+type CreateSnackbarFn = typeof CreateSnackbarFn;
 
 const HoverContainer = styled(Container)`
 	opacity: 0;
@@ -150,7 +155,14 @@ const ProfileSettings: FC<ProfileSettingsProps> = ({
 		getCapability(store, CapabilityType.MAX_USER_IMAGE_SIZE)
 	);
 
+	const createSnackbar: CreateSnackbarFn = useContext(SnackbarManagerContext);
+
 	const [t] = useTranslation();
+	const imageSizeTooLargeSnackbar = t(
+		'settings.profile.pictureSizeTooLarge',
+		`Something went wrong, remember that the maximum size for an avatar image is ${maxUserImageSize}kb`,
+		{ size: maxUserImageSize }
+	);
 	const uploadPictureLabel = t('tooltip.userAvatar.uploadAvatar', 'Upload avatar');
 	const updatePictureLabel = t('tooltip.userAvatar.updateAvatar', 'Update avatar');
 	const resetPictureLabel = t('tooltip.userAvatar.resetAvatar', 'Reset avatar');
@@ -180,10 +192,20 @@ const ProfileSettings: FC<ProfileSettingsProps> = ({
 
 	const onChangeUserImage = useCallback(
 		(e) => {
-			setTempPicture(URL.createObjectURL(e.target.files[0]));
-			setPicture(e.target.files[0]);
+			if (maxUserImageSize && e.target.files[0].size / 1000 < maxUserImageSize) {
+				setTempPicture(URL.createObjectURL(e.target.files[0]));
+				setPicture(e.target.files[0]);
+			} else {
+				createSnackbar({
+					key: new Date().toLocaleString(),
+					type: 'error',
+					label: imageSizeTooLargeSnackbar,
+					hideButton: true,
+					autoHideTimeout: 5000
+				});
+			}
 		},
-		[setPicture]
+		[createSnackbar, imageSizeTooLargeSnackbar, maxUserImageSize, setPicture]
 	);
 
 	const onResetUserImage = useCallback(() => {

@@ -55,6 +55,7 @@ const NotificationsSettings: FC<NotificationsSettingsProps> = ({
 						<Padding bottom="medium" />
 						<Checkbox
 							defaultChecked={desktopNotifications}
+							value={desktopNotifications}
 							onClick={onChangeNotificationCheckbox}
 							label={notificationsCheckboxLabel}
 							data-testid="checkbox"

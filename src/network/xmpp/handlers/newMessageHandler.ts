@@ -51,17 +51,17 @@ export function onNewMessageStanza(this: IXMPPClient, message: Element): true {
 			const room = store.rooms[newMessage.roomId];
 
 			let notificationManager = JSON.parse(
-				window.parent.localStorage.getItem('notificationsSettings') || '{}'
+				window.parent.localStorage.getItem('ChatsNotificationsSettings') || '{}'
 			);
 			if (notificationManager === '{}') {
 				window.parent.localStorage.setItem(
-					'notificationsSettings',
+					'ChatsNotificationsSettings',
 					JSON.stringify({
 						DesktopNotifications: true
 					})
 				);
 				notificationManager = JSON.parse(
-					window.parent.localStorage.getItem('notificationsSettings') || '{}'
+					window.parent.localStorage.getItem('ChatsNotificationsSettings') || '{}'
 				);
 			}
 

@@ -45,7 +45,7 @@ class UsersApi extends BaseAPI implements IUsersApi {
 
 	public changeUserPicture(userId: string, file: File): Promise<ChangeUserPictureResponse> {
 		return new Promise<ChangeUserPictureResponse>((resolve, reject) => {
-			if (file.size > 250000) {
+			if (file.size > 512000) {
 				reject(new Error('File too large'));
 			} else {
 				this.uploadFileFetchAPI(`users/${userId}/picture`, file)
