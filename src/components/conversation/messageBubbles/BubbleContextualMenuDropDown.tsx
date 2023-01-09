@@ -21,7 +21,7 @@ export const BubbleContextualMenuDropDownWrapper = styled.div<{
 }>`
 	position: absolute;
 	display: flex;
-	padding-top: 0.25rem;
+	padding-top: 0.5rem;
 	justify-content: flex-end;
 	transition: 0.2s ease-out;
 	opacity: 0;

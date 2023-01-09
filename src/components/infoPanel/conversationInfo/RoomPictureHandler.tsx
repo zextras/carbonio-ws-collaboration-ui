@@ -255,6 +255,7 @@ const RoomPictureHandler: FC<RoomPictureProps> = ({ memberId, roomType, roomId }
 					<Padding top="extrasmall" />
 					<Container orientation="horizontal" mainAlignment="flex-start" height="fit">
 						{memberOnline && <Presence data-testid="user_presence_dot" />}
+						{memberOnline && <Padding right={'0.25rem'} />}
 						<CustomText size="small" color="gray6" hasPicture={!!picture}>
 							{presenceLabel}
 						</CustomText>

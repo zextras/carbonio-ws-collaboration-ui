@@ -56,6 +56,7 @@ const ConversationHeader = ({
 					{!isDesktopView && (
 						<Tooltip label={infoTooltip}>
 							<IconButton
+								data-testid="infoPanelToggle"
 								onClick={toggleInfoPanel}
 								iconColor="secondary"
 								size="large"
