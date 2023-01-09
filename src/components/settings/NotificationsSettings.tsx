@@ -21,7 +21,7 @@ const NotificationsSettings: FC<NotificationsSettingsProps> = ({
 	const sectionTitle = t('settings.notifications.title', 'Notifications');
 	const sectionDescription = t(
 		'settings.notifications.description',
-		'Set your preferences for every type of notification in Chats.'
+		'Set your preferences for Chats notifications.'
 	);
 	const notificationsCheckboxLabel = t(
 		'settings.notifications.checkboxLabel',
@@ -36,8 +36,6 @@ const NotificationsSettings: FC<NotificationsSettingsProps> = ({
 		}
 	};
 
-	console.log(desktopNotifications);
-
 	return (
 		<Container
 			background={'gray6'}
@@ -49,17 +47,20 @@ const NotificationsSettings: FC<NotificationsSettingsProps> = ({
 					<Text weight="bold">{sectionTitle}</Text>
 				</Padding>
 				<Divider color="gray2" />
-				<Padding vertical="large"></Padding>
-				<Container mainAlignment="flex-start" crossAlignment="flex-start">
-					<Text overflow="break-word">{sectionDescription}</Text>
-					<Padding bottom="medium" />
-					<Checkbox
-						defaultChecked={desktopNotifications}
-						onClick={onChangeNotificationCheckbox}
-						label={notificationsCheckboxLabel}
-						data-testid="checkbox"
-					/>
-				</Container>
+				<Padding vertical="large">
+					<Container mainAlignment="flex-start" crossAlignment="flex-start">
+						<Text overflow="break-word" size={'small'}>
+							{sectionDescription}
+						</Text>
+						<Padding bottom="medium" />
+						<Checkbox
+							defaultChecked={desktopNotifications}
+							onClick={onChangeNotificationCheckbox}
+							label={notificationsCheckboxLabel}
+							data-testid="checkbox"
+						/>
+					</Container>
+				</Padding>
 			</Container>
 		</Container>
 	);

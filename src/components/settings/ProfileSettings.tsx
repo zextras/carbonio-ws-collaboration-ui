@@ -329,8 +329,12 @@ const ProfileSettings: FC<ProfileSettingsProps> = ({
 						<Padding right="large" />
 						<Container width="fill" mainAlignment="flex-start" crossAlignment="flex-start">
 							<Container crossAlignment="flex-start" mainAlignment="flex-start" height="fit">
-								<Text overflow="break-word">{sectionDescription}</Text>
-								<Text overflow="break-word">{sectionDescription2}</Text>
+								<Text overflow="break-word" size={'small'}>
+									{sectionDescription}
+								</Text>
+								<Text overflow="break-word" size={'small'}>
+									{sectionDescription2}
+								</Text>
 							</Container>
 							<Padding top="large" />
 							<Container

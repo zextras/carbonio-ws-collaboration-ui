@@ -95,7 +95,7 @@
     "settings": {
         "notifications": {
             "checkboxLabel": "Desktop notifications",
-            "description": "Set your preferences for every type of notification in Chats.",
+            "description": "Set your preferences for Chats notifications.",
             "title": "Notifications"
         },
         "profile": {
