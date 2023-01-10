@@ -87,11 +87,12 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 	);
 
 	const sendMessage = useCallback((): void => {
+		const message = textMessage.trim();
 		if (referenceMessage && referenceMessage.roomId === roomId) {
-			xmppClient.sendChatMessage(roomId, textMessage, referenceMessage.messageId);
+			xmppClient.sendChatMessage(roomId, message, referenceMessage.messageId);
 			unsetReferenceMessage(roomId);
 		} else {
-			xmppClient.sendChatMessage(roomId, textMessage);
+			xmppClient.sendChatMessage(roomId, message);
 		}
 		setDraftMessage(roomId, true);
 		setTextMessage('');

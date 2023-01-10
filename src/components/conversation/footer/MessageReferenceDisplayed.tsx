@@ -36,6 +36,10 @@ type MessageReferenceDisplayedProps = {
 	referenceMessage: ReferenceMessage;
 };
 
+const CustomText = styled(Text)`
+	white-space: pre;
+`;
+
 const MessageReferenceDisplayed: React.FC<MessageReferenceDisplayedProps> = ({
 	referenceMessage
 }) => {
@@ -102,9 +106,9 @@ const MessageReferenceDisplayed: React.FC<MessageReferenceDisplayedProps> = ({
 						)}
 					</Container>
 					<Container crossAlignment="flex-start" padding={{ top: 'small' }}>
-						<Text data-testid="reference-message" color="secondary" overflow="ellipsis">
+						<CustomText data-testid="reference-message" color="secondary" overflow="ellipsis">
 							{message?.type === 'text' && message?.text}
-						</Text>
+						</CustomText>
 					</Container>
 				</Container>
 			</BorderContainer>
