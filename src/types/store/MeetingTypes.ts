@@ -17,6 +17,6 @@ export type Meeting = {
 export type MeetingParticipant = {
 	userId: string;
 	sessionId: string;
-	hasMicrophoneOn: boolean;
-	hasCameraOn: boolean;
+	hasAudioStreamOn: boolean;
+	hasVideoStreamOn: boolean;
 };

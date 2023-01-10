@@ -1,154 +1,154 @@
 {
-  "action": {
-    "activateNotifications": "Activate Notifications",
-    "addNewMembers": "Add New Members",
-    "addNewMembersTo": "Add new members to {{roomName}}",
-    "clearHistory": "Clear History",
-    "copy": "Copy",
-    "create": "Create",
-    "delete": "Delete",
-    "edit": "Edit Details",
-    "editRoom": "Edit {{roomName}}",
-    "editYourMessage": "Edit your message",
-    "leave": "Leave",
-    "muteNotifications": "Mute Notifications",
-    "newChat": "New Chat",
-    "removeUser": "Remove",
-    "reply": "Reply",
-    "replyToSomeone": "Reply to",
-    "replyToYourself": "Reply to yourself",
-    "scrollToBottom": "Scroll to bottom",
-    "undo": "Undo"
-  },
-  "conversation": {
-    "chooseConversationDescription": "Choose a conversation to start a chat",
-    "emptyListDescription": "The conversations and groups will appear listed here",
-    "emptyListTitle": "This list is empty",
-    "keepInTouchTitle": "Let's keep in touch!",
-    "mockCreateChatDescription": "Interact, communicate and collaborate with your colleagues by sharing information and attachments",
-    "mockCreateChatTitle": "Create a new chat using the create button",
-    "newMessage": "New message",
-    "newMessages": "New messages"
-  },
-  "conversationInfo": {
-    "actionAccordionTitle": "Actions",
-    "email": "Email",
-    "info": "Info",
-    "messages": "Messages",
-    "name": "Name",
-    "status": "Status",
-    "title": "Title",
-    "topic": "Topic"
-  },
-  "date": {
-    "today": "Today",
-    "yesterday": "Yesterday"
-  },
-  "editModal": {
-    "confirm": "Edit Details",
-    "confirmDisabled": "You haven't changed anything",
-    "errorDisabled": "Check the information entered",
-    "groupDescriptionDetails": "It describes the subject of the Group",
-    "groupNameDetails": "It is required and identifies the Group",
-    "nameTooLong": "Maximum title length is 128 characters",
-    "nameTooShort": "The title is an essential information",
-    "topicTooLong": "Maximum topic length is 256 characters"
-  },
-  "feedback": {
-    "historyCleared": "History cleared successfully!",
-    "messageCopied": "Message copied",
-    "notificationsActivatedForThisChat": "Notifications activated for this chat",
-    "notificationsMutedForThisChat": "Notifications muted for this chat"
-  },
-  "message": {
-    "draft": "draft"
-  },
-  "modal": {
-    "clearHistoryDescription": "You are about to clean up your conversation history, remember that this action cannot be undone. The history of other participants will not be deleted.",
-    "creation": {
-      "contactList": "Select more that an address to create a group chat",
-      "description": "Chats are one-to-one conversations that help you to stay in touch with your contacts. You can create a group by including more than two participants",
-      "inputPlaceholder": "Start typing to pick an address",
-      "newChat": "New Chat",
-      "newGroup": "New Group"
+    "action": {
+        "activateNotifications": "Activate Notifications",
+        "addNewMembers": "Add New Members",
+        "addNewMembersTo": "Add new members to {{roomName}}",
+        "clearHistory": "Clear History",
+        "copy": "Copy",
+        "create": "Create",
+        "delete": "Delete",
+        "edit": "Edit Details",
+        "editRoom": "Edit {{roomName}}",
+        "editYourMessage": "Edit your message",
+        "leave": "Leave",
+        "muteNotifications": "Mute Notifications",
+        "newChat": "New Chat",
+        "removeUser": "Remove",
+        "reply": "Reply",
+        "replyToSomeone": "Reply to",
+        "replyToYourself": "Reply to yourself",
+        "scrollToBottom": "Scroll to bottom",
+        "undo": "Undo"
     },
-    "deleteGroup": "Delete Group",
-    "deleteGroupLabel": "Are you sure to delete this Group?",
-    "deleteRoom": "Delete Room",
-    "deleteRoomLabel": "Are you sure to delete this Room?",
-    "deleteUserDescription": "Are you sure you want to remove this member?",
-    "leaveAndDelete": "Leave and Delete Group",
-    "leaveGroup": "Leave Group",
-    "leaveGroupLabel": "Are you sure to leave this Group?",
-    "leaveRoom": "Leave Room",
-    "leaveRoomLabel": "Are you sure to leave this Room?",
-    "removeMember": "Remove Member",
-    "showPreviousConversationHistory": "Show previous conversation history"
-  },
-  "participantsList": {
-    "closeSearch": "Close search",
-    "moreParticipantsAccordionTitle": "Participants",
-    "noMatch": "There are no items that match this search",
-    "oneParticipantAccordionTitle": "One Participant",
-    "searchUser": "Search Participants"
-  },
-  "settings": {
-    "profile": {
-      "deletedUserImageCorrectly": "Avatar has been successfully reset to the original one",
-      "description": "Choose an avatar that other users will see, the image will be centered automatically.",
-      "errorGenericResponse": "Something went wrong. Please retry",
-      "maximumDimension": "Maximum dimension: {{size}}kb",
-      "pictureSizeTooLarge": "Something went wrong, remember that the maximum size for an avatar image is {{size}}kb",
-      "statusLabel": "Your status will appear here",
-      "title": "Profile",
-      "updatedPictureCorrectly": "New avatar has been successfully uploaded"
+    "conversation": {
+        "chooseConversationDescription": "Choose a conversation to start a chat",
+        "emptyListDescription": "The conversations and groups will appear listed here",
+        "emptyListTitle": "This list is empty",
+        "keepInTouchTitle": "Let's keep in touch!",
+        "mockCreateChatDescription": "Interact, communicate and collaborate with your colleagues by sharing information and attachments",
+        "mockCreateChatTitle": "Create a new chat using the create button",
+        "newMessage": "New message",
+        "newMessages": "New messages"
     },
-    "room": {
-      "deletedImageCorrectly": "Group avatar has been successfully reset to the original one",
-      "deletedUserImageCorrectly": "Avatar has been successfully reset to the original one",
-      "pictureSizeTooLarge": "Something went wrong, remember that the maximum size for a group’s avatar image is {{size}}kb",
-      "updatedPictureCorrectly": "New avatar has been successfully uploaded"
+    "conversationInfo": {
+        "actionAccordionTitle": "Actions",
+        "email": "Email",
+        "info": "Info",
+        "messages": "Messages",
+        "name": "Name",
+        "status": "Status",
+        "title": "Title",
+        "topic": "Topic"
     },
-    "title": "Chats Alpha"
-  },
-  "status": {
-    "areTyping": "are typing...",
-    "isTyping": "is typing...",
-    "lastSeen": "Last seen {{lastSeen}}",
-    "offline": "Offline",
-    "online": "Online"
-  },
-  "titlePlaceholder": "Your Group's Title",
-  "tooltip": {
-    "close": "Close",
-    "demoteModerator": "Demote moderator",
-    "disableModalButton": "Choose at least one address",
-    "goToPrivateChat": "Go to private chat",
-    "iAmModerator": "You're a moderator",
-    "leaveAndDelete": "Leave and Delete the conversation",
-    "leaveConversation": "Leave conversation",
-    "memberIsModerator": "This member is a moderator",
-    "messageActions": " Message actions",
-    "messageComposer": "Message composer",
-    "messageRead": "Read",
-    "messageReceived": "Received",
-    "messageSent": "Sent",
-    "promoteModerator": "Promote to moderator",
-    "promoteSomeoneElseToModerator": "Promote someone else to moderator to leave",
-    "removeMember": "Remove member",
-    "room": {
-      "resetPicture": "Reset picture",
-      "updatePicture": "Update picture",
-      "uploadPicture": "Upload picture"
+    "date": {
+        "today": "Today",
+        "yesterday": "Yesterday"
     },
-    "selectEmoji": "Select emoji",
-    "sendMessage": "Send message",
-    "showConversationList": "Show conversation list",
-    "userAvatar": {
-      "resetAvatar": "Reset avatar",
-      "updateAvatar": "Update avatar",
-      "uploadAvatar": "Upload avatar"
+    "editModal": {
+        "confirm": "Edit Details",
+        "confirmDisabled": "You haven't changed anything",
+        "errorDisabled": "Check the information entered",
+        "groupDescriptionDetails": "It describes the subject of the Group",
+        "groupNameDetails": "It is required and identifies the Group",
+        "nameTooLong": "Maximum title length is 128 characters",
+        "nameTooShort": "The title is an essential information",
+        "topicTooLong": "Maximum topic length is 256 characters"
     },
-    "writeToSend": "Write a message to send it"
-  }
+    "feedback": {
+        "historyCleared": "History cleared successfully!",
+        "messageCopied": "Message copied",
+        "notificationsActivatedForThisChat": "Notifications activated for this chat",
+        "notificationsMutedForThisChat": "Notifications muted for this chat"
+    },
+    "message": {
+        "draft": "draft"
+    },
+    "modal": {
+        "clearHistoryDescription": "You are about to clean up your conversation history, remember that this action cannot be undone. The history of other participants will not be deleted.",
+        "creation": {
+            "contactList": "Select more that an address to create a group chat",
+            "description": "Chats are one-to-one conversations that help you to stay in touch with your contacts. You can create a group by including more than two participants",
+            "inputPlaceholder": "Start typing to pick an address",
+            "newChat": "New Chat",
+            "newGroup": "New Group"
+        },
+        "deleteGroup": "Delete Group",
+        "deleteGroupLabel": "Are you sure to delete this Group?",
+        "deleteRoom": "Delete Room",
+        "deleteRoomLabel": "Are you sure to delete this Room?",
+        "deleteUserDescription": "Are you sure you want to remove this member?",
+        "leaveAndDelete": "Leave and Delete Group",
+        "leaveGroup": "Leave Group",
+        "leaveGroupLabel": "Are you sure to leave this Group?",
+        "leaveRoom": "Leave Room",
+        "leaveRoomLabel": "Are you sure to leave this Room?",
+        "removeMember": "Remove Member",
+        "showPreviousConversationHistory": "Show previous conversation history"
+    },
+    "participantsList": {
+        "closeSearch": "Close search",
+        "moreParticipantsAccordionTitle": "Participants",
+        "noMatch": "There are no items that match this search",
+        "oneParticipantAccordionTitle": "One Participant",
+        "searchUser": "Search Participants"
+    },
+    "settings": {
+        "profile": {
+            "deletedUserImageCorrectly": "Avatar has been successfully reset to the original one",
+            "description": "Choose an avatar that other users will see, the image will be centered automatically.",
+            "errorGenericResponse": "Something went wrong. Please retry",
+            "maximumDimension": "Maximum dimension: {{size}}kb",
+            "pictureSizeTooLarge": "Something went wrong, remember that the maximum size for an avatar image is {{size}}kb",
+            "statusLabel": "Your status will appear here",
+            "title": "Profile",
+            "updatedPictureCorrectly": "New avatar has been successfully uploaded"
+        },
+        "room": {
+            "deletedImageCorrectly": "Group avatar has been successfully reset to the original one",
+            "deletedUserImageCorrectly": "Avatar has been successfully reset to the original one",
+            "pictureSizeTooLarge": "Something went wrong, remember that the maximum size for a group’s avatar image is {{size}}kb",
+            "updatedPictureCorrectly": "New avatar has been successfully uploaded"
+        },
+        "title": "Chats Alpha"
+    },
+    "status": {
+        "areTyping": "are typing...",
+        "isTyping": "is typing...",
+        "lastSeen": "Last seen {{lastSeen}}",
+        "offline": "Offline",
+        "online": "Online"
+    },
+    "titlePlaceholder": "Your Group's Title",
+    "tooltip": {
+        "close": "Close",
+        "demoteModerator": "Demote moderator",
+        "disableModalButton": "Choose at least one address",
+        "goToPrivateChat": "Go to private chat",
+        "iAmModerator": "You're a moderator",
+        "leaveAndDelete": "Leave and Delete the conversation",
+        "leaveConversation": "Leave conversation",
+        "memberIsModerator": "This member is a moderator",
+        "messageActions": " Message actions",
+        "messageComposer": "Message composer",
+        "messageRead": "Read",
+        "messageReceived": "Received",
+        "messageSent": "Sent",
+        "promoteModerator": "Promote to moderator",
+        "promoteSomeoneElseToModerator": "Promote someone else to moderator to leave",
+        "removeMember": "Remove member",
+        "room": {
+            "resetPicture": "Reset picture",
+            "updatePicture": "Update picture",
+            "uploadPicture": "Upload picture"
+        },
+        "selectEmoji": "Select emoji",
+        "sendMessage": "Send message",
+        "showConversationList": "Show conversation list",
+        "userAvatar": {
+            "resetAvatar": "Reset avatar",
+            "updateAvatar": "Update avatar",
+            "uploadAvatar": "Upload avatar"
+        },
+        "writeToSend": "Write a message to send it"
+    }
 }

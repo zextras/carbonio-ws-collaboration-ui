@@ -141,8 +141,8 @@ export function wsEventsHandler(event: WsEvent): void {
 				state.addParticipant(event.meetingId, {
 					sessionId: event.sessionId,
 					userId: event.from,
-					hasMicrophoneOn: false,
-					hasCameraOn: false
+					hasAudioStreamOn: false,
+					hasVideoStreamOn: false
 				});
 			}
 			break;
