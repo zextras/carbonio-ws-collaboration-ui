@@ -10,7 +10,7 @@ import { setup } from 'test-utils';
 
 import { mockedGetURLUserPicture } from '../../../../jest-mocks';
 import useStore from '../../../store/Store';
-import { createMockRoom } from '../../../tests/createMock';
+import { createMockCapabilityList, createMockRoom } from '../../../tests/createMock';
 import { RoomType } from '../../../types/network/models/roomBeTypes';
 import { UserBe } from '../../../types/network/models/userBeTypes';
 import { User } from '../../../types/store/UserTypes';
@@ -230,6 +230,7 @@ describe('Participant component info', () => {
 		store.addRoom(mockedRoom);
 		store.setUserInfo(user1Info);
 		store.setUserInfo(user2Info);
+		store.setCapabilities(createMockCapabilityList({ canSeeUsersPresence: true }));
 		act(() => store.setUserPresence('user1', true));
 		setup(<ParticipantComponentInfo member={members[0]} roomId={mockedRoom.id} />);
 
@@ -241,6 +242,7 @@ describe('Participant component info', () => {
 		store.addRoom(mockedRoom);
 		store.setUserInfo(user1Info);
 		store.setUserInfo(user2Info);
+		store.setCapabilities(createMockCapabilityList({ canSeeUsersPresence: true }));
 		act(() => store.setUserPresence('user1', false));
 		mockedGetURLUserPicture.mockReturnValue('Imageurl.jpeg');
 		setup(<ParticipantComponentInfo member={members[0]} roomId={mockedRoom.id} />);
@@ -253,6 +255,7 @@ describe('Participant component info', () => {
 		store.addRoom(mockedRoom);
 		store.setUserInfo(user1Info);
 		store.setUserInfo(user2Info);
+		store.setCapabilities(createMockCapabilityList({ canSeeUsersPresence: true }));
 		act(() => store.setUserLastActivity('user2', 1642818617000));
 		setup(<ParticipantComponentInfo member={members[1]} roomId={mockedRoom.id} />);
 		// last activity is 2022/01/22 at 03:30:17

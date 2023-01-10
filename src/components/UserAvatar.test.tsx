@@ -9,7 +9,7 @@ import React from 'react';
 import { setup } from 'test-utils';
 
 import useStore from '../store/Store';
-import { createMockRoom } from '../tests/createMock';
+import { createMockCapabilityList, createMockRoom } from '../tests/createMock';
 import { RoomBe, RoomType } from '../types/network/models/roomBeTypes';
 import { User } from '../types/store/UserTypes';
 import UserAvatar from './UserAvatar';
@@ -64,6 +64,7 @@ describe('User avatar', () => {
 		store.addRoom(room);
 		store.setLoginInfo(user1Info.id, user1Info.email, user1Info.name);
 		store.setUserInfo(user2Info);
+		store.setCapabilities(createMockCapabilityList({ canSeeUsersPresence: true }));
 		setup(<UserAvatar roomId={roomId} draftMessage={false} />);
 		const avatar = screen.getByTestId('avatar_box');
 		expect(avatar).toBeVisible();
@@ -76,6 +77,7 @@ describe('User avatar', () => {
 		store.addRoom(room);
 		store.setLoginInfo(user1Info.id, user1Info.email, user1Info.name);
 		store.setUserInfo(user2Info);
+		store.setCapabilities(createMockCapabilityList({ canSeeUsersPresence: true }));
 		store.setUserPresence('user2', true);
 		setup(<UserAvatar roomId={roomId} draftMessage={false} />);
 		const avatar = screen.getByTestId('avatar_box');
@@ -91,6 +93,7 @@ describe('User avatar', () => {
 		store.setUserInfo(user2Info);
 		store.setUserPresence('user2', true);
 		store.setRoomMuted(roomId);
+		store.setCapabilities(createMockCapabilityList({ canSeeUsersPresence: true }));
 		setup(<UserAvatar roomId={roomId} draftMessage={false} />);
 		const iconOff = screen.getByTestId('icon: BellOff');
 		expect(iconOff).toBeVisible();
@@ -104,6 +107,7 @@ describe('User avatar', () => {
 		store.setLoginInfo(user1Info.id, user1Info.email, user1Info.name);
 		store.setUserInfo(user2Info);
 		store.setRoomMuted(roomId);
+		store.setCapabilities(createMockCapabilityList({ canSeeUsersPresence: true }));
 		setup(<UserAvatar roomId={roomId} draftMessage={false} />);
 		const iconOff = screen.getByTestId('icon: BellOff');
 		expect(iconOff).toBeVisible();
@@ -117,6 +121,7 @@ describe('User avatar', () => {
 		store.setLoginInfo(user1Info.id, user1Info.email, user1Info.name);
 		store.setUserInfo(user2Info);
 		store.setUserPresence('user2', true);
+		store.setCapabilities(createMockCapabilityList({ canSeeUsersPresence: true }));
 		setup(<UserAvatar roomId={roomId} draftMessage={false} />);
 		const userAvatar = screen.getByTestId('User 2-avatar');
 		expect(userAvatar).toBeVisible();
@@ -129,6 +134,7 @@ describe('User avatar', () => {
 		store.addRoom(room);
 		store.setLoginInfo(user1Info.id, user1Info.email, user1Info.name);
 		store.setUserInfo(user2Info);
+		store.setCapabilities(createMockCapabilityList({ canSeeUsersPresence: true }));
 		setup(<UserAvatar roomId={roomId} draftMessage={false} />);
 		const userAvatar = screen.getByTestId('User 2-avatar');
 		expect(userAvatar).toBeVisible();

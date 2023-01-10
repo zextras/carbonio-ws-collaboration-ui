@@ -143,6 +143,9 @@ const RoomPictureHandler: FC<RoomPictureProps> = ({ memberId, roomType, roomId }
 	const maxRoomImageSize = useStore((store) =>
 		getCapability(store, CapabilityType.MAX_ROOM_IMAGE_SIZE)
 	);
+	const canSeeUsersPresence = useStore((store) =>
+		getCapability(store, CapabilityType.CAN_SEE_USERS_PRESENCE)
+	);
 	const [t] = useTranslation();
 	const userOnlineLabel: string = t('status.online', 'Online');
 	const userOfflineLabel: string = t('status.offline', 'Offline');
@@ -253,17 +256,19 @@ const RoomPictureHandler: FC<RoomPictureProps> = ({ memberId, roomType, roomId }
 						{memberName || memberEmail}
 					</NameWrapText>
 					<Padding top="extrasmall" />
-					<Container orientation="horizontal" mainAlignment="flex-start" height="fit">
-						{memberOnline && <Presence data-testid="user_presence_dot" />}
-						{memberOnline && <Padding right={'0.25rem'} />}
-						<CustomText size="small" color="gray6" hasPicture={!!picture}>
-							{presenceLabel}
-						</CustomText>
-					</Container>
+					{canSeeUsersPresence && (
+						<Container orientation="horizontal" mainAlignment="flex-start" height="fit">
+							{memberOnline && <Presence data-testid="user_presence_dot" />}
+							{memberOnline && <Padding right={'0.25rem'} />}
+							<CustomText size="small" color="gray6" hasPicture={!!picture}>
+								{presenceLabel}
+							</CustomText>
+						</Container>
+					)}
 				</Container>
 			</Container>
 		),
-		[memberOnline, picture, memberEmail, memberName, presenceLabel]
+		[picture, memberName, memberEmail, canSeeUsersPresence, memberOnline, presenceLabel]
 	);
 
 	const roomInfo = useMemo(

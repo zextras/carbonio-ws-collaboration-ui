@@ -8,6 +8,7 @@ import { MemberBe, RoomBe } from '../types/network/models/roomBeTypes';
 import { Marker, MarkerStatus, MarkerType } from '../types/store/MarkersTypes';
 import { TextMessage } from '../types/store/MessageTypes';
 import { RoomType } from '../types/store/RoomTypes';
+import { CapabilityList } from '../types/store/SessionTypes';
 
 export const createMockRoom = (fields?: Record<string, any>): RoomBe => ({
 	id: 'id',
@@ -46,5 +47,19 @@ export const createMockMarker = (fields?: Record<string, any>): Marker => ({
 	messageId: 'messageId',
 	markerDate: 1662541394393,
 	type: MarkerType.DISPLAYED,
+	...fields
+});
+
+export const createMockCapabilityList = (fields?: Record<string, any>): CapabilityList => ({
+	canSeeMessageReads: true,
+	canSeeUsersPresence: true,
+	canVideoCall: true,
+	canVideoCallRecord: true,
+	canUseVirtualBackground: true,
+	editMessageTimeLimitInMinutes: 10,
+	deleteMessageTimeLimitInMinutes: 10,
+	maxGroupMembers: 128,
+	maxRoomImageSizeInKb: 512,
+	maxUserImageSizeInKb: 512,
 	...fields
 });

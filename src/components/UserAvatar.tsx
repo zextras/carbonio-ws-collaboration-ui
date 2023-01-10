@@ -11,6 +11,7 @@ import styled, { DefaultTheme } from 'styled-components';
 
 import { UsersApi } from '../network';
 import { getRoomMembers, getRoomMutedSelector } from '../store/selectors/RoomsSelectors';
+import { getCapability } from '../store/selectors/SessionSelectors';
 import {
 	getUserName,
 	getUserOnline,
@@ -18,6 +19,7 @@ import {
 } from '../store/selectors/UsersSelectors';
 import useStore from '../store/Store';
 import { Member } from '../types/store/RoomTypes';
+import { CapabilityType } from '../types/store/SessionTypes';
 
 type UserAvatarProps = {
 	roomId: string;
@@ -66,7 +68,9 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ roomId, unreadCount, draftMessa
 	const userPictureUpdatedAt: string | undefined = useStore((state) =>
 		getUserPictureUpdatedAt(state, otherMember!.userId)
 	);
-
+	const canSeeUsersPresence = useStore((store) =>
+		getCapability(store, CapabilityType.CAN_SEE_USERS_PRESENCE)
+	);
 	const [picture, setPicture] = useState<false | string>(false);
 
 	useEffect(() => {
@@ -105,7 +109,9 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ roomId, unreadCount, draftMessa
 					type={!roomMuted ? 'unread' : 'read'}
 				/>
 			) : (
-				<Presence data-testid="user_presence_dot" memberOnline={memberOnline} />
+				canSeeUsersPresence && (
+					<Presence data-testid="user_presence_dot" memberOnline={memberOnline} />
+				)
 			)}
 		</AvatarContainer>
 	) : (
