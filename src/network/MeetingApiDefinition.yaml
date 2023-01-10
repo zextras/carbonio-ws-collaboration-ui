@@ -211,6 +211,13 @@ components:
       description: session identifier
       schema:
         type: string
+    pathRoomId:
+      in: path
+      name: roomId
+      description: room identifier
+      schema:
+        type: string
+        format: uuid
       required: true
       allowEmptyValue: false
 
