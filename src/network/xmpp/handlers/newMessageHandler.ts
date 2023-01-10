@@ -50,19 +50,23 @@ export function onNewMessageStanza(this: IXMPPClient, message: Element): true {
 				store.activeConversations[newMessage.roomId].inputHasFocus;
 			const room = store.rooms[newMessage.roomId];
 
-			let notificationManager = JSON.parse(
-				window.parent.localStorage.getItem('ChatsNotificationsSettings') || '{}'
+			let areNotificationsActive;
+			const ChatsNotificationsSettings: string | null = window.parent.localStorage.getItem(
+				'ChatsNotificationsSettings'
 			);
-			if (notificationManager === '{}') {
+			if (
+				ChatsNotificationsSettings &&
+				JSON.parse(ChatsNotificationsSettings).hasOwnProperty('DesktopNotifications')
+			) {
+				areNotificationsActive = JSON.parse(ChatsNotificationsSettings).DesktopNotifications;
+			} else {
 				window.parent.localStorage.setItem(
 					'ChatsNotificationsSettings',
 					JSON.stringify({
 						DesktopNotifications: true
 					})
 				);
-				notificationManager = JSON.parse(
-					window.parent.localStorage.getItem('ChatsNotificationsSettings') || '{}'
-				);
+				areNotificationsActive = true;
 			}
 
 			if (
@@ -71,7 +75,7 @@ export function onNewMessageStanza(this: IXMPPClient, message: Element): true {
 				!inputIsFocused &&
 				room &&
 				!room?.userSettings?.muted &&
-				notificationManager.DesktopNotifications
+				areNotificationsActive
 			) {
 				const sender = store.users[newMessage.from];
 				const title =

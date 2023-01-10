@@ -44,16 +44,16 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 
 	const createSnackbar: CreateSnackbarFn = useContext(SnackbarManagerContext);
 
-	const [notificationsStorage, setNotificationsStorage] = useLocalStorage<
-		{ DesktopNotifications: boolean } | undefined
-	>('ChatsNotificationsSettings', {
+	const [notificationsStorage, setNotificationsStorage] = useLocalStorage<{
+		DesktopNotifications: boolean;
+	}>('ChatsNotificationsSettings', {
 		DesktopNotifications: true
 	});
 
 	const [picture, setPicture] = useState<false | File>(false);
 	const [deletePicture, setDeletePicture] = useState<boolean>(false);
 	const [desktopNotifications, setDesktopNotifications] = useState<boolean>(
-		notificationsStorage ? notificationsStorage.DesktopNotifications : true
+		notificationsStorage.DesktopNotifications
 	);
 	const [isEnabled, setIsEnabled] = useState<boolean>(false);
 
@@ -62,7 +62,7 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 		if (
 			!!picture ||
 			deletePicture ||
-			(notificationsStorage && notificationsStorage.DesktopNotifications !== desktopNotifications)
+			notificationsStorage.DesktopNotifications !== desktopNotifications
 		) {
 			setIsEnabled(true);
 		} else {
@@ -74,9 +74,7 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 	const onClose = useCallback(() => {
 		setPicture(false);
 		setDeletePicture(false);
-		setDesktopNotifications(
-			(notificationsStorage && notificationsStorage.DesktopNotifications) || true
-		);
+		setDesktopNotifications(notificationsStorage.DesktopNotifications);
 	}, [notificationsStorage]);
 
 	// saves the elements that have been modified
@@ -134,10 +132,7 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 		}
 
 		// if a user turn off/on the desktopNotifications
-		if (
-			notificationsStorage &&
-			notificationsStorage.DesktopNotifications !== desktopNotifications
-		) {
+		if (notificationsStorage.DesktopNotifications !== desktopNotifications) {
 			localStorage.setItem(
 				'ChatsNotificationsSettings',
 				JSON.stringify({ DesktopNotifications: desktopNotifications })

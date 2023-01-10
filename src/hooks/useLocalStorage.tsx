@@ -6,10 +6,10 @@
 
 import { useEffect, useState } from 'react';
 
-type ReturnType<T> = [T | undefined, React.Dispatch<React.SetStateAction<T | undefined>>];
+type ReturnType<T> = [T, React.Dispatch<React.SetStateAction<T>>];
 
 const useLocalStorage = <T,>(key: string, initialValue?: T): ReturnType<T> => {
-	const [localStorageItem, setLocalStorageItem] = useState<T | undefined>(() => {
+	const [localStorageItem, setLocalStorageItem] = useState<T>(() => {
 		try {
 			const item = window.localStorage.getItem(key);
 			return item ? JSON.parse(item) : initialValue;
