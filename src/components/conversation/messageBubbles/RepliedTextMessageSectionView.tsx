@@ -34,7 +34,6 @@ const ReplayedTextMessageContainer = styled(Container)`
 
 const MessageWrap = styled(Text)`
 	height: inherit;
-	white-space: pre;
 `;
 
 const RepliedTextMessageSectionView: FC<RepliedTextMessageSectionViewProps> = ({
