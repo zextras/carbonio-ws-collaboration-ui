@@ -34,7 +34,12 @@ const Conversation = ({ room }: ConversationProps): ReactElement => {
 	return (
 		<ConversationWrapper mainAlignment="flex-start" orientation="horizontal">
 			{(isDesktopView || !infoPanelOpen) && (
-				<Container width={isDesktopView ? '70%' : '100%'} minWidth="70%" mainAlignment="flex-start">
+				<Container
+					data-testid="conversationCollapsedView"
+					width={isDesktopView ? '70%' : '100%'}
+					minWidth="70%"
+					mainAlignment="flex-start"
+				>
 					<ConversationHeader roomId={room.id} setInfoPanelOpen={setInfoPanelOpen} />
 					<MessagesList roomId={room.id} />
 					<ConversationFooter roomId={room.id} />

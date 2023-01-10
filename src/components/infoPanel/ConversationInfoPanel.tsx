@@ -49,7 +49,11 @@ const ConversationInfoPanel: FC<ConversationProps> = ({
 	const roomType: string = useStore((state) => getRoomTypeSelector(state, roomId));
 
 	return (
-		<CustomContainer width={infoPanelOpen ? '100%' : '30%'} mainAlignment="flex-start">
+		<CustomContainer
+			data-testid={`conversationInfoPanel${infoPanelOpen ? 'Open' : 'Collapsed'}`}
+			width={infoPanelOpen ? '100%' : '30%'}
+			mainAlignment="flex-start"
+		>
 			<ConversationInfoContainer>
 				<ConversationInfo roomId={roomId} roomType={roomType} setInfoPanelOpen={setInfoPanelOpen} />
 			</ConversationInfoContainer>

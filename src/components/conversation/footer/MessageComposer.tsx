@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { IconButton, Container, Tooltip } from '@zextras/carbonio-design-system';
+import { IconButton, Container, Tooltip, Padding } from '@zextras/carbonio-design-system';
 import React, {
 	BaseSyntheticEvent,
 	useCallback,
@@ -233,6 +233,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 						/>
 					</Container>
 				</Tooltip>
+				<Padding right={'0.25rem'} />
 				<MessageArea
 					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 					// @ts-ignore
