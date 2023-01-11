@@ -22,7 +22,6 @@ type DateMsgProps = {
 
 const CustomMessageWrapper = styled(Container)`
 	position: sticky;
-	position: -webkit-sticky;
 	top: 0;
 `;
 
