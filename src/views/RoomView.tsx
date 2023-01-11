@@ -5,7 +5,7 @@
  */
 
 import { Container } from '@zextras/carbonio-design-system';
-import React, { ReactElement, useMemo } from 'react';
+import React, { ReactElement, useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 
 import Conversation from '../components/conversation/Conversation';
@@ -19,11 +19,18 @@ import ShimmeringInfoPanelView from './shimmerViews/ShimmeringInfoPanelView';
 const RoomView = (): ReactElement => {
 	// Retrieve room id from url
 	const params: { roomId?: string } = useParams();
+	const setSelectedRoomOneToOneGroup = useStore((state) => state.setSelectedRoomOneToOneGroup);
 
 	const selectedRoomId: string = useMemo(
 		() => (params && params.roomId ? decodeURIComponent(params.roomId) : ''),
 		[params]
 	);
+
+	// Keep selectedRoomOneToOneGroup updates
+	useEffect(() => {
+		setSelectedRoomOneToOneGroup(selectedRoomId);
+	}, [selectedRoomId, setSelectedRoomOneToOneGroup]);
+
 	const room = useStore((store) => getRoomSelector(store, selectedRoomId), roomMainInfoEqualityFn);
 
 	if (!room) {

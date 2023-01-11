@@ -36,14 +36,10 @@ const CollapsedSidebarListItem: React.FC<SidebarListItemProps> = ({ roomId }) =>
 	const roomType = useStore((state) => getRoomTypeSelector(state, roomId));
 	const roomName = useStore((state) => getRoomNameSelector(state, roomId)) || '';
 	const isConversationSelected = useStore((state) => getSelectedConversation(state, roomId));
-	const setSelectedRoomOneToOneGroup = useStore((state) => state.setSelectedRoomOneToOneGroup);
 	const unreadMessagesCount = useStore((store) => getRoomUnreadsSelector(store, roomId));
 	const draftMessage = useStore((store) => getDraftMessage(store, roomId));
 
-	const openConversation = useCallback(() => {
-		setSelectedRoomOneToOneGroup(roomId);
-		goToRoomPage(roomId);
-	}, [goToRoomPage, roomId, setSelectedRoomOneToOneGroup]);
+	const openConversation = useCallback(() => goToRoomPage(roomId), [goToRoomPage, roomId]);
 
 	return (
 		<Tooltip label={roomName}>
