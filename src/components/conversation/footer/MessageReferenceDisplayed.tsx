@@ -9,12 +9,12 @@ import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import { getMessageSelector } from '../../store/selectors/MessagesSelectors';
-import { getUserSelector } from '../../store/selectors/UsersSelectors';
-import useStore from '../../store/Store';
-import { ReferenceMessage } from '../../types/store/ActiveConversationTypes';
-import { Message } from '../../types/store/MessageTypes';
-import { calculateAvatarColor } from '../../utils/styleUtils';
+import { getMessageSelector } from '../../../store/selectors/MessagesSelectors';
+import { getUserSelector } from '../../../store/selectors/UsersSelectors';
+import useStore from '../../../store/Store';
+import { ReferenceMessage } from '../../../types/store/ActiveConversationTypes';
+import { Message } from '../../../types/store/MessageTypes';
+import { calculateAvatarColor } from '../../../utils/styleUtils';
 
 const UserName = styled(Text)`
 	color: ${({ labelColor, theme }): string[] => theme.avatarColors[labelColor]};

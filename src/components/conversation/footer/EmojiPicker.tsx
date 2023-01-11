@@ -14,7 +14,7 @@ import { Picker } from 'emoji-mart';
 import React, { useEffect, useRef } from 'react';
 import styled from 'styled-components';
 
-import { Emoji } from '../../types/generics';
+import { Emoji } from '../../../types/generics';
 
 const PickerWrapper = styled(Container)`
 	z-index: 10;
@@ -51,7 +51,7 @@ const EmojiPicker: React.FC<EmojiPickerProps> = (props) => {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
-	return <PickerWrapper ref={ref} />;
+	return <PickerWrapper ref={ref} data-testid="emojiPicker" />;
 };
 
 export default EmojiPicker;

@@ -8,8 +8,8 @@ import { Container, IconButton, Tooltip } from '@zextras/carbonio-design-system'
 import React, { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { getReferenceMessageView } from '../../store/selectors/ActiveConversationsSelectors';
-import useStore from '../../store/Store';
+import { getReferenceMessageView } from '../../../store/selectors/ActiveConversationsSelectors';
+import useStore from '../../../store/Store';
 import MessageReferenceDisplayed from './MessageReferenceDisplayed';
 
 type ReferenceMessageViewProps = {
