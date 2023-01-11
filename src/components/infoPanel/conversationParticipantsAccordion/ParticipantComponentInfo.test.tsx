@@ -26,7 +26,8 @@ const user2Info: User = {
 	id: 'user2',
 	email: 'user2@domain.com',
 	name: 'User 2',
-	last_activity: 1642818965849
+	last_activity: 1642818965849,
+	pictureUpdatedAt: '2022-08-25T17:24:28.961+02:00'
 };
 
 const members = [
@@ -111,154 +112,198 @@ const mockedRoomOneOwner = createMockRoom({
 });
 
 describe('Participant component info', () => {
-	test('The user is the only owner and sees his element inside list', async () => {
-		const store = useStore.getState();
-		store.setLoginInfo('user1', 'User 1');
-		store.addRoom(mockedRoomOneOwner);
-		store.setUserInfo(user1Be);
-		setup(<ParticipantComponentInfo member={members[0]} roomId={mockedRoomOneOwner.id} />);
+	describe('User is an owner', () => {
+		test('The user is the only owner and sees his element inside list', () => {
+			const store = useStore.getState();
+			store.setLoginInfo('user1', 'User 1');
+			store.addRoom(mockedRoomOneOwner);
+			store.setUserInfo(user1Be);
+			setup(<ParticipantComponentInfo member={members[0]} roomId={mockedRoomOneOwner.id} />);
 
-		const iAmOwnerAction = screen.getByTestId('icon: Crown');
-		expect(iAmOwnerAction).toBeInTheDocument();
-		expect(iAmOwnerAction).not.toHaveAttribute('disabled', true);
+			const iAmOwnerAction = screen.getByTestId('icon: Crown');
+			expect(iAmOwnerAction).toBeInTheDocument();
+			expect(iAmOwnerAction).not.toHaveAttribute('disabled', true);
 
-		const logoutAction = screen.getByTestId('icon: LogOut');
-		expect(logoutAction).toBeInTheDocument();
-		expect(logoutAction).not.toHaveAttribute('disabled', true);
+			const logoutAction = screen.getByTestId('icon: LogOut');
+			expect(logoutAction).toBeInTheDocument();
+			expect(logoutAction).not.toHaveAttribute('disabled', true);
+		});
+		test('The user is an owner and sees his element inside list', () => {
+			const store = useStore.getState();
+			store.setLoginInfo('user1', 'User 1');
+			store.addRoom(mockedRoom);
+			store.setUserInfo(user1Be);
+			setup(<ParticipantComponentInfo member={members[0]} roomId={mockedRoom.id} />);
+
+			const participantName = screen.getByText(/User 1/i);
+			expect(participantName).toBeInTheDocument();
+
+			const iAmOwnerAction = screen.getByTestId('icon: Crown');
+			expect(iAmOwnerAction).toBeInTheDocument();
+			expect(iAmOwnerAction).not.toHaveAttribute('disabled', true);
+
+			const logoutAction = screen.getByTestId('icon: LogOut');
+			expect(logoutAction).toBeInTheDocument();
+		});
+		test('The user is an owner and sees a normal user inside list', () => {
+			const store = useStore.getState();
+			store.setLoginInfo('user1', 'User 1');
+			store.addRoom(mockedRoom);
+			store.setUserInfo(user2Be);
+			setup(<ParticipantComponentInfo member={members[1]} roomId={mockedRoom.id} />);
+
+			const participantName = screen.getByText(/User 2/i);
+			expect(participantName).toBeInTheDocument();
+
+			const goToChatAction = screen.getByTestId('icon: MessageCircleOutline');
+			expect(goToChatAction).toBeInTheDocument();
+
+			const isOwnerAction = screen.getByTestId('icon: CrownOutline');
+			expect(isOwnerAction).toBeInTheDocument();
+
+			const deleteUserAction = screen.getByTestId('icon: Trash2Outline');
+			expect(deleteUserAction).toBeInTheDocument();
+		});
+		test('The user is an owner and sees another owner inside list', () => {
+			const store = useStore.getState();
+			store.setLoginInfo('user1', 'User 1');
+			store.addRoom(mockedRoom);
+			store.setUserInfo(user3Be);
+			setup(<ParticipantComponentInfo member={members[2]} roomId={mockedRoom.id} />);
+
+			const participantName = screen.getByText(/User 3/i);
+			expect(participantName).toBeInTheDocument();
+
+			const goToChatAction = screen.getByTestId('icon: MessageCircleOutline');
+			expect(goToChatAction).toBeInTheDocument();
+
+			const isOwnerAction = screen.getByTestId('icon: Crown');
+			expect(isOwnerAction).toBeInTheDocument();
+
+			const deleteUserAction = screen.getByTestId('icon: Trash2Outline');
+			expect(deleteUserAction).toBeInTheDocument();
+		});
 	});
-	test('The user is an owner and sees his element inside list', async () => {
-		const store = useStore.getState();
-		store.setLoginInfo('user1', 'User 1');
-		store.addRoom(mockedRoom);
-		store.setUserInfo(user1Be);
-		setup(<ParticipantComponentInfo member={members[0]} roomId={mockedRoom.id} />);
+	describe("User isn't an owner", () => {
+		test('The user is not an owner and sees his element inside list', () => {
+			const store = useStore.getState();
+			store.setLoginInfo('user2', 'User 2');
+			store.addRoom(mockedRoom);
+			store.setUserInfo(user2Be);
+			setup(<ParticipantComponentInfo member={members[1]} roomId={mockedRoom.id} />);
 
-		const participantName = screen.getByText(/User 1/i);
-		expect(participantName).toBeInTheDocument();
+			const participantName = screen.getByText(/User 2/i);
+			expect(participantName).toBeInTheDocument();
 
-		const iAmOwnerAction = screen.getByTestId('icon: Crown');
-		expect(iAmOwnerAction).toBeInTheDocument();
-		expect(iAmOwnerAction).not.toHaveAttribute('disabled', true);
+			const logoutAction = screen.getByTestId('icon: LogOut');
+			expect(logoutAction).toBeInTheDocument();
+		});
+		test('the user is not an owner and sees an owner inside list', () => {
+			const store = useStore.getState();
+			store.setLoginInfo('user2', 'User 2');
+			store.addRoom(mockedRoom);
+			store.setUserInfo(user1Be);
+			setup(<ParticipantComponentInfo member={members[0]} roomId={mockedRoom.id} />);
 
-		const logoutAction = screen.getByTestId('icon: LogOut');
-		expect(logoutAction).toBeInTheDocument();
+			const participantName = screen.getByText(/User 1/i);
+			expect(participantName).toBeInTheDocument();
+
+			const goToChatAction = screen.getByTestId('icon: MessageCircleOutline');
+			expect(goToChatAction).toBeInTheDocument();
+
+			const isOwnerAction = screen.getByTestId('icon: Crown');
+			expect(isOwnerAction).toBeInTheDocument();
+		});
+		test('The user is not an owner and sees a normal user inside list', () => {
+			const store = useStore.getState();
+			store.setLoginInfo('user2', 'User 2');
+			store.addRoom(mockedRoom);
+			store.setUserInfo(user4Be);
+			setup(<ParticipantComponentInfo member={members[3]} roomId={mockedRoom.id} />);
+
+			const participantName = screen.getByText(/User 4/i);
+			expect(participantName).toBeInTheDocument();
+
+			const goToChatAction = screen.getByTestId('icon: MessageCircleOutline');
+			expect(goToChatAction).toBeInTheDocument();
+		});
 	});
-	test('The user is an owner and sees a normal user inside list', async () => {
-		const store = useStore.getState();
-		store.setLoginInfo('user1', 'User 1');
-		store.addRoom(mockedRoom);
-		store.setUserInfo(user2Be);
-		setup(<ParticipantComponentInfo member={members[1]} roomId={mockedRoom.id} />);
+	describe('Subtitle sentence with canSeeUsersPresence capability set to true', () => {
+		test('Label should show Online', () => {
+			const store = useStore.getState();
+			store.setLoginInfo('user1', 'User 1');
+			store.addRoom(mockedRoom);
+			store.setUserInfo(user1Info);
+			store.setUserInfo(user2Info);
+			store.setCapabilities(createMockCapabilityList({ canSeeUsersPresence: true }));
+			act(() => store.setUserPresence('user1', true));
+			setup(<ParticipantComponentInfo member={members[0]} roomId={mockedRoom.id} />);
 
-		const participantName = screen.getByText(/User 2/i);
-		expect(participantName).toBeInTheDocument();
+			expect(screen.getByText(/Online/i)).toBeInTheDocument();
+		});
+		test('Label should show Offline', () => {
+			const store = useStore.getState();
+			store.setLoginInfo('user1', 'User 1');
+			store.addRoom(mockedRoom);
+			store.setUserInfo(user1Info);
+			store.setUserInfo(user2Info);
+			store.setCapabilities(createMockCapabilityList({ canSeeUsersPresence: true }));
+			act(() => store.setUserPresence('user1', false));
+			mockedGetURLUserPicture.mockReturnValue('Imageurl.jpeg');
+			setup(<ParticipantComponentInfo member={members[0]} roomId={mockedRoom.id} />);
 
-		const goToChatAction = screen.getByTestId('icon: MessageCircleOutline');
-		expect(goToChatAction).toBeInTheDocument();
-
-		const isOwnerAction = screen.getByTestId('icon: CrownOutline');
-		expect(isOwnerAction).toBeInTheDocument();
-
-		const deleteUserAction = screen.getByTestId('icon: Trash2Outline');
-		expect(deleteUserAction).toBeInTheDocument();
+			expect(screen.getByText(/Offline/i)).toBeInTheDocument();
+		});
+		test('Label should show "Last seen" phrase if last_activity is present', () => {
+			const store = useStore.getState();
+			store.setLoginInfo('user1', 'User 1');
+			store.addRoom(mockedRoom);
+			store.setUserInfo(user1Info);
+			store.setUserInfo(user2Info);
+			store.setCapabilities(createMockCapabilityList({ canSeeUsersPresence: true }));
+			act(() => store.setUserLastActivity('user2', 1642818617000));
+			setup(<ParticipantComponentInfo member={members[1]} roomId={mockedRoom.id} />);
+			// last activity is 2022/01/22 at 03:30:17
+			expect(screen.getByText(/Last seen 01\/22\/2022/i)).toBeInTheDocument();
+		});
 	});
-	test('The user is an owner and sees another owner inside list', async () => {
-		const store = useStore.getState();
-		store.setLoginInfo('user1', 'User 1');
-		store.addRoom(mockedRoom);
-		store.setUserInfo(user3Be);
-		setup(<ParticipantComponentInfo member={members[2]} roomId={mockedRoom.id} />);
+	describe('Subtitle sentence with canSeeUsersPresence capability set to false', () => {
+		test('Label should not show Online', () => {
+			const store = useStore.getState();
+			store.setLoginInfo('user1', 'User 1');
+			store.addRoom(mockedRoom);
+			store.setUserInfo(user1Info);
+			store.setUserInfo(user2Info);
+			store.setCapabilities(createMockCapabilityList({ canSeeUsersPresence: false }));
+			act(() => store.setUserPresence('user1', true));
+			setup(<ParticipantComponentInfo member={members[0]} roomId={mockedRoom.id} />);
 
-		const participantName = screen.getByText(/User 3/i);
-		expect(participantName).toBeInTheDocument();
+			expect(screen.queryByText(/Online/i)).not.toBeInTheDocument();
+		});
+		test('Label should notshow Offline', () => {
+			const store = useStore.getState();
+			store.setLoginInfo('user1', 'User 1');
+			store.addRoom(mockedRoom);
+			store.setUserInfo(user1Info);
+			store.setUserInfo(user2Info);
+			store.setCapabilities(createMockCapabilityList({ canSeeUsersPresence: false }));
+			act(() => store.setUserPresence('user1', false));
+			mockedGetURLUserPicture.mockReturnValue('Imageurl.jpeg');
+			setup(<ParticipantComponentInfo member={members[0]} roomId={mockedRoom.id} />);
 
-		const goToChatAction = screen.getByTestId('icon: MessageCircleOutline');
-		expect(goToChatAction).toBeInTheDocument();
-
-		const isOwnerAction = screen.getByTestId('icon: Crown');
-		expect(isOwnerAction).toBeInTheDocument();
-
-		const deleteUserAction = screen.getByTestId('icon: Trash2Outline');
-		expect(deleteUserAction).toBeInTheDocument();
-	});
-	test('The user is not an owner and sees his element inside list', async () => {
-		const store = useStore.getState();
-		store.setLoginInfo('user2', 'User 2');
-		store.addRoom(mockedRoom);
-		store.setUserInfo(user2Be);
-		setup(<ParticipantComponentInfo member={members[1]} roomId={mockedRoom.id} />);
-
-		const participantName = screen.getByText(/User 2/i);
-		expect(participantName).toBeInTheDocument();
-
-		const logoutAction = screen.getByTestId('icon: LogOut');
-		expect(logoutAction).toBeInTheDocument();
-	});
-	test('the user is not an owner and sees an owner inside list', async () => {
-		const store = useStore.getState();
-		store.setLoginInfo('user2', 'User 2');
-		store.addRoom(mockedRoom);
-		store.setUserInfo(user1Be);
-		setup(<ParticipantComponentInfo member={members[0]} roomId={mockedRoom.id} />);
-
-		const participantName = screen.getByText(/User 1/i);
-		expect(participantName).toBeInTheDocument();
-
-		const goToChatAction = screen.getByTestId('icon: MessageCircleOutline');
-		expect(goToChatAction).toBeInTheDocument();
-
-		const isOwnerAction = screen.getByTestId('icon: Crown');
-		expect(isOwnerAction).toBeInTheDocument();
-	});
-	test('The user is not an owner and sees a normal user inside list', async () => {
-		const store = useStore.getState();
-		store.setLoginInfo('user2', 'User 2');
-		store.addRoom(mockedRoom);
-		store.setUserInfo(user4Be);
-		setup(<ParticipantComponentInfo member={members[3]} roomId={mockedRoom.id} />);
-
-		const participantName = screen.getByText(/User 4/i);
-		expect(participantName).toBeInTheDocument();
-
-		const goToChatAction = screen.getByTestId('icon: MessageCircleOutline');
-		expect(goToChatAction).toBeInTheDocument();
-	});
-
-	test('Label should show Online', () => {
-		const store = useStore.getState();
-		store.setLoginInfo('user1', 'User 1');
-		store.addRoom(mockedRoom);
-		store.setUserInfo(user1Info);
-		store.setUserInfo(user2Info);
-		store.setCapabilities(createMockCapabilityList({ canSeeUsersPresence: true }));
-		act(() => store.setUserPresence('user1', true));
-		setup(<ParticipantComponentInfo member={members[0]} roomId={mockedRoom.id} />);
-
-		expect(screen.getByText(/Online/i)).toBeInTheDocument();
-	});
-	test('Label should show Offline', () => {
-		const store = useStore.getState();
-		store.setLoginInfo('user1', 'User 1');
-		store.addRoom(mockedRoom);
-		store.setUserInfo(user1Info);
-		store.setUserInfo(user2Info);
-		store.setCapabilities(createMockCapabilityList({ canSeeUsersPresence: true }));
-		act(() => store.setUserPresence('user1', false));
-		mockedGetURLUserPicture.mockReturnValue('Imageurl.jpeg');
-		setup(<ParticipantComponentInfo member={members[0]} roomId={mockedRoom.id} />);
-
-		expect(screen.getByText(/Offline/i)).toBeInTheDocument();
-	});
-	test('Label should show "Last seen" phrase if last_activity is present', () => {
-		const store = useStore.getState();
-		store.setLoginInfo('user1', 'User 1');
-		store.addRoom(mockedRoom);
-		store.setUserInfo(user1Info);
-		store.setUserInfo(user2Info);
-		store.setCapabilities(createMockCapabilityList({ canSeeUsersPresence: true }));
-		act(() => store.setUserLastActivity('user2', 1642818617000));
-		setup(<ParticipantComponentInfo member={members[1]} roomId={mockedRoom.id} />);
-		// last activity is 2022/01/22 at 03:30:17
-		expect(screen.getByText(/Last seen 01\/22\/2022/i)).toBeInTheDocument();
+			expect(screen.queryByText(/Offline/i)).not.toBeInTheDocument();
+		});
+		test('Label should not show "Last seen" phrase if last_activity is present', () => {
+			const store = useStore.getState();
+			store.setLoginInfo('user1', 'User 1');
+			store.addRoom(mockedRoom);
+			store.setUserInfo(user1Info);
+			store.setUserInfo(user2Info);
+			store.setCapabilities(createMockCapabilityList({ canSeeUsersPresence: false }));
+			act(() => store.setUserLastActivity('user2', 1642818617000));
+			setup(<ParticipantComponentInfo member={members[1]} roomId={mockedRoom.id} />);
+			// last activity is 2022/01/22 at 03:30:17
+			expect(screen.queryByText(/Last seen 01\/22\/2022/i)).not.toBeInTheDocument();
+		});
 	});
 });
