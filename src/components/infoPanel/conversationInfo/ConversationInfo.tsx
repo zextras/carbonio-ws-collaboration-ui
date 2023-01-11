@@ -70,6 +70,7 @@ const ConversationInfo: FC<ConversationInfoProps> = ({ roomId, roomType, setInfo
 				{!isDesktopView && (
 					<Tooltip label={messagesTooltip}>
 						<IconButton
+							data-testid="closeInfoPanel"
 							onClick={toggleMessageList}
 							iconColor="secondary"
 							size="large"
