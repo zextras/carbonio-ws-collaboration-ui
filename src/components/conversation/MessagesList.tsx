@@ -346,8 +346,6 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 		return list;
 	}, [dateMessageWrapped]);
 
-	// intorno a ogni raggruppamento mettere un container
-
 	const handleClickScrollButton = useCallback(() => {
 		MessagesListWrapperRef?.current &&
 			MessagesListWrapperRef.current.scrollTo({
