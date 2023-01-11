@@ -42,12 +42,12 @@ export const useUnreadsCountStoreSlice = (set: (...any: any) => void): UnreadsCo
 					(message: Message) => lastMarker && message.id === lastMarker.messageId
 				);
 				const unreadByMe = filter(draft.messages[roomId], (message) => {
-					const isRedByMe =
+					const isReadByMe =
 						message.type === 'text' &&
 						message.from !== draft.session.id! &&
 						(!lastMarkedMessage ||
 							(lastMarkedMessage && !isBefore(message.date, lastMarkedMessage.date)));
-					return isRedByMe;
+					return isReadByMe;
 				});
 				draft.unreads[roomId] = size(unreadByMe);
 			}),
