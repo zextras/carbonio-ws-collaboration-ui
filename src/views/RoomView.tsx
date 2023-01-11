@@ -26,7 +26,7 @@ const RoomView = (): ReactElement => {
 		[params]
 	);
 
-	// Keep selectedRoomOneToOneGroup updates
+	// Keep selectedRoomOneToOneGroup update
 	useEffect(() => {
 		setSelectedRoomOneToOneGroup(selectedRoomId);
 	}, [selectedRoomId, setSelectedRoomOneToOneGroup]);
