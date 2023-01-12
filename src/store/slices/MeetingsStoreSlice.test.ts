@@ -13,14 +13,14 @@ import useStore from '../Store';
 const mockParticipant0: MeetingParticipantBe = {
 	userId: 'userId0',
 	sessionId: 'sessionId0',
-	hasMicrophoneOn: true,
-	hasCameraOn: true
+	hasAudioStreamOn: true,
+	hasVideoStreamOn: true
 };
 const mockParticipant1: MeetingParticipantBe = {
 	userId: 'userId1',
 	sessionId: 'sessionId1',
-	hasMicrophoneOn: false,
-	hasCameraOn: true
+	hasAudioStreamOn: false,
+	hasVideoStreamOn: true
 };
 
 const mockMeeting0: MeetingBe = {

@@ -14,11 +14,11 @@ export type MeetingBe = {
 export type MeetingParticipantBe = {
 	userId: string;
 	sessionId: string;
-	hasMicrophoneOn: boolean;
-	hasCameraOn: boolean;
+	hasAudioStreamOn: boolean;
+	hasVideoStreamOn: boolean;
 };
 
 export type JoinSettings = {
-	microphoneOn?: boolean;
-	cameraOn?: boolean;
+	audioStreamOn?: boolean;
+	videoStreamOn?: boolean;
 };

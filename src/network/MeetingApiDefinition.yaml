@@ -88,6 +88,112 @@ paths:
           $ref: '#/components/responses/403ForbiddenResponse'
         404:
           $ref: '#/components/responses/404NotFoundResponse'
+  /meetings/{meetingId}/video:
+    put:
+      tags:
+        - Meetings
+      summary: open video stream for the current session
+      operationId: openVideoStream
+      parameters:
+        - $ref: '#/components/parameters/pathMeetingId'
+      responses:
+        204:
+          $ref: '#/components/responses/204OpenVideoStreamResponse'
+        401:
+          $ref: '#/components/responses/401UnauthorizedResponse'
+        403:
+          $ref: '#/components/responses/403ForbiddenResponse'
+        404:
+          $ref: '#/components/responses/404NotFoundResponse'
+  /meetings/{meetingId}/sessions/{sessionId}/video:
+    delete:
+      tags:
+        - Meetings
+      summary: close video stream for the requested session
+      operationId: closeVideoStream
+      parameters:
+        - $ref: '#/components/parameters/pathMeetingId'
+        - $ref: '#/components/parameters/pathSessionId'
+      responses:
+        204:
+          $ref: '#/components/responses/204CloseVideoStreamResponse'
+        401:
+          $ref: '#/components/responses/401UnauthorizedResponse'
+        403:
+          $ref: '#/components/responses/403ForbiddenResponse'
+        404:
+          $ref: '#/components/responses/404NotFoundResponse'
+  /meetings/{meetingId}/audio:
+    put:
+      tags:
+        - Meetings
+      summary: open audio stream for the current session
+      operationId: openAudioStream
+      parameters:
+        - $ref: '#/components/parameters/pathMeetingId'
+      responses:
+        204:
+          $ref: '#/components/responses/204OpenAudioStreamResponse'
+        401:
+          $ref: '#/components/responses/401UnauthorizedResponse'
+        403:
+          $ref: '#/components/responses/403ForbiddenResponse'
+        404:
+          $ref: '#/components/responses/404NotFoundResponse'
+  /meetings/{meetingId}/sessions/{sessionId}/audio:
+    delete:
+      tags:
+        - Meetings
+      summary: close audio stream for the current session
+      operationId: closeAudioStream
+      parameters:
+        - $ref: '#/components/parameters/pathMeetingId'
+        - $ref: '#/components/parameters/pathSessionId'
+      responses:
+        204:
+          $ref: '#/components/responses/204CloseAudioStreamResponse'
+        401:
+          $ref: '#/components/responses/401UnauthorizedResponse'
+        403:
+          $ref: '#/components/responses/403ForbiddenResponse'
+        404:
+          $ref: '#/components/responses/404NotFoundResponse'
+  /meetings/{meetingId}/screen:
+    put:
+      tags:
+        - Meetings
+      summary: open screen share stream for the current session
+      operationId: openScreenShareStream
+      parameters:
+        - $ref: '#/components/parameters/pathMeetingId'
+      responses:
+        204:
+          $ref: '#/components/responses/204OpenScreenShareStream'
+        401:
+          $ref: '#/components/responses/401UnauthorizedResponse'
+        403:
+          $ref: '#/components/responses/403ForbiddenResponse'
+        404:
+          $ref: '#/components/responses/404NotFoundResponse'
+  /meetings/{meetingId}/sessions/{sessionId}/screen:
+    delete:
+      tags:
+        - Meetings
+      summary: close screen share stream for the requested session
+      operationId: closeScreenShareStream
+      parameters:
+        - $ref: '#/components/parameters/pathMeetingId'
+        - $ref: '#/components/parameters/pathSessionId'
+      responses:
+        204:
+          $ref: '#/components/responses/204CloseScreenShareStream'
+        401:
+          $ref: '#/components/responses/401UnauthorizedResponse'
+        403:
+          $ref: '#/components/responses/403ForbiddenResponse'
+        404:
+          $ref: '#/components/responses/404NotFoundResponse'
+
 components:
   parameters:
     pathMeetingId:
@@ -99,6 +205,12 @@ components:
         format: uuid
       required: true
       allowEmptyValue: false
+    pathSessionId:
+      in: path
+      name: sessionId
+      description: session identifier
+      schema:
+        type: string
     pathRoomId:
       in: path
       name: roomId
@@ -145,6 +257,18 @@ components:
       description: The user joined the meeting successfully
     204LeaveMeetingResponse:
       description: The user exited the meeting successfully
+    204OpenAudioStreamResponse:
+      description: The audio stream opened successfully
+    204CloseAudioStreamResponse:
+      description: The audio stream closed successfully
+    204OpenVideoStreamResponse:
+      description: The video stream opened successfully
+    204CloseVideoStreamResponse:
+      description: The video stream closed successfully
+    204OpenScreenShareStream:
+      description: The screen share stream opened successfully
+    204CloseScreenShareStream:
+      description: The screen share stream closed successfully
 
     400BadRequestResponse:
       description: The request had wrong or missing parameters
@@ -190,14 +314,18 @@ components:
           type: string
           readOnly: true
           description: VideoServer session id
-        hasMicrophoneOn:
+        audioStreamOn:
           type: boolean
           readOnly: true
-          description: indicates if the microphone is on
-        hasCameraOn:
+          description: indicates if the audio stream is on
+        videoStreamOn:
           type: boolean
           readOnly: true
-          description: indicates if the camera is on
+          description: indicates if the video stream is on
+        screenStreamOn:
+          type: boolean
+          readOnly: true
+          description: indicates if the screen share stream is on
     Meeting:
       type: object
       description: Meeting data
@@ -225,12 +353,14 @@ components:
       type: object
       description: user settings to participate
       properties:
-        microphoneOn:
+        audioStreamOn:
           type: boolean
+          default: false
           readOnly: true
-          description: indicates if the microphone is on
-        cameraOn:
+          description: indicates if the audio stream is on
+        videoStreamOn:
           type: boolean
+          default: false
           readOnly: true
-          description: indicates if the camera is on
-      required: [ microphoneOn, cameraOn ]
+          description: indicates if the video stream is on
+      required: [ audioStreamOn, videoStreamOn ]
