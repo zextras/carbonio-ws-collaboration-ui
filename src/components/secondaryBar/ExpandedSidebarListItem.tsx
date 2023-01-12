@@ -70,7 +70,6 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 	const roomName = useStore((state) => getRoomNameSelector(state, roomId));
 	const usersWritingList = useStore((state) => getRoomIsWritingList(state, roomId));
 	const isConversationSelected = useStore((state) => getSelectedConversation(state, roomId));
-	const setSelectedRoomOneToOneGroup = useStore((state) => state.setSelectedRoomOneToOneGroup);
 	const userNameOfLastMessageOfRoom = useStore((store) =>
 		lastMessageOfRoom && lastMessageOfRoom.type === 'text'
 			? getUserName(store, lastMessageOfRoom.from)
@@ -179,10 +178,7 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 		[unreadMessagesCount, roomMuted]
 	);
 
-	const openConversation = useCallback(() => {
-		setSelectedRoomOneToOneGroup(roomId);
-		goToRoomPage(roomId);
-	}, [roomId, goToRoomPage, setSelectedRoomOneToOneGroup]);
+	const openConversation = useCallback(() => goToRoomPage(roomId), [roomId, goToRoomPage]);
 
 	return (
 		<ListItem

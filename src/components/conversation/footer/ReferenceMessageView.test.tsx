@@ -9,15 +9,15 @@ import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { setup } from 'test-utils';
 
-import useStore from '../../store/Store';
-import { createMockMember, createMockRoom, createMockTextMessage } from '../../tests/createMock';
-import { RoomBe } from '../../types/network/models/roomBeTypes';
-import { messageActionType } from '../../types/store/ActiveConversationTypes';
-import { MarkerStatus } from '../../types/store/MarkersTypes';
-import { TextMessage } from '../../types/store/MessageTypes';
-import { RoomType } from '../../types/store/RoomTypes';
-import { RootStore } from '../../types/store/StoreTypes';
-import MessagesList from './MessagesList';
+import useStore from '../../../store/Store';
+import { createMockMember, createMockRoom, createMockTextMessage } from '../../../tests/createMock';
+import { RoomBe } from '../../../types/network/models/roomBeTypes';
+import { messageActionType } from '../../../types/store/ActiveConversationTypes';
+import { MarkerStatus } from '../../../types/store/MarkersTypes';
+import { TextMessage } from '../../../types/store/MessageTypes';
+import { RoomType } from '../../../types/store/RoomTypes';
+import { RootStore } from '../../../types/store/StoreTypes';
+import MessagesList from '../MessagesList';
 import ReferenceMessageView from './ReferenceMessageView';
 
 const mockedRoom: RoomBe = createMockRoom({
