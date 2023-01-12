@@ -64,6 +64,7 @@ describe('User avatar', () => {
 		store.addRoom(room);
 		store.setLoginInfo(user1Info.id, user1Info.email, user1Info.name);
 		store.setUserInfo(user2Info);
+		store.setUserPictureUpdated(user2Info.id, '2022-08-25T17:24:28.961+02:00');
 		setup(<UserAvatar roomId={roomId} draftMessage={false} />);
 		const avatar = screen.getByTestId('avatar_box');
 		expect(avatar).toBeVisible();

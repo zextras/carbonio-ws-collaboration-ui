@@ -7,6 +7,7 @@
 import {
 	Container,
 	CreateSnackbarFn,
+	Padding,
 	SnackbarManagerContext
 } from '@zextras/carbonio-design-system';
 import {
@@ -14,13 +15,13 @@ import {
 	// @ts-ignore
 	SettingsHeader
 } from '@zextras/carbonio-shell-ui';
-import React, { FC, useCallback, useContext, useMemo, useState } from 'react';
+import React, { FC, useCallback, useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import useLocalStorage from '../../hooks/useLocalStorage';
 import { UsersApi } from '../../network';
-import { getCapability } from '../../store/selectors/SessionSelectors';
 import useStore from '../../store/Store';
-import { CapabilityType } from '../../types/store/SessionTypes';
+import NotificationsSettings from './NotificationsSettings';
 import ProfileSettings from './ProfileSettings';
 
 type CreateSnackbarFn = typeof CreateSnackbarFn;
@@ -30,28 +31,12 @@ type SettingsProps = {
 };
 
 const Settings: FC<SettingsProps> = ({ id }) => {
-	const maxRoomImageSize = useStore((store) =>
-		getCapability(store, CapabilityType.MAX_ROOM_IMAGE_SIZE)
-	);
-
 	const [t] = useTranslation();
 	const settingsTitle = t('settings.title', 'Chats Alpha - for testing purpose only');
-	const updatedImageSnackbar = t(
-		'settings.profile.updatedPictureCorrectly',
-		'New avatar has been successfully uploaded'
-	);
-	const imageSizeTooLargeSnackbar = t(
-		'settings.profile.pictureSizeTooLarge',
-		`Something went wrong, remember that the maximum size for an avatar image is ${maxRoomImageSize}kb`,
-		{ size: maxRoomImageSize }
-	);
+	const saveSettingsSnackbar = t('settings.save', 'Edits saved correctly');
 	const errorDeleteImageSnackbar = t(
 		'settings.profile.errorGenericResponse',
 		'Something went Wrong. Please Retry'
-	);
-	const deletedImageSnackbar = t(
-		'settings.profile.deletedUserImageCorrectly',
-		'Avatar has been successfully reset to the original one'
 	);
 
 	const setUserPictureUpdated = useStore((state) => state.setUserPictureUpdated);
@@ -59,10 +44,38 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 
 	const createSnackbar: CreateSnackbarFn = useContext(SnackbarManagerContext);
 
-	const [picture, setPicture] = useState<false | File>(false);
-	const [deletePicture, setDeletePicture] = useState(false);
+	const [notificationsStorage, setNotificationsStorage] = useLocalStorage<{
+		DesktopNotifications: boolean;
+	}>('ChatsNotificationsSettings', {
+		DesktopNotifications: true
+	});
 
-	const isEnabled = useMemo(() => !!picture || deletePicture, [deletePicture, picture]);
+	const [picture, setPicture] = useState<false | File>(false);
+	const [deletePicture, setDeletePicture] = useState<boolean>(false);
+	const [desktopNotifications, setDesktopNotifications] = useState<boolean>(
+		notificationsStorage.DesktopNotifications
+	);
+	const [isEnabled, setIsEnabled] = useState<boolean>(false);
+
+	// set the isEnabled value when changed
+	useEffect(() => {
+		if (
+			!!picture ||
+			deletePicture ||
+			notificationsStorage.DesktopNotifications !== desktopNotifications
+		) {
+			setIsEnabled(true);
+		} else {
+			setIsEnabled(false);
+		}
+	}, [deletePicture, desktopNotifications, notificationsStorage, picture]);
+
+	// sets all the values that has been changed to false and set the default values to the localStorage ones
+	const onClose = useCallback(() => {
+		setPicture(false);
+		setDeletePicture(false);
+		setDesktopNotifications(notificationsStorage.DesktopNotifications);
+	}, [notificationsStorage]);
 
 	// saves the elements that have been modified
 	const saveSettings = useCallback(() => {
@@ -74,17 +87,18 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 					createSnackbar({
 						key: new Date().toLocaleString(),
 						type: 'info',
-						label: updatedImageSnackbar,
+						label: saveSettingsSnackbar,
 						hideButton: true,
 						autoHideTimeout: 5000
 					});
 					setPicture(false);
+					setIsEnabled(false);
 				})
 				.catch(() => {
 					createSnackbar({
 						key: new Date().toLocaleString(),
 						type: 'error',
-						label: imageSizeTooLargeSnackbar,
+						label: errorDeleteImageSnackbar,
 						hideButton: true,
 						autoHideTimeout: 5000
 					});
@@ -99,11 +113,12 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 					createSnackbar({
 						key: new Date().toLocaleString(),
 						type: 'info',
-						label: deletedImageSnackbar,
+						label: saveSettingsSnackbar,
 						hideButton: true,
 						autoHideTimeout: 5000
 					});
 					setDeletePicture(false);
+					setIsEnabled(false);
 				})
 				.catch(() => {
 					createSnackbar({
@@ -115,24 +130,36 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 					});
 				});
 		}
+
+		// if a user turn off/on the desktopNotifications
+		if (notificationsStorage.DesktopNotifications !== desktopNotifications) {
+			localStorage.setItem(
+				'ChatsNotificationsSettings',
+				JSON.stringify({ DesktopNotifications: desktopNotifications })
+			);
+			createSnackbar({
+				key: new Date().toLocaleString(),
+				type: 'info',
+				label: saveSettingsSnackbar,
+				hideButton: true,
+				autoHideTimeout: 5000
+			});
+			setNotificationsStorage({ DesktopNotifications: desktopNotifications });
+			setIsEnabled(false);
+		}
 	}, [
 		picture,
 		deletePicture,
+		notificationsStorage,
+		desktopNotifications,
+		createSnackbar,
+		saveSettingsSnackbar,
 		id,
 		setUserPictureUpdated,
-		createSnackbar,
-		updatedImageSnackbar,
-		imageSizeTooLargeSnackbar,
 		setUserPictureDeleted,
-		deletedImageSnackbar,
-		errorDeleteImageSnackbar
+		errorDeleteImageSnackbar,
+		setNotificationsStorage
 	]);
-
-	// sets all the values that has been changed to false
-	const onClose = useCallback(() => {
-		setPicture(false);
-		setDeletePicture(false);
-	}, []);
 
 	return (
 		<Container
@@ -158,6 +185,11 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 					sessionId={id}
 					setToDelete={setDeletePicture}
 					toDelete={deletePicture}
+				/>
+				<Padding bottom="large" />
+				<NotificationsSettings
+					desktopNotifications={desktopNotifications}
+					setDesktopNotifications={setDesktopNotifications}
 				/>
 			</Container>
 		</Container>
