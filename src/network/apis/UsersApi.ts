@@ -15,6 +15,7 @@ import {
 	GetUserPictureResponse,
 	GetUserResponse
 } from '../../types/network/responses/usersResponses';
+import { CapabilityType } from '../../types/store/SessionTypes';
 import BaseAPI from './BaseAPI';
 
 class UsersApi extends BaseAPI implements IUsersApi {
@@ -45,7 +46,7 @@ class UsersApi extends BaseAPI implements IUsersApi {
 
 	public changeUserPicture(userId: string, file: File): Promise<ChangeUserPictureResponse> {
 		return new Promise<ChangeUserPictureResponse>((resolve, reject) => {
-			if (file.size > 512000) {
+			if (file.size > +CapabilityType.MAX_USER_IMAGE_SIZE) {
 				reject(new Error('File too large'));
 			} else {
 				this.uploadFileFetchAPI(`users/${userId}/picture`, file)

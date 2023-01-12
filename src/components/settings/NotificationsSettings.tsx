@@ -5,7 +5,7 @@
  */
 
 import { Checkbox, Container, Divider, Padding, Text } from '@zextras/carbonio-design-system';
-import React, { Dispatch, FC, SetStateAction } from 'react';
+import React, { Dispatch, FC, SetStateAction, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 
 type NotificationsSettingsProps = {
@@ -28,13 +28,13 @@ const NotificationsSettings: FC<NotificationsSettingsProps> = ({
 		'Desktop notifications'
 	);
 
-	const onChangeNotificationCheckbox = (): void => {
+	const onChangeNotificationCheckbox = useCallback(() => {
 		if (desktopNotifications) {
 			setDesktopNotifications(false);
 		} else {
 			setDesktopNotifications(true);
 		}
-	};
+	}, [desktopNotifications, setDesktopNotifications]);
 
 	return (
 		<Container
