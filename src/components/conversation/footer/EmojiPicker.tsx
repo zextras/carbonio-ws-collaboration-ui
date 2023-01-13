@@ -11,7 +11,7 @@ import { Container } from '@zextras/carbonio-design-system';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import { Picker } from 'emoji-mart';
-import React, { useEffect, useRef } from 'react';
+import React, { Dispatch, SetStateAction, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 
 import { Emoji } from '../../../types/generics';
@@ -40,10 +40,21 @@ const PickerWrapper = styled(Container)`
 
 type EmojiPickerProps = {
 	onEmojiSelect: (emoji: Emoji) => void;
+	setShowEmojiPicker?: Dispatch<SetStateAction<boolean>>;
 };
 
 const EmojiPicker: React.FC<EmojiPickerProps> = (props) => {
-	const ref = useRef();
+	const ref = useRef<HTMLDivElement>();
+
+	useEffect(() => {
+		if (ref.current) {
+			ref.current.addEventListener('mouseleave', () => {
+				if (props.setShowEmojiPicker) {
+					props.setShowEmojiPicker(false);
+				}
+			});
+		}
+	}, [props]);
 
 	useEffect(() => {
 		// eslint-disable-next-line no-new
@@ -51,7 +62,7 @@ const EmojiPicker: React.FC<EmojiPickerProps> = (props) => {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
-	return <PickerWrapper ref={ref} data-testid="emojiPicker" />;
+	return <PickerWrapper ref={ref} data-testid="emojiPicker" id="emojiPickerWrapper" />;
 };
 
 export default EmojiPicker;

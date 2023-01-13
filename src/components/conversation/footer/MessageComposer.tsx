@@ -87,6 +87,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 	);
 
 	const sendMessage = useCallback((): void => {
+		if (showEmojiPicker) setShowEmojiPicker(false);
 		const message = textMessage.trim();
 		if (referenceMessage && referenceMessage.roomId === roomId) {
 			xmppClient.sendChatMessage(roomId, message, referenceMessage.messageId);
@@ -218,9 +219,19 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 		}
 	}, [inputHasFocus]);
 
+	useEffect(() => {
+		if (emojiButtonRef.current) {
+			emojiButtonRef.current.addEventListener('mouseenter', () => {
+				setShowEmojiPicker(true);
+			});
+		}
+	}, []);
+
 	return (
 		<Container height="fit">
-			{showEmojiPicker && <EmojiPicker onEmojiSelect={insertEmojiInMessage} />}
+			{showEmojiPicker && (
+				<EmojiPicker onEmojiSelect={insertEmojiInMessage} setShowEmojiPicker={setShowEmojiPicker} />
+			)}
 			<Container orientation="horizontal" crossAlignment="flex-end">
 				<Tooltip label={selectEmojiLabel}>
 					<Container width="fit" height="fit" padding={{ left: 'extrasmall', bottom: '0.3125rem' }}>
@@ -231,6 +242,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 							size="large"
 							icon={'SmileOutline'}
 							alt={selectEmojiLabel}
+							id="prova"
 						/>
 					</Container>
 				</Tooltip>

@@ -11,19 +11,45 @@ import { setup } from 'test-utils';
 import MessageComposer from './MessageComposer';
 
 describe('MessageComposer', () => {
-	test('Open/close emoji picker', async () => {
+	test('Open/close emoji picker by clicking it', async () => {
 		const { user } = setup(<MessageComposer roomId={'roomId'} />);
 
 		// Initial state
 		expect(screen.queryByTestId('emojiPicker')).not.toBeInTheDocument();
 
-		// Click on emoji button
+		// hover on emoji button
 		const emojiButton = screen.getAllByRole('button')[0];
-		await user.click(emojiButton);
+		await user.hover(emojiButton);
 		expect(screen.getByTestId('emojiPicker')).toBeInTheDocument();
 
 		// Close emojiPicker by clicking on emoji button
 		await user.click(emojiButton);
+		expect(screen.queryByTestId('emojiPicker')).not.toBeInTheDocument();
+
+		// reopen emojiPicker by clicking on emoji button
+		await user.click(emojiButton);
+		expect(screen.getByTestId('emojiPicker')).toBeInTheDocument();
+	});
+
+	test('Open/close emoji picker by hovering it', async () => {
+		const { user } = setup(<MessageComposer roomId={'roomId'} />);
+
+		// Initial state
+		expect(screen.queryByTestId('emojiPicker')).not.toBeInTheDocument();
+
+		// hover on emoji button
+		const emojiButton = screen.getAllByRole('button')[0];
+		await user.hover(emojiButton);
+		expect(screen.getByTestId('emojiPicker')).toBeInTheDocument();
+
+		// hover on emojiPicker
+		const emojiPicker = screen.getByTestId('emojiPicker');
+		await user.hover(emojiPicker);
+		expect(screen.getByTestId('emojiPicker')).toBeInTheDocument();
+
+		// hover on textarea for closing the emojiPicker
+		const textArea = screen.getByRole('textbox');
+		await user.hover(textArea);
 		expect(screen.queryByTestId('emojiPicker')).not.toBeInTheDocument();
 	});
 
@@ -44,5 +70,15 @@ describe('MessageComposer', () => {
 		const textArea = screen.getByRole('textbox');
 		await user.type(textArea, '     ');
 		expect(screen.getAllByRole('button')[1]).toBeDisabled();
+	});
+
+	test('Send a message', async () => {
+		const { user } = setup(<MessageComposer roomId={'roomId'} />);
+		const textArea = screen.getByRole('textbox');
+		await user.type(textArea, ' hi! ');
+		const sendButton = screen.getAllByRole('button')[1];
+		expect(sendButton).not.toBeDisabled();
+		await user.click(sendButton);
+		expect(textArea).toHaveValue('');
 	});
 });
