@@ -11,26 +11,6 @@ import { setup } from 'test-utils';
 import MessageComposer from './MessageComposer';
 
 describe('MessageComposer', () => {
-	test('Open/close emoji picker by clicking it', async () => {
-		const { user } = setup(<MessageComposer roomId={'roomId'} />);
-
-		// Initial state
-		expect(screen.queryByTestId('emojiPicker')).not.toBeInTheDocument();
-
-		// hover on emoji button
-		const emojiButton = screen.getAllByRole('button')[0];
-		await user.hover(emojiButton);
-		expect(screen.getByTestId('emojiPicker')).toBeInTheDocument();
-
-		// Close emojiPicker by clicking on emoji button
-		await user.click(emojiButton);
-		expect(screen.queryByTestId('emojiPicker')).not.toBeInTheDocument();
-
-		// reopen emojiPicker by clicking on emoji button
-		await user.click(emojiButton);
-		expect(screen.getByTestId('emojiPicker')).toBeInTheDocument();
-	});
-
 	test('Open/close emoji picker by hovering it', async () => {
 		const { user } = setup(<MessageComposer roomId={'roomId'} />);
 

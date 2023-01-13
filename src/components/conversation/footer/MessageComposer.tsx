@@ -134,8 +134,6 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 		[sendDisabled, isWriting, showEmojiPicker, sendMessage, xmppClient, roomId]
 	);
 
-	const toggleEmojiSelectorView = (): void => setShowEmojiPicker((prevState) => !prevState);
-
 	const insertEmojiInMessage = useCallback(
 		(emoji: Emoji): void => {
 			console.log(messageInputRef);
@@ -150,17 +148,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 
 				const cursorMiddlePosition = emoji.native.length + position;
 				messageInputRef.current.focus();
-				const range = document.createRange();
-				range.selectNodeContents(messageInputRef.current);
-				range.collapse(false);
-				const sel = window.getSelection();
-
-				if (nextPosition === '' && sel) {
-					sel.removeAllRanges();
-					sel.addRange(range);
-				} else {
-					messageInputRef.current.setSelectionRange(cursorMiddlePosition, cursorMiddlePosition);
-				}
+				messageInputRef.current?.setSelectionRange(cursorMiddlePosition, cursorMiddlePosition);
 			}
 		},
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -237,7 +225,6 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 					<Container width="fit" height="fit" padding={{ left: 'extrasmall', bottom: '0.3125rem' }}>
 						<IconButton
 							ref={emojiButtonRef}
-							onClick={toggleEmojiSelectorView}
 							iconColor="secondary"
 							size="large"
 							icon={'SmileOutline'}
