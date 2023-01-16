@@ -11,7 +11,14 @@ import { Container } from '@zextras/carbonio-design-system';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import { Picker } from 'emoji-mart';
-import React, { Dispatch, SetStateAction, useEffect, useRef } from 'react';
+import React, {
+	Dispatch,
+	MutableRefObject,
+	SetStateAction,
+	useCallback,
+	useEffect,
+	useRef
+} from 'react';
 import styled from 'styled-components';
 
 import { Emoji } from '../../../types/generics';
@@ -41,41 +48,56 @@ const PickerWrapper = styled(Container)`
 type EmojiPickerProps = {
 	onEmojiSelect: (emoji: Emoji) => void;
 	setShowEmojiPicker?: Dispatch<SetStateAction<boolean>>;
-	emojiTimeoutRef?: any;
+	emojiTimeoutRef?: MutableRefObject<NodeJS.Timeout | undefined>;
 };
 
 const EmojiPicker: React.FC<EmojiPickerProps> = ({
 	onEmojiSelect,
 	setShowEmojiPicker,
-	emojiTimeoutRef
+	emojiTimeoutRef,
+	...props
 }) => {
 	const ref = useRef<HTMLDivElement>();
 
-	useEffect(() => {
-		if (ref.current) {
-			ref.current.addEventListener('mouseenter', () => {
-				if (setShowEmojiPicker) {
-					clearTimeout(emojiTimeoutRef.current);
-					setShowEmojiPicker(true);
-				}
-			});
-			ref.current.addEventListener('mouseleave', () => {
-				setTimeout(() => {
-					if (setShowEmojiPicker) {
-						setShowEmojiPicker(false);
-					}
-				}, 1000);
-			});
+	const mouseEnterEvent = useCallback(() => {
+		if (setShowEmojiPicker) {
+			if (emojiTimeoutRef && emojiTimeoutRef.current) {
+				clearTimeout(emojiTimeoutRef.current);
+			}
+			setShowEmojiPicker(true);
 		}
-	}, [setShowEmojiPicker, emojiTimeoutRef]);
+	}, [emojiTimeoutRef, setShowEmojiPicker]);
+
+	const mouseLeaveEvent = useCallback(() => {
+		setTimeout(() => {
+			if (setShowEmojiPicker) {
+				setShowEmojiPicker(false);
+			}
+		}, 300);
+	}, [setShowEmojiPicker]);
+
+	useEffect(() => {
+		let refValue: HTMLDivElement | null = null;
+		if (ref.current) {
+			ref.current.addEventListener('mouseenter', mouseEnterEvent);
+			ref.current.addEventListener('mouseleave', mouseLeaveEvent);
+			refValue = ref.current;
+		}
+		return () => {
+			if (refValue) {
+				refValue.removeEventListener('mouseenter', mouseEnterEvent);
+				refValue.removeEventListener('mouseleave', mouseLeaveEvent);
+			}
+		};
+	}, [setShowEmojiPicker, emojiTimeoutRef, mouseEnterEvent, mouseLeaveEvent]);
 
 	useEffect(() => {
 		// eslint-disable-next-line no-new
-		new Picker({ previewPosition: 'none', ...onEmojiSelect, data, ref });
+		new Picker({ previewPosition: 'none', ...props, onEmojiSelect, data, ref });
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
-	return <PickerWrapper ref={ref} data-testid="emojiPicker" id="emojiPickerWrapper" />;
+	return <PickerWrapper ref={ref} data-testid="emojiPicker" />;
 };
 
 export default EmojiPicker;

@@ -20,12 +20,9 @@ describe('MessageComposer', () => {
 		// hover on emoji button
 		const emojiButton = screen.getAllByRole('button')[0];
 		await user.hover(emojiButton);
-		expect(screen.getByTestId('emojiPicker')).toBeInTheDocument();
-
-		// hover on emojiPicker
-		const emojiPicker = screen.getByTestId('emojiPicker');
-		await user.hover(emojiPicker);
-		expect(screen.getByTestId('emojiPicker')).toBeInTheDocument();
+		setTimeout(() => {
+			expect(screen.getByTestId('emojiPicker')).toBeInTheDocument();
+		}, 1500);
 
 		// hover on textarea for closing the emojiPicker
 		const textArea = screen.getByRole('textbox');

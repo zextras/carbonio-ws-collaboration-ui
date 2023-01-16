@@ -208,18 +208,38 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 		}
 	}, [inputHasFocus]);
 
-	useEffect(() => {
+	const mouseEnterEvent = useCallback(() => {
 		if (emojiButtonRef.current) {
 			emojiButtonRef.current.addEventListener('mouseenter', () => {
+				clearTimeout(emojiTimeoutRef.current);
 				setShowEmojiPicker(true);
-			});
-			emojiButtonRef.current.addEventListener('mouseleave', () => {
-				emojiTimeoutRef.current = setTimeout(() => {
-					setShowEmojiPicker(false);
-				}, 1000);
 			});
 		}
 	}, []);
+
+	const mouseLeaveEvent = useCallback(() => {
+		if (emojiButtonRef.current) {
+			emojiTimeoutRef.current = setTimeout(() => {
+				setShowEmojiPicker(false);
+			}, 300);
+		}
+	}, []);
+
+	useEffect(() => {
+		let refValue: HTMLButtonElement | undefined;
+		if (emojiButtonRef.current) {
+			emojiButtonRef.current.addEventListener('mouseenter', mouseEnterEvent);
+			emojiButtonRef.current.addEventListener('mouseleave', mouseLeaveEvent);
+			refValue = emojiButtonRef.current;
+		}
+		return () => {
+			if (refValue) {
+				refValue.removeEventListener('mouseenter', mouseEnterEvent);
+				// eslint-disable-next-line react-hooks/exhaustive-deps
+				refValue.removeEventListener('mouseleave', mouseLeaveEvent);
+			}
+		};
+	}, [mouseEnterEvent, mouseLeaveEvent]);
 
 	return (
 		<Container height="fit">
@@ -239,6 +259,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 							size="large"
 							icon={'SmileOutline'}
 							alt={selectEmojiLabel}
+							onClick={(): null => null}
 						/>
 					</Container>
 				</Tooltip>
