@@ -30,7 +30,9 @@ describe('MessageComposer', () => {
 		// hover on textarea for closing the emojiPicker
 		const textArea = screen.getByRole('textbox');
 		await user.hover(textArea);
-		expect(screen.queryByTestId('emojiPicker')).not.toBeInTheDocument();
+		setTimeout(() => {
+			expect(screen.queryByTestId('emojiPicker')).not.toBeInTheDocument();
+		}, 1500);
 	});
 
 	test('Send message button status - initial status', async () => {

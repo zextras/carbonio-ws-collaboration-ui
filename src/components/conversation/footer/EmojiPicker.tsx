@@ -41,24 +41,37 @@ const PickerWrapper = styled(Container)`
 type EmojiPickerProps = {
 	onEmojiSelect: (emoji: Emoji) => void;
 	setShowEmojiPicker?: Dispatch<SetStateAction<boolean>>;
+	emojiTimeoutRef?: any;
 };
 
-const EmojiPicker: React.FC<EmojiPickerProps> = (props) => {
+const EmojiPicker: React.FC<EmojiPickerProps> = ({
+	onEmojiSelect,
+	setShowEmojiPicker,
+	emojiTimeoutRef
+}) => {
 	const ref = useRef<HTMLDivElement>();
 
 	useEffect(() => {
 		if (ref.current) {
-			ref.current.addEventListener('mouseleave', () => {
-				if (props.setShowEmojiPicker) {
-					props.setShowEmojiPicker(false);
+			ref.current.addEventListener('mouseenter', () => {
+				if (setShowEmojiPicker) {
+					clearTimeout(emojiTimeoutRef.current);
+					setShowEmojiPicker(true);
 				}
 			});
+			ref.current.addEventListener('mouseleave', () => {
+				setTimeout(() => {
+					if (setShowEmojiPicker) {
+						setShowEmojiPicker(false);
+					}
+				}, 1000);
+			});
 		}
-	}, [props]);
+	}, [setShowEmojiPicker, emojiTimeoutRef]);
 
 	useEffect(() => {
 		// eslint-disable-next-line no-new
-		new Picker({ previewPosition: 'none', ...props, data, ref });
+		new Picker({ previewPosition: 'none', ...onEmojiSelect, data, ref });
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 

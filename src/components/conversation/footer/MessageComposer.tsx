@@ -54,6 +54,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 
 	const messageInputRef = useRef<HTMLTextAreaElement>();
 	const emojiButtonRef = useRef<HTMLButtonElement>();
+	const emojiTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
 	const timeoutRef = useRef<ReturnType<typeof setTimeout>>();
 
 	// Disable if textMessage is composed only by spaces, tabs or line breaks
@@ -212,13 +213,22 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 			emojiButtonRef.current.addEventListener('mouseenter', () => {
 				setShowEmojiPicker(true);
 			});
+			emojiButtonRef.current.addEventListener('mouseleave', () => {
+				emojiTimeoutRef.current = setTimeout(() => {
+					setShowEmojiPicker(false);
+				}, 1000);
+			});
 		}
 	}, []);
 
 	return (
 		<Container height="fit">
 			{showEmojiPicker && (
-				<EmojiPicker onEmojiSelect={insertEmojiInMessage} setShowEmojiPicker={setShowEmojiPicker} />
+				<EmojiPicker
+					onEmojiSelect={insertEmojiInMessage}
+					setShowEmojiPicker={setShowEmojiPicker}
+					emojiTimeoutRef={emojiTimeoutRef}
+				/>
 			)}
 			<Container orientation="horizontal" crossAlignment="flex-end">
 				<Tooltip label={selectEmojiLabel}>
@@ -229,7 +239,6 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 							size="large"
 							icon={'SmileOutline'}
 							alt={selectEmojiLabel}
-							id="prova"
 						/>
 					</Container>
 				</Tooltip>
