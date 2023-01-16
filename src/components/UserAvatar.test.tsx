@@ -97,11 +97,12 @@ describe('User avatar', () => {
 			const presenceDotOffline = screen.queryByTestId('user_presence_dot');
 			expect(presenceDotOffline).not.toBeInTheDocument();
 		});
-		test('User presence dot should be gray and shows he is offline', () => {
+		test('User presence dot should be gray and shows he is offline', async () => {
 			const store = useStore.getState();
 			store.addRoom(room);
 			store.setLoginInfo(user1Info.id, user1Info.email, user1Info.name);
 			store.setUserInfo(user2Info);
+			store.setUserPictureUpdated(user2Info.id, '2022-08-25T17:24:28.961+02:00');
 			store.setCapabilities(createMockCapabilityList({ canSeeUsersPresence: true }));
 			setup(<UserAvatar roomId={room.id} draftMessage={false} />);
 			const avatar = screen.getByTestId('avatar_box');
@@ -110,7 +111,7 @@ describe('User avatar', () => {
 			expect(presenceDot).toBeVisible();
 			expect(presenceDot).toHaveStyle('background-color: #cfd5dc');
 		});
-		test('User presence dot should be green and shows he is online', () => {
+		test('User presence dot should be green and shows he is online', async () => {
 			const store = useStore.getState();
 			store.addRoom(room);
 			store.setLoginInfo(user1Info.id, user1Info.email, user1Info.name);
