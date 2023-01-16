@@ -6,9 +6,9 @@
 
 import { GetCapabilitiesResponse, GetTokenResponse } from '../responses/sessionResponses';
 
-interface IUsersApi {
+interface ISessionApi {
 	getToken(): Promise<GetTokenResponse>;
 	getCapabilities(): Promise<GetCapabilitiesResponse>;
 }
 
-export default IUsersApi;
+export default ISessionApi;

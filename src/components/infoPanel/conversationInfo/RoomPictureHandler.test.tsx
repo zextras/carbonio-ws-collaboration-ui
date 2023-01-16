@@ -9,7 +9,11 @@ import React from 'react';
 import { setup } from 'test-utils';
 
 import useStore from '../../../store/Store';
-import { createMockMember, createMockRoom } from '../../../tests/createMock';
+import {
+	createMockCapabilityList,
+	createMockMember,
+	createMockRoom
+} from '../../../tests/createMock';
 import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
 import { RootStore } from '../../../types/store/StoreTypes';
 import { User } from '../../../types/store/UserTypes';
@@ -219,6 +223,7 @@ describe('Room Picture Handler - one_to_one', () => {
 		store.setUserInfo(user1Info);
 		store.setUserInfo(user2Info);
 		store.setLoginInfo(user1Info.id, user1Info.name);
+		store.setCapabilities(createMockCapabilityList({ canSeeUsersPresence: true }));
 		act(() => store.setUserLastActivity(user2Info.id, 1642818617000));
 		setup(
 			<RoomPictureHandler
@@ -237,6 +242,7 @@ describe('Room Picture Handler - one_to_one', () => {
 		store.setUserInfo(user1Info);
 		store.setUserInfo(user2Info);
 		store.setLoginInfo(user1Info.id, user1Info.name);
+		store.setCapabilities(createMockCapabilityList({ canSeeUsersPresence: true }));
 		act(() => store.setUserPresence(user2Info.id, true));
 		setup(
 			<RoomPictureHandler
