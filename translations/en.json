@@ -93,6 +93,11 @@
         "searchUser": "Search Participants"
     },
     "settings": {
+        "notifications": {
+            "checkboxLabel": "Desktop notifications",
+            "description": "Set your preferences for Chats notifications.",
+            "title": "Notifications"
+        },
         "profile": {
             "deletedUserImageCorrectly": "Avatar has been successfully reset to the original one",
             "description": "Choose an avatar that other users will see, the image will be centered automatically.",
@@ -109,6 +114,7 @@
             "pictureSizeTooLarge": "Something went wrong, remember that the maximum size for a group’s avatar image is {{size}}kb",
             "updatedPictureCorrectly": "New avatar has been successfully uploaded"
         },
+        "save": "Edits saved correctly",
         "title": "Chats Alpha"
     },
     "status": {

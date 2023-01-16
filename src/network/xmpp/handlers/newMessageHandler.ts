@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { getNotificationManager } from '@zextras/carbonio-shell-ui';
+import { getNotificationManager, replaceHistory } from '@zextras/carbonio-shell-ui';
 
+import { CHATS_ROUTE_TEST } from '../../../constants/appConstants';
 import { EventName, sendCustomEventEvent } from '../../../hooks/useEventListener';
 import useStore from '../../../store/Store';
 import IXMPPClient from '../../../types/network/xmpp/IXMPPClient';
@@ -50,12 +51,32 @@ export function onNewMessageStanza(this: IXMPPClient, message: Element): true {
 				store.activeConversations[newMessage.roomId].inputHasFocus;
 			const room = store.rooms[newMessage.roomId];
 
+			let areNotificationsActive;
+			const ChatsNotificationsSettings: string | null = window.parent.localStorage.getItem(
+				'ChatsNotificationsSettings'
+			);
+			if (
+				ChatsNotificationsSettings &&
+				JSON.parse(ChatsNotificationsSettings).hasOwnProperty('DesktopNotifications')
+			) {
+				areNotificationsActive = JSON.parse(ChatsNotificationsSettings).DesktopNotifications;
+			} else {
+				window.parent.localStorage.setItem(
+					'ChatsNotificationsSettings',
+					JSON.stringify({
+						DesktopNotifications: true
+					})
+				);
+				areNotificationsActive = true;
+			}
+
 			if (
 				messageIdFromOtherUser &&
 				typeMessageIsPermitted &&
 				!inputIsFocused &&
 				room &&
-				!room?.userSettings?.muted
+				!room?.userSettings?.muted &&
+				areNotificationsActive
 			) {
 				const sender = store.users[newMessage.from];
 				const title =
@@ -69,7 +90,14 @@ export function onNewMessageStanza(this: IXMPPClient, message: Element): true {
 					showPopup: true,
 					playSound: true,
 					title,
-					message: textMessage
+					message: textMessage,
+					onClick: (): void => {
+						window.focus();
+						replaceHistory({
+							path: `/${newMessage.roomId}`,
+							route: CHATS_ROUTE_TEST
+						});
+					}
 				});
 			}
 		}

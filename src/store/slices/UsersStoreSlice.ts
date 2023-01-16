@@ -21,7 +21,8 @@ export const useUsersStoreSlice = (set: (...any: any) => void): UsersStoreSlice 
 					email: user.email,
 					name: user.name,
 					lastSeen: user.lastSeen,
-					statusMessage: user.statusMessage
+					statusMessage: user.statusMessage,
+					pictureUpdatedAt: user.pictureUpdatedAt
 				};
 			}),
 			false,

@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import { UsersApi } from '../../../network';
+import { getCapability } from '../../../store/selectors/SessionSelectors';
 import {
 	getUserEmail,
 	getUserLastActivity,
@@ -20,6 +21,7 @@ import {
 } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
 import { Member } from '../../../types/store/RoomTypes';
+import { CapabilityType } from '../../../types/store/SessionTypes';
 import ParticipantComponentActions from './ParticipantComponentActions';
 
 type ParticipantsInfoProps = {
@@ -51,6 +53,9 @@ const ParticipantComponentInfo: FC<ParticipantsInfoProps> = ({ member, roomId })
 	);
 	const memberOnline: boolean | undefined = useStore((store) =>
 		getUserOnline(store, member.userId)
+	);
+	const canSeeUsersPresence = useStore((store) =>
+		getCapability(store, CapabilityType.CAN_SEE_USERS_PRESENCE)
 	);
 
 	const [picture, setPicture] = useState<false | string>(false);
@@ -96,13 +101,15 @@ const ParticipantComponentInfo: FC<ParticipantsInfoProps> = ({ member, roomId })
 						{memberName}
 					</Text>
 					<Padding top="extrasmall" />
-					<Text size="extrasmall" color="secondary" overflow="ellipsis">
-						{presenceLabel}
-					</Text>
+					{canSeeUsersPresence && (
+						<Text size="extrasmall" color="secondary" overflow="ellipsis">
+							{presenceLabel}
+						</Text>
+					)}
 				</Container>
 			</Row>
 		),
-		[memberName, presenceLabel]
+		[canSeeUsersPresence, memberName, presenceLabel]
 	);
 
 	return (

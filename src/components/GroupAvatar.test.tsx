@@ -40,6 +40,7 @@ describe('Group avatar', () => {
 	test('Check if group notifications are disabled', async () => {
 		const store = useStore.getState();
 		store.addRoom(roomMuted);
+		store.setRoomPictureUpdated(roomMuted.id, '2022-08-25T17:24:28.961+02:00');
 		setup(<GroupAvatar roomId={roomId} draftMessage={false} />);
 		const avatarWithNotificationMuted = screen.getByTestId('icon: BellOff');
 		expect(avatarWithNotificationMuted).toBeVisible();
