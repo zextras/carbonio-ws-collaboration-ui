@@ -54,6 +54,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 
 	const messageInputRef = useRef<HTMLTextAreaElement>();
 	const emojiButtonRef = useRef<HTMLButtonElement>();
+	const emojiTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
 	const timeoutRef = useRef<ReturnType<typeof setTimeout>>();
 
 	// Disable if textMessage is composed only by spaces, tabs or line breaks
@@ -87,6 +88,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 	);
 
 	const sendMessage = useCallback((): void => {
+		if (showEmojiPicker) setShowEmojiPicker(false);
 		const message = textMessage.trim();
 		if (referenceMessage && referenceMessage.roomId === roomId) {
 			xmppClient.sendChatMessage(roomId, message, referenceMessage.messageId);
@@ -133,11 +135,8 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 		[sendDisabled, isWriting, showEmojiPicker, sendMessage, xmppClient, roomId]
 	);
 
-	const toggleEmojiSelectorView = (): void => setShowEmojiPicker((prevState) => !prevState);
-
 	const insertEmojiInMessage = useCallback(
 		(emoji: Emoji): void => {
-			console.log(messageInputRef);
 			if (messageInputRef.current) {
 				const position = messageInputRef.current.selectionStart;
 				const prevPosition = messageInputRef.current.value.slice(0, position);
@@ -149,17 +148,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 
 				const cursorMiddlePosition = emoji.native.length + position;
 				messageInputRef.current.focus();
-				const range = document.createRange();
-				range.selectNodeContents(messageInputRef.current);
-				range.collapse(false);
-				const sel = window.getSelection();
-
-				if (nextPosition === '' && sel) {
-					sel.removeAllRanges();
-					sel.addRange(range);
-				} else {
-					messageInputRef.current.setSelectionRange(cursorMiddlePosition, cursorMiddlePosition);
-				}
+				messageInputRef.current?.setSelectionRange(cursorMiddlePosition, cursorMiddlePosition);
 			}
 		},
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -218,19 +207,56 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 		}
 	}, [inputHasFocus]);
 
+	const mouseEnterEvent = useCallback(() => {
+		if (emojiButtonRef.current) {
+			clearTimeout(emojiTimeoutRef.current);
+			setShowEmojiPicker(true);
+		}
+	}, []);
+
+	const mouseLeaveEvent = useCallback(() => {
+		if (emojiButtonRef.current) {
+			emojiTimeoutRef.current = setTimeout(() => {
+				setShowEmojiPicker(false);
+			}, 300);
+		}
+	}, []);
+
+	useEffect(() => {
+		let refValue: HTMLButtonElement | undefined;
+		if (emojiButtonRef.current) {
+			emojiButtonRef.current.addEventListener('mouseenter', mouseEnterEvent);
+			emojiButtonRef.current.addEventListener('mouseleave', mouseLeaveEvent);
+			refValue = emojiButtonRef.current;
+		}
+		return () => {
+			if (refValue) {
+				refValue.removeEventListener('mouseenter', mouseEnterEvent);
+				// eslint-disable-next-line react-hooks/exhaustive-deps
+				refValue.removeEventListener('mouseleave', mouseLeaveEvent);
+			}
+		};
+	}, [mouseEnterEvent, mouseLeaveEvent]);
+
 	return (
 		<Container height="fit">
-			{showEmojiPicker && <EmojiPicker onEmojiSelect={insertEmojiInMessage} />}
+			{showEmojiPicker && (
+				<EmojiPicker
+					onEmojiSelect={insertEmojiInMessage}
+					setShowEmojiPicker={setShowEmojiPicker}
+					emojiTimeoutRef={emojiTimeoutRef}
+				/>
+			)}
 			<Container orientation="horizontal" crossAlignment="flex-end">
 				<Tooltip label={selectEmojiLabel}>
 					<Container width="fit" height="fit" padding={{ left: 'extrasmall', bottom: '0.3125rem' }}>
 						<IconButton
 							ref={emojiButtonRef}
-							onClick={toggleEmojiSelectorView}
 							iconColor="secondary"
 							size="large"
 							icon={'SmileOutline'}
 							alt={selectEmojiLabel}
+							onClick={(): null => null}
 						/>
 					</Container>
 				</Tooltip>
