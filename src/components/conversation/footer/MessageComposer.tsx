@@ -210,10 +210,8 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 
 	const mouseEnterEvent = useCallback(() => {
 		if (emojiButtonRef.current) {
-			emojiButtonRef.current.addEventListener('mouseenter', () => {
-				clearTimeout(emojiTimeoutRef.current);
-				setShowEmojiPicker(true);
-			});
+			clearTimeout(emojiTimeoutRef.current);
+			setShowEmojiPicker(true);
 		}
 	}, []);
 
