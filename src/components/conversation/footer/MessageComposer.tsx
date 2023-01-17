@@ -137,7 +137,6 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 
 	const insertEmojiInMessage = useCallback(
 		(emoji: Emoji): void => {
-			console.log(messageInputRef);
 			if (messageInputRef.current) {
 				const position = messageInputRef.current.selectionStart;
 				const prevPosition = messageInputRef.current.value.slice(0, position);
