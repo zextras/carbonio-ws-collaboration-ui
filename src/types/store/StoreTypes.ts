@@ -109,6 +109,11 @@ export type UnreadsCounterSlice = {
 	updateUnreadCount: (roomId: string) => void;
 };
 
+export type SidebarSlice = {
+	filterHasFocus: boolean;
+	setFilterHasFocus: (hasFocus: boolean) => void;
+};
+
 export type RootStore = UsersStoreSlice &
 	RoomsStoreSlice &
 	MessagesStoreSlice &
@@ -116,4 +121,5 @@ export type RootStore = UsersStoreSlice &
 	MarkersStoreSlice &
 	ActiveConversationsSlice &
 	ConnectionsStoreSlice &
-	UnreadsCounterSlice;
+	UnreadsCounterSlice &
+	SidebarSlice;

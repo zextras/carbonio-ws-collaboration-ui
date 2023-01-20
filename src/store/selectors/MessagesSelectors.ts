@@ -41,8 +41,12 @@ export const getSingleMessageSelector = (
 
 export const getRoomIdsOrderedLastMessage = (
 	store: RootStore
-): { roomId: string; lastMessageTimestamp: number }[] => {
-	const listOfConvByLastMessage: { roomId: string; lastMessageTimestamp: number }[] = [];
+): { roomId: string; roomType: string; lastMessageTimestamp: number }[] => {
+	const listOfConvByLastMessage: {
+		roomId: string;
+		roomType: string;
+		lastMessageTimestamp: number;
+	}[] = [];
 	// check to remove and tell BE to improve because if a user is removed from a room
 	// the messages of this always came back and trigger error
 	forEach(store.rooms, (room) => {
@@ -50,6 +54,7 @@ export const getRoomIdsOrderedLastMessage = (
 			store.messages[room.id] && store.messages[room.id][store.messages[room.id].length - 1];
 		listOfConvByLastMessage.push({
 			roomId: room.id,
+			roomType: room.type,
 			lastMessageTimestamp: lastMessage ? lastMessage.date : 0
 		});
 	});
