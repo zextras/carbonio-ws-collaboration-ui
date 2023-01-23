@@ -82,14 +82,20 @@ const SecondaryBarSingleGroupsView: React.FC<SecondaryBarSingleGroupsView> = ({ 
 
 	const listOfRooms = useMemo(() => {
 		const list = [];
-		list.push(<ConversationsFilter expanded={expanded} setFilteredInput={setFilteredInput} />);
+		list.push(
+			<ConversationsFilter
+				expanded={expanded}
+				setFilteredInput={setFilteredInput}
+				key="conversations_filter_item"
+			/>
+		);
 		if (filteredConversationsIds.length !== 0) {
 			map(filteredConversationsIds, (room) => {
-				list.push(<ListItem roomId={room.roomId} />);
+				list.push(<ListItem roomId={room.roomId} key={`${room.roomId}_item`} />);
 			});
 		} else {
 			list.push(
-				<CustomContainer mainAlignment="flex-start" padding={{ top: '2rem' }}>
+				<CustomContainer mainAlignment="flex-start" padding={{ top: '2rem' }} key="no_match_item">
 					<Text color="gray1" size="small" weight="light">
 						{noMatchLabel}
 					</Text>
@@ -119,7 +125,9 @@ const SecondaryBarSingleGroupsView: React.FC<SecondaryBarSingleGroupsView> = ({ 
 	);
 
 	return expanded ? (
-		<Container mainAlignment="flex-start">{listView}</Container>
+		<Container mainAlignment="flex-start" data-testid="conversations_list_modal">
+			{listView}
+		</Container>
 	) : (
 		<Container mainAlignment="flex-start" title={showConversationList}>
 			{listView}

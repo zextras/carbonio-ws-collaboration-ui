@@ -74,6 +74,7 @@ const ConversationsFilter: FC<ConversationsFilterProps> = ({ expanded, setFilter
 	return expanded ? (
 		<Container height="fit" crossAlignment="flex-end">
 			<Input
+				data-testid="filter_input"
 				inputRef={filterInputRef}
 				height="2.938rem"
 				backgroundColor="gray5"
