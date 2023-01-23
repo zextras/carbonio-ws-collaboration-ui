@@ -31,6 +31,7 @@
         "newMessages": "New messages"
     },
     "conversationFilter": {
+        "filterTooltip": "Filter list",
         "label": "Type to filter list"
     },
     "conversationInfo": {
@@ -42,6 +43,9 @@
         "status": "Status",
         "title": "Title",
         "topic": "Topic"
+    },
+    "convertationFilter": {
+        "closeTooltip": "Close filter"
     },
     "date": {
         "today": "Today",

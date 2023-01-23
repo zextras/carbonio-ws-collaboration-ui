@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Container, Input, IconButton } from '@zextras/carbonio-design-system';
+import { Container, Input, IconButton, Tooltip } from '@zextras/carbonio-design-system';
 import { size } from 'lodash';
 import React, {
 	Dispatch,
@@ -33,6 +33,8 @@ type ConversationsFilterProps = {
 const ConversationsFilter: FC<ConversationsFilterProps> = ({ expanded, setFilteredInput }) => {
 	const [t] = useTranslation();
 	const filterLabel = t('conversationFilter.label', 'Type to filter list');
+	const filterTooltip = t('conversationFilter.filterTooltip', 'Filter list');
+	const closeTooltip = t('convertationFilter.closeTooltip', 'Close filter');
 
 	const filterHasFocus = useStore((store) => getSidebarFilterHasFocus(store));
 	const setFilterHasFocus = useStore((store) => store.setFilterHasFocus);
@@ -84,23 +86,27 @@ const ConversationsFilter: FC<ConversationsFilterProps> = ({ expanded, setFilter
 				onChange={handleFilterChange}
 				onFocus={handleInputFocus}
 				CustomIcon={(): JSX.Element => (
-					<IconButton
-						icon={size(searchInput) > 0 ? 'CloseOutline' : 'FunnelOutline'}
-						size="large"
-						customSize={{ paddingSize: '0.25rem' }}
-						onClick={resetFilter}
-					/>
+					<Tooltip label={size(searchInput) > 0 ? closeTooltip : filterTooltip}>
+						<IconButton
+							icon={size(searchInput) > 0 ? 'CloseOutline' : 'FunnelOutline'}
+							size="large"
+							customSize={{ paddingSize: '0.25rem' }}
+							onClick={resetFilter}
+						/>
+					</Tooltip>
 				)}
 			/>
 		</Container>
 	) : (
 		<CustomFunnelContainer height="3rem">
-			<IconButton
-				icon="FunnelOutline"
-				size="large"
-				customSize={{ paddingSize: '0.25rem' }}
-				onClick={handleInputFocus}
-			/>
+			<Tooltip label={filterTooltip}>
+				<IconButton
+					icon="FunnelOutline"
+					size="large"
+					customSize={{ paddingSize: '0.25rem' }}
+					onClick={handleInputFocus}
+				/>
+			</Tooltip>
 		</CustomFunnelContainer>
 	);
 };
