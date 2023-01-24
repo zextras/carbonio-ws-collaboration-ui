@@ -12,6 +12,7 @@ import { DateMessage, TextMessage } from '../../../types/store/MessageTypes';
 import { onNewMessageStanza } from './newMessageHandler';
 
 type MessageInfo = {
+	id?: string;
 	roomId?: string;
 	from?: string;
 	text?: string;
@@ -25,7 +26,7 @@ function createXMPPReceivedMessage(info: MessageInfo): Element {
 				xmlns="jabber:client"
 				from="${info.roomId || 'roomId'}@muclight.carbonio/${info.from || 'from'}@carbonio"
 				to="${info.from}@carbonio"
-				id="messageId"
+				id="${info.id}"
 				type="groupchat"
 			>
 				<body>${info.text}</body>
@@ -43,6 +44,7 @@ function createXMPPReceivedMessage(info: MessageInfo): Element {
 describe('XMPP newMessageHandler', () => {
 	test('New text message arrives', () => {
 		const info = {
+			id: 'messageId',
 			roomId: 'roomId',
 			from: 'userId',
 			text: 'Hi!',
@@ -57,7 +59,8 @@ describe('XMPP newMessageHandler', () => {
 		const textMessage = store.messages[info.roomId][1] as TextMessage;
 		expect(dateMessage).not.toBeNull();
 		expect(textMessage).not.toBeNull();
-		expect(textMessage.id).toBe(info.stanzaId);
+		expect(textMessage.id).toBe(info.id);
+		expect(textMessage.stanzaId).toBe(info.stanzaId);
 		expect(textMessage.type).toBe('text');
 		expect(textMessage.roomId).toBe(info.roomId);
 		expect(textMessage.from).toBe(info.from);
@@ -66,6 +69,7 @@ describe('XMPP newMessageHandler', () => {
 
 	test('New replied message arrives', () => {
 		const info = {
+			id: 'messageId',
 			roomId: 'roomId',
 			from: 'userId',
 			text: 'Hi!!',
@@ -79,7 +83,8 @@ describe('XMPP newMessageHandler', () => {
 		// when a new message arrive and the previous one inside history has a different date than it, then the date message will be sent with it
 		const textMessage = store.messages[info.roomId][1] as TextMessage;
 		expect(textMessage).not.toBeNull();
-		expect(textMessage.id).toBe(info.stanzaId);
+		expect(textMessage.id).toBe(info.id);
+		expect(textMessage.stanzaId).toBe(info.stanzaId);
 		expect(textMessage.type).toBe('text');
 		expect(textMessage.roomId).toBe(info.roomId);
 		expect(textMessage.from).toBe(info.from);

@@ -77,6 +77,7 @@ export const useActiveConversationsSlice = (
 		roomId: string,
 		referenceMessageId: string,
 		senderId: string,
+		stanzaId: string,
 		actionType: messageActionType
 	): void => {
 		set(
@@ -86,6 +87,7 @@ export const useActiveConversationsSlice = (
 						roomId,
 						messageId: referenceMessageId,
 						senderId,
+						stanzaId,
 						actionType
 					};
 				} else {
@@ -94,6 +96,7 @@ export const useActiveConversationsSlice = (
 							roomId,
 							messageId: referenceMessageId,
 							senderId,
+							stanzaId,
 							actionType
 						}
 					};
