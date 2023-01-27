@@ -75,18 +75,19 @@ const ConversationsFilter: FC<ConversationsFilterProps> = ({ expanded, setFilter
 	}, [expanded, filterHasFocus, handleInputBlur]);
 
 	const customFilterIcon = useMemo(
-		// eslint-disable-next-line react/display-name
-		() => () =>
-			(
-				<Tooltip label={size(searchInput) > 0 ? closeTooltip : filterTooltip}>
-					<IconButton
-						icon={size(searchInput) > 0 ? 'CloseOutline' : 'FunnelOutline'}
-						size="large"
-						customSize={{ paddingSize: '0.25rem' }}
-						onClick={resetFilter}
-					/>
-				</Tooltip>
-			),
+		() =>
+			function icon() {
+				return (
+					<Tooltip label={size(searchInput) > 0 ? closeTooltip : filterTooltip}>
+						<IconButton
+							icon={size(searchInput) > 0 ? 'CloseOutline' : 'FunnelOutline'}
+							size="large"
+							customSize={{ paddingSize: '0.25rem' }}
+							onClick={resetFilter}
+						/>
+					</Tooltip>
+				);
+			},
 		[closeTooltip, filterTooltip, resetFilter, searchInput]
 	);
 
