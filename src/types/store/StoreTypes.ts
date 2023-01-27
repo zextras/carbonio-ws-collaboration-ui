@@ -61,6 +61,7 @@ export type MessagesStoreSlice = {
 
 export type SessionStoreSlice = {
 	session: Session;
+	setFilterHasFocus: (hasFocus: boolean) => void;
 	setLoginInfo: (id: string, name: string, displayName?: string) => void;
 	setSessionId: (sessionId: string) => void;
 	setCapabilities: (capabilities: CapabilityList) => void;
@@ -109,11 +110,6 @@ export type UnreadsCounterSlice = {
 	updateUnreadCount: (roomId: string) => void;
 };
 
-export type SidebarSlice = {
-	filterHasFocus: boolean;
-	setFilterHasFocus: (hasFocus: boolean) => void;
-};
-
 export type RootStore = UsersStoreSlice &
 	RoomsStoreSlice &
 	MessagesStoreSlice &
@@ -121,5 +117,4 @@ export type RootStore = UsersStoreSlice &
 	MarkersStoreSlice &
 	ActiveConversationsSlice &
 	ConnectionsStoreSlice &
-	UnreadsCounterSlice &
-	SidebarSlice;
+	UnreadsCounterSlice;

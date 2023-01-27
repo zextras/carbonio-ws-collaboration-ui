@@ -26,7 +26,8 @@ export const useSessionStoreSlice = (set: (...any: any) => void): SessionStoreSl
 						xmpp: undefined,
 						websocket: undefined
 					},
-					userPrefTimeZone: draft.session.userPrefTimeZone
+					userPrefTimeZone: draft.session.userPrefTimeZone,
+					filterHasFocus: false
 				};
 			}),
 			false,
@@ -69,6 +70,15 @@ export const useSessionStoreSlice = (set: (...any: any) => void): SessionStoreSl
 			}),
 			false,
 			'SESSION/SET_USER_PREF_TIMEZONE'
+		);
+	},
+	setFilterHasFocus: (hasFocus: boolean): void => {
+		set(
+			produce((draft: RootStore) => {
+				draft.session.filterHasFocus = hasFocus;
+			}),
+			false,
+			'SIDEBAR/SET_FILTER_FOCUS'
 		);
 	}
 });

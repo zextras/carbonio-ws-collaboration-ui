@@ -85,8 +85,8 @@ describe('Secondary Bar', () => {
 		store.setUserInfo(user2Be);
 		store.setUserInfo(user3Be);
 		setup(<SecondaryBarSingleGroupsView expanded />);
-		const listNotFiltered = await screen.findByTestId('conversations_list_modal');
-		expect(listNotFiltered.children).toHaveLength(5);
+		const listNotFiltered = await screen.findByTestId('conversations_list_filtered');
+		expect(listNotFiltered.children).toHaveLength(4);
 	});
 	test('the filter shows only what the user types', async () => {
 		const store: RootStore = useStore.getState();
@@ -103,8 +103,8 @@ describe('Secondary Bar', () => {
 		// user search a group conversation
 		const textArea = screen.getByRole('textbox');
 		await user.type(textArea, 'Group of');
-		const list = await screen.findByTestId('conversations_list_modal');
-		expect(list.children).toHaveLength(3);
+		const list = await screen.findByTestId('conversations_list_filtered');
+		expect(list.children).toHaveLength(2);
 		const closeButton = screen.getByTestId('icon: CloseOutline');
 		expect(closeButton).toBeInTheDocument();
 
@@ -115,9 +115,9 @@ describe('Secondary Bar', () => {
 		expect(funnelButton).toBeInTheDocument();
 
 		// user search a one to one conversation
-		await user.type(textArea, 'Group of');
-		const list2 = await screen.findByTestId('conversations_list_modal');
-		expect(list2.children).toHaveLength(3);
+		await user.type(textArea, 'User');
+		const list2 = await screen.findByTestId('conversations_list_filtered');
+		expect(list2.children).toHaveLength(2);
 	});
 	test("the filter doesn't find any match", async () => {
 		const store: RootStore = useStore.getState();
@@ -133,12 +133,12 @@ describe('Secondary Bar', () => {
 
 		const textArea = screen.getByRole('textbox');
 		await user.type(textArea, 'Hello');
-		const list = await screen.findByTestId('conversations_list_modal');
-		expect(list.children).toHaveLength(2);
+		const list = await screen.findByTestId('conversations_list_filtered');
+		expect(list.children).toHaveLength(1);
 		const noMatchText = screen.getByText(/There are no items that match this search/i);
 		expect(noMatchText).toBeInTheDocument();
 	});
-	test('Collapsed sidebar view', async () => {
+	test('Collapsed sidebar view', () => {
 		const store: RootStore = useStore.getState();
 		store.setLoginInfo(user1Be.id, user1Be.name);
 		store.addRoom(mockedGroup1);

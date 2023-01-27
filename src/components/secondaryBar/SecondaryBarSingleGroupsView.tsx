@@ -66,7 +66,11 @@ const SecondaryBarSingleGroupsView: React.FC<SecondaryBarSingleGroupsView> = ({ 
 					const users: Member[] | undefined = useStore.getState().rooms[room.roomId].members;
 					const userId = users?.[0].userId === sessionId ? users![1]?.userId : users![0].userId;
 					const userName = useStore.getState().users[userId].name;
-					if (userName.toLocaleLowerCase().includes(filteredInput.toLocaleLowerCase())) {
+					const userEmail = useStore.getState().users[userId].email.split('@')[0];
+					if (
+						userName.toLocaleLowerCase().includes(filteredInput.toLocaleLowerCase()) ||
+						userEmail.toLocaleLowerCase().includes(filteredInput.toLocaleLowerCase())
+					) {
 						filteredConversations.push(room);
 					}
 				}
@@ -82,13 +86,6 @@ const SecondaryBarSingleGroupsView: React.FC<SecondaryBarSingleGroupsView> = ({ 
 
 	const listOfRooms = useMemo(() => {
 		const list = [];
-		list.push(
-			<ConversationsFilter
-				expanded={expanded}
-				setFilteredInput={setFilteredInput}
-				key="conversations_filter_item"
-			/>
-		);
 		if (filteredConversationsIds.length !== 0) {
 			map(filteredConversationsIds, (room) => {
 				list.push(<ListItem roomId={room.roomId} key={`${room.roomId}_item`} />);
@@ -103,7 +100,7 @@ const SecondaryBarSingleGroupsView: React.FC<SecondaryBarSingleGroupsView> = ({ 
 			);
 		}
 		return list;
-	}, [expanded, filteredConversationsIds, noMatchLabel, ListItem]);
+	}, [filteredConversationsIds, noMatchLabel, ListItem]);
 
 	const listView = useMemo(
 		() =>
@@ -115,7 +112,16 @@ const SecondaryBarSingleGroupsView: React.FC<SecondaryBarSingleGroupsView> = ({ 
 						<ShimmeringCollapsedListView />
 					)
 				) : (
-					listOfRooms
+					<Container height="fit">
+						<ConversationsFilter
+							expanded={expanded}
+							setFilteredInput={setFilteredInput}
+							key="conversations_filter_item"
+						/>
+						<Container height="fit" data-testid="conversations_list_filtered">
+							{listOfRooms}
+						</Container>
+					</Container>
 				)
 			) : (
 				expanded && <DefaultUserSidebarView />
@@ -125,9 +131,7 @@ const SecondaryBarSingleGroupsView: React.FC<SecondaryBarSingleGroupsView> = ({ 
 	);
 
 	return expanded ? (
-		<Container mainAlignment="flex-start" data-testid="conversations_list_modal">
-			{listView}
-		</Container>
+		<Container mainAlignment="flex-start">{listView}</Container>
 	) : (
 		<Container mainAlignment="flex-start" title={showConversationList}>
 			{listView}

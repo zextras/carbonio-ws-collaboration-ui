@@ -12,13 +12,14 @@ import React, {
 	SetStateAction,
 	useCallback,
 	useEffect,
+	useMemo,
 	useRef,
 	useState
 } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import { getSidebarFilterHasFocus } from '../../store/selectors/SidebarSelectors';
+import { getSidebarFilterHasFocus } from '../../store/selectors/SessionSelectors';
 import useStore from '../../store/Store';
 
 const CustomFunnelContainer = styled(Container)`
@@ -34,7 +35,7 @@ const ConversationsFilter: FC<ConversationsFilterProps> = ({ expanded, setFilter
 	const [t] = useTranslation();
 	const filterLabel = t('conversationFilter.label', 'Type to filter list');
 	const filterTooltip = t('conversationFilter.filterTooltip', 'Filter list');
-	const closeTooltip = t('convertationFilter.closeTooltip', 'Close filter');
+	const closeTooltip = t('conversationFilter.closeTooltip', 'Close filter');
 
 	const filterHasFocus = useStore((store) => getSidebarFilterHasFocus(store));
 	const setFilterHasFocus = useStore((store) => store.setFilterHasFocus);
@@ -73,6 +74,22 @@ const ConversationsFilter: FC<ConversationsFilterProps> = ({ expanded, setFilter
 		}
 	}, [expanded, filterHasFocus, handleInputBlur]);
 
+	const customFilterIcon = useMemo(
+		// eslint-disable-next-line react/display-name
+		() => () =>
+			(
+				<Tooltip label={size(searchInput) > 0 ? closeTooltip : filterTooltip}>
+					<IconButton
+						icon={size(searchInput) > 0 ? 'CloseOutline' : 'FunnelOutline'}
+						size="large"
+						customSize={{ paddingSize: '0.25rem' }}
+						onClick={resetFilter}
+					/>
+				</Tooltip>
+			),
+		[closeTooltip, filterTooltip, resetFilter, searchInput]
+	);
+
 	return expanded ? (
 		<Container height="fit" crossAlignment="flex-end">
 			<Input
@@ -85,16 +102,7 @@ const ConversationsFilter: FC<ConversationsFilterProps> = ({ expanded, setFilter
 				value={searchInput}
 				onChange={handleFilterChange}
 				onFocus={handleInputFocus}
-				CustomIcon={(): JSX.Element => (
-					<Tooltip label={size(searchInput) > 0 ? closeTooltip : filterTooltip}>
-						<IconButton
-							icon={size(searchInput) > 0 ? 'CloseOutline' : 'FunnelOutline'}
-							size="large"
-							customSize={{ paddingSize: '0.25rem' }}
-							onClick={resetFilter}
-						/>
-					</Tooltip>
-				)}
+				CustomIcon={customFilterIcon}
 			/>
 		</Container>
 	) : (

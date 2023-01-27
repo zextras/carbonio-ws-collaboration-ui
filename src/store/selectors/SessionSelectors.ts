@@ -12,6 +12,9 @@ export const getSelectedConversation = (store: RootStore, roomId: string): boole
 
 export const getPrefTimezoneSelector = (store: RootStore): string => store.session.userPrefTimeZone;
 
+export const getSidebarFilterHasFocus = (store: RootStore): boolean | undefined =>
+	store.session.filterHasFocus;
+
 export const getCapability = (
 	store: RootStore,
 	capabilityName: CapabilityType

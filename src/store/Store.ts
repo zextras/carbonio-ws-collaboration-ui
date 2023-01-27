@@ -14,7 +14,6 @@ import { useMarkersStoreSlice } from './slices/MarkersStoreSlice';
 import { useMessagesStoreSlice } from './slices/MessagesStoreSlice';
 import { useRoomsStoreSlice } from './slices/RoomsStoreSlice';
 import { useSessionStoreSlice } from './slices/SessionStoreSlice';
-import { useSidebarStoreSlice } from './slices/SidebarStoreSlice';
 import { useUnreadsCountStoreSlice } from './slices/UnreadsCounterStoreSlice';
 import { useUsersStoreSlice } from './slices/UsersStoreSlice';
 
@@ -28,8 +27,7 @@ const useStore = create<RootStore>(
 			...useMarkersStoreSlice(set),
 			...useActiveConversationsSlice(set),
 			...useConnectionsStoreSlice(set),
-			...useUnreadsCountStoreSlice(set),
-			...useSidebarStoreSlice(set)
+			...useUnreadsCountStoreSlice(set)
 		}),
 		{ name: 'carbonio-chats-ui' }
 	)
