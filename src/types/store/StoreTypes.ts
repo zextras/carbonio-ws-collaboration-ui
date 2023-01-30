@@ -61,6 +61,7 @@ export type MessagesStoreSlice = {
 
 export type SessionStoreSlice = {
 	session: Session;
+	setFilterHasFocus: (hasFocus: boolean) => void;
 	setLoginInfo: (id: string, name: string, displayName?: string) => void;
 	setSessionId: (sessionId: string) => void;
 	setCapabilities: (capabilities: CapabilityList) => void;

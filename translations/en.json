@@ -30,6 +30,11 @@
         "newMessage": "New message",
         "newMessages": "New messages"
     },
+    "conversationFilter": {
+        "closeTooltip": "Close filter",
+        "filterTooltip": "Filter list",
+        "label": "Type to filter list"
+    },
     "conversationInfo": {
         "actionAccordionTitle": "Actions",
         "email": "Email",
