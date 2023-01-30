@@ -107,13 +107,14 @@ const ConversationsFilter: FC<ConversationsFilterProps> = ({ expanded, setFilter
 			/>
 		</Container>
 	) : (
-		<CustomFunnelContainer height="3rem">
+		<CustomFunnelContainer height="3rem" background="gray5">
 			<Tooltip label={filterTooltip}>
 				<IconButton
 					icon="FunnelOutline"
 					size="large"
 					customSize={{ paddingSize: '0.25rem' }}
 					onClick={handleInputFocus}
+					backgroundColor="gray5"
 				/>
 			</Tooltip>
 		</CustomFunnelContainer>

@@ -12,7 +12,8 @@ import { RootStore, SessionStoreSlice } from '../../types/store/StoreTypes';
 
 export const useSessionStoreSlice = (set: (...any: any) => void): SessionStoreSlice => ({
 	session: {
-		userPrefTimeZone: ''
+		userPrefTimeZone: '',
+		filterHasFocus: false
 	},
 	setLoginInfo: (id: string, name: string, displayName?: string): void => {
 		set(

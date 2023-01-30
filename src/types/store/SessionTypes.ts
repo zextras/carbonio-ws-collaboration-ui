@@ -18,7 +18,7 @@ export type Session = {
 	};
 	selectedRoomOneToOneGroup?: string;
 	userPrefTimeZone: string;
-	filterHasFocus?: boolean | undefined;
+	filterHasFocus: boolean;
 };
 
 export type CapabilityList = {

@@ -30,6 +30,13 @@ const CustomContainer = styled(Container)`
 	cursor: default;
 `;
 
+const ConversationFilterContainer = styled(Container)`
+	height: fit-content;
+	position: sticky;
+	top: 0;
+	z-index: 1;
+`;
+
 const SecondaryBarSingleGroupsView: React.FC<SecondaryBarSingleGroupsView> = ({ expanded }) => {
 	const [t] = useTranslation();
 	const showConversationList = t('tooltip.showConversationList', 'Show conversation list');
@@ -113,11 +120,13 @@ const SecondaryBarSingleGroupsView: React.FC<SecondaryBarSingleGroupsView> = ({ 
 					)
 				) : (
 					<Container height="fit">
-						<ConversationsFilter
-							expanded={expanded}
-							setFilteredInput={setFilteredInput}
-							key="conversations_filter_item"
-						/>
+						<ConversationFilterContainer>
+							<ConversationsFilter
+								expanded={expanded}
+								setFilteredInput={setFilteredInput}
+								key="conversations_filter_item"
+							/>
+						</ConversationFilterContainer>
 						<Container height="fit" data-testid="conversations_list_filtered">
 							{listOfRooms}
 						</Container>
