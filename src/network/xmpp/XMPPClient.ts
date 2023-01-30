@@ -69,13 +69,13 @@ class XMPPClient implements IXMPPClient {
 		this.connection.addHandler(onDisplayedMessageStanza, Strophe.NS.MARKERS, 'message');
 
 		// Debug
-		const parser = new DOMParser();
-		this.connection.rawInput = (data: string): void => {
-			xmppDebug('<-- IN:', parser.parseFromString(data, 'text/xml'));
-		};
-		this.connection.rawOutput = (data: string): void => {
-			xmppDebug('---> OUT:', parser.parseFromString(data, 'text/xml'));
-		};
+		// const parser = new DOMParser();
+		// this.connection.rawInput = (data: string): void => {
+		// 	xmppDebug('<-- IN:', parser.parseFromString(data, 'text/xml'));
+		// };
+		// this.connection.rawOutput = (data: string): void => {
+		// 	xmppDebug('---> OUT:', parser.parseFromString(data, 'text/xml'));
+		// };
 	}
 
 	private onConnectionStatus(statusCode: StropheConnectionStatus): void {
