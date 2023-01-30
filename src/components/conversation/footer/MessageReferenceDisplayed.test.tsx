@@ -50,6 +50,7 @@ const referenceMessage = {
 	roomId: mockedRoom.id,
 	messageId: mockedRepliedTextMessage.id,
 	senderId: mockedRepliedTextMessage.from,
+	stanzaId: mockedRepliedTextMessage.stanzaId,
 	actionType: messageActionType.REPLAY
 };
 
@@ -57,6 +58,7 @@ const myReferenceMessage = {
 	roomId: mockedRoom.id,
 	messageId: myMockedRepliedTextMessage.id,
 	senderId: myMockedRepliedTextMessage.from,
+	stanzaId: myMockedRepliedTextMessage.stanzaId,
 	actionType: messageActionType.REPLAY
 };
 

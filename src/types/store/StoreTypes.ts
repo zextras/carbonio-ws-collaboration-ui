@@ -84,6 +84,7 @@ export type ActiveConversationsSlice = {
 		roomId: string,
 		referenceMessageId: string,
 		senderId: string,
+		stanzaId: string,
 		actionType: messageActionType
 	) => void;
 	unsetReferenceMessage: (roomId: string) => void;

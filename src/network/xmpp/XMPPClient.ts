@@ -5,6 +5,7 @@
  */
 
 import { Strophe, $pres, $iq, $msg, StropheConnection, StropheConnectionStatus } from 'strophe.js';
+import { v4 as uuidGenerator } from 'uuid';
 
 import useStore from '../../store/Store';
 import IXMPPClient from '../../types/network/xmpp/IXMPPClient';
@@ -254,7 +255,8 @@ class XMPPClient implements IXMPPClient {
 
 	// Send a text message
 	sendChatMessage(roomId: string, message: string, replyTo?: string): void {
-		const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat' })
+		const uuid = uuidGenerator();
+		const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat', id: uuid })
 			.c('body')
 			.t(message)
 			.up()
@@ -324,18 +326,18 @@ class XMPPClient implements IXMPPClient {
 		this.connection.sendIQ(iq, onRequestHistory.bind(this), onErrorStanza);
 	}
 
-	requestRepliedMessage(roomId: string, originalMessageId: string, repliedMessageId: string): void {
+	requestRepliedMessage(roomId: string, originalMessageId: string, repliedStanzaId: string): void {
 		const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
 			.c('query', { xmlns: Strophe.NS.MAM, queryid: MamRequestType.REPLIED })
 			.c('x', { xmlns: 'jabber:x:data' })
 			.c('field', { var: 'from_id' })
 			.c('value')
-			.t(repliedMessageId)
+			.t(repliedStanzaId)
 			.up()
 			.up()
 			.c('field', { var: 'to_id' })
 			.c('value')
-			.t(repliedMessageId);
+			.t(repliedStanzaId);
 		this.connection.sendIQ(
 			iq,
 			(stanza) => onRequestSingleMessage(originalMessageId, stanza),
