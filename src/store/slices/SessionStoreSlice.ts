@@ -28,7 +28,7 @@ export const useSessionStoreSlice = (set: (...any: any) => void): SessionStoreSl
 						websocket: undefined
 					},
 					userPrefTimeZone: draft.session.userPrefTimeZone,
-					filterHasFocus: false
+					filterHasFocus: draft.session.filterHasFocus
 				};
 			}),
 			false,
@@ -79,7 +79,7 @@ export const useSessionStoreSlice = (set: (...any: any) => void): SessionStoreSl
 				draft.session.filterHasFocus = hasFocus;
 			}),
 			false,
-			'SIDEBAR/SET_FILTER_FOCUS'
+			'SESSION/SET_FILTER_FOCUS'
 		);
 	}
 });

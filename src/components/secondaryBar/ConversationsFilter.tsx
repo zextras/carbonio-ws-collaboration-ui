@@ -5,7 +5,6 @@
  */
 
 import { Container, Input, IconButton, Tooltip } from '@zextras/carbonio-design-system';
-import { size } from 'lodash';
 import React, {
 	Dispatch,
 	FC,
@@ -78,9 +77,9 @@ const ConversationsFilter: FC<ConversationsFilterProps> = ({ expanded, setFilter
 		() =>
 			function icon() {
 				return (
-					<Tooltip label={size(searchInput) > 0 ? closeTooltip : filterTooltip}>
+					<Tooltip label={searchInput.length > 0 ? closeTooltip : filterTooltip}>
 						<IconButton
-							icon={size(searchInput) > 0 ? 'CloseOutline' : 'FunnelOutline'}
+							icon={searchInput.length > 0 ? 'CloseOutline' : 'FunnelOutline'}
 							size="large"
 							customSize={{ paddingSize: '0.25rem' }}
 							onClick={resetFilter}
