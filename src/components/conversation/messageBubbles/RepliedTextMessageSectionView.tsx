@@ -5,6 +5,8 @@
  */
 
 import { Container, Padding, Text } from '@zextras/carbonio-design-system';
+import { useUserSettings } from '@zextras/carbonio-shell-ui';
+import { find } from 'lodash';
 import moment from 'moment-timezone';
 import React, { FC, useEffect, useMemo, useCallback } from 'react';
 import styled from 'styled-components';
@@ -53,6 +55,13 @@ const RepliedTextMessageSectionView: FC<RepliedTextMessageSectionViewProps> = ({
 		? moment.tz(repliedMessage.date, timezone).format('HH:MM')
 		: null;
 
+	const settings = useUserSettings();
+
+	const darkModeSettings = useMemo(
+		() => find(settings.props, (value) => value.name === 'zappDarkreaderMode')?._content,
+		[settings.props]
+	);
+
 	const senderIdentifier = useMemo(
 		() =>
 			replyUserInfo
@@ -80,18 +89,54 @@ const RepliedTextMessageSectionView: FC<RepliedTextMessageSectionViewProps> = ({
 		const messageScrollTo = window.parent.document.getElementById(`message-${repliedMessage.id}`);
 		if (messageScrollTo && replyUserInfo) {
 			if (!isInViewport(messageScrollTo)) messageScrollTo.scrollIntoView({ block: 'end' });
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore
-			messageScrollTo.childNodes[0].style.animation = `${
-				sessionId && sessionId !== replyUserInfo.id
-					? 'highlightothersmessagebubble'
-					: 'highlightmymessagebubble'
-			} 0.5s 0.3s ease-in`;
-			messageScrollTo.style.animation = `${
-				sessionId && sessionId !== replyUserInfo.id
-					? 'highlightothersmessagebubble'
-					: 'highlightmymessagebubble'
-			} 0.5s 0.3s ease-in`;
+			// eslint-disable-next-line default-case
+			switch (darkModeSettings) {
+				case 'enabled': {
+					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+					// @ts-ignore
+					messageScrollTo.childNodes[0].style.animation = `${
+						sessionId && sessionId !== replyUserInfo.id
+							? 'highlightothersmessagebubbledark'
+							: 'highlightmymessagebubbledark'
+					} 0.5s 0.3s ease-in`;
+					messageScrollTo.style.animation = `${
+						sessionId && sessionId !== replyUserInfo.id
+							? 'highlightothersmessagebubbledark'
+							: 'highlightmymessagebubbledark'
+					} 0.5s 0.3s ease-in`;
+					break;
+				}
+				case 'disabled': {
+					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+					// @ts-ignore
+					messageScrollTo.childNodes[0].style.animation = `${
+						sessionId && sessionId !== replyUserInfo.id
+							? 'highlightothersmessagebubblelight'
+							: 'highlightmymessagebubblelight'
+					} 0.5s 0.3s ease-in`;
+					messageScrollTo.style.animation = `${
+						sessionId && sessionId !== replyUserInfo.id
+							? 'highlightothersmessagebubblelight'
+							: 'highlightmymessagebubblelight'
+					} 0.5s 0.3s ease-in`;
+					break;
+				}
+				case 'auto': {
+					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+					// @ts-ignore
+					messageScrollTo.childNodes[0].style.animation = `${
+						sessionId && sessionId !== replyUserInfo.id
+							? 'highlightothersmessagebubble'
+							: 'highlightmymessagebubble'
+					} 0.5s 0.3s ease-in`;
+					messageScrollTo.style.animation = `${
+						sessionId && sessionId !== replyUserInfo.id
+							? 'highlightothersmessagebubble'
+							: 'highlightmymessagebubble'
+					} 0.5s 0.3s ease-in`;
+					break;
+				}
+			}
 			// eslint-disable-next-line no-return-assign
 			setTimeout(() => {
 				messageScrollTo.style.animation = '';
@@ -100,7 +145,7 @@ const RepliedTextMessageSectionView: FC<RepliedTextMessageSectionViewProps> = ({
 				messageScrollTo.firstChild.style.animation = '';
 			}, 1000);
 		}
-	}, [sessionId, repliedMessage, replyUserInfo]);
+	}, [repliedMessage.id, replyUserInfo, darkModeSettings, sessionId]);
 
 	// If replied message is not present in the loaded history, request history from that message
 	useEffect(() => {

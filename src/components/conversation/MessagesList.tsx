@@ -33,7 +33,7 @@ import { getPrefTimezoneSelector } from '../../store/selectors/SessionSelectors'
 import useStore from '../../store/Store';
 import { Message, TextMessage } from '../../types/store/MessageTypes';
 import { isBefore, now } from '../../utils/dateUtil';
-import AnimationGlobalStyle from './messageBubbles/BubblueAnimationsGlobalStyle';
+import AnimationGlobalStyle from './messageBubbles/BubbleAnimationsGlobalStyle';
 import MessageFactory from './messageBubbles/MessageFactory';
 import WritingBubble from './messageBubbles/WritingBubble';
 import MessageHistoryLoader from './MessageHistoryLoader';
