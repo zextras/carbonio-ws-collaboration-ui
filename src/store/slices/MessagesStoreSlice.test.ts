@@ -219,7 +219,6 @@ describe('Test messages slice', () => {
 		act(() => result.current.newMessage(message0));
 		act(() => result.current.newMessage(message1));
 		act(() => result.current.setDeletedMessage(room.id, deletedMessage0));
-		console.log(result.current.messages[room.id][1]);
 		expect(result.current.messages[room.id][1].type).toBe(MessageType.DELETED_MSG);
 		expect(result.current.messages[room.id][1]).toStrictEqual(deletedMessage0);
 		act(() => result.current.newMessage(deletedMessage1));

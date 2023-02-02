@@ -235,8 +235,6 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 							date: messageToDelete.date
 						});
 					} else {
-						// check because addDeletedMessageRef is used in historyAccumulator => replaceMessageInTheHistory
-						console.log('added deleted from here', deletedMessage);
 						draft.addDeletedMessageRef(roomId, deletedMessage);
 					}
 					// check for replay messages and update the caption

@@ -59,7 +59,6 @@ class HistoryAccumulator {
 	public replaceMessageInTheHistory(roomId: string, message: Message): void {
 		if (!this.histories[roomId]) this.histories[roomId] = [];
 		const index = findIndex(this.histories[roomId], { id: message.id });
-		console.log('replaceling message');
 		if (
 			this.histories[roomId][index] &&
 			this.histories[roomId][index].id === message.id &&
@@ -71,9 +70,8 @@ class HistoryAccumulator {
 				date: this.histories[roomId][index].date
 			});
 		} else if (!this.histories[roomId][index] && message.type === MessageType.DELETED_MSG) {
-			// se mi arriva il delete ma non ho l'history salvo il delete per quando faro l'update dell'history
+			// when arrives the deletion but I still don't have the history I save it for the future history update
 			const store = useStore.getState();
-			console.log('added deleted from accumulator', message.id);
 			store.addDeletedMessageRef(roomId, message);
 		}
 	}
