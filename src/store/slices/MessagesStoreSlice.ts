@@ -6,13 +6,29 @@
  */
 
 import produce from 'immer';
-import { concat, find, findIndex, map, orderBy, sortedUniqBy } from 'lodash';
+import {
+	concat,
+	each,
+	find,
+	findIndex,
+	forEachRight,
+	map,
+	orderBy,
+	pullAllBy,
+	sortedUniqBy
+} from 'lodash';
 
 import { calcReads } from '../../network/xmpp/utility/decodeMessage';
 import { MarkerStatus } from '../../types/store/MarkersTypes';
-import { Message, MessageList, TextMessage } from '../../types/store/MessageTypes';
+import {
+	DeletedMessage,
+	Message,
+	MessageList,
+	MessageType,
+	TextMessage
+} from '../../types/store/MessageTypes';
 import { MessagesStoreSlice, RootStore } from '../../types/store/StoreTypes';
-import { isBefore, datesAreFromTheSameDay } from '../../utils/dateUtil';
+import { datesAreFromTheSameDay, isBefore } from '../../utils/dateUtil';
 
 export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStoreSlice => ({
 	messages: {},
@@ -32,7 +48,7 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 						id: `dateMessage${message.date}`,
 						roomId: message.roomId,
 						date: message.date,
-						type: 'date'
+						type: MessageType.DATE_MSG
 					});
 				}
 				draft.messages[message.roomId].push(message);
@@ -71,7 +87,7 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 							id: `dateMessage${historyMessage.date}`,
 							roomId,
 							date: historyMessage.date,
-							type: 'date'
+							type: MessageType.DATE_MSG
 						});
 						historyWithDates.push(historyMessage);
 					} else {
@@ -82,7 +98,7 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 								id: `dateMessage${historyMessage.date}`,
 								roomId,
 								date: historyMessage.date,
-								type: 'date'
+								type: MessageType.DATE_MSG
 							});
 							historyWithDates.push(historyMessage);
 							// the actual message and the previous one shares the same date
@@ -94,7 +110,7 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 
 				// the historyWithDates array will be concat to the list already present (draft.messages[roomId])
 				// we have to be sure that there's no date duplicates along the list
-				// this checks if the last historyWithDates element and the firs one in draft.messages[roomId] shares the same date
+				// this checks if the last historyWithDates element and the first one in draft.messages[roomId] shares the same date
 				// if so it shift the first element already present, that will be always a date message thanks to the previous map
 				if (
 					draft.messages[roomId] &&
@@ -109,6 +125,28 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 				draft.messages[roomId] = concat(historyWithDates, draft.messages[roomId]);
 				draft.messages[roomId] = orderBy(draft.messages[roomId], ['date'], ['asc']);
 				draft.messages[roomId] = sortedUniqBy(draft.messages[roomId], 'id');
+
+				// TODO migliorare questa parte cambiando da array a mappa il tempslice cosi non serve che lo cicliamo quest'ultimo ma ci prendiamo la referenza
+				// by id del messaggio e non serve che sia un array appunto perche non ci serve
+
+				// check if there is a deleted reference in the Temporary-slice and update the message to be displayed as deleted
+				forEachRight(draft.temporaryRoomsMessagesReferences[roomId], (message: Message) => {
+					if (message.type === MessageType.DELETED_MSG) {
+						const originalMessageToReplace = find(
+							draft.messages[roomId],
+							(msg) => msg.id === message.id
+						);
+						if (originalMessageToReplace) {
+							const index = findIndex(draft.messages[roomId], { id: originalMessageToReplace.id });
+							draft.messages[roomId].splice(index, 1, {
+								...message,
+								date: originalMessageToReplace.date
+							});
+							// and then remove from temporarySlice
+							pullAllBy(draft.temporaryRoomsMessagesReferences[roomId], [{ id: message.id }], 'id');
+						}
+					}
+				});
 			}),
 			false,
 			'MESSAGES/UPDATE_HISTORY'
@@ -120,7 +158,7 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 				if (!draft.messages[roomId]) draft.messages[roomId] = [];
 				draft.messages[roomId] = map(draft.messages[roomId], (message: Message) => {
 					// todo handle attachment message type
-					if (message.type !== 'text' || message.read === MarkerStatus.READ) {
+					if (message.type !== MessageType.TEXT_MSG || message.read === MarkerStatus.READ) {
 						return message;
 					}
 					// eslint-disable-next-line no-param-reassign
@@ -144,15 +182,74 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 						draft.messages[roomId],
 						(message) => message.id === originalMessageId
 					);
+					const tempMessageRepliedToDelete = find(
+						draft.temporaryRoomsMessagesReferences[roomId],
+						(tempMessagge) =>
+							tempMessagge.id === repliedMessage.id && tempMessagge.type === MessageType.DELETED_MSG
+					);
+					// check if message subject of replay is available in the history and update it if needed
 					if (originalMessage) {
-						(originalMessage as TextMessage).repliedMessage = repliedMessage;
-						const index = findIndex(draft.messages[roomId], { id: originalMessageId });
-						draft.messages[roomId].splice(index, 1, originalMessage);
+						const messageThatIsReplied = find(
+							draft.messages[roomId],
+							(message) => message.id === repliedMessage.id
+						);
+						// check if message replied is deleted and update the replay caption
+						if (messageThatIsReplied) {
+							const repliedMessageIsDeleted: TextMessage | DeletedMessage =
+								messageThatIsReplied?.type === MessageType.DELETED_MSG
+									? { ...messageThatIsReplied, type: MessageType.DELETED_MSG }
+									: repliedMessage;
+							if (originalMessage.type === MessageType.TEXT_MSG) {
+								originalMessage.repliedMessage = repliedMessageIsDeleted;
+							}
+							const index = findIndex(draft.messages[roomId], { id: originalMessageId });
+							draft.messages[roomId].splice(index, 1, originalMessage);
+						} else if (tempMessageRepliedToDelete) {
+							// check in temporarySlice if the original message needs to be deleted in the messagesSlice
+							(originalMessage as TextMessage).repliedMessage = tempMessageRepliedToDelete;
+							const index = findIndex(draft.messages[roomId], { id: originalMessageId });
+							draft.messages[roomId].splice(index, 1, originalMessage);
+						}
 					}
 				}
 			}),
 			false,
 			'MESSAGES/SET_REPLIED_MESSAGE'
+		);
+	},
+	setDeletedMessage: (roomId: string, deletedMessage: DeletedMessage): void => {
+		set(
+			produce((draft: RootStore) => {
+				if (draft.messages[roomId]) {
+					const messageToDelete = find(
+						draft.messages[roomId],
+						(message) => message.id === deletedMessage.id
+					);
+					// replace the original message with the deletion in the history if present
+					// otherwise add the deletion to the tempSlice so when the history will be loaded
+					// the original message will be deleted
+					if (messageToDelete) {
+						const index = findIndex(draft.messages[roomId], { id: deletedMessage.id });
+						draft.messages[roomId].splice(index, 1, {
+							...deletedMessage,
+							date: messageToDelete.date
+						});
+					} else {
+						// check because addDeletedMessageRef is used in historyAccumulator => replaceMessageInTheHistory
+						console.log('added deleted from here', deletedMessage);
+						draft.addDeletedMessageRef(roomId, deletedMessage);
+					}
+					// check for replay messages and update the caption
+					each(draft.messages[roomId], (msg: Message) => {
+						if (msg.type === MessageType.TEXT_MSG && msg.replyTo === deletedMessage.id) {
+							const index = findIndex(draft.messages[roomId], { id: msg.id });
+							(draft.messages[roomId][index] as TextMessage).repliedMessage = deletedMessage;
+						}
+					});
+				}
+			}),
+			false,
+			'MESSAGES/SET_DELETED_MESSAGE'
 		);
 	}
 });

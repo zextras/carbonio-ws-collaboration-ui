@@ -6,7 +6,7 @@
 
 import useStore from '../../../store/Store';
 import IXMPPClient from '../../../types/network/xmpp/IXMPPClient';
-import { TextMessage } from '../../../types/store/MessageTypes';
+import { MessageType, TextMessage } from '../../../types/store/MessageTypes';
 import { dateToTimestamp } from '../../../utils/dateUtil';
 import { xmppDebug } from '../../../utils/debug';
 import { decodeMessage } from '../utility/decodeMessage';
@@ -36,7 +36,7 @@ export function onInboxMessageStanza(this: IXMPPClient, message: Element): true 
 		}
 
 		// Ask smart markers to update Check icon
-		if (inboxMessage.type === 'text' && inboxMessage.from === sessionId) {
+		if (inboxMessage.type === MessageType.TEXT_MSG && inboxMessage.from === sessionId) {
 			this.lastMarkers(inboxMessage.roomId);
 		}
 	}

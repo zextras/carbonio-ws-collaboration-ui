@@ -8,7 +8,7 @@ import { mockNotify } from '../../../../jest-mocks';
 import useStore from '../../../store/Store';
 import { createMockRoom } from '../../../tests/createMock';
 import { xmppClient } from '../../../tests/mockedXmppClient';
-import { DateMessage, TextMessage } from '../../../types/store/MessageTypes';
+import { DateMessage, MessageType, TextMessage } from '../../../types/store/MessageTypes';
 import { onNewMessageStanza } from './newMessageHandler';
 
 type MessageInfo = {
@@ -58,7 +58,7 @@ describe('XMPP newMessageHandler', () => {
 		expect(dateMessage).not.toBeNull();
 		expect(textMessage).not.toBeNull();
 		expect(textMessage.id).toBe(info.stanzaId);
-		expect(textMessage.type).toBe('text');
+		expect(textMessage.type).toBe(MessageType.TEXT_MSG);
 		expect(textMessage.roomId).toBe(info.roomId);
 		expect(textMessage.from).toBe(info.from);
 		expect(textMessage.text).toBe(info.text);
@@ -80,7 +80,7 @@ describe('XMPP newMessageHandler', () => {
 		const textMessage = store.messages[info.roomId][1] as TextMessage;
 		expect(textMessage).not.toBeNull();
 		expect(textMessage.id).toBe(info.stanzaId);
-		expect(textMessage.type).toBe('text');
+		expect(textMessage.type).toBe(MessageType.TEXT_MSG);
 		expect(textMessage.roomId).toBe(info.roomId);
 		expect(textMessage.from).toBe(info.from);
 		expect(textMessage.text).toBe(info.text);

@@ -86,6 +86,7 @@
 		"react-router-dom": "5.2.0",
 		"strophe.js": "1.4.4",
 		"styled-components": "5.3.3",
+		"uuid": "^9.0.0",
 		"zustand": "^3.7.2"
 	},
 	"carbonio": {

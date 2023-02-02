@@ -13,7 +13,7 @@ import { getMessageSelector } from '../../../store/selectors/MessagesSelectors';
 import { getUserSelector } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
 import { ReferenceMessage } from '../../../types/store/ActiveConversationTypes';
-import { Message } from '../../../types/store/MessageTypes';
+import { Message, MessageType } from '../../../types/store/MessageTypes';
 import { calculateAvatarColor } from '../../../utils/styleUtils';
 
 const UserName = styled(Text)`
@@ -82,7 +82,7 @@ const MessageReferenceDisplayed: React.FC<MessageReferenceDisplayedProps> = ({
 				padding={{ left: 'small' }}
 				width="fill"
 			>
-				{message?.type !== 'text' && (
+				{message?.type !== MessageType.TEXT_MSG && (
 					<>
 						<Avatar size="large" label="Name Lastname" shape="regular" />
 						<Padding right="small" />
@@ -103,7 +103,7 @@ const MessageReferenceDisplayed: React.FC<MessageReferenceDisplayedProps> = ({
 					</Container>
 					<Container crossAlignment="flex-start" padding={{ top: 'small' }}>
 						<Text data-testid="reference-message" color="secondary" overflow="ellipsis">
-							{message?.type === 'text' && message?.text}
+							{message?.type === MessageType.TEXT_MSG && message?.text}
 						</Text>
 					</Container>
 				</Container>

@@ -11,9 +11,13 @@ import IXMPPClient from '../network/xmpp/IXMPPClient';
 import { ActiveConversationsMap, messageActionType } from './ActiveConversationTypes';
 import { Connections } from './ConnectionsTypes';
 import { Marker, MarkersMap } from './MarkersTypes';
-import { MessageMap, Message, TextMessage } from './MessageTypes';
+import { MessageMap, Message, TextMessage, DeletedMessage } from './MessageTypes';
 import { RoomsMap } from './RoomTypes';
 import { CapabilityList, Session } from './SessionTypes';
+import {
+	TemporaryReferenceMessage,
+	TemporaryRoomsMessagesReferencesMap
+} from './TemporaryMessagesReferencesTypes';
 import { UnreadsMap } from './UnreadsCounterTypes';
 import { UsersMap } from './UserTypes';
 
@@ -57,6 +61,7 @@ export type MessagesStoreSlice = {
 		originalMessageId: string,
 		repliedMessage: TextMessage
 	) => void;
+	setDeletedMessage: (roomId: string, deletedMessage: DeletedMessage) => void;
 };
 
 export type SessionStoreSlice = {
@@ -109,6 +114,12 @@ export type UnreadsCounterSlice = {
 	updateUnreadCount: (roomId: string) => void;
 };
 
+export type TemporaryMessagesReferencesSlice = {
+	temporaryRoomsMessagesReferences: TemporaryRoomsMessagesReferencesMap;
+	addDeletedMessageRef: (roomId: string, messageDeleted: TemporaryReferenceMessage) => void;
+	removeDeletedMessageRef: (roomId: string, idMessageDeleted: string) => void;
+};
+
 export type RootStore = UsersStoreSlice &
 	RoomsStoreSlice &
 	MessagesStoreSlice &
@@ -116,4 +127,5 @@ export type RootStore = UsersStoreSlice &
 	MarkersStoreSlice &
 	ActiveConversationsSlice &
 	ConnectionsStoreSlice &
-	UnreadsCounterSlice;
+	UnreadsCounterSlice &
+	TemporaryMessagesReferencesSlice;

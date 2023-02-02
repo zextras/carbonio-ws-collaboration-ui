@@ -40,7 +40,11 @@ export function onHistoryMessageStanza(message: Element): true {
 		const queryid = getAttribute(result, 'queryid');
 		switch (queryid) {
 			case MamRequestType.HISTORY: {
-				HistoryAccumulator.addMessageToHistory(historyMessage.roomId, historyMessage);
+				if (historyMessage.type === 'deleted') {
+					HistoryAccumulator.replaceMessageInTheHistory(historyMessage.roomId, historyMessage);
+				} else {
+					HistoryAccumulator.addMessageToHistory(historyMessage.roomId, historyMessage);
+				}
 				break;
 			}
 			case MamRequestType.REPLIED: {

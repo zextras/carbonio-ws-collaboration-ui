@@ -5,6 +5,7 @@
  */
 
 import { Strophe, $pres, $iq, $msg, StropheConnection, StropheConnectionStatus } from 'strophe.js';
+import { v4 as uuidv4 } from 'uuid';
 
 import useStore from '../../store/Store';
 import IXMPPClient from '../../types/network/xmpp/IXMPPClient';
@@ -57,6 +58,8 @@ class XMPPClient implements IXMPPClient {
 		Strophe.addNamespace('CHAT_STATE', 'http://jabber.org/protocol/chatstates');
 		Strophe.addNamespace('MARKERS', 'urn:xmpp:chat-markers:0');
 		Strophe.addNamespace('SMART_MARKERS', 'esl:xmpp:smart-markers:0');
+		Strophe.addNamespace('XMLNS_XMPP_RETRACT', 'urn:xmpp:message-retract:0');
+		Strophe.addNamespace('XMLNS_XMPP_FALLBACK', 'urn:xmpp:fallback:0');
 
 		// Handler for event stanzas
 		this.connection.addHandler(onPresenceStanza.bind(this), null, 'presence');
@@ -254,7 +257,7 @@ class XMPPClient implements IXMPPClient {
 
 	// Send a text message
 	sendChatMessage(roomId: string, message: string, replyTo?: string): void {
-		const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat' })
+		const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat', id: uuidv4() })
 			.c('body')
 			.t(message)
 			.up()
@@ -262,6 +265,17 @@ class XMPPClient implements IXMPPClient {
 		if (replyTo != null) {
 			msg.up().c('thread').t(replyTo);
 		}
+		this.connection.send(msg);
+	}
+
+	/**
+	 * Delete a message / Message Retraction (XEP-0424)
+	 * Documentation: https://xmpp.org/extensions/xep-0424.html#schema
+	 */
+	sendChatMessageDeletion(roomId: string, messageId: string): void {
+		const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat', id: uuidv4() })
+			.c('apply-to', { id: messageId, xmlns: 'urn:xmpp:fasten:0' })
+			.c('retract', { xmlns: Strophe.NS.XMLNS_XMPP_RETRACT });
 		this.connection.send(msg);
 	}
 

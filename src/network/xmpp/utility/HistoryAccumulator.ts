@@ -4,7 +4,16 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Message, MessageList, MessageMap, TextMessage } from '../../../types/store/MessageTypes';
+import { findIndex } from 'lodash';
+
+import useStore from '../../../store/Store';
+import {
+	Message,
+	MessageList,
+	MessageMap,
+	MessageType,
+	TextMessage
+} from '../../../types/store/MessageTypes';
 
 class HistoryAccumulator {
 	// Singleton design pattern
@@ -45,6 +54,28 @@ class HistoryAccumulator {
 		const message = this.repliedMessages[messageId];
 		delete this.repliedMessages[messageId];
 		return message as TextMessage;
+	}
+
+	public replaceMessageInTheHistory(roomId: string, message: Message): void {
+		if (!this.histories[roomId]) this.histories[roomId] = [];
+		const index = findIndex(this.histories[roomId], { id: message.id });
+		console.log('replaceling message');
+		if (
+			this.histories[roomId][index] &&
+			this.histories[roomId][index].id === message.id &&
+			this.histories[roomId][index].type !== message.type &&
+			message.type === MessageType.DELETED_MSG
+		) {
+			this.histories[roomId].splice(index, 1, {
+				...message,
+				date: this.histories[roomId][index].date
+			});
+		} else if (!this.histories[roomId][index] && message.type === MessageType.DELETED_MSG) {
+			// se mi arriva il delete ma non ho l'history salvo il delete per quando faro l'update dell'history
+			const store = useStore.getState();
+			console.log('added deleted from accumulator', message.id);
+			store.addDeletedMessageRef(roomId, message);
+		}
 	}
 }
 

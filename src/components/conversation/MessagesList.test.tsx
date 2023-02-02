@@ -13,7 +13,7 @@ import useStore from '../../store/Store';
 import { createMockRoom, createMockTextMessage } from '../../tests/createMock';
 import { RoomBe, RoomType } from '../../types/network/models/roomBeTypes';
 import { MarkerStatus } from '../../types/store/MarkersTypes';
-import { TextMessage } from '../../types/store/MessageTypes';
+import { MessageType, TextMessage } from '../../types/store/MessageTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 import MessagesList from './MessagesList';
 
@@ -53,7 +53,7 @@ const messages: TextMessage[] = [
 		id: '1111-409408-555555',
 		roomId: 'Room-Id',
 		date: 1665409408796,
-		type: 'text',
+		type: MessageType.TEXT_MSG,
 		from: 'c755b1d5-08dd-49d8-bec8-59074090ef1b',
 		text: '11111',
 		read: MarkerStatus.READ
@@ -62,7 +62,7 @@ const messages: TextMessage[] = [
 		id: '2222-409408-222222',
 		roomId: 'Room-Id',
 		date: 1665409408796,
-		type: 'text',
+		type: MessageType.TEXT_MSG,
 		from: 'c755b1d5-08dd-49d8-bec8-59074090ef1b',
 		text: '22222',
 		read: MarkerStatus.READ
@@ -71,7 +71,7 @@ const messages: TextMessage[] = [
 		id: '3333-409408-333333',
 		roomId: 'Room-Id',
 		date: 1665409408796,
-		type: 'text',
+		type: MessageType.TEXT_MSG,
 		from: 'c755b1d5-08dd-49d8-bec8-59074090ef1b',
 		text: '33333',
 		read: MarkerStatus.READ
@@ -80,7 +80,7 @@ const messages: TextMessage[] = [
 		id: '4444-409408-444444',
 		roomId: 'Room-Id',
 		date: 1665409408796,
-		type: 'text',
+		type: MessageType.TEXT_MSG,
 		from: 'c755b1d5-08dd-49d8-bec8-59074090ef1b',
 		text: '44444',
 		read: MarkerStatus.READ

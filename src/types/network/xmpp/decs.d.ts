@@ -11,6 +11,7 @@
 
 /* eslint max-classes-per-file: off */
 
+declare module 'uuid';
 declare module 'strophe.js';
 
 declare global {
