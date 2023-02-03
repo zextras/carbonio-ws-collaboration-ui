@@ -151,7 +151,13 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 			id: 'Reply',
 			label: replayActionLabel,
 			click: () =>
-				setReferenceMessage(message.roomId, message.id, message.from, messageActionType.REPLAY)
+				setReferenceMessage(
+					message.roomId,
+					message.id,
+					message.from,
+					message.stanzaId,
+					messageActionType.REPLAY
+				)
 		});
 		// }
 

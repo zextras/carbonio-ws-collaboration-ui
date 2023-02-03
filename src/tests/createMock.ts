@@ -30,6 +30,7 @@ export const createMockTextMessage = (fields?: Record<string, any>): TextMessage
 	roomId: 'roomId',
 	date: 1661441294393,
 	type: MessageType.TEXT_MSG,
+	stanzaId: 'stanzaId',
 	from: 'userId',
 	text: 'Hi',
 	read: MarkerStatus.UNREAD,

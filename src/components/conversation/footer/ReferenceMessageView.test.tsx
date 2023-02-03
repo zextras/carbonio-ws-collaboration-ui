@@ -59,6 +59,7 @@ describe('Replay to a message by opening the contextual menu', () => {
 			mockedRoom.id,
 			mockedMessage.id,
 			mockedMessage.from,
+			mockedMessage.stanzaId,
 			messageActionType.REPLAY
 		);
 		setup(<ReferenceMessageView roomId={mockedRoom.id} />);
@@ -74,6 +75,7 @@ describe('Replay to a message by opening the contextual menu', () => {
 			mockedRoom.id,
 			mockedMessage.id,
 			mockedMessage.from,
+			mockedMessage.stanzaId,
 			messageActionType.REPLAY
 		);
 		const { user } = setup(<ReferenceMessageView roomId={mockedRoom.id} />);

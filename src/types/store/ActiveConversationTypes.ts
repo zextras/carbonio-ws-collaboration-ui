@@ -29,6 +29,7 @@ export type ReferenceMessage = {
 	roomId: string;
 	messageId: string;
 	senderId: string;
+	stanzaId: string;
 	actionType: messageActionType;
 };
 

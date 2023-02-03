@@ -23,7 +23,7 @@ import { getRequiredAttribute, getRequiredTagElement, getTagElement } from './de
 
 type OptionalParameters = {
 	date?: number;
-	id?: string
+	stanzaId?: string
 }
 
 export function decodeMessage(messageStanza: Element, optional?: OptionalParameters): Message | undefined {
@@ -37,8 +37,8 @@ export function decodeMessage(messageStanza: Element, optional?: OptionalParamet
 	// Text message
 	const body = messageStanza.getElementsByTagName('body')[0];
 	if (body && resource) {
-		const stanzaId = getTagElement(messageStanza, 'stanza-id');
-		const id = optional?.id || (stanzaId && getRequiredAttribute(stanzaId, 'id')) || messageId;
+		const stanzaIdReference = getTagElement(messageStanza, 'stanza-id');
+		const stanzaId = optional?.stanzaId || (stanzaIdReference && getRequiredAttribute(stanzaIdReference, 'id') || messageId);
 		const from = getId(resource);
 		const messageTxt = Strophe.getText(body)
 			.replace(/&amp;/g, '&')
@@ -54,7 +54,8 @@ export function decodeMessage(messageStanza: Element, optional?: OptionalParamet
 		}
 
 		message = {
-			id,
+			id: messageId,
+			stanzaId,
 			roomId,
 			date: messageDate,
 			type: MessageType.TEXT_MSG,

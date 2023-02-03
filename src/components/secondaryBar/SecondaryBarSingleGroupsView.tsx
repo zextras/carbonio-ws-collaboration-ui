@@ -4,43 +4,110 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Container } from '@zextras/carbonio-design-system';
+import { Container, Text } from '@zextras/carbonio-design-system';
 import { map, size } from 'lodash';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 
 import { roomsListSecondaryBarLengthEqualityFn } from '../../store/equalityFunctions/MessagesEqualityFunctions';
 import { getRoomIdsOrderedLastMessage } from '../../store/selectors/MessagesSelectors';
 import { getUsersSelector } from '../../store/selectors/UsersSelectors';
 import useStore from '../../store/Store';
+import { Member } from '../../types/store/RoomTypes';
 import DefaultUserSidebarView from '../../views/DefaultUserSidebarView';
 import ShimmeringCollapsedListView from '../../views/shimmerViews/ShimmeringCollapsedListView';
 import ShimmeringExpandedListView from '../../views/shimmerViews/ShimmeringExpandedListView';
 import CollapsedSidebarListItem from './CollapsedSidebarListItem';
+import ConversationsFilter from './ConversationsFilter';
 import ExpandedSidebarListItem from './ExpandedSidebarListItem';
 
 type SecondaryBarSingleGroupsView = {
 	expanded: boolean;
 };
 
+const CustomContainer = styled(Container)`
+	cursor: default;
+`;
+
+const ConversationFilterContainer = styled(Container)`
+	height: fit-content;
+	position: sticky;
+	top: 0;
+	z-index: 1;
+`;
+
 const SecondaryBarSingleGroupsView: React.FC<SecondaryBarSingleGroupsView> = ({ expanded }) => {
 	const [t] = useTranslation();
 	const showConversationList = t('tooltip.showConversationList', 'Show conversation list');
+	const noMatchLabel = t('participantsList.noMatch', 'There are no items that match this search');
 
-	const roomsIds = useStore<{ roomId: string; lastMessageTimestamp: number }[]>(
+	const sessionId: string | undefined = useStore((store) => store.session.id);
+	const roomsIds = useStore<{ roomId: string; roomType: string; lastMessageTimestamp: number }[]>(
 		getRoomIdsOrderedLastMessage,
 		roomsListSecondaryBarLengthEqualityFn
 	);
 	const users = useStore(getUsersSelector);
+
+	const [filteredConversationsIds, setFilteredConversationsIds] = useState<
+		{ roomId: string; roomType: string; lastMessageTimestamp: number }[]
+	>([]);
+	const [filteredInput, setFilteredInput] = useState('');
+
+	useEffect(() => {
+		if (filteredInput === '') {
+			setFilteredConversationsIds(roomsIds);
+		} else {
+			const filteredConversations: {
+				roomId: string;
+				roomType: string;
+				lastMessageTimestamp: number;
+			}[] = [];
+			map(roomsIds, (room) => {
+				if (room.roomType === 'group') {
+					const roomName = useStore.getState().rooms[room.roomId].name;
+					if (roomName.toLocaleLowerCase().includes(filteredInput.toLocaleLowerCase())) {
+						filteredConversations.push(room);
+					}
+				} else {
+					const users: Member[] | undefined = useStore.getState().rooms[room.roomId].members;
+					const userId = users?.[0].userId === sessionId ? users![1]?.userId : users![0].userId;
+					const userName = useStore.getState().users[userId].name;
+					const userEmail = useStore.getState().users[userId].email.split('@')[0];
+					if (
+						userName.toLocaleLowerCase().includes(filteredInput.toLocaleLowerCase()) ||
+						userEmail.toLocaleLowerCase().includes(filteredInput.toLocaleLowerCase())
+					) {
+						filteredConversations.push(room);
+					}
+				}
+			});
+			setFilteredConversationsIds(filteredConversations);
+		}
+	}, [filteredInput, roomsIds, sessionId]);
+
 	const ListItem = useMemo(
 		() => (expanded ? ExpandedSidebarListItem : CollapsedSidebarListItem),
 		[expanded]
 	);
 
-	const listOfRooms = useMemo(
-		() => map(roomsIds, (room) => <ListItem roomId={room.roomId} />),
-		[roomsIds, ListItem]
-	);
+	const listOfRooms = useMemo(() => {
+		const list = [];
+		if (filteredConversationsIds.length !== 0) {
+			map(filteredConversationsIds, (room) => {
+				list.push(<ListItem roomId={room.roomId} key={`${room.roomId}_item`} />);
+			});
+		} else {
+			list.push(
+				<CustomContainer mainAlignment="flex-start" padding={{ top: '2rem' }} key="no_match_item">
+					<Text color="gray1" size="small" weight="light">
+						{noMatchLabel}
+					</Text>
+				</CustomContainer>
+			);
+		}
+		return list;
+	}, [filteredConversationsIds, noMatchLabel, ListItem]);
 
 	const listView = useMemo(
 		() =>
@@ -52,7 +119,18 @@ const SecondaryBarSingleGroupsView: React.FC<SecondaryBarSingleGroupsView> = ({ 
 						<ShimmeringCollapsedListView />
 					)
 				) : (
-					listOfRooms
+					<Container height="fit">
+						<ConversationFilterContainer>
+							<ConversationsFilter
+								expanded={expanded}
+								setFilteredInput={setFilteredInput}
+								key="conversations_filter_item"
+							/>
+						</ConversationFilterContainer>
+						<Container height="fit" data-testid="conversations_list_filtered">
+							{listOfRooms}
+						</Container>
+					</Container>
 				)
 			) : (
 				expanded && <DefaultUserSidebarView />

@@ -54,6 +54,7 @@ const messages: TextMessage[] = [
 		roomId: 'Room-Id',
 		date: 1665409408796,
 		type: MessageType.TEXT_MSG,
+		stanzaId: 'stanzaId-1111-409408-555555',
 		from: 'c755b1d5-08dd-49d8-bec8-59074090ef1b',
 		text: '11111',
 		read: MarkerStatus.READ
@@ -63,6 +64,7 @@ const messages: TextMessage[] = [
 		roomId: 'Room-Id',
 		date: 1665409408796,
 		type: MessageType.TEXT_MSG,
+		stanzaId: 'stanzaId-2222-409408-222222',
 		from: 'c755b1d5-08dd-49d8-bec8-59074090ef1b',
 		text: '22222',
 		read: MarkerStatus.READ
@@ -72,6 +74,7 @@ const messages: TextMessage[] = [
 		roomId: 'Room-Id',
 		date: 1665409408796,
 		type: MessageType.TEXT_MSG,
+		stanzaId: 'stanzaId-3333-409408-333333',
 		from: 'c755b1d5-08dd-49d8-bec8-59074090ef1b',
 		text: '33333',
 		read: MarkerStatus.READ
@@ -81,6 +84,7 @@ const messages: TextMessage[] = [
 		roomId: 'Room-Id',
 		date: 1665409408796,
 		type: MessageType.TEXT_MSG,
+		stanzaId: 'stanzaId-4444-409408-444444',
 		from: 'c755b1d5-08dd-49d8-bec8-59074090ef1b',
 		text: '44444',
 		read: MarkerStatus.READ
