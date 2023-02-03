@@ -88,7 +88,7 @@ const RepliedTextMessageSectionView: FC<RepliedTextMessageSectionViewProps> = ({
 	const scrollTo = useCallback(() => {
 		const messageScrollTo = window.parent.document.getElementById(`message-${repliedMessage.id}`);
 		if (messageScrollTo && replyUserInfo) {
-			if (!isInViewport(messageScrollTo)) messageScrollTo.scrollIntoView({ block: 'end' });
+			if (!isInViewport(messageScrollTo)) messageScrollTo.scrollIntoView({ block: 'center' });
 			// eslint-disable-next-line default-case
 			switch (darkModeSettings) {
 				case 'enabled': {
@@ -98,12 +98,12 @@ const RepliedTextMessageSectionView: FC<RepliedTextMessageSectionViewProps> = ({
 						sessionId && sessionId !== replyUserInfo.id
 							? 'highlightothersmessagebubbledark'
 							: 'highlightmymessagebubbledark'
-					} 0.5s 0.3s ease-in`;
+					} 1.2s 0.2s ease-in-out`;
 					messageScrollTo.style.animation = `${
 						sessionId && sessionId !== replyUserInfo.id
 							? 'highlightothersmessagebubbledark'
 							: 'highlightmymessagebubbledark'
-					} 0.5s 0.3s ease-in`;
+					} 1.2s 0.2s ease-in-out`;
 					break;
 				}
 				case 'disabled': {
@@ -113,12 +113,12 @@ const RepliedTextMessageSectionView: FC<RepliedTextMessageSectionViewProps> = ({
 						sessionId && sessionId !== replyUserInfo.id
 							? 'highlightothersmessagebubblelight'
 							: 'highlightmymessagebubblelight'
-					} 0.5s 0.3s ease-in`;
+					} 1.2s 0.2s ease-in-out`;
 					messageScrollTo.style.animation = `${
 						sessionId && sessionId !== replyUserInfo.id
 							? 'highlightothersmessagebubblelight'
 							: 'highlightmymessagebubblelight'
-					} 0.5s 0.3s ease-in`;
+					} 1.2s 0.2s ease-in-out`;
 					break;
 				}
 				case 'auto': {
@@ -128,12 +128,12 @@ const RepliedTextMessageSectionView: FC<RepliedTextMessageSectionViewProps> = ({
 						sessionId && sessionId !== replyUserInfo.id
 							? 'highlightothersmessagebubble'
 							: 'highlightmymessagebubble'
-					} 0.5s 0.3s ease-in`;
+					} 1.2s 0.2s ease-in-out`;
 					messageScrollTo.style.animation = `${
 						sessionId && sessionId !== replyUserInfo.id
 							? 'highlightothersmessagebubble'
 							: 'highlightmymessagebubble'
-					} 0.5s 0.3s ease-in`;
+					} 1.2s 0.2s ease-in-out`;
 					break;
 				}
 			}
@@ -143,7 +143,7 @@ const RepliedTextMessageSectionView: FC<RepliedTextMessageSectionViewProps> = ({
 				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 				// @ts-ignore
 				messageScrollTo.firstChild.style.animation = '';
-			}, 1000);
+			}, 1400);
 		}
 	}, [repliedMessage.id, replyUserInfo, darkModeSettings, sessionId]);
 

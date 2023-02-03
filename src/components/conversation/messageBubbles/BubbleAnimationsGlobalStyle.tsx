@@ -8,76 +8,76 @@ import { createGlobalStyle } from 'styled-components';
 
 const AnimationGlobalStyle = createGlobalStyle`
   @keyframes highlightmymessagebubbledark {
-    0% {
+    0%, 100% {
       background-color: #1d252d;
     }
-    100% {
+    20%, 80% {
       background-color: #0E3858;
     }
   }
 
   @keyframes highlightothersmessagebubbledark {
-    0% {
+    0%, 100% {
       background-color: #13181d;
     }
-    100% {
+    20%, 80% {
       background-color: #0A243D;
     }
   }
 
   @keyframes highlightmymessagebubblelight {
-    0% {
+    0%, 100% {
       background-color: #d5e3f6;
     }
-    100% {
-      background-color: #B3D3FF;
+    20%, 80% {
+      background-color: #96b8e9;
     }
   }
 
   @keyframes highlightothersmessagebubblelight {
-    0% {
+    0%, 100% {
       background-color: #ffffff;
     }
-    100% {
-      background-color: #E7E9EE;
+    20%, 80% {
+      background-color: #d9d9d9;
     }
   }
 
   @keyframes highlightmymessagebubble {
-    0% {
+    0%, 100% {
       background-color: #d5e3f6;
     }
-    100% {
-      background-color: #B3D3FF;
+    20%, 80% {
+      background-color: #96b8e9;
     }
   }
 
   @keyframes highlightothersmessagebubble {
-    0% {
+    0%, 100% {
       background-color: #ffffff;
     }
-    100% {
-      background-color: #E7E9EE;
+    20%, 80% {
+      background-color: #d9d9d9;
     }
   }
 
   @media (prefers-color-scheme: dark) {
 		@keyframes highlightmymessagebubble {
-			0% {
+			0%, 100% {
 				background-color: #1d252d;
 			}
-			100% {
-			  	background-color: #0E3858;
+			20%, 80% {
+			  background-color: #0E3858;
 			}
 		}
 		
 		@keyframes highlightothersmessagebubble {
-			0% {
-			  	background-color: #13181d;
-			}
-			100% {
-			  	background-color: #0A243D;
-			}
+      0%, 100% {
+        background-color: #13181d;
+      }
+      20%, 80% {
+        background-color: #0A243D;
+      }
 		}
   }
 `;
