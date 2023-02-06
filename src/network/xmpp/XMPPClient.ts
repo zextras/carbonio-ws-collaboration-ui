@@ -47,19 +47,19 @@ class XMPPClient implements IXMPPClient {
 		this.connection = new Strophe.Connection(service);
 
 		// Useful namespaces
-		Strophe.addNamespace('ROSTER', 'jabber:iq:roster');
-		Strophe.addNamespace('LAST_ACTIVITY', 'jabber:iq:last');
-		Strophe.addNamespace('INBOX', 'erlang-solutions.com:xmpp:inbox:0');
-		Strophe.addNamespace('DISCO_ITEMS', 'http://jabber.org/protocol/disco#items');
-		Strophe.addNamespace('DISCO_INFO', 'http://jabber.org/protocol/disco#info');
-		Strophe.addNamespace('MAM', 'urn:xmpp:mam:2');
 		Strophe.addNamespace('AFFILIATIONS', 'urn:xmpp:muclight:0#affiliations');
 		Strophe.addNamespace('CONFIGURATION', 'urn:xmpp:muclight:0#configuration');
 		Strophe.addNamespace('CHAT_STATE', 'http://jabber.org/protocol/chatstates');
+		Strophe.addNamespace('DISCO_ITEMS', 'http://jabber.org/protocol/disco#items');
+		Strophe.addNamespace('DISCO_INFO', 'http://jabber.org/protocol/disco#info');
+		Strophe.addNamespace('INBOX', 'erlang-solutions.com:xmpp:inbox:0');
+		Strophe.addNamespace('LAST_ACTIVITY', 'jabber:iq:last');
+		Strophe.addNamespace('MAM', 'urn:xmpp:mam:2');
 		Strophe.addNamespace('MARKERS', 'urn:xmpp:chat-markers:0');
+		Strophe.addNamespace('ROSTER', 'jabber:iq:roster');
 		Strophe.addNamespace('SMART_MARKERS', 'esl:xmpp:smart-markers:0');
-		Strophe.addNamespace('XMLNS_XMPP_RETRACT', 'urn:xmpp:message-retract:0');
-		Strophe.addNamespace('XMLNS_XMPP_FALLBACK', 'urn:xmpp:fallback:0');
+		Strophe.addNamespace('XMPP_RETRACT', 'urn:xmpp:message-retract:0');
+		Strophe.addNamespace('XMPP_FASTEN', 'urn:xmpp:fasten:0');
 
 		// Handler for event stanzas
 		this.connection.addHandler(onPresenceStanza.bind(this), null, 'presence');
@@ -276,8 +276,8 @@ class XMPPClient implements IXMPPClient {
 	sendChatMessageDeletion(roomId: string, messageId: string): void {
 		const uuid = uuidGenerator();
 		const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat', id: uuid() })
-			.c('apply-to', { id: messageId, xmlns: 'urn:xmpp:fasten:0' })
-			.c('retract', { xmlns: Strophe.NS.XMLNS_XMPP_RETRACT });
+			.c('apply-to', { id: messageId, xmlns: Strophe.NS.XMPP_FASTEN })
+			.c('retract', { xmlns: Strophe.NS.XMPP_RETRACT });
 		this.connection.send(msg);
 	}
 
