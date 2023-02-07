@@ -6,6 +6,7 @@
 
 import { countBy, find, forEach, size } from 'lodash';
 
+import { RoomsApi, UsersApi } from '../../network';
 import { Member, Room, RoomsMap, RoomType } from '../../types/store/RoomTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 
@@ -95,3 +96,18 @@ export const getNumbersOfRoomMembers = (state: RootStore, roomId: string): numbe
 
 export const getPictureUpdatedAt = (state: RootStore, roomId: string): string | undefined =>
 	state.rooms[roomId]?.pictureUpdatedAt;
+
+export const getRoomURLPicture = (state: RootStore, roomId: string): string | undefined => {
+	const room = state.rooms[roomId];
+	if (room.type === RoomType.ONE_TO_ONE) {
+		const otherMember = find(
+			state.rooms[roomId].members,
+			(member) => member.userId !== state.session.id
+		);
+		if (otherMember) {
+			const otherUser = state.users[otherMember.userId];
+			return otherUser?.pictureUpdatedAt && UsersApi.getURLUserPicture(otherMember.userId);
+		}
+	}
+	return room.pictureUpdatedAt && RoomsApi.getURLRoomPicture(room.id);
+};

@@ -10,6 +10,7 @@
         "edit": "Edit Details",
         "editRoom": "Edit {{roomName}}",
         "editYourMessage": "Edit your message",
+        "forward": "Forward",
         "leave": "Leave",
         "muteNotifications": "Mute Notifications",
         "newChat": "New Chat",
@@ -77,6 +78,11 @@
         "deleteRoom": "Delete Room",
         "deleteRoomLabel": "Are you sure to delete this Room?",
         "deleteUserDescription": "Are you sure you want to remove this member?",
+        "forward": {
+            "description": "Choose a target chat to forward the message",
+            "inputPlaceholder": "Start typing to pick a chat",
+            "title": "Forward message from {{chatName}}"
+        },
         "leaveAndDelete": "Leave and Delete Group",
         "leaveGroup": "Leave Group",
         "leaveGroupLabel": "Are you sure to leave this Group?",
