@@ -66,7 +66,7 @@ class XMPPClient implements IXMPPClient {
 		this.connection.addHandler(onNewMessageStanza.bind(this), null, 'message');
 		this.connection.addHandler(onHistoryMessageStanza, Strophe.NS.MAM, 'message');
 		this.connection.addHandler(onInboxMessageStanza.bind(this), Strophe.NS.INBOX, 'message');
-		// Handler used for writing status writitng/stopped
+		// Handler used for writing status writing/stopped
 		this.connection.addHandler(onComposingMessageStanza, Strophe.NS.CHAT_STATE, 'message');
 		this.connection.addHandler(onDisplayedMessageStanza, Strophe.NS.MARKERS, 'message');
 
@@ -275,7 +275,7 @@ class XMPPClient implements IXMPPClient {
 	 */
 	sendChatMessageDeletion(roomId: string, messageId: string): void {
 		const uuid = uuidGenerator();
-		const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat', id: uuid() })
+		const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat', id: uuid })
 			.c('apply-to', { id: messageId, xmlns: Strophe.NS.XMPP_FASTEN })
 			.c('retract', { xmlns: Strophe.NS.XMPP_RETRACT });
 		this.connection.send(msg);
