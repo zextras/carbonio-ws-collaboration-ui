@@ -45,6 +45,8 @@ const EditConversationModal: FC<EditConversationProps> = ({
 	const confirmEditLabel = t('editModal.confirm', 'Edit Details');
 	const confirmLabelDisabled = t('editModal.confirmDisabled', "You haven't changed anything");
 	const errorLabelDisabled = t('editModal.errorDisabled', 'Check the information entered');
+	const closeLabel = t('action.close', 'Close');
+
 	const roomName: string = useStore((state) => getRoomNameSelector(state, roomId));
 	const roomDescription: string = useStore((state) => getRoomDescriptionSelector(state, roomId));
 	const editLabel = t('action.editRoom', `Edit ${roomName}`, {
@@ -149,6 +151,7 @@ const EditConversationModal: FC<EditConversationProps> = ({
 			title={editLabel}
 			confirmColor="primary"
 			showCloseIcon
+			closeIconTooltip={closeLabel}
 			customFooter={modalFooter}
 			onClose={closeModal}
 		>

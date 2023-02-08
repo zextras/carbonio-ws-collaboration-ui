@@ -10,6 +10,7 @@ import {
 	Container,
 	List,
 	Modal,
+	Padding,
 	Text,
 	Tooltip
 } from '@zextras/carbonio-design-system';
@@ -25,9 +26,11 @@ import React, {
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
+import { getXmppClient } from '../../../store/selectors/ConnectionSelector';
 import { getRoomIdsOrderedLastMessage } from '../../../store/selectors/MessagesSelectors';
 import { getRoomNameSelector } from '../../../store/selectors/RoomsSelectors';
 import useStore from '../../../store/Store';
+import { TextMessage } from '../../../types/store/MessageTypes';
 import ForwardMessageConversationChip from './ForwardMessageConversationChip';
 import ForwardMessageConversationListItem from './ForwardMessageConversationListItem';
 
@@ -39,12 +42,14 @@ type ForwardMessageModalProps = {
 	open: boolean;
 	onClose: () => void;
 	roomId: string;
+	message: TextMessage;
 };
 
 const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 	open,
 	onClose,
-	roomId
+	roomId,
+	message
 }): ReactElement => {
 	const roomName = useStore((state) => getRoomNameSelector(state, roomId));
 	const rooms = useStore(getRoomIdsOrderedLastMessage);
@@ -57,14 +62,18 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 		'modal.forward.description',
 		'Choose a target chat to forward the message'
 	);
+	const closeLabel = t('action.close', 'Close');
 	const noMatchLabel = t('participantsList.noMatch', 'There are no items that match this search');
-	const inputPlaceholder = t('modal.forward.inputPlaceholder', 'Start typing to pick a chat');
+	const inputPlaceholder = t('modal.forward.inputPlaceholder', 'Start typing or pick a chat');
 	const forwardActionLabel = t('action.forward', 'Forward');
+	const chooseOneChatLabel = t('modal.forward.chooseAtLeastOneChat', 'Choose at least one chat');
 
 	const [inputValue, setInputValue] = useState('');
 	const [selected, setSelected] = useState<{ [id: string]: boolean }>({});
 	const [chatList, setChatList] = useState<{ id: string }[]>([]);
 	const [chips, setChips] = useState<{ id: string }[]>([]);
+
+	const xmppClient = useStore(getXmppClient);
 
 	// Update conversation list on filter updating
 	useEffect(() => {
@@ -113,7 +122,14 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 		[chips]
 	);
 
-	const forwardMessage = useCallback(() => console.log('forward'), []);
+	const forwardMessage = useCallback(
+		() =>
+			xmppClient.forwardMessage(
+				message,
+				map(selected, (value, key) => key)
+			),
+		[message, selected, xmppClient]
+	);
 
 	const ListItem = useMemo(
 		() =>
@@ -133,7 +149,10 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 
 	const modalFooter = useMemo(
 		() => (
-			<Tooltip label={disabledForwardButton ? 'aaa' : forwardActionLabel} placement="right">
+			<Tooltip
+				label={disabledForwardButton ? chooseOneChatLabel : forwardActionLabel}
+				placement="right"
+			>
 				<Container crossAlignment="flex-end">
 					<Button
 						label={forwardActionLabel}
@@ -144,7 +163,7 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 				</Container>
 			</Tooltip>
 		),
-		[disabledForwardButton, forwardActionLabel, forwardMessage]
+		[chooseOneChatLabel, disabledForwardButton, forwardActionLabel, forwardMessage]
 	);
 
 	return (
@@ -155,8 +174,12 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 			onClose={onClose}
 			size="small"
 			customFooter={modalFooter}
+			closeIconTooltip={closeLabel}
 		>
-			<Text overflow="break-word">{modalDescription}</Text>
+			<Text overflow="break-word" size="small">
+				{modalDescription}
+			</Text>
+			<Padding bottom="large" />
 			<ChipInput
 				background={'gray5'}
 				placeholder={inputPlaceholder}
@@ -166,6 +189,7 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 				requireUniqueChips
 				ChipComponent={ForwardMessageConversationChip}
 			/>
+			<Padding bottom="large" />
 			<Container height="9.375rem">
 				{size(chatList) === 0 ? (
 					<CustomContainer padding="large">

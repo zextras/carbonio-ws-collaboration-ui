@@ -32,6 +32,8 @@ const ClearHistoryModal: FC<ClearHistoryModalProps> = ({
 		'You are about to clean up your conversation history, remember that this action cannot be undone. The history of other participants will not be deleted.'
 	);
 	const clearHistoryButtonLabel = t('action.clearHistory', 'Clear History');
+	const closeLabel = t('action.close', 'Close');
+
 	const setClearedAt = useStore((state) => state.setClearedAt);
 
 	const clearHistory = useCallback(() => {
@@ -51,6 +53,7 @@ const ClearHistoryModal: FC<ClearHistoryModalProps> = ({
 			onConfirm={clearHistory}
 			confirmColor="error"
 			showCloseIcon
+			closeIconTooltip={closeLabel}
 			onClose={closeModal}
 		>
 			<Container padding={{ vertical: 'large' }}>

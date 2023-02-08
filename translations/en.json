@@ -4,6 +4,7 @@
         "addNewMembers": "Add New Members",
         "addNewMembersTo": "Add new members to {{roomName}}",
         "clearHistory": "Clear History",
+        "close": "Close",
         "copy": "Copy",
         "create": "Create",
         "delete": "Delete",
@@ -69,7 +70,7 @@
         "creation": {
             "contactList": "Select more that an address to create a group chat",
             "description": "Chats are one-to-one conversations that help you to stay in touch with your contacts. You can create a group by including more than two participants",
-            "inputPlaceholder": "Start typing to pick an address",
+            "inputPlaceholder": "Start typing or pick an address",
             "newChat": "New Chat",
             "newGroup": "New Group"
         },
@@ -79,8 +80,9 @@
         "deleteRoomLabel": "Are you sure to delete this Room?",
         "deleteUserDescription": "Are you sure you want to remove this member?",
         "forward": {
+            "chooseAtLeastOneChat": "Choose at least one chat",
             "description": "Choose a target chat to forward the message",
-            "inputPlaceholder": "Start typing to pick a chat",
+            "inputPlaceholder": "Start typing or pick a chat",
             "title": "Forward message from {{chatName}}"
         },
         "leaveAndDelete": "Leave and Delete Group",

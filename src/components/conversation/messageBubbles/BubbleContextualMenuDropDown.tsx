@@ -212,6 +212,7 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 					open={forwardMessageModalIsOpen}
 					onClose={onCloseForwardMessageModal}
 					roomId={message.roomId}
+					message={message}
 				/>
 			)}
 		</BubbleContextualMenuDropDownWrapper>

@@ -4,10 +4,12 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { forEach } from 'lodash';
 import { Strophe, $pres, $iq, $msg, StropheConnection, StropheConnectionStatus } from 'strophe.js';
 
 import useStore from '../../store/Store';
 import IXMPPClient from '../../types/network/xmpp/IXMPPClient';
+import { TextMessage } from '../../types/store/MessageTypes';
 import { dateToISODate } from '../../utils/dateUtil';
 import { xmppDebug } from '../../utils/debug';
 import { onComposingMessageStanza } from './handlers/composingMessageHandler';
@@ -57,6 +59,7 @@ class XMPPClient implements IXMPPClient {
 		Strophe.addNamespace('CHAT_STATE', 'http://jabber.org/protocol/chatstates');
 		Strophe.addNamespace('MARKERS', 'urn:xmpp:chat-markers:0');
 		Strophe.addNamespace('SMART_MARKERS', 'esl:xmpp:smart-markers:0');
+		Strophe.addNamespace('FORWARD', 'urn:xmpp:forward:0');
 
 		// Handler for event stanzas
 		this.connection.addHandler(onPresenceStanza.bind(this), null, 'presence');
@@ -263,6 +266,34 @@ class XMPPClient implements IXMPPClient {
 			msg.up().c('thread').t(replyTo);
 		}
 		this.connection.send(msg);
+	}
+
+	forwardMessage(message: TextMessage, roomIds: string[]): void {
+		const isMyMessage = message.from === useStore.getState().session.id;
+		if (isMyMessage) {
+			forEach(roomIds, (roomId) => this.sendChatMessage(roomId, message.text));
+		} else {
+			forEach(roomIds, (roomId) => {
+				const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat' })
+					.c('forwarded', { xmlns: Strophe.NS.FORWARD })
+					.c('delay', { xmlns: 'urn:xmpp:delay', stamp: dateToISODate(message.date) })
+					.up()
+					.c('message', {
+						from: carbonizeMUC(message.from),
+						id: message.id,
+						to: carbonizeMUC(message.roomId),
+						type: 'groupchat',
+						xmlns: 'jabber:client'
+					})
+					.c('body')
+					.t(message.text)
+					.up()
+					.up()
+					.up()
+					.c('markable', { xmlns: Strophe.NS.MARKERS });
+				this.connection.send(msg);
+			});
+		}
 	}
 
 	// Request the full history of a room

@@ -21,6 +21,7 @@ const DeleteUserModal: FC<DeleteUserProps> = ({ deleteUserModalOpen, deleteUser,
 		'modal.deleteUserDescription',
 		'Are you sure you want to remove this member?'
 	);
+	const closeLabel = t('action.close', 'Close');
 
 	return (
 		<Modal
@@ -31,6 +32,7 @@ const DeleteUserModal: FC<DeleteUserProps> = ({ deleteUserModalOpen, deleteUser,
 			onConfirm={deleteUser}
 			confirmColor="error"
 			showCloseIcon
+			closeIconTooltip={closeLabel}
 			onClose={closeModal}
 		>
 			<Container padding={{ vertical: 'large' }}>
