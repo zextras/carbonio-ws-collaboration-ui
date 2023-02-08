@@ -276,7 +276,8 @@ class XMPPClient implements IXMPPClient {
 			forEach(roomIds, (roomId) => this.sendChatMessage(roomId, message.text));
 		} else {
 			forEach(roomIds, (roomId) => {
-				const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat' })
+				const uuid = uuidGenerator();
+				const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat', id: uuid })
 					.c('forwarded', { xmlns: Strophe.NS.FORWARD })
 					.c('delay', { xmlns: 'urn:xmpp:delay', stamp: dateToISODate(message.date) })
 					.up()

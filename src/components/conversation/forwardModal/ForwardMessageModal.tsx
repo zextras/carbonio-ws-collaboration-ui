@@ -21,6 +21,7 @@ import React, {
 	useCallback,
 	useEffect,
 	useMemo,
+	useRef,
 	useState
 } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -68,6 +69,7 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 	const forwardActionLabel = t('action.forward', 'Forward');
 	const chooseOneChatLabel = t('modal.forward.chooseAtLeastOneChat', 'Choose at least one chat');
 
+	const inputRef = useRef<HTMLInputElement>(null);
 	const [inputValue, setInputValue] = useState('');
 	const [selected, setSelected] = useState<{ [id: string]: boolean }>({});
 	const [chatList, setChatList] = useState<{ id: string }[]>([]);
@@ -107,6 +109,11 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 					? differenceBy(chips, [{ id: roomId }], 'id')
 					: union(chips, [{ id: roomId }])
 			);
+
+			if (inputRef.current) {
+				inputRef.current.value = '';
+				setInputValue('');
+			}
 		},
 		[select]
 	);
@@ -181,6 +188,7 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 			</Text>
 			<Padding bottom="large" />
 			<ChipInput
+				inputRef={inputRef}
 				background={'gray5'}
 				placeholder={inputPlaceholder}
 				onInputType={handleChangeText}
@@ -188,6 +196,9 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 				onChange={removeContactFromChip}
 				requireUniqueChips
 				ChipComponent={ForwardMessageConversationChip}
+				confirmChipOnBlur={false}
+				confirmChipOnSpace={false}
+				separators={['']}
 			/>
 			<Padding bottom="large" />
 			<Container height="9.375rem">
