@@ -48,12 +48,13 @@ const DeletedBubble: FC<DeletedBubbleProps> = ({ message }) => {
 			padding={{ all: 'medium' }}
 			background={'gray3'}
 			isMyMessage={message.from === sessionId}
+			crossAlignment="baseline"
 		>
 			<CustomText color="secondary" size="small">
 				{deletedMessageLabel}
 			</CustomText>
 			<Padding left="small" />
-			<Text color="secondary" size="small">
+			<Text color="secondary" size="extrasmall">
 				{messageTime}
 			</Text>
 		</BubbleDeletedContainer>
