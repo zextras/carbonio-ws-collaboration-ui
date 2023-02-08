@@ -39,6 +39,7 @@
 		"@types/react-dom": "16.9.9",
 		"@types/react-router-dom": "5.1.0",
 		"@types/styled-components": "^5.1.25",
+		"@types/uuid": "^9.0.0",
 		"@typescript-eslint/parser": "^5.15.0",
 		"@zextras/carbonio-ui-configs": "^0.1.11",
 		"@zextras/carbonio-ui-sdk": "github:Zextras/carbonio-ui-sdk#v1.2.4",
@@ -86,6 +87,7 @@
 		"react-router-dom": "5.2.0",
 		"strophe.js": "1.4.4",
 		"styled-components": "5.3.3",
+		"uuid": "^9.0.0",
 		"zustand": "^3.7.2"
 	},
 	"carbonio": {

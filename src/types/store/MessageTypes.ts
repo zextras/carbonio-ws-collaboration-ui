@@ -21,6 +21,7 @@ export type BasicMessage = {
 };
 
 export type TextMessage = BasicMessage & {
+	stanzaId: string;
 	type: 'text';
 	from: string;
 	text: string;

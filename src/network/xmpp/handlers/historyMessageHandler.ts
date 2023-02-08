@@ -33,7 +33,10 @@ export function onHistoryMessageStanza(message: Element): true {
 	const id = getRequiredAttribute(result, 'id');
 	const date = getRequiredAttribute(getRequiredTagElement(result, 'delay'), 'stamp');
 	const insideMessage = getRequiredTagElement(result, 'message');
-	const historyMessage = decodeMessage(insideMessage, { date: dateToTimestamp(date), id });
+	const historyMessage = decodeMessage(insideMessage, {
+		date: dateToTimestamp(date),
+		stanzaId: id
+	});
 
 	if (historyMessage) {
 		// Check message request type
@@ -44,7 +47,11 @@ export function onHistoryMessageStanza(message: Element): true {
 				break;
 			}
 			case MamRequestType.REPLIED: {
-				HistoryAccumulator.addRepliedMessage(historyMessage);
+				if (historyMessage.type === 'text') {
+					HistoryAccumulator.addRepliedMessage(historyMessage);
+				} else {
+					console.warn('Replied message type not supported', historyMessage);
+				}
 				break;
 			}
 			default:

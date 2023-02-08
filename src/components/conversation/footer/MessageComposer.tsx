@@ -91,7 +91,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 		if (showEmojiPicker) setShowEmojiPicker(false);
 		const message = textMessage.trim();
 		if (referenceMessage && referenceMessage.roomId === roomId) {
-			xmppClient.sendChatMessage(roomId, message, referenceMessage.messageId);
+			xmppClient.sendChatMessage(roomId, message, referenceMessage.stanzaId);
 			unsetReferenceMessage(roomId);
 		} else {
 			xmppClient.sendChatMessage(roomId, message);

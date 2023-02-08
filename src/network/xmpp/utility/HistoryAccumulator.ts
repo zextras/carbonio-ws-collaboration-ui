@@ -37,8 +37,8 @@ class HistoryAccumulator {
 		return history;
 	}
 
-	public addRepliedMessage(message: Message): void {
-		this.repliedMessages[message.id] = message;
+	public addRepliedMessage(message: TextMessage): void {
+		this.repliedMessages[message.stanzaId] = message;
 	}
 
 	public returnRepliedMessage(messageId: string): TextMessage {
