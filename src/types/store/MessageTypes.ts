@@ -14,6 +14,7 @@ export type MessageList = Message[];
 
 export type Message =
 	| TextMessage
+	| AttachmentMessage
 	| DeletedMessage
 	| AffiliationMessage
 	| ConfigurationMessage
@@ -28,6 +29,16 @@ export type BasicMessage = {
 export type TextMessage = BasicMessage & {
 	stanzaId: string;
 	type: MessageType.TEXT_MSG;
+	from: string;
+	text: string;
+	read: MarkerStatus;
+	replyTo?: string;
+	repliedMessage?: TextMessage | DeletedMessage;
+};
+
+export type AttachmentMessage = BasicMessage & {
+	stanzaId: string;
+	type: MessageType.ATTACHMENT_MSG;
 	from: string;
 	text: string;
 	read: MarkerStatus;
@@ -58,6 +69,7 @@ export type DateMessage = BasicMessage & {
 
 export enum MessageType {
 	TEXT_MSG = 'text',
+	ATTACHMENT_MSG = 'attachment',
 	DELETED_MSG = 'deleted',
 	AFFILIATION_MSG = 'affiliation',
 	CONFIGURATION_MSG = 'configuration',

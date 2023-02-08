@@ -5,7 +5,7 @@
  */
 
 import { Container, Text, Avatar, Padding, Row } from '@zextras/carbonio-design-system';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -46,9 +46,17 @@ const MessageReferenceDisplayed: React.FC<MessageReferenceDisplayedProps> = ({
 
 	const myId = useStore((store) => store.session.id);
 	const senderInfo = useStore((store) => getUserSelector(store, referenceMessage.senderId));
+	const unsetReferenceMessage = useStore((store) => store.unsetReferenceMessage);
 	const message = useStore<Message | undefined>((store) =>
 		getMessageSelector(store, referenceMessage.roomId, referenceMessage.messageId)
 	);
+
+	useEffect(() => {
+		if (message?.type === MessageType.DELETED_MSG) {
+			unsetReferenceMessage(message.roomId);
+		}
+	}, [message, unsetReferenceMessage]);
+
 	const senderIdentifier = useMemo(
 		() => (senderInfo ? senderInfo.name || senderInfo.email || senderInfo.id : null),
 		[senderInfo]
@@ -82,7 +90,7 @@ const MessageReferenceDisplayed: React.FC<MessageReferenceDisplayedProps> = ({
 				padding={{ left: 'small' }}
 				width="fill"
 			>
-				{message?.type !== MessageType.TEXT_MSG && (
+				{message?.type === MessageType.ATTACHMENT_MSG && (
 					<>
 						<Avatar size="large" label="Name Lastname" shape="regular" />
 						<Padding right="small" />
