@@ -33,13 +33,14 @@ export type TextMessage = BasicMessage & {
 export type AffiliationMessage = BasicMessage & {
 	type: 'affiliation';
 	userId: string;
-	as: 'member';
+	as: string;
 };
 
 export type ConfigurationMessage = BasicMessage & {
 	type: 'configuration';
-	operation: 'changedRoomName';
+	operation: string;
 	value: string;
+	from: string;
 };
 
 export type DateMessage = BasicMessage & {

@@ -99,6 +99,8 @@ describe('render list of messages with history loader visible for first time ope
 		const messageList = screen.getByTestId(`intersectionObserverRoot${room.id}`);
 		expect(messageList).toBeVisible();
 		act(() => result.current.updateHistory(room.id, messages));
+		expect(result.current.messages[room.id]).toHaveLength(6);
+		expect(screen.getByText(new RegExp(`${room.name} created`, 'i'))).toBeInTheDocument();
 		const message = screen.getByTestId(`Bubble-${messages[0].id}`);
 		expect(message).toBeVisible();
 		const message1 = screen.getByTestId(`Bubble-${messages[1].id}`);

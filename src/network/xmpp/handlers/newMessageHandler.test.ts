@@ -43,9 +43,12 @@ function createXMPPReceivedMessage(info: MessageInfo): Element {
 
 describe('XMPP newMessageHandler', () => {
 	test('New text message arrives', () => {
+		const store = useStore.getState();
+		const room = createMockRoom();
+		store.addRoom(room);
 		const info = {
 			id: 'messageId',
-			roomId: 'roomId',
+			roomId: room.id,
 			from: 'userId',
 			text: 'Hi!',
 			stanzaId: 'stanzaId'
@@ -53,10 +56,9 @@ describe('XMPP newMessageHandler', () => {
 		const message = createXMPPReceivedMessage(info);
 		onNewMessageStanza.call(xmppClient, message);
 
-		const store = useStore.getState();
 		// when a new message arrive and the previous one inside history has a different date than it, then the date message will be sent with it
-		const dateMessage = store.messages[info.roomId][0] as DateMessage;
-		const textMessage = store.messages[info.roomId][1] as TextMessage;
+		const dateMessage = useStore.getState().messages[room.id][0] as DateMessage;
+		const textMessage = useStore.getState().messages[room.id][1] as TextMessage;
 		expect(dateMessage).not.toBeNull();
 		expect(textMessage).not.toBeNull();
 		expect(textMessage.id).toBe(info.id);
@@ -68,9 +70,12 @@ describe('XMPP newMessageHandler', () => {
 	});
 
 	test('New replied message arrives', () => {
+		const store = useStore.getState();
+		const room = createMockRoom();
+		store.addRoom(room);
 		const info = {
 			id: 'messageId',
-			roomId: 'roomId',
+			roomId: room.id,
 			from: 'userId',
 			text: 'Hi!!',
 			stanzaId: 'stanzaId',
@@ -79,9 +84,8 @@ describe('XMPP newMessageHandler', () => {
 		const message = createXMPPReceivedMessage(info);
 		onNewMessageStanza.call(xmppClient, message);
 
-		const store = useStore.getState();
 		// when a new message arrive and the previous one inside history has a different date than it, then the date message will be sent with it
-		const textMessage = store.messages[info.roomId][1] as TextMessage;
+		const textMessage = useStore.getState().messages[room.id][1] as TextMessage;
 		expect(textMessage).not.toBeNull();
 		expect(textMessage.id).toBe(info.id);
 		expect(textMessage.stanzaId).toBe(info.stanzaId);

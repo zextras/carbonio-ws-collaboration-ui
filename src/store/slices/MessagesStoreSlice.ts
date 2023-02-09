@@ -7,10 +7,17 @@
 
 import produce from 'immer';
 import { concat, find, findIndex, map, orderBy, sortedUniqBy } from 'lodash';
+import { now } from 'moment';
 
 import { calcReads } from '../../network/xmpp/utility/decodeMessage';
 import { MarkerStatus } from '../../types/store/MarkersTypes';
-import { Message, MessageList, TextMessage } from '../../types/store/MessageTypes';
+import {
+	AffiliationMessage,
+	Message,
+	MessageList,
+	TextMessage
+} from '../../types/store/MessageTypes';
+import { RoomType } from '../../types/store/RoomTypes';
 import { MessagesStoreSlice, RootStore } from '../../types/store/StoreTypes';
 import { isBefore, datesAreFromTheSameDay } from '../../utils/dateUtil';
 
@@ -29,10 +36,21 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 					)
 				) {
 					draft.messages[message.roomId].push({
+						id: `dateMessage${now()}`,
+						roomId: message.roomId,
+						date: now(),
+						type: 'date'
+					});
+				}
+				// this is a custom message that is shown immediately after a group is created
+				if (messagesListLength === 1 && draft.rooms[message.roomId].type === RoomType.GROUP) {
+					draft.messages[message.roomId].push({
 						id: `dateMessage${message.date}`,
 						roomId: message.roomId,
 						date: message.date,
-						type: 'date'
+						type: 'affiliation',
+						as: 'creation',
+						userId: ''
 					});
 				}
 				draft.messages[message.roomId].push(message);
@@ -109,6 +127,19 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 				draft.messages[roomId] = concat(historyWithDates, draft.messages[roomId]);
 				draft.messages[roomId] = orderBy(draft.messages[roomId], ['date'], ['asc']);
 				draft.messages[roomId] = sortedUniqBy(draft.messages[roomId], 'id');
+
+				// the second message has to be a creation one if the conversation is a group one
+				if (draft.rooms[roomId].type === RoomType.GROUP) {
+					const creationMsg: AffiliationMessage = {
+						id: `creationMessage${draft.messages[roomId][0]?.date}`,
+						roomId,
+						date: draft.messages[roomId][0]?.date,
+						type: 'affiliation',
+						as: 'creation',
+						userId: ''
+					};
+					draft.messages[roomId].splice(1, 0, creationMsg);
+				}
 			}),
 			false,
 			'MESSAGES/UPDATE_HISTORY'

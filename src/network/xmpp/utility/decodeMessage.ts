@@ -23,10 +23,13 @@ import { getRequiredAttribute, getRequiredTagElement, getTagElement } from './de
 
 type OptionalParameters = {
 	date?: number;
-	stanzaId?: string
-}
+	stanzaId?: string;
+};
 
-export function decodeMessage(messageStanza: Element, optional?: OptionalParameters): Message | undefined {
+export function decodeMessage(
+	messageStanza: Element,
+	optional?: OptionalParameters
+): Message | undefined {
 	const messageId = getRequiredAttribute(messageStanza, 'id');
 	const fromAttribute = getRequiredAttribute(messageStanza, 'from');
 	const roomId = getId(fromAttribute);
@@ -38,7 +41,10 @@ export function decodeMessage(messageStanza: Element, optional?: OptionalParamet
 	const body = messageStanza.getElementsByTagName('body')[0];
 	if (body && resource) {
 		const stanzaIdReference = getTagElement(messageStanza, 'stanza-id');
-		const stanzaId = optional?.stanzaId || (stanzaIdReference && getRequiredAttribute(stanzaIdReference, 'id') || messageId);
+		const stanzaId =
+			optional?.stanzaId ||
+			(stanzaIdReference && getRequiredAttribute(stanzaIdReference, 'id')) ||
+			messageId;
 		const from = getId(resource);
 		const messageTxt = Strophe.getText(body)
 			.replace(/&amp;/g, '&')
@@ -72,7 +78,7 @@ export function decodeMessage(messageStanza: Element, optional?: OptionalParamet
 	if (x && x.getAttribute('xmlns') === Strophe.NS.AFFILIATIONS) {
 		const user = getId(Strophe.getText(x.getElementsByTagName('user')[0]));
 		const userElement = getRequiredTagElement(x, 'user');
-		const affiliationAttribute = getRequiredAttribute(userElement, 'affiliation') as 'member';
+		const affiliationAttribute = getRequiredAttribute(userElement, 'affiliation');
 		message = {
 			id: messageId,
 			roomId,
@@ -86,18 +92,25 @@ export function decodeMessage(messageStanza: Element, optional?: OptionalParamet
 
 	// Configuration message
 	if (x && x.getAttribute('xmlns') === Strophe.NS.CONFIGURATION) {
+		const from = getId(resource);
 		const operation = Strophe.getText(getRequiredTagElement(x, 'operation'));
-		const value = Strophe.getText(getRequiredTagElement(x, 'value'))
-			.replace(/&amp;/g, '&')
-			.replace(/&quot;/g, '"')
-			.replace(/&apos;/g, "'")
-			.replace(/&lt;/g, '<')
-			.replace(/&gt;/g, '>');
+		const value =
+			operation === 'roomPictureUpdated'
+				? Strophe.getText(getRequiredTagElement(x, 'picture-name'))
+				: operation === 'roomPictureDeleted'
+				? ''
+				: Strophe.getText(getRequiredTagElement(x, 'value'))
+						.replace(/&amp;/g, '&')
+						.replace(/&quot;/g, '"')
+						.replace(/&apos;/g, "'")
+						.replace(/&lt;/g, '<')
+						.replace(/&gt;/g, '>');
 		message = {
 			id: messageId,
 			roomId,
 			date: messageDate,
 			type: 'configuration',
+			from,
 			operation,
 			value
 		};
