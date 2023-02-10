@@ -335,6 +335,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 			list.push(
 				<Container
 					key={`messageList-${Math.random()}`}
+					data-testid={`messageListRef${roomId}`}
 					mainAlignment={'flex-start'}
 					crossAlignment={'flex-start'}
 					height={'fit'}
@@ -344,7 +345,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 			);
 		});
 		return list;
-	}, [dateMessageWrapped]);
+	}, [dateMessageWrapped, roomId]);
 
 	const handleClickScrollButton = useCallback(() => {
 		MessagesListWrapperRef?.current &&

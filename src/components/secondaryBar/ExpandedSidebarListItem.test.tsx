@@ -12,6 +12,7 @@ import useStore from '../../store/Store';
 import { createMockMember, createMockRoom, createMockTextMessage } from '../../tests/createMock';
 import { RoomBe, RoomType } from '../../types/network/models/roomBeTypes';
 import { MarkerStatus } from '../../types/store/MarkersTypes';
+import { AffiliationMessage, ConfigurationMessage } from '../../types/store/MessageTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 import { User } from '../../types/store/UserTypes';
 import ExpandedSidebarListItem from './ExpandedSidebarListItem';
@@ -30,6 +31,14 @@ const user1Be: User = {
 	name: 'User1',
 	lastSeen: 1234567890,
 	statusMessage: "Hey there! I'm User 1"
+};
+
+const user4Be: User = {
+	id: 'user4Id',
+	email: 'user4@domain.com',
+	name: 'User4',
+	lastSeen: 1234567890,
+	statusMessage: "Hey there! I'm User 4"
 };
 
 const mockedGroup: RoomBe = createMockRoom({
@@ -89,6 +98,25 @@ const mockedTextMessageSentBySomeoneElse = createMockTextMessage({
 	from: user2Be.id,
 	text: 'I have a really bad headache!'
 });
+
+const mockedAffiliationMessage: AffiliationMessage = {
+	id: 'Affiliationid',
+	roomId: mockedGroup.id,
+	date: 1234566789,
+	type: 'affiliation',
+	userId: user4Be.id,
+	as: 'member'
+};
+
+const mockedConfigurationMessage: ConfigurationMessage = {
+	id: 'ConfigurationId',
+	roomId: mockedGroup.id,
+	date: 123456789,
+	type: 'configuration',
+	operation: 'roomPictureDeleted',
+	value: '',
+	from: user1Be.id
+};
 
 describe('Expanded sidebar list item', () => {
 	test('Group - I sent a message', async () => {
@@ -150,6 +178,31 @@ describe('Expanded sidebar list item', () => {
 		expect(IconWithDraft).toBeVisible();
 		const lastMessageOfConversation = screen.getByText(mockedTextMessageRead.text);
 		expect(lastMessageOfConversation).toBeVisible();
+	});
+	test('Group - Added a new member message', () => {
+		const store: RootStore = useStore.getState();
+		store.addRoom(mockedGroup);
+		store.setUserInfo(user4Be);
+		store.newMessage(mockedAffiliationMessage);
+		setup(<ExpandedSidebarListItem roomId={mockedGroup.id} />);
+
+		expect(
+			screen.getByText(new RegExp(`${user4Be.name} has been added to ${mockedGroup.name}`, 'i'))
+		).toBeVisible();
+	});
+	test('Group - Deleted image message', () => {
+		const store: RootStore = useStore.getState();
+		store.addRoom(mockedGroup);
+		store.setLoginInfo(user2Be.id, user2Be.name);
+		store.setUserInfo(user1Be);
+		store.newMessage(mockedConfigurationMessage);
+		setup(<ExpandedSidebarListItem roomId={mockedGroup.id} />);
+
+		expect(
+			screen.getByText(
+				new RegExp(`${user1Be.name} restored the default ${mockedGroup.name}'s image`, 'i')
+			)
+		).toBeVisible();
 	});
 	test('One to one - I sent a message', async () => {
 		const store: RootStore = useStore.getState();
