@@ -10,7 +10,11 @@ import React from 'react';
 import { setup, triggerObserver } from 'test-utils';
 
 import useStore from '../../store/Store';
-import { createMockRoom, createMockTextMessage } from '../../tests/createMock';
+import {
+	createMockDeletedMessage,
+	createMockRoom,
+	createMockTextMessage
+} from '../../tests/createMock';
 import { RoomBe, RoomType } from '../../types/network/models/roomBeTypes';
 import { MarkerStatus } from '../../types/store/MarkersTypes';
 import { MessageType, TextMessage } from '../../types/store/MessageTypes';
@@ -149,5 +153,27 @@ describe('render list of messages with history loader visible for first time ope
 		expect(messageBubble).toBeInTheDocument();
 		const anchorElement = screen.getByText('https://www.awesomeTest.com/test');
 		expect(anchorElement.nodeName).toBe('A');
+	});
+
+	test('Display message bubble deleted on MessageList', () => {
+		const mockedRoom: RoomBe = createMockRoom({ id: 'roomTest' });
+		const mockedTextMessage = createMockTextMessage({
+			id: 'idSimpleTextMessage',
+			roomId: mockedRoom.id,
+			text: 'Hello guys!'
+		});
+		const mockedDeletedMessage = createMockDeletedMessage({
+			id: 'idSimpleTextMessage',
+			roomId: mockedRoom.id
+		});
+		const { result } = renderHook(() => useStore());
+		act(() => result.current.addRoom(mockedRoom));
+		act(() => result.current.newMessage(mockedTextMessage));
+		setup(<MessagesList roomId={mockedRoom.id} />);
+		const messageBubble = screen.getByText('Hello guys!');
+		expect(messageBubble).toBeInTheDocument();
+		act(() => result.current.setDeletedMessage(mockedRoom.id, mockedDeletedMessage));
+		const deletedMessage = screen.getByText(/Deleted message/i);
+		expect(deletedMessage).toBeInTheDocument();
 	});
 });

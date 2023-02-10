@@ -6,10 +6,12 @@
 
 import { DeletedMessage, TextMessage } from './MessageTypes';
 
-export type TemporaryRoomsMessagesReferencesMap = {
-	[id: string]: TemporaryReferenceMessageList;
+export type TemporaryMessagesMap = {
+	[id: string]: TemporaryMessageList;
 };
 
-export type TemporaryReferenceMessageList = TemporaryReferenceMessage[];
+export type TemporaryMessageList = {
+	[id: string]: TemporaryMessage;
+};
 
-export type TemporaryReferenceMessage = TextMessage | DeletedMessage;
+export type TemporaryMessage = TextMessage | DeletedMessage;

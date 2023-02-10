@@ -14,10 +14,7 @@ import { Marker, MarkersMap } from './MarkersTypes';
 import { MessageMap, Message, TextMessage, DeletedMessage } from './MessageTypes';
 import { RoomsMap } from './RoomTypes';
 import { CapabilityList, Session } from './SessionTypes';
-import {
-	TemporaryReferenceMessage,
-	TemporaryRoomsMessagesReferencesMap
-} from './TemporaryMessagesReferencesTypes';
+import { TemporaryMessage, TemporaryMessagesMap } from './TemporaryMessagesReferencesTypes';
 import { UnreadsMap } from './UnreadsCounterTypes';
 import { UsersMap } from './UserTypes';
 
@@ -116,10 +113,9 @@ export type UnreadsCounterSlice = {
 	updateUnreadCount: (roomId: string) => void;
 };
 
-export type TemporaryMessagesReferencesSlice = {
-	temporaryRoomsMessagesReferences: TemporaryRoomsMessagesReferencesMap;
-	addDeletedMessageRef: (roomId: string, messageDeleted: TemporaryReferenceMessage) => void;
-	removeDeletedMessageRef: (roomId: string, idMessageDeleted: string) => void;
+export type TemporaryMessagesSlice = {
+	temporaryMessages: TemporaryMessagesMap;
+	addDeletedMessageRef: (roomId: string, messageDeleted: TemporaryMessage) => void;
 };
 
 export type RootStore = UsersStoreSlice &
@@ -130,4 +126,4 @@ export type RootStore = UsersStoreSlice &
 	ActiveConversationsSlice &
 	ConnectionsStoreSlice &
 	UnreadsCounterSlice &
-	TemporaryMessagesReferencesSlice;
+	TemporaryMessagesSlice;

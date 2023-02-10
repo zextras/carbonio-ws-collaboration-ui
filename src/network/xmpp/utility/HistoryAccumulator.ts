@@ -56,21 +56,20 @@ class HistoryAccumulator {
 		return message as TextMessage;
 	}
 
-	public replaceMessageInTheHistory(roomId: string, message: Message): void {
+	public replaceDeletedMessageInTheHistory(roomId: string, message: Message): void {
 		if (!this.histories[roomId]) this.histories[roomId] = [];
 		const index = findIndex(this.histories[roomId], { id: message.id });
 		if (
 			this.histories[roomId][index] &&
 			this.histories[roomId][index].id === message.id &&
-			this.histories[roomId][index].type !== message.type &&
-			message.type === MessageType.DELETED_MSG
+			this.histories[roomId][index].type !== message.type
 		) {
 			this.histories[roomId].splice(index, 1, {
 				...message,
 				date: this.histories[roomId][index].date
 			});
 		} else if (!this.histories[roomId][index] && message.type === MessageType.DELETED_MSG) {
-			// when arrives the deletion but I still don't have the history I save it for the future history update
+			// when arrives the deletion, but I still don't have the history I save it for the future history update
 			const store = useStore.getState();
 			store.addDeletedMessageRef(roomId, message);
 		}

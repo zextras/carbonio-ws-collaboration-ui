@@ -5,6 +5,7 @@
  */
 
 import { act, renderHook } from '@testing-library/react-hooks';
+import { size } from 'lodash';
 
 import { createMockMember, createMockRoom, createMockTextMessage } from '../../tests/createMock';
 import { RoomBe } from '../../types/network/models/roomBeTypes';
@@ -28,13 +29,19 @@ describe('Test temporary messages slice', () => {
 	it('add reference message', () => {
 		const { result } = renderHook(() => useStore());
 		act(() => result.current.addDeletedMessageRef(room.id, textMessage1));
-		expect(result.current.temporaryRoomsMessagesReferences[room.id]).not.toBeNull();
-		expect(result.current.temporaryRoomsMessagesReferences[room.id]).toHaveLength(1);
-		expect(result.current.temporaryRoomsMessagesReferences[room.id][0]).toBe(textMessage1);
+		expect(result.current.temporaryMessages[room.id]).not.toBeNull();
+		expect(size(result.current.temporaryMessages[room.id])).toBe(1);
+		expect(result.current.temporaryMessages[room.id][`deleted_${textMessage1.id}`]).toBe(
+			textMessage1
+		);
 
 		act(() => result.current.addDeletedMessageRef(room.id, textMessage2));
-		expect(result.current.temporaryRoomsMessagesReferences[room.id]).not.toBeNull();
-		expect(result.current.temporaryRoomsMessagesReferences[room.id]).toHaveLength(2);
-		expect(result.current.temporaryRoomsMessagesReferences[room.id][1]).toBe(textMessage2);
+		expect(result.current.temporaryMessages[room.id]).not.toBeNull();
+		console.log(result.current.temporaryMessages[room.id]);
+		console.log(result.current.temporaryMessages);
+		expect(size(result.current.temporaryMessages[room.id])).toBe(2);
+		expect(result.current.temporaryMessages[room.id][`deleted_${textMessage2.id}`]).toBe(
+			textMessage2
+		);
 	});
 });

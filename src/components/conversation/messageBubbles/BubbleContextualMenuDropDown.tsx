@@ -11,9 +11,11 @@ import { useTranslation } from 'react-i18next';
 import styled, { css, FlattenSimpleInterpolation } from 'styled-components';
 
 import { getXmppClient } from '../../../store/selectors/ConnectionSelector';
+import { getCapability } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { messageActionType } from '../../../types/store/ActiveConversationTypes';
 import { MessageType, TextMessage } from '../../../types/store/MessageTypes';
+import { CapabilityType } from '../../../types/store/SessionTypes';
 
 export const BubbleContextualMenuDropDownWrapper = styled.div<{
 	isActive: boolean;
@@ -102,6 +104,9 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 	const successfulCopySnackbar = t('feedback.messageCopied', 'Message copied');
 	const messageActionsTooltip = t('tooltip.messageActions', ' Message actions');
 
+	const deleteMessageTimeLimitInMinutes = useStore((store) =>
+		getCapability(store, CapabilityType.DELETE_MESSAGE_TIME_LIMIT)
+	);
 	const setReferenceMessage = useStore((store) => store.setReferenceMessage);
 	const [dropdownActive, setDropdownActive] = useState(false);
 	const [contextualMenuActions, setContextualMenuActions] = useState<dropDownAction[]>([]);
@@ -132,9 +137,14 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 
 	useEffect(() => {
 		const actions = [];
+		const messageCanBeDeleted =
+			deleteMessageTimeLimitInMinutes &&
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore
+			Date.now() <= message.date + deleteMessageTimeLimitInMinutes * 60000;
 
 		// Delete functionality
-		if (isMyMessage) {
+		if (isMyMessage && messageCanBeDeleted) {
 			actions.push({
 				id: 'Delete',
 				label: deleteActionLabel,
@@ -175,7 +185,14 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 
 		setContextualMenuActions(actions);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [copyActionLabel, copyMessage, dropdownActive, message, replayActionLabel]);
+	}, [
+		copyActionLabel,
+		copyMessage,
+		dropdownActive,
+		message,
+		replayActionLabel,
+		deleteMessageTimeLimitInMinutes
+	]);
 
 	return (
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
