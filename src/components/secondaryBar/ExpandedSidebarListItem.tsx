@@ -34,7 +34,7 @@ import { getRoomUnreadsSelector } from '../../store/selectors/UnreadsCounterSele
 import { getUserName } from '../../store/selectors/UsersSelectors';
 import useStore from '../../store/Store';
 import { MarkerStatus } from '../../types/store/MarkersTypes';
-import { Message } from '../../types/store/MessageTypes';
+import { Message, MessageType } from '../../types/store/MessageTypes';
 import { RoomType } from '../../types/store/RoomTypes';
 import GroupAvatar from '../GroupAvatar';
 import UserAvatar from '../UserAvatar';
@@ -58,6 +58,7 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 	const isTypingLabel = t('status.isTyping', 'is typing...');
 	const areTypingLabel = t('status.areTyping', 'are typing...');
 	const draftLabel = t('message.draft', 'draft');
+	const deletedMessageLabel = t('message.deletedMessage', 'Deleted message');
 
 	const { goToRoomPage } = useRouting();
 
@@ -71,9 +72,9 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 	const usersWritingList = useStore((state) => getRoomIsWritingList(state, roomId));
 	const isConversationSelected = useStore((state) => getSelectedConversation(state, roomId));
 	const userNameOfLastMessageOfRoom = useStore((store) =>
-		lastMessageOfRoom && lastMessageOfRoom.type === 'text'
+		lastMessageOfRoom && lastMessageOfRoom.type === MessageType.TEXT_MSG
 			? getUserName(store, lastMessageOfRoom.from)
-			: lastMessageOfRoom && lastMessageOfRoom.type === 'affiliation'
+			: lastMessageOfRoom && lastMessageOfRoom.type === MessageType.AFFILIATION_MSG
 			? getUserName(store, lastMessageOfRoom.userId)
 			: null
 	);
@@ -83,14 +84,14 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 	const ackHasToAppear = useMemo(
 		() =>
 			lastMessageOfRoom &&
-			lastMessageOfRoom.type === 'text' &&
+			lastMessageOfRoom.type === MessageType.TEXT_MSG &&
 			lastMessageOfRoom.from === sessionId &&
 			!usersWritingList,
 		[lastMessageOfRoom, sessionId, usersWritingList]
 	);
 
 	const ackIcon = useMemo(() => {
-		if (lastMessageOfRoom && lastMessageOfRoom.type === 'text') {
+		if (lastMessageOfRoom && lastMessageOfRoom.type === MessageType.TEXT_MSG) {
 			switch (lastMessageOfRoom.read) {
 				case MarkerStatus.UNREAD:
 					return <Icon size="small" icon="Checkmark" color="gray" />;
@@ -104,7 +105,7 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 	}, [lastMessageOfRoom]);
 
 	const dropdownTooltip = useMemo(() => {
-		if (lastMessageOfRoom && lastMessageOfRoom.type === 'text') {
+		if (lastMessageOfRoom && lastMessageOfRoom.type === MessageType.TEXT_MSG) {
 			switch (lastMessageOfRoom.read) {
 				case MarkerStatus.UNREAD:
 					return t('tooltip.messageSent', 'Sent');
@@ -126,7 +127,7 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 		if ((usersWritingList && usersWritingList.length === 0) || !usersWritingList) {
 			if (lastMessageOfRoom) {
 				switch (lastMessageOfRoom.type) {
-					case 'text':
+					case MessageType.TEXT_MSG:
 						if (
 							roomType === RoomType.GROUP &&
 							lastMessageOfRoom.from !== sessionId &&
@@ -135,13 +136,12 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 							return `${userNameOfLastMessageOfRoom.split(/(\s+)/)[0]}: ${lastMessageOfRoom?.text}`;
 						}
 						return `${lastMessageOfRoom?.text}`;
-
-					case 'affiliation':
+					case MessageType.AFFILIATION_MSG:
 						return `${userNameOfLastMessageOfRoom} affiliate as ${lastMessageOfRoom.as}`;
-
-					case 'configuration':
+					case MessageType.CONFIGURATION_MSG:
 						return `${lastMessageOfRoom.operation} in "${lastMessageOfRoom.value}"`;
-
+					case MessageType.DELETED_MSG:
+						return deletedMessageLabel;
 					default:
 						return `affiliation message to replace`;
 				}
@@ -159,6 +159,7 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 		}
 		return undefined;
 	}, [
+		deletedMessageLabel,
 		usersWritingList,
 		lastMessageOfRoom,
 		userNameOfLastMessageOfRoom,

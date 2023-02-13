@@ -43,6 +43,8 @@ describe('Message bubble component visualization', () => {
 			/>
 		);
 		const insideText = screen.getByText(
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore
 			new RegExp(`${mockedRepliedTextMessage.repliedMessage?.text}`, 'i')
 		);
 		expect(insideText).toBeVisible();

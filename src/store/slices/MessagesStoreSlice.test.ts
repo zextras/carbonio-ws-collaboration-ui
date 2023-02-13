@@ -7,6 +7,7 @@
 import { act, renderHook } from '@testing-library/react-hooks';
 
 import {
+	createMockDeletedMessage,
 	createMockMarker,
 	createMockMember,
 	createMockRoom,
@@ -14,7 +15,7 @@ import {
 } from '../../tests/createMock';
 import { RoomBe } from '../../types/network/models/roomBeTypes';
 import { MarkerStatus } from '../../types/store/MarkersTypes';
-import { TextMessage } from '../../types/store/MessageTypes';
+import { DeletedMessage, MessageType, TextMessage } from '../../types/store/MessageTypes';
 import useStore from '../Store';
 
 const room: RoomBe = createMockRoom({
@@ -27,6 +28,8 @@ const room: RoomBe = createMockRoom({
 	]
 });
 
+const room2: RoomBe = createMockRoom();
+
 const message0: TextMessage = createMockTextMessage({
 	id: 'message0-id',
 	roomId: room.id,
@@ -35,6 +38,34 @@ const message0: TextMessage = createMockTextMessage({
 });
 
 const message1: TextMessage = createMockTextMessage({
+	id: 'message1-id',
+	roomId: room.id,
+	date: 1662541294393, // 7 set 2022, 09:01:34
+	from: 'user1'
+});
+
+const message0ReplayToMessage0: TextMessage = createMockTextMessage({
+	id: 'message-replay0-id',
+	roomId: room.id,
+	date: 1665441294393,
+	from: 'user0'
+});
+
+const message1ReplayToMessage1: TextMessage = createMockTextMessage({
+	id: 'message-replay1-id',
+	roomId: room.id,
+	date: 1665441294393,
+	from: 'user0'
+});
+
+const deletedMessage0: DeletedMessage = createMockDeletedMessage({
+	id: 'message0-id',
+	roomId: room.id,
+	date: 1661441294393, // 25 ago 2022, 15:28:14
+	from: 'user0'
+});
+
+const deletedMessage1: DeletedMessage = createMockDeletedMessage({
 	id: 'message1-id',
 	roomId: room.id,
 	date: 1662541294393, // 7 set 2022, 09:01:34
@@ -165,5 +196,31 @@ describe('Test messages slice', () => {
 		expect((result.current.messages[room.id][3] as TextMessage).read).toBe(
 			MarkerStatus.READ_BY_SOMEONE
 		);
+	});
+
+	it('setRepliedMessage', () => {
+		const { result } = renderHook(() => useStore());
+		act(() => result.current.addRoom(room));
+		act(() => result.current.addRoom(room2));
+		act(() => result.current.newMessage(message0));
+		act(() => result.current.newMessage(message1));
+		act(() => result.current.newMessage(message0ReplayToMessage0));
+		act(() => result.current.newMessage(message1ReplayToMessage1));
+		act(() => result.current.setRepliedMessage(room.id, message0ReplayToMessage0.id, message0));
+		expect((result.current.messages[room.id][5] as TextMessage).repliedMessage).toBe(message0);
+		act(() => result.current.setRepliedMessage(room.id, message1ReplayToMessage1.id, message1));
+		expect((result.current.messages[room.id][6] as TextMessage).repliedMessage).toBe(message1);
+	});
+
+	it('setDeletedMessage', () => {
+		const { result } = renderHook(() => useStore());
+		act(() => result.current.addRoom(room));
+		act(() => result.current.addRoom(room2));
+		act(() => result.current.newMessage(message0));
+		act(() => result.current.newMessage(message1));
+		act(() => result.current.setDeletedMessage(room.id, deletedMessage0));
+		expect(result.current.messages[room.id][1].type).toBe(MessageType.DELETED_MSG);
+		expect(result.current.messages[room.id][1]).toStrictEqual(deletedMessage0);
+		act(() => result.current.newMessage(deletedMessage1));
 	});
 });

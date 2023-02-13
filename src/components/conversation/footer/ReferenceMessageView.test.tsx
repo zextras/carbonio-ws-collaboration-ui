@@ -14,7 +14,7 @@ import { createMockMember, createMockRoom, createMockTextMessage } from '../../.
 import { RoomBe } from '../../../types/network/models/roomBeTypes';
 import { messageActionType } from '../../../types/store/ActiveConversationTypes';
 import { MarkerStatus } from '../../../types/store/MarkersTypes';
-import { TextMessage } from '../../../types/store/MessageTypes';
+import { MessageType, TextMessage } from '../../../types/store/MessageTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 import { RootStore } from '../../../types/store/StoreTypes';
 import MessagesList from '../MessagesList';
@@ -33,7 +33,7 @@ const mockedMessage: TextMessage = createMockTextMessage({
 	id: 'idSimpleTextMessage',
 	roomId: 'roomTest',
 	date: 1657099586818, // 18.08
-	type: 'text',
+	type: MessageType.TEXT_MSG,
 	from: 'idRoberto',
 	text: 'Hi guys! Today I will not be present to the meeting sorry!',
 	read: MarkerStatus.UNREAD

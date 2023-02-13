@@ -11,6 +11,7 @@
 
 /* eslint max-classes-per-file: off */
 
+declare module 'uuid';
 declare module 'strophe.js';
 
 declare global {
@@ -87,24 +88,34 @@ declare global {
 		 *  NS.XHTML - XHTML body namespace from XEP 71.
 		 */
 		enum NS {
-			HTTPBIND = 'http://jabber.org/protocol/httpbind',
+			AFFILIATIONS = 'urn:xmpp:muclight:0#affiliations',
+			AUTH = 'jabber:iq:auth',
+			BIND = 'urn:ietf:params:xml:ns:xmpp-bind',
 			BOSH = 'urn:xmpp:xbosh',
 			CLIENT = 'jabber:client',
-			AUTH = 'jabber:iq:auth',
-			ROSTER = 'jabber:iq:roster',
-			PROFILE = 'jabber:iq:profile',
+			CONFIGURATION = 'urn:xmpp:muclight:0#configuration',
+			CHAT_STATE = 'http://jabber.org/protocol/chatstates',
 			DISCO_INFO = 'http://jabber.org/protocol/disco#info',
 			DISCO_ITEMS = 'http://jabber.org/protocol/disco#items',
-			MUC = 'http://jabber.org/protocol/muc',
-			SASL = 'urn:ietf:params:xml:ns:xmpp-sasl',
-			STREAM = 'http://etherx.jabber.org/streams',
 			FRAMING = 'urn:ietf:params:xml:ns:xmpp-framing',
-			BIND = 'urn:ietf:params:xml:ns:xmpp-bind',
+			HTTPBIND = 'http://jabber.org/protocol/httpbind',
+			INBOX = 'erlang-solutions.com:xmpp:inbox:0',
+			LAST_ACTIVITY = 'jabber:iq:last',
+			MAM = 'urn:xmpp:mam:2',
+			MARKERS = 'urn:xmpp:chat-markers:0',
+			MUC = 'http://jabber.org/protocol/muc',
+			ROSTER = 'jabber:iq:roster',
+			PROFILE = 'jabber:iq:profile',
+			SASL = 'urn:ietf:params:xml:ns:xmpp-sasl',
 			SESSION = 'urn:ietf:params:xml:ns:xmpp-session',
-			VERSION = 'jabber:iq:version',
 			STANZAS = 'urn:ietf:params:xml:ns:xmpp-stanzas',
+			SMART_MARKERS = 'esl:xmpp:smart-markers:0',
+			STREAM = 'http://etherx.jabber.org/streams',
+			VERSION = 'jabber:iq:version',
 			XHTML_IM = 'http://jabber.org/protocol/xhtml-im',
-			XHTML = 'http://www.w3.org/1999/xhtml'
+			XHTML = 'http://www.w3.org/1999/xhtml',
+			XMPP_RETRACT = 'urn:xmpp:message-retract:0',
+			XMPP_FASTEN = 'urn:xmpp:fasten:0'
 		}
 
 		/** Constants: XHTML_IM Namespace

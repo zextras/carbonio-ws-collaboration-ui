@@ -12,7 +12,13 @@ export type MessageMap = {
 
 export type MessageList = Message[];
 
-export type Message = TextMessage | AffiliationMessage | ConfigurationMessage | DateMessage;
+export type Message =
+	| TextMessage
+	| AttachmentMessage
+	| DeletedMessage
+	| AffiliationMessage
+	| ConfigurationMessage
+	| DateMessage;
 
 export type BasicMessage = {
 	id: string;
@@ -22,26 +28,50 @@ export type BasicMessage = {
 
 export type TextMessage = BasicMessage & {
 	stanzaId: string;
-	type: 'text';
+	type: MessageType.TEXT_MSG;
 	from: string;
 	text: string;
 	read: MarkerStatus;
 	replyTo?: string;
-	repliedMessage?: TextMessage;
+	repliedMessage?: TextMessage | DeletedMessage;
+};
+
+export type AttachmentMessage = BasicMessage & {
+	stanzaId: string;
+	type: MessageType.ATTACHMENT_MSG;
+	from: string;
+	text: string;
+	read: MarkerStatus;
+	replyTo?: string;
+	repliedMessage?: TextMessage | DeletedMessage;
+};
+
+export type DeletedMessage = BasicMessage & {
+	type: MessageType.DELETED_MSG;
+	from: string;
 };
 
 export type AffiliationMessage = BasicMessage & {
-	type: 'affiliation';
+	type: MessageType.AFFILIATION_MSG;
 	userId: string;
 	as: 'member';
 };
 
 export type ConfigurationMessage = BasicMessage & {
-	type: 'configuration';
+	type: MessageType.CONFIGURATION_MSG;
 	operation: 'changedRoomName';
 	value: string;
 };
 
 export type DateMessage = BasicMessage & {
-	type: 'date';
+	type: MessageType.DATE_MSG;
 };
+
+export enum MessageType {
+	TEXT_MSG = 'text',
+	ATTACHMENT_MSG = 'attachment',
+	DELETED_MSG = 'deleted',
+	AFFILIATION_MSG = 'affiliation',
+	CONFIGURATION_MSG = 'configuration',
+	DATE_MSG = 'date'
+}
