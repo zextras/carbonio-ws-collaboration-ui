@@ -13,11 +13,15 @@ import {
 	Tooltip,
 	Row
 } from '@zextras/carbonio-design-system';
-import { find, map } from 'lodash';
+import { map } from 'lodash';
 import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
+import {
+	useAffiliationMessage,
+	useConfigurationMessage
+} from '../../hooks/AffiliationAndConfigurationLabels';
 import useRouting from '../../hooks/useRouting';
 import {
 	getRoomIsWritingList,
@@ -25,19 +29,17 @@ import {
 } from '../../store/selectors/ActiveConversationsSelectors';
 import { getLastMessageSelector } from '../../store/selectors/MessagesSelectors';
 import {
-	getRoomMembers,
 	getRoomMutedSelector,
 	getRoomNameSelector,
 	getRoomTypeSelector
 } from '../../store/selectors/RoomsSelectors';
 import { getSelectedConversation } from '../../store/selectors/SessionSelectors';
 import { getRoomUnreadsSelector } from '../../store/selectors/UnreadsCounterSelectors';
-import { getUserName, getUsersSelector } from '../../store/selectors/UsersSelectors';
+import { getUserName } from '../../store/selectors/UsersSelectors';
 import useStore from '../../store/Store';
 import { MarkerStatus } from '../../types/store/MarkersTypes';
 import { Message } from '../../types/store/MessageTypes';
 import { RoomType } from '../../types/store/RoomTypes';
-import { affiliationMessage, configurationMessage } from '../AffiliationAndConfigurationLabels';
 import GroupAvatar from '../GroupAvatar';
 import UserAvatar from '../UserAvatar';
 
@@ -72,8 +74,6 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 	const roomName = useStore((state) => getRoomNameSelector(state, roomId));
 	const usersWritingList = useStore((state) => getRoomIsWritingList(state, roomId));
 	const isConversationSelected = useStore((state) => getSelectedConversation(state, roomId));
-	const users = useStore(getUsersSelector);
-	const roomMembers = useStore((store) => getRoomMembers(store, roomId));
 	const userNameOfLastMessageOfRoom = useStore((store) =>
 		lastMessageOfRoom && lastMessageOfRoom.type === 'text'
 			? getUserName(store, lastMessageOfRoom.from)
@@ -85,30 +85,19 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 	);
 	const roomMuted = useStore((state) => getRoomMutedSelector(state, roomId));
 	const draftMessage = useStore((store) => getDraftMessage(store, roomId));
-	const actionName = useStore(
-		(store) =>
-			lastMessageOfRoom &&
-			lastMessageOfRoom.type === 'configuration' &&
-			getUserName(store, lastMessageOfRoom?.from)
+
+	const affiliationMessage = useAffiliationMessage(
+		lastMessageOfRoom?.type === 'affiliation' ? lastMessageOfRoom.as : '',
+		roomId,
+		lastMessageOfRoom?.type === 'affiliation' ? lastMessageOfRoom.userId : ''
 	);
 
-	const nameToDisplay = useMemo(
-		() =>
-			sessionId &&
-			lastMessageOfRoom?.type === 'configuration' &&
-			lastMessageOfRoom?.from === sessionId
-				? 'You'
-				: actionName,
-		[actionName, lastMessageOfRoom, sessionId]
+	const configurationMessage = useConfigurationMessage(
+		lastMessageOfRoom?.type === 'configuration' ? lastMessageOfRoom.operation : '',
+		lastMessageOfRoom?.type === 'configuration' ? lastMessageOfRoom.value : '',
+		lastMessageOfRoom?.type === 'configuration' ? lastMessageOfRoom.from : '',
+		roomId
 	);
-
-	// id of the users who acts, in this case the one who creates the one-to-one conversation
-	const actionMemberId = useMemo(() => {
-		if (roomType === RoomType.ONE_TO_ONE && lastMessageOfRoom?.type === 'affiliation') {
-			return find(roomMembers, (member) => member.userId !== lastMessageOfRoom.userId)?.userId;
-		}
-		return '';
-	}, [lastMessageOfRoom, roomMembers, roomType]);
 
 	const ackHasToAppear = useMemo(
 		() =>
@@ -167,26 +156,10 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 						return `${lastMessageOfRoom?.text}`;
 
 					case 'affiliation':
-						return affiliationMessage(
-							lastMessageOfRoom.as,
-							roomType,
-							t,
-							userNameOfLastMessageOfRoom,
-							roomName,
-							users,
-							actionMemberId,
-							sessionId
-						);
+						return affiliationMessage;
 
 					case 'configuration':
-						return configurationMessage(
-							lastMessageOfRoom.operation,
-							lastMessageOfRoom.value,
-							t,
-							nameToDisplay,
-							roomName,
-							true
-						);
+						return configurationMessage;
 
 					default:
 						return `affiliation message to replace`;
@@ -210,11 +183,8 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 		roomType,
 		sessionId,
 		userNameOfLastMessageOfRoom,
-		t,
-		roomName,
-		users,
-		actionMemberId,
-		nameToDisplay,
+		affiliationMessage,
+		configurationMessage,
 		isTypingLabel,
 		areTypingLabel
 	]);

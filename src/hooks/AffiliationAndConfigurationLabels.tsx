@@ -5,27 +5,46 @@
  */
 
 import { Text } from '@zextras/carbonio-design-system';
-import React from 'react';
-import { TFunction } from 'react-i18next';
+import { find } from 'lodash';
+import React, { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
+import {
+	getRoomMembers,
+	getRoomNameSelector,
+	getRoomTypeSelector
+} from '../store/selectors/RoomsSelectors';
+import { getUserName, getUsersSelector } from '../store/selectors/UsersSelectors';
+import useStore from '../store/Store';
 import { RoomType } from '../types/store/RoomTypes';
-import { UsersMap } from '../types/store/UserTypes';
 
 const ItalicText = styled(Text)`
 	font-style: italic;
 `;
 
-export const affiliationMessage = (
+export const useAffiliationMessage = (
 	messageType: string,
-	roomType: string,
-	t: TFunction<'translation'>,
-	affiliatedName: string,
-	roomName: string,
-	users: UsersMap,
-	actionMemberId: string | undefined,
-	sessionId: string | undefined
+	roomId: string,
+	userId: string
 ): string | JSX.Element => {
+	const [t] = useTranslation();
+
+	const users = useStore(getUsersSelector);
+	const roomType = useStore((store) => getRoomTypeSelector(store, roomId));
+	const roomName = useStore((store) => getRoomNameSelector(store, roomId));
+	const sessionId: string | undefined = useStore((store) => store.session.id);
+	const roomMembers = useStore((store) => getRoomMembers(store, roomId));
+	const affiliatedName = useStore((store) => getUserName(store, userId));
+
+	// id of the users who acts, in this case the one who creates the one-to-one conversation
+	const actionMemberId = useMemo(() => {
+		if (roomType === RoomType.ONE_TO_ONE) {
+			return find(roomMembers, (member) => member.userId !== userId)?.userId;
+		}
+		return '';
+	}, [roomMembers, roomType, userId]);
+
 	const memberAddedLabel = t(
 		'affiliationMessages.memberAdded',
 		`${affiliatedName} has been added to ${roomName}`,
@@ -65,7 +84,6 @@ export const affiliationMessage = (
 			? youCreatedOneToOne
 			: someoneCreatedOneToOne;
 
-	// eslint-disable-next-line default-case
 	switch (messageType) {
 		case 'member': {
 			if (roomType === RoomType.GROUP) {
@@ -79,18 +97,29 @@ export const affiliationMessage = (
 		case 'creation': {
 			return groupCreatedLabel;
 		}
+		default:
+			return '';
 	}
-	return '';
 };
 
-export const configurationMessage = (
+export const useConfigurationMessage = (
 	messageOperation: string,
 	messageValue: string,
-	t: TFunction<'translation'>,
-	nameToDisplay: string | false | null,
-	roomName: string,
+	messageFrom: string,
+	roomId: string,
 	sidebar?: boolean
 ): JSX.Element | string => {
+	const [t] = useTranslation();
+
+	const sessionId: string | undefined = useStore((store) => store.session.id);
+	const roomName = useStore((store) => getRoomNameSelector(store, roomId));
+	const actionName = useStore((store) => getUserName(store, messageFrom));
+
+	const nameToDisplay = useMemo(
+		() => (sessionId && messageFrom === sessionId ? 'You' : actionName),
+		[actionName, messageFrom, sessionId]
+	);
+
 	const roomNameChangedLabel = t(
 		'configurationMessages.roomNameChanged',
 		`${nameToDisplay} changed the title of this Group in `,
@@ -115,7 +144,6 @@ export const configurationMessage = (
 		{ name: nameToDisplay, roomName }
 	);
 
-	// eslint-disable-next-line default-case
 	switch (messageOperation) {
 		case 'roomNameChanged': {
 			return !sidebar ? (
@@ -147,6 +175,7 @@ export const configurationMessage = (
 		case 'roomPictureDeleted': {
 			return pictureDeletedLabel;
 		}
+		default:
+			return '';
 	}
-	return '';
 };

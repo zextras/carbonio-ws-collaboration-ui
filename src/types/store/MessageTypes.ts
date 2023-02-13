@@ -38,7 +38,11 @@ export type AffiliationMessage = BasicMessage & {
 
 export type ConfigurationMessage = BasicMessage & {
 	type: 'configuration';
-	operation: string;
+	operation:
+		| 'roomNameChanged'
+		| 'roomDescriptionChanged'
+		| 'roomPictureUpdated'
+		| 'roomPictureDeleted';
 	value: string;
 	from: string;
 };

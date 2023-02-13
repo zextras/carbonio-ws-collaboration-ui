@@ -5,14 +5,10 @@
  */
 
 import { Text } from '@zextras/carbonio-design-system';
-import React, { FC, useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
+import React, { FC } from 'react';
 
-import { getRoomNameSelector } from '../../../store/selectors/RoomsSelectors';
-import { getUserName } from '../../../store/selectors/UsersSelectors';
-import useStore from '../../../store/Store';
+import { useConfigurationMessage } from '../../../hooks/AffiliationAndConfigurationLabels';
 import { ConfigurationMessage } from '../../../types/store/MessageTypes';
-import { configurationMessage } from '../../AffiliationAndConfigurationLabels';
 import { CustomMessage } from './MessageFactory';
 
 type ConfigurationMsgProps = {
@@ -21,13 +17,11 @@ type ConfigurationMsgProps = {
 };
 
 const ConfigurationBubble: FC<ConfigurationMsgProps> = ({ message, refEl }) => {
-	const [t] = useTranslation();
-	const roomName = useStore((store) => getRoomNameSelector(store, message.roomId));
-	const sessionId: string | undefined = useStore((state) => state.session.id);
-	const actionName = useStore((store) => getUserName(store, message.from));
-	const nameToDisplay = useMemo(
-		() => (sessionId && message.from === sessionId ? 'You' : actionName),
-		[actionName, message.from, sessionId]
+	const configurationLabel = useConfigurationMessage(
+		message.operation,
+		message.value,
+		message.from,
+		message.roomId
 	);
 
 	return (
@@ -42,7 +36,7 @@ const ConfigurationBubble: FC<ConfigurationMsgProps> = ({ message, refEl }) => {
 			data-testid={`configuration_msg-${message.id}`}
 		>
 			<Text size={'medium'} color={'gray1'} overflow="break-word">
-				{configurationMessage(message.operation, message.value, t, nameToDisplay, roomName)}
+				{configurationLabel}
 			</Text>
 		</CustomMessage>
 	);

@@ -230,6 +230,7 @@ describe('render list of messages with history loader visible for first time ope
 		const { result } = renderHook(() => useStore());
 		act(() => {
 			result.current.addRoom(room);
+			result.current.setUserInfo(user4Be);
 			result.current.updateHistory(room.id, [mockedAffiliationMessage]);
 		});
 		setup(<MessagesList roomId={room.id} />);
@@ -237,7 +238,7 @@ describe('render list of messages with history loader visible for first time ope
 		expect(messageList.children).toHaveLength(3);
 		const message = screen.getByTestId(`affiliation_msg-${mockedAffiliationMessage.id}`);
 		expect(message).toBeVisible();
-		const label = await screen.findByText(
+		const label = screen.getByText(
 			new RegExp(`${user4Be.name} has been added to ${room.name}`, 'i')
 		);
 		expect(label).toBeVisible();
