@@ -106,7 +106,7 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 
 	const deleteMessageTimeLimitInMinutes = useStore((store) =>
 		getCapability(store, CapabilityType.DELETE_MESSAGE_TIME_LIMIT)
-	);
+	) as number;
 	const setReferenceMessage = useStore((store) => store.setReferenceMessage);
 	const [dropdownActive, setDropdownActive] = useState(false);
 	const [contextualMenuActions, setContextualMenuActions] = useState<dropDownAction[]>([]);
@@ -139,8 +139,6 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 		const actions = [];
 		const messageCanBeDeleted =
 			deleteMessageTimeLimitInMinutes &&
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore
 			Date.now() <= message.date + deleteMessageTimeLimitInMinutes * 60000;
 
 		// Delete functionality
