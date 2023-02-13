@@ -22,8 +22,6 @@ export function onNewMessageStanza(this: IXMPPClient, message: Element): true {
 	if (resultElement == null) {
 		const newMessage = decodeMessage(message);
 		if (newMessage) {
-			sendCustomEventEvent(EventName.NEW_MESSAGE);
-
 			const store = useStore.getState();
 			const sessionId: string | undefined = useStore.getState().session.id;
 
@@ -33,6 +31,7 @@ export function onNewMessageStanza(this: IXMPPClient, message: Element): true {
 			if (newMessage.type === MessageType.DELETED_MSG) {
 				store.setDeletedMessage(newMessage.roomId, newMessage);
 			} else {
+				sendCustomEventEvent(EventName.NEW_MESSAGE);
 				store.newMessage(newMessage);
 			}
 			// when I send a message as soon it's returned as Stanza we send the reads for ourselves
