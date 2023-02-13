@@ -89,7 +89,6 @@ const RepliedTextMessageSectionView: FC<RepliedTextMessageSectionViewProps> = ({
 		const messageScrollTo = window.parent.document.getElementById(`message-${repliedMessage.id}`);
 		if (messageScrollTo && replyUserInfo) {
 			if (!isInViewport(messageScrollTo)) messageScrollTo.scrollIntoView({ block: 'center' });
-			// eslint-disable-next-line default-case
 			switch (darkModeSettings) {
 				case 'enabled': {
 					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -136,13 +135,12 @@ const RepliedTextMessageSectionView: FC<RepliedTextMessageSectionViewProps> = ({
 					} 1.2s 0.2s ease-in-out`;
 					break;
 				}
+				default:
+					break;
 			}
-			// eslint-disable-next-line no-return-assign
 			setTimeout(() => {
 				messageScrollTo.style.animation = '';
-				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-				// @ts-ignore
-				messageScrollTo.firstChild.style.animation = '';
+				(messageScrollTo.firstChild as HTMLElement).style.animation = '';
 			}, 1400);
 		}
 	}, [repliedMessage.id, replyUserInfo, darkModeSettings, sessionId]);
