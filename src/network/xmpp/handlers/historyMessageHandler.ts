@@ -44,7 +44,6 @@ export function onHistoryMessageStanza(message: Element): true {
 		switch (queryId) {
 			case MamRequestType.HISTORY: {
 				if (historyMessage.type === MessageType.DELETED_MSG) {
-					console.log(historyMessage.id);
 					HistoryAccumulator.replaceDeletedMessageInTheHistory(
 						historyMessage.roomId,
 						historyMessage

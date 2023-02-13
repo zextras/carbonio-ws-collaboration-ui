@@ -37,7 +37,7 @@ const DeletedBubble: FC<DeletedBubbleProps> = ({ message }) => {
 	const deletedMessageLabel = t('message.deletedMessage', 'Deleted message');
 	const timezone = useStore(getPrefTimezoneSelector);
 	const sessionId: string | undefined = useStore((store) => store.session.id);
-	const messageTime = moment.tz(message.date, timezone).format('HH:MM');
+	const messageTime = moment.tz(message.date, timezone).format('HH:mm');
 
 	return (
 		<BubbleDeletedContainer
