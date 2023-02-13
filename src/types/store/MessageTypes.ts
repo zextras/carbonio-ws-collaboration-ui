@@ -28,6 +28,7 @@ export type TextMessage = BasicMessage & {
 	read: MarkerStatus;
 	replyTo?: string;
 	repliedMessage?: TextMessage;
+	forwarded?: ForwardedMessage;
 };
 
 export type AffiliationMessage = BasicMessage & {
@@ -44,4 +45,10 @@ export type ConfigurationMessage = BasicMessage & {
 
 export type DateMessage = BasicMessage & {
 	type: 'date';
+};
+
+export type ForwardedMessage = {
+	id: string;
+	date: number;
+	from: string;
 };
