@@ -6,9 +6,9 @@
 
 import { forEach } from 'lodash';
 import { Strophe } from 'strophe.js';
-import { TextMessage } from 'types/store/MessageTypes';
 
 import useStore from '../../../store/Store';
+import { TextMessage, MessageType } from '../../../types/store/MessageTypes';
 import { RootStore } from '../../../types/store/StoreTypes';
 import { dateToTimestamp } from '../../../utils/dateUtil';
 import { xmppDebug } from '../../../utils/debug';
@@ -40,14 +40,21 @@ export function onHistoryMessageStanza(message: Element): true {
 
 	if (historyMessage) {
 		// Check message request type
-		const queryid = getAttribute(result, 'queryid');
-		switch (queryid) {
+		const queryId = getAttribute(result, 'queryid');
+		switch (queryId) {
 			case MamRequestType.HISTORY: {
-				HistoryAccumulator.addMessageToHistory(historyMessage.roomId, historyMessage);
+				if (historyMessage.type === MessageType.DELETED_MSG) {
+					HistoryAccumulator.replaceDeletedMessageInTheHistory(
+						historyMessage.roomId,
+						historyMessage
+					);
+				} else {
+					HistoryAccumulator.addMessageToHistory(historyMessage.roomId, historyMessage);
+				}
 				break;
 			}
 			case MamRequestType.REPLIED: {
-				if (historyMessage.type === 'text') {
+				if (historyMessage.type === MessageType.TEXT_MSG) {
 					HistoryAccumulator.addRepliedMessage(historyMessage);
 				} else {
 					console.warn('Replied message type not supported', historyMessage);
@@ -55,7 +62,7 @@ export function onHistoryMessageStanza(message: Element): true {
 				break;
 			}
 			default:
-				console.log('Unknow MAM request type ');
+				console.log('Unknown MAM request type ');
 		}
 	}
 	return true;

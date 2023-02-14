@@ -9,8 +9,8 @@ import { Strophe } from 'strophe.js';
 
 import {
 	AffiliationMessage,
-	ConfigurationMessage,
-	Message,
+	ConfigurationMessage, DeletedMessage,
+	Message, MessageType,
 	TextMessage
 } from '../../../types/store/MessageTypes';
 import { isBefore, now } from '../../../utils/dateUtil';
@@ -26,10 +26,7 @@ type OptionalParameters = {
 	stanzaId?: string;
 };
 
-export function decodeMessage(
-	messageStanza: Element,
-	optional?: OptionalParameters
-): Message | undefined {
+export function decodeMessage(messageStanza: Element, optional?: OptionalParameters): Message | undefined {
 	const messageId = getRequiredAttribute(messageStanza, 'id');
 	const fromAttribute = getRequiredAttribute(messageStanza, 'from');
 	const roomId = getId(fromAttribute);
@@ -41,10 +38,7 @@ export function decodeMessage(
 	const body = messageStanza.getElementsByTagName('body')[0];
 	if (body && resource) {
 		const stanzaIdReference = getTagElement(messageStanza, 'stanza-id');
-		const stanzaId =
-			optional?.stanzaId ||
-			(stanzaIdReference && getRequiredAttribute(stanzaIdReference, 'id')) ||
-			messageId;
+		const stanzaId = optional?.stanzaId || (stanzaIdReference && getRequiredAttribute(stanzaIdReference, 'id') || messageId);
 		const from = getId(resource);
 		const messageTxt = Strophe.getText(body)
 			.replace(/&amp;/g, '&')
@@ -64,13 +58,29 @@ export function decodeMessage(
 			stanzaId,
 			roomId,
 			date: messageDate,
-			type: 'text',
+			type: MessageType.TEXT_MSG,
 			from,
 			text: messageTxt,
 			read: calcReads(messageDate, roomId),
 			replyTo
 		};
 		return message as TextMessage;
+	}
+
+	//Retract message
+	const retracted = getTagElement(messageStanza, 'retract');
+	if (retracted) {
+		const from = getId(resource);
+		const deletedMessageId = messageStanza.getElementsByTagName('apply-to')[0].id;
+
+		const message = {
+			id: deletedMessageId,
+			roomId,
+			type: MessageType.DELETED_MSG,
+			date: messageDate,
+			from
+		};
+		return message as DeletedMessage;
 	}
 
 	// Affiliation message
@@ -83,7 +93,7 @@ export function decodeMessage(
 			id: messageId,
 			roomId,
 			date: messageDate,
-			type: 'affiliation',
+			type: MessageType.AFFILIATION_MSG,
 			userId: user,
 			as: affiliationAttribute
 		};
@@ -109,7 +119,7 @@ export function decodeMessage(
 			id: messageId,
 			roomId,
 			date: messageDate,
-			type: 'configuration',
+			type: MessageType.CONFIGURATION_MSG,
 			from,
 			operation,
 			value

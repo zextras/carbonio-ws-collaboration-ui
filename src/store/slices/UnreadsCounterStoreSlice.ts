@@ -7,7 +7,7 @@
 import produce from 'immer';
 import { filter, find, size } from 'lodash';
 
-import { Message } from '../../types/store/MessageTypes';
+import { Message, MessageType } from '../../types/store/MessageTypes';
 import { RootStore, UnreadsCounterSlice } from '../../types/store/StoreTypes';
 import { isBefore } from '../../utils/dateUtil';
 
@@ -43,7 +43,7 @@ export const useUnreadsCountStoreSlice = (set: (...any: any) => void): UnreadsCo
 				);
 				const unreadByMe = filter(draft.messages[roomId], (message) => {
 					const isReadByMe =
-						message.type === 'text' &&
+						message.type === MessageType.TEXT_MSG &&
 						message.from !== draft.session.id! &&
 						(!lastMarkedMessage ||
 							(lastMarkedMessage && !isBefore(message.date, lastMarkedMessage.date)));

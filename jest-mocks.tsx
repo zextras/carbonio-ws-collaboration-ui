@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Account, INotificationManager } from '@zextras/carbonio-shell-ui';
+import { Account, AccountSettings, INotificationManager } from '@zextras/carbonio-shell-ui';
 import React, { ReactElement } from 'react';
 
 import { AutoCompleteGalResponse } from './src/network/soap/AutoCompleteRequest';
@@ -40,7 +40,12 @@ jest.mock('@zextras/carbonio-shell-ui', () => ({
 		identities: '',
 		rights: { targets: [] }
 	}),
-	SettingsHeader: (): ReactElement => <div>settings header</div>
+	SettingsHeader: (): ReactElement => <div>settings header</div>,
+	useUserSettings: (): AccountSettings => ({
+		attrs: {},
+		props: [{ name: '', zimlet: '', _content: '' }],
+		prefs: {}
+	})
 }));
 
 // MOCKED USEROUTING

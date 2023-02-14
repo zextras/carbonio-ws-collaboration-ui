@@ -31,9 +31,9 @@ import { getMyLastMarkerOfConversation } from '../../store/selectors/MarkersSele
 import { getMessagesSelector } from '../../store/selectors/MessagesSelectors';
 import { getPrefTimezoneSelector } from '../../store/selectors/SessionSelectors';
 import useStore from '../../store/Store';
-import { Message, TextMessage } from '../../types/store/MessageTypes';
+import { Message, MessageType, TextMessage } from '../../types/store/MessageTypes';
 import { isBefore, now } from '../../utils/dateUtil';
-import AnimationGlobalStyle from './messageBubbles/BubblueAnimationsGlobalStyle';
+import AnimationGlobalStyle from './messageBubbles/BubbleAnimationsGlobalStyle';
 import MessageFactory from './messageBubbles/MessageFactory';
 import WritingBubble from './messageBubbles/WritingBubble';
 import MessageHistoryLoader from './MessageHistoryLoader';
@@ -102,7 +102,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 			}
 			if (
 				message &&
-				message.type === 'text' &&
+				message.type === MessageType.TEXT_MSG &&
 				message.from !== mySessionId &&
 				markMessageAsRead &&
 				inputHasFocus
@@ -265,7 +265,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 		if (!actualScrollPosition && roomMessages.length >= 1 && !isLoadedFirstTime && inputHasFocus) {
 			const lastMessage = roomMessages[roomMessages.length - 1];
 			if (
-				lastMessage.type === 'text' &&
+				lastMessage.type === MessageType.TEXT_MSG &&
 				lastMessage.from !== mySessionId &&
 				(!myLastMarker || lastMessage.id !== myLastMarker?.messageId)
 			) {
@@ -308,14 +308,14 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 				let nextMessageIsFromSameSender;
 
 				const prevMessage = wrapper[index - 1];
-				if (message.type === 'text' && prevMessage?.type === 'text') {
+				if (message.type === MessageType.TEXT_MSG && prevMessage?.type === MessageType.TEXT_MSG) {
 					prevMessageIsFromSameSender = (prevMessage as TextMessage).from === message.from;
 				} else {
 					prevMessageIsFromSameSender = false;
 				}
 
 				const nextMessage = wrapper[index + 1];
-				if (message.type === 'text' && nextMessage?.type === 'text') {
+				if (message.type === MessageType.TEXT_MSG && nextMessage?.type === MessageType.TEXT_MSG) {
 					nextMessageIsFromSameSender = nextMessage.from === message.from;
 				} else {
 					nextMessageIsFromSameSender = false;

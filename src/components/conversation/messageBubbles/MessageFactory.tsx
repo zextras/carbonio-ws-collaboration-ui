@@ -10,10 +10,12 @@ import styled from 'styled-components';
 
 import { getSingleMessageSelector } from '../../../store/selectors/MessagesSelectors';
 import useStore from '../../../store/Store';
+import { MessageType } from '../../../types/store/MessageTypes';
 import AffiliationBubble from './AffiliationBubble';
 import BubbleFactory from './BubbleFactory';
 import ConfigurationBubble from './ConfigurationBubble';
 import DateBubble from './DataBubble';
+import DeletedBubble from './DeletedBubble';
 
 type MessageProps = {
 	messageId: string;
@@ -22,12 +24,6 @@ type MessageProps = {
 	nextMessageIsFromSameSender: boolean;
 	messageRef: React.RefObject<HTMLElement>;
 };
-
-// TODO handle sticky messages for timestamp
-/*
-	position: sticky;
-	top: 0;
-*/
 
 export const CustomMessage = styled(Container)`
 	width: fit-content;
@@ -59,7 +55,7 @@ const MessageFactory = ({
 
 	if (message) {
 		switch (message.type) {
-			case 'text': {
+			case MessageType.TEXT_MSG: {
 				return (
 					<BubbleFactory
 						message={message}
@@ -69,13 +65,16 @@ const MessageFactory = ({
 					/>
 				);
 			}
-			case 'affiliation': {
+			case MessageType.DELETED_MSG: {
+				return <DeletedBubble message={message} />;
+			}
+			case MessageType.AFFILIATION_MSG: {
 				return <AffiliationBubble message={message} refEl={messageRef} />;
 			}
-			case 'configuration': {
+			case MessageType.CONFIGURATION_MSG: {
 				return <ConfigurationBubble message={message} refEl={messageRef} />;
 			}
-			case 'date': {
+			case MessageType.DATE_MSG: {
 				return <DateBubble message={message} refEl={messageRef} />;
 			}
 			default: {

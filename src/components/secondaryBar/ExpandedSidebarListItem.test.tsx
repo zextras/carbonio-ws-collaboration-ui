@@ -12,7 +12,11 @@ import useStore from '../../store/Store';
 import { createMockMember, createMockRoom, createMockTextMessage } from '../../tests/createMock';
 import { RoomBe, RoomType } from '../../types/network/models/roomBeTypes';
 import { MarkerStatus } from '../../types/store/MarkersTypes';
-import { AffiliationMessage, ConfigurationMessage } from '../../types/store/MessageTypes';
+import {
+	AffiliationMessage,
+	ConfigurationMessage,
+	MessageType
+} from '../../types/store/MessageTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 import { User } from '../../types/store/UserTypes';
 import ExpandedSidebarListItem from './ExpandedSidebarListItem';
@@ -103,7 +107,7 @@ const mockedAffiliationMessage: AffiliationMessage = {
 	id: 'Affiliationid',
 	roomId: mockedGroup.id,
 	date: 1234566789,
-	type: 'affiliation',
+	type: MessageType.AFFILIATION_MSG,
 	userId: user4Be.id,
 	as: 'member'
 };
@@ -112,7 +116,7 @@ const mockedConfigurationMessage: ConfigurationMessage = {
 	id: 'ConfigurationId',
 	roomId: mockedGroup.id,
 	date: 123456789,
-	type: 'configuration',
+	type: MessageType.CONFIGURATION_MSG,
 	operation: 'roomPictureDeleted',
 	value: '',
 	from: user1Be.id
