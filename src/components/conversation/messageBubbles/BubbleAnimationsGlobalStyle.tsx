@@ -62,23 +62,23 @@ const AnimationGlobalStyle = createGlobalStyle`
   }
 
   @media (prefers-color-scheme: dark) {
-		@keyframes highlightmymessagebubble {
-			0%, 100% {
-				background-color: #1d252d;
-			}
-			20%, 80% {
-			  background-color: #0E3858;
-			}
-		}
-		
-		@keyframes highlightothersmessagebubble {
+    @keyframes highlightmymessagebubble {
+      0%, 100% {
+        background-color: #1d252d;
+      }
+      20%, 80% {
+        background-color: #0E3858;
+      }
+    }
+
+    @keyframes highlightothersmessagebubble {
       0%, 100% {
         background-color: #13181d;
       }
       20%, 80% {
         background-color: #0A243D;
       }
-		}
+    }
   }
 `;
 
