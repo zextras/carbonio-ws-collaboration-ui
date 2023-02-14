@@ -156,8 +156,6 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 					};
 					draft.messages[roomId].splice(1, 0, creationMsg);
 				}
-
-				return draft;
 			}),
 			false,
 			'MESSAGES/UPDATE_HISTORY'
