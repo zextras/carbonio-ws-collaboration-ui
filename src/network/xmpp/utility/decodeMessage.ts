@@ -63,7 +63,8 @@ export function decodeMessage(messageStanza: Element, optional?: OptionalParamet
 			forwarded = {
 				id: getRequiredAttribute(forwardedMessageElement, 'id'),
 				date: dateToTimestamp(getRequiredAttribute(delayElement, 'stamp')),
-				from: getId(getRequiredAttribute(forwardedMessageElement, 'from'))
+				from: getId(getRequiredAttribute(forwardedMessageElement, 'from')),
+				text: Strophe.getText(getRequiredTagElement(forwardedMessageElement, 'body'))
 			}
 		}
 

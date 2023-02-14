@@ -51,4 +51,5 @@ export type ForwardedMessage = {
 	id: string;
 	date: number;
 	from: string;
+	text: string;
 };

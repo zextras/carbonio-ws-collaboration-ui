@@ -5,32 +5,37 @@
  */
 
 import { Container, Padding, Text } from '@zextras/carbonio-design-system';
-import React, { FC } from 'react';
+import React, { FC, useMemo } from 'react';
 import styled from 'styled-components';
 
+import { getUserName } from '../../../store/selectors/UsersSelectors';
+import useStore from '../../../store/Store';
+import { calculateAvatarColor } from '../../../utils/styleUtils';
+
 type BubbleHeaderProps = {
-	senderIdentifier: string;
+	senderId: string;
 	notReplayedMessageHeader: boolean; // usefully to give more padding depending on type of message
-	userColor: string;
 };
 
 const SenderText = styled(Text)`
 	color: ${({ userColor, theme }): string[] => theme.avatarColors[userColor]};
 `;
 
-const BubbleHeader: FC<BubbleHeaderProps> = ({
-	senderIdentifier,
-	notReplayedMessageHeader,
-	userColor
-}) => (
-	<>
-		<Container crossAlignment="flex-start">
-			<SenderText userColor={userColor} weight="bold" size="small">
-				{senderIdentifier}
-			</SenderText>
-		</Container>
-		{notReplayedMessageHeader && <Padding top="small" />}
-	</>
-);
+const BubbleHeader: FC<BubbleHeaderProps> = ({ senderId, notReplayedMessageHeader }) => {
+	const senderName = useStore((store) => getUserName(store, senderId));
+
+	const userColor = useMemo(() => calculateAvatarColor(senderName || ''), [senderName]);
+
+	return (
+		<>
+			<Container crossAlignment="flex-start">
+				<SenderText userColor={userColor} weight="bold" size="small">
+					{senderName}
+				</SenderText>
+			</Container>
+			{notReplayedMessageHeader && <Padding top="small" />}
+		</>
+	);
+};
 
 export default BubbleHeader;

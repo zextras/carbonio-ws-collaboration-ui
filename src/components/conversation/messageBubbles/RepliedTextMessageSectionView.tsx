@@ -12,7 +12,7 @@ import styled from 'styled-components';
 import { getXmppClient } from '../../../store/selectors/ConnectionSelector';
 import { getFistMessageOfHistory } from '../../../store/selectors/MessagesSelectors';
 import { getPrefTimezoneSelector } from '../../../store/selectors/SessionSelectors';
-import { getUserSelector } from '../../../store/selectors/UsersSelectors';
+import { getUserName, getUserSelector } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
 import { TextMessage } from '../../../types/store/MessageTypes';
 import { calculateAvatarColor } from '../../../utils/styleUtils';
@@ -44,26 +44,14 @@ const RepliedTextMessageSectionView: FC<RepliedTextMessageSectionViewProps> = ({
 	const xmppClient = useStore(getXmppClient);
 	const sessionId: string | undefined = useStore((state) => state.session.id);
 	const firstMessage = useStore((state) => getFistMessageOfHistory(state, roomId));
-	const replyUserInfo = useStore((store) =>
-		getUserSelector(store, repliedMessage ? repliedMessage.from : undefined)
-	);
+	const replyUserInfo = useStore((store) => getUserSelector(store, repliedMessage?.from));
+	const senderIdentifier = useStore((store) => getUserName(store, repliedMessage?.from));
 	const timezone = useStore(getPrefTimezoneSelector);
 
 	const messageTime = repliedMessage?.date
 		? moment.tz(repliedMessage.date, timezone).format('HH:MM')
 		: null;
 
-	const senderIdentifier = useMemo(
-		() =>
-			replyUserInfo
-				? replyUserInfo.name
-					? replyUserInfo.name
-					: replyUserInfo.email
-					? replyUserInfo.email
-					: replyUserInfo.id
-				: null,
-		[replyUserInfo]
-	);
 	const userColor = useMemo(() => calculateAvatarColor(senderIdentifier || ''), [senderIdentifier]);
 
 	const isInViewport = (element: HTMLElement): boolean => {
@@ -121,11 +109,7 @@ const RepliedTextMessageSectionView: FC<RepliedTextMessageSectionViewProps> = ({
 				onClick={scrollTo}
 			>
 				{senderIdentifier && (
-					<BubbleHeader
-						senderIdentifier={senderIdentifier}
-						notReplayedMessageHeader={false}
-						userColor={userColor}
-					/>
+					<BubbleHeader senderId={repliedMessage.from} notReplayedMessageHeader={false} />
 				)}
 				{repliedMessage && repliedMessage.type === 'text' && (
 					<MessageWrap color="secondary" overflow="ellipsis" size="small">

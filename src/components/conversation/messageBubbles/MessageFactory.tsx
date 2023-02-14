@@ -11,7 +11,7 @@ import styled from 'styled-components';
 import { getSingleMessageSelector } from '../../../store/selectors/MessagesSelectors';
 import useStore from '../../../store/Store';
 import AffiliationBubble from './AffiliationBubble';
-import BubbleFactory from './BubbleFactory';
+import Bubble from './Bubble';
 import ConfigurationBubble from './ConfigurationBubble';
 import DateBubble from './DataBubble';
 
@@ -22,12 +22,6 @@ type MessageProps = {
 	nextMessageIsFromSameSender: boolean;
 	messageRef: React.RefObject<HTMLElement>;
 };
-
-// TODO handle sticky messages for timestamp
-/*
-	position: sticky;
-	top: 0;
-*/
 
 export const CustomMessage = styled(Container)`
 	width: fit-content;
@@ -61,7 +55,7 @@ const MessageFactory = ({
 		switch (message.type) {
 			case 'text': {
 				return (
-					<BubbleFactory
+					<Bubble
 						message={message}
 						prevMessageIsFromSameSender={prevMessageIsFromSameSender}
 						nextMessageIsFromSameSender={nextMessageIsFromSameSender}

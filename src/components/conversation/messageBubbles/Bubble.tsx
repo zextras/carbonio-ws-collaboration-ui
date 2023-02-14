@@ -6,30 +6,30 @@
 /* eslint-disable no-nested-ternary */
 
 import { Container } from '@zextras/carbonio-design-system';
-import React, { FC, ReactElement } from 'react';
+import moment from 'moment-timezone';
+import React, { FC, useMemo } from 'react';
 import styled from 'styled-components';
 
+import { getRoomTypeSelector } from '../../../store/selectors/RoomsSelectors';
+import { getPrefTimezoneSelector } from '../../../store/selectors/SessionSelectors';
+import useStore from '../../../store/Store';
 import { TextMessage } from '../../../types/store/MessageTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
+import { parseUrlOnMessage } from '../../../utils/parseUrlOnMessage';
 import BubbleContextualMenuDropDown, {
 	BubbleContextualMenuDropDownWrapper
 } from './BubbleContextualMenuDropDown';
 import BubbleFooter from './BubbleFooter';
 import BubbleHeader from './BubbleHeader';
+import ForwardedTextMessageSectionView from './ForwardedMessageSectionView';
 import RepliedTextMessageSectionView from './RepliedTextMessageSectionView';
 import TextContentBubble from './TextContentBubble';
 
 type BubbleProps = {
-	refEl: React.RefObject<HTMLElement>;
-	isMyMessage: boolean;
-	senderInfo: string | null; // name | email | id(fallback)
 	message: TextMessage;
-	messageTime: string;
-	messageFormatted: string | (string | ReactElement)[];
 	prevMessageIsFromSameSender: boolean;
 	nextMessageIsFromSameSender: boolean;
-	roomType: RoomType;
-	userColor: string;
+	messageRef: React.RefObject<HTMLElement>;
 };
 
 const DropDownWrapper = styled(Container)`
@@ -69,57 +69,60 @@ const BubbleContainer = styled(Container)`
 `;
 
 const Bubble: FC<BubbleProps> = ({
-	refEl,
-	isMyMessage,
-	senderInfo,
 	message,
-	messageTime,
-	messageFormatted,
 	prevMessageIsFromSameSender,
 	nextMessageIsFromSameSender,
-	roomType,
-	userColor
-}) => (
-	<BubbleContainer
-		id={`message-${message.id}`}
-		ref={refEl}
-		data-testid={`Bubble-${message.id}`}
-		key={`${message.id}`}
-		height="fit"
-		width="fit"
-		maxWidth="75%"
-		padding={{ all: 'medium' }}
-		background={isMyMessage ? 'highlight' : 'gray6'}
-		isMyMessage={isMyMessage}
-		firstMessageOfList={!prevMessageIsFromSameSender && nextMessageIsFromSameSender}
-		centerMessageOfList={prevMessageIsFromSameSender && nextMessageIsFromSameSender}
-		lastMessageOfList={prevMessageIsFromSameSender && !nextMessageIsFromSameSender}
-	>
-		<DropDownWrapper padding={{ all: 'none' }}>
-			{message.type === 'text' && (
-				<BubbleContextualMenuDropDown message={message} isMyMessage={isMyMessage} />
+	messageRef
+}) => {
+	const mySessionId = useStore((store) => store.session.id);
+	const timezone = useStore(getPrefTimezoneSelector);
+	const roomType = useStore<RoomType>((store) => getRoomTypeSelector(store, message.roomId));
+
+	const messageTime = moment.tz(message.date, timezone).format('HH:mm');
+	const isMyMessage = mySessionId === message.from;
+	const messageFormatted = useMemo(() => parseUrlOnMessage(message.text), [message.text]);
+
+	return (
+		<BubbleContainer
+			id={`message-${message.id}`}
+			ref={messageRef}
+			data-testid={`Bubble-${message.id}`}
+			key={`${message.id}`}
+			height="fit"
+			width="fit"
+			maxWidth="75%"
+			padding={{ all: 'medium' }}
+			background={isMyMessage ? 'highlight' : 'gray6'}
+			isMyMessage={isMyMessage}
+			firstMessageOfList={!prevMessageIsFromSameSender && nextMessageIsFromSameSender}
+			centerMessageOfList={prevMessageIsFromSameSender && nextMessageIsFromSameSender}
+			lastMessageOfList={prevMessageIsFromSameSender && !nextMessageIsFromSameSender}
+		>
+			<DropDownWrapper padding={{ all: 'none' }}>
+				{message.type === 'text' && (
+					<BubbleContextualMenuDropDown message={message} isMyMessage={isMyMessage} />
+				)}
+			</DropDownWrapper>
+			{!isMyMessage && roomType !== RoomType.ONE_TO_ONE && !prevMessageIsFromSameSender && (
+				<BubbleHeader senderId={message.from} notReplayedMessageHeader />
 			)}
-		</DropDownWrapper>
-		{!isMyMessage &&
-			roomType !== RoomType.ONE_TO_ONE &&
-			senderInfo &&
-			!prevMessageIsFromSameSender && (
-				<BubbleHeader
-					senderIdentifier={senderInfo}
-					notReplayedMessageHeader
-					userColor={userColor}
+			{message.repliedMessage && (
+				<RepliedTextMessageSectionView
+					repliedMessage={message.repliedMessage}
+					roomId={message.roomId}
+					isMyMessage={isMyMessage}
 				/>
 			)}
-		{message.repliedMessage && (
-			<RepliedTextMessageSectionView
-				repliedMessage={message.repliedMessage}
-				roomId={message.roomId}
-				isMyMessage={isMyMessage}
-			/>
-		)}
-		{message.type === 'text' && <TextContentBubble textContent={messageFormatted} />}
-		<BubbleFooter isMyMessage={isMyMessage} time={messageTime} messageRead={message.read} />
-	</BubbleContainer>
-);
+			{message.forwarded && (
+				<ForwardedTextMessageSectionView
+					forwardedMessage={message.forwarded}
+					isMyMessage={isMyMessage}
+				/>
+			)}
+			{message.type === 'text' && <TextContentBubble textContent={messageFormatted} />}
+			<BubbleFooter isMyMessage={isMyMessage} time={messageTime} messageRead={message.read} />
+		</BubbleContainer>
+	);
+};
 
 export default Bubble;
