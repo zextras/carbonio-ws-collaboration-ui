@@ -129,11 +129,12 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 	);
 
 	const copyMessage = useCallback(() => {
+		const textToCopy = !message.forwarded ? message.text : message.forwarded.text;
 		if (window.parent.navigator.clipboard) {
-			window.parent.navigator.clipboard.writeText(message.text).then();
+			window.parent.navigator.clipboard.writeText(textToCopy).then();
 		} else {
 			const input = window.document.createElement('input');
-			input.setAttribute('value', message.text);
+			input.setAttribute('value', textToCopy);
 			window.parent.document.body.appendChild(input);
 			input.select();
 			window.parent.document.execCommand('copy');
@@ -145,25 +146,13 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 			label: successfulCopySnackbar,
 			hideButton: true
 		});
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [message]);
+	}, [createSnackbar, message.forwarded, message.text, successfulCopySnackbar]);
 
 	useEffect(() => {
 		const actions = [];
 		const messageCanBeDeleted =
 			deleteMessageTimeLimitInMinutes &&
 			Date.now() <= message.date + deleteMessageTimeLimitInMinutes * 60000;
-
-		// Delete functionality
-		if (isMyMessage && messageCanBeDeleted) {
-			actions.push({
-				id: 'Delete',
-				label: deleteActionLabel,
-				click: () => {
-					xmppClient.sendChatMessageDeletion(message.roomId, message.id);
-				}
-			});
-		}
 
 		// Reply functionality
 		actions.push({
@@ -179,6 +168,15 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 				)
 		});
 
+		// Forward message in another chat
+		if (!message.forwarded) {
+			actions.push({
+				id: 'forward',
+				label: forwardActionLabel,
+				click: onOpenForwardMessageModal
+			});
+		}
+
 		// Copy the text of a text message to the clipboard
 		if (
 			typeof window.parent.document.execCommand !== 'undefined' &&
@@ -191,12 +189,14 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 			});
 		}
 
-		// Forward message in another chat
-		if (message.type === 'text') {
+		// Delete functionality
+		if (isMyMessage && messageCanBeDeleted) {
 			actions.push({
-				id: 'forward',
-				label: forwardActionLabel,
-				click: onOpenForwardMessageModal
+				id: 'Delete',
+				label: deleteActionLabel,
+				click: () => {
+					xmppClient.sendChatMessageDeletion(message.roomId, message.id);
+				}
 			});
 		}
 

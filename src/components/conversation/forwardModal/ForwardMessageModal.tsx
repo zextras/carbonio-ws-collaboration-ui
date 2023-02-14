@@ -129,14 +129,13 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 		[chips]
 	);
 
-	const forwardMessage = useCallback(
-		() =>
-			xmppClient.forwardMessage(
-				message,
-				map(selected, (value, key) => key)
-			),
-		[message, selected, xmppClient]
-	);
+	const forwardMessage = useCallback(() => {
+		xmppClient.forwardMessage(
+			message,
+			map(selected, (value, key) => key)
+		);
+		onClose();
+	}, [message, onClose, selected, xmppClient]);
 
 	const ListItem = useMemo(
 		() =>

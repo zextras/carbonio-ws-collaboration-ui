@@ -5,15 +5,13 @@
  */
 /* eslint-disable no-nested-ternary */
 
-import { Container } from '@zextras/carbonio-design-system';
-import moment from 'moment-timezone';
+import { Container, Padding } from '@zextras/carbonio-design-system';
 import React, { FC, useMemo } from 'react';
 import styled from 'styled-components';
 
 import { getRoomTypeSelector } from '../../../store/selectors/RoomsSelectors';
-import { getPrefTimezoneSelector } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
-import { MessageType, TextMessage } from '../../../types/store/MessageTypes';
+import { TextMessage } from '../../../types/store/MessageTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 import { parseUrlOnMessage } from '../../../utils/parseUrlOnMessage';
 import BubbleContextualMenuDropDown, {
@@ -75,10 +73,7 @@ const Bubble: FC<BubbleProps> = ({
 	messageRef
 }) => {
 	const mySessionId = useStore((store) => store.session.id);
-	const timezone = useStore(getPrefTimezoneSelector);
 	const roomType = useStore<RoomType>((store) => getRoomTypeSelector(store, message.roomId));
-
-	const messageTime = moment.tz(message.date, timezone).format('HH:mm');
 	const isMyMessage = mySessionId === message.from;
 	const messageFormatted = useMemo(() => parseUrlOnMessage(message.text), [message.text]);
 
@@ -87,7 +82,7 @@ const Bubble: FC<BubbleProps> = ({
 			id={`message-${message.id}`}
 			ref={messageRef}
 			data-testid={`Bubble-${message.id}`}
-			key={`${message.id}`}
+			key={message.id}
 			height="fit"
 			width="fit"
 			maxWidth="75%"
@@ -99,12 +94,13 @@ const Bubble: FC<BubbleProps> = ({
 			lastMessageOfList={prevMessageIsFromSameSender && !nextMessageIsFromSameSender}
 		>
 			<DropDownWrapper padding={{ all: 'none' }}>
-				{message.type === MessageType.TEXT_MSG && (
-					<BubbleContextualMenuDropDown message={message} isMyMessage={isMyMessage} />
-				)}
+				<BubbleContextualMenuDropDown message={message} isMyMessage={isMyMessage} />
 			</DropDownWrapper>
 			{!isMyMessage && roomType !== RoomType.ONE_TO_ONE && !prevMessageIsFromSameSender && (
-				<BubbleHeader senderId={message.from} notReplayedMessageHeader />
+				<>
+					<BubbleHeader senderId={message.from} />
+					<Padding bottom="small" />
+				</>
 			)}
 			{message.repliedMessage && (
 				<RepliedTextMessageSectionView
@@ -117,12 +113,16 @@ const Bubble: FC<BubbleProps> = ({
 				<ForwardedTextMessageSectionView
 					forwardedMessage={message.forwarded}
 					isMyMessage={isMyMessage}
+					roomId={message.roomId}
 				/>
 			)}
-			{message.type === MessageType.TEXT_MSG && (
-				<TextContentBubble textContent={messageFormatted} />
-			)}
-			<BubbleFooter isMyMessage={isMyMessage} time={messageTime} messageRead={message.read} />
+			<TextContentBubble textContent={messageFormatted} />
+			<BubbleFooter
+				isMyMessage={isMyMessage}
+				date={message.date}
+				messageRead={message.read}
+				forwarded={message.forwarded}
+			/>
 		</BubbleContainer>
 	);
 };

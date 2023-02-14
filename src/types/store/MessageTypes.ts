@@ -45,7 +45,6 @@ export type AttachmentMessage = BasicMessage & {
 	read: MarkerStatus;
 	replyTo?: string;
 	repliedMessage?: TextMessage | DeletedMessage;
-	forwarded?: ForwardedMessage;
 };
 
 export type DeletedMessage = BasicMessage & {

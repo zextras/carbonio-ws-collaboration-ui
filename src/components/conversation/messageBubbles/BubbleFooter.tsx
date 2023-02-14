@@ -4,40 +4,59 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Container, Icon, Text, Tooltip } from '@zextras/carbonio-design-system';
+import { Container, Icon, Padding, Text, Tooltip } from '@zextras/carbonio-design-system';
+import moment from 'moment-timezone';
 import React, { FC, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 
+import { getPrefTimezoneSelector } from '../../../store/selectors/SessionSelectors';
+import useStore from '../../../store/Store';
 import { MarkerStatus } from '../../../types/store/MarkersTypes';
+import { ForwardedMessage } from '../../../types/store/MessageTypes';
+
+const CustomText = styled(Text)`
+	font-style: italic;
+	overflow: visible;
+`;
 
 type BubbleFooterProps = {
-	isMyMessage: boolean;
-	time: string;
+	date: number;
+	isMyMessage?: boolean;
 	messageRead?: MarkerStatus;
+	forwarded?: ForwardedMessage;
+	dateAndTime?: boolean;
 	messageType?: string;
 	messageExtension?: string;
 	messageSize?: string;
 };
 
 const BubbleFooter: FC<BubbleFooterProps> = ({
-	isMyMessage,
-	time,
+	date,
+	isMyMessage = false,
 	messageRead,
+	forwarded,
+	dateAndTime = false,
 	messageType,
 	messageExtension,
 	messageSize
 }) => {
 	const [t] = useTranslation();
+	const forwardedLabel = t('action.forwarded', 'forwarded');
+
 	const ackIcon = messageRead === MarkerStatus.UNREAD ? 'Checkmark' : 'DoneAll';
 	const ackIconColor = messageRead === MarkerStatus.READ ? 'primary' : 'gray';
+
+	const timezone = useStore(getPrefTimezoneSelector);
+	const messageDate = moment.tz(date, timezone).format('DD MMM YY');
+	const messageTime = moment.tz(date, timezone).format('HH:mm');
 
 	const dropdownTooltip = useMemo(() => {
 		if (ackIcon === 'Checkmark') return t('tooltip.messageSent', 'Sent');
 		if (ackIcon === 'DoneAll' && ackIconColor === 'gray')
 			return t('tooltip.messageReceived', 'Received');
 		return t('tooltip.messageRead', 'Read');
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ackIcon, ackIconColor]);
+	}, [ackIcon, ackIconColor, t]);
 
 	return (
 		<Container
@@ -55,24 +74,29 @@ const BubbleFooter: FC<BubbleFooterProps> = ({
 			</Container>
 			<Container orientation="horizontal" width="fit">
 				{messageType && (
-					<Container width="fit" padding={{ right: 'small' }}>
+					<Padding width="fit" right="small">
 						<Text color="secondary" size="small">
 							{messageType}
 						</Text>
-					</Container>
+					</Padding>
+				)}
+				{forwarded && (
+					<Padding width="fit" right="small">
+						<CustomText color="secondary" size="small">
+							{forwardedLabel}
+						</CustomText>
+					</Padding>
 				)}
 				{isMyMessage && messageRead && (
 					<Tooltip label={dropdownTooltip}>
-						<Container width="fit" padding={{ right: 'small' }}>
+						<Padding width="fit" right="small">
 							<Icon size="small" icon={ackIcon} color={ackIconColor} />
-						</Container>
+						</Padding>
 					</Tooltip>
 				)}
-				<Container width="fit" crossAlignment="flex-end">
-					<Text color="secondary" size="extrasmall">
-						{time}
-					</Text>
-				</Container>
+				<Text color="secondary" size="extrasmall">
+					{dateAndTime && `${messageDate} • `} {messageTime}
+				</Text>
 			</Container>
 		</Container>
 	);

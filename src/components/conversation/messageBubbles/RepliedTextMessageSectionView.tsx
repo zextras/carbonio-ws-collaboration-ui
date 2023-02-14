@@ -5,14 +5,12 @@
  */
 
 import { Container, Padding, Text } from '@zextras/carbonio-design-system';
-import moment from 'moment-timezone';
 import React, { FC, useEffect, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import { getXmppClient } from '../../../store/selectors/ConnectionSelector';
 import { getFistMessageOfHistory } from '../../../store/selectors/MessagesSelectors';
-import { getPrefTimezoneSelector } from '../../../store/selectors/SessionSelectors';
 import { getUserName, getUserSelector } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
 import { DeletedMessage, MessageType, TextMessage } from '../../../types/store/MessageTypes';
@@ -56,11 +54,6 @@ const RepliedTextMessageSectionView: FC<RepliedTextMessageSectionViewProps> = ({
 	const firstMessage = useStore((state) => getFistMessageOfHistory(state, roomId));
 	const replyUserInfo = useStore((store) => getUserSelector(store, repliedMessage?.from));
 	const senderIdentifier = useStore((store) => getUserName(store, repliedMessage?.from));
-	const timezone = useStore(getPrefTimezoneSelector);
-
-	const messageTime = repliedMessage?.date
-		? moment.tz(repliedMessage.date, timezone).format('HH:MM')
-		: null;
 
 	const userColor = useMemo(() => calculateAvatarColor(senderIdentifier || ''), [senderIdentifier]);
 
@@ -118,12 +111,10 @@ const RepliedTextMessageSectionView: FC<RepliedTextMessageSectionViewProps> = ({
 				userBorderColor={userColor}
 				onClick={scrollTo}
 			>
-				{senderIdentifier && (
-					<BubbleHeader senderId={repliedMessage.from} notReplayedMessageHeader={false} />
-				)}
+				{senderIdentifier && <BubbleHeader senderId={repliedMessage.from} />}
 				{repliedMessage && repliedMessage.type === MessageType.TEXT_MSG && (
 					<MessageWrap color="secondary" overflow="ellipsis" size="small">
-						{repliedMessage.text}
+						{!repliedMessage.forwarded ? repliedMessage.text : repliedMessage.forwarded.text}
 					</MessageWrap>
 				)}
 				{repliedMessage && repliedMessage.type === MessageType.DELETED_MSG && (
@@ -131,8 +122,8 @@ const RepliedTextMessageSectionView: FC<RepliedTextMessageSectionViewProps> = ({
 						{deletedMessageLabel}
 					</DeletedMessageWrap>
 				)}
-				{messageTime && repliedMessage.type !== MessageType.DELETED_MSG && (
-					<BubbleFooter isMyMessage={false} time={messageTime} />
+				{repliedMessage && repliedMessage.type !== MessageType.DELETED_MSG && (
+					<BubbleFooter date={repliedMessage.date} />
 				)}
 			</ReplayedTextMessageContainer>
 			<Padding top="small" />
