@@ -6,7 +6,7 @@
 
 import { find, forEach, orderBy, size } from 'lodash';
 
-import { Message, TextMessage } from '../../types/store/MessageTypes';
+import { Message, MessageType, TextMessage } from '../../types/store/MessageTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 
 export const getMessagesSelector = (state: RootStore, roomId: string): Message[] =>
@@ -28,7 +28,10 @@ export const getTextMessageSelector = (
 ): TextMessage | undefined =>
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore
-	find(state.messages[roomId], (message) => message.type === 'text' && message.id === messageId);
+	find(
+		state.messages[roomId],
+		(message) => message.type === MessageType.TEXT_MSG && message.id === messageId
+	);
 
 export const getFistMessageOfHistory = (state: RootStore, roomId: string): Message =>
 	state.messages[roomId] && state.messages[roomId][0];

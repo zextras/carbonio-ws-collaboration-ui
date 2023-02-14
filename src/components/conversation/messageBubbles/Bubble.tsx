@@ -13,7 +13,7 @@ import styled from 'styled-components';
 import { getRoomTypeSelector } from '../../../store/selectors/RoomsSelectors';
 import { getPrefTimezoneSelector } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
-import { TextMessage } from '../../../types/store/MessageTypes';
+import { MessageType, TextMessage } from '../../../types/store/MessageTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 import { parseUrlOnMessage } from '../../../utils/parseUrlOnMessage';
 import BubbleContextualMenuDropDown, {
@@ -99,7 +99,7 @@ const Bubble: FC<BubbleProps> = ({
 			lastMessageOfList={prevMessageIsFromSameSender && !nextMessageIsFromSameSender}
 		>
 			<DropDownWrapper padding={{ all: 'none' }}>
-				{message.type === 'text' && (
+				{message.type === MessageType.TEXT_MSG && (
 					<BubbleContextualMenuDropDown message={message} isMyMessage={isMyMessage} />
 				)}
 			</DropDownWrapper>
@@ -119,7 +119,9 @@ const Bubble: FC<BubbleProps> = ({
 					isMyMessage={isMyMessage}
 				/>
 			)}
-			{message.type === 'text' && <TextContentBubble textContent={messageFormatted} />}
+			{message.type === MessageType.TEXT_MSG && (
+				<TextContentBubble textContent={messageFormatted} />
+			)}
 			<BubbleFooter isMyMessage={isMyMessage} time={messageTime} messageRead={message.read} />
 		</BubbleContainer>
 	);

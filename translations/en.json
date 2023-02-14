@@ -68,6 +68,7 @@
         "notificationsMutedForThisChat": "Notifications muted for this chat"
     },
     "message": {
+        "deletedMessage": "Deleted message",
         "draft": "draft"
     },
     "modal": {

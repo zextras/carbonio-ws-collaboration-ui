@@ -33,9 +33,9 @@ export const getRoomNameSelector = (state: RootStore, id: string): string => {
 					: room.members![0].userId
 				: null;
 		return otherUserId && state!.users[otherUserId]
-			? state.users[otherUserId].name
-				? state.users[otherUserId].name
-				: state.users[otherUserId].email
+			? state.users[otherUserId].name ||
+					state.users[otherUserId].email ||
+					state.users[otherUserId].id
 			: room.name;
 	}
 	return state.rooms[id].name || state.rooms[id].id;

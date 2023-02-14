@@ -10,9 +10,12 @@ import React, { FC, useCallback, useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled, { css, FlattenSimpleInterpolation } from 'styled-components';
 
+import { getXmppClient } from '../../../store/selectors/ConnectionSelector';
+import { getCapability } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { messageActionType } from '../../../types/store/ActiveConversationTypes';
-import { TextMessage } from '../../../types/store/MessageTypes';
+import { MessageType, TextMessage } from '../../../types/store/MessageTypes';
+import { CapabilityType } from '../../../types/store/SessionTypes';
 import ForwardMessageModal from '../forwardModal/ForwardMessageModal';
 
 export const BubbleContextualMenuDropDownWrapper = styled.div<{
@@ -93,13 +96,19 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 	message,
 	isMyMessage
 }) => {
+	const xmppClient = useStore(getXmppClient);
+
 	const [t] = useTranslation();
 	const replayActionLabel = t('action.reply', 'Reply');
 	const copyActionLabel = t('action.copy', 'Copy');
+	const deleteActionLabel = t('action.delete', 'Delete');
 	const forwardActionLabel = t('action.forward', 'Forward');
 	const successfulCopySnackbar = t('feedback.messageCopied', 'Message copied');
 	const messageActionsTooltip = t('tooltip.messageActions', ' Message actions');
 
+	const deleteMessageTimeLimitInMinutes = useStore((store) =>
+		getCapability(store, CapabilityType.DELETE_MESSAGE_TIME_LIMIT)
+	) as number;
 	const setReferenceMessage = useStore((store) => store.setReferenceMessage);
 	const [dropdownActive, setDropdownActive] = useState(false);
 	const [contextualMenuActions, setContextualMenuActions] = useState<DropDownActionType[]>([]);
@@ -141,12 +150,22 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 
 	useEffect(() => {
 		const actions = [];
+		const messageCanBeDeleted =
+			deleteMessageTimeLimitInMinutes &&
+			Date.now() <= message.date + deleteMessageTimeLimitInMinutes * 60000;
+
+		// Delete functionality
+		if (isMyMessage && messageCanBeDeleted) {
+			actions.push({
+				id: 'Delete',
+				label: deleteActionLabel,
+				click: () => {
+					xmppClient.sendChatMessageDeletion(message.roomId, message.id);
+				}
+			});
+		}
 
 		// Reply functionality
-		// if (
-		// 	capabilities.can_reply_to_messages &&
-		// 	messageInfos.type !== 'deleted_message'
-		// ) {
 		actions.push({
 			id: 'Reply',
 			label: replayActionLabel,
@@ -159,10 +178,12 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 					messageActionType.REPLAY
 				)
 		});
-		// }
 
 		// Copy the text of a text message to the clipboard
-		if (typeof window.parent.document.execCommand !== 'undefined' && message.type === 'text') {
+		if (
+			typeof window.parent.document.execCommand !== 'undefined' &&
+			message.type === MessageType.TEXT_MSG
+		) {
 			actions.push({
 				id: 'Copy',
 				label: copyActionLabel,
@@ -183,12 +204,16 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 	}, [
 		copyActionLabel,
 		copyMessage,
+		deleteActionLabel,
+		deleteMessageTimeLimitInMinutes,
 		dropdownActive,
 		forwardActionLabel,
+		isMyMessage,
 		message,
 		onOpenForwardMessageModal,
 		replayActionLabel,
-		setReferenceMessage
+		setReferenceMessage,
+		xmppClient
 	]);
 
 	return (

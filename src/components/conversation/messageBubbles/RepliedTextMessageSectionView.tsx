@@ -7,6 +7,7 @@
 import { Container, Padding, Text } from '@zextras/carbonio-design-system';
 import moment from 'moment-timezone';
 import React, { FC, useEffect, useMemo, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import { getXmppClient } from '../../../store/selectors/ConnectionSelector';
@@ -14,13 +15,13 @@ import { getFistMessageOfHistory } from '../../../store/selectors/MessagesSelect
 import { getPrefTimezoneSelector } from '../../../store/selectors/SessionSelectors';
 import { getUserName, getUserSelector } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
-import { TextMessage } from '../../../types/store/MessageTypes';
+import { DeletedMessage, MessageType, TextMessage } from '../../../types/store/MessageTypes';
 import { calculateAvatarColor } from '../../../utils/styleUtils';
 import BubbleFooter from './BubbleFooter';
 import BubbleHeader from './BubbleHeader';
 
 type RepliedTextMessageSectionViewProps = {
-	repliedMessage: TextMessage;
+	repliedMessage: TextMessage | DeletedMessage;
 	roomId: string;
 	isMyMessage: boolean;
 };
@@ -36,11 +37,20 @@ const MessageWrap = styled(Text)`
 	height: inherit;
 `;
 
+const DeletedMessageWrap = styled(Text)`
+	height: inherit;
+	font-style: italic;
+	padding-right: 0.1875rem;
+`;
+
 const RepliedTextMessageSectionView: FC<RepliedTextMessageSectionViewProps> = ({
 	repliedMessage,
 	roomId,
 	isMyMessage
 }) => {
+	const [t] = useTranslation();
+	const deletedMessageLabel = t('message.deletedMessage', 'Deleted message');
+
 	const xmppClient = useStore(getXmppClient);
 	const sessionId: string | undefined = useStore((state) => state.session.id);
 	const firstMessage = useStore((state) => getFistMessageOfHistory(state, roomId));
@@ -111,12 +121,19 @@ const RepliedTextMessageSectionView: FC<RepliedTextMessageSectionViewProps> = ({
 				{senderIdentifier && (
 					<BubbleHeader senderId={repliedMessage.from} notReplayedMessageHeader={false} />
 				)}
-				{repliedMessage && repliedMessage.type === 'text' && (
+				{repliedMessage && repliedMessage.type === MessageType.TEXT_MSG && (
 					<MessageWrap color="secondary" overflow="ellipsis" size="small">
 						{repliedMessage.text}
 					</MessageWrap>
 				)}
-				{messageTime && <BubbleFooter isMyMessage={false} time={messageTime} />}
+				{repliedMessage && repliedMessage.type === MessageType.DELETED_MSG && (
+					<DeletedMessageWrap color="secondary" overflow="ellipsis" size="small">
+						{deletedMessageLabel}
+					</DeletedMessageWrap>
+				)}
+				{messageTime && repliedMessage.type !== MessageType.DELETED_MSG && (
+					<BubbleFooter isMyMessage={false} time={messageTime} />
+				)}
 			</ReplayedTextMessageContainer>
 			<Padding top="small" />
 		</>

@@ -12,6 +12,7 @@ export const xmppClient = {
 	getInbox: (): null => null,
 	setInbox: (): null => null,
 	sendChatMessage: (): null => null,
+	sendChatMessageDeletion: (): null => null,
 	forwardMessage: (): null => null,
 	requestHistory: (): null => null,
 	requestHistoryBetweenTwoMessage: (): null => null,
