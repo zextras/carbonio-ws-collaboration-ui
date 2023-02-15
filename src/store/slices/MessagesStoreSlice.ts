@@ -129,7 +129,6 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 				draft.messages[roomId] = concat(historyWithDates, draft.messages[roomId]);
 				draft.messages[roomId] = orderBy(draft.messages[roomId], ['date'], ['asc']);
 				draft.messages[roomId] = sortedUniqBy(draft.messages[roomId], 'id');
-				return draft;
 			}),
 			false,
 			'MESSAGES/UPDATE_HISTORY'

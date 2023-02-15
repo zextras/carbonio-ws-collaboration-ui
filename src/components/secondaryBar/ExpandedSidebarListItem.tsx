@@ -127,15 +127,19 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 		if ((usersWritingList && usersWritingList.length === 0) || !usersWritingList) {
 			if (lastMessageOfRoom) {
 				switch (lastMessageOfRoom.type) {
-					case MessageType.TEXT_MSG:
+					case MessageType.TEXT_MSG: {
+						const text = lastMessageOfRoom.forwarded
+							? lastMessageOfRoom.forwarded.text
+							: lastMessageOfRoom.text;
 						if (
 							roomType === RoomType.GROUP &&
 							lastMessageOfRoom.from !== sessionId &&
 							userNameOfLastMessageOfRoom
 						) {
-							return `${userNameOfLastMessageOfRoom.split(/(\s+)/)[0]}: ${lastMessageOfRoom?.text}`;
+							return `${userNameOfLastMessageOfRoom.split(/(\s+)/)[0]}: ${text}`;
 						}
-						return `${lastMessageOfRoom?.text}`;
+						return text;
+					}
 					case MessageType.AFFILIATION_MSG:
 						return `${userNameOfLastMessageOfRoom} affiliate as ${lastMessageOfRoom.as}`;
 					case MessageType.CONFIGURATION_MSG:

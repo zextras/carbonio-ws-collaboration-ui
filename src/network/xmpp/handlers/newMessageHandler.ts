@@ -88,10 +88,9 @@ export function onNewMessageStanza(this: IXMPPClient, message: Element): true {
 				const sender = store.users[newMessage.from];
 				const title =
 					room.type === RoomType.ONE_TO_ONE ? sender.name || sender.email || '' : room.name;
+				const text = newMessage.forwarded ? newMessage.forwarded.text : newMessage.text;
 				const textMessage =
-					room.type === RoomType.ONE_TO_ONE
-						? newMessage.text
-						: `${sender?.name?.split(' ')[0]}: ${newMessage.text}`;
+					room.type === RoomType.ONE_TO_ONE ? text : `${sender?.name?.split(' ')[0]}: ${text}`;
 
 				getNotificationManager().notify({
 					showPopup: true,
