@@ -164,7 +164,7 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 						label={forwardActionLabel}
 						onClick={forwardMessage}
 						disabled={disabledForwardButton}
-						data-testid="create_button"
+						data-testid="forward_button"
 					/>
 				</Container>
 			</Tooltip>
@@ -187,6 +187,7 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 			</Text>
 			<Padding bottom="large" />
 			<ChipInput
+				data-testid="chip_input_forward_modal"
 				inputRef={inputRef}
 				background={'gray5'}
 				placeholder={inputPlaceholder}
@@ -209,7 +210,7 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 					</CustomContainer>
 				) : (
 					<List
-						data-testid="list_creation_modal"
+						data-testid="list_forward_modal"
 						items={chatList}
 						ItemComponent={ListItem}
 						selected={selected}

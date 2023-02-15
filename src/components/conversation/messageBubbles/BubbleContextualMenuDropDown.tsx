@@ -151,8 +151,9 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 	useEffect(() => {
 		const actions = [];
 		const messageCanBeDeleted =
-			deleteMessageTimeLimitInMinutes &&
-			Date.now() <= message.date + deleteMessageTimeLimitInMinutes * 60000;
+			!deleteMessageTimeLimitInMinutes ||
+			(deleteMessageTimeLimitInMinutes &&
+				Date.now() <= message.date + deleteMessageTimeLimitInMinutes * 60000);
 
 		// Reply functionality
 		actions.push({
@@ -178,10 +179,7 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 		}
 
 		// Copy the text of a text message to the clipboard
-		if (
-			typeof window.parent.document.execCommand !== 'undefined' &&
-			message.type === MessageType.TEXT_MSG
-		) {
+		if (message.type === MessageType.TEXT_MSG) {
 			actions.push({
 				id: 'Copy',
 				label: copyActionLabel,
