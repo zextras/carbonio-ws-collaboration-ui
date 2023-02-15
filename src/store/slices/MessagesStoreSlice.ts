@@ -8,6 +8,7 @@
 import produce from 'immer';
 import { concat, find, findIndex, forEach, map, orderBy, sortedUniqBy } from 'lodash';
 
+import { UsersApi } from '../../network';
 import { calcReads } from '../../network/xmpp/utility/decodeMessage';
 import { MarkerStatus } from '../../types/store/MarkersTypes';
 import {
@@ -42,6 +43,16 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 					});
 				}
 				draft.messages[message.roomId].push(message);
+
+				// Retrieve sender information if it is unknown
+				if (message.type === MessageType.TEXT_MSG) {
+					if (!draft.users[message.from]) {
+						UsersApi.getDebouncedUser(message.from);
+					}
+					if (message.forwarded && !draft.users[message.forwarded.from]) {
+						UsersApi.getDebouncedUser(message.forwarded.from);
+					}
+				}
 			}),
 			false,
 			'MESSAGES/NEW_MESSAGE'
@@ -58,6 +69,16 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 					isBefore(draft.rooms[message.roomId].userSettings!.clearedAt!, message.date)
 				) {
 					draft.messages[message.roomId].push(message);
+				}
+
+				// Retrieve sender information if it is unknown
+				if (message.type === MessageType.TEXT_MSG) {
+					if (!draft.users[message.from]) {
+						UsersApi.getDebouncedUser(message.from);
+					}
+					if (message.forwarded && !draft.users[message.forwarded.from]) {
+						UsersApi.getDebouncedUser(message.forwarded.from);
+					}
 				}
 			}),
 			false,
@@ -108,6 +129,16 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 							// the actual message and the previous one shares the same date
 						} else {
 							historyWithDates.push(historyMessage);
+						}
+					}
+
+					// Retrieve sender information if it is unknown
+					if (historyMessage.type === MessageType.TEXT_MSG) {
+						if (!draft.users[historyMessage.from]) {
+							UsersApi.getDebouncedUser(historyMessage.from);
+						}
+						if (historyMessage.forwarded && !draft.users[historyMessage.forwarded.from]) {
+							UsersApi.getDebouncedUser(historyMessage.forwarded.from);
 						}
 					}
 				});

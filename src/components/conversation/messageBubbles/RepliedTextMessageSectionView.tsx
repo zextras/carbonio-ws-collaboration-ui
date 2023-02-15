@@ -5,12 +5,12 @@
  */
 
 import { Container, Padding, Text } from '@zextras/carbonio-design-system';
-import React, { FC, useEffect, useMemo, useCallback } from 'react';
+import { useUserSettings } from '@zextras/carbonio-shell-ui';
+import { find } from 'lodash';
+import React, { FC, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import { getXmppClient } from '../../../store/selectors/ConnectionSelector';
-import { getFistMessageOfHistory } from '../../../store/selectors/MessagesSelectors';
 import { getUserName, getUserSelector } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
 import { DeletedMessage, MessageType, TextMessage } from '../../../types/store/MessageTypes';
@@ -20,7 +20,6 @@ import BubbleHeader from './BubbleHeader';
 
 type RepliedTextMessageSectionViewProps = {
 	repliedMessage: TextMessage | DeletedMessage;
-	roomId: string;
 	isMyMessage: boolean;
 };
 
@@ -43,19 +42,22 @@ const DeletedMessageWrap = styled(Text)`
 
 const RepliedTextMessageSectionView: FC<RepliedTextMessageSectionViewProps> = ({
 	repliedMessage,
-	roomId,
 	isMyMessage
 }) => {
 	const [t] = useTranslation();
 	const deletedMessageLabel = t('message.deletedMessage', 'Deleted message');
 
-	const xmppClient = useStore(getXmppClient);
 	const sessionId: string | undefined = useStore((state) => state.session.id);
-	const firstMessage = useStore((state) => getFistMessageOfHistory(state, roomId));
 	const replyUserInfo = useStore((store) => getUserSelector(store, repliedMessage?.from));
 	const senderIdentifier = useStore((store) => getUserName(store, repliedMessage?.from));
-
 	const userColor = useMemo(() => calculateAvatarColor(senderIdentifier || ''), [senderIdentifier]);
+
+	const settings = useUserSettings();
+
+	const darkModeSettings = useMemo(
+		() => find(settings.props, (value) => value.name === 'zappDarkreaderMode')?._content,
+		[settings.props]
+	);
 
 	const isInViewport = (element: HTMLElement): boolean => {
 		const rect = element.getBoundingClientRect();
@@ -70,37 +72,57 @@ const RepliedTextMessageSectionView: FC<RepliedTextMessageSectionViewProps> = ({
 	const scrollTo = useCallback(() => {
 		const messageScrollTo = window.parent.document.getElementById(`message-${repliedMessage.id}`);
 		if (messageScrollTo && replyUserInfo) {
-			if (!isInViewport(messageScrollTo)) messageScrollTo.scrollIntoView({ block: 'end' });
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore
-			messageScrollTo.childNodes[0].style.animation = `${
-				sessionId && sessionId !== replyUserInfo.id
-					? 'highlightothersmessagebubble'
-					: 'highlightmymessagebubble'
-			} 0.5s 0.3s ease-in`;
-			messageScrollTo.style.animation = `${
-				sessionId && sessionId !== replyUserInfo.id
-					? 'highlightothersmessagebubble'
-					: 'highlightmymessagebubble'
-			} 0.5s 0.3s ease-in`;
-			// eslint-disable-next-line no-return-assign
+			if (!isInViewport(messageScrollTo)) messageScrollTo.scrollIntoView({ block: 'center' });
+			const childNode = messageScrollTo.childNodes[0] as HTMLElement;
+			switch (darkModeSettings) {
+				case 'enabled': {
+					childNode.style.animation = `${
+						sessionId && sessionId !== replyUserInfo.id
+							? 'highlightothersmessagebubbledark'
+							: 'highlightmymessagebubbledark'
+					} 1.2s 0.2s ease-in-out`;
+					messageScrollTo.style.animation = `${
+						sessionId && sessionId !== replyUserInfo.id
+							? 'highlightothersmessagebubbledark'
+							: 'highlightmymessagebubbledark'
+					} 1.2s 0.2s ease-in-out`;
+					break;
+				}
+				case 'disabled': {
+					childNode.style.animation = `${
+						sessionId && sessionId !== replyUserInfo.id
+							? 'highlightothersmessagebubblelight'
+							: 'highlightmymessagebubblelight'
+					} 1.2s 0.2s ease-in-out`;
+					messageScrollTo.style.animation = `${
+						sessionId && sessionId !== replyUserInfo.id
+							? 'highlightothersmessagebubblelight'
+							: 'highlightmymessagebubblelight'
+					} 1.2s 0.2s ease-in-out`;
+					break;
+				}
+				case 'auto': {
+					childNode.style.animation = `${
+						sessionId && sessionId !== replyUserInfo.id
+							? 'highlightothersmessagebubble'
+							: 'highlightmymessagebubble'
+					} 1.2s 0.2s ease-in-out`;
+					messageScrollTo.style.animation = `${
+						sessionId && sessionId !== replyUserInfo.id
+							? 'highlightothersmessagebubble'
+							: 'highlightmymessagebubble'
+					} 1.2s 0.2s ease-in-out`;
+					break;
+				}
+				default:
+					break;
+			}
 			setTimeout(() => {
 				messageScrollTo.style.animation = '';
-				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-				// @ts-ignore
-				messageScrollTo.firstChild.style.animation = '';
-			}, 1000);
+				(messageScrollTo.firstChild as HTMLElement).style.animation = '';
+			}, 1400);
 		}
-	}, [sessionId, repliedMessage, replyUserInfo]);
-
-	// If replied message is not present in the loaded history, request history from that message
-	useEffect(() => {
-		if (repliedMessage == null) {
-			// TODO xmpp history request for replied message doesn't work
-			xmppClient.requestHistoryBetweenTwoMessage(roomId, repliedMessage, firstMessage.id);
-		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
+	}, [repliedMessage.id, replyUserInfo, darkModeSettings, sessionId]);
 
 	return (
 		<>
