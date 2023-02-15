@@ -255,7 +255,6 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 						}
 					});
 				}
-				return draft;
 			}),
 			false,
 			'MESSAGES/SET_DELETED_MESSAGE'

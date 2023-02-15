@@ -4,41 +4,22 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { find } from 'lodash';
-import { useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
+import { TFunction } from 'react-i18next';
 
-import {
-	getRoomMembers,
-	getRoomNameSelector,
-	getRoomTypeSelector
-} from '../store/selectors/RoomsSelectors';
-import { getUserName, getUsersSelector } from '../store/selectors/UsersSelectors';
-import useStore from '../store/Store';
 import { RoomType } from '../types/store/RoomTypes';
 
-export const useAffiliationMessage = (
+export const affiliationMessage = (
 	messageType: string,
 	roomId: string,
-	userId: string
+	userId: string,
+	actionMemberId: string | undefined,
+	actionName: string,
+	sessionId: string | undefined,
+	roomType: string,
+	roomName: string,
+	affiliatedName: string,
+	t: TFunction<'translation'>
 ): string => {
-	const [t] = useTranslation();
-
-	const users = useStore(getUsersSelector);
-	const roomType = useStore((store) => getRoomTypeSelector(store, roomId));
-	const roomName = useStore((store) => getRoomNameSelector(store, roomId));
-	const sessionId: string | undefined = useStore((store) => store.session.id);
-	const roomMembers = useStore((store) => getRoomMembers(store, roomId));
-	const affiliatedName = useStore((store) => getUserName(store, userId));
-
-	// id of the users who acts, in this case the one who creates the one-to-one conversation
-	const actionMemberId = useMemo(() => {
-		if (roomType === RoomType.ONE_TO_ONE) {
-			return find(roomMembers, (member) => member.userId !== userId)?.userId;
-		}
-		return '';
-	}, [roomMembers, roomType, userId]);
-
 	const memberAddedLabel = t(
 		'affiliationMessages.memberAdded',
 		`${affiliatedName} has been added to ${roomName}`,
@@ -60,11 +41,6 @@ export const useAffiliationMessage = (
 			userName: affiliatedName
 		}
 	);
-
-	const actionName =
-		actionMemberId !== undefined
-			? users[actionMemberId]?.name || users[actionMemberId]?.email || actionMemberId
-			: '';
 	const someoneCreatedOneToOne = t(
 		'affiliationMessages.SomeoneElseCreatedOneToOne',
 		`${actionName} started a chat with you`,
@@ -92,7 +68,8 @@ export const useAffiliationMessage = (
 			return groupCreatedLabel;
 		}
 		default: {
-			return 'affiliation message to replace';
+			console.warn('affiliation message to replace');
+			return '';
 		}
 	}
 };

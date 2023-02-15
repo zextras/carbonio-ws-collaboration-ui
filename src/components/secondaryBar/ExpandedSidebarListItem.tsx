@@ -13,13 +13,11 @@ import {
 	Text,
 	Tooltip
 } from '@zextras/carbonio-design-system';
-import { map } from 'lodash';
+import { find, map } from 'lodash';
 import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import { useAffiliationMessage } from '../../hooks/useAffiliationMessage';
-import { useConfigurationMessage } from '../../hooks/useConfigurationMessage';
 import useRouting from '../../hooks/useRouting';
 import {
 	getDraftMessage,
@@ -27,6 +25,7 @@ import {
 } from '../../store/selectors/ActiveConversationsSelectors';
 import { getLastMessageSelector } from '../../store/selectors/MessagesSelectors';
 import {
+	getRoomMembers,
 	getRoomMutedSelector,
 	getRoomNameSelector,
 	getRoomTypeSelector
@@ -38,6 +37,8 @@ import useStore from '../../store/Store';
 import { MarkerStatus } from '../../types/store/MarkersTypes';
 import { Message, MessageType } from '../../types/store/MessageTypes';
 import { RoomType } from '../../types/store/RoomTypes';
+import { affiliationMessage } from '../../utils/affiliationMessage';
+import { configurationMessage } from '../../utils/configurationMessage';
 import GroupAvatar from '../GroupAvatar';
 import UserAvatar from '../UserAvatar';
 
@@ -84,18 +85,39 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 	);
 	const roomMuted = useStore((state) => getRoomMutedSelector(state, roomId));
 	const draftMessage = useStore((store) => getDraftMessage(store, roomId));
-
-	const affiliationMessage = useAffiliationMessage(
-		lastMessageOfRoom?.type === MessageType.AFFILIATION_MSG ? lastMessageOfRoom.as : '',
-		roomId,
-		lastMessageOfRoom?.type === MessageType.AFFILIATION_MSG ? lastMessageOfRoom.userId : ''
+	const actionName = useStore((store) =>
+		getUserName(
+			store,
+			lastMessageOfRoom?.type === MessageType.CONFIGURATION_MSG ? lastMessageOfRoom.from : ''
+		)
+	);
+	const roomMembers = useStore((store) => getRoomMembers(store, roomId));
+	const affiliatedName = useStore((store) =>
+		getUserName(
+			store,
+			lastMessageOfRoom?.type === MessageType.AFFILIATION_MSG ? lastMessageOfRoom.userId : ''
+		)
 	);
 
-	const configurationMessage = useConfigurationMessage(
-		lastMessageOfRoom?.type === MessageType.CONFIGURATION_MSG ? lastMessageOfRoom.operation : '',
-		lastMessageOfRoom?.type === MessageType.CONFIGURATION_MSG ? lastMessageOfRoom.value : '',
-		lastMessageOfRoom?.type === MessageType.CONFIGURATION_MSG ? lastMessageOfRoom.from : '',
-		roomId
+	// id of the users who acts, in this case the one who creates the one-to-one conversation
+	const actionMemberId = useMemo(() => {
+		if (
+			roomType === RoomType.ONE_TO_ONE &&
+			lastMessageOfRoom?.type === MessageType.AFFILIATION_MSG
+		) {
+			return find(roomMembers, (member) => member.userId !== lastMessageOfRoom.userId)?.userId;
+		}
+		return '';
+	}, [roomType, lastMessageOfRoom, roomMembers]);
+
+	const nameToDisplay = useMemo(
+		() =>
+			sessionId &&
+			lastMessageOfRoom?.type === MessageType.CONFIGURATION_MSG &&
+			lastMessageOfRoom.from === sessionId
+				? 'You'
+				: actionName,
+		[actionName, lastMessageOfRoom, sessionId]
 	);
 
 	const ackHasToAppear = useMemo(
@@ -154,9 +176,36 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 						}
 						return `${lastMessageOfRoom?.text}`;
 					case MessageType.AFFILIATION_MSG:
-						return affiliationMessage;
+						return affiliationMessage(
+							lastMessageOfRoom?.type === MessageType.AFFILIATION_MSG ? lastMessageOfRoom.as : '',
+							roomId,
+							lastMessageOfRoom?.type === MessageType.AFFILIATION_MSG
+								? lastMessageOfRoom.userId
+								: '',
+							actionMemberId,
+							actionName,
+							sessionId,
+							roomType,
+							roomName,
+							affiliatedName,
+							t
+						);
 					case MessageType.CONFIGURATION_MSG:
-						return configurationMessage;
+						return configurationMessage(
+							lastMessageOfRoom?.type === MessageType.CONFIGURATION_MSG
+								? lastMessageOfRoom.operation
+								: '',
+							lastMessageOfRoom?.type === MessageType.CONFIGURATION_MSG
+								? lastMessageOfRoom.value
+								: '',
+							lastMessageOfRoom?.type === MessageType.CONFIGURATION_MSG
+								? lastMessageOfRoom.from
+								: '',
+							roomId,
+							roomName,
+							nameToDisplay,
+							t
+						);
 					case MessageType.DELETED_MSG:
 						return deletedMessageLabel;
 					default:
@@ -176,14 +225,19 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 		}
 		return undefined;
 	}, [
-		deletedMessageLabel,
 		usersWritingList,
 		lastMessageOfRoom,
 		roomType,
 		sessionId,
 		userNameOfLastMessageOfRoom,
-		affiliationMessage,
-		configurationMessage,
+		roomId,
+		actionMemberId,
+		actionName,
+		roomName,
+		affiliatedName,
+		t,
+		nameToDisplay,
+		deletedMessageLabel,
 		isTypingLabel,
 		areTypingLabel
 	]);
