@@ -7,7 +7,7 @@
 import { Text } from '@zextras/carbonio-design-system';
 import React, { FC } from 'react';
 
-import { useConfigurationMessage } from '../../../hooks/AffiliationAndConfigurationLabels';
+import { useConfigurationMessage } from '../../../hooks/useConfigurationMessage';
 import { ConfigurationMessage } from '../../../types/store/MessageTypes';
 import { CustomMessage } from './MessageFactory';
 

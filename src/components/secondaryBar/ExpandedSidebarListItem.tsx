@@ -18,10 +18,8 @@ import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import {
-	useAffiliationMessage,
-	useConfigurationMessage
-} from '../../hooks/AffiliationAndConfigurationLabels';
+import { useAffiliationMessage } from '../../hooks/useAffiliationMessage';
+import { useConfigurationMessage } from '../../hooks/useConfigurationMessage';
 import useRouting from '../../hooks/useRouting';
 import {
 	getDraftMessage,

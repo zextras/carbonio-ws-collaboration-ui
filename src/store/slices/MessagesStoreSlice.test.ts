@@ -30,6 +30,15 @@ const room: RoomBe = createMockRoom({
 
 const room2: RoomBe = createMockRoom();
 
+const room3: RoomBe = createMockRoom({
+	id: 'room-id',
+	members: [
+		createMockMember({ userId: 'user0' }),
+		createMockMember({ userId: 'user1' }),
+		createMockMember({ userId: 'user2' })
+	]
+});
+
 const message0: TextMessage = createMockTextMessage({
 	id: 'message0-id',
 	roomId: room.id,
@@ -151,7 +160,7 @@ describe('Test messages slice', () => {
 
 	it('updateHistory', () => {
 		const { result } = renderHook(() => useStore());
-		act(() => result.current.addRoom(room));
+		act(() => result.current.addRoom(room3));
 		// Add first message
 		act(() => result.current.updateHistory(room.id, [message0, message1]));
 		expect(result.current.messages[message0.roomId]).toHaveLength(5);

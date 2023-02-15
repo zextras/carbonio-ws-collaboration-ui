@@ -145,7 +145,11 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 				draft.messages[roomId] = sortedUniqBy(draft.messages[roomId], 'id');
 
 				// the second message has to be a creation one if the conversation is a group one
-				if (draft.rooms[roomId].type === RoomType.GROUP && messageArray.length < 50) {
+				if (
+					draft.rooms[roomId].type === RoomType.GROUP &&
+					messageArray.length < 50 &&
+					draft.rooms[roomId].userSettings?.clearedAt === undefined
+				) {
 					const creationMsg: AffiliationMessage = {
 						id: `creationMessage${draft.messages[roomId][0]?.date}`,
 						roomId,
