@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { IconButton, Container, Tooltip, Padding } from '@zextras/carbonio-design-system';
+import { Container, IconButton, Padding, Tooltip } from '@zextras/carbonio-design-system';
 import React, {
 	BaseSyntheticEvent,
 	useCallback,
@@ -24,6 +24,7 @@ import { getXmppClient } from '../../../store/selectors/ConnectionSelector';
 import { getRoomUnreadsSelector } from '../../../store/selectors/UnreadsCounterSelectors';
 import useStore from '../../../store/Store';
 import { Emoji } from '../../../types/generics';
+import { messageActionType } from '../../../types/store/ActiveConversationTypes';
 import EmojiPicker from './EmojiPicker';
 import MessageArea from './MessageArea';
 
@@ -91,7 +92,19 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 		if (showEmojiPicker) setShowEmojiPicker(false);
 		const message = textMessage.trim();
 		if (referenceMessage && referenceMessage.roomId === roomId) {
-			xmppClient.sendChatMessage(roomId, message, referenceMessage.stanzaId);
+			switch (referenceMessage.actionType) {
+				case messageActionType.REPLAY: {
+					xmppClient.sendChatMessage(roomId, message, referenceMessage.stanzaId);
+					break;
+				}
+				case messageActionType.EDIT: {
+					xmppClient.sendChatMessageCorrection(roomId, message, referenceMessage.messageId);
+					break;
+				}
+				default: {
+					console.warn('case not handled', referenceMessage);
+				}
+			}
 			unsetReferenceMessage(roomId);
 		} else {
 			xmppClient.sendChatMessage(roomId, message);

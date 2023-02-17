@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { DeletedMessage, TextMessage } from './MessageTypes';
+import { DeletedMessage, EditedMessage, TextMessage } from './MessageTypes';
 
 export type TemporaryMessagesMap = {
 	[id: string]: TemporaryMessageList;
@@ -14,4 +14,4 @@ export type TemporaryMessageList = {
 	[id: string]: TemporaryMessage;
 };
 
-export type TemporaryMessage = TextMessage | DeletedMessage;
+export type TemporaryMessage = DeletedMessage | EditedMessage | TextMessage;

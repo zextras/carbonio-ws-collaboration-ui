@@ -13,6 +13,7 @@ import { xmppClient } from '../../../tests/mockedXmppClient';
 import {
 	DateMessage,
 	DeletedMessage,
+	EditedMessage,
 	MessageType,
 	TextMessage
 } from '../../../types/store/MessageTypes';
@@ -27,6 +28,7 @@ type MessageInfo = {
 	stanzaId?: string;
 	replyTo?: string;
 	messageIdDeletion?: string;
+	idMessageToToEdit?: string;
 };
 
 const createMockMessageInfo = (fields?: Record<string, any>): MessageInfo => ({
@@ -54,6 +56,13 @@ const createXMPPReceivedMessage = (info: MessageInfo): Element => {
 						<body>${info.text}</body>
 						<markable xmlns="urn:xmpp:chat-markers:0"></markable>
 						${info.replyTo && `<thread>${info.replyTo}</thread>`}
+					`
+				}
+				${
+					info.messageType === MessageType.EDITED_MSG &&
+					`
+						<body>${info.text}</body>
+						<replace id="${info.idMessageToToEdit}" xmlns="urn:xmpp:message-correct:0"/>
 					`
 				}
 				${
@@ -174,6 +183,26 @@ describe('XMPP newMessageHandler', () => {
 		expect(messageList[4].type).toBe(MessageType.DELETED_MSG);
 		expect(messageList[4].id).toBe(fourthMessageInfo.id);
 		expect(messageList[5].id).toBe(fifthMessageInfo.id);
+	});
+
+	test('New correction of a message arrives', () => {
+		const initialMessageInfo = createMockMessageInfo({ text: 'Hi!' });
+		const editInfo = createMockMessageInfo({
+			id: 'messageId2',
+			messageType: MessageType.EDITED_MSG,
+			idMessageToToEdit: initialMessageInfo.id,
+			text: 'Hi everyone!'
+		});
+		const message = createXMPPReceivedMessage(initialMessageInfo);
+		const messageCorrection = createXMPPReceivedMessage(editInfo);
+		onNewMessageStanza.call(xmppClient, message);
+		onNewMessageStanza.call(xmppClient, messageCorrection);
+		const store = useStore.getState();
+
+		const editedMessage = store.messages[initialMessageInfo.roomId][1];
+		expect(editedMessage.id).toBe(initialMessageInfo.id);
+		expect(editedMessage.type).toBe(MessageType.EDITED_MSG);
+		expect((editedMessage as EditedMessage).text).toBe(editInfo.text);
 	});
 
 	test('Send desktop notification on new message', () => {

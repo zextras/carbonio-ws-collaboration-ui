@@ -11,14 +11,14 @@ import { getRoomTypeSelector } from '../../../store/selectors/RoomsSelectors';
 import { getPrefTimezoneSelector } from '../../../store/selectors/SessionSelectors';
 import { getUserSelector } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
-import { TextMessage } from '../../../types/store/MessageTypes';
+import { EditedMessage, TextMessage } from '../../../types/store/MessageTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 import { parseUrlOnMessage } from '../../../utils/parseUrlOnMessage';
 import { calculateAvatarColor } from '../../../utils/styleUtils';
 import Bubble from './Bubble';
 
 type BubbleFactoryProps = {
-	message: TextMessage;
+	message: TextMessage | EditedMessage;
 	prevMessageIsFromSameSender: boolean;
 	nextMessageIsFromSameSender: boolean;
 	messageRef: React.RefObject<HTMLElement>;

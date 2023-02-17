@@ -8,7 +8,7 @@ import { forEach } from 'lodash';
 import { Strophe } from 'strophe.js';
 
 import useStore from '../../../store/Store';
-import { TextMessage, MessageType } from '../../../types/store/MessageTypes';
+import { MessageType, TextMessage } from '../../../types/store/MessageTypes';
 import { RootStore } from '../../../types/store/StoreTypes';
 import { dateToTimestamp } from '../../../utils/dateUtil';
 import { xmppDebug } from '../../../utils/debug';
@@ -48,13 +48,21 @@ export function onHistoryMessageStanza(message: Element): true {
 						historyMessage.roomId,
 						historyMessage
 					);
+				} else if (historyMessage.type === MessageType.EDITED_MSG) {
+					HistoryAccumulator.replaceMessageEditedInTheHistory(
+						historyMessage.roomId,
+						historyMessage
+					);
 				} else {
 					HistoryAccumulator.addMessageToHistory(historyMessage.roomId, historyMessage);
 				}
 				break;
 			}
 			case MamRequestType.REPLIED: {
-				if (historyMessage.type === MessageType.TEXT_MSG) {
+				if (
+					historyMessage.type === MessageType.TEXT_MSG ||
+					historyMessage.type === MessageType.EDITED_MSG
+				) {
 					HistoryAccumulator.addRepliedMessage(historyMessage);
 				} else {
 					console.warn('Replied message type not supported', historyMessage);
@@ -96,9 +104,9 @@ export function onRequestHistory(this: XMPPClient, stanza: Element): void {
 	this.lastMarkers(roomId);
 }
 
-export function onRequestSingleMessage(originalMessageId: string, stanza: Element): void {
+export function onRequestSingleMessage(replayMessageId: string, stanza: Element): void {
 	const repliedMessageId = Strophe.getText(getRequiredTagElement(stanza, 'first'));
 	const repliedMessage = HistoryAccumulator.returnRepliedMessage(repliedMessageId);
 	const store: RootStore = useStore.getState();
-	store.setRepliedMessage(repliedMessage.roomId, originalMessageId, repliedMessage);
+	store.setRepliedMessage(repliedMessage.roomId, replayMessageId, repliedMessage);
 }

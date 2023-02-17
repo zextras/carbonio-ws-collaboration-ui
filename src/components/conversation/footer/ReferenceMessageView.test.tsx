@@ -29,7 +29,7 @@ const mockedRoom: RoomBe = createMockRoom({
 	]
 });
 
-const mockedMessage: TextMessage = createMockTextMessage({
+const mockedMessage = createMockTextMessage({
 	id: 'idSimpleTextMessage',
 	roomId: 'roomTest',
 	date: 1657099586818, // 18.08
@@ -37,7 +37,7 @@ const mockedMessage: TextMessage = createMockTextMessage({
 	from: 'idRoberto',
 	text: 'Hi guys! Today I will not be present to the meeting sorry!',
 	read: MarkerStatus.UNREAD
-});
+} as TextMessage);
 
 describe('Replay to a message by opening the contextual menu', () => {
 	test('Display the contextual menu of a message', () => {

@@ -8,6 +8,7 @@ import { findIndex } from 'lodash';
 
 import useStore from '../../../store/Store';
 import {
+	EditedMessage,
 	Message,
 	MessageList,
 	MessageMap,
@@ -46,7 +47,7 @@ class HistoryAccumulator {
 		return history;
 	}
 
-	public addRepliedMessage(message: TextMessage): void {
+	public addRepliedMessage(message: TextMessage | EditedMessage): void {
 		this.repliedMessages[message.stanzaId] = message;
 	}
 
@@ -72,6 +73,36 @@ class HistoryAccumulator {
 			// when arrives the deletion, but I still don't have the history I save it for the future history update
 			const store = useStore.getState();
 			store.addDeletedMessageRef(roomId, message);
+		}
+	}
+
+	replaceMessageEditedInTheHistory(roomId: string, editedMessage: EditedMessage): void {
+		if (!this.histories[roomId]) this.histories[roomId] = [];
+		const index = findIndex(this.histories[roomId], { id: editedMessage.id });
+		if (
+			this.histories[roomId][index] &&
+			this.histories[roomId][index].id === editedMessage.id &&
+			this.histories[roomId][index].type !== editedMessage.type
+		) {
+			const messageToReplace = this.histories[roomId][index];
+			if (
+				(messageToReplace.type === MessageType.TEXT_MSG ||
+					messageToReplace.type === MessageType.EDITED_MSG) &&
+				messageToReplace.replyTo
+			) {
+				this.histories[roomId].splice(index, 1, {
+					...editedMessage,
+					date: messageToReplace.date,
+					replyTo: messageToReplace.replyTo,
+					repliedMessage: messageToReplace.repliedMessage
+				});
+			} else {
+				this.histories[roomId].splice(index, 1, { ...editedMessage, date: messageToReplace.date });
+			}
+		} else if (!this.histories[roomId][index] && editedMessage.type === MessageType.EDITED_MSG) {
+			// when arrives the correction, but I still don't have the history I save it for the future history update
+			const store = useStore.getState();
+			store.addEditedMessageRef(roomId, editedMessage);
 		}
 	}
 }

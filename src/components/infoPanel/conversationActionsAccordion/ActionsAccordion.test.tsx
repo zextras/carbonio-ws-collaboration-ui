@@ -48,7 +48,7 @@ describe('Actions Accordion', () => {
 				createMockMember({ userId: user3Be.id, owner: true })
 			]
 		});
-		const message: TextMessage = createMockTextMessage({ roomId: room.id });
+		const message = createMockTextMessage({ roomId: room.id } as TextMessage);
 		const store = useStore.getState();
 		store.addRoom(room);
 		store.newMessage(message);
@@ -109,7 +109,7 @@ describe('Actions Accordion', () => {
 
 	test('See Clear History action only if there are some messages in the conversation', () => {
 		const room: RoomBe = createMockRoom({ members: [createMockMember({ userId: user1Be.id })] });
-		const message: TextMessage = createMockTextMessage({ roomId: room.id });
+		const message = createMockTextMessage({ roomId: room.id } as TextMessage);
 		const store = useStore.getState();
 		store.addRoom(room);
 		store.setUserInfo(user1Be);

@@ -15,13 +15,18 @@ import { getFistMessageOfHistory } from '../../../store/selectors/MessagesSelect
 import { getPrefTimezoneSelector } from '../../../store/selectors/SessionSelectors';
 import { getUserSelector } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
-import { DeletedMessage, MessageType, TextMessage } from '../../../types/store/MessageTypes';
+import {
+	DeletedMessage,
+	EditedMessage,
+	MessageType,
+	TextMessage
+} from '../../../types/store/MessageTypes';
 import { calculateAvatarColor } from '../../../utils/styleUtils';
 import BubbleFooter from './BubbleFooter';
 import BubbleHeader from './BubbleHeader';
 
 type RepliedTextMessageSectionViewProps = {
-	repliedMessage: TextMessage | DeletedMessage;
+	repliedMessage: TextMessage | DeletedMessage | EditedMessage;
 	roomId: string;
 	isMyMessage: boolean;
 };
@@ -124,6 +129,7 @@ const RepliedTextMessageSectionView: FC<RepliedTextMessageSectionViewProps> = ({
 	return (
 		<>
 			<ReplayedTextMessageContainer
+				data-testid={`repliedView-${repliedMessage.id}`}
 				background={isMyMessage ? '#C4D5EF' : 'gray5'}
 				padding={{ horizontal: 'small', vertical: 'small' }}
 				crossAlignment="flex-start"
@@ -137,18 +143,20 @@ const RepliedTextMessageSectionView: FC<RepliedTextMessageSectionViewProps> = ({
 						userColor={userColor}
 					/>
 				)}
-				{repliedMessage && repliedMessage.type === MessageType.TEXT_MSG && (
-					<MessageWrap color="secondary" overflow="ellipsis" size="small">
-						{repliedMessage.text}
-					</MessageWrap>
-				)}
+				{repliedMessage &&
+					(repliedMessage.type === MessageType.TEXT_MSG ||
+						repliedMessage.type === MessageType.EDITED_MSG) && (
+						<MessageWrap color="secondary" overflow="ellipsis" size="small">
+							{repliedMessage.text}
+						</MessageWrap>
+					)}
 				{repliedMessage && repliedMessage.type === MessageType.DELETED_MSG && (
 					<DeletedMessageWrap color="secondary" overflow="ellipsis" size="small">
 						{deletedMessageLabel}
 					</DeletedMessageWrap>
 				)}
 				{messageTime && repliedMessage.type !== MessageType.DELETED_MSG && (
-					<BubbleFooter isMyMessage={false} time={messageTime} />
+					<BubbleFooter isMyMessage={false} messageType={repliedMessage.type} time={messageTime} />
 				)}
 			</ReplayedTextMessageContainer>
 			<Padding top="small" />

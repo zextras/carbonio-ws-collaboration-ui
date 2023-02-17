@@ -9,7 +9,7 @@ import { Container } from '@zextras/carbonio-design-system';
 import React, { FC, ReactElement } from 'react';
 import styled from 'styled-components';
 
-import { MessageType, TextMessage } from '../../../types/store/MessageTypes';
+import { EditedMessage, MessageType, TextMessage } from '../../../types/store/MessageTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 import BubbleContextualMenuDropDown, {
 	BubbleContextualMenuDropDownWrapper
@@ -23,7 +23,7 @@ type BubbleProps = {
 	refEl: React.RefObject<HTMLElement>;
 	isMyMessage: boolean;
 	senderInfo: string | null; // name | email | id(fallback)
-	message: TextMessage;
+	message: TextMessage | EditedMessage;
 	messageTime: string;
 	messageFormatted: string | (string | ReactElement)[];
 	prevMessageIsFromSameSender: boolean;
@@ -96,9 +96,7 @@ const Bubble: FC<BubbleProps> = ({
 		lastMessageOfList={prevMessageIsFromSameSender && !nextMessageIsFromSameSender}
 	>
 		<DropDownWrapper padding={{ all: 'none' }}>
-			{message.type === MessageType.TEXT_MSG && (
-				<BubbleContextualMenuDropDown message={message} isMyMessage={isMyMessage} />
-			)}
+			<BubbleContextualMenuDropDown message={message} isMyMessage={isMyMessage} />
 		</DropDownWrapper>
 		{!isMyMessage &&
 			roomType !== RoomType.ONE_TO_ONE &&
@@ -117,8 +115,15 @@ const Bubble: FC<BubbleProps> = ({
 				isMyMessage={isMyMessage}
 			/>
 		)}
-		{message.type === MessageType.TEXT_MSG && <TextContentBubble textContent={messageFormatted} />}
-		<BubbleFooter isMyMessage={isMyMessage} time={messageTime} messageRead={message.read} />
+		{(message.type === MessageType.TEXT_MSG || message.type === MessageType.EDITED_MSG) && (
+			<TextContentBubble textContent={messageFormatted} />
+		)}
+		<BubbleFooter
+			isMyMessage={isMyMessage}
+			messageType={message.type}
+			time={messageTime}
+			messageRead={message.read}
+		/>
 	</BubbleContainer>
 );
 

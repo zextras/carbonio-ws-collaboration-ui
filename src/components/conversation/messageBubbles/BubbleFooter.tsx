@@ -7,17 +7,24 @@
 import { Container, Icon, Text, Tooltip } from '@zextras/carbonio-design-system';
 import React, { FC, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 
 import { MarkerStatus } from '../../../types/store/MarkersTypes';
+import { MessageType } from '../../../types/store/MessageTypes';
 
 type BubbleFooterProps = {
 	isMyMessage: boolean;
 	time: string;
 	messageRead?: MarkerStatus;
-	messageType?: string;
+	messageType?: MessageType;
 	messageExtension?: string;
 	messageSize?: string;
 };
+
+const ItalicText = styled(Text)`
+	font-style: italic;
+	padding-right: ${({ theme }): string => theme.sizes.padding.small};
+`;
 
 const BubbleFooter: FC<BubbleFooterProps> = ({
 	isMyMessage,
@@ -54,11 +61,11 @@ const BubbleFooter: FC<BubbleFooterProps> = ({
 				)}
 			</Container>
 			<Container orientation="horizontal" width="fit">
-				{messageType && (
-					<Container width="fit" padding={{ right: 'small' }}>
-						<Text color="secondary" size="small">
+				{messageType === MessageType.EDITED_MSG && (
+					<Container width="fit">
+						<ItalicText color="secondary" size="extrasmall">
 							{messageType}
-						</Text>
+						</ItalicText>
 					</Container>
 				)}
 				{isMyMessage && messageRead && (

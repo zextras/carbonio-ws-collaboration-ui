@@ -14,7 +14,7 @@ import { getXmppClient } from '../../../store/selectors/ConnectionSelector';
 import { getCapability } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { messageActionType } from '../../../types/store/ActiveConversationTypes';
-import { MessageType, TextMessage } from '../../../types/store/MessageTypes';
+import { EditedMessage, MessageType, TextMessage } from '../../../types/store/MessageTypes';
 import { CapabilityType } from '../../../types/store/SessionTypes';
 
 export const BubbleContextualMenuDropDownWrapper = styled.div<{
@@ -81,7 +81,7 @@ export const BubbleContextualMenuDropDownWrapper = styled.div<{
 `;
 
 type BubbleContextualMenuDropDownProps = {
-	message: TextMessage;
+	message: TextMessage | EditedMessage;
 	isMyMessage: boolean;
 };
 
@@ -100,12 +100,16 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 	const [t] = useTranslation();
 	const copyActionLabel = t('action.copy', 'Copy');
 	const deleteActionLabel = t('action.delete', 'Delete');
+	const editActionLabel = t('action.edit', 'Edit');
 	const replayActionLabel = t('action.reply', 'Reply');
 	const successfulCopySnackbar = t('feedback.messageCopied', 'Message copied');
 	const messageActionsTooltip = t('tooltip.messageActions', ' Message actions');
 
 	const deleteMessageTimeLimitInMinutes = useStore((store) =>
 		getCapability(store, CapabilityType.DELETE_MESSAGE_TIME_LIMIT)
+	) as number;
+	const editMessageTimeLimitInMinutes = useStore((store) =>
+		getCapability(store, CapabilityType.EDIT_MESSAGE_TIME_LIMIT)
 	) as number;
 	const setReferenceMessage = useStore((store) => store.setReferenceMessage);
 	const [dropdownActive, setDropdownActive] = useState(false);
@@ -141,12 +145,32 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 			deleteMessageTimeLimitInMinutes &&
 			Date.now() <= message.date + deleteMessageTimeLimitInMinutes * 60000;
 
+		const messageCanBeEdited =
+			deleteMessageTimeLimitInMinutes &&
+			Date.now() <= message.date + editMessageTimeLimitInMinutes * 60000;
+
 		// Delete functionality
 		if (isMyMessage && messageCanBeDeleted) {
 			actions.push({
 				id: 'Delete',
 				label: deleteActionLabel,
 				click: () => xmppClient.sendChatMessageDeletion(message.roomId, message.id)
+			});
+		}
+
+		// Edit functionality
+		if (isMyMessage && messageCanBeEdited) {
+			actions.push({
+				id: 'Edit',
+				label: editActionLabel,
+				click: () =>
+					setReferenceMessage(
+						message.roomId,
+						message.id,
+						message.from,
+						message.stanzaId,
+						messageActionType.EDIT
+					)
 			});
 		}
 
@@ -172,7 +196,7 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 		// Copy the text of a text message to the clipboard
 		if (
 			typeof window.parent.document.execCommand !== 'undefined' &&
-			message.type === MessageType.TEXT_MSG
+			(message.type === MessageType.TEXT_MSG || message.type === MessageType.EDITED_MSG)
 		) {
 			actions.push({
 				id: 'Copy',

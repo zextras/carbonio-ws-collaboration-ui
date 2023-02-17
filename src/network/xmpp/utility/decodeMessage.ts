@@ -9,7 +9,9 @@ import { Strophe } from 'strophe.js';
 
 import {
 	AffiliationMessage,
-	ConfigurationMessage, DeletedMessage,
+	ConfigurationMessage,
+	DeletedMessage,
+	EditedMessage,
 	Message, MessageType,
 	TextMessage
 } from '../../../types/store/MessageTypes';
@@ -53,6 +55,24 @@ export function decodeMessage(messageStanza: Element, optional?: OptionalParamet
 			replyTo = Strophe.getText(thread);
 		}
 
+		// Correction/edited message
+		const replaceTag = messageStanza.getElementsByTagName('replace')[0];
+		if (replaceTag) {
+			const from = getId(resource);
+			const editedMessageId = replaceTag.id;
+			const message = {
+				id: editedMessageId,
+				stanzaId,
+				roomId,
+				date: messageDate,
+				type: MessageType.EDITED_MSG,
+				from,
+				text: messageTxt,
+				replyTo
+			}
+			return message as EditedMessage;
+		}
+
 		message = {
 			id: messageId,
 			stanzaId,
@@ -67,7 +87,7 @@ export function decodeMessage(messageStanza: Element, optional?: OptionalParamet
 		return message as TextMessage;
 	}
 
-	//Retract message
+	// Retract/deleted message
 	const retracted = getTagElement(messageStanza, 'retract');
 	if (retracted) {
 		const from = getId(resource);

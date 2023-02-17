@@ -21,14 +21,14 @@ const mockedRoom: RoomBe = createMockRoom({
 	type: RoomType.GROUP
 });
 
-const mockedRepliedTextMessage: TextMessage = createMockTextMessage({
+const mockedRepliedTextMessage = createMockTextMessage({
 	roomId: mockedRoom.id,
 	replyTo: 'insideId',
 	repliedMessage: createMockTextMessage({
 		id: 'insideId',
 		text: 'Hi!'
 	})
-});
+} as TextMessage);
 
 describe('Message bubble component visualization', () => {
 	test('Display replied text message', () => {

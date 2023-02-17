@@ -111,7 +111,9 @@ const MessageReferenceDisplayed: React.FC<MessageReferenceDisplayedProps> = ({
 					</Container>
 					<Container crossAlignment="flex-start" padding={{ top: 'small' }}>
 						<Text data-testid="reference-message" color="secondary" overflow="ellipsis">
-							{message?.type === MessageType.TEXT_MSG && message?.text}
+							{(message?.type === MessageType.TEXT_MSG ||
+								message?.type === MessageType.EDITED_MSG) &&
+								message?.text}
 						</Text>
 					</Container>
 				</Container>
