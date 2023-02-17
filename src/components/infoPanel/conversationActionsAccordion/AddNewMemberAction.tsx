@@ -38,6 +38,7 @@ const AddNewMemberAction: FC<AddNewMemberProps> = ({ roomId }) => {
 
 	const closeModal = useCallback(() => {
 		setAddNewMemberModalOpen(false);
+		setContactSelected({});
 	}, []);
 
 	const addNewMember = useCallback(() => {
