@@ -112,6 +112,7 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 		getCapability(store, CapabilityType.EDIT_MESSAGE_TIME_LIMIT)
 	) as number;
 	const setReferenceMessage = useStore((store) => store.setReferenceMessage);
+	const setDraftMessage = useStore((store) => store.setDraftMessage);
 	const [dropdownActive, setDropdownActive] = useState(false);
 	const [contextualMenuActions, setContextualMenuActions] = useState<dropDownAction[]>([]);
 	const createSnackbar: any = useContext(SnackbarManagerContext);
@@ -149,6 +150,18 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 			deleteMessageTimeLimitInMinutes &&
 			Date.now() <= message.date + editMessageTimeLimitInMinutes * 60000;
 
+		// Copy the text of a text message to the clipboard
+		if (
+			typeof window.parent.document.execCommand !== 'undefined' &&
+			(message.type === MessageType.TEXT_MSG || message.type === MessageType.EDITED_MSG)
+		) {
+			actions.push({
+				id: 'Copy',
+				label: copyActionLabel,
+				click: copyMessage
+			});
+		}
+
 		// Delete functionality
 		if (isMyMessage && messageCanBeDeleted) {
 			actions.push({
@@ -163,14 +176,16 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 			actions.push({
 				id: 'Edit',
 				label: editActionLabel,
-				click: () =>
+				click: () => {
+					setDraftMessage(message.roomId, false, message.text);
 					setReferenceMessage(
 						message.roomId,
 						message.id,
 						message.from,
 						message.stanzaId,
 						messageActionType.EDIT
-					)
+					);
+				}
 			});
 		}
 
@@ -192,18 +207,6 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 				)
 		});
 		// }
-
-		// Copy the text of a text message to the clipboard
-		if (
-			typeof window.parent.document.execCommand !== 'undefined' &&
-			(message.type === MessageType.TEXT_MSG || message.type === MessageType.EDITED_MSG)
-		) {
-			actions.push({
-				id: 'Copy',
-				label: copyActionLabel,
-				click: copyMessage
-			});
-		}
 
 		setContextualMenuActions(actions);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
