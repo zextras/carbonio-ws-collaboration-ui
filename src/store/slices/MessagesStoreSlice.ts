@@ -12,7 +12,6 @@ import { calcReads } from '../../network/xmpp/utility/decodeMessage';
 import { MarkerStatus } from '../../types/store/MarkersTypes';
 import {
 	DeletedMessage,
-	EditedMessage,
 	Message,
 	MessageList,
 	MessageType,
@@ -181,7 +180,7 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 	setRepliedMessage: (
 		roomId: string,
 		replayMessageId: string, // id of message which contains the replayMessage and replayTo fields
-		repliedMessage: TextMessage | EditedMessage // message not in history which will be placed as replayMessage if not edited/deleted
+		repliedMessage: TextMessage // message not in history which will be placed as replayMessage if not edited/deleted
 	): void => {
 		set(
 			produce((draft: RootStore) => {
@@ -202,20 +201,19 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 						// check if message subject of replay is available in the history and
 						// if is deleted or edited and update the replay caption
 						if (repliedMessageInHistory) {
-							let messageToPlaceAsReplayedMessage: TextMessage | EditedMessage | DeletedMessage =
-								repliedMessage;
+							let messageToPlaceAsReplayedMessage: TextMessage | DeletedMessage = repliedMessage;
 							if (repliedMessageInHistory.type === MessageType.DELETED_MSG) {
 								messageToPlaceAsReplayedMessage = {
 									...repliedMessageInHistory,
 									type: MessageType.DELETED_MSG
 								};
-							} else if (repliedMessageInHistory.type === MessageType.EDITED_MSG) {
+							} else if (
+								repliedMessageInHistory.type === MessageType.TEXT_MSG &&
+								repliedMessageInHistory.edited
+							) {
 								messageToPlaceAsReplayedMessage = repliedMessageInHistory;
 							}
-							if (
-								replayMessage.type === MessageType.TEXT_MSG ||
-								replayMessage.type === MessageType.EDITED_MSG
-							) {
+							if (replayMessage.type === MessageType.TEXT_MSG) {
 								replayMessage.repliedMessage = messageToPlaceAsReplayedMessage;
 							}
 							const index = findIndex(draft.messages[roomId], { id: replayMessageId });
@@ -254,7 +252,7 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 					forEach(draft.messages[roomId], (message, index) => {
 						// check for replay messages and update the caption
 						if (
-							(message.type === MessageType.TEXT_MSG || message.type === MessageType.EDITED_MSG) &&
+							message.type === MessageType.TEXT_MSG &&
 							message.repliedMessage &&
 							message.repliedMessage.id === deletedMessage.id
 						) {
@@ -281,7 +279,7 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 			'MESSAGES/SET_DELETED_MESSAGE'
 		);
 	},
-	setEditedMessage: (roomId: string, editedMessage: EditedMessage): void => {
+	setEditedMessage: (roomId: string, editedMessage: TextMessage): void => {
 		set(
 			produce((draft: RootStore) => {
 				if (draft.messages[roomId]) {
@@ -297,10 +295,7 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 						// replace the original message with the correction in the history if present
 						// otherwise add the correction to the tempSlice so when the history will be loaded
 						// the original message will be edited
-						if (
-							(message.type === MessageType.TEXT_MSG || message.type === MessageType.EDITED_MSG) &&
-							message.id === editedMessage.id
-						) {
+						if (message.type === MessageType.TEXT_MSG && message.id === editedMessage.id) {
 							if (message.replyTo) {
 								draft.messages[roomId].splice(index, 1, {
 									...editedMessage,

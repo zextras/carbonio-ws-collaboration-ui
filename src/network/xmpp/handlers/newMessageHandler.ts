@@ -30,7 +30,7 @@ export function onNewMessageStanza(this: IXMPPClient, message: Element): true {
 			// remove it from the store and swap with the delete tag
 			if (newMessage.type === MessageType.DELETED_MSG) {
 				store.setDeletedMessage(newMessage.roomId, newMessage);
-			} else if (newMessage.type === MessageType.EDITED_MSG) {
+			} else if (newMessage.type === MessageType.TEXT_MSG && newMessage.edited) {
 				// Edited Message reference
 				// XMPP doesn't edit the message, so we have to
 				// remove it from the store and swap with the edited

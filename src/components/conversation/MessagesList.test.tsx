@@ -17,7 +17,7 @@ import {
 } from '../../tests/createMock';
 import { RoomBe, RoomType } from '../../types/network/models/roomBeTypes';
 import { MarkerStatus } from '../../types/store/MarkersTypes';
-import { EditedMessage, MessageType, TextMessage } from '../../types/store/MessageTypes';
+import { MessageType, TextMessage } from '../../types/store/MessageTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 import MessagesList from './MessagesList';
 
@@ -188,7 +188,7 @@ describe('render list of messages with history loader visible for first time ope
 			id: 'idSimpleTextMessage',
 			roomId: mockedRoom.id,
 			text: 'Hello guys! Sorry for the delay',
-			type: MessageType.EDITED_MSG
+			edited: true
 		});
 		const { result } = renderHook(() => useStore());
 		act(() => result.current.addRoom(mockedRoom));
@@ -197,7 +197,7 @@ describe('render list of messages with history loader visible for first time ope
 		const messageBubble = screen.getByText('Hello guys!');
 		expect(messageBubble).toBeInTheDocument();
 		act(() =>
-			result.current.setEditedMessage(mockedRoom.id, mockedEditedTextMessage as EditedMessage)
+			result.current.setEditedMessage(mockedRoom.id, mockedEditedTextMessage as TextMessage)
 		);
 		const messageEditedBubble = screen.getByText('Hello guys! Sorry for the delay');
 		expect(messageEditedBubble).toBeInTheDocument();
@@ -243,7 +243,7 @@ describe('render list of messages with history loader visible for first time ope
 			id: 'idSimpleTextMessage',
 			roomId: mockedRoom.id,
 			text: 'Hello guys! Sorry for the delay',
-			type: MessageType.EDITED_MSG
+			edited: true
 		});
 		const mockedReplayTextMessage = createMockTextMessage({
 			id: 'idReplayTextMessage',
@@ -256,7 +256,7 @@ describe('render list of messages with history loader visible for first time ope
 		act(() => result.current.addRoom(mockedRoom));
 		act(() => result.current.newMessage(mockedTextMessage));
 		act(() =>
-			result.current.setEditedMessage(mockedRoom.id, mockedEditedTextMessage as EditedMessage)
+			result.current.setEditedMessage(mockedRoom.id, mockedEditedTextMessage as TextMessage)
 		);
 		act(() => result.current.newMessage(mockedReplayTextMessage));
 		setup(<MessagesList roomId={mockedRoom.id} />);

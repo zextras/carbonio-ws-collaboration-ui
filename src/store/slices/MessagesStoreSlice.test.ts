@@ -15,12 +15,7 @@ import {
 } from '../../tests/createMock';
 import { RoomBe } from '../../types/network/models/roomBeTypes';
 import { MarkerStatus } from '../../types/store/MarkersTypes';
-import {
-	DeletedMessage,
-	EditedMessage,
-	MessageType,
-	TextMessage
-} from '../../types/store/MessageTypes';
+import { DeletedMessage, MessageType, TextMessage } from '../../types/store/MessageTypes';
 import useStore from '../Store';
 
 const room: RoomBe = createMockRoom({
@@ -40,34 +35,34 @@ const message0 = createMockTextMessage({
 	roomId: room.id,
 	date: 1661441294393, // 25 ago 2022, 15:28:14
 	from: 'user0'
-} as TextMessage);
+});
 
 const message1 = createMockTextMessage({
 	id: 'message1-id',
 	roomId: room.id,
 	date: 1662541294393, // 7 set 2022, 09:01:34
 	from: 'user1'
-} as TextMessage);
+});
 
 const message2 = createMockTextMessage({
 	id: 'message2-id',
 	roomId: room.id,
 	date: 1662541394393 // 7 set 2022, 09:03:14
-} as TextMessage);
+});
 
 const message0ReplayToMessage0 = createMockTextMessage({
 	id: 'message-replay0-id',
 	roomId: room.id,
 	date: 1665441294393,
 	from: 'user0'
-} as TextMessage);
+});
 
 const message1ReplayToMessage1 = createMockTextMessage({
 	id: 'message-replay1-id',
 	roomId: room.id,
 	date: 1665441294393,
 	from: 'user0'
-} as TextMessage);
+});
 
 const deletedMessage0: DeletedMessage = createMockDeletedMessage({
 	id: 'message0-id',
@@ -88,9 +83,9 @@ const message0Correction = createMockTextMessage({
 	roomId: room.id,
 	date: 1665441294393,
 	from: 'user0',
-	type: MessageType.EDITED_MSG,
-	text: 'edited message n0'
-} as EditedMessage);
+	text: 'edited message n0',
+	edited: true
+});
 
 const marker0_user0 = createMockMarker({
 	from: 'user0',
@@ -243,8 +238,8 @@ describe('Test messages slice', () => {
 		act(() => result.current.addRoom(room));
 		act(() => result.current.newMessage(message0));
 		act(() => result.current.newMessage(message1));
-		act(() => result.current.setEditedMessage(room.id, message0Correction as EditedMessage));
-		expect(result.current.messages[room.id][1].type).toBe(MessageType.EDITED_MSG);
+		act(() => result.current.setEditedMessage(room.id, message0Correction as TextMessage));
+		expect((result.current.messages[room.id][1] as TextMessage).edited).toBeTruthy();
 		expect(result.current.messages[room.id][1].date).toBe(message0.date);
 		expect((result.current.messages[room.id][1] as TextMessage).text).toBe(message0Correction.text);
 	});
@@ -254,7 +249,7 @@ describe('Test messages slice', () => {
 		act(() => result.current.addRoom(room));
 		act(() => result.current.newMessage(message0));
 		act(() => result.current.newMessage(message1));
-		act(() => result.current.setEditedMessage(room.id, message0Correction as EditedMessage));
+		act(() => result.current.setEditedMessage(room.id, message0Correction as TextMessage));
 		act(() => result.current.newMessage(message0ReplayToMessage0));
 		act(() => result.current.setRepliedMessage(room.id, message0ReplayToMessage0.id, message0));
 		expect((result.current.messages[room.id][5] as TextMessage).repliedMessage?.id).toBe(

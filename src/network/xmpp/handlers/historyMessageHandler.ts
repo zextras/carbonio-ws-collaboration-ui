@@ -48,7 +48,7 @@ export function onHistoryMessageStanza(message: Element): true {
 						historyMessage.roomId,
 						historyMessage
 					);
-				} else if (historyMessage.type === MessageType.EDITED_MSG) {
+				} else if (historyMessage.type === MessageType.TEXT_MSG && historyMessage.edited) {
 					HistoryAccumulator.replaceMessageEditedInTheHistory(
 						historyMessage.roomId,
 						historyMessage
@@ -59,10 +59,7 @@ export function onHistoryMessageStanza(message: Element): true {
 				break;
 			}
 			case MamRequestType.REPLIED: {
-				if (
-					historyMessage.type === MessageType.TEXT_MSG ||
-					historyMessage.type === MessageType.EDITED_MSG
-				) {
+				if (historyMessage.type === MessageType.TEXT_MSG) {
 					HistoryAccumulator.addRepliedMessage(historyMessage);
 				} else {
 					console.warn('Replied message type not supported', historyMessage);

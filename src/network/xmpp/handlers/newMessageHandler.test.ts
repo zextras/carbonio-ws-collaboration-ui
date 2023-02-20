@@ -13,7 +13,6 @@ import { xmppClient } from '../../../tests/mockedXmppClient';
 import {
 	DateMessage,
 	DeletedMessage,
-	EditedMessage,
 	MessageType,
 	TextMessage
 } from '../../../types/store/MessageTypes';
@@ -29,6 +28,7 @@ type MessageInfo = {
 	replyTo?: string;
 	messageIdDeletion?: string;
 	idMessageToToEdit?: string;
+	isEdited?: boolean;
 };
 
 const createMockMessageInfo = (fields?: Record<string, any>): MessageInfo => ({
@@ -37,6 +37,7 @@ const createMockMessageInfo = (fields?: Record<string, any>): MessageInfo => ({
 	roomId: 'roomId',
 	from: 'userId',
 	stanzaId: 'stanzaId',
+	isEdited: false,
 	...fields
 });
 
@@ -52,6 +53,7 @@ const createXMPPReceivedMessage = (info: MessageInfo): Element => {
 			>
 				${
 					info.messageType === MessageType.TEXT_MSG &&
+					!info.isEdited &&
 					`
 						<body>${info.text}</body>
 						<markable xmlns="urn:xmpp:chat-markers:0"></markable>
@@ -59,7 +61,8 @@ const createXMPPReceivedMessage = (info: MessageInfo): Element => {
 					`
 				}
 				${
-					info.messageType === MessageType.EDITED_MSG &&
+					info.messageType === MessageType.TEXT_MSG &&
+					info.isEdited &&
 					`
 						<body>${info.text}</body>
 						<replace id="${info.idMessageToToEdit}" xmlns="urn:xmpp:message-correct:0"/>
@@ -189,9 +192,9 @@ describe('XMPP newMessageHandler', () => {
 		const initialMessageInfo = createMockMessageInfo({ text: 'Hi!' });
 		const editInfo = createMockMessageInfo({
 			id: 'messageId2',
-			messageType: MessageType.EDITED_MSG,
 			idMessageToToEdit: initialMessageInfo.id,
-			text: 'Hi everyone!'
+			text: 'Hi everyone!',
+			isEdited: true
 		});
 		const message = createXMPPReceivedMessage(initialMessageInfo);
 		const messageCorrection = createXMPPReceivedMessage(editInfo);
@@ -201,8 +204,8 @@ describe('XMPP newMessageHandler', () => {
 
 		const editedMessage = store.messages[initialMessageInfo.roomId][1];
 		expect(editedMessage.id).toBe(initialMessageInfo.id);
-		expect(editedMessage.type).toBe(MessageType.EDITED_MSG);
-		expect((editedMessage as EditedMessage).text).toBe(editInfo.text);
+		expect((editedMessage as TextMessage).edited).toBeTruthy();
+		expect((editedMessage as TextMessage).text).toBe(editInfo.text);
 	});
 
 	test('Send desktop notification on new message', () => {

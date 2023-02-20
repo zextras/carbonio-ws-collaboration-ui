@@ -14,7 +14,7 @@ import { createMockMember, createMockRoom, createMockTextMessage } from '../../.
 import { RoomBe } from '../../../types/network/models/roomBeTypes';
 import { messageActionType } from '../../../types/store/ActiveConversationTypes';
 import { MarkerStatus } from '../../../types/store/MarkersTypes';
-import { MessageType, TextMessage } from '../../../types/store/MessageTypes';
+import { MessageType } from '../../../types/store/MessageTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 import { RootStore } from '../../../types/store/StoreTypes';
 import MessagesList from '../MessagesList';
@@ -37,7 +37,7 @@ const mockedMessage = createMockTextMessage({
 	from: 'idRoberto',
 	text: 'Hi guys! Today I will not be present to the meeting sorry!',
 	read: MarkerStatus.UNREAD
-} as TextMessage);
+});
 
 describe('Replay to a message by opening the contextual menu', () => {
 	test('Display the contextual menu of a message', () => {

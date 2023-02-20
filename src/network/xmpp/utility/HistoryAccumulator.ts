@@ -8,7 +8,6 @@ import { findIndex } from 'lodash';
 
 import useStore from '../../../store/Store';
 import {
-	EditedMessage,
 	Message,
 	MessageList,
 	MessageMap,
@@ -47,7 +46,7 @@ class HistoryAccumulator {
 		return history;
 	}
 
-	public addRepliedMessage(message: TextMessage | EditedMessage): void {
+	public addRepliedMessage(message: TextMessage): void {
 		this.repliedMessages[message.stanzaId] = message;
 	}
 
@@ -76,20 +75,17 @@ class HistoryAccumulator {
 		}
 	}
 
-	replaceMessageEditedInTheHistory(roomId: string, editedMessage: EditedMessage): void {
+	replaceMessageEditedInTheHistory(roomId: string, editedMessage: TextMessage): void {
 		if (!this.histories[roomId]) this.histories[roomId] = [];
 		const index = findIndex(this.histories[roomId], { id: editedMessage.id });
 		if (
 			this.histories[roomId][index] &&
 			this.histories[roomId][index].id === editedMessage.id &&
-			this.histories[roomId][index].type !== editedMessage.type
+			this.histories[roomId][index].type === MessageType.TEXT_MSG &&
+			(this.histories[roomId][index] as TextMessage).edited !== editedMessage.edited
 		) {
 			const messageToReplace = this.histories[roomId][index];
-			if (
-				(messageToReplace.type === MessageType.TEXT_MSG ||
-					messageToReplace.type === MessageType.EDITED_MSG) &&
-				messageToReplace.replyTo
-			) {
+			if (messageToReplace.type === MessageType.TEXT_MSG && messageToReplace.replyTo) {
 				this.histories[roomId].splice(index, 1, {
 					...editedMessage,
 					date: messageToReplace.date,
@@ -99,7 +95,7 @@ class HistoryAccumulator {
 			} else {
 				this.histories[roomId].splice(index, 1, { ...editedMessage, date: messageToReplace.date });
 			}
-		} else if (!this.histories[roomId][index] && editedMessage.type === MessageType.EDITED_MSG) {
+		} else if (!this.histories[roomId][index] && editedMessage.edited) {
 			// when arrives the correction, but I still don't have the history I save it for the future history update
 			const store = useStore.getState();
 			store.addEditedMessageRef(roomId, editedMessage);

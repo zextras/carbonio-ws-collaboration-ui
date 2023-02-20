@@ -9,7 +9,6 @@ import { size } from 'lodash';
 
 import { createMockMember, createMockRoom, createMockTextMessage } from '../../tests/createMock';
 import { RoomBe } from '../../types/network/models/roomBeTypes';
-import { TextMessage } from '../../types/store/MessageTypes';
 import useStore from '../Store';
 
 const room: RoomBe = createMockRoom({
@@ -22,8 +21,8 @@ const room: RoomBe = createMockRoom({
 	]
 });
 
-const textMessage1 = createMockTextMessage({ id: 'text-msg-1', roomId: room.id } as TextMessage);
-const textMessage2 = createMockTextMessage({ id: 'text-msg-2', roomId: room.id } as TextMessage);
+const textMessage1 = createMockTextMessage({ id: 'text-msg-1', roomId: room.id });
+const textMessage2 = createMockTextMessage({ id: 'text-msg-2', roomId: room.id });
 
 describe('Test temporary messages slice', () => {
 	it('add reference message deleted', () => {

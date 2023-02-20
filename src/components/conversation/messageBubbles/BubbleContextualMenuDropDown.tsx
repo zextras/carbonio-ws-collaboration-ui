@@ -14,7 +14,7 @@ import { getXmppClient } from '../../../store/selectors/ConnectionSelector';
 import { getCapability } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { messageActionType } from '../../../types/store/ActiveConversationTypes';
-import { EditedMessage, MessageType, TextMessage } from '../../../types/store/MessageTypes';
+import { MessageType, TextMessage } from '../../../types/store/MessageTypes';
 import { CapabilityType } from '../../../types/store/SessionTypes';
 
 export const BubbleContextualMenuDropDownWrapper = styled.div<{
@@ -81,7 +81,7 @@ export const BubbleContextualMenuDropDownWrapper = styled.div<{
 `;
 
 type BubbleContextualMenuDropDownProps = {
-	message: TextMessage | EditedMessage;
+	message: TextMessage;
 	isMyMessage: boolean;
 };
 
@@ -150,24 +150,34 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 			deleteMessageTimeLimitInMinutes &&
 			Date.now() <= message.date + editMessageTimeLimitInMinutes * 60000;
 
+		// Reply functionality
+		// if (
+		// 	capabilities.can_reply_to_messages &&
+		// 	messageInfos.type !== 'deleted_message'
+		// ) {
+		actions.push({
+			id: 'Reply',
+			label: replayActionLabel,
+			click: () =>
+				setReferenceMessage(
+					message.roomId,
+					message.id,
+					message.from,
+					message.stanzaId,
+					messageActionType.REPLAY
+				)
+		});
+		// }
+
 		// Copy the text of a text message to the clipboard
 		if (
 			typeof window.parent.document.execCommand !== 'undefined' &&
-			(message.type === MessageType.TEXT_MSG || message.type === MessageType.EDITED_MSG)
+			message.type === MessageType.TEXT_MSG
 		) {
 			actions.push({
 				id: 'Copy',
 				label: copyActionLabel,
 				click: copyMessage
-			});
-		}
-
-		// Delete functionality
-		if (isMyMessage && messageCanBeDeleted) {
-			actions.push({
-				id: 'Delete',
-				label: deleteActionLabel,
-				click: () => xmppClient.sendChatMessageDeletion(message.roomId, message.id)
 			});
 		}
 
@@ -189,24 +199,14 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 			});
 		}
 
-		// Reply functionality
-		// if (
-		// 	capabilities.can_reply_to_messages &&
-		// 	messageInfos.type !== 'deleted_message'
-		// ) {
-		actions.push({
-			id: 'Reply',
-			label: replayActionLabel,
-			click: () =>
-				setReferenceMessage(
-					message.roomId,
-					message.id,
-					message.from,
-					message.stanzaId,
-					messageActionType.REPLAY
-				)
-		});
-		// }
+		// Delete functionality
+		if (isMyMessage && messageCanBeDeleted) {
+			actions.push({
+				id: 'Delete',
+				label: deleteActionLabel,
+				click: () => xmppClient.sendChatMessageDeletion(message.roomId, message.id)
+			});
+		}
 
 		setContextualMenuActions(actions);
 		// eslint-disable-next-line react-hooks/exhaustive-deps

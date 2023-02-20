@@ -11,7 +11,7 @@ import IXMPPClient from '../network/xmpp/IXMPPClient';
 import { ActiveConversationsMap, messageActionType } from './ActiveConversationTypes';
 import { Connections } from './ConnectionsTypes';
 import { Marker, MarkersMap } from './MarkersTypes';
-import { MessageMap, Message, TextMessage, DeletedMessage, EditedMessage } from './MessageTypes';
+import { MessageMap, Message, TextMessage, DeletedMessage } from './MessageTypes';
 import { RoomsMap } from './RoomTypes';
 import { CapabilityList, Session } from './SessionTypes';
 import { TemporaryMessage, TemporaryMessagesMap } from './TemporaryMessagesReferencesTypes';
@@ -53,13 +53,9 @@ export type MessagesStoreSlice = {
 	newInboxMessage: (message: Message) => void;
 	updateHistory: (roomId: string, messageArray: Message[]) => void;
 	updateUnreadMessages: (roomId: string) => void;
-	setRepliedMessage: (
-		roomId: string,
-		replayMessageId: string,
-		repliedMessage: TextMessage | EditedMessage
-	) => void;
+	setRepliedMessage: (roomId: string, replayMessageId: string, repliedMessage: TextMessage) => void;
 	setDeletedMessage: (roomId: string, deletedMessage: DeletedMessage) => void;
-	setEditedMessage: (roomId: string, editedMessage: EditedMessage) => void;
+	setEditedMessage: (roomId: string, editedMessage: TextMessage) => void;
 };
 
 export type SessionStoreSlice = {

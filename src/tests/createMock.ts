@@ -6,12 +6,7 @@
 
 import { MemberBe, RoomBe } from '../types/network/models/roomBeTypes';
 import { Marker, MarkerStatus, MarkerType } from '../types/store/MarkersTypes';
-import {
-	DeletedMessage,
-	EditedMessage,
-	MessageType,
-	TextMessage
-} from '../types/store/MessageTypes';
+import { DeletedMessage, MessageType, TextMessage } from '../types/store/MessageTypes';
 import { RoomType } from '../types/store/RoomTypes';
 import { CapabilityList } from '../types/store/SessionTypes';
 
@@ -30,9 +25,7 @@ export const createMockRoom = (fields?: Record<string, any>): RoomBe => ({
 	...fields
 });
 
-export const createMockTextMessage = (
-	fields?: Record<string, any>
-): TextMessage | EditedMessage => ({
+export const createMockTextMessage = (fields?: Record<string, any>): TextMessage => ({
 	id: 'id',
 	roomId: 'roomId',
 	date: 1661441294393,
@@ -41,6 +34,7 @@ export const createMockTextMessage = (
 	from: 'userId',
 	text: 'Hi',
 	read: MarkerStatus.UNREAD,
+	edited: false,
 	...fields
 });
 

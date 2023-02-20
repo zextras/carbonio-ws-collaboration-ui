@@ -21,10 +21,12 @@ import {
 	getReferenceMessageView
 } from '../../../store/selectors/ActiveConversationsSelectors';
 import { getXmppClient } from '../../../store/selectors/ConnectionSelector';
+import { getMessageSelector } from '../../../store/selectors/MessagesSelectors';
 import { getRoomUnreadsSelector } from '../../../store/selectors/UnreadsCounterSelectors';
 import useStore from '../../../store/Store';
 import { Emoji } from '../../../types/generics';
 import { messageActionType } from '../../../types/store/ActiveConversationTypes';
+import { Message, MessageType } from '../../../types/store/MessageTypes';
 import EmojiPicker from './EmojiPicker';
 import MessageArea from './MessageArea';
 
@@ -47,6 +49,9 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 	const setInputHasFocus = useStore((store) => store.setInputHasFocus);
 	const setDraftMessage = useStore((store) => store.setDraftMessage);
 	const unreadMessagesCount = useStore((store) => getRoomUnreadsSelector(store, roomId));
+	const messageReference = useStore<Message | undefined>((store) =>
+		getMessageSelector(store, roomId, referenceMessage?.messageId)
+	);
 
 	const [textMessage, setTextMessage] = useState('');
 	const [isWriting, setIsWriting] = useState(false);
@@ -98,7 +103,12 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 					break;
 				}
 				case messageActionType.EDIT: {
-					xmppClient.sendChatMessageCorrection(roomId, message, referenceMessage.messageId);
+					if (
+						messageReference?.type === MessageType.TEXT_MSG &&
+						messageReference?.text !== message
+					) {
+						xmppClient.sendChatMessageCorrection(roomId, message, referenceMessage.messageId);
+					}
 					break;
 				}
 				default: {
@@ -118,7 +128,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 		const listOfMessages = document.getElementById(`messageListRef${roomId}`);
 		listOfMessages?.scrollTo({ top: listOfMessages.scrollHeight, behavior: 'auto' });
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [xmppClient, roomId, textMessage, timeoutRef, referenceMessage]);
+	}, [xmppClient, roomId, textMessage, timeoutRef, referenceMessage, messageReference]);
 
 	const handleTypingMessage = useCallback(
 		(e: BaseSyntheticEvent): void => {

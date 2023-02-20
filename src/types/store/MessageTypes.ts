@@ -14,7 +14,6 @@ export type MessageList = Message[];
 
 export type Message =
 	| TextMessage
-	| EditedMessage
 	| AttachmentMessage
 	| DeletedMessage
 	| AffiliationMessage
@@ -34,7 +33,8 @@ export type TextMessage = BasicMessage & {
 	text: string;
 	read: MarkerStatus;
 	replyTo?: string;
-	repliedMessage?: TextMessage | DeletedMessage | EditedMessage;
+	repliedMessage?: TextMessage | DeletedMessage;
+	edited?: boolean;
 };
 
 export type AttachmentMessage = BasicMessage & {
@@ -44,17 +44,7 @@ export type AttachmentMessage = BasicMessage & {
 	text: string;
 	read: MarkerStatus;
 	replyTo?: string;
-	repliedMessage?: TextMessage | DeletedMessage | EditedMessage;
-};
-
-export type EditedMessage = BasicMessage & {
-	stanzaId: string;
-	type: MessageType.EDITED_MSG;
-	from: string;
-	text: string;
-	read: MarkerStatus;
-	replyTo?: string;
-	repliedMessage?: TextMessage | DeletedMessage | EditedMessage;
+	repliedMessage?: TextMessage | DeletedMessage;
 };
 
 export type DeletedMessage = BasicMessage & {
@@ -81,7 +71,6 @@ export type DateMessage = BasicMessage & {
 export enum MessageType {
 	TEXT_MSG = 'text',
 	ATTACHMENT_MSG = 'attachment',
-	EDITED_MSG = 'edited',
 	DELETED_MSG = 'deleted',
 	AFFILIATION_MSG = 'affiliation',
 	CONFIGURATION_MSG = 'configuration',

@@ -68,7 +68,8 @@
     },
     "message": {
         "deletedMessage": "Deleted message",
-        "draft": "draft"
+        "draft": "draft",
+        "edited": "Edited"
     },
     "modal": {
         "clearHistoryDescription": "You are about to clean up your conversation history, remember that this action cannot be undone. The history of other participants will not be deleted.",

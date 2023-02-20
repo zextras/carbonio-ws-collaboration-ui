@@ -9,7 +9,7 @@ import { Container } from '@zextras/carbonio-design-system';
 import React, { FC, ReactElement } from 'react';
 import styled from 'styled-components';
 
-import { EditedMessage, MessageType, TextMessage } from '../../../types/store/MessageTypes';
+import { MessageType, TextMessage } from '../../../types/store/MessageTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 import BubbleContextualMenuDropDown, {
 	BubbleContextualMenuDropDownWrapper
@@ -23,7 +23,7 @@ type BubbleProps = {
 	refEl: React.RefObject<HTMLElement>;
 	isMyMessage: boolean;
 	senderInfo: string | null; // name | email | id(fallback)
-	message: TextMessage | EditedMessage;
+	message: TextMessage;
 	messageTime: string;
 	messageFormatted: string | (string | ReactElement)[];
 	prevMessageIsFromSameSender: boolean;
@@ -115,12 +115,10 @@ const Bubble: FC<BubbleProps> = ({
 				isMyMessage={isMyMessage}
 			/>
 		)}
-		{(message.type === MessageType.TEXT_MSG || message.type === MessageType.EDITED_MSG) && (
-			<TextContentBubble textContent={messageFormatted} />
-		)}
+		{message.type === MessageType.TEXT_MSG && <TextContentBubble textContent={messageFormatted} />}
 		<BubbleFooter
 			isMyMessage={isMyMessage}
-			messageType={message.type}
+			isEdited={message?.edited}
 			time={messageTime}
 			messageRead={message.read}
 		/>

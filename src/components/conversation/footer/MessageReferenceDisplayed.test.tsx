@@ -12,7 +12,6 @@ import useStore from '../../../store/Store';
 import { createMockRoom, createMockTextMessage } from '../../../tests/createMock';
 import { RoomBe } from '../../../types/network/models/roomBeTypes';
 import { messageActionType } from '../../../types/store/ActiveConversationTypes';
-import { TextMessage } from '../../../types/store/MessageTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 import { User } from '../../../types/store/UserTypes';
 import MessageReferenceDisplayed from './MessageReferenceDisplayed';
@@ -29,14 +28,14 @@ const mockedRepliedTextMessage = createMockTextMessage({
 	roomId: mockedRoom.id,
 	from: 'user1',
 	text: 'Text message used for test'
-} as TextMessage);
+});
 
 const myMockedRepliedTextMessage = createMockTextMessage({
 	id: 'messageId',
 	roomId: mockedRoom.id,
 	from: myId,
 	text: 'Text message sent by me'
-} as TextMessage);
+});
 
 const user1: User = {
 	id: 'user1',

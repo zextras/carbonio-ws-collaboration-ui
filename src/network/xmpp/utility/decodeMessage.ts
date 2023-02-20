@@ -11,7 +11,6 @@ import {
 	AffiliationMessage,
 	ConfigurationMessage,
 	DeletedMessage,
-	EditedMessage,
 	Message, MessageType,
 	TextMessage
 } from '../../../types/store/MessageTypes';
@@ -65,12 +64,13 @@ export function decodeMessage(messageStanza: Element, optional?: OptionalParamet
 				stanzaId,
 				roomId,
 				date: messageDate,
-				type: MessageType.EDITED_MSG,
+				type: MessageType.TEXT_MSG,
 				from,
 				text: messageTxt,
-				replyTo
+				replyTo,
+				edited: true
 			}
-			return message as EditedMessage;
+			return message as TextMessage;
 		}
 
 		message = {
@@ -82,7 +82,8 @@ export function decodeMessage(messageStanza: Element, optional?: OptionalParamet
 			from,
 			text: messageTxt,
 			read: calcReads(messageDate, roomId),
-			replyTo
+			replyTo,
+			edited: false
 		};
 		return message as TextMessage;
 	}

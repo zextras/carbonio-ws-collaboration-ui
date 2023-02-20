@@ -11,7 +11,6 @@ import { setup } from 'test-utils';
 import useStore from '../../../store/Store';
 import { createMockRoom, createMockTextMessage } from '../../../tests/createMock';
 import { RoomBe } from '../../../types/network/models/roomBeTypes';
-import { TextMessage } from '../../../types/store/MessageTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 import { RootStore } from '../../../types/store/StoreTypes';
 import BubbleFactory from './BubbleFactory';
@@ -28,7 +27,7 @@ const mockedRepliedTextMessage = createMockTextMessage({
 		id: 'insideId',
 		text: 'Hi!'
 	})
-} as TextMessage);
+});
 
 describe('Message bubble component visualization', () => {
 	test('Display replied text message', () => {

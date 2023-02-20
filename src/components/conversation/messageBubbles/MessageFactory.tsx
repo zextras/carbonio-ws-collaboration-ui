@@ -55,8 +55,7 @@ const MessageFactory = ({
 
 	if (message) {
 		switch (message.type) {
-			case MessageType.TEXT_MSG:
-			case MessageType.EDITED_MSG: {
+			case MessageType.TEXT_MSG: {
 				return (
 					<BubbleFactory
 						message={message}
