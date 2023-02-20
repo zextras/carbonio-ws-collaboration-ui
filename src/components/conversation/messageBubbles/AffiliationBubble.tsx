@@ -44,10 +44,12 @@ const AffiliationBubble: FC<AffiliationMsgProps> = ({ message, refEl }) => {
 		return '';
 	}, [roomMembers, roomType, message.userId]);
 
-	const actionName =
-		actionMemberId !== undefined
-			? users[actionMemberId]?.name || users[actionMemberId]?.email || actionMemberId
-			: '';
+	const actionName = useMemo(() => {
+		if (actionMemberId !== undefined) {
+			return users[actionMemberId]?.name || users[actionMemberId]?.email || actionMemberId;
+		}
+		return '';
+	}, [actionMemberId, users]);
 
 	const affiliationLabel = affiliationMessage(
 		message.as,

@@ -58,7 +58,7 @@ export const configurationMessage = (
 			return pictureDeletedLabel;
 		}
 		default: {
-			console.warn('configuration message to replace');
+			console.warn('configuration message to replace: ', messageOperation);
 			return '';
 		}
 	}

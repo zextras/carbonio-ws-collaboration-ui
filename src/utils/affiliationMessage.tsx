@@ -55,20 +55,23 @@ export const affiliationMessage = (
 			: someoneCreatedOneToOne;
 
 	switch (messageType) {
+		// when a user is added to a chat, used as a creation message in one-to-one
 		case 'member': {
 			if (roomType === RoomType.GROUP) {
 				return memberAddedLabel;
 			}
 			return oneToOneCreatedLabel;
 		}
+		// when a user is removed from a chat
 		case 'none': {
 			return memberRemovedLabel;
 		}
+		// custom message for when a group is created
 		case 'creation': {
 			return groupCreatedLabel;
 		}
 		default: {
-			console.warn('affiliation message to replace');
+			console.warn('affiliation message to replace: ', messageType);
 			return '';
 		}
 	}
