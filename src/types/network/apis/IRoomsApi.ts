@@ -58,7 +58,11 @@ interface IRoomsApi {
 		pageNumber: number,
 		pageFilter: string
 	): Promise<GetRoomAttachmentsResponse>;
-	addRoomAttachment(roomId: string, file: File): Promise<AddRoomAttachmentResponse>;
+	addRoomAttachment(
+		roomId: string,
+		file: File,
+		description?: string
+	): Promise<AddRoomAttachmentResponse>;
 }
 
 export default IRoomsApi;

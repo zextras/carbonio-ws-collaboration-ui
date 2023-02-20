@@ -4,7 +4,14 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { IconButton, Container, Tooltip, Padding } from '@zextras/carbonio-design-system';
+import {
+	IconButton,
+	Container,
+	Tooltip,
+	Padding,
+	FileLoader
+} from '@zextras/carbonio-design-system';
+import { forEach } from 'lodash';
 import React, {
 	BaseSyntheticEvent,
 	useCallback,
@@ -15,6 +22,7 @@ import React, {
 } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { RoomsApi } from '../../../network';
 import {
 	getDraftMessage,
 	getInputHasFocus,
@@ -238,6 +246,19 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 		};
 	}, [mouseEnterEvent, mouseLeaveEvent]);
 
+	const selectFiles = useCallback(
+		(ev) => {
+			const { files } = ev.target as HTMLInputElement;
+			forEach(files, (file: File) => {
+				console.log(file.name, file.size, file.type);
+				RoomsApi.addRoomAttachment(roomId, file)
+					.then((resp) => console.log(resp))
+					.catch((error) => console.log(error));
+			});
+		},
+		[roomId]
+	);
+
 	return (
 		<Container height="fit">
 			{showEmojiPicker && (
@@ -272,6 +293,9 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 					handleOnBlur={handleOnBlur}
 					handleOnFocus={handleOnFocus}
 				/>
+				<Container width="fit" height="fit" padding={{ right: 'extrasmall', bottom: '0.3125rem' }}>
+					<FileLoader size="large" iconColor="gray1" onChange={selectFiles} multiple />
+				</Container>
 				<Tooltip label={sendDisabled ? writeToSendTooltip : sendMessageLabel} placement="top">
 					<Container
 						width="fit"

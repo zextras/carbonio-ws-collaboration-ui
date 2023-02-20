@@ -46,26 +46,33 @@ export default abstract class BaseAPI implements IBaseAPI {
 			.catch((err: Error) => Promise.reject(err));
 	}
 
-	uploadFileFetchAPI(endpoint: string, file: File, requestType?: RequestType): Promise<any> {
-		// TODO encode filename
+	uploadFileFetchAPI(
+		endpoint: string,
+		requestType: RequestType,
+		file: File,
+		description?: string
+	): Promise<any> {
 		return new Promise<any>((resolve, reject) => {
 			const reader = new FileReader();
 			reader.addEventListener('load', () => {
 				const headers = new Headers();
-				headers.append(
-					'X-Content-Disposition',
-					`fileName=${btoa(encodeURIComponent(file.name))}; mimeType=${file.type}`
-				);
+				headers.append('fileName', btoa(encodeURIComponent(file.name)));
+				headers.append('mimeType', file.type);
+				description && headers.append('description', description);
 				// Add sessionId to headers only if it is already defined
 				const sessionId = useStore.getState().session.sessionId;
 				if (sessionId) {
 					headers.append('session-id', sessionId);
 				}
 				fetch(this.url + endpoint, {
-					method: requestType || RequestType.PUT,
+					method: requestType,
 					headers,
 					body: reader.result
 				})
+					.then((resp: Response) => {
+						if (resp.ok) return resp;
+						return Promise.reject(resp);
+					})
 					.then((resp: Response) => {
 						const contentType = resp.headers.get('content-type');
 						if (includes(contentType, 'image/')) resolve(resp.blob());
