@@ -54,13 +54,18 @@ export type DeletedMessage = BasicMessage & {
 export type AffiliationMessage = BasicMessage & {
 	type: MessageType.AFFILIATION_MSG;
 	userId: string;
-	as: 'member';
+	as: string;
 };
 
 export type ConfigurationMessage = BasicMessage & {
 	type: MessageType.CONFIGURATION_MSG;
-	operation: 'changedRoomName';
+	operation:
+		| 'roomNameChanged'
+		| 'roomDescriptionChanged'
+		| 'roomPictureUpdated'
+		| 'roomPictureDeleted';
 	value: string;
+	from: string;
 };
 
 export type DateMessage = BasicMessage & {

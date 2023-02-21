@@ -20,6 +20,20 @@
         "scrollToBottom": "Scroll to bottom",
         "undo": "Undo"
     },
+    "affiliationMessages": {
+        "SomeoneElseCreatedOneToOne": "{{userName}} started a chat with you",
+        "groupCreated": "{{roomName}} created!",
+        "memberAdded": "{{userName}} has been added to {{roomName}}",
+        "memberRemoved": "{{userName}} has been removed from {{roomName}}",
+        "oneToOneCreated": "New Chat created!",
+        "youCreatedOneToOne": "You started a chat with {{userName}}"
+    },
+    "configurationMessages": {
+        "roomNameChanged": "{{name}} changed the title of this Group in \"<i>{{roomName}}</i>\"",
+        "roomPictureDeleted": "{{name}} restored the default {{roomName}}'s image",
+        "roomPictureUpdated": "{{name}} changed {{roomName}}'s image",
+        "roomTopicChanged": "{{name}} changed the topic of {{roomName}} in \"<i>{{topicName}}</i>\""
+    },
     "conversation": {
         "chooseConversationDescription": "Choose a conversation to start a chat",
         "emptyListDescription": "The conversations and groups will appear listed here",

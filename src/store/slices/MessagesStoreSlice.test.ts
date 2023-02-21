@@ -30,18 +30,29 @@ const room: RoomBe = createMockRoom({
 
 const room2: RoomBe = createMockRoom();
 
+const room3: RoomBe = createMockRoom({
+	id: 'room-id',
+	members: [
+		createMockMember({ userId: 'user0' }),
+		createMockMember({ userId: 'user1' }),
+		createMockMember({ userId: 'user2' })
+	]
+});
+
 const message0: TextMessage = createMockTextMessage({
 	id: 'message0-id',
 	roomId: room.id,
 	date: 1661441294393, // 25 ago 2022, 15:28:14
-	from: 'user0'
+	from: 'user0',
+	text: 'message0'
 });
 
 const message1: TextMessage = createMockTextMessage({
 	id: 'message1-id',
 	roomId: room.id,
 	date: 1662541294393, // 7 set 2022, 09:01:34
-	from: 'user1'
+	from: 'user1',
+	text: 'message1'
 });
 
 const message0ReplayToMessage0: TextMessage = createMockTextMessage({
@@ -75,7 +86,9 @@ const deletedMessage1: DeletedMessage = createMockDeletedMessage({
 const message2: TextMessage = createMockTextMessage({
 	id: 'message2-id',
 	roomId: room.id,
-	date: 1662541394393 // 7 set 2022, 09:03:14
+	date: 1662541394393, // 7 set 2022, 09:03:14
+	from: 'user0',
+	text: 'message2'
 });
 
 const marker0_user0 = createMockMarker({
@@ -147,20 +160,21 @@ describe('Test messages slice', () => {
 
 	it('updateHistory', () => {
 		const { result } = renderHook(() => useStore());
+		act(() => result.current.addRoom(room3));
 		// Add first message
-		act(() => result.current.updateHistory(message0.roomId, [message0, message1]));
-		expect(result.current.messages[message0.roomId]).toHaveLength(4);
+		act(() => result.current.updateHistory(room.id, [message0, message1]));
+		expect(result.current.messages[message0.roomId]).toHaveLength(5);
 
 		// Insert new messages in the center of history
 		act(() => result.current.updateHistory(message0.roomId, [message2]));
-		expect(result.current.messages[message0.roomId]).toHaveLength(6);
-		expect(result.current.messages[message0.roomId][1]).toBe(message0);
-		expect(result.current.messages[message0.roomId][3]).toBe(message1);
-		expect(result.current.messages[message0.roomId][5]).toBe(message2);
+		expect(result.current.messages[message0.roomId]).toHaveLength(8);
+		expect(result.current.messages[message0.roomId][3]).toBe(message0);
+		expect(result.current.messages[message0.roomId][5]).toBe(message1);
+		expect(result.current.messages[message0.roomId][7]).toBe(message2);
 
 		// Insert message with same id of another
-		act(() => result.current.updateHistory(message0.roomId, [message2]));
-		expect(result.current.messages[message0.roomId]).toHaveLength(8);
+		act(() => result.current.updateHistory(room.id, [message2]));
+		expect(result.current.messages[message0.roomId]).toHaveLength(10);
 	});
 
 	it('updateUnreadMessages', () => {
