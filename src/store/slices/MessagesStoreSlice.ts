@@ -86,7 +86,7 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 						delete draft.temporaryMessages[roomId][`edited_${historyMessage.id}`];
 					}
 					// check if there is a deleted reference in temporaryMessages and update the message to be displayed as deleted
-					else if (
+					if (
 						draft.temporaryMessages[roomId] &&
 						draft.temporaryMessages[roomId][`deleted_${historyMessage.id}`]
 					) {
