@@ -33,7 +33,7 @@ import { getPrefTimezoneSelector } from '../../store/selectors/SessionSelectors'
 import useStore from '../../store/Store';
 import { Message, MessageType, TextMessage } from '../../types/store/MessageTypes';
 import { isBefore, now } from '../../utils/dateUtil';
-import AnimationGlobalStyle from './messageBubbles/BubblueAnimationsGlobalStyle';
+import AnimationGlobalStyle from './messageBubbles/BubbleAnimationsGlobalStyle';
 import MessageFactory from './messageBubbles/MessageFactory';
 import WritingBubble from './messageBubbles/WritingBubble';
 import MessageHistoryLoader from './MessageHistoryLoader';
@@ -335,6 +335,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 			list.push(
 				<Container
 					key={`messageList-${Math.random()}`}
+					data-testid={`messageListRef${roomId}`}
 					mainAlignment={'flex-start'}
 					crossAlignment={'flex-start'}
 					height={'fit'}
@@ -344,7 +345,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 			);
 		});
 		return list;
-	}, [dateMessageWrapped]);
+	}, [dateMessageWrapped, roomId]);
 
 	const handleClickScrollButton = useCallback(() => {
 		MessagesListWrapperRef?.current &&
