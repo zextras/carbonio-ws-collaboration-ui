@@ -198,7 +198,7 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 		}
 
 		// Edit functionality
-		if (isMyMessage && messageCanBeEdited) {
+		if (isMyMessage && messageCanBeEdited && !message.forwarded) {
 			actions.push({
 				id: 'Edit',
 				label: editActionLabel,

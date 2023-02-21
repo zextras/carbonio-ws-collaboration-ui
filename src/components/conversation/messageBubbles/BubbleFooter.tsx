@@ -15,11 +15,6 @@ import useStore from '../../../store/Store';
 import { MarkerStatus } from '../../../types/store/MarkersTypes';
 import { ForwardedMessage } from '../../../types/store/MessageTypes';
 
-const CustomText = styled(Text)`
-	font-style: italic;
-	overflow: visible;
-`;
-
 type BubbleFooterProps = {
 	date: number;
 	isMyMessage?: boolean;
@@ -50,7 +45,7 @@ const BubbleFooter: FC<BubbleFooterProps> = ({
 }) => {
 	const [t] = useTranslation();
 	const forwardedLabel = t('action.forwarded', 'forwarded');
-	const editedLabel = t('message.edited', 'Edited');
+	const editedLabel = t('message.edited', 'edited');
 
 	const ackIcon = messageRead === MarkerStatus.UNREAD ? 'Checkmark' : 'DoneAll';
 	const ackIconColor = messageRead === MarkerStatus.READ ? 'primary' : 'gray';
@@ -97,9 +92,9 @@ const BubbleFooter: FC<BubbleFooterProps> = ({
 				)}
 				{forwarded && (
 					<Padding width="fit" right="small">
-						<CustomText color="secondary" size="small">
+						<ItalicText color="secondary" size="extrasmall">
 							{forwardedLabel}
-						</CustomText>
+						</ItalicText>
 					</Padding>
 				)}
 				{isMyMessage && messageRead && (
