@@ -5,6 +5,7 @@
  */
 
 import { MemberBe, RoomBe } from '../types/network/models/roomBeTypes';
+import { UserBe } from '../types/network/models/userBeTypes';
 import { Marker, MarkerStatus, MarkerType } from '../types/store/MarkersTypes';
 import { DeletedMessage, MessageType, TextMessage } from '../types/store/MessageTypes';
 import { RoomType } from '../types/store/RoomTypes';
@@ -34,6 +35,7 @@ export const createMockTextMessage = (fields?: Record<string, any>): TextMessage
 	from: 'userId',
 	text: 'Hi',
 	read: MarkerStatus.UNREAD,
+	edited: false,
 	...fields
 });
 
@@ -71,5 +73,12 @@ export const createMockCapabilityList = (fields?: Record<string, any>): Capabili
 	maxGroupMembers: 128,
 	maxRoomImageSizeInKb: 512,
 	maxUserImageSizeInKb: 512,
+	...fields
+});
+
+export const createMockUser = (fields?: Record<string, any>): UserBe => ({
+	id: 'id',
+	email: 'user@usrer.com',
+	name: 'Name',
 	...fields
 });

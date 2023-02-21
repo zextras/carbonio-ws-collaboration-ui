@@ -9,11 +9,12 @@ import { Strophe } from 'strophe.js';
 
 import {
 	AffiliationMessage,
-	ConfigurationMessage, DeletedMessage,
+	ConfigurationMessage,
+	DeletedMessage,
 	Message, MessageType,
 	TextMessage
 } from '../../../types/store/MessageTypes';
-import { isBefore, now } from '../../../utils/dateUtil';
+import {dateToTimestamp, isBefore, now} from '../../../utils/dateUtil';
 import { getId, getResource } from './decodeJid';
 import useStore from '../../../store/Store';
 import { find, forEach, size } from 'lodash';
@@ -23,8 +24,8 @@ import { getRequiredAttribute, getRequiredTagElement, getTagElement } from './de
 
 type OptionalParameters = {
 	date?: number;
-	stanzaId?: string
-}
+	stanzaId?: string;
+};
 
 export function decodeMessage(messageStanza: Element, optional?: OptionalParameters): Message | undefined {
 	const messageId = getRequiredAttribute(messageStanza, 'id');
@@ -47,10 +48,44 @@ export function decodeMessage(messageStanza: Element, optional?: OptionalParamet
 			.replace(/&lt;/g, '<')
 			.replace(/&gt;/g, '>');
 
+		// Message is a reply to another message
 		let replyTo;
-		const thread = getTagElement(messageStanza, 'thread');
-		if (thread != null) {
-			replyTo = Strophe.getText(thread);
+		const threadElement = getTagElement(messageStanza, 'thread');
+		if (threadElement != null) {
+			replyTo = Strophe.getText(threadElement);
+		}
+
+		// Message is a forwarded message from another conversation
+		let forwarded;
+		const forwardedElement = messageStanza.getElementsByTagName('forwarded')[0];
+		if (forwardedElement) {
+			const forwardedMessageElement = getRequiredTagElement(forwardedElement, 'message');
+			const delayElement = getRequiredTagElement(forwardedElement, 'delay');
+			forwarded = {
+				id: getRequiredAttribute(forwardedMessageElement, 'id'),
+				date: dateToTimestamp(getRequiredAttribute(delayElement, 'stamp')),
+				from: getId(getRequiredAttribute(forwardedMessageElement, 'from')),
+				text: Strophe.getText(getRequiredTagElement(forwardedMessageElement, 'body'))
+			}
+		}
+
+		// Correction/edited message
+		const replaceTag = messageStanza.getElementsByTagName('replace')[0];
+		if (replaceTag) {
+			const from = getId(resource);
+			const editedMessageId = replaceTag.id;
+			const message = {
+				id: editedMessageId,
+				stanzaId,
+				roomId,
+				date: messageDate,
+				type: MessageType.TEXT_MSG,
+				from,
+				text: messageTxt,
+				replyTo,
+				edited: true
+			}
+			return message as TextMessage;
 		}
 
 		message = {
@@ -62,12 +97,14 @@ export function decodeMessage(messageStanza: Element, optional?: OptionalParamet
 			from,
 			text: messageTxt,
 			read: calcReads(messageDate, roomId),
-			replyTo
+			replyTo,
+			edited: false,
+			forwarded
 		};
 		return message as TextMessage;
 	}
 
-	//Retract message
+	// Retract/deleted message
 	const retracted = getTagElement(messageStanza, 'retract');
 	if (retracted) {
 		const from = getId(resource);
@@ -88,7 +125,7 @@ export function decodeMessage(messageStanza: Element, optional?: OptionalParamet
 	if (x && x.getAttribute('xmlns') === Strophe.NS.AFFILIATIONS) {
 		const user = getId(Strophe.getText(x.getElementsByTagName('user')[0]));
 		const userElement = getRequiredTagElement(x, 'user');
-		const affiliationAttribute = getRequiredAttribute(userElement, 'affiliation') as 'member';
+		const affiliationAttribute = getRequiredAttribute(userElement, 'affiliation');
 		message = {
 			id: messageId,
 			roomId,
@@ -102,18 +139,25 @@ export function decodeMessage(messageStanza: Element, optional?: OptionalParamet
 
 	// Configuration message
 	if (x && x.getAttribute('xmlns') === Strophe.NS.CONFIGURATION) {
+		const from = getId(resource);
 		const operation = Strophe.getText(getRequiredTagElement(x, 'operation'));
-		const value = Strophe.getText(getRequiredTagElement(x, 'value'))
-			.replace(/&amp;/g, '&')
-			.replace(/&quot;/g, '"')
-			.replace(/&apos;/g, "'")
-			.replace(/&lt;/g, '<')
-			.replace(/&gt;/g, '>');
+		const value =
+			operation === 'roomPictureUpdated'
+				? Strophe.getText(getRequiredTagElement(x, 'picture-name'))
+				: operation === 'roomPictureDeleted'
+				? ''
+				: Strophe.getText(getRequiredTagElement(x, 'value'))
+						.replace(/&amp;/g, '&')
+						.replace(/&quot;/g, '"')
+						.replace(/&apos;/g, "'")
+						.replace(/&lt;/g, '<')
+						.replace(/&gt;/g, '>');
 		message = {
 			id: messageId,
 			roomId,
 			date: messageDate,
 			type: MessageType.CONFIGURATION_MSG,
+			from,
 			operation,
 			value
 		};

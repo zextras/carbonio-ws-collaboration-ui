@@ -34,6 +34,8 @@ export type TextMessage = BasicMessage & {
 	read: MarkerStatus;
 	replyTo?: string;
 	repliedMessage?: TextMessage | DeletedMessage;
+	edited?: boolean;
+	forwarded?: ForwardedMessage;
 };
 
 export type AttachmentMessage = BasicMessage & {
@@ -54,13 +56,18 @@ export type DeletedMessage = BasicMessage & {
 export type AffiliationMessage = BasicMessage & {
 	type: MessageType.AFFILIATION_MSG;
 	userId: string;
-	as: 'member';
+	as: string;
 };
 
 export type ConfigurationMessage = BasicMessage & {
 	type: MessageType.CONFIGURATION_MSG;
-	operation: 'changedRoomName';
+	operation:
+		| 'roomNameChanged'
+		| 'roomDescriptionChanged'
+		| 'roomPictureUpdated'
+		| 'roomPictureDeleted';
 	value: string;
+	from: string;
 };
 
 export type DateMessage = BasicMessage & {
@@ -75,3 +82,10 @@ export enum MessageType {
 	CONFIGURATION_MSG = 'configuration',
 	DATE_MSG = 'date'
 }
+
+export type ForwardedMessage = {
+	id: string;
+	date: number;
+	from: string;
+	text: string;
+};

@@ -27,7 +27,23 @@ export const useTemporaryMessagesSlice = (set: (...any: any) => void): Temporary
 				}
 			}),
 			false,
-			'TEMP_CONV_MESS_REFS/ADD_DELETED_MESSAGE_REF'
+			'TEMP_MESS_REFS/ADD_DELETED_MESSAGE_REF'
+		);
+	},
+	addEditedMessageRef: (roomId: string, messageEdited: TemporaryMessage): void => {
+		set(
+			produce((draft: RootStore) => {
+				if (!draft.temporaryMessages[messageEdited.roomId]) {
+					draft.temporaryMessages[messageEdited.roomId] = {
+						[`edited_${messageEdited.id}`]: messageEdited
+					};
+				} else if (!draft.temporaryMessages[messageEdited.roomId][`edited_${messageEdited.id}`]) {
+					draft.temporaryMessages[messageEdited.roomId][`edited_${messageEdited.id}`] =
+						messageEdited;
+				}
+			}),
+			false,
+			'TEMP_MESS_REFS/ADD_EDITED_MESSAGE_REF'
 		);
 	}
 });

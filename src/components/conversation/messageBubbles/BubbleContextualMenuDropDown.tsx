@@ -16,6 +16,7 @@ import useStore from '../../../store/Store';
 import { messageActionType } from '../../../types/store/ActiveConversationTypes';
 import { MessageType, TextMessage } from '../../../types/store/MessageTypes';
 import { CapabilityType } from '../../../types/store/SessionTypes';
+import ForwardMessageModal from '../forwardModal/ForwardMessageModal';
 
 export const BubbleContextualMenuDropDownWrapper = styled.div<{
 	isActive: boolean;
@@ -85,7 +86,7 @@ type BubbleContextualMenuDropDownProps = {
 	isMyMessage: boolean;
 };
 
-type dropDownAction = {
+type DropDownActionType = {
 	id: string;
 	label: string;
 	click: () => void;
@@ -100,27 +101,45 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 	const [t] = useTranslation();
 	const copyActionLabel = t('action.copy', 'Copy');
 	const deleteActionLabel = t('action.delete', 'Delete');
-	const replayActionLabel = t('action.reply', 'Reply');
+	const editActionLabel = t('action.edit', 'Edit');
+	const replyActionLabel = t('action.reply', 'Reply');
+	const forwardActionLabel = t('action.forward', 'Forward');
 	const successfulCopySnackbar = t('feedback.messageCopied', 'Message copied');
 	const messageActionsTooltip = t('tooltip.messageActions', ' Message actions');
 
 	const deleteMessageTimeLimitInMinutes = useStore((store) =>
 		getCapability(store, CapabilityType.DELETE_MESSAGE_TIME_LIMIT)
 	) as number;
+	const editMessageTimeLimitInMinutes = useStore((store) =>
+		getCapability(store, CapabilityType.EDIT_MESSAGE_TIME_LIMIT)
+	) as number;
 	const setReferenceMessage = useStore((store) => store.setReferenceMessage);
+	const setDraftMessage = useStore((store) => store.setDraftMessage);
 	const [dropdownActive, setDropdownActive] = useState(false);
-	const [contextualMenuActions, setContextualMenuActions] = useState<dropDownAction[]>([]);
+	const [contextualMenuActions, setContextualMenuActions] = useState<DropDownActionType[]>([]);
+	const [forwardMessageModalIsOpen, setForwardMessageModalIsOpen] = useState<boolean>(false);
 	const createSnackbar: any = useContext(SnackbarManagerContext);
 
 	const onDropdownOpen = useCallback(() => setDropdownActive(true), [setDropdownActive]);
 	const onDropdownClose = useCallback(() => setDropdownActive(false), [setDropdownActive]);
 
+	const onOpenForwardMessageModal = useCallback(
+		() => setForwardMessageModalIsOpen(true),
+		[setForwardMessageModalIsOpen]
+	);
+
+	const onCloseForwardMessageModal = useCallback(
+		() => setForwardMessageModalIsOpen(false),
+		[setForwardMessageModalIsOpen]
+	);
+
 	const copyMessage = useCallback(() => {
+		const textToCopy = !message.forwarded ? message.text : message.forwarded.text;
 		if (window.parent.navigator.clipboard) {
-			window.parent.navigator.clipboard.writeText(message.text).then();
+			window.parent.navigator.clipboard.writeText(textToCopy).then();
 		} else {
 			const input = window.document.createElement('input');
-			input.setAttribute('value', message.text);
+			input.setAttribute('value', textToCopy);
 			window.parent.document.body.appendChild(input);
 			input.select();
 			window.parent.document.execCommand('copy');
@@ -132,14 +151,69 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 			label: successfulCopySnackbar,
 			hideButton: true
 		});
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [message]);
+	}, [createSnackbar, message.forwarded, message.text, successfulCopySnackbar]);
 
 	useEffect(() => {
 		const actions = [];
 		const messageCanBeDeleted =
-			deleteMessageTimeLimitInMinutes &&
-			Date.now() <= message.date + deleteMessageTimeLimitInMinutes * 60000;
+			!deleteMessageTimeLimitInMinutes ||
+			(deleteMessageTimeLimitInMinutes &&
+				Date.now() <= message.date + deleteMessageTimeLimitInMinutes * 60000);
+
+		const messageCanBeEdited =
+			!editMessageTimeLimitInMinutes ||
+			(editMessageTimeLimitInMinutes &&
+				Date.now() <= message.date + editMessageTimeLimitInMinutes * 60000);
+
+		// Reply functionality
+		actions.push({
+			id: 'Reply',
+			label: replyActionLabel,
+			click: () =>
+				setReferenceMessage(
+					message.roomId,
+					message.id,
+					message.from,
+					message.stanzaId,
+					messageActionType.REPLY
+				)
+		});
+
+		// Forward message in another chat
+		if (!message.forwarded) {
+			actions.push({
+				id: 'forward',
+				label: forwardActionLabel,
+				click: onOpenForwardMessageModal
+			});
+		}
+
+		// Copy the text of a text message to the clipboard
+		if (message.type === MessageType.TEXT_MSG) {
+			actions.push({
+				id: 'Copy',
+				label: copyActionLabel,
+				click: copyMessage
+			});
+		}
+
+		// Edit functionality
+		if (isMyMessage && messageCanBeEdited && !message.forwarded) {
+			actions.push({
+				id: 'Edit',
+				label: editActionLabel,
+				click: () => {
+					setDraftMessage(message.roomId, false, message.text);
+					setReferenceMessage(
+						message.roomId,
+						message.id,
+						message.from,
+						message.stanzaId,
+						messageActionType.EDIT
+					);
+				}
+			});
+		}
 
 		// Delete functionality
 		if (isMyMessage && messageCanBeDeleted) {
@@ -150,52 +224,26 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 			});
 		}
 
-		// Reply functionality
-		// if (
-		// 	capabilities.can_reply_to_messages &&
-		// 	messageInfos.type !== 'deleted_message'
-		// ) {
-		actions.push({
-			id: 'Reply',
-			label: replayActionLabel,
-			click: () =>
-				setReferenceMessage(
-					message.roomId,
-					message.id,
-					message.from,
-					message.stanzaId,
-					messageActionType.REPLAY
-				)
-		});
-		// }
-
-		// Copy the text of a text message to the clipboard
-		if (
-			typeof window.parent.document.execCommand !== 'undefined' &&
-			message.type === MessageType.TEXT_MSG
-		) {
-			actions.push({
-				id: 'Copy',
-				label: copyActionLabel,
-				click: copyMessage
-			});
-		}
-
 		setContextualMenuActions(actions);
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [
 		copyActionLabel,
 		copyMessage,
+		deleteActionLabel,
+		deleteMessageTimeLimitInMinutes,
 		dropdownActive,
+		forwardActionLabel,
+		isMyMessage,
 		message,
-		replayActionLabel,
-		deleteMessageTimeLimitInMinutes
+		replyActionLabel,
+		onOpenForwardMessageModal,
+		setReferenceMessage,
+		xmppClient,
+		editMessageTimeLimitInMinutes,
+		editActionLabel,
+		setDraftMessage
 	]);
 
 	return (
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore
-		// eslint-disable-next-line prettier/prettier
 		<BubbleContextualMenuDropDownWrapper
 			data-testid={`cxtMenu-${message.id}-iconOpen`}
 			isMyMessage={isMyMessage}
@@ -217,6 +265,14 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 					title={messageActionsTooltip}
 				/>
 			</Dropdown>
+			{forwardMessageModalIsOpen && (
+				<ForwardMessageModal
+					open={forwardMessageModalIsOpen}
+					onClose={onCloseForwardMessageModal}
+					roomId={message.roomId}
+					message={message}
+				/>
+			)}
 		</BubbleContextualMenuDropDownWrapper>
 	);
 };

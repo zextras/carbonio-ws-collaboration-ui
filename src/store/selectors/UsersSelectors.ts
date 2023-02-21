@@ -12,7 +12,7 @@ export const getUsersSelector = (store: RootStore): UsersMap => store.users;
 export const getUserSelector = (store: RootStore, id: string | undefined): User | undefined =>
 	id ? store.users[id] : undefined;
 
-export const getUserName = (store: RootStore, id: string): string =>
+export const getUserName = (store: RootStore, id: string): string | undefined =>
 	store.users[id]?.name || store.users[id]?.email || store.users[id]?.id;
 
 export const getUserLastActivity = (store: RootStore, id: string): number | undefined =>

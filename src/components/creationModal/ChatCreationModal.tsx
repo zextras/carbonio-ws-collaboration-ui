@@ -35,6 +35,7 @@ const ChatCreationModal = ({
 		'Chats are one-to-one conversations that help you to stay in touch with your contacts. You can create a group by including more than two participants'
 	);
 	const createLabel = t('action.create', 'Create');
+	const closeLabel = t('action.close', 'Close');
 
 	const addRoom = useStore((store) => store.addRoom);
 
@@ -149,13 +150,15 @@ const ChatCreationModal = ({
 			open={open}
 			title={modalTitle}
 			showCloseIcon
+			closeIconTooltip={closeLabel}
 			onClose={onModalClose}
 			size="medium"
 			customFooter={modalFooter}
 		>
-			<Padding vertical="small">
-				<Text overflow="break-word">{descriptionLabel}</Text>
-			</Padding>
+			<Text overflow="break-word" size="small">
+				{descriptionLabel}
+			</Text>
+			<Padding bottom="large" />
 			<ChatCreationContactsSelection
 				contactsSelected={contactsSelected}
 				setContactSelected={setContactSelected}

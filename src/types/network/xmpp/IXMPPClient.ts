@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { TextMessage } from '../../store/MessageTypes';
+
 interface IXMMPClient {
 	connect(token: string): void;
 	// Presence
@@ -17,6 +19,8 @@ interface IXMMPClient {
 	// Message
 	sendChatMessage(roomId: string, message: string, replyTo?: string): void;
 	sendChatMessageDeletion(roomId: string, messageId: string): void;
+	sendChatMessageCorrection(roomId: string, message: string, messageId: string): void;
+	forwardMessage(message: TextMessage, roomIds: string[]): void;
 	requestHistory(roomId: string, endHistory: number, quantity?: number): void;
 	requestHistoryBetweenTwoMessage(
 		roomId: string,

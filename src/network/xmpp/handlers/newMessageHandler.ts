@@ -30,10 +30,16 @@ export function onNewMessageStanza(this: IXMPPClient, message: Element): true {
 			// remove it from the store and swap with the delete tag
 			if (newMessage.type === MessageType.DELETED_MSG) {
 				store.setDeletedMessage(newMessage.roomId, newMessage);
+			} else if (newMessage.type === MessageType.TEXT_MSG && newMessage.edited) {
+				// Edited Message reference
+				// XMPP doesn't edit the message, so we have to
+				// remove it from the store and swap with the edited
+				store.setEditedMessage(newMessage.roomId, newMessage);
 			} else {
 				sendCustomEventEvent(EventName.NEW_MESSAGE);
 				store.newMessage(newMessage);
 			}
+
 			// when I send a message as soon it's returned as Stanza we send the reads for ourselves
 			if (newMessage.type === MessageType.TEXT_MSG && sessionId === newMessage.from) {
 				this.readMessage(newMessage.roomId, newMessage.id);
@@ -88,10 +94,9 @@ export function onNewMessageStanza(this: IXMPPClient, message: Element): true {
 				const sender = store.users[newMessage.from];
 				const title =
 					room.type === RoomType.ONE_TO_ONE ? sender.name || sender.email || '' : room.name;
+				const text = newMessage.forwarded ? newMessage.forwarded.text : newMessage.text;
 				const textMessage =
-					room.type === RoomType.ONE_TO_ONE
-						? newMessage.text
-						: `${sender?.name?.split(' ')[0]}: ${newMessage.text}`;
+					room.type === RoomType.ONE_TO_ONE ? text : `${sender?.name?.split(' ')[0]}: ${text}`;
 
 				getNotificationManager().notify({
 					showPopup: true,

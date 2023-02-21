@@ -22,7 +22,7 @@ export type ActiveConversationsMap = {
 
 export enum messageActionType {
 	EDIT = 'edit',
-	REPLAY = 'reply'
+	REPLY = 'reply'
 }
 
 export type ReferenceMessage = {

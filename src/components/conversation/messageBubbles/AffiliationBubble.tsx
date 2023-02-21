@@ -5,12 +5,20 @@
  */
 
 import { Text } from '@zextras/carbonio-design-system';
+import { find } from 'lodash';
 import React, { FC, useMemo } from 'react';
-// import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 
-import { getUsersSelector } from '../../../store/selectors/UsersSelectors';
+import {
+	getRoomMembers,
+	getRoomNameSelector,
+	getRoomTypeSelector
+} from '../../../store/selectors/RoomsSelectors';
+import { getUserName, getUsersSelector } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
 import { AffiliationMessage } from '../../../types/store/MessageTypes';
+import { RoomType } from '../../../types/store/RoomTypes';
+import { affiliationMessage } from '../../../utils/affiliationMessage';
 import { CustomMessage } from './MessageFactory';
 
 type AffiliationMsgProps = {
@@ -19,10 +27,41 @@ type AffiliationMsgProps = {
 };
 
 const AffiliationBubble: FC<AffiliationMsgProps> = ({ message, refEl }) => {
+	const [t] = useTranslation();
+
 	const users = useStore(getUsersSelector);
-	const displayName = useMemo(
-		() => users[message.userId]?.name || users[message.userId]?.email || message.userId,
-		[message.userId, users]
+	const roomType = useStore((store) => getRoomTypeSelector(store, message.roomId));
+	const roomName = useStore((store) => getRoomNameSelector(store, message.roomId));
+	const sessionId: string | undefined = useStore((store) => store.session.id);
+	const roomMembers = useStore((store) => getRoomMembers(store, message.roomId));
+	const affiliatedName = useStore((store) => getUserName(store, message.userId));
+
+	// id of the users who acts, in this case the one who creates the one-to-one conversation
+	const actionMemberId = useMemo(() => {
+		if (roomType === RoomType.ONE_TO_ONE) {
+			return find(roomMembers, (member) => member.userId !== message.userId)?.userId;
+		}
+		return '';
+	}, [roomMembers, roomType, message.userId]);
+
+	const actionName = useMemo(() => {
+		if (actionMemberId !== undefined) {
+			return users[actionMemberId]?.name || users[actionMemberId]?.email || actionMemberId;
+		}
+		return '';
+	}, [actionMemberId, users]);
+
+	const affiliationLabel = affiliationMessage(
+		message.as,
+		message.roomId,
+		message.userId,
+		actionMemberId,
+		actionName,
+		sessionId,
+		roomType,
+		roomName,
+		affiliatedName || '',
+		t
 	);
 
 	return (
@@ -37,7 +76,7 @@ const AffiliationBubble: FC<AffiliationMsgProps> = ({ message, refEl }) => {
 			data-testid={`affiliation_msg-${message.id}`}
 		>
 			<Text size={'medium'} color={'gray1'}>
-				{displayName} affiliate as {message.as}
+				{affiliationLabel}
 			</Text>
 		</CustomMessage>
 	);

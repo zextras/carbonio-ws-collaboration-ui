@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 
 import { getReferenceMessageView } from '../../../store/selectors/ActiveConversationsSelectors';
 import useStore from '../../../store/Store';
+import { messageActionType } from '../../../types/store/ActiveConversationTypes';
 import MessageReferenceDisplayed from './MessageReferenceDisplayed';
 
 type ReferenceMessageViewProps = {
@@ -21,11 +22,14 @@ const ReferenceMessageView: React.FC<ReferenceMessageViewProps> = ({ roomId }) =
 	const closeTooltip = t('tooltip.close', 'Close');
 	const referenceMessage = useStore((store) => getReferenceMessageView(store, roomId));
 	const unsetReferenceMessage = useStore((store) => store.unsetReferenceMessage);
+	const setDraftMessage = useStore((store) => store.setDraftMessage);
 
-	const closeReferenceView = useCallback(
-		() => unsetReferenceMessage(roomId),
-		[roomId, unsetReferenceMessage]
-	);
+	const closeReferenceView = useCallback(() => {
+		if (referenceMessage?.actionType === messageActionType.EDIT) {
+			setDraftMessage(roomId, true);
+		}
+		unsetReferenceMessage(roomId);
+	}, [roomId, unsetReferenceMessage, referenceMessage, setDraftMessage]);
 
 	if (referenceMessage) {
 		return (

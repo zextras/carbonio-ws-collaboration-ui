@@ -201,7 +201,7 @@ describe('Add participant Modal Contact Selector', () => {
 		setup(<ChatCreationContactsSelection contactsSelected={{}} setContactSelected={jest.fn()} />);
 
 		// Render ChipInput
-		const chipInput = screen.getByText(/Start typing to pick an address/i);
+		const chipInput = screen.getByText(/Start typing or pick an address/i);
 		expect(chipInput).toBeVisible();
 
 		// Render ListItem (after autoCompleteGalRequest)
