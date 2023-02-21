@@ -102,11 +102,7 @@ const Bubble: FC<BubbleProps> = ({
 			roomType !== RoomType.ONE_TO_ONE &&
 			senderInfo &&
 			!prevMessageIsFromSameSender && (
-				<BubbleHeader
-					senderIdentifier={senderInfo}
-					notReplayedMessageHeader
-					userColor={userColor}
-				/>
+				<BubbleHeader senderIdentifier={senderInfo} notRepliedMessageHeader userColor={userColor} />
 			)}
 		{message.repliedMessage && (
 			<RepliedTextMessageSectionView

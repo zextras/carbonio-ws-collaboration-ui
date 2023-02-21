@@ -205,34 +205,34 @@ describe('render list of messages with history loader visible for first time ope
 		expect(editedLabel).toBeInTheDocument();
 	});
 
-	test('Display replay message bubble on MessageList', () => {
+	test('Display reply message bubble on MessageList', () => {
 		const mockedRoom: RoomBe = createMockRoom({ id: 'roomTest' });
 		const mockedTextMessage = createMockTextMessage({
 			id: 'idSimpleTextMessage',
 			roomId: mockedRoom.id,
 			text: 'Hello guys!'
 		});
-		const mockedReplayTextMessage = createMockTextMessage({
-			id: 'idReplayTextMessage',
+		const mockedReplyTextMessage = createMockTextMessage({
+			id: 'idReplyTextMessage',
 			roomId: mockedRoom.id,
 			text: 'Hi David!',
-			replayTo: 'idSimpleTextMessage',
+			replyTo: 'idSimpleTextMessage',
 			repliedMessage: mockedTextMessage
 		});
 		const { result } = renderHook(() => useStore());
 		act(() => result.current.addRoom(mockedRoom));
 		act(() => result.current.newMessage(mockedTextMessage));
-		act(() => result.current.newMessage(mockedReplayTextMessage));
+		act(() => result.current.newMessage(mockedReplyTextMessage));
 		setup(<MessagesList roomId={mockedRoom.id} />);
 		const messageBubble = screen.getAllByText('Hello guys!');
 		expect(messageBubble.length).toBe(2);
-		const replayMessageBubble = screen.getByText('Hi David!');
-		expect(replayMessageBubble).toBeInTheDocument();
-		const replayView = screen.getByTestId(`repliedView-${mockedTextMessage.id}`);
-		expect(replayView).toBeInTheDocument();
+		const replyMessageBubble = screen.getByText('Hi David!');
+		expect(replyMessageBubble).toBeInTheDocument();
+		const replyView = screen.getByTestId(`repliedView-${mockedTextMessage.id}`);
+		expect(replyView).toBeInTheDocument();
 	});
 
-	test('Display a replay of a deleted message', () => {
+	test('Display a reply of a deleted message', () => {
 		const mockedRoom: RoomBe = createMockRoom({ id: 'roomTest' });
 		const mockedTextMessage = createMockTextMessage({
 			id: 'idSimpleTextMessage',
@@ -245,11 +245,11 @@ describe('render list of messages with history loader visible for first time ope
 			text: 'Hello guys! Sorry for the delay',
 			edited: true
 		});
-		const mockedReplayTextMessage = createMockTextMessage({
-			id: 'idReplayTextMessage',
+		const mockedReplyTextMessage = createMockTextMessage({
+			id: 'idReplyTextMessage',
 			roomId: mockedRoom.id,
 			text: 'Hi David!',
-			replayTo: 'idSimpleTextMessage',
+			replyTo: 'idSimpleTextMessage',
 			repliedMessage: mockedEditedTextMessage
 		});
 		const { result } = renderHook(() => useStore());
@@ -258,19 +258,19 @@ describe('render list of messages with history loader visible for first time ope
 		act(() =>
 			result.current.setEditedMessage(mockedRoom.id, mockedEditedTextMessage as TextMessage)
 		);
-		act(() => result.current.newMessage(mockedReplayTextMessage));
+		act(() => result.current.newMessage(mockedReplyTextMessage));
 		setup(<MessagesList roomId={mockedRoom.id} />);
 		const messagesWithSameText = screen.getAllByText('Hello guys! Sorry for the delay');
 		expect(messagesWithSameText.length).toBe(2);
 		const editedLabel = screen.getAllByText(/edited/i);
 		expect(editedLabel.length).toBe(2);
-		const replayView = screen.getByTestId(`repliedView-${mockedTextMessage.id}`);
-		expect(replayView).toBeInTheDocument();
-		const replayMessageBubble = screen.getByText('Hi David!');
-		expect(replayMessageBubble).toBeInTheDocument();
+		const replyView = screen.getByTestId(`repliedView-${mockedTextMessage.id}`);
+		expect(replyView).toBeInTheDocument();
+		const replyMessageBubble = screen.getByText('Hi David!');
+		expect(replyMessageBubble).toBeInTheDocument();
 	});
 
-	test('Display a replay of an edited message', () => {
+	test('Display a reply of an edited message', () => {
 		const mockedRoom: RoomBe = createMockRoom({ id: 'roomTest' });
 		const mockedTextMessage = createMockTextMessage({
 			id: 'idSimpleTextMessage',
@@ -281,24 +281,24 @@ describe('render list of messages with history loader visible for first time ope
 			id: 'idSimpleTextMessage',
 			roomId: mockedRoom.id
 		});
-		const mockedReplayMessage = createMockTextMessage({
-			id: 'idReplayTextMessage',
+		const mockedReplyMessage = createMockTextMessage({
+			id: 'idReplyTextMessage',
 			roomId: mockedRoom.id,
 			text: 'Hi David!',
-			replayTo: 'idSimpleTextMessage',
+			replyTo: 'idSimpleTextMessage',
 			repliedMessage: mockedTextMessage
 		});
 		const { result } = renderHook(() => useStore());
 		act(() => result.current.addRoom(mockedRoom));
 		act(() => result.current.newMessage(mockedTextMessage));
-		act(() => result.current.newMessage(mockedReplayMessage));
+		act(() => result.current.newMessage(mockedReplyMessage));
 		act(() => result.current.setDeletedMessage(mockedRoom.id, mockedDeletedMessage));
 		setup(<MessagesList roomId={mockedRoom.id} />);
 		const editedLabel = screen.getAllByText(/deleted/i);
 		expect(editedLabel.length).toBe(2);
-		const replayView = screen.getByTestId(`repliedView-${mockedTextMessage.id}`);
-		expect(replayView).toBeInTheDocument();
-		const replayMessageBubble = screen.getByText('Hi David!');
-		expect(replayMessageBubble).toBeInTheDocument();
+		const replyView = screen.getByTestId(`repliedView-${mockedTextMessage.id}`);
+		expect(replyView).toBeInTheDocument();
+		const replyMessageBubble = screen.getByText('Hi David!');
+		expect(replyMessageBubble).toBeInTheDocument();
 	});
 });

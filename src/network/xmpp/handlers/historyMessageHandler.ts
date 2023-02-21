@@ -101,9 +101,9 @@ export function onRequestHistory(this: XMPPClient, stanza: Element): void {
 	this.lastMarkers(roomId);
 }
 
-export function onRequestSingleMessage(replayMessageId: string, stanza: Element): void {
+export function onRequestSingleMessage(replyMessageId: string, stanza: Element): void {
 	const repliedMessageId = Strophe.getText(getRequiredTagElement(stanza, 'first'));
 	const repliedMessage = HistoryAccumulator.returnRepliedMessage(repliedMessageId);
 	const store: RootStore = useStore.getState();
-	store.setRepliedMessage(repliedMessage.roomId, replayMessageId, repliedMessage);
+	store.setRepliedMessage(repliedMessage.roomId, replyMessageId, repliedMessage);
 }

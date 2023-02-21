@@ -50,7 +50,7 @@ const referenceMessage = {
 	messageId: mockedRepliedTextMessage.id,
 	senderId: mockedRepliedTextMessage.from,
 	stanzaId: mockedRepliedTextMessage.stanzaId,
-	actionType: messageActionType.REPLAY
+	actionType: messageActionType.REPLY
 };
 
 const myReferenceMessage = {
@@ -58,7 +58,7 @@ const myReferenceMessage = {
 	messageId: myMockedRepliedTextMessage.id,
 	senderId: myMockedRepliedTextMessage.from,
 	stanzaId: myMockedRepliedTextMessage.stanzaId,
-	actionType: messageActionType.REPLAY
+	actionType: messageActionType.REPLY
 };
 
 const myReferenceEditMessage = {

@@ -71,18 +71,18 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 				// this checks if the last element present inside the history has not the same date of the first element of the requested history
 				const historyWithDates: MessageList = [];
 				forEach(messageArray, (historyMessage: Message, index) => {
-					// check if a message in temporaryMessages has both edit and delete reference and inca se remove both and set as delete
+					// check if a message in temporaryMessages has both edit and delete reference and in that case
+					// remove both after check edited and deleted and set deleted as last
+					// check if there is an edited reference in temporaryMessages and update the message to be displayed as edited
 					if (
 						draft.temporaryMessages[roomId] &&
-						draft.temporaryMessages[roomId][`deleted_${historyMessage.id}`] &&
 						draft.temporaryMessages[roomId][`edited_${historyMessage.id}`]
 					) {
-						const messageDeletion = draft.temporaryMessages[roomId][`deleted_${historyMessage.id}`];
+						const messageEdited = draft.temporaryMessages[roomId][`edited_${historyMessage.id}`];
 						historyMessage = {
-							...messageDeletion,
+							...messageEdited,
 							date: historyMessage.date
 						};
-						delete draft.temporaryMessages[roomId][`deleted_${historyMessage.id}`];
 						delete draft.temporaryMessages[roomId][`edited_${historyMessage.id}`];
 					}
 					// check if there is a deleted reference in temporaryMessages and update the message to be displayed as deleted
@@ -96,18 +96,6 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 							date: historyMessage.date
 						};
 						delete draft.temporaryMessages[roomId][`deleted_${historyMessage.id}`];
-					}
-					// check if there is an edited reference in temporaryMessages and update the message to be displayed as edited
-					else if (
-						draft.temporaryMessages[roomId] &&
-						draft.temporaryMessages[roomId][`edited_${historyMessage.id}`]
-					) {
-						const messageEdited = draft.temporaryMessages[roomId][`edited_${historyMessage.id}`];
-						historyMessage = {
-							...messageEdited,
-							date: historyMessage.date
-						};
-						delete draft.temporaryMessages[roomId][`edited_${historyMessage.id}`];
 					}
 
 					// the first message always needs a date before it
@@ -179,31 +167,31 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 	},
 	setRepliedMessage: (
 		roomId: string,
-		replayMessageId: string, // id of message which contains the replayMessage and replayTo fields
-		repliedMessage: TextMessage // message not in history which will be placed as replayMessage if not edited/deleted
+		replyMessageId: string, // id of message which contains the replyMessage and replyTo fields
+		repliedMessage: TextMessage // message not in history which will be placed as replyMessage if not edited/deleted
 	): void => {
 		set(
 			produce((draft: RootStore) => {
 				if (draft.messages[roomId]) {
-					// retrieve the replayMessage from messagesList
-					const replayMessage = find(
+					// retrieve the replyMessage from messagesList
+					const replyMessage = find(
 						draft.messages[roomId],
-						(message) => message.id === replayMessageId
+						(message) => message.id === replyMessageId
 					);
 					// return a message that if it was edited or deleted is still present
 					// and return it as not edited or deleted, so we need to check if in the history we have this message and if it's edited/delete use them as
-					// reference for the replay view
-					if (replayMessage) {
+					// reference for the reply view
+					if (replyMessage) {
 						const repliedMessageInHistory = find(
 							draft.messages[roomId],
 							(message) => message.id === repliedMessage.id
 						);
-						// check if message subject of replay is available in the history and
-						// if is deleted or edited and update the replay caption
+						// check if message subject of reply is available in the history and
+						// if is deleted or edited and update the reply caption
 						if (repliedMessageInHistory) {
-							let messageToPlaceAsReplayedMessage: TextMessage | DeletedMessage = repliedMessage;
+							let messageToPlaceAsreplyedMessage: TextMessage | DeletedMessage = repliedMessage;
 							if (repliedMessageInHistory.type === MessageType.DELETED_MSG) {
-								messageToPlaceAsReplayedMessage = {
+								messageToPlaceAsreplyedMessage = {
 									...repliedMessageInHistory,
 									type: MessageType.DELETED_MSG
 								};
@@ -211,32 +199,32 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 								repliedMessageInHistory.type === MessageType.TEXT_MSG &&
 								repliedMessageInHistory.edited
 							) {
-								messageToPlaceAsReplayedMessage = repliedMessageInHistory;
+								messageToPlaceAsreplyedMessage = repliedMessageInHistory;
 							}
-							if (replayMessage.type === MessageType.TEXT_MSG) {
-								replayMessage.repliedMessage = messageToPlaceAsReplayedMessage;
+							if (replyMessage.type === MessageType.TEXT_MSG) {
+								replyMessage.repliedMessage = messageToPlaceAsreplyedMessage;
 							}
-							const index = findIndex(draft.messages[roomId], { id: replayMessageId });
-							draft.messages[roomId].splice(index, 1, replayMessage);
+							const index = findIndex(draft.messages[roomId], { id: replyMessageId });
+							draft.messages[roomId].splice(index, 1, replyMessage);
 						}
 						// replied message is not in the history because 50+ message behind so
-						// update the replay view with the info in the temporaryMessages
+						// update the reply view with the info in the temporaryMessages
 						else if (
 							draft.temporaryMessages[roomId] &&
 							draft.temporaryMessages[roomId][`deleted_${repliedMessage.id}`]
 						) {
-							(replayMessage as TextMessage).repliedMessage =
+							(replyMessage as TextMessage).repliedMessage =
 								draft.temporaryMessages[roomId][`deleted_${repliedMessage.id}`];
-							const index = findIndex(draft.messages[roomId], { id: replayMessageId });
-							draft.messages[roomId].splice(index, 1, replayMessage);
+							const index = findIndex(draft.messages[roomId], { id: replyMessageId });
+							draft.messages[roomId].splice(index, 1, replyMessage);
 						} else if (
 							draft.temporaryMessages[roomId] &&
 							draft.temporaryMessages[roomId][`edited_${repliedMessage.id}`]
 						) {
-							(replayMessage as TextMessage).repliedMessage =
+							(replyMessage as TextMessage).repliedMessage =
 								draft.temporaryMessages[roomId][`edited_${repliedMessage.id}`];
-							const index = findIndex(draft.messages[roomId], { id: replayMessageId });
-							draft.messages[roomId].splice(index, 1, replayMessage);
+							const index = findIndex(draft.messages[roomId], { id: replyMessageId });
+							draft.messages[roomId].splice(index, 1, replyMessage);
 						}
 					}
 				}
@@ -250,7 +238,7 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 			produce((draft: RootStore) => {
 				if (draft.messages[roomId]) {
 					forEach(draft.messages[roomId], (message, index) => {
-						// check for replay messages and update the caption
+						// check for reply messages and update the caption
 						if (
 							message.type === MessageType.TEXT_MSG &&
 							message.repliedMessage &&
@@ -284,7 +272,7 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 			produce((draft: RootStore) => {
 				if (draft.messages[roomId]) {
 					forEach(draft.messages[roomId], (message, index) => {
-						// check for replay messages and update the caption
+						// check for reply messages and update the caption
 						if (
 							message.type === MessageType.TEXT_MSG &&
 							message.repliedMessage &&

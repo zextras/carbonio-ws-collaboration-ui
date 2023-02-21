@@ -98,7 +98,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 		const message = textMessage.trim();
 		if (referenceMessage && referenceMessage.roomId === roomId) {
 			switch (referenceMessage.actionType) {
-				case messageActionType.REPLAY: {
+				case messageActionType.REPLY: {
 					xmppClient.sendChatMessage(roomId, message, referenceMessage.stanzaId);
 					break;
 				}

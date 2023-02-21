@@ -10,7 +10,7 @@ import styled from 'styled-components';
 
 type BubbleHeaderProps = {
 	senderIdentifier: string;
-	notReplayedMessageHeader: boolean; // usefully to give more padding depending on type of message
+	notRepliedMessageHeader: boolean; // usefully to give more padding depending on type of message
 	userColor: string;
 };
 
@@ -20,7 +20,7 @@ const SenderText = styled(Text)`
 
 const BubbleHeader: FC<BubbleHeaderProps> = ({
 	senderIdentifier,
-	notReplayedMessageHeader,
+	notRepliedMessageHeader,
 	userColor
 }) => (
 	<>
@@ -29,7 +29,7 @@ const BubbleHeader: FC<BubbleHeaderProps> = ({
 				{senderIdentifier}
 			</SenderText>
 		</Container>
-		{notReplayedMessageHeader && <Padding top="small" />}
+		{notRepliedMessageHeader && <Padding top="small" />}
 	</>
 );
 

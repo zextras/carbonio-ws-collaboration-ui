@@ -39,7 +39,7 @@ const mockedMessage = createMockTextMessage({
 	read: MarkerStatus.UNREAD
 });
 
-describe('Replay to a message by opening the contextual menu', () => {
+describe('Reply to a message by opening the contextual menu', () => {
 	test('Display the contextual menu of a message', () => {
 		const store: RootStore = useStore.getState();
 		store.addRoom(mockedRoom);
@@ -60,7 +60,7 @@ describe('Replay to a message by opening the contextual menu', () => {
 			mockedMessage.id,
 			mockedMessage.from,
 			mockedMessage.stanzaId,
-			messageActionType.REPLAY
+			messageActionType.REPLY
 		);
 		setup(<ReferenceMessageView roomId={mockedRoom.id} />);
 		const referenceMessage = screen.getByTestId('reference_message');
@@ -76,7 +76,7 @@ describe('Replay to a message by opening the contextual menu', () => {
 			mockedMessage.id,
 			mockedMessage.from,
 			mockedMessage.stanzaId,
-			messageActionType.REPLAY
+			messageActionType.REPLY
 		);
 		const { user } = setup(<ReferenceMessageView roomId={mockedRoom.id} />);
 		const referenceMessage = screen.getByTestId('reference_message');

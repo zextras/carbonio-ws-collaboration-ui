@@ -101,7 +101,7 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 	const copyActionLabel = t('action.copy', 'Copy');
 	const deleteActionLabel = t('action.delete', 'Delete');
 	const editActionLabel = t('action.edit', 'Edit');
-	const replayActionLabel = t('action.reply', 'Reply');
+	const replyActionLabel = t('action.reply', 'Reply');
 	const successfulCopySnackbar = t('feedback.messageCopied', 'Message copied');
 	const messageActionsTooltip = t('tooltip.messageActions', ' Message actions');
 
@@ -157,14 +157,14 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 		// ) {
 		actions.push({
 			id: 'Reply',
-			label: replayActionLabel,
+			label: replyActionLabel,
 			click: () =>
 				setReferenceMessage(
 					message.roomId,
 					message.id,
 					message.from,
 					message.stanzaId,
-					messageActionType.REPLAY
+					messageActionType.REPLY
 				)
 		});
 		// }
@@ -215,7 +215,7 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 		copyMessage,
 		dropdownActive,
 		message,
-		replayActionLabel,
+		replyActionLabel,
 		deleteMessageTimeLimitInMinutes
 	]);
 
