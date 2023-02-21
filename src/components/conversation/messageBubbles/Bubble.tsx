@@ -14,6 +14,7 @@ import useStore from '../../../store/Store';
 import { TextMessage } from '../../../types/store/MessageTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 import { parseUrlOnMessage } from '../../../utils/parseUrlOnMessage';
+import AttachmentView from './AttachmentView';
 import BubbleContextualMenuDropDown, {
 	BubbleContextualMenuDropDownWrapper
 } from './BubbleContextualMenuDropDown';
@@ -115,6 +116,7 @@ const Bubble: FC<BubbleProps> = ({
 					roomId={message.roomId}
 				/>
 			)}
+			{message.attachment && <AttachmentView attachment={message.attachment} />}
 			<TextContentBubble textContent={messageFormatted} />
 			<BubbleFooter
 				isMyMessage={isMyMessage}

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Container, Text, Avatar, Padding, Row } from '@zextras/carbonio-design-system';
+import { Container, Text, Row } from '@zextras/carbonio-design-system';
 import React, { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -97,12 +97,6 @@ const MessageReferenceDisplayed: React.FC<MessageReferenceDisplayedProps> = ({
 				padding={{ left: 'small' }}
 				width="fill"
 			>
-				{message?.type === MessageType.ATTACHMENT_MSG && (
-					<>
-						<Avatar size="large" label="Name Lastname" shape="regular" />
-						<Padding right="small" />
-					</>
-				)}
 				<Container mainAlignment="flex-start">
 					<Container mainAlignment="flex-start" orientation="horizontal">
 						<Text size="medium" color="secondary">
