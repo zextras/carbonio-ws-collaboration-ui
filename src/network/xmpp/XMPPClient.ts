@@ -54,6 +54,7 @@ class XMPPClient implements IXMPPClient {
 		Strophe.addNamespace('CHAT_STATE', 'http://jabber.org/protocol/chatstates');
 		Strophe.addNamespace('DISCO_ITEMS', 'http://jabber.org/protocol/disco#items');
 		Strophe.addNamespace('DISCO_INFO', 'http://jabber.org/protocol/disco#info');
+		Strophe.addNamespace('FORWARD', 'urn:xmpp:forward:0');
 		Strophe.addNamespace('INBOX', 'erlang-solutions.com:xmpp:inbox:0');
 		Strophe.addNamespace('LAST_ACTIVITY', 'jabber:iq:last');
 		Strophe.addNamespace('MAM', 'urn:xmpp:mam:2');
@@ -62,7 +63,7 @@ class XMPPClient implements IXMPPClient {
 		Strophe.addNamespace('SMART_MARKERS', 'esl:xmpp:smart-markers:0');
 		Strophe.addNamespace('XMPP_RETRACT', 'urn:xmpp:message-retract:0');
 		Strophe.addNamespace('XMPP_FASTEN', 'urn:xmpp:fasten:0');
-		Strophe.addNamespace('FORWARD', 'urn:xmpp:forward:0');
+		Strophe.addNamespace('XMPP_CORRECT', 'urn:xmpp:message-correct:0');
 
 		// Handler for event stanzas
 		this.connection.addHandler(onPresenceStanza.bind(this), null, 'presence');
@@ -281,6 +282,23 @@ class XMPPClient implements IXMPPClient {
 		const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat', id: uuid })
 			.c('apply-to', { id: messageId, xmlns: Strophe.NS.XMPP_FASTEN })
 			.c('retract', { xmlns: Strophe.NS.XMPP_RETRACT });
+		this.connection.send(msg);
+	}
+
+	/**
+	 * Edit a message / Last Message Correction (XEP-0308)
+	 * Documentation: https://xmpp.org/extensions/xep-0308.html#usecase
+	 */
+	sendChatMessageCorrection(roomId: string, message: string, messageId: string): void {
+		const uuid = uuidGenerator();
+		const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat', id: uuid })
+			.c('body')
+			.t(message)
+			.up()
+			.c('replace', {
+				id: messageId,
+				xmlns: Strophe.NS.XMPP_CORRECT
+			});
 		this.connection.send(msg);
 	}
 

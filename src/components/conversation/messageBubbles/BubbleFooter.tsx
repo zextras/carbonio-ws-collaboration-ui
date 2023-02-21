@@ -29,7 +29,13 @@ type BubbleFooterProps = {
 	messageType?: string;
 	messageExtension?: string;
 	messageSize?: string;
+	isEdited?: boolean;
 };
+
+const ItalicText = styled(Text)`
+	font-style: italic;
+	padding-right: ${({ theme }): string => theme.sizes.padding.small};
+`;
 
 const BubbleFooter: FC<BubbleFooterProps> = ({
 	date,
@@ -39,10 +45,12 @@ const BubbleFooter: FC<BubbleFooterProps> = ({
 	dateAndTime = false,
 	messageType,
 	messageExtension,
-	messageSize
+	messageSize,
+	isEdited
 }) => {
 	const [t] = useTranslation();
 	const forwardedLabel = t('action.forwarded', 'forwarded');
+	const editedLabel = t('message.edited', 'Edited');
 
 	const ackIcon = messageRead === MarkerStatus.UNREAD ? 'Checkmark' : 'DoneAll';
 	const ackIconColor = messageRead === MarkerStatus.READ ? 'primary' : 'gray';
@@ -79,6 +87,13 @@ const BubbleFooter: FC<BubbleFooterProps> = ({
 							{messageType}
 						</Text>
 					</Padding>
+				)}
+				{isEdited && (
+					<Container width="fit">
+						<ItalicText color="secondary" size="extrasmall">
+							{editedLabel}
+						</ItalicText>
+					</Container>
 				)}
 				{forwarded && (
 					<Padding width="fit" right="small">

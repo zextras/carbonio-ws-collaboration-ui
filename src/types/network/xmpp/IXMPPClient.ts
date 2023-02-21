@@ -19,6 +19,7 @@ interface IXMMPClient {
 	// Message
 	sendChatMessage(roomId: string, message: string, replyTo?: string): void;
 	sendChatMessageDeletion(roomId: string, messageId: string): void;
+	sendChatMessageCorrection(roomId: string, message: string, messageId: string): void;
 	forwardMessage(message: TextMessage, roomIds: string[]): void;
 	requestHistory(roomId: string, endHistory: number, quantity?: number): void;
 	requestHistoryBetweenTwoMessage(

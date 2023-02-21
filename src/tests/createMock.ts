@@ -35,6 +35,7 @@ export const createMockTextMessage = (fields?: Record<string, any>): TextMessage
 	from: 'userId',
 	text: 'Hi',
 	read: MarkerStatus.UNREAD,
+	edited: false,
 	...fields
 });
 

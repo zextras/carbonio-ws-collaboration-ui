@@ -17,7 +17,7 @@ type EditProps = {
 
 const EditConversationAction: FC<EditProps> = ({ roomId }) => {
 	const [t] = useTranslation();
-	const editLabel = t('action.edit', 'Edit Details');
+	const editLabel = t('action.editDetails', 'Edit Details');
 
 	const [editModalOpen, setEditModalOpen] = useState<boolean>(false);
 

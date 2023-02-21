@@ -9,7 +9,6 @@ import { size } from 'lodash';
 
 import { createMockMember, createMockRoom, createMockTextMessage } from '../../tests/createMock';
 import { RoomBe } from '../../types/network/models/roomBeTypes';
-import { TextMessage } from '../../types/store/MessageTypes';
 import useStore from '../Store';
 
 const room: RoomBe = createMockRoom({
@@ -22,11 +21,11 @@ const room: RoomBe = createMockRoom({
 	]
 });
 
-const textMessage1: TextMessage = createMockTextMessage({ id: 'text-msg-1', roomId: room.id });
-const textMessage2: TextMessage = createMockTextMessage({ id: 'text-msg-2', roomId: room.id });
+const textMessage1 = createMockTextMessage({ id: 'text-msg-1', roomId: room.id });
+const textMessage2 = createMockTextMessage({ id: 'text-msg-2', roomId: room.id });
 
 describe('Test temporary messages slice', () => {
-	it('add reference message', () => {
+	it('add reference message deleted', () => {
 		const { result } = renderHook(() => useStore());
 		act(() => result.current.addDeletedMessageRef(room.id, textMessage1));
 		expect(result.current.temporaryMessages[room.id]).not.toBeNull();
@@ -37,10 +36,39 @@ describe('Test temporary messages slice', () => {
 
 		act(() => result.current.addDeletedMessageRef(room.id, textMessage2));
 		expect(result.current.temporaryMessages[room.id]).not.toBeNull();
-		console.log(result.current.temporaryMessages[room.id]);
-		console.log(result.current.temporaryMessages);
 		expect(size(result.current.temporaryMessages[room.id])).toBe(2);
 		expect(result.current.temporaryMessages[room.id][`deleted_${textMessage2.id}`]).toBe(
+			textMessage2
+		);
+	});
+
+	it('add reference message edited', () => {
+		const { result } = renderHook(() => useStore());
+		act(() => result.current.addEditedMessageRef(room.id, textMessage1));
+		expect(result.current.temporaryMessages[room.id]).not.toBeNull();
+		expect(size(result.current.temporaryMessages[room.id])).toBe(1);
+		expect(result.current.temporaryMessages[room.id][`edited_${textMessage1.id}`]).toBe(
+			textMessage1
+		);
+
+		act(() => result.current.addEditedMessageRef(room.id, textMessage2));
+		expect(result.current.temporaryMessages[room.id]).not.toBeNull();
+		expect(size(result.current.temporaryMessages[room.id])).toBe(2);
+		expect(result.current.temporaryMessages[room.id][`edited_${textMessage2.id}`]).toBe(
+			textMessage2
+		);
+	});
+
+	it('add one reference edited and on deleted', () => {
+		const { result } = renderHook(() => useStore());
+		act(() => result.current.addDeletedMessageRef(room.id, textMessage1));
+		act(() => result.current.addEditedMessageRef(room.id, textMessage2));
+		expect(result.current.temporaryMessages[room.id][`deleted_${textMessage1.id}`]).toBe(
+			textMessage1
+		);
+		expect(result.current.temporaryMessages[room.id]).not.toBeNull();
+		expect(size(result.current.temporaryMessages[room.id])).toBe(2);
+		expect(result.current.temporaryMessages[room.id][`edited_${textMessage2.id}`]).toBe(
 			textMessage2
 		);
 	});

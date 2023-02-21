@@ -14,4 +14,4 @@ export type TemporaryMessageList = {
 	[id: string]: TemporaryMessage;
 };
 
-export type TemporaryMessage = TextMessage | DeletedMessage;
+export type TemporaryMessage = DeletedMessage | TextMessage;

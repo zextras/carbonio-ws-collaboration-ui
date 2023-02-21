@@ -121,6 +121,7 @@ const Bubble: FC<BubbleProps> = ({
 				date={message.date}
 				messageRead={message.read}
 				forwarded={message.forwarded}
+				isEdited={message?.edited}
 			/>
 		</BubbleContainer>
 	);

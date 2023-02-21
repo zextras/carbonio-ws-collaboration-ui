@@ -78,11 +78,11 @@ const MessageFactory = ({
 				return <DateBubble message={message} refEl={messageRef} />;
 			}
 			default: {
-				return <div>Errore</div>;
+				return <div>Message not handled</div>;
 			}
 		}
 	}
-	return <div>Errore</div>;
+	return <div>Message not handled</div>;
 };
 
 export default MessageFactory;
