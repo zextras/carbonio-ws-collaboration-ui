@@ -11,7 +11,6 @@ import { setup } from 'test-utils';
 import useStore from '../../../store/Store';
 import { createMockRoom, createMockTextMessage } from '../../../tests/createMock';
 import { RoomBe } from '../../../types/network/models/roomBeTypes';
-import { TextMessage } from '../../../types/store/MessageTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 import { RootStore } from '../../../types/store/StoreTypes';
 import BubbleFactory from './BubbleFactory';
@@ -21,7 +20,7 @@ const mockedRoom: RoomBe = createMockRoom({
 	type: RoomType.GROUP
 });
 
-const mockedRepliedTextMessage: TextMessage = createMockTextMessage({
+const mockedRepliedTextMessage = createMockTextMessage({
 	roomId: mockedRoom.id,
 	replyTo: 'insideId',
 	repliedMessage: createMockTextMessage({

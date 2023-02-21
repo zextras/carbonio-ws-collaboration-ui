@@ -41,7 +41,7 @@ const MessageReferenceDisplayed: React.FC<MessageReferenceDisplayedProps> = ({
 }) => {
 	const [t] = useTranslation();
 	const editYourMessageLabel = t('action.editYourMessage', 'Edit your message');
-	const replayToYourselfLabel = t('action.replyToYourself', 'Reply to yourself');
+	const replyToYourselfLabel = t('action.replyToYourself', 'Reply to yourself');
 	const replyTo = t('action.replyToSomeone', 'Reply to');
 
 	const myId = useStore((store) => store.session.id);
@@ -68,14 +68,14 @@ const MessageReferenceDisplayed: React.FC<MessageReferenceDisplayedProps> = ({
 			referenceMessage.actionType === 'edit'
 				? editYourMessageLabel
 				: myId === referenceMessage.senderId
-				? replayToYourselfLabel
+				? replyToYourselfLabel
 				: replyTo,
 		[
 			editYourMessageLabel,
 			myId,
 			referenceMessage.actionType,
 			referenceMessage.senderId,
-			replayToYourselfLabel,
+			replyToYourselfLabel,
 			replyTo
 		]
 	);

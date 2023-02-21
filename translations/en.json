@@ -7,7 +7,8 @@
         "copy": "Copy",
         "create": "Create",
         "delete": "Delete",
-        "edit": "Edit Details",
+        "edit": "Edit",
+        "editDetails": "Edit Details",
         "editRoom": "Edit {{roomName}}",
         "editYourMessage": "Edit your message",
         "leave": "Leave",
@@ -81,7 +82,8 @@
     },
     "message": {
         "deletedMessage": "Deleted message",
-        "draft": "draft"
+        "draft": "draft",
+        "edited": "Edited"
     },
     "modal": {
         "clearHistoryDescription": "You are about to clean up your conversation history, remember that this action cannot be undone. The history of other participants will not be deleted.",

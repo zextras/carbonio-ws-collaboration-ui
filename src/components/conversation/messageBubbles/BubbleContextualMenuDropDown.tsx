@@ -100,14 +100,19 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 	const [t] = useTranslation();
 	const copyActionLabel = t('action.copy', 'Copy');
 	const deleteActionLabel = t('action.delete', 'Delete');
-	const replayActionLabel = t('action.reply', 'Reply');
+	const editActionLabel = t('action.edit', 'Edit');
+	const replyActionLabel = t('action.reply', 'Reply');
 	const successfulCopySnackbar = t('feedback.messageCopied', 'Message copied');
 	const messageActionsTooltip = t('tooltip.messageActions', ' Message actions');
 
 	const deleteMessageTimeLimitInMinutes = useStore((store) =>
 		getCapability(store, CapabilityType.DELETE_MESSAGE_TIME_LIMIT)
 	) as number;
+	const editMessageTimeLimitInMinutes = useStore((store) =>
+		getCapability(store, CapabilityType.EDIT_MESSAGE_TIME_LIMIT)
+	) as number;
 	const setReferenceMessage = useStore((store) => store.setReferenceMessage);
+	const setDraftMessage = useStore((store) => store.setDraftMessage);
 	const [dropdownActive, setDropdownActive] = useState(false);
 	const [contextualMenuActions, setContextualMenuActions] = useState<dropDownAction[]>([]);
 	const createSnackbar: any = useContext(SnackbarManagerContext);
@@ -141,14 +146,9 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 			deleteMessageTimeLimitInMinutes &&
 			Date.now() <= message.date + deleteMessageTimeLimitInMinutes * 60000;
 
-		// Delete functionality
-		if (isMyMessage && messageCanBeDeleted) {
-			actions.push({
-				id: 'Delete',
-				label: deleteActionLabel,
-				click: () => xmppClient.sendChatMessageDeletion(message.roomId, message.id)
-			});
-		}
+		const messageCanBeEdited =
+			deleteMessageTimeLimitInMinutes &&
+			Date.now() <= message.date + editMessageTimeLimitInMinutes * 60000;
 
 		// Reply functionality
 		// if (
@@ -157,14 +157,14 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 		// ) {
 		actions.push({
 			id: 'Reply',
-			label: replayActionLabel,
+			label: replyActionLabel,
 			click: () =>
 				setReferenceMessage(
 					message.roomId,
 					message.id,
 					message.from,
 					message.stanzaId,
-					messageActionType.REPLAY
+					messageActionType.REPLY
 				)
 		});
 		// }
@@ -181,6 +181,33 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 			});
 		}
 
+		// Edit functionality
+		if (isMyMessage && messageCanBeEdited) {
+			actions.push({
+				id: 'Edit',
+				label: editActionLabel,
+				click: () => {
+					setDraftMessage(message.roomId, false, message.text);
+					setReferenceMessage(
+						message.roomId,
+						message.id,
+						message.from,
+						message.stanzaId,
+						messageActionType.EDIT
+					);
+				}
+			});
+		}
+
+		// Delete functionality
+		if (isMyMessage && messageCanBeDeleted) {
+			actions.push({
+				id: 'Delete',
+				label: deleteActionLabel,
+				click: () => xmppClient.sendChatMessageDeletion(message.roomId, message.id)
+			});
+		}
+
 		setContextualMenuActions(actions);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [
@@ -188,7 +215,7 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 		copyMessage,
 		dropdownActive,
 		message,
-		replayActionLabel,
+		replyActionLabel,
 		deleteMessageTimeLimitInMinutes
 	]);
 

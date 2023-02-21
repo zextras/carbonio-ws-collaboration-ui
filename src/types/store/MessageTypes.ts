@@ -34,6 +34,7 @@ export type TextMessage = BasicMessage & {
 	read: MarkerStatus;
 	replyTo?: string;
 	repliedMessage?: TextMessage | DeletedMessage;
+	edited?: boolean;
 };
 
 export type AttachmentMessage = BasicMessage & {

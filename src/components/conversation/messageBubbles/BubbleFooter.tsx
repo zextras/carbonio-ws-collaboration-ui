@@ -7,6 +7,7 @@
 import { Container, Icon, Text, Tooltip } from '@zextras/carbonio-design-system';
 import React, { FC, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 
 import { MarkerStatus } from '../../../types/store/MarkersTypes';
 
@@ -14,20 +15,26 @@ type BubbleFooterProps = {
 	isMyMessage: boolean;
 	time: string;
 	messageRead?: MarkerStatus;
-	messageType?: string;
+	isEdited?: boolean;
 	messageExtension?: string;
 	messageSize?: string;
 };
+
+const ItalicText = styled(Text)`
+	font-style: italic;
+	padding-right: ${({ theme }): string => theme.sizes.padding.small};
+`;
 
 const BubbleFooter: FC<BubbleFooterProps> = ({
 	isMyMessage,
 	time,
 	messageRead,
-	messageType,
+	isEdited,
 	messageExtension,
 	messageSize
 }) => {
 	const [t] = useTranslation();
+	const editedLabel = t('message.edited', 'Edited');
 	const ackIcon = messageRead === MarkerStatus.UNREAD ? 'Checkmark' : 'DoneAll';
 	const ackIconColor = messageRead === MarkerStatus.READ ? 'primary' : 'gray';
 
@@ -54,11 +61,11 @@ const BubbleFooter: FC<BubbleFooterProps> = ({
 				)}
 			</Container>
 			<Container orientation="horizontal" width="fit">
-				{messageType && (
-					<Container width="fit" padding={{ right: 'small' }}>
-						<Text color="secondary" size="small">
-							{messageType}
-						</Text>
+				{isEdited && (
+					<Container width="fit">
+						<ItalicText color="secondary" size="extrasmall">
+							{editedLabel}
+						</ItalicText>
 					</Container>
 				)}
 				{isMyMessage && messageRead && (

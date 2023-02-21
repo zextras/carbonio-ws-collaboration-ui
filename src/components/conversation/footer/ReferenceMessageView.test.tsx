@@ -14,7 +14,7 @@ import { createMockMember, createMockRoom, createMockTextMessage } from '../../.
 import { RoomBe } from '../../../types/network/models/roomBeTypes';
 import { messageActionType } from '../../../types/store/ActiveConversationTypes';
 import { MarkerStatus } from '../../../types/store/MarkersTypes';
-import { MessageType, TextMessage } from '../../../types/store/MessageTypes';
+import { MessageType } from '../../../types/store/MessageTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 import { RootStore } from '../../../types/store/StoreTypes';
 import MessagesList from '../MessagesList';
@@ -29,7 +29,7 @@ const mockedRoom: RoomBe = createMockRoom({
 	]
 });
 
-const mockedMessage: TextMessage = createMockTextMessage({
+const mockedMessage = createMockTextMessage({
 	id: 'idSimpleTextMessage',
 	roomId: 'roomTest',
 	date: 1657099586818, // 18.08
@@ -39,7 +39,7 @@ const mockedMessage: TextMessage = createMockTextMessage({
 	read: MarkerStatus.UNREAD
 });
 
-describe('Replay to a message by opening the contextual menu', () => {
+describe('Reply to a message by opening the contextual menu', () => {
 	test('Display the contextual menu of a message', () => {
 		const store: RootStore = useStore.getState();
 		store.addRoom(mockedRoom);
@@ -60,7 +60,7 @@ describe('Replay to a message by opening the contextual menu', () => {
 			mockedMessage.id,
 			mockedMessage.from,
 			mockedMessage.stanzaId,
-			messageActionType.REPLAY
+			messageActionType.REPLY
 		);
 		setup(<ReferenceMessageView roomId={mockedRoom.id} />);
 		const referenceMessage = screen.getByTestId('reference_message');
@@ -76,7 +76,7 @@ describe('Replay to a message by opening the contextual menu', () => {
 			mockedMessage.id,
 			mockedMessage.from,
 			mockedMessage.stanzaId,
-			messageActionType.REPLAY
+			messageActionType.REPLY
 		);
 		const { user } = setup(<ReferenceMessageView roomId={mockedRoom.id} />);
 		const referenceMessage = screen.getByTestId('reference_message');

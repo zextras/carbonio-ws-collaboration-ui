@@ -28,7 +28,7 @@ type RepliedTextMessageSectionViewProps = {
 	isMyMessage: boolean;
 };
 
-const ReplayedTextMessageContainer = styled(Container)`
+const ReplyedTextMessageContainer = styled(Container)`
 	border-left: ${({ userBorderColor, theme }): string =>
 		`0.25rem solid ${theme.avatarColors[userBorderColor]}`};
 	border-radius: 0 0.25rem 0.25rem 0;
@@ -166,7 +166,8 @@ const RepliedTextMessageSectionView: FC<RepliedTextMessageSectionViewProps> = ({
 
 	return (
 		<>
-			<ReplayedTextMessageContainer
+			<ReplyedTextMessageContainer
+				data-testid={`repliedView-${repliedMessage.id}`}
 				background={isMyMessage ? '#C4D5EF' : 'gray5'}
 				padding={{ horizontal: 'small', vertical: 'small' }}
 				crossAlignment="flex-start"
@@ -176,7 +177,7 @@ const RepliedTextMessageSectionView: FC<RepliedTextMessageSectionViewProps> = ({
 				{senderIdentifier && (
 					<BubbleHeader
 						senderIdentifier={senderIdentifier}
-						notReplayedMessageHeader={false}
+						notRepliedMessageHeader={false}
 						userColor={userColor}
 					/>
 				)}
@@ -191,9 +192,9 @@ const RepliedTextMessageSectionView: FC<RepliedTextMessageSectionViewProps> = ({
 					</DeletedMessageWrap>
 				)}
 				{messageTime && repliedMessage.type !== MessageType.DELETED_MSG && (
-					<BubbleFooter isMyMessage={false} time={messageTime} />
+					<BubbleFooter isMyMessage={false} isEdited={repliedMessage.edited} time={messageTime} />
 				)}
-			</ReplayedTextMessageContainer>
+			</ReplyedTextMessageContainer>
 			<Padding top="small" />
 		</>
 	);

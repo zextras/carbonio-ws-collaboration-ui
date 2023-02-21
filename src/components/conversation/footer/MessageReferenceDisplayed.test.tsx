@@ -12,7 +12,6 @@ import useStore from '../../../store/Store';
 import { createMockRoom, createMockTextMessage } from '../../../tests/createMock';
 import { RoomBe } from '../../../types/network/models/roomBeTypes';
 import { messageActionType } from '../../../types/store/ActiveConversationTypes';
-import { TextMessage } from '../../../types/store/MessageTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 import { User } from '../../../types/store/UserTypes';
 import MessageReferenceDisplayed from './MessageReferenceDisplayed';
@@ -24,14 +23,14 @@ const mockedRoom: RoomBe = createMockRoom({
 
 const myId = 'myId'; // on DS them will be color #EF9A9A
 
-const mockedRepliedTextMessage: TextMessage = createMockTextMessage({
+const mockedRepliedTextMessage = createMockTextMessage({
 	id: 'messageId',
 	roomId: mockedRoom.id,
 	from: 'user1',
 	text: 'Text message used for test'
 });
 
-const myMockedRepliedTextMessage: TextMessage = createMockTextMessage({
+const myMockedRepliedTextMessage = createMockTextMessage({
 	id: 'messageId',
 	roomId: mockedRoom.id,
 	from: myId,
@@ -51,7 +50,7 @@ const referenceMessage = {
 	messageId: mockedRepliedTextMessage.id,
 	senderId: mockedRepliedTextMessage.from,
 	stanzaId: mockedRepliedTextMessage.stanzaId,
-	actionType: messageActionType.REPLAY
+	actionType: messageActionType.REPLY
 };
 
 const myReferenceMessage = {
@@ -59,7 +58,15 @@ const myReferenceMessage = {
 	messageId: myMockedRepliedTextMessage.id,
 	senderId: myMockedRepliedTextMessage.from,
 	stanzaId: myMockedRepliedTextMessage.stanzaId,
-	actionType: messageActionType.REPLAY
+	actionType: messageActionType.REPLY
+};
+
+const myReferenceEditMessage = {
+	roomId: mockedRoom.id,
+	messageId: myMockedRepliedTextMessage.id,
+	senderId: myMockedRepliedTextMessage.from,
+	stanzaId: myMockedRepliedTextMessage.stanzaId,
+	actionType: messageActionType.EDIT
 };
 
 describe('Message reference displayed', () => {
@@ -90,6 +97,21 @@ describe('Message reference displayed', () => {
 		const replyToMySelfLabel = screen.getByText(/Reply to yourself/i);
 		expect(replyToMySelfLabel).toBeInTheDocument();
 		expect(replyToMySelfLabel).toHaveStyle('color: #828282');
+		const borderComponent = await screen.findByTestId('reference-border-message');
+		expect(borderComponent).toBeInTheDocument();
+		expect(borderComponent).toHaveStyle('border-left: 0.25rem solid #EF9A9A');
+		const message = screen.getByText(/Text message sent by me/i);
+		expect(message).toBeInTheDocument();
+	});
+	test('Display the reference message I want to edit', async () => {
+		const store = useStore.getState();
+		store.setLoginInfo(myId, 'me@userme.it');
+		store.addRoom(mockedRoom);
+		store.newMessage(myMockedRepliedTextMessage);
+		setup(<MessageReferenceDisplayed referenceMessage={myReferenceEditMessage} />);
+		const editYourMessageLabel = screen.getByText(/Edit your message/i);
+		expect(editYourMessageLabel).toBeInTheDocument();
+		expect(editYourMessageLabel).toHaveStyle('color: #828282');
 		const borderComponent = await screen.findByTestId('reference-border-message');
 		expect(borderComponent).toBeInTheDocument();
 		expect(borderComponent).toHaveStyle('border-left: 0.25rem solid #EF9A9A');

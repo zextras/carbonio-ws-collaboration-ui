@@ -27,6 +27,8 @@ type MessageInfo = {
 	stanzaId?: string;
 	replyTo?: string;
 	messageIdDeletion?: string;
+	idMessageToToEdit?: string;
+	isEdited?: boolean;
 };
 
 const createMockMessageInfo = (fields?: Record<string, any>): MessageInfo => ({
@@ -35,6 +37,7 @@ const createMockMessageInfo = (fields?: Record<string, any>): MessageInfo => ({
 	roomId: 'roomId',
 	from: 'userId',
 	stanzaId: 'stanzaId',
+	isEdited: false,
 	...fields
 });
 
@@ -50,10 +53,19 @@ const createXMPPReceivedMessage = (info: MessageInfo): Element => {
 			>
 				${
 					info.messageType === MessageType.TEXT_MSG &&
+					!info.isEdited &&
 					`
 						<body>${info.text}</body>
 						<markable xmlns="urn:xmpp:chat-markers:0"></markable>
 						${info.replyTo && `<thread>${info.replyTo}</thread>`}
+					`
+				}
+				${
+					info.messageType === MessageType.TEXT_MSG &&
+					info.isEdited &&
+					`
+						<body>${info.text}</body>
+						<replace id="${info.idMessageToToEdit}" xmlns="urn:xmpp:message-correct:0"/>
 					`
 				}
 				${
@@ -174,6 +186,26 @@ describe('XMPP newMessageHandler', () => {
 		expect(messageList[4].type).toBe(MessageType.DELETED_MSG);
 		expect(messageList[4].id).toBe(fourthMessageInfo.id);
 		expect(messageList[5].id).toBe(fifthMessageInfo.id);
+	});
+
+	test('New correction of a message arrives', () => {
+		const initialMessageInfo = createMockMessageInfo({ text: 'Hi!' });
+		const editInfo = createMockMessageInfo({
+			id: 'messageId2',
+			idMessageToToEdit: initialMessageInfo.id,
+			text: 'Hi everyone!',
+			isEdited: true
+		});
+		const message = createXMPPReceivedMessage(initialMessageInfo);
+		const messageCorrection = createXMPPReceivedMessage(editInfo);
+		onNewMessageStanza.call(xmppClient, message);
+		onNewMessageStanza.call(xmppClient, messageCorrection);
+		const store = useStore.getState();
+
+		const editedMessage = store.messages[initialMessageInfo.roomId][1];
+		expect(editedMessage.id).toBe(initialMessageInfo.id);
+		expect((editedMessage as TextMessage).edited).toBeTruthy();
+		expect((editedMessage as TextMessage).text).toBe(editInfo.text);
 	});
 
 	test('Send desktop notification on new message', () => {

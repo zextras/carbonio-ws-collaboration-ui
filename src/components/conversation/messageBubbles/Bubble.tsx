@@ -96,19 +96,13 @@ const Bubble: FC<BubbleProps> = ({
 		lastMessageOfList={prevMessageIsFromSameSender && !nextMessageIsFromSameSender}
 	>
 		<DropDownWrapper padding={{ all: 'none' }}>
-			{message.type === MessageType.TEXT_MSG && (
-				<BubbleContextualMenuDropDown message={message} isMyMessage={isMyMessage} />
-			)}
+			<BubbleContextualMenuDropDown message={message} isMyMessage={isMyMessage} />
 		</DropDownWrapper>
 		{!isMyMessage &&
 			roomType !== RoomType.ONE_TO_ONE &&
 			senderInfo &&
 			!prevMessageIsFromSameSender && (
-				<BubbleHeader
-					senderIdentifier={senderInfo}
-					notReplayedMessageHeader
-					userColor={userColor}
-				/>
+				<BubbleHeader senderIdentifier={senderInfo} notRepliedMessageHeader userColor={userColor} />
 			)}
 		{message.repliedMessage && (
 			<RepliedTextMessageSectionView
@@ -118,7 +112,12 @@ const Bubble: FC<BubbleProps> = ({
 			/>
 		)}
 		{message.type === MessageType.TEXT_MSG && <TextContentBubble textContent={messageFormatted} />}
-		<BubbleFooter isMyMessage={isMyMessage} time={messageTime} messageRead={message.read} />
+		<BubbleFooter
+			isMyMessage={isMyMessage}
+			isEdited={message?.edited}
+			time={messageTime}
+			messageRead={message.read}
+		/>
 	</BubbleContainer>
 );
 
