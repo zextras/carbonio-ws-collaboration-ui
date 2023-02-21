@@ -35,6 +35,7 @@ export type TextMessage = BasicMessage & {
 	replyTo?: string;
 	repliedMessage?: TextMessage | DeletedMessage;
 	edited?: boolean;
+	forwarded?: ForwardedMessage;
 };
 
 export type AttachmentMessage = BasicMessage & {
@@ -81,3 +82,10 @@ export enum MessageType {
 	CONFIGURATION_MSG = 'configuration',
 	DATE_MSG = 'date'
 }
+
+export type ForwardedMessage = {
+	id: string;
+	date: number;
+	from: string;
+	text: string;
+};

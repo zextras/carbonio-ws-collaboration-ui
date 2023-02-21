@@ -47,6 +47,7 @@ const AddNewMemberModal: FC<AddNewMemberProps> = ({
 		'Show previous conversation history'
 	);
 	const addNewMemberButtonLabel = t('action.addNewMembers', 'Add New Members');
+	const closeLabel = t('action.close', 'Close');
 
 	const onClickCheckbox = useCallback(
 		() => setShowHistory((check) => !check),
@@ -85,6 +86,7 @@ const AddNewMemberModal: FC<AddNewMemberProps> = ({
 			confirmColor="primary"
 			showCloseIcon
 			onClose={closeModal}
+			closeIconTooltip={closeLabel}
 		>
 			<Container>
 				<ChatCreationContactsSelection

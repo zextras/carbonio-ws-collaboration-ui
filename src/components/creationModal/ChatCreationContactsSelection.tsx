@@ -55,7 +55,7 @@ const ChatCreationContactsSelection = ({
 }: ChatCreationContactsSelectionProps): ReactElement => {
 	const [t] = useTranslation();
 	const noMatchLabel = t('participantsList.noMatch', 'There are no items that match this search');
-	const inputPlaceholder = t('modal.creation.inputPlaceholder', 'Start typing to pick an address');
+	const inputPlaceholder = t('modal.creation.inputPlaceholder', 'Start typing or pick an address');
 	const listTextLabel = t(
 		'modal.creation.contactList',
 		'Select more that an address to create a group chat'

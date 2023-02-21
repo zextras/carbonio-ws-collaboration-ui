@@ -63,10 +63,13 @@ const initApp = () => {
 	const store = useStore.getState();
 	store.setLoginInfo(id, name, displayName);
 
-	// SET TIMEZONE
+	// SET TIMEZONE and LOCALE
 	settings?.prefs?.zimbraPrefTimeZoneId
 		? store.setUserPrefTimezone(settings?.prefs?.zimbraPrefTimeZoneId)
 		: store.setUserPrefTimezone(moment.tz.guess());
+	if (settings?.prefs?.zimbraPrefLocale) {
+		moment.locale(settings.prefs.zimbraPrefLocale);
+	}
 
 	Promise.all([SessionApi.getToken(), SessionApi.getCapabilities()])
 		.then((resp) => {

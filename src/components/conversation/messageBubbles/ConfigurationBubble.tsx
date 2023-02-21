@@ -38,7 +38,7 @@ const ConfigurationBubble: FC<ConfigurationMsgProps> = ({ message, refEl }) => {
 		message.from,
 		message.roomId,
 		roomName,
-		nameToDisplay,
+		nameToDisplay || '',
 		t
 	);
 

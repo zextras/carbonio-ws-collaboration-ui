@@ -12,7 +12,7 @@ import { getSingleMessageSelector } from '../../../store/selectors/MessagesSelec
 import useStore from '../../../store/Store';
 import { MessageType } from '../../../types/store/MessageTypes';
 import AffiliationBubble from './AffiliationBubble';
-import BubbleFactory from './BubbleFactory';
+import Bubble from './Bubble';
 import ConfigurationBubble from './ConfigurationBubble';
 import DateBubble from './DataBubble';
 import DeletedBubble from './DeletedBubble';
@@ -57,7 +57,7 @@ const MessageFactory = ({
 		switch (message.type) {
 			case MessageType.TEXT_MSG: {
 				return (
-					<BubbleFactory
+					<Bubble
 						message={message}
 						prevMessageIsFromSameSender={prevMessageIsFromSameSender}
 						nextMessageIsFromSameSender={nextMessageIsFromSameSender}

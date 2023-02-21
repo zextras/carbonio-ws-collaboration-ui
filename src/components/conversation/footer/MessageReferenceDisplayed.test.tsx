@@ -9,8 +9,9 @@ import React from 'react';
 import { setup } from 'test-utils';
 
 import useStore from '../../../store/Store';
-import { createMockRoom, createMockTextMessage } from '../../../tests/createMock';
+import { createMockRoom, createMockTextMessage, createMockUser } from '../../../tests/createMock';
 import { RoomBe } from '../../../types/network/models/roomBeTypes';
+import { UserBe } from '../../../types/network/models/userBeTypes';
 import { messageActionType } from '../../../types/store/ActiveConversationTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 import { User } from '../../../types/store/UserTypes';
@@ -45,29 +46,19 @@ const user1: User = {
 	statusMessage: "Hey there! I'm User 1"
 };
 
-const referenceMessage = {
-	roomId: mockedRoom.id,
-	messageId: mockedRepliedTextMessage.id,
-	senderId: mockedRepliedTextMessage.from,
-	stanzaId: mockedRepliedTextMessage.stanzaId,
-	actionType: messageActionType.REPLY
-};
+const forwardedUser: UserBe = createMockUser({ id: 'forwardedUserId' });
 
-const myReferenceMessage = {
+const forwardedTextMessage = createMockTextMessage({
+	id: 'messageId',
 	roomId: mockedRoom.id,
-	messageId: myMockedRepliedTextMessage.id,
-	senderId: myMockedRepliedTextMessage.from,
-	stanzaId: myMockedRepliedTextMessage.stanzaId,
-	actionType: messageActionType.REPLY
-};
-
-const myReferenceEditMessage = {
-	roomId: mockedRoom.id,
-	messageId: myMockedRepliedTextMessage.id,
-	senderId: myMockedRepliedTextMessage.from,
-	stanzaId: myMockedRepliedTextMessage.stanzaId,
-	actionType: messageActionType.EDIT
-};
+	from: user1.id,
+	text: '',
+	forwarded: {
+		from: forwardedUser.id,
+		date: 1661441294393,
+		text: 'Forwarded text!'
+	}
+});
 
 describe('Message reference displayed', () => {
 	test('Display the reference message of another user in a reply action of user', async () => {
@@ -76,6 +67,14 @@ describe('Message reference displayed', () => {
 		store.addRoom(mockedRoom);
 		store.setUserInfo(user1);
 		store.newMessage(mockedRepliedTextMessage);
+
+		const referenceMessage = {
+			roomId: mockedRoom.id,
+			messageId: mockedRepliedTextMessage.id,
+			senderId: mockedRepliedTextMessage.from,
+			stanzaId: mockedRepliedTextMessage.stanzaId,
+			actionType: messageActionType.REPLY
+		};
 		setup(<MessageReferenceDisplayed referenceMessage={referenceMessage} />);
 		const userNameComponent = await screen.findByTestId('reference-message-username');
 		expect(userNameComponent).toBeInTheDocument();
@@ -93,6 +92,14 @@ describe('Message reference displayed', () => {
 		store.setLoginInfo(myId, 'me@userme.it');
 		store.addRoom(mockedRoom);
 		store.newMessage(myMockedRepliedTextMessage);
+
+		const myReferenceMessage = {
+			roomId: mockedRoom.id,
+			messageId: myMockedRepliedTextMessage.id,
+			senderId: myMockedRepliedTextMessage.from,
+			stanzaId: myMockedRepliedTextMessage.stanzaId,
+			actionType: messageActionType.REPLY
+		};
 		setup(<MessageReferenceDisplayed referenceMessage={myReferenceMessage} />);
 		const replyToMySelfLabel = screen.getByText(/Reply to yourself/i);
 		expect(replyToMySelfLabel).toBeInTheDocument();
@@ -108,6 +115,13 @@ describe('Message reference displayed', () => {
 		store.setLoginInfo(myId, 'me@userme.it');
 		store.addRoom(mockedRoom);
 		store.newMessage(myMockedRepliedTextMessage);
+		const myReferenceEditMessage = {
+			roomId: mockedRoom.id,
+			messageId: myMockedRepliedTextMessage.id,
+			senderId: myMockedRepliedTextMessage.from,
+			stanzaId: myMockedRepliedTextMessage.stanzaId,
+			actionType: messageActionType.EDIT
+		};
 		setup(<MessageReferenceDisplayed referenceMessage={myReferenceEditMessage} />);
 		const editYourMessageLabel = screen.getByText(/Edit your message/i);
 		expect(editYourMessageLabel).toBeInTheDocument();
@@ -116,6 +130,35 @@ describe('Message reference displayed', () => {
 		expect(borderComponent).toBeInTheDocument();
 		expect(borderComponent).toHaveStyle('border-left: 0.25rem solid #EF9A9A');
 		const message = screen.getByText(/Text message sent by me/i);
+		expect(message).toBeInTheDocument();
+	});
+
+	test('Reference message is a forwarded message', async () => {
+		const store = useStore.getState();
+		store.setSessionId(myId);
+		store.setUserInfo(user1);
+		store.setUserInfo(forwardedUser);
+		store.addRoom(mockedRoom);
+		store.newMessage(forwardedTextMessage);
+
+		const referenceMessage = {
+			roomId: mockedRoom.id,
+			messageId: forwardedTextMessage.id,
+			senderId: forwardedTextMessage.from,
+			stanzaId: forwardedTextMessage.stanzaId,
+			actionType: messageActionType.REPLY
+		};
+		setup(<MessageReferenceDisplayed referenceMessage={referenceMessage} />);
+
+		const userNameComponent = await screen.findByTestId('reference-message-username');
+		expect(userNameComponent).toBeInTheDocument();
+
+		// Displayed username is the username of who forward message
+		const userName = screen.getByText(new RegExp(user1.name, 'i'));
+		expect(userName).toBeInTheDocument();
+
+		// Displayed text is the text of the forwarded message
+		const message = screen.getByText(new RegExp(forwardedTextMessage.forwarded!.text, 'i'));
 		expect(message).toBeInTheDocument();
 	});
 });

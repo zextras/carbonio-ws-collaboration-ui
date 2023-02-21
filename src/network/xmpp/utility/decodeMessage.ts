@@ -14,7 +14,7 @@ import {
 	Message, MessageType,
 	TextMessage
 } from '../../../types/store/MessageTypes';
-import { isBefore, now } from '../../../utils/dateUtil';
+import {dateToTimestamp, isBefore, now} from '../../../utils/dateUtil';
 import { getId, getResource } from './decodeJid';
 import useStore from '../../../store/Store';
 import { find, forEach, size } from 'lodash';
@@ -48,10 +48,25 @@ export function decodeMessage(messageStanza: Element, optional?: OptionalParamet
 			.replace(/&lt;/g, '<')
 			.replace(/&gt;/g, '>');
 
+		// Message is a reply to another message
 		let replyTo;
-		const thread = getTagElement(messageStanza, 'thread');
-		if (thread != null) {
-			replyTo = Strophe.getText(thread);
+		const threadElement = getTagElement(messageStanza, 'thread');
+		if (threadElement != null) {
+			replyTo = Strophe.getText(threadElement);
+		}
+
+		// Message is a forwarded message from another conversation
+		let forwarded;
+		const forwardedElement = messageStanza.getElementsByTagName('forwarded')[0];
+		if (forwardedElement) {
+			const forwardedMessageElement = getRequiredTagElement(forwardedElement, 'message');
+			const delayElement = getRequiredTagElement(forwardedElement, 'delay');
+			forwarded = {
+				id: getRequiredAttribute(forwardedMessageElement, 'id'),
+				date: dateToTimestamp(getRequiredAttribute(delayElement, 'stamp')),
+				from: getId(getRequiredAttribute(forwardedMessageElement, 'from')),
+				text: Strophe.getText(getRequiredTagElement(forwardedMessageElement, 'body'))
+			}
 		}
 
 		// Correction/edited message
@@ -83,7 +98,8 @@ export function decodeMessage(messageStanza: Element, optional?: OptionalParamet
 			text: messageTxt,
 			read: calcReads(messageDate, roomId),
 			replyTo,
-			edited: false
+			edited: false,
+			forwarded
 		};
 		return message as TextMessage;
 	}
