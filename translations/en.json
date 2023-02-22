@@ -8,6 +8,7 @@
         "copy": "Copy",
         "create": "Create",
         "delete": "Delete",
+        "download": "Download",
         "edit": "Edit",
         "editDetails": "Edit Details",
         "editRoom": "Edit {{roomName}}",

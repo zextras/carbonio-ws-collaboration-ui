@@ -105,6 +105,7 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 	const editActionLabel = t('action.edit', 'Edit');
 	const replyActionLabel = t('action.reply', 'Reply');
 	const forwardActionLabel = t('action.forward', 'Forward');
+	const downloadActionLabel = t('action.download', 'Download');
 	const successfulCopySnackbar = t('feedback.messageCopied', 'Message copied');
 	const messageActionsTooltip = t('tooltip.messageActions', ' Message actions');
 
@@ -163,6 +164,19 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 		}
 	}, [message.attachment, message.id, message.roomId, xmppClient]);
 
+	const downloadAction = useCallback(() => {
+		if (message.attachment) {
+			const downloadUrl = AttachmentsApi.getURLAttachment(message.attachment.id);
+			const linkTag: HTMLAnchorElement = document.createElement('a');
+			document.body.appendChild(linkTag);
+			linkTag.href = downloadUrl;
+			linkTag.download = message.attachment.name;
+			linkTag.target = '_blank';
+			linkTag.click();
+			linkTag.remove();
+		}
+	}, [message.attachment]);
+
 	const contextualMenuActions = useMemo(() => {
 		const actions: DropDownActionType[] = [];
 		const messageCanBeDeleted =
@@ -209,7 +223,7 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 		}
 
 		// Edit functionality
-		if (isMyMessage && messageCanBeEdited && !message.forwarded) {
+		if (isMyMessage && messageCanBeEdited && !message.forwarded && !message.attachment) {
 			actions.push({
 				id: 'Edit',
 				label: editActionLabel,
@@ -232,6 +246,14 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 				id: 'Delete',
 				label: deleteActionLabel,
 				click: deleteMessage
+			});
+		}
+
+		if (message.attachment) {
+			actions.push({
+				id: 'Download',
+				label: downloadActionLabel,
+				click: downloadAction
 			});
 		}
 		return actions;
@@ -257,7 +279,9 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 		editActionLabel,
 		setDraftMessage,
 		deleteActionLabel,
-		deleteMessage
+		deleteMessage,
+		downloadActionLabel,
+		downloadAction
 	]);
 
 	return (
