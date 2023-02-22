@@ -5,7 +5,7 @@
  */
 
 import { Avatar, Container, Row, Text } from '@zextras/carbonio-design-system';
-import React, { FC, useCallback, useMemo } from 'react';
+import React, { FC, useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import { AttachmentsApi } from '../../../network';
@@ -34,6 +34,10 @@ type AttachmentViewProps = {
 
 const AttachmentView: FC<AttachmentViewProps> = ({ attachment, from, isMyMessage = false }) => {
 	const senderIdentifier = useStore((store) => getUserName(store, from));
+
+	const [previewError, setPreviewError] = useState(false);
+	const setError = useCallback(() => setPreviewError(true), []);
+
 	const userColor = useMemo(() => calculateAvatarColor(senderIdentifier || ''), [senderIdentifier]);
 
 	const previewURL = useMemo(
@@ -52,9 +56,9 @@ const AttachmentView: FC<AttachmentViewProps> = ({ attachment, from, isMyMessage
 		linkTag.remove();
 	}, [attachment.id, attachment.name]);
 
-	if (previewURL) {
+	if (previewURL && !previewError) {
 		// TODO image style
-		return <AttachmentImg src={previewURL} />;
+		return <AttachmentImg src={previewURL} onError={setError} />;
 	}
 	return (
 		<FileContainer

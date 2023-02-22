@@ -83,11 +83,21 @@ const Bubble: FC<BubbleProps> = ({
 		[message.attachment]
 	);
 
-	// TODO calc size (kb, mb, gb,..)
-	const size = useMemo(
-		() => message.attachment && `${message.attachment.size}KB`,
-		[message.attachment]
-	);
+	const size = useMemo(() => {
+		if (message.attachment) {
+			if (message.attachment.size < 1024) {
+				return `${message.attachment.size}B`;
+			}
+			if (message.attachment.size < 1024 * 1024) {
+				return `${(message.attachment.size / 1024).toFixed(2)}KB`;
+			}
+			if (message.attachment.size < 1024 * 1024 * 1024) {
+				return `${(message.attachment.size / 1024 / 1024).toFixed(2)}MB`;
+			}
+			return `${(message.attachment.size / 1024 / 1024 / 1024).toFixed(2)}GB`;
+		}
+		return undefined;
+	}, [message.attachment]);
 
 	return (
 		<BubbleContainer

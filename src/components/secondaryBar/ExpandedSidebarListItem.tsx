@@ -167,17 +167,24 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 			if (lastMessageOfRoom) {
 				switch (lastMessageOfRoom.type) {
 					case MessageType.TEXT_MSG: {
-						const text = lastMessageOfRoom.forwarded
-							? lastMessageOfRoom.forwarded.text
-							: lastMessageOfRoom.text;
+						const text = (): string => {
+							if (lastMessageOfRoom.attachment) {
+								return lastMessageOfRoom.text !== ''
+									? lastMessageOfRoom.text
+									: lastMessageOfRoom.attachment.name;
+							}
+							return lastMessageOfRoom.forwarded
+								? lastMessageOfRoom.forwarded.text
+								: lastMessageOfRoom.text;
+						};
 						if (
 							roomType === RoomType.GROUP &&
 							lastMessageOfRoom.from !== sessionId &&
 							userNameOfLastMessageOfRoom
 						) {
-							return `${userNameOfLastMessageOfRoom.split(/(\s+)/)[0]}: ${text}`;
+							return `${userNameOfLastMessageOfRoom.split(/(\s+)/)[0]}: ${text()}`;
 						}
-						return text;
+						return text();
 					}
 					case MessageType.AFFILIATION_MSG:
 						return affiliationMessage(
@@ -291,41 +298,28 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 								orientation="horizontal"
 								mainAlignment="flex-start"
 							>
-								{draftMessage ? (
-									<>
-										<Tooltip label={draftTooltip} maxWidth="12.5rem">
-											<Container width="fit" padding={{ right: 'extrasmall' }}>
-												<Icon size="small" icon="Edit2" color="gray" />
-											</Container>
-										</Tooltip>
-										<Text
-											color="secondary"
-											size="extrasmall"
-											overflow="ellipsis"
-											data-testid="message"
-										>
-											{messageToDisplay}
-										</Text>
-									</>
-								) : (
-									<>
-										{ackHasToAppear && (
-											<Tooltip label={dropdownTooltip}>
-												<Container width="fit" padding={{ right: 'extrasmall' }}>
-													{ackIcon}
-												</Container>
-											</Tooltip>
-										)}
-										<Text
-											color="secondary"
-											size="extrasmall"
-											overflow="ellipsis"
-											data-testid="message"
-										>
-											{messageToDisplay}
-										</Text>
-									</>
+								{draftMessage && (
+									<Tooltip label={draftTooltip} maxWidth="12.5rem">
+										<Container width="fit" padding={{ right: 'extrasmall' }}>
+											<Icon size="small" icon="Edit2" color="gray" />
+										</Container>
+									</Tooltip>
 								)}
+								{!draftMessage && ackHasToAppear && (
+									<Tooltip label={dropdownTooltip}>
+										<Container width="fit" padding={{ right: 'extrasmall' }}>
+											{ackIcon}
+										</Container>
+									</Tooltip>
+								)}
+								{lastMessageOfRoom?.type === MessageType.TEXT_MSG && lastMessageOfRoom.attachment && (
+									<Container width="fit" padding={{ right: 'extrasmall' }}>
+										<Icon size="small" icon="FileTextOutline" color="gray" />
+									</Container>
+								)}
+								<Text color="secondary" size="extrasmall" overflow="ellipsis" data-testid="message">
+									{messageToDisplay}
+								</Text>
 							</Container>
 						</Row>
 						{UnreadCounter}

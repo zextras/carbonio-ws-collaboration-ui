@@ -124,7 +124,7 @@ export function decodeMessage(messageStanza: Element, optional?: OptionalParamet
 					read: calcReads(messageDate, roomId),
 					attachment: {
 						id: attachmentId,
-						name: filename || "",
+						name: decodeURI(filename) || "",
 						mimeType: fileMimeType || "",
 						size: fileSize || 0
 					},
