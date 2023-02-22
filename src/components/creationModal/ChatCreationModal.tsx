@@ -45,6 +45,7 @@ const ChatCreationModal = ({
 	const [contactsSelected, setContactSelected] = useState<ContactSelected>({});
 	const [title, setTitle] = useState<string>(titlePlaceholder);
 	const [topic, setTopic] = useState<string>('');
+	const [isPending, setIsPending] = useState<boolean>(false);
 
 	const { goToRoomPage } = useRouting();
 
@@ -97,6 +98,7 @@ const ChatCreationModal = ({
 			goToRoomPage(oneToOneChatExist.id);
 			onModalClose();
 		} else {
+			setIsPending(true);
 			RoomsApi.addRoom({
 				name: chatType === RoomType.ONE_TO_ONE ? ' ' : title,
 				description: chatType === RoomType.ONE_TO_ONE ? ' ' : topic,
@@ -104,6 +106,7 @@ const ChatCreationModal = ({
 				membersIds: ids
 			})
 				.then((response: AddRoomResponse) => {
+					setIsPending(false);
 					addRoom(response);
 					goToRoomPage(response.id);
 					onModalClose();
@@ -128,7 +131,7 @@ const ChatCreationModal = ({
 					<Button
 						label={createButtonLabel}
 						onClick={onCreate}
-						disabled={disabledCreateButton}
+						disabled={disabledCreateButton || isPending}
 						data-testid="create_button"
 					/>
 				</Container>
@@ -141,7 +144,8 @@ const ChatCreationModal = ({
 			errorLabelDisabled,
 			disabledButtonTooltip,
 			createButtonLabel,
-			onCreate
+			onCreate,
+			isPending
 		]
 	);
 
