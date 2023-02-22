@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Container, Text, Row } from '@zextras/carbonio-design-system';
+import { Container, Text, Row, Padding, Avatar } from '@zextras/carbonio-design-system';
 import React, { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -14,6 +14,7 @@ import { getUserSelector } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
 import { ReferenceMessage } from '../../../types/store/ActiveConversationTypes';
 import { Message, MessageType } from '../../../types/store/MessageTypes';
+import { getPreviewURL } from '../../../utils/attachmentUtils';
 import { calculateAvatarColor } from '../../../utils/styleUtils';
 
 const UserName = styled(Text)`
@@ -82,10 +83,20 @@ const MessageReferenceDisplayed: React.FC<MessageReferenceDisplayedProps> = ({
 
 	const textMessage = useMemo(() => {
 		if (message?.type === MessageType.TEXT_MSG) {
-			return !message.forwarded ? message.text : message.forwarded.text;
+			if (message.attachment) {
+				return message.text !== '' ? message.text : message.attachment.name;
+			}
+			return message.forwarded ? message.forwarded.text : message.text;
 		}
 		return '';
 	}, [message]);
+
+	const previewURL = useMemo(() => {
+		if (referenceMessage.attachment) {
+			return getPreviewURL(referenceMessage.attachment.id, referenceMessage.attachment.mimeType);
+		}
+		return undefined;
+	}, [referenceMessage]);
 
 	return (
 		<Row takeAvailableSpace wrap="nowrap" height="100%">
@@ -97,6 +108,18 @@ const MessageReferenceDisplayed: React.FC<MessageReferenceDisplayedProps> = ({
 				padding={{ left: 'small' }}
 				width="fill"
 			>
+				{referenceMessage.attachment && (
+					<Padding right="small">
+						<Avatar
+							size="large"
+							icon="FileTextOutline"
+							label={referenceMessage.attachment.name}
+							shape="square"
+							background="gray0"
+							picture={previewURL}
+						/>
+					</Padding>
+				)}
 				<Container mainAlignment="flex-start">
 					<Container mainAlignment="flex-start" orientation="horizontal">
 						<Text size="medium" color="secondary">

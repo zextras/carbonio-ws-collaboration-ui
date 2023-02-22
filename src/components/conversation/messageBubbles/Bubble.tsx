@@ -78,6 +78,17 @@ const Bubble: FC<BubbleProps> = ({
 	const isMyMessage = mySessionId === message.from;
 	const messageFormatted = useMemo(() => parseUrlOnMessage(message.text), [message.text]);
 
+	const extension = useMemo(
+		() => message.attachment && message.attachment.mimeType.split('/')[1]?.toUpperCase(),
+		[message.attachment]
+	);
+
+	// TODO calc size (kb, mb, gb,..)
+	const size = useMemo(
+		() => message.attachment && `${message.attachment.size}KB`,
+		[message.attachment]
+	);
+
 	return (
 		<BubbleContainer
 			id={`message-${message.id}`}
@@ -116,7 +127,13 @@ const Bubble: FC<BubbleProps> = ({
 					roomId={message.roomId}
 				/>
 			)}
-			{message.attachment && <AttachmentView attachment={message.attachment} />}
+			{message.attachment && (
+				<AttachmentView
+					attachment={message.attachment}
+					isMyMessage={isMyMessage}
+					from={message.from}
+				/>
+			)}
 			<TextContentBubble textContent={messageFormatted} />
 			<BubbleFooter
 				isMyMessage={isMyMessage}
@@ -124,6 +141,8 @@ const Bubble: FC<BubbleProps> = ({
 				messageRead={message.read}
 				forwarded={message.forwarded}
 				isEdited={message?.edited}
+				messageExtension={extension}
+				messageSize={size}
 			/>
 		</BubbleContainer>
 	);

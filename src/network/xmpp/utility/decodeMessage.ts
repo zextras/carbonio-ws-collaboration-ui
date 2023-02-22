@@ -104,6 +104,8 @@ export function decodeMessage(messageStanza: Element, optional?: OptionalParamet
 				const stanzaId = optional?.stanzaId || (stanzaIdReference && getRequiredAttribute(stanzaIdReference, 'id') || messageId);
 				const attachmentId = Strophe.getText(getRequiredTagElement(x, 'attachment-id'));
 				const filename = Strophe.getText(getRequiredTagElement(x, 'filename'));
+				const fileMimeType = Strophe.getText(getRequiredTagElement(x, 'mime-type'));
+				const fileSize = Strophe.getText(getRequiredTagElement(x, 'size'));
 				const description = Strophe.getText(getRequiredTagElement(messageStanza, 'body'))
 					.replace(/&amp;/g, '&')
 					.replace(/&quot;/g, '"')
@@ -122,9 +124,9 @@ export function decodeMessage(messageStanza: Element, optional?: OptionalParamet
 					read: calcReads(messageDate, roomId),
 					attachment: {
 						id: attachmentId,
-						name: filename,
-						mimeType: 'jpg', // TODO use real data
-						size: 512 // TODO use real data
+						name: filename || "",
+						mimeType: fileMimeType || "",
+						size: fileSize || 0
 					},
 				};
 				return message as TextMessage;

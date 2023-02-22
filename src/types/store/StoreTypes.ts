@@ -11,7 +11,13 @@ import IXMPPClient from '../network/xmpp/IXMPPClient';
 import { ActiveConversationsMap, messageActionType } from './ActiveConversationTypes';
 import { Connections } from './ConnectionsTypes';
 import { Marker, MarkersMap } from './MarkersTypes';
-import { MessageMap, Message, TextMessage, DeletedMessage } from './MessageTypes';
+import {
+	MessageMap,
+	Message,
+	TextMessage,
+	DeletedMessage,
+	AttachmentMessageType
+} from './MessageTypes';
 import { RoomsMap } from './RoomTypes';
 import { CapabilityList, Session } from './SessionTypes';
 import { TemporaryMessage, TemporaryMessagesMap } from './TemporaryMessagesReferencesTypes';
@@ -85,7 +91,8 @@ export type ActiveConversationsSlice = {
 		referenceMessageId: string,
 		senderId: string,
 		stanzaId: string,
-		actionType: messageActionType
+		actionType: messageActionType,
+		attachment?: AttachmentMessageType
 	) => void;
 	unsetReferenceMessage: (roomId: string) => void;
 	setHistoryIsFullyLoaded: (roomId: string) => void;

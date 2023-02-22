@@ -175,12 +175,13 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 					message.id,
 					message.from,
 					message.stanzaId,
-					messageActionType.REPLY
+					messageActionType.REPLY,
+					message.attachment
 				)
 		});
 
 		// Forward message in another chat
-		if (!message.forwarded) {
+		if (!message.forwarded && !message.attachment) {
 			actions.push({
 				id: 'forward',
 				label: forwardActionLabel,
@@ -198,6 +199,7 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 		}
 
 		// Edit functionality
+		// TODO fix edit functionality for attachment
 		if (isMyMessage && messageCanBeEdited && !message.forwarded) {
 			actions.push({
 				id: 'Edit',
@@ -216,7 +218,8 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 		}
 
 		// Delete functionality
-		if (isMyMessage && messageCanBeDeleted) {
+		// TODO send delete attachment with the retraction
+		if (isMyMessage && messageCanBeDeleted && !message.attachment) {
 			actions.push({
 				id: 'Delete',
 				label: deleteActionLabel,
