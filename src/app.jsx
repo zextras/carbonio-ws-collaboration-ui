@@ -74,13 +74,17 @@ const initApp = () => {
 	Promise.all([SessionApi.getToken(), SessionApi.getCapabilities()])
 		.then((resp) => {
 			// CHATS BE: get all rooms list
-			RoomsApi.listRooms(true, true);
-
-			// XMPP: connection to Mongoose Instant Messaging platform
-			const xmppClient = new XMPPClient();
-			xmppClient.connect(resp[0].zmToken);
-			store.setXmppClient(xmppClient);
-
+			RoomsApi.listRooms(true, true)
+				.then(() => {
+					// XMPP: connection to Mongoose Instant Messaging platform
+					// Init xmppClient after roomList request to avoid missing data after inboxMessages
+					// main scenario when requesting history of a room and without this check previously
+					// an error for missing clearedAt was returned
+					const xmppClient = new XMPPClient();
+					xmppClient.connect(resp[0].zmToken);
+					store.setXmppClient(xmppClient);
+				})
+				.catch(() => store.setChatsBeStatus(false));
 			// Web Socket: connection to receive realtime events
 			const webSocket = new WebSocketClient();
 			store.setWebSocketClient(webSocket);

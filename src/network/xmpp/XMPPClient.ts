@@ -302,6 +302,10 @@ class XMPPClient implements IXMPPClient {
 		this.connection.send(msg);
 	}
 
+	/**
+	 * Forward a message (XEP-0297)
+	 * Documentation: https://xmpp.org/extensions/xep-0297.html
+	 */
 	forwardMessage(message: TextMessage, roomIds: string[]): void {
 		const isMyMessage = message.from === useStore.getState().session.id;
 		if (isMyMessage) {

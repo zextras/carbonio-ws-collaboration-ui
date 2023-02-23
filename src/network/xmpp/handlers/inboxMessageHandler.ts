@@ -7,7 +7,7 @@
 import useStore from '../../../store/Store';
 import IXMPPClient from '../../../types/network/xmpp/IXMPPClient';
 import { MessageType, TextMessage } from '../../../types/store/MessageTypes';
-import { dateToTimestamp } from '../../../utils/dateUtil';
+import { dateToTimestamp, now } from '../../../utils/dateUtil';
 import { xmppDebug } from '../../../utils/debug';
 import { decodeMessage } from '../utility/decodeMessage';
 import { getRequiredAttribute, getRequiredTagElement } from '../utility/decodeStanza';
@@ -28,6 +28,14 @@ export function onInboxMessageStanza(this: IXMPPClient, message: Element): true 
 		const store = useStore.getState();
 		store.newInboxMessage(inboxMessage);
 		store.addUnreadCount(inboxMessage.roomId, parseInt(unreadMessagesOfSingleConversation, 10));
+
+		// Last inboxMessage is a retraction/correction, we need to request more messages to display the real last one
+		if (
+			inboxMessage.type === MessageType.DELETED_MSG ||
+			(inboxMessage.type === MessageType.TEXT_MSG && inboxMessage.edited)
+		) {
+			this.requestHistory(inboxMessage.roomId, now());
+		}
 
 		// Request replied message information
 		const repliedId = (inboxMessage as TextMessage).replyTo;
