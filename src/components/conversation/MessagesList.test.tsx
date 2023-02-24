@@ -156,7 +156,13 @@ describe('render list of messages with history loader visible for first time ope
 	test('Render the list of messages', () => {
 		const { result } = renderHook(() => useStore());
 		act(() => result.current.addRoom(room));
-		setup(<MessagesList roomId={room.id} />);
+		setup(
+			<MessagesList
+				roomId={room.id}
+				newConversationLoaded={false}
+				setNewConversationLoaded={jest.fn()}
+			/>
+		);
 		const messageList = screen.getByTestId(`intersectionObserverRoot${room.id}`);
 		expect(messageList).toBeVisible();
 		act(() => result.current.updateHistory(room.id, messages));
@@ -175,7 +181,13 @@ describe('render list of messages with history loader visible for first time ope
 	test('Render the history message loader', () => {
 		const { result } = renderHook(() => useStore());
 		act(() => result.current.addRoom(room));
-		setup(<MessagesList roomId={room.id} />);
+		setup(
+			<MessagesList
+				roomId={room.id}
+				newConversationLoaded={false}
+				setNewConversationLoaded={jest.fn()}
+			/>
+		);
 		const messageList = screen.getByTestId(`intersectionObserverRoot${room.id}`);
 		expect(messageList).toBeVisible();
 		const messageHistoryLoader = screen.getByTestId('messageHistoryLoader');
@@ -192,7 +204,13 @@ describe('render list of messages with history loader visible for first time ope
 		const store: RootStore = useStore.getState();
 		store.addRoom(mockedRoom);
 		store.newMessage(mockedTextMessage);
-		setup(<MessagesList roomId={mockedRoom.id} />);
+		setup(
+			<MessagesList
+				roomId={mockedRoom.id}
+				newConversationLoaded={false}
+				setNewConversationLoaded={jest.fn()}
+			/>
+		);
 		const messageBubble = screen.getByTestId(`Bubble-${mockedTextMessage.id}`);
 		expect(messageBubble).toBeInTheDocument();
 	});
@@ -207,7 +225,13 @@ describe('render list of messages with history loader visible for first time ope
 		const store: RootStore = useStore.getState();
 		store.addRoom(mockedRoom);
 		store.newMessage(mockedURLTextMessage);
-		setup(<MessagesList roomId={mockedRoom.id} />);
+		setup(
+			<MessagesList
+				roomId={mockedRoom.id}
+				newConversationLoaded={false}
+				setNewConversationLoaded={jest.fn()}
+			/>
+		);
 		const messageBubble = screen.getByTestId(`Bubble-${mockedURLTextMessage.id}`);
 		expect(messageBubble).toBeInTheDocument();
 		const anchorElement = screen.getByText('https://www.awesomeTest.com/test');
@@ -228,7 +252,13 @@ describe('render list of messages with history loader visible for first time ope
 		const { result } = renderHook(() => useStore());
 		act(() => result.current.addRoom(mockedRoom));
 		act(() => result.current.newMessage(mockedTextMessage));
-		setup(<MessagesList roomId={mockedRoom.id} />);
+		setup(
+			<MessagesList
+				roomId={mockedRoom.id}
+				newConversationLoaded={false}
+				setNewConversationLoaded={jest.fn()}
+			/>
+		);
 		const messageBubble = screen.getByText('Hello guys!');
 		expect(messageBubble).toBeInTheDocument();
 		act(() => result.current.setDeletedMessage(mockedRoom.id, mockedDeletedMessage));
@@ -252,7 +282,13 @@ describe('render list of messages with history loader visible for first time ope
 		const { result } = renderHook(() => useStore());
 		act(() => result.current.addRoom(mockedRoom));
 		act(() => result.current.newMessage(mockedTextMessage));
-		setup(<MessagesList roomId={mockedRoom.id} />);
+		setup(
+			<MessagesList
+				roomId={mockedRoom.id}
+				newConversationLoaded={false}
+				setNewConversationLoaded={jest.fn()}
+			/>
+		);
 		const messageBubble = screen.getByText('Hello guys!');
 		expect(messageBubble).toBeInTheDocument();
 		act(() =>
@@ -282,7 +318,13 @@ describe('render list of messages with history loader visible for first time ope
 		act(() => result.current.addRoom(mockedRoom));
 		act(() => result.current.newMessage(mockedTextMessage));
 		act(() => result.current.newMessage(mockedReplyTextMessage));
-		setup(<MessagesList roomId={mockedRoom.id} />);
+		setup(
+			<MessagesList
+				roomId={mockedRoom.id}
+				newConversationLoaded={false}
+				setNewConversationLoaded={jest.fn()}
+			/>
+		);
 		const messageBubble = screen.getAllByText('Hello guys!');
 		expect(messageBubble.length).toBe(2);
 		const replyMessageBubble = screen.getByText('Hi David!');
@@ -318,7 +360,13 @@ describe('render list of messages with history loader visible for first time ope
 			result.current.setEditedMessage(mockedRoom.id, mockedEditedTextMessage as TextMessage)
 		);
 		act(() => result.current.newMessage(mockedReplyTextMessage));
-		setup(<MessagesList roomId={mockedRoom.id} />);
+		setup(
+			<MessagesList
+				roomId={mockedRoom.id}
+				newConversationLoaded={false}
+				setNewConversationLoaded={jest.fn()}
+			/>
+		);
 		const messagesWithSameText = screen.getAllByText('Hello guys! Sorry for the delay');
 		expect(messagesWithSameText.length).toBe(2);
 		const editedLabel = screen.getAllByText(/edited/i);
@@ -352,7 +400,13 @@ describe('render list of messages with history loader visible for first time ope
 		act(() => result.current.newMessage(mockedTextMessage));
 		act(() => result.current.newMessage(mockedReplyMessage));
 		act(() => result.current.setDeletedMessage(mockedRoom.id, mockedDeletedMessage));
-		setup(<MessagesList roomId={mockedRoom.id} />);
+		setup(
+			<MessagesList
+				roomId={mockedRoom.id}
+				newConversationLoaded={false}
+				setNewConversationLoaded={jest.fn()}
+			/>
+		);
 		const editedLabel = screen.getAllByText(/deleted/i);
 		expect(editedLabel.length).toBe(2);
 		const replyView = screen.getByTestId(`repliedView-${mockedTextMessage.id}`);
@@ -369,7 +423,13 @@ describe('render list of messages with history loader visible for first time ope
 			result.current.setLoginInfo(user1Be.id, user1Be.name);
 			result.current.updateHistory(room.id, [mockedConfigurationMessage]);
 		});
-		setup(<MessagesList roomId={room.id} />);
+		setup(
+			<MessagesList
+				roomId={room.id}
+				newConversationLoaded={false}
+				setNewConversationLoaded={jest.fn()}
+			/>
+		);
 		const messageList = screen.getByTestId(`messageListRef${room.id}`);
 		expect(messageList.children).toHaveLength(3);
 		const message = screen.getByTestId(`configuration_msg-${mockedConfigurationMessage.id}`);
@@ -386,7 +446,13 @@ describe('render list of messages with history loader visible for first time ope
 			result.current.setUserInfo(user4Be);
 			result.current.updateHistory(room.id, [mockedAffiliationMessage]);
 		});
-		setup(<MessagesList roomId={room.id} />);
+		setup(
+			<MessagesList
+				roomId={room.id}
+				newConversationLoaded={false}
+				setNewConversationLoaded={jest.fn()}
+			/>
+		);
 		const messageList = screen.getByTestId(`messageListRef${room.id}`);
 		expect(messageList.children).toHaveLength(3);
 		const message = screen.getByTestId(`affiliation_msg-${mockedAffiliationMessage.id}`);

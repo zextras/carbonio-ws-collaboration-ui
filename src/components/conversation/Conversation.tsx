@@ -24,6 +24,11 @@ const ConversationWrapper = styled(Container)`
 const Conversation = ({ room }: ConversationProps): ReactElement => {
 	const isDesktopView = useMediaQueryCheck();
 	const [infoPanelOpen, setInfoPanelOpen] = useState(false);
+	const [newConversationLoaded, setNewConversationLoaded] = useState(true);
+
+	useEffect(() => {
+		setNewConversationLoaded(true);
+	}, [room]);
 
 	useEffect(() => {
 		if (isDesktopView) {
@@ -41,7 +46,11 @@ const Conversation = ({ room }: ConversationProps): ReactElement => {
 					mainAlignment="flex-start"
 				>
 					<ConversationHeader roomId={room.id} setInfoPanelOpen={setInfoPanelOpen} />
-					<MessagesList roomId={room.id} />
+					<MessagesList
+						roomId={room.id}
+						newConversationLoaded={newConversationLoaded}
+						setNewConversationLoaded={setNewConversationLoaded}
+					/>
 					<ConversationFooter roomId={room.id} />
 				</Container>
 			)}

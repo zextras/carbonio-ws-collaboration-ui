@@ -63,7 +63,13 @@ describe('Display is typing list', () => {
 		store.setUserInfo(user1);
 		store.setUserInfo(user2);
 		store.setIsWriting(room.id, user1.id, true);
-		setup(<MessagesList roomId={room.id} />);
+		setup(
+			<MessagesList
+				roomId={room.id}
+				newConversationLoaded={false}
+				setNewConversationLoaded={jest.fn()}
+			/>
+		);
 		const paoloIsWriting = screen.getByText(new RegExp(`${user1.name} is typing`, 'i'));
 		expect(paoloIsWriting).toBeInTheDocument();
 	});

@@ -5,13 +5,15 @@
  */
 
 import { Container } from '@zextras/carbonio-design-system';
-import { debounce, map, find, groupBy } from 'lodash';
+import { debounce, find, findLastIndex, groupBy, map } from 'lodash';
 import moment from 'moment-timezone';
 import React, {
+	Dispatch,
 	ForwardedRef,
-	useEffect,
 	ReactElement,
+	SetStateAction,
 	useCallback,
+	useEffect,
 	useMemo,
 	useRef,
 	useState
@@ -31,6 +33,7 @@ import { getMyLastMarkerOfConversation } from '../../store/selectors/MarkersSele
 import { getMessagesSelector } from '../../store/selectors/MessagesSelectors';
 import { getPrefTimezoneSelector } from '../../store/selectors/SessionSelectors';
 import useStore from '../../store/Store';
+import { Marker } from '../../types/store/MarkersTypes';
 import { Message, MessageType, TextMessage } from '../../types/store/MessageTypes';
 import { isBefore, now } from '../../utils/dateUtil';
 import AnimationGlobalStyle from './messageBubbles/BubbleAnimationsGlobalStyle';
@@ -52,9 +55,15 @@ const MessagesListWrapper = styled(Container)`
 
 type ConversationProps = {
 	roomId: string;
+	newConversationLoaded: boolean;
+	setNewConversationLoaded: Dispatch<SetStateAction<boolean>>;
 };
 
-const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
+const MessagesList = ({
+	roomId,
+	newConversationLoaded,
+	setNewConversationLoaded
+}: ConversationProps): ReactElement => {
 	const xmppClient = useStore(getXmppClient);
 	const inputHasFocus = useStore((store) => getInputHasFocus(store, roomId));
 	const roomMessages = useStore((store) => getMessagesSelector(store, roomId));
@@ -76,6 +85,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 
 	const [showScrollButton, setShowScrollButton] = useState(false);
 	const [isLoadedFirstTime, setIsLoadedFirstTime] = useState(true);
+	const [lastReadMessage, setLastReadMessage] = useState<Marker | null>(myLastMarker);
 
 	const messageScrollPositionObserver = useRef<IntersectionObserver>();
 	const historyLoaderObserver = useRef<IntersectionObserver>();
@@ -291,12 +301,21 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [roomId]);
 
+	useEffect(() => {
+		// this has to change ONLY when the room is changed
+		if (myLastMarker != null && newConversationLoaded) {
+			setLastReadMessage(myLastMarker);
+			setNewConversationLoaded(false);
+		}
+	}, [roomId, myLastMarker, newConversationLoaded, setNewConversationLoaded]);
+
 	const dateMessageWrapped = useMemo(
 		() => groupBy(roomMessages, (message) => moment.tz(message.date, timezone).format('YYMMDD')),
 		[roomMessages, timezone]
 	);
 
 	const messagesWrapped = useMemo(() => {
+		// console.log(lastReadMessage);
 		const list: JSX.Element[] = [];
 		map(dateMessageWrapped, (wrapper) => {
 			const messageList = map(wrapper, (message: Message, index) => {
@@ -314,6 +333,24 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 					prevMessageIsFromSameSender = false;
 				}
 
+				// see if the previous message has been seen by me or not
+				let previousMessageSeen;
+				if (prevMessage?.type === MessageType.TEXT_MSG) {
+					previousMessageSeen = lastReadMessage?.messageId === prevMessage?.id;
+				} else if (lastReadMessage) {
+					previousMessageSeen = lastReadMessage?.markerDate < prevMessage?.date;
+				} else {
+					const areTextMessagesPresent = findLastIndex(
+						roomMessages,
+						(message) => message.type === MessageType.TEXT_MSG
+					);
+					if (areTextMessagesPresent === -1) previousMessageSeen = true;
+					else {
+						const previousTextMessageSeen = roomMessages[areTextMessagesPresent] as TextMessage;
+						previousMessageSeen = previousTextMessageSeen?.from !== mySessionId;
+					}
+				}
+
 				const nextMessage = wrapper[index + 1];
 				if (message.type === MessageType.TEXT_MSG && nextMessage?.type === MessageType.TEXT_MSG) {
 					nextMessageIsFromSameSender = nextMessage.from === message.from;
@@ -329,6 +366,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 						prevMessageIsFromSameSender={prevMessageIsFromSameSender}
 						nextMessageIsFromSameSender={nextMessageIsFromSameSender}
 						messageRef={messageRef}
+						previousMessageSeen={previousMessageSeen}
 					/>
 				);
 			});
@@ -345,7 +383,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 			);
 		});
 		return list;
-	}, [dateMessageWrapped, roomId]);
+	}, [dateMessageWrapped, lastReadMessage, mySessionId, roomId, roomMessages]);
 
 	const handleClickScrollButton = useCallback(() => {
 		MessagesListWrapperRef?.current &&

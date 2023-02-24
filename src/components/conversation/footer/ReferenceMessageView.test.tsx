@@ -44,7 +44,13 @@ describe('Reply to a message by opening the contextual menu', () => {
 		const store: RootStore = useStore.getState();
 		store.addRoom(mockedRoom);
 		store.newMessage(mockedMessage);
-		setup(<MessagesList roomId={mockedRoom.id} />);
+		setup(
+			<MessagesList
+				roomId={mockedRoom.id}
+				newConversationLoaded={false}
+				setNewConversationLoaded={jest.fn()}
+			/>
+		);
 		const messageBubble = screen.getByTestId(`Bubble-${mockedMessage.id}`);
 		expect(messageBubble).toBeVisible();
 		userEvent.hover(messageBubble);

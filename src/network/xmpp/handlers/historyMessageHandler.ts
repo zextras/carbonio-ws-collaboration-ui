@@ -97,6 +97,8 @@ export function onRequestHistory(this: XMPPClient, stanza: Element): void {
 		}
 	});
 
+	// TODO find a better place because it's run every time we load a part of history and we only need on first load
+	// is possible to move from here?
 	// Update last marker
 	this.lastMarkers(roomId);
 }
