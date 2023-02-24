@@ -5,9 +5,12 @@
  */
 
 import { Avatar, Container, Row, Text } from '@zextras/carbonio-design-system';
-import React, { FC, useCallback, useMemo, useState } from 'react';
+import React, { FC, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import pngTest from '../../../assets/pngTest.jpg';
 import { AttachmentsApi } from '../../../network';
 import { getUserName } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
@@ -15,8 +18,23 @@ import { AttachmentMessageType } from '../../../types/store/MessageTypes';
 import { getPreviewURL } from '../../../utils/attachmentUtils';
 import { calculateAvatarColor } from '../../../utils/styleUtils';
 
-const AttachmentImg = styled.img`
-	max-width: 100%;
+const AttachmentContainer = styled(Container)`
+	border-radius: 0;
+	background-image: url(${({ picture }): string => picture}), url(${pngTest});
+	background-size: cover;
+	background-position: center;
+	aspect-ratio: 1/1;
+	min-width: 100%;
+	max-width: 300px;
+
+	&:after {
+		background-color: ${({ theme }): string => `${theme.palette.gray6.regular}`};
+		z-index: 1;
+	}
+`;
+
+const GradientContainer = styled(Container)`
+	background: linear-gradient(0deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0) 45%);
 `;
 
 const FileContainer = styled(Container)`
@@ -34,9 +52,6 @@ type AttachmentViewProps = {
 
 const AttachmentView: FC<AttachmentViewProps> = ({ attachment, from, isMyMessage = false }) => {
 	const senderIdentifier = useStore((store) => getUserName(store, from));
-
-	const [previewError, setPreviewError] = useState(false);
-	const setError = useCallback(() => setPreviewError(true), []);
 
 	const userColor = useMemo(() => calculateAvatarColor(senderIdentifier || ''), [senderIdentifier]);
 
@@ -56,9 +71,23 @@ const AttachmentView: FC<AttachmentViewProps> = ({ attachment, from, isMyMessage
 		linkTag.remove();
 	}, [attachment.id, attachment.name]);
 
-	if (previewURL && !previewError) {
-		// TODO image style
-		return <AttachmentImg src={previewURL} onError={setError} />;
+	if (previewURL) {
+		return (
+			<AttachmentContainer picture={previewURL}>
+				<GradientContainer>
+					<Container
+						padding={{ all: 'small' }}
+						wrap="wrap"
+						mainAlignment="flex-end"
+						crossAlignment="flex-start"
+					>
+						<Text size="small" color="gray6">
+							{attachment.name}
+						</Text>
+					</Container>
+				</GradientContainer>
+			</AttachmentContainer>
+		);
 	}
 	return (
 		<FileContainer
