@@ -4,9 +4,17 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Button, Container, Modal, Padding, Text, Tooltip } from '@zextras/carbonio-design-system';
+import {
+	Button,
+	Container,
+	Modal,
+	Padding,
+	SnackbarManagerContext,
+	Text,
+	Tooltip
+} from '@zextras/carbonio-design-system';
 import { find, map, size } from 'lodash';
-import React, { ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { ReactElement, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import useRouting from '../../hooks/useRouting';
@@ -36,6 +44,10 @@ const ChatCreationModal = ({
 	);
 	const createLabel = t('action.create', 'Create');
 	const closeLabel = t('action.close', 'Close');
+	const errorSnackbar = t(
+		'settings.profile.errorGenericResponse',
+		'Something went Wrong. Please Retry'
+	);
 
 	const addRoom = useStore((store) => store.addRoom);
 
@@ -46,6 +58,8 @@ const ChatCreationModal = ({
 	const [title, setTitle] = useState<string>(titlePlaceholder);
 	const [topic, setTopic] = useState<string>('');
 	const [isPending, setIsPending] = useState<boolean>(false);
+
+	const createSnackbar: any = useContext(SnackbarManagerContext);
 
 	const { goToRoomPage } = useRouting();
 
@@ -111,9 +125,26 @@ const ChatCreationModal = ({
 					goToRoomPage(response.id);
 					onModalClose();
 				})
-				.catch(() => null);
+				.catch(() => {
+					setIsPending(false);
+					createSnackbar({
+						key: new Date().toLocaleString(),
+						type: 'error',
+						label: errorSnackbar
+					});
+				});
 		}
-	}, [addRoom, chatType, contactsSelected, goToRoomPage, onModalClose, title, topic]);
+	}, [
+		addRoom,
+		chatType,
+		contactsSelected,
+		goToRoomPage,
+		onModalClose,
+		title,
+		topic,
+		errorSnackbar,
+		createSnackbar
+	]);
 
 	const modalFooter = useMemo(
 		() => (
