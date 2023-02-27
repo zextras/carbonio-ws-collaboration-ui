@@ -115,7 +115,7 @@ const MessageReferenceDisplayed: React.FC<MessageReferenceDisplayedProps> = ({
 							icon="FileTextOutline"
 							label={referenceMessage.attachment.name}
 							shape="square"
-							background="gray0"
+							background={previewURL ? 'gray3' : 'gray0'}
 							picture={previewURL}
 						/>
 					</Padding>

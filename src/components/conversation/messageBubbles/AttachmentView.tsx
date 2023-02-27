@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Avatar, Container, Row, Text } from '@zextras/carbonio-design-system';
+import { Avatar, Container, Icon, Row, Shimmer, Text } from '@zextras/carbonio-design-system';
 import React, { FC, useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
@@ -16,7 +16,6 @@ import { getPreviewURL } from '../../../utils/attachmentUtils';
 import { calculateAvatarColor } from '../../../utils/styleUtils';
 
 const AttachmentImg = styled.img`
-	max-width: 100%;
 	mask-image: linear-gradient(
 		180deg,
 		rgba(0, 0, 0, 1) 0%,
@@ -25,9 +24,10 @@ const AttachmentImg = styled.img`
 	);
 `;
 
-const CustomContainer = styled(Container)`
-	background: black;
+const PreviewContainer = styled(Container)`
+	${({ isLoaded }): string => isLoaded && `background: black;`};
 	position: relative;
+	min-width: 100%;
 `;
 
 const TextContainer = styled(Container)`
@@ -50,8 +50,13 @@ type AttachmentViewProps = {
 const AttachmentView: FC<AttachmentViewProps> = ({ attachment, from, isMyMessage = false }) => {
 	const senderIdentifier = useStore((store) => getUserName(store, from));
 
+	const [isPreviewLoaded, setPreviewLoaded] = useState(false);
 	const [previewError, setPreviewError] = useState(false);
-	const setError = useCallback(() => setPreviewError(true), []);
+	const setLoaded = useCallback(() => setPreviewLoaded(true), []);
+	const setError = useCallback(() => {
+		setPreviewLoaded(true);
+		setPreviewError(true);
+	}, []);
 
 	const userColor = useMemo(() => calculateAvatarColor(senderIdentifier || ''), [senderIdentifier]);
 
@@ -79,22 +84,50 @@ const AttachmentView: FC<AttachmentViewProps> = ({ attachment, from, isMyMessage
 				mainAlignment="flex-end"
 				crossAlignment="flex-start"
 			>
-				<Text size="small" color="gray6" overflow="break-word">
+				<Text
+					size="small"
+					color={isPreviewLoaded && !previewError ? 'gray6' : 'gray1'}
+					overflow="break-word"
+				>
 					{attachment.name}
 				</Text>
 			</TextContainer>
 		),
-		[attachment.name]
+		[attachment.name, isPreviewLoaded, previewError]
 	);
 
-	if (previewURL && !previewError) {
+	// Previewer service can be used for generate a preview for this file
+	if (previewURL) {
 		return (
-			<CustomContainer width={'fit'} height={'fit'}>
-				<AttachmentImg src={previewURL} onError={setError} />
+			<PreviewContainer width={'fit'} height={'fit'} borderRadius="half" isLoaded={isPreviewLoaded}>
+				{!isPreviewLoaded && <Shimmer.Logo size="large" />}
+				{previewError ? (
+					<Container background="gray5" width="18.75rem" height="9.375rem">
+						<Icon size="large" icon="Image" color="gray2" />
+					</Container>
+				) : (
+					<AttachmentImg src={previewURL} onLoad={setLoaded} onError={setError} />
+				)}
 				{imageLabel}
-			</CustomContainer>
+			</PreviewContainer>
 		);
+		if (previewError) {
+			return (
+				<PreviewContainer
+					width={'fit'}
+					height={'fit'}
+					borderRadius="half"
+					isLoaded={isPreviewLoaded}
+				>
+					<Container background="gray5" width="18.75rem" height="9.375rem">
+						<Icon size="large" icon="Image" color="gray2" />
+					</Container>
+					{imageLabel}
+				</PreviewContainer>
+			);
+		}
 	}
+	// Generic file visualization
 	return (
 		<FileContainer
 			background={isMyMessage ? '#C4D5EF' : 'gray5'}

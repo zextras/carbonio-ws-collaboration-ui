@@ -23,6 +23,7 @@ type DateMsgProps = {
 const CustomMessageWrapper = styled(Container)`
 	position: sticky;
 	top: 0;
+	z-index: 10;
 `;
 
 const DateBubble: FC<DateMsgProps> = ({ message, refEl }) => {

@@ -159,7 +159,7 @@ const RepliedTextMessageSectionView: FC<RepliedTextMessageSectionViewProps> = ({
 							icon="FileTextOutline"
 							label={repliedMessage.attachment.name}
 							shape="square"
-							background="gray0"
+							background={previewURL ? 'gray3' : 'gray0'}
 							picture={previewURL}
 						/>
 					</Padding>

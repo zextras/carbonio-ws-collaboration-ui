@@ -33,6 +33,7 @@ type BubbleProps = {
 
 const DropDownWrapper = styled(Container)`
 	position: relative;
+	z-index: 10;
 `;
 
 const BubbleContainer = styled(Container)`

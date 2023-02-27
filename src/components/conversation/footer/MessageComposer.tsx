@@ -296,7 +296,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 					handleOnBlur={handleOnBlur}
 					handleOnFocus={handleOnFocus}
 				/>
-				<AttachmentSelector roomId={roomId} />
+				{textMessage === '' && !messageReference && <AttachmentSelector roomId={roomId} />}
 				<Tooltip label={sendDisabled ? writeToSendTooltip : sendMessageLabel} placement="top">
 					<Container
 						width="fit"
