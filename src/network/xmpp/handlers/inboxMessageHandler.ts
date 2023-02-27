@@ -23,6 +23,7 @@ export function onInboxMessageStanza(this: IXMPPClient, message: Element): true 
 	const insideMessage = getRequiredTagElement(result, 'message');
 	const inboxMessage = decodeMessage(insideMessage, { date: dateToTimestamp(date) });
 	const sessionId = useStore.getState().session.id;
+	console.log(message);
 	if (inboxMessage) {
 		const unreadMessagesOfSingleConversation = getRequiredAttribute(result, 'unread');
 		const store = useStore.getState();
@@ -34,7 +35,7 @@ export function onInboxMessageStanza(this: IXMPPClient, message: Element): true 
 			inboxMessage.type === MessageType.DELETED_MSG ||
 			(inboxMessage.type === MessageType.TEXT_MSG && inboxMessage.edited)
 		) {
-			this.requestHistory(inboxMessage.roomId, now());
+			this.requestHistory(inboxMessage.roomId, now(), 3);
 		}
 
 		// Request replied message information

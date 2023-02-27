@@ -159,6 +159,7 @@ describe('render list of messages with history loader visible for first time ope
 		setup(<MessagesList roomId={room.id} />);
 		const messageList = screen.getByTestId(`intersectionObserverRoot${room.id}`);
 		expect(messageList).toBeVisible();
+		act(() => result.current.setHistoryIsFullyLoaded(room.id));
 		act(() => result.current.updateHistory(room.id, messages));
 		expect(result.current.messages[room.id]).toHaveLength(6);
 		expect(screen.getByText(new RegExp(`${room.name} created`, 'i'))).toBeInTheDocument();
@@ -367,6 +368,7 @@ describe('render list of messages with history loader visible for first time ope
 			result.current.addRoom(room);
 			result.current.setUserInfo(user2Be);
 			result.current.setLoginInfo(user1Be.id, user1Be.name);
+			result.current.setHistoryIsFullyLoaded(room.id);
 			result.current.updateHistory(room.id, [mockedConfigurationMessage]);
 		});
 		setup(<MessagesList roomId={room.id} />);
@@ -384,6 +386,7 @@ describe('render list of messages with history loader visible for first time ope
 		act(() => {
 			result.current.addRoom(room);
 			result.current.setUserInfo(user4Be);
+			result.current.setHistoryIsFullyLoaded(room.id);
 			result.current.updateHistory(room.id, [mockedAffiliationMessage]);
 		});
 		setup(<MessagesList roomId={room.id} />);
