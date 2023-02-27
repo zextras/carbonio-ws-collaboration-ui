@@ -12,7 +12,7 @@ import { getSingleMessageSelector } from '../../../store/selectors/MessagesSelec
 import useStore from '../../../store/Store';
 import { MessageType } from '../../../types/store/MessageTypes';
 import AffiliationBubble from './AffiliationBubble';
-import BubbleFactory from './BubbleFactory';
+import Bubble from './Bubble';
 import ConfigurationBubble from './ConfigurationBubble';
 import DateBubble from './DataBubble';
 import DeletedBubble from './DeletedBubble';
@@ -70,7 +70,7 @@ const MessageFactory = ({
 								<Text color={'gray1'}>New Messages</Text>
 							</CustomMessage>
 						)}
-						<BubbleFactory
+						<Bubble
 							message={message}
 							prevMessageIsFromSameSender={prevMessageIsFromSameSender}
 							nextMessageIsFromSameSender={nextMessageIsFromSameSender}

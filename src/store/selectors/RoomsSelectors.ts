@@ -6,6 +6,7 @@
 
 import { countBy, find, forEach, size } from 'lodash';
 
+import { RoomsApi, UsersApi } from '../../network';
 import { Member, Room, RoomsMap, RoomType } from '../../types/store/RoomTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 
@@ -32,9 +33,9 @@ export const getRoomNameSelector = (state: RootStore, id: string): string => {
 					: room.members![0].userId
 				: null;
 		return otherUserId && state!.users[otherUserId]
-			? state.users[otherUserId].name
-				? state.users[otherUserId].name
-				: state.users[otherUserId].email
+			? state.users[otherUserId].name ||
+					state.users[otherUserId].email ||
+					state.users[otherUserId].id
 			: room.name;
 	}
 	return state.rooms[id].name || state.rooms[id].id;
@@ -95,3 +96,18 @@ export const getNumbersOfRoomMembers = (state: RootStore, roomId: string): numbe
 
 export const getPictureUpdatedAt = (state: RootStore, roomId: string): string | undefined =>
 	state.rooms[roomId]?.pictureUpdatedAt;
+
+export const getRoomURLPicture = (state: RootStore, roomId: string): string | undefined => {
+	const room = state.rooms[roomId];
+	if (room.type === RoomType.ONE_TO_ONE) {
+		const otherMember = find(
+			state.rooms[roomId].members,
+			(member) => member.userId !== state.session.id
+		);
+		if (otherMember) {
+			const otherUser = state.users[otherMember.userId];
+			return otherUser?.pictureUpdatedAt && UsersApi.getURLUserPicture(otherMember.userId);
+		}
+	}
+	return room.pictureUpdatedAt && RoomsApi.getURLRoomPicture(room.id);
+};

@@ -146,7 +146,7 @@ const ProfileSettings: FC<ProfileSettingsProps> = ({
 	setToDelete,
 	toDelete
 }) => {
-	const memberName: string = useStore((state) => getUserName(state, sessionId || ''));
+	const memberName: string | undefined = useStore((state) => getUserName(state, sessionId || ''));
 	const memberEmail: string | undefined = useStore((state) => getUserEmail(state, sessionId || ''));
 	const userPictureUpdatedAt: string | undefined = useStore((state) =>
 		getUserPictureUpdatedAt(state, sessionId || '')

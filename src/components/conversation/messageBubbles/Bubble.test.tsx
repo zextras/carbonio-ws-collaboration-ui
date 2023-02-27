@@ -13,7 +13,7 @@ import { createMockRoom, createMockTextMessage } from '../../../tests/createMock
 import { RoomBe } from '../../../types/network/models/roomBeTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 import { RootStore } from '../../../types/store/StoreTypes';
-import BubbleFactory from './BubbleFactory';
+import Bubble from './Bubble';
 
 const mockedRoom: RoomBe = createMockRoom({
 	id: 'roomId',
@@ -34,7 +34,7 @@ describe('Message bubble component visualization', () => {
 		const store: RootStore = useStore.getState();
 		store.addRoom(mockedRoom);
 		setup(
-			<BubbleFactory
+			<Bubble
 				message={mockedRepliedTextMessage}
 				prevMessageIsFromSameSender={false}
 				nextMessageIsFromSameSender={false}

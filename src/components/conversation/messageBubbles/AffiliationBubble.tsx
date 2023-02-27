@@ -60,7 +60,7 @@ const AffiliationBubble: FC<AffiliationMsgProps> = ({ message, refEl }) => {
 		sessionId,
 		roomType,
 		roomName,
-		affiliatedName,
+		affiliatedName || '',
 		t
 	);
 

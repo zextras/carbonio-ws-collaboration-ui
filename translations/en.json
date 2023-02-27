@@ -4,6 +4,7 @@
         "addNewMembers": "Add New Members",
         "addNewMembersTo": "Add new members to {{roomName}}",
         "clearHistory": "Clear History",
+        "close": "Close",
         "copy": "Copy",
         "create": "Create",
         "delete": "Delete",
@@ -11,6 +12,8 @@
         "editDetails": "Edit Details",
         "editRoom": "Edit {{roomName}}",
         "editYourMessage": "Edit your message",
+        "forward": "Forward",
+        "forwarded": "forwarded",
         "leave": "Leave",
         "muteNotifications": "Mute Notifications",
         "newChat": "New Chat",
@@ -83,14 +86,14 @@
     "message": {
         "deletedMessage": "Deleted message",
         "draft": "draft",
-        "edited": "Edited"
+        "edited": "edited"
     },
     "modal": {
         "clearHistoryDescription": "You are about to clean up your conversation history, remember that this action cannot be undone. The history of other participants will not be deleted.",
         "creation": {
             "contactList": "Select more that an address to create a group chat",
             "description": "Chats are one-to-one conversations that help you to stay in touch with your contacts. You can create a group by including more than two participants",
-            "inputPlaceholder": "Start typing to pick an address",
+            "inputPlaceholder": "Start typing or pick an address",
             "newChat": "New Chat",
             "newGroup": "New Group"
         },
@@ -99,6 +102,12 @@
         "deleteRoom": "Delete Room",
         "deleteRoomLabel": "Are you sure to delete this Room?",
         "deleteUserDescription": "Are you sure you want to remove this member?",
+        "forward": {
+            "chooseAtLeastOneChat": "Choose at least one chat",
+            "description": "Choose a target chat to forward the message",
+            "inputPlaceholder": "Start typing or pick a chat",
+            "title": "Forward message from {{chatName}}"
+        },
         "leaveAndDelete": "Leave and Delete Group",
         "leaveGroup": "Leave Group",
         "leaveGroupLabel": "Are you sure to leave this Group?",
@@ -151,6 +160,8 @@
         "close": "Close",
         "demoteModerator": "Demote moderator",
         "disableModalButton": "Choose at least one address",
+        "forwardedMessage": "The message does not belong to {{conversationName}}",
+        "forwardedMessageToThisChat": "The message does not belong to this Chat",
         "goToPrivateChat": "Go to private chat",
         "iAmModerator": "You're a moderator",
         "leaveAndDelete": "Leave and Delete the conversation",
