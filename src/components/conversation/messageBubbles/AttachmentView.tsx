@@ -17,6 +17,21 @@ import { calculateAvatarColor } from '../../../utils/styleUtils';
 
 const AttachmentImg = styled.img`
 	max-width: 100%;
+	mask-image: linear-gradient(
+		180deg,
+		rgba(0, 0, 0, 1) 0%,
+		rgba(0, 0, 0, 1) 65%,
+		rgba(0, 0, 0, 0) 100%
+	);
+`;
+
+const CustomContainer = styled(Container)`
+	background: black;
+	position: relative;
+`;
+
+const TextContainer = styled(Container)`
+	position: absolute;
 `;
 
 const FileContainer = styled(Container)`
@@ -56,9 +71,29 @@ const AttachmentView: FC<AttachmentViewProps> = ({ attachment, from, isMyMessage
 		linkTag.remove();
 	}, [attachment.id, attachment.name]);
 
+	const imageLabel = useMemo(
+		() => (
+			<TextContainer
+				padding={{ all: 'small' }}
+				wrap="wrap"
+				mainAlignment="flex-end"
+				crossAlignment="flex-start"
+			>
+				<Text size="small" color="gray6" overflow="break-word">
+					{attachment.name}
+				</Text>
+			</TextContainer>
+		),
+		[attachment.name]
+	);
+
 	if (previewURL && !previewError) {
-		// TODO image style
-		return <AttachmentImg src={previewURL} onError={setError} />;
+		return (
+			<CustomContainer width={'fit'} height={'fit'}>
+				<AttachmentImg src={previewURL} onError={setError} />
+				{imageLabel}
+			</CustomContainer>
+		);
 	}
 	return (
 		<FileContainer
