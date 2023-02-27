@@ -333,21 +333,32 @@ const MessagesList = ({
 					prevMessageIsFromSameSender = false;
 				}
 
-				// see if the previous message has been seen by me or not
-				let previousMessageSeen;
-				if (prevMessage?.type === MessageType.TEXT_MSG) {
-					previousMessageSeen = lastReadMessage?.messageId === prevMessage?.id;
-				} else if (lastReadMessage) {
-					previousMessageSeen = lastReadMessage?.markerDate < prevMessage?.date;
-				} else {
-					const areTextMessagesPresent = findLastIndex(
-						roomMessages,
-						(message) => message.type === MessageType.TEXT_MSG
-					);
-					if (areTextMessagesPresent === -1) previousMessageSeen = true;
-					else {
-						const previousTextMessageSeen = roomMessages[areTextMessagesPresent] as TextMessage;
-						previousMessageSeen = previousTextMessageSeen?.from !== mySessionId;
+				// check if the new message label has to appear or not
+				let newMessageLabel;
+				// the label has to appear ONLY if the message is not sent by me
+				if (message?.type === MessageType.TEXT_MSG && message?.from !== mySessionId) {
+					if (prevMessage?.type === MessageType.TEXT_MSG) {
+						// if prevMessage is a text type the label will appear if the id is equal to lastReadMessage one
+						newMessageLabel = lastReadMessage?.messageId === prevMessage?.id;
+					} else if (lastReadMessage) {
+						// if prevMessage is not a text one it checks the date
+						// the label will appear if prevMessage date is minor to the lastReadMessage one
+						newMessageLabel = lastReadMessage?.markerDate < prevMessage?.date;
+					} else {
+						// if there's no lastReadMessage it means that there's no history or the user has been added to a new group
+						// it checks if there are messages inside the conversation and return the last index of it
+						const areTextMessagesPresent = findLastIndex(
+							roomMessages,
+							(message) => message.type === MessageType.TEXT_MSG
+						);
+						if (areTextMessagesPresent === -1) {
+							// if there's no text message, the label has to be shown
+							newMessageLabel = true;
+						} else {
+							// else the label is shown only if the message returned before is not sent by me
+							const previousTextMessageSeen = roomMessages[areTextMessagesPresent] as TextMessage;
+							newMessageLabel = previousTextMessageSeen?.from !== mySessionId;
+						}
 					}
 				}
 
@@ -366,7 +377,7 @@ const MessagesList = ({
 						prevMessageIsFromSameSender={prevMessageIsFromSameSender}
 						nextMessageIsFromSameSender={nextMessageIsFromSameSender}
 						messageRef={messageRef}
-						previousMessageSeen={previousMessageSeen}
+						newMessageLabel={newMessageLabel}
 					/>
 				);
 			});

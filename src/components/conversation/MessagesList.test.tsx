@@ -90,6 +90,47 @@ const room: RoomBe = {
 	]
 };
 
+const roomWithoutHistory: RoomBe = {
+	id: 'Room-Id',
+	name: 'Room Name',
+	description: 'This is the description of the group',
+	type: RoomType.GROUP,
+	hash: 'hash',
+	createdAt: '2022-10-31T10:39:48.622581+01:00',
+	updatedAt: '2022-10-31T10:45:48.622581+01:00',
+	pictureUpdatedAt: '2022-10-31T10:45:48.622581+01:00',
+	members: [
+		{
+			userId: user1Be.id,
+			owner: true,
+			temporary: false,
+			external: false
+		},
+		{
+			userId: user2Be.id,
+			owner: false,
+			temporary: false,
+			external: false
+		}
+	],
+	userSettings: {
+		muted: false,
+		clearedAt: '2022-10-31T10:50:48.622581+01:00'
+	}
+};
+
+const mockedMessage = createMockTextMessage({
+	id: 'idSimpleTextMessage',
+	roomId: roomWithoutHistory.id,
+	from: user1Be.id
+});
+
+const mockedMessage2 = createMockTextMessage({
+	id: 'idSimpleTextMessage',
+	roomId: roomWithoutHistory.id,
+	from: user2Be.id
+});
+
 const mockedAffiliationMessage: AffiliationMessage = {
 	id: 'Affiliationid',
 	roomId: room.id,
@@ -199,10 +240,12 @@ describe('render list of messages with history loader visible for first time ope
 		const mockedRoom: RoomBe = createMockRoom({ id: 'roomTest' });
 		const mockedTextMessage = createMockTextMessage({
 			id: 'idSimpleTextMessage',
-			roomId: mockedRoom.id
+			roomId: mockedRoom.id,
+			from: user2Be.id
 		});
 		const store: RootStore = useStore.getState();
 		store.addRoom(mockedRoom);
+		store.setLoginInfo(user1Be.id, user1Be.name);
 		store.newMessage(mockedTextMessage);
 		setup(
 			<MessagesList
@@ -213,6 +256,10 @@ describe('render list of messages with history loader visible for first time ope
 		);
 		const messageBubble = screen.getByTestId(`Bubble-${mockedTextMessage.id}`);
 		expect(messageBubble).toBeInTheDocument();
+
+		// here the new message label is shown because the mockedTextMessage has been sent by a user
+		const newMessageLabel = screen.getByTestId(`new_msg-${mockedTextMessage.id}`);
+		expect(newMessageLabel).toBeInTheDocument();
 	});
 
 	test('Display text message bubble with URL on MessageList', () => {
@@ -439,6 +486,7 @@ describe('render list of messages with history loader visible for first time ope
 		);
 		expect(label).toBeVisible();
 	});
+
 	test('Affiliation message is visible', async () => {
 		const { result } = renderHook(() => useStore());
 		act(() => {
@@ -461,5 +509,46 @@ describe('render list of messages with history loader visible for first time ope
 			new RegExp(`${user4Be.name} has been added to ${room.name}`, 'i')
 		);
 		expect(label).toBeVisible();
+	});
+
+	test('new message after history has been deleted - sent by me', async () => {
+		const { result } = renderHook(() => useStore());
+		act(() => {
+			result.current.addRoom(roomWithoutHistory);
+			result.current.setLoginInfo(user1Be.id, user1Be.name);
+			result.current.newMessage(mockedMessage);
+		});
+		setup(
+			<MessagesList
+				roomId={roomWithoutHistory.id}
+				newConversationLoaded={false}
+				setNewConversationLoaded={jest.fn()}
+			/>
+		);
+		expect(result.current.messages[room.id]).toHaveLength(2);
+
+		// mockedMessage is sent by me, so the new message label should not appear
+		expect(screen.queryByText(/New Messages/i)).not.toBeInTheDocument();
+	});
+
+	test('new message after history has been deleted - sent by other', async () => {
+		const { result } = renderHook(() => useStore());
+		act(() => {
+			result.current.addRoom(roomWithoutHistory);
+			result.current.setUserInfo(user2Be);
+			result.current.setLoginInfo(user1Be.id, user1Be.name);
+			result.current.newMessage(mockedMessage2);
+		});
+		setup(
+			<MessagesList
+				roomId={roomWithoutHistory.id}
+				newConversationLoaded={false}
+				setNewConversationLoaded={jest.fn()}
+			/>
+		);
+
+		// mockedMessage is sent by a user, so the new message label should appear
+		const newMessageLabel = screen.getByTestId(`new_msg-${mockedMessage2.id}`);
+		expect(newMessageLabel).toBeInTheDocument();
 	});
 });

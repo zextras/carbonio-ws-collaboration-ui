@@ -23,7 +23,7 @@ type MessageProps = {
 	prevMessageIsFromSameSender: boolean;
 	nextMessageIsFromSameSender: boolean;
 	messageRef: React.RefObject<HTMLElement>;
-	previousMessageSeen: boolean | undefined;
+	newMessageLabel: boolean | undefined;
 };
 
 export const CustomMessage = styled(Container)`
@@ -45,29 +45,13 @@ export const CustomMessage = styled(Container)`
 		dateMessage ? theme.palette.gray6.regular : theme.palette.gray5.regular}; ;
 `;
 
-const NewMessagesContainer = styled(Container)`
-	width: fit-content;
-	white-space: pre-wrap;
-	max-width: 80%;
-	height: auto;
-	padding: 0.25em 1em;
-	border-radius: 1rem;
-	box-shadow: 0 0 0.25rem rgba(166, 166, 166, 0.5);
-	margin: 0.625rem auto;
-	cursor: default;
-	-webkit-user-select: none;
-	user-select: none;
-	text-align: center;
-	background-color: ${({ theme }): string => theme.palette.gray6.regular};
-`;
-
 const MessageFactory = ({
 	messageId,
 	messageRoomId,
 	prevMessageIsFromSameSender,
 	nextMessageIsFromSameSender,
 	messageRef,
-	previousMessageSeen
+	newMessageLabel
 }: MessageProps): ReactElement => {
 	const message = useStore((store) => getSingleMessageSelector(store, messageRoomId, messageId));
 
@@ -76,10 +60,15 @@ const MessageFactory = ({
 			case MessageType.TEXT_MSG: {
 				return (
 					<>
-						{previousMessageSeen && (
-							<NewMessagesContainer mainAlignment={'flex-start'} crossAlignment={'flex-start'}>
+						{newMessageLabel && (
+							<CustomMessage
+								mainAlignment={'flex-start'}
+								crossAlignment={'flex-start'}
+								borderColor="gray3"
+								data-testid={`new_msg-${message.id}`}
+							>
 								<Text color={'gray1'}>New Messages</Text>
-							</NewMessagesContainer>
+							</CustomMessage>
 						)}
 						<BubbleFactory
 							message={message}
