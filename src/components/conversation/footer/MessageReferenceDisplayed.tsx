@@ -33,6 +33,15 @@ const BorderContainer = styled(Container)`
 	border-radius: 0;
 `;
 
+const CustomAvatar = styled(Avatar)`
+	svg {
+		width: calc(2rem * 0.75);
+		min-width: calc(2rem * 0.75);
+		height: calc(2rem * 0.75);
+		min-height: calc(2rem * 0.75);
+	}
+`;
+
 type MessageReferenceDisplayedProps = {
 	referenceMessage: ReferenceMessage;
 };
@@ -110,7 +119,7 @@ const MessageReferenceDisplayed: React.FC<MessageReferenceDisplayedProps> = ({
 			>
 				{referenceMessage.attachment && (
 					<Padding right="small">
-						<Avatar
+						<CustomAvatar
 							size="large"
 							icon="FileTextOutline"
 							label={referenceMessage.attachment.name}

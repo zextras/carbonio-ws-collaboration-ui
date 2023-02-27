@@ -16,6 +16,7 @@ import { getPreviewURL } from '../../../utils/attachmentUtils';
 import { calculateAvatarColor } from '../../../utils/styleUtils';
 
 const AttachmentImg = styled.img`
+	max-width: 100%;
 	mask-image: linear-gradient(
 		180deg,
 		rgba(0, 0, 0, 1) 0%,
@@ -39,6 +40,15 @@ const FileContainer = styled(Container)`
 		`0.25rem solid ${theme.avatarColors[userBorderColor]}`};
 	border-radius: 0 0.25rem 0.25rem 0;
 	cursor: pointer;
+`;
+
+const CustomAvatar = styled(Avatar)`
+	svg {
+		width: calc(2rem * 0.75);
+		min-width: calc(2rem * 0.75);
+		height: calc(2rem * 0.75);
+		min-height: calc(2rem * 0.75);
+	}
 `;
 
 type AttachmentViewProps = {
@@ -102,7 +112,7 @@ const AttachmentView: FC<AttachmentViewProps> = ({ attachment, from, isMyMessage
 			<PreviewContainer width={'fit'} height={'fit'} borderRadius="half" isLoaded={isPreviewLoaded}>
 				{!isPreviewLoaded && <Shimmer.Logo size="large" />}
 				{previewError ? (
-					<Container background="gray5" width="18.75rem" height="9.375rem">
+					<Container background="gray5" width="18.75rem" height="9.375rem" maxWidth="100%">
 						<Icon size="large" icon="Image" color="gray2" />
 					</Container>
 				) : (
@@ -111,21 +121,6 @@ const AttachmentView: FC<AttachmentViewProps> = ({ attachment, from, isMyMessage
 				{imageLabel}
 			</PreviewContainer>
 		);
-		if (previewError) {
-			return (
-				<PreviewContainer
-					width={'fit'}
-					height={'fit'}
-					borderRadius="half"
-					isLoaded={isPreviewLoaded}
-				>
-					<Container background="gray5" width="18.75rem" height="9.375rem">
-						<Icon size="large" icon="Image" color="gray2" />
-					</Container>
-					{imageLabel}
-				</PreviewContainer>
-			);
-		}
 	}
 	// Generic file visualization
 	return (
@@ -138,7 +133,7 @@ const AttachmentView: FC<AttachmentViewProps> = ({ attachment, from, isMyMessage
 			onClick={download}
 		>
 			<Row>
-				<Avatar
+				<CustomAvatar
 					size="large"
 					icon="FileTextOutline"
 					label={attachment.name}

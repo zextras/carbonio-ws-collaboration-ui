@@ -41,6 +41,15 @@ const DeletedMessageWrap = styled(Text)`
 	padding-right: 0.1875rem;
 `;
 
+const CustomAvatar = styled(Avatar)`
+	svg {
+		width: calc(2rem * 0.75);
+		min-width: calc(2rem * 0.75);
+		height: calc(2rem * 0.75);
+		min-height: calc(2rem * 0.75);
+	}
+`;
+
 const RepliedTextMessageSectionView: FC<RepliedTextMessageSectionViewProps> = ({
 	repliedMessage,
 	isMyMessage
@@ -154,7 +163,7 @@ const RepliedTextMessageSectionView: FC<RepliedTextMessageSectionViewProps> = ({
 			>
 				{repliedMessage.type === MessageType.TEXT_MSG && repliedMessage.attachment && (
 					<Padding right="small">
-						<Avatar
+						<CustomAvatar
 							size="large"
 							icon="FileTextOutline"
 							label={repliedMessage.attachment.name}
