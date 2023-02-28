@@ -122,6 +122,7 @@ describe('Chat Creation Modal', () => {
 			pictureUpdatedAt: 'pictureUpdatedAt'
 		});
 		await user.click(footerButton);
+		expect(footerButton).not.toHaveAttribute('disabled', true);
 	});
 
 	test('title and topic fields are filled properly', async () => {
