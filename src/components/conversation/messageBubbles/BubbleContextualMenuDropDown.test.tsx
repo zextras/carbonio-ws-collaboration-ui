@@ -44,6 +44,8 @@ describe('Bubble Contextual Menu - other user messages', () => {
 		expect(forwardAction).toBeInTheDocument();
 		const deleteAction = screen.queryByText(/Delete/i);
 		expect(deleteAction).not.toBeInTheDocument();
+		const downloadAction = screen.queryByText(/Download/i);
+		expect(downloadAction).not.toBeInTheDocument();
 	});
 
 	test('Replied text message', async () => {
@@ -70,6 +72,8 @@ describe('Bubble Contextual Menu - other user messages', () => {
 		expect(forwardAction).toBeInTheDocument();
 		const deleteAction = screen.queryByText(/Delete/i);
 		expect(deleteAction).not.toBeInTheDocument();
+		const downloadAction = screen.queryByText(/Download/i);
+		expect(downloadAction).not.toBeInTheDocument();
 	});
 
 	test('Forwarded text message', async () => {
@@ -95,6 +99,35 @@ describe('Bubble Contextual Menu - other user messages', () => {
 		expect(forwardAction).not.toBeInTheDocument();
 		const deleteAction = screen.queryByText(/Delete/i);
 		expect(deleteAction).not.toBeInTheDocument();
+		const downloadAction = screen.queryByText(/Download/i);
+		expect(downloadAction).not.toBeInTheDocument();
+	});
+
+	test('Attachment text message', async () => {
+		const simpleTextMessage: TextMessage = createMockTextMessage({
+			roomId: mockedRoom.id,
+			attachment: { id: 'id', name: 'file', mimeType: 'image/png', size: 122312 }
+		});
+		const store: RootStore = useStore.getState();
+		store.addRoom(mockedRoom);
+		store.newMessage(simpleTextMessage);
+		const { user } = setup(
+			<BubbleContextualMenuDropDown message={simpleTextMessage} isMyMessage={false} />
+		);
+		const arrowButton = screen.getByTestId('icon: ArrowIosDownward');
+		await user.click(arrowButton);
+
+		// Actions
+		const replyAction = screen.getByText(/Reply/i);
+		expect(replyAction).toBeInTheDocument();
+		const copyAction = screen.getByText(/Copy/i);
+		expect(copyAction).toBeInTheDocument();
+		const forwardAction = screen.queryByText(/Forward/i);
+		expect(forwardAction).not.toBeInTheDocument();
+		const deleteAction = screen.queryByText(/Delete/i);
+		expect(deleteAction).not.toBeInTheDocument();
+		const downloadAction = screen.queryByText(/Download/i);
+		expect(downloadAction).toBeInTheDocument();
 	});
 });
 
@@ -124,6 +157,8 @@ describe('Bubble Contextual Menu - my messages', () => {
 		expect(forwardAction).toBeInTheDocument();
 		const deleteAction = screen.getByText(/Delete/i);
 		expect(deleteAction).toBeInTheDocument();
+		const downloadAction = screen.queryByText(/Download/i);
+		expect(downloadAction).not.toBeInTheDocument();
 	});
 
 	test('Replied text message', async () => {
@@ -152,6 +187,8 @@ describe('Bubble Contextual Menu - my messages', () => {
 		expect(forwardAction).toBeInTheDocument();
 		const deleteAction = screen.getByText(/Delete/i);
 		expect(deleteAction).toBeInTheDocument();
+		const downloadAction = screen.queryByText(/Download/i);
+		expect(downloadAction).not.toBeInTheDocument();
 	});
 
 	test('Forwarded text message', async () => {
@@ -179,5 +216,34 @@ describe('Bubble Contextual Menu - my messages', () => {
 		expect(forwardAction).not.toBeInTheDocument();
 		const deleteAction = screen.queryByTestId(/Delete/i);
 		expect(deleteAction).not.toBeInTheDocument();
+		const downloadAction = screen.queryByText(/Download/i);
+		expect(downloadAction).not.toBeInTheDocument();
+	});
+
+	test('Attachment text message', async () => {
+		const simpleTextMessage: TextMessage = createMockTextMessage({
+			roomId: mockedRoom.id,
+			attachment: { id: 'id', name: 'file', mimeType: 'image/png', size: 122312 }
+		});
+		const store: RootStore = useStore.getState();
+		store.addRoom(mockedRoom);
+		store.newMessage(simpleTextMessage);
+		const { user } = setup(
+			<BubbleContextualMenuDropDown message={simpleTextMessage} isMyMessage={false} />
+		);
+		const arrowButton = screen.getByTestId('icon: ArrowIosDownward');
+		await user.click(arrowButton);
+
+		// Actions
+		const replyAction = screen.getByText(/Reply/i);
+		expect(replyAction).toBeInTheDocument();
+		const copyAction = screen.getByText(/Copy/i);
+		expect(copyAction).toBeInTheDocument();
+		const forwardAction = screen.queryByText(/Forward/i);
+		expect(forwardAction).not.toBeInTheDocument();
+		const deleteAction = screen.queryByText(/Delete/i);
+		expect(deleteAction).not.toBeInTheDocument();
+		const downloadAction = screen.queryByText(/Download/i);
+		expect(downloadAction).toBeInTheDocument();
 	});
 });

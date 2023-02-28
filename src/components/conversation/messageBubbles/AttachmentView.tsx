@@ -116,7 +116,12 @@ const AttachmentView: FC<AttachmentViewProps> = ({ attachment, from, isMyMessage
 						<Icon size="large" icon="Image" color="gray2" />
 					</Container>
 				) : (
-					<AttachmentImg src={previewURL} onLoad={setLoaded} onError={setError} />
+					<AttachmentImg
+						src={previewURL}
+						onLoad={setLoaded}
+						onError={setError}
+						data-testid="attachmentImg"
+					/>
 				)}
 				{imageLabel}
 			</PreviewContainer>

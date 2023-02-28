@@ -63,4 +63,15 @@ describe('MessageComposer', () => {
 		await user.click(sendButton);
 		expect(textArea).toHaveValue('');
 	});
+
+	test('Select file button', async () => {
+		const { user } = setup(<MessageComposer roomId={'roomId'} />);
+		const selectFileButton = screen.getByTestId('icon: Attach');
+		expect(selectFileButton).toBeVisible();
+
+		// Button status while user writes
+		const textArea = screen.getByRole('textbox');
+		await user.type(textArea, ' hi! ');
+		expect(selectFileButton).not.toBeVisible();
+	});
 });
