@@ -6,10 +6,11 @@
  */
 
 import { Dropdown, IconButton, SnackbarManagerContext } from '@zextras/carbonio-design-system';
-import React, { FC, useCallback, useContext, useEffect, useState } from 'react';
+import React, { FC, useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled, { css, FlattenSimpleInterpolation } from 'styled-components';
 
+import { AttachmentsApi } from '../../../network';
 import { getXmppClient } from '../../../store/selectors/ConnectionSelector';
 import { getCapability } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
@@ -104,6 +105,7 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 	const editActionLabel = t('action.edit', 'Edit');
 	const replyActionLabel = t('action.reply', 'Reply');
 	const forwardActionLabel = t('action.forward', 'Forward');
+	const downloadActionLabel = t('action.download', 'Download');
 	const successfulCopySnackbar = t('feedback.messageCopied', 'Message copied');
 	const messageActionsTooltip = t('tooltip.messageActions', ' Message actions');
 
@@ -116,7 +118,6 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 	const setReferenceMessage = useStore((store) => store.setReferenceMessage);
 	const setDraftMessage = useStore((store) => store.setDraftMessage);
 	const [dropdownActive, setDropdownActive] = useState(false);
-	const [contextualMenuActions, setContextualMenuActions] = useState<DropDownActionType[]>([]);
 	const [forwardMessageModalIsOpen, setForwardMessageModalIsOpen] = useState<boolean>(false);
 	const createSnackbar: any = useContext(SnackbarManagerContext);
 
@@ -153,8 +154,31 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 		});
 	}, [createSnackbar, message.forwarded, message.text, successfulCopySnackbar]);
 
-	useEffect(() => {
-		const actions = [];
+	const deleteMessage = useCallback(() => {
+		if (message.attachment) {
+			AttachmentsApi.deleteAttachment(message.attachment?.id).then(() =>
+				xmppClient.sendChatMessageDeletion(message.roomId, message.id)
+			);
+		} else {
+			xmppClient.sendChatMessageDeletion(message.roomId, message.id);
+		}
+	}, [message.attachment, message.id, message.roomId, xmppClient]);
+
+	const downloadAction = useCallback(() => {
+		if (message.attachment) {
+			const downloadUrl = AttachmentsApi.getURLAttachment(message.attachment.id);
+			const linkTag: HTMLAnchorElement = document.createElement('a');
+			document.body.appendChild(linkTag);
+			linkTag.href = downloadUrl;
+			linkTag.download = message.attachment.name;
+			linkTag.target = '_blank';
+			linkTag.click();
+			linkTag.remove();
+		}
+	}, [message.attachment]);
+
+	const contextualMenuActions = useMemo(() => {
+		const actions: DropDownActionType[] = [];
 		const messageCanBeDeleted =
 			!deleteMessageTimeLimitInMinutes ||
 			(deleteMessageTimeLimitInMinutes &&
@@ -175,12 +199,13 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 					message.id,
 					message.from,
 					message.stanzaId,
-					messageActionType.REPLY
+					messageActionType.REPLY,
+					message.attachment
 				)
 		});
 
 		// Forward message in another chat
-		if (!message.forwarded) {
+		if (!message.forwarded && !message.attachment) {
 			actions.push({
 				id: 'forward',
 				label: forwardActionLabel,
@@ -198,7 +223,7 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 		}
 
 		// Edit functionality
-		if (isMyMessage && messageCanBeEdited && !message.forwarded) {
+		if (isMyMessage && messageCanBeEdited && !message.forwarded && !message.attachment) {
 			actions.push({
 				id: 'Edit',
 				label: editActionLabel,
@@ -220,27 +245,43 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 			actions.push({
 				id: 'Delete',
 				label: deleteActionLabel,
-				click: () => xmppClient.sendChatMessageDeletion(message.roomId, message.id)
+				click: deleteMessage
 			});
 		}
 
-		setContextualMenuActions(actions);
+		if (message.attachment) {
+			actions.push({
+				id: 'Download',
+				label: downloadActionLabel,
+				click: downloadAction
+			});
+		}
+		return actions;
 	}, [
+		deleteMessageTimeLimitInMinutes,
+		message.date,
+		message.forwarded,
+		message.attachment,
+		message.type,
+		message.roomId,
+		message.id,
+		message.from,
+		message.stanzaId,
+		message.text,
+		editMessageTimeLimitInMinutes,
+		replyActionLabel,
+		isMyMessage,
+		setReferenceMessage,
+		forwardActionLabel,
+		onOpenForwardMessageModal,
 		copyActionLabel,
 		copyMessage,
-		deleteActionLabel,
-		deleteMessageTimeLimitInMinutes,
-		dropdownActive,
-		forwardActionLabel,
-		isMyMessage,
-		message,
-		replyActionLabel,
-		onOpenForwardMessageModal,
-		setReferenceMessage,
-		xmppClient,
-		editMessageTimeLimitInMinutes,
 		editActionLabel,
-		setDraftMessage
+		setDraftMessage,
+		deleteActionLabel,
+		deleteMessage,
+		downloadActionLabel,
+		downloadAction
 	]);
 
 	return (

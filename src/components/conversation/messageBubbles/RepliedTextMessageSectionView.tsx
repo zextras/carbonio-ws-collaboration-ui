@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Container, Padding, Text } from '@zextras/carbonio-design-system';
+import { Avatar, Container, Padding, Text } from '@zextras/carbonio-design-system';
 import { useUserSettings } from '@zextras/carbonio-shell-ui';
 import { find } from 'lodash';
 import React, { FC, useMemo, useCallback } from 'react';
@@ -14,6 +14,7 @@ import styled from 'styled-components';
 import { getUserName, getUserSelector } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
 import { DeletedMessage, MessageType, TextMessage } from '../../../types/store/MessageTypes';
+import { getPreviewURL } from '../../../utils/attachmentUtils';
 import { calculateAvatarColor } from '../../../utils/styleUtils';
 import BubbleFooter from './BubbleFooter';
 import BubbleHeader from './BubbleHeader';
@@ -38,6 +39,15 @@ const DeletedMessageWrap = styled(Text)`
 	height: inherit;
 	font-style: italic;
 	padding-right: 0.1875rem;
+`;
+
+const CustomAvatar = styled(Avatar)`
+	svg {
+		width: calc(2rem * 0.75);
+		min-width: calc(2rem * 0.75);
+		height: calc(2rem * 0.75);
+		min-height: calc(2rem * 0.75);
+	}
 `;
 
 const RepliedTextMessageSectionView: FC<RepliedTextMessageSectionViewProps> = ({
@@ -124,30 +134,61 @@ const RepliedTextMessageSectionView: FC<RepliedTextMessageSectionViewProps> = ({
 		}
 	}, [repliedMessage.id, replyUserInfo, darkModeSettings, sessionId]);
 
+	const previewURL = useMemo(() => {
+		if (repliedMessage.type === MessageType.TEXT_MSG && repliedMessage.attachment) {
+			return getPreviewURL(repliedMessage.attachment.id, repliedMessage.attachment.mimeType);
+		}
+		return undefined;
+	}, [repliedMessage]);
+
+	const textToShow = useMemo(() => {
+		if (repliedMessage.type === MessageType.TEXT_MSG) {
+			if (repliedMessage.attachment) {
+				return repliedMessage.text !== '' ? repliedMessage.text : repliedMessage.attachment.name;
+			}
+			return repliedMessage.forwarded ? repliedMessage.forwarded.text : repliedMessage.text;
+		}
+		return '';
+	}, [repliedMessage]);
+
 	return (
 		<>
 			<RepliedTextMessageContainer
 				data-testid={`repliedView-${repliedMessage.id}`}
 				background={isMyMessage ? '#C4D5EF' : 'gray5'}
 				padding={{ horizontal: 'small', vertical: 'small' }}
-				crossAlignment="flex-start"
+				orientation="horizontal"
 				userBorderColor={userColor}
 				onClick={scrollTo}
 			>
-				{senderIdentifier && <BubbleHeader senderId={repliedMessage.from} />}
-				{repliedMessage && repliedMessage.type === MessageType.TEXT_MSG && (
-					<MessageWrap color="secondary" overflow="ellipsis" size="small">
-						{!repliedMessage.forwarded ? repliedMessage.text : repliedMessage.forwarded.text}
-					</MessageWrap>
+				{repliedMessage.type === MessageType.TEXT_MSG && repliedMessage.attachment && (
+					<Padding right="small">
+						<CustomAvatar
+							size="large"
+							icon="FileTextOutline"
+							label={repliedMessage.attachment.name}
+							shape="square"
+							background={previewURL ? 'gray3' : 'gray0'}
+							picture={previewURL}
+						/>
+					</Padding>
 				)}
-				{repliedMessage && repliedMessage.type === MessageType.DELETED_MSG && (
-					<DeletedMessageWrap color="secondary" overflow="ellipsis" size="small">
-						{deletedMessageLabel}
-					</DeletedMessageWrap>
-				)}
-				{repliedMessage && repliedMessage.type !== MessageType.DELETED_MSG && (
-					<BubbleFooter date={repliedMessage.date} isEdited={repliedMessage.edited} />
-				)}
+				<Container crossAlignment="flex-start">
+					{senderIdentifier && <BubbleHeader senderId={repliedMessage.from} />}
+					{repliedMessage && repliedMessage.type === MessageType.TEXT_MSG && (
+						<MessageWrap color="secondary" overflow="ellipsis" size="small">
+							{textToShow}
+						</MessageWrap>
+					)}
+					{repliedMessage && repliedMessage.type === MessageType.DELETED_MSG && (
+						<DeletedMessageWrap color="secondary" overflow="ellipsis" size="small">
+							{deletedMessageLabel}
+						</DeletedMessageWrap>
+					)}
+					{repliedMessage && repliedMessage.type !== MessageType.DELETED_MSG && (
+						<BubbleFooter date={repliedMessage.date} isEdited={repliedMessage.edited} />
+					)}
+				</Container>
 			</RepliedTextMessageContainer>
 			<Padding top="small" />
 		</>

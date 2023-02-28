@@ -61,6 +61,7 @@ class XMPPClient implements IXMPPClient {
 		Strophe.addNamespace('MARKERS', 'urn:xmpp:chat-markers:0');
 		Strophe.addNamespace('ROSTER', 'jabber:iq:roster');
 		Strophe.addNamespace('SMART_MARKERS', 'esl:xmpp:smart-markers:0');
+		Strophe.addNamespace('STANDARD_CLIENT', 'jabber:client');
 		Strophe.addNamespace('XMPP_RETRACT', 'urn:xmpp:message-retract:0');
 		Strophe.addNamespace('XMPP_FASTEN', 'urn:xmpp:fasten:0');
 		Strophe.addNamespace('XMPP_CORRECT', 'urn:xmpp:message-correct:0');

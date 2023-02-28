@@ -43,6 +43,9 @@ class AttachmentsApi extends BaseAPI implements IAttachmentsApi {
 	public getAttachmentPreview(fileId: string): Promise<GetAttachmentPreviewResponse> {
 		return this.fetchAPI(`attachments/${fileId}/preview`, RequestType.GET);
 	}
+
+	public getURLPreview = (fileId: string): string =>
+		`${window.document.location.origin}/services/chats/attachments/${fileId}/preview`;
 }
 
 export default AttachmentsApi.getInstance();

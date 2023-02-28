@@ -38,7 +38,6 @@ const BubbleFooter: FC<BubbleFooterProps> = ({
 	messageRead,
 	forwarded,
 	dateAndTime = false,
-	messageType,
 	messageExtension,
 	messageSize,
 	isEdited
@@ -71,18 +70,11 @@ const BubbleFooter: FC<BubbleFooterProps> = ({
 			<Container width="fit" padding={{ right: 'medium' }}>
 				{messageExtension && messageSize && (
 					<Text color="secondary" size="small">
-						{messageExtension} {messageSize}
+						{messageExtension} • {messageSize}
 					</Text>
 				)}
 			</Container>
 			<Container orientation="horizontal" width="fit">
-				{messageType && (
-					<Padding width="fit" right="small">
-						<Text color="secondary" size="small">
-							{messageType}
-						</Text>
-					</Padding>
-				)}
 				{isEdited && (
 					<Container width="fit">
 						<ItalicText color="secondary" size="extrasmall">

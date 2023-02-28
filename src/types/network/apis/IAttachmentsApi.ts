@@ -17,6 +17,7 @@ interface IAttachmentsApi {
 	getURLAttachment(fileId: string): string;
 	getAttachment(fileId: string): Promise<GetAttachmentResponse>;
 	getAttachmentPreview(fileId: string): Promise<GetAttachmentPreviewResponse>;
+	getURLPreview(fileId: string): string;
 }
 
 export default IAttachmentsApi;

@@ -35,32 +35,43 @@ describe('MessageComposer', () => {
 		}, 1500);
 	});
 
-	test('Send message button status - initial status', async () => {
+	test('Send message button status - initial status', () => {
 		setup(<MessageComposer roomId={'roomId'} />);
-		expect(screen.getAllByRole('button')[1]).toBeDisabled();
+		expect(screen.getByTestId('icon: Navigation2').parentNode).toBeDisabled();
 	});
 
 	test('Send message button status - spaces and text', async () => {
 		const { user } = setup(<MessageComposer roomId={'roomId'} />);
 		const textArea = screen.getByRole('textbox');
 		await user.type(textArea, ' hi! ');
-		expect(screen.getAllByRole('button')[1]).not.toBeDisabled();
+		expect(screen.getByTestId('icon: Navigation2').parentNode).not.toBeDisabled();
 	});
 
 	test('Send message button status - only spaces', async () => {
 		const { user } = setup(<MessageComposer roomId={'roomId'} />);
 		const textArea = screen.getByRole('textbox');
 		await user.type(textArea, '     ');
-		expect(screen.getAllByRole('button')[1]).toBeDisabled();
+		expect(screen.getByTestId('icon: Navigation2').parentNode).toBeDisabled();
 	});
 
 	test('Send a message', async () => {
 		const { user } = setup(<MessageComposer roomId={'roomId'} />);
 		const textArea = screen.getByRole('textbox');
 		await user.type(textArea, ' hi! ');
-		const sendButton = screen.getAllByRole('button')[1];
+		const sendButton = screen.getByTestId('icon: Navigation2');
 		expect(sendButton).not.toBeDisabled();
 		await user.click(sendButton);
 		expect(textArea).toHaveValue('');
+	});
+
+	test('Select file button', async () => {
+		const { user } = setup(<MessageComposer roomId={'roomId'} />);
+		const selectFileButton = screen.getByTestId('icon: Attach');
+		expect(selectFileButton).toBeVisible();
+
+		// Button status while user writes
+		const textArea = screen.getByRole('textbox');
+		await user.type(textArea, ' hi! ');
+		expect(selectFileButton).not.toBeVisible();
 	});
 });

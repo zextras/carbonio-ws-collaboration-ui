@@ -86,6 +86,8 @@ export const mockedGetUserRequest: jest.Mock = jest.fn();
 export const mockedGetUserPictureRequest: jest.Mock = jest.fn();
 export const mockedGetURLUserPicture: jest.Mock = jest.fn();
 export const mockedGetDebouncedUserRequest: jest.Mock = jest.fn();
+export const mockedGetURLAttachment: jest.Mock = jest.fn();
+export const mockedGetURLPreview: jest.Mock = jest.fn();
 
 jest.mock('./src/network', () => ({
 	RoomsApi: {
@@ -140,5 +142,9 @@ jest.mock('./src/network', () => ({
 		getURLUserPicture: (): string => 'image.url',
 		// eslint-disable-next-line @typescript-eslint/no-empty-function
 		getDebouncedUser: (): void => {}
+	},
+	AttachmentsApi: {
+		getURLAttachment: mockedGetURLAttachment,
+		getURLPreview: mockedGetURLPreview
 	}
 }));

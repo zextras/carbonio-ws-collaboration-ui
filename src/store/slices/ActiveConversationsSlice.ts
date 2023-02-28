@@ -9,6 +9,7 @@ import produce from 'immer';
 import { find, remove } from 'lodash';
 
 import { messageActionType } from '../../types/store/ActiveConversationTypes';
+import { AttachmentMessageType } from '../../types/store/MessageTypes';
 import { ActiveConversationsSlice, RootStore } from '../../types/store/StoreTypes';
 
 export const useActiveConversationsSlice = (
@@ -78,7 +79,8 @@ export const useActiveConversationsSlice = (
 		referenceMessageId: string,
 		senderId: string,
 		stanzaId: string,
-		actionType: messageActionType
+		actionType: messageActionType,
+		attachment?: AttachmentMessageType
 	): void => {
 		set(
 			produce((draft: RootStore) => {
@@ -88,7 +90,8 @@ export const useActiveConversationsSlice = (
 						messageId: referenceMessageId,
 						senderId,
 						stanzaId,
-						actionType
+						actionType,
+						attachment
 					};
 				} else {
 					draft.activeConversations[roomId] = {
@@ -97,7 +100,8 @@ export const useActiveConversationsSlice = (
 							messageId: referenceMessageId,
 							senderId,
 							stanzaId,
-							actionType
+							actionType,
+							attachment
 						}
 					};
 				}

@@ -49,7 +49,7 @@ class UsersApi extends BaseAPI implements IUsersApi {
 			if (file.size > +CapabilityType.MAX_USER_IMAGE_SIZE) {
 				reject(new Error('File too large'));
 			} else {
-				this.uploadFileFetchAPI(`users/${userId}/picture`, file)
+				this.uploadFileFetchAPI(`users/${userId}/picture`, RequestType.PUT, file)
 					.then((resp: ChangeUserPictureResponse) => resolve(resp))
 					.catch((error) => reject(error));
 			}

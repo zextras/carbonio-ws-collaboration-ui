@@ -14,6 +14,7 @@ import useStore from '../../../store/Store';
 import { TextMessage } from '../../../types/store/MessageTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 import { parseUrlOnMessage } from '../../../utils/parseUrlOnMessage';
+import AttachmentView from './AttachmentView';
 import BubbleContextualMenuDropDown, {
 	BubbleContextualMenuDropDownWrapper
 } from './BubbleContextualMenuDropDown';
@@ -32,6 +33,7 @@ type BubbleProps = {
 
 const DropDownWrapper = styled(Container)`
 	position: relative;
+	z-index: 10;
 `;
 
 const BubbleContainer = styled(Container)`
@@ -77,6 +79,27 @@ const Bubble: FC<BubbleProps> = ({
 	const isMyMessage = mySessionId === message.from;
 	const messageFormatted = useMemo(() => parseUrlOnMessage(message.text), [message.text]);
 
+	const extension = useMemo(
+		() => message.attachment && message.attachment.mimeType.split('/')[1]?.toUpperCase(),
+		[message.attachment]
+	);
+
+	const size = useMemo(() => {
+		if (message.attachment) {
+			if (message.attachment.size < 1024) {
+				return `${message.attachment.size}B`;
+			}
+			if (message.attachment.size < 1024 * 1024) {
+				return `${(message.attachment.size / 1024).toFixed(2)}KB`;
+			}
+			if (message.attachment.size < 1024 * 1024 * 1024) {
+				return `${(message.attachment.size / 1024 / 1024).toFixed(2)}MB`;
+			}
+			return `${(message.attachment.size / 1024 / 1024 / 1024).toFixed(2)}GB`;
+		}
+		return undefined;
+	}, [message.attachment]);
+
 	return (
 		<BubbleContainer
 			id={`message-${message.id}`}
@@ -115,6 +138,13 @@ const Bubble: FC<BubbleProps> = ({
 					roomId={message.roomId}
 				/>
 			)}
+			{message.attachment && (
+				<AttachmentView
+					attachment={message.attachment}
+					isMyMessage={isMyMessage}
+					from={message.from}
+				/>
+			)}
 			<TextContentBubble textContent={messageFormatted} />
 			<BubbleFooter
 				isMyMessage={isMyMessage}
@@ -122,6 +152,8 @@ const Bubble: FC<BubbleProps> = ({
 				messageRead={message.read}
 				forwarded={message.forwarded}
 				isEdited={message?.edited}
+				messageExtension={extension}
+				messageSize={size}
 			/>
 		</BubbleContainer>
 	);

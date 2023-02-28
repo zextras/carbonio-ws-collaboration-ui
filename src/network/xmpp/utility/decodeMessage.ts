@@ -9,8 +9,7 @@ import { Strophe } from 'strophe.js';
 
 import {
 	AffiliationMessage,
-	ConfigurationMessage,
-	DeletedMessage,
+	ConfigurationMessage, DeletedMessage,
 	Message, MessageType,
 	TextMessage
 } from '../../../types/store/MessageTypes';
@@ -34,6 +33,106 @@ export function decodeMessage(messageStanza: Element, optional?: OptionalParamet
 	const resource = getResource(fromAttribute);
 	const messageDate = optional?.date || now();
 	let message: Message;
+
+	// Retract/deleted message
+	const retracted = getTagElement(messageStanza, 'retract');
+	if (retracted) {
+		const from = getId(resource);
+		const deletedMessageId = messageStanza.getElementsByTagName('apply-to')[0].id;
+
+		const message = {
+			id: deletedMessageId,
+			roomId,
+			type: MessageType.DELETED_MSG,
+			date: messageDate,
+			from
+		};
+		return message as DeletedMessage;
+	}
+
+
+
+	// Affiliation message
+	const x = getTagElement(messageStanza, 'x');
+	if (x && x.getAttribute('xmlns') === Strophe.NS.AFFILIATIONS) {
+		const user = getId(Strophe.getText(x.getElementsByTagName('user')[0]));
+		const userElement = getRequiredTagElement(x, 'user');
+		const affiliationAttribute = getRequiredAttribute(userElement, 'affiliation');
+		message = {
+			id: messageId,
+			roomId,
+			date: messageDate,
+			type: MessageType.AFFILIATION_MSG,
+			userId: user,
+			as: affiliationAttribute
+		};
+		return message as AffiliationMessage;
+	}
+
+	// Configuration and attachment message
+	if (x && x.getAttribute('xmlns') === Strophe.NS.CONFIGURATION) {
+		const operation = Strophe.getText(getRequiredTagElement(x, 'operation'));
+		switch (operation) {
+			case 'roomNameChanged':
+			case 'roomDescriptionChanged':
+			case 'roomPictureUpdated':
+			case 'roomPictureDeleted': {
+				const value =
+					operation === 'roomPictureUpdated'
+						? Strophe.getText(getRequiredTagElement(x, 'picture-name'))
+						: operation === 'roomPictureDeleted'
+							? ''
+							: Strophe.getText(getRequiredTagElement(x, 'value'))
+								.replace(/&amp;/g, '&')
+								.replace(/&quot;/g, '"')
+								.replace(/&apos;/g, "'")
+								.replace(/&lt;/g, '<')
+								.replace(/&gt;/g, '>');
+				message = {
+					id: messageId,
+					roomId,
+					date: messageDate,
+					type: MessageType.CONFIGURATION_MSG,
+					from: getId(resource),
+					operation,
+					value
+				};
+				return message as ConfigurationMessage;
+			}
+			case 'attachmentAdded': {
+				const stanzaIdReference = getTagElement(messageStanza, 'stanza-id');
+				const stanzaId = optional?.stanzaId || (stanzaIdReference && getRequiredAttribute(stanzaIdReference, 'id') || messageId);
+				const attachmentId = Strophe.getText(getRequiredTagElement(x, 'attachment-id'));
+				const filename = Strophe.getText(getRequiredTagElement(x, 'filename'));
+				const fileMimeType = Strophe.getText(getRequiredTagElement(x, 'mime-type'));
+				const fileSize = Strophe.getText(getRequiredTagElement(x, 'size'));
+				const description = Strophe.getText(getRequiredTagElement(messageStanza, 'body'))
+					.replace(/&amp;/g, '&')
+					.replace(/&quot;/g, '"')
+					.replace(/&apos;/g, "'")
+					.replace(/&lt;/g, '<')
+					.replace(/&gt;/g, '>');
+
+				message = {
+					id: messageId,
+					stanzaId,
+					roomId,
+					date: messageDate,
+					type: MessageType.TEXT_MSG,
+					from: getId(resource),
+					text: description,
+					read: calcReads(messageDate, roomId),
+					attachment: {
+						id: attachmentId,
+						name: decodeURI(filename) || "",
+						mimeType: fileMimeType || "",
+						size: fileSize || 0
+					},
+				};
+				return message as TextMessage;
+			}
+		}
+	}
 
 	// Text message
 	const body = messageStanza.getElementsByTagName('body')[0];
@@ -102,66 +201,6 @@ export function decodeMessage(messageStanza: Element, optional?: OptionalParamet
 			forwarded
 		};
 		return message as TextMessage;
-	}
-
-	// Retract/deleted message
-	const retracted = getTagElement(messageStanza, 'retract');
-	if (retracted) {
-		const from = getId(resource);
-		const deletedMessageId = messageStanza.getElementsByTagName('apply-to')[0].id;
-
-		const message = {
-			id: deletedMessageId,
-			roomId,
-			type: MessageType.DELETED_MSG,
-			date: messageDate,
-			from
-		};
-		return message as DeletedMessage;
-	}
-
-	// Affiliation message
-	const x = getTagElement(messageStanza, 'x');
-	if (x && x.getAttribute('xmlns') === Strophe.NS.AFFILIATIONS) {
-		const user = getId(Strophe.getText(x.getElementsByTagName('user')[0]));
-		const userElement = getRequiredTagElement(x, 'user');
-		const affiliationAttribute = getRequiredAttribute(userElement, 'affiliation');
-		message = {
-			id: messageId,
-			roomId,
-			date: messageDate,
-			type: MessageType.AFFILIATION_MSG,
-			userId: user,
-			as: affiliationAttribute
-		};
-		return message as AffiliationMessage;
-	}
-
-	// Configuration message
-	if (x && x.getAttribute('xmlns') === Strophe.NS.CONFIGURATION) {
-		const from = getId(resource);
-		const operation = Strophe.getText(getRequiredTagElement(x, 'operation'));
-		const value =
-			operation === 'roomPictureUpdated'
-				? Strophe.getText(getRequiredTagElement(x, 'picture-name'))
-				: operation === 'roomPictureDeleted'
-				? ''
-				: Strophe.getText(getRequiredTagElement(x, 'value'))
-						.replace(/&amp;/g, '&')
-						.replace(/&quot;/g, '"')
-						.replace(/&apos;/g, "'")
-						.replace(/&lt;/g, '<')
-						.replace(/&gt;/g, '>');
-		message = {
-			id: messageId,
-			roomId,
-			date: messageDate,
-			type: MessageType.CONFIGURATION_MSG,
-			from,
-			operation,
-			value
-		};
-		return message as ConfigurationMessage;
 	}
 }
 

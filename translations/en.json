@@ -8,6 +8,7 @@
         "copy": "Copy",
         "create": "Create",
         "delete": "Delete",
+        "download": "Download",
         "edit": "Edit",
         "editDetails": "Edit Details",
         "editRoom": "Edit {{roomName}}",
@@ -183,6 +184,7 @@
         "selectEmoji": "Select emoji",
         "sendMessage": "Send message",
         "showConversationList": "Show conversation list",
+        "uploadAttachment": "Upload an attachment",
         "userAvatar": {
             "resetAvatar": "Reset avatar",
             "updateAvatar": "Update avatar",

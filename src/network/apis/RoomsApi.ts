@@ -94,7 +94,7 @@ class RoomsApi extends BaseAPI implements IRoomsApi {
 			if (sizeLimit && file.size > sizeLimit * 1000) {
 				reject(new Error('File too large'));
 			} else {
-				this.uploadFileFetchAPI(`rooms/${roomId}/picture`, file)
+				this.uploadFileFetchAPI(`rooms/${roomId}/picture`, RequestType.PUT, file)
 					.then((resp: UpdateRoomPictureResponse) => resolve(resp))
 					.catch((error) => reject(error));
 			}
@@ -156,8 +156,17 @@ class RoomsApi extends BaseAPI implements IRoomsApi {
 		return this.fetchAPI(`rooms/${roomId}/attachments${params}`, RequestType.GET);
 	}
 
-	public addRoomAttachment(roomId: string, file: File): Promise<AddRoomAttachmentResponse> {
-		return this.uploadFileFetchAPI(`rooms/${roomId}/attachments`, file, RequestType.POST);
+	public addRoomAttachment(
+		roomId: string,
+		file: File,
+		description?: string
+	): Promise<AddRoomAttachmentResponse> {
+		return this.uploadFileFetchAPI(
+			`rooms/${roomId}/attachments`,
+			RequestType.POST,
+			file,
+			description
+		);
 	}
 }
 

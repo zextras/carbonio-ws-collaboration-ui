@@ -60,6 +60,19 @@ const forwardedTextMessage = createMockTextMessage({
 	}
 });
 
+const attachmentTextMessage = createMockTextMessage({
+	id: 'messageId',
+	roomId: mockedRoom.id,
+	from: user1.id,
+	text: '',
+	attachment: {
+		id: 'attachmentId',
+		name: 'file_name',
+		mimeType: 'image/png',
+		size: 1661441294393
+	}
+});
+
 describe('Message reference displayed', () => {
 	test('Display the reference message of another user in a reply action of user', async () => {
 		const store = useStore.getState();
@@ -159,6 +172,31 @@ describe('Message reference displayed', () => {
 
 		// Displayed text is the text of the forwarded message
 		const message = screen.getByText(new RegExp(forwardedTextMessage.forwarded!.text, 'i'));
+		expect(message).toBeInTheDocument();
+	});
+
+	test('Reference message is a message with an attachment', async () => {
+		const store = useStore.getState();
+		store.setSessionId(myId);
+		store.setUserInfo(user1);
+		store.addRoom(mockedRoom);
+		store.newMessage(attachmentTextMessage);
+
+		const referenceMessage = {
+			roomId: mockedRoom.id,
+			messageId: attachmentTextMessage.id,
+			senderId: attachmentTextMessage.from,
+			stanzaId: attachmentTextMessage.stanzaId,
+			actionType: messageActionType.REPLY
+		};
+		setup(<MessageReferenceDisplayed referenceMessage={referenceMessage} />);
+
+		// Displayed username is the username of who forward message
+		const userName = screen.getByText(new RegExp(user1.name, 'i'));
+		expect(userName).toBeInTheDocument();
+
+		// Displayed text is the attachment name
+		const message = screen.getByText(new RegExp(attachmentTextMessage.attachment!.name, 'i'));
 		expect(message).toBeInTheDocument();
 	});
 });

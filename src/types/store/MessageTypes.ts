@@ -14,7 +14,6 @@ export type MessageList = Message[];
 
 export type Message =
 	| TextMessage
-	| AttachmentMessage
 	| DeletedMessage
 	| AffiliationMessage
 	| ConfigurationMessage
@@ -36,16 +35,7 @@ export type TextMessage = BasicMessage & {
 	repliedMessage?: TextMessage | DeletedMessage;
 	edited?: boolean;
 	forwarded?: ForwardedMessage;
-};
-
-export type AttachmentMessage = BasicMessage & {
-	stanzaId: string;
-	type: MessageType.ATTACHMENT_MSG;
-	from: string;
-	text: string;
-	read: MarkerStatus;
-	replyTo?: string;
-	repliedMessage?: TextMessage | DeletedMessage;
+	attachment?: AttachmentMessageType;
 };
 
 export type DeletedMessage = BasicMessage & {
@@ -88,4 +78,11 @@ export type ForwardedMessage = {
 	date: number;
 	from: string;
 	text: string;
+};
+
+export type AttachmentMessageType = {
+	id: string;
+	name: string;
+	mimeType: string;
+	size: number;
 };

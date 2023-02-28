@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Container, IconButton, Padding, Tooltip } from '@zextras/carbonio-design-system';
+import { IconButton, Container, Tooltip, Padding } from '@zextras/carbonio-design-system';
 import React, {
 	BaseSyntheticEvent,
 	useCallback,
@@ -27,6 +27,7 @@ import useStore from '../../../store/Store';
 import { Emoji } from '../../../types/generics';
 import { messageActionType } from '../../../types/store/ActiveConversationTypes';
 import { Message, MessageType } from '../../../types/store/MessageTypes';
+import AttachmentSelector from './AttachmentSelector';
 import EmojiPicker from './EmojiPicker';
 import MessageArea from './MessageArea';
 
@@ -295,6 +296,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 					handleOnBlur={handleOnBlur}
 					handleOnFocus={handleOnFocus}
 				/>
+				{textMessage === '' && !messageReference && <AttachmentSelector roomId={roomId} />}
 				<Tooltip label={sendDisabled ? writeToSendTooltip : sendMessageLabel} placement="top">
 					<Container
 						width="fit"
