@@ -23,7 +23,7 @@ export function onInboxMessageStanza(this: IXMPPClient, message: Element): true 
 	const insideMessage = getRequiredTagElement(result, 'message');
 	const inboxMessage = decodeMessage(insideMessage, { date: dateToTimestamp(date) });
 	const sessionId = useStore.getState().session.id;
-	console.log(message);
+
 	if (inboxMessage) {
 		const unreadMessagesOfSingleConversation = getRequiredAttribute(result, 'unread');
 		const store = useStore.getState();

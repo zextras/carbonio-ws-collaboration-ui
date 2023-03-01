@@ -101,11 +101,11 @@ export function onRequestHistory(this: XMPPClient, stanza: Element): void {
 	const isHistoryFullyLoaded = fin.getAttribute('complete');
 	if (isHistoryFullyLoaded || historyMessages.length === 0) store.setHistoryIsFullyLoaded(roomId);
 
-	// Set history loadable again
-	store.setHistoryLoadDisabled(roomId, false);
-
 	// Store history messages on store updating the history of the room
 	if (historyMessages.length > 0) store.updateHistory(roomId, historyMessages);
+
+	// Set history loadable again
+	store.setHistoryLoadDisabled(roomId, false);
 
 	// Request replied message information
 	forEach(historyMessages, (message) => {
