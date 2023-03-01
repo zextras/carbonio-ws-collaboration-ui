@@ -66,7 +66,7 @@ const MessageFactory = ({
 				);
 			}
 			case MessageType.DELETED_MSG: {
-				return <DeletedBubble message={message} />;
+				return <DeletedBubble message={message} refEl={messageRef} />;
 			}
 			case MessageType.AFFILIATION_MSG: {
 				return <AffiliationBubble message={message} refEl={messageRef} />;

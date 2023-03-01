@@ -16,6 +16,7 @@ import { DeletedMessage } from '../../../types/store/MessageTypes';
 
 type DeletedBubbleProps = {
 	message: DeletedMessage;
+	refEl: React.RefObject<HTMLElement>;
 };
 
 const BubbleDeletedContainer = styled(Container)`
@@ -32,7 +33,7 @@ const CustomText = styled(Text)`
 	padding-right: 0.1875rem;
 `;
 
-const DeletedBubble: FC<DeletedBubbleProps> = ({ message }) => {
+const DeletedBubble: FC<DeletedBubbleProps> = ({ message, refEl }) => {
 	const [t] = useTranslation();
 	const deletedMessageLabel = t('message.deletedMessage', 'Deleted message');
 	const timezone = useStore(getPrefTimezoneSelector);
@@ -41,7 +42,9 @@ const DeletedBubble: FC<DeletedBubbleProps> = ({ message }) => {
 
 	return (
 		<BubbleDeletedContainer
+			id={`message-${message.id}`}
 			key={`${message.id}-deleted`}
+			ref={refEl}
 			height="fit"
 			width="fit"
 			orientation="horizontal"
