@@ -356,6 +356,7 @@ class XMPPClient implements IXMPPClient {
 		referenceMessage: string,
 		messageWithResponseId: string
 	): void {
+		console.log('Request info of:', referenceMessage);
 		const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
 			.c('query', { xmlns: Strophe.NS.MAM, queryid: MamRequestType.REPLIED })
 			.c('x', { xmlns: 'jabber:x:data' })
