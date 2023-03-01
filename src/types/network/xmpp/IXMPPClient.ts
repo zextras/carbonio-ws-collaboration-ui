@@ -17,7 +17,13 @@ interface IXMMPClient {
 	getInbox(): void;
 	setInbox(): void;
 	// Message
-	sendChatMessage(roomId: string, message: string, replyTo?: string): void;
+	sendChatMessage(roomId: string, message: string): void;
+	sendChatMessageReply(
+		roomId: string,
+		message: string,
+		replyTo: string,
+		replyMessageId: string
+	): void;
 	sendChatMessageDeletion(roomId: string, messageId: string): void;
 	sendChatMessageCorrection(roomId: string, message: string, messageId: string): void;
 	forwardMessage(message: TextMessage, roomIds: string[]): void;
@@ -27,7 +33,11 @@ interface IXMMPClient {
 		olderMessageId: string,
 		newerMessageId: string
 	): void;
-	requestRepliedMessage(roomId: string, originalMessageId: string, repliedMessageId: string): void;
+	requestMessageInsideAReply(
+		roomId: string,
+		messageToRequest: string,
+		messageWithResponse: string
+	): void;
 	// Chat state
 	sendIsWriting(roomId: string): void;
 	sendPaused(roomId: string): void;

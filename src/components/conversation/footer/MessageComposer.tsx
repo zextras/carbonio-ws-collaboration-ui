@@ -100,7 +100,12 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 		if (referenceMessage && referenceMessage.roomId === roomId) {
 			switch (referenceMessage.actionType) {
 				case messageActionType.REPLY: {
-					xmppClient.sendChatMessage(roomId, message, referenceMessage.stanzaId);
+					xmppClient.sendChatMessageReply(
+						roomId,
+						message,
+						referenceMessage.senderId,
+						referenceMessage.stanzaId
+					);
 					break;
 				}
 				case messageActionType.EDIT: {

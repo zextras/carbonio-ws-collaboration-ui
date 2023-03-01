@@ -29,10 +29,10 @@ export function onInboxMessageStanza(this: IXMPPClient, message: Element): true 
 		store.newInboxMessage(inboxMessage);
 		store.addUnreadCount(inboxMessage.roomId, parseInt(unreadMessagesOfSingleConversation, 10));
 
-		// Request replied message information
-		const repliedId = (inboxMessage as TextMessage).replyTo;
-		if (repliedId) {
-			this.requestRepliedMessage(inboxMessage.roomId, inboxMessage.id, repliedId);
+		// Request reference message info inside a replied message
+		const referenceId = (inboxMessage as TextMessage).replyTo;
+		if (referenceId) {
+			this.requestMessageInsideAReply(inboxMessage.roomId, referenceId, inboxMessage.id);
 		}
 
 		// Ask smart markers to update Check icon

@@ -149,9 +149,9 @@ export function decodeMessage(messageStanza: Element, optional?: OptionalParamet
 
 		// Message is a reply to another message
 		let replyTo;
-		const threadElement = getTagElement(messageStanza, 'thread');
-		if (threadElement != null) {
-			replyTo = Strophe.getText(threadElement);
+		const replyElement = getTagElement(messageStanza, 'reply');
+		if (replyElement != null) {
+			replyTo = getRequiredAttribute(replyElement, 'id');
 		}
 
 		// Message is a forwarded message from another conversation

@@ -57,7 +57,7 @@ const createXMPPReceivedMessage = (info: MessageInfo): Element => {
 					`
 						<body>${info.text}</body>
 						<markable xmlns="urn:xmpp:chat-markers:0"></markable>
-						${info.replyTo && `<thread>${info.replyTo}</thread>`}
+						${info.replyTo && `<reply to='userId' id='${info.replyTo}' xmlns='urn:xmpp:reply:0' />`}
 					`
 				}
 				${
