@@ -267,6 +267,10 @@ class XMPPClient implements IXMPPClient {
 		this.connection.send(msg);
 	}
 
+	/**
+	 * Forward a message (XEP-0297)
+	 * Documentation: https://xmpp.org/extensions/xep-0297.html
+	 */
 	forwardMessage(message: TextMessage, roomIds: string[]): void {
 		const isMyMessage = message.from === useStore.getState().session.id;
 		if (isMyMessage) {
@@ -303,7 +307,7 @@ class XMPPClient implements IXMPPClient {
 	requestHistory(roomId: string, endHistory: number, quantity = 5): void {
 		const clearedAt = useStore.getState().rooms[roomId].userSettings?.clearedAt;
 		const startHistory = clearedAt || useStore.getState().rooms[roomId].createdAt;
-
+		console.log('History conversation request triggered');
 		// Ask for ${QUANTITY} messages before end date but not before start date
 		const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
 			.c('query', { xmlns: Strophe.NS.MAM, queryid: MamRequestType.HISTORY })

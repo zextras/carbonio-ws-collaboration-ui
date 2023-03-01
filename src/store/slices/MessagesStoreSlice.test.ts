@@ -171,6 +171,7 @@ describe('Test messages slice', () => {
 		const { result } = renderHook(() => useStore());
 		act(() => result.current.addRoom(room3));
 		// Add first message
+		act(() => result.current.setHistoryIsFullyLoaded(room.id));
 		act(() => result.current.updateHistory(room.id, [message0, message1]));
 		expect(result.current.messages[message0.roomId]).toHaveLength(5);
 
