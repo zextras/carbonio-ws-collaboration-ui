@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Container } from '@zextras/carbonio-design-system';
+import { Container, Text } from '@zextras/carbonio-design-system';
 import React, { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import { getSingleMessageSelector } from '../../../store/selectors/MessagesSelectors';
@@ -23,6 +24,7 @@ type MessageProps = {
 	prevMessageIsFromSameSender: boolean;
 	nextMessageIsFromSameSender: boolean;
 	messageRef: React.RefObject<HTMLElement>;
+	isFirstNewMessage: boolean;
 };
 
 export const CustomMessage = styled(Container)`
@@ -49,20 +51,36 @@ const MessageFactory = ({
 	messageRoomId,
 	prevMessageIsFromSameSender,
 	nextMessageIsFromSameSender,
-	messageRef
+	messageRef,
+	isFirstNewMessage
 }: MessageProps): ReactElement => {
+	const [t] = useTranslation();
+	const newMessagesLabel = t('conversation.newMessages', 'New messages');
+
 	const message = useStore((store) => getSingleMessageSelector(store, messageRoomId, messageId));
 
 	if (message) {
 		switch (message.type) {
 			case MessageType.TEXT_MSG: {
 				return (
-					<Bubble
-						message={message}
-						prevMessageIsFromSameSender={prevMessageIsFromSameSender}
-						nextMessageIsFromSameSender={nextMessageIsFromSameSender}
-						messageRef={messageRef}
-					/>
+					<>
+						{isFirstNewMessage && (
+							<CustomMessage
+								mainAlignment={'flex-start'}
+								crossAlignment={'flex-start'}
+								borderColor="gray3"
+								data-testid={`new_msg-${message.id}`}
+							>
+								<Text color="gray1">{newMessagesLabel}</Text>
+							</CustomMessage>
+						)}
+						<Bubble
+							message={message}
+							prevMessageIsFromSameSender={prevMessageIsFromSameSender}
+							nextMessageIsFromSameSender={nextMessageIsFromSameSender}
+							messageRef={messageRef}
+						/>
+					</>
 				);
 			}
 			case MessageType.DELETED_MSG: {
