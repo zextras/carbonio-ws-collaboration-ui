@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { debounce, find, forEach } from 'lodash';
+import { chunk, debounce, find, forEach, join, map } from 'lodash';
 
-import useStore from '../../store/Store';
+// import useStore from '../../store/Store';
 import { RequestType } from '../../types/network/apis/IBaseAPI';
 import IUsersApi from '../../types/network/apis/IUsersApi';
 import {
@@ -29,10 +29,12 @@ class UsersApi extends BaseAPI implements IUsersApi {
 		return UsersApi.instance;
 	}
 
-	public getUser(userId: string): Promise<GetUserResponse> {
-		const { setUserInfo } = useStore.getState();
-		return this.fetchAPI(`users/${userId}`, RequestType.GET).then((resp: GetUserResponse) => {
-			setUserInfo(resp);
+	public getUser(userIds: string[]): Promise<GetUserResponse> {
+		// const { setUserInfo } = useStore.getState();
+		const ids = map(userIds, (id) => `userIds=${id}`);
+		return this.fetchAPI(`?${join(ids, '&')}`, RequestType.GET).then((resp: GetUserResponse) => {
+			// setUserInfo(resp);
+			console.log(resp);
 			return resp;
 		});
 	}
@@ -66,7 +68,10 @@ class UsersApi extends BaseAPI implements IUsersApi {
 	public getDebouncedUser(userId: string): void {
 		if (!find(this.unknownUsers, (id) => id === userId)) this.unknownUsers.push(userId);
 		debounce(() => {
-			forEach(this.unknownUsers, (id) => this.getUser(id));
+			const arrayChunk = chunk(this.unknownUsers, 10);
+			forEach(arrayChunk, (ids) => {
+				this.getUser(ids);
+			});
 			this.unknownUsers = [];
 		}, 1000)();
 	}

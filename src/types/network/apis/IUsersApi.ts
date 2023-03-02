@@ -12,7 +12,7 @@ import {
 } from '../responses/usersResponses';
 
 interface IUsersApi {
-	getUser(userId: string): Promise<GetUserResponse>;
+	getUser(userId: string[]): Promise<GetUserResponse>;
 	getURLUserPicture(userId: string): string;
 	getUserPicture(userId: string): Promise<GetUserPictureResponse>;
 	changeUserPicture(userId: string, file: File): Promise<ChangeUserPictureResponse>;
