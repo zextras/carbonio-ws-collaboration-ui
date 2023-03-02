@@ -33,10 +33,10 @@ interface IXMMPClient {
 		olderMessageId: string,
 		newerMessageId: string
 	): void;
-	requestMessageInsideAReply(
+	requestMessageSubjectOfReply(
 		roomId: string,
-		messageToRequest: string,
-		messageWithResponse: string
+		messageSubjectOfReplyId: string,
+		replyMessageId: string
 	): void;
 	// Chat state
 	sendIsWriting(roomId: string): void;

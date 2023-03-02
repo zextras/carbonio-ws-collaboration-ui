@@ -107,11 +107,11 @@ export function onRequestHistory(this: XMPPClient, stanza: Element): void {
 	// Set history loadable again
 	store.setHistoryLoadDisabled(roomId, false);
 
-	// Request reference message info inside a replied message
+	// Request message subject of reply
 	forEach(historyMessages, (message) => {
-		const referenceId = (message as TextMessage).replyTo;
-		if (referenceId) {
-			this.requestMessageInsideAReply(message.roomId, referenceId, message.id);
+		const messageSubjectOfReplyId = (message as TextMessage).replyTo;
+		if (messageSubjectOfReplyId) {
+			this.requestMessageSubjectOfReply(message.roomId, messageSubjectOfReplyId, message.id);
 		}
 	});
 

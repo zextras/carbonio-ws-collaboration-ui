@@ -230,20 +230,20 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 	},
 	setRepliedMessage: (
 		roomId: string,
-		messageWithResponseId: string, // id of message which contains the replyMessage and replyTo fields
-		referenceMessage: TextMessage // message not in history which will be placed as replyMessage if not edited/deleted
+		replyMessageId: string, // id of message which contains the replyMessage and replyTo fields
+		messageSubjectOfReply: TextMessage // message not in history which will be placed as replyMessage if not edited/deleted
 	): void => {
 		set(
 			produce((draft: RootStore) => {
 				// Message to add the replyMessage prop
 				const messageWithAResponse = find(
 					draft.messages[roomId],
-					(message) => message.id === messageWithResponseId
+					(message) => message.id === replyMessageId
 				);
 				if (messageWithAResponse && messageWithAResponse.type === MessageType.TEXT_MSG) {
 					const referenceMessageOnHistory = find(
 						draft.messages[roomId],
-						(message) => message.id === referenceMessage.id
+						(message) => message.id === messageSubjectOfReply.id
 					);
 					// Check if message reference is already loaded on local history.
 					// If it is, we can use it for the reference because it is already processed for edit / delete
@@ -256,23 +256,23 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 						const temporaryMessages = draft.temporaryMessages[roomId];
 						if (temporaryMessages) {
 							const editInformation = temporaryMessages[
-								`edited_${referenceMessage.id}`
+								`edited_${messageSubjectOfReply.id}`
 							] as TextMessage;
 							if (editInformation) {
-								referenceMessage.text = editInformation.text;
+								messageSubjectOfReply.text = editInformation.text;
 							}
-							const deleteInformation = temporaryMessages[`delete_${referenceMessage.id}`];
+							const deleteInformation = temporaryMessages[`delete_${messageSubjectOfReply.id}`];
 							if (deleteInformation) {
 								messageWithAResponse.repliedMessage = {
-									id: referenceMessage.id,
-									roomId: referenceMessage.roomId,
-									date: referenceMessage.date,
-									from: referenceMessage.from,
+									id: messageSubjectOfReply.id,
+									roomId: messageSubjectOfReply.roomId,
+									date: messageSubjectOfReply.date,
+									from: messageSubjectOfReply.from,
 									type: MessageType.DELETED_MSG
 								};
 							}
 						} else {
-							messageWithAResponse.repliedMessage = referenceMessage;
+							messageWithAResponse.repliedMessage = messageSubjectOfReply;
 						}
 					}
 				}

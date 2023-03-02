@@ -240,7 +240,7 @@ class XMPPClient implements IXMPPClient {
 
 	/**
 	 * Delete a message / Message Retraction (XEP-0424)
-	 * Documentation: https://xmpp.org/extensions/xep-0424.html#schema
+	 * Documentation: https://xmpp.org/extensions/xep-0424.html
 	 */
 	sendChatMessageDeletion(roomId: string, messageId: string): void {
 		const uuid = uuidGenerator();
@@ -303,6 +303,12 @@ class XMPPClient implements IXMPPClient {
 		}
 	}
 
+	// Request the full history of a room
+	requestFullHistory(roomId: string): void {
+		const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) }).c('query', { xmlns: Strophe.NS.MAM });
+		this.connection.sendIQ(iq, onRequestHistory.bind(this), onErrorStanza);
+	}
+
 	// Request n messages before end date but not before start date
 	requestHistory(roomId: string, endHistory: number, quantity = 5): void {
 		const clearedAt = useStore.getState().rooms[roomId].userSettings?.clearedAt;
@@ -355,26 +361,25 @@ class XMPPClient implements IXMPPClient {
 		this.connection.sendIQ(iq, onRequestHistory.bind(this), onErrorStanza);
 	}
 
-	requestMessageInsideAReply(
+	requestMessageSubjectOfReply(
 		roomId: string,
-		referenceMessage: string,
-		messageWithResponseId: string
+		messageSubjectOfReplyId: string,
+		replyMessageId: string
 	): void {
-		console.log('Request info of:', referenceMessage);
 		const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
 			.c('query', { xmlns: Strophe.NS.MAM, queryid: MamRequestType.REPLIED })
 			.c('x', { xmlns: 'jabber:x:data' })
 			.c('field', { var: 'from_id' })
 			.c('value')
-			.t(referenceMessage)
+			.t(messageSubjectOfReplyId)
 			.up()
 			.up()
 			.c('field', { var: 'to_id' })
 			.c('value')
-			.t(referenceMessage);
+			.t(messageSubjectOfReplyId);
 		this.connection.sendIQ(
 			iq,
-			(stanza) => onRequestSingleMessage(messageWithResponseId, stanza),
+			(stanza) => onRequestSingleMessage(replyMessageId, stanza),
 			onErrorStanza
 		);
 	}
