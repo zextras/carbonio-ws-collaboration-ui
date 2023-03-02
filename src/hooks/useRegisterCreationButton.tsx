@@ -26,7 +26,7 @@ const useRegisterCreationButton = (): ReactElement => {
 				type: ACTION_TYPES.NEW,
 				label: t('action.newChat', 'New Chat'),
 				icon: 'MessageSquareOutline',
-				click: () => setNewChatModal(true),
+				onClick: () => setNewChatModal(true),
 				group: CHATS_APP_ID,
 				primary: true,
 				disabled: false
