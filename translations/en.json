@@ -18,6 +18,7 @@
         "leave": "Leave",
         "muteNotifications": "Mute Notifications",
         "newChat": "New Chat",
+        "preview": "Preview",
         "removeUser": "Remove",
         "reply": "Reply",
         "replyToSomeone": "Reply to",
@@ -123,6 +124,16 @@
         "noMatch": "There are no items that match this search",
         "oneParticipantAccordionTitle": "One Participant",
         "searchUser": "Search Participants"
+    },
+    "preview": {
+        "actions": {
+            "tooltip": {
+                "download": "Download"
+            }
+        },
+        "close": {
+            "tooltip": "Close"
+        }
     },
     "settings": {
         "notifications": {

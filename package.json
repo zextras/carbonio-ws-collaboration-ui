@@ -71,6 +71,7 @@
 		"@testing-library/react-hooks": "^8.0.1",
 		"@zextras/carbonio-design-system": "1.1.0",
 		"@zextras/carbonio-shell-ui": "1.1.0",
+		"@zextras/carbonio-ui-preview": "^1.0.0",
 		"emoji-mart": "^5.1.0",
 		"i18next": "20.0.0",
 		"identity-obj-proxy": "^3.0.0",
@@ -86,7 +87,7 @@
 		"react-router": "5.2.0",
 		"react-router-dom": "5.2.0",
 		"strophe.js": "1.4.4",
-		"styled-components": "5.3.3",
+		"styled-components": "5.3.6",
 		"uuid": "^9.0.0",
 		"zustand": "^3.7.2"
 	},

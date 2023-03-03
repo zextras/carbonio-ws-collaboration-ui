@@ -12,10 +12,19 @@ const previewExtensionSupported = {
 	jpeg: 'image/jpeg'
 };
 
+export const isPreviewSupported = (mimeType: string): boolean =>
+	Object.values(previewExtensionSupported).includes(mimeType);
+
 export const getPreviewURL = (attachmentId: string, mimeType: string): string | undefined => {
-	const isPreviewSupported = Object.values(previewExtensionSupported).includes(mimeType);
-	if (isPreviewSupported) {
+	if (isPreviewSupported(mimeType)) {
 		return AttachmentsApi.getURLPreview(attachmentId);
+	}
+	return undefined;
+};
+
+export const getAttachmentURL = (attachmentId: string, mimeType: string): string | undefined => {
+	if (isPreviewSupported(mimeType)) {
+		return AttachmentsApi.getURLAttachment(attachmentId);
 	}
 	return undefined;
 };
