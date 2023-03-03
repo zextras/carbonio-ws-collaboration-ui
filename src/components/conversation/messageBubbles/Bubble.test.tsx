@@ -8,6 +8,7 @@ import { screen } from '@testing-library/react';
 import React from 'react';
 import { setup } from 'test-utils';
 
+import { mockedGetURLPreview } from '../../../../jest-mocks';
 import useStore from '../../../store/Store';
 import { createMockRoom, createMockTextMessage } from '../../../tests/createMock';
 import { RoomBe } from '../../../types/network/models/roomBeTypes';
@@ -29,6 +30,16 @@ const mockedRepliedTextMessage = createMockTextMessage({
 	})
 });
 
+const mockedRepliedTextMessageWithAttachment = createMockTextMessage({
+	roomId: mockedRoom.id,
+	replyTo: 'insideId',
+	repliedMessage: createMockTextMessage({
+		id: 'insideId',
+		text: 'Hi!',
+		attachment: { id: 'pngAttachmentId', name: 'image.png', mimeType: 'image/png', size: 21412 }
+	})
+});
+
 describe('Message bubble component visualization', () => {
 	test('Display replied text message', () => {
 		const store: RootStore = useStore.getState();
@@ -47,5 +58,20 @@ describe('Message bubble component visualization', () => {
 			new RegExp(`${mockedRepliedTextMessage.repliedMessage?.text}`, 'i')
 		);
 		expect(insideText).toBeVisible();
+	});
+	test('Hover on image reply', async () => {
+		const store: RootStore = useStore.getState();
+		store.addRoom(mockedRoom);
+		mockedGetURLPreview.mockReturnValue('preview-url');
+		const { user } = setup(
+			<Bubble
+				message={mockedRepliedTextMessageWithAttachment}
+				prevMessageIsFromSameSender={false}
+				nextMessageIsFromSameSender={false}
+				messageRef={React.createRef<HTMLElement>()}
+			/>
+		);
+		await user.hover(screen.getByTestId('hover-container'));
+		expect(screen.getByTestId('icon: EyeOutline')).toBeInTheDocument();
 	});
 });

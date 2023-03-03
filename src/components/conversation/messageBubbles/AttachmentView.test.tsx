@@ -39,9 +39,24 @@ describe('Attachment view', () => {
 			mimeType: 'image/png',
 			size: 21412
 		};
+		mockedGetURLPreview.mockReturnValue('mocked-url');
 		setup(<AttachmentView attachment={imageAttachment} from={'from'} />);
 		const imageName = await screen.findByText(imageAttachment.name);
 		expect(imageName).toBeVisible();
+	});
+
+	test('Hover on Image visualization', async () => {
+		const imageAttachment: AttachmentMessageType = {
+			id: 'pngAttachmentId',
+			name: 'image.png',
+			mimeType: 'image/png',
+			size: 21412
+		};
+		mockedGetURLPreview.mockReturnValue('mocked-url');
+		const { user } = setup(<AttachmentView attachment={imageAttachment} from={'from'} />);
+		await user.hover(screen.getByTestId('preview-container'));
+		expect(screen.getByTestId('icon: EyeOutline')).toBeInTheDocument();
+		expect(screen.getByTestId('icon: DownloadOutline')).toBeInTheDocument();
 	});
 
 	test('Image visualization with error on preview', async () => {

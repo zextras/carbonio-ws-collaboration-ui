@@ -187,7 +187,13 @@ const AttachmentView: FC<AttachmentViewProps> = ({ attachment, from, isMyMessage
 		return (
 			// hover sul previewContainer, appare l'hover container che è semi trasparente
 			// deve esserci l'immagine naturalmente
-			<PreviewContainer width={'fit'} height={'fit'} borderRadius="half" isLoaded={isPreviewLoaded}>
+			<PreviewContainer
+				width={'fit'}
+				height={'fit'}
+				borderRadius="half"
+				isLoaded={isPreviewLoaded}
+				data-testid="preview-container"
+			>
 				{!isPreviewLoaded && <Shimmer.Logo size="large" />}
 				{previewError ? (
 					<Container background="gray5" width="18.75rem" height="9.375rem" maxWidth="100%">

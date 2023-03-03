@@ -128,6 +128,8 @@ describe('Bubble Contextual Menu - other user messages', () => {
 		expect(deleteAction).not.toBeInTheDocument();
 		const downloadAction = screen.queryByText(/Download/i);
 		expect(downloadAction).toBeInTheDocument();
+		const previewAction = screen.queryByText(/Preview/i);
+		expect(previewAction).toBeInTheDocument();
 	});
 });
 
@@ -245,5 +247,7 @@ describe('Bubble Contextual Menu - my messages', () => {
 		expect(deleteAction).not.toBeInTheDocument();
 		const downloadAction = screen.queryByText(/Download/i);
 		expect(downloadAction).toBeInTheDocument();
+		const previewAction = screen.queryByText(/Preview/i);
+		expect(previewAction).toBeInTheDocument();
 	});
 });

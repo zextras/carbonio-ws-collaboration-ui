@@ -198,7 +198,7 @@ const RepliedTextMessageSectionView: FC<RepliedTextMessageSectionViewProps> = ({
 				onClick={scrollTo}
 			>
 				{repliedMessage.type === MessageType.TEXT_MSG && repliedMessage.attachment && (
-					<CustomPadding right="small">
+					<CustomPadding right="small" data-testid="hover-container">
 						<HoverContainer
 							height="3rem"
 							width="3rem"
