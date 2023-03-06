@@ -190,8 +190,9 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 
 				// the second message has to be a creation one if the conversation is a group one
 				if (
+					draft.activeConversations[roomId] &&
+					draft.activeConversations[roomId].isHistoryFullyLoaded &&
 					draft.rooms[roomId].type === RoomType.GROUP &&
-					messageArray.length < 50 &&
 					draft.rooms[roomId].userSettings?.clearedAt === undefined
 				) {
 					const creationMsg: AffiliationMessage = {
