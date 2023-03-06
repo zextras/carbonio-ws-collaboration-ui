@@ -5,7 +5,7 @@
  */
 
 import { Container, Text } from '@zextras/carbonio-design-system';
-import React, { ReactElement } from 'react';
+import React, { ReactElement, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -59,21 +59,26 @@ const MessageFactory = ({
 
 	const message = useStore((store) => getSingleMessageSelector(store, messageRoomId, messageId));
 
+	const newMessagesComponent = useMemo(
+		() => (
+			<CustomMessage
+				mainAlignment={'flex-start'}
+				crossAlignment={'flex-start'}
+				borderColor="gray3"
+				data-testid={`new_msg`}
+			>
+				<Text color="gray1">{newMessagesLabel}</Text>
+			</CustomMessage>
+		),
+		[newMessagesLabel]
+	);
+
 	if (message) {
 		switch (message.type) {
 			case MessageType.TEXT_MSG: {
 				return (
 					<>
-						{isFirstNewMessage && (
-							<CustomMessage
-								mainAlignment={'flex-start'}
-								crossAlignment={'flex-start'}
-								borderColor="gray3"
-								data-testid={`new_msg-${message.id}`}
-							>
-								<Text color="gray1">{newMessagesLabel}</Text>
-							</CustomMessage>
-						)}
+						{isFirstNewMessage && newMessagesComponent}
 						<Bubble
 							message={message}
 							prevMessageIsFromSameSender={prevMessageIsFromSameSender}
@@ -84,7 +89,12 @@ const MessageFactory = ({
 				);
 			}
 			case MessageType.DELETED_MSG: {
-				return <DeletedBubble message={message} refEl={messageRef} />;
+				return (
+					<>
+						{isFirstNewMessage && newMessagesComponent}{' '}
+						<DeletedBubble message={message} refEl={messageRef} />
+					</>
+				);
 			}
 			case MessageType.AFFILIATION_MSG: {
 				return <AffiliationBubble message={message} refEl={messageRef} />;

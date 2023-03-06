@@ -38,7 +38,9 @@ const useFirstUnreadMessage = (roomId: string): string | undefined => {
 					const unreadMessages = slice(messages, lastMessageReadByMe + 1);
 					const othersMessages = filter(
 						unreadMessages,
-						(message) => message.type === MessageType.TEXT_MSG && message.from !== mySessionId
+						(message) =>
+							(message.type === MessageType.TEXT_MSG || message.type === MessageType.DELETED_MSG) &&
+							message.from !== mySessionId
 					);
 					// The fist of them is the fist unread text message
 					if (size(othersMessages) > 0) {
