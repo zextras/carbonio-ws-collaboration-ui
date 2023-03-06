@@ -9,6 +9,7 @@ import {
 	Container,
 	IconButton,
 	Padding,
+	Row,
 	Text,
 	Tooltip
 } from '@zextras/carbonio-design-system';
@@ -198,48 +199,52 @@ const RepliedTextMessageSectionView: FC<RepliedTextMessageSectionViewProps> = ({
 				onClick={scrollTo}
 			>
 				{repliedMessage.type === MessageType.TEXT_MSG && repliedMessage.attachment && (
-					<CustomPadding right="small" data-testid="hover-container">
-						<HoverContainer
-							height="3rem"
-							width="3rem"
-							mainAlignment="center"
-							crossAlignment="center"
-						>
-							<Tooltip label={previewActionLabel}>
-								<CustomIconButton
-									icon="EyeOutline"
-									iconColor="gray6"
-									customSize={{ iconSize: 'large', paddingSize: 'extrasmall' }}
-									onClick={onPreviewClick}
-								/>
-							</Tooltip>
-						</HoverContainer>
-						<CustomAvatar
-							size="large"
-							icon="FileTextOutline"
-							label={repliedMessage.attachment.name}
-							shape="square"
-							background={previewURL ? 'gray3' : 'gray0'}
-							picture={previewURL}
-						/>
-					</CustomPadding>
+					<Row wrap="nowrap">
+						<CustomPadding right="small" data-testid="hover-container">
+							<HoverContainer
+								height="3rem"
+								width="3rem"
+								mainAlignment="center"
+								crossAlignment="center"
+							>
+								<Tooltip label={previewActionLabel}>
+									<CustomIconButton
+										icon="EyeOutline"
+										iconColor="gray6"
+										customSize={{ iconSize: 'large', paddingSize: 'extrasmall' }}
+										onClick={onPreviewClick}
+									/>
+								</Tooltip>
+							</HoverContainer>
+							<CustomAvatar
+								size="large"
+								icon="FileTextOutline"
+								label={repliedMessage.attachment.name}
+								shape="square"
+								background={previewURL ? 'gray3' : 'gray0'}
+								picture={previewURL}
+							/>
+						</CustomPadding>
+					</Row>
 				)}
-				<Container crossAlignment="flex-start">
-					{senderIdentifier && <BubbleHeader senderId={repliedMessage.from} />}
-					{repliedMessage && repliedMessage.type === MessageType.TEXT_MSG && (
-						<MessageWrap color="secondary" overflow="ellipsis" size="small">
-							{textToShow}
-						</MessageWrap>
-					)}
-					{repliedMessage && repliedMessage.type === MessageType.DELETED_MSG && (
-						<DeletedMessageWrap color="secondary" overflow="ellipsis" size="small">
-							{deletedMessageLabel}
-						</DeletedMessageWrap>
-					)}
-					{repliedMessage && repliedMessage.type !== MessageType.DELETED_MSG && (
-						<BubbleFooter date={repliedMessage.date} isEdited={repliedMessage.edited} />
-					)}
-				</Container>
+				<Row takeAvailableSpace wrap="nowrap">
+					<Container crossAlignment="flex-start">
+						{senderIdentifier && <BubbleHeader senderId={repliedMessage.from} />}
+						{repliedMessage && repliedMessage.type === MessageType.TEXT_MSG && (
+							<MessageWrap color="secondary" overflow="ellipsis" size="small">
+								{textToShow}
+							</MessageWrap>
+						)}
+						{repliedMessage && repliedMessage.type === MessageType.DELETED_MSG && (
+							<DeletedMessageWrap color="secondary" overflow="ellipsis" size="small">
+								{deletedMessageLabel}
+							</DeletedMessageWrap>
+						)}
+						{repliedMessage && repliedMessage.type !== MessageType.DELETED_MSG && (
+							<BubbleFooter date={repliedMessage.date} isEdited={repliedMessage.edited} />
+						)}
+					</Container>
+				</Row>
 			</RepliedTextMessageContainer>
 			<Padding top="small" />
 		</>

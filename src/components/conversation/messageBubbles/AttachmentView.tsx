@@ -185,8 +185,6 @@ const AttachmentView: FC<AttachmentViewProps> = ({ attachment, from, isMyMessage
 	// Previewer service can be used for generate a preview for this file
 	if (previewURL) {
 		return (
-			// hover sul previewContainer, appare l'hover container che è semi trasparente
-			// deve esserci l'immagine naturalmente
 			<PreviewContainer
 				width={'fit'}
 				height={'fit'}

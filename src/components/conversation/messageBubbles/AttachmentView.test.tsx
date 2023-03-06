@@ -32,7 +32,7 @@ describe('Attachment view', () => {
 		expect(mockedGetURLAttachment).toHaveBeenCalled();
 	});
 
-	test('Image visualization with preview', async () => {
+	test('attachment visualization with preview', async () => {
 		const imageAttachment: AttachmentMessageType = {
 			id: 'pngAttachmentId',
 			name: 'image.png',
@@ -45,7 +45,7 @@ describe('Attachment view', () => {
 		expect(imageName).toBeVisible();
 	});
 
-	test('Hover on Image visualization', async () => {
+	test('Hover on attachment visualization', async () => {
 		const imageAttachment: AttachmentMessageType = {
 			id: 'pngAttachmentId',
 			name: 'image.png',
