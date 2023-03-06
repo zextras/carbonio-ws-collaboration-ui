@@ -223,13 +223,15 @@ const AttachmentView: FC<AttachmentViewProps> = ({ attachment, from, isMyMessage
 			onClick={download}
 		>
 			<Row>
-				<CustomAvatar
-					size="large"
-					icon="FileTextOutline"
-					label={attachment.name}
-					shape="square"
-					background="gray0"
-				/>
+				<Tooltip label={downloadActionLabel}>
+					<CustomAvatar
+						size="large"
+						icon="FileTextOutline"
+						label={attachment.name}
+						shape="square"
+						background="gray0"
+					/>
+				</Tooltip>
 			</Row>
 			<Row takeAvailableSpace wrap="nowrap" height="100%">
 				<Container padding={{ all: 'small' }} wrap="wrap">
