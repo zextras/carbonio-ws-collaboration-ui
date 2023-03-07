@@ -126,8 +126,6 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 		if (timeoutRef.current) clearTimeout(timeoutRef.current);
 		setIsWriting(false);
 		xmppClient.sendPaused(roomId);
-		const listOfMessages = document.getElementById(`messageListRef${roomId}`);
-		listOfMessages?.scrollTo({ top: listOfMessages.scrollHeight, behavior: 'auto' });
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [xmppClient, roomId, textMessage, timeoutRef, referenceMessage, messageReference]);
 
@@ -143,10 +141,8 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 		(e: KeyboardEvent) => {
 			if (!sendDisabled) {
 				if (e.key === 'Enter' && !e.shiftKey) {
-					if (showEmojiPicker) setShowEmojiPicker(false);
 					sendMessage();
-				}
-				if (!isWriting) {
+				} else if (!isWriting) {
 					if (timeoutRef.current) clearTimeout(timeoutRef.current);
 					timeoutRef.current = setTimeout(() => {
 						setIsWriting(false);
@@ -156,7 +152,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 				}
 			}
 		},
-		[sendDisabled, isWriting, showEmojiPicker, sendMessage, xmppClient, roomId]
+		[sendDisabled, isWriting, sendMessage, xmppClient, roomId]
 	);
 
 	const insertEmojiInMessage = useCallback(
