@@ -176,12 +176,12 @@ const RepliedTextMessageSectionView: FC<RepliedTextMessageSectionViewProps> = ({
 				<Container crossAlignment="flex-start">
 					{senderIdentifier && <BubbleHeader senderId={repliedMessage.from} />}
 					{repliedMessage && repliedMessage.type === MessageType.TEXT_MSG && (
-						<MessageWrap color="secondary" overflow="ellipsis" size="small">
+						<MessageWrap color="secondary" overflow="ellipsis" size="medium">
 							{textToShow}
 						</MessageWrap>
 					)}
 					{repliedMessage && repliedMessage.type === MessageType.DELETED_MSG && (
-						<DeletedMessageWrap color="secondary" overflow="ellipsis" size="small">
+						<DeletedMessageWrap color="secondary" overflow="ellipsis" size="medium">
 							{deletedMessageLabel}
 						</DeletedMessageWrap>
 					)}

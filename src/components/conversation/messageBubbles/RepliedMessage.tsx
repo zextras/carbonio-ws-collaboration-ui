@@ -52,13 +52,13 @@ const RepliedMessage: FunctionComponent<RepliedMessageProps> = ({ roomId, replyT
 		<RepliedMessageContainer crossAlignment="flex-start">
 			{repliedMessage ? (
 				<>
-					<Text size={'small'} color={'gray1'}>
+					<Text size={'medium'} color={'gray1'}>
 						{users[repliedMessage.from]?.name}
 					</Text>
 					{repliedMessage.text}
 				</>
 			) : (
-				<Text size={'small'} color={'gray1'}>
+				<Text size={'medium'} color={'gray1'}>
 					{' '}
 					Message not found
 				</Text>

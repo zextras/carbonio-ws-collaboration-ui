@@ -232,9 +232,7 @@ const ChatCreationContactsSelection = ({
 				)}
 			</Container>
 			<Padding bottom="large" />
-			<Text size="small" color="gray1">
-				{isCreationModal && listTextLabel}
-			</Text>
+			<Text color="gray1">{isCreationModal && listTextLabel}</Text>
 		</>
 	);
 };

@@ -69,7 +69,7 @@ const BubbleFooter: FC<BubbleFooterProps> = ({
 		>
 			<Container width="fit" padding={{ right: 'medium' }}>
 				{messageExtension && messageSize && (
-					<Text color="secondary" size="small">
+					<Text color="secondary" size="medium">
 						{messageExtension} • {messageSize}
 					</Text>
 				)}
@@ -96,7 +96,7 @@ const BubbleFooter: FC<BubbleFooterProps> = ({
 						</Padding>
 					</Tooltip>
 				)}
-				<Text color="secondary" size="extrasmall">
+				<Text color="secondary" size="small">
 					{dateAndTime && `${messageDate} • `} {messageTime}
 				</Text>
 			</Container>

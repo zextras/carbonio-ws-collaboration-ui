@@ -58,7 +58,7 @@ const WritingBubble: FC<WritingBubbleProps> = ({ writingListNames }) => {
 			padding={{ all: 'medium' }}
 			background={'gray6'}
 		>
-			<CustomText color="secondary" size="small">
+			<CustomText color="secondary" size="medium">
 				{writingUsersLabel}
 			</CustomText>
 		</BubbleWritingContainer>

@@ -38,7 +38,7 @@ type TextContentBubbleProps = {
 const TextContentBubble: FC<TextContentBubbleProps> = ({ textContent }) => (
 	<MessageText color="secondary" size="small" crossAlignment="flex-start">
 		<MessageContent>
-			<Text size="small" overflow="break-word">
+			<Text size="medium" overflow="break-word">
 				{textContent}
 			</Text>
 		</MessageContent>
