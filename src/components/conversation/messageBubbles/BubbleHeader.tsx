@@ -27,7 +27,7 @@ const BubbleHeader: FC<BubbleHeaderProps> = ({ senderId }) => {
 
 	return (
 		<Container crossAlignment="flex-start">
-			<SenderText userColor={userColor} weight="bold" size="medium">
+			<SenderText userColor={userColor} weight="bold">
 				{senderName}
 			</SenderText>
 		</Container>

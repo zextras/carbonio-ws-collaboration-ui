@@ -69,7 +69,7 @@ const BubbleFooter: FC<BubbleFooterProps> = ({
 		>
 			<Container width="fit" padding={{ right: 'medium' }}>
 				{messageExtension && messageSize && (
-					<Text color="secondary" size="medium">
+					<Text color="secondary">
 						{messageExtension} • {messageSize}
 					</Text>
 				)}

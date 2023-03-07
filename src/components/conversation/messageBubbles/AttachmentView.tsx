@@ -94,11 +94,7 @@ const AttachmentView: FC<AttachmentViewProps> = ({ attachment, from, isMyMessage
 				mainAlignment="flex-end"
 				crossAlignment="flex-start"
 			>
-				<Text
-					size="medium"
-					color={isPreviewLoaded && !previewError ? 'gray6' : 'gray1'}
-					overflow="break-word"
-				>
+				<Text color={isPreviewLoaded && !previewError ? 'gray6' : 'gray1'} overflow="break-word">
 					{attachment.name}
 				</Text>
 			</TextContainer>
@@ -148,9 +144,7 @@ const AttachmentView: FC<AttachmentViewProps> = ({ attachment, from, isMyMessage
 			</Row>
 			<Row takeAvailableSpace wrap="nowrap" height="100%">
 				<Container padding={{ all: 'small' }} wrap="wrap">
-					<Text size="medium" color="secondary">
-						{attachment.name}
-					</Text>
+					<Text color="secondary">{attachment.name}</Text>
 				</Container>
 			</Row>
 		</FileContainer>
