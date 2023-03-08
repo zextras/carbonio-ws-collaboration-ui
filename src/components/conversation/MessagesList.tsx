@@ -30,7 +30,7 @@ import {
 import { getXmppClient } from '../../store/selectors/ConnectionSelector';
 import { getMyLastMarkerOfConversation } from '../../store/selectors/MarkersSelectors';
 import { getMessagesSelector } from '../../store/selectors/MessagesSelectors';
-import { getPrefTimezoneSelector } from '../../store/selectors/SessionSelectors';
+import { getPrefTimezoneSelector, getUserId } from '../../store/selectors/SessionSelectors';
 import useStore from '../../store/Store';
 import { Message, MessageType, TextMessage } from '../../types/store/MessageTypes';
 import { isBefore, now } from '../../utils/dateUtil';
@@ -71,7 +71,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 	);
 	const setHistoryLoadDisabled = useStore((store) => store.setHistoryLoadDisabled);
 	const setInputHasFocus = useStore((store) => store.setInputHasFocus);
-	const mySessionId = useStore((store) => store.session.id);
+	const myUserId = useStore(getUserId);
 	const myLastMarker = useStore((store) => getMyLastMarkerOfConversation(store, roomId));
 	const timezone = useStore(getPrefTimezoneSelector);
 
@@ -104,14 +104,14 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 			if (
 				message &&
 				message.type === MessageType.TEXT_MSG &&
-				message.from !== mySessionId &&
+				message.from !== myUserId &&
 				markMessageAsRead &&
 				inputHasFocus
 			) {
 				xmppClient.readMessage(message.roomId, message.id);
 			}
 		},
-		[roomMessages, myLastMarker, inputHasFocus, mySessionId, xmppClient]
+		[roomMessages, myLastMarker, inputHasFocus, myUserId, xmppClient]
 	);
 
 	// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -258,7 +258,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 			const lastMessage = roomMessages[roomMessages.length - 1];
 			if (
 				lastMessage.type === MessageType.TEXT_MSG &&
-				lastMessage.from !== mySessionId &&
+				lastMessage.from !== myUserId &&
 				(!myLastMarker || lastMessage.id !== myLastMarker?.messageId)
 			) {
 				xmppClient.readMessage(lastMessage.roomId, lastMessage.id);
@@ -270,7 +270,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 		actualScrollPosition,
 		inputHasFocus,
 		myLastMarker,
-		mySessionId,
+		myUserId,
 		xmppClient
 	]);
 
@@ -372,7 +372,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 			if (
 				actualScrollPosition === roomMessages[roomMessages.length - 1].id ||
 				(messageFromEvent.detail.type === MessageType.TEXT_MSG &&
-					messageFromEvent.detail.from === mySessionId)
+					messageFromEvent.detail.from === myUserId)
 			) {
 				setTimeout(() => {
 					MessagesListWrapperRef.current.scrollTo({
@@ -382,7 +382,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 				}, 200);
 			}
 		},
-		[actualScrollPosition, roomMessages, mySessionId]
+		[actualScrollPosition, roomMessages, myUserId]
 	);
 
 	useEventListener(EventName.NEW_MESSAGE, newMessageScrollToButtonHandler);

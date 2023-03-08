@@ -137,10 +137,11 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 		[roomId, textMessage, timeoutRef]
 	);
 
-	const handleKeyUp = useCallback(
+	const handleKeyDown = useCallback(
 		(e: KeyboardEvent) => {
 			if (!sendDisabled) {
 				if (e.key === 'Enter' && !e.shiftKey) {
+					e.preventDefault();
 					sendMessage();
 				} else if (!isWriting) {
 					if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -288,7 +289,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 					message={textMessage}
 					onInput={handleTypingMessage}
 					composerIsFull={noMoreCharsOnInputComposer}
-					handleKeyUpTextarea={handleKeyUp}
+					handleKeyDownTextarea={handleKeyDown}
 					handleOnBlur={handleOnBlur}
 					handleOnFocus={handleOnFocus}
 				/>
