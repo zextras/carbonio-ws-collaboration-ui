@@ -38,10 +38,14 @@ export function onInboxMessageStanza(this: IXMPPClient, message: Element): true 
 			this.requestHistory(inboxMessage.roomId, now(), 3);
 		}
 
-		// Request replied message information
-		const repliedId = (inboxMessage as TextMessage).replyTo;
-		if (repliedId) {
-			this.requestRepliedMessage(inboxMessage.roomId, inboxMessage.id, repliedId);
+		// Request message subject of reply
+		const messageSubjectOfReplyId = (inboxMessage as TextMessage).replyTo;
+		if (messageSubjectOfReplyId) {
+			this.requestMessageSubjectOfReply(
+				inboxMessage.roomId,
+				messageSubjectOfReplyId,
+				inboxMessage.id
+			);
 		}
 
 		// Ask smart markers to update Check icon

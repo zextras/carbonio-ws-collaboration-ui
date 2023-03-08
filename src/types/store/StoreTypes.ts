@@ -59,7 +59,11 @@ export type MessagesStoreSlice = {
 	newInboxMessage: (message: Message) => void;
 	updateHistory: (roomId: string, messageArray: Message[]) => void;
 	updateUnreadMessages: (roomId: string) => void;
-	setRepliedMessage: (roomId: string, replyMessageId: string, repliedMessage: TextMessage) => void;
+	setRepliedMessage: (
+		roomId: string,
+		replyMessageId: string,
+		messageSubjectOfReply: TextMessage
+	) => void;
 	setDeletedMessage: (roomId: string, deletedMessage: DeletedMessage) => void;
 	setEditedMessage: (roomId: string, editedMessage: TextMessage) => void;
 };

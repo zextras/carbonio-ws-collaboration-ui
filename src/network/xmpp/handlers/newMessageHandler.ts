@@ -50,10 +50,14 @@ export function onNewMessageStanza(this: IXMPPClient, message: Element): true {
 				store.incrementUnreadCount(newMessage.roomId);
 			}
 
-			// Request replied message information
-			const repliedId = (newMessage as TextMessage).replyTo;
-			if (repliedId) {
-				this.requestRepliedMessage(newMessage.roomId, newMessage.id, repliedId);
+			// Request message subject of reply
+			const messageSubjectOfReplyId = (newMessage as TextMessage).replyTo;
+			if (messageSubjectOfReplyId) {
+				this.requestMessageSubjectOfReply(
+					newMessage.roomId,
+					messageSubjectOfReplyId,
+					newMessage.id
+				);
 			}
 
 			// Display desktop notification

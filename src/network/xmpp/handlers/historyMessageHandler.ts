@@ -60,7 +60,7 @@ export function onHistoryMessageStanza(message: Element): true {
 			}
 			case MamRequestType.REPLIED: {
 				if (historyMessage.type === MessageType.TEXT_MSG) {
-					HistoryAccumulator.addRepliedMessage(historyMessage);
+					HistoryAccumulator.addReferenceForRepliedMessage(historyMessage);
 				} else {
 					console.warn('Replied message type not supported', historyMessage);
 				}
@@ -107,11 +107,11 @@ export function onRequestHistory(this: XMPPClient, stanza: Element): void {
 	// Set history loadable again
 	store.setHistoryLoadDisabled(roomId, false);
 
-	// Request replied message information
+	// Request message subject of reply
 	forEach(historyMessages, (message) => {
-		const repliedId = (message as TextMessage).replyTo;
-		if (repliedId) {
-			this.requestRepliedMessage(message.roomId, message.id, repliedId);
+		const messageSubjectOfReplyId = (message as TextMessage).replyTo;
+		if (messageSubjectOfReplyId) {
+			this.requestMessageSubjectOfReply(message.roomId, messageSubjectOfReplyId, message.id);
 		}
 	});
 
@@ -119,9 +119,9 @@ export function onRequestHistory(this: XMPPClient, stanza: Element): void {
 	this.lastMarkers(roomId);
 }
 
-export function onRequestSingleMessage(replyMessageId: string, stanza: Element): void {
-	const repliedMessageId = Strophe.getText(getRequiredTagElement(stanza, 'first'));
-	const repliedMessage = HistoryAccumulator.returnRepliedMessage(repliedMessageId);
+export function onRequestSingleMessage(messageWithResponseId: string, stanza: Element): void {
+	const referenceMessageId = Strophe.getText(getRequiredTagElement(stanza, 'first'));
+	const referenceMessage = HistoryAccumulator.returnReferenceForRepliedMessage(referenceMessageId);
 	const store: RootStore = useStore.getState();
-	store.setRepliedMessage(repliedMessage.roomId, replyMessageId, repliedMessage);
+	store.setRepliedMessage(referenceMessage.roomId, messageWithResponseId, referenceMessage);
 }

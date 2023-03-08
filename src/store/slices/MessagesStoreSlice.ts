@@ -6,7 +6,7 @@
  */
 
 import produce from 'immer';
-import { concat, find, findIndex, forEach, map, orderBy, sortedUniqBy } from 'lodash';
+import { concat, find, forEach, map, orderBy, sortedUniqBy } from 'lodash';
 import { now } from 'moment';
 
 import { UsersApi } from '../../network';
@@ -231,63 +231,48 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 	setRepliedMessage: (
 		roomId: string,
 		replyMessageId: string, // id of message which contains the replyMessage and replyTo fields
-		repliedMessage: TextMessage // message not in history which will be placed as replyMessage if not edited/deleted
+		messageSubjectOfReply: TextMessage // message not in history which will be placed as replyMessage if not edited/deleted
 	): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (draft.messages[roomId]) {
-					// retrieve the replyMessage from messagesList
-					const replyMessage = find(
+				// Message to add the replyMessage prop
+				const messageWithAResponse = find(
+					draft.messages[roomId],
+					(message) => message.id === replyMessageId
+				);
+				if (messageWithAResponse && messageWithAResponse.type === MessageType.TEXT_MSG) {
+					const referenceMessageOnHistory = find(
 						draft.messages[roomId],
-						(message) => message.id === replyMessageId
+						(message) => message.id === messageSubjectOfReply.id
 					);
-					// return a message that if it was edited or deleted is still present
-					// and return it as not edited or deleted, so we need to check if in the history we have this message and if it's edited/delete use them as
-					// reference for the reply view
-					if (replyMessage) {
-						const repliedMessageInHistory = find(
-							draft.messages[roomId],
-							(message) => message.id === repliedMessage.id
-						);
-						// check if message subject of reply is available in the history and
-						// if is deleted or edited and update the reply caption
-						if (repliedMessageInHistory) {
-							let messageToPlaceAsreplyedMessage: TextMessage | DeletedMessage = repliedMessage;
-							if (repliedMessageInHistory.type === MessageType.DELETED_MSG) {
-								messageToPlaceAsreplyedMessage = {
-									...repliedMessageInHistory,
+					// Check if message reference is already loaded on local history.
+					// If it is, we can use it for the reference because it is already processed for edit / delete
+					if (referenceMessageOnHistory) {
+						messageWithAResponse.repliedMessage = referenceMessageOnHistory as
+							| TextMessage
+							| DeletedMessage;
+					} else {
+						// Apply the delete/reply information if there are some temporary message
+						const temporaryMessages = draft.temporaryMessages[roomId];
+						if (temporaryMessages) {
+							const editInformation = temporaryMessages[
+								`edited_${messageSubjectOfReply.id}`
+							] as TextMessage;
+							if (editInformation) {
+								messageSubjectOfReply.text = editInformation.text;
+							}
+							const deleteInformation = temporaryMessages[`delete_${messageSubjectOfReply.id}`];
+							if (deleteInformation) {
+								messageWithAResponse.repliedMessage = {
+									id: messageSubjectOfReply.id,
+									roomId: messageSubjectOfReply.roomId,
+									date: messageSubjectOfReply.date,
+									from: messageSubjectOfReply.from,
 									type: MessageType.DELETED_MSG
 								};
-							} else if (
-								repliedMessageInHistory.type === MessageType.TEXT_MSG &&
-								repliedMessageInHistory.edited
-							) {
-								messageToPlaceAsreplyedMessage = repliedMessageInHistory;
 							}
-							if (replyMessage.type === MessageType.TEXT_MSG) {
-								replyMessage.repliedMessage = messageToPlaceAsreplyedMessage;
-							}
-							const index = findIndex(draft.messages[roomId], { id: replyMessageId });
-							draft.messages[roomId].splice(index, 1, replyMessage);
-						}
-						// replied message is not in the history because 50+ message behind so
-						// update the reply view with the info in the temporaryMessages
-						else if (
-							draft.temporaryMessages[roomId] &&
-							draft.temporaryMessages[roomId][`deleted_${repliedMessage.id}`]
-						) {
-							(replyMessage as TextMessage).repliedMessage =
-								draft.temporaryMessages[roomId][`deleted_${repliedMessage.id}`];
-							const index = findIndex(draft.messages[roomId], { id: replyMessageId });
-							draft.messages[roomId].splice(index, 1, replyMessage);
-						} else if (
-							draft.temporaryMessages[roomId] &&
-							draft.temporaryMessages[roomId][`edited_${repliedMessage.id}`]
-						) {
-							(replyMessage as TextMessage).repliedMessage =
-								draft.temporaryMessages[roomId][`edited_${repliedMessage.id}`];
-							const index = findIndex(draft.messages[roomId], { id: replyMessageId });
-							draft.messages[roomId].splice(index, 1, replyMessage);
+						} else {
+							messageWithAResponse.repliedMessage = messageSubjectOfReply;
 						}
 					}
 				}
