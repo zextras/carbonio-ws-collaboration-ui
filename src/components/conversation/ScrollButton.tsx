@@ -22,6 +22,7 @@ type ScrollButtonProps = {
 
 const CustomContainer = styled(Container)`
 	position: absolute;
+	z-index: 15;
 	right: 0.875rem;
 	bottom: 0.875rem;
 	cursor: pointer;
