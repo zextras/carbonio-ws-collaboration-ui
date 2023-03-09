@@ -192,6 +192,23 @@ describe('Chat Creation Modal Contact Selector', () => {
 		expect(list2).toBeVisible();
 		expect(list2.children).toHaveLength(0);
 	});
+
+	test('Search an user by name and surname', async () => {
+		mockedAutoCompleteGalRequest.mockReturnValueOnce([zimbraUser1, zimbraUser2]);
+
+		const { user } = setup(
+			<ChatCreationContactsSelection
+				isCreationModal
+				contactsSelected={{}}
+				setContactSelected={jest.fn()}
+			/>
+		);
+
+		// Type on ChipInput to trigger a new autoCompleteGalRequest
+		const chipInput = await screen.findByTestId('chip_input_creation_modal');
+		await user.type(chipInput, `${zimbraUser1.firstName} ${zimbraUser1.lastName}`);
+		expect(screen.getByDisplayValue(/User One/i)).toBeInTheDocument();
+	});
 });
 
 describe('Add participant Modal Contact Selector', () => {
