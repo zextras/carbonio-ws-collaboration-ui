@@ -9,7 +9,8 @@ import { AttachmentsApi } from '../network';
 const previewExtensionSupported = {
 	png: 'image/png',
 	gif: 'image/gif',
-	jpeg: 'image/jpeg'
+	jpeg: 'image/jpeg',
+	pdf: 'application/pdf'
 };
 
 export const isPreviewSupported = (mimeType: string): boolean =>

@@ -46,6 +46,8 @@ describe('Bubble Contextual Menu - other user messages', () => {
 		expect(deleteAction).not.toBeInTheDocument();
 		const downloadAction = screen.queryByText(/Download/i);
 		expect(downloadAction).not.toBeInTheDocument();
+		const previewAction = screen.queryByText(/Preview/i);
+		expect(previewAction).not.toBeInTheDocument();
 	});
 
 	test('Replied text message', async () => {
@@ -74,6 +76,8 @@ describe('Bubble Contextual Menu - other user messages', () => {
 		expect(deleteAction).not.toBeInTheDocument();
 		const downloadAction = screen.queryByText(/Download/i);
 		expect(downloadAction).not.toBeInTheDocument();
+		const previewAction = screen.queryByText(/Preview/i);
+		expect(previewAction).not.toBeInTheDocument();
 	});
 
 	test('Forwarded text message', async () => {
@@ -101,6 +105,8 @@ describe('Bubble Contextual Menu - other user messages', () => {
 		expect(deleteAction).not.toBeInTheDocument();
 		const downloadAction = screen.queryByText(/Download/i);
 		expect(downloadAction).not.toBeInTheDocument();
+		const previewAction = screen.queryByText(/Preview/i);
+		expect(previewAction).not.toBeInTheDocument();
 	});
 
 	test('Attachment text message', async () => {
@@ -161,6 +167,8 @@ describe('Bubble Contextual Menu - my messages', () => {
 		expect(deleteAction).toBeInTheDocument();
 		const downloadAction = screen.queryByText(/Download/i);
 		expect(downloadAction).not.toBeInTheDocument();
+		const previewAction = screen.queryByText(/Preview/i);
+		expect(previewAction).not.toBeInTheDocument();
 	});
 
 	test('Replied text message', async () => {
@@ -191,6 +199,8 @@ describe('Bubble Contextual Menu - my messages', () => {
 		expect(deleteAction).toBeInTheDocument();
 		const downloadAction = screen.queryByText(/Download/i);
 		expect(downloadAction).not.toBeInTheDocument();
+		const previewAction = screen.queryByText(/Preview/i);
+		expect(previewAction).not.toBeInTheDocument();
 	});
 
 	test('Forwarded text message', async () => {
@@ -220,6 +230,8 @@ describe('Bubble Contextual Menu - my messages', () => {
 		expect(deleteAction).not.toBeInTheDocument();
 		const downloadAction = screen.queryByText(/Download/i);
 		expect(downloadAction).not.toBeInTheDocument();
+		const previewAction = screen.queryByText(/Preview/i);
+		expect(previewAction).not.toBeInTheDocument();
 	});
 
 	test('Attachment text message', async () => {

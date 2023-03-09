@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next';
 
 import { AttachmentsApi } from '../network';
 import { AttachmentMessageType } from '../types/store/MessageTypes';
-import { getAttachmentURL } from '../utils/attachmentUtils';
+import { getPreviewURL } from '../utils/attachmentUtils';
 
 export type UsePreviewHook = {
 	onPreviewClick: () => void;
@@ -21,7 +21,7 @@ const usePreview = (attachment: AttachmentMessageType): UsePreviewHook => {
 	const { createPreview } = useContext(PreviewsManagerContext);
 
 	const attachmentURL = useMemo(
-		() => getAttachmentURL(attachment.id, attachment.mimeType),
+		() => getPreviewURL(attachment.id, attachment.mimeType),
 		[attachment.id, attachment.mimeType]
 	);
 
@@ -30,7 +30,12 @@ const usePreview = (attachment: AttachmentMessageType): UsePreviewHook => {
 		[attachment.mimeType]
 	);
 
-	const extension = useMemo(() => attachment.mimeType.split('/')[1]?.toUpperCase(), [attachment]);
+	// check un solo elemento
+	const extension = useMemo(() => {
+		const mimeType = attachment.mimeType.split('/');
+		if (mimeType[1]) return mimeType[1].toUpperCase();
+		return '';
+	}, [attachment]);
 
 	const size = useMemo(() => {
 		if (attachment) {
@@ -60,7 +65,7 @@ const usePreview = (attachment: AttachmentMessageType): UsePreviewHook => {
 	}, [attachment.id, attachment.name]);
 
 	const onPreviewClick = useCallback(() => {
-		if (attachmentURL !== undefined) {
+		if (attachmentURL) {
 			createPreview({
 				previewType: attachmentType as 'image' | 'pdf',
 				filename: attachment.name,
@@ -69,7 +74,7 @@ const usePreview = (attachment: AttachmentMessageType): UsePreviewHook => {
 				actions: [
 					{
 						icon: 'DownloadOutline',
-						tooltipLabel: t('preview.actions.tooltip.download', 'Download'),
+						tooltipLabel: t('action.download', 'Download'),
 						id: 'DownloadOutline',
 						onClick: (): void => download()
 					}
@@ -77,12 +82,12 @@ const usePreview = (attachment: AttachmentMessageType): UsePreviewHook => {
 				closeAction: {
 					id: 'close-action',
 					icon: 'ArrowBackOutline',
-					tooltipLabel: t('preview.close.tooltip', 'Close')
+					tooltipLabel: t('action.close', 'Close')
 				},
 				src: attachmentURL
 			});
 		}
-	}, [attachment.name, attachmentType, attachmentURL, createPreview, download, extension, size, t]);
+	}, [attachment, attachmentType, attachmentURL, createPreview, download, extension, size, t]);
 
 	return { onPreviewClick };
 };
