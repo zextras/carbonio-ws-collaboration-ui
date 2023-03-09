@@ -18,6 +18,7 @@ import React, {
 } from 'react';
 import styled from 'styled-components';
 
+import useEventListener, { EventName } from '../../hooks/useEventListener';
 import { messageWhereScrollIsStoppedEqualityFn } from '../../store/equalityFunctions/ActiveConversationsEqualityFunctions';
 import {
 	getHistoryIsFullyLoaded,
@@ -29,7 +30,7 @@ import {
 import { getXmppClient } from '../../store/selectors/ConnectionSelector';
 import { getMyLastMarkerOfConversation } from '../../store/selectors/MarkersSelectors';
 import { getMessagesSelector } from '../../store/selectors/MessagesSelectors';
-import { getPrefTimezoneSelector } from '../../store/selectors/SessionSelectors';
+import { getPrefTimezoneSelector, getUserId } from '../../store/selectors/SessionSelectors';
 import useStore from '../../store/Store';
 import { Message, MessageType, TextMessage } from '../../types/store/MessageTypes';
 import { isBefore, now } from '../../utils/dateUtil';
@@ -42,7 +43,7 @@ import useFirstUnreadMessage from './useFirstUnreadMessage';
 
 const Messages = styled(Container)`
 	position: relative;
-	overflow-y: scroll;
+	overflow: hidden;
 `;
 
 const MessagesListWrapper = styled(Container)`
@@ -71,7 +72,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 	);
 	const setHistoryLoadDisabled = useStore((store) => store.setHistoryLoadDisabled);
 	const setInputHasFocus = useStore((store) => store.setInputHasFocus);
-	const mySessionId = useStore((store) => store.session.id);
+	const myUserId = useStore(getUserId);
 	const myLastMarker = useStore((store) => getMyLastMarkerOfConversation(store, roomId));
 	const timezone = useStore(getPrefTimezoneSelector);
 
@@ -106,14 +107,14 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 			if (
 				message &&
 				message.type === MessageType.TEXT_MSG &&
-				message.from !== mySessionId &&
+				message.from !== myUserId &&
 				markMessageAsRead &&
 				inputHasFocus
 			) {
 				xmppClient.readMessage(message.roomId, message.id);
 			}
 		},
-		[roomMessages, myLastMarker, inputHasFocus, mySessionId, xmppClient]
+		[roomMessages, myLastMarker, inputHasFocus, myUserId, xmppClient]
 	);
 
 	// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -248,15 +249,6 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 				top: MessagesListWrapperRef.current.scrollHeight,
 				behavior: 'instant'
 			});
-		} else if (
-			roomMessages.length >= 2 &&
-			actualScrollPosition === roomMessages[roomMessages.length - 2].id
-		) {
-			// scroll to the bottom when a new message arrives, and we are already at the bottom
-			MessagesListWrapperRef.current.scrollTo({
-				top: MessagesListWrapperRef.current.scrollHeight,
-				behavior: 'instant'
-			});
 		} else if (historyLoadedDisabled) {
 			// keep the scroll to the message where we stopped scroll because history loader appeared and is loading history
 			const messageRef = window.document.getElementById(`message-${actualScrollPosition}`);
@@ -269,7 +261,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 			const lastMessage = roomMessages[roomMessages.length - 1];
 			if (
 				lastMessage.type === MessageType.TEXT_MSG &&
-				lastMessage.from !== mySessionId &&
+				lastMessage.from !== myUserId &&
 				(!myLastMarker || lastMessage.id !== myLastMarker?.messageId)
 			) {
 				xmppClient.readMessage(lastMessage.roomId, lastMessage.id);
@@ -281,7 +273,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 		actualScrollPosition,
 		inputHasFocus,
 		myLastMarker,
-		mySessionId,
+		myUserId,
 		xmppClient
 	]);
 
@@ -293,6 +285,21 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [roomId]);
+
+	useEffect(() => {
+		// Scroll all the way down when the is writing label appears to make it always visible
+		if (
+			usersWritingList &&
+			usersWritingList.length > 0 &&
+			roomMessages.length > 0 &&
+			actualScrollPosition === roomMessages[roomMessages.length - 1].id
+		) {
+			MessagesListWrapperRef.current.scrollTo({
+				top: MessagesListWrapperRef.current.scrollHeight,
+				behavior: 'instant'
+			});
+		}
+	}, [usersWritingList, actualScrollPosition, roomMessages]);
 
 	const dateMessageWrapped = useMemo(
 		() => groupBy(roomMessages, (message) => moment.tz(message.date, timezone).format('YYMMDD')),
@@ -359,6 +366,30 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 			});
 		setInputHasFocus(roomId, true);
 	}, [MessagesListWrapperRef, roomId, setInputHasFocus]);
+
+	const newMessageScrollToButtonHandler = useCallback(
+		// scroll to the bottom when a new message arrives, and we are already at the bottom
+		// checking to be actually at the bottom and also if last message it's mine
+		// since we want to go always at the bottom when we send a message, no matter
+		// if we scrolled up in the history
+		(messageFromEvent) => {
+			if (
+				actualScrollPosition === roomMessages[roomMessages.length - 1].id ||
+				(messageFromEvent.detail.type === MessageType.TEXT_MSG &&
+					messageFromEvent.detail.from === myUserId)
+			) {
+				setTimeout(() => {
+					MessagesListWrapperRef.current.scrollTo({
+						top: MessagesListWrapperRef.current.scrollHeight,
+						behavior: 'instant'
+					});
+				}, 200);
+			}
+		},
+		[actualScrollPosition, roomMessages, myUserId]
+	);
+
+	useEventListener(EventName.NEW_MESSAGE, newMessageScrollToButtonHandler);
 
 	return (
 		<Messages
