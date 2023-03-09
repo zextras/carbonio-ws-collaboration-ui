@@ -24,6 +24,7 @@ import { User } from '../../../types/store/UserTypes';
 import GoToPrivateChatAction from './GoToPrivateChatAction';
 import LeaveConversationListAction from './LeaveConversationListAction';
 import ParticipantComponentInfo from './ParticipantComponentInfo';
+import RemoveMemberListAction from './RemoveMemberListAction';
 
 const user1Info: User = {
 	id: 'user1',
@@ -120,7 +121,7 @@ describe('participants actions - go to private chat', () => {
 	});
 });
 
-describe('participants actions - leave or delete conversation', () => {
+describe('participants actions - leave/delete conversation', () => {
 	test('leave conversation - open and close modal', async () => {
 		const store = useStore.getState();
 		store.setLoginInfo(user2Info.id, user2Info.name);
@@ -249,5 +250,46 @@ describe('participants actions - promote/demote member', () => {
 
 		await user.click(button);
 		expect(screen.getByTestId('icon: CrownOutline')).toBeInTheDocument();
+	});
+});
+
+describe('participants actions - delete user', () => {
+	test('open/close modal', async () => {
+		const store = useStore.getState();
+		store.setLoginInfo(user1Info.id, user1Info.name);
+		store.setUserInfo(user2Info);
+		store.addRoom(mockedRoom);
+		const { user } = setup(
+			<RemoveMemberListAction roomId={mockedRoom.id} memberId={user2Info.id} />
+		);
+
+		await user.click(screen.getByTestId('icon: Trash2Outline'));
+		expect(screen.getByTestId('delete_user_modal')).toBeInTheDocument();
+
+		await user.click(screen.getByTestId('icon: Close'));
+		expect(screen.queryByTestId('delete_user_modal')).not.toBeInTheDocument();
+	});
+
+	test('delete user', async () => {
+		const store = useStore.getState();
+		store.setLoginInfo(user1Info.id, user1Info.name);
+		store.setUserInfo(user2Info);
+		store.addRoom(mockedRoom);
+		mockedDeleteRoomMemberRequest
+			// for testing catch statement
+			.mockRejectedValueOnce('user is still here')
+			// for testing then statement
+			.mockReturnValueOnce('user has been kicked out from the conversation');
+		const { user } = setup(
+			<RemoveMemberListAction roomId={mockedRoom.id} memberId={user2Info.id} />
+		);
+
+		await user.click(screen.getByTestId('icon: Trash2Outline'));
+		const button = screen.getAllByRole('button')[2];
+		await user.click(button);
+		expect(screen.getByTestId('icon: Close')).toBeInTheDocument();
+
+		await user.click(button);
+		expect(mockedDeleteRoomMemberRequest).toBeCalledTimes(2);
 	});
 });
