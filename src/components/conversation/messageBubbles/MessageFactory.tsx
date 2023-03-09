@@ -91,7 +91,7 @@ const MessageFactory = ({
 			case MessageType.DELETED_MSG: {
 				return (
 					<>
-						{isFirstNewMessage && newMessagesComponent}{' '}
+						{isFirstNewMessage && newMessagesComponent}
 						<DeletedBubble message={message} refEl={messageRef} />
 					</>
 				);
