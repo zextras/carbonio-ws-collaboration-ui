@@ -44,7 +44,7 @@ const DateBubble: FC<DateMsgProps> = ({ message, refEl }) => {
 				crossAlignment={'flex-start'}
 				key={message.id}
 				dateMessage
-				data-testid={`data_msg-${message.id}`}
+				data-testid={`date_msg-${message.id}`}
 			>
 				<Text color={'gray1'}>{dateLabel}</Text>
 			</CustomMessage>

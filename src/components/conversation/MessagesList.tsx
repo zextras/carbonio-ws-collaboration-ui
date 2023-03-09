@@ -5,13 +5,13 @@
  */
 
 import { Container } from '@zextras/carbonio-design-system';
-import { debounce, map, find, groupBy } from 'lodash';
+import { debounce, find, groupBy, map } from 'lodash';
 import moment from 'moment-timezone';
 import React, {
 	ForwardedRef,
-	useEffect,
 	ReactElement,
 	useCallback,
+	useEffect,
 	useMemo,
 	useRef,
 	useState
@@ -38,6 +38,7 @@ import MessageFactory from './messageBubbles/MessageFactory';
 import WritingBubble from './messageBubbles/WritingBubble';
 import MessageHistoryLoader from './MessageHistoryLoader';
 import ScrollButton from './ScrollButton';
+import useFirstUnreadMessage from './useFirstUnreadMessage';
 
 const Messages = styled(Container)`
 	position: relative;
@@ -83,6 +84,8 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 	const MessagesListWrapperRef: ForwardedRef<any> = useRef();
 	const listOfMessagesObservedRef = useRef<HTMLElement[]>([]);
 	const messageHistoryLoaderRef = React.createRef<HTMLDivElement>();
+
+	const firstNewMessage = useFirstUnreadMessage(roomId);
 
 	const readMessage = useCallback(
 		(refId) => {
@@ -329,6 +332,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 						prevMessageIsFromSameSender={prevMessageIsFromSameSender}
 						nextMessageIsFromSameSender={nextMessageIsFromSameSender}
 						messageRef={messageRef}
+						isFirstNewMessage={firstNewMessage === message.id}
 					/>
 				);
 			});
@@ -345,7 +349,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 			);
 		});
 		return list;
-	}, [dateMessageWrapped, roomId]);
+	}, [dateMessageWrapped, firstNewMessage, roomId]);
 
 	const handleClickScrollButton = useCallback(() => {
 		MessagesListWrapperRef?.current &&
