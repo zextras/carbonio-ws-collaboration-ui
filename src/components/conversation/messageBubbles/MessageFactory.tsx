@@ -15,7 +15,7 @@ import { MessageType } from '../../../types/store/MessageTypes';
 import AffiliationBubble from './AffiliationBubble';
 import Bubble from './Bubble';
 import ConfigurationBubble from './ConfigurationBubble';
-import DateBubble from './DataBubble';
+import DateBubble from './DateBubble';
 import DeletedBubble from './DeletedBubble';
 
 type MessageProps = {
