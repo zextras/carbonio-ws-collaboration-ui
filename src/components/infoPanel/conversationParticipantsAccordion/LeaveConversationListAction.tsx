@@ -82,9 +82,9 @@ const LeaveConversationListAction: FC<LeaveConversationProps> = ({
 		setLeaveConversationModalOpen(false);
 	}, []);
 
-	const closeDeleteConversationModal = (): void => {
+	const closeDeleteConversationModal = useCallback(() => {
 		setDeleteConversationModalOpen(false);
-	};
+	}, []);
 	return (
 		<>
 			<Tooltip label={tooltipLabel} maxWidth="fit-content">

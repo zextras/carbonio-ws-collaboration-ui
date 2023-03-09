@@ -183,6 +183,7 @@ describe('Participant component info', () => {
 			const deleteUserAction = screen.getByTestId('icon: Trash2Outline');
 			expect(deleteUserAction).toBeInTheDocument();
 		});
+		test;
 	});
 	describe("User isn't an owner", () => {
 		test('The user is not an owner and sees his element inside list', () => {
