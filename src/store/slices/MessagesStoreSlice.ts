@@ -215,11 +215,9 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 			produce((draft: RootStore) => {
 				if (!draft.messages[roomId]) draft.messages[roomId] = [];
 				draft.messages[roomId] = map(draft.messages[roomId], (message: Message) => {
-					// todo handle attachment message type
 					if (message.type !== MessageType.TEXT_MSG || message.read === MarkerStatus.READ) {
 						return message;
 					}
-					// eslint-disable-next-line no-param-reassign
 					message.read = calcReads(message.date, roomId);
 					return message;
 				});

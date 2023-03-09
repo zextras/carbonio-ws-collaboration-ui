@@ -14,7 +14,7 @@ import { MessageType } from '../../types/store/MessageTypes';
 
 const useFirstUnreadMessage = (roomId: string): string | undefined => {
 	const unreadCount = useStore((store) => getRoomUnreadsSelector(store, roomId));
-	const mySessionId = useStore((store) => store.session.id);
+	const myUserId = useStore((store) => store.session.id);
 	const messages = useStore((store) => getMessagesSelector(store, roomId));
 	const myLastMarker = useStore((store) => getMyLastMarkerOfConversation(store, roomId));
 
@@ -26,7 +26,7 @@ const useFirstUnreadMessage = (roomId: string): string | undefined => {
 	useEffect(() => {
 		// Don't calculate if it is just set once
 		// or if necessary data aren't already loaded on local store
-		if (!firstUnreadMessageId && mySessionId && size(messages) > 0 && myLastMarker) {
+		if (!firstUnreadMessageId && myUserId && size(messages) > 0 && myLastMarker) {
 			if (unreadCount > 0) {
 				const lastMessageReadByMe = findIndex(
 					messages,
@@ -40,7 +40,7 @@ const useFirstUnreadMessage = (roomId: string): string | undefined => {
 						unreadMessages,
 						(message) =>
 							(message.type === MessageType.TEXT_MSG || message.type === MessageType.DELETED_MSG) &&
-							message.from !== mySessionId
+							message.from !== myUserId
 					);
 					// The fist of them is the fist unread text message
 					if (size(othersMessages) > 0) {
@@ -51,7 +51,7 @@ const useFirstUnreadMessage = (roomId: string): string | undefined => {
 				setFirstUnreadMessageId('noUnread');
 			}
 		}
-	}, [firstUnreadMessageId, messages, myLastMarker, mySessionId, unreadCount]);
+	}, [firstUnreadMessageId, messages, myLastMarker, myUserId, unreadCount]);
 
 	return firstUnreadMessageId;
 };

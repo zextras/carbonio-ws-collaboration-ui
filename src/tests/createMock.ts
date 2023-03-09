@@ -21,7 +21,7 @@ import { CapabilityList } from '../types/store/SessionTypes';
 export const createMockRoom = (fields?: Record<string, any>): RoomBe => ({
 	id: 'id',
 	name: 'name',
-	description: 'descrption',
+	description: 'description',
 	type: RoomType.GROUP,
 	hash: 'hash',
 	createdAt: '2022-08-25T17:24:28.961+02:00',
