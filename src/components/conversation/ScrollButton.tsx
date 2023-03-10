@@ -12,8 +12,10 @@ import styled from 'styled-components';
 
 import useEventListener, { EventName } from '../../hooks/useEventListener';
 import { getRoomMutedSelector } from '../../store/selectors/RoomsSelectors';
+import { getUserId } from '../../store/selectors/SessionSelectors';
 import { getRoomUnreadsSelector } from '../../store/selectors/UnreadsCounterSelectors';
 import useStore from '../../store/Store';
+import { MessageType } from '../../types/store/MessageTypes';
 
 type ScrollButtonProps = {
 	roomId: string;
@@ -22,6 +24,7 @@ type ScrollButtonProps = {
 
 const CustomContainer = styled(Container)`
 	position: absolute;
+	z-index: 15;
 	right: 0.875rem;
 	bottom: 0.875rem;
 	cursor: pointer;
@@ -38,6 +41,7 @@ export const ScrollBadge = styled(Badge)`
 const ScrollButton = ({ roomId, onClickCb }: ScrollButtonProps): ReactElement => {
 	const unreadCount = useStore((store) => getRoomUnreadsSelector(store, roomId));
 	const roomMuted = useStore((state) => getRoomMutedSelector(state, roomId));
+	const myUserId = useStore(getUserId);
 
 	const [t] = useTranslation();
 	const buttonLabel = t('action.scrollToBottom', 'Scroll to bottom');
@@ -53,10 +57,18 @@ const ScrollButton = ({ roomId, onClickCb }: ScrollButtonProps): ReactElement =>
 		[]
 	);
 
-	const newMessageEventHandler = useCallback(() => {
-		setShowNewMessageBadge(true);
-		debouncedNewMessagesBadgeSetter();
-	}, [debouncedNewMessagesBadgeSetter]);
+	const newMessageEventHandler = useCallback(
+		(messageFromEvent) => {
+			if (
+				messageFromEvent.detail.type === MessageType.TEXT_MSG &&
+				messageFromEvent.detail.from !== myUserId
+			) {
+				setShowNewMessageBadge(true);
+				debouncedNewMessagesBadgeSetter();
+			}
+		},
+		[debouncedNewMessagesBadgeSetter, myUserId]
+	);
 
 	const labelNewMessages = useMemo(
 		() => (unreadCount === 1 ? newMessageHasArrivedLabel : newMessagesHaveArrivedLabel),

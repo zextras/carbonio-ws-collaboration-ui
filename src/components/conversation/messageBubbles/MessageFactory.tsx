@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Container } from '@zextras/carbonio-design-system';
-import React, { ReactElement } from 'react';
+import { Container, Text } from '@zextras/carbonio-design-system';
+import React, { ReactElement, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import { getSingleMessageSelector } from '../../../store/selectors/MessagesSelectors';
@@ -14,7 +15,7 @@ import { MessageType } from '../../../types/store/MessageTypes';
 import AffiliationBubble from './AffiliationBubble';
 import Bubble from './Bubble';
 import ConfigurationBubble from './ConfigurationBubble';
-import DateBubble from './DataBubble';
+import DateBubble from './DateBubble';
 import DeletedBubble from './DeletedBubble';
 
 type MessageProps = {
@@ -23,6 +24,7 @@ type MessageProps = {
 	prevMessageIsFromSameSender: boolean;
 	nextMessageIsFromSameSender: boolean;
 	messageRef: React.RefObject<HTMLElement>;
+	isFirstNewMessage: boolean;
 };
 
 export const CustomMessage = styled(Container)`
@@ -49,24 +51,50 @@ const MessageFactory = ({
 	messageRoomId,
 	prevMessageIsFromSameSender,
 	nextMessageIsFromSameSender,
-	messageRef
+	messageRef,
+	isFirstNewMessage
 }: MessageProps): ReactElement => {
+	const [t] = useTranslation();
+	const newMessagesLabel = t('conversation.newMessages', 'New messages');
+
 	const message = useStore((store) => getSingleMessageSelector(store, messageRoomId, messageId));
+
+	const newMessagesComponent = useMemo(
+		() => (
+			<CustomMessage
+				mainAlignment={'flex-start'}
+				crossAlignment={'flex-start'}
+				borderColor="gray3"
+				data-testid={`new_msg`}
+			>
+				<Text color="gray1">{newMessagesLabel}</Text>
+			</CustomMessage>
+		),
+		[newMessagesLabel]
+	);
 
 	if (message) {
 		switch (message.type) {
 			case MessageType.TEXT_MSG: {
 				return (
-					<Bubble
-						message={message}
-						prevMessageIsFromSameSender={prevMessageIsFromSameSender}
-						nextMessageIsFromSameSender={nextMessageIsFromSameSender}
-						messageRef={messageRef}
-					/>
+					<>
+						{isFirstNewMessage && newMessagesComponent}
+						<Bubble
+							message={message}
+							prevMessageIsFromSameSender={prevMessageIsFromSameSender}
+							nextMessageIsFromSameSender={nextMessageIsFromSameSender}
+							messageRef={messageRef}
+						/>
+					</>
 				);
 			}
 			case MessageType.DELETED_MSG: {
-				return <DeletedBubble message={message} refEl={messageRef} />;
+				return (
+					<>
+						{isFirstNewMessage && newMessagesComponent}
+						<DeletedBubble message={message} refEl={messageRef} />
+					</>
+				);
 			}
 			case MessageType.AFFILIATION_MSG: {
 				return <AffiliationBubble message={message} refEl={messageRef} />;

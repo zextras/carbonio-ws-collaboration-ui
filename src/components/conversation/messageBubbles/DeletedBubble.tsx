@@ -44,6 +44,7 @@ const DeletedBubble: FC<DeletedBubbleProps> = ({ message, refEl }) => {
 		<BubbleDeletedContainer
 			id={`message-${message.id}`}
 			key={`${message.id}-deleted`}
+			data-testid={`BubbleDeleted-${message.id}`}
 			ref={refEl}
 			height="fit"
 			width="fit"

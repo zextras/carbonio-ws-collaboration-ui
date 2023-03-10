@@ -14,7 +14,8 @@ export const autoCompleteGalRequest = (text: string): Promise<AutoCompleteGalRes
 			type: 'account',
 			name: {
 				_content: text
-			}
+			},
+			sortBy: 'nameAsc'
 		})
 			.then((response: AutoCompleteGalSoapResponse) => {
 				const filterUsers = filter(response.cn, (user) => !!user._attrs.fullName);
@@ -34,6 +35,7 @@ export type AutoCompleteGalSoapRequest = {
 	_jsns: 'urn:zimbraAccount';
 	type: 'account';
 	name: { _content: string };
+	sortBy: 'nameAsc';
 };
 
 export type AutoCompleteGalSoapResponse = {
