@@ -260,11 +260,6 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 
 		// Download and Preview Functionality
 		if (message.attachment) {
-			actions.push({
-				id: 'Download',
-				label: downloadActionLabel,
-				click: downloadAction
-			});
 			if (isPreviewSupported(message.attachment.mimeType)) {
 				actions.push({
 					id: 'Preview',
@@ -272,6 +267,11 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 					click: onPreviewClick
 				});
 			}
+			actions.push({
+				id: 'Download',
+				label: downloadActionLabel,
+				click: downloadAction
+			});
 		}
 		return actions;
 	}, [
