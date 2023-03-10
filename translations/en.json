@@ -125,16 +125,6 @@
         "oneParticipantAccordionTitle": "One Participant",
         "searchUser": "Search Participants"
     },
-    "preview": {
-        "actions": {
-            "tooltip": {
-                "download": "Download"
-            }
-        },
-        "close": {
-            "tooltip": "Close"
-        }
-    },
     "settings": {
         "notifications": {
             "checkboxLabel": "Desktop notifications",
