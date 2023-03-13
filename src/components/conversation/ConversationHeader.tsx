@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Container, IconButton, Text as DSText, Tooltip } from '@zextras/carbonio-design-system';
+import { Container, IconButton, Text, Tooltip } from '@zextras/carbonio-design-system';
 import React, { Dispatch, ReactElement, SetStateAction, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -48,9 +48,9 @@ const ConversationHeader = ({
 				padding={{ vertical: 'medium', horizontal: 'large' }}
 			>
 				<Container crossAlignment="flex-start" maxWidth="94%">
-					<DSText title={roomName} overflow="ellipsis">
+					<Text title={roomName} overflow="ellipsis">
 						{roomName}
-					</DSText>
+					</Text>
 				</Container>
 				<Container orientation="horizontal" width="fit" style={{ minWidth: 'fit-content' }}>
 					{!isDesktopView && (
