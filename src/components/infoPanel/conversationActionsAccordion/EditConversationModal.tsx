@@ -16,7 +16,7 @@ import {
 import React, { FC, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import RoomsApi from '../../../network/apis/RoomsApi';
+import { RoomsApi } from '../../../network';
 import {
 	getRoomDescriptionSelector,
 	getRoomNameSelector
@@ -117,7 +117,7 @@ const EditConversationModal: FC<EditConversationProps> = ({
 
 	const modalFooter = useMemo(
 		() => (
-			<Container mainAlignment="flex-end" orientation="horizontal" data-testid="edit_modal">
+			<Container mainAlignment="flex-end" orientation="horizontal">
 				<Tooltip
 					placement="bottom"
 					label={
@@ -154,6 +154,7 @@ const EditConversationModal: FC<EditConversationProps> = ({
 			closeIconTooltip={closeLabel}
 			customFooter={modalFooter}
 			onClose={closeModal}
+			data-testid="edit_conversation_modal"
 		>
 			<Container>
 				<Input

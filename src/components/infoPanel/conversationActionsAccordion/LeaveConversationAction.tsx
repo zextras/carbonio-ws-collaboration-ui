@@ -9,7 +9,7 @@ import React, { FC, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import useRouting from '../../../hooks/useRouting';
-import RoomsApi from '../../../network/apis/RoomsApi';
+import { RoomsApi } from '../../../network';
 import useStore from '../../../store/Store';
 import { RoomType } from '../../../types/store/RoomTypes';
 import ActionComponent from './ActionComponent';

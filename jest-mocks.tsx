@@ -19,7 +19,8 @@ import {
 	DeleteRoomMemberResponse,
 	DeleteRoomResponse,
 	PromoteRoomMemberResponse,
-	DemotesRoomMemberResponse
+	DemotesRoomMemberResponse,
+	AddRoomMemberResponse
 } from './src/types/network/responses/roomsResponses';
 import {
 	GetUserPictureResponse,
@@ -98,6 +99,7 @@ export const mockedGetURLPreview: jest.Mock = jest.fn();
 export const mockedDeleteRoomMemberRequest: jest.Mock = jest.fn();
 export const mockedPromoteRoomMemberRequest: jest.Mock = jest.fn();
 export const mockedDemotesRoomMemberRequest: jest.Mock = jest.fn();
+export const mockedAddRoomMemberRequest: jest.Mock = jest.fn();
 
 jest.mock('./src/network', () => ({
 	RoomsApi: {
@@ -155,6 +157,11 @@ jest.mock('./src/network', () => ({
 		demotesRoomMember: (): Promise<DemotesRoomMemberResponse> =>
 			new Promise((resolve, reject) => {
 				const result = mockedDemotesRoomMemberRequest();
+				result ? resolve(result) : reject(new Error('no result provided'));
+			}),
+		addRoomMember: (): Promise<AddRoomMemberResponse> =>
+			new Promise((resolve, reject) => {
+				const result = mockedAddRoomMemberRequest();
 				result ? resolve(result) : reject(new Error('no result provided'));
 			})
 	},

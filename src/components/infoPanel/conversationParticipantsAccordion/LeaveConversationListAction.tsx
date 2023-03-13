@@ -66,17 +66,16 @@ const LeaveConversationListAction: FC<LeaveConversationProps> = ({
 				})
 				.catch(() => null);
 		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [roomId, sessionId]);
+	}, [deleteRoom, goToMainPage, roomId, sessionId]);
 
 	const deleteConversation = useCallback(() => {
 		RoomsApi.deleteRoom(roomId)
 			.then(() => {
-				useStore.getState().deleteRoom(roomId);
+				deleteRoom(roomId);
 				goToMainPage();
 			})
 			.catch(() => null);
-	}, [goToMainPage, roomId]);
+	}, [deleteRoom, goToMainPage, roomId]);
 
 	const closeLeaveModal = useCallback(() => {
 		setLeaveConversationModalOpen(false);
