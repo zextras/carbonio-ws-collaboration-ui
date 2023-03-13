@@ -61,7 +61,7 @@ const ChatCreationContactsSelection = ({
 		'Select more that an address to create a group chat'
 	);
 
-	const inputRef = useRef(undefined);
+	const inputRef = useRef<HTMLInputElement>(null);
 	const [result, setResult] = useState<ContactMatch[]>([]);
 	const [chips, setChips] = useState<ChipInfo[]>([]);
 	const [loading, setLoading] = useState<boolean>(false);
@@ -156,9 +156,11 @@ const ChatCreationContactsSelection = ({
 					? differenceBy(chips, [newChip], 'id')
 					: union(chips, [newChip])
 			);
+			if (inputRef.current) {
+				inputRef.current.value = '';
+			}
 		},
-		// eslint-disable-next-line
-		[]
+		[setContactSelected]
 	);
 
 	const ListItem = useMemo(
@@ -195,8 +197,7 @@ const ChatCreationContactsSelection = ({
 				setChips((chips) => differenceBy(chips, [differenceChip], 'id'));
 			}
 		},
-		// eslint-disable-next-line
-		[chips]
+		[chips, setContactSelected]
 	);
 
 	return (
@@ -211,6 +212,9 @@ const ChatCreationContactsSelection = ({
 				requireUniqueChips
 				maxChips={15} // TODO
 				data-testid="chip_input_creation_modal"
+				confirmChipOnBlur={false}
+				confirmChipOnSpace={false}
+				separators={['']}
 			/>
 			<Padding bottom="large" />
 			<Container height="9.375rem">

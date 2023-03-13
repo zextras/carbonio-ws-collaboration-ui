@@ -6,12 +6,14 @@
 
 import { useEffect, useRef } from 'react';
 
+import { Message } from '../types/store/MessageTypes';
+
 export enum EventName {
 	NEW_MESSAGE = 'newMessage'
 }
 
-export const sendCustomEventEvent = (eventName: EventName): void => {
-	window.dispatchEvent(new CustomEvent(eventName));
+export const sendCustomEvent = (eventName: EventName, message: Message): void => {
+	window.dispatchEvent(new CustomEvent(eventName, { detail: message }));
 };
 
 const useEventListener = (

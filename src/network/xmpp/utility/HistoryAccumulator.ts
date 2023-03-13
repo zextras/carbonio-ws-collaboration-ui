@@ -46,11 +46,11 @@ class HistoryAccumulator {
 		return history;
 	}
 
-	public addRepliedMessage(message: TextMessage): void {
+	public addReferenceForRepliedMessage(message: TextMessage): void {
 		this.repliedMessages[message.stanzaId] = message;
 	}
 
-	public returnRepliedMessage(messageId: string): TextMessage {
+	public returnReferenceForRepliedMessage(messageId: string): TextMessage {
 		const message = this.repliedMessages[messageId];
 		delete this.repliedMessages[messageId];
 		return message as TextMessage;
