@@ -75,9 +75,7 @@ const AffiliationBubble: FC<AffiliationMsgProps> = ({ message, refEl }) => {
 			serviceMessage
 			data-testid={`affiliation_msg-${message.id}`}
 		>
-			<Text size={'medium'} color={'gray1'}>
-				{affiliationLabel}
-			</Text>
+			<Text color={'gray1'}>{affiliationLabel}</Text>
 		</CustomMessage>
 	);
 };

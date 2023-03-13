@@ -53,7 +53,7 @@ const ConfigurationBubble: FC<ConfigurationMsgProps> = ({ message, refEl }) => {
 			serviceMessage
 			data-testid={`configuration_msg-${message.id}`}
 		>
-			<Text size={'medium'} color={'gray1'} overflow="break-word">
+			<Text color={'gray1'} overflow="break-word">
 				{configurationLabel}
 			</Text>
 		</CustomMessage>
