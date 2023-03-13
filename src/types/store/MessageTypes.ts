@@ -66,7 +66,6 @@ export type DateMessage = BasicMessage & {
 
 export enum MessageType {
 	TEXT_MSG = 'text',
-	ATTACHMENT_MSG = 'attachment',
 	DELETED_MSG = 'deleted',
 	AFFILIATION_MSG = 'affiliation',
 	CONFIGURATION_MSG = 'configuration',
