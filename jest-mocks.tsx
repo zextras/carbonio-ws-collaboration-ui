@@ -155,7 +155,7 @@ export const fetchResponse: jest.Mock = jest.fn(() => ({}));
 // @ts-ignore
 global.fetch = jest.fn(() =>
 	Promise.resolve({
-		json: () => Promise.resolve(fetchResponse()),
+		json: () => fetchResponse(),
 		ok: true,
 		headers: { get: (): string => 'application/json' }
 	})
