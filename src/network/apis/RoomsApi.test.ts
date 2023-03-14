@@ -11,7 +11,7 @@ import roomsApi from './RoomsApi';
 
 describe('Rooms API', () => {
 	test('listRooms is called correctly', async () => {
-		// Send getUser request
+		// Send listRooms request
 		const room = createMockRoom({ id: 'room0' });
 		fetchResponse.mockResolvedValueOnce([room]);
 		await roomsApi.listRooms(true, true);
@@ -60,7 +60,7 @@ describe('Rooms API', () => {
 	});
 
 	test('getRoom is called correctly', async () => {
-		// Send addRoom request
+		// Send getRoom request
 		const room = createMockRoom({ id: 'room0' });
 		fetchResponse.mockResolvedValueOnce(room);
 		await roomsApi.getRoom(room.id);
@@ -78,7 +78,7 @@ describe('Rooms API', () => {
 	});
 
 	test('updateRoom is called correctly', async () => {
-		// Send addRoom request
+		// Send updateRoom request
 		const room = createMockRoom({ id: 'room0', name: 'new name' });
 		fetchResponse.mockResolvedValueOnce(room);
 		await roomsApi.updateRoom(room.id, { name: 'new name' });
@@ -96,7 +96,7 @@ describe('Rooms API', () => {
 	});
 
 	test('deleteRoom is called correctly', async () => {
-		// Send addRoom request
+		// Send deleteRoom request
 		await roomsApi.deleteRoom('roomId');
 
 		// Set appropriate headers
@@ -112,7 +112,7 @@ describe('Rooms API', () => {
 	});
 
 	test('updateRoomPicture is called correctly', async () => {
-		// Send getUser request
+		// Send updateRoomPicture request
 		const testFile = new File([], 'image.png', { type: 'image/png' });
 		await roomsApi.updateRoomPicture('roomId', testFile);
 
@@ -133,7 +133,7 @@ describe('Rooms API', () => {
 		// Set maxRoomImageSizeInKb to 512kb
 		const store = useStore.getState();
 		store.setCapabilities(createMockCapabilityList({ maxRoomImageSizeInKb: 512 }));
-		// Send getUser request
+		// Send updateRoomPicture request
 		const testFile = new File([], 'image.png', { type: 'image/png' });
 		Object.defineProperty(testFile, 'size', { value: 1024 * 1024 + 1 });
 
@@ -142,7 +142,7 @@ describe('Rooms API', () => {
 	});
 
 	test('deleteRoomPicture is called correctly', async () => {
-		// Send getUser request
+		// Send deleteRoomPicture request
 		await roomsApi.deleteRoomPicture('roomId');
 
 		// Set appropriate headers
@@ -158,7 +158,7 @@ describe('Rooms API', () => {
 	});
 
 	test('muteRoomNotification is called correctly', async () => {
-		// Send addRoom request
+		// Send muteRoomNotification request
 		await roomsApi.muteRoomNotification('roomId');
 
 		// Set appropriate headers
@@ -174,7 +174,7 @@ describe('Rooms API', () => {
 	});
 
 	test('unmuteRoomNotification is called correctly', async () => {
-		// Send addRoom request
+		// Send unmuteRoomNotification request
 		await roomsApi.unmuteRoomNotification('roomId');
 
 		// Set appropriate headers
@@ -190,7 +190,7 @@ describe('Rooms API', () => {
 	});
 
 	test('clearRoomHistory is called correctly', async () => {
-		// Send addRoom request
+		// Send clearRoomHistory request
 		await roomsApi.clearRoomHistory('roomId');
 
 		// Set appropriate headers

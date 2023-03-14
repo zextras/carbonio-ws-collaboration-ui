@@ -34,7 +34,7 @@ describe('Users API', () => {
 	});
 
 	test('getUserPicture is called correctly', async () => {
-		// Send getUser request
+		// Send getUserPicture request
 		await usersApi.getUserPicture(user.id);
 
 		// Set appropriate headers
@@ -50,7 +50,7 @@ describe('Users API', () => {
 	});
 
 	test('changeUserPicture is called correctly', async () => {
-		// Send getUser request
+		// Send changeUserPicture request
 		const testFile = new File([], 'image.png', { type: 'image/png' });
 		await usersApi.changeUserPicture(user.id, testFile);
 
@@ -71,7 +71,7 @@ describe('Users API', () => {
 		// Set maxUserImageSizeInKb to 512kb
 		const store = useStore.getState();
 		store.setCapabilities(createMockCapabilityList({ maxUserImageSizeInKb: 512 }));
-		// Send getUser request
+		// Send changeUserPicture request
 		const testFile = new File([], 'image.png', { type: 'image/png' });
 		Object.defineProperty(testFile, 'size', { value: 1024 * 1024 + 1 });
 
@@ -80,7 +80,7 @@ describe('Users API', () => {
 	});
 
 	test('deleteUserPicture is called correctly', async () => {
-		// Send getUser request
+		// Send deleteUserPicture request
 		await usersApi.deleteUserPicture(user.id);
 
 		// Set appropriate headers

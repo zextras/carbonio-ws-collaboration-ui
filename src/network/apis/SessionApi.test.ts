@@ -11,7 +11,7 @@ import sessionApi from './SessionApi';
 
 describe('Session API', () => {
 	test('getToken is called correctly', async () => {
-		// Send getUser request
+		// Send getToken request
 		fetchResponse.mockResolvedValueOnce({ token: 'test-token' });
 		await sessionApi.getToken();
 
@@ -28,7 +28,7 @@ describe('Session API', () => {
 	});
 
 	test('getCapabilities is called correctly', async () => {
-		// Send getUser request
+		// Send getCapabilities request
 		const capabilityList = createMockCapabilityList();
 		fetchResponse.mockResolvedValueOnce(capabilityList);
 		await sessionApi.getCapabilities();
