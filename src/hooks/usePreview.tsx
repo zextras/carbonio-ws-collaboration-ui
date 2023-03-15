@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next';
 
 import { AttachmentsApi } from '../network';
 import { AttachmentMessageType } from '../types/store/MessageTypes';
-import { getPreviewURL } from '../utils/attachmentUtils';
+import { getAttachmentURL, getPreviewURL } from '../utils/attachmentUtils';
 
 export type UsePreviewHook = {
 	onPreviewClick: () => void;
@@ -20,22 +20,25 @@ const usePreview = (attachment: AttachmentMessageType): UsePreviewHook => {
 	const [t] = useTranslation();
 	const { createPreview } = useContext(PreviewsManagerContext);
 
-	const attachmentURL = useMemo(
-		() => getPreviewURL(attachment.id, attachment.mimeType),
-		[attachment.id, attachment.mimeType]
-	);
-
-	const attachmentType: string = useMemo(
-		() => attachment.mimeType.split('/')[0]?.toUpperCase(),
-		[attachment.mimeType]
-	);
-
-	// check un solo elemento
 	const extension = useMemo(() => {
 		const mimeType = attachment.mimeType.split('/');
 		if (mimeType[1]) return mimeType[1].toUpperCase();
 		return '';
 	}, [attachment]);
+
+	const attachmentURL = useMemo(() => {
+		if (extension === 'PDF') {
+			return getAttachmentURL(attachment.id, attachment.mimeType);
+		}
+		return getPreviewURL(attachment.id, attachment.mimeType);
+	}, [attachment.id, attachment.mimeType, extension]);
+
+	const typeOfAttachment = useMemo(() => {
+		if (extension === 'PDF') {
+			return 'pdf';
+		}
+		return 'image';
+	}, [extension]);
 
 	const size = useMemo(() => {
 		if (attachment) {
@@ -67,7 +70,7 @@ const usePreview = (attachment: AttachmentMessageType): UsePreviewHook => {
 	const onPreviewClick = useCallback(() => {
 		if (attachmentURL) {
 			createPreview({
-				previewType: attachmentType as 'image' | 'pdf',
+				previewType: typeOfAttachment,
 				filename: attachment.name,
 				extension,
 				size: size || undefined,
@@ -87,7 +90,16 @@ const usePreview = (attachment: AttachmentMessageType): UsePreviewHook => {
 				src: attachmentURL
 			});
 		}
-	}, [attachment, attachmentType, attachmentURL, createPreview, download, extension, size, t]);
+	}, [
+		attachment.name,
+		attachmentURL,
+		createPreview,
+		download,
+		extension,
+		size,
+		t,
+		typeOfAttachment
+	]);
 
 	return { onPreviewClick };
 };
