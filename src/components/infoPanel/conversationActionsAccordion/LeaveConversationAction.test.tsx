@@ -5,6 +5,7 @@
  */
 
 import { screen } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react-hooks';
 import React from 'react';
 import { setup } from 'test-utils';
 
@@ -83,9 +84,11 @@ describe('Leave conversation Action', () => {
 		expect(screen.queryByTestId('leave_modal')).not.toBeInTheDocument();
 	});
 	test('leave conversation', async () => {
-		const store = useStore.getState();
-		store.setLoginInfo(user2Info.id, user2Info.name);
-		store.addRoom(mockedRoom);
+		const { result } = renderHook(() => useStore());
+		act(() => {
+			result.current.setLoginInfo(user2Info.id, user2Info.name);
+			result.current.addRoom(mockedRoom);
+		});
 		mockedDeleteRoomMemberRequest
 			// for testing catch statement
 			.mockRejectedValueOnce("you're still here")
@@ -94,16 +97,22 @@ describe('Leave conversation Action', () => {
 		mockGoToMainPage.mockReturnValue('main page');
 		const { user } = setup(
 			<LeaveConversationAction
-				type={mockedRoom2.type}
-				roomId={mockedRoom2.id}
+				type={mockedRoom.type}
+				roomId={mockedRoom.id}
 				iAmOneOfOwner={false}
 			/>
 		);
-		await user.click(screen.getByText(/Leave Room/i));
+
+		expect(result.current.rooms[mockedRoom.id].members?.length).toBe(2);
+
+		await user.click(screen.getByText(/Leave Group/i));
 		const button = screen.getAllByRole('button')[2];
 		await user.click(button);
 		expect(mockGoToMainPage).not.toBeCalled();
 		await user.click(button);
 		expect(mockGoToMainPage).toBeCalled();
+
+		// if i leave a group, that group will not be defined for me
+		expect(result.current.rooms[mockedRoom.id]).not.toBeDefined();
 	});
 });

@@ -5,6 +5,7 @@
  */
 
 import { screen } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react-hooks';
 import React from 'react';
 import { setup } from 'test-utils';
 
@@ -50,12 +51,14 @@ const message = createMockTextMessage({ roomId: mockedRoom.id });
 
 describe('clear history action', () => {
 	test('clear history', async () => {
-		const store = useStore.getState();
-		store.addRoom(mockedRoom);
-		store.setLoginInfo(user1Info.id, user1Info.name);
-		store.setUserInfo(user1Info);
-		store.setUserInfo(user2Info);
-		store.newMessage(message);
+		const { result } = renderHook(() => useStore());
+		act(() => {
+			result.current.addRoom(mockedRoom);
+			result.current.setLoginInfo(user1Info.id, user1Info.name);
+			result.current.setUserInfo(user1Info);
+			result.current.setUserInfo(user2Info);
+			result.current.newMessage(message);
+		});
 
 		mockedClearHistoryRequest.mockReturnValueOnce({
 			clearedAt: '2022-10-31T10:39:48.622581+01:00'
@@ -72,5 +75,11 @@ describe('clear history action', () => {
 
 		// the modal has disappeared
 		expect(screen.getAllByText(/Clear History/i)).toHaveLength(1);
+
+		// store checks
+		expect(result.current.rooms[mockedRoom.id].userSettings?.clearedAt).toBe(
+			'2022-10-31T10:39:48.622581+01:00'
+		);
+		expect(result.current.messages[mockedRoom.id].length).toBe(0);
 	});
 });

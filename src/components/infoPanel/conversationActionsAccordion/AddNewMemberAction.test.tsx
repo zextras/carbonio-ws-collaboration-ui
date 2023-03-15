@@ -66,7 +66,7 @@ describe('Add new member action', () => {
 		const { user } = setup(<AddNewMemberAction roomId={mockedRoom.id} />);
 
 		await user.click(screen.getByText(/Add new Members/i));
-		expect(screen.getByTestId('modal')).toBeInTheDocument();
+		expect(screen.getByTestId('add_member_modal')).toBeInTheDocument();
 
 		const checkboxIcon = screen.getByTestId('icon: Square');
 		expect(checkboxIcon).toBeInTheDocument();
@@ -75,7 +75,7 @@ describe('Add new member action', () => {
 		expect(screen.getByTestId('icon: CheckmarkSquare')).toBeInTheDocument();
 
 		await user.click(screen.getByTestId('icon: Close'));
-		expect(screen.queryByTestId('modal')).not.toBeInTheDocument();
+		expect(screen.queryByTestId('add_member_modal')).not.toBeInTheDocument();
 	});
 
 	test('Add new member', async () => {
@@ -98,7 +98,7 @@ describe('Add new member action', () => {
 		expect(result.current.rooms[mockedRoom.id].members?.length).toBe(1);
 
 		await user.click(screen.getByText(/Add new Members/i));
-		expect(screen.getByTestId('modal')).toBeInTheDocument();
+		expect(screen.getByTestId('add_member_modal')).toBeInTheDocument();
 
 		const chipInput = await screen.findByTestId('chip_input_creation_modal');
 		await user.type(chipInput, zimbraUser2.fullName[0]);

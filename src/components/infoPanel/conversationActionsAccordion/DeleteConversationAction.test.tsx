@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 import { screen } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react-hooks';
 import React from 'react';
 import { setup } from 'test-utils';
 
@@ -88,9 +89,11 @@ describe('delete conversation action', () => {
 		expect(screen.queryByTestId('leave_modal')).not.toBeInTheDocument();
 	});
 	test('delete conversation', async () => {
-		const store: RootStore = useStore.getState();
-		store.setLoginInfo(user1Info.id, user1Info.name);
-		store.addRoom(testRoom);
+		const { result } = renderHook(() => useStore());
+		act(() => {
+			result.current.setLoginInfo(user1Info.id, user1Info.name);
+			result.current.addRoom(testRoom);
+		});
 		mockedDeleteRoomRequest
 			.mockRejectedValueOnce("conversation's still here")
 			.mockReturnValueOnce('the conversation has been deleted');
@@ -98,6 +101,9 @@ describe('delete conversation action', () => {
 		const { user } = setup(
 			<DeleteConversationAction roomId={testRoom.id} type={testRoom.type} numberOfMembers={2} />
 		);
+
+		expect(result.current.rooms[testRoom.id]).toBeDefined();
+
 		const deleteRoomLabel = screen.getByText(/Delete Group/i);
 		await user.click(deleteRoomLabel);
 
@@ -108,5 +114,8 @@ describe('delete conversation action', () => {
 
 		await user.click(deleteButton);
 		expect(mockGoToMainPage).toBeCalled();
+
+		// store checks
+		expect(result.current.rooms[testRoom.id]).not.toBeDefined();
 	});
 });

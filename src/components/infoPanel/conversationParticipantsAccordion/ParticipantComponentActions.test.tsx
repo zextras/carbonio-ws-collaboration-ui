@@ -5,6 +5,7 @@
  */
 
 import { screen } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react-hooks';
 import React from 'react';
 import { setup } from 'test-utils';
 
@@ -105,9 +106,11 @@ describe('participants actions - go to private chat', () => {
 		expect(mockGoToRoomPage).toBeCalled();
 	});
 	test('non-existent chat', async () => {
-		const store = useStore.getState();
-		store.setLoginInfo(user2Info.id, user2Info.name);
-		store.setUserInfo(user1Info);
+		const { result } = renderHook(() => useStore());
+		act(() => {
+			result.current.setLoginInfo(user2Info.id, user2Info.name);
+			result.current.setUserInfo(user1Info);
+		});
 		mockedAddRoomRequest.mockReturnValue({
 			id: 'room-id',
 			name: ' ',
@@ -118,6 +121,9 @@ describe('participants actions - go to private chat', () => {
 		const { user } = setup(<GoToPrivateChatAction memberId={user1Info.id} />);
 		await user.click(screen.getByTestId('go_to_private_chat'));
 		expect(mockGoToRoomPage).toBeCalled();
+
+		// store checks
+		expect(result.current.rooms['room-id']).toBeDefined();
 	});
 });
 
@@ -142,9 +148,11 @@ describe('participants actions - leave/delete conversation', () => {
 		expect(screen.queryByTestId('leave_modal')).not.toBeInTheDocument();
 	});
 	test('leave conversation', async () => {
-		const store = useStore.getState();
-		store.setLoginInfo(user2Info.id, user2Info.name);
-		store.addRoom(mockedRoom);
+		const { result } = renderHook(() => useStore());
+		act(() => {
+			result.current.setLoginInfo(user2Info.id, user2Info.name);
+			result.current.addRoom(mockedRoom);
+		});
 		mockedDeleteRoomMemberRequest
 			// for testing catch statement
 			.mockRejectedValueOnce("you're still here")
@@ -166,6 +174,9 @@ describe('participants actions - leave/delete conversation', () => {
 		expect(mockGoToMainPage).not.toBeCalled();
 		await user.click(button);
 		expect(mockGoToMainPage).toBeCalled();
+
+		// store checks
+		expect(result.current.rooms[mockedRoom.id]).not.toBeDefined();
 	});
 	test('delete conversation - open and close modal', async () => {
 		const store = useStore.getState();
@@ -187,9 +198,11 @@ describe('participants actions - leave/delete conversation', () => {
 		expect(screen.queryByTestId('delete_modal')).not.toBeInTheDocument();
 	});
 	test('delete conversation', async () => {
-		const store = useStore.getState();
-		store.setLoginInfo(user1Info.id, user1Info.name);
-		store.addRoom(mockedRoom2);
+		const { result } = renderHook(() => useStore());
+		act(() => {
+			result.current.setLoginInfo(user1Info.id, user1Info.name);
+			result.current.addRoom(mockedRoom2);
+		});
 		mockedDeleteRoomRequest
 			// for testing catch statement
 			.mockRejectedValueOnce("conversation's still here")
@@ -212,15 +225,20 @@ describe('participants actions - leave/delete conversation', () => {
 		expect(mockGoToMainPage).not.toBeCalled();
 		await user.click(button);
 		expect(mockGoToMainPage).toBeCalled();
+
+		// store checks
+		expect(result.current.rooms[mockedRoom2.id]).not.toBeDefined();
 	});
 });
 
 describe('participants actions - promote/demote member', () => {
 	test('promote/demote member', async () => {
-		const store = useStore.getState();
-		store.setLoginInfo(user1Info.id, user1Info.name);
-		store.setUserInfo(user2Info);
-		store.addRoom(mockedRoom);
+		const { result } = renderHook(() => useStore());
+		act(() => {
+			result.current.setLoginInfo(user1Info.id, user1Info.name);
+			result.current.setUserInfo(user2Info);
+			result.current.addRoom(mockedRoom);
+		});
 		mockedPromoteRoomMemberRequest
 			.mockRejectedValueOnce('not promoted')
 			.mockReturnValueOnce('promoted');
@@ -244,12 +262,18 @@ describe('participants actions - promote/demote member', () => {
 		const button = await screen.findByTestId('icon: Crown');
 		expect(button).toBeInTheDocument();
 
+		// store checks
+		expect(result.current.rooms[mockedRoom.id].members?.[1].owner).toBe(true);
+
 		// Demote member
 		await user.click(button);
 		expect(button).toBeInTheDocument();
 
 		await user.click(button);
 		expect(screen.getByTestId('icon: CrownOutline')).toBeInTheDocument();
+
+		// store checks
+		expect(result.current.rooms[mockedRoom.id].members?.[1].owner).toBe(false);
 	});
 });
 
@@ -271,10 +295,12 @@ describe('participants actions - delete user', () => {
 	});
 
 	test('delete user', async () => {
-		const store = useStore.getState();
-		store.setLoginInfo(user1Info.id, user1Info.name);
-		store.setUserInfo(user2Info);
-		store.addRoom(mockedRoom);
+		const { result } = renderHook(() => useStore());
+		act(() => {
+			result.current.setLoginInfo(user1Info.id, user1Info.name);
+			result.current.setUserInfo(user2Info);
+			result.current.addRoom(mockedRoom);
+		});
 		mockedDeleteRoomMemberRequest
 			// for testing catch statement
 			.mockRejectedValueOnce('user is still here')
@@ -291,5 +317,8 @@ describe('participants actions - delete user', () => {
 
 		await user.click(button);
 		expect(mockedDeleteRoomMemberRequest).toBeCalledTimes(2);
+
+		// store checks
+		expect(result.current.rooms[mockedRoom.id].members?.length).toBe(1);
 	});
 });
