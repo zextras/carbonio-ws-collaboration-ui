@@ -6,7 +6,11 @@
 
 import { fetchResponse } from '../../../jest-mocks';
 import useStore from '../../store/Store';
-import { createMockCapabilityList, createMockRoom } from '../../tests/createMock';
+import {
+	createMockCapabilityList,
+	createMockRoom,
+	createMockTextMessage
+} from '../../tests/createMock';
 import roomsApi from './RoomsApi';
 
 describe('Rooms API', () => {
@@ -202,6 +206,27 @@ describe('Rooms API', () => {
 			method: 'PUT',
 			headers,
 			body: undefined
+		});
+	});
+
+	test('forwardMessages is called correctly', async () => {
+		// Send addRoom request
+		const message = createMockTextMessage();
+		const forwardedMessage = {
+			originalMessage: message.id,
+			originalMessageTime: message.date
+		};
+		await roomsApi.forwardMessages('roomId', [forwardedMessage]);
+
+		// Set appropriate headers
+		const headers = new Headers();
+		headers.append('Content-Type', 'application/json');
+
+		// Check if fetch is called with the correct parameters
+		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/rooms/roomId/forward`, {
+			method: 'POST',
+			headers,
+			body: JSON.stringify([forwardedMessage])
 		});
 	});
 });

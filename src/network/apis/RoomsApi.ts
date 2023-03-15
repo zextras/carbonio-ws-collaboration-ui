@@ -9,6 +9,7 @@ import { RequestType } from '../../types/network/apis/IBaseAPI';
 import IRoomsApi from '../../types/network/apis/IRoomsApi';
 import {
 	AddMemberFields,
+	ForwardedMessage,
 	RoomCreationFields,
 	RoomEditableFields
 } from '../../types/network/models/roomBeTypes';
@@ -21,6 +22,7 @@ import {
 	DeleteRoomPictureResponse,
 	DeleteRoomResponse,
 	DemotesRoomMemberResponse,
+	ForwardMessagesResponse,
 	GetRoomAttachmentsResponse,
 	GetRoomMembersResponse,
 	GetRoomPictureResponse,
@@ -167,6 +169,13 @@ class RoomsApi extends BaseAPI implements IRoomsApi {
 			file,
 			description
 		);
+	}
+
+	public forwardMessages(
+		roomId: string,
+		messagesToForward: ForwardedMessage[]
+	): Promise<ForwardMessagesResponse> {
+		return this.fetchAPI(`rooms/${roomId}/forward`, RequestType.POST, messagesToForward);
 	}
 }
 
