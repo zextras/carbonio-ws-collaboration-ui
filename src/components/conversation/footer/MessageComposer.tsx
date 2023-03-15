@@ -216,7 +216,9 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 		window.parent.addEventListener('beforeunload', sendStopWriting);
 		const messageRef = messageInputRef.current;
 		return () => {
-			xmppClient.sendPaused(roomId);
+			if (xmppClient) {
+				xmppClient.sendPaused(roomId);
+			}
 			window.parent.removeEventListener('beforeunload', sendStopWriting);
 			setTextMessage('');
 			if (messageRef) {

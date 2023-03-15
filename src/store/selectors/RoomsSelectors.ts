@@ -81,6 +81,17 @@ export const getMyOwnershipOfTheRoom = (
 	return false;
 };
 
+export const getOwner = (state: RootStore, roomId: string, userId: string): boolean => {
+	if (state.rooms[roomId].members != null) {
+		const user = find(state.rooms[roomId].members, (member) => member.userId === userId);
+		if (user != null) {
+			return user.owner;
+		}
+		return false;
+	}
+	return false;
+};
+
 export const getNumberOfOwnersOfTheRoom = (state: RootStore, roomId: string): number => {
 	if (state.rooms[roomId].members != null) {
 		return countBy(state.rooms[roomId].members, (member) => member.owner).true;

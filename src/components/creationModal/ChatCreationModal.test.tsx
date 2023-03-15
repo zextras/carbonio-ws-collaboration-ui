@@ -177,7 +177,6 @@ describe('Chat Creation Modal', () => {
 		expect(footerButton).not.toBeEnabled();
 	});
 
-	jest.setTimeout(7000);
 	test('Error on topic input', async () => {
 		const { user } = setup(<ChatCreationModal open onClose={jest.fn()} />);
 

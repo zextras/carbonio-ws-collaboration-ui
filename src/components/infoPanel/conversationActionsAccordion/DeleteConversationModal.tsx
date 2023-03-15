@@ -58,6 +58,7 @@ const DeleteConversationModal: FC<DeleteModalProps> = ({
 			showCloseIcon
 			closeIconTooltip={closeLabel}
 			onClose={closeModal}
+			data-testid="delete_modal"
 		>
 			<Container padding={{ vertical: 'large' }}>
 				<Text>{deleteConversationDescriptionLabel}</Text>

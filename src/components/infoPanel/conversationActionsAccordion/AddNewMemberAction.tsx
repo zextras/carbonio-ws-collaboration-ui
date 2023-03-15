@@ -9,7 +9,7 @@ import { map } from 'lodash';
 import React, { FC, useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import RoomsApi from '../../../network/apis/RoomsApi';
+import { RoomsApi } from '../../../network';
 import { getRoomMembers, getRoomNameSelector } from '../../../store/selectors/RoomsSelectors';
 import useStore from '../../../store/Store';
 import { AddMemberFields } from '../../../types/network/models/roomBeTypes';

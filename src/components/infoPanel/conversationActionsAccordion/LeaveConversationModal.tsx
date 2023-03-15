@@ -51,6 +51,7 @@ const LeaveConversationModal: FC<LeaveModalProps> = ({
 			showCloseIcon
 			onClose={closeModal}
 			closeIconTooltip={closeLabel}
+			data-testid="leave_modal"
 		>
 			<Container padding={{ vertical: 'large' }}>
 				<Text>{leaveConversationDescriptionLabel}</Text>
