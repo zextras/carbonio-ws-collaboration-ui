@@ -57,6 +57,7 @@ const GoToPrivateChatAction: FC<GoToPrivateChatProps> = ({ memberId }) => {
 				size="extralarge"
 				icon={'MessageCircleOutline'}
 				onClick={goToUserRoom}
+				data-testid="go_to_private_chat"
 			/>
 		</Tooltip>
 	);

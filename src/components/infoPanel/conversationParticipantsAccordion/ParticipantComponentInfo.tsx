@@ -121,7 +121,7 @@ const ParticipantComponentInfo: FC<ParticipantsInfoProps> = ({ member, roomId })
 			{avatarElement}
 			{infoElement}
 			<Row>
-				<ParticipantComponentActions roomId={roomId} member={member} />
+				<ParticipantComponentActions roomId={roomId} memberId={member.userId} />
 			</Row>
 		</CustomContainer>
 	);

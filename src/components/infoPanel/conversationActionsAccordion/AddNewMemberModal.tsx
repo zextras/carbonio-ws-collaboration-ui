@@ -87,6 +87,7 @@ const AddNewMemberModal: FC<AddNewMemberProps> = ({
 			showCloseIcon
 			onClose={closeModal}
 			closeIconTooltip={closeLabel}
+			data-testid="add_member_modal"
 		>
 			<Container>
 				<ChatCreationContactsSelection

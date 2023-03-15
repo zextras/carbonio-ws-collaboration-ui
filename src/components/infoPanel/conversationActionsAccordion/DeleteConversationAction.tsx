@@ -9,8 +9,7 @@ import React, { FC, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import useRouting from '../../../hooks/useRouting';
-import RoomsApi from '../../../network/apis/RoomsApi';
-import { getNumbersOfRoomMembers } from '../../../store/selectors/RoomsSelectors';
+import { RoomsApi } from '../../../network';
 import useStore from '../../../store/Store';
 import { RoomType } from '../../../types/store/RoomTypes';
 import ActionComponent from './ActionComponent';
@@ -19,9 +18,10 @@ import DeleteConversationModal from './DeleteConversationModal';
 type DeleteProps = {
 	roomId: string;
 	type: string;
+	numberOfMembers: number;
 };
 
-const DeleteConversationAction: FC<DeleteProps> = ({ roomId, type }) => {
+const DeleteConversationAction: FC<DeleteProps> = ({ roomId, type, numberOfMembers }) => {
 	const [t] = useTranslation();
 	const deleteLabel = useMemo(() => {
 		if (type === RoomType.GROUP) {
@@ -30,7 +30,9 @@ const DeleteConversationAction: FC<DeleteProps> = ({ roomId, type }) => {
 		return t('modal.deleteRoom', 'Delete Room');
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [type]);
-	const numberOfMembers: number = useStore((state) => getNumbersOfRoomMembers(state, roomId));
+
+	const deleteRoom = useStore((state) => state.deleteRoom);
+
 	const [deleteConversationModalOpen, setDeleteConversationModalOpen] = useState(false);
 
 	const { goToMainPage } = useRouting();
@@ -38,15 +40,15 @@ const DeleteConversationAction: FC<DeleteProps> = ({ roomId, type }) => {
 	const deleteConversation = useCallback(() => {
 		RoomsApi.deleteRoom(roomId)
 			.then(() => {
-				useStore.getState().deleteRoom(roomId);
+				deleteRoom(roomId);
 				goToMainPage();
 			})
 			.catch(() => null);
-	}, [goToMainPage, roomId]);
+	}, [deleteRoom, goToMainPage, roomId]);
 
-	const closeModal = (): void => {
+	const closeModal = useCallback(() => {
 		setDeleteConversationModalOpen(false);
-	};
+	}, []);
 
 	return (
 		<Container>

@@ -34,6 +34,7 @@ const DeleteUserModal: FC<DeleteUserProps> = ({ deleteUserModalOpen, deleteUser,
 			showCloseIcon
 			closeIconTooltip={closeLabel}
 			onClose={closeModal}
+			data-testid="delete_user_modal"
 		>
 			<Container padding={{ vertical: 'large' }}>
 				<Text>{removeMemberDescriptionLabel}</Text>

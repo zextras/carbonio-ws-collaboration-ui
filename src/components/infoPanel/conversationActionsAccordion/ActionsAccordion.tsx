@@ -14,6 +14,7 @@ import { roomIsEmpty } from '../../../store/selectors/MessagesSelectors';
 import {
 	getMyOwnershipOfTheRoom,
 	getNumberOfOwnersOfTheRoom,
+	getNumbersOfRoomMembers,
 	getRoomTypeSelector
 } from '../../../store/selectors/RoomsSelectors';
 import useStore from '../../../store/Store';
@@ -39,6 +40,7 @@ export const ActionsAccordion: FC<ActionAccordionProps> = ({ roomId }) => {
 	const actionAccordionTitle: string = t('conversationInfo.actionAccordionTitle', 'Actions');
 	const roomType: string = useStore((state) => getRoomTypeSelector(state, roomId));
 	const sessionId: string | undefined = useStore((state) => state.session.id);
+	const numberOfMembers: number = useStore((state) => getNumbersOfRoomMembers(state, roomId));
 	const iAmOwner: boolean = useStore((state) => getMyOwnershipOfTheRoom(state, sessionId, roomId));
 	const numberOfOwners: number = useStore((state) => getNumberOfOwnersOfTheRoom(state, roomId));
 	const emptyRoom: boolean = useStore((state) => roomIsEmpty(state, roomId));
@@ -113,7 +115,13 @@ export const ActionsAccordion: FC<ActionAccordionProps> = ({ roomId }) => {
 				id: '6',
 				disableHover: true,
 				background: 'gray6',
-				CustomComponent: () => <DeleteConversationAction roomId={roomId} type={roomType} />
+				CustomComponent: () => (
+					<DeleteConversationAction
+						roomId={roomId}
+						type={roomType}
+						numberOfMembers={numberOfMembers}
+					/>
+				)
 			});
 		}
 
@@ -135,7 +143,8 @@ export const ActionsAccordion: FC<ActionAccordionProps> = ({ roomId }) => {
 		actionAccordionTitle,
 		accordionStatus,
 		toggleAccordionStatus,
-		roomId
+		roomId,
+		numberOfMembers
 	]);
 
 	return <CustomAccordion key="listAccordions" items={infoDetails} borderRadius="none" />;
