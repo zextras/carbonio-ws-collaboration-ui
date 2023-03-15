@@ -185,3 +185,15 @@ jest.mock('./src/network', () => ({
 		getURLPreview: mockedGetURLPreview
 	}
 }));
+
+export const fetchResponse: jest.Mock = jest.fn(() => ({}));
+
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+global.fetch = jest.fn(() =>
+	Promise.resolve({
+		json: () => fetchResponse(),
+		ok: true,
+		headers: { get: (): string => 'application/json' }
+	})
+);
