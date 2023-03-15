@@ -10,6 +10,7 @@ import React, { FC, useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled, { css, FlattenSimpleInterpolation } from 'styled-components';
 
+import usePreview from '../../../hooks/usePreview';
 import { AttachmentsApi } from '../../../network';
 import { getXmppClient } from '../../../store/selectors/ConnectionSelector';
 import { getCapability } from '../../../store/selectors/SessionSelectors';
@@ -17,6 +18,7 @@ import useStore from '../../../store/Store';
 import { messageActionType } from '../../../types/store/ActiveConversationTypes';
 import { MessageType, TextMessage } from '../../../types/store/MessageTypes';
 import { CapabilityType } from '../../../types/store/SessionTypes';
+import { isPreviewSupported } from '../../../utils/attachmentUtils';
 import ForwardMessageModal from '../forwardModal/ForwardMessageModal';
 
 export const BubbleContextualMenuDropDownWrapper = styled.div<{
@@ -106,6 +108,7 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 	const replyActionLabel = t('action.reply', 'Reply');
 	const forwardActionLabel = t('action.forward', 'Forward');
 	const downloadActionLabel = t('action.download', 'Download');
+	const previewActionLabel = t('action.preview', 'Preview');
 	const successfulCopySnackbar = t('feedback.messageCopied', 'Message copied');
 	const messageActionsTooltip = t('tooltip.messageActions', ' Message actions');
 
@@ -120,6 +123,12 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 	const [dropdownActive, setDropdownActive] = useState(false);
 	const [forwardMessageModalIsOpen, setForwardMessageModalIsOpen] = useState<boolean>(false);
 	const createSnackbar: any = useContext(SnackbarManagerContext);
+
+	const { onPreviewClick } = usePreview(
+		message.type === MessageType.TEXT_MSG && message.attachment
+			? message.attachment
+			: { id: '', name: '', mimeType: '', size: 0 }
+	);
 
 	const onDropdownOpen = useCallback(() => setDropdownActive(true), [setDropdownActive]);
 	const onDropdownClose = useCallback(() => setDropdownActive(false), [setDropdownActive]);
@@ -249,7 +258,15 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 			});
 		}
 
+		// Download and Preview Functionality
 		if (message.attachment) {
+			if (isPreviewSupported(message.attachment.mimeType)) {
+				actions.push({
+					id: 'Preview',
+					label: previewActionLabel,
+					click: onPreviewClick
+				});
+			}
 			actions.push({
 				id: 'Download',
 				label: downloadActionLabel,
@@ -281,7 +298,9 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 		deleteActionLabel,
 		deleteMessage,
 		downloadActionLabel,
-		downloadAction
+		downloadAction,
+		previewActionLabel,
+		onPreviewClick
 	]);
 
 	return (

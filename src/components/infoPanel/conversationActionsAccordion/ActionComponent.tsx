@@ -73,9 +73,7 @@ const ActionComponent: FC<ActionProps> = ({
 					backgroundColor={actionColor}
 				/>
 				<Padding right="large" />
-				<CustomText size={'medium'} color={actionColor}>
-					{label}
-				</CustomText>
+				<CustomText color={actionColor}>{label}</CustomText>
 			</CustomContainer>
 			{withArrow && <CustomIcon icon="ArrowIosForwardOutline" color={actionColor} size="medium" />}
 		</ActionContainer>

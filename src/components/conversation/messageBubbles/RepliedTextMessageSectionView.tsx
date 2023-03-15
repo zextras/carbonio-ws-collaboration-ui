@@ -4,13 +4,22 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Avatar, Container, Padding, Text } from '@zextras/carbonio-design-system';
+import {
+	Avatar,
+	Container,
+	IconButton,
+	Padding,
+	Row,
+	Text,
+	Tooltip
+} from '@zextras/carbonio-design-system';
 import { useUserSettings } from '@zextras/carbonio-shell-ui';
 import { find } from 'lodash';
-import React, { FC, useMemo, useCallback } from 'react';
+import React, { FC, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
+import usePreview from '../../../hooks/usePreview';
 import { getUserName, getUserSelector } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
 import { DeletedMessage, MessageType, TextMessage } from '../../../types/store/MessageTypes';
@@ -23,6 +32,27 @@ type RepliedTextMessageSectionViewProps = {
 	repliedMessage: TextMessage | DeletedMessage;
 	isMyMessage: boolean;
 };
+
+const HoverContainer = styled(Container)`
+	z-index: 1;
+	position: absolute;
+	opacity: 0;
+	border-radius: 0.5rem;
+	background-color: rgba(0, 0, 0, 0.6);
+`;
+
+const CustomPadding = styled(Padding)`
+	position: relative;
+	&:hover {
+		${HoverContainer} {
+			opacity: 1;
+		}
+	}
+`;
+
+const CustomIconButton = styled(IconButton)`
+	background-color: rgba(255, 255, 255, 0);
+`;
 
 const RepliedTextMessageContainer = styled(Container)`
 	border-left: ${({ userBorderColor, theme }): string =>
@@ -56,6 +86,7 @@ const RepliedTextMessageSectionView: FC<RepliedTextMessageSectionViewProps> = ({
 }) => {
 	const [t] = useTranslation();
 	const deletedMessageLabel = t('message.deletedMessage', 'Deleted message');
+	const previewActionLabel = t('action.preview', 'Preview');
 
 	const sessionId: string | undefined = useStore((state) => state.session.id);
 	const replyUserInfo = useStore((store) => getUserSelector(store, repliedMessage?.from));
@@ -63,6 +94,12 @@ const RepliedTextMessageSectionView: FC<RepliedTextMessageSectionViewProps> = ({
 	const userColor = useMemo(() => calculateAvatarColor(senderIdentifier || ''), [senderIdentifier]);
 
 	const settings = useUserSettings();
+
+	const { onPreviewClick } = usePreview(
+		repliedMessage.type === MessageType.TEXT_MSG && repliedMessage.attachment
+			? repliedMessage.attachment
+			: { id: '', name: '', mimeType: '', size: 0 }
+	);
 
 	const darkModeSettings = useMemo(
 		() => find(settings.props, (value) => value.name === 'zappDarkreaderMode')?._content,
@@ -162,33 +199,52 @@ const RepliedTextMessageSectionView: FC<RepliedTextMessageSectionViewProps> = ({
 				onClick={scrollTo}
 			>
 				{repliedMessage.type === MessageType.TEXT_MSG && repliedMessage.attachment && (
-					<Padding right="small">
-						<CustomAvatar
-							size="large"
-							icon="FileTextOutline"
-							label={repliedMessage.attachment.name}
-							shape="square"
-							background={previewURL ? 'gray3' : 'gray0'}
-							picture={previewURL}
-						/>
-					</Padding>
+					<Row wrap="nowrap">
+						<CustomPadding right="small" data-testid="hover-container">
+							<HoverContainer
+								height="3rem"
+								width="3rem"
+								mainAlignment="center"
+								crossAlignment="center"
+							>
+								<Tooltip label={previewActionLabel}>
+									<CustomIconButton
+										icon="EyeOutline"
+										iconColor="gray6"
+										customSize={{ iconSize: 'large', paddingSize: 'extrasmall' }}
+										onClick={onPreviewClick}
+									/>
+								</Tooltip>
+							</HoverContainer>
+							<CustomAvatar
+								size="large"
+								icon="FileTextOutline"
+								label={repliedMessage.attachment.name}
+								shape="square"
+								background={previewURL ? 'gray3' : 'gray0'}
+								picture={previewURL}
+							/>
+						</CustomPadding>
+					</Row>
 				)}
-				<Container crossAlignment="flex-start">
-					{senderIdentifier && <BubbleHeader senderId={repliedMessage.from} />}
-					{repliedMessage && repliedMessage.type === MessageType.TEXT_MSG && (
-						<MessageWrap color="secondary" overflow="ellipsis" size="small">
-							{textToShow}
-						</MessageWrap>
-					)}
-					{repliedMessage && repliedMessage.type === MessageType.DELETED_MSG && (
-						<DeletedMessageWrap color="secondary" overflow="ellipsis" size="small">
-							{deletedMessageLabel}
-						</DeletedMessageWrap>
-					)}
-					{repliedMessage && repliedMessage.type !== MessageType.DELETED_MSG && (
-						<BubbleFooter date={repliedMessage.date} isEdited={repliedMessage.edited} />
-					)}
-				</Container>
+				<Row takeAvailableSpace wrap="nowrap">
+					<Container crossAlignment="flex-start">
+						{senderIdentifier && <BubbleHeader senderId={repliedMessage.from} />}
+						{repliedMessage && repliedMessage.type === MessageType.TEXT_MSG && (
+							<MessageWrap color="secondary" overflow="ellipsis">
+								{textToShow}
+							</MessageWrap>
+						)}
+						{repliedMessage && repliedMessage.type === MessageType.DELETED_MSG && (
+							<DeletedMessageWrap color="secondary" overflow="ellipsis">
+								{deletedMessageLabel}
+							</DeletedMessageWrap>
+						)}
+						{repliedMessage && repliedMessage.type !== MessageType.DELETED_MSG && (
+							<BubbleFooter date={repliedMessage.date} isEdited={repliedMessage.edited} />
+						)}
+					</Container>
+				</Row>
 			</RepliedTextMessageContainer>
 			<Padding top="small" />
 		</>

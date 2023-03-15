@@ -119,7 +119,7 @@ export const createMockCapabilityList = (fields?: Record<string, any>): Capabili
 
 export const createMockUser = (fields?: Record<string, any>): UserBe => ({
 	id: 'id',
-	email: 'user@usrer.com',
+	email: 'user@user.com',
 	name: 'Name',
 	...fields
 });

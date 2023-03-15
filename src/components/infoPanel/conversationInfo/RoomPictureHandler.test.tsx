@@ -8,6 +8,10 @@ import { act, screen } from '@testing-library/react';
 import React from 'react';
 import { setup } from 'test-utils';
 
+import {
+	mockedDeleteRoomPictureRequest,
+	mockedUpdateRoomPictureRequest
+} from '../../../../jest-mocks';
 import useStore from '../../../store/Store';
 import {
 	createMockCapabilityList,
@@ -109,6 +113,9 @@ describe('Room Picture Handler - groups', () => {
 		expect(deleteButton).toBeInTheDocument();
 	});
 	test('upload an image', async () => {
+		const testImageFile = new File(['hello'], 'hello.png', { type: 'image/png' });
+
+		mockedUpdateRoomPictureRequest.mockReturnValueOnce('ww.url.it');
 		const store: RootStore = useStore.getState();
 		store.addRoom(testRoom);
 		store.setUserInfo(user1Info);
@@ -121,22 +128,25 @@ describe('Room Picture Handler - groups', () => {
 		const backgroundContainer = screen.getByTestId('background_container');
 		await user.hover(backgroundContainer);
 
-		const uploadButton = screen.getByTestId('upload_button');
-		await user.click(uploadButton);
+		const hoverContainer = screen.getByTestId('hover_container');
+		const input = hoverContainer.children.item(0) as HTMLInputElement;
 
-		// Simulate ROOM_PICTURE_CHANGED WebSocket event
-		act(() => store.setRoomPictureUpdated(testRoom.id, '2022-08-26T17:24:28.961+02:00'));
+		expect(input).not.toBeNull();
+		expect(input.files).toHaveLength(0);
 
-		const pictureContainer = await screen.findByTestId('picture_container');
+		await user.upload(input, testImageFile);
+		expect(input.files).toHaveLength(1);
+
+		const snackbar = await screen.findByText(/New avatar has been successfully uploaded/i);
+		expect(snackbar).toBeVisible();
+
+		const pictureContainer = screen.getByTestId('picture_container');
 		expect(pictureContainer).toBeInTheDocument();
-
-		await user.hover(pictureContainer);
-		const updateButton = screen.getByTestId('upload_button');
-		const deleteButton = screen.getByTestId('delete_button');
-		expect(updateButton).toBeInTheDocument();
-		expect(deleteButton).toBeInTheDocument();
 	});
-	test('update an image', async () => {
+	test('update an image fails', async () => {
+		const testImageFile = new File(['hello'], 'hello.png', { type: 'image/png' });
+
+		mockedUpdateRoomPictureRequest.mockRejectedValueOnce('image not changed');
 		const store: RootStore = useStore.getState();
 		store.addRoom(testRoom2);
 		store.setUserInfo(user1Info);
@@ -150,14 +160,14 @@ describe('Room Picture Handler - groups', () => {
 		expect(pictureContainer).toBeInTheDocument();
 
 		await user.hover(pictureContainer);
-		const updateButton = screen.getByTestId('upload_button');
-		expect(updateButton).toBeInTheDocument();
-		await user.click(updateButton);
+		const hoverContainer = screen.getByTestId('hover_container');
+		const input = hoverContainer.children.item(0) as HTMLInputElement;
+		expect(input).not.toBeNull();
 
-		// Simulate ROOM_PICTURE_CHANGED WebSocket event
-		act(() => store.setRoomPictureUpdated(testRoom.id, '2022-08-26T17:24:28.961+02:00'));
+		await user.upload(input, testImageFile);
 
-		expect(pictureContainer).toBeInTheDocument();
+		const snackbar = await screen.findByText(/Something went wrong/i);
+		expect(snackbar).toBeVisible();
 	});
 	test('delete an image', async () => {
 		const store: RootStore = useStore.getState();
@@ -165,6 +175,8 @@ describe('Room Picture Handler - groups', () => {
 		store.setUserInfo(user1Info);
 		store.setUserInfo(user2Info);
 		store.setLoginInfo(user1Info.id, user1Info.name);
+
+		mockedDeleteRoomPictureRequest.mockReturnValueOnce('deleted');
 		const { user } = setup(
 			<RoomPictureHandler roomId={testRoom.id} memberId="" roomType={RoomType.GROUP} />
 		);
@@ -177,8 +189,10 @@ describe('Room Picture Handler - groups', () => {
 		expect(deleteButton).toBeInTheDocument();
 		await user.click(deleteButton);
 
-		// Simulate ROOM_PICTURE_DELETED WebSocket event
-		act(() => store.setRoomPictureDeleted(testRoom.id));
+		const snackbar = await screen.findByText(
+			/Group avatar has been successfully reset to the original one/i
+		);
+		expect(snackbar).toBeVisible();
 
 		const backgroundContainer = await screen.findByTestId('background_container');
 		expect(backgroundContainer).toBeInTheDocument();
@@ -187,6 +201,31 @@ describe('Room Picture Handler - groups', () => {
 		const uploadButton = screen.getByTestId('upload_button');
 		expect(uploadButton).toBeInTheDocument();
 		expect(deleteButton).not.toBeInTheDocument();
+	});
+	test('delete an image fails ', async () => {
+		const store: RootStore = useStore.getState();
+		store.addRoom(testRoom2);
+		store.setUserInfo(user1Info);
+		store.setUserInfo(user2Info);
+		store.setLoginInfo(user1Info.id, user1Info.name);
+
+		mockedDeleteRoomPictureRequest.mockRejectedValueOnce('not deleted');
+		const { user } = setup(
+			<RoomPictureHandler roomId={testRoom.id} memberId="" roomType={RoomType.GROUP} />
+		);
+
+		const pictureContainer = await screen.findByTestId('picture_container');
+		expect(pictureContainer).toBeInTheDocument();
+
+		await user.hover(pictureContainer);
+		const deleteButton = screen.getByTestId('delete_button');
+		expect(deleteButton).toBeInTheDocument();
+		await user.click(deleteButton);
+
+		const snackbar = await screen.findByText(/Something went wrong. Please Retry/i);
+		expect(snackbar).toBeVisible();
+
+		expect(pictureContainer).toBeInTheDocument();
 	});
 });
 

@@ -72,7 +72,7 @@ const ForwardedMessageSectionView: FC<ForwardedMessageSectionViewProps> = ({
 				userBorderColor={userColor}
 			>
 				{forwardUsername && <BubbleHeader senderId={forwardedMessage.from} />}
-				<MessageWrap color="secondary" size="small" overflow="break-word">
+				<MessageWrap color="secondary" overflow="break-word">
 					{forwardedMessage.text}
 				</MessageWrap>
 				<BubbleFooter date={forwardedMessage.date} dateAndTime />
