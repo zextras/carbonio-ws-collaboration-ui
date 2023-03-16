@@ -52,7 +52,7 @@ export type RoomUserSettings = {
 	clearedAt?: string;
 };
 
-export type ForwardedMessage = {
+export type ForwardedMessageInfo = {
 	originalMessage: string;
 	originalMessageTime: number;
 	description?: string;

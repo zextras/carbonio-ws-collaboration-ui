@@ -27,10 +27,11 @@ import React, {
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import { getXmppClient } from '../../../store/selectors/ConnectionSelector';
+import { RoomsApi } from '../../../network';
 import { getRoomIdsOrderedLastMessage } from '../../../store/selectors/MessagesSelectors';
 import { getRoomNameSelector } from '../../../store/selectors/RoomsSelectors';
 import useStore from '../../../store/Store';
+import { ForwardedMessageInfo } from '../../../types/network/models/roomBeTypes';
 import { TextMessage } from '../../../types/store/MessageTypes';
 import ForwardMessageConversationChip from './ForwardMessageConversationChip';
 import ForwardMessageConversationListItem from './ForwardMessageConversationListItem';
@@ -74,8 +75,6 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 	const [selected, setSelected] = useState<{ [id: string]: boolean }>({});
 	const [chatList, setChatList] = useState<{ id: string }[]>([]);
 	const [chips, setChips] = useState<{ id: string }[]>([]);
-
-	const xmppClient = useStore(getXmppClient);
 
 	// Update conversation list on filter updating
 	useEffect(() => {
@@ -130,12 +129,15 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 	);
 
 	const forwardMessage = useCallback(() => {
-		xmppClient.forwardMessage(
-			message,
-			map(selected, (value, key) => key)
-		);
-		onClose();
-	}, [message, onClose, selected, xmppClient]);
+		// TODO Check what time of data BE wants on 'originalMessage' and 'originalMessageTime'
+		const messageToForward: ForwardedMessageInfo = {
+			originalMessage: message.id,
+			originalMessageTime: message.date
+		};
+		Promise.all(map(selected, (value, key) => RoomsApi.forwardMessages(key, [messageToForward])))
+			.then(() => onClose())
+			.catch(() => onClose());
+	}, [message, onClose, selected]);
 
 	const ListItem = useMemo(
 		() =>

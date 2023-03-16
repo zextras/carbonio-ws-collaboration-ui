@@ -160,6 +160,7 @@ export function decodeMessage(messageStanza: Element, optional?: OptionalParamet
 		if (forwardedElement) {
 			const forwardedMessageElement = getRequiredTagElement(forwardedElement, 'message');
 			const delayElement = getRequiredTagElement(forwardedElement, 'delay');
+			// TODO decode aso forwarded attachments
 			forwarded = {
 				id: getRequiredAttribute(forwardedMessageElement, 'id'),
 				date: dateToTimestamp(getRequiredAttribute(delayElement, 'stamp')),

@@ -214,7 +214,7 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 		});
 
 		// Forward message in another chat
-		if (!message.forwarded && !message.attachment) {
+		if (!message.forwarded) {
 			actions.push({
 				id: 'forward',
 				label: forwardActionLabel,

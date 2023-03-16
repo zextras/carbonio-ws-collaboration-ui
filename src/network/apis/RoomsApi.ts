@@ -9,7 +9,7 @@ import { RequestType } from '../../types/network/apis/IBaseAPI';
 import IRoomsApi from '../../types/network/apis/IRoomsApi';
 import {
 	AddMemberFields,
-	ForwardedMessage,
+	ForwardedMessageInfo,
 	RoomCreationFields,
 	RoomEditableFields
 } from '../../types/network/models/roomBeTypes';
@@ -163,17 +163,14 @@ class RoomsApi extends BaseAPI implements IRoomsApi {
 		file: File,
 		description?: string
 	): Promise<AddRoomAttachmentResponse> {
-		return this.uploadFileFetchAPI(
-			`rooms/${roomId}/attachments`,
-			RequestType.POST,
-			file,
+		return this.uploadFileFetchAPI(`rooms/${roomId}/attachments`, RequestType.POST, file, {
 			description
-		);
+		});
 	}
 
 	public forwardMessages(
 		roomId: string,
-		messagesToForward: ForwardedMessage[]
+		messagesToForward: ForwardedMessageInfo[]
 	): Promise<ForwardMessagesResponse> {
 		return this.fetchAPI(`rooms/${roomId}/forward`, RequestType.POST, messagesToForward);
 	}

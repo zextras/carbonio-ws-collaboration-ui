@@ -6,7 +6,7 @@
 
 import {
 	AddMemberFields,
-	ForwardedMessage,
+	ForwardedMessageInfo,
 	RoomCreationFields,
 	RoomEditableFields
 } from '../models/roomBeTypes';
@@ -71,7 +71,7 @@ interface IRoomsApi {
 	): Promise<AddRoomAttachmentResponse>;
 	forwardMessages(
 		roomId: string,
-		messagesToForward: ForwardedMessage[]
+		messagesToForward: ForwardedMessageInfo[]
 	): Promise<ForwardMessagesResponse>;
 }
 
