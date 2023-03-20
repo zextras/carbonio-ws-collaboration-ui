@@ -8,7 +8,7 @@ import { debounce, DebouncedFunc, includes } from 'lodash';
 
 import useStore from '../../store/Store';
 import IWebSocketClient from '../../types/network/websocket/IWebSocketClient';
-import { WsEvent, WsEventType } from '../../types/network/websocket/wsEvents';
+import { WsEventType } from '../../types/network/websocket/wsEvents';
 import { WsMessage } from '../../types/network/websocket/wsMessages';
 import { wsDebug } from '../../utils/debug';
 import { wsEventsHandler } from './wsEventsHandler';
@@ -95,15 +95,12 @@ export class WebSocketClient implements IWebSocketClient {
 	_onMessage = (e: MessageEvent): void => {
 		if (typeof e.data === 'string') {
 			const event = JSON.parse(e.data);
-			if (event.type == null && event.sessionId) {
-				useStore.getState().setSessionId(event.sessionId);
-			} else if (event.type === WsEventType.PONG) {
+			if (event.type === WsEventType.PONG) {
 				wsDebug('<-- pong');
 				this._disconnectionCheckFunction.cancel();
 			} else {
-				const wsEvent = event as WsEvent;
-				wsDebug(`<--- ${wsEvent.type}`);
-				wsEventsHandler(wsEvent);
+				wsDebug(`<--- ${event.type}`);
+				wsEventsHandler(event);
 			}
 		}
 	};
