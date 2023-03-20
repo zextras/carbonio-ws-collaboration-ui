@@ -264,7 +264,7 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 				actions.push({
 					id: 'Preview',
 					label: previewActionLabel,
-					click: onPreviewClick
+					onClick: onPreviewClick
 				});
 			}
 			actions.push({
