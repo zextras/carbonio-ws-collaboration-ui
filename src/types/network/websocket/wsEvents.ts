@@ -23,7 +23,8 @@ export enum WsEventType {
 	ROOM_UNMUTED = 'roomUnmuted',
 	USER_PICTURE_CHANGED = 'userPictureChanged',
 	USER_PICTURE_DELETED = 'userPictureDeleted',
-	ROOM_HISTORY_CLEARED = 'roomHistoryCleared'
+	ROOM_HISTORY_CLEARED = 'roomHistoryCleared',
+	INITIALIZATION = 'websocketConnected'
 }
 
 export type WsEvent =
@@ -42,9 +43,11 @@ export type WsEvent =
 	| RoomUnmutedEvent
 	| UserPictureChangedEvent
 	| UserPictureDeletedEvent
-	| RoomHistoryClearedEvent;
+	| RoomHistoryClearedEvent
+	| InizializationEvent;
 
-export type SessionEvent = {
+export type InizializationEvent = {
+	type: WsEventType.INITIALIZATION;
 	sessionId: string;
 };
 
