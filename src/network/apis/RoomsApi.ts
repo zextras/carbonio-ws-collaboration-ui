@@ -9,7 +9,6 @@ import { RequestType } from '../../types/network/apis/IBaseAPI';
 import IRoomsApi from '../../types/network/apis/IRoomsApi';
 import {
 	AddMemberFields,
-	ForwardedMessageInfo,
 	RoomCreationFields,
 	RoomEditableFields
 } from '../../types/network/models/roomBeTypes';
@@ -36,6 +35,9 @@ import {
 	UpdateRoomResponse
 } from '../../types/network/responses/roomsResponses';
 import { ChangeUserPictureResponse } from '../../types/network/responses/usersResponses';
+import { TextMessage } from '../../types/store/MessageTypes';
+import { dateToISODate } from '../../utils/dateUtil';
+import { encodeMessage } from '../xmpp/utility/encodeMessage';
 import BaseAPI from './BaseAPI';
 
 class RoomsApi extends BaseAPI implements IRoomsApi {
@@ -170,8 +172,12 @@ class RoomsApi extends BaseAPI implements IRoomsApi {
 
 	public forwardMessages(
 		roomId: string,
-		messagesToForward: ForwardedMessageInfo[]
+		messages: TextMessage[]
 	): Promise<ForwardMessagesResponse> {
+		const messagesToForward = messages.map((message) => ({
+			originalMessage: encodeMessage(message),
+			originalMessageSentAt: dateToISODate(message.date)
+		}));
 		return this.fetchAPI(`rooms/${roomId}/forward`, RequestType.POST, messagesToForward);
 	}
 }

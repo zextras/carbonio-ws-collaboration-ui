@@ -31,7 +31,6 @@ import { RoomsApi } from '../../../network';
 import { getRoomIdsOrderedLastMessage } from '../../../store/selectors/MessagesSelectors';
 import { getRoomNameSelector } from '../../../store/selectors/RoomsSelectors';
 import useStore from '../../../store/Store';
-import { ForwardedMessageInfo } from '../../../types/network/models/roomBeTypes';
 import { TextMessage } from '../../../types/store/MessageTypes';
 import ForwardMessageConversationChip from './ForwardMessageConversationChip';
 import ForwardMessageConversationListItem from './ForwardMessageConversationListItem';
@@ -129,12 +128,7 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 	);
 
 	const forwardMessage = useCallback(() => {
-		// TODO Check what time of data BE wants on 'originalMessage' and 'originalMessageTime'
-		const messageToForward: ForwardedMessageInfo = {
-			originalMessage: message.id,
-			originalMessageTime: message.date
-		};
-		Promise.all(map(selected, (value, key) => RoomsApi.forwardMessages(key, [messageToForward])))
+		Promise.all(map(selected, (value, key) => RoomsApi.forwardMessages(key, [message])))
 			.then(() => onClose())
 			.catch(() => onClose());
 	}, [message, onClose, selected]);

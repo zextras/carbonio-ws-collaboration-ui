@@ -11,6 +11,8 @@ import {
 	createMockRoom,
 	createMockTextMessage
 } from '../../tests/createMock';
+import { dateToISODate } from '../../utils/dateUtil';
+import { encodeMessage } from '../xmpp/utility/encodeMessage';
 import roomsApi from './RoomsApi';
 
 describe('Rooms API', () => {
@@ -374,10 +376,10 @@ describe('Rooms API', () => {
 		// Send addRoom request
 		const message = createMockTextMessage();
 		const forwardedMessage = {
-			originalMessage: message.id,
-			originalMessageTime: message.date
+			originalMessage: encodeMessage(message),
+			originalMessageSentAt: dateToISODate(message.date)
 		};
-		await roomsApi.forwardMessages('roomId', [forwardedMessage]);
+		await roomsApi.forwardMessages('roomId', [message]);
 
 		// Set appropriate headers
 		const headers = new Headers();

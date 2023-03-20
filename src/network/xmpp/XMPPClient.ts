@@ -29,7 +29,7 @@ import { onNewMessageStanza } from './handlers/newMessageHandler';
 import { onPresenceStanza } from './handlers/presenceHandler';
 import { onGetRosterResponse } from './handlers/rosterHandler';
 import { onSmartMarkers, onDisplayedMessageStanza } from './handlers/smartMarkersHandler';
-import { carbonizeMUC } from './utility/decodeJid';
+import { carbonize, carbonizeMUC } from './utility/decodeJid';
 
 class XMPPClient implements IXMPPClient {
 	private connection: StropheConnection;
@@ -70,13 +70,13 @@ class XMPPClient implements IXMPPClient {
 		this.connection.addHandler(onDisplayedMessageStanza, Strophe.NS.MARKERS, 'message');
 
 		// Debug
-		// const parser = new DOMParser();
-		// this.connection.rawInput = (data: string): void => {
-		// 	xmppDebug('<-- IN:', parser.parseFromString(data, 'text/xml'));
-		// };
-		// this.connection.rawOutput = (data: string): void => {
-		// 	xmppDebug('---> OUT:', parser.parseFromString(data, 'text/xml'));
-		// };
+		const parser = new DOMParser();
+		this.connection.rawInput = (data: string): void => {
+			xmppDebug('<-- IN:', parser.parseFromString(data, 'text/xml'));
+		};
+		this.connection.rawOutput = (data: string): void => {
+			xmppDebug('---> OUT:', parser.parseFromString(data, 'text/xml'));
+		};
 	}
 
 	private onConnectionStatus(statusCode: StropheConnectionStatus): void {
@@ -224,7 +224,7 @@ class XMPPClient implements IXMPPClient {
 		replyTo: string,
 		replyMessageId: string
 	): void {
-		const to = `${carbonizeMUC(replyTo)}/${carbonizeMUC(roomId)}}`;
+		const to = `${carbonize(replyTo)}/${carbonizeMUC(roomId)}}`;
 		const uuid = uuidGenerator();
 		const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat', id: uuid })
 			.c('body')

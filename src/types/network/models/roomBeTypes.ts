@@ -54,6 +54,6 @@ export type RoomUserSettings = {
 
 export type ForwardedMessageInfo = {
 	originalMessage: string;
-	originalMessageTime: number;
+	originalMessageSentAt: string;
 	description?: string;
 };

@@ -94,16 +94,13 @@ export class WebSocketClient implements IWebSocketClient {
 
 	_onMessage = (e: MessageEvent): void => {
 		if (typeof e.data === 'string') {
-			const event = JSON.parse(e.data);
-			if (event.type == null && event.sessionId) {
-				useStore.getState().setSessionId(event.sessionId);
-			} else if (event.type === WsEventType.PONG) {
+			const event: WsEvent = JSON.parse(e.data);
+			if (event.type === WsEventType.PONG) {
 				wsDebug('<-- pong');
 				this._disconnectionCheckFunction.cancel();
 			} else {
-				const wsEvent = event as WsEvent;
-				wsDebug(`<--- ${wsEvent.type}`);
-				wsEventsHandler(wsEvent);
+				wsDebug(`<--- ${event.type}`);
+				wsEventsHandler(event);
 			}
 		}
 	};
