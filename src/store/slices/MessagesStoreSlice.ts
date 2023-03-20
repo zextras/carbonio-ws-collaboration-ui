@@ -207,7 +207,7 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 				// message list can't have duplicates, so it's sorted by id
 				draft.messages[roomId] = sortedUniqBy(draft.messages[roomId], 'id');
 
-				// checks if creation modal is duplicated and removes it
+				// checks if creation message is duplicated and removes it
 				if (draft.messages[roomId][0].id === draft.messages[roomId][2].id) {
 					draft.messages[roomId].splice(0, 2);
 				}
