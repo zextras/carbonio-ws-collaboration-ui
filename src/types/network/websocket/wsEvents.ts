@@ -44,9 +44,9 @@ export type WsEvent =
 	| UserPictureChangedEvent
 	| UserPictureDeletedEvent
 	| RoomHistoryClearedEvent
-	| InizializationEvent;
+	| InitializationEvent;
 
-export type InizializationEvent = {
+export type InitializationEvent = {
 	type: WsEventType.INITIALIZATION;
 	sessionId: string;
 };
