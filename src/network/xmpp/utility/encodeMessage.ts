@@ -9,8 +9,9 @@ import { carbonizeMUC } from './decodeJid';
 
 export function encodeMessage(message: TextMessage): string {
 	const { id } = message;
+	const from = `${carbonizeMUC(message.roomId)}/${carbonizeMUC(message.from)}`;
 	const to = carbonizeMUC(message.roomId);
 	const textMessage = `<body>${message.text}</body>`;
 	// TODO attachment and reply
-	return `<message xmlns="jabber:client" type="groupchat" to="${to}" id="${id}">${textMessage}</message>`;
+	return `<message xmlns="jabber:client" type="groupchat" to="${to}" id="${id}" from="${from}">${textMessage}</message>`;
 }
