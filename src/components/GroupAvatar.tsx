@@ -7,6 +7,7 @@
 import { Avatar, Shimmer } from '@zextras/carbonio-design-system';
 import React, { useEffect, useMemo, useState } from 'react';
 
+import { AvatarBadge, AvatarContainer } from './UserAvatar';
 import { RoomsApi } from '../network';
 import {
 	getPictureUpdatedAt,
@@ -14,7 +15,6 @@ import {
 	getRoomNameSelector
 } from '../store/selectors/RoomsSelectors';
 import useStore from '../store/Store';
-import { AvatarBadge, AvatarContainer } from './UserAvatar';
 
 type UserAvatarProps = {
 	roomId: string;

@@ -9,6 +9,7 @@ import { act, renderHook } from '@testing-library/react-hooks';
 import React from 'react';
 import { setup } from 'test-utils';
 
+import MuteConversationAction from './MuteConversationAction';
 import {
 	mockedMuteRoomNotificationRequest,
 	mockedUnmuteRoomNotificationRequest
@@ -16,7 +17,6 @@ import {
 import useStore from '../../../store/Store';
 import { createMockMember, createMockRoom } from '../../../tests/createMock';
 import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
-import MuteConversationAction from './MuteConversationAction';
 
 const testRoom: RoomBe = createMockRoom({
 	id: 'room-test',

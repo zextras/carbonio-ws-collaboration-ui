@@ -4,18 +4,17 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { screen } from '@testing-library/react';
+import {act, screen, waitFor} from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 import React from 'react';
-import { act } from 'react-dom/test-utils';
 import { setup } from 'test-utils';
 
+import ChatCreationModal from './ChatCreationModal';
 import { mockedAddRoomRequest, mockedAutoCompleteGalRequest } from '../../../jest-mocks';
 import { ContactMatch } from '../../network/soap/AutoCompleteRequest';
 import useStore from '../../store/Store';
 import { createMockMember, createMockRoom } from '../../tests/createMock';
 import { RoomBe, RoomType } from '../../types/network/models/roomBeTypes';
-import ChatCreationModal from './ChatCreationModal';
 
 // Mock objects
 const zimbraUser1: ContactMatch = {
@@ -86,7 +85,8 @@ describe('Chat Creation Modal', () => {
 			updatedAt: 'updated',
 			pictureUpdatedAt: 'pictureUpdatedAt'
 		});
-		await user.click(footerButton);
+		user.click(footerButton);
+		expect(footerButton).not.toHaveAttribute('disabled', true);
 	});
 
 	test('Create a group', async () => {
@@ -122,7 +122,7 @@ describe('Chat Creation Modal', () => {
 			pictureUpdatedAt: 'pictureUpdatedAt'
 		});
 		await user.click(footerButton);
-		expect(footerButton).not.toHaveAttribute('disabled', true);
+		await waitFor(() => expect(footerButton).not.toHaveAttribute('disabled', true));
 	});
 
 	test('title and topic fields are filled properly', async () => {

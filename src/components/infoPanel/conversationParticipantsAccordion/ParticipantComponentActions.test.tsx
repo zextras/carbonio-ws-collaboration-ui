@@ -9,6 +9,10 @@ import { act, renderHook } from '@testing-library/react-hooks';
 import React from 'react';
 import { setup } from 'test-utils';
 
+import GoToPrivateChatAction from './GoToPrivateChatAction';
+import LeaveConversationListAction from './LeaveConversationListAction';
+import ParticipantComponentInfo from './ParticipantComponentInfo';
+import RemoveMemberListAction from './RemoveMemberListAction';
 import {
 	mockedAddRoomRequest,
 	mockedDeleteRoomMemberRequest,
@@ -22,10 +26,6 @@ import useStore from '../../../store/Store';
 import { createMockRoom } from '../../../tests/createMock';
 import { RoomType } from '../../../types/network/models/roomBeTypes';
 import { User } from '../../../types/store/UserTypes';
-import GoToPrivateChatAction from './GoToPrivateChatAction';
-import LeaveConversationListAction from './LeaveConversationListAction';
-import ParticipantComponentInfo from './ParticipantComponentInfo';
-import RemoveMemberListAction from './RemoveMemberListAction';
 
 const user1Info: User = {
 	id: 'user1',

@@ -8,10 +8,10 @@ import { screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { setup } from 'test-utils';
 
+import ChatCreationContactsSelection from './ChatCreationContactsSelection';
 import { mockedAutoCompleteGalRequest } from '../../../jest-mocks';
 import { ContactMatch } from '../../network/soap/AutoCompleteRequest';
 import { Member } from '../../types/store/RoomTypes';
-import ChatCreationContactsSelection from './ChatCreationContactsSelection';
 
 // Mock objects
 const zimbraUser1: ContactMatch = {

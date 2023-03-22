@@ -8,11 +8,11 @@ import { screen } from '@testing-library/react';
 import React from 'react';
 import { setup } from 'test-utils';
 
+import { ParticipantsAccordion } from './ParticipantsAccordion';
 import useStore from '../../../store/Store';
 import { createMockRoom } from '../../../tests/createMock';
 import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
 import { UserBe } from '../../../types/network/models/userBeTypes';
-import { ParticipantsAccordion } from './ParticipantsAccordion';
 
 const user1Be: UserBe = {
 	id: 'user1',

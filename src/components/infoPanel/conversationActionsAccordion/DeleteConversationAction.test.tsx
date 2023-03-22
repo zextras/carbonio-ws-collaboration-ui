@@ -8,6 +8,7 @@ import { act, renderHook } from '@testing-library/react-hooks';
 import React from 'react';
 import { setup } from 'test-utils';
 
+import DeleteConversationAction from './DeleteConversationAction';
 import { mockedDeleteRoomRequest, mockGoToMainPage } from '../../../../jest-mocks';
 import useStore from '../../../store/Store';
 import { createMockRoom } from '../../../tests/createMock';
@@ -15,7 +16,6 @@ import { RoomBe } from '../../../types/network/models/roomBeTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 import { RootStore } from '../../../types/store/StoreTypes';
 import { User } from '../../../types/store/UserTypes';
-import DeleteConversationAction from './DeleteConversationAction';
 
 const user1Info: User = {
 	id: 'user1-id',

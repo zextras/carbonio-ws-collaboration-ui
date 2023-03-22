@@ -9,12 +9,12 @@ import { act, renderHook } from '@testing-library/react-hooks';
 import React from 'react';
 import { setup } from 'test-utils';
 
+import ClearHistoryAction from './ClearHistoryAction';
 import { mockedClearHistoryRequest } from '../../../../jest-mocks';
 import useStore from '../../../store/Store';
 import { createMockRoom, createMockTextMessage } from '../../../tests/createMock';
 import { RoomType } from '../../../types/network/models/roomBeTypes';
 import { User } from '../../../types/store/UserTypes';
-import ClearHistoryAction from './ClearHistoryAction';
 
 const user1Info: User = {
 	id: 'user1-id',

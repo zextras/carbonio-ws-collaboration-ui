@@ -10,6 +10,9 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
+import CollapsedSidebarListItem from './CollapsedSidebarListItem';
+import ConversationsFilter from './ConversationsFilter';
+import ExpandedSidebarListItem from './ExpandedSidebarListItem';
 import { roomsListSecondaryBarLengthEqualityFn } from '../../store/equalityFunctions/MessagesEqualityFunctions';
 import { getRoomIdsOrderedLastMessage } from '../../store/selectors/MessagesSelectors';
 import { getUsersSelector } from '../../store/selectors/UsersSelectors';
@@ -18,9 +21,6 @@ import { Member } from '../../types/store/RoomTypes';
 import DefaultUserSidebarView from '../../views/DefaultUserSidebarView';
 import ShimmeringCollapsedListView from '../../views/shimmerViews/ShimmeringCollapsedListView';
 import ShimmeringExpandedListView from '../../views/shimmerViews/ShimmeringExpandedListView';
-import CollapsedSidebarListItem from './CollapsedSidebarListItem';
-import ConversationsFilter from './ConversationsFilter';
-import ExpandedSidebarListItem from './ExpandedSidebarListItem';
 
 type SecondaryBarSingleGroupsView = {
 	expanded: boolean;

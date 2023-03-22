@@ -8,6 +8,7 @@ import { act, screen } from '@testing-library/react';
 import React from 'react';
 import { setup } from 'test-utils';
 
+import RoomPictureHandler from './RoomPictureHandler';
 import {
 	mockedDeleteRoomPictureRequest,
 	mockedUpdateRoomPictureRequest
@@ -21,7 +22,6 @@ import {
 import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
 import { RootStore } from '../../../types/store/StoreTypes';
 import { User } from '../../../types/store/UserTypes';
-import RoomPictureHandler from './RoomPictureHandler';
 
 const user1Info: User = {
 	id: 'myId',

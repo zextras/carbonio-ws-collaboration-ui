@@ -9,6 +9,8 @@ import { map } from 'lodash';
 import React, { FC, useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import ActionComponent from './ActionComponent';
+import AddNewMemberModal from './AddNewMemberModal';
 import { RoomsApi } from '../../../network';
 import { getRoomMembers, getRoomNameSelector } from '../../../store/selectors/RoomsSelectors';
 import useStore from '../../../store/Store';
@@ -16,8 +18,6 @@ import { AddMemberFields } from '../../../types/network/models/roomBeTypes';
 import { AddRoomMemberResponse } from '../../../types/network/responses/roomsResponses';
 import { Member } from '../../../types/store/RoomTypes';
 import { ContactSelected } from '../../creationModal/ChatCreationContactsSelection';
-import ActionComponent from './ActionComponent';
-import AddNewMemberModal from './AddNewMemberModal';
 
 type AddNewMemberProps = {
 	roomId: string;

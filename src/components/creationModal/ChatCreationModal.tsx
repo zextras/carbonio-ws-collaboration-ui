@@ -17,13 +17,13 @@ import { find, map, size } from 'lodash';
 import React, { ReactElement, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import ChatCreationContactsSelection, { ContactSelected } from './ChatCreationContactsSelection';
+import ChatCreationTitleInput from './ChatCreationTitleInput';
 import useRouting from '../../hooks/useRouting';
 import { RoomsApi } from '../../network';
 import useStore from '../../store/Store';
 import { AddRoomResponse } from '../../types/network/responses/roomsResponses';
 import { RoomType } from '../../types/store/RoomTypes';
-import ChatCreationContactsSelection, { ContactSelected } from './ChatCreationContactsSelection';
-import ChatCreationTitleInput from './ChatCreationTitleInput';
 
 const ChatCreationModal = ({
 	open,

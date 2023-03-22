@@ -27,13 +27,13 @@ import React, {
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
+import ForwardMessageConversationChip from './ForwardMessageConversationChip';
+import ForwardMessageConversationListItem from './ForwardMessageConversationListItem';
 import { getXmppClient } from '../../../store/selectors/ConnectionSelector';
 import { getRoomIdsOrderedLastMessage } from '../../../store/selectors/MessagesSelectors';
 import { getRoomNameSelector } from '../../../store/selectors/RoomsSelectors';
 import useStore from '../../../store/Store';
 import { TextMessage } from '../../../types/store/MessageTypes';
-import ForwardMessageConversationChip from './ForwardMessageConversationChip';
-import ForwardMessageConversationListItem from './ForwardMessageConversationListItem';
 
 const CustomContainer = styled(Container)`
 	cursor: default;

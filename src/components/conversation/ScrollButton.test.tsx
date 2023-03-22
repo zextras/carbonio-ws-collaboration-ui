@@ -8,9 +8,9 @@ import { screen } from '@testing-library/react';
 import React from 'react';
 import { setup } from 'test-utils';
 
+import ScrollButton from './ScrollButton';
 import useStore from '../../store/Store';
 import { createMockRoom } from '../../tests/createMock';
-import ScrollButton from './ScrollButton';
 
 const room = createMockRoom();
 

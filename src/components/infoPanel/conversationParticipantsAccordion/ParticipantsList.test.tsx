@@ -8,12 +8,12 @@ import { screen, act } from '@testing-library/react';
 import React from 'react';
 import { setup } from 'test-utils';
 
+import ParticipantsList from './ParticipantsList';
 import { mockedGetUserPictureRequest } from '../../../../jest-mocks';
 import useStore from '../../../store/Store';
 import { RoomBe } from '../../../types/network/models/roomBeTypes';
 import { Member, RoomType } from '../../../types/store/RoomTypes';
 import { User } from '../../../types/store/UserTypes';
-import ParticipantsList from './ParticipantsList';
 
 const user1Be: User = {
 	id: 'user1',
