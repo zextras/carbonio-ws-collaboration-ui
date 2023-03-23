@@ -54,6 +54,28 @@ const replyMessageFromInbox = `
     </result>
 </message>`;
 
+const forwardedTextMessageFromInbox = `
+<message xmlns="jabber:client" from="userId@carbonio" to="userId@carbonio/0637b3772630df231679-560156-424312" id="messageId">
+    <result xmlns="erlang-solutions.com:xmpp:inbox:0" unread="0" queryid="queryId">
+        <forwarded xmlns="urn:xmpp:forward:0">
+            <delay xmlns="urn:xmpp:delay" stamp="2023-03-23T08:22:36.564202Z"/>
+            <message to="userId@carbonio" id="messageId" type="groupchat" from="roomId@muclight.carbonio/userId@carbonio">
+                <body/>
+                <forwarded xmlns="urn:xmpp:forward:0">
+                    <delay xmlns="urn:xmpp:delay" stamp="2023-03-23T08:22:24.457Z"/>
+                    <message from="roomId@muclight.carbonio/userId@carbonio" id="messageId" to="roomId@muclight.carbonio" type="groupchat">
+                        <body>Hello!</body>
+                    </message>
+                </forwarded>
+                <stanza-id xmlns="urn:xmpp:sid:0" by="roomId@muclight.carbonio" id="stanzaId"/>
+            </message>
+        </forwarded>
+        <box>inbox</box>
+        <archive>false</archive>
+        <mute>0</mute>
+    </result>
+</message>`;
+
 /**
  * History stanzas
  */
@@ -108,6 +130,27 @@ const replyMessageFromHistory = `
     </result>
 </message>`;
 
+const forwardedTextMessageFromHistory = `
+<message xmlns="jabber:client" from="roomId@muclight.carbonio" to="userId@carbonio/f0932068bb1fbd061679-560392-720919" id="messageId">
+    <result xmlns="urn:xmpp:mam:2" queryid="history" id="stanzaId">
+        <forwarded xmlns="urn:xmpp:forward:0">
+            <delay xmlns="urn:xmpp:delay" stamp="2023-03-23T08:22:36.533016Z" from="roomId@muclight.carbonio/userId@carbonio"/>
+                <message xmlns="jabber:client" from="roomId@muclight.carbonio/userId@carbonio" id="messageId" type="groupchat">
+                    <body/>
+                    <forwarded xmlns="urn:xmpp:forward:0">
+                        <delay xmlns="urn:xmpp:delay" stamp="2023-03-23T08:22:24.457Z"/>
+                        <message from="roomId@muclight.carbonio/userId@carbonio" id="messageId" to="roomId@muclight.carbonio" type="groupchat">
+                            <body>Hello!</body>
+                        </message>
+                    </forwarded>
+                    <x xmlns="http://jabber.org/protocol/muc#user">
+                        <item affiliation="member" jid="userId@carbonio" role="participant"/>
+                    </x>
+            </message>
+        </forwarded>
+    </result>
+</message>`;
+
 /**
  * Realtime messages
  */
@@ -136,6 +179,31 @@ const replyMessageRealTime = `
     <markable xmlns="urn:xmpp:chat-markers:0"/>
     <reply xmlns="urn:xmpp:reply:0" id="stanzaId" to="userId@carbonio/roomId@muclight.carbonio}"/>
     <stanza-id xmlns="urn:xmpp:sid:0" by="roomid@muclight.carbonio" id="stanzaId"/>
+</message>`;
+
+const forwardedTextMessage = `
+<message xmlns="jabber:client" from="roomId@muclight.carbonio/userId@carbonio" to="userId@carbonio" id="messageId" type="groupchat">
+    <body/>
+    <forwarded xmlns="urn:xmpp:forward:0">
+        <delay xmlns="urn:xmpp:delay" stamp="2023-03-23T08:22:24.457Z"/>
+        <message from="roomId@muclight.carbonio/userId@carbonio" id="messageId" to="roomId@muclight.carbonio" type="groupchat">
+            <body>Hello!</body>
+        </message>
+    </forwarded>
+    <stanza-id xmlns="urn:xmpp:sid:0" by="roomId@muclight.carbonio" id="stanzaId"/>
+</message>`;
+
+const messageWithAttachment = `
+<message xmlns="jabber:client" from="roomId@muclight.carbonio/userId@carbonio" to="userId@carbonio" id="messageId" type="groupchat">
+    <x xmlns="urn:xmpp:muclight:0#configuration">
+        <operation>attachmentAdded</operation>
+        <attachment-id>attachmentId</attachment-id>
+        <filename>imageName</filename>
+        <mime-type>image/jpeg</mime-type>
+        <size>384890</size>
+    </x>
+    <body/>
+    <stanza-id xmlns="urn:xmpp:sid:0" by="roomId@muclight.carbonio" id="BTSDPG086R81"/>
 </message>`;
 
 const displayMessageRealTime = `

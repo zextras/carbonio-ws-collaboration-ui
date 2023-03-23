@@ -14,7 +14,18 @@ import {
 	Text,
 	Tooltip
 } from '@zextras/carbonio-design-system';
-import { difference, differenceBy, find, keyBy, map, mapValues, omit, size, union } from 'lodash';
+import {
+	difference,
+	differenceBy,
+	find,
+	forEach,
+	keyBy,
+	map,
+	mapValues,
+	omit,
+	size,
+	union
+} from 'lodash';
 import React, {
 	FunctionComponent,
 	ReactElement,
@@ -28,6 +39,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import { RoomsApi } from '../../../network';
+import { getXmppClient } from '../../../store/selectors/ConnectionSelector';
 import { getRoomIdsOrderedLastMessage } from '../../../store/selectors/MessagesSelectors';
 import { getRoomNameSelector } from '../../../store/selectors/RoomsSelectors';
 import useStore from '../../../store/Store';
@@ -63,6 +75,9 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 		'modal.forward.description',
 		'Choose a target chat to forward the message'
 	);
+
+	const xmppClient = useStore(getXmppClient);
+
 	const closeLabel = t('action.close', 'Close');
 	const noMatchLabel = t('participantsList.noMatch', 'There are no items that match this search');
 	const inputPlaceholder = t('modal.forward.inputPlaceholder', 'Start typing or pick a chat');
@@ -128,10 +143,16 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 	);
 
 	const forwardMessage = useCallback(() => {
-		Promise.all(map(selected, (value, key) => RoomsApi.forwardMessages(key, [message])))
-			.then(() => onClose())
-			.catch(() => onClose());
-	}, [message, onClose, selected]);
+		const isMyMessage = message.from === useStore.getState().session.id;
+		// TODO handle forward of my attachments
+		if (isMyMessage && !message.attachment) {
+			forEach(selected, (value, key) => xmppClient.sendChatMessage(key, message.text));
+		} else {
+			Promise.all(map(selected, (value, key) => RoomsApi.forwardMessages(key, [message])))
+				.then(() => onClose())
+				.catch(() => onClose());
+		}
+	}, [message, onClose, selected, xmppClient]);
 
 	const ListItem = useMemo(
 		() =>

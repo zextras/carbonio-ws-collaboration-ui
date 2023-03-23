@@ -265,42 +265,6 @@ class XMPPClient implements IXMPPClient {
 		this.connection.send(msg);
 	}
 
-	/**
-	 * Forward a message (XEP-0297)
-	 * Documentation: https://xmpp.org/extensions/xep-0297.html
-	 */
-	// forwardMessage(message: TextMessage, roomIds: string[]): void {
-	// 	const isMyMessage = message.from === useStore.getState().session.id;
-	// 	if (isMyMessage) {
-	// 		forEach(roomIds, (roomId) => this.sendChatMessage(roomId, message.text));
-	// 	} else {
-	// 		forEach(roomIds, (roomId) => {
-	// 			const uuid = uuidGenerator();
-	// 			const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat', id: uuid })
-	// 				.c('body')
-	// 				.t('')
-	// 				.up()
-	// 				.c('forwarded', { xmlns: Strophe.NS.FORWARD })
-	// 				.c('delay', { xmlns: 'urn:xmpp:delay', stamp: dateToISODate(message.date) })
-	// 				.up()
-	// 				.c('message', {
-	// 					from: carbonizeMUC(message.from),
-	// 					id: message.id,
-	// 					to: carbonizeMUC(message.roomId),
-	// 					type: 'groupchat',
-	// 					xmlns: 'jabber:client'
-	// 				})
-	// 				.c('body')
-	// 				.t(message.text)
-	// 				.up()
-	// 				.up()
-	// 				.up()
-	// 				.c('markable', { xmlns: Strophe.NS.MARKERS });
-	// 			this.connection.send(msg);
-	// 		});
-	// 	}
-	// }
-
 	// Request the full history of a room
 	requestFullHistory(roomId: string): void {
 		const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) }).c('query', { xmlns: Strophe.NS.MAM });

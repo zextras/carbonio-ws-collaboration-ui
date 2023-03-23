@@ -6,6 +6,7 @@
 /* eslint-disable */
 
 import { Strophe } from 'strophe.js';
+import { decode } from 'html-entities';
 
 import {
 	AffiliationMessage,
@@ -50,8 +51,6 @@ export function decodeMessage(messageStanza: Element, optional?: OptionalParamet
 		return message as DeletedMessage;
 	}
 
-
-
 	// Affiliation message
 	const x = getTagElement(messageStanza, 'x');
 	if (x && x.getAttribute('xmlns') === Strophe.NS.AFFILIATIONS) {
@@ -82,12 +81,7 @@ export function decodeMessage(messageStanza: Element, optional?: OptionalParamet
 						? Strophe.getText(getRequiredTagElement(x, 'picture-name'))
 						: operation === 'roomPictureDeleted'
 							? ''
-							: Strophe.getText(getRequiredTagElement(x, 'value'))
-								.replace(/&amp;/g, '&')
-								.replace(/&quot;/g, '"')
-								.replace(/&apos;/g, "'")
-								.replace(/&lt;/g, '<')
-								.replace(/&gt;/g, '>');
+							: decode(Strophe.getText(getRequiredTagElement(x, 'value')));
 				message = {
 					id: messageId,
 					roomId,
@@ -106,12 +100,7 @@ export function decodeMessage(messageStanza: Element, optional?: OptionalParamet
 				const filename = Strophe.getText(getRequiredTagElement(x, 'filename'));
 				const fileMimeType = Strophe.getText(getRequiredTagElement(x, 'mime-type'));
 				const fileSize = Strophe.getText(getRequiredTagElement(x, 'size'));
-				const description = Strophe.getText(getRequiredTagElement(messageStanza, 'body'))
-					.replace(/&amp;/g, '&')
-					.replace(/&quot;/g, '"')
-					.replace(/&apos;/g, "'")
-					.replace(/&lt;/g, '<')
-					.replace(/&gt;/g, '>');
+				const description = decode(Strophe.getText(getRequiredTagElement(messageStanza, 'body')));
 
 				message = {
 					id: messageId,
@@ -124,7 +113,7 @@ export function decodeMessage(messageStanza: Element, optional?: OptionalParamet
 					read: calcReads(messageDate, roomId),
 					attachment: {
 						id: attachmentId,
-						name: decodeURI(filename) || "",
+						name: decode(filename) || "",
 						mimeType: fileMimeType || "",
 						size: fileSize || 0
 					},
@@ -140,12 +129,7 @@ export function decodeMessage(messageStanza: Element, optional?: OptionalParamet
 		const stanzaIdReference = getTagElement(messageStanza, 'stanza-id');
 		const stanzaId = optional?.stanzaId || (stanzaIdReference && getRequiredAttribute(stanzaIdReference, 'id') || messageId);
 		const from = getId(resource);
-		const messageTxt = Strophe.getText(body)
-			.replace(/&amp;/g, '&')
-			.replace(/&quot;/g, '"')
-			.replace(/&apos;/g, "'")
-			.replace(/&lt;/g, '<')
-			.replace(/&gt;/g, '>');
+		const messageTxt = decode(body.textContent || '');
 
 		// Message is a reply to another message
 		let replyTo;
@@ -160,12 +144,30 @@ export function decodeMessage(messageStanza: Element, optional?: OptionalParamet
 		if (forwardedElement) {
 			const forwardedMessageElement = getRequiredTagElement(forwardedElement, 'message');
 			const delayElement = getRequiredTagElement(forwardedElement, 'delay');
-			// TODO decode aso forwarded attachments
+			// Attachment forwarded decoding
+			let attachment;
+			const x = getTagElement(messageStanza, 'x');
+			if (x && x.getAttribute('xmlns') === Strophe.NS.CONFIGURATION) {
+				const operation = Strophe.getText(getRequiredTagElement(x, 'operation'));
+				if (operation === 'attachmentAdded') {
+					const attachmentId = Strophe.getText(getRequiredTagElement(x, 'attachment-id'));
+					const filename = getRequiredTagElement(x, 'filename').textContent;
+					const fileMimeType = Strophe.getText(getRequiredTagElement(x, 'mime-type'));
+					const fileSize = Strophe.getText(getRequiredTagElement(x, 'size'));
+					attachment =  {
+						id: attachmentId,
+						name: decode(filename) || "",
+						mimeType: fileMimeType || "",
+						size: fileSize || 0
+					}
+				}
+			}
 			forwarded = {
 				id: getRequiredAttribute(forwardedMessageElement, 'id'),
 				date: dateToTimestamp(getRequiredAttribute(delayElement, 'stamp')),
-				from: getId(getRequiredAttribute(forwardedMessageElement, 'from')),
-				text: Strophe.getText(getRequiredTagElement(forwardedMessageElement, 'body'))
+				from: getId(getResource(getRequiredAttribute(forwardedMessageElement, 'from'))),
+				text: decode(getRequiredTagElement(forwardedMessageElement, 'body').textContent),
+				attachment
 			}
 		}
 

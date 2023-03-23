@@ -15,6 +15,7 @@ import useStore from '../../../store/Store';
 import { ForwardedMessage } from '../../../types/store/MessageTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 import { calculateAvatarColor } from '../../../utils/styleUtils';
+import AttachmentView from './AttachmentView';
 import BubbleFooter from './BubbleFooter';
 import BubbleHeader from './BubbleHeader';
 
@@ -72,10 +73,9 @@ const ForwardedMessageSectionView: FC<ForwardedMessageSectionViewProps> = ({
 				userBorderColor={userColor}
 			>
 				{forwardUsername && <BubbleHeader senderId={forwardedMessage.from} />}
-				{/* TODO add attachment view */}
-				{/* {forwardedMessage.attachment && ( */}
-				{/*	<AttachmentView attachment={forwardedMessage.attachment} from={forwardedMessage.from} /> */}
-				{/* )} */}
+				{forwardedMessage.attachment && (
+					<AttachmentView attachment={forwardedMessage.attachment} from={forwardedMessage.from} />
+				)}
 				<MessageWrap color="secondary" overflow="break-word">
 					{forwardedMessage.text}
 				</MessageWrap>

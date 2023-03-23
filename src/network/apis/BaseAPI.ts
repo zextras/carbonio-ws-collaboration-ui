@@ -57,7 +57,7 @@ export default abstract class BaseAPI implements IBaseAPI {
 			const reader = new FileReader();
 			reader.addEventListener('load', () => {
 				const headers = new Headers();
-				headers.append('fileName', btoa(encodeURIComponent(file.name)));
+				headers.append('fileName', btoa(file.name));
 				headers.append('mimeType', file.type);
 				if (optionalFields) {
 					optionalFields.description && headers.append('description', optionalFields.description);
