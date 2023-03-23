@@ -93,33 +93,6 @@ export function decodeMessage(messageStanza: Element, optional?: OptionalParamet
 				};
 				return message as ConfigurationMessage;
 			}
-			case 'attachmentAdded': {
-				const stanzaIdReference = getTagElement(messageStanza, 'stanza-id');
-				const stanzaId = optional?.stanzaId || (stanzaIdReference && getRequiredAttribute(stanzaIdReference, 'id') || messageId);
-				const attachmentId = Strophe.getText(getRequiredTagElement(x, 'attachment-id'));
-				const filename = Strophe.getText(getRequiredTagElement(x, 'filename'));
-				const fileMimeType = Strophe.getText(getRequiredTagElement(x, 'mime-type'));
-				const fileSize = Strophe.getText(getRequiredTagElement(x, 'size'));
-				const description = decode(Strophe.getText(getRequiredTagElement(messageStanza, 'body')));
-
-				message = {
-					id: messageId,
-					stanzaId,
-					roomId,
-					date: messageDate,
-					type: MessageType.TEXT_MSG,
-					from: getId(resource),
-					text: description,
-					read: calcReads(messageDate, roomId),
-					attachment: {
-						id: attachmentId,
-						name: decode(filename) || "",
-						mimeType: fileMimeType || "",
-						size: fileSize || 0
-					},
-				};
-				return message as TextMessage;
-			}
 		}
 	}
 
@@ -138,6 +111,25 @@ export function decodeMessage(messageStanza: Element, optional?: OptionalParamet
 			replyTo = getRequiredAttribute(replyElement, 'id');
 		}
 
+		// Message has an attachment
+		let attachment;
+		if (x && x.getAttribute('xmlns') === Strophe.NS.CONFIGURATION) {
+			const operation = Strophe.getText(getRequiredTagElement(x, 'operation'));
+			if (operation === 'attachmentAdded') {
+				const attachmentId = Strophe.getText(getRequiredTagElement(x, 'attachment-id'));
+				const filename = Strophe.getText(getRequiredTagElement(x, 'filename'));
+				const fileMimeType = Strophe.getText(getRequiredTagElement(x, 'mime-type'));
+				const fileSize = Strophe.getText(getRequiredTagElement(x, 'size'));
+				attachment = {
+					id: attachmentId,
+					name: decode(filename) || "",
+					mimeType: fileMimeType || "",
+					size: fileSize || 0
+				}
+			}
+		}
+
+
 		// Message is a forwarded message from another conversation
 		let forwarded;
 		const forwardedElement = messageStanza.getElementsByTagName('forwarded')[0];
@@ -145,7 +137,7 @@ export function decodeMessage(messageStanza: Element, optional?: OptionalParamet
 			const forwardedMessageElement = getRequiredTagElement(forwardedElement, 'message');
 			const delayElement = getRequiredTagElement(forwardedElement, 'delay');
 			// Attachment forwarded decoding
-			let attachment;
+			let forwardedAttachment;
 			const x = getTagElement(messageStanza, 'x');
 			if (x && x.getAttribute('xmlns') === Strophe.NS.CONFIGURATION) {
 				const operation = Strophe.getText(getRequiredTagElement(x, 'operation'));
@@ -154,7 +146,7 @@ export function decodeMessage(messageStanza: Element, optional?: OptionalParamet
 					const filename = getRequiredTagElement(x, 'filename').textContent;
 					const fileMimeType = Strophe.getText(getRequiredTagElement(x, 'mime-type'));
 					const fileSize = Strophe.getText(getRequiredTagElement(x, 'size'));
-					attachment =  {
+					forwardedAttachment =  {
 						id: attachmentId,
 						name: decode(filename) || "",
 						mimeType: fileMimeType || "",
@@ -167,7 +159,12 @@ export function decodeMessage(messageStanza: Element, optional?: OptionalParamet
 				date: dateToTimestamp(getRequiredAttribute(delayElement, 'stamp')),
 				from: getId(getResource(getRequiredAttribute(forwardedMessageElement, 'from'))),
 				text: decode(getRequiredTagElement(forwardedMessageElement, 'body').textContent),
-				attachment
+				attachment: forwardedAttachment
+			}
+
+			// If it is a forwarded message, we want to see attachment only as a forwarded attachment
+			if (attachment) {
+				attachment = undefined;
 			}
 		}
 
@@ -201,7 +198,8 @@ export function decodeMessage(messageStanza: Element, optional?: OptionalParamet
 			read: calcReads(messageDate, roomId),
 			replyTo,
 			edited: false,
-			forwarded
+			forwarded,
+			attachment
 		};
 		return message as TextMessage;
 	}

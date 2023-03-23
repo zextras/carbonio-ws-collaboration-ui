@@ -74,7 +74,11 @@ const ForwardedMessageSectionView: FC<ForwardedMessageSectionViewProps> = ({
 			>
 				{forwardUsername && <BubbleHeader senderId={forwardedMessage.from} />}
 				{forwardedMessage.attachment && (
-					<AttachmentView attachment={forwardedMessage.attachment} from={forwardedMessage.from} />
+					<AttachmentView
+						attachment={forwardedMessage.attachment}
+						from={forwardedMessage.from}
+						isMyMessage={isMyMessage}
+					/>
 				)}
 				<MessageWrap color="secondary" overflow="break-word">
 					{forwardedMessage.text}
