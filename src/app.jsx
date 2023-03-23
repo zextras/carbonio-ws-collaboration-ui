@@ -17,7 +17,7 @@ import React, { lazy, Suspense, useEffect } from 'react';
 
 import CounterBadgeUpdater from './components/CounterBadgeUpdater';
 import SecondaryBarSingleGroupsView from './components/secondaryBar/SecondaryBarSingleGroupsView';
-import { CHATS_ROUTE_TEST, PRODUCT_NAME } from './constants/appConstants';
+import { CHATS_ROUTE, PRODUCT_NAME } from './constants/appConstants';
 import useRegisterCreationButton from './hooks/useRegisterCreationButton';
 import useSnackbarManager from './hooks/useSnackbarManager';
 import { RoomsApi, SessionApi } from './network';
@@ -101,11 +101,10 @@ initApp();
 export default function App() {
 	useEffect(() => {
 		addRoute({
-			route: CHATS_ROUTE_TEST,
-			position: 90,
+			route: CHATS_ROUTE,
 			visible: true,
 			label: PRODUCT_NAME,
-			primaryBar: 'Gift',
+			primaryBar: 'TeamOutline',
 			appView: Main,
 			secondaryBar: SecondaryBar
 		});
@@ -113,7 +112,7 @@ export default function App() {
 			route: 'external',
 			visible: false,
 			label: PRODUCT_NAME,
-			primaryBar: 'coffee',
+			primaryBar: 'TeamOutline',
 			appView: () => <AccessMeetingView />,
 			standalone: {
 				hidePrimaryBar: true,
@@ -122,8 +121,8 @@ export default function App() {
 			}
 		});
 		addSettingsView({
-			icon: 'Gift',
-			route: CHATS_ROUTE_TEST,
+			icon: 'TeamOutline',
+			route: CHATS_ROUTE,
 			label: PRODUCT_NAME,
 			component: SettingsView
 		});

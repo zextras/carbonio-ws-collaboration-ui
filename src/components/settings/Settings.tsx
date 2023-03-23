@@ -32,7 +32,7 @@ type SettingsProps = {
 
 const Settings: FC<SettingsProps> = ({ id }) => {
 	const [t] = useTranslation();
-	const settingsTitle = t('settings.title', 'Chats Alpha - for testing purpose only');
+	const settingsTitle = t('settings.title', 'Chats Settings');
 	const saveSettingsSnackbar = t('settings.save', 'Edits saved correctly');
 	const errorDeleteImageSnackbar = t(
 		'settings.profile.errorGenericResponse',

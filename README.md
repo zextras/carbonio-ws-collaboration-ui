@@ -3,7 +3,7 @@ SPDX-FileCopyrightText: 2022 Zextras <https://www.zextras.com>
 SPDX-License-Identifier: AGPL-3.0-only
 -->
 <div align="center">
-  <h1>Carbonio Chats UI</h1>
+  <h1>Carbonio Workstream Collaboration UI</h1>
 </div>
 
 <div align="center">
@@ -47,7 +47,7 @@ npm run lint
 ```
 
 ## License
-Carbonio Chats UI - Web client for Zextras Carbonio Chats module
+Carbonio Workstream Collaboration UI - Web client for Zextras Carbonio Chats module
 
 Copyright (C) 2022 Zextras <https://www.zextras.com>
 
