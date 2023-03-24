@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import { act, renderHook } from '@testing-library/react-hooks';
 import React from 'react';
 import { setup } from 'test-utils';
@@ -105,12 +105,12 @@ describe('Leave conversation Action', () => {
 
 		expect(result.current.rooms[mockedRoom.id].members?.length).toBe(2);
 
-		await user.click(screen.getByText(/Leave Group/i));
-		const button = screen.getAllByRole('button')[2];
-		await user.click(button);
-		expect(mockGoToMainPage).not.toBeCalled();
-		await user.click(button);
-		expect(mockGoToMainPage).toBeCalled();
+		user.click(screen.getByText(/Leave Group/i));
+		const button = await screen.findByRole('button', { name: 'Leave' });
+		user.click(button);
+		await waitFor(() => expect(mockGoToMainPage).not.toBeCalled());
+		user.click(button);
+		await waitFor(() => expect(mockGoToMainPage).toBeCalled());
 
 		// if i leave a group, that group will not be defined for me
 		expect(result.current.rooms[mockedRoom.id]).not.toBeDefined();

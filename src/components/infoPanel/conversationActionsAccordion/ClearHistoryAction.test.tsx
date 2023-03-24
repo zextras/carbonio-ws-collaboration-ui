@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import { act, renderHook } from '@testing-library/react-hooks';
 import React from 'react';
 import { setup } from 'test-utils';
@@ -66,20 +66,22 @@ describe('clear history action', () => {
 		const { user } = setup(<ClearHistoryAction roomId={mockedRoom.id} />);
 		const clearHistoryLabel = screen.getByText(/Clear History/i);
 
-		await user.click(clearHistoryLabel);
+		user.click(clearHistoryLabel);
 
 		// the third one is the button one
-		expect(screen.getAllByText(/Clear History/i)).toHaveLength(3);
+		await waitFor(() => expect(screen.getAllByText(/Clear History/i)).toHaveLength(3));
 
-		await user.click(screen.getAllByText(/Clear History/i)[2]);
+		user.click(screen.getAllByText(/Clear History/i)[2]);
 
 		// the modal has disappeared
-		expect(screen.getAllByText(/Clear History/i)).toHaveLength(1);
+		await waitFor(() => expect(screen.getAllByText(/Clear History/i)).toHaveLength(1));
 
 		// store checks
-		expect(result.current.rooms[mockedRoom.id].userSettings?.clearedAt).toBe(
-			'2022-10-31T10:39:48.622581+01:00'
+		await waitFor(() =>
+			expect(result.current.rooms[mockedRoom.id].userSettings?.clearedAt).toBe(
+				'2022-10-31T10:39:48.622581+01:00'
+			)
 		);
-		expect(result.current.messages[mockedRoom.id].length).toBe(0);
+		await waitFor(() => expect(result.current.messages[mockedRoom.id].length).toBe(0));
 	});
 });

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import { act, renderHook } from '@testing-library/react-hooks';
 import React from 'react';
 import { setup } from 'test-utils';
@@ -65,17 +65,19 @@ describe('Add new member action', () => {
 
 		const { user } = setup(<AddNewMemberAction roomId={mockedRoom.id} />);
 
-		await user.click(screen.getByText(/Add new Members/i));
-		// expect(screen.getByTestId('add_member_modal')).toBeInTheDocument();
-		//
-		// const checkboxIcon = screen.getByTestId('icon: Square');
-		// expect(checkboxIcon).toBeInTheDocument();
+		user.click(screen.getByText(/Add new Members/i));
+		const addMemberModal = await screen.findByTestId('add_member_modal');
+		expect(addMemberModal).toBeInTheDocument();
 
-		// await user.click(checkboxIcon);
-		// expect(screen.getByTestId('icon: CheckmarkSquare')).toBeInTheDocument();
+		const checkboxIcon = await screen.findByTestId('icon: Square');
+		expect(checkboxIcon).toBeInTheDocument();
 
-		// await user.click(screen.getByTestId('icon: Close'));
-		// expect(screen.queryByTestId('add_member_modal')).not.toBeInTheDocument();
+		user.click(checkboxIcon);
+		const checkmark = await screen.findByTestId('icon: CheckmarkSquare');
+		await waitFor(() => expect(checkmark).toBeInTheDocument());
+
+		user.click(screen.getByTestId('icon: Close'));
+		await waitFor(() => expect(addMemberModal).not.toBeInTheDocument());
 	});
 
 	test('Add new member', async () => {
@@ -97,22 +99,23 @@ describe('Add new member action', () => {
 
 		expect(result.current.rooms[mockedRoom.id].members?.length).toBe(1);
 
-		await user.click(screen.getByText(/Add new Members/i));
-		expect(screen.getByTestId('add_member_modal')).toBeInTheDocument();
+		user.click(screen.getByText(/Add new Members/i));
+		const addMemberModal = await screen.findByTestId('add_member_modal');
+		await waitFor(() => expect(addMemberModal).toBeInTheDocument());
 
 		const chipInput = await screen.findByTestId('chip_input_creation_modal');
-		await user.type(chipInput, zimbraUser2.fullName[0]);
+		user.type(chipInput, zimbraUser2.fullName[0]);
 
 		await screen.findByText('spinner');
 		const list = await screen.findByTestId('list_creation_modal');
-		expect(list).toBeVisible();
+		await waitFor(() => expect(list).toBeVisible());
 
 		const checkboxIcon = screen.queryAllByTestId('icon: Square')[0];
-		await user.click(checkboxIcon);
+		user.click(checkboxIcon);
 
-		const addButton = screen.getAllByRole('button');
-		await user.click(addButton[3]);
+		const addButton = await screen.findByTestId('add_new_member_button');
+		user.click(addButton);
 
-		expect(result.current.rooms[mockedRoom.id].members?.length).toBe(2);
+		await waitFor(() => expect(result.current.rooms[mockedRoom.id].members?.length).toBe(2));
 	});
 });

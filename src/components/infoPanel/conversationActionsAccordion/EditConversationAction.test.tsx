@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import { act, renderHook } from '@testing-library/react-hooks';
 import React from 'react';
 import { setup } from 'test-utils';
@@ -98,19 +98,19 @@ describe('Edit conversation action', () => {
 			]
 		});
 		const { user } = setup(<EditConversationAction roomId={testRoom.id} />);
-		await user.click(screen.getByText(/Edit Details/i));
+		user.click(screen.getByText(/Edit Details/i));
 
-		const nameInput = screen.getByTestId('name_input');
-		await user.type(nameInput, 'A new name');
+		const nameInput = await screen.findByTestId('name_input');
+		user.type(nameInput, 'A new name');
 
-		const editButton = screen.getByTestId('edit_button');
-		await user.click(editButton);
+		const editButton = await screen.findByTestId('edit_button');
+		user.click(editButton);
 
 		const snackbar = await screen.findByText(/Something went Wrong. Please Retry/i);
-		expect(snackbar).toBeVisible();
-		expect(result.current.rooms[testRoom2.id].name).toBe('A Group');
+		await waitFor(() => expect(snackbar).toBeVisible());
+		await waitFor(() => expect(result.current.rooms[testRoom2.id].name).toBe('A Group'));
 
-		await user.click(editButton);
-		expect(result.current.rooms[testRoom2.id].name).toBe('A new name');
+		user.click(editButton);
+		await waitFor(() => expect(result.current.rooms[testRoom2.id].name).toBe('A new name'));
 	});
 });

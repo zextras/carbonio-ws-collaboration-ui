@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import {act, screen, waitFor} from '@testing-library/react';
+import { act, screen, waitFor } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 import React from 'react';
 import { setup } from 'test-utils';
@@ -66,14 +66,14 @@ describe('Chat Creation Modal', () => {
 
 		// Type on ChipInput to trigger a new autoCompleteGalRequest
 		const chipInput = await screen.findByTestId('chip_input_creation_modal');
-		await user.type(chipInput, zimbraUser1.fullName[0]);
+		user.type(chipInput, zimbraUser1.fullName[0]);
 
 		// Add Chip on ChipInput
 		const userComponent = await screen.findByText(zimbraUser1.fullName);
-		await user.click(userComponent);
+		user.click(userComponent);
 
 		const footerButton = await screen.findByTestId('create_button');
-		expect(footerButton).not.toHaveAttribute('disabled', true);
+		await waitFor(() => expect(footerButton).not.toHaveAttribute('disabled', true));
 
 		mockedAddRoomRequest.mockReturnValue({
 			id: 'room-id',
@@ -86,7 +86,7 @@ describe('Chat Creation Modal', () => {
 			pictureUpdatedAt: 'pictureUpdatedAt'
 		});
 		user.click(footerButton);
-		expect(footerButton).not.toHaveAttribute('disabled', true);
+		await waitFor(() => expect(footerButton).not.toHaveAttribute('disabled', true));
 	});
 
 	test('Create a group', async () => {
@@ -96,17 +96,21 @@ describe('Chat Creation Modal', () => {
 
 		// Add zimbraUser1 and zimbraUser2 chips
 		const chipInput = await screen.findByTestId('chip_input_creation_modal');
-		await user.type(chipInput, zimbraUser1.fullName[0]);
+		user.type(chipInput, zimbraUser1.fullName[0]);
 		const user1Component = await screen.findByText(zimbraUser1.fullName);
-		await user.click(user1Component);
-		await user.type(chipInput, zimbraUser2.fullName[0]);
+		user.click(user1Component);
+
+		// the state here changes, in fact now there's a chip inside the input, so there's need to focus again on it
+		const chipInput1 = await screen.findByTestId('chip_input_creation_modal');
+		user.type(chipInput1, zimbraUser2.fullName[0]);
 		const user2Component = await screen.findByText(zimbraUser2.fullName);
-		await user.click(user2Component);
+		user.click(user2Component);
 
 		// Add group title
-		const titleInput = screen.getByRole('textbox', { name: /title/i });
-		await user.type(titleInput, 'Title');
-		expect(screen.getByDisplayValue(/Title/i)).toBeInTheDocument();
+		const titleInput = await screen.findByRole('textbox', { name: /title/i });
+		user.type(titleInput, 'Title');
+		const title = await screen.findByDisplayValue(/Title/i);
+		await waitFor(() => expect(title).toBeInTheDocument());
 
 		const footerButton = await screen.findByTestId('create_button');
 		expect(footerButton).toBeEnabled();
@@ -121,7 +125,7 @@ describe('Chat Creation Modal', () => {
 			updatedAt: 'updated',
 			pictureUpdatedAt: 'pictureUpdatedAt'
 		});
-		await user.click(footerButton);
+		user.click(footerButton);
 		await waitFor(() => expect(footerButton).not.toHaveAttribute('disabled', true));
 	});
 

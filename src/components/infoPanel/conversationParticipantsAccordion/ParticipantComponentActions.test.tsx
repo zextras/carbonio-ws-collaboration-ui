@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import { act, renderHook } from '@testing-library/react-hooks';
 import React from 'react';
 import { setup } from 'test-utils';
@@ -119,11 +119,14 @@ describe('participants actions - go to private chat', () => {
 		});
 		mockGoToRoomPage.mockReturnValue(`room of ${user1Info.name}`);
 		const { user } = setup(<GoToPrivateChatAction memberId={user1Info.id} />);
-		await user.click(screen.getByTestId('go_to_private_chat'));
-		expect(mockGoToRoomPage).toBeCalled();
-
-		// store checks
-		expect(result.current.rooms['room-id']).toBeDefined();
+		user.click(screen.getByTestId('go_to_private_chat'));
+		await waitFor(() => {
+			expect(mockGoToRoomPage).toBeCalled();
+		});
+		await waitFor(() =>
+			// store checks
+			expect(result.current.rooms['room-id']).toBeDefined()
+		);
 	});
 });
 
@@ -168,15 +171,19 @@ describe('participants actions - leave/delete conversation', () => {
 				roomId={mockedRoom.id}
 			/>
 		);
-		await user.click(screen.getByTestId('icon: LogOut'));
-		const button = screen.getAllByRole('button')[2];
-		await user.click(button);
-		expect(mockGoToMainPage).not.toBeCalled();
-		await user.click(button);
-		expect(mockGoToMainPage).toBeCalled();
+		const logout = await screen.findByTestId('icon: LogOut');
+		user.click(logout);
+		const button = await screen.findByRole('button', { name: 'Leave' });
+		user.click(button);
+		await waitFor(() => expect(mockGoToMainPage).not.toBeCalled());
 
-		// store checks
-		expect(result.current.rooms[mockedRoom.id]).not.toBeDefined();
+		user.click(button);
+		await waitFor(() => expect(mockGoToMainPage).toBeCalled());
+
+		await waitFor(() =>
+			// store checks
+			expect(result.current.rooms[mockedRoom.id]).not.toBeDefined()
+		);
 	});
 	test('delete conversation - open and close modal', async () => {
 		const store = useStore.getState();
@@ -219,15 +226,15 @@ describe('participants actions - leave/delete conversation', () => {
 			/>
 		);
 
-		await user.click(screen.getByTestId('icon: Trash2Outline'));
-		const button = screen.getAllByRole('button')[2];
-		await user.click(button);
-		expect(mockGoToMainPage).not.toBeCalled();
-		await user.click(button);
-		expect(mockGoToMainPage).toBeCalled();
+		user.click(screen.getByTestId('icon: Trash2Outline'));
+		const button = await screen.findByRole('button', { name: 'Delete' });
+		user.click(button);
+		await waitFor(() => expect(mockGoToMainPage).not.toBeCalled());
+		user.click(button);
+		await waitFor(() => expect(mockGoToMainPage).toBeCalled());
 
 		// store checks
-		expect(result.current.rooms[mockedRoom2.id]).not.toBeDefined();
+		await waitFor(() => expect(result.current.rooms[mockedRoom2.id]).not.toBeDefined());
 	});
 });
 
@@ -255,25 +262,26 @@ describe('participants actions - promote/demote member', () => {
 		expect(promoteButton).toBeEnabled();
 
 		// Promote member
-		await user.click(promoteButton);
-		expect(promoteButton).toBeInTheDocument();
+		user.click(promoteButton);
+		await waitFor(() => expect(promoteButton).toBeInTheDocument());
 
-		await user.click(promoteButton);
+		user.click(promoteButton);
 		const button = await screen.findByTestId('icon: Crown');
-		expect(button).toBeInTheDocument();
+		await waitFor(() => expect(button).toBeInTheDocument());
 
 		// store checks
-		expect(result.current.rooms[mockedRoom.id].members?.[1].owner).toBe(true);
+		await waitFor(() => expect(result.current.rooms[mockedRoom.id].members?.[1].owner).toBe(true));
 
 		// Demote member
-		await user.click(button);
-		expect(button).toBeInTheDocument();
+		user.click(button);
+		await waitFor(() => expect(button).toBeInTheDocument());
 
-		await user.click(button);
-		expect(screen.getByTestId('icon: CrownOutline')).toBeInTheDocument();
+		user.click(button);
+		const crownIcon = await screen.findByTestId('icon: CrownOutline');
+		await waitFor(() => expect(crownIcon).toBeInTheDocument());
 
 		// store checks
-		expect(result.current.rooms[mockedRoom.id].members?.[1].owner).toBe(false);
+		await waitFor(() => expect(result.current.rooms[mockedRoom.id].members?.[1].owner).toBe(false));
 	});
 });
 
@@ -310,15 +318,16 @@ describe('participants actions - delete user', () => {
 			<RemoveMemberListAction roomId={mockedRoom.id} memberId={user2Info.id} />
 		);
 
-		await user.click(screen.getByTestId('icon: Trash2Outline'));
-		const button = screen.getAllByRole('button')[2];
-		await user.click(button);
-		expect(screen.getByTestId('icon: Close')).toBeInTheDocument();
+		user.click(screen.getByTestId('icon: Trash2Outline'));
+		const button = await screen.findByRole('button', { name: 'Remove' });
+		user.click(button);
+		const closeIcon = await screen.findByTestId('icon: Close');
+		await waitFor(() => expect(closeIcon).toBeInTheDocument());
 
-		await user.click(button);
-		expect(mockedDeleteRoomMemberRequest).toBeCalledTimes(2);
+		user.click(button);
+		await waitFor(() => expect(mockedDeleteRoomMemberRequest).toBeCalledTimes(2));
 
 		// store checks
-		expect(result.current.rooms[mockedRoom.id].members?.length).toBe(1);
+		await waitFor(() => expect(result.current.rooms[mockedRoom.id].members?.length).toBe(1));
 	});
 });
