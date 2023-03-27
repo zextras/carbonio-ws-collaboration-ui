@@ -94,7 +94,7 @@
 	"carbonio": {
 		"name": "carbonio-workstream-collaboration-ui",
 		"display": "Chats",
-		"priority": 8,
+		"priority": 9,
 		"attrKey": "carbonioFeatureChatsEnabled",
 		"type": "carbonio",
 		"translations_repository": "git@bitbucket.org:zextras/com_zextras_zapp_chats_ui.git"

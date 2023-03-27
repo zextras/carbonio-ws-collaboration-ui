@@ -20,6 +20,7 @@ import SecondaryBarSingleGroupsView from './components/secondaryBar/SecondaryBar
 import { CHATS_ROUTE, PRODUCT_NAME } from './constants/appConstants';
 import useRegisterCreationButton from './hooks/useRegisterCreationButton';
 import useSnackbarManager from './hooks/useSnackbarManager';
+import { LogoBeta, LogoSettingsBeta } from './LogoBeta';
 import { RoomsApi, SessionApi } from './network';
 import { WebSocketClient } from './network/websocket/WebSocketClient';
 import XMPPClient from './network/xmpp/XMPPClient';
@@ -104,7 +105,7 @@ export default function App() {
 			route: CHATS_ROUTE,
 			visible: true,
 			label: PRODUCT_NAME,
-			primaryBar: 'TeamOutline',
+			primaryBar: LogoBeta,
 			appView: Main,
 			secondaryBar: SecondaryBar
 		});
@@ -121,7 +122,7 @@ export default function App() {
 			}
 		});
 		addSettingsView({
-			icon: 'TeamOutline',
+			icon: LogoSettingsBeta,
 			route: CHATS_ROUTE,
 			label: PRODUCT_NAME,
 			component: SettingsView
