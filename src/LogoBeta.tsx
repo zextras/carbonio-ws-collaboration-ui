@@ -5,19 +5,23 @@
  */
 
 import { Container, Icon, IconButton } from '@zextras/carbonio-design-system';
-import { replaceHistory } from '@zextras/carbonio-shell-ui';
 import React, { useCallback } from 'react';
+import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { CHATS_ROUTE } from './constants/appConstants';
 
 const CustomLabel = styled(Container)`
 	position: absolute;
-	top: 5px;
-	padding: 1px;
-	font-size: 6px;
+	top: 0.375rem;
+	left: 0;
+	padding: 0.063rem;
+	font-size: 0.375rem;
 	color: white;
-	border-radius: 2px 2px 0 0;
+	border-radius: 0 2px 2px 0;
+	writing-mode: vertical-rl;
+	text-orientation: upright;
+	user-select: none;
 `;
 
 const CustomSettingsContainer = styled.div`
@@ -25,17 +29,16 @@ const CustomSettingsContainer = styled.div`
 `;
 
 const CustomSettingsLabel = styled(CustomLabel)`
-	top: -8px;
-	left: -5px;
+	top: -0.5rem;
+	left: -1rem;
 `;
 
 const LogoBeta = ({ active }: { active: boolean }): JSX.Element => {
+	const history = useHistory();
+
 	const goToChats = useCallback(() => {
-		replaceHistory({
-			path: `/`,
-			route: CHATS_ROUTE
-		});
-	}, []);
+		history.push(`/${CHATS_ROUTE}`);
+	}, [history]);
 
 	return (
 		<>
@@ -45,8 +48,8 @@ const LogoBeta = ({ active }: { active: boolean }): JSX.Element => {
 				iconColor={active ? 'primary' : 'gray0'}
 				onClick={goToChats}
 			/>
-			<CustomLabel background="warning" height="fit" width="35px">
-				beta
+			<CustomLabel background="info" height="2.25rem" width="fit">
+				BETA
 			</CustomLabel>
 		</>
 	);
@@ -55,8 +58,8 @@ const LogoBeta = ({ active }: { active: boolean }): JSX.Element => {
 const LogoSettingsBeta = (): JSX.Element => (
 	<CustomSettingsContainer>
 		<Icon icon="TeamOutline" size={'large'} />
-		<CustomSettingsLabel background="warning" height="fit" width="35px">
-			beta
+		<CustomSettingsLabel background="info" height="2.5rem" width="fit">
+			BETA
 		</CustomSettingsLabel>
 	</CustomSettingsContainer>
 );
