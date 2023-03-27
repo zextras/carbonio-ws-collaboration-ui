@@ -6,11 +6,12 @@
 
 import { Container, Dropdown, IconButton, Tooltip } from '@zextras/carbonio-design-system';
 import { forEach } from 'lodash';
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { v4 as uuidGenerator } from 'uuid';
 
+import { getFilesToUploadArray } from '../../../store/selectors/ActiveConversationsSelectors';
 import useStore from '../../../store/Store';
 import { FileToUpload } from '../../../types/store/ActiveConversationTypes';
 
@@ -36,6 +37,7 @@ const AttachmentSelector: React.FC<AttachmentSelectorProps> = ({ roomId }) => {
 	const addLocalLabel = t('attachments.addFromLocal', 'Add from local');
 
 	const setFilesToAttach = useStore((store) => store.setFilesToAttach);
+	const filesToUploadArray = useStore((store) => getFilesToUploadArray(store, roomId));
 
 	const fileSelectorInputRef = useRef<HTMLInputElement>(null);
 
@@ -63,6 +65,12 @@ const AttachmentSelector: React.FC<AttachmentSelectorProps> = ({ roomId }) => {
 		() => fileSelectorInputRef.current?.click(),
 		[fileSelectorInputRef]
 	);
+
+	useEffect(() => {
+		if (!filesToUploadArray && fileSelectorInputRef.current) {
+			fileSelectorInputRef.current.value = '';
+		}
+	}, [filesToUploadArray]);
 
 	const items = [
 		{

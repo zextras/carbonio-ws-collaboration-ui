@@ -153,7 +153,7 @@ export const useActiveConversationsSlice = (
 				}
 			}),
 			false,
-			'ACTIVE_CONVERSATION/SET_DRAFT_MESSAGE'
+			'AC/SET_DRAFT_MESSAGE'
 		);
 	},
 	setHistoryIsFullyLoaded: (roomId: string): void => {
