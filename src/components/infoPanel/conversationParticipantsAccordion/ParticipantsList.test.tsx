@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { screen, act, waitFor } from '@testing-library/react';
+import { screen, act } from '@testing-library/react';
 import React from 'react';
 import { setup } from 'test-utils';
 
@@ -177,12 +177,12 @@ describe('Participants list', () => {
 		user.type(searchInput, 'user 4');
 
 		const placeholderText = await screen.findByText(/There are no items that match this search/i);
-		await waitFor(() => expect(placeholderText).toBeInTheDocument());
-		await waitFor(() => expect(list).not.toBeInTheDocument());
+		expect(placeholderText).toBeInTheDocument();
+		expect(list).not.toBeInTheDocument();
 
 		const closeButton = await screen.findByTestId('close_button');
 		user.click(closeButton);
 		const placeholderText1 = await screen.findByText(/There are no items that match this search/i);
-		await waitFor(() => expect(placeholderText1).not.toBeInTheDocument());
+		expect(placeholderText1).not.toBeInTheDocument();
 	});
 });

@@ -74,7 +74,7 @@ describe('Add new member action', () => {
 
 		user.click(checkboxIcon);
 		const checkmark = await screen.findByTestId('icon: CheckmarkSquare');
-		await waitFor(() => expect(checkmark).toBeInTheDocument());
+		expect(checkmark).toBeInTheDocument();
 
 		user.click(screen.getByTestId('icon: Close'));
 		await waitFor(() => expect(addMemberModal).not.toBeInTheDocument());
@@ -101,14 +101,14 @@ describe('Add new member action', () => {
 
 		user.click(screen.getByText(/Add new Members/i));
 		const addMemberModal = await screen.findByTestId('add_member_modal');
-		await waitFor(() => expect(addMemberModal).toBeInTheDocument());
+		expect(addMemberModal).toBeInTheDocument();
 
 		const chipInput = await screen.findByTestId('chip_input_creation_modal');
 		user.type(chipInput, zimbraUser2.fullName[0]);
 
 		await screen.findByText('spinner');
 		const list = await screen.findByTestId('list_creation_modal');
-		await waitFor(() => expect(list).toBeVisible());
+		expect(list).toBeVisible();
 
 		const checkboxIcon = screen.queryAllByTestId('icon: Square')[0];
 		user.click(checkboxIcon);

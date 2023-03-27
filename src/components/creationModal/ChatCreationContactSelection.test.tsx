@@ -196,16 +196,16 @@ describe('Chat Creation Modal Contact Selector - search', () => {
 		const chipInput = await screen.findByTestId('chip_input_creation_modal');
 		// here I check that the chip exist and is the one related to user1
 		const user1Chip = chipInput.children[0].children[0];
-		await waitFor(() => expect(chipInput.children[0].children).toHaveLength(3));
-		await waitFor(() => expect(user1Chip).toBeInTheDocument());
-		await waitFor(() => expect(user1Chip.id).toBe(zimbraUser1.zimbraId));
+		expect(chipInput.children[0].children).toHaveLength(3);
+		expect(user1Chip).toBeInTheDocument();
+		expect(user1Chip.id).toBe(zimbraUser1.zimbraId);
 
 		const removeButton = await screen.findByTestId('icon: Close');
 		user.click(removeButton);
 		const chipInput1 = await screen.findByTestId('chip_input_creation_modal');
 
 		// the chip should not be in the document
-		await waitFor(() => expect(chipInput1.children[0].children).toHaveLength(2));
+		expect(chipInput1.children[0].children).toHaveLength(2);
 	});
 
 	test('Add and remove chip by clicking the same component', async () => {
@@ -225,11 +225,11 @@ describe('Chat Creation Modal Contact Selector - search', () => {
 		user.click(userComponent);
 		const chipInput = await screen.findByTestId('chip_input_creation_modal');
 		const user1Chip = chipInput.children[0].children[0];
-		await waitFor(() => expect(user1Chip.id).toBe(zimbraUser1.zimbraId));
+		expect(user1Chip.id).toBe(zimbraUser1.zimbraId);
 		user.click(userComponent);
 		const chipInput1 = await screen.findByTestId('chip_input_creation_modal');
 
-		await waitFor(() => expect(chipInput1.children[0].children).toHaveLength(2));
+		expect(chipInput1.children[0].children).toHaveLength(2);
 	});
 });
 

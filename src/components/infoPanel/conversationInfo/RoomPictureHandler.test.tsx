@@ -131,17 +131,17 @@ describe('Room Picture Handler - groups', () => {
 		const hoverContainer = await screen.findByTestId('hover_container');
 		const input = hoverContainer.children.item(0) as HTMLInputElement;
 
-		await waitFor(() => expect(input).not.toBeNull());
-		await waitFor(() => expect(input.files).toHaveLength(0));
+		expect(input).not.toBeNull();
+		expect(input.files).toHaveLength(0);
 
 		user.upload(input, testImageFile);
 		await waitFor(() => expect(input.files).toHaveLength(1));
 
 		const snackbar = await screen.findByText(/New avatar has been successfully uploaded/i);
-		await waitFor(() => expect(snackbar).toBeVisible());
+		expect(snackbar).toBeVisible();
 
 		const pictureContainer = await screen.findByTestId('picture_container');
-		await waitFor(() => expect(pictureContainer).toBeInTheDocument());
+		expect(pictureContainer).toBeInTheDocument();
 	});
 	test('update an image fails', async () => {
 		const testImageFile = new File(['hello'], 'hello.png', { type: 'image/png' });
@@ -162,12 +162,12 @@ describe('Room Picture Handler - groups', () => {
 		user.hover(pictureContainer);
 		const hoverContainer = await screen.findByTestId('hover_container');
 		const input = hoverContainer.children.item(0) as HTMLInputElement;
-		await waitFor(() => expect(input).not.toBeNull());
+		expect(input).not.toBeNull();
 
 		user.upload(input, testImageFile);
 
 		const snackbar = await screen.findByText(/Something went wrong/i);
-		await waitFor(() => expect(snackbar).toBeVisible());
+		expect(snackbar).toBeVisible();
 	});
 	test('delete an image', async () => {
 		const store: RootStore = useStore.getState();
@@ -186,19 +186,19 @@ describe('Room Picture Handler - groups', () => {
 
 		user.hover(pictureContainer);
 		const deleteButton = await screen.findByTestId('delete_button');
-		await waitFor(() => expect(deleteButton).toBeInTheDocument());
+		expect(deleteButton).toBeInTheDocument();
 		user.click(deleteButton);
 
 		const snackbar = await screen.findByText(
 			/Group avatar has been successfully reset to the original one/i
 		);
-		await waitFor(() => expect(snackbar).toBeVisible());
+		expect(snackbar).toBeVisible();
 
 		const backgroundContainer = await screen.findByTestId('background_container');
-		await waitFor(() => expect(backgroundContainer).toBeInTheDocument());
+		expect(backgroundContainer).toBeInTheDocument();
 
-		await user.hover(backgroundContainer);
-		const uploadButton = screen.getByTestId('upload_button');
+		user.hover(backgroundContainer);
+		const uploadButton = await screen.findByTestId('upload_button');
 		expect(uploadButton).toBeInTheDocument();
 		expect(deleteButton).not.toBeInTheDocument();
 	});
@@ -219,13 +219,13 @@ describe('Room Picture Handler - groups', () => {
 
 		user.hover(pictureContainer);
 		const deleteButton = await screen.findByTestId('delete_button');
-		await waitFor(() => expect(deleteButton).toBeInTheDocument());
+		expect(deleteButton).toBeInTheDocument();
 		user.click(deleteButton);
 
 		const snackbar = await screen.findByText(/Something went wrong. Please Retry/i);
-		await waitFor(() => expect(snackbar).toBeVisible());
+		expect(snackbar).toBeVisible();
 
-		await waitFor(() => expect(pictureContainer).toBeInTheDocument());
+		expect(pictureContainer).toBeInTheDocument();
 	});
 });
 

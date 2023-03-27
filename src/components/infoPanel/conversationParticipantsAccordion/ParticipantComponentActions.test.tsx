@@ -263,22 +263,22 @@ describe('participants actions - promote/demote member', () => {
 
 		// Promote member
 		user.click(promoteButton);
-		await waitFor(() => expect(promoteButton).toBeInTheDocument());
+		expect(promoteButton).toBeInTheDocument();
 
 		user.click(promoteButton);
 		const button = await screen.findByTestId('icon: Crown');
-		await waitFor(() => expect(button).toBeInTheDocument());
+		expect(button).toBeInTheDocument();
 
 		// store checks
 		await waitFor(() => expect(result.current.rooms[mockedRoom.id].members?.[1].owner).toBe(true));
 
 		// Demote member
 		user.click(button);
-		await waitFor(() => expect(button).toBeInTheDocument());
+		expect(button).toBeInTheDocument();
 
 		user.click(button);
 		const crownIcon = await screen.findByTestId('icon: CrownOutline');
-		await waitFor(() => expect(crownIcon).toBeInTheDocument());
+		expect(crownIcon).toBeInTheDocument();
 
 		// store checks
 		await waitFor(() => expect(result.current.rooms[mockedRoom.id].members?.[1].owner).toBe(false));
@@ -322,7 +322,7 @@ describe('participants actions - delete user', () => {
 		const button = await screen.findByRole('button', { name: 'Remove' });
 		user.click(button);
 		const closeIcon = await screen.findByTestId('icon: Close');
-		await waitFor(() => expect(closeIcon).toBeInTheDocument());
+		expect(closeIcon).toBeInTheDocument();
 
 		user.click(button);
 		await waitFor(() => expect(mockedDeleteRoomMemberRequest).toBeCalledTimes(2));

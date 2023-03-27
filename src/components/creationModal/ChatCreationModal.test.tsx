@@ -73,7 +73,7 @@ describe('Chat Creation Modal', () => {
 		user.click(userComponent);
 
 		const footerButton = await screen.findByTestId('create_button');
-		await waitFor(() => expect(footerButton).not.toHaveAttribute('disabled', true));
+		expect(footerButton).not.toHaveAttribute('disabled', true);
 
 		mockedAddRoomRequest.mockReturnValue({
 			id: 'room-id',
@@ -110,7 +110,7 @@ describe('Chat Creation Modal', () => {
 		const titleInput = await screen.findByRole('textbox', { name: /title/i });
 		user.type(titleInput, 'Title');
 		const title = await screen.findByDisplayValue(/Title/i);
-		await waitFor(() => expect(title).toBeInTheDocument());
+		expect(title).toBeInTheDocument();
 
 		const footerButton = await screen.findByTestId('create_button');
 		expect(footerButton).toBeEnabled();

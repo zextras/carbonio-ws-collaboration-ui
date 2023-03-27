@@ -107,7 +107,7 @@ describe('Edit conversation action', () => {
 		user.click(editButton);
 
 		const snackbar = await screen.findByText(/Something went Wrong. Please Retry/i);
-		await waitFor(() => expect(snackbar).toBeVisible());
+		expect(snackbar).toBeVisible();
 		await waitFor(() => expect(result.current.rooms[testRoom2.id].name).toBe('A Group'));
 
 		user.click(editButton);
