@@ -8,6 +8,7 @@ import { screen } from '@testing-library/react';
 import React from 'react';
 import { setup } from 'test-utils';
 
+import MessageFactory from './MessageFactory';
 import useStore from '../../../store/Store';
 import {
 	createMockAffiliationMessage,
@@ -17,7 +18,6 @@ import {
 	createMockRoom,
 	createMockTextMessage
 } from '../../../tests/createMock';
-import MessageFactory from './MessageFactory';
 
 describe('Message Factory', () => {
 	test("Message isn't in the store", () => {

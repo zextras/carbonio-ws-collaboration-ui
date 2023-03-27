@@ -8,14 +8,14 @@ import { Container } from '@zextras/carbonio-design-system';
 import React, { ReactElement, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
+import ConversationHeader from './ConversationHeader';
+import ConversationFooter from './footer/ConversationFooter';
+import MessagesList from './MessagesList';
 import papyrusDark from '../../assets/papyrus-dark.png';
 import papyrus from '../../assets/papyrus.png';
 import { ConversationProps } from '../../types/store/RoomTypes';
 import useMediaQueryCheck from '../../utils/useMediaQueryCheck';
 import ConversationInfoPanel from '../infoPanel/ConversationInfoPanel';
-import ConversationHeader from './ConversationHeader';
-import ConversationFooter from './footer/ConversationFooter';
-import MessagesList from './MessagesList';
 
 const ConversationWrapper = styled(Container)`
 	background-image: url('${(props): string => (props.theme === 'dark' ? papyrusDark : papyrus)}');

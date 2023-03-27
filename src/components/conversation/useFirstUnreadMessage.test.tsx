@@ -7,11 +7,11 @@
 import { renderHook } from '@testing-library/react-hooks';
 import { last, size } from 'lodash';
 
+import useFirstUnreadMessage from './useFirstUnreadMessage';
 import useStore from '../../store/Store';
 import { createMockMarker, createMockRoom, createMockTextMessage } from '../../tests/createMock';
 import { MessageType } from '../../types/store/MessageTypes';
 import { dateToTimestamp } from '../../utils/dateUtil';
-import useFirstUnreadMessage from './useFirstUnreadMessage';
 
 const myUserId = 'myUserId';
 const room = createMockRoom();

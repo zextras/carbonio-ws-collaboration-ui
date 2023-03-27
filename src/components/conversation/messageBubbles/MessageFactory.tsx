@@ -9,14 +9,14 @@ import React, { ReactElement, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import { getSingleMessageSelector } from '../../../store/selectors/MessagesSelectors';
-import useStore from '../../../store/Store';
-import { MessageType } from '../../../types/store/MessageTypes';
 import AffiliationBubble from './AffiliationBubble';
 import Bubble from './Bubble';
 import ConfigurationBubble from './ConfigurationBubble';
 import DateBubble from './DateBubble';
 import DeletedBubble from './DeletedBubble';
+import { getSingleMessageSelector } from '../../../store/selectors/MessagesSelectors';
+import useStore from '../../../store/Store';
+import { MessageType } from '../../../types/store/MessageTypes';
 
 type MessageProps = {
 	messageId: string;
@@ -43,7 +43,7 @@ export const CustomMessage = styled(Container)`
 	user-select: none;
 	text-align: center;
 	background-color: ${({ theme, dateMessage }): string =>
-		dateMessage ? theme.palette.gray6.regular : theme.palette.gray5.regular}; ;
+		dateMessage ? theme.palette.gray6.regular : theme.palette.gray5.regular};
 `;
 
 const MessageFactory = ({

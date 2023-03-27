@@ -8,6 +8,7 @@ import { screen } from '@testing-library/react';
 import React from 'react';
 import { setup } from 'test-utils';
 
+import MessageReferenceDisplayed from './MessageReferenceDisplayed';
 import useStore from '../../../store/Store';
 import { createMockRoom, createMockTextMessage, createMockUser } from '../../../tests/createMock';
 import { RoomBe } from '../../../types/network/models/roomBeTypes';
@@ -15,7 +16,6 @@ import { UserBe } from '../../../types/network/models/userBeTypes';
 import { messageActionType } from '../../../types/store/ActiveConversationTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 import { User } from '../../../types/store/UserTypes';
-import MessageReferenceDisplayed from './MessageReferenceDisplayed';
 
 const mockedRoom: RoomBe = createMockRoom({
 	id: 'roomId',

@@ -18,6 +18,12 @@ import React, {
 } from 'react';
 import styled from 'styled-components';
 
+import AnimationGlobalStyle from './messageBubbles/BubbleAnimationsGlobalStyle';
+import MessageFactory from './messageBubbles/MessageFactory';
+import WritingBubble from './messageBubbles/WritingBubble';
+import MessageHistoryLoader from './MessageHistoryLoader';
+import ScrollButton from './ScrollButton';
+import useFirstUnreadMessage from './useFirstUnreadMessage';
 import useEventListener, { EventName } from '../../hooks/useEventListener';
 import { messageWhereScrollIsStoppedEqualityFn } from '../../store/equalityFunctions/ActiveConversationsEqualityFunctions';
 import {
@@ -34,12 +40,6 @@ import { getPrefTimezoneSelector, getUserId } from '../../store/selectors/Sessio
 import useStore from '../../store/Store';
 import { Message, MessageType, TextMessage } from '../../types/store/MessageTypes';
 import { isBefore, now } from '../../utils/dateUtil';
-import AnimationGlobalStyle from './messageBubbles/BubbleAnimationsGlobalStyle';
-import MessageFactory from './messageBubbles/MessageFactory';
-import WritingBubble from './messageBubbles/WritingBubble';
-import MessageHistoryLoader from './MessageHistoryLoader';
-import ScrollButton from './ScrollButton';
-import useFirstUnreadMessage from './useFirstUnreadMessage';
 
 const Messages = styled(Container)`
 	position: relative;

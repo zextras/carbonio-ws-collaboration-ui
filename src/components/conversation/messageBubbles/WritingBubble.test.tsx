@@ -8,6 +8,7 @@ import { screen } from '@testing-library/react';
 import React from 'react';
 import { setup } from 'test-utils';
 
+import WritingBubble from './WritingBubble';
 import useStore from '../../../store/Store';
 import { createMockMember, createMockRoom } from '../../../tests/createMock';
 import { RoomBe } from '../../../types/network/models/roomBeTypes';
@@ -15,7 +16,6 @@ import { UserBe } from '../../../types/network/models/userBeTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 import { RootStore } from '../../../types/store/StoreTypes';
 import MessagesList from '../MessagesList';
-import WritingBubble from './WritingBubble';
 
 const user1: UserBe = {
 	id: 'idDiPaolo',

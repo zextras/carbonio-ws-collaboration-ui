@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { setup } from 'test-utils';
 
@@ -19,20 +19,18 @@ describe('MessageComposer', () => {
 
 		// hover on emoji button
 		const emojiButton = screen.getAllByRole('button')[0];
-		await user.hover(emojiButton);
-		expect(screen.getByTestId('emojiPicker')).toBeInTheDocument();
+		user.hover(emojiButton);
+		const emojiPicker = await screen.findByTestId('emojiPicker');
+		expect(emojiPicker).toBeInTheDocument();
 
 		// hover on emojiPicker
-		const emojiPicker = screen.getByTestId('emojiPicker');
-		await user.hover(emojiPicker);
-		expect(screen.getByTestId('emojiPicker')).toBeInTheDocument();
+		user.hover(emojiPicker);
+		expect(emojiPicker).toBeInTheDocument();
 
 		// hover on textarea for closing the emojiPicker
-		const textArea = screen.getByRole('textbox');
-		await user.hover(textArea);
-		setTimeout(() => {
-			expect(screen.queryByTestId('emojiPicker')).not.toBeInTheDocument();
-		}, 1500);
+		const textArea = await screen.findByRole('textbox');
+		user.hover(textArea);
+		await waitFor(() => expect(emojiPicker).not.toBeInTheDocument());
 	});
 
 	test('Send message button status - initial status', () => {
