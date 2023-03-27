@@ -9,11 +9,11 @@ import React, { Dispatch, FC, SetStateAction, useCallback, useMemo } from 'react
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
+import RoomPictureHandler from './RoomPictureHandler';
 import { getRoomMembers } from '../../../store/selectors/RoomsSelectors';
 import useStore from '../../../store/Store';
 import { Member, RoomType } from '../../../types/store/RoomTypes';
 import useMediaQueryCheck from '../../../utils/useMediaQueryCheck';
-import RoomPictureHandler from './RoomPictureHandler';
 
 type ConversationInfoProps = {
 	roomId: string;

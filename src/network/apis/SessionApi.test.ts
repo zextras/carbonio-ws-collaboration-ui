@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import sessionApi from './SessionApi';
 import { fetchResponse } from '../../../jest-mocks';
 import useStore from '../../store/Store';
 import { createMockCapabilityList } from '../../tests/createMock';
-import sessionApi from './SessionApi';
 
 describe('Session API', () => {
 	test('getToken is called correctly', async () => {

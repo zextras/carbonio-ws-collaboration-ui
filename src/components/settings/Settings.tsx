@@ -18,11 +18,11 @@ import {
 import React, { FC, useCallback, useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import NotificationsSettings from './NotificationsSettings';
+import ProfileSettings from './ProfileSettings';
 import useLocalStorage from '../../hooks/useLocalStorage';
 import { UsersApi } from '../../network';
 import useStore from '../../store/Store';
-import NotificationsSettings from './NotificationsSettings';
-import ProfileSettings from './ProfileSettings';
 
 type CreateSnackbarFn = typeof CreateSnackbarFn;
 

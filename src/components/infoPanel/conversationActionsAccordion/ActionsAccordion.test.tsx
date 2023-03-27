@@ -9,11 +9,11 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { setup } from 'test-utils';
 
+import { ActionsAccordion } from './ActionsAccordion';
 import useStore from '../../../store/Store';
 import { createMockMember, createMockRoom, createMockTextMessage } from '../../../tests/createMock';
 import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
 import { UserBe } from '../../../types/network/models/userBeTypes';
-import { ActionsAccordion } from './ActionsAccordion';
 
 const user1Be: UserBe = {
 	id: 'user1',

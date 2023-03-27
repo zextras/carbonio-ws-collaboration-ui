@@ -8,12 +8,12 @@ import { screen } from '@testing-library/react';
 import React from 'react';
 import { setup } from 'test-utils';
 
+import SecondaryBarSingleGroupsView from './SecondaryBarSingleGroupsView';
 import useStore from '../../store/Store';
 import { createMockMember, createMockRoom } from '../../tests/createMock';
 import { RoomBe, RoomType } from '../../types/network/models/roomBeTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 import { User } from '../../types/store/UserTypes';
-import SecondaryBarSingleGroupsView from './SecondaryBarSingleGroupsView';
 
 const user1Be: User = {
 	id: 'user1Id',

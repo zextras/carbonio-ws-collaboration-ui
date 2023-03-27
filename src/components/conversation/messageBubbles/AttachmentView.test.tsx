@@ -8,9 +8,9 @@ import { fireEvent, screen } from '@testing-library/react';
 import React from 'react';
 import { setup } from 'test-utils';
 
+import AttachmentView from './AttachmentView';
 import { mockedGetURLAttachment, mockedGetURLPreview } from '../../../../jest-mocks';
 import { AttachmentMessageType } from '../../../types/store/MessageTypes';
-import AttachmentView from './AttachmentView';
 
 describe('Attachment view', () => {
 	test('Generic file visualization', async () => {

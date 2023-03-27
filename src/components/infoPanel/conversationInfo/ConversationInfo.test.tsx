@@ -8,12 +8,12 @@ import { act, screen } from '@testing-library/react';
 import React from 'react';
 import { setup } from 'test-utils';
 
+import ConversationInfo from './ConversationInfo';
+import ConversationInfoDetails from './ConversationInfoDetails';
 import { mockedGetUserPictureRequest, mockUseMediaQueryCheck } from '../../../../jest-mocks';
 import useStore from '../../../store/Store';
 import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
 import { UserBe } from '../../../types/network/models/userBeTypes';
-import ConversationInfo from './ConversationInfo';
-import ConversationInfoDetails from './ConversationInfoDetails';
 
 const user1Be: UserBe = {
 	id: 'user1',

@@ -15,6 +15,9 @@ import React, {
 } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import AttachmentSelector from './AttachmentSelector';
+import EmojiPicker from './EmojiPicker';
+import MessageArea from './MessageArea';
 import {
 	getDraftMessage,
 	getInputHasFocus,
@@ -27,9 +30,6 @@ import useStore from '../../../store/Store';
 import { Emoji } from '../../../types/generics';
 import { messageActionType } from '../../../types/store/ActiveConversationTypes';
 import { Message, MessageType } from '../../../types/store/MessageTypes';
-import AttachmentSelector from './AttachmentSelector';
-import EmojiPicker from './EmojiPicker';
-import MessageArea from './MessageArea';
 
 type ConversationMessageComposerProps = {
 	roomId: string;
