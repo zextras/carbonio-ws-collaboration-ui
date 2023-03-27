@@ -8,12 +8,12 @@ import { Container } from '@zextras/carbonio-design-system';
 import React, { FC, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import ActionComponent from './ActionComponent';
+import DeleteConversationModal from './DeleteConversationModal';
 import useRouting from '../../../hooks/useRouting';
 import { RoomsApi } from '../../../network';
 import useStore from '../../../store/Store';
 import { RoomType } from '../../../types/store/RoomTypes';
-import ActionComponent from './ActionComponent';
-import DeleteConversationModal from './DeleteConversationModal';
 
 type DeleteProps = {
 	roomId: string;

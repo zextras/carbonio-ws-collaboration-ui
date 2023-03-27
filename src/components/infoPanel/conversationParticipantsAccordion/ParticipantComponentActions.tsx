@@ -8,6 +8,10 @@ import { Container, IconButton, Tooltip } from '@zextras/carbonio-design-system'
 import React, { FC, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import GoToPrivateChatAction from './GoToPrivateChatAction';
+import LeaveConversationListAction from './LeaveConversationListAction';
+import PromoteDemoteMemberAction from './PromoteDemoteMemberAction';
+import RemoveMemberListAction from './RemoveMemberListAction';
 import {
 	getOwner,
 	getMyOwnershipOfTheRoom,
@@ -15,10 +19,6 @@ import {
 	getNumbersOfRoomMembers
 } from '../../../store/selectors/RoomsSelectors';
 import useStore from '../../../store/Store';
-import GoToPrivateChatAction from './GoToPrivateChatAction';
-import LeaveConversationListAction from './LeaveConversationListAction';
-import PromoteDemoteMemberAction from './PromoteDemoteMemberAction';
-import RemoveMemberListAction from './RemoveMemberListAction';
 
 type ActionsProps = {
 	roomId: string;

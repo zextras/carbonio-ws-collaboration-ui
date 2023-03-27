@@ -8,12 +8,12 @@ import { screen } from '@testing-library/react';
 import React from 'react';
 import { setup } from 'test-utils';
 
+import Conversation from './Conversation';
 import { mockUseMediaQueryCheck } from '../../../jest-mocks';
 import useStore from '../../store/Store';
 import { createMockMember, createMockRoom } from '../../tests/createMock';
 import { RoomBe, RoomType } from '../../types/network/models/roomBeTypes';
 import { User } from '../../types/store/UserTypes';
-import Conversation from './Conversation';
 
 const testRoom: RoomBe = createMockRoom({
 	id: 'room-test',

@@ -7,12 +7,8 @@
 import { size } from 'lodash';
 
 import { Room } from '../../types/store/RoomTypes';
-import { RoomMainInfosType } from '../selectors/RoomsSelectors';
 
-export const roomMainInfoEqualityFn = (
-	oldState: Room | RoomMainInfosType,
-	newState: Room | RoomMainInfosType
-): boolean =>
+export const roomMainInfoEqualityFn = (oldState: Room, newState: Room): boolean =>
 	oldState?.name === newState?.name &&
 	oldState?.description === newState?.description &&
 	oldState?.type === newState?.type &&

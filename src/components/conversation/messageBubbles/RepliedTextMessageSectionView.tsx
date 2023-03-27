@@ -19,14 +19,14 @@ import React, { FC, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
+import BubbleFooter from './BubbleFooter';
+import BubbleHeader from './BubbleHeader';
 import usePreview from '../../../hooks/usePreview';
 import { getUserName, getUserSelector } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
 import { DeletedMessage, MessageType, TextMessage } from '../../../types/store/MessageTypes';
 import { getPreviewURL } from '../../../utils/attachmentUtils';
 import { calculateAvatarColor } from '../../../utils/styleUtils';
-import BubbleFooter from './BubbleFooter';
-import BubbleHeader from './BubbleHeader';
 
 type RepliedTextMessageSectionViewProps = {
 	repliedMessage: TextMessage | DeletedMessage;

@@ -312,11 +312,12 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 										</Container>
 									</Tooltip>
 								)}
-								{lastMessageOfRoom?.type === MessageType.TEXT_MSG && lastMessageOfRoom.attachment && (
-									<Container width="fit" padding={{ right: 'extrasmall' }}>
-										<Icon size="small" icon="FileTextOutline" color="gray" />
-									</Container>
-								)}
+								{lastMessageOfRoom?.type === MessageType.TEXT_MSG &&
+									lastMessageOfRoom.attachment && (
+										<Container width="fit" padding={{ right: 'extrasmall' }}>
+											<Icon size="small" icon="FileTextOutline" color="gray" />
+										</Container>
+									)}
 								<Text color="secondary" size="extrasmall" overflow="ellipsis" data-testid="message">
 									{messageToDisplay}
 								</Text>

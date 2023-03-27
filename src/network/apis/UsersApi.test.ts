@@ -3,11 +3,11 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
+import usersApi from './UsersApi';
 import { fetchResponse } from '../../../jest-mocks';
 import useStore from '../../store/Store';
 import { createMockCapabilityList, createMockUser } from '../../tests/createMock';
 import { UserBe } from '../../types/network/models/userBeTypes';
-import usersApi from './UsersApi';
 
 const user: UserBe = createMockUser();
 

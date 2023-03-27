@@ -6,6 +6,7 @@
 
 import { size } from 'lodash';
 
+import { onNewMessageStanza } from './newMessageHandler';
 import { mockNotify } from '../../../../jest-mocks';
 import useStore from '../../../store/Store';
 import { createMockRoom } from '../../../tests/createMock';
@@ -16,7 +17,6 @@ import {
 	MessageType,
 	TextMessage
 } from '../../../types/store/MessageTypes';
-import { onNewMessageStanza } from './newMessageHandler';
 
 type MessageInfo = {
 	id?: string;
