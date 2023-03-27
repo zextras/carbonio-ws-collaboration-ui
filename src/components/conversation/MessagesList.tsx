@@ -5,7 +5,7 @@
  */
 
 import { Container } from '@zextras/carbonio-design-system';
-import { debounce, find, groupBy, map } from 'lodash';
+import { debounce, find, forEach, groupBy, map } from 'lodash';
 import moment from 'moment-timezone';
 import React, {
 	ForwardedRef,
@@ -17,6 +17,7 @@ import React, {
 	useState
 } from 'react';
 import styled from 'styled-components';
+import { v4 as uuidGenerator } from 'uuid';
 
 import useEventListener, { EventName } from '../../hooks/useEventListener';
 import { messageWhereScrollIsStoppedEqualityFn } from '../../store/equalityFunctions/ActiveConversationsEqualityFunctions';
@@ -32,8 +33,10 @@ import { getMyLastMarkerOfConversation } from '../../store/selectors/MarkersSele
 import { getMessagesSelector } from '../../store/selectors/MessagesSelectors';
 import { getPrefTimezoneSelector, getUserId } from '../../store/selectors/SessionSelectors';
 import useStore from '../../store/Store';
+import { FileToUpload } from '../../types/store/ActiveConversationTypes';
 import { Message, MessageType, TextMessage } from '../../types/store/MessageTypes';
 import { isBefore, now } from '../../utils/dateUtil';
+import DropZoneView from './DropZoneView';
 import AnimationGlobalStyle from './messageBubbles/BubbleAnimationsGlobalStyle';
 import MessageFactory from './messageBubbles/MessageFactory';
 import WritingBubble from './messageBubbles/WritingBubble';
@@ -75,9 +78,11 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 	const myUserId = useStore(getUserId);
 	const myLastMarker = useStore((store) => getMyLastMarkerOfConversation(store, roomId));
 	const timezone = useStore(getPrefTimezoneSelector);
+	const setFilesToAttach = useStore((store) => store.setFilesToAttach);
 
 	const [showScrollButton, setShowScrollButton] = useState(false);
 	const [isLoadedFirstTime, setIsLoadedFirstTime] = useState(true);
+	const [dropzoneEnabled, setDropzoneEnabled] = useState(false);
 
 	const messageScrollPositionObserver = useRef<IntersectionObserver>();
 	const historyLoaderObserver = useRef<IntersectionObserver>();
@@ -389,6 +394,37 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 		[actualScrollPosition, roomMessages, myUserId]
 	);
 
+	const handleOnDrop = useCallback(
+		(ev) => {
+			ev.preventDefault();
+			const listOfFiles: FileToUpload[] = [];
+			forEach(ev.dataTransfer.files, (file: File) => {
+				const fileLocalUrl = URL.createObjectURL(file);
+				const fileId = uuidGenerator();
+				listOfFiles.push({
+					file,
+					fileId,
+					hasFocus: false,
+					description: '',
+					localUrl: fileLocalUrl
+				});
+			});
+			setFilesToAttach(roomId, listOfFiles);
+			setDropzoneEnabled(false);
+		},
+		[roomId, setFilesToAttach]
+	);
+
+	const handleOnDragOver = useCallback((ev) => {
+		ev.preventDefault();
+		setDropzoneEnabled(true);
+	}, []);
+
+	const handleOnDragLeave = useCallback((ev) => {
+		ev.preventDefault();
+		setDropzoneEnabled(false);
+	}, []);
+
 	useEventListener(EventName.NEW_MESSAGE, newMessageScrollToButtonHandler);
 
 	return (
@@ -398,7 +434,15 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 			data-testid={`intersectionObserverRoot${roomId}`}
 			mainAlignment={'flex-start'}
 			crossAlignment={'flex-start'}
+			onDragOver={handleOnDragOver}
 		>
+			{dropzoneEnabled && (
+				<DropZoneView
+					onDragOverEvent={handleOnDragOver}
+					onDropEvent={handleOnDrop}
+					onDragLeaveEvent={handleOnDragLeave}
+				/>
+			)}
 			<AnimationGlobalStyle />
 			<MessagesListWrapper
 				ref={MessagesListWrapperRef}

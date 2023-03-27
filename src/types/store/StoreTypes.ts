@@ -8,7 +8,7 @@ import { MemberBe, RoomBe } from '../network/models/roomBeTypes';
 import { UserBe } from '../network/models/userBeTypes';
 import IWebSocketClient from '../network/websocket/IWebSocketClient';
 import IXMPPClient from '../network/xmpp/IXMPPClient';
-import { ActiveConversationsMap, messageActionType } from './ActiveConversationTypes';
+import { ActiveConversationsMap, FileToUpload, messageActionType } from './ActiveConversationTypes';
 import { Connections } from './ConnectionsTypes';
 import { Marker, MarkersMap } from './MarkersTypes';
 import {
@@ -103,6 +103,12 @@ export type ActiveConversationsSlice = {
 	setHistoryLoadDisabled: (roomId: string, status: boolean) => void;
 	setActionsAccordionStatus: (roomId: string, status: boolean) => void;
 	setParticipantsAccordionStatus: (roomId: string, status: boolean) => void;
+	setFilesToAttach: (roomId: string, files: FileToUpload[]) => void;
+	setFileFocusedToModify: (roomId: string, fileTempId: string, active: boolean) => void;
+	addDescriptionToFileToAttach: (roomId: string, fileTempId: string, description: string) => void;
+	removeDescriptionToFileToAttach: (roomId: string, fileTempId: string) => void;
+	removeFileToAttach: (roomId: string, fileTempId: string) => void;
+	unsetFilesToAttach: (roomId: string) => void;
 };
 
 export type ConnectionsStoreSlice = {

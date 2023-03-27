@@ -58,7 +58,7 @@ export default abstract class BaseAPI implements IBaseAPI {
 				const headers = new Headers();
 				headers.append('fileName', btoa(encodeURIComponent(file.name)));
 				headers.append('mimeType', file.type);
-				description && headers.append('description', description);
+				description && headers.append('description', btoa(encodeURIComponent(description)));
 				// Add sessionId to headers only if it is already defined
 				const sessionId = useStore.getState().session.sessionId;
 				if (sessionId) {

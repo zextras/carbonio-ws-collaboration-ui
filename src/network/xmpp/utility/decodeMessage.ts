@@ -50,8 +50,6 @@ export function decodeMessage(messageStanza: Element, optional?: OptionalParamet
 		return message as DeletedMessage;
 	}
 
-
-
 	// Affiliation message
 	const x = getTagElement(messageStanza, 'x');
 	if (x && x.getAttribute('xmlns') === Strophe.NS.AFFILIATIONS) {
@@ -106,12 +104,12 @@ export function decodeMessage(messageStanza: Element, optional?: OptionalParamet
 				const filename = Strophe.getText(getRequiredTagElement(x, 'filename'));
 				const fileMimeType = Strophe.getText(getRequiredTagElement(x, 'mime-type'));
 				const fileSize = Strophe.getText(getRequiredTagElement(x, 'size'));
-				const description = Strophe.getText(getRequiredTagElement(messageStanza, 'body'))
+				const description = decodeURIComponent(Strophe.getText(getRequiredTagElement(messageStanza, 'body'))
 					.replace(/&amp;/g, '&')
 					.replace(/&quot;/g, '"')
 					.replace(/&apos;/g, "'")
 					.replace(/&lt;/g, '<')
-					.replace(/&gt;/g, '>');
+					.replace(/&gt;/g, '>'));
 
 				message = {
 					id: messageId,

@@ -1,6 +1,7 @@
 {
     "action": {
         "activateNotifications": "Activate Notifications",
+        "addAttachment": "Add attachment",
         "addNewMembers": "Add New Members",
         "addNewMembersTo": "Add new members to {{roomName}}",
         "clearHistory": "Clear History",
@@ -33,6 +34,13 @@
         "memberRemoved": "{{userName}} has been removed from {{roomName}}",
         "oneToOneCreated": "New Chat created!",
         "youCreatedOneToOne": "You started a chat with {{userName}}"
+    },
+    "attachments": {
+        "addFromLocal": "Add from local",
+        "attachLinkFiles": "Attach public link from Files",
+        "dragAndDrop": "Drag&Drop Mode",
+        "dropHereDescription": "Drop here your attachments to quickly add them to this chat",
+        "errorUploadingFile": ""
     },
     "configurationMessages": {
         "roomNameChanged": "{{name}} changed the title of this Group in \"<i>{{roomName}}</i>\"",

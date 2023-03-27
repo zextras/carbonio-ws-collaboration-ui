@@ -6,9 +6,9 @@
  */
 
 import produce from 'immer';
-import { find, remove } from 'lodash';
+import { find, forEach, remove } from 'lodash';
 
-import { messageActionType } from '../../types/store/ActiveConversationTypes';
+import { FileToUpload, messageActionType } from '../../types/store/ActiveConversationTypes';
 import { AttachmentMessageType } from '../../types/store/MessageTypes';
 import { ActiveConversationsSlice, RootStore } from '../../types/store/StoreTypes';
 
@@ -28,7 +28,7 @@ export const useActiveConversationsSlice = (
 				}
 			}),
 			false,
-			'ACTIVE_CONVERSATIONS/SET_INPUT_FOCUS'
+			'AC/SET_INPUT_FOCUS'
 		);
 	},
 	setIsWriting: (roomId: string, userId: string, writingStatus: boolean): void => {
@@ -71,7 +71,7 @@ export const useActiveConversationsSlice = (
 				}
 			}),
 			false,
-			'ACTIVE_CONVERSATIONS/SET_IS_WRITING'
+			'AC/SET_IS_WRITING'
 		);
 	},
 	setReferenceMessage: (
@@ -107,7 +107,7 @@ export const useActiveConversationsSlice = (
 				}
 			}),
 			false,
-			'ACTIVE_CONVERSATIONS/SET_REFERENCE_MESSAGE_VIEW'
+			'AC/SET_REFERENCE_MESSAGE_VIEW'
 		);
 	},
 	unsetReferenceMessage: (roomId: string): void => {
@@ -118,7 +118,7 @@ export const useActiveConversationsSlice = (
 				}
 			}),
 			false,
-			'ACTIVE_CONVERSATIONS/REMOVE_REFERENCE_MESSAGE_VIEW'
+			'AC/REMOVE_REFERENCE_MESSAGE_VIEW'
 		);
 	},
 	setPinnedMessage: (roomId: string, message: object) => ({ id: roomId, ms: message }),
@@ -134,7 +134,7 @@ export const useActiveConversationsSlice = (
 				}
 			}),
 			false,
-			'ACTIVE_CONVERSATIONS/SET_SCROLL_POSITION'
+			'AC/SET_SCROLL_POSITION'
 		);
 	},
 	setDraftMessage: (roomId: string, sended: boolean, message?: string): void => {
@@ -168,7 +168,7 @@ export const useActiveConversationsSlice = (
 				}
 			}),
 			false,
-			'ACTIVE_CONVERSATIONS/SET_HISTORY_FULLY_LOADED'
+			'AC/SET_HISTORY_FULLY_LOADED'
 		);
 	},
 	setHistoryLoadDisabled: (roomId: string, status: boolean): void => {
@@ -183,7 +183,7 @@ export const useActiveConversationsSlice = (
 				}
 			}),
 			false,
-			'ACTIVE_CONVERSATIONS/SET_HISTORY_LOAD_DISABLED'
+			'AC/SET_HISTORY_LOAD_DISABLED'
 		);
 	},
 	setActionsAccordionStatus: (roomId: string, status: boolean): void => {
@@ -199,7 +199,7 @@ export const useActiveConversationsSlice = (
 				draft.activeConversations[roomId].infoPanelStatus!.actionsAccordionIsOpened = status;
 			}),
 			false,
-			'ACTIVE_CONVERSATIONS/SET_ACTIONS_ACCORDION_STATUS'
+			'AC/SET_ACTIONS_ACCORDION_STATUS'
 		);
 	},
 	setParticipantsAccordionStatus: (roomId: string, status: boolean): void => {
@@ -215,7 +215,98 @@ export const useActiveConversationsSlice = (
 				draft.activeConversations[roomId].infoPanelStatus!.participantsAccordionIsOpened = status;
 			}),
 			false,
-			'ACTIVE_CONVERSATIONS/SET_PARTICIPANTS_ACCORDION_STATUS'
+			'AC/SET_PARTICIPANTS_ACCORDION_STATUS'
+		);
+	},
+	setFilesToAttach: (roomId: string, files: FileToUpload[]): void => {
+		set(
+			produce((draft: RootStore) => {
+				if (!draft.activeConversations[roomId]) draft.activeConversations[roomId] = {};
+				if (!draft.activeConversations[roomId].filesToAttach) {
+					draft.activeConversations[roomId].filesToAttach = files;
+				} else {
+					draft.activeConversations[roomId].filesToAttach = [
+						...draft.activeConversations[roomId].filesToAttach!,
+						...files
+					];
+				}
+			}),
+			false,
+			'AC/SET_FILES_TO_ATTACH'
+		);
+	},
+	setFileFocusedToModify: (roomId: string, fileTempId: string, active: boolean): void => {
+		set(
+			produce((draft: RootStore) => {
+				if (
+					draft.activeConversations[roomId].filesToAttach &&
+					draft.activeConversations[roomId].filesToAttach
+				) {
+					forEach(draft.activeConversations[roomId].filesToAttach, (file) => {
+						if (file.fileId === fileTempId) {
+							file.hasFocus = active;
+						} else {
+							file.hasFocus = false;
+						}
+					});
+				}
+			}),
+			false,
+			'AC/SET_FILE_FOCUSED'
+		);
+	},
+	addDescriptionToFileToAttach: (roomId: string, fileTempId: string, description: string): void => {
+		set(
+			produce((draft: RootStore) => {
+				if (draft.activeConversations[roomId].filesToAttach) {
+					forEach(draft.activeConversations[roomId].filesToAttach, (file) => {
+						if (file.fileId === fileTempId) {
+							file.description = description;
+							file.hasFocus = false;
+						}
+					});
+				}
+			}),
+			false,
+			'AC/ADD_DESC_FILE_TO_ATTACH'
+		);
+	},
+	removeDescriptionToFileToAttach: (roomId: string, fileTempId: string): void => {
+		set(
+			produce((draft: RootStore) => {
+				if (draft.activeConversations[roomId].filesToAttach) {
+					forEach(draft.activeConversations[roomId].filesToAttach, (file) => {
+						if (file.fileId === fileTempId) file.description = '';
+					});
+				}
+			}),
+			false,
+			'AC/REMOVE_DESC_FILE_TO_ATTACH'
+		);
+	},
+	removeFileToAttach: (roomId: string, fileTempId: string): void => {
+		set(
+			produce((draft: RootStore) => {
+				if (draft.activeConversations[roomId].filesToAttach) {
+					remove(
+						draft.activeConversations[roomId].filesToAttach!,
+						(file) => file.fileId === fileTempId
+					);
+				}
+			}),
+			false,
+			'AC/REMOVE_FILE_TO_ATTACH'
+		);
+	},
+	unsetFilesToAttach: (roomId: string): void => {
+		set(
+			produce((draft: RootStore) => {
+				if (draft.activeConversations[roomId]) {
+					delete draft.activeConversations[roomId].filesToAttach;
+				}
+			}),
+			false,
+			'AC/UNSET_FILES_TO_ATTACH'
 		);
 	}
 });
