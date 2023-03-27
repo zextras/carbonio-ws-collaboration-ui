@@ -6,12 +6,12 @@
 
 import { debounce, DebouncedFunc, includes } from 'lodash';
 
+import { wsEventsHandler } from './wsEventsHandler';
 import useStore from '../../store/Store';
 import IWebSocketClient from '../../types/network/websocket/IWebSocketClient';
 import { WsEvent, WsEventType } from '../../types/network/websocket/wsEvents';
 import { WsMessage } from '../../types/network/websocket/wsMessages';
 import { wsDebug } from '../../utils/debug';
-import { wsEventsHandler } from './wsEventsHandler';
 
 enum WsReadyState {
 	CONNECTING = 0,

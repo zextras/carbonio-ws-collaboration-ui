@@ -9,15 +9,15 @@ import React, { FC, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
+import AttachmentSmallView from './AttachmentSmallView';
+import BubbleFooter from './BubbleFooter';
+import BubbleHeader from './BubbleHeader';
 import { getRoomNameSelector, getRoomTypeSelector } from '../../../store/selectors/RoomsSelectors';
 import { getUserName } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
 import { ForwardedMessage } from '../../../types/store/MessageTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 import { calculateAvatarColor } from '../../../utils/styleUtils';
-import AttachmentSmallView from './AttachmentSmallView';
-import BubbleFooter from './BubbleFooter';
-import BubbleHeader from './BubbleHeader';
 
 const ForwardMessageContainer = styled(Container)`
 	border-left: ${({ userBorderColor, theme }): string =>

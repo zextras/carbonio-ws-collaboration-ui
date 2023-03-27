@@ -11,13 +11,13 @@ import React, { FC, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
+import AttachmentSmallView from './AttachmentSmallView';
+import BubbleFooter from './BubbleFooter';
+import BubbleHeader from './BubbleHeader';
 import { getUserName, getUserSelector } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
 import { DeletedMessage, MessageType, TextMessage } from '../../../types/store/MessageTypes';
 import { calculateAvatarColor } from '../../../utils/styleUtils';
-import AttachmentSmallView from './AttachmentSmallView';
-import BubbleFooter from './BubbleFooter';
-import BubbleHeader from './BubbleHeader';
 
 type RepliedTextMessageSectionViewProps = {
 	repliedMessage: TextMessage | DeletedMessage;

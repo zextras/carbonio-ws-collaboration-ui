@@ -8,9 +8,9 @@ import { IconButton, Tooltip } from '@zextras/carbonio-design-system';
 import React, { FC, useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import DeleteUserModal from './DeleteUserModal';
 import { RoomsApi } from '../../../network';
 import useStore from '../../../store/Store';
-import DeleteUserModal from './DeleteUserModal';
 
 type RemoveMemberProps = {
 	roomId: string;

@@ -38,14 +38,14 @@ import React, {
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
+import ForwardMessageConversationChip from './ForwardMessageConversationChip';
+import ForwardMessageConversationListItem from './ForwardMessageConversationListItem';
 import { RoomsApi } from '../../../network';
 import { getXmppClient } from '../../../store/selectors/ConnectionSelector';
 import { getRoomIdsOrderedLastMessage } from '../../../store/selectors/MessagesSelectors';
 import { getRoomNameSelector } from '../../../store/selectors/RoomsSelectors';
 import useStore from '../../../store/Store';
 import { TextMessage } from '../../../types/store/MessageTypes';
-import ForwardMessageConversationChip from './ForwardMessageConversationChip';
-import ForwardMessageConversationListItem from './ForwardMessageConversationListItem';
 
 const CustomContainer = styled(Container)`
 	cursor: default;
@@ -76,8 +76,6 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 		'Choose a target chat to forward the message'
 	);
 
-	const xmppClient = useStore(getXmppClient);
-
 	const closeLabel = t('action.close', 'Close');
 	const noMatchLabel = t('participantsList.noMatch', 'There are no items that match this search');
 	const inputPlaceholder = t('modal.forward.inputPlaceholder', 'Start typing or pick a chat');
@@ -89,6 +87,8 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 	const [selected, setSelected] = useState<{ [id: string]: boolean }>({});
 	const [chatList, setChatList] = useState<{ id: string }[]>([]);
 	const [chips, setChips] = useState<{ id: string }[]>([]);
+
+	const xmppClient = useStore(getXmppClient);
 
 	// Update conversation list on filter updating
 	useEffect(() => {
@@ -144,7 +144,6 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 
 	const forwardMessage = useCallback(() => {
 		const isMyMessage = message.from === useStore.getState().session.id;
-		// TODO handle forward of my attachments
 		if (isMyMessage && !message.attachment) {
 			forEach(selected, (value, key) => xmppClient.sendChatMessage(key, message.text));
 		} else {

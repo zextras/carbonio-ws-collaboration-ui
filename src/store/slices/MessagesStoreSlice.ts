@@ -7,7 +7,6 @@
 
 import produce from 'immer';
 import { concat, find, forEach, map, orderBy, sortedUniqBy } from 'lodash';
-import { now } from 'moment';
 
 import { UsersApi } from '../../network';
 import { calcReads } from '../../network/xmpp/utility/decodeMessage';
@@ -39,18 +38,18 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 					)
 				) {
 					draft.messages[message.roomId].push({
-						id: `dateMessage${now()}`,
+						id: `dateMessage${message.date - 2}`,
 						roomId: message.roomId,
-						date: now(),
+						date: message.date - 2,
 						type: MessageType.DATE_MSG
 					});
 				}
 				// this is a custom message that is shown immediately after a group is created
 				if (messagesListLength === 1 && draft.rooms[message.roomId].type === RoomType.GROUP) {
 					draft.messages[message.roomId].push({
-						id: `dateMessage${message.date}`,
+						id: `dateMessage${message.date - 1}`,
 						roomId: message.roomId,
-						date: message.date,
+						date: message.date - 1,
 						type: MessageType.AFFILIATION_MSG,
 						as: 'creation',
 						userId: ''
@@ -136,9 +135,9 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 					// the first message always needs a date before it
 					if (index === 0) {
 						historyWithDates.push({
-							id: `dateMessage${historyMessage.date}`,
+							id: `dateMessage${historyMessage.date - 2}`,
 							roomId,
-							date: historyMessage.date,
+							date: historyMessage.date - 2,
 							type: MessageType.DATE_MSG
 						});
 						historyWithDates.push(historyMessage);
@@ -147,9 +146,9 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 						// if the actual message and the previous one has not the same date, it puts a date message before the actual one
 						if (datesAreFromTheSameDay(prevMessage?.date, historyMessage?.date)) {
 							historyWithDates.push({
-								id: `dateMessage${historyMessage.date}`,
+								id: `dateMessage${historyMessage.date - 2}`,
 								roomId,
-								date: historyMessage.date,
+								date: historyMessage.date - 2,
 								type: MessageType.DATE_MSG
 							});
 							historyWithDates.push(historyMessage);
@@ -185,10 +184,10 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 				}
 
 				draft.messages[roomId] = concat(historyWithDates, draft.messages[roomId]);
+				// message list has to be ordered by date
 				draft.messages[roomId] = orderBy(draft.messages[roomId], ['date'], ['asc']);
-				draft.messages[roomId] = sortedUniqBy(draft.messages[roomId], 'id');
+				// the second message has to be a creation one if the conversation is a group one and the history has never been cleared
 
-				// the second message has to be a creation one if the conversation is a group one
 				if (
 					draft.activeConversations[roomId] &&
 					draft.activeConversations[roomId].isHistoryFullyLoaded &&
@@ -196,14 +195,21 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 					draft.rooms[roomId].userSettings?.clearedAt === undefined
 				) {
 					const creationMsg: AffiliationMessage = {
-						id: `creationMessage${draft.messages[roomId][0]?.date}`,
+						id: `creationMessage${draft.messages[roomId][0].date + 1}`,
 						roomId,
-						date: draft.messages[roomId][0]?.date,
+						date: draft.messages[roomId][0].date + 1,
 						type: MessageType.AFFILIATION_MSG,
 						as: 'creation',
 						userId: ''
 					};
 					draft.messages[roomId].splice(1, 0, creationMsg);
+				}
+				// message list can't have duplicates, so it's sorted by id
+				draft.messages[roomId] = sortedUniqBy(draft.messages[roomId], 'id');
+
+				// checks if creation message is duplicated and removes it
+				if (draft.messages[roomId][0].id === draft.messages[roomId][2].id) {
+					draft.messages[roomId].splice(0, 2);
 				}
 			}),
 			false,

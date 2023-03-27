@@ -8,10 +8,10 @@ import { screen } from '@testing-library/react';
 import React from 'react';
 import { setup } from 'test-utils';
 
+import ConversationInfoPanel from './ConversationInfoPanel';
 import useStore from '../../store/Store';
 import { createMockMember, createMockRoom } from '../../tests/createMock';
 import { RoomBe, RoomType } from '../../types/network/models/roomBeTypes';
-import ConversationInfoPanel from './ConversationInfoPanel';
 
 const testRoom: RoomBe = createMockRoom({
 	id: 'room-test',
@@ -31,11 +31,7 @@ describe('Conversation info panel', () => {
 	test('Display info panel opened', async () => {
 		useStore.getState().addRoom(testRoom);
 		setup(
-			<ConversationInfoPanel
-				roomId={testRoom.id}
-				infoPanelOpen={true}
-				setInfoPanelOpen={jest.fn()}
-			/>
+			<ConversationInfoPanel roomId={testRoom.id} infoPanelOpen setInfoPanelOpen={jest.fn()} />
 		);
 		const conversationInfoPanel = screen.getByTestId('conversationInfoPanelOpen');
 		expect(conversationInfoPanel).toBeInTheDocument();

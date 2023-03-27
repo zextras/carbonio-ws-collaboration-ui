@@ -17,6 +17,7 @@ import React, { FC, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
+import AttachmentSmallView from './AttachmentSmallView';
 import usePreview from '../../../hooks/usePreview';
 import { AttachmentsApi } from '../../../network';
 import { getUserName } from '../../../store/selectors/UsersSelectors';
@@ -24,7 +25,6 @@ import useStore from '../../../store/Store';
 import { AttachmentMessageType } from '../../../types/store/MessageTypes';
 import { getPreviewURL } from '../../../utils/attachmentUtils';
 import { calculateAvatarColor } from '../../../utils/styleUtils';
-import AttachmentSmallView from './AttachmentSmallView';
 
 const HoverContainer = styled(Container)`
 	z-index: 1;

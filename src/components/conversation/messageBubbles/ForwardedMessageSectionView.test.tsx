@@ -8,13 +8,13 @@ import { screen } from '@testing-library/react';
 import React from 'react';
 import { setup } from 'test-utils';
 
+import ForwardedMessageSectionView from './ForwardedMessageSectionView';
 import useStore from '../../../store/Store';
 import { createMockRoom, createMockTextMessage, createMockUser } from '../../../tests/createMock';
 import { RoomBe } from '../../../types/network/models/roomBeTypes';
 import { UserBe } from '../../../types/network/models/userBeTypes';
 import { ForwardedMessage } from '../../../types/store/MessageTypes';
 import { RootStore } from '../../../types/store/StoreTypes';
-import ForwardedMessageSectionView from './ForwardedMessageSectionView';
 
 const forwardedUser: UserBe = createMockUser({ id: 'forwardedUserId', name: 'User' });
 

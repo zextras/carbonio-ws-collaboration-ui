@@ -6,6 +6,7 @@
 
 import { debounce, find, forEach } from 'lodash';
 
+import BaseAPI from './BaseAPI';
 import useStore from '../../store/Store';
 import { RequestType } from '../../types/network/apis/IBaseAPI';
 import IUsersApi from '../../types/network/apis/IUsersApi';
@@ -15,7 +16,6 @@ import {
 	GetUserPictureResponse,
 	GetUserResponse
 } from '../../types/network/responses/usersResponses';
-import BaseAPI from './BaseAPI';
 
 class UsersApi extends BaseAPI implements IUsersApi {
 	// Singleton design pattern

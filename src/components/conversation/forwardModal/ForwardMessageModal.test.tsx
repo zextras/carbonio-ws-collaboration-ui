@@ -8,12 +8,12 @@ import { screen } from '@testing-library/react';
 import React from 'react';
 import { setup } from 'test-utils';
 
+import ForwardMessageModal from './ForwardMessageModal';
 import { mockedForwardMessagesRequest } from '../../../../jest-mocks';
 import useStore from '../../../store/Store';
 import { createMockRoom, createMockTextMessage } from '../../../tests/createMock';
 import { RoomBe } from '../../../types/network/models/roomBeTypes';
 import { RootStore } from '../../../types/store/StoreTypes';
-import ForwardMessageModal from './ForwardMessageModal';
 
 const testRoom: RoomBe = createMockRoom({ id: 'roomTest', name: 'Test room' });
 

@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import BaseAPI from './BaseAPI';
 import useStore from '../../store/Store';
 import { RequestType } from '../../types/network/apis/IBaseAPI';
 import IRoomsApi from '../../types/network/apis/IRoomsApi';
@@ -38,7 +39,6 @@ import { ChangeUserPictureResponse } from '../../types/network/responses/usersRe
 import { TextMessage } from '../../types/store/MessageTypes';
 import { dateToISODate } from '../../utils/dateUtil';
 import { encodeMessage } from '../xmpp/utility/encodeMessage';
-import BaseAPI from './BaseAPI';
 
 class RoomsApi extends BaseAPI implements IRoomsApi {
 	// Singleton design pattern

@@ -6,8 +6,8 @@
 
 import { encode } from 'html-entities';
 
-import { AttachmentMessageType, TextMessage } from '../../../types/store/MessageTypes';
 import { carbonize, carbonizeMUC } from './decodeJid';
+import { AttachmentMessageType, TextMessage } from '../../../types/store/MessageTypes';
 
 const createBodyElement = (text: string): Element => {
 	const body = document.createElement('body');

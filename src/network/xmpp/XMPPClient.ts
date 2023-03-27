@@ -7,10 +7,6 @@
 import { Strophe, $pres, $iq, $msg, StropheConnection, StropheConnectionStatus } from 'strophe.js';
 import { v4 as uuidGenerator } from 'uuid';
 
-import useStore from '../../store/Store';
-import IXMPPClient from '../../types/network/xmpp/IXMPPClient';
-import { dateToISODate } from '../../utils/dateUtil';
-import { xmppDebug } from '../../utils/debug';
 import { onComposingMessageStanza } from './handlers/composingMessageHandler';
 import { onErrorStanza } from './handlers/errorHandler';
 import {
@@ -29,7 +25,11 @@ import { onNewMessageStanza } from './handlers/newMessageHandler';
 import { onPresenceStanza } from './handlers/presenceHandler';
 import { onGetRosterResponse } from './handlers/rosterHandler';
 import { onSmartMarkers, onDisplayedMessageStanza } from './handlers/smartMarkersHandler';
-import { carbonize, carbonizeMUC } from './utility/decodeJid';
+import { carbonizeMUC, carbonize } from './utility/decodeJid';
+import useStore from '../../store/Store';
+import IXMPPClient from '../../types/network/xmpp/IXMPPClient';
+import { dateToISODate } from '../../utils/dateUtil';
+import { xmppDebug } from '../../utils/debug';
 
 class XMPPClient implements IXMPPClient {
 	private connection: StropheConnection;
@@ -70,13 +70,13 @@ class XMPPClient implements IXMPPClient {
 		this.connection.addHandler(onDisplayedMessageStanza, Strophe.NS.MARKERS, 'message');
 
 		// Debug
-		const parser = new DOMParser();
-		this.connection.rawInput = (data: string): void => {
-			xmppDebug('<-- IN:', parser.parseFromString(data, 'text/xml'));
-		};
-		this.connection.rawOutput = (data: string): void => {
-			xmppDebug('---> OUT:', parser.parseFromString(data, 'text/xml'));
-		};
+		// const parser = new DOMParser();
+		// this.connection.rawInput = (data: string): void => {
+		// 	xmppDebug('<-- IN:', parser.parseFromString(data, 'text/xml'));
+		// };
+		// this.connection.rawOutput = (data: string): void => {
+		// 	xmppDebug('---> OUT:', parser.parseFromString(data, 'text/xml'));
+		// };
 	}
 
 	private onConnectionStatus(statusCode: StropheConnectionStatus): void {
