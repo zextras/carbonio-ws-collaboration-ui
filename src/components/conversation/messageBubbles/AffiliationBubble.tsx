@@ -9,6 +9,7 @@ import { find } from 'lodash';
 import React, { FC, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { CustomMessage } from './MessageFactory';
 import {
 	getRoomMembers,
 	getRoomNameSelector,
@@ -19,7 +20,6 @@ import useStore from '../../../store/Store';
 import { AffiliationMessage } from '../../../types/store/MessageTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 import { affiliationMessage } from '../../../utils/affiliationMessage';
-import { CustomMessage } from './MessageFactory';
 
 type AffiliationMsgProps = {
 	message: AffiliationMessage;

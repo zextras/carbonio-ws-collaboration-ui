@@ -8,10 +8,10 @@ import { screen } from '@testing-library/react';
 import React from 'react';
 import { setup } from 'test-utils';
 
+import DeleteUserModal from './DeleteUserModal';
 import useStore from '../../../store/Store';
 import { createMockRoom } from '../../../tests/createMock';
 import { RoomBe } from '../../../types/network/models/roomBeTypes';
-import DeleteUserModal from './DeleteUserModal';
 
 const mockRoom: RoomBe = createMockRoom({ id: 'roomId' });
 

@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import BaseAPI from './BaseAPI';
 import useStore from '../../store/Store';
 import { RequestType } from '../../types/network/apis/IBaseAPI';
 import ISessionApi from '../../types/network/apis/ISessionApi';
@@ -11,7 +12,6 @@ import {
 	GetCapabilitiesResponse,
 	GetTokenResponse
 } from '../../types/network/responses/sessionResponses';
-import BaseAPI from './BaseAPI';
 
 class SessionApi extends BaseAPI implements ISessionApi {
 	// Singleton design pattern

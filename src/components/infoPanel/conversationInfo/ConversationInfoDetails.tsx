@@ -9,6 +9,7 @@ import React, { FC, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
+import ConversationInfoDetailsElement from './ConversationInfoDetailsElement';
 import {
 	getRoomDescriptionSelector,
 	getRoomMembers
@@ -20,7 +21,6 @@ import {
 } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
 import { Member, RoomType } from '../../../types/store/RoomTypes';
-import ConversationInfoDetailsElement from './ConversationInfoDetailsElement';
 
 type ConversationInfoDetailsProps = {
 	roomId: string;

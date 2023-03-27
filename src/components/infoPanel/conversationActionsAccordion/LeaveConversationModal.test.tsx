@@ -8,9 +8,9 @@ import { screen } from '@testing-library/react';
 import React from 'react';
 import { setup } from 'test-utils';
 
+import LeaveConversationModal from './LeaveConversationModal';
 import useStore from '../../../store/Store';
 import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
-import LeaveConversationModal from './LeaveConversationModal';
 
 describe('Leave Conversation', () => {
 	test('Leave modal should be visible', async () => {

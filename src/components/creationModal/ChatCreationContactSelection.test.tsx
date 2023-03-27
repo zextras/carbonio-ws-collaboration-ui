@@ -8,10 +8,10 @@ import { screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { setup } from 'test-utils';
 
+import ChatCreationContactsSelection from './ChatCreationContactsSelection';
 import { mockedAutoCompleteGalRequest } from '../../../jest-mocks';
 import { ContactMatch } from '../../network/soap/AutoCompleteRequest';
 import { Member } from '../../types/store/RoomTypes';
-import ChatCreationContactsSelection from './ChatCreationContactsSelection';
 
 // Mock objects
 const zimbraUser1: ContactMatch = {
@@ -44,7 +44,7 @@ const user1: Member = {
 	external: false
 };
 
-describe('Chat Creation Modal Contact Selector', () => {
+describe('Chat Creation Modal Contact Selector - search', () => {
 	test('All elements are rendered', async () => {
 		mockedAutoCompleteGalRequest.mockReturnValue([]);
 
@@ -102,39 +102,6 @@ describe('Chat Creation Modal Contact Selector', () => {
 		// Check presence of userObj on the contact list
 		const userComponent = screen.getByText(zimbraUser1.fullName);
 		expect(userComponent).toBeVisible();
-	});
-
-	test('Add and remove', async () => {
-		mockedAutoCompleteGalRequest.mockReturnValueOnce([zimbraUser1]);
-
-		const { user } = setup(
-			<ChatCreationContactsSelection
-				isCreationModal
-				contactsSelected={{}}
-				setContactSelected={jest.fn()}
-			/>
-		);
-		await screen.findByTestId('list_creation_modal');
-
-		// Add Chip on ChipInput
-		const userComponent = screen.getByText(zimbraUser1.fullName);
-		await user.click(userComponent);
-
-		const userComponents = screen.getAllByText(zimbraUser1.fullName);
-		expect(userComponents).toHaveLength(2);
-
-		// Remove Chip from ChipInput with x button on chip
-		const removeButton = screen.getByTestId('icon: Close');
-		await user.click(removeButton);
-		const userComponentsAfterRemove = screen.getAllByText(zimbraUser1.fullName);
-		expect(userComponentsAfterRemove).toHaveLength(1);
-
-		// Add chip input and remove by clicking the same component
-		const userComponent2 = screen.getByText(zimbraUser1.fullName);
-		await user.click(userComponent2);
-		await user.click(userComponent2);
-		const userComponents2AfterRemove = screen.getAllByText(zimbraUser1.fullName);
-		expect(userComponents2AfterRemove).toHaveLength(1);
 	});
 
 	test('Search user fails', async () => {
@@ -208,6 +175,61 @@ describe('Chat Creation Modal Contact Selector', () => {
 		const chipInput = await screen.findByTestId('chip_input_creation_modal');
 		await user.type(chipInput, `${zimbraUser1.firstName} ${zimbraUser1.lastName}`);
 		expect(screen.getByDisplayValue(/User One/i)).toBeInTheDocument();
+	});
+
+	test('Add and remove chip by clicking different components', async () => {
+		mockedAutoCompleteGalRequest.mockReturnValueOnce([zimbraUser1]);
+
+		const { user } = setup(
+			<ChatCreationContactsSelection
+				isCreationModal
+				contactsSelected={{}}
+				setContactSelected={jest.fn()}
+			/>
+		);
+		const list = await screen.findByTestId('list_creation_modal');
+		expect(list).toBeInTheDocument();
+
+		const userComponent = screen.getByText(zimbraUser1.fullName);
+		user.click(userComponent);
+
+		const chipInput = await screen.findByTestId('chip_input_creation_modal');
+		// here I check that the chip exist and is the one related to user1
+		const user1Chip = chipInput.children[0].children[0];
+		expect(chipInput.children[0].children).toHaveLength(3);
+		expect(user1Chip).toBeInTheDocument();
+		expect(user1Chip.id).toBe(zimbraUser1.zimbraId);
+
+		const removeButton = await screen.findByTestId('icon: Close');
+		user.click(removeButton);
+		const chipInput1 = await screen.findByTestId('chip_input_creation_modal');
+
+		// the chip should not be in the document
+		expect(chipInput1.children[0].children).toHaveLength(2);
+	});
+
+	test('Add and remove chip by clicking the same component', async () => {
+		mockedAutoCompleteGalRequest.mockReturnValueOnce([zimbraUser1]);
+
+		const { user } = setup(
+			<ChatCreationContactsSelection
+				isCreationModal
+				contactsSelected={{}}
+				setContactSelected={jest.fn()}
+			/>
+		);
+		const list = await screen.findByTestId('list_creation_modal');
+		expect(list).toBeInTheDocument();
+
+		const userComponent = await screen.findByText(zimbraUser1.fullName);
+		user.click(userComponent);
+		const chipInput = await screen.findByTestId('chip_input_creation_modal');
+		const user1Chip = chipInput.children[0].children[0];
+		expect(user1Chip.id).toBe(zimbraUser1.zimbraId);
+		user.click(userComponent);
+		const chipInput1 = await screen.findByTestId('chip_input_creation_modal');
+
+		expect(chipInput1.children[0].children).toHaveLength(2);
 	});
 });
 

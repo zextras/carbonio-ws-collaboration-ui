@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import roomsApi from './RoomsApi';
 import { fetchResponse } from '../../../jest-mocks';
 import useStore from '../../store/Store';
 import { createMockCapabilityList, createMockRoom } from '../../tests/createMock';
-import roomsApi from './RoomsApi';
 
 describe('Rooms API', () => {
 	test('listRooms is called correctly', async () => {
