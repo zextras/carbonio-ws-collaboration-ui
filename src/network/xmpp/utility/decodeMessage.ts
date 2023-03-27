@@ -14,7 +14,7 @@ import {
 	Message, MessageType,
 	TextMessage
 } from '../../../types/store/MessageTypes';
-import {dateToTimestamp, isBefore, now} from '../../../utils/dateUtil';
+import { dateToTimestamp, isBefore, now } from '../../../utils/dateUtil';
 import { getId, getResource } from './decodeJid';
 import useStore from '../../../store/Store';
 import { find, forEach, size } from 'lodash';
@@ -68,7 +68,7 @@ export function decodeMessage(messageStanza: Element, optional?: OptionalParamet
 		return message as AffiliationMessage;
 	}
 
-	// Configuration and attachment message
+	// Configuration message
 	if (x && x.getAttribute('xmlns') === Strophe.NS.CONFIGURATION) {
 		const operation = Strophe.getText(getRequiredTagElement(x, 'operation'));
 		switch (operation) {
@@ -161,11 +161,6 @@ export function decodeMessage(messageStanza: Element, optional?: OptionalParamet
 				text: decode(getRequiredTagElement(forwardedMessageElement, 'body').textContent),
 				attachment: forwardedAttachment
 			}
-
-			// If it is a forwarded message, we want to see attachment only as a forwarded attachment
-			if (attachment) {
-				attachment = undefined;
-			}
 		}
 
 		// Correction/edited message
@@ -201,6 +196,20 @@ export function decodeMessage(messageStanza: Element, optional?: OptionalParamet
 			forwarded,
 			attachment
 		};
+
+		// Special case: if a message has a forwarded attachment, we have to remove the attachment from the message
+		if (message.forwarded?.attachment) {
+			message.attachment = undefined;
+		}
+
+		// Special case: if the forwarded message is from the same person that forward the message,
+		// the message is seen as a normal message and not a forwarded one
+		if (message.from === message.forwarded?.from) {
+			message.text = message.forwarded.text;
+			message.attachment = message.forwarded.attachment;
+			message.forwarded = undefined;
+		}
+
 		return message as TextMessage;
 	}
 }

@@ -5,7 +5,6 @@
  */
 
 import {
-	Avatar,
 	Container,
 	Icon,
 	IconButton,
@@ -25,6 +24,7 @@ import useStore from '../../../store/Store';
 import { AttachmentMessageType } from '../../../types/store/MessageTypes';
 import { getPreviewURL } from '../../../utils/attachmentUtils';
 import { calculateAvatarColor } from '../../../utils/styleUtils';
+import AttachmentSmallView from './AttachmentSmallView';
 
 const HoverContainer = styled(Container)`
 	z-index: 1;
@@ -78,15 +78,6 @@ const FileContainer = styled(Container)`
 		`0.25rem solid ${theme.avatarColors[userBorderColor]}`};
 	border-radius: 0 0.25rem 0.25rem 0;
 	cursor: pointer;
-`;
-
-const CustomAvatar = styled(Avatar)`
-	svg {
-		width: calc(2rem * 0.75);
-		min-width: calc(2rem * 0.75);
-		height: calc(2rem * 0.75);
-		min-height: calc(2rem * 0.75);
-	}
 `;
 
 type AttachmentViewProps = {
@@ -219,18 +210,10 @@ const AttachmentView: FC<AttachmentViewProps> = ({ attachment, from, isMyMessage
 			onClick={download}
 		>
 			<Row>
-				<Tooltip label={downloadActionLabel}>
-					<CustomAvatar
-						size="large"
-						icon="FileTextOutline"
-						label={attachment.name}
-						shape="square"
-						background="gray0"
-					/>
-				</Tooltip>
+				<AttachmentSmallView attachment={attachment} />
 			</Row>
 			<Row takeAvailableSpace wrap="nowrap" height="100%">
-				<Container padding={{ all: 'small' }} wrap="wrap">
+				<Container padding={{ vertical: 'small' }} wrap="wrap">
 					<Text color="secondary">{attachment.name}</Text>
 				</Container>
 			</Row>

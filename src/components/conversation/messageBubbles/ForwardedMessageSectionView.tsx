@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Container, Text, Tooltip } from '@zextras/carbonio-design-system';
+import { Container, Row, Text, Tooltip } from '@zextras/carbonio-design-system';
 import React, { FC, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -15,7 +15,7 @@ import useStore from '../../../store/Store';
 import { ForwardedMessage } from '../../../types/store/MessageTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 import { calculateAvatarColor } from '../../../utils/styleUtils';
-import AttachmentView from './AttachmentView';
+import AttachmentSmallView from './AttachmentSmallView';
 import BubbleFooter from './BubbleFooter';
 import BubbleHeader from './BubbleHeader';
 
@@ -64,26 +64,38 @@ const ForwardedMessageSectionView: FC<ForwardedMessageSectionViewProps> = ({
 
 	const userColor = useMemo(() => calculateAvatarColor(forwardUsername || ''), [forwardUsername]);
 
+	const textToShow = useMemo(() => {
+		if (forwardedMessage.attachment) {
+			return forwardedMessage.text !== ''
+				? forwardedMessage.text
+				: forwardedMessage.attachment.name;
+		}
+		return forwardedMessage.text;
+	}, [forwardedMessage]);
+
 	return (
 		<Tooltip label={tooltip}>
 			<ForwardMessageContainer
 				background={isMyMessage ? '#C4D5EF' : 'gray5'}
 				padding={{ horizontal: 'small', vertical: 'small' }}
-				crossAlignment="flex-start"
+				orientation="horizontal"
 				userBorderColor={userColor}
+				crossAlignment="flex-start"
 			>
-				{forwardUsername && <BubbleHeader senderId={forwardedMessage.from} />}
 				{forwardedMessage.attachment && (
-					<AttachmentView
-						attachment={forwardedMessage.attachment}
-						from={forwardedMessage.from}
-						isMyMessage={isMyMessage}
-					/>
+					<Row wrap="nowrap">
+						<AttachmentSmallView attachment={forwardedMessage.attachment} />
+					</Row>
 				)}
-				<MessageWrap color="secondary" overflow="break-word">
-					{forwardedMessage.text}
-				</MessageWrap>
-				<BubbleFooter date={forwardedMessage.date} dateAndTime />
+				<Row takeAvailableSpace wrap="nowrap">
+					<Container crossAlignment="flex-start">
+						{forwardUsername && <BubbleHeader senderId={forwardedMessage.from} />}
+						<MessageWrap color="secondary" overflow="break-word">
+							{textToShow}
+						</MessageWrap>
+						<BubbleFooter date={forwardedMessage.date} dateAndTime />
+					</Container>
+				</Row>
 			</ForwardMessageContainer>
 		</Tooltip>
 	);
