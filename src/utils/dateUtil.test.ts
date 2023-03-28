@@ -5,8 +5,8 @@
  */
 import moment from 'moment-timezone';
 
-import useStore from '../store/Store';
 import { dateString } from './dateUtil';
+import useStore from '../store/Store';
 
 describe('date utils', () => {
 	test('given two dates, the function will return the right string', () => {

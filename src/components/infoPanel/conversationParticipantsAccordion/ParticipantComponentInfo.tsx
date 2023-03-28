@@ -10,6 +10,7 @@ import React, { FC, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
+import ParticipantComponentActions from './ParticipantComponentActions';
 import { UsersApi } from '../../../network';
 import { getCapability } from '../../../store/selectors/SessionSelectors';
 import {
@@ -22,7 +23,6 @@ import {
 import useStore from '../../../store/Store';
 import { Member } from '../../../types/store/RoomTypes';
 import { CapabilityType } from '../../../types/store/SessionTypes';
-import ParticipantComponentActions from './ParticipantComponentActions';
 
 type ParticipantsInfoProps = {
 	member: Member;

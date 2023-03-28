@@ -192,7 +192,10 @@ const ProfileSettings: FC<ProfileSettingsProps> = ({
 
 	const onChangeUserImage = useCallback(
 		(e) => {
-			if (maxUserImageSize && e.target.files[0].size / 1000 < maxUserImageSize) {
+			if (
+				typeof maxUserImageSize === 'number' &&
+				e.target.files[0].size / 1000 < maxUserImageSize
+			) {
 				setTempPicture(URL.createObjectURL(e.target.files[0]));
 				setPicture(e.target.files[0]);
 			} else {

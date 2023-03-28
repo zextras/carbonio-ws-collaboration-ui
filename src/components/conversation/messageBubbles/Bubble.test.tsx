@@ -8,6 +8,7 @@ import { screen } from '@testing-library/react';
 import React from 'react';
 import { setup } from 'test-utils';
 
+import Bubble from './Bubble';
 import { mockedGetURLPreview } from '../../../../jest-mocks';
 import useStore from '../../../store/Store';
 import { createMockRoom, createMockTextMessage } from '../../../tests/createMock';
@@ -15,7 +16,6 @@ import { RoomBe } from '../../../types/network/models/roomBeTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 import { RootStore } from '../../../types/store/StoreTypes';
 import { User } from '../../../types/store/UserTypes';
-import Bubble from './Bubble';
 
 const user1Be: User = {
 	id: 'user1',

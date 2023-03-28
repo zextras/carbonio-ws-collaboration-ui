@@ -10,14 +10,14 @@ import React, { FC, useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
+import ListOfMembers from './ListOfMembers';
+import SearchUserAction from './SearchUserAction';
 import { usersNameListEqualityFn } from '../../../store/equalityFunctions/UsersEqualityFunctions';
 import { getRoomMembers } from '../../../store/selectors/RoomsSelectors';
 import { getUsersSelector } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
 import { Member } from '../../../types/store/RoomTypes';
 import { UsersMap } from '../../../types/store/UserTypes';
-import ListOfMembers from './ListOfMembers';
-import SearchUserAction from './SearchUserAction';
 
 type ParticipantsListProps = {
 	roomId: string;

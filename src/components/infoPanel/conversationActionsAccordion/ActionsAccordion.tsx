@@ -9,6 +9,12 @@ import React, { FC, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
+import AddNewMemberAction from './AddNewMemberAction';
+import ClearHistoryAction from './ClearHistoryAction';
+import DeleteConversationAction from './DeleteConversationAction';
+import EditConversationAction from './EditConversationAction';
+import LeaveConversationAction from './LeaveConversationAction';
+import MuteConversationAction from './MuteConversationAction';
 import { getActionsAccordionStatus } from '../../../store/selectors/ActiveConversationsSelectors';
 import { roomIsEmpty } from '../../../store/selectors/MessagesSelectors';
 import {
@@ -19,12 +25,6 @@ import {
 } from '../../../store/selectors/RoomsSelectors';
 import useStore from '../../../store/Store';
 import { RoomType } from '../../../types/store/RoomTypes';
-import AddNewMemberAction from './AddNewMemberAction';
-import ClearHistoryAction from './ClearHistoryAction';
-import DeleteConversationAction from './DeleteConversationAction';
-import EditConversationAction from './EditConversationAction';
-import LeaveConversationAction from './LeaveConversationAction';
-import MuteConversationAction from './MuteConversationAction';
 
 const CustomAccordion = styled(Accordion)`
 	-webkit-user-select: none;

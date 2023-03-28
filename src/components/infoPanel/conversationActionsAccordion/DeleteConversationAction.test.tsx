@@ -3,11 +3,12 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import { act, renderHook } from '@testing-library/react-hooks';
 import React from 'react';
 import { setup } from 'test-utils';
 
+import DeleteConversationAction from './DeleteConversationAction';
 import { mockedDeleteRoomRequest, mockGoToMainPage } from '../../../../jest-mocks';
 import useStore from '../../../store/Store';
 import { createMockRoom } from '../../../tests/createMock';
@@ -15,7 +16,6 @@ import { RoomBe } from '../../../types/network/models/roomBeTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 import { RootStore } from '../../../types/store/StoreTypes';
 import { User } from '../../../types/store/UserTypes';
-import DeleteConversationAction from './DeleteConversationAction';
 
 const user1Info: User = {
 	id: 'user1-id',
@@ -105,15 +105,15 @@ describe('delete conversation action', () => {
 		expect(result.current.rooms[testRoom.id]).toBeDefined();
 
 		const deleteRoomLabel = screen.getByText(/Delete Group/i);
-		await user.click(deleteRoomLabel);
+		user.click(deleteRoomLabel);
 
-		const deleteButton = screen.getAllByRole('button')[2];
+		const deleteButton = await screen.findByRole('button', { name: 'Delete' });
 
-		await user.click(deleteButton);
-		expect(mockGoToMainPage).not.toBeCalled();
+		user.click(deleteButton);
+		await waitFor(() => expect(mockGoToMainPage).not.toBeCalled());
 
-		await user.click(deleteButton);
-		expect(mockGoToMainPage).toBeCalled();
+		user.click(deleteButton);
+		await waitFor(() => expect(mockGoToMainPage).toBeCalled());
 
 		// store checks
 		expect(result.current.rooms[testRoom.id]).not.toBeDefined();

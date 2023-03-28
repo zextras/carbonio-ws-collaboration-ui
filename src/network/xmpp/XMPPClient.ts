@@ -8,11 +8,6 @@ import { forEach } from 'lodash';
 import { Strophe, $pres, $iq, $msg, StropheConnection, StropheConnectionStatus } from 'strophe.js';
 import { v4 as uuidGenerator } from 'uuid';
 
-import useStore from '../../store/Store';
-import IXMPPClient from '../../types/network/xmpp/IXMPPClient';
-import { TextMessage } from '../../types/store/MessageTypes';
-import { dateToISODate } from '../../utils/dateUtil';
-import { xmppDebug } from '../../utils/debug';
 import { onComposingMessageStanza } from './handlers/composingMessageHandler';
 import { onErrorStanza } from './handlers/errorHandler';
 import {
@@ -32,6 +27,11 @@ import { onPresenceStanza } from './handlers/presenceHandler';
 import { onGetRosterResponse } from './handlers/rosterHandler';
 import { onSmartMarkers, onDisplayedMessageStanza } from './handlers/smartMarkersHandler';
 import { carbonizeMUC } from './utility/decodeJid';
+import useStore from '../../store/Store';
+import IXMPPClient from '../../types/network/xmpp/IXMPPClient';
+import { TextMessage } from '../../types/store/MessageTypes';
+import { dateToISODate } from '../../utils/dateUtil';
+import { xmppDebug } from '../../utils/debug';
 
 class XMPPClient implements IXMPPClient {
 	private connection: StropheConnection;
