@@ -23,6 +23,7 @@ import {
 	map,
 	mapValues,
 	omit,
+	remove,
 	size,
 	union
 } from 'lodash';
@@ -104,8 +105,10 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 				}
 			});
 		}
+		// Remove from roomList the message original conversation
+		remove(roomList, (room) => room.id === roomId);
 		setChatList(roomList);
-	}, [inputValue, rooms]);
+	}, [inputValue, roomId, rooms]);
 
 	const handleChangeText = useCallback((e) => setInputValue(e.target.value), []);
 

@@ -26,6 +26,7 @@ describe('Forward Message Modal', () => {
 	test('All elements are rendered', () => {
 		const store: RootStore = useStore.getState();
 		store.addRoom(testRoom);
+		store.addRoom(chat2);
 		setup(
 			<ForwardMessageModal
 				open
@@ -44,6 +45,24 @@ describe('Forward Message Modal', () => {
 		const footerButton = screen.getByTestId('forward_button');
 		expect(footerButton).toBeInTheDocument();
 		expect(footerButton).toHaveAttribute('disabled');
+	});
+
+	test("Current conversation isn't displayed in the list", () => {
+		const store: RootStore = useStore.getState();
+		store.addRoom(testRoom);
+		store.addRoom(chat);
+		setup(
+			<ForwardMessageModal
+				open
+				onClose={jest.fn()}
+				roomId={testRoom.id}
+				message={messageToForward}
+			/>
+		);
+
+		const list = screen.getByTestId('list_forward_modal');
+		expect(list).not.toHaveTextContent(testRoom.name);
+		expect(list).toHaveTextContent(chat.name);
 	});
 
 	test('Forward a message', async () => {
