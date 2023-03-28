@@ -122,7 +122,7 @@ export function decodeMessage(messageStanza: Element, optional?: OptionalParamet
 				const fileSize = Strophe.getText(getRequiredTagElement(x, 'size'));
 				attachment = {
 					id: attachmentId,
-					name: decode(filename) || "",
+					name: decode(decodeURI(filename)) || "",
 					mimeType: fileMimeType || "",
 					size: fileSize || 0
 				}
