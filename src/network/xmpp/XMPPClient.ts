@@ -8,17 +8,7 @@ import { forEach } from 'lodash';
 import { Strophe, $pres, $iq, $msg, StropheConnection, StropheConnectionStatus } from 'strophe.js';
 import { v4 as uuidGenerator } from 'uuid';
 
-import useStore from '../../store/Store';
-import IXMPPClient from '../../types/network/xmpp/IXMPPClient';
-import { TextMessage } from '../../types/store/MessageTypes';
-import { dateToISODate } from '../../utils/dateUtil';
-import { xmppDebug } from '../../utils/debug';
 import { onComposingMessageStanza } from './handlers/composingMessageHandler';
-import {
-	onGetDiscoverMUCItemsResponse,
-	onGetServiceDiscoveryInfoResponse,
-	onGetServiceDiscoveryItemsResponse
-} from './handlers/discoveryHandler';
 import { onErrorStanza } from './handlers/errorHandler';
 import {
 	MamRequestType,
@@ -36,7 +26,12 @@ import { onNewMessageStanza } from './handlers/newMessageHandler';
 import { onPresenceStanza } from './handlers/presenceHandler';
 import { onGetRosterResponse } from './handlers/rosterHandler';
 import { onSmartMarkers, onDisplayedMessageStanza } from './handlers/smartMarkersHandler';
-import { MUCservice, carbonizeMUC } from './utility/decodeJid';
+import { carbonizeMUC } from './utility/decodeJid';
+import useStore from '../../store/Store';
+import IXMPPClient from '../../types/network/xmpp/IXMPPClient';
+import { TextMessage } from '../../types/store/MessageTypes';
+import { dateToISODate } from '../../utils/dateUtil';
+import { xmppDebug } from '../../utils/debug';
 
 class XMPPClient implements IXMPPClient {
 	private connection: StropheConnection;
@@ -59,6 +54,7 @@ class XMPPClient implements IXMPPClient {
 		Strophe.addNamespace('LAST_ACTIVITY', 'jabber:iq:last');
 		Strophe.addNamespace('MAM', 'urn:xmpp:mam:2');
 		Strophe.addNamespace('MARKERS', 'urn:xmpp:chat-markers:0');
+		Strophe.addNamespace('REPLY', 'urn:xmpp:reply:0');
 		Strophe.addNamespace('ROSTER', 'jabber:iq:roster');
 		Strophe.addNamespace('SMART_MARKERS', 'esl:xmpp:smart-markers:0');
 		Strophe.addNamespace('STANDARD_CLIENT', 'jabber:client');
@@ -187,57 +183,6 @@ class XMPPClient implements IXMPPClient {
 		this.connection.sendIQ(iq, onGetLastActivityResponse, onErrorStanza);
 	}
 
-	// Add a user to my contact list
-	// TODO: remove because it is done automatically by server
-	public addContactItem(jid: string, name?: string): void {
-		const iq = $iq({ type: 'set' })
-			.c('query', { xmlns: Strophe.NS.ROSTER })
-			.c('item', { jid, name });
-		this.connection.sendIQ(iq, (resp: any) => console.log('Add contact', resp), onErrorStanza);
-	}
-
-	// Remove a user to my contact list
-	// TODO: remove because it is done automatically by server
-	public removeContactItem(jid: string): void {
-		const iq = $iq({ type: 'set' })
-			.c('query', { xmlns: Strophe.NS.ROSTER })
-			.c('item', { jid, subscription: 'remove' });
-		this.connection.sendIQ(iq, (resp: any) => console.log('Remove contact', resp), onErrorStanza);
-	}
-
-	// Subscribe to a user to receive his 'presence' events
-	// TODO: remove because it is done automatically by server
-	public sendPresenceSubscription(jid: string): void {
-		this.connection.send($pres({ to: jid, type: 'subscribe' }));
-	}
-
-	// Let a user to subscribe to my 'presence' events
-	// TODO: remove because it is done automatically by server
-	public sendPresenceSubscribed(jid: string): void {
-		this.connection.send($pres({ to: jid, type: 'subscribed' }));
-	}
-
-	/**
-	 * DISCOVERY:
-	 * Useful only for initial project development.
-	 * Useless for chat flow
-	 */
-
-	public serviceDiscoveryItems(): void {
-		const iq = $iq({ type: 'get' }).c('query', { xmlns: Strophe.NS.DISCO_ITEMS });
-		this.connection.sendIQ(iq, onGetServiceDiscoveryItemsResponse, onErrorStanza);
-	}
-
-	public serviceDiscoveryInfo(): void {
-		const iq = $iq({ type: 'get', to: MUCservice }).c('query', { xmlns: Strophe.NS.DISCO_INFO });
-		this.connection.sendIQ(iq, onGetServiceDiscoveryInfoResponse, onErrorStanza);
-	}
-
-	public discoverMUCItems(): void {
-		const iq = $iq({ type: 'get', to: MUCservice }).c('query', { xmlns: Strophe.NS.DISCO_ITEMS });
-		this.connection.sendIQ(iq, onGetDiscoverMUCItemsResponse, onErrorStanza);
-	}
-
 	/**
 	 * INBOX:
 	 * Request chat initial information like unread messages or active conversations.
@@ -261,22 +206,41 @@ class XMPPClient implements IXMPPClient {
 	 */
 
 	// Send a text message
-	sendChatMessage(roomId: string, message: string, replyTo?: string): void {
+	sendChatMessage(roomId: string, message: string): void {
 		const uuid = uuidGenerator();
 		const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat', id: uuid })
 			.c('body')
 			.t(message)
 			.up()
 			.c('markable', { xmlns: Strophe.NS.MARKERS });
-		if (replyTo != null) {
-			msg.up().c('thread').t(replyTo);
-		}
+		this.connection.send(msg);
+	}
+
+	/**
+	 * Reply to a message (XEP-0461)
+	 * Documentation: https://xmpp.org/extensions/xep-0461.html
+	 */
+	sendChatMessageReply(
+		roomId: string,
+		message: string,
+		replyTo: string,
+		replyMessageId: string
+	): void {
+		const to = `${carbonizeMUC(replyTo)}/${carbonizeMUC(roomId)}}`;
+		const uuid = uuidGenerator();
+		const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat', id: uuid })
+			.c('body')
+			.t(message)
+			.up()
+			.c('markable', { xmlns: Strophe.NS.MARKERS })
+			.up()
+			.c('reply', { to, id: replyMessageId, xmlns: Strophe.NS.REPLY });
 		this.connection.send(msg);
 	}
 
 	/**
 	 * Delete a message / Message Retraction (XEP-0424)
-	 * Documentation: https://xmpp.org/extensions/xep-0424.html#schema
+	 * Documentation: https://xmpp.org/extensions/xep-0424.html
 	 */
 	sendChatMessageDeletion(roomId: string, messageId: string): void {
 		const uuid = uuidGenerator();
@@ -288,7 +252,7 @@ class XMPPClient implements IXMPPClient {
 
 	/**
 	 * Edit a message / Last Message Correction (XEP-0308)
-	 * Documentation: https://xmpp.org/extensions/xep-0308.html#usecase
+	 * Documentation: https://xmpp.org/extensions/xep-0308.html
 	 */
 	sendChatMessageCorrection(roomId: string, message: string, messageId: string): void {
 		const uuid = uuidGenerator();
@@ -340,7 +304,6 @@ class XMPPClient implements IXMPPClient {
 	}
 
 	// Request the full history of a room
-	// TODO: remove, useless
 	requestFullHistory(roomId: string): void {
 		const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) }).c('query', { xmlns: Strophe.NS.MAM });
 		this.connection.sendIQ(iq, onRequestHistory.bind(this), onErrorStanza);
@@ -398,21 +361,25 @@ class XMPPClient implements IXMPPClient {
 		this.connection.sendIQ(iq, onRequestHistory.bind(this), onErrorStanza);
 	}
 
-	requestRepliedMessage(roomId: string, originalMessageId: string, repliedStanzaId: string): void {
+	requestMessageSubjectOfReply(
+		roomId: string,
+		messageSubjectOfReplyId: string,
+		replyMessageId: string
+	): void {
 		const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
 			.c('query', { xmlns: Strophe.NS.MAM, queryid: MamRequestType.REPLIED })
 			.c('x', { xmlns: 'jabber:x:data' })
 			.c('field', { var: 'from_id' })
 			.c('value')
-			.t(repliedStanzaId)
+			.t(messageSubjectOfReplyId)
 			.up()
 			.up()
 			.c('field', { var: 'to_id' })
 			.c('value')
-			.t(repliedStanzaId);
+			.t(messageSubjectOfReplyId);
 		this.connection.sendIQ(
 			iq,
-			(stanza) => onRequestSingleMessage(originalMessageId, stanza),
+			(stanza) => onRequestSingleMessage(replyMessageId, stanza),
 			onErrorStanza
 		);
 	}

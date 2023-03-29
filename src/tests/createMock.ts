@@ -7,14 +7,21 @@
 import { MemberBe, RoomBe } from '../types/network/models/roomBeTypes';
 import { UserBe } from '../types/network/models/userBeTypes';
 import { Marker, MarkerStatus, MarkerType } from '../types/store/MarkersTypes';
-import { DeletedMessage, MessageType, TextMessage } from '../types/store/MessageTypes';
+import {
+	AffiliationMessage,
+	ConfigurationMessage,
+	DateMessage,
+	DeletedMessage,
+	MessageType,
+	TextMessage
+} from '../types/store/MessageTypes';
 import { RoomType } from '../types/store/RoomTypes';
 import { CapabilityList } from '../types/store/SessionTypes';
 
 export const createMockRoom = (fields?: Record<string, any>): RoomBe => ({
 	id: 'id',
 	name: 'name',
-	description: 'descrption',
+	description: 'description',
 	type: RoomType.GROUP,
 	hash: 'hash',
 	createdAt: '2022-08-25T17:24:28.961+02:00',
@@ -36,6 +43,10 @@ export const createMockTextMessage = (fields?: Record<string, any>): TextMessage
 	text: 'Hi',
 	read: MarkerStatus.UNREAD,
 	edited: false,
+	replyTo: undefined,
+	repliedMessage: undefined,
+	forwarded: undefined,
+	attachment: undefined,
 	...fields
 });
 
@@ -45,6 +56,36 @@ export const createMockDeletedMessage = (fields?: Record<string, any>): DeletedM
 	date: 1661441294393,
 	type: MessageType.DELETED_MSG,
 	from: 'userId',
+	...fields
+});
+
+export const createMockAffiliationMessage = (fields?: Record<string, any>): AffiliationMessage => ({
+	id: 'id',
+	roomId: 'roomId',
+	date: 1661441294393,
+	type: MessageType.AFFILIATION_MSG,
+	userId: 'userId',
+	as: 'member',
+	...fields
+});
+
+export const createMockConfigurationMessage = (
+	fields?: Record<string, any>
+): ConfigurationMessage => ({
+	id: 'id',
+	roomId: 'roomId',
+	date: 1661441294393,
+	type: MessageType.CONFIGURATION_MSG,
+	operation: 'roomNameChanged',
+	value: 'Right',
+	from: 'Wrong',
+	...fields
+});
+export const createMockDateMessage = (fields?: Record<string, any>): DateMessage => ({
+	id: 'id',
+	roomId: 'roomId',
+	date: 1661441294393,
+	type: MessageType.DATE_MSG,
 	...fields
 });
 
@@ -78,7 +119,7 @@ export const createMockCapabilityList = (fields?: Record<string, any>): Capabili
 
 export const createMockUser = (fields?: Record<string, any>): UserBe => ({
 	id: 'id',
-	email: 'user@usrer.com',
+	email: 'user@user.com',
 	name: 'Name',
 	...fields
 });

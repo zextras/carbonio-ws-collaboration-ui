@@ -13,7 +13,7 @@ import { RootStore } from '../../types/store/StoreTypes';
 export const getRoomIsWritingList = (store: RootStore, id: string): string[] | undefined =>
 	store.activeConversations[id]?.isWritingList
 		? map(store.activeConversations[id]?.isWritingList, (userId) =>
-				store.users[userId].name ? store.users[userId].name : store.users[userId].email
+				store.users[userId]?.name || store.users[userId]?.email || ''
 		  )
 		: store.activeConversations[id]?.isWritingList;
 

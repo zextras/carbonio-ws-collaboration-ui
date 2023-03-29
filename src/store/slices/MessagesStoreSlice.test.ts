@@ -171,20 +171,20 @@ describe('Test messages slice', () => {
 		const { result } = renderHook(() => useStore());
 		act(() => result.current.addRoom(room3));
 		// Add first message
-		act(() => result.current.setHistoryIsFullyLoaded(room.id));
-		act(() => result.current.updateHistory(room.id, [message0, message1]));
-		expect(result.current.messages[message0.roomId]).toHaveLength(5);
+		act(() => result.current.setHistoryIsFullyLoaded(room3.id));
+		act(() => result.current.updateHistory(room3.id, [message0, message1]));
+		expect(result.current.messages[room3.id]).toHaveLength(5);
 
 		// Insert new messages in the center of history
-		act(() => result.current.updateHistory(message0.roomId, [message2]));
-		expect(result.current.messages[message0.roomId]).toHaveLength(8);
-		expect(result.current.messages[message0.roomId][3]).toBe(message0);
-		expect(result.current.messages[message0.roomId][5]).toBe(message1);
-		expect(result.current.messages[message0.roomId][7]).toBe(message2);
+		act(() => result.current.updateHistory(room3.id, [message2]));
+		expect(result.current.messages[room3.id]).toHaveLength(7);
+		expect(result.current.messages[room3.id][2]).toBe(message0);
+		expect(result.current.messages[room3.id][4]).toBe(message1);
+		expect(result.current.messages[room3.id][6]).toBe(message2);
 
-		// Insert message with same id of another
-		act(() => result.current.updateHistory(room.id, [message2]));
-		expect(result.current.messages[message0.roomId]).toHaveLength(10);
+		// Insert message with same id of another should not appear
+		act(() => result.current.updateHistory(room3.id, [message2]));
+		expect(result.current.messages[room3.id]).toHaveLength(7);
 	});
 
 	it('Tests updateUnreadMessages', () => {

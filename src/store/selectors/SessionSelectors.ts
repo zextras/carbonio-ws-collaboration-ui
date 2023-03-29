@@ -19,3 +19,5 @@ export const getCapability = (
 	capabilityName: CapabilityType
 ): boolean | number | undefined =>
 	store.session.capabilities && store.session.capabilities[capabilityName];
+
+export const getUserId = (store: RootStore): string | undefined => store.session?.id;

@@ -44,6 +44,7 @@ const DeletedBubble: FC<DeletedBubbleProps> = ({ message, refEl }) => {
 		<BubbleDeletedContainer
 			id={`message-${message.id}`}
 			key={`${message.id}-deleted`}
+			data-testid={`BubbleDeleted-${message.id}`}
 			ref={refEl}
 			height="fit"
 			width="fit"
@@ -53,11 +54,9 @@ const DeletedBubble: FC<DeletedBubbleProps> = ({ message, refEl }) => {
 			isMyMessage={message.from === sessionId}
 			crossAlignment="baseline"
 		>
-			<CustomText color="secondary" size="small">
-				{deletedMessageLabel}
-			</CustomText>
+			<CustomText color="secondary">{deletedMessageLabel}</CustomText>
 			<Padding left="small" />
-			<Text color="secondary" size="extrasmall">
+			<Text color="secondary" size="small">
 				{messageTime}
 			</Text>
 		</BubbleDeletedContainer>

@@ -4,16 +4,16 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Container, IconButton, Text as DSText, Tooltip } from '@zextras/carbonio-design-system';
+import { Container, IconButton, Text, Tooltip } from '@zextras/carbonio-design-system';
 import React, { Dispatch, FC, SetStateAction, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
+import RoomPictureHandler from './RoomPictureHandler';
 import { getRoomMembers } from '../../../store/selectors/RoomsSelectors';
 import useStore from '../../../store/Store';
 import { Member, RoomType } from '../../../types/store/RoomTypes';
 import useMediaQueryCheck from '../../../utils/useMediaQueryCheck';
-import RoomPictureHandler from './RoomPictureHandler';
 
 type ConversationInfoProps = {
 	roomId: string;
@@ -64,9 +64,9 @@ const ConversationInfo: FC<ConversationInfoProps> = ({ roomId, roomType, setInfo
 				mainAlignment="space-between"
 				padding={{ vertical: 'medium', horizontal: 'large' }}
 			>
-				<DSText title={infoLabel} overflow="ellipsis">
+				<Text title={infoLabel} overflow="ellipsis">
 					{infoLabel}
-				</DSText>
+				</Text>
 				{!isDesktopView && (
 					<Tooltip label={messagesTooltip}>
 						<IconButton

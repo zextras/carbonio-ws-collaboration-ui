@@ -7,7 +7,7 @@
 import { getNotificationManager, replaceHistory } from '@zextras/carbonio-shell-ui';
 
 import { CHATS_ROUTE_TEST } from '../../../constants/appConstants';
-import { EventName, sendCustomEventEvent } from '../../../hooks/useEventListener';
+import { EventName, sendCustomEvent } from '../../../hooks/useEventListener';
 import useStore from '../../../store/Store';
 import IXMPPClient from '../../../types/network/xmpp/IXMPPClient';
 import { MessageType, TextMessage } from '../../../types/store/MessageTypes';
@@ -36,7 +36,7 @@ export function onNewMessageStanza(this: IXMPPClient, message: Element): true {
 				// remove it from the store and swap with the edited
 				store.setEditedMessage(newMessage.roomId, newMessage);
 			} else {
-				sendCustomEventEvent(EventName.NEW_MESSAGE);
+				sendCustomEvent(EventName.NEW_MESSAGE, newMessage);
 				store.newMessage(newMessage);
 			}
 
@@ -50,10 +50,14 @@ export function onNewMessageStanza(this: IXMPPClient, message: Element): true {
 				store.incrementUnreadCount(newMessage.roomId);
 			}
 
-			// Request replied message information
-			const repliedId = (newMessage as TextMessage).replyTo;
-			if (repliedId) {
-				this.requestRepliedMessage(newMessage.roomId, newMessage.id, repliedId);
+			// Request message subject of reply
+			const messageSubjectOfReplyId = (newMessage as TextMessage).replyTo;
+			if (messageSubjectOfReplyId) {
+				this.requestMessageSubjectOfReply(
+					newMessage.roomId,
+					messageSubjectOfReplyId,
+					newMessage.id
+				);
 			}
 
 			// Display desktop notification

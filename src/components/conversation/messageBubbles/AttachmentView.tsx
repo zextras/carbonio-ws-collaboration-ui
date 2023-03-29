@@ -4,10 +4,21 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Avatar, Container, Icon, Row, Shimmer, Text } from '@zextras/carbonio-design-system';
+import {
+	Avatar,
+	Container,
+	Icon,
+	IconButton,
+	Row,
+	Shimmer,
+	Text,
+	Tooltip
+} from '@zextras/carbonio-design-system';
 import React, { FC, useCallback, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
+import usePreview from '../../../hooks/usePreview';
 import { AttachmentsApi } from '../../../network';
 import { getUserName } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
@@ -15,6 +26,31 @@ import { AttachmentMessageType } from '../../../types/store/MessageTypes';
 import { getPreviewURL } from '../../../utils/attachmentUtils';
 import { calculateAvatarColor } from '../../../utils/styleUtils';
 
+const HoverContainer = styled(Container)`
+	z-index: 1;
+	position: absolute;
+	opacity: 0;
+`;
+
+const CustomContainer = styled(Container)`
+	border-radius: 31.25rem;
+	background-color: rgba(255, 255, 255, 0.2);
+`;
+
+const CustomIconButton = styled(IconButton)`
+	background-color: rgba(255, 255, 255, 0);
+`;
+
+const PreviewContainer = styled(Container)`
+	${({ isLoaded }): string => isLoaded && `background: black;`};
+	position: relative;
+	min-width: 100%;
+	&:hover {
+		${HoverContainer} {
+			opacity: 1;
+		}
+	}
+`;
 const AttachmentImg = styled.img`
 	max-width: 100%;
 	mask-image: linear-gradient(
@@ -23,12 +59,14 @@ const AttachmentImg = styled.img`
 		rgba(0, 0, 0, 1) 65%,
 		rgba(0, 0, 0, 0) 100%
 	);
-`;
-
-const PreviewContainer = styled(Container)`
-	${({ isLoaded }): string => isLoaded && `background: black;`};
-	position: relative;
-	min-width: 100%;
+	${PreviewContainer}:hover & {
+		mask-image: linear-gradient(
+			180deg,
+			rgba(0, 0, 0, 0.5) 0%,
+			rgba(0, 0, 0, 0.5) 65%,
+			rgba(0, 0, 0, 0) 100%
+		);
+	}
 `;
 
 const TextContainer = styled(Container)`
@@ -58,10 +96,16 @@ type AttachmentViewProps = {
 };
 
 const AttachmentView: FC<AttachmentViewProps> = ({ attachment, from, isMyMessage = false }) => {
+	const [t] = useTranslation();
+
+	const downloadActionLabel = t('action.download', 'Download');
+	const previewActionLabel = t('action.preview', 'Preview');
+
 	const senderIdentifier = useStore((store) => getUserName(store, from));
 
 	const [isPreviewLoaded, setPreviewLoaded] = useState(false);
 	const [previewError, setPreviewError] = useState(false);
+
 	const setLoaded = useCallback(() => setPreviewLoaded(true), []);
 	const setError = useCallback(() => {
 		setPreviewLoaded(true);
@@ -86,6 +130,8 @@ const AttachmentView: FC<AttachmentViewProps> = ({ attachment, from, isMyMessage
 		linkTag.remove();
 	}, [attachment.id, attachment.name]);
 
+	const { onPreviewClick } = usePreview(attachment);
+
 	const imageLabel = useMemo(
 		() => (
 			<TextContainer
@@ -94,11 +140,7 @@ const AttachmentView: FC<AttachmentViewProps> = ({ attachment, from, isMyMessage
 				mainAlignment="flex-end"
 				crossAlignment="flex-start"
 			>
-				<Text
-					size="small"
-					color={isPreviewLoaded && !previewError ? 'gray6' : 'gray1'}
-					overflow="break-word"
-				>
+				<Text color={isPreviewLoaded && !previewError ? 'gray6' : 'gray1'} overflow="break-word">
 					{attachment.name}
 				</Text>
 			</TextContainer>
@@ -106,22 +148,61 @@ const AttachmentView: FC<AttachmentViewProps> = ({ attachment, from, isMyMessage
 		[attachment.name, isPreviewLoaded, previewError]
 	);
 
+	const actionButtons = useMemo(
+		() => (
+			<HoverContainer>
+				<CustomContainer width="fit" height="fit" padding={{ all: 'small' }}>
+					<Container orientation="horizontal" style={{ gap: '0.625rem' }}>
+						<Tooltip label={previewActionLabel}>
+							<CustomIconButton
+								borderRadius="round"
+								icon="EyeOutline"
+								iconColor="gray6"
+								customSize={{ iconSize: 'large', paddingSize: 'extrasmall' }}
+								onClick={onPreviewClick}
+							/>
+						</Tooltip>
+						<Tooltip label={downloadActionLabel}>
+							<CustomIconButton
+								borderRadius="round"
+								iconColor="gray6"
+								icon="DownloadOutline"
+								customSize={{ iconSize: 'large', paddingSize: 'extrasmall' }}
+								onClick={download}
+							/>
+						</Tooltip>
+					</Container>
+				</CustomContainer>
+			</HoverContainer>
+		),
+		[download, downloadActionLabel, onPreviewClick, previewActionLabel]
+	);
+
 	// Previewer service can be used for generate a preview for this file
 	if (previewURL) {
 		return (
-			<PreviewContainer width={'fit'} height={'fit'} borderRadius="half" isLoaded={isPreviewLoaded}>
+			<PreviewContainer
+				width={'fit'}
+				height={'fit'}
+				borderRadius="half"
+				isLoaded={isPreviewLoaded}
+				data-testid="preview-container"
+			>
 				{!isPreviewLoaded && <Shimmer.Logo size="large" />}
 				{previewError ? (
 					<Container background="gray5" width="18.75rem" height="9.375rem" maxWidth="100%">
 						<Icon size="large" icon="Image" color="gray2" />
 					</Container>
 				) : (
-					<AttachmentImg
-						src={previewURL}
-						onLoad={setLoaded}
-						onError={setError}
-						data-testid="attachmentImg"
-					/>
+					<>
+						{actionButtons}
+						<AttachmentImg
+							src={previewURL}
+							onLoad={setLoaded}
+							onError={setError}
+							data-testid="attachmentImg"
+						/>
+					</>
 				)}
 				{imageLabel}
 			</PreviewContainer>
@@ -138,19 +219,19 @@ const AttachmentView: FC<AttachmentViewProps> = ({ attachment, from, isMyMessage
 			onClick={download}
 		>
 			<Row>
-				<CustomAvatar
-					size="large"
-					icon="FileTextOutline"
-					label={attachment.name}
-					shape="square"
-					background="gray0"
-				/>
+				<Tooltip label={downloadActionLabel}>
+					<CustomAvatar
+						size="large"
+						icon="FileTextOutline"
+						label={attachment.name}
+						shape="square"
+						background="gray0"
+					/>
+				</Tooltip>
 			</Row>
 			<Row takeAvailableSpace wrap="nowrap" height="100%">
 				<Container padding={{ all: 'small' }} wrap="wrap">
-					<Text size="small" color="secondary">
-						{attachment.name}
-					</Text>
+					<Text color="secondary">{attachment.name}</Text>
 				</Container>
 			</Row>
 		</FileContainer>

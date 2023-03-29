@@ -8,24 +8,24 @@ import { Container, IconButton, Tooltip } from '@zextras/carbonio-design-system'
 import React, { FC, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import GoToPrivateChatAction from './GoToPrivateChatAction';
+import LeaveConversationListAction from './LeaveConversationListAction';
+import PromoteDemoteMemberAction from './PromoteDemoteMemberAction';
+import RemoveMemberListAction from './RemoveMemberListAction';
 import {
+	getOwner,
 	getMyOwnershipOfTheRoom,
 	getNumberOfOwnersOfTheRoom,
 	getNumbersOfRoomMembers
 } from '../../../store/selectors/RoomsSelectors';
 import useStore from '../../../store/Store';
-import { Member } from '../../../types/store/RoomTypes';
-import GoToPrivateChatAction from './GoToPrivateChatAction';
-import LeaveConversationListAction from './LeaveConversationListAction';
-import PromoteDemoteMemberAction from './PromoteDemoteMemberAction';
-import RemoveMemberListAction from './RemoveMemberListAction';
 
 type ActionsProps = {
 	roomId: string;
-	member: Member;
+	memberId: string;
 };
 
-const ParticipantComponentActions: FC<ActionsProps> = ({ roomId, member }) => {
+const ParticipantComponentActions: FC<ActionsProps> = ({ roomId, memberId }) => {
 	const [t] = useTranslation();
 	const memberIsModeratorLabel: string = t(
 		'tooltip.memberIsModerator',
@@ -35,25 +35,26 @@ const ParticipantComponentActions: FC<ActionsProps> = ({ roomId, member }) => {
 	const sessionId: string | undefined = useStore((state) => state.session.id);
 	const numberOfOwners: number = useStore((state) => getNumberOfOwnersOfTheRoom(state, roomId));
 	const numberOfMembers: number = useStore((state) => getNumbersOfRoomMembers(state, roomId));
+	const memberOwner: boolean = useStore((store) => getOwner(store, roomId, memberId));
 	const iAmOwner: boolean = useStore((state) => getMyOwnershipOfTheRoom(state, sessionId, roomId));
 	const isSessionParticipant: boolean = useMemo(
-		() => member.userId === sessionId,
-		[member.userId, sessionId]
+		() => memberId === sessionId,
+		[memberId, sessionId]
 	);
 
 	return (
 		<Container orientation="horizontal" mainAlignment="flex-end">
-			{!isSessionParticipant && <GoToPrivateChatAction memberId={member.userId} />}
+			{!isSessionParticipant && <GoToPrivateChatAction memberId={memberId} />}
 
 			{iAmOwner ? (
 				<PromoteDemoteMemberAction
-					memberId={member.userId}
+					memberId={memberId}
 					roomId={roomId}
 					isSessionParticipant={isSessionParticipant}
-					owner={member.owner}
+					owner={memberOwner}
 				/>
 			) : (
-				member.owner && (
+				memberOwner && (
 					<Tooltip label={memberIsModeratorLabel}>
 						<IconButton iconColor="primary" size="extralarge" icon="Crown" disabled />
 					</Tooltip>
@@ -69,7 +70,7 @@ const ParticipantComponentActions: FC<ActionsProps> = ({ roomId, member }) => {
 					roomId={roomId}
 				/>
 			) : (
-				iAmOwner && <RemoveMemberListAction memberId={member.userId} roomId={roomId} />
+				iAmOwner && <RemoveMemberListAction memberId={memberId} roomId={roomId} />
 			)}
 		</Container>
 	);

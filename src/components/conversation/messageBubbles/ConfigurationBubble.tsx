@@ -8,12 +8,12 @@ import { Text } from '@zextras/carbonio-design-system';
 import React, { FC, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { CustomMessage } from './MessageFactory';
 import { getRoomNameSelector } from '../../../store/selectors/RoomsSelectors';
 import { getUserName } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
 import { ConfigurationMessage } from '../../../types/store/MessageTypes';
 import { configurationMessage } from '../../../utils/configurationMessage';
-import { CustomMessage } from './MessageFactory';
 
 type ConfigurationMsgProps = {
 	message: ConfigurationMessage;
@@ -53,7 +53,7 @@ const ConfigurationBubble: FC<ConfigurationMsgProps> = ({ message, refEl }) => {
 			serviceMessage
 			data-testid={`configuration_msg-${message.id}`}
 		>
-			<Text size={'medium'} color={'gray1'} overflow="break-word">
+			<Text color={'gray1'} overflow="break-word">
 				{configurationLabel}
 			</Text>
 		</CustomMessage>

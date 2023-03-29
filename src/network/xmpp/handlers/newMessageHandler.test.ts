@@ -6,6 +6,7 @@
 
 import { size } from 'lodash';
 
+import { onNewMessageStanza } from './newMessageHandler';
 import { mockNotify } from '../../../../jest-mocks';
 import useStore from '../../../store/Store';
 import { createMockRoom } from '../../../tests/createMock';
@@ -16,7 +17,6 @@ import {
 	MessageType,
 	TextMessage
 } from '../../../types/store/MessageTypes';
-import { onNewMessageStanza } from './newMessageHandler';
 
 type MessageInfo = {
 	id?: string;
@@ -57,7 +57,7 @@ const createXMPPReceivedMessage = (info: MessageInfo): Element => {
 					`
 						<body>${info.text}</body>
 						<markable xmlns="urn:xmpp:chat-markers:0"></markable>
-						${info.replyTo && `<thread>${info.replyTo}</thread>`}
+						${info.replyTo && `<reply to='userId' id='${info.replyTo}' xmlns='urn:xmpp:reply:0' />`}
 					`
 				}
 				${

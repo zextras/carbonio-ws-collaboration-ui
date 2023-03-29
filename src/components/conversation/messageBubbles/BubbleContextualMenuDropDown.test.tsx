@@ -8,13 +8,13 @@ import { screen } from '@testing-library/react';
 import React from 'react';
 import { setup } from 'test-utils';
 
+import BubbleContextualMenuDropDown from './BubbleContextualMenuDropDown';
 import useStore from '../../../store/Store';
 import { createMockRoom, createMockTextMessage } from '../../../tests/createMock';
 import { RoomBe } from '../../../types/network/models/roomBeTypes';
 import { TextMessage } from '../../../types/store/MessageTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 import { RootStore } from '../../../types/store/StoreTypes';
-import BubbleContextualMenuDropDown from './BubbleContextualMenuDropDown';
 
 const mockedRoom: RoomBe = createMockRoom({
 	id: 'roomId',
@@ -46,6 +46,8 @@ describe('Bubble Contextual Menu - other user messages', () => {
 		expect(deleteAction).not.toBeInTheDocument();
 		const downloadAction = screen.queryByText(/Download/i);
 		expect(downloadAction).not.toBeInTheDocument();
+		const previewAction = screen.queryByText(/Preview/i);
+		expect(previewAction).not.toBeInTheDocument();
 	});
 
 	test('Replied text message', async () => {
@@ -74,6 +76,8 @@ describe('Bubble Contextual Menu - other user messages', () => {
 		expect(deleteAction).not.toBeInTheDocument();
 		const downloadAction = screen.queryByText(/Download/i);
 		expect(downloadAction).not.toBeInTheDocument();
+		const previewAction = screen.queryByText(/Preview/i);
+		expect(previewAction).not.toBeInTheDocument();
 	});
 
 	test('Forwarded text message', async () => {
@@ -101,6 +105,8 @@ describe('Bubble Contextual Menu - other user messages', () => {
 		expect(deleteAction).not.toBeInTheDocument();
 		const downloadAction = screen.queryByText(/Download/i);
 		expect(downloadAction).not.toBeInTheDocument();
+		const previewAction = screen.queryByText(/Preview/i);
+		expect(previewAction).not.toBeInTheDocument();
 	});
 
 	test('Attachment text message', async () => {
@@ -128,6 +134,8 @@ describe('Bubble Contextual Menu - other user messages', () => {
 		expect(deleteAction).not.toBeInTheDocument();
 		const downloadAction = screen.queryByText(/Download/i);
 		expect(downloadAction).toBeInTheDocument();
+		const previewAction = screen.queryByText(/Preview/i);
+		expect(previewAction).toBeInTheDocument();
 	});
 });
 
@@ -159,6 +167,8 @@ describe('Bubble Contextual Menu - my messages', () => {
 		expect(deleteAction).toBeInTheDocument();
 		const downloadAction = screen.queryByText(/Download/i);
 		expect(downloadAction).not.toBeInTheDocument();
+		const previewAction = screen.queryByText(/Preview/i);
+		expect(previewAction).not.toBeInTheDocument();
 	});
 
 	test('Replied text message', async () => {
@@ -189,6 +199,8 @@ describe('Bubble Contextual Menu - my messages', () => {
 		expect(deleteAction).toBeInTheDocument();
 		const downloadAction = screen.queryByText(/Download/i);
 		expect(downloadAction).not.toBeInTheDocument();
+		const previewAction = screen.queryByText(/Preview/i);
+		expect(previewAction).not.toBeInTheDocument();
 	});
 
 	test('Forwarded text message', async () => {
@@ -218,6 +230,8 @@ describe('Bubble Contextual Menu - my messages', () => {
 		expect(deleteAction).not.toBeInTheDocument();
 		const downloadAction = screen.queryByText(/Download/i);
 		expect(downloadAction).not.toBeInTheDocument();
+		const previewAction = screen.queryByText(/Preview/i);
+		expect(previewAction).not.toBeInTheDocument();
 	});
 
 	test('Attachment text message', async () => {
@@ -245,5 +259,7 @@ describe('Bubble Contextual Menu - my messages', () => {
 		expect(deleteAction).not.toBeInTheDocument();
 		const downloadAction = screen.queryByText(/Download/i);
 		expect(downloadAction).toBeInTheDocument();
+		const previewAction = screen.queryByText(/Preview/i);
+		expect(previewAction).toBeInTheDocument();
 	});
 });

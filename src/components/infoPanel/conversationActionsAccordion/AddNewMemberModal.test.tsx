@@ -8,12 +8,12 @@ import { screen } from '@testing-library/react';
 import React from 'react';
 import { setup } from 'test-utils';
 
+import AddNewMemberModal from './AddNewMemberModal';
 import { mockedAutoCompleteGalRequest } from '../../../../jest-mocks';
 import useStore from '../../../store/Store';
 import { createMockMember, createMockRoom } from '../../../tests/createMock';
 import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
 import { RootStore } from '../../../types/store/StoreTypes';
-import AddNewMemberModal from './AddNewMemberModal';
 
 const testRoom: RoomBe = createMockRoom({
 	id: 'room-test',

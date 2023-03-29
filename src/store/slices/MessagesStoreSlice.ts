@@ -6,8 +6,7 @@
  */
 
 import produce from 'immer';
-import { concat, find, findIndex, forEach, map, orderBy, sortedUniqBy } from 'lodash';
-import { now } from 'moment';
+import { concat, find, forEach, map, orderBy, sortedUniqBy } from 'lodash';
 
 import { UsersApi } from '../../network';
 import { calcReads } from '../../network/xmpp/utility/decodeMessage';
@@ -39,18 +38,18 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 					)
 				) {
 					draft.messages[message.roomId].push({
-						id: `dateMessage${now()}`,
+						id: `dateMessage${message.date - 2}`,
 						roomId: message.roomId,
-						date: now(),
+						date: message.date - 2,
 						type: MessageType.DATE_MSG
 					});
 				}
 				// this is a custom message that is shown immediately after a group is created
 				if (messagesListLength === 1 && draft.rooms[message.roomId].type === RoomType.GROUP) {
 					draft.messages[message.roomId].push({
-						id: `dateMessage${message.date}`,
+						id: `dateMessage${message.date - 1}`,
 						roomId: message.roomId,
-						date: message.date,
+						date: message.date - 1,
 						type: MessageType.AFFILIATION_MSG,
 						as: 'creation',
 						userId: ''
@@ -136,9 +135,9 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 					// the first message always needs a date before it
 					if (index === 0) {
 						historyWithDates.push({
-							id: `dateMessage${historyMessage.date}`,
+							id: `dateMessage${historyMessage.date - 2}`,
 							roomId,
-							date: historyMessage.date,
+							date: historyMessage.date - 2,
 							type: MessageType.DATE_MSG
 						});
 						historyWithDates.push(historyMessage);
@@ -147,9 +146,9 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 						// if the actual message and the previous one has not the same date, it puts a date message before the actual one
 						if (datesAreFromTheSameDay(prevMessage?.date, historyMessage?.date)) {
 							historyWithDates.push({
-								id: `dateMessage${historyMessage.date}`,
+								id: `dateMessage${historyMessage.date - 2}`,
 								roomId,
-								date: historyMessage.date,
+								date: historyMessage.date - 2,
 								type: MessageType.DATE_MSG
 							});
 							historyWithDates.push(historyMessage);
@@ -185,10 +184,10 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 				}
 
 				draft.messages[roomId] = concat(historyWithDates, draft.messages[roomId]);
+				// message list has to be ordered by date
 				draft.messages[roomId] = orderBy(draft.messages[roomId], ['date'], ['asc']);
-				draft.messages[roomId] = sortedUniqBy(draft.messages[roomId], 'id');
+				// the second message has to be a creation one if the conversation is a group one and the history has never been cleared
 
-				// the second message has to be a creation one if the conversation is a group one
 				if (
 					draft.activeConversations[roomId] &&
 					draft.activeConversations[roomId].isHistoryFullyLoaded &&
@@ -196,14 +195,21 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 					draft.rooms[roomId].userSettings?.clearedAt === undefined
 				) {
 					const creationMsg: AffiliationMessage = {
-						id: `creationMessage${draft.messages[roomId][0]?.date}`,
+						id: `creationMessage${draft.messages[roomId][0].date + 1}`,
 						roomId,
-						date: draft.messages[roomId][0]?.date,
+						date: draft.messages[roomId][0].date + 1,
 						type: MessageType.AFFILIATION_MSG,
 						as: 'creation',
 						userId: ''
 					};
 					draft.messages[roomId].splice(1, 0, creationMsg);
+				}
+				// message list can't have duplicates, so it's sorted by id
+				draft.messages[roomId] = sortedUniqBy(draft.messages[roomId], 'id');
+
+				// checks if creation message is duplicated and removes it
+				if (draft.messages[roomId][0].id === draft.messages[roomId][2].id) {
+					draft.messages[roomId].splice(0, 2);
 				}
 			}),
 			false,
@@ -215,11 +221,9 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 			produce((draft: RootStore) => {
 				if (!draft.messages[roomId]) draft.messages[roomId] = [];
 				draft.messages[roomId] = map(draft.messages[roomId], (message: Message) => {
-					// todo handle attachment message type
 					if (message.type !== MessageType.TEXT_MSG || message.read === MarkerStatus.READ) {
 						return message;
 					}
-					// eslint-disable-next-line no-param-reassign
 					message.read = calcReads(message.date, roomId);
 					return message;
 				});
@@ -231,63 +235,48 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 	setRepliedMessage: (
 		roomId: string,
 		replyMessageId: string, // id of message which contains the replyMessage and replyTo fields
-		repliedMessage: TextMessage // message not in history which will be placed as replyMessage if not edited/deleted
+		messageSubjectOfReply: TextMessage // message not in history which will be placed as replyMessage if not edited/deleted
 	): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (draft.messages[roomId]) {
-					// retrieve the replyMessage from messagesList
-					const replyMessage = find(
+				// Message to add the replyMessage prop
+				const messageWithAResponse = find(
+					draft.messages[roomId],
+					(message) => message.id === replyMessageId
+				);
+				if (messageWithAResponse && messageWithAResponse.type === MessageType.TEXT_MSG) {
+					const referenceMessageOnHistory = find(
 						draft.messages[roomId],
-						(message) => message.id === replyMessageId
+						(message) => message.id === messageSubjectOfReply.id
 					);
-					// return a message that if it was edited or deleted is still present
-					// and return it as not edited or deleted, so we need to check if in the history we have this message and if it's edited/delete use them as
-					// reference for the reply view
-					if (replyMessage) {
-						const repliedMessageInHistory = find(
-							draft.messages[roomId],
-							(message) => message.id === repliedMessage.id
-						);
-						// check if message subject of reply is available in the history and
-						// if is deleted or edited and update the reply caption
-						if (repliedMessageInHistory) {
-							let messageToPlaceAsreplyedMessage: TextMessage | DeletedMessage = repliedMessage;
-							if (repliedMessageInHistory.type === MessageType.DELETED_MSG) {
-								messageToPlaceAsreplyedMessage = {
-									...repliedMessageInHistory,
+					// Check if message reference is already loaded on local history.
+					// If it is, we can use it for the reference because it is already processed for edit / delete
+					if (referenceMessageOnHistory) {
+						messageWithAResponse.repliedMessage = referenceMessageOnHistory as
+							| TextMessage
+							| DeletedMessage;
+					} else {
+						// Apply the delete/reply information if there are some temporary message
+						const temporaryMessages = draft.temporaryMessages[roomId];
+						if (temporaryMessages) {
+							const editInformation = temporaryMessages[
+								`edited_${messageSubjectOfReply.id}`
+							] as TextMessage;
+							if (editInformation) {
+								messageSubjectOfReply.text = editInformation.text;
+							}
+							const deleteInformation = temporaryMessages[`delete_${messageSubjectOfReply.id}`];
+							if (deleteInformation) {
+								messageWithAResponse.repliedMessage = {
+									id: messageSubjectOfReply.id,
+									roomId: messageSubjectOfReply.roomId,
+									date: messageSubjectOfReply.date,
+									from: messageSubjectOfReply.from,
 									type: MessageType.DELETED_MSG
 								};
-							} else if (
-								repliedMessageInHistory.type === MessageType.TEXT_MSG &&
-								repliedMessageInHistory.edited
-							) {
-								messageToPlaceAsreplyedMessage = repliedMessageInHistory;
 							}
-							if (replyMessage.type === MessageType.TEXT_MSG) {
-								replyMessage.repliedMessage = messageToPlaceAsreplyedMessage;
-							}
-							const index = findIndex(draft.messages[roomId], { id: replyMessageId });
-							draft.messages[roomId].splice(index, 1, replyMessage);
-						}
-						// replied message is not in the history because 50+ message behind so
-						// update the reply view with the info in the temporaryMessages
-						else if (
-							draft.temporaryMessages[roomId] &&
-							draft.temporaryMessages[roomId][`deleted_${repliedMessage.id}`]
-						) {
-							(replyMessage as TextMessage).repliedMessage =
-								draft.temporaryMessages[roomId][`deleted_${repliedMessage.id}`];
-							const index = findIndex(draft.messages[roomId], { id: replyMessageId });
-							draft.messages[roomId].splice(index, 1, replyMessage);
-						} else if (
-							draft.temporaryMessages[roomId] &&
-							draft.temporaryMessages[roomId][`edited_${repliedMessage.id}`]
-						) {
-							(replyMessage as TextMessage).repliedMessage =
-								draft.temporaryMessages[roomId][`edited_${repliedMessage.id}`];
-							const index = findIndex(draft.messages[roomId], { id: replyMessageId });
-							draft.messages[roomId].splice(index, 1, replyMessage);
+						} else {
+							messageWithAResponse.repliedMessage = messageSubjectOfReply;
 						}
 					}
 				}

@@ -8,11 +8,11 @@ import { act, screen } from '@testing-library/react';
 import React from 'react';
 import { setup } from 'test-utils';
 
+import UserAvatar from './UserAvatar';
 import useStore from '../store/Store';
 import { createMockCapabilityList, createMockMember, createMockRoom } from '../tests/createMock';
 import { RoomBe, RoomType } from '../types/network/models/roomBeTypes';
 import { User } from '../types/store/UserTypes';
-import UserAvatar from './UserAvatar';
 
 const user1Info: User = {
 	id: 'user1',

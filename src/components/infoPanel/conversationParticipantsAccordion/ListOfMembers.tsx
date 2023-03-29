@@ -8,8 +8,8 @@ import { Container } from '@zextras/carbonio-design-system';
 import { map } from 'lodash';
 import React, { FC } from 'react';
 
-import { Member } from '../../../types/store/RoomTypes';
 import ParticipantComponentInfo from './ParticipantComponentInfo';
+import { Member } from '../../../types/store/RoomTypes';
 
 type ListOfMembersProps = {
 	roomId: string;
