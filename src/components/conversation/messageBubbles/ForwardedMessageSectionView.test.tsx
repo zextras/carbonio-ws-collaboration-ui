@@ -37,13 +37,7 @@ describe('Forward Message Section View', () => {
 		const store: RootStore = useStore.getState();
 		store.addRoom(testRoom);
 		store.setUserInfo(forwardedUser);
-		setup(
-			<ForwardedMessageSectionView
-				forwardedMessage={forwardedMessage}
-				isMyMessage={false}
-				roomId={testRoom.id}
-			/>
-		);
+		setup(<ForwardedMessageSectionView forwardedMessage={forwardedMessage} isMyMessage={false} />);
 
 		// Displayed username is the username of who forward message
 		const userName = screen.getByText(new RegExp(forwardedUser.name, 'i'));
@@ -75,7 +69,6 @@ describe('Forward Message Section View', () => {
 			<ForwardedMessageSectionView
 				forwardedMessage={forwardedAttachmentMessage}
 				isMyMessage={false}
-				roomId={testRoom.id}
 			/>
 		);
 
@@ -106,7 +99,6 @@ describe('Forward Message Section View', () => {
 			<ForwardedMessageSectionView
 				forwardedMessage={forwardedAttachmentMessage}
 				isMyMessage={false}
-				roomId={testRoom.id}
 			/>
 		);
 

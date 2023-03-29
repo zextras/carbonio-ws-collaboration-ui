@@ -149,6 +149,7 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 		const isMyMessage = message.from === useStore.getState().session.id;
 		if (isMyMessage && !message.attachment) {
 			forEach(selected, (value, key) => xmppClient.sendChatMessage(key, message.text));
+			onClose();
 		} else {
 			Promise.all(map(selected, (value, key) => RoomsApi.forwardMessages(key, [message])))
 				.then(() => onClose())

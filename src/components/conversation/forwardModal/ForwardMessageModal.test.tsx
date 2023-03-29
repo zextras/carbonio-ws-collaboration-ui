@@ -123,4 +123,42 @@ describe('Forward Message Modal', () => {
 
 		expect(mockedForwardMessagesRequest).toHaveBeenCalledTimes(2);
 	});
+
+	test('Close modal after forward someone else message', async () => {
+		const store: RootStore = useStore.getState();
+		store.addRoom(testRoom);
+		store.addRoom(chat);
+
+		const onClose = jest.fn();
+		const { user } = setup(
+			<ForwardMessageModal open onClose={onClose} roomId={testRoom.id} message={messageToForward} />
+		);
+
+		// Forward to Test Room
+		await user.type(await screen.findByTestId('chip_input_forward_modal'), chat.name[0]);
+		await user.click(await screen.findByText(chat.name));
+		await user.click(await screen.findByTestId('forward_button'));
+
+		expect(onClose).toHaveBeenCalledTimes(1);
+	});
+
+	test('Close modal after forward my message', async () => {
+		const store: RootStore = useStore.getState();
+		store.addRoom(testRoom);
+		store.addRoom(chat);
+		store.setLoginInfo('id', 'Name');
+		const messageToForward = createMockTextMessage({ roomId: testRoom.id, from: 'id' });
+
+		const onClose = jest.fn();
+		const { user } = setup(
+			<ForwardMessageModal open onClose={onClose} roomId={testRoom.id} message={messageToForward} />
+		);
+
+		// Forward to Test Room
+		await user.type(await screen.findByTestId('chip_input_forward_modal'), chat.name[0]);
+		await user.click(await screen.findByText(chat.name));
+		await user.click(await screen.findByTestId('forward_button'));
+
+		expect(onClose).toHaveBeenCalledTimes(1);
+	});
 });
