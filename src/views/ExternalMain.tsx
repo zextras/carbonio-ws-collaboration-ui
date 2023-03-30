@@ -8,11 +8,11 @@ import { createMemoryHistory } from 'history';
 import React, { ReactElement } from 'react';
 import { Switch, Route, Router } from 'react-router-dom';
 
-import { ROUTES } from '../hooks/useRouting';
 import AccessMeetingPageView from './AccessMeetingPageView';
 import InfoPage from './InfoPage';
 import MeetingPageView from './MeetingPageView';
 import WaitingRoomPageView from './WaitingRoomPageView';
+import { ROUTES } from '../hooks/useRouting';
 
 const ExternalMainView = (): ReactElement => {
 	const history = createMemoryHistory();

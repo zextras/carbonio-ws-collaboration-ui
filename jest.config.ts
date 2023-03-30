@@ -92,7 +92,9 @@ export default {
 
 	// A map from regular expressions to module names or to arrays of module names that allow to stub out resources with a single module
 	moduleNameMapper: {
-		'\\.(jpg|jpeg|png)$': 'identity-obj-proxy'
+		'\\.(jpg|jpeg|png)$': 'identity-obj-proxy',
+		'^react-pdf': 'react-pdf/dist/cjs/entry.jest',
+		'\\.(css|less)$': './__mocks__/styleMock.js'
 	},
 
 	// An array of regexp pattern strings, matched against all module paths before considered 'visible' to the module loader

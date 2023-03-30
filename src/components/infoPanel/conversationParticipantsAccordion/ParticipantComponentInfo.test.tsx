@@ -8,13 +8,13 @@ import { act, screen } from '@testing-library/react';
 import React from 'react';
 import { setup } from 'test-utils';
 
+import ParticipantComponentInfo from './ParticipantComponentInfo';
 import { mockedGetURLUserPicture } from '../../../../jest-mocks';
 import useStore from '../../../store/Store';
 import { createMockCapabilityList, createMockRoom } from '../../../tests/createMock';
 import { RoomType } from '../../../types/network/models/roomBeTypes';
 import { UserBe } from '../../../types/network/models/userBeTypes';
 import { User } from '../../../types/store/UserTypes';
-import ParticipantComponentInfo from './ParticipantComponentInfo';
 
 const user1Info: User = {
 	id: 'user1',

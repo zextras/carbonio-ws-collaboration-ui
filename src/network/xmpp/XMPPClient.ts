@@ -4,18 +4,11 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { forEach } from 'lodash';
 import { Strophe, $pres, $iq, $msg, StropheConnection, StropheConnectionStatus } from 'strophe.js';
+import { v4 as uuidGenerator } from 'uuid';
 
-import useStore from '../../store/Store';
-import IXMPPClient from '../../types/network/xmpp/IXMPPClient';
-import { dateToISODate } from '../../utils/dateUtil';
-import { xmppDebug } from '../../utils/debug';
 import { onComposingMessageStanza } from './handlers/composingMessageHandler';
-import {
-	onGetDiscoverMUCItemsResponse,
-	onGetServiceDiscoveryInfoResponse,
-	onGetServiceDiscoveryItemsResponse
-} from './handlers/discoveryHandler';
 import { onErrorStanza } from './handlers/errorHandler';
 import {
 	MamRequestType,
@@ -33,7 +26,12 @@ import { onNewMessageStanza } from './handlers/newMessageHandler';
 import { onPresenceStanza } from './handlers/presenceHandler';
 import { onGetRosterResponse } from './handlers/rosterHandler';
 import { onSmartMarkers, onDisplayedMessageStanza } from './handlers/smartMarkersHandler';
-import { MUCservice, carbonizeMUC } from './utility/decodeJid';
+import { carbonizeMUC } from './utility/decodeJid';
+import useStore from '../../store/Store';
+import IXMPPClient from '../../types/network/xmpp/IXMPPClient';
+import { TextMessage } from '../../types/store/MessageTypes';
+import { dateToISODate } from '../../utils/dateUtil';
+import { xmppDebug } from '../../utils/debug';
 
 class XMPPClient implements IXMPPClient {
 	private connection: StropheConnection;
@@ -46,24 +44,30 @@ class XMPPClient implements IXMPPClient {
 		this.connection = new Strophe.Connection(service);
 
 		// Useful namespaces
-		Strophe.addNamespace('ROSTER', 'jabber:iq:roster');
-		Strophe.addNamespace('LAST_ACTIVITY', 'jabber:iq:last');
-		Strophe.addNamespace('INBOX', 'erlang-solutions.com:xmpp:inbox:0');
-		Strophe.addNamespace('DISCO_ITEMS', 'http://jabber.org/protocol/disco#items');
-		Strophe.addNamespace('DISCO_INFO', 'http://jabber.org/protocol/disco#info');
-		Strophe.addNamespace('MAM', 'urn:xmpp:mam:2');
 		Strophe.addNamespace('AFFILIATIONS', 'urn:xmpp:muclight:0#affiliations');
 		Strophe.addNamespace('CONFIGURATION', 'urn:xmpp:muclight:0#configuration');
 		Strophe.addNamespace('CHAT_STATE', 'http://jabber.org/protocol/chatstates');
+		Strophe.addNamespace('DISCO_ITEMS', 'http://jabber.org/protocol/disco#items');
+		Strophe.addNamespace('DISCO_INFO', 'http://jabber.org/protocol/disco#info');
+		Strophe.addNamespace('FORWARD', 'urn:xmpp:forward:0');
+		Strophe.addNamespace('INBOX', 'erlang-solutions.com:xmpp:inbox:0');
+		Strophe.addNamespace('LAST_ACTIVITY', 'jabber:iq:last');
+		Strophe.addNamespace('MAM', 'urn:xmpp:mam:2');
 		Strophe.addNamespace('MARKERS', 'urn:xmpp:chat-markers:0');
+		Strophe.addNamespace('REPLY', 'urn:xmpp:reply:0');
+		Strophe.addNamespace('ROSTER', 'jabber:iq:roster');
 		Strophe.addNamespace('SMART_MARKERS', 'esl:xmpp:smart-markers:0');
+		Strophe.addNamespace('STANDARD_CLIENT', 'jabber:client');
+		Strophe.addNamespace('XMPP_RETRACT', 'urn:xmpp:message-retract:0');
+		Strophe.addNamespace('XMPP_FASTEN', 'urn:xmpp:fasten:0');
+		Strophe.addNamespace('XMPP_CORRECT', 'urn:xmpp:message-correct:0');
 
 		// Handler for event stanzas
 		this.connection.addHandler(onPresenceStanza.bind(this), null, 'presence');
 		this.connection.addHandler(onNewMessageStanza.bind(this), null, 'message');
 		this.connection.addHandler(onHistoryMessageStanza, Strophe.NS.MAM, 'message');
 		this.connection.addHandler(onInboxMessageStanza.bind(this), Strophe.NS.INBOX, 'message');
-		// Handler used for writing status writitng/stopped
+		// Handler used for writing status writing/stopped
 		this.connection.addHandler(onComposingMessageStanza, Strophe.NS.CHAT_STATE, 'message');
 		this.connection.addHandler(onDisplayedMessageStanza, Strophe.NS.MARKERS, 'message');
 
@@ -179,57 +183,6 @@ class XMPPClient implements IXMPPClient {
 		this.connection.sendIQ(iq, onGetLastActivityResponse, onErrorStanza);
 	}
 
-	// Add a user to my contact list
-	// TODO: remove because it is done automatically by server
-	public addContactItem(jid: string, name?: string): void {
-		const iq = $iq({ type: 'set' })
-			.c('query', { xmlns: Strophe.NS.ROSTER })
-			.c('item', { jid, name });
-		this.connection.sendIQ(iq, (resp: any) => console.log('Add contact', resp), onErrorStanza);
-	}
-
-	// Remove a user to my contact list
-	// TODO: remove because it is done automatically by server
-	public removeContactItem(jid: string): void {
-		const iq = $iq({ type: 'set' })
-			.c('query', { xmlns: Strophe.NS.ROSTER })
-			.c('item', { jid, subscription: 'remove' });
-		this.connection.sendIQ(iq, (resp: any) => console.log('Remove contact', resp), onErrorStanza);
-	}
-
-	// Subscribe to a user to receive his 'presence' events
-	// TODO: remove because it is done automatically by server
-	public sendPresenceSubscription(jid: string): void {
-		this.connection.send($pres({ to: jid, type: 'subscribe' }));
-	}
-
-	// Let a user to subscribe to my 'presence' events
-	// TODO: remove because it is done automatically by server
-	public sendPresenceSubscribed(jid: string): void {
-		this.connection.send($pres({ to: jid, type: 'subscribed' }));
-	}
-
-	/**
-	 * DISCOVERY:
-	 * Useful only for initial project development.
-	 * Useless for chat flow
-	 */
-
-	public serviceDiscoveryItems(): void {
-		const iq = $iq({ type: 'get' }).c('query', { xmlns: Strophe.NS.DISCO_ITEMS });
-		this.connection.sendIQ(iq, onGetServiceDiscoveryItemsResponse, onErrorStanza);
-	}
-
-	public serviceDiscoveryInfo(): void {
-		const iq = $iq({ type: 'get', to: MUCservice }).c('query', { xmlns: Strophe.NS.DISCO_INFO });
-		this.connection.sendIQ(iq, onGetServiceDiscoveryInfoResponse, onErrorStanza);
-	}
-
-	public discoverMUCItems(): void {
-		const iq = $iq({ type: 'get', to: MUCservice }).c('query', { xmlns: Strophe.NS.DISCO_ITEMS });
-		this.connection.sendIQ(iq, onGetDiscoverMUCItemsResponse, onErrorStanza);
-	}
-
 	/**
 	 * INBOX:
 	 * Request chat initial information like unread messages or active conversations.
@@ -253,20 +206,104 @@ class XMPPClient implements IXMPPClient {
 	 */
 
 	// Send a text message
-	sendChatMessage(roomId: string, message: string, replyTo?: string): void {
-		const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat' })
+	sendChatMessage(roomId: string, message: string): void {
+		const uuid = uuidGenerator();
+		const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat', id: uuid })
 			.c('body')
 			.t(message)
 			.up()
 			.c('markable', { xmlns: Strophe.NS.MARKERS });
-		if (replyTo != null) {
-			msg.up().c('thread').t(replyTo);
-		}
 		this.connection.send(msg);
 	}
 
+	/**
+	 * Reply to a message (XEP-0461)
+	 * Documentation: https://xmpp.org/extensions/xep-0461.html
+	 */
+	sendChatMessageReply(
+		roomId: string,
+		message: string,
+		replyTo: string,
+		replyMessageId: string
+	): void {
+		const to = `${carbonizeMUC(replyTo)}/${carbonizeMUC(roomId)}}`;
+		const uuid = uuidGenerator();
+		const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat', id: uuid })
+			.c('body')
+			.t(message)
+			.up()
+			.c('markable', { xmlns: Strophe.NS.MARKERS })
+			.up()
+			.c('reply', { to, id: replyMessageId, xmlns: Strophe.NS.REPLY });
+		this.connection.send(msg);
+	}
+
+	/**
+	 * Delete a message / Message Retraction (XEP-0424)
+	 * Documentation: https://xmpp.org/extensions/xep-0424.html
+	 */
+	sendChatMessageDeletion(roomId: string, messageId: string): void {
+		const uuid = uuidGenerator();
+		const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat', id: uuid })
+			.c('apply-to', { id: messageId, xmlns: Strophe.NS.XMPP_FASTEN })
+			.c('retract', { xmlns: Strophe.NS.XMPP_RETRACT });
+		this.connection.send(msg);
+	}
+
+	/**
+	 * Edit a message / Last Message Correction (XEP-0308)
+	 * Documentation: https://xmpp.org/extensions/xep-0308.html
+	 */
+	sendChatMessageCorrection(roomId: string, message: string, messageId: string): void {
+		const uuid = uuidGenerator();
+		const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat', id: uuid })
+			.c('body')
+			.t(message)
+			.up()
+			.c('replace', {
+				id: messageId,
+				xmlns: Strophe.NS.XMPP_CORRECT
+			});
+		this.connection.send(msg);
+	}
+
+	/**
+	 * Forward a message (XEP-0297)
+	 * Documentation: https://xmpp.org/extensions/xep-0297.html
+	 */
+	forwardMessage(message: TextMessage, roomIds: string[]): void {
+		const isMyMessage = message.from === useStore.getState().session.id;
+		if (isMyMessage) {
+			forEach(roomIds, (roomId) => this.sendChatMessage(roomId, message.text));
+		} else {
+			forEach(roomIds, (roomId) => {
+				const uuid = uuidGenerator();
+				const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat', id: uuid })
+					.c('body')
+					.t('')
+					.up()
+					.c('forwarded', { xmlns: Strophe.NS.FORWARD })
+					.c('delay', { xmlns: 'urn:xmpp:delay', stamp: dateToISODate(message.date) })
+					.up()
+					.c('message', {
+						from: carbonizeMUC(message.from),
+						id: message.id,
+						to: carbonizeMUC(message.roomId),
+						type: 'groupchat',
+						xmlns: 'jabber:client'
+					})
+					.c('body')
+					.t(message.text)
+					.up()
+					.up()
+					.up()
+					.c('markable', { xmlns: Strophe.NS.MARKERS });
+				this.connection.send(msg);
+			});
+		}
+	}
+
 	// Request the full history of a room
-	// TODO: remove, useless
 	requestFullHistory(roomId: string): void {
 		const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) }).c('query', { xmlns: Strophe.NS.MAM });
 		this.connection.sendIQ(iq, onRequestHistory.bind(this), onErrorStanza);
@@ -276,7 +313,7 @@ class XMPPClient implements IXMPPClient {
 	requestHistory(roomId: string, endHistory: number, quantity = 5): void {
 		const clearedAt = useStore.getState().rooms[roomId].userSettings?.clearedAt;
 		const startHistory = clearedAt || useStore.getState().rooms[roomId].createdAt;
-
+		console.log('History conversation request triggered');
 		// Ask for ${QUANTITY} messages before end date but not before start date
 		const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
 			.c('query', { xmlns: Strophe.NS.MAM, queryid: MamRequestType.HISTORY })
@@ -324,21 +361,25 @@ class XMPPClient implements IXMPPClient {
 		this.connection.sendIQ(iq, onRequestHistory.bind(this), onErrorStanza);
 	}
 
-	requestRepliedMessage(roomId: string, originalMessageId: string, repliedMessageId: string): void {
+	requestMessageSubjectOfReply(
+		roomId: string,
+		messageSubjectOfReplyId: string,
+		replyMessageId: string
+	): void {
 		const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
 			.c('query', { xmlns: Strophe.NS.MAM, queryid: MamRequestType.REPLIED })
 			.c('x', { xmlns: 'jabber:x:data' })
 			.c('field', { var: 'from_id' })
 			.c('value')
-			.t(repliedMessageId)
+			.t(messageSubjectOfReplyId)
 			.up()
 			.up()
 			.c('field', { var: 'to_id' })
 			.c('value')
-			.t(repliedMessageId);
+			.t(messageSubjectOfReplyId);
 		this.connection.sendIQ(
 			iq,
-			(stanza) => onRequestSingleMessage(originalMessageId, stanza),
+			(stanza) => onRequestSingleMessage(replyMessageId, stanza),
 			onErrorStanza
 		);
 	}

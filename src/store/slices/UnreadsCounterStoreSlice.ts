@@ -7,7 +7,7 @@
 import produce from 'immer';
 import { filter, find, size } from 'lodash';
 
-import { Message } from '../../types/store/MessageTypes';
+import { Message, MessageType } from '../../types/store/MessageTypes';
 import { RootStore, UnreadsCounterSlice } from '../../types/store/StoreTypes';
 import { isBefore } from '../../utils/dateUtil';
 
@@ -36,18 +36,18 @@ export const useUnreadsCountStoreSlice = (set: (...any: any) => void): UnreadsCo
 	updateUnreadCount: (roomId: string): void => {
 		set(
 			produce((draft: RootStore) => {
-				const lastMarker = draft.markers[roomId][draft.session.id!];
+				const lastMarker = draft.markers[roomId] && draft.markers[roomId][draft.session.id!];
 				const lastMarkedMessage = find(
 					draft.messages[roomId],
 					(message: Message) => lastMarker && message.id === lastMarker.messageId
 				);
 				const unreadByMe = filter(draft.messages[roomId], (message) => {
-					const isReadByMe =
-						message.type === 'text' &&
+					const isUnreadByMe =
+						message.type === MessageType.TEXT_MSG &&
 						message.from !== draft.session.id! &&
 						(!lastMarkedMessage ||
 							(lastMarkedMessage && !isBefore(message.date, lastMarkedMessage.date)));
-					return isReadByMe;
+					return isUnreadByMe;
 				});
 				draft.unreads[roomId] = size(unreadByMe);
 			}),

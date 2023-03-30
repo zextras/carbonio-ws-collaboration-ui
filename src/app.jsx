@@ -63,22 +63,29 @@ const initApp = () => {
 	const store = useStore.getState();
 	store.setLoginInfo(id, name, displayName);
 
-	// SET TIMEZONE
+	// SET TIMEZONE and LOCALE
 	settings?.prefs?.zimbraPrefTimeZoneId
 		? store.setUserPrefTimezone(settings?.prefs?.zimbraPrefTimeZoneId)
 		: store.setUserPrefTimezone(moment.tz.guess());
+	if (settings?.prefs?.zimbraPrefLocale) {
+		moment.locale(settings.prefs.zimbraPrefLocale);
+	}
 
 	Promise.all([SessionApi.getToken(), SessionApi.getCapabilities()])
 		.then((resp) => {
 			// CHATS BE: get all rooms list
-			RoomsApi.listRooms(true, true);
+			RoomsApi.listRooms(true, true)
+				.then(() => {
+					// XMPP: connection to Mongoose Instant Messaging platform
+					// Init xmppClient after roomList request to avoid missing data after inboxMessages
+					// main scenario when requesting history of a room and without this check previously
+					// an error for missing clearedAt was returned
+					const xmppClient = new XMPPClient();
+					xmppClient.connect(resp[0].zmToken);
+					store.setXmppClient(xmppClient);
+				})
+				.catch(() => store.setChatsBeStatus(false));
 			MeetingsApi.listMeetings();
-
-			// XMPP: connection to Mongoose Instant Messaging platform
-			const xmppClient = new XMPPClient();
-			xmppClient.connect(resp[0].zmToken);
-			store.setXmppClient(xmppClient);
-
 			// Web Socket: connection to receive realtime events
 			const webSocket = new WebSocketClient();
 			store.setWebSocketClient(webSocket);

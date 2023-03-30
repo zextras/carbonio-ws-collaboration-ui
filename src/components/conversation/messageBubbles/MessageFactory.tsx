@@ -4,16 +4,19 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Container } from '@zextras/carbonio-design-system';
-import React, { ReactElement } from 'react';
+import { Container, Text } from '@zextras/carbonio-design-system';
+import React, { ReactElement, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
+import AffiliationBubble from './AffiliationBubble';
+import Bubble from './Bubble';
+import ConfigurationBubble from './ConfigurationBubble';
+import DateBubble from './DateBubble';
+import DeletedBubble from './DeletedBubble';
 import { getSingleMessageSelector } from '../../../store/selectors/MessagesSelectors';
 import useStore from '../../../store/Store';
-import AffiliationBubble from './AffiliationBubble';
-import BubbleFactory from './BubbleFactory';
-import ConfigurationBubble from './ConfigurationBubble';
-import DateBubble from './DataBubble';
+import { MessageType } from '../../../types/store/MessageTypes';
 
 type MessageProps = {
 	messageId: string;
@@ -21,13 +24,8 @@ type MessageProps = {
 	prevMessageIsFromSameSender: boolean;
 	nextMessageIsFromSameSender: boolean;
 	messageRef: React.RefObject<HTMLElement>;
+	isFirstNewMessage: boolean;
 };
-
-// TODO handle sticky messages for timestamp
-/*
-	position: sticky;
-	top: 0;
-*/
 
 export const CustomMessage = styled(Container)`
 	width: fit-content;
@@ -45,7 +43,7 @@ export const CustomMessage = styled(Container)`
 	user-select: none;
 	text-align: center;
 	background-color: ${({ theme, dateMessage }): string =>
-		dateMessage ? theme.palette.gray6.regular : theme.palette.gray5.regular}; ;
+		dateMessage ? theme.palette.gray6.regular : theme.palette.gray5.regular};
 `;
 
 const MessageFactory = ({
@@ -53,37 +51,66 @@ const MessageFactory = ({
 	messageRoomId,
 	prevMessageIsFromSameSender,
 	nextMessageIsFromSameSender,
-	messageRef
+	messageRef,
+	isFirstNewMessage
 }: MessageProps): ReactElement => {
+	const [t] = useTranslation();
+	const newMessagesLabel = t('conversation.newMessages', 'New messages');
+
 	const message = useStore((store) => getSingleMessageSelector(store, messageRoomId, messageId));
+
+	const newMessagesComponent = useMemo(
+		() => (
+			<CustomMessage
+				mainAlignment={'flex-start'}
+				crossAlignment={'flex-start'}
+				borderColor="gray3"
+				data-testid={`new_msg`}
+			>
+				<Text color="gray1">{newMessagesLabel}</Text>
+			</CustomMessage>
+		),
+		[newMessagesLabel]
+	);
 
 	if (message) {
 		switch (message.type) {
-			case 'text': {
+			case MessageType.TEXT_MSG: {
 				return (
-					<BubbleFactory
-						message={message}
-						prevMessageIsFromSameSender={prevMessageIsFromSameSender}
-						nextMessageIsFromSameSender={nextMessageIsFromSameSender}
-						messageRef={messageRef}
-					/>
+					<>
+						{isFirstNewMessage && newMessagesComponent}
+						<Bubble
+							message={message}
+							prevMessageIsFromSameSender={prevMessageIsFromSameSender}
+							nextMessageIsFromSameSender={nextMessageIsFromSameSender}
+							messageRef={messageRef}
+						/>
+					</>
 				);
 			}
-			case 'affiliation': {
+			case MessageType.DELETED_MSG: {
+				return (
+					<>
+						{isFirstNewMessage && newMessagesComponent}
+						<DeletedBubble message={message} refEl={messageRef} />
+					</>
+				);
+			}
+			case MessageType.AFFILIATION_MSG: {
 				return <AffiliationBubble message={message} refEl={messageRef} />;
 			}
-			case 'configuration': {
+			case MessageType.CONFIGURATION_MSG: {
 				return <ConfigurationBubble message={message} refEl={messageRef} />;
 			}
-			case 'date': {
+			case MessageType.DATE_MSG: {
 				return <DateBubble message={message} refEl={messageRef} />;
 			}
 			default: {
-				return <div>Errore</div>;
+				return <div>Message not handled</div>;
 			}
 		}
 	}
-	return <div>Errore</div>;
+	return <div>Message not handled</div>;
 };
 
 export default MessageFactory;

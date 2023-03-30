@@ -15,17 +15,21 @@ import React, {
 } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import AttachmentSelector from './AttachmentSelector';
+import EmojiPicker from './EmojiPicker';
+import MessageArea from './MessageArea';
 import {
 	getDraftMessage,
 	getInputHasFocus,
 	getReferenceMessageView
 } from '../../../store/selectors/ActiveConversationsSelectors';
 import { getXmppClient } from '../../../store/selectors/ConnectionSelector';
+import { getMessageSelector } from '../../../store/selectors/MessagesSelectors';
 import { getRoomUnreadsSelector } from '../../../store/selectors/UnreadsCounterSelectors';
 import useStore from '../../../store/Store';
 import { Emoji } from '../../../types/generics';
-import EmojiPicker from './EmojiPicker';
-import MessageArea from './MessageArea';
+import { messageActionType } from '../../../types/store/ActiveConversationTypes';
+import { Message, MessageType } from '../../../types/store/MessageTypes';
 
 type ConversationMessageComposerProps = {
 	roomId: string;
@@ -46,6 +50,9 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 	const setInputHasFocus = useStore((store) => store.setInputHasFocus);
 	const setDraftMessage = useStore((store) => store.setDraftMessage);
 	const unreadMessagesCount = useStore((store) => getRoomUnreadsSelector(store, roomId));
+	const messageReference = useStore<Message | undefined>((store) =>
+		getMessageSelector(store, roomId, referenceMessage?.messageId)
+	);
 
 	const [textMessage, setTextMessage] = useState('');
 	const [isWriting, setIsWriting] = useState(false);
@@ -54,6 +61,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 
 	const messageInputRef = useRef<HTMLTextAreaElement>();
 	const emojiButtonRef = useRef<HTMLButtonElement>();
+	const emojiTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
 	const timeoutRef = useRef<ReturnType<typeof setTimeout>>();
 
 	// Disable if textMessage is composed only by spaces, tabs or line breaks
@@ -87,9 +95,32 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 	);
 
 	const sendMessage = useCallback((): void => {
+		if (showEmojiPicker) setShowEmojiPicker(false);
 		const message = textMessage.trim();
 		if (referenceMessage && referenceMessage.roomId === roomId) {
-			xmppClient.sendChatMessage(roomId, message, referenceMessage.messageId);
+			switch (referenceMessage.actionType) {
+				case messageActionType.REPLY: {
+					xmppClient.sendChatMessageReply(
+						roomId,
+						message,
+						referenceMessage.senderId,
+						referenceMessage.stanzaId
+					);
+					break;
+				}
+				case messageActionType.EDIT: {
+					if (
+						messageReference?.type === MessageType.TEXT_MSG &&
+						messageReference?.text !== message
+					) {
+						xmppClient.sendChatMessageCorrection(roomId, message, referenceMessage.messageId);
+					}
+					break;
+				}
+				default: {
+					console.warn('case not handled', referenceMessage);
+				}
+			}
 			unsetReferenceMessage(roomId);
 		} else {
 			xmppClient.sendChatMessage(roomId, message);
@@ -100,10 +131,8 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 		if (timeoutRef.current) clearTimeout(timeoutRef.current);
 		setIsWriting(false);
 		xmppClient.sendPaused(roomId);
-		const listOfMessages = document.getElementById(`messageListRef${roomId}`);
-		listOfMessages?.scrollTo({ top: listOfMessages.scrollHeight, behavior: 'auto' });
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [xmppClient, roomId, textMessage, timeoutRef, referenceMessage]);
+	}, [xmppClient, roomId, textMessage, timeoutRef, referenceMessage, messageReference]);
 
 	const handleTypingMessage = useCallback(
 		(e: BaseSyntheticEvent): void => {
@@ -113,14 +142,13 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 		[roomId, textMessage, timeoutRef]
 	);
 
-	const handleKeyUp = useCallback(
+	const handleKeyDown = useCallback(
 		(e: KeyboardEvent) => {
 			if (!sendDisabled) {
 				if (e.key === 'Enter' && !e.shiftKey) {
-					if (showEmojiPicker) setShowEmojiPicker(false);
+					e.preventDefault();
 					sendMessage();
-				}
-				if (!isWriting) {
+				} else if (!isWriting) {
 					if (timeoutRef.current) clearTimeout(timeoutRef.current);
 					timeoutRef.current = setTimeout(() => {
 						setIsWriting(false);
@@ -130,14 +158,11 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 				}
 			}
 		},
-		[sendDisabled, isWriting, showEmojiPicker, sendMessage, xmppClient, roomId]
+		[sendDisabled, isWriting, sendMessage, xmppClient, roomId]
 	);
-
-	const toggleEmojiSelectorView = (): void => setShowEmojiPicker((prevState) => !prevState);
 
 	const insertEmojiInMessage = useCallback(
 		(emoji: Emoji): void => {
-			console.log(messageInputRef);
 			if (messageInputRef.current) {
 				const position = messageInputRef.current.selectionStart;
 				const prevPosition = messageInputRef.current.value.slice(0, position);
@@ -149,17 +174,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 
 				const cursorMiddlePosition = emoji.native.length + position;
 				messageInputRef.current.focus();
-				const range = document.createRange();
-				range.selectNodeContents(messageInputRef.current);
-				range.collapse(false);
-				const sel = window.getSelection();
-
-				if (nextPosition === '' && sel) {
-					sel.removeAllRanges();
-					sel.addRange(range);
-				} else {
-					messageInputRef.current.setSelectionRange(cursorMiddlePosition, cursorMiddlePosition);
-				}
+				messageInputRef.current?.setSelectionRange(cursorMiddlePosition, cursorMiddlePosition);
 			}
 		},
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -201,7 +216,9 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 		window.parent.addEventListener('beforeunload', sendStopWriting);
 		const messageRef = messageInputRef.current;
 		return () => {
-			xmppClient.sendPaused(roomId);
+			if (xmppClient) {
+				xmppClient.sendPaused(roomId);
+			}
 			window.parent.removeEventListener('beforeunload', sendStopWriting);
 			setTextMessage('');
 			if (messageRef) {
@@ -209,8 +226,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 				messageRef.style.height = '0';
 			}
 		};
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [roomId]);
+	}, [roomId, sendStopWriting, unreadMessagesCount, xmppClient]);
 
 	useEffect(() => {
 		if (inputHasFocus) {
@@ -218,19 +234,56 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 		}
 	}, [inputHasFocus]);
 
+	const mouseEnterEvent = useCallback(() => {
+		if (emojiButtonRef.current) {
+			clearTimeout(emojiTimeoutRef.current);
+			setShowEmojiPicker(true);
+		}
+	}, []);
+
+	const mouseLeaveEvent = useCallback(() => {
+		if (emojiButtonRef.current) {
+			emojiTimeoutRef.current = setTimeout(() => {
+				setShowEmojiPicker(false);
+			}, 300);
+		}
+	}, []);
+
+	useEffect(() => {
+		let refValue: HTMLButtonElement | undefined;
+		if (emojiButtonRef.current) {
+			emojiButtonRef.current.addEventListener('mouseenter', mouseEnterEvent);
+			emojiButtonRef.current.addEventListener('mouseleave', mouseLeaveEvent);
+			refValue = emojiButtonRef.current;
+		}
+		return () => {
+			if (refValue) {
+				refValue.removeEventListener('mouseenter', mouseEnterEvent);
+				// eslint-disable-next-line react-hooks/exhaustive-deps
+				refValue.removeEventListener('mouseleave', mouseLeaveEvent);
+			}
+		};
+	}, [mouseEnterEvent, mouseLeaveEvent]);
+
 	return (
 		<Container height="fit">
-			{showEmojiPicker && <EmojiPicker onEmojiSelect={insertEmojiInMessage} />}
+			{showEmojiPicker && (
+				<EmojiPicker
+					onEmojiSelect={insertEmojiInMessage}
+					setShowEmojiPicker={setShowEmojiPicker}
+					emojiTimeoutRef={emojiTimeoutRef}
+				/>
+			)}
 			<Container orientation="horizontal" crossAlignment="flex-end">
 				<Tooltip label={selectEmojiLabel}>
 					<Container width="fit" height="fit" padding={{ left: 'extrasmall', bottom: '0.3125rem' }}>
 						<IconButton
 							ref={emojiButtonRef}
-							onClick={toggleEmojiSelectorView}
 							iconColor="secondary"
 							size="large"
 							icon={'SmileOutline'}
 							alt={selectEmojiLabel}
+							onClick={(): null => null}
 						/>
 					</Container>
 				</Tooltip>
@@ -242,10 +295,11 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 					message={textMessage}
 					onInput={handleTypingMessage}
 					composerIsFull={noMoreCharsOnInputComposer}
-					handleKeyUpTextarea={handleKeyUp}
+					handleKeyDownTextarea={handleKeyDown}
 					handleOnBlur={handleOnBlur}
 					handleOnFocus={handleOnFocus}
 				/>
+				{textMessage === '' && !messageReference && <AttachmentSelector roomId={roomId} />}
 				<Tooltip label={sendDisabled ? writeToSendTooltip : sendMessageLabel} placement="top">
 					<Container
 						width="fit"

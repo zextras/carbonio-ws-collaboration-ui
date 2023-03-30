@@ -9,10 +9,10 @@ import React, { FC, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
+import ParticipantsList from './ParticipantsList';
 import { getParticipantsAccordionStatus } from '../../../store/selectors/ActiveConversationsSelectors';
 import { getNumbersOfRoomMembers } from '../../../store/selectors/RoomsSelectors';
 import useStore from '../../../store/Store';
-import ParticipantsList from './ParticipantsList';
 
 const CustomAccordion = styled(Accordion)`
 	-webkit-user-select: none;

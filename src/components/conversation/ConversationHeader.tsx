@@ -4,17 +4,17 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Container, IconButton, Text as DSText, Tooltip } from '@zextras/carbonio-design-system';
+import { Container, IconButton, Text, Tooltip } from '@zextras/carbonio-design-system';
 import React, { Dispatch, ReactElement, SetStateAction, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
+import ConversationHeaderMeetingButton from './ConversationHeaderMeetingButton';
 import { getRoomNameSelector } from '../../store/selectors/RoomsSelectors';
 import { getCapability } from '../../store/selectors/SessionSelectors';
 import useStore from '../../store/Store';
 import { CapabilityType } from '../../types/store/SessionTypes';
 import useMediaQueryCheck from '../../utils/useMediaQueryCheck';
-import ConversationHeaderMeetingButton from './ConversationHeaderMeetingButton';
 
 type ConversationHeaderProps = {
 	roomId: string;
@@ -53,9 +53,9 @@ const ConversationHeader = ({
 				padding={{ vertical: 'medium', horizontal: 'large' }}
 			>
 				<Container crossAlignment="flex-start" maxWidth="94%">
-					<DSText title={roomName} overflow="ellipsis">
+					<Text title={roomName} overflow="ellipsis">
 						{roomName}
-					</DSText>
+					</Text>
 				</Container>
 				<Container orientation="horizontal" width="fit" style={{ minWidth: 'fit-content' }}>
 					{!canVideoCall && ( // TODO change check in canVideoCall &&

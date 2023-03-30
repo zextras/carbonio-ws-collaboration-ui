@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { AttachmentMessageType } from './MessageTypes';
+
 export type ActiveConversation = {
 	draftMessage?: string | undefined;
 	scrollPositionMessageId?: string;
@@ -22,14 +24,16 @@ export type ActiveConversationsMap = {
 
 export enum messageActionType {
 	EDIT = 'edit',
-	REPLAY = 'reply'
+	REPLY = 'reply'
 }
 
 export type ReferenceMessage = {
 	roomId: string;
 	messageId: string;
 	senderId: string;
+	stanzaId: string;
 	actionType: messageActionType;
+	attachment?: AttachmentMessageType;
 };
 
 type InfoPanelStatus = {

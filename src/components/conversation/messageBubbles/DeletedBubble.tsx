@@ -12,11 +12,11 @@ import styled from 'styled-components';
 
 import { getPrefTimezoneSelector } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
-import { Message } from '../../../types/store/MessageTypes';
+import { DeletedMessage } from '../../../types/store/MessageTypes';
 
 type DeletedBubbleProps = {
-	message: Message;
-	isMyMessage: boolean;
+	message: DeletedMessage;
+	refEl: React.RefObject<HTMLElement>;
 };
 
 const BubbleDeletedContainer = styled(Container)`
@@ -33,25 +33,28 @@ const CustomText = styled(Text)`
 	padding-right: 0.1875rem;
 `;
 
-const DeletedBubble: FC<DeletedBubbleProps> = ({ message, isMyMessage }) => {
+const DeletedBubble: FC<DeletedBubbleProps> = ({ message, refEl }) => {
 	const [t] = useTranslation();
 	const deletedMessageLabel = t('message.deletedMessage', 'Deleted message');
 	const timezone = useStore(getPrefTimezoneSelector);
-	const messageTime = moment.tz(message.date, timezone).format('HH:MM');
+	const sessionId: string | undefined = useStore((store) => store.session.id);
+	const messageTime = moment.tz(message.date, timezone).format('HH:mm');
 
 	return (
 		<BubbleDeletedContainer
+			id={`message-${message.id}`}
 			key={`${message.id}-deleted`}
+			data-testid={`BubbleDeleted-${message.id}`}
+			ref={refEl}
 			height="fit"
 			width="fit"
 			orientation="horizontal"
 			padding={{ all: 'medium' }}
 			background={'gray3'}
-			isMyMessage={isMyMessage}
+			isMyMessage={message.from === sessionId}
+			crossAlignment="baseline"
 		>
-			<CustomText color="secondary" size="small">
-				{deletedMessageLabel}
-			</CustomText>
+			<CustomText color="secondary">{deletedMessageLabel}</CustomText>
 			<Padding left="small" />
 			<Text color="secondary" size="small">
 				{messageTime}

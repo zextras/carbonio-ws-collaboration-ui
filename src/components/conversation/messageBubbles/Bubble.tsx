@@ -5,35 +5,35 @@
  */
 /* eslint-disable no-nested-ternary */
 
-import { Container } from '@zextras/carbonio-design-system';
-import React, { FC, ReactElement } from 'react';
+import { Container, Padding } from '@zextras/carbonio-design-system';
+import React, { FC, useMemo } from 'react';
 import styled from 'styled-components';
 
-import { TextMessage } from '../../../types/store/MessageTypes';
-import { RoomType } from '../../../types/store/RoomTypes';
+import AttachmentView from './AttachmentView';
 import BubbleContextualMenuDropDown, {
 	BubbleContextualMenuDropDownWrapper
 } from './BubbleContextualMenuDropDown';
 import BubbleFooter from './BubbleFooter';
 import BubbleHeader from './BubbleHeader';
+import ForwardedTextMessageSectionView from './ForwardedMessageSectionView';
 import RepliedTextMessageSectionView from './RepliedTextMessageSectionView';
 import TextContentBubble from './TextContentBubble';
+import { getRoomTypeSelector } from '../../../store/selectors/RoomsSelectors';
+import useStore from '../../../store/Store';
+import { TextMessage } from '../../../types/store/MessageTypes';
+import { RoomType } from '../../../types/store/RoomTypes';
+import { parseUrlOnMessage } from '../../../utils/parseUrlOnMessage';
 
 type BubbleProps = {
-	refEl: React.RefObject<HTMLElement>;
-	isMyMessage: boolean;
-	senderInfo: string | null; // name | email | id(fallback)
 	message: TextMessage;
-	messageTime: string;
-	messageFormatted: string | (string | ReactElement)[];
 	prevMessageIsFromSameSender: boolean;
 	nextMessageIsFromSameSender: boolean;
-	roomType: RoomType;
-	userColor: string;
+	messageRef: React.RefObject<HTMLElement>;
 };
 
 const DropDownWrapper = styled(Container)`
 	position: relative;
+	z-index: 10;
 `;
 
 const BubbleContainer = styled(Container)`
@@ -69,57 +69,94 @@ const BubbleContainer = styled(Container)`
 `;
 
 const Bubble: FC<BubbleProps> = ({
-	refEl,
-	isMyMessage,
-	senderInfo,
 	message,
-	messageTime,
-	messageFormatted,
 	prevMessageIsFromSameSender,
 	nextMessageIsFromSameSender,
-	roomType,
-	userColor
-}) => (
-	<BubbleContainer
-		id={`message-${message.id}`}
-		ref={refEl}
-		data-testid={`Bubble-${message.id}`}
-		key={`${message.id}`}
-		height="fit"
-		width="fit"
-		maxWidth="75%"
-		padding={{ all: 'medium' }}
-		background={isMyMessage ? 'highlight' : 'gray6'}
-		isMyMessage={isMyMessage}
-		firstMessageOfList={!prevMessageIsFromSameSender && nextMessageIsFromSameSender}
-		centerMessageOfList={prevMessageIsFromSameSender && nextMessageIsFromSameSender}
-		lastMessageOfList={prevMessageIsFromSameSender && !nextMessageIsFromSameSender}
-	>
-		<DropDownWrapper padding={{ all: 'none' }}>
-			{message.type === 'text' && (
+	messageRef
+}) => {
+	const mySessionId = useStore((store) => store.session.id);
+	const roomType = useStore<RoomType>((store) => getRoomTypeSelector(store, message.roomId));
+	const isMyMessage = mySessionId === message.from;
+	const messageFormatted = useMemo(() => parseUrlOnMessage(message.text), [message.text]);
+
+	const extension = useMemo(
+		() => message.attachment && message.attachment.mimeType.split('/')[1]?.toUpperCase(),
+		[message.attachment]
+	);
+
+	const size = useMemo(() => {
+		if (message.attachment) {
+			if (message.attachment.size < 1024) {
+				return `${message.attachment.size}B`;
+			}
+			if (message.attachment.size < 1024 * 1024) {
+				return `${(message.attachment.size / 1024).toFixed(2)}KB`;
+			}
+			if (message.attachment.size < 1024 * 1024 * 1024) {
+				return `${(message.attachment.size / 1024 / 1024).toFixed(2)}MB`;
+			}
+			return `${(message.attachment.size / 1024 / 1024 / 1024).toFixed(2)}GB`;
+		}
+		return undefined;
+	}, [message.attachment]);
+
+	return (
+		<BubbleContainer
+			id={`message-${message.id}`}
+			ref={messageRef}
+			data-testid={`Bubble-${message.id}`}
+			key={message.id}
+			height="fit"
+			width="fit"
+			maxWidth="75%"
+			padding={{ all: 'medium' }}
+			background={isMyMessage ? 'highlight' : 'gray6'}
+			isMyMessage={isMyMessage}
+			firstMessageOfList={!prevMessageIsFromSameSender && nextMessageIsFromSameSender}
+			centerMessageOfList={prevMessageIsFromSameSender && nextMessageIsFromSameSender}
+			lastMessageOfList={prevMessageIsFromSameSender && !nextMessageIsFromSameSender}
+		>
+			<DropDownWrapper padding={{ all: 'none' }}>
 				<BubbleContextualMenuDropDown message={message} isMyMessage={isMyMessage} />
+			</DropDownWrapper>
+			{!isMyMessage && roomType !== RoomType.ONE_TO_ONE && !prevMessageIsFromSameSender && (
+				<>
+					<BubbleHeader senderId={message.from} />
+					<Padding bottom="small" />
+				</>
 			)}
-		</DropDownWrapper>
-		{!isMyMessage &&
-			roomType !== RoomType.ONE_TO_ONE &&
-			senderInfo &&
-			!prevMessageIsFromSameSender && (
-				<BubbleHeader
-					senderIdentifier={senderInfo}
-					notReplayedMessageHeader
-					userColor={userColor}
+			{message.repliedMessage && (
+				<RepliedTextMessageSectionView
+					repliedMessage={message.repliedMessage}
+					isMyMessage={isMyMessage}
 				/>
 			)}
-		{message.repliedMessage && (
-			<RepliedTextMessageSectionView
-				repliedMessage={message.repliedMessage}
-				roomId={message.roomId}
+			{message.forwarded && (
+				<ForwardedTextMessageSectionView
+					forwardedMessage={message.forwarded}
+					isMyMessage={isMyMessage}
+					roomId={message.roomId}
+				/>
+			)}
+			{message.attachment && (
+				<AttachmentView
+					attachment={message.attachment}
+					isMyMessage={isMyMessage}
+					from={message.from}
+				/>
+			)}
+			<TextContentBubble textContent={messageFormatted} />
+			<BubbleFooter
 				isMyMessage={isMyMessage}
+				date={message.date}
+				messageRead={message.read}
+				forwarded={message.forwarded}
+				isEdited={message?.edited}
+				messageExtension={extension}
+				messageSize={size}
 			/>
-		)}
-		{message.type === 'text' && <TextContentBubble textContent={messageFormatted} />}
-		<BubbleFooter isMyMessage={isMyMessage} time={messageTime} messageRead={message.read} />
-	</BubbleContainer>
-);
+		</BubbleContainer>
+	);
+};
 
 export default Bubble;

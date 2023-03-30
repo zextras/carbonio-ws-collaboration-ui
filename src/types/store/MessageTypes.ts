@@ -12,7 +12,12 @@ export type MessageMap = {
 
 export type MessageList = Message[];
 
-export type Message = TextMessage | AffiliationMessage | ConfigurationMessage | DateMessage;
+export type Message =
+	| TextMessage
+	| DeletedMessage
+	| AffiliationMessage
+	| ConfigurationMessage
+	| DateMessage;
 
 export type BasicMessage = {
 	id: string;
@@ -21,26 +26,62 @@ export type BasicMessage = {
 };
 
 export type TextMessage = BasicMessage & {
-	type: 'text';
+	stanzaId: string;
+	type: MessageType.TEXT_MSG;
 	from: string;
 	text: string;
 	read: MarkerStatus;
 	replyTo?: string;
-	repliedMessage?: TextMessage;
+	repliedMessage?: TextMessage | DeletedMessage;
+	edited?: boolean;
+	forwarded?: ForwardedMessage;
+	attachment?: AttachmentMessageType;
+};
+
+export type DeletedMessage = BasicMessage & {
+	type: MessageType.DELETED_MSG;
+	from: string;
 };
 
 export type AffiliationMessage = BasicMessage & {
-	type: 'affiliation';
+	type: MessageType.AFFILIATION_MSG;
 	userId: string;
-	as: 'member';
+	as: string;
 };
 
 export type ConfigurationMessage = BasicMessage & {
-	type: 'configuration';
-	operation: 'changedRoomName';
+	type: MessageType.CONFIGURATION_MSG;
+	operation:
+		| 'roomNameChanged'
+		| 'roomDescriptionChanged'
+		| 'roomPictureUpdated'
+		| 'roomPictureDeleted';
 	value: string;
+	from: string;
 };
 
 export type DateMessage = BasicMessage & {
-	type: 'date';
+	type: MessageType.DATE_MSG;
+};
+
+export enum MessageType {
+	TEXT_MSG = 'text',
+	DELETED_MSG = 'deleted',
+	AFFILIATION_MSG = 'affiliation',
+	CONFIGURATION_MSG = 'configuration',
+	DATE_MSG = 'date'
+}
+
+export type ForwardedMessage = {
+	id: string;
+	date: number;
+	from: string;
+	text: string;
+};
+
+export type AttachmentMessageType = {
+	id: string;
+	name: string;
+	mimeType: string;
+	size: number;
 };

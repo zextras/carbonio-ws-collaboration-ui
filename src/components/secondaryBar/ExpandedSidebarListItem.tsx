@@ -8,23 +8,24 @@ import {
 	Badge,
 	Container,
 	Icon,
+	Row,
 	Shimmer,
 	Text,
-	Tooltip,
-	Row
+	Tooltip
 } from '@zextras/carbonio-design-system';
-import { map } from 'lodash';
+import { find, map } from 'lodash';
 import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import useRouting from '../../hooks/useRouting';
 import {
-	getRoomIsWritingList,
-	getDraftMessage
+	getDraftMessage,
+	getRoomIsWritingList
 } from '../../store/selectors/ActiveConversationsSelectors';
 import { getLastMessageSelector } from '../../store/selectors/MessagesSelectors';
 import {
+	getRoomMembers,
 	getRoomMutedSelector,
 	getRoomNameSelector,
 	getRoomTypeSelector
@@ -34,8 +35,10 @@ import { getRoomUnreadsSelector } from '../../store/selectors/UnreadsCounterSele
 import { getUserName } from '../../store/selectors/UsersSelectors';
 import useStore from '../../store/Store';
 import { MarkerStatus } from '../../types/store/MarkersTypes';
-import { Message } from '../../types/store/MessageTypes';
+import { Message, MessageType } from '../../types/store/MessageTypes';
 import { RoomType } from '../../types/store/RoomTypes';
+import { affiliationMessage } from '../../utils/affiliationMessage';
+import { configurationMessage } from '../../utils/configurationMessage';
 import GroupAvatar from '../GroupAvatar';
 import UserAvatar from '../UserAvatar';
 
@@ -58,6 +61,7 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 	const isTypingLabel = t('status.isTyping', 'is typing...');
 	const areTypingLabel = t('status.areTyping', 'are typing...');
 	const draftLabel = t('message.draft', 'draft');
+	const deletedMessageLabel = t('message.deletedMessage', 'Deleted message');
 
 	const { goToRoomPage } = useRouting();
 
@@ -71,26 +75,62 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 	const usersWritingList = useStore((state) => getRoomIsWritingList(state, roomId));
 	const isConversationSelected = useStore((state) => getSelectedConversation(state, roomId));
 	const userNameOfLastMessageOfRoom = useStore((store) =>
-		lastMessageOfRoom && lastMessageOfRoom.type === 'text'
+		lastMessageOfRoom && lastMessageOfRoom.type === MessageType.TEXT_MSG
 			? getUserName(store, lastMessageOfRoom.from)
-			: lastMessageOfRoom && lastMessageOfRoom.type === 'affiliation'
+			: lastMessageOfRoom && lastMessageOfRoom.type === MessageType.AFFILIATION_MSG
 			? getUserName(store, lastMessageOfRoom.userId)
-			: null
+			: lastMessageOfRoom && lastMessageOfRoom.type === MessageType.CONFIGURATION_MSG
+			? getUserName(store, lastMessageOfRoom.from)
+			: ''
 	);
 	const roomMuted = useStore((state) => getRoomMutedSelector(state, roomId));
 	const draftMessage = useStore((store) => getDraftMessage(store, roomId));
+	const actionName = useStore((store) =>
+		getUserName(
+			store,
+			lastMessageOfRoom?.type === MessageType.CONFIGURATION_MSG ? lastMessageOfRoom.from : ''
+		)
+	);
+	const roomMembers = useStore((store) => getRoomMembers(store, roomId));
+	const affiliatedName = useStore((store) =>
+		getUserName(
+			store,
+			lastMessageOfRoom?.type === MessageType.AFFILIATION_MSG ? lastMessageOfRoom.userId : ''
+		)
+	);
+
+	// id of the users who acts, in this case the one who creates the one-to-one conversation
+	const actionMemberId = useMemo(() => {
+		if (
+			roomType === RoomType.ONE_TO_ONE &&
+			lastMessageOfRoom?.type === MessageType.AFFILIATION_MSG
+		) {
+			return find(roomMembers, (member) => member.userId !== lastMessageOfRoom.userId)?.userId;
+		}
+		return '';
+	}, [roomType, lastMessageOfRoom, roomMembers]);
+
+	const nameToDisplay = useMemo(
+		() =>
+			sessionId &&
+			lastMessageOfRoom?.type === MessageType.CONFIGURATION_MSG &&
+			lastMessageOfRoom.from === sessionId
+				? 'You'
+				: actionName,
+		[actionName, lastMessageOfRoom, sessionId]
+	);
 
 	const ackHasToAppear = useMemo(
 		() =>
 			lastMessageOfRoom &&
-			lastMessageOfRoom.type === 'text' &&
+			lastMessageOfRoom.type === MessageType.TEXT_MSG &&
 			lastMessageOfRoom.from === sessionId &&
 			!usersWritingList,
 		[lastMessageOfRoom, sessionId, usersWritingList]
 	);
 
 	const ackIcon = useMemo(() => {
-		if (lastMessageOfRoom && lastMessageOfRoom.type === 'text') {
+		if (lastMessageOfRoom && lastMessageOfRoom.type === MessageType.TEXT_MSG) {
 			switch (lastMessageOfRoom.read) {
 				case MarkerStatus.UNREAD:
 					return <Icon size="small" icon="Checkmark" color="gray" />;
@@ -104,7 +144,7 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 	}, [lastMessageOfRoom]);
 
 	const dropdownTooltip = useMemo(() => {
-		if (lastMessageOfRoom && lastMessageOfRoom.type === 'text') {
+		if (lastMessageOfRoom && lastMessageOfRoom.type === MessageType.TEXT_MSG) {
 			switch (lastMessageOfRoom.read) {
 				case MarkerStatus.UNREAD:
 					return t('tooltip.messageSent', 'Sent');
@@ -122,26 +162,63 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 		[draftMessage, draftLabel]
 	);
 
-	const messageToDisplay = useMemo((): string | undefined => {
+	const messageToDisplay = useMemo((): JSX.Element | string | undefined => {
 		if ((usersWritingList && usersWritingList.length === 0) || !usersWritingList) {
 			if (lastMessageOfRoom) {
 				switch (lastMessageOfRoom.type) {
-					case 'text':
+					case MessageType.TEXT_MSG: {
+						const text = (): string => {
+							if (lastMessageOfRoom.attachment) {
+								return lastMessageOfRoom.text !== ''
+									? lastMessageOfRoom.text
+									: lastMessageOfRoom.attachment.name;
+							}
+							return lastMessageOfRoom.forwarded
+								? lastMessageOfRoom.forwarded.text
+								: lastMessageOfRoom.text;
+						};
 						if (
 							roomType === RoomType.GROUP &&
 							lastMessageOfRoom.from !== sessionId &&
 							userNameOfLastMessageOfRoom
 						) {
-							return `${userNameOfLastMessageOfRoom.split(/(\s+)/)[0]}: ${lastMessageOfRoom?.text}`;
+							return `${userNameOfLastMessageOfRoom.split(/(\s+)/)[0]}: ${text()}`;
 						}
-						return `${lastMessageOfRoom?.text}`;
-
-					case 'affiliation':
-						return `${userNameOfLastMessageOfRoom} affiliate as ${lastMessageOfRoom.as}`;
-
-					case 'configuration':
-						return `${lastMessageOfRoom.operation} in "${lastMessageOfRoom.value}"`;
-
+						return text();
+					}
+					case MessageType.AFFILIATION_MSG:
+						return affiliationMessage(
+							lastMessageOfRoom?.type === MessageType.AFFILIATION_MSG ? lastMessageOfRoom.as : '',
+							roomId,
+							lastMessageOfRoom?.type === MessageType.AFFILIATION_MSG
+								? lastMessageOfRoom.userId
+								: '',
+							actionMemberId,
+							actionName || '',
+							sessionId,
+							roomType,
+							roomName,
+							affiliatedName || '',
+							t
+						);
+					case MessageType.CONFIGURATION_MSG:
+						return configurationMessage(
+							lastMessageOfRoom?.type === MessageType.CONFIGURATION_MSG
+								? lastMessageOfRoom.operation
+								: '',
+							lastMessageOfRoom?.type === MessageType.CONFIGURATION_MSG
+								? lastMessageOfRoom.value
+								: '',
+							lastMessageOfRoom?.type === MessageType.CONFIGURATION_MSG
+								? lastMessageOfRoom.from
+								: '',
+							roomId,
+							roomName,
+							nameToDisplay || '',
+							t
+						);
+					case MessageType.DELETED_MSG:
+						return deletedMessageLabel;
 					default:
 						return `affiliation message to replace`;
 				}
@@ -161,9 +238,17 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 	}, [
 		usersWritingList,
 		lastMessageOfRoom,
-		userNameOfLastMessageOfRoom,
 		roomType,
 		sessionId,
+		userNameOfLastMessageOfRoom,
+		roomId,
+		actionMemberId,
+		actionName,
+		roomName,
+		affiliatedName,
+		t,
+		nameToDisplay,
+		deletedMessageLabel,
 		isTypingLabel,
 		areTypingLabel
 	]);
@@ -213,41 +298,29 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 								orientation="horizontal"
 								mainAlignment="flex-start"
 							>
-								{draftMessage ? (
-									<>
-										<Tooltip label={draftTooltip} maxWidth="12.5rem">
-											<Container width="fit" padding={{ right: 'extrasmall' }}>
-												<Icon size="small" icon="Edit2" color="gray" />
-											</Container>
-										</Tooltip>
-										<Text
-											color="secondary"
-											size="extrasmall"
-											overflow="ellipsis"
-											data-testid="message"
-										>
-											{messageToDisplay}
-										</Text>
-									</>
-								) : (
-									<>
-										{ackHasToAppear && (
-											<Tooltip label={dropdownTooltip}>
-												<Container width="fit" padding={{ right: 'extrasmall' }}>
-													{ackIcon}
-												</Container>
-											</Tooltip>
-										)}
-										<Text
-											color="secondary"
-											size="extrasmall"
-											overflow="ellipsis"
-											data-testid="message"
-										>
-											{messageToDisplay}
-										</Text>
-									</>
+								{draftMessage && (
+									<Tooltip label={draftTooltip} maxWidth="12.5rem">
+										<Container width="fit" padding={{ right: 'extrasmall' }}>
+											<Icon size="small" icon="Edit2" color="gray" />
+										</Container>
+									</Tooltip>
 								)}
+								{!draftMessage && ackHasToAppear && (
+									<Tooltip label={dropdownTooltip}>
+										<Container width="fit" padding={{ right: 'extrasmall' }}>
+											{ackIcon}
+										</Container>
+									</Tooltip>
+								)}
+								{lastMessageOfRoom?.type === MessageType.TEXT_MSG &&
+									lastMessageOfRoom.attachment && (
+										<Container width="fit" padding={{ right: 'extrasmall' }}>
+											<Icon size="small" icon="FileTextOutline" color="gray" />
+										</Container>
+									)}
+								<Text color="secondary" size="extrasmall" overflow="ellipsis" data-testid="message">
+									{messageToDisplay}
+								</Text>
 							</Container>
 						</Row>
 						{UnreadCounter}

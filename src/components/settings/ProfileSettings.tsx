@@ -146,7 +146,7 @@ const ProfileSettings: FC<ProfileSettingsProps> = ({
 	setToDelete,
 	toDelete
 }) => {
-	const memberName: string = useStore((state) => getUserName(state, sessionId || ''));
+	const memberName: string | undefined = useStore((state) => getUserName(state, sessionId || ''));
 	const memberEmail: string | undefined = useStore((state) => getUserEmail(state, sessionId || ''));
 	const userPictureUpdatedAt: string | undefined = useStore((state) =>
 		getUserPictureUpdatedAt(state, sessionId || '')
@@ -192,7 +192,10 @@ const ProfileSettings: FC<ProfileSettingsProps> = ({
 
 	const onChangeUserImage = useCallback(
 		(e) => {
-			if (maxUserImageSize && e.target.files[0].size / 1000 < maxUserImageSize) {
+			if (
+				typeof maxUserImageSize === 'number' &&
+				e.target.files[0].size / 1000 < maxUserImageSize
+			) {
 				setTempPicture(URL.createObjectURL(e.target.files[0]));
 				setPicture(e.target.files[0]);
 			} else {

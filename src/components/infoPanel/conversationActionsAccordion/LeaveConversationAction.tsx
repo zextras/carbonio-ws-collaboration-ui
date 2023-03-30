@@ -8,12 +8,12 @@ import { Container } from '@zextras/carbonio-design-system';
 import React, { FC, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import useRouting from '../../../hooks/useRouting';
-import RoomsApi from '../../../network/apis/RoomsApi';
-import useStore from '../../../store/Store';
-import { RoomType } from '../../../types/store/RoomTypes';
 import ActionComponent from './ActionComponent';
 import LeaveConversationModal from './LeaveConversationModal';
+import useRouting from '../../../hooks/useRouting';
+import { RoomsApi } from '../../../network';
+import useStore from '../../../store/Store';
+import { RoomType } from '../../../types/store/RoomTypes';
 
 type LeaveProps = {
 	roomId: string;

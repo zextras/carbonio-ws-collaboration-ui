@@ -5,6 +5,7 @@
  */
 
 import { decodeMessage } from './decodeMessage';
+import { MessageType } from '../../../types/store/MessageTypes';
 
 describe('Test decode message function', () => {
 	test('Parse special chars', async () => {
@@ -12,7 +13,7 @@ describe('Test decode message function', () => {
 		const parser = new DOMParser();
 		const xmlToParse = parser.parseFromString(messageToParse, 'application/xml');
 		const messageParsed = decodeMessage(xmlToParse.getElementsByTagName('message')[0]);
-		expect(messageParsed?.type).toBe('text');
+		expect(messageParsed?.type).toBe(MessageType.TEXT_MSG);
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore
 		expect(messageParsed?.text).toBe(`"ciao > 'ragazzi' & 'ragazze' <"`);
@@ -23,7 +24,7 @@ describe('Test decode message function', () => {
 		const parser = new DOMParser();
 		const xmlToParse = parser.parseFromString(messageToParse, 'application/xml');
 		const messageParsed = decodeMessage(xmlToParse.getElementsByTagName('message')[0]);
-		expect(messageParsed?.type).toBe('text');
+		expect(messageParsed?.type).toBe(MessageType.TEXT_MSG);
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore
 		expect(messageParsed?.text).toBe(
@@ -36,7 +37,7 @@ describe('Test decode message function', () => {
 		const parser = new DOMParser();
 		const xmlToParse = parser.parseFromString(messageToParse, 'application/xml');
 		const messageParsed = decodeMessage(xmlToParse.getElementsByTagName('message')[0]);
-		expect(messageParsed?.type).toBe('text');
+		expect(messageParsed?.type).toBe(MessageType.TEXT_MSG);
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore
 		expect(messageParsed?.text).toBe(

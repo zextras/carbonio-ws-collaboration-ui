@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import BaseAPI from './BaseAPI';
 import useStore from '../../store/Store';
 import { RequestType } from '../../types/network/apis/IBaseAPI';
 import IMeetingsApi from '../../types/network/apis/IMeetingsApi';
@@ -21,7 +22,6 @@ import {
 	OpenScreenShareStreamResponse,
 	OpenVideoStreamResponse
 } from '../../types/network/responses/meetingsResponses';
-import BaseAPI from './BaseAPI';
 
 class MeetingsApi extends BaseAPI implements IMeetingsApi {
 	// Singleton design pattern

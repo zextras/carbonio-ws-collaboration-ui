@@ -8,13 +8,13 @@ import { Container } from '@zextras/carbonio-design-system';
 import React, { Dispatch, FC, SetStateAction } from 'react';
 import styled from 'styled-components';
 
-import { getRoomTypeSelector } from '../../store/selectors/RoomsSelectors';
-import useStore from '../../store/Store';
-import { RoomType } from '../../types/store/RoomTypes';
 import { ActionsAccordion } from './conversationActionsAccordion/ActionsAccordion';
 import ConversationInfo from './conversationInfo/ConversationInfo';
 import ConversationInfoDetails from './conversationInfo/ConversationInfoDetails';
 import { ParticipantsAccordion } from './conversationParticipantsAccordion/ParticipantsAccordion';
+import { getRoomTypeSelector } from '../../store/selectors/RoomsSelectors';
+import useStore from '../../store/Store';
+import { RoomType } from '../../types/store/RoomTypes';
 
 const ConversationInfoContainer = styled(Container)`
 	height: fit-content;

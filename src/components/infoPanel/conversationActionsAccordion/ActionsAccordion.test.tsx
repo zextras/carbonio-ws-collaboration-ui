@@ -9,12 +9,11 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { setup } from 'test-utils';
 
+import { ActionsAccordion } from './ActionsAccordion';
 import useStore from '../../../store/Store';
 import { createMockMember, createMockRoom, createMockTextMessage } from '../../../tests/createMock';
 import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
 import { UserBe } from '../../../types/network/models/userBeTypes';
-import { TextMessage } from '../../../types/store/MessageTypes';
-import { ActionsAccordion } from './ActionsAccordion';
 
 const user1Be: UserBe = {
 	id: 'user1',
@@ -48,7 +47,7 @@ describe('Actions Accordion', () => {
 				createMockMember({ userId: user3Be.id, owner: true })
 			]
 		});
-		const message: TextMessage = createMockTextMessage({ roomId: room.id });
+		const message = createMockTextMessage({ roomId: room.id });
 		const store = useStore.getState();
 		store.addRoom(room);
 		store.newMessage(message);
@@ -109,7 +108,7 @@ describe('Actions Accordion', () => {
 
 	test('See Clear History action only if there are some messages in the conversation', () => {
 		const room: RoomBe = createMockRoom({ members: [createMockMember({ userId: user1Be.id })] });
-		const message: TextMessage = createMockTextMessage({ roomId: room.id });
+		const message = createMockTextMessage({ roomId: room.id });
 		const store = useStore.getState();
 		store.addRoom(room);
 		store.setUserInfo(user1Be);

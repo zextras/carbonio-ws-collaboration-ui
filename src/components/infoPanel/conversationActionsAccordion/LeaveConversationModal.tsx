@@ -24,6 +24,8 @@ const LeaveConversationModal: FC<LeaveModalProps> = ({
 	roomType
 }) => {
 	const [t] = useTranslation();
+	const closeLabel = t('action.close', 'Close');
+
 	const leaveConversationTitle: string = useMemo(() => {
 		if (roomType === RoomType.GROUP) {
 			return t('modal.leaveGroup', 'Leave Group');
@@ -36,8 +38,7 @@ const LeaveConversationModal: FC<LeaveModalProps> = ({
 			return t('modal.leaveGroupLabel', 'Are you sure to leave this Group?');
 		}
 		return t('modal.leaveRoomLabel', 'Are you sure to leave this Room?');
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [roomType]);
+	}, [roomType, t]);
 
 	return (
 		<Modal
@@ -49,6 +50,8 @@ const LeaveConversationModal: FC<LeaveModalProps> = ({
 			confirmColor="error"
 			showCloseIcon
 			onClose={closeModal}
+			closeIconTooltip={closeLabel}
+			data-testid="leave_modal"
 		>
 			<Container padding={{ vertical: 'large' }}>
 				<Text>{leaveConversationDescriptionLabel}</Text>

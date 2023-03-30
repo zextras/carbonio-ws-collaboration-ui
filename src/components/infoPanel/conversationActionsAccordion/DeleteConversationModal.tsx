@@ -27,6 +27,7 @@ const DeleteConversationModal: FC<DeleteModalProps> = ({
 }) => {
 	const [t] = useTranslation();
 	const deleteConversationButtonLabel = t('action.delete', 'Delete');
+	const closeLabel = t('action.close', 'Close');
 	const deleteConversationTitle = useMemo(() => {
 		if (type === RoomType.GROUP) {
 			if (numberOfMembers && numberOfMembers === 1) {
@@ -55,7 +56,9 @@ const DeleteConversationModal: FC<DeleteModalProps> = ({
 			onConfirm={deleteConversation}
 			confirmColor="error"
 			showCloseIcon
+			closeIconTooltip={closeLabel}
 			onClose={closeModal}
+			data-testid="delete_modal"
 		>
 			<Container padding={{ vertical: 'large' }}>
 				<Text>{deleteConversationDescriptionLabel}</Text>

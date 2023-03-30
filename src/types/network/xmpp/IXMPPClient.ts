@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { TextMessage } from '../../store/MessageTypes';
+
 interface IXMMPClient {
 	connect(token: string): void;
 	// Presence
@@ -15,14 +17,27 @@ interface IXMMPClient {
 	getInbox(): void;
 	setInbox(): void;
 	// Message
-	sendChatMessage(roomId: string, message: string, replyTo?: string): void;
+	sendChatMessage(roomId: string, message: string): void;
+	sendChatMessageReply(
+		roomId: string,
+		message: string,
+		replyTo: string,
+		replyMessageId: string
+	): void;
+	sendChatMessageDeletion(roomId: string, messageId: string): void;
+	sendChatMessageCorrection(roomId: string, message: string, messageId: string): void;
+	forwardMessage(message: TextMessage, roomIds: string[]): void;
 	requestHistory(roomId: string, endHistory: number, quantity?: number): void;
 	requestHistoryBetweenTwoMessage(
 		roomId: string,
 		olderMessageId: string,
 		newerMessageId: string
 	): void;
-	requestRepliedMessage(roomId: string, originalMessageId: string, repliedMessageId: string): void;
+	requestMessageSubjectOfReply(
+		roomId: string,
+		messageSubjectOfReplyId: string,
+		replyMessageId: string
+	): void;
 	// Chat state
 	sendIsWriting(roomId: string): void;
 	sendPaused(roomId: string): void;

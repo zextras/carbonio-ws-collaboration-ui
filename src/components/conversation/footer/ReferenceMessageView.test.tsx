@@ -9,16 +9,16 @@ import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { setup } from 'test-utils';
 
+import ReferenceMessageView from './ReferenceMessageView';
 import useStore from '../../../store/Store';
 import { createMockMember, createMockRoom, createMockTextMessage } from '../../../tests/createMock';
 import { RoomBe } from '../../../types/network/models/roomBeTypes';
 import { messageActionType } from '../../../types/store/ActiveConversationTypes';
 import { MarkerStatus } from '../../../types/store/MarkersTypes';
-import { TextMessage } from '../../../types/store/MessageTypes';
+import { MessageType } from '../../../types/store/MessageTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 import { RootStore } from '../../../types/store/StoreTypes';
 import MessagesList from '../MessagesList';
-import ReferenceMessageView from './ReferenceMessageView';
 
 const mockedRoom: RoomBe = createMockRoom({
 	id: 'roomTest',
@@ -29,17 +29,17 @@ const mockedRoom: RoomBe = createMockRoom({
 	]
 });
 
-const mockedMessage: TextMessage = createMockTextMessage({
+const mockedMessage = createMockTextMessage({
 	id: 'idSimpleTextMessage',
 	roomId: 'roomTest',
 	date: 1657099586818, // 18.08
-	type: 'text',
+	type: MessageType.TEXT_MSG,
 	from: 'idRoberto',
 	text: 'Hi guys! Today I will not be present to the meeting sorry!',
 	read: MarkerStatus.UNREAD
 });
 
-describe('Replay to a message by opening the contextual menu', () => {
+describe('Reply to a message by opening the contextual menu', () => {
 	test('Display the contextual menu of a message', () => {
 		const store: RootStore = useStore.getState();
 		store.addRoom(mockedRoom);
@@ -59,7 +59,8 @@ describe('Replay to a message by opening the contextual menu', () => {
 			mockedRoom.id,
 			mockedMessage.id,
 			mockedMessage.from,
-			messageActionType.REPLAY
+			mockedMessage.stanzaId,
+			messageActionType.REPLY
 		);
 		setup(<ReferenceMessageView roomId={mockedRoom.id} />);
 		const referenceMessage = screen.getByTestId('reference_message');
@@ -74,7 +75,8 @@ describe('Replay to a message by opening the contextual menu', () => {
 			mockedRoom.id,
 			mockedMessage.id,
 			mockedMessage.from,
-			messageActionType.REPLAY
+			mockedMessage.stanzaId,
+			messageActionType.REPLY
 		);
 		const { user } = setup(<ReferenceMessageView roomId={mockedRoom.id} />);
 		const referenceMessage = screen.getByTestId('reference_message');

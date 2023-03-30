@@ -66,25 +66,24 @@ const LeaveConversationListAction: FC<LeaveConversationProps> = ({
 				})
 				.catch(() => null);
 		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [roomId, sessionId]);
+	}, [deleteRoom, goToMainPage, roomId, sessionId]);
 
 	const deleteConversation = useCallback(() => {
 		RoomsApi.deleteRoom(roomId)
 			.then(() => {
-				useStore.getState().deleteRoom(roomId);
+				deleteRoom(roomId);
 				goToMainPage();
 			})
 			.catch(() => null);
-	}, [goToMainPage, roomId]);
+	}, [deleteRoom, goToMainPage, roomId]);
 
 	const closeLeaveModal = useCallback(() => {
 		setLeaveConversationModalOpen(false);
 	}, []);
 
-	const closeDeleteConversationModal = (): void => {
+	const closeDeleteConversationModal = useCallback(() => {
 		setDeleteConversationModalOpen(false);
-	};
+	}, []);
 	return (
 		<>
 			<Tooltip label={tooltipLabel} maxWidth="fit-content">

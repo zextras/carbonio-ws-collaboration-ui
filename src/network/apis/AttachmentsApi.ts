@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import BaseAPI from './BaseAPI';
 import IAttachmentsApi from '../../types/network/apis/IAttachmentsApi';
 import { RequestType } from '../../types/network/apis/IBaseAPI';
 import {
@@ -12,7 +13,6 @@ import {
 	GetAttachmentPreviewResponse,
 	GetAttachmentResponse
 } from '../../types/network/responses/attachmentsResponses';
-import BaseAPI from './BaseAPI';
 
 class AttachmentsApi extends BaseAPI implements IAttachmentsApi {
 	// Singleton design pattern
@@ -43,6 +43,9 @@ class AttachmentsApi extends BaseAPI implements IAttachmentsApi {
 	public getAttachmentPreview(fileId: string): Promise<GetAttachmentPreviewResponse> {
 		return this.fetchAPI(`attachments/${fileId}/preview`, RequestType.GET);
 	}
+
+	public getURLPreview = (fileId: string): string =>
+		`${window.document.location.origin}/services/chats/attachments/${fileId}/preview`;
 }
 
 export default AttachmentsApi.getInstance();

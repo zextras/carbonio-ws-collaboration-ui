@@ -4,20 +4,27 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { ActiveConversationsMap, messageActionType } from './ActiveConversationTypes';
+import { Connections } from './ConnectionsTypes';
+import { Marker, MarkersMap } from './MarkersTypes';
+import { MeetingsMap } from './MeetingTypes';
+import {
+	MessageMap,
+	Message,
+	TextMessage,
+	DeletedMessage,
+	AttachmentMessageType
+} from './MessageTypes';
+import { RoomsMap } from './RoomTypes';
+import { CapabilityList, Session } from './SessionTypes';
+import { TemporaryMessage, TemporaryMessagesMap } from './TemporaryMessagesReferencesTypes';
+import { UnreadsMap } from './UnreadsCounterTypes';
+import { UsersMap } from './UserTypes';
 import { MeetingBe, MeetingParticipantBe } from '../network/models/meetingBeTypes';
 import { MemberBe, RoomBe } from '../network/models/roomBeTypes';
 import { UserBe } from '../network/models/userBeTypes';
 import IWebSocketClient from '../network/websocket/IWebSocketClient';
 import IXMPPClient from '../network/xmpp/IXMPPClient';
-import { ActiveConversationsMap, messageActionType } from './ActiveConversationTypes';
-import { Connections } from './ConnectionsTypes';
-import { Marker, MarkersMap } from './MarkersTypes';
-import { MeetingsMap } from './MeetingTypes';
-import { MessageMap, Message, TextMessage } from './MessageTypes';
-import { RoomsMap } from './RoomTypes';
-import { CapabilityList, Session } from './SessionTypes';
-import { UnreadsMap } from './UnreadsCounterTypes';
-import { UsersMap } from './UserTypes';
 
 export type UsersStoreSlice = {
 	users: UsersMap;
@@ -56,13 +63,16 @@ export type MessagesStoreSlice = {
 	updateUnreadMessages: (roomId: string) => void;
 	setRepliedMessage: (
 		roomId: string,
-		originalMessageId: string,
-		repliedMessage: TextMessage
+		replyMessageId: string,
+		messageSubjectOfReply: TextMessage
 	) => void;
+	setDeletedMessage: (roomId: string, deletedMessage: DeletedMessage) => void;
+	setEditedMessage: (roomId: string, editedMessage: TextMessage) => void;
 };
 
 export type SessionStoreSlice = {
 	session: Session;
+	setFilterHasFocus: (hasFocus: boolean) => void;
 	setLoginInfo: (id: string, name: string, displayName?: string) => void;
 	setSessionId: (sessionId: string) => void;
 	setCapabilities: (capabilities: CapabilityList) => void;
@@ -86,7 +96,9 @@ export type ActiveConversationsSlice = {
 		roomId: string,
 		referenceMessageId: string,
 		senderId: string,
-		actionType: messageActionType
+		stanzaId: string,
+		actionType: messageActionType,
+		attachment?: AttachmentMessageType
 	) => void;
 	unsetReferenceMessage: (roomId: string) => void;
 	setHistoryIsFullyLoaded: (roomId: string) => void;
@@ -111,6 +123,12 @@ export type UnreadsCounterSlice = {
 	updateUnreadCount: (roomId: string) => void;
 };
 
+export type TemporaryMessagesSlice = {
+	temporaryMessages: TemporaryMessagesMap;
+	addDeletedMessageRef: (roomId: string, messageDeleted: TemporaryMessage) => void;
+	addEditedMessageRef: (roomId: string, messageEdited: TemporaryMessage) => void;
+};
+
 export type MeetingsSlice = {
 	meetings: MeetingsMap;
 	setMeetings: (meetings: MeetingBe[]) => void;
@@ -128,4 +146,5 @@ export type RootStore = UsersStoreSlice &
 	ActiveConversationsSlice &
 	ConnectionsStoreSlice &
 	UnreadsCounterSlice &
+	TemporaryMessagesSlice &
 	MeetingsSlice;

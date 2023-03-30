@@ -4,18 +4,26 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Button, Container, Modal, Padding, Text, Tooltip } from '@zextras/carbonio-design-system';
+import {
+	Button,
+	Container,
+	Modal,
+	Padding,
+	SnackbarManagerContext,
+	Text,
+	Tooltip
+} from '@zextras/carbonio-design-system';
 import { find, map, size } from 'lodash';
-import React, { ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { ReactElement, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import ChatCreationContactsSelection, { ContactSelected } from './ChatCreationContactsSelection';
+import ChatCreationTitleInput from './ChatCreationTitleInput';
 import useRouting from '../../hooks/useRouting';
 import { RoomsApi } from '../../network';
 import useStore from '../../store/Store';
 import { AddRoomResponse } from '../../types/network/responses/roomsResponses';
 import { RoomType } from '../../types/store/RoomTypes';
-import ChatCreationContactsSelection, { ContactSelected } from './ChatCreationContactsSelection';
-import ChatCreationTitleInput from './ChatCreationTitleInput';
 
 const ChatCreationModal = ({
 	open,
@@ -35,6 +43,11 @@ const ChatCreationModal = ({
 		'Chats are one-to-one conversations that help you to stay in touch with your contacts. You can create a group by including more than two participants'
 	);
 	const createLabel = t('action.create', 'Create');
+	const closeLabel = t('action.close', 'Close');
+	const errorSnackbar = t(
+		'settings.profile.errorGenericResponse',
+		'Something went Wrong. Please Retry'
+	);
 
 	const addRoom = useStore((store) => store.addRoom);
 
@@ -44,6 +57,9 @@ const ChatCreationModal = ({
 	const [contactsSelected, setContactSelected] = useState<ContactSelected>({});
 	const [title, setTitle] = useState<string>(titlePlaceholder);
 	const [topic, setTopic] = useState<string>('');
+	const [isPending, setIsPending] = useState<boolean>(false);
+
+	const createSnackbar: any = useContext(SnackbarManagerContext);
 
 	const { goToRoomPage } = useRouting();
 
@@ -96,6 +112,7 @@ const ChatCreationModal = ({
 			goToRoomPage(oneToOneChatExist.id);
 			onModalClose();
 		} else {
+			setIsPending(true);
 			RoomsApi.addRoom({
 				name: chatType === RoomType.ONE_TO_ONE ? ' ' : title,
 				description: chatType === RoomType.ONE_TO_ONE ? ' ' : topic,
@@ -103,13 +120,31 @@ const ChatCreationModal = ({
 				membersIds: ids
 			})
 				.then((response: AddRoomResponse) => {
+					setIsPending(false);
 					addRoom(response);
 					goToRoomPage(response.id);
 					onModalClose();
 				})
-				.catch(() => null);
+				.catch(() => {
+					setIsPending(false);
+					createSnackbar({
+						key: new Date().toLocaleString(),
+						type: 'error',
+						label: errorSnackbar
+					});
+				});
 		}
-	}, [addRoom, chatType, contactsSelected, goToRoomPage, onModalClose, title, topic]);
+	}, [
+		addRoom,
+		chatType,
+		contactsSelected,
+		goToRoomPage,
+		onModalClose,
+		title,
+		topic,
+		errorSnackbar,
+		createSnackbar
+	]);
 
 	const modalFooter = useMemo(
 		() => (
@@ -127,7 +162,7 @@ const ChatCreationModal = ({
 					<Button
 						label={createButtonLabel}
 						onClick={onCreate}
-						disabled={disabledCreateButton}
+						disabled={disabledCreateButton || isPending}
 						data-testid="create_button"
 					/>
 				</Container>
@@ -140,7 +175,8 @@ const ChatCreationModal = ({
 			errorLabelDisabled,
 			disabledButtonTooltip,
 			createButtonLabel,
-			onCreate
+			onCreate,
+			isPending
 		]
 	);
 
@@ -149,13 +185,15 @@ const ChatCreationModal = ({
 			open={open}
 			title={modalTitle}
 			showCloseIcon
+			closeIconTooltip={closeLabel}
 			onClose={onModalClose}
 			size="medium"
 			customFooter={modalFooter}
 		>
-			<Padding vertical="small">
-				<Text overflow="break-word">{descriptionLabel}</Text>
-			</Padding>
+			<Text overflow="break-word" size="small">
+				{descriptionLabel}
+			</Text>
+			<Padding bottom="large" />
 			<ChatCreationContactsSelection
 				contactsSelected={contactsSelected}
 				setContactSelected={setContactSelected}

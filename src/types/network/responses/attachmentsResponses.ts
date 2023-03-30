@@ -12,4 +12,4 @@ export type GetAttachmentInfoResponse = Attachment;
 
 export type GetAttachmentResponse = Blob;
 
-export type GetAttachmentPreviewResponse = ''; // TODO
+export type GetAttachmentPreviewResponse = Blob;

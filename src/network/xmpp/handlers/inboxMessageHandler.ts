@@ -6,8 +6,8 @@
 
 import useStore from '../../../store/Store';
 import IXMPPClient from '../../../types/network/xmpp/IXMPPClient';
-import { TextMessage } from '../../../types/store/MessageTypes';
-import { dateToTimestamp } from '../../../utils/dateUtil';
+import { MessageType, TextMessage } from '../../../types/store/MessageTypes';
+import { dateToTimestamp, now } from '../../../utils/dateUtil';
 import { xmppDebug } from '../../../utils/debug';
 import { decodeMessage } from '../utility/decodeMessage';
 import { getRequiredAttribute, getRequiredTagElement } from '../utility/decodeStanza';
@@ -23,20 +23,33 @@ export function onInboxMessageStanza(this: IXMPPClient, message: Element): true 
 	const insideMessage = getRequiredTagElement(result, 'message');
 	const inboxMessage = decodeMessage(insideMessage, { date: dateToTimestamp(date) });
 	const sessionId = useStore.getState().session.id;
+
 	if (inboxMessage) {
 		const unreadMessagesOfSingleConversation = getRequiredAttribute(result, 'unread');
 		const store = useStore.getState();
 		store.newInboxMessage(inboxMessage);
 		store.addUnreadCount(inboxMessage.roomId, parseInt(unreadMessagesOfSingleConversation, 10));
 
-		// Request replied message information
-		const repliedId = (inboxMessage as TextMessage).replyTo;
-		if (repliedId) {
-			this.requestRepliedMessage(inboxMessage.roomId, inboxMessage.id, repliedId);
+		// Last inboxMessage is a retraction/correction, we need to request more messages to display the real last one
+		if (
+			inboxMessage.type === MessageType.DELETED_MSG ||
+			(inboxMessage.type === MessageType.TEXT_MSG && inboxMessage.edited)
+		) {
+			this.requestHistory(inboxMessage.roomId, now(), 3);
+		}
+
+		// Request message subject of reply
+		const messageSubjectOfReplyId = (inboxMessage as TextMessage).replyTo;
+		if (messageSubjectOfReplyId) {
+			this.requestMessageSubjectOfReply(
+				inboxMessage.roomId,
+				messageSubjectOfReplyId,
+				inboxMessage.id
+			);
 		}
 
 		// Ask smart markers to update Check icon
-		if (inboxMessage.type === 'text' && inboxMessage.from === sessionId) {
+		if (inboxMessage.type === MessageType.TEXT_MSG && inboxMessage.from === sessionId) {
 			this.lastMarkers(inboxMessage.roomId);
 		}
 	}

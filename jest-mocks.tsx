@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Account, INotificationManager } from '@zextras/carbonio-shell-ui';
+import { Account, AccountSettings, INotificationManager } from '@zextras/carbonio-shell-ui';
 import React, { ReactElement } from 'react';
 
 import { AutoCompleteGalResponse } from './src/network/soap/AutoCompleteRequest';
@@ -15,7 +15,12 @@ import {
 	ClearRoomHistoryResponse,
 	MuteRoomResponse,
 	UnmuteRoomResponse,
-	UpdateRoomResponse
+	UpdateRoomResponse,
+	DeleteRoomMemberResponse,
+	DeleteRoomResponse,
+	PromoteRoomMemberResponse,
+	DemotesRoomMemberResponse,
+	AddRoomMemberResponse
 } from './src/types/network/responses/roomsResponses';
 import {
 	GetUserPictureResponse,
@@ -40,13 +45,20 @@ jest.mock('@zextras/carbonio-shell-ui', () => ({
 		identities: '',
 		rights: { targets: [] }
 	}),
-	SettingsHeader: (): ReactElement => <div>settings header</div>
+	SettingsHeader: (): ReactElement => <div>settings header</div>,
+	useUserSettings: (): AccountSettings => ({
+		attrs: {},
+		props: [{ name: '', zimlet: '', _content: '' }],
+		prefs: {}
+	})
 }));
 
 // MOCKED USEROUTING
+export const mockGoToRoomPage: jest.Mock = jest.fn();
+export const mockGoToMainPage: jest.Mock = jest.fn();
 jest.mock('./src/hooks/useRouting', () => {
-	const goToMainPage = jest.fn();
-	const goToRoomPage = jest.fn();
+	const goToMainPage = mockGoToMainPage;
+	const goToRoomPage = mockGoToRoomPage;
 
 	return jest.fn(() => ({
 		goToMainPage,
@@ -71,6 +83,7 @@ jest.mock('./src/network/soap/AutoCompleteRequest', () => ({
 
 // MOCKED APIs
 export const mockedAddRoomRequest: jest.Mock = jest.fn();
+export const mockedDeleteRoomRequest: jest.Mock = jest.fn();
 export const mockedClearHistoryRequest: jest.Mock = jest.fn();
 export const mockedUpdateRoomPictureRequest: jest.Mock = jest.fn();
 export const mockedDeleteRoomPictureRequest: jest.Mock = jest.fn();
@@ -81,12 +94,23 @@ export const mockedGetUserRequest: jest.Mock = jest.fn();
 export const mockedGetUserPictureRequest: jest.Mock = jest.fn();
 export const mockedGetURLUserPicture: jest.Mock = jest.fn();
 export const mockedGetDebouncedUserRequest: jest.Mock = jest.fn();
+export const mockedGetURLAttachment: jest.Mock = jest.fn();
+export const mockedGetURLPreview: jest.Mock = jest.fn();
+export const mockedDeleteRoomMemberRequest: jest.Mock = jest.fn();
+export const mockedPromoteRoomMemberRequest: jest.Mock = jest.fn();
+export const mockedDemotesRoomMemberRequest: jest.Mock = jest.fn();
+export const mockedAddRoomMemberRequest: jest.Mock = jest.fn();
 
 jest.mock('./src/network', () => ({
 	RoomsApi: {
 		addRoom: (): Promise<AddRoomResponse> =>
 			new Promise((resolve, reject) => {
 				const result = mockedAddRoomRequest();
+				result ? resolve(result) : reject(new Error('no result provided'));
+			}),
+		deleteRoom: (): Promise<DeleteRoomResponse> =>
+			new Promise((resolve, reject) => {
+				const result = mockedDeleteRoomRequest();
 				result ? resolve(result) : reject(new Error('no result provided'));
 			}),
 		clearRoomHistory: (): Promise<ClearRoomHistoryResponse> =>
@@ -119,6 +143,26 @@ jest.mock('./src/network', () => ({
 			new Promise((resolve, reject) => {
 				const result = mockedUpdateRoomRequest();
 				result ? resolve(result) : reject(new Error('no result provided'));
+			}),
+		deleteRoomMember: (): Promise<DeleteRoomMemberResponse> =>
+			new Promise((resolve, reject) => {
+				const result = mockedDeleteRoomMemberRequest();
+				result ? resolve(result) : reject(new Error('no result provided'));
+			}),
+		promoteRoomMember: (): Promise<PromoteRoomMemberResponse> =>
+			new Promise((resolve, reject) => {
+				const result = mockedPromoteRoomMemberRequest();
+				result ? resolve(result) : reject(new Error('no result provided'));
+			}),
+		demotesRoomMember: (): Promise<DemotesRoomMemberResponse> =>
+			new Promise((resolve, reject) => {
+				const result = mockedDemotesRoomMemberRequest();
+				result ? resolve(result) : reject(new Error('no result provided'));
+			}),
+		addRoomMember: (): Promise<AddRoomMemberResponse> =>
+			new Promise((resolve, reject) => {
+				const result = mockedAddRoomMemberRequest();
+				result ? resolve(result) : reject(new Error('no result provided'));
 			})
 	},
 	UsersApi: {
@@ -135,5 +179,21 @@ jest.mock('./src/network', () => ({
 		getURLUserPicture: (): string => 'image.url',
 		// eslint-disable-next-line @typescript-eslint/no-empty-function
 		getDebouncedUser: (): void => {}
+	},
+	AttachmentsApi: {
+		getURLAttachment: mockedGetURLAttachment,
+		getURLPreview: mockedGetURLPreview
 	}
 }));
+
+export const fetchResponse: jest.Mock = jest.fn(() => ({}));
+
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+global.fetch = jest.fn(() =>
+	Promise.resolve({
+		json: () => fetchResponse(),
+		ok: true,
+		headers: { get: (): string => 'application/json' }
+	})
+);

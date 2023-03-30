@@ -16,7 +16,7 @@ import {
 import React, { FC, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import RoomsApi from '../../../network/apis/RoomsApi';
+import { RoomsApi } from '../../../network';
 import {
 	getRoomDescriptionSelector,
 	getRoomNameSelector
@@ -45,6 +45,8 @@ const EditConversationModal: FC<EditConversationProps> = ({
 	const confirmEditLabel = t('editModal.confirm', 'Edit Details');
 	const confirmLabelDisabled = t('editModal.confirmDisabled', "You haven't changed anything");
 	const errorLabelDisabled = t('editModal.errorDisabled', 'Check the information entered');
+	const closeLabel = t('action.close', 'Close');
+
 	const roomName: string = useStore((state) => getRoomNameSelector(state, roomId));
 	const roomDescription: string = useStore((state) => getRoomDescriptionSelector(state, roomId));
 	const editLabel = t('action.editRoom', `Edit ${roomName}`, {
@@ -115,7 +117,7 @@ const EditConversationModal: FC<EditConversationProps> = ({
 
 	const modalFooter = useMemo(
 		() => (
-			<Container mainAlignment="flex-end" orientation="horizontal" data-testid="edit_modal">
+			<Container mainAlignment="flex-end" orientation="horizontal">
 				<Tooltip
 					placement="bottom"
 					label={
@@ -149,8 +151,10 @@ const EditConversationModal: FC<EditConversationProps> = ({
 			title={editLabel}
 			confirmColor="primary"
 			showCloseIcon
+			closeIconTooltip={closeLabel}
 			customFooter={modalFooter}
 			onClose={closeModal}
+			data-testid="edit_conversation_modal"
 		>
 			<Container>
 				<Input

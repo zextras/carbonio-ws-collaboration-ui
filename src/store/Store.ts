@@ -7,7 +7,6 @@
 import create, { SetState } from 'zustand';
 import { devtools } from 'zustand/middleware';
 
-import { RootStore } from '../types/store/StoreTypes';
 import { useActiveConversationsSlice } from './slices/ActiveConversationsSlice';
 import { useConnectionsStoreSlice } from './slices/ConnectionStoreSlice';
 import { useMarkersStoreSlice } from './slices/MarkersStoreSlice';
@@ -15,8 +14,10 @@ import { useMeetingsStoreSlice } from './slices/MeetingsStoreSlice';
 import { useMessagesStoreSlice } from './slices/MessagesStoreSlice';
 import { useRoomsStoreSlice } from './slices/RoomsStoreSlice';
 import { useSessionStoreSlice } from './slices/SessionStoreSlice';
+import { useTemporaryMessagesSlice } from './slices/TemporaryMessagesSlice';
 import { useUnreadsCountStoreSlice } from './slices/UnreadsCounterStoreSlice';
 import { useUsersStoreSlice } from './slices/UsersStoreSlice';
+import { RootStore } from '../types/store/StoreTypes';
 
 const useStore = create<RootStore>(
 	devtools(
@@ -29,6 +30,7 @@ const useStore = create<RootStore>(
 			...useActiveConversationsSlice(set),
 			...useConnectionsStoreSlice(set),
 			...useUnreadsCountStoreSlice(set),
+			...useTemporaryMessagesSlice(set),
 			...useMeetingsStoreSlice(set)
 		}),
 		{ name: 'carbonio-chats-ui' }

@@ -4,10 +4,12 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react-hooks';
 import React from 'react';
 import { setup } from 'test-utils';
 
+import MuteConversationAction from './MuteConversationAction';
 import {
 	mockedMuteRoomNotificationRequest,
 	mockedUnmuteRoomNotificationRequest
@@ -15,7 +17,6 @@ import {
 import useStore from '../../../store/Store';
 import { createMockMember, createMockRoom } from '../../../tests/createMock';
 import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
-import MuteConversationAction from './MuteConversationAction';
 
 const testRoom: RoomBe = createMockRoom({
 	id: 'room-test',
@@ -37,19 +38,101 @@ const testRoom2: RoomBe = createMockRoom({
 
 describe('Mute/Unmute Conversation', () => {
 	test('Label should be "Mute notifications" in groups', async () => {
-		mockedMuteRoomNotificationRequest.mockReturnValueOnce(true);
 		useStore.getState().addRoom(testRoom);
-		const { user } = setup(<MuteConversationAction roomId={testRoom.id} />);
-		await user.click(screen.getByTestId('action'));
+		setup(<MuteConversationAction roomId={testRoom.id} />);
 		const titleIsPresent = screen.getByText(/Mute notifications/i);
 		expect(titleIsPresent).toBeInTheDocument();
 	});
 	test('Label should be "Activate notifications" in groups', async () => {
-		mockedUnmuteRoomNotificationRequest.mockReturnValueOnce(false);
 		useStore.getState().addRoom(testRoom2);
-		const { user } = setup(<MuteConversationAction roomId={testRoom2.id} />);
-		await user.click(screen.getByTestId('action'));
+		setup(<MuteConversationAction roomId={testRoom2.id} />);
 		const titleIsPresent = screen.getByText(/Activate notifications/i);
 		expect(titleIsPresent).toBeInTheDocument();
+	});
+	test('mute notifications', async () => {
+		const { result } = renderHook(() => useStore());
+		act(() => result.current.addRoom(testRoom));
+		mockedMuteRoomNotificationRequest.mockRejectedValueOnce(false).mockReturnValueOnce(true);
+		const { user } = setup(<MuteConversationAction roomId={testRoom.id} />);
+
+		const muteAction = await screen.findByText(/Mute notifications/i);
+		user.click(muteAction);
+		expect(muteAction).toBeInTheDocument();
+
+		user.click(muteAction);
+		const snackbar = await screen.findByText(/Notifications muted for this chat/i);
+		expect(snackbar).toBeVisible();
+		expect(result.current.rooms[testRoom.id].userSettings?.muted).toBe(true);
+	});
+	test('unmute notifications', async () => {
+		const { result } = renderHook(() => useStore());
+		act(() => result.current.addRoom(testRoom2));
+		mockedUnmuteRoomNotificationRequest.mockRejectedValueOnce(false).mockReturnValueOnce(true);
+		const { user } = setup(<MuteConversationAction roomId={testRoom2.id} />);
+
+		const unmuteAction = screen.getByText(/Activate notifications/i);
+		user.click(unmuteAction);
+		expect(unmuteAction).toBeInTheDocument();
+
+		user.click(unmuteAction);
+		const snackbar = await screen.findByText(/Notifications activated for this chat/i);
+		expect(snackbar).toBeVisible();
+		expect(result.current.rooms[testRoom.id].userSettings?.muted).toBe(false);
+	});
+	test('undo mute rejected', async () => {
+		const { result } = renderHook(() => useStore());
+		act(() => result.current.addRoom(testRoom));
+		mockedMuteRoomNotificationRequest.mockReturnValue(true);
+		mockedUnmuteRoomNotificationRequest.mockRejectedValueOnce(false);
+		const { user } = setup(<MuteConversationAction roomId={testRoom.id} />);
+
+		const muteAction = screen.getByText(/Mute notifications/i);
+		user.click(muteAction);
+		const snackbar = await screen.findByText(/Notifications muted for this chat/i);
+		expect(snackbar).toBeVisible();
+		user.click(screen.getByText(/UNDO/i));
+		expect(result.current.rooms[testRoom.id].userSettings?.muted).toBe(true);
+	});
+	test('undo mute', async () => {
+		const { result } = renderHook(() => useStore());
+		act(() => result.current.addRoom(testRoom));
+		mockedMuteRoomNotificationRequest.mockReturnValue(true);
+		mockedUnmuteRoomNotificationRequest.mockReturnValueOnce(true);
+		const { user } = setup(<MuteConversationAction roomId={testRoom.id} />);
+
+		const muteAction = screen.getByText(/Mute notifications/i);
+		user.click(muteAction);
+		const snackbar = await screen.findByText(/Notifications muted for this chat/i);
+		expect(snackbar).toBeVisible();
+		user.click(screen.getByText(/UNDO/i));
+		await waitFor(() => expect(result.current.rooms[testRoom.id].userSettings?.muted).toBe(false));
+	});
+	test('undo unmute rejected', async () => {
+		const { result } = renderHook(() => useStore());
+		act(() => result.current.addRoom(testRoom2));
+		mockedUnmuteRoomNotificationRequest.mockReturnValue(true);
+		mockedMuteRoomNotificationRequest.mockRejectedValueOnce(false);
+		const { user } = setup(<MuteConversationAction roomId={testRoom2.id} />);
+
+		const unmuteAction = screen.getByText(/Activate notifications/i);
+		user.click(unmuteAction);
+		const snackbar = await screen.findByText(/Notifications activated for this chat/i);
+		expect(snackbar).toBeVisible();
+		user.click(screen.getByText(/UNDO/i));
+		expect(result.current.rooms[testRoom.id].userSettings?.muted).toBe(false);
+	});
+	test('undo unmute', async () => {
+		const { result } = renderHook(() => useStore());
+		act(() => result.current.addRoom(testRoom2));
+		mockedUnmuteRoomNotificationRequest.mockReturnValue(true);
+		mockedMuteRoomNotificationRequest.mockReturnValueOnce(true);
+		const { user } = setup(<MuteConversationAction roomId={testRoom2.id} />);
+
+		const unmuteAction = screen.getByText(/Activate notifications/i);
+		user.click(unmuteAction);
+		const snackbar = await screen.findByText(/Notifications activated for this chat/i);
+		expect(snackbar).toBeVisible();
+		user.click(screen.getByText(/UNDO/i));
+		await waitFor(() => expect(result.current.rooms[testRoom.id].userSettings?.muted).toBe(true));
 	});
 });

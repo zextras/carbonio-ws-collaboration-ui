@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { WsEventType } from './wsEvents';
 import { Attachment } from '../models/attachmentTypes';
 import { MemberBe } from '../models/roomBeTypes';
-import { WsEventType } from './wsEvents';
 
 export type WsConversationEvent =
 	| RoomCreatedEvent
