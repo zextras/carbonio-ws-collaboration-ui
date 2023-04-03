@@ -5,5 +5,5 @@
  */
 
 export const PRODUCT_NAME = 'Chats';
-export const CHATS_APP_ID = 'carbonio-workstream-collaboration-ui';
+export const CHATS_APP_ID = 'carbonio-ws-collaboration-ui';
 export const CHATS_ROUTE = 'chats';
