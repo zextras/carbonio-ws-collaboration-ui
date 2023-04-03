@@ -72,7 +72,7 @@ describe('Test meetings slice', () => {
 		expect(result.current.meetings[mockMeeting0.roomId].createdAt).toBe(mockMeeting0.createdAt);
 	});
 
-	it('Combination of set meetings, add meeting, and remove meeting setters', () => {
+	it('Combination of set meetings, add meetings, and remove meetings setters', () => {
 		const { result } = renderHook(() => useStore());
 
 		act(() => result.current.setMeetings([mockMeeting0, mockMeeting1]));

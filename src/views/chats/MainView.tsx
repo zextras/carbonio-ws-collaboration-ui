@@ -7,7 +7,7 @@
 import React, { lazy, ReactElement } from 'react';
 import { Route, Switch, useRouteMatch } from 'react-router-dom';
 
-import { ROUTES } from '../hooks/useRouting';
+import { ROUTES } from '../../hooks/useRouting';
 
 const LazyDefault = lazy(() => import(/* webpackChunkName: "defaultView" */ './DefaultView'));
 const LazyRoom = lazy(() => import(/* webpackChunkName: "roomView" */ './RoomView'));

@@ -6,7 +6,7 @@
 import React, { ReactElement } from 'react';
 import { useParams } from 'react-router-dom';
 
-import useRouting, { PAGE_INFO_TYPE } from '../hooks/useRouting';
+import useRouting, { PAGE_INFO_TYPE } from '../../hooks/useRouting';
 
 const WaitingRoomPageView = (): ReactElement => {
 	const { goToInfoPage } = useRouting();

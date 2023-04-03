@@ -4,56 +4,19 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Container } from '@zextras/carbonio-design-system';
-import {
-	addRoute,
-	addSettingsView,
-	getUserAccount,
-	getUserSettings,
-	Spinner
-} from '@zextras/carbonio-shell-ui';
+import { getUserAccount, getUserSettings } from '@zextras/carbonio-shell-ui';
 import moment from 'moment-timezone';
-import React, { lazy, Suspense, useEffect } from 'react';
+import React, { useEffect } from 'react';
 
 import CounterBadgeUpdater from './components/CounterBadgeUpdater';
-import SecondaryBarSingleGroupsView from './components/secondaryBar/SecondaryBarSingleGroupsView';
-import { CHATS_ROUTE_TEST, PRODUCT_NAME } from './constants/appConstants';
 import useRegisterCreationButton from './hooks/useRegisterCreationButton';
 import useSnackbarManager from './hooks/useSnackbarManager';
 import { MeetingsApi, RoomsApi, SessionApi } from './network';
 import { WebSocketClient } from './network/websocket/WebSocketClient';
 import XMPPClient from './network/xmpp/XMPPClient';
 import useStore from './store/Store';
-import ExternalMainView from './views/ExternalMain';
-import ShimmeringConversationView from './views/shimmerViews/ShimmeringConversationView';
-import ShimmeringInfoPanelView from './views/shimmerViews/ShimmeringInfoPanelView';
-
-const LazyMainView = lazy(() => import(/* webpackChunkName: "mainView" */ './views/MainView'));
-
-const LazySettingsView = lazy(() =>
-	import(/* webpackChunkName: "settingsView" */ './views/SettingsView')
-);
-
-const Main = () => (
-	<Suspense
-		fallback={
-			<Container mainAlignment="flex-start" orientation="horizontal">
-				<ShimmeringConversationView />
-				<ShimmeringInfoPanelView />
-			</Container>
-		}
-	>
-		<LazyMainView />
-	</Suspense>
-);
-
-const SettingsView = () => (
-	<Suspense fallback={<Spinner />}>
-		<LazySettingsView />
-	</Suspense>
-);
-
-const SecondaryBar = ({ expanded }) => <SecondaryBarSingleGroupsView expanded={expanded} />;
+import useChatsRoute from './useChatsRoute';
+import useMeetingsRoute from './useMeetingsRoute';
 
 const initApp = () => {
 	const { id, name, displayName } = getUserAccount();
@@ -93,42 +56,13 @@ const initApp = () => {
 		.catch(() => store.setChatsBeStatus(false));
 };
 
-/*
-	TODO: move initApp inside App
-	but not now because there is a shell bug that makes mount App more that once
- */
-initApp();
-
 export default function App() {
 	useEffect(() => {
-		addRoute({
-			route: CHATS_ROUTE_TEST,
-			position: 90,
-			visible: true,
-			label: PRODUCT_NAME,
-			primaryBar: 'Gift',
-			appView: Main,
-			secondaryBar: SecondaryBar
-		});
-		addRoute({
-			route: 'external',
-			visible: false,
-			label: PRODUCT_NAME,
-			primaryBar: 'coffee',
-			appView: () => <ExternalMainView />,
-			standalone: {
-				hidePrimaryBar: true,
-				hideShellHeader: true,
-				allowUnauthenticated: true
-			}
-		});
-		addSettingsView({
-			icon: 'Gift',
-			route: CHATS_ROUTE_TEST,
-			label: PRODUCT_NAME,
-			component: SettingsView
-		});
+		initApp();
 	}, []);
+
+	useChatsRoute();
+	useMeetingsRoute();
 
 	// Register actions on creation button
 	const CreationModal = useRegisterCreationButton();

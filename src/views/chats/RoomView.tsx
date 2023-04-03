@@ -10,10 +10,10 @@ import { useParams } from 'react-router-dom';
 
 import ShimmeringConversationView from './shimmerViews/ShimmeringConversationView';
 import ShimmeringInfoPanelView from './shimmerViews/ShimmeringInfoPanelView';
-import Conversation from '../components/conversation/Conversation';
-import { roomMainInfoEqualityFn } from '../store/equalityFunctions/RoomsEqualityFunctions';
-import { getRoomSelector } from '../store/selectors/RoomsSelectors';
-import useStore from '../store/Store';
+import Conversation from '../../components/conversation/Conversation';
+import { roomMainInfoEqualityFn } from '../../store/equalityFunctions/RoomsEqualityFunctions';
+import { getRoomSelector } from '../../store/selectors/RoomsSelectors';
+import useStore from '../../store/Store';
 
 // Render TestRoom ONLY when we are sure room is present in the store
 const RoomView = (): ReactElement => {

@@ -8,9 +8,9 @@ import { Button, Container, Padding } from '@zextras/carbonio-design-system';
 import React, { ReactElement, useCallback, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
-import useRouting, { PAGE_INFO_TYPE } from '../hooks/useRouting';
-import { MeetingsApi } from '../network';
-import useStore from '../store/Store';
+import useRouting, { PAGE_INFO_TYPE } from '../../hooks/useRouting';
+import { MeetingsApi } from '../../network';
+import useStore from '../../store/Store';
 
 const MeetingPageView = (): ReactElement => {
 	const { goToInfoPage } = useRouting();

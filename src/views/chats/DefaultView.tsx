@@ -8,9 +8,9 @@ import { Container } from '@zextras/carbonio-design-system';
 import React, { ReactElement } from 'react';
 
 import DefaultUserView from './DefaultUserView';
-import { roomsListLengthEqualityFn } from '../store/equalityFunctions/RoomsEqualityFunctions';
-import { getRoomIdsList } from '../store/selectors/RoomsSelectors';
-import useStore from '../store/Store';
+import { roomsListLengthEqualityFn } from '../../store/equalityFunctions/RoomsEqualityFunctions';
+import { getRoomIdsList } from '../../store/selectors/RoomsSelectors';
+import useStore from '../../store/Store';
 
 const DefaultView = (): ReactElement => {
 	const roomsIds = useStore<string[]>(getRoomIdsList, roomsListLengthEqualityFn);

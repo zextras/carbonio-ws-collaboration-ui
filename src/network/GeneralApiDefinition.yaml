@@ -318,7 +318,7 @@ paths:
       tags:
         - Meetings
         - Rooms
-      summary: Retrieves the meeting associated with the requested room
+      summary: Retrieves the meetings associated with the requested room
       operationId: getMeetingByRoomId
       parameters:
         - $ref: '#/components/parameters/pathRoomId'
@@ -336,7 +336,7 @@ paths:
       tags:
         - Meetings
         - Rooms
-      summary: Adds the current user to the specified meeting, if this doesn't exist then creates it
+      summary: Adds the current user to the specified meetings, if this doesn't exist then creates it
       operationId: joinRoomMeeting
       parameters:
         - $ref: '#/components/parameters/pathRoomId'
@@ -821,19 +821,19 @@ components:
           schema:
             $ref: '#/components/schemas/Token'
     200GetRoomMeetingResponse:
-      description: Gets the requested meeting data
+      description: Gets the requested meetings data
       content:
         application/json:
           schema:
-            $ref: '../meeting/meeting-api.yaml#/components/schemas/Meeting'
+            $ref: '../meetings/meetings-api.yaml#/components/schemas/Meeting'
     200JoinRoomMeetingResponse:
-      description: A meeting was created and the user joined it successfully
+      description: A meetings was created and the user joined it successfully
       content:
         application/json:
           schema:
-            $ref: '../meeting/meeting-api.yaml#/components/schemas/Meeting'
+            $ref: '../meetings/meetings-api.yaml#/components/schemas/Meeting'
     204JoinRoomMeetingResponse:
-      description: The user joined the meeting successfully
+      description: The user joined the meetings successfully
 
     400BadRequestResponse:
       description: The request had wrong or missing parameters
@@ -1218,4 +1218,4 @@ components:
       type: object
       description: Room data
       allOf:
-        - $ref: '../meeting/meeting-api.yaml#/components/schemas/JoinSettings'
+        - $ref: '../meetings/meetings-api.yaml#/components/schemas/JoinSettings'

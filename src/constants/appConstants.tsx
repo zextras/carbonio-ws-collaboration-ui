@@ -4,6 +4,11 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+// Chats zapp constants
 export const PRODUCT_NAME = 'Chats test';
 export const CHATS_APP_ID = 'carbonio-chats-ui-test';
 export const CHATS_ROUTE_TEST = 'test';
+
+// Meetings zapp constants
+export const MEETINGS_NAME = 'Meetings';
+export const MEETINGS_ROUTE = 'meetings';

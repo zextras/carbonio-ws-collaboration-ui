@@ -12,7 +12,7 @@ import AccessMeetingPageView from './AccessMeetingPageView';
 import InfoPage from './InfoPage';
 import MeetingPageView from './MeetingPageView';
 import WaitingRoomPageView from './WaitingRoomPageView';
-import { ROUTES } from '../hooks/useRouting';
+import { ROUTES } from '../../hooks/useRouting';
 
 const ExternalMainView = (): ReactElement => {
 	const history = createMemoryHistory();

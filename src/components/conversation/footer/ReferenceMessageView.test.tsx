@@ -35,7 +35,7 @@ const mockedMessage = createMockTextMessage({
 	date: 1657099586818, // 18.08
 	type: MessageType.TEXT_MSG,
 	from: 'idRoberto',
-	text: 'Hi guys! Today I will not be present to the meeting sorry!',
+	text: 'Hi guys! Today I will not be present to the meetings sorry!',
 	read: MarkerStatus.UNREAD
 });
 

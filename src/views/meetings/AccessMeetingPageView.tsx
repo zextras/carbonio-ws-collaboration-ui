@@ -7,7 +7,7 @@
 import { Container } from '@zextras/carbonio-design-system';
 import React, { ReactElement, useMemo } from 'react';
 
-import AccessMeetingModal from '../components/meeting/AccessMeetingModal';
+import AccessMeetingModal from '../../components/meetings/AccessMeetingModal';
 
 const AccessMeetingPageView = (): ReactElement => {
 	// Retrieve room information

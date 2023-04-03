@@ -18,9 +18,9 @@ import { getRoomIdsOrderedLastMessage } from '../../store/selectors/MessagesSele
 import { getUsersSelector } from '../../store/selectors/UsersSelectors';
 import useStore from '../../store/Store';
 import { Member } from '../../types/store/RoomTypes';
-import DefaultUserSidebarView from '../../views/DefaultUserSidebarView';
-import ShimmeringCollapsedListView from '../../views/shimmerViews/ShimmeringCollapsedListView';
-import ShimmeringExpandedListView from '../../views/shimmerViews/ShimmeringExpandedListView';
+import DefaultUserSidebarView from '../../views/chats/DefaultUserSidebarView';
+import ShimmeringCollapsedListView from '../../views/chats/shimmerViews/ShimmeringCollapsedListView';
+import ShimmeringExpandedListView from '../../views/chats/shimmerViews/ShimmeringExpandedListView';
 
 type SecondaryBarSingleGroupsView = {
 	expanded: boolean;

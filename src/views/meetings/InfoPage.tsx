@@ -6,7 +6,7 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 
-import useRouting from '../hooks/useRouting';
+import useRouting from '../../hooks/useRouting';
 
 const InfoPage = (): any => {
 	const { goToMeetingPage } = useRouting();

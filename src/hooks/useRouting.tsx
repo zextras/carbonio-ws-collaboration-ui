@@ -11,7 +11,8 @@ import { useHistory } from 'react-router-dom';
 export enum ROUTES {
 	MAIN = '/',
 	ROOM = '/:roomId',
-	MEETING = '/meeting/:meetingId',
+	MEETINGS_MAIN = '/meetings',
+	MEETING = '/meetings/:meetingId',
 	WAITING_ROOM = '/waitingRoom/:roomId',
 	INFO = '/infoPage/:infoType'
 }
@@ -25,6 +26,7 @@ export enum PAGE_INFO_TYPE {
 export type UseRoutingHook = {
 	goToMainPage: () => void;
 	goToRoomPage: (roomId: string) => void;
+	goToMeetingsMainPage: () => void;
 	goToMeetingPage: (meetingId: string) => void;
 	goToWaitingPage: (roomId: string, roomName: string) => void;
 	goToInfoPage: (infoType: PAGE_INFO_TYPE) => void;
@@ -32,10 +34,13 @@ export type UseRoutingHook = {
 
 const useRouting = (): UseRoutingHook => {
 	const goToMainPage = useCallback(() => replaceHistory(ROUTES.MAIN), []);
+
 	const goToRoomPage = useCallback(
 		(roomId: string) => pushHistory(ROUTES.ROOM.replace(':roomId', roomId)),
 		[]
 	);
+	const goToMeetingsMainPage = useCallback(() => replaceHistory(ROUTES.MEETINGS_MAIN), []);
+
 	const history = useHistory();
 	const route = (url: string): void => history.push(url);
 	const goToMeetingPage = (meetingId: string): void => route(`/meeting/${meetingId}`);
@@ -46,6 +51,7 @@ const useRouting = (): UseRoutingHook => {
 	return {
 		goToMainPage,
 		goToRoomPage,
+		goToMeetingsMainPage,
 		goToMeetingPage,
 		goToWaitingPage,
 		goToInfoPage

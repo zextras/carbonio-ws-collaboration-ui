@@ -70,7 +70,7 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 		<Modal
 			size="small"
 			open={true}
-			title={'How do you want to enter the meeting?'}
+			title={'How do you want to enter the meetings?'}
 			confirmLabel={'Enter'}
 			onConfirm={joinMeeting}
 		>
