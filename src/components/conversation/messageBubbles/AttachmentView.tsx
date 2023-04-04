@@ -23,7 +23,7 @@ import { AttachmentsApi } from '../../../network';
 import { getUserName } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
 import { AttachmentMessageType } from '../../../types/store/MessageTypes';
-import { getPreviewURL } from '../../../utils/attachmentUtils';
+import { getThumbnailURL } from '../../../utils/attachmentUtils';
 import { calculateAvatarColor } from '../../../utils/styleUtils';
 
 const HoverContainer = styled(Container)`
@@ -52,6 +52,7 @@ const PreviewContainer = styled(Container)`
 	}
 `;
 const AttachmentImg = styled.img`
+	max-height: 15.625rem;
 	max-width: 100%;
 	mask-image: linear-gradient(
 		180deg,
@@ -115,7 +116,7 @@ const AttachmentView: FC<AttachmentViewProps> = ({ attachment, from, isMyMessage
 	const userColor = useMemo(() => calculateAvatarColor(senderIdentifier || ''), [senderIdentifier]);
 
 	const previewURL = useMemo(
-		() => getPreviewURL(attachment.id, attachment.mimeType),
+		() => getThumbnailURL(attachment.id, attachment.mimeType),
 		[attachment.id, attachment.mimeType]
 	);
 

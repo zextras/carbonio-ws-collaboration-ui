@@ -25,7 +25,7 @@ import usePreview from '../../../hooks/usePreview';
 import { getUserName, getUserSelector } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
 import { DeletedMessage, MessageType, TextMessage } from '../../../types/store/MessageTypes';
-import { getPreviewURL } from '../../../utils/attachmentUtils';
+import { getThumbnailURL } from '../../../utils/attachmentUtils';
 import { calculateAvatarColor } from '../../../utils/styleUtils';
 
 type RepliedTextMessageSectionViewProps = {
@@ -173,7 +173,7 @@ const RepliedTextMessageSectionView: FC<RepliedTextMessageSectionViewProps> = ({
 
 	const previewURL = useMemo(() => {
 		if (repliedMessage.type === MessageType.TEXT_MSG && repliedMessage.attachment) {
-			return getPreviewURL(repliedMessage.attachment.id, repliedMessage.attachment.mimeType);
+			return getThumbnailURL(repliedMessage.attachment.id, repliedMessage.attachment.mimeType);
 		}
 		return undefined;
 	}, [repliedMessage]);
