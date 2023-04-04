@@ -168,19 +168,25 @@ class XMPPClient implements IXMPPClient {
 
 	// Request my contact list
 	public getContactList(): void {
-		const iq = $iq({ type: 'get' }).c('query', { xmlns: Strophe.NS.ROSTER });
-		this.connection.sendIQ(iq, onGetRosterResponse.bind(this), onErrorStanza);
+		if (this.connection && this.connection.connected) {
+			const iq = $iq({ type: 'get' }).c('query', { xmlns: Strophe.NS.ROSTER });
+			this.connection.sendIQ(iq, onGetRosterResponse.bind(this), onErrorStanza);
+		}
 	}
 
 	// Send my 'presence' event to all my contacts
 	public setOnline(): void {
-		this.connection.send($pres());
+		if (this.connection && this.connection.connected) {
+			this.connection.send($pres());
+		}
 	}
 
 	// Request last activity date of a particular user
 	public getLastActivity(jid: string): void {
-		const iq = $iq({ type: 'get', to: jid }).c('query', { xmlns: Strophe.NS.LAST_ACTIVITY });
-		this.connection.sendIQ(iq, onGetLastActivityResponse, onErrorStanza);
+		if (this.connection && this.connection.connected) {
+			const iq = $iq({ type: 'get', to: jid }).c('query', { xmlns: Strophe.NS.LAST_ACTIVITY });
+			this.connection.sendIQ(iq, onGetLastActivityResponse, onErrorStanza);
+		}
 	}
 
 	/**
@@ -190,14 +196,18 @@ class XMPPClient implements IXMPPClient {
 
 	// Request the supported form
 	public getInbox(): void {
-		const iq = $iq({ type: 'get' }).c('inbox', { xmlns: Strophe.NS.INBOX });
-		this.connection.sendIQ(iq, onGetInboxResponse, onErrorStanza);
+		if (this.connection && this.connection.connected) {
+			const iq = $iq({ type: 'get' }).c('inbox', { xmlns: Strophe.NS.INBOX });
+			this.connection.sendIQ(iq, onGetInboxResponse, onErrorStanza);
+		}
 	}
 
 	// Fetch the inbox and get initial information:
 	public setInbox(): void {
-		const iq = $iq({ type: 'set' }).c('inbox', { xmlns: Strophe.NS.INBOX });
-		this.connection.sendIQ(iq, onSetInboxResponse, onErrorStanza);
+		if (this.connection && this.connection.connected) {
+			const iq = $iq({ type: 'set' }).c('inbox', { xmlns: Strophe.NS.INBOX });
+			this.connection.sendIQ(iq, onSetInboxResponse, onErrorStanza);
+		}
 	}
 
 	/**
@@ -207,13 +217,15 @@ class XMPPClient implements IXMPPClient {
 
 	// Send a text message
 	sendChatMessage(roomId: string, message: string): void {
-		const uuid = uuidGenerator();
-		const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat', id: uuid })
-			.c('body')
-			.t(message)
-			.up()
-			.c('markable', { xmlns: Strophe.NS.MARKERS });
-		this.connection.send(msg);
+		if (this.connection && this.connection.connected) {
+			const uuid = uuidGenerator();
+			const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat', id: uuid })
+				.c('body')
+				.t(message)
+				.up()
+				.c('markable', { xmlns: Strophe.NS.MARKERS });
+			this.connection.send(msg);
+		}
 	}
 
 	/**
@@ -226,16 +238,18 @@ class XMPPClient implements IXMPPClient {
 		replyTo: string,
 		replyMessageId: string
 	): void {
-		const to = `${carbonizeMUC(replyTo)}/${carbonizeMUC(roomId)}}`;
-		const uuid = uuidGenerator();
-		const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat', id: uuid })
-			.c('body')
-			.t(message)
-			.up()
-			.c('markable', { xmlns: Strophe.NS.MARKERS })
-			.up()
-			.c('reply', { to, id: replyMessageId, xmlns: Strophe.NS.REPLY });
-		this.connection.send(msg);
+		if (this.connection && this.connection.connected) {
+			const to = `${carbonizeMUC(replyTo)}/${carbonizeMUC(roomId)}}`;
+			const uuid = uuidGenerator();
+			const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat', id: uuid })
+				.c('body')
+				.t(message)
+				.up()
+				.c('markable', { xmlns: Strophe.NS.MARKERS })
+				.up()
+				.c('reply', { to, id: replyMessageId, xmlns: Strophe.NS.REPLY });
+			this.connection.send(msg);
+		}
 	}
 
 	/**
@@ -243,11 +257,13 @@ class XMPPClient implements IXMPPClient {
 	 * Documentation: https://xmpp.org/extensions/xep-0424.html
 	 */
 	sendChatMessageDeletion(roomId: string, messageId: string): void {
-		const uuid = uuidGenerator();
-		const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat', id: uuid })
-			.c('apply-to', { id: messageId, xmlns: Strophe.NS.XMPP_FASTEN })
-			.c('retract', { xmlns: Strophe.NS.XMPP_RETRACT });
-		this.connection.send(msg);
+		if (this.connection && this.connection.connected) {
+			const uuid = uuidGenerator();
+			const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat', id: uuid })
+				.c('apply-to', { id: messageId, xmlns: Strophe.NS.XMPP_FASTEN })
+				.c('retract', { xmlns: Strophe.NS.XMPP_RETRACT });
+			this.connection.send(msg);
+		}
 	}
 
 	/**
@@ -255,16 +271,18 @@ class XMPPClient implements IXMPPClient {
 	 * Documentation: https://xmpp.org/extensions/xep-0308.html
 	 */
 	sendChatMessageCorrection(roomId: string, message: string, messageId: string): void {
-		const uuid = uuidGenerator();
-		const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat', id: uuid })
-			.c('body')
-			.t(message)
-			.up()
-			.c('replace', {
-				id: messageId,
-				xmlns: Strophe.NS.XMPP_CORRECT
-			});
-		this.connection.send(msg);
+		if (this.connection && this.connection.connected) {
+			const uuid = uuidGenerator();
+			const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat', id: uuid })
+				.c('body')
+				.t(message)
+				.up()
+				.c('replace', {
+					id: messageId,
+					xmlns: Strophe.NS.XMPP_CORRECT
+				});
+			this.connection.send(msg);
+		}
 	}
 
 	/**
@@ -272,74 +290,82 @@ class XMPPClient implements IXMPPClient {
 	 * Documentation: https://xmpp.org/extensions/xep-0297.html
 	 */
 	forwardMessage(message: TextMessage, roomIds: string[]): void {
-		const isMyMessage = message.from === useStore.getState().session.id;
-		if (isMyMessage) {
-			forEach(roomIds, (roomId) => this.sendChatMessage(roomId, message.text));
-		} else {
-			forEach(roomIds, (roomId) => {
-				const uuid = uuidGenerator();
-				const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat', id: uuid })
-					.c('body')
-					.t('')
-					.up()
-					.c('forwarded', { xmlns: Strophe.NS.FORWARD })
-					.c('delay', { xmlns: 'urn:xmpp:delay', stamp: dateToISODate(message.date) })
-					.up()
-					.c('message', {
-						from: carbonizeMUC(message.from),
-						id: message.id,
-						to: carbonizeMUC(message.roomId),
-						type: 'groupchat',
-						xmlns: 'jabber:client'
-					})
-					.c('body')
-					.t(message.text)
-					.up()
-					.up()
-					.up()
-					.c('markable', { xmlns: Strophe.NS.MARKERS });
-				this.connection.send(msg);
-			});
+		if (this.connection && this.connection.connected) {
+			const isMyMessage = message.from === useStore.getState().session.id;
+			if (isMyMessage) {
+				forEach(roomIds, (roomId) => this.sendChatMessage(roomId, message.text));
+			} else {
+				forEach(roomIds, (roomId) => {
+					const uuid = uuidGenerator();
+					const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat', id: uuid })
+						.c('body')
+						.t('')
+						.up()
+						.c('forwarded', { xmlns: Strophe.NS.FORWARD })
+						.c('delay', { xmlns: 'urn:xmpp:delay', stamp: dateToISODate(message.date) })
+						.up()
+						.c('message', {
+							from: carbonizeMUC(message.from),
+							id: message.id,
+							to: carbonizeMUC(message.roomId),
+							type: 'groupchat',
+							xmlns: 'jabber:client'
+						})
+						.c('body')
+						.t(message.text)
+						.up()
+						.up()
+						.up()
+						.c('markable', { xmlns: Strophe.NS.MARKERS });
+					this.connection.send(msg);
+				});
+			}
 		}
 	}
 
 	// Request the full history of a room
 	requestFullHistory(roomId: string): void {
-		const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) }).c('query', { xmlns: Strophe.NS.MAM });
-		this.connection.sendIQ(iq, onRequestHistory.bind(this), onErrorStanza);
+		if (this.connection && this.connection.connected) {
+			const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) }).c('query', {
+				xmlns: Strophe.NS.MAM
+			});
+			this.connection.sendIQ(iq, onRequestHistory.bind(this), onErrorStanza);
+		}
 	}
 
 	// Request n messages before end date but not before start date
 	requestHistory(roomId: string, endHistory: number, quantity = 5): void {
-		const clearedAt = useStore.getState().rooms[roomId].userSettings?.clearedAt;
-		const startHistory = clearedAt || useStore.getState().rooms[roomId].createdAt;
-		console.log('History conversation request triggered');
-		// Ask for ${QUANTITY} messages before end date but not before start date
-		const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
-			.c('query', { xmlns: Strophe.NS.MAM, queryid: MamRequestType.HISTORY })
-			.c('x', { type: 'submit' })
-			.c('field', { var: 'FORM_TYPE', type: 'hidden' })
-			.c('value')
-			.t('urn:xmpp:mam:2')
-			.up()
-			.up()
-			.c('field', { var: 'start' })
-			.c('value')
-			.t(dateToISODate(startHistory))
-			.up()
-			.up()
-			.c('field', { var: 'end' })
-			.c('value')
-			.t(dateToISODate(endHistory))
-			.up()
-			.up()
-			.up()
-			.c('set', { xmlns: 'http://jabber.org/protocol/rsm' })
-			.c('max')
-			.t(quantity)
-			.up()
-			.c('before');
-		this.connection.sendIQ(iq, onRequestHistory.bind(this), onErrorStanza);
+		if (this.connection && this.connection.connected) {
+			const clearedAt = useStore.getState().rooms[roomId].userSettings?.clearedAt;
+			const startHistory = clearedAt || useStore.getState().rooms[roomId].createdAt;
+			console.log('History conversation request triggered');
+			// Ask for ${QUANTITY} messages before end date but not before start date
+			const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
+				.c('query', { xmlns: Strophe.NS.MAM, queryid: MamRequestType.HISTORY })
+				.c('x', { type: 'submit' })
+				.c('field', { var: 'FORM_TYPE', type: 'hidden' })
+				.c('value')
+				.t('urn:xmpp:mam:2')
+				.up()
+				.up()
+				.c('field', { var: 'start' })
+				.c('value')
+				.t(dateToISODate(startHistory))
+				.up()
+				.up()
+				.c('field', { var: 'end' })
+				.c('value')
+				.t(dateToISODate(endHistory))
+				.up()
+				.up()
+				.up()
+				.c('set', { xmlns: 'http://jabber.org/protocol/rsm' })
+				.c('max')
+				.t(quantity)
+				.up()
+				.c('before');
+			this.connection.sendIQ(iq, onRequestHistory.bind(this), onErrorStanza);
+		}
 	}
 
 	requestHistoryBetweenTwoMessage(
@@ -347,18 +373,20 @@ class XMPPClient implements IXMPPClient {
 		olderMessageId: string,
 		newerMessageId: string
 	): void {
-		const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
-			.c('query', { xmlns: Strophe.NS.MAM })
-			.c('x', { xmlns: 'jabber:x:data' })
-			.c('field', { var: 'from_id' })
-			.c('value')
-			.t(olderMessageId)
-			.up()
-			.up()
-			.c('field', { var: 'to_id' })
-			.c('value')
-			.t(newerMessageId);
-		this.connection.sendIQ(iq, onRequestHistory.bind(this), onErrorStanza);
+		if (this.connection && this.connection.connected) {
+			const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
+				.c('query', { xmlns: Strophe.NS.MAM })
+				.c('x', { xmlns: 'jabber:x:data' })
+				.c('field', { var: 'from_id' })
+				.c('value')
+				.t(olderMessageId)
+				.up()
+				.up()
+				.c('field', { var: 'to_id' })
+				.c('value')
+				.t(newerMessageId);
+			this.connection.sendIQ(iq, onRequestHistory.bind(this), onErrorStanza);
+		}
 	}
 
 	requestMessageSubjectOfReply(
@@ -366,22 +394,24 @@ class XMPPClient implements IXMPPClient {
 		messageSubjectOfReplyId: string,
 		replyMessageId: string
 	): void {
-		const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
-			.c('query', { xmlns: Strophe.NS.MAM, queryid: MamRequestType.REPLIED })
-			.c('x', { xmlns: 'jabber:x:data' })
-			.c('field', { var: 'from_id' })
-			.c('value')
-			.t(messageSubjectOfReplyId)
-			.up()
-			.up()
-			.c('field', { var: 'to_id' })
-			.c('value')
-			.t(messageSubjectOfReplyId);
-		this.connection.sendIQ(
-			iq,
-			(stanza) => onRequestSingleMessage(replyMessageId, stanza),
-			onErrorStanza
-		);
+		if (this.connection && this.connection.connected) {
+			const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
+				.c('query', { xmlns: Strophe.NS.MAM, queryid: MamRequestType.REPLIED })
+				.c('x', { xmlns: 'jabber:x:data' })
+				.c('field', { var: 'from_id' })
+				.c('value')
+				.t(messageSubjectOfReplyId)
+				.up()
+				.up()
+				.c('field', { var: 'to_id' })
+				.c('value')
+				.t(messageSubjectOfReplyId);
+			this.connection.sendIQ(
+				iq,
+				(stanza) => onRequestSingleMessage(replyMessageId, stanza),
+				onErrorStanza
+			);
+		}
 	}
 
 	/**
@@ -391,18 +421,22 @@ class XMPPClient implements IXMPPClient {
 
 	// Send "I'm typing" information to all the users on the room
 	sendIsWriting(roomId: string): void {
-		const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat' }).c('composing', {
-			xmlns: Strophe.NS.CHAT_STATE
-		});
-		this.connection.send(msg);
+		if (this.connection && this.connection.connected) {
+			const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat' }).c('composing', {
+				xmlns: Strophe.NS.CHAT_STATE
+			});
+			this.connection.send(msg);
+		}
 	}
 
 	// Sending a paused event to all users on the room
 	sendPaused(roomId: string): void {
-		const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat' }).c('paused', {
-			xmlns: Strophe.NS.CHAT_STATE
-		});
-		this.connection.send(msg);
+		if (this.connection && this.connection.connected) {
+			const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat' }).c('paused', {
+				xmlns: Strophe.NS.CHAT_STATE
+			});
+			this.connection.send(msg);
+		}
 	}
 
 	/**
@@ -412,20 +446,24 @@ class XMPPClient implements IXMPPClient {
 
 	// Send confirmation that I read a certain message
 	readMessage(roomId: string, messageId: string): void {
-		const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat' }).c('displayed', {
-			xmlns: Strophe.NS.MARKERS,
-			id: messageId
-		});
-		this.connection.send(msg);
+		if (this.connection && this.connection.connected) {
+			const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat' }).c('displayed', {
+				xmlns: Strophe.NS.MARKERS,
+				id: messageId
+			});
+			this.connection.send(msg);
+		}
 	}
 
 	// Request last message read date of all the members of a room
 	lastMarkers(roomId: string): void {
-		const iq = $iq({ type: 'get' }).c('query', {
-			xmlns: Strophe.NS.SMART_MARKERS,
-			peer: carbonizeMUC(roomId)
-		});
-		this.connection.sendIQ(iq, onSmartMarkers, onErrorStanza);
+		if (this.connection && this.connection.connected) {
+			const iq = $iq({ type: 'get' }).c('query', {
+				xmlns: Strophe.NS.SMART_MARKERS,
+				peer: carbonizeMUC(roomId)
+			});
+			this.connection.sendIQ(iq, onSmartMarkers, onErrorStanza);
+		}
 	}
 }
 
