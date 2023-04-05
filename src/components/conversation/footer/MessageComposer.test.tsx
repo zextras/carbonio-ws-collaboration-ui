@@ -72,6 +72,6 @@ describe('MessageComposer', () => {
 		// Button status while user writes
 		const textArea = screen.getByRole('textbox');
 		await user.type(textArea, ' hi! ');
-		expect(selectFileButton).not.toBeVisible();
+		expect(selectFileButton).toBeVisible();
 	});
 });

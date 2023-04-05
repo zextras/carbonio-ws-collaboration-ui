@@ -2,8 +2,10 @@
     "action": {
         "activateNotifications": "Activate Notifications",
         "addAttachment": "Add attachment",
+        "addMoreAttachments": "Add {{counter}} attachments",
         "addNewMembers": "Add New Members",
         "addNewMembersTo": "Add new members to {{roomName}}",
+        "addSingleAttachment": "Add {{counter}} attachment",
         "clearHistory": "Clear History",
         "close": "Close",
         "copy": "Copy",
@@ -40,7 +42,9 @@
         "attachLinkFiles": "Attach public link from Files",
         "dragAndDrop": "Drag&Drop Mode",
         "dropHereDescription": "Drop here your attachments to quickly add them to this chat",
-        "errorUploadingFile": ""
+        "errorUploadingFile": "Something went wrong uploading {{file}}",
+        "stopUpload": "Stop upload",
+        "uploadAborted": "Upload has been interrupted"
     },
     "configurationMessages": {
         "roomNameChanged": "{{name}} changed the title of this Group in \"<i>{{roomName}}</i>\"",
@@ -167,6 +171,7 @@
     },
     "titlePlaceholder": "Your Group's Title",
     "tooltip": {
+        "clear": "Clear",
         "close": "Close",
         "demoteModerator": "Demote moderator",
         "disableModalButton": "Choose at least one address",
@@ -184,6 +189,7 @@
         "messageSent": "Sent",
         "promoteModerator": "Promote to moderator",
         "promoteSomeoneElseToModerator": "Promote someone else to moderator to leave",
+        "removeCaption": "Remove caption",
         "removeMember": "Remove member",
         "room": {
             "resetPicture": "Reset picture",
@@ -194,6 +200,7 @@
         "sendMessage": "Send message",
         "showConversationList": "Show conversation list",
         "uploadAttachment": "Upload an attachment",
+        "uploading": "Uploading",
         "userAvatar": {
             "resetAvatar": "Reset avatar",
             "updateAvatar": "Update avatar",

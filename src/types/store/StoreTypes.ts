@@ -85,7 +85,7 @@ export type MarkersStoreSlice = {
 
 export type ActiveConversationsSlice = {
 	activeConversations: ActiveConversationsMap;
-	setDraftMessage: (roomId: string, sended: boolean, message?: string) => void;
+	setDraftMessage: (roomId: string, sent: boolean, message?: string) => void;
 	setIdMessageWhereScrollIsStopped: (roomId: string, messageId: string) => void;
 	setPinnedMessage: (roomId: string, message: object) => void;
 	setInputHasFocus: (roomId: string, hasFocus: boolean) => void;

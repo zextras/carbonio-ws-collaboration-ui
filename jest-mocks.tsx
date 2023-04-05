@@ -197,3 +197,5 @@ global.fetch = jest.fn(() =>
 		headers: { get: (): string => 'application/json' }
 	})
 );
+
+global.URL.createObjectURL = jest.fn();

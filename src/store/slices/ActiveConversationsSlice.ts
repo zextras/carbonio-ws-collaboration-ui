@@ -6,7 +6,7 @@
  */
 
 import produce from 'immer';
-import { find, forEach, remove } from 'lodash';
+import { find, findIndex, forEach, remove } from 'lodash';
 
 import { FileToUpload, messageActionType } from '../../types/store/ActiveConversationTypes';
 import { AttachmentMessageType } from '../../types/store/MessageTypes';
@@ -137,10 +137,10 @@ export const useActiveConversationsSlice = (
 			'AC/SET_SCROLL_POSITION'
 		);
 	},
-	setDraftMessage: (roomId: string, sended: boolean, message?: string): void => {
+	setDraftMessage: (roomId: string, sent: boolean, message?: string): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (sended) {
+				if (sent) {
 					if (draft.activeConversations[roomId]) {
 						delete draft.activeConversations[roomId].draftMessage;
 					}
@@ -288,6 +288,41 @@ export const useActiveConversationsSlice = (
 		set(
 			produce((draft: RootStore) => {
 				if (draft.activeConversations[roomId].filesToAttach) {
+					// we set as active a different file only if the one we are removing is the selected one
+					// before to remove the file, we set as selected the once who comes after if present otherwise the previous one
+					const fileToRemoveIsSelected = find(
+						draft.activeConversations[roomId].filesToAttach,
+						(file) => file.fileId === fileTempId && file.hasFocus
+					);
+
+					if (fileToRemoveIsSelected) {
+						const fileToRemoveIdx = findIndex(draft.activeConversations[roomId].filesToAttach, [
+							'fileId',
+							fileTempId
+						]);
+						forEach(draft.activeConversations[roomId].filesToAttach, (file) => {
+							file.hasFocus = false;
+						});
+
+						if (draft.activeConversations[roomId].filesToAttach![fileToRemoveIdx + 1]) {
+							draft.activeConversations[roomId].filesToAttach![fileToRemoveIdx + 1].hasFocus = true;
+							if (
+								draft.activeConversations[roomId].filesToAttach![fileToRemoveIdx + 1].description
+							) {
+								draft.activeConversations[roomId].draftMessage =
+									draft.activeConversations[roomId].filesToAttach![fileToRemoveIdx + 1].description;
+							}
+						} else if (draft.activeConversations[roomId].filesToAttach![fileToRemoveIdx - 1]) {
+							draft.activeConversations[roomId].filesToAttach![fileToRemoveIdx - 1].hasFocus = true;
+							if (
+								draft.activeConversations[roomId].filesToAttach![fileToRemoveIdx - 1].description
+							) {
+								draft.activeConversations[roomId].draftMessage =
+									draft.activeConversations[roomId].filesToAttach![fileToRemoveIdx - 1].description;
+							}
+						}
+					}
+
 					remove(
 						draft.activeConversations[roomId].filesToAttach!,
 						(file) => file.fileId === fileTempId

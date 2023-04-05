@@ -9,7 +9,6 @@ import { forEach } from 'lodash';
 import React, { useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { v4 as uuidGenerator } from 'uuid';
 
 import { getFilesToUploadArray } from '../../../store/selectors/ActiveConversationsSelectors';
 import useStore from '../../../store/Store';
@@ -36,29 +35,43 @@ const AttachmentSelector: React.FC<AttachmentSelectorProps> = ({ roomId }) => {
 	const attachLinkLabel = t('attachments.attachLinkFiles', 'Attach public link from Files');
 	const addLocalLabel = t('attachments.addFromLocal', 'Add from local');
 
+	const setInputHasFocus = useStore((store) => store.setInputHasFocus);
 	const setFilesToAttach = useStore((store) => store.setFilesToAttach);
 	const filesToUploadArray = useStore((store) => getFilesToUploadArray(store, roomId));
 
 	const fileSelectorInputRef = useRef<HTMLInputElement>(null);
 
+	// generates random id format 'aaaaaaaa'-'aaaa'-'aaaa'-'aaaa'-'aaaaaaaaaaaa'
+	const uid = (): string => {
+		const s4 = (): string =>
+			Math.floor((1 + Math.random()) * 0x10000)
+				.toString(16)
+				.substring(1);
+		return `${s4() + s4()}-${s4()}-${s4()}-${s4()}-${s4()}${s4()}${s4()}`;
+	};
+
 	const selectFiles = useCallback(
 		(ev) => {
 			const { files } = ev.target as HTMLInputElement;
 			const listOfFiles: FileToUpload[] = [];
-			forEach(files, (file: File) => {
+			forEach(files, (file: File, index) => {
 				const fileLocalUrl = URL.createObjectURL(file);
-				const fileId = uuidGenerator();
+				const fileId = uid();
+				const isFocusedIfFirstOfListAndFirstToBeUploaded = index === 0 && !filesToUploadArray;
 				listOfFiles.push({
 					file,
 					fileId,
-					hasFocus: false,
+					hasFocus: isFocusedIfFirstOfListAndFirstToBeUploaded,
 					description: '',
 					localUrl: fileLocalUrl
 				});
 			});
 			setFilesToAttach(roomId, listOfFiles);
+			if (!filesToUploadArray) {
+				setInputHasFocus(roomId, true);
+			}
 		},
-		[setFilesToAttach, roomId]
+		[setFilesToAttach, roomId, setInputHasFocus, filesToUploadArray]
 	);
 
 	const handleClickAttachment = useCallback(
@@ -99,6 +112,7 @@ const AttachmentSelector: React.FC<AttachmentSelectorProps> = ({ roomId }) => {
 				</Dropdown>
 			</Tooltip>
 			<InputSelector
+				data-testid="inputSelector"
 				onChange={selectFiles}
 				type="file"
 				multiple

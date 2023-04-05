@@ -50,7 +50,8 @@ export default abstract class BaseAPI implements IBaseAPI {
 		endpoint: string,
 		requestType: RequestType,
 		file: File,
-		description?: string
+		description?: string,
+		signal?: AbortSignal
 	): Promise<any> {
 		return new Promise<any>((resolve, reject) => {
 			const reader = new FileReader();
@@ -67,7 +68,8 @@ export default abstract class BaseAPI implements IBaseAPI {
 				fetch(this.url + endpoint, {
 					method: requestType,
 					headers,
-					body: reader.result
+					body: reader.result,
+					signal
 				})
 					.then((resp: Response) => {
 						if (resp.ok) return resp;

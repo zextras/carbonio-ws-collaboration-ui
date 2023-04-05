@@ -9,9 +9,10 @@ import {
 	Container,
 	Tooltip,
 	Padding,
-	SnackbarManagerContext
+	SnackbarManagerContext,
+	Spinner
 } from '@zextras/carbonio-design-system';
-import { find, forEach } from 'lodash';
+import { find, forEach, map } from 'lodash';
 import React, {
 	BaseSyntheticEvent,
 	useCallback,
@@ -22,6 +23,7 @@ import React, {
 	useState
 } from 'react';
 import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 
 import { RoomsApi } from '../../../network';
 import {
@@ -35,6 +37,7 @@ import { getMessageSelector } from '../../../store/selectors/MessagesSelectors';
 import { getRoomUnreadsSelector } from '../../../store/selectors/UnreadsCounterSelectors';
 import useStore from '../../../store/Store';
 import { Emoji } from '../../../types/generics';
+import { AddRoomAttachmentResponse } from '../../../types/network/responses/roomsResponses';
 import { FileToUpload, messageActionType } from '../../../types/store/ActiveConversationTypes';
 import { Message, MessageType } from '../../../types/store/MessageTypes';
 import AttachmentSelector from './AttachmentSelector';
@@ -45,6 +48,21 @@ type ConversationMessageComposerProps = {
 	roomId: string;
 };
 
+const BlockUploadButton = styled(IconButton)`
+	display: none;
+`;
+const LoadingSpinner = styled(Spinner)``;
+const UploadSpinnerWrapper = styled(Container)`
+	&:hover {
+		${BlockUploadButton} {
+			display: block;
+		}
+		${LoadingSpinner} {
+			display: none;
+		}
+	}
+`;
+
 const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId }) => {
 	const xmppClient = useStore(getXmppClient);
 
@@ -52,6 +70,10 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 	const writeToSendTooltip = t('tooltip.writeToSend', 'Write a message to send it');
 	const selectEmojiLabel = t('tooltip.selectEmoji', 'Select emoji');
 	const sendMessageLabel = t('tooltip.sendMessage', 'Send message');
+	const uploadingLabel = t('tooltip.uploading', 'Uploading');
+	const uploadAbortedLabel = t('attachments.uploadAborted', 'Upload has been interrupted');
+	const stopUploadLabel = t('attachments.stopUpload', 'Stop upload');
+	const clearLabel = t('tooltip.removeCaption', 'Remove caption');
 
 	const referenceMessage = useStore((store) => getReferenceMessageView(store, roomId));
 	const draftMessage = useStore((store) => getDraftMessage(store, roomId));
@@ -63,13 +85,14 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 	const unsetFilesToAttach = useStore((store) => store.unsetFilesToAttach);
 	const unreadMessagesCount = useStore((store) => getRoomUnreadsSelector(store, roomId));
 	const filesToUploadArray = useStore((store) => getFilesToUploadArray(store, roomId));
-	const setFileFocusedToModify = useStore((store) => store.setFileFocusedToModify);
 	const messageReference = useStore<Message | undefined>((store) =>
 		getMessageSelector(store, roomId, referenceMessage?.messageId)
 	);
 
+	const [listAbortController, setListAbortController] = useState<AbortController[]>([]);
 	const [textMessage, setTextMessage] = useState('');
 	const [isWriting, setIsWriting] = useState(false);
+	const [isUploading, setIsUploading] = useState(false);
 	const [noMoreCharsOnInputComposer, setNoMoreCharsOnInputComposer] = useState(false);
 	const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
@@ -86,11 +109,22 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 		[textMessage, filesToUploadArray]
 	);
 
+	const abortUploadRequest = useCallback(() => {
+		forEach(listAbortController, (controller: AbortController) => controller.abort());
+		createSnackbar({
+			key: new Date().toLocaleString(),
+			type: 'info',
+			label: uploadAbortedLabel,
+			hideButton: true,
+			autoHideTimeout: 3000
+		});
+	}, [listAbortController, uploadAbortedLabel, createSnackbar]);
+
 	const checkMaxLengthAndSetMessage = useCallback(
 		(textareaValue: string): void => {
 			if (textareaValue.length > 4096) {
 				setTextMessage(textareaValue.slice(0, 4096));
-				// todo fix selection place when user is modifing in the middle of the components
+				// todo fix selection place when user is modifying in the middle of the components
 				// const cursorPosition = messageInputRef.current.selectionStart;
 				// messageInputRef.current.setSelectionRange(cursorPosition, cursorPosition);
 				setNoMoreCharsOnInputComposer(true);
@@ -113,46 +147,69 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 		[textMessage, messageInputRef]
 	);
 
-	const sendMessage = useCallback((): void => {
-		if (showEmojiPicker) setShowEmojiPicker(false);
-		const message = textMessage.trim();
-		const fileWithDescriptionChange: FileToUpload | undefined = find(
-			filesToUploadArray,
-			(file) => file.hasFocus
-		);
-
-		if (fileWithDescriptionChange) {
-			// user is attaching files and send the description,
-			// so we save the description for that attachment and clean the input
-			addDescriptionToFileToAttach(roomId, fileWithDescriptionChange.fileId, message);
-			setDraftMessage(roomId, true);
-			setTextMessage('');
-		} else if (!fileWithDescriptionChange && filesToUploadArray && filesToUploadArray.length > 0) {
-			// user clicked the send button or pressed enter and there is no text in the input,
-			// there are some attachment
-			const listOfRequest: any[] = [];
-			forEach(filesToUploadArray, (file) => {
-				const fileName = file.file.name;
+	const uploadAttachmentPromise = (
+		file: FileToUpload,
+		controller: AbortController
+	): Promise<AddRoomAttachmentResponse | void> => {
+		const fileName = file.file.name;
+		const { signal } = controller;
+		return RoomsApi.addRoomAttachment(
+			roomId,
+			file.file,
+			file.description ? file.description : undefined,
+			signal
+		).catch((reason: DOMException) => {
+			if (reason.name !== 'AbortError') {
 				const errorString = t(
 					'attachments.errorUploadingFile',
 					`Something went wrong uploading ${fileName}`,
 					{ file: fileName }
 				);
-				listOfRequest.push(
-					RoomsApi.addRoomAttachment(
-						roomId,
-						file.file,
-						file.description ? file.description : undefined
-					).catch(() => {
-						createSnackbar({
-							key: new Date().toLocaleString(),
-							type: 'error',
-							label: errorString
-						});
-					})
-				);
+				createSnackbar({
+					key: new Date().toLocaleString(),
+					type: 'error',
+					label: errorString,
+					hideButton: true,
+					autoHideTimeout: 3000
+				});
+			}
+		});
+	};
+
+	const sendMessage = useCallback((): void => {
+		if (showEmojiPicker) setShowEmojiPicker(false);
+		const message = textMessage.trim();
+		if (filesToUploadArray) {
+			const abortControllerList: AbortController[] = [];
+			const copyOfFilesToUploadArray = map(filesToUploadArray, (file) => {
+				const copyOfFile = { ...file };
+				if (copyOfFile.hasFocus) {
+					copyOfFile.description = message;
+				}
+				const controller = new AbortController();
+				abortControllerList.push(controller);
+				return copyOfFile;
 			});
-			Promise.all(listOfRequest).then(() => unsetFilesToAttach(roomId));
+
+			setIsUploading(true);
+			unsetFilesToAttach(roomId);
+			setDraftMessage(roomId, true);
+			setTextMessage('');
+			if (messageInputRef.current) messageInputRef.current.style.height = '';
+
+			setListAbortController(abortControllerList);
+			const uploadFilesInOrder = copyOfFilesToUploadArray.reduce(
+				(acc: Promise<AddRoomAttachmentResponse | void>, file, i) =>
+					acc.then(() => uploadAttachmentPromise(file, abortControllerList[i])),
+				Promise.resolve()
+			);
+
+			uploadFilesInOrder
+				.then(() => {
+					unsetFilesToAttach(roomId);
+					setIsUploading(false);
+				})
+				.catch(() => console.log('chea vaca'));
 		} else {
 			if (referenceMessage && referenceMessage.roomId === roomId) {
 				switch (referenceMessage.actionType) {
@@ -228,6 +285,15 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 		[sendDisabled, isWriting, sendMessage, xmppClient, roomId]
 	);
 
+	const clearInput = useCallback(() => {
+		setTextMessage('');
+		setDraftMessage(roomId, true);
+		if (messageInputRef.current) {
+			messageInputRef.current.style.height = '';
+			messageInputRef.current.focus();
+		}
+	}, [setTextMessage, setDraftMessage, roomId]);
+
 	const insertEmojiInMessage = useCallback(
 		(emoji: Emoji): void => {
 			if (messageInputRef.current) {
@@ -250,36 +316,13 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 	}, [roomId, setInputHasFocus]);
 
 	const handleOnBlur = useCallback(() => {
-		// if user is adding a description to a file and blur the input
-		// we save the description of the file and set the file as not focused
-		const fileWithDescriptionChanging: FileToUpload | undefined = find(
-			filesToUploadArray,
-			(file) => file.hasFocus
-		);
-		if (fileWithDescriptionChanging) {
-			const message = textMessage.trim();
-			if (message.length > 0) {
-				addDescriptionToFileToAttach(roomId, fileWithDescriptionChanging.fileId, message);
-			}
-			setFileFocusedToModify(roomId, fileWithDescriptionChanging.fileId, false);
-			setDraftMessage(roomId, true);
-			setTextMessage('');
-			if (messageInputRef.current) messageInputRef.current.style.height = '';
-		} else if (textMessage.length > 0) {
+		if (textMessage.length > 0) {
 			setDraftMessage(roomId, false, textMessage);
 		} else {
 			setDraftMessage(roomId, true);
 		}
 		setInputHasFocus(roomId, false);
-	}, [
-		filesToUploadArray,
-		textMessage,
-		setInputHasFocus,
-		roomId,
-		addDescriptionToFileToAttach,
-		setFileFocusedToModify,
-		setDraftMessage
-	]);
+	}, [textMessage, setInputHasFocus, roomId, setDraftMessage]);
 
 	const sendStopWriting = useCallback(() => xmppClient.sendPaused(roomId), [xmppClient, roomId]);
 
@@ -326,15 +369,6 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 		}
 	}, [inputHasFocus]);
 
-	useEffect(() => {
-		// set the message in the input as description of the first file
-		// when user add some or one file to attach and set the first file active for edit the description
-		if (filesToUploadArray && filesToUploadArray.length >= 1 && textMessage.length > 0) {
-			setFileFocusedToModify(roomId, filesToUploadArray[0].fileId, true);
-		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [filesToUploadArray, setFileFocusedToModify, roomId]);
-
 	const mouseEnterEvent = useCallback(() => {
 		if (emojiButtonRef.current) {
 			clearTimeout(emojiTimeoutRef.current);
@@ -364,6 +398,13 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 			}
 		};
 	}, [mouseEnterEvent, mouseLeaveEvent]);
+
+	const isDisabledWhileAttachingFile = useMemo(() => {
+		if (filesToUploadArray) {
+			return !find(filesToUploadArray, (file) => file.hasFocus);
+		}
+		return false;
+	}, [filesToUploadArray]);
 
 	return (
 		<Container height="fit">
@@ -398,8 +439,38 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 					handleKeyDownTextarea={handleKeyDown}
 					handleOnBlur={handleOnBlur}
 					handleOnFocus={handleOnFocus}
+					isDisabled={isDisabledWhileAttachingFile}
 				/>
-				{textMessage === '' && !messageReference && <AttachmentSelector roomId={roomId} />}
+				{!messageReference && !isUploading && !filesToUploadArray && (
+					<AttachmentSelector roomId={roomId} />
+				)}
+				{isUploading && (
+					<Tooltip label={stopUploadLabel} placement="top">
+						<UploadSpinnerWrapper width="2.25rem" height="2.5625rem" padding={{ all: '0.3125rem' }}>
+							<LoadingSpinner color="primary" title={uploadingLabel} />
+							<BlockUploadButton
+								onClick={abortUploadRequest}
+								iconColor="gray0"
+								size="large"
+								icon="CloseOutline"
+								title={stopUploadLabel}
+							/>
+						</UploadSpinnerWrapper>
+					</Tooltip>
+				)}
+				{filesToUploadArray && textMessage.length > 0 && (
+					<Tooltip label={clearLabel} placement="top">
+						<Container width="fit" height="fit" padding={{ all: '0.3125rem' }}>
+							<IconButton
+								onClick={clearInput}
+								iconColor="gray0"
+								size="large"
+								icon="BackspaceOutline"
+								disabled={sendDisabled}
+							/>
+						</Container>
+					</Tooltip>
+				)}
 				<Tooltip label={sendDisabled ? writeToSendTooltip : sendMessageLabel} placement="top">
 					<Container
 						width="fit"

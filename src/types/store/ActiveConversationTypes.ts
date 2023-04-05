@@ -16,7 +16,7 @@ export type ActiveConversation = {
 	isWritingList?: string[];
 	referenceMessage?: ReferenceMessage | undefined;
 	infoPanelStatus?: InfoPanelStatus;
-	filesToAttach?: FileToUpload[];
+	filesToAttach?: FileToUpload[] | undefined;
 };
 
 export type ActiveConversationsMap = {
