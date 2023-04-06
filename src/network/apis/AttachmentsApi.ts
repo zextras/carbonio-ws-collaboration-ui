@@ -156,7 +156,7 @@ class AttachmentsApi extends BaseAPI implements IAttachmentsApi {
 			if (format) array.push(`format=${format}`);
 			params = `?${array.join('&')}`;
 		}
-		return this.fetchAPI(`preview/pdf/${fileId}/thumbnail/${params}`, RequestType.GET);
+		return this.fetchAPI(`preview/pdf/${fileId}/${area}/thumbnail/${params}`, RequestType.GET);
 	}
 
 	public getPdfThumbnailURL = (

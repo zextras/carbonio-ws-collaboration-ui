@@ -18,3 +18,9 @@ export type AttachmentsPagination = {
 	filter: string;
 	attachments: Attachment[];
 };
+
+export type AdditionalHeaders = {
+	description?: string;
+	messageId?: string;
+	replyId?: string;
+};
