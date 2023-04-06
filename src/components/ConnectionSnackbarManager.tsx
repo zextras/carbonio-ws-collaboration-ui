@@ -57,30 +57,30 @@ const ConnectionSnackbarManager = (): ReactElement => {
 				<Snackbar
 					open={!chatsBeNetworkStatus}
 					onClose={(): void => setChatsBeSnackbarManuallyClosed(true)}
-					actionLabel="Close"
+					actionLabel="UNDERSTOOD"
 					disableAutoHide
 					type="warning"
-					label={'Error: Chats CE'}
+					label={'Something went wrong while connecting with Chats CE'}
 				/>
 			)}
 			{!hideXmppBeSnackbar && !(xmppNetworkStatus === undefined) && (
 				<Snackbar
 					open={!xmppNetworkStatus}
 					onClose={(): void => setXmppSnackbarManuallyClosed(true)}
-					actionLabel="Close"
+					actionLabel="UNDERSTOOD"
 					disableAutoHide
 					type="warning"
-					label={'Error: XMPP'}
+					label={'Something went wrong while connecting with XMPP'}
 				/>
 			)}
 			{!hideWebsocketSnackbar && !(websocketNetworkStatus === undefined) && (
 				<Snackbar
 					open={!websocketNetworkStatus}
 					onClose={(): void => setWebsocketSnackbarManuallyClosed(true)}
-					actionLabel="Close"
+					actionLabel="UNDERSTOOD"
 					disableAutoHide
 					type="warning"
-					label={'Error: WebSocket'}
+					label={'Something went wrong while connecting with WEBSOCKET'}
 				/>
 			)}
 		</SnackbarManager>
