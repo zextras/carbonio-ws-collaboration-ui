@@ -352,27 +352,26 @@ describe('Rooms API', () => {
 		);
 	});
 
-	// test('addRoomAttachment is called correctly', async () => {
-	// 	// Send addRoomAttachments request
-	// 	const testFile = new File([], 'file.pdf', { type: 'application/pdf' });
-	// 	const controller = new AbortController();
-	// 	const { signal } = controller;
-	// 	await roomsApi.addRoomAttachment('roomId', testFile, 'description', signal);
-	//
-	// 	// Set appropriate headers
-	// 	const headers = new Headers();
-	// 	headers.append('fileName', 'ZmlsZS5wZGY='); // Base64 of 'file.pdf'
-	// 	headers.append('mimeType', testFile.type);
-	// 	headers.append('description', 'description');
-	//
-	// 	// Check if fetch is called with the correct parameters
-	// 	expect(global.fetch).toHaveBeenCalledWith(`/services/chats/rooms/roomId/attachments`, {
-	// 		method: 'POST',
-	// 		headers,
-	// 		body: new ArrayBuffer(0),
-	// 		signal
-	// 	});
-	// });
+	test('addRoomAttachment is called correctly', async () => {
+		// Send addRoomAttachments request
+		const testFile = new File([], 'file.pdf', { type: 'application/pdf' });
+		const { signal } = new AbortController();
+		await roomsApi.addRoomAttachment('roomId', testFile, 'description', signal);
+
+		// Set appropriate headers
+		const headers = new Headers();
+		headers.append('fileName', 'ZmlsZS5wZGY='); // Base64 of 'file.pdf'
+		headers.append('mimeType', testFile.type);
+		headers.append('description', 'ZGVzY3JpcHRpb24='); // Base64 of 'description'
+
+		// Check if fetch is called with the correct parameters
+		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/rooms/roomId/attachments`, {
+			method: 'POST',
+			headers,
+			body: new ArrayBuffer(0),
+			signal
+		});
+	});
 
 	test('forwardMessages is called correctly', async () => {
 		// Send addRoom request
