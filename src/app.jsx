@@ -92,9 +92,14 @@ const initApp = () => {
 		.catch(() => store.setChatsBeStatus(false));
 };
 
+/*
+	TODO: move initApp inside App
+	but not now because there is a shell bug that makes mount App more that once
+ */
+initApp();
+
 export default function App() {
 	useEffect(() => {
-		initApp();
 		addRoute({
 			route: CHATS_ROUTE_TEST,
 			position: 90,
