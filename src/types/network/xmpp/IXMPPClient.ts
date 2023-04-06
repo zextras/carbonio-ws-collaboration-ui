@@ -35,6 +35,7 @@ interface IXMMPClient {
 		messageSubjectOfReplyId: string,
 		replyMessageId: string
 	): void;
+	requestMessageToForward(roomId: string, messageId: string): Promise<Element>;
 	// Chat state
 	sendIsWriting(roomId: string): void;
 	sendPaused(roomId: string): void;

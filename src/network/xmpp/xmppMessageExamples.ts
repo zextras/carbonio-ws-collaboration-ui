@@ -10,16 +10,16 @@
  * Presence stanzas
  */
 // Presence stanza received after a roster iq or when a user logs in
-const loginPresenceStanza = `<presence xmlns="jabber:client" from="userId@carbonio/23404c07056f067a1679-319950-697888" to="userId@carbonio/23404c07056f067a1679-319950-697888"/>`;
+export const loginPresenceStanza = `<presence xmlns="jabber:client" from="userId@carbonio/23404c07056f067a1679-319950-697888" to="userId@carbonio/23404c07056f067a1679-319950-697888"/>`;
 
 // Presence stanza received when a user logs out
-const logoutPresenceStanza = `<presence xmlns="jabber:client" from="userIde@carbonio/36d4feb9816b11381679-322829-747836" to="userId@carbonio/92f080e7f2dfa5fe1679-320957-345490" type="unavailable"/>`;
+export const logoutPresenceStanza = `<presence xmlns="jabber:client" from="userIde@carbonio/36d4feb9816b11381679-322829-747836" to="userId@carbonio/92f080e7f2dfa5fe1679-320957-345490" type="unavailable"/>`;
 
 /**
  * Inbox stanzas: messages received after an inbox iq
  */
 
-const textMessageFromInbox = `
+export const textMessageFromInbox = `
 <message xmlns="jabber:client" from="userId@carbonio" to="userId@carbonio/c7e75930c3382f901679-320886-854829" id="messageId">
     <result xmlns="erlang-solutions.com:xmpp:inbox:0" unread="0" queryid="queryId">
         <forwarded xmlns="urn:xmpp:forward:0">
@@ -36,7 +36,7 @@ const textMessageFromInbox = `
     </result>
 </message>`;
 
-const replyMessageFromInbox = `
+export const replyMessageFromInbox = `
 <message xmlns="jabber:client" from="userId@carbonio" to="userId@carbonio/ccca1b879044b0971679-323677-633848" id="1679-323677-729980">
     <result xmlns="erlang-solutions.com:xmpp:inbox:0" unread="0" queryid="queryId">
         <forwarded xmlns="urn:xmpp:forward:0">
@@ -54,7 +54,7 @@ const replyMessageFromInbox = `
     </result>
 </message>`;
 
-const forwardedTextMessageFromInbox = `
+export const forwardedTextMessageFromInbox = `
 <message xmlns="jabber:client" from="userId@carbonio" to="userId@carbonio/0637b3772630df231679-560156-424312" id="messageId">
     <result xmlns="erlang-solutions.com:xmpp:inbox:0" unread="0" queryid="queryId">
         <forwarded xmlns="urn:xmpp:forward:0">
@@ -80,7 +80,7 @@ const forwardedTextMessageFromInbox = `
  * History stanzas
  */
 
-const affiliationMessageFromHistory = `
+export const affiliationMessageFromHistory = `
 <message xmlns="jabber:client" from="roomId@muclight.carbonio" to="userId@carbonio/d01b4714166cf0531679-320498-378373" id="messageId">
     <result xmlns="urn:xmpp:mam:2" queryid="history" id="stanzaId">
         <forwarded xmlns="urn:xmpp:forward:0">
@@ -96,7 +96,7 @@ const affiliationMessageFromHistory = `
     </result>
 </message>`;
 
-const textMessageFromHistory = `
+export const textMessageFromHistory = `
 <message xmlns="jabber:client" from="roomId@muclight.carbonio" to="userId@carbonio/92f080e7f2dfa5fe1679-320957-345490" id="messageId">
     <result xmlns="urn:xmpp:mam:2" queryid="history" id="stanzaId">
         <forwarded xmlns="urn:xmpp:forward:0">
@@ -112,7 +112,7 @@ const textMessageFromHistory = `
     </result>
 </message>`;
 
-const replyMessageFromHistory = `
+export const replyMessageFromHistory = `
 <message xmlns="jabber:client" from="userId@carbonio" to="userId@carbonio/ccca1b879044b0971679-323677-633848" id="messageId">
     <result xmlns="erlang-solutions.com:xmpp:inbox:0" unread="0" queryid="queryId">
         <forwarded xmlns="urn:xmpp:forward:0">
@@ -130,7 +130,7 @@ const replyMessageFromHistory = `
     </result>
 </message>`;
 
-const forwardedTextMessageFromHistory = `
+export const forwardedTextMessageFromHistory = `
 <message xmlns="jabber:client" from="roomId@muclight.carbonio" to="userId@carbonio/f0932068bb1fbd061679-560392-720919" id="messageId">
     <result xmlns="urn:xmpp:mam:2" queryid="history" id="stanzaId">
         <forwarded xmlns="urn:xmpp:forward:0">
@@ -155,7 +155,7 @@ const forwardedTextMessageFromHistory = `
  * Realtime messages
  */
 
-const affiliationMessageRealTime = `
+export const affiliationMessageRealTime = `
 <message xmlns="jabber:client" from="roomId@muclight.carbonio" to="userId@carbonio" id="messageId" type="groupchat">
     <x xmlns="urn:xmpp:muclight:0#affiliations">
         <prev-version>1679-320164-756841</prev-version>
@@ -166,14 +166,14 @@ const affiliationMessageRealTime = `
     <stanza-id xmlns="urn:xmpp:sid:0" by="roomId@muclight.carbonio" id="stanzaId"/>
 </message>`;
 
-const textMessageRealTime = `
+export const textMessageRealTime = `
 <message xmlns="jabber:client" from="roomId@muclight.carbonio/userId@carbonio" to="userId@carbonio" id="messageId" type="groupchat">
     <body>hello!</body>
     <markable xmlns="urn:xmpp:chat-markers:0"/>
     <stanza-id xmlns="urn:xmpp:sid:0" by="roomId@muclight.carbonio" id="stanzaId"/>
 </message>`;
 
-const replyMessageRealTime = `
+export const replyMessageRealTime = `
 <message xmlns="jabber:client" from="roomId@muclight.carbonio/userId@carbonio" to="userId@carbonio" id="messageId" type="groupchat">
     <body>bene!</body>
     <markable xmlns="urn:xmpp:chat-markers:0"/>
@@ -181,7 +181,7 @@ const replyMessageRealTime = `
     <stanza-id xmlns="urn:xmpp:sid:0" by="roomid@muclight.carbonio" id="stanzaId"/>
 </message>`;
 
-const forwardedTextMessage = `
+export const forwardedTextMessage = `
 <message xmlns="jabber:client" from="roomId@muclight.carbonio/userId@carbonio" to="userId@carbonio" id="messageId" type="groupchat">
     <body/>
     <forwarded xmlns="urn:xmpp:forward:0">
@@ -193,7 +193,7 @@ const forwardedTextMessage = `
     <stanza-id xmlns="urn:xmpp:sid:0" by="roomId@muclight.carbonio" id="stanzaId"/>
 </message>`;
 
-const messageWithAttachment = `
+export const messageWithAttachment = `
 <message xmlns="jabber:client" from="roomId@muclight.carbonio/userId@carbonio" to="userId@carbonio" id="messageId" type="groupchat">
     <x xmlns="urn:xmpp:muclight:0#configuration">
         <operation>attachmentAdded</operation>
@@ -206,17 +206,17 @@ const messageWithAttachment = `
     <stanza-id xmlns="urn:xmpp:sid:0" by="roomId@muclight.carbonio" id="BTSDPG086R81"/>
 </message>`;
 
-const displayMessageRealTime = `
+export const displayMessageRealTime = `
 <message xmlns="jabber:client" from="roomId@muclight.carbonio/userId@carbonio" to="userId@carbonio" id="messageId" type="groupchat">
     <displayed xmlns="urn:xmpp:chat-markers:0" id="messageId"/>
 </message>`;
 
-const pauseWritingMessage = `
+export const pauseWritingMessage = `
 <message xmlns="jabber:client" from="roomId@muclight.carbonio/userId@carbonio" to="userId@carbonio" id="messageId" type="groupchat">
     <paused xmlns="http://jabber.org/protocol/chatstates"/>
 </message>`;
 
-const startWritingMessage = `
+export const startWritingMessage = `
 <message xmlns="jabber:client" from="roomId@muclight.carbonio/userId@carbonio" to="userId@carbonio" id="messageId" type="groupchat">
     <composing xmlns="http://jabber.org/protocol/chatstates"/>
 </message>`;

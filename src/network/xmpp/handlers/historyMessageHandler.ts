@@ -25,7 +25,8 @@ import XMPPClient from '../XMPPClient';
 
 export enum MamRequestType {
 	HISTORY = 'history',
-	REPLIED = 'replied'
+	REPLIED = 'replied',
+	FORWARDED = 'forwarded'
 }
 
 export function onHistoryMessageStanza(message: Element): true {
@@ -63,6 +64,15 @@ export function onHistoryMessageStanza(message: Element): true {
 					HistoryAccumulator.addReferenceForRepliedMessage(historyMessage);
 				} else {
 					console.warn('Replied message type not supported', historyMessage);
+				}
+				break;
+			}
+			case MamRequestType.FORWARDED: {
+				if (historyMessage.type === MessageType.TEXT_MSG) {
+					HistoryAccumulator.addReferenceForForwardedMessage(
+						historyMessage.stanzaId,
+						insideMessage
+					);
 				}
 				break;
 			}

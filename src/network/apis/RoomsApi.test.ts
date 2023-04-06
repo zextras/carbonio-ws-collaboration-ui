@@ -13,7 +13,6 @@ import {
 	createMockTextMessage
 } from '../../tests/createMock';
 import { dateToISODate } from '../../utils/dateUtil';
-import { encodeMessage } from '../xmpp/utility/encodeMessage';
 
 describe('Rooms API', () => {
 	test('listRooms is called correctly', async () => {
@@ -376,7 +375,7 @@ describe('Rooms API', () => {
 		// Send addRoom request
 		const message = createMockTextMessage();
 		const forwardedMessage = {
-			originalMessage: encodeMessage(message),
+			originalMessage: undefined,
 			originalMessageSentAt: dateToISODate(message.date)
 		};
 		await roomsApi.forwardMessages('roomId', [message]);

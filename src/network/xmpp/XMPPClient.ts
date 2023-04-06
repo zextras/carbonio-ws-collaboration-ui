@@ -346,6 +346,26 @@ class XMPPClient implements IXMPPClient {
 		);
 	}
 
+	requestMessageToForward(roomId: string, messageToForwardStanzaId: string): Promise<Element> {
+		return new Promise((resolve, reject) => {
+			const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
+				.c('query', { xmlns: Strophe.NS.MAM, queryid: MamRequestType.FORWARDED })
+				.c('x', { xmlns: 'jabber:x:data' })
+				.c('field', { var: 'from_id' })
+				.c('value')
+				.t(messageToForwardStanzaId)
+				.up()
+				.up()
+				.c('field', { var: 'to_id' })
+				.c('value')
+				.t(messageToForwardStanzaId);
+			this.connection.sendIQ(iq, resolve, (stanzaError) => {
+				onErrorStanza(stanzaError);
+				reject(stanzaError);
+			});
+		});
+	}
+
 	/**
 	 * CHAT STATE:
 	 * Control 'isWriting' information by sending 'composing' or 'paused' events.

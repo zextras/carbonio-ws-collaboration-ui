@@ -38,7 +38,7 @@ import {
 import { ChangeUserPictureResponse } from '../../types/network/responses/usersResponses';
 import { TextMessage } from '../../types/store/MessageTypes';
 import { dateToISODate } from '../../utils/dateUtil';
-import { encodeMessage } from '../xmpp/utility/encodeMessage';
+import HistoryAccumulator from '../xmpp/utility/HistoryAccumulator';
 
 class RoomsApi extends BaseAPI implements IRoomsApi {
 	// Singleton design pattern
@@ -174,11 +174,26 @@ class RoomsApi extends BaseAPI implements IRoomsApi {
 		roomId: string,
 		messages: TextMessage[]
 	): Promise<ForwardMessagesResponse> {
-		const messagesToForward = messages.map((message) => ({
-			originalMessage: encodeMessage(message),
-			originalMessageSentAt: dateToISODate(message.date)
-		}));
-		return this.fetchAPI(`rooms/${roomId}/forward`, RequestType.POST, messagesToForward);
+		const { xmppClient } = useStore.getState().connections;
+		const listOfMessages: { [stanzaId: string]: string } = {};
+
+		// Get the XML messages to forward from history
+		const promises = messages.map((message) =>
+			xmppClient.requestMessageToForward(message.roomId, message.stanzaId).then(() => {
+				const historyMessage = HistoryAccumulator.returnReferenceForForwardedMessage(
+					message.stanzaId
+				);
+				listOfMessages[message.stanzaId] = historyMessage?.outerHTML;
+			})
+		);
+
+		return Promise.all(promises).then(() => {
+			const messagesToForward = messages.map((message) => ({
+				originalMessage: listOfMessages[message.stanzaId],
+				originalMessageSentAt: dateToISODate(message.date)
+			}));
+			return this.fetchAPI(`rooms/${roomId}/forward`, RequestType.POST, messagesToForward);
+		});
 	}
 }
 
