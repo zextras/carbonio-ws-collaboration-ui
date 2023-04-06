@@ -33,6 +33,7 @@ describe('MessageComposer', () => {
 		setTimeout(() => {
 			expect(screen.queryByTestId('emojiPicker')).not.toBeInTheDocument();
 		}, 1500);
+		// await waitFor(() => expect(screen.queryByTestId('emojiPicker')).not.toBeInTheDocument());
 	});
 
 	test('Send message button status - initial status', () => {
@@ -73,5 +74,13 @@ describe('MessageComposer', () => {
 		const textArea = screen.getByRole('textbox');
 		await user.type(textArea, ' hi! ');
 		expect(selectFileButton).toBeVisible();
+	});
+	test('User type some text in the composer => text is displayed and button to send si enabled', async () => {
+		const { user } = setup(<MessageComposer roomId={'roomId'} />);
+		const textArea = screen.getByRole('textbox');
+		await user.type(textArea, ' hi! ');
+		expect(screen.getByTestId('icon: Navigation2').parentNode).not.toBeDisabled();
+		const textAreaUpdated = screen.getByRole('textbox');
+		expect((textAreaUpdated as HTMLTextAreaElement).value).toBe(' hi! ');
 	});
 });

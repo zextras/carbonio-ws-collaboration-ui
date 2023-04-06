@@ -13,6 +13,7 @@ import styled from 'styled-components';
 import { getFilesToUploadArray } from '../../../store/selectors/ActiveConversationsSelectors';
 import useStore from '../../../store/Store';
 import { FileToUpload } from '../../../types/store/ActiveConversationTypes';
+import { uid } from '../../../utils/attachmentUtils';
 
 type AttachmentSelectorProps = {
 	roomId: string;
@@ -40,15 +41,6 @@ const AttachmentSelector: React.FC<AttachmentSelectorProps> = ({ roomId }) => {
 	const filesToUploadArray = useStore((store) => getFilesToUploadArray(store, roomId));
 
 	const fileSelectorInputRef = useRef<HTMLInputElement>(null);
-
-	// generates random id format 'aaaaaaaa'-'aaaa'-'aaaa'-'aaaa'-'aaaaaaaaaaaa'
-	const uid = (): string => {
-		const s4 = (): string =>
-			Math.floor((1 + Math.random()) * 0x10000)
-				.toString(16)
-				.substring(1);
-		return `${s4() + s4()}-${s4()}-${s4()}-${s4()}-${s4()}${s4()}${s4()}`;
-	};
 
 	const selectFiles = useCallback(
 		(ev) => {

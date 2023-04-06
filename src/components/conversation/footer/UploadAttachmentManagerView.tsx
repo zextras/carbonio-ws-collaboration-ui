@@ -10,7 +10,6 @@ import { forEach, map } from 'lodash';
 import React, { useCallback, useContext, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { v4 as uuidGenerator } from 'uuid';
 
 import {
 	getDraftMessage,
@@ -22,7 +21,8 @@ import {
 	canDisplayPreview,
 	getAttachmentSize,
 	getAttachmentType,
-	getExtension
+	getExtension,
+	uid
 } from '../../../utils/attachmentUtils';
 
 type UploadAttachmentManagerViewProps = {
@@ -221,6 +221,7 @@ const UploadAttachmentManagerView: React.FC<UploadAttachmentManagerViewProps> = 
 					<HoverActions>
 						<Tooltip label={removeActionLabel} placement="top">
 							<FileCloseIconButton
+								data-testid={`removeSingleFile-${file.fileId}`}
 								backgroundColor="gray6"
 								borderRadius="round"
 								icon="Close"
@@ -231,7 +232,7 @@ const UploadAttachmentManagerView: React.FC<UploadAttachmentManagerViewProps> = 
 						{displayPreview && (
 							<Tooltip label={previewActionLabel} placement="top">
 								<IconButton
-									data-testid={'onto'}
+									data-testid={`previewSingleFile-${file.fileId}`}
 									backgroundColor="gray6"
 									borderRadius="round"
 									icon="EyeOutline"
@@ -293,7 +294,7 @@ const UploadAttachmentManagerView: React.FC<UploadAttachmentManagerViewProps> = 
 			const listOfFiles: FileToUpload[] = [];
 			forEach(files, (file: File, index) => {
 				const fileLocalUrl = URL.createObjectURL(file);
-				const fileId = uuidGenerator();
+				const fileId = uid();
 				const isFocusedIfFirstOfListAndFirstToBeUploaded = index === 0 && !filesToUploadArray;
 				listOfFiles.push({
 					file,
@@ -331,6 +332,7 @@ const UploadAttachmentManagerView: React.FC<UploadAttachmentManagerViewProps> = 
 					<Text color="secondary">{titleLabel}</Text>
 					<Tooltip label={closeTooltip} placement="top">
 						<IconButton
+							data-testid="closeFilesManager"
 							icon="Close"
 							iconColor="secondary"
 							size="medium"
@@ -351,6 +353,7 @@ const UploadAttachmentManagerView: React.FC<UploadAttachmentManagerViewProps> = 
 					</FileListContainer>
 					<Tooltip label={addAttachmentLabel} placement="top">
 						<IconButton
+							data-testid="addMoreFilesFromManager"
 							size="large"
 							icon="Plus"
 							iconColor="gray1"
@@ -360,7 +363,14 @@ const UploadAttachmentManagerView: React.FC<UploadAttachmentManagerViewProps> = 
 						/>
 					</Tooltip>
 				</Container>
-				<input onChange={selectFiles} type="file" multiple hidden ref={fileSelectorInputRef} />
+				<input
+					data-testid="addMoreFilesInput"
+					onChange={selectFiles}
+					type="file"
+					multiple
+					hidden
+					ref={fileSelectorInputRef}
+				/>
 			</Container>
 		);
 	}

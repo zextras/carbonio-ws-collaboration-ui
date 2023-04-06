@@ -15,11 +15,11 @@ import React, {
 	useState
 } from 'react';
 import styled from 'styled-components';
-import { v4 as uuidGenerator } from 'uuid';
 
 import { getFilesToUploadArray } from '../../store/selectors/ActiveConversationsSelectors';
 import useStore from '../../store/Store';
 import { FileToUpload } from '../../types/store/ActiveConversationTypes';
+import { uid } from '../../utils/attachmentUtils';
 import useMediaQueryCheck from '../../utils/useMediaQueryCheck';
 import ConversationHeader from './ConversationHeader';
 import DropZoneView from './DropZoneView';
@@ -37,9 +37,6 @@ type ChatsProps = {
 
 const Chat = ({ roomId, setInfoPanelOpen }: ChatsProps): ReactElement => {
 	const filesToUploadArray = useStore((store) => getFilesToUploadArray(store, roomId));
-	// const draftMessage = useStore((store) => getDraftMessage(store, roomId));
-	// const setDraftMessage = useStore((store) => store.setDraftMessage);
-	// const addDescriptionToFileToAttach = useStore((store) => store.addDescriptionToFileToAttach);
 	const setFilesToAttach = useStore((store) => store.setFilesToAttach);
 	const setInputHasFocus = useStore((store) => store.setInputHasFocus);
 
@@ -59,7 +56,7 @@ const Chat = ({ roomId, setInfoPanelOpen }: ChatsProps): ReactElement => {
 			const listOfFiles: FileToUpload[] = [];
 			forEach(files, (file: File, index) => {
 				const fileLocalUrl = URL.createObjectURL(file);
-				const fileId = uuidGenerator();
+				const fileId = uid();
 				const isFocusedIfFirstOfListAndFirstToBeUploaded = index === 0 && !filesToUploadArray;
 				listOfFiles.push({
 					file,

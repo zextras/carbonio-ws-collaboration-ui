@@ -94,3 +94,12 @@ export const getAttachmentSize = (attachmentSize: number): string | undefined =>
 	}
 	return undefined;
 };
+
+// generates random id format 'aaaaaaaa'-'aaaa'-'aaaa'-'aaaa'-'aaaaaaaaaaaa'
+export const uid = (): string => {
+	const s4 = (): string =>
+		Math.floor((1 + Math.random()) * 0x10000)
+			.toString(16)
+			.substring(1);
+	return `${s4() + s4()}-${s4()}-${s4()}-${s4()}-${s4()}${s4()}${s4()}`;
+};

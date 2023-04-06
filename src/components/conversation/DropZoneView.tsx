@@ -81,6 +81,7 @@ const DropZoneView = ({
 
 	return (
 		<BackDropLayout
+			data-testid="dropZoneView"
 			onDragOver={onDragOverEvent}
 			onDrop={onDropEvent}
 			onDragLeave={onDragLeaveEvent}
