@@ -4,6 +4,10 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { Strophe } from 'strophe.js';
+
+import { textMessageRealTime } from '../network/xmpp/xmppMessageExamples';
+
 export const xmppClient = {
 	connect: (): null => null,
 	getContactList: (): null => null,
@@ -15,7 +19,10 @@ export const xmppClient = {
 	sendChatMessageReply: (): null => null,
 	sendChatMessageDeletion: (): null => null,
 	sendChatMessageCorrection: (): null => null,
-	forwardMessage: (): null => null,
+	requestMessageToForward: (): Promise<Element> =>
+		new Promise((resolve) => {
+			resolve(Strophe.createHtml(textMessageRealTime));
+		}),
 	requestHistory: (): null => null,
 	requestHistoryBetweenTwoMessage: (): null => null,
 	requestMessageSubjectOfReply: (): null => null,

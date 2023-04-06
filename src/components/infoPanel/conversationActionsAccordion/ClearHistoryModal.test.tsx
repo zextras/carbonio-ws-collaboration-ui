@@ -8,11 +8,11 @@ import { screen } from '@testing-library/react';
 import React from 'react';
 import { setup } from 'test-utils';
 
+import ClearHistoryModal from './ClearHistoryModal';
 import { mockedClearHistoryRequest } from '../../../../jest-mocks';
 import useStore from '../../../store/Store';
 import { createMockRoom } from '../../../tests/createMock';
 import { RoomBe } from '../../../types/network/models/roomBeTypes';
-import ClearHistoryModal from './ClearHistoryModal';
 
 const mockRoom: RoomBe = createMockRoom({ id: 'roomId' });
 

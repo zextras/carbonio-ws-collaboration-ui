@@ -8,10 +8,10 @@ import { SnackbarManagerContext } from '@zextras/carbonio-design-system';
 import React, { FC, useCallback, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import ActionComponent from './ActionComponent';
 import { RoomsApi } from '../../../network';
 import { getRoomMutedSelector } from '../../../store/selectors/RoomsSelectors';
 import useStore from '../../../store/Store';
-import ActionComponent from './ActionComponent';
 
 type MuteProps = {
 	roomId: string;

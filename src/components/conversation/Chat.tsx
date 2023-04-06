@@ -16,15 +16,15 @@ import React, {
 } from 'react';
 import styled from 'styled-components';
 
+import ConversationHeader from './ConversationHeader';
+import DropZoneView from './DropZoneView';
+import ConversationFooter from './footer/ConversationFooter';
+import MessagesList from './MessagesList';
 import { getFilesToUploadArray } from '../../store/selectors/ActiveConversationsSelectors';
 import useStore from '../../store/Store';
 import { FileToUpload } from '../../types/store/ActiveConversationTypes';
 import { uid } from '../../utils/attachmentUtils';
 import useMediaQueryCheck from '../../utils/useMediaQueryCheck';
-import ConversationHeader from './ConversationHeader';
-import DropZoneView from './DropZoneView';
-import ConversationFooter from './footer/ConversationFooter';
-import MessagesList from './MessagesList';
 
 const CustomContainer = styled(Container)`
 	position: relative;

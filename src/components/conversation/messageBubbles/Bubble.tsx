@@ -9,11 +9,6 @@ import { Container, Padding } from '@zextras/carbonio-design-system';
 import React, { FC, useMemo } from 'react';
 import styled from 'styled-components';
 
-import { getRoomTypeSelector } from '../../../store/selectors/RoomsSelectors';
-import useStore from '../../../store/Store';
-import { TextMessage } from '../../../types/store/MessageTypes';
-import { RoomType } from '../../../types/store/RoomTypes';
-import { parseUrlOnMessage } from '../../../utils/parseUrlOnMessage';
 import AttachmentView from './AttachmentView';
 import BubbleContextualMenuDropDown, {
 	BubbleContextualMenuDropDownWrapper
@@ -23,6 +18,11 @@ import BubbleHeader from './BubbleHeader';
 import ForwardedTextMessageSectionView from './ForwardedMessageSectionView';
 import RepliedTextMessageSectionView from './RepliedTextMessageSectionView';
 import TextContentBubble from './TextContentBubble';
+import { getRoomTypeSelector } from '../../../store/selectors/RoomsSelectors';
+import useStore from '../../../store/Store';
+import { TextMessage } from '../../../types/store/MessageTypes';
+import { RoomType } from '../../../types/store/RoomTypes';
+import { parseUrlOnMessage } from '../../../utils/parseUrlOnMessage';
 
 type BubbleProps = {
 	message: TextMessage;
@@ -135,7 +135,6 @@ const Bubble: FC<BubbleProps> = ({
 				<ForwardedTextMessageSectionView
 					forwardedMessage={message.forwarded}
 					isMyMessage={isMyMessage}
-					roomId={message.roomId}
 				/>
 			)}
 			{message.attachment && (

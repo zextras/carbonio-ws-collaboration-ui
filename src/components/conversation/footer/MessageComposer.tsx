@@ -25,6 +25,9 @@ import React, {
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
+import AttachmentSelector from './AttachmentSelector';
+import EmojiPicker from './EmojiPicker';
+import MessageArea from './MessageArea';
 import { RoomsApi } from '../../../network';
 import {
 	getDraftMessage,
@@ -40,9 +43,6 @@ import { Emoji } from '../../../types/generics';
 import { AddRoomAttachmentResponse } from '../../../types/network/responses/roomsResponses';
 import { FileToUpload, messageActionType } from '../../../types/store/ActiveConversationTypes';
 import { Message, MessageType } from '../../../types/store/MessageTypes';
-import AttachmentSelector from './AttachmentSelector';
-import EmojiPicker from './EmojiPicker';
-import MessageArea from './MessageArea';
 
 type ConversationMessageComposerProps = {
 	roomId: string;

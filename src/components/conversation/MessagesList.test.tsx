@@ -9,6 +9,7 @@ import { act, renderHook } from '@testing-library/react-hooks';
 import React from 'react';
 import { setup, triggerObserver } from 'test-utils';
 
+import MessagesList from './MessagesList';
 import useStore from '../../store/Store';
 import {
 	createMockDeletedMessage,
@@ -25,7 +26,6 @@ import {
 } from '../../types/store/MessageTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 import { User } from '../../types/store/UserTypes';
-import MessagesList from './MessagesList';
 
 const user2Be: User = {
 	id: 'user2',

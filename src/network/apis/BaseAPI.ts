@@ -9,6 +9,7 @@ import { includes } from 'lodash';
 
 import useStore from '../../store/Store';
 import IBaseAPI, { RequestType } from '../../types/network/apis/IBaseAPI';
+import { AdditionalHeaders } from '../../types/network/models/attachmentTypes';
 
 export default abstract class BaseAPI implements IBaseAPI {
 	private readonly url: string = '/services/chats/';
@@ -16,7 +17,7 @@ export default abstract class BaseAPI implements IBaseAPI {
 	public fetchAPI(
 		endpoint: string,
 		method: RequestType,
-		data?: Record<string, unknown>
+		data?: Record<string, unknown> | Array<Record<string, unknown>>
 	): Promise<any> {
 		const URL = this.url + endpoint;
 		const headers = new Headers();
@@ -50,8 +51,8 @@ export default abstract class BaseAPI implements IBaseAPI {
 		endpoint: string,
 		requestType: RequestType,
 		file: File,
-		description?: string,
-		signal?: AbortSignal
+		signal?: AbortSignal,
+		optionalFields?: AdditionalHeaders
 	): Promise<any> {
 		return new Promise<any>((resolve, reject) => {
 			const reader = new FileReader();
@@ -59,7 +60,13 @@ export default abstract class BaseAPI implements IBaseAPI {
 				const headers = new Headers();
 				headers.append('fileName', btoa(encodeURIComponent(file.name)));
 				headers.append('mimeType', file.type);
-				description && headers.append('description', btoa(encodeURIComponent(description)));
+				if (optionalFields) {
+					optionalFields.description &&
+						headers.append('description', btoa(encodeURIComponent(optionalFields.description)));
+					optionalFields.messageId && headers.append('messageId', optionalFields.messageId);
+					optionalFields.replyId && headers.append('replyId', optionalFields.replyId);
+				}
+
 				// Add sessionId to headers only if it is already defined
 				const sessionId = useStore.getState().session.sessionId;
 				if (sessionId) {

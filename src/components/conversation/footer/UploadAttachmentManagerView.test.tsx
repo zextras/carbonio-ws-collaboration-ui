@@ -9,6 +9,8 @@ import { UserEvent } from '@testing-library/user-event/setup/setup';
 import React from 'react';
 import { setup } from 'test-utils';
 
+import MessageComposer from './MessageComposer';
+import UploadAttachmentManagerView from './UploadAttachmentManagerView';
 import useStore from '../../../store/Store';
 import {
 	createMockFile,
@@ -23,8 +25,6 @@ import { FileToUpload } from '../../../types/store/ActiveConversationTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 import { RootStore } from '../../../types/store/StoreTypes';
 import Chat from '../Chat';
-import MessageComposer from './MessageComposer';
-import UploadAttachmentManagerView from './UploadAttachmentManagerView';
 
 const mockedRoom: RoomBe = createMockRoom({
 	id: 'roomTest',

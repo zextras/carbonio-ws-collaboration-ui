@@ -4,10 +4,6 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { MemberBe, RoomBe } from '../network/models/roomBeTypes';
-import { UserBe } from '../network/models/userBeTypes';
-import IWebSocketClient from '../network/websocket/IWebSocketClient';
-import IXMPPClient from '../network/xmpp/IXMPPClient';
 import { ActiveConversationsMap, FileToUpload, messageActionType } from './ActiveConversationTypes';
 import { Connections } from './ConnectionsTypes';
 import { Marker, MarkersMap } from './MarkersTypes';
@@ -23,6 +19,10 @@ import { CapabilityList, Session } from './SessionTypes';
 import { TemporaryMessage, TemporaryMessagesMap } from './TemporaryMessagesReferencesTypes';
 import { UnreadsMap } from './UnreadsCounterTypes';
 import { UsersMap } from './UserTypes';
+import { MemberBe, RoomBe } from '../network/models/roomBeTypes';
+import { UserBe } from '../network/models/userBeTypes';
+import IWebSocketClient from '../network/websocket/IWebSocketClient';
+import IXMPPClient from '../network/xmpp/IXMPPClient';
 
 export type UsersStoreSlice = {
 	users: UsersMap;

@@ -15,6 +15,10 @@ export function wsEventsHandler(event: WsEvent): void {
 	const eventArrivesFromAnotherSession = event.sessionId !== useStore.getState().session.sessionId;
 
 	switch (event.type) {
+		case WsEventType.INITIALIZATION: {
+			state.setSessionId(event.sessionId);
+			break;
+		}
 		case WsEventType.ROOM_CREATED: {
 			if (eventArrivesFromAnotherSession) {
 				RoomsApi.getRoom(event.roomId)

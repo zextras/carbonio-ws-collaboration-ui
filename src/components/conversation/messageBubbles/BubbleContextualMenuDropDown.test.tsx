@@ -8,13 +8,13 @@ import { screen } from '@testing-library/react';
 import React from 'react';
 import { setup } from 'test-utils';
 
+import BubbleContextualMenuDropDown from './BubbleContextualMenuDropDown';
 import useStore from '../../../store/Store';
 import { createMockRoom, createMockTextMessage } from '../../../tests/createMock';
 import { RoomBe } from '../../../types/network/models/roomBeTypes';
 import { TextMessage } from '../../../types/store/MessageTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 import { RootStore } from '../../../types/store/StoreTypes';
-import BubbleContextualMenuDropDown from './BubbleContextualMenuDropDown';
 
 const mockedRoom: RoomBe = createMockRoom({
 	id: 'roomId',
@@ -128,8 +128,8 @@ describe('Bubble Contextual Menu - other user messages', () => {
 		expect(replyAction).toBeInTheDocument();
 		const copyAction = screen.getByText(/Copy/i);
 		expect(copyAction).toBeInTheDocument();
-		const forwardAction = screen.queryByText(/Forward/i);
-		expect(forwardAction).not.toBeInTheDocument();
+		const forwardAction = screen.getByText(/Forward/i);
+		expect(forwardAction).toBeInTheDocument();
 		const deleteAction = screen.queryByText(/Delete/i);
 		expect(deleteAction).not.toBeInTheDocument();
 		const downloadAction = screen.queryByText(/Download/i);
@@ -253,8 +253,8 @@ describe('Bubble Contextual Menu - my messages', () => {
 		expect(replyAction).toBeInTheDocument();
 		const copyAction = screen.getByText(/Copy/i);
 		expect(copyAction).toBeInTheDocument();
-		const forwardAction = screen.queryByText(/Forward/i);
-		expect(forwardAction).not.toBeInTheDocument();
+		const forwardAction = screen.getByText(/Forward/i);
+		expect(forwardAction).toBeInTheDocument();
 		const deleteAction = screen.queryByText(/Delete/i);
 		expect(deleteAction).not.toBeInTheDocument();
 		const downloadAction = screen.queryByText(/Download/i);

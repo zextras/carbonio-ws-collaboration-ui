@@ -8,11 +8,11 @@ import { screen } from '@testing-library/react';
 import React from 'react';
 import { setup } from 'test-utils';
 
+import NotificationsSettings from './NotificationsSettings';
+import Settings from './Settings';
 import useStore from '../../store/Store';
 import { UserBe } from '../../types/network/models/userBeTypes';
 import { RootStore } from '../../types/store/StoreTypes';
-import NotificationsSettings from './NotificationsSettings';
-import Settings from './Settings';
 
 const userWithoutImage: UserBe = {
 	id: 'user1',

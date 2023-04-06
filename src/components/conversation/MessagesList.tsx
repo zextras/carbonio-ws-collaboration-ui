@@ -18,6 +18,12 @@ import React, {
 } from 'react';
 import styled from 'styled-components';
 
+import AnimationGlobalStyle from './messageBubbles/BubbleAnimationsGlobalStyle';
+import MessageFactory from './messageBubbles/MessageFactory';
+import WritingBubble from './messageBubbles/WritingBubble';
+import MessageHistoryLoader from './MessageHistoryLoader';
+import ScrollButton from './ScrollButton';
+import useFirstUnreadMessage from './useFirstUnreadMessage';
 import useEventListener, { EventName } from '../../hooks/useEventListener';
 import { messageWhereScrollIsStoppedEqualityFn } from '../../store/equalityFunctions/ActiveConversationsEqualityFunctions';
 import {
@@ -34,12 +40,6 @@ import { getPrefTimezoneSelector, getUserId } from '../../store/selectors/Sessio
 import useStore from '../../store/Store';
 import { Message, MessageType, TextMessage } from '../../types/store/MessageTypes';
 import { isBefore, now } from '../../utils/dateUtil';
-import AnimationGlobalStyle from './messageBubbles/BubbleAnimationsGlobalStyle';
-import MessageFactory from './messageBubbles/MessageFactory';
-import WritingBubble from './messageBubbles/WritingBubble';
-import MessageHistoryLoader from './MessageHistoryLoader';
-import ScrollButton from './ScrollButton';
-import useFirstUnreadMessage from './useFirstUnreadMessage';
 
 const Messages = styled(Container)`
 	position: relative;
@@ -374,9 +374,10 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 		// if we scrolled up in the history
 		(messageFromEvent) => {
 			if (
-				actualScrollPosition === roomMessages[roomMessages.length - 1].id ||
-				(messageFromEvent.detail.type === MessageType.TEXT_MSG &&
-					messageFromEvent.detail.from === myUserId)
+				messageFromEvent.detail.roomId === roomId &&
+				(actualScrollPosition === roomMessages[roomMessages.length - 1].id ||
+					(messageFromEvent.detail.type === MessageType.TEXT_MSG &&
+						messageFromEvent.detail.from === myUserId))
 			) {
 				setTimeout(() => {
 					MessagesListWrapperRef.current.scrollTo({
@@ -386,7 +387,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 				}, 200);
 			}
 		},
-		[actualScrollPosition, roomMessages, myUserId]
+		[roomId, actualScrollPosition, roomMessages, myUserId]
 	);
 
 	useEventListener(EventName.NEW_MESSAGE, newMessageScrollToButtonHandler);

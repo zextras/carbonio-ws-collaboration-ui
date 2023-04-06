@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { TextMessage } from '../../store/MessageTypes';
 import { AddMemberFields, RoomCreationFields, RoomEditableFields } from '../models/roomBeTypes';
 import {
 	AddRoomAttachmentResponse,
@@ -14,6 +15,7 @@ import {
 	DeleteRoomPictureResponse,
 	DeleteRoomResponse,
 	DemotesRoomMemberResponse,
+	ForwardMessagesResponse,
 	GetRoomAttachmentsResponse,
 	GetRoomMembersResponse,
 	GetRoomPictureResponse,
@@ -63,6 +65,10 @@ interface IRoomsApi {
 		file: File,
 		description?: string
 	): Promise<AddRoomAttachmentResponse>;
+	forwardMessages(
+		roomId: string,
+		messagesToForward: TextMessage[]
+	): Promise<ForwardMessagesResponse>;
 }
 
 export default IRoomsApi;

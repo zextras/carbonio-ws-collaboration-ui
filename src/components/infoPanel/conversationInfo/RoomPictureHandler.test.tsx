@@ -4,10 +4,11 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { act, screen } from '@testing-library/react';
+import { act, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { setup } from 'test-utils';
 
+import RoomPictureHandler from './RoomPictureHandler';
 import {
 	mockedDeleteRoomPictureRequest,
 	mockedUpdateRoomPictureRequest
@@ -21,7 +22,6 @@ import {
 import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
 import { RootStore } from '../../../types/store/StoreTypes';
 import { User } from '../../../types/store/UserTypes';
-import RoomPictureHandler from './RoomPictureHandler';
 
 const user1Info: User = {
 	id: 'myId',
@@ -126,21 +126,21 @@ describe('Room Picture Handler - groups', () => {
 		);
 
 		const backgroundContainer = screen.getByTestId('background_container');
-		await user.hover(backgroundContainer);
+		user.hover(backgroundContainer);
 
-		const hoverContainer = screen.getByTestId('hover_container');
+		const hoverContainer = await screen.findByTestId('hover_container');
 		const input = hoverContainer.children.item(0) as HTMLInputElement;
 
 		expect(input).not.toBeNull();
 		expect(input.files).toHaveLength(0);
 
-		await user.upload(input, testImageFile);
-		expect(input.files).toHaveLength(1);
+		user.upload(input, testImageFile);
+		await waitFor(() => expect(input.files).toHaveLength(1));
 
 		const snackbar = await screen.findByText(/New avatar has been successfully uploaded/i);
 		expect(snackbar).toBeVisible();
 
-		const pictureContainer = screen.getByTestId('picture_container');
+		const pictureContainer = await screen.findByTestId('picture_container');
 		expect(pictureContainer).toBeInTheDocument();
 	});
 	test('update an image fails', async () => {
@@ -159,12 +159,12 @@ describe('Room Picture Handler - groups', () => {
 		const pictureContainer = await screen.findByTestId('picture_container');
 		expect(pictureContainer).toBeInTheDocument();
 
-		await user.hover(pictureContainer);
-		const hoverContainer = screen.getByTestId('hover_container');
+		user.hover(pictureContainer);
+		const hoverContainer = await screen.findByTestId('hover_container');
 		const input = hoverContainer.children.item(0) as HTMLInputElement;
 		expect(input).not.toBeNull();
 
-		await user.upload(input, testImageFile);
+		user.upload(input, testImageFile);
 
 		const snackbar = await screen.findByText(/Something went wrong/i);
 		expect(snackbar).toBeVisible();
@@ -184,10 +184,10 @@ describe('Room Picture Handler - groups', () => {
 		const pictureContainer = await screen.findByTestId('picture_container');
 		expect(pictureContainer).toBeInTheDocument();
 
-		await user.hover(pictureContainer);
-		const deleteButton = screen.getByTestId('delete_button');
+		user.hover(pictureContainer);
+		const deleteButton = await screen.findByTestId('delete_button');
 		expect(deleteButton).toBeInTheDocument();
-		await user.click(deleteButton);
+		user.click(deleteButton);
 
 		const snackbar = await screen.findByText(
 			/Group avatar has been successfully reset to the original one/i
@@ -197,8 +197,8 @@ describe('Room Picture Handler - groups', () => {
 		const backgroundContainer = await screen.findByTestId('background_container');
 		expect(backgroundContainer).toBeInTheDocument();
 
-		await user.hover(backgroundContainer);
-		const uploadButton = screen.getByTestId('upload_button');
+		user.hover(backgroundContainer);
+		const uploadButton = await screen.findByTestId('upload_button');
 		expect(uploadButton).toBeInTheDocument();
 		expect(deleteButton).not.toBeInTheDocument();
 	});
@@ -217,10 +217,10 @@ describe('Room Picture Handler - groups', () => {
 		const pictureContainer = await screen.findByTestId('picture_container');
 		expect(pictureContainer).toBeInTheDocument();
 
-		await user.hover(pictureContainer);
-		const deleteButton = screen.getByTestId('delete_button');
+		user.hover(pictureContainer);
+		const deleteButton = await screen.findByTestId('delete_button');
 		expect(deleteButton).toBeInTheDocument();
-		await user.click(deleteButton);
+		user.click(deleteButton);
 
 		const snackbar = await screen.findByText(/Something went wrong. Please Retry/i);
 		expect(snackbar).toBeVisible();
