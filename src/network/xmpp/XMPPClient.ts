@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { forEach } from 'lodash';
 import { Strophe, $pres, $iq, $msg, StropheConnection, StropheConnectionStatus } from 'strophe.js';
 import { v4 as uuidGenerator } from 'uuid';
 
@@ -26,10 +25,9 @@ import { onNewMessageStanza } from './handlers/newMessageHandler';
 import { onPresenceStanza } from './handlers/presenceHandler';
 import { onGetRosterResponse } from './handlers/rosterHandler';
 import { onSmartMarkers, onDisplayedMessageStanza } from './handlers/smartMarkersHandler';
-import { carbonizeMUC } from './utility/decodeJid';
+import { carbonizeMUC, carbonize } from './utility/decodeJid';
 import useStore from '../../store/Store';
 import IXMPPClient from '../../types/network/xmpp/IXMPPClient';
-import { TextMessage } from '../../types/store/MessageTypes';
 import { dateToISODate } from '../../utils/dateUtil';
 import { xmppDebug } from '../../utils/debug';
 
@@ -239,7 +237,7 @@ class XMPPClient implements IXMPPClient {
 		replyMessageId: string
 	): void {
 		if (this.connection && this.connection.connected) {
-			const to = `${carbonizeMUC(replyTo)}/${carbonizeMUC(roomId)}}`;
+			const to = `${carbonize(replyTo)}/${carbonizeMUC(roomId)}}`;
 			const uuid = uuidGenerator();
 			const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat', id: uuid })
 				.c('body')
@@ -282,44 +280,6 @@ class XMPPClient implements IXMPPClient {
 					xmlns: Strophe.NS.XMPP_CORRECT
 				});
 			this.connection.send(msg);
-		}
-	}
-
-	/**
-	 * Forward a message (XEP-0297)
-	 * Documentation: https://xmpp.org/extensions/xep-0297.html
-	 */
-	forwardMessage(message: TextMessage, roomIds: string[]): void {
-		if (this.connection && this.connection.connected) {
-			const isMyMessage = message.from === useStore.getState().session.id;
-			if (isMyMessage) {
-				forEach(roomIds, (roomId) => this.sendChatMessage(roomId, message.text));
-			} else {
-				forEach(roomIds, (roomId) => {
-					const uuid = uuidGenerator();
-					const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat', id: uuid })
-						.c('body')
-						.t('')
-						.up()
-						.c('forwarded', { xmlns: Strophe.NS.FORWARD })
-						.c('delay', { xmlns: 'urn:xmpp:delay', stamp: dateToISODate(message.date) })
-						.up()
-						.c('message', {
-							from: carbonizeMUC(message.from),
-							id: message.id,
-							to: carbonizeMUC(message.roomId),
-							type: 'groupchat',
-							xmlns: 'jabber:client'
-						})
-						.c('body')
-						.t(message.text)
-						.up()
-						.up()
-						.up()
-						.c('markable', { xmlns: Strophe.NS.MARKERS });
-					this.connection.send(msg);
-				});
-			}
 		}
 	}
 
@@ -412,6 +372,26 @@ class XMPPClient implements IXMPPClient {
 				onErrorStanza
 			);
 		}
+	}
+
+	requestMessageToForward(roomId: string, messageToForwardStanzaId: string): Promise<Element> {
+		return new Promise((resolve, reject) => {
+			const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
+				.c('query', { xmlns: Strophe.NS.MAM, queryid: MamRequestType.FORWARDED })
+				.c('x', { xmlns: 'jabber:x:data' })
+				.c('field', { var: 'from_id' })
+				.c('value')
+				.t(messageToForwardStanzaId)
+				.up()
+				.up()
+				.c('field', { var: 'to_id' })
+				.c('value')
+				.t(messageToForwardStanzaId);
+			this.connection.sendIQ(iq, resolve, (stanzaError) => {
+				onErrorStanza(stanzaError);
+				reject(stanzaError);
+			});
+		});
 	}
 
 	/**

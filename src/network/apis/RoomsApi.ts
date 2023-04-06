@@ -22,6 +22,7 @@ import {
 	DeleteRoomPictureResponse,
 	DeleteRoomResponse,
 	DemotesRoomMemberResponse,
+	ForwardMessagesResponse,
 	GetRoomAttachmentsResponse,
 	GetRoomMembersResponse,
 	GetRoomPictureResponse,
@@ -35,6 +36,9 @@ import {
 	UpdateRoomResponse
 } from '../../types/network/responses/roomsResponses';
 import { ChangeUserPictureResponse } from '../../types/network/responses/usersResponses';
+import { TextMessage } from '../../types/store/MessageTypes';
+import { dateToISODate } from '../../utils/dateUtil';
+import HistoryAccumulator from '../xmpp/utility/HistoryAccumulator';
 
 class RoomsApi extends BaseAPI implements IRoomsApi {
 	// Singleton design pattern
@@ -161,12 +165,35 @@ class RoomsApi extends BaseAPI implements IRoomsApi {
 		file: File,
 		description?: string
 	): Promise<AddRoomAttachmentResponse> {
-		return this.uploadFileFetchAPI(
-			`rooms/${roomId}/attachments`,
-			RequestType.POST,
-			file,
+		return this.uploadFileFetchAPI(`rooms/${roomId}/attachments`, RequestType.POST, file, {
 			description
+		});
+	}
+
+	public forwardMessages(
+		roomId: string,
+		messages: TextMessage[]
+	): Promise<ForwardMessagesResponse> {
+		const { xmppClient } = useStore.getState().connections;
+		const listOfMessages: { [stanzaId: string]: string } = {};
+
+		// Get the XML messages to forward from history
+		const promises = messages.map((message) =>
+			xmppClient.requestMessageToForward(message.roomId, message.stanzaId).then(() => {
+				const historyMessage = HistoryAccumulator.returnReferenceForForwardedMessage(
+					message.stanzaId
+				);
+				listOfMessages[message.stanzaId] = historyMessage?.outerHTML;
+			})
 		);
+
+		return Promise.all(promises).then(() => {
+			const messagesToForward = messages.map((message) => ({
+				originalMessage: listOfMessages[message.stanzaId],
+				originalMessageSentAt: dateToISODate(message.date)
+			}));
+			return this.fetchAPI(`rooms/${roomId}/forward`, RequestType.POST, messagesToForward);
+		});
 	}
 }
 

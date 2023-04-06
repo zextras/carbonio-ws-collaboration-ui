@@ -9,7 +9,7 @@ import React, { ReactElement } from 'react';
 import styled from 'styled-components';
 
 type MessageHistoryLoaderProps = {
-	messageHistoryLoaderRef: any;
+	messageHistoryLoaderRef: React.RefObject<HTMLDivElement>;
 };
 
 const Loader = styled.div`

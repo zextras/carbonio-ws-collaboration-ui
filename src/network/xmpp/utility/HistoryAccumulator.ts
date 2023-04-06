@@ -30,9 +30,12 @@ class HistoryAccumulator {
 
 	private repliedMessages: { [id: string]: Message };
 
+	private forwardedMessages: { [id: string]: Element };
+
 	constructor() {
 		this.histories = {};
 		this.repliedMessages = {};
+		this.forwardedMessages = {};
 	}
 
 	public addMessageToHistory(roomId: string, message: Message): void {
@@ -75,7 +78,7 @@ class HistoryAccumulator {
 		}
 	}
 
-	replaceMessageEditedInTheHistory(roomId: string, editedMessage: TextMessage): void {
+	public replaceMessageEditedInTheHistory(roomId: string, editedMessage: TextMessage): void {
 		if (!this.histories[roomId]) this.histories[roomId] = [];
 		const index = findIndex(this.histories[roomId], { id: editedMessage.id });
 		if (
@@ -100,6 +103,16 @@ class HistoryAccumulator {
 			const store = useStore.getState();
 			store.addEditedMessageRef(roomId, editedMessage);
 		}
+	}
+
+	public addReferenceForForwardedMessage(stanzaId: string, message: Element): void {
+		this.forwardedMessages[stanzaId] = message;
+	}
+
+	public returnReferenceForForwardedMessage(messageStanzaId: string): Element {
+		const message = this.forwardedMessages[messageStanzaId];
+		delete this.forwardedMessages[messageStanzaId];
+		return message;
 	}
 }
 

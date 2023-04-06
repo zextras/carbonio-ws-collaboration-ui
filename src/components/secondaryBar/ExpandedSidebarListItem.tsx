@@ -168,10 +168,10 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 				switch (lastMessageOfRoom.type) {
 					case MessageType.TEXT_MSG: {
 						const text = (): string => {
-							if (lastMessageOfRoom.attachment) {
-								return lastMessageOfRoom.text !== ''
-									? lastMessageOfRoom.text
-									: lastMessageOfRoom.attachment.name;
+							const attachment =
+								lastMessageOfRoom.attachment || lastMessageOfRoom.forwarded?.attachment;
+							if (attachment) {
+								return lastMessageOfRoom.text !== '' ? lastMessageOfRoom.text : attachment.name;
 							}
 							return lastMessageOfRoom.forwarded
 								? lastMessageOfRoom.forwarded.text
@@ -313,7 +313,7 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 									</Tooltip>
 								)}
 								{lastMessageOfRoom?.type === MessageType.TEXT_MSG &&
-									lastMessageOfRoom.attachment && (
+									(lastMessageOfRoom.attachment || lastMessageOfRoom.forwarded?.attachment) && (
 										<Container width="fit" padding={{ right: 'extrasmall' }}>
 											<Icon size="small" icon="FileTextOutline" color="gray" />
 										</Container>
