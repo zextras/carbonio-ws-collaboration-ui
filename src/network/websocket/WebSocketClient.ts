@@ -39,8 +39,6 @@ export class WebSocketClient implements IWebSocketClient {
 			this.disconnect();
 			this._tryReconnection();
 		}, this._pongTimeout);
-
-		this.connect();
 	}
 
 	connect(): void {
