@@ -9,7 +9,7 @@ import React from 'react';
 import { setup } from 'test-utils';
 
 import AttachmentSmallView from './AttachmentSmallView';
-import { mockedGetURLAttachment, mockedGetURLPreview } from '../../../../jest-mocks';
+import { mockedGetImageThumbnailURL, mockedGetURLAttachment } from '../../../../jest-mocks';
 import { AttachmentMessageType } from '../../../types/store/MessageTypes';
 
 describe('Attachment Small view', () => {
@@ -50,6 +50,6 @@ describe('Attachment Small view', () => {
 
 		// preview action is triggered
 		await user.click(previewIcon);
-		expect(mockedGetURLPreview).toHaveBeenCalled();
+		expect(mockedGetImageThumbnailURL).toHaveBeenCalled();
 	});
 });

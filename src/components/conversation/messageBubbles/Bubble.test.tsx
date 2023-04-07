@@ -9,7 +9,7 @@ import React from 'react';
 import { setup } from 'test-utils';
 
 import Bubble from './Bubble';
-import { mockedGetURLPreview } from '../../../../jest-mocks';
+import { mockedGetImageThumbnailURL } from '../../../../jest-mocks';
 import useStore from '../../../store/Store';
 import { createMockRoom, createMockTextMessage } from '../../../tests/createMock';
 import { RoomBe } from '../../../types/network/models/roomBeTypes';
@@ -114,7 +114,7 @@ describe('Message bubble component visualization', () => {
 	test('Display image', () => {
 		const store: RootStore = useStore.getState();
 		store.addRoom(mockedRoom);
-		mockedGetURLPreview.mockReturnValue('preview-url');
+		mockedGetImageThumbnailURL.mockReturnValue('preview-url');
 		setup(
 			<Bubble
 				message={mockedAttachmentMessageKb}
@@ -128,7 +128,7 @@ describe('Message bubble component visualization', () => {
 	test('Hover on image reply', async () => {
 		const store: RootStore = useStore.getState();
 		store.addRoom(mockedRoom);
-		mockedGetURLPreview.mockReturnValue('preview-url');
+		mockedGetImageThumbnailURL.mockReturnValue('preview-url');
 		const { user } = setup(
 			<Bubble
 				message={mockedRepliedTextMessageWithAttachment}
@@ -146,7 +146,7 @@ describe('Attachment footer', () => {
 	test('Display size in B', () => {
 		const store: RootStore = useStore.getState();
 		store.addRoom(mockedRoom);
-		mockedGetURLPreview.mockReturnValue('preview-url');
+		mockedGetImageThumbnailURL.mockReturnValue('preview-url');
 		setup(
 			<Bubble
 				message={mockedAttachmentMessageB}
@@ -161,7 +161,7 @@ describe('Attachment footer', () => {
 	test('Display size in Kb', () => {
 		const store: RootStore = useStore.getState();
 		store.addRoom(mockedRoom);
-		mockedGetURLPreview.mockReturnValue('preview-url');
+		mockedGetImageThumbnailURL.mockReturnValue('preview-url');
 		setup(
 			<Bubble
 				message={mockedAttachmentMessageKb}
@@ -176,7 +176,7 @@ describe('Attachment footer', () => {
 	test('Display size in Mb', () => {
 		const store: RootStore = useStore.getState();
 		store.addRoom(mockedRoom);
-		mockedGetURLPreview.mockReturnValue('preview-url');
+		mockedGetImageThumbnailURL.mockReturnValue('preview-url');
 		setup(
 			<Bubble
 				message={mockedAttachmentMessageMb}
@@ -191,7 +191,7 @@ describe('Attachment footer', () => {
 	test('Display size in Gb', () => {
 		const store: RootStore = useStore.getState();
 		store.addRoom(mockedRoom);
-		mockedGetURLPreview.mockReturnValue('preview-url');
+		mockedGetImageThumbnailURL.mockReturnValue('preview-url');
 		setup(
 			<Bubble
 				message={mockedAttachmentMessageGb}
