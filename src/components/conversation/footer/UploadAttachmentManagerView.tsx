@@ -210,66 +210,68 @@ const UploadAttachmentManagerView: React.FC<UploadAttachmentManagerViewProps> = 
 		map(filesToUploadArray, (file) => {
 			const displayPreview = canDisplayPreview(file.file.type);
 			const previewFile = (
-				<PreviewContainer
-					key={file.fileId}
-					data-testid={`previewFileUpload-${file.file.name}-${file.fileId}`}
-					height="6.25rem"
-					width="6.25rem"
-					hasFocus={file.hasFocus}
-					onClick={(): void => editFileDescription(file.fileId, file.description)}
-				>
-					<HoverActions>
-						<Tooltip label={removeActionLabel} placement="top">
-							<FileCloseIconButton
-								data-testid={`removeSingleFile-${file.fileId}`}
-								backgroundColor="gray6"
-								borderRadius="round"
-								icon="Close"
-								size="small"
-								onClick={(ev: Event): void => removeFile(ev, file.fileId)}
-							/>
-						</Tooltip>
-						{displayPreview && (
-							<Tooltip label={previewActionLabel} placement="top">
-								<IconButton
-									data-testid={`previewSingleFile-${file.fileId}`}
+				<Tooltip label={file.file.name} placement="top">
+					<PreviewContainer
+						key={file.fileId}
+						data-testid={`previewFileUpload-${file.file.name}-${file.fileId}`}
+						height="6.25rem"
+						width="6.25rem"
+						hasFocus={file.hasFocus}
+						onClick={(): void => editFileDescription(file.fileId, file.description)}
+					>
+						<HoverActions>
+							<Tooltip label={removeActionLabel} placement="top">
+								<FileCloseIconButton
+									data-testid={`removeSingleFile-${file.fileId}`}
 									backgroundColor="gray6"
 									borderRadius="round"
-									icon="EyeOutline"
-									size="large"
-									onClick={(): void => previewClick(file)}
+									icon="Close"
+									size="small"
+									onClick={(ev: Event): void => removeFile(ev, file.fileId)}
 								/>
 							</Tooltip>
-						)}
-					</HoverActions>
-					{!displayPreview ? (
-						<LocalFile
-							data-testid={`fileNoPreview-${file.file.name}-${file.fileId}`}
-							height="6.25rem"
-							width="6.25rem"
-							background="gray2"
-							hasFocus={file.hasFocus}
-						>
-							<CustomIcon
-								icon="FileTextOutline"
-								height="2.625rem"
-								width="2.625rem"
-								color="secondary"
-								label={file.file.name}
+							{displayPreview && (
+								<Tooltip label={previewActionLabel} placement="top">
+									<IconButton
+										data-testid={`previewSingleFile-${file.fileId}`}
+										backgroundColor="gray6"
+										borderRadius="round"
+										icon="EyeOutline"
+										size="large"
+										onClick={(): void => previewClick(file)}
+									/>
+								</Tooltip>
+							)}
+						</HoverActions>
+						{!displayPreview ? (
+							<LocalFile
+								data-testid={`fileNoPreview-${file.file.name}-${file.fileId}`}
+								height="6.25rem"
+								width="6.25rem"
+								background="gray2"
+								hasFocus={file.hasFocus}
+							>
+								<CustomIcon
+									icon="FileTextOutline"
+									height="2.625rem"
+									width="2.625rem"
+									color="secondary"
+									label={file.file.name}
+								/>
+							</LocalFile>
+						) : (
+							<PreviewLocalFile
+								data-testid={`previewImage-${file.file.name}-${file.fileId}`}
+								height="6.25rem"
+								width="6.25rem"
+								minHeight="6.25rem"
+								minWidth="6.25rem"
+								bkgUrl={file.localUrl}
+								hasFocus={file.hasFocus}
 							/>
-						</LocalFile>
-					) : (
-						<PreviewLocalFile
-							data-testid={`previewImage-${file.file.name}-${file.fileId}`}
-							height="6.25rem"
-							width="6.25rem"
-							minHeight="6.25rem"
-							minWidth="6.25rem"
-							bkgUrl={file.localUrl}
-							hasFocus={file.hasFocus}
-						/>
-					)}
-				</PreviewContainer>
+						)}
+					</PreviewContainer>
+				</Tooltip>
 			);
 			filePreviews.push(previewFile);
 		});

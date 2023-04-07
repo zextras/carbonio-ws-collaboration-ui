@@ -138,7 +138,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 						messageInputRef.current.style.paddingBottom = '0.75rem';
 					} else {
 						messageInputRef.current.style.paddingBottom = '0';
-						messageInputRef.current.style.paddingTop = '0.75rem';
+						messageInputRef.current.style.paddingTop = '0.9375rem';
 					}
 				}
 			}
@@ -169,8 +169,8 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 					key: new Date().toLocaleString(),
 					type: 'error',
 					label: errorString,
-					hideButton: true,
-					autoHideTimeout: 3000
+					actionLabel: 'UNDERSTOOD',
+					disableAutoHide: true
 				});
 			}
 		});
@@ -446,21 +446,24 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 				)}
 				{isUploading && (
 					<Tooltip label={stopUploadLabel} placement="top">
-						<UploadSpinnerWrapper width="2.25rem" height="2.5625rem" padding={{ all: '0.3125rem' }}>
+						<UploadSpinnerWrapper
+							width="2.25rem"
+							height="2.5625rem"
+							padding={{ bottom: '0.3125rem' }}
+						>
 							<LoadingSpinner color="primary" title={uploadingLabel} />
 							<BlockUploadButton
 								onClick={abortUploadRequest}
 								iconColor="gray0"
 								size="large"
 								icon="CloseOutline"
-								title={stopUploadLabel}
 							/>
 						</UploadSpinnerWrapper>
 					</Tooltip>
 				)}
 				{filesToUploadArray && textMessage.length > 0 && (
 					<Tooltip label={clearLabel} placement="top">
-						<Container width="fit" height="fit" padding={{ all: '0.3125rem' }}>
+						<Container width="fit" height="fit" padding={{ bottom: '0.3125rem' }}>
 							<IconButton
 								onClick={clearInput}
 								iconColor="gray0"

@@ -17,7 +17,7 @@ const MessageTextarea = styled.textarea`
 	cursor: auto;
 	height: 2.875rem;
 	min-height: 2.875rem;
-	padding-top: 0.75rem;
+	padding-top: 0.9375rem;
 	border: none;
 	vertical-align: text-top;
 	overflow-y: scroll;
