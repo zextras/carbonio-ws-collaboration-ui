@@ -209,7 +209,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 					unsetFilesToAttach(roomId);
 					setIsUploading(false);
 				})
-				.catch(() => console.log('chea vaca'));
+				.catch(() => console.log('error'));
 		} else {
 			if (referenceMessage && referenceMessage.roomId === roomId) {
 				switch (referenceMessage.actionType) {
