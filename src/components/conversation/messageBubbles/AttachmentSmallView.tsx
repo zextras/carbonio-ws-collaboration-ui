@@ -12,7 +12,7 @@ import styled from 'styled-components';
 import usePreview from '../../../hooks/usePreview';
 import { AttachmentsApi } from '../../../network';
 import { AttachmentMessageType } from '../../../types/store/MessageTypes';
-import { getPreviewURL, isPreviewSupported } from '../../../utils/attachmentUtils';
+import { getThumbnailURL, isPreviewSupported } from '../../../utils/attachmentUtils';
 
 const HoverContainer = styled(Container)`
 	z-index: 1;
@@ -55,7 +55,10 @@ const AttachmentSmallView: FC<AttachmentSmallViewProps> = ({ attachment }) => {
 
 	const { onPreviewClick } = usePreview(attachment);
 
-	const previewURL = useMemo(() => getPreviewURL(attachment.id, attachment.mimeType), [attachment]);
+	const previewURL = useMemo(
+		() => getThumbnailURL(attachment.id, attachment.mimeType),
+		[attachment]
+	);
 
 	const previewSupported = useMemo(() => isPreviewSupported(attachment.mimeType), [attachment]);
 

@@ -60,21 +60,67 @@ describe('Attachments API', () => {
 		});
 	});
 
-	test('getURLPreview is called correctly', () => {
-		const url = attachmentsApi.getURLPreview('fileId');
-		expect(url).toEqual(`http://localhost/services/chats/attachments/fileId/preview`);
-	});
-
-	test('getAttachmentPreview is called correctly', async () => {
+	test('getImagePreview is called correctly', async () => {
 		// Send getAttachmentPreview request
-		await attachmentsApi.getAttachmentPreview('fileId');
+		await attachmentsApi.getImagePreview('fileId', '0x0');
 
 		// Set appropriate headers
 		const headers = new Headers();
 		headers.append('Content-Type', 'application/json');
 
 		// Check if fetch is called with the correct parameters
-		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/attachments/fileId/preview`, {
+		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/preview/image/fileId/0x0/`, {
+			headers,
+			method: 'GET',
+			body: undefined
+		});
+	});
+
+	test('getImageThumbnail is called correctly', async () => {
+		// Send getAttachmentPreview request
+		await attachmentsApi.getImageThumbnail('fileId', '0x0');
+
+		// Set appropriate headers
+		const headers = new Headers();
+		headers.append('Content-Type', 'application/json');
+
+		// Check if fetch is called with the correct parameters
+		expect(global.fetch).toHaveBeenCalledWith(
+			`/services/chats/preview/image/fileId/0x0/thumbnail/`,
+			{
+				headers,
+				method: 'GET',
+				body: undefined
+			}
+		);
+	});
+
+	test('getPdfPreview is called correctly', async () => {
+		// Send getAttachmentPreview request
+		await attachmentsApi.getPdfPreview('fileId');
+
+		// Set appropriate headers
+		const headers = new Headers();
+		headers.append('Content-Type', 'application/json');
+
+		// Check if fetch is called with the correct parameters
+		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/preview/pdf/fileId/`, {
+			headers,
+			method: 'GET',
+			body: undefined
+		});
+	});
+
+	test('getPdfThumbnail is called correctly', async () => {
+		// Send getAttachmentPreview request
+		await attachmentsApi.getPdfThumbnail('fileId', '0x0');
+
+		// Set appropriate headers
+		const headers = new Headers();
+		headers.append('Content-Type', 'application/json');
+
+		// Check if fetch is called with the correct parameters
+		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/preview/pdf/fileId/0x0/thumbnail/`, {
 			headers,
 			method: 'GET',
 			body: undefined

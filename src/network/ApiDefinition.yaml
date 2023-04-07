@@ -535,19 +535,120 @@ paths:
           $ref: '#/components/responses/403ForbiddenResponse'
         404:
           $ref: '#/components/responses/404NotFoundResponse'
-  /attachments/{fileId}/preview:
+/preview/image/{fileId}/{area}/:
+  get:
+    tags:
+      - Preview
+    summary: Get image preview
+    description: |
+      Creates and returns a preview of the image fetched by id
+      with the given size, quality and format
+      - **fileId**: UUID of the image        
+      - **quality**: quality of the output image
+      (the higher you go the slower the process)
+      - **output_format**: format of the output image
+      - **area**: width of the output image (>=0) x
+      height of the output image (>=0), width x height => 100x200.
+      The first is width, the latter height, the order is important!
+      - **crop**: True will crop the picture starting from the borders.
+      This option will lose information, leaving it False will scale and
+      have borders to fill the requested size.
+    operationId: getImagePreview
+    parameters:
+      - $ref: '#/components/parameters/pathFileId'
+      - $ref: '#/components/parameters/pathPreviewArea'
+      - $ref: '#/components/parameters/queryImageQuality'
+      - $ref: '#/components/parameters/queryImageType'
+      - $ref: '#/components/parameters/queryImageCrop'
+    responses:
+      200:
+        $ref: '#/components/responses/200PreviewFileResponse'
+      400:
+        $ref: '#/components/responses/400BadRequestResponse'
+      404:
+        $ref: '#/components/responses/404NotFoundResponse'
+  /preview/image/{fileId}/{area}/thumbnail:
     get:
       tags:
-        - Attachments
-      summary: Retrieves the preview of an uploaded attachment
-      operationId: getAttachmentPreview
+        - Preview
+      summary: Get image thumbnail
+      description: |
+        Creates and returns a preview of the image fetched by id
+        with the given size, quality and format
+        - **fileId**: UUID of the image        
+        - **quality**: quality of the output image
+        (the higher you go the slower the process)
+        - **output_format**: format of the output image
+        - **area**: width of the output image (>=0) x
+        height of the output image (>=0), width x height => 100x200.
+        The first is width, the latter height, the order is important!
+        - **shape**: Rounded and Rectangular are currently supported.
+      operationId: getImageThumbnail
       parameters:
         - $ref: '#/components/parameters/pathFileId'
+        - $ref: '#/components/parameters/pathPreviewArea'
+        - $ref: '#/components/parameters/queryImageQuality'
+        - $ref: '#/components/parameters/queryImageType'
+        - $ref: '#/components/parameters/queryImageShape'
       responses:
         200:
-          $ref: '#/components/responses/200GetAttachmentPreviewResponse'
-        403:
-          $ref: '#/components/responses/403ForbiddenResponse'
+          $ref: '#/components/responses/200PreviewFileResponse'
+        400:
+          $ref: '#/components/responses/400BadRequestResponse'
+        404:
+          $ref: '#/components/responses/404NotFoundResponse'
+  /preview/pdf/{fileId}/:
+    get:
+      tags:
+        - Preview
+      summary: Get pdf preview
+      description: |
+        Creates and returns a preview of the pdf fetched by id, 
+        the pdf file will contain the first and last page given. With default values
+        it will return a pdf with all the pages.
+        - **fileId**: UUID of the pdf        
+        - **first_page**: integer value of first page to preview (n>=1)
+        - **last_page**: integer value of last page to preview (0 = last of the original pdf)
+      operationId: getPdfPreview
+      parameters:
+        - $ref: '#/components/parameters/pathFileId'
+        - $ref: '#/components/parameters/queryFirstPage'
+        - $ref: '#/components/parameters/queryLastPage'
+      responses:
+        200:
+          $ref: '#/components/responses/200PreviewFileResponse'
+        400:
+          $ref: '#/components/responses/400BadRequestResponse'
+        404:
+          $ref: '#/components/responses/404NotFoundResponse'
+  /preview/pdf/{fileId}/{area}/thumbnail:
+    get:
+      tags:
+        - Preview
+      summary: Get pdf thumbnail
+      description: |
+        Creates and returns a preview of the pdf fetched by id
+        with the given size, quality and format
+        - **fileId**: UUID of the pdf        
+        - **quality**: quality of the output image
+        (the higher you go the slower the process)
+        - **output_format**: format of the output image
+        - **area**: width of the output image (>=0) x
+        height of the output image (>=0), width x height => 100x200.
+        The first is width, the latter height, the order is important!
+        - **shape**: Rounded and Rectangular are currently supported.
+      operationId: getPdfThumbnail
+      parameters:
+        - $ref: '#/components/parameters/pathFileId'
+        - $ref: '#/components/parameters/pathPreviewArea'
+        - $ref: '#/components/parameters/queryImageQuality'
+        - $ref: '#/components/parameters/queryImageType'
+        - $ref: '#/components/parameters/queryImageShape'
+      responses:
+        200:
+          $ref: '#/components/responses/200PreviewFileResponse'
+        400:
+          $ref: '#/components/responses/400BadRequestResponse'
         404:
           $ref: '#/components/responses/404NotFoundResponse'
   /supported:
@@ -583,15 +684,59 @@ components:
         format: uuid
       required: true
       allowEmptyValue: false
-    pathFileId:
+    pathPreviewArea:
       in: path
-      name: fileId
-      description: file identifier
+      name: area
       schema:
+        title: Area
         type: string
-        format: uuid
       required: true
-      allowEmptyValue: false
+      queryImageQuality:
+        in: query
+        name: quality
+        schema:
+          allOf:
+            - $ref: '#/components/schemas/ImageQualityEnum'
+          default: medium
+        required: false
+      queryImageType:
+        in: query
+        name: output_format
+        schema:
+          allOf:
+            - $ref: '#/components/schemas/ImageTypeEnum'
+          default: medium
+        required: false
+      queryImageCrop:
+        in: query
+        name: crop
+        schema:
+          title: Crop
+          type: boolean
+          default: false
+        required: false
+      queryImageShape:
+        in: query
+        name: shape
+        schema:
+          allOf:
+            - $ref: '#/components/schemas/ImageShapeEnum'
+          default: Rectangular
+        required: false
+      queryFirstPage:
+        in: query
+        name: firstPage
+        schema:
+          title: FirstPage
+          type: integer
+        required: false
+      queryLastPage:
+        in: query
+        name: lastPage
+        schema:
+          title: LastPage
+          type: integer
+        required: false
     pathUserId:
       in: path
       name: userId
@@ -866,8 +1011,8 @@ components:
           schema:
             type: string
             format: binary
-    200GetAttachmentPreviewResponse:
-      description: The requested file preview
+    200PreviewFileResponse:
+      description: The preview of the requested file
       content:
         application/octet-stream:
           schema:
@@ -918,6 +1063,8 @@ components:
       description: The request conflict with the current state
     413PayloadTooLargeResponse:
       description: The request had a payload that was too big
+    502BadGatewayResponse:
+      description: The service was unavailable
   schemas:
     Error:
       type: object
@@ -1289,6 +1436,30 @@ components:
         zmToken:
           type: string
           description: ZM token
+    ImageQualityEnum:
+      title: ImageQualityEnum
+      enum:
+        - Lowest
+        - Low
+        - Medium
+        - High
+        - Highest
+      type: string
+      description: Class representing all the image quality accepted values
+    ImageTypeEnum:
+      title: ImageTypeEnum
+      enum:
+        - Jpeg
+        - Png
+      type: string
+      description: Class representing all the image type accepted values
+    ImageShapeEnum:
+      title: ImageShapeEnum
+      enum:
+        - Rounded
+        - Rectangular
+      type: string
+      description: Class representing all the image shape accepted values
     JoinSettingsByRoom:
       type: object
       description: Room data

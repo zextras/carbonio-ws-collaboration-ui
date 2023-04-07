@@ -96,7 +96,11 @@ export const mockedGetUserPictureRequest: jest.Mock = jest.fn();
 export const mockedGetURLUserPicture: jest.Mock = jest.fn();
 export const mockedGetDebouncedUserRequest: jest.Mock = jest.fn();
 export const mockedGetURLAttachment: jest.Mock = jest.fn();
-export const mockedGetURLPreview: jest.Mock = jest.fn();
+export const mockedGetImageURL: jest.Mock = jest.fn();
+export const mockedGetImageThumbnailURL: jest.Mock = jest.fn();
+export const mockedGetPdfURL: jest.Mock = jest.fn();
+export const mockedGetPdfThumbnailURL: jest.Mock = jest.fn();
+
 export const mockedDeleteRoomMemberRequest: jest.Mock = jest.fn();
 export const mockedPromoteRoomMemberRequest: jest.Mock = jest.fn();
 export const mockedDemotesRoomMemberRequest: jest.Mock = jest.fn();
@@ -189,7 +193,10 @@ jest.mock('./src/network', () => ({
 	},
 	AttachmentsApi: {
 		getURLAttachment: mockedGetURLAttachment,
-		getURLPreview: mockedGetURLPreview
+		getImagePreviewURL: mockedGetImageURL,
+		getImageThumbnailURL: mockedGetImageThumbnailURL,
+		getPdfPreviewURL: mockedGetPdfURL,
+		getPdfThumbnailURL: mockedGetPdfThumbnailURL
 	}
 }));
 
