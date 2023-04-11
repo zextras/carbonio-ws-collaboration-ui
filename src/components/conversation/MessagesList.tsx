@@ -374,9 +374,10 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 		// if we scrolled up in the history
 		(messageFromEvent) => {
 			if (
-				actualScrollPosition === roomMessages[roomMessages.length - 1].id ||
-				(messageFromEvent.detail.type === MessageType.TEXT_MSG &&
-					messageFromEvent.detail.from === myUserId)
+				messageFromEvent.detail.roomId === roomId &&
+				(actualScrollPosition === roomMessages[roomMessages.length - 1].id ||
+					(messageFromEvent.detail.type === MessageType.TEXT_MSG &&
+						messageFromEvent.detail.from === myUserId))
 			) {
 				setTimeout(() => {
 					MessagesListWrapperRef.current.scrollTo({
@@ -386,7 +387,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 				}, 200);
 			}
 		},
-		[actualScrollPosition, roomMessages, myUserId]
+		[roomId, actualScrollPosition, roomMessages, myUserId]
 	);
 
 	useEventListener(EventName.NEW_MESSAGE, newMessageScrollToButtonHandler);

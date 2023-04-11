@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next';
 
 import { AttachmentsApi } from '../network';
 import { AttachmentMessageType } from '../types/store/MessageTypes';
-import { getAttachmentURL, getPreviewURL } from '../utils/attachmentUtils';
+import { getAttachmentURL } from '../utils/attachmentUtils';
 
 export type UsePreviewHook = {
 	onPreviewClick: () => void;
@@ -26,12 +26,10 @@ const usePreview = (attachment: AttachmentMessageType): UsePreviewHook => {
 		return '';
 	}, [attachment]);
 
-	const attachmentURL = useMemo(() => {
-		if (extension === 'PDF') {
-			return getAttachmentURL(attachment.id, attachment.mimeType);
-		}
-		return getPreviewURL(attachment.id, attachment.mimeType);
-	}, [attachment.id, attachment.mimeType, extension]);
+	const attachmentURL = useMemo(
+		() => getAttachmentURL(attachment.id, attachment.mimeType),
+		[attachment.id, attachment.mimeType]
+	);
 
 	const typeOfAttachment = useMemo(() => {
 		if (extension === 'PDF') {

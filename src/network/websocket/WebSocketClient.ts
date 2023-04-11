@@ -9,7 +9,7 @@ import { debounce, DebouncedFunc, includes } from 'lodash';
 import { wsEventsHandler } from './wsEventsHandler';
 import useStore from '../../store/Store';
 import IWebSocketClient from '../../types/network/websocket/IWebSocketClient';
-import { WsEventType } from '../../types/network/websocket/wsEvents';
+import { WsEvent, WsEventType } from '../../types/network/websocket/wsEvents';
 import { WsMessage } from '../../types/network/websocket/wsMessages';
 import { wsDebug } from '../../utils/debug';
 
@@ -39,8 +39,6 @@ export class WebSocketClient implements IWebSocketClient {
 			this.disconnect();
 			this._tryReconnection();
 		}, this._pongTimeout);
-
-		this.connect();
 	}
 
 	connect(): void {
@@ -94,7 +92,7 @@ export class WebSocketClient implements IWebSocketClient {
 
 	_onMessage = (e: MessageEvent): void => {
 		if (typeof e.data === 'string') {
-			const event = JSON.parse(e.data);
+			const event: WsEvent = JSON.parse(e.data);
 			if (event.type === WsEventType.PONG) {
 				wsDebug('<-- pong');
 				this._disconnectionCheckFunction.cancel();

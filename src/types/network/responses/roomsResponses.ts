@@ -50,3 +50,5 @@ export type GetRoomAttachmentsResponse = {
 export type AddRoomAttachmentResponse = {
 	id: string;
 };
+
+export type ForwardMessagesResponse = Response;
