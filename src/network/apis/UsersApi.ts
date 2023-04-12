@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { chunk, concat, debounce, difference, find, forEach, join, map } from 'lodash';
+import { concat, debounce, difference, find, forEach, join, map } from 'lodash';
 
 import BaseAPI from './BaseAPI';
 import useStore from '../../store/Store';
@@ -42,7 +42,6 @@ class UsersApi extends BaseAPI implements IUsersApi {
 		const ids = map(userIds, (id) => `userIds=${id}`);
 		return this.fetchAPI(`users?${join(ids, '&')}`, RequestType.GET).then(
 			(resp: GetUsersResponse) => {
-				console.log(resp);
 				forEach(resp, (user) => setUserInfo(user));
 				return resp;
 			}
@@ -79,8 +78,10 @@ class UsersApi extends BaseAPI implements IUsersApi {
 
 	// getUsers wants max 10 userId at a time
 	private deboucedUserGetter = debounce(() => {
-		const arrayChunk = chunk(this.usersToRequest, 10);
-		forEach(arrayChunk, (ids) => this.getUsers(ids));
+		this.getUsers(this.usersToRequest).then(() => {
+			this.requestingUsers = difference(this.requestingUsers, this.usersToRequest);
+		});
+		this.usersToRequest = [];
 	}, 1000);
 
 	// Create groups of 10 users after 1 second of delay from the last call
