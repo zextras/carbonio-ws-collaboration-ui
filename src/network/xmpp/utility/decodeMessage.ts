@@ -102,7 +102,7 @@ export function decodeMessage(messageStanza: Element, optional?: OptionalParamet
 		const stanzaIdReference = getTagElement(messageStanza, 'stanza-id');
 		const stanzaId = optional?.stanzaId || (stanzaIdReference && getRequiredAttribute(stanzaIdReference, 'id') || messageId);
 		const from = getId(resource);
-		const messageTxt = decode(body.textContent || '');
+		const messageTxt = decodeURIComponent(decode(body.textContent || ''));
 
 		// Message is a reply to another message
 		let replyTo;

@@ -16,6 +16,7 @@ export type ActiveConversation = {
 	isWritingList?: string[];
 	referenceMessage?: ReferenceMessage | undefined;
 	infoPanelStatus?: InfoPanelStatus;
+	filesToAttach?: FileToUpload[] | undefined;
 };
 
 export type ActiveConversationsMap = {
@@ -39,4 +40,12 @@ export type ReferenceMessage = {
 type InfoPanelStatus = {
 	participantsAccordionIsOpened: boolean;
 	actionsAccordionIsOpened: boolean;
+};
+
+export type FileToUpload = {
+	file: File;
+	fileId: string;
+	localUrl: string;
+	description: string;
+	hasFocus: boolean;
 };

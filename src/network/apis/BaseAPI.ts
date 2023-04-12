@@ -51,6 +51,7 @@ export default abstract class BaseAPI implements IBaseAPI {
 		endpoint: string,
 		requestType: RequestType,
 		file: File,
+		signal?: AbortSignal,
 		optionalFields?: AdditionalHeaders
 	): Promise<any> {
 		return new Promise<any>((resolve, reject) => {
@@ -60,9 +61,10 @@ export default abstract class BaseAPI implements IBaseAPI {
 				headers.append('fileName', btoa(encodeURIComponent(file.name)));
 				headers.append('mimeType', file.type);
 				if (optionalFields) {
-					optionalFields.description && headers.append('description', optionalFields.description);
-					optionalFields.messageId && headers.append('description', optionalFields.messageId);
-					optionalFields.replyId && headers.append('description', optionalFields.replyId);
+					optionalFields.description &&
+						headers.append('description', btoa(encodeURIComponent(optionalFields.description)));
+					optionalFields.messageId && headers.append('messageId', optionalFields.messageId);
+					optionalFields.replyId && headers.append('replyId', optionalFields.replyId);
 				}
 
 				// Add sessionId to headers only if it is already defined
@@ -73,7 +75,8 @@ export default abstract class BaseAPI implements IBaseAPI {
 				fetch(this.url + endpoint, {
 					method: requestType,
 					headers,
-					body: reader.result
+					body: reader.result,
+					signal
 				})
 					.then((resp: Response) => {
 						if (resp.ok) return resp;

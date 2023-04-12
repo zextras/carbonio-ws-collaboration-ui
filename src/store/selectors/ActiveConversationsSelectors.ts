@@ -7,7 +7,7 @@
 
 import { map } from 'lodash';
 
-import { ReferenceMessage } from '../../types/store/ActiveConversationTypes';
+import { FileToUpload, ReferenceMessage } from '../../types/store/ActiveConversationTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 
 export const getRoomIsWritingList = (store: RootStore, id: string): string[] | undefined =>
@@ -64,3 +64,8 @@ export const getDraftMessage = (
 	store: RootStore,
 	roomId: string
 ): string | undefined => store.activeConversations[roomId] ? store.activeConversations[roomId]?.draftMessage : '';
+
+export const getFilesToUploadArray = (
+	store: RootStore,
+	roomId: string
+): FileToUpload[] | undefined => store.activeConversations[roomId]?.filesToAttach;

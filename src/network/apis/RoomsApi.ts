@@ -163,9 +163,10 @@ class RoomsApi extends BaseAPI implements IRoomsApi {
 	public addRoomAttachment(
 		roomId: string,
 		file: File,
-		description?: string
+		description?: string,
+		signal?: AbortSignal
 	): Promise<AddRoomAttachmentResponse> {
-		return this.uploadFileFetchAPI(`rooms/${roomId}/attachments`, RequestType.POST, file, {
+		return this.uploadFileFetchAPI(`rooms/${roomId}/attachments`, RequestType.POST, file, signal, {
 			description
 		});
 	}
