@@ -6,11 +6,11 @@
 
 import { getUserAccount, getUserSettings } from '@zextras/carbonio-shell-ui';
 import moment from 'moment-timezone';
-import React, { useEffect } from 'react';
+import React from 'react';
 
+import ConnectionSnackbarManager from './components/ConnectionSnackbarManager';
 import CounterBadgeUpdater from './components/CounterBadgeUpdater';
-import useRegisterCreationButton from './hooks/useRegisterCreationButton';
-import useSnackbarManager from './hooks/useSnackbarManager';
+import RegisterCreationButton from './components/RegisterCreationButton';
 import { MeetingsApi, RoomsApi, SessionApi } from './network';
 import { WebSocketClient } from './network/websocket/WebSocketClient';
 import XMPPClient from './network/xmpp/XMPPClient';
@@ -34,45 +34,42 @@ const initApp = () => {
 		moment.locale(settings.prefs.zimbraPrefLocale);
 	}
 
+	// Create and set into store XMPPClient and WebSocketClient instances
+	// to avoid errors when views are rendered
+	const xmppClient = new XMPPClient();
+	store.setXmppClient(xmppClient);
+	const webSocket = new WebSocketClient();
+	store.setWebSocketClient(webSocket);
+
 	Promise.all([SessionApi.getToken(), SessionApi.getCapabilities()])
 		.then((resp) => {
 			// CHATS BE: get all rooms list
 			RoomsApi.listRooms(true, true)
 				.then(() => {
-					// XMPP: connection to Mongoose Instant Messaging platform
-					// Init xmppClient after roomList request to avoid missing data after inboxMessages
-					// main scenario when requesting history of a room and without this check previously
-					// an error for missing clearedAt was returned
-					const xmppClient = new XMPPClient();
+					// Init xmppClient and webSocket after roomList request to avoid missing data (specially for the inbox request)
 					xmppClient.connect(resp[0].zmToken);
-					store.setXmppClient(xmppClient);
+					webSocket.connect();
 				})
 				.catch(() => store.setChatsBeStatus(false));
 			MeetingsApi.listMeetings();
-			// Web Socket: connection to receive realtime events
-			const webSocket = new WebSocketClient();
-			store.setWebSocketClient(webSocket);
 		})
 		.catch(() => store.setChatsBeStatus(false));
 };
 
-export default function App() {
-	useEffect(() => {
-		initApp();
-	}, []);
+/*
+	TODO: move initApp inside App
+	but not now because there is a shell bug that makes mount App more that once
+ */
+initApp();
 
+export default function App() {
 	useChatsRoute();
 	useMeetingsRoute();
 
-	// Register actions on creation button
-	const CreationModal = useRegisterCreationButton();
-
-	const Snackbars = useSnackbarManager();
-
 	return (
 		<>
-			{CreationModal}
-			{Snackbars}
+			<RegisterCreationButton />
+			<ConnectionSnackbarManager />
 			<CounterBadgeUpdater />
 		</>
 	);

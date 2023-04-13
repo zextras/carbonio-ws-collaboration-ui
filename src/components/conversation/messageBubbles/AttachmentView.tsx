@@ -5,7 +5,6 @@
  */
 
 import {
-	Avatar,
 	Container,
 	Icon,
 	IconButton,
@@ -18,12 +17,13 @@ import React, { FC, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
+import AttachmentSmallView from './AttachmentSmallView';
 import usePreview from '../../../hooks/usePreview';
 import { AttachmentsApi } from '../../../network';
 import { getUserName } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
 import { AttachmentMessageType } from '../../../types/store/MessageTypes';
-import { getPreviewURL } from '../../../utils/attachmentUtils';
+import { getThumbnailURL } from '../../../utils/attachmentUtils';
 import { calculateAvatarColor } from '../../../utils/styleUtils';
 
 const HoverContainer = styled(Container)`
@@ -52,6 +52,7 @@ const PreviewContainer = styled(Container)`
 	}
 `;
 const AttachmentImg = styled.img`
+	max-height: 15.625rem;
 	max-width: 100%;
 	mask-image: linear-gradient(
 		180deg,
@@ -80,15 +81,6 @@ const FileContainer = styled(Container)`
 	cursor: pointer;
 `;
 
-const CustomAvatar = styled(Avatar)`
-	svg {
-		width: calc(2rem * 0.75);
-		min-width: calc(2rem * 0.75);
-		height: calc(2rem * 0.75);
-		min-height: calc(2rem * 0.75);
-	}
-`;
-
 type AttachmentViewProps = {
 	attachment: AttachmentMessageType;
 	isMyMessage?: boolean;
@@ -115,7 +107,7 @@ const AttachmentView: FC<AttachmentViewProps> = ({ attachment, from, isMyMessage
 	const userColor = useMemo(() => calculateAvatarColor(senderIdentifier || ''), [senderIdentifier]);
 
 	const previewURL = useMemo(
-		() => getPreviewURL(attachment.id, attachment.mimeType),
+		() => getThumbnailURL(attachment.id, attachment.mimeType),
 		[attachment.id, attachment.mimeType]
 	);
 
@@ -219,18 +211,10 @@ const AttachmentView: FC<AttachmentViewProps> = ({ attachment, from, isMyMessage
 			onClick={download}
 		>
 			<Row>
-				<Tooltip label={downloadActionLabel}>
-					<CustomAvatar
-						size="large"
-						icon="FileTextOutline"
-						label={attachment.name}
-						shape="square"
-						background="gray0"
-					/>
-				</Tooltip>
+				<AttachmentSmallView attachment={attachment} />
 			</Row>
 			<Row takeAvailableSpace wrap="nowrap" height="100%">
-				<Container padding={{ all: 'small' }} wrap="wrap">
+				<Container padding={{ vertical: 'small' }} wrap="wrap">
 					<Text color="secondary">{attachment.name}</Text>
 				</Container>
 			</Row>

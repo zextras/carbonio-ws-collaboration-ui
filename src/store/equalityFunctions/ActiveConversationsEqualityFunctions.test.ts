@@ -7,12 +7,12 @@
 import { messageWhereScrollIsStoppedEqualityFn } from './ActiveConversationsEqualityFunctions';
 
 describe('Testing activeConversationsEqualityFunctions', () => {
-	it('tests messageWhereScrollIsStoppedEqualityFn changes', function () {
+	it('tests messageWhereScrollIsStoppedEqualityFn changes', () => {
 		const result = messageWhereScrollIsStoppedEqualityFn(undefined, '4571vcxv54gd5f4');
 		expect(result).toBeFalsy();
 	});
 
-	it('tests messageWhereScrollIsStoppedEqualityFn equality', function () {
+	it('tests messageWhereScrollIsStoppedEqualityFn equality', () => {
 		const result = messageWhereScrollIsStoppedEqualityFn('4571vcxv54gd5f4', '4571vcxv54gd5f4');
 		expect(result).toBeTruthy();
 	});
