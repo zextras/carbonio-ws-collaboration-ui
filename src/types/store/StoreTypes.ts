@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { ActiveConversationsMap, messageActionType } from './ActiveConversationTypes';
+import { ActiveConversationsMap, FileToUpload, messageActionType } from './ActiveConversationTypes';
 import { Connections } from './ConnectionsTypes';
 import { Marker, MarkersMap } from './MarkersTypes';
 import {
@@ -85,7 +85,7 @@ export type MarkersStoreSlice = {
 
 export type ActiveConversationsSlice = {
 	activeConversations: ActiveConversationsMap;
-	setDraftMessage: (roomId: string, sended: boolean, message?: string) => void;
+	setDraftMessage: (roomId: string, sent: boolean, message?: string) => void;
 	setIdMessageWhereScrollIsStopped: (roomId: string, messageId: string) => void;
 	setPinnedMessage: (roomId: string, message: object) => void;
 	setInputHasFocus: (roomId: string, hasFocus: boolean) => void;
@@ -103,6 +103,12 @@ export type ActiveConversationsSlice = {
 	setHistoryLoadDisabled: (roomId: string, status: boolean) => void;
 	setActionsAccordionStatus: (roomId: string, status: boolean) => void;
 	setParticipantsAccordionStatus: (roomId: string, status: boolean) => void;
+	setFilesToAttach: (roomId: string, files: FileToUpload[]) => void;
+	setFileFocusedToModify: (roomId: string, fileTempId: string, active: boolean) => void;
+	addDescriptionToFileToAttach: (roomId: string, fileTempId: string, description: string) => void;
+	removeDescriptionToFileToAttach: (roomId: string, fileTempId: string) => void;
+	removeFileToAttach: (roomId: string, fileTempId: string) => void;
+	unsetFilesToAttach: (roomId: string) => void;
 };
 
 export type ConnectionsStoreSlice = {

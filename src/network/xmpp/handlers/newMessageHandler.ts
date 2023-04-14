@@ -98,9 +98,18 @@ export function onNewMessageStanza(this: IXMPPClient, message: Element): true {
 				const sender = store.users[newMessage.from];
 				const title =
 					room.type === RoomType.ONE_TO_ONE ? sender.name || sender.email || '' : room.name;
-				const text = newMessage.forwarded ? newMessage.forwarded.text : newMessage.text;
+				const textToDisplay = (): string => {
+					const attachment = newMessage.attachment || newMessage.forwarded?.attachment;
+					if (attachment) {
+						return newMessage.text !== '' ? newMessage.text : attachment.name;
+					}
+					return newMessage.forwarded ? newMessage.forwarded.text : newMessage.text;
+				};
+
 				const textMessage =
-					room.type === RoomType.ONE_TO_ONE ? text : `${sender?.name?.split(' ')[0]}: ${text}`;
+					room.type === RoomType.ONE_TO_ONE
+						? textToDisplay()
+						: `${sender?.name?.split(' ')[0]}: ${textToDisplay()}`;
 
 				getNotificationManager().notify({
 					showPopup: true,

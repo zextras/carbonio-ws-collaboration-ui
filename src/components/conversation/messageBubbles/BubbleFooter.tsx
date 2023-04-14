@@ -83,11 +83,11 @@ const BubbleFooter: FC<BubbleFooterProps> = ({
 					</Container>
 				)}
 				{forwarded && (
-					<Padding width="fit" right="small">
+					<Container width="fit">
 						<ItalicText color="secondary" size="extrasmall">
 							{forwardedLabel}
 						</ItalicText>
-					</Padding>
+					</Container>
 				)}
 				{isMyMessage && messageRead && (
 					<Tooltip label={dropdownTooltip}>

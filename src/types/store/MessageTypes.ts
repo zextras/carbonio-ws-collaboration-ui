@@ -77,6 +77,7 @@ export type ForwardedMessage = {
 	date: number;
 	from: string;
 	text: string;
+	attachment?: AttachmentMessageType;
 };
 
 export type AttachmentMessageType = {

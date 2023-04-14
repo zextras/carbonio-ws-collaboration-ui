@@ -12,4 +12,10 @@ export type GetAttachmentInfoResponse = Attachment;
 
 export type GetAttachmentResponse = Blob;
 
-export type GetAttachmentPreviewResponse = Blob;
+export type GetImageResponse = Blob;
+
+export type GetPdfResponse = Response;
+
+export type GetImageThumbnailResponse = Blob;
+
+export type GetPdfThumbnailResponse = Response;

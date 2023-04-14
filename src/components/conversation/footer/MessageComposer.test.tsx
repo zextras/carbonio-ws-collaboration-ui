@@ -70,6 +70,14 @@ describe('MessageComposer', () => {
 		// Button status while user writes
 		const textArea = screen.getByRole('textbox');
 		await user.type(textArea, ' hi! ');
-		expect(selectFileButton).not.toBeVisible();
+		expect(selectFileButton).toBeVisible();
+	});
+	test('User type some text in the composer => text is displayed and button to send si enabled', async () => {
+		const { user } = setup(<MessageComposer roomId={'roomId'} />);
+		const textArea = screen.getByRole('textbox');
+		await user.type(textArea, ' hi! ');
+		expect(screen.getByTestId('icon: Navigation2').parentNode).not.toBeDisabled();
+		const textAreaUpdated = screen.getByRole('textbox');
+		expect((textAreaUpdated as HTMLTextAreaElement).value).toBe(' hi! ');
 	});
 });

@@ -7,7 +7,12 @@
 import roomsApi from './RoomsApi';
 import { fetchResponse } from '../../../jest-mocks';
 import useStore from '../../store/Store';
-import { createMockCapabilityList, createMockRoom } from '../../tests/createMock';
+import {
+	createMockCapabilityList,
+	createMockRoom,
+	createMockTextMessage
+} from '../../tests/createMock';
+import { dateToISODate } from '../../utils/dateUtil';
 
 describe('Rooms API', () => {
 	test('listRooms is called correctly', async () => {
@@ -111,6 +116,28 @@ describe('Rooms API', () => {
 		});
 	});
 
+	test('getURLRoomPicture is called correctly', () => {
+		const room = createMockRoom({ id: 'roomId', name: 'new name' });
+		const url = roomsApi.getURLRoomPicture(room.id);
+		expect(url).toEqual(`http://localhost/services/chats/rooms/roomId/picture`);
+	});
+
+	test('getRoomPicture is called correctly', async () => {
+		// Send getUserPicture request
+		await roomsApi.getRoomPicture('roomId');
+
+		// Set appropriate headers
+		const headers = new Headers();
+		headers.append('Content-Type', 'application/json');
+
+		// Check if fetch is called with the correct parameters
+		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/rooms/roomId/picture`, {
+			headers,
+			method: 'GET',
+			body: undefined
+		});
+	});
+
 	test('updateRoomPicture is called correctly', async () => {
 		// Send updateRoomPicture request
 		const testFile = new File([], 'image.png', { type: 'image/png' });
@@ -202,6 +229,168 @@ describe('Rooms API', () => {
 			method: 'PUT',
 			headers,
 			body: undefined
+		});
+	});
+
+	test('getRoomMembers is called correctly', async () => {
+		// Send getRoomMembers request
+		await roomsApi.getRoomMembers('roomId');
+
+		// Set appropriate headers
+		const headers = new Headers();
+		headers.append('Content-Type', 'application/json');
+
+		// Check if fetch is called with the correct parameters
+		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/rooms/roomId/members`, {
+			method: 'GET',
+			headers,
+			body: undefined
+		});
+	});
+
+	test('addRoomMember is called correctly', async () => {
+		// Send addRoomMember request
+		const member = {
+			userId: 'userId',
+			owner: false,
+			historyCleared: true
+		};
+		await roomsApi.addRoomMember('roomId', member);
+
+		// Set appropriate headers
+		const headers = new Headers();
+		headers.append('Content-Type', 'application/json');
+
+		// Check if fetch is called with the correct parameters
+		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/rooms/roomId/members`, {
+			method: 'POST',
+			headers,
+			body: JSON.stringify(member)
+		});
+	});
+
+	test('deleteRoomMember is called correctly', async () => {
+		// Send deleteRoomMember request
+		await roomsApi.deleteRoomMember('roomId', 'userId');
+
+		// Set appropriate headers
+		const headers = new Headers();
+		headers.append('Content-Type', 'application/json');
+
+		// Check if fetch is called with the correct parameters
+		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/rooms/roomId/members/userId`, {
+			method: 'DELETE',
+			headers,
+			body: undefined
+		});
+	});
+
+	test('promoteRoomMember is called correctly', async () => {
+		// Send promoteRoomMember request
+		await roomsApi.promoteRoomMember('roomId', 'userId');
+
+		// Set appropriate headers
+		const headers = new Headers();
+		headers.append('Content-Type', 'application/json');
+
+		// Check if fetch is called with the correct parameters
+		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/rooms/roomId/members/userId/owner`, {
+			method: 'PUT',
+			headers,
+			body: undefined
+		});
+	});
+
+	test('demotesRoomMember is called correctly', async () => {
+		// Send demotesRoomMember request
+		await roomsApi.demotesRoomMember('roomId', 'userId');
+
+		// Set appropriate headers
+		const headers = new Headers();
+		headers.append('Content-Type', 'application/json');
+
+		// Check if fetch is called with the correct parameters
+		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/rooms/roomId/members/userId/owner`, {
+			method: 'DELETE',
+			headers,
+			body: undefined
+		});
+	});
+
+	test('getRoomAttachments is called correctly', async () => {
+		// Send getRoomAttachments request
+		await roomsApi.getRoomAttachments('roomId');
+
+		// Set appropriate headers
+		const headers = new Headers();
+		headers.append('Content-Type', 'application/json');
+
+		// Check if fetch is called with the correct parameters
+		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/rooms/roomId/attachments`, {
+			headers,
+			method: 'GET',
+			body: undefined
+		});
+	});
+
+	test('getRoomAttachments is called correctly with params', async () => {
+		// Send getRoomAttachments request
+		await roomsApi.getRoomAttachments('roomId', 3, 'filter');
+
+		// Set appropriate headers
+		const headers = new Headers();
+		headers.append('Content-Type', 'application/json');
+
+		// Check if fetch is called with the correct parameters
+		expect(global.fetch).toHaveBeenCalledWith(
+			`/services/chats/rooms/roomId/attachments?itemsNumber=3&extraFields=filter`,
+			{
+				headers,
+				method: 'GET',
+				body: undefined
+			}
+		);
+	});
+
+	test('addRoomAttachment is called correctly', async () => {
+		// Send addRoomAttachments request
+		const testFile = new File([], 'file.pdf', { type: 'application/pdf' });
+		const { signal } = new AbortController();
+		await roomsApi.addRoomAttachment('roomId', testFile, 'description', signal);
+
+		// Set appropriate headers
+		const headers = new Headers();
+		headers.append('fileName', 'ZmlsZS5wZGY='); // Base64 of 'file.pdf'
+		headers.append('mimeType', testFile.type);
+		headers.append('description', 'ZGVzY3JpcHRpb24='); // Base64 of 'description'
+
+		// Check if fetch is called with the correct parameters
+		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/rooms/roomId/attachments`, {
+			method: 'POST',
+			headers,
+			body: new ArrayBuffer(0),
+			signal
+		});
+	});
+
+	test('forwardMessages is called correctly', async () => {
+		// Send addRoom request
+		const message = createMockTextMessage();
+		const forwardedMessage = {
+			originalMessage: undefined,
+			originalMessageSentAt: dateToISODate(message.date)
+		};
+		await roomsApi.forwardMessages('roomId', [message]);
+
+		// Set appropriate headers
+		const headers = new Headers();
+		headers.append('Content-Type', 'application/json');
+
+		// Check if fetch is called with the correct parameters
+		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/rooms/roomId/forward`, {
+			method: 'POST',
+			headers,
+			body: JSON.stringify([forwardedMessage])
 		});
 	});
 });
