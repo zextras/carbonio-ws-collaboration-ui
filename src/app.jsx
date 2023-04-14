@@ -19,7 +19,8 @@ import ConnectionSnackbarManager from './components/ConnectionSnackbarManager';
 import CounterBadgeUpdater from './components/CounterBadgeUpdater';
 import RegisterCreationButton from './components/RegisterCreationButton';
 import SecondaryBarSingleGroupsView from './components/secondaryBar/SecondaryBarSingleGroupsView';
-import { CHATS_ROUTE_TEST, PRODUCT_NAME } from './constants/appConstants';
+import { CHATS_ROUTE, PRODUCT_NAME } from './constants/appConstants';
+import { LogoBeta, LogoSettingsBeta } from './LogoBeta';
 import { RoomsApi, SessionApi } from './network';
 import { WebSocketClient } from './network/websocket/WebSocketClient';
 import XMPPClient from './network/xmpp/XMPPClient';
@@ -101,11 +102,10 @@ initApp();
 export default function App() {
 	useEffect(() => {
 		addRoute({
-			route: CHATS_ROUTE_TEST,
-			position: 90,
+			route: CHATS_ROUTE,
 			visible: true,
 			label: PRODUCT_NAME,
-			primaryBar: 'Gift',
+			primaryBar: LogoBeta,
 			appView: Main,
 			secondaryBar: SecondaryBar
 		});
@@ -113,7 +113,7 @@ export default function App() {
 			route: 'external',
 			visible: false,
 			label: PRODUCT_NAME,
-			primaryBar: 'coffee',
+			primaryBar: 'TeamOutline',
 			appView: () => <AccessMeetingView />,
 			standalone: {
 				hidePrimaryBar: true,
@@ -122,8 +122,8 @@ export default function App() {
 			}
 		});
 		addSettingsView({
-			icon: 'Gift',
-			route: CHATS_ROUTE_TEST,
+			icon: LogoSettingsBeta,
+			route: CHATS_ROUTE,
 			label: PRODUCT_NAME,
 			component: SettingsView
 		});
