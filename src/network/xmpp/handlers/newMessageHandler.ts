@@ -6,7 +6,7 @@
 
 import { getNotificationManager, replaceHistory } from '@zextras/carbonio-shell-ui';
 
-import { CHATS_ROUTE_TEST } from '../../../constants/appConstants';
+import { CHATS_ROUTE } from '../../../constants/appConstants';
 import { EventName, sendCustomEvent } from '../../../hooks/useEventListener';
 import useStore from '../../../store/Store';
 import IXMPPClient from '../../../types/network/xmpp/IXMPPClient';
@@ -120,7 +120,7 @@ export function onNewMessageStanza(this: IXMPPClient, message: Element): true {
 						window.focus();
 						replaceHistory({
 							path: `/${newMessage.roomId}`,
-							route: CHATS_ROUTE_TEST
+							route: CHATS_ROUTE
 						});
 					}
 				});
