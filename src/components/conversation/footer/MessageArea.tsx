@@ -77,6 +77,7 @@ type MessageAreaPros = {
 	handleKeyDownTextarea: (e: never) => void;
 	handleOnBlur: (e: never) => void;
 	handleOnFocus: (e: never) => void;
+	handleOnPaste: (e: never) => void;
 	isDisabled: boolean;
 };
 
@@ -88,11 +89,11 @@ const MessageArea: React.FC<MessageAreaPros> = ({
 	handleKeyDownTextarea,
 	handleOnBlur,
 	handleOnFocus,
+	handleOnPaste,
 	isDisabled
 }) => {
 	const [t] = useTranslation();
 	const messageComposerLabel = t('tooltip.messageComposer', 'Message composer');
-	// TODO handle onpaste for images and text
 
 	return (
 		<MessageTextarea
@@ -103,7 +104,7 @@ const MessageArea: React.FC<MessageAreaPros> = ({
 			onChange={onInput}
 			onFocus={handleOnFocus}
 			onBlur={handleOnBlur}
-			// onPaste={handleOnPaste}
+			onPaste={handleOnPaste}
 			aria-label={messageComposerLabel}
 			composerIsFull={composerIsFull}
 			disabled={isDisabled}
