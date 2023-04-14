@@ -15,11 +15,12 @@ import {
 import moment from 'moment-timezone';
 import React, { lazy, Suspense, useEffect } from 'react';
 
+import ConnectionSnackbarManager from './components/ConnectionSnackbarManager';
 import CounterBadgeUpdater from './components/CounterBadgeUpdater';
+import RegisterCreationButton from './components/RegisterCreationButton';
 import SecondaryBarSingleGroupsView from './components/secondaryBar/SecondaryBarSingleGroupsView';
-import { CHATS_ROUTE_TEST, PRODUCT_NAME } from './constants/appConstants';
-import useRegisterCreationButton from './hooks/useRegisterCreationButton';
-import useSnackbarManager from './hooks/useSnackbarManager';
+import { CHATS_ROUTE, PRODUCT_NAME } from './constants/appConstants';
+import { LogoBeta, LogoSettingsBeta } from './LogoBeta';
 import { RoomsApi, SessionApi } from './network';
 import { WebSocketClient } from './network/websocket/WebSocketClient';
 import XMPPClient from './network/xmpp/XMPPClient';
@@ -71,23 +72,23 @@ const initApp = () => {
 		moment.locale(settings.prefs.zimbraPrefLocale);
 	}
 
+	// Create and set into store XMPPClient and WebSocketClient instances
+	// to avoid errors when views are rendered
+	const xmppClient = new XMPPClient();
+	store.setXmppClient(xmppClient);
+	const webSocket = new WebSocketClient();
+	store.setWebSocketClient(webSocket);
+
 	Promise.all([SessionApi.getToken(), SessionApi.getCapabilities()])
 		.then((resp) => {
 			// CHATS BE: get all rooms list
 			RoomsApi.listRooms(true, true)
 				.then(() => {
-					// XMPP: connection to Mongoose Instant Messaging platform
-					// Init xmppClient after roomList request to avoid missing data after inboxMessages
-					// main scenario when requesting history of a room and without this check previously
-					// an error for missing clearedAt was returned
-					const xmppClient = new XMPPClient();
+					// Init xmppClient and webSocket after roomList request to avoid missing data (specially for the inbox request)
 					xmppClient.connect(resp[0].zmToken);
-					store.setXmppClient(xmppClient);
+					webSocket.connect();
 				})
 				.catch(() => store.setChatsBeStatus(false));
-			// Web Socket: connection to receive realtime events
-			const webSocket = new WebSocketClient();
-			store.setWebSocketClient(webSocket);
 		})
 		.catch(() => store.setChatsBeStatus(false));
 };
@@ -101,11 +102,10 @@ initApp();
 export default function App() {
 	useEffect(() => {
 		addRoute({
-			route: CHATS_ROUTE_TEST,
-			position: 90,
+			route: CHATS_ROUTE,
 			visible: true,
 			label: PRODUCT_NAME,
-			primaryBar: 'Gift',
+			primaryBar: LogoBeta,
 			appView: Main,
 			secondaryBar: SecondaryBar
 		});
@@ -113,7 +113,7 @@ export default function App() {
 			route: 'external',
 			visible: false,
 			label: PRODUCT_NAME,
-			primaryBar: 'coffee',
+			primaryBar: 'TeamOutline',
 			appView: () => <AccessMeetingView />,
 			standalone: {
 				hidePrimaryBar: true,
@@ -122,22 +122,17 @@ export default function App() {
 			}
 		});
 		addSettingsView({
-			icon: 'Gift',
-			route: CHATS_ROUTE_TEST,
+			icon: LogoSettingsBeta,
+			route: CHATS_ROUTE,
 			label: PRODUCT_NAME,
 			component: SettingsView
 		});
 	}, []);
 
-	// Register actions on creation button
-	const CreationModal = useRegisterCreationButton();
-
-	const Snackbars = useSnackbarManager();
-
 	return (
 		<>
-			{CreationModal}
-			{Snackbars}
+			<RegisterCreationButton />
+			<ConnectionSnackbarManager />
 			<CounterBadgeUpdater />
 		</>
 	);

@@ -37,13 +37,7 @@ describe('Forward Message Section View', () => {
 		const store: RootStore = useStore.getState();
 		store.addRoom(testRoom);
 		store.setUserInfo(forwardedUser);
-		setup(
-			<ForwardedMessageSectionView
-				forwardedMessage={forwardedMessage}
-				isMyMessage={false}
-				roomId={testRoom.id}
-			/>
-		);
+		setup(<ForwardedMessageSectionView forwardedMessage={forwardedMessage} isMyMessage={false} />);
 
 		// Displayed username is the username of who forward message
 		const userName = screen.getByText(new RegExp(forwardedUser.name, 'i'));
@@ -51,6 +45,65 @@ describe('Forward Message Section View', () => {
 
 		// Displayed text is the text of the forwarded message
 		const message = screen.getByText(new RegExp(forwardedMessage.text, 'i'));
+		expect(message).toBeInTheDocument();
+	});
+
+	test('Forward file is rendered - no description', () => {
+		const forwardedAttachmentMessage: ForwardedMessage = {
+			id: messageToForward.id,
+			date: messageToForward.date,
+			from: messageToForward.from,
+			text: '',
+			attachment: {
+				id: 'attachmentId',
+				name: 'attachmentName',
+				mimeType: 'image/png',
+				size: 1000
+			}
+		};
+
+		const store: RootStore = useStore.getState();
+		store.addRoom(testRoom);
+		store.setUserInfo(forwardedUser);
+		setup(
+			<ForwardedMessageSectionView
+				forwardedMessage={forwardedAttachmentMessage}
+				isMyMessage={false}
+			/>
+		);
+
+		// Displayed text is the name of the file
+		const fileName = forwardedAttachmentMessage.attachment?.name || '';
+		const message = screen.getByText(new RegExp(fileName, 'i'));
+		expect(message).toBeInTheDocument();
+	});
+
+	test('Forward file is rendered - with description', () => {
+		const forwardedAttachmentMessage: ForwardedMessage = {
+			id: messageToForward.id,
+			date: messageToForward.date,
+			from: messageToForward.from,
+			text: 'hello world',
+			attachment: {
+				id: 'attachmentId',
+				name: 'attachmentName',
+				mimeType: 'image/png',
+				size: 1000
+			}
+		};
+
+		const store: RootStore = useStore.getState();
+		store.addRoom(testRoom);
+		store.setUserInfo(forwardedUser);
+		setup(
+			<ForwardedMessageSectionView
+				forwardedMessage={forwardedAttachmentMessage}
+				isMyMessage={false}
+			/>
+		);
+
+		// Displayed text is the text of the forwarded message
+		const message = screen.getByText(new RegExp(forwardedAttachmentMessage.text, 'i'));
 		expect(message).toBeInTheDocument();
 	});
 });

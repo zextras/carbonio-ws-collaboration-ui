@@ -10,6 +10,7 @@ import styled from 'styled-components';
 
 import MessageComposer from './MessageComposer';
 import ReferenceMessageView from './ReferenceMessageView';
+import UploadAttachmentManagerView from './UploadAttachmentManagerView';
 
 const ConversationFooterWrapper = styled(Container)`
 	border-top: 0.0625rem solid ${({ theme }): string => theme.palette.gray3.regular};
@@ -23,6 +24,7 @@ type ConversationFooterProps = {
 const ConversationFooter: React.FC<ConversationFooterProps> = ({ roomId }) => (
 	<ConversationFooterWrapper height="fit" background={'gray6'}>
 		<ReferenceMessageView roomId={roomId} />
+		<UploadAttachmentManagerView roomId={roomId} />
 		<MessageComposer roomId={roomId} />
 	</ConversationFooterWrapper>
 );

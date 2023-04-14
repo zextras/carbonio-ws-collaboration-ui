@@ -28,13 +28,14 @@ failOnConsole({
 beforeEach(() => {
 	// Do not useFakeTimers with `whatwg-fetch` if using mocked server
 	// https://github.com/mswjs/msw/issues/448
-	jest.useFakeTimers();
 	useStore.getState().setXmppClient(xmppClient);
 });
 
 beforeAll(() => {
 	jest.setTimeout(30000);
-	jest.retryTimes(2);
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore
+	jest.retryTimes(2, { logErrorsBeforeRetry: true });
 
 	// define browser objects non available in jest
 	// https://jestjs.io/docs/en/manual-mocks#mocking-methods-which-are-not-implemented-in-jsdom
@@ -100,7 +101,6 @@ beforeAll(() => {
 });
 
 afterEach(() => {
-	jest.useRealTimers();
 	jest.restoreAllMocks();
 	act(() => {
 		window.resizeTo(1024, 768);

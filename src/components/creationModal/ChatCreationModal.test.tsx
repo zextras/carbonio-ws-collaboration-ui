@@ -130,9 +130,8 @@ describe('Chat Creation Modal', () => {
 	});
 
 	test('title and topic fields are filled properly', async () => {
-		const { user } = setup(<ChatCreationModal open onClose={jest.fn()} />);
-
 		mockedAutoCompleteGalRequest.mockReturnValueOnce([zimbraUser1, zimbraUser2]);
+		const { user } = setup(<ChatCreationModal open onClose={jest.fn()} />);
 
 		// Add zimbraUser1 and zimbraUser2 chips
 		const chipInput = await screen.findByTestId('chip_input_creation_modal');
@@ -156,10 +155,8 @@ describe('Chat Creation Modal', () => {
 	});
 
 	test('Error on title input', async () => {
-		const { user } = setup(<ChatCreationModal open onClose={jest.fn()} />);
-
 		mockedAutoCompleteGalRequest.mockReturnValueOnce([zimbraUser1, zimbraUser2]);
-
+		const { user } = setup(<ChatCreationModal open onClose={jest.fn()} />);
 		// Add zimbraUser1 and zimbraUser2 chips
 		const chipInput = await screen.findByTestId('chip_input_creation_modal');
 		await user.type(chipInput, zimbraUser1.fullName[0]);
@@ -182,9 +179,8 @@ describe('Chat Creation Modal', () => {
 	});
 
 	test('Error on topic input', async () => {
-		const { user } = setup(<ChatCreationModal open onClose={jest.fn()} />);
-
 		mockedAutoCompleteGalRequest.mockReturnValueOnce([zimbraUser1, zimbraUser2]);
+		const { user } = setup(<ChatCreationModal open onClose={jest.fn()} />);
 
 		// Add zimbraUser1 and zimbraUser2 chips
 		const chipInput = await screen.findByTestId('chip_input_creation_modal');

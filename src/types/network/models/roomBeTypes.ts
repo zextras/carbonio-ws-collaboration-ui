@@ -51,3 +51,9 @@ export type RoomUserSettings = {
 	muted: boolean;
 	clearedAt?: string;
 };
+
+export type ForwardedMessageInfo = {
+	originalMessage: string;
+	originalMessageSentAt: string;
+	description?: string;
+};

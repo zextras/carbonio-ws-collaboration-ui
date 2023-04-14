@@ -135,7 +135,6 @@ const Bubble: FC<BubbleProps> = ({
 				<ForwardedTextMessageSectionView
 					forwardedMessage={message.forwarded}
 					isMyMessage={isMyMessage}
-					roomId={message.roomId}
 				/>
 			)}
 			{message.attachment && (

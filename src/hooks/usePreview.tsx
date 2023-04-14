@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next';
 
 import { AttachmentsApi } from '../network';
 import { AttachmentMessageType } from '../types/store/MessageTypes';
-import { getAttachmentURL, getPreviewURL } from '../utils/attachmentUtils';
+import { getAttachmentSize, getAttachmentURL } from '../utils/attachmentUtils';
 
 export type UsePreviewHook = {
 	onPreviewClick: () => void;
@@ -26,12 +26,10 @@ const usePreview = (attachment: AttachmentMessageType): UsePreviewHook => {
 		return '';
 	}, [attachment]);
 
-	const attachmentURL = useMemo(() => {
-		if (extension === 'PDF') {
-			return getAttachmentURL(attachment.id, attachment.mimeType);
-		}
-		return getPreviewURL(attachment.id, attachment.mimeType);
-	}, [attachment.id, attachment.mimeType, extension]);
+	const attachmentURL = useMemo(
+		() => getAttachmentURL(attachment.id, attachment.mimeType),
+		[attachment.id, attachment.mimeType]
+	);
 
 	const typeOfAttachment = useMemo(() => {
 		if (extension === 'PDF') {
@@ -40,21 +38,7 @@ const usePreview = (attachment: AttachmentMessageType): UsePreviewHook => {
 		return 'image';
 	}, [extension]);
 
-	const size = useMemo(() => {
-		if (attachment) {
-			if (attachment.size < 1024) {
-				return `${attachment.size}B`;
-			}
-			if (attachment.size < 1024 * 1024) {
-				return `${(attachment.size / 1024).toFixed(2)}KB`;
-			}
-			if (attachment.size < 1024 * 1024 * 1024) {
-				return `${(attachment.size / 1024 / 1024).toFixed(2)}MB`;
-			}
-			return `${(attachment.size / 1024 / 1024 / 1024).toFixed(2)}GB`;
-		}
-		return undefined;
-	}, [attachment]);
+	const size = useMemo(() => getAttachmentSize(attachment.size), [attachment]);
 
 	const download = useCallback(() => {
 		const downloadUrl = AttachmentsApi.getURLAttachment(attachment.id);
@@ -68,7 +52,7 @@ const usePreview = (attachment: AttachmentMessageType): UsePreviewHook => {
 	}, [attachment.id, attachment.name]);
 
 	const onPreviewClick = useCallback(() => {
-		if (attachmentURL) {
+		if (attachmentURL && typeOfAttachment) {
 			createPreview({
 				previewType: typeOfAttachment,
 				filename: attachment.name,

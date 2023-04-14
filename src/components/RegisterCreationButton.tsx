@@ -8,10 +8,10 @@ import { registerActions, ACTION_TYPES, removeActions } from '@zextras/carbonio-
 import React, { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import ChatCreationModal from '../components/creationModal/ChatCreationModal';
+import ChatCreationModal from './creationModal/ChatCreationModal';
 import { CHATS_APP_ID } from '../constants/appConstants';
 
-const useRegisterCreationButton = (): ReactElement => {
+const RegisterCreationButton = (): ReactElement => {
 	const [t] = useTranslation();
 	const [newChatModal, setNewChatModal] = useState(false);
 
@@ -43,4 +43,4 @@ const useRegisterCreationButton = (): ReactElement => {
 	return CreationModal;
 };
 
-export default useRegisterCreationButton;
+export default RegisterCreationButton;
