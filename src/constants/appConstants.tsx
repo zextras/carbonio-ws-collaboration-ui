@@ -5,9 +5,9 @@
  */
 
 // Chats zapp constants
-export const PRODUCT_NAME = 'Chats test';
-export const CHATS_APP_ID = 'carbonio-chats-ui-test';
-export const CHATS_ROUTE_TEST = 'test';
+export const PRODUCT_NAME = 'Chats';
+export const CHATS_APP_ID = 'carbonio-ws-collaboration-ui';
+export const CHATS_ROUTE = 'chats';
 
 // Meetings zapp constants
 export const MEETINGS_NAME = 'Meetings';

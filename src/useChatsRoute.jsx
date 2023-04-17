@@ -9,7 +9,8 @@ import { addRoute, addSettingsView, Spinner } from '@zextras/carbonio-shell-ui';
 import React, { lazy, Suspense, useEffect } from 'react';
 
 import SecondaryBarSingleGroupsView from './components/secondaryBar/SecondaryBarSingleGroupsView';
-import { CHATS_ROUTE_TEST, PRODUCT_NAME } from './constants/appConstants';
+import { CHATS_ROUTE, PRODUCT_NAME } from './constants/appConstants';
+import { LogoBeta, LogoSettingsBeta } from './LogoBeta';
 import ShimmeringConversationView from './views/chats/shimmerViews/ShimmeringConversationView';
 import ShimmeringInfoPanelView from './views/chats/shimmerViews/ShimmeringInfoPanelView';
 
@@ -42,17 +43,16 @@ const SettingsView = () => (
 export default function useChatsRoute() {
 	useEffect(() => {
 		addRoute({
-			route: CHATS_ROUTE_TEST,
-			position: 90,
+			route: CHATS_ROUTE,
 			visible: true,
 			label: PRODUCT_NAME,
-			primaryBar: 'Gift',
+			primaryBar: LogoBeta,
 			appView: ChatsMain,
 			secondaryBar: SecondaryBar
 		});
 		addSettingsView({
-			icon: 'Gift',
-			route: CHATS_ROUTE_TEST,
+			icon: LogoSettingsBeta,
+			route: CHATS_ROUTE,
 			label: PRODUCT_NAME,
 			component: SettingsView
 		});

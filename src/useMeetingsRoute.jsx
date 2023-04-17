@@ -8,7 +8,7 @@ import { addRoute, Spinner } from '@zextras/carbonio-shell-ui';
 import React, { lazy, Suspense, useEffect } from 'react';
 
 import MeetingsSecondaryBar from './components/meetings/secondaryBar/MeetingsSecondaryBar';
-import { MEETINGS_NAME, MEETINGS_ROUTE, PRODUCT_NAME } from './constants/appConstants';
+import { MEETINGS_NAME, MEETINGS_ROUTE } from './constants/appConstants';
 import ExternalMainView from './views/meetings/ExternalMainView';
 
 const LazyMeetingsMainView = lazy(() =>
@@ -37,8 +37,8 @@ export default function useMeetingsRoute() {
 		addRoute({
 			route: 'external',
 			visible: false,
-			label: PRODUCT_NAME,
-			primaryBar: 'coffee',
+			label: MEETINGS_NAME,
+			primaryBar: 'TeamOutline',
 			appView: ExternalMainView,
 			standalone: {
 				hidePrimaryBar: true,
