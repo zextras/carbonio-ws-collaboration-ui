@@ -20,6 +20,7 @@ import {
 	difference,
 	differenceBy,
 	find,
+	forEach,
 	includes,
 	map,
 	omit,
@@ -79,17 +80,16 @@ const ChatCreationContactsSelection = ({
 	const [loading, setLoading] = useState<boolean>(false);
 	const [error, setError] = useState<boolean>(false);
 
-	// Callback that creates the users'list when you are already inside a group
+	// Callback that creates the users' list when you are already inside a group
 	const userListNotInsideRoom = useCallback(
 		(response) => {
 			const userList: ContactMatch[] = [];
 			const membersIds = map(members, 'userId');
-			// eslint-disable-next-line no-restricted-syntax
-			for (const user of response) {
+			forEach(response, (user) => {
 				if (!includes(membersIds, user.zimbraId)) {
 					userList.push(user);
 				}
-			}
+			});
 			return userList;
 		},
 		[members]
@@ -118,13 +118,10 @@ const ChatCreationContactsSelection = ({
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
-	// Search zimbra contacts on typing
-	const handleChangeText = useCallback(
-		(ev) => {
-			setLoading(true);
-			setError(false);
+	const debouncedAutoComplete = useMemo(
+		() =>
 			debounce(() => {
-				autoCompleteGalRequest(ev.textContent)
+				autoCompleteGalRequest(inputRef.current?.value || '')
 					.then((response: AutoCompleteGalResponse) => {
 						setLoading(false);
 						// Remove myself from the list
@@ -135,17 +132,23 @@ const ChatCreationContactsSelection = ({
 						} else {
 							const usersNotInsideRoom: ContactMatch[] = userListNotInsideRoom(response);
 							setResult(usersNotInsideRoom);
-							if (size(response) === 0) setError(true);
+							if (size(usersNotInsideRoom) === 0) setError(true);
 						}
 					})
 					.catch((err: Error) => {
 						setLoading(false);
 						console.error(err);
 					});
-			}, 200)();
-		},
+			}, 200),
 		[isCreationModal, userListNotInsideRoom]
 	);
+
+	// Search zimbra contacts on typing
+	const handleChangeText = useCallback(() => {
+		setLoading(true);
+		setError(false);
+		debouncedAutoComplete();
+	}, [debouncedAutoComplete]);
 
 	const resultList = useMemo(
 		() =>
