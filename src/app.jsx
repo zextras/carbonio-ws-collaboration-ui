@@ -8,15 +8,15 @@ import { getUserAccount, getUserSettings } from '@zextras/carbonio-shell-ui';
 import moment from 'moment-timezone';
 import React from 'react';
 
-import ConnectionSnackbarManager from './components/ConnectionSnackbarManager';
-import CounterBadgeUpdater from './components/CounterBadgeUpdater';
-import RegisterCreationButton from './components/RegisterCreationButton';
+import ConnectionSnackbarManager from './chats/components/ConnectionSnackbarManager';
+import CounterBadgeUpdater from './chats/components/CounterBadgeUpdater';
+import RegisterCreationButton from './chats/components/RegisterCreationButton';
+import useChatsApp from './chats/useChatsApp';
+import useMeetingsApp from './meetings/useMeetingsApp';
 import { MeetingsApi, RoomsApi, SessionApi } from './network';
 import { WebSocketClient } from './network/websocket/WebSocketClient';
 import XMPPClient from './network/xmpp/XMPPClient';
 import useStore from './store/Store';
-import useChatsRoute from './useChatsRoute';
-import useMeetingsRoute from './useMeetingsRoute';
 
 const initApp = () => {
 	const { id, name, displayName } = getUserAccount();
@@ -63,8 +63,8 @@ const initApp = () => {
 initApp();
 
 export default function App() {
-	useChatsRoute();
-	useMeetingsRoute();
+	useChatsApp();
+	useMeetingsApp();
 
 	return (
 		<>

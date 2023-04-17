@@ -73,7 +73,7 @@ export const useMeetingsStoreSlice = (set: (...any: any) => void): MeetingsSlice
 	addParticipant: (meetingId: string, participant: MeetingParticipantBe): void => {
 		set(
 			produce((draft: RootStore) => {
-				// Add participant only if meetings exists and sessionId isn't already on meetings
+				// Add participant only if components exists and sessionId isn't already on components
 				const meeting = find(draft.meetings, (meeting) => meeting.id === meetingId);
 				if (meeting) {
 					const sessionIdParticipant = find(
@@ -97,7 +97,7 @@ export const useMeetingsStoreSlice = (set: (...any: any) => void): MeetingsSlice
 	removeParticipant: (meetingId: string, sessionId): void => {
 		set(
 			produce((draft: RootStore) => {
-				// Add participant only if meetings exists and sessionId isn't already on meetings
+				// Add participant only if components exists and sessionId isn't already on components
 				const meeting = find(draft.meetings, (meeting) => meeting.id === meetingId);
 				if (meeting) {
 					remove(draft.meetings[meeting.roomId].participants, { sessionId });

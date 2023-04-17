@@ -318,7 +318,7 @@ paths:
       tags:
         - Meetings
         - Rooms
-      summary: Retrieves the meetings associated with the requested room
+      summary: Retrieves the components associated with the requested room
       operationId: getMeetingByRoomId
       parameters:
         - $ref: '#/components/parameters/pathRoomId'
@@ -336,7 +336,7 @@ paths:
       tags:
         - Meetings
         - Rooms
-      summary: Adds the current user to the specified meetings, if this doesn't exist then creates it
+      summary: Adds the current user to the specified components, if this doesn't exist then creates it
       operationId: joinRoomMeeting
       parameters:
         - $ref: '#/components/parameters/pathRoomId'
@@ -821,19 +821,19 @@ components:
           schema:
             $ref: '#/components/schemas/Token'
     200GetRoomMeetingResponse:
-      description: Gets the requested meetings data
+      description: Gets the requested components data
       content:
         application/json:
           schema:
-            $ref: '../meetings/meetings-api.yaml#/components/schemas/Meeting'
+            $ref: '../components/components-api.yaml#/components/schemas/Meeting'
     200JoinRoomMeetingResponse:
-      description: A meetings was created and the user joined it successfully
+      description: A components was created and the user joined it successfully
       content:
         application/json:
           schema:
-            $ref: '../meetings/meetings-api.yaml#/components/schemas/Meeting'
+            $ref: '../components/components-api.yaml#/components/schemas/Meeting'
     204JoinRoomMeetingResponse:
-      description: The user joined the meetings successfully
+      description: The user joined the components successfully
 
     400BadRequestResponse:
       description: The request had wrong or missing parameters
@@ -1218,4 +1218,4 @@ components:
       type: object
       description: Room data
       allOf:
-        - $ref: '../meetings/meetings-api.yaml#/components/schemas/JoinSettings'
+        - $ref: '../components/components-api.yaml#/components/schemas/JoinSettings'

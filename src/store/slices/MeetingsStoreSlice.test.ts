@@ -42,7 +42,7 @@ const mockMeeting2: MeetingBe = {
 	createdAt: '2022-08-25T19:34:28.961+02:00'
 };
 
-describe('Test meetings slice', () => {
+describe('Test components slice', () => {
 	it('setMeetings setter', () => {
 		const { result } = renderHook(() => useStore());
 		act(() => result.current.setMeetings([mockMeeting0, mockMeeting1, mockMeeting2]));
@@ -72,7 +72,7 @@ describe('Test meetings slice', () => {
 		expect(result.current.meetings[mockMeeting0.roomId].createdAt).toBe(mockMeeting0.createdAt);
 	});
 
-	it('Combination of set meetings, add meetings, and remove meetings setters', () => {
+	it('Combination of set components, add components, and remove components setters', () => {
 		const { result } = renderHook(() => useStore());
 
 		act(() => result.current.setMeetings([mockMeeting0, mockMeeting1]));

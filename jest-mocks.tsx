@@ -69,7 +69,7 @@ jest.mock('./src/hooks/useRouting', () => {
 
 // MOCKED USEMEDIAQUERYCHECK
 export const mockUseMediaQueryCheck = jest.fn();
-jest.mock('./src/utils/useMediaQueryCheck', () => mockUseMediaQueryCheck);
+jest.mock('./src/hooks/useMediaQueryCheck', () => mockUseMediaQueryCheck);
 
 // MOCKED AUTOCOMPLETEREQUEST
 export const mockedAutoCompleteGalRequest: jest.Mock = jest.fn();
