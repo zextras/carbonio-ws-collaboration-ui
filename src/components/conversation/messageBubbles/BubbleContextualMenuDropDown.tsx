@@ -92,7 +92,7 @@ type BubbleContextualMenuDropDownProps = {
 type DropDownActionType = {
 	id: string;
 	label: string;
-	click: () => void;
+	onClick: () => void;
 };
 
 const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
@@ -203,7 +203,7 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 		actions.push({
 			id: 'Reply',
 			label: replyActionLabel,
-			click: () =>
+			onClick: () =>
 				setReferenceMessage(
 					message.roomId,
 					message.id,
@@ -219,7 +219,7 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 			actions.push({
 				id: 'forward',
 				label: forwardActionLabel,
-				click: onOpenForwardMessageModal
+				onClick: onOpenForwardMessageModal
 			});
 		}
 
@@ -228,7 +228,7 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 			actions.push({
 				id: 'Copy',
 				label: copyActionLabel,
-				click: copyMessage
+				onClick: copyMessage
 			});
 		}
 
@@ -237,7 +237,7 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 			actions.push({
 				id: 'Edit',
 				label: editActionLabel,
-				click: () => {
+				onClick: () => {
 					setDraftMessage(message.roomId, false, message.text);
 					setReferenceMessage(
 						message.roomId,
@@ -255,7 +255,7 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 			actions.push({
 				id: 'Delete',
 				label: deleteActionLabel,
-				click: deleteMessage
+				onClick: deleteMessage
 			});
 		}
 
@@ -266,13 +266,13 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 				actions.push({
 					id: 'Preview',
 					label: previewActionLabel,
-					click: onPreviewClick
+					onClick: onPreviewClick
 				});
 			}
 			actions.push({
 				id: 'Download',
 				label: downloadActionLabel,
-				click: downloadAction
+				onClick: downloadAction
 			});
 		}
 		return actions;

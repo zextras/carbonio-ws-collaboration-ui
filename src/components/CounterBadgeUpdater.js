@@ -7,7 +7,7 @@
 import { updatePrimaryBadge } from '@zextras/carbonio-shell-ui';
 import { useEffect } from 'react';
 
-import { CHATS_ROUTE_TEST } from '../constants/appConstants';
+import { CHATS_ROUTE } from '../constants/appConstants';
 import { getTotalUnreadCountSelector } from '../store/selectors/UnreadsCounterSelectors';
 import useStore from '../store/Store';
 
@@ -21,7 +21,7 @@ const CounterBadgeUpdater = () => {
 				count: totalUnreadCount,
 				showCount: true
 			},
-			CHATS_ROUTE_TEST
+			CHATS_ROUTE
 		);
 	}, [totalUnreadCount]);
 
