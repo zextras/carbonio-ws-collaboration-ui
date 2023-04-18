@@ -99,7 +99,7 @@ class UsersApi extends BaseAPI implements IUsersApi {
 			this.usersToRequest.push(userId);
 
 			// If there are less than 10 users to request, wait 1 second before requesting them (wait if there are other calls)
-			if (this.usersToRequest.length <= 10) {
+			if (this.usersToRequest.length < 10) {
 				this.deboucedUserGetter();
 			}
 			// If there are more than 10 users to request, request them immediately
