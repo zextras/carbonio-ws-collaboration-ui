@@ -158,27 +158,39 @@ export function wsEventsHandler(event: WsEvent): void {
 			break;
 		}
 		case WsEventType.MEETING_VIDEO_STREAM_OPENED: {
-			// TODO handle
+			if (eventArrivesFromAnotherSession) {
+				state.changeStreamStatus(event.meetingId, event.sessionId, 'video', true);
+			}
 			break;
 		}
 		case WsEventType.MEETING_VIDEO_STREAM_CLOSED: {
-			// TODO handle
+			if (eventArrivesFromAnotherSession) {
+				state.changeStreamStatus(event.meetingId, event.sessionId, 'video', false);
+			}
 			break;
 		}
 		case WsEventType.MEETING_AUDIO_STREAM_OPENED: {
-			// TODO handle
+			if (eventArrivesFromAnotherSession) {
+				state.changeStreamStatus(event.meetingId, event.sessionId, 'audio', true);
+			}
 			break;
 		}
 		case WsEventType.MEETING_AUDIO_STREAM_CLOSED: {
-			// TODO handle
+			if (eventArrivesFromAnotherSession) {
+				state.changeStreamStatus(event.meetingId, event.sessionId, 'audio', false);
+			}
 			break;
 		}
 		case WsEventType.MEETING_SCREEN_STREAM_OPENED: {
-			// TODO handle
+			if (eventArrivesFromAnotherSession) {
+				state.changeStreamStatus(event.meetingId, event.sessionId, 'screen', true);
+			}
 			break;
 		}
 		case WsEventType.MEETING_SCREEN_STREAM_CLOSED: {
-			// TODO handle
+			if (eventArrivesFromAnotherSession) {
+				state.changeStreamStatus(event.meetingId, event.sessionId, 'screen', false);
+			}
 			break;
 		}
 		default:

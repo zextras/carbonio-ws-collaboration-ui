@@ -6,10 +6,11 @@
 /* eslint-disable no-param-reassign */
 
 import produce from 'immer';
-import { find, forEach, remove } from 'lodash';
+import { find, forEach } from 'lodash';
 
 import { UsersApi } from '../../network';
 import { MeetingBe, MeetingParticipantBe } from '../../types/network/models/meetingBeTypes';
+import { MeetingParticipant, MeetingParticipantMap } from '../../types/store/MeetingTypes';
 import { MeetingsSlice, RootStore } from '../../types/store/StoreTypes';
 
 export const useMeetingsStoreSlice = (set: (...any: any) => void): MeetingsSlice => ({
@@ -18,10 +19,19 @@ export const useMeetingsStoreSlice = (set: (...any: any) => void): MeetingsSlice
 		set(
 			produce((draft: RootStore) => {
 				forEach(meetings, (meeting) => {
+					// Create a map of participants instead of an array
+					const participantsMap: MeetingParticipantMap = meeting.participants.reduce(
+						(acc: MeetingParticipantMap, participant: MeetingParticipantBe) => {
+							acc[participant.sessionId] = participant as MeetingParticipant;
+							return acc;
+						},
+						{}
+					);
+
 					draft.meetings[meeting.roomId] = {
 						id: meeting.id,
 						roomId: meeting.roomId,
-						participants: meeting.participants,
+						participants: participantsMap,
 						createdAt: meeting.createdAt
 					};
 
@@ -40,10 +50,18 @@ export const useMeetingsStoreSlice = (set: (...any: any) => void): MeetingsSlice
 	addMeeting: (meeting: MeetingBe): void => {
 		set(
 			produce((draft: RootStore) => {
+				// Create a map of participants instead of an array
+				const participantsMap: MeetingParticipantMap = meeting.participants.reduce(
+					(acc: MeetingParticipantMap, participant: MeetingParticipantBe) => {
+						acc[participant.sessionId] = participant as MeetingParticipant;
+						return acc;
+					},
+					{}
+				);
 				draft.meetings[meeting.roomId] = {
 					id: meeting.id,
 					roomId: meeting.roomId,
-					participants: meeting.participants,
+					participants: participantsMap,
 					createdAt: meeting.createdAt
 				};
 
@@ -76,13 +94,7 @@ export const useMeetingsStoreSlice = (set: (...any: any) => void): MeetingsSlice
 				// Add participant only if components exists and sessionId isn't already on components
 				const meeting = find(draft.meetings, (meeting) => meeting.id === meetingId);
 				if (meeting) {
-					const sessionIdParticipant = find(
-						meeting.participants,
-						(meetingPart) => meetingPart.sessionId === participant.sessionId
-					);
-					if (!sessionIdParticipant) {
-						draft.meetings[meeting.roomId].participants.push(participant);
-					}
+					meeting.participants[participant.sessionId] = participant as MeetingParticipant;
 
 					// Retrieve member information if he is unknown
 					if (!find(draft.users, (user) => user.id === participant.userId)) {
@@ -100,11 +112,40 @@ export const useMeetingsStoreSlice = (set: (...any: any) => void): MeetingsSlice
 				// Add participant only if components exists and sessionId isn't already on components
 				const meeting = find(draft.meetings, (meeting) => meeting.id === meetingId);
 				if (meeting) {
-					remove(draft.meetings[meeting.roomId].participants, { sessionId });
+					delete draft.meetings[meeting.roomId].participants[sessionId];
 				}
 			}),
 			false,
 			'MEETINGS/REMOVE_PARTICIPANT'
+		);
+	},
+	changeStreamStatus: (
+		meetingId: string,
+		sessionId: string,
+		stream: 'audio' | 'video' | 'screen',
+		status: boolean
+	): void => {
+		set(
+			produce((draft: RootStore) => {
+				const meeting = find(draft.meetings, (meeting) => meeting.id === meetingId);
+				if (meeting) {
+					switch (stream) {
+						case 'audio':
+							draft.meetings[meeting.roomId].participants[sessionId].hasAudioStreamOn = status;
+							break;
+						case 'video':
+							draft.meetings[meeting.roomId].participants[sessionId].hasVideoStreamOn = status;
+							break;
+						case 'screen':
+							draft.meetings[meeting.roomId].participants[sessionId].hasScreenStreamOn = status;
+							break;
+						default:
+							break;
+					}
+				}
+			}),
+			false,
+			'MEETINGS/CHANGE_STREAM_STATUS'
 		);
 	}
 });
