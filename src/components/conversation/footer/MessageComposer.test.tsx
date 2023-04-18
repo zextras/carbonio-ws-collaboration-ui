@@ -247,4 +247,212 @@ describe('MessageComposer', () => {
 		expect(imageCopied).toBeInTheDocument();
 		expect(imageCopied).toHaveStyle('border-color: #8bc34a');
 	});
+	test('test paste some text at the end of the text present in the composer', async () => {
+		const navigatorSetter = jest.spyOn(navigator, 'platform', 'get');
+		navigatorSetter.mockReturnValue('MacIntel');
+		const { user } = storeSetupAdvanced();
+		const initialText = 'we are gonna see ';
+		const composerTextArea = screen.getByRole('textbox');
+		await user.type(composerTextArea, initialText);
+		await user.paste('later');
+		const composerUpdated = screen.getByRole('textbox');
+		expect((composerUpdated as HTMLTextAreaElement).value).toBe('we are gonna see later');
+	});
+	test('test paste some text in the middle of the text present in the composer', async () => {
+		const navigatorSetter = jest.spyOn(navigator, 'platform', 'get');
+		navigatorSetter.mockReturnValue('MacIntel');
+		const { user } = storeSetupAdvanced();
+		const initialText = 'we are gonna later';
+		const composerTextArea = screen.getByRole('textbox');
+		await user.type(
+			composerTextArea,
+			`${initialText}{arrowleft}{arrowleft}{arrowleft}{arrowleft}{arrowleft}`
+		);
+		await user.paste('check ');
+		const composerUpdated = screen.getByRole('textbox');
+		expect((composerUpdated as HTMLTextAreaElement).value).toBe('we are gonna check later');
+	});
+	test('test paste some text at the beginning of the text present in the composer', async () => {
+		const navigatorSetter = jest.spyOn(navigator, 'platform', 'get');
+		navigatorSetter.mockReturnValue('MacIntel');
+		const { user } = storeSetupAdvanced();
+		const initialText = 'Sam';
+		const composerTextArea = screen.getByRole('textbox');
+		await user.type(composerTextArea, `${initialText}{arrowleft}{arrowleft}{arrowleft}`);
+		await user.paste('Hi ');
+		const composerUpdated = screen.getByRole('textbox');
+		expect((composerUpdated as HTMLTextAreaElement).value).toBe('Hi Sam');
+	});
+	test('test paste single attachment at the beginning of the text present in the composer', async () => {
+		const navigatorSetter = jest.spyOn(navigator, 'platform', 'get');
+		navigatorSetter.mockReturnValue('MacIntel');
+		const { user } = storeSetupAdvanced();
+		const initialText = 'Hi';
+		const composerTextArea = screen.getByRole('textbox');
+		await user.type(composerTextArea, initialText);
+		await user.type(composerTextArea, `{arrowleft}{arrowleft}`);
+		const eventProperties = {
+			clipboardData: {
+				getData: jest.fn(),
+				files: [marioPicture]
+			}
+		};
+		const pasteEvent = createEvent.paste(composerTextArea, eventProperties);
+		fireEvent(composerTextArea, pasteEvent);
+		const composerUpdated = screen.getByRole('textbox');
+		expect((composerUpdated as HTMLTextAreaElement).value).toBe('Hi');
+		const updatedStore = useStore.getState();
+		const { filesToAttach } = updatedStore.activeConversations[mockedRoom.id];
+		expect(filesToAttach?.length).toBe(1);
+		const imageCopied = await screen.findByTestId(
+			`previewImage-${(filesToAttach as FileToUpload[])[0].file.name}-${
+				(filesToAttach as FileToUpload[])[0].fileId
+			}`
+		);
+		expect(imageCopied).toBeInTheDocument();
+		expect(imageCopied).toHaveStyle('border-color: #8bc34a');
+	});
+	test('test paste single attachment at the end of the text present in the composer', async () => {
+		const navigatorSetter = jest.spyOn(navigator, 'platform', 'get');
+		navigatorSetter.mockReturnValue('MacIntel');
+		const { user } = storeSetupAdvanced();
+		const initialText = 'Hi';
+		const composerTextArea = screen.getByRole('textbox');
+		await user.type(composerTextArea, initialText);
+		const eventProperties = {
+			clipboardData: {
+				getData: jest.fn(),
+				files: [marioPicture]
+			}
+		};
+		const pasteEvent = createEvent.paste(composerTextArea, eventProperties);
+		fireEvent(composerTextArea, pasteEvent);
+		const composerUpdated = screen.getByRole('textbox');
+		expect((composerUpdated as HTMLTextAreaElement).value).toBe('Hi');
+		const updatedStore = useStore.getState();
+		const { filesToAttach } = updatedStore.activeConversations[mockedRoom.id];
+		expect(filesToAttach?.length).toBe(1);
+		const imageCopied = await screen.findByTestId(
+			`previewImage-${(filesToAttach as FileToUpload[])[0].file.name}-${
+				(filesToAttach as FileToUpload[])[0].fileId
+			}`
+		);
+		expect(imageCopied).toBeInTheDocument();
+		expect(imageCopied).toHaveStyle('border-color: #8bc34a');
+	});
+	test('test paste single attachment in the middle of the text present in the composer', async () => {
+		const navigatorSetter = jest.spyOn(navigator, 'platform', 'get');
+		navigatorSetter.mockReturnValue('MacIntel');
+		const { user } = storeSetupAdvanced();
+		const initialText = 'Hi Red';
+		const composerTextArea = screen.getByRole('textbox');
+		await user.type(composerTextArea, initialText);
+		await user.type(composerTextArea, `{arrowleft}{arrowleft}{arrowleft}`);
+		const eventProperties = {
+			clipboardData: {
+				getData: jest.fn(),
+				files: [marioPicture]
+			}
+		};
+		const pasteEvent = createEvent.paste(composerTextArea, eventProperties);
+		fireEvent(composerTextArea, pasteEvent);
+		const composerUpdated = screen.getByRole('textbox');
+		expect((composerUpdated as HTMLTextAreaElement).value).toBe('Hi Red');
+		const updatedStore = useStore.getState();
+		const { filesToAttach } = updatedStore.activeConversations[mockedRoom.id];
+		expect(filesToAttach?.length).toBe(1);
+		const imageCopied = await screen.findByTestId(
+			`previewImage-${(filesToAttach as FileToUpload[])[0].file.name}-${
+				(filesToAttach as FileToUpload[])[0].fileId
+			}`
+		);
+		expect(imageCopied).toBeInTheDocument();
+		expect(imageCopied).toHaveStyle('border-color: #8bc34a');
+	});
+	test('test paste more attachments at the beginning of the text present in the composer', async () => {
+		const navigatorSetter = jest.spyOn(navigator, 'platform', 'get');
+		navigatorSetter.mockReturnValue('MacIntel');
+		const { user } = storeSetupAdvanced();
+		const initialText = 'Hi';
+		const composerTextArea = screen.getByRole('textbox');
+		await user.type(composerTextArea, initialText);
+		await user.type(composerTextArea, `{arrowleft}{arrowleft}`);
+		const eventProperties = {
+			clipboardData: {
+				getData: jest.fn(),
+				files: [marioPicture, luigiPicture, peachPicture]
+			}
+		};
+		const pasteEvent = createEvent.paste(composerTextArea, eventProperties);
+		fireEvent(composerTextArea, pasteEvent);
+		const composerUpdated = screen.getByRole('textbox');
+		expect((composerUpdated as HTMLTextAreaElement).value).toBe('Hi');
+		const updatedStore = useStore.getState();
+		const { filesToAttach } = updatedStore.activeConversations[mockedRoom.id];
+		expect(filesToAttach?.length).toBe(3);
+		const imageCopied = await screen.findByTestId(
+			`previewImage-${(filesToAttach as FileToUpload[])[0].file.name}-${
+				(filesToAttach as FileToUpload[])[0].fileId
+			}`
+		);
+		expect(imageCopied).toBeInTheDocument();
+		expect(imageCopied).toHaveStyle('border-color: #8bc34a');
+	});
+	test('test paste more attachments at the end of the text present in the composer', async () => {
+		const navigatorSetter = jest.spyOn(navigator, 'platform', 'get');
+		navigatorSetter.mockReturnValue('MacIntel');
+		const { user } = storeSetupAdvanced();
+		const initialText = 'Hi';
+		const composerTextArea = screen.getByRole('textbox');
+		await user.type(composerTextArea, initialText);
+		const eventProperties = {
+			clipboardData: {
+				getData: jest.fn(),
+				files: [marioPicture, luigiPicture, peachPicture]
+			}
+		};
+		const pasteEvent = createEvent.paste(composerTextArea, eventProperties);
+		fireEvent(composerTextArea, pasteEvent);
+		const composerUpdated = screen.getByRole('textbox');
+		expect((composerUpdated as HTMLTextAreaElement).value).toBe('Hi');
+		const updatedStore = useStore.getState();
+		const { filesToAttach } = updatedStore.activeConversations[mockedRoom.id];
+		expect(filesToAttach?.length).toBe(3);
+		const imageCopied = await screen.findByTestId(
+			`previewImage-${(filesToAttach as FileToUpload[])[0].file.name}-${
+				(filesToAttach as FileToUpload[])[0].fileId
+			}`
+		);
+		expect(imageCopied).toBeInTheDocument();
+		expect(imageCopied).toHaveStyle('border-color: #8bc34a');
+	});
+	test('test paste more attachments in the middle of the text present in the composer', async () => {
+		const navigatorSetter = jest.spyOn(navigator, 'platform', 'get');
+		navigatorSetter.mockReturnValue('MacIntel');
+		const { user } = storeSetupAdvanced();
+		const initialText = 'Hi Red';
+		const composerTextArea = screen.getByRole('textbox');
+		await user.type(composerTextArea, initialText);
+		await user.type(composerTextArea, `{arrowleft}{arrowleft}{arrowleft}`);
+		const eventProperties = {
+			clipboardData: {
+				getData: jest.fn(),
+				files: [marioPicture, luigiPicture, peachPicture]
+			}
+		};
+		const pasteEvent = createEvent.paste(composerTextArea, eventProperties);
+		fireEvent(composerTextArea, pasteEvent);
+		const composerUpdated = screen.getByRole('textbox');
+		expect((composerUpdated as HTMLTextAreaElement).value).toBe('Hi Red');
+		const updatedStore = useStore.getState();
+		const { filesToAttach } = updatedStore.activeConversations[mockedRoom.id];
+		expect(filesToAttach?.length).toBe(3);
+		const imageCopied = await screen.findByTestId(
+			`previewImage-${(filesToAttach as FileToUpload[])[0].file.name}-${
+				(filesToAttach as FileToUpload[])[0].fileId
+			}`
+		);
+		expect(imageCopied).toBeInTheDocument();
+		expect(imageCopied).toHaveStyle('border-color: #8bc34a');
+	});
 });
