@@ -76,6 +76,11 @@ class UsersApi extends BaseAPI implements IUsersApi {
 
 	private requestingUsers: string[] = [];
 
+	public clearUserCache(): void {
+		this.usersToRequest = [];
+		this.requestingUsers = [];
+	}
+
 	// getUsers wants max 10 userId at a time
 	private deboucedUserGetter = debounce(() => {
 		this.getUsers(this.usersToRequest).then(() => {
@@ -92,21 +97,21 @@ class UsersApi extends BaseAPI implements IUsersApi {
 			!find(this.requestingUsers, (id) => id === userId)
 		) {
 			this.usersToRequest.push(userId);
-		}
 
-		// If there are less than 10 users to request, wait 1 second before requesting them (wait if there are other calls)
-		if (this.usersToRequest.length < 10) {
-			this.deboucedUserGetter();
-		}
-		// If there are more than 10 users to request, request them immediately
-		else {
-			this.deboucedUserGetter && this.deboucedUserGetter.cancel();
-			// Save momentarily the users that are being requested to not request them again
-			this.requestingUsers = concat(this.requestingUsers, this.usersToRequest);
-			this.getUsers(this.usersToRequest).then(() => {
-				this.requestingUsers = difference(this.requestingUsers, this.usersToRequest);
-			});
-			this.usersToRequest = [];
+			// If there are less than 10 users to request, wait 1 second before requesting them (wait if there are other calls)
+			if (this.usersToRequest.length <= 10) {
+				this.deboucedUserGetter();
+			}
+			// If there are more than 10 users to request, request them immediately
+			else {
+				this.deboucedUserGetter && this.deboucedUserGetter.cancel();
+				// Save momentarily the users that are being requested to not request them again
+				this.requestingUsers = concat(this.requestingUsers, this.usersToRequest);
+				this.getUsers(this.usersToRequest).then(() => {
+					this.requestingUsers = difference(this.requestingUsers, this.usersToRequest);
+				});
+				this.usersToRequest = [];
+			}
 		}
 	}
 }

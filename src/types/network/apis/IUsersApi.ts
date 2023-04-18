@@ -20,6 +20,7 @@ interface IUsersApi {
 	changeUserPicture(userId: string, file: File): Promise<ChangeUserPictureResponse>;
 	deleteUserPicture(userId: string): Promise<DeleteUserPictureResponse>;
 	getDebouncedUser(userId: string): void;
+	clearUserCache(): void;
 }
 
 export default IUsersApi;

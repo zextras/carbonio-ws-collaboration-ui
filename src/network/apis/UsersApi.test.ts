@@ -14,6 +14,9 @@ import { UserBe } from '../../types/network/models/userBeTypes';
 const user: UserBe = createMockUser({ id: 'userId1' });
 const user2: UserBe = createMockUser({ id: 'userId2' });
 
+beforeEach(() => {
+	usersApi.clearUserCache();
+});
 describe('Users API', () => {
 	test('getUser is called correctly', async () => {
 		// Send getUser request
