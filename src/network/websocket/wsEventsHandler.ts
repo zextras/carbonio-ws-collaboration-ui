@@ -157,6 +157,30 @@ export function wsEventsHandler(event: WsEvent): void {
 			state.deleteMeeting(event.meetingId);
 			break;
 		}
+		case WsEventType.MEETING_VIDEO_STREAM_OPENED: {
+			// TODO handle
+			break;
+		}
+		case WsEventType.MEETING_VIDEO_STREAM_CLOSED: {
+			// TODO handle
+			break;
+		}
+		case WsEventType.MEETING_AUDIO_STREAM_OPENED: {
+			// TODO handle
+			break;
+		}
+		case WsEventType.MEETING_AUDIO_STREAM_CLOSED: {
+			// TODO handle
+			break;
+		}
+		case WsEventType.MEETING_SCREEN_STREAM_OPENED: {
+			// TODO handle
+			break;
+		}
+		case WsEventType.MEETING_SCREEN_STREAM_CLOSED: {
+			// TODO handle
+			break;
+		}
 		default:
 			wsDebug('Unhandled event', event);
 	}

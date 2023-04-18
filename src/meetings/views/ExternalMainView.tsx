@@ -11,8 +11,7 @@ import { Switch, Route, Router } from 'react-router-dom';
 import AccessMeetingPageView from './AccessMeetingPageView';
 import InfoPage from './InfoPage';
 import MeetingPageView from './MeetingPageView';
-import WaitingRoomPageView from './WaitingRoomPageView';
-import { ROUTES } from '../../hooks/useRouting';
+import { MEETINGS_ROUTES, ROUTES } from '../../hooks/useRouting';
 
 const ExternalMainView = (): ReactElement => {
 	const history = createMemoryHistory();
@@ -21,9 +20,8 @@ const ExternalMainView = (): ReactElement => {
 		<Router history={history}>
 			<Switch>
 				<Route exact path={ROUTES.MAIN} component={AccessMeetingPageView} />
-				<Route exact path={ROUTES.MEETING} component={MeetingPageView} />
-				<Route exact path={ROUTES.WAITING_ROOM} component={WaitingRoomPageView} />
-				<Route exact path={ROUTES.INFO} component={InfoPage} />
+				<Route exact path={MEETINGS_ROUTES.MEETING} component={MeetingPageView} />
+				<Route exact path={MEETINGS_ROUTES.INFO} component={InfoPage} />
 			</Switch>
 		</Router>
 	);

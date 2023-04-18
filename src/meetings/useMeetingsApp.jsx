@@ -4,36 +4,14 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { addRoute, Spinner } from '@zextras/carbonio-shell-ui';
-import React, { lazy, Suspense, useEffect } from 'react';
+import { addRoute } from '@zextras/carbonio-shell-ui';
+import { useEffect } from 'react';
 
-import MeetingsSecondaryBar from './components/secondaryBar/MeetingsSecondaryBar';
 import ExternalMainView from './views/ExternalMainView';
-import { MEETINGS_NAME, MEETINGS_ROUTE } from '../constants/appConstants';
-
-const LazyMeetingsMainView = lazy(() =>
-	import(/* webpackChunkName: "mainView" */ './views/MainView')
-);
-
-const MeetingsMain = () => (
-	<Suspense fallback={<Spinner />}>
-		<LazyMeetingsMainView />
-	</Suspense>
-);
-
-const SecondaryBar = ({ expanded }) => <MeetingsSecondaryBar expanded={expanded} />;
+import { MEETINGS_NAME } from '../constants/appConstants';
 
 export default function useMeetingsApp() {
 	useEffect(() => {
-		addRoute({
-			route: MEETINGS_ROUTE,
-			position: 90,
-			visible: true,
-			label: MEETINGS_NAME,
-			primaryBar: 'VideoOutline',
-			appView: MeetingsMain,
-			secondaryBar: SecondaryBar
-		});
 		addRoute({
 			route: 'external',
 			visible: false,
@@ -46,5 +24,14 @@ export default function useMeetingsApp() {
 				allowUnauthenticated: true
 			}
 		});
+		// addRoute({
+		// 	route: MEETINGS_ROUTE,
+		// 	position: 90,
+		// 	visible: true,
+		// 	label: MEETINGS_NAME,
+		// 	primaryBar: 'VideoOutline',
+		// 	appView: MeetingsMain,
+		// 	secondaryBar: SecondaryBar
+		// });
 	}, []);
 }
