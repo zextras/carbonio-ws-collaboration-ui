@@ -366,7 +366,8 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 					const isWin = BrowserUtils.isWin();
 
 					// LINUX OS AND BROWSER ARE FIREFOX/CHROME
-					if (isLinux) {
+					// WIN OS AND BROWSER ARE CHROME/FIREFOX
+					if (isLinux || isWin) {
 						if (isFirefoxBrowser || isChromeBrowser || chromeVersion) {
 							mapFiles(listOfFiles, includeFiles);
 						} else {
@@ -380,16 +381,6 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 						} else {
 							console.error(`Browser not support copy/paste function ${navigator}`);
 						}
-					}
-					// WIN OS AND BROWSER ARE CHROME/FIREFOX
-					else if (isWin) {
-						if (isChromeBrowser || chromeVersion || isFirefoxBrowser) {
-							mapFiles(listOfFiles, includeFiles);
-						} else {
-							console.error(`Browser not support copy/paste function ${navigator}`);
-						}
-					} else {
-						console.error(`Browser not support copy/paste function ${navigator}`);
 					}
 				}
 			} catch (e) {
