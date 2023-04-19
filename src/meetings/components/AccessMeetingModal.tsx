@@ -38,8 +38,8 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 					addParticipant(meeting.id, {
 						userId: session.id!,
 						sessionId: session.sessionId!,
-						hasVideoStreamOn: videoStreamOn,
-						hasAudioStreamOn: audioStreamOn
+						videoStreamOn,
+						audioStreamOn
 					});
 					goToMeetingPage(meeting.id);
 				})

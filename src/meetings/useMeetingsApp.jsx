@@ -4,11 +4,21 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { Spinner } from '@zextras/carbonio-design-system';
 import { addRoute } from '@zextras/carbonio-shell-ui';
-import { useEffect } from 'react';
+import React, { lazy, Suspense, useEffect } from 'react';
 
-import ExternalMainView from './views/ExternalMainView';
 import { MEETINGS_NAME } from '../constants/appConstants';
+
+const LazyExternalMainView = lazy(() =>
+	import(/* webpackChunkName: "mainView" */ './views/ExternalMainView')
+);
+
+const ExternalMain = () => (
+	<Suspense fallback={<Spinner />}>
+		<LazyExternalMainView />
+	</Suspense>
+);
 
 export default function useMeetingsApp() {
 	useEffect(() => {
@@ -17,7 +27,7 @@ export default function useMeetingsApp() {
 			visible: false,
 			label: MEETINGS_NAME,
 			primaryBar: 'TeamOutline',
-			appView: ExternalMainView,
+			appView: ExternalMain,
 			standalone: {
 				hidePrimaryBar: true,
 				hideShellHeader: true,

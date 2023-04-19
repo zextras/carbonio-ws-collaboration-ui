@@ -10,7 +10,7 @@ import { find, forEach } from 'lodash';
 
 import { UsersApi } from '../../network';
 import { MeetingBe, MeetingParticipantBe } from '../../types/network/models/meetingBeTypes';
-import { MeetingParticipant, MeetingParticipantMap } from '../../types/store/MeetingTypes';
+import { MeetingParticipantMap } from '../../types/store/MeetingTypes';
 import { MeetingsSlice, RootStore } from '../../types/store/StoreTypes';
 
 export const useMeetingsStoreSlice = (set: (...any: any) => void): MeetingsSlice => ({
@@ -22,7 +22,13 @@ export const useMeetingsStoreSlice = (set: (...any: any) => void): MeetingsSlice
 					// Create a map of participants instead of an array
 					const participantsMap: MeetingParticipantMap = meeting.participants.reduce(
 						(acc: MeetingParticipantMap, participant: MeetingParticipantBe) => {
-							acc[participant.sessionId] = participant as MeetingParticipant;
+							acc[participant.sessionId] = {
+								userId: participant.userId,
+								sessionId: participant.sessionId,
+								hasAudioStreamOn: participant.audioStreamOn,
+								hasVideoStreamOn: participant.videoStreamOn,
+								hasScreenStreamOn: participant.screenStreamOn || false
+							};
 							return acc;
 						},
 						{}
@@ -53,7 +59,13 @@ export const useMeetingsStoreSlice = (set: (...any: any) => void): MeetingsSlice
 				// Create a map of participants instead of an array
 				const participantsMap: MeetingParticipantMap = meeting.participants.reduce(
 					(acc: MeetingParticipantMap, participant: MeetingParticipantBe) => {
-						acc[participant.sessionId] = participant as MeetingParticipant;
+						acc[participant.sessionId] = {
+							userId: participant.userId,
+							sessionId: participant.sessionId,
+							hasAudioStreamOn: participant.audioStreamOn,
+							hasVideoStreamOn: participant.videoStreamOn,
+							hasScreenStreamOn: participant.screenStreamOn || false
+						};
 						return acc;
 					},
 					{}
@@ -94,7 +106,13 @@ export const useMeetingsStoreSlice = (set: (...any: any) => void): MeetingsSlice
 				// Add participant only if components exists and sessionId isn't already on components
 				const meeting = find(draft.meetings, (meeting) => meeting.id === meetingId);
 				if (meeting) {
-					meeting.participants[participant.sessionId] = participant as MeetingParticipant;
+					meeting.participants[participant.sessionId] = {
+						userId: participant.userId,
+						sessionId: participant.sessionId,
+						hasAudioStreamOn: participant.audioStreamOn,
+						hasVideoStreamOn: participant.videoStreamOn,
+						hasScreenStreamOn: participant.screenStreamOn || false
+					};
 
 					// Retrieve member information if he is unknown
 					if (!find(draft.users, (user) => user.id === participant.userId)) {
