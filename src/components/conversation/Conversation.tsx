@@ -8,9 +8,7 @@ import { Container } from '@zextras/carbonio-design-system';
 import React, { ReactElement, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-import ConversationHeader from './ConversationHeader';
-import ConversationFooter from './footer/ConversationFooter';
-import MessagesList from './MessagesList';
+import Chat from './Chat';
 import papyrusDark from '../../assets/papyrus-dark.png';
 import papyrus from '../../assets/papyrus.png';
 import { ConversationProps } from '../../types/store/RoomTypes';
@@ -34,16 +32,7 @@ const Conversation = ({ room }: ConversationProps): ReactElement => {
 	return (
 		<ConversationWrapper mainAlignment="flex-start" orientation="horizontal">
 			{(isDesktopView || !infoPanelOpen) && (
-				<Container
-					data-testid="conversationCollapsedView"
-					width={isDesktopView ? '70%' : '100%'}
-					minWidth="70%"
-					mainAlignment="flex-start"
-				>
-					<ConversationHeader roomId={room.id} setInfoPanelOpen={setInfoPanelOpen} />
-					<MessagesList roomId={room.id} />
-					<ConversationFooter roomId={room.id} />
-				</Container>
+				<Chat roomId={room.id} setInfoPanelOpen={setInfoPanelOpen} />
 			)}
 			{(isDesktopView || infoPanelOpen) && (
 				<ConversationInfoPanel

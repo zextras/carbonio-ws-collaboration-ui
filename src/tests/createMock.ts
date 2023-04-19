@@ -6,6 +6,7 @@
 
 import { MemberBe, RoomBe } from '../types/network/models/roomBeTypes';
 import { UserBe } from '../types/network/models/userBeTypes';
+import { FileToUpload } from '../types/store/ActiveConversationTypes';
 import { Marker, MarkerStatus, MarkerType } from '../types/store/MarkersTypes';
 import {
 	AffiliationMessage,
@@ -121,5 +122,31 @@ export const createMockUser = (fields?: Record<string, any>): UserBe => ({
 	id: 'id',
 	email: 'user@user.com',
 	name: 'Name',
+	...fields
+});
+
+export const imageFile = new File(['sunrise'], 'sunrise.png', {
+	type: 'image/png'
+});
+
+export const pdfFile = new File(['doc'], 'doc.pdf', {
+	type: 'application/pdf'
+});
+
+export const createMockFile = (fields?: Record<string, any>): File => {
+	const newFile = fields
+		? new File(['lotsOfBite'], fields.name, { ...fields.options })
+		: new File(['sunrise'], 'sunrise.png', {
+				type: 'image/png'
+		  });
+	return newFile;
+};
+
+export const createMockFileToUpload = (fields?: Record<string, any>): FileToUpload => ({
+	fileId: 'genericImageId',
+	file: imageFile,
+	localUrl: 'localhost/generic/url',
+	description: '',
+	hasFocus: false,
 	...fields
 });

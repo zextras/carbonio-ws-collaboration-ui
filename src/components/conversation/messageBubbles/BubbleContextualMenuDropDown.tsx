@@ -92,7 +92,7 @@ type BubbleContextualMenuDropDownProps = {
 type DropDownActionType = {
 	id: string;
 	label: string;
-	click: () => void;
+	onClick: () => void;
 };
 
 const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
@@ -125,9 +125,8 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 	const createSnackbar: any = useContext(SnackbarManagerContext);
 
 	const { onPreviewClick } = usePreview(
-		message.type === MessageType.TEXT_MSG && message.attachment
-			? message.attachment
-			: { id: '', name: '', mimeType: '', size: 0 }
+		message.attachment ||
+			message.forwarded?.attachment || { id: '', name: '', mimeType: '', size: 0 }
 	);
 
 	const onDropdownOpen = useCallback(() => setDropdownActive(true), [setDropdownActive]);
@@ -164,27 +163,29 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 	}, [createSnackbar, message.forwarded, message.text, successfulCopySnackbar]);
 
 	const deleteMessage = useCallback(() => {
-		if (message.attachment) {
-			AttachmentsApi.deleteAttachment(message.attachment?.id).then(() =>
+		const attachment = message.attachment || message.forwarded?.attachment;
+		if (attachment) {
+			AttachmentsApi.deleteAttachment(attachment.id).then(() =>
 				xmppClient.sendChatMessageDeletion(message.roomId, message.id)
 			);
 		} else {
 			xmppClient.sendChatMessageDeletion(message.roomId, message.id);
 		}
-	}, [message.attachment, message.id, message.roomId, xmppClient]);
+	}, [message.attachment, message.forwarded?.attachment, message.id, message.roomId, xmppClient]);
 
 	const downloadAction = useCallback(() => {
-		if (message.attachment) {
-			const downloadUrl = AttachmentsApi.getURLAttachment(message.attachment.id);
+		const attachment = message.attachment || message.forwarded?.attachment;
+		if (attachment) {
+			const downloadUrl = AttachmentsApi.getURLAttachment(attachment.id);
 			const linkTag: HTMLAnchorElement = document.createElement('a');
 			document.body.appendChild(linkTag);
 			linkTag.href = downloadUrl;
-			linkTag.download = message.attachment.name;
+			linkTag.download = attachment.name;
 			linkTag.target = '_blank';
 			linkTag.click();
 			linkTag.remove();
 		}
-	}, [message.attachment]);
+	}, [message.attachment, message.forwarded]);
 
 	const contextualMenuActions = useMemo(() => {
 		const actions: DropDownActionType[] = [];
@@ -202,7 +203,7 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 		actions.push({
 			id: 'Reply',
 			label: replyActionLabel,
-			click: () =>
+			onClick: () =>
 				setReferenceMessage(
 					message.roomId,
 					message.id,
@@ -214,11 +215,11 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 		});
 
 		// Forward message in another chat
-		if (!message.forwarded && !message.attachment) {
+		if (!message.forwarded) {
 			actions.push({
 				id: 'forward',
 				label: forwardActionLabel,
-				click: onOpenForwardMessageModal
+				onClick: onOpenForwardMessageModal
 			});
 		}
 
@@ -227,7 +228,7 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 			actions.push({
 				id: 'Copy',
 				label: copyActionLabel,
-				click: copyMessage
+				onClick: copyMessage
 			});
 		}
 
@@ -236,7 +237,7 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 			actions.push({
 				id: 'Edit',
 				label: editActionLabel,
-				click: () => {
+				onClick: () => {
 					setDraftMessage(message.roomId, false, message.text);
 					setReferenceMessage(
 						message.roomId,
@@ -254,23 +255,24 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 			actions.push({
 				id: 'Delete',
 				label: deleteActionLabel,
-				click: deleteMessage
+				onClick: deleteMessage
 			});
 		}
 
 		// Download and Preview Functionality
-		if (message.attachment) {
-			if (isPreviewSupported(message.attachment.mimeType)) {
+		const attachment = message.attachment || message.forwarded?.attachment;
+		if (attachment) {
+			if (isPreviewSupported(attachment.mimeType)) {
 				actions.push({
 					id: 'Preview',
 					label: previewActionLabel,
-					click: onPreviewClick
+					onClick: onPreviewClick
 				});
 			}
 			actions.push({
 				id: 'Download',
 				label: downloadActionLabel,
-				click: downloadAction
+				onClick: downloadAction
 			});
 		}
 		return actions;

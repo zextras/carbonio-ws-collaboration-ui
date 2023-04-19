@@ -10,8 +10,11 @@ import { RequestType } from '../../types/network/apis/IBaseAPI';
 import {
 	DeleteAttachmentResponse,
 	GetAttachmentInfoResponse,
-	GetAttachmentPreviewResponse,
-	GetAttachmentResponse
+	GetAttachmentResponse,
+	GetImageResponse,
+	GetImageThumbnailResponse,
+	GetPdfResponse,
+	GetPdfThumbnailResponse
 } from '../../types/network/responses/attachmentsResponses';
 
 class AttachmentsApi extends BaseAPI implements IAttachmentsApi {
@@ -40,12 +43,139 @@ class AttachmentsApi extends BaseAPI implements IAttachmentsApi {
 		return this.fetchAPI(`attachments/${fileId}/download`, RequestType.GET);
 	}
 
-	public getAttachmentPreview(fileId: string): Promise<GetAttachmentPreviewResponse> {
-		return this.fetchAPI(`attachments/${fileId}/preview`, RequestType.GET);
+	public getImagePreview(
+		fileId: string,
+		area: string,
+		quality?: string,
+		shape?: string,
+		format?: string
+	): Promise<GetImageResponse> {
+		let params = '';
+		if (shape || quality || format) {
+			const array = [];
+			if (shape) array.push(`shape=${shape}`);
+			if (quality) array.push(`quality=${quality}`);
+			if (format) array.push(`format=${format}`);
+			params = `?${array.join('&')}`;
+		}
+		return this.fetchAPI(`preview/image/${fileId}/${area}/${params}`, RequestType.GET);
 	}
 
-	public getURLPreview = (fileId: string): string =>
-		`${window.document.location.origin}/services/chats/attachments/${fileId}/preview`;
+	public getImagePreviewURL = (
+		fileId: string,
+		area: string,
+		quality?: string,
+		shape?: string,
+		format?: string
+	): string => {
+		let params = '';
+		if (shape || quality || format) {
+			const array = [];
+			if (shape) array.push(`shape=${shape}`);
+			if (quality) array.push(`quality=${quality}`);
+			if (format) array.push(`format=${format}`);
+			params = `?${array.join('&')}`;
+		}
+		return `${window.document.location.origin}/services/chats/preview/image/${fileId}/${area}/${params}`;
+	};
+
+	public getImageThumbnail(
+		fileId: string,
+		area: string,
+		quality?: string,
+		shape?: string,
+		format?: string
+	): Promise<GetImageThumbnailResponse> {
+		let params = '';
+		if (shape || quality || format) {
+			const array = [];
+			if (shape) array.push(`shape=${shape}`);
+			if (quality) array.push(`quality=${quality}`);
+			if (format) array.push(`format=${format}`);
+			params = `?${array.join('&')}`;
+		}
+		return this.fetchAPI(`preview/image/${fileId}/${area}/thumbnail/${params}`, RequestType.GET);
+	}
+
+	public getImageThumbnailURL = (
+		fileId: string,
+		area: string,
+		quality?: string,
+		shape?: string,
+		format?: string
+	): string => {
+		let params = '';
+		if (shape || quality || format) {
+			const array = [];
+			if (shape) array.push(`shape=${shape}`);
+			if (quality) array.push(`quality=${quality}`);
+			if (format) array.push(`format=${format}`);
+			params = `?${array.join('&')}`;
+		}
+		return `${window.document.location.origin}/services/chats/preview/image/${fileId}/${area}/thumbnail/${params}`;
+	};
+
+	public getPdfPreview(
+		fileId: string,
+		firstPage?: number,
+		lastPage?: number
+	): Promise<GetPdfResponse> {
+		let params = '';
+		if (firstPage || lastPage) {
+			const array = [];
+			if (firstPage) array.push(`first_page=${firstPage}`);
+			if (lastPage) array.push(`last_page=${lastPage}`);
+			params = `?${array.join('&')}`;
+		}
+		return this.fetchAPI(`preview/pdf/${fileId}/${params}`, RequestType.GET);
+	}
+
+	public getPdfPreviewURL = (fileId: string, firstPage?: number, lastPage?: number): string => {
+		let params = '';
+		if (firstPage || lastPage) {
+			const array = [];
+			if (firstPage) array.push(`first_page=${firstPage}`);
+			if (lastPage) array.push(`last_page=${lastPage}`);
+			params = `?${array.join('&')}`;
+		}
+		return `${window.document.location.origin}/services/chats/preview/pdf/${fileId}/${params}`;
+	};
+
+	public getPdfThumbnail(
+		fileId: string,
+		area: string,
+		quality?: string,
+		shape?: string,
+		format?: string
+	): Promise<GetPdfThumbnailResponse> {
+		let params = '';
+		if (shape || quality || format) {
+			const array = [];
+			if (shape) array.push(`shape=${shape}`);
+			if (quality) array.push(`quality=${quality}`);
+			if (format) array.push(`format=${format}`);
+			params = `?${array.join('&')}`;
+		}
+		return this.fetchAPI(`preview/pdf/${fileId}/${area}/thumbnail/${params}`, RequestType.GET);
+	}
+
+	public getPdfThumbnailURL = (
+		fileId: string,
+		area: string,
+		quality?: string,
+		shape?: string,
+		format?: string
+	): string => {
+		let params = '';
+		if (shape || quality || format) {
+			const array = [];
+			if (shape) array.push(`shape=${shape}`);
+			if (quality) array.push(`quality=${quality}`);
+			if (format) array.push(`format=${format}`);
+			params = `?${array.join('&')}`;
+		}
+		return `${window.document.location.origin}/services/chats/preview/pdf/${fileId}/${area}/thumbnail/${params}`;
+	};
 }
 
 export default AttachmentsApi.getInstance();

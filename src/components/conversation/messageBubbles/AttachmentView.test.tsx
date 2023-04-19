@@ -9,7 +9,7 @@ import React from 'react';
 import { setup } from 'test-utils';
 
 import AttachmentView from './AttachmentView';
-import { mockedGetURLAttachment, mockedGetURLPreview } from '../../../../jest-mocks';
+import { mockedGetImageThumbnailURL, mockedGetURLAttachment } from '../../../../jest-mocks';
 import { AttachmentMessageType } from '../../../types/store/MessageTypes';
 
 describe('Attachment view', () => {
@@ -39,7 +39,7 @@ describe('Attachment view', () => {
 			mimeType: 'image/png',
 			size: 21412
 		};
-		mockedGetURLPreview.mockReturnValue('mocked-url');
+		mockedGetImageThumbnailURL.mockReturnValue('mocked-url');
 		setup(<AttachmentView attachment={imageAttachment} from={'from'} />);
 		const imageName = await screen.findByText(imageAttachment.name);
 		expect(imageName).toBeVisible();
@@ -52,7 +52,7 @@ describe('Attachment view', () => {
 			mimeType: 'image/png',
 			size: 21412
 		};
-		mockedGetURLPreview.mockReturnValue('mocked-url');
+		mockedGetImageThumbnailURL.mockReturnValue('mocked-url');
 		const { user } = setup(<AttachmentView attachment={imageAttachment} from={'from'} />);
 		await user.hover(screen.getByTestId('preview-container'));
 		expect(screen.getByTestId('icon: EyeOutline')).toBeInTheDocument();
@@ -66,7 +66,7 @@ describe('Attachment view', () => {
 			mimeType: 'image/png',
 			size: 21412
 		};
-		mockedGetURLPreview.mockReturnValue('image.jpg');
+		mockedGetImageThumbnailURL.mockReturnValue('image.jpg');
 		setup(<AttachmentView attachment={imageAttachment} from={'from'} />);
 		const img = screen.getByTestId('attachmentImg');
 		fireEvent.error(img);

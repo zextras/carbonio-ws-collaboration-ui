@@ -14,7 +14,7 @@ import { getUserSelector } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
 import { ReferenceMessage } from '../../../types/store/ActiveConversationTypes';
 import { Message, MessageType } from '../../../types/store/MessageTypes';
-import { getPreviewURL } from '../../../utils/attachmentUtils';
+import { getThumbnailURL } from '../../../utils/attachmentUtils';
 import { calculateAvatarColor } from '../../../utils/styleUtils';
 
 const UserName = styled(Text)`
@@ -102,7 +102,7 @@ const MessageReferenceDisplayed: React.FC<MessageReferenceDisplayedProps> = ({
 
 	const previewURL = useMemo(() => {
 		if (referenceMessage.attachment) {
-			return getPreviewURL(referenceMessage.attachment.id, referenceMessage.attachment.mimeType);
+			return getThumbnailURL(referenceMessage.attachment.id, referenceMessage.attachment.mimeType);
 		}
 		return undefined;
 	}, [referenceMessage]);

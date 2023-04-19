@@ -12,7 +12,8 @@ export const now = (): number => moment().valueOf();
 export const dateToTimestamp = (date: Date | string | number): number => moment(date).valueOf();
 
 // Transform generic date format into ISO Date (format accept from XMPP)
-export const dateToISODate = (date: Date | number | string): string => moment(date).toISOString();
+export const dateToISODate = (date: Date | number | string): string =>
+	moment(date).format('YYYY-MM-DDTHH:mm:ss.SSSZ');
 
 export const displayTimestamp = (timestamp: Date | string | number): string =>
 	moment(timestamp).format('HH:mm:ss DD-MM-YYYY');

@@ -60,6 +60,7 @@ const ScrollButton = ({ roomId, onClickCb }: ScrollButtonProps): ReactElement =>
 	const newMessageEventHandler = useCallback(
 		(messageFromEvent) => {
 			if (
+				messageFromEvent.detail.roomId === roomId &&
 				messageFromEvent.detail.type === MessageType.TEXT_MSG &&
 				messageFromEvent.detail.from !== myUserId
 			) {
@@ -67,7 +68,7 @@ const ScrollButton = ({ roomId, onClickCb }: ScrollButtonProps): ReactElement =>
 				debouncedNewMessagesBadgeSetter();
 			}
 		},
-		[debouncedNewMessagesBadgeSetter, myUserId]
+		[debouncedNewMessagesBadgeSetter, myUserId, roomId]
 	);
 
 	const labelNewMessages = useMemo(
