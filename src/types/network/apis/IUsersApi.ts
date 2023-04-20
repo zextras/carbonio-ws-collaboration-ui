@@ -8,16 +8,19 @@ import {
 	ChangeUserPictureResponse,
 	DeleteUserPictureResponse,
 	GetUserPictureResponse,
-	GetUserResponse
+	GetUserResponse,
+	GetUsersResponse
 } from '../responses/usersResponses';
 
 interface IUsersApi {
 	getUser(userId: string): Promise<GetUserResponse>;
+	getUsers(userId: string[]): Promise<GetUsersResponse>;
 	getURLUserPicture(userId: string): string;
 	getUserPicture(userId: string): Promise<GetUserPictureResponse>;
 	changeUserPicture(userId: string, file: File): Promise<ChangeUserPictureResponse>;
 	deleteUserPicture(userId: string): Promise<DeleteUserPictureResponse>;
 	getDebouncedUser(userId: string): void;
+	clearUserCache(): void;
 }
 
 export default IUsersApi;

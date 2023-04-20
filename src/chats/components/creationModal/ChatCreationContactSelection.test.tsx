@@ -10,6 +10,7 @@ import React from 'react';
 import ChatCreationContactsSelection from './ChatCreationContactsSelection';
 import { mockedAutoCompleteGalRequest } from '../../../../jest-mocks';
 import { ContactMatch } from '../../../network/soap/AutoCompleteRequest';
+import useStore from '../../../store/Store';
 import { setup } from '../../../tests/test-utils';
 import { Member } from '../../../types/store/RoomTypes';
 
@@ -100,8 +101,10 @@ describe('Chat Creation Modal Contact Selector - search', () => {
 		expect(list2.children).toHaveLength(1);
 
 		// Check presence of userObj on the contact list
-		const userComponent = screen.getByText(zimbraUser1.fullName);
-		expect(userComponent).toBeVisible();
+		const userNameComponent = screen.getByText(zimbraUser1.fullName);
+		expect(userNameComponent).toBeVisible();
+		const userEmailComponent = screen.getByText(zimbraUser1.email);
+		expect(userEmailComponent).toBeVisible();
 	});
 
 	test('Search user fails', async () => {
@@ -161,7 +164,7 @@ describe('Chat Creation Modal Contact Selector - search', () => {
 	});
 
 	test('Search an user by name and surname', async () => {
-		mockedAutoCompleteGalRequest.mockReturnValueOnce([zimbraUser1, zimbraUser2]);
+		mockedAutoCompleteGalRequest.mockReturnValueOnce([zimbraUser1]);
 
 		const { user } = setup(
 			<ChatCreationContactsSelection
@@ -174,7 +177,30 @@ describe('Chat Creation Modal Contact Selector - search', () => {
 		// Type on ChipInput to trigger a new autoCompleteGalRequest
 		const chipInput = await screen.findByTestId('chip_input_creation_modal');
 		await user.type(chipInput, `${zimbraUser1.firstName} ${zimbraUser1.lastName}`);
-		expect(screen.getByDisplayValue(/User One/i)).toBeInTheDocument();
+		expect(screen.getByText(/User One/i)).toBeInTheDocument();
+		expect(screen.getByText('user1@test.com')).toBeInTheDocument();
+	});
+
+	test('Search an user with logged user inside the response', async () => {
+		useStore.getState().setLoginInfo(zimbraUser1.zimbraId, zimbraUser1.fullName);
+		mockedAutoCompleteGalRequest.mockReturnValueOnce([zimbraUser1, zimbraUser2]);
+
+		const { user } = setup(
+			<ChatCreationContactsSelection
+				isCreationModal
+				contactsSelected={{}}
+				setContactSelected={jest.fn()}
+			/>
+		);
+
+		// Type on ChipInput to trigger a new autoCompleteGalRequest
+		const chipInput = await screen.findByTestId('chip_input_creation_modal');
+		await user.type(chipInput, `User`);
+		expect(screen.queryByText(/User One/i)).not.toBeInTheDocument();
+		expect(screen.queryByText('user1@test.com')).not.toBeInTheDocument();
+		// User Two is present because is not the logged user
+		expect(screen.getByText(/User Two/i)).toBeInTheDocument();
+		expect(screen.getByText('user2@test.com')).toBeInTheDocument();
 	});
 
 	test('Add and remove chip by clicking different components', async () => {

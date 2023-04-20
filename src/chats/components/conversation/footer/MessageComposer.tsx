@@ -43,6 +43,8 @@ import { Emoji } from '../../../../types/generics';
 import { AddRoomAttachmentResponse } from '../../../../types/network/responses/roomsResponses';
 import { FileToUpload, messageActionType } from '../../../../types/store/ActiveConversationTypes';
 import { Message, MessageType } from '../../../../types/store/MessageTypes';
+import { uid } from '../../../../utils/attachmentUtils';
+import { BrowserUtils } from '../../../../utils/BrowserUtils';
 
 type ConversationMessageComposerProps = {
 	roomId: string;
@@ -88,6 +90,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 	const messageReference = useStore<Message | undefined>((store) =>
 		getMessageSelector(store, roomId, referenceMessage?.messageId)
 	);
+	const setFilesToAttach = useStore((store) => store.setFilesToAttach);
 
 	const [listAbortController, setListAbortController] = useState<AbortController[]>([]);
 	const [textMessage, setTextMessage] = useState('');
@@ -326,6 +329,67 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 
 	const sendStopWriting = useCallback(() => xmppClient.sendPaused(roomId), [xmppClient, roomId]);
 
+	const mapFiles = useCallback(
+		(listOfFiles, includeFiles) => {
+			forEach(includeFiles as [], (file: File, index) => {
+				const fileLocalUrl = URL.createObjectURL(file);
+				const fileId = uid();
+				const isFocusedIfFirstOfListAndFirstToBeUploaded = index === 0 && !filesToUploadArray;
+				listOfFiles.push({
+					file,
+					fileId,
+					hasFocus: isFocusedIfFirstOfListAndFirstToBeUploaded,
+					description: '',
+					localUrl: fileLocalUrl
+				});
+			});
+			setFilesToAttach(roomId, listOfFiles);
+			setInputHasFocus(roomId, true);
+		},
+		[filesToUploadArray, roomId, setFilesToAttach, setInputHasFocus]
+	);
+
+	const handlePaste = useCallback(
+		(ev) => {
+			try {
+				const includeFiles = ev.clipboardData.files;
+				const listOfFiles: FileToUpload[] = [];
+				if (includeFiles && includeFiles.length > 0) {
+					ev.preventDefault();
+					ev.stopPropagation();
+					const isFirefoxBrowser = BrowserUtils.isFirefox();
+					const isChromeBrowser = BrowserUtils.isChrome();
+					const chromeVersion = BrowserUtils.getChromeVersion();
+					const isSafariBrowser = BrowserUtils.isSafari();
+					const isLinux = BrowserUtils.isLinux();
+					const isMac = BrowserUtils.isMac();
+					const isWin = BrowserUtils.isWin();
+
+					// LINUX OS AND BROWSER ARE FIREFOX/CHROME
+					// WIN OS AND BROWSER ARE CHROME/FIREFOX
+					if (isLinux || isWin) {
+						if (isFirefoxBrowser || isChromeBrowser || chromeVersion) {
+							mapFiles(listOfFiles, includeFiles);
+						} else {
+							console.error(`Browser not support copy/paste function ${navigator}`);
+						}
+					}
+					// MAC OS AND BROWSER ARE CHROME/FIREFOX/SAFARI
+					else if (isMac) {
+						if (isChromeBrowser || chromeVersion || isFirefoxBrowser || isSafariBrowser) {
+							mapFiles(listOfFiles, includeFiles);
+						} else {
+							console.error(`Browser not support copy/paste function ${navigator}`);
+						}
+					}
+				}
+			} catch (e) {
+				console.error(e);
+			}
+		},
+		[mapFiles]
+	);
+
 	useEffect(() => {
 		setTextMessage(draftMessage || '');
 	}, [draftMessage, roomId]);
@@ -439,6 +503,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 					handleKeyDownTextarea={handleKeyDown}
 					handleOnBlur={handleOnBlur}
 					handleOnFocus={handleOnFocus}
+					handleOnPaste={handlePaste}
 					isDisabled={isDisabledWhileAttachingFile}
 				/>
 				{!messageReference && !isUploading && !filesToUploadArray && (

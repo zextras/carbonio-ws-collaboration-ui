@@ -15,7 +15,19 @@ import {
 	Checkbox
 } from '@zextras/carbonio-design-system';
 import { Spinner } from '@zextras/carbonio-shell-ui';
-import { debounce, difference, differenceBy, find, includes, map, omit, size, union } from 'lodash';
+import {
+	debounce,
+	difference,
+	differenceBy,
+	find,
+	forEach,
+	includes,
+	map,
+	omit,
+	remove,
+	size,
+	union
+} from 'lodash';
 import React, {
 	Dispatch,
 	ReactElement,
@@ -34,6 +46,7 @@ import {
 	AutoCompleteGalResponse,
 	ContactMatch
 } from '../../../network/soap/AutoCompleteRequest';
+import useStore from '../../../store/Store';
 import { Member } from '../../../types/store/RoomTypes';
 
 const CustomContainer = styled(Container)`
@@ -67,17 +80,16 @@ const ChatCreationContactsSelection = ({
 	const [loading, setLoading] = useState<boolean>(false);
 	const [error, setError] = useState<boolean>(false);
 
-	// Callback that creates the users'list when you are already inside a group
+	// Callback that creates the users' list when you are already inside a group
 	const userListNotInsideRoom = useCallback(
 		(response) => {
 			const userList: ContactMatch[] = [];
 			const membersIds = map(members, 'userId');
-			// eslint-disable-next-line no-restricted-syntax
-			for (const user of response) {
+			forEach(response, (user) => {
 				if (!includes(membersIds, user.zimbraId)) {
 					userList.push(user);
 				}
-			}
+			});
 			return userList;
 		},
 		[members]
@@ -90,6 +102,8 @@ const ChatCreationContactsSelection = ({
 		autoCompleteGalRequest('')
 			.then((response: AutoCompleteGalResponse) => {
 				setLoading(false);
+				// Remove myself from the list
+				remove(response, (user) => user.zimbraId === useStore.getState().session.id);
 				if (isCreationModal) {
 					setResult(response);
 				} else {
@@ -104,39 +118,44 @@ const ChatCreationContactsSelection = ({
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
-	// Search zimbra contacts on typing
-	const handleChangeText = useCallback(
-		(ev) => {
-			setLoading(true);
-			setError(false);
+	const debouncedAutoComplete = useMemo(
+		() =>
 			debounce(() => {
-				autoCompleteGalRequest(ev.textContent)
+				autoCompleteGalRequest(inputRef.current?.value || '')
 					.then((response: AutoCompleteGalResponse) => {
 						setLoading(false);
+						// Remove myself from the list
+						remove(response, (user) => user.zimbraId === useStore.getState().session.id);
 						if (isCreationModal) {
 							setResult(response);
 							if (size(response) === 0) setError(true);
 						} else {
 							const usersNotInsideRoom: ContactMatch[] = userListNotInsideRoom(response);
 							setResult(usersNotInsideRoom);
-							if (size(response) === 0) setError(true);
+							if (size(usersNotInsideRoom) === 0) setError(true);
 						}
 					})
 					.catch((err: Error) => {
 						setLoading(false);
 						console.error(err);
 					});
-			}, 200)();
-		},
+			}, 200),
 		[isCreationModal, userListNotInsideRoom]
 	);
+
+	// Search zimbra contacts on typing
+	const handleChangeText = useCallback(() => {
+		setLoading(true);
+		setError(false);
+		debouncedAutoComplete();
+	}, [debouncedAutoComplete]);
 
 	const resultList = useMemo(
 		() =>
 			map(result, (user: ContactMatch) => ({
 				id: user.zimbraId,
 				name: user.fullName,
-				email: user.fullName
+				email: user.email
 			})),
 		[result]
 	);
@@ -180,7 +199,13 @@ const ChatCreationContactsSelection = ({
 								<Padding horizontal="small">
 									<Avatar label={item.name} />
 								</Padding>
-								<Text>{item.name}</Text>
+								<Container crossAlignment="flex-start" width="fit">
+									<Text size="small">{item.name}</Text>
+									<Padding top="extrasmall" />
+									<Text size="extrasmall" color="gray1">
+										{item.email}
+									</Text>
+								</Container>
 							</Row>
 						</Container>
 					</Padding>

@@ -210,7 +210,7 @@ const UploadAttachmentManagerView: React.FC<UploadAttachmentManagerViewProps> = 
 		map(filesToUploadArray, (file) => {
 			const displayPreview = canDisplayPreview(file.file.type);
 			const previewFile = (
-				<Tooltip label={file.file.name}>
+				<Tooltip key={`${file.file.name}-${file.fileId}`} label={file.file.name}>
 					<PreviewContainer
 						key={file.fileId}
 						data-testid={`previewFileUpload-${file.file.name}-${file.fileId}`}
