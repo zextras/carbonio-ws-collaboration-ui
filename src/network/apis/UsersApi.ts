@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { debounce, find, forEach } from 'lodash';
+import { concat, debounce, difference, find, forEach, join, map } from 'lodash';
 
 import BaseAPI from './BaseAPI';
 import useStore from '../../store/Store';
@@ -14,7 +14,8 @@ import {
 	ChangeUserPictureResponse,
 	DeleteUserPictureResponse,
 	GetUserPictureResponse,
-	GetUserResponse
+	GetUserResponse,
+	GetUsersResponse
 } from '../../types/network/responses/usersResponses';
 
 class UsersApi extends BaseAPI implements IUsersApi {
@@ -34,6 +35,17 @@ class UsersApi extends BaseAPI implements IUsersApi {
 			setUserInfo(resp);
 			return resp;
 		});
+	}
+
+	public getUsers(userIds: string[]): Promise<GetUsersResponse> {
+		const { setUserInfo } = useStore.getState();
+		const ids = map(userIds, (id) => `userIds=${id}`);
+		return this.fetchAPI(`users?${join(ids, '&')}`, RequestType.GET).then(
+			(resp: GetUsersResponse) => {
+				forEach(resp, (user) => setUserInfo(user));
+				return resp;
+			}
+		);
 	}
 
 	public getURLUserPicture = (userId: string): string =>
@@ -60,15 +72,47 @@ class UsersApi extends BaseAPI implements IUsersApi {
 		return this.fetchAPI(`users/${userId}/picture`, RequestType.DELETE);
 	}
 
-	private unknownUsers: string[] = [];
+	private usersToRequest: string[] = [];
 
-	// TODO improve
+	private requestingUsers: string[] = [];
+
+	public clearUserCache(): void {
+		this.usersToRequest = [];
+		this.requestingUsers = [];
+	}
+
+	// getUsers wants max 10 userId at a time
+	private deboucedUserGetter = debounce(() => {
+		this.getUsers(this.usersToRequest).then(() => {
+			this.requestingUsers = difference(this.requestingUsers, this.usersToRequest);
+		});
+		this.usersToRequest = [];
+	}, 1000);
+
+	// Create groups of 10 users after 1 second of delay from the last call
 	public getDebouncedUser(userId: string): void {
-		if (!find(this.unknownUsers, (id) => id === userId)) this.unknownUsers.push(userId);
-		debounce(() => {
-			forEach(this.unknownUsers, (id) => this.getUser(id));
-			this.unknownUsers = [];
-		}, 1000)();
+		// If the user is already being requested, don't request it again
+		if (
+			!find(this.usersToRequest, (id) => id === userId) &&
+			!find(this.requestingUsers, (id) => id === userId)
+		) {
+			this.usersToRequest.push(userId);
+
+			// If there are less than 10 users to request, wait 1 second before requesting them (wait if there are other calls)
+			if (this.usersToRequest.length < 10) {
+				this.deboucedUserGetter();
+			}
+			// If there are more than 10 users to request, request them immediately
+			else {
+				this.deboucedUserGetter && this.deboucedUserGetter.cancel();
+				// Save momentarily the users that are being requested to not request them again
+				this.requestingUsers = concat(this.requestingUsers, this.usersToRequest);
+				this.getUsers(this.usersToRequest).then(() => {
+					this.requestingUsers = difference(this.requestingUsers, this.usersToRequest);
+				});
+				this.usersToRequest = [];
+			}
+		}
 	}
 }
 
