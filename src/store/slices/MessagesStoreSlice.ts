@@ -208,7 +208,11 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 				draft.messages[roomId] = sortedUniqBy(draft.messages[roomId], 'id');
 
 				// checks if creation message is duplicated and removes it
-				if (draft.messages[roomId][0].id === draft.messages[roomId][2].id) {
+				if (
+					draft.messages[roomId][0] &&
+					draft.messages[roomId][2] &&
+					draft.messages[roomId][0].id === draft.messages[roomId][2].id
+				) {
 					draft.messages[roomId].splice(0, 2);
 				}
 			}),
