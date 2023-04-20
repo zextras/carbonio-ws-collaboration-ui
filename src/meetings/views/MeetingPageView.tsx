@@ -10,12 +10,10 @@ import { useParams } from 'react-router-dom';
 
 import useRouting, { PAGE_INFO_TYPE } from '../../hooks/useRouting';
 import { MeetingsApi } from '../../network';
-import useStore from '../../store/Store';
 
 const MeetingPageView = (): ReactElement => {
 	const { goToInfoPage } = useRouting();
 	const { meetingId }: any = useParams();
-	const sessionId: string | undefined = useStore((store) => store.session.sessionId);
 
 	const [videoStatus, setVideoStatus] = useState(false);
 	const [audioStatus, setAudioStatus] = useState(false);
@@ -36,28 +34,26 @@ const MeetingPageView = (): ReactElement => {
 	const toggleVideoStream = useCallback(() => {
 		if (!videoStatus) {
 			MeetingsApi.openVideoStream(meetingId).then(() => setVideoStatus(!videoStatus));
-		} else if (sessionId) {
-			MeetingsApi.closeVideoStream(meetingId, sessionId).then(() => setVideoStatus(!videoStatus));
+		} else {
+			MeetingsApi.closeVideoStream(meetingId).then(() => setVideoStatus(!videoStatus));
 		}
-	}, [videoStatus, meetingId, sessionId]);
+	}, [videoStatus, meetingId]);
 
 	const toggleAudioStream = useCallback(() => {
 		if (!audioStatus) {
 			MeetingsApi.openAudioStream(meetingId).then(() => setAudioStatus(!audioStatus));
-		} else if (sessionId) {
-			MeetingsApi.closeAudioStream(meetingId, sessionId).then(() => setAudioStatus(!audioStatus));
+		} else {
+			MeetingsApi.closeAudioStream(meetingId).then(() => setAudioStatus(!audioStatus));
 		}
-	}, [audioStatus, meetingId, sessionId]);
+	}, [audioStatus, meetingId]);
 
 	const toggleShareStream = useCallback(() => {
 		if (!shareStatus) {
 			MeetingsApi.openScreenShareStream(meetingId).then(() => setShareStatus(!shareStatus));
-		} else if (sessionId) {
-			MeetingsApi.closeScreenShareStream(meetingId, sessionId).then(() =>
-				setShareStatus(!shareStatus)
-			);
+		} else {
+			MeetingsApi.closeScreenShareStream(meetingId).then(() => setShareStatus(!shareStatus));
 		}
-	}, [shareStatus, meetingId, sessionId]);
+	}, [shareStatus, meetingId]);
 
 	return (
 		<Container>

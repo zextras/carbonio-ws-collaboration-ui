@@ -28,14 +28,11 @@ interface IMeetingsApi {
 	leaveMeeting(meetingId: string): Promise<LeaveMeetingResponse>;
 	deleteMeeting(meetingId: string): Promise<DeleteMeetingResponse>;
 	openVideoStream(meetingId: string): Promise<OpenVideoStreamResponse>;
-	closeVideoStream(meetingId: string, sessionId: string): Promise<CloseVideoStreamResponse>;
+	closeVideoStream(meetingId: string): Promise<CloseVideoStreamResponse>;
 	openAudioStream(meetingId: string): Promise<OpenAudioStreamResponse>;
-	closeAudioStream(meetingId: string, sessionId: string): Promise<CloseAudioStreamResponse>;
+	closeAudioStream(meetingId: string): Promise<CloseAudioStreamResponse>;
 	openScreenShareStream(meetingId: string): Promise<OpenScreenShareStreamResponse>;
-	closeScreenShareStream(
-		meetingId: string,
-		sessionId: string
-	): Promise<CloseScreenShareStreamResponse>;
+	closeScreenShareStream(meetingId: string): Promise<CloseScreenShareStreamResponse>;
 }
 
 export default IMeetingsApi;

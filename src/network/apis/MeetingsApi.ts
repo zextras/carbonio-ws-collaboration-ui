@@ -42,7 +42,7 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 		});
 	}
 
-	getMeeting(roomId: string): Promise<GetMeetingResponse> {
+	public getMeeting(roomId: string): Promise<GetMeetingResponse> {
 		return this.fetchAPI(`rooms/${roomId}/meeting`, RequestType.GET);
 	}
 
@@ -79,7 +79,8 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 		);
 	}
 
-	public closeVideoStream(meetingId: string, sessionId: string): Promise<CloseVideoStreamResponse> {
+	public closeVideoStream(meetingId: string): Promise<CloseVideoStreamResponse> {
+		const { sessionId } = useStore.getState().session;
 		return this.fetchAPI(
 			`meetings/${meetingId}/sessions/${sessionId}/video`,
 			RequestType.DELETE
@@ -100,7 +101,8 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 		);
 	}
 
-	public closeAudioStream(meetingId: string, sessionId: string): Promise<CloseAudioStreamResponse> {
+	public closeAudioStream(meetingId: string): Promise<CloseAudioStreamResponse> {
+		const { sessionId } = useStore.getState().session;
 		return this.fetchAPI(
 			`meetings/${meetingId}/sessions/${sessionId}/audio`,
 			RequestType.DELETE
@@ -121,10 +123,8 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 		);
 	}
 
-	public closeScreenShareStream(
-		meetingId: string,
-		sessionId: string
-	): Promise<CloseScreenShareStreamResponse> {
+	public closeScreenShareStream(meetingId: string): Promise<CloseScreenShareStreamResponse> {
+		const { sessionId } = useStore.getState().session;
 		return this.fetchAPI(
 			`meetings/${meetingId}/sessions/${sessionId}/screen`,
 			RequestType.DELETE
