@@ -43,6 +43,7 @@ const CustomIconButton = styled(IconButton)`
 
 const PreviewContainer = styled(Container)`
 	${({ isLoaded }): string => isLoaded && `background: black;`};
+	${({ previewError }): string => previewError && `border-radius: 0.25rem;`};
 	position: relative;
 	min-width: 100%;
 	&:hover {
@@ -178,6 +179,7 @@ const AttachmentView: FC<AttachmentViewProps> = ({ attachment, from, isMyMessage
 				height={'fit'}
 				borderRadius="half"
 				isLoaded={isPreviewLoaded}
+				previewError={previewError}
 				data-testid="preview-container"
 			>
 				{!isPreviewLoaded && <Shimmer.Logo size="large" />}
@@ -207,7 +209,7 @@ const AttachmentView: FC<AttachmentViewProps> = ({ attachment, from, isMyMessage
 			padding={{ horizontal: 'small', vertical: 'small' }}
 			orientation="horizontal"
 			crossAlignment="flex-start"
-			userBorderColor={userColor}
+			userBorderColor={isMyMessage ? '#C4D5EF' : userColor}
 			onClick={download}
 		>
 			<Row>

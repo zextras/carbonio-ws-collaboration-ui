@@ -4,11 +4,22 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Container, IconButton, Padding, Text, Icon } from '@zextras/carbonio-design-system';
+import { Container, IconButton, Padding, Text, Icon, Row } from '@zextras/carbonio-design-system';
 import React, { FC } from 'react';
 import styled from 'styled-components';
 
 const CustomText = styled(Text)``;
+
+const CustomIconButton = styled(IconButton)`
+	background-color: ${({ theme, backgroundColor }): string =>
+		theme.palette[backgroundColor].regular} !important;
+	color: ${({ theme }): string => theme.palette.gray6.regular} !important;
+	&:hover {
+		background-color: ${({ theme, backgroundColor }): string =>
+			theme.palette[backgroundColor].regular} !important;
+		color: ${({ theme }): string => theme.palette.gray6.regular} !important;
+	}
+`;
 
 const CustomIcon = styled(Icon)`
 	padding-right: 0.5rem;
@@ -39,8 +50,6 @@ const CustomActionContainer = styled(Container)`
 	padding-right: 0.5rem;
 `;
 
-const CustomIconButton = styled(IconButton)``;
-
 type ActionProps = {
 	icon: string;
 	actionColor: string;
@@ -66,14 +75,19 @@ const ActionComponent: FC<ActionProps> = ({
 			onClick={action}
 		>
 			<CustomContainer orientation="horizontal" mainAlignment="flex-start">
-				<CustomIconButton
-					icon={icon}
-					iconColor="gray6"
-					size="medium"
-					backgroundColor={actionColor}
-				/>
-				<Padding right="large" />
-				<CustomText color={actionColor}>{label}</CustomText>
+				<Row>
+					<CustomIconButton
+						icon={icon}
+						iconColor="gray6"
+						size="medium"
+						backgroundColor={actionColor}
+						onClick={action}
+					/>
+					<Padding right="large" />
+				</Row>
+				<Row takeAvailableSpace mainAlignment="flex-start">
+					<CustomText color={actionColor}>{label}</CustomText>
+				</Row>
 			</CustomContainer>
 			{withArrow && <CustomIcon icon="ArrowIosForwardOutline" color={actionColor} size="medium" />}
 		</ActionContainer>
