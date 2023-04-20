@@ -14,7 +14,7 @@ paths:
     get:
       tags:
         - Meetings
-      summary: Retrieves a list of every meeting the user has access to
+      summary: Retrieves a list of every components the user has access to
       operationId: listMeeting
       responses:
         200:
@@ -23,7 +23,7 @@ paths:
     get:
       tags:
         - Meetings
-      summary: Retrieves the requested meeting
+      summary: Retrieves the requested components
       operationId: getMeeting
       parameters:
         - $ref: '#/components/parameters/pathMeetingId'
@@ -39,7 +39,7 @@ paths:
     delete:
       tags:
         - Meetings
-      summary: Deletes the requested meeting
+      summary: Deletes the requested components
       operationId: deleteMeeting
       parameters:
         - $ref: '#/components/parameters/pathMeetingId'
@@ -56,7 +56,7 @@ paths:
     put:
       tags:
         - Meetings
-      summary: adds the current user to the specified meeting
+      summary: adds the current user to the specified components
       operationId: joinMeeting
       parameters:
         - $ref: '#/components/parameters/pathMeetingId'
@@ -75,7 +75,7 @@ paths:
     put:
       tags:
         - Meetings
-      summary: remove the current user to the specified meeting
+      summary: remove the current user to the specified components
       operationId: leaveMeeting
       parameters:
         - $ref: '#/components/parameters/pathMeetingId'
@@ -199,7 +199,7 @@ components:
     pathMeetingId:
       in: path
       name: meetingId
-      description: meeting identifier
+      description: components identifier
       schema:
         type: string
         format: uuid
@@ -232,7 +232,7 @@ components:
 
   responses:
     200ListMeetingResponse:
-      description: List of every meeting that the user has access to
+      description: List of every components that the user has access to
       content:
         application/json:
           schema:
@@ -240,7 +240,7 @@ components:
             items:
               $ref: '#/components/schemas/Meeting'
     200GetMeetingResponse:
-      description: Gets the requested meeting data
+      description: Gets the requested components data
       content:
         application/json:
           schema:
@@ -252,11 +252,11 @@ components:
           schema:
             $ref: '#/components/schemas/Meeting'
     204DeleteMeetingResponse:
-      description: The meeting was deleted successfully
+      description: The components was deleted successfully
     204JoinMeetingResponse:
-      description: The user joined the meeting successfully
+      description: The user joined the components successfully
     204LeaveMeetingResponse:
-      description: The user exited the meeting successfully
+      description: The user exited the components successfully
     204OpenAudioStreamResponse:
       description: The audio stream opened successfully
     204CloseAudioStreamResponse:
@@ -284,7 +284,7 @@ components:
   schemas:
     Room:
       type: object
-      description: Room data for a meeting
+      description: Room data for a components
       properties:
         id:
           type: string

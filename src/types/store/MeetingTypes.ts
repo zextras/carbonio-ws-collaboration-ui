@@ -10,7 +10,7 @@ export type MeetingsMap = {
 export type Meeting = {
 	id: string;
 	roomId: string;
-	participants: MeetingParticipant[];
+	participants: MeetingParticipantMap;
 	createdAt: string;
 };
 
@@ -19,4 +19,9 @@ export type MeetingParticipant = {
 	sessionId: string;
 	hasAudioStreamOn: boolean;
 	hasVideoStreamOn: boolean;
+	hasScreenStreamOn: boolean;
+};
+
+export type MeetingParticipantMap = {
+	[sessionId: string]: MeetingParticipant;
 };

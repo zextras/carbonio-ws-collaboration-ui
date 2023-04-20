@@ -142,6 +142,12 @@ export type MeetingsSlice = {
 	deleteMeeting: (meetingId: string) => void;
 	addParticipant: (meetingId: string, participant: MeetingParticipantBe) => void;
 	removeParticipant: (meetingId: string, sessionId: string) => void;
+	changeStreamStatus: (
+		meetingId: string,
+		sessionId: string,
+		stream: 'audio' | 'video' | 'screen',
+		status: boolean
+	) => void;
 };
 
 export type RootStore = UsersStoreSlice &

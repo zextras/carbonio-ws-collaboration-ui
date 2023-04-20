@@ -28,7 +28,13 @@ export enum WsEventType {
 	MEETING_CREATED = 'meetingCreated',
 	MEETING_JOINED = 'meetingParticipantJoined',
 	MEETING_LEFT = 'meetingParticipantLeft',
-	MEETING_DELETED = 'meetingDeleted'
+	MEETING_DELETED = 'meetingDeleted',
+	MEETING_VIDEO_STREAM_OPENED = 'meetingParticipantVideoStreamOpened',
+	MEETING_VIDEO_STREAM_CLOSED = 'meetingParticipantVideoStreamClosed',
+	MEETING_AUDIO_STREAM_OPENED = 'meetingParticipantAudioStreamOpened',
+	MEETING_AUDIO_STREAM_CLOSED = 'meetingParticipantAudioStreamClosed',
+	MEETING_SCREEN_STREAM_OPENED = 'meetingParticipantScreenStreamOpened',
+	MEETING_SCREEN_STREAM_CLOSED = 'meetingParticipantScreenStreamClosed'
 }
 
 export type WsEvent = InitializationEvent | PongEvent | WsConversationEvent | WsMeetingEvent;

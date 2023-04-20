@@ -141,8 +141,8 @@ export function wsEventsHandler(event: WsEvent): void {
 				state.addParticipant(event.meetingId, {
 					sessionId: event.sessionId,
 					userId: event.from,
-					hasAudioStreamOn: false,
-					hasVideoStreamOn: false
+					audioStreamOn: false,
+					videoStreamOn: false
 				});
 			}
 			break;
@@ -155,6 +155,42 @@ export function wsEventsHandler(event: WsEvent): void {
 		}
 		case WsEventType.MEETING_DELETED: {
 			state.deleteMeeting(event.meetingId);
+			break;
+		}
+		case WsEventType.MEETING_VIDEO_STREAM_OPENED: {
+			if (eventArrivesFromAnotherSession) {
+				state.changeStreamStatus(event.meetingId, event.sessionId, 'video', true);
+			}
+			break;
+		}
+		case WsEventType.MEETING_VIDEO_STREAM_CLOSED: {
+			if (eventArrivesFromAnotherSession) {
+				state.changeStreamStatus(event.meetingId, event.sessionId, 'video', false);
+			}
+			break;
+		}
+		case WsEventType.MEETING_AUDIO_STREAM_OPENED: {
+			if (eventArrivesFromAnotherSession) {
+				state.changeStreamStatus(event.meetingId, event.sessionId, 'audio', true);
+			}
+			break;
+		}
+		case WsEventType.MEETING_AUDIO_STREAM_CLOSED: {
+			if (eventArrivesFromAnotherSession) {
+				state.changeStreamStatus(event.meetingId, event.sessionId, 'audio', false);
+			}
+			break;
+		}
+		case WsEventType.MEETING_SCREEN_STREAM_OPENED: {
+			if (eventArrivesFromAnotherSession) {
+				state.changeStreamStatus(event.meetingId, event.sessionId, 'screen', true);
+			}
+			break;
+		}
+		case WsEventType.MEETING_SCREEN_STREAM_CLOSED: {
+			if (eventArrivesFromAnotherSession) {
+				state.changeStreamStatus(event.meetingId, event.sessionId, 'screen', false);
+			}
 			break;
 		}
 		default:

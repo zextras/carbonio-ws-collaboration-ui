@@ -10,9 +10,11 @@ import { useHistory } from 'react-router-dom';
 
 export enum ROUTES {
 	MAIN = '/',
-	ROOM = '/:roomId',
+	ROOM = '/:roomId'
+}
+
+export enum MEETINGS_ROUTES {
 	MEETING = '/meeting/:meetingId',
-	WAITING_ROOM = '/waitingRoom/:roomId',
 	INFO = '/infoPage/:infoType'
 }
 
@@ -26,28 +28,35 @@ export type UseRoutingHook = {
 	goToMainPage: () => void;
 	goToRoomPage: (roomId: string) => void;
 	goToMeetingPage: (meetingId: string) => void;
-	goToWaitingPage: (roomId: string, roomName: string) => void;
 	goToInfoPage: (infoType: PAGE_INFO_TYPE) => void;
 };
 
 const useRouting = (): UseRoutingHook => {
+	const history = useHistory();
+	const route = useCallback((url: string): void => history.push(url), [history]);
+
+	// Chats routing
 	const goToMainPage = useCallback(() => replaceHistory(ROUTES.MAIN), []);
+
 	const goToRoomPage = useCallback(
 		(roomId: string) => pushHistory(ROUTES.ROOM.replace(':roomId', roomId)),
 		[]
 	);
-	const history = useHistory();
-	const route = (url: string): void => history.push(url);
-	const goToMeetingPage = (meetingId: string): void => route(`/meeting/${meetingId}`);
-	const goToWaitingPage = (roomId: string, roomName: string): void =>
-		route(`/waitingRoom/${roomId}?${roomName}`);
-	const goToInfoPage = (infoType: PAGE_INFO_TYPE): void => route(`/infoPage/${infoType}`);
+
+	// Meeting routing
+	const goToMeetingPage = useCallback(
+		(meetingId: string): void => route(MEETINGS_ROUTES.MEETING.replace(':meetingId', meetingId)),
+		[route]
+	);
+	const goToInfoPage = useCallback(
+		(infoType: PAGE_INFO_TYPE): void => route(MEETINGS_ROUTES.INFO.replace(':infoType', infoType)),
+		[route]
+	);
 
 	return {
 		goToMainPage,
 		goToRoomPage,
 		goToMeetingPage,
-		goToWaitingPage,
 		goToInfoPage
 	};
 };

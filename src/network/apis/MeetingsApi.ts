@@ -42,7 +42,7 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 		});
 	}
 
-	getMeeting(roomId: string): Promise<GetMeetingResponse> {
+	public getMeeting(roomId: string): Promise<GetMeetingResponse> {
 		return this.fetchAPI(`rooms/${roomId}/meeting`, RequestType.GET);
 	}
 
@@ -70,30 +70,69 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 	}
 
 	public openVideoStream(meetingId: string): Promise<OpenVideoStreamResponse> {
-		return this.fetchAPI(`meetings/${meetingId}/video`, RequestType.PUT);
+		return this.fetchAPI(`meetings/${meetingId}/video`, RequestType.PUT).then(
+			(resp: OpenVideoStreamResponse) => {
+				const { changeStreamStatus, session } = useStore.getState();
+				changeStreamStatus(meetingId, session.sessionId!, 'video', true);
+				return resp;
+			}
+		);
 	}
 
-	public closeVideoStream(meetingId: string, sessionId: string): Promise<CloseVideoStreamResponse> {
-		return this.fetchAPI(`meetings/${meetingId}/sessions/${sessionId}/video`, RequestType.DELETE);
+	public closeVideoStream(meetingId: string): Promise<CloseVideoStreamResponse> {
+		const { sessionId } = useStore.getState().session;
+		return this.fetchAPI(
+			`meetings/${meetingId}/sessions/${sessionId}/video`,
+			RequestType.DELETE
+		).then((resp: CloseVideoStreamResponse) => {
+			const { changeStreamStatus, session } = useStore.getState();
+			changeStreamStatus(meetingId, session.sessionId!, 'video', false);
+			return resp;
+		});
 	}
 
 	public openAudioStream(meetingId: string): Promise<OpenAudioStreamResponse> {
-		return this.fetchAPI(`meetings/${meetingId}/audio`, RequestType.PUT);
+		return this.fetchAPI(`meetings/${meetingId}/audio`, RequestType.PUT).then(
+			(resp: OpenAudioStreamResponse) => {
+				const { changeStreamStatus, session } = useStore.getState();
+				changeStreamStatus(meetingId, session.sessionId!, 'audio', true);
+				return resp;
+			}
+		);
 	}
 
-	public closeAudioStream(meetingId: string, sessionId: string): Promise<CloseAudioStreamResponse> {
-		return this.fetchAPI(`meetings/${meetingId}/sessions/${sessionId}/audio`, RequestType.DELETE);
+	public closeAudioStream(meetingId: string): Promise<CloseAudioStreamResponse> {
+		const { sessionId } = useStore.getState().session;
+		return this.fetchAPI(
+			`meetings/${meetingId}/sessions/${sessionId}/audio`,
+			RequestType.DELETE
+		).then((resp: CloseAudioStreamResponse) => {
+			const { changeStreamStatus, session } = useStore.getState();
+			changeStreamStatus(meetingId, session.sessionId!, 'audio', false);
+			return resp;
+		});
 	}
 
 	public openScreenShareStream(meetingId: string): Promise<OpenScreenShareStreamResponse> {
-		return this.fetchAPI(`meetings/${meetingId}/screen`, RequestType.PUT);
+		return this.fetchAPI(`meetings/${meetingId}/screen`, RequestType.PUT).then(
+			(resp: OpenScreenShareStreamResponse) => {
+				const { changeStreamStatus, session } = useStore.getState();
+				changeStreamStatus(meetingId, session.sessionId!, 'screen', true);
+				return resp;
+			}
+		);
 	}
 
-	public closeScreenShareStream(
-		meetingId: string,
-		sessionId: string
-	): Promise<CloseScreenShareStreamResponse> {
-		return this.fetchAPI(`meetings/${meetingId}/sessions/${sessionId}/screen`, RequestType.DELETE);
+	public closeScreenShareStream(meetingId: string): Promise<CloseScreenShareStreamResponse> {
+		const { sessionId } = useStore.getState().session;
+		return this.fetchAPI(
+			`meetings/${meetingId}/sessions/${sessionId}/screen`,
+			RequestType.DELETE
+		).then((resp: CloseScreenShareStreamResponse) => {
+			const { changeStreamStatus, session } = useStore.getState();
+			changeStreamStatus(meetingId, session.sessionId!, 'screen', false);
+			return resp;
+		});
 	}
 }
 

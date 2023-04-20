@@ -10,32 +10,59 @@ export type WsMeetingEvent =
 	| MeetingCreatedEvent
 	| MeetingJoinedEvent
 	| MeetingLeftEvent
-	| MeetingDeletedEvent;
+	| MeetingDeletedEvent
+	| MeetingVideoStreamOpenedEvent
+	| MeetingVideoStreamClosedEvent
+	| MeetingAudioStreamOpenedEvent
+	| MeetingAudioStreamClosedEvent
+	| MeetingScreenStreamOpenedEvent
+	| MeetingScreenStreamClosedEvent;
 
 type BasicMeetingEvent = {
 	id: string;
 	from: string;
 	sentDate: string;
 	sessionId: string;
+	meetingId: string;
 };
 
 export type MeetingCreatedEvent = BasicMeetingEvent & {
 	type: WsEventType.MEETING_CREATED;
-	meetingId: string;
 	roomId: string;
 };
 
 export type MeetingJoinedEvent = BasicMeetingEvent & {
 	type: WsEventType.MEETING_JOINED;
-	meetingId: string;
 };
 
 export type MeetingLeftEvent = BasicMeetingEvent & {
 	type: WsEventType.MEETING_LEFT;
-	meetingId: string;
 };
 
 export type MeetingDeletedEvent = BasicMeetingEvent & {
 	type: WsEventType.MEETING_DELETED;
-	meetingId: string;
+};
+
+export type MeetingVideoStreamOpenedEvent = BasicMeetingEvent & {
+	type: WsEventType.MEETING_VIDEO_STREAM_OPENED;
+};
+
+export type MeetingVideoStreamClosedEvent = BasicMeetingEvent & {
+	type: WsEventType.MEETING_VIDEO_STREAM_CLOSED;
+};
+
+export type MeetingAudioStreamOpenedEvent = BasicMeetingEvent & {
+	type: WsEventType.MEETING_AUDIO_STREAM_OPENED;
+};
+
+export type MeetingAudioStreamClosedEvent = BasicMeetingEvent & {
+	type: WsEventType.MEETING_AUDIO_STREAM_CLOSED;
+};
+
+export type MeetingScreenStreamOpenedEvent = BasicMeetingEvent & {
+	type: WsEventType.MEETING_SCREEN_STREAM_OPENED;
+};
+
+export type MeetingScreenStreamClosedEvent = BasicMeetingEvent & {
+	type: WsEventType.MEETING_SCREEN_STREAM_CLOSED;
 };

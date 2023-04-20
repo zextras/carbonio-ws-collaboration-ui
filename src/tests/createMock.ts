@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { MeetingBe } from '../types/network/models/meetingBeTypes';
 import { MemberBe, RoomBe } from '../types/network/models/roomBeTypes';
 import { UserBe } from '../types/network/models/userBeTypes';
 import { FileToUpload } from '../types/store/ActiveConversationTypes';
@@ -148,5 +149,13 @@ export const createMockFileToUpload = (fields?: Record<string, any>): FileToUplo
 	localUrl: 'localhost/generic/url',
 	description: '',
 	hasFocus: false,
+	...fields
+});
+
+export const createMockMeeting = (fields?: Record<string, any>): MeetingBe => ({
+	id: 'meetingId',
+	roomId: 'roomId',
+	participants: [],
+	createdAt: '2022-08-25T17:24:28.961+02:00',
 	...fields
 });
