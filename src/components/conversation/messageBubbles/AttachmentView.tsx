@@ -43,7 +43,7 @@ const CustomIconButton = styled(IconButton)`
 
 const PreviewContainer = styled(Container)`
 	${({ isLoaded }): string => isLoaded && `background: black;`};
-	${({ previewError }): string => previewError && `border-radius: 0.125rem;`};
+	${({ previewError }): string => previewError && `border-radius: 0.25rem;`};
 	position: relative;
 	min-width: 100%;
 	&:hover {
