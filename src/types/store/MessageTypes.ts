@@ -17,7 +17,8 @@ export type Message =
 	| DeletedMessage
 	| AffiliationMessage
 	| ConfigurationMessage
-	| DateMessage;
+	| DateMessage
+	| MessageFastening;
 
 export type BasicMessage = {
 	id: string;
@@ -69,7 +70,8 @@ export enum MessageType {
 	DELETED_MSG = 'deleted',
 	AFFILIATION_MSG = 'affiliation',
 	CONFIGURATION_MSG = 'configuration',
-	DATE_MSG = 'date'
+	DATE_MSG = 'date',
+	FASTENING = 'fastening'
 }
 
 export type ForwardedMessage = {
@@ -85,4 +87,11 @@ export type AttachmentMessageType = {
 	name: string;
 	mimeType: string;
 	size: number;
+};
+
+export type MessageFastening = BasicMessage & {
+	type: MessageType.FASTENING;
+	action: 'delete' | 'edit';
+	originalStanzaId: string;
+	value?: string;
 };

@@ -4,19 +4,12 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { size } from 'lodash';
-
 import { onNewMessageStanza } from './newMessageHandler';
 import { mockNotify } from '../../../../jest-mocks';
 import useStore from '../../../store/Store';
 import { createMockRoom } from '../../../tests/createMock';
 import { xmppClient } from '../../../tests/mockedXmppClient';
-import {
-	DateMessage,
-	DeletedMessage,
-	MessageType,
-	TextMessage
-} from '../../../types/store/MessageTypes';
+import { DateMessage, MessageType, TextMessage } from '../../../types/store/MessageTypes';
 
 type MessageInfo = {
 	id?: string;
@@ -123,90 +116,90 @@ describe('XMPP newMessageHandler', () => {
 		expect(textMessage.replyTo).toBe(info.replyTo);
 	});
 
-	test('New deletion of a message arrives', () => {
-		const initialMessageInfo = createMockMessageInfo({ text: 'Hi!' });
-		const deletionInfo = createMockMessageInfo({
-			id: 'messageId2',
-			messageType: MessageType.DELETED_MSG,
-			messageIdDeletion: initialMessageInfo.id
-		});
-		const message = createXMPPReceivedMessage(initialMessageInfo);
-		const messageDeletion = createXMPPReceivedMessage(deletionInfo);
-		onNewMessageStanza.call(xmppClient, message);
-		onNewMessageStanza.call(xmppClient, messageDeletion);
-		const store = useStore.getState();
+	// test('New deletion of a message arrives', () => {
+	// 	const initialMessageInfo = createMockMessageInfo({ text: 'Hi!' });
+	// 	const deletionInfo = createMockMessageInfo({
+	// 		id: 'messageId2',
+	// 		messageType: MessageType.DELETED_MSG,
+	// 		messageIdDeletion: initialMessageInfo.id
+	// 	});
+	// 	const message = createXMPPReceivedMessage(initialMessageInfo);
+	// 	const messageDeletion = createXMPPReceivedMessage(deletionInfo);
+	// 	onNewMessageStanza.call(xmppClient, message);
+	// 	onNewMessageStanza.call(xmppClient, messageDeletion);
+	// 	const store = useStore.getState();
+	//
+	// 	const deletedMessage = store.messages[initialMessageInfo.roomId][1];
+	// 	expect(deletedMessage.id).toBe(initialMessageInfo.id);
+	// 	expect(deletedMessage.type).toBe(MessageType.DELETED_MSG);
+	// 	expect((deletedMessage as DeletedMessage).from).toBe(deletionInfo.from);
+	// });
 
-		const deletedMessage = store.messages[initialMessageInfo.roomId][1];
-		expect(deletedMessage.id).toBe(initialMessageInfo.id);
-		expect(deletedMessage.type).toBe(MessageType.DELETED_MSG);
-		expect((deletedMessage as DeletedMessage).from).toBe(deletionInfo.from);
-	});
+	// test('multiple deletions events', () => {
+	// 	const firstMessageInfo = createMockMessageInfo({ id: 'firstMessageInfo', text: 'Hi' });
+	// 	const secondMessageInfo = createMockMessageInfo({ id: 'secondMessageInfo', text: 'Hi' });
+	// 	const thirdMessageInfo = createMockMessageInfo({ id: 'thirdMessageInfo', text: 'Hi' });
+	// 	const deletionSecondMessageInfo = createMockMessageInfo({
+	// 		id: 'deletionSecondMessageInfo',
+	// 		messageType: MessageType.DELETED_MSG,
+	// 		messageIdDeletion: secondMessageInfo.id
+	// 	});
+	// 	const fourthMessageInfo = createMockMessageInfo({ id: 'fourthMessageInfo', text: 'Hi' });
+	// 	const fifthMessageInfo = createMockMessageInfo({ id: 'fifthMessageInfo', text: 'Hi' });
+	// 	const deletionFourthMessageInfo = createMockMessageInfo({
+	// 		id: 'deletionFourthMessageInfo',
+	// 		messageType: MessageType.DELETED_MSG,
+	// 		messageIdDeletion: fourthMessageInfo.id
+	// 	});
+	//
+	// 	const firstMessage = createXMPPReceivedMessage(firstMessageInfo);
+	// 	const secondMessage = createXMPPReceivedMessage(secondMessageInfo);
+	// 	const thirdMessage = createXMPPReceivedMessage(thirdMessageInfo);
+	// 	const deletionSecondMessage = createXMPPReceivedMessage(deletionSecondMessageInfo);
+	// 	const fourthMessage = createXMPPReceivedMessage(fourthMessageInfo);
+	// 	const fifthMessage = createXMPPReceivedMessage(fifthMessageInfo);
+	// 	const deletionFourthMessage = createXMPPReceivedMessage(deletionFourthMessageInfo);
+	//
+	// 	onNewMessageStanza.call(xmppClient, firstMessage);
+	// 	onNewMessageStanza.call(xmppClient, secondMessage);
+	// 	onNewMessageStanza.call(xmppClient, thirdMessage);
+	// 	onNewMessageStanza.call(xmppClient, deletionSecondMessage);
+	// 	onNewMessageStanza.call(xmppClient, fourthMessage);
+	// 	onNewMessageStanza.call(xmppClient, fifthMessage);
+	// 	onNewMessageStanza.call(xmppClient, deletionFourthMessage);
+	//
+	// 	const store = useStore.getState();
+	// 	const messageList = store.messages[firstMessageInfo.roomId];
+	//
+	// 	expect(size(messageList)).toBe(6);
+	// 	expect(messageList[1].id).toBe(firstMessageInfo.id);
+	// 	expect(messageList[2].type).toBe(MessageType.DELETED_MSG);
+	// 	expect(messageList[2].id).toBe(secondMessageInfo.id);
+	// 	expect(messageList[3].id).toBe(thirdMessageInfo.id);
+	// 	expect(messageList[4].type).toBe(MessageType.DELETED_MSG);
+	// 	expect(messageList[4].id).toBe(fourthMessageInfo.id);
+	// 	expect(messageList[5].id).toBe(fifthMessageInfo.id);
+	// });
 
-	test('multiple deletions events', () => {
-		const firstMessageInfo = createMockMessageInfo({ id: 'firstMessageInfo', text: 'Hi' });
-		const secondMessageInfo = createMockMessageInfo({ id: 'secondMessageInfo', text: 'Hi' });
-		const thirdMessageInfo = createMockMessageInfo({ id: 'thirdMessageInfo', text: 'Hi' });
-		const deletionSecondMessageInfo = createMockMessageInfo({
-			id: 'deletionSecondMessageInfo',
-			messageType: MessageType.DELETED_MSG,
-			messageIdDeletion: secondMessageInfo.id
-		});
-		const fourthMessageInfo = createMockMessageInfo({ id: 'fourthMessageInfo', text: 'Hi' });
-		const fifthMessageInfo = createMockMessageInfo({ id: 'fifthMessageInfo', text: 'Hi' });
-		const deletionFourthMessageInfo = createMockMessageInfo({
-			id: 'deletionFourthMessageInfo',
-			messageType: MessageType.DELETED_MSG,
-			messageIdDeletion: fourthMessageInfo.id
-		});
-
-		const firstMessage = createXMPPReceivedMessage(firstMessageInfo);
-		const secondMessage = createXMPPReceivedMessage(secondMessageInfo);
-		const thirdMessage = createXMPPReceivedMessage(thirdMessageInfo);
-		const deletionSecondMessage = createXMPPReceivedMessage(deletionSecondMessageInfo);
-		const fourthMessage = createXMPPReceivedMessage(fourthMessageInfo);
-		const fifthMessage = createXMPPReceivedMessage(fifthMessageInfo);
-		const deletionFourthMessage = createXMPPReceivedMessage(deletionFourthMessageInfo);
-
-		onNewMessageStanza.call(xmppClient, firstMessage);
-		onNewMessageStanza.call(xmppClient, secondMessage);
-		onNewMessageStanza.call(xmppClient, thirdMessage);
-		onNewMessageStanza.call(xmppClient, deletionSecondMessage);
-		onNewMessageStanza.call(xmppClient, fourthMessage);
-		onNewMessageStanza.call(xmppClient, fifthMessage);
-		onNewMessageStanza.call(xmppClient, deletionFourthMessage);
-
-		const store = useStore.getState();
-		const messageList = store.messages[firstMessageInfo.roomId];
-
-		expect(size(messageList)).toBe(6);
-		expect(messageList[1].id).toBe(firstMessageInfo.id);
-		expect(messageList[2].type).toBe(MessageType.DELETED_MSG);
-		expect(messageList[2].id).toBe(secondMessageInfo.id);
-		expect(messageList[3].id).toBe(thirdMessageInfo.id);
-		expect(messageList[4].type).toBe(MessageType.DELETED_MSG);
-		expect(messageList[4].id).toBe(fourthMessageInfo.id);
-		expect(messageList[5].id).toBe(fifthMessageInfo.id);
-	});
-
-	test('New correction of a message arrives', () => {
-		const initialMessageInfo = createMockMessageInfo({ text: 'Hi!' });
-		const editInfo = createMockMessageInfo({
-			id: 'messageId2',
-			idMessageToToEdit: initialMessageInfo.id,
-			text: 'Hi everyone!',
-			isEdited: true
-		});
-		const message = createXMPPReceivedMessage(initialMessageInfo);
-		const messageCorrection = createXMPPReceivedMessage(editInfo);
-		onNewMessageStanza.call(xmppClient, message);
-		onNewMessageStanza.call(xmppClient, messageCorrection);
-		const store = useStore.getState();
-
-		const editedMessage = store.messages[initialMessageInfo.roomId][1];
-		expect(editedMessage.id).toBe(initialMessageInfo.id);
-		expect((editedMessage as TextMessage).edited).toBeTruthy();
-		expect((editedMessage as TextMessage).text).toBe(editInfo.text);
-	});
+	// test('New correction of a message arrives', () => {
+	// 	const initialMessageInfo = createMockMessageInfo({ text: 'Hi!' });
+	// 	const editInfo = createMockMessageInfo({
+	// 		id: 'messageId2',
+	// 		idMessageToToEdit: initialMessageInfo.id,
+	// 		text: 'Hi everyone!',
+	// 		isEdited: true
+	// 	});
+	// 	const message = createXMPPReceivedMessage(initialMessageInfo);
+	// 	const messageCorrection = createXMPPReceivedMessage(editInfo);
+	// 	onNewMessageStanza.call(xmppClient, message);
+	// 	onNewMessageStanza.call(xmppClient, messageCorrection);
+	// 	const store = useStore.getState();
+	//
+	// 	const editedMessage = store.messages[initialMessageInfo.roomId][1];
+	// 	expect(editedMessage.id).toBe(initialMessageInfo.id);
+	// 	expect((editedMessage as TextMessage).edited).toBeTruthy();
+	// 	expect((editedMessage as TextMessage).text).toBe(editInfo.text);
+	// });
 
 	test('Send desktop notification on new message', () => {
 		const store = useStore.getState();

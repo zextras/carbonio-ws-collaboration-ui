@@ -13,8 +13,8 @@ import { RootStore } from '../../../types/store/StoreTypes';
 import { dateToTimestamp } from '../../../utils/dateUtil';
 import { xmppDebug } from '../../../utils/debug';
 import { getId } from '../utility/decodeJid';
-import { decodeMessage } from '../utility/decodeMessage';
 import { getAttribute, getRequiredAttribute, getRequiredTagElement } from '../utility/decodeStanza';
+import { decodeXMPPMessageStanza } from '../utility/decodeXMPPMessageStanza';
 import HistoryAccumulator from '../utility/HistoryAccumulator';
 import XMPPClient from '../XMPPClient';
 
@@ -34,7 +34,7 @@ export function onHistoryMessageStanza(message: Element): true {
 	const id = getRequiredAttribute(result, 'id');
 	const date = getRequiredAttribute(getRequiredTagElement(result, 'delay'), 'stamp');
 	const insideMessage = getRequiredTagElement(result, 'message');
-	const historyMessage = decodeMessage(insideMessage, {
+	const historyMessage = decodeXMPPMessageStanza(insideMessage, {
 		date: dateToTimestamp(date),
 		stanzaId: id
 	});
@@ -44,16 +44,8 @@ export function onHistoryMessageStanza(message: Element): true {
 		const queryId = getAttribute(result, 'queryid');
 		switch (queryId) {
 			case MamRequestType.HISTORY: {
-				if (historyMessage.type === MessageType.DELETED_MSG) {
-					HistoryAccumulator.replaceDeletedMessageInTheHistory(
-						historyMessage.roomId,
-						historyMessage
-					);
-				} else if (historyMessage.type === MessageType.TEXT_MSG && historyMessage.edited) {
-					HistoryAccumulator.replaceMessageEditedInTheHistory(
-						historyMessage.roomId,
-						historyMessage
-					);
+				if (historyMessage.type === MessageType.FASTENING) {
+					// TODO - handle fastening
 				} else {
 					HistoryAccumulator.addMessageToHistory(historyMessage.roomId, historyMessage);
 				}

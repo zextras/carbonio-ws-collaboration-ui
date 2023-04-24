@@ -9,7 +9,7 @@ import produce from 'immer';
 import { concat, find, forEach, map, orderBy, sortedUniqBy } from 'lodash';
 
 import { UsersApi } from '../../network';
-import { calcReads } from '../../network/xmpp/utility/decodeMessage';
+import { calcReads } from '../../network/xmpp/utility/decodeXMPPMessageStanza';
 import { MarkerStatus } from '../../types/store/MarkersTypes';
 import {
 	AffiliationMessage,
