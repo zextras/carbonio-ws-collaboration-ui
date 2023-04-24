@@ -230,7 +230,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 							messageReference?.type === MessageType.TEXT_MSG &&
 							messageReference?.text !== message
 						) {
-							xmppClient.sendChatMessageCorrection(roomId, message, referenceMessage.messageId);
+							xmppClient.sendChatMessageEdit(roomId, message, referenceMessage.stanzaId);
 						}
 						break;
 					}
