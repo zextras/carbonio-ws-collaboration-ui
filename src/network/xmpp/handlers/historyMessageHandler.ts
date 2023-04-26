@@ -45,7 +45,7 @@ export function onHistoryMessageStanza(message: Element): true {
 		switch (queryId) {
 			case MamRequestType.HISTORY: {
 				if (historyMessage.type === MessageType.FASTENING) {
-					// TODO - handle fastening
+					useStore.getState().addFastening(historyMessage);
 				} else {
 					HistoryAccumulator.addMessageToHistory(historyMessage.roomId, historyMessage);
 				}

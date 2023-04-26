@@ -55,7 +55,7 @@ export function onNewMessageStanza(this: IXMPPClient, message: Element): true {
 					break;
 				}
 				case MessageType.FASTENING: {
-					// TODO - handle fastening
+					store.addFastening(newMessage);
 					break;
 				}
 				default: {

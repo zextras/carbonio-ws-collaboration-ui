@@ -29,30 +29,36 @@ export function onInboxMessageStanza(this: IXMPPClient, message: Element): true 
 		const store = useStore.getState();
 		store.addUnreadCount(inboxMessage.roomId, parseInt(unreadMessagesOfSingleConversation, 10));
 
-		if (inboxMessage.type === MessageType.FASTENING) {
-			// TODO - handle fastening
+		switch (inboxMessage.type) {
+			case MessageType.TEXT_MSG:
+				store.newInboxMessage(inboxMessage);
 
-			// Last inboxMessage is a fastening, we need to request more messages to display the real last one
-			this.requestHistory(inboxMessage.roomId, now(), 3);
-		} else {
-			store.newInboxMessage(inboxMessage);
-		}
+				// Request message subject of reply
+				if (inboxMessage.replyTo) {
+					this.requestMessageSubjectOfReply(
+						inboxMessage.roomId,
+						inboxMessage.replyTo,
+						inboxMessage.id
+					);
+				}
 
-		if (inboxMessage.type === MessageType.TEXT_MSG) {
-			// Request message subject of reply
-			const messageSubjectOfReplyId = inboxMessage.replyTo;
-			if (messageSubjectOfReplyId) {
-				this.requestMessageSubjectOfReply(
-					inboxMessage.roomId,
-					messageSubjectOfReplyId,
-					inboxMessage.id
-				);
+				// Ask smart markers to update Check icon
+				if (inboxMessage.from === sessionId) {
+					this.lastMarkers(inboxMessage.roomId);
+				}
+				break;
+			case MessageType.CONFIGURATION_MSG:
+			case MessageType.AFFILIATION_MSG: {
+				store.newInboxMessage(inboxMessage);
+				break;
 			}
-
-			// Ask smart markers to update Check icon
-			if (inboxMessage.from === sessionId) {
-				this.lastMarkers(inboxMessage.roomId);
-			}
+			case MessageType.FASTENING:
+				store.addFastening(inboxMessage);
+				// Last inboxMessage is a fastening, we need to request more messages to display the real last one
+				this.requestHistory(inboxMessage.roomId, now(), 3);
+				break;
+			default:
+				break;
 		}
 	}
 	return true;

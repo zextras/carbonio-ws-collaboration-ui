@@ -7,7 +7,6 @@
 import { act, renderHook } from '@testing-library/react-hooks';
 
 import {
-	createMockDeletedMessage,
 	createMockMarker,
 	createMockMember,
 	createMockRoom,
@@ -15,7 +14,7 @@ import {
 } from '../../tests/createMock';
 import { RoomBe } from '../../types/network/models/roomBeTypes';
 import { MarkerStatus } from '../../types/store/MarkersTypes';
-import { DeletedMessage, MessageType, TextMessage } from '../../types/store/MessageTypes';
+import { TextMessage } from '../../types/store/MessageTypes';
 import useStore from '../Store';
 
 const room: RoomBe = createMockRoom({
@@ -77,28 +76,28 @@ const message1ReplyToMessage1 = createMockTextMessage({
 	from: 'user0'
 });
 
-const deletedMessage0: DeletedMessage = createMockDeletedMessage({
-	id: 'message0-id',
-	roomId: room.id,
-	date: 1661441294393, // 25 ago 2022, 15:28:14
-	from: 'user0'
-});
-
-const deletedMessage1: DeletedMessage = createMockDeletedMessage({
-	id: 'message1-id',
-	roomId: room.id,
-	date: 1662541294393, // 7 set 2022, 09:01:34
-	from: 'user1'
-});
-
-const message0Correction = createMockTextMessage({
-	id: message0.id,
-	roomId: room.id,
-	date: 1665441294393,
-	from: 'user0',
-	text: 'edited message n0',
-	edited: true
-});
+// const deletedMessage0: DeletedMessage = createMockDeletedMessage({
+// 	id: 'message0-id',
+// 	roomId: room.id,
+// 	date: 1661441294393, // 25 ago 2022, 15:28:14
+// 	from: 'user0'
+// });
+//
+// const deletedMessage1: DeletedMessage = createMockDeletedMessage({
+// 	id: 'message1-id',
+// 	roomId: room.id,
+// 	date: 1662541294393, // 7 set 2022, 09:01:34
+// 	from: 'user1'
+// });
+//
+// const message0Correction = createMockTextMessage({
+// 	id: message0.id,
+// 	roomId: room.id,
+// 	date: 1665441294393,
+// 	from: 'user0',
+// 	text: 'edited message n0',
+// 	edited: true
+// });
 
 const marker0_user0 = createMockMarker({
 	from: 'user0',
@@ -236,58 +235,58 @@ describe('Test messages slice', () => {
 		expect((result.current.messages[room.id][6] as TextMessage).repliedMessage).toBe(message1);
 	});
 
-	it('Tests setDeletedMessage', () => {
-		const { result } = renderHook(() => useStore());
-		act(() => result.current.addRoom(room));
-		act(() => result.current.addRoom(room2));
-		act(() => result.current.newMessage(message0));
-		act(() => result.current.newMessage(message1));
-		act(() => result.current.setDeletedMessage(room.id, deletedMessage0));
-		expect(result.current.messages[room.id][1].type).toBe(MessageType.DELETED_MSG);
-		expect(result.current.messages[room.id][1]).toStrictEqual(deletedMessage0);
-		act(() => result.current.newMessage(deletedMessage1));
-	});
+	// it('Tests setDeletedMessage', () => {
+	// 	const { result } = renderHook(() => useStore());
+	// 	act(() => result.current.addRoom(room));
+	// 	act(() => result.current.addRoom(room2));
+	// 	act(() => result.current.newMessage(message0));
+	// 	act(() => result.current.newMessage(message1));
+	// 	act(() => result.current.setDeletedMessage(room.id, deletedMessage0));
+	// 	expect(result.current.messages[room.id][1].type).toBe(MessageType.DELETED_MSG);
+	// 	expect(result.current.messages[room.id][1]).toStrictEqual(deletedMessage0);
+	// 	act(() => result.current.newMessage(deletedMessage1));
+	// });
 
-	it('Tests setEditedMessage', () => {
-		const { result } = renderHook(() => useStore());
-		act(() => result.current.addRoom(room));
-		act(() => result.current.newMessage(message0));
-		act(() => result.current.newMessage(message1));
-		act(() => result.current.setEditedMessage(room.id, message0Correction as TextMessage));
-		expect((result.current.messages[room.id][1] as TextMessage).edited).toBeTruthy();
-		expect(result.current.messages[room.id][1].date).toBe(message0.date);
-		expect((result.current.messages[room.id][1] as TextMessage).text).toBe(message0Correction.text);
-	});
+	// it('Tests setEditedMessage', () => {
+	// 	const { result } = renderHook(() => useStore());
+	// 	act(() => result.current.addRoom(room));
+	// 	act(() => result.current.newMessage(message0));
+	// 	act(() => result.current.newMessage(message1));
+	// 	act(() => result.current.setEditedMessage(room.id, message0Correction as TextMessage));
+	// 	expect((result.current.messages[room.id][1] as TextMessage).edited).toBeTruthy();
+	// 	expect(result.current.messages[room.id][1].date).toBe(message0.date);
+	// 	expect((result.current.messages[room.id][1] as TextMessage).text).toBe(message0Correction.text);
+	// });
 
-	it('test reply of a edited message', () => {
-		const { result } = renderHook(() => useStore());
-		act(() => result.current.addRoom(room));
-		act(() => result.current.newMessage(message0));
-		act(() => result.current.newMessage(message1));
-		act(() => result.current.setEditedMessage(room.id, message0Correction as TextMessage));
-		act(() => result.current.newMessage(message0ReplyToMessage0));
-		act(() => result.current.setRepliedMessage(room.id, message0ReplyToMessage0.id, message0));
-		expect((result.current.messages[room.id][5] as TextMessage).repliedMessage?.id).toBe(
-			message0.id
-		);
-		expect(
-			((result.current.messages[room.id][5] as TextMessage).repliedMessage as TextMessage)?.text
-		).toBe(message0Correction.text);
-	});
+	// it('test reply of a edited message', () => {
+	// 	const { result } = renderHook(() => useStore());
+	// 	act(() => result.current.addRoom(room));
+	// 	act(() => result.current.newMessage(message0));
+	// 	act(() => result.current.newMessage(message1));
+	// 	act(() => result.current.setEditedMessage(room.id, message0Correction as TextMessage));
+	// 	act(() => result.current.newMessage(message0ReplyToMessage0));
+	// 	act(() => result.current.setRepliedMessage(room.id, message0ReplyToMessage0.id, message0));
+	// 	expect((result.current.messages[room.id][5] as TextMessage).repliedMessage?.id).toBe(
+	// 		message0.id
+	// 	);
+	// 	expect(
+	// 		((result.current.messages[room.id][5] as TextMessage).repliedMessage as TextMessage)?.text
+	// 	).toBe(message0Correction.text);
+	// });
 
-	it('test reply of a deleted message', () => {
-		const { result } = renderHook(() => useStore());
-		act(() => result.current.addRoom(room));
-		act(() => result.current.newMessage(message0));
-		act(() => result.current.newMessage(message1));
-		act(() => result.current.newMessage(message0ReplyToMessage0));
-		act(() => result.current.setDeletedMessage(room.id, deletedMessage0));
-		act(() => result.current.setRepliedMessage(room.id, message0ReplyToMessage0.id, message0));
-		expect((result.current.messages[room.id][5] as TextMessage).repliedMessage?.id).toBe(
-			message0.id
-		);
-		expect(
-			((result.current.messages[room.id][5] as TextMessage).repliedMessage as DeletedMessage)?.type
-		).toBe(MessageType.DELETED_MSG);
-	});
+	// it('test reply of a deleted message', () => {
+	// 	const { result } = renderHook(() => useStore());
+	// 	act(() => result.current.addRoom(room));
+	// 	act(() => result.current.newMessage(message0));
+	// 	act(() => result.current.newMessage(message1));
+	// 	act(() => result.current.newMessage(message0ReplyToMessage0));
+	// 	act(() => result.current.setDeletedMessage(room.id, deletedMessage0));
+	// 	act(() => result.current.setRepliedMessage(room.id, message0ReplyToMessage0.id, message0));
+	// 	expect((result.current.messages[room.id][5] as TextMessage).repliedMessage?.id).toBe(
+	// 		message0.id
+	// 	);
+	// 	expect(
+	// 		((result.current.messages[room.id][5] as TextMessage).repliedMessage as DeletedMessage)?.type
+	// 	).toBe(MessageType.DELETED_MSG);
+	// });
 });

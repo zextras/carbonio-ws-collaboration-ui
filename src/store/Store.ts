@@ -9,11 +9,11 @@ import { devtools } from 'zustand/middleware';
 
 import { useActiveConversationsSlice } from './slices/ActiveConversationsSlice';
 import { useConnectionsStoreSlice } from './slices/ConnectionStoreSlice';
+import { useFasteningMessagesSlice } from './slices/FasteningMessagesSlice';
 import { useMarkersStoreSlice } from './slices/MarkersStoreSlice';
 import { useMessagesStoreSlice } from './slices/MessagesStoreSlice';
 import { useRoomsStoreSlice } from './slices/RoomsStoreSlice';
 import { useSessionStoreSlice } from './slices/SessionStoreSlice';
-import { useTemporaryMessagesSlice } from './slices/TemporaryMessagesSlice';
 import { useUnreadsCountStoreSlice } from './slices/UnreadsCounterStoreSlice';
 import { useUsersStoreSlice } from './slices/UsersStoreSlice';
 import { RootStore } from '../types/store/StoreTypes';
@@ -29,9 +29,9 @@ const useStore = create<RootStore>(
 			...useActiveConversationsSlice(set),
 			...useConnectionsStoreSlice(set),
 			...useUnreadsCountStoreSlice(set),
-			...useTemporaryMessagesSlice(set)
+			...useFasteningMessagesSlice(set)
 		}),
-		{ name: 'carbonio-chats-ui' }
+		{ name: 'carbonio-ws-collaboration-ui' }
 	)
 );
 
