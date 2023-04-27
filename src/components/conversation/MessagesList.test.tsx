@@ -6,12 +6,17 @@
 
 import { screen } from '@testing-library/react';
 import { act, renderHook } from '@testing-library/react-hooks';
+import { size } from 'lodash';
 import React from 'react';
 import { setup, triggerObserver } from 'test-utils';
 
 import MessagesList from './MessagesList';
 import useStore from '../../store/Store';
-import { createMockRoom, createMockTextMessage } from '../../tests/createMock';
+import {
+	createMockMessageFastening,
+	createMockRoom,
+	createMockTextMessage
+} from '../../tests/createMock';
 import { RoomBe, RoomType } from '../../types/network/models/roomBeTypes';
 import { MarkerStatus } from '../../types/store/MarkersTypes';
 import {
@@ -211,152 +216,156 @@ describe('render list of messages with history loader visible for first time ope
 		expect(anchorElement.nodeName).toBe('A');
 	});
 
-	// test('Display message bubble deleted on MessageList', () => {
-	// 	const mockedRoom: RoomBe = createMockRoom({ id: 'roomTest' });
-	// 	const mockedTextMessage = createMockTextMessage({
-	// 		id: 'idSimpleTextMessage',
-	// 		roomId: mockedRoom.id,
-	// 		text: 'Hello guys!'
-	// 	});
-	// 	const mockedDeletedMessage = createMockDeletedMessage({
-	// 		id: 'idSimpleTextMessage',
-	// 		roomId: mockedRoom.id
-	// 	});
-	// 	const { result } = renderHook(() => useStore());
-	// 	act(() => result.current.addRoom(mockedRoom));
-	// 	act(() => result.current.newMessage(mockedTextMessage));
-	// 	setup(<MessagesList roomId={mockedRoom.id} />);
-	// 	const messageBubble = screen.getByText('Hello guys!');
-	// 	expect(messageBubble).toBeInTheDocument();
-	// 	act(() => result.current.setDeletedMessage(mockedRoom.id, mockedDeletedMessage));
-	// 	const deletedMessage = screen.getByText(/Deleted message/i);
-	// 	expect(deletedMessage).toBeInTheDocument();
-	// });
+	test('Display message bubble deleted on MessageList', () => {
+		const { result } = renderHook(() => useStore());
+		const mockedRoom: RoomBe = createMockRoom();
+		act(() => result.current.addRoom(mockedRoom));
 
-	// test('Display message bubble edited on MessageList', () => {
-	// 	const mockedRoom: RoomBe = createMockRoom({ id: 'roomTest' });
-	// 	const mockedTextMessage = createMockTextMessage({
-	// 		id: 'idSimpleTextMessage',
-	// 		roomId: mockedRoom.id,
-	// 		text: 'Hello guys!'
-	// 	});
-	// 	const mockedEditedTextMessage = createMockTextMessage({
-	// 		id: 'idSimpleTextMessage',
-	// 		roomId: mockedRoom.id,
-	// 		text: 'Hello guys! Sorry for the delay',
-	// 		edited: true
-	// 	});
-	// 	const { result } = renderHook(() => useStore());
-	// 	act(() => result.current.addRoom(mockedRoom));
-	// 	act(() => result.current.newMessage(mockedTextMessage));
-	// 	setup(<MessagesList roomId={mockedRoom.id} />);
-	// 	const messageBubble = screen.getByText('Hello guys!');
-	// 	expect(messageBubble).toBeInTheDocument();
-	// 	act(() =>
-	// 		result.current.setEditedMessage(mockedRoom.id, mockedEditedTextMessage as TextMessage)
-	// 	);
-	// 	const messageEditedBubble = screen.getByText('Hello guys! Sorry for the delay');
-	// 	expect(messageEditedBubble).toBeInTheDocument();
-	// 	const editedLabel = screen.getByText(/edited/i);
-	// 	expect(editedLabel).toBeInTheDocument();
-	// });
-	//
-	// test('Display reply message bubble on MessageList', () => {
-	// 	const mockedRoom: RoomBe = createMockRoom({ id: 'roomTest' });
-	// 	const mockedTextMessage = createMockTextMessage({
-	// 		id: 'idSimpleTextMessage',
-	// 		roomId: mockedRoom.id,
-	// 		text: 'Hello guys!'
-	// 	});
-	// 	const mockedReplyTextMessage = createMockTextMessage({
-	// 		id: 'idReplyTextMessage',
-	// 		roomId: mockedRoom.id,
-	// 		text: 'Hi David!',
-	// 		replyTo: 'idSimpleTextMessage',
-	// 		repliedMessage: mockedTextMessage
-	// 	});
-	// 	const { result } = renderHook(() => useStore());
-	// 	act(() => result.current.addRoom(mockedRoom));
-	// 	act(() => result.current.newMessage(mockedTextMessage));
-	// 	act(() => result.current.newMessage(mockedReplyTextMessage));
-	// 	setup(<MessagesList roomId={mockedRoom.id} />);
-	// 	const messageBubble = screen.getAllByText('Hello guys!');
-	// 	expect(messageBubble.length).toBe(2);
-	// 	const replyMessageBubble = screen.getByText('Hi David!');
-	// 	expect(replyMessageBubble).toBeInTheDocument();
-	// 	const replyView = screen.getByTestId(`repliedView-${mockedTextMessage.id}`);
-	// 	expect(replyView).toBeInTheDocument();
-	// });
-	//
-	// test('Display a reply of a deleted message', () => {
-	// 	const mockedRoom: RoomBe = createMockRoom({ id: 'roomTest' });
-	// 	const mockedTextMessage = createMockTextMessage({
-	// 		id: 'idSimpleTextMessage',
-	// 		roomId: mockedRoom.id,
-	// 		text: 'Hello guys!'
-	// 	});
-	// 	const mockedEditedTextMessage = createMockTextMessage({
-	// 		id: 'idSimpleTextMessage',
-	// 		roomId: mockedRoom.id,
-	// 		text: 'Hello guys! Sorry for the delay',
-	// 		edited: true
-	// 	});
-	// 	const mockedReplyTextMessage = createMockTextMessage({
-	// 		id: 'idReplyTextMessage',
-	// 		roomId: mockedRoom.id,
-	// 		text: 'Hi David!',
-	// 		replyTo: 'idSimpleTextMessage',
-	// 		repliedMessage: mockedEditedTextMessage
-	// 	});
-	// 	const { result } = renderHook(() => useStore());
-	// 	act(() => result.current.addRoom(mockedRoom));
-	// 	act(() => result.current.newMessage(mockedTextMessage));
-	// 	act(() =>
-	// 		result.current.setEditedMessage(mockedRoom.id, mockedEditedTextMessage as TextMessage)
-	// 	);
-	// 	act(() => result.current.newMessage(mockedReplyTextMessage));
-	// 	setup(<MessagesList roomId={mockedRoom.id} />);
-	// 	const messagesWithSameText = screen.getAllByText('Hello guys! Sorry for the delay');
-	// 	expect(messagesWithSameText.length).toBe(2);
-	// 	const editedLabel = screen.getAllByText(/edited/i);
-	// 	expect(editedLabel.length).toBe(2);
-	// 	const replyView = screen.getByTestId(`repliedView-${mockedTextMessage.id}`);
-	// 	expect(replyView).toBeInTheDocument();
-	// 	const replyMessageBubble = screen.getByText('Hi David!');
-	// 	expect(replyMessageBubble).toBeInTheDocument();
-	// });
-	//
-	// test('Display a reply of an edited message', () => {
-	// 	const mockedRoom: RoomBe = createMockRoom({ id: 'roomTest' });
-	// 	const mockedTextMessage = createMockTextMessage({
-	// 		id: 'idSimpleTextMessage',
-	// 		roomId: mockedRoom.id,
-	// 		text: 'Hello guys!'
-	// 	});
-	// 	const mockedDeletedMessage = createMockDeletedMessage({
-	// 		id: 'idSimpleTextMessage',
-	// 		roomId: mockedRoom.id
-	// 	});
-	// 	const mockedReplyMessage = createMockTextMessage({
-	// 		id: 'idReplyTextMessage',
-	// 		roomId: mockedRoom.id,
-	// 		text: 'Hi David!',
-	// 		replyTo: 'idSimpleTextMessage',
-	// 		repliedMessage: mockedTextMessage
-	// 	});
-	// 	const { result } = renderHook(() => useStore());
-	// 	act(() => result.current.addRoom(mockedRoom));
-	// 	act(() => result.current.newMessage(mockedTextMessage));
-	// 	act(() => result.current.newMessage(mockedReplyMessage));
-	// 	act(() => result.current.setDeletedMessage(mockedRoom.id, mockedDeletedMessage));
-	// 	setup(<MessagesList roomId={mockedRoom.id} />);
-	// 	const editedLabel = screen.getAllByText(/deleted/i);
-	// 	expect(editedLabel.length).toBe(2);
-	// 	const replyView = screen.getByTestId(`repliedView-${mockedTextMessage.id}`);
-	// 	expect(replyView).toBeInTheDocument();
-	// 	const replyMessageBubble = screen.getByText('Hi David!');
-	// 	expect(replyMessageBubble).toBeInTheDocument();
-	// });
+		// Add text message to store
+		const mockedTextMessage = createMockTextMessage({
+			roomId: mockedRoom.id,
+			text: 'Hello guys!'
+		});
+		act(() => result.current.newMessage(mockedTextMessage));
+
+		// Delete text message
+		const mockedDeletedMessage = createMockMessageFastening({
+			roomId: mockedRoom.id,
+			action: 'delete',
+			originalStanzaId: mockedTextMessage.stanzaId
+		});
+		act(() => result.current.addFastening(mockedDeletedMessage));
+
+		setup(<MessagesList roomId={mockedRoom.id} />);
+
+		const deletedMessage = screen.getByText(/Deleted message/i);
+		expect(deletedMessage).toBeInTheDocument();
+	});
+
+	test('Display edited message bubble on MessageList', () => {
+		const { result } = renderHook(() => useStore());
+		const mockedRoom: RoomBe = createMockRoom();
+		act(() => result.current.addRoom(mockedRoom));
+
+		// Add text message to store
+		const mockedTextMessage = createMockTextMessage({
+			roomId: mockedRoom.id,
+			text: 'Hello guys!'
+		});
+		act(() => result.current.newMessage(mockedTextMessage));
+
+		// Delete text message
+		const mockedDeletedMessage = createMockMessageFastening({
+			roomId: mockedRoom.id,
+			action: 'edit',
+			originalStanzaId: mockedTextMessage.stanzaId,
+			value: 'Hello guys! I am edited message'
+		});
+		act(() => result.current.addFastening(mockedDeletedMessage));
+
+		setup(<MessagesList roomId={mockedRoom.id} />);
+
+		const deletedMessage = screen.getByText(/Hello guys! I am edited message/i);
+		expect(deletedMessage).toBeInTheDocument();
+	});
+
+	test('Display reply message bubble on MessageList', () => {
+		const mockedRoom: RoomBe = createMockRoom({ id: 'roomTest' });
+		const mockedTextMessage = createMockTextMessage({
+			id: 'idSimpleTextMessage',
+			roomId: mockedRoom.id,
+			text: 'Hello guys!'
+		});
+		const mockedReplyTextMessage = createMockTextMessage({
+			id: 'idReplyTextMessage',
+			roomId: mockedRoom.id,
+			text: 'Hi David!',
+			replyTo: 'idSimpleTextMessage',
+			repliedMessage: mockedTextMessage
+		});
+		const { result } = renderHook(() => useStore());
+		act(() => result.current.addRoom(mockedRoom));
+		act(() => result.current.newMessage(mockedTextMessage));
+		act(() => result.current.newMessage(mockedReplyTextMessage));
+		setup(<MessagesList roomId={mockedRoom.id} />);
+		const messageBubble = screen.getAllByText('Hello guys!');
+		expect(messageBubble.length).toBe(2);
+		const replyMessageBubble = screen.getByText('Hi David!');
+		expect(replyMessageBubble).toBeInTheDocument();
+		const replyView = screen.getByTestId(`repliedView-${mockedTextMessage.id}`);
+		expect(replyView).toBeInTheDocument();
+	});
+
+	test('Display a reply of a deleted message', () => {
+		const { result } = renderHook(() => useStore());
+		const mockedRoom: RoomBe = createMockRoom();
+		act(() => result.current.addRoom(mockedRoom));
+
+		// Add text message to store
+		const mockedTextMessage = createMockTextMessage({
+			roomId: mockedRoom.id,
+			text: 'Hello guys!'
+		});
+		act(() => result.current.newMessage(mockedTextMessage));
+
+		// Reply to text message
+		const mockedReplyTextMessage = createMockTextMessage({
+			id: 'idReplyTextMessage',
+			roomId: mockedRoom.id,
+			text: 'Hi!',
+			replyTo: mockedTextMessage.id
+		});
+		act(() => result.current.newMessage(mockedReplyTextMessage));
+
+		// Delete first text message
+		const mockedDeletedMessage = createMockMessageFastening({
+			roomId: mockedRoom.id,
+			action: 'delete',
+			originalStanzaId: mockedTextMessage.stanzaId
+		});
+		act(() => result.current.addFastening(mockedDeletedMessage));
+
+		setup(<MessagesList roomId={mockedRoom.id} />);
+
+		const deletedMessage = screen.getAllByText(/Deleted message/i);
+		expect(size(deletedMessage)).toBe(2);
+	});
+
+	test('Display a reply of an edited message', () => {
+		const { result } = renderHook(() => useStore());
+		const mockedRoom: RoomBe = createMockRoom();
+		act(() => result.current.addRoom(mockedRoom));
+
+		// Add text message to store
+		const mockedTextMessage = createMockTextMessage({
+			roomId: mockedRoom.id,
+			text: 'Hello guys!'
+		});
+		act(() => result.current.newMessage(mockedTextMessage));
+
+		// Edit text message
+		const mockedDeletedMessage = createMockMessageFastening({
+			roomId: mockedRoom.id,
+			action: 'edit',
+			originalStanzaId: mockedTextMessage.stanzaId,
+			value: 'Hello guys! I am edited message'
+		});
+		act(() => result.current.addFastening(mockedDeletedMessage));
+
+		// Reply to text message
+		const mockedReplyTextMessage = createMockTextMessage({
+			id: 'idReplyTextMessage',
+			roomId: mockedRoom.id,
+			text: 'Hi!',
+			replyTo: mockedTextMessage.id
+		});
+		act(() => result.current.newMessage(mockedReplyTextMessage));
+
+		setup(<MessagesList roomId={mockedRoom.id} />);
+
+		const deletedMessage = screen.getAllByText(/Hello guys! I am edited message/i);
+		expect(size(deletedMessage)).toBe(2);
+	});
 
 	test('Configuration message is visible', async () => {
 		const { result } = renderHook(() => useStore());

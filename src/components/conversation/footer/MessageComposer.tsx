@@ -87,8 +87,9 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 	const unsetFilesToAttach = useStore((store) => store.unsetFilesToAttach);
 	const unreadMessagesCount = useStore((store) => getRoomUnreadsSelector(store, roomId));
 	const filesToUploadArray = useStore((store) => getFilesToUploadArray(store, roomId));
-	const messageReference = useMessage(roomId, referenceMessage?.messageId || '');
 	const setFilesToAttach = useStore((store) => store.setFilesToAttach);
+
+	const completeReferenceMessage = useMessage(roomId, referenceMessage?.messageId || '');
 
 	const [listAbortController, setListAbortController] = useState<AbortController[]>([]);
 	const [textMessage, setTextMessage] = useState('');
@@ -212,7 +213,12 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 				})
 				.catch(() => console.log('error'));
 		} else {
-			if (referenceMessage && referenceMessage.roomId === roomId) {
+			if (
+				referenceMessage &&
+				completeReferenceMessage &&
+				completeReferenceMessage.type === MessageType.TEXT_MSG &&
+				!completeReferenceMessage.deleted
+			) {
 				switch (referenceMessage.actionType) {
 					case messageActionType.REPLY: {
 						xmppClient.sendChatMessageReply(
@@ -224,11 +230,8 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 						break;
 					}
 					case messageActionType.EDIT: {
-						if (
-							messageReference?.type === MessageType.TEXT_MSG &&
-							!messageReference?.deleted &&
-							messageReference?.text !== message
-						) {
+						// Avoid to send correction if text doesn't change
+						if (completeReferenceMessage.text !== message) {
 							xmppClient.sendChatMessageEdit(roomId, message, referenceMessage.stanzaId);
 						}
 						break;
@@ -255,7 +258,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 		textMessage,
 		timeoutRef,
 		referenceMessage,
-		messageReference,
+		completeReferenceMessage,
 		filesToUploadArray,
 		addDescriptionToFileToAttach
 	]);
@@ -505,7 +508,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 					handleOnPaste={handlePaste}
 					isDisabled={isDisabledWhileAttachingFile}
 				/>
-				{!messageReference && !isUploading && !filesToUploadArray && (
+				{!completeReferenceMessage && !isUploading && !filesToUploadArray && (
 					<AttachmentSelector roomId={roomId} />
 				)}
 				{isUploading && (

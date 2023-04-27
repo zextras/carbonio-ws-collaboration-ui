@@ -44,21 +44,22 @@ export function decodeXMPPMessageStanza(messageStanza: Element, optional?: Optio
 		// Message Fastening for a delete message
 		const retracted = getTagElement(fasteningElement, 'retract');
 		if (retracted) {
-			return {
+			const message: MessageFastening = {
 				id: messageId,
 				type: MessageType.FASTENING,
 				action: 'delete',
 				roomId,
 				date: messageDate,
 				originalStanzaId,
-			} as MessageFastening;
+			};
+			return message;
 		}
 
 		// Message Fastening for an edited message
 		const edited = getTagElement(fasteningElement, 'edit');
 		if (edited) {
 			const body = getTagElement(messageStanza, 'body');
-			return {
+			const message: MessageFastening = {
 				id: messageId,
 				type: MessageType.FASTENING,
 				action: 'edit',
@@ -66,7 +67,8 @@ export function decodeXMPPMessageStanza(messageStanza: Element, optional?: Optio
 				date: messageDate,
 				originalStanzaId,
 				value: decodeURIComponent(decode(body?.textContent || ''))
-			} as MessageFastening;
+			};
+			return message;
 		}
 	}
 

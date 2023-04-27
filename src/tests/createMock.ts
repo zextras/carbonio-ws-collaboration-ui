@@ -12,13 +12,16 @@ import {
 	AffiliationMessage,
 	ConfigurationMessage,
 	DateMessage,
+	MessageFastening,
 	MessageType,
 	TextMessage
 } from '../types/store/MessageTypes';
 import { RoomType } from '../types/store/RoomTypes';
 import { CapabilityList } from '../types/store/SessionTypes';
 
-export const createMockRoom = (fields?: Record<string, any>): RoomBe => ({
+type GenericFieldsType = Record<string, string | boolean | number | object | object[]>;
+
+export const createMockRoom = (fields?: GenericFieldsType): RoomBe => ({
 	id: 'id',
 	name: 'name',
 	description: 'description',
@@ -33,7 +36,7 @@ export const createMockRoom = (fields?: Record<string, any>): RoomBe => ({
 	...fields
 });
 
-export const createMockTextMessage = (fields?: Record<string, any>): TextMessage => ({
+export const createMockTextMessage = (fields?: GenericFieldsType): TextMessage => ({
 	id: 'id',
 	roomId: 'roomId',
 	date: 1661441294393,
@@ -50,7 +53,7 @@ export const createMockTextMessage = (fields?: Record<string, any>): TextMessage
 	...fields
 });
 
-export const createMockAffiliationMessage = (fields?: Record<string, any>): AffiliationMessage => ({
+export const createMockAffiliationMessage = (fields?: GenericFieldsType): AffiliationMessage => ({
 	id: 'id',
 	roomId: 'roomId',
 	date: 1661441294393,
@@ -61,7 +64,7 @@ export const createMockAffiliationMessage = (fields?: Record<string, any>): Affi
 });
 
 export const createMockConfigurationMessage = (
-	fields?: Record<string, any>
+	fields?: GenericFieldsType
 ): ConfigurationMessage => ({
 	id: 'id',
 	roomId: 'roomId',
@@ -72,7 +75,7 @@ export const createMockConfigurationMessage = (
 	from: 'Wrong',
 	...fields
 });
-export const createMockDateMessage = (fields?: Record<string, any>): DateMessage => ({
+export const createMockDateMessage = (fields?: GenericFieldsType): DateMessage => ({
 	id: 'id',
 	roomId: 'roomId',
 	date: 1661441294393,
@@ -80,13 +83,23 @@ export const createMockDateMessage = (fields?: Record<string, any>): DateMessage
 	...fields
 });
 
-export const createMockMember = (fields?: Record<string, any>): MemberBe => ({
+export const createMockMessageFastening = (fields?: GenericFieldsType): MessageFastening => ({
+	id: 'id',
+	roomId: 'roomId',
+	date: 1661441294393,
+	type: MessageType.FASTENING,
+	action: 'delete',
+	originalStanzaId: 'originalStanzaId',
+	...fields
+});
+
+export const createMockMember = (fields?: GenericFieldsType): MemberBe => ({
 	userId: 'userId',
 	owner: false,
 	...fields
 });
 
-export const createMockMarker = (fields?: Record<string, any>): Marker => ({
+export const createMockMarker = (fields?: GenericFieldsType): Marker => ({
 	from: 'from',
 	messageId: 'messageId',
 	markerDate: 1662541394393,
@@ -94,7 +107,7 @@ export const createMockMarker = (fields?: Record<string, any>): Marker => ({
 	...fields
 });
 
-export const createMockCapabilityList = (fields?: Record<string, any>): CapabilityList => ({
+export const createMockCapabilityList = (fields?: GenericFieldsType): CapabilityList => ({
 	canSeeMessageReads: true,
 	canSeeUsersPresence: true,
 	canVideoCall: true,
@@ -108,7 +121,7 @@ export const createMockCapabilityList = (fields?: Record<string, any>): Capabili
 	...fields
 });
 
-export const createMockUser = (fields?: Record<string, any>): UserBe => ({
+export const createMockUser = (fields?: GenericFieldsType): UserBe => ({
 	id: 'id',
 	email: 'user@user.com',
 	name: 'Name',
@@ -123,7 +136,7 @@ export const pdfFile = new File(['doc'], 'doc.pdf', {
 	type: 'application/pdf'
 });
 
-export const createMockFile = (fields?: Record<string, any>): File => {
+export const createMockFile = (fields?: { name: string; options?: GenericFieldsType }): File => {
 	const newFile = fields
 		? new File(['lotsOfBite'], fields.name, { ...fields.options })
 		: new File(['sunrise'], 'sunrise.png', {
@@ -132,7 +145,7 @@ export const createMockFile = (fields?: Record<string, any>): File => {
 	return newFile;
 };
 
-export const createMockFileToUpload = (fields?: Record<string, any>): FileToUpload => ({
+export const createMockFileToUpload = (fields?: GenericFieldsType): FileToUpload => ({
 	fileId: 'genericImageId',
 	file: imageFile,
 	localUrl: 'localhost/generic/url',
