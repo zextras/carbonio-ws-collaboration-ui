@@ -215,19 +215,9 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 				const messageWithAResponse = find(
 					draft.messages[roomId],
 					(message) => message.id === replyMessageId
-				);
-				if (messageWithAResponse && messageWithAResponse.type === MessageType.TEXT_MSG) {
-					const referenceMessageOnHistory = find(
-						draft.messages[roomId],
-						(message) => message.id === messageSubjectOfReply.id
-					);
-					// Check if message reference is already loaded on local history.
-					// TODO fix better this check
-					if (referenceMessageOnHistory) {
-						messageWithAResponse.repliedMessage = referenceMessageOnHistory as TextMessage;
-					} else {
-						messageWithAResponse.repliedMessage = messageSubjectOfReply;
-					}
+				) as TextMessage;
+				if (messageWithAResponse) {
+					messageWithAResponse.repliedMessage = messageSubjectOfReply;
 				}
 			}),
 			false,

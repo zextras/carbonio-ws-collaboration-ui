@@ -12,7 +12,6 @@ import {
 	AffiliationMessage,
 	ConfigurationMessage,
 	DateMessage,
-	DeletedMessage,
 	MessageType,
 	TextMessage
 } from '../types/store/MessageTypes';
@@ -48,15 +47,6 @@ export const createMockTextMessage = (fields?: Record<string, any>): TextMessage
 	repliedMessage: undefined,
 	forwarded: undefined,
 	attachment: undefined,
-	...fields
-});
-
-export const createMockDeletedMessage = (fields?: Record<string, any>): DeletedMessage => ({
-	id: 'deleted-id',
-	roomId: 'roomId',
-	date: 1661441294393,
-	type: MessageType.DELETED_MSG,
-	from: 'userId',
 	...fields
 });
 

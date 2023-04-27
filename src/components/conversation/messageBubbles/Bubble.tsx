@@ -127,7 +127,7 @@ const Bubble: FC<BubbleProps> = ({
 			)}
 			{message.repliedMessage && (
 				<RepliedTextMessageSectionView
-					repliedMessage={message.repliedMessage}
+					repliedMessageRef={message.repliedMessage}
 					isMyMessage={isMyMessage}
 				/>
 			)}

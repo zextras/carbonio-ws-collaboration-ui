@@ -12,10 +12,10 @@ import styled from 'styled-components';
 
 import { getPrefTimezoneSelector } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
-import { DeletedMessage } from '../../../types/store/MessageTypes';
+import { TextMessage } from '../../../types/store/MessageTypes';
 
 type DeletedBubbleProps = {
-	message: DeletedMessage;
+	message: TextMessage;
 	refEl: React.RefObject<HTMLElement>;
 };
 

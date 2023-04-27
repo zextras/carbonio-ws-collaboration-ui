@@ -14,7 +14,6 @@ import {
 	createMockAffiliationMessage,
 	createMockConfigurationMessage,
 	createMockDateMessage,
-	createMockDeletedMessage,
 	createMockRoom,
 	createMockTextMessage
 } from '../../../tests/createMock';
@@ -80,7 +79,7 @@ describe('Message Factory', () => {
 
 	test('Render DeletedMessage', () => {
 		const room = createMockRoom();
-		const message = createMockDeletedMessage({ roomId: room.id });
+		const message = createMockTextMessage({ roomId: room.id, deleted: true });
 		const store = useStore.getState();
 		store.addRoom(room);
 		store.newMessage(message);
@@ -100,7 +99,7 @@ describe('Message Factory', () => {
 
 	test('Render unread DeletedMessage', () => {
 		const room = createMockRoom();
-		const message = createMockDeletedMessage({ roomId: room.id });
+		const message = createMockTextMessage({ roomId: room.id, deleted: true });
 		const store = useStore.getState();
 		store.addRoom(room);
 		store.newMessage(message);
