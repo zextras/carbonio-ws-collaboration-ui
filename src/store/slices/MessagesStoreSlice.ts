@@ -6,7 +6,7 @@
  */
 
 import produce from 'immer';
-import { concat, find, forEach, map, orderBy, sortedUniqBy } from 'lodash';
+import { concat, find, forEach, map, orderBy, uniqBy } from 'lodash';
 
 import { UsersApi } from '../../network';
 import { calcReads } from '../../network/xmpp/utility/decodeXMPPMessageStanza';
@@ -158,8 +158,8 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 				draft.messages[roomId] = concat(historyWithDates, draft.messages[roomId]);
 				// message list has to be ordered by date
 				draft.messages[roomId] = orderBy(draft.messages[roomId], ['date'], ['asc']);
-				// the second message has to be a creation one if the conversation is a group one and the history has never been cleared
 
+				// the second message has to be a creation one if the conversation is a group one and the history has never been cleared
 				if (
 					draft.activeConversations[roomId] &&
 					draft.activeConversations[roomId].isHistoryFullyLoaded &&
@@ -177,12 +177,7 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 					draft.messages[roomId].splice(1, 0, creationMsg);
 				}
 				// message list can't have duplicates, so it's sorted by id
-				draft.messages[roomId] = sortedUniqBy(draft.messages[roomId], 'id');
-
-				// checks if creation message is duplicated and removes it
-				if (draft.messages[roomId][0].id === draft.messages[roomId][2].id) {
-					draft.messages[roomId].splice(0, 2);
-				}
+				draft.messages[roomId] = uniqBy(draft.messages[roomId], 'id');
 			}),
 			false,
 			'MESSAGES/UPDATE_HISTORY'
