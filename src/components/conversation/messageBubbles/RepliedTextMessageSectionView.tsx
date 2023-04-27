@@ -130,7 +130,7 @@ const RepliedTextMessageSectionView: FC<RepliedTextMessageSectionViewProps> = ({
 	}, [repliedMessage.id, replyUserInfo, darkModeSettings, sessionId]);
 
 	const textToShow = useMemo(() => {
-		if (repliedMessage.type === MessageType.TEXT_MSG && !repliedMessage.deleted) {
+		if (repliedMessage.type === MessageType.TEXT_MSG) {
 			if (repliedMessage.attachment) {
 				return repliedMessage.text !== '' ? repliedMessage.text : repliedMessage.attachment.name;
 			}

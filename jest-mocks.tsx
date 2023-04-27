@@ -34,7 +34,7 @@ jest.mock('@zextras/carbonio-shell-ui', () => ({
 	Spinner: (): ReactElement => <div>spinner</div>,
 	getNotificationManager: (): INotificationManager => ({
 		showPopup: () => null,
-		notify: () => mockNotify(),
+		notify: mockNotify,
 		multipleNotify: () => null,
 		playSound: () => null
 	}),

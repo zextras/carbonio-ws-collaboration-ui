@@ -52,7 +52,7 @@ const displayMessageBrowserNotification = (message: TextMessage): void => {
 		const textMessage =
 			room.type === RoomType.ONE_TO_ONE
 				? textToDisplay()
-				: `${sender?.name?.split(' ')[0]}: ${textToDisplay()}`;
+				: `${(sender?.name || sender?.email)?.split(' ')[0]}: ${textToDisplay()}`;
 
 		getNotificationManager().notify({
 			showPopup: true,
