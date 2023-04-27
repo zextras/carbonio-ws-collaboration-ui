@@ -216,8 +216,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 			if (
 				referenceMessage &&
 				completeReferenceMessage &&
-				completeReferenceMessage.type === MessageType.TEXT_MSG &&
-				!completeReferenceMessage.deleted
+				completeReferenceMessage.type === MessageType.TEXT_MSG
 			) {
 				switch (referenceMessage.actionType) {
 					case messageActionType.REPLY: {
