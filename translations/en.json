@@ -97,6 +97,16 @@
         "notificationsActivatedForThisChat": "Notifications activated for this chat",
         "notificationsMutedForThisChat": "Notifications muted for this chat"
     },
+    "meeting": {
+        "collapseParticipantsMeetingTooltip": "Collapse active participants list",
+        "expandParticipantsListTooltip": "Expand active participants list",
+        "joinMeeting": "Join meeting",
+        "moreParticipantsListTitle": "meeting's participants",
+        "oneParticipantListTitle": "One meeting's participant",
+        "ongoingGroupMeetingTooltip": "You are already participating in this meeting",
+        "ongoingOneToOneMeetingTooltip": "You already have an active meeting with {{name}}",
+        "startMeeting": "Start meeting"
+    },
     "message": {
         "deletedMessage": "Deleted message",
         "draft": "draft",

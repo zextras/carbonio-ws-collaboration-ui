@@ -17,9 +17,10 @@ import { RoomType } from '../../../../types/store/RoomTypes';
 
 type GoToPrivateChatProps = {
 	memberId: string;
+	isParticipantMeeting?: boolean;
 };
 
-const GoToPrivateChatAction: FC<GoToPrivateChatProps> = ({ memberId }) => {
+const GoToPrivateChatAction: FC<GoToPrivateChatProps> = ({ memberId, isParticipantMeeting }) => {
 	const [t] = useTranslation();
 	const goToPrivateChatLabel: string = t('tooltip.goToPrivateChat', 'Go to private chat');
 
@@ -54,7 +55,10 @@ const GoToPrivateChatAction: FC<GoToPrivateChatProps> = ({ memberId }) => {
 		<Tooltip label={goToPrivateChatLabel}>
 			<IconButton
 				iconColor="secondary"
-				size="extralarge"
+				customSize={{
+					iconSize: '1.25rem',
+					paddingSize: isParticipantMeeting ? '0.438rem' : '0.75rem'
+				}}
 				icon={'MessageCircleOutline'}
 				onClick={goToUserRoom}
 				data-testid="go_to_private_chat"
