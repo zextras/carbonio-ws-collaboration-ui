@@ -156,10 +156,15 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 	): Promise<AddRoomAttachmentResponse | void> => {
 		const fileName = file.file.name;
 		const { signal } = controller;
+		// Send as reply only the first file of the array
+		const sendAsReply = filesToUploadArray && file.fileId === filesToUploadArray[0].fileId;
 		return RoomsApi.addRoomAttachment(
 			roomId,
 			file.file,
-			file.description ? file.description : undefined,
+			{
+				description: file.description,
+				replyId: sendAsReply ? referenceMessage?.stanzaId : undefined
+			},
 			signal
 		).catch((reason: DOMException) => {
 			if (reason.name !== 'AbortError') {
@@ -195,17 +200,19 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 			});
 
 			setIsUploading(true);
-			unsetFilesToAttach(roomId);
-			setDraftMessage(roomId, true);
-			setTextMessage('');
-			if (messageInputRef.current) messageInputRef.current.style.height = '';
-
 			setListAbortController(abortControllerList);
 			const uploadFilesInOrder = copyOfFilesToUploadArray.reduce(
 				(acc: Promise<AddRoomAttachmentResponse | void>, file, i) =>
 					acc.then(() => uploadAttachmentPromise(file, abortControllerList[i])),
 				Promise.resolve()
 			);
+
+			// Clean input composer
+			unsetFilesToAttach(roomId);
+			setDraftMessage(roomId, true);
+			setTextMessage('');
+			if (messageInputRef.current) messageInputRef.current.style.height = '';
+			if (referenceMessage) unsetReferenceMessage(roomId);
 
 			uploadFilesInOrder
 				.then(() => {
@@ -470,6 +477,14 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 		return false;
 	}, [filesToUploadArray]);
 
+	const showAttachFileButton = useMemo(
+		() =>
+			!isUploading &&
+			!filesToUploadArray &&
+			(!referenceMessage || referenceMessage.actionType === messageActionType.REPLY),
+		[filesToUploadArray, isUploading, referenceMessage]
+	);
+
 	return (
 		<Container height="fit">
 			{showEmojiPicker && (
@@ -506,9 +521,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 					handleOnPaste={handlePaste}
 					isDisabled={isDisabledWhileAttachingFile}
 				/>
-				{!messageReference && !isUploading && !filesToUploadArray && (
-					<AttachmentSelector roomId={roomId} />
-				)}
+				{showAttachFileButton && <AttachmentSelector roomId={roomId} />}
 				{isUploading && (
 					<Tooltip label={stopUploadLabel} placement="top">
 						<UploadSpinnerWrapper
