@@ -18,6 +18,7 @@ import React, {
 	useCallback,
 	useEffect,
 	/* useContext, */ useMemo,
+	useRef,
 	useState
 } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -88,11 +89,11 @@ const ConversationHeaderMeetingButton = ({
 	const joinMeeting = t('meeting.joinMeeting', 'Join meeting');
 	const expandParticipantsListTooltip = t(
 		'meeting.expandParticipantsListTooltip',
-		'Expand active participants list'
+		'Expand participants list'
 	);
 	const collapseParticipantsMeetingTooltip = t(
 		'meeting.collapseParticipantsMeetingTooltip',
-		'Collapse active participants list'
+		'Collapse participants list'
 	);
 	const ongoingOneToOneMeetingTooltip = t(
 		'meeting.ongoingOneToOneMeetingTooltip',
@@ -102,6 +103,10 @@ const ConversationHeaderMeetingButton = ({
 	const ongoingGroupMeetingTooltip = t(
 		'meeting.ongoingGroupMeetingTooltip',
 		'You are already participating in this meeting'
+	);
+	const activeMeetingTooltip = t(
+		'meeting.activeMeetingTooltip',
+		"There's an active meeting for this group"
 	);
 
 	const roomType: RoomType = useStore((store) => getRoomTypeSelector(store, roomId));
@@ -113,7 +118,14 @@ const ConversationHeaderMeetingButton = ({
 
 	const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
+	const ref = useRef<HTMLDivElement>(null);
+
 	// const createSnackbar: CreateSnackbarFn = useContext(SnackbarManagerContext);
+
+	const disableOngoingMeetingButton: boolean = useMemo(
+		() => meetingIsActive && amIParticipating,
+		[amIParticipating, meetingIsActive]
+	);
 
 	const openMeeting = useCallback(() => {
 		window.open(`external/${roomId}`);
@@ -137,14 +149,21 @@ const ConversationHeaderMeetingButton = ({
 		setIsDropdownOpen((prevState) => !prevState);
 	}, [setIsDropdownOpen]);
 
-	const disableOngoingMeetingButton: boolean = useMemo(
-		() => meetingIsActive && amIParticipating,
-		[amIParticipating, meetingIsActive]
+	const closeDropdown = useCallback(
+		(event) => {
+			if (ref.current && !ref.current.contains(event.target)) {
+				setIsDropdownOpen(false);
+			}
+		},
+		[setIsDropdownOpen, ref]
 	);
 
 	useEffect(() => {
-		setIsDropdownOpen(false);
-	}, [roomName]);
+		document.addEventListener('click', closeDropdown, true);
+		return () => {
+			document.removeEventListener('click', closeDropdown, true);
+		};
+	}, [closeDropdown, ref]);
 
 	return (
 		<Container orientation="horizontal">
@@ -187,14 +206,16 @@ const ConversationHeaderMeetingButton = ({
 					<Container width="fit" padding={{ left: '0.5rem', right: '0.5rem' }}>
 						<Container background="gray3" width="0.125rem" />
 					</Container>
-					<CustomActiveMeetingContainer width="fit">
-						<CustomVideoButton
-							iconColor="secondary"
-							icon="VideoOutline"
-							customSize={{ iconSize: '1.25rem', paddingSize: '0.125rem' }}
-						/>
-						<ActiveMeetingDot />
-					</CustomActiveMeetingContainer>
+					<Tooltip label={activeMeetingTooltip} placement="top">
+						<CustomActiveMeetingContainer width="fit">
+							<CustomVideoButton
+								iconColor="secondary"
+								icon="VideoOutline"
+								customSize={{ iconSize: '1.25rem', paddingSize: '0.125rem' }}
+							/>
+							<ActiveMeetingDot />
+						</CustomActiveMeetingContainer>
+					</Tooltip>
 					<Padding right="0.5rem" />
 					<Tooltip
 						label={
@@ -212,11 +233,13 @@ const ConversationHeaderMeetingButton = ({
 				</Container>
 			)}
 			{
-				<ActiveMeetingParticipantsDropdown
-					isDropdownOpen={isDropdownOpen}
-					setIsDropdownOpen={setIsDropdownOpen}
-					roomId={roomId}
-				/>
+				<Container ref={ref} width="fit" height="fit">
+					<ActiveMeetingParticipantsDropdown
+						isDropdownOpen={isDropdownOpen}
+						setIsDropdownOpen={setIsDropdownOpen}
+						roomId={roomId}
+					/>
+				</Container>
 			}
 		</Container>
 	);

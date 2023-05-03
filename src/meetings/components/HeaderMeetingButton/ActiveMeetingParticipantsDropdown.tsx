@@ -23,7 +23,7 @@ const CustomContainer = styled(Container)`
 	z-index: 11;
 	top: 3.5rem;
 	right: 1rem;
-	box-shadow: 0rem 0rem 0.25rem rgba(166, 166, 166, 0.5);
+	box-shadow: 0 0 0.25rem rgba(166, 166, 166, 0.5);
 	border-radius: 1rem;
 	opacity: ${({ isDropdownOpen }): string => (isDropdownOpen ? '1' : '0')};
 `;
