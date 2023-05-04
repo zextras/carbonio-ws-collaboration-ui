@@ -40,7 +40,7 @@ const ChatCreationModal = ({
 	const newGroupLabel = t('modal.creation.newGroup', 'New Group');
 	const descriptionLabel = t(
 		'modal.creation.description',
-		'Chats are one-to-one conversations that help you to stay in touch with your contacts. You can create a group by including more than two participants'
+		'Chats are one-to-one conversations that help you to stay in touch with your contacts. You can create a group by including more than two addresses'
 	);
 	const createLabel = t('action.create', 'Create');
 	const closeLabel = t('action.close', 'Close');

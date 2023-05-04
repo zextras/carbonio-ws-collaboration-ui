@@ -25,14 +25,8 @@ type ParticipantsAccordionProps = {
 
 export const ParticipantsAccordion: FC<ParticipantsAccordionProps> = ({ roomId }) => {
 	const [t] = useTranslation();
-	const oneParticipantAccordionTitle = t(
-		'participantsList.oneParticipantAccordionTitle',
-		'One Participant'
-	);
-	const moreParticipantsAccordionTitle = t(
-		'participantsList.moreParticipantsAccordionTitle',
-		`Participants`
-	);
+	const oneMemberAccordionTitle = t('participantsList.oneMemberAccordionTitle', 'One member');
+	const moreMembersAccordionTitle = t('participantsList.moreMembersAccordionTitle', `members`);
 	const numberOfMembers: number = useStore((state) => getNumbersOfRoomMembers(state, roomId));
 	const accordionStatus: boolean = useStore((state) =>
 		getParticipantsAccordionStatus(state, roomId)
@@ -46,11 +40,10 @@ export const ParticipantsAccordion: FC<ParticipantsAccordionProps> = ({ roomId }
 
 	const participantsAccordionTitle = useMemo(() => {
 		if (numberOfMembers === 1) {
-			return oneParticipantAccordionTitle;
+			return oneMemberAccordionTitle;
 		}
-		return `${numberOfMembers} ${moreParticipantsAccordionTitle}`;
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [numberOfMembers]);
+		return `${numberOfMembers} ${moreMembersAccordionTitle}`;
+	}, [moreMembersAccordionTitle, numberOfMembers, oneMemberAccordionTitle]);
 
 	const infoDetails = useMemo(() => {
 		const arrayOfActions = [

@@ -6,7 +6,7 @@
         "addNewMembers": "Add New Members",
         "addNewMembersTo": "Add new members to {{roomName}}",
         "addSingleAttachment": "Add {{counter}} attachment",
-        "clearHistory": "Clear History",
+        "clearHistory": "Clear history",
         "close": "Close",
         "copy": "Copy",
         "create": "Create",
@@ -103,10 +103,10 @@
         "edited": "edited"
     },
     "modal": {
-        "clearHistoryDescription": "You are about to clean up your conversation history, remember that this action cannot be undone. The history of other participants will not be deleted.",
+        "clearHistoryDescription": "You are about to clean up your conversation history, remember that this action cannot be undone. The history of other members will not be deleted.",
         "creation": {
             "contactList": "Select more that an address to create a group chat",
-            "description": "Chats are one-to-one conversations that help you to stay in touch with your contacts. You can create a group by including more than two participants",
+            "description": "Chats are one-to-one conversations that help you to stay in touch with your contacts. You can create a group by including more than two addresses",
             "inputPlaceholder": "Start typing or pick an address",
             "newChat": "New Chat",
             "newGroup": "New Group"
@@ -132,10 +132,10 @@
     },
     "participantsList": {
         "closeSearch": "Close search",
-        "moreParticipantsAccordionTitle": "Participants",
+        "moreMembersAccordionTitle": "members",
         "noMatch": "There are no items that match this search",
-        "oneParticipantAccordionTitle": "One Participant",
-        "searchUser": "Search Participants"
+        "oneMemberAccordionTitle": "One member",
+        "searchMembers": "Search members"
     },
     "settings": {
         "notifications": {

@@ -161,14 +161,8 @@ const RoomPictureHandler: FC<RoomPictureProps> = ({ memberId, roomType, roomId }
 	const uploadPictureLabel = t('tooltip.room.uploadPicture', 'Upload picture');
 	const updatePictureLabel = t('tooltip.room.updatePicture', 'Update picture');
 	const resetPictureLabel = t('tooltip.room.resetPicture', 'Reset picture');
-	const oneParticipantAccordionTitle = t(
-		'participantsList.oneParticipantAccordionTitle',
-		'One Participant'
-	);
-	const moreParticipantsAccordionTitle = t(
-		'participantsList.moreParticipantsAccordionTitle',
-		`Participants`
-	);
+	const oneMemberAccordionTitle = t('participantsList.oneMemberAccordionTitle', 'One member');
+	const moreMembersAccordionTitle = t('participantsList.moreMembersAccordionTitle', `members`);
 	const errorDeleteImageSnackbar = t(
 		'settings.profile.errorGenericResponse',
 		'Something went Wrong. Please Retry'
@@ -225,10 +219,10 @@ const RoomPictureHandler: FC<RoomPictureProps> = ({ memberId, roomType, roomId }
 
 	const numberOfParticipantsLabel = useMemo(() => {
 		if (numberOfMembers === 1) {
-			return oneParticipantAccordionTitle;
+			return oneMemberAccordionTitle;
 		}
-		return `${numberOfMembers} ${moreParticipantsAccordionTitle}`;
-	}, [numberOfMembers, oneParticipantAccordionTitle, moreParticipantsAccordionTitle]);
+		return `${numberOfMembers} ${moreMembersAccordionTitle}`;
+	}, [numberOfMembers, oneMemberAccordionTitle, moreMembersAccordionTitle]);
 
 	const lastSeen: string | undefined = useMemo(() => {
 		if (memberLastActivity) {

@@ -49,7 +49,7 @@ describe('Chat Creation Modal', () => {
 		const title = await screen.findByText('New Chat');
 		expect(title).toBeInTheDocument();
 		const description = await screen.findByText(
-			'Chats are one-to-one conversations that help you to stay in touch with your contacts. You can create a group by including more than two participants'
+			'Chats are one-to-one conversations that help you to stay in touch with your contacts. You can create a group by including more than two addresses'
 		);
 		expect(description).toBeInTheDocument();
 		const list = await screen.findByTestId('list_creation_modal');
