@@ -6,7 +6,11 @@
 
 import { Container, IconButton, Padding } from '@zextras/carbonio-design-system';
 import React, { ReactElement, RefObject, useCallback, useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import styled, { FlattenSimpleInterpolation } from 'styled-components';
+
+import useRouting, { PAGE_INFO_TYPE } from '../../hooks/useRouting';
+import { MeetingsApi } from '../../network';
 
 const ActionsWrapper = styled(Container)`
 	position: absolute;
@@ -26,10 +30,14 @@ type MeetingActionsProps = {
 };
 
 const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElement => {
+	const { goToInfoPage } = useRouting();
+	const { meetingId }: any = useParams();
+
 	const [isHoovering, setIsHoovering] = useState(false);
 	const [isHoverActions, setIsHoverActions] = useState(false);
-	const [allowAudio, setAllowAudio] = useState(true);
-	const [allowVideo, setAllowVideo] = useState(true);
+	const [videoStatus, setVideoStatus] = useState(false);
+	const [audioStatus, setAudioStatus] = useState(false);
+	const [shareStatus, setShareStatus] = useState(false);
 	let timeout: string | number | NodeJS.Timeout | undefined;
 
 	const handleHoverMouseMove = useCallback(
@@ -64,13 +72,41 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 		setIsHoverActions(false);
 	}, []);
 
-	const toggleAudio = useCallback(() => {
-		setAllowAudio(!allowAudio);
-	}, [allowAudio, setAllowAudio]);
+	const toggleVideoStream = useCallback(() => {
+		if (!videoStatus) {
+			MeetingsApi.openVideoStream(meetingId).then(() => setVideoStatus(!videoStatus));
+		} else {
+			MeetingsApi.closeVideoStream(meetingId).then(() => setVideoStatus(!videoStatus));
+		}
+	}, [videoStatus, meetingId]);
 
-	const toggleVideo = useCallback(() => {
-		setAllowVideo(!allowVideo);
-	}, [allowVideo, setAllowVideo]);
+	const toggleAudioStream = useCallback(() => {
+		if (!audioStatus) {
+			MeetingsApi.openAudioStream(meetingId).then(() => setAudioStatus(!audioStatus));
+		} else {
+			MeetingsApi.closeAudioStream(meetingId).then(() => setAudioStatus(!audioStatus));
+		}
+	}, [audioStatus, meetingId]);
+
+	const toggleShareStream = useCallback(() => {
+		if (!shareStatus) {
+			MeetingsApi.openScreenShareStream(meetingId).then(() => setShareStatus(!shareStatus));
+		} else {
+			MeetingsApi.closeScreenShareStream(meetingId).then(() => setShareStatus(!shareStatus));
+		}
+	}, [shareStatus, meetingId]);
+
+	const leaveMeeting = useCallback(() => {
+		MeetingsApi.leaveMeeting(meetingId)
+			.then(() => goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED))
+			.catch(() => console.log('Error on leave'));
+	}, [meetingId, goToInfoPage]);
+
+	const deleteMeeting = useCallback(() => {
+		MeetingsApi.deleteMeeting(meetingId)
+			.then(() => goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED))
+			.catch(() => console.log('Error on leave'));
+	}, [meetingId, goToInfoPage]);
 
 	useEffect(() => {
 		let elRef: React.RefObject<HTMLDivElement> | null = streamsWrapperRef;
@@ -101,8 +137,8 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 			<IconButton
 				iconColor="gray6"
 				backgroundColor="primary"
-				icon={allowAudio ? 'Mic' : 'MicOff'}
-				onClick={toggleAudio}
+				icon={audioStatus ? 'Mic' : 'MicOff'}
+				onClick={toggleAudioStream}
 				size="large"
 			/>
 			<Padding right="16px" />
@@ -110,23 +146,23 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 				iconColor="gray6"
 				backgroundColor="primary"
 				icon="Headphones"
-				onClick={toggleVideo}
+				onClick={deleteMeeting}
 				size="large"
 			/>
 			<Padding right="16px" />
 			<IconButton
 				iconColor="gray6"
 				backgroundColor="primary"
-				icon={allowVideo ? 'Video' : 'VideoOff'}
-				onClick={toggleVideo}
+				icon={videoStatus ? 'Video' : 'VideoOff'}
+				onClick={toggleVideoStream}
 				size="large"
 			/>
 			<Padding right="16px" />
 			<IconButton
 				iconColor="gray6"
 				backgroundColor="primary"
-				icon={allowVideo ? 'ScreenSharingOn' : 'ScreenSharingOff'}
-				onClick={toggleVideo}
+				icon={shareStatus ? 'ScreenSharingOn' : 'ScreenSharingOff'}
+				onClick={toggleShareStream}
 				size="large"
 			/>
 			<Padding right="16px" />
@@ -134,7 +170,7 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 				iconColor="gray6"
 				backgroundColor="primary"
 				icon="MoreVertical"
-				onClick={toggleVideo}
+				onClick={deleteMeeting}
 				size="large"
 			/>
 			<Padding right="48px" />
@@ -142,7 +178,7 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 				iconColor="gray6"
 				backgroundColor="error"
 				icon="Hangup"
-				onClick={toggleVideo}
+				onClick={leaveMeeting}
 				size="large"
 			/>
 		</ActionsWrapper>
