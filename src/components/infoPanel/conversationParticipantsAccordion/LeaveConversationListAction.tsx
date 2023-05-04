@@ -33,7 +33,7 @@ const LeaveConversationListAction: FC<LeaveConversationProps> = ({
 	const [t] = useTranslation();
 	const leaveAndDeleteLabel: string = t(
 		'tooltip.leaveAndDelete',
-		'Leave and Delete the conversation'
+		'Leave and delete the conversation'
 	);
 	const promoteSomeoneElseToModeratorLabel: string = t(
 		'tooltip.promoteSomeoneElseToModerator',

@@ -15,7 +15,7 @@ type SearchUserProps = {
 
 const SearchUserAction: FC<SearchUserProps> = ({ setFilteredInput }) => {
 	const [t] = useTranslation();
-	const searchLabel: string = t('participantsList.searchUser', 'Search Participants');
+	const searchLabel: string = t('participantsList.searchMembers', 'Search members');
 	const closeSearchTooltip: string = t('participantsList.closeSearch', 'Close search');
 	const [searchInput, setSearchInput] = useState('');
 

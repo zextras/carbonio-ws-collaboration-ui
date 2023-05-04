@@ -71,7 +71,7 @@ describe('Participants accordion', () => {
 		store.setUserInfo(user1Be);
 		store.setUserInfo(user2Be);
 		setup(<ParticipantsAccordion roomId={room.id} />);
-		const titleIsPlural = screen.getByText(/2 Participants/i);
+		const titleIsPlural = screen.getByText(/2 members/i);
 		expect(titleIsPlural).toBeInTheDocument();
 	});
 
@@ -92,7 +92,7 @@ describe('Participants accordion', () => {
 		store.addRoom(room);
 		store.setUserInfo(user1Be);
 		setup(<ParticipantsAccordion roomId={room.id} />);
-		const titleIsSingular = screen.getByText(/One Participant/i);
+		const titleIsSingular = screen.getByText(/One member/i);
 		expect(titleIsSingular).toBeInTheDocument();
 	});
 
@@ -103,7 +103,7 @@ describe('Participants accordion', () => {
 
 		// Default status: open
 		const { user } = setup(<ParticipantsAccordion roomId={room.id} />);
-		expect(screen.getByText(/Search Participants/i)).toBeVisible();
+		expect(screen.getByText(/Search members/i)).toBeVisible();
 
 		// Check store change
 		const closeAccordionButton = screen.getByTestId('icon: ChevronUp');
@@ -124,7 +124,7 @@ describe('Participants accordion', () => {
 		store.setParticipantsAccordionStatus(room.id, true);
 
 		setup(<ParticipantsAccordion roomId={room.id} />);
-		expect(screen.getByText(/Search Participants/i)).toBeVisible();
+		expect(screen.getByText(/Search members/i)).toBeVisible();
 		expect(screen.getByTestId('icon: ChevronUp')).toBeInTheDocument();
 	});
 
@@ -135,7 +135,7 @@ describe('Participants accordion', () => {
 		store.setParticipantsAccordionStatus(room.id, false);
 
 		setup(<ParticipantsAccordion roomId={room.id} />);
-		expect(screen.queryByText(/Search Participants/i)).not.toBeVisible();
+		expect(screen.queryByText(/Search members/i)).not.toBeVisible();
 		expect(screen.getByTestId('icon: ChevronDown')).toBeInTheDocument();
 	});
 });

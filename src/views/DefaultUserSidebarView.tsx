@@ -18,7 +18,7 @@ const DefaultUserSidebarView = (): ReactElement => {
 	const emptyListTitle = t('conversation.emptyListTitle', 'This list is empty');
 	const emptyListDescription = t(
 		'conversation.emptyListDescription',
-		'The conversations and groups will appear listed here'
+		'Chats and Groups will appear listed here'
 	);
 	return (
 		<Container mainAlignment="center" crossAlignment="center">
