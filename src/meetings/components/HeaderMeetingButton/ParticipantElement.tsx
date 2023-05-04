@@ -29,7 +29,7 @@ type ParticipantElementProps = {
 
 const ParticipantElement: FC<ParticipantElementProps> = ({ memberId }) => {
 	const memberName: string | undefined = useStore((store) => getUserName(store, memberId));
-	const sessionId: string | undefined = useStore((store) => getUserId(store));
+	const userId: string | undefined = useStore((store) => getUserId(store));
 	const userPictureUpdatedAt: string | undefined = useStore((state) =>
 		getUserPictureUpdatedAt(state, memberId)
 	);
@@ -44,10 +44,7 @@ const ParticipantElement: FC<ParticipantElementProps> = ({ memberId }) => {
 		}
 	}, [memberId, userPictureUpdatedAt]);
 
-	const isSessionParticipant: boolean = useMemo(
-		() => memberId === sessionId,
-		[memberId, sessionId]
-	);
+	const isSessionParticipant: boolean = useMemo(() => memberId === userId, [memberId, userId]);
 
 	const avatarElement = useMemo(
 		() =>
