@@ -19,6 +19,7 @@ export type Session = {
 	selectedRoomOneToOneGroup?: string;
 	userPrefTimeZone: string;
 	filterHasFocus: boolean;
+	customLogo?: string | false;
 };
 
 export type CapabilityList = {
