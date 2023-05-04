@@ -356,13 +356,38 @@ describe('Rooms API', () => {
 		// Send addRoomAttachments request
 		const testFile = new File([], 'file.pdf', { type: 'application/pdf' });
 		const { signal } = new AbortController();
-		await roomsApi.addRoomAttachment('roomId', testFile, 'description', signal);
+		await roomsApi.addRoomAttachment('roomId', testFile, {}, signal);
+
+		// Set appropriate headers
+		const headers = new Headers();
+		headers.append('fileName', 'ZmlsZS5wZGY='); // Base64 of 'file.pdf'
+		headers.append('mimeType', testFile.type);
+		// Check if fetch is called with the correct parameters
+		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/rooms/roomId/attachments`, {
+			method: 'POST',
+			headers,
+			body: new ArrayBuffer(0),
+			signal
+		});
+	});
+
+	test('addRoomAttachment is called correctly with optionalParams', async () => {
+		// Send addRoomAttachments request
+		const testFile = new File([], 'file.pdf', { type: 'application/pdf' });
+		const { signal } = new AbortController();
+		await roomsApi.addRoomAttachment(
+			'roomId',
+			testFile,
+			{ description: 'description', replyId: 'stanzaId' },
+			signal
+		);
 
 		// Set appropriate headers
 		const headers = new Headers();
 		headers.append('fileName', 'ZmlsZS5wZGY='); // Base64 of 'file.pdf'
 		headers.append('mimeType', testFile.type);
 		headers.append('description', 'ZGVzY3JpcHRpb24='); // Base64 of 'description'
+		headers.append('replyId', 'stanzaId');
 
 		// Check if fetch is called with the correct parameters
 		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/rooms/roomId/attachments`, {

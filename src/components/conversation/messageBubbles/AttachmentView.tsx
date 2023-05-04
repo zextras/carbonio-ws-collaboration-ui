@@ -40,10 +40,18 @@ const CustomContainer = styled(Container)`
 const CustomIconButton = styled(IconButton)`
 	background-color: rgba(255, 255, 255, 0);
 `;
+const CustomShimmerLogo = styled(Shimmer.Logo)`
+	min-width: 18.75rem;
+	width: 100%;
+	height: 12.5rem;
+`;
 
 const PreviewContainer = styled(Container)`
 	${({ isLoaded }): string => isLoaded && `background: black;`};
-	${({ previewError }): string => previewError && `border-radius: 0.25rem;`};
+	${({ previewError, theme }): string =>
+		previewError &&
+		`border-radius: 0.25rem;
+		background: ${theme.palette.gray5.regular};`};
 	position: relative;
 	min-width: 100%;
 	&:hover {
@@ -52,7 +60,7 @@ const PreviewContainer = styled(Container)`
 		}
 	}
 `;
-const AttachmentImg = styled.img`
+const AttachmentImg = styled.img<{ isPreviewLoaded: boolean }>`
 	max-height: 15.625rem;
 	max-width: 100%;
 	mask-image: linear-gradient(
@@ -69,6 +77,7 @@ const AttachmentImg = styled.img`
 			rgba(0, 0, 0, 0) 100%
 		);
 	}
+	display: ${({ isPreviewLoaded }): string => (isPreviewLoaded ? 'flex' : `none`)};
 `;
 
 const TextContainer = styled(Container)`
@@ -182,7 +191,7 @@ const AttachmentView: FC<AttachmentViewProps> = ({ attachment, from, isMyMessage
 				previewError={previewError}
 				data-testid="preview-container"
 			>
-				{!isPreviewLoaded && <Shimmer.Logo size="large" />}
+				{!isPreviewLoaded && <CustomShimmerLogo />}
 				{previewError ? (
 					<Container background="gray5" width="18.75rem" height="9.375rem" maxWidth="100%">
 						<Icon size="large" icon="Image" color="gray2" />
@@ -195,6 +204,7 @@ const AttachmentView: FC<AttachmentViewProps> = ({ attachment, from, isMyMessage
 							onLoad={setLoaded}
 							onError={setError}
 							data-testid="attachmentImg"
+							isPreviewLoaded={isPreviewLoaded}
 						/>
 					</>
 				)}
@@ -216,7 +226,7 @@ const AttachmentView: FC<AttachmentViewProps> = ({ attachment, from, isMyMessage
 				<AttachmentSmallView attachment={attachment} />
 			</Row>
 			<Row takeAvailableSpace wrap="nowrap" height="100%">
-				<Container padding={{ vertical: 'small' }} wrap="wrap">
+				<Container padding={{ vertical: 'small' }} wrap="wrap" crossAlignment="flex-start">
 					<Text color="secondary">{attachment.name}</Text>
 				</Container>
 			</Row>
