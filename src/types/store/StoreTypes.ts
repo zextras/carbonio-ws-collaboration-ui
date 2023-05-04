@@ -78,6 +78,7 @@ export type SessionStoreSlice = {
 	setCapabilities: (capabilities: CapabilityList) => void;
 	setSelectedRoomOneToOneGroup: (id: string) => void;
 	setUserPrefTimezone: (timezoneId: string) => void;
+	setCustomLogo: (logo: string | false) => void;
 };
 
 export type MarkersStoreSlice = {
@@ -148,6 +149,7 @@ export type MeetingsSlice = {
 		stream: 'audio' | 'video' | 'screen',
 		status: boolean
 	) => void;
+	toggleSidebarStatus: (meetingId: string, isOpen: boolean) => void;
 };
 
 export type RootStore = UsersStoreSlice &

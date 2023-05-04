@@ -12,6 +12,7 @@ export type Meeting = {
 	roomId: string;
 	participants: MeetingParticipantMap;
 	createdAt: string;
+	sidebarStatus: boolean;
 };
 
 export type MeetingParticipant = {

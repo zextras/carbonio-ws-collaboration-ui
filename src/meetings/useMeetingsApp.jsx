@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Spinner } from '@zextras/carbonio-design-system';
 import { addRoute } from '@zextras/carbonio-shell-ui';
 import React, { lazy, Suspense, useEffect } from 'react';
 
+import ShimmerEntryMeetingView from './views/shimmers/ShimmerEntryMeetingView';
 import { MEETINGS_NAME } from '../constants/appConstants';
 
 const LazyExternalMainView = lazy(() =>
@@ -15,7 +15,7 @@ const LazyExternalMainView = lazy(() =>
 );
 
 const ExternalMain = () => (
-	<Suspense fallback={<Spinner />}>
+	<Suspense fallback={<ShimmerEntryMeetingView />}>
 		<LazyExternalMainView />
 	</Suspense>
 );

@@ -11,5 +11,9 @@ import { RootStore } from '../../types/store/StoreTypes';
 
 export const getMeeting = (store: RootStore, roomId: string): Meeting | undefined =>
 	store.meetings[roomId];
+
 export const getMeetingByMeetingId = (store: RootStore, meetingId: string): Meeting | undefined =>
 	find(store.meetings, (meeting) => meeting.id === meetingId);
+
+export const getSidebarStatus = (store: RootStore, meetingId: string): boolean | undefined =>
+	find(store.meetings, (meeting) => meeting.id === meetingId)?.sidebarStatus;
