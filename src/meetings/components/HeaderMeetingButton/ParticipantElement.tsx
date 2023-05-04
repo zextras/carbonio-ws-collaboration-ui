@@ -10,6 +10,7 @@ import styled from 'styled-components';
 
 import GoToPrivateChatAction from '../../../chats/components/infoPanel/conversationParticipantsAccordion/GoToPrivateChatAction';
 import { UsersApi } from '../../../network';
+import { getUserId } from '../../../store/selectors/SessionSelectors';
 import { getUserName, getUserPictureUpdatedAt } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
 
@@ -28,7 +29,7 @@ type ParticipantElementProps = {
 
 const ParticipantElement: FC<ParticipantElementProps> = ({ memberId }) => {
 	const memberName: string | undefined = useStore((store) => getUserName(store, memberId));
-	const sessionId: string | undefined = useStore((state) => state.session.id);
+	const sessionId: string | undefined = useStore((store) => getUserId(store));
 	const userPictureUpdatedAt: string | undefined = useStore((state) =>
 		getUserPictureUpdatedAt(state, memberId)
 	);

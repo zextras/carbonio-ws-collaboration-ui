@@ -59,9 +59,13 @@ const ActiveMeetingParticipantsDropdown = ({
 		return `${numberOfParticipants} ${moreParticipantsTitle}`;
 	}, [moreParticipantsTitle, numberOfParticipants, oneParticipantTitle]);
 
-	const listOfMembers = map(meetingParticipants, (member: MeetingParticipant) => (
-		<ParticipantElement key={`${member.userId}-${Math.random()}`} memberId={member.userId} />
-	));
+	const listOfMembers = useMemo(
+		() =>
+			map(meetingParticipants, (member: MeetingParticipant) => (
+				<ParticipantElement key={`${member.userId}-${member.sessionId}`} memberId={member.userId} />
+			)),
+		[meetingParticipants]
+	);
 
 	useEffect(() => {
 		if (isDropdownOpen && numberOfParticipants === 0) {
