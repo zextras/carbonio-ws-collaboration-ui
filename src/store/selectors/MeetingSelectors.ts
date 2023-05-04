@@ -17,6 +17,9 @@ export const getMeetingActive = (store: RootStore, roomId: string): boolean =>
 export const getMeetingByMeetingId = (store: RootStore, meetingId: string): Meeting | undefined =>
 	find(store.meetings, (meeting) => meeting.id === meetingId);
 
+export const getSidebarStatus = (store: RootStore, meetingId: string): boolean | undefined =>
+	find(store.meetings, (meeting) => meeting.id === meetingId)?.sidebarStatus;
+
 export const getMeetingParticipants = (
 	store: RootStore,
 	roomId: string

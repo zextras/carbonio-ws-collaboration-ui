@@ -38,7 +38,8 @@ export const useMeetingsStoreSlice = (set: (...any: any) => void): MeetingsSlice
 						id: meeting.id,
 						roomId: meeting.roomId,
 						participants: participantsMap,
-						createdAt: meeting.createdAt
+						createdAt: meeting.createdAt,
+						sidebarStatus: true
 					};
 
 					// Retrieve participants information if they are unknown
@@ -74,7 +75,8 @@ export const useMeetingsStoreSlice = (set: (...any: any) => void): MeetingsSlice
 					id: meeting.id,
 					roomId: meeting.roomId,
 					participants: participantsMap,
-					createdAt: meeting.createdAt
+					createdAt: meeting.createdAt,
+					sidebarStatus: true
 				};
 
 				// Retrieve participants information if they are unknown
@@ -164,6 +166,18 @@ export const useMeetingsStoreSlice = (set: (...any: any) => void): MeetingsSlice
 			}),
 			false,
 			'MEETINGS/CHANGE_STREAM_STATUS'
+		);
+	},
+	toggleSidebarStatus: (meetingId: string, isOpen: boolean): void => {
+		set(
+			produce((draft: RootStore) => {
+				const meeting = find(draft.meetings, (meeting) => meeting.id === meetingId);
+				if (meeting) {
+					draft.meetings[meeting.roomId].sidebarStatus = isOpen;
+				}
+			}),
+			false,
+			'MEETINGS/TOGGLE_SIDEBAR_STATUS'
 		);
 	}
 });
