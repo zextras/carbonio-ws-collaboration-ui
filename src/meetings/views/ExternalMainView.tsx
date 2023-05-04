@@ -5,7 +5,7 @@
  */
 
 import { createMemoryHistory } from 'history';
-import React, { lazy, ReactElement, Suspense } from 'react';
+import React, { lazy, ReactElement, Suspense, useEffect } from 'react';
 import { Switch, Route, Router } from 'react-router-dom';
 import { createGlobalStyle } from 'styled-components';
 
@@ -54,16 +54,18 @@ const ExternalMainView = (): ReactElement => {
 	const history = createMemoryHistory();
 	const setCustomLogo = useStore((store) => store.setCustomLogo);
 
-	fetch('/zx/login/v3/config')
-		.then((response) => response.json())
-		.then((data) => {
-			const clientLogo = data.carbonioWebUiAppLogo ? data.carbonioWebUiAppLogo : false;
-			setCustomLogo(clientLogo);
-		})
-		.catch((reason) => {
-			setCustomLogo(false);
-			console.log(reason);
-		});
+	useEffect(() => {
+		fetch('/zx/login/v3/config')
+			.then((response) => response.json())
+			.then((data) => {
+				const clientLogo = data.carbonioWebUiAppLogo ? data.carbonioWebUiAppLogo : false;
+				setCustomLogo(clientLogo);
+			})
+			.catch((reason) => {
+				setCustomLogo(false);
+				console.log(reason);
+			});
+	}, [setCustomLogo]);
 
 	return (
 		<Router history={history}>
