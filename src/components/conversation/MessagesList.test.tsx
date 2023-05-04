@@ -217,23 +217,21 @@ describe('render list of messages with history loader visible for first time ope
 	});
 
 	test('Display message bubble deleted on MessageList', () => {
-		const { result } = renderHook(() => useStore());
 		const mockedRoom: RoomBe = createMockRoom();
-		act(() => result.current.addRoom(mockedRoom));
-
-		// Add text message to store
 		const mockedTextMessage = createMockTextMessage({
 			roomId: mockedRoom.id,
 			text: 'Hello guys!'
 		});
-		act(() => result.current.newMessage(mockedTextMessage));
-
-		// Delete text message
 		const mockedDeletedMessage = createMockMessageFastening({
 			roomId: mockedRoom.id,
 			action: 'delete',
 			originalStanzaId: mockedTextMessage.stanzaId
 		});
+
+		const { result } = renderHook(() => useStore());
+		act(() => result.current.addRoom(mockedRoom));
+		act(() => result.current.newMessage(mockedTextMessage));
+		// Delete text message
 		act(() => result.current.addFastening(mockedDeletedMessage));
 
 		setup(<MessagesList roomId={mockedRoom.id} />);
@@ -243,25 +241,23 @@ describe('render list of messages with history loader visible for first time ope
 	});
 
 	test('Display edited message bubble on MessageList', () => {
-		const { result } = renderHook(() => useStore());
 		const mockedRoom: RoomBe = createMockRoom();
-		act(() => result.current.addRoom(mockedRoom));
-
-		// Add text message to store
 		const mockedTextMessage = createMockTextMessage({
 			roomId: mockedRoom.id,
 			text: 'Hello guys!'
 		});
-		act(() => result.current.newMessage(mockedTextMessage));
-
-		// Delete text message
-		const mockedDeletedMessage = createMockMessageFastening({
+		const mockedEditedMessage = createMockMessageFastening({
 			roomId: mockedRoom.id,
 			action: 'edit',
 			originalStanzaId: mockedTextMessage.stanzaId,
 			value: 'Hello guys! I am edited message'
 		});
-		act(() => result.current.addFastening(mockedDeletedMessage));
+
+		const { result } = renderHook(() => useStore());
+		act(() => result.current.addRoom(mockedRoom));
+		act(() => result.current.newMessage(mockedTextMessage));
+		// Edit text message
+		act(() => result.current.addFastening(mockedEditedMessage));
 
 		setup(<MessagesList roomId={mockedRoom.id} />);
 
@@ -297,32 +293,29 @@ describe('render list of messages with history loader visible for first time ope
 	});
 
 	test('Display a reply of a deleted message', () => {
-		const { result } = renderHook(() => useStore());
 		const mockedRoom: RoomBe = createMockRoom();
-		act(() => result.current.addRoom(mockedRoom));
-
-		// Add text message to store
 		const mockedTextMessage = createMockTextMessage({
 			roomId: mockedRoom.id,
 			text: 'Hello guys!'
 		});
-		act(() => result.current.newMessage(mockedTextMessage));
-
-		// Reply to text message
 		const mockedReplyTextMessage = createMockTextMessage({
 			id: 'idReplyTextMessage',
 			roomId: mockedRoom.id,
 			text: 'Hi!',
 			replyTo: mockedTextMessage.id
 		});
-		act(() => result.current.newMessage(mockedReplyTextMessage));
-
-		// Delete first text message
 		const mockedDeletedMessage = createMockMessageFastening({
 			roomId: mockedRoom.id,
 			action: 'delete',
 			originalStanzaId: mockedTextMessage.stanzaId
 		});
+
+		const { result } = renderHook(() => useStore());
+		act(() => result.current.addRoom(mockedRoom));
+		act(() => result.current.newMessage(mockedTextMessage));
+		// Reply to text message
+		act(() => result.current.newMessage(mockedReplyTextMessage));
+		// Delete first text message
 		act(() => result.current.addFastening(mockedDeletedMessage));
 
 		setup(<MessagesList roomId={mockedRoom.id} />);
@@ -332,33 +325,30 @@ describe('render list of messages with history loader visible for first time ope
 	});
 
 	test('Display a reply of an edited message', () => {
-		const { result } = renderHook(() => useStore());
 		const mockedRoom: RoomBe = createMockRoom();
-		act(() => result.current.addRoom(mockedRoom));
-
-		// Add text message to store
 		const mockedTextMessage = createMockTextMessage({
 			roomId: mockedRoom.id,
 			text: 'Hello guys!'
 		});
-		act(() => result.current.newMessage(mockedTextMessage));
-
-		// Edit text message
-		const mockedDeletedMessage = createMockMessageFastening({
+		const mockedEditedMessage = createMockMessageFastening({
 			roomId: mockedRoom.id,
 			action: 'edit',
 			originalStanzaId: mockedTextMessage.stanzaId,
 			value: 'Hello guys! I am edited message'
 		});
-		act(() => result.current.addFastening(mockedDeletedMessage));
-
-		// Reply to text message
 		const mockedReplyTextMessage = createMockTextMessage({
 			id: 'idReplyTextMessage',
 			roomId: mockedRoom.id,
 			text: 'Hi!',
 			replyTo: mockedTextMessage.id
 		});
+
+		const { result } = renderHook(() => useStore());
+		act(() => result.current.addRoom(mockedRoom));
+		act(() => result.current.newMessage(mockedTextMessage));
+		// Edit text message
+		act(() => result.current.addFastening(mockedEditedMessage));
+		// Reply to text message
 		act(() => result.current.newMessage(mockedReplyTextMessage));
 
 		setup(<MessagesList roomId={mockedRoom.id} />);
