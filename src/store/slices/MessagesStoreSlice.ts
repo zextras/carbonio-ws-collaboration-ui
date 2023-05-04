@@ -9,11 +9,10 @@ import produce from 'immer';
 import { concat, find, forEach, map, orderBy, uniqBy } from 'lodash';
 
 import { UsersApi } from '../../network';
-import { calcReads } from '../../network/xmpp/utility/decodeMessage';
+import { calcReads } from '../../network/xmpp/utility/decodeXMPPMessageStanza';
 import { MarkerStatus } from '../../types/store/MarkersTypes';
 import {
 	AffiliationMessage,
-	DeletedMessage,
 	Message,
 	MessageList,
 	MessageType,
@@ -105,33 +104,6 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 				// this checks if the last element present inside the history has not the same date of the first element of the requested history
 				const historyWithDates: MessageList = [];
 				forEach(messageArray, (historyMessage: Message, index) => {
-					// check if a message in temporaryMessages has both edit and delete reference and in that case
-					// remove both after check edited and deleted and set deleted as last
-					// check if there is an edited reference in temporaryMessages and update the message to be displayed as edited
-					if (
-						draft.temporaryMessages[roomId] &&
-						draft.temporaryMessages[roomId][`edited_${historyMessage.id}`]
-					) {
-						const messageEdited = draft.temporaryMessages[roomId][`edited_${historyMessage.id}`];
-						historyMessage = {
-							...messageEdited,
-							date: historyMessage.date
-						};
-						delete draft.temporaryMessages[roomId][`edited_${historyMessage.id}`];
-					}
-					// check if there is a deleted reference in temporaryMessages and update the message to be displayed as deleted
-					if (
-						draft.temporaryMessages[roomId] &&
-						draft.temporaryMessages[roomId][`deleted_${historyMessage.id}`]
-					) {
-						const messageDeletion = draft.temporaryMessages[roomId][`deleted_${historyMessage.id}`];
-						historyMessage = {
-							...messageDeletion,
-							date: historyMessage.date
-						};
-						delete draft.temporaryMessages[roomId][`deleted_${historyMessage.id}`];
-					}
-
 					// the first message always needs a date before it
 					if (index === 0) {
 						historyWithDates.push({
@@ -238,123 +210,13 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 				const messageWithAResponse = find(
 					draft.messages[roomId],
 					(message) => message.id === replyMessageId
-				);
-				if (messageWithAResponse && messageWithAResponse.type === MessageType.TEXT_MSG) {
-					const referenceMessageOnHistory = find(
-						draft.messages[roomId],
-						(message) => message.id === messageSubjectOfReply.id
-					);
-					// Check if message reference is already loaded on local history.
-					// If it is, we can use it for the reference because it is already processed for edit / delete
-					if (referenceMessageOnHistory) {
-						messageWithAResponse.repliedMessage = referenceMessageOnHistory as
-							| TextMessage
-							| DeletedMessage;
-					} else {
-						// Apply the delete/reply information if there are some temporary message
-						const temporaryMessages = draft.temporaryMessages[roomId];
-						if (temporaryMessages) {
-							const editInformation = temporaryMessages[
-								`edited_${messageSubjectOfReply.id}`
-							] as TextMessage;
-							if (editInformation) {
-								messageSubjectOfReply.text = editInformation.text;
-							}
-							const deleteInformation = temporaryMessages[`delete_${messageSubjectOfReply.id}`];
-							if (deleteInformation) {
-								messageWithAResponse.repliedMessage = {
-									id: messageSubjectOfReply.id,
-									roomId: messageSubjectOfReply.roomId,
-									date: messageSubjectOfReply.date,
-									from: messageSubjectOfReply.from,
-									type: MessageType.DELETED_MSG
-								};
-							}
-						} else {
-							messageWithAResponse.repliedMessage = messageSubjectOfReply;
-						}
-					}
+				) as TextMessage;
+				if (messageWithAResponse) {
+					messageWithAResponse.repliedMessage = messageSubjectOfReply;
 				}
 			}),
 			false,
 			'MESSAGES/SET_REPLIED_MESSAGE'
-		);
-	},
-	setDeletedMessage: (roomId: string, deletedMessage: DeletedMessage): void => {
-		set(
-			produce((draft: RootStore) => {
-				if (draft.messages[roomId]) {
-					forEach(draft.messages[roomId], (message, index) => {
-						// check for reply messages and update the caption
-						if (
-							message.type === MessageType.TEXT_MSG &&
-							message.repliedMessage &&
-							message.repliedMessage.id === deletedMessage.id
-						) {
-							(draft.messages[roomId][index] as TextMessage).repliedMessage = deletedMessage;
-						}
-						// replace the original message with the deletion in the history if present
-						// otherwise add the deletion to the tempSlice so when the history will be loaded
-						// the original message will be deleted
-						if (message.id === deletedMessage.id) {
-							draft.messages[roomId].splice(index, 1, {
-								...deletedMessage,
-								date: message.date
-							});
-						} else if (
-							!draft.temporaryMessages[deletedMessage.roomId] ||
-							!draft.temporaryMessages[deletedMessage.roomId][`deleted_${deletedMessage.id}`]
-						) {
-							draft.addDeletedMessageRef(roomId, deletedMessage);
-						}
-					});
-				}
-			}),
-			false,
-			'MESSAGES/SET_DELETED_MESSAGE'
-		);
-	},
-	setEditedMessage: (roomId: string, editedMessage: TextMessage): void => {
-		set(
-			produce((draft: RootStore) => {
-				if (draft.messages[roomId]) {
-					forEach(draft.messages[roomId], (message, index) => {
-						// check for reply messages and update the caption
-						if (
-							message.type === MessageType.TEXT_MSG &&
-							message.repliedMessage &&
-							message.repliedMessage.id === editedMessage.id
-						) {
-							(draft.messages[roomId][index] as TextMessage).repliedMessage = editedMessage;
-						}
-						// replace the original message with the correction in the history if present
-						// otherwise add the correction to the tempSlice so when the history will be loaded
-						// the original message will be edited
-						if (message.type === MessageType.TEXT_MSG && message.id === editedMessage.id) {
-							if (message.replyTo) {
-								draft.messages[roomId].splice(index, 1, {
-									...editedMessage,
-									date: message.date,
-									replyTo: message.replyTo,
-									repliedMessage: message.repliedMessage
-								});
-							} else {
-								draft.messages[roomId].splice(index, 1, {
-									...editedMessage,
-									date: message.date
-								});
-							}
-						} else if (
-							!draft.temporaryMessages[editedMessage.roomId] ||
-							!draft.temporaryMessages[editedMessage.roomId][`edited_${editedMessage.id}`]
-						) {
-							draft.addEditedMessageRef(roomId, editedMessage);
-						}
-					});
-				}
-			}),
-			false,
-			'MESSAGES/SET_EDITED_MESSAGE'
 		);
 	}
 });

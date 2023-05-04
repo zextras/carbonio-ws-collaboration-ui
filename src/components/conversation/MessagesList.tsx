@@ -90,28 +90,32 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 
 	const readMessage = useCallback(
 		(refId) => {
+			// Message under the scroll position
 			const message: Message | undefined = find(roomMessages, (message) => refId === message.id);
-			let markMessageAsRead;
-			if (myLastMarker && find(roomMessages, (msg) => msg.id === myLastMarker.messageId)) {
-				const markedMsg = find(roomMessages, (msg) => msg.id === myLastMarker.messageId);
-				markMessageAsRead =
-					markedMsg &&
-					message &&
-					!(markedMsg.date === message.date) &&
-					isBefore(markedMsg.date, message.date);
-			} else if (
-				find(roomMessages, (msg) => msg.id === myLastMarker?.messageId || !!myLastMarker)
-			) {
-				markMessageAsRead = true;
-			}
+
+			// Conditions to mark the message as read
 			if (
+				inputHasFocus &&
 				message &&
 				message.type === MessageType.TEXT_MSG &&
-				message.from !== myUserId &&
-				markMessageAsRead &&
-				inputHasFocus
+				message.from !== myUserId
 			) {
-				xmppClient.readMessage(message.roomId, message.id);
+				let markMessageAsRead;
+				if (myLastMarker && find(roomMessages, (msg) => msg.id === myLastMarker.messageId)) {
+					const markedMsg = find(roomMessages, (msg) => msg.id === myLastMarker.messageId);
+					markMessageAsRead =
+						markedMsg &&
+						message &&
+						!(markedMsg.date === message.date) &&
+						isBefore(markedMsg.date, message.date);
+				} else if (
+					find(roomMessages, (msg) => msg.id === myLastMarker?.messageId || !!myLastMarker)
+				) {
+					markMessageAsRead = true;
+				}
+				if (markMessageAsRead) {
+					xmppClient.readMessage(message.roomId, message.id);
+				}
 			}
 		},
 		[roomMessages, myLastMarker, inputHasFocus, myUserId, xmppClient]

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { decodeMessage } from './decodeMessage';
+import { decodeXMPPMessageStanza } from './decodeXMPPMessageStanza';
 import { MessageType } from '../../../types/store/MessageTypes';
 
 describe('Test decode message function', () => {
@@ -12,7 +12,7 @@ describe('Test decode message function', () => {
 		const messageToParse = `<message from='b8f6dc34-9b36-4956-a8ab-9b44a0b21951@muclight.carbonio/c755b1d5-08dd-49d8-bec8-59074090ef1b@carbonio' to='9b91c824-9ef7-4f86-b2ca-30b456d2641d@carbonio' id='1665-52642-42267' type='groupchat' xmlns='jabber:client'><body>&quot;ciao &gt; &apos;ragazzi&apos; &amp; &apos;ragazze&apos; &lt;&quot;</body><markable xmlns='urn:xmpp:chat-markers:0'/><stanza-id by='b8f6dc34-9b36-4956-a8ab-9b44a0b21951@muclight.carbonio' id='BQIR8T1E2281' xmlns='urn:xmpp:sid:0'/></message>`;
 		const parser = new DOMParser();
 		const xmlToParse = parser.parseFromString(messageToParse, 'application/xml');
-		const messageParsed = decodeMessage(xmlToParse.getElementsByTagName('message')[0]);
+		const messageParsed = decodeXMPPMessageStanza(xmlToParse.getElementsByTagName('message')[0]);
 		expect(messageParsed?.type).toBe(MessageType.TEXT_MSG);
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore
@@ -23,7 +23,7 @@ describe('Test decode message function', () => {
 		const messageToParse = `<message from='b8f6dc34-9b36-4956-a8ab-9b44a0b21951@muclight.carbonio/c755b1d5-08dd-49d8-bec8-59074090ef1b@carbonio' to='9b91c824-9ef7-4f86-b2ca-30b456d2641d@carbonio' id='1665-52642-42267' type='groupchat' xmlns='jabber:client'><body>sto provando a testare una cosa (anche se &quot;testare&quot; è difficile),un po' mi piace. Inoltre, 2 &lt; 3 e 5 &gt; 1! Ciao a tutt* da Yuki &amp; co!</body><markable xmlns='urn:xmpp:chat-markers:0'/><stanza-id by='b8f6dc34-9b36-4956-a8ab-9b44a0b21951@muclight.carbonio' id='BQIR8T1E2281' xmlns='urn:xmpp:sid:0'/></message>`;
 		const parser = new DOMParser();
 		const xmlToParse = parser.parseFromString(messageToParse, 'application/xml');
-		const messageParsed = decodeMessage(xmlToParse.getElementsByTagName('message')[0]);
+		const messageParsed = decodeXMPPMessageStanza(xmlToParse.getElementsByTagName('message')[0]);
 		expect(messageParsed?.type).toBe(MessageType.TEXT_MSG);
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore
@@ -36,7 +36,7 @@ describe('Test decode message function', () => {
 		const messageToParse = `<message from='b8f6dc34-9b36-4956-a8ab-9b44a0b21951@muclight.carbonio/c755b1d5-08dd-49d8-bec8-59074090ef1b@carbonio' to='9b91c824-9ef7-4f86-b2ca-30b456d2641d@carbonio' id='1665-52642-42267' type='groupchat' xmlns='jabber:client'><body>se vai sul sito &lt; www.zextras.com &gt; troverai un sacco di informazioni! Puoi cercarlo anche su &quot; www.google.it &quot;</body><markable xmlns='urn:xmpp:chat-markers:0'/><stanza-id by='b8f6dc34-9b36-4956-a8ab-9b44a0b21951@muclight.carbonio' id='BQIR8T1E2281' xmlns='urn:xmpp:sid:0'/></message>`;
 		const parser = new DOMParser();
 		const xmlToParse = parser.parseFromString(messageToParse, 'application/xml');
-		const messageParsed = decodeMessage(xmlToParse.getElementsByTagName('message')[0]);
+		const messageParsed = decodeXMPPMessageStanza(xmlToParse.getElementsByTagName('message')[0]);
 		expect(messageParsed?.type).toBe(MessageType.TEXT_MSG);
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore

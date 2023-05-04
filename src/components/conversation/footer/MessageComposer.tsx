@@ -28,6 +28,7 @@ import styled from 'styled-components';
 import AttachmentSelector from './AttachmentSelector';
 import EmojiPicker from './EmojiPicker';
 import MessageArea from './MessageArea';
+import useMessage from '../../../hooks/useMessage';
 import { RoomsApi } from '../../../network';
 import {
 	getDraftMessage,
@@ -36,13 +37,12 @@ import {
 	getReferenceMessageView
 } from '../../../store/selectors/ActiveConversationsSelectors';
 import { getXmppClient } from '../../../store/selectors/ConnectionSelector';
-import { getMessageSelector } from '../../../store/selectors/MessagesSelectors';
 import { getRoomUnreadsSelector } from '../../../store/selectors/UnreadsCounterSelectors';
 import useStore from '../../../store/Store';
 import { Emoji } from '../../../types/generics';
 import { AddRoomAttachmentResponse } from '../../../types/network/responses/roomsResponses';
 import { FileToUpload, messageActionType } from '../../../types/store/ActiveConversationTypes';
-import { Message, MessageType } from '../../../types/store/MessageTypes';
+import { MessageType } from '../../../types/store/MessageTypes';
 import { uid } from '../../../utils/attachmentUtils';
 import { BrowserUtils } from '../../../utils/BrowserUtils';
 
@@ -87,10 +87,9 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 	const unsetFilesToAttach = useStore((store) => store.unsetFilesToAttach);
 	const unreadMessagesCount = useStore((store) => getRoomUnreadsSelector(store, roomId));
 	const filesToUploadArray = useStore((store) => getFilesToUploadArray(store, roomId));
-	const messageReference = useStore<Message | undefined>((store) =>
-		getMessageSelector(store, roomId, referenceMessage?.messageId)
-	);
 	const setFilesToAttach = useStore((store) => store.setFilesToAttach);
+
+	const completeReferenceMessage = useMessage(roomId, referenceMessage?.messageId || '');
 
 	const [listAbortController, setListAbortController] = useState<AbortController[]>([]);
 	const [textMessage, setTextMessage] = useState('');
@@ -221,7 +220,11 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 				})
 				.catch(() => console.log('error'));
 		} else {
-			if (referenceMessage && referenceMessage.roomId === roomId) {
+			if (
+				referenceMessage &&
+				completeReferenceMessage &&
+				completeReferenceMessage.type === MessageType.TEXT_MSG
+			) {
 				switch (referenceMessage.actionType) {
 					case messageActionType.REPLY: {
 						xmppClient.sendChatMessageReply(
@@ -233,11 +236,9 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 						break;
 					}
 					case messageActionType.EDIT: {
-						if (
-							messageReference?.type === MessageType.TEXT_MSG &&
-							messageReference?.text !== message
-						) {
-							xmppClient.sendChatMessageCorrection(roomId, message, referenceMessage.messageId);
+						// Avoid to send correction if text doesn't change
+						if (completeReferenceMessage.text !== message) {
+							xmppClient.sendChatMessageEdit(roomId, message, referenceMessage.stanzaId);
 						}
 						break;
 					}
@@ -263,7 +264,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 		textMessage,
 		timeoutRef,
 		referenceMessage,
-		messageReference,
+		completeReferenceMessage,
 		filesToUploadArray,
 		addDescriptionToFileToAttach
 	]);

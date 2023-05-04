@@ -9,11 +9,11 @@ import React, { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import { getMessageSelector } from '../../../store/selectors/MessagesSelectors';
+import useMessage from '../../../hooks/useMessage';
 import { getUserSelector } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
 import { ReferenceMessage } from '../../../types/store/ActiveConversationTypes';
-import { Message, MessageType } from '../../../types/store/MessageTypes';
+import { MessageType, TextMessage } from '../../../types/store/MessageTypes';
 import { getThumbnailURL } from '../../../utils/attachmentUtils';
 import { calculateAvatarColor } from '../../../utils/styleUtils';
 
@@ -57,12 +57,11 @@ const MessageReferenceDisplayed: React.FC<MessageReferenceDisplayedProps> = ({
 	const myId = useStore((store) => store.session.id);
 	const senderInfo = useStore((store) => getUserSelector(store, referenceMessage.senderId));
 	const unsetReferenceMessage = useStore((store) => store.unsetReferenceMessage);
-	const message = useStore<Message | undefined>((store) =>
-		getMessageSelector(store, referenceMessage.roomId, referenceMessage.messageId)
-	);
+	const message = useMessage(referenceMessage.roomId, referenceMessage.messageId) as TextMessage;
 
+	// Remove reference view when message is deleted
 	useEffect(() => {
-		if (message?.type === MessageType.DELETED_MSG) {
+		if (message?.deleted) {
 			unsetReferenceMessage(message.roomId);
 		}
 	}, [message, unsetReferenceMessage]);

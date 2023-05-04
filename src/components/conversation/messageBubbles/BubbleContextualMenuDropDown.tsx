@@ -166,12 +166,18 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 		const attachment = message.attachment || message.forwarded?.attachment;
 		if (attachment) {
 			AttachmentsApi.deleteAttachment(attachment.id).then(() =>
-				xmppClient.sendChatMessageDeletion(message.roomId, message.id)
+				xmppClient.sendChatMessageDeletion(message.roomId, message.stanzaId)
 			);
 		} else {
-			xmppClient.sendChatMessageDeletion(message.roomId, message.id);
+			xmppClient.sendChatMessageDeletion(message.roomId, message.stanzaId);
 		}
-	}, [message.attachment, message.forwarded?.attachment, message.id, message.roomId, xmppClient]);
+	}, [
+		message.attachment,
+		message.forwarded?.attachment,
+		message.stanzaId,
+		message.roomId,
+		xmppClient
+	]);
 
 	const downloadAction = useCallback(() => {
 		const attachment = message.attachment || message.forwarded?.attachment;

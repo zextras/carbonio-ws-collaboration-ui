@@ -58,7 +58,7 @@ class XMPPClient implements IXMPPClient {
 		Strophe.addNamespace('STANDARD_CLIENT', 'jabber:client');
 		Strophe.addNamespace('XMPP_RETRACT', 'urn:xmpp:message-retract:0');
 		Strophe.addNamespace('XMPP_FASTEN', 'urn:xmpp:fasten:0');
-		Strophe.addNamespace('XMPP_CORRECT', 'urn:xmpp:message-correct:0');
+		Strophe.addNamespace('ZEXTRAS_EDIT', 'zextras:xmpp:edit:0');
 
 		// Handler for event stanzas
 		this.connection.addHandler(onPresenceStanza.bind(this), null, 'presence');
@@ -254,31 +254,32 @@ class XMPPClient implements IXMPPClient {
 	 * Delete a message / Message Retraction (XEP-0424)
 	 * Documentation: https://xmpp.org/extensions/xep-0424.html
 	 */
-	sendChatMessageDeletion(roomId: string, messageId: string): void {
+	sendChatMessageDeletion(roomId: string, messageStanzaId: string): void {
 		if (this.connection && this.connection.connected) {
 			const uuid = uuidGenerator();
 			const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat', id: uuid })
-				.c('apply-to', { id: messageId, xmlns: Strophe.NS.XMPP_FASTEN })
+				.c('apply-to', { id: messageStanzaId, xmlns: Strophe.NS.XMPP_FASTEN })
 				.c('retract', { xmlns: Strophe.NS.XMPP_RETRACT });
 			this.connection.send(msg);
 		}
 	}
 
 	/**
-	 * Edit a message / Last Message Correction (XEP-0308)
-	 * Documentation: https://xmpp.org/extensions/xep-0308.html
+	 * Edit a message using Message Fastening
+	 * Documentation: https://xmpp.org/extensions/xep-0422.html
 	 */
-	sendChatMessageCorrection(roomId: string, message: string, messageId: string): void {
+	sendChatMessageEdit(roomId: string, message: string, messageStanzaId: string): void {
 		if (this.connection && this.connection.connected) {
 			const uuid = uuidGenerator();
 			const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat', id: uuid })
-				.c('body')
-				.t(message)
+				.c('apply-to', { id: messageStanzaId, xmlns: Strophe.NS.XMPP_FASTEN })
+				.c('edit', { xmlns: Strophe.NS.ZEXTRAS_EDIT })
 				.up()
-				.c('replace', {
-					id: messageId,
-					xmlns: Strophe.NS.XMPP_CORRECT
-				});
+				.c('external', { name: 'body' })
+				.up()
+				.up()
+				.c('body')
+				.t(message);
 			this.connection.send(msg);
 		}
 	}

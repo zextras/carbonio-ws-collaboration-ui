@@ -18,12 +18,13 @@ import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
+import useMessage from '../../hooks/useMessage';
 import useRouting from '../../hooks/useRouting';
 import {
 	getDraftMessage,
 	getRoomIsWritingList
 } from '../../store/selectors/ActiveConversationsSelectors';
-import { getLastMessageSelector } from '../../store/selectors/MessagesSelectors';
+import { getLastMessageIdSelector } from '../../store/selectors/MessagesSelectors';
 import {
 	getRoomMembers,
 	getRoomMutedSelector,
@@ -66,9 +67,10 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 	const { goToRoomPage } = useRouting();
 
 	const sessionId: string | undefined = useStore((store) => store.session.id);
-	const lastMessageOfRoom: Message | null = useStore((state) =>
-		getLastMessageSelector(state, roomId)
+	const lastMessageId: string | undefined = useStore((state) =>
+		getLastMessageIdSelector(state, roomId)
 	);
+	const lastMessageOfRoom: Message | undefined = useMessage(roomId, lastMessageId || '');
 	const unreadMessagesCount = useStore((store) => getRoomUnreadsSelector(store, roomId));
 	const roomType = useStore((state) => getRoomTypeSelector(state, roomId));
 	const roomName = useStore((state) => getRoomNameSelector(state, roomId));
@@ -120,17 +122,14 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 		[actionName, lastMessageOfRoom, sessionId]
 	);
 
-	const ackHasToAppear = useMemo(
-		() =>
+	const ackIcon = useMemo(() => {
+		if (
 			lastMessageOfRoom &&
 			lastMessageOfRoom.type === MessageType.TEXT_MSG &&
+			!lastMessageOfRoom.deleted &&
 			lastMessageOfRoom.from === sessionId &&
-			!usersWritingList,
-		[lastMessageOfRoom, sessionId, usersWritingList]
-	);
-
-	const ackIcon = useMemo(() => {
-		if (lastMessageOfRoom && lastMessageOfRoom.type === MessageType.TEXT_MSG) {
+			!usersWritingList
+		) {
 			switch (lastMessageOfRoom.read) {
 				case MarkerStatus.UNREAD:
 					return <Icon size="small" icon="Checkmark" color="gray" />;
@@ -141,10 +140,14 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 			}
 		}
 		return undefined;
-	}, [lastMessageOfRoom]);
+	}, [lastMessageOfRoom, sessionId, usersWritingList]);
 
 	const dropdownTooltip = useMemo(() => {
-		if (lastMessageOfRoom && lastMessageOfRoom.type === MessageType.TEXT_MSG) {
+		if (
+			lastMessageOfRoom &&
+			lastMessageOfRoom.type === MessageType.TEXT_MSG &&
+			!lastMessageOfRoom.deleted
+		) {
 			switch (lastMessageOfRoom.read) {
 				case MarkerStatus.UNREAD:
 					return t('tooltip.messageSent', 'Sent');
@@ -167,6 +170,9 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 			if (lastMessageOfRoom) {
 				switch (lastMessageOfRoom.type) {
 					case MessageType.TEXT_MSG: {
+						if (lastMessageOfRoom.deleted) {
+							return deletedMessageLabel;
+						}
 						const text = (): string => {
 							const attachment =
 								lastMessageOfRoom.attachment || lastMessageOfRoom.forwarded?.attachment;
@@ -217,8 +223,6 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 							nameToDisplay || '',
 							t
 						);
-					case MessageType.DELETED_MSG:
-						return deletedMessageLabel;
 					default:
 						return `affiliation message to replace`;
 				}
@@ -305,7 +309,7 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 										</Container>
 									</Tooltip>
 								)}
-								{!draftMessage && ackHasToAppear && (
+								{!draftMessage && ackIcon && (
 									<Tooltip label={dropdownTooltip}>
 										<Container width="fit" padding={{ right: 'extrasmall' }}>
 											{ackIcon}

@@ -8,13 +8,14 @@ import { useEffect, useState } from 'react';
 
 import { getMyLastMarkerOfConversation } from '../../store/selectors/MarkersSelectors';
 import { getMessagesSelector } from '../../store/selectors/MessagesSelectors';
+import { getUserId } from '../../store/selectors/SessionSelectors';
 import { getRoomUnreadsSelector } from '../../store/selectors/UnreadsCounterSelectors';
 import useStore from '../../store/Store';
 import { MessageType } from '../../types/store/MessageTypes';
 
 const useFirstUnreadMessage = (roomId: string): string | undefined => {
 	const unreadCount = useStore((store) => getRoomUnreadsSelector(store, roomId));
-	const myUserId = useStore((store) => store.session.id);
+	const myUserId = useStore(getUserId);
 	const messages = useStore((store) => getMessagesSelector(store, roomId));
 	const myLastMarker = useStore((store) => getMyLastMarkerOfConversation(store, roomId));
 
@@ -38,9 +39,7 @@ const useFirstUnreadMessage = (roomId: string): string | undefined => {
 					const unreadMessages = slice(messages, lastMessageReadByMe + 1);
 					const othersMessages = filter(
 						unreadMessages,
-						(message) =>
-							(message.type === MessageType.TEXT_MSG || message.type === MessageType.DELETED_MSG) &&
-							message.from !== myUserId
+						(message) => message.type === MessageType.TEXT_MSG && message.from !== myUserId
 					);
 					// The fist of them is the fist unread text message
 					if (size(othersMessages) > 0) {

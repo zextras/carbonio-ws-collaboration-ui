@@ -14,13 +14,14 @@ import styled from 'styled-components';
 import AttachmentSmallView from './AttachmentSmallView';
 import BubbleFooter from './BubbleFooter';
 import BubbleHeader from './BubbleHeader';
+import useMessage from '../../../hooks/useMessage';
 import { getUserName, getUserSelector } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
-import { DeletedMessage, MessageType, TextMessage } from '../../../types/store/MessageTypes';
+import { MessageType, TextMessage } from '../../../types/store/MessageTypes';
 import { calculateAvatarColor } from '../../../utils/styleUtils';
 
 type RepliedTextMessageSectionViewProps = {
-	repliedMessage: TextMessage | DeletedMessage;
+	repliedMessageRef: TextMessage;
 	isMyMessage: boolean;
 };
 
@@ -42,15 +43,18 @@ const DeletedMessageWrap = styled(Text)`
 `;
 
 const RepliedTextMessageSectionView: FC<RepliedTextMessageSectionViewProps> = ({
-	repliedMessage,
+	repliedMessageRef,
 	isMyMessage
 }) => {
 	const [t] = useTranslation();
 	const deletedMessageLabel = t('message.deletedMessage', 'Deleted message');
 
 	const sessionId: string | undefined = useStore((state) => state.session.id);
-	const replyUserInfo = useStore((store) => getUserSelector(store, repliedMessage?.from));
-	const senderIdentifier = useStore((store) => getUserName(store, repliedMessage?.from));
+	const repliedMessage =
+		(useMessage(repliedMessageRef.roomId, repliedMessageRef.id) as TextMessage) ||
+		repliedMessageRef;
+	const replyUserInfo = useStore((store) => getUserSelector(store, repliedMessage.from));
+	const senderIdentifier = useStore((store) => getUserName(store, repliedMessage.from));
 	const userColor = useMemo(() => calculateAvatarColor(senderIdentifier || ''), [senderIdentifier]);
 
 	const settings = useUserSettings();
@@ -146,7 +150,7 @@ const RepliedTextMessageSectionView: FC<RepliedTextMessageSectionViewProps> = ({
 				userBorderColor={userColor}
 				onClick={scrollTo}
 			>
-				{repliedMessage.type === MessageType.TEXT_MSG && repliedMessage.attachment && (
+				{repliedMessage.attachment && (
 					<Row wrap="nowrap">
 						<AttachmentSmallView attachment={repliedMessage.attachment} />
 					</Row>
@@ -154,18 +158,17 @@ const RepliedTextMessageSectionView: FC<RepliedTextMessageSectionViewProps> = ({
 				<Row takeAvailableSpace wrap="nowrap">
 					<Container crossAlignment="flex-start">
 						{senderIdentifier && <BubbleHeader senderId={repliedMessage.from} />}
-						{repliedMessage && repliedMessage.type === MessageType.TEXT_MSG && (
-							<MessageWrap color="secondary" overflow="ellipsis">
-								{textToShow}
-							</MessageWrap>
-						)}
-						{repliedMessage && repliedMessage.type === MessageType.DELETED_MSG && (
+						{repliedMessage.deleted ? (
 							<DeletedMessageWrap color="secondary" overflow="ellipsis">
 								{deletedMessageLabel}
 							</DeletedMessageWrap>
-						)}
-						{repliedMessage && repliedMessage.type !== MessageType.DELETED_MSG && (
-							<BubbleFooter date={repliedMessage.date} isEdited={repliedMessage.edited} />
+						) : (
+							<>
+								<MessageWrap color="secondary" overflow="ellipsis">
+									{textToShow}
+								</MessageWrap>
+								<BubbleFooter date={repliedMessage.date} isEdited={repliedMessage.edited} />
+							</>
 						)}
 					</Container>
 				</Row>
