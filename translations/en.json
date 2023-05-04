@@ -98,7 +98,7 @@
         "notificationsMutedForThisChat": "Notifications muted for this chat"
     },
     "meeting": {
-        "activeMeetingTooltip": "There's an active meeting for this group",
+        "activeMeetingTooltip": "There's an active meeting for this Group",
         "collapseParticipantsMeetingTooltip": "Collapse participants list",
         "expandParticipantsListTooltip": "Expand participants list",
         "joinMeeting": "Join meeting",

@@ -22,15 +22,11 @@ export const getMeetingParticipants = (
 	roomId: string
 ): MeetingParticipantMap | undefined => store.meetings[roomId]?.participants;
 
-export const getMyMeetingParticipation = (
-	store: RootStore,
-	sessionId: string | undefined,
-	roomId: string
-): boolean => {
-	if (store.meetings[roomId]?.participants && sessionId != null) {
+export const getMyMeetingParticipation = (store: RootStore, roomId: string): boolean => {
+	if (store.meetings[roomId]?.participants && store.session.id != null) {
 		const sessionMember = find(
 			store.meetings[roomId].participants,
-			(member) => member.userId === sessionId
+			(member) => member.userId === store.session.id
 		);
 		return sessionMember != null;
 	}

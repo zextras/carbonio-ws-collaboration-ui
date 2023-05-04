@@ -10,11 +10,7 @@ import styled from 'styled-components';
 
 import GoToPrivateChatAction from '../../../chats/components/infoPanel/conversationParticipantsAccordion/GoToPrivateChatAction';
 import { UsersApi } from '../../../network';
-import {
-	getUserEmail,
-	getUserName,
-	getUserPictureUpdatedAt
-} from '../../../store/selectors/UsersSelectors';
+import { getUserName, getUserPictureUpdatedAt } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
 
 const CustomContainer = styled(Container)`
@@ -32,7 +28,6 @@ type ParticipantElementProps = {
 
 const ParticipantElement: FC<ParticipantElementProps> = ({ memberId }) => {
 	const memberName: string | undefined = useStore((store) => getUserName(store, memberId));
-	const memberEmail: string | undefined = useStore((store) => getUserEmail(store, memberId));
 	const sessionId: string | undefined = useStore((state) => state.session.id);
 	const userPictureUpdatedAt: string | undefined = useStore((state) =>
 		getUserPictureUpdatedAt(state, memberId)
@@ -55,14 +50,14 @@ const ParticipantElement: FC<ParticipantElementProps> = ({ memberId }) => {
 
 	const avatarElement = useMemo(
 		() =>
-			memberName == null && memberEmail == null ? (
+			memberName == null ? (
 				<Container width="fit" height="fit">
 					<Shimmer.Avatar height="2rem" width="2rem" />
 				</Container>
 			) : (
-				<CustomAvatar label={memberName || memberEmail} shape="round" picture={picture} />
+				<CustomAvatar label={memberName} shape="round" picture={picture} />
 			),
-		[memberEmail, memberName, picture]
+		[memberName, picture]
 	);
 
 	const infoElement = useMemo(

@@ -7,6 +7,7 @@
 import {
 	Button,
 	Container,
+	Icon,
 	IconButton,
 	Padding,
 	/* SnackbarManagerContext,
@@ -37,13 +38,6 @@ const CustomButton = styled(Button)`
 	padding: 0.125rem;
 `;
 
-const CustomVideoButton = styled(IconButton)`
-	cursor: default;
-	background-color: ${({ theme }): string => theme.palette.gray5.regular} !important;
-	&:hover {
-		background-color: ${({ theme }): string => theme.palette.gray5.regular} !important;
-`;
-
 const CustomActiveMeetingContainer = styled(Container)`
 	position: relative;
 `;
@@ -55,7 +49,7 @@ const ActiveMeetingDot = styled.div`
 	background-color: ${({ theme }: { theme: DefaultTheme }): string => theme.palette.error.regular};
 	border: 0.0625rem solid ${(props): string => props.theme.palette.error.regular};
 	border-radius: 50%;
-	left: 0.063rem;
+	left: 0;
 	top: 0.188rem;
 	animation: blink 1.5s linear infinite;
 
@@ -106,15 +100,12 @@ const ConversationHeaderMeetingButton = ({
 	);
 	const activeMeetingTooltip = t(
 		'meeting.activeMeetingTooltip',
-		"There's an active meeting for this group"
+		"There's an active meeting for this Group"
 	);
 
 	const roomType: RoomType = useStore((store) => getRoomTypeSelector(store, roomId));
 	const meetingIsActive: boolean = useStore((store) => getMeetingActive(store, roomId));
-	const sessionId: string | undefined = useStore((store) => store.session.id);
-	const amIParticipating: boolean = useStore((store) =>
-		getMyMeetingParticipation(store, sessionId, roomId)
-	);
+	const amIParticipating: boolean = useStore((store) => getMyMeetingParticipation(store, roomId));
 
 	const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
@@ -125,6 +116,26 @@ const ConversationHeaderMeetingButton = ({
 	const disableOngoingMeetingButton: boolean = useMemo(
 		() => meetingIsActive && amIParticipating,
 		[amIParticipating, meetingIsActive]
+	);
+
+	const meetingButtonTooltip = useMemo(
+		() =>
+			meetingIsActive
+				? amIParticipating
+					? roomType === RoomType.ONE_TO_ONE
+						? ongoingOneToOneMeetingTooltip
+						: ongoingGroupMeetingTooltip
+					: joinMeeting
+				: startMeeting,
+		[
+			amIParticipating,
+			joinMeeting,
+			meetingIsActive,
+			ongoingGroupMeetingTooltip,
+			ongoingOneToOneMeetingTooltip,
+			roomType,
+			startMeeting
+		]
 	);
 
 	const openMeeting = useCallback(() => {
@@ -182,19 +193,7 @@ const ConversationHeaderMeetingButton = ({
 					<Padding right="0.5rem" />
 				</Container>
 			)} */}
-			<Tooltip
-				label={
-					meetingIsActive
-						? amIParticipating
-							? roomType === RoomType.ONE_TO_ONE
-								? ongoingOneToOneMeetingTooltip
-								: ongoingGroupMeetingTooltip
-							: joinMeeting
-						: startMeeting
-				}
-				placement="top"
-				maxWidth="40rem"
-			>
+			<Tooltip label={meetingButtonTooltip} placement="top" maxWidth="40rem">
 				<Container height="fit" width="fit">
 					<CustomButton
 						type="ghost"
@@ -214,12 +213,7 @@ const ConversationHeaderMeetingButton = ({
 					</Container>
 					<Tooltip label={activeMeetingTooltip} placement="top">
 						<CustomActiveMeetingContainer width="fit">
-							<CustomVideoButton
-								iconColor="secondary"
-								icon="VideoOutline"
-								customSize={{ iconSize: '1.25rem', paddingSize: '0.125rem' }}
-								data-testid="video_button"
-							/>
+							<Icon color="secondary" icon="VideoOutline" size="large" data-testid="video_button" />
 							<ActiveMeetingDot />
 						</CustomActiveMeetingContainer>
 					</Tooltip>

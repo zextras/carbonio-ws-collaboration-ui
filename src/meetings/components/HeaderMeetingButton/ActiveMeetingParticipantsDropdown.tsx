@@ -57,11 +57,10 @@ const ActiveMeetingParticipantsDropdown = ({
 			return oneParticipantTitle;
 		}
 		return `${numberOfParticipants} ${moreParticipantsTitle}`;
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [numberOfParticipants]);
+	}, [moreParticipantsTitle, numberOfParticipants, oneParticipantTitle]);
 
 	const listOfMembers = map(meetingParticipants, (member: MeetingParticipant) => (
-		<ParticipantElement key={member.userId} memberId={member.userId} />
+		<ParticipantElement key={`${member.userId}-${Math.random()}`} memberId={member.userId} />
 	));
 
 	useEffect(() => {
