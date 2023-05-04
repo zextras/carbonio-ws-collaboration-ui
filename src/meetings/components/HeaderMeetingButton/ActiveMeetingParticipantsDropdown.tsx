@@ -81,6 +81,7 @@ const ActiveMeetingParticipantsDropdown = ({
 			padding={{ horizontal: '1rem', bottom: '0.75rem', top: '1rem' }}
 			height="fit"
 			maxHeight="50%"
+			data-testid="participant_dropdown"
 		>
 			<Container width="fit" height="fit">
 				<Text color="gray0" size="0.875rem">
@@ -90,7 +91,13 @@ const ActiveMeetingParticipantsDropdown = ({
 			</Container>
 			<Divider />
 			<Padding bottom="0.75rem" />
-			<ListContainer>{listOfMembers}</ListContainer>
+			<ListContainer
+				crossAlignment="flex-start"
+				mainAlignment="flex-start"
+				data-testid="participant_list"
+			>
+				{listOfMembers}
+			</ListContainer>
 		</CustomContainer>
 	);
 };

@@ -88,7 +88,11 @@ const ParticipantElement: FC<ParticipantElementProps> = ({ memberId }) => {
 			{infoElement}
 			{!isSessionParticipant && (
 				<Row>
-					<GoToPrivateChatAction memberId={memberId} isParticipantMeeting />
+					<GoToPrivateChatAction
+						memberId={memberId}
+						isParticipantMeeting
+						data-testid="go_to_private_chat"
+					/>
 				</Row>
 			)}
 		</CustomContainer>

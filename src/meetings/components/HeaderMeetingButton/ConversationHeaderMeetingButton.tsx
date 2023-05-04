@@ -159,6 +159,10 @@ const ConversationHeaderMeetingButton = ({
 	);
 
 	useEffect(() => {
+		setIsDropdownOpen(false);
+	}, [roomName]);
+
+	useEffect(() => {
 		document.addEventListener('click', closeDropdown, true);
 		return () => {
 			document.removeEventListener('click', closeDropdown, true);
@@ -189,6 +193,7 @@ const ConversationHeaderMeetingButton = ({
 						: startMeeting
 				}
 				placement="top"
+				maxWidth="40rem"
 			>
 				<Container height="fit" width="fit">
 					<CustomButton
@@ -198,13 +203,14 @@ const ConversationHeaderMeetingButton = ({
 						color="secondary"
 						width="fit"
 						disabled={disableOngoingMeetingButton}
+						data-testid="join_meeting_button"
 					/>
 				</Container>
 			</Tooltip>
 			{roomType !== RoomType.ONE_TO_ONE && meetingIsActive && (
 				<Container orientation="horizontal" width="fit">
 					<Container width="fit" padding={{ left: '0.5rem', right: '0.5rem' }}>
-						<Container background="gray3" width="0.125rem" />
+						<Container background="gray3" width="0.063rem" />
 					</Container>
 					<Tooltip label={activeMeetingTooltip} placement="top">
 						<CustomActiveMeetingContainer width="fit">
@@ -212,6 +218,7 @@ const ConversationHeaderMeetingButton = ({
 								iconColor="secondary"
 								icon="VideoOutline"
 								customSize={{ iconSize: '1.25rem', paddingSize: '0.125rem' }}
+								data-testid="video_button"
 							/>
 							<ActiveMeetingDot />
 						</CustomActiveMeetingContainer>
@@ -228,6 +235,7 @@ const ConversationHeaderMeetingButton = ({
 							iconColor="secondary"
 							customSize={{ iconSize: '1.25rem', paddingSize: '0.125rem' }}
 							onClick={toggleDropdown}
+							data-testid="participant_list_button"
 						/>
 					</Tooltip>
 				</Container>
