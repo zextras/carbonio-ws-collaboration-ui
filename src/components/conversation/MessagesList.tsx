@@ -155,6 +155,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 				entries.forEach((entry: IntersectionObserverEntry) => {
 					if (entry.isIntersecting) {
 						debouncedSetterScrollPosition.cancel();
+						// console.log(entry.target.id.split('message-')[1]);
 						debouncedSetterScrollPosition(entry.target.id.split('message-')[1]);
 					}
 				});
@@ -283,11 +284,11 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 
 	useEffect(() => {
 		// scroll to the previous position after have changed the conversation
-		if (actualScrollPosition) {
-			const messageRef = window.document.getElementById(`message-${actualScrollPosition}`);
+		const actualPosition = useStore.getState().activeConversations[roomId]?.scrollPositionMessageId;
+		if (actualPosition) {
+			const messageRef = window.document.getElementById(`message-${actualPosition}`);
 			messageRef?.scrollIntoView({ block: 'end' });
 		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [roomId]);
 
 	useEffect(() => {
@@ -349,7 +350,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 			});
 			list.push(
 				<Container
-					key={`messageList-${Math.random()}`}
+					key={`messageList-${roomId}`}
 					data-testid={`messageListRef${roomId}`}
 					mainAlignment={'flex-start'}
 					crossAlignment={'flex-start'}

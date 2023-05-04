@@ -40,10 +40,11 @@ const CustomContainer = styled(Container)`
 const CustomIconButton = styled(IconButton)`
 	background-color: rgba(255, 255, 255, 0);
 `;
+
 const CustomShimmerLogo = styled(Shimmer.Logo)`
 	min-width: 18.75rem;
 	width: 100%;
-	height: 12.5rem;
+	height: 15.625rem;
 `;
 
 const PreviewContainer = styled(Container)`
