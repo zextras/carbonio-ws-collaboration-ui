@@ -26,12 +26,12 @@ const ClearHistoryModal: FC<ClearHistoryModalProps> = ({
 	successfulSnackbar
 }) => {
 	const [t] = useTranslation();
-	const clearHistoryTitle = t('action.clearHistory', 'Clear History');
+	const clearHistoryTitle = t('action.clearHistory', 'Clear history');
 	const clearHistoryDescriptionLabel = t(
 		'modal.clearHistoryDescription',
-		'You are about to clean up your conversation history, remember that this action cannot be undone. The history of other participants will not be deleted.'
+		'You are about to clean up your conversation history, remember that this action cannot be undone. The history of other members will not be deleted.'
 	);
-	const clearHistoryButtonLabel = t('action.clearHistory', 'Clear History');
+	const clearHistoryButtonLabel = t('action.clearHistory', 'Clear history');
 	const closeLabel = t('action.close', 'Close');
 
 	const setClearedAt = useStore((state) => state.setClearedAt);

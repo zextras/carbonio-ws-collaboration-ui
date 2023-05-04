@@ -73,10 +73,10 @@ const DropZoneView = ({
 	onDragLeaveEvent
 }: DropZoneAttachmentType): ReactElement => {
 	const [t] = useTranslation();
-	const dragAndDropLabel = t('attachments.dragAndDrop', 'Drag&Drop Mode');
+	const dragAndDropLabel = t('attachments.dragAndDrop', 'Drag&Drop mode');
 	const dropHereDescriptionLabel = t(
 		'attachments.dropHereDescription',
-		'Drop here your attachments to quickly add them to this chat'
+		'Drop here your attachments to quickly add them to this Chat'
 	);
 
 	return (

@@ -63,7 +63,11 @@ interface IRoomsApi {
 	addRoomAttachment(
 		roomId: string,
 		file: File,
-		description?: string
+		optionalFields: {
+			description?: string;
+			replyId?: string;
+		},
+		signal?: AbortSignal
 	): Promise<AddRoomAttachmentResponse>;
 	forwardMessages(
 		roomId: string,

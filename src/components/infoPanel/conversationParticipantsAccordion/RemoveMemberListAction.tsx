@@ -19,7 +19,7 @@ type RemoveMemberProps = {
 
 const RemoveMemberListAction: FC<RemoveMemberProps> = ({ roomId, memberId }) => {
 	const [t] = useTranslation();
-	const removeMemberLabel: string = t('tooltip.removeMember', 'Remove member');
+	const removeMemberLabel: string = t('modal.removeMember', 'Remove member');
 	const [deleteUserModalOpen, setDeleteUserModalOpen] = useState<boolean>(false);
 
 	const closeDeleteModal = useCallback(() => {
