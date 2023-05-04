@@ -155,7 +155,7 @@ const RoomPictureHandler: FC<RoomPictureProps> = ({ memberId, roomType, roomId }
 	);
 	const imageSizeTooLargeSnackbar = t(
 		'settings.room.pictureSizeTooLarge',
-		`Something went wrong, remember that the maximum size for a group’s avatar image is ${maxRoomImageSize}kb`,
+		`Something went wrong, remember that the maximum size for a Group’s avatar image is ${maxRoomImageSize}kb`,
 		{ size: maxRoomImageSize }
 	);
 	const uploadPictureLabel = t('tooltip.room.uploadPicture', 'Upload picture');

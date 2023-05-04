@@ -31,7 +31,7 @@ const DeleteConversationModal: FC<DeleteModalProps> = ({
 	const deleteConversationTitle = useMemo(() => {
 		if (type === RoomType.GROUP) {
 			if (numberOfMembers && numberOfMembers === 1) {
-				return t('modal.leaveAndDelete', 'Leave and Delete Group');
+				return t('modal.leaveAndDelete', 'Leave and delete Group');
 			}
 			return t('modal.deleteGroup', 'Delete Group');
 		}
