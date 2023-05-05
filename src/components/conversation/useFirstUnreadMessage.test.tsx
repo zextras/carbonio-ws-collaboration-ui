@@ -117,7 +117,10 @@ describe('useFirstUnreadMessage with text messages', () => {
 
 	test('User reads all messages', () => {
 		// Mark last message as read
-		const myLastMarker = createMockMarker({ from: myUserId, messageId: last(textHistory)!.id });
+		const myLastMarker = createMockMarker({
+			from: myUserId,
+			messageId: last(textHistory)?.id || ''
+		});
 		useStore.getState().updateMarkers([myLastMarker], room.id);
 		useStore.getState().updateUnreadMessages(room.id);
 		useStore.getState().updateUnreadCount(room.id);
@@ -173,7 +176,10 @@ describe('useFirstUnreadMessage with all types of messages', () => {
 
 	test('User reads all messages, last is mine', () => {
 		// Mark last message as read
-		const myLastMarker = createMockMarker({ from: myUserId, messageId: last(complexHistory)!.id });
+		const myLastMarker = createMockMarker({
+			from: myUserId,
+			messageId: last(complexHistory)?.id || ''
+		});
 		useStore.getState().updateMarkers([myLastMarker], room.id);
 		useStore.getState().updateUnreadMessages(room.id);
 		useStore.getState().updateUnreadCount(room.id);

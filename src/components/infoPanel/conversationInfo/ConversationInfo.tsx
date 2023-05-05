@@ -38,9 +38,9 @@ const ConversationInfo: FC<ConversationInfoProps> = ({ roomId, roomType, setInfo
 	const isDesktopView = useMediaQueryCheck();
 
 	const memberId: string = useMemo(() => {
-		if (roomType === RoomType.ONE_TO_ONE) {
-			if (roomMembers![0].userId === sessionId) return roomMembers![1].userId;
-			return roomMembers![0].userId;
+		if (roomType === RoomType.ONE_TO_ONE && roomMembers !== undefined) {
+			if (roomMembers[0].userId === sessionId) return roomMembers[1].userId;
+			return roomMembers[0].userId;
 		}
 		return '';
 	}, [roomMembers, roomType, sessionId]);

@@ -26,13 +26,14 @@ export const getRoomNameSelector = (state: RootStore, id: string): string => {
 	const room: Room = state.rooms[id];
 	if (!room) return '';
 	if (room.type === RoomType.ONE_TO_ONE) {
-		const otherUserId =
-			room.members!.length > 1
-				? state.session.id === room.members![0].userId
-					? room.members![1].userId
-					: room.members![0].userId
-				: null;
-		return otherUserId && state!.users[otherUserId]
+		const otherUserId = room.members
+			? room.members.length > 1
+				? state.session.id === room.members[0].userId
+					? room.members[1].userId
+					: room.members[0].userId
+				: null
+			: null;
+		return otherUserId && state.users[otherUserId]
 			? state.users[otherUserId].name ||
 					state.users[otherUserId].email ||
 					state.users[otherUserId].id

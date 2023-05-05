@@ -9,9 +9,9 @@ import { Strophe } from 'strophe.js';
 export const domain = 'carbonio';
 export const MUCservice = 'muclight.carbonio';
 
-export const carbonize = (id: string): any => `${id}@${domain}`;
+export const carbonize = (id: string): string => `${id}@${domain}`;
 
-export const carbonizeMUC = (id: string): any => `${id}@${MUCservice}`;
+export const carbonizeMUC = (id: string): string => `${id}@${MUCservice}`;
 
 // a@b.com/c@d.com --> a
 export const getId = (jid: string): string => Strophe.getNodeFromJid(jid);

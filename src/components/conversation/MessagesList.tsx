@@ -7,15 +7,7 @@
 import { Container } from '@zextras/carbonio-design-system';
 import { debounce, find, groupBy, map } from 'lodash';
 import moment from 'moment-timezone';
-import React, {
-	ForwardedRef,
-	ReactElement,
-	useCallback,
-	useEffect,
-	useMemo,
-	useRef,
-	useState
-} from 'react';
+import React, { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 
 import AnimationGlobalStyle from './messageBubbles/BubbleAnimationsGlobalStyle';
@@ -81,8 +73,8 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 
 	const messageScrollPositionObserver = useRef<IntersectionObserver>();
 	const historyLoaderObserver = useRef<IntersectionObserver>();
-	const messageListRef: ForwardedRef<any> = useRef();
-	const MessagesListWrapperRef: ForwardedRef<any> = useRef();
+	const messageListRef = useRef<HTMLDivElement>();
+	const MessagesListWrapperRef = useRef<HTMLDivElement>();
 	const listOfMessagesObservedRef = useRef<HTMLElement[]>([]);
 	const messageHistoryLoaderRef = React.createRef<HTMLDivElement>();
 
@@ -249,10 +241,12 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 
 		// first part scroll to end when the chat is loaded for the first time
 		if (!isLoadedFirstTime && !actualScrollPosition) {
-			MessagesListWrapperRef.current.scrollTo({
-				top: MessagesListWrapperRef.current.scrollHeight,
-				behavior: 'instant'
-			});
+			if (MessagesListWrapperRef.current) {
+				MessagesListWrapperRef.current.scrollTo({
+					top: MessagesListWrapperRef.current.scrollHeight,
+					behavior: 'auto'
+				});
+			}
 		} else if (historyLoadedDisabled) {
 			// keep the scroll to the message where we stopped scroll because history loader appeared and is loading history
 			const messageRef = window.document.getElementById(`message-${actualScrollPosition}`);
@@ -298,10 +292,12 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 			roomMessages.length > 0 &&
 			actualScrollPosition === roomMessages[roomMessages.length - 1].id
 		) {
-			MessagesListWrapperRef.current.scrollTo({
-				top: MessagesListWrapperRef.current.scrollHeight,
-				behavior: 'instant'
-			});
+			if (MessagesListWrapperRef.current) {
+				MessagesListWrapperRef.current.scrollTo({
+					top: MessagesListWrapperRef.current.scrollHeight,
+					behavior: 'auto'
+				});
+			}
 		}
 	}, [usersWritingList, actualScrollPosition, roomMessages]);
 
@@ -366,7 +362,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 		MessagesListWrapperRef?.current &&
 			MessagesListWrapperRef.current.scrollTo({
 				top: MessagesListWrapperRef.current.scrollHeight,
-				behavior: 'instant'
+				behavior: 'auto'
 			});
 		setInputHasFocus(roomId, true);
 	}, [MessagesListWrapperRef, roomId, setInputHasFocus]);
@@ -384,10 +380,12 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 						messageFromEvent.detail.from === myUserId))
 			) {
 				setTimeout(() => {
-					MessagesListWrapperRef.current.scrollTo({
-						top: MessagesListWrapperRef.current.scrollHeight,
-						behavior: 'instant'
-					});
+					if (MessagesListWrapperRef.current) {
+						MessagesListWrapperRef.current.scrollTo({
+							top: MessagesListWrapperRef.current.scrollHeight,
+							behavior: 'auto'
+						});
+					}
 				}, 200);
 			}
 		},

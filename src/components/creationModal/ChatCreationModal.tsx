@@ -9,6 +9,7 @@ import {
 	Container,
 	Modal,
 	Padding,
+	CreateSnackbarFn,
 	SnackbarManagerContext,
 	Text,
 	Tooltip
@@ -24,6 +25,8 @@ import { RoomsApi } from '../../network';
 import useStore from '../../store/Store';
 import { AddRoomResponse } from '../../types/network/responses/roomsResponses';
 import { RoomType } from '../../types/store/RoomTypes';
+
+type CreateSnackbarFn = typeof CreateSnackbarFn;
 
 const ChatCreationModal = ({
 	open,
@@ -59,7 +62,7 @@ const ChatCreationModal = ({
 	const [topic, setTopic] = useState<string>('');
 	const [isPending, setIsPending] = useState<boolean>(false);
 
-	const createSnackbar: any = useContext(SnackbarManagerContext);
+	const createSnackbar: CreateSnackbarFn = useContext(SnackbarManagerContext);
 
 	const { goToRoomPage } = useRouting();
 
