@@ -283,11 +283,11 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 
 	useEffect(() => {
 		// scroll to the previous position after have changed the conversation
-		if (actualScrollPosition) {
-			const messageRef = window.document.getElementById(`message-${actualScrollPosition}`);
+		const actualPosition = useStore.getState().activeConversations[roomId]?.scrollPositionMessageId;
+		if (actualPosition) {
+			const messageRef = window.document.getElementById(`message-${actualPosition}`);
 			messageRef?.scrollIntoView({ block: 'end' });
 		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [roomId]);
 
 	useEffect(() => {
@@ -349,7 +349,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 			});
 			list.push(
 				<Container
-					key={`messageList-${Math.random()}`}
+					key={`messageList-${roomId}`}
 					data-testid={`messageListRef${roomId}`}
 					mainAlignment={'flex-start'}
 					crossAlignment={'flex-start'}
@@ -398,6 +398,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 
 	return (
 		<Messages
+			key={`messagesBox-${roomId}`}
 			ref={messageListRef}
 			id={`intersectionObserverRoot${roomId}`}
 			data-testid={`intersectionObserverRoot${roomId}`}
