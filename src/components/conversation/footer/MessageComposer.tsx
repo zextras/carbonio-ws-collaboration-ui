@@ -433,7 +433,8 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 				messageRef.style.height = '0';
 			}
 		};
-	}, [roomId, sendStopWriting, unreadMessagesCount, xmppClient]);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [roomId, sendStopWriting, xmppClient]);
 
 	useEffect(() => {
 		if (inputHasFocus) {

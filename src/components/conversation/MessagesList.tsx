@@ -398,6 +398,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 
 	return (
 		<Messages
+			key={`messagesBox-${roomId}`}
 			ref={messageListRef}
 			id={`intersectionObserverRoot${roomId}`}
 			data-testid={`intersectionObserverRoot${roomId}`}
