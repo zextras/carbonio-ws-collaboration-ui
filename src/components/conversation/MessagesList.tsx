@@ -155,7 +155,6 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 				entries.forEach((entry: IntersectionObserverEntry) => {
 					if (entry.isIntersecting) {
 						debouncedSetterScrollPosition.cancel();
-						// console.log(entry.target.id.split('message-')[1]);
 						debouncedSetterScrollPosition(entry.target.id.split('message-')[1]);
 					}
 				});
