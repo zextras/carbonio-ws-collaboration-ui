@@ -66,7 +66,7 @@ export function decodeXMPPMessageStanza(messageStanza: Element, optional?: Optio
 				roomId,
 				date: messageDate,
 				originalStanzaId,
-				value: decodeURIComponent(decode(body?.textContent || ''))
+				value:body?.textContent || ''
 			};
 			return message;
 		}
@@ -123,7 +123,7 @@ export function decodeXMPPMessageStanza(messageStanza: Element, optional?: Optio
 		const stanzaIdReference = getTagElement(messageStanza, 'stanza-id');
 		const stanzaId = optional?.stanzaId || (stanzaIdReference && getRequiredAttribute(stanzaIdReference, 'id') || messageId);
 		const from = getId(resource);
-		const messageTxt = decodeURIComponent(decode(body.textContent || ''));
+		let messageTxt = body.textContent || '';
 
 		// Message is a reply to another message
 		let replyTo;
@@ -143,10 +143,13 @@ export function decodeXMPPMessageStanza(messageStanza: Element, optional?: Optio
 				const fileSize = Strophe.getText(getRequiredTagElement(x, 'size'));
 				attachment = {
 					id: attachmentId,
-					name: decode(decodeURIComponent(filename)) || "",
+					name: decodeURIComponent(filename || ""),
 					mimeType: fileMimeType || "",
 					size: fileSize || 0
 				}
+
+				// Text ad description of the attachment has to be decoded
+				messageTxt = decodeURIComponent(messageTxt);
 			}
 		}
 
@@ -157,6 +160,7 @@ export function decodeXMPPMessageStanza(messageStanza: Element, optional?: Optio
 		if (forwardedElement) {
 			const forwardedMessageElement = getRequiredTagElement(forwardedElement, 'message');
 			const delayElement = getRequiredTagElement(forwardedElement, 'delay');
+			let forwardedTextMessage = decode(getRequiredTagElement(forwardedMessageElement, 'body').textContent || '');
 			// Attachment forwarded decoding
 			let forwardedAttachment;
 			const x = getTagElement(messageStanza, 'x');
@@ -169,17 +173,18 @@ export function decodeXMPPMessageStanza(messageStanza: Element, optional?: Optio
 					const fileSize = Strophe.getText(getRequiredTagElement(x, 'size'));
 					forwardedAttachment =  {
 						id: attachmentId,
-						name: decode(decodeURIComponent(filename || "")),
+						name: decodeURIComponent(filename || ""),
 						mimeType: fileMimeType || "",
 						size: fileSize || 0
 					}
+					forwardedTextMessage = decodeURIComponent(forwardedTextMessage)
 				}
 			}
 			forwarded = {
 				id: getRequiredAttribute(forwardedMessageElement, 'id'),
 				date: dateToTimestamp(getRequiredAttribute(delayElement, 'stamp')),
 				from: getId(getResource(getRequiredAttribute(forwardedMessageElement, 'from'))),
-				text: decode(getRequiredTagElement(forwardedMessageElement, 'body').textContent),
+				text: forwardedTextMessage,
 				attachment: forwardedAttachment
 			}
 		}
