@@ -1,0 +1,107 @@
+{
+    "action": {
+        "activateNotifications": "Abilita notifiche",
+        "addAttachment": "Aggiungi allegato",
+        "addNewMembers": "Aggiungi nuovi partecipanti",
+        "clearHistory": "Cancella cronologia",
+        "close": "Chiudi",
+        "copy": "Copia",
+        "create": "Crea",
+        "delete": "Elimina",
+        "download": "Scarica",
+        "edit": "Modifica",
+        "editYourMessage": "Modifica il tuo messaggio",
+        "forward": "Inoltra",
+        "forwarded": "inoltrati",
+        "leave": "Abbandona",
+        "muteNotifications": "Silenzia notifiche",
+        "preview": "Anteprima",
+        "removeUser": "Rimuovi",
+        "reply": "Rispondi",
+        "replyToSomeone": "Rispondi a",
+        "replyToYourself": "Rispondi al tuo messaggio",
+        "undo": "Annulla"
+    },
+    "conversationInfo": {
+        "title": "Titolo",
+        "topic": "Argomento",
+        "actionAccordionTitle": "Azioni",
+        "email": "Email",
+        "info": "Info",
+        "messages": "Messaggi",
+        "name": "Nome",
+        "status": "Stato"
+    },
+    "date": {
+        "yesterday": "Ieri"
+    },
+    "message": {
+        "draft": "bozza",
+        "deletedMessage": "Messaggi eliminati",
+        "edited": "modificato"
+    },
+    "modal": {
+        "creation": {
+            "newGroup": "Nuovo gruppo"
+        },
+        "removeMember": "Rimuovi membro",
+        "showPreviousConversationHistory": "Mostra cronologia della conversazione precedente",
+        "deleteRoom": "Elimina Stanza",
+        "deleteUserDescription": "Vuoi rimuovere questo partecipante?",
+        "leaveGroup": "Abbandona il Gruppo"
+    },
+    "participantsList": {
+        "closeSearch": "Chiudi ricerca",
+        "moreMembersAccordionTitle": "partecipanti"
+    },
+    "tooltip": {
+        "clear": "Elimina",
+        "leaveConversation": "Abbandona conversazione",
+        "messageComposer": "Compositore messaggi",
+        "messageRead": "Letto",
+        "messageSent": "Inviato",
+        "uploading": "Caricamento",
+        "close": "Chiudi",
+        "goToPrivateChat": "Vai alla conversazione privata",
+        "room": {
+            "uploadPicture": "Carica immagine"
+        },
+        "selectEmoji": "Seleziona emoji",
+        "sendMessage": "Invia messaggio"
+    },
+    "attachments": {
+        "addFromLocal": "Aggiungi da locale",
+        "attachLinkFiles": "Allega link pubblico da Files",
+        "stopUpload": "Sospendi caricamento"
+    },
+    "conversation": {
+        "chooseConversationDescription": "Scegli una conversazione per iniziare una Chat",
+        "keepInTouchTitle": "Restiamo in contatto!",
+        "newMessage": "Nuovo messaggio"
+    },
+    "editModal": {
+        "groupDescriptionDetails": "Descrive l'argomento del Gruppo"
+    },
+    "feedback": {
+        "historyCleared": "Cronologia eliminata con successo!",
+        "notificationsActivatedForThisChat": "Notifiche attive per questa conversazione",
+        "notificationsMutedForThisChat": "Notifiche silenziate per questa chat"
+    },
+    "settings": {
+        "notifications": {
+            "checkboxLabel": "Notifiche desktop",
+            "title": "Notifiche"
+        },
+        "profile": {
+            "errorGenericResponse": "Qualcosa è andato storto. Per favore riprova",
+            "title": "Profilo"
+        },
+        "save": "Modifiche salvate correttamente",
+        "title": "Impostazioni chat"
+    },
+    "status": {
+        "lastSeen": "Ultima visualizzazione {{lastSeen}}",
+        "offline": "Disconnesso",
+        "online": "Online"
+    }
+}

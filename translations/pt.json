@@ -1,0 +1,104 @@
+{
+    "action": {
+        "activateNotifications": "Ativar notificações",
+        "addAttachment": "Adicionar anexo",
+        "addNewMembers": "Adicionar novos contatos",
+        "clearHistory": "Apagar histórico",
+        "close": "Fechar",
+        "copy": "Copiar",
+        "create": "Criar",
+        "delete": "Excluir",
+        "download": "Baixar",
+        "edit": "Editar",
+        "undo": "Desfazer",
+        "editYourMessage": "Editar mensagem",
+        "forward": "Encaminhar",
+        "forwarded": "Encaminhada",
+        "leave": "Sair",
+        "muteNotifications": "Silenciar notificações",
+        "preview": "Pré-visualizar",
+        "removeUser": "Remover",
+        "reply": "Responder",
+        "replyToSomeone": "Responder a",
+        "replyToYourself": "Responder a si mesmo"
+    },
+    "attachments": {
+        "attachLinkFiles": "Anexar link público a partir de Files",
+        "addFromLocal": "Adicionar a partir do Meu Computador",
+        "stopUpload": "Parar upload"
+    },
+    "modal": {
+        "deleteRoom": "Excluir Sala",
+        "creation": {
+            "newGroup": "Novo Grupo"
+        },
+        "deleteUserDescription": "Tem certeza que deseja remover este membro?",
+        "leaveGroup": "Sair do Grupo",
+        "removeMember": "Remover membro",
+        "showPreviousConversationHistory": "Mostrar histórico de conversas"
+    },
+    "settings": {
+        "profile": {
+            "errorGenericResponse": "Alguma coisa deu errado. Por favor tente novamente",
+            "title": "Perfil"
+        },
+        "save": "Edições salvas corretamente",
+        "notifications": {
+            "checkboxLabel": "Notificações do desktop",
+            "title": "Notificações"
+        },
+        "title": "Configurações dos chats"
+    },
+    "conversation": {
+        "chooseConversationDescription": "Escolher uma conversa para iniciar um chat",
+        "keepInTouchTitle": "Vamos manter contato!",
+        "newMessage": "Nova mensagem"
+    },
+    "conversationInfo": {
+        "actionAccordionTitle": "Ações",
+        "email": "E-mail",
+        "info": "Informação",
+        "messages": "Mensagens",
+        "name": "Nome",
+        "status": "Status",
+        "title": "Título",
+        "topic": "Assunto"
+    },
+    "date": {
+        "yesterday": "Ontem"
+    },
+    "editModal": {
+        "groupDescriptionDetails": "Descreve o tema do Grupo"
+    },
+    "feedback": {
+        "historyCleared": "Histórico de mensagens eliminado correctamente!",
+        "notificationsActivatedForThisChat": "Notificações ativas para este chat",
+        "notificationsMutedForThisChat": "Notificações silenciadas para este chat"
+    },
+    "message": {
+        "deletedMessage": "Mensagem apagada",
+        "draft": "rascunho",
+        "edited": "editada"
+    },
+    "participantsList": {
+        "closeSearch": "Fechar busca",
+        "moreMembersAccordionTitle": "Membros"
+    },
+    "status": {
+        "lastSeen": "Visto por última vez {{lastSeen}}",
+        "offline": "Desconectado",
+        "online": "Online"
+    },
+    "tooltip": {
+        "clear": "Apagar",
+        "close": "Fechar",
+        "goToPrivateChat": "Ir para chat privado",
+        "leaveConversation": "Sair da conversa",
+        "messageComposer": "Autor da mensagem",
+        "messageRead": "Lida",
+        "messageSent": "Enviado",
+        "selectEmoji": "Selecionar emoji",
+        "sendMessage": "Enviar mensagem",
+        "uploading": "Carregando"
+    }
+}
