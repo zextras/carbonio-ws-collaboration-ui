@@ -17,7 +17,7 @@ export const getRoomIsWritingList = (store: RootStore, id: string): string[] | u
 		  )
 		: store.activeConversations[id]?.isWritingList;
 
-export const getReferenceMessageView = (
+export const getReferenceMessage = (
 	store: RootStore,
 	roomId: string
 ): ReferenceMessage | undefined => store.activeConversations[roomId]?.referenceMessage;
