@@ -107,12 +107,12 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 	const emojiTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
 	const timeoutRef = useRef<ReturnType<typeof setTimeout>>();
 
-	// Disable if textMessage is composed only by spaces, tabs or line breaks
-	// but if user is editing, send button is always enabled
 	const sendDisabled = useMemo(() => {
+		// Send button is always enabled if user is editing
 		if (referenceMessage?.actionType === messageActionType.EDIT) {
 			return false;
 		}
+		// Disable if textMessage is composed only by spaces, tabs or line breaks
 		return !/\S/.test(textMessage) && !filesToUploadArray;
 	}, [referenceMessage, textMessage, filesToUploadArray]);
 
@@ -241,7 +241,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 						break;
 					}
 					case messageActionType.EDIT: {
-						// If a text message (not an attachment description) is completely removed, send a deletion
+						// If a text message (not an attachment description) is completely removed, open the delete dialog
 						if (message === '' && !referenceMessage.attachment) {
 							setStanzaIdToDelete(referenceMessage.stanzaId);
 						}
@@ -369,7 +369,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 	const handlePaste = useCallback(
 		(ev) => {
 			try {
-				// If user is editing a message, he can't paste files
+				// Avoid to paste files if user is editing a message
 				const editingMessage = referenceMessage?.actionType === messageActionType.EDIT;
 				if (!editingMessage) {
 					const includeFiles = ev.clipboardData.files;

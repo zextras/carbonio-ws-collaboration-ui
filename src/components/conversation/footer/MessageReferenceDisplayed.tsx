@@ -91,7 +91,7 @@ const MessageReferenceDisplayed: React.FC<MessageReferenceDisplayedProps> = ({
 
 	const textMessage = useMemo(() => {
 		if (message.attachment) {
-			// Display always text (even if it's empty) when editing an attachment description
+			//  Always display text (even if it's empty) when editing an attachment description
 			if (referenceMessage.actionType === 'edit') {
 				return message.text;
 			}

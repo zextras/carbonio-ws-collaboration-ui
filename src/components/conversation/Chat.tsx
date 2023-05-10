@@ -74,12 +74,12 @@ const Chat = ({ roomId, setInfoPanelOpen }: ChatsProps): ReactElement => {
 			setDropzoneEnabled(false);
 			setInputHasFocus(roomId, true);
 		},
-		[setFilesToAttach, roomId, setInputHasFocus, filesToUploadArray]
+		[roomId, setFilesToAttach, setInputHasFocus, filesToUploadArray]
 	);
 
 	const handleOnDragOver = useCallback(
 		(ev) => {
-			// If user is editing a message, he can't drop files
+			// Avoid to drop files if user is editing a message
 			const editingMessage = referenceMessage?.actionType === messageActionType.EDIT;
 			if (!editingMessage) {
 				ev.preventDefault();
