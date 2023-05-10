@@ -98,7 +98,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 	const [isUploading, setIsUploading] = useState(false);
 	const [noMoreCharsOnInputComposer, setNoMoreCharsOnInputComposer] = useState(false);
 	const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-	const [stanzaIdToDelete, setStanzaIdToDelete] = useState<string | undefined>(undefined);
+	const [deleteMessageModalStatus, setDeleteMessageModalStatus] = useState(false);
 
 	const createSnackbar: any = useContext(SnackbarManagerContext);
 
@@ -238,16 +238,20 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 							referenceMessage.senderId,
 							referenceMessage.stanzaId
 						);
+						unsetReferenceMessage(roomId);
 						break;
 					}
 					case messageActionType.EDIT: {
 						// If a text message (not an attachment description) is completely removed, open the delete dialog
 						if (message === '' && !referenceMessage.attachment) {
-							setStanzaIdToDelete(referenceMessage.stanzaId);
+							setDeleteMessageModalStatus(true);
 						}
 						// Avoid to send correction if text doesn't change
-						else if (completeReferenceMessage.text !== message) {
-							xmppClient.sendChatMessageEdit(roomId, message, referenceMessage.stanzaId);
+						else {
+							if (completeReferenceMessage.text !== message) {
+								xmppClient.sendChatMessageEdit(roomId, message, referenceMessage.stanzaId);
+							}
+							unsetReferenceMessage(roomId);
 						}
 						break;
 					}
@@ -255,7 +259,6 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 						console.warn('case not handled', referenceMessage);
 					}
 				}
-				unsetReferenceMessage(roomId);
 			} else {
 				xmppClient.sendChatMessage(roomId, message);
 			}
@@ -277,6 +280,15 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 		filesToUploadArray,
 		addDescriptionToFileToAttach
 	]);
+
+	// Set focus on input after closing DeleteMessageModal
+	useEffect(() => {
+		if (referenceMessage?.actionType === messageActionType.EDIT && !deleteMessageModalStatus) {
+			if (messageInputRef?.current) {
+				messageInputRef.current?.focus();
+			}
+		}
+	}, [referenceMessage, deleteMessageModalStatus]);
 
 	const handleTypingMessage = useCallback(
 		(e: BaseSyntheticEvent): void => {
@@ -584,11 +596,11 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 					</Container>
 				</Tooltip>
 			</Container>
-			{stanzaIdToDelete && (
+			{deleteMessageModalStatus && (
 				<DeleteMessageModal
 					roomId={roomId}
-					stanzaId={stanzaIdToDelete}
-					removeStanzaId={setStanzaIdToDelete}
+					open={deleteMessageModalStatus}
+					setModalStatus={setDeleteMessageModalStatus}
 				/>
 			)}
 		</Container>
