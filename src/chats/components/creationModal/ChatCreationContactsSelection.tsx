@@ -71,7 +71,7 @@ const ChatCreationContactsSelection = ({
 	const inputPlaceholder = t('modal.creation.inputPlaceholder', 'Start typing or pick an address');
 	const listTextLabel = t(
 		'modal.creation.contactList',
-		'Select more that an address to create a group chat'
+		'Select more than an address to create a Group'
 	);
 
 	const inputRef = useRef<HTMLInputElement>(null);

@@ -36,7 +36,7 @@ export const affiliationMessage = (
 	const oneToOneCreated = t('affiliationMessages.oneToOneCreated', 'New Chat created!');
 	const youCreatedOneToOne = t(
 		'affiliationMessages.youCreatedOneToOne',
-		`You started a chat with ${affiliatedName}`,
+		`You started a Chat with ${affiliatedName}`,
 		{
 			userName: affiliatedName
 		}

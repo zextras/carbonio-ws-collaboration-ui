@@ -10,8 +10,10 @@ import { decode } from 'html-entities';
 
 import {
 	AffiliationMessage,
-	ConfigurationMessage, DeletedMessage,
-	Message, MessageType,
+	ConfigurationMessage,
+	Message,
+	MessageFastening,
+	MessageType,
 	TextMessage
 } from '../../../types/store/MessageTypes';
 import { dateToTimestamp, isBefore, now } from '../../../utils/dateUtil';
@@ -27,28 +29,47 @@ type OptionalParameters = {
 	stanzaId?: string;
 };
 
-export function decodeMessage(messageStanza: Element, optional?: OptionalParameters): Message | undefined {
+export function decodeXMPPMessageStanza(messageStanza: Element, optional?: OptionalParameters): Message | undefined {
 	const messageId = getRequiredAttribute(messageStanza, 'id');
 	const fromAttribute = getRequiredAttribute(messageStanza, 'from');
 	const roomId = getId(fromAttribute);
 	const resource = getResource(fromAttribute);
 	const messageDate = optional?.date || now();
-	let message: Message;
 
-	// Retract/deleted message
-	const retracted = getTagElement(messageStanza, 'retract');
-	if (retracted) {
-		const from = getId(resource);
-		const deletedMessageId = messageStanza.getElementsByTagName('apply-to')[0].id;
+	// Message fastening
+	const fasteningElement = getTagElement(messageStanza, 'apply-to');
+	if (fasteningElement) {
+		const originalStanzaId = getRequiredAttribute(fasteningElement, 'id');
 
-		const message = {
-			id: deletedMessageId,
-			roomId,
-			type: MessageType.DELETED_MSG,
-			date: messageDate,
-			from
-		};
-		return message as DeletedMessage;
+		// Message Fastening for a delete message
+		const retracted = getTagElement(fasteningElement, 'retract');
+		if (retracted) {
+			const message: MessageFastening = {
+				id: messageId,
+				type: MessageType.FASTENING,
+				action: 'delete',
+				roomId,
+				date: messageDate,
+				originalStanzaId,
+			};
+			return message;
+		}
+
+		// Message Fastening for an edited message
+		const edited = getTagElement(fasteningElement, 'edit');
+		if (edited) {
+			const body = getTagElement(messageStanza, 'body');
+			const message: MessageFastening = {
+				id: messageId,
+				type: MessageType.FASTENING,
+				action: 'edit',
+				roomId,
+				date: messageDate,
+				originalStanzaId,
+				value:body?.textContent || ''
+			};
+			return message;
+		}
 	}
 
 	// Affiliation message
@@ -57,7 +78,7 @@ export function decodeMessage(messageStanza: Element, optional?: OptionalParamet
 		const user = getId(Strophe.getText(x.getElementsByTagName('user')[0]));
 		const userElement = getRequiredTagElement(x, 'user');
 		const affiliationAttribute = getRequiredAttribute(userElement, 'affiliation');
-		message = {
+		const message: AffiliationMessage = {
 			id: messageId,
 			roomId,
 			date: messageDate,
@@ -65,7 +86,7 @@ export function decodeMessage(messageStanza: Element, optional?: OptionalParamet
 			userId: user,
 			as: affiliationAttribute
 		};
-		return message as AffiliationMessage;
+		return message;
 	}
 
 	// Configuration message
@@ -82,7 +103,7 @@ export function decodeMessage(messageStanza: Element, optional?: OptionalParamet
 						: operation === 'roomPictureDeleted'
 							? ''
 							: decode(Strophe.getText(getRequiredTagElement(x, 'value')));
-				message = {
+				const message: ConfigurationMessage = {
 					id: messageId,
 					roomId,
 					date: messageDate,
@@ -91,7 +112,7 @@ export function decodeMessage(messageStanza: Element, optional?: OptionalParamet
 					operation,
 					value
 				};
-				return message as ConfigurationMessage;
+				return message;
 			}
 		}
 	}
@@ -102,7 +123,7 @@ export function decodeMessage(messageStanza: Element, optional?: OptionalParamet
 		const stanzaIdReference = getTagElement(messageStanza, 'stanza-id');
 		const stanzaId = optional?.stanzaId || (stanzaIdReference && getRequiredAttribute(stanzaIdReference, 'id') || messageId);
 		const from = getId(resource);
-		const messageTxt = decodeURIComponent(decode(body.textContent || ''));
+		let messageTxt = body.textContent || '';
 
 		// Message is a reply to another message
 		let replyTo;
@@ -122,10 +143,13 @@ export function decodeMessage(messageStanza: Element, optional?: OptionalParamet
 				const fileSize = Strophe.getText(getRequiredTagElement(x, 'size'));
 				attachment = {
 					id: attachmentId,
-					name: decode(decodeURIComponent(filename)) || "",
+					name: decodeURIComponent(filename || ""),
 					mimeType: fileMimeType || "",
 					size: fileSize || 0
 				}
+
+				// Text ad description of the attachment has to be decoded
+				messageTxt = decodeURIComponent(messageTxt);
 			}
 		}
 
@@ -136,6 +160,7 @@ export function decodeMessage(messageStanza: Element, optional?: OptionalParamet
 		if (forwardedElement) {
 			const forwardedMessageElement = getRequiredTagElement(forwardedElement, 'message');
 			const delayElement = getRequiredTagElement(forwardedElement, 'delay');
+			let forwardedTextMessage = decode(getRequiredTagElement(forwardedMessageElement, 'body').textContent || '');
 			// Attachment forwarded decoding
 			let forwardedAttachment;
 			const x = getTagElement(messageStanza, 'x');
@@ -148,41 +173,23 @@ export function decodeMessage(messageStanza: Element, optional?: OptionalParamet
 					const fileSize = Strophe.getText(getRequiredTagElement(x, 'size'));
 					forwardedAttachment =  {
 						id: attachmentId,
-						name: decode(decodeURIComponent(filename || "")),
+						name: decodeURIComponent(filename || ""),
 						mimeType: fileMimeType || "",
 						size: fileSize || 0
 					}
+					forwardedTextMessage = decodeURIComponent(forwardedTextMessage)
 				}
 			}
 			forwarded = {
 				id: getRequiredAttribute(forwardedMessageElement, 'id'),
 				date: dateToTimestamp(getRequiredAttribute(delayElement, 'stamp')),
 				from: getId(getResource(getRequiredAttribute(forwardedMessageElement, 'from'))),
-				text: decode(getRequiredTagElement(forwardedMessageElement, 'body').textContent),
+				text: forwardedTextMessage,
 				attachment: forwardedAttachment
 			}
 		}
 
-		// Correction/edited message
-		const replaceTag = messageStanza.getElementsByTagName('replace')[0];
-		if (replaceTag) {
-			const from = getId(resource);
-			const editedMessageId = replaceTag.id;
-			const message = {
-				id: editedMessageId,
-				stanzaId,
-				roomId,
-				date: messageDate,
-				type: MessageType.TEXT_MSG,
-				from,
-				text: messageTxt,
-				replyTo,
-				edited: true
-			}
-			return message as TextMessage;
-		}
-
-		message = {
+		const message: TextMessage = {
 			id: messageId,
 			stanzaId,
 			roomId,
@@ -210,7 +217,7 @@ export function decodeMessage(messageStanza: Element, optional?: OptionalParamet
 			message.forwarded = undefined;
 		}
 
-		return message as TextMessage;
+		return message;
 	}
 }
 

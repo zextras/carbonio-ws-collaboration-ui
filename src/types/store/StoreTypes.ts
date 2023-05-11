@@ -6,18 +6,18 @@
 
 import { ActiveConversationsMap, FileToUpload, messageActionType } from './ActiveConversationTypes';
 import { Connections } from './ConnectionsTypes';
+import { FasteningsMap } from './FasteningMessagesTypes';
 import { Marker, MarkersMap } from './MarkersTypes';
 import { MeetingsMap } from './MeetingTypes';
 import {
 	MessageMap,
 	Message,
 	TextMessage,
-	DeletedMessage,
-	AttachmentMessageType
+	AttachmentMessageType,
+	MessageFastening
 } from './MessageTypes';
 import { RoomsMap } from './RoomTypes';
 import { CapabilityList, Session } from './SessionTypes';
-import { TemporaryMessage, TemporaryMessagesMap } from './TemporaryMessagesReferencesTypes';
 import { UnreadsMap } from './UnreadsCounterTypes';
 import { UsersMap } from './UserTypes';
 import { MeetingBe, MeetingParticipantBe } from '../network/models/meetingBeTypes';
@@ -66,8 +66,6 @@ export type MessagesStoreSlice = {
 		replyMessageId: string,
 		messageSubjectOfReply: TextMessage
 	) => void;
-	setDeletedMessage: (roomId: string, deletedMessage: DeletedMessage) => void;
-	setEditedMessage: (roomId: string, editedMessage: TextMessage) => void;
 };
 
 export type SessionStoreSlice = {
@@ -130,10 +128,9 @@ export type UnreadsCounterSlice = {
 	updateUnreadCount: (roomId: string) => void;
 };
 
-export type TemporaryMessagesSlice = {
-	temporaryMessages: TemporaryMessagesMap;
-	addDeletedMessageRef: (roomId: string, messageDeleted: TemporaryMessage) => void;
-	addEditedMessageRef: (roomId: string, messageEdited: TemporaryMessage) => void;
+export type FasteningMessagesSlice = {
+	fastenings: FasteningsMap;
+	addFastening: (fasteningMessage: MessageFastening) => void;
 };
 
 export type MeetingsSlice = {
@@ -160,5 +157,5 @@ export type RootStore = UsersStoreSlice &
 	ActiveConversationsSlice &
 	ConnectionsStoreSlice &
 	UnreadsCounterSlice &
-	TemporaryMessagesSlice &
+	FasteningMessagesSlice &
 	MeetingsSlice;

@@ -6,41 +6,24 @@
 
 import { find, forEach, orderBy, size } from 'lodash';
 
-import { Message, MessageType, TextMessage } from '../../types/store/MessageTypes';
+import { Message } from '../../types/store/MessageTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 
 export const getMessagesSelector = (state: RootStore, roomId: string): Message[] =>
 	state.messages[roomId] ? state.messages[roomId] : [];
 
-export const getLastMessageSelector = (state: RootStore, roomId: string): Message | null =>
-	state.messages[roomId] ? state.messages[roomId][state.messages[roomId].length - 1] : null;
+export const getLastMessageIdSelector = (state: RootStore, roomId: string): string | undefined => {
+	if (state.messages[roomId] && state.messages[roomId][state.messages[roomId].length - 1]) {
+		return state.messages[roomId][state.messages[roomId].length - 1].id;
+	}
+	return undefined;
+};
 
 export const getMessageSelector = (
 	state: RootStore,
 	roomId: string,
 	messageId: string | undefined
 ): Message | undefined => find(state.messages[roomId], (message) => message.id === messageId);
-
-export const getTextMessageSelector = (
-	state: RootStore,
-	roomId: string,
-	messageId: string | undefined
-): TextMessage | undefined =>
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore
-	find(
-		state.messages[roomId],
-		(message) => message.type === MessageType.TEXT_MSG && message.id === messageId
-	);
-
-export const getFistMessageOfHistory = (state: RootStore, roomId: string): Message =>
-	state.messages[roomId] && state.messages[roomId][0];
-
-export const getSingleMessageSelector = (
-	state: RootStore,
-	roomId: string,
-	messageId: string
-): Message | undefined => find(state.messages[roomId], (msg) => msg.id === messageId);
 
 export const getRoomIdsOrderedLastMessage = (
 	store: RootStore

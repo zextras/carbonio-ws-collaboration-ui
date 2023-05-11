@@ -38,11 +38,11 @@ const EditConversationModal: FC<EditConversationProps> = ({
 	const [t] = useTranslation();
 	const errorSnackbar = t(
 		'settings.profile.errorGenericResponse',
-		'Something went Wrong. Please Retry'
+		'Something went wrong. Please retry'
 	);
 	const namePlaceholder = t('conversationInfo.title', 'Title');
 	const topicPlaceholder = t('conversationInfo.topic', 'Topic');
-	const confirmEditLabel = t('editModal.confirm', 'Edit Details');
+	const confirmEditLabel = t('editModal.confirm', 'Edit details');
 	const confirmLabelDisabled = t('editModal.confirmDisabled', "You haven't changed anything");
 	const errorLabelDisabled = t('editModal.errorDisabled', 'Check the information entered');
 	const closeLabel = t('action.close', 'Close');

@@ -17,7 +17,7 @@ type ClearHistoryProps = {
 
 const ClearHistoryAction: FC<ClearHistoryProps> = ({ roomId }) => {
 	const [t] = useTranslation();
-	const clearHistoryLabel = t('action.clearHistory', 'Clear History');
+	const clearHistoryLabel = t('action.clearHistory', 'Clear history');
 	const historyClearedLabel = t('feedback.historyCleared', 'History cleared successfully!');
 
 	const [clearHistoryModalOpen, setClearHistoryModalOpen] = useState<boolean>(false);

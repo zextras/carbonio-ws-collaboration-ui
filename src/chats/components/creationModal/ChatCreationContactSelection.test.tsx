@@ -67,7 +67,7 @@ describe('Chat Creation Modal Contact Selector - search', () => {
 			expect(list).toBeVisible();
 		});
 
-		expect(screen.getByText('Select more that an address to create a group chat')).toBeVisible();
+		expect(screen.getByText('Select more than an address to create a Group')).toBeVisible();
 	});
 
 	test('Search user on Creation Modal', async () => {
@@ -276,7 +276,7 @@ describe('Add participant Modal Contact Selector', () => {
 		});
 
 		expect(
-			screen.queryByText('Select more that an address to create a group chat')
+			screen.queryByText('Select more than an address to create a Group')
 		).not.toBeInTheDocument();
 	});
 

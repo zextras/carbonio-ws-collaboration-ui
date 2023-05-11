@@ -1,25 +1,25 @@
 {
     "action": {
-        "activateNotifications": "Activate Notifications",
+        "activateNotifications": "Activate notifications",
         "addAttachment": "Add attachment",
         "addMoreAttachments": "Add {{counter}} attachments",
-        "addNewMembers": "Add New Members",
+        "addNewMembers": "Add new members",
         "addNewMembersTo": "Add new members to {{roomName}}",
         "addSingleAttachment": "Add {{counter}} attachment",
-        "clearHistory": "Clear History",
+        "clearHistory": "Clear history",
         "close": "Close",
         "copy": "Copy",
         "create": "Create",
         "delete": "Delete",
         "download": "Download",
         "edit": "Edit",
-        "editDetails": "Edit Details",
+        "editDetails": "Edit details",
         "editRoom": "Edit {{roomName}}",
         "editYourMessage": "Edit your message",
         "forward": "Forward",
         "forwarded": "forwarded",
         "leave": "Leave",
-        "muteNotifications": "Mute Notifications",
+        "muteNotifications": "Mute notifications",
         "newChat": "New Chat",
         "preview": "Preview",
         "removeUser": "Remove",
@@ -35,12 +35,12 @@
         "memberAdded": "{{userName}} has been added to {{roomName}}",
         "memberRemoved": "{{userName}} has been removed from {{roomName}}",
         "oneToOneCreated": "New Chat created!",
-        "youCreatedOneToOne": "You started a chat with {{userName}}"
+        "youCreatedOneToOne": "You started a Chat with {{userName}}"
     },
     "attachments": {
         "addFromLocal": "Add from local",
         "attachLinkFiles": "Attach public link from Files",
-        "dragAndDrop": "Drag&Drop Mode",
+        "dragAndDrop": "Drag&Drop mode",
         "dropHereDescription": "Drop here your attachments to quickly add them to this chat",
         "errorUploadingFile": "Something went wrong uploading {{file}}",
         "stopUpload": "Stop upload",
@@ -54,7 +54,7 @@
     },
     "conversation": {
         "chooseConversationDescription": "Choose a conversation to start a chat",
-        "emptyListDescription": "The conversations and groups will appear listed here",
+        "emptyListDescription": "Chats and Groups will appear listed here",
         "emptyListTitle": "This list is empty",
         "keepInTouchTitle": "Let's keep in touch!",
         "mockCreateChatDescription": "Interact, communicate and collaborate with your colleagues by sharing information and attachments",
@@ -82,7 +82,7 @@
         "yesterday": "Yesterday"
     },
     "editModal": {
-        "confirm": "Edit Details",
+        "confirm": "Edit details",
         "confirmDisabled": "You haven't changed anything",
         "errorDisabled": "Check the information entered",
         "groupDescriptionDetails": "It describes the subject of the Group",
@@ -103,10 +103,10 @@
         "edited": "edited"
     },
     "modal": {
-        "clearHistoryDescription": "You are about to clean up your conversation history, remember that this action cannot be undone. The history of other participants will not be deleted.",
+        "clearHistoryDescription": "You are about to clean up your conversation history, remember that this action cannot be undone. The history of other members will not be deleted.",
         "creation": {
-            "contactList": "Select more that an address to create a group chat",
-            "description": "Chats are one-to-one conversations that help you to stay in touch with your contacts. You can create a group by including more than two participants",
+            "contactList": "Select more than an address to create a Group",
+            "description": "Chats are one-to-one conversations that help you to stay in touch with your contacts. You can create a Group by including more than two addresses",
             "inputPlaceholder": "Start typing or pick an address",
             "newChat": "New Chat",
             "newGroup": "New Group"
@@ -122,20 +122,20 @@
             "inputPlaceholder": "Start typing or pick a chat",
             "title": "Forward message from {{chatName}}"
         },
-        "leaveAndDelete": "Leave and Delete Group",
+        "leaveAndDelete": "Leave and delete Group",
         "leaveGroup": "Leave Group",
         "leaveGroupLabel": "Are you sure to leave this Group?",
         "leaveRoom": "Leave Room",
         "leaveRoomLabel": "Are you sure to leave this Room?",
-        "removeMember": "Remove Member",
+        "removeMember": "Remove member",
         "showPreviousConversationHistory": "Show previous conversation history"
     },
     "participantsList": {
         "closeSearch": "Close search",
-        "moreParticipantsAccordionTitle": "Participants",
+        "moreMembersAccordionTitle": "members",
         "noMatch": "There are no items that match this search",
-        "oneParticipantAccordionTitle": "One Participant",
-        "searchUser": "Search Participants"
+        "oneMemberAccordionTitle": "One member",
+        "searchMembers": "Search members"
     },
     "settings": {
         "notifications": {
@@ -156,11 +156,11 @@
         "room": {
             "deletedImageCorrectly": "Group avatar has been successfully reset to the original one",
             "deletedUserImageCorrectly": "Avatar has been successfully reset to the original one",
-            "pictureSizeTooLarge": "Something went wrong, remember that the maximum size for a group’s avatar image is {{size}}kb",
+            "pictureSizeTooLarge": "Something went wrong, remember that the maximum size for a Group’s avatar image is {{size}}kb",
             "updatedPictureCorrectly": "New avatar has been successfully uploaded"
         },
         "save": "Edits saved correctly",
-        "title": "Chats Settings"
+        "title": "Chats settings"
     },
     "status": {
         "areTyping": "are typing...",
@@ -169,7 +169,7 @@
         "offline": "Offline",
         "online": "Online"
     },
-    "titlePlaceholder": "Your Group's Title",
+    "titlePlaceholder": "Your Group's title",
     "tooltip": {
         "clear": "Clear",
         "close": "Close",
@@ -180,7 +180,7 @@
         "forwardedMessage": "Message forwarded from another chat",
         "goToPrivateChat": "Go to private chat",
         "iAmModerator": "You're a moderator",
-        "leaveAndDelete": "Leave and Delete the conversation",
+        "leaveAndDelete": "Leave and delete the conversation",
         "leaveConversation": "Leave conversation",
         "memberIsModerator": "This member is a moderator",
         "messageActions": " Message actions",
@@ -191,7 +191,6 @@
         "promoteModerator": "Promote to moderator",
         "promoteSomeoneElseToModerator": "Promote someone else to moderator to leave",
         "removeCaption": "Remove caption",
-        "removeMember": "Remove member",
         "room": {
             "resetPicture": "Reset picture",
             "updatePicture": "Update picture",

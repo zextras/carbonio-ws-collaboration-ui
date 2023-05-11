@@ -18,7 +18,7 @@ export const xmppClient = {
 	sendChatMessage: (): null => null,
 	sendChatMessageReply: (): null => null,
 	sendChatMessageDeletion: (): null => null,
-	sendChatMessageCorrection: (): null => null,
+	sendChatMessageEdit: (): null => null,
 	requestMessageToForward: (): Promise<Element> =>
 		new Promise((resolve) => {
 			resolve(Strophe.createHtml(textMessageRealTime));

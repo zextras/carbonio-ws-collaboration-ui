@@ -82,7 +82,7 @@ describe('Room Picture Handler - groups', () => {
 		await user.hover(backgroundContainer);
 
 		const groupTitle = screen.getByText(new RegExp(`${testRoom.name}`, 'i'));
-		const groupMembers = screen.getByText(/2 Participants/i);
+		const groupMembers = screen.getByText(/2 members/i);
 		const updateButton = screen.getByTestId('upload_button');
 
 		expect(groupTitle).toBeInTheDocument();
@@ -103,7 +103,7 @@ describe('Room Picture Handler - groups', () => {
 		await user.hover(pictureContainer);
 
 		const groupTitle = screen.getByText(new RegExp(`${testRoom.name}`, 'i'));
-		const groupMembers = screen.getByText(/2 Participants/i);
+		const groupMembers = screen.getByText(/2 members/i);
 		const updateButton = screen.getByTestId('upload_button');
 		const deleteButton = screen.getByTestId('delete_button');
 

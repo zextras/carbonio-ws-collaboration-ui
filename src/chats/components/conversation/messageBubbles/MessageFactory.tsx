@@ -14,8 +14,7 @@ import Bubble from './Bubble';
 import ConfigurationBubble from './ConfigurationBubble';
 import DateBubble from './DateBubble';
 import DeletedBubble from './DeletedBubble';
-import { getSingleMessageSelector } from '../../../../store/selectors/MessagesSelectors';
-import useStore from '../../../../store/Store';
+import useMessage from '../../../../hooks/useMessage';
 import { MessageType } from '../../../../types/store/MessageTypes';
 
 type MessageProps = {
@@ -57,7 +56,7 @@ const MessageFactory = ({
 	const [t] = useTranslation();
 	const newMessagesLabel = t('conversation.newMessages', 'New messages');
 
-	const message = useStore((store) => getSingleMessageSelector(store, messageRoomId, messageId));
+	const message = useMessage(messageRoomId, messageId);
 
 	const newMessagesComponent = useMemo(
 		() => (
@@ -79,20 +78,16 @@ const MessageFactory = ({
 				return (
 					<>
 						{isFirstNewMessage && newMessagesComponent}
-						<Bubble
-							message={message}
-							prevMessageIsFromSameSender={prevMessageIsFromSameSender}
-							nextMessageIsFromSameSender={nextMessageIsFromSameSender}
-							messageRef={messageRef}
-						/>
-					</>
-				);
-			}
-			case MessageType.DELETED_MSG: {
-				return (
-					<>
-						{isFirstNewMessage && newMessagesComponent}
-						<DeletedBubble message={message} refEl={messageRef} />
+						{message.deleted ? (
+							<DeletedBubble message={message} refEl={messageRef} />
+						) : (
+							<Bubble
+								message={message}
+								prevMessageIsFromSameSender={prevMessageIsFromSameSender}
+								nextMessageIsFromSameSender={nextMessageIsFromSameSender}
+								messageRef={messageRef}
+							/>
+						)}
 					</>
 				);
 			}
