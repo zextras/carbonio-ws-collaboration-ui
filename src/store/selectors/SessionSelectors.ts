@@ -7,6 +7,8 @@
 import { CapabilityType } from '../../types/store/SessionTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 
+export const getSelectedRoomId = (store: RootStore): string | undefined =>
+	store.session.selectedRoomOneToOneGroup;
 export const getSelectedConversation = (store: RootStore, roomId: string): boolean =>
 	store.session.selectedRoomOneToOneGroup === roomId;
 
