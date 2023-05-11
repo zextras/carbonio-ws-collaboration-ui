@@ -98,6 +98,6 @@
 		"priority": 9,
 		"attrKey": "carbonioFeatureChatsEnabled",
 		"type": "carbonio",
-		"translations_repository": "git@bitbucket.org:zextras/com_zextras_zapp_chats_ui.git"
+		"translations_repository": "git@github.com:Zextras/carbonio-ws-collaboration-ui-i18n.git"
 	}
 }

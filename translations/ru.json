@@ -1,0 +1,107 @@
+{
+    "attachments": {
+        "stopUpload": "Остановить загрузку",
+        "addFromLocal": "Добавить из локального",
+        "attachLinkFiles": "Прикрепите публичную ссылку из Files"
+    },
+    "feedback": {
+        "historyCleared": "История очищена!",
+        "notificationsActivatedForThisChat": "Уведомления включены для этого Чата",
+        "notificationsMutedForThisChat": "Отключить уведомления для этого чата"
+    },
+    "message": {
+        "deletedMessage": "Удаленное сообщение",
+        "draft": "черновик",
+        "edited": "отредактировано"
+    },
+    "modal": {
+        "leaveGroup": "Выйти из Группы",
+        "creation": {
+            "newGroup": "Новая группа"
+        },
+        "deleteRoom": "Удалить конференц-зал",
+        "deleteUserDescription": "Вы уверены, что хотите удалить этого пользователя?",
+        "removeMember": "Удалить участника",
+        "showPreviousConversationHistory": "Показать предыдущую историю чата"
+    },
+    "action": {
+        "activateNotifications": "Включить уведомления",
+        "addAttachment": "Прикрепить вложение",
+        "addNewMembers": "Добавить новых участников",
+        "clearHistory": "Очистить историю чата",
+        "close": "Закрыть",
+        "copy": "Копия",
+        "create": "Создать",
+        "delete": "Удалить",
+        "download": "Загрузить",
+        "edit": "Редактировать",
+        "editYourMessage": "Редактировать сообщение",
+        "forward": "Переслать",
+        "forwarded": "переадресовано",
+        "leave": "Покинуть",
+        "muteNotifications": "Отключить уведомления",
+        "preview": "Предварительный просмотр",
+        "removeUser": "Удалить",
+        "reply": "Ответить",
+        "replyToSomeone": "Ответить",
+        "replyToYourself": "Ответить",
+        "undo": "Отменить"
+    },
+    "conversation": {
+        "chooseConversationDescription": "Выберите беседу, чтобы начать чат",
+        "keepInTouchTitle": "Будем на связи!",
+        "newMessage": "Новое сообщение"
+    },
+    "conversationInfo": {
+        "actionAccordionTitle": "Действия",
+        "email": "Электронная почта",
+        "info": "Информация",
+        "messages": "Сообщения",
+        "name": "имя",
+        "status": "статусу",
+        "title": "Заголовок",
+        "topic": "Тема"
+    },
+    "date": {
+        "yesterday": "Вчера"
+    },
+    "editModal": {
+        "groupDescriptionDetails": "Описание темы Группы"
+    },
+    "participantsList": {
+        "closeSearch": "Закрыть поиск",
+        "moreMembersAccordionTitle": "участники"
+    },
+    "settings": {
+        "notifications": {
+            "checkboxLabel": "Уведомления",
+            "title": "Оповещения"
+        },
+        "profile": {
+            "errorGenericResponse": "Что-то пошло не так. Пожалуйста повторите",
+            "title": "Параметры пользователя"
+        },
+        "save": "Правки сохранены",
+        "title": "Настройки Чатов"
+    },
+    "status": {
+        "lastSeen": "Последнее посещение {{lastSeen}}",
+        "offline": "Не в сети",
+        "online": "В сети"
+    },
+    "tooltip": {
+        "clear": "Удалить",
+        "close": "Закрыть",
+        "goToPrivateChat": "Перейти в личный чат",
+        "leaveConversation": "Покинуть беседу",
+        "messageComposer": "Средство создания сообщения",
+        "messageRead": "Читать",
+        "messageSent": "Отправленные",
+        "room": {
+            "uploadPicture": "Загрузить картинку"
+        },
+        "selectEmoji": "Выбрать emoji",
+        "sendMessage": "Отправить сообщение",
+        "uploading": "Выгрузка"
+    }
+}

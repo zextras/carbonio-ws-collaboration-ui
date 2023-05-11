@@ -1,0 +1,104 @@
+{
+    "conversationInfo": {
+        "topic": "主题",
+        "actionAccordionTitle": "操作项",
+        "email": "电子邮件",
+        "info": "信息",
+        "messages": "消息",
+        "name": "名称",
+        "status": "状态",
+        "title": "标题"
+    },
+    "date": {
+        "yesterday": "昨天"
+    },
+    "editModal": {
+        "groupDescriptionDetails": "描述群组主题"
+    },
+    "feedback": {
+        "historyCleared": "历史记录清除成功！",
+        "notificationsActivatedForThisChat": "已为此聊天激活消息通知",
+        "notificationsMutedForThisChat": "已为此聊天静音消息通知"
+    },
+    "message": {
+        "deletedMessage": "已删除消息",
+        "draft": "草稿",
+        "edited": "已编辑"
+    },
+    "modal": {
+        "deleteRoom": "删除房间",
+        "deleteUserDescription": "确定要移除该成员吗？",
+        "leaveGroup": "离开群组",
+        "removeMember": "移除成员",
+        "showPreviousConversationHistory": "显示之前的对话历史记录"
+    },
+    "participantsList": {
+        "closeSearch": "关闭搜索",
+        "moreMembersAccordionTitle": "成员"
+    },
+    "settings": {
+        "notifications": {
+            "checkboxLabel": "桌面通知",
+            "title": "通知"
+        },
+        "profile": {
+            "errorGenericResponse": "出现错误。请重试",
+            "title": "档案"
+        },
+        "save": "编辑保存正确",
+        "title": "聊天设置"
+    },
+    "status": {
+        "lastSeen": "上次出现{{lastSeen}}",
+        "offline": "离线",
+        "online": "在线"
+    },
+    "tooltip": {
+        "clear": "清除",
+        "close": "关闭",
+        "goToPrivateChat": "转到私密聊天",
+        "leaveConversation": "离开对话",
+        "messageComposer": "消息编辑器",
+        "messageRead": "读取",
+        "messageSent": "已发送",
+        "room": {
+            "uploadPicture": "上传图片"
+        },
+        "selectEmoji": "选择表情符号",
+        "sendMessage": "发送消息",
+        "uploading": "上传中"
+    },
+    "action": {
+        "activateNotifications": "激活消息通知",
+        "addAttachment": "添加附件",
+        "addNewMembers": "添加新成员",
+        "clearHistory": "清除历史记录",
+        "close": "关闭",
+        "copy": "复制",
+        "create": "创建",
+        "delete": "删除",
+        "download": "下载",
+        "edit": "编辑",
+        "editYourMessage": "编辑您的消息",
+        "forward": "转发",
+        "forwarded": "已转发",
+        "leave": "离开",
+        "muteNotifications": "静音通知",
+        "preview": "预览",
+        "removeUser": "移除",
+        "reply": "回复",
+        "replyToSomeone": "回复",
+        "replyToYourself": "回复自己",
+        "undo": "撤消"
+    },
+    "attachments": {
+        "addFromLocal": "从本地添加",
+        "attachLinkFiles": "从文件附加公开链接",
+        "stopUpload": "停止上传"
+    },
+    "conversation": {
+        "chooseConversationDescription": "选择要进行聊天的会话",
+        "keepInTouchTitle": "让我们保持联系！",
+        "newMessage": "新消息"
+    }
+}

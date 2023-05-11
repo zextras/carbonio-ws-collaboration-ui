@@ -113,6 +113,8 @@
         },
         "deleteGroup": "Delete Group",
         "deleteGroupLabel": "Are you sure to delete this Group?",
+        "deleteMessageTitle": "Delete selected message?",
+        "deleteMessageTitleDescription": "If you remove the entire content of the message, it will no longer be available and will consequently be deleted.",
         "deleteRoom": "Delete Room",
         "deleteRoomLabel": "Are you sure to delete this Room?",
         "deleteUserDescription": "Are you sure you want to remove this member?",
