@@ -9,8 +9,8 @@ import React, { Dispatch, ReactElement, SetStateAction, useCallback } from 'reac
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import ConversationHeaderMeetingButton from './ConversationHeaderMeetingButton';
 import useMediaQueryCheck from '../../../hooks/useMediaQueryCheck';
+import ConversationHeaderMeetingButton from '../../../meetings/components/HeaderMeetingButton/ConversationHeaderMeetingButton';
 import { getRoomNameSelector } from '../../../store/selectors/RoomsSelectors';
 import { getCapability } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
