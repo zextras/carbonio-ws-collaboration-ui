@@ -23,6 +23,7 @@ const MessageTextarea = styled.textarea`
 	overflow-y: scroll;
 	max-height: calc(50vh - 6.25rem);
 	width: 100%;
+	scrollbar-color: ${({ theme }): string => theme.palette.gray3.regular} transparent;
 
 	@keyframes inputFull {
 		0% {
@@ -54,7 +55,7 @@ const MessageTextarea = styled.textarea`
 		height: 0.5rem;
 	}
 	&::-webkit-scrollbar-thumb {
-		background: ${({ theme }): string => theme.palette.gray6.active};
+		background: ${({ theme }): string => theme.palette.gray3.regular};
 		border-radius: 0.25rem;
 	}
 	&::-webkit-scrollbar-thumb:hover {
