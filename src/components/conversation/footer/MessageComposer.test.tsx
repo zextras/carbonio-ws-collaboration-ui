@@ -476,4 +476,15 @@ describe('MessageComposer', () => {
 		const sendButton = screen.getByTestId('icon: Navigation2');
 		expect(sendButton).not.toHaveAttribute('disabled', true);
 	});
+
+	test('The composer should have the draft message in the text area on opening the conversation', () => {
+		const store = useStore.getState();
+		store.addRoom(mockedRoom);
+		store.setDraftMessage(mockedRoom.id, false, "I'm a draft!");
+
+		setup(<MessageComposer roomId={mockedRoom.id} />);
+
+		const composerTextArea = screen.getByRole('textbox');
+		expect((composerTextArea as HTMLTextAreaElement).value).toBe("I'm a draft!");
+	});
 });
