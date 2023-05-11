@@ -1,0 +1,104 @@
+{
+    "action": {
+        "preview": "Voorbeeld",
+        "removeUser": "Verwijderen",
+        "activateNotifications": "Berichten inschakelen",
+        "addAttachment": "Bijlage toevoegen",
+        "addNewMembers": "Nieuwe leden toevoegen",
+        "clearHistory": "Historiek wissen",
+        "close": "Sluiten",
+        "copy": "Kopieren",
+        "create": "Creëren",
+        "delete": "Verwijderen",
+        "download": "Downloaden",
+        "edit": "Bewerken",
+        "editYourMessage": "Bewerk uw bericht",
+        "forward": "Doorsturen",
+        "forwarded": "doorgestuurd",
+        "leave": "Verlaten",
+        "muteNotifications": "Meldingen dempen",
+        "reply": "Antwoorden",
+        "replyToSomeone": "Antwoord aan",
+        "replyToYourself": "Antwoord aan uzelf",
+        "undo": "Ongedaan maken"
+    },
+    "conversation": {
+        "keepInTouchTitle": "Laten we contact houden!",
+        "newMessage": "Nieuw bericht",
+        "chooseConversationDescription": "Kies een gesprek om een chat te beginnen"
+    },
+    "conversationInfo": {
+        "actionAccordionTitle": "Acties",
+        "name": "Naam",
+        "status": "Status",
+        "title": "Titel",
+        "topic": "Onderwerp",
+        "email": "E-mail",
+        "info": "Info",
+        "messages": "Berichten"
+    },
+    "date": {
+        "yesterday": "Gisteren"
+    },
+    "editModal": {
+        "groupDescriptionDetails": "Het omschrijft het onderwerp van de Groep"
+    },
+    "feedback": {
+        "historyCleared": "Historiek met succes gewist!",
+        "notificationsActivatedForThisChat": "Berichten ingeschakeld voor deze chat",
+        "notificationsMutedForThisChat": "Meldingen voor deze chat gedempt"
+    },
+    "modal": {
+        "leaveGroup": "Groep verlaten",
+        "deleteRoom": "Ruimte verwijderen",
+        "deleteUserDescription": "Weet u zeker dat u dit lid wilt verwijderen?",
+        "removeMember": "Lid verwijderen",
+        "showPreviousConversationHistory": "Vorige gesprekshistoriek tonen"
+    },
+    "participantsList": {
+        "closeSearch": "Zoeken sluiten",
+        "moreMembersAccordionTitle": "leden"
+    },
+    "settings": {
+        "notifications": {
+            "checkboxLabel": "Desktopmeldingen",
+            "title": "kennisgevingen"
+        },
+        "save": "Bewerkingen correct opgeslagen",
+        "profile": {
+            "errorGenericResponse": "Er is iets misgegaan. Probeer het opnieuw",
+            "title": "Profiel"
+        },
+        "title": "Chats instellingen"
+    },
+    "status": {
+        "lastSeen": "Laatst bekeken {{lastSeen}}",
+        "offline": "Offline",
+        "online": "Online"
+    },
+    "tooltip": {
+        "leaveConversation": "Gesprek verlaten",
+        "messageComposer": "Samensteller bericht",
+        "messageRead": "Gelezen",
+        "messageSent": "Verstuurd",
+        "room": {
+            "uploadPicture": "Afbeelding uploaden"
+        },
+        "uploading": "Wordt geüpload",
+        "clear": "Wissen",
+        "close": "Sluiten",
+        "goToPrivateChat": "Naar private chat gaan",
+        "selectEmoji": "Emoji selecteren",
+        "sendMessage": "Bericht versturen"
+    },
+    "attachments": {
+        "addFromLocal": "Toevoegen van lokaal",
+        "attachLinkFiles": "Openbare link bijvoegen vanuit Bestanden",
+        "stopUpload": "Upload stoppen"
+    },
+    "message": {
+        "deletedMessage": "Verwijderd bericht",
+        "draft": "concept",
+        "edited": "bewerkt"
+    }
+}

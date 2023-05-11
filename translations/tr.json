@@ -1,0 +1,104 @@
+{
+    "action": {
+        "editYourMessage": "Mesajınızı düzenleyin",
+        "forward": "İlet",
+        "activateNotifications": "Bildirimleri etkinleştir",
+        "addAttachment": "Eklenti ekle",
+        "addNewMembers": "Yeni üyeler ekle",
+        "clearHistory": "Geçmişi temizle",
+        "close": "Kapat",
+        "copy": "Kopyala",
+        "create": "Oluştur",
+        "delete": "Sil",
+        "download": "İndir",
+        "edit": "Düzenle",
+        "forwarded": "iletildi",
+        "leave": "Ayrıl",
+        "muteNotifications": "Bildirimleri kapat",
+        "preview": "Önizleme",
+        "removeUser": "Kaldır",
+        "reply": "Yanıtla",
+        "replyToSomeone": "Yanıtla",
+        "replyToYourself": "Kendine yanıtla",
+        "undo": "Geri al"
+    },
+    "attachments": {
+        "addFromLocal": "Lokalden ekle",
+        "attachLinkFiles": "Dosyalar'dan genel bağlantı ekle",
+        "stopUpload": "Yüklemeyi durdur"
+    },
+    "conversation": {
+        "chooseConversationDescription": "Bir sohbet başlatmak için görüşme seçin",
+        "keepInTouchTitle": "Haberleşelim!",
+        "newMessage": "Yeni mesaj"
+    },
+    "conversationInfo": {
+        "actionAccordionTitle": "Eylemler",
+        "email": "E-Posta",
+        "info": "Bilgi",
+        "messages": "Mesajlar",
+        "name": "Ad",
+        "status": "Durum",
+        "title": "Başlık",
+        "topic": "Konu tanımı"
+    },
+    "date": {
+        "yesterday": "Dün"
+    },
+    "editModal": {
+        "groupDescriptionDetails": "Grubun konusunu açıklar"
+    },
+    "feedback": {
+        "historyCleared": "Geçmiş başarıyla temizlendi!",
+        "notificationsActivatedForThisChat": "Bu sohbet için bildirimler etkinleştirildi",
+        "notificationsMutedForThisChat": "Bu sohbet için bildirimler kapatıldı"
+    },
+    "message": {
+        "deletedMessage": "Silinmiş mesaj",
+        "draft": "taslak",
+        "edited": "düzenlendi"
+    },
+    "modal": {
+        "deleteRoom": "Odayı Sil",
+        "deleteUserDescription": "Bu üyeyi çıkartmak istediğinize emin misiniz?",
+        "leaveGroup": "Gruptan ayrıl",
+        "removeMember": "Üyeyi kaldır",
+        "showPreviousConversationHistory": "Önceki görüşme geçmişini göster"
+    },
+    "participantsList": {
+        "closeSearch": "Aramayı kapat",
+        "moreMembersAccordionTitle": "Üyeler"
+    },
+    "settings": {
+        "notifications": {
+            "checkboxLabel": "Masaüstü bildirimleri",
+            "title": "Bildirimler"
+        },
+        "profile": {
+            "errorGenericResponse": "Bir sorun oluştu. Lütfen tekrar deneyin",
+            "title": "Profil"
+        },
+        "save": "Değişiklikler başarıyla kaydedildi",
+        "title": "Sohbet ayarları"
+    },
+    "status": {
+        "lastSeen": "Son görülme {{lastSeen}}",
+        "offline": "Çevrimdışı",
+        "online": "Çevrim içi"
+    },
+    "tooltip": {
+        "clear": "Temizle",
+        "close": "Kapat",
+        "goToPrivateChat": "Özel sohbete git",
+        "leaveConversation": "Görüşmeden çık",
+        "messageComposer": "Mesaj hazırlayıcı",
+        "messageRead": "Okunmuş",
+        "messageSent": "Gönderildi",
+        "room": {
+            "uploadPicture": "Resim yükle"
+        },
+        "selectEmoji": "Emoji seç",
+        "sendMessage": "Mesaj gönder",
+        "uploading": "Yükleniyor"
+    }
+}
