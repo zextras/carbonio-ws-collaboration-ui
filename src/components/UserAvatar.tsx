@@ -76,10 +76,8 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ roomId, unreadCount, draftMessa
 	const [picture, setPicture] = useState<false | string>(false);
 
 	useEffect(() => {
-		if (userPictureUpdatedAt != null) {
-			setPicture(
-				`${UsersApi.getURLUserPicture(otherMember?.userId || '')}?${userPictureUpdatedAt}`
-			);
+		if (userPictureUpdatedAt != null && otherMember && otherMember.userId !== undefined) {
+			setPicture(`${UsersApi.getURLUserPicture(otherMember.userId)}?${userPictureUpdatedAt}`);
 		} else {
 			setPicture(false);
 		}
