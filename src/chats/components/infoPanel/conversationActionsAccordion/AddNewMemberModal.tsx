@@ -46,7 +46,7 @@ const AddNewMemberModal: FC<AddNewMemberProps> = ({
 		'modal.showPreviousConversationHistory',
 		'Show previous conversation history'
 	);
-	const addNewMemberButtonLabel = t('action.addNewMembers', 'Add New Members');
+	const addNewMemberButtonLabel = t('action.addNewMembers', 'Add new members');
 	const closeLabel = t('action.close', 'Close');
 
 	const onClickCheckbox = useCallback(

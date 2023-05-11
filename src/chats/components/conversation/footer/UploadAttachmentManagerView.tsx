@@ -29,6 +29,11 @@ type UploadAttachmentManagerViewProps = {
 	roomId: string;
 };
 
+const AttachmentsPreview = styled(Container)`
+	box-shadow: 0px -1px 2px rgba(0, 0, 0, 0.1);
+	-webkit-box-shadow: 0px -1px 2px rgba(0, 0, 0, 0.1);
+`;
+
 const HoverActions = styled(Container)`
 	z-index: 1;
 	position: absolute;
@@ -325,7 +330,7 @@ const UploadAttachmentManagerView: React.FC<UploadAttachmentManagerViewProps> = 
 
 	if (filesToUploadArray) {
 		return (
-			<Container
+			<AttachmentsPreview
 				background="gray5"
 				padding={{ all: 'small' }}
 				data-testid="upload_attachment_manager"
@@ -373,7 +378,7 @@ const UploadAttachmentManagerView: React.FC<UploadAttachmentManagerViewProps> = 
 					hidden
 					ref={fileSelectorInputRef}
 				/>
-			</Container>
+			</AttachmentsPreview>
 		);
 	}
 	return null;

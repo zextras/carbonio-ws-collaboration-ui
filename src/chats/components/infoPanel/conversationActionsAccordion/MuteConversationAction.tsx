@@ -19,8 +19,8 @@ type MuteProps = {
 
 const MuteConversationAction: FC<MuteProps> = ({ roomId }) => {
 	const [t] = useTranslation();
-	const muteNotificationsLabel = t('action.muteNotifications', 'Mute Notifications');
-	const activateNotificationsLabel = t('action.activateNotifications', 'Activate Notifications');
+	const muteNotificationsLabel = t('action.muteNotifications', 'Mute notifications');
+	const activateNotificationsLabel = t('action.activateNotifications', 'activate notifications');
 	const undoLabel = t('action.undo', 'Undo');
 	const notificationsActivatedForThisChatLabel = t(
 		'feedback.notificationsActivatedForThisChat',

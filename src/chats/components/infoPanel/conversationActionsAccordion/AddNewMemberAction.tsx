@@ -25,7 +25,7 @@ type AddNewMemberProps = {
 
 const AddNewMemberAction: FC<AddNewMemberProps> = ({ roomId }) => {
 	const [t] = useTranslation();
-	const addNewMemberTitle: string = t('action.addNewMembers', `Add New Members`);
+	const addNewMemberTitle: string = t('action.addNewMembers', `Add new members`);
 
 	const members: Member[] | undefined = useStore((state) => getRoomMembers(state, roomId));
 	const roomName: string = useStore((state) => getRoomNameSelector(state, roomId));

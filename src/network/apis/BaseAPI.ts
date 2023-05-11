@@ -57,6 +57,7 @@ export default abstract class BaseAPI implements IBaseAPI {
 		return new Promise<any>((resolve, reject) => {
 			const reader = new FileReader();
 			reader.addEventListener('load', () => {
+				// Headers have to be encoded in base64 and then in utf-8 to be sent
 				const headers = new Headers();
 				headers.append('fileName', btoa(encodeURIComponent(file.name)));
 				headers.append('mimeType', file.type);

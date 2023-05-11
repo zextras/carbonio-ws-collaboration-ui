@@ -14,10 +14,10 @@ export type MessageList = Message[];
 
 export type Message =
 	| TextMessage
-	| DeletedMessage
 	| AffiliationMessage
 	| ConfigurationMessage
-	| DateMessage;
+	| DateMessage
+	| MessageFastening;
 
 export type BasicMessage = {
 	id: string;
@@ -31,16 +31,12 @@ export type TextMessage = BasicMessage & {
 	from: string;
 	text: string;
 	read: MarkerStatus;
-	replyTo?: string;
-	repliedMessage?: TextMessage | DeletedMessage;
 	edited?: boolean;
+	deleted?: boolean;
+	replyTo?: string;
+	repliedMessage?: TextMessage;
 	forwarded?: ForwardedMessage;
 	attachment?: AttachmentMessageType;
-};
-
-export type DeletedMessage = BasicMessage & {
-	type: MessageType.DELETED_MSG;
-	from: string;
 };
 
 export type AffiliationMessage = BasicMessage & {
@@ -64,12 +60,19 @@ export type DateMessage = BasicMessage & {
 	type: MessageType.DATE_MSG;
 };
 
+export type MessageFastening = BasicMessage & {
+	type: MessageType.FASTENING;
+	action: 'delete' | 'edit';
+	originalStanzaId: string;
+	value?: string;
+};
 export enum MessageType {
 	TEXT_MSG = 'text',
 	DELETED_MSG = 'deleted',
 	AFFILIATION_MSG = 'affiliation',
 	CONFIGURATION_MSG = 'configuration',
-	DATE_MSG = 'date'
+	DATE_MSG = 'date',
+	FASTENING = 'fastening'
 }
 
 export type ForwardedMessage = {

@@ -14,7 +14,7 @@ import useStore from '../../../../store/Store';
 import { createMockFile, createMockMember, createMockRoom } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe } from '../../../../types/network/models/roomBeTypes';
-import { FileToUpload } from '../../../../types/store/ActiveConversationTypes';
+import { FileToUpload, messageActionType } from '../../../../types/store/ActiveConversationTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
 import { RootStore } from '../../../../types/store/StoreTypes';
 
@@ -454,5 +454,26 @@ describe('MessageComposer', () => {
 		);
 		expect(imageCopied).toBeInTheDocument();
 		expect(imageCopied).toHaveStyle('border-color: #8bc34a');
+	});
+
+	test('User can reply to a message attaching a file', async () => {
+		const store = useStore.getState();
+
+		// Set reply message
+		store.setReferenceMessage(
+			mockedRoom.id,
+			'messageId',
+			'senderId',
+			'stanzaId',
+			messageActionType.REPLY
+		);
+
+		setup(<MessageComposer roomId={mockedRoom.id} />);
+
+		const attachFileButton = screen.getByTestId('icon: Attach');
+		expect(attachFileButton).not.toHaveAttribute('disabled', true);
+
+		const sendButton = screen.getByTestId('icon: Navigation2');
+		expect(sendButton).not.toHaveAttribute('disabled', true);
 	});
 });

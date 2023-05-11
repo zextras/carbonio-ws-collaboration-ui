@@ -10,6 +10,8 @@ import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { CHATS_ROUTE } from '../constants/appConstants';
+import { getSelectedRoomId } from '../store/selectors/SessionSelectors';
+import useStore from '../store/Store';
 
 const CustomLabel = styled(Container)`
 	position: absolute;
@@ -35,10 +37,12 @@ const CustomSettingsLabel = styled(CustomLabel)`
 
 const LogoBeta = ({ active }: { active: boolean }): JSX.Element => {
 	const history = useHistory();
+	const selectedRoom: string | undefined = useStore(getSelectedRoomId);
 
 	const goToChats = useCallback(() => {
-		history.push(`/${CHATS_ROUTE}`);
-	}, [history]);
+		const route = selectedRoom ? `/${CHATS_ROUTE}/${selectedRoom}` : `/${CHATS_ROUTE}`;
+		history.push(route);
+	}, [history, selectedRoom]);
 
 	return (
 		<>

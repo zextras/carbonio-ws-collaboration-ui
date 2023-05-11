@@ -16,7 +16,7 @@ type DeleteUserProps = {
 
 const DeleteUserModal: FC<DeleteUserProps> = ({ deleteUserModalOpen, deleteUser, closeModal }) => {
 	const [t] = useTranslation();
-	const removeMemberTitle: string = t('modal.removeMember', 'Remove Member');
+	const removeMemberTitle: string = t('modal.removeMember', 'Remove member');
 	const removeMemberDescriptionLabel: string = t(
 		'modal.deleteUserDescription',
 		'Are you sure you want to remove this member?'
