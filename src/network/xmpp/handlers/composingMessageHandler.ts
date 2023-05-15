@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { debounce } from 'lodash';
+
 import useStore from '../../../store/Store';
 import { RootStore } from '../../../types/store/StoreTypes';
 import { xmppDebug } from '../../../utils/debug';
@@ -15,6 +17,11 @@ import { getRequiredAttribute } from '../utility/decodeStanza';
  * Documentation: https://xmpp.org/extensions/xep-0085.html
  */
 
+// Reset isWriting after 10 seconds to avoid network problems
+const debouncedStopWriting = debounce((store: RootStore, roomId: string, from: string) => {
+	console.log('stop stop stop');
+	store.setIsWriting(roomId, from, false);
+}, 7000);
 export function onComposingMessageStanza(message: Element): true {
 	xmppDebug('<--- composing message');
 
@@ -26,10 +33,14 @@ export function onComposingMessageStanza(message: Element): true {
 	const stopComposing = message.getElementsByTagName('paused')[0];
 	const store: RootStore = useStore.getState();
 
+	// Ignore my own messages of writing status
 	if (store.session.id !== from) {
-		// handle user iswriting
-		if (composing && !stopComposing) store.setIsWriting(roomId, from, true);
-		// handle user stopped writing
+		// If user starts (or continues) to write set isWriting to true
+		if (composing && !stopComposing) {
+			store.setIsWriting(roomId, from, true);
+			debouncedStopWriting(store, roomId, from);
+		}
+		// User stopped writing
 		if (!composing && stopComposing) store.setIsWriting(roomId, from, false);
 	}
 
