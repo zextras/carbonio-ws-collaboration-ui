@@ -91,12 +91,17 @@
         "nameTooShort": "The title is an essential information",
         "topicTooLong": "Maximum topic length is 256 characters"
     },
+    "external": {
+        "nobodyInTheRoom": "It seems nobody is in this Room",
+        "roomIsEmpty": "This Room is empty"
+    },
     "feedback": {
         "historyCleared": "History cleared successfully!",
         "messageCopied": "Message copied",
         "notificationsActivatedForThisChat": "Notifications activated for this chat",
         "notificationsMutedForThisChat": "Notifications muted for this chat"
     },
+    "keepInTouchWithColleagues": "Keep in touch with your colleagues or join your groups' meeting rooms",
     "meeting": {
         "activeMeetingTooltip": "There's an active meeting for this Group",
         "collapseParticipantsMeetingTooltip": "Collapse participants list",
@@ -143,6 +148,11 @@
         "removeMember": "Remove member",
         "showPreviousConversationHistory": "Show previous conversation history"
     },
+    "notification": {
+        "meeting": {
+            "ended": "Meeting Ended"
+        }
+    },
     "participantsList": {
         "closeSearch": "Close search",
         "moreMembersAccordionTitle": "members",
@@ -182,6 +192,7 @@
         "offline": "Offline",
         "online": "Online"
     },
+    "thanksForParticipating": "Thanks for participating",
     "titlePlaceholder": "Your Group's title",
     "tooltip": {
         "clear": "Clear",
@@ -220,5 +231,6 @@
             "uploadAvatar": "Upload avatar"
         },
         "writeToSend": "Write a message to send it"
-    }
+    },
+    "tryLater": "Try later"
 }
