@@ -10,6 +10,7 @@ import {
 	Tooltip,
 	Padding,
 	SnackbarManagerContext,
+	CreateSnackbarFn,
 	Spinner
 } from '@zextras/carbonio-design-system';
 import { find, forEach, map } from 'lodash';
@@ -66,6 +67,8 @@ const UploadSpinnerWrapper = styled(Container)`
 	}
 `;
 
+type CreateSnackbarFn = typeof CreateSnackbarFn;
+
 const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId }) => {
 	const xmppClient = useStore(getXmppClient);
 
@@ -100,7 +103,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 	const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 	const [deleteMessageModalStatus, setDeleteMessageModalStatus] = useState(false);
 
-	const createSnackbar: any = useContext(SnackbarManagerContext);
+	const createSnackbar: CreateSnackbarFn = useContext(SnackbarManagerContext);
 
 	const messageInputRef = useRef<HTMLTextAreaElement>();
 	const emojiButtonRef = useRef<HTMLButtonElement>();

@@ -11,6 +11,7 @@ import {
 	Modal,
 	Padding,
 	SnackbarManagerContext,
+	CreateSnackbarFn,
 	Tooltip
 } from '@zextras/carbonio-design-system';
 import React, { FC, useCallback, useContext, useEffect, useMemo, useState } from 'react';
@@ -29,6 +30,8 @@ type EditConversationProps = {
 	closeModal: () => void;
 	roomId: string;
 };
+
+type CreateSnackbarFn = typeof CreateSnackbarFn;
 
 const EditConversationModal: FC<EditConversationProps> = ({
 	roomId,
@@ -58,7 +61,7 @@ const EditConversationModal: FC<EditConversationProps> = ({
 	const [newDescription, setNewDescription] = useState<string>('');
 	const [buttonDisabled, setButtonDisabled] = useState<boolean>(true);
 
-	const createSnackbar: any = useContext(SnackbarManagerContext);
+	const createSnackbar: CreateSnackbarFn = useContext(SnackbarManagerContext);
 
 	const nameError = useMemo(() => newName.length === 0 || newName.length > 128, [newName]);
 	const descriptionError = useMemo(() => newDescription.length > 256, [newDescription]);

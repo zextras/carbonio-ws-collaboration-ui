@@ -36,19 +36,23 @@ export const useUnreadsCountStoreSlice = (set: (...any: any) => void): UnreadsCo
 	updateUnreadCount: (roomId: string): void => {
 		set(
 			produce((draft: RootStore) => {
-				const lastMarker = draft.markers[roomId] && draft.markers[roomId][draft.session.id!];
+				const lastMarker =
+					draft.markers[roomId] &&
+					draft.session.id !== undefined &&
+					draft.markers[roomId][draft.session.id];
 				const lastMarkedMessage = find(
 					draft.messages[roomId],
 					(message: Message) => lastMarker && message.id === lastMarker.messageId
 				);
-				const unreadByMe = filter(draft.messages[roomId], (message) => {
-					const isUnreadByMe =
+				const unreadByMe = filter(
+					draft.messages[roomId],
+					(message) =>
 						message.type === MessageType.TEXT_MSG &&
-						message.from !== draft.session.id! &&
+						draft.session.id !== undefined &&
+						message.from !== draft.session.id &&
 						(!lastMarkedMessage ||
-							(lastMarkedMessage && !isBefore(message.date, lastMarkedMessage.date)));
-					return isUnreadByMe;
-				});
+							(lastMarkedMessage && !isBefore(message.date, lastMarkedMessage.date)))
+				);
 				draft.unreads[roomId] = size(unreadByMe);
 			}),
 			false,
