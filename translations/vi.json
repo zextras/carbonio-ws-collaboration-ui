@@ -1,0 +1,103 @@
+{
+    "action": {
+        "close": "Đóng",
+        "undo": "Hoàn tác",
+        "activateNotifications": "Kích hoạt thông báo",
+        "addAttachment": "Thêm đính kèm",
+        "addNewMembers": "Thêm thành viên mới",
+        "clearHistory": "Xoá lịch sử",
+        "copy": "Sao chép",
+        "create": "Tạo",
+        "delete": "Xoá",
+        "download": "Tải xuống",
+        "edit": "Chỉnh sửa",
+        "editYourMessage": "Chỉnh sửa thông điệp của bạn",
+        "forward": "Chuyển tiếp",
+        "forwarded": "đã chuyển tiếp",
+        "leave": "Rời đi",
+        "muteNotifications": "Tắt thông báo",
+        "preview": "Xem trước",
+        "removeUser": "xoá",
+        "reply": "Trả lời",
+        "replyToSomeone": "Trả lời đến",
+        "replyToYourself": "Trả lời đến chính bạn"
+    },
+    "conversation": {
+        "newMessage": "Thư mới",
+        "chooseConversationDescription": "Chọn cuộc hội thoại để bắt đầu trò chuyện",
+        "keepInTouchTitle": "Hãy giữ liên lạc!"
+    },
+    "tooltip": {
+        "room": {
+            "uploadPicture": "Tải ảnh lên"
+        },
+        "selectEmoji": "Chọn biểu tượng Emoji",
+        "sendMessage": "Gửi tin nhắn",
+        "uploading": "Đang tải lên",
+        "clear": "Xoá",
+        "close": "Đóng",
+        "goToPrivateChat": "Đi đến cuộc trò chuyện riêng tư",
+        "messageComposer": "Người soạn tin nhắn",
+        "messageRead": "Đọc",
+        "messageSent": "Gửi đi"
+    },
+    "attachments": {
+        "addFromLocal": "Thêm vào từ thiết bị cục bộ",
+        "attachLinkFiles": "Đính kèm liên kết công khai từ tệp",
+        "stopUpload": "Dừng tải lên"
+    },
+    "conversationInfo": {
+        "actionAccordionTitle": "Thao tác",
+        "email": "Email",
+        "info": "Thông tin",
+        "messages": "Tin nhắn",
+        "name": "Tên",
+        "status": "Trạng thái",
+        "title": "Tiêu đề",
+        "topic": "Chủ đề"
+    },
+    "date": {
+        "yesterday": "Hôm qua"
+    },
+    "editModal": {
+        "groupDescriptionDetails": "Nó mô tả chủ đề của nhóm"
+    },
+    "feedback": {
+        "historyCleared": "Xoá lịch sử thành công!",
+        "notificationsActivatedForThisChat": "Thông báo được kích hoạt cho cuộc trò chuyện này",
+        "notificationsMutedForThisChat": "Thông báo sẽ tắt cho cuộc trò chuyện này"
+    },
+    "message": {
+        "deletedMessage": "Xoá thông điệp",
+        "draft": "bản nháp",
+        "edited": "biên tập"
+    },
+    "modal": {
+        "deleteRoom": "Xoá phòng",
+        "deleteUserDescription": "Bạn có chắc chắn muốn xoá thành viên này?",
+        "leaveGroup": "Rời Nhóm",
+        "removeMember": "Xoá thành viên",
+        "showPreviousConversationHistory": "Hiển thị lịch sử các cuộc hội thoại trước"
+    },
+    "participantsList": {
+        "closeSearch": "Đóng tìm kiếm",
+        "moreMembersAccordionTitle": "thành viên"
+    },
+    "settings": {
+        "notifications": {
+            "checkboxLabel": "Hiển thị cảnh báo màn hình",
+            "title": "Các thông báo"
+        },
+        "profile": {
+            "errorGenericResponse": "Có lỗi xảy ra, vui lòng thử lại",
+            "title": "Hồ sơ"
+        },
+        "save": "Chỉnh sửa được lưu chính xác",
+        "title": "Cài đặt cuộc trò chuyện"
+    },
+    "status": {
+        "lastSeen": "Lần xem cuối {{lastSeen}}",
+        "offline": "Ngoại tuyến",
+        "online": "Trực tuyến"
+    }
+}

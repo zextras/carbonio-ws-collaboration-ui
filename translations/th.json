@@ -1,0 +1,107 @@
+{
+    "tooltip": {
+        "room": {
+            "uploadPicture": "อัปโหลดรูปภาพ"
+        },
+        "selectEmoji": "เลือกอีโมจิ",
+        "sendMessage": "ส่งข้อความ",
+        "uploading": "กำลังอัปโหลด",
+        "clear": "เคลียร์",
+        "close": "ปิด",
+        "goToPrivateChat": "ไปที่แชทส่วนตัว",
+        "leaveConversation": "ออกจากการสนทนา",
+        "messageComposer": "ผู้เขียนข้อความ",
+        "messageRead": "อ่าน",
+        "messageSent": "ส่งแล้ว"
+    },
+    "action": {
+        "undo": "เลิกทำ",
+        "activateNotifications": "เปิดใช้งานการแจ้งเตือน",
+        "addAttachment": "เพิ่มไฟล์แนบ",
+        "addNewMembers": "เพิ่มสมาชิกใหม่",
+        "clearHistory": "ล้างประวัติ",
+        "close": "ปิด",
+        "copy": "คัดลอก",
+        "create": "สร้าง",
+        "delete": "ลบ",
+        "download": "ดาวน์โหลด",
+        "edit": "แก้ไข",
+        "editYourMessage": "แก้ไขข้อความของคุณ",
+        "forward": "ส่งต่อ",
+        "forwarded": "ส่งต่อแล้ว",
+        "leave": "ออก",
+        "muteNotifications": "ปิดเสียงการแจ้งเตือน",
+        "preview": "ดูตัวอย่าง",
+        "removeUser": "เอาออก",
+        "reply": "ตอบกลับ",
+        "replyToSomeone": "ตอบกลับไปยัง",
+        "replyToYourself": "ตอบกลับไปยังตัวของคุณเอง"
+    },
+    "attachments": {
+        "addFromLocal": "เพิ่มจาก local",
+        "attachLinkFiles": "แนบลิงก์สาธารณะจาก Files",
+        "stopUpload": "หยุดอัปโหลด"
+    },
+    "settings": {
+        "profile": {
+            "errorGenericResponse": "มีข้อผิดพลาด โปรดลองอีกครั้ง",
+            "title": "โปรไฟล์"
+        },
+        "save": "บันทึกการแก้ไขอย่างถูกต้อง",
+        "title": "การตั้งค่า Chats",
+        "notifications": {
+            "checkboxLabel": "การแจ้งเตือนของเดสก์ท็อป",
+            "title": "การแจ้งเตือน"
+        }
+    },
+    "status": {
+        "lastSeen": "ดูครั้งล่าสุด {{lastSeen}}",
+        "offline": "ออฟไลน์",
+        "online": "ออนไลน์"
+    },
+    "conversation": {
+        "chooseConversationDescription": "เลือกการสนทนาเพื่อเริ่มการแชท",
+        "keepInTouchTitle": "เรามาติดต่อกันเถอะ!",
+        "newMessage": "ข้อความใหม่"
+    },
+    "conversationInfo": {
+        "actionAccordionTitle": "การดำเนินการ",
+        "email": "อีเมล",
+        "info": "ข้อมูล",
+        "messages": "ข้อความ",
+        "name": "ชื่อ",
+        "status": "สถานะ",
+        "title": "หัวข้อ",
+        "topic": "หัวข้อ"
+    },
+    "date": {
+        "yesterday": "เมื่อวาน"
+    },
+    "editModal": {
+        "groupDescriptionDetails": "อธิบายถึงหัวข้อของกลุ่ม"
+    },
+    "feedback": {
+        "historyCleared": "ล้างประวัติสำเร็จแล้ว!",
+        "notificationsActivatedForThisChat": "เปิดใช้งานการแจ้งเตือนสำหรับแชทนี้",
+        "notificationsMutedForThisChat": "ปิดเสียงการแจ้งเตือนสำหรับแชทนี้"
+    },
+    "message": {
+        "deletedMessage": "ข้อความที่ถูกลบ",
+        "draft": "แบบร่าง",
+        "edited": "แก้ไขแล้ว"
+    },
+    "modal": {
+        "creation": {
+            "newGroup": "กลุ่มใหม่"
+        },
+        "deleteRoom": "ลบห้อง",
+        "deleteUserDescription": "คุณแน่ใจหรือไม่ว่าต้องการลบสมาชิกคนนี้ออก?",
+        "leaveGroup": "ออกจากกลุ่ม",
+        "removeMember": "ลบสมาชิก",
+        "showPreviousConversationHistory": "แสดงประวัติการสนทนาก่อนหน้า"
+    },
+    "participantsList": {
+        "closeSearch": "ปิดการค้นหา",
+        "moreMembersAccordionTitle": "สมาชิก"
+    }
+}

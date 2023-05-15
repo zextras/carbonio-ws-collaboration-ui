@@ -13,7 +13,7 @@ import useMessage from '../../../hooks/useMessage';
 import { getUserSelector } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
 import { ReferenceMessage } from '../../../types/store/ActiveConversationTypes';
-import { MessageType, TextMessage } from '../../../types/store/MessageTypes';
+import { TextMessage } from '../../../types/store/MessageTypes';
 import { getThumbnailURL } from '../../../utils/attachmentUtils';
 import { calculateAvatarColor } from '../../../utils/styleUtils';
 
@@ -90,14 +90,15 @@ const MessageReferenceDisplayed: React.FC<MessageReferenceDisplayedProps> = ({
 	);
 
 	const textMessage = useMemo(() => {
-		if (message?.type === MessageType.TEXT_MSG) {
-			if (message.attachment) {
-				return message.text !== '' ? message.text : message.attachment.name;
+		if (message.attachment) {
+			//  Always display text (even if it's empty) when editing an attachment description
+			if (referenceMessage.actionType === 'edit') {
+				return message.text;
 			}
-			return message.forwarded ? message.forwarded.text : message.text;
+			return message.text !== '' ? message.text : message.attachment.name;
 		}
-		return '';
-	}, [message]);
+		return message.forwarded ? message.forwarded.text : message.text;
+	}, [message, referenceMessage.actionType]);
 
 	const previewURL = useMemo(() => {
 		if (referenceMessage.attachment) {
