@@ -9,7 +9,7 @@ import React, { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import MessageReferenceDisplayed from './MessageReferenceDisplayed';
-import { getReferenceMessageView } from '../../../store/selectors/ActiveConversationsSelectors';
+import { getReferenceMessage } from '../../../store/selectors/ActiveConversationsSelectors';
 import useStore from '../../../store/Store';
 import { messageActionType } from '../../../types/store/ActiveConversationTypes';
 
@@ -20,7 +20,7 @@ type ReferenceMessageViewProps = {
 const ReferenceMessageView: React.FC<ReferenceMessageViewProps> = ({ roomId }) => {
 	const [t] = useTranslation();
 	const closeTooltip = t('tooltip.close', 'Close');
-	const referenceMessage = useStore((store) => getReferenceMessageView(store, roomId));
+	const referenceMessage = useStore((store) => getReferenceMessage(store, roomId));
 	const unsetReferenceMessage = useStore((store) => store.unsetReferenceMessage);
 	const setDraftMessage = useStore((store) => store.setDraftMessage);
 

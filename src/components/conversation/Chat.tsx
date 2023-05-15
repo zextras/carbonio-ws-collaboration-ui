@@ -20,9 +20,12 @@ import ConversationHeader from './ConversationHeader';
 import DropZoneView from './DropZoneView';
 import ConversationFooter from './footer/ConversationFooter';
 import MessagesList from './MessagesList';
-import { getFilesToUploadArray } from '../../store/selectors/ActiveConversationsSelectors';
+import {
+	getFilesToUploadArray,
+	getReferenceMessage
+} from '../../store/selectors/ActiveConversationsSelectors';
 import useStore from '../../store/Store';
-import { FileToUpload } from '../../types/store/ActiveConversationTypes';
+import { FileToUpload, messageActionType } from '../../types/store/ActiveConversationTypes';
 import { uid } from '../../utils/attachmentUtils';
 import useMediaQueryCheck from '../../utils/useMediaQueryCheck';
 
@@ -39,6 +42,7 @@ const Chat = ({ roomId, setInfoPanelOpen }: ChatsProps): ReactElement => {
 	const filesToUploadArray = useStore((store) => getFilesToUploadArray(store, roomId));
 	const setFilesToAttach = useStore((store) => store.setFilesToAttach);
 	const setInputHasFocus = useStore((store) => store.setInputHasFocus);
+	const referenceMessage = useStore((store) => getReferenceMessage(store, roomId));
 
 	const isDesktopView = useMediaQueryCheck();
 	const [dropzoneEnabled, setDropzoneEnabled] = useState(false);
@@ -73,10 +77,17 @@ const Chat = ({ roomId, setInfoPanelOpen }: ChatsProps): ReactElement => {
 		[roomId, setFilesToAttach, setInputHasFocus, filesToUploadArray]
 	);
 
-	const handleOnDragOver = useCallback((ev) => {
-		ev.preventDefault();
-		setDropzoneEnabled(true);
-	}, []);
+	const handleOnDragOver = useCallback(
+		(ev) => {
+			// Avoid to drop files if user is editing a message
+			const editingMessage = referenceMessage?.actionType === messageActionType.EDIT;
+			if (!editingMessage) {
+				ev.preventDefault();
+				setDropzoneEnabled(true);
+			}
+		},
+		[referenceMessage]
+	);
 
 	const handleOnDragLeave = useCallback((ev) => {
 		ev.preventDefault();

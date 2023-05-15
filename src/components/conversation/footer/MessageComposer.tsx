@@ -26,6 +26,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import AttachmentSelector from './AttachmentSelector';
+import DeleteMessageModal from './DeleteMessageModal';
 import EmojiPicker from './EmojiPicker';
 import MessageArea from './MessageArea';
 import useMessage from '../../../hooks/useMessage';
@@ -34,7 +35,7 @@ import {
 	getDraftMessage,
 	getFilesToUploadArray,
 	getInputHasFocus,
-	getReferenceMessageView
+	getReferenceMessage
 } from '../../../store/selectors/ActiveConversationsSelectors';
 import { getXmppClient } from '../../../store/selectors/ConnectionSelector';
 import { getRoomUnreadsSelector } from '../../../store/selectors/UnreadsCounterSelectors';
@@ -77,7 +78,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 	const stopUploadLabel = t('attachments.stopUpload', 'Stop upload');
 	const clearLabel = t('tooltip.removeCaption', 'Remove caption');
 
-	const referenceMessage = useStore((store) => getReferenceMessageView(store, roomId));
+	const referenceMessage = useStore((store) => getReferenceMessage(store, roomId));
 	const draftMessage = useStore((store) => getDraftMessage(store, roomId));
 	const unsetReferenceMessage = useStore((store) => store.unsetReferenceMessage);
 	const inputHasFocus = useStore((store) => getInputHasFocus(store, roomId));
@@ -97,6 +98,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 	const [isUploading, setIsUploading] = useState(false);
 	const [noMoreCharsOnInputComposer, setNoMoreCharsOnInputComposer] = useState(false);
 	const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+	const [deleteMessageModalStatus, setDeleteMessageModalStatus] = useState(false);
 
 	const createSnackbar: any = useContext(SnackbarManagerContext);
 
@@ -105,11 +107,14 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 	const emojiTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
 	const timeoutRef = useRef<ReturnType<typeof setTimeout>>();
 
-	// Disable if textMessage is composed only by spaces, tabs or line breaks
-	const sendDisabled = useMemo(
-		() => !/\S/.test(textMessage) && !filesToUploadArray,
-		[textMessage, filesToUploadArray]
-	);
+	const sendDisabled = useMemo(() => {
+		// Send button is always enabled if user is editing
+		if (referenceMessage?.actionType === messageActionType.EDIT) {
+			return false;
+		}
+		// Disable if textMessage is composed only by spaces, tabs or line breaks
+		return !/\S/.test(textMessage) && !filesToUploadArray;
+	}, [referenceMessage, textMessage, filesToUploadArray]);
 
 	const abortUploadRequest = useCallback(() => {
 		forEach(listAbortController, (controller: AbortController) => controller.abort());
@@ -233,12 +238,20 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 							referenceMessage.senderId,
 							referenceMessage.stanzaId
 						);
+						unsetReferenceMessage(roomId);
 						break;
 					}
 					case messageActionType.EDIT: {
+						// If a text message (not an attachment description) is completely removed, open the delete dialog
+						if (message === '' && !referenceMessage.attachment) {
+							setDeleteMessageModalStatus(true);
+						}
 						// Avoid to send correction if text doesn't change
-						if (completeReferenceMessage.text !== message) {
-							xmppClient.sendChatMessageEdit(roomId, message, referenceMessage.stanzaId);
+						else {
+							if (completeReferenceMessage.text !== message) {
+								xmppClient.sendChatMessageEdit(roomId, message, referenceMessage.stanzaId);
+							}
+							unsetReferenceMessage(roomId);
 						}
 						break;
 					}
@@ -246,7 +259,6 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 						console.warn('case not handled', referenceMessage);
 					}
 				}
-				unsetReferenceMessage(roomId);
 			} else {
 				xmppClient.sendChatMessage(roomId, message);
 			}
@@ -268,6 +280,15 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 		filesToUploadArray,
 		addDescriptionToFileToAttach
 	]);
+
+	// Set focus on input after closing DeleteMessageModal
+	useEffect(() => {
+		if (referenceMessage?.actionType === messageActionType.EDIT && !deleteMessageModalStatus) {
+			if (messageInputRef?.current) {
+				messageInputRef.current?.focus();
+			}
+		}
+	}, [referenceMessage, deleteMessageModalStatus]);
 
 	const handleTypingMessage = useCallback(
 		(e: BaseSyntheticEvent): void => {
@@ -360,34 +381,38 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 	const handlePaste = useCallback(
 		(ev) => {
 			try {
-				const includeFiles = ev.clipboardData.files;
-				const listOfFiles: FileToUpload[] = [];
-				if (includeFiles && includeFiles.length > 0) {
-					ev.preventDefault();
-					ev.stopPropagation();
-					const isFirefoxBrowser = BrowserUtils.isFirefox();
-					const isChromeBrowser = BrowserUtils.isChrome();
-					const chromeVersion = BrowserUtils.getChromeVersion();
-					const isSafariBrowser = BrowserUtils.isSafari();
-					const isLinux = BrowserUtils.isLinux();
-					const isMac = BrowserUtils.isMac();
-					const isWin = BrowserUtils.isWin();
+				// Avoid to paste files if user is editing a message
+				const editingMessage = referenceMessage?.actionType === messageActionType.EDIT;
+				if (!editingMessage) {
+					const includeFiles = ev.clipboardData.files;
+					const listOfFiles: FileToUpload[] = [];
+					if (includeFiles && includeFiles.length > 0) {
+						ev.preventDefault();
+						ev.stopPropagation();
+						const isFirefoxBrowser = BrowserUtils.isFirefox();
+						const isChromeBrowser = BrowserUtils.isChrome();
+						const chromeVersion = BrowserUtils.getChromeVersion();
+						const isSafariBrowser = BrowserUtils.isSafari();
+						const isLinux = BrowserUtils.isLinux();
+						const isMac = BrowserUtils.isMac();
+						const isWin = BrowserUtils.isWin();
 
-					// LINUX OS AND BROWSER ARE FIREFOX/CHROME
-					// WIN OS AND BROWSER ARE CHROME/FIREFOX
-					if (isLinux || isWin) {
-						if (isFirefoxBrowser || isChromeBrowser || chromeVersion) {
-							mapFiles(listOfFiles, includeFiles);
-						} else {
-							console.error(`Browser not support copy/paste function ${navigator}`);
+						// LINUX OS AND BROWSER ARE FIREFOX/CHROME
+						// WIN OS AND BROWSER ARE CHROME/FIREFOX
+						if (isLinux || isWin) {
+							if (isFirefoxBrowser || isChromeBrowser || chromeVersion) {
+								mapFiles(listOfFiles, includeFiles);
+							} else {
+								console.error(`Browser not support copy/paste function ${navigator}`);
+							}
 						}
-					}
-					// MAC OS AND BROWSER ARE CHROME/FIREFOX/SAFARI
-					else if (isMac) {
-						if (isChromeBrowser || chromeVersion || isFirefoxBrowser || isSafariBrowser) {
-							mapFiles(listOfFiles, includeFiles);
-						} else {
-							console.error(`Browser not support copy/paste function ${navigator}`);
+						// MAC OS AND BROWSER ARE CHROME/FIREFOX/SAFARI
+						else if (isMac) {
+							if (isChromeBrowser || chromeVersion || isFirefoxBrowser || isSafariBrowser) {
+								mapFiles(listOfFiles, includeFiles);
+							} else {
+								console.error(`Browser not support copy/paste function ${navigator}`);
+							}
 						}
 					}
 				}
@@ -395,7 +420,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 				console.error(e);
 			}
 		},
-		[mapFiles]
+		[mapFiles, referenceMessage]
 	);
 
 	useEffect(() => {
@@ -578,6 +603,13 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 					</Container>
 				</Tooltip>
 			</Container>
+			{deleteMessageModalStatus && (
+				<DeleteMessageModal
+					roomId={roomId}
+					open={deleteMessageModalStatus}
+					setModalStatus={setDeleteMessageModalStatus}
+				/>
+			)}
 		</Container>
 	);
 };
