@@ -92,7 +92,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 	const completeReferenceMessage = useMessage(roomId, referenceMessage?.messageId || '');
 
 	const [listAbortController, setListAbortController] = useState<AbortController[]>([]);
-	const [textMessage, setTextMessage] = useState('');
+	const [textMessage, setTextMessage] = useState(draftMessage || '');
 	const [isWriting, setIsWriting] = useState(false);
 	const [isUploading, setIsUploading] = useState(false);
 	const [noMoreCharsOnInputComposer, setNoMoreCharsOnInputComposer] = useState(false);
@@ -439,6 +439,13 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 	useEffect(() => {
 		if (inputHasFocus) {
 			messageInputRef.current?.focus();
+
+			// Focus the end of the input if there is a draft message
+			if (messageInputRef.current && messageInputRef.current?.value !== '') {
+				const value = messageInputRef.current?.value;
+				messageInputRef.current.value = '';
+				messageInputRef.current.value = value;
+			}
 		}
 	}, [inputHasFocus]);
 
