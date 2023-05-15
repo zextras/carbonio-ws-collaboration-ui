@@ -14,7 +14,7 @@ import XMPPClient from '../XMPPClient';
  * Documentation: https://xmpp.org/extensions/xep-0162.html
  */
 
-export function onGetRosterResponse(this: XMPPClient, stanza: Element): any {
+export function onGetRosterResponse(this: XMPPClient, stanza: Element): boolean {
 	const contacts = stanza.getElementsByTagName('item');
 	forEach(contacts, (contact) => {
 		const jid = getRequiredAttribute(contact, 'jid');

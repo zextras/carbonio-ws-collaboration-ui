@@ -18,8 +18,8 @@ export const roomNameEqualityFn = (oldState: string, newState: string): boolean 
 	oldState === newState;
 
 export const roomsListLengthEqualityFn = (
-	oldState: Record<any, any>,
-	newState: Record<any, any>
+	oldState: Record<number, string>,
+	newState: Record<number, string>
 ): boolean => size(oldState) === size(newState);
 
 export const roomMessagesEqualityFn = (

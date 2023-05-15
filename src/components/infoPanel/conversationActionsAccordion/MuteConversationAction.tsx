@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { SnackbarManagerContext } from '@zextras/carbonio-design-system';
+import { SnackbarManagerContext, CreateSnackbarFn } from '@zextras/carbonio-design-system';
 import React, { FC, useCallback, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -16,6 +16,8 @@ import useStore from '../../../store/Store';
 type MuteProps = {
 	roomId: string;
 };
+
+type CreateSnackbarFn = typeof CreateSnackbarFn;
 
 const MuteConversationAction: FC<MuteProps> = ({ roomId }) => {
 	const [t] = useTranslation();
@@ -35,7 +37,7 @@ const MuteConversationAction: FC<MuteProps> = ({ roomId }) => {
 	const setRoomUnmuted = useStore((state) => state.setRoomUnmuted);
 
 	// TODO fix type of createSnackbar
-	const createSnackbar: any = useContext(SnackbarManagerContext);
+	const createSnackbar: CreateSnackbarFn = useContext(SnackbarManagerContext);
 
 	const muteConversation = useCallback(() => {
 		if (isMuted) {
