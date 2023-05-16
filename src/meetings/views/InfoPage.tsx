@@ -87,7 +87,7 @@ const InfoPage = (): JSX.Element => {
 				<Line />
 			</ErrorWrapper>
 			<Padding vertical="large">
-				<Text>{descriptionLowerLabel}</Text>
+				<Text weight="light">{descriptionLowerLabel}</Text>
 			</Padding>
 		</CustomContainer>
 	);
