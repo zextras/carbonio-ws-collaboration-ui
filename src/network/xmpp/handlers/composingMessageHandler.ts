@@ -18,10 +18,10 @@ import { getRequiredAttribute } from '../utility/decodeStanza';
  */
 
 // Reset isWriting after 10 seconds to avoid network problems
-const debouncedStopWriting = debounce((store: RootStore, roomId: string, from: string) => {
-	console.log('stop stop stop');
-	store.setIsWriting(roomId, from, false);
-}, 7000);
+const debouncedStopWriting = debounce(
+	(store: RootStore, roomId: string, from: string) => store.setIsWriting(roomId, from, false),
+	7000
+);
 export function onComposingMessageStanza(message: Element): true {
 	xmppDebug('<--- composing message');
 

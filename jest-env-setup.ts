@@ -26,6 +26,7 @@ failOnConsole({
 });
 
 beforeEach(() => {
+	jest.useFakeTimers();
 	// Do not useFakeTimers with `whatwg-fetch` if using mocked server
 	// https://github.com/mswjs/msw/issues/448
 	useStore.getState().setXmppClient(xmppClient);

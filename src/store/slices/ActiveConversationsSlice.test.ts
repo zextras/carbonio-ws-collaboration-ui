@@ -52,7 +52,6 @@ describe('Active conversations slice', () => {
 	});
 
 	test('User continue to write', () => {
-		jest.useFakeTimers();
 		useStore.getState().setIsWriting(mockedRoom.id, mockedUser0.userId, true);
 		setTimeout(() => {
 			useStore.getState().setIsWriting(mockedRoom.id, mockedUser0.userId, true);
