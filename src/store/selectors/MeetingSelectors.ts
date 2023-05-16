@@ -12,6 +12,9 @@ import { RootStore } from '../../types/store/StoreTypes';
 export const getMeeting = (store: RootStore, roomId: string): Meeting | undefined =>
 	store.meetings[roomId];
 
+export const getRoomIdByMeetingId = (store: RootStore, meetingId: string): string | undefined =>
+	find(store.meetings, (meeting) => meeting.id === meetingId)?.roomId;
+
 export const getMeetingActive = (store: RootStore, roomId: string): boolean =>
 	store.meetings[roomId] !== undefined;
 export const getMeetingByMeetingId = (store: RootStore, meetingId: string): Meeting | undefined =>
@@ -24,6 +27,12 @@ export const getMeetingParticipants = (
 	store: RootStore,
 	roomId: string
 ): MeetingParticipantMap | undefined => store.meetings[roomId]?.participants;
+
+export const getMeetingParticipantsByMeetingId = (
+	store: RootStore,
+	meetingId: string
+): MeetingParticipantMap | undefined =>
+	find(store.meetings, (meeting) => meeting.id === meetingId)?.participants;
 
 export const getMyMeetingParticipation = (store: RootStore, roomId: string): boolean => {
 	if (store.meetings[roomId]?.participants && store.session.id != null) {
@@ -40,3 +49,9 @@ export const getNumberOfMeetingParticipants = (
 	store: RootStore,
 	roomId: string
 ): number | undefined => size(store.meetings[roomId]?.participants);
+
+export const getNumberOfMeetingParticipantsByMeetingId = (
+	store: RootStore,
+	meetingId: string
+): number | undefined =>
+	size(find(store.meetings, (meeting) => meeting.id === meetingId)?.participants);

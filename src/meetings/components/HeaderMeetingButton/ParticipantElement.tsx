@@ -13,6 +13,7 @@ import { UsersApi } from '../../../network';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import { getUserName, getUserPictureUpdatedAt } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
+import MeetingParticipantActions from '../Sidebar/ParticipantsAccordion/MeetingParticipantActions';
 
 const CustomContainer = styled(Container)`
 	cursor: default;
@@ -25,11 +26,18 @@ const CustomAvatar = styled(Avatar)`
 
 type ParticipantElementProps = {
 	memberId: string;
+	meetingId?: string | undefined;
+	isInsideMeeting?: boolean;
 };
 
-const ParticipantElement: FC<ParticipantElementProps> = ({ memberId }) => {
-	const memberName: string | undefined = useStore((store) => getUserName(store, memberId));
+const ParticipantElement: FC<ParticipantElementProps> = ({
+	memberId,
+	isInsideMeeting,
+	meetingId
+}) => {
 	const userId: string | undefined = useStore((store) => getUserId(store));
+	const memberName: string | undefined = useStore((store) => getUserName(store, memberId));
+
 	const userPictureUpdatedAt: string | undefined = useStore((state) =>
 		getUserPictureUpdatedAt(state, memberId)
 	);
@@ -43,8 +51,6 @@ const ParticipantElement: FC<ParticipantElementProps> = ({ memberId }) => {
 			setPicture(false);
 		}
 	}, [memberId, userPictureUpdatedAt]);
-
-	const isSessionParticipant: boolean = useMemo(() => memberId === userId, [memberId, userId]);
 
 	const avatarElement = useMemo(
 		() =>
@@ -71,6 +77,8 @@ const ParticipantElement: FC<ParticipantElementProps> = ({ memberId }) => {
 		[memberName]
 	);
 
+	const isSessionParticipant: boolean = useMemo(() => memberId === userId, [memberId, userId]);
+
 	return (
 		<CustomContainer
 			orientation="horizontal"
@@ -79,14 +87,18 @@ const ParticipantElement: FC<ParticipantElementProps> = ({ memberId }) => {
 		>
 			{avatarElement}
 			{infoElement}
-			{!isSessionParticipant && (
-				<Row>
-					<GoToPrivateChatAction
-						memberId={memberId}
-						isParticipantMeeting
-						data-testid="go_to_private_chat"
-					/>
-				</Row>
+			{!isInsideMeeting ? (
+				!isSessionParticipant && (
+					<Row>
+						<GoToPrivateChatAction
+							memberId={memberId}
+							isParticipantMeeting
+							data-testid="go_to_private_chat"
+						/>
+					</Row>
+				)
+			) : (
+				<MeetingParticipantActions memberId={memberId} meetingId={meetingId} />
 			)}
 		</CustomContainer>
 	);

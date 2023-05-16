@@ -16,13 +16,15 @@ type PromoteDemoteMemberProps = {
 	owner: boolean;
 	memberId: string;
 	roomId: string;
+	isInsideMeeting?: boolean;
 };
 
 const PromoteDemoteMemberAction: FC<PromoteDemoteMemberProps> = ({
 	isSessionParticipant,
 	owner,
 	memberId,
-	roomId
+	roomId,
+	isInsideMeeting
 }) => {
 	const [t] = useTranslation();
 	const iAmModeratorLabel: string = t('tooltip.iAmModerator', "You're a moderator");
@@ -52,8 +54,9 @@ const PromoteDemoteMemberAction: FC<PromoteDemoteMemberProps> = ({
 	return (
 		<Tooltip label={tooltipLabel}>
 			<IconButton
-				iconColor={owner ? 'primary' : 'secondary'}
-				size="extralarge"
+				iconColor={isInsideMeeting ? 'gray0' : owner ? 'primary' : 'secondary'}
+				backgroundColor="gray6"
+				size={isInsideMeeting ? 'large' : 'extralarge'}
 				icon={owner ? 'Crown' : 'CrownOutline'}
 				onClick={owner ? demoteMember : promoteMember}
 				disabled={isSessionParticipant}
