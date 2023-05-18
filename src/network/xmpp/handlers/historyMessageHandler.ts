@@ -94,17 +94,21 @@ export function onRequestHistory(this: XMPPClient, stanza: Element): void {
 	xmppDebug(`<--- End request history`);
 	const from = getRequiredAttribute(stanza, 'from');
 	const roomId = getId(from);
+	const fin = getRequiredTagElement(stanza, 'fin');
+	const isHistoryFullyLoaded = fin.getAttribute('complete');
 	const store = useStore.getState();
 
 	const historyMessages = HistoryAccumulator.returnHistory(roomId);
 
-	// Set load history
-	const fin = getRequiredTagElement(stanza, 'fin');
-	const isHistoryFullyLoaded = fin.getAttribute('complete');
+	// History is fully loaded if the response is marked as complete
+	// or if there are no messages in the response because the history has been cleared
 	if (isHistoryFullyLoaded || historyMessages.length === 0) store.setHistoryIsFullyLoaded(roomId);
 
 	// Store history messages on store updating the history of the room
 	if (historyMessages.length > 0) store.updateHistory(roomId, historyMessages);
+
+	// Add message of creation room at the start of the history
+	if (isHistoryFullyLoaded) store.addCreateRoomMessage(roomId);
 
 	// Set history loadable again
 	store.setHistoryLoadDisabled(roomId, false);
