@@ -85,8 +85,8 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 			`meetings/${meetingId}/sessions/${sessionId}/video`,
 			RequestType.DELETE
 		).then((resp: CloseVideoStreamResponse) => {
-			const { changeStreamStatus, session } = useStore.getState();
-			changeStreamStatus(meetingId, session.sessionId!, 'video', false);
+			const { changeStreamStatus } = useStore.getState();
+			changeStreamStatus(meetingId, sessionId!, 'video', false);
 			return resp;
 		});
 	}
@@ -107,8 +107,8 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 			`meetings/${meetingId}/sessions/${sessionId}/audio`,
 			RequestType.DELETE
 		).then((resp: CloseAudioStreamResponse) => {
-			const { changeStreamStatus, session } = useStore.getState();
-			changeStreamStatus(meetingId, session.sessionId!, 'audio', false);
+			const { changeStreamStatus } = useStore.getState();
+			changeStreamStatus(meetingId, sessionId!, 'audio', false);
 			return resp;
 		});
 	}
@@ -129,8 +129,8 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 			`meetings/${meetingId}/sessions/${sessionId}/screen`,
 			RequestType.DELETE
 		).then((resp: CloseScreenShareStreamResponse) => {
-			const { changeStreamStatus, session } = useStore.getState();
-			changeStreamStatus(meetingId, session.sessionId!, 'screen', false);
+			const { changeStreamStatus } = useStore.getState();
+			changeStreamStatus(meetingId, sessionId!, 'screen', false);
 			return resp;
 		});
 	}

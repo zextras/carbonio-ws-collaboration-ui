@@ -55,3 +55,16 @@ export const getNumberOfMeetingParticipantsByMeetingId = (
 	meetingId: string
 ): number | undefined =>
 	size(find(store.meetings, (meeting) => meeting.id === meetingId)?.participants);
+
+export const getParticipantAudioStatus = (
+	store: RootStore,
+	roomId: string,
+	sessionId: string | undefined
+): boolean => {
+	const audioStream = find(
+		store.meetings[roomId].participants,
+		(participant) => participant.sessionId === sessionId
+	)?.hasAudioStreamOn;
+	if (audioStream !== undefined) return audioStream;
+	return false;
+};

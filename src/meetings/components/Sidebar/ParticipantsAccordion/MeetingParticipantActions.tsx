@@ -8,7 +8,10 @@ import React, { FC, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import PromoteDemoteMemberAction from '../../../../chats/components/infoPanel/conversationParticipantsAccordion/PromoteDemoteMemberAction';
-import { getRoomIdByMeetingId } from '../../../../store/selectors/MeetingSelectors';
+import {
+	getParticipantAudioStatus,
+	getRoomIdByMeetingId
+} from '../../../../store/selectors/MeetingSelectors';
 import { getMyOwnershipOfTheRoom, getOwner } from '../../../../store/selectors/RoomsSelectors';
 import { getUserId } from '../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../store/Store';
@@ -28,13 +31,16 @@ const MeetingParticipantActions: FC<ParticipantActionsProps> = ({ memberId, meet
 	const roomId: string | undefined = useStore((store) =>
 		getRoomIdByMeetingId(store, meetingId || '')
 	);
+	const participantAudioStatus = useStore((store) =>
+		getParticipantAudioStatus(store, roomId || '', memberId)
+	);
 	const memberOwner: boolean = useStore((store) => getOwner(store, roomId || '', memberId));
 	const iAmOwner: boolean = useStore((state) =>
 		getMyOwnershipOfTheRoom(state, userId, roomId || '')
 	);
 
 	const [isPinned, setIsPinned] = useState<boolean>(false);
-	const [isMuted, setIsMuted] = useState<boolean>(false);
+	const [isMuted, setIsMuted] = useState<boolean>(!participantAudioStatus);
 
 	const isSessionParticipant: boolean = useMemo(() => memberId === userId, [memberId, userId]);
 
@@ -43,8 +49,10 @@ const MeetingParticipantActions: FC<ParticipantActionsProps> = ({ memberId, meet
 	}, []);
 
 	const toggleMute = useCallback(() => {
-		setIsMuted((prevState) => !prevState);
-	}, []);
+		if (!isMuted) {
+			setIsMuted((prevState) => !prevState);
+		}
+	}, [isMuted]);
 
 	return (
 		<Container width="fit" height="fit" orientation="horizontal">
