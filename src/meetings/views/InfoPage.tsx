@@ -17,28 +17,19 @@ const CustomContainer = styled(Container)`
 	top: 0;
 `;
 
-const MainTextWrapper = styled.div`
-	color: #2b73d2;
+const MainTextWrapper = styled(Container)`
+	color: ${({ theme }): string => theme.palette.primary.regular};
 	font-size: 2.25rem;
 	margin-top: 1.875rem;
 	font-weight: bold;
 	text-transform: capitalize;
 `;
 
-const ErrorWrapper = styled.div`
-	display: flex;
-	flex-direction: row;
-	align-items: center;
+const ErrorWrapper = styled(Container)`
 	margin: 3rem 0;
 `;
 
-const Line = styled.div`
-	height: 0.0625rem;
-	width: 6.25rem;
-	background-color: gray;
-`;
-
-const ErrorCode = styled.div`
+const ErrorCode = styled(Container)`
 	color: #4d4d4d;
 	font-weight: 300;
 	font-size: 0.875rem;
@@ -80,11 +71,15 @@ const InfoPage = (): JSX.Element => {
 
 	return (
 		<CustomContainer>
-			<MainTextWrapper>{titleLabel}</MainTextWrapper>
-			<ErrorWrapper>
-				<Line />
-				<ErrorCode>{centralLabel}</ErrorCode>
-				<Line />
+			<MainTextWrapper height="fit" width="fit">
+				{titleLabel}
+			</MainTextWrapper>
+			<ErrorWrapper height="fit" width="fit" orientation="horizontal">
+				<Container height="0.0625rem" width="6.25rem" background="gray1" />
+				<ErrorCode height="fit" width="fit">
+					{centralLabel}
+				</ErrorCode>
+				<Container height="0.0625rem" width="6.25rem" background="gray1" />
 			</ErrorWrapper>
 			<Padding vertical="large">
 				<Text weight="light">{descriptionLowerLabel}</Text>
