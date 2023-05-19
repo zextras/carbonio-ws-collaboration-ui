@@ -59,11 +59,11 @@ export const getNumberOfMeetingParticipantsByMeetingId = (
 export const getParticipantAudioStatus = (
 	store: RootStore,
 	roomId: string,
-	sessionId: string | undefined
+	userId: string | undefined
 ): boolean => {
 	const audioStream = find(
 		store.meetings[roomId].participants,
-		(participant) => participant.sessionId === sessionId
+		(participant) => participant.userId === userId
 	)?.hasAudioStreamOn;
 	if (audioStream !== undefined) return audioStream;
 	return false;

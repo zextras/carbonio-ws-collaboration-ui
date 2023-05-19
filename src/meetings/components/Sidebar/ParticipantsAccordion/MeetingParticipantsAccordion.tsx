@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import { Accordion } from '@zextras/carbonio-design-system';
+import { Accordion, Container } from '@zextras/carbonio-design-system';
 import React, { FC, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -58,7 +58,9 @@ const MeetingParticipantsAccordion: FC<MeetingParticipantsAccordionProps> = ({ m
 	}, [meetingId, participantsTitle]);
 
 	return (
-		<CustomAccordion data-testid="participantAccordion" items={infoDetails} borderRadius="none" />
+		<Container crossAlignment="flex-start" mainAlignment="flex-start">
+			<CustomAccordion items={infoDetails} borderRadius="none" />
+		</Container>
 	);
 };
 

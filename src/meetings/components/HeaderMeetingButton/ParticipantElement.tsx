@@ -81,6 +81,7 @@ const ParticipantElement: FC<ParticipantElementProps> = ({
 
 	return (
 		<CustomContainer
+			data-testid="participant_element"
 			orientation="horizontal"
 			width="fill"
 			padding={{ top: 'extrasmall', bottom: 'extrasmall' }}

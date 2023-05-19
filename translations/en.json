@@ -148,7 +148,8 @@
         "moreMembersAccordionTitle": "members",
         "noMatch": "There are no items that match this search",
         "oneMemberAccordionTitle": "One member",
-        "searchMembers": "Search members"
+        "searchMembers": "Search members",
+        "searchParticipants": "Search participants"
     },
     "settings": {
         "notifications": {

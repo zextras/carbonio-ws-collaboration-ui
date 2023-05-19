@@ -72,7 +72,7 @@ const MeetingParticipantsList: FC<ParticipantsListProps> = ({ meetingId }) => {
 		() =>
 			filteredContactList !== undefined &&
 			(filteredContactList.length !== 0 ? (
-				listOfMembers
+				<Container data-testid="meeting_participants_list">{listOfMembers}</Container>
 			) : (
 				<CustomContainer padding="large">
 					<Text color="gray1" size="small" weight="light">
@@ -86,7 +86,7 @@ const MeetingParticipantsList: FC<ParticipantsListProps> = ({ meetingId }) => {
 
 	return (
 		<Container padding={{ right: 'small' }}>
-			<SearchUserAction setFilteredInput={setFilteredInput} />
+			<SearchUserAction setFilteredInput={setFilteredInput} isInsideMeeting />
 			{memberList}
 		</Container>
 	);
