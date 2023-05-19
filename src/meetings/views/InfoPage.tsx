@@ -3,12 +3,12 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { useParams } from 'react-router-dom';
 
 import useRouting from '../../hooks/useRouting';
 
-const InfoPage = (): any => {
+const InfoPage = (): ReactElement => {
 	const { goToMeetingPage } = useRouting();
 	const { infoType }: any = useParams();
 	console.log(infoType);

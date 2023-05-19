@@ -4,7 +4,11 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Container, SnackbarManagerContext } from '@zextras/carbonio-design-system';
+import {
+	Container,
+	SnackbarManagerContext,
+	CreateSnackbarFn
+} from '@zextras/carbonio-design-system';
 import React, { FC, useCallback, useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -14,6 +18,8 @@ import ClearHistoryModal from './ClearHistoryModal';
 type ClearHistoryProps = {
 	roomId: string;
 };
+
+type CreateSnackbarFn = typeof CreateSnackbarFn;
 
 const ClearHistoryAction: FC<ClearHistoryProps> = ({ roomId }) => {
 	const [t] = useTranslation();
@@ -26,7 +32,7 @@ const ClearHistoryAction: FC<ClearHistoryProps> = ({ roomId }) => {
 
 	const closeModal = useCallback(() => setClearHistoryModalOpen(false), []);
 
-	const createSnackbar: any = useContext(SnackbarManagerContext);
+	const createSnackbar: CreateSnackbarFn = useContext(SnackbarManagerContext);
 	const successfulSnackbar = useCallback(
 		() =>
 			createSnackbar({

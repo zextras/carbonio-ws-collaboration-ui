@@ -42,7 +42,11 @@ export const useRoomsStoreSlice = (set: (...any: any) => void): RoomsStoreSlice 
 					// Delete stored messages that have a date previous clearedAt date
 					if (roomBe.userSettings?.clearedAt != null) {
 						forEach(draft.messages[roomBe.id], (message) => {
-							if (isBefore(message.date, roomBe.userSettings!.clearedAt!)) {
+							if (
+								roomBe.userSettings &&
+								roomBe.userSettings.clearedAt &&
+								isBefore(message.date, roomBe.userSettings.clearedAt)
+							) {
 								remove(draft.messages[roomBe.id], (mes) => mes.id === message.id);
 							}
 						});

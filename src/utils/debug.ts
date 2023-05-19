@@ -6,7 +6,9 @@
  */
 
 // Debug WebSocket events
-export const wsDebug = (text: string, object?: any): void =>
+import { WsEvent } from '../types/network/websocket/wsEvents';
+
+export const wsDebug = (text: string, object?: WsEvent): void =>
 	console.log(
 		`%c CHATS WS [${new Date().toISOString().slice(11, -5)}]: ${text}`,
 		'color: Green',
@@ -14,7 +16,7 @@ export const wsDebug = (text: string, object?: any): void =>
 	);
 
 // Debug XMPP events
-export const xmppDebug = (text: string, object?: any): void => {
+export const xmppDebug = (text: string, object?: Element): void => {
 	console.log(
 		`%c CHATS XMPP [${new Date().toISOString().slice(11, -5)}]: ${text}`,
 		'color: Violet',

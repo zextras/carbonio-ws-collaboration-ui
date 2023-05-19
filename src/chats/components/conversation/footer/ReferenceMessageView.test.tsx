@@ -59,6 +59,7 @@ describe('Reply to a message by opening the contextual menu', () => {
 	test('Display of reference message shows correctly', () => {
 		const store: RootStore = useStore.getState();
 		store.addRoom(mockedRoom);
+		store.newMessage(mockedMessage);
 		store.setReferenceMessage(
 			mockedRoom.id,
 			mockedMessage.id,
@@ -75,6 +76,7 @@ describe('Reply to a message by opening the contextual menu', () => {
 	test('Close reference message', async () => {
 		const store: RootStore = useStore.getState();
 		store.addRoom(mockedRoom);
+		store.newMessage(mockedMessage);
 		store.setReferenceMessage(
 			mockedRoom.id,
 			mockedMessage.id,
