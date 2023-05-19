@@ -12,7 +12,7 @@ import { MarkersStoreSlice, RootStore } from '../../types/store/StoreTypes';
 
 export const useMarkersStoreSlice = (set: (...any: any) => void): MarkersStoreSlice => ({
 	markers: {},
-	updateMarkers: (markers: Marker[], roomId: string): any => {
+	updateMarkers: (markers: Marker[], roomId: string): void => {
 		set(
 			produce((draft: RootStore) => {
 				if (!draft.markers[roomId]) draft.markers[roomId] = {};

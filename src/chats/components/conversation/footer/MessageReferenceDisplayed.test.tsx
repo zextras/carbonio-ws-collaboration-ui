@@ -175,7 +175,7 @@ describe('Message reference displayed', () => {
 		expect(userName).toBeInTheDocument();
 
 		// Displayed text is the text of the forwarded message
-		const message = screen.getByText(new RegExp(forwardedTextMessage.forwarded!.text, 'i'));
+		const message = screen.getByText(new RegExp(forwardedTextMessage.forwarded?.text || '', 'i'));
 		expect(message).toBeInTheDocument();
 	});
 
@@ -200,7 +200,7 @@ describe('Message reference displayed', () => {
 		expect(userName).toBeInTheDocument();
 
 		// Displayed text is the attachment name
-		const message = screen.getByText(new RegExp(attachmentTextMessage.attachment!.name, 'i'));
+		const message = screen.getByText(new RegExp(attachmentTextMessage.attachment?.name || '', 'i'));
 		expect(message).toBeInTheDocument();
 	});
 });

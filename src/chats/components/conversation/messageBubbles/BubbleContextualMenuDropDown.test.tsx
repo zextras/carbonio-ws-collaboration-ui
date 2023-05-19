@@ -42,6 +42,8 @@ describe('Bubble Contextual Menu - other user messages', () => {
 		expect(copyAction).toBeInTheDocument();
 		const forwardAction = screen.getByText(/Forward/i);
 		expect(forwardAction).toBeInTheDocument();
+		const editAction = screen.queryByText(/Edit/i);
+		expect(editAction).not.toBeInTheDocument();
 		const deleteAction = screen.queryByText(/Delete/i);
 		expect(deleteAction).not.toBeInTheDocument();
 		const downloadAction = screen.queryByText(/Download/i);
@@ -72,6 +74,8 @@ describe('Bubble Contextual Menu - other user messages', () => {
 		expect(copyAction).toBeInTheDocument();
 		const forwardAction = screen.getByText(/Forward/i);
 		expect(forwardAction).toBeInTheDocument();
+		const editAction = screen.queryByText(/Edit/i);
+		expect(editAction).not.toBeInTheDocument();
 		const deleteAction = screen.queryByText(/Delete/i);
 		expect(deleteAction).not.toBeInTheDocument();
 		const downloadAction = screen.queryByText(/Download/i);
@@ -101,6 +105,8 @@ describe('Bubble Contextual Menu - other user messages', () => {
 		expect(copyAction).toBeInTheDocument();
 		const forwardAction = screen.queryByText(/Forward/i);
 		expect(forwardAction).not.toBeInTheDocument();
+		const editAction = screen.queryByText(/Edit/i);
+		expect(editAction).not.toBeInTheDocument();
 		const deleteAction = screen.queryByText(/Delete/i);
 		expect(deleteAction).not.toBeInTheDocument();
 		const downloadAction = screen.queryByText(/Download/i);
@@ -130,6 +136,8 @@ describe('Bubble Contextual Menu - other user messages', () => {
 		expect(copyAction).toBeInTheDocument();
 		const forwardAction = screen.getByText(/Forward/i);
 		expect(forwardAction).toBeInTheDocument();
+		const editAction = screen.queryByText(/Edit/i);
+		expect(editAction).not.toBeInTheDocument();
 		const deleteAction = screen.queryByText(/Delete/i);
 		expect(deleteAction).not.toBeInTheDocument();
 		const downloadAction = screen.queryByText(/Download/i);
@@ -163,6 +171,8 @@ describe('Bubble Contextual Menu - my messages', () => {
 		expect(copyAction).toBeInTheDocument();
 		const forwardAction = screen.getByText(/Forward/i);
 		expect(forwardAction).toBeInTheDocument();
+		const editAction = screen.queryByText(/Edit/i);
+		expect(editAction).toBeInTheDocument();
 		const deleteAction = screen.getByText(/Delete/i);
 		expect(deleteAction).toBeInTheDocument();
 		const downloadAction = screen.queryByText(/Download/i);
@@ -195,6 +205,8 @@ describe('Bubble Contextual Menu - my messages', () => {
 		expect(copyAction).toBeInTheDocument();
 		const forwardAction = screen.getByText(/Forward/i);
 		expect(forwardAction).toBeInTheDocument();
+		const editAction = screen.queryByText(/Edit/i);
+		expect(editAction).toBeInTheDocument();
 		const deleteAction = screen.getByText(/Delete/i);
 		expect(deleteAction).toBeInTheDocument();
 		const downloadAction = screen.queryByText(/Download/i);
@@ -226,6 +238,8 @@ describe('Bubble Contextual Menu - my messages', () => {
 		expect(copyAction).toBeInTheDocument();
 		const forwardAction = screen.queryByText(/Forward/i);
 		expect(forwardAction).not.toBeInTheDocument();
+		const editAction = screen.queryByText(/Edit/i);
+		expect(editAction).not.toBeInTheDocument();
 		const deleteAction = screen.queryByTestId(/Delete/i);
 		expect(deleteAction).not.toBeInTheDocument();
 		const downloadAction = screen.queryByText(/Download/i);
@@ -237,13 +251,15 @@ describe('Bubble Contextual Menu - my messages', () => {
 	test('Attachment text message', async () => {
 		const simpleTextMessage: TextMessage = createMockTextMessage({
 			roomId: mockedRoom.id,
+			from: mySessionId,
+			date: Date.now() - 60,
 			attachment: { id: 'id', name: 'file', mimeType: 'image/png', size: 122312 }
 		});
 		const store: RootStore = useStore.getState();
 		store.addRoom(mockedRoom);
 		store.newMessage(simpleTextMessage);
 		const { user } = setup(
-			<BubbleContextualMenuDropDown message={simpleTextMessage} isMyMessage={false} />
+			<BubbleContextualMenuDropDown message={simpleTextMessage} isMyMessage />
 		);
 		const arrowButton = screen.getByTestId('icon: ArrowIosDownward');
 		await user.click(arrowButton);
@@ -255,8 +271,10 @@ describe('Bubble Contextual Menu - my messages', () => {
 		expect(copyAction).toBeInTheDocument();
 		const forwardAction = screen.getByText(/Forward/i);
 		expect(forwardAction).toBeInTheDocument();
+		const editAction = screen.queryByText(/Edit/i);
+		expect(editAction).toBeInTheDocument();
 		const deleteAction = screen.queryByText(/Delete/i);
-		expect(deleteAction).not.toBeInTheDocument();
+		expect(deleteAction).toBeInTheDocument();
 		const downloadAction = screen.queryByText(/Download/i);
 		expect(downloadAction).toBeInTheDocument();
 		const previewAction = screen.queryByText(/Preview/i);

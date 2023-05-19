@@ -5,7 +5,11 @@
  */
 
 interface IBaseAPI {
-	fetchAPI(endpoint: string, method: RequestType, data?: Record<string, unknown>): Promise<any>;
+	fetchAPI(
+		endpoint: string,
+		method: RequestType,
+		data?: Record<string, unknown>
+	): Promise<Response>;
 }
 
 export enum RequestType {

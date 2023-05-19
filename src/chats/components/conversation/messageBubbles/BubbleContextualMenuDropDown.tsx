@@ -6,17 +6,19 @@
  */
 
 import { Dropdown, IconButton, SnackbarManagerContext } from '@zextras/carbonio-design-system';
+import { size } from 'lodash';
 import React, { FC, useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled, { css, FlattenSimpleInterpolation } from 'styled-components';
 
 import usePreview from '../../../../hooks/usePreview';
 import { AttachmentsApi } from '../../../../network';
+import { getFilesToUploadArray } from '../../../../store/selectors/ActiveConversationsSelectors';
 import { getXmppClient } from '../../../../store/selectors/ConnectionSelector';
 import { getCapability } from '../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../store/Store';
 import { messageActionType } from '../../../../types/store/ActiveConversationTypes';
-import { MessageType, TextMessage } from '../../../../types/store/MessageTypes';
+import { TextMessage } from '../../../../types/store/MessageTypes';
 import { CapabilityType } from '../../../../types/store/SessionTypes';
 import { isPreviewSupported } from '../../../../utils/attachmentUtils';
 import ForwardMessageModal from '../forwardModal/ForwardMessageModal';
@@ -93,6 +95,7 @@ type DropDownActionType = {
 	id: string;
 	label: string;
 	onClick: () => void;
+	disabled?: boolean;
 };
 
 const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
@@ -110,7 +113,7 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 	const downloadActionLabel = t('action.download', 'Download');
 	const previewActionLabel = t('action.preview', 'Preview');
 	const successfulCopySnackbar = t('feedback.messageCopied', 'Message copied');
-	const messageActionsTooltip = t('tooltip.messageActions', ' Message actions');
+	const messageActionsTooltip = t('tooltip.messageActions', 'Message actions');
 
 	const deleteMessageTimeLimitInMinutes = useStore((store) =>
 		getCapability(store, CapabilityType.DELETE_MESSAGE_TIME_LIMIT)
@@ -120,6 +123,7 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 	) as number;
 	const setReferenceMessage = useStore((store) => store.setReferenceMessage);
 	const setDraftMessage = useStore((store) => store.setDraftMessage);
+	const filesToUploadArray = useStore((store) => getFilesToUploadArray(store, message.roomId));
 	const [dropdownActive, setDropdownActive] = useState(false);
 	const [forwardMessageModalIsOpen, setForwardMessageModalIsOpen] = useState<boolean>(false);
 	const createSnackbar: any = useContext(SnackbarManagerContext);
@@ -142,7 +146,7 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 		[setForwardMessageModalIsOpen]
 	);
 
-	const copyMessage = useCallback(() => {
+	const copyMessageAction = useCallback(() => {
 		const textToCopy = !message.forwarded ? message.text : message.forwarded.text;
 		if (window.parent.navigator.clipboard) {
 			window.parent.navigator.clipboard.writeText(textToCopy).then();
@@ -162,7 +166,19 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 		});
 	}, [createSnackbar, message.forwarded, message.text, successfulCopySnackbar]);
 
-	const deleteMessage = useCallback(() => {
+	const editMessageAction = useCallback(() => {
+		setDraftMessage(message.roomId, false, message.text);
+		setReferenceMessage(
+			message.roomId,
+			message.id,
+			message.from,
+			message.stanzaId,
+			messageActionType.EDIT,
+			message.attachment
+		);
+	}, [message, setDraftMessage, setReferenceMessage]);
+
+	const deleteMessageAction = useCallback(() => {
 		const attachment = message.attachment || message.forwarded?.attachment;
 		if (attachment) {
 			AttachmentsApi.deleteAttachment(attachment.id).then(() =>
@@ -193,17 +209,36 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 		}
 	}, [message.attachment, message.forwarded]);
 
-	const contextualMenuActions = useMemo(() => {
-		const actions: DropDownActionType[] = [];
-		const messageCanBeDeleted =
-			!deleteMessageTimeLimitInMinutes ||
-			(deleteMessageTimeLimitInMinutes &&
-				Date.now() <= message.date + deleteMessageTimeLimitInMinutes * 60000);
+	const canBeForwarded = useMemo(() => !message.forwarded, [message.forwarded]);
 
-		const messageCanBeEdited =
+	const canBeEdited = useMemo(() => {
+		const inTime =
 			!editMessageTimeLimitInMinutes ||
 			(editMessageTimeLimitInMinutes &&
 				Date.now() <= message.date + editMessageTimeLimitInMinutes * 60000);
+		return isMyMessage && inTime && !message.forwarded;
+	}, [editMessageTimeLimitInMinutes, isMyMessage, message.date, message.forwarded]);
+
+	const canBeDeleted = useMemo(() => {
+		const inTime =
+			!deleteMessageTimeLimitInMinutes ||
+			(deleteMessageTimeLimitInMinutes &&
+				Date.now() <= message.date + deleteMessageTimeLimitInMinutes * 60000);
+		return isMyMessage && inTime;
+	}, [deleteMessageTimeLimitInMinutes, isMyMessage, message.date]);
+
+	const canBePreviewed = useMemo(() => {
+		const attachment = message.attachment || message.forwarded?.attachment;
+		return attachment && isPreviewSupported(attachment.mimeType);
+	}, [message.attachment, message.forwarded?.attachment]);
+
+	const canBeDownloaded = useMemo(
+		() => message.attachment || message.forwarded?.attachment,
+		[message.attachment, message.forwarded?.attachment]
+	);
+
+	const contextualMenuActions = useMemo(() => {
+		const actions: DropDownActionType[] = [];
 
 		// Reply functionality
 		actions.push({
@@ -221,7 +256,7 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 		});
 
 		// Forward message in another chat
-		if (!message.forwarded) {
+		if (canBeForwarded) {
 			actions.push({
 				id: 'forward',
 				label: forwardActionLabel,
@@ -230,85 +265,72 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 		}
 
 		// Copy the text of a text message to the clipboard
-		if (message.type === MessageType.TEXT_MSG) {
-			actions.push({
-				id: 'Copy',
-				label: copyActionLabel,
-				onClick: copyMessage
-			});
-		}
+		actions.push({
+			id: 'Copy',
+			label: copyActionLabel,
+			onClick: copyMessageAction
+		});
 
 		// Edit functionality
-		if (isMyMessage && messageCanBeEdited && !message.forwarded && !message.attachment) {
+		if (canBeEdited) {
 			actions.push({
 				id: 'Edit',
 				label: editActionLabel,
-				onClick: () => {
-					setDraftMessage(message.roomId, false, message.text);
-					setReferenceMessage(
-						message.roomId,
-						message.id,
-						message.from,
-						message.stanzaId,
-						messageActionType.EDIT
-					);
-				}
+				onClick: editMessageAction,
+				disabled: size(filesToUploadArray) > 0
 			});
 		}
 
 		// Delete functionality
-		if (isMyMessage && messageCanBeDeleted) {
+		if (canBeDeleted) {
 			actions.push({
 				id: 'Delete',
 				label: deleteActionLabel,
-				onClick: deleteMessage
+				onClick: deleteMessageAction
 			});
 		}
 
-		// Download and Preview Functionality
-		const attachment = message.attachment || message.forwarded?.attachment;
-		if (attachment) {
-			if (isPreviewSupported(attachment.mimeType)) {
-				actions.push({
-					id: 'Preview',
-					label: previewActionLabel,
-					onClick: onPreviewClick
-				});
-			}
+		// Preview Functionality
+		if (canBePreviewed) {
+			actions.push({
+				id: 'Preview',
+				label: previewActionLabel,
+				onClick: onPreviewClick
+			});
+		}
+
+		// Download functionality
+		if (canBeDownloaded) {
 			actions.push({
 				id: 'Download',
 				label: downloadActionLabel,
 				onClick: downloadAction
 			});
 		}
+
 		return actions;
 	}, [
-		deleteMessageTimeLimitInMinutes,
-		message.date,
-		message.forwarded,
-		message.attachment,
-		message.type,
-		message.roomId,
-		message.id,
-		message.from,
-		message.stanzaId,
-		message.text,
-		editMessageTimeLimitInMinutes,
 		replyActionLabel,
-		isMyMessage,
+		canBeForwarded,
+		copyActionLabel,
+		copyMessageAction,
+		canBeEdited,
+		canBeDeleted,
+		canBePreviewed,
+		canBeDownloaded,
 		setReferenceMessage,
+		message,
 		forwardActionLabel,
 		onOpenForwardMessageModal,
-		copyActionLabel,
-		copyMessage,
 		editActionLabel,
-		setDraftMessage,
+		editMessageAction,
+		filesToUploadArray,
 		deleteActionLabel,
-		deleteMessage,
-		downloadActionLabel,
-		downloadAction,
+		deleteMessageAction,
 		previewActionLabel,
-		onPreviewClick
+		onPreviewClick,
+		downloadActionLabel,
+		downloadAction
 	]);
 
 	return (

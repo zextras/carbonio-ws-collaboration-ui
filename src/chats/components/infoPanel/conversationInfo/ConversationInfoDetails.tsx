@@ -40,9 +40,9 @@ const ConversationInfoDetails: FC<ConversationInfoDetailsProps> = ({ roomId, roo
 	const sessionId: string | undefined = useStore((store) => store.session.id);
 	const roomMembers: Member[] | undefined = useStore((state) => getRoomMembers(state, roomId));
 	const memberId: string = useMemo(() => {
-		if (roomType === RoomType.ONE_TO_ONE) {
-			if (roomMembers![0].userId === sessionId) return roomMembers![1]?.userId;
-			return roomMembers![0].userId;
+		if (roomType === RoomType.ONE_TO_ONE && roomMembers !== undefined) {
+			if (roomMembers[0].userId === sessionId) return roomMembers[1]?.userId;
+			return roomMembers[0].userId;
 		}
 		return '';
 	}, [roomMembers, roomType, sessionId]);
