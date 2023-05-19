@@ -8,7 +8,7 @@ import { ActiveConversationsMap, FileToUpload, messageActionType } from './Activ
 import { Connections } from './ConnectionsTypes';
 import { FasteningsMap } from './FasteningMessagesTypes';
 import { Marker, MarkersMap } from './MarkersTypes';
-import { MeetingsMap } from './MeetingTypes';
+import { MeetingsMap, MeetingViewType } from './MeetingTypes';
 import {
 	MessageMap,
 	Message,
@@ -147,6 +147,7 @@ export type MeetingsSlice = {
 		status: boolean
 	) => void;
 	toggleSidebarStatus: (meetingId: string, isOpen: boolean) => void;
+	setMeetingViewSelected: (meetingId: string, viewType: MeetingViewType) => void;
 };
 
 export type RootStore = UsersStoreSlice &

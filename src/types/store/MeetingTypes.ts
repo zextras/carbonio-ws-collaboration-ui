@@ -13,6 +13,7 @@ export type Meeting = {
 	participants: MeetingParticipantMap;
 	createdAt: string;
 	sidebarStatus: boolean;
+	meetingViewSelected: MeetingViewType;
 };
 
 export type MeetingParticipant = {
@@ -26,3 +27,9 @@ export type MeetingParticipant = {
 export type MeetingParticipantMap = {
 	[sessionId: string]: MeetingParticipant;
 };
+
+export enum MeetingViewType {
+	CINEMA = 'cinema',
+	GRID = 'grid',
+	WAITING = 'waiting'
+}
