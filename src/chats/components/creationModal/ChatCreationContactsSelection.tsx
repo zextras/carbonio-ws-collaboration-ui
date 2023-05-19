@@ -185,7 +185,7 @@ const ChatCreationContactsSelection = ({
 	const ListItem = useMemo(
 		() =>
 			// eslint-disable-next-line react/display-name
-			({ item, selected }: any) =>
+			({ item, selected }: { item: ContactInfo; selected: boolean }) =>
 				(
 					<Padding vertical="small">
 						<Container
@@ -218,7 +218,7 @@ const ChatCreationContactsSelection = ({
 		(newChips) => {
 			const differenceChip = difference(chips, newChips)[0];
 			if (size(chips) > size(newChips) && differenceChip) {
-				setContactSelected((contacts: any) => omit(contacts, differenceChip.id));
+				setContactSelected((contacts: ContactSelected) => omit(contacts, differenceChip.id));
 				setChips((chips) => differenceBy(chips, [differenceChip], 'id'));
 			}
 		},

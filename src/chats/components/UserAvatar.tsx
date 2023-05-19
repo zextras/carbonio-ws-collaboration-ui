@@ -40,8 +40,8 @@ const Presence = styled.div`
 	}): string => (memberOnline ? theme.palette.success.regular : theme.palette.gray2.regular)};
 	border: 0.0625rem solid ${(props): string => props.theme.palette.gray5.regular};
 	border-radius: 50%;
-	right: 0rem;
-	bottom: 0rem;
+	right: 0;
+	bottom: 0;
 `;
 
 export const AvatarBadge = styled(Badge)`
@@ -60,13 +60,15 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ roomId, unreadCount, draftMessa
 	const sessionId: string | undefined = useStore((store) => store.session.id);
 	const roomMembers: Member[] | undefined = useStore((store) => getRoomMembers(store, roomId));
 	const otherMember = find(roomMembers, (member) => member.userId !== sessionId);
-	const userName: string | undefined = useStore((store) => getUserName(store, otherMember!.userId));
+	const userName: string | undefined = useStore((store) =>
+		getUserName(store, otherMember?.userId || '')
+	);
 	const roomMuted = useStore((state) => getRoomMutedSelector(state, roomId));
 	const memberOnline: boolean | undefined = useStore((store) =>
-		getUserOnline(store, otherMember!.userId)
+		getUserOnline(store, otherMember?.userId || '')
 	);
 	const userPictureUpdatedAt: string | undefined = useStore((state) =>
-		getUserPictureUpdatedAt(state, otherMember!.userId)
+		getUserPictureUpdatedAt(state, otherMember?.userId || '')
 	);
 	const canSeeUsersPresence = useStore((store) =>
 		getCapability(store, CapabilityType.CAN_SEE_USERS_PRESENCE)
@@ -74,8 +76,8 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ roomId, unreadCount, draftMessa
 	const [picture, setPicture] = useState<false | string>(false);
 
 	useEffect(() => {
-		if (userPictureUpdatedAt != null) {
-			setPicture(`${UsersApi.getURLUserPicture(otherMember!.userId)}?${userPictureUpdatedAt}`);
+		if (userPictureUpdatedAt != null && otherMember && otherMember.userId !== undefined) {
+			setPicture(`${UsersApi.getURLUserPicture(otherMember.userId)}?${userPictureUpdatedAt}`);
 		} else {
 			setPicture(false);
 		}

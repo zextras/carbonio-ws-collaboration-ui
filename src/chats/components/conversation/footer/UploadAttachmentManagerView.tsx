@@ -211,7 +211,7 @@ const UploadAttachmentManagerView: React.FC<UploadAttachmentManagerViewProps> = 
 	);
 
 	const filesWithPreview = useMemo(() => {
-		const filePreviews: any[] = [];
+		const filePreviews: JSX.Element[] = [];
 		map(filesToUploadArray, (file) => {
 			const displayPreview = canDisplayPreview(file.file.type);
 			const previewFile = (

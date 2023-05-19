@@ -71,7 +71,11 @@ const SecondaryBarSingleGroupsView: React.FC<SecondaryBarSingleGroupsView> = ({ 
 					}
 				} else {
 					const users: Member[] | undefined = useStore.getState().rooms[room.roomId].members;
-					const userId = users?.[0].userId === sessionId ? users![1]?.userId : users![0].userId;
+					const userId = users
+						? users[0].userId === sessionId
+							? users[1].userId
+							: users[0].userId
+						: '';
 					const userName = useStore.getState().users[userId].name;
 					const userEmail = useStore.getState().users[userId].email.split('@')[0];
 					if (
