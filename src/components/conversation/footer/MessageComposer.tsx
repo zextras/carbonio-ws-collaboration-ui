@@ -13,7 +13,7 @@ import {
 	CreateSnackbarFn,
 	Spinner
 } from '@zextras/carbonio-design-system';
-import { find, forEach, map } from 'lodash';
+import { debounce, find, forEach, map, throttle } from 'lodash';
 import React, {
 	BaseSyntheticEvent,
 	useCallback,
@@ -97,7 +97,6 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 
 	const [listAbortController, setListAbortController] = useState<AbortController[]>([]);
 	const [textMessage, setTextMessage] = useState(draftMessage || '');
-	const [isWriting, setIsWriting] = useState(false);
 	const [isUploading, setIsUploading] = useState(false);
 	const [noMoreCharsOnInputComposer, setNoMoreCharsOnInputComposer] = useState(false);
 	const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -108,7 +107,6 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 	const messageInputRef = useRef<HTMLTextAreaElement>();
 	const emojiButtonRef = useRef<HTMLButtonElement>();
 	const emojiTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
-	const timeoutRef = useRef<ReturnType<typeof setTimeout>>();
 
 	const sendDisabled = useMemo(() => {
 		// Send button is always enabled if user is editing
@@ -191,7 +189,29 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 		});
 	};
 
+	// Send isWriting every 3 seconds
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	const sendThrottleIsWriting = useCallback(
+		throttle(() => xmppClient.sendIsWriting(roomId), 3000),
+		[xmppClient, roomId]
+	);
+
+	// Send paused after 3,5 seconds user stops typing
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	const sendDebouncedPause = useCallback(
+		debounce(() => xmppClient.sendPaused(roomId), 3500),
+		[xmppClient, roomId]
+	);
+
+	// Send paused and avoid to send pending isWriting
+	const sendStopWriting = useCallback(() => {
+		sendThrottleIsWriting.cancel();
+		sendDebouncedPause.cancel();
+		xmppClient.sendPaused(roomId);
+	}, [sendThrottleIsWriting, sendDebouncedPause, xmppClient, roomId]);
+
 	const sendMessage = useCallback((): void => {
+		sendStopWriting();
 		if (showEmojiPicker) setShowEmojiPicker(false);
 		const message = textMessage.trim();
 		if (filesToUploadArray) {
@@ -268,16 +288,13 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 			setDraftMessage(roomId, true);
 			setTextMessage('');
 			if (messageInputRef.current) messageInputRef.current.style.height = '';
-			if (timeoutRef.current) clearTimeout(timeoutRef.current);
-			setIsWriting(false);
-			xmppClient.sendPaused(roomId);
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [
 		xmppClient,
 		roomId,
 		textMessage,
-		timeoutRef,
+		sendStopWriting,
 		referenceMessage,
 		completeReferenceMessage,
 		filesToUploadArray,
@@ -298,26 +315,20 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 			checkMaxLengthAndSetMessage(e.target.value);
 		},
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[roomId, textMessage, timeoutRef]
+		[roomId, textMessage]
 	);
 
 	const handleKeyDown = useCallback(
 		(e: KeyboardEvent) => {
-			if (!sendDisabled) {
-				if (e.key === 'Enter' && !e.shiftKey) {
-					e.preventDefault();
-					sendMessage();
-				} else if (!isWriting) {
-					if (timeoutRef.current) clearTimeout(timeoutRef.current);
-					timeoutRef.current = setTimeout(() => {
-						setIsWriting(false);
-						xmppClient.sendPaused(roomId);
-					}, 3000);
-					xmppClient.sendIsWriting(roomId);
-				}
+			if (!sendDisabled && e.key === 'Enter' && !e.shiftKey) {
+				e.preventDefault();
+				sendMessage();
+			} else {
+				sendThrottleIsWriting();
+				sendDebouncedPause();
 			}
 		},
-		[sendDisabled, isWriting, sendMessage, xmppClient, roomId]
+		[sendDisabled, sendMessage, sendThrottleIsWriting, sendDebouncedPause]
 	);
 
 	const clearInput = useCallback(() => {
@@ -358,8 +369,6 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 		}
 		setInputHasFocus(roomId, false);
 	}, [textMessage, setInputHasFocus, roomId, setDraftMessage]);
-
-	const sendStopWriting = useCallback(() => xmppClient.sendPaused(roomId), [xmppClient, roomId]);
 
 	const mapFiles = useCallback(
 		(listOfFiles, includeFiles) => {
@@ -447,14 +456,8 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 
 	useEffect(() => {
 		if (unreadMessagesCount <= 0) messageInputRef.current?.focus();
-		if (timeoutRef.current) clearTimeout(timeoutRef.current);
-		window.parent.addEventListener('beforeunload', sendStopWriting);
 		const messageRef = messageInputRef.current;
 		return () => {
-			if (xmppClient) {
-				xmppClient.sendPaused(roomId);
-			}
-			window.parent.removeEventListener('beforeunload', sendStopWriting);
 			setTextMessage('');
 			if (messageRef) {
 				messageRef.value = '';
