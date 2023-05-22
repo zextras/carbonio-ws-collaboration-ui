@@ -91,12 +91,17 @@
         "nameTooShort": "The title is an essential information",
         "topicTooLong": "Maximum topic length is 256 characters"
     },
+    "external": {
+        "nobodyInTheRoom": "It seems nobody is in this Room",
+        "roomIsEmpty": "This Room is empty"
+    },
     "feedback": {
         "historyCleared": "History cleared successfully!",
         "messageCopied": "Message copied",
         "notificationsActivatedForThisChat": "Notifications activated for this chat",
         "notificationsMutedForThisChat": "Notifications muted for this chat"
     },
+    "keepInTouchWithColleagues": "Keep in touch with your colleagues or join your groups' meeting rooms",
     "meeting": {
         "activeMeetingTooltip": "There's an active meeting for this Group",
         "collapseParticipantsMeetingTooltip": "Collapse participants list",
@@ -106,7 +111,8 @@
         "oneParticipantListTitle": "One meeting's participant",
         "ongoingGroupMeetingTooltip": "You are already participating in this meeting",
         "ongoingOneToOneMeetingTooltip": "You already have an active meeting with {{name}}",
-        "startMeeting": "Start meeting"
+        "startMeeting": "Start meeting",
+        "waitingParticipants": "Waiting for participants to join..."
     },
     "message": {
         "deletedMessage": "Deleted message",
@@ -142,6 +148,11 @@
         "leaveRoomLabel": "Are you sure to leave this Room?",
         "removeMember": "Remove member",
         "showPreviousConversationHistory": "Show previous conversation history"
+    },
+    "notification": {
+        "meeting": {
+            "ended": "Meeting Ended"
+        }
     },
     "participantsList": {
         "closeSearch": "Close search",
@@ -183,6 +194,7 @@
         "offline": "Offline",
         "online": "Online"
     },
+    "thanksForParticipating": "Thanks for participating",
     "titlePlaceholder": "Your Group's title",
     "tooltip": {
         "clear": "Clear",
@@ -221,5 +233,6 @@
             "uploadAvatar": "Upload avatar"
         },
         "writeToSend": "Write a message to send it"
-    }
+    },
+    "tryLater": "Try later"
 }

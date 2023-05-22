@@ -11,6 +11,9 @@ import styled, { FlattenSimpleInterpolation } from 'styled-components';
 
 import useRouting, { PAGE_INFO_TYPE } from '../../hooks/useRouting';
 import { MeetingsApi } from '../../network';
+import { getMeetingViewSelected } from '../../store/selectors/MeetingSelectors';
+import useStore from '../../store/Store';
+import { MeetingViewType } from '../../types/store/MeetingTypes';
 
 const ActionsWrapper = styled(Container)`
 	position: absolute;
@@ -32,6 +35,9 @@ type MeetingActionsProps = {
 const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElement => {
 	const { goToInfoPage } = useRouting();
 	const { meetingId }: any = useParams();
+
+	const meetingViewSelected = useStore((store) => getMeetingViewSelected(store, meetingId));
+	const setMeetingViewSelected = useStore((store) => store.setMeetingViewSelected);
 
 	const [isHoovering, setIsHoovering] = useState(false);
 	const [isHoverActions, setIsHoverActions] = useState(false);
@@ -108,6 +114,13 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 			.catch(() => console.log('Error on leave'));
 	}, [meetingId, goToInfoPage]);
 
+	const toggleMeetingView = useCallback(() => {
+		setMeetingViewSelected(
+			meetingId,
+			meetingViewSelected === MeetingViewType.GRID ? MeetingViewType.CINEMA : MeetingViewType.GRID
+		);
+	}, [meetingId, meetingViewSelected, setMeetingViewSelected]);
+
 	useEffect(() => {
 		let elRef: React.RefObject<HTMLDivElement> | null = streamsWrapperRef;
 		if (elRef && elRef.current && !isHoverActions) {
@@ -140,6 +153,14 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 				icon={audioStatus ? 'Mic' : 'MicOff'}
 				onClick={toggleAudioStream}
 				size="large"
+			/>
+			<Padding right="16px" />
+			<IconButton
+				size="large"
+				backgroundColor="primary"
+				iconColor="gray6"
+				icon={meetingViewSelected === MeetingViewType.GRID ? 'Grid' : 'CinemaView'}
+				onClick={toggleMeetingView}
 			/>
 			<Padding right="16px" />
 			<IconButton
