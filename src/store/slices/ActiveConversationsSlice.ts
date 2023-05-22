@@ -34,40 +34,30 @@ export const useActiveConversationsSlice = (
 	setIsWriting: (roomId: string, userId: string, writingStatus: boolean): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (draft.activeConversations[roomId]) {
-					if (draft.activeConversations[roomId]) {
-						const isUserYetInWritingList = find(
-							draft.activeConversations[roomId].isWritingList,
-							(id) => id === userId
-						);
+				// Handle the case when the conversation is not yet in the activeConversations map
+				if (!draft.activeConversations[roomId]) draft.activeConversations[roomId] = {};
+				if (!draft.activeConversations[roomId].isWritingList)
+					draft.activeConversations[roomId].isWritingList = [];
 
-						// If a new user is writing add it to the list
-						if (writingStatus && !isUserYetInWritingList) {
-							draft.activeConversations[roomId].isWritingList = [
-								...(draft.activeConversations[roomId].isWritingList || []),
-								userId
-							];
-						}
-						// If pause writing event arrives remove the user from the writing list
-						if (
-							!writingStatus &&
-							isUserYetInWritingList &&
-							draft.activeConversations[roomId].isWritingList
-						) {
-							remove(draft.activeConversations[roomId].isWritingList!, (id) => id === userId);
-							if (draft.activeConversations[roomId].isWritingList!.length === 0) {
-								delete draft.activeConversations[roomId].isWritingList;
-							}
-						}
-					} else {
-						const newArray = [];
-						newArray.push(userId);
-						draft.activeConversations[roomId] = { isWritingList: newArray };
+				const isUserYetInWritingList = find(
+					draft.activeConversations[roomId].isWritingList,
+					(id) => id === userId
+				);
+
+				// If a new user starts writing add it to the list
+				if (writingStatus && !isUserYetInWritingList) {
+					draft.activeConversations[roomId].isWritingList = [
+						...(draft.activeConversations[roomId].isWritingList || []),
+						userId
+					];
+				}
+
+				// If a user stops writing remove it from the list
+				if (!writingStatus && isUserYetInWritingList) {
+					remove(draft.activeConversations[roomId].isWritingList!, (id) => id === userId);
+					if (draft.activeConversations[roomId].isWritingList!.length === 0) {
+						delete draft.activeConversations[roomId].isWritingList;
 					}
-				} else if (writingStatus) {
-					const newArray = [];
-					newArray.push(userId);
-					draft.activeConversations[roomId] = { isWritingList: newArray };
 				}
 			}),
 			false,
