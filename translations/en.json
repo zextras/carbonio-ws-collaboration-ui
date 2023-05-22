@@ -111,7 +111,8 @@
         "oneParticipantListTitle": "One meeting's participant",
         "ongoingGroupMeetingTooltip": "You are already participating in this meeting",
         "ongoingOneToOneMeetingTooltip": "You already have an active meeting with {{name}}",
-        "startMeeting": "Start meeting"
+        "startMeeting": "Start meeting",
+        "waitingParticipants": "Waiting for participants to join..."
     },
     "message": {
         "deletedMessage": "Deleted message",

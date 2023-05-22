@@ -11,6 +11,7 @@ import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import MeetingActions from './MeetingActions';
+import MeetingViewManager from './MeetingViewManager';
 import { getSidebarStatus } from '../../store/selectors/MeetingSelectors';
 import { getCustomLogo } from '../../store/selectors/SessionSelectors';
 import useStore from '../../store/Store';
@@ -18,6 +19,10 @@ import defaultLogo from '../assets/Logo.png';
 
 const SidebarIconButton = styled(IconButton)`
 	height: 240px;
+	margin-right: ${({ theme }): string => theme.sizes.padding.medium};
+	//position: absolute;
+	//top: calc(50% - 120px);
+	//z-index: 1;
 `;
 
 const BoxContainer = styled(Container)`
@@ -62,7 +67,8 @@ const MeetingStreamsWrapper = (): ReactElement => {
 			width={sidebarStatus ? 'fill' : '100%'}
 			borderRadius="none"
 			padding={{ all: 'large' }}
-			crossAlignment="flex-start"
+			crossAlignment="center"
+			orientation="horizontal"
 		>
 			<LogoApp customLogo={customLogo} />
 			<Tooltip label={sidebarStatus ? collapseSidebarLabel : expandSidebarLabel}>
@@ -74,6 +80,7 @@ const MeetingStreamsWrapper = (): ReactElement => {
 					size="large"
 				/>
 			</Tooltip>
+			<MeetingViewManager />
 			<MeetingActions streamsWrapperRef={streamsWrapperRef} />
 		</BoxContainer>
 	);

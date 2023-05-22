@@ -10,7 +10,7 @@ import { find, forEach } from 'lodash';
 
 import { UsersApi } from '../../network';
 import { MeetingBe, MeetingParticipantBe } from '../../types/network/models/meetingBeTypes';
-import { MeetingParticipantMap } from '../../types/store/MeetingTypes';
+import { MeetingParticipantMap, MeetingViewType } from '../../types/store/MeetingTypes';
 import { MeetingsSlice, RootStore } from '../../types/store/StoreTypes';
 
 export const useMeetingsStoreSlice = (set: (...any: any) => void): MeetingsSlice => ({
@@ -39,7 +39,8 @@ export const useMeetingsStoreSlice = (set: (...any: any) => void): MeetingsSlice
 						roomId: meeting.roomId,
 						participants: participantsMap,
 						createdAt: meeting.createdAt,
-						sidebarStatus: true
+						sidebarStatus: true,
+						meetingViewSelected: MeetingViewType.WAITING
 					};
 
 					// Retrieve participants information if they are unknown
@@ -76,7 +77,8 @@ export const useMeetingsStoreSlice = (set: (...any: any) => void): MeetingsSlice
 					roomId: meeting.roomId,
 					participants: participantsMap,
 					createdAt: meeting.createdAt,
-					sidebarStatus: true
+					sidebarStatus: true,
+					meetingViewSelected: MeetingViewType.WAITING
 				};
 
 				// Retrieve participants information if they are unknown
@@ -178,6 +180,18 @@ export const useMeetingsStoreSlice = (set: (...any: any) => void): MeetingsSlice
 			}),
 			false,
 			'MEETINGS/TOGGLE_SIDEBAR_STATUS'
+		);
+	},
+	setMeetingViewSelected: (meetingId: string, viewType: MeetingViewType): void => {
+		set(
+			produce((draft: RootStore) => {
+				const meeting = find(draft.meetings, (meeting) => meeting.id === meetingId);
+				if (meeting) {
+					draft.meetings[meeting.roomId].meetingViewSelected = viewType;
+				}
+			}),
+			false,
+			'MEETINGS/SET_VIEW_TYPE'
 		);
 	}
 });
