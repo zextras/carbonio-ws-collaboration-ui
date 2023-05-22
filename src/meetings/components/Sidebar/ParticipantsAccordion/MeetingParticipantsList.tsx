@@ -80,8 +80,7 @@ const MeetingParticipantsList: FC<ParticipantsListProps> = ({ meetingId }) => {
 					</Text>
 				</CustomContainer>
 			)),
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[filteredContactList]
+		[filteredContactList, listOfMembers, noMatchLabel]
 	);
 
 	return (

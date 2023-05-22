@@ -29,13 +29,17 @@ const MeetingParticipantsAccordion: FC<MeetingParticipantsAccordionProps> = ({ m
 	);
 
 	const oneParticipantTitle = t('meeting.oneParticipantListTitle', "One meeting's participant");
-	const moreParticipantsTitle = t('meeting.moreParticipantsListTitle', `meeting's participants`);
+	const moreParticipantsTitle = t(
+		'meeting.moreParticipantsListTitle',
+		`${numberOfParticipants} meeting's participants`,
+		{ number: numberOfParticipants }
+	);
 
 	const participantsTitle = useMemo(() => {
 		if (numberOfParticipants === 1) {
 			return oneParticipantTitle;
 		}
-		return `${numberOfParticipants} ${moreParticipantsTitle}`;
+		return moreParticipantsTitle;
 	}, [moreParticipantsTitle, numberOfParticipants, oneParticipantTitle]);
 
 	const infoDetails = useMemo(() => {

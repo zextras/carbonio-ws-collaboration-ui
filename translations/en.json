@@ -102,7 +102,7 @@
         "collapseParticipantsMeetingTooltip": "Collapse participants list",
         "expandParticipantsListTooltip": "Expand participants list",
         "joinMeeting": "Join meeting",
-        "moreParticipantsListTitle": "meeting's participants",
+        "moreParticipantsListTitle": "{{number}} meeting's participants",
         "oneParticipantListTitle": "One meeting's participant",
         "ongoingGroupMeetingTooltip": "You are already participating in this meeting",
         "ongoingOneToOneMeetingTooltip": "You already have an active meeting with {{name}}",
