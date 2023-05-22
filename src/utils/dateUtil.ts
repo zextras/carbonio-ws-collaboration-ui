@@ -21,20 +21,16 @@ export const displayTimestamp = (timestamp: Date | string | number): string =>
 export const isBefore = (previousDate: number | string, nextDate: number | string): boolean =>
 	moment(previousDate).isSameOrBefore(nextDate);
 
-// it returns if the two dates are in different days or months or years
-export const datesAreFromTheSameDay = (date1: number | string, date2: number | string): boolean => {
-	const prevDate = new Date(date1).toLocaleString('en-US', {
-		month: 'numeric',
-		day: 'numeric',
-		year: 'numeric'
-	});
-	const actualDate = new Date(date2).toLocaleString('en-US', {
-		month: 'numeric',
-		day: 'numeric',
-		year: 'numeric'
-	});
-	return prevDate !== actualDate;
-};
+export const isStrictlyBefore = (
+	previousDate: number | string,
+	nextDate: number | string
+): boolean => moment(previousDate).isBefore(nextDate);
+
+// It returns true if the two dates represent the same day
+export const datesAreFromTheSameDay = (
+	date1: Date | number | string,
+	date2: Date | number | string
+): boolean => moment(date1).format('YYYY-MM-DD') === moment(date2).format('YYYY-MM-DD');
 
 // it transforms a ms date to a string one
 export const dateString = (actualDate: string | number, timezone: string): string => {
