@@ -108,7 +108,8 @@ export function onRequestHistory(this: XMPPClient, stanza: Element): void {
 	if (historyMessages.length > 0) store.updateHistory(roomId, historyMessages);
 
 	// Add message of creation room at the start of the history
-	if (isHistoryFullyLoaded) store.addCreateRoomMessage(roomId);
+	const historyIsBeenCleared = !!store.rooms[roomId].userSettings?.clearedAt;
+	if (isHistoryFullyLoaded && !historyIsBeenCleared) store.addCreateRoomMessage(roomId);
 
 	// Set history loadable again
 	store.setHistoryLoadDisabled(roomId, false);

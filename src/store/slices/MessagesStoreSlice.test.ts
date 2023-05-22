@@ -15,7 +15,8 @@ import {
 	createMockUser
 } from '../../tests/createMock';
 import { MarkerStatus } from '../../types/store/MarkersTypes';
-import { MessageType, TextMessage } from '../../types/store/MessageTypes';
+import { AffiliationMessage, MessageType, TextMessage } from '../../types/store/MessageTypes';
+import { RoomType } from '../../types/store/RoomTypes';
 import { dateToTimestamp } from '../../utils/dateUtil';
 import useStore from '../Store';
 
@@ -415,6 +416,66 @@ describe('Test messages slice - updateHistory', () => {
 		expect(result.current.messages[message0.roomId][0].type).toBe(MessageType.DATE_MSG);
 		expect(result.current.messages[message0.roomId][1]).toBe(message0);
 		expect(result.current.messages[message0.roomId][2]).toBe(message1);
+	});
+});
+
+describe('Test message slice - addCreateRoomMessage', () => {
+	test('Add a create room message to a group', () => {
+		const room = createMockRoom({ type: RoomType.GROUP });
+		const message0 = createMockTextMessage({ id: 'message0' });
+		const message1 = createMockTextMessage({ id: 'message1' });
+		const { result } = renderHook(() => useStore());
+
+		act(() => {
+			result.current.addRoom(room);
+			result.current.updateHistory(room.id, [message0, message1]);
+			result.current.addCreateRoomMessage(room.id);
+		});
+
+		expect(result.current.messages[room.id]).toHaveLength(4);
+		expect(result.current.messages[room.id][0].type).toBe(MessageType.DATE_MSG);
+		const createRoomMessage = result.current.messages[room.id][1] as AffiliationMessage;
+		expect(createRoomMessage.type).toBe(MessageType.AFFILIATION_MSG);
+		expect(createRoomMessage.as).toBe('creation');
+	});
+
+	test('Add a create room message to a single conversation', () => {
+		const room = createMockRoom({ type: RoomType.ONE_TO_ONE });
+		const message0 = createMockTextMessage({ id: 'message0' });
+		const message1 = createMockTextMessage({ id: 'message1' });
+		const { result } = renderHook(() => useStore());
+
+		act(() => {
+			result.current.addRoom(room);
+			result.current.updateHistory(room.id, [message0, message1]);
+			result.current.addCreateRoomMessage(room.id);
+		});
+
+		expect(result.current.messages[room.id]).toHaveLength(3);
+		const dateMessage = result.current.messages[room.id][0] as AffiliationMessage;
+		expect(dateMessage.type).toBe(MessageType.DATE_MSG);
+		expect(result.current.messages[room.id][1]).toBe(message0);
+	});
+
+	test('Add a create room message to a group with cleared history', () => {
+		const room = createMockRoom({
+			type: RoomType.GROUP,
+			userSettings: { clearedAt: dateToTimestamp('2023-05-01 14:00') }
+		});
+		const message0 = createMockTextMessage({ id: 'message0' });
+		const message1 = createMockTextMessage({ id: 'message1' });
+		const { result } = renderHook(() => useStore());
+
+		act(() => {
+			result.current.addRoom(room);
+			result.current.updateHistory(room.id, [message0, message1]);
+			result.current.addCreateRoomMessage(room.id);
+		});
+
+		expect(result.current.messages[room.id]).toHaveLength(3);
+		const dateMessage = result.current.messages[room.id][0] as AffiliationMessage;
+		expect(dateMessage.type).toBe(MessageType.DATE_MSG);
+		expect(result.current.messages[room.id][1]).toBe(message0);
 	});
 });
 

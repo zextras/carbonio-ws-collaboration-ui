@@ -6,7 +6,7 @@
  */
 
 import produce from 'immer';
-import { concat, find, forEach, last, map, orderBy, remove, size, uniqBy } from 'lodash';
+import { concat, find, first, forEach, last, map, orderBy, remove, size, uniqBy } from 'lodash';
 
 import { UsersApi } from '../../network';
 import { calcReads } from '../../network/xmpp/utility/decodeXMPPMessageStanza';
@@ -153,13 +153,19 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 	addCreateRoomMessage: (roomId: string): void => {
 		set(
 			produce((draft: RootStore) => {
-				const firstMessageDate = draft.messages[roomId][0]?.date;
+				const firstMessageDate = first(draft.messages[roomId])?.date;
 				const creationMessage = find(
 					draft.messages[roomId],
 					(message) => message.type === MessageType.AFFILIATION_MSG && message.as === 'creation'
 				);
-				// Add creation message only if the room is a non-empty group
-				if (draft.rooms[roomId].type === RoomType.GROUP && firstMessageDate && !creationMessage) {
+				const historyIsBeenCleared = !!draft.rooms[roomId].userSettings?.clearedAt;
+				// Add creation message only if the room is a non-empty group without the history cleared
+				if (
+					draft.rooms[roomId].type === RoomType.GROUP &&
+					firstMessageDate &&
+					!creationMessage &&
+					!historyIsBeenCleared
+				) {
 					const creationMsg: AffiliationMessage = {
 						id: `creationMessage${firstMessageDate + 1}`,
 						roomId,
