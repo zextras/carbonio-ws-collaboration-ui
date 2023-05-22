@@ -9,6 +9,8 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
+import { PAGE_INFO_TYPE } from '../../hooks/useRouting';
+
 const CustomContainer = styled(Container)`
 	z-index: 10;
 	position: fixed;
@@ -47,12 +49,12 @@ const InfoPage = (): ReactElement => {
 	let descriptionLowerLabel;
 
 	switch (infoType) {
-		case 'room_empty':
+		case PAGE_INFO_TYPE.ROOM_EMPTY:
 			titleLabel = t('external.roomIsEmpty', 'This Room is empty');
 			centralLabel = t('tryLater', 'Try later');
 			descriptionLowerLabel = t('external.nobodyInTheRoom', 'It seems nobody is in this Room');
 			break;
-		case 'meeting_ended':
+		case PAGE_INFO_TYPE.MEETING_ENDED:
 			titleLabel = t('notification.meeting.ended', 'Meeting Ended');
 			centralLabel = t('thanksForParticipating', 'Thanks for participating');
 			descriptionLowerLabel = t(

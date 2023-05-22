@@ -41,5 +41,8 @@ export const getNumberOfMeetingParticipants = (
 	roomId: string
 ): number | undefined => size(store.meetings[roomId]?.participants);
 
-export const getMeetingViewSelected = (store: RootStore, meetingId: string): MeetingViewType =>
-	find(store.meetings, (meeting) => meeting.id === meetingId)!.meetingViewSelected;
+export const getMeetingViewSelected = (
+	store: RootStore,
+	meetingId: string
+): MeetingViewType | undefined =>
+	find(store.meetings, (meeting) => meeting.id === meetingId)?.meetingViewSelected;
