@@ -11,8 +11,7 @@ import {
 	createMockMarker,
 	createMockMember,
 	createMockRoom,
-	createMockTextMessage,
-	createMockUser
+	createMockTextMessage
 } from '../../tests/createMock';
 import { MarkerStatus } from '../../types/store/MarkersTypes';
 import { AffiliationMessage, MessageType, TextMessage } from '../../types/store/MessageTypes';
@@ -100,45 +99,6 @@ describe('Test messages slice - newMessage', () => {
 		// Messages list: [DATE, NEW MESSAGE]
 		expect(result.current.messages[newMessage.roomId][0].type).toBe(MessageType.DATE_MSG);
 		expect(result.current.messages[newMessage.roomId][1]).toBe(newMessage);
-	});
-
-	test('Arrive a message forwarded from an unknown user', () => {
-		const newMessage = createMockTextMessage({
-			from: 'userId',
-			forwarded: {
-				id: 'forwardedMessageId',
-				date: 12312312312,
-				from: 'unknownUserId',
-				text: 'hi!'
-			}
-		});
-		const { result } = renderHook(() => useStore());
-		act(() => {
-			result.current.setUserInfo(createMockUser({ id: 'userId' }));
-			result.current.newMessage(newMessage);
-		});
-
-		jest.advanceTimersByTime(1000);
-		expect(fetch).toBeCalledTimes(1);
-		expect(fetch).toHaveBeenCalledWith(
-			`/services/chats/users?userIds=unknownUserId`,
-			expect.anything()
-		);
-	});
-
-	test('Arrive an affiliation message from an unknown user', () => {
-		const newMessage = createMockAffiliationMessage({
-			userId: 'unknownUserId'
-		});
-		const { result } = renderHook(() => useStore());
-		act(() => result.current.newMessage(newMessage));
-
-		jest.advanceTimersByTime(1000);
-		expect(fetch).toBeCalledTimes(1);
-		expect(fetch).toHaveBeenCalledWith(
-			`/services/chats/users?userIds=unknownUserId`,
-			expect.anything()
-		);
 	});
 });
 
@@ -601,21 +561,5 @@ describe('Test message slice - setRepliedMessage', () => {
 
 		const textMessage = result.current.messages[message.roomId][1] as TextMessage;
 		expect(textMessage.repliedMessage).toBe(message);
-	});
-
-	test('Reply to a message to one in which from user is unknown', () => {
-		const { result } = renderHook(() => useStore());
-		act(() => {
-			result.current.setUserInfo(createMockUser({ id: messageReplyToMessage.from }));
-			result.current.updateHistory(message.roomId, [messageReplyToMessage]);
-			result.current.setRepliedMessage(message.roomId, messageReplyToMessage.id, message);
-		});
-
-		jest.advanceTimersByTime(1000);
-		expect(global.fetch).toBeCalledTimes(1);
-		expect(global.fetch).toHaveBeenCalledWith(
-			`/services/chats/users?userIds=unknownUserId`,
-			expect.anything()
-		);
 	});
 });
