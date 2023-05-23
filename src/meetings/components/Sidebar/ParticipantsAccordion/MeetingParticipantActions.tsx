@@ -18,8 +18,7 @@ import useStore from '../../../../store/Store';
 
 type ParticipantActionsProps = {
 	memberId: string;
-	isInsideMeeting?: boolean | undefined;
-	meetingId?: string | undefined;
+	meetingId?: string;
 };
 const MeetingParticipantActions: FC<ParticipantActionsProps> = ({ memberId, meetingId }) => {
 	const [t] = useTranslation();
