@@ -9,8 +9,9 @@ import React, { ReactElement } from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { getSidebarStatus } from '../../store/selectors/MeetingSelectors';
-import useStore from '../../store/Store';
+import MeetingParticipantsAccordion from './ParticipantsAccordion/MeetingParticipantsAccordion';
+import { getSidebarStatus } from '../../../store/selectors/MeetingSelectors';
+import useStore from '../../../store/Store';
 
 const SidebarContainer = styled(Container)`
 	transition: width 300ms ease 0s;
@@ -29,7 +30,9 @@ const MeetingSidebar = (): ReactElement => {
 			// minWidth={sidebarIsVisible ? '300px' : '0'}
 			maxWidth="500px"
 			borderRadius="none"
-		/>
+		>
+			<MeetingParticipantsAccordion meetingId={meetingId} />
+		</SidebarContainer>
 	);
 };
 

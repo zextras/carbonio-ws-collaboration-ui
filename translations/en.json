@@ -107,7 +107,7 @@
         "collapseParticipantsMeetingTooltip": "Collapse participants list",
         "expandParticipantsListTooltip": "Expand participants list",
         "joinMeeting": "Join meeting",
-        "moreParticipantsListTitle": "meeting's participants",
+        "moreParticipantsListTitle": "{{number}} meeting's participants",
         "oneParticipantListTitle": "One meeting's participant",
         "ongoingGroupMeetingTooltip": "You are already participating in this meeting",
         "ongoingOneToOneMeetingTooltip": "You already have an active meeting with {{name}}",
@@ -159,7 +159,8 @@
         "moreMembersAccordionTitle": "members",
         "noMatch": "There are no items that match this search",
         "oneMemberAccordionTitle": "One member",
-        "searchMembers": "Search members"
+        "searchMembers": "Search members",
+        "searchParticipants": "Search participants"
     },
     "settings": {
         "notifications": {
@@ -213,6 +214,9 @@
         "messageRead": "Read",
         "messageReceived": "Received",
         "messageSent": "Sent",
+        "muteForAll": "Mute for all",
+        "participantAlreadyMuted": "This participant is already muted",
+        "pinVideo": "Pin video",
         "promoteModerator": "Promote to moderator",
         "promoteSomeoneElseToModerator": "Promote someone else to moderator to leave",
         "removeCaption": "Remove caption",
@@ -224,6 +228,7 @@
         "selectEmoji": "Select emoji",
         "sendMessage": "Send message",
         "showConversationList": "Show conversation list",
+        "unpinVideo": "Unpin video",
         "uploadAttachment": "Upload an attachment",
         "uploading": "Uploading",
         "userAvatar": {

@@ -11,11 +11,17 @@ import { useTranslation } from 'react-i18next';
 
 type SearchUserProps = {
 	setFilteredInput: (element: string) => void;
+	isInsideMeeting?: boolean;
 };
 
-const SearchUserAction: FC<SearchUserProps> = ({ setFilteredInput }) => {
+const SearchUserAction: FC<SearchUserProps> = ({ setFilteredInput, isInsideMeeting }) => {
 	const [t] = useTranslation();
-	const searchLabel: string = t('participantsList.searchMembers', 'Search members');
+	const searchMemberLabel: string = t('participantsList.searchMembers', 'Search members');
+	const searchParticipantLabel: string = t(
+		'participantsList.searchParticipants',
+		'Search participants'
+	);
+
 	const closeSearchTooltip: string = t('participantsList.closeSearch', 'Close search');
 	const [searchInput, setSearchInput] = useState('');
 
@@ -33,7 +39,16 @@ const SearchUserAction: FC<SearchUserProps> = ({ setFilteredInput }) => {
 
 	const CustomElement = useCallback(
 		(): React.ReactElement => (
-			<Tooltip placement="top" label={size(searchInput) > 0 ? closeSearchTooltip : searchLabel}>
+			<Tooltip
+				placement="top"
+				label={
+					size(searchInput) > 0
+						? closeSearchTooltip
+						: isInsideMeeting
+						? searchParticipantLabel
+						: searchMemberLabel
+				}
+			>
 				<IconButton
 					data-testid="close_button"
 					icon={size(searchInput) > 0 ? 'Close' : 'Search'}
@@ -49,7 +64,7 @@ const SearchUserAction: FC<SearchUserProps> = ({ setFilteredInput }) => {
 	return (
 		<Container padding={{ top: 'large', bottom: 'small' }}>
 			<Input
-				label={searchLabel}
+				label={isInsideMeeting ? searchParticipantLabel : searchMemberLabel}
 				CustomIcon={CustomElement}
 				onChange={handleFilterChange}
 				value={searchInput}
