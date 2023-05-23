@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import { Container, IconButton, Tooltip, Icon } from '@zextras/carbonio-design-system';
+import { Container, IconButton, Tooltip, Icon, Padding } from '@zextras/carbonio-design-system';
 import React, { FC, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -48,11 +48,9 @@ const MeetingParticipantActions: FC<ParticipantActionsProps> = ({ memberId, meet
 		setIsPinned((prevState) => !prevState);
 	}, []);
 
-	const toggleMute = useCallback(() => {
-		if (!isMuted) {
-			setIsMuted((prevState) => !prevState);
-		}
-	}, [isMuted]);
+	const muteUser = useCallback(() => {
+		setIsMuted(true);
+	}, []);
 
 	return (
 		<Container width="fit" height="fit" orientation="horizontal">
@@ -67,21 +65,31 @@ const MeetingParticipantActions: FC<ParticipantActionsProps> = ({ memberId, meet
 			) : (
 				memberOwner && (
 					<Tooltip label={memberIsModeratorLabel}>
-						<Icon iconColor="gray0" icon="Crown" size="medium" />
+						<Padding all="0.5rem">
+							<Icon iconColor="gray0" icon="Crown" size="medium" />
+						</Padding>
 					</Tooltip>
 				)
 			)}
-			{iAmOwner && !isSessionParticipant && (
-				<Tooltip label={isMuted ? 'This participant is already muted' : 'Mute for all'}>
-					<IconButton
-						iconColor="gray0"
-						backgroundColor="gray6"
-						icon={isMuted ? 'MicOff' : 'MicOffOutline'}
-						onClick={toggleMute}
-						size="large"
-					/>
-				</Tooltip>
-			)}
+			{iAmOwner &&
+				!isSessionParticipant &&
+				(isMuted ? (
+					<Tooltip label="This participant is already muted">
+						<Padding all="0.5rem">
+							<Icon icon="MicOff" iconColor="gray0" size="medium" />
+						</Padding>
+					</Tooltip>
+				) : (
+					<Tooltip label="Mute for all">
+						<IconButton
+							iconColor="gray0"
+							backgroundColor="gray6"
+							icon="MicOffOutline"
+							onClick={muteUser}
+							size="large"
+						/>
+					</Tooltip>
+				))}
 			{!isSessionParticipant && (
 				<Tooltip label={isPinned ? 'Unpin video' : 'Pin video'}>
 					<IconButton

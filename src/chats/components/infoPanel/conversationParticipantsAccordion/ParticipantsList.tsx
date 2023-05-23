@@ -45,6 +45,12 @@ const ParticipantsList: FC<ParticipantsListProps> = ({ roomId }) => {
 					users[member.userId].name?.toLocaleLowerCase().includes(filteredInput.toLocaleLowerCase())
 				) {
 					filteredMembers.push(member);
+				} else if (
+					users[member.userId].email
+						?.toLocaleLowerCase()
+						.includes(filteredInput.toLocaleLowerCase())
+				) {
+					filteredMembers.push(member);
 				}
 			});
 			setFilteredContactList(filteredMembers);

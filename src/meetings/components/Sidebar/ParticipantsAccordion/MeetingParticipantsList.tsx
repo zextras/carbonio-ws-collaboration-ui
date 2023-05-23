@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 import { Container, Text } from '@zextras/carbonio-design-system';
-import { forEach, map } from 'lodash';
+import { forEach, map, values } from 'lodash';
 import React, { FC, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -33,21 +33,26 @@ const MeetingParticipantsList: FC<ParticipantsListProps> = ({ meetingId }) => {
 		getMeetingParticipantsByMeetingId(store, meetingId)
 	);
 	const users: UsersMap = useStore(getUsersSelector, usersNameListEqualityFn);
-	const [filteredContactList, setFilteredContactList] = useState<
-		MeetingParticipant[] | MeetingParticipantMap | undefined
-	>();
+	const [filteredContactList, setFilteredContactList] = useState<MeetingParticipant[] | undefined>(
+		values(meetingParticipants)
+	);
 	const [filteredInput, setFilteredInput] = useState('');
 
 	useEffect(() => {
 		if (filteredInput === '') {
-			setFilteredContactList(meetingParticipants);
+			setFilteredContactList(values(meetingParticipants));
 		} else {
 			const filteredMembers: MeetingParticipant[] = [];
 			forEach(meetingParticipants, (member: MeetingParticipant) => {
 				if (
 					users[member.userId].name?.toLocaleLowerCase().includes(filteredInput.toLocaleLowerCase())
 				) {
-					console.log(users[member.userId].name);
+					filteredMembers.push(member);
+				} else if (
+					users[member.userId].email
+						?.toLocaleLowerCase()
+						.includes(filteredInput.toLocaleLowerCase())
+				) {
 					filteredMembers.push(member);
 				}
 			});
