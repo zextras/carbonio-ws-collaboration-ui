@@ -8,6 +8,8 @@ import { Strophe } from 'strophe.js';
 
 import { textMessageRealTime } from '../network/xmpp/xmppMessageExamples';
 
+export const mockedSendIsWriting = jest.fn();
+export const mockedSendPaused = jest.fn();
 export const xmppClient = {
 	connect: (): null => null,
 	getContactList: (): null => null,
@@ -26,8 +28,8 @@ export const xmppClient = {
 	requestHistory: (): null => null,
 	requestHistoryBetweenTwoMessage: (): null => null,
 	requestMessageSubjectOfReply: (): null => null,
-	sendIsWriting: (): null => null,
-	sendPaused: (): null => null,
+	sendIsWriting: mockedSendIsWriting,
+	sendPaused: mockedSendPaused,
 	readMessage: (): null => null,
 	lastMarkers: (): null => null
 };

@@ -6,7 +6,7 @@
  */
 
 import produce from 'immer';
-import { concat, find, forEach, map, orderBy, uniqBy } from 'lodash';
+import { concat, find, first, forEach, last, map, orderBy, remove, size, uniqBy } from 'lodash';
 
 import { UsersApi } from '../../network';
 import { calcReads } from '../../network/xmpp/utility/decodeXMPPMessageStanza';
@@ -20,22 +20,33 @@ import {
 } from '../../types/store/MessageTypes';
 import { RoomType } from '../../types/store/RoomTypes';
 import { MessagesStoreSlice, RootStore } from '../../types/store/StoreTypes';
-import { datesAreFromTheSameDay, isBefore } from '../../utils/dateUtil';
+import { UsersMap } from '../../types/store/UserTypes';
+import { datesAreFromTheSameDay, isBefore, isStrictlyBefore } from '../../utils/dateUtil';
+
+// Retrieve user information about userId in the various type of message (only if it is unknown)
+const retrieveMessageUserInfo = (message: Message, users: UsersMap): void => {
+	if (message.type === MessageType.TEXT_MSG) {
+		if (!users[message.from]) UsersApi.getDebouncedUser(message.from);
+		if (message.forwarded && !users[message.forwarded.from])
+			UsersApi.getDebouncedUser(message.forwarded.from);
+	} else if (message.type === MessageType.AFFILIATION_MSG) {
+		if (!users[message.userId]) UsersApi.getDebouncedUser(message.userId);
+	} else if (message.type === MessageType.CONFIGURATION_MSG) {
+		if (!users[message.from]) UsersApi.getDebouncedUser(message.from);
+	}
+};
 
 export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStoreSlice => ({
 	messages: {},
 	newMessage: (message: Message): void => {
 		set(
 			produce((draft: RootStore) => {
+				// Initialize messages list if it does not exist
 				if (!draft.messages[message.roomId]) draft.messages[message.roomId] = [];
-				// if the message has a different date than the previous one it will add the date
-				const messagesListLength = draft.messages[message.roomId].length;
-				if (
-					datesAreFromTheSameDay(
-						draft.messages[message.roomId][messagesListLength - 1]?.date,
-						message?.date
-					)
-				) {
+
+				// Add date message if the new message has a different date than the previous one
+				const lastMessageDate = last(draft.messages[message.roomId])?.date || 0;
+				if (!datesAreFromTheSameDay(lastMessageDate, message.date)) {
 					draft.messages[message.roomId].push({
 						id: `dateMessage${message.date - 2}`,
 						roomId: message.roomId,
@@ -43,28 +54,12 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 						type: MessageType.DATE_MSG
 					});
 				}
-				// this is a custom message that is shown immediately after a group is created
-				if (messagesListLength === 1 && draft.rooms[message.roomId].type === RoomType.GROUP) {
-					draft.messages[message.roomId].push({
-						id: `dateMessage${message.date - 1}`,
-						roomId: message.roomId,
-						date: message.date - 1,
-						type: MessageType.AFFILIATION_MSG,
-						as: 'creation',
-						userId: ''
-					});
-				}
+
+				// Add message to the end of list
 				draft.messages[message.roomId].push(message);
 
-				// Retrieve sender information if it is unknown
-				if (message.type === MessageType.TEXT_MSG) {
-					if (!draft.users[message.from]) {
-						UsersApi.getDebouncedUser(message.from);
-					}
-					if (message.forwarded && !draft.users[message.forwarded.from]) {
-						UsersApi.getDebouncedUser(message.forwarded.from);
-					}
-				}
+				// Retrieve user information
+				retrieveMessageUserInfo(message, draft.users);
 			}),
 			false,
 			'MESSAGES/NEW_MESSAGE'
@@ -73,24 +68,27 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 	newInboxMessage: (message: Message): void => {
 		set(
 			produce((draft: RootStore) => {
+				// Initialize messages list if it does not exist
 				if (!draft.messages[message.roomId]) draft.messages[message.roomId] = [];
 
-				// Avoid setting a last message dated before clearAt
-				if (
-					!draft.rooms[message.roomId]?.userSettings?.clearedAt ||
-					isBefore(draft.rooms[message.roomId].userSettings!.clearedAt!, message.date)
-				) {
-					draft.messages[message.roomId].push(message);
-				}
+				// Avoid adding the same message if a history request had already added the same message
+				const alreadyExists = find(draft.messages[message.roomId], { id: message.id });
+				if (!alreadyExists) {
+					// Avoid setting a last message dated before clearAt
+					const roomHistoryIsBeenCleared = draft.rooms[message.roomId]?.userSettings?.clearedAt;
+					if (!roomHistoryIsBeenCleared || isBefore(roomHistoryIsBeenCleared, message.date)) {
+						// Add always a date message before the inbox message
+						draft.messages[message.roomId].push({
+							id: `dateMessage${message.date - 2}`,
+							roomId: message.roomId,
+							date: message.date - 2,
+							type: MessageType.DATE_MSG
+						});
+						draft.messages[message.roomId].push(message);
+					}
 
-				// Retrieve sender information if it is unknown
-				if (message.type === MessageType.TEXT_MSG) {
-					if (!draft.users[message.from]) {
-						UsersApi.getDebouncedUser(message.from);
-					}
-					if (message.forwarded && !draft.users[message.forwarded.from]) {
-						UsersApi.getDebouncedUser(message.forwarded.from);
-					}
+					// Retrieve user information
+					retrieveMessageUserInfo(message, draft.users);
 				}
 			}),
 			false,
@@ -100,87 +98,87 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 	updateHistory: (roomId: string, messageArray: Message[]): void => {
 		set(
 			produce((draft: RootStore) => {
+				// Initialize messages list if it does not exist
 				if (!draft.messages[roomId]) draft.messages[roomId] = [];
-				// this checks if the last element present inside the history has not the same date of the first element of the requested history
+
+				// Be sure that array with the new history messages will be processed in the correct date order
+				const orderedMessageArray = orderBy(messageArray, ['date'], ['asc']);
+
 				const historyWithDates: MessageList = [];
-				forEach(messageArray, (historyMessage: Message, index) => {
-					// the first message always needs a date before it
-					if (index === 0) {
-						historyWithDates.push({
-							id: `dateMessage${historyMessage.date - 2}`,
-							roomId,
-							date: historyMessage.date - 2,
-							type: MessageType.DATE_MSG
-						});
-						historyWithDates.push(historyMessage);
-					} else {
-						const prevMessage = messageArray[index - 1];
-						// if the actual message and the previous one has not the same date, it puts a date message before the actual one
-						if (datesAreFromTheSameDay(prevMessage?.date, historyMessage?.date)) {
+				forEach(orderedMessageArray, (historyMessage: Message, index) => {
+					// Process only new messages (i.e. messages dated before the last message of the current history)
+					if (
+						!draft.messages[roomId][0] ||
+						isStrictlyBefore(historyMessage.date, draft.messages[roomId][0].date)
+					) {
+						// Add date message if the new message has a different date than the previous one
+						const prevMessageDate = orderedMessageArray[index - 1]?.date || 0;
+						if (!datesAreFromTheSameDay(prevMessageDate, historyMessage.date)) {
 							historyWithDates.push({
 								id: `dateMessage${historyMessage.date - 2}`,
 								roomId,
 								date: historyMessage.date - 2,
 								type: MessageType.DATE_MSG
 							});
-							historyWithDates.push(historyMessage);
-							// the actual message and the previous one shares the same date
-						} else {
-							historyWithDates.push(historyMessage);
 						}
-					}
+						historyWithDates.push(historyMessage);
 
-					// Retrieve sender information if it is unknown
-					if (historyMessage.type === MessageType.TEXT_MSG) {
-						if (!draft.users[historyMessage.from]) {
-							UsersApi.getDebouncedUser(historyMessage.from);
-						}
-						if (historyMessage.forwarded && !draft.users[historyMessage.forwarded.from]) {
-							UsersApi.getDebouncedUser(historyMessage.forwarded.from);
-						}
+						// Retrieve user information
+						retrieveMessageUserInfo(historyMessage, draft.users);
 					}
 				});
 
-				// the historyWithDates array will be concat to the list already present (draft.messages[roomId])
-				// we have to be sure that there's no date duplicates along the list
-				// this checks if the last historyWithDates element and the first one in draft.messages[roomId] shares the same date
-				// if so it shift the first element already present, that will be always a date message thanks to the previous map
-				if (
-					draft.messages[roomId] &&
-					!datesAreFromTheSameDay(
-						historyWithDates[historyWithDates.length - 1].date,
-						draft.messages[roomId][0]?.date
-					)
-				) {
-					draft.messages[roomId].shift();
+				if (size(historyWithDates) > 0) {
+					// Remove old first date message if the last message of the new history has the same date
+					const oldFirstMessage = draft.messages[roomId][0];
+					const lastRequestedMessageDate = last(historyWithDates)?.date || 0;
+					if (
+						oldFirstMessage?.type === MessageType.DATE_MSG &&
+						datesAreFromTheSameDay(oldFirstMessage.date, lastRequestedMessageDate)
+					) {
+						remove(draft.messages[roomId], (message) => message.id === oldFirstMessage.id);
+					}
+
+					draft.messages[roomId] = concat(historyWithDates, draft.messages[roomId]);
+
+					// We must check for duplicates because inbox message has
+					// a different date than the same message in history.
+					draft.messages[roomId] = uniqBy(draft.messages[roomId], 'id');
 				}
-
-				draft.messages[roomId] = concat(historyWithDates, draft.messages[roomId]);
-				// message list has to be ordered by date
-				draft.messages[roomId] = orderBy(draft.messages[roomId], ['date'], ['asc']);
-
-				// the second message has to be a creation one if the conversation is a group one and the history has never been cleared
+			}),
+			false,
+			'MESSAGES/UPDATE_HISTORY'
+		);
+	},
+	addCreateRoomMessage: (roomId: string): void => {
+		set(
+			produce((draft: RootStore) => {
+				const firstMessageDate = first(draft.messages[roomId])?.date;
+				const creationMessage = find(
+					draft.messages[roomId],
+					(message) => message.type === MessageType.AFFILIATION_MSG && message.as === 'creation'
+				);
+				const historyIsBeenCleared = !!draft.rooms[roomId].userSettings?.clearedAt;
+				// Add creation message only if the room is a non-empty group without the history cleared
 				if (
-					draft.activeConversations[roomId] &&
-					draft.activeConversations[roomId].isHistoryFullyLoaded &&
 					draft.rooms[roomId].type === RoomType.GROUP &&
-					draft.rooms[roomId].userSettings?.clearedAt === undefined
+					firstMessageDate &&
+					!creationMessage &&
+					!historyIsBeenCleared
 				) {
 					const creationMsg: AffiliationMessage = {
-						id: `creationMessage${draft.messages[roomId][0].date + 1}`,
+						id: `creationMessage${firstMessageDate + 1}`,
 						roomId,
-						date: draft.messages[roomId][0].date + 1,
+						date: firstMessageDate + 1,
 						type: MessageType.AFFILIATION_MSG,
 						as: 'creation',
 						userId: ''
 					};
 					draft.messages[roomId].splice(1, 0, creationMsg);
 				}
-				// message list can't have duplicates, so it's sorted by id
-				draft.messages[roomId] = uniqBy(draft.messages[roomId], 'id');
 			}),
 			false,
-			'MESSAGES/UPDATE_HISTORY'
+			'MESSAGES/CREATE_ROOM_MESSAGE'
 		);
 	},
 	updateUnreadMessages: (roomId: string): void => {
@@ -214,6 +212,8 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 				if (messageWithAResponse) {
 					messageWithAResponse.repliedMessage = messageSubjectOfReply;
 				}
+
+				retrieveMessageUserInfo(messageSubjectOfReply, draft.users);
 			}),
 			false,
 			'MESSAGES/SET_REPLIED_MESSAGE'

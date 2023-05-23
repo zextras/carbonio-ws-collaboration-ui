@@ -60,6 +60,7 @@ export type MessagesStoreSlice = {
 	newMessage: (message: Message) => void;
 	newInboxMessage: (message: Message) => void;
 	updateHistory: (roomId: string, messageArray: Message[]) => void;
+	addCreateRoomMessage: (roomId: string) => void;
 	updateUnreadMessages: (roomId: string) => void;
 	setRepliedMessage: (
 		roomId: string,

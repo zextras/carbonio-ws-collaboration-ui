@@ -12,6 +12,7 @@ import MessageComposer from './MessageComposer';
 import UploadAttachmentManagerView from './UploadAttachmentManagerView';
 import useStore from '../../../../store/Store';
 import { createMockFile, createMockMember, createMockRoom } from '../../../../tests/createMock';
+import { mockedSendIsWriting, mockedSendPaused } from '../../../../tests/mockedXmppClient';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe } from '../../../../types/network/models/roomBeTypes';
 import { FileToUpload, messageActionType } from '../../../../types/store/ActiveConversationTypes';
@@ -486,5 +487,53 @@ describe('MessageComposer', () => {
 
 		const composerTextArea = screen.getByRole('textbox');
 		expect((composerTextArea as HTMLTextAreaElement).value).toBe("I'm a draft!");
+	});
+});
+
+describe('MessageComposer - isWriting events', () => {
+	test('sendIsWriting is called immediately when user start writing', async () => {
+		const { user } = setup(<MessageComposer roomId={mockedRoom.id} />);
+		const composerTextArea = screen.getByRole('textbox');
+
+		await user.type(composerTextArea, 'Hi');
+		expect(mockedSendIsWriting).toBeCalledTimes(1);
+	});
+
+	test('sendIsWriting is called every 3 seconds', async () => {
+		const { user } = setup(<MessageComposer roomId={mockedRoom.id} />);
+		const composerTextArea = screen.getByRole('textbox');
+
+		// User type for 5 seconds
+		await user.type(composerTextArea, 'Hi');
+		jest.advanceTimersByTime(500);
+		await user.type(composerTextArea, '!');
+		jest.advanceTimersByTime(500);
+		await user.type(composerTextArea, ':)');
+		jest.advanceTimersByTime(2000);
+		await user.type(composerTextArea, 'How are you?');
+		jest.advanceTimersByTime(2000);
+		await user.type(composerTextArea, 'I am fine');
+		expect(mockedSendIsWriting).toBeCalledTimes(2);
+		jest.advanceTimersByTime(1000);
+		expect(mockedSendIsWriting).toBeCalledTimes(3);
+	});
+
+	test('sendStopWriting is called after 3.5 seconds after user stops writing', async () => {
+		const { user } = setup(<MessageComposer roomId={mockedRoom.id} />);
+		const composerTextArea = screen.getByRole('textbox');
+
+		await user.type(composerTextArea, 'Hi');
+		jest.advanceTimersByTime(4000);
+		expect(mockedSendPaused).toBeCalledTimes(1);
+	});
+
+	test('sendStopWriting is called immediately when user sends the message', async () => {
+		const { user } = setup(<MessageComposer roomId={mockedRoom.id} />);
+		const composerTextArea = screen.getByRole('textbox');
+
+		await user.type(composerTextArea, 'Hi');
+		const sendButton = screen.getByTestId('icon: Navigation2');
+		await user.click(sendButton);
+		expect(mockedSendPaused).toBeCalledTimes(1);
 	});
 });

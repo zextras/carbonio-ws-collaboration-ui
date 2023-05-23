@@ -160,8 +160,12 @@ describe('render list of messages with history loader visible for first time ope
 		setup(<MessagesList roomId={room.id} />);
 		const messageList = screen.getByTestId(`intersectionObserverRoot${room.id}`);
 		expect(messageList).toBeVisible();
-		act(() => result.current.setHistoryIsFullyLoaded(room.id));
-		act(() => result.current.updateHistory(room.id, messages));
+		// Simulate the loading of the full history
+		act(() => {
+			result.current.setHistoryIsFullyLoaded(room.id);
+			result.current.updateHistory(room.id, messages);
+			result.current.addCreateRoomMessage(room.id);
+		});
 		expect(result.current.messages[room.id]).toHaveLength(6);
 		expect(screen.getByText(new RegExp(`${room.name} created`, 'i'))).toBeInTheDocument();
 		const message = screen.getByTestId(`Bubble-${messages[0].id}`);
@@ -365,6 +369,7 @@ describe('render list of messages with history loader visible for first time ope
 			result.current.setLoginInfo(user1Be.id, user1Be.name);
 			result.current.setHistoryIsFullyLoaded(room.id);
 			result.current.updateHistory(room.id, [mockedConfigurationMessage]);
+			result.current.addCreateRoomMessage(room.id);
 		});
 		setup(<MessagesList roomId={room.id} />);
 		const messageList = screen.getByTestId(`messageListRef${room.id}`);
@@ -376,6 +381,7 @@ describe('render list of messages with history loader visible for first time ope
 		);
 		expect(label).toBeVisible();
 	});
+
 	test('Affiliation message is visible', async () => {
 		const { result } = renderHook(() => useStore());
 		act(() => {
@@ -383,6 +389,7 @@ describe('render list of messages with history loader visible for first time ope
 			result.current.setUserInfo(user4Be);
 			result.current.setHistoryIsFullyLoaded(room.id);
 			result.current.updateHistory(room.id, [mockedAffiliationMessage]);
+			result.current.addCreateRoomMessage(room.id);
 		});
 		setup(<MessagesList roomId={room.id} />);
 		const messageList = screen.getByTestId(`messageListRef${room.id}`);
