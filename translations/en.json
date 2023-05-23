@@ -214,6 +214,9 @@
         "messageRead": "Read",
         "messageReceived": "Received",
         "messageSent": "Sent",
+        "muteForAll": "Mute for all",
+        "participantAlreadyMuted": "This participant is already muted",
+        "pinVideo": "Pin video",
         "promoteModerator": "Promote to moderator",
         "promoteSomeoneElseToModerator": "Promote someone else to moderator to leave",
         "removeCaption": "Remove caption",
@@ -225,6 +228,7 @@
         "selectEmoji": "Select emoji",
         "sendMessage": "Send message",
         "showConversationList": "Show conversation list",
+        "unpinVideo": "Unpin video",
         "uploadAttachment": "Upload an attachment",
         "uploading": "Uploading",
         "userAvatar": {

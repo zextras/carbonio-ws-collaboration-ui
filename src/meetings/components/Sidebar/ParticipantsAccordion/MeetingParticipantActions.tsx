@@ -27,6 +27,13 @@ const MeetingParticipantActions: FC<ParticipantActionsProps> = ({ memberId, meet
 		'tooltip.memberIsModerator',
 		'This member is a moderator'
 	);
+	const participantAlreadyMutedLabel = t(
+		'tooltip.participantAlreadyMuted',
+		'This participant is already muted'
+	);
+	const muteForAllLabel = t('tooltip.muteForAll', 'Mute for all');
+	const pinVideoLabel = t('tooltip.pinVideo', 'Pin video');
+	const unpinVideoLabel = t('tooltip.unpinVideo', 'Unpin video');
 	const userId: string | undefined = useStore((store) => getUserId(store));
 	const roomId: string | undefined = useStore((store) =>
 		getRoomIdByMeetingId(store, meetingId || '')
@@ -74,13 +81,13 @@ const MeetingParticipantActions: FC<ParticipantActionsProps> = ({ memberId, meet
 			{iAmOwner &&
 				!isSessionParticipant &&
 				(isMuted ? (
-					<Tooltip label="This participant is already muted">
+					<Tooltip label={participantAlreadyMutedLabel}>
 						<Padding all="0.5rem">
 							<Icon icon="MicOff" iconColor="gray0" size="medium" />
 						</Padding>
 					</Tooltip>
 				) : (
-					<Tooltip label="Mute for all">
+					<Tooltip label={muteForAllLabel}>
 						<IconButton
 							iconColor="gray0"
 							backgroundColor="gray6"
@@ -91,7 +98,7 @@ const MeetingParticipantActions: FC<ParticipantActionsProps> = ({ memberId, meet
 					</Tooltip>
 				))}
 			{!isSessionParticipant && (
-				<Tooltip label={isPinned ? 'Unpin video' : 'Pin video'}>
+				<Tooltip label={isPinned ? unpinVideoLabel : pinVideoLabel}>
 					<IconButton
 						iconColor="gray0"
 						backgroundColor="gray6"

@@ -45,10 +45,9 @@ const MeetingParticipantsList: FC<ParticipantsListProps> = ({ meetingId }) => {
 			const filteredMembers: MeetingParticipant[] = [];
 			forEach(meetingParticipants, (member: MeetingParticipant) => {
 				if (
-					users[member.userId].name?.toLocaleLowerCase().includes(filteredInput.toLocaleLowerCase())
-				) {
-					filteredMembers.push(member);
-				} else if (
+					users[member.userId].name
+						?.toLocaleLowerCase()
+						.includes(filteredInput.toLocaleLowerCase()) ||
 					users[member.userId].email
 						?.toLocaleLowerCase()
 						.includes(filteredInput.toLocaleLowerCase())
