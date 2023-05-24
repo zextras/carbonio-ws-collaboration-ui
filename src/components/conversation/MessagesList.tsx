@@ -235,7 +235,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 
 	useEffect(() => {
 		// set history is loaded for the first time
-		if (roomMessages.length <= 3 && isLoadedFirstTime) {
+		if (isLoadedFirstTime) {
 			setIsLoadedFirstTime(false);
 		}
 
