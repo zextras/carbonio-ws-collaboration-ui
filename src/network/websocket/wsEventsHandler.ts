@@ -4,9 +4,11 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
 import useStore from '../../store/Store';
 import { GetRoomResponse } from '../../types/network/responses/roomsResponses';
 import { WsEvent, WsEventType } from '../../types/network/websocket/wsEvents';
+import { RoomType } from '../../types/store/RoomTypes';
 import { wsDebug } from '../../utils/debug';
 import { RoomsApi } from '../index';
 
@@ -133,6 +135,13 @@ export function wsEventsHandler(event: WsEvent): void {
 					participants: [],
 					createdAt: event.sentDate
 				});
+
+				// Send custom event to open an incoming meeting notification
+				const room = state.rooms[event.roomId];
+				const iStartedTheMeeting = event.from === state.session.id;
+				if (room?.type === RoomType.ONE_TO_ONE && !iStartedTheMeeting) {
+					sendCustomEvent({ name: EventName.INCOMING_MEETING, data: event });
+				}
 			}
 			break;
 		}
