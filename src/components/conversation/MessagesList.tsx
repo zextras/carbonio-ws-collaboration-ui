@@ -92,20 +92,19 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 				message.type === MessageType.TEXT_MSG &&
 				message.from !== myUserId
 			) {
-				let markMessageAsRead;
+				// set as ready to be mark when there isn't a marker because it's means I never saw a message of that conversation
+				// or my last marker is older and isn't present in the list of messages in the store
+				let canMessageBeMarkedAsRead = true;
+				// check if message is already marked as read by me or not
+				// if not it could mark as read
 				if (myLastMarker && find(roomMessages, (msg) => msg.id === myLastMarker.messageId)) {
 					const markedMsg = find(roomMessages, (msg) => msg.id === myLastMarker.messageId);
-					markMessageAsRead =
-						markedMsg &&
-						message &&
-						!(markedMsg.date === message.date) &&
+					canMessageBeMarkedAsRead =
+						!!markedMsg &&
+						markedMsg.date !== message.date &&
 						isBefore(markedMsg.date, message.date);
-				} else if (
-					find(roomMessages, (msg) => msg.id === myLastMarker?.messageId || !!myLastMarker)
-				) {
-					markMessageAsRead = true;
 				}
-				if (markMessageAsRead) {
+				if (canMessageBeMarkedAsRead) {
 					xmppClient.readMessage(message.roomId, message.id);
 				}
 			}
