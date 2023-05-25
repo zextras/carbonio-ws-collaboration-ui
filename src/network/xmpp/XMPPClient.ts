@@ -82,13 +82,6 @@ class XMPPClient implements IXMPPClient {
 		// };
 	}
 
-	private addRequestToQueue(request: RequestType): void {
-		// Avoid to add a request for the same room if it's already in the queue
-		if (!find(this.requestsQueue, { roomId: request.roomId })) {
-			this.requestsQueue.push(request);
-		}
-	}
-
 	private onConnectionStatus(statusCode: StropheConnectionStatus): void {
 		const { setXmppStatus } = useStore.getState();
 
@@ -165,7 +158,7 @@ class XMPPClient implements IXMPPClient {
 
 		this.setInbox();
 
-		// Send queued requests
+		// Send history queued requests
 		forEach(this.requestsQueue, ({ iq, callback }) => this.connection.sendIQ(iq, callback));
 		this.requestsQueue = [];
 	}
@@ -340,8 +333,10 @@ class XMPPClient implements IXMPPClient {
 			.c('before');
 		if (this.connection && this.connection.connected) {
 			this.connection.sendIQ(iq, onRequestHistory.bind(this), onErrorStanza);
-		} else {
-			this.addRequestToQueue({ iq, callback: onRequestHistory.bind(this), roomId });
+		}
+		// If XMPP is offline, save request to perform it later
+		else if (!find(this.requestsQueue, (request) => request.roomId === roomId)) {
+			this.requestsQueue.push({ iq, callback: onRequestHistory.bind(this), roomId });
 		}
 	}
 
