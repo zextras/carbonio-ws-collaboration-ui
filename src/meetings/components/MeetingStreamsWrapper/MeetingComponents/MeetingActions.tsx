@@ -9,11 +9,11 @@ import React, { ReactElement, RefObject, useCallback, useEffect, useState } from
 import { useParams } from 'react-router-dom';
 import styled, { FlattenSimpleInterpolation } from 'styled-components';
 
-import useRouting, { PAGE_INFO_TYPE } from '../../hooks/useRouting';
-import { MeetingsApi } from '../../network';
-import { getMeetingViewSelected } from '../../store/selectors/MeetingSelectors';
-import useStore from '../../store/Store';
-import { MeetingViewType } from '../../types/store/MeetingTypes';
+import useRouting, { PAGE_INFO_TYPE } from '../../../../hooks/useRouting';
+import { MeetingsApi } from '../../../../network';
+import { getMeetingViewSelected } from '../../../../store/selectors/MeetingSelectors';
+import useStore from '../../../../store/Store';
+import { MeetingViewType } from '../../../../types/store/MeetingTypes';
 
 const ActionsWrapper = styled(Container)`
 	position: absolute;

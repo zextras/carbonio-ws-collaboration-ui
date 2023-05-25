@@ -8,7 +8,7 @@ import { Container } from '@zextras/carbonio-design-system';
 import { map } from 'lodash';
 import React, { FC } from 'react';
 
-import ParticipantComponentInfo from './ParticipantComponentInfo';
+import MemberComponentInfo from './MemberComponentInfo';
 import { Member } from '../../../../types/store/RoomTypes';
 
 type ListOfMembersProps = {
@@ -18,7 +18,7 @@ type ListOfMembersProps = {
 
 const ListOfMembers: FC<ListOfMembersProps> = ({ roomId, contactList }) => {
 	const listOfMembers = map(contactList, (member: Member) => (
-		<ParticipantComponentInfo key={member.userId} member={member} roomId={roomId} />
+		<MemberComponentInfo key={member.userId} member={member} roomId={roomId} />
 	));
 
 	return <Container data-testid="conversation_list">{listOfMembers}</Container>;

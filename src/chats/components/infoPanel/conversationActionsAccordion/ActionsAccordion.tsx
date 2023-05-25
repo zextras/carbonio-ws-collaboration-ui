@@ -33,9 +33,10 @@ const CustomAccordion = styled(Accordion)`
 
 type ActionAccordionProps = {
 	roomId: string;
+	isInsideMeeting?: boolean;
 };
 
-export const ActionsAccordion: FC<ActionAccordionProps> = ({ roomId }) => {
+export const ActionsAccordion: FC<ActionAccordionProps> = ({ roomId, isInsideMeeting }) => {
 	const [t] = useTranslation();
 	const actionAccordionTitle: string = t('conversationInfo.actionAccordionTitle', 'Actions');
 	const roomType: string = useStore((state) => getRoomTypeSelector(state, roomId));
@@ -60,7 +61,9 @@ export const ActionsAccordion: FC<ActionAccordionProps> = ({ roomId }) => {
 			id: '1',
 			disableHover: true,
 			background: 'gray6',
-			CustomComponent: () => <MuteConversationAction roomId={roomId} />
+			CustomComponent: () => (
+				<MuteConversationAction roomId={roomId} isInsideMeeting={isInsideMeeting} />
+			)
 		});
 
 		// Edit conversation info
@@ -69,7 +72,9 @@ export const ActionsAccordion: FC<ActionAccordionProps> = ({ roomId }) => {
 				id: '2',
 				disableHover: true,
 				background: 'gray6',
-				CustomComponent: () => <EditConversationAction roomId={roomId} />
+				CustomComponent: () => (
+					<EditConversationAction roomId={roomId} isInsideMeeting={isInsideMeeting} />
+				)
 			});
 		}
 
@@ -79,7 +84,9 @@ export const ActionsAccordion: FC<ActionAccordionProps> = ({ roomId }) => {
 				id: '3',
 				disableHover: true,
 				background: 'gray6',
-				CustomComponent: () => <AddNewMemberAction roomId={roomId} />
+				CustomComponent: () => (
+					<AddNewMemberAction roomId={roomId} isInsideMeeting={isInsideMeeting} />
+				)
 			});
 		}
 
@@ -89,7 +96,14 @@ export const ActionsAccordion: FC<ActionAccordionProps> = ({ roomId }) => {
 				id: '4',
 				disableHover: true,
 				background: 'gray6',
-				CustomComponent: () => <ClearHistoryAction roomId={roomId} />
+				CustomComponent: () => (
+					<ClearHistoryAction
+						roomId={roomId}
+						roomType={roomType}
+						isInsideMeeting={isInsideMeeting}
+						iAmTheOnlyOwner={iAmOwner && numberOfOwners === 1}
+					/>
+				)
 			});
 		}
 
@@ -104,13 +118,14 @@ export const ActionsAccordion: FC<ActionAccordionProps> = ({ roomId }) => {
 						roomId={roomId}
 						type={roomType}
 						iAmOneOfOwner={iAmOwner && numberOfOwners !== 1}
+						isInsideMeeting={isInsideMeeting}
 					/>
 				)
 			});
 		}
 
 		// Delete conversation
-		if (iAmOwner && roomType !== RoomType.ONE_TO_ONE) {
+		if (iAmOwner && roomType !== RoomType.ONE_TO_ONE && !isInsideMeeting) {
 			arrayOfActions.push({
 				id: '6',
 				disableHover: true,
@@ -144,6 +159,7 @@ export const ActionsAccordion: FC<ActionAccordionProps> = ({ roomId }) => {
 		accordionStatus,
 		toggleAccordionStatus,
 		roomId,
+		isInsideMeeting,
 		numberOfMembers
 	]);
 

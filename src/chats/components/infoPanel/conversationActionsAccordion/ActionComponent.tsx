@@ -57,6 +57,7 @@ type ActionProps = {
 	padding: { top?: string; bottom?: string };
 	withArrow?: boolean;
 	action: () => void;
+	isInsideMeeting?: boolean;
 };
 
 const ActionComponent: FC<ActionProps> = ({
@@ -65,7 +66,8 @@ const ActionComponent: FC<ActionProps> = ({
 	label,
 	padding,
 	withArrow,
-	action
+	action,
+	isInsideMeeting
 }) => (
 	<CustomActionContainer padding={padding} data-testid="action">
 		<ActionContainer
@@ -86,10 +88,16 @@ const ActionComponent: FC<ActionProps> = ({
 					<Padding right="large" />
 				</Row>
 				<Row takeAvailableSpace mainAlignment="flex-start">
-					<CustomText color={actionColor}>{label}</CustomText>
+					<CustomText color={isInsideMeeting ? 'gray0' : actionColor}>{label}</CustomText>
 				</Row>
 			</CustomContainer>
-			{withArrow && <CustomIcon icon="ArrowIosForwardOutline" color={actionColor} size="medium" />}
+			{withArrow && (
+				<CustomIcon
+					icon="ArrowIosForwardOutline"
+					color={isInsideMeeting ? 'gray0' : actionColor}
+					size="medium"
+				/>
+			)}
 		</ActionContainer>
 	</CustomActionContainer>
 );

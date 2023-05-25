@@ -45,6 +45,22 @@ export const getMyMeetingParticipation = (store: RootStore, roomId: string): boo
 	return false;
 };
 
+export const getMyMeetingParticipationByMeetingid = (
+	store: RootStore,
+	meetingId: string
+): boolean => {
+	const meetingParticipants = find(
+		store.meetings,
+		(meeting) => meeting.id === meetingId
+	)?.participants;
+
+	if (meetingParticipants && store.session.id != null) {
+		const sessionMember = find(meetingParticipants, (member) => member.userId === store.session.id);
+		return sessionMember != null;
+	}
+	return false;
+};
+
 export const getNumberOfMeetingParticipants = (
 	store: RootStore,
 	roomId: string

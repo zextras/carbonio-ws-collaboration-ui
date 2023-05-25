@@ -72,7 +72,7 @@ const MeetingParticipantActions: FC<ParticipantActionsProps> = ({ memberId, meet
 				memberOwner && (
 					<Tooltip label={memberIsModeratorLabel}>
 						<Padding all="0.5rem">
-							<Icon iconColor="gray0" icon="Crown" size="medium" />
+							<Icon icon="Crown" size="medium" />
 						</Padding>
 					</Tooltip>
 				)
@@ -82,7 +82,7 @@ const MeetingParticipantActions: FC<ParticipantActionsProps> = ({ memberId, meet
 				(isMuted ? (
 					<Tooltip label={participantAlreadyMutedLabel}>
 						<Padding all="0.5rem">
-							<Icon icon="MicOff" iconColor="gray0" size="medium" />
+							<Icon icon="MicOff" size="medium" />
 						</Padding>
 					</Tooltip>
 				) : (

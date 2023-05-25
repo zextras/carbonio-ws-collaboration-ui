@@ -9,24 +9,43 @@ import {
 	SnackbarManagerContext,
 	CreateSnackbarFn
 } from '@zextras/carbonio-design-system';
-import React, { FC, useCallback, useContext, useState } from 'react';
+import React, { FC, useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import ActionComponent from './ActionComponent';
 import ClearHistoryModal from './ClearHistoryModal';
+import { RoomType } from '../../../../types/store/RoomTypes';
 
 type ClearHistoryProps = {
 	roomId: string;
+	roomType?: string;
+	isInsideMeeting?: boolean;
+	iAmTheOnlyOwner?: boolean;
 };
 
 type CreateSnackbarFn = typeof CreateSnackbarFn;
 
-const ClearHistoryAction: FC<ClearHistoryProps> = ({ roomId }) => {
+const ClearHistoryAction: FC<ClearHistoryProps> = ({
+	roomId,
+	roomType,
+	isInsideMeeting,
+	iAmTheOnlyOwner
+}) => {
 	const [t] = useTranslation();
 	const clearHistoryLabel = t('action.clearHistory', 'Clear history');
 	const historyClearedLabel = t('feedback.historyCleared', 'History cleared successfully!');
 
 	const [clearHistoryModalOpen, setClearHistoryModalOpen] = useState<boolean>(false);
+
+	const padding = useMemo(
+		() =>
+			roomType === RoomType.GROUP
+				? iAmTheOnlyOwner && isInsideMeeting
+					? { top: 'small', bottom: 'large' }
+					: { top: 'small' }
+				: { top: 'small', bottom: 'large' },
+		[iAmTheOnlyOwner, isInsideMeeting, roomType]
+	);
 
 	const openModal = useCallback(() => setClearHistoryModalOpen(true), []);
 
@@ -50,10 +69,11 @@ const ClearHistoryAction: FC<ClearHistoryProps> = ({ roomId }) => {
 			<ActionComponent
 				icon="BookOpenOutline"
 				actionColor="error"
-				padding={{ top: 'small' }}
+				padding={padding}
 				label={clearHistoryLabel}
 				withArrow
 				action={openModal}
+				isInsideMeeting={isInsideMeeting}
 			/>
 			{clearHistoryModalOpen && (
 				<ClearHistoryModal

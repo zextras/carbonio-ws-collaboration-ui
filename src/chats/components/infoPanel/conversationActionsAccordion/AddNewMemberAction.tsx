@@ -21,9 +21,10 @@ import { ContactSelected } from '../../creationModal/ChatCreationContactsSelecti
 
 type AddNewMemberProps = {
 	roomId: string;
+	isInsideMeeting?: boolean;
 };
 
-const AddNewMemberAction: FC<AddNewMemberProps> = ({ roomId }) => {
+const AddNewMemberAction: FC<AddNewMemberProps> = ({ roomId, isInsideMeeting }) => {
 	const [t] = useTranslation();
 	const addNewMemberTitle: string = t('action.addNewMembers', `Add new members`);
 
@@ -67,6 +68,7 @@ const AddNewMemberAction: FC<AddNewMemberProps> = ({ roomId }) => {
 				label={addNewMemberTitle}
 				withArrow
 				action={(): void => setAddNewMemberModalOpen(true)}
+				isInsideMeeting={isInsideMeeting}
 			/>
 			{addNewMemberModalOpen && (
 				<AddNewMemberModal

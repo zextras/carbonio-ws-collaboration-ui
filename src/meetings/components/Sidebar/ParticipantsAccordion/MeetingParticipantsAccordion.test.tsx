@@ -150,7 +150,7 @@ describe("Meeting Participants Accordion - moderator's side", () => {
 	test('everything is rendered correctly', async () => {
 		const { user } = storeSetupGroupMeetingModerator();
 		const chevron = screen.getByTestId('icon: ChevronDown');
-		user.click(chevron);
+		await user.click(chevron);
 		const chevronUp = await screen.findByTestId('icon: ChevronUp');
 		expect(chevronUp).toBeInTheDocument();
 		const searchInput = screen.getByRole('textbox', { name: /Search participants/i });

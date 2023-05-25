@@ -15,11 +15,12 @@ import useStore from '../../../../store/Store';
 
 type MuteProps = {
 	roomId: string;
+	isInsideMeeting?: boolean;
 };
 
 type CreateSnackbarFn = typeof CreateSnackbarFn;
 
-const MuteConversationAction: FC<MuteProps> = ({ roomId }) => {
+const MuteConversationAction: FC<MuteProps> = ({ roomId, isInsideMeeting }) => {
 	const [t] = useTranslation();
 	const muteNotificationsLabel = t('action.muteNotifications', 'Mute notifications');
 	const activateNotificationsLabel = t('action.activateNotifications', 'activate notifications');
@@ -85,6 +86,7 @@ const MuteConversationAction: FC<MuteProps> = ({ roomId }) => {
 			padding={{ top: 'large' }}
 			label={!isMuted ? muteNotificationsLabel : activateNotificationsLabel}
 			action={muteConversation}
+			isInsideMeeting={isInsideMeeting}
 		/>
 	);
 };

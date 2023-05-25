@@ -9,16 +9,23 @@ import { Container } from '@zextras/carbonio-design-system';
 // @ts-ignore
 import { disable, enable } from 'darkreader';
 import React, { lazy, ReactElement, Suspense, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 
 import ShimmerMeetingSidebar from './shimmers/ShimmerMeetingSidebar';
 import ShimmerMeetingStreamsWrapper from './shimmers/ShimmerMeetingStreamsWrapper';
+import useRouting, { PAGE_INFO_TYPE } from '../../hooks/useRouting';
+import { getMeetingByMeetingId } from '../../store/selectors/MeetingSelectors';
+import useStore from '../../store/Store';
 
 const LazyMeetingSidebar = lazy(
 	() => import(/* webpackChunkName: "MeetingSidebar" */ '../components/Sidebar/MeetingSidebar')
 );
 
 const LazyMeetingStreamsWrapper = lazy(
-	() => import(/* webpackChunkName: "MeetingSidebar" */ '../components/MeetingStreamsWrapper')
+	() =>
+		import(
+			/* webpackChunkName: "MeetingSidebar" */ '../components/MeetingStreamsWrapper/MeetingStreamsWrapper'
+		)
 );
 
 const MeetingStreamsWrapper = (): ReactElement => (
@@ -34,6 +41,10 @@ const MeetingSidebar = (): ReactElement => (
 );
 
 const MeetingSkeleton = (): ReactElement => {
+	const { meetingId }: Record<string, string> = useParams();
+	const meeting = useStore((store) => getMeetingByMeetingId(store, meetingId));
+	const { goToInfoPage } = useRouting();
+
 	useEffect(() => {
 		enable(
 			{
@@ -54,6 +65,12 @@ const MeetingSkeleton = (): ReactElement => {
 		);
 		return () => disable();
 	}, []);
+
+	useEffect(() => {
+		if (!meeting) {
+			goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED);
+		}
+	}, [goToInfoPage, meeting]);
 
 	return (
 		<Container orientation="horizontal" borderRadius="none">

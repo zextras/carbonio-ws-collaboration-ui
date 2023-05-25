@@ -10,12 +10,12 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
-import MeetingActions from './MeetingActions';
-import MeetingViewManager from './MeetingViewManager';
-import { getSidebarStatus } from '../../store/selectors/MeetingSelectors';
-import { getCustomLogo } from '../../store/selectors/SessionSelectors';
-import useStore from '../../store/Store';
-import defaultLogo from '../assets/Logo.png';
+import MeetingActions from './MeetingComponents/MeetingActions';
+import MeetingViewManager from './MeetingComponents/MeetingViewManager';
+import { getSidebarStatus } from '../../../store/selectors/MeetingSelectors';
+import { getCustomLogo } from '../../../store/selectors/SessionSelectors';
+import useStore from '../../../store/Store';
+import defaultLogo from '../../assets/Logo.png';
 
 const SidebarIconButton = styled(IconButton)`
 	height: 240px;

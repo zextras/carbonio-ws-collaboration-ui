@@ -10,7 +10,8 @@ import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import MeetingParticipantsAccordion from './ParticipantsAccordion/MeetingParticipantsAccordion';
-import { getSidebarStatus } from '../../../store/selectors/MeetingSelectors';
+import { ActionsAccordion } from '../../../chats/components/infoPanel/conversationActionsAccordion/ActionsAccordion';
+import { getRoomIdByMeetingId, getSidebarStatus } from '../../../store/selectors/MeetingSelectors';
 import useStore from '../../../store/Store';
 
 const SidebarContainer = styled(Container)`
@@ -19,6 +20,7 @@ const SidebarContainer = styled(Container)`
 
 const MeetingSidebar = (): ReactElement => {
 	const { meetingId }: Record<string, string> = useParams();
+	const roomId = useStore((store) => getRoomIdByMeetingId(store, meetingId));
 	const sidebarStatus: boolean | undefined = useStore((store) =>
 		getSidebarStatus(store, meetingId)
 	);
@@ -31,6 +33,7 @@ const MeetingSidebar = (): ReactElement => {
 			maxWidth="500px"
 			borderRadius="none"
 		>
+			<ActionsAccordion roomId={roomId || ''} isInsideMeeting />
 			<MeetingParticipantsAccordion meetingId={meetingId} />
 		</SidebarContainer>
 	);

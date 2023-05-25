@@ -11,7 +11,7 @@ import styled from 'styled-components';
 import { ActionsAccordion } from './conversationActionsAccordion/ActionsAccordion';
 import ConversationInfo from './conversationInfo/ConversationInfo';
 import ConversationInfoDetails from './conversationInfo/ConversationInfoDetails';
-import { ParticipantsAccordion } from './conversationParticipantsAccordion/ParticipantsAccordion';
+import { MemberAccordion } from './conversationParticipantsAccordion/MemberAccordion';
 import { getRoomTypeSelector } from '../../../store/selectors/RoomsSelectors';
 import useStore from '../../../store/Store';
 import { RoomType } from '../../../types/store/RoomTypes';
@@ -59,7 +59,7 @@ const ConversationInfoPanel: FC<ConversationProps> = ({
 			<AccordionsContainer>
 				<ConversationInfoDetails roomId={roomId} roomType={roomType} />
 				<ActionsAccordion roomId={roomId} />
-				{roomType !== RoomType.ONE_TO_ONE && <ParticipantsAccordion roomId={roomId} />}
+				{roomType !== RoomType.ONE_TO_ONE && <MemberAccordion roomId={roomId} />}
 			</AccordionsContainer>
 		</CustomContainer>
 	);

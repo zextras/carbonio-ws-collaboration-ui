@@ -149,7 +149,13 @@ export function wsEventsHandler(event: WsEvent): void {
 		}
 		case WsEventType.MEETING_LEFT: {
 			if (eventArrivesFromAnotherSession) {
-				state.removeParticipant(event.meetingId, event.sessionId);
+				if (event.from === state.session.id) {
+					state.deleteMeeting(event.meetingId);
+				} else {
+					state.removeParticipant(event.meetingId, event.sessionId);
+				}
+			} else {
+				state.deleteMeeting(event.meetingId);
 			}
 			break;
 		}
