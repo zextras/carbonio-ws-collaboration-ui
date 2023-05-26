@@ -4,7 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { screen, waitFor } from '@testing-library/react';
+import { act, screen, waitFor } from '@testing-library/react';
+import { renderHook } from '@testing-library/react-hooks';
 import React from 'react';
 import { setup } from 'test-utils';
 
@@ -12,6 +13,7 @@ import ChatCreationContactsSelection from './ChatCreationContactsSelection';
 import { mockedAutoCompleteGalRequest } from '../../../jest-mocks';
 import { ContactMatch } from '../../network/soap/AutoCompleteRequest';
 import useStore from '../../store/Store';
+import { createMockCapabilityList } from '../../tests/createMock';
 import { Member } from '../../types/store/RoomTypes';
 
 // Mock objects
@@ -47,6 +49,8 @@ const user1: Member = {
 
 describe('Chat Creation Modal Contact Selector - search', () => {
 	test('All elements are rendered', async () => {
+		const { result } = renderHook(() => useStore());
+		act(() => result.current.setCapabilities(createMockCapabilityList({ maxGroupMembers: 3 })));
 		mockedAutoCompleteGalRequest.mockReturnValue([]);
 
 		setup(
@@ -309,7 +313,7 @@ describe('Add participant Modal Contact Selector', () => {
 		const list = await screen.findByTestId('list_creation_modal');
 		expect(list).toBeVisible();
 
-		// AutoCompleteRequest return zimbraUser1 and zimbraUser2 but we can see only zimbraUser2
+		// AutoCompleteRequest return zimbraUser1 and zimbraUser2, but we can see only zimbraUser2
 		expect(list.children).toHaveLength(1);
 		const user1Component = screen.queryByText(zimbraUser1.fullName);
 		expect(user1Component).not.toBeInTheDocument();
