@@ -222,23 +222,6 @@ describe('Chat Creation Modal', () => {
 		await user.click(footerButton);
 	});
 
-	test('Check creation disabled if user add more members than the limit available', async () => {
-		const { result } = renderHook(() => useStore());
-		act(() => result.current.setCapabilities(createMockCapabilityList({ maxGroupMembers: 2 })));
-		mockedAutoCompleteGalRequest.mockReturnValueOnce([zimbraUser1, zimbraUser2]);
-		const { user } = setup(<ChatCreationModal open onClose={jest.fn()} />);
-		const chipInput = await screen.findByTestId('chip_input_creation_modal');
-		await user.type(chipInput, zimbraUser1.fullName[0]);
-		const user1Component = await screen.findByText(zimbraUser1.fullName);
-		await user.click(user1Component);
-		await user.type(chipInput, zimbraUser2.fullName[0]);
-		const user2Component = await screen.findByText(zimbraUser2.fullName);
-		await user.click(user2Component);
-		const footerButton = await screen.findByTestId('create_button');
-		await user.click(footerButton);
-		expect(footerButton).not.toBeEnabled();
-	});
-
 	test('Check creation enabled if user add members and respect the limit available', async () => {
 		const { result } = renderHook(() => useStore());
 		act(() => result.current.setCapabilities(createMockCapabilityList({ maxGroupMembers: 4 })));

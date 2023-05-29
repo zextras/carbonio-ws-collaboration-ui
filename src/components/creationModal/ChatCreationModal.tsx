@@ -22,11 +22,9 @@ import ChatCreationContactsSelection, { ContactSelected } from './ChatCreationCo
 import ChatCreationTitleInput from './ChatCreationTitleInput';
 import useRouting from '../../hooks/useRouting';
 import { RoomsApi } from '../../network';
-import { getCapability } from '../../store/selectors/SessionSelectors';
 import useStore from '../../store/Store';
 import { AddRoomResponse } from '../../types/network/responses/roomsResponses';
 import { RoomType } from '../../types/store/RoomTypes';
-import { CapabilityType } from '../../types/store/SessionTypes';
 
 type CreateSnackbarFn = typeof CreateSnackbarFn;
 
@@ -55,14 +53,6 @@ const ChatCreationModal = ({
 	);
 
 	const addRoom = useStore((store) => store.addRoom);
-	const maxMembers = useStore((store) => getCapability(store, CapabilityType.MAX_GROUP_MEMBERS));
-
-	const maxGroupMembers = useMemo(() => {
-		if (typeof maxMembers === 'number') {
-			return maxMembers - 1;
-		}
-		return 0;
-	}, [maxMembers]);
 
 	const [chatType, setChatType] = useState<RoomType.ONE_TO_ONE | RoomType.GROUP>(
 		RoomType.ONE_TO_ONE
@@ -96,16 +86,13 @@ const ChatCreationModal = ({
 	);
 	const titleError = useMemo(() => title.length === 0 || title.length > 128, [title]);
 	const topicError = useMemo(() => topic.length > 256, [topic]);
-	const limitUsersReached = useMemo(
-		() => maxGroupMembers < size(contactsSelected),
-		[maxGroupMembers, contactsSelected]
-	);
+
 	const disabledCreateButton = useMemo(() => {
 		if (chatType === RoomType.ONE_TO_ONE) {
 			return size(contactsSelected) === 0;
 		}
-		return titleError || topicError || limitUsersReached;
-	}, [chatType, titleError, topicError, contactsSelected, limitUsersReached]);
+		return titleError || topicError;
+	}, [chatType, titleError, topicError, contactsSelected]);
 
 	const onModalClose = useCallback(() => {
 		setChatType(RoomType.ONE_TO_ONE);
@@ -163,27 +150,18 @@ const ChatCreationModal = ({
 		createSnackbar
 	]);
 
-	const creationButtonTooltipLabel = useMemo(() => {
-		if (disabledCreateButton) {
-			if (titleError || topicError || limitUsersReached) {
-				return errorLabelDisabled;
-			}
-			return disabledButtonTooltip;
-		}
-		return createButtonLabel;
-	}, [
-		createButtonLabel,
-		limitUsersReached,
-		disabledButtonTooltip,
-		disabledCreateButton,
-		errorLabelDisabled,
-		titleError,
-		topicError
-	]);
-
 	const modalFooter = useMemo(
 		() => (
-			<Tooltip label={creationButtonTooltipLabel} placement="right">
+			<Tooltip
+				label={
+					disabledCreateButton
+						? titleError || topicError
+							? errorLabelDisabled
+							: disabledButtonTooltip
+						: createButtonLabel
+				}
+				placement="right"
+			>
 				<Container crossAlignment="flex-end">
 					<Button
 						label={createButtonLabel}
@@ -194,7 +172,16 @@ const ChatCreationModal = ({
 				</Container>
 			</Tooltip>
 		),
-		[disabledCreateButton, createButtonLabel, onCreate, isPending, creationButtonTooltipLabel]
+		[
+			disabledCreateButton,
+			titleError,
+			topicError,
+			errorLabelDisabled,
+			disabledButtonTooltip,
+			createButtonLabel,
+			onCreate,
+			isPending
+		]
 	);
 
 	return (

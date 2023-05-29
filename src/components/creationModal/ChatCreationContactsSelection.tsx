@@ -69,7 +69,7 @@ const ChatCreationContactsSelection = ({
 	);
 	const addUserLimitReachedLabel = t(
 		'modal.creation.addUserLimit.limitReached',
-		'You have selected the maximum number of participants for a group'
+		'You have selected the maximum number of members for a group'
 	);
 
 	const inputRef = useRef<HTMLInputElement>(null);
@@ -188,13 +188,33 @@ const ChatCreationContactsSelection = ({
 		[setContactSelected]
 	);
 
+	const chipInputHasError = useMemo(
+		() =>
+			isCreationModal
+				? typeof maxGroupMembers === 'number' && maxGroupMembers <= size(contactsSelected)
+				: typeof maxGroupMembers === 'number' &&
+				  maxGroupMembers - size(members) <= size(contactsSelected),
+		[isCreationModal, contactsSelected, maxGroupMembers, members]
+	);
+
 	const ListItem = useMemo(
 		() =>
 			// eslint-disable-next-line react/display-name
-			({ item, selected }: { item: ContactInfo; selected: boolean }) =>
-				<ListParticipant item={item} selected={selected} onClickCb={onClickListItem} />,
-		// eslint-disable-next-line
-		[]
+			({ item, selected }: { item: ContactInfo; selected: boolean }) => {
+				const clickCb =
+					(chipInputHasError && selected) || !chipInputHasError
+						? onClickListItem
+						: (): null => null;
+				return (
+					<ListParticipant
+						item={item}
+						selected={selected}
+						onClickCb={clickCb}
+						isDisabled={chipInputHasError}
+					/>
+				);
+			},
+		[chipInputHasError, onClickListItem]
 	);
 
 	const removeContactFromChip = useCallback(
@@ -206,15 +226,6 @@ const ChatCreationContactsSelection = ({
 			}
 		},
 		[chips, setContactSelected]
-	);
-
-	const chipInputHasError = useMemo(
-		() =>
-			isCreationModal
-				? typeof maxGroupMembers === 'number' && maxGroupMembers < size(contactsSelected)
-				: typeof maxGroupMembers === 'number' &&
-				  maxGroupMembers - size(members) < size(contactsSelected),
-		[isCreationModal, contactsSelected, maxGroupMembers, members]
 	);
 
 	const chipInputDescriptionLabel = useMemo(() => {
@@ -278,8 +289,6 @@ const ChatCreationContactsSelection = ({
 				description={
 					size(contactsSelected) > 1 || !isCreationModal ? chipInputDescriptionLabel : ''
 				}
-				errorLabel={addUserLimitReachedLabel}
-				hasError={chipInputHasError}
 			/>
 			<Padding bottom="large" />
 			<Container height="9.375rem">{contentToDisplay}</Container>

@@ -106,9 +106,9 @@
         "clearHistoryDescription": "You are about to clean up your conversation history, remember that this action cannot be undone. The history of other members will not be deleted.",
         "creation": {
             "addUserLimit": {
-                "limitReached": "You have selected the maximum number of participants for a group",
-                "users": "You can add one last participant",
-                "users_plural": "You can add other {{count}} participants"
+                "limitReached": "You have selected the maximum number of members for a group",
+                "users": "You can add one last member",
+                "users_plural": "You can add other {{count}} members"
             },
             "contactList": "Select more than an address to create a Group",
             "description": "Chats are one-to-one conversations that help you to stay in touch with your contacts. You can create a Group by including more than two addresses",
@@ -196,7 +196,7 @@
         "promoteModerator": "Promote to moderator",
         "promoteSomeoneElseToModerator": "Promote someone else to moderator to leave",
         "removeCaption": "Remove caption",
-        "removeToAddNewOne": "Remove someone to add new participants",
+        "removeToAddNewOne": "Remove someone to add new members",
         "room": {
             "resetPicture": "Reset picture",
             "updatePicture": "Update picture",

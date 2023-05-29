@@ -6,13 +6,10 @@
 
 import { Button, Checkbox, Container, Modal, Tooltip } from '@zextras/carbonio-design-system';
 import { size } from 'lodash';
-import React, { Dispatch, FC, SetStateAction, useCallback, useMemo } from 'react';
+import React, { Dispatch, FC, SetStateAction, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { getCapability } from '../../../store/selectors/SessionSelectors';
-import useStore from '../../../store/Store';
 import { Member } from '../../../types/store/RoomTypes';
-import { CapabilityType } from '../../../types/store/SessionTypes';
 import ChatCreationContactsSelection, {
 	ContactSelected
 } from '../../creationModal/ChatCreationContactsSelection';
@@ -51,38 +48,12 @@ const AddNewMemberModal: FC<AddNewMemberProps> = ({
 	);
 	const addNewMemberButtonLabel = t('action.addNewMembers', 'Add new members');
 	const closeLabel = t('action.close', 'Close');
-	const removeToAddNewOneLabel = t(
-		'tooltip.removeToAddNewOne',
-		'Remove someone to add new participants'
-	);
-
-	const maxGroupMembers = useStore((store) =>
-		getCapability(store, CapabilityType.MAX_GROUP_MEMBERS)
-	);
 
 	const onClickCheckbox = useCallback(
 		() => setShowHistory((check) => !check),
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[]
 	);
-
-	const disableButton = useMemo(
-		() =>
-			size(contactsSelected) === 0 ||
-			(typeof maxGroupMembers === 'number' &&
-				maxGroupMembers - size(members) < size(contactsSelected)),
-		[contactsSelected, members, maxGroupMembers]
-	);
-
-	const buttonTooltipLabel = useMemo(() => {
-		if (
-			typeof maxGroupMembers === 'number' &&
-			maxGroupMembers - size(members) < size(contactsSelected)
-		) {
-			return removeToAddNewOneLabel;
-		}
-		return disabledButtonTooltip;
-	}, [contactsSelected, disabledButtonTooltip, maxGroupMembers, members, removeToAddNewOneLabel]);
 
 	const modalFooter = (
 		<Container orientation="horizontal" mainAlignment="space-between">
@@ -93,19 +64,12 @@ const AddNewMemberModal: FC<AddNewMemberProps> = ({
 					onClick={onClickCheckbox}
 				/>
 			</Container>
-			<Tooltip
-				label={buttonTooltipLabel}
-				disabled={
-					typeof maxGroupMembers === 'number' &&
-					maxGroupMembers - size(members) >= size(contactsSelected) &&
-					size(contactsSelected) !== 0
-				}
-			>
+			<Tooltip label={disabledButtonTooltip} disabled={size(contactsSelected) !== 0}>
 				<Container crossAlignment="flex-end" width="fit">
 					<Button
 						label={addNewMemberButtonLabel}
 						onClick={addNewMember}
-						disabled={disableButton}
+						disabled={size(contactsSelected) === 0}
 						data-testid="add_new_member_button"
 					/>
 				</Container>
