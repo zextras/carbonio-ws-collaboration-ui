@@ -27,11 +27,11 @@ const useFirstUnreadMessage = (roomId: string): string | undefined => {
 	useEffect(() => {
 		// Don't calculate if it is just set once
 		// or if necessary data aren't already loaded on local store
-		if (!firstUnreadMessageId && myUserId && size(messages) > 0 && myLastMarker) {
+		if (!firstUnreadMessageId && myUserId && size(messages) > 0) {
 			if (unreadCount > 0) {
 				const lastMessageReadByMe = findIndex(
 					messages,
-					(message) => message.id === myLastMarker.messageId
+					(message) => message.id === myLastMarker?.messageId
 				);
 				// If last message read by me exist on local store
 				if (lastMessageReadByMe !== -1) {
@@ -44,6 +44,16 @@ const useFirstUnreadMessage = (roomId: string): string | undefined => {
 					// The fist of them is the fist unread text message
 					if (size(othersMessages) > 0) {
 						setFirstUnreadMessageId(othersMessages[0].id);
+					}
+				} else if (myLastMarker == null && size(messages) >= unreadCount) {
+					const firstUnreadTextMessage = filter(
+						messages,
+						(message) => message.type === MessageType.TEXT_MSG && message.from !== myUserId
+					);
+					if (size(firstUnreadTextMessage) > 0) {
+						setFirstUnreadMessageId(firstUnreadTextMessage[0].id);
+					} else {
+						setFirstUnreadMessageId('noUnread');
 					}
 				}
 			} else {

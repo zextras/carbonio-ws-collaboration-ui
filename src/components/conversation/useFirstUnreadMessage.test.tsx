@@ -93,13 +93,14 @@ describe('useFirstUnreadMessage with text messages', () => {
 		store.addRoom(room);
 		store.updateHistory(room.id, textHistory);
 	});
-	test('User never reads messages', () => {
+	test('User have never red a message', () => {
 		// Update unread
 		useStore.getState().updateUnreadCount(room.id);
 		// Check number unread
 		expect(useStore.getState().unreads[room.id]).toBe(size(textHistory));
 		const { result } = renderHook(() => useFirstUnreadMessage(room.id));
-		expect(result.current).toBeUndefined();
+		// the reference should be the firs text message arrived
+		expect(result.current).toBe('messageId0');
 	});
 
 	test('User some messages', () => {
@@ -158,7 +159,7 @@ describe('useFirstUnreadMessage with all types of messages', () => {
 		// Check number unread
 		expect(useStore.getState().unreads[room.id]).toBe(3);
 		const { result } = renderHook(() => useFirstUnreadMessage(room.id));
-		expect(result.current).toBeUndefined();
+		expect(result.current).toBe('messageId0');
 	});
 
 	test('User last read is his message and after there is a deleted message', () => {
