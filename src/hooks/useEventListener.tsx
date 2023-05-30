@@ -6,12 +6,16 @@
 
 import { useEffect, useRef } from 'react';
 
-import { MeetingCreatedEvent } from '../types/network/websocket/wsMeetingEvents';
+import {
+	MeetingCreatedEvent,
+	MeetingJoinedEvent
+} from '../types/network/websocket/wsMeetingEvents';
 import { Message } from '../types/store/MessageTypes';
 
 export enum EventName {
 	NEW_MESSAGE = 'newMessage',
-	INCOMING_MEETING = 'incomingMeeting'
+	INCOMING_MEETING = 'incomingMeeting',
+	REMOVED_MEETING_NOTIFICATION = 'removedMeetingNotification'
 }
 
 type CustomEvent =
@@ -22,6 +26,10 @@ type CustomEvent =
 	| {
 			name: EventName.INCOMING_MEETING;
 			data: MeetingCreatedEvent;
+	  }
+	| {
+			name: EventName.REMOVED_MEETING_NOTIFICATION;
+			data: MeetingJoinedEvent;
 	  };
 
 export const sendCustomEvent = (event: CustomEvent): void => {

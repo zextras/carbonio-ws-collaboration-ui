@@ -29,7 +29,7 @@ const MeetingNotificationsHandler = (): ReactElement => {
 
 	const addNotification = useCallback(
 		({ detail: meetingCreatedEvent }) =>
-			setNotificationArray((prev) => [...prev, meetingCreatedEvent]),
+			setNotificationArray((prev) => [meetingCreatedEvent, ...prev]),
 		[]
 	);
 
@@ -43,7 +43,14 @@ const MeetingNotificationsHandler = (): ReactElement => {
 		[]
 	);
 
+	const removeNotificationFromMeetingEvent = useCallback(
+		({ detail: meetingEvent }) => removeNotification(meetingEvent.id),
+		[removeNotification]
+	);
+
 	useEventListener(EventName.INCOMING_MEETING, addNotification);
+
+	useEventListener(EventName.REMOVED_MEETING_NOTIFICATION, removeNotificationFromMeetingEvent);
 
 	const notificationComponents = useMemo(
 		() =>
