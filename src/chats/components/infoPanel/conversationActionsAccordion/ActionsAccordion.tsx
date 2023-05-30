@@ -62,7 +62,12 @@ export const ActionsAccordion: FC<ActionAccordionProps> = ({ roomId, isInsideMee
 			disableHover: true,
 			background: 'gray6',
 			CustomComponent: () => (
-				<MuteConversationAction roomId={roomId} isInsideMeeting={isInsideMeeting} />
+				<MuteConversationAction
+					roomId={roomId}
+					isInsideMeeting={isInsideMeeting}
+					roomType={roomType}
+					emptyRoom={emptyRoom}
+				/>
 			)
 		});
 
@@ -76,16 +81,18 @@ export const ActionsAccordion: FC<ActionAccordionProps> = ({ roomId, isInsideMee
 					<EditConversationAction roomId={roomId} isInsideMeeting={isInsideMeeting} />
 				)
 			});
-		}
 
-		// Add member to conversation
-		if (iAmOwner && roomType !== RoomType.ONE_TO_ONE) {
+			// Add member to conversation
 			arrayOfActions.push({
 				id: '3',
 				disableHover: true,
 				background: 'gray6',
 				CustomComponent: () => (
-					<AddNewMemberAction roomId={roomId} isInsideMeeting={isInsideMeeting} />
+					<AddNewMemberAction
+						roomId={roomId}
+						iAmTheOnlyOwner={iAmOwner && numberOfOwners === 1}
+						isInsideMeeting={isInsideMeeting}
+					/>
 				)
 			});
 		}

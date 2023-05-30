@@ -6,7 +6,7 @@
 
 import { Container } from '@zextras/carbonio-design-system';
 import { map } from 'lodash';
-import React, { FC, useCallback, useState } from 'react';
+import React, { FC, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import ActionComponent from './ActionComponent';
@@ -22,9 +22,14 @@ import { ContactSelected } from '../../creationModal/ChatCreationContactsSelecti
 type AddNewMemberProps = {
 	roomId: string;
 	isInsideMeeting?: boolean;
+	iAmTheOnlyOwner?: boolean;
 };
 
-const AddNewMemberAction: FC<AddNewMemberProps> = ({ roomId, isInsideMeeting }) => {
+const AddNewMemberAction: FC<AddNewMemberProps> = ({
+	roomId,
+	isInsideMeeting,
+	iAmTheOnlyOwner
+}) => {
 	const [t] = useTranslation();
 	const addNewMemberTitle: string = t('action.addNewMembers', `Add new members`);
 
@@ -34,8 +39,13 @@ const AddNewMemberAction: FC<AddNewMemberProps> = ({ roomId, isInsideMeeting }) 
 
 	const [contactsSelected, setContactSelected] = useState<ContactSelected>({});
 	const [addNewMemberModalOpen, setAddNewMemberModalOpen] = useState<boolean>(false);
-
 	const [showHistory, setShowHistory] = useState<boolean>(false);
+
+	const padding = useMemo(
+		() =>
+			isInsideMeeting && iAmTheOnlyOwner ? { top: 'small', bottom: 'large' } : { top: 'small' },
+		[isInsideMeeting, iAmTheOnlyOwner]
+	);
 
 	const closeModal = useCallback(() => {
 		setAddNewMemberModalOpen(false);
@@ -64,7 +74,7 @@ const AddNewMemberAction: FC<AddNewMemberProps> = ({ roomId, isInsideMeeting }) 
 			<ActionComponent
 				icon="PersonAddOutline"
 				actionColor="primary"
-				padding={{ top: 'small' }}
+				padding={padding}
 				label={addNewMemberTitle}
 				withArrow
 				action={(): void => setAddNewMemberModalOpen(true)}

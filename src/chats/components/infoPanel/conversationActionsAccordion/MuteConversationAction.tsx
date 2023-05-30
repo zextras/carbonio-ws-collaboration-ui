@@ -5,22 +5,30 @@
  */
 
 import { SnackbarManagerContext, CreateSnackbarFn } from '@zextras/carbonio-design-system';
-import React, { FC, useCallback, useContext } from 'react';
+import React, { FC, useCallback, useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import ActionComponent from './ActionComponent';
 import { RoomsApi } from '../../../../network';
 import { getRoomMutedSelector } from '../../../../store/selectors/RoomsSelectors';
 import useStore from '../../../../store/Store';
+import { RoomType } from '../../../../types/store/RoomTypes';
 
 type MuteProps = {
 	roomId: string;
 	isInsideMeeting?: boolean;
+	roomType?: string;
+	emptyRoom?: boolean;
 };
 
 type CreateSnackbarFn = typeof CreateSnackbarFn;
 
-const MuteConversationAction: FC<MuteProps> = ({ roomId, isInsideMeeting }) => {
+const MuteConversationAction: FC<MuteProps> = ({
+	roomId,
+	isInsideMeeting,
+	roomType,
+	emptyRoom
+}) => {
 	const [t] = useTranslation();
 	const muteNotificationsLabel = t('action.muteNotifications', 'Mute notifications');
 	const activateNotificationsLabel = t('action.activateNotifications', 'activate notifications');
@@ -37,8 +45,15 @@ const MuteConversationAction: FC<MuteProps> = ({ roomId, isInsideMeeting }) => {
 	const setRoomMuted = useStore((state) => state.setRoomMuted);
 	const setRoomUnmuted = useStore((state) => state.setRoomUnmuted);
 
-	// TODO fix type of createSnackbar
 	const createSnackbar: CreateSnackbarFn = useContext(SnackbarManagerContext);
+
+	const padding = useMemo(
+		() =>
+			emptyRoom && roomType === RoomType.ONE_TO_ONE
+				? { top: 'large', bottom: 'large' }
+				: { top: 'large' },
+		[emptyRoom, roomType]
+	);
 
 	const muteConversation = useCallback(() => {
 		if (isMuted) {
@@ -83,7 +98,7 @@ const MuteConversationAction: FC<MuteProps> = ({ roomId, isInsideMeeting }) => {
 		<ActionComponent
 			icon={!isMuted ? 'BellOffOutline' : 'BellOutline'}
 			actionColor="primary"
-			padding={{ top: 'large' }}
+			padding={padding}
 			label={!isMuted ? muteNotificationsLabel : activateNotificationsLabel}
 			action={muteConversation}
 			isInsideMeeting={isInsideMeeting}
