@@ -73,6 +73,8 @@ const AddNewMemberAction: FC<AddNewMemberProps> = ({ roomId }) => {
 	return (
 		<Container>
 			<ActionComponent
+				data-testId="addNewMemberAction"
+				idComponent="addNewMemberAction"
 				icon="PersonAddOutline"
 				actionColor="primary"
 				padding={{ top: 'small' }}

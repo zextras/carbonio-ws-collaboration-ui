@@ -197,7 +197,7 @@ const ChatCreationModal = ({
 			<Text overflow="break-word" size="small">
 				{descriptionLabel}
 			</Text>
-			<Padding bottom="large" />
+			<Padding bottom="medium" />
 			<ChatCreationContactsSelection
 				contactsSelected={contactsSelected}
 				setContactSelected={setContactSelected}

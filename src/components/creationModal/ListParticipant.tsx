@@ -41,13 +41,18 @@ const ListParticipant = ({
 		<Padding vertical="small">
 			<Tooltip disabled={!isDisabled} label={removeToAddNewOneLabel}>
 				<Container
+					data-testid={`chip-${item.email}`}
 					onClick={onClickCb(item)}
 					orientation="horizontal"
 					mainAlignment="flex-start"
 					width="fill"
 				>
 					<Row>
-						<Checkbox value={selected} disabled={!selected && isDisabled} />
+						<Checkbox
+							data-testid={`checkbox-chip-${item.email}`}
+							value={selected}
+							disabled={!selected && isDisabled}
+						/>
 						<Padding horizontal="small">
 							<Avatar label={item.name} />
 						</Padding>

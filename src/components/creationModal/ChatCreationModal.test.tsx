@@ -33,6 +33,14 @@ const zimbraUser2: ContactMatch = {
 	zimbraId: 'user2-id'
 };
 
+const zimbraUser3: ContactMatch = {
+	email: 'user3@test.com',
+	firstName: 'User',
+	fullName: 'User Three',
+	lastName: 'Three',
+	zimbraId: 'user3-id'
+};
+
 const testRoom: RoomBe = createMockRoom({
 	id: 'roomTest',
 	type: RoomType.ONE_TO_ONE,
@@ -222,10 +230,10 @@ describe('Chat Creation Modal', () => {
 		await user.click(footerButton);
 	});
 
-	test('Check creation enabled if user add members and respect the limit available', async () => {
+	test('Check creation disabled if user reach the limit available, and check list checkbox are disabled', async () => {
 		const { result } = renderHook(() => useStore());
-		act(() => result.current.setCapabilities(createMockCapabilityList({ maxGroupMembers: 4 })));
-		mockedAutoCompleteGalRequest.mockReturnValueOnce([zimbraUser1, zimbraUser2]);
+		act(() => result.current.setCapabilities(createMockCapabilityList({ maxGroupMembers: 3 })));
+		mockedAutoCompleteGalRequest.mockReturnValueOnce([zimbraUser1, zimbraUser2, zimbraUser3]);
 		const { user } = setup(<ChatCreationModal open onClose={jest.fn()} />);
 		const chipInput = await screen.findByTestId('chip_input_creation_modal');
 		await user.type(chipInput, zimbraUser1.fullName[0]);
@@ -234,8 +242,32 @@ describe('Chat Creation Modal', () => {
 		await user.type(chipInput, zimbraUser2.fullName[0]);
 		const user2Component = await screen.findByText(zimbraUser2.fullName);
 		await user.click(user2Component);
-		const footerButton = await screen.findByTestId('create_button');
-		expect(footerButton).toBeEnabled();
+		const usersToAddLimitReached = await screen.findByText(
+			'You have selected the maximum number of members for a group'
+		);
+		await user.type(chipInput, zimbraUser3.fullName[0]);
+		const user3Checkbox = screen.getByTestId('icon: Square');
+		expect(user3Checkbox).toBeInTheDocument();
+		expect(user3Checkbox).toHaveAttribute('disabled');
+		expect(usersToAddLimitReached).toBeInTheDocument();
+	});
+
+	test('Check list checkbox are enabled when user can add other members', async () => {
+		const { result } = renderHook(() => useStore());
+		act(() => result.current.setCapabilities(createMockCapabilityList({ maxGroupMembers: 4 })));
+		mockedAutoCompleteGalRequest.mockReturnValueOnce([zimbraUser1, zimbraUser2, zimbraUser3]);
+		const { user } = setup(<ChatCreationModal open onClose={jest.fn()} />);
+		const chipInput = await screen.findByTestId('chip_input_creation_modal');
+		await user.type(chipInput, zimbraUser1.fullName[0]);
+		const user1Component = await screen.findByText(zimbraUser1.fullName);
+		await user.click(user1Component);
+		await user.type(chipInput, zimbraUser2.fullName[0]);
+		const user2Component = await screen.findByText(zimbraUser2.fullName);
+		await user.click(user2Component);
+		await user.type(chipInput, zimbraUser3.fullName[0]);
+		const user3Checkbox = screen.getByTestId('icon: Square');
+		expect(user3Checkbox).toBeInTheDocument();
+		expect(user3Checkbox).not.toHaveAttribute('disabled');
 	});
 });
 

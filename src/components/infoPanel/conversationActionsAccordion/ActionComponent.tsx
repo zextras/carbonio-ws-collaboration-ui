@@ -73,6 +73,7 @@ type ActionProps = {
 	action: () => void;
 	isDisabled?: boolean;
 	disabledTooltip?: string;
+	idComponent?: string;
 };
 
 const ActionComponent: FC<ActionProps> = ({
@@ -83,11 +84,13 @@ const ActionComponent: FC<ActionProps> = ({
 	withArrow,
 	action,
 	isDisabled,
-	disabledTooltip
+	disabledTooltip,
+	idComponent
 }) => (
 	<Tooltip disabled={!isDisabled} label={disabledTooltip}>
 		<CustomActionContainer padding={padding} data-testid="action">
 			<ActionContainer
+				data-testid={idComponent || 'action'}
 				orientation="horizontal"
 				width="fill"
 				actionColor={actionColor}

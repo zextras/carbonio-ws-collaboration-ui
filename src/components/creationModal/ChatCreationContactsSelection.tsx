@@ -290,7 +290,7 @@ const ChatCreationContactsSelection = ({
 					size(contactsSelected) > 1 || !isCreationModal ? chipInputDescriptionLabel : ''
 				}
 			/>
-			<Padding bottom="large" />
+			{(size(contactsSelected) > 1 || !isCreationModal) && <Padding bottom="small" />}
 			<Container height="9.375rem">{contentToDisplay}</Container>
 			<Padding bottom="large" />
 			<Text color="gray1">{isCreationModal && listTextLabel}</Text>
