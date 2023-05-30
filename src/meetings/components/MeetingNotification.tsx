@@ -10,7 +10,8 @@ import {
 	Container,
 	IconButton,
 	Input,
-	Text
+	Text,
+	Tooltip
 } from '@zextras/carbonio-design-system';
 import { size } from 'lodash';
 import React, { ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
@@ -19,7 +20,7 @@ import styled from 'styled-components';
 
 import { UsersApi } from '../../network';
 import { getXmppClient } from '../../store/selectors/ConnectionSelector';
-import { getUserName } from '../../store/selectors/UsersSelectors';
+import { getUserName, getUserPictureUpdatedAt } from '../../store/selectors/UsersSelectors';
 import useStore from '../../store/Store';
 import { MeetingCreatedEvent } from '../../types/network/websocket/wsMeetingEvents';
 import meetingNotificationRingMp3 from '../assets/meeting-notification-sound.mp3';
@@ -39,12 +40,19 @@ const NotificationContainer = styled(Container)`
 const CustomText = styled(Text)`
 	text-align: center;
 `;
+
+const CustomTooltip = styled(Tooltip)`
+	z-index: 99999;
+`;
 const MeetingNotification = ({
 	event,
 	removeNotification
 }: MeetingNotificationProps): ReactElement => {
 	const xmppClient = useStore(getXmppClient);
 	const userName: string = useStore((store) => getUserName(store, event.from)) || '';
+	const userPictureUpdatedAt: string | undefined = useStore((state) =>
+		getUserPictureUpdatedAt(state, event.from)
+	);
 	const meeting = useStore((store) => store.meetings[event.roomId]);
 
 	const [t] = useTranslation();
@@ -61,6 +69,11 @@ const MeetingNotification = ({
 	);
 	const declineLabel = t('action.decline', 'Decline');
 	const joinMeetingLabel = t('action.joinMeeting', 'Join meeting');
+	const disableSendTooltip = t(
+		'meeting.newMeetingNotification.writeAMessageToSendIt',
+		'Write a message to send it'
+	);
+	const activeSendTooltip = t('meeting.newMeetingNotification.sendMessage', 'Send message');
 
 	const [message, setMessage] = useState('');
 	const [meetingSound, setMeetingSound] = useState(true);
@@ -79,12 +92,14 @@ const MeetingNotification = ({
 
 	const onTextChange = useCallback((e) => setMessage(e.currentTarget.value.trim()), []);
 
-	const sendMessage = useCallback(() => {
-		xmppClient.sendChatMessage(event.roomId, message);
-		setMessage('');
-	}, [event.roomId, message, xmppClient]);
-
 	const disableSendMessage = useMemo(() => size(message) === 0, [message]);
+
+	const sendMessage = useCallback(() => {
+		if (!disableSendMessage) {
+			xmppClient.sendChatMessage(event.roomId, message);
+			setMessage('');
+		}
+	}, [disableSendMessage, event.roomId, message, xmppClient]);
 
 	const declineMeeting = useCallback(
 		() => removeNotification(event.id),
@@ -100,8 +115,13 @@ const MeetingNotification = ({
 
 	return (
 		<NotificationContainer width="fill" height="fill" background="gray6" padding="1rem" gap="1rem">
-			<Container>
-				<Avatar size="large" label={userName} title={userName} picture={picture} />
+			<Container gap="0.5rem">
+				<Avatar
+					size="large"
+					label={userName}
+					title={userName}
+					picture={userPictureUpdatedAt ? picture : false}
+				/>
 				<CustomText overflow="break-word">{userIsInvitingYouLabel}</CustomText>
 			</Container>
 			<Container orientation="horizontal" gap="0.5rem">
@@ -111,18 +131,20 @@ const MeetingNotification = ({
 					onEnter={sendMessage}
 					onChange={onTextChange}
 				/>
-				<IconButton
-					icon="Navigation2"
-					size="extralarge"
-					iconColor="primary"
-					type="outlined"
-					disabled={disableSendMessage}
-					onClick={sendMessage}
-				/>
+				<CustomTooltip label={disableSendMessage ? disableSendTooltip : activeSendTooltip}>
+					<IconButton
+						icon="Navigation2"
+						size="extralarge"
+						iconColor="primary"
+						type="outlined"
+						disabled={disableSendMessage}
+						onClick={sendMessage}
+					/>
+				</CustomTooltip>
 			</Container>
 			<Container orientation="horizontal" gap="0.5rem">
-				<Button label={declineLabel} color="secondary" onClick={declineMeeting} />
-				<Button label={joinMeetingLabel} onClick={joinMeeting} />
+				<Button width="fill" label={declineLabel} color="secondary" onClick={declineMeeting} />
+				<Button width="fill" label={joinMeetingLabel} onClick={joinMeeting} />
 			</Container>
 			{meetingSound && (
 				// eslint-disable-next-line jsx-a11y/media-has-caption

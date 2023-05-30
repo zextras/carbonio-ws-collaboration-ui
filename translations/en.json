@@ -113,7 +113,9 @@
         "moreParticipantsListTitle": "{{number}} meeting's participants",
         "newMeetingNotification": {
             "sendAQuickMessage": "Send a quick message",
-            "userIsInvitingYou": "<strong>{{name}}</strong> is inviting you"
+            "sendMessage": "Send message",
+            "userIsInvitingYou": "<strong>{{name}}</strong> is inviting you",
+            "writeAMessageToSendIt": "Write a message to send it"
         },
         "oneParticipantListTitle": "One meeting's participant",
         "ongoingGroupMeetingTooltip": "You are already participating in this meeting",

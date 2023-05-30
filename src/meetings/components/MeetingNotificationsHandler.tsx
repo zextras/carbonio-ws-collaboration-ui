@@ -5,6 +5,7 @@
  */
 
 import { Button, Container, Portal } from '@zextras/carbonio-design-system';
+import { useCurrentRoute } from '@zextras/carbonio-shell-ui';
 import { map, remove, size } from 'lodash';
 import React, { ReactElement, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -24,6 +25,7 @@ const PortalContainer = styled(Container)`
 const MeetingNotificationsHandler = (): ReactElement => {
 	const [t] = useTranslation();
 	const declineAllLabel = t('action.declineAll', 'Decline all');
+	const currentRoute = useCurrentRoute();
 
 	const [notificationArray, setNotificationArray] = useState<MeetingCreatedEvent[]>([]);
 
@@ -62,7 +64,10 @@ const MeetingNotificationsHandler = (): ReactElement => {
 
 	const declineAll = useCallback(() => setNotificationArray([]), []);
 
-	const displayPortal = useMemo(() => size(notificationArray) > 0, [notificationArray]);
+	const displayPortal = useMemo(
+		() => size(notificationArray) > 0 && currentRoute?.route !== 'external',
+		[notificationArray, currentRoute]
+	);
 
 	return (
 		<Portal show={displayPortal}>
