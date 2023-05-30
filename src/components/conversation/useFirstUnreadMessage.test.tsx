@@ -93,7 +93,7 @@ describe('useFirstUnreadMessage with text messages', () => {
 		store.addRoom(room);
 		store.updateHistory(room.id, textHistory);
 	});
-	test('User have never red a message', () => {
+	test('User has never read a message', () => {
 		// Update unread
 		useStore.getState().updateUnreadCount(room.id);
 		// Check number unread
@@ -153,7 +153,7 @@ describe('useFirstUnreadMessage with all types of messages', () => {
 		store.addRoom(room);
 		store.updateHistory(room.id, complexHistory);
 	});
-	test('User never reads messages', () => {
+	test('User has never read a message', () => {
 		// Update unread
 		useStore.getState().updateUnreadCount(room.id);
 		// Check number unread
