@@ -14,7 +14,9 @@
 		"test:watch": "jest --watch",
 		"type-check": "tsc --noEmit",
 		"type-check:watch": "npm run type-check -- --watch",
-		"lint": "eslint --ext .js,.jsx,.ts,.tsx --resolve-plugins-relative-to node_modules/@zextras/carbonio-ui-configs ./src"
+		"lint": "eslint --ext .js,.jsx,.ts,.tsx --resolve-plugins-relative-to node_modules/@zextras/carbonio-ui-configs ./src",
+		"translations:push": "git subtree push --prefix translations $npm_package_config_translations_repository translations-updater/$(date '+%Y-%m-%d')",
+		"translations:pull": "git subtree pull --squash --prefix translations $npm_package_config_translations_repository main"
 	},
 	"keywords": [],
 	"author": "",
@@ -42,7 +44,7 @@
 		"@types/uuid": "^9.0.0",
 		"@typescript-eslint/parser": "^5.15.0",
 		"@zextras/carbonio-ui-configs": "^0.1.11",
-		"@zextras/carbonio-ui-sdk": "1.5.0",
+		"@zextras/carbonio-ui-sdk": "1.5.3",
 		"babel-eslint": "10.0.3",
 		"babel-jest": "28.1.3",
 		"babel-loader": "8.0.6",
@@ -69,8 +71,8 @@
 	"dependencies": {
 		"@emoji-mart/data": "^1.0.2",
 		"@testing-library/react-hooks": "^8.0.1",
-		"@zextras/carbonio-design-system": "1.1.0",
-		"@zextras/carbonio-shell-ui": "1.1.0",
+		"@zextras/carbonio-design-system": "2.1.0",
+		"@zextras/carbonio-shell-ui": "3.0.2",
 		"@zextras/carbonio-ui-preview": "^1.0.0",
 		"emoji-mart": "^5.1.0",
 		"html-entities": "2.3.3",
@@ -98,6 +100,9 @@
 		"priority": 9,
 		"attrKey": "carbonioFeatureChatsEnabled",
 		"type": "carbonio",
+		"translations_repository": "git@github.com:Zextras/carbonio-ws-collaboration-ui-i18n.git"
+	},
+	"config": {
 		"translations_repository": "git@github.com:Zextras/carbonio-ws-collaboration-ui-i18n.git"
 	}
 }

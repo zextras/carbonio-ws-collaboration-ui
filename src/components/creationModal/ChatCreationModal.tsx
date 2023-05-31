@@ -7,9 +7,9 @@
 import {
 	Button,
 	Container,
+	CreateSnackbarFn,
 	Modal,
 	Padding,
-	CreateSnackbarFn,
 	SnackbarManagerContext,
 	Text,
 	Tooltip
@@ -86,6 +86,7 @@ const ChatCreationModal = ({
 	);
 	const titleError = useMemo(() => title.length === 0 || title.length > 128, [title]);
 	const topicError = useMemo(() => topic.length > 256, [topic]);
+
 	const disabledCreateButton = useMemo(() => {
 		if (chatType === RoomType.ONE_TO_ONE) {
 			return size(contactsSelected) === 0;
@@ -196,7 +197,7 @@ const ChatCreationModal = ({
 			<Text overflow="break-word" size="small">
 				{descriptionLabel}
 			</Text>
-			<Padding bottom="large" />
+			<Padding bottom="medium" />
 			<ChatCreationContactsSelection
 				contactsSelected={contactsSelected}
 				setContactSelected={setContactSelected}
