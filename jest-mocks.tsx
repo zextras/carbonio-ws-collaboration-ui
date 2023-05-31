@@ -4,7 +4,12 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Account, AccountSettings, INotificationManager } from '@zextras/carbonio-shell-ui';
+import {
+	Account,
+	AccountSettings,
+	INotificationManager,
+	AppRoute
+} from '@zextras/carbonio-shell-ui';
 import React, { ReactElement } from 'react';
 
 import { AutoCompleteGalResponse } from './src/network/soap/AutoCompleteRequest';
@@ -51,6 +56,11 @@ jest.mock('@zextras/carbonio-shell-ui', () => ({
 		attrs: {},
 		props: [{ name: '', zimlet: '', _content: '' }],
 		prefs: {}
+	}),
+	useCurrentRoute: (): AppRoute => ({
+		id: 'chats',
+		route: 'chats',
+		app: 'Chats'
 	})
 }));
 
@@ -100,7 +110,6 @@ export const mockedGetImageURL: jest.Mock = jest.fn();
 export const mockedGetImageThumbnailURL: jest.Mock = jest.fn();
 export const mockedGetPdfURL: jest.Mock = jest.fn();
 export const mockedGetPdfThumbnailURL: jest.Mock = jest.fn();
-
 export const mockedDeleteRoomMemberRequest: jest.Mock = jest.fn();
 export const mockedPromoteRoomMemberRequest: jest.Mock = jest.fn();
 export const mockedDemotesRoomMemberRequest: jest.Mock = jest.fn();

@@ -6,7 +6,7 @@
 
 import { Button, Container, Portal } from '@zextras/carbonio-design-system';
 import { useCurrentRoute } from '@zextras/carbonio-shell-ui';
-import { map, remove, size } from 'lodash';
+import { find, map, remove, size } from 'lodash';
 import React, { ReactElement, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -46,8 +46,16 @@ const MeetingNotificationsHandler = (): ReactElement => {
 	);
 
 	const removeNotificationFromMeetingEvent = useCallback(
-		({ detail: meetingEvent }) => removeNotification(meetingEvent.id),
-		[removeNotification]
+		({ detail: meetingEvent }) => {
+			const notificationToRemove = find(
+				notificationArray,
+				(notification) => notification.meetingId === meetingEvent.meetingId
+			);
+			if (notificationToRemove) {
+				removeNotification(notificationToRemove.id);
+			}
+		},
+		[notificationArray, removeNotification]
 	);
 
 	useEventListener(EventName.INCOMING_MEETING, addNotification);
@@ -57,7 +65,13 @@ const MeetingNotificationsHandler = (): ReactElement => {
 	const notificationComponents = useMemo(
 		() =>
 			map(notificationArray, (notification) => (
-				<MeetingNotification event={notification} removeNotification={removeNotification} />
+				<MeetingNotification
+					key={notification.id}
+					id={notification.id}
+					from={notification.from}
+					roomId={notification.roomId}
+					removeNotification={removeNotification}
+				/>
 			)),
 		[notificationArray, removeNotification]
 	);
@@ -76,6 +90,7 @@ const MeetingNotificationsHandler = (): ReactElement => {
 				height="fit"
 				padding={{ top: '4.75rem', right: '1rem' }}
 				gap="1rem"
+				data-testid="incoming_call_notification_portal"
 			>
 				{size(notificationArray) > 1 && (
 					<Button color="secondary" label={declineAllLabel} onClick={declineAll} width="fill" />

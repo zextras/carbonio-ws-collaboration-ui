@@ -22,19 +22,14 @@ import { UsersApi } from '../../network';
 import { getXmppClient } from '../../store/selectors/ConnectionSelector';
 import { getUserName, getUserPictureUpdatedAt } from '../../store/selectors/UsersSelectors';
 import useStore from '../../store/Store';
-import { MeetingCreatedEvent } from '../../types/network/websocket/wsMeetingEvents';
 import meetingNotificationRingMp3 from '../assets/meeting-notification-sound.mp3';
 import meetingNotificationRingOgg from '../assets/meeting-notification-sound.ogg';
-
-type MeetingNotificationProps = {
-	event: MeetingCreatedEvent;
-	removeNotification: (notificationId: string) => void;
-};
 
 const NotificationContainer = styled(Container)`
 	box-shadow: 0px 0px 4px rgba(166, 166, 166, 0.5);
 	border-radius: 4px;
-	max-width: 20rem;
+	min-width: 20rem;
+	max-width: 25rem;
 `;
 
 const CustomText = styled(Text)`
@@ -44,16 +39,25 @@ const CustomText = styled(Text)`
 const CustomTooltip = styled(Tooltip)`
 	z-index: 99999;
 `;
+
+type MeetingNotificationProps = {
+	id: string;
+	from: string;
+	roomId: string;
+	removeNotification: (notificationId: string) => void;
+};
 const MeetingNotification = ({
-	event,
+	id,
+	from,
+	roomId,
 	removeNotification
 }: MeetingNotificationProps): ReactElement => {
 	const xmppClient = useStore(getXmppClient);
-	const userName: string = useStore((store) => getUserName(store, event.from)) || '';
+	const userName: string = useStore((store) => getUserName(store, from)) || '';
 	const userPictureUpdatedAt: string | undefined = useStore((state) =>
-		getUserPictureUpdatedAt(state, event.from)
+		getUserPictureUpdatedAt(state, from)
 	);
-	const meeting = useStore((store) => store.meetings[event.roomId]);
+	const meeting = useStore((store) => store.meetings[roomId]);
 
 	const [t] = useTranslation();
 	const userIsInvitingYouLabel = (
@@ -86,9 +90,9 @@ const MeetingNotification = ({
 	// Remove notification if meeting is deleted from store
 	useEffect(() => {
 		if (!meeting) {
-			removeNotification(event.id);
+			removeNotification(id);
 		}
-	}, [event.id, meeting, removeNotification]);
+	}, [id, meeting, removeNotification]);
 
 	const onTextChange = useCallback((e) => setMessage(e.currentTarget.value.trim()), []);
 
@@ -96,25 +100,29 @@ const MeetingNotification = ({
 
 	const sendMessage = useCallback(() => {
 		if (!disableSendMessage) {
-			xmppClient.sendChatMessage(event.roomId, message);
+			xmppClient.sendChatMessage(roomId, message);
 			setMessage('');
 		}
-	}, [disableSendMessage, event.roomId, message, xmppClient]);
+	}, [disableSendMessage, roomId, message, xmppClient]);
 
-	const declineMeeting = useCallback(
-		() => removeNotification(event.id),
-		[event.id, removeNotification]
-	);
+	const declineMeeting = useCallback(() => removeNotification(id), [id, removeNotification]);
 
 	const joinMeeting = useCallback(() => {
-		window.open(`external/${event.roomId}`);
-		removeNotification(event.id);
-	}, [event, removeNotification]);
+		window.open(`external/${roomId}`);
+		removeNotification(id);
+	}, [id, removeNotification, roomId]);
 
-	const picture = useMemo(() => UsersApi.getURLUserPicture(event.from), [event.from]);
+	const picture = useMemo(() => UsersApi.getURLUserPicture(from), [from]);
 
 	return (
-		<NotificationContainer width="fill" height="fill" background="gray6" padding="1rem" gap="1rem">
+		<NotificationContainer
+			data-testid="incoming_call_notification"
+			width="fill"
+			height="fill"
+			background="gray6"
+			padding="1rem"
+			gap="1rem"
+		>
 			<Container gap="0.5rem">
 				<Avatar
 					size="large"
