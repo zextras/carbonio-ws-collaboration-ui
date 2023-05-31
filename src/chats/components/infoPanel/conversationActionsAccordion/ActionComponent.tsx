@@ -48,6 +48,7 @@ const CustomContainer = styled(Container)`
 
 const CustomActionContainer = styled(Container)`
 	padding-right: 0.5rem;
+	pointer-events: auto;
 `;
 
 type ActionProps = {
@@ -57,6 +58,7 @@ type ActionProps = {
 	padding: { top?: string; bottom?: string };
 	withArrow?: boolean;
 	action: () => void;
+	actionTestId?: string;
 };
 
 const ActionComponent: FC<ActionProps> = ({
@@ -65,7 +67,8 @@ const ActionComponent: FC<ActionProps> = ({
 	label,
 	padding,
 	withArrow,
-	action
+	action,
+	actionTestId
 }) => (
 	<CustomActionContainer padding={padding} data-testid="action">
 		<ActionContainer
@@ -77,6 +80,7 @@ const ActionComponent: FC<ActionProps> = ({
 			<CustomContainer orientation="horizontal" mainAlignment="flex-start">
 				<Row>
 					<CustomIconButton
+						data-testid={actionTestId || 'action-button'}
 						icon={icon}
 						iconColor="gray6"
 						size="medium"

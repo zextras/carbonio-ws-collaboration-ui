@@ -4,11 +4,16 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 
 import Conversation from './Conversation';
-import { mockUseMediaQueryCheck } from '../../../../jest-mocks';
+import {
+	mockedDeleteRoomMemberRequest,
+	mockGoToMainPage,
+	mockUseMediaQueryCheck
+} from '../../../../jest-mocks';
 import useStore from '../../../store/Store';
 import { createMockMember, createMockRoom } from '../../../tests/createMock';
 import { setup } from '../../../tests/test-utils';
@@ -20,7 +25,22 @@ const testRoom: RoomBe = createMockRoom({
 	name: 'Name of the group',
 	description: 'A description',
 	type: RoomType.GROUP,
-	members: [createMockMember({ userId: 'user1' }), createMockMember({ userId: 'user2' })],
+	members: [
+		createMockMember({ userId: 'user1' }),
+		createMockMember({ userId: 'user2', owner: true })
+	],
+	userSettings: { muted: false }
+});
+
+const testRoom2: RoomBe = createMockRoom({
+	id: 'room-test-two',
+	name: 'Another group',
+	description: 'A description',
+	type: RoomType.GROUP,
+	members: [
+		createMockMember({ userId: 'user1', owner: true }),
+		createMockMember({ userId: 'user2' })
+	],
 	userSettings: { muted: false }
 });
 
@@ -75,5 +95,29 @@ describe('Conversation view', () => {
 		expect(roomName).toBeInTheDocument();
 		const roomDescription = screen.getByText(/A description/i);
 		expect(roomDescription).toBeInTheDocument();
+	});
+	test('Leave a group and check everything is shown correctly', async () => {
+		// jest.spyOn(console, 'error').mockImplementation();
+		mockUseMediaQueryCheck.mockReturnValue(true);
+		const store = useStore.getState();
+		store.addRoom(testRoom);
+		store.addRoom(testRoom2);
+		store.setLoginInfo(user1Info.id, user1Info.email, user1Info.name);
+		store.setUserInfo(user2Info);
+		mockedDeleteRoomMemberRequest.mockReturnValueOnce('you left the conversation');
+		mockGoToMainPage.mockReturnValueOnce('main page');
+		const { user } = setup(<Conversation room={testRoom} />);
+		expect(screen.getByText(/Leave Group/i)).toBeInTheDocument();
+		await user.click(screen.getByText(/Leave Group/i));
+		const leaveModal = screen.getByTestId('leave_modal');
+		expect(leaveModal).toBeInTheDocument();
+		const button = await screen.findByRole('button', { name: 'Leave' });
+		await waitFor(() => {
+			act(() => {
+				user.click(button);
+			});
+		});
+		expect(mockedDeleteRoomMemberRequest).toHaveBeenCalledTimes(1);
+		expect(mockGoToMainPage).toHaveBeenCalledTimes(1);
 	});
 });
