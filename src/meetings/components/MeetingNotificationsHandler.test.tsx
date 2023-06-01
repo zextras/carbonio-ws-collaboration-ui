@@ -52,7 +52,7 @@ describe('MeetingNotificationsHandler', () => {
 		expect(notifications).not.toBeInTheDocument();
 	});
 
-	test('An notification is rendered when a MeetingCreatedEvent is received', () => {
+	test('A notification is rendered when a MeetingCreatedEvent is received', () => {
 		setup(<MeetingNotificationsHandler />);
 		addIncomingMeetingNotification(room, meeting);
 		expect(screen.getByTestId('incoming_call_notification_portal')).toBeInTheDocument();

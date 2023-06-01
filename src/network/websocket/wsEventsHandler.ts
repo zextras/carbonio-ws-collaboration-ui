@@ -140,8 +140,8 @@ export function wsEventsHandler(event: WsEvent): void {
 
 				// Send custom event to open an incoming meeting notification
 				const room = state.rooms[event.roomId];
-				const iStartedTheMeeting = event.from === state.session.id;
-				if (room?.type === RoomType.ONE_TO_ONE && !iStartedTheMeeting) {
+				const isMeetingStartedByMe = event.from === state.session.id;
+				if (room?.type === RoomType.ONE_TO_ONE && !isMeetingStartedByMe) {
 					sendCustomEvent({ name: EventName.INCOMING_MEETING, data: event });
 				}
 			}
