@@ -97,7 +97,6 @@ describe('Conversation view', () => {
 		expect(roomDescription).toBeInTheDocument();
 	});
 	test('Leave a group and check everything is shown correctly', async () => {
-		// jest.spyOn(console, 'error').mockImplementation();
 		mockUseMediaQueryCheck.mockReturnValue(true);
 		const store = useStore.getState();
 		store.addRoom(testRoom);
