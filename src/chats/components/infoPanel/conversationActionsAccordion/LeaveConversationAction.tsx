@@ -82,6 +82,7 @@ const LeaveConversationAction: FC<LeaveProps> = ({
 				withArrow
 				action={(): void => setLeaveConversationModalOpen(true)}
 				isInsideMeeting={isInsideMeeting}
+				actionTestId="leaveAction"
 			/>
 			{leaveConversationModalOpen && (
 				<LeaveConversationModal

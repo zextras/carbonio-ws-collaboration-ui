@@ -112,7 +112,7 @@ describe('Leave conversation Action', () => {
 		user.click(button);
 		await waitFor(() => expect(mockGoToMainPage).toBeCalled());
 
-		// if i leave a group, that group will not be defined for me
+		// if I leave a group, that group will not be defined for me
 		expect(result.current.rooms[mockedRoom.id]).not.toBeDefined();
 	});
 });
