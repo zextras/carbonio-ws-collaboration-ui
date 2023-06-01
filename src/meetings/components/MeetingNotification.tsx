@@ -22,11 +22,9 @@ import { UsersApi } from '../../network';
 import { getXmppClient } from '../../store/selectors/ConnectionSelector';
 import { getUserName, getUserPictureUpdatedAt } from '../../store/selectors/UsersSelectors';
 import useStore from '../../store/Store';
-import meetingNotificationRingMp3 from '../assets/meeting-notification-sound.mp3';
-import meetingNotificationRingOgg from '../assets/meeting-notification-sound.ogg';
 
 const NotificationContainer = styled(Container)`
-	box-shadow: 0px 0px 4px rgba(166, 166, 166, 0.5);
+	box-shadow: 0px 0px 0.25rem rgba(166, 166, 166, 0.5);
 	border-radius: 4px;
 	min-width: 20rem;
 	max-width: 25rem;
@@ -45,12 +43,14 @@ type MeetingNotificationProps = {
 	from: string;
 	roomId: string;
 	removeNotification: (notificationId: string) => void;
+	stopMeetingSound: () => void;
 };
 const MeetingNotification = ({
 	id,
 	from,
 	roomId,
-	removeNotification
+	removeNotification,
+	stopMeetingSound
 }: MeetingNotificationProps): ReactElement => {
 	const xmppClient = useStore(getXmppClient);
 	const userName: string = useStore((store) => getUserName(store, from)) || '';
@@ -80,12 +80,6 @@ const MeetingNotification = ({
 	const activeSendTooltip = t('meeting.newMeetingNotification.sendMessage', 'Send message');
 
 	const [message, setMessage] = useState('');
-	const [meetingSound, setMeetingSound] = useState(true);
-
-	useEffect(() => {
-		const soundTimeout = setTimeout(() => setMeetingSound(false), 10000);
-		return () => clearTimeout(soundTimeout);
-	}, []);
 
 	// Remove notification if meeting is deleted from store
 	useEffect(() => {
@@ -94,16 +88,17 @@ const MeetingNotification = ({
 		}
 	}, [id, meeting, removeNotification]);
 
-	const onTextChange = useCallback((e) => setMessage(e.currentTarget.value.trim()), []);
+	const onTextChange = useCallback((e) => setMessage(e.currentTarget.value), []);
 
-	const disableSendMessage = useMemo(() => size(message) === 0, [message]);
+	const disableSendMessage = useMemo(() => size(message.trim()) === 0, [message]);
 
 	const sendMessage = useCallback(() => {
 		if (!disableSendMessage) {
 			xmppClient.sendChatMessage(roomId, message);
 			setMessage('');
+			stopMeetingSound();
 		}
-	}, [disableSendMessage, roomId, message, xmppClient]);
+	}, [disableSendMessage, xmppClient, roomId, message, stopMeetingSound]);
 
 	const declineMeeting = useCallback(() => removeNotification(id), [id, removeNotification]);
 
@@ -154,13 +149,6 @@ const MeetingNotification = ({
 				<Button width="fill" label={declineLabel} color="secondary" onClick={declineMeeting} />
 				<Button width="fill" label={joinMeetingLabel} onClick={joinMeeting} />
 			</Container>
-			{meetingSound && (
-				// eslint-disable-next-line jsx-a11y/media-has-caption
-				<audio autoPlay loop>
-					<source id="src_mp3" type="audio/mp3" src={meetingNotificationRingMp3} />
-					<source id="src_ogg" type="audio/ogg" src={meetingNotificationRingOgg} />
-				</audio>
-			)}
 		</NotificationContainer>
 	);
 };

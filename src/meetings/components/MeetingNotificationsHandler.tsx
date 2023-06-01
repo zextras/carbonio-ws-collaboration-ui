@@ -14,12 +14,26 @@ import styled from 'styled-components';
 import MeetingNotification from './MeetingNotification';
 import useEventListener, { EventName } from '../../hooks/useEventListener';
 import { MeetingCreatedEvent } from '../../types/network/websocket/wsMeetingEvents';
+import meetingNotificationRingMp3 from '../assets/meeting-notification-sound.mp3';
+import meetingNotificationRingOgg from '../assets/meeting-notification-sound.ogg';
 
 const PortalContainer = styled(Container)`
 	position: fixed;
 	z-index: 9999;
 	top: 0;
 	right: 0;
+	max-height: calc(100vh - 1rem);
+`;
+
+const CustomContainer = styled(Container)`
+	justify-content: start;
+	overflow-y: scroll;
+	/* Hide scrollbar for Chrome, Safari and Opera */
+	&::-webkit-scrollbar {
+		display: none;
+	}
+	-ms-overflow-style: none; /* IE and Edge */
+	scrollbar-width: none; /* Firefox */
 `;
 
 const MeetingNotificationsHandler = (): ReactElement => {
@@ -28,22 +42,22 @@ const MeetingNotificationsHandler = (): ReactElement => {
 	const currentRoute = useCurrentRoute();
 
 	const [notificationArray, setNotificationArray] = useState<MeetingCreatedEvent[]>([]);
+	const [meetingSound, setMeetingSound] = useState(true);
 
-	const addNotification = useCallback(
-		({ detail: meetingCreatedEvent }) =>
-			setNotificationArray((prev) => [meetingCreatedEvent, ...prev]),
-		[]
-	);
+	const addNotification = useCallback(({ detail: meetingCreatedEvent }) => {
+		setNotificationArray((prev) => [meetingCreatedEvent, ...prev]);
+		setMeetingSound(true);
+		setTimeout(() => setMeetingSound(false), 12000);
+	}, []);
 
-	const removeNotification = useCallback(
-		(notificationId: string): void =>
-			setNotificationArray((prev: MeetingCreatedEvent[]) => {
-				const notificationArray = [...prev];
-				remove(notificationArray, (notification) => notification.id === notificationId);
-				return notificationArray;
-			}),
-		[]
-	);
+	const removeNotification = useCallback((notificationId: string): void => {
+		setNotificationArray((prev: MeetingCreatedEvent[]) => {
+			const notificationArray = [...prev];
+			remove(notificationArray, (notification) => notification.id === notificationId);
+			return notificationArray;
+		});
+		setMeetingSound(false);
+	}, []);
 
 	const removeNotificationFromMeetingEvent = useCallback(
 		({ detail: meetingEvent }) => {
@@ -53,6 +67,7 @@ const MeetingNotificationsHandler = (): ReactElement => {
 			);
 			if (notificationToRemove) {
 				removeNotification(notificationToRemove.id);
+				setMeetingSound(false);
 			}
 		},
 		[notificationArray, removeNotification]
@@ -71,12 +86,16 @@ const MeetingNotificationsHandler = (): ReactElement => {
 					from={notification.from}
 					roomId={notification.roomId}
 					removeNotification={removeNotification}
+					stopMeetingSound={(): void => setMeetingSound(false)}
 				/>
 			)),
 		[notificationArray, removeNotification]
 	);
 
-	const declineAll = useCallback(() => setNotificationArray([]), []);
+	const declineAll = useCallback(() => {
+		setNotificationArray([]);
+		setMeetingSound(false);
+	}, []);
 
 	const displayPortal = useMemo(
 		() => size(notificationArray) > 0 && currentRoute?.route !== 'external',
@@ -95,7 +114,16 @@ const MeetingNotificationsHandler = (): ReactElement => {
 				{size(notificationArray) > 1 && (
 					<Button color="secondary" label={declineAllLabel} onClick={declineAll} width="fill" />
 				)}
-				{notificationComponents}
+				<CustomContainer width="fit" height="fit" gap="1rem" padding={{ all: '0.25rem' }}>
+					{notificationComponents}
+				</CustomContainer>
+				{meetingSound && size(notificationArray) > 0 && (
+					// eslint-disable-next-line jsx-a11y/media-has-caption
+					<audio autoPlay loop>
+						<source id="src_mp3" type="audio/mp3" src={meetingNotificationRingMp3} />
+						<source id="src_ogg" type="audio/ogg" src={meetingNotificationRingOgg} />
+					</audio>
+				)}
 			</PortalContainer>
 		</Portal>
 	);

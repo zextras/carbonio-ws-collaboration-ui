@@ -31,6 +31,7 @@ describe('MeetingNotification', () => {
 				from={user.id}
 				roomId={room.id}
 				removeNotification={mockRemoveNotification}
+				stopMeetingSound={jest.fn()}
 			/>
 		);
 
@@ -50,6 +51,7 @@ describe('MeetingNotification', () => {
 				from={user.id}
 				roomId={room.id}
 				removeNotification={mockRemoveNotification}
+				stopMeetingSound={jest.fn()}
 			/>
 		);
 		await userEvent.type(screen.getByPlaceholderText('Send a quick message'), 'Hello');
@@ -64,6 +66,7 @@ describe('MeetingNotification', () => {
 				from={user.id}
 				roomId={room.id}
 				removeNotification={mockRemoveNotification}
+				stopMeetingSound={jest.fn()}
 			/>
 		);
 		userEvent.type(screen.getByPlaceholderText('Send a quick message'), 'Hello{enter}');
@@ -77,6 +80,7 @@ describe('MeetingNotification', () => {
 				from={user.id}
 				roomId={room.id}
 				removeNotification={mockRemoveNotification}
+				stopMeetingSound={jest.fn()}
 			/>
 		);
 		await userEvent.click(screen.getByText('Decline'));
@@ -91,6 +95,7 @@ describe('MeetingNotification', () => {
 				from={user.id}
 				roomId={room.id}
 				removeNotification={mockRemoveNotification}
+				stopMeetingSound={jest.fn()}
 			/>
 		);
 		await userEvent.click(screen.getByText('Join meeting'));
