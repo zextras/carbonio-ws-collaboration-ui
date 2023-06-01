@@ -10,6 +10,11 @@ import React, { FC, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { CustomMessage } from './MessageFactory';
+import { roomMembersLengthFn } from '../../../store/equalityFunctions/RoomsEqualityFunctions';
+import {
+	userNameEqualityFn,
+	usersNameEmailEqualityFn
+} from '../../../store/equalityFunctions/UsersEqualityFunctions';
 import {
 	getRoomMembers,
 	getRoomNameSelector,
@@ -29,12 +34,18 @@ type AffiliationMsgProps = {
 const AffiliationBubble: FC<AffiliationMsgProps> = ({ message, refEl }) => {
 	const [t] = useTranslation();
 
-	const users = useStore(getUsersSelector);
+	const users = useStore(getUsersSelector, usersNameEmailEqualityFn);
 	const roomType = useStore((store) => getRoomTypeSelector(store, message.roomId));
 	const roomName = useStore((store) => getRoomNameSelector(store, message.roomId));
 	const sessionId: string | undefined = useStore((store) => store.session.id);
-	const roomMembers = useStore((store) => getRoomMembers(store, message.roomId));
-	const affiliatedName = useStore((store) => getUserName(store, message.userId));
+	const roomMembers = useStore(
+		(store) => getRoomMembers(store, message.roomId),
+		roomMembersLengthFn
+	);
+	const affiliatedName = useStore(
+		(store) => getUserName(store, message.userId),
+		userNameEqualityFn
+	);
 
 	// id of the users who acts, in this case the one who creates the one-to-one conversation
 	const actionMemberId = useMemo(() => {

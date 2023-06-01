@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import RoomPictureHandler from './RoomPictureHandler';
+import { roomMembersLengthFn } from '../../../store/equalityFunctions/RoomsEqualityFunctions';
 import { getRoomMembers } from '../../../store/selectors/RoomsSelectors';
 import useStore from '../../../store/Store';
 import { Member, RoomType } from '../../../types/store/RoomTypes';
@@ -34,7 +35,10 @@ const ConversationInfo: FC<ConversationInfoProps> = ({ roomId, roomType, setInfo
 	const infoLabel = t('conversationInfo.info', 'Info');
 
 	const sessionId: string | undefined = useStore((store) => store.session.id);
-	const roomMembers: Member[] | undefined = useStore((state) => getRoomMembers(state, roomId));
+	const roomMembers: Member[] | undefined = useStore(
+		(state) => getRoomMembers(state, roomId),
+		roomMembersLengthFn
+	);
 	const isDesktopView = useMediaQueryCheck();
 
 	const memberId: string = useMemo(() => {
