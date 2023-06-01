@@ -61,6 +61,7 @@ const LeaveConversationAction: FC<LeaveProps> = ({ roomId, type, iAmOneOfOwner }
 				label={leaveLabel}
 				withArrow
 				action={(): void => setLeaveConversationModalOpen(true)}
+				actionTestId="leaveAction"
 			/>
 			{leaveConversationModalOpen && (
 				<LeaveConversationModal
