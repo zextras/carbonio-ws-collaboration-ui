@@ -4,7 +4,15 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Container, IconButton, Padding, Text, Icon, Row } from '@zextras/carbonio-design-system';
+import {
+	Container,
+	IconButton,
+	Padding,
+	Text,
+	Icon,
+	Row,
+	Tooltip
+} from '@zextras/carbonio-design-system';
 import React, { FC } from 'react';
 import styled from 'styled-components';
 
@@ -58,6 +66,9 @@ type ActionProps = {
 	padding: { top?: string; bottom?: string };
 	withArrow?: boolean;
 	action: () => void;
+	isDisabled?: boolean;
+	disabledTooltip?: string;
+	idComponent?: string;
 	actionTestId?: string;
 };
 
@@ -68,34 +79,51 @@ const ActionComponent: FC<ActionProps> = ({
 	padding,
 	withArrow,
 	action,
+	isDisabled,
+	disabledTooltip,
+	idComponent,
 	actionTestId
 }) => (
-	<CustomActionContainer padding={padding} data-testid="action">
-		<ActionContainer
-			orientation="horizontal"
-			width="fill"
-			actionColor={actionColor}
-			onClick={action}
-		>
-			<CustomContainer orientation="horizontal" mainAlignment="flex-start">
-				<Row>
-					<CustomIconButton
-						data-testid={actionTestId || 'action-button'}
-						icon={icon}
-						iconColor="gray6"
+	<Tooltip disabled={!isDisabled} label={disabledTooltip}>
+		<CustomActionContainer padding={padding} data-testid="action">
+			<ActionContainer
+				data-testid={idComponent || 'action'}
+				orientation="horizontal"
+				width="fill"
+				actionColor={actionColor}
+				onClick={!isDisabled ? action : null}
+				disabled={isDisabled}
+			>
+				<CustomContainer orientation="horizontal" mainAlignment="flex-start">
+					<Row>
+						<CustomIconButton
+							data-testid={actionTestId || 'action-button'}
+							icon={icon}
+							iconColor="gray6"
+							size="medium"
+							backgroundColor={actionColor}
+							onClick={action}
+							disabled={isDisabled}
+						/>
+						<Padding right="large" />
+					</Row>
+					<Row takeAvailableSpace mainAlignment="flex-start">
+						<CustomText color={actionColor} disabled={isDisabled}>
+							{label}
+						</CustomText>
+					</Row>
+				</CustomContainer>
+				{withArrow && (
+					<CustomIcon
+						disabled={isDisabled}
+						icon="ArrowIosForwardOutline"
+						color={actionColor}
 						size="medium"
-						backgroundColor={actionColor}
-						onClick={action}
 					/>
-					<Padding right="large" />
-				</Row>
-				<Row takeAvailableSpace mainAlignment="flex-start">
-					<CustomText color={actionColor}>{label}</CustomText>
-				</Row>
-			</CustomContainer>
-			{withArrow && <CustomIcon icon="ArrowIosForwardOutline" color={actionColor} size="medium" />}
-		</ActionContainer>
-	</CustomActionContainer>
+				)}
+			</ActionContainer>
+		</CustomActionContainer>
+	</Tooltip>
 );
 
 export default ActionComponent;

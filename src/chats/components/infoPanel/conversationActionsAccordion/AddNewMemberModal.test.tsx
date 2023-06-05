@@ -61,7 +61,7 @@ describe('Add new Member Modal', () => {
 		const checkboxIcon2 = screen.getByTestId('icon: CheckmarkSquare');
 		expect(checkboxIcon2).toBeInTheDocument();
 	});
-	test('Everitnihg should be rendered - checkbox not selected', async () => {
+	test('Everything should be rendered - checkbox not selected', async () => {
 		mockedAutoCompleteGalRequest.mockReturnValue([]);
 		const store: RootStore = useStore.getState();
 		store.addRoom(testRoom);

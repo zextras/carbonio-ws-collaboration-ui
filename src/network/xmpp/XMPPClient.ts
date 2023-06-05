@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { find, forEach } from 'lodash';
 import { Strophe, $pres, $iq, $msg, StropheConnection, StropheConnectionStatus } from 'strophe.js';
 import { v4 as uuidGenerator } from 'uuid';
 
@@ -35,6 +36,8 @@ class XMPPClient implements IXMPPClient {
 	private connection: StropheConnection;
 
 	private connectionStatus: StropheConnectionStatus | undefined;
+
+	private requestsQueue: RequestType[] = [];
 
 	constructor() {
 		// Init XMPP connection
@@ -154,6 +157,10 @@ class XMPPClient implements IXMPPClient {
 		this.setOnline();
 
 		this.setInbox();
+
+		// Send history queued requests
+		forEach(this.requestsQueue, ({ iq, callback }) => this.connection.sendIQ(iq, callback));
+		this.requestsQueue = [];
 	}
 
 	/**
@@ -296,36 +303,40 @@ class XMPPClient implements IXMPPClient {
 
 	// Request n messages before end date but not before start date
 	requestHistory(roomId: string, endHistory: number, quantity = 5): void {
+		const clearedAt = useStore.getState().rooms[roomId].userSettings?.clearedAt;
+		const startHistory = clearedAt || useStore.getState().rooms[roomId].createdAt;
+		console.log('History conversation request triggered');
+		// Ask for ${QUANTITY} messages before end date but not before start date
+		const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
+			.c('query', { xmlns: Strophe.NS.MAM, queryid: MamRequestType.HISTORY })
+			.c('x', { type: 'submit' })
+			.c('field', { var: 'FORM_TYPE', type: 'hidden' })
+			.c('value')
+			.t('urn:xmpp:mam:2')
+			.up()
+			.up()
+			.c('field', { var: 'start' })
+			.c('value')
+			.t(dateToISODate(startHistory))
+			.up()
+			.up()
+			.c('field', { var: 'end' })
+			.c('value')
+			.t(dateToISODate(endHistory))
+			.up()
+			.up()
+			.up()
+			.c('set', { xmlns: 'http://jabber.org/protocol/rsm' })
+			.c('max')
+			.t(quantity)
+			.up()
+			.c('before');
 		if (this.connection && this.connection.connected) {
-			const clearedAt = useStore.getState().rooms[roomId].userSettings?.clearedAt;
-			const startHistory = clearedAt || useStore.getState().rooms[roomId].createdAt;
-			console.log('History conversation request triggered');
-			// Ask for ${QUANTITY} messages before end date but not before start date
-			const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
-				.c('query', { xmlns: Strophe.NS.MAM, queryid: MamRequestType.HISTORY })
-				.c('x', { type: 'submit' })
-				.c('field', { var: 'FORM_TYPE', type: 'hidden' })
-				.c('value')
-				.t('urn:xmpp:mam:2')
-				.up()
-				.up()
-				.c('field', { var: 'start' })
-				.c('value')
-				.t(dateToISODate(startHistory))
-				.up()
-				.up()
-				.c('field', { var: 'end' })
-				.c('value')
-				.t(dateToISODate(endHistory))
-				.up()
-				.up()
-				.up()
-				.c('set', { xmlns: 'http://jabber.org/protocol/rsm' })
-				.c('max')
-				.t(quantity)
-				.up()
-				.c('before');
 			this.connection.sendIQ(iq, onRequestHistory.bind(this), onErrorStanza);
+		}
+		// If XMPP is offline, save request to perform it later
+		else if (!find(this.requestsQueue, (request) => request.roomId === roomId)) {
+			this.requestsQueue.push({ iq, callback: onRequestHistory.bind(this), roomId });
 		}
 	}
 
@@ -449,3 +460,9 @@ class XMPPClient implements IXMPPClient {
 }
 
 export default XMPPClient;
+
+type RequestType = {
+	iq: Element;
+	callback: (stanza: Element) => void;
+	roomId: string;
+};
