@@ -6,7 +6,7 @@
 
 import { size } from 'lodash';
 
-import { Room } from '../../types/store/RoomTypes';
+import { Member, Room } from '../../types/store/RoomTypes';
 
 export const roomMainInfoEqualityFn = (oldState: Room, newState: Room): boolean =>
 	oldState?.name === newState?.name &&
@@ -17,6 +17,11 @@ export const roomMainInfoEqualityFn = (oldState: Room, newState: Room): boolean 
 export const roomNameEqualityFn = (oldState: string, newState: string): boolean =>
 	oldState === newState;
 
+export const roomMembersLengthFn = (
+	oldState: Member[] | undefined,
+	newState: Member[] | undefined
+): boolean => size(oldState) === size(newState);
+
 export const roomsListLengthEqualityFn = (
 	oldState: Record<number, string>,
 	newState: Record<number, string>
@@ -26,3 +31,6 @@ export const roomMessagesEqualityFn = (
 	oldState: Record<any, any>,
 	newState: Record<any, any>
 ): boolean => oldState.length === newState.length;
+
+export const roomHasMoreThanTwoOwnerEqualityFn = (oldState: number, newState: number): boolean =>
+	newState > 2;
