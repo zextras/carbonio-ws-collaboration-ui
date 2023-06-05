@@ -35,7 +35,7 @@ export type TextMessage = BasicMessage & {
 	deleted?: boolean;
 	replyTo?: string;
 	repliedMessage?: TextMessage;
-	forwarded?: ForwardedMessage;
+	forwarded?: ForwardedInfo;
 	attachment?: AttachmentMessageType;
 };
 
@@ -75,12 +75,11 @@ export enum MessageType {
 	FASTENING = 'fastening'
 }
 
-export type ForwardedMessage = {
+export type ForwardedInfo = {
 	id: string;
 	date: number;
 	from: string;
-	text: string;
-	attachment?: AttachmentMessageType;
+	count: number;
 };
 
 export type AttachmentMessageType = {

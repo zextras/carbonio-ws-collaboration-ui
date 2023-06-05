@@ -13,13 +13,13 @@ import styled from 'styled-components';
 import { getPrefTimezoneSelector } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { MarkerStatus } from '../../../types/store/MarkersTypes';
-import { ForwardedMessage } from '../../../types/store/MessageTypes';
+import { ForwardedInfo } from '../../../types/store/MessageTypes';
 
 type BubbleFooterProps = {
 	date: number;
 	isMyMessage?: boolean;
 	messageRead?: MarkerStatus;
-	forwarded?: ForwardedMessage;
+	forwarded?: ForwardedInfo;
 	dateAndTime?: boolean;
 	messageType?: string;
 	messageExtension?: string;

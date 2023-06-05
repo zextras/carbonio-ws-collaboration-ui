@@ -22,7 +22,7 @@ import useStore from '../../../store/Store';
 import { find, forEach, size } from 'lodash';
 import { Marker, MarkerStatus, RoomMarkers } from '../../../types/store/MarkersTypes';
 import { Member } from '../../../types/store/RoomTypes';
-import { getRequiredAttribute, getRequiredTagElement, getTagElement } from './decodeStanza';
+import {getAttribute, getRequiredAttribute, getRequiredTagElement, getTagElement} from './decodeStanza';
 
 type OptionalParameters = {
 	date?: number;
@@ -132,6 +132,24 @@ export function decodeXMPPMessageStanza(messageStanza: Element, optional?: Optio
 			replyTo = getRequiredAttribute(replyElement, 'id');
 		}
 
+		// Message is a forwarded message from another conversation
+		let forwarded;
+		const forwardedElement = messageStanza.getElementsByTagName('forwarded')[0];
+		if (forwardedElement) {
+			console.log(messageStanza)
+			const forwardCount = getAttribute(forwardedElement, 'count') || '1';
+			const delayElement = getRequiredTagElement(forwardedElement, 'delay');
+			const forwardedMessageElement = getRequiredTagElement(forwardedElement, 'message');
+			messageTxt = decode(getRequiredTagElement(forwardedMessageElement, 'body').textContent || '');
+
+			forwarded = {
+				id: getRequiredAttribute(forwardedMessageElement, 'id'),
+				date: dateToTimestamp(getRequiredAttribute(delayElement, 'stamp')),
+				from: getId(getResource(getRequiredAttribute(forwardedMessageElement, 'from'))),
+				count: parseInt(forwardCount)
+			}
+		}
+
 		// Message has an attachment
 		let attachment;
 		if (x && x.getAttribute('xmlns') === Strophe.NS.CONFIGURATION) {
@@ -153,42 +171,6 @@ export function decodeXMPPMessageStanza(messageStanza: Element, optional?: Optio
 			}
 		}
 
-
-		// Message is a forwarded message from another conversation
-		let forwarded;
-		const forwardedElement = messageStanza.getElementsByTagName('forwarded')[0];
-		if (forwardedElement) {
-			const forwardedMessageElement = getRequiredTagElement(forwardedElement, 'message');
-			const delayElement = getRequiredTagElement(forwardedElement, 'delay');
-			let forwardedTextMessage = decode(getRequiredTagElement(forwardedMessageElement, 'body').textContent || '');
-			// Attachment forwarded decoding
-			let forwardedAttachment;
-			const x = getTagElement(messageStanza, 'x');
-			if (x && x.getAttribute('xmlns') === Strophe.NS.CONFIGURATION) {
-				const operation = Strophe.getText(getRequiredTagElement(x, 'operation'));
-				if (operation === 'attachmentAdded') {
-					const attachmentId = Strophe.getText(getRequiredTagElement(x, 'attachment-id'));
-					const filename = getRequiredTagElement(x, 'filename').textContent;
-					const fileMimeType = Strophe.getText(getRequiredTagElement(x, 'mime-type'));
-					const fileSize = Strophe.getText(getRequiredTagElement(x, 'size'));
-					forwardedAttachment =  {
-						id: attachmentId,
-						name: decodeURIComponent(filename || ""),
-						mimeType: fileMimeType || "",
-						size: fileSize || 0
-					}
-					forwardedTextMessage = decodeURIComponent(forwardedTextMessage)
-				}
-			}
-			forwarded = {
-				id: getRequiredAttribute(forwardedMessageElement, 'id'),
-				date: dateToTimestamp(getRequiredAttribute(delayElement, 'stamp')),
-				from: getId(getResource(getRequiredAttribute(forwardedMessageElement, 'from'))),
-				text: forwardedTextMessage,
-				attachment: forwardedAttachment
-			}
-		}
-
 		const message: TextMessage = {
 			id: messageId,
 			stanzaId,
@@ -200,20 +182,13 @@ export function decodeXMPPMessageStanza(messageStanza: Element, optional?: Optio
 			read: calcReads(messageDate, roomId),
 			replyTo,
 			edited: false,
-			forwarded,
+			forwarded: forwarded,
 			attachment
 		};
-
-		// Special case: if a message has a forwarded attachment, we have to remove the attachment from the message
-		if (message.forwarded?.attachment) {
-			message.attachment = undefined;
-		}
 
 		// Special case: if the forwarded message is from the same person that forward the message,
 		// the message is seen as a normal message and not a forwarded one
 		if (message.from === message.forwarded?.from) {
-			message.text = message.forwarded.text;
-			message.attachment = message.forwarded.attachment;
 			message.forwarded = undefined;
 		}
 
