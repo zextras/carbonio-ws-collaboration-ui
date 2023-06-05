@@ -92,6 +92,7 @@ export const ActionsAccordion: FC<ActionAccordionProps> = ({ roomId, isInsideMee
 						roomId={roomId}
 						iAmTheOnlyOwner={iAmOwner && numberOfOwners === 1}
 						isInsideMeeting={isInsideMeeting}
+						emptyRoom={emptyRoom}
 					/>
 				)
 			});

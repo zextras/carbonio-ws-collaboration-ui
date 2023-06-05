@@ -25,12 +25,14 @@ type AddNewMemberProps = {
 	roomId: string;
 	isInsideMeeting?: boolean;
 	iAmTheOnlyOwner?: boolean;
+	emptyRoom?: boolean;
 };
 
 const AddNewMemberAction: FC<AddNewMemberProps> = ({
 	roomId,
 	isInsideMeeting,
-	iAmTheOnlyOwner
+	iAmTheOnlyOwner,
+	emptyRoom
 }) => {
 	const [t] = useTranslation();
 	const addNewMemberTitle: string = t('action.addNewMembers', `Add new members`);
@@ -50,8 +52,10 @@ const AddNewMemberAction: FC<AddNewMemberProps> = ({
 
 	const padding = useMemo(
 		() =>
-			isInsideMeeting && iAmTheOnlyOwner ? { top: 'small', bottom: 'large' } : { top: 'small' },
-		[isInsideMeeting, iAmTheOnlyOwner]
+			isInsideMeeting && iAmTheOnlyOwner && emptyRoom
+				? { top: 'small', bottom: 'large' }
+				: { top: 'small' },
+		[isInsideMeeting, iAmTheOnlyOwner, emptyRoom]
 	);
 
 	const closeModal = useCallback(() => {

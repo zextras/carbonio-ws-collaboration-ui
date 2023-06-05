@@ -24,7 +24,7 @@ const LazyMeetingSidebar = lazy(
 const LazyMeetingStreamsWrapper = lazy(
 	() =>
 		import(
-			/* webpackChunkName: "MeetingSidebar" */ '../components/MeetingStreamsWrapper/MeetingStreamsWrapper'
+			/* webpackChunkName: "MeetingStreamsWrapper" */ '../components/MeetingStreamsWrapper/MeetingStreamsWrapper'
 		)
 );
 
