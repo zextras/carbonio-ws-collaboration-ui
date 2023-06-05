@@ -4,16 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import {
-	ChipInput,
-	Padding,
-	Text,
-	Row,
-	Avatar,
-	List,
-	Container,
-	Checkbox
-} from '@zextras/carbonio-design-system';
+import { ChipInput, Container, List, Padding, Text } from '@zextras/carbonio-design-system';
 import { Spinner } from '@zextras/carbonio-shell-ui';
 import {
 	debounce,
@@ -41,13 +32,16 @@ import React, {
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
+import ListParticipant from './ListParticipant';
 import {
 	autoCompleteGalRequest,
 	AutoCompleteGalResponse,
 	ContactMatch
 } from '../../network/soap/AutoCompleteRequest';
+import { getCapability } from '../../store/selectors/SessionSelectors';
 import useStore from '../../store/Store';
 import { Member } from '../../types/store/RoomTypes';
+import { CapabilityType } from '../../types/store/SessionTypes';
 
 const CustomContainer = styled(Container)`
 	cursor: default;
@@ -57,7 +51,7 @@ type ChatCreationContactsSelectionProps = {
 	contactsSelected: ContactSelected;
 	setContactSelected: Dispatch<SetStateAction<ContactSelected>>;
 	isCreationModal?: boolean;
-	members?: Member[] | undefined;
+	members?: Member[];
 };
 
 const ChatCreationContactsSelection = ({
@@ -73,8 +67,20 @@ const ChatCreationContactsSelection = ({
 		'modal.creation.contactList',
 		'Select more than an address to create a Group'
 	);
+	const addUserLimitReachedLabel = t(
+		'modal.creation.addUserLimit.limitReached',
+		'You have selected the maximum number of members for a group'
+	);
 
 	const inputRef = useRef<HTMLInputElement>(null);
+
+	const maxMembers = useStore((store) => getCapability(store, CapabilityType.MAX_GROUP_MEMBERS));
+
+	const maxGroupMembers = useMemo(
+		() => (isCreationModal && typeof maxMembers === 'number' ? maxMembers - 1 : maxMembers),
+		[isCreationModal, maxMembers]
+	);
+
 	const [result, setResult] = useState<ContactMatch[]>([]);
 	const [chips, setChips] = useState<ChipInfo[]>([]);
 	const [loading, setLoading] = useState<boolean>(false);
@@ -182,36 +188,33 @@ const ChatCreationContactsSelection = ({
 		[setContactSelected]
 	);
 
+	const chipInputHasError = useMemo(
+		() =>
+			isCreationModal
+				? typeof maxGroupMembers === 'number' && maxGroupMembers <= size(contactsSelected)
+				: typeof maxGroupMembers === 'number' &&
+				  maxGroupMembers - size(members) <= size(contactsSelected),
+		[isCreationModal, contactsSelected, maxGroupMembers, members]
+	);
+
 	const ListItem = useMemo(
 		() =>
 			// eslint-disable-next-line react/display-name
-			({ item, selected }: { item: ContactInfo; selected: boolean }) =>
-				(
-					<Padding vertical="small">
-						<Container
-							onClick={onClickListItem(item)}
-							orientation="horizontal"
-							mainAlignment="flex-start"
-							width="fill"
-						>
-							<Row>
-								<Checkbox value={selected} />
-								<Padding horizontal="small">
-									<Avatar label={item.name} />
-								</Padding>
-								<Container crossAlignment="flex-start" width="fit">
-									<Text size="small">{item.name}</Text>
-									<Padding top="extrasmall" />
-									<Text size="extrasmall" color="gray1">
-										{item.email}
-									</Text>
-								</Container>
-							</Row>
-						</Container>
-					</Padding>
-				),
-		// eslint-disable-next-line
-		[]
+			({ item, selected }: { item: ContactInfo; selected: boolean }) => {
+				const clickCb =
+					(chipInputHasError && selected) || !chipInputHasError
+						? onClickListItem
+						: (): null => null;
+				return (
+					<ListParticipant
+						item={item}
+						selected={selected}
+						onClickCb={clickCb}
+						isDisabled={chipInputHasError}
+					/>
+				);
+			},
+		[chipInputHasError, onClickListItem]
 	);
 
 	const removeContactFromChip = useCallback(
@@ -225,6 +228,49 @@ const ChatCreationContactsSelection = ({
 		[chips, setContactSelected]
 	);
 
+	const chipInputDescriptionLabel = useMemo(() => {
+		if (isCreationModal) {
+			if (typeof maxGroupMembers === 'number' && maxGroupMembers - size(contactsSelected) !== 0) {
+				return t('modal.creation.addUserLimit.users', 'You can invite other {{count}} members', {
+					count: maxGroupMembers ? maxGroupMembers - size(contactsSelected) : 0
+				});
+			}
+			return addUserLimitReachedLabel;
+		}
+		if (
+			typeof maxGroupMembers === 'number' &&
+			maxGroupMembers - size(members) - size(contactsSelected) !== 0
+		) {
+			return t('modal.creation.addUserLimit.users', 'You can invite other {{count}} members', {
+				count: maxGroupMembers ? maxGroupMembers - size(members) - size(contactsSelected) : 0
+			});
+		}
+		return addUserLimitReachedLabel;
+	}, [isCreationModal, maxGroupMembers, contactsSelected, t, addUserLimitReachedLabel, members]);
+
+	const contentToDisplay = useMemo(() => {
+		if (loading) {
+			return <Spinner />;
+		}
+		if (!error) {
+			return (
+				<List
+					data-testid="list_creation_modal"
+					items={resultList}
+					ItemComponent={ListItem}
+					selected={contactsSelected}
+				/>
+			);
+		}
+		return (
+			<CustomContainer padding="large">
+				<Text color="gray1" size="small" weight="light">
+					{noMatchLabel}
+				</Text>
+			</CustomContainer>
+		);
+	}, [ListItem, contactsSelected, error, loading, noMatchLabel, resultList]);
+
 	return (
 		<>
 			<ChipInput
@@ -235,31 +281,17 @@ const ChatCreationContactsSelection = ({
 				value={chips}
 				onChange={removeContactFromChip}
 				requireUniqueChips
-				maxChips={15} // TODO
+				maxChips={maxGroupMembers}
 				data-testid="chip_input_creation_modal"
 				confirmChipOnBlur={false}
 				confirmChipOnSpace={false}
 				separators={['']}
+				description={
+					size(contactsSelected) > 1 || !isCreationModal ? chipInputDescriptionLabel : ''
+				}
 			/>
-			<Padding bottom="large" />
-			<Container height="9.375rem">
-				{loading ? (
-					<Spinner />
-				) : !error ? (
-					<List
-						data-testid="list_creation_modal"
-						items={resultList}
-						ItemComponent={ListItem}
-						selected={contactsSelected}
-					/>
-				) : (
-					<CustomContainer padding="large">
-						<Text color="gray1" size="small" weight="light">
-							{noMatchLabel}
-						</Text>
-					</CustomContainer>
-				)}
-			</Container>
+			{(size(contactsSelected) > 1 || !isCreationModal) && <Padding bottom="small" />}
+			<Container height="9.375rem">{contentToDisplay}</Container>
 			<Padding bottom="large" />
 			<Text color="gray1">{isCreationModal && listTextLabel}</Text>
 		</>

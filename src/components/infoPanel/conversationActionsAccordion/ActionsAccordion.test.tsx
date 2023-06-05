@@ -11,7 +11,12 @@ import { setup } from 'test-utils';
 
 import { ActionsAccordion } from './ActionsAccordion';
 import useStore from '../../../store/Store';
-import { createMockMember, createMockRoom, createMockTextMessage } from '../../../tests/createMock';
+import {
+	createMockCapabilityList,
+	createMockMember,
+	createMockRoom,
+	createMockTextMessage
+} from '../../../tests/createMock';
 import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
 import { UserBe } from '../../../types/network/models/userBeTypes';
 
@@ -165,5 +170,49 @@ describe('Actions Accordion', () => {
 		setup(<ActionsAccordion roomId={room.id} />);
 		expect(screen.queryByText(/Mute notifications/i)).not.toBeVisible();
 		expect(screen.getByTestId('icon: ChevronDown')).toBeInTheDocument();
+	});
+
+	test('A owner of a group should see add member disabled', () => {
+		const room: RoomBe = createMockRoom({
+			type: RoomType.GROUP,
+			members: [
+				createMockMember({ userId: user1Be.id, owner: true }),
+				createMockMember({ userId: user2Be.id }),
+				createMockMember({ userId: user3Be.id })
+			]
+		});
+		const store = useStore.getState();
+		store.addRoom(room);
+		store.setUserInfo(user1Be);
+		store.setUserInfo(user2Be);
+		store.setUserInfo(user3Be);
+		store.setLoginInfo(user1Be.id, user1Be.name);
+		store.setCapabilities(createMockCapabilityList({ maxGroupMembers: 3 }));
+
+		setup(<ActionsAccordion roomId={room.id} />);
+		const addNewMemberAction = screen.getByTestId('addNewMemberAction');
+		expect(addNewMemberAction).toHaveAttribute('disabled');
+	});
+
+	test('A owner of a group should see add member enabled', async () => {
+		const room: RoomBe = createMockRoom({
+			type: RoomType.GROUP,
+			members: [
+				createMockMember({ userId: user1Be.id, owner: true }),
+				createMockMember({ userId: user2Be.id }),
+				createMockMember({ userId: user3Be.id })
+			]
+		});
+		const store = useStore.getState();
+		store.addRoom(room);
+		store.setUserInfo(user1Be);
+		store.setUserInfo(user2Be);
+		store.setUserInfo(user3Be);
+		store.setLoginInfo(user1Be.id, user1Be.name);
+		store.setCapabilities(createMockCapabilityList({ maxGroupMembers: 5 }));
+
+		setup(<ActionsAccordion roomId={room.id} />);
+		const addNewMemberAction = screen.getByTestId('addNewMemberAction');
+		expect(addNewMemberAction).not.toHaveAttribute('disabled');
 	});
 });

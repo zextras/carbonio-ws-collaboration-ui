@@ -4,21 +4,31 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Container, IconButton, Padding, Text, Icon, Row } from '@zextras/carbonio-design-system';
+import {
+	Container,
+	IconButton,
+	Padding,
+	Text,
+	Icon,
+	Row,
+	Tooltip
+} from '@zextras/carbonio-design-system';
 import React, { FC } from 'react';
-import styled from 'styled-components';
+import styled, { css, SimpleInterpolation } from 'styled-components';
 
 const CustomText = styled(Text)``;
 
 const CustomIconButton = styled(IconButton)`
-	background-color: ${({ theme, backgroundColor }): string =>
-		theme.palette[backgroundColor].regular} !important;
-	color: ${({ theme }): string => theme.palette.gray6.regular} !important;
-	&:hover {
-		background-color: ${({ theme, backgroundColor }): string =>
-			theme.palette[backgroundColor].regular} !important;
-		color: ${({ theme }): string => theme.palette.gray6.regular} !important;
-	}
+	${({ theme, backgroundColor, disabled }): false | ReadonlyArray<SimpleInterpolation> =>
+		!disabled &&
+		css`
+			background-color: ${theme.palette[backgroundColor].regular} !important;
+			color: ${theme.palette.gray6.regular} !important;
+			&:hover {
+				background-color: ${theme.palette[backgroundColor].regular} !important;
+				color: ${theme.palette.gray6.regular} !important;
+			}
+		`};
 `;
 
 const CustomIcon = styled(Icon)`
@@ -28,16 +38,20 @@ const CustomIcon = styled(Icon)`
 const ActionContainer = styled(Container)`
 	border-radius: 0.5rem;
 	height: fit-content;
-	cursor: pointer;
-	&:hover {
-		background-color: ${({ theme, actionColor }): string => theme.palette[actionColor].regular};
-		${CustomIcon} {
-			color: ${({ theme }): string => theme.palette.gray6.regular} !important;
-		}
-		${CustomText} {
-			color: ${({ theme }): string => theme.palette.gray6.regular};
-		}
-	}
+	${({ theme, actionColor, disabled }): false | ReadonlyArray<SimpleInterpolation> =>
+		!disabled &&
+		css`
+			cursor: pointer;
+			&:hover {
+				background-color: ${theme.palette[actionColor].regular};
+				${CustomIcon} {
+					color: ${theme.palette.gray6.regular} !important;
+				}
+				${CustomText} {
+					color: ${theme.palette.gray6.regular};
+				}
+			}
+		`};
 	-webkit-user-select: none;
 	user-select: none;
 `;
@@ -57,6 +71,9 @@ type ActionProps = {
 	padding: { top?: string; bottom?: string };
 	withArrow?: boolean;
 	action: () => void;
+	isDisabled?: boolean;
+	disabledTooltip?: string;
+	idComponent?: string;
 };
 
 const ActionComponent: FC<ActionProps> = ({
@@ -65,33 +82,50 @@ const ActionComponent: FC<ActionProps> = ({
 	label,
 	padding,
 	withArrow,
-	action
+	action,
+	isDisabled,
+	disabledTooltip,
+	idComponent
 }) => (
-	<CustomActionContainer padding={padding} data-testid="action">
-		<ActionContainer
-			orientation="horizontal"
-			width="fill"
-			actionColor={actionColor}
-			onClick={action}
-		>
-			<CustomContainer orientation="horizontal" mainAlignment="flex-start">
-				<Row>
-					<CustomIconButton
-						icon={icon}
-						iconColor="gray6"
+	<Tooltip disabled={!isDisabled} label={disabledTooltip}>
+		<CustomActionContainer padding={padding} data-testid="action">
+			<ActionContainer
+				data-testid={idComponent || 'action'}
+				orientation="horizontal"
+				width="fill"
+				actionColor={actionColor}
+				onClick={!isDisabled ? action : null}
+				disabled={isDisabled}
+			>
+				<CustomContainer orientation="horizontal" mainAlignment="flex-start">
+					<Row>
+						<CustomIconButton
+							icon={icon}
+							iconColor="gray6"
+							size="medium"
+							backgroundColor={actionColor}
+							onClick={action}
+							disabled={isDisabled}
+						/>
+						<Padding right="large" />
+					</Row>
+					<Row takeAvailableSpace mainAlignment="flex-start">
+						<CustomText color={actionColor} disabled={isDisabled}>
+							{label}
+						</CustomText>
+					</Row>
+				</CustomContainer>
+				{withArrow && (
+					<CustomIcon
+						disabled={isDisabled}
+						icon="ArrowIosForwardOutline"
+						color={actionColor}
 						size="medium"
-						backgroundColor={actionColor}
-						onClick={action}
 					/>
-					<Padding right="large" />
-				</Row>
-				<Row takeAvailableSpace mainAlignment="flex-start">
-					<CustomText color={actionColor}>{label}</CustomText>
-				</Row>
-			</CustomContainer>
-			{withArrow && <CustomIcon icon="ArrowIosForwardOutline" color={actionColor} size="medium" />}
-		</ActionContainer>
-	</CustomActionContainer>
+				)}
+			</ActionContainer>
+		</CustomActionContainer>
+	</Tooltip>
 );
 
 export default ActionComponent;

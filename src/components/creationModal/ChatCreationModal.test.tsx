@@ -13,7 +13,7 @@ import ChatCreationModal from './ChatCreationModal';
 import { mockedAddRoomRequest, mockedAutoCompleteGalRequest } from '../../../jest-mocks';
 import { ContactMatch } from '../../network/soap/AutoCompleteRequest';
 import useStore from '../../store/Store';
-import { createMockMember, createMockRoom } from '../../tests/createMock';
+import { createMockCapabilityList, createMockMember, createMockRoom } from '../../tests/createMock';
 import { RoomBe, RoomType } from '../../types/network/models/roomBeTypes';
 
 // Mock objects
@@ -31,6 +31,14 @@ const zimbraUser2: ContactMatch = {
 	fullName: 'User Two',
 	lastName: 'Two',
 	zimbraId: 'user2-id'
+};
+
+const zimbraUser3: ContactMatch = {
+	email: 'user3@test.com',
+	firstName: 'User',
+	fullName: 'User Three',
+	lastName: 'Three',
+	zimbraId: 'user3-id'
 };
 
 const testRoom: RoomBe = createMockRoom({
@@ -90,6 +98,8 @@ describe('Chat Creation Modal', () => {
 	});
 
 	test('Create a group', async () => {
+		const { result } = renderHook(() => useStore());
+		act(() => result.current.setCapabilities(createMockCapabilityList({ maxGroupMembers: 5 })));
 		const { user } = setup(<ChatCreationModal open onClose={jest.fn()} />);
 
 		mockedAutoCompleteGalRequest.mockReturnValueOnce([zimbraUser1, zimbraUser2]);
@@ -130,6 +140,8 @@ describe('Chat Creation Modal', () => {
 	});
 
 	test('title and topic fields are filled properly', async () => {
+		const { result } = renderHook(() => useStore());
+		act(() => result.current.setCapabilities(createMockCapabilityList({ maxGroupMembers: 5 })));
 		mockedAutoCompleteGalRequest.mockReturnValueOnce([zimbraUser1, zimbraUser2]);
 		const { user } = setup(<ChatCreationModal open onClose={jest.fn()} />);
 
@@ -216,6 +228,46 @@ describe('Chat Creation Modal', () => {
 
 		const footerButton = await screen.findByTestId('create_button');
 		await user.click(footerButton);
+	});
+
+	test('Check creation disabled if user reach the limit available, and check list checkbox are disabled', async () => {
+		const { result } = renderHook(() => useStore());
+		act(() => result.current.setCapabilities(createMockCapabilityList({ maxGroupMembers: 3 })));
+		mockedAutoCompleteGalRequest.mockReturnValueOnce([zimbraUser1, zimbraUser2, zimbraUser3]);
+		const { user } = setup(<ChatCreationModal open onClose={jest.fn()} />);
+		const chipInput = await screen.findByTestId('chip_input_creation_modal');
+		await user.type(chipInput, zimbraUser1.fullName[0]);
+		const user1Component = await screen.findByText(zimbraUser1.fullName);
+		await user.click(user1Component);
+		await user.type(chipInput, zimbraUser2.fullName[0]);
+		const user2Component = await screen.findByText(zimbraUser2.fullName);
+		await user.click(user2Component);
+		const usersToAddLimitReached = await screen.findByText(
+			'You have selected the maximum number of members for a group'
+		);
+		await user.type(chipInput, zimbraUser3.fullName[0]);
+		const user3Checkbox = screen.getByTestId('icon: Square');
+		expect(user3Checkbox).toBeInTheDocument();
+		expect(user3Checkbox).toHaveAttribute('disabled');
+		expect(usersToAddLimitReached).toBeInTheDocument();
+	});
+
+	test('Check list checkbox are enabled when user can add other members', async () => {
+		const { result } = renderHook(() => useStore());
+		act(() => result.current.setCapabilities(createMockCapabilityList({ maxGroupMembers: 4 })));
+		mockedAutoCompleteGalRequest.mockReturnValueOnce([zimbraUser1, zimbraUser2, zimbraUser3]);
+		const { user } = setup(<ChatCreationModal open onClose={jest.fn()} />);
+		const chipInput = await screen.findByTestId('chip_input_creation_modal');
+		await user.type(chipInput, zimbraUser1.fullName[0]);
+		const user1Component = await screen.findByText(zimbraUser1.fullName);
+		await user.click(user1Component);
+		await user.type(chipInput, zimbraUser2.fullName[0]);
+		const user2Component = await screen.findByText(zimbraUser2.fullName);
+		await user.click(user2Component);
+		await user.type(chipInput, zimbraUser3.fullName[0]);
+		const user3Checkbox = screen.getByTestId('icon: Square');
+		expect(user3Checkbox).toBeInTheDocument();
+		expect(user3Checkbox).not.toHaveAttribute('disabled');
 	});
 });
 
