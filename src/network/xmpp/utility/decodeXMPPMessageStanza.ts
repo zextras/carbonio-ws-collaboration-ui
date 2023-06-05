@@ -136,7 +136,6 @@ export function decodeXMPPMessageStanza(messageStanza: Element, optional?: Optio
 		let forwarded;
 		const forwardedElement = messageStanza.getElementsByTagName('forwarded')[0];
 		if (forwardedElement) {
-			console.log(messageStanza)
 			const forwardCount = getAttribute(forwardedElement, 'count') || '1';
 			const delayElement = getRequiredTagElement(forwardedElement, 'delay');
 			const forwardedMessageElement = getRequiredTagElement(forwardedElement, 'message');
@@ -182,7 +181,7 @@ export function decodeXMPPMessageStanza(messageStanza: Element, optional?: Optio
 			read: calcReads(messageDate, roomId),
 			replyTo,
 			edited: false,
-			forwarded: forwarded,
+			forwarded,
 			attachment
 		};
 

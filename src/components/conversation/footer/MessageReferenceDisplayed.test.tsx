@@ -170,7 +170,7 @@ describe('Message reference displayed', () => {
 		const userName = screen.getByText(new RegExp(user1.name, 'i'));
 		expect(userName).toBeInTheDocument();
 
-		// Displayed forwarded text
+		// Displayed text is the text of the forwarded message
 		const message = screen.getByText(new RegExp(forwardedTextMessage.text || '', 'i'));
 		expect(message).toBeInTheDocument();
 	});
