@@ -45,13 +45,15 @@ const useFirstUnreadMessage = (roomId: string): string | undefined => {
 					if (size(othersMessages) > 0) {
 						setFirstUnreadMessageId(othersMessages[0].id);
 					}
+					// There's no last message read by me inside local store and the message count is higher than the unread count
+					// it means that it's a conversation in which I never have read a message
 				} else if (myLastMarker == null && size(messages) >= unreadCount) {
-					const firstUnreadTextMessage = filter(
+					const unreadTextMessages = filter(
 						messages,
 						(message) => message.type === MessageType.TEXT_MSG && message.from !== myUserId
 					);
-					if (size(firstUnreadTextMessage) > 0) {
-						setFirstUnreadMessageId(firstUnreadTextMessage[0].id);
+					if (size(unreadTextMessages) > 0) {
+						setFirstUnreadMessageId(unreadTextMessages[0].id);
 					} else {
 						setFirstUnreadMessageId('noUnread');
 					}
