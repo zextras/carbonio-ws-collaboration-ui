@@ -26,7 +26,7 @@ import {
 	getRoomIsWritingList
 } from '../../store/selectors/ActiveConversationsSelectors';
 import { getXmppClient } from '../../store/selectors/ConnectionSelector';
-import { getMyLastMarkerOfConversation } from '../../store/selectors/MarkersSelectors';
+import { getMyLastMarkerOfRoom } from '../../store/selectors/MarkersSelectors';
 import { getMessagesSelector } from '../../store/selectors/MessagesSelectors';
 import { getPrefTimezoneSelector, getUserId } from '../../store/selectors/SessionSelectors';
 import useStore from '../../store/Store';
@@ -65,7 +65,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 	const setHistoryLoadDisabled = useStore((store) => store.setHistoryLoadDisabled);
 	const setInputHasFocus = useStore((store) => store.setInputHasFocus);
 	const myUserId = useStore(getUserId);
-	const myLastMarker = useStore((store) => getMyLastMarkerOfConversation(store, roomId));
+	const myLastMarker = useStore((store) => getMyLastMarkerOfRoom(store, roomId));
 	const timezone = useStore(getPrefTimezoneSelector);
 
 	const [showScrollButton, setShowScrollButton] = useState(false);

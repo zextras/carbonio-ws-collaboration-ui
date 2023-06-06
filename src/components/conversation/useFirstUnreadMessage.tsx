@@ -6,7 +6,7 @@
 import { filter, findIndex, size, slice } from 'lodash';
 import { useEffect, useState } from 'react';
 
-import { getMyLastMarkerOfConversation } from '../../store/selectors/MarkersSelectors';
+import { getMyLastMarkerOfRoom, getRoomHasMarkers } from '../../store/selectors/MarkersSelectors';
 import { getTextMessagesSelector } from '../../store/selectors/MessagesSelectors';
 import { getUserId } from '../../store/selectors/SessionSelectors';
 import { getRoomUnreadsSelector } from '../../store/selectors/UnreadsCounterSelectors';
@@ -16,7 +16,8 @@ const useFirstUnreadMessage = (roomId: string): string | undefined => {
 	const unreadCount = useStore((store) => getRoomUnreadsSelector(store, roomId));
 	const myUserId = useStore(getUserId);
 	const messages = useStore((store) => getTextMessagesSelector(store, roomId));
-	const myLastMarker = useStore((store) => getMyLastMarkerOfConversation(store, roomId));
+	const hasConversationMarkers = useStore((store) => getRoomHasMarkers(store, roomId));
+	const myLastMarker = useStore((store) => getMyLastMarkerOfRoom(store, roomId));
 
 	const [firstUnreadMessageId, setFirstUnreadMessageId] = useState<string | undefined>(undefined);
 
@@ -43,7 +44,11 @@ const useFirstUnreadMessage = (roomId: string): string | undefined => {
 					}
 					// There's no last message read by me inside local store and the message count is higher than the unread count
 					// it means that it's a conversation in which I never have read a message
-				} else if (myLastMarker == null && size(messages) >= unreadCount) {
+				} else if (
+					hasConversationMarkers &&
+					myLastMarker == null &&
+					size(messages) >= unreadCount
+				) {
 					const unreadTextMessages = filter(messages, (message) => message.from !== myUserId);
 					if (size(unreadTextMessages) > 0) {
 						setFirstUnreadMessageId(unreadTextMessages[0].id);
@@ -55,7 +60,7 @@ const useFirstUnreadMessage = (roomId: string): string | undefined => {
 				setFirstUnreadMessageId('noUnread');
 			}
 		}
-	}, [firstUnreadMessageId, messages, myLastMarker, myUserId, unreadCount]);
+	}, [firstUnreadMessageId, hasConversationMarkers, messages, myLastMarker, myUserId, unreadCount]);
 
 	return firstUnreadMessageId;
 };
