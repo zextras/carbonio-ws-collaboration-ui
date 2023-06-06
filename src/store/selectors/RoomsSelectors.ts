@@ -74,7 +74,7 @@ export const getMyOwnershipOfTheRoom = (
 ): boolean => {
 	if (state.rooms[roomId]?.members != null && sessionId != null) {
 		const sessionMember = find(
-			state.rooms[roomId].members,
+			state.rooms[roomId]?.members,
 			(member) => member.userId === sessionId
 		);
 		if (sessionMember != null) {
@@ -87,7 +87,7 @@ export const getMyOwnershipOfTheRoom = (
 
 export const getOwner = (state: RootStore, roomId: string, userId: string): boolean => {
 	if (state.rooms[roomId]?.members != null) {
-		const user = find(state.rooms[roomId].members, (member) => member.userId === userId);
+		const user = find(state.rooms[roomId]?.members, (member) => member.userId === userId);
 		if (user != null) {
 			return user.owner;
 		}
@@ -98,7 +98,7 @@ export const getOwner = (state: RootStore, roomId: string, userId: string): bool
 
 export const getNumberOfOwnersOfTheRoom = (state: RootStore, roomId: string): number => {
 	if (state.rooms[roomId]?.members != null) {
-		return countBy(state.rooms[roomId].members, (member) => member.owner).true;
+		return countBy(state.rooms[roomId]?.members, (member) => member.owner).true;
 	}
 	return 0;
 };

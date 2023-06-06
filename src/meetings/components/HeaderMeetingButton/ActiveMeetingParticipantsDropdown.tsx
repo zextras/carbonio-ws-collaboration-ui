@@ -49,15 +49,11 @@ const ActiveMeetingParticipantsDropdown = ({
 		getMeetingParticipants(store, roomId)
 	);
 
-	const oneParticipantTitle = t('meeting.oneParticipantListTitle', "One meeting's participant");
-	const moreParticipantsTitle = t('meeting.moreParticipantsListTitle', `meeting's participants`);
-
-	const participantsTitle = useMemo(() => {
-		if (numberOfParticipants === 1) {
-			return oneParticipantTitle;
-		}
-		return `${numberOfParticipants} ${moreParticipantsTitle}`;
-	}, [moreParticipantsTitle, numberOfParticipants, oneParticipantTitle]);
+	const participantsTitle = t(
+		'meeting.participantsList.title',
+		"{{count}} meeting's participants",
+		{ count: numberOfParticipants !== undefined ? numberOfParticipants : 0 }
+	);
 
 	const listOfMembers = useMemo(
 		() =>

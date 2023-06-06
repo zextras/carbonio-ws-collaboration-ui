@@ -12,11 +12,14 @@ import { ActionsAccordion } from './ActionsAccordion';
 import useStore from '../../../../store/Store';
 import {
 	createMockCapabilityList,
+	createMockMeeting,
 	createMockMember,
+	createMockParticipants,
 	createMockRoom,
 	createMockTextMessage
 } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
+import { MeetingBe, MeetingParticipantBe } from '../../../../types/network/models/meetingBeTypes';
 import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
 import { UserBe } from '../../../../types/network/models/userBeTypes';
 
@@ -214,5 +217,128 @@ describe('Actions Accordion', () => {
 		setup(<ActionsAccordion roomId={room.id} />);
 		const addNewMemberAction = screen.getByTestId('addNewMemberAction');
 		expect(addNewMemberAction).not.toHaveAttribute('disabled');
+	});
+});
+
+describe('Actions Accordion - meeting', () => {
+	test('A owner of a group should see the correct actions - More than one owner', () => {
+		const room: RoomBe = createMockRoom({
+			type: RoomType.GROUP,
+			members: [
+				createMockMember({ userId: user1Be.id, owner: true }),
+				createMockMember({ userId: user2Be.id }),
+				createMockMember({ userId: user3Be.id, owner: true })
+			]
+		});
+		const message = createMockTextMessage({ roomId: room.id });
+		const user1Participant: MeetingParticipantBe = createMockParticipants({
+			userId: user1Be.id,
+			sessionId: 'sessionIdUser1'
+		});
+		const user3Participant: MeetingParticipantBe = createMockParticipants({
+			userId: user3Be.id,
+			sessionId: 'sessionIdUser3'
+		});
+		const user2Participant: MeetingParticipantBe = createMockParticipants({
+			userId: user2Be.id,
+			sessionId: 'sessionIdUser2'
+		});
+		const meeting: MeetingBe = createMockMeeting({
+			roomId: room.id,
+			participants: [user1Participant, user2Participant, user3Participant]
+		});
+		const store = useStore.getState();
+		store.addRoom(room);
+		store.newMessage(message);
+		store.setUserInfo(user1Be);
+		store.setUserInfo(user2Be);
+		store.setUserInfo(user3Be);
+		store.setLoginInfo(user1Be.id, user1Be.name);
+		store.addMeeting(meeting);
+
+		setup(<ActionsAccordion roomId={room.id} isInsideMeeting />);
+		expect(screen.getByText(/Mute Notifications/i)).toBeInTheDocument();
+		expect(screen.getByText(/Add New Members/i)).toBeInTheDocument();
+		expect(screen.getByText(/Edit Details/i)).toBeInTheDocument();
+		expect(screen.getByText(/Clear History/i)).toBeInTheDocument();
+		expect(screen.getByText(/Leave Group/i)).toBeInTheDocument();
+		expect(screen.queryByText(/Delete Group/i)).not.toBeInTheDocument();
+	});
+	test('A owner of a group should see the correct actions - one owner', () => {
+		const room: RoomBe = createMockRoom({
+			type: RoomType.GROUP,
+			members: [
+				createMockMember({ userId: user1Be.id, owner: true }),
+				createMockMember({ userId: user2Be.id }),
+				createMockMember({ userId: user3Be.id })
+			]
+		});
+		const message = createMockTextMessage({ roomId: room.id });
+		const user1Participant: MeetingParticipantBe = createMockParticipants({
+			userId: user1Be.id,
+			sessionId: 'sessionIdUser1'
+		});
+		const user3Participant: MeetingParticipantBe = createMockParticipants({
+			userId: user3Be.id,
+			sessionId: 'sessionIdUser3'
+		});
+		const user2Participant: MeetingParticipantBe = createMockParticipants({
+			userId: user2Be.id,
+			sessionId: 'sessionIdUser2'
+		});
+		const meeting: MeetingBe = createMockMeeting({
+			roomId: room.id,
+			participants: [user1Participant, user2Participant, user3Participant]
+		});
+		const store = useStore.getState();
+		store.addRoom(room);
+		store.newMessage(message);
+		store.setUserInfo(user1Be);
+		store.setUserInfo(user2Be);
+		store.setUserInfo(user3Be);
+		store.setLoginInfo(user1Be.id, user1Be.name);
+		store.addMeeting(meeting);
+
+		setup(<ActionsAccordion roomId={room.id} isInsideMeeting />);
+		expect(screen.getByText(/Mute Notifications/i)).toBeInTheDocument();
+		expect(screen.getByText(/Add New Members/i)).toBeInTheDocument();
+		expect(screen.getByText(/Edit Details/i)).toBeInTheDocument();
+		expect(screen.getByText(/Clear History/i)).toBeInTheDocument();
+		expect(screen.queryByText(/Leave Group/i)).not.toBeInTheDocument();
+		expect(screen.queryByText(/Delete Group/i)).not.toBeInTheDocument();
+	});
+	test('In a one_to_one users should see only mute action and clear history actions', () => {
+		const room: RoomBe = createMockRoom({
+			type: RoomType.ONE_TO_ONE,
+			members: [createMockMember({ userId: user1Be.id }), createMockMember({ userId: user2Be.id })]
+		});
+		const user1Participant: MeetingParticipantBe = createMockParticipants({
+			userId: user1Be.id,
+			sessionId: 'sessionIdUser1'
+		});
+		const user2Participant: MeetingParticipantBe = createMockParticipants({
+			userId: user2Be.id,
+			sessionId: 'sessionIdUser2'
+		});
+		const meeting: MeetingBe = createMockMeeting({
+			roomId: room.id,
+			participants: [user1Participant, user2Participant]
+		});
+		const message = createMockTextMessage({ roomId: room.id });
+
+		const store = useStore.getState();
+		store.addRoom(room);
+		store.newMessage(message);
+		store.setUserInfo(user1Be);
+		store.setUserInfo(user2Be);
+		store.setLoginInfo(user1Be.id, user1Be.name);
+		store.addMeeting(meeting);
+		setup(<ActionsAccordion roomId={room.id} />);
+		expect(screen.getByText(/Mute Notifications/i)).toBeInTheDocument();
+		expect(screen.getByText(/Clear History/i)).toBeInTheDocument();
+		expect(screen.queryByText(/Add New Members/i)).not.toBeInTheDocument();
+		expect(screen.queryByText(/Edit Details/i)).not.toBeInTheDocument();
+		expect(screen.queryByText(/Leave Group/i)).not.toBeInTheDocument();
+		expect(screen.queryByText(/Delete Group/i)).not.toBeInTheDocument();
 	});
 });

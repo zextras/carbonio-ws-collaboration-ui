@@ -7,7 +7,7 @@
 import { screen, act } from '@testing-library/react';
 import React from 'react';
 
-import ParticipantsList from './ParticipantsList';
+import MemberList from './MemberList';
 import { mockedGetUserPictureRequest } from '../../../../../jest-mocks';
 import useStore from '../../../../store/Store';
 import { setup } from '../../../../tests/test-utils';
@@ -95,7 +95,7 @@ describe('Participants list', () => {
 		store.setUserInfo(user1Be);
 		store.setUserInfo(user2Be);
 		store.setUserInfo(user3Be);
-		setup(<ParticipantsList roomId={room.id} />);
+		setup(<MemberList roomId={room.id} />);
 		mockedGetUserPictureRequest.mockReturnValueOnce(ImageBlob);
 		const list = await screen.findByTestId('conversation_list');
 		expect(list).toBeInTheDocument();
@@ -111,7 +111,7 @@ describe('Participants list', () => {
 		store.setUserInfo(user2Be);
 		store.setUserInfo(user3Be);
 		store.setUserInfo(user4Be);
-		setup(<ParticipantsList roomId={room.id} />);
+		setup(<MemberList roomId={room.id} />);
 		// mockedGetUserPictureRequest.mockReturnValueOnce(ImageBlob);
 		const list = await screen.findByTestId('conversation_list');
 		expect(list).toBeInTheDocument();
@@ -127,7 +127,7 @@ describe('Participants list', () => {
 		store.setUserInfo(user2Be);
 		store.setUserInfo(user3Be);
 		store.setUserInfo(user4Be);
-		setup(<ParticipantsList roomId={room.id} />);
+		setup(<MemberList roomId={room.id} />);
 		mockedGetUserPictureRequest.mockReturnValueOnce(ImageBlob);
 		const list = await screen.findByTestId('conversation_list');
 		expect(list).toBeInTheDocument();
@@ -142,7 +142,7 @@ describe('Participants list', () => {
 		store.setUserInfo(user1Be);
 		store.setUserInfo(user2Be);
 		store.setUserInfo(user3Be);
-		const { user } = setup(<ParticipantsList roomId={room.id} />);
+		const { user } = setup(<MemberList roomId={room.id} />);
 		mockedGetUserPictureRequest.mockReturnValueOnce(ImageBlob);
 		const searchInput = screen.getByRole('textbox', { name: /Search members/i });
 		const list = await screen.findByTestId('conversation_list');
@@ -155,7 +155,7 @@ describe('Participants list', () => {
 		store.setUserInfo(user1Be);
 		store.setUserInfo(user2Be);
 		store.setUserInfo(user3Be);
-		const { user } = setup(<ParticipantsList roomId={room.id} />);
+		const { user } = setup(<MemberList roomId={room.id} />);
 		mockedGetUserPictureRequest.mockReturnValueOnce(ImageBlob);
 		const searchInput = screen.getByRole('textbox', { name: /Search members/i });
 		const list = await screen.findByTestId('conversation_list');
@@ -168,7 +168,7 @@ describe('Participants list', () => {
 		store.setUserInfo(user1Be);
 		store.setUserInfo(user2Be);
 		store.setUserInfo(user3Be);
-		const { user } = setup(<ParticipantsList roomId={room.id} />);
+		const { user } = setup(<MemberList roomId={room.id} />);
 		mockedGetUserPictureRequest.mockReturnValueOnce(ImageBlob);
 		const searchInput = screen.getByRole('textbox', { name: /Search members/i });
 		const searchIcon = screen.getByTestId('icon: Search');

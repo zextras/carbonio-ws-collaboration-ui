@@ -27,7 +27,7 @@ const CustomContainer = styled(Container)`
 	cursor: default;
 `;
 
-const ParticipantsList: FC<ParticipantsListProps> = ({ roomId }) => {
+const MemberList: FC<ParticipantsListProps> = ({ roomId }) => {
 	const [t] = useTranslation();
 	const noMatchLabel = t('participantsList.noMatch', 'There are no items that match this search');
 	const members: Member[] | undefined = useStore((state) => getRoomMembers(state, roomId));
@@ -80,4 +80,4 @@ const ParticipantsList: FC<ParticipantsListProps> = ({ roomId }) => {
 	);
 };
 
-export default ParticipantsList;
+export default MemberList;

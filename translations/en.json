@@ -110,16 +110,18 @@
         "collapseParticipantsMeetingTooltip": "Collapse participants list",
         "expandParticipantsListTooltip": "Expand participants list",
         "joinMeeting": "Join meeting",
-        "moreParticipantsListTitle": "{{number}} meeting's participants",
         "newMeetingNotification": {
             "sendAQuickMessage": "Send a quick message",
             "sendMessage": "Send message",
             "userIsInvitingYou": "<strong>{{name}}</strong> is inviting you",
             "writeAMessageToSendIt": "Write a message to send it"
         },
-        "oneParticipantListTitle": "One meeting's participant",
         "ongoingGroupMeetingTooltip": "You are already participating in this meeting",
         "ongoingOneToOneMeetingTooltip": "You already have an active meeting with {{name}}",
+        "participantsList": {
+            "title": "One meeting's participant",
+            "title_plural": "{{count}} meeting's participants"
+        },
         "startMeeting": "Start meeting",
         "waitingParticipants": "Waiting for participants to join..."
     },

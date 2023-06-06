@@ -7,7 +7,7 @@
 import { screen } from '@testing-library/react';
 import React from 'react';
 
-import { ParticipantsAccordion } from './ParticipantsAccordion';
+import { MemberAccordion } from './MemberAccordion';
 import useStore from '../../../../store/Store';
 import { createMockRoom } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
@@ -70,7 +70,7 @@ describe('Participants accordion', () => {
 		store.addRoom(room);
 		store.setUserInfo(user1Be);
 		store.setUserInfo(user2Be);
-		setup(<ParticipantsAccordion roomId={room.id} />);
+		setup(<MemberAccordion roomId={room.id} />);
 		const titleIsPlural = screen.getByText(/2 members/i);
 		expect(titleIsPlural).toBeInTheDocument();
 	});
@@ -91,7 +91,7 @@ describe('Participants accordion', () => {
 		const store = useStore.getState();
 		store.addRoom(room);
 		store.setUserInfo(user1Be);
-		setup(<ParticipantsAccordion roomId={room.id} />);
+		setup(<MemberAccordion roomId={room.id} />);
 		const titleIsSingular = screen.getByText(/One member/i);
 		expect(titleIsSingular).toBeInTheDocument();
 	});
@@ -102,7 +102,7 @@ describe('Participants accordion', () => {
 		store.addRoom(room);
 
 		// Default status: open
-		const { user } = setup(<ParticipantsAccordion roomId={room.id} />);
+		const { user } = setup(<MemberAccordion roomId={room.id} />);
 		expect(screen.getByText(/Search members/i)).toBeVisible();
 
 		// Check store change
@@ -123,7 +123,7 @@ describe('Participants accordion', () => {
 		store.addRoom(room);
 		store.setParticipantsAccordionStatus(room.id, true);
 
-		setup(<ParticipantsAccordion roomId={room.id} />);
+		setup(<MemberAccordion roomId={room.id} />);
 		expect(screen.getByText(/Search members/i)).toBeVisible();
 		expect(screen.getByTestId('icon: ChevronUp')).toBeInTheDocument();
 	});
@@ -134,7 +134,7 @@ describe('Participants accordion', () => {
 		store.addRoom(room);
 		store.setParticipantsAccordionStatus(room.id, false);
 
-		setup(<ParticipantsAccordion roomId={room.id} />);
+		setup(<MemberAccordion roomId={room.id} />);
 		expect(screen.queryByText(/Search members/i)).not.toBeVisible();
 		expect(screen.getByTestId('icon: ChevronDown')).toBeInTheDocument();
 	});

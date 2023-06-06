@@ -25,7 +25,7 @@ type ActionsProps = {
 	memberId: string;
 };
 
-const ParticipantComponentActions: FC<ActionsProps> = ({ roomId, memberId }) => {
+const MemberComponentActions: FC<ActionsProps> = ({ roomId, memberId }) => {
 	const [t] = useTranslation();
 	const memberIsModeratorLabel: string = t(
 		'tooltip.memberIsModerator',
@@ -76,4 +76,4 @@ const ParticipantComponentActions: FC<ActionsProps> = ({ roomId, memberId }) => 
 	);
 };
 
-export default ParticipantComponentActions;
+export default MemberComponentActions;

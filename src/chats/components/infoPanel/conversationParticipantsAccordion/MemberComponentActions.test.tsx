@@ -10,7 +10,7 @@ import React from 'react';
 
 import GoToPrivateChatAction from './GoToPrivateChatAction';
 import LeaveConversationListAction from './LeaveConversationListAction';
-import ParticipantComponentInfo from './ParticipantComponentInfo';
+import MemberComponentInfo from './MemberComponentInfo';
 import RemoveMemberListAction from './RemoveMemberListAction';
 import {
 	mockedAddRoomRequest,
@@ -253,9 +253,7 @@ describe('participants actions - promote/demote member', () => {
 		mockedDemotesRoomMemberRequest
 			.mockRejectedValueOnce('not promoted')
 			.mockReturnValueOnce('promoted');
-		const { user } = setup(
-			<ParticipantComponentInfo roomId={mockedRoom.id} member={userInfoMember} />
-		);
+		const { user } = setup(<MemberComponentInfo roomId={mockedRoom.id} member={userInfoMember} />);
 
 		const promoteButton = screen.getByTestId('icon: CrownOutline');
 		expect(promoteButton).toBeInTheDocument();

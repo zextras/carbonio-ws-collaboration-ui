@@ -19,9 +19,12 @@ export type WsMeetingEvent =
 	| MeetingScreenStreamClosedEvent;
 
 type BasicMeetingEvent = {
+	// id: event id
 	id: string;
+	// from: userId of sender
 	from: string;
 	sentDate: string;
+	// sessionId: identifier of sender's session
 	sessionId: string;
 	meetingId: string;
 };

@@ -26,6 +26,10 @@ const CustomContainer = styled(Container)`
 	cursor: default;
 `;
 
+const ListContainer = styled(Container)`
+	overflow-y: scroll;
+`;
+
 const MeetingParticipantsList: FC<ParticipantsListProps> = ({ meetingId }) => {
 	const [t] = useTranslation();
 	const noMatchLabel = t('participantsList.noMatch', 'There are no items that match this search');
@@ -76,7 +80,14 @@ const MeetingParticipantsList: FC<ParticipantsListProps> = ({ meetingId }) => {
 		() =>
 			filteredContactList !== undefined &&
 			(filteredContactList.length !== 0 ? (
-				<Container data-testid="meeting_participants_list">{listOfMembers}</Container>
+				<ListContainer
+					data-testid="meeting_participants_list"
+					maxHeight={'28.25rem'}
+					crossAlignment="flex-start"
+					mainAlignment="flex-start"
+				>
+					{listOfMembers}
+				</ListContainer>
 			) : (
 				<CustomContainer padding="large">
 					<Text color="gray1" size="small" weight="light">
@@ -90,7 +101,9 @@ const MeetingParticipantsList: FC<ParticipantsListProps> = ({ meetingId }) => {
 	return (
 		<Container padding={{ right: 'small' }}>
 			<SearchUserAction setFilteredInput={setFilteredInput} isInsideMeeting />
-			{memberList}
+			<Container height="fit" padding={{ bottom: '0.75rem' }}>
+				{memberList}
+			</Container>
 		</Container>
 	);
 };

@@ -7,7 +7,7 @@
 import { act, screen } from '@testing-library/react';
 import React from 'react';
 
-import ParticipantComponentInfo from './ParticipantComponentInfo';
+import MemberComponentInfo from './MemberComponentInfo';
 import { mockedGetURLUserPicture } from '../../../../../jest-mocks';
 import useStore from '../../../../store/Store';
 import { createMockCapabilityList, createMockRoom } from '../../../../tests/createMock';
@@ -118,7 +118,7 @@ describe('Participant component info', () => {
 			store.setLoginInfo('user1', 'User 1');
 			store.addRoom(mockedRoomOneOwner);
 			store.setUserInfo(user1Be);
-			setup(<ParticipantComponentInfo member={members[0]} roomId={mockedRoomOneOwner.id} />);
+			setup(<MemberComponentInfo member={members[0]} roomId={mockedRoomOneOwner.id} />);
 
 			const iAmOwnerAction = screen.getByTestId('icon: Crown');
 			expect(iAmOwnerAction).toBeInTheDocument();
@@ -133,7 +133,7 @@ describe('Participant component info', () => {
 			store.setLoginInfo('user1', 'User 1');
 			store.addRoom(mockedRoom);
 			store.setUserInfo(user1Be);
-			setup(<ParticipantComponentInfo member={members[0]} roomId={mockedRoom.id} />);
+			setup(<MemberComponentInfo member={members[0]} roomId={mockedRoom.id} />);
 
 			const participantName = screen.getByText(/User 1/i);
 			expect(participantName).toBeInTheDocument();
@@ -150,7 +150,7 @@ describe('Participant component info', () => {
 			store.setLoginInfo('user1', 'User 1');
 			store.addRoom(mockedRoom);
 			store.setUserInfo(user2Be);
-			setup(<ParticipantComponentInfo member={members[1]} roomId={mockedRoom.id} />);
+			setup(<MemberComponentInfo member={members[1]} roomId={mockedRoom.id} />);
 
 			const participantName = screen.getByText(/User 2/i);
 			expect(participantName).toBeInTheDocument();
@@ -169,7 +169,7 @@ describe('Participant component info', () => {
 			store.setLoginInfo('user1', 'User 1');
 			store.addRoom(mockedRoom);
 			store.setUserInfo(user3Be);
-			setup(<ParticipantComponentInfo member={members[2]} roomId={mockedRoom.id} />);
+			setup(<MemberComponentInfo member={members[2]} roomId={mockedRoom.id} />);
 
 			const participantName = screen.getByText(/User 3/i);
 			expect(participantName).toBeInTheDocument();
@@ -190,7 +190,7 @@ describe('Participant component info', () => {
 			store.setLoginInfo('user2', 'User 2');
 			store.addRoom(mockedRoom);
 			store.setUserInfo(user2Be);
-			setup(<ParticipantComponentInfo member={members[1]} roomId={mockedRoom.id} />);
+			setup(<MemberComponentInfo member={members[1]} roomId={mockedRoom.id} />);
 
 			const participantName = screen.getByText(/User 2/i);
 			expect(participantName).toBeInTheDocument();
@@ -203,7 +203,7 @@ describe('Participant component info', () => {
 			store.setLoginInfo('user2', 'User 2');
 			store.addRoom(mockedRoom);
 			store.setUserInfo(user1Be);
-			setup(<ParticipantComponentInfo member={members[0]} roomId={mockedRoom.id} />);
+			setup(<MemberComponentInfo member={members[0]} roomId={mockedRoom.id} />);
 
 			const participantName = screen.getByText(/User 1/i);
 			expect(participantName).toBeInTheDocument();
@@ -219,7 +219,7 @@ describe('Participant component info', () => {
 			store.setLoginInfo('user2', 'User 2');
 			store.addRoom(mockedRoom);
 			store.setUserInfo(user4Be);
-			setup(<ParticipantComponentInfo member={members[3]} roomId={mockedRoom.id} />);
+			setup(<MemberComponentInfo member={members[3]} roomId={mockedRoom.id} />);
 
 			const participantName = screen.getByText(/User 4/i);
 			expect(participantName).toBeInTheDocument();
@@ -237,7 +237,7 @@ describe('Participant component info', () => {
 			store.setUserInfo(user2Info);
 			store.setCapabilities(createMockCapabilityList({ canSeeUsersPresence: true }));
 			act(() => store.setUserPresence('user1', true));
-			setup(<ParticipantComponentInfo member={members[0]} roomId={mockedRoom.id} />);
+			setup(<MemberComponentInfo member={members[0]} roomId={mockedRoom.id} />);
 
 			expect(screen.getByText(/Online/i)).toBeInTheDocument();
 		});
@@ -250,7 +250,7 @@ describe('Participant component info', () => {
 			store.setCapabilities(createMockCapabilityList({ canSeeUsersPresence: true }));
 			act(() => store.setUserPresence('user1', false));
 			mockedGetURLUserPicture.mockReturnValue('Imageurl.jpeg');
-			setup(<ParticipantComponentInfo member={members[0]} roomId={mockedRoom.id} />);
+			setup(<MemberComponentInfo member={members[0]} roomId={mockedRoom.id} />);
 
 			expect(screen.getByText(/Offline/i)).toBeInTheDocument();
 		});
@@ -262,7 +262,7 @@ describe('Participant component info', () => {
 			store.setUserInfo(user2Info);
 			store.setCapabilities(createMockCapabilityList({ canSeeUsersPresence: true }));
 			act(() => store.setUserLastActivity('user2', 1642818617000));
-			setup(<ParticipantComponentInfo member={members[1]} roomId={mockedRoom.id} />);
+			setup(<MemberComponentInfo member={members[1]} roomId={mockedRoom.id} />);
 			// last activity is 2022/01/22 at 03:30:17
 			expect(screen.getByText(/Last seen 01\/22\/2022/i)).toBeInTheDocument();
 		});
@@ -276,7 +276,7 @@ describe('Participant component info', () => {
 			store.setUserInfo(user2Info);
 			store.setCapabilities(createMockCapabilityList({ canSeeUsersPresence: false }));
 			act(() => store.setUserPresence('user1', true));
-			setup(<ParticipantComponentInfo member={members[0]} roomId={mockedRoom.id} />);
+			setup(<MemberComponentInfo member={members[0]} roomId={mockedRoom.id} />);
 
 			expect(screen.queryByText(/Online/i)).not.toBeInTheDocument();
 		});
@@ -289,7 +289,7 @@ describe('Participant component info', () => {
 			store.setCapabilities(createMockCapabilityList({ canSeeUsersPresence: false }));
 			act(() => store.setUserPresence('user1', false));
 			mockedGetURLUserPicture.mockReturnValue('Imageurl.jpeg');
-			setup(<ParticipantComponentInfo member={members[0]} roomId={mockedRoom.id} />);
+			setup(<MemberComponentInfo member={members[0]} roomId={mockedRoom.id} />);
 
 			expect(screen.queryByText(/Offline/i)).not.toBeInTheDocument();
 		});
@@ -301,7 +301,7 @@ describe('Participant component info', () => {
 			store.setUserInfo(user2Info);
 			store.setCapabilities(createMockCapabilityList({ canSeeUsersPresence: false }));
 			act(() => store.setUserLastActivity('user2', 1642818617000));
-			setup(<ParticipantComponentInfo member={members[1]} roomId={mockedRoom.id} />);
+			setup(<MemberComponentInfo member={members[1]} roomId={mockedRoom.id} />);
 			// last activity is 2022/01/22 at 03:30:17
 			expect(screen.queryByText(/Last seen 01\/22\/2022/i)).not.toBeInTheDocument();
 		});

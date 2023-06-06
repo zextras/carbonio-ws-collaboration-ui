@@ -9,7 +9,7 @@ import React, { FC, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import ParticipantsList from './ParticipantsList';
+import MemberList from './MemberList';
 import { getParticipantsAccordionStatus } from '../../../../store/selectors/ActiveConversationsSelectors';
 import { getNumbersOfRoomMembers } from '../../../../store/selectors/RoomsSelectors';
 import useStore from '../../../../store/Store';
@@ -23,7 +23,7 @@ type ParticipantsAccordionProps = {
 	roomId: string;
 };
 
-export const ParticipantsAccordion: FC<ParticipantsAccordionProps> = ({ roomId }) => {
+export const MemberAccordion: FC<ParticipantsAccordionProps> = ({ roomId }) => {
 	const [t] = useTranslation();
 	const oneMemberAccordionTitle = t('participantsList.oneMemberAccordionTitle', 'One member');
 	const moreMembersAccordionTitle = t('participantsList.moreMembersAccordionTitle', `members`);
@@ -52,7 +52,7 @@ export const ParticipantsAccordion: FC<ParticipantsAccordionProps> = ({ roomId }
 				disableHover: true,
 				background: 'gray6',
 				label: 'title',
-				CustomComponent: () => <ParticipantsList roomId={roomId} />
+				CustomComponent: () => <MemberList roomId={roomId} />
 			}
 		];
 		return [

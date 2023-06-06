@@ -10,7 +10,7 @@ import React, { FC, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import ParticipantComponentActions from './ParticipantComponentActions';
+import MemberComponentActions from './MemberComponentActions';
 import { UsersApi } from '../../../../network';
 import { getCapability } from '../../../../store/selectors/SessionSelectors';
 import {
@@ -38,7 +38,7 @@ const CustomAvatar = styled(Avatar)`
 	min-height: 2rem;
 `;
 
-const ParticipantComponentInfo: FC<ParticipantsInfoProps> = ({ member, roomId }) => {
+const MemberComponentInfo: FC<ParticipantsInfoProps> = ({ member, roomId }) => {
 	const [t] = useTranslation();
 	const userOnlineLabel: string = t('status.online', 'Online');
 	const userOfflineLabel: string = t('status.offline', 'Offline');
@@ -121,10 +121,10 @@ const ParticipantComponentInfo: FC<ParticipantsInfoProps> = ({ member, roomId })
 			{avatarElement}
 			{infoElement}
 			<Row>
-				<ParticipantComponentActions roomId={roomId} memberId={member.userId} />
+				<MemberComponentActions roomId={roomId} memberId={member.userId} />
 			</Row>
 		</CustomContainer>
 	);
 };
 
-export default ParticipantComponentInfo;
+export default MemberComponentInfo;
