@@ -142,7 +142,8 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 	);
 
 	const forwardMessage = useCallback(() => {
-		Promise.all(map(selected, (value, key) => RoomsApi.forwardMessages(key, [message])))
+		const roomsId = map(selected, (key, value) => value);
+		RoomsApi.forwardMessages(roomsId, [message])
 			.then(() => onClose())
 			.catch(() => onClose());
 	}, [message, onClose, selected]);

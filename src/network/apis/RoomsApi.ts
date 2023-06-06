@@ -176,7 +176,7 @@ class RoomsApi extends BaseAPI implements IRoomsApi {
 	}
 
 	public forwardMessages(
-		roomId: string,
+		roomsId: string[],
 		messages: TextMessage[]
 	): Promise<ForwardMessagesResponse> {
 		const { xmppClient } = useStore.getState().connections;
@@ -197,7 +197,11 @@ class RoomsApi extends BaseAPI implements IRoomsApi {
 				originalMessage: listOfMessages[message.stanzaId],
 				originalMessageSentAt: dateToISODate(message.date)
 			}));
-			return this.fetchAPI(`rooms/${roomId}/forward`, RequestType.POST, messagesToForward);
+			return Promise.all(
+				roomsId.map((roomId) =>
+					this.fetchAPI(`rooms/${roomId}/forward`, RequestType.POST, messagesToForward)
+				)
+			);
 		});
 	}
 }
