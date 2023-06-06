@@ -7,9 +7,12 @@
 import { Marker } from '../../types/store/MarkersTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 
-export const getMyLastMarkerOfConversation = (store: RootStore, roomId: string): Marker | null => {
+export const getMyLastMarkerOfRoom = (store: RootStore, roomId: string): Marker | null => {
 	if (store.session.id && store.markers[roomId] && store.markers[roomId][store.session.id]) {
 		return store.markers[roomId][store.session.id];
 	}
 	return null;
 };
+
+export const getRoomHasMarkers = (store: RootStore, roomId: string): boolean =>
+	!!store.markers[roomId];

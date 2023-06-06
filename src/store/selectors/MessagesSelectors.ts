@@ -4,13 +4,19 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { find, forEach, orderBy, size } from 'lodash';
+import { filter, find, forEach, orderBy, size } from 'lodash';
 
-import { Message } from '../../types/store/MessageTypes';
+import { Message, MessageType, TextMessage } from '../../types/store/MessageTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 
 export const getMessagesSelector = (state: RootStore, roomId: string): Message[] =>
 	state.messages[roomId] ? state.messages[roomId] : [];
+
+export const getTextMessagesSelector = (state: RootStore, roomId: string): TextMessage[] =>
+	filter(
+		state.messages[roomId],
+		(message) => message.type === MessageType.TEXT_MSG
+	) as TextMessage[];
 
 export const getLastMessageIdSelector = (state: RootStore, roomId: string): string | undefined => {
 	if (state.messages[roomId] && state.messages[roomId][state.messages[roomId].length - 1]) {
