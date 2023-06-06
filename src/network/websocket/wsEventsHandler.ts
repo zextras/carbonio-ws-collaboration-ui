@@ -4,9 +4,13 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { find } from 'lodash';
+
+import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
 import useStore from '../../store/Store';
 import { GetRoomResponse } from '../../types/network/responses/roomsResponses';
 import { WsEvent, WsEventType } from '../../types/network/websocket/wsEvents';
+import { RoomType } from '../../types/store/RoomTypes';
 import { wsDebug } from '../../utils/debug';
 import { RoomsApi } from '../index';
 
@@ -133,6 +137,13 @@ export function wsEventsHandler(event: WsEvent): void {
 					participants: [],
 					createdAt: event.sentDate
 				});
+
+				// Send custom event to open an incoming meeting notification
+				const room = state.rooms[event.roomId];
+				const isMeetingStartedByMe = event.from === state.session.id;
+				if (room?.type === RoomType.ONE_TO_ONE && !isMeetingStartedByMe) {
+					sendCustomEvent({ name: EventName.INCOMING_MEETING, data: event });
+				}
 			}
 			break;
 		}
@@ -144,6 +155,17 @@ export function wsEventsHandler(event: WsEvent): void {
 					audioStreamOn: false,
 					videoStreamOn: false
 				});
+			}
+
+			// Send custom event to delete an incoming meeting notification
+			// if I joined the meeting from another session
+			const meeting = find(state.meetings, (meeting) => meeting.id === event.meetingId);
+			if (
+				meeting &&
+				state.rooms[meeting.roomId]?.type === RoomType.ONE_TO_ONE &&
+				event.from === state.session.id
+			) {
+				sendCustomEvent({ name: EventName.REMOVED_MEETING_NOTIFICATION, data: event });
 			}
 			break;
 		}
