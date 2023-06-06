@@ -8,6 +8,7 @@ import { Strophe } from 'strophe.js';
 
 import { textMessageRealTime } from '../network/xmpp/xmppMessageExamples';
 
+export const mockedSendChatMessage = jest.fn();
 export const mockedSendIsWriting = jest.fn();
 export const mockedSendPaused = jest.fn();
 export const xmppClient = {
@@ -17,7 +18,7 @@ export const xmppClient = {
 	getLastActivity: (): null => null,
 	getInbox: (): null => null,
 	setInbox: (): null => null,
-	sendChatMessage: (): null => null,
+	sendChatMessage: mockedSendChatMessage,
 	sendChatMessageReply: (): null => null,
 	sendChatMessageDeletion: (): null => null,
 	sendChatMessageEdit: (): null => null,

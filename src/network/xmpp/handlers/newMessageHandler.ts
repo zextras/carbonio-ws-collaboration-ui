@@ -24,7 +24,7 @@ export function onNewMessageStanza(this: IXMPPClient, message: Element): true {
 
 			switch (newMessage.type) {
 				case MessageType.TEXT_MSG: {
-					sendCustomEvent(EventName.NEW_MESSAGE, newMessage);
+					sendCustomEvent({ name: EventName.NEW_MESSAGE, data: newMessage });
 					store.newMessage(newMessage);
 					displayMessageBrowserNotification(newMessage);
 

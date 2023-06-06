@@ -12,6 +12,7 @@ import ConnectionSnackbarManager from './chats/components/ConnectionSnackbarMana
 import CounterBadgeUpdater from './chats/components/CounterBadgeUpdater';
 import RegisterCreationButton from './chats/components/RegisterCreationButton';
 import useChatsApp from './chats/useChatsApp';
+import MeetingNotificationHandler from './meetings/components/MeetingNotificationsHandler';
 import useMeetingsApp from './meetings/useMeetingsApp';
 import { MeetingsApi, RoomsApi, SessionApi } from './network';
 import { WebSocketClient } from './network/websocket/WebSocketClient';
@@ -71,6 +72,7 @@ export default function App() {
 			<RegisterCreationButton />
 			<ConnectionSnackbarManager />
 			<CounterBadgeUpdater />
+			<MeetingNotificationHandler />
 		</>
 	);
 }
