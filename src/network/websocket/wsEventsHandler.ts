@@ -8,10 +8,12 @@ import { find } from 'lodash';
 
 import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
 import useStore from '../../store/Store';
+import { GetMeetingResponse } from '../../types/network/responses/meetingsResponses';
 import { GetRoomResponse } from '../../types/network/responses/roomsResponses';
 import { WsEvent, WsEventType } from '../../types/network/websocket/wsEvents';
 import { RoomType } from '../../types/store/RoomTypes';
 import { wsDebug } from '../../utils/debug';
+import MeetingsApi from '../apis/MeetingsApi';
 import { RoomsApi } from '../index';
 
 export function wsEventsHandler(event: WsEvent): void {
@@ -68,11 +70,17 @@ export function wsEventsHandler(event: WsEvent): void {
 			break;
 		}
 		case WsEventType.ROOM_MEMBER_ADDED: {
+			console.log(state.meetings[event.roomId]);
 			if (eventArrivesFromAnotherSession) {
 				if (event.member.userId === state.session.id) {
 					RoomsApi.getRoom(event.roomId)
 						.then((response: GetRoomResponse) => {
 							state.addRoom(response);
+							MeetingsApi.getMeeting(response.id)
+								.then((meetingResponse: GetMeetingResponse) => {
+									state.addMeeting(meetingResponse);
+								})
+								.catch();
 						})
 						.catch(() => null);
 				} else {
@@ -85,6 +93,9 @@ export function wsEventsHandler(event: WsEvent): void {
 			if (eventArrivesFromAnotherSession) {
 				if (event.userId === state.session.id) {
 					state.deleteRoom(event.roomId);
+					if (state.meetings[event.roomId] !== undefined) {
+						state.deleteMeeting(state.meetings[event.roomId].id);
+					}
 				} else {
 					state.removeRoomMember(event.roomId, event.userId);
 				}
