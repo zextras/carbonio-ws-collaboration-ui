@@ -10,34 +10,35 @@ import { setup } from 'test-utils';
 
 import ForwardedMessageSectionView from './ForwardedMessageSectionView';
 import useStore from '../../../store/Store';
-import { createMockRoom, createMockTextMessage, createMockUser } from '../../../tests/createMock';
-import { RoomBe } from '../../../types/network/models/roomBeTypes';
+import { createMockTextMessage, createMockUser } from '../../../tests/createMock';
 import { UserBe } from '../../../types/network/models/userBeTypes';
-import { ForwardedMessage } from '../../../types/store/MessageTypes';
 import { RootStore } from '../../../types/store/StoreTypes';
 
 const forwardedUser: UserBe = createMockUser({ id: 'forwardedUserId', name: 'User' });
 
-const testRoom: RoomBe = createMockRoom({
-	id: 'roomTest',
-	name: 'Test room'
-});
-
-const messageToForward = createMockTextMessage({ roomId: testRoom.id, from: forwardedUser.id });
-
-const forwardedMessage: ForwardedMessage = {
-	id: messageToForward.id,
-	date: messageToForward.date,
-	from: messageToForward.from,
-	text: messageToForward.text
+const textMessage = createMockTextMessage({ from: forwardedUser.id });
+const forwardedInfo = {
+	id: textMessage.id,
+	date: textMessage.date,
+	from: textMessage.from,
+	count: 1
 };
 
 describe('Forward Message Section View', () => {
 	test('All elements are rendered', () => {
 		const store: RootStore = useStore.getState();
-		store.addRoom(testRoom);
 		store.setUserInfo(forwardedUser);
-		setup(<ForwardedMessageSectionView forwardedMessage={forwardedMessage} isMyMessage={false} />);
+		const forwardedMessage = createMockTextMessage({
+			id: 'forwardedMessageId',
+			forwarded: forwardedInfo
+		});
+		setup(
+			<ForwardedMessageSectionView
+				message={forwardedMessage}
+				forwardedInfo={forwardedInfo}
+				isMyMessage={false}
+			/>
+		);
 
 		// Displayed username is the username of who forward message
 		const userName = screen.getByText(new RegExp(forwardedUser.name, 'i'));
@@ -49,61 +50,58 @@ describe('Forward Message Section View', () => {
 	});
 
 	test('Forward file is rendered - no description', () => {
-		const forwardedAttachmentMessage: ForwardedMessage = {
-			id: messageToForward.id,
-			date: messageToForward.date,
-			from: messageToForward.from,
+		const store: RootStore = useStore.getState();
+		store.setUserInfo(forwardedUser);
+		const forwardedMessageWithAttachment = createMockTextMessage({
+			id: 'forwardedTextMessageWithAttachmentId',
 			text: '',
 			attachment: {
 				id: 'attachmentId',
 				name: 'attachmentName',
 				mimeType: 'image/png',
 				size: 1000
-			}
-		};
-
-		const store: RootStore = useStore.getState();
-		store.addRoom(testRoom);
-		store.setUserInfo(forwardedUser);
+			},
+			forwarded: forwardedInfo
+		});
 		setup(
 			<ForwardedMessageSectionView
-				forwardedMessage={forwardedAttachmentMessage}
+				message={forwardedMessageWithAttachment}
+				forwardedInfo={forwardedMessageWithAttachment.forwarded!}
 				isMyMessage={false}
 			/>
 		);
 
 		// Displayed text is the name of the file
-		const fileName = forwardedAttachmentMessage.attachment?.name || '';
+		const fileName = forwardedMessageWithAttachment.attachment?.name || '';
 		const message = screen.getByText(new RegExp(fileName, 'i'));
 		expect(message).toBeInTheDocument();
 	});
 
 	test('Forward file is rendered - with description', () => {
-		const forwardedAttachmentMessage: ForwardedMessage = {
-			id: messageToForward.id,
-			date: messageToForward.date,
-			from: messageToForward.from,
-			text: 'hello world',
+		const forwardedMessageWithAttachment = createMockTextMessage({
+			id: 'forwardedTextMessageWithAttachmentId',
+			text: 'description',
 			attachment: {
 				id: 'attachmentId',
 				name: 'attachmentName',
 				mimeType: 'image/png',
 				size: 1000
-			}
-		};
+			},
+			forwarded: forwardedInfo
+		});
 
 		const store: RootStore = useStore.getState();
-		store.addRoom(testRoom);
 		store.setUserInfo(forwardedUser);
 		setup(
 			<ForwardedMessageSectionView
-				forwardedMessage={forwardedAttachmentMessage}
+				message={forwardedMessageWithAttachment}
+				forwardedInfo={forwardedInfo}
 				isMyMessage={false}
 			/>
 		);
 
 		// Displayed text is the text of the forwarded message
-		const message = screen.getByText(new RegExp(forwardedAttachmentMessage.text, 'i'));
+		const message = screen.getByText(new RegExp(forwardedMessageWithAttachment.text, 'i'));
 		expect(message).toBeInTheDocument();
 	});
 });

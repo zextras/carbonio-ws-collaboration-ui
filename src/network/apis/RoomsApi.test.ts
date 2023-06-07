@@ -405,7 +405,7 @@ describe('Rooms API', () => {
 			originalMessage: undefined,
 			originalMessageSentAt: dateToISODate(message.date)
 		};
-		await roomsApi.forwardMessages('roomId', [message]);
+		await roomsApi.forwardMessages(['roomId'], [message]);
 
 		// Set appropriate headers
 		const headers = new Headers();

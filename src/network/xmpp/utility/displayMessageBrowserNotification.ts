@@ -41,18 +41,12 @@ const displayMessageBrowserNotification = (message: TextMessage): void => {
 	if (notMyMessage && !inputIsFocused && room && !roomIsMuted && notificationsAreActive) {
 		const sender = store.users[message.from];
 		const title = room.type === RoomType.ONE_TO_ONE ? sender.name || sender.email || '' : room.name;
-		const textToDisplay = (): string => {
-			const attachment = message.attachment || message.forwarded?.attachment;
-			if (attachment) {
-				return message.text !== '' ? message.text : attachment.name;
-			}
-			return message.forwarded ? message.forwarded.text : message.text;
-		};
+		const text = message.attachment && message.text === '' ? message.attachment.name : message.text;
 
 		const textMessage =
 			room.type === RoomType.ONE_TO_ONE
-				? textToDisplay()
-				: `${(sender?.name || sender?.email)?.split(' ')[0]}: ${textToDisplay()}`;
+				? text
+				: `${(sender?.name || sender?.email)?.split(' ')[0]}: ${text}`;
 
 		getNotificationManager().notify({
 			showPopup: true,

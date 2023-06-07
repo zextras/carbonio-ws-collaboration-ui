@@ -18,7 +18,6 @@ import {
 	difference,
 	differenceBy,
 	find,
-	forEach,
 	keyBy,
 	map,
 	mapValues,
@@ -42,7 +41,6 @@ import styled from 'styled-components';
 import ForwardMessageConversationChip from './ForwardMessageConversationChip';
 import ForwardMessageConversationListItem from './ForwardMessageConversationListItem';
 import { RoomsApi } from '../../../network';
-import { getXmppClient } from '../../../store/selectors/ConnectionSelector';
 import { getRoomIdsOrderedLastMessage } from '../../../store/selectors/MessagesSelectors';
 import { getRoomNameSelector } from '../../../store/selectors/RoomsSelectors';
 import useStore from '../../../store/Store';
@@ -88,8 +86,6 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 	const [selected, setSelected] = useState<{ [id: string]: boolean }>({});
 	const [chatList, setChatList] = useState<{ id: string }[]>([]);
 	const [chips, setChips] = useState<{ id: string }[]>([]);
-
-	const xmppClient = useStore(getXmppClient);
 
 	// Update conversation list on filter updating
 	useEffect(() => {
@@ -146,16 +142,11 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 	);
 
 	const forwardMessage = useCallback(() => {
-		const isMyMessage = message.from === useStore.getState().session.id;
-		if (isMyMessage && !message.attachment) {
-			forEach(selected, (value, key) => xmppClient.sendChatMessage(key, message.text));
-			onClose();
-		} else {
-			Promise.all(map(selected, (value, key) => RoomsApi.forwardMessages(key, [message])))
-				.then(() => onClose())
-				.catch(() => onClose());
-		}
-	}, [message, onClose, selected, xmppClient]);
+		const roomsId = map(selected, (key, value) => value);
+		RoomsApi.forwardMessages(roomsId, [message])
+			.then(() => onClose())
+			.catch(() => onClose());
+	}, [message, onClose, selected]);
 
 	const ListItem = useMemo(
 		() =>

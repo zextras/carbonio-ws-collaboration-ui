@@ -52,11 +52,11 @@ const forwardedTextMessage = createMockTextMessage({
 	id: 'messageId',
 	roomId: mockedRoom.id,
 	from: user1.id,
-	text: '',
+	text: 'Forwarded text!',
 	forwarded: {
 		from: forwardedUser.id,
 		date: 1661441294393,
-		text: 'Forwarded text!'
+		count: 1
 	}
 });
 
@@ -171,7 +171,7 @@ describe('Message reference displayed', () => {
 		expect(userName).toBeInTheDocument();
 
 		// Displayed text is the text of the forwarded message
-		const message = screen.getByText(new RegExp(forwardedTextMessage.forwarded?.text || '', 'i'));
+		const message = screen.getByText(new RegExp(forwardedTextMessage.text || '', 'i'));
 		expect(message).toBeInTheDocument();
 	});
 
