@@ -221,7 +221,6 @@ const AttachmentView: FC<AttachmentViewProps> = ({ attachment, from, isMyMessage
 			orientation="horizontal"
 			crossAlignment="flex-start"
 			userBorderColor={isMyMessage ? '#C4D5EF' : userColor}
-			onClick={download}
 		>
 			<Row>
 				<AttachmentSmallView attachment={attachment} />
