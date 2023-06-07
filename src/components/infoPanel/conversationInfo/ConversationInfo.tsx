@@ -10,7 +10,6 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import RoomPictureHandler from './RoomPictureHandler';
-import { roomMembersLengthFn } from '../../../store/equalityFunctions/RoomsEqualityFunctions';
 import { getRoomMembers } from '../../../store/selectors/RoomsSelectors';
 import useStore from '../../../store/Store';
 import { Member, RoomType } from '../../../types/store/RoomTypes';
@@ -35,10 +34,7 @@ const ConversationInfo: FC<ConversationInfoProps> = ({ roomId, roomType, setInfo
 	const infoLabel = t('conversationInfo.info', 'Info');
 
 	const sessionId: string | undefined = useStore((store) => store.session.id);
-	const roomMembers: Member[] | undefined = useStore(
-		(state) => getRoomMembers(state, roomId),
-		roomMembersLengthFn
-	);
+	const roomMembers: Member[] | undefined = useStore((state) => getRoomMembers(state, roomId));
 	const isDesktopView = useMediaQueryCheck();
 
 	const memberId: string = useMemo(() => {
@@ -49,7 +45,6 @@ const ConversationInfo: FC<ConversationInfoProps> = ({ roomId, roomType, setInfo
 		return '';
 	}, [roomMembers, roomType, sessionId]);
 
-	// eslint-disable-next-line consistent-return
 	const infoAvatar = useMemo(
 		() => <RoomPictureHandler roomId={roomId} roomType={roomType} memberId={memberId} />,
 		[roomType, memberId, roomId]
