@@ -28,7 +28,11 @@ describe('Attachment view', () => {
 
 		// Download is triggered
 		mockedGetURLAttachment.mockReturnValue('image.jpg');
-		await user.click(genericIcon);
+		// Hover action is shown
+		await user.hover(screen.getByTestId('hover-container'));
+		const downloadIcon = screen.getByTestId('icon: DownloadOutline');
+		expect(downloadIcon).toBeInTheDocument();
+		await user.click(downloadIcon);
 		expect(mockedGetURLAttachment).toHaveBeenCalled();
 	});
 
