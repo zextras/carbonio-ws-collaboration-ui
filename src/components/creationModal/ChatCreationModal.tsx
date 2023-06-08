@@ -117,12 +117,16 @@ const ChatCreationModal = ({
 			onModalClose();
 		} else {
 			setIsPending(true);
-			RoomsApi.addRoom({
-				name: chatType === RoomType.ONE_TO_ONE ? ' ' : title,
-				description: chatType === RoomType.ONE_TO_ONE ? ' ' : topic,
-				type: chatType,
-				membersIds: ids
-			})
+			const creationFields =
+				chatType === RoomType.ONE_TO_ONE
+					? { membersIds: ids, type: chatType }
+					: {
+							name: title,
+							description: topic,
+							type: chatType,
+							membersIds: ids
+					  };
+			RoomsApi.addRoom(creationFields)
 				.then((response: AddRoomResponse) => {
 					setIsPending(false);
 					addRoom(response);

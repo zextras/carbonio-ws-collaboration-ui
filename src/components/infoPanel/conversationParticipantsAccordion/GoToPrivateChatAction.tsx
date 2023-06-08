@@ -38,8 +38,6 @@ const GoToPrivateChatAction: FC<GoToPrivateChatProps> = ({ memberId }) => {
 			goToRoomPage(oneToOneChatExist.id);
 		} else {
 			RoomsApi.addRoom({
-				name: ' ',
-				description: '',
 				type: RoomType.ONE_TO_ONE,
 				membersIds: [memberId]
 			}).then((response: AddRoomResponse) => {

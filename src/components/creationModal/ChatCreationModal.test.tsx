@@ -85,8 +85,8 @@ describe('Chat Creation Modal', () => {
 
 		mockedAddRoomRequest.mockReturnValue({
 			id: 'room-id',
-			name: ' ',
-			description: 'description',
+			name: '',
+			description: '',
 			type: RoomType.ONE_TO_ONE,
 			hash: 'hash',
 			createdAt: 'created',
@@ -95,6 +95,7 @@ describe('Chat Creation Modal', () => {
 		});
 		user.click(footerButton);
 		await waitFor(() => expect(footerButton).not.toHaveAttribute('disabled', true));
+		expect(mockedAddRoomRequest).toHaveBeenCalled();
 	});
 
 	test('Create a group', async () => {
@@ -137,6 +138,7 @@ describe('Chat Creation Modal', () => {
 		});
 		user.click(footerButton);
 		await waitFor(() => expect(footerButton).not.toHaveAttribute('disabled', true));
+		expect(mockedAddRoomRequest).toHaveBeenCalled();
 	});
 
 	test('title and topic fields are filled properly', async () => {

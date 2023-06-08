@@ -22,12 +22,17 @@ export enum RoomType {
 	GROUP = 'group'
 }
 
-export type RoomCreationFields = {
-	name: string; // min: 1, max: 128
-	description: string; // min: 0, max: 256
-	type: RoomType;
-	membersIds: string[]; // minItems: 1 (not include creator id)
-};
+export type RoomCreationFields =
+	| {
+			type: RoomType.ONE_TO_ONE;
+			membersIds: string[]; // only 1 item (other's user id, not mine)
+	  }
+	| {
+			type: RoomType.GROUP;
+			name: string; // min: 1, max: 128
+			description: string; // min: 0, max: 256
+			membersIds: string[]; // minItems: 1 (not include creator id)
+	  };
 
 export type RoomEditableFields = {
 	name?: string; // min: 1, max: 128
