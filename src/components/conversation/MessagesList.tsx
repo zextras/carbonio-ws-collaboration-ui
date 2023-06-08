@@ -5,7 +5,7 @@
  */
 
 import { Container } from '@zextras/carbonio-design-system';
-import { debounce, find, groupBy, map } from 'lodash';
+import { debounce, find, findLast, groupBy, map } from 'lodash';
 import moment from 'moment-timezone';
 import React, { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
@@ -86,26 +86,44 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 			const message: Message | undefined = find(roomMessages, (message) => refId === message.id);
 
 			// Conditions to mark the message as read
-			if (
-				inputHasFocus &&
-				message &&
-				message.type === MessageType.TEXT_MSG &&
-				message.from !== myUserId
-			) {
-				// set as ready to be mark when there isn't a marker because it's means I never saw a message of that conversation
-				// or my last marker is older and isn't present in the list of messages in the store
-				let canMessageBeMarkedAsRead = true;
-				// check if message is already marked as read by me or not
-				// if not it could mark as read
-				if (myLastMarker && find(roomMessages, (msg) => msg.id === myLastMarker.messageId)) {
-					const markedMsg = find(roomMessages, (msg) => msg.id === myLastMarker.messageId);
-					canMessageBeMarkedAsRead =
-						!!markedMsg &&
-						markedMsg.date !== message.date &&
-						isBefore(markedMsg.date, message.date);
-				}
-				if (canMessageBeMarkedAsRead) {
-					xmppClient.readMessage(message.roomId, message.id);
+			if (inputHasFocus && message) {
+				// If is a text message
+				if (message.type === MessageType.TEXT_MSG && message.from !== myUserId) {
+					// set as ready to be mark when there isn't a marker because it's means I never saw a message of that conversation
+					// or my last marker is older and isn't present in the list of messages in the store
+					let canMessageBeMarkedAsRead = true;
+					// check if message is already marked as read by me or not
+					// if not it could mark as read
+					if (myLastMarker && find(roomMessages, (msg) => msg.id === myLastMarker.messageId)) {
+						const markedMsg = find(roomMessages, (msg) => msg.id === myLastMarker.messageId);
+						canMessageBeMarkedAsRead =
+							!!markedMsg &&
+							markedMsg.date !== message.date &&
+							isBefore(markedMsg.date, message.date);
+					}
+					if (canMessageBeMarkedAsRead) {
+						xmppClient.readMessage(message.roomId, message.id);
+					}
+					// If the last message is configuration or affiliation message we need to mark as read the last text message in the history
+					// otherwise when user focus the conversation we will not be able to mark the message as read
+				} else if (
+					message.type === MessageType.AFFILIATION_MSG ||
+					message.type === MessageType.CONFIGURATION_MSG
+				) {
+					const lastMessageNotMineFromHistory = findLast(
+						roomMessages,
+						(message) => message.type === MessageType.TEXT_MSG && message.from !== myUserId
+					) as TextMessage;
+					if (
+						lastMessageNotMineFromHistory &&
+						myLastMarker &&
+						myLastMarker.messageId !== lastMessageNotMineFromHistory.id
+					) {
+						xmppClient.readMessage(
+							lastMessageNotMineFromHistory.roomId,
+							lastMessageNotMineFromHistory.id
+						);
+					}
 				}
 			}
 		},
