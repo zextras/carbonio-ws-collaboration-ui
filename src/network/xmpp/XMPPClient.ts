@@ -297,12 +297,12 @@ class XMPPClient implements IXMPPClient {
 			const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) }).c('query', {
 				xmlns: Strophe.NS.MAM
 			});
-			this.connection.sendIQ(iq, onRequestHistory.bind(this), onErrorStanza);
+			this.connection.sendIQ(iq, onRequestHistory.bind(this, undefined), onErrorStanza);
 		}
 	}
 
 	// Request n messages before end date but not before start date
-	requestHistory(roomId: string, endHistory: number, quantity = 5): void {
+	requestHistory(roomId: string, endHistory: number, quantity: number, unread?: number): void {
 		const clearedAt = useStore.getState().rooms[roomId].userSettings?.clearedAt;
 		const startHistory = clearedAt || useStore.getState().rooms[roomId].createdAt;
 		console.log('History conversation request triggered');
@@ -332,11 +332,11 @@ class XMPPClient implements IXMPPClient {
 			.up()
 			.c('before');
 		if (this.connection && this.connection.connected) {
-			this.connection.sendIQ(iq, onRequestHistory.bind(this), onErrorStanza);
+			this.connection.sendIQ(iq, onRequestHistory.bind(this, unread), onErrorStanza);
 		}
 		// If XMPP is offline, save request to perform it later
 		else if (!find(this.requestsQueue, (request) => request.roomId === roomId)) {
-			this.requestsQueue.push({ iq, callback: onRequestHistory.bind(this), roomId });
+			this.requestsQueue.push({ iq, callback: onRequestHistory.bind(this, unread), roomId });
 		}
 	}
 
@@ -357,7 +357,7 @@ class XMPPClient implements IXMPPClient {
 				.c('field', { var: 'to_id' })
 				.c('value')
 				.t(newerMessageId);
-			this.connection.sendIQ(iq, onRequestHistory.bind(this), onErrorStanza);
+			this.connection.sendIQ(iq, onRequestHistory.bind(this, undefined), onErrorStanza);
 		}
 	}
 
