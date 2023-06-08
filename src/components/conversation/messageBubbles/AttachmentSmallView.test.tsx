@@ -31,7 +31,7 @@ describe('Attachment Small view', () => {
 
 		// Download action is triggered
 		await user.click(downloadIcon);
-		expect(mockedGetURLAttachment).toHaveBeenCalled();
+		expect(mockedGetURLAttachment).toHaveBeenCalledTimes(1);
 	});
 
 	test('Preview image file', async () => {
