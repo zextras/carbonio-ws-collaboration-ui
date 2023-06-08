@@ -89,7 +89,6 @@ const FileContainer = styled(Container)`
 	border-left: ${({ userBorderColor, theme }): string =>
 		`0.25rem solid ${theme.avatarColors[userBorderColor]}`};
 	border-radius: 0 0.25rem 0.25rem 0;
-	cursor: pointer;
 `;
 
 type AttachmentViewProps = {
