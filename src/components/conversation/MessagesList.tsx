@@ -126,7 +126,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 		debounce(() => {
 			const date = roomMessages.length > 0 ? roomMessages[0].date : now();
 			if (!historyLoadedDisabled) {
-				xmppClient.requestHistory(roomId, date, 50);
+				xmppClient.requestHistory(roomId, date, 50, useStore.getState().unreads[roomId]);
 				setHistoryLoadDisabled(roomId, true);
 			}
 		}, 500),
