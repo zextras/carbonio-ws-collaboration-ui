@@ -64,6 +64,7 @@ const meeting: MeetingBe = createMockMeeting({
 });
 
 const room: RoomBe = createMockRoom({
+	id: 'id',
 	name: 'Room With Me',
 	description: '',
 	type: RoomType.GROUP,
@@ -72,6 +73,7 @@ const room: RoomBe = createMockRoom({
 });
 
 const roomWithoutMe: RoomBe = createMockRoom({
+	id: 'id',
 	name: 'Room Without Me',
 	description: '',
 	type: RoomType.GROUP,
@@ -92,12 +94,7 @@ describe('wsEventHandler', () => {
 		});
 
 		mockedGetRoomRequest.mockReturnValue(room);
-		mockedGetMeetingRequest.mockReturnValue({
-			id: 'meetingId',
-			roomId: 'id',
-			participants: [user3Participant, user2Participant],
-			createdAt: '2022-08-25T17:24:28.961+02:00'
-		});
+		mockedGetMeetingRequest.mockReturnValue(meeting);
 
 		wsEventsHandler({
 			type: WsEventType.ROOM_MEMBER_ADDED,

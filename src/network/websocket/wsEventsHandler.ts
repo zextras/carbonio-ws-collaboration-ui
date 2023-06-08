@@ -77,7 +77,6 @@ export function wsEventsHandler(event: WsEvent): void {
 							if (response.meetingId) {
 								MeetingsApi.getMeeting(response.id)
 									.then((meetingResponse: GetMeetingResponse) => {
-										console.log(meetingResponse);
 										state.addMeeting(meetingResponse);
 									})
 									.catch();
