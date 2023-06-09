@@ -302,12 +302,18 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 	}, [roomId]);
 
 	useEffect(() => {
+		const lastMsg =
+			roomMessages.length > 0
+				? document.getElementById(`message-${roomMessages[roomMessages.length - 1].id}`)
+				: null;
+		const lastMsgRect = lastMsg ? lastMsg.getBoundingClientRect() : null;
 		// Scroll all the way down when the is writing label appears to make it always visible
 		if (
 			usersWritingList &&
 			usersWritingList.length > 0 &&
 			roomMessages.length > 0 &&
-			actualScrollPosition === roomMessages[roomMessages.length - 1].id
+			lastMsgRect !== null &&
+			lastMsgRect.bottom === document.documentElement.clientHeight
 		) {
 			if (MessagesListWrapperRef.current) {
 				MessagesListWrapperRef.current.scrollTo({
