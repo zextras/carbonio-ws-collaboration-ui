@@ -391,6 +391,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 		// if we scrolled up in the history
 		(messageFromEvent) => {
 			if (
+				roomMessages.length > 0 &&
 				messageFromEvent.detail.roomId === roomId &&
 				(actualScrollPosition === roomMessages[roomMessages.length - 1].id ||
 					(messageFromEvent.detail.type === MessageType.TEXT_MSG &&
