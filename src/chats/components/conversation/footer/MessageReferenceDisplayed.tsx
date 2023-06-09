@@ -97,7 +97,7 @@ const MessageReferenceDisplayed: React.FC<MessageReferenceDisplayedProps> = ({
 			}
 			return message.text !== '' ? message.text : message.attachment.name;
 		}
-		return message.forwarded ? message.forwarded.text : message.text;
+		return message.text;
 	}, [message, referenceMessage.actionType]);
 
 	const previewURL = useMemo(() => {

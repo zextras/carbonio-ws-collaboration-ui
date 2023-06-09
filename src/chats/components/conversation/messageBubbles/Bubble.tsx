@@ -133,11 +133,12 @@ const Bubble: FC<BubbleProps> = ({
 			)}
 			{message.forwarded && (
 				<ForwardedTextMessageSectionView
-					forwardedMessage={message.forwarded}
+					message={message}
+					forwardedInfo={message.forwarded}
 					isMyMessage={isMyMessage}
 				/>
 			)}
-			{message.attachment && (
+			{message.attachment && !message.forwarded && (
 				<>
 					<AttachmentView
 						attachment={message.attachment}
@@ -147,7 +148,7 @@ const Bubble: FC<BubbleProps> = ({
 					<Padding bottom="0.5rem" />
 				</>
 			)}
-			<TextContentBubble textContent={messageFormatted} />
+			{!message.forwarded && <TextContentBubble textContent={messageFormatted} />}
 			<BubbleFooter
 				isMyMessage={isMyMessage}
 				date={message.date}

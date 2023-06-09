@@ -70,7 +70,7 @@ interface IRoomsApi {
 		signal?: AbortSignal
 	): Promise<AddRoomAttachmentResponse>;
 	forwardMessages(
-		roomId: string,
+		roomsId: string[],
 		messagesToForward: TextMessage[]
 	): Promise<ForwardMessagesResponse>;
 }

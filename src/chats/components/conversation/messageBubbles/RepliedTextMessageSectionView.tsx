@@ -131,10 +131,9 @@ const RepliedTextMessageSectionView: FC<RepliedTextMessageSectionViewProps> = ({
 
 	const textToShow = useMemo(() => {
 		if (repliedMessage.type === MessageType.TEXT_MSG) {
-			if (repliedMessage.attachment) {
-				return repliedMessage.text !== '' ? repliedMessage.text : repliedMessage.attachment.name;
-			}
-			return repliedMessage.forwarded ? repliedMessage.forwarded.text : repliedMessage.text;
+			return repliedMessage.attachment && repliedMessage.text === ''
+				? repliedMessage.attachment.name
+				: repliedMessage.text;
 		}
 		return '';
 	}, [repliedMessage]);

@@ -129,8 +129,7 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 	const createSnackbar: any = useContext(SnackbarManagerContext);
 
 	const { onPreviewClick } = usePreview(
-		message.attachment ||
-			message.forwarded?.attachment || { id: '', name: '', mimeType: '', size: 0 }
+		message.attachment || { id: '', name: '', mimeType: '', size: 0 }
 	);
 
 	const onDropdownOpen = useCallback(() => setDropdownActive(true), [setDropdownActive]);
@@ -147,12 +146,11 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 	);
 
 	const copyMessageAction = useCallback(() => {
-		const textToCopy = !message.forwarded ? message.text : message.forwarded.text;
 		if (window.parent.navigator.clipboard) {
-			window.parent.navigator.clipboard.writeText(textToCopy).then();
+			window.parent.navigator.clipboard.writeText(message.text).then();
 		} else {
 			const input = window.document.createElement('input');
-			input.setAttribute('value', textToCopy);
+			input.setAttribute('value', message.text);
 			window.parent.document.body.appendChild(input);
 			input.select();
 			window.parent.document.execCommand('copy');
@@ -164,7 +162,7 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 			label: successfulCopySnackbar,
 			hideButton: true
 		});
-	}, [createSnackbar, message.forwarded, message.text, successfulCopySnackbar]);
+	}, [createSnackbar, message.text, successfulCopySnackbar]);
 
 	const editMessageAction = useCallback(() => {
 		setDraftMessage(message.roomId, false, message.text);
@@ -179,37 +177,27 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 	}, [message, setDraftMessage, setReferenceMessage]);
 
 	const deleteMessageAction = useCallback(() => {
-		const attachment = message.attachment || message.forwarded?.attachment;
-		if (attachment) {
-			AttachmentsApi.deleteAttachment(attachment.id).then(() =>
+		if (message.attachment) {
+			AttachmentsApi.deleteAttachment(message.attachment.id).then(() =>
 				xmppClient.sendChatMessageDeletion(message.roomId, message.stanzaId)
 			);
 		} else {
 			xmppClient.sendChatMessageDeletion(message.roomId, message.stanzaId);
 		}
-	}, [
-		message.attachment,
-		message.forwarded?.attachment,
-		message.stanzaId,
-		message.roomId,
-		xmppClient
-	]);
+	}, [message.attachment, message.stanzaId, message.roomId, xmppClient]);
 
 	const downloadAction = useCallback(() => {
-		const attachment = message.attachment || message.forwarded?.attachment;
-		if (attachment) {
-			const downloadUrl = AttachmentsApi.getURLAttachment(attachment.id);
+		if (message.attachment) {
+			const downloadUrl = AttachmentsApi.getURLAttachment(message.attachment.id);
 			const linkTag: HTMLAnchorElement = document.createElement('a');
 			document.body.appendChild(linkTag);
 			linkTag.href = downloadUrl;
-			linkTag.download = attachment.name;
+			linkTag.download = message.attachment.name;
 			linkTag.target = '_blank';
 			linkTag.click();
 			linkTag.remove();
 		}
-	}, [message.attachment, message.forwarded]);
-
-	const canBeForwarded = useMemo(() => !message.forwarded, [message.forwarded]);
+	}, [message.attachment]);
 
 	const canBeEdited = useMemo(() => {
 		const inTime =
@@ -227,15 +215,12 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 		return isMyMessage && inTime;
 	}, [deleteMessageTimeLimitInMinutes, isMyMessage, message.date]);
 
-	const canBePreviewed = useMemo(() => {
-		const attachment = message.attachment || message.forwarded?.attachment;
-		return attachment && isPreviewSupported(attachment.mimeType);
-	}, [message.attachment, message.forwarded?.attachment]);
-
-	const canBeDownloaded = useMemo(
-		() => message.attachment || message.forwarded?.attachment,
-		[message.attachment, message.forwarded?.attachment]
+	const canBePreviewed = useMemo(
+		() => message.attachment && isPreviewSupported(message.attachment.mimeType),
+		[message.attachment]
 	);
+
+	const canBeDownloaded = useMemo(() => message.attachment, [message.attachment]);
 
 	const contextualMenuActions = useMemo(() => {
 		const actions: DropDownActionType[] = [];
@@ -256,13 +241,11 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 		});
 
 		// Forward message in another chat
-		if (canBeForwarded) {
-			actions.push({
-				id: 'forward',
-				label: forwardActionLabel,
-				onClick: onOpenForwardMessageModal
-			});
-		}
+		actions.push({
+			id: 'forward',
+			label: forwardActionLabel,
+			onClick: onOpenForwardMessageModal
+		});
 
 		// Copy the text of a text message to the clipboard
 		actions.push({
@@ -311,7 +294,6 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 		return actions;
 	}, [
 		replyActionLabel,
-		canBeForwarded,
 		copyActionLabel,
 		copyMessageAction,
 		canBeEdited,
