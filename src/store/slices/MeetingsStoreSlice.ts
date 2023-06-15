@@ -10,7 +10,11 @@ import { find, forEach } from 'lodash';
 
 import { UsersApi } from '../../network';
 import { MeetingBe, MeetingParticipantBe } from '../../types/network/models/meetingBeTypes';
-import { MeetingParticipantMap, MeetingViewType } from '../../types/store/MeetingTypes';
+import {
+	MeetingChatVisibility,
+	MeetingParticipantMap,
+	MeetingViewType
+} from '../../types/store/MeetingTypes';
 import { MeetingsSlice, RootStore } from '../../types/store/StoreTypes';
 
 export const useMeetingsStoreSlice = (set: (...any: any) => void): MeetingsSlice => ({
@@ -40,6 +44,7 @@ export const useMeetingsStoreSlice = (set: (...any: any) => void): MeetingsSlice
 						participants: participantsMap,
 						createdAt: meeting.createdAt,
 						sidebarStatus: true,
+						chatVisibility: MeetingChatVisibility.CLOSED,
 						meetingViewSelected: MeetingViewType.WAITING
 					};
 
@@ -78,6 +83,7 @@ export const useMeetingsStoreSlice = (set: (...any: any) => void): MeetingsSlice
 					participants: participantsMap,
 					createdAt: meeting.createdAt,
 					sidebarStatus: true,
+					chatVisibility: MeetingChatVisibility.CLOSED,
 					meetingViewSelected: MeetingViewType.WAITING
 				};
 
@@ -192,6 +198,21 @@ export const useMeetingsStoreSlice = (set: (...any: any) => void): MeetingsSlice
 			}),
 			false,
 			'MEETINGS/SET_VIEW_TYPE'
+		);
+	},
+	toggleMeetingChatVisibility: (
+		meetingId: string,
+		visibilityStatus: MeetingChatVisibility
+	): void => {
+		set(
+			produce((draft: RootStore) => {
+				const meeting = find(draft.meetings, (meeting) => meeting.id === meetingId);
+				if (meeting) {
+					draft.meetings[meeting.roomId].chatVisibility = visibilityStatus;
+				}
+			}),
+			false,
+			'MEETINGS/SET_CHAT_VIEW'
 		);
 	}
 });

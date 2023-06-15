@@ -5,11 +5,10 @@
  */
 
 import { Container } from '@zextras/carbonio-design-system';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
 import { disable, enable } from 'darkreader';
 import React, { lazy, ReactElement, Suspense, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import styled from 'styled-components';
 
 import ShimmerMeetingSidebar from './shimmers/ShimmerMeetingSidebar';
 import ShimmerMeetingStreamsWrapper from './shimmers/ShimmerMeetingStreamsWrapper';
@@ -40,6 +39,11 @@ const MeetingSidebar = (): ReactElement => (
 	</Suspense>
 );
 
+const CustomContainer = styled(Container)`
+	overflow: hidden;
+	height: 100vh;
+`;
+
 const MeetingSkeleton = (): ReactElement => {
 	const { meetingId }: Record<string, string> = useParams();
 	const meeting = useStore((store) => getMeetingByMeetingId(store, meetingId));
@@ -48,7 +52,7 @@ const MeetingSkeleton = (): ReactElement => {
 	useEffect(() => {
 		enable(
 			{
-				sepia: -50
+				sepia: 0
 			},
 			{
 				ignoreImageAnalysis: ['.no-dr-invert *'],
@@ -73,10 +77,10 @@ const MeetingSkeleton = (): ReactElement => {
 	}, [goToInfoPage, meeting]);
 
 	return (
-		<Container orientation="horizontal" borderRadius="none">
+		<CustomContainer orientation="horizontal" borderRadius="none">
 			<MeetingSidebar />
 			<MeetingStreamsWrapper />
-		</Container>
+		</CustomContainer>
 	);
 };
 

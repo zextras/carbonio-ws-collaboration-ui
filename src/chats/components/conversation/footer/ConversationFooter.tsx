@@ -22,7 +22,7 @@ type ConversationFooterProps = {
 };
 
 const ConversationFooter: React.FC<ConversationFooterProps> = ({ roomId }) => (
-	<ConversationFooterWrapper height="fit" background={'gray6'}>
+	<ConversationFooterWrapper height="fit" background={'gray6'} borderRadius="none">
 		<ReferenceMessageView roomId={roomId} />
 		<UploadAttachmentManagerView roomId={roomId} />
 		<MessageComposer roomId={roomId} />
