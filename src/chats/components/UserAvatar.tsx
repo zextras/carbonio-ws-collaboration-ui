@@ -115,8 +115,10 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ roomId, unreadCount, draftMessa
 
 	const userColor = useMemo(() => {
 		const color = calculateAvatarColor(userName || '');
-		return `linear-gradient(0deg, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), ${themeColor.avatarColors[color]}`;
-	}, [userName, themeColor]);
+		return isMeetingActive
+			? `linear-gradient(0deg, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), ${themeColor.avatarColors[color]}`
+			: `${themeColor.avatarColors[color]}`;
+	}, [userName, isMeetingActive, themeColor.avatarColors]);
 
 	const avatarUser = useMemo(() => {
 		if (isMeetingActive) {
@@ -134,10 +136,26 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ roomId, unreadCount, draftMessa
 			);
 		}
 		if (draftMessage) {
-			return <Avatar icon="Edit2" label={userName} title={userName} shape="round" />;
+			return (
+				<Avatar
+					icon="Edit2"
+					label={userName}
+					title={userName}
+					shape="round"
+					background={userColor}
+				/>
+			);
 		}
 		if (roomMuted) {
-			return <Avatar icon="BellOff" label={userName} title={userName} shape="round" />;
+			return (
+				<Avatar
+					icon="BellOff"
+					label={userName}
+					title={userName}
+					shape="round"
+					background={userColor}
+				/>
+			);
 		}
 		return (
 			<Avatar
@@ -145,6 +163,7 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ roomId, unreadCount, draftMessa
 				label={userName}
 				title={userName}
 				shape="round"
+				background={userColor}
 				picture={picture}
 			/>
 		);

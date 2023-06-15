@@ -71,8 +71,10 @@ const GroupAvatar: React.FC<UserAvatarProps> = ({ roomId, unreadCount, draftMess
 
 	const userColor = useMemo(() => {
 		const color = calculateAvatarColor(roomName);
-		return `linear-gradient(0deg, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), ${themeColor.avatarColors[color]}`;
-	}, [roomName, themeColor]);
+		return isMeetingActive
+			? `linear-gradient(0deg, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), ${themeColor.avatarColors[color]}`
+			: `${themeColor.avatarColors[color]}`;
+	}, [isMeetingActive, roomName, themeColor.avatarColors]);
 
 	const avatarGroup = useMemo(() => {
 		if (isMeetingActive) {
@@ -90,10 +92,26 @@ const GroupAvatar: React.FC<UserAvatarProps> = ({ roomId, unreadCount, draftMess
 			);
 		}
 		if (draftMessage) {
-			return <Avatar icon="Edit2" label={roomName} title={roomName} shape="square" />;
+			return (
+				<Avatar
+					icon="Edit2"
+					label={roomName}
+					title={roomName}
+					shape="square"
+					background={userColor}
+				/>
+			);
 		}
 		if (roomMuted) {
-			return <Avatar icon="BellOff" label={roomName} title={roomName} shape="square" />;
+			return (
+				<Avatar
+					icon="BellOff"
+					label={roomName}
+					title={roomName}
+					shape="square"
+					background={userColor}
+				/>
+			);
 		}
 		return (
 			<Avatar
@@ -101,6 +119,7 @@ const GroupAvatar: React.FC<UserAvatarProps> = ({ roomId, unreadCount, draftMess
 				label={roomName}
 				title={roomName}
 				shape="square"
+				background={userColor}
 				picture={picture}
 			/>
 		);
