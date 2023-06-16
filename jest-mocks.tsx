@@ -13,6 +13,7 @@ import {
 import React, { ReactElement } from 'react';
 
 import { AutoCompleteGalResponse } from './src/network/soap/AutoCompleteRequest';
+import { GetMeetingResponse } from './src/types/network/responses/meetingsResponses';
 import {
 	AddRoomResponse,
 	DeleteRoomPictureResponse,
@@ -26,7 +27,8 @@ import {
 	PromoteRoomMemberResponse,
 	DemotesRoomMemberResponse,
 	AddRoomMemberResponse,
-	ForwardMessagesResponse
+	ForwardMessagesResponse,
+	GetRoomResponse
 } from './src/types/network/responses/roomsResponses';
 import {
 	GetUserPictureResponse,
@@ -94,6 +96,8 @@ jest.mock('./src/network/soap/AutoCompleteRequest', () => ({
 
 // MOCKED APIs
 export const mockedAddRoomRequest: jest.Mock = jest.fn();
+export const mockedGetRoomRequest: jest.Mock = jest.fn();
+
 export const mockedDeleteRoomRequest: jest.Mock = jest.fn();
 export const mockedClearHistoryRequest: jest.Mock = jest.fn();
 export const mockedUpdateRoomPictureRequest: jest.Mock = jest.fn();
@@ -115,12 +119,18 @@ export const mockedPromoteRoomMemberRequest: jest.Mock = jest.fn();
 export const mockedDemotesRoomMemberRequest: jest.Mock = jest.fn();
 export const mockedAddRoomMemberRequest: jest.Mock = jest.fn();
 export const mockedForwardMessagesRequest: jest.Mock = jest.fn();
+export const mockedGetMeetingRequest: jest.Mock = jest.fn();
 
 jest.mock('./src/network', () => ({
 	RoomsApi: {
 		addRoom: (): Promise<AddRoomResponse> =>
 			new Promise((resolve, reject) => {
 				const result = mockedAddRoomRequest();
+				result ? resolve(result) : reject(new Error('no result provided'));
+			}),
+		getRoom: (): Promise<GetRoomResponse> =>
+			new Promise((resolve, reject) => {
+				const result = mockedGetRoomRequest();
 				result ? resolve(result) : reject(new Error('no result provided'));
 			}),
 		deleteRoom: (): Promise<DeleteRoomResponse> =>
@@ -206,6 +216,13 @@ jest.mock('./src/network', () => ({
 		getImageThumbnailURL: mockedGetImageThumbnailURL,
 		getPdfPreviewURL: mockedGetPdfURL,
 		getPdfThumbnailURL: mockedGetPdfThumbnailURL
+	},
+	MeetingsApi: {
+		getMeeting: (): Promise<GetMeetingResponse> =>
+			new Promise((resolve, reject) => {
+				const result = mockedGetMeetingRequest();
+				result ? resolve(result) : reject(new Error('no result provided'));
+			})
 	}
 }));
 

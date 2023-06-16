@@ -103,8 +103,8 @@ describe('Bubble Contextual Menu - other user messages', () => {
 		expect(replyAction).toBeInTheDocument();
 		const copyAction = screen.getByText(/Copy/i);
 		expect(copyAction).toBeInTheDocument();
-		const forwardAction = screen.queryByText(/Forward/i);
-		expect(forwardAction).not.toBeInTheDocument();
+		const forwardAction = screen.getByText(/Forward/i);
+		expect(forwardAction).toBeInTheDocument();
 		const editAction = screen.queryByText(/Edit/i);
 		expect(editAction).not.toBeInTheDocument();
 		const deleteAction = screen.queryByText(/Delete/i);
@@ -236,8 +236,8 @@ describe('Bubble Contextual Menu - my messages', () => {
 		expect(replyAction).toBeInTheDocument();
 		const copyAction = screen.getByText(/Copy/i);
 		expect(copyAction).toBeInTheDocument();
-		const forwardAction = screen.queryByText(/Forward/i);
-		expect(forwardAction).not.toBeInTheDocument();
+		const forwardAction = screen.getByText(/Forward/i);
+		expect(forwardAction).toBeInTheDocument();
 		const editAction = screen.queryByText(/Edit/i);
 		expect(editAction).not.toBeInTheDocument();
 		const deleteAction = screen.queryByTestId(/Delete/i);

@@ -173,24 +173,18 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 						if (lastMessageOfRoom.deleted) {
 							return deletedMessageLabel;
 						}
-						const text = (): string => {
-							const attachment =
-								lastMessageOfRoom.attachment || lastMessageOfRoom.forwarded?.attachment;
-							if (attachment) {
-								return lastMessageOfRoom.text !== '' ? lastMessageOfRoom.text : attachment.name;
-							}
-							return lastMessageOfRoom.forwarded
-								? lastMessageOfRoom.forwarded.text
+						const text =
+							lastMessageOfRoom.attachment && lastMessageOfRoom.text === ''
+								? lastMessageOfRoom.attachment.name
 								: lastMessageOfRoom.text;
-						};
 						if (
 							roomType === RoomType.GROUP &&
 							lastMessageOfRoom.from !== sessionId &&
 							userNameOfLastMessageOfRoom
 						) {
-							return `${userNameOfLastMessageOfRoom.split(/(\s+)/)[0]}: ${text()}`;
+							return `${userNameOfLastMessageOfRoom.split(/(\s+)/)[0]}: ${text}`;
 						}
-						return text();
+						return text;
 					}
 					case MessageType.AFFILIATION_MSG:
 						return affiliationMessage(
@@ -317,7 +311,7 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 									</Tooltip>
 								)}
 								{lastMessageOfRoom?.type === MessageType.TEXT_MSG &&
-									(lastMessageOfRoom.attachment || lastMessageOfRoom.forwarded?.attachment) && (
+									lastMessageOfRoom.attachment && (
 										<Container width="fit" padding={{ right: 'extrasmall' }}>
 											<Icon size="small" icon="FileTextOutline" color="gray" />
 										</Container>

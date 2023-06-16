@@ -14,7 +14,7 @@ import BubbleFooter from './BubbleFooter';
 import BubbleHeader from './BubbleHeader';
 import { getUserName } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
-import { ForwardedMessage } from '../../../../types/store/MessageTypes';
+import { ForwardedInfo, TextMessage } from '../../../../types/store/MessageTypes';
 import { calculateAvatarColor } from '../../../../utils/styleUtils';
 
 const ForwardMessageContainer = styled(Container)`
@@ -28,14 +28,16 @@ const MessageWrap = styled(Text)`
 `;
 
 type ForwardedMessageSectionViewProps = {
-	forwardedMessage: ForwardedMessage;
+	message: TextMessage;
+	forwardedInfo: ForwardedInfo;
 	isMyMessage: boolean;
 };
 const ForwardedMessageSectionView: FC<ForwardedMessageSectionViewProps> = ({
-	forwardedMessage,
+	message,
+	forwardedInfo,
 	isMyMessage
 }) => {
-	const forwardUsername = useStore((store) => getUserName(store, forwardedMessage.from));
+	const forwardUsername = useStore((store) => getUserName(store, forwardedInfo.from));
 
 	const [t] = useTranslation();
 	const forwardedMessageTooltip = t(
@@ -45,14 +47,10 @@ const ForwardedMessageSectionView: FC<ForwardedMessageSectionViewProps> = ({
 
 	const userColor = useMemo(() => calculateAvatarColor(forwardUsername || ''), [forwardUsername]);
 
-	const textToShow = useMemo(() => {
-		if (forwardedMessage.attachment) {
-			return forwardedMessage.text !== ''
-				? forwardedMessage.text
-				: forwardedMessage.attachment.name;
-		}
-		return forwardedMessage.text;
-	}, [forwardedMessage]);
+	const textToShow = useMemo(
+		() => (message.attachment && message.text === '' ? message.attachment.name : message.text),
+		[message]
+	);
 
 	return (
 		<Tooltip label={forwardedMessageTooltip}>
@@ -63,18 +61,18 @@ const ForwardedMessageSectionView: FC<ForwardedMessageSectionViewProps> = ({
 				userBorderColor={userColor}
 				crossAlignment="flex-start"
 			>
-				{forwardedMessage.attachment && (
+				{message.attachment && (
 					<Row wrap="nowrap">
-						<AttachmentSmallView attachment={forwardedMessage.attachment} />
+						<AttachmentSmallView attachment={message.attachment} />
 					</Row>
 				)}
 				<Row takeAvailableSpace wrap="nowrap">
 					<Container crossAlignment="flex-start">
-						{forwardUsername && <BubbleHeader senderId={forwardedMessage.from} />}
+						{forwardUsername && <BubbleHeader senderId={forwardedInfo.from} />}
 						<MessageWrap color="secondary" overflow="break-word">
 							{textToShow}
 						</MessageWrap>
-						<BubbleFooter date={forwardedMessage.date} dateAndTime />
+						<BubbleFooter date={forwardedInfo.date} dateAndTime />
 					</Container>
 				</Row>
 			</ForwardMessageContainer>

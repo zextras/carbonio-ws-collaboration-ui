@@ -93,12 +93,13 @@ describe('useFirstUnreadMessage with text messages', () => {
 		store.addRoom(room);
 		store.updateHistory(room.id, textHistory);
 	});
-	test('User never reads messages', () => {
+	test('User has never read a message', () => {
 		// Update unread
 		useStore.getState().updateUnreadCount(room.id);
 		// Check number unread
 		expect(useStore.getState().unreads[room.id]).toBe(size(textHistory));
 		const { result } = renderHook(() => useFirstUnreadMessage(room.id));
+		// the reference should be the firs text message arrived
 		expect(result.current).toBeUndefined();
 	});
 
@@ -152,7 +153,7 @@ describe('useFirstUnreadMessage with all types of messages', () => {
 		store.addRoom(room);
 		store.updateHistory(room.id, complexHistory);
 	});
-	test('User never reads messages', () => {
+	test('User has never read a message', () => {
 		// Update unread
 		useStore.getState().updateUnreadCount(room.id);
 		// Check number unread

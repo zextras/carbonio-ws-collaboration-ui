@@ -15,6 +15,7 @@ import DeleteConversationAction from './DeleteConversationAction';
 import EditConversationAction from './EditConversationAction';
 import LeaveConversationAction from './LeaveConversationAction';
 import MuteConversationAction from './MuteConversationAction';
+import { roomHasMoreThanTwoOwnerEqualityFn } from '../../../../store/equalityFunctions/RoomsEqualityFunctions';
 import { getActionsAccordionStatus } from '../../../../store/selectors/ActiveConversationsSelectors';
 import { roomIsEmpty } from '../../../../store/selectors/MessagesSelectors';
 import {
@@ -43,7 +44,10 @@ export const ActionsAccordion: FC<ActionAccordionProps> = ({ roomId, isInsideMee
 	const sessionId: string | undefined = useStore((state) => state.session.id);
 	const numberOfMembers: number = useStore((state) => getNumbersOfRoomMembers(state, roomId));
 	const iAmOwner: boolean = useStore((state) => getMyOwnershipOfTheRoom(state, sessionId, roomId));
-	const numberOfOwners: number = useStore((state) => getNumberOfOwnersOfTheRoom(state, roomId));
+	const numberOfOwners: number = useStore(
+		(state) => getNumberOfOwnersOfTheRoom(state, roomId),
+		roomHasMoreThanTwoOwnerEqualityFn
+	);
 	const emptyRoom: boolean = useStore((state) => roomIsEmpty(state, roomId));
 	const accordionStatus: boolean = useStore((state) => getActionsAccordionStatus(state, roomId));
 	const setActionsAccordionStatus = useStore((state) => state.setActionsAccordionStatus);

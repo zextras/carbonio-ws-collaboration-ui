@@ -21,7 +21,7 @@ const ListOfMembers: FC<ListOfMembersProps> = ({ roomId, contactList }) => {
 		<MemberComponentInfo key={member.userId} member={member} roomId={roomId} />
 	));
 
-	return <Container data-testid="conversation_list">{listOfMembers}</Container>;
+	return <Container data-testid="members_list">{listOfMembers}</Container>;
 };
 
 export default ListOfMembers;

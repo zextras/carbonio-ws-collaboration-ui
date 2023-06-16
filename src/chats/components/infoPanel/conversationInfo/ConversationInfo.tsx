@@ -45,7 +45,6 @@ const ConversationInfo: FC<ConversationInfoProps> = ({ roomId, roomType, setInfo
 		return '';
 	}, [roomMembers, roomType, sessionId]);
 
-	// eslint-disable-next-line consistent-return
 	const infoAvatar = useMemo(
 		() => <RoomPictureHandler roomId={roomId} roomType={roomType} memberId={memberId} />,
 		[roomType, memberId, roomId]

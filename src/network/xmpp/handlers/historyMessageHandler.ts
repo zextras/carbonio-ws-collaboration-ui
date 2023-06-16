@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { forEach } from 'lodash';
+import { filter, forEach, size, unionBy } from 'lodash';
 import { Strophe } from 'strophe.js';
 
 import useStore from '../../../store/Store';
@@ -90,7 +90,11 @@ export function onHistoryMessageStanza(message: Element): true {
  * 6- Updates the last message read of all the members of a room
  *
  * */
-export function onRequestHistory(this: XMPPClient, stanza: Element): void {
+export function onRequestHistory(
+	this: XMPPClient,
+	unread: number | undefined,
+	stanza: Element
+): void {
 	xmppDebug(`<--- End request history`);
 	const from = getRequiredAttribute(stanza, 'from');
 	const roomId = getId(from);
@@ -102,7 +106,21 @@ export function onRequestHistory(this: XMPPClient, stanza: Element): void {
 
 	// History is fully loaded if the response is marked as complete
 	// or if there are no messages in the response because the history has been cleared
-	if (isHistoryFullyLoaded || historyMessages.length === 0) store.setHistoryIsFullyLoaded(roomId);
+	if (isHistoryFullyLoaded || size(historyMessages) === 0) store.setHistoryIsFullyLoaded(roomId);
+
+	// If unread are more than loaded text messages, request history again
+	// Do this check here to load history only when user opens conversation
+	if (size(historyMessages) > 0 && unread && unread > 0) {
+		const textMessages = filter(
+			unionBy(historyMessages, store.messages[roomId], 'id'),
+			(message) => message.type === MessageType.TEXT_MSG
+		);
+		const unreadNotLoaded = unread - size(textMessages);
+		if (unreadNotLoaded > 0) {
+			// Request 5 more messages to avoid a new history request when user scrolls to the first new message
+			this.requestHistory(roomId, historyMessages[0].date, unreadNotLoaded + 5, unread);
+		}
+	}
 
 	// Store history messages on store updating the history of the room
 	if (historyMessages.length > 0) store.updateHistory(roomId, historyMessages);

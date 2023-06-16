@@ -121,7 +121,7 @@ describe('Forward Message Modal', () => {
 		const footerButton = await screen.findByTestId('forward_button');
 		await user.click(footerButton);
 
-		expect(mockedForwardMessagesRequest).toHaveBeenCalledTimes(2);
+		expect(mockedForwardMessagesRequest).toHaveBeenCalledTimes(1);
 	});
 
 	test('Close modal after forward someone else message', async () => {

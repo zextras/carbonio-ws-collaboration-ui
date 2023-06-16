@@ -89,7 +89,6 @@ const FileContainer = styled(Container)`
 	border-left: ${({ userBorderColor, theme }): string =>
 		`0.25rem solid ${theme.avatarColors[userBorderColor]}`};
 	border-radius: 0 0.25rem 0.25rem 0;
-	cursor: pointer;
 `;
 
 type AttachmentViewProps = {
@@ -221,7 +220,6 @@ const AttachmentView: FC<AttachmentViewProps> = ({ attachment, from, isMyMessage
 			orientation="horizontal"
 			crossAlignment="flex-start"
 			userBorderColor={isMyMessage ? '#C4D5EF' : userColor}
-			onClick={download}
 		>
 			<Row>
 				<AttachmentSmallView attachment={attachment} />

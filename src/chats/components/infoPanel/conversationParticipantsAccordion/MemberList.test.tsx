@@ -97,7 +97,7 @@ describe('Participants list', () => {
 		store.setUserInfo(user3Be);
 		setup(<MemberList roomId={room.id} />);
 		mockedGetUserPictureRequest.mockReturnValueOnce(ImageBlob);
-		const list = await screen.findByTestId('conversation_list');
+		const list = await screen.findByTestId('members_list');
 		expect(list).toBeInTheDocument();
 		expect(list.children).toHaveLength(3);
 		expect(screen.getByText(/User 1/i)).toBeInTheDocument();
@@ -113,7 +113,7 @@ describe('Participants list', () => {
 		store.setUserInfo(user4Be);
 		setup(<MemberList roomId={room.id} />);
 		// mockedGetUserPictureRequest.mockReturnValueOnce(ImageBlob);
-		const list = await screen.findByTestId('conversation_list');
+		const list = await screen.findByTestId('members_list');
 		expect(list).toBeInTheDocument();
 		expect(list.children).toHaveLength(3);
 
@@ -129,7 +129,7 @@ describe('Participants list', () => {
 		store.setUserInfo(user4Be);
 		setup(<MemberList roomId={room.id} />);
 		mockedGetUserPictureRequest.mockReturnValueOnce(ImageBlob);
-		const list = await screen.findByTestId('conversation_list');
+		const list = await screen.findByTestId('members_list');
 		expect(list).toBeInTheDocument();
 		expect(list.children).toHaveLength(3);
 
@@ -145,7 +145,7 @@ describe('Participants list', () => {
 		const { user } = setup(<MemberList roomId={room.id} />);
 		mockedGetUserPictureRequest.mockReturnValueOnce(ImageBlob);
 		const searchInput = screen.getByRole('textbox', { name: /Search members/i });
-		const list = await screen.findByTestId('conversation_list');
+		const list = await screen.findByTestId('members_list');
 		await user.type(searchInput, user1Be.name);
 		expect(list.children).toHaveLength(1);
 	});
@@ -158,7 +158,7 @@ describe('Participants list', () => {
 		const { user } = setup(<MemberList roomId={room.id} />);
 		mockedGetUserPictureRequest.mockReturnValueOnce(ImageBlob);
 		const searchInput = screen.getByRole('textbox', { name: /Search members/i });
-		const list = await screen.findByTestId('conversation_list');
+		const list = await screen.findByTestId('members_list');
 		await user.type(searchInput, 'user');
 		expect(list.children).toHaveLength(3);
 	});
@@ -173,7 +173,7 @@ describe('Participants list', () => {
 		const searchInput = screen.getByRole('textbox', { name: /Search members/i });
 		const searchIcon = screen.getByTestId('icon: Search');
 		expect(searchIcon).toBeInTheDocument();
-		const list = await screen.findByTestId('conversation_list');
+		const list = await screen.findByTestId('members_list');
 		user.type(searchInput, 'user 4');
 
 		const placeholderText = await screen.findByText(/There are no items that match this search/i);
