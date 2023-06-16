@@ -20,6 +20,7 @@ import RepliedTextMessageSectionView from './RepliedTextMessageSectionView';
 import TextContentBubble from './TextContentBubble';
 import { getRoomTypeSelector } from '../../../../store/selectors/RoomsSelectors';
 import useStore from '../../../../store/Store';
+import { Z_INDEX_RANK } from '../../../../types/generics';
 import { TextMessage } from '../../../../types/store/MessageTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
 import { parseUrlOnMessage } from '../../../../utils/parseUrlOnMessage';
@@ -33,7 +34,7 @@ type BubbleProps = {
 
 const DropDownWrapper = styled(Container)`
 	position: relative;
-	z-index: 10;
+	z-index: ${Z_INDEX_RANK.DROPDOWN_CXT};
 `;
 
 const BubbleContainer = styled(Container)`

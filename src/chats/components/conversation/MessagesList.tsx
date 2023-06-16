@@ -179,7 +179,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 	}, []);
 
 	const observerInit = useCallback(() => {
-		if (messageListRef.current) {
+		if (messageListRef.current && messageListRef.current.clientHeight > 100) {
 			messageScrollPositionObserver.current = new IntersectionObserver(
 				intersectionObserverCallback,
 				{

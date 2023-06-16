@@ -92,13 +92,15 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({
 					<Text>{chatLabel}</Text>
 				</Container>
 				<Container width="30%" orientation="horizontal" mainAlignment="flex-end">
-					<Tooltip label={!chatFullExpanded ? extendChatLabel : minimizeChatLabel}>
-						<IconButton
-							icon={!chatFullExpanded ? 'ArrowUpward' : 'ArrowDownward'}
-							size="large"
-							onClick={toggleChatExpanded}
-						/>
-					</Tooltip>
+					{(chatIsOpen || chatFullExpanded) && (
+						<Tooltip label={!chatFullExpanded ? extendChatLabel : minimizeChatLabel}>
+							<IconButton
+								icon={!chatFullExpanded ? 'ArrowUpward' : 'ArrowDownward'}
+								size="large"
+								onClick={toggleChatExpanded}
+							/>
+						</Tooltip>
+					)}
 					<Tooltip label={chatIsOpen || chatFullExpanded ? collapseChatLabel : expandChatLabel}>
 						<IconButton
 							icon={chatIsOpen || chatFullExpanded ? 'ChevronDown' : 'ChevronUp'}

@@ -12,6 +12,7 @@ import styled from 'styled-components';
 import { CustomMessage } from './MessageFactory';
 import { getPrefTimezoneSelector } from '../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../store/Store';
+import { Z_INDEX_RANK } from '../../../../types/generics';
 import { DateMessage } from '../../../../types/store/MessageTypes';
 import { dateString } from '../../../../utils/dateUtil';
 
@@ -23,7 +24,7 @@ type DateMsgProps = {
 const CustomMessageWrapper = styled(Container)`
 	position: sticky;
 	top: 0;
-	z-index: 10;
+	z-index: ${Z_INDEX_RANK.DATE_STICKY_LABEL};
 `;
 
 const DateBubble: FC<DateMsgProps> = ({ message, refEl }) => {
