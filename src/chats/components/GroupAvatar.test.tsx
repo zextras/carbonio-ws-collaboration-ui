@@ -9,8 +9,9 @@ import React from 'react';
 
 import GroupAvatar from './GroupAvatar';
 import useStore from '../../store/Store';
-import { createMockRoom } from '../../tests/createMock';
+import { createMockMeeting, createMockParticipants, createMockRoom } from '../../tests/createMock';
 import { setup } from '../../tests/test-utils';
+import { MeetingBe, MeetingParticipantBe } from '../../types/network/models/meetingBeTypes';
 import { RoomBe } from '../../types/network/models/roomBeTypes';
 
 const members = [
@@ -27,13 +28,36 @@ const members = [
 		external: false
 	}
 ];
+const user1Participant: MeetingParticipantBe = createMockParticipants({
+	userId: 'user1',
+	sessionId: 'sessionIdUser1'
+});
+const user2Participant: MeetingParticipantBe = createMockParticipants({
+	userId: 'user2',
+	sessionId: 'sessionIdUser2'
+});
 
 const roomId = 'Group-Room-Id';
+const meeting: MeetingBe = createMockMeeting({
+	roomId,
+	participants: [user1Participant, user2Participant]
+});
 const room: RoomBe = createMockRoom({ members, id: roomId });
 const roomMuted: RoomBe = createMockRoom({
 	members,
 	id: roomId,
 	userSettings: { muted: true }
+});
+const roomWithMeeting = createMockRoom({
+	members,
+	id: roomId,
+	meetingId: 'meetingId'
+});
+const roomMutedWithMeeting = createMockRoom({
+	members,
+	id: roomId,
+	userSettings: { muted: true },
+	meetingId: 'meetingId'
 });
 
 describe('Group avatar', () => {
@@ -67,5 +91,30 @@ describe('Group avatar', () => {
 		setup(<GroupAvatar roomId={roomId} draftMessage />);
 		const userAvatarWithDraft = screen.getByTestId('icon: Edit2');
 		expect(userAvatarWithDraft).toBeVisible();
+	});
+	test('Check if there is an ongoing meeting', async () => {
+		const store = useStore.getState();
+		store.addRoom(roomWithMeeting);
+		store.addMeeting(meeting);
+		setup(<GroupAvatar roomId={roomId} draftMessage={false} />);
+		const userAvatarWithMeeting = screen.getByTestId('icon: Video');
+		expect(userAvatarWithMeeting).toBeVisible();
+	});
+	test('Check if there is an ongoing meeting in a muted room', async () => {
+		const store = useStore.getState();
+		store.addRoom(roomMutedWithMeeting);
+		store.addMeeting(meeting);
+		setup(<GroupAvatar roomId={roomId} draftMessage={false} />);
+		const userAvatarWithMeeting = screen.getByTestId('icon: Video');
+		expect(userAvatarWithMeeting).toBeVisible();
+	});
+	test('Check if there is an ongoing meeting in a room with a draft message', async () => {
+		const store = useStore.getState();
+		store.addRoom(roomWithMeeting);
+		store.addMeeting(meeting);
+		store.setDraftMessage(roomId, false, 'hi everyone!');
+		setup(<GroupAvatar roomId={roomId} draftMessage />);
+		const userAvatarWithMeeting = screen.getByTestId('icon: Video');
+		expect(userAvatarWithMeeting).toBeVisible();
 	});
 });

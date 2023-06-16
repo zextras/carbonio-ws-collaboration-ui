@@ -9,8 +9,15 @@ import React from 'react';
 
 import UserAvatar from './UserAvatar';
 import useStore from '../../store/Store';
-import { createMockCapabilityList, createMockMember, createMockRoom } from '../../tests/createMock';
+import {
+	createMockCapabilityList,
+	createMockMeeting,
+	createMockMember,
+	createMockParticipants,
+	createMockRoom
+} from '../../tests/createMock';
 import { setup } from '../../tests/test-utils';
+import { MeetingBe, MeetingParticipantBe } from '../../types/network/models/meetingBeTypes';
 import { RoomBe, RoomType } from '../../types/network/models/roomBeTypes';
 import { User } from '../../types/store/UserTypes';
 
@@ -33,6 +40,16 @@ const user3Info: User = {
 	pictureUpdatedAt: '2022-08-25T17:24:28.961+02:00'
 };
 
+const user1Participant: MeetingParticipantBe = createMockParticipants({
+	userId: 'user1',
+	sessionId: 'sessionIdUser1'
+});
+
+const user2Participant: MeetingParticipantBe = createMockParticipants({
+	userId: 'user2',
+	sessionId: 'sessionIdUser2'
+});
+
 const members = [
 	createMockMember({ userId: user1Info.id, owner: true }),
 	createMockMember({ userId: user2Info.id })
@@ -49,6 +66,24 @@ const roomWithPicture: RoomBe = createMockRoom({
 		createMockMember({ userId: user1Info.id, owner: true }),
 		createMockMember({ userId: user3Info.id })
 	]
+});
+
+const roomWithMeeting: RoomBe = createMockRoom({
+	type: RoomType.ONE_TO_ONE,
+	members,
+	meeting: 'meetingId'
+});
+
+const roomMutedWithMeeting: RoomBe = createMockRoom({
+	type: RoomType.ONE_TO_ONE,
+	members,
+	userSettings: { muted: true },
+	meeting: 'meetingId'
+});
+
+const meeting: MeetingBe = createMockMeeting({
+	roomId: 'id',
+	participants: [user1Participant, user2Participant]
 });
 
 describe('User avatar', () => {
@@ -193,6 +228,16 @@ describe('User avatar', () => {
 			const userAvatarWithNotificationMuted = screen.getByTestId('icon: BellOff');
 			expect(userAvatarWithNotificationMuted).toBeVisible();
 		});
+		test('Check if user has notifications disabled in a chat with an ongoing meeting', () => {
+			const store = useStore.getState();
+			store.addRoom(roomMutedWithMeeting);
+			store.addMeeting(meeting);
+			store.setLoginInfo(user1Info.id, user1Info.email, user1Info.name);
+			store.setUserInfo(user2Info);
+			setup(<UserAvatar roomId={roomMuted.id} draftMessage={false} />);
+			const userAvatarWithNotificationMuted = screen.getByTestId('icon: Video');
+			expect(userAvatarWithNotificationMuted).toBeVisible();
+		});
 	});
 
 	describe('Draft message', () => {
@@ -214,6 +259,17 @@ describe('User avatar', () => {
 			store.setDraftMessage(room.id, false, 'hi everyone!');
 			setup(<UserAvatar roomId={room.id} draftMessage />);
 			const userAvatarWithDraft = screen.getByTestId('icon: Edit2');
+			expect(userAvatarWithDraft).toBeVisible();
+		});
+		test('Check if there is the draft message and there is an ongoing meeting', () => {
+			const store = useStore.getState();
+			store.addRoom(roomWithMeeting);
+			store.addMeeting(meeting);
+			store.setLoginInfo(user1Info.id, user1Info.email, user1Info.name);
+			store.setUserInfo(user2Info);
+			store.setDraftMessage(room.id, false, 'hi everyone!');
+			setup(<UserAvatar roomId={room.id} draftMessage />);
+			const userAvatarWithDraft = screen.getByTestId('icon: Video');
 			expect(userAvatarWithDraft).toBeVisible();
 		});
 	});
