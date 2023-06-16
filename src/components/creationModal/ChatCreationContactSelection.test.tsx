@@ -58,6 +58,7 @@ describe('Chat Creation Modal Contact Selector - search', () => {
 				isCreationModal
 				contactsSelected={{}}
 				setContactSelected={jest.fn()}
+				inputRef={React.createRef()}
 			/>
 		);
 
@@ -83,6 +84,7 @@ describe('Chat Creation Modal Contact Selector - search', () => {
 				isCreationModal
 				contactsSelected={{}}
 				setContactSelected={jest.fn()}
+				inputRef={React.createRef()}
 			/>
 		);
 		// Initial AutoCompleteRequest trigger an initial "Spinner" state and then render contact list
@@ -119,6 +121,7 @@ describe('Chat Creation Modal Contact Selector - search', () => {
 				isCreationModal
 				contactsSelected={{}}
 				setContactSelected={jest.fn()}
+				inputRef={React.createRef()}
 			/>
 		);
 
@@ -147,6 +150,7 @@ describe('Chat Creation Modal Contact Selector - search', () => {
 				isCreationModal
 				contactsSelected={{}}
 				setContactSelected={jest.fn()}
+				inputRef={React.createRef()}
 			/>
 		);
 
@@ -175,6 +179,7 @@ describe('Chat Creation Modal Contact Selector - search', () => {
 				isCreationModal
 				contactsSelected={{}}
 				setContactSelected={jest.fn()}
+				inputRef={React.createRef()}
 			/>
 		);
 
@@ -194,6 +199,7 @@ describe('Chat Creation Modal Contact Selector - search', () => {
 				isCreationModal
 				contactsSelected={{}}
 				setContactSelected={jest.fn()}
+				inputRef={React.createRef()}
 			/>
 		);
 
@@ -215,6 +221,7 @@ describe('Chat Creation Modal Contact Selector - search', () => {
 				isCreationModal
 				contactsSelected={{}}
 				setContactSelected={jest.fn()}
+				inputRef={React.createRef()}
 			/>
 		);
 		const list = await screen.findByTestId('list_creation_modal');
@@ -246,6 +253,7 @@ describe('Chat Creation Modal Contact Selector - search', () => {
 				isCreationModal
 				contactsSelected={{}}
 				setContactSelected={jest.fn()}
+				inputRef={React.createRef()}
 			/>
 		);
 		const list = await screen.findByTestId('list_creation_modal');
@@ -267,7 +275,13 @@ describe('Add participant Modal Contact Selector', () => {
 	test('All elements are rendered', async () => {
 		mockedAutoCompleteGalRequest.mockReturnValue([]);
 
-		setup(<ChatCreationContactsSelection contactsSelected={{}} setContactSelected={jest.fn()} />);
+		setup(
+			<ChatCreationContactsSelection
+				contactsSelected={{}}
+				setContactSelected={jest.fn()}
+				inputRef={React.createRef()}
+			/>
+		);
 
 		// Render ChipInput
 		const chipInput = screen.getByText(/Start typing or pick an address/i);
@@ -293,6 +307,7 @@ describe('Add participant Modal Contact Selector', () => {
 				contactsSelected={{}}
 				setContactSelected={jest.fn()}
 				members={[user0, user1]}
+				inputRef={React.createRef()}
 			/>
 		);
 

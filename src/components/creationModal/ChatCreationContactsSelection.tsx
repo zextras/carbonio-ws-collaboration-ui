@@ -26,7 +26,6 @@ import React, {
 	useCallback,
 	useEffect,
 	useMemo,
-	useRef,
 	useState
 } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -52,13 +51,15 @@ type ChatCreationContactsSelectionProps = {
 	setContactSelected: Dispatch<SetStateAction<ContactSelected>>;
 	isCreationModal?: boolean;
 	members?: Member[];
+	inputRef: React.RefObject<HTMLInputElement>;
 };
 
 const ChatCreationContactsSelection = ({
 	contactsSelected,
 	setContactSelected,
 	isCreationModal,
-	members
+	members,
+	inputRef
 }: ChatCreationContactsSelectionProps): ReactElement => {
 	const [t] = useTranslation();
 	const noMatchLabel = t('participantsList.noMatch', 'There are no items that match this search');
@@ -71,8 +72,6 @@ const ChatCreationContactsSelection = ({
 		'modal.creation.addUserLimit.limitReached',
 		'You have selected the maximum number of members for a group'
 	);
-
-	const inputRef = useRef<HTMLInputElement>(null);
 
 	const maxMembers = useStore((store) => getCapability(store, CapabilityType.MAX_GROUP_MEMBERS));
 
@@ -100,6 +99,12 @@ const ChatCreationContactsSelection = ({
 		},
 		[members]
 	);
+
+	useEffect(() => {
+		if (inputRef.current) {
+			inputRef.current.focus();
+		}
+	}, [inputRef]);
 
 	// Start with a full zimbra contacts list
 	useEffect(() => {
@@ -146,7 +151,7 @@ const ChatCreationContactsSelection = ({
 						console.error(err);
 					});
 			}, 200),
-		[isCreationModal, userListNotInsideRoom]
+		[inputRef, isCreationModal, userListNotInsideRoom]
 	);
 
 	// Search zimbra contacts on typing
@@ -181,9 +186,6 @@ const ChatCreationContactsSelection = ({
 					? differenceBy(chips, [newChip], 'id')
 					: union(chips, [newChip])
 			);
-			if (inputRef.current) {
-				inputRef.current.value = '';
-			}
 		},
 		[setContactSelected]
 	);
