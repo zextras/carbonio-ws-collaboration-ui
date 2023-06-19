@@ -20,7 +20,7 @@ import { MeetingParticipant, MeetingParticipantMap } from '../../../types/store/
 
 const CustomContainer = styled(Container)`
 	position: absolute;
-	z-index: 11;
+	z-index: ${({ isDropdownOpen }): string => (isDropdownOpen ? '11' : '-1')};
 	top: 3.5rem;
 	right: 1rem;
 	box-shadow: 0 0 0.25rem rgba(166, 166, 166, 0.5);
