@@ -33,8 +33,9 @@ const PickerWrapper = styled(Container)`
 	transform-origin: bottom left;
 	animation: showEmoji 0.2s ease-in 0s 1;
 
+	// set height of emojiPicker when is small or large device
 	@media (height <= 62.5rem) {
-		height: 18.125rem;
+		max-height: 18.125rem;
 	}
 
 	@keyframes showEmoji {
