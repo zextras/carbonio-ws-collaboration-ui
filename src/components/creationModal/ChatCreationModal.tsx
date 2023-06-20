@@ -15,7 +15,15 @@ import {
 	Tooltip
 } from '@zextras/carbonio-design-system';
 import { find, map, size } from 'lodash';
-import React, { ReactElement, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, {
+	ReactElement,
+	useCallback,
+	useContext,
+	useEffect,
+	useMemo,
+	useRef,
+	useState
+} from 'react';
 import { useTranslation } from 'react-i18next';
 
 import ChatCreationContactsSelection, { ContactSelected } from './ChatCreationContactsSelection';
@@ -54,6 +62,8 @@ const ChatCreationModal = ({
 
 	const addRoom = useStore((store) => store.addRoom);
 
+	const inputRef = useRef<HTMLInputElement>(null);
+
 	const [chatType, setChatType] = useState<RoomType.ONE_TO_ONE | RoomType.GROUP>(
 		RoomType.ONE_TO_ONE
 	);
@@ -72,7 +82,12 @@ const ChatCreationModal = ({
 		} else {
 			setChatType(RoomType.ONE_TO_ONE);
 		}
-	}, [contactsSelected]);
+		if (open) {
+			if (inputRef.current) {
+				inputRef.current.focus();
+			}
+		}
+	}, [contactsSelected, open]);
 
 	const modalTitle = useMemo(
 		() => (chatType === RoomType.ONE_TO_ONE ? newChatLabel : newGroupLabel),
@@ -188,6 +203,12 @@ const ChatCreationModal = ({
 		]
 	);
 
+	useEffect(() => {
+		if (inputRef.current) {
+			inputRef.current.value = '';
+		}
+	}, [contactsSelected]);
+
 	return (
 		<Modal
 			open={open}
@@ -206,6 +227,7 @@ const ChatCreationModal = ({
 				contactsSelected={contactsSelected}
 				setContactSelected={setContactSelected}
 				isCreationModal
+				inputRef={inputRef}
 			/>
 			{chatType === RoomType.GROUP && (
 				<ChatCreationTitleInput
