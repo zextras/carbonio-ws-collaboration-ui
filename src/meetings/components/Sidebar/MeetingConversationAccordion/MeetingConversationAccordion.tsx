@@ -73,7 +73,7 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({
 	return (
 		<Container
 			key="MeetingConversationAccordion"
-			data-testId="MeetingConversationAccordion"
+			data-testid="MeetingConversationAccordion"
 			mainAlignment="flex-end"
 			maxHeight={chatFullExpanded ? '100%' : chatIsOpen ? '50%' : 'fit'}
 			height={chatFullExpanded ? '100%' : chatIsOpen ? '50%' : 'fit'}
@@ -95,6 +95,7 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({
 					{(chatIsOpen || chatFullExpanded) && (
 						<Tooltip label={!chatFullExpanded ? extendChatLabel : minimizeChatLabel}>
 							<IconButton
+								data-testid="toggleChatExpanded"
 								icon={!chatFullExpanded ? 'ArrowUpward' : 'ArrowDownward'}
 								size="large"
 								onClick={toggleChatExpanded}
@@ -103,6 +104,7 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({
 					)}
 					<Tooltip label={chatIsOpen || chatFullExpanded ? collapseChatLabel : expandChatLabel}>
 						<IconButton
+							data-testid="toggleChatStatus"
 							icon={chatIsOpen || chatFullExpanded ? 'ChevronDown' : 'ChevronUp'}
 							size="large"
 							onClick={toggleChatStatus}

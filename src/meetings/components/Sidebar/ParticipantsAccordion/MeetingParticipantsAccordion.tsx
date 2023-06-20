@@ -55,7 +55,11 @@ const MeetingParticipantsAccordion: FC<MeetingParticipantsAccordionProps> = ({ m
 	}, [meetingId, participantsTitle]);
 
 	return (
-		<Container crossAlignment="flex-start" mainAlignment="flex-start">
+		<Container
+			data-testid="MeetingParticipantsAccordion"
+			crossAlignment="flex-start"
+			mainAlignment="flex-start"
+		>
 			<CustomAccordion items={infoDetails} borderRadius="none" />
 		</Container>
 	);
