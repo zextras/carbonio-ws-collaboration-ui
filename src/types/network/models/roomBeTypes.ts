@@ -6,10 +6,9 @@
 
 export type RoomBe = {
 	id: string;
-	name: string;
-	description: string;
+	name?: string;
+	description?: string;
 	type: RoomType;
-	hash: string;
 	createdAt: string;
 	updatedAt: string;
 	pictureUpdatedAt?: string;

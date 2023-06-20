@@ -45,7 +45,7 @@ describe('Add new Member Modal', () => {
 				setContactSelected={jest.fn()}
 				showHistory
 				setShowHistory={jest.fn()}
-				label={testRoom.name}
+				label={testRoom.name!}
 			/>
 		);
 
@@ -82,7 +82,7 @@ describe('Add new Member Modal', () => {
 				setContactSelected={jest.fn()}
 				showHistory={false}
 				setShowHistory={jest.fn()}
-				label={testRoom.name}
+				label={testRoom.name!}
 			/>
 		);
 

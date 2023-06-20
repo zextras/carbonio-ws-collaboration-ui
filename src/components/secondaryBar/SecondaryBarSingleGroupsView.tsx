@@ -66,7 +66,10 @@ const SecondaryBarSingleGroupsView: React.FC<SecondaryBarSingleGroupsView> = ({ 
 			map(roomsIds, (room) => {
 				if (room.roomType === 'group') {
 					const roomName = useStore.getState().rooms[room.roomId].name;
-					if (roomName.toLocaleLowerCase().includes(filteredInput.toLocaleLowerCase())) {
+					if (
+						roomName &&
+						roomName.toLocaleLowerCase().includes(filteredInput.toLocaleLowerCase())
+					) {
 						filteredConversations.push(room);
 					}
 				} else {

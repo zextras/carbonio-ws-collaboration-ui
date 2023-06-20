@@ -88,7 +88,6 @@ describe('Chat Creation Modal', () => {
 			name: '',
 			description: '',
 			type: RoomType.ONE_TO_ONE,
-			hash: 'hash',
 			createdAt: 'created',
 			updatedAt: 'updated',
 			pictureUpdatedAt: 'pictureUpdatedAt'
@@ -131,7 +130,6 @@ describe('Chat Creation Modal', () => {
 			name: 'name',
 			description: 'description',
 			type: RoomType.GROUP,
-			hash: 'hash',
 			createdAt: 'created',
 			updatedAt: 'updated',
 			pictureUpdatedAt: 'pictureUpdatedAt'
