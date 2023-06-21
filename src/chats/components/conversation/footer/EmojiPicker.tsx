@@ -21,10 +21,10 @@ import React, {
 } from 'react';
 import styled from 'styled-components';
 
-import { Emoji } from '../../../../types/generics';
+import { Emoji, Z_INDEX_RANK } from '../../../../types/generics';
 
 const PickerWrapper = styled(Container)`
-	z-index: 10;
+	z-index: ${Z_INDEX_RANK.EMOJI_PICKER};
 	position: absolute;
 	bottom: 3.4375rem;
 	left: 0.5rem;
@@ -32,6 +32,11 @@ const PickerWrapper = styled(Container)`
 	width: 22rem;
 	transform-origin: bottom left;
 	animation: showEmoji 0.2s ease-in 0s 1;
+
+	// set height of emojiPicker when is small or large device
+	@media (height <= 62.5rem) {
+		max-height: 18.125rem;
+	}
 
 	@keyframes showEmoji {
 		0% {

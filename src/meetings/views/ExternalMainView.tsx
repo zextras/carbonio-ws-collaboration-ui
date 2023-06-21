@@ -6,7 +6,7 @@
 
 import { createMemoryHistory } from 'history';
 import React, { lazy, ReactElement, Suspense, useEffect } from 'react';
-import { Switch, Route, Router } from 'react-router-dom';
+import { Route, Router, Switch } from 'react-router-dom';
 import { createGlobalStyle } from 'styled-components';
 
 import ShimmerEntryMeetingView from './shimmers/ShimmerEntryMeetingView';
@@ -42,10 +42,10 @@ const InfoPage = (): ReactElement => (
 );
 
 const MeetingTempGlobalStyle = createGlobalStyle`
-	[data-testid="MainHeaderContainer"], .bZBYRl {
+	[data-testid="MainHeaderContainer"], .hjBWLK {
 	  display: none;
 	}
-	.ciRVyT {
+	.ddayvo {
 	  max-height: 100%;
 	}
 `;

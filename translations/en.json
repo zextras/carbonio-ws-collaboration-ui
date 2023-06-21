@@ -49,6 +49,7 @@
         "stopUpload": "Stop upload",
         "uploadAborted": "Upload has been interrupted"
     },
+    "chat": "Chat",
     "configurationMessages": {
         "roomNameChanged": "{{name}} changed the title of this Group in \"<i>{{roomName}}</i>\"",
         "roomPictureDeleted": "{{name}} restored the default {{roomName}}'s image",
@@ -107,9 +108,13 @@
     "keepInTouchWithColleagues": "Keep in touch with your colleagues or join your groups' meeting rooms",
     "meeting": {
         "activeMeetingTooltip": "There's an active meeting for this Group",
+        "collapseChat": "Collapse chat",
         "collapseParticipantsMeetingTooltip": "Collapse participants list",
+        "expandChat": "Expand chat",
         "expandParticipantsListTooltip": "Expand participants list",
+        "extendChat": "Extend chat",
         "joinMeeting": "Join meeting",
+        "minimizeChat": "Minimize chat",
         "newMeetingNotification": {
             "sendAQuickMessage": "Send a quick message",
             "sendMessage": "Send message",

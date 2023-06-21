@@ -7,28 +7,28 @@
 import {
 	Account,
 	AccountSettings,
-	INotificationManager,
-	AppRoute
+	AppRoute,
+	INotificationManager
 } from '@zextras/carbonio-shell-ui';
 import React, { ReactElement } from 'react';
 
 import { AutoCompleteGalResponse } from './src/network/soap/AutoCompleteRequest';
 import { GetMeetingResponse } from './src/types/network/responses/meetingsResponses';
 import {
-	AddRoomResponse,
-	DeleteRoomPictureResponse,
-	UpdateRoomPictureResponse,
-	ClearRoomHistoryResponse,
-	MuteRoomResponse,
-	UnmuteRoomResponse,
-	UpdateRoomResponse,
-	DeleteRoomMemberResponse,
-	DeleteRoomResponse,
-	PromoteRoomMemberResponse,
-	DemotesRoomMemberResponse,
 	AddRoomMemberResponse,
+	AddRoomResponse,
+	ClearRoomHistoryResponse,
+	DeleteRoomMemberResponse,
+	DeleteRoomPictureResponse,
+	DeleteRoomResponse,
+	DemotesRoomMemberResponse,
 	ForwardMessagesResponse,
-	GetRoomResponse
+	GetRoomResponse,
+	MuteRoomResponse,
+	PromoteRoomMemberResponse,
+	UnmuteRoomResponse,
+	UpdateRoomPictureResponse,
+	UpdateRoomResponse
 } from './src/types/network/responses/roomsResponses';
 import {
 	GetUserPictureResponse,
@@ -224,6 +224,13 @@ jest.mock('./src/network', () => ({
 				result ? resolve(result) : reject(new Error('no result provided'));
 			})
 	}
+}));
+
+export const mockUseParams = jest.fn();
+
+jest.mock('react-router', () => ({
+	...jest.requireActual('react-router'),
+	useParams: mockUseParams
 }));
 
 export const fetchResponse: jest.Mock = jest.fn(() => ({}));

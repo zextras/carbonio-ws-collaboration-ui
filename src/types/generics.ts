@@ -13,3 +13,15 @@ export type Emoji = {
 	shortcodes: string;
 	unified: string;
 };
+
+export enum Z_INDEX_RANK {
+	DATE_STICKY_LABEL = 2,
+	DROPDOWN_CXT = 3,
+	EMOJI_PICKER = 10
+}
+
+export enum SIZES {
+	ATTACHMENT_UPLOAD_SECTION = '11.25rem',
+	REPLAY_EDIT_MESSAGE_VIEW_SECTION = '4.5rem',
+	SPACE_FOR_ELEMENTS_VISIBLE_ON_MESSAGE_LIST = '18.4375rem'
+}

@@ -8,6 +8,8 @@ import React, { Ref } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled, { css, FlattenSimpleInterpolation } from 'styled-components';
 
+import { SIZES } from '../../../../types/generics';
+
 const MessageTextarea = styled.textarea`
 	box-sizing: border-box;
 	font-family: 'Segoe UI', 'Lucida Sans', sans-serif;
@@ -21,7 +23,7 @@ const MessageTextarea = styled.textarea`
 	border: none;
 	vertical-align: text-top;
 	overflow-y: scroll;
-	max-height: calc(50vh - 6.25rem);
+	max-height: calc(50vh - ${SIZES.SPACE_FOR_ELEMENTS_VISIBLE_ON_MESSAGE_LIST});
 	width: 100%;
 	scrollbar-color: ${({ theme }): string => theme.palette.gray3.regular} transparent;
 
