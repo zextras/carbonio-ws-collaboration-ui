@@ -6,7 +6,12 @@
 
 import { find, size } from 'lodash';
 
-import { Meeting, MeetingParticipantMap, MeetingViewType } from '../../types/store/MeetingTypes';
+import {
+	Meeting,
+	MeetingChatVisibility,
+	MeetingParticipantMap,
+	MeetingViewType
+} from '../../types/store/MeetingTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 
 export const getMeeting = (store: RootStore, roomId: string): Meeting | undefined =>
@@ -90,3 +95,9 @@ export const getMeetingViewSelected = (
 	meetingId: string
 ): MeetingViewType | undefined =>
 	find(store.meetings, (meeting) => meeting.id === meetingId)?.meetingViewSelected;
+
+export const getMeetingChatVisibility = (
+	store: RootStore,
+	meetingId: string
+): MeetingChatVisibility | undefined =>
+	find(store.meetings, (meeting) => meeting.id === meetingId)?.chatVisibility;

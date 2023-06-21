@@ -193,7 +193,7 @@ const AttachmentView: FC<AttachmentViewProps> = ({ attachment, from, isMyMessage
 			>
 				{!isPreviewLoaded && <CustomShimmerLogo />}
 				{previewError ? (
-					<Container background="gray5" width="18.75rem" height="15.625rem" maxWidth="100%">
+					<Container background="gray5" width="15rem" height="11.87rem" maxWidth="100%">
 						<Icon size="large" icon="Image" color="gray2" />
 					</Container>
 				) : (

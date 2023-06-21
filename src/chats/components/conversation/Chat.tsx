@@ -36,9 +36,10 @@ const CustomContainer = styled(Container)`
 type ChatsProps = {
 	roomId: string;
 	setInfoPanelOpen: Dispatch<SetStateAction<boolean>>;
+	isInsideMeeting?: boolean;
 };
 
-const Chat = ({ roomId, setInfoPanelOpen }: ChatsProps): ReactElement => {
+const Chat = ({ roomId, setInfoPanelOpen, isInsideMeeting }: ChatsProps): ReactElement => {
 	const filesToUploadArray = useStore((store) => getFilesToUploadArray(store, roomId));
 	const setFilesToAttach = useStore((store) => store.setFilesToAttach);
 	const setInputHasFocus = useStore((store) => store.setInputHasFocus);
@@ -97,7 +98,7 @@ const Chat = ({ roomId, setInfoPanelOpen }: ChatsProps): ReactElement => {
 	return (
 		<CustomContainer
 			data-testid="conversationCollapsedView"
-			width={isDesktopView ? '70%' : '100%'}
+			width={isDesktopView && !isInsideMeeting ? '70%' : '100%'}
 			minWidth="70%"
 			mainAlignment="flex-start"
 			onDragOver={handleOnDragOver}
@@ -109,7 +110,9 @@ const Chat = ({ roomId, setInfoPanelOpen }: ChatsProps): ReactElement => {
 					onDragLeaveEvent={handleOnDragLeave}
 				/>
 			)}
-			<ConversationHeader roomId={roomId} setInfoPanelOpen={setInfoPanelOpen} />
+			{!isInsideMeeting && (
+				<ConversationHeader roomId={roomId} setInfoPanelOpen={setInfoPanelOpen} />
+			)}
 			<MessagesList roomId={roomId} />
 			<ConversationFooter roomId={roomId} />
 		</CustomContainer>

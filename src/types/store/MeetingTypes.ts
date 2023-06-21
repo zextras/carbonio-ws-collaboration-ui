@@ -13,6 +13,7 @@ export type Meeting = {
 	participants: MeetingParticipantMap;
 	createdAt: string;
 	sidebarStatus: boolean;
+	chatVisibility: MeetingChatVisibility;
 	meetingViewSelected: MeetingViewType;
 };
 
@@ -32,4 +33,10 @@ export enum MeetingViewType {
 	CINEMA = 'cinema',
 	GRID = 'grid',
 	WAITING = 'waiting'
+}
+
+export enum MeetingChatVisibility {
+	CLOSED = 'closed',
+	OPEN = 'open',
+	EXPANDED = 'expanded'
 }
