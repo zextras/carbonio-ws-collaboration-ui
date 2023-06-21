@@ -22,24 +22,24 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 	const meeting = useStore((store) => getMeeting(store, roomId));
 	const addMeeting = useStore((store) => store.addMeeting);
 	const addParticipant = useStore((store) => store.addParticipant);
-	const [videoStreamOn, setVideoStreamOn] = useState(false);
-	const [audioStreamOn, setAudioStreamOn] = useState(false);
+	const [videoStreamEnabled, setVideoStreamEnabled] = useState(false);
+	const [audioStreamEnabled, setAudioStreamEnabled] = useState(false);
 
-	const onSwitchCamera = useCallback(() => setVideoStreamOn((c) => !c), []);
-	const onSwitchMicrophone = useCallback(() => setAudioStreamOn((c) => !c), []);
+	const onSwitchCamera = useCallback(() => setVideoStreamEnabled((c) => !c), []);
+	const onSwitchMicrophone = useCallback(() => setAudioStreamEnabled((c) => !c), []);
 
 	const { goToMeetingPage } = useRouting();
 
 	const joinMeeting = useCallback(() => {
 		// Meeting already exists: user joins it
 		if (meeting) {
-			MeetingsApi.joinMeetingByMeetingId(meeting.id, { videoStreamOn, audioStreamOn })
+			MeetingsApi.joinMeetingByMeetingId(meeting.id, { videoStreamEnabled, audioStreamEnabled })
 				.then(() => {
 					addParticipant(meeting.id, {
 						userId: session.id!,
 						sessionId: session.sessionId!,
-						videoStreamOn,
-						audioStreamOn
+						videoStreamOn: videoStreamEnabled,
+						audioStreamOn: audioStreamEnabled
 					});
 					goToMeetingPage(meeting.id);
 				})
@@ -47,7 +47,7 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 		}
 		// Meeting doesn't exist: user creates and joins it
 		else {
-			MeetingsApi.joinMeeting(roomId, { videoStreamOn, audioStreamOn })
+			MeetingsApi.joinMeeting(roomId, { videoStreamEnabled, audioStreamEnabled })
 				.then((response: JoinMeetingResponse) => {
 					addMeeting(response);
 					goToMeetingPage(response.id);
@@ -56,8 +56,8 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 		}
 	}, [
 		meeting,
-		videoStreamOn,
-		audioStreamOn,
+		videoStreamEnabled,
+		audioStreamEnabled,
 		addParticipant,
 		session.id,
 		session.sessionId,
@@ -74,8 +74,8 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 			confirmLabel={'Enter'}
 			onConfirm={joinMeeting}
 		>
-			<Switch label="Camera" value={videoStreamOn} onClick={onSwitchCamera} />
-			<Switch label="Microphone" value={audioStreamOn} onClick={onSwitchMicrophone} />
+			<Switch label="Camera" value={videoStreamEnabled} onClick={onSwitchCamera} />
+			<Switch label="Microphone" value={audioStreamEnabled} onClick={onSwitchMicrophone} />
 		</Modal>
 	);
 };
