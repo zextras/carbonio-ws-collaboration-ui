@@ -16,14 +16,8 @@ export type LeaveMeetingResponse = Response;
 
 export type DeleteMeetingResponse = Response;
 
-export type OpenVideoStreamResponse = Response;
+export type ChangeVideoStreamResponse = Response;
 
-export type CloseVideoStreamResponse = Response;
+export type ChangeAudioStreamResponse = Response;
 
-export type OpenAudioStreamResponse = Response;
-
-export type CloseAudioStreamResponse = Response;
-
-export type OpenScreenShareStreamResponse = Response;
-
-export type CloseScreenShareStreamResponse = Response;
+export type ChangeScreenStreamResponse = Response;

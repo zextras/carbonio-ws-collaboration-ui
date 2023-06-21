@@ -79,27 +79,17 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 	}, []);
 
 	const toggleVideoStream = useCallback(() => {
-		if (!videoStatus) {
-			MeetingsApi.openVideoStream(meetingId).then(() => setVideoStatus(!videoStatus));
-		} else {
-			MeetingsApi.closeVideoStream(meetingId).then(() => setVideoStatus(!videoStatus));
-		}
+		MeetingsApi.changeVideoStream(meetingId, !videoStatus).then(() => setVideoStatus(!videoStatus));
 	}, [videoStatus, meetingId]);
 
 	const toggleAudioStream = useCallback(() => {
-		if (!audioStatus) {
-			MeetingsApi.openAudioStream(meetingId).then(() => setAudioStatus(!audioStatus));
-		} else {
-			MeetingsApi.closeAudioStream(meetingId).then(() => setAudioStatus(!audioStatus));
-		}
+		MeetingsApi.changeAudioStream(meetingId, !audioStatus).then(() => setAudioStatus(!audioStatus));
 	}, [audioStatus, meetingId]);
 
 	const toggleShareStream = useCallback(() => {
-		if (!shareStatus) {
-			MeetingsApi.openScreenShareStream(meetingId).then(() => setShareStatus(!shareStatus));
-		} else {
-			MeetingsApi.closeScreenShareStream(meetingId).then(() => setShareStatus(!shareStatus));
-		}
+		MeetingsApi.changeScreenStream(meetingId, !shareStatus).then(() =>
+			setShareStatus(!shareStatus)
+		);
 	}, [shareStatus, meetingId]);
 
 	const leaveMeeting = useCallback(() => {

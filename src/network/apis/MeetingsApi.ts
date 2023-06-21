@@ -10,17 +10,14 @@ import { RequestType } from '../../types/network/apis/IBaseAPI';
 import IMeetingsApi from '../../types/network/apis/IMeetingsApi';
 import { JoinSettings } from '../../types/network/models/meetingBeTypes';
 import {
-	CloseAudioStreamResponse,
-	CloseScreenShareStreamResponse,
-	CloseVideoStreamResponse,
+	ChangeAudioStreamResponse,
+	ChangeScreenStreamResponse,
+	ChangeVideoStreamResponse,
 	DeleteMeetingResponse,
 	GetMeetingResponse,
 	JoinMeetingResponse,
 	LeaveMeetingResponse,
-	ListMeetingsResponse,
-	OpenAudioStreamResponse,
-	OpenScreenShareStreamResponse,
-	OpenVideoStreamResponse
+	ListMeetingsResponse
 } from '../../types/network/responses/meetingsResponses';
 
 class MeetingsApi extends BaseAPI implements IMeetingsApi {
@@ -69,68 +66,44 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 		return this.fetchAPI(`meetings/${meetingId}`, RequestType.DELETE);
 	}
 
-	public openVideoStream(meetingId: string): Promise<OpenVideoStreamResponse> {
-		return this.fetchAPI(`meetings/${meetingId}/video`, RequestType.PUT).then(
-			(resp: OpenVideoStreamResponse) => {
-				const { changeStreamStatus, session } = useStore.getState();
-				changeStreamStatus(meetingId, session.sessionId!, 'video', true);
-				return resp;
-			}
-		);
-	}
-
-	public closeVideoStream(meetingId: string): Promise<CloseVideoStreamResponse> {
+	public changeVideoStream(
+		meetingId: string,
+		enabled: boolean
+	): Promise<ChangeVideoStreamResponse> {
 		const { sessionId } = useStore.getState().session;
-		return this.fetchAPI(
-			`meetings/${meetingId}/sessions/${sessionId}/video`,
-			RequestType.DELETE
-		).then((resp: CloseVideoStreamResponse) => {
+		return this.fetchAPI(`meetings/${meetingId}/sessions/${sessionId}/video`, RequestType.PUT, {
+			enabled
+		}).then((resp: ChangeAudioStreamResponse) => {
 			const { changeStreamStatus } = useStore.getState();
-			changeStreamStatus(meetingId, sessionId!, 'video', false);
+			changeStreamStatus(meetingId, sessionId!, 'video', enabled);
 			return resp;
 		});
 	}
 
-	public openAudioStream(meetingId: string): Promise<OpenAudioStreamResponse> {
-		return this.fetchAPI(`meetings/${meetingId}/audio`, RequestType.PUT).then(
-			(resp: OpenAudioStreamResponse) => {
-				const { changeStreamStatus, session } = useStore.getState();
-				changeStreamStatus(meetingId, session.sessionId!, 'audio', true);
-				return resp;
-			}
-		);
-	}
-
-	public closeAudioStream(meetingId: string): Promise<CloseAudioStreamResponse> {
+	public changeAudioStream(
+		meetingId: string,
+		enabled: boolean
+	): Promise<ChangeAudioStreamResponse> {
 		const { sessionId } = useStore.getState().session;
-		return this.fetchAPI(
-			`meetings/${meetingId}/sessions/${sessionId}/audio`,
-			RequestType.DELETE
-		).then((resp: CloseAudioStreamResponse) => {
+		return this.fetchAPI(`meetings/${meetingId}/sessions/${sessionId}/audio`, RequestType.PUT, {
+			enabled
+		}).then((resp: ChangeAudioStreamResponse) => {
 			const { changeStreamStatus } = useStore.getState();
-			changeStreamStatus(meetingId, sessionId!, 'audio', false);
+			changeStreamStatus(meetingId, sessionId!, 'audio', enabled);
 			return resp;
 		});
 	}
 
-	public openScreenShareStream(meetingId: string): Promise<OpenScreenShareStreamResponse> {
-		return this.fetchAPI(`meetings/${meetingId}/screen`, RequestType.PUT).then(
-			(resp: OpenScreenShareStreamResponse) => {
-				const { changeStreamStatus, session } = useStore.getState();
-				changeStreamStatus(meetingId, session.sessionId!, 'screen', true);
-				return resp;
-			}
-		);
-	}
-
-	public closeScreenShareStream(meetingId: string): Promise<CloseScreenShareStreamResponse> {
+	public changeScreenStream(
+		meetingId: string,
+		enabled: boolean
+	): Promise<ChangeScreenStreamResponse> {
 		const { sessionId } = useStore.getState().session;
-		return this.fetchAPI(
-			`meetings/${meetingId}/sessions/${sessionId}/screen`,
-			RequestType.DELETE
-		).then((resp: CloseScreenShareStreamResponse) => {
+		return this.fetchAPI(`meetings/${meetingId}/sessions/${sessionId}/screen`, RequestType.PUT, {
+			enabled
+		}).then((resp: ChangeScreenStreamResponse) => {
 			const { changeStreamStatus } = useStore.getState();
-			changeStreamStatus(meetingId, sessionId!, 'screen', false);
+			changeStreamStatus(meetingId, sessionId!, 'screen', enabled);
 			return resp;
 		});
 	}

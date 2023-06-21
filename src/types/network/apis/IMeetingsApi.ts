@@ -6,17 +6,14 @@
 
 import { JoinSettings } from '../models/meetingBeTypes';
 import {
-	CloseAudioStreamResponse,
-	CloseScreenShareStreamResponse,
-	CloseVideoStreamResponse,
+	ChangeAudioStreamResponse,
+	ChangeScreenStreamResponse,
+	ChangeVideoStreamResponse,
 	DeleteMeetingResponse,
 	GetMeetingResponse,
 	JoinMeetingResponse,
 	LeaveMeetingResponse,
-	ListMeetingsResponse,
-	OpenAudioStreamResponse,
-	OpenScreenShareStreamResponse,
-	OpenVideoStreamResponse
+	ListMeetingsResponse
 } from '../responses/meetingsResponses';
 
 interface IMeetingsApi {
@@ -27,12 +24,9 @@ interface IMeetingsApi {
 	joinMeetingByMeetingId(meetingId: string, settings: JoinSettings): Promise<JoinMeetingResponse>;
 	leaveMeeting(meetingId: string): Promise<LeaveMeetingResponse>;
 	deleteMeeting(meetingId: string): Promise<DeleteMeetingResponse>;
-	openVideoStream(meetingId: string): Promise<OpenVideoStreamResponse>;
-	closeVideoStream(meetingId: string): Promise<CloseVideoStreamResponse>;
-	openAudioStream(meetingId: string): Promise<OpenAudioStreamResponse>;
-	closeAudioStream(meetingId: string): Promise<CloseAudioStreamResponse>;
-	openScreenShareStream(meetingId: string): Promise<OpenScreenShareStreamResponse>;
-	closeScreenShareStream(meetingId: string): Promise<CloseScreenShareStreamResponse>;
+	changeVideoStream(meetingId: string, enabled: boolean): Promise<ChangeVideoStreamResponse>;
+	changeAudioStream(meetingId: string, enabled: boolean): Promise<ChangeAudioStreamResponse>;
+	changeScreenStream(meetingId: string, enabled: boolean): Promise<ChangeScreenStreamResponse>;
 }
 
 export default IMeetingsApi;

@@ -20,6 +20,6 @@ export type MeetingParticipantBe = {
 };
 
 export type JoinSettings = {
-	audioStreamOn?: boolean;
-	videoStreamOn?: boolean;
+	audioStreamEnabled?: boolean;
+	videoStreamEnabled?: boolean;
 };
