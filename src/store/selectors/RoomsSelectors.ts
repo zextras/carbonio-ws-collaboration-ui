@@ -37,14 +37,14 @@ export const getRoomNameSelector = (state: RootStore, id: string): string => {
 			? state.users[otherUserId].name ||
 					state.users[otherUserId].email ||
 					state.users[otherUserId].id
-			: room.name;
+			: room.name || '';
 	}
 	return state.rooms[id].name || state.rooms[id].id;
 };
 
 export const getRoomTypeSelector = (state: RootStore, id: string): RoomType => state.rooms[id].type;
 export const getRoomDescriptionSelector = (state: RootStore, id: string): string =>
-	state.rooms[id].description;
+	state.rooms[id].description || '';
 export const getRoomMutedSelector = (state: RootStore, id: string): boolean | undefined =>
 	state.rooms[id]?.userSettings?.muted;
 

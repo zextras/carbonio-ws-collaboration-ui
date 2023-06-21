@@ -24,7 +24,6 @@ export const useRoomsStoreSlice = (set: (...any: any) => void): RoomsStoreSlice 
 						name: roomBe.name,
 						description: roomBe.description,
 						type: roomBe.type,
-						hash: roomBe.hash,
 						createdAt: roomBe.createdAt,
 						updatedAt: roomBe.createdAt,
 						pictureUpdatedAt: roomBe.pictureUpdatedAt,
@@ -62,10 +61,9 @@ export const useRoomsStoreSlice = (set: (...any: any) => void): RoomsStoreSlice 
 			produce((draft: RootStore) => {
 				draft.rooms[roomBe.id] = {
 					id: roomBe.id,
-					name: roomBe.name,
-					description: roomBe.description,
+					name: roomBe.name || '',
+					description: roomBe.description || '',
 					type: roomBe.type,
-					hash: roomBe.hash,
 					createdAt: roomBe.createdAt,
 					updatedAt: roomBe.createdAt,
 					pictureUpdatedAt: roomBe.pictureUpdatedAt,
@@ -120,13 +118,17 @@ export const useRoomsStoreSlice = (set: (...any: any) => void): RoomsStoreSlice 
 			'ROOMS/CHANGE_DESCRIPTION'
 		);
 	},
-	setRoomNameAndDescription: (id: string, newName: string, newDescription: string): void => {
+	setRoomNameAndDescription: (
+		id: string,
+		newName: string | undefined,
+		newDescription: string | undefined
+	): void => {
 		set(
 			produce((draft: RootStore) => {
 				draft.rooms[id] = {
 					...draft.rooms[id],
-					name: newName,
-					description: newDescription
+					name: newName || '',
+					description: newDescription || ''
 				};
 			}),
 			false,

@@ -30,7 +30,6 @@ import {
 	ListRoomsResponse,
 	MuteRoomResponse,
 	PromoteRoomMemberResponse,
-	ResetRoomHashResponse,
 	UnmuteRoomResponse,
 	UpdateRoomPictureResponse,
 	UpdateRoomResponse
@@ -119,10 +118,6 @@ class RoomsApi extends BaseAPI implements IRoomsApi {
 
 	public clearRoomHistory(roomId: string): Promise<ClearRoomHistoryResponse> {
 		return this.fetchAPI(`rooms/${roomId}/clear`, RequestType.PUT);
-	}
-
-	public resetRoomHash(roomId: string): Promise<ResetRoomHashResponse> {
-		return this.fetchAPI(`rooms/${roomId}/hash`, RequestType.PUT);
 	}
 
 	public getRoomMembers(roomId: string): Promise<GetRoomMembersResponse> {

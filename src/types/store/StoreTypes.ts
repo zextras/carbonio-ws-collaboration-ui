@@ -41,7 +41,11 @@ export type RoomsStoreSlice = {
 	deleteRoom: (id: string) => void;
 	setRoomName: (id: string, newName: string) => void;
 	setRoomDescription: (id: string, newDescription: string) => void;
-	setRoomNameAndDescription: (id: string, newName: string, newDescription: string) => void;
+	setRoomNameAndDescription: (
+		id: string,
+		newName: string | undefined,
+		newDescription: string | undefined
+	) => void;
 	setRoomMuted: (id: string) => void;
 	setRoomUnmuted: (id: string) => void;
 	addRoomMember: (id: string, member: MemberBe) => void;
