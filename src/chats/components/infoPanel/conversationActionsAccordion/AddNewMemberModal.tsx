@@ -6,7 +6,7 @@
 
 import { Button, Checkbox, Container, Modal, Tooltip } from '@zextras/carbonio-design-system';
 import { size } from 'lodash';
-import React, { Dispatch, FC, SetStateAction, useCallback } from 'react';
+import React, { Dispatch, FC, SetStateAction, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Member } from '../../../../types/store/RoomTypes';
@@ -49,11 +49,19 @@ const AddNewMemberModal: FC<AddNewMemberProps> = ({
 	const addNewMemberButtonLabel = t('action.addNewMembers', 'Add new members');
 	const closeLabel = t('action.close', 'Close');
 
+	const inputRef = useRef<HTMLInputElement>(null);
+
 	const onClickCheckbox = useCallback(
 		() => setShowHistory((check) => !check),
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[]
 	);
+
+	useEffect(() => {
+		if (inputRef.current) {
+			inputRef.current.value = '';
+		}
+	}, [contactsSelected]);
 
 	const modalFooter = (
 		<Container orientation="horizontal" mainAlignment="space-between">
@@ -94,6 +102,7 @@ const AddNewMemberModal: FC<AddNewMemberProps> = ({
 					contactsSelected={contactsSelected}
 					setContactSelected={setContactSelected}
 					members={members}
+					inputRef={inputRef}
 				/>
 			</Container>
 		</Modal>
