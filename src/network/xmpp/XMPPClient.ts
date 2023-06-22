@@ -37,6 +37,10 @@ class XMPPClient implements IXMPPClient {
 
 	private connectionStatus: StropheConnectionStatus | undefined;
 
+	private token: string | undefined;
+
+	private reconnectionTime = 0;
+
 	private requestsQueue: RequestType[] = [];
 
 	constructor() {
@@ -63,15 +67,6 @@ class XMPPClient implements IXMPPClient {
 		Strophe.addNamespace('XMPP_FASTEN', 'urn:xmpp:fasten:0');
 		Strophe.addNamespace('ZEXTRAS_EDIT', 'zextras:xmpp:edit:0');
 
-		// Handler for event stanzas
-		this.connection.addHandler(onPresenceStanza.bind(this), null, 'presence');
-		this.connection.addHandler(onNewMessageStanza.bind(this), null, 'message');
-		this.connection.addHandler(onHistoryMessageStanza, Strophe.NS.MAM, 'message');
-		this.connection.addHandler(onInboxMessageStanza.bind(this), Strophe.NS.INBOX, 'message');
-		// Handler used for writing status writing/stopped
-		this.connection.addHandler(onComposingMessageStanza, Strophe.NS.CHAT_STATE, 'message');
-		this.connection.addHandler(onDisplayedMessageStanza, Strophe.NS.MARKERS, 'message');
-
 		// Debug
 		// const parser = new DOMParser();
 		// this.connection.rawInput = (data: string): void => {
@@ -84,7 +79,6 @@ class XMPPClient implements IXMPPClient {
 
 	private onConnectionStatus(statusCode: StropheConnectionStatus): void {
 		const { setXmppStatus } = useStore.getState();
-
 		this.connectionStatus = statusCode;
 		switch (statusCode) {
 			case Strophe.Status.ERROR: {
@@ -112,13 +106,14 @@ class XMPPClient implements IXMPPClient {
 			}
 			case Strophe.Status.CONNECTED: {
 				xmppDebug('Connected!');
-				this.connectionEstablish();
 				setXmppStatus(true);
+				this.connectionEstablish();
 				break;
 			}
 			case Strophe.Status.DISCONNECTED: {
 				xmppDebug('Disconnected!');
 				setXmppStatus(false);
+				this.tryReconnection();
 				break;
 			}
 			case Strophe.Status.DISCONNECTING: {
@@ -142,25 +137,49 @@ class XMPPClient implements IXMPPClient {
 		}
 	}
 
+	private connectionEstablish(): void {
+		// In case of reconnection, reset XMPP data to let the client know that it has to re-request everything
+		if (this.reconnectionTime > 0) {
+			useStore.getState().resetXmppData();
+			this.reconnectionTime = 0;
+		}
+
+		// Register handlers for event stanzas on every connection
+		this.connection.addHandler(onPresenceStanza.bind(this), null, 'presence');
+		this.connection.addHandler(onNewMessageStanza.bind(this), null, 'message');
+		this.connection.addHandler(onHistoryMessageStanza, Strophe.NS.MAM, 'message');
+		this.connection.addHandler(onInboxMessageStanza.bind(this), Strophe.NS.INBOX, 'message');
+		this.connection.addHandler(onComposingMessageStanza, Strophe.NS.CHAT_STATE, 'message');
+		this.connection.addHandler(onDisplayedMessageStanza, Strophe.NS.MARKERS, 'message');
+
+		// Receive list of my subscription
+		this.getContactList();
+		// Send my presence and start receiving others
+		this.setOnline();
+		// Request inbox data: last message of every chat and unread messages count
+		this.setInbox();
+		// Send history queued requests
+		forEach(this.requestsQueue, ({ iq, callback }) => this.connection.sendIQ(iq, callback));
+		this.requestsQueue = [];
+	}
+
+	private tryReconnection(): void {
+		xmppDebug(`Retry reconnection in: ${this.reconnectionTime}`);
+		setTimeout(() => {
+			if (this.token && this.connectionStatus !== Strophe.Status.CONNECTING) {
+				this.connect(this.token);
+			}
+		}, 5000);
+		this.reconnectionTime = this.reconnectionTime * 2 + 1000;
+	}
+
 	public connect(token: string): void {
+		this.token = token;
 		const store = useStore.getState();
 		const jid = `${store.session.id}@carbonio`;
 		if (this.connectionStatus !== Strophe.Status.CONNECTING) {
 			this.connection.connect(jid, token, this.onConnectionStatus.bind(this));
 		}
-	}
-
-	private connectionEstablish(): void {
-		// Receive list of my subscription
-		this.getContactList();
-		// Send my presence and start receiving others
-		this.setOnline();
-
-		this.setInbox();
-
-		// Send history queued requests
-		forEach(this.requestsQueue, ({ iq, callback }) => this.connection.sendIQ(iq, callback));
-		this.requestsQueue = [];
 	}
 
 	/**

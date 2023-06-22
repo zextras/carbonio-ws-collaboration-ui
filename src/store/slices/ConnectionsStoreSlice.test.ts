@@ -8,10 +8,16 @@ import { act, renderHook } from '@testing-library/react-hooks';
 
 import { WebSocketClient } from '../../network/websocket/WebSocketClient';
 import XMPPClient from '../../network/xmpp/XMPPClient';
+import {
+	createMockMarker,
+	createMockRoom,
+	createMockTextMessage,
+	createMockUser
+} from '../../tests/createMock';
 import useStore from '../Store';
 
 describe('Connections slice', () => {
-	it('XmppClient', () => {
+	test('XmppClient', () => {
 		const { result } = renderHook(() => useStore());
 		const xmpp = new XMPPClient();
 		act(() => result.current.setXmppClient(xmpp));
@@ -24,7 +30,7 @@ describe('Connections slice', () => {
 		expect(result.current.connections.status.xmpp).toBe(false);
 	});
 
-	it('WobSocketClient', () => {
+	test('WobSocketClient', () => {
 		const { result } = renderHook(() => useStore());
 		const ws = new WebSocketClient();
 		act(() => result.current.setWebSocketClient(ws));
@@ -37,12 +43,55 @@ describe('Connections slice', () => {
 		expect(result.current.connections.status.websocket).toBe(false);
 	});
 
-	it('ChatsBe', () => {
+	test('ChatsBe', () => {
 		const { result } = renderHook(() => useStore());
 		act(() => result.current.setChatsBeStatus(true));
 		expect(result.current.connections.status.chats_be).toBe(true);
 
 		act(() => result.current.setChatsBeStatus(false));
 		expect(result.current.connections.status.chats_be).toBe(false);
+	});
+
+	test('Reset XMPP data', () => {
+		const user = createMockUser({ id: '1', online: true });
+		const room1 = createMockRoom({ id: '1' });
+		const room2 = createMockRoom({ id: '2' });
+		const message1 = createMockTextMessage({ id: '1', roomId: room1.id });
+		const message2 = createMockTextMessage({ id: '2', roomId: room2.id });
+		const marker1 = createMockMarker({ messageId: message1.id });
+		const marker2 = createMockMarker({ messageId: message2.id });
+
+		const { result } = renderHook(() => useStore());
+
+		// API effects to store
+		act(() => {
+			result.current.setLoginInfo('userId', 'User');
+			result.current.setUserInfo(user);
+			result.current.setRooms([room1, room2]);
+		});
+
+		const initialStore = useStore.getState();
+
+		// XMPP effects to store
+		act(() => {
+			result.current.setLoginInfo('userId', 'User');
+			result.current.setUserInfo(user);
+			result.current.newInboxMessage(message1);
+			result.current.updateHistory(room1.id, [message1]);
+			result.current.updateHistory(room2.id, [message2]);
+			result.current.updateMarkers([marker1], room1.id);
+			result.current.updateMarkers([marker2], room2.id);
+		});
+
+		act(() => result.current.resetXmppData());
+
+		expect(result.current.session).toEqual(initialStore.session);
+		expect(result.current.rooms).toEqual(initialStore.rooms);
+		expect(result.current.users[user.id].online).toBeUndefined();
+		expect(result.current.rooms).toEqual(initialStore.rooms);
+		expect(result.current.messages).toEqual(initialStore.messages);
+		expect(result.current.markers).toEqual(initialStore.markers);
+		expect(result.current.unreads).toEqual(initialStore.unreads);
+		expect(result.current.fastenings).toEqual(initialStore.fastenings);
 	});
 });
