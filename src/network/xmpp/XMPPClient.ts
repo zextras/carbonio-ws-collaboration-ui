@@ -138,7 +138,7 @@ class XMPPClient implements IXMPPClient {
 	}
 
 	private connectionEstablish(): void {
-		// In case of reconnection, reset XMPP data to let the client know that it has to re-request everything
+		// In case of reconnection, reset XMPP data to let the client knows that it has to re-request everything
 		if (this.reconnectionTime > 0) {
 			useStore.getState().resetXmppData();
 			this.reconnectionTime = 0;
@@ -177,9 +177,7 @@ class XMPPClient implements IXMPPClient {
 		this.token = token;
 		const store = useStore.getState();
 		const jid = `${store.session.id}@carbonio`;
-		if (this.connectionStatus !== Strophe.Status.CONNECTING) {
-			this.connection.connect(jid, token, this.onConnectionStatus.bind(this));
-		}
+		this.connection.connect(jid, token, this.onConnectionStatus.bind(this));
 	}
 
 	/**
