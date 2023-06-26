@@ -169,7 +169,7 @@ class XMPPClient implements IXMPPClient {
 			if (this.token && this.connectionStatus !== Strophe.Status.CONNECTING) {
 				this.connect(this.token);
 			}
-		}, 5000);
+		}, this.reconnectionTime);
 		this.reconnectionTime = this.reconnectionTime * 2 + 1000;
 	}
 
