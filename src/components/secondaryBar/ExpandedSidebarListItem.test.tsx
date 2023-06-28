@@ -123,6 +123,22 @@ const mockedConfigurationMessage: ConfigurationMessage = {
 };
 
 describe('Expanded sidebar list item', () => {
+	test('Group - I sent a message but it is in pending state', async () => {
+		const store: RootStore = useStore.getState();
+		store.addRoom(mockedGroup);
+		store.setLoginInfo(user1Be.id, user1Be.name);
+		store.setUserInfo(user1Be);
+		store.setPlaceholderMessage({
+			roomId: mockedTextMessageUnread.roomId,
+			id: mockedTextMessageUnread.id,
+			text: mockedTextMessageUnread.text
+		});
+		setup(<ExpandedSidebarListItem roomId={mockedGroup.id} />);
+		const ackIcon = screen.getByTestId('icon: ClockOutline');
+		const message = screen.getByText(mockedTextMessageUnread.text);
+		expect(ackIcon).toBeInTheDocument();
+		expect(message).toBeInTheDocument();
+	});
 	test('Group - I sent a message', async () => {
 		const store: RootStore = useStore.getState();
 		store.addRoom(mockedGroup);

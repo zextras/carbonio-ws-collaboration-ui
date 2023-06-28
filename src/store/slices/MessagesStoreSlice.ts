@@ -211,6 +211,7 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 			produce((draft: RootStore) => {
 				if (!draft.messages[roomId]) draft.messages[roomId] = [];
 				draft.messages[roomId] = map(draft.messages[roomId], (message: Message) => {
+					// Avoid updating messages which are not text messages or only placeholder
 					if (
 						message.type !== MessageType.TEXT_MSG ||
 						message.read === MarkerStatus.READ ||
