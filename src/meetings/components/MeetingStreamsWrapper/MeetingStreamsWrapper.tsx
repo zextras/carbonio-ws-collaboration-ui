@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Container, IconButton, Tooltip } from '@zextras/carbonio-design-system';
+import { Container, IconButton, Row, Tooltip } from '@zextras/carbonio-design-system';
 import React, { ReactElement, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
@@ -18,7 +18,8 @@ import useStore from '../../../store/Store';
 import defaultLogo from '../../assets/Logo.png';
 
 const SidebarIconButton = styled(IconButton)`
-	height: 240px;
+	width: 2.25rem;
+	height: 15.09375rem;
 	margin-right: ${({ theme }): string => theme.sizes.padding.medium};
 	//position: absolute;
 	//top: calc(50% - 120px);
@@ -63,7 +64,7 @@ const MeetingStreamsWrapper = (): ReactElement => {
 	return (
 		<BoxContainer
 			ref={streamsWrapperRef}
-			background="gray0"
+			background={'gray0'}
 			width={sidebarStatus ? 'fill' : '100%'}
 			borderRadius="none"
 			padding={{ all: 'large' }}
@@ -71,16 +72,22 @@ const MeetingStreamsWrapper = (): ReactElement => {
 			orientation="horizontal"
 		>
 			<LogoApp customLogo={customLogo} />
-			<Tooltip label={sidebarStatus ? collapseSidebarLabel : expandSidebarLabel}>
-				<SidebarIconButton
-					iconColor="gray6"
-					backgroundColor="text"
-					icon={sidebarStatus ? 'ChevronLeftOutline' : 'ChevronRightOutline'}
-					onClick={toggleSidebar}
-					size="large"
-				/>
-			</Tooltip>
-			<MeetingViewManager />
+			<Row height="fill">
+				<Container width="48px">
+					<Tooltip label={sidebarStatus ? collapseSidebarLabel : expandSidebarLabel}>
+						<SidebarIconButton
+							iconColor="gray6"
+							backgroundColor="text"
+							icon={sidebarStatus ? 'ChevronLeftOutline' : 'ChevronRightOutline'}
+							onClick={toggleSidebar}
+							size="large"
+						/>
+					</Tooltip>
+				</Container>
+			</Row>
+			<Row takeAvailableSpace={true} height="fill">
+				<MeetingViewManager />
+			</Row>
 			<MeetingActions streamsWrapperRef={streamsWrapperRef} />
 		</BoxContainer>
 	);

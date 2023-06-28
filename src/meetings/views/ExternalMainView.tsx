@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { disable, enable } from 'darkreader';
 import { createMemoryHistory } from 'history';
 import React, { lazy, ReactElement, Suspense, useEffect } from 'react';
 import { Route, Router, Switch } from 'react-router-dom';
@@ -66,6 +67,27 @@ const ExternalMainView = (): ReactElement => {
 				console.log(reason);
 			});
 	}, [setCustomLogo]);
+
+	useEffect(() => {
+		enable(
+			{
+				sepia: 0
+			},
+			{
+				ignoreImageAnalysis: ['.no-dr-invert *'],
+				invert: [],
+				css: `
+		.tox, .force-white-bg, .tox-swatches-menu, .tox .tox-edit-area__iframe {
+			background-color: #fff !important;
+			background: #fff !important;
+		}
+	`,
+				ignoreInlineStyle: ['.tox-menu *'],
+				disableStyleSheetsProxy: false
+			}
+		);
+		return () => disable();
+	}, []);
 
 	return (
 		<Router history={history}>

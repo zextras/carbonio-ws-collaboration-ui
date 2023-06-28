@@ -5,7 +5,6 @@
  */
 
 import { Container } from '@zextras/carbonio-design-system';
-import { disable, enable } from 'darkreader';
 import React, { lazy, ReactElement, Suspense, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -48,27 +47,6 @@ const MeetingSkeleton = (): ReactElement => {
 	const { meetingId }: Record<string, string> = useParams();
 	const meeting = useStore((store) => getMeetingByMeetingId(store, meetingId));
 	const { goToInfoPage } = useRouting();
-
-	useEffect(() => {
-		enable(
-			{
-				sepia: 0
-			},
-			{
-				ignoreImageAnalysis: ['.no-dr-invert *'],
-				invert: [],
-				css: `
-		.tox, .force-white-bg, .tox-swatches-menu, .tox .tox-edit-area__iframe {
-			background-color: #fff !important;
-			background: #fff !important;
-		}
-	`,
-				ignoreInlineStyle: ['.tox-menu *'],
-				disableStyleSheetsProxy: false
-			}
-		);
-		return () => disable();
-	}, []);
 
 	useEffect(() => {
 		if (!meeting) {
