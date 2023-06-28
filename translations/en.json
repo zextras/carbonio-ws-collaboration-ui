@@ -193,6 +193,7 @@
         "messageRead": "Read",
         "messageReceived": "Received",
         "messageSent": "Sent",
+        "pending": "Pending",
         "promoteModerator": "Promote to moderator",
         "promoteSomeoneElseToModerator": "Promote someone else to moderator to leave",
         "removeCaption": "Remove caption",

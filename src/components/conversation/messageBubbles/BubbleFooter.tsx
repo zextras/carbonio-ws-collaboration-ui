@@ -69,6 +69,7 @@ const BubbleFooter: FC<BubbleFooterProps> = ({
 		if (ackIcon === 'Checkmark') return t('tooltip.messageSent', 'Sent');
 		if (ackIcon === 'DoneAll' && ackIconColor === 'gray')
 			return t('tooltip.messageReceived', 'Received');
+		if (ackIcon === 'ClockOutline') return t('tooltip.pending', 'Pending');
 		return t('tooltip.messageRead', 'Read');
 	}, [ackIcon, ackIconColor, t]);
 
