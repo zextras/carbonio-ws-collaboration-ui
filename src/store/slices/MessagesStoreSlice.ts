@@ -307,5 +307,14 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 			false,
 			'MESSAGES/SET_PLACEHOLDER_MESSAGE'
 		);
+	},
+	removePlaceholderMessage: (roomId: string, messageId: string): void => {
+		set(
+			produce((draft: RootStore) => {
+				remove(draft.messages[roomId], (message) => message.id === messageId);
+			}),
+			false,
+			'MESSAGES/remove_PLACEHOLDER_MESSAGE'
+		);
 	}
 });

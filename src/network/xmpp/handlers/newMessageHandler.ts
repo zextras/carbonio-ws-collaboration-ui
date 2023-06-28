@@ -37,17 +37,18 @@ export function onNewMessageStanza(this: IXMPPClient, message: Element): true {
 
 						// Increment unread counter
 						store.incrementUnreadCount(newMessage.roomId);
-
-						// Request message subject of reply
-						const messageSubjectOfReplyId = newMessage.replyTo;
-						if (messageSubjectOfReplyId) {
-							this.requestMessageSubjectOfReply(
-								newMessage.roomId,
-								messageSubjectOfReplyId,
-								newMessage.id
-							);
-						}
 					}
+
+					// Request message subject of reply
+					const messageSubjectOfReplyId = newMessage.replyTo;
+					if (messageSubjectOfReplyId) {
+						this.requestMessageSubjectOfReply(
+							newMessage.roomId,
+							messageSubjectOfReplyId,
+							newMessage.id
+						);
+					}
+
 					break;
 				}
 				case MessageType.AFFILIATION_MSG:

@@ -71,6 +71,7 @@ export type MessagesStoreSlice = {
 		messageSubjectOfReply: TextMessage
 	) => void;
 	setPlaceholderMessage: (fields: PlaceholderFields) => void;
+	removePlaceholderMessage: (roomId: string, messageId: string) => void;
 };
 
 export type SessionStoreSlice = {

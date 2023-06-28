@@ -167,26 +167,29 @@ class RoomsApi extends BaseAPI implements IRoomsApi {
 		signal?: AbortSignal
 	): Promise<AddRoomAttachmentResponse> {
 		const uuid = uuidGenerator();
+		// Set a placeholder message into the store
+		useStore.getState().setPlaceholderMessage({
+			roomId,
+			id: uuid,
+			text: optionalFields.description || '',
+			replyTo: optionalFields.replyId,
+			attachment: {
+				id: 'placeholderFileId',
+				name: file.name,
+				mimeType: file.type,
+				size: file.size
+			}
+		});
 		return this.uploadFileFetchAPI(`rooms/${roomId}/attachments`, RequestType.POST, file, signal, {
 			description: optionalFields.description,
 			replyId: optionalFields.replyId,
 			messageId: uuid
-		}).then((resp: AddRoomAttachmentResponse) => {
-			// Set a placeholder message into the store
-			useStore.getState().setPlaceholderMessage({
-				roomId,
-				id: uuid,
-				text: optionalFields.description || '',
-				replyTo: optionalFields.replyId,
-				attachment: {
-					id: 'placeholderFileId',
-					name: file.name,
-					mimeType: file.type,
-					size: file.size
-				}
+		})
+			.then((resp: AddRoomAttachmentResponse) => resp)
+			.catch((error) => {
+				useStore.getState().removePlaceholderMessage(roomId, uuid);
+				return error;
 			});
-			return resp;
-		});
 	}
 
 	public forwardMessages(
