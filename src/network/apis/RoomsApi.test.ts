@@ -365,7 +365,7 @@ describe('Rooms API', () => {
 		// Check if fetch is called with the correct parameters
 		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/rooms/roomId/attachments`, {
 			method: 'POST',
-			headers,
+			headers: expect.objectContaining(headers),
 			body: new ArrayBuffer(0),
 			signal
 		});
@@ -392,7 +392,7 @@ describe('Rooms API', () => {
 		// Check if fetch is called with the correct parameters
 		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/rooms/roomId/attachments`, {
 			method: 'POST',
-			headers,
+			headers: expect.objectContaining(headers),
 			body: new ArrayBuffer(0),
 			signal
 		});

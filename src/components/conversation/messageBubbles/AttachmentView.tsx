@@ -13,7 +13,7 @@ import {
 	Text,
 	Tooltip
 } from '@zextras/carbonio-design-system';
-import React, { FC, useCallback, useMemo, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -107,6 +107,12 @@ const AttachmentView: FC<AttachmentViewProps> = ({ attachment, from, isMyMessage
 
 	const [isPreviewLoaded, setPreviewLoaded] = useState(false);
 	const [previewError, setPreviewError] = useState(false);
+
+	// Reset preview state when attachment changes to request again preview
+	useEffect(() => {
+		setPreviewLoaded(false);
+		setPreviewError(false);
+	}, [attachment.id]);
 
 	const setLoaded = useCallback(() => setPreviewLoaded(true), []);
 	const setError = useCallback(() => {

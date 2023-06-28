@@ -88,3 +88,12 @@ export type AttachmentMessageType = {
 	mimeType: string;
 	size: number;
 };
+
+export type PlaceholderFields = {
+	id: string;
+	roomId: string;
+	text: string;
+	replyTo?: string;
+	forwarded?: ForwardedInfo;
+	attachment?: AttachmentMessageType;
+};

@@ -46,8 +46,20 @@ const BubbleFooter: FC<BubbleFooterProps> = ({
 	const forwardedLabel = t('action.forwarded', 'forwarded');
 	const editedLabel = t('message.edited', 'edited');
 
-	const ackIcon = messageRead === MarkerStatus.UNREAD ? 'Checkmark' : 'DoneAll';
-	const ackIconColor = messageRead === MarkerStatus.READ ? 'primary' : 'gray';
+	const { ackIcon, ackIconColor } = useMemo(() => {
+		switch (messageRead) {
+			case MarkerStatus.READ:
+				return { ackIcon: 'DoneAll', ackIconColor: 'primary' };
+			case MarkerStatus.READ_BY_SOMEONE:
+				return { ackIcon: 'DoneAll', ackIconColor: 'gray' };
+			case MarkerStatus.UNREAD:
+				return { ackIcon: 'Checkmark', ackIconColor: 'gray' };
+			case MarkerStatus.PENDING:
+				return { ackIcon: 'ClockOutline', ackIconColor: 'gray' };
+			default:
+				return { ackIcon: 'ClockOutline', ackIconColor: 'gray' };
+		}
+	}, [messageRead]);
 
 	const timezone = useStore(getPrefTimezoneSelector);
 	const messageDate = moment.tz(date, timezone).format('DD MMM YY');

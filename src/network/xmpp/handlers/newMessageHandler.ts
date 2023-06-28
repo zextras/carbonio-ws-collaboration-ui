@@ -24,28 +24,29 @@ export function onNewMessageStanza(this: IXMPPClient, message: Element): true {
 
 			switch (newMessage.type) {
 				case MessageType.TEXT_MSG: {
-					sendCustomEvent(EventName.NEW_MESSAGE, newMessage);
 					store.newMessage(newMessage);
-					displayMessageBrowserNotification(newMessage);
 
-					// when I send a message as soon it's returned as Stanza we send the reads for ourselves
 					if (newMessage.from === sessionId) {
+						// Sent my message as read
 						this.readMessage(newMessage.roomId, newMessage.id);
-					}
+					} else {
+						sendCustomEvent(EventName.NEW_MESSAGE, newMessage);
 
-					// Increment unread counter
-					if (newMessage.from !== sessionId) {
+						// Show browser notification
+						displayMessageBrowserNotification(newMessage);
+
+						// Increment unread counter
 						store.incrementUnreadCount(newMessage.roomId);
-					}
 
-					// Request message subject of reply
-					const messageSubjectOfReplyId = newMessage.replyTo;
-					if (messageSubjectOfReplyId) {
-						this.requestMessageSubjectOfReply(
-							newMessage.roomId,
-							messageSubjectOfReplyId,
-							newMessage.id
-						);
+						// Request message subject of reply
+						const messageSubjectOfReplyId = newMessage.replyTo;
+						if (messageSubjectOfReplyId) {
+							this.requestMessageSubjectOfReply(
+								newMessage.roomId,
+								messageSubjectOfReplyId,
+								newMessage.id
+							);
+						}
 					}
 					break;
 				}

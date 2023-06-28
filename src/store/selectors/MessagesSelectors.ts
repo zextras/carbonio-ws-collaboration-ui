@@ -6,7 +6,12 @@
 
 import { filter, find, forEach, orderBy, size } from 'lodash';
 
-import { Message, MessageType, TextMessage } from '../../types/store/MessageTypes';
+import {
+	AttachmentMessageType,
+	Message,
+	MessageType,
+	TextMessage
+} from '../../types/store/MessageTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 
 export const getMessagesSelector = (store: RootStore, roomId: string): Message[] =>
@@ -69,3 +74,14 @@ export const getRoomIdsOrderedLastMessage = (
 
 export const roomIsEmpty = (store: RootStore, roomId: string): boolean =>
 	size(store.messages[roomId]) === 0;
+
+export const getMessageAttachment = (
+	store: RootStore,
+	message: TextMessage
+): AttachmentMessageType | undefined => {
+	const textMessage = find(
+		store.messages[message.roomId],
+		(mex) => mex.id === message.id
+	) as TextMessage;
+	return textMessage?.attachment;
+};

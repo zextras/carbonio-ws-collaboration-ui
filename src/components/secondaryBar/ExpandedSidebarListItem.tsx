@@ -131,12 +131,16 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 			!usersWritingList
 		) {
 			switch (lastMessageOfRoom.read) {
-				case MarkerStatus.UNREAD:
-					return <Icon size="small" icon="Checkmark" color="gray" />;
 				case MarkerStatus.READ:
 					return <Icon size="small" icon="DoneAll" color="primary" />;
-				default:
+				case MarkerStatus.READ_BY_SOMEONE:
 					return <Icon size="small" icon="DoneAll" color="gray" />;
+				case MarkerStatus.UNREAD:
+					return <Icon size="small" icon="Checkmark" color="gray" />;
+				case MarkerStatus.PENDING:
+					return <Icon size="small" icon="ClockOutline" color="gray" />;
+				default:
+					return <Icon size="small" icon="Checkmark" color="gray" />;
 			}
 		}
 		return undefined;

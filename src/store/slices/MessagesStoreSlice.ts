@@ -6,8 +6,21 @@
  */
 
 import produce from 'immer';
-import { concat, find, first, forEach, last, map, orderBy, remove, size, uniqBy } from 'lodash';
+import {
+	concat,
+	find,
+	findIndex,
+	first,
+	forEach,
+	last,
+	map,
+	orderBy,
+	remove,
+	size,
+	uniqBy
+} from 'lodash';
 
+import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
 import { UsersApi } from '../../network';
 import { calcReads } from '../../network/xmpp/utility/decodeXMPPMessageStanza';
 import { MarkerStatus } from '../../types/store/MarkersTypes';
@@ -16,6 +29,7 @@ import {
 	Message,
 	MessageList,
 	MessageType,
+	PlaceholderFields,
 	TextMessage
 } from '../../types/store/MessageTypes';
 import { RoomType } from '../../types/store/RoomTypes';
@@ -55,8 +69,19 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 					});
 				}
 
-				// Add message to the end of list
-				draft.messages[message.roomId].push(message);
+				// Add message to the end of list or replace a placeholder message
+				const placeholderMessageIndex = findIndex(draft.messages[message.roomId], {
+					id: message.id
+				});
+				if (placeholderMessageIndex !== -1) {
+					const newMessage = {
+						...draft.messages[message.roomId][placeholderMessageIndex],
+						...message
+					};
+					draft.messages[message.roomId].splice(placeholderMessageIndex, 1, newMessage);
+				} else {
+					draft.messages[message.roomId].push(message);
+				}
 
 				// Retrieve user information
 				retrieveMessageUserInfo(message, draft.users);
@@ -186,7 +211,11 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 			produce((draft: RootStore) => {
 				if (!draft.messages[roomId]) draft.messages[roomId] = [];
 				draft.messages[roomId] = map(draft.messages[roomId], (message: Message) => {
-					if (message.type !== MessageType.TEXT_MSG || message.read === MarkerStatus.READ) {
+					if (
+						message.type !== MessageType.TEXT_MSG ||
+						message.read === MarkerStatus.READ ||
+						message.read === MarkerStatus.PENDING
+					) {
 						return message;
 					}
 					message.read = calcReads(message.date, roomId);
@@ -217,6 +246,66 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 			}),
 			false,
 			'MESSAGES/SET_REPLIED_MESSAGE'
+		);
+	},
+	setPlaceholderMessage: ({
+		roomId,
+		id,
+		text,
+		replyTo,
+		attachment,
+		forwarded
+	}: PlaceholderFields): void => {
+		set(
+			produce((draft: RootStore) => {
+				const placeholderMessage: TextMessage = {
+					id,
+					stanzaId: `placeholder_${id}`,
+					roomId,
+					date: Date.now(),
+					type: MessageType.TEXT_MSG,
+					from: draft.session.id!,
+					text,
+					read: MarkerStatus.PENDING,
+					replyTo,
+					attachment,
+					forwarded
+				};
+
+				// Initialize messages list if it does not exist
+				if (!draft.messages[roomId]) draft.messages[roomId] = [];
+
+				// Add date message if the new message has a different date than the previous one
+				const lastMessageDate = last(draft.messages[roomId])?.date || 0;
+				if (!datesAreFromTheSameDay(lastMessageDate, placeholderMessage.date)) {
+					draft.messages[roomId].push({
+						id: `dateMessage${placeholderMessage.date - 2}`,
+						roomId,
+						date: placeholderMessage.date - 2,
+						type: MessageType.DATE_MSG
+					});
+				}
+
+				// Request message subject of reply
+				const messageSubjectOfReplyId = placeholderMessage.replyTo;
+				if (messageSubjectOfReplyId) {
+					const messageSubjectOfReply = find(
+						draft.messages[roomId],
+						(message) =>
+							message.type === MessageType.TEXT_MSG && message.stanzaId === messageSubjectOfReplyId
+					) as TextMessage;
+					if (messageSubjectOfReply) {
+						placeholderMessage.repliedMessage = messageSubjectOfReply;
+					}
+				}
+
+				// Add message to the end of list or replace a placeholder message
+				draft.messages[roomId].push(placeholderMessage);
+
+				sendCustomEvent(EventName.NEW_MESSAGE, placeholderMessage);
+			}),
+			false,
+			'MESSAGES/SET_PLACEHOLDER_MESSAGE'
 		);
 	}
 });
