@@ -121,6 +121,7 @@ export type ConnectionsStoreSlice = {
 	setChatsBeStatus: (status: boolean) => void;
 	setXmppStatus: (status: boolean) => void;
 	setWebsocketStatus: (status: boolean) => void;
+	resetXmppData: () => void;
 };
 
 export type UnreadsCounterSlice = {
