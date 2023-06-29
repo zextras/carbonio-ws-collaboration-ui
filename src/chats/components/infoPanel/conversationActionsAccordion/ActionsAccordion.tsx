@@ -17,6 +17,7 @@ import LeaveConversationAction from './LeaveConversationAction';
 import MuteConversationAction from './MuteConversationAction';
 import { roomHasMoreThanTwoOwnerEqualityFn } from '../../../../store/equalityFunctions/RoomsEqualityFunctions';
 import { getActionsAccordionStatus } from '../../../../store/selectors/ActiveConversationsSelectors';
+import { getMeetingActionsAccordionStatus } from '../../../../store/selectors/ActiveMeetingSelectors';
 import { roomIsEmpty } from '../../../../store/selectors/MessagesSelectors';
 import {
 	getMyOwnershipOfTheRoom,
@@ -35,9 +36,14 @@ const CustomAccordion = styled(Accordion)`
 type ActionAccordionProps = {
 	roomId: string;
 	isInsideMeeting?: boolean;
+	meetingId?: string;
 };
 
-export const ActionsAccordion: FC<ActionAccordionProps> = ({ roomId, isInsideMeeting }) => {
+export const ActionsAccordion: FC<ActionAccordionProps> = ({
+	roomId,
+	isInsideMeeting,
+	meetingId
+}) => {
 	const [t] = useTranslation();
 	const actionAccordionTitle: string = t('conversationInfo.actionAccordionTitle', 'Actions');
 	const roomType: string = useStore((state) => getRoomTypeSelector(state, roomId));
@@ -50,12 +56,29 @@ export const ActionsAccordion: FC<ActionAccordionProps> = ({ roomId, isInsideMee
 	);
 	const emptyRoom: boolean = useStore((state) => roomIsEmpty(state, roomId));
 	const accordionStatus: boolean = useStore((state) => getActionsAccordionStatus(state, roomId));
+	const meetingAccordionStatus: boolean = useStore((state) =>
+		getMeetingActionsAccordionStatus(state, meetingId || '')
+	);
+
 	const setActionsAccordionStatus = useStore((state) => state.setActionsAccordionStatus);
 
-	const toggleAccordionStatus = useCallback(
-		() => setActionsAccordionStatus(roomId, !accordionStatus),
-		[accordionStatus, roomId, setActionsAccordionStatus]
+	const setMeetingActionsAccordionStatus = useStore(
+		(state) => state.setMeetingActionsAccordionStatus
 	);
+
+	const toggleAccordionStatus = useCallback(() => {
+		isInsideMeeting
+			? setMeetingActionsAccordionStatus(meetingId || '', !meetingAccordionStatus)
+			: setActionsAccordionStatus(roomId, !accordionStatus);
+	}, [
+		accordionStatus,
+		isInsideMeeting,
+		meetingAccordionStatus,
+		meetingId,
+		roomId,
+		setActionsAccordionStatus,
+		setMeetingActionsAccordionStatus
+	]);
 
 	const infoDetails = useMemo(() => {
 		const arrayOfActions = [];
@@ -156,7 +179,7 @@ export const ActionsAccordion: FC<ActionAccordionProps> = ({ roomId, isInsideMee
 			{
 				id: 'ActionsAccordion',
 				label: actionAccordionTitle,
-				open: accordionStatus,
+				open: isInsideMeeting ? meetingAccordionStatus : accordionStatus,
 				items: arrayOfActions,
 				onOpen: toggleAccordionStatus,
 				onClose: toggleAccordionStatus
@@ -167,11 +190,12 @@ export const ActionsAccordion: FC<ActionAccordionProps> = ({ roomId, isInsideMee
 		roomType,
 		emptyRoom,
 		numberOfOwners,
+		isInsideMeeting,
 		actionAccordionTitle,
+		meetingAccordionStatus,
 		accordionStatus,
 		toggleAccordionStatus,
 		roomId,
-		isInsideMeeting,
 		numberOfMembers
 	]);
 

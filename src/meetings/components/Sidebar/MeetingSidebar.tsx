@@ -55,7 +55,7 @@ const MeetingSidebar = (): ReactElement => {
 					maxHeight={meetingChatVisibility === MeetingChatVisibility.OPEN ? '50%' : 'fill'}
 					mainAlignment="flex-start"
 				>
-					<ActionsAccordion roomId={roomId || ''} isInsideMeeting />
+					<ActionsAccordion roomId={roomId || ''} isInsideMeeting meetingId={meetingId} />
 					{roomType !== RoomType.ONE_TO_ONE && (
 						<MeetingParticipantsAccordion meetingId={meetingId} />
 					)}

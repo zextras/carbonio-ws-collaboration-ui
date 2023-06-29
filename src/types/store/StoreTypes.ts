@@ -5,6 +5,7 @@
  */
 
 import { ActiveConversationsMap, FileToUpload, messageActionType } from './ActiveConversationTypes';
+import { ActiveMeetingMap } from './ActiveMeetingTypes';
 import { Connections } from './ConnectionsTypes';
 import { FasteningsMap } from './FasteningMessagesTypes';
 import { Marker, MarkersMap } from './MarkersTypes';
@@ -152,6 +153,12 @@ export type MeetingsSlice = {
 	toggleMeetingChatVisibility: (meetingId: string, visibilityStatus: MeetingChatVisibility) => void;
 };
 
+export type ActiveMeetingSlice = {
+	activeMeeting: ActiveMeetingMap;
+	setMeetingActionsAccordionStatus: (roomId: string, status: boolean) => void;
+	setMeetingParticipantsAccordionStatus: (roomId: string, status: boolean) => void;
+};
+
 export type RootStore = UsersStoreSlice &
 	RoomsStoreSlice &
 	MessagesStoreSlice &
@@ -161,4 +168,5 @@ export type RootStore = UsersStoreSlice &
 	ConnectionsStoreSlice &
 	UnreadsCounterSlice &
 	FasteningMessagesSlice &
-	MeetingsSlice;
+	MeetingsSlice &
+	ActiveMeetingSlice;
