@@ -35,7 +35,9 @@ const TileVideo = styled.video`
 		lightgray 50% / cover no-repeat;
 `;
 
-const CentralTile = styled(Container)``;
+const CentralTile = styled(Container)`
+	border-radius: 8px;
+`;
 
 const CentralVideo = styled.video`
 	width: 100%;
@@ -90,7 +92,8 @@ const FaceToFaceMode = (): ReactElement => {
 	useEffect(() => {
 		navigator.mediaDevices
 			.getUserMedia({
-				video: { aspectRatio: 1.7777 }
+				// video: { aspectRatio: 1.618 }
+				video: { aspectRatio: 1.777 }
 			})
 			.then((stream: MediaStream) => {
 				setTestLocalStream(stream);
@@ -117,7 +120,11 @@ const FaceToFaceMode = (): ReactElement => {
 	const centralContentToDisplay = useMemo(
 		() =>
 			centralStream ? (
-				<CentralTile height={centralTileSize.tileHeight} width={centralTileSize.tileWidth}>
+				<CentralTile
+					height={centralTileSize.tileHeight}
+					width={centralTileSize.tileWidth}
+					background="text"
+				>
 					<CentralVideo playsInline autoPlay muted controls={false} ref={streamRef2} />
 				</CentralTile>
 			) : (

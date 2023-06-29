@@ -19,6 +19,7 @@ const MeetingViewManager = (): ReactElement => {
 	const { meetingId }: any = useParams();
 	const meetingViewSelected = useStore((store) => getMeetingViewSelected(store, meetingId));
 
+	// TODO add check on more of 2 streams visible to change from FaceToFace to Cinema/Grid
 	const ViewToDisplay = useMemo(() => {
 		switch (meetingViewSelected) {
 			case MeetingViewType.CINEMA:
@@ -34,7 +35,7 @@ const MeetingViewManager = (): ReactElement => {
 		<Container
 			borderRadius="none"
 			crossAlignment="flex-start"
-			padding={{ left: 'large', right: '3.25rem', top: '2.81rem', bottom: '2.06rem' }}
+			padding={{ left: '0.25rem', right: '3.25rem', top: '2.81rem', bottom: '2.06rem' }}
 		>
 			{ViewToDisplay}
 		</Container>
