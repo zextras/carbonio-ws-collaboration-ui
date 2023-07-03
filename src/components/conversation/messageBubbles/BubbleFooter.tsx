@@ -66,12 +66,19 @@ const BubbleFooter: FC<BubbleFooterProps> = ({
 	const messageTime = moment.tz(date, timezone).format('HH:mm');
 
 	const dropdownTooltip = useMemo(() => {
-		if (ackIcon === 'Checkmark') return t('tooltip.messageSent', 'Sent');
-		if (ackIcon === 'DoneAll' && ackIconColor === 'gray')
-			return t('tooltip.messageReceived', 'Received');
-		if (ackIcon === 'ClockOutline') return t('tooltip.pending', 'Pending');
-		return t('tooltip.messageRead', 'Read');
-	}, [ackIcon, ackIconColor, t]);
+		switch (ackIcon) {
+			case MarkerStatus.READ:
+				return t('tooltip.messageRead', 'Read');
+			case MarkerStatus.READ_BY_SOMEONE:
+				return t('tooltip.messageReceived', 'Received');
+			case MarkerStatus.UNREAD:
+				return t('tooltip.messageSent', 'Sent');
+			case MarkerStatus.PENDING:
+				return t('tooltip.pending', 'Pending');
+			default:
+				return t('tooltip.pending', 'Pending');
+		}
+	}, [ackIcon, t]);
 
 	return (
 		<Container
