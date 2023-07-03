@@ -13,7 +13,8 @@ import {
 	Message,
 	TextMessage,
 	AttachmentMessageType,
-	MessageFastening
+	MessageFastening,
+	PlaceholderFields
 } from './MessageTypes';
 import { RoomsMap } from './RoomTypes';
 import { CapabilityList, Session } from './SessionTypes';
@@ -69,6 +70,8 @@ export type MessagesStoreSlice = {
 		replyMessageId: string,
 		messageSubjectOfReply: TextMessage
 	) => void;
+	setPlaceholderMessage: (fields: PlaceholderFields) => void;
+	removePlaceholderMessage: (roomId: string, messageId: string) => void;
 };
 
 export type SessionStoreSlice = {

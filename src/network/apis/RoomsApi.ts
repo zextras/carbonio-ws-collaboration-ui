@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { v4 as uuidGenerator } from 'uuid';
+
 import BaseAPI from './BaseAPI';
 import useStore from '../../store/Store';
 import { RequestType } from '../../types/network/apis/IBaseAPI';
@@ -164,10 +166,30 @@ class RoomsApi extends BaseAPI implements IRoomsApi {
 		},
 		signal?: AbortSignal
 	): Promise<AddRoomAttachmentResponse> {
+		const uuid = uuidGenerator();
+		// Set a placeholder message into the store
+		useStore.getState().setPlaceholderMessage({
+			roomId,
+			id: uuid,
+			text: optionalFields.description || '',
+			replyTo: optionalFields.replyId,
+			attachment: {
+				id: 'placeholderFileId',
+				name: file.name,
+				mimeType: file.type,
+				size: file.size
+			}
+		});
 		return this.uploadFileFetchAPI(`rooms/${roomId}/attachments`, RequestType.POST, file, signal, {
 			description: optionalFields.description,
-			replyId: optionalFields.replyId
-		});
+			replyId: optionalFields.replyId,
+			messageId: uuid
+		})
+			.then((resp: AddRoomAttachmentResponse) => resp)
+			.catch((error) => {
+				useStore.getState().removePlaceholderMessage(roomId, uuid);
+				return error;
+			});
 	}
 
 	public forwardMessages(

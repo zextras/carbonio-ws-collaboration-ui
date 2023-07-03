@@ -21,7 +21,8 @@ export type Marker = {
 export enum MarkerStatus {
 	READ = 'read',
 	READ_BY_SOMEONE = 'read_by_someone',
-	UNREAD = 'unread'
+	UNREAD = 'unread',
+	PENDING = 'pending'
 }
 
 export enum MarkerType {

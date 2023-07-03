@@ -241,6 +241,10 @@ class XMPPClient implements IXMPPClient {
 	sendChatMessage(roomId: string, message: string): void {
 		if (this.connection && this.connection.connected) {
 			const uuid = uuidGenerator();
+			// Set a placeholder message into the store
+			useStore.getState().setPlaceholderMessage({ roomId, id: uuid, text: message });
+
+			// Send the message to xmpp server
 			const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat', id: uuid })
 				.c('body')
 				.t(message)
@@ -263,6 +267,12 @@ class XMPPClient implements IXMPPClient {
 		if (this.connection && this.connection.connected) {
 			const to = `${carbonize(replyTo)}/${carbonizeMUC(roomId)}}`;
 			const uuid = uuidGenerator();
+
+			// Set a placeholder message into the store
+			useStore
+				.getState()
+				.setPlaceholderMessage({ roomId, id: uuid, text: message, replyTo: replyMessageId });
+
 			const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat', id: uuid })
 				.c('body')
 				.t(message)
