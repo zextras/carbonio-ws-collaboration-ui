@@ -325,7 +325,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 
 	const messagesWrapped = useMemo(() => {
 		const list: JSX.Element[] = [];
-		map(dateMessageWrapped, (wrapper) => {
+		map(dateMessageWrapped, (wrapper, idx) => {
 			const messageList = map(wrapper, (message: Message, index) => {
 				const messageRef = React.createRef<HTMLElement>();
 				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -362,7 +362,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 			});
 			list.push(
 				<Container
-					key={`messageList-${roomId}`}
+					key={`messageList-${roomId}-${idx}`}
 					data-testid={`messageListRef${roomId}`}
 					mainAlignment={'flex-start'}
 					crossAlignment={'flex-start'}

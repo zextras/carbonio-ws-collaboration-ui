@@ -18,9 +18,11 @@ import BubbleHeader from './BubbleHeader';
 import ForwardedTextMessageSectionView from './ForwardedMessageSectionView';
 import RepliedTextMessageSectionView from './RepliedTextMessageSectionView';
 import TextContentBubble from './TextContentBubble';
+import { getMessageAttachment } from '../../../../store/selectors/MessagesSelectors';
 import { getRoomTypeSelector } from '../../../../store/selectors/RoomsSelectors';
 import useStore from '../../../../store/Store';
 import { Z_INDEX_RANK } from '../../../../types/generics';
+import { MarkerStatus } from '../../../../types/store/MarkersTypes';
 import { TextMessage } from '../../../../types/store/MessageTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
 import { parseUrlOnMessage } from '../../../../utils/parseUrlOnMessage';
@@ -78,28 +80,29 @@ const Bubble: FC<BubbleProps> = ({
 	const mySessionId = useStore((store) => store.session.id);
 	const roomType = useStore<RoomType>((store) => getRoomTypeSelector(store, message.roomId));
 	const isMyMessage = mySessionId === message.from;
+	const messageAttachment = useStore((store) => getMessageAttachment(store, message));
 	const messageFormatted = useMemo(() => parseUrlOnMessage(message.text), [message.text]);
 
 	const extension = useMemo(
-		() => message.attachment && message.attachment.mimeType.split('/')[1]?.toUpperCase(),
-		[message.attachment]
+		() => messageAttachment && messageAttachment.mimeType.split('/')[1]?.toUpperCase(),
+		[messageAttachment]
 	);
 
 	const size = useMemo(() => {
-		if (message.attachment) {
-			if (message.attachment.size < 1024) {
-				return `${message.attachment.size}B`;
+		if (messageAttachment) {
+			if (messageAttachment.size < 1024) {
+				return `${messageAttachment.size}B`;
 			}
-			if (message.attachment.size < 1024 * 1024) {
-				return `${(message.attachment.size / 1024).toFixed(2)}KB`;
+			if (messageAttachment.size < 1024 * 1024) {
+				return `${(messageAttachment.size / 1024).toFixed(2)}KB`;
 			}
-			if (message.attachment.size < 1024 * 1024 * 1024) {
-				return `${(message.attachment.size / 1024 / 1024).toFixed(2)}MB`;
+			if (messageAttachment.size < 1024 * 1024 * 1024) {
+				return `${(messageAttachment.size / 1024 / 1024).toFixed(2)}MB`;
 			}
-			return `${(message.attachment.size / 1024 / 1024 / 1024).toFixed(2)}GB`;
+			return `${(messageAttachment.size / 1024 / 1024 / 1024).toFixed(2)}GB`;
 		}
 		return undefined;
-	}, [message.attachment]);
+	}, [messageAttachment]);
 
 	return (
 		<BubbleContainer
@@ -117,9 +120,11 @@ const Bubble: FC<BubbleProps> = ({
 			centerMessageOfList={prevMessageIsFromSameSender && nextMessageIsFromSameSender}
 			lastMessageOfList={prevMessageIsFromSameSender && !nextMessageIsFromSameSender}
 		>
-			<DropDownWrapper padding={{ all: 'none' }}>
-				<BubbleContextualMenuDropDown message={message} isMyMessage={isMyMessage} />
-			</DropDownWrapper>
+			{message.read !== MarkerStatus.PENDING && (
+				<DropDownWrapper padding={{ all: 'none' }}>
+					<BubbleContextualMenuDropDown message={message} isMyMessage={isMyMessage} />
+				</DropDownWrapper>
+			)}
 			{!isMyMessage && roomType !== RoomType.ONE_TO_ONE && !prevMessageIsFromSameSender && (
 				<>
 					<BubbleHeader senderId={message.from} />
@@ -139,10 +144,10 @@ const Bubble: FC<BubbleProps> = ({
 					isMyMessage={isMyMessage}
 				/>
 			)}
-			{message.attachment && !message.forwarded && (
+			{messageAttachment && !message.forwarded && (
 				<>
 					<AttachmentView
-						attachment={message.attachment}
+						attachment={messageAttachment}
 						isMyMessage={isMyMessage}
 						from={message.from}
 					/>

@@ -23,12 +23,11 @@ const user1Be: UserBe = {
 	statusMessage: "Hey there! I'm User 1"
 };
 
-const room: RoomBe = {
+const room = {
 	id: 'Room-Id',
 	name: 'Room Name',
 	description: 'This is the description of the group',
 	type: RoomType.GROUP,
-	hash: 'hash',
 	createdAt: '1234567',
 	updatedAt: '12345678',
 	pictureUpdatedAt: '123456789',
@@ -59,7 +58,6 @@ const OneToOneRoom: RoomBe = {
 	name: ' ',
 	description: '',
 	type: RoomType.ONE_TO_ONE,
-	hash: 'hash',
 	createdAt: '1234567',
 	updatedAt: '12345678',
 	pictureUpdatedAt: '123456789',

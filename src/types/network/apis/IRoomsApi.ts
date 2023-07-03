@@ -23,7 +23,6 @@ import {
 	ListRoomsResponse,
 	MuteRoomResponse,
 	PromoteRoomMemberResponse,
-	ResetRoomHashResponse,
 	UnmuteRoomResponse,
 	UpdateRoomPictureResponse,
 	UpdateRoomResponse
@@ -46,8 +45,6 @@ interface IRoomsApi {
 	unmuteRoomNotification(roomId: string): Promise<UnmuteRoomResponse>;
 	// Clear history
 	clearRoomHistory(roomId: string): Promise<ClearRoomHistoryResponse>;
-	// Hash
-	resetRoomHash(roomId: string): Promise<ResetRoomHashResponse>;
 	// Room members
 	getRoomMembers(roomId: string): Promise<GetRoomMembersResponse>;
 	addRoomMember(roomId: string, member: AddMemberFields): Promise<AddRoomMemberResponse>;

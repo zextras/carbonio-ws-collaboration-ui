@@ -19,7 +19,6 @@ describe('Leave Conversation', () => {
 			name: 'Room Name',
 			description: 'This is the description of the group',
 			type: RoomType.GROUP,
-			hash: 'hash',
 			createdAt: '1234567',
 			updatedAt: '12345678',
 			pictureUpdatedAt: '123456789'

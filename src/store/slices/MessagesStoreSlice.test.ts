@@ -5,6 +5,7 @@
  */
 
 import { act, renderHook } from '@testing-library/react-hooks';
+import { find, last } from 'lodash';
 
 import {
 	createMockAffiliationMessage,
@@ -561,5 +562,47 @@ describe('Test message slice - setRepliedMessage', () => {
 
 		const textMessage = result.current.messages[message.roomId][1] as TextMessage;
 		expect(textMessage.repliedMessage).toBe(message);
+	});
+
+	test('Add a placeholder message', () => {
+		const placeholderMessageFields = {
+			roomId: 'roomId',
+			id: 'placeholderMessageId',
+			text: 'placeholderMessageText',
+			replyTo: 'replyToMessageId'
+		};
+		const { result } = renderHook(() => useStore());
+		act(() => {
+			result.current.setPlaceholderMessage(placeholderMessageFields);
+		});
+
+		const storeMessage = last(
+			result.current.messages[placeholderMessageFields.roomId]
+		) as TextMessage;
+		expect(storeMessage.id).toBe('placeholderMessageId');
+		expect(storeMessage.text).toBe('placeholderMessageText');
+		expect(storeMessage.replyTo).toBe('replyToMessageId');
+	});
+
+	test('Remove a placeholder message', () => {
+		const placeholderMessageFields = {
+			roomId: 'roomId',
+			id: 'placeholderMessageId',
+			text: 'placeholderMessageText',
+			replyTo: 'replyToMessageId'
+		};
+		const { result } = renderHook(() => useStore());
+		act(() => {
+			result.current.setPlaceholderMessage(placeholderMessageFields);
+			result.current.removePlaceholderMessage(
+				placeholderMessageFields.roomId,
+				placeholderMessageFields.id
+			);
+		});
+
+		const messageOnStore = find(result.current.messages[placeholderMessageFields.roomId], {
+			id: placeholderMessageFields.id
+		});
+		expect(messageOnStore).toBeUndefined();
 	});
 });

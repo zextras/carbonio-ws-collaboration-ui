@@ -27,7 +27,6 @@ export const createMockRoom = (fields?: GenericFieldsType): RoomBe => ({
 	name: 'name',
 	description: 'description',
 	type: RoomType.GROUP,
-	hash: 'hash',
 	createdAt: '2022-08-25T17:24:28.961+02:00',
 	updatedAt: '2022-08-25T17:24:28.961+02:00',
 	members: [],

@@ -61,8 +61,8 @@ describe('Forward Message Modal', () => {
 		);
 
 		const list = screen.getByTestId('list_forward_modal');
-		expect(list).not.toHaveTextContent(testRoom.name);
-		expect(list).toHaveTextContent(chat.name);
+		expect(list).not.toHaveTextContent(testRoom.name!);
+		expect(list).toHaveTextContent(chat.name!);
 	});
 
 	test('Forward a message', async () => {
@@ -80,10 +80,10 @@ describe('Forward Message Modal', () => {
 
 		// Type on ChipInput to trigger a new autoCompleteGalRequest
 		const chipInput = await screen.findByTestId('chip_input_forward_modal');
-		await user.type(chipInput, chat.name[0]);
+		await user.type(chipInput, chat.name![0]);
 
 		// Add Chip on ChipInput
-		const conversationComponent = await screen.findByText(chat.name);
+		const conversationComponent = await screen.findByText(chat.name!);
 		await user.click(conversationComponent);
 
 		const footerButton = await screen.findByTestId('forward_button');
@@ -109,13 +109,13 @@ describe('Forward Message Modal', () => {
 
 		// Select Test Room conversation
 		const chipInput = await screen.findByTestId('chip_input_forward_modal');
-		await user.type(chipInput, chat.name[0]);
-		const conversationComponent = await screen.findByText(chat.name);
+		await user.type(chipInput, chat.name![0]);
+		const conversationComponent = await screen.findByText(chat.name!);
 		await user.click(conversationComponent);
 
 		// Select Test Room 2 conversation
-		await user.type(chipInput, chat2.name[0]);
-		const conversation2Component = await screen.findByText(chat2.name);
+		await user.type(chipInput, chat2.name![0]);
+		const conversation2Component = await screen.findByText(chat2.name!);
 		await user.click(conversation2Component);
 
 		const footerButton = await screen.findByTestId('forward_button');
@@ -135,8 +135,8 @@ describe('Forward Message Modal', () => {
 		);
 
 		// Forward to Test Room
-		await user.type(await screen.findByTestId('chip_input_forward_modal'), chat.name[0]);
-		await user.click(await screen.findByText(chat.name));
+		await user.type(await screen.findByTestId('chip_input_forward_modal'), chat.name![0]);
+		await user.click(await screen.findByText(chat.name!));
 		await user.click(await screen.findByTestId('forward_button'));
 
 		expect(onClose).toHaveBeenCalledTimes(1);
@@ -155,8 +155,8 @@ describe('Forward Message Modal', () => {
 		);
 
 		// Forward to Test Room
-		await user.type(await screen.findByTestId('chip_input_forward_modal'), chat.name[0]);
-		await user.click(await screen.findByText(chat.name));
+		await user.type(await screen.findByTestId('chip_input_forward_modal'), chat.name![0]);
+		await user.click(await screen.findByText(chat.name!));
 		await user.click(await screen.findByTestId('forward_button'));
 
 		expect(onClose).toHaveBeenCalledTimes(1);

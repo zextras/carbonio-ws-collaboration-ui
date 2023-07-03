@@ -35,6 +35,9 @@ import {
 	GetUserResponse
 } from './src/types/network/responses/usersResponses';
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const crypto = require('crypto');
+
 // MOCKED SHELL UI
 export const mockNotify: jest.Mock = jest.fn();
 jest.mock('@zextras/carbonio-shell-ui', () => ({
@@ -246,3 +249,9 @@ global.fetch = jest.fn(() =>
 );
 
 global.URL.createObjectURL = jest.fn();
+
+Object.defineProperty(window, 'crypto', {
+	value: {
+		getRandomValues: (arr: string[]) => crypto.randomBytes(arr.length)
+	}
+});

@@ -15,7 +15,8 @@ import {
 	Message,
 	TextMessage,
 	AttachmentMessageType,
-	MessageFastening
+	MessageFastening,
+	PlaceholderFields
 } from './MessageTypes';
 import { RoomsMap } from './RoomTypes';
 import { CapabilityList, Session } from './SessionTypes';
@@ -44,7 +45,11 @@ export type RoomsStoreSlice = {
 	deleteRoom: (id: string) => void;
 	setRoomName: (id: string, newName: string) => void;
 	setRoomDescription: (id: string, newDescription: string) => void;
-	setRoomNameAndDescription: (id: string, newName: string, newDescription: string) => void;
+	setRoomNameAndDescription: (
+		id: string,
+		newName: string | undefined,
+		newDescription: string | undefined
+	) => void;
 	setRoomMuted: (id: string) => void;
 	setRoomUnmuted: (id: string) => void;
 	addRoomMember: (id: string, member: MemberBe) => void;
@@ -68,6 +73,8 @@ export type MessagesStoreSlice = {
 		replyMessageId: string,
 		messageSubjectOfReply: TextMessage
 	) => void;
+	setPlaceholderMessage: (fields: PlaceholderFields) => void;
+	removePlaceholderMessage: (roomId: string, messageId: string) => void;
 };
 
 export type SessionStoreSlice = {
@@ -121,6 +128,7 @@ export type ConnectionsStoreSlice = {
 	setChatsBeStatus: (status: boolean) => void;
 	setXmppStatus: (status: boolean) => void;
 	setWebsocketStatus: (status: boolean) => void;
+	resetXmppData: () => void;
 };
 
 export type UnreadsCounterSlice = {

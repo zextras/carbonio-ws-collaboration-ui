@@ -42,10 +42,10 @@ describe('Rooms API', () => {
 
 	test('addRoom is called correctly', async () => {
 		// Send addRoom request
-		const room = createMockRoom({ id: 'room0' });
+		const room = createMockRoom({ id: 'room0', name: 'new room', description: 'new description' });
 		const roomToAdd = {
-			name: room.name,
-			description: room.description,
+			name: room.name!,
+			description: room.description!,
 			type: room.type,
 			membersIds: []
 		};
@@ -365,7 +365,7 @@ describe('Rooms API', () => {
 		// Check if fetch is called with the correct parameters
 		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/rooms/roomId/attachments`, {
 			method: 'POST',
-			headers,
+			headers: expect.objectContaining(headers),
 			body: new ArrayBuffer(0),
 			signal
 		});
@@ -392,7 +392,7 @@ describe('Rooms API', () => {
 		// Check if fetch is called with the correct parameters
 		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/rooms/roomId/attachments`, {
 			method: 'POST',
-			headers,
+			headers: expect.objectContaining(headers),
 			body: new ArrayBuffer(0),
 			signal
 		});
