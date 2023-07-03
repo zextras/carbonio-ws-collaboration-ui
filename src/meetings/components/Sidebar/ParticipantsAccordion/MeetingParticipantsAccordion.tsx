@@ -5,11 +5,12 @@
  */
 
 import { Accordion, Container } from '@zextras/carbonio-design-system';
-import React, { FC, useMemo } from 'react';
+import React, { FC, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import MeetingParticipantsList from './MeetingParticipantsList';
+import { getMeetingParticipantsAccordionStatus } from '../../../../store/selectors/ActiveMeetingSelectors';
 import { getNumberOfMeetingParticipantsByMeetingId } from '../../../../store/selectors/MeetingSelectors';
 import useStore from '../../../../store/Store';
 
@@ -35,6 +36,18 @@ const MeetingParticipantsAccordion: FC<MeetingParticipantsAccordionProps> = ({ m
 		{ count: numberOfParticipants !== undefined ? numberOfParticipants : 0 }
 	);
 
+	const accordionStatus: boolean = useStore((state) =>
+		getMeetingParticipantsAccordionStatus(state, meetingId)
+	);
+	const setParticipantsAccordionStatus = useStore(
+		(state) => state.setMeetingParticipantsAccordionStatus
+	);
+
+	const toggleAccordionStatus = useCallback(
+		() => setParticipantsAccordionStatus(meetingId, !accordionStatus),
+		[accordionStatus, meetingId, setParticipantsAccordionStatus]
+	);
+
 	const infoDetails = useMemo(() => {
 		const arrayOfActions = [
 			{
@@ -49,10 +62,13 @@ const MeetingParticipantsAccordion: FC<MeetingParticipantsAccordionProps> = ({ m
 			{
 				id: 'ParticipantAccordion',
 				label: participantsTitle,
-				items: arrayOfActions
+				open: accordionStatus,
+				items: arrayOfActions,
+				onOpen: toggleAccordionStatus,
+				onClose: toggleAccordionStatus
 			}
 		];
-	}, [meetingId, participantsTitle]);
+	}, [accordionStatus, meetingId, participantsTitle, toggleAccordionStatus]);
 
 	return (
 		<Container

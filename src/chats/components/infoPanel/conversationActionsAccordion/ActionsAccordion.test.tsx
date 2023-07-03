@@ -221,7 +221,7 @@ describe('Actions Accordion', () => {
 });
 
 describe('Actions Accordion - meeting', () => {
-	test('A owner of a group should see the correct actions - More than one owner', () => {
+	test('A owner of a group should see the correct actions - More than one owner', async () => {
 		const room: RoomBe = createMockRoom({
 			type: RoomType.GROUP,
 			members: [
@@ -256,7 +256,13 @@ describe('Actions Accordion - meeting', () => {
 		store.setLoginInfo(user1Be.id, user1Be.name);
 		store.addMeeting(meeting);
 
-		setup(<ActionsAccordion roomId={room.id} isInsideMeeting />);
+		const { user } = setup(
+			<ActionsAccordion roomId={room.id} isInsideMeeting meetingId={meeting.id} />
+		);
+		const chevron = screen.getByTestId('icon: ChevronUp');
+		await user.click(chevron);
+		const chevronDown = await screen.findByTestId('icon: ChevronDown');
+		expect(chevronDown).toBeInTheDocument();
 		expect(screen.getByText(/Mute Notifications/i)).toBeInTheDocument();
 		expect(screen.getByText(/Add New Members/i)).toBeInTheDocument();
 		expect(screen.getByText(/Edit Details/i)).toBeInTheDocument();
@@ -299,7 +305,7 @@ describe('Actions Accordion - meeting', () => {
 		store.setLoginInfo(user1Be.id, user1Be.name);
 		store.addMeeting(meeting);
 
-		setup(<ActionsAccordion roomId={room.id} isInsideMeeting />);
+		setup(<ActionsAccordion roomId={room.id} isInsideMeeting meetingId={meeting.id} />);
 		expect(screen.getByText(/Mute Notifications/i)).toBeInTheDocument();
 		expect(screen.getByText(/Add New Members/i)).toBeInTheDocument();
 		expect(screen.getByText(/Edit Details/i)).toBeInTheDocument();
@@ -333,7 +339,7 @@ describe('Actions Accordion - meeting', () => {
 		store.setUserInfo(user2Be);
 		store.setLoginInfo(user1Be.id, user1Be.name);
 		store.addMeeting(meeting);
-		setup(<ActionsAccordion roomId={room.id} />);
+		setup(<ActionsAccordion roomId={room.id} isInsideMeeting meetingId={meeting.id} />);
 		expect(screen.getByText(/Mute Notifications/i)).toBeInTheDocument();
 		expect(screen.getByText(/Clear History/i)).toBeInTheDocument();
 		expect(screen.queryByText(/Add New Members/i)).not.toBeInTheDocument();
