@@ -286,7 +286,7 @@ class XMPPClient implements IXMPPClient {
 
 	/**
 	 * Delete a message / Message Retraction (XEP-0424)
-	 * Documentation: https://xmpp.org/extensions/xep-0424.html
+	 * Documentation: https://esl.github.io/MongooseDocs/latest/modules/mod_mam/#retraction-on-the-stanza-id
 	 */
 	sendChatMessageDeletion(roomId: string, messageStanzaId: string): void {
 		if (this.connection && this.connection.connected) {
