@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-// Decode a string full of unicode characters into a string with the actual characters
 import { forEach } from 'lodash';
 
 // Encode a string into a string full of unicode characters

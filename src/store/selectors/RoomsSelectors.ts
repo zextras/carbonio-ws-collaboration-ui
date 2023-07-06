@@ -42,7 +42,8 @@ export const getRoomNameSelector = (state: RootStore, id: string): string => {
 	return state.rooms[id].name || state.rooms[id].id;
 };
 
-export const getRoomTypeSelector = (state: RootStore, id: string): RoomType => state.rooms[id].type;
+export const getRoomTypeSelector = (state: RootStore, id: string): RoomType =>
+	state.rooms[id]?.type;
 export const getRoomDescriptionSelector = (state: RootStore, id: string): string =>
 	state.rooms[id].description || '';
 export const getRoomMutedSelector = (state: RootStore, id: string): boolean | undefined =>

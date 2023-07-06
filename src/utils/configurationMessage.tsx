@@ -21,7 +21,7 @@ export const configurationMessage = (
 	const roomNameChangedLabel = (
 		<Trans
 			i18nKey="configurationMessages.roomNameChanged"
-			defaults='{{nameToDisplay}} changed the title of this Group in "<i>{{messageValue}}</i>"'
+			defaults='{{nameToDisplay}} changed the title of this Group in <i>"{{messageValue}}"</i>'
 			values={{ name: nameToDisplay, roomName: messageValue }}
 		/>
 	);
@@ -29,7 +29,7 @@ export const configurationMessage = (
 	const roomDescriptionChangedLabel = (
 		<Trans
 			i18nKey={'configurationMessages.roomTopicChanged'}
-			defaults='{{nameToDisplay}} changed the topic of {{roomName}} in "<i>{{messageValue}}"</i>'
+			defaults='{{nameToDisplay}} changed the topic of {{roomName}} in <i>"{{messageValue}}"</i>'
 			values={{ name: nameToDisplay, roomName, topicName: messageValue }}
 		/>
 	);

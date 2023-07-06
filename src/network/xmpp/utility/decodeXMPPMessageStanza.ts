@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { decode } from 'html-entities';
 import { includes } from 'lodash';
 import { Strophe } from 'strophe.js';
 
@@ -150,8 +149,8 @@ export function decodeXMPPMessageStanza(
 			const forwardCount = getAttribute(forwardedElement, 'count') || '1';
 			const delayElement = getRequiredTagElement(forwardedElement, 'delay');
 			const forwardedMessageElement = getRequiredTagElement(forwardedElement, 'message');
-			messageTxt = decode(
-				unicodeToChar(getRequiredTagElement(forwardedMessageElement, 'body').textContent || '')
+			messageTxt = unicodeToChar(
+				getRequiredTagElement(forwardedMessageElement, 'body').textContent || ''
 			);
 
 			forwarded = {
