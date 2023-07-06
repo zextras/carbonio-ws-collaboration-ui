@@ -124,6 +124,24 @@ export function decodeXMPPMessageStanza(
 		}
 	}
 
+	// Retracted message
+	const retracted = getTagElement(messageStanza, 'retracted');
+	if (retracted) {
+		const stanzaIdReference = getTagElement(messageStanza, 'stanza-id');
+		const stanzaId = optional?.stanzaId || (stanzaIdReference && getRequiredAttribute(stanzaIdReference, 'id') || messageId);
+		return {
+			id: messageId,
+			stanzaId,
+			roomId,
+			date: messageDate,
+			type: MessageType.TEXT_MSG,
+			from: getId(resource),
+			text: '',
+			read: calcReads(messageDate, roomId),
+			deleted: true,
+		};
+	}
+
 	// Text message
 	const body = messageStanza.getElementsByTagName('body')[0];
 	if (body && resource) {
