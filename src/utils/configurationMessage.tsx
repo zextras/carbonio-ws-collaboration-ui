@@ -7,6 +7,8 @@
 import React from 'react';
 import { TFunction, Trans } from 'react-i18next';
 
+import { OperationType } from '../types/store/MessageTypes';
+
 export const configurationMessage = (
 	messageOperation: string,
 	messageValue: string,
@@ -45,18 +47,14 @@ export const configurationMessage = (
 	);
 
 	switch (messageOperation) {
-		case 'roomNameChanged': {
+		case OperationType.ROOM_NAME_CHANGED:
 			return roomNameChangedLabel;
-		}
-		case 'roomDescriptionChanged': {
+		case OperationType.ROOM_DESCRIPTION_CHANGED:
 			return roomDescriptionChangedLabel;
-		}
-		case 'roomPictureUpdated': {
+		case OperationType.ROOM_PICTURE_UPDATED:
 			return pictureUpdatedLabel;
-		}
-		case 'roomPictureDeleted': {
+		case OperationType.ROOM_PICTURE_DELETED:
 			return pictureDeletedLabel;
-		}
 		default: {
 			console.warn('configuration message to replace: ', messageOperation);
 			return '';
