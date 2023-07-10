@@ -22,7 +22,7 @@ import { RoomsMap } from './RoomTypes';
 import { CapabilityList, Session } from './SessionTypes';
 import { UnreadsMap } from './UnreadsCounterTypes';
 import { UsersMap } from './UserTypes';
-import { MeetingBe, MeetingParticipantBe } from '../network/models/meetingBeTypes';
+import { MeetingBe, MeetingParticipant } from '../network/models/meetingBeTypes';
 import { MemberBe, RoomBe } from '../network/models/roomBeTypes';
 import { UserBe } from '../network/models/userBeTypes';
 import IWebSocketClient from '../network/websocket/IWebSocketClient';
@@ -148,11 +148,11 @@ export type MeetingsSlice = {
 	setMeetings: (meetings: MeetingBe[]) => void;
 	addMeeting: (meeting: MeetingBe) => void;
 	deleteMeeting: (meetingId: string) => void;
-	addParticipant: (meetingId: string, participant: MeetingParticipantBe) => void;
-	removeParticipant: (meetingId: string, sessionId: string) => void;
+	addParticipant: (meetingId: string, participant: MeetingParticipant) => void;
+	removeParticipant: (meetingId: string, userId: string) => void;
 	changeStreamStatus: (
 		meetingId: string,
-		sessionId: string,
+		userId: string,
 		stream: 'audio' | 'video' | 'screen',
 		status: boolean
 	) => void;

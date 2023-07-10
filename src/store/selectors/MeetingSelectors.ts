@@ -85,7 +85,7 @@ export const getParticipantAudioStatus = (
 	const audioStream = find(
 		store.meetings[roomId].participants,
 		(participant) => participant.userId === userId
-	)?.hasAudioStreamOn;
+	)?.audioStreamOn;
 	if (audioStream !== undefined) return audioStream;
 	return false;
 };

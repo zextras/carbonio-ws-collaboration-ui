@@ -19,7 +19,7 @@ import {
 	createMockTextMessage
 } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
-import { MeetingBe, MeetingParticipantBe } from '../../../../types/network/models/meetingBeTypes';
+import { MeetingBe, MeetingParticipant } from '../../../../types/network/models/meetingBeTypes';
 import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
 import { UserBe } from '../../../../types/network/models/userBeTypes';
 
@@ -231,15 +231,15 @@ describe('Actions Accordion - meeting', () => {
 			]
 		});
 		const message = createMockTextMessage({ roomId: room.id });
-		const user1Participant: MeetingParticipantBe = createMockParticipants({
+		const user1Participant: MeetingParticipant = createMockParticipants({
 			userId: user1Be.id,
 			sessionId: 'sessionIdUser1'
 		});
-		const user3Participant: MeetingParticipantBe = createMockParticipants({
+		const user3Participant: MeetingParticipant = createMockParticipants({
 			userId: user3Be.id,
 			sessionId: 'sessionIdUser3'
 		});
-		const user2Participant: MeetingParticipantBe = createMockParticipants({
+		const user2Participant: MeetingParticipant = createMockParticipants({
 			userId: user2Be.id,
 			sessionId: 'sessionIdUser2'
 		});
@@ -280,15 +280,15 @@ describe('Actions Accordion - meeting', () => {
 			]
 		});
 		const message = createMockTextMessage({ roomId: room.id });
-		const user1Participant: MeetingParticipantBe = createMockParticipants({
+		const user1Participant: MeetingParticipant = createMockParticipants({
 			userId: user1Be.id,
 			sessionId: 'sessionIdUser1'
 		});
-		const user3Participant: MeetingParticipantBe = createMockParticipants({
+		const user3Participant: MeetingParticipant = createMockParticipants({
 			userId: user3Be.id,
 			sessionId: 'sessionIdUser3'
 		});
-		const user2Participant: MeetingParticipantBe = createMockParticipants({
+		const user2Participant: MeetingParticipant = createMockParticipants({
 			userId: user2Be.id,
 			sessionId: 'sessionIdUser2'
 		});
@@ -318,11 +318,11 @@ describe('Actions Accordion - meeting', () => {
 			type: RoomType.ONE_TO_ONE,
 			members: [createMockMember({ userId: user1Be.id }), createMockMember({ userId: user2Be.id })]
 		});
-		const user1Participant: MeetingParticipantBe = createMockParticipants({
+		const user1Participant: MeetingParticipant = createMockParticipants({
 			userId: user1Be.id,
 			sessionId: 'sessionIdUser1'
 		});
-		const user2Participant: MeetingParticipantBe = createMockParticipants({
+		const user2Participant: MeetingParticipant = createMockParticipants({
 			userId: user2Be.id,
 			sessionId: 'sessionIdUser2'
 		});

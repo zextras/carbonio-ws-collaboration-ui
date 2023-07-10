@@ -25,7 +25,7 @@ type BasicMeetingEvent = {
 	from: string;
 	sentDate: string;
 	// sessionId: identifier of sender's session
-	sessionId: string;
+	sessionId: string; // TODO for the moment, this sessionId is the userId
 	meetingId: string;
 };
 

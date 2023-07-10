@@ -8,16 +8,22 @@ import { MeetingBe } from '../models/meetingBeTypes';
 
 export type ListMeetingsResponse = MeetingBe[];
 
+export type CreateMeetingResponse = MeetingBe;
+
 export type GetMeetingResponse = MeetingBe;
+
+export type StartMeetingResponse = Response;
 
 export type JoinMeetingResponse = MeetingBe;
 
 export type LeaveMeetingResponse = Response;
 
+export type StopMeetingResponse = Response;
+
 export type DeleteMeetingResponse = Response;
 
-export type ChangeVideoStreamResponse = Response;
+export type UpdateAudioStreamStatusResponse = Response;
 
-export type ChangeAudioStreamResponse = Response;
+export type UpdateVideoStreamStatusResponse = Response;
 
-export type ChangeScreenStreamResponse = Response;
+export type UpdateScreenStreamStatusResponse = Response;

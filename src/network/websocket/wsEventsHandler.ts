@@ -8,12 +8,13 @@ import { find } from 'lodash';
 
 import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
 import useStore from '../../store/Store';
+import { MeetingType, MeetingUserType } from '../../types/network/models/meetingBeTypes';
 import { GetMeetingResponse } from '../../types/network/responses/meetingsResponses';
 import { GetRoomResponse } from '../../types/network/responses/roomsResponses';
 import { WsEvent, WsEventType } from '../../types/network/websocket/wsEvents';
 import { RoomType } from '../../types/store/RoomTypes';
 import { wsDebug } from '../../utils/debug';
-import { RoomsApi, MeetingsApi } from '../index';
+import { MeetingsApi, RoomsApi } from '../index';
 
 export function wsEventsHandler(event: WsEvent): void {
 	const state = useStore.getState();
@@ -120,14 +121,6 @@ export function wsEventsHandler(event: WsEvent): void {
 			}
 			break;
 		}
-		case WsEventType.ATTACHMENT_ADDED: {
-			// TODO handle
-			break;
-		}
-		case WsEventType.ATTACHMENT_REMOVED: {
-			// TODO handle
-			break;
-		}
 		case WsEventType.USER_PICTURE_CHANGED: {
 			if (eventArrivesFromAnotherSession) {
 				state.setUserPictureUpdated(event.userId, event.sentDate);
@@ -141,12 +134,16 @@ export function wsEventsHandler(event: WsEvent): void {
 			break;
 		}
 		case WsEventType.MEETING_CREATED: {
+			// TODO: wait for event changes
 			if (eventArrivesFromAnotherSession) {
 				state.addMeeting({
 					id: event.meetingId,
+					name: '', // TODO placeholder
 					roomId: event.roomId,
+					active: false,
 					participants: [],
-					createdAt: event.sentDate
+					createdAt: event.sentDate,
+					meetingType: MeetingType.PERMANENT // TODO placeholder
 				});
 
 				// Send custom event to open an incoming meeting notification
@@ -159,10 +156,11 @@ export function wsEventsHandler(event: WsEvent): void {
 			break;
 		}
 		case WsEventType.MEETING_JOINED: {
+			// TODO: wait for event changes
 			if (eventArrivesFromAnotherSession) {
 				state.addParticipant(event.meetingId, {
-					sessionId: event.sessionId,
 					userId: event.from,
+					userType: MeetingUserType.REGISTERED, // TODO placeholder
 					audioStreamOn: false,
 					videoStreamOn: false
 				});
@@ -181,6 +179,7 @@ export function wsEventsHandler(event: WsEvent): void {
 			break;
 		}
 		case WsEventType.MEETING_LEFT: {
+			// TODO: wait for event changes
 			if (eventArrivesFromAnotherSession) {
 				if (event.from === state.session.id) {
 					state.deleteMeeting(event.meetingId);
@@ -197,36 +196,42 @@ export function wsEventsHandler(event: WsEvent): void {
 			break;
 		}
 		case WsEventType.MEETING_VIDEO_STREAM_OPENED: {
+			// TODO: wait for event changes
 			if (eventArrivesFromAnotherSession) {
 				state.changeStreamStatus(event.meetingId, event.sessionId, 'video', true);
 			}
 			break;
 		}
 		case WsEventType.MEETING_VIDEO_STREAM_CLOSED: {
+			// TODO: wait for event changes
 			if (eventArrivesFromAnotherSession) {
 				state.changeStreamStatus(event.meetingId, event.sessionId, 'video', false);
 			}
 			break;
 		}
 		case WsEventType.MEETING_AUDIO_STREAM_OPENED: {
+			// TODO: wait for event changes
 			if (eventArrivesFromAnotherSession) {
 				state.changeStreamStatus(event.meetingId, event.sessionId, 'audio', true);
 			}
 			break;
 		}
 		case WsEventType.MEETING_AUDIO_STREAM_CLOSED: {
+			// TODO: wait for event changes
 			if (eventArrivesFromAnotherSession) {
 				state.changeStreamStatus(event.meetingId, event.sessionId, 'audio', false);
 			}
 			break;
 		}
 		case WsEventType.MEETING_SCREEN_STREAM_OPENED: {
+			// TODO: wait for event changes
 			if (eventArrivesFromAnotherSession) {
 				state.changeStreamStatus(event.meetingId, event.sessionId, 'screen', true);
 			}
 			break;
 		}
 		case WsEventType.MEETING_SCREEN_STREAM_CLOSED: {
+			// TODO: wait for event changes
 			if (eventArrivesFromAnotherSession) {
 				state.changeStreamStatus(event.meetingId, event.sessionId, 'screen', false);
 			}

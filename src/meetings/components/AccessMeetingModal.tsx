@@ -11,6 +11,7 @@ import useRouting from '../../hooks/useRouting';
 import { MeetingsApi } from '../../network';
 import { getMeeting } from '../../store/selectors/MeetingSelectors';
 import useStore from '../../store/Store';
+import { MeetingUserType } from '../../types/network/models/meetingBeTypes';
 import { JoinMeetingResponse } from '../../types/network/responses/meetingsResponses';
 
 type AccessMeetingModalProps = {
@@ -33,11 +34,11 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 	const joinMeeting = useCallback(() => {
 		// Meeting already exists: user joins it
 		if (meeting) {
-			MeetingsApi.joinMeetingByMeetingId(meeting.id, { videoStreamEnabled, audioStreamEnabled })
+			MeetingsApi.joinMeeting(meeting.id, { videoStreamEnabled, audioStreamEnabled })
 				.then(() => {
 					addParticipant(meeting.id, {
 						userId: session.id!,
-						sessionId: session.sessionId!,
+						userType: MeetingUserType.REGISTERED, // TODO placeholder
 						videoStreamOn: videoStreamEnabled,
 						audioStreamOn: audioStreamEnabled
 					});
@@ -47,7 +48,7 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 		}
 		// Meeting doesn't exist: user creates and joins it
 		else {
-			MeetingsApi.joinMeeting(roomId, { videoStreamEnabled, audioStreamEnabled })
+			MeetingsApi.joinMeetingByRoomId(roomId, { videoStreamEnabled, audioStreamEnabled })
 				.then((response: JoinMeetingResponse) => {
 					addMeeting(response);
 					goToMeetingPage(response.id);
@@ -60,7 +61,6 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 		audioStreamEnabled,
 		addParticipant,
 		session.id,
-		session.sessionId,
 		goToMeetingPage,
 		roomId,
 		addMeeting

@@ -18,7 +18,7 @@ import {
 	createMockRoom
 } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
-import { MeetingBe, MeetingParticipantBe } from '../../../../types/network/models/meetingBeTypes';
+import { MeetingBe, MeetingParticipant } from '../../../../types/network/models/meetingBeTypes';
 import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
 import { RootStore } from '../../../../types/store/StoreTypes';
 import MeetingSidebar from '../MeetingSidebar';
@@ -33,7 +33,7 @@ const groupRoom: RoomBe = createMockRoom({
 	userSettings: { muted: false }
 });
 
-const user1Participant: MeetingParticipantBe = createMockParticipants({
+const user1Participant: MeetingParticipant = createMockParticipants({
 	userId: 'user1',
 	sessionId: 'sessionIdUser1'
 });
