@@ -134,37 +134,40 @@ export function wsEventsHandler(event: WsEvent): void {
 			break;
 		}
 		case WsEventType.MEETING_CREATED: {
-			// TODO: wait for event changes
-			if (eventArrivesFromAnotherSession) {
-				state.addMeeting({
-					id: event.meetingId,
-					name: '', // TODO placeholder
-					roomId: event.roomId,
-					active: false,
-					participants: [],
-					createdAt: event.sentDate,
-					meetingType: MeetingType.PERMANENT // TODO placeholder
-				});
+			// TODO: wait for meeting events changes
+			// For now, this event doesn't arrive
 
-				// Send custom event to open an incoming meeting notification
-				const room = state.rooms[event.roomId];
-				const isMeetingStartedByMe = event.from === state.session.id;
-				if (room?.type === RoomType.ONE_TO_ONE && !isMeetingStartedByMe) {
-					sendCustomEvent({ name: EventName.INCOMING_MEETING, data: event });
-				}
+			state.addMeeting({
+				id: event.meetingId,
+				name: '', // TODO placeholder
+				roomId: event.roomId,
+				active: false,
+				participants: [],
+				createdAt: event.sentDate,
+				meetingType: MeetingType.PERMANENT // TODO placeholder
+			});
+
+			// Send custom event to open an incoming meeting notification
+			const room = state.rooms[event.roomId];
+			const isMeetingStartedByMe = event.from === state.session.id;
+			if (room?.type === RoomType.ONE_TO_ONE && !isMeetingStartedByMe) {
+				sendCustomEvent({ name: EventName.INCOMING_MEETING, data: event });
 			}
+			break;
+		}
+		case WsEventType.MEETING_STARTED: {
+			// TODO: wait for meeting events changes
+			state.startMeeting(event.meetingId);
 			break;
 		}
 		case WsEventType.MEETING_JOINED: {
 			// TODO: wait for event changes
-			if (eventArrivesFromAnotherSession) {
-				state.addParticipant(event.meetingId, {
-					userId: event.from,
-					userType: MeetingUserType.REGISTERED, // TODO placeholder
-					audioStreamOn: false,
-					videoStreamOn: false
-				});
-			}
+			state.addParticipant(event.meetingId, {
+				userId: event.from,
+				userType: MeetingUserType.REGISTERED, // TODO placeholder
+				audioStreamOn: false,
+				videoStreamOn: false
+			});
 
 			// Send custom event to delete an incoming meeting notification
 			// if I joined the meeting from another session
@@ -191,47 +194,53 @@ export function wsEventsHandler(event: WsEvent): void {
 			}
 			break;
 		}
+		case WsEventType.MEETING_STOPPED: {
+			// TODO: wait for meeting events changes
+			state.stopMeeting(event.meetingId);
+			break;
+		}
 		case WsEventType.MEETING_DELETED: {
+			// TODO: wait for meeting events changes
 			state.deleteMeeting(event.meetingId);
 			break;
 		}
 		case WsEventType.MEETING_VIDEO_STREAM_OPENED: {
-			// TODO: wait for event changes
+			// TODO: wait for meeting events changes
 			if (eventArrivesFromAnotherSession) {
 				state.changeStreamStatus(event.meetingId, event.sessionId, 'video', true);
 			}
 			break;
 		}
 		case WsEventType.MEETING_VIDEO_STREAM_CLOSED: {
-			// TODO: wait for event changes
+			// TODO: wait for meeting events changes
 			if (eventArrivesFromAnotherSession) {
 				state.changeStreamStatus(event.meetingId, event.sessionId, 'video', false);
 			}
 			break;
 		}
 		case WsEventType.MEETING_AUDIO_STREAM_OPENED: {
-			// TODO: wait for event changes
+			// TODO: wait for meeting events changes
 			if (eventArrivesFromAnotherSession) {
 				state.changeStreamStatus(event.meetingId, event.sessionId, 'audio', true);
 			}
 			break;
 		}
 		case WsEventType.MEETING_AUDIO_STREAM_CLOSED: {
-			// TODO: wait for event changes
+			// TODO: wait for meeting events changes
 			if (eventArrivesFromAnotherSession) {
 				state.changeStreamStatus(event.meetingId, event.sessionId, 'audio', false);
 			}
 			break;
 		}
 		case WsEventType.MEETING_SCREEN_STREAM_OPENED: {
-			// TODO: wait for event changes
+			// TODO: wait for meeting events changes
 			if (eventArrivesFromAnotherSession) {
 				state.changeStreamStatus(event.meetingId, event.sessionId, 'screen', true);
 			}
 			break;
 		}
 		case WsEventType.MEETING_SCREEN_STREAM_CLOSED: {
-			// TODO: wait for event changes
+			// TODO: wait for meeting events changes
 			if (eventArrivesFromAnotherSession) {
 				state.changeStreamStatus(event.meetingId, event.sessionId, 'screen', false);
 			}

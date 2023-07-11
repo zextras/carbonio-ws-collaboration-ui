@@ -148,6 +148,8 @@ export type MeetingsSlice = {
 	setMeetings: (meetings: MeetingBe[]) => void;
 	addMeeting: (meeting: MeetingBe) => void;
 	deleteMeeting: (meetingId: string) => void;
+	startMeeting: (meetingId: string) => void;
+	stopMeeting: (meetingId: string) => void;
 	addParticipant: (meetingId: string, participant: MeetingParticipant) => void;
 	removeParticipant: (meetingId: string, userId: string) => void;
 	changeStreamStatus: (

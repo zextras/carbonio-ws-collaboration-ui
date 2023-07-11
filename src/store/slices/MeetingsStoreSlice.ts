@@ -116,6 +116,30 @@ export const useMeetingsStoreSlice = (set: (...any: any) => void): MeetingsSlice
 			'MEETINGS/DELETE'
 		);
 	},
+	startMeeting: (meetingId: string): void => {
+		set(
+			produce((draft: RootStore) => {
+				const meeting = find(draft.meetings, (meeting) => meeting.id === meetingId);
+				if (meeting) {
+					draft.meetings[meeting.roomId].active = true;
+				}
+			}),
+			false,
+			'MEETINGS/START'
+		);
+	},
+	stopMeeting: (meetingId: string): void => {
+		set(
+			produce((draft: RootStore) => {
+				const meeting = find(draft.meetings, (meeting) => meeting.id === meetingId);
+				if (meeting) {
+					draft.meetings[meeting.roomId].active = false;
+				}
+			}),
+			false,
+			'MEETINGS/STOP'
+		);
+	},
 	addParticipant: (meetingId: string, participant: MeetingParticipant): void => {
 		set(
 			produce((draft: RootStore) => {
