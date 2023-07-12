@@ -128,7 +128,10 @@ export function decodeXMPPMessageStanza(
 	const retracted = getTagElement(messageStanza, 'retracted');
 	if (retracted) {
 		const stanzaIdReference = getTagElement(messageStanza, 'stanza-id');
-		const stanzaId = optional?.stanzaId || (stanzaIdReference && getRequiredAttribute(stanzaIdReference, 'id') || messageId);
+		const stanzaId =
+			optional?.stanzaId ||
+			(stanzaIdReference && getRequiredAttribute(stanzaIdReference, 'id')) ||
+			messageId;
 		return {
 			id: messageId,
 			stanzaId,
@@ -138,7 +141,7 @@ export function decodeXMPPMessageStanza(
 			from: getId(resource),
 			text: '',
 			read: calcReads(messageDate, roomId),
-			deleted: true,
+			deleted: true
 		};
 	}
 
