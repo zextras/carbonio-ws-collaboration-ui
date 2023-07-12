@@ -68,7 +68,7 @@ const MeetingParticipantsList: FC<ParticipantsListProps> = ({ meetingId }) => {
 		() =>
 			map(filteredContactList, (member: MeetingParticipant) => (
 				<ParticipantElement
-					key={`${member.userId}-${member.userId}`}
+					key={member.userId}
 					memberId={member.userId}
 					meetingId={meetingId}
 					isInsideMeeting

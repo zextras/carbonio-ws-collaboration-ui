@@ -42,7 +42,7 @@ const mockMeeting2 = createMockMeeting({
 });
 
 describe('Test components slice', () => {
-	it('setMeetings setter', () => {
+	test('setMeetings setter', () => {
 		const { result } = renderHook(() => useStore());
 		act(() => result.current.setMeetings([mockMeeting0, mockMeeting1, mockMeeting2]));
 
@@ -57,7 +57,7 @@ describe('Test components slice', () => {
 		expect(result.current.meetings[mockMeeting0.roomId].createdAt).toBe(mockMeeting0.createdAt);
 	});
 
-	it('addMeeting setter', () => {
+	test('addMeeting setter', () => {
 		const { result } = renderHook(() => useStore());
 		act(() => result.current.addMeeting(mockMeeting0));
 
@@ -71,7 +71,7 @@ describe('Test components slice', () => {
 		expect(result.current.meetings[mockMeeting0.roomId].createdAt).toBe(mockMeeting0.createdAt);
 	});
 
-	it('Combination of set components, add components, and remove components setters', () => {
+	test('Combination of set components, add components, and remove components setters', () => {
 		const { result } = renderHook(() => useStore());
 
 		act(() => result.current.setMeetings([mockMeeting0, mockMeeting1]));
