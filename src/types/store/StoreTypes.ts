@@ -5,23 +5,24 @@
  */
 
 import { ActiveConversationsMap, FileToUpload, messageActionType } from './ActiveConversationTypes';
-import { ActiveMeetingMap } from './ActiveMeetingTypes';
+import { ActiveMeetingMap, STREAM_TYPE } from './ActiveMeetingTypes';
 import { Connections } from './ConnectionsTypes';
 import { FasteningsMap } from './FasteningMessagesTypes';
 import { Marker, MarkersMap } from './MarkersTypes';
 import { MeetingChatVisibility, MeetingsMap, MeetingViewType } from './MeetingTypes';
 import {
-	MessageMap,
-	Message,
-	TextMessage,
 	AttachmentMessageType,
+	Message,
 	MessageFastening,
-	PlaceholderFields
+	MessageMap,
+	PlaceholderFields,
+	TextMessage
 } from './MessageTypes';
 import { RoomsMap } from './RoomTypes';
 import { CapabilityList, Session } from './SessionTypes';
 import { UnreadsMap } from './UnreadsCounterTypes';
 import { UsersMap } from './UserTypes';
+import { PeerConnConfig } from '../../network/webRTC/PeerConnConfig';
 import { MeetingBe, MeetingParticipantBe } from '../network/models/meetingBeTypes';
 import { MemberBe, RoomBe } from '../network/models/roomBeTypes';
 import { UserBe } from '../network/models/userBeTypes';
@@ -165,6 +166,15 @@ export type ActiveMeetingSlice = {
 	activeMeeting: ActiveMeetingMap;
 	setMeetingActionsAccordionStatus: (roomId: string, status: boolean) => void;
 	setMeetingParticipantsAccordionStatus: (roomId: string, status: boolean) => void;
+	createBidirectionalAudioConn: (meetingId: string, peerConnectionConfig: PeerConnConfig) => void;
+	createVideoOutConn: (meetingId: string, peerConnectionConfig: PeerConnConfig) => void;
+	createVideoInConn: (meetingId: string, peerConnectionConfig: PeerConnConfig) => void;
+	createShareOutConn: (meetingId: string, peerConnectionConfig: PeerConnConfig) => void;
+	closeBidirectionalAudioConn: (meetingId: string) => void;
+	closeVideoOutConn: (meetingId: string) => void;
+	closeVideoInConn: (meetingId: string) => void;
+	closeShareOutConn: (meetingId: string) => void;
+	setLocalStreams: (meetingId: string, streamType: STREAM_TYPE, stream: MediaStream) => void;
 };
 
 export type RootStore = UsersStoreSlice &

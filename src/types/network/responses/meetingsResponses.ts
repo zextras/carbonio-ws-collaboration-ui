@@ -21,3 +21,7 @@ export type ChangeVideoStreamResponse = Response;
 export type ChangeAudioStreamResponse = Response;
 
 export type ChangeScreenStreamResponse = Response;
+
+export type CreateAudioOfferResponse = Response;
+
+export type CreateVideoOfferResponse = Response;

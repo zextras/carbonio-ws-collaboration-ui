@@ -13,7 +13,7 @@ import { GetRoomResponse } from '../../types/network/responses/roomsResponses';
 import { WsEvent, WsEventType } from '../../types/network/websocket/wsEvents';
 import { RoomType } from '../../types/store/RoomTypes';
 import { wsDebug } from '../../utils/debug';
-import { RoomsApi, MeetingsApi } from '../index';
+import { MeetingsApi, RoomsApi } from '../index';
 
 export function wsEventsHandler(event: WsEvent): void {
 	const state = useStore.getState();
@@ -232,6 +232,21 @@ export function wsEventsHandler(event: WsEvent): void {
 			}
 			break;
 		}
+		// TODO AUDIO ANSWER
+		// case WsEventType.AUDIO_ANSWER: {
+		// state.activeMeeting[event.meetingId].bidirectionalAudioConn.handleRemoteAnswer();
+		// break;
+		// }
+		// TODO VIDEO_IN OFFER
+		// case WsEventType.VIDEO_IN_OFFER: {
+		// state.activeMeeting[event.meetingId].videoIn.handleRemoteOffer();
+		// break;
+		// }
+		// TODO SHARE OFFER
+		// case WsEventType.MEETING_SCREEN_STREAM_CLOSED: {
+		// state.activeMeeting[event.meetingId].bidirectionalAudioConn.;
+		// break;
+		// }
 		default:
 			wsDebug('Unhandled event', event);
 	}

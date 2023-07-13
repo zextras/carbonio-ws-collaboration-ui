@@ -9,6 +9,8 @@ import {
 	ChangeAudioStreamResponse,
 	ChangeScreenStreamResponse,
 	ChangeVideoStreamResponse,
+	CreateAudioOfferResponse,
+	CreateVideoOfferResponse,
 	DeleteMeetingResponse,
 	GetMeetingResponse,
 	JoinMeetingResponse,
@@ -27,6 +29,14 @@ interface IMeetingsApi {
 	changeVideoStream(meetingId: string, enabled: boolean): Promise<ChangeVideoStreamResponse>;
 	changeAudioStream(meetingId: string, enabled: boolean): Promise<ChangeAudioStreamResponse>;
 	changeScreenStream(meetingId: string, enabled: boolean): Promise<ChangeScreenStreamResponse>;
+	createAudioOffer(
+		meetingId: string,
+		sdpOffer: RTCSessionDescriptionInit
+	): Promise<CreateAudioOfferResponse>;
+	createVideoOffer(
+		meetingId: string,
+		sdpOffer: RTCSessionDescriptionInit
+	): Promise<CreateVideoOfferResponse>;
 }
 
 export default IMeetingsApi;

@@ -13,6 +13,8 @@ import {
 	ChangeAudioStreamResponse,
 	ChangeScreenStreamResponse,
 	ChangeVideoStreamResponse,
+	CreateAudioOfferResponse,
+	CreateVideoOfferResponse,
 	DeleteMeetingResponse,
 	GetMeetingResponse,
 	JoinMeetingResponse,
@@ -106,6 +108,36 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 			changeStreamStatus(meetingId, sessionId!, 'screen', enabled);
 			return resp;
 		});
+	}
+
+	public createAudioOffer(
+		meetingId: string,
+		sdpOffer: RTCSessionDescriptionInit
+	): Promise<CreateAudioOfferResponse> {
+		const { sessionId } = useStore.getState().session;
+		return this.fetchAPI(
+			`meetings/${meetingId}/sessions/${sessionId}/audio/offer`,
+			RequestType.PUT,
+			{
+				type: 'offer',
+				sdp: sdpOffer
+			}
+		).then((resp: CreateAudioOfferResponse) => resp);
+	}
+
+	public createVideoOffer(
+		meetingId: string,
+		sdpOffer: RTCSessionDescriptionInit
+	): Promise<CreateVideoOfferResponse> {
+		const { sessionId } = useStore.getState().session;
+		return this.fetchAPI(
+			`meetings/${meetingId}/sessions/${sessionId}/video/offer`,
+			RequestType.PUT,
+			{
+				type: 'offer',
+				sdp: sdpOffer
+			}
+		).then((resp: CreateVideoOfferResponse) => resp);
 	}
 }
 

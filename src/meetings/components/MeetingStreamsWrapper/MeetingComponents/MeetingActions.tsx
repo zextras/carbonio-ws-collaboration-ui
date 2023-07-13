@@ -14,6 +14,7 @@ import { MeetingsApi } from '../../../../network';
 import { getMeetingViewSelected } from '../../../../store/selectors/MeetingSelectors';
 import useStore from '../../../../store/Store';
 import { MeetingViewType } from '../../../../types/store/MeetingTypes';
+import { getAudioStream } from '../../../../utils/UserMediaManager';
 
 const ActionsWrapper = styled(Container)`
 	position: absolute;
@@ -38,6 +39,9 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 
 	const meetingViewSelected = useStore((store) => getMeetingViewSelected(store, meetingId));
 	const setMeetingViewSelected = useStore((store) => store.setMeetingViewSelected);
+	const bidirectionalAudioConn = useStore(
+		(store) => store.activeMeeting[meetingId].bidirectionalAudioConn
+	);
 
 	const [isHoovering, setIsHoovering] = useState(false);
 	const [isHoverActions, setIsHoverActions] = useState(false);
@@ -83,8 +87,19 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 	}, [videoStatus, meetingId]);
 
 	const toggleAudioStream = useCallback(() => {
-		MeetingsApi.changeAudioStream(meetingId, !audioStatus).then(() => setAudioStatus(!audioStatus));
-	}, [audioStatus, meetingId]);
+		if (!audioStatus) {
+			getAudioStream().then((stream) => {
+				MeetingsApi.changeAudioStream(meetingId, !audioStatus).then(() => {
+					bidirectionalAudioConn?.updateLocalStreamTrack(stream, 'local');
+					setAudioStatus(!audioStatus);
+				});
+			});
+		} else {
+			MeetingsApi.changeAudioStream(meetingId, !audioStatus).then(() =>
+				setAudioStatus(!audioStatus)
+			);
+		}
+	}, [audioStatus, bidirectionalAudioConn, meetingId]);
 
 	const toggleShareStream = useCallback(() => {
 		MeetingsApi.changeScreenStream(meetingId, !shareStatus).then(() =>

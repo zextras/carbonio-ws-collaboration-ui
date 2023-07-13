@@ -9,6 +9,7 @@ import React, { ReactElement, useCallback, useState } from 'react';
 
 import useRouting from '../../hooks/useRouting';
 import { MeetingsApi } from '../../network';
+import { PeerConnConfig } from '../../network/webRTC/PeerConnConfig';
 import { getMeeting } from '../../store/selectors/MeetingSelectors';
 import useStore from '../../store/Store';
 import { JoinMeetingResponse } from '../../types/network/responses/meetingsResponses';
@@ -22,6 +23,10 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 	const meeting = useStore((store) => getMeeting(store, roomId));
 	const addMeeting = useStore((store) => store.addMeeting);
 	const addParticipant = useStore((store) => store.addParticipant);
+	const createBidirectionalAudioConn = useStore((store) => store.createBidirectionalAudioConn);
+	const createVideoOutConn = useStore((store) => store.createVideoOutConn);
+	// const createVideoInConn = useStore((store) => store.createVideoInConn);
+
 	const [videoStreamEnabled, setVideoStreamEnabled] = useState(false);
 	const [audioStreamEnabled, setAudioStreamEnabled] = useState(false);
 
@@ -29,6 +34,19 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 	const onSwitchMicrophone = useCallback(() => setAudioStreamEnabled((c) => !c), []);
 
 	const { goToMeetingPage } = useRouting();
+
+	const redirectToMeetingAndInitWebRTC = useCallback(
+		(meetingId: string): void => {
+			const peerConnectionConfig = new PeerConnConfig();
+			createBidirectionalAudioConn(meetingId, peerConnectionConfig);
+			// createVideoInConn(meetingId, peerConnectionConfig);
+			if (videoStreamEnabled) {
+				createVideoOutConn(meetingId, peerConnectionConfig);
+			}
+			goToMeetingPage(meetingId);
+		},
+		[createBidirectionalAudioConn, createVideoOutConn, goToMeetingPage, videoStreamEnabled]
+	);
 
 	const joinMeeting = useCallback(() => {
 		// Meeting already exists: user joins it
@@ -41,7 +59,7 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 						videoStreamOn: videoStreamEnabled,
 						audioStreamOn: audioStreamEnabled
 					});
-					goToMeetingPage(meeting.id);
+					redirectToMeetingAndInitWebRTC(meeting.id);
 				})
 				.catch(() => console.log('Error on join'));
 		}
@@ -50,7 +68,7 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 			MeetingsApi.joinMeeting(roomId, { videoStreamEnabled, audioStreamEnabled })
 				.then((response: JoinMeetingResponse) => {
 					addMeeting(response);
-					goToMeetingPage(response.id);
+					redirectToMeetingAndInitWebRTC(response.id);
 				})
 				.catch(() => console.log('Error on join'));
 		}
@@ -61,7 +79,7 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 		addParticipant,
 		session.id,
 		session.sessionId,
-		goToMeetingPage,
+		redirectToMeetingAndInitWebRTC,
 		roomId,
 		addMeeting
 	]);

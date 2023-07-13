@@ -5,17 +5,13 @@
  */
 import { RootStore } from '../../types/store/StoreTypes';
 
-export const getMeetingActionsAccordionStatus = (store: RootStore, meetingId: string): boolean => {
-	if (store.activeMeeting[meetingId]?.sidebarStatus)
-		return store.activeMeeting[meetingId].sidebarStatus!.actionsAccordionIsOpened;
-	return true;
-};
+export const getMeetingActionsAccordionStatus = (store: RootStore, meetingId: string): boolean =>
+	store.activeMeeting[meetingId]?.sidebarStatus?.actionsAccordionIsOpened || true;
 
 export const getMeetingParticipantsAccordionStatus = (
 	store: RootStore,
 	meetingId: string
-): boolean => {
-	if (store.activeMeeting[meetingId]?.sidebarStatus)
-		return store.activeMeeting[meetingId].sidebarStatus!.participantsAccordionIsOpened;
-	return false;
-};
+): boolean => store.activeMeeting[meetingId]?.sidebarStatus?.participantsAccordionIsOpened || false;
+
+export const getLocalVideoSteam = (store: RootStore, meetingId: string): MediaStream | undefined =>
+	store.activeMeeting[meetingId]?.localStreams?.video || undefined;
