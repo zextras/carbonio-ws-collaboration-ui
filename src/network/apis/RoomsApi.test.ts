@@ -145,7 +145,7 @@ describe('Rooms API', () => {
 
 		// Set appropriate headers
 		const headers = new Headers();
-		headers.append('fileName', 'aW1hZ2UucG5n'); // Base64 of 'image.png'
+		headers.append('fileName', '\\u0069\\u006d\\u0061\\u0067\\u0065\\u002e\\u0070\\u006e\\u0067'); // Unicode of 'image.png'
 		headers.append('mimeType', testFile.type);
 
 		// Check if fetch is called with the correct parameters
@@ -360,12 +360,14 @@ describe('Rooms API', () => {
 
 		// Set appropriate headers
 		const headers = new Headers();
-		headers.append('fileName', 'ZmlsZS5wZGY='); // Base64 of 'file.pdf'
+		headers.append('fileName', '\\u0066\\u0069\\u006c\\u0065\\u002e\\u0070\\u0064\\u0066'); // Unicode of 'file.pdf'
 		headers.append('mimeType', testFile.type);
+		headers.append('messageId', '00000000-0000-4000-8000-000000000000');
+
 		// Check if fetch is called with the correct parameters
 		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/rooms/roomId/attachments`, {
 			method: 'POST',
-			headers: expect.objectContaining(headers),
+			headers,
 			body: new ArrayBuffer(0),
 			signal
 		});
@@ -384,15 +386,19 @@ describe('Rooms API', () => {
 
 		// Set appropriate headers
 		const headers = new Headers();
-		headers.append('fileName', 'ZmlsZS5wZGY='); // Base64 of 'file.pdf'
+		headers.append('fileName', '\\u0066\\u0069\\u006c\\u0065\\u002e\\u0070\\u0064\\u0066'); // Unicode of 'file.pdf'
 		headers.append('mimeType', testFile.type);
-		headers.append('description', 'ZGVzY3JpcHRpb24='); // Base64 of 'description'
+		headers.append(
+			'description',
+			'\\u0064\\u0065\\u0073\\u0063\\u0072\\u0069\\u0070\\u0074\\u0069\\u006f\\u006e'
+		); // Unicode of 'description'
 		headers.append('replyId', 'stanzaId');
+		headers.append('messageId', '00000000-0000-4000-8000-000000000000');
 
 		// Check if fetch is called with the correct parameters
 		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/rooms/roomId/attachments`, {
 			method: 'POST',
-			headers: expect.objectContaining(headers),
+			headers,
 			body: new ArrayBuffer(0),
 			signal
 		});

@@ -10,6 +10,7 @@ import { includes } from 'lodash';
 import useStore from '../../store/Store';
 import IBaseAPI, { RequestType } from '../../types/network/apis/IBaseAPI';
 import { AdditionalHeaders } from '../../types/network/models/attachmentTypes';
+import { charToUnicode } from '../../utils/textUtils';
 
 export default abstract class BaseAPI implements IBaseAPI {
 	private readonly url: string = '/services/chats/';
@@ -57,13 +58,13 @@ export default abstract class BaseAPI implements IBaseAPI {
 		return new Promise<any>((resolve, reject) => {
 			const reader = new FileReader();
 			reader.addEventListener('load', () => {
-				// Headers have to be encoded in base64 and then in utf-8 to be sent
+				// Headers have to be encoded in unicode to be sent
 				const headers = new Headers();
-				headers.append('fileName', btoa(encodeURIComponent(file.name)));
+				headers.append('fileName', charToUnicode(file.name));
 				headers.append('mimeType', file.type);
 				if (optionalFields) {
 					optionalFields.description &&
-						headers.append('description', btoa(encodeURIComponent(optionalFields.description)));
+						headers.append('description', charToUnicode(optionalFields.description));
 					optionalFields.messageId && headers.append('messageId', optionalFields.messageId);
 					optionalFields.replyId && headers.append('replyId', optionalFields.replyId);
 				}

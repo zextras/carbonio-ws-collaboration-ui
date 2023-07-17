@@ -47,14 +47,17 @@ export type AffiliationMessage = BasicMessage & {
 
 export type ConfigurationMessage = BasicMessage & {
 	type: MessageType.CONFIGURATION_MSG;
-	operation:
-		| 'roomNameChanged'
-		| 'roomDescriptionChanged'
-		| 'roomPictureUpdated'
-		| 'roomPictureDeleted';
+	operation: OperationType;
 	value: string;
 	from: string;
 };
+
+export enum OperationType {
+	ROOM_NAME_CHANGED = 'roomNameChanged',
+	ROOM_DESCRIPTION_CHANGED = 'roomDescriptionChanged',
+	ROOM_PICTURE_UPDATED = 'roomPictureUpdated',
+	ROOM_PICTURE_DELETED = 'roomPictureDeleted'
+}
 
 export type DateMessage = BasicMessage & {
 	type: MessageType.DATE_MSG;

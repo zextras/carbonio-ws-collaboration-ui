@@ -28,9 +28,6 @@ import {
 	GetUserResponse
 } from './src/types/network/responses/usersResponses';
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const crypto = require('crypto');
-
 // MOCKED SHELL UI
 export const mockNotify: jest.Mock = jest.fn();
 jest.mock('@zextras/carbonio-shell-ui', () => ({
@@ -217,8 +214,13 @@ global.fetch = jest.fn(() =>
 
 global.URL.createObjectURL = jest.fn();
 
+// This mock makes uuid/v4 to always generate the same uuid "00000000-0000-4000-8000-000000000000"
 Object.defineProperty(window, 'crypto', {
 	value: {
-		getRandomValues: (arr: string[]) => crypto.randomBytes(arr.length)
+		getRandomValues: (arr: string[]) => {
+			const byteValues = new Uint8Array(arr.length);
+			byteValues.fill(0);
+			return byteValues;
+		}
 	}
 });
