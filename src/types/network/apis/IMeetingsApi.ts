@@ -35,7 +35,7 @@ interface IMeetingsApi {
 	startMeeting(meetingId: string): Promise<StartMeetingResponse>;
 	// Join meeting when someone has already started the meeting
 	joinMeeting(roomId: string, settings: JoinSettings): Promise<JoinMeetingResponse>;
-	joinMeetingByRoomId(meetingId: string, settings: JoinSettings): Promise<JoinMeetingResponse>;
+	joinMeetingByRoomId(roomId: string, settings: JoinSettings): Promise<JoinMeetingResponse>;
 	leaveMeeting(meetingId: string): Promise<LeaveMeetingResponse>;
 	// Stop meeting when all the users have left the meeting
 	stopMeeting(meetingId: string): Promise<StopMeetingResponse>;
