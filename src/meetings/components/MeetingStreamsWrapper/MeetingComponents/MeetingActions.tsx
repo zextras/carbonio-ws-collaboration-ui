@@ -79,15 +79,19 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 	}, []);
 
 	const toggleVideoStream = useCallback(() => {
-		MeetingsApi.changeVideoStream(meetingId, !videoStatus).then(() => setVideoStatus(!videoStatus));
+		MeetingsApi.updateVideoStreamStatus(meetingId, !videoStatus).then(() =>
+			setVideoStatus(!videoStatus)
+		);
 	}, [videoStatus, meetingId]);
 
 	const toggleAudioStream = useCallback(() => {
-		MeetingsApi.changeAudioStream(meetingId, !audioStatus).then(() => setAudioStatus(!audioStatus));
+		MeetingsApi.updateAudioStreamStatus(meetingId, !audioStatus).then(() =>
+			setAudioStatus(!audioStatus)
+		);
 	}, [audioStatus, meetingId]);
 
 	const toggleShareStream = useCallback(() => {
-		MeetingsApi.changeScreenStream(meetingId, !shareStatus).then(() =>
+		MeetingsApi.updateScreenStreamStatus(meetingId, !shareStatus).then(() =>
 			setShareStatus(!shareStatus)
 		);
 	}, [shareStatus, meetingId]);

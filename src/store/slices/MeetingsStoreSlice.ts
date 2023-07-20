@@ -9,7 +9,7 @@ import produce from 'immer';
 import { find, forEach } from 'lodash';
 
 import { UsersApi } from '../../network';
-import { MeetingBe, MeetingParticipantBe } from '../../types/network/models/meetingBeTypes';
+import { MeetingBe, MeetingParticipant } from '../../types/network/models/meetingBeTypes';
 import {
 	MeetingChatVisibility,
 	MeetingParticipantMap,
@@ -25,13 +25,13 @@ export const useMeetingsStoreSlice = (set: (...any: any) => void): MeetingsSlice
 				forEach(meetings, (meeting) => {
 					// Create a map of participants instead of an array
 					const participantsMap: MeetingParticipantMap = meeting.participants.reduce(
-						(acc: MeetingParticipantMap, participant: MeetingParticipantBe) => {
-							acc[participant.sessionId] = {
+						(acc: MeetingParticipantMap, participant: MeetingParticipant) => {
+							acc[participant.userId] = {
 								userId: participant.userId,
-								sessionId: participant.sessionId,
-								hasAudioStreamOn: participant.audioStreamOn,
-								hasVideoStreamOn: participant.videoStreamOn,
-								hasScreenStreamOn: participant.screenStreamOn || false
+								userType: participant.userType,
+								audioStreamOn: participant.audioStreamOn || false,
+								videoStreamOn: participant.videoStreamOn || false,
+								screenStreamOn: participant.screenStreamOn || false
 							};
 							return acc;
 						},
@@ -40,12 +40,15 @@ export const useMeetingsStoreSlice = (set: (...any: any) => void): MeetingsSlice
 
 					draft.meetings[meeting.roomId] = {
 						id: meeting.id,
+						name: meeting.name,
 						roomId: meeting.roomId,
+						active: meeting.active,
 						participants: participantsMap,
 						createdAt: meeting.createdAt,
-						sidebarStatus: true,
+						meetingType: meeting.meetingType,
 						chatVisibility: MeetingChatVisibility.CLOSED,
-						meetingViewSelected: MeetingViewType.WAITING
+						meetingViewSelected: MeetingViewType.WAITING,
+						sidebarStatus: true
 					};
 
 					// Retrieve participants information if they are unknown
@@ -65,13 +68,13 @@ export const useMeetingsStoreSlice = (set: (...any: any) => void): MeetingsSlice
 			produce((draft: RootStore) => {
 				// Create a map of participants instead of an array
 				const participantsMap: MeetingParticipantMap = meeting.participants.reduce(
-					(acc: MeetingParticipantMap, participant: MeetingParticipantBe) => {
-						acc[participant.sessionId] = {
+					(acc: MeetingParticipantMap, participant: MeetingParticipant) => {
+						acc[participant.userId] = {
 							userId: participant.userId,
-							sessionId: participant.sessionId,
-							hasAudioStreamOn: participant.audioStreamOn,
-							hasVideoStreamOn: participant.videoStreamOn,
-							hasScreenStreamOn: participant.screenStreamOn || false
+							userType: participant.userType,
+							audioStreamOn: participant.audioStreamOn || false,
+							videoStreamOn: participant.videoStreamOn || false,
+							screenStreamOn: participant.screenStreamOn || false
 						};
 						return acc;
 					},
@@ -79,12 +82,15 @@ export const useMeetingsStoreSlice = (set: (...any: any) => void): MeetingsSlice
 				);
 				draft.meetings[meeting.roomId] = {
 					id: meeting.id,
+					name: meeting.name,
 					roomId: meeting.roomId,
+					active: meeting.active,
 					participants: participantsMap,
 					createdAt: meeting.createdAt,
-					sidebarStatus: true,
+					meetingType: meeting.meetingType,
 					chatVisibility: MeetingChatVisibility.CLOSED,
-					meetingViewSelected: MeetingViewType.WAITING
+					meetingViewSelected: MeetingViewType.WAITING,
+					sidebarStatus: true
 				};
 
 				// Retrieve participants information if they are unknown
@@ -110,18 +116,42 @@ export const useMeetingsStoreSlice = (set: (...any: any) => void): MeetingsSlice
 			'MEETINGS/DELETE'
 		);
 	},
-	addParticipant: (meetingId: string, participant: MeetingParticipantBe): void => {
+	startMeeting: (meetingId: string): void => {
+		set(
+			produce((draft: RootStore) => {
+				const meeting = find(draft.meetings, (meeting) => meeting.id === meetingId);
+				if (meeting) {
+					draft.meetings[meeting.roomId].active = true;
+				}
+			}),
+			false,
+			'MEETINGS/START'
+		);
+	},
+	stopMeeting: (meetingId: string): void => {
+		set(
+			produce((draft: RootStore) => {
+				const meeting = find(draft.meetings, (meeting) => meeting.id === meetingId);
+				if (meeting) {
+					draft.meetings[meeting.roomId].active = false;
+				}
+			}),
+			false,
+			'MEETINGS/STOP'
+		);
+	},
+	addParticipant: (meetingId: string, participant: MeetingParticipant): void => {
 		set(
 			produce((draft: RootStore) => {
 				// Add participant only if components exists and sessionId isn't already on components
 				const meeting = find(draft.meetings, (meeting) => meeting.id === meetingId);
 				if (meeting) {
-					meeting.participants[participant.sessionId] = {
+					meeting.participants[participant.userId] = {
 						userId: participant.userId,
-						sessionId: participant.sessionId,
-						hasAudioStreamOn: participant.audioStreamOn,
-						hasVideoStreamOn: participant.videoStreamOn,
-						hasScreenStreamOn: participant.screenStreamOn || false
+						userType: participant.userType,
+						audioStreamOn: participant.audioStreamOn || false,
+						videoStreamOn: participant.videoStreamOn || false,
+						screenStreamOn: participant.screenStreamOn || false
 					};
 
 					// Retrieve member information if he is unknown
@@ -134,13 +164,13 @@ export const useMeetingsStoreSlice = (set: (...any: any) => void): MeetingsSlice
 			'MEETINGS/ADD_PARTICIPANT'
 		);
 	},
-	removeParticipant: (meetingId: string, sessionId): void => {
+	removeParticipant: (meetingId: string, userId: string): void => {
 		set(
 			produce((draft: RootStore) => {
 				// Add participant only if components exists and sessionId isn't already on components
 				const meeting = find(draft.meetings, (meeting) => meeting.id === meetingId);
 				if (meeting) {
-					delete draft.meetings[meeting.roomId].participants[sessionId];
+					delete draft.meetings[meeting.roomId].participants[userId];
 				}
 			}),
 			false,
@@ -149,7 +179,7 @@ export const useMeetingsStoreSlice = (set: (...any: any) => void): MeetingsSlice
 	},
 	changeStreamStatus: (
 		meetingId: string,
-		sessionId: string,
+		userId: string,
 		stream: 'audio' | 'video' | 'screen',
 		status: boolean
 	): void => {
@@ -159,13 +189,13 @@ export const useMeetingsStoreSlice = (set: (...any: any) => void): MeetingsSlice
 				if (meeting) {
 					switch (stream) {
 						case 'audio':
-							draft.meetings[meeting.roomId].participants[sessionId].hasAudioStreamOn = status;
+							draft.meetings[meeting.roomId].participants[userId].audioStreamOn = status;
 							break;
 						case 'video':
-							draft.meetings[meeting.roomId].participants[sessionId].hasVideoStreamOn = status;
+							draft.meetings[meeting.roomId].participants[userId].videoStreamOn = status;
 							break;
 						case 'screen':
-							draft.meetings[meeting.roomId].participants[sessionId].hasScreenStreamOn = status;
+							draft.meetings[meeting.roomId].participants[userId].screenStreamOn = status;
 							break;
 						default:
 							break;

@@ -13,7 +13,15 @@ import {
 import React, { ReactElement } from 'react';
 
 import { AutoCompleteGalResponse } from './src/network/soap/AutoCompleteRequest';
-import { GetMeetingResponse } from './src/types/network/responses/meetingsResponses';
+import {
+	CreateMeetingResponse,
+	DeleteMeetingResponse,
+	GetMeetingResponse,
+	JoinMeetingResponse,
+	LeaveMeetingResponse,
+	StartMeetingResponse,
+	StopMeetingResponse
+} from './src/types/network/responses/meetingsResponses';
 import {
 	AddRoomMemberResponse,
 	AddRoomResponse,
@@ -72,13 +80,17 @@ jest.mock('@zextras/carbonio-shell-ui', () => ({
 // MOCKED USEROUTING
 export const mockGoToRoomPage: jest.Mock = jest.fn();
 export const mockGoToMainPage: jest.Mock = jest.fn();
+export const mockGoToMeetingPage: jest.Mock = jest.fn();
+
 jest.mock('./src/hooks/useRouting', () => {
 	const goToMainPage = mockGoToMainPage;
 	const goToRoomPage = mockGoToRoomPage;
+	const goToMeetingPage = mockGoToMeetingPage;
 
 	return jest.fn(() => ({
 		goToMainPage,
-		goToRoomPage
+		goToRoomPage,
+		goToMeetingPage
 	}));
 });
 
@@ -123,6 +135,12 @@ export const mockedDemotesRoomMemberRequest: jest.Mock = jest.fn();
 export const mockedAddRoomMemberRequest: jest.Mock = jest.fn();
 export const mockedForwardMessagesRequest: jest.Mock = jest.fn();
 export const mockedGetMeetingRequest: jest.Mock = jest.fn();
+export const mockedCreateMeetingRequest: jest.Mock = jest.fn();
+export const mockedStartMeetingRequest: jest.Mock = jest.fn();
+export const mockedJoinMeetingRequest: jest.Mock = jest.fn();
+export const mockedLeaveMeetingRequest: jest.Mock = jest.fn();
+export const mockedStopMeetingRequest: jest.Mock = jest.fn();
+export const mockedDeleteMeetingRequest: jest.Mock = jest.fn();
 
 jest.mock('./src/network', () => ({
 	RoomsApi: {
@@ -224,6 +242,36 @@ jest.mock('./src/network', () => ({
 		getMeeting: (): Promise<GetMeetingResponse> =>
 			new Promise((resolve, reject) => {
 				const result = mockedGetMeetingRequest();
+				result ? resolve(result) : reject(new Error('no result provided'));
+			}),
+		createPermanentMeeting: (): Promise<CreateMeetingResponse> =>
+			new Promise((resolve, reject) => {
+				const result = mockedCreateMeetingRequest();
+				result ? resolve(result) : reject(new Error('no result provided'));
+			}),
+		startMeeting: (): Promise<StartMeetingResponse> =>
+			new Promise((resolve, reject) => {
+				const result = mockedStartMeetingRequest();
+				result ? resolve(result) : reject(new Error('no result provided'));
+			}),
+		joinMeeting: (): Promise<JoinMeetingResponse> =>
+			new Promise((resolve, reject) => {
+				const result = mockedJoinMeetingRequest();
+				result ? resolve(result) : reject(new Error('no result provided'));
+			}),
+		leaveMeeting: (): Promise<LeaveMeetingResponse> =>
+			new Promise((resolve, reject) => {
+				const result = mockedLeaveMeetingRequest();
+				result ? resolve(result) : reject(new Error('no result provided'));
+			}),
+		stopMeeting: (): Promise<StopMeetingResponse> =>
+			new Promise((resolve, reject) => {
+				const result = mockedStopMeetingRequest();
+				result ? resolve(result) : reject(new Error('no result provided'));
+			}),
+		deleteMeeting: (): Promise<DeleteMeetingResponse> =>
+			new Promise((resolve, reject) => {
+				const result = mockedDeleteMeetingRequest();
 				result ? resolve(result) : reject(new Error('no result provided'));
 			})
 	}

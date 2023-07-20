@@ -16,7 +16,8 @@ import {
 	getNumberOfMeetingParticipants
 } from '../../../store/selectors/MeetingSelectors';
 import useStore from '../../../store/Store';
-import { MeetingParticipant, MeetingParticipantMap } from '../../../types/store/MeetingTypes';
+import { MeetingParticipant } from '../../../types/network/models/meetingBeTypes';
+import { MeetingParticipantMap } from '../../../types/store/MeetingTypes';
 
 const CustomContainer = styled(Container)`
 	position: absolute;
@@ -58,7 +59,7 @@ const ActiveMeetingParticipantsDropdown = ({
 	const listOfMembers = useMemo(
 		() =>
 			map(meetingParticipants, (member: MeetingParticipant) => (
-				<ParticipantElement key={`${member.userId}-${member.sessionId}`} memberId={member.userId} />
+				<ParticipantElement key={member.userId} memberId={member.userId} />
 			)),
 		[meetingParticipants]
 	);

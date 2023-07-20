@@ -3,30 +3,26 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
+import { MeetingParticipant, MeetingType } from '../network/models/meetingBeTypes';
+
 export type MeetingsMap = {
 	[roomId: string]: Meeting;
 };
 
 export type Meeting = {
 	id: string;
+	name: string;
 	roomId: string;
+	active: boolean;
 	participants: MeetingParticipantMap;
 	createdAt: string;
-	sidebarStatus: boolean;
+	meetingType: MeetingType;
 	chatVisibility: MeetingChatVisibility;
 	meetingViewSelected: MeetingViewType;
+	sidebarStatus: boolean;
 };
-
-export type MeetingParticipant = {
-	userId: string;
-	sessionId: string;
-	hasAudioStreamOn: boolean;
-	hasVideoStreamOn: boolean;
-	hasScreenStreamOn: boolean;
-};
-
 export type MeetingParticipantMap = {
-	[sessionId: string]: MeetingParticipant;
+	[userId: string]: MeetingParticipant;
 };
 
 export enum MeetingViewType {

@@ -10,10 +10,12 @@ import meetingsApi from './MeetingsApi';
 import { fetchResponse } from '../../../jest-mocks';
 import useStore from '../../store/Store';
 import { createMockMeeting } from '../../tests/createMock';
+import { MeetingType, MeetingUserType } from '../../types/network/models/meetingBeTypes';
 
 const meetingMock = createMockMeeting();
 const meetingMock1 = createMockMeeting({ id: 'meetingId1', roomId: 'roomId1' });
 
+const userId = 'userId';
 const sessionId = 'sessionId';
 
 // Set appropriate headers for meeting requests
@@ -26,13 +28,14 @@ const ongoingMeetingSetup = (): void => {
 	store.addMeeting(meetingMock);
 	store.addParticipant(meetingMock.id, {
 		userId: 'userId',
-		sessionId,
+		userType: MeetingUserType.REGISTERED,
 		audioStreamOn: false,
 		videoStreamOn: false
 	});
 };
 
 beforeEach(() => {
+	useStore.getState().setLoginInfo(userId, 'User');
 	useStore.getState().setSessionId('sessionId');
 });
 describe('Meetings API', () => {
@@ -55,6 +58,22 @@ describe('Meetings API', () => {
 		expect(size(store.meetings[meetingMock.roomId].participants)).toEqual(
 			size(meetingMock.participants)
 		);
+	});
+
+	test('createPermanentMeeting is called correctly', async () => {
+		fetchResponse.mockResolvedValueOnce(meetingMock);
+		await meetingsApi.createPermanentMeeting('roomId');
+		// Check if fetch is called with the correct parameters
+		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/meetings`, {
+			method: 'POST',
+			headers,
+			body: JSON.stringify({
+				name: '',
+				users: [],
+				roomId: 'roomId',
+				meetingType: MeetingType.PERMANENT
+			})
+		});
 	});
 
 	test('getMeeting is called correctly', async () => {
@@ -84,9 +103,36 @@ describe('Meetings API', () => {
 		});
 	});
 
+	test('start is called correctly', async () => {
+		fetchResponse.mockResolvedValueOnce(meetingMock);
+		await meetingsApi.startMeeting('meetingId');
+		// Check if fetch is called with the correct parameters
+		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/meetings/${meetingMock.id}/start`, {
+			method: 'POST',
+			headers
+		});
+	});
+
 	test('joinMeeting is called correctly', async () => {
 		fetchResponse.mockResolvedValueOnce(meetingMock);
-		await meetingsApi.joinMeeting(meetingMock.roomId, {
+		await meetingsApi.joinMeeting(meetingMock.id, {
+			audioStreamEnabled: false,
+			videoStreamEnabled: false
+		});
+		// Check if fetch is called with the correct parameters
+		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/meetings/${meetingMock.id}/join`, {
+			method: 'POST',
+			headers,
+			body: JSON.stringify({
+				audioStreamEnabled: false,
+				videoStreamEnabled: false
+			})
+		});
+	});
+
+	test('joinMeetingByRoomId is called correctly', async () => {
+		fetchResponse.mockResolvedValueOnce(meetingMock);
+		await meetingsApi.joinMeetingByRoomId(meetingMock.roomId, {
 			audioStreamEnabled: false,
 			videoStreamEnabled: false
 		});
@@ -105,32 +151,25 @@ describe('Meetings API', () => {
 		);
 	});
 
-	test('joinMeetingByMeetingId is called correctly', async () => {
-		fetchResponse.mockResolvedValueOnce(meetingMock);
-		await meetingsApi.joinMeetingByMeetingId(meetingMock.id, {
-			audioStreamEnabled: false,
-			videoStreamEnabled: false
-		});
-		// Check if fetch is called with the correct parameters
-		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/meetings/${meetingMock.id}/join`, {
-			method: 'PUT',
-			headers,
-			body: JSON.stringify({
-				audioStreamEnabled: false,
-				videoStreamEnabled: false
-			})
-		});
-	});
-
 	test('leaveMeeting is called correctly', async () => {
 		fetchResponse.mockResolvedValueOnce(meetingMock);
 		await meetingsApi.leaveMeeting(meetingMock.id);
 
 		// Check if fetch is called with the correct parameters
 		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/meetings/${meetingMock.id}/leave`, {
-			method: 'PUT',
+			method: 'POST',
 			headers,
 			body: undefined
+		});
+	});
+
+	test('stopMeeting is called correctly', async () => {
+		fetchResponse.mockResolvedValueOnce(meetingMock);
+		await meetingsApi.stopMeeting('meetingId');
+		// Check if fetch is called with the correct parameters
+		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/meetings/${meetingMock.id}/stop`, {
+			method: 'POST',
+			headers
 		});
 	});
 
@@ -146,10 +185,10 @@ describe('Meetings API', () => {
 		});
 	});
 
-	test('changeAudioStream is called to set audio enabled', async () => {
+	test('updateAudioStreamStatus is called to set audio enabled', async () => {
 		ongoingMeetingSetup();
 		fetchResponse.mockResolvedValueOnce(meetingMock);
-		await meetingsApi.changeAudioStream(meetingMock.id, true);
+		await meetingsApi.updateAudioStreamStatus(meetingMock.id, true);
 
 		// Check if fetch is called with the correct parameters
 		expect(global.fetch).toHaveBeenCalledWith(
@@ -164,14 +203,14 @@ describe('Meetings API', () => {
 		);
 
 		// Check if store is correctly updated
-		const participant = useStore.getState().meetings[meetingMock.roomId].participants[sessionId];
-		expect(participant.hasAudioStreamOn).toEqual(true);
+		const participant = useStore.getState().meetings[meetingMock.roomId].participants[userId];
+		expect(participant.audioStreamOn).toEqual(true);
 	});
 
-	test('changeAudioStream is called to set audio disabled', async () => {
+	test('updateAudioStreamStatus is called to set audio disabled', async () => {
 		ongoingMeetingSetup();
 		fetchResponse.mockResolvedValueOnce(meetingMock);
-		await meetingsApi.changeAudioStream(meetingMock.id, false);
+		await meetingsApi.updateAudioStreamStatus(meetingMock.id, false);
 
 		// Check if fetch is called with the correct parameters
 		expect(global.fetch).toHaveBeenCalledWith(
@@ -186,14 +225,14 @@ describe('Meetings API', () => {
 		);
 
 		// Check if store is correctly updated
-		const participant = useStore.getState().meetings[meetingMock.roomId].participants[sessionId];
-		expect(participant.hasAudioStreamOn).toEqual(false);
+		const participant = useStore.getState().meetings[meetingMock.roomId].participants[userId];
+		expect(participant.audioStreamOn).toEqual(false);
 	});
 
-	test('changeVideoStream is called to set video enabled', async () => {
+	test('updateVideoStreamStatus is called to set video enabled', async () => {
 		ongoingMeetingSetup();
 		fetchResponse.mockResolvedValueOnce(meetingMock);
-		await meetingsApi.changeVideoStream(meetingMock.id, true);
+		await meetingsApi.updateVideoStreamStatus(meetingMock.id, true);
 
 		// Check if fetch is called with the correct parameters
 		expect(global.fetch).toHaveBeenCalledWith(
@@ -208,14 +247,14 @@ describe('Meetings API', () => {
 		);
 
 		// Check if store is correctly updated
-		const participant = useStore.getState().meetings[meetingMock.roomId].participants[sessionId];
-		expect(participant.hasVideoStreamOn).toEqual(true);
+		const participant = useStore.getState().meetings[meetingMock.roomId].participants[userId];
+		expect(participant.videoStreamOn).toEqual(true);
 	});
 
-	test('changeVideoStream is called to set video disabled', async () => {
+	test('updateVideoStreamStatus is called to set video disabled', async () => {
 		ongoingMeetingSetup();
 		fetchResponse.mockResolvedValueOnce(meetingMock);
-		await meetingsApi.changeVideoStream(meetingMock.id, false);
+		await meetingsApi.updateVideoStreamStatus(meetingMock.id, false);
 
 		// Check if fetch is called with the correct parameters
 		expect(global.fetch).toHaveBeenCalledWith(
@@ -230,14 +269,14 @@ describe('Meetings API', () => {
 		);
 
 		// Check if store is correctly updated
-		const participant = useStore.getState().meetings[meetingMock.roomId].participants[sessionId];
-		expect(participant.hasVideoStreamOn).toEqual(false);
+		const participant = useStore.getState().meetings[meetingMock.roomId].participants[userId];
+		expect(participant.videoStreamOn).toEqual(false);
 	});
 
-	test('changeScreenStream is called to set screen share enabled', async () => {
+	test('updateScreenStreamStatus is called to set screen share enabled', async () => {
 		ongoingMeetingSetup();
 		fetchResponse.mockResolvedValueOnce(meetingMock);
-		await meetingsApi.changeScreenStream(meetingMock.id, true);
+		await meetingsApi.updateScreenStreamStatus(meetingMock.id, true);
 
 		// Check if fetch is called with the correct parameters
 		expect(global.fetch).toHaveBeenCalledWith(
@@ -252,14 +291,14 @@ describe('Meetings API', () => {
 		);
 
 		// Check if store is correctly updated
-		const participant = useStore.getState().meetings[meetingMock.roomId].participants[sessionId];
-		expect(participant.hasScreenStreamOn).toEqual(true);
+		const participant = useStore.getState().meetings[meetingMock.roomId].participants[userId];
+		expect(participant.screenStreamOn).toEqual(true);
 	});
 
-	test('changeScreenStream is called to set screen share disabled', async () => {
+	test('updateScreenStreamStatus is called to set screen share disabled', async () => {
 		ongoingMeetingSetup();
 		fetchResponse.mockResolvedValueOnce(meetingMock);
-		await meetingsApi.changeScreenStream(meetingMock.id, false);
+		await meetingsApi.updateScreenStreamStatus(meetingMock.id, false);
 
 		// Check if fetch is called with the correct parameters
 		expect(global.fetch).toHaveBeenCalledWith(
@@ -274,7 +313,7 @@ describe('Meetings API', () => {
 		);
 
 		// Check if store is correctly updated
-		const participant = useStore.getState().meetings[meetingMock.roomId].participants[sessionId];
-		expect(participant.hasScreenStreamOn).toEqual(false);
+		const participant = useStore.getState().meetings[meetingMock.roomId].participants[userId];
+		expect(participant.screenStreamOn).toEqual(false);
 	});
 });

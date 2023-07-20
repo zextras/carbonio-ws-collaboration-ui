@@ -11,17 +11,14 @@ import useRouting from '../../hooks/useRouting';
 import { MeetingsApi } from '../../network';
 import { getMeeting } from '../../store/selectors/MeetingSelectors';
 import useStore from '../../store/Store';
-import { JoinMeetingResponse } from '../../types/network/responses/meetingsResponses';
 
 type AccessMeetingModalProps = {
 	roomId: string;
 };
 
 const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement => {
-	const session = useStore((store) => store.session);
 	const meeting = useStore((store) => getMeeting(store, roomId));
 	const addMeeting = useStore((store) => store.addMeeting);
-	const addParticipant = useStore((store) => store.addParticipant);
 	const [videoStreamEnabled, setVideoStreamEnabled] = useState(false);
 	const [audioStreamEnabled, setAudioStreamEnabled] = useState(false);
 
@@ -31,40 +28,39 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 	const { goToMeetingPage } = useRouting();
 
 	const joinMeeting = useCallback(() => {
-		// Meeting already exists: user joins it
-		if (meeting) {
-			MeetingsApi.joinMeetingByMeetingId(meeting.id, { videoStreamEnabled, audioStreamEnabled })
+		const join = (meetingId: string): Promise<void> =>
+			MeetingsApi.joinMeeting(meetingId, { videoStreamEnabled, audioStreamEnabled })
 				.then(() => {
-					addParticipant(meeting.id, {
-						userId: session.id!,
-						sessionId: session.sessionId!,
-						videoStreamOn: videoStreamEnabled,
-						audioStreamOn: audioStreamEnabled
-					});
-					goToMeetingPage(meeting.id);
+					goToMeetingPage(meetingId);
 				})
-				.catch(() => console.log('Error on join'));
-		}
-		// Meeting doesn't exist: user creates and joins it
-		else {
-			MeetingsApi.joinMeeting(roomId, { videoStreamEnabled, audioStreamEnabled })
-				.then((response: JoinMeetingResponse) => {
+				.catch((err) => console.error(err, 'Error on joinMeeting'));
+		const start = (meetingId: string): Promise<void> =>
+			MeetingsApi.startMeeting(meetingId)
+				.then(() => join(meetingId))
+				.catch((err) => {
+					console.error(err, 'Error on startMeeting');
+				});
+
+		if (meeting) {
+			if (meeting.active) {
+				// If meeting is already active, just join it
+				join(meeting.id);
+			} else {
+				// If meeting is not active, start it and then join it
+				start(meeting.id);
+			}
+		} else {
+			// If meeting doesn't exist, create it, start it and then join it
+			MeetingsApi.createPermanentMeeting(roomId)
+				.then((response) => {
 					addMeeting(response);
-					goToMeetingPage(response.id);
+					start(response.id);
 				})
-				.catch(() => console.log('Error on join'));
+				.catch((err) => {
+					console.log(err, 'Error on createMeeting');
+				});
 		}
-	}, [
-		meeting,
-		videoStreamEnabled,
-		audioStreamEnabled,
-		addParticipant,
-		session.id,
-		session.sessionId,
-		goToMeetingPage,
-		roomId,
-		addMeeting
-	]);
+	}, [meeting, videoStreamEnabled, audioStreamEnabled, goToMeetingPage, roomId, addMeeting]);
 
 	return (
 		<Modal

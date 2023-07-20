@@ -4,7 +4,12 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { MeetingBe, MeetingParticipantBe } from '../types/network/models/meetingBeTypes';
+import {
+	MeetingBe,
+	MeetingParticipant,
+	MeetingType,
+	MeetingUserType
+} from '../types/network/models/meetingBeTypes';
 import { MemberBe, RoomBe } from '../types/network/models/roomBeTypes';
 import { UserBe } from '../types/network/models/userBeTypes';
 import { FileToUpload } from '../types/store/ActiveConversationTypes';
@@ -156,15 +161,18 @@ export const createMockFileToUpload = (fields?: GenericFieldsType): FileToUpload
 
 export const createMockMeeting = (fields?: Record<string, any>): MeetingBe => ({
 	id: 'meetingId',
+	name: '',
 	roomId: 'roomId',
+	active: true,
 	participants: [],
 	createdAt: '2022-08-25T17:24:28.961+02:00',
+	meetingType: MeetingType.PERMANENT,
 	...fields
 });
 
-export const createMockParticipants = (fields?: Record<string, any>): MeetingParticipantBe => ({
+export const createMockParticipants = (fields?: Record<string, any>): MeetingParticipant => ({
 	userId: 'userId',
-	sessionId: `sessionIdUserId`,
+	userType: MeetingUserType.REGISTERED,
 	audioStreamOn: false,
 	videoStreamOn: false,
 	...fields

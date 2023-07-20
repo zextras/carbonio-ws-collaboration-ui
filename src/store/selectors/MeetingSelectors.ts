@@ -21,7 +21,7 @@ export const getRoomIdByMeetingId = (store: RootStore, meetingId: string): strin
 	find(store.meetings, (meeting) => meeting.id === meetingId)?.roomId;
 
 export const getMeetingActive = (store: RootStore, roomId: string): boolean =>
-	store.meetings[roomId] !== undefined;
+	store.meetings[roomId] && store.meetings[roomId].active;
 export const getMeetingByMeetingId = (store: RootStore, meetingId: string): Meeting | undefined =>
 	find(store.meetings, (meeting) => meeting.id === meetingId);
 
@@ -85,7 +85,7 @@ export const getParticipantAudioStatus = (
 	const audioStream = find(
 		store.meetings[roomId].participants,
 		(participant) => participant.userId === userId
-	)?.hasAudioStreamOn;
+	)?.audioStreamOn;
 	if (audioStream !== undefined) return audioStream;
 	return false;
 };

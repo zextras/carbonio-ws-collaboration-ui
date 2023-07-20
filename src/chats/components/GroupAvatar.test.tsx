@@ -11,7 +11,7 @@ import GroupAvatar from './GroupAvatar';
 import useStore from '../../store/Store';
 import { createMockMeeting, createMockParticipants, createMockRoom } from '../../tests/createMock';
 import { setup } from '../../tests/test-utils';
-import { MeetingBe, MeetingParticipantBe } from '../../types/network/models/meetingBeTypes';
+import { MeetingBe, MeetingParticipant } from '../../types/network/models/meetingBeTypes';
 import { RoomBe } from '../../types/network/models/roomBeTypes';
 
 const members = [
@@ -28,11 +28,11 @@ const members = [
 		external: false
 	}
 ];
-const user1Participant: MeetingParticipantBe = createMockParticipants({
+const user1Participant: MeetingParticipant = createMockParticipants({
 	userId: 'user1',
 	sessionId: 'sessionIdUser1'
 });
-const user2Participant: MeetingParticipantBe = createMockParticipants({
+const user2Participant: MeetingParticipant = createMockParticipants({
 	userId: 'user2',
 	sessionId: 'sessionIdUser2'
 });
