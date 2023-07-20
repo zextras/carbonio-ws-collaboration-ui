@@ -18,6 +18,7 @@ type AccessMeetingModalProps = {
 
 const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement => {
 	const meeting = useStore((store) => getMeeting(store, roomId));
+	const addMeeting = useStore((store) => store.addMeeting);
 	const [videoStreamEnabled, setVideoStreamEnabled] = useState(false);
 	const [audioStreamEnabled, setAudioStreamEnabled] = useState(false);
 
@@ -29,12 +30,16 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 	const joinMeeting = useCallback(() => {
 		const join = (meetingId: string): Promise<void> =>
 			MeetingsApi.joinMeeting(meetingId, { videoStreamEnabled, audioStreamEnabled })
-				.then(() => goToMeetingPage(meetingId))
-				.catch(() => console.log('Error on joinMeeting'));
+				.then(() => {
+					goToMeetingPage(meetingId);
+				})
+				.catch((err) => console.error(err, 'Error on joinMeeting'));
 		const start = (meetingId: string): Promise<void> =>
 			MeetingsApi.startMeeting(meetingId)
 				.then(() => join(meetingId))
-				.catch(() => console.log('Error on startMeeting'));
+				.catch((err) => {
+					console.error(err, 'Error on startMeeting');
+				});
 
 		if (meeting) {
 			if (meeting.active) {
@@ -47,10 +52,15 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 		} else {
 			// If meeting doesn't exist, create it, start it and then join it
 			MeetingsApi.createPermanentMeeting(roomId)
-				.then((response) => start(response.id))
-				.catch(() => console.log('Error on createMeeting'));
+				.then((response) => {
+					addMeeting(response);
+					start(response.id);
+				})
+				.catch((err) => {
+					console.log(err, 'Error on createMeeting');
+				});
 		}
-	}, [meeting, videoStreamEnabled, audioStreamEnabled, goToMeetingPage, roomId]);
+	}, [meeting, videoStreamEnabled, audioStreamEnabled, goToMeetingPage, roomId, addMeeting]);
 
 	return (
 		<Modal

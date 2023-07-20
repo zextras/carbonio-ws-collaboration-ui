@@ -14,10 +14,13 @@ import React, { ReactElement } from 'react';
 
 import { AutoCompleteGalResponse } from './src/network/soap/AutoCompleteRequest';
 import {
-	CreateMeetingResponse, DeleteMeetingResponse,
+	CreateMeetingResponse,
+	DeleteMeetingResponse,
 	GetMeetingResponse,
-	JoinMeetingResponse, LeaveMeetingResponse,
-	StartMeetingResponse, StopMeetingResponse
+	JoinMeetingResponse,
+	LeaveMeetingResponse,
+	StartMeetingResponse,
+	StopMeetingResponse
 } from './src/types/network/responses/meetingsResponses';
 import {
 	AddRoomMemberResponse,
@@ -77,13 +80,17 @@ jest.mock('@zextras/carbonio-shell-ui', () => ({
 // MOCKED USEROUTING
 export const mockGoToRoomPage: jest.Mock = jest.fn();
 export const mockGoToMainPage: jest.Mock = jest.fn();
+export const mockGoToMeetingPage: jest.Mock = jest.fn();
+
 jest.mock('./src/hooks/useRouting', () => {
 	const goToMainPage = mockGoToMainPage;
 	const goToRoomPage = mockGoToRoomPage;
+	const goToMeetingPage = mockGoToMeetingPage;
 
 	return jest.fn(() => ({
 		goToMainPage,
-		goToRoomPage
+		goToRoomPage,
+		goToMeetingPage
 	}));
 });
 
