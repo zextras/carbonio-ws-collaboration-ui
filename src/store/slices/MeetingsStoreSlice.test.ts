@@ -7,43 +7,42 @@
 import { act, renderHook } from '@testing-library/react-hooks';
 import { size } from 'lodash';
 
-import { MeetingBe, MeetingParticipantBe } from '../../types/network/models/meetingBeTypes';
+import { createMockMeeting, createMockParticipants } from '../../tests/createMock';
 import useStore from '../Store';
 
-const mockParticipant0: MeetingParticipantBe = {
+const mockParticipant0 = createMockParticipants({
 	userId: 'userId0',
-	sessionId: 'sessionId0',
 	audioStreamOn: true,
 	videoStreamOn: true
-};
-const mockParticipant1: MeetingParticipantBe = {
+});
+
+const mockParticipant1 = createMockParticipants({
 	userId: 'userId1',
-	sessionId: 'sessionId1',
 	audioStreamOn: false,
 	videoStreamOn: true
-};
+});
 
-const mockMeeting0: MeetingBe = {
+const mockMeeting0 = createMockMeeting({
 	id: 'meetingId0',
 	roomId: 'roomId0',
 	participants: [mockParticipant0, mockParticipant1],
 	createdAt: '2022-08-25T17:24:28.961+02:00'
-};
-const mockMeeting1: MeetingBe = {
+});
+const mockMeeting1 = createMockMeeting({
 	id: 'meetingId1',
 	roomId: 'roomId1',
 	participants: [mockParticipant0],
 	createdAt: '2022-08-25T18:25:29.961+02:00'
-};
-const mockMeeting2: MeetingBe = {
+});
+const mockMeeting2 = createMockMeeting({
 	id: 'meetingId2',
 	roomId: 'roomId2',
 	participants: [mockParticipant1],
 	createdAt: '2022-08-25T19:34:28.961+02:00'
-};
+});
 
 describe('Test components slice', () => {
-	it('setMeetings setter', () => {
+	test('setMeetings setter', () => {
 		const { result } = renderHook(() => useStore());
 		act(() => result.current.setMeetings([mockMeeting0, mockMeeting1, mockMeeting2]));
 
@@ -58,7 +57,7 @@ describe('Test components slice', () => {
 		expect(result.current.meetings[mockMeeting0.roomId].createdAt).toBe(mockMeeting0.createdAt);
 	});
 
-	it('addMeeting setter', () => {
+	test('addMeeting setter', () => {
 		const { result } = renderHook(() => useStore());
 		act(() => result.current.addMeeting(mockMeeting0));
 
@@ -72,7 +71,7 @@ describe('Test components slice', () => {
 		expect(result.current.meetings[mockMeeting0.roomId].createdAt).toBe(mockMeeting0.createdAt);
 	});
 
-	it('Combination of set components, add components, and remove components setters', () => {
+	test('Combination of set components, add components, and remove components setters', () => {
 		const { result } = renderHook(() => useStore());
 
 		act(() => result.current.setMeetings([mockMeeting0, mockMeeting1]));

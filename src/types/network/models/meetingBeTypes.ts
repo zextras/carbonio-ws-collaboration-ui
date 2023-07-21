@@ -6,20 +6,46 @@
 
 export type MeetingBe = {
 	id: string;
+	name: string;
 	roomId: string;
-	participants: MeetingParticipantBe[];
+	active: boolean;
+	participants: MeetingParticipant[];
 	createdAt: string;
+	meetingType: MeetingType;
 };
 
-export type MeetingParticipantBe = {
+export type MeetingParticipant = {
 	userId: string;
-	sessionId: string;
-	audioStreamOn: boolean;
-	videoStreamOn: boolean;
+	userType: MeetingUserType;
+	audioStreamOn?: boolean;
+	videoStreamOn?: boolean;
 	screenStreamOn?: boolean;
 };
 
+export enum MeetingUserType {
+	MODERATOR = 'moderator',
+	REGISTERED = 'registered'
+}
+
+export enum MeetingType {
+	PERMANENT = 'permanent',
+	SCHEDULED = 'scheduled'
+}
+
+export type CreateMeetingData = {
+	name: string;
+	users: MeetingUser[];
+	roomId: string;
+	meetingType: MeetingType;
+	expiration?: number;
+};
+
+export type MeetingUser = {
+	userId: string;
+	userType: MeetingUserType;
+};
+
 export type JoinSettings = {
-	audioStreamEnabled?: boolean;
-	videoStreamEnabled?: boolean;
+	audioStreamEnabled: boolean;
+	videoStreamEnabled: boolean;
 };

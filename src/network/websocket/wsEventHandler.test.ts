@@ -17,7 +17,7 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../tests/createMock';
-import { MeetingBe, MeetingParticipantBe } from '../../types/network/models/meetingBeTypes';
+import { MeetingBe, MeetingParticipant } from '../../types/network/models/meetingBeTypes';
 import { MemberBe, RoomBe } from '../../types/network/models/roomBeTypes';
 import { UserBe } from '../../types/network/models/userBeTypes';
 import { WsEventType } from '../../types/network/websocket/wsEvents';
@@ -48,11 +48,11 @@ const member3: MemberBe = {
 	external: false
 };
 
-const user3Participant: MeetingParticipantBe = createMockParticipants({
+const user3Participant: MeetingParticipant = createMockParticipants({
 	userId: user3.id,
 	sessionId: 'sessionIdUser3'
 });
-const user2Participant: MeetingParticipantBe = createMockParticipants({
+const user2Participant: MeetingParticipant = createMockParticipants({
 	userId: user2.id,
 	sessionId: 'sessionIdUser2'
 });

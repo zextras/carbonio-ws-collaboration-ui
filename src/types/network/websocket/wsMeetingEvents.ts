@@ -8,8 +8,10 @@ import { WsEventType } from './wsEvents';
 
 export type WsMeetingEvent =
 	| MeetingCreatedEvent
+	| MeetingStartedEvent
 	| MeetingJoinedEvent
 	| MeetingLeftEvent
+	| MeetingStoppedEvent
 	| MeetingDeletedEvent
 	| MeetingVideoStreamOpenedEvent
 	| MeetingVideoStreamClosedEvent
@@ -25,12 +27,17 @@ type BasicMeetingEvent = {
 	from: string;
 	sentDate: string;
 	// sessionId: identifier of sender's session
-	sessionId: string;
+	sessionId: string; // TODO for the moment, this sessionId is the userId
 	meetingId: string;
 };
 
 export type MeetingCreatedEvent = BasicMeetingEvent & {
 	type: WsEventType.MEETING_CREATED;
+	roomId: string;
+};
+
+export type MeetingStartedEvent = BasicMeetingEvent & {
+	type: WsEventType.MEETING_STARTED;
 	roomId: string;
 };
 
@@ -40,6 +47,11 @@ export type MeetingJoinedEvent = BasicMeetingEvent & {
 
 export type MeetingLeftEvent = BasicMeetingEvent & {
 	type: WsEventType.MEETING_LEFT;
+};
+
+export type MeetingStoppedEvent = BasicMeetingEvent & {
+	type: WsEventType.MEETING_STOPPED;
+	roomId: string;
 };
 
 export type MeetingDeletedEvent = BasicMeetingEvent & {

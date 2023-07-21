@@ -8,18 +8,26 @@ import BaseAPI from './BaseAPI';
 import useStore from '../../store/Store';
 import { RequestType } from '../../types/network/apis/IBaseAPI';
 import IMeetingsApi from '../../types/network/apis/IMeetingsApi';
-import { JoinSettings } from '../../types/network/models/meetingBeTypes';
 import {
-	ChangeAudioStreamResponse,
-	ChangeScreenStreamResponse,
-	ChangeVideoStreamResponse,
+	CreateMeetingData,
+	JoinSettings,
+	MeetingType,
+	MeetingUser
+} from '../../types/network/models/meetingBeTypes';
+import {
+	CreateMeetingResponse,
 	CreateAudioOfferResponse,
 	CreateVideoOfferResponse,
 	DeleteMeetingResponse,
 	GetMeetingResponse,
 	JoinMeetingResponse,
 	LeaveMeetingResponse,
-	ListMeetingsResponse
+	ListMeetingsResponse,
+	StartMeetingResponse,
+	StopMeetingResponse,
+	UpdateAudioStreamStatusResponse,
+	UpdateScreenStreamStatusResponse,
+	UpdateVideoStreamStatusResponse
 } from '../../types/network/responses/meetingsResponses';
 
 class MeetingsApi extends BaseAPI implements IMeetingsApi {
@@ -41,6 +49,34 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 		});
 	}
 
+	private createMeeting(createMeetingData: CreateMeetingData): Promise<CreateMeetingResponse> {
+		return this.fetchAPI(`meetings`, RequestType.POST, createMeetingData);
+	}
+
+	public createPermanentMeeting(roomId: string): Promise<CreateMeetingResponse> {
+		return this.createMeeting({
+			name: '',
+			users: [],
+			roomId,
+			meetingType: MeetingType.PERMANENT
+		});
+	}
+
+	public createScheduledMeeting(
+		name: string,
+		users: MeetingUser[],
+		roomId: string,
+		expiration?: number
+	): Promise<CreateMeetingResponse> {
+		return this.createMeeting({
+			name,
+			users,
+			roomId,
+			meetingType: MeetingType.SCHEDULED,
+			expiration
+		});
+	}
+
 	public getMeeting(roomId: string): Promise<GetMeetingResponse> {
 		return this.fetchAPI(`rooms/${roomId}/meeting`, RequestType.GET);
 	}
@@ -49,63 +85,68 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 		return this.fetchAPI(`meetings/${meetingId}`, RequestType.GET);
 	}
 
-	public joinMeeting(roomId: string, settings: JoinSettings): Promise<JoinMeetingResponse> {
+	public startMeeting(meetingId: string): Promise<StartMeetingResponse> {
+		return this.fetchAPI(`meetings/${meetingId}/start`, RequestType.POST);
+	}
+
+	public joinMeeting(meetingId: string, settings: JoinSettings): Promise<JoinMeetingResponse> {
+		return this.fetchAPI(`meetings/${meetingId}/join`, RequestType.POST, settings);
+	}
+
+	public joinMeetingByRoomId(roomId: string, settings: JoinSettings): Promise<JoinMeetingResponse> {
 		return this.fetchAPI(`rooms/${roomId}/meeting/join`, RequestType.PUT, settings);
 	}
 
-	public joinMeetingByMeetingId(
-		meetingId: string,
-		settings: JoinSettings
-	): Promise<JoinMeetingResponse> {
-		return this.fetchAPI(`meetings/${meetingId}/join`, RequestType.PUT, settings);
+	public leaveMeeting(meetingId: string): Promise<LeaveMeetingResponse> {
+		return this.fetchAPI(`meetings/${meetingId}/leave`, RequestType.POST);
 	}
 
-	public leaveMeeting(meetingId: string): Promise<LeaveMeetingResponse> {
-		return this.fetchAPI(`meetings/${meetingId}/leave`, RequestType.PUT);
+	public stopMeeting(meetingId: string): Promise<StopMeetingResponse> {
+		return this.fetchAPI(`meetings/${meetingId}/stop`, RequestType.POST);
 	}
 
 	public deleteMeeting(meetingId: string): Promise<DeleteMeetingResponse> {
 		return this.fetchAPI(`meetings/${meetingId}`, RequestType.DELETE);
 	}
 
-	public changeVideoStream(
+	public updateAudioStreamStatus(
 		meetingId: string,
 		enabled: boolean
-	): Promise<ChangeVideoStreamResponse> {
-		const { sessionId } = useStore.getState().session;
-		return this.fetchAPI(`meetings/${meetingId}/sessions/${sessionId}/video`, RequestType.PUT, {
-			enabled
-		}).then((resp: ChangeAudioStreamResponse) => {
-			const { changeStreamStatus } = useStore.getState();
-			changeStreamStatus(meetingId, sessionId!, 'video', enabled);
-			return resp;
-		});
-	}
-
-	public changeAudioStream(
-		meetingId: string,
-		enabled: boolean
-	): Promise<ChangeAudioStreamResponse> {
-		const { sessionId } = useStore.getState().session;
+	): Promise<UpdateAudioStreamStatusResponse> {
+		const { sessionId, id } = useStore.getState().session;
 		return this.fetchAPI(`meetings/${meetingId}/sessions/${sessionId}/audio`, RequestType.PUT, {
 			enabled
-		}).then((resp: ChangeAudioStreamResponse) => {
+		}).then((resp: UpdateAudioStreamStatusResponse) => {
 			const { changeStreamStatus } = useStore.getState();
-			changeStreamStatus(meetingId, sessionId!, 'audio', enabled);
+			changeStreamStatus(meetingId, id!, 'audio', enabled);
 			return resp;
 		});
 	}
 
-	public changeScreenStream(
+	public updateVideoStreamStatus(
 		meetingId: string,
 		enabled: boolean
-	): Promise<ChangeScreenStreamResponse> {
-		const { sessionId } = useStore.getState().session;
+	): Promise<UpdateVideoStreamStatusResponse> {
+		const { sessionId, id } = useStore.getState().session;
+		return this.fetchAPI(`meetings/${meetingId}/sessions/${sessionId}/video`, RequestType.PUT, {
+			enabled
+		}).then((resp: UpdateVideoStreamStatusResponse) => {
+			const { changeStreamStatus } = useStore.getState();
+			changeStreamStatus(meetingId, id!, 'video', enabled);
+			return resp;
+		});
+	}
+
+	public updateScreenStreamStatus(
+		meetingId: string,
+		enabled: boolean
+	): Promise<UpdateScreenStreamStatusResponse> {
+		const { sessionId, id } = useStore.getState().session;
 		return this.fetchAPI(`meetings/${meetingId}/sessions/${sessionId}/screen`, RequestType.PUT, {
 			enabled
-		}).then((resp: ChangeScreenStreamResponse) => {
+		}).then((resp: UpdateScreenStreamStatusResponse) => {
 			const { changeStreamStatus } = useStore.getState();
-			changeStreamStatus(meetingId, sessionId!, 'screen', enabled);
+			changeStreamStatus(meetingId, id!, 'screen', enabled);
 			return resp;
 		});
 	}
