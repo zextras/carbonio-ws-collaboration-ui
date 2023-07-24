@@ -12,7 +12,7 @@ import styled from 'styled-components';
 
 import MeetingActions from './MeetingComponents/MeetingActions';
 import MeetingViewManager from './MeetingComponents/MeetingViewManager';
-import { getSidebarStatus } from '../../../store/selectors/MeetingSelectors';
+import { getMeetingSidebarStatus } from '../../../store/selectors/ActiveMeetingSelectors';
 import { getCustomLogo } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import defaultLogo from '../../assets/Logo.png';
@@ -49,16 +49,16 @@ const MeetingStreamsWrapper = (): ReactElement => {
 
 	const { meetingId }: Record<string, string> = useParams();
 	const sidebarStatus: boolean | undefined = useStore((store) =>
-		getSidebarStatus(store, meetingId)
+		getMeetingSidebarStatus(store, meetingId)
 	);
 	const customLogo = useStore(getCustomLogo);
-	const toggleSidebarStatus = useStore((store) => store.toggleSidebarStatus);
+	const setMeetingSidebarStatus = useStore((store) => store.setMeetingSidebarStatus);
 
 	const streamsWrapperRef = useRef<HTMLDivElement>(null);
 
 	const toggleSidebar = useCallback(
-		() => toggleSidebarStatus(meetingId, !sidebarStatus),
-		[toggleSidebarStatus, meetingId, sidebarStatus]
+		() => setMeetingSidebarStatus(meetingId, !sidebarStatus),
+		[setMeetingSidebarStatus, meetingId, sidebarStatus]
 	);
 
 	return (

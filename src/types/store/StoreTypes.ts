@@ -5,11 +5,11 @@
  */
 
 import { ActiveConversationsMap, FileToUpload, messageActionType } from './ActiveConversationTypes';
-import { ActiveMeetingMap } from './ActiveMeetingTypes';
+import { ActiveMeetingMap, MeetingChatVisibility, MeetingViewType } from './ActiveMeetingTypes';
 import { Connections } from './ConnectionsTypes';
 import { FasteningsMap } from './FasteningMessagesTypes';
 import { Marker, MarkersMap } from './MarkersTypes';
-import { MeetingChatVisibility, MeetingsMap, MeetingViewType } from './MeetingTypes';
+import { MeetingsMap } from './MeetingTypes';
 import {
 	MessageMap,
 	Message,
@@ -158,15 +158,17 @@ export type MeetingsSlice = {
 		stream: 'audio' | 'video' | 'screen',
 		status: boolean
 	) => void;
-	toggleSidebarStatus: (meetingId: string, isOpen: boolean) => void;
-	setMeetingViewSelected: (meetingId: string, viewType: MeetingViewType) => void;
-	toggleMeetingChatVisibility: (meetingId: string, visibilityStatus: MeetingChatVisibility) => void;
 };
 
 export type ActiveMeetingSlice = {
 	activeMeeting: ActiveMeetingMap;
+	setActiveMeeting: (meetingId: string) => void;
+	removeActiveMeeting: (meetingId: string) => void;
+	setMeetingSidebarStatus: (roomId: string, status: boolean) => void;
 	setMeetingActionsAccordionStatus: (roomId: string, status: boolean) => void;
 	setMeetingParticipantsAccordionStatus: (roomId: string, status: boolean) => void;
+	setMeetingViewSelected: (meetingId: string, viewType: MeetingViewType) => void;
+	toggleMeetingChatVisibility: (meetingId: string, visibilityStatus: MeetingChatVisibility) => void;
 };
 
 export type RootStore = UsersStoreSlice &

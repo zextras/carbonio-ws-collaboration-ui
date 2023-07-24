@@ -10,11 +10,7 @@ import { find, forEach } from 'lodash';
 
 import { UsersApi } from '../../network';
 import { MeetingBe, MeetingParticipant } from '../../types/network/models/meetingBeTypes';
-import {
-	MeetingChatVisibility,
-	MeetingParticipantMap,
-	MeetingViewType
-} from '../../types/store/MeetingTypes';
+import { MeetingParticipantMap } from '../../types/store/MeetingTypes';
 import { MeetingsSlice, RootStore } from '../../types/store/StoreTypes';
 
 export const useMeetingsStoreSlice = (set: (...any: any) => void): MeetingsSlice => ({
@@ -46,8 +42,6 @@ export const useMeetingsStoreSlice = (set: (...any: any) => void): MeetingsSlice
 						participants: participantsMap,
 						createdAt: meeting.createdAt,
 						meetingType: meeting.meetingType,
-						chatVisibility: MeetingChatVisibility.CLOSED,
-						meetingViewSelected: MeetingViewType.WAITING,
 						sidebarStatus: true
 					};
 
@@ -88,8 +82,6 @@ export const useMeetingsStoreSlice = (set: (...any: any) => void): MeetingsSlice
 					participants: participantsMap,
 					createdAt: meeting.createdAt,
 					meetingType: meeting.meetingType,
-					chatVisibility: MeetingChatVisibility.CLOSED,
-					meetingViewSelected: MeetingViewType.WAITING,
 					sidebarStatus: true
 				};
 
@@ -204,45 +196,6 @@ export const useMeetingsStoreSlice = (set: (...any: any) => void): MeetingsSlice
 			}),
 			false,
 			'MEETINGS/CHANGE_STREAM_STATUS'
-		);
-	},
-	toggleSidebarStatus: (meetingId: string, isOpen: boolean): void => {
-		set(
-			produce((draft: RootStore) => {
-				const meeting = find(draft.meetings, (meeting) => meeting.id === meetingId);
-				if (meeting) {
-					draft.meetings[meeting.roomId].sidebarStatus = isOpen;
-				}
-			}),
-			false,
-			'MEETINGS/TOGGLE_SIDEBAR_STATUS'
-		);
-	},
-	setMeetingViewSelected: (meetingId: string, viewType: MeetingViewType): void => {
-		set(
-			produce((draft: RootStore) => {
-				const meeting = find(draft.meetings, (meeting) => meeting.id === meetingId);
-				if (meeting) {
-					draft.meetings[meeting.roomId].meetingViewSelected = viewType;
-				}
-			}),
-			false,
-			'MEETINGS/SET_VIEW_TYPE'
-		);
-	},
-	toggleMeetingChatVisibility: (
-		meetingId: string,
-		visibilityStatus: MeetingChatVisibility
-	): void => {
-		set(
-			produce((draft: RootStore) => {
-				const meeting = find(draft.meetings, (meeting) => meeting.id === meetingId);
-				if (meeting) {
-					draft.meetings[meeting.roomId].chatVisibility = visibilityStatus;
-				}
-			}),
-			false,
-			'MEETINGS/SET_CHAT_VIEW'
 		);
 	}
 });

@@ -5,7 +5,9 @@
  */
 
 export type ActiveMeeting = {
-	sidebarStatus?: SidebarStatus;
+	sidebarStatus: SidebarStatus;
+	chatVisibility: MeetingChatVisibility;
+	meetingViewSelected: MeetingViewType;
 };
 
 export type ActiveMeetingMap = {
@@ -13,6 +15,19 @@ export type ActiveMeetingMap = {
 };
 
 type SidebarStatus = {
+	sidebarIsOpened: boolean;
 	participantsAccordionIsOpened: boolean;
 	actionsAccordionIsOpened: boolean;
 };
+
+export enum MeetingViewType {
+	CINEMA = 'cinema',
+	GRID = 'grid',
+	WAITING = 'waiting'
+}
+
+export enum MeetingChatVisibility {
+	CLOSED = 'closed',
+	OPEN = 'open',
+	EXPANDED = 'expanded'
+}

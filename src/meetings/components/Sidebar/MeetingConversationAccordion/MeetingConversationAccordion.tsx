@@ -12,9 +12,9 @@ import styled from 'styled-components';
 import papyrusDark from '../../../../chats/assets/papyrus-dark.png';
 import papyrus from '../../../../chats/assets/papyrus.png';
 import Chat from '../../../../chats/components/conversation/Chat';
-import { getMeetingChatVisibility } from '../../../../store/selectors/MeetingSelectors';
+import { getMeetingChatVisibility } from '../../../../store/selectors/ActiveMeetingSelectors';
 import useStore from '../../../../store/Store';
-import { MeetingChatVisibility } from '../../../../types/store/MeetingTypes';
+import { MeetingChatVisibility } from '../../../../types/store/ActiveMeetingTypes';
 
 type MeetingConversationAccordionProps = {
 	roomId: string;
