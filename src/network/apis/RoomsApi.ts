@@ -164,6 +164,7 @@ class RoomsApi extends BaseAPI implements IRoomsApi {
 			description?: string;
 			replyId?: string;
 		},
+		area: string,
 		signal?: AbortSignal
 	): Promise<AddRoomAttachmentResponse> {
 		const uuid = uuidGenerator();
@@ -180,11 +181,19 @@ class RoomsApi extends BaseAPI implements IRoomsApi {
 				size: file.size
 			}
 		});
-		return this.uploadFileFetchAPI(`rooms/${roomId}/attachments`, RequestType.POST, file, signal, {
-			description: optionalFields.description,
-			replyId: optionalFields.replyId,
-			messageId: uuid
-		})
+
+		return this.uploadFileFetchAPI(
+			`rooms/${roomId}/attachments`,
+			RequestType.POST,
+			file,
+			area,
+			signal,
+			{
+				description: optionalFields.description,
+				replyId: optionalFields.replyId,
+				messageId: uuid
+			}
+		)
 			.then((resp: AddRoomAttachmentResponse) => resp)
 			.catch((error) => {
 				useStore.getState().removePlaceholderMessage(roomId, uuid);
