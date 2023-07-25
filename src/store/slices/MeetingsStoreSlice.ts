@@ -41,8 +41,7 @@ export const useMeetingsStoreSlice = (set: (...any: any) => void): MeetingsSlice
 						active: meeting.active,
 						participants: participantsMap,
 						createdAt: meeting.createdAt,
-						meetingType: meeting.meetingType,
-						sidebarStatus: true
+						meetingType: meeting.meetingType
 					};
 
 					// Retrieve participants information if they are unknown
@@ -81,8 +80,7 @@ export const useMeetingsStoreSlice = (set: (...any: any) => void): MeetingsSlice
 					active: meeting.active,
 					participants: participantsMap,
 					createdAt: meeting.createdAt,
-					meetingType: meeting.meetingType,
-					sidebarStatus: true
+					meetingType: meeting.meetingType
 				};
 
 				// Retrieve participants information if they are unknown

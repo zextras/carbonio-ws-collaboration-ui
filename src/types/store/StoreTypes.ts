@@ -164,11 +164,11 @@ export type ActiveMeetingSlice = {
 	activeMeeting: ActiveMeetingMap;
 	setActiveMeeting: (meetingId: string) => void;
 	removeActiveMeeting: (meetingId: string) => void;
-	setMeetingSidebarStatus: (roomId: string, status: boolean) => void;
-	setMeetingActionsAccordionStatus: (roomId: string, status: boolean) => void;
-	setMeetingParticipantsAccordionStatus: (roomId: string, status: boolean) => void;
+	setMeetingSidebarStatus: (meetingId: string, status: boolean) => void;
+	setMeetingActionsAccordionStatus: (meetingId: string, status: boolean) => void;
+	setMeetingParticipantsAccordionStatus: (meetingId: string, status: boolean) => void;
+	setMeetingChatVisibility: (meetingId: string, visibilityStatus: MeetingChatVisibility) => void;
 	setMeetingViewSelected: (meetingId: string, viewType: MeetingViewType) => void;
-	toggleMeetingChatVisibility: (meetingId: string, visibilityStatus: MeetingChatVisibility) => void;
 };
 
 export type RootStore = UsersStoreSlice &

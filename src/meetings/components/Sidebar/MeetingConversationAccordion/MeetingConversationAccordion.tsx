@@ -40,25 +40,25 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({
 	const chatLabel = t('chat', 'Chat');
 
 	const meetingChatVisibility = useStore((store) => getMeetingChatVisibility(store, meetingId));
-	const toggleMeetingChatVisibility = useStore((store) => store.toggleMeetingChatVisibility);
+	const setMeetingChatVisibility = useStore((store) => store.setMeetingChatVisibility);
 
 	const toggleChatStatus = useCallback(() => {
-		toggleMeetingChatVisibility(
+		setMeetingChatVisibility(
 			meetingId,
 			MeetingChatVisibility.CLOSED === meetingChatVisibility
 				? MeetingChatVisibility.OPEN
 				: MeetingChatVisibility.CLOSED
 		);
-	}, [meetingChatVisibility, meetingId, toggleMeetingChatVisibility]);
+	}, [setMeetingChatVisibility, meetingId, meetingChatVisibility]);
 
 	const toggleChatExpanded = useCallback(() => {
-		toggleMeetingChatVisibility(
+		setMeetingChatVisibility(
 			meetingId,
 			MeetingChatVisibility.EXPANDED === meetingChatVisibility
 				? MeetingChatVisibility.OPEN
 				: MeetingChatVisibility.EXPANDED
 		);
-	}, [toggleMeetingChatVisibility, meetingChatVisibility, meetingId]);
+	}, [setMeetingChatVisibility, meetingChatVisibility, meetingId]);
 
 	const chatFullExpanded = useMemo(
 		() => meetingChatVisibility === MeetingChatVisibility.EXPANDED,

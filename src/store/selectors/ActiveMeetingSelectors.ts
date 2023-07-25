@@ -17,10 +17,10 @@ export const getMeetingParticipantsAccordionStatus = (
 	meetingId: string
 ): boolean => store.activeMeeting[meetingId]?.sidebarStatus.participantsAccordionIsOpened;
 
-export const getMeetingViewSelected = (store: RootStore, meetingId: string): MeetingViewType =>
-	store.activeMeeting[meetingId]?.meetingViewSelected;
-
 export const getMeetingChatVisibility = (
 	store: RootStore,
 	meetingId: string
 ): MeetingChatVisibility => store.activeMeeting[meetingId]?.chatVisibility;
+
+export const getMeetingViewSelected = (store: RootStore, meetingId: string): MeetingViewType =>
+	store.activeMeeting[meetingId]?.meetingViewSelected;

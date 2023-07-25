@@ -73,6 +73,17 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 			'AM/SET_MEETING_PARTICIPANTS_ACCORDION_STATUS'
 		);
 	},
+	setMeetingChatVisibility: (meetingId: string, visibilityStatus: MeetingChatVisibility): void => {
+		set(
+			produce((draft: RootStore) => {
+				if (draft.activeMeeting[meetingId]) {
+					draft.activeMeeting[meetingId].chatVisibility = visibilityStatus;
+				}
+			}),
+			false,
+			'AM/SET_CHAT_VIEW'
+		);
+	},
 	setMeetingViewSelected: (meetingId: string, viewType: MeetingViewType): void => {
 		set(
 			produce((draft: RootStore) => {
@@ -82,20 +93,6 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 			}),
 			false,
 			'AM/SET_VIEW_TYPE'
-		);
-	},
-	toggleMeetingChatVisibility: (
-		meetingId: string,
-		visibilityStatus: MeetingChatVisibility
-	): void => {
-		set(
-			produce((draft: RootStore) => {
-				if (draft.activeMeeting[meetingId]) {
-					draft.activeMeeting[meetingId].chatVisibility = visibilityStatus;
-				}
-			}),
-			false,
-			'AM/SET_CHAT_VIEW'
 		);
 	}
 });

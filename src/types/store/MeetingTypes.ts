@@ -17,7 +17,6 @@ export type Meeting = {
 	participants: MeetingParticipantMap;
 	createdAt: string;
 	meetingType: MeetingType;
-	sidebarStatus: boolean;
 };
 export type MeetingParticipantMap = {
 	[userId: string]: MeetingParticipant;
