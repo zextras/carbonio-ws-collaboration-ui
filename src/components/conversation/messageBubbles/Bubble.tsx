@@ -113,6 +113,7 @@ const Bubble: FC<BubbleProps> = ({
 			data-testid={`Bubble-${message.id}`}
 			key={message.id}
 			height="fit"
+			width="fit"
 			maxWidth={messageAttachment && !message.forwarded ? '60%' : '75%'}
 			padding={{ all: 'medium' }}
 			background={isMyMessage ? 'highlight' : 'gray6'}

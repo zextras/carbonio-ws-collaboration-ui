@@ -178,7 +178,8 @@ class RoomsApi extends BaseAPI implements IRoomsApi {
 				id: 'placeholderFileId',
 				name: file.name,
 				mimeType: file.type,
-				size: file.size
+				size: file.size,
+				area
 			}
 		});
 

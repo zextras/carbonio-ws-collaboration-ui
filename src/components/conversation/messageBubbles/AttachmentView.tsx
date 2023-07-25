@@ -68,7 +68,9 @@ const AttachmentImg = styled.img<{
 	width: number;
 	height: number;
 }>`
-	${({ width }): string | false => width === 0 && `width: fit-content;`};
+	${({ width, isPreviewLoaded }): string | false =>
+		width === 0 && !isPreviewLoaded && `width: fit-content;`};
+	${({ isPreviewLoaded }): string | false => isPreviewLoaded && `width: fit-content;`};
 	${({ height, isPreviewLoaded }): string | false =>
 		height * 0.063 >= 37.5 && isPreviewLoaded && `object-fit: contain;`};
 	max-width: ${({ width }): string => (width === 0 ? '100%' : `min(${width * 0.063}rem, 100%)`)};
@@ -136,14 +138,14 @@ const AttachmentView: FC<AttachmentViewProps> = ({
 	const resizeHandler = useCallback(() => {
 		if (previewError && messageListRef) {
 			const relativeWidth = messageListRef.current?.clientWidth;
-			setAttachmentBubbleMaxWidth(relativeWidth !== undefined ? relativeWidth * 0.5 : 0);
+			setAttachmentBubbleMaxWidth(relativeWidth !== undefined ? relativeWidth * 0.55 : 0);
 		} else setAttachmentBubbleMaxWidth(0);
 	}, [messageListRef, previewError]);
 
 	useEffect(() => {
 		if (previewError && messageListRef) {
 			const relativeWidth = messageListRef.current?.clientWidth;
-			setAttachmentBubbleMaxWidth(relativeWidth !== undefined ? relativeWidth * 0.5 : 0);
+			setAttachmentBubbleMaxWidth(relativeWidth !== undefined ? relativeWidth * 0.55 : 0);
 		} else setAttachmentBubbleMaxWidth(0);
 	}, [messageListRef, previewError]);
 
@@ -230,7 +232,7 @@ const AttachmentView: FC<AttachmentViewProps> = ({
 	if (previewURL) {
 		return (
 			<PreviewContainer
-				width={'fit'}
+				width={'fill'}
 				height={'fit'}
 				borderRadius="half"
 				isLoaded={isPreviewLoaded}
