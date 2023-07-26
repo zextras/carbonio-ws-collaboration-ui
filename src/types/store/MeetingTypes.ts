@@ -17,22 +17,7 @@ export type Meeting = {
 	participants: MeetingParticipantMap;
 	createdAt: string;
 	meetingType: MeetingType;
-	chatVisibility: MeetingChatVisibility;
-	meetingViewSelected: MeetingViewType;
-	sidebarStatus: boolean;
 };
 export type MeetingParticipantMap = {
 	[userId: string]: MeetingParticipant;
 };
-
-export enum MeetingViewType {
-	CINEMA = 'cinema',
-	GRID = 'grid',
-	WAITING = 'waiting'
-}
-
-export enum MeetingChatVisibility {
-	CLOSED = 'closed',
-	OPEN = 'open',
-	EXPANDED = 'expanded'
-}

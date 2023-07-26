@@ -3,19 +3,24 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
+import { MeetingChatVisibility, MeetingViewType } from '../../types/store/ActiveMeetingTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 
-export const getMeetingActionsAccordionStatus = (store: RootStore, meetingId: string): boolean => {
-	if (store.activeMeeting[meetingId]?.sidebarStatus)
-		return store.activeMeeting[meetingId].sidebarStatus!.actionsAccordionIsOpened;
-	return true;
-};
+export const getMeetingSidebarStatus = (store: RootStore, meetingId: string): boolean =>
+	store.activeMeeting[meetingId]?.sidebarStatus.sidebarIsOpened;
+
+export const getMeetingActionsAccordionStatus = (store: RootStore, meetingId: string): boolean =>
+	store.activeMeeting[meetingId]?.sidebarStatus.actionsAccordionIsOpened;
 
 export const getMeetingParticipantsAccordionStatus = (
 	store: RootStore,
 	meetingId: string
-): boolean => {
-	if (store.activeMeeting[meetingId]?.sidebarStatus)
-		return store.activeMeeting[meetingId].sidebarStatus!.participantsAccordionIsOpened;
-	return false;
-};
+): boolean => store.activeMeeting[meetingId]?.sidebarStatus.participantsAccordionIsOpened;
+
+export const getMeetingChatVisibility = (
+	store: RootStore,
+	meetingId: string
+): MeetingChatVisibility => store.activeMeeting[meetingId]?.chatVisibility;
+
+export const getMeetingViewSelected = (store: RootStore, meetingId: string): MeetingViewType =>
+	store.activeMeeting[meetingId]?.meetingViewSelected;

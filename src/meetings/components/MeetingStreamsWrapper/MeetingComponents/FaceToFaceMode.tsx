@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { getSidebarStatus } from '../../../../store/selectors/MeetingSelectors';
+import { getMeetingSidebarStatus } from '../../../../store/selectors/ActiveMeetingSelectors';
 import useStore from '../../../../store/Store';
 
 const FaceToFace = styled(Container)`
@@ -55,7 +55,7 @@ const FaceToFaceMode = (): ReactElement => {
 
 	const { meetingId }: Record<string, string> = useParams();
 	const sidebarStatus: boolean | undefined = useStore((store) =>
-		getSidebarStatus(store, meetingId)
+		getMeetingSidebarStatus(store, meetingId)
 	);
 
 	const [testLocalStream, setTestLocalStream] = useState<null | MediaStream>(null);

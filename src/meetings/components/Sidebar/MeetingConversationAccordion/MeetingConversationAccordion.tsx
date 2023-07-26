@@ -12,9 +12,9 @@ import styled from 'styled-components';
 import papyrusDark from '../../../../chats/assets/papyrus-dark.png';
 import papyrus from '../../../../chats/assets/papyrus.png';
 import Chat from '../../../../chats/components/conversation/Chat';
-import { getMeetingChatVisibility } from '../../../../store/selectors/MeetingSelectors';
+import { getMeetingChatVisibility } from '../../../../store/selectors/ActiveMeetingSelectors';
 import useStore from '../../../../store/Store';
-import { MeetingChatVisibility } from '../../../../types/store/MeetingTypes';
+import { MeetingChatVisibility } from '../../../../types/store/ActiveMeetingTypes';
 
 type MeetingConversationAccordionProps = {
 	roomId: string;
@@ -40,25 +40,25 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({
 	const chatLabel = t('chat', 'Chat');
 
 	const meetingChatVisibility = useStore((store) => getMeetingChatVisibility(store, meetingId));
-	const toggleMeetingChatVisibility = useStore((store) => store.toggleMeetingChatVisibility);
+	const setMeetingChatVisibility = useStore((store) => store.setMeetingChatVisibility);
 
 	const toggleChatStatus = useCallback(() => {
-		toggleMeetingChatVisibility(
+		setMeetingChatVisibility(
 			meetingId,
 			MeetingChatVisibility.CLOSED === meetingChatVisibility
 				? MeetingChatVisibility.OPEN
 				: MeetingChatVisibility.CLOSED
 		);
-	}, [meetingChatVisibility, meetingId, toggleMeetingChatVisibility]);
+	}, [setMeetingChatVisibility, meetingId, meetingChatVisibility]);
 
 	const toggleChatExpanded = useCallback(() => {
-		toggleMeetingChatVisibility(
+		setMeetingChatVisibility(
 			meetingId,
 			MeetingChatVisibility.EXPANDED === meetingChatVisibility
 				? MeetingChatVisibility.OPEN
 				: MeetingChatVisibility.EXPANDED
 		);
-	}, [toggleMeetingChatVisibility, meetingChatVisibility, meetingId]);
+	}, [setMeetingChatVisibility, meetingChatVisibility, meetingId]);
 
 	const chatFullExpanded = useMemo(
 		() => meetingChatVisibility === MeetingChatVisibility.EXPANDED,

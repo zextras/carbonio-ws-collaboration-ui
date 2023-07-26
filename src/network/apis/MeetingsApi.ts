@@ -88,7 +88,12 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 	}
 
 	public joinMeeting(meetingId: string, settings: JoinSettings): Promise<JoinMeetingResponse> {
-		return this.fetchAPI(`meetings/${meetingId}/join`, RequestType.POST, settings);
+		return this.fetchAPI(`meetings/${meetingId}/join`, RequestType.POST, settings).then(
+			(resp: JoinMeetingResponse) => {
+				useStore.getState().setActiveMeeting(meetingId);
+				return resp;
+			}
+		);
 	}
 
 	public joinMeetingByRoomId(roomId: string, settings: JoinSettings): Promise<JoinMeetingResponse> {
@@ -96,7 +101,12 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 	}
 
 	public leaveMeeting(meetingId: string): Promise<LeaveMeetingResponse> {
-		return this.fetchAPI(`meetings/${meetingId}/leave`, RequestType.POST);
+		return this.fetchAPI(`meetings/${meetingId}/leave`, RequestType.POST).then(
+			(resp: LeaveMeetingResponse) => {
+				useStore.getState().removeActiveMeeting(meetingId);
+				return resp;
+			}
+		);
 	}
 
 	public stopMeeting(meetingId: string): Promise<StopMeetingResponse> {

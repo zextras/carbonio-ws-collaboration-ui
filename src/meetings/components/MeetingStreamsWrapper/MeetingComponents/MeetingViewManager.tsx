@@ -11,9 +11,9 @@ import { useParams } from 'react-router-dom';
 import CinemaMode from './CinemaMode';
 import FaceToFaceMode from './FaceToFaceMode';
 import GridMode from './GridMode';
-import { getMeetingViewSelected } from '../../../../store/selectors/MeetingSelectors';
+import { getMeetingViewSelected } from '../../../../store/selectors/ActiveMeetingSelectors';
 import useStore from '../../../../store/Store';
-import { MeetingViewType } from '../../../../types/store/MeetingTypes';
+import { MeetingViewType } from '../../../../types/store/ActiveMeetingTypes';
 
 const MeetingViewManager = (): ReactElement => {
 	const { meetingId }: any = useParams();

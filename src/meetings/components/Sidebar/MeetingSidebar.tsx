@@ -14,12 +14,12 @@ import MeetingParticipantsAccordion from './ParticipantsAccordion/MeetingPartici
 import { ActionsAccordion } from '../../../chats/components/infoPanel/conversationActionsAccordion/ActionsAccordion';
 import {
 	getMeetingChatVisibility,
-	getRoomIdByMeetingId,
-	getSidebarStatus
-} from '../../../store/selectors/MeetingSelectors';
+	getMeetingSidebarStatus
+} from '../../../store/selectors/ActiveMeetingSelectors';
+import { getRoomIdByMeetingId } from '../../../store/selectors/MeetingSelectors';
 import { getRoomTypeSelector } from '../../../store/selectors/RoomsSelectors';
 import useStore from '../../../store/Store';
-import { MeetingChatVisibility } from '../../../types/store/MeetingTypes';
+import { MeetingChatVisibility } from '../../../types/store/ActiveMeetingTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 
 const SidebarContainer = styled(Container)`
@@ -36,7 +36,7 @@ const MeetingSidebar = (): ReactElement => {
 	const roomType = useStore((store) => getRoomTypeSelector(store, roomId || ''));
 	const meetingChatVisibility = useStore((store) => getMeetingChatVisibility(store, meetingId));
 	const sidebarIsVisible: boolean | undefined = useStore((store) =>
-		getSidebarStatus(store, meetingId)
+		getMeetingSidebarStatus(store, meetingId)
 	);
 
 	return (
