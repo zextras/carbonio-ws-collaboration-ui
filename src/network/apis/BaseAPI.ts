@@ -52,7 +52,6 @@ export default abstract class BaseAPI implements IBaseAPI {
 		endpoint: string,
 		requestType: RequestType,
 		file: File,
-		area?: string,
 		signal?: AbortSignal,
 		optionalFields?: AdditionalHeaders
 	): Promise<any> {
@@ -63,14 +62,12 @@ export default abstract class BaseAPI implements IBaseAPI {
 				const headers = new Headers();
 				headers.append('fileName', charToUnicode(file.name));
 				headers.append('mimeType', file.type);
-				if (area) {
-					headers.append('area', area);
-				}
 				if (optionalFields) {
 					optionalFields.description &&
 						headers.append('description', charToUnicode(optionalFields.description));
 					optionalFields.messageId && headers.append('messageId', optionalFields.messageId);
 					optionalFields.replyId && headers.append('replyId', optionalFields.replyId);
+					optionalFields.area && headers.append('area', optionalFields.area);
 				}
 
 				// Add sessionId to headers only if it is already defined

@@ -183,18 +183,12 @@ class RoomsApi extends BaseAPI implements IRoomsApi {
 			}
 		});
 
-		return this.uploadFileFetchAPI(
-			`rooms/${roomId}/attachments`,
-			RequestType.POST,
-			file,
-			area,
-			signal,
-			{
-				description: optionalFields.description,
-				replyId: optionalFields.replyId,
-				messageId: uuid
-			}
-		)
+		return this.uploadFileFetchAPI(`rooms/${roomId}/attachments`, RequestType.POST, file, signal, {
+			description: optionalFields.description,
+			replyId: optionalFields.replyId,
+			messageId: uuid,
+			area
+		})
 			.then((resp: AddRoomAttachmentResponse) => resp)
 			.catch((error) => {
 				useStore.getState().removePlaceholderMessage(roomId, uuid);

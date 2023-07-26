@@ -161,20 +161,25 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 	): Promise<AddRoomAttachmentResponse | void> => {
 		const fileName = file.file.name;
 		const { signal } = controller;
+
+		// Send as reply only the first file of the array
 		const sendAsReply = filesToUploadArray && file.fileId === filesToUploadArray[0].fileId;
 
 		const getImageSize = (url: string): Promise<{ width: number; height: number }> =>
 			new Promise((resolve) => {
 				const img = new Image();
 
-				img.addEventListener('load', () => {
-					resolve({ width: img.naturalWidth, height: img.naturalHeight });
-				});
+				img.addEventListener(
+					'load',
+					() => {
+						resolve({ width: img.naturalWidth, height: img.naturalHeight });
+					},
+					{ once: true }
+				);
 
 				img.src = url;
 			});
 
-		// Send as reply only the first file of the array
 		return getImageSize(file.localUrl)
 			.then((res) => {
 				RoomsApi.addRoomAttachment(
@@ -203,7 +208,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 					}
 				});
 			})
-			.catch(() => console.log('aaa'));
+			.catch();
 	};
 
 	// Send isWriting every 3 seconds
