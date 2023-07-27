@@ -37,7 +37,7 @@ const LeaveConversationListAction: FC<LeaveConversationProps> = ({
 	);
 	const promoteSomeoneElseToModeratorLabel: string = t(
 		'tooltip.promoteSomeoneElseToModerator',
-		'Promote someone else to moderator to leave'
+		'Before leaving you have to promote someone else to moderator'
 	);
 	const leaveConversationLabel: string = t('tooltip.leaveConversation', 'Leave conversation');
 
