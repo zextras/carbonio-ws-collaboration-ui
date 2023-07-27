@@ -79,7 +79,6 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 	const uploadingLabel = t('tooltip.uploading', 'Uploading');
 	const uploadAbortedLabel = t('attachments.uploadAborted', 'Upload has been interrupted');
 	const stopUploadLabel = t('attachments.stopUpload', 'Stop upload');
-	const clearLabel = t('tooltip.removeCaption', 'Remove caption');
 
 	const referenceMessage = useStore((store) => getReferenceMessage(store, roomId));
 	const draftMessage = useStore((store) => getDraftMessage(store, roomId));
@@ -331,15 +330,6 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 		[sendDisabled, sendMessage, sendThrottleIsWriting, sendDebouncedPause]
 	);
 
-	const clearInput = useCallback(() => {
-		setTextMessage('');
-		setDraftMessage(roomId, true);
-		if (messageInputRef.current) {
-			messageInputRef.current.style.height = '';
-			messageInputRef.current.focus();
-		}
-	}, [setTextMessage, setDraftMessage, roomId]);
-
 	const insertEmojiInMessage = useCallback(
 		(emoji: Emoji): void => {
 			if (messageInputRef.current) {
@@ -577,19 +567,6 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 								icon="CloseOutline"
 							/>
 						</UploadSpinnerWrapper>
-					</Tooltip>
-				)}
-				{filesToUploadArray && textMessage.length > 0 && (
-					<Tooltip label={clearLabel} placement="top">
-						<Container width="fit" height="fit" padding={{ bottom: '0.3125rem' }}>
-							<IconButton
-								onClick={clearInput}
-								iconColor="gray0"
-								size="large"
-								icon="BackspaceOutline"
-								disabled={sendDisabled}
-							/>
-						</Container>
 					</Tooltip>
 				)}
 				<Tooltip label={sendDisabled ? writeToSendTooltip : sendMessageLabel} placement="top">
