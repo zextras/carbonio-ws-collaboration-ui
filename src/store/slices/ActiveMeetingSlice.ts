@@ -104,15 +104,17 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 	},
 	createBidirectionalAudioConn: (
 		meetingId: string,
+		peerConnectionConfig: PeerConnConfig,
 		audioStreamEnabled: boolean,
-		peerConnectionConfig: PeerConnConfig
+		selectedAudioDeviceId?: string
 	): void => {
 		set(
 			produce((draft: RootStore) => {
 				const bidirectionalAudioConn = new BidirectionalConnectionAudioInOut(
 					peerConnectionConfig,
+					meetingId,
 					audioStreamEnabled,
-					meetingId
+					selectedAudioDeviceId
 				);
 				if (!draft.activeMeeting[meetingId]) {
 					draft.activeMeeting[meetingId] = {

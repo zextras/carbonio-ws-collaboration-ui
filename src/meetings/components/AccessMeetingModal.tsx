@@ -35,7 +35,7 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 	const redirectToMeetingAndInitWebRTC = useCallback(
 		(meetingId: string): void => {
 			const peerConnectionConfig = new PeerConnConfig();
-			createBidirectionalAudioConn(meetingId, audioStreamEnabled, peerConnectionConfig);
+			createBidirectionalAudioConn(meetingId, peerConnectionConfig, audioStreamEnabled);
 			// createVideoInConn(meetingId, peerConnectionConfig);
 			if (videoStreamEnabled) {
 				createVideoOutConn(meetingId, peerConnectionConfig);

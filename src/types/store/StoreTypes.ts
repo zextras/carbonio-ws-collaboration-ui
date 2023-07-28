@@ -174,8 +174,9 @@ export type ActiveMeetingSlice = {
 	setMeetingViewSelected: (meetingId: string, viewType: MeetingViewType) => void;
 	createBidirectionalAudioConn: (
 		meetingId: string,
+		peerConnectionConfig: PeerConnConfig,
 		audioStreamEnabled: boolean,
-		peerConnectionConfig: PeerConnConfig
+		selectedAudioDeviceId?: string
 	) => void;
 	createVideoOutConn: (meetingId: string, peerConnectionConfig: PeerConnConfig) => void;
 	createVideoInConn: (meetingId: string, peerConnectionConfig: PeerConnConfig) => void;

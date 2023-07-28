@@ -7,6 +7,7 @@
 
 import { PeerConnConfig } from './PeerConnConfig';
 import { IBidirectionalConnectionAudioInOut } from '../../types/network/webRTC/webRTC';
+import { getAudioStream } from '../../utils/UserMediaManager';
 import MeetingsApi from '../apis/MeetingsApi';
 
 export default class BidirectionalConnectionAudioInOut
@@ -20,7 +21,12 @@ export default class BidirectionalConnectionAudioInOut
 
 	rtpSender: RTCRtpSender | null;
 
-	constructor(peerConnConfig: PeerConnConfig, audioStreamEnabled: boolean, meetingId: string) {
+	constructor(
+		peerConnConfig: PeerConnConfig,
+		meetingId: string,
+		audioStreamEnabled: boolean,
+		selectedAudioDeviceId?: string
+	) {
 		this.peerConn = new RTCPeerConnection(peerConnConfig.getConfig());
 		this.rtpSender = null;
 		this.meetingId = meetingId;
@@ -44,7 +50,13 @@ export default class BidirectionalConnectionAudioInOut
 		// eslint-disable-next-line prefer-destructuring
 		this.oscillatorAudioTrack = oscillatorAudioTrack.getAudioTracks()[0];
 		this.updateRemoteStreamAudio();
-		this.updateLocalStreamTrack(oscillatorAudioTrack);
+		this.updateLocalStreamTrack(oscillatorAudioTrack).then(() => {
+			if (audioStreamEnabled) {
+				getAudioStream(true, true, selectedAudioDeviceId).then((stream) => {
+					this.updateLocalStreamTrack(stream).then();
+				});
+			}
+		});
 	}
 
 	handleOnTrack = (trackEvent: RTCTrackEvent): void => {
