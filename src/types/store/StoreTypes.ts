@@ -5,11 +5,16 @@
  */
 
 import { ActiveConversationsMap, FileToUpload, messageActionType } from './ActiveConversationTypes';
-import { ActiveMeetingMap, STREAM_TYPE } from './ActiveMeetingTypes';
+import {
+	ActiveMeetingMap,
+	MeetingChatVisibility,
+	MeetingViewType,
+	STREAM_TYPE
+} from './ActiveMeetingTypes';
 import { Connections } from './ConnectionsTypes';
 import { FasteningsMap } from './FasteningMessagesTypes';
 import { Marker, MarkersMap } from './MarkersTypes';
-import { MeetingChatVisibility, MeetingsMap, MeetingViewType } from './MeetingTypes';
+import { MeetingsMap } from './MeetingTypes';
 import {
 	AttachmentMessageType,
 	Message,
@@ -159,15 +164,14 @@ export type MeetingsSlice = {
 		stream: 'audio' | 'video' | 'screen',
 		status: boolean
 	) => void;
-	toggleSidebarStatus: (meetingId: string, isOpen: boolean) => void;
-	setMeetingViewSelected: (meetingId: string, viewType: MeetingViewType) => void;
-	toggleMeetingChatVisibility: (meetingId: string, visibilityStatus: MeetingChatVisibility) => void;
 };
 
 export type ActiveMeetingSlice = {
 	activeMeeting: ActiveMeetingMap;
 	setMeetingActionsAccordionStatus: (roomId: string, status: boolean) => void;
 	setMeetingParticipantsAccordionStatus: (roomId: string, status: boolean) => void;
+	setMeetingChatVisibility: (meetingId: string, visibilityStatus: MeetingChatVisibility) => void;
+	setMeetingViewSelected: (meetingId: string, viewType: MeetingViewType) => void;
 	createBidirectionalAudioConn: (
 		meetingId: string,
 		audioStreamEnabled: boolean,
@@ -181,6 +185,9 @@ export type ActiveMeetingSlice = {
 	closeVideoInConn: (meetingId: string) => void;
 	closeShareOutConn: (meetingId: string) => void;
 	setLocalStreams: (meetingId: string, streamType: STREAM_TYPE, stream: MediaStream) => void;
+	setActiveMeeting: (meetingId: string) => void;
+	removeActiveMeeting: (meetingId: string) => void;
+	setMeetingSidebarStatus: (meetingId: string, status: boolean) => void;
 };
 
 export type RootStore = UsersStoreSlice &

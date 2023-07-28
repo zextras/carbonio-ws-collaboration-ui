@@ -128,6 +128,10 @@ describe('Meetings API', () => {
 				videoStreamEnabled: false
 			})
 		});
+
+		// Check if store is correctly updated
+		const store = useStore.getState();
+		expect(store.activeMeeting[meetingMock.id]).toBeDefined();
 	});
 
 	test('joinMeetingByRoomId is called correctly', async () => {
@@ -161,6 +165,10 @@ describe('Meetings API', () => {
 			headers,
 			body: undefined
 		});
+
+		// Check if store is correctly updated
+		const store = useStore.getState();
+		expect(store.activeMeeting[meetingMock.id]).not.toBeDefined();
 	});
 
 	test('stopMeeting is called correctly', async () => {

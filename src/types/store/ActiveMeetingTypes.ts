@@ -7,7 +7,9 @@
 import { IBidirectionalConnectionAudioInOut, IVideoOutConnection } from '../network/webRTC/webRTC';
 
 export type ActiveMeeting = {
-	sidebarStatus?: SidebarStatus;
+	sidebarStatus: SidebarStatus;
+	chatVisibility: MeetingChatVisibility;
+	meetingViewSelected: MeetingViewType;
 	bidirectionalAudioConn?: IBidirectionalConnectionAudioInOut;
 	videoInConn?: any;
 	videoOutConn?: IVideoOutConnection;
@@ -21,9 +23,22 @@ export type ActiveMeetingMap = {
 };
 
 export type SidebarStatus = {
+	sidebarIsOpened: boolean;
 	participantsAccordionIsOpened: boolean;
 	actionsAccordionIsOpened: boolean;
 };
+
+export enum MeetingViewType {
+	CINEMA = 'cinema',
+	GRID = 'grid',
+	WAITING = 'waiting'
+}
+
+export enum MeetingChatVisibility {
+	CLOSED = 'closed',
+	OPEN = 'open',
+	EXPANDED = 'expanded'
+}
 
 export type LocalStreams = {
 	audio?: MediaStream;

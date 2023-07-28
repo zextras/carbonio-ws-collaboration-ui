@@ -11,7 +11,7 @@ import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { getLocalVideoSteam } from '../../../../store/selectors/ActiveMeetingSelectors';
-import { getSidebarStatus } from '../../../../store/selectors/MeetingSelectors';
+import { getMeetingSidebarStatus } from '../../../../store/selectors/ActiveMeetingSelectors';
 import useStore from '../../../../store/Store';
 import { STREAM_TYPE } from '../../../../types/store/ActiveMeetingTypes';
 import { getVideoStream } from '../../../../utils/UserMediaManager';
@@ -60,7 +60,7 @@ const FaceToFaceMode = (): ReactElement => {
 	const setLocalStreams = useStore((store) => store.setLocalStreams);
 	const localVideoStream = useStore((store) => getLocalVideoSteam(store, meetingId));
 	const sidebarStatus: boolean | undefined = useStore((store) =>
-		getSidebarStatus(store, meetingId)
+		getMeetingSidebarStatus(store, meetingId)
 	);
 
 	const [centralStream, setCentralStream] = useState<null | MediaStream>(null);

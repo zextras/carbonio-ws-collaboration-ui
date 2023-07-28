@@ -6,12 +6,7 @@
 
 import { find, size } from 'lodash';
 
-import {
-	Meeting,
-	MeetingChatVisibility,
-	MeetingParticipantMap,
-	MeetingViewType
-} from '../../types/store/MeetingTypes';
+import { Meeting, MeetingParticipantMap } from '../../types/store/MeetingTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 
 export const getMeeting = (store: RootStore, roomId: string): Meeting | undefined =>
@@ -24,10 +19,6 @@ export const getMeetingActive = (store: RootStore, roomId: string): boolean =>
 	store.meetings[roomId] && store.meetings[roomId].active;
 export const getMeetingByMeetingId = (store: RootStore, meetingId: string): Meeting | undefined =>
 	find(store.meetings, (meeting) => meeting.id === meetingId);
-
-export const getSidebarStatus = (store: RootStore, meetingId: string): boolean | undefined =>
-	find(store.meetings, (meeting) => meeting.id === meetingId)?.sidebarStatus;
-
 export const getMeetingParticipants = (
 	store: RootStore,
 	roomId: string
@@ -89,15 +80,3 @@ export const getParticipantAudioStatus = (
 	if (audioStream !== undefined) return audioStream;
 	return false;
 };
-
-export const getMeetingViewSelected = (
-	store: RootStore,
-	meetingId: string
-): MeetingViewType | undefined =>
-	find(store.meetings, (meeting) => meeting.id === meetingId)?.meetingViewSelected;
-
-export const getMeetingChatVisibility = (
-	store: RootStore,
-	meetingId: string
-): MeetingChatVisibility | undefined =>
-	find(store.meetings, (meeting) => meeting.id === meetingId)?.chatVisibility;

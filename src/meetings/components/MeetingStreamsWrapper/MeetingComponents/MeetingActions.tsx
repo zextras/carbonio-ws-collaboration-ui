@@ -12,9 +12,9 @@ import styled, { FlattenSimpleInterpolation } from 'styled-components';
 
 import useRouting, { PAGE_INFO_TYPE } from '../../../../hooks/useRouting';
 import { MeetingsApi } from '../../../../network';
-import { getMeetingViewSelected } from '../../../../store/selectors/MeetingSelectors';
+import { getMeetingViewSelected } from '../../../../store/selectors/ActiveMeetingSelectors';
 import useStore from '../../../../store/Store';
-import { MeetingViewType } from '../../../../types/store/MeetingTypes';
+import { MeetingViewType } from '../../../../types/store/ActiveMeetingTypes';
 import { getAudioStream } from '../../../../utils/UserMediaManager';
 
 const ActionsWrapper = styled(Container)`
