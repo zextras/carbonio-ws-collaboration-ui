@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 import { AttachmentsApi } from '../network';
-import { ImageQuality } from '../types/network/apis/IAttachmentsApi';
+import { ImageQuality, ImageShape, ImageType } from '../types/network/apis/IAttachmentsApi';
 
 // TODO implement all the possible extensions based on Previewer
 const previewExtensionSupported = {
@@ -18,12 +18,28 @@ const previewExtensionSupported = {
 export const isPreviewSupported = (mimeType: string): boolean =>
 	Object.values(previewExtensionSupported).includes(mimeType);
 
+const getImageType = (attachmentType: string): string | undefined => {
+	const type = attachmentType.split('/');
+	if (type[1]) {
+		if (type[1] === 'gif') return ImageType.GIF;
+		if (type[1] === 'png') return ImageType.PNG;
+		if (type[1] === 'jpeg') return ImageType.JPEG;
+	}
+	return undefined;
+};
+
 // returns the thumbnail's url of the attachment
 export const getThumbnailURL = (attachmentId: string, mimeType: string): string | undefined => {
 	if (isPreviewSupported(mimeType)) {
 		return mimeType === previewExtensionSupported.pdf
 			? AttachmentsApi.getPdfThumbnailURL(attachmentId, '0x0', ImageQuality.LOW)
-			: AttachmentsApi.getImageThumbnailURL(attachmentId, '0x0', ImageQuality.LOW);
+			: AttachmentsApi.getImageThumbnailURL(
+					attachmentId,
+					'0x0',
+					ImageQuality.LOW,
+					getImageType(mimeType),
+					ImageShape.RECTANGULAR
+			  );
 	}
 	return undefined;
 };
@@ -33,7 +49,12 @@ export const getAttachmentURL = (attachmentId: string, mimeType: string): string
 	if (isPreviewSupported(mimeType)) {
 		return mimeType === previewExtensionSupported.pdf
 			? AttachmentsApi.getPdfPreviewURL(attachmentId)
-			: AttachmentsApi.getImagePreviewURL(attachmentId, '0x0', ImageQuality.HIGH);
+			: AttachmentsApi.getImagePreviewURL(
+					attachmentId,
+					'0x0',
+					ImageQuality.HIGH,
+					getImageType(mimeType)
+			  );
 	}
 	return undefined;
 };
