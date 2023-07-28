@@ -264,4 +264,24 @@ export function wsEventsHandler(event: WsEvent): void {
 		default:
 			wsDebug('Unhandled event', event);
 	}
+	// TODO REPLACE WITH NEW MEETINGS EVENTS
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore
+	if (event.type === 8) {
+		console.log('TEST ANSWER');
+		console.log(event);
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore
+		if (event.event.jsep.type === 'ANSWER') {
+			console.log('IMMA ANSWER', state.activeMeeting);
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore
+			state.activeMeeting[event.meeting_id].bidirectionalAudioConn.handleRemoteAnswer({
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+				// @ts-ignore
+				...event.event.jsep,
+				type: 'answer'
+			});
+		}
+	}
 }

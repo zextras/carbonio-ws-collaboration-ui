@@ -168,7 +168,11 @@ export type ActiveMeetingSlice = {
 	activeMeeting: ActiveMeetingMap;
 	setMeetingActionsAccordionStatus: (roomId: string, status: boolean) => void;
 	setMeetingParticipantsAccordionStatus: (roomId: string, status: boolean) => void;
-	createBidirectionalAudioConn: (meetingId: string, peerConnectionConfig: PeerConnConfig) => void;
+	createBidirectionalAudioConn: (
+		meetingId: string,
+		audioStreamEnabled: boolean,
+		peerConnectionConfig: PeerConnConfig
+	) => void;
 	createVideoOutConn: (meetingId: string, peerConnectionConfig: PeerConnConfig) => void;
 	createVideoInConn: (meetingId: string, peerConnectionConfig: PeerConnConfig) => void;
 	createShareOutConn: (meetingId: string, peerConnectionConfig: PeerConnConfig) => void;

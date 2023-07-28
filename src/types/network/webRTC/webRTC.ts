@@ -25,14 +25,11 @@ export interface IPeerConnection {
 }
 
 export interface IBidirectionalConnectionAudioInOut extends IPeerConnection {
-	localStreamAudioTrack: MediaStreamTrack | null;
 	oscillatorAudioTrack: MediaStreamTrack | null;
 	updateRemoteStreamAudio: () => void;
 	handleOnTrack: (trackEvent: RTCTrackEvent) => void;
-	handleOnMuteTrack: (trackEvent: MediaStreamTrackEvent) => void;
-	handleOnUnMuteTrack: (trackEvent: MediaStreamTrackEvent) => void;
-	handleOnRemoveTrack: (trackEvent: MediaStreamTrackEvent) => void;
-	updateLocalStreamTrack: (mediaStreamTrack: MediaStream, type: 'oscillator' | 'local') => void;
+	updateLocalStreamTrack(mediaStreamTrack: MediaStream): Promise<MediaStreamTrack>;
+	closeRtpSenderTrack: () => void;
 	closePeerConnection: () => void;
 }
 

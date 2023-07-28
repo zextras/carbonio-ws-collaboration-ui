@@ -15,8 +15,8 @@ import {
 	MeetingUser
 } from '../../types/network/models/meetingBeTypes';
 import {
-	CreateMeetingResponse,
 	CreateAudioOfferResponse,
+	CreateMeetingResponse,
 	CreateVideoOfferResponse,
 	DeleteMeetingResponse,
 	GetMeetingResponse,
@@ -151,16 +151,12 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 		});
 	}
 
-	public createAudioOffer(
-		meetingId: string,
-		sdpOffer: RTCSessionDescriptionInit
-	): Promise<CreateAudioOfferResponse> {
+	public createAudioOffer(meetingId: string, sdpOffer: string): Promise<CreateAudioOfferResponse> {
 		const { sessionId } = useStore.getState().session;
 		return this.fetchAPI(
 			`meetings/${meetingId}/sessions/${sessionId}/audio/offer`,
 			RequestType.PUT,
 			{
-				type: 'offer',
 				sdp: sdpOffer
 			}
 		).then((resp: CreateAudioOfferResponse) => resp);
@@ -175,7 +171,6 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 			`meetings/${meetingId}/sessions/${sessionId}/video/offer`,
 			RequestType.PUT,
 			{
-				type: 'offer',
 				sdp: sdpOffer
 			}
 		).then((resp: CreateVideoOfferResponse) => resp);

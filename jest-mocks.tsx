@@ -307,7 +307,11 @@ Object.defineProperty(window, 'crypto', {
 });
 
 Object.defineProperty(window, 'RTCPeerConnection', {
-	value: jest.fn()
+	value: jest.fn(function RTCPeerConnectionMock() {
+		return {
+			addTrack: jest.fn()
+		};
+	})
 });
 
 Object.defineProperty(window, 'AudioContext', {
@@ -332,9 +336,11 @@ Object.defineProperty(window, 'MediaStream', {
 	value: jest.fn(function MediaStreamMock() {
 		return {
 			stream: (): any => ({
-				getAudioTracks: jest.fn()
+				getAudioTracks: jest.fn(),
+				addTrack: jest.fn()
 			}),
-			getAudioTracks: (): any[] => [MediaStream]
+			getAudioTracks: (): any[] => [MediaStream],
+			addTrack: jest.fn()
 		};
 	})
 });
