@@ -115,7 +115,15 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 					meetingId
 				);
 				if (!draft.activeMeeting[meetingId]) {
-					draft.activeMeeting[meetingId] = {};
+					draft.activeMeeting[meetingId] = {
+						sidebarStatus: {
+							sidebarIsOpened: true,
+							actionsAccordionIsOpened: true,
+							participantsAccordionIsOpened: false
+						},
+						chatVisibility: MeetingChatVisibility.CLOSED,
+						meetingViewSelected: MeetingViewType.WAITING
+					};
 				}
 				if (!draft.activeMeeting[meetingId].bidirectionalAudioConn) {
 					draft.activeMeeting[meetingId].bidirectionalAudioConn = bidirectionalAudioConn;
@@ -129,9 +137,6 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 		set(
 			produce((draft: RootStore) => {
 				const videoOutConn = new VideoOutConnection(peerConnectionConfig, meetingId);
-				if (!draft.activeMeeting[meetingId]) {
-					draft.activeMeeting[meetingId] = {};
-				}
 				if (!draft.activeMeeting[meetingId].videoOutConn) {
 					draft.activeMeeting[meetingId].videoOutConn = videoOutConn;
 				}
@@ -144,9 +149,6 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 		set(
 			produce((draft: RootStore) => {
 				const videoInConn = new VideoOutConnection(peerConnectionConfig, meetingId);
-				if (!draft.activeMeeting[meetingId]) {
-					draft.activeMeeting[meetingId] = {};
-				}
 				if (!draft.activeMeeting[meetingId].videoInConn) {
 					draft.activeMeeting[meetingId].videoInConn = videoInConn;
 				}
@@ -160,9 +162,6 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 			produce((draft: RootStore) => {
 				// TODO IMPLEMENT
 				const shareOutConn = new VideoOutConnection(peerConnectionConfig, meetingId);
-				if (!draft.activeMeeting[meetingId]) {
-					draft.activeMeeting[meetingId] = {};
-				}
 				if (!draft.activeMeeting[meetingId].shareOutConn) {
 					draft.activeMeeting[meetingId].shareOutConn = shareOutConn;
 				}

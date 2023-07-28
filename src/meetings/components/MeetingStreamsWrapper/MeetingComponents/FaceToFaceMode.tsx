@@ -10,8 +10,10 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { getLocalVideoSteam } from '../../../../store/selectors/ActiveMeetingSelectors';
-import { getMeetingSidebarStatus } from '../../../../store/selectors/ActiveMeetingSelectors';
+import {
+	getLocalVideoSteam,
+	getMeetingSidebarStatus
+} from '../../../../store/selectors/ActiveMeetingSelectors';
 import useStore from '../../../../store/Store';
 import { STREAM_TYPE } from '../../../../types/store/ActiveMeetingTypes';
 import { getVideoStream } from '../../../../utils/UserMediaManager';
