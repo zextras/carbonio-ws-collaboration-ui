@@ -47,15 +47,13 @@ class AttachmentsApi extends BaseAPI implements IAttachmentsApi {
 		fileId: string,
 		area: string,
 		quality?: string,
-		shape?: string,
 		format?: string
 	): Promise<GetImageResponse> {
 		let params = '';
-		if (shape || quality || format) {
+		if (quality || format) {
 			const array = [];
-			if (shape) array.push(`shape=${shape}`);
 			if (quality) array.push(`quality=${quality}`);
-			if (format) array.push(`format=${format}`);
+			if (format) array.push(`output_format=${format}`);
 			params = `?${array.join('&')}`;
 		}
 		return this.fetchAPI(`preview/image/${fileId}/${area}/${params}`, RequestType.GET);
@@ -65,15 +63,13 @@ class AttachmentsApi extends BaseAPI implements IAttachmentsApi {
 		fileId: string,
 		area: string,
 		quality?: string,
-		shape?: string,
 		format?: string
 	): string => {
 		let params = '';
-		if (shape || quality || format) {
+		if (quality || format) {
 			const array = [];
-			if (shape) array.push(`shape=${shape}`);
 			if (quality) array.push(`quality=${quality}`);
-			if (format) array.push(`format=${format}`);
+			if (format) array.push(`output_format=${format}`);
 			params = `?${array.join('&')}`;
 		}
 		return `${window.document.location.origin}/services/chats/preview/image/${fileId}/${area}/${params}`;
@@ -83,15 +79,15 @@ class AttachmentsApi extends BaseAPI implements IAttachmentsApi {
 		fileId: string,
 		area: string,
 		quality?: string,
-		shape?: string,
-		format?: string
+		format?: string,
+		shape?: string
 	): Promise<GetImageThumbnailResponse> {
 		let params = '';
 		if (shape || quality || format) {
 			const array = [];
-			if (shape) array.push(`shape=${shape}`);
 			if (quality) array.push(`quality=${quality}`);
-			if (format) array.push(`format=${format}`);
+			if (format) array.push(`output_format=${format}`);
+			if (shape) array.push(`shape=${shape}`);
 			params = `?${array.join('&')}`;
 		}
 		return this.fetchAPI(`preview/image/${fileId}/${area}/thumbnail/${params}`, RequestType.GET);
@@ -101,15 +97,15 @@ class AttachmentsApi extends BaseAPI implements IAttachmentsApi {
 		fileId: string,
 		area: string,
 		quality?: string,
-		shape?: string,
-		format?: string
+		format?: string,
+		shape?: string
 	): string => {
 		let params = '';
 		if (shape || quality || format) {
 			const array = [];
-			if (shape) array.push(`shape=${shape}`);
 			if (quality) array.push(`quality=${quality}`);
-			if (format) array.push(`format=${format}`);
+			if (format) array.push(`output_format=${format}`);
+			if (shape) array.push(`shape=${shape}`);
 			params = `?${array.join('&')}`;
 		}
 		return `${window.document.location.origin}/services/chats/preview/image/${fileId}/${area}/thumbnail/${params}`;
@@ -153,7 +149,7 @@ class AttachmentsApi extends BaseAPI implements IAttachmentsApi {
 			const array = [];
 			if (shape) array.push(`shape=${shape}`);
 			if (quality) array.push(`quality=${quality}`);
-			if (format) array.push(`format=${format}`);
+			if (format) array.push(`output_format=${format}`);
 			params = `?${array.join('&')}`;
 		}
 		return this.fetchAPI(`preview/pdf/${fileId}/${area}/thumbnail/${params}`, RequestType.GET);
@@ -171,7 +167,7 @@ class AttachmentsApi extends BaseAPI implements IAttachmentsApi {
 			const array = [];
 			if (shape) array.push(`shape=${shape}`);
 			if (quality) array.push(`quality=${quality}`);
-			if (format) array.push(`format=${format}`);
+			if (format) array.push(`output_format=${format}`);
 			params = `?${array.join('&')}`;
 		}
 		return `${window.document.location.origin}/services/chats/preview/pdf/${fileId}/${area}/thumbnail/${params}`;
