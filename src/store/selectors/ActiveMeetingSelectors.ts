@@ -27,3 +27,9 @@ export const getMeetingViewSelected = (store: RootStore, meetingId: string): Mee
 
 export const getLocalVideoSteam = (store: RootStore, meetingId: string): MediaStream | undefined =>
 	store.activeMeeting[meetingId]?.localStreams?.video || undefined;
+
+export const getSelectedAudioDeviceId = (store: RootStore, meetingId: string): string | undefined =>
+	store.activeMeeting[meetingId]?.localStreams?.selectedAudioDeviceId || undefined;
+
+export const getSelectedVideoDeviceId = (store: RootStore, meetingId: string): string | undefined =>
+	store.activeMeeting[meetingId]?.localStreams?.selectedVideoDeviceId || undefined;

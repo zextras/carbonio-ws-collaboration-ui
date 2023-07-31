@@ -135,10 +135,18 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 			'AM/SET_AUDIO_CONN'
 		);
 	},
-	createVideoOutConn: (meetingId: string, peerConnectionConfig: PeerConnConfig): void => {
+	createVideoOutConn: (
+		meetingId: string,
+		peerConnectionConfig: PeerConnConfig,
+		selectedVideoDeviceId?: string
+	): void => {
 		set(
 			produce((draft: RootStore) => {
-				const videoOutConn = new VideoOutConnection(peerConnectionConfig, meetingId);
+				const videoOutConn = new VideoOutConnection(
+					peerConnectionConfig,
+					meetingId,
+					selectedVideoDeviceId
+				);
 				if (!draft.activeMeeting[meetingId].videoOutConn) {
 					draft.activeMeeting[meetingId].videoOutConn = videoOutConn;
 				}
@@ -224,6 +232,32 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 			}),
 			false,
 			'AM/SET_LOCAL_STREAM'
+		);
+	},
+	setSelectedDeviceId: (meetingId: string, streamType: STREAM_TYPE, deviceId: string): void => {
+		set(
+			produce((draft: RootStore) => {
+				if (!draft.activeMeeting[meetingId]?.localStreams) {
+					if (streamType === STREAM_TYPE.AUDIO) {
+						draft.activeMeeting[meetingId].localStreams = {
+							...draft.activeMeeting[meetingId].localStreams,
+							selectedAudioDeviceId: deviceId
+						};
+					} else {
+						draft.activeMeeting[meetingId].localStreams = {
+							...draft.activeMeeting[meetingId].localStreams,
+							selectedVideoDeviceId: deviceId
+						};
+					}
+				} else {
+					draft.activeMeeting[meetingId].localStreams = {
+						[streamType === STREAM_TYPE.AUDIO ? 'selectedAudioDeviceId' : 'selectedVideoDeviceId']:
+							deviceId
+					};
+				}
+			}),
+			false,
+			'AM/SET_SELECTED_DEVICE_ID'
 		);
 	}
 });

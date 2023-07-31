@@ -12,9 +12,12 @@ import styled, { FlattenSimpleInterpolation } from 'styled-components';
 
 import useRouting, { PAGE_INFO_TYPE } from '../../../../hooks/useRouting';
 import { MeetingsApi } from '../../../../network';
-import { getMeetingViewSelected } from '../../../../store/selectors/ActiveMeetingSelectors';
+import {
+	getMeetingViewSelected,
+	getSelectedAudioDeviceId
+} from '../../../../store/selectors/ActiveMeetingSelectors';
 import useStore from '../../../../store/Store';
-import { MeetingViewType } from '../../../../types/store/ActiveMeetingTypes';
+import { MeetingViewType, STREAM_TYPE } from '../../../../types/store/ActiveMeetingTypes';
 import { getAudioStream } from '../../../../utils/UserMediaManager';
 
 const ActionsWrapper = styled(Container)`
@@ -39,7 +42,9 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 	const { meetingId }: Record<string, string> = useParams();
 
 	const meetingViewSelected = useStore((store) => getMeetingViewSelected(store, meetingId));
+	const selectedAudioDeviceId = useStore((store) => getSelectedAudioDeviceId(store, meetingId));
 	const setMeetingViewSelected = useStore((store) => store.setMeetingViewSelected);
+	const setSelectedDeviceId = useStore((store) => store.setSelectedDeviceId);
 	const closeBidirectionalAudioConn = useStore((store) => store.closeBidirectionalAudioConn);
 	const bidirectionalAudioConn = useStore(
 		(store) => store.activeMeeting[meetingId].bidirectionalAudioConn
@@ -51,7 +56,6 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 	const [audioStatus, setAudioStatus] = useState<boolean>(false);
 	const [shareStatus, setShareStatus] = useState<boolean>(false);
 	const [audioMediaList, setAudioMediaList] = useState<[] | MediaDeviceInfo[]>([]);
-	const [selectedAudioDeviceId, setSelectedAudioDeviceId] = useState<undefined | string>(undefined);
 	let timeout: string | number | NodeJS.Timeout | undefined;
 
 	const handleHoverMouseMove = useCallback(
@@ -140,7 +144,7 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 				id: `device-${i}`,
 				label: audioItem.label ? audioItem.label : `device-${i}`,
 				onClick: (): void => {
-					setSelectedAudioDeviceId(audioItem.deviceId);
+					setSelectedDeviceId(meetingId, STREAM_TYPE.AUDIO, audioItem.deviceId);
 					getAudioStream(true, true, audioItem.deviceId).then((stream) => {
 						bidirectionalAudioConn?.updateLocalStreamTrack(stream);
 					});
@@ -152,7 +156,7 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 				},
 				value: audioItem.deviceId
 			})),
-		[audioMediaList, audioStatus, bidirectionalAudioConn, meetingId]
+		[audioMediaList, audioStatus, bidirectionalAudioConn, meetingId, setSelectedDeviceId]
 	);
 
 	useEffect(() => {
