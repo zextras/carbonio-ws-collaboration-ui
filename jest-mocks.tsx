@@ -77,6 +77,8 @@ jest.mock('@zextras/carbonio-shell-ui', () => ({
 	})
 }));
 
+export const RTCPeerConnection: jest.Mock = jest.fn();
+
 // MOCKED USEROUTING
 export const mockGoToRoomPage: jest.Mock = jest.fn();
 export const mockGoToMainPage: jest.Mock = jest.fn();
@@ -302,4 +304,43 @@ Object.defineProperty(window, 'crypto', {
 	value: {
 		getRandomValues: (arr: string[]) => crypto.randomBytes(arr.length)
 	}
+});
+
+Object.defineProperty(window, 'RTCPeerConnection', {
+	value: jest.fn(function RTCPeerConnectionMock() {
+		return {
+			addTrack: jest.fn()
+		};
+	})
+});
+
+Object.defineProperty(window, 'AudioContext', {
+	writable: true,
+	value: jest.fn(function AudioContextMock() {
+		return {
+			createOscillator: (): any => ({
+				connect: () => ({
+					stream: {
+						getAudioTracks: () => [MediaStream]
+					}
+				}),
+				start: jest.fn()
+			}),
+			createMediaStreamDestination: jest.fn()
+		};
+	})
+});
+
+Object.defineProperty(window, 'MediaStream', {
+	writable: true,
+	value: jest.fn(function MediaStreamMock() {
+		return {
+			stream: (): any => ({
+				getAudioTracks: jest.fn(),
+				addTrack: jest.fn()
+			}),
+			getAudioTracks: (): any[] => [MediaStream],
+			addTrack: jest.fn()
+		};
+	})
 });

@@ -10,8 +10,13 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { getMeetingSidebarStatus } from '../../../../store/selectors/ActiveMeetingSelectors';
+import {
+	getLocalVideoSteam,
+	getMeetingSidebarStatus
+} from '../../../../store/selectors/ActiveMeetingSelectors';
 import useStore from '../../../../store/Store';
+import { STREAM_TYPE } from '../../../../types/store/ActiveMeetingTypes';
+import { getVideoStream } from '../../../../utils/UserMediaManager';
 
 const FaceToFace = styled(Container)`
 	position: relative;
@@ -54,11 +59,12 @@ const FaceToFaceMode = (): ReactElement => {
 	);
 
 	const { meetingId }: Record<string, string> = useParams();
+	const setLocalStreams = useStore((store) => store.setLocalStreams);
+	const localVideoStream = useStore((store) => getLocalVideoSteam(store, meetingId));
 	const sidebarStatus: boolean | undefined = useStore((store) =>
 		getMeetingSidebarStatus(store, meetingId)
 	);
 
-	const [testLocalStream, setTestLocalStream] = useState<null | MediaStream>(null);
 	const [centralStream, setCentralStream] = useState<null | MediaStream>(null);
 	const [centralTileSize, setCentralTileSize] = useState({ tileHeight: '0', tileWidth: '0' });
 
@@ -90,26 +96,18 @@ const FaceToFaceMode = (): ReactElement => {
 	useEffect(() => getSizeOfCentralTile(), [faceToFaceRef, getSizeOfCentralTile, sidebarStatus]);
 
 	useEffect(() => {
-		navigator.mediaDevices
-			.getUserMedia({
-				// video: { aspectRatio: 1.618 }
-				video: { aspectRatio: 1.777 }
-			})
-			.then((stream: MediaStream) => {
-				setTestLocalStream(stream);
-				setCentralStream(stream);
-				console.debug(stream);
-			})
-			.catch((err) => {
-				console.error('Error while requesting video track', err);
-			});
-	}, []);
+		getVideoStream().then((stream) => {
+			setLocalStreams(meetingId, STREAM_TYPE.VIDEO, stream);
+			setCentralStream(stream);
+			console.debug(stream);
+		});
+	}, [meetingId, setLocalStreams]);
 
 	useEffect(() => {
-		if (streamRef != null && streamRef.current != null && testLocalStream != null) {
-			streamRef.current.srcObject = testLocalStream;
+		if (streamRef != null && streamRef.current != null && localVideoStream != null) {
+			streamRef.current.srcObject = localVideoStream;
 		}
-	}, [testLocalStream]);
+	}, [localVideoStream]);
 
 	useEffect(() => {
 		if (streamRef2 != null && streamRef2.current != null && centralStream != null) {

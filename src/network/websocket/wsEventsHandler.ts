@@ -246,7 +246,42 @@ export function wsEventsHandler(event: WsEvent): void {
 			}
 			break;
 		}
+		// TODO AUDIO ANSWER
+		// case WsEventType.AUDIO_ANSWER: {
+		// state.activeMeeting[event.meetingId].bidirectionalAudioConn.handleRemoteAnswer();
+		// break;
+		// }
+		// TODO VIDEO_IN OFFER
+		// case WsEventType.VIDEO_IN_OFFER: {
+		// state.activeMeeting[event.meetingId].videoIn.handleRemoteOffer();
+		// break;
+		// }
+		// TODO SHARE OFFER
+		// case WsEventType.MEETING_SCREEN_STREAM_CLOSED: {
+		// state.activeMeeting[event.meetingId].bidirectionalAudioConn.;
+		// break;
+		// }
 		default:
 			wsDebug('Unhandled event', event);
+	}
+	// TODO REPLACE WITH NEW MEETINGS EVENTS
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore
+	if (event.type === 8) {
+		console.log('TEST ANSWER');
+		console.log(event);
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore
+		if (event.event.jsep.type === 'ANSWER') {
+			console.log('IMMA ANSWER', state.activeMeeting);
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore
+			state.activeMeeting[event.meeting_id].bidirectionalAudioConn.handleRemoteAnswer({
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+				// @ts-ignore
+				...event.event.jsep,
+				type: 'answer'
+			});
+		}
 	}
 }

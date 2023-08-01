@@ -6,7 +6,9 @@
 
 import { JoinSettings, MeetingUser } from '../models/meetingBeTypes';
 import {
+	CreateAudioOfferResponse,
 	CreateMeetingResponse,
+	CreateVideoOfferResponse,
 	DeleteMeetingResponse,
 	GetMeetingResponse,
 	JoinMeetingResponse,
@@ -54,6 +56,11 @@ interface IMeetingsApi {
 		meetingId: string,
 		enabled: boolean
 	): Promise<UpdateScreenStreamStatusResponse>;
+	createAudioOffer(meetingId: string, sdpOffer: string): Promise<CreateAudioOfferResponse>;
+	createVideoOffer(
+		meetingId: string,
+		sdpOffer: RTCSessionDescriptionInit
+	): Promise<CreateVideoOfferResponse>;
 }
 
 export default IMeetingsApi;
