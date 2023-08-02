@@ -23,4 +23,5 @@ export type AdditionalHeaders = {
 	description?: string;
 	messageId?: string;
 	replyId?: string;
+	area?: string;
 };

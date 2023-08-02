@@ -356,13 +356,15 @@ describe('Rooms API', () => {
 		// Send addRoomAttachments request
 		const testFile = new File([], 'file.pdf', { type: 'application/pdf' });
 		const { signal } = new AbortController();
-		await roomsApi.addRoomAttachment('roomId', testFile, {}, signal);
+		const area = '0x0';
+		await roomsApi.addRoomAttachment('roomId', testFile, {}, area, signal);
 
 		// Set appropriate headers
 		const headers = new Headers();
 		headers.append('fileName', '\\u0066\\u0069\\u006c\\u0065\\u002e\\u0070\\u0064\\u0066'); // Unicode of 'file.pdf'
 		headers.append('mimeType', testFile.type);
 		headers.append('messageId', '00000000-0000-4000-8000-000000000000');
+		headers.append('area', area);
 
 		// Check if fetch is called with the correct parameters
 		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/rooms/roomId/attachments`, {
@@ -377,10 +379,12 @@ describe('Rooms API', () => {
 		// Send addRoomAttachments request
 		const testFile = new File([], 'file.pdf', { type: 'application/pdf' });
 		const { signal } = new AbortController();
+		const area = '0x0';
 		await roomsApi.addRoomAttachment(
 			'roomId',
 			testFile,
 			{ description: 'description', replyId: 'stanzaId' },
+			area,
 			signal
 		);
 
@@ -394,6 +398,7 @@ describe('Rooms API', () => {
 		); // Unicode of 'description'
 		headers.append('replyId', 'stanzaId');
 		headers.append('messageId', '00000000-0000-4000-8000-000000000000');
+		headers.append('area', area);
 
 		// Check if fetch is called with the correct parameters
 		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/rooms/roomId/attachments`, {

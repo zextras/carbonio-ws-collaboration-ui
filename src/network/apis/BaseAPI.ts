@@ -67,6 +67,7 @@ export default abstract class BaseAPI implements IBaseAPI {
 						headers.append('description', charToUnicode(optionalFields.description));
 					optionalFields.messageId && headers.append('messageId', optionalFields.messageId);
 					optionalFields.replyId && headers.append('replyId', optionalFields.replyId);
+					optionalFields.area && headers.append('area', optionalFields.area);
 				}
 
 				// Add sessionId to headers only if it is already defined

@@ -41,7 +41,8 @@ describe('Attachment view', () => {
 			id: 'pngAttachmentId',
 			name: 'image.png',
 			mimeType: 'image/png',
-			size: 21412
+			size: 21412,
+			area: '0x0'
 		};
 		mockedGetImageThumbnailURL.mockReturnValue('mocked-url');
 		setup(<AttachmentView attachment={imageAttachment} from={'from'} />);
@@ -50,11 +51,13 @@ describe('Attachment view', () => {
 	});
 
 	test('Hover on attachment visualization', async () => {
+		const area = '0x0';
 		const imageAttachment: AttachmentMessageType = {
 			id: 'pngAttachmentId',
 			name: 'image.png',
 			mimeType: 'image/png',
-			size: 21412
+			size: 21412,
+			area
 		};
 		mockedGetImageThumbnailURL.mockReturnValue('mocked-url');
 		const { user } = setup(<AttachmentView attachment={imageAttachment} from={'from'} />);
@@ -64,11 +67,13 @@ describe('Attachment view', () => {
 	});
 
 	test('Image visualization with error on preview', async () => {
+		const area = '0x0';
 		const imageAttachment: AttachmentMessageType = {
 			id: 'pngAttachmentId',
 			name: 'image.png',
 			mimeType: 'image/png',
-			size: 21412
+			size: 21412,
+			area
 		};
 		mockedGetImageThumbnailURL.mockReturnValue('image.jpg');
 		setup(<AttachmentView attachment={imageAttachment} from={'from'} />);

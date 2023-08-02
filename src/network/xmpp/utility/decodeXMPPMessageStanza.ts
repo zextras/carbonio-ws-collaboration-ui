@@ -191,11 +191,15 @@ export function decodeXMPPMessageStanza(
 				const filename = Strophe.getText(getRequiredTagElement(x, 'filename'));
 				const fileMimeType = Strophe.getText(getRequiredTagElement(x, 'mime-type'));
 				const fileSize = Strophe.getText(getRequiredTagElement(x, 'size'));
+
+				const area = getTagElement(x, 'area') ? Strophe.getText(getTagElement(x, 'area')) : '0x0';
+
 				attachment = {
 					id: attachmentId,
 					name: unicodeToChar(filename || ''),
 					mimeType: fileMimeType || '',
-					size: fileSize || 0
+					size: fileSize || 0,
+					area
 				};
 
 				// Text ad description of the attachment has to be decoded

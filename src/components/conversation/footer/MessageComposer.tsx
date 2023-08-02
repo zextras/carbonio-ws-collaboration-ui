@@ -5,13 +5,13 @@
  */
 
 import {
-	IconButton,
 	Container,
-	Tooltip,
+	CreateSnackbarFn,
+	IconButton,
 	Padding,
 	SnackbarManagerContext,
-	CreateSnackbarFn,
-	Spinner
+	Spinner,
+	Tooltip
 } from '@zextras/carbonio-design-system';
 import { debounce, find, forEach, map, throttle } from 'lodash';
 import React, {
@@ -160,32 +160,54 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 	): Promise<AddRoomAttachmentResponse | void> => {
 		const fileName = file.file.name;
 		const { signal } = controller;
+
 		// Send as reply only the first file of the array
 		const sendAsReply = filesToUploadArray && file.fileId === filesToUploadArray[0].fileId;
-		return RoomsApi.addRoomAttachment(
-			roomId,
-			file.file,
-			{
-				description: file.description,
-				replyId: sendAsReply ? referenceMessage?.stanzaId : undefined
-			},
-			signal
-		).catch((reason: DOMException) => {
-			if (reason.name !== 'AbortError') {
-				const errorString = t(
-					'attachments.errorUploadingFile',
-					`Something went wrong uploading ${fileName}`,
-					{ file: fileName }
+
+		const getImageSize = (url: string): Promise<{ width: number; height: number }> =>
+			new Promise((resolve) => {
+				const img = new Image();
+
+				img.addEventListener(
+					'load',
+					() => {
+						resolve({ width: img.naturalWidth, height: img.naturalHeight });
+					},
+					{ once: true }
 				);
-				createSnackbar({
-					key: new Date().toLocaleString(),
-					type: 'error',
-					label: errorString,
-					actionLabel: 'UNDERSTOOD',
-					disableAutoHide: true
+
+				img.src = url;
+			});
+
+		return getImageSize(file.localUrl)
+			.then((res) => {
+				RoomsApi.addRoomAttachment(
+					roomId,
+					file.file,
+					{
+						description: file.description,
+						replyId: sendAsReply ? referenceMessage?.stanzaId : undefined
+					},
+					`${res.width}x${res.height}`,
+					signal
+				).catch((reason: DOMException) => {
+					if (reason.name !== 'AbortError') {
+						const errorString = t(
+							'attachments.errorUploadingFile',
+							`Something went wrong uploading ${fileName}`,
+							{ file: fileName }
+						);
+						createSnackbar({
+							key: new Date().toLocaleString(),
+							type: 'error',
+							label: errorString,
+							actionLabel: 'UNDERSTOOD',
+							disableAutoHide: true
+						});
+					}
 				});
-			}
-		});
+			})
+			.catch();
 	};
 
 	// Send isWriting every 3 seconds

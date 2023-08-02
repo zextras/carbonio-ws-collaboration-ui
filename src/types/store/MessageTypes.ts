@@ -90,6 +90,7 @@ export type AttachmentMessageType = {
 	name: string;
 	mimeType: string;
 	size: number;
+	area?: string;
 };
 
 export type PlaceholderFields = {
