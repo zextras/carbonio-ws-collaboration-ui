@@ -14,7 +14,7 @@ const AccessMeetingPageView = (): ReactElement => {
 	const roomId: string = useMemo(() => document.location.pathname.split('external/')[1], []);
 
 	return (
-		<Container background={'gray0'}>{roomId && <AccessMeetingModal roomId={roomId} />}</Container>
+		<Container background={'gray1'}>{roomId && <AccessMeetingModal roomId={roomId} />}</Container>
 	);
 };
 

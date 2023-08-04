@@ -58,6 +58,10 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 	const [audioMediaList, setAudioMediaList] = useState<[] | MediaDeviceInfo[]>([]);
 	let timeout: string | number | NodeJS.Timeout | undefined;
 
+	useEffect(() => {
+		if (selectedAudioDeviceId !== undefined) setAudioStatus(true);
+	}, [selectedAudioDeviceId]);
+
 	const handleHoverMouseMove = useCallback(
 		(e) => {
 			clearTimeout(timeout);

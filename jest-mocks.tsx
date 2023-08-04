@@ -279,15 +279,36 @@ jest.mock('./src/network', () => ({
 	}
 }));
 
-export const mockUseParams = jest.fn();
+// MOCK NAVIGATOR
+const mockGetUserMedia = jest.fn(
+	async () =>
+		new Promise<void>((resolve) => {
+			resolve();
+		})
+);
+const mockEnumerateDevices = jest.fn(
+	async () =>
+		new Promise<void>((resolve) => {
+			resolve();
+		})
+);
 
+Object.defineProperty(global.navigator, 'mediaDevices', {
+	value: {
+		getUserMedia: mockGetUserMedia,
+		enumerateDevices: mockEnumerateDevices,
+		addEventListener: jest.fn(),
+		removeEventListener: jest.fn()
+	}
+});
+
+export const mockUseParams = jest.fn();
 jest.mock('react-router', () => ({
 	...jest.requireActual('react-router'),
 	useParams: mockUseParams
 }));
 
 export const fetchResponse: jest.Mock = jest.fn(() => ({}));
-
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 global.fetch = jest.fn(() =>
