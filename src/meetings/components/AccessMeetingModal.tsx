@@ -18,7 +18,7 @@ import React, { ReactElement, useCallback, useEffect, useMemo, useRef, useState 
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import useRouting from '../../hooks/useRouting';
+import useRouting, { PAGE_INFO_TYPE } from '../../hooks/useRouting';
 import { MeetingsApi } from '../../network';
 import { PeerConnConfig } from '../../network/webRTC/PeerConnConfig';
 import { getMeeting } from '../../store/selectors/MeetingSelectors';
@@ -47,6 +47,11 @@ const VideoEl = styled.video`
 	max-width: 100%;
 `;
 
+const CustomModal = styled(Modal)`
+	cursor: default;
+	user-select: none;
+`;
+
 const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement => {
 	const [t] = useTranslation();
 	const enter = t('meeting.startModal.enter', 'Enter');
@@ -56,6 +61,7 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 	const enableVideoLabel = t('meeting.interactions.enableVideo', 'Enable Video');
 	const playMicLabel = t('meeting.interactions.playMic', 'Start microphone testing');
 	const stopMicLabel = t('meeting.interactions.stopMic', 'Stop microphone testing');
+	const closeModalTooltip = t('meeting.interactions.closeModal', 'Close');
 	const joinMeetingDescription = t(
 		'meeting.joinMeetingDescription',
 		'How do you want to join this meeting?'
@@ -78,7 +84,7 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 		{ meetingTitle: conversationTitle }
 	);
 
-	const { goToMeetingPage } = useRouting();
+	const { goToMeetingPage, goToInfoPage } = useRouting();
 
 	const roomType = useStore((store) => getRoomTypeSelector(store, roomId));
 	const meeting = useStore((store) => getMeeting(store, roomId));
@@ -253,6 +259,10 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 		setVideoPlayerTestMuted((prevState) => !prevState);
 	}, []);
 
+	const onCloseHandler = useCallback(() => {
+		goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED);
+	}, [goToInfoPage]);
+
 	const redirectToMeetingAndInitWebRTC = useCallback(
 		(meetingId: string): void => {
 			const peerConnectionConfig = new PeerConnConfig();
@@ -342,13 +352,14 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 	);
 
 	return (
-		<Modal
+		<CustomModal
 			background={'text'}
 			open
 			size="small"
 			title={modalTitle}
-			// onClick={stopProp}
-			showCloseIcon={false}
+			showCloseIcon
+			onClose={onCloseHandler}
+			closeIconTooltip={closeModalTooltip}
 			customFooter={modalFooter}
 		>
 			<Padding top="small" />
@@ -415,7 +426,7 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 				<Text size="small">{setInputDescription}</Text>
 				<Padding bottom="1rem" />
 			</Container>
-		</Modal>
+		</CustomModal>
 	);
 };
 

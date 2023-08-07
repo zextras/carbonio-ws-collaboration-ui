@@ -118,6 +118,7 @@
             "audioEnabled": "Audio enabled",
             "cameraDisabled": "Camera disabled",
             "cameraEnabled": "Camera enabled",
+            "closeModal": "Close",
             "disableAudio": "Disable Audio",
             "disableVideo": "Disable Video",
             "enableAudio": "Enable Audio",
