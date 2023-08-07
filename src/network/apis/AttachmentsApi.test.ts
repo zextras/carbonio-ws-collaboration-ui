@@ -5,6 +5,7 @@
  */
 
 import attachmentsApi from './AttachmentsApi';
+import { ImageQuality, ImageShape, ImageType } from '../../types/network/apis/IAttachmentsApi';
 
 describe('Attachments API', () => {
 	test('deleteAttachment is called correctly', async () => {
@@ -62,23 +63,7 @@ describe('Attachments API', () => {
 
 	test('getImagePreview is called correctly', async () => {
 		// Send getAttachmentPreview request
-		await attachmentsApi.getImagePreview('fileId', '0x0');
-
-		// Set appropriate headers
-		const headers = new Headers();
-		headers.append('Content-Type', 'application/json');
-
-		// Check if fetch is called with the correct parameters
-		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/preview/image/fileId/0x0/`, {
-			headers,
-			method: 'GET',
-			body: undefined
-		});
-	});
-
-	test('getImageThumbnail is called correctly', async () => {
-		// Send getAttachmentPreview request
-		await attachmentsApi.getImageThumbnail('fileId', '0x0');
+		await attachmentsApi.getImagePreview('fileId', '0x0', ImageQuality.LOW, ImageType.PNG);
 
 		// Set appropriate headers
 		const headers = new Headers();
@@ -86,7 +71,32 @@ describe('Attachments API', () => {
 
 		// Check if fetch is called with the correct parameters
 		expect(global.fetch).toHaveBeenCalledWith(
-			`/services/chats/preview/image/fileId/0x0/thumbnail/`,
+			`/services/chats/preview/image/fileId/0x0/?quality=Low&output_format=Png`,
+			{
+				headers,
+				method: 'GET',
+				body: undefined
+			}
+		);
+	});
+
+	test('getImageThumbnail is called correctly', async () => {
+		// Send getAttachmentPreview request
+		await attachmentsApi.getImageThumbnail(
+			'fileId',
+			'0x0',
+			ImageQuality.HIGH,
+			ImageType.JPEG,
+			ImageShape.ROUNDED
+		);
+
+		// Set appropriate headers
+		const headers = new Headers();
+		headers.append('Content-Type', 'application/json');
+
+		// Check if fetch is called with the correct parameters
+		expect(global.fetch).toHaveBeenCalledWith(
+			`/services/chats/preview/image/fileId/0x0/thumbnail/?quality=High&output_format=Jpeg&shape=Rounded`,
 			{
 				headers,
 				method: 'GET',
@@ -97,33 +107,45 @@ describe('Attachments API', () => {
 
 	test('getPdfPreview is called correctly', async () => {
 		// Send getAttachmentPreview request
-		await attachmentsApi.getPdfPreview('fileId');
+		await attachmentsApi.getPdfPreview('fileId', 1, 4);
 
 		// Set appropriate headers
 		const headers = new Headers();
 		headers.append('Content-Type', 'application/json');
 
 		// Check if fetch is called with the correct parameters
-		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/preview/pdf/fileId/`, {
-			headers,
-			method: 'GET',
-			body: undefined
-		});
+		expect(global.fetch).toHaveBeenCalledWith(
+			`/services/chats/preview/pdf/fileId/?first_page=1&last_page=4`,
+			{
+				headers,
+				method: 'GET',
+				body: undefined
+			}
+		);
 	});
 
 	test('getPdfThumbnail is called correctly', async () => {
 		// Send getAttachmentPreview request
-		await attachmentsApi.getPdfThumbnail('fileId', '0x0');
+		await attachmentsApi.getPdfThumbnail(
+			'fileId',
+			'0x0',
+			ImageQuality.LOWEST,
+			ImageShape.RECTANGULAR,
+			ImageType.PNG
+		);
 
 		// Set appropriate headers
 		const headers = new Headers();
 		headers.append('Content-Type', 'application/json');
 
 		// Check if fetch is called with the correct parameters
-		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/preview/pdf/fileId/0x0/thumbnail/`, {
-			headers,
-			method: 'GET',
-			body: undefined
-		});
+		expect(global.fetch).toHaveBeenCalledWith(
+			`/services/chats/preview/pdf/fileId/0x0/thumbnail/?shape=Rectangular&quality=Lowest&output_format=Png`,
+			{
+				headers,
+				method: 'GET',
+				body: undefined
+			}
+		);
 	});
 });

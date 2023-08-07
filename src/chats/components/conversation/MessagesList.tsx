@@ -356,6 +356,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 						prevMessageIsFromSameSender={prevMessageIsFromSameSender}
 						nextMessageIsFromSameSender={nextMessageIsFromSameSender}
 						messageRef={messageRef}
+						messageListRef={messageListRef}
 						isFirstNewMessage={firstNewMessage === message.id}
 					/>
 				);

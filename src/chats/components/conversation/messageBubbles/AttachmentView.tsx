@@ -4,15 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import {
-	Container,
-	Icon,
-	IconButton,
-	Row,
-	Shimmer,
-	Text,
-	Tooltip
-} from '@zextras/carbonio-design-system';
+import { Container, Icon, IconButton, Row, Text, Tooltip } from '@zextras/carbonio-design-system';
+import { split } from 'lodash';
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -41,12 +34,6 @@ const CustomIconButton = styled(IconButton)`
 	background-color: rgba(255, 255, 255, 0);
 `;
 
-const CustomShimmerLogo = styled(Shimmer.Logo)`
-	min-width: 18.75rem;
-	width: 100%;
-	height: 15.625rem;
-`;
-
 const PreviewContainer = styled(Container)`
 	${({ isLoaded }): string => isLoaded && `background: black;`};
 	${({ previewError, theme }): string =>
@@ -61,9 +48,34 @@ const PreviewContainer = styled(Container)`
 		}
 	}
 `;
-const AttachmentImg = styled.img<{ isPreviewLoaded: boolean }>`
-	max-height: 15.625rem;
-	max-width: 100%;
+
+const PreviewErrorContainer = styled(Container)`
+	${({ imgWidth, maxWidth }): string | false =>
+		imgWidth === 0
+			? `width: ${maxWidth * 0.063}rem;`
+			: maxWidth === 0
+			? 'width: 100%'
+			: `width: min(${imgWidth * 0.063}rem, ${maxWidth * 0.063}rem);`};
+	${({ imgWidth, imgHeight }): string | false =>
+		imgWidth !== 0
+			? `aspect-ratio: ${imgWidth * 0.063}/${imgHeight * 0.063};`
+			: 'aspect-ratio: 1;'};
+	max-height: 37.5rem;
+`;
+
+const AttachmentImg = styled.img<{
+	isPreviewLoaded: boolean;
+	width: number;
+	height: number;
+}>`
+	${({ width, isPreviewLoaded }): string | false =>
+		width === 0 && !isPreviewLoaded && `width: fit-content;`};
+	${({ isPreviewLoaded }): string | false => isPreviewLoaded && `width: fit-content;`};
+	${({ height, isPreviewLoaded }): string | false =>
+		height * 0.063 >= 37.5 && isPreviewLoaded && `object-fit: contain;`};
+	max-width: ${({ width }): string => (width === 0 ? '100%' : `min(${width * 0.063}rem, 100%)`)};
+	max-height: 37.5rem;
+	height: fit-content;
 	mask-image: linear-gradient(
 		180deg,
 		rgba(0, 0, 0, 1) 0%,
@@ -78,7 +90,7 @@ const AttachmentImg = styled.img<{ isPreviewLoaded: boolean }>`
 			rgba(0, 0, 0, 0) 100%
 		);
 	}
-	display: ${({ isPreviewLoaded }): string => (isPreviewLoaded ? 'flex' : `none`)};
+	display: flex;
 `;
 
 const TextContainer = styled(Container)`
@@ -95,9 +107,15 @@ type AttachmentViewProps = {
 	attachment: AttachmentMessageType;
 	isMyMessage?: boolean;
 	from: string;
+	messageListRef?: React.MutableRefObject<HTMLDivElement | undefined>;
 };
 
-const AttachmentView: FC<AttachmentViewProps> = ({ attachment, from, isMyMessage = false }) => {
+const AttachmentView: FC<AttachmentViewProps> = ({
+	attachment,
+	from,
+	isMyMessage = false,
+	messageListRef
+}) => {
 	const [t] = useTranslation();
 
 	const downloadActionLabel = t('action.download', 'Download');
@@ -105,14 +123,38 @@ const AttachmentView: FC<AttachmentViewProps> = ({ attachment, from, isMyMessage
 
 	const senderIdentifier = useStore((store) => getUserName(store, from));
 
+	const dimensions = split(attachment.area, 'x');
+
 	const [isPreviewLoaded, setPreviewLoaded] = useState(false);
 	const [previewError, setPreviewError] = useState(false);
+	const [attachmentBubbleMaxWidth, setAttachmentBubbleMaxWidth] = useState(0);
 
 	// Reset preview state when attachment changes to request again preview
 	useEffect(() => {
 		setPreviewLoaded(false);
 		setPreviewError(false);
 	}, [attachment.id]);
+
+	const resizeHandler = useCallback(() => {
+		if (previewError && messageListRef) {
+			const relativeWidth = messageListRef.current?.clientWidth;
+			setAttachmentBubbleMaxWidth(relativeWidth !== undefined ? relativeWidth * 0.55 : 0);
+		} else setAttachmentBubbleMaxWidth(0);
+	}, [messageListRef, previewError]);
+
+	useEffect(() => {
+		if (previewError && messageListRef) {
+			const relativeWidth = messageListRef.current?.clientWidth;
+			setAttachmentBubbleMaxWidth(relativeWidth !== undefined ? relativeWidth * 0.55 : 0);
+		} else setAttachmentBubbleMaxWidth(0);
+	}, [messageListRef, previewError]);
+
+	useEffect(() => {
+		window.addEventListener('resize', resizeHandler);
+		return () => {
+			window.removeEventListener('resize', resizeHandler);
+		};
+	}, [resizeHandler]);
 
 	const setLoaded = useCallback(() => setPreviewLoaded(true), []);
 	const setError = useCallback(() => {
@@ -158,7 +200,7 @@ const AttachmentView: FC<AttachmentViewProps> = ({ attachment, from, isMyMessage
 
 	const actionButtons = useMemo(
 		() => (
-			<HoverContainer>
+			<HoverContainer width="fit" height="fit">
 				<CustomContainer width="fit" height="fit" padding={{ all: 'small' }}>
 					<Container orientation="horizontal" style={{ gap: '0.625rem' }}>
 						<Tooltip label={previewActionLabel}>
@@ -190,18 +232,22 @@ const AttachmentView: FC<AttachmentViewProps> = ({ attachment, from, isMyMessage
 	if (previewURL) {
 		return (
 			<PreviewContainer
-				width={'fit'}
+				width={'fill'}
 				height={'fit'}
 				borderRadius="half"
 				isLoaded={isPreviewLoaded}
 				previewError={previewError}
 				data-testid="preview-container"
 			>
-				{!isPreviewLoaded && <CustomShimmerLogo />}
 				{previewError ? (
-					<Container background="gray5" width="15rem" height="11.87rem" maxWidth="100%">
+					<PreviewErrorContainer
+						background="gray5"
+						imgWidth={Number(dimensions[0])}
+						imgHeight={Number(dimensions[1])}
+						maxWidth={attachmentBubbleMaxWidth}
+					>
 						<Icon size="large" icon="Image" color="gray2" />
-					</Container>
+					</PreviewErrorContainer>
 				) : (
 					<>
 						{actionButtons}
@@ -211,6 +257,8 @@ const AttachmentView: FC<AttachmentViewProps> = ({ attachment, from, isMyMessage
 							onError={setError}
 							data-testid="attachmentImg"
 							isPreviewLoaded={isPreviewLoaded}
+							width={Number(dimensions[0])}
+							height={Number(dimensions[1])}
 						/>
 					</>
 				)}

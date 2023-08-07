@@ -23,6 +23,7 @@ import {
 	AffiliationMessage,
 	ConfigurationMessage,
 	MessageType,
+	OperationType,
 	TextMessage
 } from '../../../types/store/MessageTypes';
 import { RootStore } from '../../../types/store/StoreTypes';
@@ -104,7 +105,7 @@ const mockedConfigurationMessage: ConfigurationMessage = {
 	roomId: room.id,
 	date: 123456789,
 	type: MessageType.CONFIGURATION_MSG,
-	operation: 'roomPictureUpdated',
+	operation: OperationType.ROOM_PICTURE_UPDATED,
 	value: room.id,
 	from: user2Be.id
 };

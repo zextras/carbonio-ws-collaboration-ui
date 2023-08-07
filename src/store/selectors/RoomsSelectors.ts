@@ -44,7 +44,6 @@ export const getRoomNameSelector = (state: RootStore, id: string): string => {
 
 export const getRoomTypeSelector = (state: RootStore, id: string): RoomType =>
 	state.rooms[id]?.type;
-
 export const getRoomDescriptionSelector = (state: RootStore, id: string): string =>
 	state.rooms[id]?.description || '';
 
