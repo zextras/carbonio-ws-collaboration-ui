@@ -15,10 +15,11 @@ export type WsMeetingEvent =
 	| MeetingDeletedEvent
 	| MeetingVideoStreamOpenedEvent
 	| MeetingVideoStreamClosedEvent
-	| MeetingAudioStreamOpenedEvent
+	| MeetingAudioStreamEnabledEvent
 	| MeetingAudioStreamClosedEvent
 	| MeetingScreenStreamOpenedEvent
-	| MeetingScreenStreamClosedEvent;
+	| MeetingScreenStreamClosedEvent
+	| MeetingMediaStreamChangedEvent;
 
 type BasicMeetingEvent = {
 	// id: event id
@@ -66,8 +67,8 @@ export type MeetingVideoStreamClosedEvent = BasicMeetingEvent & {
 	type: WsEventType.MEETING_VIDEO_STREAM_CLOSED;
 };
 
-export type MeetingAudioStreamOpenedEvent = BasicMeetingEvent & {
-	type: WsEventType.MEETING_AUDIO_STREAM_OPENED;
+export type MeetingAudioStreamEnabledEvent = BasicMeetingEvent & {
+	type: WsEventType.MEETING_AUDIO_STREAM_ENABLED;
 };
 
 export type MeetingAudioStreamClosedEvent = BasicMeetingEvent & {
@@ -80,4 +81,8 @@ export type MeetingScreenStreamOpenedEvent = BasicMeetingEvent & {
 
 export type MeetingScreenStreamClosedEvent = BasicMeetingEvent & {
 	type: WsEventType.MEETING_SCREEN_STREAM_CLOSED;
+};
+
+export type MeetingMediaStreamChangedEvent = BasicMeetingEvent & {
+	type: WsEventType.MEETING_MEDIA_STREAM_CHANGED;
 };

@@ -22,7 +22,7 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 	const addMeeting = useStore((store) => store.addMeeting);
 	const createBidirectionalAudioConn = useStore((store) => store.createBidirectionalAudioConn);
 	const createVideoOutConn = useStore((store) => store.createVideoOutConn);
-	// const createVideoInConn = useStore((store) => store.createVideoInConn);
+	const createVideoInConn = useStore((store) => store.createVideoInConn);
 
 	const [videoStreamEnabled, setVideoStreamEnabled] = useState(false);
 	const [audioStreamEnabled, setAudioStreamEnabled] = useState(false);
@@ -36,18 +36,19 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 		(meetingId: string): void => {
 			const peerConnectionConfig = new PeerConnConfig();
 			createBidirectionalAudioConn(meetingId, peerConnectionConfig, audioStreamEnabled);
-			// createVideoInConn(meetingId, peerConnectionConfig);
+			createVideoInConn(meetingId, peerConnectionConfig);
 			if (videoStreamEnabled) {
-				createVideoOutConn(meetingId, peerConnectionConfig);
+				createVideoOutConn(meetingId, peerConnectionConfig, videoStreamEnabled);
 			}
 			goToMeetingPage(meetingId);
 		},
 		[
 			createBidirectionalAudioConn,
-			createVideoOutConn,
-			goToMeetingPage,
+			audioStreamEnabled,
+			createVideoInConn,
 			videoStreamEnabled,
-			audioStreamEnabled
+			goToMeetingPage,
+			createVideoOutConn
 		]
 	);
 

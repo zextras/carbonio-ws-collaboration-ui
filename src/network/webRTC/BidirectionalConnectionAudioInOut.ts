@@ -64,8 +64,8 @@ export default class BidirectionalConnectionAudioInOut
 		this.updateRemoteStreamAudio();
 	};
 
-	handleOnNegotiationNeeded: (ev: Event) => void = (ev) => {
-		console.log('AudioInOut handleOnNegotiationNeeded ', ev);
+	handleOnNegotiationNeeded: (ev: Event) => void = (/* ev */) => {
+		// console.log('AudioInOut handleOnNegotiationNeeded ', ev);
 		this.peerConn.createOffer().then((RTCsessionDesc: any) => {
 			if (this.peerConn.signalingState === 'stable') {
 				this.peerConn
@@ -75,12 +75,12 @@ export default class BidirectionalConnectionAudioInOut
 		});
 	};
 
-	handleOnIceCandidate: (ev: Event) => void = (ev) => {
-		console.log('AudioInOut handleOnIceCandidate ', ev);
+	handleOnIceCandidate: (ev: Event) => void = (/* ev */) => {
+		// console.log('AudioInOut handleOnIceCandidate ', ev);
 	};
 
-	handleOnConnectionStateChange: (ev: Event) => void = (ev) => {
-		console.log('AudioInOut handleOnConnectionStateChange ', ev);
+	handleOnConnectionStateChange: (ev: Event) => void = (/* ev */) => {
+		// console.log('AudioInOut handleOnConnectionStateChange ', ev);
 	};
 
 	handleOnIceConnectionStateChange: (ev: Event) => void = (ev) => {
@@ -92,12 +92,12 @@ export default class BidirectionalConnectionAudioInOut
 		}
 	};
 
-	handleOnIceGatheringStateChange: (ev: Event) => void = (ev) => {
-		console.log('AudioInOut handleOnIceGatheringStateChange ', ev);
+	handleOnIceGatheringStateChange: (ev: Event) => void = (/* ev */) => {
+		// console.log('AudioInOut handleOnIceGatheringStateChange ', ev);
 	};
 
-	handleOnSignalingStateChange: (ev: Event) => void = (ev) => {
-		console.log('AudioInOut handleOnSignalingStateChange ', ev);
+	handleOnSignalingStateChange: (ev: Event) => void = (/* ev */) => {
+		// console.log('AudioInOut handleOnSignalingStateChange ', ev);
 	};
 
 	handleLocalDescriptionSet = (

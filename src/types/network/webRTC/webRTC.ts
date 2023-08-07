@@ -35,5 +35,13 @@ export interface IBidirectionalConnectionAudioInOut extends IPeerConnection {
 
 export interface IVideoOutConnection extends IPeerConnection {
 	localStreamVideoOutTrack: MediaStreamTrack | null;
+	updateLocalStreamTrack(mediaStreamTrack: MediaStream): Promise<MediaStreamTrack>;
+	closePeerConnection: () => void;
+	closeRtpSenderTrack: () => void;
+}
+
+export interface IVideoInConnection {
+	peerConn: RTCPeerConnection;
+	meetingId: string;
 	closePeerConnection: () => void;
 }

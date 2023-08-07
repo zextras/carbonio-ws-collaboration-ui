@@ -15,8 +15,6 @@ import {
 	getMeetingSidebarStatus
 } from '../../../../store/selectors/ActiveMeetingSelectors';
 import useStore from '../../../../store/Store';
-import { STREAM_TYPE } from '../../../../types/store/ActiveMeetingTypes';
-import { getVideoStream } from '../../../../utils/UserMediaManager';
 
 const FaceToFace = styled(Container)`
 	position: relative;
@@ -59,7 +57,6 @@ const FaceToFaceMode = (): ReactElement => {
 	);
 
 	const { meetingId }: Record<string, string> = useParams();
-	const setLocalStreams = useStore((store) => store.setLocalStreams);
 	const localVideoStream = useStore((store) => getLocalVideoSteam(store, meetingId));
 	const sidebarStatus: boolean | undefined = useStore((store) =>
 		getMeetingSidebarStatus(store, meetingId)
@@ -96,16 +93,9 @@ const FaceToFaceMode = (): ReactElement => {
 	useEffect(() => getSizeOfCentralTile(), [faceToFaceRef, getSizeOfCentralTile, sidebarStatus]);
 
 	useEffect(() => {
-		getVideoStream().then((stream) => {
-			setLocalStreams(meetingId, STREAM_TYPE.VIDEO, stream);
-			setCentralStream(stream);
-			console.debug(stream);
-		});
-	}, [meetingId, setLocalStreams]);
-
-	useEffect(() => {
 		if (streamRef != null && streamRef.current != null && localVideoStream != null) {
 			streamRef.current.srcObject = localVideoStream;
+			setCentralStream(localVideoStream);
 		}
 	}, [localVideoStream]);
 

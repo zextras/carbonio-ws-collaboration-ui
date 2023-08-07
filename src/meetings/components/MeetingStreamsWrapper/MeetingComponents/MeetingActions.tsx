@@ -12,13 +12,22 @@ import styled, { FlattenSimpleInterpolation } from 'styled-components';
 
 import useRouting, { PAGE_INFO_TYPE } from '../../../../hooks/useRouting';
 import { MeetingsApi } from '../../../../network';
+import { PeerConnConfig } from '../../../../network/webRTC/PeerConnConfig';
 import {
 	getMeetingViewSelected,
-	getSelectedAudioDeviceId
+	getSelectedAudioDeviceId,
+	getSelectedVideoDeviceId
 } from '../../../../store/selectors/ActiveMeetingSelectors';
+import {
+	getMeetingByMeetingId,
+	getParticipantAudioStatusByMeetingId,
+	getParticipantScreenStatusByMeetingId,
+	getParticipantVideoStatusByMeetingId
+} from '../../../../store/selectors/MeetingSelectors';
+import { getUserId } from '../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../store/Store';
 import { MeetingViewType, STREAM_TYPE } from '../../../../types/store/ActiveMeetingTypes';
-import { getAudioStream } from '../../../../utils/UserMediaManager';
+import { getAudioStream, getVideoStream } from '../../../../utils/UserMediaManager';
 
 const ActionsWrapper = styled(Container)`
 	position: absolute;
@@ -41,21 +50,38 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 	const { goToInfoPage } = useRouting();
 	const { meetingId }: Record<string, string> = useParams();
 
-	const meetingViewSelected = useStore((store) => getMeetingViewSelected(store, meetingId));
-	const selectedAudioDeviceId = useStore((store) => getSelectedAudioDeviceId(store, meetingId));
+	const setLocalStreams = useStore((store) => store.setLocalStreams);
+	const removeLocalStreams = useStore((store) => store.removeLocalStreams);
+	const changeStreamStatus = useStore((store) => store.changeStreamStatus);
 	const setMeetingViewSelected = useStore((store) => store.setMeetingViewSelected);
 	const setSelectedDeviceId = useStore((store) => store.setSelectedDeviceId);
 	const closeBidirectionalAudioConn = useStore((store) => store.closeBidirectionalAudioConn);
+	const closeVideoOutConn = useStore((store) => store.closeVideoOutConn);
+	const deleteVideoOutConn = useStore((store) => store.deleteVideoOutConn);
+	const createVideoOutConn = useStore((store) => store.createVideoOutConn);
+	const myUserId = useStore(getUserId);
+	const meeting = useStore((store) => getMeetingByMeetingId(store, meetingId));
+	const audioStatus = useStore((store) =>
+		getParticipantAudioStatusByMeetingId(store, meeting?.roomId, myUserId)
+	);
+	const videoStatus = useStore((store) =>
+		getParticipantVideoStatusByMeetingId(store, meeting?.roomId, myUserId)
+	);
+	const shareStatus = useStore((store) =>
+		getParticipantScreenStatusByMeetingId(store, meeting?.roomId, myUserId)
+	);
+	const meetingViewSelected = useStore((store) => getMeetingViewSelected(store, meetingId));
+	const selectedAudioDeviceId = useStore((store) => getSelectedAudioDeviceId(store, meetingId));
+	const selectedVideoDeviceId = useStore((store) => getSelectedVideoDeviceId(store, meetingId));
+	const videoOutConn = useStore((store) => store.activeMeeting[meetingId].videoOutConn);
 	const bidirectionalAudioConn = useStore(
 		(store) => store.activeMeeting[meetingId].bidirectionalAudioConn
 	);
 
 	const [isHoovering, setIsHoovering] = useState<boolean>(false);
 	const [isHoverActions, setIsHoverActions] = useState<boolean>(false);
-	const [videoStatus, setVideoStatus] = useState<boolean>(false);
-	const [audioStatus, setAudioStatus] = useState<boolean>(false);
-	const [shareStatus, setShareStatus] = useState<boolean>(false);
 	const [audioMediaList, setAudioMediaList] = useState<[] | MediaDeviceInfo[]>([]);
+	const [videoMediaList, setVideoMediaList] = useState<[] | MediaDeviceInfo[]>([]);
 	let timeout: string | number | NodeJS.Timeout | undefined;
 
 	const handleHoverMouseMove = useCallback(
@@ -89,47 +115,80 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 	}, []);
 
 	const toggleVideoStream = useCallback(() => {
-		MeetingsApi.updateVideoStreamStatus(meetingId, !videoStatus).then(() =>
-			setVideoStatus(!videoStatus)
-		);
-	}, [videoStatus, meetingId]);
+		if (!videoStatus) {
+			if (!videoOutConn) {
+				const peerConnectionConfig = new PeerConnConfig();
+				createVideoOutConn(meetingId, peerConnectionConfig, true, selectedVideoDeviceId);
+			} else {
+				getVideoStream(selectedVideoDeviceId).then((stream) => {
+					videoOutConn?.updateLocalStreamTrack(stream).then(() => {
+						MeetingsApi.updateMediaOffer(meetingId, STREAM_TYPE.VIDEO, true).then();
+					});
+				});
+			}
+		} else {
+			// TODO ASK BE TO IMPROVE AND TEST IF IT IS POSSIBLE TO ALLOW NOT RECREATE THE CONNECTION BUT SIMPLY SET THE SOURCE TO ENABLED
+			// videoOutConn?.closeRtpSenderTrack();
+			closeVideoOutConn(meetingId);
+			deleteVideoOutConn(meetingId);
+			MeetingsApi.updateMediaOffer(meetingId, STREAM_TYPE.VIDEO, !videoStatus).then(() => {
+				if (myUserId != null) {
+					removeLocalStreams(meetingId, STREAM_TYPE.VIDEO);
+				}
+			});
+		}
+	}, [
+		videoStatus,
+		videoOutConn,
+		createVideoOutConn,
+		meetingId,
+		selectedVideoDeviceId,
+		closeVideoOutConn,
+		deleteVideoOutConn,
+		myUserId,
+		removeLocalStreams
+	]);
 
 	const toggleAudioStream = useCallback(() => {
 		if (!audioStatus) {
 			getAudioStream(true, true, selectedAudioDeviceId).then((stream) => {
 				bidirectionalAudioConn?.updateLocalStreamTrack(stream).then(() => {
-					MeetingsApi.updateAudioStreamStatus(meetingId, !audioStatus).then(() => {
-						setAudioStatus(!audioStatus);
-					});
+					MeetingsApi.updateAudioStreamStatus(meetingId, !audioStatus).then();
 				});
 			});
 		} else {
 			bidirectionalAudioConn?.closeRtpSenderTrack();
-			MeetingsApi.updateAudioStreamStatus(meetingId, !audioStatus).then(() =>
-				setAudioStatus(!audioStatus)
-			);
+			MeetingsApi.updateAudioStreamStatus(meetingId, !audioStatus).then();
 		}
 	}, [audioStatus, bidirectionalAudioConn, meetingId, selectedAudioDeviceId]);
 
 	const toggleShareStream = useCallback(() => {
-		MeetingsApi.updateScreenStreamStatus(meetingId, !shareStatus).then(() =>
-			setShareStatus(!shareStatus)
-		);
-	}, [shareStatus, meetingId]);
+		// MeetingsApi.updateVideoShareOffer(meetingId, !shareStatus).then(() => {
+		// 	if (myUserId != null) {
+		// 		changeStreamStatus(meetingId, myUserId, 'screen', !shareStatus);
+		// 	}
+		// });
+	}, []);
 
 	const leaveMeeting = useCallback(() => {
 		closeBidirectionalAudioConn(meetingId);
+		closeVideoOutConn(meetingId);
 		MeetingsApi.leaveMeeting(meetingId)
-			.then(() => goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED))
+			.then(() => {
+				// TODO ADD MEETING STOP WHEN IM AM THE LAST USER INSIDE THE MEETING
+				// MeetingsApi.leaveMeeting(meetingId).then(());
+				goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED);
+			})
 			.catch(() => console.log('Error on leave'));
-	}, [closeBidirectionalAudioConn, meetingId, goToInfoPage]);
+	}, [closeBidirectionalAudioConn, meetingId, closeVideoOutConn, goToInfoPage]);
 
 	const deleteMeeting = useCallback(() => {
 		closeBidirectionalAudioConn(meetingId);
+		closeVideoOutConn(meetingId);
 		MeetingsApi.deleteMeeting(meetingId)
 			.then(() => goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED))
 			.catch(() => console.log('Error on leave'));
-	}, [closeBidirectionalAudioConn, meetingId, goToInfoPage]);
+	}, [closeBidirectionalAudioConn, meetingId, closeVideoOutConn, goToInfoPage]);
 
 	const toggleMeetingView = useCallback(() => {
 		setMeetingViewSelected(
@@ -147,16 +206,56 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 					setSelectedDeviceId(meetingId, STREAM_TYPE.AUDIO, audioItem.deviceId);
 					getAudioStream(true, true, audioItem.deviceId).then((stream) => {
 						bidirectionalAudioConn?.updateLocalStreamTrack(stream);
+						if (myUserId != null) {
+							changeStreamStatus(meetingId, myUserId, STREAM_TYPE.AUDIO, true);
+						}
 					});
 					if (!audioStatus) {
-						MeetingsApi.updateAudioStreamStatus(meetingId, !audioStatus).then(() => {
-							setAudioStatus(!audioStatus);
-						});
+						MeetingsApi.updateAudioStreamStatus(meetingId, !audioStatus).then();
 					}
 				},
 				value: audioItem.deviceId
 			})),
-		[audioMediaList, audioStatus, bidirectionalAudioConn, meetingId, setSelectedDeviceId]
+		[
+			myUserId,
+			audioMediaList,
+			audioStatus,
+			bidirectionalAudioConn,
+			meetingId,
+			changeStreamStatus,
+			setSelectedDeviceId
+		]
+	);
+
+	const mediaVideoList = useMemo(
+		() =>
+			map(videoMediaList, (videoItem: MediaDeviceInfo, i) => ({
+				id: `device-${i}`,
+				label: videoItem.label ? videoItem.label : `device-${i}`,
+				onClick: (): void => {
+					setSelectedDeviceId(meetingId, STREAM_TYPE.VIDEO, videoItem.deviceId);
+					if (!videoOutConn) {
+						const peerConnectionConfig = new PeerConnConfig();
+						createVideoOutConn(meetingId, peerConnectionConfig, true, videoItem.deviceId);
+					} else {
+						getVideoStream(videoItem.deviceId).then((stream) => {
+							const videoStream = stream;
+							videoOutConn?.updateLocalStreamTrack(stream).then(() => {
+								setLocalStreams(meetingId, STREAM_TYPE.VIDEO, videoStream);
+							});
+						});
+					}
+				},
+				value: videoItem.deviceId
+			})),
+		[
+			videoMediaList,
+			setSelectedDeviceId,
+			meetingId,
+			videoOutConn,
+			createVideoOutConn,
+			setLocalStreams
+		]
 	);
 
 	useEffect(() => {
@@ -183,7 +282,12 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 					devices,
 					(device) => device.kind === 'audioinput' && device
 				);
+				const videoInputs: [] | MediaDeviceInfo[] | any = filter(
+					devices,
+					(device) => device.kind === 'videoinput' && device
+				);
 				setAudioMediaList(audioInputs);
+				setVideoMediaList(videoInputs);
 			})
 			.catch();
 	}, []);
@@ -239,12 +343,15 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 				size="large"
 			/>
 			<Padding right="16px" />
-			<IconButton
+			<MultiButton
 				iconColor="gray6"
 				backgroundColor="primary"
-				icon={videoStatus ? 'Video' : 'VideoOff'}
+				primaryIcon={videoStatus ? 'Video' : 'VideoOff'}
+				icon="ChevronUp"
 				onClick={toggleVideoStream}
+				items={mediaVideoList}
 				size="large"
+				shape="regular"
 			/>
 			<Padding right="16px" />
 			<IconButton

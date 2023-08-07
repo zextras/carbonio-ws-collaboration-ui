@@ -43,13 +43,13 @@ export enum MeetingChatVisibility {
 export type LocalStreams = {
 	audio?: MediaStream;
 	video?: MediaStream;
-	share?: MediaStream;
+	screen?: MediaStream;
 	selectedAudioDeviceId?: string;
 	selectedVideoDeviceId?: string;
 };
 
 export enum STREAM_TYPE {
-	SHARE = 'share',
+	SCREEN = 'screen',
 	VIDEO = 'video',
 	AUDIO = 'audio'
 }

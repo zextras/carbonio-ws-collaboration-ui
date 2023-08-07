@@ -24,10 +24,8 @@ export type DeleteMeetingResponse = Response;
 
 export type UpdateAudioStreamStatusResponse = Response;
 
-export type UpdateVideoStreamStatusResponse = Response;
-
-export type UpdateScreenStreamStatusResponse = Response;
-
 export type CreateAudioOfferResponse = Response;
 
-export type CreateVideoOfferResponse = Response;
+export type UpdateMediaOfferResponse = Response;
+
+export type SubscribeMediaResponse = Response;

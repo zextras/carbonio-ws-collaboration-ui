@@ -19,8 +19,15 @@ const MeetingViewManager = (): ReactElement => {
 	const { meetingId }: any = useParams();
 	const meetingViewSelected = useStore((store) => getMeetingViewSelected(store, meetingId));
 
+	// const numberOfParticipants = useStore((store) =>
+	// 	getNumberOfMeetingParticipantsByMeetingId(store, meetingId)
+	// );
+
 	// TODO add check on more of 2 streams visible to change from FaceToFace to Cinema/Grid
 	const ViewToDisplay = useMemo(() => {
+		// if (numberOfParticipants && numberOfParticipants > 2) {
+		// 	return <CinemaMode />;
+		// }
 		switch (meetingViewSelected) {
 			case MeetingViewType.CINEMA:
 				return <CinemaMode />;

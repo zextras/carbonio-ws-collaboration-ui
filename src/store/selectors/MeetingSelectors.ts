@@ -41,22 +41,6 @@ export const getMyMeetingParticipation = (store: RootStore, roomId: string): boo
 	return false;
 };
 
-export const getMyMeetingParticipationByMeetingid = (
-	store: RootStore,
-	meetingId: string
-): boolean => {
-	const meetingParticipants = find(
-		store.meetings,
-		(meeting) => meeting.id === meetingId
-	)?.participants;
-
-	if (meetingParticipants && store.session.id != null) {
-		const sessionMember = find(meetingParticipants, (member) => member.userId === store.session.id);
-		return sessionMember != null;
-	}
-	return false;
-};
-
 export const getNumberOfMeetingParticipants = (
 	store: RootStore,
 	roomId: string
@@ -78,5 +62,55 @@ export const getParticipantAudioStatus = (
 		(participant) => participant.userId === userId
 	)?.audioStreamOn;
 	if (audioStream !== undefined) return audioStream;
+	return false;
+};
+
+export const getParticipantAudioStatusByMeetingId = (
+	store: RootStore,
+	meetingId: string | undefined,
+	userId: string | undefined
+): boolean => {
+	if (!meetingId || !userId) {
+		return false;
+	}
+	const audioStream = find(
+		store.meetings[meetingId]?.participants,
+		(participant) => participant.userId === userId
+	)?.audioStreamOn;
+	if (audioStream !== undefined) {
+		return audioStream;
+	}
+	return false;
+};
+
+export const getParticipantVideoStatusByMeetingId = (
+	store: RootStore,
+	meetingId: string | undefined,
+	userId: string | undefined
+): boolean => {
+	if (!meetingId || !userId) {
+		return false;
+	}
+	const videoStream = find(
+		store.meetings[meetingId]?.participants,
+		(participant) => participant.userId === userId
+	)?.videoStreamOn;
+	if (videoStream !== undefined) return videoStream;
+	return false;
+};
+
+export const getParticipantScreenStatusByMeetingId = (
+	store: RootStore,
+	meetingId: string | undefined,
+	userId: string | undefined
+): boolean => {
+	if (!meetingId || !userId) {
+		return false;
+	}
+	const screenStream = find(
+		store.meetings[meetingId]?.participants,
+		(participant) => participant.userId === userId
+	)?.screenStreamOn;
+	if (screenStream !== undefined) return screenStream;
 	return false;
 };

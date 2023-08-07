@@ -4,11 +4,11 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { STREAM_TYPE } from '../../store/ActiveMeetingTypes';
 import { JoinSettings, MeetingUser } from '../models/meetingBeTypes';
 import {
 	CreateAudioOfferResponse,
 	CreateMeetingResponse,
-	CreateVideoOfferResponse,
 	DeleteMeetingResponse,
 	GetMeetingResponse,
 	JoinMeetingResponse,
@@ -16,9 +16,9 @@ import {
 	ListMeetingsResponse,
 	StartMeetingResponse,
 	StopMeetingResponse,
+	SubscribeMediaResponse,
 	UpdateAudioStreamStatusResponse,
-	UpdateScreenStreamStatusResponse,
-	UpdateVideoStreamStatusResponse
+	UpdateMediaOfferResponse
 } from '../responses/meetingsResponses';
 
 interface IMeetingsApi {
@@ -48,19 +48,18 @@ interface IMeetingsApi {
 		meetingId: string,
 		enabled: boolean
 	): Promise<UpdateAudioStreamStatusResponse>;
-	updateVideoStreamStatus(
-		meetingId: string,
-		enabled: boolean
-	): Promise<UpdateVideoStreamStatusResponse>;
-	updateScreenStreamStatus(
-		meetingId: string,
-		enabled: boolean
-	): Promise<UpdateScreenStreamStatusResponse>;
 	createAudioOffer(meetingId: string, sdpOffer: string): Promise<CreateAudioOfferResponse>;
-	createVideoOffer(
+	updateMediaOffer(
 		meetingId: string,
-		sdpOffer: RTCSessionDescriptionInit
-	): Promise<CreateVideoOfferResponse>;
+		type: STREAM_TYPE,
+		enabled: boolean,
+		sdp?: string
+	): Promise<UpdateMediaOfferResponse>;
+	subscribeToMedia(
+		meetingId: string,
+		userSessionId: string,
+		type: STREAM_TYPE
+	): Promise<SubscribeMediaResponse>;
 }
 
 export default IMeetingsApi;

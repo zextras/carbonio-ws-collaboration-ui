@@ -161,7 +161,7 @@ export type MeetingsSlice = {
 	changeStreamStatus: (
 		meetingId: string,
 		userId: string,
-		stream: 'audio' | 'video' | 'screen',
+		stream: STREAM_TYPE,
 		status: boolean
 	) => void;
 };
@@ -178,7 +178,13 @@ export type ActiveMeetingSlice = {
 		audioStreamEnabled: boolean,
 		selectedAudioDeviceId?: string
 	) => void;
-	createVideoOutConn: (meetingId: string, peerConnectionConfig: PeerConnConfig) => void;
+	createVideoOutConn: (
+		meetingId: string,
+		peerConnectionConfig: PeerConnConfig,
+		videoStreamEnabled: boolean,
+		selectedVideoDeviceId?: string
+	) => void;
+	deleteVideoOutConn: (meetingId: string) => void;
 	createVideoInConn: (meetingId: string, peerConnectionConfig: PeerConnConfig) => void;
 	createShareOutConn: (meetingId: string, peerConnectionConfig: PeerConnConfig) => void;
 	closeBidirectionalAudioConn: (meetingId: string) => void;
@@ -186,6 +192,7 @@ export type ActiveMeetingSlice = {
 	closeVideoInConn: (meetingId: string) => void;
 	closeShareOutConn: (meetingId: string) => void;
 	setLocalStreams: (meetingId: string, streamType: STREAM_TYPE, stream: MediaStream) => void;
+	removeLocalStreams: (meetingId: string, streamType: STREAM_TYPE) => void;
 	setActiveMeeting: (meetingId: string) => void;
 	removeActiveMeeting: (meetingId: string) => void;
 	setMeetingSidebarStatus: (meetingId: string, status: boolean) => void;
