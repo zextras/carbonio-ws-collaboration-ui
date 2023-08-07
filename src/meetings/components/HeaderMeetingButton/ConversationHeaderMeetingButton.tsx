@@ -35,7 +35,7 @@ import useStore from '../../../store/Store';
 import { RoomType } from '../../../types/store/RoomTypes';
 
 const CustomButton = styled(Button)`
-	padding: 0.125rem;
+	padding: 0.125rem 0.5rem;
 `;
 
 const CustomActiveMeetingContainer = styled(Container)`
@@ -196,7 +196,6 @@ const ConversationHeaderMeetingButton = ({
 			<Tooltip label={meetingButtonTooltip} placement="top" maxWidth="40rem">
 				<Container height="fit" width="fit">
 					<CustomButton
-						type="ghost"
 						onClick={openMeeting}
 						label={meetingIsActive ? joinMeeting : startMeeting}
 						color="secondary"
