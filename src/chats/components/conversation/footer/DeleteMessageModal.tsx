@@ -26,7 +26,7 @@ const DeleteMessageModal: FC<DeleteMessageModalProps> = ({ roomId, open, setModa
 	const deleteMessageTitle = t('modal.deleteMessageTitle', 'Delete selected message?');
 	const clearHistoryDescriptionLabel = t(
 		'modal.deleteMessageTitleDescription',
-		'If you remove the entire content of the message, it will no longer be available and will consequently be deleted.'
+		"You're deleting the message, it will no longer be available"
 	);
 	const deleteActionLabel = t('action.delete', 'Delete');
 	const closeLabel = t('action.close', 'Close');

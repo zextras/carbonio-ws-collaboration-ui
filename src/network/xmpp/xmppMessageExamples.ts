@@ -220,3 +220,10 @@ export const startWritingMessage = `
 <message xmlns="jabber:client" from="roomId@muclight.carbonio/userId@carbonio" to="userId@carbonio" id="messageId" type="groupchat">
     <composing xmlns="http://jabber.org/protocol/chatstates"/>
 </message>`;
+
+export const retractedMessage = `
+    <message xmlns="jabber:client" from="roomId@muclight.carbonio/userId@carbonio" id="messageId" type="groupchat">
+        <retracted xmlns="urn:esl:message-retract-by-stanza-id:0" stamp="date">
+            <stanza-id xmlns="urn:xmpp:sid:0" id="stanzaId" by="roomId@muclight.carbonio"/>
+        </retracted>
+    </message>`;

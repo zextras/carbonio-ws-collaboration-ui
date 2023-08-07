@@ -5,7 +5,8 @@
  */
 
 import { decodeXMPPMessageStanza } from './decodeXMPPMessageStanza';
-import { MessageType } from '../../../types/store/MessageTypes';
+import { MessageType, TextMessage } from '../../../types/store/MessageTypes';
+import { retractedMessage } from '../xmppMessageExamples';
 
 describe('Test decode message function', () => {
 	test('Parse special chars', async () => {
@@ -43,5 +44,23 @@ describe('Test decode message function', () => {
 		expect(messageParsed?.text).toBe(
 			`se vai sul sito < www.zextras.com > troverai un sacco di informazioni! Puoi cercarlo anche su " www.google.it "`
 		);
+	});
+
+	test('Parse retracted message', async () => {
+		const messageToParse = retractedMessage
+			.replace('roomId', 'testRoomId')
+			.replace('messageId', 'testMessageId')
+			.replace('userId', 'testUserId');
+		const parser = new DOMParser();
+		const xmlToParse = parser.parseFromString(messageToParse, 'application/xml');
+		const messageParsed = decodeXMPPMessageStanza(
+			xmlToParse.getElementsByTagName('message')[0]
+		) as TextMessage;
+
+		expect(messageParsed.type).toBe(MessageType.TEXT_MSG);
+		expect(messageParsed.roomId).toBe('testRoomId');
+		expect(messageParsed.id).toBe('testMessageId');
+		expect(messageParsed.from).toBe('testUserId');
+		expect(messageParsed.deleted).toBeTruthy();
 	});
 });

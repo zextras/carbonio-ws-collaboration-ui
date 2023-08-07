@@ -63,7 +63,7 @@ class XMPPClient implements IXMPPClient {
 		Strophe.addNamespace('ROSTER', 'jabber:iq:roster');
 		Strophe.addNamespace('SMART_MARKERS', 'esl:xmpp:smart-markers:0');
 		Strophe.addNamespace('STANDARD_CLIENT', 'jabber:client');
-		Strophe.addNamespace('XMPP_RETRACT', 'urn:xmpp:message-retract:0');
+		Strophe.addNamespace('XMPP_RETRACT', 'urn:esl:message-retract-by-stanza-id:0');
 		Strophe.addNamespace('XMPP_FASTEN', 'urn:xmpp:fasten:0');
 		Strophe.addNamespace('ZEXTRAS_EDIT', 'zextras:xmpp:edit:0');
 
@@ -286,7 +286,7 @@ class XMPPClient implements IXMPPClient {
 
 	/**
 	 * Delete a message / Message Retraction (XEP-0424)
-	 * Documentation: https://xmpp.org/extensions/xep-0424.html
+	 * Documentation: https://esl.github.io/MongooseDocs/latest/modules/mod_mam/#retraction-on-the-stanza-id
 	 */
 	sendChatMessageDeletion(roomId: string, messageStanzaId: string): void {
 		if (this.connection && this.connection.connected) {

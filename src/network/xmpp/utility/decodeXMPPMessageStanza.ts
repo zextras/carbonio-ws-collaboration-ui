@@ -3,33 +3,38 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-/* eslint-disable */
 
+import { includes } from 'lodash';
 import { Strophe } from 'strophe.js';
-import { decode } from 'html-entities';
 
+import { getId, getResource } from './decodeJid';
+import {
+	getAttribute,
+	getRequiredAttribute,
+	getRequiredTagElement,
+	getTagElement
+} from './decodeStanza';
 import {
 	AffiliationMessage,
 	ConfigurationMessage,
 	Message,
 	MessageFastening,
 	MessageType,
+	OperationType,
 	TextMessage
 } from '../../../types/store/MessageTypes';
-import { dateToTimestamp, isBefore, now } from '../../../utils/dateUtil';
-import { getId, getResource } from './decodeJid';
-import useStore from '../../../store/Store';
-import { find, forEach, size } from 'lodash';
-import { Marker, MarkerStatus, RoomMarkers } from '../../../types/store/MarkersTypes';
-import { Member } from '../../../types/store/RoomTypes';
-import {getAttribute, getRequiredAttribute, getRequiredTagElement, getTagElement} from './decodeStanza';
+import { calcReads } from '../../../utils/calcReads';
+import { dateToTimestamp, now } from '../../../utils/dateUtil';
+import { unicodeToChar } from '../../../utils/textUtils';
 
 type OptionalParameters = {
 	date?: number;
 	stanzaId?: string;
 };
-
-export function decodeXMPPMessageStanza(messageStanza: Element, optional?: OptionalParameters): Message | undefined {
+export function decodeXMPPMessageStanza(
+	messageStanza: Element,
+	optional?: OptionalParameters
+): Message | undefined {
 	const messageId = getRequiredAttribute(messageStanza, 'id');
 	const fromAttribute = getRequiredAttribute(messageStanza, 'from');
 	const roomId = getId(fromAttribute);
@@ -50,7 +55,7 @@ export function decodeXMPPMessageStanza(messageStanza: Element, optional?: Optio
 				action: 'delete',
 				roomId,
 				date: messageDate,
-				originalStanzaId,
+				originalStanzaId
 			};
 			return message;
 		}
@@ -66,7 +71,7 @@ export function decodeXMPPMessageStanza(messageStanza: Element, optional?: Optio
 				roomId,
 				date: messageDate,
 				originalStanzaId,
-				value:body?.textContent || ''
+				value: body?.textContent || ''
 			};
 			return message;
 		}
@@ -92,36 +97,62 @@ export function decodeXMPPMessageStanza(messageStanza: Element, optional?: Optio
 	// Configuration message
 	if (x && x.getAttribute('xmlns') === Strophe.NS.CONFIGURATION) {
 		const operation = Strophe.getText(getRequiredTagElement(x, 'operation'));
-		switch (operation) {
-			case 'roomNameChanged':
-			case 'roomDescriptionChanged':
-			case 'roomPictureUpdated':
-			case 'roomPictureDeleted': {
-				const value =
-					operation === 'roomPictureUpdated'
-						? Strophe.getText(getRequiredTagElement(x, 'picture-name'))
-						: operation === 'roomPictureDeleted'
-							? ''
-							: decode(Strophe.getText(getRequiredTagElement(x, 'value')));
-				const message: ConfigurationMessage = {
-					id: messageId,
-					roomId,
-					date: messageDate,
-					type: MessageType.CONFIGURATION_MSG,
-					from: getId(resource),
-					operation,
-					value
-				};
-				return message;
+		if (includes(OperationType, operation)) {
+			let value = '';
+			switch (operation) {
+				case OperationType.ROOM_NAME_CHANGED:
+				case OperationType.ROOM_DESCRIPTION_CHANGED:
+					value = unicodeToChar(Strophe.getText(getRequiredTagElement(x, 'value')) || '');
+					break;
+				case OperationType.ROOM_PICTURE_UPDATED:
+					value = unicodeToChar(Strophe.getText(getRequiredTagElement(x, 'picture-name')) || '');
+					break;
+				default:
+					break;
 			}
+
+			const message: ConfigurationMessage = {
+				id: messageId,
+				roomId,
+				date: messageDate,
+				type: MessageType.CONFIGURATION_MSG,
+				from: getId(resource),
+				operation,
+				value
+			};
+			return message;
 		}
+	}
+
+	// Retracted message
+	const retracted = getTagElement(messageStanza, 'retracted');
+	if (retracted) {
+		const stanzaIdReference = getTagElement(messageStanza, 'stanza-id');
+		const stanzaId =
+			optional?.stanzaId ||
+			(stanzaIdReference && getRequiredAttribute(stanzaIdReference, 'id')) ||
+			messageId;
+		return {
+			id: messageId,
+			stanzaId,
+			roomId,
+			date: messageDate,
+			type: MessageType.TEXT_MSG,
+			from: getId(resource),
+			text: '',
+			read: calcReads(messageDate, roomId),
+			deleted: true
+		};
 	}
 
 	// Text message
 	const body = messageStanza.getElementsByTagName('body')[0];
 	if (body && resource) {
 		const stanzaIdReference = getTagElement(messageStanza, 'stanza-id');
-		const stanzaId = optional?.stanzaId || (stanzaIdReference && getRequiredAttribute(stanzaIdReference, 'id') || messageId);
+		const stanzaId =
+			optional?.stanzaId ||
+			(stanzaIdReference && getRequiredAttribute(stanzaIdReference, 'id')) ||
+			messageId;
 		const from = getId(resource);
 		let messageTxt = body.textContent || '';
 
@@ -139,14 +170,16 @@ export function decodeXMPPMessageStanza(messageStanza: Element, optional?: Optio
 			const forwardCount = getAttribute(forwardedElement, 'count') || '1';
 			const delayElement = getRequiredTagElement(forwardedElement, 'delay');
 			const forwardedMessageElement = getRequiredTagElement(forwardedElement, 'message');
-			messageTxt = decode(getRequiredTagElement(forwardedMessageElement, 'body').textContent || '');
+			messageTxt = unicodeToChar(
+				getRequiredTagElement(forwardedMessageElement, 'body').textContent || ''
+			);
 
 			forwarded = {
 				id: getRequiredAttribute(forwardedMessageElement, 'id'),
 				date: dateToTimestamp(getRequiredAttribute(delayElement, 'stamp')),
 				from: getId(getResource(getRequiredAttribute(forwardedMessageElement, 'from'))),
-				count: parseInt(forwardCount)
-			}
+				count: parseInt(forwardCount, 10)
+			};
 		}
 
 		// Message has an attachment
@@ -158,15 +191,19 @@ export function decodeXMPPMessageStanza(messageStanza: Element, optional?: Optio
 				const filename = Strophe.getText(getRequiredTagElement(x, 'filename'));
 				const fileMimeType = Strophe.getText(getRequiredTagElement(x, 'mime-type'));
 				const fileSize = Strophe.getText(getRequiredTagElement(x, 'size'));
+
+				const area = getTagElement(x, 'area') ? Strophe.getText(getTagElement(x, 'area')) : '0x0';
+
 				attachment = {
 					id: attachmentId,
-					name: decodeURIComponent(filename || ""),
-					mimeType: fileMimeType || "",
-					size: fileSize || 0
-				}
+					name: unicodeToChar(filename || ''),
+					mimeType: fileMimeType || '',
+					size: fileSize || 0,
+					area
+				};
 
 				// Text ad description of the attachment has to be decoded
-				messageTxt = decodeURIComponent(messageTxt);
+				messageTxt = unicodeToChar(messageTxt);
 			}
 		}
 
@@ -193,36 +230,5 @@ export function decodeXMPPMessageStanza(messageStanza: Element, optional?: Optio
 
 		return message;
 	}
-}
-
-export function calcReads(messageDate: number, roomId: string): MarkerStatus {
-	const roomMessages: Message[] = useStore.getState().messages[roomId];
-	const roomMarkers: RoomMarkers = useStore.getState().markers[roomId];
-	const members: Member[] | undefined = useStore.getState().rooms[roomId]
-		? useStore.getState().rooms[roomId].members
-		: [];
-
-	const readBy: string[] = [];
-	let read: MarkerStatus = MarkerStatus.UNREAD;
-
-	if (roomMarkers != null && members != null && size(members) > 0) {
-		forEach(roomMarkers, (marker: Marker, userId: string) => {
-			const markedMessage = find(
-				roomMessages,
-				(message: Message) => message.id === marker.messageId
-			) as TextMessage;
-			if (markedMessage && isBefore(messageDate, markedMessage.date)) {
-				readBy.push(userId);
-			}
-		});
-
-		if (size(readBy) > 1) {
-			if (size(readBy) >= size(members)) {
-				read = MarkerStatus.READ;
-			} else {
-				read = MarkerStatus.READ_BY_SOMEONE;
-			}
-		}
-	}
-	return read;
+	return undefined;
 }

@@ -93,7 +93,7 @@ describe('Users API', () => {
 
 		// Set appropriate headers
 		const headers = new Headers();
-		headers.append('fileName', 'aW1hZ2UucG5n'); // Base64 of 'image.png'
+		headers.append('fileName', '\\u0069\\u006d\\u0061\\u0067\\u0065\\u002e\\u0070\\u006e\\u0067'); // Unicode of 'image.png'
 		headers.append('mimeType', testFile.type);
 
 		// Check if fetch is called with the correct parameters

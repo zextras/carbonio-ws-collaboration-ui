@@ -178,6 +178,7 @@ class RoomsApi extends BaseAPI implements IRoomsApi {
 			description?: string;
 			replyId?: string;
 		},
+		area: string,
 		signal?: AbortSignal
 	): Promise<AddRoomAttachmentResponse> {
 		const uuid = uuidGenerator();
@@ -191,13 +192,16 @@ class RoomsApi extends BaseAPI implements IRoomsApi {
 				id: 'placeholderFileId',
 				name: file.name,
 				mimeType: file.type,
-				size: file.size
+				size: file.size,
+				area
 			}
 		});
+
 		return this.uploadFileFetchAPI(`rooms/${roomId}/attachments`, RequestType.POST, file, signal, {
 			description: optionalFields.description,
 			replyId: optionalFields.replyId,
-			messageId: uuid
+			messageId: uuid,
+			area
 		})
 			.then((resp: AddRoomAttachmentResponse) => resp)
 			.catch((error) => {

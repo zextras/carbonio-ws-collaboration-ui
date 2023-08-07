@@ -32,6 +32,7 @@ type BubbleProps = {
 	prevMessageIsFromSameSender: boolean;
 	nextMessageIsFromSameSender: boolean;
 	messageRef: React.RefObject<HTMLElement>;
+	messageListRef?: React.MutableRefObject<HTMLDivElement | undefined>;
 };
 
 const DropDownWrapper = styled(Container)`
@@ -42,6 +43,7 @@ const DropDownWrapper = styled(Container)`
 const BubbleContainer = styled(Container)`
 	margin-top: 0.25rem;
 	margin-bottom: 0.25rem;
+	${({ messageAttachment }): string | false => !messageAttachment && 'width: fit-content;'};
 	${({ isMyMessage }): string => isMyMessage && 'margin-left: auto;'};
 	box-shadow: 0 0 0.25rem rgba(166, 166, 166, 0.5);
 
@@ -75,7 +77,8 @@ const Bubble: FC<BubbleProps> = ({
 	message,
 	prevMessageIsFromSameSender,
 	nextMessageIsFromSameSender,
-	messageRef
+	messageRef,
+	messageListRef
 }) => {
 	const mySessionId = useStore((store) => store.session.id);
 	const roomType = useStore<RoomType>((store) => getRoomTypeSelector(store, message.roomId));
@@ -112,13 +115,14 @@ const Bubble: FC<BubbleProps> = ({
 			key={message.id}
 			height="fit"
 			width="fit"
-			maxWidth="75%"
+			maxWidth={messageAttachment && !message.forwarded ? '60%' : '75%'}
 			padding={{ all: 'medium' }}
 			background={isMyMessage ? 'highlight' : 'gray6'}
 			isMyMessage={isMyMessage}
 			firstMessageOfList={!prevMessageIsFromSameSender && nextMessageIsFromSameSender}
 			centerMessageOfList={prevMessageIsFromSameSender && nextMessageIsFromSameSender}
 			lastMessageOfList={prevMessageIsFromSameSender && !nextMessageIsFromSameSender}
+			messageAttachment={messageAttachment !== undefined}
 		>
 			{message.read !== MarkerStatus.PENDING && (
 				<DropDownWrapper padding={{ all: 'none' }}>
@@ -150,6 +154,7 @@ const Bubble: FC<BubbleProps> = ({
 						attachment={messageAttachment}
 						isMyMessage={isMyMessage}
 						from={message.from}
+						messageListRef={messageListRef}
 					/>
 					<Padding bottom="0.5rem" />
 				</>
