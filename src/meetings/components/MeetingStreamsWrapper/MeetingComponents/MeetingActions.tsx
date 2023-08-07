@@ -59,8 +59,17 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 	let timeout: string | number | NodeJS.Timeout | undefined;
 
 	useEffect(() => {
-		if (selectedAudioDeviceId !== undefined) setAudioStatus(true);
-	}, [selectedAudioDeviceId]);
+		if (selectedAudioDeviceId !== undefined) {
+			getAudioStream(true, true, selectedAudioDeviceId).then((stream) => {
+				bidirectionalAudioConn?.updateLocalStreamTrack(stream).then(() => {
+					MeetingsApi.updateAudioStreamStatus(meetingId, !audioStatus).then(() => {
+						setAudioStatus(!audioStatus);
+					});
+				});
+			});
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
 
 	const handleHoverMouseMove = useCallback(
 		(e) => {
