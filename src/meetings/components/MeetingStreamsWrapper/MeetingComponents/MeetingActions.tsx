@@ -59,7 +59,7 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 	let timeout: string | number | NodeJS.Timeout | undefined;
 
 	useEffect(() => {
-		if (selectedAudioDeviceId !== undefined) {
+		if (selectedAudioDeviceId != null) {
 			getAudioStream(true, true, selectedAudioDeviceId).then((stream) => {
 				bidirectionalAudioConn?.updateLocalStreamTrack(stream).then(() => {
 					MeetingsApi.updateAudioStreamStatus(meetingId, true).then(() => {
@@ -167,9 +167,17 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 						});
 					}
 				},
+				selected: audioItem.deviceId === selectedAudioDeviceId,
 				value: audioItem.deviceId
 			})),
-		[audioMediaList, audioStatus, bidirectionalAudioConn, meetingId, setSelectedDeviceId]
+		[
+			audioMediaList,
+			audioStatus,
+			bidirectionalAudioConn,
+			meetingId,
+			selectedAudioDeviceId,
+			setSelectedDeviceId
+		]
 	);
 
 	useEffect(() => {

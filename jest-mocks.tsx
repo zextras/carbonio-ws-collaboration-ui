@@ -276,7 +276,6 @@ jest.mock('./src/network', () => ({
 	}
 }));
 
-// MOCK NAVIGATOR
 const mockGetUserMedia = jest.fn(
 	async () =>
 		new Promise<void>((resolve) => {
@@ -290,6 +289,7 @@ const mockEnumerateDevices = jest.fn(
 		})
 );
 
+// MOCK NAVIGATOR
 Object.defineProperty(global.navigator, 'mediaDevices', {
 	value: {
 		getUserMedia: mockGetUserMedia,

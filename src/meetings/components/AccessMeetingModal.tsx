@@ -54,14 +54,14 @@ const CustomModal = styled(Modal)`
 
 const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement => {
 	const [t] = useTranslation();
-	const enter = t('meeting.startModal.enter', 'Enter');
+	const enter = t('action.enter', 'Enter');
 	const disableAudioLabel = t('meeting.interactions.disableAudio', 'Disable Audio');
 	const enableAudioLabel = t('meeting.interactions.enableAudio', 'Enable Audio');
 	const disableVideoLabel = t('meeting.interactions.disableVideo', 'Disable Video');
 	const enableVideoLabel = t('meeting.interactions.enableVideo', 'Enable Video');
 	const playMicLabel = t('meeting.interactions.playMic', 'Start microphone testing');
 	const stopMicLabel = t('meeting.interactions.stopMic', 'Stop microphone testing');
-	const closeModalTooltip = t('meeting.interactions.closeModal', 'Close');
+	const closeModalTooltip = t('action.close', 'Close');
 	const joinMeetingDescription = t(
 		'meeting.joinMeetingDescription',
 		'How do you want to join this meeting?'
@@ -180,9 +180,10 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 				onClick: (): void => {
 					toggleStreams(audioStreamEnabled, true, selectedAudioStream, videoItem.deviceId);
 				},
+				selected: videoItem.deviceId === selectedVideoStream,
 				value: videoItem.deviceId
 			})),
-		[audioStreamEnabled, selectedAudioStream, toggleStreams, videoMediaList]
+		[audioStreamEnabled, selectedAudioStream, selectedVideoStream, toggleStreams, videoMediaList]
 	);
 
 	const mediaAudioList = useMemo(
@@ -193,9 +194,10 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 				onClick: (): void => {
 					toggleStreams(true, videoStreamEnabled, audioItem.deviceId, selectedVideoStream);
 				},
+				selected: audioItem.deviceId === selectedAudioStream,
 				value: audioItem.deviceId
 			})),
-		[audioMediaList, selectedVideoStream, toggleStreams, videoStreamEnabled]
+		[audioMediaList, selectedAudioStream, selectedVideoStream, toggleStreams, videoStreamEnabled]
 	);
 
 	const updateListOfDevices = useCallback(() => {
