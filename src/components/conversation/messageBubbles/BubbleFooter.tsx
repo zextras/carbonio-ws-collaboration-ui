@@ -66,7 +66,7 @@ const BubbleFooter: FC<BubbleFooterProps> = ({
 	const messageTime = moment.tz(date, timezone).format('HH:mm');
 
 	const dropdownTooltip = useMemo(() => {
-		switch (ackIcon) {
+		switch (messageRead) {
 			case MarkerStatus.READ:
 				return t('tooltip.messageRead', 'Read');
 			case MarkerStatus.READ_BY_SOMEONE:
@@ -78,7 +78,7 @@ const BubbleFooter: FC<BubbleFooterProps> = ({
 			default:
 				return t('tooltip.pending', 'Pending');
 		}
-	}, [ackIcon, t]);
+	}, [messageRead, t]);
 
 	return (
 		<Container
