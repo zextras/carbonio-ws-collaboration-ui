@@ -62,8 +62,8 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 		if (selectedAudioDeviceId !== undefined) {
 			getAudioStream(true, true, selectedAudioDeviceId).then((stream) => {
 				bidirectionalAudioConn?.updateLocalStreamTrack(stream).then(() => {
-					MeetingsApi.updateAudioStreamStatus(meetingId, !audioStatus).then(() => {
-						setAudioStatus(!audioStatus);
+					MeetingsApi.updateAudioStreamStatus(meetingId, true).then(() => {
+						setAudioStatus(true);
 					});
 				});
 			});
