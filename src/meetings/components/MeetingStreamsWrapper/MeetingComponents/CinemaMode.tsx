@@ -66,7 +66,7 @@ const CinemaMode = (): ReactElement => {
 	// }, [calcMainStreamSize, sidebarStatus, mainStreamRef]);
 
 	return (
-		<CinemaModeWrapper orientation="horizontal">
+		<CinemaModeWrapper data-testid="cinemaModeView" orientation="horizontal">
 			{/* CINEMA 1TO1 */}
 			{/* <MyStream height="144px" width="256px" background="secondary" /> */}
 			{/* <MainStreamWrapper ref={mainStreamRef} width="fill" height="fill" background="primary"> */}

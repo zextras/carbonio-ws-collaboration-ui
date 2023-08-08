@@ -344,3 +344,9 @@ Object.defineProperty(window, 'MediaStream', {
 		};
 	})
 });
+
+// MOCK HTMLMEDIAELEMENT.PROTOTYPE
+// this is a statement to use when there's a video tag with the muted prop
+Object.defineProperty(HTMLMediaElement.prototype, 'muted', {
+	set: jest.fn()
+});

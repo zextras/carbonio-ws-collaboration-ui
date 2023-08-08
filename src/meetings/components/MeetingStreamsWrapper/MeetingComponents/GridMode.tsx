@@ -22,7 +22,7 @@ const GridMode = (): ReactElement => {
 
 	return (
 		<>
-			<Container height="fit" crossAlignment="flex-end">
+			<Container data-testid="gridModeView" height="fit" crossAlignment="flex-end">
 				<MyStreamContainer height="153px" width="256px" background="secondary" />
 			</Container>
 			<Container>

@@ -124,8 +124,14 @@ const FaceToFaceMode = (): ReactElement => {
 	);
 
 	return (
-		<FaceToFace ref={faceToFaceRef}>
-			<MyStreamContainer height="fit" width="fit" background="secondary" borderRadius="round">
+		<FaceToFace data-testid="faceToFaceModeView" ref={faceToFaceRef}>
+			<MyStreamContainer
+				data-testid="myStreamContainer"
+				height="fit"
+				width="fit"
+				background="secondary"
+				borderRadius="round"
+			>
 				<TileVideo id="testVideo" playsInline autoPlay muted controls={false} ref={streamRef}>
 					Your browser does not support the <code>video</code> element.
 				</TileVideo>
