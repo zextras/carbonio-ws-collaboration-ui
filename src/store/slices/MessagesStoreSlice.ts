@@ -24,10 +24,11 @@ import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
 import { UsersApi } from '../../network';
 import { MarkerStatus } from '../../types/store/MarkersTypes';
 import {
-	AffiliationMessage,
+	ConfigurationMessage,
 	Message,
 	MessageList,
 	MessageType,
+	OperationType,
 	PlaceholderFields,
 	TextMessage
 } from '../../types/store/MessageTypes';
@@ -43,8 +44,6 @@ const retrieveMessageUserInfo = (message: Message, users: UsersMap): void => {
 		if (!users[message.from]) UsersApi.getDebouncedUser(message.from);
 		if (message.forwarded && !users[message.forwarded.from])
 			UsersApi.getDebouncedUser(message.forwarded.from);
-	} else if (message.type === MessageType.AFFILIATION_MSG) {
-		if (!users[message.userId]) UsersApi.getDebouncedUser(message.userId);
 	} else if (message.type === MessageType.CONFIGURATION_MSG) {
 		if (!users[message.from]) UsersApi.getDebouncedUser(message.from);
 	}
@@ -181,7 +180,9 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 				const firstMessageDate = first(draft.messages[roomId])?.date;
 				const creationMessage = find(
 					draft.messages[roomId],
-					(message) => message.type === MessageType.AFFILIATION_MSG && message.as === 'creation'
+					(message) =>
+						message.type === MessageType.CONFIGURATION_MSG &&
+						message.operation === OperationType.ROOM_CREATION
 				);
 				const historyIsBeenCleared = !!draft.rooms[roomId].userSettings?.clearedAt;
 				// Add creation message only if the room is a non-empty group without the history cleared
@@ -191,13 +192,14 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 					!creationMessage &&
 					!historyIsBeenCleared
 				) {
-					const creationMsg: AffiliationMessage = {
+					const creationMsg: ConfigurationMessage = {
 						id: `creationMessage${firstMessageDate + 1}`,
 						roomId,
 						date: firstMessageDate + 1,
-						type: MessageType.AFFILIATION_MSG,
-						as: 'creation',
-						userId: ''
+						type: MessageType.CONFIGURATION_MSG,
+						operation: OperationType.ROOM_CREATION,
+						value: '',
+						from: ''
 					};
 					draft.messages[roomId].splice(1, 0, creationMsg);
 				}

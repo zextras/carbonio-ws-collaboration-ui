@@ -9,7 +9,6 @@ import React, { ReactElement, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import AffiliationBubble from './AffiliationBubble';
 import Bubble from './Bubble';
 import ConfigurationBubble from './ConfigurationBubble';
 import DateBubble from './DateBubble';
@@ -93,9 +92,6 @@ const MessageFactory = ({
 						)}
 					</>
 				);
-			}
-			case MessageType.AFFILIATION_MSG: {
-				return <AffiliationBubble message={message} refEl={messageRef} />;
 			}
 			case MessageType.CONFIGURATION_MSG: {
 				return <ConfigurationBubble message={message} refEl={messageRef} />;

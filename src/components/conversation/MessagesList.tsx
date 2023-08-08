@@ -104,12 +104,9 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 					if (canMessageBeMarkedAsRead) {
 						xmppClient.readMessage(message.roomId, message.id);
 					}
-					// If the last message is configuration or affiliation message we need to mark as read the last text message in the history
+					// If the last message is a configuration message we need to mark as read the last text message in the history
 					// otherwise when user focus the conversation we will not be able to mark the message as read
-				} else if (
-					message.type === MessageType.AFFILIATION_MSG ||
-					message.type === MessageType.CONFIGURATION_MSG
-				) {
+				} else if (message.type === MessageType.CONFIGURATION_MSG) {
 					const lastMessageNotMineFromHistory = findLast(
 						roomMessages,
 						(message) => message.type === MessageType.TEXT_MSG && message.from !== myUserId

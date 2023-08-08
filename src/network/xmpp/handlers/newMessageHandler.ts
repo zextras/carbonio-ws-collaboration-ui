@@ -51,7 +51,6 @@ export function onNewMessageStanza(this: IXMPPClient, message: Element): true {
 
 					break;
 				}
-				case MessageType.AFFILIATION_MSG:
 				case MessageType.CONFIGURATION_MSG: {
 					store.newMessage(newMessage);
 					break;

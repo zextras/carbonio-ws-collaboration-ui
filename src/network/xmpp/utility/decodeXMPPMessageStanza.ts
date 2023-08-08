@@ -15,7 +15,6 @@ import {
 	getTagElement
 } from './decodeStanza';
 import {
-	AffiliationMessage,
 	ConfigurationMessage,
 	Message,
 	MessageFastening,
@@ -77,21 +76,10 @@ export function decodeXMPPMessageStanza(
 		}
 	}
 
-	// Affiliation message
+	// Affiliation message are not considered, they are replaced by configuration messages
 	const x = getTagElement(messageStanza, 'x');
 	if (x && x.getAttribute('xmlns') === Strophe.NS.AFFILIATIONS) {
-		const user = getId(Strophe.getText(x.getElementsByTagName('user')[0]));
-		const userElement = getRequiredTagElement(x, 'user');
-		const affiliationAttribute = getRequiredAttribute(userElement, 'affiliation');
-		const message: AffiliationMessage = {
-			id: messageId,
-			roomId,
-			date: messageDate,
-			type: MessageType.AFFILIATION_MSG,
-			userId: user,
-			as: affiliationAttribute
-		};
-		return message;
+		return undefined;
 	}
 
 	// Configuration message
@@ -107,6 +95,11 @@ export function decodeXMPPMessageStanza(
 				case OperationType.ROOM_PICTURE_UPDATED:
 					value = unicodeToChar(Strophe.getText(getRequiredTagElement(x, 'picture-name')) || '');
 					break;
+				case OperationType.MEMBER_ADDED:
+				case OperationType.MEMBER_REMOVED: {
+					value = Strophe.getText(getRequiredTagElement(x, 'user-id'));
+					break;
+				}
 				default:
 					break;
 			}

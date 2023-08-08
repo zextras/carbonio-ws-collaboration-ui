@@ -9,7 +9,6 @@ import { UserBe } from '../types/network/models/userBeTypes';
 import { FileToUpload } from '../types/store/ActiveConversationTypes';
 import { Marker, MarkerStatus, MarkerType } from '../types/store/MarkersTypes';
 import {
-	AffiliationMessage,
 	ConfigurationMessage,
 	DateMessage,
 	MessageFastening,
@@ -50,16 +49,6 @@ export const createMockTextMessage = (fields?: GenericFieldsType): TextMessage =
 	repliedMessage: undefined,
 	forwarded: undefined,
 	attachment: undefined,
-	...fields
-});
-
-export const createMockAffiliationMessage = (fields?: GenericFieldsType): AffiliationMessage => ({
-	id: 'id',
-	roomId: 'roomId',
-	date: 1661441294393,
-	type: MessageType.AFFILIATION_MSG,
-	userId: 'userId',
-	as: 'member',
 	...fields
 });
 
