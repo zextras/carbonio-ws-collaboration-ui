@@ -1,6 +1,5 @@
 {
     "action": {
-        "enter": "Enter",
         "activateNotifications": "Activate notifications",
         "addAttachment": "Add attachment",
         "addMoreAttachments": "Add {{counter}} attachments",
@@ -19,6 +18,7 @@
         "editDetails": "Edit details",
         "editRoom": "Edit {{roomName}}",
         "editYourMessage": "Edit your message",
+        "enter": "Enter",
         "forward": "Forward",
         "forwarded": "forwarded",
         "joinMeeting": "Join meeting",

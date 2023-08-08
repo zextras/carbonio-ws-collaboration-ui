@@ -13,7 +13,7 @@ import {
 	Text,
 	Tooltip
 } from '@zextras/carbonio-design-system';
-import { filter, map } from 'lodash';
+import { filter, find, map } from 'lodash';
 import React, { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -26,6 +26,7 @@ import { getRoomNameSelector, getRoomTypeSelector } from '../../store/selectors/
 import useStore from '../../store/Store';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
 import { RoomType } from '../../types/store/RoomTypes';
+import { BrowserUtils } from '../../utils/BrowserUtils';
 
 type AccessMeetingModalProps = {
 	roomId: string;
@@ -201,22 +202,57 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 	);
 
 	const updateListOfDevices = useCallback(() => {
-		navigator.mediaDevices
-			.enumerateDevices()
-			.then((devices) => {
-				const audioInputs: [] | MediaDeviceInfo[] | any = filter(
-					devices,
-					(device) => device.kind === 'audioinput' && device
+		if (!BrowserUtils.isChrome()) {
+			navigator.mediaDevices.enumerateDevices().then((list) => {
+				const firstAudioInputForPermissions = find(
+					list,
+					(device: MediaDeviceInfo) => device.kind === 'audioinput'
 				);
-				const videoInputs: [] | MediaDeviceInfo[] | any = filter(
-					devices,
-					(device: MediaDeviceInfo) => device.kind === 'videoinput' && device
-				);
-				setAudioMediaList(audioInputs);
-				setVideoMediaList(videoInputs);
-			})
-			.catch();
-	}, []);
+				if (firstAudioInputForPermissions) {
+					navigator.mediaDevices
+						.getUserMedia({
+							audio: { deviceId: { exact: firstAudioInputForPermissions.deviceId } },
+							video: videoStreamEnabled
+						})
+						.then((stream: MediaStream) => {
+							const tracks: MediaStreamTrack[] = stream.getTracks();
+							tracks.forEach((track) => track.stop());
+							navigator.mediaDevices
+								.enumerateDevices()
+								.then((devices) => {
+									const audioInputs: [] | MediaDeviceInfo[] | any = filter(
+										devices,
+										(device) => device.kind === 'audioinput' && device
+									);
+									const videoInputs: [] | MediaDeviceInfo[] | any = filter(
+										devices,
+										(device: MediaDeviceInfo) => device.kind === 'videoinput' && device
+									);
+									setAudioMediaList(audioInputs);
+									setVideoMediaList(videoInputs);
+								})
+								.catch();
+						});
+				}
+			});
+		} else {
+			navigator.mediaDevices
+				.enumerateDevices()
+				.then((devices) => {
+					const audioInputs: [] | MediaDeviceInfo[] | any = filter(
+						devices,
+						(device) => device.kind === 'audioinput' && device
+					);
+					const videoInputs: [] | MediaDeviceInfo[] | any = filter(
+						devices,
+						(device: MediaDeviceInfo) => device.kind === 'videoinput' && device
+					);
+					setAudioMediaList(audioInputs);
+					setVideoMediaList(videoInputs);
+				})
+				.catch();
+		}
+	}, [videoStreamEnabled]);
 
 	useEffect(() => {
 		updateListOfDevices();
@@ -353,6 +389,8 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 		]
 	);
 
+	const stopProp = useCallback((ev) => ev.stopPropagation(), []);
+
 	return (
 		<CustomModal
 			background={'text'}
@@ -363,6 +401,7 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 			onClose={onCloseHandler}
 			closeIconTooltip={closeModalTooltip}
 			customFooter={modalFooter}
+			onClick={stopProp}
 		>
 			<Padding top="small" />
 			<Container

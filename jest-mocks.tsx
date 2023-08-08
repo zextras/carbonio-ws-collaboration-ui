@@ -276,27 +276,77 @@ jest.mock('./src/network', () => ({
 	}
 }));
 
-const mockGetUserMedia = jest.fn(
+const mockedGetUserMediaPromise: jest.Mock = jest.fn(() => ({
+	getTracks: jest.fn(() => ({ forEach: jest.fn() }))
+}));
+const getUserMediaPromise = jest.fn(
 	async () =>
-		new Promise<void>((resolve) => {
-			resolve();
+		new Promise<void>((resolve, reject) => {
+			const result = mockedGetUserMediaPromise();
+			result ? resolve(result) : reject(new Error('no result provided'));
 		})
 );
-const mockEnumerateDevices = jest.fn(
+
+export const mockedEnumerateDevicesPromise: jest.Mock = jest.fn(() => [
+	{
+		deviceId: 'audioDefault',
+		kind: 'audioinput',
+		label: 'Audio Default',
+		groupId: 'default'
+	},
+	{
+		deviceId: 'audioDevice1',
+		kind: 'audioinput',
+		label: 'Audio Device 1',
+		groupId: 'device1'
+	},
+	{
+		deviceId: 'audioDevice2',
+		kind: 'audioinput',
+		label: 'Audio Device 2',
+		groupId: 'device2'
+	},
+	{
+		deviceId: 'videoDefault',
+		kind: 'videoinput',
+		label: 'Video Default',
+		groupId: 'default'
+	},
+	{
+		deviceId: 'videoDevice 1',
+		kind: 'videoinput',
+		label: 'Video Device 1',
+		groupId: 'device1'
+	},
+	{
+		deviceId: 'videoDevice 2',
+		kind: 'videoinput',
+		label: 'Video Device 2',
+		groupId: 'device2'
+	}
+]);
+const enumerateDevicesPromise = jest.fn(
 	async () =>
-		new Promise<void>((resolve) => {
-			resolve();
+		new Promise<void>((resolve, reject) => {
+			const result = mockedEnumerateDevicesPromise();
+			result ? resolve(result) : reject(new Error('no result provided'));
 		})
 );
 
 // MOCK NAVIGATOR
 Object.defineProperty(global.navigator, 'mediaDevices', {
 	value: {
-		getUserMedia: mockGetUserMedia,
-		enumerateDevices: mockEnumerateDevices,
+		getUserMedia: getUserMediaPromise,
+		enumerateDevices: enumerateDevicesPromise,
 		addEventListener: jest.fn(),
 		removeEventListener: jest.fn()
 	}
+});
+
+// MOCK HTMLMEDIAELEMENT.PROTOTYPE
+// this is a statement to use when there's a video tag with the muted prop
+Object.defineProperty(HTMLMediaElement.prototype, 'muted', {
+	set: jest.fn()
 });
 
 export const mockUseParams = jest.fn();
