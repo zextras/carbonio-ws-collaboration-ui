@@ -86,7 +86,13 @@ const mockedAttachmentMessageKb = createMockTextMessage({
 const mockedAttachmentMessageMb = createMockTextMessage({
 	roomId: mockedRoom.id,
 	from: user1Be.id,
-	attachment: { id: 'pngAttachmentId', name: 'image.png', mimeType: 'image/png', size: 3349586 }
+	attachment: {
+		id: 'pngAttachmentId',
+		name: 'image.png',
+		mimeType: 'image/png',
+		size: 3349586,
+		area: '34x23'
+	}
 });
 const mockedAttachmentMessageGb = createMockTextMessage({
 	roomId: mockedRoom.id,

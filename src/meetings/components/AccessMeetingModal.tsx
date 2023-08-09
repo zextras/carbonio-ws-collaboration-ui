@@ -27,6 +27,7 @@ import useStore from '../../store/Store';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
 import { RoomType } from '../../types/store/RoomTypes';
 import { BrowserUtils } from '../../utils/BrowserUtils';
+import { getAudioAndVideo } from '../../utils/UserMediaManager';
 
 type AccessMeetingModalProps = {
 	roomId: string;
@@ -131,35 +132,32 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 			}
 
 			if (!audio && !video) {
-				navigator.mediaDevices
-					.getUserMedia({ audio: true, video: false })
-					.then((stream: MediaStream) => {
-						const tracks = stream.getTracks();
-						tracks.forEach((track) => track.stop());
-						setStreamTrack(stream);
-						setAudioStreamEnabled(audio);
-						setVideoStreamEnabled(video);
-					});
+				getAudioAndVideo(true, false).then((stream: MediaStream) => {
+					const tracks = stream.getTracks();
+					tracks.forEach((track) => track.stop());
+					setStreamTrack(stream);
+					setAudioStreamEnabled(audio);
+					setVideoStreamEnabled(video);
+				});
 			} else {
-				navigator.mediaDevices
-					.getUserMedia({ audio: { noiseSuppression: true, echoCancellation: true } })
-					.then((stream: MediaStream) => {
+				getAudioAndVideo({ noiseSuppression: true, echoCancellation: true }).then(
+					(stream: MediaStream) => {
 						const tracks = stream.getTracks();
 						tracks.forEach((track) => track.stop());
-					});
-				navigator.mediaDevices
-					.getUserMedia({
-						audio: audio
-							? audioId
-								? {
-										deviceId: { exact: audioId } /* , autoGainControl: false */,
-										noiseSuppression: true,
-										echoCancellation: true
-								  }
-								: { noiseSuppression: true, echoCancellation: true }
-							: false,
-						video: video ? (videoId ? { deviceId: { exact: videoId } } : true) : false
-					})
+					}
+				);
+				getAudioAndVideo(
+					audio
+						? audioId
+							? {
+									deviceId: { exact: audioId },
+									noiseSuppression: true,
+									echoCancellation: true
+							  }
+							: { noiseSuppression: true, echoCancellation: true }
+						: false,
+					video ? (videoId ? { deviceId: { exact: videoId } } : true) : false
+				)
 					.then((stream: MediaStream) => {
 						setStreamTrack(stream);
 						setAudioStreamEnabled(audio);
@@ -202,62 +200,48 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 	);
 
 	const updateListOfDevices = useCallback(() => {
-		if (!BrowserUtils.isChrome()) {
+		navigator.mediaDevices
+			.enumerateDevices()
+			.then((devices) => {
+				const audioInputs: [] | MediaDeviceInfo[] | any = filter(
+					devices,
+					(device) => device.kind === 'audioinput' && device
+				);
+				const videoInputs: [] | MediaDeviceInfo[] | any = filter(
+					devices,
+					(device: MediaDeviceInfo) => device.kind === 'videoinput' && device
+				);
+				setAudioMediaList(audioInputs);
+				setVideoMediaList(videoInputs);
+			})
+			.catch();
+	}, []);
+
+	useEffect(() => {
+		if (BrowserUtils.isFirefox()) {
 			navigator.mediaDevices.enumerateDevices().then((list) => {
 				const firstAudioInputForPermissions = find(
 					list,
 					(device: MediaDeviceInfo) => device.kind === 'audioinput'
 				);
 				if (firstAudioInputForPermissions) {
-					navigator.mediaDevices
-						.getUserMedia({
-							audio: { deviceId: { exact: firstAudioInputForPermissions.deviceId } },
-							video: videoStreamEnabled
-						})
-						.then((stream: MediaStream) => {
-							const tracks: MediaStreamTrack[] = stream.getTracks();
-							tracks.forEach((track) => track.stop());
-							navigator.mediaDevices
-								.enumerateDevices()
-								.then((devices) => {
-									const audioInputs: [] | MediaDeviceInfo[] | any = filter(
-										devices,
-										(device) => device.kind === 'audioinput' && device
-									);
-									const videoInputs: [] | MediaDeviceInfo[] | any = filter(
-										devices,
-										(device: MediaDeviceInfo) => device.kind === 'videoinput' && device
-									);
-									setAudioMediaList(audioInputs);
-									setVideoMediaList(videoInputs);
-								})
-								.catch();
-						});
+					getAudioAndVideo(
+						{ deviceId: { exact: firstAudioInputForPermissions.deviceId } },
+						videoStreamEnabled
+					).then((stream: MediaStream) => {
+						const tracks: MediaStreamTrack[] = stream.getTracks();
+						tracks.forEach((track) => track.stop());
+						updateListOfDevices();
+					});
 				}
 			});
 		} else {
-			navigator.mediaDevices
-				.enumerateDevices()
-				.then((devices) => {
-					const audioInputs: [] | MediaDeviceInfo[] | any = filter(
-						devices,
-						(device) => device.kind === 'audioinput' && device
-					);
-					const videoInputs: [] | MediaDeviceInfo[] | any = filter(
-						devices,
-						(device: MediaDeviceInfo) => device.kind === 'videoinput' && device
-					);
-					setAudioMediaList(audioInputs);
-					setVideoMediaList(videoInputs);
-				})
-				.catch();
+			updateListOfDevices();
 		}
-	}, [videoStreamEnabled]);
+	}, [audioStreamEnabled, updateListOfDevices, videoStreamEnabled]);
 
 	useEffect(() => {
-		updateListOfDevices();
 		navigator.mediaDevices.addEventListener('devicechange', updateListOfDevices);
-
 		return (): void => {
 			navigator.mediaDevices.removeEventListener('devicechange', updateListOfDevices);
 		};
@@ -304,7 +288,12 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 	const redirectToMeetingAndInitWebRTC = useCallback(
 		(meetingId: string): void => {
 			const peerConnectionConfig = new PeerConnConfig();
-			createBidirectionalAudioConn(meetingId, peerConnectionConfig, audioStreamEnabled);
+			createBidirectionalAudioConn(
+				meetingId,
+				peerConnectionConfig,
+				audioStreamEnabled,
+				selectedAudioStream
+			);
 			setSelectedDeviceId(meetingId, STREAM_TYPE.AUDIO, selectedAudioStream);
 			// createVideoInConn(meetingId, peerConnectionConfig);
 			if (videoStreamEnabled) {
@@ -389,8 +378,6 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 		]
 	);
 
-	const stopProp = useCallback((ev) => ev.stopPropagation(), []);
-
 	return (
 		<CustomModal
 			background={'text'}
@@ -401,7 +388,6 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 			onClose={onCloseHandler}
 			closeIconTooltip={closeModalTooltip}
 			customFooter={modalFooter}
-			onClick={stopProp}
 		>
 			<Padding top="small" />
 			<Container
