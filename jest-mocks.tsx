@@ -74,8 +74,6 @@ jest.mock('@zextras/carbonio-shell-ui', () => ({
 	})
 }));
 
-export const RTCPeerConnection: jest.Mock = jest.fn();
-
 // MOCKED USEROUTING
 export const mockGoToRoomPage: jest.Mock = jest.fn();
 export const mockGoToMainPage: jest.Mock = jest.fn();
@@ -111,7 +109,6 @@ jest.mock('./src/network/soap/AutoCompleteRequest', () => ({
 // MOCKED APIs
 export const mockedAddRoomRequest: jest.Mock = jest.fn();
 export const mockedGetRoomRequest: jest.Mock = jest.fn();
-
 export const mockedDeleteRoomRequest: jest.Mock = jest.fn();
 export const mockedClearHistoryRequest: jest.Mock = jest.fn();
 export const mockedUpdateRoomPictureRequest: jest.Mock = jest.fn();
@@ -276,6 +273,7 @@ jest.mock('./src/network', () => ({
 	}
 }));
 
+// MOCK MEDIADEVICES
 const mockedGetUserMediaPromise: jest.Mock = jest.fn(() => ({
 	getTracks: jest.fn(() => ({ forEach: jest.fn() }))
 }));
@@ -416,4 +414,7 @@ Object.defineProperty(window, 'MediaStream', {
 			addTrack: jest.fn()
 		};
 	})
+});
+Object.defineProperty(window, 'open', {
+	value: jest.fn()
 });
