@@ -7,7 +7,7 @@ import { filter, findIndex, size, slice } from 'lodash';
 import { useEffect, useState } from 'react';
 
 import { getMyLastMarkerOfRoom, getRoomHasMarkers } from '../../store/selectors/MarkersSelectors';
-import { getTextMessagesSelector } from '../../store/selectors/MessagesSelectors';
+import { getReadableMessagesSelector } from '../../store/selectors/MessagesSelectors';
 import { getUserId } from '../../store/selectors/SessionSelectors';
 import { getRoomUnreadsSelector } from '../../store/selectors/UnreadsCounterSelectors';
 import useStore from '../../store/Store';
@@ -15,7 +15,7 @@ import useStore from '../../store/Store';
 const useFirstUnreadMessage = (roomId: string): string | undefined => {
 	const unreadCount = useStore((store) => getRoomUnreadsSelector(store, roomId));
 	const myUserId = useStore(getUserId);
-	const messages = useStore((store) => getTextMessagesSelector(store, roomId));
+	const messages = useStore((store) => getReadableMessagesSelector(store, roomId));
 	const hasConversationMarkers = useStore((store) => getRoomHasMarkers(store, roomId));
 	const myLastMarker = useStore((store) => getMyLastMarkerOfRoom(store, roomId));
 
@@ -35,7 +35,7 @@ const useFirstUnreadMessage = (roomId: string): string | undefined => {
 				);
 				// If last message read by me exist on local store
 				if (lastMessageReadByMe !== -1) {
-					// Take only messages text messages from other that come later (all unread text messages)
+					// Take only messages from other that come later (all unread messages)
 					const unreadMessages = slice(messages, lastMessageReadByMe + 1);
 					const othersMessages = filter(unreadMessages, (message) => message.from !== myUserId);
 					// The fist of them is the fist unread text message

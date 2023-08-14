@@ -111,7 +111,8 @@ export function decodeXMPPMessageStanza(
 				type: MessageType.CONFIGURATION_MSG,
 				from: getId(resource),
 				operation,
-				value
+				value,
+				read: calcReads(messageDate, roomId)
 			};
 			return message;
 		}

@@ -120,7 +120,8 @@ const mockedConfigurationMessage: ConfigurationMessage = {
 	type: MessageType.CONFIGURATION_MSG,
 	operation: OperationType.ROOM_PICTURE_DELETED,
 	value: '',
-	from: user1Be.id
+	from: user1Be.id,
+	read: MarkerStatus.READ
 };
 
 describe('Expanded sidebar list item', () => {

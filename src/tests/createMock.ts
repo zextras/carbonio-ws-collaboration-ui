@@ -62,6 +62,7 @@ export const createMockConfigurationMessage = (
 	operation: OperationType.ROOM_NAME_CHANGED,
 	value: 'Right',
 	from: 'Wrong',
+	read: MarkerStatus.UNREAD,
 	...fields
 });
 export const createMockDateMessage = (fields?: GenericFieldsType): DateMessage => ({

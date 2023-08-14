@@ -46,6 +46,12 @@ const retrieveMessageUserInfo = (message: Message, users: UsersMap): void => {
 			UsersApi.getDebouncedUser(message.forwarded.from);
 	} else if (message.type === MessageType.CONFIGURATION_MSG) {
 		if (!users[message.from]) UsersApi.getDebouncedUser(message.from);
+		if (
+			message.operation === OperationType.MEMBER_ADDED ||
+			message.operation === OperationType.MEMBER_REMOVED
+		) {
+			if (!users[message.value]) UsersApi.getDebouncedUser(message.value);
+		}
 	}
 };
 
@@ -199,7 +205,8 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 						type: MessageType.CONFIGURATION_MSG,
 						operation: OperationType.ROOM_CREATION,
 						value: '',
-						from: ''
+						from: '',
+						read: MarkerStatus.READ
 					};
 					draft.messages[roomId].splice(1, 0, creationMsg);
 				}
@@ -212,16 +219,19 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 		set(
 			produce((draft: RootStore) => {
 				if (!draft.messages[roomId]) draft.messages[roomId] = [];
+
 				draft.messages[roomId] = map(draft.messages[roomId], (message: Message) => {
-					// Avoid updating messages which are not text messages or only placeholder
+					// Updating text and configuration messages which are not read yet
+					const readable =
+						message.type === MessageType.TEXT_MSG || message.type === MessageType.CONFIGURATION_MSG;
+
 					if (
-						message.type !== MessageType.TEXT_MSG ||
-						message.read === MarkerStatus.READ ||
-						message.read === MarkerStatus.PENDING
+						readable &&
+						(message.read === MarkerStatus.UNREAD || message.read === MarkerStatus.READ_BY_SOMEONE)
 					) {
-						return message;
+						message.read = calcReads(message.date, roomId);
 					}
-					message.read = calcReads(message.date, roomId);
+
 					return message;
 				});
 			}),
@@ -317,7 +327,7 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 				remove(draft.messages[roomId], (message) => message.id === messageId);
 			}),
 			false,
-			'MESSAGES/remove_PLACEHOLDER_MESSAGE'
+			'MESSAGES/REMOVE_PLACEHOLDER_MESSAGE'
 		);
 	}
 });

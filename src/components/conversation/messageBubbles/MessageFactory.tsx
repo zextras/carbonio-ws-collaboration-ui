@@ -94,7 +94,12 @@ const MessageFactory = ({
 				);
 			}
 			case MessageType.CONFIGURATION_MSG: {
-				return <ConfigurationBubble message={message} refEl={messageRef} />;
+				return (
+					<>
+						{isFirstNewMessage && newMessagesComponent}
+						<ConfigurationBubble message={message} refEl={messageRef} />
+					</>
+				);
 			}
 			case MessageType.DATE_MSG: {
 				return <DateBubble message={message} refEl={messageRef} />;

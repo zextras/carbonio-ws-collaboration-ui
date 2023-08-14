@@ -106,7 +106,8 @@ const mockedConfigurationMessage: ConfigurationMessage = {
 	type: MessageType.CONFIGURATION_MSG,
 	operation: OperationType.ROOM_PICTURE_UPDATED,
 	value: room.id,
-	from: user2Be.id
+	from: user2Be.id,
+	read: MarkerStatus.READ
 };
 
 const messages: TextMessage[] = [

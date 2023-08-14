@@ -47,9 +47,8 @@ export const useUnreadsCountStoreSlice = (set: (...any: any) => void): UnreadsCo
 				const unreadByMe = filter(
 					draft.messages[roomId],
 					(message) =>
-						message.type === MessageType.TEXT_MSG &&
-						draft.session.id !== undefined &&
-						message.from !== draft.session.id &&
+						(message.type === MessageType.CONFIGURATION_MSG ||
+							(message.type === MessageType.TEXT_MSG && message.from !== draft.session.id)) &&
 						(!lastMarkedMessage ||
 							(lastMarkedMessage && !isBefore(message.date, lastMarkedMessage.date)))
 				);

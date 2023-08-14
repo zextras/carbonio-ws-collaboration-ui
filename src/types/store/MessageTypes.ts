@@ -39,6 +39,7 @@ export type ConfigurationMessage = BasicMessage & {
 	operation: OperationType;
 	value: string;
 	from: string;
+	read: MarkerStatus;
 };
 
 export enum OperationType {

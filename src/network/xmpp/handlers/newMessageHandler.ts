@@ -27,16 +27,12 @@ export function onNewMessageStanza(this: IXMPPClient, message: Element): true {
 					store.newMessage(newMessage);
 
 					if (newMessage.from === sessionId) {
-						// Sent my message as read
+						// Set my message as read
 						this.readMessage(newMessage.roomId, newMessage.id);
 					} else {
 						sendCustomEvent(EventName.NEW_MESSAGE, newMessage);
-
-						// Show browser notification
-						displayMessageBrowserNotification(newMessage);
-
-						// Increment unread counter
 						store.incrementUnreadCount(newMessage.roomId);
+						displayMessageBrowserNotification(newMessage);
 					}
 
 					// Request message subject of reply
@@ -53,6 +49,12 @@ export function onNewMessageStanza(this: IXMPPClient, message: Element): true {
 				}
 				case MessageType.CONFIGURATION_MSG: {
 					store.newMessage(newMessage);
+					if (newMessage.from === sessionId) {
+						this.readMessage(newMessage.roomId, newMessage.id);
+					} else {
+						sendCustomEvent(EventName.NEW_MESSAGE, newMessage);
+						store.incrementUnreadCount(newMessage.roomId);
+					}
 					break;
 				}
 				case MessageType.FASTENING: {

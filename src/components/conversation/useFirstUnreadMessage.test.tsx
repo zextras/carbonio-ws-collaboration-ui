@@ -157,7 +157,7 @@ describe('useFirstUnreadMessage with all types of messages', () => {
 		// Update unread
 		useStore.getState().updateUnreadCount(room.id);
 		// Check number unread
-		expect(useStore.getState().unreads[room.id]).toBe(3);
+		expect(useStore.getState().unreads[room.id]).toBe(4);
 		const { result } = renderHook(() => useFirstUnreadMessage(room.id));
 		expect(result.current).toBeUndefined();
 	});
@@ -169,7 +169,7 @@ describe('useFirstUnreadMessage with all types of messages', () => {
 		useStore.getState().updateUnreadMessages(room.id);
 		useStore.getState().updateUnreadCount(room.id);
 		// Check number unread
-		expect(useStore.getState().unreads[room.id]).toBe(2);
+		expect(useStore.getState().unreads[room.id]).toBe(3);
 		// Check customHook result, deleted is set as message to read
 		const { result } = renderHook(() => useFirstUnreadMessage(room.id));
 		expect(result.current).toBe('messageId2');
@@ -190,6 +190,7 @@ describe('useFirstUnreadMessage with all types of messages', () => {
 		const { result } = renderHook(() => useFirstUnreadMessage(room.id));
 		expect(result.current).toBe('noUnread');
 	});
+
 	test('Reading a message before a configuration message', () => {
 		// Mark last message as read
 		const myLastMarker = createMockMarker({ from: myUserId, messageId: 'messageId3' });
@@ -197,9 +198,9 @@ describe('useFirstUnreadMessage with all types of messages', () => {
 		useStore.getState().updateUnreadMessages(room.id);
 		useStore.getState().updateUnreadCount(room.id);
 		// Check number unread
-		expect(useStore.getState().unreads[room.id]).toBe(0);
+		expect(useStore.getState().unreads[room.id]).toBe(1);
 		// Check customHook result
 		const { result } = renderHook(() => useFirstUnreadMessage(room.id));
-		expect(result.current).toBe('noUnread');
+		expect(result.current).toBe('messageId4');
 	});
 });

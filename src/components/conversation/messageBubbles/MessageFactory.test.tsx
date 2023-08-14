@@ -137,7 +137,7 @@ describe('Message Factory', () => {
 		const bubble = screen.getByTestId(`configuration_msg-${message.id}`);
 		expect(bubble).toBeVisible();
 		const newMessages = screen.queryByTestId(`new_msg`);
-		expect(newMessages).not.toBeInTheDocument();
+		expect(newMessages).toBeInTheDocument();
 	});
 
 	test('Render DateMessage', () => {

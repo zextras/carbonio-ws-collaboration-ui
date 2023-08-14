@@ -5,7 +5,7 @@
  */
 
 import { Container } from '@zextras/carbonio-design-system';
-import { debounce, find, findLast, groupBy, map } from 'lodash';
+import { debounce, find, groupBy, map } from 'lodash';
 import moment from 'moment-timezone';
 import React, { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
@@ -81,46 +81,23 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 	const firstNewMessage = useFirstUnreadMessage(roomId);
 
 	const readMessage = useCallback(
-		(refId) => {
-			// Message under the scroll position
-			const message: Message | undefined = find(roomMessages, (message) => refId === message.id);
-
-			// Conditions to mark the message as read
-			if (inputHasFocus && message) {
-				// If is a text message
-				if (message.type === MessageType.TEXT_MSG && message.from !== myUserId) {
-					// set as ready to be mark when there isn't a marker because it's means I never saw a message of that conversation
-					// or my last marker is older and isn't present in the list of messages in the store
-					let canMessageBeMarkedAsRead = true;
-					// check if message is already marked as read by me or not
-					// if not it could mark as read
-					if (myLastMarker && find(roomMessages, (msg) => msg.id === myLastMarker.messageId)) {
-						const markedMsg = find(roomMessages, (msg) => msg.id === myLastMarker.messageId);
-						canMessageBeMarkedAsRead =
-							!!markedMsg &&
-							markedMsg.date !== message.date &&
-							isBefore(markedMsg.date, message.date);
-					}
-					if (canMessageBeMarkedAsRead) {
-						xmppClient.readMessage(message.roomId, message.id);
-					}
-					// If the last message is a configuration message we need to mark as read the last text message in the history
-					// otherwise when user focus the conversation we will not be able to mark the message as read
-				} else if (message.type === MessageType.CONFIGURATION_MSG) {
-					const lastMessageNotMineFromHistory = findLast(
-						roomMessages,
-						(message) => message.type === MessageType.TEXT_MSG && message.from !== myUserId
-					) as TextMessage;
-					if (
-						lastMessageNotMineFromHistory &&
-						myLastMarker &&
-						myLastMarker.messageId !== lastMessageNotMineFromHistory.id
-					) {
-						xmppClient.readMessage(
-							lastMessageNotMineFromHistory.roomId,
-							lastMessageNotMineFromHistory.id
-						);
-					}
+		(refId: string) => {
+			const selectedMessage = find(roomMessages, (message) => refId === message.id);
+			const isReadable =
+				(selectedMessage?.type === MessageType.TEXT_MSG && selectedMessage.from !== myUserId) ||
+				selectedMessage?.type === MessageType.CONFIGURATION_MSG;
+			if (inputHasFocus && isReadable) {
+				// Mark as read when:
+				// - there isn't a marker because it's means I never saw a message of that conversation
+				// - marked message isn't in the list of messages in the store (marker is older than the oldest message)
+				// - marked message is older than the message that is on the screen
+				const markedMsg = find(roomMessages, (msg) => msg.id === myLastMarker?.messageId);
+				const canMessageBeMarkedAsRead =
+					!!markedMsg &&
+					markedMsg.date !== selectedMessage.date &&
+					isBefore(markedMsg.date, selectedMessage.date);
+				if (!myLastMarker || !markedMsg || canMessageBeMarkedAsRead) {
+					xmppClient.readMessage(selectedMessage.roomId, selectedMessage.id);
 				}
 			}
 		},
@@ -271,23 +248,11 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 	useEffect(() => {
 		if (!actualScrollPosition && roomMessages.length >= 1 && !isLoadedFirstTime && inputHasFocus) {
 			const lastMessage = roomMessages[roomMessages.length - 1];
-			if (
-				lastMessage.type === MessageType.TEXT_MSG &&
-				lastMessage.from !== myUserId &&
-				(!myLastMarker || lastMessage.id !== myLastMarker?.messageId)
-			) {
-				xmppClient.readMessage(lastMessage.roomId, lastMessage.id);
+			if (lastMessage) {
+				readMessage(lastMessage.id);
 			}
 		}
-	}, [
-		isLoadedFirstTime,
-		roomMessages,
-		actualScrollPosition,
-		inputHasFocus,
-		myLastMarker,
-		myUserId,
-		xmppClient
-	]);
+	}, [isLoadedFirstTime, roomMessages, actualScrollPosition, readMessage, inputHasFocus]);
 
 	useEffect(() => {
 		// scroll to the previous position after have changed the conversation
