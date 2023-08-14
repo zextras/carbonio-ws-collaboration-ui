@@ -7,6 +7,7 @@
 import { screen } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event/setup/setup';
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 
 import ConversationHeaderMeetingButton from './ConversationHeaderMeetingButton';
 import { mockedAddRoomRequest, mockGoToRoomPage } from '../../../../jest-mocks';
@@ -223,5 +224,28 @@ describe('Conversation header meeting button - group', () => {
 		expect(goToPrivateChatButton).toHaveLength(1);
 		await user.click(goToPrivateChatButton[0]);
 		expect(mockGoToRoomPage).toBeCalled();
+	});
+	test('open meeting', async () => {
+		const meetingOpen = jest.spyOn(window, 'open');
+		const { user } = storeSetupGroupMeetingWithoutMe();
+		const joinMeetingButton = screen.getByTestId('join_meeting_button');
+		expect(joinMeetingButton).toBeVisible();
+		expect(joinMeetingButton).not.toBeDisabled();
+
+		await user.click(joinMeetingButton);
+		expect(meetingOpen).toHaveBeenCalledTimes(1);
+	});
+	test("hide dropdown when there's no one else inside the meeting", async () => {
+		const { user } = storeSetupGroupMeetingWithoutMe();
+		const participantListButton = screen.getByTestId('participant_list_button');
+		expect(screen.getByTestId('participant_dropdown')).not.toBeVisible();
+		await user.click(participantListButton);
+		expect(screen.getByTestId('participant_dropdown')).toBeVisible();
+
+		act(() => {
+			useStore.getState().removeParticipant('meetingId', 'user2Id');
+			useStore.getState().removeParticipant('meetingId', 'user3Id');
+		});
+		expect(screen.getByTestId('participant_dropdown')).not.toBeVisible();
 	});
 });

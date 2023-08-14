@@ -58,6 +58,19 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 	const [audioMediaList, setAudioMediaList] = useState<[] | MediaDeviceInfo[]>([]);
 	let timeout: string | number | NodeJS.Timeout | undefined;
 
+	useEffect(() => {
+		if (selectedAudioDeviceId != null) {
+			getAudioStream(true, true, selectedAudioDeviceId).then((stream) => {
+				bidirectionalAudioConn?.updateLocalStreamTrack(stream).then(() => {
+					MeetingsApi.updateAudioStreamStatus(meetingId, true).then(() => {
+						setAudioStatus(true);
+					});
+				});
+			});
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
+
 	const handleHoverMouseMove = useCallback(
 		(e) => {
 			clearTimeout(timeout);
@@ -154,9 +167,17 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 						});
 					}
 				},
+				selected: audioItem.deviceId === selectedAudioDeviceId,
 				value: audioItem.deviceId
 			})),
-		[audioMediaList, audioStatus, bidirectionalAudioConn, meetingId, setSelectedDeviceId]
+		[
+			audioMediaList,
+			audioStatus,
+			bidirectionalAudioConn,
+			meetingId,
+			selectedAudioDeviceId,
+			setSelectedDeviceId
+		]
 	);
 
 	useEffect(() => {
