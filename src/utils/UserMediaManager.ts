@@ -92,16 +92,24 @@ export const getVideoStream = (deviceId?: string): Promise<MediaStream> =>
 			});
 	});
 
-export const getAudioAndVideo = (): Promise<MediaStream> =>
+export const getAudioAndVideo = (
+	audio?:
+		| boolean
+		| {
+				noiseSuppression?: boolean | true;
+				echoCancellation?: boolean | true;
+				deviceId?: { exact: string };
+		  },
+	video?: boolean | { deviceId?: { exact: string } }
+): Promise<MediaStream> =>
 	new Promise((resolve, reject) => {
 		navigator.mediaDevices
 			.getUserMedia({
-				video: CONSTRAINT_ASPECT_RATIO,
-				audio: true
+				video,
+				audio
 			})
 			.then((stream: MediaStream) => {
 				resolve(stream);
-				console.debug(stream);
 			})
 			.catch((err) => {
 				console.error('Error while requesting video and audio tracks', err);

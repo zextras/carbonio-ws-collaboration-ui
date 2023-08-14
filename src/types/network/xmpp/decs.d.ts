@@ -115,7 +115,7 @@ declare global {
 			XHTML_IM = 'http://jabber.org/protocol/xhtml-im',
 			XHTML = 'http://www.w3.org/1999/xhtml',
 			XMPP_CORRECT = 'urn:xmpp:message-correct:0',
-			XMPP_RETRACT = 'urn:xmpp:message-retract:0',
+			XMPP_RETRACT = 'urn:esl:message-retract-by-stanza-id:0',
 			XMPP_FASTEN = 'urn:xmpp:fasten:0'
 		}
 

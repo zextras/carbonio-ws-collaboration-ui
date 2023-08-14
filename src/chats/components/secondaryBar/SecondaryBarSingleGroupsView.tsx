@@ -39,7 +39,7 @@ const ConversationFilterContainer = styled(Container)`
 
 const SecondaryBarSingleGroupsView: React.FC<SecondaryBarSingleGroupsView> = ({ expanded }) => {
 	const [t] = useTranslation();
-	const showConversationList = t('tooltip.showConversationList', 'Show conversation list');
+	const showConversationList = t('tooltip.showConversationList', 'Show conversations list');
 	const noMatchLabel = t('participantsList.noMatch', 'There are no items that match this search');
 
 	const sessionId: string | undefined = useStore((store) => store.session.id);

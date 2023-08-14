@@ -16,7 +16,8 @@ import { MarkerStatus } from '../../../types/store/MarkersTypes';
 import {
 	AffiliationMessage,
 	ConfigurationMessage,
-	MessageType
+	MessageType,
+	OperationType
 } from '../../../types/store/MessageTypes';
 import { RootStore } from '../../../types/store/StoreTypes';
 import { User } from '../../../types/store/UserTypes';
@@ -117,7 +118,7 @@ const mockedConfigurationMessage: ConfigurationMessage = {
 	roomId: mockedGroup.id,
 	date: 123456789,
 	type: MessageType.CONFIGURATION_MSG,
-	operation: 'roomPictureDeleted',
+	operation: OperationType.ROOM_PICTURE_DELETED,
 	value: '',
 	from: user1Be.id
 };

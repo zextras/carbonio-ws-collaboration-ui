@@ -604,17 +604,4 @@ describe('Upload attachment view', () => {
 		const composer = await screen.findByTestId('textAreaComposer');
 		expect((composer as HTMLTextAreaElement).value).toBe('');
 	});
-	test('Remove description - file is selected and so the input has the description and user click the clean button => description will be removed', async () => {
-		const { user, store } = storeSetupAdvanced();
-		const fileOne = createMockFileToUpload({ hasFocus: true });
-		act(() => store.setFilesToAttach(mockedRoom.id, [fileOne]));
-		const inputText = 'description fileOne';
-		const composerTextArea = screen.getByRole('textbox');
-		await user.type(composerTextArea, inputText);
-		const clearInputButton = screen.getByTestId('icon: BackspaceOutline');
-		expect(clearInputButton).toBeVisible();
-		await user.click(clearInputButton);
-		const composer = await screen.findByTestId('textAreaComposer');
-		expect((composer as HTMLTextAreaElement).value).toBe('');
-	});
 });

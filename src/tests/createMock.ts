@@ -20,6 +20,7 @@ import {
 	DateMessage,
 	MessageFastening,
 	MessageType,
+	OperationType,
 	TextMessage
 } from '../types/store/MessageTypes';
 import { RoomType } from '../types/store/RoomTypes';
@@ -75,7 +76,7 @@ export const createMockConfigurationMessage = (
 	roomId: 'roomId',
 	date: 1661441294393,
 	type: MessageType.CONFIGURATION_MSG,
-	operation: 'roomNameChanged',
+	operation: OperationType.ROOM_NAME_CHANGED,
 	value: 'Right',
 	from: 'Wrong',
 	...fields

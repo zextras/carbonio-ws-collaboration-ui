@@ -64,22 +64,46 @@ const mockedRepliedTextMessage = createMockTextMessage({
 const mockedAttachmentMessageB = createMockTextMessage({
 	roomId: mockedRoom.id,
 	from: user1Be.id,
-	attachment: { id: 'pngAttachmentId', name: 'image.png', mimeType: 'image/png', size: 21 }
+	attachment: {
+		id: 'pngAttachmentId',
+		name: 'image.png',
+		mimeType: 'image/png',
+		size: 21,
+		area: '34x23'
+	}
 });
 const mockedAttachmentMessageKb = createMockTextMessage({
 	roomId: mockedRoom.id,
 	from: user1Be.id,
-	attachment: { id: 'pngAttachmentId', name: 'image.png', mimeType: 'image/png', size: 21412 }
+	attachment: {
+		id: 'pngAttachmentId',
+		name: 'image.png',
+		mimeType: 'image/png',
+		size: 21412,
+		area: '350x240'
+	}
 });
 const mockedAttachmentMessageMb = createMockTextMessage({
 	roomId: mockedRoom.id,
 	from: user1Be.id,
-	attachment: { id: 'pngAttachmentId', name: 'image.png', mimeType: 'image/png', size: 3349586 }
+	attachment: {
+		id: 'pngAttachmentId',
+		name: 'image.png',
+		mimeType: 'image/png',
+		size: 3349586,
+		area: '34x23'
+	}
 });
 const mockedAttachmentMessageGb = createMockTextMessage({
 	roomId: mockedRoom.id,
 	from: user1Be.id,
-	attachment: { id: 'pngAttachmentId', name: 'image.jpeg', mimeType: 'image/png', size: 5697830293 }
+	attachment: {
+		id: 'pngAttachmentId',
+		name: 'image.jpeg',
+		mimeType: 'image/png',
+		size: 5697830293,
+		area: '34x23'
+	}
 });
 
 const mockedRepliedTextMessageWithAttachment = createMockTextMessage({
@@ -88,7 +112,13 @@ const mockedRepliedTextMessageWithAttachment = createMockTextMessage({
 	repliedMessage: createMockTextMessage({
 		id: 'insideId',
 		text: 'Hi!',
-		attachment: { id: 'pngAttachmentId', name: 'image.png', mimeType: 'image/png', size: 21412 }
+		attachment: {
+			id: 'pngAttachmentId',
+			name: 'image.png',
+			mimeType: 'image/png',
+			size: 21412,
+			area: '34x23'
+		}
 	})
 });
 

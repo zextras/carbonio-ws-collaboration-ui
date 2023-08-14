@@ -22,7 +22,6 @@ import {
 
 import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
 import { UsersApi } from '../../network';
-import { calcReads } from '../../network/xmpp/utility/decodeXMPPMessageStanza';
 import { MarkerStatus } from '../../types/store/MarkersTypes';
 import {
 	AffiliationMessage,
@@ -35,6 +34,7 @@ import {
 import { RoomType } from '../../types/store/RoomTypes';
 import { MessagesStoreSlice, RootStore } from '../../types/store/StoreTypes';
 import { UsersMap } from '../../types/store/UserTypes';
+import { calcReads } from '../../utils/calcReads';
 import { datesAreFromTheSameDay, isBefore, isStrictlyBefore } from '../../utils/dateUtil';
 
 // Retrieve user information about userId in the various type of message (only if it is unknown)

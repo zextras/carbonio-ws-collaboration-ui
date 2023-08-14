@@ -18,6 +18,7 @@
         "editDetails": "Edit details",
         "editRoom": "Edit {{roomName}}",
         "editYourMessage": "Edit your message",
+        "enter": "Enter",
         "forward": "Forward",
         "forwarded": "forwarded",
         "joinMeeting": "Join meeting",
@@ -113,7 +114,20 @@
         "expandChat": "Expand chat",
         "expandParticipantsListTooltip": "Expand participants list",
         "extendChat": "Extend chat",
+        "interactions": {
+            "audioDisabled": "Audio disabled",
+            "audioEnabled": "Audio enabled",
+            "cameraDisabled": "Camera disabled",
+            "cameraEnabled": "Camera enabled",
+            "disableAudio": "Disable Audio",
+            "disableVideo": "Disable Video",
+            "enableAudio": "Enable Audio",
+            "enableVideo": "Enable Video",
+            "playMic": "Start microphone testing",
+            "stopMic": "Stop microphone testing"
+        },
         "joinMeeting": "Join meeting",
+        "joinMeetingDescription": "How do you want to join this meeting?",
         "minimizeChat": "Minimize chat",
         "newMeetingNotification": {
             "sendAQuickMessage": "Send a quick message",
@@ -127,7 +141,12 @@
             "title": "One meeting's participant",
             "title_plural": "{{count}} meeting's participants"
         },
+        "setInputDescription": "Set your input devices by choosing them from dropdown menu",
         "startMeeting": "Start meeting",
+        "startModal": {
+            "enterOneToOneMeetingTitle": "Start meeting with {{meetingTitle}}",
+            "enterRoomMeetingTitle": "Participate to {{meetingTitle}} meeting"
+        },
         "waitingParticipants": "Waiting for participants to join..."
     },
     "message": {
@@ -136,7 +155,7 @@
         "edited": "edited"
     },
     "modal": {
-        "clearHistoryDescription": "You are about to clean up your conversation history, remember that this action cannot be undone. The history of other members will not be deleted.",
+        "clearHistoryDescription": "You're cleaning your conversation history, please note that this action is irreversible. The history will be deleted for you and not for the other members.",
         "creation": {
             "addUserLimit": {
                 "limitReached": "You have selected the maximum number of members for a group",
@@ -152,7 +171,7 @@
         "deleteGroup": "Delete Group",
         "deleteGroupLabel": "Are you sure to delete this Group?",
         "deleteMessageTitle": "Delete selected message?",
-        "deleteMessageTitleDescription": "If you remove the entire content of the message, it will no longer be available and will consequently be deleted.",
+        "deleteMessageTitleDescription": "You're deleting the message, it will no longer be available",
         "deleteRoom": "Delete Room",
         "deleteRoomLabel": "Are you sure to delete this Room?",
         "deleteUserDescription": "Are you sure you want to remove this member?",
@@ -230,7 +249,7 @@
         "leaveAndDelete": "Leave and delete the conversation",
         "leaveConversation": "Leave conversation",
         "memberIsModerator": "This member is a moderator",
-        "messageActions": " Message actions",
+        "messageActions": "Message actions",
         "messageComposer": "Message composer",
         "messageRead": "Read",
         "messageReceived": "Received",
@@ -240,8 +259,7 @@
         "pending": "Pending",
         "pinVideo": "Pin video",
         "promoteModerator": "Promote to moderator",
-        "promoteSomeoneElseToModerator": "Promote someone else to moderator to leave",
-        "removeCaption": "Remove caption",
+        "promoteSomeoneElseToModerator": "Before leaving you have to promote someone else to moderator",
         "removeToAddNewOne": "Remove someone to add new members",
         "room": {
             "resetPicture": "Reset picture",
@@ -250,7 +268,7 @@
         },
         "selectEmoji": "Select emoji",
         "sendMessage": "Send message",
-        "showConversationList": "Show conversation list",
+        "showConversationList": "Show conversations list",
         "unpinVideo": "Unpin video",
         "uploadAttachment": "Upload an attachment",
         "uploading": "Uploading",
