@@ -23,7 +23,6 @@ import {
 	getRoomNameSelector
 } from '../../../store/selectors/RoomsSelectors';
 import useStore from '../../../store/Store';
-import { UpdateRoomResponse } from '../../../types/network/responses/roomsResponses';
 
 type EditConversationProps = {
 	editModalOpen: boolean;
@@ -55,7 +54,6 @@ const EditConversationModal: FC<EditConversationProps> = ({
 	const editLabel = t('action.editRoom', `Edit ${roomName}`, {
 		roomName
 	});
-	const setRoomNameAndDescription = useStore((store) => store.setRoomNameAndDescription);
 
 	const [newName, setNewName] = useState<string>('');
 	const [newDescription, setNewDescription] = useState<string>('');
@@ -71,21 +69,18 @@ const EditConversationModal: FC<EditConversationProps> = ({
 		if (newName.length > 128)
 			return t('editModal.nameTooLong', 'Maximum title length is 128 characters');
 		return t('editModal.groupNameDetails', 'It is required and identifies the Group');
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [newName]);
+	}, [newName.length, t]);
 	const topicDescription = useMemo(() => {
 		if (newDescription.length > 256)
 			return t('editModal.topicTooLong', 'Maximum topic length is 256 characters');
 		return t('editModal.groupDescriptionDetails', 'It describes the subject of the Group');
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [newDescription]);
+	}, [newDescription.length, t]);
 
 	const editAction = useCallback(() => {
 		setButtonDisabled(true);
 		RoomsApi.updateRoom(roomId, { name: newName, description: newDescription })
-			.then((room: UpdateRoomResponse) => {
+			.then(() => {
 				setButtonDisabled(false);
-				setRoomNameAndDescription(room.id, room.name, room.description);
 				closeModal();
 			})
 			.catch(() => {
@@ -96,8 +91,7 @@ const EditConversationModal: FC<EditConversationProps> = ({
 					label: errorSnackbar
 				});
 			});
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [roomId, newName, newDescription, closeModal]);
+	}, [roomId, newName, newDescription, closeModal, createSnackbar, errorSnackbar]);
 
 	useEffect(() => {
 		setButtonDisabled(

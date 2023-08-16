@@ -52,11 +52,8 @@ export type PongEvent = {
 };
 
 type BasicEvent = {
-	id: string;
 	type: WsEventType;
-	from: string;
 	sentDate: string;
-	sessionId: string;
 };
 
 export type RoomCreatedEvent = BasicEvent & {

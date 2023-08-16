@@ -12,7 +12,6 @@ import ActionComponent from './ActionComponent';
 import DeleteConversationModal from './DeleteConversationModal';
 import useRouting from '../../../hooks/useRouting';
 import { RoomsApi } from '../../../network';
-import useStore from '../../../store/Store';
 import { RoomType } from '../../../types/store/RoomTypes';
 
 type DeleteProps = {
@@ -28,27 +27,18 @@ const DeleteConversationAction: FC<DeleteProps> = ({ roomId, type, numberOfMembe
 			return t('modal.deleteGroup', 'Delete Group');
 		}
 		return t('modal.deleteRoom', 'Delete Room');
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [type]);
-
-	const deleteRoom = useStore((state) => state.deleteRoom);
+	}, [t, type]);
 
 	const [deleteConversationModalOpen, setDeleteConversationModalOpen] = useState(false);
 
 	const { goToMainPage } = useRouting();
 
-	const deleteConversation = useCallback(() => {
-		RoomsApi.deleteRoom(roomId)
-			.then(() => {
-				deleteRoom(roomId);
-				goToMainPage();
-			})
-			.catch(() => null);
-	}, [deleteRoom, goToMainPage, roomId]);
+	const deleteConversation = useCallback(
+		() => RoomsApi.deleteRoom(roomId).then(() => goToMainPage()),
+		[goToMainPage, roomId]
+	);
 
-	const closeModal = useCallback(() => {
-		setDeleteConversationModalOpen(false);
-	}, []);
+	const closeModal = useCallback(() => setDeleteConversationModalOpen(false), []);
 
 	return (
 		<Container>

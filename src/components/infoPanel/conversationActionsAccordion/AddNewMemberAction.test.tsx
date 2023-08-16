@@ -116,6 +116,6 @@ describe('Add new member action', () => {
 		const addButton = await screen.findByTestId('add_new_member_button');
 		user.click(addButton);
 
-		await waitFor(() => expect(result.current.rooms[mockedRoom.id].members?.length).toBe(2));
+		await waitFor(() => expect(mockedAddRoomMemberRequest).toBeCalled());
 	});
 });

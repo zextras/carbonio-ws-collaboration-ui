@@ -94,9 +94,7 @@ describe('delete conversation action', () => {
 			result.current.setLoginInfo(user1Info.id, user1Info.name);
 			result.current.addRoom(testRoom);
 		});
-		mockedDeleteRoomRequest
-			.mockRejectedValueOnce("conversation's still here")
-			.mockReturnValueOnce('the conversation has been deleted');
+		mockedDeleteRoomRequest.mockReturnValueOnce('the conversation has been deleted');
 		mockGoToMainPage.mockReturnValueOnce('main page');
 		const { user } = setup(
 			<DeleteConversationAction roomId={testRoom.id} type={testRoom.type} numberOfMembers={2} />
@@ -110,12 +108,6 @@ describe('delete conversation action', () => {
 		const deleteButton = await screen.findByRole('button', { name: 'Delete' });
 
 		user.click(deleteButton);
-		await waitFor(() => expect(mockGoToMainPage).not.toBeCalled());
-
-		user.click(deleteButton);
 		await waitFor(() => expect(mockGoToMainPage).toBeCalled());
-
-		// store checks
-		expect(result.current.rooms[testRoom.id]).not.toBeDefined();
 	});
 });

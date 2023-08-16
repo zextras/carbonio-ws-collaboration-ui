@@ -188,8 +188,6 @@ const RoomPictureHandler: FC<RoomPictureProps> = ({ memberId, roomType, roomId }
 	const memberLastActivity: number | undefined = useStore((state) =>
 		getUserLastActivity(state, memberId)
 	);
-	const setRoomPictureUpdated = useStore((state) => state.setRoomPictureUpdated);
-	const setRoomPictureDeleted = useStore((state) => state.setRoomPictureDeleted);
 
 	const createSnackbar: CreateSnackbarFn = useContext(SnackbarManagerContext);
 
@@ -289,7 +287,6 @@ const RoomPictureHandler: FC<RoomPictureProps> = ({ memberId, roomType, roomId }
 		(e) => {
 			RoomsApi.updateRoomPicture(roomId, e.target.files[0])
 				.then(() => {
-					setRoomPictureUpdated(roomId, new Date().toISOString());
 					createSnackbar({
 						key: new Date().toLocaleString(),
 						type: 'info',
@@ -308,13 +305,12 @@ const RoomPictureHandler: FC<RoomPictureProps> = ({ memberId, roomType, roomId }
 					});
 				});
 		},
-		[createSnackbar, imageSizeTooLargeSnackbar, roomId, setRoomPictureUpdated, updatedImageSnackbar]
+		[createSnackbar, imageSizeTooLargeSnackbar, roomId, updatedImageSnackbar]
 	);
 
 	const onDeleteGroupImage = useCallback(() => {
 		RoomsApi.deleteRoomPicture(roomId)
 			.then(() => {
-				setRoomPictureDeleted(roomId);
 				createSnackbar({
 					key: new Date().toLocaleString(),
 					type: 'info',
@@ -332,8 +328,7 @@ const RoomPictureHandler: FC<RoomPictureProps> = ({ memberId, roomType, roomId }
 					autoHideTimeout: 5000
 				});
 			});
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [roomId]);
+	}, [createSnackbar, deletedImageSnackbar, errorDeleteImageSnackbar, roomId]);
 
 	const hoverContainer = useMemo(
 		() => (
