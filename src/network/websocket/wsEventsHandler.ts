@@ -41,19 +41,21 @@ export function wsEventsHandler(event: WsEvent): void {
 			}
 			break;
 		}
-		case WsEventType.ROOM_OWNER_CHANGED: {
+		case WsEventType.ROOM_OWNER_PROMOTED: {
 			if (eventArrivesFromAnotherSession) {
-				if (event.owner) {
-					state.promoteMemberToModerator(event.roomId, event.userId);
-				} else {
-					state.demoteMemberFromModerator(event.roomId, event.userId);
-				}
+				state.promoteMemberToModerator(event.roomId, event.userId);
+			}
+			break;
+		}
+		case WsEventType.ROOM_OWNER_DEMOTED: {
+			if (eventArrivesFromAnotherSession) {
+				state.demoteMemberFromModerator(event.roomId, event.userId);
 			}
 			break;
 		}
 		case WsEventType.ROOM_PICTURE_CHANGED: {
 			if (eventArrivesFromAnotherSession) {
-				state.setRoomPictureUpdated(event.roomId, event.sentDate);
+				state.setRoomPictureUpdated(event.roomId, event.updatedAt);
 			}
 			break;
 		}
@@ -65,14 +67,17 @@ export function wsEventsHandler(event: WsEvent): void {
 		}
 		case WsEventType.ROOM_MEMBER_ADDED: {
 			if (eventArrivesFromAnotherSession) {
-				if (event.member.userId === state.session.id) {
+				if (event.userId === state.session.id) {
 					RoomsApi.getRoom(event.roomId)
 						.then((response: GetRoomResponse) => {
 							state.addRoom(response);
 						})
 						.catch(() => null);
 				} else {
-					state.addRoomMember(event.roomId, event.member);
+					state.addRoomMember(event.roomId, {
+						userId: event.userId,
+						owner: event.isOwner
+					});
 				}
 			}
 			break;
@@ -85,14 +90,6 @@ export function wsEventsHandler(event: WsEvent): void {
 					state.removeRoomMember(event.roomId, event.userId);
 				}
 			}
-			break;
-		}
-		case WsEventType.ATTACHMENT_ADDED: {
-			// TODO handle
-			break;
-		}
-		case WsEventType.ATTACHMENT_REMOVED: {
-			// TODO handle
 			break;
 		}
 		case WsEventType.ROOM_MUTED: {
