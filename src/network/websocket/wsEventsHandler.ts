@@ -12,6 +12,7 @@ import { MeetingType, MeetingUserType } from '../../types/network/models/meeting
 import { GetMeetingResponse } from '../../types/network/responses/meetingsResponses';
 import { GetRoomResponse } from '../../types/network/responses/roomsResponses';
 import { WsEvent, WsEventType } from '../../types/network/websocket/wsEvents';
+import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
 import { RoomType } from '../../types/store/RoomTypes';
 import { wsDebug } from '../../utils/debug';
 import { MeetingsApi, RoomsApi } from '../index';
@@ -207,43 +208,57 @@ export function wsEventsHandler(event: WsEvent): void {
 		case WsEventType.MEETING_VIDEO_STREAM_OPENED: {
 			// TODO: wait for meeting events changes
 			if (eventArrivesFromAnotherSession) {
-				state.changeStreamStatus(event.meetingId, event.sessionId, 'video', true);
+				state.changeStreamStatus(event.meetingId, event.sessionId, STREAM_TYPE.VIDEO, true);
 			}
 			break;
 		}
 		case WsEventType.MEETING_VIDEO_STREAM_CLOSED: {
 			// TODO: wait for meeting events changes
 			if (eventArrivesFromAnotherSession) {
-				state.changeStreamStatus(event.meetingId, event.sessionId, 'video', false);
+				state.changeStreamStatus(event.meetingId, event.sessionId, STREAM_TYPE.VIDEO, false);
 			}
 			break;
 		}
-		case WsEventType.MEETING_AUDIO_STREAM_OPENED: {
+		case WsEventType.MEETING_AUDIO_STREAM_ENABLED: {
 			// TODO: wait for meeting events changes
 			if (eventArrivesFromAnotherSession) {
-				state.changeStreamStatus(event.meetingId, event.sessionId, 'audio', true);
+				state.changeStreamStatus(event.meetingId, event.sessionId, STREAM_TYPE.AUDIO, true);
 			}
 			break;
 		}
 		case WsEventType.MEETING_AUDIO_STREAM_CLOSED: {
 			// TODO: wait for meeting events changes
 			if (eventArrivesFromAnotherSession) {
-				state.changeStreamStatus(event.meetingId, event.sessionId, 'audio', false);
+				state.changeStreamStatus(event.meetingId, event.sessionId, STREAM_TYPE.AUDIO, false);
 			}
 			break;
 		}
 		case WsEventType.MEETING_SCREEN_STREAM_OPENED: {
 			// TODO: wait for meeting events changes
 			if (eventArrivesFromAnotherSession) {
-				state.changeStreamStatus(event.meetingId, event.sessionId, 'screen', true);
+				state.changeStreamStatus(event.meetingId, event.sessionId, STREAM_TYPE.SCREEN, true);
 			}
 			break;
 		}
 		case WsEventType.MEETING_SCREEN_STREAM_CLOSED: {
 			// TODO: wait for meeting events changes
 			if (eventArrivesFromAnotherSession) {
-				state.changeStreamStatus(event.meetingId, event.sessionId, 'screen', false);
+				state.changeStreamStatus(event.meetingId, event.sessionId, STREAM_TYPE.SCREEN, false);
 			}
+			break;
+		}
+		case WsEventType.MEETING_MEDIA_STREAM_CHANGED: {
+			// TODO COMMENTED ONLY FOR TEST PURPOSE
+			// if (eventArrivesFromAnotherSession) {
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore
+			const mediaType = event.mediaType.toLowerCase();
+			MeetingsApi.subscribeToMedia(event.meetingId, event.sessionId, mediaType)
+				.then((res) => {
+					console.log(res);
+				})
+				.catch((er) => console.error(er));
+			// }
 			break;
 		}
 		// TODO AUDIO ANSWER
@@ -256,7 +271,7 @@ export function wsEventsHandler(event: WsEvent): void {
 		// state.activeMeeting[event.meetingId].videoIn.handleRemoteOffer();
 		// break;
 		// }
-		// TODO SHARE OFFER
+		// TODO SCREEN OFFER
 		// case WsEventType.MEETING_SCREEN_STREAM_CLOSED: {
 		// state.activeMeeting[event.meetingId].bidirectionalAudioConn.;
 		// break;
@@ -272,16 +287,36 @@ export function wsEventsHandler(event: WsEvent): void {
 		console.log(event);
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore
-		if (event.event.jsep.type === 'ANSWER') {
-			console.log('IMMA ANSWER', state.activeMeeting);
+		if (event.event.jsep.sdp.includes('AudioBridge')) {
 			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-ignore
-			state.activeMeeting[event.meeting_id].bidirectionalAudioConn.handleRemoteAnswer({
+			if (event.event.jsep.type === 'ANSWER') {
+				console.log('AUDIO ANSWER');
 				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 				// @ts-ignore
-				...event.event.jsep,
-				type: 'answer'
-			});
+				state.activeMeeting[event.meeting_id].bidirectionalAudioConn.handleRemoteAnswer({
+					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+					// @ts-ignore
+					...event.event.jsep,
+					type: 'answer'
+				});
+			}
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore
+		} else if (event.event.jsep.sdp.includes('VideoRoom')) {
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore
+			if (event.event.jsep.type === 'ANSWER') {
+				console.log('VIDEO ANSWER');
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+				// @ts-ignore
+				state.activeMeeting[event.meeting_id].videoOutConn.handleRemoteAnswer({
+					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+					// @ts-ignore
+					...event.event.jsep,
+					type: 'answer'
+				});
+			}
 		}
 	}
 }

@@ -9,6 +9,7 @@ import produce from 'immer';
 
 import BidirectionalConnectionAudioInOut from '../../network/webRTC/BidirectionalConnectionAudioInOut';
 import { PeerConnConfig } from '../../network/webRTC/PeerConnConfig';
+import VideoInConnection from '../../network/webRTC/VideoInConnection';
 import VideoOutConnection from '../../network/webRTC/VideoOutConnection';
 import {
 	MeetingChatVisibility,
@@ -138,6 +139,7 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 	createVideoOutConn: (
 		meetingId: string,
 		peerConnectionConfig: PeerConnConfig,
+		videoStreamEnabled: boolean,
 		selectedVideoDeviceId?: string
 	): void => {
 		set(
@@ -145,6 +147,7 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 				const videoOutConn = new VideoOutConnection(
 					peerConnectionConfig,
 					meetingId,
+					videoStreamEnabled,
 					selectedVideoDeviceId
 				);
 				if (!draft.activeMeeting[meetingId].videoOutConn) {
@@ -155,10 +158,21 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 			'AM/SET_VIDEO_OUT_CONN'
 		);
 	},
+	deleteVideoOutConn: (meetingId: string): void => {
+		set(
+			produce((draft: RootStore) => {
+				if (draft.activeMeeting[meetingId].videoOutConn) {
+					delete draft.activeMeeting[meetingId].videoOutConn;
+				}
+			}),
+			false,
+			'AM/REM_VIDEO_OUT_CONN'
+		);
+	},
 	createVideoInConn: (meetingId: string, peerConnectionConfig: PeerConnConfig): void => {
 		set(
 			produce((draft: RootStore) => {
-				const videoInConn = new VideoOutConnection(peerConnectionConfig, meetingId);
+				const videoInConn = new VideoInConnection(peerConnectionConfig, meetingId);
 				if (!draft.activeMeeting[meetingId].videoInConn) {
 					draft.activeMeeting[meetingId].videoInConn = videoInConn;
 				}
@@ -171,7 +185,7 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 		set(
 			produce((draft: RootStore) => {
 				// TODO IMPLEMENT
-				const shareOutConn = new VideoOutConnection(peerConnectionConfig, meetingId);
+				const shareOutConn = new VideoInConnection(peerConnectionConfig, meetingId);
 				if (!draft.activeMeeting[meetingId].shareOutConn) {
 					draft.activeMeeting[meetingId].shareOutConn = shareOutConn;
 				}
@@ -229,6 +243,15 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 						[streamType]: stream
 					};
 				}
+			}),
+			false,
+			'AM/SET_LOCAL_STREAM'
+		);
+	},
+	removeLocalStreams: (meetingId: string, streamType: STREAM_TYPE): void => {
+		set(
+			produce((draft: RootStore) => {
+				delete draft.activeMeeting[meetingId].localStreams![streamType];
 			}),
 			false,
 			'AM/SET_LOCAL_STREAM'

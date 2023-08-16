@@ -94,7 +94,7 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 	const setSelectedDeviceId = useStore((store) => store.setSelectedDeviceId);
 	const createBidirectionalAudioConn = useStore((store) => store.createBidirectionalAudioConn);
 	const createVideoOutConn = useStore((store) => store.createVideoOutConn);
-	// const createVideoInConn = useStore((store) => store.createVideoInConn);
+	const createVideoInConn = useStore((store) => store.createVideoInConn);
 
 	const [videoStreamEnabled, setVideoStreamEnabled] = useState(false);
 	const [audioStreamEnabled, setAudioStreamEnabled] = useState(false);
@@ -118,7 +118,6 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 			videoStreamRef.current.srcObject = streamTrack;
 		}
 	}, [streamTrack, audioStreamEnabled, videoStreamEnabled]);
-
 	const modalTitle = useMemo(
 		() => (roomType === RoomType.ONE_TO_ONE ? oneToOneTitle : groupTitle),
 		[groupTitle, oneToOneTitle, roomType]
@@ -295,9 +294,9 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 				selectedAudioStream
 			);
 			setSelectedDeviceId(meetingId, STREAM_TYPE.AUDIO, selectedAudioStream);
-			// createVideoInConn(meetingId, peerConnectionConfig);
+			createVideoInConn(meetingId, peerConnectionConfig);
 			if (videoStreamEnabled) {
-				createVideoOutConn(meetingId, peerConnectionConfig);
+				createVideoOutConn(meetingId, peerConnectionConfig, videoStreamEnabled);
 				setSelectedDeviceId(meetingId, STREAM_TYPE.VIDEO, selectedVideoStream);
 			}
 			goToMeetingPage(meetingId);
@@ -305,8 +304,9 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 		[
 			createBidirectionalAudioConn,
 			audioStreamEnabled,
-			setSelectedDeviceId,
 			selectedAudioStream,
+			setSelectedDeviceId,
+			createVideoInConn,
 			videoStreamEnabled,
 			goToMeetingPage,
 			createVideoOutConn,

@@ -10,6 +10,7 @@ import { find, forEach } from 'lodash';
 
 import { UsersApi } from '../../network';
 import { MeetingBe, MeetingParticipant } from '../../types/network/models/meetingBeTypes';
+import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
 import { MeetingParticipantMap } from '../../types/store/MeetingTypes';
 import { MeetingsSlice, RootStore } from '../../types/store/StoreTypes';
 
@@ -170,7 +171,7 @@ export const useMeetingsStoreSlice = (set: (...any: any) => void): MeetingsSlice
 	changeStreamStatus: (
 		meetingId: string,
 		userId: string,
-		stream: 'audio' | 'video' | 'screen',
+		stream: STREAM_TYPE,
 		status: boolean
 	): void => {
 		set(
@@ -178,13 +179,13 @@ export const useMeetingsStoreSlice = (set: (...any: any) => void): MeetingsSlice
 				const meeting = find(draft.meetings, (meeting) => meeting.id === meetingId);
 				if (meeting) {
 					switch (stream) {
-						case 'audio':
+						case STREAM_TYPE.AUDIO:
 							draft.meetings[meeting.roomId].participants[userId].audioStreamOn = status;
 							break;
-						case 'video':
+						case STREAM_TYPE.VIDEO:
 							draft.meetings[meeting.roomId].participants[userId].videoStreamOn = status;
 							break;
-						case 'screen':
+						case STREAM_TYPE.SCREEN:
 							draft.meetings[meeting.roomId].participants[userId].screenStreamOn = status;
 							break;
 						default:

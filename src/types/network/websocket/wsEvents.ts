@@ -31,9 +31,10 @@ export enum WsEventType {
 	MEETING_LEFT = 'meetingParticipantLeft',
 	MEETING_STOPPED = 'meetingStopped',
 	MEETING_DELETED = 'meetingDeleted',
+	MEETING_MEDIA_STREAM_CHANGED = 'meetingMediaStreamChanged',
 	MEETING_VIDEO_STREAM_OPENED = 'meetingParticipantVideoStreamOpened',
 	MEETING_VIDEO_STREAM_CLOSED = 'meetingParticipantVideoStreamClosed',
-	MEETING_AUDIO_STREAM_OPENED = 'meetingParticipantAudioStreamOpened',
+	MEETING_AUDIO_STREAM_ENABLED = 'meetingAudioStreamEnabled',
 	MEETING_AUDIO_STREAM_CLOSED = 'meetingParticipantAudioStreamClosed',
 	MEETING_SCREEN_STREAM_OPENED = 'meetingParticipantScreenStreamOpened',
 	MEETING_SCREEN_STREAM_CLOSED = 'meetingParticipantScreenStreamClosed'

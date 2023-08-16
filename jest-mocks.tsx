@@ -74,6 +74,8 @@ jest.mock('@zextras/carbonio-shell-ui', () => ({
 	})
 }));
 
+export const RTCPeerConnection: jest.Mock = jest.fn();
+
 // MOCKED USEROUTING
 export const mockGoToRoomPage: jest.Mock = jest.fn();
 export const mockGoToMainPage: jest.Mock = jest.fn();
@@ -417,4 +419,10 @@ Object.defineProperty(window, 'MediaStream', {
 });
 Object.defineProperty(window, 'open', {
 	value: jest.fn()
+});
+
+// MOCK HTMLMEDIAELEMENT.PROTOTYPE
+// this is a statement to use when there's a video tag with the muted prop
+Object.defineProperty(HTMLMediaElement.prototype, 'muted', {
+	set: jest.fn()
 });

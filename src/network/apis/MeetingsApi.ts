@@ -17,7 +17,6 @@ import {
 import {
 	CreateAudioOfferResponse,
 	CreateMeetingResponse,
-	CreateVideoOfferResponse,
 	DeleteMeetingResponse,
 	GetMeetingResponse,
 	JoinMeetingResponse,
@@ -25,10 +24,11 @@ import {
 	ListMeetingsResponse,
 	StartMeetingResponse,
 	StopMeetingResponse,
+	SubscribeMediaResponse,
 	UpdateAudioStreamStatusResponse,
-	UpdateScreenStreamStatusResponse,
-	UpdateVideoStreamStatusResponse
+	UpdateMediaOfferResponse
 } from '../../types/network/responses/meetingsResponses';
+import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
 
 class MeetingsApi extends BaseAPI implements IMeetingsApi {
 	// Singleton design pattern
@@ -128,35 +128,7 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 			enabled
 		}).then((resp: UpdateAudioStreamStatusResponse) => {
 			const { changeStreamStatus } = useStore.getState();
-			changeStreamStatus(meetingId, id!, 'audio', enabled);
-			return resp;
-		});
-	}
-
-	public updateVideoStreamStatus(
-		meetingId: string,
-		enabled: boolean
-	): Promise<UpdateVideoStreamStatusResponse> {
-		const { sessionId, id } = useStore.getState().session;
-		return this.fetchAPI(`meetings/${meetingId}/sessions/${sessionId}/video`, RequestType.PUT, {
-			enabled
-		}).then((resp: UpdateVideoStreamStatusResponse) => {
-			const { changeStreamStatus } = useStore.getState();
-			changeStreamStatus(meetingId, id!, 'video', enabled);
-			return resp;
-		});
-	}
-
-	public updateScreenStreamStatus(
-		meetingId: string,
-		enabled: boolean
-	): Promise<UpdateScreenStreamStatusResponse> {
-		const { sessionId, id } = useStore.getState().session;
-		return this.fetchAPI(`meetings/${meetingId}/sessions/${sessionId}/screen`, RequestType.PUT, {
-			enabled
-		}).then((resp: UpdateScreenStreamStatusResponse) => {
-			const { changeStreamStatus } = useStore.getState();
-			changeStreamStatus(meetingId, id!, 'screen', enabled);
+			changeStreamStatus(meetingId, id!, STREAM_TYPE.AUDIO, enabled);
 			return resp;
 		});
 	}
@@ -172,18 +144,43 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 		).then((resp: CreateAudioOfferResponse) => resp);
 	}
 
-	public createVideoOffer(
+	public updateMediaOffer(
 		meetingId: string,
-		sdpOffer: RTCSessionDescriptionInit
-	): Promise<CreateVideoOfferResponse> {
+		type: STREAM_TYPE,
+		enabled: boolean,
+		sdp?: string
+	): Promise<UpdateMediaOfferResponse> {
+		const { sessionId, id } = useStore.getState().session;
+		return this.fetchAPI(`meetings/${meetingId}/sessions/${sessionId}/media`, RequestType.PUT, {
+			type,
+			enabled,
+			sdp
+		}).then((resp: UpdateMediaOfferResponse) => {
+			const { changeStreamStatus } = useStore.getState();
+			changeStreamStatus(meetingId, id!, type, enabled);
+			return resp;
+		});
+	}
+
+	public subscribeToMedia(
+		meetingId: string,
+		userSessionId: string,
+		type: STREAM_TYPE
+	): Promise<SubscribeMediaResponse> {
 		const { sessionId } = useStore.getState().session;
 		return this.fetchAPI(
-			`meetings/${meetingId}/sessions/${sessionId}/video/offer`,
+			`meetings/${meetingId}/sessions/${sessionId}/media/subscribe`,
 			RequestType.PUT,
 			{
-				sdp: sdpOffer
+				subscribe: [
+					{
+						session_id: userSessionId,
+						type
+					}
+				],
+				unsubscribe: []
 			}
-		).then((resp: CreateVideoOfferResponse) => resp);
+		).then((resp: SubscribeMediaResponse) => resp);
 	}
 }
 

@@ -11,6 +11,7 @@ import { fetchResponse } from '../../../jest-mocks';
 import useStore from '../../store/Store';
 import { createMockMeeting } from '../../tests/createMock';
 import { MeetingType, MeetingUserType } from '../../types/network/models/meetingBeTypes';
+import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
 
 const meetingMock = createMockMeeting();
 const meetingMock1 = createMockMeeting({ id: 'meetingId1', roomId: 'roomId1' });
@@ -33,6 +34,8 @@ const ongoingMeetingSetup = (): void => {
 		videoStreamOn: false
 	});
 };
+
+const sdpOffer = 'spdOfferMock';
 
 beforeEach(() => {
 	useStore.getState().setLoginInfo(userId, 'User');
@@ -240,16 +243,18 @@ describe('Meetings API', () => {
 	test('updateVideoStreamStatus is called to set video enabled', async () => {
 		ongoingMeetingSetup();
 		fetchResponse.mockResolvedValueOnce(meetingMock);
-		await meetingsApi.updateVideoStreamStatus(meetingMock.id, true);
+		await meetingsApi.updateMediaOffer(meetingMock.id, STREAM_TYPE.VIDEO, true, sdpOffer);
 
 		// Check if fetch is called with the correct parameters
 		expect(global.fetch).toHaveBeenCalledWith(
-			`/services/chats/meetings/${meetingMock.id}/sessions/${sessionId}/video`,
+			`/services/chats/meetings/${meetingMock.id}/sessions/${sessionId}/media`,
 			{
 				method: 'PUT',
 				headers,
 				body: JSON.stringify({
-					enabled: true
+					type: STREAM_TYPE.VIDEO,
+					enabled: true,
+					sdp: sdpOffer
 				})
 			}
 		);
@@ -262,15 +267,16 @@ describe('Meetings API', () => {
 	test('updateVideoStreamStatus is called to set video disabled', async () => {
 		ongoingMeetingSetup();
 		fetchResponse.mockResolvedValueOnce(meetingMock);
-		await meetingsApi.updateVideoStreamStatus(meetingMock.id, false);
+		await meetingsApi.updateMediaOffer(meetingMock.id, STREAM_TYPE.VIDEO, false);
 
 		// Check if fetch is called with the correct parameters
 		expect(global.fetch).toHaveBeenCalledWith(
-			`/services/chats/meetings/${meetingMock.id}/sessions/${sessionId}/video`,
+			`/services/chats/meetings/${meetingMock.id}/sessions/${sessionId}/media`,
 			{
 				method: 'PUT',
 				headers,
 				body: JSON.stringify({
+					type: STREAM_TYPE.VIDEO,
 					enabled: false
 				})
 			}
@@ -284,16 +290,18 @@ describe('Meetings API', () => {
 	test('updateScreenStreamStatus is called to set screen share enabled', async () => {
 		ongoingMeetingSetup();
 		fetchResponse.mockResolvedValueOnce(meetingMock);
-		await meetingsApi.updateScreenStreamStatus(meetingMock.id, true);
+		await meetingsApi.updateMediaOffer(meetingMock.id, STREAM_TYPE.SCREEN, true, sdpOffer);
 
 		// Check if fetch is called with the correct parameters
 		expect(global.fetch).toHaveBeenCalledWith(
-			`/services/chats/meetings/${meetingMock.id}/sessions/${sessionId}/screen`,
+			`/services/chats/meetings/${meetingMock.id}/sessions/${sessionId}/media`,
 			{
 				method: 'PUT',
 				headers,
 				body: JSON.stringify({
-					enabled: true
+					type: STREAM_TYPE.SCREEN,
+					enabled: true,
+					sdp: sdpOffer
 				})
 			}
 		);
@@ -306,15 +314,16 @@ describe('Meetings API', () => {
 	test('updateScreenStreamStatus is called to set screen share disabled', async () => {
 		ongoingMeetingSetup();
 		fetchResponse.mockResolvedValueOnce(meetingMock);
-		await meetingsApi.updateScreenStreamStatus(meetingMock.id, false);
+		await meetingsApi.updateMediaOffer(meetingMock.id, STREAM_TYPE.SCREEN, false);
 
 		// Check if fetch is called with the correct parameters
 		expect(global.fetch).toHaveBeenCalledWith(
-			`/services/chats/meetings/${meetingMock.id}/sessions/${sessionId}/screen`,
+			`/services/chats/meetings/${meetingMock.id}/sessions/${sessionId}/media`,
 			{
 				method: 'PUT',
 				headers,
 				body: JSON.stringify({
+					type: STREAM_TYPE.SCREEN,
 					enabled: false
 				})
 			}
