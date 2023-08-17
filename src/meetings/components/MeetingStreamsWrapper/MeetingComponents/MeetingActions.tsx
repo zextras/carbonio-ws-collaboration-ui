@@ -193,10 +193,10 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 			.catch(() => console.log('Error on leave'));
 	}, [closeBidirectionalAudioConn, meetingId, closeVideoOutConn, goToInfoPage]);
 
-	const deleteMeeting = useCallback(() => {
+	const stopMeeting = useCallback(() => {
 		closeBidirectionalAudioConn(meetingId);
 		closeVideoOutConn(meetingId);
-		MeetingsApi.deleteMeeting(meetingId)
+		MeetingsApi.stopMeeting(meetingId)
 			.then(() => goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED))
 			.catch(() => console.log('Error on leave'));
 	}, [closeBidirectionalAudioConn, meetingId, closeVideoOutConn, goToInfoPage]);
@@ -329,6 +329,14 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 			onMouseLeave={handleMouseLeave}
 			isHoovering={isHoovering}
 		>
+			<IconButton
+				size="large"
+				backgroundColor="primary"
+				iconColor="gray6"
+				icon={meetingViewSelected === MeetingViewType.GRID ? 'Grid' : 'CinemaView'}
+				onClick={toggleMeetingView}
+			/>
+			<Padding right="16px" />
 			<MultiButton
 				iconColor="gray6"
 				backgroundColor="primary"
@@ -338,22 +346,6 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 				items={mediaAudioList}
 				size="large"
 				shape="regular"
-			/>
-			<Padding right="16px" />
-			<IconButton
-				size="large"
-				backgroundColor="primary"
-				iconColor="gray6"
-				icon={meetingViewSelected === MeetingViewType.GRID ? 'Grid' : 'CinemaView'}
-				onClick={toggleMeetingView}
-			/>
-			<Padding right="16px" />
-			<IconButton
-				iconColor="gray6"
-				backgroundColor="primary"
-				icon="Headphones"
-				onClick={deleteMeeting}
-				size="large"
 			/>
 			<Padding right="16px" />
 			<MultiButton
@@ -379,7 +371,7 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 				iconColor="gray6"
 				backgroundColor="primary"
 				icon="MoreVertical"
-				onClick={deleteMeeting}
+				onClick={stopMeeting}
 				size="large"
 			/>
 			<Padding right="48px" />

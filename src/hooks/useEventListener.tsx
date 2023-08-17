@@ -7,8 +7,8 @@
 import { useEffect, useRef } from 'react';
 
 import {
-	MeetingCreatedEvent,
-	MeetingJoinedEvent
+	MeetingJoinedEvent,
+	MeetingStartedEvent
 } from '../types/network/websocket/wsMeetingEvents';
 import { Message } from '../types/store/MessageTypes';
 
@@ -25,7 +25,7 @@ type CustomEvent =
 	  }
 	| {
 			name: EventName.INCOMING_MEETING;
-			data: MeetingCreatedEvent;
+			data: MeetingStartedEvent;
 	  }
 	| {
 			name: EventName.REMOVED_MEETING_NOTIFICATION;

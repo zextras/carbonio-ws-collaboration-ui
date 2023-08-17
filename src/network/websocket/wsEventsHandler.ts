@@ -4,16 +4,16 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { find } from 'lodash';
+// import { find } from 'lodash';
 
-import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
+// import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
 import useStore from '../../store/Store';
 import { MeetingType, MeetingUserType } from '../../types/network/models/meetingBeTypes';
 import { GetMeetingResponse } from '../../types/network/responses/meetingsResponses';
 import { GetRoomResponse } from '../../types/network/responses/roomsResponses';
 import { WsEvent, WsEventType } from '../../types/network/websocket/wsEvents';
-import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
-import { RoomType } from '../../types/store/RoomTypes';
+// import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
+// import { RoomType } from '../../types/store/RoomTypes';
 import { wsDebug } from '../../utils/debug';
 import { MeetingsApi, RoomsApi } from '../index';
 
@@ -104,60 +104,55 @@ export function wsEventsHandler(event: WsEvent): void {
 			break;
 		}
 		case WsEventType.MEETING_CREATED: {
-			// TODO: wait for meeting events changes
-			// For now, this event doesn't arrive
-
 			state.addMeeting({
 				id: event.meetingId,
-				name: '', // TODO placeholder
+				name: '',
 				roomId: event.roomId,
 				active: false,
 				participants: [],
 				createdAt: event.sentDate,
-				meetingType: MeetingType.PERMANENT // TODO placeholder
+				meetingType: MeetingType.PERMANENT
 			});
-
-			// Send custom event to open an incoming meeting notification
-			const room = state.rooms[event.roomId];
-			const isMeetingStartedByMe = event.from === state.session.id;
-			if (room?.type === RoomType.ONE_TO_ONE && !isMeetingStartedByMe) {
-				sendCustomEvent({ name: EventName.INCOMING_MEETING, data: event });
-			}
 			break;
 		}
 		case WsEventType.MEETING_STARTED: {
-			// TODO: wait for meeting events changes
 			state.startMeeting(event.meetingId);
+
+			// Send custom event to open an incoming meeting notification
+			// const meeting = find(state.meetings, (meeting) => meeting.id === event.meetingId);
+			// const room = find(state.rooms, (room) => room.id === meeting?.roomId);
+			// const isMeetingStartedByMe = event.starterUser === state.session.id;
+			// if (room?.type === RoomType.ONE_TO_ONE && !isMeetingStartedByMe) {
+			// 	sendCustomEvent({ name: EventName.INCOMING_MEETING, data: event });
+			// }
 			break;
 		}
 		case WsEventType.MEETING_JOINED: {
-			// TODO: wait for event changes
 			state.addParticipant(event.meetingId, {
-				userId: event.from,
-				userType: MeetingUserType.REGISTERED, // TODO placeholder
+				userId: event.userId,
+				userType: MeetingUserType.REGISTERED,
 				audioStreamOn: false,
 				videoStreamOn: false
 			});
 
 			// Send custom event to delete an incoming meeting notification
 			// if I joined the meeting from another session
-			const meeting = find(state.meetings, (meeting) => meeting.id === event.meetingId);
-			if (
-				meeting &&
-				state.rooms[meeting.roomId]?.type === RoomType.ONE_TO_ONE &&
-				event.from === state.session.id
-			) {
-				sendCustomEvent({ name: EventName.REMOVED_MEETING_NOTIFICATION, data: event });
-			}
+			// const meeting = find(state.meetings, (meeting) => meeting.id === event.meetingId);
+			// if (
+			// 	meeting &&
+			// 	state.rooms[meeting.roomId]?.type === RoomType.ONE_TO_ONE &&
+			// 	event.from === state.session.id
+			// ) {
+			// 	sendCustomEvent({ name: EventName.REMOVED_MEETING_NOTIFICATION, data: event });
+			// }
 			break;
 		}
 		case WsEventType.MEETING_LEFT: {
-			// TODO: wait for event changes
 			if (eventArrivesFromAnotherSession) {
-				if (event.from === state.session.id) {
+				if (event.userId === state.session.id) {
 					state.deleteMeeting(event.meetingId);
 				} else {
-					state.removeParticipant(event.meetingId, event.sessionId);
+					state.removeParticipant(event.meetingId, event.userId);
 				}
 			} else {
 				state.deleteMeeting(event.meetingId);
@@ -165,55 +160,53 @@ export function wsEventsHandler(event: WsEvent): void {
 			break;
 		}
 		case WsEventType.MEETING_STOPPED: {
-			// TODO: wait for meeting events changes
 			state.stopMeeting(event.meetingId);
 			break;
 		}
 		case WsEventType.MEETING_DELETED: {
-			// TODO: wait for meeting events changes
 			state.deleteMeeting(event.meetingId);
 			break;
 		}
 		case WsEventType.MEETING_VIDEO_STREAM_OPENED: {
 			// TODO: wait for meeting events changes
-			if (eventArrivesFromAnotherSession) {
-				state.changeStreamStatus(event.meetingId, event.sessionId, STREAM_TYPE.VIDEO, true);
-			}
+			// if (eventArrivesFromAnotherSession) {
+			// 	state.changeStreamStatus(event.meetingId, event.sessionId, STREAM_TYPE.VIDEO, true);
+			// }
 			break;
 		}
 		case WsEventType.MEETING_VIDEO_STREAM_CLOSED: {
 			// TODO: wait for meeting events changes
-			if (eventArrivesFromAnotherSession) {
-				state.changeStreamStatus(event.meetingId, event.sessionId, STREAM_TYPE.VIDEO, false);
-			}
+			// if (eventArrivesFromAnotherSession) {
+			// 	state.changeStreamStatus(event.meetingId, event.sessionId, STREAM_TYPE.VIDEO, false);
+			// }
 			break;
 		}
 		case WsEventType.MEETING_AUDIO_STREAM_ENABLED: {
 			// TODO: wait for meeting events changes
-			if (eventArrivesFromAnotherSession) {
-				state.changeStreamStatus(event.meetingId, event.sessionId, STREAM_TYPE.AUDIO, true);
-			}
+			// if (eventArrivesFromAnotherSession) {
+			// 	state.changeStreamStatus(event.meetingId, event.sessionId, STREAM_TYPE.AUDIO, true);
+			// }
 			break;
 		}
 		case WsEventType.MEETING_AUDIO_STREAM_CLOSED: {
 			// TODO: wait for meeting events changes
-			if (eventArrivesFromAnotherSession) {
-				state.changeStreamStatus(event.meetingId, event.sessionId, STREAM_TYPE.AUDIO, false);
-			}
+			// if (eventArrivesFromAnotherSession) {
+			// 	state.changeStreamStatus(event.meetingId, event.sessionId, STREAM_TYPE.AUDIO, false);
+			// }
 			break;
 		}
 		case WsEventType.MEETING_SCREEN_STREAM_OPENED: {
 			// TODO: wait for meeting events changes
-			if (eventArrivesFromAnotherSession) {
-				state.changeStreamStatus(event.meetingId, event.sessionId, STREAM_TYPE.SCREEN, true);
-			}
+			// if (eventArrivesFromAnotherSession) {
+			// 	state.changeStreamStatus(event.meetingId, event.sessionId, STREAM_TYPE.SCREEN, true);
+			// }
 			break;
 		}
 		case WsEventType.MEETING_SCREEN_STREAM_CLOSED: {
 			// TODO: wait for meeting events changes
-			if (eventArrivesFromAnotherSession) {
-				state.changeStreamStatus(event.meetingId, event.sessionId, STREAM_TYPE.SCREEN, false);
-			}
+			// if (eventArrivesFromAnotherSession) {
+			// 	state.changeStreamStatus(event.meetingId, event.sessionId, STREAM_TYPE.SCREEN, false);
+			// }
 			break;
 		}
 		case WsEventType.MEETING_MEDIA_STREAM_CHANGED: {
@@ -221,12 +214,12 @@ export function wsEventsHandler(event: WsEvent): void {
 			// if (eventArrivesFromAnotherSession) {
 			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-ignore
-			const mediaType = event.mediaType.toLowerCase();
-			MeetingsApi.subscribeToMedia(event.meetingId, event.sessionId, mediaType)
-				.then((res) => {
-					console.log(res);
-				})
-				.catch((er) => console.error(er));
+			// const mediaType = event.mediaType.toLowerCase();
+			// MeetingsApi.subscribeToMedia(event.meetingId, event.sessionId, mediaType)
+			// 	.then((res) => {
+			// 		console.log(res);
+			// 	})
+			// 	.catch((er) => console.error(er));
 			// }
 			break;
 		}

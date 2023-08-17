@@ -90,7 +90,6 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 
 	const roomType = useStore((store) => getRoomTypeSelector(store, roomId));
 	const meeting = useStore((store) => getMeeting(store, roomId));
-	const addMeeting = useStore((store) => store.addMeeting);
 	const setSelectedDeviceId = useStore((store) => store.setSelectedDeviceId);
 	const createBidirectionalAudioConn = useStore((store) => store.createBidirectionalAudioConn);
 	const createVideoOutConn = useStore((store) => store.createVideoOutConn);
@@ -317,15 +316,11 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 	const joinMeeting = useCallback(() => {
 		const join = (meetingId: string): Promise<void> =>
 			MeetingsApi.joinMeeting(meetingId, { videoStreamEnabled, audioStreamEnabled })
-				.then(() => {
-					redirectToMeetingAndInitWebRTC(meetingId);
-				})
+				.then(() => redirectToMeetingAndInitWebRTC(meetingId))
 				.catch((err) => console.error(err, 'Error on joinMeeting'));
 		const start = (meetingId: string): Promise<void> =>
 			MeetingsApi.startMeeting(meetingId)
-				.then(() => {
-					join(meetingId);
-				})
+				.then(() => join(meetingId))
 				.catch((err) => console.error(err, 'Error on startMeeting'));
 
 		if (meeting) {
@@ -339,20 +334,10 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 		} else {
 			// If meeting doesn't exist, create it, start it and then join it
 			MeetingsApi.createPermanentMeeting(roomId)
-				.then((response) => {
-					addMeeting(response);
-					start(response.id);
-				})
+				.then((response) => start(response.id))
 				.catch((err) => console.log(err, 'Error on create-join'));
 		}
-	}, [
-		meeting,
-		videoStreamEnabled,
-		audioStreamEnabled,
-		redirectToMeetingAndInitWebRTC,
-		roomId,
-		addMeeting
-	]);
+	}, [meeting, videoStreamEnabled, audioStreamEnabled, redirectToMeetingAndInitWebRTC, roomId]);
 
 	const modalFooter = useMemo(
 		() => (

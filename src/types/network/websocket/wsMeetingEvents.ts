@@ -22,13 +22,7 @@ export type WsMeetingEvent =
 	| MeetingMediaStreamChangedEvent;
 
 type BasicMeetingEvent = {
-	// id: event id
-	id: string;
-	// from: userId of sender
-	from: string;
 	sentDate: string;
-	// sessionId: identifier of sender's session
-	sessionId: string; // TODO for the moment, this sessionId is the userId
 	meetingId: string;
 };
 
@@ -39,20 +33,21 @@ export type MeetingCreatedEvent = BasicMeetingEvent & {
 
 export type MeetingStartedEvent = BasicMeetingEvent & {
 	type: WsEventType.MEETING_STARTED;
-	roomId: string;
+	starterUser: string;
 };
 
 export type MeetingJoinedEvent = BasicMeetingEvent & {
 	type: WsEventType.MEETING_JOINED;
+	userId: string;
 };
 
 export type MeetingLeftEvent = BasicMeetingEvent & {
 	type: WsEventType.MEETING_LEFT;
+	userId: string;
 };
 
 export type MeetingStoppedEvent = BasicMeetingEvent & {
 	type: WsEventType.MEETING_STOPPED;
-	roomId: string;
 };
 
 export type MeetingDeletedEvent = BasicMeetingEvent & {
