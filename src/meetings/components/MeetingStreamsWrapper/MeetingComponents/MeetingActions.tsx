@@ -184,19 +184,15 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 	const leaveMeeting = useCallback(() => {
 		closeBidirectionalAudioConn(meetingId);
 		closeVideoOutConn(meetingId);
-		MeetingsApi.leaveMeeting(meetingId)
-			.then(() => {
-				// TODO ADD MEETING STOP WHEN IM AM THE LAST USER INSIDE THE MEETING
-				// MeetingsApi.leaveMeeting(meetingId).then(());
-				goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED);
-			})
+		MeetingsApi.quitMeeting(meetingId)
+			.then(() => goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED))
 			.catch(() => console.log('Error on leave'));
 	}, [closeBidirectionalAudioConn, meetingId, closeVideoOutConn, goToInfoPage]);
 
-	const stopMeeting = useCallback(() => {
+	const deleteMeeting = useCallback(() => {
 		closeBidirectionalAudioConn(meetingId);
 		closeVideoOutConn(meetingId);
-		MeetingsApi.stopMeeting(meetingId)
+		MeetingsApi.deleteMeeting(meetingId)
 			.then(() => goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED))
 			.catch(() => console.log('Error on leave'));
 	}, [closeBidirectionalAudioConn, meetingId, closeVideoOutConn, goToInfoPage]);
@@ -329,14 +325,6 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 			onMouseLeave={handleMouseLeave}
 			isHoovering={isHoovering}
 		>
-			<IconButton
-				size="large"
-				backgroundColor="primary"
-				iconColor="gray6"
-				icon={meetingViewSelected === MeetingViewType.GRID ? 'Grid' : 'CinemaView'}
-				onClick={toggleMeetingView}
-			/>
-			<Padding right="16px" />
 			<MultiButton
 				iconColor="gray6"
 				backgroundColor="primary"
@@ -368,10 +356,18 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 			/>
 			<Padding right="16px" />
 			<IconButton
+				size="large"
+				backgroundColor="primary"
+				iconColor="gray6"
+				icon={meetingViewSelected === MeetingViewType.GRID ? 'Grid' : 'CinemaView'}
+				onClick={toggleMeetingView}
+			/>
+			<Padding right="16px" />
+			<IconButton
 				iconColor="gray6"
 				backgroundColor="primary"
 				icon="MoreVertical"
-				onClick={stopMeeting}
+				onClick={deleteMeeting}
 				size="large"
 			/>
 			<Padding right="48px" />

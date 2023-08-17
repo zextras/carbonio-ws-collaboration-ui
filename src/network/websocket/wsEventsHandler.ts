@@ -4,22 +4,21 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-// import { find } from 'lodash';
+import { find } from 'lodash';
 
-// import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
+import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
 import useStore from '../../store/Store';
 import { MeetingType, MeetingUserType } from '../../types/network/models/meetingBeTypes';
 import { GetMeetingResponse } from '../../types/network/responses/meetingsResponses';
 import { GetRoomResponse } from '../../types/network/responses/roomsResponses';
 import { WsEvent, WsEventType } from '../../types/network/websocket/wsEvents';
 // import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
-// import { RoomType } from '../../types/store/RoomTypes';
+import { RoomType } from '../../types/store/RoomTypes';
 import { wsDebug } from '../../utils/debug';
 import { MeetingsApi, RoomsApi } from '../index';
 
 export function wsEventsHandler(event: WsEvent): void {
 	const state = useStore.getState();
-	const eventArrivesFromAnotherSession = false;
 
 	switch (event.type) {
 		case WsEventType.INITIALIZATION: {
@@ -119,12 +118,12 @@ export function wsEventsHandler(event: WsEvent): void {
 			state.startMeeting(event.meetingId);
 
 			// Send custom event to open an incoming meeting notification
-			// const meeting = find(state.meetings, (meeting) => meeting.id === event.meetingId);
-			// const room = find(state.rooms, (room) => room.id === meeting?.roomId);
-			// const isMeetingStartedByMe = event.starterUser === state.session.id;
-			// if (room?.type === RoomType.ONE_TO_ONE && !isMeetingStartedByMe) {
-			// 	sendCustomEvent({ name: EventName.INCOMING_MEETING, data: event });
-			// }
+			const meeting = find(state.meetings, (meeting) => meeting.id === event.meetingId);
+			const room = find(state.rooms, (room) => room.id === meeting?.roomId);
+			const isMeetingStartedByMe = event.starterUser === state.session.id;
+			if (room?.type === RoomType.ONE_TO_ONE && !isMeetingStartedByMe) {
+				sendCustomEvent({ name: EventName.INCOMING_MEETING, data: event });
+			}
 			break;
 		}
 		case WsEventType.MEETING_JOINED: {
@@ -135,28 +134,19 @@ export function wsEventsHandler(event: WsEvent): void {
 				videoStreamOn: false
 			});
 
-			// Send custom event to delete an incoming meeting notification
-			// if I joined the meeting from another session
-			// const meeting = find(state.meetings, (meeting) => meeting.id === event.meetingId);
-			// if (
-			// 	meeting &&
-			// 	state.rooms[meeting.roomId]?.type === RoomType.ONE_TO_ONE &&
-			// 	event.from === state.session.id
-			// ) {
-			// 	sendCustomEvent({ name: EventName.REMOVED_MEETING_NOTIFICATION, data: event });
-			// }
+			// Send custom event to delete an incoming meeting notification if I joined the meeting from another session
+			const meeting = find(state.meetings, (meeting) => meeting.id === event.meetingId);
+			if (
+				meeting &&
+				state.rooms[meeting.roomId]?.type === RoomType.ONE_TO_ONE &&
+				event.userId === state.session.id
+			) {
+				sendCustomEvent({ name: EventName.REMOVED_MEETING_NOTIFICATION, data: event });
+			}
 			break;
 		}
 		case WsEventType.MEETING_LEFT: {
-			if (eventArrivesFromAnotherSession) {
-				if (event.userId === state.session.id) {
-					state.deleteMeeting(event.meetingId);
-				} else {
-					state.removeParticipant(event.meetingId, event.userId);
-				}
-			} else {
-				state.deleteMeeting(event.meetingId);
-			}
+			state.removeParticipant(event.meetingId, event.userId);
 			break;
 		}
 		case WsEventType.MEETING_STOPPED: {

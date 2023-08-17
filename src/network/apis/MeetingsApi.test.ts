@@ -137,27 +137,6 @@ describe('Meetings API', () => {
 		expect(store.activeMeeting[meetingMock.id]).toBeDefined();
 	});
 
-	test('joinMeetingByRoomId is called correctly', async () => {
-		fetchResponse.mockResolvedValueOnce(meetingMock);
-		await meetingsApi.joinMeetingByRoomId(meetingMock.roomId, {
-			audioStreamEnabled: false,
-			videoStreamEnabled: false
-		});
-
-		// Check if fetch is called with the correct parameters
-		expect(global.fetch).toHaveBeenCalledWith(
-			`/services/chats/rooms/${meetingMock.roomId}/meeting/join`,
-			{
-				method: 'PUT',
-				headers,
-				body: JSON.stringify({
-					audioStreamEnabled: false,
-					videoStreamEnabled: false
-				})
-			}
-		);
-	});
-
 	test('leaveMeeting is called correctly', async () => {
 		fetchResponse.mockResolvedValueOnce(meetingMock);
 		await meetingsApi.leaveMeeting(meetingMock.id);

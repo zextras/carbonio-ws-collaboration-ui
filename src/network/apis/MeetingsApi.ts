@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { find, size } from 'lodash';
+
 import BaseAPI from './BaseAPI';
 import useStore from '../../store/Store';
 import { RequestType } from '../../types/network/apis/IBaseAPI';
@@ -98,8 +100,21 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 		);
 	}
 
-	public joinMeetingByRoomId(roomId: string, settings: JoinSettings): Promise<JoinMeetingResponse> {
-		return this.fetchAPI(`rooms/${roomId}/meeting/join`, RequestType.PUT, settings);
+	public enterMeeting(roomId: string, settings: JoinSettings): Promise<string> {
+		const meeting = useStore.getState().meetings[roomId];
+		if (meeting) {
+			if (meeting.active) {
+				return this.joinMeeting(meeting.id, settings).then(() => meeting.id);
+			}
+			return this.startMeeting(meeting.id).then(() =>
+				this.joinMeeting(meeting.id, settings).then(() => meeting.id)
+			);
+		}
+		return this.createPermanentMeeting(roomId).then((response) =>
+			this.startMeeting(response.id).then(() =>
+				this.joinMeeting(response.id, settings).then(() => response.id)
+			)
+		);
 	}
 
 	public leaveMeeting(meetingId: string): Promise<LeaveMeetingResponse> {
@@ -113,6 +128,16 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 
 	public stopMeeting(meetingId: string): Promise<StopMeetingResponse> {
 		return this.fetchAPI(`meetings/${meetingId}/stop`, RequestType.POST);
+	}
+
+	public quitMeeting(meetingId: string): Promise<LeaveMeetingResponse> {
+		const meeting = find(useStore.getState().meetings, { id: meetingId });
+		return this.leaveMeeting(meetingId).then((response: LeaveMeetingResponse) => {
+			if (size(meeting?.participants) < 2) {
+				this.stopMeeting(meetingId);
+			}
+			return response;
+		});
 	}
 
 	public deleteMeeting(meetingId: string): Promise<DeleteMeetingResponse> {

@@ -21,7 +21,6 @@ import styled from 'styled-components';
 import useRouting, { PAGE_INFO_TYPE } from '../../hooks/useRouting';
 import { MeetingsApi } from '../../network';
 import { PeerConnConfig } from '../../network/webRTC/PeerConnConfig';
-import { getMeeting } from '../../store/selectors/MeetingSelectors';
 import { getRoomNameSelector, getRoomTypeSelector } from '../../store/selectors/RoomsSelectors';
 import useStore from '../../store/Store';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
@@ -89,7 +88,6 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 	const { goToMeetingPage, goToInfoPage } = useRouting();
 
 	const roomType = useStore((store) => getRoomTypeSelector(store, roomId));
-	const meeting = useStore((store) => getMeeting(store, roomId));
 	const setSelectedDeviceId = useStore((store) => store.setSelectedDeviceId);
 	const createBidirectionalAudioConn = useStore((store) => store.createBidirectionalAudioConn);
 	const createVideoOutConn = useStore((store) => store.createVideoOutConn);
@@ -314,30 +312,10 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 	);
 
 	const joinMeeting = useCallback(() => {
-		const join = (meetingId: string): Promise<void> =>
-			MeetingsApi.joinMeeting(meetingId, { videoStreamEnabled, audioStreamEnabled })
-				.then(() => redirectToMeetingAndInitWebRTC(meetingId))
-				.catch((err) => console.error(err, 'Error on joinMeeting'));
-		const start = (meetingId: string): Promise<void> =>
-			MeetingsApi.startMeeting(meetingId)
-				.then(() => join(meetingId))
-				.catch((err) => console.error(err, 'Error on startMeeting'));
-
-		if (meeting) {
-			if (meeting.active) {
-				// If meeting is already active, just join it
-				join(meeting.id);
-			} else {
-				// If meeting is not active, start it and then join it
-				start(meeting.id);
-			}
-		} else {
-			// If meeting doesn't exist, create it, start it and then join it
-			MeetingsApi.createPermanentMeeting(roomId)
-				.then((response) => start(response.id))
-				.catch((err) => console.log(err, 'Error on create-join'));
-		}
-	}, [meeting, videoStreamEnabled, audioStreamEnabled, redirectToMeetingAndInitWebRTC, roomId]);
+		MeetingsApi.enterMeeting(roomId, { videoStreamEnabled, audioStreamEnabled })
+			.then((meetingId) => redirectToMeetingAndInitWebRTC(meetingId))
+			.catch((err) => console.error(err, 'Error on joinMeeting'));
+	}, [videoStreamEnabled, audioStreamEnabled, redirectToMeetingAndInitWebRTC, roomId]);
 
 	const modalFooter = useMemo(
 		() => (
