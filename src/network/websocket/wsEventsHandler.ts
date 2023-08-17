@@ -19,7 +19,7 @@ import { MeetingsApi, RoomsApi } from '../index';
 
 export function wsEventsHandler(event: WsEvent): void {
 	const state = useStore.getState();
-	const eventArrivesFromAnotherSession = event.sessionId !== useStore.getState().session.sessionId;
+	const eventArrivesFromAnotherSession = false;
 
 	switch (event.type) {
 		case WsEventType.INITIALIZATION: {
@@ -27,111 +27,80 @@ export function wsEventsHandler(event: WsEvent): void {
 			break;
 		}
 		case WsEventType.ROOM_CREATED: {
-			if (eventArrivesFromAnotherSession) {
-				RoomsApi.getRoom(event.roomId)
-					.then((response: GetRoomResponse) => {
-						state.addRoom(response);
-					})
-					.catch(() => null);
-			}
+			RoomsApi.getRoom(event.roomId).then((response: GetRoomResponse) => state.addRoom(response));
 			break;
 		}
 		case WsEventType.ROOM_UPDATED: {
-			if (eventArrivesFromAnotherSession) {
-				state.setRoomNameAndDescription(event.roomId, event.name, event.description);
-			}
+			state.setRoomNameAndDescription(event.roomId, event.name, event.description);
 			break;
 		}
 		case WsEventType.ROOM_DELETED: {
-			if (eventArrivesFromAnotherSession) {
-				state.deleteRoom(event.roomId);
-			}
+			state.deleteRoom(event.roomId);
 			break;
 		}
-		case WsEventType.ROOM_OWNER_CHANGED: {
-			if (eventArrivesFromAnotherSession) {
-				if (event.owner) {
-					state.promoteMemberToModerator(event.roomId, event.userId);
-				} else {
-					state.demoteMemberFromModerator(event.roomId, event.userId);
-				}
-			}
+		case WsEventType.ROOM_OWNER_PROMOTED: {
+			state.promoteMemberToModerator(event.roomId, event.userId);
+			break;
+		}
+		case WsEventType.ROOM_OWNER_DEMOTED: {
+			state.demoteMemberFromModerator(event.roomId, event.userId);
 			break;
 		}
 		case WsEventType.ROOM_PICTURE_CHANGED: {
-			if (eventArrivesFromAnotherSession) {
-				state.setRoomPictureUpdated(event.roomId, event.sentDate);
-			}
+			state.setRoomPictureUpdated(event.roomId, event.updatedAt);
 			break;
 		}
 		case WsEventType.ROOM_PICTURE_DELETED: {
-			if (eventArrivesFromAnotherSession) {
-				state.setRoomPictureDeleted(event.roomId);
-			}
+			state.setRoomPictureDeleted(event.roomId);
 			break;
 		}
 		case WsEventType.ROOM_MEMBER_ADDED: {
-			if (eventArrivesFromAnotherSession) {
-				if (event.member.userId === state.session.id) {
-					RoomsApi.getRoom(event.roomId)
-						.then((response: GetRoomResponse) => {
-							state.addRoom(response);
-							if (response.meetingId) {
-								MeetingsApi.getMeeting(response.id)
-									.then((meetingResponse: GetMeetingResponse) => {
-										state.addMeeting(meetingResponse);
-									})
-									.catch();
-							}
-						})
-						.catch(() => null);
-				} else {
-					state.addRoomMember(event.roomId, event.member);
-				}
+			if (event.userId === state.session.id) {
+				RoomsApi.getRoom(event.roomId).then((response: GetRoomResponse) => {
+					state.addRoom(response);
+					if (response.meetingId) {
+						MeetingsApi.getMeeting(response.id).then((meetingResponse: GetMeetingResponse) =>
+							state.addMeeting(meetingResponse)
+						);
+					}
+				});
+			} else {
+				state.addRoomMember(event.roomId, {
+					userId: event.userId,
+					owner: event.isOwner
+				});
 			}
 			break;
 		}
 		case WsEventType.ROOM_MEMBER_REMOVED: {
-			if (eventArrivesFromAnotherSession) {
-				if (event.userId === state.session.id) {
-					if (state.meetings[event.roomId] !== undefined) {
-						state.deleteMeeting(state.meetings[event.roomId].id);
-					}
-					state.deleteRoom(event.roomId);
-				} else {
-					state.removeRoomMember(event.roomId, event.userId);
+			if (event.userId === state.session.id) {
+				if (state.meetings[event.roomId] !== undefined) {
+					state.deleteMeeting(state.meetings[event.roomId].id);
 				}
+				state.deleteRoom(event.roomId);
+			} else {
+				state.removeRoomMember(event.roomId, event.userId);
 			}
 			break;
 		}
 		case WsEventType.ROOM_MUTED: {
-			if (eventArrivesFromAnotherSession) {
-				state.setRoomMuted(event.roomId);
-			}
+			state.setRoomMuted(event.roomId);
 			break;
 		}
 		case WsEventType.ROOM_UNMUTED: {
-			if (eventArrivesFromAnotherSession) {
-				state.setRoomUnmuted(event.roomId);
-			}
-			break;
-		}
-		case WsEventType.ROOM_HISTORY_CLEARED: {
-			if (eventArrivesFromAnotherSession) {
-				state.setClearedAt(event.roomId, event.clearedAt);
-			}
+			state.setRoomUnmuted(event.roomId);
 			break;
 		}
 		case WsEventType.USER_PICTURE_CHANGED: {
-			if (eventArrivesFromAnotherSession) {
-				state.setUserPictureUpdated(event.userId, event.sentDate);
-			}
+			state.setUserPictureUpdated(event.userId, event.sentDate);
 			break;
 		}
 		case WsEventType.USER_PICTURE_DELETED: {
-			if (eventArrivesFromAnotherSession) {
-				state.setUserPictureDeleted(event.userId);
-			}
+			state.setUserPictureDeleted(event.userId);
+			break;
+		}
+		case WsEventType.ROOM_HISTORY_CLEARED: {
+			state.setClearedAt(event.roomId, event.clearedAt);
 			break;
 		}
 		case WsEventType.MEETING_CREATED: {

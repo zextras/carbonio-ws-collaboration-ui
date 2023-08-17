@@ -140,8 +140,7 @@ describe('Room Picture Handler - groups', () => {
 		const snackbar = await screen.findByText(/New avatar has been successfully uploaded/i);
 		expect(snackbar).toBeVisible();
 
-		const pictureContainer = await screen.findByTestId('picture_container');
-		expect(pictureContainer).toBeInTheDocument();
+		expect(mockedUpdateRoomPictureRequest).toBeCalled();
 	});
 	test('update an image fails', async () => {
 		const testImageFile = new File(['hello'], 'hello.png', { type: 'image/png' });
@@ -194,13 +193,7 @@ describe('Room Picture Handler - groups', () => {
 		);
 		expect(snackbar).toBeVisible();
 
-		const backgroundContainer = await screen.findByTestId('background_container');
-		expect(backgroundContainer).toBeInTheDocument();
-
-		user.hover(backgroundContainer);
-		const uploadButton = await screen.findByTestId('upload_button');
-		expect(uploadButton).toBeInTheDocument();
-		expect(deleteButton).not.toBeInTheDocument();
+		expect(mockedDeleteRoomPictureRequest).toBeCalled();
 	});
 	test('delete an image fails ', async () => {
 		const store: RootStore = useStore.getState();

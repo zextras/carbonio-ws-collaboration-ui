@@ -10,7 +10,6 @@ import { useTranslation } from 'react-i18next';
 
 import DeleteUserModal from './DeleteUserModal';
 import { RoomsApi } from '../../../../network';
-import useStore from '../../../../store/Store';
 
 type RemoveMemberProps = {
 	roomId: string;
@@ -26,14 +25,10 @@ const RemoveMemberListAction: FC<RemoveMemberProps> = ({ roomId, memberId }) => 
 		setDeleteUserModalOpen(false);
 	}, []);
 
-	const deleteUser = useCallback(() => {
-		RoomsApi.deleteRoomMember(roomId, memberId)
-			.then(() => {
-				useStore.getState().removeRoomMember(roomId, memberId);
-			})
-			.catch(() => null);
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [roomId, memberId]);
+	const deleteUser = useCallback(
+		() => RoomsApi.deleteRoomMember(roomId, memberId),
+		[roomId, memberId]
+	);
 
 	return (
 		<>

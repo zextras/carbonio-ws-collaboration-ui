@@ -34,10 +34,10 @@ const LeaveConversationAction: FC<LeaveProps> = ({
 			return t('modal.leaveGroup', 'Leave Group');
 		}
 		return t('modal.leaveRoom', 'Leave Room');
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [type]);
+	}, [t, type]);
+
 	const sessionId: string | undefined = useStore((state) => state.session.id);
-	const deleteRoom = useStore((state) => state.deleteRoom);
+
 	const [leaveConversationModalOpen, setLeaveConversationModalOpen] = useState<boolean>(false);
 
 	const { goToMainPage, goToInfoPage } = useRouting();
@@ -54,23 +54,17 @@ const LeaveConversationAction: FC<LeaveProps> = ({
 
 	const leaveConversation = useCallback(() => {
 		if (sessionId) {
-			RoomsApi.deleteRoomMember(roomId, sessionId)
-				.then(() => {
-					deleteRoom(roomId);
-					if (isInsideMeeting) {
-						goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED);
-					} else {
-						goToMainPage();
-					}
-				})
-				.catch(() => null);
+			RoomsApi.deleteRoomMember(roomId, sessionId).then(() => {
+				if (isInsideMeeting) {
+					goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED);
+				} else {
+					goToMainPage();
+				}
+			});
 		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [roomId, sessionId]);
+	}, [goToInfoPage, goToMainPage, isInsideMeeting, roomId, sessionId]);
 
-	const closeModal = useCallback(() => {
-		setLeaveConversationModalOpen(false);
-	}, []);
+	const closeModal = useCallback(() => setLeaveConversationModalOpen(false), []);
 
 	return (
 		<Container>

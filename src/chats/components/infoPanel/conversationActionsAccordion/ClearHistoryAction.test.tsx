@@ -76,12 +76,6 @@ describe('clear history action', () => {
 		// the modal has disappeared
 		await waitFor(() => expect(screen.getAllByText(/Clear History/i)).toHaveLength(1));
 
-		// store checks
-		await waitFor(() =>
-			expect(result.current.rooms[mockedRoom.id].userSettings?.clearedAt).toBe(
-				'2022-10-31T10:39:48.622581+01:00'
-			)
-		);
-		await waitFor(() => expect(result.current.messages[mockedRoom.id].length).toBe(0));
+		await waitFor(() => expect(mockedClearHistoryRequest).toBeCalled());
 	});
 });

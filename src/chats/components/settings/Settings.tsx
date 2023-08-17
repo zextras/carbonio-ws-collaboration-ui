@@ -22,7 +22,6 @@ import NotificationsSettings from './NotificationsSettings';
 import ProfileSettings from './ProfileSettings';
 import useLocalStorage from '../../../hooks/useLocalStorage';
 import { UsersApi } from '../../../network';
-import useStore from '../../../store/Store';
 
 type CreateSnackbarFn = typeof CreateSnackbarFn;
 
@@ -38,9 +37,6 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 		'settings.profile.errorGenericResponse',
 		'Something went Wrong. Please Retry'
 	);
-
-	const setUserPictureUpdated = useStore((state) => state.setUserPictureUpdated);
-	const setUserPictureDeleted = useStore((state) => state.setUserPictureDeleted);
 
 	const createSnackbar: CreateSnackbarFn = useContext(SnackbarManagerContext);
 
@@ -83,7 +79,6 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 		if (picture) {
 			UsersApi.changeUserPicture(id || '', picture)
 				.then(() => {
-					setUserPictureUpdated(id || '', new Date().toISOString());
 					createSnackbar({
 						key: new Date().toLocaleString(),
 						type: 'info',
@@ -109,7 +104,6 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 		if (deletePicture) {
 			UsersApi.deleteUserPicture(id || '')
 				.then(() => {
-					setUserPictureDeleted(id || '');
 					createSnackbar({
 						key: new Date().toLocaleString(),
 						type: 'info',
@@ -155,8 +149,6 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 		createSnackbar,
 		saveSettingsSnackbar,
 		id,
-		setUserPictureUpdated,
-		setUserPictureDeleted,
 		errorDeleteImageSnackbar,
 		setNotificationsStorage
 	]);

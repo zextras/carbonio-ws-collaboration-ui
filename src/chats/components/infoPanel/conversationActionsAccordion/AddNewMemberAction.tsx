@@ -16,7 +16,6 @@ import { getRoomMembers, getRoomNameSelector } from '../../../../store/selectors
 import { getCapability } from '../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../store/Store';
 import { AddMemberFields } from '../../../../types/network/models/roomBeTypes';
-import { AddRoomMemberResponse } from '../../../../types/network/responses/roomsResponses';
 import { Member } from '../../../../types/store/RoomTypes';
 import { CapabilityType } from '../../../../types/store/SessionTypes';
 import { ContactSelected } from '../../creationModal/ChatCreationContactsSelection';
@@ -43,7 +42,6 @@ const AddNewMemberAction: FC<AddNewMemberProps> = ({
 
 	const members: Member[] | undefined = useStore((state) => getRoomMembers(state, roomId));
 	const roomName: string = useStore((state) => getRoomNameSelector(state, roomId));
-	const addRoomMember = useStore((state) => state.addRoomMember);
 	const maxMembers = useStore((store) => getCapability(store, CapabilityType.MAX_GROUP_MEMBERS));
 
 	const [contactsSelected, setContactSelected] = useState<ContactSelected>({});
@@ -70,15 +68,9 @@ const AddNewMemberAction: FC<AddNewMemberProps> = ({
 				owner: false,
 				historyCleared: !showHistory
 			};
-			RoomsApi.addRoomMember(roomId, userToAdd)
-				.then((response: AddRoomMemberResponse) => {
-					addRoomMember(roomId, response);
-					closeModal();
-				})
-				.catch();
+			RoomsApi.addRoomMember(roomId, userToAdd).then(() => closeModal());
 		});
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [contactsSelected, roomId, showHistory]);
+	}, [closeModal, contactsSelected, roomId, showHistory]);
 
 	const addMemberDisabled = useMemo(
 		() => maxMembers === members?.length,

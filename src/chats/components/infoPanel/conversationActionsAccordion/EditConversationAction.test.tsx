@@ -111,6 +111,6 @@ describe('Edit conversation action', () => {
 		await waitFor(() => expect(result.current.rooms[testRoom2.id].name).toBe('A Group'));
 
 		user.click(editButton);
-		await waitFor(() => expect(result.current.rooms[testRoom2.id].name).toBe('A new name'));
+		await waitFor(() => expect(mockedUpdateRoomRequest).toBeCalledTimes(2));
 	});
 });

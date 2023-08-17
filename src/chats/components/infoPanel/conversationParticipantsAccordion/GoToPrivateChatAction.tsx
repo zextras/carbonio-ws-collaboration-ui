@@ -24,8 +24,6 @@ const GoToPrivateChatAction: FC<GoToPrivateChatProps> = ({ memberId, isParticipa
 	const [t] = useTranslation();
 	const goToPrivateChatLabel: string = t('tooltip.goToPrivateChat', 'Go to private chat');
 
-	const addRoom = useStore((store) => store.addRoom);
-
 	const { goToRoomPage } = useRouting();
 
 	const goToUserRoom = useCallback(() => {
@@ -41,10 +39,7 @@ const GoToPrivateChatAction: FC<GoToPrivateChatProps> = ({ memberId, isParticipa
 			RoomsApi.addRoom({
 				type: RoomType.ONE_TO_ONE,
 				membersIds: [memberId]
-			}).then((response: AddRoomResponse) => {
-				addRoom(response);
-				goToRoomPage(response.id);
-			});
+			}).then((response: AddRoomResponse) => goToRoomPage(response.id));
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [memberId]);

@@ -38,6 +38,12 @@ const user2Info: User = {
 	name: 'User 2'
 };
 
+const user3Info: User = {
+	id: 'user3',
+	email: 'user3@domain.com',
+	name: 'User 3'
+};
+
 const userInfoMember = {
 	userId: user2Info.id,
 	owner: false,
@@ -76,6 +82,12 @@ const mockedRoom = createMockRoom({
 		{
 			userId: user2Info.id,
 			owner: false,
+			temporary: false,
+			external: false
+		},
+		{
+			userId: user3Info.id,
+			owner: true,
 			temporary: false,
 			external: false
 		}
@@ -123,10 +135,6 @@ describe('participants actions - go to private chat', () => {
 		await waitFor(() => {
 			expect(mockGoToRoomPage).toBeCalled();
 		});
-		await waitFor(() =>
-			// store checks
-			expect(result.current.rooms['room-id']).toBeDefined()
-		);
 	});
 });
 
@@ -156,11 +164,7 @@ describe('participants actions - leave/delete conversation', () => {
 			result.current.setLoginInfo(user2Info.id, user2Info.name);
 			result.current.addRoom(mockedRoom);
 		});
-		mockedDeleteRoomMemberRequest
-			// for testing catch statement
-			.mockRejectedValueOnce("you're still here")
-			// for testing then statement
-			.mockReturnValueOnce('you left the conversation');
+		mockedDeleteRoomMemberRequest.mockReturnValueOnce('you left the conversation');
 		mockGoToMainPage.mockReturnValue('main page');
 		const { user } = setup(
 			<LeaveConversationListAction
@@ -174,16 +178,10 @@ describe('participants actions - leave/delete conversation', () => {
 		const logout = await screen.findByTestId('icon: LogOut');
 		user.click(logout);
 		const button = await screen.findByRole('button', { name: 'Leave' });
-		user.click(button);
-		await waitFor(() => expect(mockGoToMainPage).not.toBeCalled());
 
 		user.click(button);
+		await waitFor(() => expect(mockedDeleteRoomMemberRequest).toBeCalled());
 		await waitFor(() => expect(mockGoToMainPage).toBeCalled());
-
-		await waitFor(() =>
-			// store checks
-			expect(result.current.rooms[mockedRoom.id]).not.toBeDefined()
-		);
 	});
 	test('delete conversation - open and close modal', async () => {
 		const store = useStore.getState();
@@ -210,11 +208,7 @@ describe('participants actions - leave/delete conversation', () => {
 			result.current.setLoginInfo(user1Info.id, user1Info.name);
 			result.current.addRoom(mockedRoom2);
 		});
-		mockedDeleteRoomRequest
-			// for testing catch statement
-			.mockRejectedValueOnce("conversation's still here")
-			// for testing then statement
-			.mockReturnValueOnce('the conversation has been deleted');
+		mockedDeleteRoomRequest.mockReturnValueOnce('the conversation has been deleted');
 		mockGoToMainPage.mockReturnValue('main page');
 		const { user } = setup(
 			<LeaveConversationListAction
@@ -229,30 +223,21 @@ describe('participants actions - leave/delete conversation', () => {
 		user.click(screen.getByTestId('icon: Trash2Outline'));
 		const button = await screen.findByRole('button', { name: 'Delete' });
 		user.click(button);
-		await waitFor(() => expect(mockGoToMainPage).not.toBeCalled());
-		user.click(button);
+		await waitFor(() => expect(mockedDeleteRoomRequest).toBeCalled());
 		await waitFor(() => expect(mockGoToMainPage).toBeCalled());
-
-		// store checks
-		await waitFor(() => expect(result.current.rooms[mockedRoom2.id]).not.toBeDefined());
 	});
 });
 
 describe('participants actions - promote/demote member', () => {
-	test('promote/demote member', async () => {
+	test('Promote member', async () => {
 		const { result } = renderHook(() => useStore());
 		act(() => {
 			result.current.setLoginInfo(user1Info.id, user1Info.name);
 			result.current.setUserInfo(user2Info);
 			result.current.addRoom(mockedRoom);
 		});
-		mockedPromoteRoomMemberRequest
-			.mockRejectedValueOnce('not promoted')
-			.mockReturnValueOnce('promoted');
+		mockedPromoteRoomMemberRequest.mockReturnValueOnce('promoted');
 
-		mockedDemotesRoomMemberRequest
-			.mockRejectedValueOnce('not promoted')
-			.mockReturnValueOnce('promoted');
 		const { user } = setup(<MemberComponentInfo roomId={mockedRoom.id} member={userInfoMember} />);
 
 		const promoteButton = screen.getByTestId('icon: CrownOutline');
@@ -261,25 +246,38 @@ describe('participants actions - promote/demote member', () => {
 
 		// Promote member
 		user.click(promoteButton);
-		expect(promoteButton).toBeInTheDocument();
 
-		user.click(promoteButton);
-		const button = await screen.findByTestId('icon: Crown');
-		expect(button).toBeInTheDocument();
+		await waitFor(() => expect(mockedPromoteRoomMemberRequest).toBeCalled());
+	});
 
-		// store checks
-		await waitFor(() => expect(result.current.rooms[mockedRoom.id].members?.[1].owner).toBe(true));
+	test('Demote member', async () => {
+		const { result } = renderHook(() => useStore());
+		act(() => {
+			result.current.setLoginInfo(user1Info.id, user1Info.name);
+			result.current.setUserInfo(user3Info);
+			result.current.addRoom(mockedRoom);
+		});
 
-		// Demote member
-		user.click(button);
-		expect(button).toBeInTheDocument();
+		mockedDemotesRoomMemberRequest.mockReturnValueOnce('demoted');
+		const { user } = setup(
+			<MemberComponentInfo
+				roomId={mockedRoom.id}
+				member={{
+					userId: user3Info.id,
+					owner: true,
+					temporary: false,
+					external: false
+				}}
+			/>
+		);
 
-		user.click(button);
-		const crownIcon = await screen.findByTestId('icon: CrownOutline');
-		expect(crownIcon).toBeInTheDocument();
+		const demoteButton = screen.getByTestId('icon: Crown');
+		expect(demoteButton).toBeInTheDocument();
+		expect(demoteButton).toBeEnabled();
 
-		// store checks
-		await waitFor(() => expect(result.current.rooms[mockedRoom.id].members?.[1].owner).toBe(false));
+		user.click(demoteButton);
+
+		await waitFor(() => expect(mockedDemotesRoomMemberRequest).toBeCalled());
 	});
 });
 
@@ -307,25 +305,17 @@ describe('participants actions - delete user', () => {
 			result.current.setUserInfo(user2Info);
 			result.current.addRoom(mockedRoom);
 		});
-		mockedDeleteRoomMemberRequest
-			// for testing catch statement
-			.mockRejectedValueOnce('user is still here')
-			// for testing then statement
-			.mockReturnValueOnce('user has been kicked out from the conversation');
+		mockedDeleteRoomMemberRequest.mockReturnValueOnce(
+			'user has been kicked out from the conversation'
+		);
 		const { user } = setup(
 			<RemoveMemberListAction roomId={mockedRoom.id} memberId={user2Info.id} />
 		);
 
 		user.click(screen.getByTestId('icon: Trash2Outline'));
 		const button = await screen.findByRole('button', { name: 'Remove' });
-		user.click(button);
-		const closeIcon = await screen.findByTestId('icon: Close');
-		expect(closeIcon).toBeInTheDocument();
 
 		user.click(button);
-		await waitFor(() => expect(mockedDeleteRoomMemberRequest).toBeCalledTimes(2));
-
-		// store checks
-		await waitFor(() => expect(result.current.rooms[mockedRoom.id].members?.length).toBe(1));
+		await waitFor(() => expect(mockedDeleteRoomMemberRequest).toBeCalled());
 	});
 });

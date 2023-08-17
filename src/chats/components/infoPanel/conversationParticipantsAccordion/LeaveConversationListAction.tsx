@@ -49,8 +49,7 @@ const LeaveConversationListAction: FC<LeaveConversationProps> = ({
 			? promoteSomeoneElseToModeratorLabel
 			: leaveConversationLabel;
 
-	const deleteRoom = useStore((state) => state.deleteRoom);
-	const sessionId = useStore((store) => store.session.id);
+	const sessionUserId = useStore((store) => store.session.id);
 
 	const [leaveConversationModalOpen, setLeaveConversationModalOpen] = useState<boolean>(false);
 	const [deleteConversationModalOpen, setDeleteConversationModalOpen] = useState<boolean>(false);
@@ -58,24 +57,15 @@ const LeaveConversationListAction: FC<LeaveConversationProps> = ({
 	const { goToMainPage } = useRouting();
 
 	const leaveConversation = useCallback(() => {
-		if (sessionId) {
-			RoomsApi.deleteRoomMember(roomId, sessionId)
-				.then(() => {
-					deleteRoom(roomId);
-					goToMainPage();
-				})
-				.catch(() => null);
+		if (sessionUserId) {
+			RoomsApi.deleteRoomMember(roomId, sessionUserId).then(() => goToMainPage());
 		}
-	}, [deleteRoom, goToMainPage, roomId, sessionId]);
+	}, [goToMainPage, roomId, sessionUserId]);
 
-	const deleteConversation = useCallback(() => {
-		RoomsApi.deleteRoom(roomId)
-			.then(() => {
-				deleteRoom(roomId);
-				goToMainPage();
-			})
-			.catch(() => null);
-	}, [deleteRoom, goToMainPage, roomId]);
+	const deleteConversation = useCallback(
+		() => RoomsApi.deleteRoom(roomId).then(() => goToMainPage()),
+		[goToMainPage, roomId]
+	);
 
 	const closeLeaveModal = useCallback(() => {
 		setLeaveConversationModalOpen(false);

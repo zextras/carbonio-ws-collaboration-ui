@@ -9,10 +9,7 @@ import React from 'react';
 
 import MeetingParticipantsAccordion from './MeetingParticipantsAccordion';
 import MeetingParticipantsList from './MeetingParticipantsList';
-import {
-	mockedDemotesRoomMemberRequest,
-	mockedPromoteRoomMemberRequest
-} from '../../../../../jest-mocks';
+import { mockedPromoteRoomMemberRequest } from '../../../../../jest-mocks';
 import useStore from '../../../../store/Store';
 import {
 	createMockMeeting,
@@ -110,42 +107,6 @@ const storeSetupParticipantModerator = (): { user: UserEvent; store: RootStore }
 	return { user, store };
 };
 
-// setup of the store of a Participant element that is a moderator, and I'm a moderator
-const storeSetupModeratorModerator = (): { user: UserEvent; store: RootStore } => {
-	const store: RootStore = useStore.getState();
-	const user1: UserBe = createMockUser({ id: 'user1Id', name: 'user 1' });
-	const user2: UserBe = createMockUser({ id: 'user2Id', name: 'user 2' });
-
-	const member1: MemberBe = { userId: user1.id, owner: true };
-	const member2: MemberBe = { userId: user2.id, owner: true };
-
-	const room: RoomBe = createMockRoom({
-		name: '',
-		description: '',
-		type: RoomType.GROUP,
-		members: [member1, member2]
-	});
-	store.setUserInfo(user1);
-	store.setUserInfo(user2);
-	store.setLoginInfo(user1.id, user1.name);
-	store.addRoom(room);
-	const user1Participant: MeetingParticipant = createMockParticipants({
-		userId: user1.id,
-		sessionId: 'sessionIdUser1'
-	});
-	const user2Participant: MeetingParticipant = createMockParticipants({
-		userId: user2.id,
-		sessionId: 'sessionIdUser2'
-	});
-	const meeting: MeetingBe = createMockMeeting({
-		roomId: room.id,
-		participants: [user1Participant, user2Participant]
-	});
-	store.addMeeting(meeting);
-	const { user } = setup(<MeetingParticipantsList meetingId={meeting.id} />);
-	return { user, store };
-};
-
 describe("Meeting Participants Accordion - moderator's side", () => {
 	test('everything is rendered correctly', async () => {
 		const { user } = storeSetupGroupMeetingModerator();
@@ -188,20 +149,6 @@ describe("Meeting Participants Accordion - moderator's side", () => {
 		// promote member
 		user.click(promoteButton);
 		const button = await screen.findByTestId('icon: Crown');
-		expect(button).toBeInTheDocument();
-	});
-	test('demote moderator', async () => {
-		mockedDemotesRoomMemberRequest.mockReturnValueOnce('promoted');
-
-		const { user } = storeSetupModeratorModerator();
-
-		const demoteButton = screen.getAllByTestId('icon: Crown');
-		expect(demoteButton[1]).toBeInTheDocument();
-		expect(demoteButton[1]).toBeEnabled();
-
-		// demote member
-		user.click(demoteButton[1]);
-		const button = await screen.findByTestId('icon: CrownOutline');
 		expect(button).toBeInTheDocument();
 	});
 

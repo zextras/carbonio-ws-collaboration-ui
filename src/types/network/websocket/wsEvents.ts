@@ -10,21 +10,20 @@ import { WsMeetingEvent } from './wsMeetingEvents';
 export enum WsEventType {
 	INITIALIZATION = 'websocketConnected',
 	PONG = 'pong',
-	ROOM_CREATED = 'roomCreated',
-	ROOM_UPDATED = 'roomUpdated',
-	ROOM_DELETED = 'roomDeleted',
-	ROOM_OWNER_CHANGED = 'roomOwnerChanged',
-	ROOM_PICTURE_CHANGED = 'roomPictureChanged',
-	ROOM_PICTURE_DELETED = 'roomPictureDeleted',
-	ROOM_MEMBER_ADDED = 'roomMemberAdded',
-	ROOM_MEMBER_REMOVED = 'roomMemberRemoved',
-	ROOM_MUTED = 'roomMuted',
-	ROOM_UNMUTED = 'roomUnmuted',
-	ROOM_HISTORY_CLEARED = 'roomHistoryCleared',
-	ATTACHMENT_ADDED = 'attachmentAdded',
-	ATTACHMENT_REMOVED = 'attachmentRemoved',
-	USER_PICTURE_CHANGED = 'userPictureChanged',
-	USER_PICTURE_DELETED = 'userPictureDeleted',
+	ROOM_CREATED = 'ROOM_CREATED',
+	ROOM_UPDATED = 'ROOM_UPDATED',
+	ROOM_DELETED = 'ROOM_DELETED',
+	ROOM_OWNER_PROMOTED = 'ROOM_OWNER_PROMOTED',
+	ROOM_OWNER_DEMOTED = 'ROOM_OWNER_DEMOTED',
+	ROOM_PICTURE_CHANGED = 'ROOM_PICTURE_CHANGED',
+	ROOM_PICTURE_DELETED = 'ROOM_PICTURE_DELETED',
+	ROOM_MEMBER_ADDED = 'ROOM_MEMBER_ADDED',
+	ROOM_MEMBER_REMOVED = 'ROOM_MEMBER_REMOVED',
+	ROOM_MUTED = 'ROOM_MUTED',
+	ROOM_UNMUTED = 'ROOM_UNMUTED',
+	USER_PICTURE_CHANGED = 'USER_PICTURE_CHANGED',
+	USER_PICTURE_DELETED = 'USER_PICTURE_DELETED',
+	ROOM_HISTORY_CLEARED = 'ROOM_HISTORY_CLEARED',
 	MEETING_CREATED = 'meetingCreated',
 	MEETING_STARTED = 'meetingStarted',
 	MEETING_JOINED = 'meetingParticipantJoined',
@@ -49,5 +48,4 @@ export type InitializationEvent = {
 
 export type PongEvent = {
 	type: WsEventType.PONG;
-	sessionId: string;
 };

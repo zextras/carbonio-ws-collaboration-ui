@@ -42,8 +42,6 @@ const MuteConversationAction: FC<MuteProps> = ({
 		'Notifications muted for this chat'
 	);
 	const isMuted: boolean | undefined = useStore((state) => getRoomMutedSelector(state, roomId));
-	const setRoomMuted = useStore((state) => state.setRoomMuted);
-	const setRoomUnmuted = useStore((state) => state.setRoomUnmuted);
 
 	const createSnackbar: CreateSnackbarFn = useContext(SnackbarManagerContext);
 
@@ -59,40 +57,36 @@ const MuteConversationAction: FC<MuteProps> = ({
 		if (isMuted) {
 			RoomsApi.unmuteRoomNotification(roomId)
 				.then(() => {
-					setRoomUnmuted(roomId);
 					createSnackbar({
 						key: new Date().toLocaleString(),
 						type: 'info',
 						label: notificationsActivatedForThisChatLabel,
 						actionLabel: undoLabel,
-						onActionClick: () => {
-							RoomsApi.muteRoomNotification(roomId)
-								.then(() => setRoomMuted(roomId))
-								.catch(() => null);
-						}
+						onActionClick: () => RoomsApi.muteRoomNotification(roomId)
 					});
 				})
 				.catch(() => null);
 		} else {
 			RoomsApi.muteRoomNotification(roomId)
 				.then(() => {
-					setRoomMuted(roomId);
 					createSnackbar({
 						key: new Date().toLocaleString(),
 						type: 'info',
 						label: notificationsMutedForThisChatLabel,
 						actionLabel: undoLabel,
-						onActionClick: () => {
-							RoomsApi.unmuteRoomNotification(roomId)
-								.then(() => setRoomUnmuted(roomId))
-								.catch(() => null);
-						}
+						onActionClick: () => RoomsApi.unmuteRoomNotification(roomId)
 					});
 				})
 				.catch(() => null);
 		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [isMuted, roomId]);
+	}, [
+		isMuted,
+		roomId,
+		createSnackbar,
+		notificationsActivatedForThisChatLabel,
+		undoLabel,
+		notificationsMutedForThisChatLabel
+	]);
 
 	return (
 		<ActionComponent

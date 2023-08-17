@@ -5,20 +5,17 @@
  */
 
 import { WsEventType } from './wsEvents';
-import { Attachment } from '../models/attachmentTypes';
-import { MemberBe } from '../models/roomBeTypes';
 
 export type WsConversationEvent =
 	| RoomCreatedEvent
 	| RoomUpdatedEvent
 	| RoomDeletedEvent
-	| RoomOwnerChangedEvent
+	| RoomOwnerPromotedEvent
+	| RoomOwnerDemotedEvent
 	| RoomPictureChangedEvent
 	| RoomPictureDeletedEvent
 	| RoomMemberAddedEvent
 	| RoomMemberRemovedEvent
-	| AttachmentAddedEvent
-	| AttachmentRemovedEvent
 	| RoomMutedEvent
 	| RoomUnmutedEvent
 	| UserPictureChangedEvent
@@ -26,10 +23,8 @@ export type WsConversationEvent =
 	| RoomHistoryClearedEvent;
 
 type BasicConversationEvent = {
-	id: string;
-	from: string;
+	type: WsConversationEvent;
 	sentDate: string;
-	sessionId?: string;
 };
 
 export type RoomCreatedEvent = BasicConversationEvent & {
@@ -49,16 +44,22 @@ export type RoomDeletedEvent = BasicConversationEvent & {
 	roomId: string;
 };
 
-export type RoomOwnerChangedEvent = BasicConversationEvent & {
-	type: WsEventType.ROOM_OWNER_CHANGED;
+export type RoomOwnerPromotedEvent = BasicConversationEvent & {
+	type: WsEventType.ROOM_OWNER_PROMOTED;
 	roomId: string;
 	userId: string;
-	owner: boolean;
+};
+
+export type RoomOwnerDemotedEvent = BasicConversationEvent & {
+	type: WsEventType.ROOM_OWNER_DEMOTED;
+	roomId: string;
+	userId: string;
 };
 
 export type RoomPictureChangedEvent = BasicConversationEvent & {
 	type: WsEventType.ROOM_PICTURE_CHANGED;
 	roomId: string;
+	updatedAt: string;
 };
 
 export type RoomPictureDeletedEvent = BasicConversationEvent & {
@@ -69,7 +70,8 @@ export type RoomPictureDeletedEvent = BasicConversationEvent & {
 export type RoomMemberAddedEvent = BasicConversationEvent & {
 	type: WsEventType.ROOM_MEMBER_ADDED;
 	roomId: string;
-	member: MemberBe;
+	userId: string;
+	isOwner: boolean;
 };
 
 export type RoomMemberRemovedEvent = BasicConversationEvent & {
@@ -88,24 +90,6 @@ export type RoomUnmutedEvent = BasicConversationEvent & {
 	roomId: string;
 };
 
-export type RoomHistoryClearedEvent = BasicConversationEvent & {
-	type: WsEventType.ROOM_HISTORY_CLEARED;
-	roomId: string;
-	clearedAt: string;
-};
-
-export type AttachmentAddedEvent = BasicConversationEvent & {
-	type: WsEventType.ATTACHMENT_ADDED;
-	roomId: string;
-	attachment: Attachment;
-};
-
-export type AttachmentRemovedEvent = BasicConversationEvent & {
-	type: WsEventType.ATTACHMENT_REMOVED;
-	roomId: string;
-	fileId: string;
-};
-
 export type UserPictureChangedEvent = BasicConversationEvent & {
 	type: WsEventType.USER_PICTURE_CHANGED;
 	userId: string;
@@ -114,4 +98,10 @@ export type UserPictureChangedEvent = BasicConversationEvent & {
 export type UserPictureDeletedEvent = BasicConversationEvent & {
 	type: WsEventType.USER_PICTURE_DELETED;
 	userId: string;
+};
+
+export type RoomHistoryClearedEvent = BasicConversationEvent & {
+	type: WsEventType.ROOM_HISTORY_CLEARED;
+	roomId: string;
+	clearedAt: string;
 };

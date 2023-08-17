@@ -9,7 +9,6 @@ import React, { FC, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { RoomsApi } from '../../../../network';
-import useStore from '../../../../store/Store';
 
 type PromoteDemoteMemberProps = {
 	isSessionParticipant: boolean;
@@ -30,8 +29,7 @@ const PromoteDemoteMemberAction: FC<PromoteDemoteMemberProps> = ({
 	const iAmModeratorLabel: string = t('tooltip.iAmModerator', "You're a moderator");
 	const demoteModeratorLabel: string = t('tooltip.demoteModerator', 'Demote moderator');
 	const promoteModeratorLabel: string = t('tooltip.promoteModerator', 'Promote to moderator');
-	const promoteMemberToModerator = useStore((state) => state.promoteMemberToModerator);
-	const demoteMemberFromModerator = useStore((state) => state.demoteMemberFromModerator);
+
 	// eslint-disable-next-line no-nested-ternary
 	const tooltipLabel = isSessionParticipant
 		? iAmModeratorLabel
@@ -39,17 +37,15 @@ const PromoteDemoteMemberAction: FC<PromoteDemoteMemberProps> = ({
 		? demoteModeratorLabel
 		: promoteModeratorLabel;
 
-	const promoteMember = useCallback(() => {
-		RoomsApi.promoteRoomMember(roomId, memberId)
-			.then(() => promoteMemberToModerator(roomId, memberId))
-			.catch(() => null);
-	}, [memberId, promoteMemberToModerator, roomId]);
+	const promoteMember = useCallback(
+		() => RoomsApi.promoteRoomMember(roomId, memberId),
+		[memberId, roomId]
+	);
 
-	const demoteMember = useCallback(() => {
-		RoomsApi.demotesRoomMember(roomId, memberId)
-			.then(() => demoteMemberFromModerator(roomId, memberId))
-			.catch(() => null);
-	}, [demoteMemberFromModerator, memberId, roomId]);
+	const demoteMember = useCallback(
+		() => RoomsApi.demotesRoomMember(roomId, memberId),
+		[memberId, roomId]
+	);
 
 	return (
 		<Tooltip label={tooltipLabel}>

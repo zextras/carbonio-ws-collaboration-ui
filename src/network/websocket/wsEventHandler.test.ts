@@ -20,6 +20,10 @@ import {
 import { MeetingBe, MeetingParticipant } from '../../types/network/models/meetingBeTypes';
 import { MemberBe, RoomBe } from '../../types/network/models/roomBeTypes';
 import { UserBe } from '../../types/network/models/userBeTypes';
+import {
+	RoomMemberAddedEvent,
+	RoomMemberRemovedEvent
+} from '../../types/network/websocket/wsConversationEvents';
 import { WsEventType } from '../../types/network/websocket/wsEvents';
 import { RoomType } from '../../types/store/RoomTypes';
 
@@ -99,12 +103,9 @@ describe('wsEventHandler', () => {
 		wsEventsHandler({
 			type: WsEventType.ROOM_MEMBER_ADDED,
 			roomId: room.id,
-			member: member1,
-			id: 'memberAddedId',
-			from: user2.id,
-			sentDate: '123456789',
-			sessionId: 'sessionIdUser2'
-		});
+			userId: user1.id,
+			sentDate: '123456789'
+		} as RoomMemberAddedEvent);
 		await waitFor(() => expect(result.current.meetings[room.id]).not.toBeUndefined());
 	});
 	test('Room Member Removed in a room with an ongoing meeting', async () => {
@@ -121,11 +122,8 @@ describe('wsEventHandler', () => {
 				type: WsEventType.ROOM_MEMBER_REMOVED,
 				roomId: roomWithoutMe.id,
 				userId: member1.userId,
-				id: 'memberRemovedId',
-				from: user2.id,
-				sentDate: '123456789',
-				sessionId: 'sessionIdUser2'
-			});
+				sentDate: '123456789'
+			} as RoomMemberRemovedEvent);
 		});
 
 		await waitFor(() => expect(result.current.meetings[roomWithoutMe.id]).toBeUndefined());
