@@ -13,12 +13,7 @@ export type WsMeetingEvent =
 	| MeetingLeftEvent
 	| MeetingStoppedEvent
 	| MeetingDeletedEvent
-	| MeetingVideoStreamOpenedEvent
-	| MeetingVideoStreamClosedEvent
-	| MeetingAudioStreamEnabledEvent
-	| MeetingAudioStreamClosedEvent
-	| MeetingScreenStreamOpenedEvent
-	| MeetingScreenStreamClosedEvent
+	| MeetingAudioStreamChangedEvent
 	| MeetingMediaStreamChangedEvent;
 
 type BasicMeetingEvent = {
@@ -54,30 +49,15 @@ export type MeetingDeletedEvent = BasicMeetingEvent & {
 	type: WsEventType.MEETING_DELETED;
 };
 
-export type MeetingVideoStreamOpenedEvent = BasicMeetingEvent & {
-	type: WsEventType.MEETING_VIDEO_STREAM_OPENED;
-};
-
-export type MeetingVideoStreamClosedEvent = BasicMeetingEvent & {
-	type: WsEventType.MEETING_VIDEO_STREAM_CLOSED;
-};
-
-export type MeetingAudioStreamEnabledEvent = BasicMeetingEvent & {
-	type: WsEventType.MEETING_AUDIO_STREAM_ENABLED;
-};
-
-export type MeetingAudioStreamClosedEvent = BasicMeetingEvent & {
-	type: WsEventType.MEETING_AUDIO_STREAM_CLOSED;
-};
-
-export type MeetingScreenStreamOpenedEvent = BasicMeetingEvent & {
-	type: WsEventType.MEETING_SCREEN_STREAM_OPENED;
-};
-
-export type MeetingScreenStreamClosedEvent = BasicMeetingEvent & {
-	type: WsEventType.MEETING_SCREEN_STREAM_CLOSED;
+export type MeetingAudioStreamChangedEvent = BasicMeetingEvent & {
+	type: WsEventType.MEETING_AUDIO_STREAM_CHANGED;
+	active: boolean;
+	userId: string; // ora è sessionId
 };
 
 export type MeetingMediaStreamChangedEvent = BasicMeetingEvent & {
 	type: WsEventType.MEETING_MEDIA_STREAM_CHANGED;
+	userId: string;
+	mediaType: 'VIDEO' | 'SCREEN';
+	active: boolean;
 };

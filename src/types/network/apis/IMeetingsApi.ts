@@ -41,7 +41,6 @@ interface IMeetingsApi {
 	leaveMeeting(meetingId: string): Promise<LeaveMeetingResponse>;
 	// Stop meeting when all the users have left the meeting
 	stopMeeting(meetingId: string): Promise<StopMeetingResponse>;
-	quitMeeting(meetingId: string): Promise<LeaveMeetingResponse>;
 	// Delete meeting with the deletion of the room
 	deleteMeeting(meetingId: string): Promise<DeleteMeetingResponse>;
 	// Update user stream status

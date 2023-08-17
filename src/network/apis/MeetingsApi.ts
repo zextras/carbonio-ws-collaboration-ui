@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { find, size } from 'lodash';
-
 import BaseAPI from './BaseAPI';
 import useStore from '../../store/Store';
 import { RequestType } from '../../types/network/apis/IBaseAPI';
@@ -128,16 +126,6 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 
 	public stopMeeting(meetingId: string): Promise<StopMeetingResponse> {
 		return this.fetchAPI(`meetings/${meetingId}/stop`, RequestType.POST);
-	}
-
-	public quitMeeting(meetingId: string): Promise<LeaveMeetingResponse> {
-		const meeting = find(useStore.getState().meetings, { id: meetingId });
-		return this.leaveMeeting(meetingId).then((response: LeaveMeetingResponse) => {
-			if (size(meeting?.participants) < 2) {
-				this.stopMeeting(meetingId);
-			}
-			return response;
-		});
 	}
 
 	public deleteMeeting(meetingId: string): Promise<DeleteMeetingResponse> {

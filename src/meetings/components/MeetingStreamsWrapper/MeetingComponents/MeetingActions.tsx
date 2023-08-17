@@ -184,7 +184,7 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 	const leaveMeeting = useCallback(() => {
 		closeBidirectionalAudioConn(meetingId);
 		closeVideoOutConn(meetingId);
-		MeetingsApi.quitMeeting(meetingId)
+		MeetingsApi.leaveMeeting(meetingId)
 			.then(() => goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED))
 			.catch(() => console.log('Error on leave'));
 	}, [closeBidirectionalAudioConn, meetingId, closeVideoOutConn, goToInfoPage]);

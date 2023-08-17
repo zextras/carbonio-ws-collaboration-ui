@@ -12,7 +12,7 @@ import { MeetingType, MeetingUserType } from '../../types/network/models/meeting
 import { GetMeetingResponse } from '../../types/network/responses/meetingsResponses';
 import { GetRoomResponse } from '../../types/network/responses/roomsResponses';
 import { WsEvent, WsEventType } from '../../types/network/websocket/wsEvents';
-// import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
+import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
 import { RoomType } from '../../types/store/RoomTypes';
 import { wsDebug } from '../../utils/debug';
 import { MeetingsApi, RoomsApi } from '../index';
@@ -157,60 +157,22 @@ export function wsEventsHandler(event: WsEvent): void {
 			state.deleteMeeting(event.meetingId);
 			break;
 		}
-		case WsEventType.MEETING_VIDEO_STREAM_OPENED: {
-			// TODO: wait for meeting events changes
-			// if (eventArrivesFromAnotherSession) {
-			// 	state.changeStreamStatus(event.meetingId, event.sessionId, STREAM_TYPE.VIDEO, true);
-			// }
-			break;
-		}
-		case WsEventType.MEETING_VIDEO_STREAM_CLOSED: {
-			// TODO: wait for meeting events changes
-			// if (eventArrivesFromAnotherSession) {
-			// 	state.changeStreamStatus(event.meetingId, event.sessionId, STREAM_TYPE.VIDEO, false);
-			// }
-			break;
-		}
-		case WsEventType.MEETING_AUDIO_STREAM_ENABLED: {
-			// TODO: wait for meeting events changes
-			// if (eventArrivesFromAnotherSession) {
-			// 	state.changeStreamStatus(event.meetingId, event.sessionId, STREAM_TYPE.AUDIO, true);
-			// }
-			break;
-		}
-		case WsEventType.MEETING_AUDIO_STREAM_CLOSED: {
-			// TODO: wait for meeting events changes
-			// if (eventArrivesFromAnotherSession) {
-			// 	state.changeStreamStatus(event.meetingId, event.sessionId, STREAM_TYPE.AUDIO, false);
-			// }
-			break;
-		}
-		case WsEventType.MEETING_SCREEN_STREAM_OPENED: {
-			// TODO: wait for meeting events changes
-			// if (eventArrivesFromAnotherSession) {
-			// 	state.changeStreamStatus(event.meetingId, event.sessionId, STREAM_TYPE.SCREEN, true);
-			// }
-			break;
-		}
-		case WsEventType.MEETING_SCREEN_STREAM_CLOSED: {
-			// TODO: wait for meeting events changes
-			// if (eventArrivesFromAnotherSession) {
-			// 	state.changeStreamStatus(event.meetingId, event.sessionId, STREAM_TYPE.SCREEN, false);
-			// }
+		case WsEventType.MEETING_AUDIO_STREAM_CHANGED: {
+			state.changeStreamStatus(event.meetingId, event.userId, STREAM_TYPE.AUDIO, event.active);
 			break;
 		}
 		case WsEventType.MEETING_MEDIA_STREAM_CHANGED: {
-			// TODO COMMENTED ONLY FOR TEST PURPOSE
-			// if (eventArrivesFromAnotherSession) {
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore
-			// const mediaType = event.mediaType.toLowerCase();
-			// MeetingsApi.subscribeToMedia(event.meetingId, event.sessionId, mediaType)
-			// 	.then((res) => {
-			// 		console.log(res);
-			// 	})
-			// 	.catch((er) => console.error(er));
-			// }
+			if (event.mediaType === 'VIDEO') {
+				state.changeStreamStatus(event.meetingId, event.userId, STREAM_TYPE.VIDEO, event.active);
+			}
+			if (event.mediaType === 'SCREEN') {
+				state.changeStreamStatus(event.meetingId, event.userId, STREAM_TYPE.SCREEN, event.active);
+			}
+
+			const mediaType = event.mediaType.toLowerCase() as STREAM_TYPE;
+			MeetingsApi.subscribeToMedia(event.meetingId, event.userId, mediaType)
+				.then((res) => console.log(res))
+				.catch((er) => console.error(er));
 			break;
 		}
 		// TODO AUDIO ANSWER
