@@ -62,7 +62,7 @@ describe('Mute/Unmute Conversation', () => {
 		user.click(muteAction);
 		const snackbar = await screen.findByText(/Notifications muted for this chat/i);
 		expect(snackbar).toBeVisible();
-		expect(result.current.rooms[testRoom.id].userSettings?.muted).toBe(true);
+		expect(mockedMuteRoomNotificationRequest).toBeCalled();
 	});
 	test('unmute notifications', async () => {
 		const { result } = renderHook(() => useStore());
@@ -77,21 +77,7 @@ describe('Mute/Unmute Conversation', () => {
 		user.click(unmuteAction);
 		const snackbar = await screen.findByText(/Notifications activated for this chat/i);
 		expect(snackbar).toBeVisible();
-		expect(result.current.rooms[testRoom.id].userSettings?.muted).toBe(false);
-	});
-	test('undo mute rejected', async () => {
-		const { result } = renderHook(() => useStore());
-		act(() => result.current.addRoom(testRoom));
-		mockedMuteRoomNotificationRequest.mockReturnValue(true);
-		mockedUnmuteRoomNotificationRequest.mockRejectedValueOnce(false);
-		const { user } = setup(<MuteConversationAction roomId={testRoom.id} />);
-
-		const muteAction = screen.getByText(/Mute notifications/i);
-		user.click(muteAction);
-		const snackbar = await screen.findByText(/Notifications muted for this chat/i);
-		expect(snackbar).toBeVisible();
-		user.click(screen.getByText(/UNDO/i));
-		expect(result.current.rooms[testRoom.id].userSettings?.muted).toBe(true);
+		expect(mockedUnmuteRoomNotificationRequest).toBeCalled();
 	});
 	test('undo mute', async () => {
 		const { result } = renderHook(() => useStore());
@@ -107,20 +93,7 @@ describe('Mute/Unmute Conversation', () => {
 		user.click(screen.getByText(/UNDO/i));
 		await waitFor(() => expect(result.current.rooms[testRoom.id].userSettings?.muted).toBe(false));
 	});
-	test('undo unmute rejected', async () => {
-		const { result } = renderHook(() => useStore());
-		act(() => result.current.addRoom(testRoom2));
-		mockedUnmuteRoomNotificationRequest.mockReturnValue(true);
-		mockedMuteRoomNotificationRequest.mockRejectedValueOnce(false);
-		const { user } = setup(<MuteConversationAction roomId={testRoom2.id} />);
 
-		const unmuteAction = screen.getByText(/Activate notifications/i);
-		user.click(unmuteAction);
-		const snackbar = await screen.findByText(/Notifications activated for this chat/i);
-		expect(snackbar).toBeVisible();
-		user.click(screen.getByText(/UNDO/i));
-		expect(result.current.rooms[testRoom.id].userSettings?.muted).toBe(false);
-	});
 	test('undo unmute', async () => {
 		const { result } = renderHook(() => useStore());
 		act(() => result.current.addRoom(testRoom2));

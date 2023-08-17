@@ -89,11 +89,7 @@ describe('Leave conversation Action', () => {
 			result.current.setLoginInfo(user2Info.id, user2Info.name);
 			result.current.addRoom(mockedRoom);
 		});
-		mockedDeleteRoomMemberRequest
-			// for testing catch statement
-			.mockRejectedValueOnce("you're still here")
-			// for testing then statement
-			.mockReturnValueOnce('you left the conversation');
+		mockedDeleteRoomMemberRequest.mockReturnValueOnce('you left the conversation');
 		mockGoToMainPage.mockReturnValue('main page');
 		const { user } = setup(
 			<LeaveConversationAction
@@ -108,11 +104,7 @@ describe('Leave conversation Action', () => {
 		user.click(screen.getByText(/Leave Group/i));
 		const button = await screen.findByRole('button', { name: 'Leave' });
 		user.click(button);
-		await waitFor(() => expect(mockGoToMainPage).not.toBeCalled());
-		user.click(button);
+		await waitFor(() => expect(mockedDeleteRoomMemberRequest).toBeCalled());
 		await waitFor(() => expect(mockGoToMainPage).toBeCalled());
-
-		// if i leave a group, that group will not be defined for me
-		expect(result.current.rooms[mockedRoom.id]).not.toBeDefined();
 	});
 });

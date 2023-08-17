@@ -60,8 +60,6 @@ const ChatCreationModal = ({
 		'Something went Wrong. Please Retry'
 	);
 
-	const addRoom = useStore((store) => store.addRoom);
-
 	const inputRef = useRef<HTMLInputElement>(null);
 
 	const [chatType, setChatType] = useState<RoomType.ONE_TO_ONE | RoomType.GROUP>(
@@ -91,13 +89,11 @@ const ChatCreationModal = ({
 
 	const modalTitle = useMemo(
 		() => (chatType === RoomType.ONE_TO_ONE ? newChatLabel : newGroupLabel),
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[chatType]
+		[chatType, newChatLabel, newGroupLabel]
 	);
 	const createButtonLabel = useMemo(
 		() => (chatType === RoomType.ONE_TO_ONE ? createLabel : newGroupLabel),
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[chatType]
+		[chatType, createLabel, newGroupLabel]
 	);
 	const titleError = useMemo(() => title.length === 0 || title.length > 128, [title]);
 	const topicError = useMemo(() => topic.length > 256, [topic]);
@@ -144,7 +140,6 @@ const ChatCreationModal = ({
 			RoomsApi.addRoom(creationFields)
 				.then((response: AddRoomResponse) => {
 					setIsPending(false);
-					addRoom(response);
 					goToRoomPage(response.id);
 					onModalClose();
 				})
@@ -158,7 +153,6 @@ const ChatCreationModal = ({
 				});
 		}
 	}, [
-		addRoom,
 		chatType,
 		contactsSelected,
 		goToRoomPage,
