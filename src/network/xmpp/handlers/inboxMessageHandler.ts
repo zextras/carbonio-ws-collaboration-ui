@@ -47,8 +47,7 @@ export function onInboxMessageStanza(this: IXMPPClient, message: Element): true 
 					this.lastMarkers(inboxMessage.roomId);
 				}
 				break;
-			case MessageType.CONFIGURATION_MSG:
-			case MessageType.AFFILIATION_MSG: {
+			case MessageType.CONFIGURATION_MSG: {
 				store.newInboxMessage(inboxMessage);
 				break;
 			}
