@@ -13,6 +13,7 @@ import { setup, triggerObserver } from 'test-utils';
 import MessagesList from './MessagesList';
 import useStore from '../../store/Store';
 import {
+	createMockConfigurationMessage,
 	createMockMessageFastening,
 	createMockRoom,
 	createMockTextMessage
@@ -20,7 +21,6 @@ import {
 import { RoomBe, RoomType } from '../../types/network/models/roomBeTypes';
 import { MarkerStatus } from '../../types/store/MarkersTypes';
 import {
-	AffiliationMessage,
 	ConfigurationMessage,
 	MessageType,
 	OperationType,
@@ -91,14 +91,13 @@ const room: RoomBe = {
 	]
 };
 
-const mockedAffiliationMessage: AffiliationMessage = {
-	id: 'Affiliationid',
+const mockedAddMemberMessage = createMockConfigurationMessage({
+	id: 'AddMemberId',
 	roomId: room.id,
 	date: 1234566789,
-	type: MessageType.AFFILIATION_MSG,
-	userId: user4Be.id,
-	as: 'member'
-};
+	operation: OperationType.MEMBER_ADDED,
+	value: user4Be.id
+});
 
 const mockedConfigurationMessage: ConfigurationMessage = {
 	id: 'ConfigurationId',
@@ -107,7 +106,8 @@ const mockedConfigurationMessage: ConfigurationMessage = {
 	type: MessageType.CONFIGURATION_MSG,
 	operation: OperationType.ROOM_PICTURE_UPDATED,
 	value: room.id,
-	from: user2Be.id
+	from: user2Be.id,
+	read: MarkerStatus.READ
 };
 
 const messages: TextMessage[] = [
@@ -382,19 +382,19 @@ describe('render list of messages with history loader visible for first time ope
 		expect(label).toBeVisible();
 	});
 
-	test('Affiliation message is visible', async () => {
+	test('Add member message is visible', async () => {
 		const { result } = renderHook(() => useStore());
 		act(() => {
 			result.current.addRoom(room);
 			result.current.setUserInfo(user4Be);
 			result.current.setHistoryIsFullyLoaded(room.id);
-			result.current.updateHistory(room.id, [mockedAffiliationMessage]);
+			result.current.updateHistory(room.id, [mockedAddMemberMessage]);
 			result.current.addCreateRoomMessage(room.id);
 		});
 		setup(<MessagesList roomId={room.id} />);
 		const messageList = screen.getByTestId(`messageListRef${room.id}`);
 		expect(messageList.children).toHaveLength(3);
-		const message = screen.getByTestId(`affiliation_msg-${mockedAffiliationMessage.id}`);
+		const message = screen.getByTestId(`configuration_msg-${mockedAddMemberMessage.id}`);
 		expect(message).toBeVisible();
 		const label = screen.getByText(
 			new RegExp(`${user4Be.name} has been added to ${room.name}`, 'i')
