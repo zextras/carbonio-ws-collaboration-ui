@@ -14,7 +14,7 @@ export function wsEventsHandler(event: WsEvent): void {
 	const state = useStore.getState();
 	switch (event.type) {
 		case WsEventType.INITIALIZATION: {
-			state.setSessionId(event.sessionId);
+			state.setSessionId(event.queueId);
 			break;
 		}
 		case WsEventType.ROOM_CREATED: {

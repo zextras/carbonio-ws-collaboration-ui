@@ -27,7 +27,7 @@ export default abstract class BaseAPI implements IBaseAPI {
 		// Add sessionId to headers only id it is already defined
 		const sessionId = useStore.getState().session.sessionId;
 		if (sessionId) {
-			headers.append('session-id', sessionId);
+			headers.append('queue-id', sessionId);
 		}
 
 		return fetch(URL, {
