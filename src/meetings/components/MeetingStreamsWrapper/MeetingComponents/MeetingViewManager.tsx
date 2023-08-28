@@ -27,27 +27,51 @@ const MeetingViewManager = (): ReactElement => {
 	// TODO add check on more of 2 streams visible to change from FaceToFace to Cinema/Grid
 	const ViewToDisplay = useMemo(() => {
 		if (numberOfParticipants && numberOfParticipants <= 2) {
-			return <FaceToFaceMode />;
+			return (
+				<Container
+					borderRadius="none"
+					crossAlignment="flex-start"
+					padding={{ left: '0.25rem', right: '3.25rem', top: '2.81rem', bottom: '2.06rem' }}
+				>
+					<FaceToFaceMode />
+				</Container>
+			);
 		}
 		switch (meetingViewSelected) {
 			case MeetingViewType.CINEMA:
-				return <CinemaMode />;
+				return (
+					<Container
+						borderRadius="none"
+						crossAlignment="flex-start"
+						padding={{ left: '0.25rem', right: '0.25rem', top: '2.81rem', bottom: '2.06rem' }}
+					>
+						<CinemaMode />
+					</Container>
+				);
 			case MeetingViewType.GRID:
-				return <GridMode />;
+				return (
+					<Container
+						borderRadius="none"
+						crossAlignment="flex-start"
+						padding={{ left: '0.25rem', right: '0.25rem', top: '2.81rem', bottom: '2.06rem' }}
+					>
+						<GridMode />
+					</Container>
+				);
 			default:
-				return <CinemaMode />;
+				return (
+					<Container
+						borderRadius="none"
+						crossAlignment="flex-start"
+						padding={{ left: '0.25rem', right: '0.25rem', top: '2.81rem', bottom: '2.06rem' }}
+					>
+						<CinemaMode />
+					</Container>
+				);
 		}
 	}, [meetingViewSelected, numberOfParticipants]);
 
-	return (
-		<Container
-			borderRadius="none"
-			crossAlignment="flex-start"
-			padding={{ left: '0.25rem', right: '3.25rem', top: '2.81rem', bottom: '2.06rem' }}
-		>
-			{ViewToDisplay}
-		</Container>
-	);
+	return ViewToDisplay;
 };
 
 export default MeetingViewManager;

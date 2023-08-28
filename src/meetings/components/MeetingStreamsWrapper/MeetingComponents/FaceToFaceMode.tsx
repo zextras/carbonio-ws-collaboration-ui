@@ -26,6 +26,9 @@ const MyStreamContainer = styled(Container)`
 	right: -3.4rem;
 	transition: opacity 200ms linear;
 	z-index: 10;
+	width: 16rem;
+	height: 9rem;
+	border-radius: 0.5rem;
 	&:hover {
 		opacity: 0;
 	}
@@ -33,9 +36,9 @@ const MyStreamContainer = styled(Container)`
 
 const TileVideo = styled.video`
 	width: 16rem;
-	border-radius: 8px;
-	background: linear-gradient(180deg, rgba(0, 0, 0, 0) 78.65%, rgba(0, 0, 0, 0.5) 100%),
-		lightgray 50% / cover no-repeat;
+	height: 9rem;
+	border-radius: 0.5rem;
+	background: ${({ theme }): string => theme.palette.text};
 `;
 
 const CentralTile = styled(Container)`
@@ -45,8 +48,7 @@ const CentralTile = styled(Container)`
 const CentralVideo = styled.video`
 	width: 100%;
 	border-radius: 8px;
-	background: linear-gradient(180deg, rgba(0, 0, 0, 0) 78.65%, rgba(0, 0, 0, 0.5) 100%),
-		lightgray 50% / cover no-repeat;
+	background: ${({ theme }): string => theme.palette.text};
 `;
 
 const FaceToFaceMode = (): ReactElement => {
@@ -90,8 +92,6 @@ const FaceToFaceMode = (): ReactElement => {
 
 	useEffect(() => getSizeOfCentralTile(), [faceToFaceRef, getSizeOfCentralTile, sidebarStatus]);
 
-	useEffect(() => getSizeOfCentralTile(), [faceToFaceRef, getSizeOfCentralTile, sidebarStatus]);
-
 	useEffect(() => {
 		if (streamRef != null && streamRef.current != null && localVideoStream != null) {
 			streamRef.current.srcObject = localVideoStream;
@@ -113,7 +113,15 @@ const FaceToFaceMode = (): ReactElement => {
 					width={centralTileSize.tileWidth}
 					background="text"
 				>
-					<CentralVideo playsInline autoPlay muted controls={false} ref={streamRef2} />
+					<CentralVideo
+						height={centralTileSize.tileHeight}
+						width={centralTileSize.tileWidth}
+						playsInline
+						autoPlay
+						muted
+						controls={false}
+						ref={streamRef2}
+					/>
 				</CentralTile>
 			) : (
 				<Text color="gray6" size="large">
@@ -125,13 +133,7 @@ const FaceToFaceMode = (): ReactElement => {
 
 	return (
 		<FaceToFace data-testid="faceToFaceModeView" ref={faceToFaceRef}>
-			<MyStreamContainer
-				data-testid="myStreamContainer"
-				height="fit"
-				width="fit"
-				background="secondary"
-				borderRadius="round"
-			>
+			<MyStreamContainer data-testid="myStreamContainer" height="fit" width="fit" background="text">
 				<TileVideo id="testVideo" playsInline autoPlay muted controls={false} ref={streamRef}>
 					Your browser does not support the <code>video</code> element.
 				</TileVideo>

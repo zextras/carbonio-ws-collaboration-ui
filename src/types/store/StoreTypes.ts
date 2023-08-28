@@ -197,6 +197,7 @@ export type ActiveMeetingSlice = {
 	removeActiveMeeting: (meetingId: string) => void;
 	setMeetingSidebarStatus: (meetingId: string, status: boolean) => void;
 	setSelectedDeviceId: (meetingId: string, streamType: STREAM_TYPE, deviceId: string) => void;
+	setIsCarouseVisible: (meetingId: string, status: boolean) => void;
 };
 
 export type RootStore = UsersStoreSlice &

@@ -33,3 +33,6 @@ export const getSelectedAudioDeviceId = (store: RootStore, meetingId: string): s
 
 export const getSelectedVideoDeviceId = (store: RootStore, meetingId: string): string | undefined =>
 	store.activeMeeting[meetingId]?.localStreams?.selectedVideoDeviceId || undefined;
+
+export const getMeetingCarouselVisibility = (store: RootStore, meetingId: string): boolean =>
+	store.activeMeeting[meetingId]?.isCarouselVisible;

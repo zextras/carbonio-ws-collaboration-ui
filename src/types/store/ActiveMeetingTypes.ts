@@ -9,6 +9,7 @@ import { IBidirectionalConnectionAudioInOut, IVideoOutConnection } from '../netw
 export type ActiveMeeting = {
 	sidebarStatus: SidebarStatus;
 	chatVisibility: MeetingChatVisibility;
+	isCarouselVisible: boolean;
 	meetingViewSelected: MeetingViewType;
 	bidirectionalAudioConn?: IBidirectionalConnectionAudioInOut;
 	videoInConn?: any;

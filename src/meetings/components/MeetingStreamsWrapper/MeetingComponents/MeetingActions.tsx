@@ -26,7 +26,9 @@ import {
 } from '../../../../store/selectors/MeetingSelectors';
 import { getUserId } from '../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../store/Store';
+import { MeetingUserType } from '../../../../types/network/models/meetingBeTypes';
 import { MeetingViewType, STREAM_TYPE } from '../../../../types/store/ActiveMeetingTypes';
+import { uid } from '../../../../utils/attachmentUtils';
 import { getAudioStream, getVideoStream } from '../../../../utils/UserMediaManager';
 
 const ActionsWrapper = styled(Container)`
@@ -59,6 +61,7 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 	const closeVideoOutConn = useStore((store) => store.closeVideoOutConn);
 	const deleteVideoOutConn = useStore((store) => store.deleteVideoOutConn);
 	const createVideoOutConn = useStore((store) => store.createVideoOutConn);
+	const addParticipant = useStore((store) => store.addParticipant);
 	const myUserId = useStore(getUserId);
 	const meeting = useStore((store) => getMeetingByMeetingId(store, meetingId));
 	const audioStatus = useStore((store) =>
@@ -94,6 +97,15 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
+
+	const addPart = (): void => {
+		addParticipant(meetingId, {
+			userId: uid(),
+			userType: MeetingUserType.REGISTERED,
+			audioStreamOn: false,
+			videoStreamOn: false
+		});
+	};
 
 	const handleHoverMouseMove = useCallback(
 		(e) => {
@@ -388,6 +400,13 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 				backgroundColor="error"
 				icon="Hangup"
 				onClick={leaveMeeting}
+				size="large"
+			/>
+			<IconButton
+				iconColor="gray6"
+				backgroundColor="primary"
+				icon="Hangup"
+				onClick={addPart}
 				size="large"
 			/>
 		</ActionsWrapper>

@@ -31,6 +31,7 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 							participantsAccordionIsOpened: false
 						},
 						chatVisibility: MeetingChatVisibility.CLOSED,
+						isCarouselVisible: true,
 						meetingViewSelected: MeetingViewType.WAITING
 					};
 				}
@@ -125,6 +126,7 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 							participantsAccordionIsOpened: false
 						},
 						chatVisibility: MeetingChatVisibility.CLOSED,
+						isCarouselVisible: true,
 						meetingViewSelected: MeetingViewType.WAITING
 					};
 				}
@@ -281,6 +283,17 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 			}),
 			false,
 			'AM/SET_SELECTED_DEVICE_ID'
+		);
+	},
+	setIsCarouseVisible: (meetingId: string, status: boolean): void => {
+		set(
+			produce((draft: RootStore) => {
+				if (draft.activeMeeting[meetingId]) {
+					draft.activeMeeting[meetingId].isCarouselVisible = status;
+				}
+			}),
+			false,
+			'AM/SET_MEETING_CAROUSEL_VISIBILITY'
 		);
 	}
 });

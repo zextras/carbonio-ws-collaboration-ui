@@ -5,79 +5,92 @@
  */
 
 import { Container } from '@zextras/carbonio-design-system';
-import React, { ReactElement, useRef } from 'react';
+import React, { ReactElement, useCallback, useEffect, useRef, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import StreamsCarousel from './StreamsCarousel';
-
-// const MyStream = styled(Container)`
-// 	position: absolute;
-// 	top: 0;
-// 	right: 0;
-// `;
-
-const CinemaModeWrapper = styled(Container)`
-	position: relative;
-`;
+import {
+	getLocalVideoSteam,
+	getMeetingCarouselVisibility,
+	getMeetingSidebarStatus
+} from '../../../../store/selectors/ActiveMeetingSelectors';
+import useStore from '../../../../store/Store';
 
 const MainStreamWrapper = styled(Container)`
-	//margin: ${({ theme }): string => theme.sizes.padding.small};
+	border-radius: 0.5rem;
 `;
-const MainStream = styled(Container)`
-	height: ${({ h }): string => h}px;
-	width: ${({ w }): string => w}px;
+
+const MainVideo = styled.video`
+	border-radius: 0.5rem;
+	background: ${({ theme }): string => theme.palette.text};
+	min-width: 100%;
+	max-width: 100%;
+	max-height: 100%;
 `;
 
 const CinemaMode = (): ReactElement => {
-	// const { meetingId }: Record<string, string> = useParams();
-	// const sidebarStatus: boolean | undefined = useStore((store) =>
-	// 	getSidebarStatus(store, meetingId)
-	// );
+	const { meetingId }: Record<string, string> = useParams();
 
-	// const [mainStreamHeight, setMainStreamHeight] = useState(0);
-	// const [mainStreamWidth, setMainStreamWidth] = useState(0);
+	const localVideoStream = useStore((store) => getLocalVideoSteam(store, meetingId));
+	const isCarouselVisible = useStore((store) => getMeetingCarouselVisibility(store, meetingId));
+	const sidebarStatus: boolean | undefined = useStore((store) =>
+		getMeetingSidebarStatus(store, meetingId)
+	);
+
+	const [mainStreamHeight, setMainStreamHeight] = useState('0');
+	const [mainStreamWidth, setMainStreamWidth] = useState('0');
+
 	const mainStreamRef = useRef<HTMLDivElement>(null);
+	const streamRef = useRef<null | HTMLVideoElement>(null);
 
-	// const calcMainStreamSize = useCallback(() => {
-	// 	if (mainStreamRef && mainStreamRef.current) {
-	// 		let idealHeight;
-	// 		let idealWidth;
-	// 		idealHeight = (mainStreamRef.current.offsetWidth / 16) * 9;
-	// 		idealWidth = mainStreamRef.current.offsetWidth;
-	// 		if (idealHeight > mainStreamRef.current.offsetHeight) {
-	// 			idealHeight = mainStreamRef.current.offsetHeight;
-	// 			idealWidth = (mainStreamRef.current.offsetHeight / 9) * 16;
-	// 		}
-	// 		setMainStreamHeight(idealHeight);
-	// 		setMainStreamWidth(idealWidth);
-	// 	}
-	// }, [mainStreamRef]);
+	const calcMainStreamSize = useCallback(() => {
+		if (mainStreamRef && mainStreamRef.current) {
+			let idealHeight;
+			let idealWidth;
+			idealHeight = (mainStreamRef.current.offsetWidth / 16) * 9;
+			idealWidth = mainStreamRef.current.offsetWidth;
+			if (idealHeight > mainStreamRef.current.offsetHeight) {
+				idealHeight = mainStreamRef.current.offsetHeight;
+				idealWidth = (mainStreamRef.current.offsetHeight / 9) * 16;
+			}
+			setMainStreamHeight(`${idealHeight}px`);
+			setMainStreamWidth(`${idealWidth}px`);
+		}
+	}, [mainStreamRef]);
 
-	// useEffect(() => {
-	// 	calcMainStreamSize();
-	// 	if (mainStreamRef !== null && mainStreamRef.current) {
-	// 		mainStreamRef.current.addEventListener('resize', calcMainStreamSize);
-	// 	}
-	// 	return () => {
-	// 		if (mainStreamRef !== null && mainStreamRef.current) {
-	// 			mainStreamRef.current.removeEventListener('resize', calcMainStreamSize);
-	// 		}
-	// 	};
-	// }, [calcMainStreamSize, sidebarStatus, mainStreamRef]);
+	useEffect(() => {
+		window.parent.addEventListener('resize', calcMainStreamSize);
+		return () => window.parent.removeEventListener('resize', calcMainStreamSize);
+	}, [calcMainStreamSize]);
+
+	useEffect(
+		() => calcMainStreamSize(),
+		[mainStreamRef, calcMainStreamSize, sidebarStatus, isCarouselVisible]
+	);
+
+	useEffect(() => {
+		if (streamRef != null && streamRef.current != null && localVideoStream != null) {
+			streamRef.current.srcObject = localVideoStream;
+		}
+	}, [localVideoStream]);
 
 	return (
-		<CinemaModeWrapper data-testid="cinemaModeView" orientation="horizontal">
-			{/* CINEMA 1TO1 */}
-			{/* <MyStream height="144px" width="256px" background="secondary" /> */}
-			{/* <MainStreamWrapper ref={mainStreamRef} width="fill" height="fill" background="primary"> */}
-			{/*	<MainStream h={mainStreamHeight} w={mainStreamWidth} background="success" /> */}
-			{/* </MainStreamWrapper> */}
-			{/* CINEMA MORE STREAM */}
-			<MainStreamWrapper ref={mainStreamRef} width="fill" height="fill" /* background="primary" */>
-				<MainStream /* background="success" */ />
-			</MainStreamWrapper>
+		<Container data-testid="cinemaModeView" orientation="horizontal">
+			<Container ref={mainStreamRef}>
+				<MainStreamWrapper height="fit" width="fit" background="text">
+					<MainVideo
+						height={mainStreamHeight}
+						width={mainStreamWidth}
+						playsInline
+						autoPlay
+						controls={false}
+						ref={streamRef}
+					/>
+				</MainStreamWrapper>
+			</Container>
 			<StreamsCarousel />
-		</CinemaModeWrapper>
+		</Container>
 	);
 };
 
