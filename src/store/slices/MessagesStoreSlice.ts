@@ -24,10 +24,11 @@ import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
 import { UsersApi } from '../../network';
 import { MarkerStatus } from '../../types/store/MarkersTypes';
 import {
-	AffiliationMessage,
+	ConfigurationMessage,
 	Message,
 	MessageList,
 	MessageType,
+	OperationType,
 	PlaceholderFields,
 	TextMessage
 } from '../../types/store/MessageTypes';
@@ -43,10 +44,14 @@ const retrieveMessageUserInfo = (message: Message, users: UsersMap): void => {
 		if (!users[message.from]) UsersApi.getDebouncedUser(message.from);
 		if (message.forwarded && !users[message.forwarded.from])
 			UsersApi.getDebouncedUser(message.forwarded.from);
-	} else if (message.type === MessageType.AFFILIATION_MSG) {
-		if (!users[message.userId]) UsersApi.getDebouncedUser(message.userId);
 	} else if (message.type === MessageType.CONFIGURATION_MSG) {
 		if (!users[message.from]) UsersApi.getDebouncedUser(message.from);
+		if (
+			message.operation === OperationType.MEMBER_ADDED ||
+			message.operation === OperationType.MEMBER_REMOVED
+		) {
+			if (!users[message.value]) UsersApi.getDebouncedUser(message.value);
+		}
 	}
 };
 
@@ -181,7 +186,9 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 				const firstMessageDate = first(draft.messages[roomId])?.date;
 				const creationMessage = find(
 					draft.messages[roomId],
-					(message) => message.type === MessageType.AFFILIATION_MSG && message.as === 'creation'
+					(message) =>
+						message.type === MessageType.CONFIGURATION_MSG &&
+						message.operation === OperationType.ROOM_CREATION
 				);
 				const historyIsBeenCleared = !!draft.rooms[roomId].userSettings?.clearedAt;
 				// Add creation message only if the room is a non-empty group without the history cleared
@@ -191,13 +198,15 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 					!creationMessage &&
 					!historyIsBeenCleared
 				) {
-					const creationMsg: AffiliationMessage = {
+					const creationMsg: ConfigurationMessage = {
 						id: `creationMessage${firstMessageDate + 1}`,
 						roomId,
 						date: firstMessageDate + 1,
-						type: MessageType.AFFILIATION_MSG,
-						as: 'creation',
-						userId: ''
+						type: MessageType.CONFIGURATION_MSG,
+						operation: OperationType.ROOM_CREATION,
+						value: '',
+						from: '',
+						read: MarkerStatus.READ
 					};
 					draft.messages[roomId].splice(1, 0, creationMsg);
 				}
@@ -210,16 +219,19 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 		set(
 			produce((draft: RootStore) => {
 				if (!draft.messages[roomId]) draft.messages[roomId] = [];
+
 				draft.messages[roomId] = map(draft.messages[roomId], (message: Message) => {
-					// Avoid updating messages which are not text messages or only placeholder
+					// Updating text and configuration messages which are not read yet
+					const readable =
+						message.type === MessageType.TEXT_MSG || message.type === MessageType.CONFIGURATION_MSG;
+
 					if (
-						message.type !== MessageType.TEXT_MSG ||
-						message.read === MarkerStatus.READ ||
-						message.read === MarkerStatus.PENDING
+						readable &&
+						(message.read === MarkerStatus.UNREAD || message.read === MarkerStatus.READ_BY_SOMEONE)
 					) {
-						return message;
+						message.read = calcReads(message.date, roomId);
 					}
-					message.read = calcReads(message.date, roomId);
+
 					return message;
 				});
 			}),
@@ -315,7 +327,7 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 				remove(draft.messages[roomId], (message) => message.id === messageId);
 			}),
 			false,
-			'MESSAGES/remove_PLACEHOLDER_MESSAGE'
+			'MESSAGES/REMOVE_PLACEHOLDER_MESSAGE'
 		);
 	}
 });

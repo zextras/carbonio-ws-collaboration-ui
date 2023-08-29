@@ -23,7 +23,7 @@ export function wsEventsHandler(event: WsEvent): void {
 
 	switch (event.type) {
 		case WsEventType.INITIALIZATION: {
-			state.setSessionId(event.sessionId);
+			state.setSessionId(event.queueId);
 			break;
 		}
 		case WsEventType.ROOM_CREATED: {

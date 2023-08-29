@@ -4,10 +4,11 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { filter, find, forEach, orderBy, size } from 'lodash';
+import { filter, find, forEach, includes, orderBy, size } from 'lodash';
 
 import {
 	AttachmentMessageType,
+	ConfigurationMessage,
 	Message,
 	MessageType,
 	TextMessage
@@ -21,6 +22,14 @@ export const getTextMessagesSelector = (store: RootStore, roomId: string): TextM
 	filter(
 		store.messages[roomId],
 		(message) => message.type === MessageType.TEXT_MSG
+	) as TextMessage[];
+
+export const getReadableMessagesSelector = (
+	store: RootStore,
+	roomId: string
+): (TextMessage | ConfigurationMessage)[] =>
+	filter(store.messages[roomId], (message) =>
+		includes([MessageType.TEXT_MSG, MessageType.CONFIGURATION_MSG], message.type)
 	) as TextMessage[];
 
 export const getLastTextMessageIdSelector = (

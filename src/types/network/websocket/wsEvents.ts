@@ -43,7 +43,7 @@ export type WsEvent = InitializationEvent | PongEvent | WsConversationEvent | Ws
 
 export type InitializationEvent = {
 	type: WsEventType.INITIALIZATION;
-	sessionId: string;
+	queueId: string;
 };
 
 export type PongEvent = {

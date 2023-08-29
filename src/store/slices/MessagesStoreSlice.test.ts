@@ -8,14 +8,20 @@ import { act, renderHook } from '@testing-library/react-hooks';
 import { find, last } from 'lodash';
 
 import {
-	createMockAffiliationMessage,
+	createMockConfigurationMessage,
 	createMockMarker,
 	createMockMember,
 	createMockRoom,
 	createMockTextMessage
 } from '../../tests/createMock';
 import { MarkerStatus } from '../../types/store/MarkersTypes';
-import { AffiliationMessage, MessageType, TextMessage } from '../../types/store/MessageTypes';
+import {
+	ConfigurationMessage,
+	DateMessage,
+	MessageType,
+	OperationType,
+	TextMessage
+} from '../../types/store/MessageTypes';
 import { RoomType } from '../../types/store/RoomTypes';
 import { dateToTimestamp } from '../../utils/dateUtil';
 import useStore from '../Store';
@@ -90,8 +96,8 @@ describe('Test messages slice - newMessage', () => {
 		expect(messages[newMessage.roomId][4]).toBe(newMessage);
 	});
 
-	test('Arrive an affiliate message as first', () => {
-		const newMessage = createMockAffiliationMessage();
+	test('Arrive an configuration message as first', () => {
+		const newMessage = createMockConfigurationMessage({ operation: OperationType.MEMBER_ADDED });
 		const { result } = renderHook(() => useStore());
 		act(() => result.current.newMessage(newMessage));
 		expect(result.current.messages[newMessage.roomId]).not.toBeNull();
@@ -395,9 +401,9 @@ describe('Test message slice - addCreateRoomMessage', () => {
 
 		expect(result.current.messages[room.id]).toHaveLength(4);
 		expect(result.current.messages[room.id][0].type).toBe(MessageType.DATE_MSG);
-		const createRoomMessage = result.current.messages[room.id][1] as AffiliationMessage;
-		expect(createRoomMessage.type).toBe(MessageType.AFFILIATION_MSG);
-		expect(createRoomMessage.as).toBe('creation');
+		const createRoomMessage = result.current.messages[room.id][1] as ConfigurationMessage;
+		expect(createRoomMessage.type).toBe(MessageType.CONFIGURATION_MSG);
+		expect(createRoomMessage.operation).toBe(OperationType.ROOM_CREATION);
 	});
 
 	test('Add a create room message to a single conversation', () => {
@@ -413,7 +419,7 @@ describe('Test message slice - addCreateRoomMessage', () => {
 		});
 
 		expect(result.current.messages[room.id]).toHaveLength(3);
-		const dateMessage = result.current.messages[room.id][0] as AffiliationMessage;
+		const dateMessage = result.current.messages[room.id][0] as DateMessage;
 		expect(dateMessage.type).toBe(MessageType.DATE_MSG);
 		expect(result.current.messages[room.id][1]).toBe(message0);
 	});
@@ -434,7 +440,7 @@ describe('Test message slice - addCreateRoomMessage', () => {
 		});
 
 		expect(result.current.messages[room.id]).toHaveLength(3);
-		const dateMessage = result.current.messages[room.id][0] as AffiliationMessage;
+		const dateMessage = result.current.messages[room.id][0] as DateMessage;
 		expect(dateMessage.type).toBe(MessageType.DATE_MSG);
 		expect(result.current.messages[room.id][1]).toBe(message0);
 	});

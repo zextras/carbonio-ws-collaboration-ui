@@ -9,12 +9,16 @@ import React from 'react';
 
 import ExpandedSidebarListItem from './ExpandedSidebarListItem';
 import useStore from '../../../store/Store';
-import { createMockMember, createMockRoom, createMockTextMessage } from '../../../tests/createMock';
+import {
+	createMockConfigurationMessage,
+	createMockMember,
+	createMockRoom,
+	createMockTextMessage
+} from '../../../tests/createMock';
 import { setup } from '../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
 import { MarkerStatus } from '../../../types/store/MarkersTypes';
 import {
-	AffiliationMessage,
 	ConfigurationMessage,
 	MessageType,
 	OperationType
@@ -104,14 +108,14 @@ const mockedTextMessageSentBySomeoneElse = createMockTextMessage({
 	text: 'I have a really bad headache!'
 });
 
-const mockedAffiliationMessage: AffiliationMessage = {
-	id: 'Affiliationid',
+const mockedAddMemberMessage: ConfigurationMessage = createMockConfigurationMessage({
+	id: 'AddMemberId',
 	roomId: mockedGroup.id,
 	date: 1234566789,
-	type: MessageType.AFFILIATION_MSG,
-	userId: user4Be.id,
-	as: 'member'
-};
+	type: MessageType.CONFIGURATION_MSG,
+	operation: OperationType.MEMBER_ADDED,
+	value: user4Be.id
+});
 
 const mockedConfigurationMessage: ConfigurationMessage = {
 	id: 'ConfigurationId',
@@ -120,7 +124,8 @@ const mockedConfigurationMessage: ConfigurationMessage = {
 	type: MessageType.CONFIGURATION_MSG,
 	operation: OperationType.ROOM_PICTURE_DELETED,
 	value: '',
-	from: user1Be.id
+	from: user1Be.id,
+	read: MarkerStatus.READ
 };
 
 describe('Expanded sidebar list item', () => {
@@ -204,7 +209,7 @@ describe('Expanded sidebar list item', () => {
 		const store: RootStore = useStore.getState();
 		store.addRoom(mockedGroup);
 		store.setUserInfo(user4Be);
-		store.newMessage(mockedAffiliationMessage);
+		store.newMessage(mockedAddMemberMessage);
 		setup(<ExpandedSidebarListItem roomId={mockedGroup.id} />);
 
 		expect(
