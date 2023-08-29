@@ -17,12 +17,12 @@ const meetingMock = createMockMeeting();
 const meetingMock1 = createMockMeeting({ id: 'meetingId1', roomId: 'roomId1' });
 
 const userId = 'userId';
-const sessionId = 'sessionId';
+const queueId = 'queueId';
 
 // Set appropriate headers for meeting requests
 const headers = new Headers();
 headers.append('Content-Type', 'application/json');
-headers.append('session-id', 'sessionId');
+headers.append('queue-id', 'queueId');
 
 const ongoingMeetingSetup = (): void => {
 	const store = useStore.getState();
@@ -39,7 +39,7 @@ const sdpOffer = 'spdOfferMock';
 
 beforeEach(() => {
 	useStore.getState().setLoginInfo(userId, 'User');
-	useStore.getState().setSessionId('sessionId');
+	useStore.getState().setSessionId('queueId');
 });
 describe('Meetings API', () => {
 	test('listMeetings is called correctly', async () => {
@@ -182,7 +182,7 @@ describe('Meetings API', () => {
 
 		// Check if fetch is called with the correct parameters
 		expect(global.fetch).toHaveBeenCalledWith(
-			`/services/chats/meetings/${meetingMock.id}/sessions/${sessionId}/audio`,
+			`/services/chats/meetings/${meetingMock.id}/sessions/${queueId}/audio`,
 			{
 				method: 'PUT',
 				headers,
@@ -204,7 +204,7 @@ describe('Meetings API', () => {
 
 		// Check if fetch is called with the correct parameters
 		expect(global.fetch).toHaveBeenCalledWith(
-			`/services/chats/meetings/${meetingMock.id}/sessions/${sessionId}/audio`,
+			`/services/chats/meetings/${meetingMock.id}/sessions/${queueId}/audio`,
 			{
 				method: 'PUT',
 				headers,
@@ -226,7 +226,7 @@ describe('Meetings API', () => {
 
 		// Check if fetch is called with the correct parameters
 		expect(global.fetch).toHaveBeenCalledWith(
-			`/services/chats/meetings/${meetingMock.id}/sessions/${sessionId}/media`,
+			`/services/chats/meetings/${meetingMock.id}/sessions/${queueId}/media`,
 			{
 				method: 'PUT',
 				headers,
@@ -250,7 +250,7 @@ describe('Meetings API', () => {
 
 		// Check if fetch is called with the correct parameters
 		expect(global.fetch).toHaveBeenCalledWith(
-			`/services/chats/meetings/${meetingMock.id}/sessions/${sessionId}/media`,
+			`/services/chats/meetings/${meetingMock.id}/sessions/${queueId}/media`,
 			{
 				method: 'PUT',
 				headers,
@@ -273,7 +273,7 @@ describe('Meetings API', () => {
 
 		// Check if fetch is called with the correct parameters
 		expect(global.fetch).toHaveBeenCalledWith(
-			`/services/chats/meetings/${meetingMock.id}/sessions/${sessionId}/media`,
+			`/services/chats/meetings/${meetingMock.id}/sessions/${queueId}/media`,
 			{
 				method: 'PUT',
 				headers,
@@ -297,7 +297,7 @@ describe('Meetings API', () => {
 
 		// Check if fetch is called with the correct parameters
 		expect(global.fetch).toHaveBeenCalledWith(
-			`/services/chats/meetings/${meetingMock.id}/sessions/${sessionId}/media`,
+			`/services/chats/meetings/${meetingMock.id}/sessions/${queueId}/media`,
 			{
 				method: 'PUT',
 				headers,

@@ -31,8 +31,8 @@ export function onNewMessageStanza(this: IXMPPClient, message: Element): true {
 						this.readMessage(newMessage.roomId, newMessage.id);
 					} else {
 						sendCustomEvent({ name: EventName.NEW_MESSAGE, data: newMessage });
-						displayMessageBrowserNotification(newMessage);
 						store.incrementUnreadCount(newMessage.roomId);
+						displayMessageBrowserNotification(newMessage);
 					}
 
 					// Request message subject of reply
