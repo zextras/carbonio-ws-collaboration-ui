@@ -17,7 +17,6 @@ const meetingMock = createMockMeeting();
 const meetingMock1 = createMockMeeting({ id: 'meetingId1', roomId: 'roomId1' });
 
 const userId = 'userId';
-const queueId = 'queueId';
 
 // Set appropriate headers for meeting requests
 const headers = new Headers();
@@ -181,16 +180,13 @@ describe('Meetings API', () => {
 		await meetingsApi.updateAudioStreamStatus(meetingMock.id, true);
 
 		// Check if fetch is called with the correct parameters
-		expect(global.fetch).toHaveBeenCalledWith(
-			`/services/chats/meetings/${meetingMock.id}/sessions/${queueId}/audio`,
-			{
-				method: 'PUT',
-				headers,
-				body: JSON.stringify({
-					enabled: true
-				})
-			}
-		);
+		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/meetings/${meetingMock.id}/audio`, {
+			method: 'PUT',
+			headers,
+			body: JSON.stringify({
+				enabled: true
+			})
+		});
 
 		// Check if store is correctly updated
 		const participant = useStore.getState().meetings[meetingMock.roomId].participants[userId];
@@ -203,16 +199,13 @@ describe('Meetings API', () => {
 		await meetingsApi.updateAudioStreamStatus(meetingMock.id, false);
 
 		// Check if fetch is called with the correct parameters
-		expect(global.fetch).toHaveBeenCalledWith(
-			`/services/chats/meetings/${meetingMock.id}/sessions/${queueId}/audio`,
-			{
-				method: 'PUT',
-				headers,
-				body: JSON.stringify({
-					enabled: false
-				})
-			}
-		);
+		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/meetings/${meetingMock.id}/audio`, {
+			method: 'PUT',
+			headers,
+			body: JSON.stringify({
+				enabled: false
+			})
+		});
 
 		// Check if store is correctly updated
 		const participant = useStore.getState().meetings[meetingMock.roomId].participants[userId];
@@ -225,18 +218,15 @@ describe('Meetings API', () => {
 		await meetingsApi.updateMediaOffer(meetingMock.id, STREAM_TYPE.VIDEO, true, sdpOffer);
 
 		// Check if fetch is called with the correct parameters
-		expect(global.fetch).toHaveBeenCalledWith(
-			`/services/chats/meetings/${meetingMock.id}/sessions/${queueId}/media`,
-			{
-				method: 'PUT',
-				headers,
-				body: JSON.stringify({
-					type: STREAM_TYPE.VIDEO,
-					enabled: true,
-					sdp: sdpOffer
-				})
-			}
-		);
+		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/meetings/${meetingMock.id}/media`, {
+			method: 'PUT',
+			headers,
+			body: JSON.stringify({
+				type: STREAM_TYPE.VIDEO,
+				enabled: true,
+				sdp: sdpOffer
+			})
+		});
 
 		// Check if store is correctly updated
 		const participant = useStore.getState().meetings[meetingMock.roomId].participants[userId];
@@ -249,17 +239,14 @@ describe('Meetings API', () => {
 		await meetingsApi.updateMediaOffer(meetingMock.id, STREAM_TYPE.VIDEO, false);
 
 		// Check if fetch is called with the correct parameters
-		expect(global.fetch).toHaveBeenCalledWith(
-			`/services/chats/meetings/${meetingMock.id}/sessions/${queueId}/media`,
-			{
-				method: 'PUT',
-				headers,
-				body: JSON.stringify({
-					type: STREAM_TYPE.VIDEO,
-					enabled: false
-				})
-			}
-		);
+		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/meetings/${meetingMock.id}/media`, {
+			method: 'PUT',
+			headers,
+			body: JSON.stringify({
+				type: STREAM_TYPE.VIDEO,
+				enabled: false
+			})
+		});
 
 		// Check if store is correctly updated
 		const participant = useStore.getState().meetings[meetingMock.roomId].participants[userId];
@@ -272,18 +259,15 @@ describe('Meetings API', () => {
 		await meetingsApi.updateMediaOffer(meetingMock.id, STREAM_TYPE.SCREEN, true, sdpOffer);
 
 		// Check if fetch is called with the correct parameters
-		expect(global.fetch).toHaveBeenCalledWith(
-			`/services/chats/meetings/${meetingMock.id}/sessions/${queueId}/media`,
-			{
-				method: 'PUT',
-				headers,
-				body: JSON.stringify({
-					type: STREAM_TYPE.SCREEN,
-					enabled: true,
-					sdp: sdpOffer
-				})
-			}
-		);
+		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/meetings/${meetingMock.id}/media`, {
+			method: 'PUT',
+			headers,
+			body: JSON.stringify({
+				type: STREAM_TYPE.SCREEN,
+				enabled: true,
+				sdp: sdpOffer
+			})
+		});
 
 		// Check if store is correctly updated
 		const participant = useStore.getState().meetings[meetingMock.roomId].participants[userId];
@@ -296,17 +280,14 @@ describe('Meetings API', () => {
 		await meetingsApi.updateMediaOffer(meetingMock.id, STREAM_TYPE.SCREEN, false);
 
 		// Check if fetch is called with the correct parameters
-		expect(global.fetch).toHaveBeenCalledWith(
-			`/services/chats/meetings/${meetingMock.id}/sessions/${queueId}/media`,
-			{
-				method: 'PUT',
-				headers,
-				body: JSON.stringify({
-					type: STREAM_TYPE.SCREEN,
-					enabled: false
-				})
-			}
-		);
+		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/meetings/${meetingMock.id}/media`, {
+			method: 'PUT',
+			headers,
+			body: JSON.stringify({
+				type: STREAM_TYPE.SCREEN,
+				enabled: false
+			})
+		});
 
 		// Check if store is correctly updated
 		const participant = useStore.getState().meetings[meetingMock.roomId].participants[userId];

@@ -136,8 +136,8 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 		meetingId: string,
 		enabled: boolean
 	): Promise<UpdateAudioStreamStatusResponse> {
-		const { sessionId, id } = useStore.getState().session;
-		return this.fetchAPI(`meetings/${meetingId}/sessions/${sessionId}/audio`, RequestType.PUT, {
+		const { id } = useStore.getState().session;
+		return this.fetchAPI(`meetings/${meetingId}/audio`, RequestType.PUT, {
 			enabled
 		}).then((resp: UpdateAudioStreamStatusResponse) => {
 			const { changeStreamStatus } = useStore.getState();
@@ -147,14 +147,9 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 	}
 
 	public createAudioOffer(meetingId: string, sdpOffer: string): Promise<CreateAudioOfferResponse> {
-		const { sessionId } = useStore.getState().session;
-		return this.fetchAPI(
-			`meetings/${meetingId}/sessions/${sessionId}/audio/offer`,
-			RequestType.PUT,
-			{
-				sdp: sdpOffer
-			}
-		).then((resp: CreateAudioOfferResponse) => resp);
+		return this.fetchAPI(`meetings/${meetingId}/audio/offer`, RequestType.PUT, {
+			sdp: sdpOffer
+		}).then((resp: CreateAudioOfferResponse) => resp);
 	}
 
 	public updateMediaOffer(
@@ -163,8 +158,8 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 		enabled: boolean,
 		sdp?: string
 	): Promise<UpdateMediaOfferResponse> {
-		const { sessionId, id } = useStore.getState().session;
-		return this.fetchAPI(`meetings/${meetingId}/sessions/${sessionId}/media`, RequestType.PUT, {
+		const { id } = useStore.getState().session;
+		return this.fetchAPI(`meetings/${meetingId}/media`, RequestType.PUT, {
 			type,
 			enabled,
 			sdp
@@ -180,20 +175,15 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 		userSessionId: string,
 		type: STREAM_TYPE
 	): Promise<SubscribeMediaResponse> {
-		const { sessionId } = useStore.getState().session;
-		return this.fetchAPI(
-			`meetings/${meetingId}/sessions/${sessionId}/media/subscribe`,
-			RequestType.PUT,
-			{
-				subscribe: [
-					{
-						session_id: userSessionId,
-						type
-					}
-				],
-				unsubscribe: []
-			}
-		).then((resp: SubscribeMediaResponse) => resp);
+		return this.fetchAPI(`meetings/${meetingId}/media/subscribe`, RequestType.PUT, {
+			subscribe: [
+				{
+					user_id: userSessionId,
+					type
+				}
+			],
+			unsubscribe: []
+		}).then((resp: SubscribeMediaResponse) => resp);
 	}
 }
 

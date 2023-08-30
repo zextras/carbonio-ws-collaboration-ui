@@ -162,10 +162,10 @@ export function wsEventsHandler(event: WsEvent): void {
 			break;
 		}
 		case WsEventType.MEETING_MEDIA_STREAM_CHANGED: {
-			if (event.mediaType === 'VIDEO') {
+			if (event.mediaType === STREAM_TYPE.VIDEO) {
 				state.changeStreamStatus(event.meetingId, event.userId, STREAM_TYPE.VIDEO, event.active);
 			}
-			if (event.mediaType === 'SCREEN') {
+			if (event.mediaType === STREAM_TYPE.SCREEN) {
 				state.changeStreamStatus(event.meetingId, event.userId, STREAM_TYPE.SCREEN, event.active);
 			}
 
@@ -175,62 +175,60 @@ export function wsEventsHandler(event: WsEvent): void {
 				.catch((er) => console.error(er));
 			break;
 		}
-		// TODO AUDIO ANSWER
-		// case WsEventType.AUDIO_ANSWER: {
-		// state.activeMeeting[event.meetingId].bidirectionalAudioConn.handleRemoteAnswer();
-		// break;
-		// }
-		// TODO VIDEO_IN OFFER
-		// case WsEventType.VIDEO_IN_OFFER: {
-		// state.activeMeeting[event.meetingId].videoIn.handleRemoteOffer();
-		// break;
-		// }
-		// TODO SCREEN OFFER
-		// case WsEventType.MEETING_SCREEN_STREAM_CLOSED: {
-		// state.activeMeeting[event.meetingId].bidirectionalAudioConn.;
-		// break;
-		// }
+		case WsEventType.MEETING_AUDIO_ANSWERED: {
+			console.log('AUDIO ANSWER');
+			const activeMeeting = state.activeMeeting[event.meetingId];
+			if (activeMeeting.bidirectionalAudioConn) {
+				activeMeeting.bidirectionalAudioConn.handleRemoteAnswer({
+					sdp: event.sdp,
+					type: 'answer'
+				});
+			}
+			break;
+		}
+		case WsEventType.MEETING_SDP_ANSWERED: {
+			console.log('VIDEO ANSWER');
+			const activeMeeting = state.activeMeeting[event.meetingId];
+			if (activeMeeting.videoOutConn) {
+				if (event.mediaType === STREAM_TYPE.VIDEO) {
+					activeMeeting.videoOutConn.handleRemoteAnswer({
+						sdp: event.sdp,
+						type: 'answer'
+					});
+				}
+			}
+			// else {
+			// 	return 0;
+			// }
+			break;
+		}
+		case WsEventType.MEETING_SDP_OFFERED: {
+			console.log('MEETING_SDP_OFFERED ', event);
+			break;
+		}
 		default:
 			wsDebug('Unhandled event', event);
+			break;
 	}
-	// TODO REPLACE WITH NEW MEETINGS EVENTS
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore
-	if (event.type === 8) {
-		console.log('TEST ANSWER');
-		console.log(event);
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore
-		if (event.event.jsep.sdp.includes('AudioBridge')) {
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore
-			if (event.event.jsep.type === 'ANSWER') {
-				console.log('AUDIO ANSWER');
-				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-				// @ts-ignore
-				state.activeMeeting[event.meeting_id].bidirectionalAudioConn.handleRemoteAnswer({
-					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-					// @ts-ignore
-					...event.event.jsep,
-					type: 'answer'
-				});
-			}
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore
-		} else if (event.event.jsep.sdp.includes('VideoRoom')) {
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore
-			if (event.event.jsep.type === 'ANSWER') {
-				console.log('VIDEO ANSWER');
-				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-				// @ts-ignore
-				state.activeMeeting[event.meeting_id].videoOutConn.handleRemoteAnswer({
-					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-					// @ts-ignore
-					...event.event.jsep,
-					type: 'answer'
-				});
-			}
-		}
-	}
+	// if (event.type === 8) {
+	// 	console.log('TEST ANSWER');
+	// 	console.log(event);
+	// 	if (event.event.jsep.sdp.includes('AudioBridge')) {
+	// 		if (event.event.jsep.type === 'ANSWER') {
+	// 			console.log('AUDIO ANSWER');
+	// 			state.activeMeeting[event.meeting_id].bidirectionalAudioConn.handleRemoteAnswer({
+	// 				...event.event.jsep,
+	// 				type: 'answer'
+	// 			});
+	// 		}
+	// 	} else if (event.event.jsep.sdp.includes('VideoRoom')) {
+	// 		if (event.event.jsep.type === 'ANSWER') {
+	// 			console.log('VIDEO ANSWER');
+	// 			state.activeMeeting[event.meeting_id].videoOutConn.handleRemoteAnswer({
+	// 				...event.event.jsep,
+	// 				type: 'answer'
+	// 			});
+	// 		}
+	// 	}
+	// }
 }

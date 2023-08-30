@@ -5,6 +5,7 @@
  */
 
 import { WsEventType } from './wsEvents';
+import { STREAM_TYPE } from '../../store/ActiveMeetingTypes';
 
 export type WsMeetingEvent =
 	| MeetingCreatedEvent
@@ -14,7 +15,12 @@ export type WsMeetingEvent =
 	| MeetingStoppedEvent
 	| MeetingDeletedEvent
 	| MeetingAudioStreamChangedEvent
-	| MeetingMediaStreamChangedEvent;
+	| MeetingMediaStreamChangedEvent
+	| MeetingAudioAnsweredEvent
+	| MeetingSDPOfferedEvent
+	| MeetingSDPAnsweredEvent
+	| MeetingParticipantTalkingEvent
+	| MeetingParticipantClashedEvent;
 
 type BasicMeetingEvent = {
 	sentDate: string;
@@ -58,6 +64,41 @@ export type MeetingAudioStreamChangedEvent = BasicMeetingEvent & {
 export type MeetingMediaStreamChangedEvent = BasicMeetingEvent & {
 	type: WsEventType.MEETING_MEDIA_STREAM_CHANGED;
 	userId: string;
-	mediaType: 'VIDEO' | 'SCREEN';
+	mediaType: STREAM_TYPE.VIDEO | STREAM_TYPE.SCREEN;
 	active: boolean;
+};
+
+export type MeetingAudioAnsweredEvent = BasicMeetingEvent & {
+	type: WsEventType.MEETING_AUDIO_ANSWERED;
+	userId: string;
+	meetingId: string;
+	sdp: string;
+};
+
+export type MeetingSDPOfferedEvent = BasicMeetingEvent & {
+	type: WsEventType.MEETING_SDP_OFFERED;
+	userId: string;
+	meetingId: string;
+	sdp: string;
+	mediaType: STREAM_TYPE.VIDEO | STREAM_TYPE.SCREEN;
+};
+
+export type MeetingSDPAnsweredEvent = BasicMeetingEvent & {
+	type: WsEventType.MEETING_SDP_ANSWERED;
+	userId: string;
+	meetingId: string;
+	sdp: string;
+	mediaType: STREAM_TYPE.VIDEO | STREAM_TYPE.SCREEN;
+};
+
+export type MeetingParticipantTalkingEvent = BasicMeetingEvent & {
+	type: WsEventType.MEETING_PARTICIPANT_TALKING;
+	userId: string;
+	isTalking: boolean;
+};
+
+export type MeetingParticipantClashedEvent = BasicMeetingEvent & {
+	type: WsEventType.MEETING_PARTICIPANT_CLASHED;
+	userId: string;
+	isTalking: boolean;
 };
