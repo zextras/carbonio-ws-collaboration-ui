@@ -45,7 +45,7 @@ import { Emoji } from '../../../types/generics';
 import { AddRoomAttachmentResponse } from '../../../types/network/responses/roomsResponses';
 import { FileToUpload, messageActionType } from '../../../types/store/ActiveConversationTypes';
 import { MessageType } from '../../../types/store/MessageTypes';
-import { uid } from '../../../utils/attachmentUtils';
+import { isAttachmentImage, uid } from '../../../utils/attachmentUtils';
 import { BrowserUtils } from '../../../utils/BrowserUtils';
 
 type ConversationMessageComposerProps = {
@@ -164,50 +164,72 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 		// Send as reply only the first file of the array
 		const sendAsReply = filesToUploadArray && file.fileId === filesToUploadArray[0].fileId;
 
-		const getImageSize = (url: string): Promise<{ width: number; height: number }> =>
-			new Promise((resolve) => {
-				const img = new Image();
+		// get the attachment type
+		const isImage = isAttachmentImage(file.file.type);
 
-				img.addEventListener(
-					'load',
-					() => {
-						resolve({ width: img.naturalWidth, height: img.naturalHeight });
-					},
-					{ once: true }
+		const errorHandler = (reason: DOMException): void => {
+			if (reason.name !== 'AbortError') {
+				const errorString = t(
+					'attachments.errorUploadingFile',
+					`Something went wrong uploading ${fileName}`,
+					{ file: fileName }
 				);
-
-				img.src = url;
-			});
-
-		return getImageSize(file.localUrl)
-			.then((res) => {
-				RoomsApi.addRoomAttachment(
-					roomId,
-					file.file,
-					{
-						description: file.description,
-						replyId: sendAsReply ? referenceMessage?.stanzaId : undefined
-					},
-					`${res.width}x${res.height}`,
-					signal
-				).catch((reason: DOMException) => {
-					if (reason.name !== 'AbortError') {
-						const errorString = t(
-							'attachments.errorUploadingFile',
-							`Something went wrong uploading ${fileName}`,
-							{ file: fileName }
-						);
-						createSnackbar({
-							key: new Date().toLocaleString(),
-							type: 'error',
-							label: errorString,
-							actionLabel: 'UNDERSTOOD',
-							disableAutoHide: true
-						});
-					}
+				createSnackbar({
+					key: new Date().toLocaleString(),
+					type: 'error',
+					label: errorString,
+					actionLabel: 'UNDERSTOOD',
+					disableAutoHide: true
 				});
-			})
-			.catch();
+			}
+		};
+
+		// we have to check if it's supported by the previewer or not
+		// if it's not supported we can avoid to send the area field
+		if (isImage) {
+			const getImageSize = (url: string): Promise<{ width: number; height: number }> =>
+				new Promise((resolve) => {
+					const img = new Image();
+
+					img.addEventListener(
+						'load',
+						() => {
+							resolve({ width: img.naturalWidth, height: img.naturalHeight });
+						},
+						{ once: true }
+					);
+
+					img.src = url;
+				});
+
+			return getImageSize(file.localUrl)
+				.then((res) => {
+					RoomsApi.addRoomAttachment(
+						roomId,
+						file.file,
+						{
+							description: file.description,
+							replyId: sendAsReply ? referenceMessage?.stanzaId : undefined,
+							area: `${res.width}x${res.height}`
+						},
+						signal
+					).catch((reason: DOMException) => {
+						errorHandler(reason);
+					});
+				})
+				.catch();
+		}
+		return RoomsApi.addRoomAttachment(
+			roomId,
+			file.file,
+			{
+				description: file.description,
+				replyId: sendAsReply ? referenceMessage?.stanzaId : undefined
+			},
+			signal
+		).catch((reason: DOMException) => {
+			errorHandler(reason);
+		});
 	};
 
 	// Send isWriting every 3 seconds

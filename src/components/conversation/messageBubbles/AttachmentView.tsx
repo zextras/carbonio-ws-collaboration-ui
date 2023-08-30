@@ -15,8 +15,9 @@ import usePreview from '../../../hooks/usePreview';
 import { AttachmentsApi } from '../../../network';
 import { getUserName } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
+import { AttachmentType } from '../../../types/network/apis/IAttachmentsApi';
 import { AttachmentMessageType } from '../../../types/store/MessageTypes';
-import { getThumbnailURL } from '../../../utils/attachmentUtils';
+import { getAttachmentExtension, getThumbnailURL } from '../../../utils/attachmentUtils';
 import { calculateAvatarColor } from '../../../utils/styleUtils';
 
 const HoverContainer = styled(Container)`
@@ -123,7 +124,10 @@ const AttachmentView: FC<AttachmentViewProps> = ({
 
 	const senderIdentifier = useStore((store) => getUserName(store, from));
 
-	const dimensions = split(attachment.area, 'x');
+	const dimensions = useMemo(() => {
+		if (getAttachmentExtension(attachment.mimeType) === AttachmentType.PDF) return ['2480', '3508'];
+		return split(attachment.area, 'x');
+	}, [attachment.area, attachment.mimeType]);
 
 	const [isPreviewLoaded, setPreviewLoaded] = useState(false);
 	const [previewError, setPreviewError] = useState(false);

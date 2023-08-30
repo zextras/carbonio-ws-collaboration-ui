@@ -69,10 +69,12 @@ export enum ImageQuality {
 	HIGHEST = 'Highest'
 }
 
-export enum ImageType {
+export enum AttachmentType {
 	JPEG = 'Jpeg',
 	PNG = 'Png',
-	GIF = 'Gif'
+	GIF = 'Gif',
+	WEBP = 'Webp',
+	PDF = 'pdf'
 }
 
 export enum ImageShape {

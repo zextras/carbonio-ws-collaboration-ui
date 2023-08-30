@@ -5,7 +5,7 @@
  */
 
 import attachmentsApi from './AttachmentsApi';
-import { ImageQuality, ImageShape, ImageType } from '../../types/network/apis/IAttachmentsApi';
+import { AttachmentType, ImageQuality, ImageShape } from '../../types/network/apis/IAttachmentsApi';
 
 describe('Attachments API', () => {
 	test('deleteAttachment is called correctly', async () => {
@@ -63,7 +63,7 @@ describe('Attachments API', () => {
 
 	test('getImagePreview is called correctly', async () => {
 		// Send getAttachmentPreview request
-		await attachmentsApi.getImagePreview('fileId', '0x0', ImageQuality.LOW, ImageType.PNG);
+		await attachmentsApi.getImagePreview('fileId', '0x0', ImageQuality.LOW, AttachmentType.PNG);
 
 		// Set appropriate headers
 		const headers = new Headers();
@@ -86,7 +86,7 @@ describe('Attachments API', () => {
 			'fileId',
 			'0x0',
 			ImageQuality.HIGH,
-			ImageType.JPEG,
+			AttachmentType.JPEG,
 			ImageShape.ROUNDED
 		);
 
@@ -131,7 +131,7 @@ describe('Attachments API', () => {
 			'0x0',
 			ImageQuality.LOWEST,
 			ImageShape.RECTANGULAR,
-			ImageType.PNG
+			AttachmentType.PNG
 		);
 
 		// Set appropriate headers
