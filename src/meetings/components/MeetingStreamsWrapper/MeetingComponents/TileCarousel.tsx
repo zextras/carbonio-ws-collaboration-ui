@@ -23,9 +23,10 @@ const TileVideo = styled.video`
 
 type TileExamplePros = {
 	meetingId: string;
+	tileTitle: string;
 };
 
-const TileExample = ({ meetingId }: TileExamplePros): ReactElement => {
+const TileExample = ({ meetingId, tileTitle }: TileExamplePros): ReactElement => {
 	const localVideoStream = useStore((store) => getLocalVideoSteam(store, meetingId));
 
 	const streamRef = useRef<null | HTMLVideoElement>(null);
@@ -42,6 +43,7 @@ const TileExample = ({ meetingId }: TileExamplePros): ReactElement => {
 				<TileVideo playsInline autoPlay controls={false} ref={streamRef}>
 					Your browser does not support the <code>video</code> element.
 				</TileVideo>
+				<span>{tileTitle}</span>
 			</Stream>
 			<Padding bottom="small" />
 		</>

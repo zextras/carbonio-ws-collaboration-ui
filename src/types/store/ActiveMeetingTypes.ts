@@ -17,6 +17,7 @@ export type ActiveMeeting = {
 	shareOutConn?: any;
 	localStreams?: LocalStreams;
 	streamsSubscription?: StreamsSubscriptionMap;
+	meetingStreams?: meetingStreamsMap;
 };
 
 export type ActiveMeetingMap = {
@@ -63,4 +64,10 @@ export type StreamSubscription = {
 
 export type StreamsSubscriptionMap = {
 	[id: string]: StreamSubscription;
+};
+
+export type meetingStreamsMap = {
+	[userId: string]: {
+		type: STREAM_TYPE;
+	};
 };
