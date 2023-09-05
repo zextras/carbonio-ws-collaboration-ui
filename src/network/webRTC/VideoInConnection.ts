@@ -12,8 +12,8 @@ export default class VideoInConnection implements IVideoInConnection {
 
 	meetingId: string;
 
-	constructor(peerConnConfig: PeerConnConfig, meetingId: string) {
-		this.peerConn = new RTCPeerConnection(peerConnConfig.getConfig());
+	constructor(meetingId: string) {
+		this.peerConn = new RTCPeerConnection(new PeerConnConfig().getConfig());
 		this.meetingId = meetingId;
 	}
 
@@ -21,6 +21,6 @@ export default class VideoInConnection implements IVideoInConnection {
 	 * close all tracks and peerConnection
 	 */
 	closePeerConnection: () => void = () => {
-		this.peerConn.close();
+		this.peerConn.close?.();
 	};
 }

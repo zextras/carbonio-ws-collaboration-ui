@@ -117,10 +117,14 @@ describe('Meetings API', () => {
 
 	test('joinMeeting is called correctly', async () => {
 		fetchResponse.mockResolvedValueOnce(meetingMock);
-		await meetingsApi.joinMeeting(meetingMock.id, {
-			audioStreamEnabled: false,
-			videoStreamEnabled: false
-		});
+		await meetingsApi.joinMeeting(
+			meetingMock.id,
+			{
+				audioStreamEnabled: false,
+				videoStreamEnabled: false
+			},
+			{}
+		);
 		// Check if fetch is called with the correct parameters
 		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/meetings/${meetingMock.id}/join`, {
 			method: 'POST',

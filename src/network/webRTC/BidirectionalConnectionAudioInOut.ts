@@ -21,13 +21,8 @@ export default class BidirectionalConnectionAudioInOut
 
 	rtpSender: RTCRtpSender | null;
 
-	constructor(
-		peerConnConfig: PeerConnConfig,
-		meetingId: string,
-		audioStreamEnabled: boolean,
-		selectedAudioDeviceId?: string
-	) {
-		this.peerConn = new RTCPeerConnection(peerConnConfig.getConfig());
+	constructor(meetingId: string, audioStreamEnabled: boolean, selectedAudioDeviceId?: string) {
+		this.peerConn = new RTCPeerConnection(new PeerConnConfig().getConfig());
 		this.rtpSender = null;
 		this.meetingId = meetingId;
 		this.peerConn.ontrack = this.handleOnTrack;
@@ -112,11 +107,9 @@ export default class BidirectionalConnectionAudioInOut
 	 * close all tracks and the peerConnection
 	 */
 	closePeerConnection: () => void = () => {
-		if (this.rtpSender != null && this.rtpSender.track != null) {
-			this.rtpSender.track.stop();
-		}
-		this.oscillatorAudioTrack?.stop();
-		this.peerConn.close();
+		this.rtpSender?.track?.stop();
+		this.oscillatorAudioTrack?.stop?.();
+		this.peerConn?.close?.();
 	};
 
 	closeRtpSenderTrack: () => void = () => {
