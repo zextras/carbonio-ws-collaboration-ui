@@ -18,14 +18,19 @@ import React, { ReactElement, useCallback, useEffect, useMemo, useRef, useState 
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
+import Tile from './Tile/Tile';
 import useRouting, { PAGE_INFO_TYPE } from '../../hooks/useRouting';
 import { MeetingsApi } from '../../network';
 import { PeerConnConfig } from '../../network/webRTC/PeerConnConfig';
 import { getMeeting } from '../../store/selectors/MeetingSelectors';
-import { getRoomNameSelector, getRoomTypeSelector } from '../../store/selectors/RoomsSelectors';
+import {
+	getRoomMembers,
+	getRoomNameSelector,
+	getRoomTypeSelector
+} from '../../store/selectors/RoomsSelectors';
 import useStore from '../../store/Store';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
-import { RoomType } from '../../types/store/RoomTypes';
+import { Member, RoomType } from '../../types/store/RoomTypes';
 import { BrowserUtils } from '../../utils/BrowserUtils';
 import { getAudioAndVideo } from '../../utils/UserMediaManager';
 
@@ -42,11 +47,6 @@ const VideoTile = styled(Container)`
 	background: ${({ theme }): string => theme.palette.gray0.regular};
 	border-radius: 0.3125rem !important;
 	overflow: hidden;
-`;
-
-const VideoEl = styled.video`
-	min-width: 100%;
-	max-width: 100%;
 `;
 
 const CustomModal = styled(Modal)`
@@ -95,6 +95,9 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 	const createBidirectionalAudioConn = useStore((store) => store.createBidirectionalAudioConn);
 	const createVideoOutConn = useStore((store) => store.createVideoOutConn);
 	const createVideoInConn = useStore((store) => store.createVideoInConn);
+
+	const sessionId: string | undefined = useStore((store) => store.session.id);
+	const roomMembers: Member[] | undefined = useStore((state) => getRoomMembers(state, roomId));
 
 	const [videoStreamEnabled, setVideoStreamEnabled] = useState(false);
 	const [audioStreamEnabled, setAudioStreamEnabled] = useState(false);
@@ -169,6 +172,11 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 		},
 		[streamTrack]
 	);
+
+	const memberId: string | undefined = useMemo(() => {
+		const user: Member | undefined = find(roomMembers, (member) => member.userId === sessionId);
+		return user?.userId;
+	}, [roomMembers, sessionId]);
 
 	const mediaVideoList = useMemo(
 		() =>
@@ -380,7 +388,7 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 
 	return (
 		<CustomModal
-			background={'text'}
+			background={'gray0'}
 			open
 			size="small"
 			title={modalTitle}
@@ -398,12 +406,13 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 				mainAlignment="flex-start"
 			>
 				<VideoTile width={wrapperWidth}>
-					<VideoEl
-						playsInline
-						autoPlay
-						muted={videoPlayerTestMuted}
-						controls={false}
-						ref={videoStreamRef}
+					<Tile
+						streamRef={videoStreamRef}
+						streamMuted={videoPlayerTestMuted}
+						videoStreamEnabled={videoStreamEnabled}
+						audioStreamEnabled={audioStreamEnabled}
+						memberId={memberId}
+						// isInsideAccessModal
 					/>
 				</VideoTile>
 				<Padding top="1rem" />
