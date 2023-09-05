@@ -5,6 +5,8 @@
  */
 /* eslint-disable no-param-reassign */
 
+import { first } from 'lodash';
+
 import { PeerConnConfig } from './PeerConnConfig';
 import { IBidirectionalConnectionAudioInOut } from '../../types/network/webRTC/webRTC';
 import { getAudioStream } from '../../utils/UserMediaManager';
@@ -13,25 +15,26 @@ import MeetingsApi from '../apis/MeetingsApi';
 export default class BidirectionalConnectionAudioInOut
 	implements IBidirectionalConnectionAudioInOut
 {
-	peerConn: RTCPeerConnection;
-
 	meetingId: string;
-
-	oscillatorAudioTrack: MediaStreamTrack | null;
 
 	rtpSender: RTCRtpSender | null;
 
+	peerConn: RTCPeerConnection;
+
+	oscillatorAudioTrack: MediaStreamTrack | undefined;
+
 	constructor(meetingId: string, audioStreamEnabled: boolean, selectedAudioDeviceId?: string) {
-		this.peerConn = new RTCPeerConnection(new PeerConnConfig().getConfig());
-		this.rtpSender = null;
 		this.meetingId = meetingId;
+		this.rtpSender = null;
+
+		this.peerConn = new RTCPeerConnection(new PeerConnConfig().getConfig());
 		this.peerConn.ontrack = this.handleOnTrack;
 		this.peerConn.onnegotiationneeded = this.handleOnNegotiationNeeded;
-		this.peerConn.onicecandidate = this.handleOnIceCandidate;
-		this.peerConn.onconnectionstatechange = this.handleOnConnectionStateChange;
 		this.peerConn.oniceconnectionstatechange = this.handleOnIceConnectionStateChange;
-		this.peerConn.onicegatheringstatechange = this.handleOnIceGatheringStateChange;
-		this.peerConn.onsignalingstatechange = this.handleOnSignalingStateChange;
+		// this.peerConn.onicecandidate = this.handleOnIceCandidate;
+		// this.peerConn.onconnectionstatechange = this.handleOnConnectionStateChange;
+		// this.peerConn.onicegatheringstatechange = this.handleOnIceGatheringStateChange;
+		// this.peerConn.onsignalingstatechange = this.handleOnSignalingStateChange;
 
 		const audioCtx = new window.AudioContext();
 		const oscillator = audioCtx.createOscillator();
@@ -42,8 +45,8 @@ export default class BidirectionalConnectionAudioInOut
 			// @ts-ignore
 			Object.assign(dst.stream.getAudioTracks()[0], { enabled: false })
 		]);
-		// eslint-disable-next-line prefer-destructuring
-		this.oscillatorAudioTrack = oscillatorAudioTrack.getAudioTracks()[0];
+
+		this.oscillatorAudioTrack = first(oscillatorAudioTrack.getAudioTracks());
 		this.updateRemoteStreamAudio();
 		this.updateLocalStreamTrack(oscillatorAudioTrack).then(() => {
 			if (audioStreamEnabled) {
@@ -60,7 +63,6 @@ export default class BidirectionalConnectionAudioInOut
 	};
 
 	handleOnNegotiationNeeded: (ev: Event) => void = (/* ev */) => {
-		// console.log('AudioInOut handleOnNegotiationNeeded ', ev);
 		this.peerConn.createOffer().then((RTCsessionDesc: any) => {
 			if (this.peerConn.signalingState === 'stable') {
 				this.peerConn
@@ -70,29 +72,12 @@ export default class BidirectionalConnectionAudioInOut
 		});
 	};
 
-	handleOnIceCandidate: (ev: Event) => void = (/* ev */) => {
-		// console.log('AudioInOut handleOnIceCandidate ', ev);
-	};
-
-	handleOnConnectionStateChange: (ev: Event) => void = (/* ev */) => {
-		// console.log('AudioInOut handleOnConnectionStateChange ', ev);
-	};
-
 	handleOnIceConnectionStateChange: (ev: Event) => void = (ev) => {
-		// console.log('AudioInOut handleOnIceConnectionStateChange ', ev);
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore
 		if (ev.target.iceConnectionState === 'failed') {
 			this.handleOnNegotiationNeeded(ev);
 		}
-	};
-
-	handleOnIceGatheringStateChange: (ev: Event) => void = (/* ev */) => {
-		// console.log('AudioInOut handleOnIceGatheringStateChange ', ev);
-	};
-
-	handleOnSignalingStateChange: (ev: Event) => void = (/* ev */) => {
-		// console.log('AudioInOut handleOnSignalingStateChange ', ev);
 	};
 
 	handleLocalDescriptionSet = (
@@ -113,15 +98,11 @@ export default class BidirectionalConnectionAudioInOut
 	};
 
 	closeRtpSenderTrack: () => void = () => {
-		if (this.rtpSender != null && this.rtpSender.track != null) {
-			this.rtpSender.track.stop();
-		}
+		this.rtpSender?.track?.stop();
 	};
 
 	updateRemoteStreamAudio: () => void = () => {
-		// console.log('inside updateRemoteStreamAudio');
 		if (this.oscillatorAudioTrack != null) {
-			// console.log('setting remote audio');
 			const fragment = window!.top!.document.createDocumentFragment();
 			const audio = window!.top!.document.createElement('audio');
 			audio.autoplay = true;
@@ -136,14 +117,12 @@ export default class BidirectionalConnectionAudioInOut
 	};
 
 	handleRemoteAnswer = (remoteAnswer: RTCSessionDescriptionInit): void => {
-		// console.log('handleRemoteAnswer ', remoteAnswer);
 		if (this.peerConn.signalingState !== 'have-remote-offer') {
 			this.peerConn.setRemoteDescription(remoteAnswer).catch((reason) => console.warn(reason));
 		}
 	};
 
 	handleOfferCreated = (rtcSessDesc: RTCSessionDescriptionInit): void => {
-		// console.log('handleOfferCreated ', rtcSessDesc);
 		if (this.peerConn.signalingState === 'stable' && this.peerConn.localDescription == null) {
 			this.peerConn
 				.setLocalDescription(rtcSessDesc)
@@ -161,15 +140,12 @@ export default class BidirectionalConnectionAudioInOut
 	 */
 	updateLocalStreamTrack = (mediaStreamTrack: MediaStream): Promise<MediaStreamTrack> =>
 		new Promise((resolve) => {
-			// console.log('updateLocalStreamTrack ', mediaStreamTrack);
 			const audioTrack: MediaStreamTrack = mediaStreamTrack.getAudioTracks()[0];
 			if (this.rtpSender == null) {
 				this.rtpSender = this.peerConn.addTrack(audioTrack, mediaStreamTrack ?? new MediaStream());
-			} else if (this.rtpSender?.track) {
-				// if (this.rtpSender.track.id !== audioTrack.id) {
+			} else if (this.rtpSender.track) {
 				this.rtpSender.track.stop();
 				this.rtpSender.replaceTrack(audioTrack).catch((reason) => console.warn(reason));
-				// }
 			}
 			this.oscillatorAudioTrack = audioTrack;
 			resolve(audioTrack);

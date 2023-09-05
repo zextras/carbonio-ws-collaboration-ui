@@ -28,11 +28,11 @@ export default class VideoOutConnection implements IVideoOutConnection {
 		this.rtpSender = null;
 		this.meetingId = meetingId;
 		this.peerConn.onnegotiationneeded = this.handleOnNegotiationNeeded;
-		this.peerConn.onicecandidate = this.handleOnIceCandidate;
-		this.peerConn.onconnectionstatechange = this.handleOnConnectionStateChange;
 		this.peerConn.oniceconnectionstatechange = this.handleOnIceConnectionStateChange;
-		this.peerConn.onicegatheringstatechange = this.handleOnIceGatheringStateChange;
-		this.peerConn.onsignalingstatechange = this.handleOnSignalingStateChange;
+		// this.peerConn.onicecandidate = this.handleOnIceCandidate;
+		// this.peerConn.onconnectionstatechange = this.handleOnConnectionStateChange;
+		// this.peerConn.onicegatheringstatechange = this.handleOnIceGatheringStateChange;
+		// this.peerConn.onsignalingstatechange = this.handleOnSignalingStateChange;
 		this.selectedVideoDeviceId = selectedVideoDeviceId;
 
 		if (videoStreamEnabled) {
@@ -43,8 +43,7 @@ export default class VideoOutConnection implements IVideoOutConnection {
 		}
 	}
 
-	handleOnNegotiationNeeded: (ev: Event) => void = (ev) => {
-		console.log('VideoOut handleOnNegotiationNeeded ', ev);
+	handleOnNegotiationNeeded: (ev: Event) => void = () => {
 		this.peerConn.createOffer().then((RTCsessionDesc: any) => {
 			if (this.peerConn.signalingState === 'stable') {
 				this.peerConn
@@ -54,16 +53,7 @@ export default class VideoOutConnection implements IVideoOutConnection {
 		});
 	};
 
-	handleOnIceCandidate: (ev: Event) => void = (ev) => {
-		console.log('VideoOut handleOnIceCandidate ', ev);
-	};
-
-	handleOnConnectionStateChange: (ev: Event) => void = (ev) => {
-		console.log('VideoOut handleOnConnectionStateChange ', ev);
-	};
-
 	handleOnIceConnectionStateChange: (ev: Event) => void = (ev) => {
-		console.log('VideoOut handleOnIceConnectionStateChange ', ev);
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore
 		if (ev.target.iceConnectionState === 'failed') {
@@ -71,18 +61,9 @@ export default class VideoOutConnection implements IVideoOutConnection {
 		}
 	};
 
-	handleOnIceGatheringStateChange: (ev: Event) => void = (ev) => {
-		console.log('VideoOut handleOnIceGatheringStateChange ', ev);
-	};
-
-	handleOnSignalingStateChange: (ev: Event) => void = (ev) => {
-		console.log('VideoOut handleOnSignalingStateChange ', ev);
-	};
-
 	handleLocalDescriptionSet = (
 		rtcSessionDescription: void | RTCSessionDescriptionInit
 	): void | RTCSessionDescriptionInit => {
-		console.log('VideoOut handleLocalDescriptionSet ', rtcSessionDescription);
 		if (rtcSessionDescription && rtcSessionDescription.sdp) {
 			MeetingsApi.updateMediaOffer(
 				this.meetingId,
@@ -104,14 +85,12 @@ export default class VideoOutConnection implements IVideoOutConnection {
 	};
 
 	handleRemoteAnswer = (remoteAnswer: RTCSessionDescriptionInit): void => {
-		console.log('VideoOut handleRemoteAnswer ', remoteAnswer);
 		if (this.peerConn.signalingState !== 'have-remote-offer') {
 			this.peerConn.setRemoteDescription(remoteAnswer).catch((reason) => console.warn(reason));
 		}
 	};
 
 	handleOfferCreated = (rtcSessDesc: RTCSessionDescriptionInit): void => {
-		console.log('handleOfferCreated ', rtcSessDesc);
 		if (this.peerConn.signalingState === 'stable' && this.peerConn.localDescription == null) {
 			this.peerConn
 				.setLocalDescription(rtcSessDesc)
@@ -123,9 +102,7 @@ export default class VideoOutConnection implements IVideoOutConnection {
 	};
 
 	closeRtpSenderTrack: () => void = () => {
-		if (this.rtpSender != null && this.rtpSender.track != null) {
-			this.rtpSender.track.stop();
-		}
+		this.rtpSender?.track?.stop();
 	};
 
 	/**
@@ -135,7 +112,6 @@ export default class VideoOutConnection implements IVideoOutConnection {
 	 */
 	updateLocalStreamTrack = (mediaStreamTrack: MediaStream): Promise<MediaStreamTrack> =>
 		new Promise((resolve) => {
-			console.log('updateLocalStreamTrack ', mediaStreamTrack);
 			const videoTrack: MediaStreamTrack = mediaStreamTrack.getVideoTracks()[0];
 			if (this.rtpSender == null) {
 				this.rtpSender = this.peerConn.addTrack(videoTrack, mediaStreamTrack ?? new MediaStream());

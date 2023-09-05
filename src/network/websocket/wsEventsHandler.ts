@@ -162,21 +162,21 @@ export function wsEventsHandler(event: WsEvent): void {
 			break;
 		}
 		case WsEventType.MEETING_MEDIA_STREAM_CHANGED: {
-			if (event.mediaType === STREAM_TYPE.VIDEO) {
+			const mediaType = event.mediaType.toLowerCase() as STREAM_TYPE;
+			if (mediaType === STREAM_TYPE.VIDEO) {
 				state.changeStreamStatus(event.meetingId, event.userId, STREAM_TYPE.VIDEO, event.active);
 			}
-			if (event.mediaType === STREAM_TYPE.SCREEN) {
+			if (mediaType === STREAM_TYPE.SCREEN) {
 				state.changeStreamStatus(event.meetingId, event.userId, STREAM_TYPE.SCREEN, event.active);
 			}
-
-			const mediaType = event.mediaType.toLowerCase() as STREAM_TYPE;
-			MeetingsApi.subscribeToMedia(event.meetingId, event.userId, mediaType)
-				.then((res) => console.log(res))
-				.catch((er) => console.error(er));
+			if (event.userId !== state.session.id) {
+				MeetingsApi.subscribeToMedia(event.meetingId, event.userId, mediaType)
+					.then((res) => console.log(res))
+					.catch((er) => console.error(er));
+			}
 			break;
 		}
 		case WsEventType.MEETING_AUDIO_ANSWERED: {
-			console.log('AUDIO ANSWER');
 			const activeMeeting = state.activeMeeting[event.meetingId];
 			if (activeMeeting.bidirectionalAudioConn) {
 				activeMeeting.bidirectionalAudioConn.handleRemoteAnswer({
@@ -187,7 +187,6 @@ export function wsEventsHandler(event: WsEvent): void {
 			break;
 		}
 		case WsEventType.MEETING_SDP_ANSWERED: {
-			console.log('VIDEO ANSWER');
 			const activeMeeting = state.activeMeeting[event.meetingId];
 			if (activeMeeting.videoOutConn) {
 				if (event.mediaType === STREAM_TYPE.VIDEO) {
@@ -197,9 +196,6 @@ export function wsEventsHandler(event: WsEvent): void {
 					});
 				}
 			}
-			// else {
-			// 	return 0;
-			// }
 			break;
 		}
 		case WsEventType.MEETING_SDP_OFFERED: {
@@ -210,25 +206,4 @@ export function wsEventsHandler(event: WsEvent): void {
 			wsDebug('Unhandled event', event);
 			break;
 	}
-	// if (event.type === 8) {
-	// 	console.log('TEST ANSWER');
-	// 	console.log(event);
-	// 	if (event.event.jsep.sdp.includes('AudioBridge')) {
-	// 		if (event.event.jsep.type === 'ANSWER') {
-	// 			console.log('AUDIO ANSWER');
-	// 			state.activeMeeting[event.meeting_id].bidirectionalAudioConn.handleRemoteAnswer({
-	// 				...event.event.jsep,
-	// 				type: 'answer'
-	// 			});
-	// 		}
-	// 	} else if (event.event.jsep.sdp.includes('VideoRoom')) {
-	// 		if (event.event.jsep.type === 'ANSWER') {
-	// 			console.log('VIDEO ANSWER');
-	// 			state.activeMeeting[event.meeting_id].videoOutConn.handleRemoteAnswer({
-	// 				...event.event.jsep,
-	// 				type: 'answer'
-	// 			});
-	// 		}
-	// 	}
-	// }
 }

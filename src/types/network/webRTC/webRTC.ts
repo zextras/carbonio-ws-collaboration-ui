@@ -14,18 +14,14 @@ export interface IPeerConnection {
 	meetingId: string;
 	rtpSender: RTCRtpSender | null;
 	handleOnNegotiationNeeded: (ev: Event) => void;
-	handleOnIceCandidate: (ev: Event) => void;
-	handleOnConnectionStateChange: (ev: Event) => void;
 	handleOnIceConnectionStateChange: (ev: Event) => void;
-	handleOnIceGatheringStateChange: (ev: Event) => void;
-	handleOnSignalingStateChange: (ev: Event) => void;
 	handleRemoteAnswer: (remoteAnswer: any) => void;
 	handleOfferCreated: (rtcSessionDescription: RTCSessionDescriptionInit) => void;
 	handleLocalDescriptionSet: (rtcSessionDescription: RTCSessionDescriptionInit) => void;
 }
 
 export interface IBidirectionalConnectionAudioInOut extends IPeerConnection {
-	oscillatorAudioTrack: MediaStreamTrack | null;
+	oscillatorAudioTrack: MediaStreamTrack | undefined;
 	updateRemoteStreamAudio: () => void;
 	handleOnTrack: (trackEvent: RTCTrackEvent) => void;
 	updateLocalStreamTrack(mediaStreamTrack: MediaStream): Promise<MediaStreamTrack>;
