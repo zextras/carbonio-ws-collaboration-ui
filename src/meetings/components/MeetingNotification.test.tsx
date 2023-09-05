@@ -9,19 +9,21 @@ import React from 'react';
 
 import MeetingNotification from './MeetingNotification';
 import useStore from '../../store/Store';
-import { createMockRoom, createMockUser } from '../../tests/createMock';
+import { createMockMeeting, createMockRoom, createMockUser } from '../../tests/createMock';
 import { mockedSendChatMessage } from '../../tests/mockedXmppClient';
 import { setup } from '../../tests/test-utils';
 import { RoomType } from '../../types/store/RoomTypes';
 
 const user = createMockUser({ id: 'userId', name: 'User' });
 const room = createMockRoom({ id: 'roomId', type: RoomType.ONE_TO_ONE });
+const meeting = createMockMeeting({ id: 'meetingId', roomId: room.id });
 const mockRemoveNotification = jest.fn();
 
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setUserInfo(user);
 	store.addRoom(room);
+	store.addMeeting(meeting);
 });
 describe('MeetingNotification', () => {
 	test('Everything is rendered correctly', () => {
@@ -29,7 +31,7 @@ describe('MeetingNotification', () => {
 			<MeetingNotification
 				id={'notificationId'}
 				from={user.id}
-				roomId={room.id}
+				meetingId={'meetingId'}
 				removeNotification={mockRemoveNotification}
 				stopMeetingSound={jest.fn()}
 			/>
@@ -49,7 +51,7 @@ describe('MeetingNotification', () => {
 			<MeetingNotification
 				id={'notificationId'}
 				from={user.id}
-				roomId={room.id}
+				meetingId={'meetingId'}
 				removeNotification={mockRemoveNotification}
 				stopMeetingSound={jest.fn()}
 			/>
@@ -64,7 +66,7 @@ describe('MeetingNotification', () => {
 			<MeetingNotification
 				id={'notificationId'}
 				from={user.id}
-				roomId={room.id}
+				meetingId={'meetingId'}
 				removeNotification={mockRemoveNotification}
 				stopMeetingSound={jest.fn()}
 			/>
@@ -78,7 +80,7 @@ describe('MeetingNotification', () => {
 			<MeetingNotification
 				id={'notificationId'}
 				from={user.id}
-				roomId={room.id}
+				meetingId={'meetingId'}
 				removeNotification={mockRemoveNotification}
 				stopMeetingSound={jest.fn()}
 			/>
@@ -93,7 +95,7 @@ describe('MeetingNotification', () => {
 			<MeetingNotification
 				id={'notificationId'}
 				from={user.id}
-				roomId={room.id}
+				meetingId={'meetingId'}
 				removeNotification={mockRemoveNotification}
 				stopMeetingSound={jest.fn()}
 			/>

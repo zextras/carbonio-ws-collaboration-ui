@@ -48,7 +48,7 @@ const setupBasicGroup = (): { user: UserEvent; store: RootStore } => {
 	act(() => {
 		result.current.addRoom(groupRoom);
 		result.current.addMeeting(groupMeeting);
-		result.current.setActiveMeeting(groupMeeting.id);
+		result.current.meetingConnection(groupMeeting.id, false, undefined, false, undefined);
 	});
 	mockUseParams.mockReturnValue({ meetingId: groupMeeting.id });
 	const { user } = setup(<MeetingSidebar />);
