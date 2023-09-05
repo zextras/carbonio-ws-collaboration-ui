@@ -70,8 +70,10 @@ const CentralTile = styled(Container)`
 	}
 `;
 
-const VideoEl = styled.video`
-	min-width: 100%;
+const VideoEl = styled.video<{
+	isScreenShare: boolean;
+}>`
+	${({ isScreenShare }): string | false => isScreenShare && 'max-height: 100%'};
 	max-width: 100%;
 	&:hover {
 		${HoverContainer} {
@@ -85,7 +87,8 @@ const Tile: React.FC<TileProps> = ({
 	streamMuted,
 	videoStreamEnabled,
 	audioStreamEnabled,
-	memberId
+	memberId,
+	isScreenShare
 }) => {
 	const sessionId: string | undefined = useStore((store) => store.session.id);
 	const userName = useStore((store) => getUserName(store, memberId || ''));
@@ -113,8 +116,8 @@ const Tile: React.FC<TileProps> = ({
 	}, [userName, themeColor.avatarColors]);
 
 	return (
-		<CentralTile background={'text'}>
-			{isMyTile && (
+		<CentralTile background={'text'} data-testid="tile">
+			{!isMyTile && (
 				<HoverContainer width="100%" data-testid="hover_container" orientation="horizontal">
 					{audioStreamEnabled && (
 						<>
@@ -170,7 +173,14 @@ const Tile: React.FC<TileProps> = ({
 				)}
 			</CustomContainer>
 			{videoStreamEnabled ? (
-				<VideoEl playsInline autoPlay muted={streamMuted} controls={false} ref={streamRef} />
+				<VideoEl
+					playsInline
+					autoPlay
+					muted={streamMuted}
+					controls={false}
+					ref={streamRef}
+					isScreenShare={isScreenShare || false}
+				/>
 			) : (
 				<AvatarContainer data-testid="avatar_box" width="fit">
 					<StyledAvatar

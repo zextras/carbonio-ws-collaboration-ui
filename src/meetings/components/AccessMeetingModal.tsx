@@ -412,7 +412,6 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 						videoStreamEnabled={videoStreamEnabled}
 						audioStreamEnabled={audioStreamEnabled}
 						memberId={memberId}
-						// isInsideAccessModal
 					/>
 				</VideoTile>
 				<Padding top="1rem" />
