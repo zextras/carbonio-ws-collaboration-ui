@@ -72,7 +72,7 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 	const selectedVideoDeviceId = useStore((store) => getSelectedVideoDeviceId(store, meetingId));
 	const videoOutConn = useStore((store) => store.activeMeeting[meetingId]?.videoOutConn);
 	const bidirectionalAudioConn = useStore(
-		(store) => store.activeMeeting[meetingId].bidirectionalAudioConn
+		(store) => store.activeMeeting[meetingId]?.bidirectionalAudioConn
 	);
 
 	const [isHoovering, setIsHoovering] = useState<boolean>(false);

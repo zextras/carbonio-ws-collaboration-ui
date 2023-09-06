@@ -16,23 +16,26 @@ export default class VideoOutConnection implements IVideoOutConnection {
 
 	meetingId: string;
 
-	localStreamVideoOutTrack: MediaStreamTrack | null;
-
 	rtpSender: RTCRtpSender | null;
+
+	localStreamVideoOutTrack: MediaStreamTrack | null;
 
 	selectedVideoDeviceId: string | undefined;
 
 	constructor(meetingId: string, videoStreamEnabled: boolean, selectedVideoDeviceId?: string) {
 		this.peerConn = new RTCPeerConnection(new PeerConnConfig().getConfig());
-		this.localStreamVideoOutTrack = null;
-		this.rtpSender = null;
-		this.meetingId = meetingId;
 		this.peerConn.onnegotiationneeded = this.handleOnNegotiationNeeded;
 		this.peerConn.oniceconnectionstatechange = this.handleOnIceConnectionStateChange;
 		// this.peerConn.onicecandidate = this.handleOnIceCandidate;
 		// this.peerConn.onconnectionstatechange = this.handleOnConnectionStateChange;
 		// this.peerConn.onicegatheringstatechange = this.handleOnIceGatheringStateChange;
 		// this.peerConn.onsignalingstatechange = this.handleOnSignalingStateChange;
+
+		this.meetingId = meetingId;
+		this.rtpSender = null;
+
+		this.localStreamVideoOutTrack = null;
+
 		this.selectedVideoDeviceId = selectedVideoDeviceId;
 
 		if (videoStreamEnabled) {

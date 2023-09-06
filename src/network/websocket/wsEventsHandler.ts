@@ -200,6 +200,7 @@ export function wsEventsHandler(event: WsEvent): void {
 		}
 		case WsEventType.MEETING_SDP_OFFERED: {
 			console.log('MEETING_SDP_OFFERED ', event);
+			// TODO
 			break;
 		}
 		default:

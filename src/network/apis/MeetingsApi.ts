@@ -177,15 +177,10 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 		enabled: boolean,
 		sdp?: string
 	): Promise<UpdateMediaOfferResponse> {
-		const { id } = useStore.getState().session;
 		return this.fetchAPI(`meetings/${meetingId}/media`, RequestType.PUT, {
 			type,
 			enabled,
 			sdp
-		}).then((resp: UpdateMediaOfferResponse) => {
-			const { changeStreamStatus } = useStore.getState();
-			changeStreamStatus(meetingId, id!, type, enabled);
-			return resp;
 		});
 	}
 

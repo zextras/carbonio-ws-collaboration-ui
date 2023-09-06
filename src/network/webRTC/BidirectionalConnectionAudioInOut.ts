@@ -8,25 +8,28 @@
 import { first } from 'lodash';
 
 import { PeerConnConfig } from './PeerConnConfig';
+import useStore from '../../store/Store';
 import { IBidirectionalConnectionAudioInOut } from '../../types/network/webRTC/webRTC';
+import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
 import { getAudioStream } from '../../utils/UserMediaManager';
 import MeetingsApi from '../apis/MeetingsApi';
 
 export default class BidirectionalConnectionAudioInOut
 	implements IBidirectionalConnectionAudioInOut
 {
+	peerConn: RTCPeerConnection;
+
 	meetingId: string;
 
 	rtpSender: RTCRtpSender | null;
 
-	peerConn: RTCPeerConnection;
-
 	oscillatorAudioTrack: MediaStreamTrack | undefined;
 
-	constructor(meetingId: string, audioStreamEnabled: boolean, selectedAudioDeviceId?: string) {
-		this.meetingId = meetingId;
-		this.rtpSender = null;
+	selectedAudioDeviceId: string | undefined;
 
+	initialAudioStatus: boolean;
+
+	constructor(meetingId: string, audioStreamEnabled: boolean, selectedAudioDeviceId?: string) {
 		this.peerConn = new RTCPeerConnection(new PeerConnConfig().getConfig());
 		this.peerConn.ontrack = this.handleOnTrack;
 		this.peerConn.onnegotiationneeded = this.handleOnNegotiationNeeded;
@@ -35,6 +38,9 @@ export default class BidirectionalConnectionAudioInOut
 		// this.peerConn.onconnectionstatechange = this.handleOnConnectionStateChange;
 		// this.peerConn.onicegatheringstatechange = this.handleOnIceGatheringStateChange;
 		// this.peerConn.onsignalingstatechange = this.handleOnSignalingStateChange;
+
+		this.meetingId = meetingId;
+		this.rtpSender = null;
 
 		const audioCtx = new window.AudioContext();
 		const oscillator = audioCtx.createOscillator();
@@ -52,9 +58,13 @@ export default class BidirectionalConnectionAudioInOut
 			if (audioStreamEnabled) {
 				getAudioStream(true, true, selectedAudioDeviceId).then((stream) => {
 					this.updateLocalStreamTrack(stream).then();
+					useStore.getState().setLocalStreams(this.meetingId, STREAM_TYPE.AUDIO, stream);
 				});
 			}
 		});
+
+		this.selectedAudioDeviceId = selectedAudioDeviceId;
+		this.initialAudioStatus = audioStreamEnabled;
 	}
 
 	handleOnTrack = (trackEvent: RTCTrackEvent): void => {
@@ -62,7 +72,7 @@ export default class BidirectionalConnectionAudioInOut
 		this.updateRemoteStreamAudio();
 	};
 
-	handleOnNegotiationNeeded: (ev: Event) => void = (/* ev */) => {
+	handleOnNegotiationNeeded: (ev: Event) => void = () => {
 		this.peerConn.createOffer().then((RTCsessionDesc: any) => {
 			if (this.peerConn.signalingState === 'stable') {
 				this.peerConn
@@ -84,7 +94,9 @@ export default class BidirectionalConnectionAudioInOut
 		rtcSessionDescription: void | RTCSessionDescriptionInit
 	): void | RTCSessionDescriptionInit => {
 		if (rtcSessionDescription && rtcSessionDescription.sdp) {
-			MeetingsApi.createAudioOffer(this.meetingId, rtcSessionDescription.sdp).then();
+			MeetingsApi.createAudioOffer(this.meetingId, rtcSessionDescription.sdp).then(() => {
+				MeetingsApi.updateAudioStreamStatus(this.meetingId, this.initialAudioStatus);
+			});
 		}
 	};
 

@@ -231,10 +231,6 @@ describe('Meetings API', () => {
 				sdp: sdpOffer
 			})
 		});
-
-		// Check if store is correctly updated
-		const participant = useStore.getState().meetings[meetingMock.roomId].participants[userId];
-		expect(participant.videoStreamOn).toEqual(true);
 	});
 
 	test('updateVideoStreamStatus is called to set video disabled', async () => {
@@ -272,10 +268,6 @@ describe('Meetings API', () => {
 				sdp: sdpOffer
 			})
 		});
-
-		// Check if store is correctly updated
-		const participant = useStore.getState().meetings[meetingMock.roomId].participants[userId];
-		expect(participant.screenStreamOn).toEqual(true);
 	});
 
 	test('updateScreenStreamStatus is called to set screen share disabled', async () => {
