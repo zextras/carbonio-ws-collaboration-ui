@@ -193,6 +193,13 @@ export type ActiveMeetingSlice = {
 	removeLocalStreams: (meetingId: string, streamType: STREAM_TYPE) => void;
 	setMeetingSidebarStatus: (meetingId: string, status: boolean) => void;
 	setSelectedDeviceId: (meetingId: string, streamType: STREAM_TYPE, deviceId: string) => void;
+	setSubscribedTrack: (
+		meetingId: string,
+		userId: string,
+		mediaStream: MediaStream,
+		streamType: STREAM_TYPE
+	) => void;
+	removeSubscribedTrack: (meetingId: string, userId: string, streamType: STREAM_TYPE) => void;
 };
 
 export type RootStore = UsersStoreSlice &

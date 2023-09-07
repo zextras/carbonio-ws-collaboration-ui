@@ -16,6 +16,7 @@ import {
 } from '../../types/network/models/meetingBeTypes';
 import {
 	CreateAudioOfferResponse,
+	CreateMediaAnswerResponse,
 	CreateMeetingResponse,
 	DeleteMeetingResponse,
 	GetMeetingResponse,
@@ -151,6 +152,12 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 		);
 	}
 
+	public createAudioOffer(meetingId: string, sdpOffer: string): Promise<CreateAudioOfferResponse> {
+		return this.fetchAPI(`meetings/${meetingId}/audio/offer`, RequestType.PUT, {
+			sdp: sdpOffer
+		});
+	}
+
 	public updateAudioStreamStatus(
 		meetingId: string,
 		enabled: boolean
@@ -163,12 +170,6 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 			changeStreamStatus(meetingId, id!, STREAM_TYPE.AUDIO, enabled);
 			return resp;
 		});
-	}
-
-	public createAudioOffer(meetingId: string, sdpOffer: string): Promise<CreateAudioOfferResponse> {
-		return this.fetchAPI(`meetings/${meetingId}/audio/offer`, RequestType.PUT, {
-			sdp: sdpOffer
-		}).then((resp: CreateAudioOfferResponse) => resp);
 	}
 
 	public updateMediaOffer(
@@ -186,18 +187,22 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 
 	public subscribeToMedia(
 		meetingId: string,
-		userSessionId: string,
-		type: STREAM_TYPE
+		subscription: { user_id: string; type: STREAM_TYPE }[],
+		unsubscription: { user_id: string; type: STREAM_TYPE }[]
 	): Promise<SubscribeMediaResponse> {
 		return this.fetchAPI(`meetings/${meetingId}/media/subscribe`, RequestType.PUT, {
-			subscribe: [
-				{
-					user_id: userSessionId,
-					type
-				}
-			],
-			unsubscribe: []
+			subscribe: subscription,
+			unsubscribe: unsubscription
 		}).then((resp: SubscribeMediaResponse) => resp);
+	}
+
+	public createMediaAnswer(
+		meetingId: string,
+		sdpAnswer: string
+	): Promise<CreateMediaAnswerResponse> {
+		return this.fetchAPI(`meetings/${meetingId}/media/answer`, RequestType.PUT, {
+			sdp: sdpAnswer
+		}).then((resp: CreateAudioOfferResponse) => resp);
 	}
 }
 

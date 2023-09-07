@@ -12,32 +12,36 @@ export interface IPeerConnConfig {
 export interface IPeerConnection {
 	peerConn: RTCPeerConnection;
 	meetingId: string;
-	rtpSender: RTCRtpSender | null;
-	handleOnNegotiationNeeded: (ev: Event) => void;
-	handleOnIceConnectionStateChange: (ev: Event) => void;
-	handleRemoteAnswer: (remoteAnswer: any) => void;
-	handleOfferCreated: (rtcSessionDescription: RTCSessionDescriptionInit) => void;
-	handleLocalDescriptionSet: (rtcSessionDescription: RTCSessionDescriptionInit) => void;
+	closePeerConnection(): void;
 }
 
 export interface IBidirectionalConnectionAudioInOut extends IPeerConnection {
+	rtpSender: RTCRtpSender | null;
+	selectedAudioDeviceId: string | undefined;
+	initialAudioStatus: boolean;
 	oscillatorAudioTrack: MediaStreamTrack | undefined;
-	updateRemoteStreamAudio: () => void;
-	handleOnTrack: (trackEvent: RTCTrackEvent) => void;
+	onTrack: (trackEvent: RTCTrackEvent) => void;
+	onNegotiationNeeded: () => void;
+	onIceConnectionStateChange: (ev: Event) => void;
+	handleRemoteAnswer(remoteAnswer: RTCSessionDescriptionInit): void;
 	updateLocalStreamTrack(mediaStreamTrack: MediaStream): Promise<MediaStreamTrack>;
-	closeRtpSenderTrack: () => void;
-	closePeerConnection: () => void;
+	updateRemoteStreamAudio(): void;
+	closeRtpSenderTrack(): void;
 }
 
 export interface IVideoOutConnection extends IPeerConnection {
+	rtpSender: RTCRtpSender | null;
 	localStreamVideoOutTrack: MediaStreamTrack | null;
+	selectedVideoDeviceId: string | undefined;
+	onNegotiationNeeded: () => void;
+	onIceConnectionStateChange: (ev: Event) => void;
+	handleRemoteAnswer(remoteAnswer: RTCSessionDescriptionInit): void;
+	handleOfferCreated(rtcSessionDescription: RTCSessionDescriptionInit): void;
 	updateLocalStreamTrack(mediaStreamTrack: MediaStream): Promise<MediaStreamTrack>;
-	closePeerConnection: () => void;
-	closeRtpSenderTrack: () => void;
+	closeRtpSenderTrack(): void;
 }
 
-export interface IVideoInConnection {
-	peerConn: RTCPeerConnection;
-	meetingId: string;
-	closePeerConnection: () => void;
+export interface IVideoInConnection extends IPeerConnection {
+	onTrack: (ev: RTCTrackEvent) => void;
+	handleRemoteOffer(sdp: string): void;
 }

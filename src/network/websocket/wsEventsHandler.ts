@@ -169,10 +169,12 @@ export function wsEventsHandler(event: WsEvent): void {
 			if (mediaType === STREAM_TYPE.SCREEN) {
 				state.changeStreamStatus(event.meetingId, event.userId, STREAM_TYPE.SCREEN, event.active);
 			}
-			if (event.userId !== state.session.id) {
-				MeetingsApi.subscribeToMedia(event.meetingId, event.userId, mediaType)
-					.then((res) => console.log(res))
-					.catch((er) => console.error(er));
+			if (event.userId !== state.session.id && event.active) {
+				MeetingsApi.subscribeToMedia(
+					event.meetingId,
+					[{ user_id: event.userId, type: mediaType }],
+					[]
+				);
 			}
 			break;
 		}
@@ -189,7 +191,7 @@ export function wsEventsHandler(event: WsEvent): void {
 		case WsEventType.MEETING_SDP_ANSWERED: {
 			const activeMeeting = state.activeMeeting[event.meetingId];
 			if (activeMeeting.videoOutConn) {
-				if (event.mediaType === STREAM_TYPE.VIDEO) {
+				if (event.mediaType.toLowerCase() === STREAM_TYPE.VIDEO) {
 					activeMeeting.videoOutConn.handleRemoteAnswer({
 						sdp: event.sdp,
 						type: 'answer'
@@ -199,8 +201,10 @@ export function wsEventsHandler(event: WsEvent): void {
 			break;
 		}
 		case WsEventType.MEETING_SDP_OFFERED: {
-			console.log('MEETING_SDP_OFFERED ', event);
-			// TODO
+			const activeMeeting = state.activeMeeting[event.meetingId];
+			if (activeMeeting.videoInConn) {
+				activeMeeting.videoInConn.handleRemoteOffer(event.sdp);
+			}
 			break;
 		}
 		default:

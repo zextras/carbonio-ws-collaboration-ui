@@ -61,12 +61,14 @@ const FaceToFaceMode = (): ReactElement => {
 	const sidebarStatus: boolean | undefined = useStore((store) =>
 		getMeetingSidebarStatus(store, meetingId)
 	);
+	const centralStream = useStore(
+		(store) => store.activeMeeting[meetingId]?.subscription['userId-video']?.stream
+	);
 
-	const [centralStream, setCentralStream] = useState<null | MediaStream>(null);
 	const [centralTileSize, setCentralTileSize] = useState({ tileHeight: '0', tileWidth: '0' });
 
-	const streamRef = useRef<null | HTMLVideoElement>(null);
-	const streamRef2 = useRef<null | HTMLVideoElement>(null);
+	const localStreamRef = useRef<null | HTMLVideoElement>(null);
+	const centerStreamRef = useRef<null | HTMLVideoElement>(null);
 	const faceToFaceRef = useRef<null | HTMLDivElement>(null);
 
 	const getSizeOfCentralTile = useCallback(() => {
@@ -92,16 +94,17 @@ const FaceToFaceMode = (): ReactElement => {
 
 	useEffect(() => getSizeOfCentralTile(), [faceToFaceRef, getSizeOfCentralTile, sidebarStatus]);
 
+	// Set local stream
 	useEffect(() => {
-		if (streamRef != null && streamRef.current != null && localVideoStream != null) {
-			streamRef.current.srcObject = localVideoStream;
-			setCentralStream(localVideoStream);
+		if (localStreamRef != null && localStreamRef.current != null && localVideoStream != null) {
+			localStreamRef.current.srcObject = localVideoStream;
 		}
 	}, [localVideoStream]);
 
+	// Set central stream
 	useEffect(() => {
-		if (streamRef2 != null && streamRef2.current != null && centralStream != null) {
-			streamRef2.current.srcObject = centralStream;
+		if (centerStreamRef && centerStreamRef.current && centerStreamRef) {
+			centerStreamRef.current.srcObject = centralStream;
 		}
 	}, [centralStream]);
 
@@ -113,7 +116,7 @@ const FaceToFaceMode = (): ReactElement => {
 					width={centralTileSize.tileWidth}
 					background="text"
 				>
-					<CentralVideo playsInline autoPlay muted controls={false} ref={streamRef2} />
+					<CentralVideo playsInline autoPlay muted controls={false} ref={centerStreamRef} />
 				</CentralTile>
 			) : (
 				<Text color="gray6" size="large">
@@ -132,7 +135,7 @@ const FaceToFaceMode = (): ReactElement => {
 				background="secondary"
 				borderRadius="round"
 			>
-				<TileVideo id="testVideo" playsInline autoPlay muted controls={false} ref={streamRef}>
+				<TileVideo id="testVideo" playsInline autoPlay muted controls={false} ref={localStreamRef}>
 					Your browser does not support the <code>video</code> element.
 				</TileVideo>
 			</MyStreamContainer>

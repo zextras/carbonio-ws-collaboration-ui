@@ -50,7 +50,8 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 					videoInConn: new VideoInConnection(meetingId),
 					videoOutConn: videoStreamEnabled
 						? new VideoOutConnection(meetingId, videoStreamEnabled, selectedVideoDeviceId)
-						: undefined
+						: undefined,
+					subscription: {}
 				};
 			}),
 			false,
@@ -62,6 +63,7 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 			produce((draft: RootStore) => {
 				draft.activeMeeting[meetingId]?.bidirectionalAudioConn?.closePeerConnection();
 				draft.activeMeeting[meetingId]?.videoInConn?.closePeerConnection();
+				draft.activeMeeting[meetingId]?.videoOutConn?.closePeerConnection();
 				delete draft.activeMeeting[meetingId];
 			}),
 			false,
@@ -229,6 +231,37 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 			}),
 			false,
 			'AM/SET_SELECTED_DEVICE_ID'
+		);
+	},
+	setSubscribedTrack: (
+		meetingId: string,
+		userId: string,
+		mediaStream: MediaStream,
+		streamType: STREAM_TYPE
+	): void => {
+		set(
+			produce((draft: RootStore) => {
+				const subscriptionId = `${userId}-${streamType}`;
+				draft.activeMeeting[meetingId].subscription[subscriptionId] = {
+					type: streamType,
+					stream: mediaStream,
+					userId
+				};
+			}),
+			false,
+			'AM/SET_SUBSCRIPTION'
+		);
+	},
+	removeSubscribedTrack: (meetingId: string, userId: string, streamType: STREAM_TYPE): void => {
+		set(
+			produce((draft: RootStore) => {
+				const subscriptionId = `${userId}-${streamType}`;
+				if (draft.activeMeeting[meetingId]?.subscription[subscriptionId]) {
+					delete draft.activeMeeting[meetingId].subscription[subscriptionId];
+				}
+			}),
+			false,
+			'AM/REMOVE_SUBSCRIPTION'
 		);
 	}
 });
