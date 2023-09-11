@@ -36,7 +36,7 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 						participantsAccordionIsOpened: false
 					},
 					chatVisibility: MeetingChatVisibility.CLOSED,
-					meetingViewSelected: MeetingViewType.WAITING,
+					meetingViewSelected: MeetingViewType.CINEMA,
 					// Peer connections
 					localStreams: {
 						selectedAudioDeviceId,

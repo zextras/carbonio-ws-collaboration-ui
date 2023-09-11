@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { find, size } from 'lodash';
+import { filter, find, size } from 'lodash';
 
 import { Meeting, MeetingParticipantMap } from '../../types/store/MeetingTypes';
 import { RootStore } from '../../types/store/StoreTypes';
@@ -51,6 +51,18 @@ export const getNumberOfMeetingParticipantsByMeetingId = (
 	meetingId: string
 ): number | undefined =>
 	size(find(store.meetings, (meeting) => meeting.id === meetingId)?.participants);
+
+export const getNumberOfTiles = (store: RootStore, meetingId: string): number => {
+	const meeting = find(store.meetings, (meeting) => meeting.id === meetingId);
+	if (meeting) {
+		const participantWithScreen = filter(
+			meeting.participants,
+			(participant) => participant.screenStreamOn === true
+		);
+		return size(meeting.participants) + size(participantWithScreen);
+	}
+	return 0;
+};
 
 export const getParticipantAudioStatus = (
 	store: RootStore,

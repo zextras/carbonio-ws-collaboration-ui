@@ -34,8 +34,7 @@ export type SidebarStatus = {
 
 export enum MeetingViewType {
 	CINEMA = 'cinema',
-	GRID = 'grid',
-	WAITING = 'waiting'
+	GRID = 'grid'
 }
 
 export enum MeetingChatVisibility {

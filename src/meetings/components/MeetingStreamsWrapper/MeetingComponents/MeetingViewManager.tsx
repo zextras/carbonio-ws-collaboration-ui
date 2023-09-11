@@ -12,32 +12,21 @@ import CinemaMode from './CinemaMode';
 import FaceToFaceMode from './FaceToFaceMode';
 import GridMode from './GridMode';
 import { getMeetingViewSelected } from '../../../../store/selectors/ActiveMeetingSelectors';
-import { getNumberOfMeetingParticipantsByMeetingId } from '../../../../store/selectors/MeetingSelectors';
+import { getNumberOfTiles } from '../../../../store/selectors/MeetingSelectors';
 import useStore from '../../../../store/Store';
 import { MeetingViewType } from '../../../../types/store/ActiveMeetingTypes';
 
 const MeetingViewManager = (): ReactElement => {
 	const { meetingId }: any = useParams();
 	const meetingViewSelected = useStore((store) => getMeetingViewSelected(store, meetingId));
+	const numberOfTiles = useStore((store) => getNumberOfTiles(store, meetingId));
 
-	const numberOfParticipants = useStore((store) =>
-		getNumberOfMeetingParticipantsByMeetingId(store, meetingId)
-	);
-
-	// TODO add check on more of 2 streams visible to change from FaceToFace to Cinema/Grid
 	const ViewToDisplay = useMemo(() => {
-		if (numberOfParticipants && numberOfParticipants <= 2) {
+		if (numberOfTiles <= 2) {
 			return <FaceToFaceMode />;
 		}
-		switch (meetingViewSelected) {
-			case MeetingViewType.CINEMA:
-				return <CinemaMode />;
-			case MeetingViewType.GRID:
-				return <GridMode />;
-			default:
-				return <CinemaMode />;
-		}
-	}, [meetingViewSelected, numberOfParticipants]);
+		return meetingViewSelected === MeetingViewType.CINEMA ? <CinemaMode /> : <GridMode />;
+	}, [meetingViewSelected, numberOfTiles]);
 
 	return (
 		<Container

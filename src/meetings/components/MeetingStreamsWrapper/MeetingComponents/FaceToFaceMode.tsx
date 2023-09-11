@@ -11,6 +11,7 @@ import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import {
+	getFirstStream,
 	getLocalVideoSteam,
 	getMeetingSidebarStatus
 } from '../../../../store/selectors/ActiveMeetingSelectors';
@@ -50,26 +51,36 @@ const CentralVideo = styled.video`
 `;
 
 const FaceToFaceMode = (): ReactElement => {
+	const { meetingId }: Record<string, string> = useParams();
+
 	const [t] = useTranslation();
 	const waitingParticipants = t(
 		'meeting.waitingParticipants',
 		'Waiting for participants to join...'
 	);
 
-	const { meetingId }: Record<string, string> = useParams();
 	const localVideoStream = useStore((store) => getLocalVideoSteam(store, meetingId));
-	const sidebarStatus: boolean | undefined = useStore((store) =>
-		getMeetingSidebarStatus(store, meetingId)
-	);
-	const centralStream = useStore(
-		(store) => store.activeMeeting[meetingId]?.subscription['userId-video']?.stream
-	);
+	const centralStream = useStore((store) => getFirstStream(store, meetingId));
+
+	const sidebarStatus: boolean = useStore((store) => getMeetingSidebarStatus(store, meetingId));
 
 	const [centralTileSize, setCentralTileSize] = useState({ tileHeight: '0', tileWidth: '0' });
 
 	const localStreamRef = useRef<null | HTMLVideoElement>(null);
 	const centerStreamRef = useRef<null | HTMLVideoElement>(null);
 	const faceToFaceRef = useRef<null | HTMLDivElement>(null);
+
+	useEffect(() => {
+		if (localStreamRef != null && localStreamRef.current != null && localVideoStream != null) {
+			localStreamRef.current.srcObject = localVideoStream;
+		}
+	}, [localVideoStream]);
+
+	useEffect(() => {
+		if (centerStreamRef && centerStreamRef.current && centralStream) {
+			centerStreamRef.current.srcObject = centralStream;
+		}
+	}, [centralStream]);
 
 	const getSizeOfCentralTile = useCallback(() => {
 		if (faceToFaceRef && faceToFaceRef.current) {
@@ -91,22 +102,6 @@ const FaceToFaceMode = (): ReactElement => {
 	}, [getSizeOfCentralTile]);
 
 	useEffect(() => getSizeOfCentralTile(), [faceToFaceRef, getSizeOfCentralTile, sidebarStatus]);
-
-	useEffect(() => getSizeOfCentralTile(), [faceToFaceRef, getSizeOfCentralTile, sidebarStatus]);
-
-	// Set local stream
-	useEffect(() => {
-		if (localStreamRef != null && localStreamRef.current != null && localVideoStream != null) {
-			localStreamRef.current.srcObject = localVideoStream;
-		}
-	}, [localVideoStream]);
-
-	// Set central stream
-	useEffect(() => {
-		if (centerStreamRef && centerStreamRef.current && centerStreamRef) {
-			centerStreamRef.current.srcObject = centralStream;
-		}
-	}, [centralStream]);
 
 	const centralContentToDisplay = useMemo(
 		() =>
