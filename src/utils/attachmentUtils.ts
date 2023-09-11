@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 import { AttachmentsApi } from '../network';
-import { ImageQuality, ImageShape, ImageType } from '../types/network/apis/IAttachmentsApi';
+import { AttachmentType, ImageQuality, ImageShape } from '../types/network/apis/IAttachmentsApi';
 
 // TODO implement all the possible extensions based on Previewer
 const previewExtensionSupported = {
@@ -18,14 +18,28 @@ const previewExtensionSupported = {
 export const isPreviewSupported = (mimeType: string): boolean =>
 	Object.values(previewExtensionSupported).includes(mimeType);
 
-const getImageType = (attachmentType: string): string | undefined => {
+export const canDisplayPreviewOnLoad = (attachmentType: string): boolean => {
 	const type = attachmentType.split('/');
-	if (type[1]) {
-		if (type[1] === 'gif') return ImageType.GIF;
-		if (type[1] === 'png') return ImageType.PNG;
-		if (type[1] === 'jpeg') return ImageType.JPEG;
+	return type[0] === 'image';
+};
+
+// get attachment extension
+export const getAttachmentExtension = (attachmentType: string): string | undefined => {
+	const type = attachmentType.split('/');
+	switch (type[1]) {
+		case 'gif':
+			return AttachmentType.GIF;
+		case 'png':
+			return AttachmentType.PNG;
+		case 'jpeg':
+			return AttachmentType.JPEG;
+		case 'webp':
+			return AttachmentType.WEBP;
+		case 'pdf':
+			return AttachmentType.PDF;
+		default:
+			return undefined;
 	}
-	return undefined;
 };
 
 // returns the thumbnail's url of the attachment
@@ -37,7 +51,7 @@ export const getThumbnailURL = (attachmentId: string, mimeType: string): string 
 					attachmentId,
 					'0x0',
 					ImageQuality.LOW,
-					getImageType(mimeType),
+					getAttachmentExtension(mimeType),
 					ImageShape.RECTANGULAR
 			  );
 	}
@@ -53,32 +67,29 @@ export const getAttachmentURL = (attachmentId: string, mimeType: string): string
 					attachmentId,
 					'0x0',
 					ImageQuality.HIGH,
-					getImageType(mimeType)
+					getAttachmentExtension(mimeType)
 			  );
 	}
 	return undefined;
 };
 
-export const getExtension = (attachmentType: string): string | undefined => {
+// return if the attachment is an image or not
+export const isAttachmentImage = (attachmentType: string): boolean => {
 	const type = attachmentType.split('/');
-	if (type[1]) return type[1].toUpperCase();
-	return undefined;
+	if (type[0]) return type[0] === 'image';
+	return false;
 };
 
-export const getAttachmentType = (extension: string): 'pdf' | 'image' => {
-	if (extension === 'PDF') {
+// get attachment type, it's necessary for the previewer
+export const getAttachmentType = (attachmentType: string): 'pdf' | 'image' => {
+	if (!isAttachmentImage(attachmentType)) {
 		return 'pdf';
 	}
 	return 'image';
 };
 
-export const canDisplayPreview = (attachmentType: string): boolean => {
-	const type = attachmentType.split('/');
-	return type[0] === 'image';
-};
-
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const getAttachmentIcon = (fileType: string): string => {
+export const getAttachmentIcon = (fileType: string): string => {
 	switch (fileType.split('/')[0]) {
 		case 'audio':
 			return 'FileAudioOutline';

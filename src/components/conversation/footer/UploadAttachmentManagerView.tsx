@@ -18,10 +18,11 @@ import {
 import useStore from '../../../store/Store';
 import { FileToUpload } from '../../../types/store/ActiveConversationTypes';
 import {
-	canDisplayPreview,
+	canDisplayPreviewOnLoad,
+	getAttachmentExtension,
+	getAttachmentIcon,
 	getAttachmentSize,
 	getAttachmentType,
-	getExtension,
 	uid
 } from '../../../utils/attachmentUtils';
 
@@ -192,7 +193,7 @@ const UploadAttachmentManagerView: React.FC<UploadAttachmentManagerViewProps> = 
 			createPreview({
 				previewType: getAttachmentType(file.file.type),
 				filename: file.file.name,
-				extension: getExtension(file.file.type),
+				extension: getAttachmentExtension(file.file.type)?.toUpperCase(),
 				size: getAttachmentSize(file.file.size),
 				closeAction: {
 					id: 'close-action',
@@ -213,7 +214,7 @@ const UploadAttachmentManagerView: React.FC<UploadAttachmentManagerViewProps> = 
 	const filesWithPreview = useMemo(() => {
 		const filePreviews: JSX.Element[] = [];
 		map(filesToUploadArray, (file) => {
-			const displayPreview = canDisplayPreview(file.file.type);
+			const displayPreview = canDisplayPreviewOnLoad(file.file.type);
 			const previewFile = (
 				<Tooltip key={`${file.file.name}-${file.fileId}`} label={file.file.name}>
 					<PreviewContainer
@@ -257,7 +258,7 @@ const UploadAttachmentManagerView: React.FC<UploadAttachmentManagerViewProps> = 
 								hasFocus={file.hasFocus}
 							>
 								<CustomIcon
-									icon="FileTextOutline"
+									icon={getAttachmentIcon(file.file.type)}
 									height="2.625rem"
 									width="2.625rem"
 									color="secondary"
