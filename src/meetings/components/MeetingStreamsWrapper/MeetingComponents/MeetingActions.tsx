@@ -18,10 +18,8 @@ import {
 	getSelectedVideoDeviceId
 } from '../../../../store/selectors/ActiveMeetingSelectors';
 import {
-	getMeetingByMeetingId,
-	getParticipantAudioStatusByMeetingId,
-	getParticipantScreenStatusByMeetingId,
-	getParticipantVideoStatusByMeetingId
+	getParticipantAudioStatus,
+	getParticipantVideoStatus
 } from '../../../../store/selectors/MeetingSelectors';
 import { getUserId } from '../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../store/Store';
@@ -57,16 +55,8 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 	const closeVideoOutConn = useStore((store) => store.closeVideoOutConn);
 	const createVideoOutConn = useStore((store) => store.createVideoOutConn);
 	const myUserId = useStore(getUserId);
-	const meeting = useStore((store) => getMeetingByMeetingId(store, meetingId));
-	const audioStatus = useStore((store) =>
-		getParticipantAudioStatusByMeetingId(store, meeting?.roomId, myUserId)
-	);
-	const videoStatus = useStore((store) =>
-		getParticipantVideoStatusByMeetingId(store, meeting?.roomId, myUserId)
-	);
-	const shareStatus = useStore((store) =>
-		getParticipantScreenStatusByMeetingId(store, meeting?.roomId, myUserId)
-	);
+	const audioStatus = useStore((store) => getParticipantAudioStatus(store, meetingId, myUserId));
+	const videoStatus = useStore((store) => getParticipantVideoStatus(store, meetingId, myUserId));
 	const meetingViewSelected = useStore((store) => getMeetingViewSelected(store, meetingId));
 	const selectedAudioDeviceId = useStore((store) => getSelectedAudioDeviceId(store, meetingId));
 	const selectedVideoDeviceId = useStore((store) => getSelectedVideoDeviceId(store, meetingId));
@@ -339,7 +329,7 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 			<IconButton
 				iconColor="gray6"
 				backgroundColor="primary"
-				icon={shareStatus ? 'ScreenSharingOn' : 'ScreenSharingOff'}
+				icon="ScreenSharingOff" // TODO shareStatus ? 'ScreenSharingOn' : 'ScreenSharingOff'}
 				onClick={toggleShareStream}
 				size="large"
 				disabled // TODO: enable when screen sharing will be available

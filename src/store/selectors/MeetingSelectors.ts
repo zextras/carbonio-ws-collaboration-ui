@@ -12,13 +12,14 @@ import { RootStore } from '../../types/store/StoreTypes';
 export const getMeeting = (store: RootStore, roomId: string): Meeting | undefined =>
 	store.meetings[roomId];
 
+export const getMeetingByMeetingId = (store: RootStore, meetingId: string): Meeting | undefined =>
+	find(store.meetings, (meeting) => meeting.id === meetingId);
+
 export const getRoomIdByMeetingId = (store: RootStore, meetingId: string): string | undefined =>
 	find(store.meetings, (meeting) => meeting.id === meetingId)?.roomId;
 
 export const getMeetingActive = (store: RootStore, roomId: string): boolean =>
 	store.meetings[roomId] && store.meetings[roomId].active;
-export const getMeetingByMeetingId = (store: RootStore, meetingId: string): Meeting | undefined =>
-	find(store.meetings, (meeting) => meeting.id === meetingId);
 export const getMeetingParticipants = (
 	store: RootStore,
 	roomId: string
@@ -66,63 +67,22 @@ export const getNumberOfTiles = (store: RootStore, meetingId: string): number =>
 
 export const getParticipantAudioStatus = (
 	store: RootStore,
-	roomId: string,
+	meetingId: string | undefined,
 	userId: string | undefined
 ): boolean => {
-	const audioStream = find(
-		store.meetings[roomId].participants,
-		(participant) => participant.userId === userId
-	)?.audioStreamOn;
-	if (audioStream !== undefined) return audioStream;
-	return false;
+	if (!meetingId || !userId) return false;
+	const meeting = find(store.meetings, (meeting) => meeting.id === meetingId);
+	const participant = find(meeting?.participants, (participant) => participant.userId === userId);
+	return participant?.audioStreamOn ?? false;
 };
 
-export const getParticipantAudioStatusByMeetingId = (
+export const getParticipantVideoStatus = (
 	store: RootStore,
 	meetingId: string | undefined,
 	userId: string | undefined
 ): boolean => {
-	if (!meetingId || !userId) {
-		return false;
-	}
-	const audioStream = find(
-		store.meetings[meetingId]?.participants,
-		(participant) => participant.userId === userId
-	)?.audioStreamOn;
-	if (audioStream !== undefined) {
-		return audioStream;
-	}
-	return false;
-};
-
-export const getParticipantVideoStatusByMeetingId = (
-	store: RootStore,
-	meetingId: string | undefined,
-	userId: string | undefined
-): boolean => {
-	if (!meetingId || !userId) {
-		return false;
-	}
-	const videoStream = find(
-		store.meetings[meetingId]?.participants,
-		(participant) => participant.userId === userId
-	)?.videoStreamOn;
-	if (videoStream !== undefined) return videoStream;
-	return false;
-};
-
-export const getParticipantScreenStatusByMeetingId = (
-	store: RootStore,
-	meetingId: string | undefined,
-	userId: string | undefined
-): boolean => {
-	if (!meetingId || !userId) {
-		return false;
-	}
-	const screenStream = find(
-		store.meetings[meetingId]?.participants,
-		(participant) => participant.userId === userId
-	)?.screenStreamOn;
-	if (screenStream !== undefined) return screenStream;
-	return false;
+	if (!meetingId || !userId) return false;
+	const meeting = find(store.meetings, (meeting) => meeting.id === meetingId);
+	const participant = find(meeting?.participants, (participant) => participant.userId === userId);
+	return participant?.videoStreamOn ?? false;
 };

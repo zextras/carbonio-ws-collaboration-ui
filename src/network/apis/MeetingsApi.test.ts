@@ -191,10 +191,6 @@ describe('Meetings API', () => {
 				enabled: true
 			})
 		});
-
-		// Check if store is correctly updated
-		const participant = useStore.getState().meetings[meetingMock.roomId].participants[userId];
-		expect(participant.audioStreamOn).toEqual(true);
 	});
 
 	test('updateAudioStreamStatus is called to set audio disabled', async () => {
@@ -210,10 +206,6 @@ describe('Meetings API', () => {
 				enabled: false
 			})
 		});
-
-		// Check if store is correctly updated
-		const participant = useStore.getState().meetings[meetingMock.roomId].participants[userId];
-		expect(participant.audioStreamOn).toEqual(false);
 	});
 
 	test('updateVideoStreamStatus is called to set video enabled', async () => {
@@ -247,10 +239,6 @@ describe('Meetings API', () => {
 				enabled: false
 			})
 		});
-
-		// Check if store is correctly updated
-		const participant = useStore.getState().meetings[meetingMock.roomId].participants[userId];
-		expect(participant.videoStreamOn).toEqual(false);
 	});
 
 	test('updateScreenStreamStatus is called to set screen share enabled', async () => {
@@ -284,9 +272,5 @@ describe('Meetings API', () => {
 				enabled: false
 			})
 		});
-
-		// Check if store is correctly updated
-		const participant = useStore.getState().meetings[meetingMock.roomId].participants[userId];
-		expect(participant.screenStreamOn).toEqual(false);
 	});
 });

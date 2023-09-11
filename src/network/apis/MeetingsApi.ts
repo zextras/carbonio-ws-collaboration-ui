@@ -162,13 +162,8 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 		meetingId: string,
 		enabled: boolean
 	): Promise<UpdateAudioStreamStatusResponse> {
-		const { id } = useStore.getState().session;
 		return this.fetchAPI(`meetings/${meetingId}/audio`, RequestType.PUT, {
 			enabled
-		}).then((resp: UpdateAudioStreamStatusResponse) => {
-			const { changeStreamStatus } = useStore.getState();
-			changeStreamStatus(meetingId, id!, STREAM_TYPE.AUDIO, enabled);
-			return resp;
 		});
 	}
 
@@ -193,7 +188,7 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 		return this.fetchAPI(`meetings/${meetingId}/media/subscribe`, RequestType.PUT, {
 			subscribe: subscription,
 			unsubscribe: unsubscription
-		}).then((resp: SubscribeMediaResponse) => resp);
+		});
 	}
 
 	public createMediaAnswer(
@@ -202,7 +197,7 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 	): Promise<CreateMediaAnswerResponse> {
 		return this.fetchAPI(`meetings/${meetingId}/media/answer`, RequestType.PUT, {
 			sdp: sdpAnswer
-		}).then((resp: CreateAudioOfferResponse) => resp);
+		});
 	}
 }
 
