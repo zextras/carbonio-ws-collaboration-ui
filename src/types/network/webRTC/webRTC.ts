@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { STREAM_TYPE } from '../../store/ActiveMeetingTypes';
+
 export interface IPeerConnConfig {
 	addIceServer(iceServer: RTCIceServer): void;
 	getConfig(): RTCConfiguration;
@@ -43,5 +45,6 @@ export interface IVideoOutConnection extends IPeerConnection {
 
 export interface IVideoInConnection extends IPeerConnection {
 	onTrack: (ev: RTCTrackEvent) => void;
+	handleStreams(streamsMap: { user_id: string; type: STREAM_TYPE }[]): void;
 	handleRemoteOffer(sdp: string): void;
 }

@@ -19,6 +19,7 @@ export type WsMeetingEvent =
 	| MeetingAudioAnsweredEvent
 	| MeetingSDPOfferedEvent
 	| MeetingSDPAnsweredEvent
+	| MeetingParticipantStreamsEvent
 	| MeetingParticipantTalkingEvent
 	| MeetingParticipantClashedEvent;
 
@@ -71,14 +72,12 @@ export type MeetingMediaStreamChangedEvent = BasicMeetingEvent & {
 export type MeetingAudioAnsweredEvent = BasicMeetingEvent & {
 	type: WsEventType.MEETING_AUDIO_ANSWERED;
 	userId: string;
-	meetingId: string;
 	sdp: string;
 };
 
 export type MeetingSDPOfferedEvent = BasicMeetingEvent & {
 	type: WsEventType.MEETING_SDP_OFFERED;
 	userId: string;
-	meetingId: string;
 	sdp: string;
 	mediaType: STREAM_TYPE.VIDEO | STREAM_TYPE.SCREEN;
 };
@@ -86,9 +85,14 @@ export type MeetingSDPOfferedEvent = BasicMeetingEvent & {
 export type MeetingSDPAnsweredEvent = BasicMeetingEvent & {
 	type: WsEventType.MEETING_SDP_ANSWERED;
 	userId: string;
-	meetingId: string;
 	sdp: string;
 	mediaType: STREAM_TYPE.VIDEO | STREAM_TYPE.SCREEN;
+};
+
+export type MeetingParticipantStreamsEvent = BasicMeetingEvent & {
+	type: WsEventType.MEETING_PARTICIPANT_STREAMS;
+	userId: string;
+	streams: { user_id: string; type: STREAM_TYPE }[];
 };
 
 export type MeetingParticipantTalkingEvent = BasicMeetingEvent & {

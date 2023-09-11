@@ -4,10 +4,12 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { forEach } from 'lodash';
+
 import { PeerConnConfig } from './PeerConnConfig';
 import useStore from '../../store/Store';
 import { IVideoInConnection } from '../../types/network/webRTC/webRTC';
-import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
+import { STREAM_TYPE, StreamsSubscriptionMap } from '../../types/store/ActiveMeetingTypes';
 import { MeetingsApi } from '../index';
 
 export default class VideoInConnection implements IVideoInConnection {
@@ -15,20 +17,32 @@ export default class VideoInConnection implements IVideoInConnection {
 
 	meetingId: string;
 
+	streams: MediaStream[] = [];
+
 	constructor(meetingId: string) {
 		this.peerConn = new RTCPeerConnection(new PeerConnConfig().getConfig());
 		this.peerConn.ontrack = this.onTrack;
 		this.meetingId = meetingId;
+		this.streams = [];
 	}
 
 	// Handle new tracks
 	onTrack = (ev: RTCTrackEvent): void => {
-		console.log('VIDEOIN onTrack event', ev);
-		// TODO: check if this is the right way to handle the stream
-		useStore
-			.getState()
-			.setSubscribedTrack(this.meetingId, 'userId', ev.streams[0], STREAM_TYPE.VIDEO);
+		this.streams = [...ev.streams];
 	};
+
+	handleStreams(streamsMap: { user_id: string; type: STREAM_TYPE }[]): void {
+		const newStreams: StreamsSubscriptionMap = {};
+		forEach(streamsMap, (stream, key) => {
+			const streamsKey = `${stream.user_id}-${stream.type.toLowerCase()}`;
+			newStreams[streamsKey] = {
+				userId: stream.user_id,
+				type: stream.type.toLowerCase() as STREAM_TYPE,
+				stream: this.streams[key]
+			};
+		});
+		useStore.getState().setSubscribedTracks(this.meetingId, newStreams);
+	}
 
 	// Handle remote offer creating an answer and sending it to the remote peer
 	handleRemoteOffer(sdp: string): void {

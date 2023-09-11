@@ -9,7 +9,8 @@ import {
 	ActiveMeetingMap,
 	MeetingChatVisibility,
 	MeetingViewType,
-	STREAM_TYPE
+	STREAM_TYPE,
+	StreamsSubscriptionMap
 } from './ActiveMeetingTypes';
 import { Connections } from './ConnectionsTypes';
 import { FasteningsMap } from './FasteningMessagesTypes';
@@ -193,13 +194,7 @@ export type ActiveMeetingSlice = {
 	removeLocalStreams: (meetingId: string, streamType: STREAM_TYPE) => void;
 	setMeetingSidebarStatus: (meetingId: string, status: boolean) => void;
 	setSelectedDeviceId: (meetingId: string, streamType: STREAM_TYPE, deviceId: string) => void;
-	setSubscribedTrack: (
-		meetingId: string,
-		userId: string,
-		mediaStream: MediaStream,
-		streamType: STREAM_TYPE
-	) => void;
-	removeSubscribedTrack: (meetingId: string, userId: string, streamType: STREAM_TYPE) => void;
+	setSubscribedTracks: (meetingId: string, streams: StreamsSubscriptionMap) => void;
 };
 
 export type RootStore = UsersStoreSlice &

@@ -13,7 +13,8 @@ import VideoOutConnection from '../../network/webRTC/VideoOutConnection';
 import {
 	MeetingChatVisibility,
 	MeetingViewType,
-	STREAM_TYPE
+	STREAM_TYPE,
+	StreamsSubscriptionMap
 } from '../../types/store/ActiveMeetingTypes';
 import { ActiveMeetingSlice, RootStore } from '../../types/store/StoreTypes';
 
@@ -233,35 +234,13 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 			'AM/SET_SELECTED_DEVICE_ID'
 		);
 	},
-	setSubscribedTrack: (
-		meetingId: string,
-		userId: string,
-		mediaStream: MediaStream,
-		streamType: STREAM_TYPE
-	): void => {
+	setSubscribedTracks: (meetingId: string, streams: StreamsSubscriptionMap): void => {
 		set(
 			produce((draft: RootStore) => {
-				const subscriptionId = `${userId}-${streamType}`;
-				draft.activeMeeting[meetingId].subscription[subscriptionId] = {
-					type: streamType,
-					stream: mediaStream,
-					userId
-				};
+				draft.activeMeeting[meetingId].subscription = streams;
 			}),
 			false,
 			'AM/SET_SUBSCRIPTION'
-		);
-	},
-	removeSubscribedTrack: (meetingId: string, userId: string, streamType: STREAM_TYPE): void => {
-		set(
-			produce((draft: RootStore) => {
-				const subscriptionId = `${userId}-${streamType}`;
-				if (draft.activeMeeting[meetingId]?.subscription[subscriptionId]) {
-					delete draft.activeMeeting[meetingId].subscription[subscriptionId];
-				}
-			}),
-			false,
-			'AM/REMOVE_SUBSCRIPTION'
 		);
 	}
 });
