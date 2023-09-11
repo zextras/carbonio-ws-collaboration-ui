@@ -6,6 +6,7 @@
 
 import { filter, find, size } from 'lodash';
 
+import { MeetingParticipant } from '../../types/network/models/meetingBeTypes';
 import { Meeting, MeetingParticipantMap } from '../../types/store/MeetingTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 
@@ -81,8 +82,15 @@ export const getParticipantVideoStatus = (
 	meetingId: string | undefined,
 	userId: string | undefined
 ): boolean => {
-	if (!meetingId || !userId) return false;
 	const meeting = find(store.meetings, (meeting) => meeting.id === meetingId);
 	const participant = find(meeting?.participants, (participant) => participant.userId === userId);
 	return participant?.videoStreamOn ?? false;
+};
+
+export const getFirstParticipant = (
+	store: RootStore,
+	meetingId: string | undefined
+): MeetingParticipant | undefined => {
+	const meeting = find(store.meetings, (meeting) => meeting.id === meetingId);
+	return find(meeting?.participants, (participant) => participant.userId !== store.session.id);
 };

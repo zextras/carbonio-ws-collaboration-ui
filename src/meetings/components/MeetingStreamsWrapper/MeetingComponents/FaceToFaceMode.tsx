@@ -15,6 +15,7 @@ import {
 	getLocalVideoSteam,
 	getMeetingSidebarStatus
 } from '../../../../store/selectors/ActiveMeetingSelectors';
+import { getFirstParticipant } from '../../../../store/selectors/MeetingSelectors';
 import useStore from '../../../../store/Store';
 
 const FaceToFace = styled(Container)`
@@ -58,6 +59,8 @@ const FaceToFaceMode = (): ReactElement => {
 		'meeting.waitingParticipants',
 		'Waiting for participants to join...'
 	);
+
+	const centralParticipant = useStore((store) => getFirstParticipant(store, meetingId));
 
 	const localVideoStream = useStore((store) => getLocalVideoSteam(store, meetingId));
 	const centralStream = useStore((store) => getFirstStream(store, meetingId));
@@ -105,7 +108,7 @@ const FaceToFaceMode = (): ReactElement => {
 
 	const centralContentToDisplay = useMemo(
 		() =>
-			centralStream ? (
+			centralParticipant ? (
 				<CentralTile
 					height={centralTileSize.tileHeight}
 					width={centralTileSize.tileWidth}
@@ -118,7 +121,7 @@ const FaceToFaceMode = (): ReactElement => {
 					{waitingParticipants}
 				</Text>
 			),
-		[centralStream, centralTileSize.tileHeight, centralTileSize.tileWidth, waitingParticipants]
+		[centralParticipant, centralTileSize.tileHeight, centralTileSize.tileWidth, waitingParticipants]
 	);
 
 	return (

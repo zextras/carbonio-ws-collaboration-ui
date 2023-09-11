@@ -28,7 +28,12 @@ const Video = styled.video`
 	background: black;
 `;
 
-const TestTile = ({ meetingId, userId }: { meetingId: string; userId: string }): ReactElement => {
+type TestTileProps = {
+	meetingId: string;
+	userId: string;
+};
+
+const TestTile = ({ meetingId, userId }: TestTileProps): ReactElement => {
 	const isSessionTile = useStore(getUserId) === userId;
 	const username = useStore((store) => getUserName(store, userId));
 	const audioStatus = useStore((store) => getParticipantAudioStatus(store, meetingId, userId));
