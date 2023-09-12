@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import MeetingNotification from './MeetingNotification';
+import { MEETINGS_ROUTE } from '../../constants/appConstants';
 import useEventListener, { EventName } from '../../hooks/useEventListener';
 import { MeetingStartedEvent } from '../../types/network/websocket/wsMeetingEvents';
 import meetingNotificationRingMp3 from '../assets/meeting-notification-sound.mp3';
@@ -98,7 +99,7 @@ const MeetingNotificationsHandler = (): ReactElement => {
 	}, []);
 
 	const displayPortal = useMemo(
-		() => size(notificationArray) > 0 && currentRoute?.route !== 'external',
+		() => size(notificationArray) > 0 && currentRoute?.route !== MEETINGS_ROUTE,
 		[notificationArray, currentRoute]
 	);
 

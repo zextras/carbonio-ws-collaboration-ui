@@ -26,6 +26,7 @@ import { useTranslation } from 'react-i18next';
 import styled, { DefaultTheme } from 'styled-components';
 
 import ActiveMeetingParticipantsDropdown from './ActiveMeetingParticipantsDropdown';
+import { MEETINGS_PATH } from '../../../constants/appConstants';
 import {
 	getMeetingActive,
 	getMyMeetingParticipation
@@ -138,16 +139,14 @@ const ConversationHeaderMeetingButton = ({
 		]
 	);
 
-	const openMeeting = useCallback(() => {
-		window.open(`external/${roomId}`);
-	}, [roomId]);
+	const openMeeting = useCallback(() => window.open(`${MEETINGS_PATH}${roomId}`), [roomId]);
 
 	// TODO for the copy link functionality just uncomment the sections
 	/* const copyUrl = useCallback(() => {
 		let url = document.location.href;
 		const a = url.indexOf('chats/');
 		url = url.slice(0, a);
-		window.parent.navigator.clipboard.writeText(url.concat(`external/${roomId}`)).then(() => {
+		window.parent.navigator.clipboard.writeText(url.concat(`${MEETINGS_PATH}${roomId}`)).then(() => {
 			createSnackbar({
 				key: new Date().toLocaleString(),
 				type: 'info',

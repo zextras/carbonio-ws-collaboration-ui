@@ -12,3 +12,6 @@ export const CHATS_ROUTE = 'chats';
 // Meetings zapp constants
 export const MEETINGS_NAME = 'Meetings';
 export const MEETINGS_ROUTE = 'meetings';
+
+// TODO WITH NEW SHELL: change this to `standalone/${MEETINGS_ROUTE}/`;
+export const MEETINGS_PATH = `${MEETINGS_ROUTE}/`;
