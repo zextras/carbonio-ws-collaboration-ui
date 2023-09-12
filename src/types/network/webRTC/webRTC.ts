@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { STREAM_TYPE } from '../../store/ActiveMeetingTypes';
+
 export interface IPeerConnConfig {
 	addIceServer(iceServer: RTCIceServer): void;
 	getConfig(): RTCConfiguration;
@@ -12,36 +14,37 @@ export interface IPeerConnConfig {
 export interface IPeerConnection {
 	peerConn: RTCPeerConnection;
 	meetingId: string;
-	rtpSender: RTCRtpSender | null;
-	handleOnNegotiationNeeded: (ev: Event) => void;
-	handleOnIceCandidate: (ev: Event) => void;
-	handleOnConnectionStateChange: (ev: Event) => void;
-	handleOnIceConnectionStateChange: (ev: Event) => void;
-	handleOnIceGatheringStateChange: (ev: Event) => void;
-	handleOnSignalingStateChange: (ev: Event) => void;
-	handleRemoteAnswer: (remoteAnswer: any) => void;
-	handleOfferCreated: (rtcSessionDescription: RTCSessionDescriptionInit) => void;
-	handleLocalDescriptionSet: (rtcSessionDescription: RTCSessionDescriptionInit) => void;
+	closePeerConnection(): void;
 }
 
 export interface IBidirectionalConnectionAudioInOut extends IPeerConnection {
-	oscillatorAudioTrack: MediaStreamTrack | null;
-	updateRemoteStreamAudio: () => void;
-	handleOnTrack: (trackEvent: RTCTrackEvent) => void;
+	rtpSender: RTCRtpSender | null;
+	selectedAudioDeviceId: string | undefined;
+	initialAudioStatus: boolean;
+	oscillatorAudioTrack: MediaStreamTrack | undefined;
+	onTrack: (trackEvent: RTCTrackEvent) => void;
+	onNegotiationNeeded: () => void;
+	onIceConnectionStateChange: (ev: Event) => void;
+	handleRemoteAnswer(remoteAnswer: RTCSessionDescriptionInit): void;
 	updateLocalStreamTrack(mediaStreamTrack: MediaStream): Promise<MediaStreamTrack>;
-	closeRtpSenderTrack: () => void;
-	closePeerConnection: () => void;
+	updateRemoteStreamAudio(): void;
+	closeRtpSenderTrack(): void;
 }
 
 export interface IVideoOutConnection extends IPeerConnection {
+	rtpSender: RTCRtpSender | null;
 	localStreamVideoOutTrack: MediaStreamTrack | null;
+	selectedVideoDeviceId: string | undefined;
+	onNegotiationNeeded: () => void;
+	onIceConnectionStateChange: (ev: Event) => void;
+	handleRemoteAnswer(remoteAnswer: RTCSessionDescriptionInit): void;
+	handleOfferCreated(rtcSessionDescription: RTCSessionDescriptionInit): void;
 	updateLocalStreamTrack(mediaStreamTrack: MediaStream): Promise<MediaStreamTrack>;
-	closePeerConnection: () => void;
-	closeRtpSenderTrack: () => void;
+	closeRtpSenderTrack(): void;
 }
 
-export interface IVideoInConnection {
-	peerConn: RTCPeerConnection;
-	meetingId: string;
-	closePeerConnection: () => void;
+export interface IVideoInConnection extends IPeerConnection {
+	onTrack: (ev: RTCTrackEvent) => void;
+	handleStreams(streamsMap: { user_id: string; type: STREAM_TYPE }[]): void;
+	handleRemoteOffer(sdp: string): void;
 }

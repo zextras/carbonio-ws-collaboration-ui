@@ -3,7 +3,13 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import { MeetingChatVisibility, MeetingViewType } from '../../types/store/ActiveMeetingTypes';
+import { sample } from 'lodash';
+
+import {
+	MeetingChatVisibility,
+	MeetingViewType,
+	STREAM_TYPE
+} from '../../types/store/ActiveMeetingTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 
 export const getMeetingSidebarStatus = (store: RootStore, meetingId: string): boolean =>
@@ -26,10 +32,26 @@ export const getMeetingViewSelected = (store: RootStore, meetingId: string): Mee
 	store.activeMeeting[meetingId]?.meetingViewSelected;
 
 export const getLocalVideoSteam = (store: RootStore, meetingId: string): MediaStream | undefined =>
-	store.activeMeeting[meetingId]?.localStreams?.video || undefined;
+	store.activeMeeting[meetingId]?.localStreams?.video;
 
 export const getSelectedAudioDeviceId = (store: RootStore, meetingId: string): string | undefined =>
-	store.activeMeeting[meetingId]?.localStreams?.selectedAudioDeviceId || undefined;
+	store.activeMeeting[meetingId]?.localStreams?.selectedAudioDeviceId;
 
 export const getSelectedVideoDeviceId = (store: RootStore, meetingId: string): string | undefined =>
-	store.activeMeeting[meetingId]?.localStreams?.selectedVideoDeviceId || undefined;
+	store.activeMeeting[meetingId]?.localStreams?.selectedVideoDeviceId;
+
+export const getStream = (
+	store: RootStore,
+	meetingId: string,
+	userId: string,
+	streamType: STREAM_TYPE
+): MediaStream | undefined => {
+	if (userId === store.session.id) {
+		return store.activeMeeting[meetingId]?.localStreams?.video;
+	}
+	const subscriptionId = `${userId}-${streamType}`;
+	return store.activeMeeting[meetingId]?.subscription[subscriptionId]?.stream;
+};
+
+export const getFirstStream = (store: RootStore, meetingId: string): MediaStream | undefined =>
+	sample(store.activeMeeting[meetingId]?.subscription)?.stream;

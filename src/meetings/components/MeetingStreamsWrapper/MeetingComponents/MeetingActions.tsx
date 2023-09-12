@@ -18,10 +18,8 @@ import {
 	getSelectedVideoDeviceId
 } from '../../../../store/selectors/ActiveMeetingSelectors';
 import {
-	getMeetingByMeetingId,
-	getParticipantAudioStatusByMeetingId,
-	getParticipantScreenStatusByMeetingId,
-	getParticipantVideoStatusByMeetingId
+	getParticipantAudioStatus,
+	getParticipantVideoStatus
 } from '../../../../store/selectors/MeetingSelectors';
 import { getUserId } from '../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../store/Store';
@@ -57,22 +55,14 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 	const closeVideoOutConn = useStore((store) => store.closeVideoOutConn);
 	const createVideoOutConn = useStore((store) => store.createVideoOutConn);
 	const myUserId = useStore(getUserId);
-	const meeting = useStore((store) => getMeetingByMeetingId(store, meetingId));
-	const audioStatus = useStore((store) =>
-		getParticipantAudioStatusByMeetingId(store, meeting?.roomId, myUserId)
-	);
-	const videoStatus = useStore((store) =>
-		getParticipantVideoStatusByMeetingId(store, meeting?.roomId, myUserId)
-	);
-	const shareStatus = useStore((store) =>
-		getParticipantScreenStatusByMeetingId(store, meeting?.roomId, myUserId)
-	);
+	const audioStatus = useStore((store) => getParticipantAudioStatus(store, meetingId, myUserId));
+	const videoStatus = useStore((store) => getParticipantVideoStatus(store, meetingId, myUserId));
 	const meetingViewSelected = useStore((store) => getMeetingViewSelected(store, meetingId));
 	const selectedAudioDeviceId = useStore((store) => getSelectedAudioDeviceId(store, meetingId));
 	const selectedVideoDeviceId = useStore((store) => getSelectedVideoDeviceId(store, meetingId));
 	const videoOutConn = useStore((store) => store.activeMeeting[meetingId]?.videoOutConn);
 	const bidirectionalAudioConn = useStore(
-		(store) => store.activeMeeting[meetingId].bidirectionalAudioConn
+		(store) => store.activeMeeting[meetingId]?.bidirectionalAudioConn
 	);
 
 	const [isHoovering, setIsHoovering] = useState<boolean>(false);
@@ -80,17 +70,6 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 	const [audioMediaList, setAudioMediaList] = useState<[] | MediaDeviceInfo[]>([]);
 	const [videoMediaList, setVideoMediaList] = useState<[] | MediaDeviceInfo[]>([]);
 	let timeout: string | number | NodeJS.Timeout | undefined;
-
-	useEffect(() => {
-		if (selectedAudioDeviceId != null) {
-			getAudioStream(true, true, selectedAudioDeviceId).then((stream) => {
-				bidirectionalAudioConn?.updateLocalStreamTrack(stream).then(() => {
-					MeetingsApi.updateAudioStreamStatus(meetingId, true);
-				});
-			});
-		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
 
 	const handleHoverMouseMove = useCallback(
 		(e) => {
@@ -114,13 +93,9 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 		if (!isHoverActions) setIsHoovering(false);
 	}, [streamsWrapperRef, isHoverActions, handleHoverMouseMove]);
 
-	const handleMouseEnter = useCallback(() => {
-		setIsHoverActions(true);
-	}, []);
+	const handleMouseEnter = useCallback(() => setIsHoverActions(true), []);
 
-	const handleMouseLeave = useCallback(() => {
-		setIsHoverActions(false);
-	}, []);
+	const handleMouseLeave = useCallback(() => setIsHoverActions(false), []);
 
 	const toggleVideoStream = useCallback(() => {
 		if (!videoStatus) {
@@ -128,20 +103,16 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 				createVideoOutConn(meetingId, true, selectedVideoDeviceId);
 			} else {
 				getVideoStream(selectedVideoDeviceId).then((stream) => {
-					videoOutConn?.updateLocalStreamTrack(stream).then(() => {
-						MeetingsApi.updateMediaOffer(meetingId, STREAM_TYPE.VIDEO, true).then();
-					});
+					videoOutConn
+						?.updateLocalStreamTrack(stream)
+						.then(() => MeetingsApi.updateMediaOffer(meetingId, STREAM_TYPE.VIDEO, true));
 				});
 			}
 		} else {
-			// TODO ASK BE TO IMPROVE AND TEST IF IT IS POSSIBLE TO ALLOW NOT RECREATE THE CONNECTION BUT SIMPLY SET THE SOURCE TO ENABLED
-			// videoOutConn?.closeRtpSenderTrack();
 			closeVideoOutConn(meetingId);
-			MeetingsApi.updateMediaOffer(meetingId, STREAM_TYPE.VIDEO, !videoStatus).then(() => {
-				if (myUserId != null) {
-					removeLocalStreams(meetingId, STREAM_TYPE.VIDEO);
-				}
-			});
+			MeetingsApi.updateMediaOffer(meetingId, STREAM_TYPE.VIDEO, false).then(() =>
+				removeLocalStreams(meetingId, STREAM_TYPE.VIDEO)
+			);
 		}
 	}, [
 		videoStatus,
@@ -150,7 +121,6 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 		meetingId,
 		selectedVideoDeviceId,
 		closeVideoOutConn,
-		myUserId,
 		removeLocalStreams
 	]);
 
@@ -158,33 +128,21 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 		if (!audioStatus) {
 			getAudioStream(true, true, selectedAudioDeviceId).then((stream) => {
 				bidirectionalAudioConn?.updateLocalStreamTrack(stream).then(() => {
-					MeetingsApi.updateAudioStreamStatus(meetingId, !audioStatus).then();
+					MeetingsApi.updateAudioStreamStatus(meetingId, !audioStatus);
 				});
 			});
 		} else {
 			bidirectionalAudioConn?.closeRtpSenderTrack();
-			MeetingsApi.updateAudioStreamStatus(meetingId, !audioStatus).then();
+			MeetingsApi.updateAudioStreamStatus(meetingId, !audioStatus);
 		}
 	}, [audioStatus, bidirectionalAudioConn, meetingId, selectedAudioDeviceId]);
 
-	const toggleShareStream = useCallback(() => {
-		// MeetingsApi.updateVideoShareOffer(meetingId, !shareStatus).then(() => {
-		// 	if (myUserId != null) {
-		// 		changeStreamStatus(meetingId, myUserId, 'screen', !shareStatus);
-		// 	}
-		// });
-	}, []);
-
 	const leaveMeeting = useCallback(() => {
-		MeetingsApi.leaveMeeting(meetingId)
-			.then(() => goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED))
-			.catch(() => console.log('Error on leave'));
+		MeetingsApi.leaveMeeting(meetingId).then(() => goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED));
 	}, [meetingId, goToInfoPage]);
 
 	const deleteMeeting = useCallback(() => {
-		MeetingsApi.deleteMeeting(meetingId)
-			.then(() => goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED))
-			.catch(() => console.log('Error on leave'));
+		MeetingsApi.deleteMeeting(meetingId).then(() => goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED));
 	}, [meetingId, goToInfoPage]);
 
 	const toggleMeetingView = useCallback(() => {
@@ -339,8 +297,8 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 			<IconButton
 				iconColor="gray6"
 				backgroundColor="primary"
-				icon={shareStatus ? 'ScreenSharingOn' : 'ScreenSharingOff'}
-				onClick={toggleShareStream}
+				icon="ScreenSharingOff" // TODO shareStatus ? 'ScreenSharingOn' : 'ScreenSharingOff'}
+				onClick={(): null => null}
 				size="large"
 				disabled // TODO: enable when screen sharing will be available
 			/>

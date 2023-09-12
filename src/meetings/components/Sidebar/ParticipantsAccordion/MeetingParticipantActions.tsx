@@ -38,7 +38,7 @@ const MeetingParticipantActions: FC<ParticipantActionsProps> = ({ memberId, meet
 		getRoomIdByMeetingId(store, meetingId || '')
 	);
 	const participantAudioStatus = useStore((store) =>
-		getParticipantAudioStatus(store, roomId || '', memberId)
+		getParticipantAudioStatus(store, meetingId || '', memberId)
 	);
 	const memberOwner: boolean = useStore((store) => getOwner(store, roomId || '', memberId));
 	const iAmOwner: boolean = useStore((state) =>

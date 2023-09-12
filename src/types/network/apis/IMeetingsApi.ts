@@ -8,6 +8,7 @@ import { STREAM_TYPE } from '../../store/ActiveMeetingTypes';
 import { JoinSettings, MeetingUser } from '../models/meetingBeTypes';
 import {
 	CreateAudioOfferResponse,
+	CreateMediaAnswerResponse,
 	CreateMeetingResponse,
 	DeleteMeetingResponse,
 	GetMeetingResponse,
@@ -52,11 +53,11 @@ interface IMeetingsApi {
 	// Delete meeting with the deletion of the room
 	deleteMeeting(meetingId: string): Promise<DeleteMeetingResponse>;
 	// Update user stream status
+	createAudioOffer(meetingId: string, sdpOffer: string): Promise<CreateAudioOfferResponse>;
 	updateAudioStreamStatus(
 		meetingId: string,
 		enabled: boolean
 	): Promise<UpdateAudioStreamStatusResponse>;
-	createAudioOffer(meetingId: string, sdpOffer: string): Promise<CreateAudioOfferResponse>;
 	updateMediaOffer(
 		meetingId: string,
 		type: STREAM_TYPE,
@@ -65,9 +66,10 @@ interface IMeetingsApi {
 	): Promise<UpdateMediaOfferResponse>;
 	subscribeToMedia(
 		meetingId: string,
-		userSessionId: string,
-		type: STREAM_TYPE
+		subscription: { user_id: string; type: STREAM_TYPE }[],
+		unsubscription: { user_id: string; type: STREAM_TYPE }[]
 	): Promise<SubscribeMediaResponse>;
+	createMediaAnswer(meetingId: string, sdpOffer: string): Promise<CreateMediaAnswerResponse>;
 }
 
 export default IMeetingsApi;

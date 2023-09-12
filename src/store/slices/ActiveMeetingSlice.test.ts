@@ -28,7 +28,7 @@ describe('Active Meeting Slice', () => {
 			MeetingChatVisibility.CLOSED
 		);
 		expect(result.current.activeMeeting[meetingId].meetingViewSelected).toBe(
-			MeetingViewType.WAITING
+			MeetingViewType.CINEMA
 		);
 
 		act(() => result.current.meetingDisconnection(meetingId));
