@@ -177,8 +177,8 @@ class RoomsApi extends BaseAPI implements IRoomsApi {
 		optionalFields: {
 			description?: string;
 			replyId?: string;
+			area?: string;
 		},
-		area: string,
 		signal?: AbortSignal
 	): Promise<AddRoomAttachmentResponse> {
 		const uuid = uuidGenerator();
@@ -193,7 +193,7 @@ class RoomsApi extends BaseAPI implements IRoomsApi {
 				name: file.name,
 				mimeType: file.type,
 				size: file.size,
-				area
+				area: optionalFields.area
 			}
 		});
 
@@ -201,7 +201,7 @@ class RoomsApi extends BaseAPI implements IRoomsApi {
 			description: optionalFields.description,
 			replyId: optionalFields.replyId,
 			messageId: uuid,
-			area
+			area: optionalFields.area
 		})
 			.then((resp: AddRoomAttachmentResponse) => resp)
 			.catch((error) => {
