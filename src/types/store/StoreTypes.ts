@@ -9,7 +9,8 @@ import {
 	ActiveMeetingMap,
 	MeetingChatVisibility,
 	MeetingViewType,
-	STREAM_TYPE
+	STREAM_TYPE,
+	StreamsSubscriptionMap
 } from './ActiveMeetingTypes';
 import { Connections } from './ConnectionsTypes';
 import { FasteningsMap } from './FasteningMessagesTypes';
@@ -172,31 +173,28 @@ export type ActiveMeetingSlice = {
 	setMeetingParticipantsAccordionStatus: (roomId: string, status: boolean) => void;
 	setMeetingChatVisibility: (meetingId: string, visibilityStatus: MeetingChatVisibility) => void;
 	setMeetingViewSelected: (meetingId: string, viewType: MeetingViewType) => void;
-	createBidirectionalAudioConn: (
+
+	meetingConnection: (
 		meetingId: string,
-		peerConnectionConfig: PeerConnConfig,
 		audioStreamEnabled: boolean,
-		selectedAudioDeviceId?: string
+		selectedAudioDeviceId: string | undefined,
+		videoStreamEnabled: boolean,
+		selectedVideoDeviceId: string | undefined
 	) => void;
+	meetingDisconnection: (meetingId: string) => void;
 	createVideoOutConn: (
 		meetingId: string,
-		peerConnectionConfig: PeerConnConfig,
 		videoStreamEnabled: boolean,
 		selectedVideoDeviceId?: string
 	) => void;
-	deleteVideoOutConn: (meetingId: string) => void;
-	createVideoInConn: (meetingId: string, peerConnectionConfig: PeerConnConfig) => void;
-	createShareOutConn: (meetingId: string, peerConnectionConfig: PeerConnConfig) => void;
-	closeBidirectionalAudioConn: (meetingId: string) => void;
 	closeVideoOutConn: (meetingId: string) => void;
-	closeVideoInConn: (meetingId: string) => void;
+	createShareOutConn: (meetingId: string, peerConnectionConfig: PeerConnConfig) => void;
 	closeShareOutConn: (meetingId: string) => void;
 	setLocalStreams: (meetingId: string, streamType: STREAM_TYPE, stream: MediaStream) => void;
 	removeLocalStreams: (meetingId: string, streamType: STREAM_TYPE) => void;
-	setActiveMeeting: (meetingId: string) => void;
-	removeActiveMeeting: (meetingId: string) => void;
 	setMeetingSidebarStatus: (meetingId: string, status: boolean) => void;
 	setSelectedDeviceId: (meetingId: string, streamType: STREAM_TYPE, deviceId: string) => void;
+	setSubscribedTracks: (meetingId: string, streams: StreamsSubscriptionMap) => void;
 };
 
 export type RootStore = UsersStoreSlice &

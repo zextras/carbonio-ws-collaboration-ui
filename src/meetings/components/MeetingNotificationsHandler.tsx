@@ -12,8 +12,9 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import MeetingNotification from './MeetingNotification';
+import { MEETINGS_ROUTE } from '../../constants/appConstants';
 import useEventListener, { EventName } from '../../hooks/useEventListener';
-import { MeetingCreatedEvent } from '../../types/network/websocket/wsMeetingEvents';
+import { MeetingStartedEvent } from '../../types/network/websocket/wsMeetingEvents';
 import meetingNotificationRingMp3 from '../assets/meeting-notification-sound.mp3';
 import meetingNotificationRingOgg from '../assets/meeting-notification-sound.ogg';
 
@@ -41,19 +42,19 @@ const MeetingNotificationsHandler = (): ReactElement => {
 	const declineAllLabel = t('action.declineAll', 'Decline all');
 	const currentRoute = useCurrentRoute();
 
-	const [notificationArray, setNotificationArray] = useState<MeetingCreatedEvent[]>([]);
+	const [notificationArray, setNotificationArray] = useState<MeetingStartedEvent[]>([]);
 	const [meetingSound, setMeetingSound] = useState(true);
 
-	const addNotification = useCallback(({ detail: meetingCreatedEvent }) => {
-		setNotificationArray((prev) => [meetingCreatedEvent, ...prev]);
+	const addNotification = useCallback(({ detail: meetingStartedEvent }) => {
+		setNotificationArray((prev) => [meetingStartedEvent, ...prev]);
 		setMeetingSound(true);
 		setTimeout(() => setMeetingSound(false), 12000);
 	}, []);
 
 	const removeNotification = useCallback((notificationId: string): void => {
-		setNotificationArray((prev: MeetingCreatedEvent[]) => {
+		setNotificationArray((prev: MeetingStartedEvent[]) => {
 			const notificationArray = [...prev];
-			remove(notificationArray, (notification) => notification.id === notificationId);
+			remove(notificationArray, (notification) => notification.meetingId === notificationId);
 			return notificationArray;
 		});
 		setMeetingSound(false);
@@ -66,7 +67,7 @@ const MeetingNotificationsHandler = (): ReactElement => {
 				(notification) => notification.meetingId === meetingEvent.meetingId
 			);
 			if (notificationToRemove) {
-				removeNotification(notificationToRemove.id);
+				removeNotification(notificationToRemove.meetingId);
 				setMeetingSound(false);
 			}
 		},
@@ -81,10 +82,10 @@ const MeetingNotificationsHandler = (): ReactElement => {
 		() =>
 			map(notificationArray, (notification) => (
 				<MeetingNotification
-					key={notification.id}
-					id={notification.id}
-					from={notification.from}
-					roomId={notification.roomId}
+					key={notification.meetingId}
+					id={notification.meetingId}
+					from={notification.starterUser}
+					meetingId={notification.meetingId}
 					removeNotification={removeNotification}
 					stopMeetingSound={(): void => setMeetingSound(false)}
 				/>
@@ -98,7 +99,7 @@ const MeetingNotificationsHandler = (): ReactElement => {
 	}, []);
 
 	const displayPortal = useMemo(
-		() => size(notificationArray) > 0 && currentRoute?.route !== 'external',
+		() => size(notificationArray) > 0 && currentRoute?.route !== MEETINGS_ROUTE,
 		[notificationArray, currentRoute]
 	);
 

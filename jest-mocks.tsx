@@ -36,7 +36,8 @@ import {
 	PromoteRoomMemberResponse,
 	UnmuteRoomResponse,
 	UpdateRoomPictureResponse,
-	UpdateRoomResponse
+	UpdateRoomResponse,
+	AddRoomAttachmentResponse
 } from './src/types/network/responses/roomsResponses';
 import {
 	GetUserPictureResponse,
@@ -136,9 +137,11 @@ export const mockedGetMeetingRequest: jest.Mock = jest.fn();
 export const mockedCreateMeetingRequest: jest.Mock = jest.fn();
 export const mockedStartMeetingRequest: jest.Mock = jest.fn();
 export const mockedJoinMeetingRequest: jest.Mock = jest.fn();
+export const mockedEnterMeetingRequest: jest.Mock = jest.fn();
 export const mockedLeaveMeetingRequest: jest.Mock = jest.fn();
 export const mockedStopMeetingRequest: jest.Mock = jest.fn();
 export const mockedDeleteMeetingRequest: jest.Mock = jest.fn();
+export const mockedAddRoomAttachmentRequest: jest.Mock = jest.fn();
 
 jest.mock('./src/network', () => ({
 	RoomsApi: {
@@ -212,6 +215,11 @@ jest.mock('./src/network', () => ({
 			new Promise((resolve, reject) => {
 				const result = mockedForwardMessagesRequest();
 				result ? resolve(result) : reject(new Error('no result provided'));
+			}),
+		addRoomAttachment: (): Promise<AddRoomAttachmentResponse> =>
+			new Promise((resolve, reject) => {
+				const result = mockedAddRoomAttachmentRequest();
+				result ? resolve(result) : reject(new Error('no result provided'));
 			})
 	},
 	UsersApi: {
@@ -255,6 +263,11 @@ jest.mock('./src/network', () => ({
 		joinMeeting: (): Promise<JoinMeetingResponse> =>
 			new Promise((resolve, reject) => {
 				const result = mockedJoinMeetingRequest();
+				result ? resolve(result) : reject(new Error('no result provided'));
+			}),
+		enterMeeting: (): Promise<string> =>
+			new Promise((resolve, reject) => {
+				const result = mockedEnterMeetingRequest();
 				result ? resolve(result) : reject(new Error('no result provided'));
 			}),
 		leaveMeeting: (): Promise<LeaveMeetingResponse> =>

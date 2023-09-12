@@ -7,11 +7,12 @@
 import { Container, useTheme } from '@zextras/carbonio-design-system';
 import React, { ReactElement, useMemo } from 'react';
 
+import { MEETINGS_PATH } from '../../constants/appConstants';
 import AccessMeetingModal from '../components/AccessMeetingModal';
 
 const AccessMeetingPageView = (): ReactElement => {
 	// Retrieve room information
-	const roomId: string = useMemo(() => document.location.pathname.split('external/')[1], []);
+	const roomId: string = useMemo(() => document.location.pathname.split(MEETINGS_PATH)[1], []);
 
 	const theme = useTheme();
 

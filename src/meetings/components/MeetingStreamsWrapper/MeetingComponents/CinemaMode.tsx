@@ -5,78 +5,35 @@
  */
 
 import { Container } from '@zextras/carbonio-design-system';
-import React, { ReactElement, useRef } from 'react';
+import { map } from 'lodash';
+import React, { ReactElement, useMemo } from 'react';
+import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
-import StreamsCarousel from './StreamsCarousel';
-
-// const MyStream = styled(Container)`
-// 	position: absolute;
-// 	top: 0;
-// 	right: 0;
-// `;
+import TestTile from './TestTile';
+import { getMeetingParticipantsByMeetingId } from '../../../../store/selectors/MeetingSelectors';
+import useStore from '../../../../store/Store';
 
 const CinemaModeWrapper = styled(Container)`
 	position: relative;
 `;
 
-const MainStreamWrapper = styled(Container)`
-	//margin: ${({ theme }): string => theme.sizes.padding.small};
-`;
-const MainStream = styled(Container)`
-	height: ${({ h }): string => h}px;
-	width: ${({ w }): string => w}px;
-`;
-
 const CinemaMode = (): ReactElement => {
-	// const { meetingId }: Record<string, string> = useParams();
-	// const sidebarStatus: boolean | undefined = useStore((store) =>
-	// 	getSidebarStatus(store, meetingId)
-	// );
+	const { meetingId }: Record<string, string> = useParams();
 
-	// const [mainStreamHeight, setMainStreamHeight] = useState(0);
-	// const [mainStreamWidth, setMainStreamWidth] = useState(0);
-	const mainStreamRef = useRef<HTMLDivElement>(null);
+	const participants = useStore((store) => getMeetingParticipantsByMeetingId(store, meetingId));
 
-	// const calcMainStreamSize = useCallback(() => {
-	// 	if (mainStreamRef && mainStreamRef.current) {
-	// 		let idealHeight;
-	// 		let idealWidth;
-	// 		idealHeight = (mainStreamRef.current.offsetWidth / 16) * 9;
-	// 		idealWidth = mainStreamRef.current.offsetWidth;
-	// 		if (idealHeight > mainStreamRef.current.offsetHeight) {
-	// 			idealHeight = mainStreamRef.current.offsetHeight;
-	// 			idealWidth = (mainStreamRef.current.offsetHeight / 9) * 16;
-	// 		}
-	// 		setMainStreamHeight(idealHeight);
-	// 		setMainStreamWidth(idealWidth);
-	// 	}
-	// }, [mainStreamRef]);
-
-	// useEffect(() => {
-	// 	calcMainStreamSize();
-	// 	if (mainStreamRef !== null && mainStreamRef.current) {
-	// 		mainStreamRef.current.addEventListener('resize', calcMainStreamSize);
-	// 	}
-	// 	return () => {
-	// 		if (mainStreamRef !== null && mainStreamRef.current) {
-	// 			mainStreamRef.current.removeEventListener('resize', calcMainStreamSize);
-	// 		}
-	// 	};
-	// }, [calcMainStreamSize, sidebarStatus, mainStreamRef]);
+	const videos = useMemo(
+		() =>
+			map(participants, (participant) => (
+				<TestTile key={participant.userId} meetingId={meetingId} userId={participant.userId} />
+			)),
+		[meetingId, participants]
+	);
 
 	return (
-		<CinemaModeWrapper data-testid="cinemaModeView" orientation="horizontal">
-			{/* CINEMA 1TO1 */}
-			{/* <MyStream height="144px" width="256px" background="secondary" /> */}
-			{/* <MainStreamWrapper ref={mainStreamRef} width="fill" height="fill" background="primary"> */}
-			{/*	<MainStream h={mainStreamHeight} w={mainStreamWidth} background="success" /> */}
-			{/* </MainStreamWrapper> */}
-			{/* CINEMA MORE STREAM */}
-			<MainStreamWrapper ref={mainStreamRef} width="fill" height="fill" /* background="primary" */>
-				<MainStream /* background="success" */ />
-			</MainStreamWrapper>
-			<StreamsCarousel />
+		<CinemaModeWrapper data-testid="cinemaModeView" orientation="vertical">
+			{videos}
 		</CinemaModeWrapper>
 	);
 };

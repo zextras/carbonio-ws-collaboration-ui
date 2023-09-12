@@ -18,8 +18,10 @@ import React, { ReactElement, useCallback, useEffect, useMemo, useState } from '
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
+import { MEETINGS_PATH } from '../../constants/appConstants';
 import { UsersApi } from '../../network';
 import { getXmppClient } from '../../store/selectors/ConnectionSelector';
+import { getMeetingByMeetingId } from '../../store/selectors/MeetingSelectors';
 import { getUserName, getUserPictureUpdatedAt } from '../../store/selectors/UsersSelectors';
 import useStore from '../../store/Store';
 
@@ -41,14 +43,14 @@ const CustomTooltip = styled(Tooltip)`
 type MeetingNotificationProps = {
 	id: string;
 	from: string;
-	roomId: string;
+	meetingId: string;
 	removeNotification: (notificationId: string) => void;
 	stopMeetingSound: () => void;
 };
 const MeetingNotification = ({
 	id,
 	from,
-	roomId,
+	meetingId,
 	removeNotification,
 	stopMeetingSound
 }: MeetingNotificationProps): ReactElement => {
@@ -57,7 +59,7 @@ const MeetingNotification = ({
 	const userPictureUpdatedAt: string | undefined = useStore((state) =>
 		getUserPictureUpdatedAt(state, from)
 	);
-	const meeting = useStore((store) => store.meetings[roomId]);
+	const meeting = useStore((store) => getMeetingByMeetingId(store, meetingId));
 
 	const [t] = useTranslation();
 	const userIsInvitingYouLabel = (
@@ -93,19 +95,19 @@ const MeetingNotification = ({
 	const disableSendMessage = useMemo(() => size(message.trim()) === 0, [message]);
 
 	const sendMessage = useCallback(() => {
-		if (!disableSendMessage) {
-			xmppClient.sendChatMessage(roomId, message);
+		if (meeting && !disableSendMessage) {
+			xmppClient.sendChatMessage(meeting.roomId, message);
 			setMessage('');
 			stopMeetingSound();
 		}
-	}, [disableSendMessage, xmppClient, roomId, message, stopMeetingSound]);
+	}, [disableSendMessage, xmppClient, meeting, message, stopMeetingSound]);
 
 	const declineMeeting = useCallback(() => removeNotification(id), [id, removeNotification]);
 
 	const joinMeeting = useCallback(() => {
-		window.open(`external/${roomId}`);
+		window.open(`${MEETINGS_PATH}${meeting?.roomId}`);
 		removeNotification(id);
-	}, [id, removeNotification, roomId]);
+	}, [id, removeNotification, meeting]);
 
 	const picture = useMemo(() => UsersApi.getURLUserPicture(from), [from]);
 

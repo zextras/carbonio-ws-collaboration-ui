@@ -10,6 +10,7 @@ import React from 'react';
 
 import MessageComposer from './MessageComposer';
 import UploadAttachmentManagerView from './UploadAttachmentManagerView';
+import { mockedAddRoomAttachmentRequest } from '../../../../../jest-mocks';
 import useStore from '../../../../store/Store';
 import { createMockFile, createMockMember, createMockRoom } from '../../../../tests/createMock';
 import { mockedSendIsWriting, mockedSendPaused } from '../../../../tests/mockedXmppClient';
@@ -94,6 +95,57 @@ describe('MessageComposer', () => {
 		expect(sendButton).not.toBeDisabled();
 		await user.click(sendButton);
 		expect(textArea).toHaveValue('');
+	});
+
+	test('Send a message with attachment - image', async () => {
+		mockedAddRoomAttachmentRequest.mockReturnValue('attachmentId');
+		const testImageFile = new File(['hello'], 'hello.png', { type: 'image/png' });
+		const { user } = storeSetupAdvanced();
+
+		const input = screen.getByTestId('inputSelector') as HTMLInputElement;
+
+		user.upload(input, testImageFile);
+		await waitFor(() => expect(input.files).toHaveLength(1));
+
+		const sendButton = screen.getByTestId('icon: Navigation2');
+		await user.click(sendButton);
+
+		const updatedStore = useStore.getState();
+		expect(updatedStore.activeConversations[mockedRoom.id].filesToAttach).toBeUndefined();
+	});
+
+	test('Send a message with attachment - pdf', async () => {
+		mockedAddRoomAttachmentRequest.mockReturnValue('attachmentId');
+		const testPdfFile = new File(['hello'], 'hello.pdf', { type: 'application/pdf' });
+		const { user } = storeSetupAdvanced();
+
+		const input = screen.getByTestId('inputSelector') as HTMLInputElement;
+
+		user.upload(input, testPdfFile);
+		await waitFor(() => expect(input.files).toHaveLength(1));
+
+		const sendButton = screen.getByTestId('icon: Navigation2');
+		await waitFor(() => user.click(sendButton));
+
+		const updatedStore = useStore.getState();
+		expect(updatedStore.activeConversations[mockedRoom.id].filesToAttach).toBeUndefined();
+	});
+
+	test('Send a message with attachment - other extension', async () => {
+		mockedAddRoomAttachmentRequest.mockReturnValue('attachmentId');
+		const testFile = new File(['hello'], 'hello.xls', { type: 'application/ms-excel' });
+		const { user } = storeSetupAdvanced();
+
+		const input = screen.getByTestId('inputSelector') as HTMLInputElement;
+
+		user.upload(input, testFile);
+		await waitFor(() => expect(input.files).toHaveLength(1));
+
+		const sendButton = screen.getByTestId('icon: Navigation2');
+		await waitFor(() => user.click(sendButton));
+
+		const updatedStore = useStore.getState();
+		expect(updatedStore.activeConversations[mockedRoom.id].filesToAttach).toBeUndefined();
 	});
 
 	test('Select file button', async () => {

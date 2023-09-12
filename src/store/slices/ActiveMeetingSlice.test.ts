@@ -15,7 +15,7 @@ const meetingId = 'meetingId';
 describe('Active Meeting Slice', () => {
 	test('Add and remove active meeting', () => {
 		const { result } = renderHook(() => useStore());
-		act(() => result.current.setActiveMeeting(meetingId));
+		act(() => result.current.meetingConnection(meetingId, false, undefined, false, undefined));
 
 		// Check store data
 		expect(size(result.current.activeMeeting)).toBe(1);
@@ -28,16 +28,16 @@ describe('Active Meeting Slice', () => {
 			MeetingChatVisibility.CLOSED
 		);
 		expect(result.current.activeMeeting[meetingId].meetingViewSelected).toBe(
-			MeetingViewType.WAITING
+			MeetingViewType.CINEMA
 		);
 
-		act(() => result.current.removeActiveMeeting(meetingId));
+		act(() => result.current.meetingDisconnection(meetingId));
 		expect(result.current.activeMeeting[meetingId]).toBeUndefined();
 	});
 
 	test('Change sidebar status', () => {
 		const { result } = renderHook(() => useStore());
-		act(() => result.current.setActiveMeeting(meetingId));
+		act(() => result.current.meetingConnection(meetingId, false, undefined, false, undefined));
 
 		act(() => result.current.setMeetingSidebarStatus(meetingId, false));
 		expect(result.current.activeMeeting[meetingId].sidebarStatus.sidebarIsOpened).toBeFalsy();
@@ -48,7 +48,7 @@ describe('Active Meeting Slice', () => {
 
 	test('Change action accordion status', () => {
 		const { result } = renderHook(() => useStore());
-		act(() => result.current.setActiveMeeting(meetingId));
+		act(() => result.current.meetingConnection(meetingId, false, undefined, false, undefined));
 
 		act(() => result.current.setMeetingActionsAccordionStatus(meetingId, false));
 		expect(
@@ -63,7 +63,7 @@ describe('Active Meeting Slice', () => {
 
 	test('Change participants accordion status', () => {
 		const { result } = renderHook(() => useStore());
-		act(() => result.current.setActiveMeeting(meetingId));
+		act(() => result.current.meetingConnection(meetingId, false, undefined, false, undefined));
 
 		act(() => result.current.setMeetingParticipantsAccordionStatus(meetingId, false));
 		expect(
@@ -78,7 +78,7 @@ describe('Active Meeting Slice', () => {
 
 	test('Change chat visibility ', () => {
 		const { result } = renderHook(() => useStore());
-		act(() => result.current.setActiveMeeting(meetingId));
+		act(() => result.current.meetingConnection(meetingId, false, undefined, false, undefined));
 
 		act(() => result.current.setMeetingChatVisibility(meetingId, MeetingChatVisibility.CLOSED));
 		expect(result.current.activeMeeting[meetingId].chatVisibility).toBe(

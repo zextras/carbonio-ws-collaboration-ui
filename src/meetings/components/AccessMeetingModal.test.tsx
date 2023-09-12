@@ -9,17 +9,12 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 
 import AccessMeetingModal from './AccessMeetingModal';
-import {
-	mockedCreateMeetingRequest,
-	mockedJoinMeetingRequest,
-	mockedStartMeetingRequest
-} from '../../../jest-mocks';
+import { mockedEnterMeetingRequest, mockedJoinMeetingRequest } from '../../../jest-mocks';
 import useStore from '../../store/Store';
 import { createMockMeeting, createMockRoom } from '../../tests/createMock';
 import { setup } from '../../tests/test-utils';
 
 const room = createMockRoom();
-const meeting = createMockMeeting({ id: room.id, active: false });
 
 beforeEach(() => {
 	const store = useStore.getState();
@@ -27,48 +22,10 @@ beforeEach(() => {
 });
 
 describe('AccessMeetingModal - enter to meeting', () => {
-	test("Meeting doesn't exist", async () => {
-		mockedCreateMeetingRequest.mockResolvedValueOnce(meeting);
-		mockedStartMeetingRequest.mockResolvedValueOnce(meeting);
-		mockedJoinMeetingRequest.mockResolvedValueOnce(meeting);
-
-		const { user } = setup(<AccessMeetingModal roomId={room.id} />);
-
-		// Click on enter button to join the meeting
-		const enterButton = await screen.findByText('Enter');
-		await user.click(enterButton);
-
-		expect(mockedCreateMeetingRequest).toBeCalled();
-		expect(mockedStartMeetingRequest).toBeCalled();
-		expect(mockedJoinMeetingRequest).toBeCalled();
-	});
-
-	test('Meeting exists but is not active', async () => {
-		const meeting = createMockMeeting({ roomId: room.id, active: false });
-		useStore.getState().addMeeting(meeting);
-
-		mockedStartMeetingRequest.mockResolvedValueOnce(
-			createMockMeeting({ roomId: room.id, active: true })
-		);
-		mockedJoinMeetingRequest.mockResolvedValueOnce(
-			createMockMeeting({ roomId: room.id, active: true })
-		);
-
-		const { user } = setup(<AccessMeetingModal roomId={room.id} />);
-
-		// Click on enter button to join the meeting
-		const enterButton = await screen.findByText('Enter');
-		await user.click(enterButton);
-
-		expect(mockedCreateMeetingRequest).not.toBeCalled();
-		expect(mockedStartMeetingRequest).toBeCalled();
-		expect(mockedJoinMeetingRequest).toBeCalled();
-	});
-
-	test('Meeting exists and is active', async () => {
+	test('Enter to meeting', async () => {
 		const meeting = createMockMeeting({ roomId: room.id, active: true });
 		useStore.getState().addMeeting(meeting);
-		mockedJoinMeetingRequest.mockReturnValueOnce(meeting);
+		mockedEnterMeetingRequest.mockReturnValueOnce('meetingId');
 
 		const { user } = setup(<AccessMeetingModal roomId={room.id} />);
 
@@ -76,9 +33,7 @@ describe('AccessMeetingModal - enter to meeting', () => {
 		const enterButton = await screen.findByText('Enter');
 		await user.click(enterButton);
 
-		expect(mockedCreateMeetingRequest).not.toBeCalled();
-		expect(mockedStartMeetingRequest).not.toBeCalled();
-		expect(mockedJoinMeetingRequest).toBeCalled();
+		expect(mockedEnterMeetingRequest).toBeCalled();
 	});
 
 	test('Select audio device', async () => {
