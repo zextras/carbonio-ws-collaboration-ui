@@ -12,66 +12,31 @@ import CinemaMode from './CinemaMode';
 import FaceToFaceMode from './FaceToFaceMode';
 import GridMode from './GridMode';
 import { getMeetingViewSelected } from '../../../../store/selectors/ActiveMeetingSelectors';
-import { getNumberOfMeetingParticipantsByMeetingId } from '../../../../store/selectors/MeetingSelectors';
+import { getNumberOfTiles } from '../../../../store/selectors/MeetingSelectors';
 import useStore from '../../../../store/Store';
 import { MeetingViewType } from '../../../../types/store/ActiveMeetingTypes';
 
 const MeetingViewManager = (): ReactElement => {
 	const { meetingId }: any = useParams();
 	const meetingViewSelected = useStore((store) => getMeetingViewSelected(store, meetingId));
+	const numberOfTiles = useStore((store) => getNumberOfTiles(store, meetingId));
 
-	const numberOfParticipants = useStore((store) =>
-		getNumberOfMeetingParticipantsByMeetingId(store, meetingId)
-	);
-
-	// TODO add check on more of 2 streams visible to change from FaceToFace to Cinema/Grid
 	const ViewToDisplay = useMemo(() => {
-		if (numberOfParticipants && numberOfParticipants <= 2) {
-			return (
-				<Container
-					borderRadius="none"
-					crossAlignment="flex-start"
-					padding={{ left: '0.25rem', right: '3.25rem', top: '2.81rem', bottom: '2.06rem' }}
-				>
-					<FaceToFaceMode />
-				</Container>
-			);
+		if (numberOfTiles <= 2) {
+			return <FaceToFaceMode />;
 		}
-		switch (meetingViewSelected) {
-			case MeetingViewType.CINEMA:
-				return (
-					<Container
-						borderRadius="none"
-						crossAlignment="flex-start"
-						padding={{ left: '0.25rem', right: '0.25rem', top: '2.81rem', bottom: '2.06rem' }}
-					>
-						<CinemaMode />
-					</Container>
-				);
-			case MeetingViewType.GRID:
-				return (
-					<Container
-						borderRadius="none"
-						crossAlignment="flex-start"
-						padding={{ left: '0.25rem', right: '0.25rem', top: '2.81rem', bottom: '2.06rem' }}
-					>
-						<GridMode />
-					</Container>
-				);
-			default:
-				return (
-					<Container
-						borderRadius="none"
-						crossAlignment="flex-start"
-						padding={{ left: '0.25rem', right: '0.25rem', top: '2.81rem', bottom: '2.06rem' }}
-					>
-						<CinemaMode />
-					</Container>
-				);
-		}
-	}, [meetingViewSelected, numberOfParticipants]);
+		return meetingViewSelected === MeetingViewType.CINEMA ? <CinemaMode /> : <GridMode />;
+	}, [meetingViewSelected, numberOfTiles]);
 
-	return ViewToDisplay;
+	return (
+		<Container
+			borderRadius="none"
+			crossAlignment="flex-start"
+			padding={{ left: '0.25rem', right: '3.25rem', top: '2.81rem', bottom: '2.06rem' }}
+		>
+			{ViewToDisplay}
+		</Container>
+	);
 };
 
 export default MeetingViewManager;

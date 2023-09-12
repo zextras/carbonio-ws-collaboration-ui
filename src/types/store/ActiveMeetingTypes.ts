@@ -4,20 +4,23 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { IBidirectionalConnectionAudioInOut, IVideoOutConnection } from '../network/webRTC/webRTC';
+import {
+	IBidirectionalConnectionAudioInOut,
+	IVideoInConnection,
+	IVideoOutConnection
+} from '../network/webRTC/webRTC';
 
 export type ActiveMeeting = {
 	sidebarStatus: SidebarStatus;
 	chatVisibility: MeetingChatVisibility;
-	isCarouselVisible: boolean;
 	meetingViewSelected: MeetingViewType;
+	isCarouselVisible: boolean;
 	bidirectionalAudioConn?: IBidirectionalConnectionAudioInOut;
-	videoInConn?: any;
+	videoInConn?: IVideoInConnection;
 	videoOutConn?: IVideoOutConnection;
 	shareOutConn?: any;
 	localStreams?: LocalStreams;
-	streamsSubscription?: StreamsSubscriptionMap;
-	meetingStreams?: meetingStreamsMap;
+	subscription: StreamsSubscriptionMap;
 };
 
 export type ActiveMeetingMap = {
@@ -32,8 +35,7 @@ export type SidebarStatus = {
 
 export enum MeetingViewType {
 	CINEMA = 'cinema',
-	GRID = 'grid',
-	WAITING = 'waiting'
+	GRID = 'grid'
 }
 
 export enum MeetingChatVisibility {
@@ -59,15 +61,9 @@ export enum STREAM_TYPE {
 export type StreamSubscription = {
 	type: STREAM_TYPE;
 	stream: MediaStream;
-	userId: string; // TODO DECIDE HOW TO HANDLE USER WITH VIDEO AND SHARE ACTIVE WITH SAME SESSION_ID
+	userId: string;
 };
 
 export type StreamsSubscriptionMap = {
 	[id: string]: StreamSubscription;
-};
-
-export type meetingStreamsMap = {
-	[userId: string]: {
-		type: STREAM_TYPE;
-	};
 };

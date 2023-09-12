@@ -13,7 +13,8 @@ import VideoOutConnection from '../../network/webRTC/VideoOutConnection';
 import {
 	MeetingChatVisibility,
 	MeetingViewType,
-	STREAM_TYPE
+	STREAM_TYPE,
+	StreamsSubscriptionMap
 } from '../../types/store/ActiveMeetingTypes';
 import { ActiveMeetingSlice, RootStore } from '../../types/store/StoreTypes';
 
@@ -36,7 +37,7 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 						participantsAccordionIsOpened: false
 					},
 					chatVisibility: MeetingChatVisibility.CLOSED,
-					meetingViewSelected: MeetingViewType.WAITING,
+					meetingViewSelected: MeetingViewType.CINEMA,
 					isCarouselVisible: true,
 					// Peer connections
 					localStreams: {
@@ -51,7 +52,8 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 					videoInConn: new VideoInConnection(meetingId),
 					videoOutConn: videoStreamEnabled
 						? new VideoOutConnection(meetingId, videoStreamEnabled, selectedVideoDeviceId)
-						: undefined
+						: undefined,
+					subscription: {}
 				};
 			}),
 			false,
@@ -63,6 +65,7 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 			produce((draft: RootStore) => {
 				draft.activeMeeting[meetingId]?.bidirectionalAudioConn?.closePeerConnection();
 				draft.activeMeeting[meetingId]?.videoInConn?.closePeerConnection();
+				draft.activeMeeting[meetingId]?.videoOutConn?.closePeerConnection();
 				delete draft.activeMeeting[meetingId];
 			}),
 			false,
@@ -230,6 +233,15 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 			}),
 			false,
 			'AM/SET_SELECTED_DEVICE_ID'
+		);
+	},
+	setSubscribedTracks: (meetingId: string, streams: StreamsSubscriptionMap): void => {
+		set(
+			produce((draft: RootStore) => {
+				draft.activeMeeting[meetingId].subscription = streams;
+			}),
+			false,
+			'AM/SET_SUBSCRIPTION'
 		);
 	},
 	setIsCarouseVisible: (meetingId: string, status: boolean): void => {

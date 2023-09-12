@@ -11,9 +11,11 @@ import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import {
+	getFirstStream,
 	getLocalVideoSteam,
 	getMeetingSidebarStatus
 } from '../../../../store/selectors/ActiveMeetingSelectors';
+import { getFirstParticipant } from '../../../../store/selectors/MeetingSelectors';
 import useStore from '../../../../store/Store';
 
 const FaceToFace = styled(Container)`
@@ -52,24 +54,38 @@ const CentralVideo = styled.video`
 `;
 
 const FaceToFaceMode = (): ReactElement => {
+	const { meetingId }: Record<string, string> = useParams();
+
 	const [t] = useTranslation();
 	const waitingParticipants = t(
 		'meeting.waitingParticipants',
 		'Waiting for participants to join...'
 	);
 
-	const { meetingId }: Record<string, string> = useParams();
-	const localVideoStream = useStore((store) => getLocalVideoSteam(store, meetingId));
-	const sidebarStatus: boolean | undefined = useStore((store) =>
-		getMeetingSidebarStatus(store, meetingId)
-	);
+	const centralParticipant = useStore((store) => getFirstParticipant(store, meetingId));
 
-	const [centralStream, setCentralStream] = useState<null | MediaStream>(null);
+	const localVideoStream = useStore((store) => getLocalVideoSteam(store, meetingId));
+	const centralStream = useStore((store) => getFirstStream(store, meetingId));
+
+	const sidebarStatus: boolean = useStore((store) => getMeetingSidebarStatus(store, meetingId));
+
 	const [centralTileSize, setCentralTileSize] = useState({ tileHeight: '0', tileWidth: '0' });
 
-	const streamRef = useRef<null | HTMLVideoElement>(null);
-	const streamRef2 = useRef<null | HTMLVideoElement>(null);
+	const localStreamRef = useRef<null | HTMLVideoElement>(null);
+	const centerStreamRef = useRef<null | HTMLVideoElement>(null);
 	const faceToFaceRef = useRef<null | HTMLDivElement>(null);
+
+	useEffect(() => {
+		if (localStreamRef != null && localStreamRef.current != null && localVideoStream != null) {
+			localStreamRef.current.srcObject = localVideoStream;
+		}
+	}, [localVideoStream]);
+
+	useEffect(() => {
+		if (centerStreamRef && centerStreamRef.current && centralStream) {
+			centerStreamRef.current.srcObject = centralStream;
+		}
+	}, [centralStream]);
 
 	const getSizeOfCentralTile = useCallback(() => {
 		if (faceToFaceRef && faceToFaceRef.current) {
@@ -92,22 +108,9 @@ const FaceToFaceMode = (): ReactElement => {
 
 	useEffect(() => getSizeOfCentralTile(), [faceToFaceRef, getSizeOfCentralTile, sidebarStatus]);
 
-	useEffect(() => {
-		if (streamRef != null && streamRef.current != null && localVideoStream != null) {
-			streamRef.current.srcObject = localVideoStream;
-			setCentralStream(localVideoStream);
-		}
-	}, [localVideoStream]);
-
-	useEffect(() => {
-		if (streamRef2 != null && streamRef2.current != null && centralStream != null) {
-			streamRef2.current.srcObject = centralStream;
-		}
-	}, [centralStream]);
-
 	const centralContentToDisplay = useMemo(
 		() =>
-			centralStream ? (
+			centralParticipant ? (
 				<CentralTile
 					height={centralTileSize.tileHeight}
 					width={centralTileSize.tileWidth}
@@ -120,7 +123,7 @@ const FaceToFaceMode = (): ReactElement => {
 						autoPlay
 						muted
 						controls={false}
-						ref={streamRef2}
+						ref={centerStreamRef}
 					/>
 				</CentralTile>
 			) : (
@@ -128,13 +131,13 @@ const FaceToFaceMode = (): ReactElement => {
 					{waitingParticipants}
 				</Text>
 			),
-		[centralStream, centralTileSize.tileHeight, centralTileSize.tileWidth, waitingParticipants]
+		[centralParticipant, centralTileSize.tileHeight, centralTileSize.tileWidth, waitingParticipants]
 	);
 
 	return (
 		<FaceToFace data-testid="faceToFaceModeView" ref={faceToFaceRef}>
 			<MyStreamContainer data-testid="myStreamContainer" height="fit" width="fit" background="text">
-				<TileVideo id="testVideo" playsInline autoPlay muted controls={false} ref={streamRef}>
+				<TileVideo id="testVideo" playsInline autoPlay muted controls={false} ref={localStreamRef}>
 					Your browser does not support the <code>video</code> element.
 				</TileVideo>
 			</MyStreamContainer>

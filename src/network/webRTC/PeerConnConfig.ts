@@ -22,16 +22,10 @@ export class PeerConnConfig implements IPeerConnConfig {
 		};
 	}
 
-	/**
-	 * Add ice server
-	 */
 	addIceServer(iceServer: RTCIceServer): void {
 		this.additionalRTCIceServers.push(iceServer);
 	}
 
-	/**
-	 * Return the peer connection config
-	 */
 	getConfig(): RTCConfiguration {
 		return {
 			...this.defaultConfig,
@@ -40,9 +34,3 @@ export class PeerConnConfig implements IPeerConnConfig {
 		};
 	}
 }
-
-export type LocalStreamsStatus = {
-	audioAllowed: boolean;
-	videoAllowed: boolean;
-	screenAllowed: boolean;
-};

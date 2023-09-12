@@ -29,3 +29,5 @@ export type CreateAudioOfferResponse = Response;
 export type UpdateMediaOfferResponse = Response;
 
 export type SubscribeMediaResponse = Response;
+
+export type CreateMediaAnswerResponse = Response;

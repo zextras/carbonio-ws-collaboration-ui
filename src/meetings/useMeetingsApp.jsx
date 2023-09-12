@@ -8,7 +8,7 @@ import { addRoute } from '@zextras/carbonio-shell-ui';
 import React, { lazy, Suspense, useEffect } from 'react';
 
 import ShimmerEntryMeetingView from './views/shimmers/ShimmerEntryMeetingView';
-import { MEETINGS_NAME } from '../constants/appConstants';
+import { MEETINGS_NAME, MEETINGS_ROUTE } from '../constants/appConstants';
 
 const LazyExternalMainView = lazy(() =>
 	import(/* webpackChunkName: "mainView" */ './views/ExternalMainView')
@@ -23,25 +23,17 @@ const ExternalMain = () => (
 export default function useMeetingsApp() {
 	useEffect(() => {
 		addRoute({
-			route: 'external',
+			route: MEETINGS_ROUTE,
 			visible: false,
 			label: MEETINGS_NAME,
 			primaryBar: 'TeamOutline',
 			appView: ExternalMain,
+			// TODO WITH NEW SHELL: set standalone: true
 			standalone: {
 				hidePrimaryBar: true,
 				hideShellHeader: true,
 				allowUnauthenticated: true
 			}
 		});
-		// addRoute({
-		// 	route: MEETINGS_ROUTE,
-		// 	position: 90,
-		// 	visible: true,
-		// 	label: MEETINGS_NAME,
-		// 	primaryBar: 'VideoOutline',
-		// 	appView: MeetingsMain,
-		// 	secondaryBar: SecondaryBar
-		// });
 	}, []);
 }

@@ -42,6 +42,7 @@ const InfoPage = (): ReactElement => (
 	</Suspense>
 );
 
+// TODO WITH NEW SHELL: remove
 const MeetingTempGlobalStyle = createGlobalStyle`
 	[data-testid="MainHeaderContainer"], .hjBWLK {
 	  display: none;
