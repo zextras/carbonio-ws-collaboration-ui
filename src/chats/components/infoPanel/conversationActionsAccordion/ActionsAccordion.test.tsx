@@ -255,7 +255,7 @@ describe('Actions Accordion - meeting', () => {
 		store.setUserInfo(user3Be);
 		store.setLoginInfo(user1Be.id, user1Be.name);
 		store.addMeeting(meeting);
-		store.setActiveMeeting(meeting.id);
+		store.meetingConnection(meeting.id, false, undefined, false, undefined);
 
 		const { user } = setup(
 			<ActionsAccordion roomId={room.id} isInsideMeeting meetingId={meeting.id} />
@@ -305,7 +305,7 @@ describe('Actions Accordion - meeting', () => {
 		store.setUserInfo(user3Be);
 		store.setLoginInfo(user1Be.id, user1Be.name);
 		store.addMeeting(meeting);
-		store.setActiveMeeting(meeting.id);
+		store.meetingConnection(meeting.id, false, undefined, false, undefined);
 
 		setup(<ActionsAccordion roomId={room.id} isInsideMeeting meetingId={meeting.id} />);
 		expect(screen.getByText(/Mute Notifications/i)).toBeInTheDocument();
@@ -341,7 +341,7 @@ describe('Actions Accordion - meeting', () => {
 		store.setUserInfo(user2Be);
 		store.setLoginInfo(user1Be.id, user1Be.name);
 		store.addMeeting(meeting);
-		store.setActiveMeeting(meeting.id);
+		store.meetingConnection(meeting.id, false, undefined, false, undefined);
 
 		setup(<ActionsAccordion roomId={room.id} isInsideMeeting meetingId={meeting.id} />);
 		expect(screen.getByText(/Mute Notifications/i)).toBeInTheDocument();

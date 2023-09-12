@@ -10,7 +10,6 @@ import React from 'react';
 import MessageFactory from './MessageFactory';
 import useStore from '../../../../store/Store';
 import {
-	createMockAffiliationMessage,
 	createMockConfigurationMessage,
 	createMockDateMessage,
 	createMockRoom,
@@ -119,28 +118,6 @@ describe('Message Factory', () => {
 		expect(newMessages).toBeVisible();
 	});
 
-	test('Render AffiliationMessage', () => {
-		const room = createMockRoom();
-		const message = createMockAffiliationMessage({ roomId: room.id });
-		const store = useStore.getState();
-		store.addRoom(room);
-		store.newMessage(message);
-		setup(
-			<MessageFactory
-				messageId={message.id}
-				messageRoomId={room.id}
-				prevMessageIsFromSameSender={false}
-				nextMessageIsFromSameSender={false}
-				messageRef={React.createRef()}
-				isFirstNewMessage
-			/>
-		);
-		const bubble = screen.getByTestId(`affiliation_msg-${message.id}`);
-		expect(bubble).toBeVisible();
-		const newMessages = screen.queryByTestId(`new_msg`);
-		expect(newMessages).not.toBeInTheDocument();
-	});
-
 	test('Render ConfigurationMessage', () => {
 		const room = createMockRoom();
 		const message = createMockConfigurationMessage({ roomId: room.id });
@@ -160,7 +137,7 @@ describe('Message Factory', () => {
 		const bubble = screen.getByTestId(`configuration_msg-${message.id}`);
 		expect(bubble).toBeVisible();
 		const newMessages = screen.queryByTestId(`new_msg`);
-		expect(newMessages).not.toBeInTheDocument();
+		expect(newMessages).toBeInTheDocument();
 	});
 
 	test('Render DateMessage', () => {

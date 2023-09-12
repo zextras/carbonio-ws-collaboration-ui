@@ -89,23 +89,50 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 		return this.fetchAPI(`meetings/${meetingId}/start`, RequestType.POST);
 	}
 
-	public joinMeeting(meetingId: string, settings: JoinSettings): Promise<JoinMeetingResponse> {
-		return this.fetchAPI(`meetings/${meetingId}/join`, RequestType.POST, settings).then(
-			(resp: JoinMeetingResponse) => {
-				useStore.getState().setActiveMeeting(meetingId);
-				return resp;
-			}
-		);
+	public joinMeeting(
+		meetingId: string,
+		settings: JoinSettings,
+		devicesId: { audioDevice?: string; videoDevice?: string }
+	): Promise<JoinMeetingResponse> {
+		return this.fetchAPI(`meetings/${meetingId}/join`, RequestType.POST, settings).then((resp) => {
+			useStore
+				.getState()
+				.meetingConnection(
+					meetingId,
+					settings.audioStreamEnabled,
+					devicesId.audioDevice,
+					settings.videoStreamEnabled,
+					devicesId.videoDevice
+				);
+			return resp;
+		});
 	}
 
-	public joinMeetingByRoomId(roomId: string, settings: JoinSettings): Promise<JoinMeetingResponse> {
-		return this.fetchAPI(`rooms/${roomId}/meeting/join`, RequestType.PUT, settings);
+	public enterMeeting(
+		roomId: string,
+		settings: JoinSettings,
+		devicesId: { audioDevice?: string; videoDevice?: string }
+	): Promise<string> {
+		const meeting = useStore.getState().meetings[roomId];
+		if (meeting) {
+			if (meeting.active) {
+				return this.joinMeeting(meeting.id, settings, devicesId).then(() => meeting.id);
+			}
+			return this.startMeeting(meeting.id).then(() =>
+				this.joinMeeting(meeting.id, settings, devicesId).then(() => meeting.id)
+			);
+		}
+		return this.createPermanentMeeting(roomId).then((response) =>
+			this.startMeeting(response.id).then(() =>
+				this.joinMeeting(response.id, settings, devicesId).then(() => response.id)
+			)
+		);
 	}
 
 	public leaveMeeting(meetingId: string): Promise<LeaveMeetingResponse> {
 		return this.fetchAPI(`meetings/${meetingId}/leave`, RequestType.POST).then(
 			(resp: LeaveMeetingResponse) => {
-				useStore.getState().removeActiveMeeting(meetingId);
+				useStore.getState().meetingDisconnection(meetingId);
 				return resp;
 			}
 		);
@@ -116,15 +143,20 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 	}
 
 	public deleteMeeting(meetingId: string): Promise<DeleteMeetingResponse> {
-		return this.fetchAPI(`meetings/${meetingId}`, RequestType.DELETE);
+		return this.fetchAPI(`meetings/${meetingId}`, RequestType.DELETE).then(
+			(resp: DeleteMeetingResponse) => {
+				useStore.getState().meetingDisconnection(meetingId);
+				return resp;
+			}
+		);
 	}
 
 	public updateAudioStreamStatus(
 		meetingId: string,
 		enabled: boolean
 	): Promise<UpdateAudioStreamStatusResponse> {
-		const { sessionId, id } = useStore.getState().session;
-		return this.fetchAPI(`meetings/${meetingId}/sessions/${sessionId}/audio`, RequestType.PUT, {
+		const { id } = useStore.getState().session;
+		return this.fetchAPI(`meetings/${meetingId}/audio`, RequestType.PUT, {
 			enabled
 		}).then((resp: UpdateAudioStreamStatusResponse) => {
 			const { changeStreamStatus } = useStore.getState();
@@ -134,14 +166,9 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 	}
 
 	public createAudioOffer(meetingId: string, sdpOffer: string): Promise<CreateAudioOfferResponse> {
-		const { sessionId } = useStore.getState().session;
-		return this.fetchAPI(
-			`meetings/${meetingId}/sessions/${sessionId}/audio/offer`,
-			RequestType.PUT,
-			{
-				sdp: sdpOffer
-			}
-		).then((resp: CreateAudioOfferResponse) => resp);
+		return this.fetchAPI(`meetings/${meetingId}/audio/offer`, RequestType.PUT, {
+			sdp: sdpOffer
+		}).then((resp: CreateAudioOfferResponse) => resp);
 	}
 
 	public updateMediaOffer(
@@ -150,8 +177,8 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 		enabled: boolean,
 		sdp?: string
 	): Promise<UpdateMediaOfferResponse> {
-		const { sessionId, id } = useStore.getState().session;
-		return this.fetchAPI(`meetings/${meetingId}/sessions/${sessionId}/media`, RequestType.PUT, {
+		const { id } = useStore.getState().session;
+		return this.fetchAPI(`meetings/${meetingId}/media`, RequestType.PUT, {
 			type,
 			enabled,
 			sdp
@@ -167,20 +194,15 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 		userSessionId: string,
 		type: STREAM_TYPE
 	): Promise<SubscribeMediaResponse> {
-		const { sessionId } = useStore.getState().session;
-		return this.fetchAPI(
-			`meetings/${meetingId}/sessions/${sessionId}/media/subscribe`,
-			RequestType.PUT,
-			{
-				subscribe: [
-					{
-						session_id: userSessionId,
-						type
-					}
-				],
-				unsubscribe: []
-			}
-		).then((resp: SubscribeMediaResponse) => resp);
+		return this.fetchAPI(`meetings/${meetingId}/media/subscribe`, RequestType.PUT, {
+			subscribe: [
+				{
+					user_id: userSessionId,
+					type
+				}
+			],
+			unsubscribe: []
+		}).then((resp: SubscribeMediaResponse) => resp);
 	}
 }
 

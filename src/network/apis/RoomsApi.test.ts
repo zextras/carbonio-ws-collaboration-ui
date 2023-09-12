@@ -371,7 +371,7 @@ describe('Rooms API', () => {
 		const testFile = new File([], 'file.pdf', { type: 'application/pdf' });
 		const { signal } = new AbortController();
 		const area = '0x0';
-		await roomsApi.addRoomAttachment('roomId', testFile, {}, area, signal);
+		await roomsApi.addRoomAttachment('roomId', testFile, { area }, signal);
 
 		// Set appropriate headers
 		const headers = new Headers();
@@ -397,8 +397,7 @@ describe('Rooms API', () => {
 		await roomsApi.addRoomAttachment(
 			'roomId',
 			testFile,
-			{ description: 'description', replyId: 'stanzaId' },
-			area,
+			{ description: 'description', replyId: 'stanzaId', area },
 			signal
 		);
 

@@ -12,7 +12,6 @@ import styled, { FlattenSimpleInterpolation } from 'styled-components';
 
 import useRouting, { PAGE_INFO_TYPE } from '../../../../hooks/useRouting';
 import { MeetingsApi } from '../../../../network';
-import { PeerConnConfig } from '../../../../network/webRTC/PeerConnConfig';
 import {
 	getMeetingViewSelected,
 	getSelectedAudioDeviceId,
@@ -57,9 +56,7 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 	const changeStreamStatus = useStore((store) => store.changeStreamStatus);
 	const setMeetingViewSelected = useStore((store) => store.setMeetingViewSelected);
 	const setSelectedDeviceId = useStore((store) => store.setSelectedDeviceId);
-	const closeBidirectionalAudioConn = useStore((store) => store.closeBidirectionalAudioConn);
 	const closeVideoOutConn = useStore((store) => store.closeVideoOutConn);
-	const deleteVideoOutConn = useStore((store) => store.deleteVideoOutConn);
 	const createVideoOutConn = useStore((store) => store.createVideoOutConn);
 	const addParticipant = useStore((store) => store.addParticipant);
 	const myUserId = useStore(getUserId);
@@ -76,7 +73,7 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 	const meetingViewSelected = useStore((store) => getMeetingViewSelected(store, meetingId));
 	const selectedAudioDeviceId = useStore((store) => getSelectedAudioDeviceId(store, meetingId));
 	const selectedVideoDeviceId = useStore((store) => getSelectedVideoDeviceId(store, meetingId));
-	const videoOutConn = useStore((store) => store.activeMeeting[meetingId].videoOutConn);
+	const videoOutConn = useStore((store) => store.activeMeeting[meetingId]?.videoOutConn);
 	const bidirectionalAudioConn = useStore(
 		(store) => store.activeMeeting[meetingId].bidirectionalAudioConn
 	);
@@ -140,8 +137,7 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 	const toggleVideoStream = useCallback(() => {
 		if (!videoStatus) {
 			if (!videoOutConn) {
-				const peerConnectionConfig = new PeerConnConfig();
-				createVideoOutConn(meetingId, peerConnectionConfig, true, selectedVideoDeviceId);
+				createVideoOutConn(meetingId, true, selectedVideoDeviceId);
 			} else {
 				getVideoStream(selectedVideoDeviceId).then((stream) => {
 					videoOutConn?.updateLocalStreamTrack(stream).then(() => {
@@ -153,7 +149,6 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 			// TODO ASK BE TO IMPROVE AND TEST IF IT IS POSSIBLE TO ALLOW NOT RECREATE THE CONNECTION BUT SIMPLY SET THE SOURCE TO ENABLED
 			// videoOutConn?.closeRtpSenderTrack();
 			closeVideoOutConn(meetingId);
-			deleteVideoOutConn(meetingId);
 			MeetingsApi.updateMediaOffer(meetingId, STREAM_TYPE.VIDEO, !videoStatus).then(() => {
 				if (myUserId != null) {
 					removeLocalStreams(meetingId, STREAM_TYPE.VIDEO);
@@ -167,7 +162,6 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 		meetingId,
 		selectedVideoDeviceId,
 		closeVideoOutConn,
-		deleteVideoOutConn,
 		myUserId,
 		removeLocalStreams
 	]);
@@ -194,24 +188,16 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 	}, []);
 
 	const leaveMeeting = useCallback(() => {
-		closeBidirectionalAudioConn(meetingId);
-		closeVideoOutConn(meetingId);
 		MeetingsApi.leaveMeeting(meetingId)
-			.then(() => {
-				// TODO ADD MEETING STOP WHEN IM AM THE LAST USER INSIDE THE MEETING
-				// MeetingsApi.leaveMeeting(meetingId).then(());
-				goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED);
-			})
+			.then(() => goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED))
 			.catch(() => console.log('Error on leave'));
-	}, [closeBidirectionalAudioConn, meetingId, closeVideoOutConn, goToInfoPage]);
+	}, [meetingId, goToInfoPage]);
 
 	const deleteMeeting = useCallback(() => {
-		closeBidirectionalAudioConn(meetingId);
-		closeVideoOutConn(meetingId);
 		MeetingsApi.deleteMeeting(meetingId)
 			.then(() => goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED))
 			.catch(() => console.log('Error on leave'));
-	}, [closeBidirectionalAudioConn, meetingId, closeVideoOutConn, goToInfoPage]);
+	}, [meetingId, goToInfoPage]);
 
 	const toggleMeetingView = useCallback(() => {
 		setMeetingViewSelected(
@@ -260,8 +246,7 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 				onClick: (): void => {
 					setSelectedDeviceId(meetingId, STREAM_TYPE.VIDEO, videoItem.deviceId);
 					if (!videoOutConn) {
-						const peerConnectionConfig = new PeerConnConfig();
-						createVideoOutConn(meetingId, peerConnectionConfig, true, videoItem.deviceId);
+						createVideoOutConn(meetingId, true, videoItem.deviceId);
 					} else {
 						getVideoStream(videoItem.deviceId).then((stream) => {
 							const videoStream = stream;
@@ -352,22 +337,6 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 				shape="regular"
 			/>
 			<Padding right="16px" />
-			<IconButton
-				size="large"
-				backgroundColor="primary"
-				iconColor="gray6"
-				icon={meetingViewSelected === MeetingViewType.GRID ? 'Grid' : 'CinemaView'}
-				onClick={toggleMeetingView}
-			/>
-			<Padding right="16px" />
-			<IconButton
-				iconColor="gray6"
-				backgroundColor="primary"
-				icon="Headphones"
-				onClick={deleteMeeting}
-				size="large"
-			/>
-			<Padding right="16px" />
 			<MultiButton
 				iconColor="gray6"
 				backgroundColor="primary"
@@ -385,6 +354,16 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 				icon={shareStatus ? 'ScreenSharingOn' : 'ScreenSharingOff'}
 				onClick={toggleShareStream}
 				size="large"
+				disabled // TODO: enable when screen sharing will be available
+			/>
+			<Padding right="16px" />
+			<IconButton
+				size="large"
+				backgroundColor="primary"
+				iconColor="gray6"
+				icon={meetingViewSelected === MeetingViewType.GRID ? 'Grid' : 'CinemaView'}
+				onClick={toggleMeetingView}
+				disabled // TODO: enable when grid mode will be available
 			/>
 			<Padding right="16px" />
 			<IconButton

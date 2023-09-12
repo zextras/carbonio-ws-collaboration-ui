@@ -8,7 +8,6 @@
 import produce from 'immer';
 
 import BidirectionalConnectionAudioInOut from '../../network/webRTC/BidirectionalConnectionAudioInOut';
-import { PeerConnConfig } from '../../network/webRTC/PeerConnConfig';
 import VideoInConnection from '../../network/webRTC/VideoInConnection';
 import VideoOutConnection from '../../network/webRTC/VideoOutConnection';
 import {
@@ -20,35 +19,57 @@ import { ActiveMeetingSlice, RootStore } from '../../types/store/StoreTypes';
 
 export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeetingSlice => ({
 	activeMeeting: {},
-	setActiveMeeting: (meetingId: string): void => {
+	meetingConnection: (
+		meetingId: string,
+		audioStreamEnabled: boolean,
+		selectedAudioDeviceId: string | undefined,
+		videoStreamEnabled: boolean,
+		selectedVideoDeviceId?: string | undefined
+	): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (!draft.activeMeeting[meetingId]) {
-					draft.activeMeeting[meetingId] = {
-						sidebarStatus: {
-							sidebarIsOpened: true,
-							actionsAccordionIsOpened: true,
-							participantsAccordionIsOpened: false
-						},
-						chatVisibility: MeetingChatVisibility.CLOSED,
-						isCarouselVisible: true,
-						meetingViewSelected: MeetingViewType.WAITING
-					};
-				}
+				draft.activeMeeting[meetingId] = {
+					// Default graphic values
+					sidebarStatus: {
+						sidebarIsOpened: true,
+						actionsAccordionIsOpened: true,
+						participantsAccordionIsOpened: false
+					},
+					chatVisibility: MeetingChatVisibility.CLOSED,
+					meetingViewSelected: MeetingViewType.WAITING,
+					isCarouselVisible: true,
+					// Peer connections
+					localStreams: {
+						selectedAudioDeviceId,
+						selectedVideoDeviceId
+					},
+					bidirectionalAudioConn: new BidirectionalConnectionAudioInOut(
+						meetingId,
+						audioStreamEnabled,
+						selectedAudioDeviceId
+					),
+					videoInConn: new VideoInConnection(meetingId),
+					videoOutConn: videoStreamEnabled
+						? new VideoOutConnection(meetingId, videoStreamEnabled, selectedVideoDeviceId)
+						: undefined
+				};
 			}),
 			false,
-			'AM/SET_ACTIVE_MEETING'
+			'AM/MEETING_CONNECTION'
 		);
 	},
-	removeActiveMeeting: (meetingId: string): void => {
+	meetingDisconnection: (meetingId: string): void => {
 		set(
 			produce((draft: RootStore) => {
+				draft.activeMeeting[meetingId]?.bidirectionalAudioConn?.closePeerConnection();
+				draft.activeMeeting[meetingId]?.videoInConn?.closePeerConnection();
 				delete draft.activeMeeting[meetingId];
 			}),
 			false,
-			'AM/REMOVE_ACTIVE_MEETING'
+			'AM/MEETING_DISCONNECTION'
 		);
 	},
+
 	setMeetingSidebarStatus: (meetingId: string, status: boolean): void => {
 		set(
 			produce((draft: RootStore) => {
@@ -104,123 +125,48 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 			'AM/SET_VIEW_TYPE'
 		);
 	},
-	createBidirectionalAudioConn: (
-		meetingId: string,
-		peerConnectionConfig: PeerConnConfig,
-		audioStreamEnabled: boolean,
-		selectedAudioDeviceId?: string
-	): void => {
-		set(
-			produce((draft: RootStore) => {
-				const bidirectionalAudioConn = new BidirectionalConnectionAudioInOut(
-					peerConnectionConfig,
-					meetingId,
-					audioStreamEnabled,
-					selectedAudioDeviceId
-				);
-				if (!draft.activeMeeting[meetingId]) {
-					draft.activeMeeting[meetingId] = {
-						sidebarStatus: {
-							sidebarIsOpened: true,
-							actionsAccordionIsOpened: true,
-							participantsAccordionIsOpened: false
-						},
-						chatVisibility: MeetingChatVisibility.CLOSED,
-						isCarouselVisible: true,
-						meetingViewSelected: MeetingViewType.WAITING
-					};
-				}
-				if (!draft.activeMeeting[meetingId].bidirectionalAudioConn) {
-					draft.activeMeeting[meetingId].bidirectionalAudioConn = bidirectionalAudioConn;
-				}
-			}),
-			false,
-			'AM/SET_AUDIO_CONN'
-		);
-	},
+
 	createVideoOutConn: (
 		meetingId: string,
-		peerConnectionConfig: PeerConnConfig,
 		videoStreamEnabled: boolean,
 		selectedVideoDeviceId?: string
 	): void => {
 		set(
 			produce((draft: RootStore) => {
 				const videoOutConn = new VideoOutConnection(
-					peerConnectionConfig,
 					meetingId,
 					videoStreamEnabled,
 					selectedVideoDeviceId
 				);
-				if (!draft.activeMeeting[meetingId].videoOutConn) {
-					draft.activeMeeting[meetingId].videoOutConn = videoOutConn;
-				}
+				draft.activeMeeting[meetingId].videoOutConn = videoOutConn;
 			}),
 			false,
 			'AM/SET_VIDEO_OUT_CONN'
 		);
 	},
-	deleteVideoOutConn: (meetingId: string): void => {
+	closeVideoOutConn: (meetingId: string): void => {
 		set(
 			produce((draft: RootStore) => {
 				if (draft.activeMeeting[meetingId].videoOutConn) {
+					draft.activeMeeting[meetingId].videoOutConn?.closePeerConnection();
 					delete draft.activeMeeting[meetingId].videoOutConn;
 				}
 			}),
 			false,
-			'AM/REM_VIDEO_OUT_CONN'
+			'AM/CLOSE_VIDEO_OUT_CONN'
 		);
 	},
-	createVideoInConn: (meetingId: string, peerConnectionConfig: PeerConnConfig): void => {
-		set(
-			produce((draft: RootStore) => {
-				const videoInConn = new VideoInConnection(peerConnectionConfig, meetingId);
-				if (!draft.activeMeeting[meetingId].videoInConn) {
-					draft.activeMeeting[meetingId].videoInConn = videoInConn;
-				}
-			}),
-			false,
-			'AM/SET_VIDEO_IN_CONN'
-		);
-	},
-	createShareOutConn: (meetingId: string, peerConnectionConfig: PeerConnConfig): void => {
+	createShareOutConn: (meetingId: string): void => {
 		set(
 			produce((draft: RootStore) => {
 				// TODO IMPLEMENT
-				const shareOutConn = new VideoInConnection(peerConnectionConfig, meetingId);
+				const shareOutConn = new VideoInConnection(meetingId);
 				if (!draft.activeMeeting[meetingId].shareOutConn) {
 					draft.activeMeeting[meetingId].shareOutConn = shareOutConn;
 				}
 			}),
 			false,
 			'AM/SET_SHARE_OUT_CONN'
-		);
-	},
-	closeBidirectionalAudioConn: (meetingId: string): void => {
-		set(
-			produce((draft: RootStore) => {
-				draft.activeMeeting[meetingId]?.bidirectionalAudioConn?.closePeerConnection();
-			}),
-			false,
-			'AM/CLOSE_AUDIO_CONN'
-		);
-	},
-	closeVideoOutConn: (meetingId: string): void => {
-		set(
-			produce((draft: RootStore) => {
-				draft.activeMeeting[meetingId]?.videoOutConn?.closePeerConnection();
-			}),
-			false,
-			'AM/CLOSE_VIDEO_OUT_CONN'
-		);
-	},
-	closeVideoInConn: (meetingId: string): void => {
-		set(
-			produce((draft: RootStore) => {
-				draft.activeMeeting[meetingId]?.videoInConn?.closePeerConnection();
-			}),
-			false,
-			'AM/CLOSE_VIDEO_IN_CONN'
 		);
 	},
 	closeShareOutConn: (meetingId: string): void => {
@@ -232,6 +178,7 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 			'AM/CLOSE_SHARE_OUT_CONN'
 		);
 	},
+
 	setLocalStreams: (meetingId: string, streamType: STREAM_TYPE, stream: MediaStream): void => {
 		set(
 			produce((draft: RootStore) => {

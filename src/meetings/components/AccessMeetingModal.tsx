@@ -20,11 +20,8 @@ import styled from 'styled-components';
 
 import useRouting, { PAGE_INFO_TYPE } from '../../hooks/useRouting';
 import { MeetingsApi } from '../../network';
-import { PeerConnConfig } from '../../network/webRTC/PeerConnConfig';
-import { getMeeting } from '../../store/selectors/MeetingSelectors';
 import { getRoomNameSelector, getRoomTypeSelector } from '../../store/selectors/RoomsSelectors';
 import useStore from '../../store/Store';
-import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
 import { RoomType } from '../../types/store/RoomTypes';
 import { BrowserUtils } from '../../utils/BrowserUtils';
 import { getAudioAndVideo } from '../../utils/UserMediaManager';
@@ -89,19 +86,13 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 	const { goToMeetingPage, goToInfoPage } = useRouting();
 
 	const roomType = useStore((store) => getRoomTypeSelector(store, roomId));
-	const meeting = useStore((store) => getMeeting(store, roomId));
-	const addMeeting = useStore((store) => store.addMeeting);
-	const setSelectedDeviceId = useStore((store) => store.setSelectedDeviceId);
-	const createBidirectionalAudioConn = useStore((store) => store.createBidirectionalAudioConn);
-	const createVideoOutConn = useStore((store) => store.createVideoOutConn);
-	const createVideoInConn = useStore((store) => store.createVideoInConn);
 
 	const [videoStreamEnabled, setVideoStreamEnabled] = useState(false);
 	const [audioStreamEnabled, setAudioStreamEnabled] = useState(false);
 	const [audioMediaList, setAudioMediaList] = useState<[] | MediaDeviceInfo[]>([]);
 	const [videoMediaList, setVideoMediaList] = useState<[] | MediaDeviceInfo[]>([]);
-	const [selectedAudioStream, setSelectedAudioStream] = useState('');
-	const [selectedVideoStream, setSelectedVideoStream] = useState('');
+	const [selectedAudioDevice, setSelectedAudioDevice] = useState('');
+	const [selectedVideoDevice, setSelectedVideoDevice] = useState('');
 	const [streamTrack, setStreamTrack] = useState<MediaStream | null>(null);
 	const [wrapperWidth, setWrapperWidth] = useState(0);
 	const [videoPlayerTestMuted, setVideoPlayerTestMuted] = useState(true);
@@ -161,8 +152,8 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 						setStreamTrack(stream);
 						setAudioStreamEnabled(audio);
 						setVideoStreamEnabled(video);
-						setSelectedVideoStream(videoId);
-						setSelectedAudioStream(audioId);
+						setSelectedVideoDevice(videoId);
+						setSelectedAudioDevice(audioId);
 					})
 					.catch((e) => console.error(e));
 			}
@@ -176,12 +167,12 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 				id: `device-${i}`,
 				label: videoItem.label ? videoItem.label : `device-${i}`,
 				onClick: (): void => {
-					toggleStreams(audioStreamEnabled, true, selectedAudioStream, videoItem.deviceId);
+					toggleStreams(audioStreamEnabled, true, selectedAudioDevice, videoItem.deviceId);
 				},
-				selected: videoItem.deviceId === selectedVideoStream,
+				selected: videoItem.deviceId === selectedVideoDevice,
 				value: videoItem.deviceId
 			})),
-		[audioStreamEnabled, selectedAudioStream, selectedVideoStream, toggleStreams, videoMediaList]
+		[audioStreamEnabled, selectedAudioDevice, selectedVideoDevice, toggleStreams, videoMediaList]
 	);
 
 	const mediaAudioList = useMemo(
@@ -190,12 +181,12 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 				id: `device-${i}`,
 				label: audioItem.label ? audioItem.label : `device-${i}`,
 				onClick: (): void => {
-					toggleStreams(true, videoStreamEnabled, audioItem.deviceId, selectedVideoStream);
+					toggleStreams(true, videoStreamEnabled, audioItem.deviceId, selectedVideoDevice);
 				},
-				selected: audioItem.deviceId === selectedAudioStream,
+				selected: audioItem.deviceId === selectedAudioDevice,
 				value: audioItem.deviceId
 			})),
-		[audioMediaList, selectedAudioStream, selectedVideoStream, toggleStreams, videoStreamEnabled]
+		[audioMediaList, selectedAudioDevice, selectedVideoDevice, toggleStreams, videoStreamEnabled]
 	);
 
 	const updateListOfDevices = useCallback(() => {
@@ -250,30 +241,30 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 		toggleStreams(
 			audioStreamEnabled,
 			!videoStreamEnabled,
-			selectedAudioStream,
-			selectedVideoStream
+			selectedAudioDevice,
+			selectedVideoDevice
 		);
 	}, [
 		toggleStreams,
 		audioStreamEnabled,
 		videoStreamEnabled,
-		selectedAudioStream,
-		selectedVideoStream
+		selectedAudioDevice,
+		selectedVideoDevice
 	]);
 
 	const toggleAudio = useCallback(() => {
 		toggleStreams(
 			!audioStreamEnabled,
 			videoStreamEnabled,
-			selectedAudioStream,
-			selectedVideoStream
+			selectedAudioDevice,
+			selectedVideoDevice
 		);
 	}, [
 		toggleStreams,
 		audioStreamEnabled,
 		videoStreamEnabled,
-		selectedAudioStream,
-		selectedVideoStream
+		selectedAudioDevice,
+		selectedVideoDevice
 	]);
 
 	const onToggleAudioTest = useCallback(() => {
@@ -284,74 +275,21 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 		goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED);
 	}, [goToInfoPage]);
 
-	const redirectToMeetingAndInitWebRTC = useCallback(
-		(meetingId: string): void => {
-			const peerConnectionConfig = new PeerConnConfig();
-			createBidirectionalAudioConn(
-				meetingId,
-				peerConnectionConfig,
-				audioStreamEnabled,
-				selectedAudioStream
-			);
-			setSelectedDeviceId(meetingId, STREAM_TYPE.AUDIO, selectedAudioStream);
-			createVideoInConn(meetingId, peerConnectionConfig);
-			if (videoStreamEnabled) {
-				createVideoOutConn(meetingId, peerConnectionConfig, videoStreamEnabled);
-				setSelectedDeviceId(meetingId, STREAM_TYPE.VIDEO, selectedVideoStream);
-			}
-			goToMeetingPage(meetingId);
-		},
-		[
-			createBidirectionalAudioConn,
-			audioStreamEnabled,
-			selectedAudioStream,
-			setSelectedDeviceId,
-			createVideoInConn,
-			videoStreamEnabled,
-			goToMeetingPage,
-			createVideoOutConn,
-			selectedVideoStream
-		]
-	);
-
 	const joinMeeting = useCallback(() => {
-		const join = (meetingId: string): Promise<void> =>
-			MeetingsApi.joinMeeting(meetingId, { videoStreamEnabled, audioStreamEnabled })
-				.then(() => {
-					redirectToMeetingAndInitWebRTC(meetingId);
-				})
-				.catch((err) => console.error(err, 'Error on joinMeeting'));
-		const start = (meetingId: string): Promise<void> =>
-			MeetingsApi.startMeeting(meetingId)
-				.then(() => {
-					join(meetingId);
-				})
-				.catch((err) => console.error(err, 'Error on startMeeting'));
-
-		if (meeting) {
-			if (meeting.active) {
-				// If meeting is already active, just join it
-				join(meeting.id);
-			} else {
-				// If meeting is not active, start it and then join it
-				start(meeting.id);
-			}
-		} else {
-			// If meeting doesn't exist, create it, start it and then join it
-			MeetingsApi.createPermanentMeeting(roomId)
-				.then((response) => {
-					addMeeting(response);
-					start(response.id);
-				})
-				.catch((err) => console.log(err, 'Error on create-join'));
-		}
+		MeetingsApi.enterMeeting(
+			roomId,
+			{ videoStreamEnabled, audioStreamEnabled },
+			{ audioDevice: selectedAudioDevice, videoDevice: selectedVideoDevice }
+		)
+			.then((meetingId) => goToMeetingPage(meetingId))
+			.catch((err) => console.error(err, 'Error on joinMeeting'));
 	}, [
-		meeting,
+		roomId,
 		videoStreamEnabled,
 		audioStreamEnabled,
-		redirectToMeetingAndInitWebRTC,
-		roomId,
-		addMeeting
+		selectedAudioDevice,
+		selectedVideoDevice,
+		goToMeetingPage
 	]);
 
 	const modalFooter = useMemo(

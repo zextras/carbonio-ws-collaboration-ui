@@ -63,7 +63,7 @@ const setupBasicGroupMeeting = (): { user: UserEvent; store: RootStore } => {
 	act(() => {
 		result.current.addRoom(groupRoom);
 		result.current.addMeeting(groupMeeting);
-		result.current.setActiveMeeting(groupMeeting.id);
+		result.current.meetingConnection(groupMeeting.id, false, undefined, false, undefined);
 	});
 	mockUseParams.mockReturnValue({ meetingId: groupMeeting.id });
 	const { user } = setup(<MeetingViewManager />);
@@ -75,7 +75,7 @@ const setupMeetingWith3Participants = (): { user: UserEvent; store: RootStore } 
 	act(() => {
 		result.current.addRoom(groupRoom);
 		result.current.addMeeting(groupMeeting);
-		result.current.setActiveMeeting(groupMeeting.id);
+		result.current.meetingConnection(groupMeeting.id, false, undefined, false, undefined);
 		result.current.addParticipant(groupMeeting.id, user3Participant);
 	});
 	mockUseParams.mockReturnValue({ meetingId: groupMeeting.id });

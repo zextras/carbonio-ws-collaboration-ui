@@ -36,8 +36,16 @@ interface IMeetingsApi {
 	// Start meeting when the created meeting is not active (no one is inside)
 	startMeeting(meetingId: string): Promise<StartMeetingResponse>;
 	// Join meeting when someone has already started the meeting
-	joinMeeting(roomId: string, settings: JoinSettings): Promise<JoinMeetingResponse>;
-	joinMeetingByRoomId(roomId: string, settings: JoinSettings): Promise<JoinMeetingResponse>;
+	joinMeeting(
+		meetingId: string,
+		settings: JoinSettings,
+		devicesId: { audioDevice?: string; videoDevice?: string }
+	): Promise<JoinMeetingResponse>;
+	enterMeeting(
+		roomId: string,
+		settings: JoinSettings,
+		devicesId: { audioDevice?: string; videoDevice?: string }
+	): Promise<string>;
 	leaveMeeting(meetingId: string): Promise<LeaveMeetingResponse>;
 	// Stop meeting when all the users have left the meeting
 	stopMeeting(meetingId: string): Promise<StopMeetingResponse>;
