@@ -5,18 +5,14 @@
  */
 
 import { Container, Text } from '@zextras/carbonio-design-system';
-import React, { ReactElement, useEffect, useMemo, useRef } from 'react';
+import React, { ReactElement, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
-import useCentralTileDimensions from '../../../hooks/useCentralTileDimensions';
-import {
-	getFirstStream,
-	getLocalVideoSteam
-} from '../../../store/selectors/ActiveMeetingSelectors';
 import { getFirstParticipant } from '../../../store/selectors/MeetingSelectors';
 import useStore from '../../../store/Store';
+import { SimpleTestTile } from '../TestTile';
 
 const FaceToFace = styled(Container)`
 	position: relative;
@@ -24,8 +20,8 @@ const FaceToFace = styled(Container)`
 
 const MyStreamContainer = styled(Container)`
 	position: absolute;
-	top: -2rem;
-	right: -3.4rem;
+	top: 0;
+	right: -3.25rem;
 	transition: opacity 200ms linear;
 	z-index: 10;
 	width: 16rem;
@@ -34,23 +30,6 @@ const MyStreamContainer = styled(Container)`
 	&:hover {
 		opacity: 0;
 	}
-`;
-
-const TileVideo = styled.video`
-	width: 16rem;
-	height: 9rem;
-	border-radius: 0.5rem;
-	background: ${({ theme }): string => theme.palette.text};
-`;
-
-const CentralTile = styled(Container)`
-	border-radius: 8px;
-`;
-
-const CentralVideo = styled.video`
-	width: 100%;
-	border-radius: 8px;
-	background: ${({ theme }): string => theme.palette.text};
 `;
 
 const FaceToFaceMode = (): ReactElement => {
@@ -64,67 +43,22 @@ const FaceToFaceMode = (): ReactElement => {
 
 	const centralParticipant = useStore((store) => getFirstParticipant(store, meetingId));
 
-	const localVideoStream = useStore((store) => getLocalVideoSteam(store, meetingId));
-	const centralStream = useStore((store) => getFirstStream(store, meetingId));
-
-	const localStreamRef = useRef<HTMLVideoElement>(null);
-	const centerStreamRef = useRef<HTMLVideoElement>(null);
-	const faceToFaceRef = useRef<HTMLDivElement>(null);
-
-	const centralTileDimensions = useCentralTileDimensions(meetingId, faceToFaceRef);
-
-	useEffect(() => {
-		if (localStreamRef != null && localStreamRef.current != null) {
-			if (localVideoStream) {
-				localStreamRef.current.srcObject = localVideoStream;
-			} else {
-				localStreamRef.current.srcObject = null;
-			}
-		}
-	}, [localVideoStream]);
-
-	useEffect(() => {
-		if (centerStreamRef && centerStreamRef.current) {
-			if (centralStream) {
-				centerStreamRef.current.srcObject = centralStream;
-			} else {
-				centerStreamRef.current.srcObject = null;
-			}
-		}
-	}, [centralStream]);
-
 	const centralContentToDisplay = useMemo(
 		() =>
 			centralParticipant ? (
-				<CentralTile
-					height={centralTileDimensions.height}
-					width={centralTileDimensions.width}
-					background="text"
-				>
-					<CentralVideo
-						height={centralTileDimensions.height}
-						width={centralTileDimensions.width}
-						playsInline
-						autoPlay
-						muted
-						controls={false}
-						ref={centerStreamRef}
-					/>
-				</CentralTile>
+				<SimpleTestTile userId={'selectedId'} />
 			) : (
 				<Text color="gray6" size="large">
 					{waitingParticipants}
 				</Text>
 			),
-		[centralParticipant, centralTileDimensions, waitingParticipants]
+		[centralParticipant, waitingParticipants]
 	);
 
 	return (
-		<FaceToFace data-testid="faceToFaceModeView" ref={faceToFaceRef}>
-			<MyStreamContainer data-testid="myStreamContainer" height="fit" width="fit" background="text">
-				<TileVideo id="testVideo" playsInline autoPlay muted controls={false} ref={localStreamRef}>
-					Your browser does not support the <code>video</code> element.
-				</TileVideo>
+		<FaceToFace data-testid="faceToFaceModeView">
+			<MyStreamContainer data-testid="myStreamContainer" background="text">
+				<SimpleTestTile userId={'myId'} />
 			</MyStreamContainer>
 			{centralContentToDisplay}
 		</FaceToFace>

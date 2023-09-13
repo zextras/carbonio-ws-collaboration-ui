@@ -70,16 +70,14 @@ const MeetingSkeleton = (): ReactElement => {
 	useGeneralMeetingControls(meetingId);
 
 	const ViewToDisplay = useMemo(() => {
-		// TODO: set numberOfTiles <= 2
-		if (numberOfTiles > 200) {
+		if (numberOfTiles <= 2) {
 			return <FaceToFaceMode />;
 		}
 		return meetingViewSelected === MeetingViewType.CINEMA ? <CinemaMode /> : <GridMode />;
 	}, [meetingViewSelected, numberOfTiles]);
 
-	// TODO: set numberOfTiles > 2
 	const displayCarousel = useMemo(
-		() => meetingViewSelected === MeetingViewType.CINEMA && numberOfTiles < 2,
+		() => meetingViewSelected === MeetingViewType.CINEMA && numberOfTiles > 2,
 		[meetingViewSelected, numberOfTiles]
 	);
 

@@ -85,7 +85,10 @@ const MeetingSidebar = (): ReactElement => {
 			)}
 			<MeetingConversationAccordion roomId={roomId || ''} meetingId={meetingId} isInsideMeeting />
 			<ChangeSidebarStatusButton>
-				<Tooltip label={sidebarIsVisible ? collapseSidebarLabel : expandSidebarLabel}>
+				<Tooltip
+					label={sidebarIsVisible ? collapseSidebarLabel : expandSidebarLabel}
+					placement="right"
+				>
 					<SidebarIconButton
 						iconColor="gray6"
 						backgroundColor="text"

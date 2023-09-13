@@ -34,8 +34,8 @@ const SidebarCarousel = (): ReactElement => {
 	const { meetingId }: Record<string, string> = useParams();
 
 	const [t] = useTranslation();
-	const collapseCarouselLabel = t('tooltip.collapseCarousel', '');
-	const expandCarouselLabel = t('tooltip.expandCarousel', '');
+	const collapseCarouselLabel = t('tooltip.collapseCarousel', 'Collapse');
+	const expandCarouselLabel = t('tooltip.expandCarousel', 'Expand');
 
 	const carouselIsVisible = useStore((store) => getMeetingCarouselVisibility(store, meetingId));
 	const setIsCarouselVisible = useStore((store) => store.setIsCarouseVisible);
@@ -52,7 +52,10 @@ const SidebarCarousel = (): ReactElement => {
 			maxWidth="300px"
 		>
 			<ChangeSidebarStatusButton>
-				<Tooltip label={carouselIsVisible ? collapseCarouselLabel : expandCarouselLabel}>
+				<Tooltip
+					label={carouselIsVisible ? collapseCarouselLabel : expandCarouselLabel}
+					placement="left"
+				>
 					<SidebarIconButton
 						iconColor="gray6"
 						backgroundColor="text"
