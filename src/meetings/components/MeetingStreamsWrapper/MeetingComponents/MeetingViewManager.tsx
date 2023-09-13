@@ -8,7 +8,7 @@ import { Container } from '@zextras/carbonio-design-system';
 import React, { ReactElement, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 
-import CinemaMode from './CinemaMode';
+import CinemaMode from './CinemaMode/CinemaMode';
 import FaceToFaceMode from './FaceToFaceMode';
 import GridMode from './GridMode';
 import { getMeetingViewSelected } from '../../../../store/selectors/ActiveMeetingSelectors';
@@ -17,7 +17,7 @@ import useStore from '../../../../store/Store';
 import { MeetingViewType } from '../../../../types/store/ActiveMeetingTypes';
 
 const MeetingViewManager = (): ReactElement => {
-	const { meetingId }: any = useParams();
+	const { meetingId }: { meetingId: string } = useParams();
 	const meetingViewSelected = useStore((store) => getMeetingViewSelected(store, meetingId));
 	const numberOfTiles = useStore((store) => getNumberOfTiles(store, meetingId));
 

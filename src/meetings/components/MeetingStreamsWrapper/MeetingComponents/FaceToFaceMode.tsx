@@ -5,15 +5,15 @@
  */
 
 import { Container, Text } from '@zextras/carbonio-design-system';
-import React, { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { ReactElement, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
+import useCentralTileDimensions from '../../../../hooks/useCentralTileDimensions';
 import {
 	getFirstStream,
-	getLocalVideoSteam,
-	getMeetingSidebarStatus
+	getLocalVideoSteam
 } from '../../../../store/selectors/ActiveMeetingSelectors';
 import { getFirstParticipant } from '../../../../store/selectors/MeetingSelectors';
 import useStore from '../../../../store/Store';
@@ -54,7 +54,7 @@ const CentralVideo = styled.video`
 `;
 
 const FaceToFaceMode = (): ReactElement => {
-	const { meetingId }: Record<string, string> = useParams();
+	const { meetingId }: { meetingId: string } = useParams();
 
 	const [t] = useTranslation();
 	const waitingParticipants = t(
@@ -67,58 +67,43 @@ const FaceToFaceMode = (): ReactElement => {
 	const localVideoStream = useStore((store) => getLocalVideoSteam(store, meetingId));
 	const centralStream = useStore((store) => getFirstStream(store, meetingId));
 
-	const sidebarStatus: boolean = useStore((store) => getMeetingSidebarStatus(store, meetingId));
+	const localStreamRef = useRef<HTMLVideoElement>(null);
+	const centerStreamRef = useRef<HTMLVideoElement>(null);
+	const faceToFaceRef = useRef<HTMLDivElement>(null);
 
-	const [centralTileSize, setCentralTileSize] = useState({ tileHeight: '0', tileWidth: '0' });
-
-	const localStreamRef = useRef<null | HTMLVideoElement>(null);
-	const centerStreamRef = useRef<null | HTMLVideoElement>(null);
-	const faceToFaceRef = useRef<null | HTMLDivElement>(null);
+	const centralTileDimensions = useCentralTileDimensions(meetingId, faceToFaceRef);
 
 	useEffect(() => {
-		if (localStreamRef != null && localStreamRef.current != null && localVideoStream != null) {
-			localStreamRef.current.srcObject = localVideoStream;
+		if (localStreamRef != null && localStreamRef.current != null) {
+			if (localVideoStream) {
+				localStreamRef.current.srcObject = localVideoStream;
+			} else {
+				localStreamRef.current.srcObject = null;
+			}
 		}
 	}, [localVideoStream]);
 
 	useEffect(() => {
-		if (centerStreamRef && centerStreamRef.current && centralStream) {
-			centerStreamRef.current.srcObject = centralStream;
+		if (centerStreamRef && centerStreamRef.current) {
+			if (centralStream) {
+				centerStreamRef.current.srcObject = centralStream;
+			} else {
+				centerStreamRef.current.srcObject = null;
+			}
 		}
 	}, [centralStream]);
-
-	const getSizeOfCentralTile = useCallback(() => {
-		if (faceToFaceRef && faceToFaceRef.current) {
-			let tileHeight;
-			let tileWidth;
-			tileHeight = (faceToFaceRef.current.offsetWidth / 16) * 9;
-			tileWidth = faceToFaceRef.current.offsetWidth;
-			if (tileHeight >= faceToFaceRef.current.offsetHeight) {
-				tileHeight = faceToFaceRef.current.offsetHeight;
-				tileWidth = (faceToFaceRef.current.offsetHeight / 9) * 16;
-			}
-			setCentralTileSize({ tileHeight: `${tileHeight}px`, tileWidth: `${tileWidth}px` });
-		}
-	}, []);
-
-	useEffect(() => {
-		window.parent.addEventListener('resize', getSizeOfCentralTile);
-		return () => window.parent.removeEventListener('resize', getSizeOfCentralTile);
-	}, [getSizeOfCentralTile]);
-
-	useEffect(() => getSizeOfCentralTile(), [faceToFaceRef, getSizeOfCentralTile, sidebarStatus]);
 
 	const centralContentToDisplay = useMemo(
 		() =>
 			centralParticipant ? (
 				<CentralTile
-					height={centralTileSize.tileHeight}
-					width={centralTileSize.tileWidth}
+					height={centralTileDimensions.height}
+					width={centralTileDimensions.width}
 					background="text"
 				>
 					<CentralVideo
-						height={centralTileSize.tileHeight}
-						width={centralTileSize.tileWidth}
+						height={centralTileDimensions.height}
+						width={centralTileDimensions.width}
 						playsInline
 						autoPlay
 						muted
@@ -131,7 +116,7 @@ const FaceToFaceMode = (): ReactElement => {
 					{waitingParticipants}
 				</Text>
 			),
-		[centralParticipant, centralTileSize.tileHeight, centralTileSize.tileWidth, waitingParticipants]
+		[centralParticipant, centralTileDimensions, waitingParticipants]
 	);
 
 	return (

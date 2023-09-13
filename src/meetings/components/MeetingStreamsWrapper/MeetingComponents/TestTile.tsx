@@ -65,3 +65,13 @@ const TestTile = ({ meetingId, userId }: TestTileProps): ReactElement => {
 };
 
 export default TestTile;
+
+const CustomContainer = styled(Container)`
+	width: 100%;
+	height: auto;
+	aspect-ratio: 16/9;
+	border: 1px solid black;
+`;
+export const SimpleTestTile = ({ userId }: { userId: string }): ReactElement => (
+	<CustomContainer>{userId}</CustomContainer>
+);
