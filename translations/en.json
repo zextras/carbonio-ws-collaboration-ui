@@ -239,9 +239,11 @@
     "tooltip": {
         "clear": "Clear",
         "close": "Close",
+        "collapseCarousel": "",
         "collapseSidebar": "Collapse sidebar",
         "demoteModerator": "Demote moderator",
         "disableModalButton": "Choose at least one address",
+        "expandCarousel": "",
         "expandSidebar": "Expand sidebar",
         "forwardedMessage": "Message forwarded from another chat",
         "goToPrivateChat": "Go to private chat",

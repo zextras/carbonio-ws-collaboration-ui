@@ -5,17 +5,17 @@
  */
 
 import { Container } from '@zextras/carbonio-design-system';
-import React, { lazy, ReactElement, Suspense, useEffect, useMemo, useRef } from 'react';
+import React, { lazy, ReactElement, Suspense, useMemo, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import ShimmerMeetingSidebar from './shimmers/ShimmerMeetingSidebar';
-import useRouting, { PAGE_INFO_TYPE } from '../../hooks/useRouting';
+import useGeneralMeetingControls from '../../hooks/useGeneralMeetingControls';
 import {
 	getMeetingSidebarStatus,
 	getMeetingViewSelected
 } from '../../store/selectors/ActiveMeetingSelectors';
-import { getMeetingByMeetingId, getNumberOfTiles } from '../../store/selectors/MeetingSelectors';
+import { getNumberOfTiles } from '../../store/selectors/MeetingSelectors';
 import { getCustomLogo } from '../../store/selectors/SessionSelectors';
 import useStore from '../../store/Store';
 import { MeetingViewType } from '../../types/store/ActiveMeetingTypes';
@@ -60,7 +60,6 @@ const LogoApp = styled(Container)`
 const MeetingSkeleton = (): ReactElement => {
 	const { meetingId }: Record<string, string> = useParams();
 
-	const meeting = useStore((store) => getMeetingByMeetingId(store, meetingId));
 	const meetingViewSelected = useStore((store) => getMeetingViewSelected(store, meetingId));
 	const sidebarStatus: boolean = useStore((store) => getMeetingSidebarStatus(store, meetingId));
 	const numberOfTiles = useStore((store) => getNumberOfTiles(store, meetingId));
@@ -68,11 +67,7 @@ const MeetingSkeleton = (): ReactElement => {
 
 	const streamsWrapperRef = useRef<HTMLDivElement>(null);
 
-	const { goToInfoPage } = useRouting();
-
-	useEffect(() => {
-		if (!meeting) goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED);
-	}, [goToInfoPage, meeting]);
+	useGeneralMeetingControls(meetingId);
 
 	const ViewToDisplay = useMemo(() => {
 		// TODO: set numberOfTiles <= 2
