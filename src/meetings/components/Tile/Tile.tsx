@@ -9,6 +9,7 @@ import {
 	Container,
 	IconButton,
 	Padding,
+	Row,
 	Shimmer,
 	Text,
 	Tooltip,
@@ -53,6 +54,35 @@ const HoverContainer = styled(Container)`
 	z-index: 1;
 `;
 
+const CustomTile = styled(Container)`
+	position: relative;
+	aspect-ratio: 16/9;
+	height: auto;
+	min-width: 9.375rem;
+	border-radius: 8px;
+	&:hover {
+		${HoverContainer} {
+			opacity: 1;
+		}
+	}
+`;
+
+const ActionContainer = styled(Container)`
+	aspect-ratio: 16/9;
+	position: absolute;
+	padding: 0.5rem;
+`;
+
+const VideoEl = styled.video`
+	width: inherit;
+	border-radius: 8px;
+	&:hover {
+		${HoverContainer} {
+			opacity: 1;
+		}
+	}
+`;
+
 const StyledAvatar = styled(Avatar)`
 	min-height: 3.125rem;
 	min-width: 3.125rem;
@@ -82,10 +112,6 @@ const CustomIconButton = styled(IconButton)`
 	}
 `;
 
-export const AvatarContainer = styled(Container)`
-	position: relative;
-`;
-
 const TextContainer = styled(Container)`
 	background-color: ${({ theme }): string => theme.palette.text.regular};
 	border-radius: 0.25rem;
@@ -93,35 +119,6 @@ const TextContainer = styled(Container)`
 	z-index: 2;
 	max-width: 100%;
 	user-select: none;
-`;
-
-const CustomContainer = styled(Container)`
-	aspect-ratio: 16/9;
-	position: absolute;
-	padding: 0.5rem;
-`;
-
-const CustomTile = styled(Container)`
-	position: relative;
-	aspect-ratio: 16/9;
-	height: auto;
-	min-width: 9.375rem;
-	border-radius: 8px;
-	&:hover {
-		${HoverContainer} {
-			opacity: 1;
-		}
-	}
-`;
-
-const VideoEl = styled.video`
-	width: inherit;
-	border-radius: 8px;
-	&:hover {
-		${HoverContainer} {
-			opacity: 1;
-		}
-	}
 `;
 
 const Tile: React.FC<TileProps> = ({ memberId, meetingId, modalProps }) => {
@@ -187,53 +184,26 @@ const Tile: React.FC<TileProps> = ({ memberId, meetingId, modalProps }) => {
 		return `${themeColor.avatarColors[color]}`;
 	}, [userName, themeColor.avatarColors]);
 
-	return (
-		<CustomTile background={'text'} data-testid="tile" width="100%">
-			{
-				// TODO uncomment when the actions on hover are implemented
-				/*! isSessionTile && (
-				<HoverContainer
-					width="100%"
-					data-testid="hover_container"
-					orientation="horizontal"
-				>
-					{audioStreamEnabled && (
-						<>
-							<IconButton
-								icon="MicOffOutline"
-								iconColor="text"
-								backgroundColor="gray6"
-								size="large"
-								borderRadius="round"
-								customSize={{ iconSize: '1.5rem', paddingSize: '0.75rem' }}
-								onClick={null}
-							/>
-							<Padding right="1rem" />
-						</>
-					)}
-					<IconButton
-						icon="Pin3Outline"
-						iconColor="text"
-						backgroundColor="gray6"
-						size="large"
-						borderRadius="round"
-						customSize={{ iconSize: '1.5rem', paddingSize: '0.75rem' }}
-						onClick={null}
-					/>
-				</HoverContainer>
-				
-				- Your camera is off
-- Your microphone is off
-				
-			) */
-			}
-			<CustomContainer
-				orientation="horizontal"
-				mainAlignment={'flex-start'}
-				crossAlignment={'flex-start'}
-				height="fit"
-				width="fill"
-			>
+	const avatarComponent = useMemo(
+		() =>
+			userName ? (
+				<StyledAvatar
+					label={userName}
+					title={userName}
+					shape="round"
+					size="extralarge"
+					background={userColor}
+					picture={picture}
+				/>
+			) : (
+				<StyledShimmerAvatar />
+			),
+		[picture, userColor, userName]
+	);
+
+	const actionIcons = useMemo(
+		() => (
+			<>
 				{!audioStreamEnabled && (
 					<>
 						<Tooltip label="Your microphone is off" disabled={!isSessionTile}>
@@ -259,7 +229,70 @@ const Tile: React.FC<TileProps> = ({ memberId, meetingId, modalProps }) => {
 						/>
 					</Tooltip>
 				)}
-			</CustomContainer>
+			</>
+		),
+		[audioStreamEnabled, isSessionTile, videoStreamEnabled]
+	);
+
+	// TODO uncomment when the actions on hover are implemented
+	/* const hoverContainer = useMemo(
+		() =>
+			!isSessionTile && (
+				<HoverContainer width="100%" data-testid="hover_container" orientation="horizontal">
+					{audioStreamEnabled && (
+						<>
+							<IconButton
+								icon="MicOffOutline"
+								iconColor="text"
+								backgroundColor="gray6"
+								size="large"
+								borderRadius="round"
+								customSize={{ iconSize: '1.5rem', paddingSize: '0.75rem' }}
+								onClick={null}
+							/>
+							<Padding right="1rem" />
+						</>
+					)}
+					<IconButton
+						icon="Pin3Outline"
+						iconColor="text"
+						backgroundColor="gray6"
+						size="large"
+						borderRadius="round"
+						customSize={{ iconSize: '1.5rem', paddingSize: '0.75rem' }}
+						onClick={null}
+					/>
+				</HoverContainer>
+			),
+		[audioStreamEnabled, isSessionTile]
+	); */
+
+	return (
+		<CustomTile background={'text'} data-testid="tile" width="100%">
+			{
+				// TODO uncomment when the actions on hover are implemented
+				/* {hoverContainer} */
+			}
+			<ActionContainer orientation="horizontal">
+				<Row
+					orientation="horizontal"
+					mainAlignment={'flex-start'}
+					crossAlignment={'flex-start'}
+					height="fill"
+				>
+					{actionIcons}
+				</Row>
+				<Row
+					mainAlignment={'flex-end'}
+					crossAlignment={'flex-end'}
+					height="fill"
+					takeAvailableSpace
+				>
+					<TextContainer width={'fit'} height={'fit'} overflow="ellipsis">
+						<Text color={'gray6'}>{userName}</Text>
+					</TextContainer>
+				</Row>
+			</ActionContainer>
 			{videoStreamEnabled ? (
 				<VideoEl
 					playsInline
@@ -269,31 +302,8 @@ const Tile: React.FC<TileProps> = ({ memberId, meetingId, modalProps }) => {
 					ref={finalStreamRef}
 				/>
 			) : (
-				<AvatarContainer data-testid="avatar_box">
-					{userName ? (
-						<StyledAvatar
-							label={userName || ''}
-							title={userName || ''}
-							shape="round"
-							size="extralarge"
-							background={userColor}
-							picture={picture}
-						/>
-					) : (
-						<StyledShimmerAvatar />
-					)}
-				</AvatarContainer>
+				<Container data-testid="avatar_box">{avatarComponent}</Container>
 			)}
-			<CustomContainer
-				mainAlignment={'flex-end'}
-				crossAlignment={'flex-end'}
-				height="fit"
-				width="fill"
-			>
-				<TextContainer width={'fit'} height={'fit'} overflow="ellipsis">
-					<Text color={'gray6'}>{userName}</Text>
-				</TextContainer>
-			</CustomContainer>
 		</CustomTile>
 	);
 };

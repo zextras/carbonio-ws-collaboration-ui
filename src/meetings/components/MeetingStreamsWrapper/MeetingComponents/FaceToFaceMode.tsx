@@ -25,10 +25,12 @@ const MyStreamContainer = styled(Container)`
 	top: -2rem;
 	right: -3.4rem;
 	transition: opacity 200ms linear;
+	border-radius: 8px;
 	z-index: 10;
 	&:hover {
 		opacity: 0;
 	}
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
 `;
 
 const CentralTile = styled(Container)`
@@ -96,7 +98,6 @@ const FaceToFaceMode = (): ReactElement => {
 				width="30%"
 				height="fit"
 				background="secondary"
-				borderRadius="round"
 			>
 				<Tile memberId={localId} meetingId={meetingId} />
 			</MyStreamContainer>
