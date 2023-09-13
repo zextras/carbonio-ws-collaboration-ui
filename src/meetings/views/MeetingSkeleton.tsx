@@ -44,7 +44,7 @@ const SkeletonContainer = styled(Container)`
 const ViewContainer = styled(Container)`
 	position: relative;
 	overflow-y: hidden;
-	padding: 1rem 4.25rem;
+	padding: 4.25rem;
 `;
 
 const LogoApp = styled(Container)`

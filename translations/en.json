@@ -237,6 +237,7 @@
     "thanksForParticipating": "Thanks for participating",
     "titlePlaceholder": "Your Group's title",
     "tooltip": {
+        "bottomOfList": "Bottom of list",
         "clear": "Clear",
         "close": "Close",
         "collapseCarousel": "Collapse",
@@ -268,9 +269,12 @@
             "updatePicture": "Update picture",
             "uploadPicture": "Upload picture"
         },
+        "scrollListDown": "Scroll list down",
+        "scrollListUp": "Scroll list up",
         "selectEmoji": "Select emoji",
         "sendMessage": "Send message",
         "showConversationList": "Show conversations list",
+        "topOfList": "Top of list",
         "unpinVideo": "Unpin video",
         "uploadAttachment": "Upload an attachment",
         "uploading": "Uploading",

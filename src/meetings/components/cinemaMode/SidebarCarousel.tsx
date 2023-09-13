@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
-import StreamsBar from './StreamsBar';
+import TilesBar from './TilesBar';
 import { MeetingRoutesParams } from '../../../hooks/useRouting';
 import { getMeetingCarouselVisibility } from '../../../store/selectors/ActiveMeetingSelectors';
 import useStore from '../../../store/Store';
@@ -66,7 +66,7 @@ const SidebarCarousel = (): ReactElement => {
 					/>
 				</Tooltip>
 			</ChangeSidebarStatusButton>
-			{carouselIsVisible && <StreamsBar />}
+			{carouselIsVisible && <TilesBar />}
 		</SidebarContainer>
 	);
 };
