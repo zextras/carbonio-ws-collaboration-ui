@@ -9,7 +9,9 @@ import {
 	Container,
 	IconButton,
 	Padding,
+	Shimmer,
 	Text,
+	Tooltip,
 	useTheme
 } from '@zextras/carbonio-design-system';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
@@ -22,6 +24,7 @@ import {
 	getParticipantVideoStatus
 } from '../../../store/selectors/MeetingSelectors';
 // import { getUserId } from '../../../store/selectors/SessionSelectors';
+import { getUserId } from '../../../store/selectors/SessionSelectors';
 import { getUserName, getUserPictureUpdatedAt } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
 import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
@@ -60,9 +63,23 @@ const StyledAvatar = styled(Avatar)`
 	max-width: 8.75rem;
 `;
 
+const StyledShimmerAvatar = styled(Shimmer.Avatar)`
+	min-height: 3.125rem;
+	min-width: 3.125rem;
+	height: 49%;
+	width: 27.5%;
+	aspect-ratio: 1;
+	max-height: 8.75rem;
+	max-width: 8.75rem;
+`;
+
 const CustomIconButton = styled(IconButton)`
 	cursor: default;
 	z-index: 1;
+	&:hover {
+		background-color: ${({ theme }): string => theme.palette.gray0.regular} !important;
+		color: ${({ theme }): string => theme.palette.gray6.regular} !important;
+	}
 `;
 
 export const AvatarContainer = styled(Container)`
@@ -80,14 +97,15 @@ const TextContainer = styled(Container)`
 
 const CustomContainer = styled(Container)`
 	aspect-ratio: 16/9;
-	height: auto;
 	position: absolute;
 	padding: 0.5rem;
 `;
 
 const CustomTile = styled(Container)`
+	position: relative;
 	aspect-ratio: 16/9;
 	height: auto;
+	min-width: 9.375rem;
 	border-radius: 8px;
 	&:hover {
 		${HoverContainer} {
@@ -107,7 +125,7 @@ const VideoEl = styled.video`
 `;
 
 const Tile: React.FC<TileProps> = ({ memberId, meetingId, modalProps }) => {
-	// const isSessionTile = useStore(getUserId) === memberId;
+	const isSessionTile = useStore(getUserId) === memberId;
 	const userName = useStore((store) => getUserName(store, memberId || ''));
 	const audioStatus = useStore((store) => getParticipantAudioStatus(store, meetingId, memberId));
 	const videoStatus = useStore((store) => getParticipantVideoStatus(store, meetingId, memberId));
@@ -203,34 +221,43 @@ const Tile: React.FC<TileProps> = ({ memberId, meetingId, modalProps }) => {
 						onClick={null}
 					/>
 				</HoverContainer>
+				
+				- Your camera is off
+- Your microphone is off
+				
 			) */
 			}
 			<CustomContainer
 				orientation="horizontal"
-				width="100%"
 				mainAlignment={'flex-start'}
 				crossAlignment={'flex-start'}
+				height="fit"
+				width="fill"
 			>
 				{!audioStreamEnabled && (
 					<>
+						<Tooltip label="Your microphone is off" disabled={!isSessionTile}>
+							<CustomIconButton
+								icon="MicOffOutline"
+								iconColor="gray6"
+								backgroundColor="gray0"
+								size="large"
+								onClick={null}
+							/>
+						</Tooltip>
+						<Padding right="0.5rem" />
+					</>
+				)}
+				{!videoStreamEnabled && (
+					<Tooltip label="Your camera is off" disabled={!isSessionTile}>
 						<CustomIconButton
-							icon="MicOffOutline"
+							icon="VideoOffOutline"
 							iconColor="gray6"
 							backgroundColor="gray0"
 							size="large"
 							onClick={null}
 						/>
-						<Padding right="0.5rem" />
-					</>
-				)}
-				{!videoStreamEnabled && (
-					<CustomIconButton
-						icon="VideoOffOutline"
-						iconColor="gray6"
-						backgroundColor="gray0"
-						size="large"
-						onClick={null}
-					/>
+					</Tooltip>
 				)}
 			</CustomContainer>
 			{videoStreamEnabled ? (
@@ -243,17 +270,26 @@ const Tile: React.FC<TileProps> = ({ memberId, meetingId, modalProps }) => {
 				/>
 			) : (
 				<AvatarContainer data-testid="avatar_box">
-					<StyledAvatar
-						label={userName || ''}
-						title={userName || ''}
-						shape="round"
-						size="extralarge"
-						background={userColor}
-						picture={picture}
-					/>
+					{userName ? (
+						<StyledAvatar
+							label={userName || ''}
+							title={userName || ''}
+							shape="round"
+							size="extralarge"
+							background={userColor}
+							picture={picture}
+						/>
+					) : (
+						<StyledShimmerAvatar />
+					)}
 				</AvatarContainer>
 			)}
-			<CustomContainer width="100%" mainAlignment={'flex-end'} crossAlignment={'flex-end'}>
+			<CustomContainer
+				mainAlignment={'flex-end'}
+				crossAlignment={'flex-end'}
+				height="fit"
+				width="fill"
+			>
 				<TextContainer width={'fit'} height={'fit'} overflow="ellipsis">
 					<Text color={'gray6'}>{userName}</Text>
 				</TextContainer>
