@@ -10,11 +10,12 @@ import React, { ReactElement, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
-import TestTile from './TestTile';
 import { getMeetingParticipantsByMeetingId } from '../../../../store/selectors/MeetingSelectors';
 import useStore from '../../../../store/Store';
+import Tile from '../../Tile/Tile';
 
 const CinemaModeWrapper = styled(Container)`
+	width: 20rem;
 	position: relative;
 `;
 
@@ -26,7 +27,7 @@ const CinemaMode = (): ReactElement => {
 	const videos = useMemo(
 		() =>
 			map(participants, (participant) => (
-				<TestTile key={participant.userId} meetingId={meetingId} userId={participant.userId} />
+				<Tile key={participant.userId} meetingId={meetingId} memberId={participant.userId} />
 			)),
 		[meetingId, participants]
 	);

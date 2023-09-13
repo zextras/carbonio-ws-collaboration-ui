@@ -21,6 +21,7 @@ import styled from 'styled-components';
 import Tile from './Tile/Tile';
 import useRouting, { PAGE_INFO_TYPE } from '../../hooks/useRouting';
 import { MeetingsApi } from '../../network';
+import { getMeeting } from '../../store/selectors/MeetingSelectors';
 import {
 	getRoomMembers,
 	getRoomNameSelector,
@@ -89,6 +90,7 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 
 	const sessionId: string | undefined = useStore((store) => store.session.id);
 	const roomMembers: Member[] | undefined = useStore((state) => getRoomMembers(state, roomId));
+	const meeting = useStore((store) => getMeeting(store, roomId));
 
 	const [videoStreamEnabled, setVideoStreamEnabled] = useState(false);
 	const [audioStreamEnabled, setAudioStreamEnabled] = useState(false);
@@ -345,22 +347,19 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 			>
 				<VideoTile width={wrapperWidth}>
 					<Tile
-						streamRef={videoStreamRef}
-						streamMuted={videoPlayerTestMuted}
-						videoStreamEnabled={videoStreamEnabled}
-						audioStreamEnabled={audioStreamEnabled}
 						memberId={memberId}
+						meetingId={meeting?.id}
+						modalProps={{
+							streamRef: videoStreamRef,
+							streamMuted: videoPlayerTestMuted,
+							audioStreamEnabled,
+							videoStreamEnabled
+						}}
 					/>
 				</VideoTile>
 				<Padding top="1rem" />
 				<Text weight="bold">{joinMeetingDescription}</Text>
-				<Container
-					padding={{ top: '1rem' }}
-					ref={wrapperRef}
-					height="fit"
-					width="fill"
-					orientation={'horizontal'}
-				>
+				<Container padding={{ top: '1rem' }} height="fit" width="fill" orientation={'horizontal'}>
 					<Tooltip
 						placement="top"
 						label={videoStreamEnabled ? disableVideoLabel : enableVideoLabel}

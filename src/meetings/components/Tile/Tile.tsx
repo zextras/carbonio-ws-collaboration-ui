@@ -12,24 +12,38 @@ import {
 	Text,
 	useTheme
 } from '@zextras/carbonio-design-system';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 
 import { UsersApi } from '../../../network';
+import { getStream } from '../../../store/selectors/ActiveMeetingSelectors';
+import {
+	getParticipantAudioStatus,
+	getParticipantVideoStatus
+} from '../../../store/selectors/MeetingSelectors';
+// import { getUserId } from '../../../store/selectors/SessionSelectors';
 import { getUserName, getUserPictureUpdatedAt } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
+import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
 import { calculateAvatarColor } from '../../../utils/styleUtils';
 
-type TileProps = {
+type modalTileProps = {
 	streamRef: React.MutableRefObject<HTMLVideoElement | null>;
 	streamMuted: boolean;
 	videoStreamEnabled: boolean;
 	audioStreamEnabled: boolean;
+};
+
+type TileProps = {
 	memberId: string | undefined;
-	isScreenShare?: boolean;
+	meetingId: string | undefined;
+	// isScreenShare?: boolean;
+	modalProps?: modalTileProps;
 };
 
 const HoverContainer = styled(Container)`
+	aspect-ratio: 16/9;
+	height: auto;
 	opacity: 0;
 	position: absolute;
 	background-color: rgba(255, 255, 255, 0.7);
@@ -37,12 +51,18 @@ const HoverContainer = styled(Container)`
 `;
 
 const StyledAvatar = styled(Avatar)`
-	min-height: 7.5rem;
-	min-width: 7.5rem;
+	min-height: 3.125rem;
+	min-width: 3.125rem;
+	height: 49%;
+	width: 27.5%;
+	aspect-ratio: 1;
+	max-height: 8.75rem;
+	max-width: 8.75rem;
 `;
 
 const CustomIconButton = styled(IconButton)`
 	cursor: default;
+	z-index: 1;
 `;
 
 export const AvatarContainer = styled(Container)`
@@ -54,14 +74,20 @@ const TextContainer = styled(Container)`
 	border-radius: 0.25rem;
 	padding: 0.25rem 0.5rem;
 	z-index: 2;
+	max-width: 100%;
+	user-select: none;
 `;
 
 const CustomContainer = styled(Container)`
+	aspect-ratio: 16/9;
+	height: auto;
 	position: absolute;
 	padding: 0.5rem;
 `;
 
-const CentralTile = styled(Container)`
+const CustomTile = styled(Container)`
+	aspect-ratio: 16/9;
+	height: auto;
 	border-radius: 8px;
 	&:hover {
 		${HoverContainer} {
@@ -70,11 +96,9 @@ const CentralTile = styled(Container)`
 	}
 `;
 
-const VideoEl = styled.video<{
-	isScreenShare: boolean;
-}>`
-	${({ isScreenShare }): string | false => isScreenShare && 'max-height: 100%'};
-	max-width: 100%;
+const VideoEl = styled.video`
+	width: inherit;
+	border-radius: 8px;
 	&:hover {
 		${HoverContainer} {
 			opacity: 1;
@@ -82,25 +106,34 @@ const VideoEl = styled.video<{
 	}
 `;
 
-const Tile: React.FC<TileProps> = ({
-	streamRef,
-	streamMuted,
-	videoStreamEnabled,
-	audioStreamEnabled,
-	memberId,
-	isScreenShare
-}) => {
-	const sessionId: string | undefined = useStore((store) => store.session.id);
+const Tile: React.FC<TileProps> = ({ memberId, meetingId, modalProps }) => {
+	// const isSessionTile = useStore(getUserId) === memberId;
 	const userName = useStore((store) => getUserName(store, memberId || ''));
+	const audioStatus = useStore((store) => getParticipantAudioStatus(store, meetingId, memberId));
+	const videoStatus = useStore((store) => getParticipantVideoStatus(store, meetingId, memberId));
+	const videoStream = useStore((store) =>
+		getStream(store, meetingId || '', memberId || '', STREAM_TYPE.VIDEO)
+	);
+
+	const [picture, setPicture] = useState<false | string>(false);
+
+	const streamRef = useRef<null | HTMLVideoElement>(null);
+
 	const userPictureUpdatedAt: string | undefined = useStore((state) =>
 		getUserPictureUpdatedAt(state, memberId || '')
 	);
 
 	const themeColor = useTheme();
 
-	const [picture, setPicture] = useState<false | string>(false);
-
-	const isMyTile = useMemo(() => memberId === sessionId, [memberId, sessionId]);
+	useEffect(() => {
+		if (streamRef && streamRef.current) {
+			if (videoStream) {
+				streamRef.current.srcObject = videoStream;
+			} else {
+				streamRef.current.srcObject = null;
+			}
+		}
+	}, [videoStatus, videoStream]);
 
 	useEffect(() => {
 		if (userPictureUpdatedAt != null) {
@@ -110,15 +143,42 @@ const Tile: React.FC<TileProps> = ({
 		}
 	}, [memberId, userPictureUpdatedAt]);
 
+	const finalStreamRef = useMemo(() => {
+		if (modalProps) {
+			return modalProps.streamRef;
+		}
+		return streamRef;
+	}, [modalProps, streamRef]);
+
+	const audioStreamEnabled = useMemo(() => {
+		if (modalProps) {
+			return modalProps.audioStreamEnabled;
+		}
+		return audioStatus;
+	}, [audioStatus, modalProps]);
+
+	const videoStreamEnabled = useMemo(() => {
+		if (modalProps) {
+			return modalProps.videoStreamEnabled;
+		}
+		return videoStatus;
+	}, [modalProps, videoStatus]);
+
 	const userColor = useMemo(() => {
 		const color = calculateAvatarColor(userName || '');
 		return `${themeColor.avatarColors[color]}`;
 	}, [userName, themeColor.avatarColors]);
 
 	return (
-		<CentralTile background={'text'} data-testid="tile">
-			{!isMyTile && (
-				<HoverContainer width="100%" data-testid="hover_container" orientation="horizontal">
+		<CustomTile background={'text'} data-testid="tile" width="100%">
+			{
+				// TODO uncomment when the actions on hover are implemented
+				/*! isSessionTile && (
+				<HoverContainer
+					width="100%"
+					data-testid="hover_container"
+					orientation="horizontal"
+				>
 					{audioStreamEnabled && (
 						<>
 							<IconButton
@@ -143,7 +203,8 @@ const Tile: React.FC<TileProps> = ({
 						onClick={null}
 					/>
 				</HoverContainer>
-			)}
+			) */
+			}
 			<CustomContainer
 				orientation="horizontal"
 				width="100%"
@@ -176,28 +237,28 @@ const Tile: React.FC<TileProps> = ({
 				<VideoEl
 					playsInline
 					autoPlay
-					muted={streamMuted}
+					muted={modalProps ? modalProps.streamMuted : true}
 					controls={false}
-					ref={streamRef}
-					isScreenShare={isScreenShare || false}
+					ref={finalStreamRef}
 				/>
 			) : (
-				<AvatarContainer data-testid="avatar_box" width="fit">
+				<AvatarContainer data-testid="avatar_box">
 					<StyledAvatar
 						label={userName || ''}
 						title={userName || ''}
 						shape="round"
+						size="extralarge"
 						background={userColor}
 						picture={picture}
 					/>
 				</AvatarContainer>
 			)}
 			<CustomContainer width="100%" mainAlignment={'flex-end'} crossAlignment={'flex-end'}>
-				<TextContainer width={'fit'} height={'fit'}>
+				<TextContainer width={'fit'} height={'fit'} overflow="ellipsis">
 					<Text color={'gray6'}>{userName}</Text>
 				</TextContainer>
 			</CustomContainer>
-		</CentralTile>
+		</CustomTile>
 	);
 };
 

@@ -10,13 +10,11 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
-import {
-	getFirstStream,
-	getLocalVideoSteam,
-	getMeetingSidebarStatus
-} from '../../../../store/selectors/ActiveMeetingSelectors';
+import { getMeetingSidebarStatus } from '../../../../store/selectors/ActiveMeetingSelectors';
 import { getFirstParticipant } from '../../../../store/selectors/MeetingSelectors';
+import { getUserId } from '../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../store/Store';
+import Tile from '../../Tile/Tile';
 
 const FaceToFace = styled(Container)`
 	position: relative;
@@ -33,22 +31,8 @@ const MyStreamContainer = styled(Container)`
 	}
 `;
 
-const TileVideo = styled.video`
-	width: 16rem;
-	border-radius: 8px;
-	background: linear-gradient(180deg, rgba(0, 0, 0, 0) 78.65%, rgba(0, 0, 0, 0.5) 100%),
-		lightgray 50% / cover no-repeat;
-`;
-
 const CentralTile = styled(Container)`
 	border-radius: 8px;
-`;
-
-const CentralVideo = styled.video`
-	width: 100%;
-	border-radius: 8px;
-	background: linear-gradient(180deg, rgba(0, 0, 0, 0) 78.65%, rgba(0, 0, 0, 0.5) 100%),
-		lightgray 50% / cover no-repeat;
 `;
 
 const FaceToFaceMode = (): ReactElement => {
@@ -62,28 +46,13 @@ const FaceToFaceMode = (): ReactElement => {
 
 	const centralParticipant = useStore((store) => getFirstParticipant(store, meetingId));
 
-	const localVideoStream = useStore((store) => getLocalVideoSteam(store, meetingId));
-	const centralStream = useStore((store) => getFirstStream(store, meetingId));
+	const localId = useStore(getUserId);
 
 	const sidebarStatus: boolean = useStore((store) => getMeetingSidebarStatus(store, meetingId));
 
 	const [centralTileSize, setCentralTileSize] = useState({ tileHeight: '0', tileWidth: '0' });
 
-	const localStreamRef = useRef<null | HTMLVideoElement>(null);
-	const centerStreamRef = useRef<null | HTMLVideoElement>(null);
 	const faceToFaceRef = useRef<null | HTMLDivElement>(null);
-
-	useEffect(() => {
-		if (localStreamRef != null && localStreamRef.current != null && localVideoStream != null) {
-			localStreamRef.current.srcObject = localVideoStream;
-		}
-	}, [localVideoStream]);
-
-	useEffect(() => {
-		if (centerStreamRef && centerStreamRef.current && centralStream) {
-			centerStreamRef.current.srcObject = centralStream;
-		}
-	}, [centralStream]);
 
 	const getSizeOfCentralTile = useCallback(() => {
 		if (faceToFaceRef && faceToFaceRef.current) {
@@ -109,33 +78,27 @@ const FaceToFaceMode = (): ReactElement => {
 	const centralContentToDisplay = useMemo(
 		() =>
 			centralParticipant ? (
-				<CentralTile
-					height={centralTileSize.tileHeight}
-					width={centralTileSize.tileWidth}
-					background="text"
-				>
-					<CentralVideo playsInline autoPlay muted controls={false} ref={centerStreamRef} />
+				<CentralTile width={centralTileSize.tileWidth} height="fit" background="text">
+					<Tile memberId={centralParticipant.userId} meetingId={meetingId} />
 				</CentralTile>
 			) : (
 				<Text color="gray6" size="large">
 					{waitingParticipants}
 				</Text>
 			),
-		[centralParticipant, centralTileSize.tileHeight, centralTileSize.tileWidth, waitingParticipants]
+		[centralParticipant, centralTileSize.tileWidth, meetingId, waitingParticipants]
 	);
 
 	return (
 		<FaceToFace data-testid="faceToFaceModeView" ref={faceToFaceRef}>
 			<MyStreamContainer
 				data-testid="myStreamContainer"
+				width="30%"
 				height="fit"
-				width="fit"
 				background="secondary"
 				borderRadius="round"
 			>
-				<TileVideo id="testVideo" playsInline autoPlay muted controls={false} ref={localStreamRef}>
-					Your browser does not support the <code>video</code> element.
-				</TileVideo>
+				<Tile memberId={localId} meetingId={meetingId} />
 			</MyStreamContainer>
 			{centralContentToDisplay}
 		</FaceToFace>
