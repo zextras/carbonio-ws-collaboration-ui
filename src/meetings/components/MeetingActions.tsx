@@ -10,7 +10,7 @@ import React, { ReactElement, RefObject, useCallback, useEffect, useMemo, useSta
 import { useParams } from 'react-router-dom';
 import styled, { FlattenSimpleInterpolation } from 'styled-components';
 
-import useRouting, { PAGE_INFO_TYPE } from '../../hooks/useRouting';
+import useRouting, { MeetingRoutesParams, PAGE_INFO_TYPE } from '../../hooks/useRouting';
 import { MeetingsApi } from '../../network';
 import {
 	getMeetingViewSelected,
@@ -48,7 +48,7 @@ type MeetingActionsProps = {
 
 const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElement => {
 	const { goToInfoPage } = useRouting();
-	const { meetingId }: Record<string, string> = useParams();
+	const { meetingId }: MeetingRoutesParams = useParams();
 
 	const setLocalStreams = useStore((store) => store.setLocalStreams);
 	const removeLocalStreams = useStore((store) => store.removeLocalStreams);

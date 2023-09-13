@@ -13,6 +13,7 @@ import styled from 'styled-components';
 import MeetingConversationAccordion from './MeetingConversationAccordion/MeetingConversationAccordion';
 import MeetingParticipantsAccordion from './ParticipantsAccordion/MeetingParticipantsAccordion';
 import { ActionsAccordion } from '../../../chats/components/infoPanel/conversationActionsAccordion/ActionsAccordion';
+import { MeetingRoutesParams } from '../../../hooks/useRouting';
 import {
 	getMeetingChatVisibility,
 	getMeetingSidebarStatus
@@ -44,7 +45,7 @@ const AccordionContainer = styled(Container)`
 `;
 
 const MeetingSidebar = (): ReactElement => {
-	const { meetingId }: Record<string, string> = useParams();
+	const { meetingId }: MeetingRoutesParams = useParams();
 
 	const [t] = useTranslation();
 	const collapseSidebarLabel = t('tooltip.collapseSidebar', 'Collapse sidebar');

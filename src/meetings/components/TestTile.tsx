@@ -75,3 +75,8 @@ const CustomContainer = styled(Container)`
 export const SimpleTestTile = ({ userId }: { userId: string }): ReactElement => (
 	<CustomContainer background="text">{userId}</CustomContainer>
 );
+
+export type TileData = {
+	userId: string;
+	type: STREAM_TYPE;
+};

@@ -11,6 +11,7 @@ import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import StreamsBar from './StreamsBar';
+import { MeetingRoutesParams } from '../../../hooks/useRouting';
 import { getMeetingCarouselVisibility } from '../../../store/selectors/ActiveMeetingSelectors';
 import useStore from '../../../store/Store';
 
@@ -31,7 +32,7 @@ const SidebarIconButton = styled(IconButton)`
 `;
 
 const SidebarCarousel = (): ReactElement => {
-	const { meetingId }: Record<string, string> = useParams();
+	const { meetingId }: MeetingRoutesParams = useParams();
 
 	const [t] = useTranslation();
 	const collapseCarouselLabel = t('tooltip.collapseCarousel', 'Collapse');
@@ -46,7 +47,7 @@ const SidebarCarousel = (): ReactElement => {
 
 	return (
 		<SidebarContainer
-			background="text"
+			background="gray0"
 			width={carouselIsVisible ? '35%' : '0'}
 			minWidth={carouselIsVisible ? '150px' : '0'}
 			maxWidth="300px"

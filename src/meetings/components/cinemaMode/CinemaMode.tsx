@@ -6,22 +6,19 @@
 
 import { Container } from '@zextras/carbonio-design-system';
 import React, { ReactElement } from 'react';
+import { useParams } from 'react-router-dom';
 
-import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
+import useCalculateTilesOrder from '../../../hooks/useCalculateTilesOrder';
+import { MeetingRoutesParams } from '../../../hooks/useRouting';
 import { SimpleTestTile } from '../TestTile';
 
 const CinemaMode = (): ReactElement => {
-	// const { meetingId }: { meetingId: string } = useParams();
-
-	// TODO select stream to show
-	const centralTileStream: { userId: string; type: STREAM_TYPE } = {
-		userId: 'IO',
-		type: STREAM_TYPE.VIDEO
-	};
+	const { meetingId }: MeetingRoutesParams = useParams();
+	const { centralTile } = useCalculateTilesOrder(meetingId);
 
 	return (
 		<Container data-testid="cinemaModeView">
-			<SimpleTestTile userId={centralTileStream.userId} />
+			<SimpleTestTile userId={centralTile.userId} />
 		</Container>
 	);
 };

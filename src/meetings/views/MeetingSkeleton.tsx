@@ -11,6 +11,7 @@ import styled from 'styled-components';
 
 import ShimmerMeetingSidebar from './shimmers/ShimmerMeetingSidebar';
 import useGeneralMeetingControls from '../../hooks/useGeneralMeetingControls';
+import { MeetingRoutesParams } from '../../hooks/useRouting';
 import {
 	getMeetingSidebarStatus,
 	getMeetingViewSelected
@@ -58,7 +59,7 @@ const LogoApp = styled(Container)`
 `;
 
 const MeetingSkeleton = (): ReactElement => {
-	const { meetingId }: Record<string, string> = useParams();
+	const { meetingId }: MeetingRoutesParams = useParams();
 
 	const meetingViewSelected = useStore((store) => getMeetingViewSelected(store, meetingId));
 	const sidebarStatus: boolean = useStore((store) => getMeetingSidebarStatus(store, meetingId));
@@ -86,7 +87,7 @@ const MeetingSkeleton = (): ReactElement => {
 			<MeetingSidebar />
 			<ViewContainer
 				ref={streamsWrapperRef}
-				background={'gray0'}
+				background="gray0"
 				width={sidebarStatus ? 'fill' : '100%'}
 				borderRadius="none"
 				padding={{ all: 'large' }}

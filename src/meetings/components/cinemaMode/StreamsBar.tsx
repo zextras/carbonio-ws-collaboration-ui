@@ -5,89 +5,92 @@
  */
 
 import { Container, IconButton } from '@zextras/carbonio-design-system';
-import { map } from 'lodash';
-import React, { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { map, size } from 'lodash';
+import React, { ReactElement, useCallback, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { getMeetingParticipantsByMeetingId } from '../../../store/selectors/MeetingSelectors';
-import useStore from '../../../store/Store';
-import { MeetingParticipantMap } from '../../../types/store/MeetingTypes';
-import {
-	calcTilesQuantity,
-	listOfTileToShow,
-	positionToStartOnNextButton,
-	positionToStartOnPrevButton
-} from '../../../utils/MeetingsUtils';
+import useCalculateTilesOrder from '../../../hooks/useCalculateTilesOrder';
+import { MeetingRoutesParams } from '../../../hooks/useRouting';
 import { SimpleTestTile } from '../TestTile';
 
-const ArrowButton = styled(IconButton)`
-	width: 16rem;
+const StreamBarContainer = styled(Container)`
+	padding: 1rem 1rem 1rem 0;
 `;
 
-const streamsInMeeting = ['1', '2', '3', '4', '5'];
+const TileContainer = styled(Container)`
+	gap: 1rem;
+`;
+
+const ArrowButton = styled(IconButton)`
+	width: 100%;
+`;
 
 const StreamsBar = (): ReactElement => {
-	const { meetingId }: Record<string, string> = useParams();
+	const { meetingId }: MeetingRoutesParams = useParams();
 
-	const meetingParticipants: MeetingParticipantMap | undefined = useStore((store) =>
-		getMeetingParticipantsByMeetingId(store, meetingId)
+	const [index, setIndex] = useState(0);
+
+	const tilesContainerRef = useRef<HTMLDivElement>(null);
+
+	const { carouselTiles } = useCalculateTilesOrder(meetingId);
+	const totalTiles = useMemo(() => size(carouselTiles), [carouselTiles]);
+	const step = useMemo(() => (totalTiles > 3 ? 3 : totalTiles), [totalTiles]);
+
+	// TODO calculate how many tiles can max be shown
+	const tilesForPage = useMemo(() => 5, []);
+
+	const tilesToRender = useMemo(() => {
+		const selectedTiles = carouselTiles.slice(index, index + tilesForPage);
+		return map(selectedTiles, (tile) => <SimpleTestTile userId={tile.userId} />);
+	}, [carouselTiles, index, tilesForPage]);
+
+	const clickPrevButton = useCallback(
+		() => setIndex((prev) => (prev - step > 0 ? prev - step : 0)),
+		[step]
 	);
 
-	const [numOfTilesToDisplay, setNumOfTilesToDisplay] = useState(0);
-	const [lastTileIdxPosition, setLastTileIdxPosition] = useState<null | number>(null);
-	const [tilesToDisplay, setTilesToDisplay] = useState<string[]>([]);
-
-	const streamWrapperRef = useRef<null | HTMLDivElement>(null);
-
-	const streamsCarousel = useMemo(
-		() => map(tilesToDisplay, (tile) => <SimpleTestTile userId={tile} />),
-		[tilesToDisplay]
+	const clickNextButton = useCallback(
+		() =>
+			setIndex((prev) =>
+				prev + step >= totalTiles - tilesForPage ? totalTiles - tilesForPage : prev + step
+			),
+		[step, tilesForPage, totalTiles]
 	);
 
-	const handleClickOnPrevButton = useCallback(() => {
-		const lastPosUpdated = positionToStartOnPrevButton(
-			numOfTilesToDisplay,
-			streamsInMeeting,
-			lastTileIdxPosition
-		);
-		setLastTileIdxPosition(lastPosUpdated);
-	}, [numOfTilesToDisplay, lastTileIdxPosition]);
+	const prevButtonDisabled = useMemo(() => index === 0, [index]);
 
-	const handleClickOnNextButton = useCallback(() => {
-		const lastPosUpdated = positionToStartOnNextButton(
-			numOfTilesToDisplay,
-			streamsInMeeting,
-			lastTileIdxPosition
-		);
-		setLastTileIdxPosition(lastPosUpdated);
-	}, [numOfTilesToDisplay, lastTileIdxPosition]);
+	const nextButtonDisabled = useMemo(
+		() => index === totalTiles - tilesForPage,
+		[index, tilesForPage, totalTiles]
+	);
 
-	useEffect(() => {
-		const numOfTiles = calcTilesQuantity(streamWrapperRef.current?.offsetHeight ?? 0);
-		const idsListTileToShow = listOfTileToShow(numOfTiles, streamsInMeeting, lastTileIdxPosition);
-		setNumOfTilesToDisplay(numOfTiles);
-		setTilesToDisplay(idsListTileToShow);
-	}, [meetingParticipants, numOfTilesToDisplay, lastTileIdxPosition]);
+	const showButtons = useMemo(() => totalTiles > tilesForPage, [tilesForPage, totalTiles]);
 
 	return (
-		<Container mainAlignment="space-between">
-			<ArrowButton
-				onClick={handleClickOnPrevButton}
-				conColor="gray6"
-				backgroundColor="text"
-				icon="ChevronUpOutline"
-				size="large"
-			/>
-			<Container ref={streamWrapperRef}>{streamsCarousel}</Container>
-			<ArrowButton
-				onClick={handleClickOnNextButton}
-				conColor="gray6"
-				backgroundColor="text"
-				icon="ChevronDownOutline"
-				size="large"
-			/>
-		</Container>
+		<StreamBarContainer mainAlignment="space-between">
+			{showButtons && (
+				<ArrowButton
+					conColor="gray6"
+					backgroundColor="text"
+					icon="ChevronUpOutline"
+					size="large"
+					onClick={clickPrevButton}
+					disabled={prevButtonDisabled}
+				/>
+			)}
+			<TileContainer ref={tilesContainerRef}>{tilesToRender}</TileContainer>
+			{showButtons && (
+				<ArrowButton
+					conColor="gray6"
+					backgroundColor="text"
+					icon="ChevronDownOutline"
+					size="large"
+					onClick={clickNextButton}
+					disabled={nextButtonDisabled}
+				/>
+			)}
+		</StreamBarContainer>
 	);
 };
 

@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
+import { MeetingRoutesParams } from '../../../hooks/useRouting';
 import { getFirstParticipant } from '../../../store/selectors/MeetingSelectors';
 import useStore from '../../../store/Store';
 import { SimpleTestTile } from '../TestTile';
@@ -33,7 +34,7 @@ const MyStreamContainer = styled(Container)`
 `;
 
 const FaceToFaceMode = (): ReactElement => {
-	const { meetingId }: { meetingId: string } = useParams();
+	const { meetingId }: MeetingRoutesParams = useParams();
 
 	const [t] = useTranslation();
 	const waitingParticipants = t(
