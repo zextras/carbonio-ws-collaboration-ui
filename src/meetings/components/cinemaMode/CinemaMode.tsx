@@ -9,7 +9,6 @@ import React, { ReactElement, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
-import SidebarCarousel from './SidebarCarousel';
 import useCentralTileDimensions from '../../../hooks/useCentralTileDimensions';
 import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
 import { SimpleTestTile } from '../TestTile';
@@ -42,7 +41,6 @@ const CinemaMode = (): ReactElement => {
 					<SimpleTestTile userId={centralTileStream.userId} />
 				</MainStreamWrapper>
 			</Container>
-			<SidebarCarousel />
 		</Container>
 	);
 };

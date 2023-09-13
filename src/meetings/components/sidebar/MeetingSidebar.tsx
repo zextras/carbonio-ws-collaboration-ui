@@ -36,7 +36,7 @@ const ChangeSidebarStatusButton = styled.div`
 
 const SidebarIconButton = styled(IconButton)`
 	width: 2.25rem;
-	height: 15.09375rem;
+	height: 15rem;
 `;
 
 const AccordionContainer = styled(Container)`
