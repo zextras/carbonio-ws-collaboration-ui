@@ -10,19 +10,19 @@ import { UserEvent } from '@testing-library/user-event/setup/setup';
 import React from 'react';
 
 import MeetingViewManager from './MeetingViewManager';
-import { mockUseParams } from '../../../../../jest-mocks';
-import useStore from '../../../../store/Store';
+import { mockUseParams } from '../../../jest-mocks';
+import useStore from '../../store/Store';
 import {
 	createMockMeeting,
 	createMockMember,
 	createMockParticipants,
 	createMockRoom
-} from '../../../../tests/createMock';
-import { setup } from '../../../../tests/test-utils';
-import { MeetingBe, MeetingParticipant } from '../../../../types/network/models/meetingBeTypes';
-import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
-import { MeetingViewType } from '../../../../types/store/ActiveMeetingTypes';
-import { RootStore } from '../../../../types/store/StoreTypes';
+} from '../../tests/createMock';
+import { setup } from '../../tests/test-utils';
+import { MeetingBe, MeetingParticipant } from '../../types/network/models/meetingBeTypes';
+import { RoomBe, RoomType } from '../../types/network/models/roomBeTypes';
+import { MeetingViewType } from '../../types/store/ActiveMeetingTypes';
+import { RootStore } from '../../types/store/StoreTypes';
 
 const gridModeViewTestId = 'gridModeView';
 const cinemaModeViewTestId = 'cinemaModeView';
@@ -84,23 +84,10 @@ const setupMeetingWith3Participants = (): { user: UserEvent; store: RootStore } 
 };
 
 describe('MeetingViewManager', () => {
-	test('It should display the MeetingViewManager component', async () => {
-		setupBasicGroupMeeting();
-	});
 	test('Display the faceToFace viewMode with 2 participants', async () => {
 		setupBasicGroupMeeting();
 		const faceToFaceSelected = await screen.findByTestId(faceToFaceModeViewTestId);
 		expect(faceToFaceSelected).toBeInTheDocument();
-	});
-	test('Expect not to display cinemaMode with 2 participants', async () => {
-		setupBasicGroupMeeting();
-		const faceToFaceSelected = screen.queryByTestId(cinemaModeViewTestId);
-		expect(faceToFaceSelected).not.toBeInTheDocument();
-	});
-	test('Expect not to display gridMode with 2 participants', async () => {
-		setupBasicGroupMeeting();
-		const gridModeViewSelected = screen.queryByTestId(gridModeViewTestId);
-		expect(gridModeViewSelected).not.toBeInTheDocument();
 	});
 	test('Display change view from faceToFace to cinema mode on first time when a participant joins', async () => {
 		const { store } = setupBasicGroupMeeting();

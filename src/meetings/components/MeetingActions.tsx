@@ -10,21 +10,21 @@ import React, { ReactElement, RefObject, useCallback, useEffect, useMemo, useSta
 import { useParams } from 'react-router-dom';
 import styled, { FlattenSimpleInterpolation } from 'styled-components';
 
-import useRouting, { PAGE_INFO_TYPE } from '../../../../hooks/useRouting';
-import { MeetingsApi } from '../../../../network';
+import useRouting, { PAGE_INFO_TYPE } from '../../hooks/useRouting';
+import { MeetingsApi } from '../../network';
 import {
 	getMeetingViewSelected,
 	getSelectedAudioDeviceId,
 	getSelectedVideoDeviceId
-} from '../../../../store/selectors/ActiveMeetingSelectors';
+} from '../../store/selectors/ActiveMeetingSelectors';
 import {
 	getParticipantAudioStatus,
 	getParticipantVideoStatus
-} from '../../../../store/selectors/MeetingSelectors';
-import { getUserId } from '../../../../store/selectors/SessionSelectors';
-import useStore from '../../../../store/Store';
-import { MeetingViewType, STREAM_TYPE } from '../../../../types/store/ActiveMeetingTypes';
-import { getAudioStream, getVideoStream } from '../../../../utils/UserMediaManager';
+} from '../../store/selectors/MeetingSelectors';
+import { getUserId } from '../../store/selectors/SessionSelectors';
+import useStore from '../../store/Store';
+import { MeetingViewType, STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
+import { getAudioStream, getVideoStream } from '../../utils/UserMediaManager';
 
 const ActionsWrapper = styled(Container)`
 	position: absolute;

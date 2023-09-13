@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Container } from '@zextras/carbonio-design-system';
-import React, { ReactElement } from 'react';
+import { Container, IconButton, Tooltip } from '@zextras/carbonio-design-system';
+import React, { ReactElement, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -23,7 +24,19 @@ import { MeetingChatVisibility } from '../../../types/store/ActiveMeetingTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 
 const SidebarContainer = styled(Container)`
-	//transition: width 300ms ease 0s;
+	position: relative;
+`;
+
+const ChangeSidebarStatusButton = styled.div`
+	position: absolute;
+	right: calc(-1rem - 2.25rem);
+	top: calc(50% - (15.09375rem / 2));
+	z-index: 999;
+`;
+
+const SidebarIconButton = styled(IconButton)`
+	width: 2.25rem;
+	height: 15.09375rem;
 `;
 
 const AccordionContainer = styled(Container)`
@@ -32,11 +45,20 @@ const AccordionContainer = styled(Container)`
 
 const MeetingSidebar = (): ReactElement => {
 	const { meetingId }: Record<string, string> = useParams();
+
+	const [t] = useTranslation();
+	const collapseSidebarLabel = t('tooltip.collapseSidebar', 'Collapse sidebar');
+	const expandSidebarLabel = t('tooltip.expandSidebar', 'Expand sidebar');
+
 	const roomId = useStore((store) => getRoomIdByMeetingId(store, meetingId));
 	const roomType = useStore((store) => getRoomTypeSelector(store, roomId || ''));
 	const meetingChatVisibility = useStore((store) => getMeetingChatVisibility(store, meetingId));
-	const sidebarIsVisible: boolean | undefined = useStore((store) =>
-		getMeetingSidebarStatus(store, meetingId)
+	const sidebarIsVisible: boolean = useStore((store) => getMeetingSidebarStatus(store, meetingId));
+	const setMeetingSidebarStatus = useStore((store) => store.setMeetingSidebarStatus);
+
+	const toggleSidebar = useCallback(
+		() => setMeetingSidebarStatus(meetingId, !sidebarIsVisible),
+		[setMeetingSidebarStatus, meetingId, sidebarIsVisible]
 	);
 
 	return (
@@ -62,6 +84,17 @@ const MeetingSidebar = (): ReactElement => {
 				</AccordionContainer>
 			)}
 			<MeetingConversationAccordion roomId={roomId || ''} meetingId={meetingId} isInsideMeeting />
+			<ChangeSidebarStatusButton>
+				<Tooltip label={sidebarIsVisible ? collapseSidebarLabel : expandSidebarLabel}>
+					<SidebarIconButton
+						iconColor="gray6"
+						backgroundColor="text"
+						icon={sidebarIsVisible ? 'ChevronLeftOutline' : 'ChevronRightOutline'}
+						onClick={toggleSidebar}
+						size="large"
+					/>
+				</Tooltip>
+			</ChangeSidebarStatusButton>
 		</SidebarContainer>
 	);
 };

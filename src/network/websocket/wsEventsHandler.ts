@@ -207,7 +207,7 @@ export function wsEventsHandler(event: WsEvent): void {
 			}
 			break;
 		}
-		case WsEventType.MEETING_PARTICIPANT_STREAMS: {
+		case WsEventType.MEETING_PARTICIPANT_SUBSCRIBED: {
 			const activeMeeting = state.activeMeeting[event.meetingId];
 			if (activeMeeting.videoInConn) {
 				activeMeeting.videoInConn.handleStreams(event.streams);

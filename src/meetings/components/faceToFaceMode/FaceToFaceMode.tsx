@@ -10,13 +10,13 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
-import useCentralTileDimensions from '../../../../hooks/useCentralTileDimensions';
+import useCentralTileDimensions from '../../../hooks/useCentralTileDimensions';
 import {
 	getFirstStream,
 	getLocalVideoSteam
-} from '../../../../store/selectors/ActiveMeetingSelectors';
-import { getFirstParticipant } from '../../../../store/selectors/MeetingSelectors';
-import useStore from '../../../../store/Store';
+} from '../../../store/selectors/ActiveMeetingSelectors';
+import { getFirstParticipant } from '../../../store/selectors/MeetingSelectors';
+import useStore from '../../../store/Store';
 
 const FaceToFace = styled(Container)`
 	position: relative;

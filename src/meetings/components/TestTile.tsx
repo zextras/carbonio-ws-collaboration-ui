@@ -8,15 +8,15 @@ import { Container, Text } from '@zextras/carbonio-design-system';
 import React, { ReactElement, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 
-import { getStream } from '../../../../store/selectors/ActiveMeetingSelectors';
+import { getStream } from '../../store/selectors/ActiveMeetingSelectors';
 import {
 	getParticipantAudioStatus,
 	getParticipantVideoStatus
-} from '../../../../store/selectors/MeetingSelectors';
-import { getUserId } from '../../../../store/selectors/SessionSelectors';
-import { getUserName } from '../../../../store/selectors/UsersSelectors';
-import useStore from '../../../../store/Store';
-import { STREAM_TYPE } from '../../../../types/store/ActiveMeetingTypes';
+} from '../../store/selectors/MeetingSelectors';
+import { getUserId } from '../../store/selectors/SessionSelectors';
+import { getUserName } from '../../store/selectors/UsersSelectors';
+import useStore from '../../store/Store';
+import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
 
 const TestTileContainer = styled(Container)`
 	height: 200px;
@@ -70,8 +70,8 @@ const CustomContainer = styled(Container)`
 	width: 100%;
 	height: auto;
 	aspect-ratio: 16/9;
-	border: 1px solid black;
+	border-radius: 0.5rem;
 `;
 export const SimpleTestTile = ({ userId }: { userId: string }): ReactElement => (
-	<CustomContainer>{userId}</CustomContainer>
+	<CustomContainer background="text">{userId}</CustomContainer>
 );

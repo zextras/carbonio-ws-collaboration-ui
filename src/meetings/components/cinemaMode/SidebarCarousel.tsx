@@ -10,8 +10,8 @@ import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import StreamsBar from './StreamsBar';
-import { getMeetingCarouselVisibility } from '../../../../../store/selectors/ActiveMeetingSelectors';
-import useStore from '../../../../../store/Store';
+import { getMeetingCarouselVisibility } from '../../../store/selectors/ActiveMeetingSelectors';
+import useStore from '../../../store/Store';
 
 const SidebarIconButton = styled(IconButton)`
 	height: 15rem;

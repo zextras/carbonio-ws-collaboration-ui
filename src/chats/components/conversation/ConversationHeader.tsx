@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import useMediaQueryCheck from '../../../hooks/useMediaQueryCheck';
-import ConversationHeaderMeetingButton from '../../../meetings/components/HeaderMeetingButton/ConversationHeaderMeetingButton';
+import ConversationHeaderMeetingButton from '../../../meetings/components/headerMeetingButton/ConversationHeaderMeetingButton';
 import { getRoomNameSelector } from '../../../store/selectors/RoomsSelectors';
 import { getCapability } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';

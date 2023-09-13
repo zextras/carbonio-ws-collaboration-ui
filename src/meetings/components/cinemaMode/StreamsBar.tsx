@@ -10,15 +10,15 @@ import React, { ReactElement, useCallback, useEffect, useMemo, useRef, useState 
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { getMeetingParticipantsByMeetingId } from '../../../../../store/selectors/MeetingSelectors';
-import useStore from '../../../../../store/Store';
-import { MeetingParticipantMap } from '../../../../../types/store/MeetingTypes';
+import { getMeetingParticipantsByMeetingId } from '../../../store/selectors/MeetingSelectors';
+import useStore from '../../../store/Store';
+import { MeetingParticipantMap } from '../../../types/store/MeetingTypes';
 import {
 	calcTilesQuantity,
 	listOfTileToShow,
 	positionToStartOnNextButton,
 	positionToStartOnPrevButton
-} from '../../../../../utils/MeetingsUtils';
+} from '../../../utils/MeetingsUtils';
 import { SimpleTestTile } from '../TestTile';
 
 const ArrowButton = styled(IconButton)`

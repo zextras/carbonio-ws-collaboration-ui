@@ -16,19 +16,16 @@ import { getMeetingByMeetingId } from '../../store/selectors/MeetingSelectors';
 import useStore from '../../store/Store';
 
 const LazyMeetingSidebar = lazy(
-	() => import(/* webpackChunkName: "MeetingSidebar" */ '../components/Sidebar/MeetingSidebar')
+	() => import(/* webpackChunkName: "MeetingSidebar" */ '../components/sidebar/MeetingSidebar')
 );
 
-const LazyMeetingStreamsWrapper = lazy(
-	() =>
-		import(
-			/* webpackChunkName: "MeetingStreamsWrapper" */ '../components/MeetingStreamsWrapper/MeetingStreamsWrapper'
-		)
+const LazyMeetingViewManager = lazy(
+	() => import(/* webpackChunkName: "MeetingViewManager" */ '../components/MeetingViewManager')
 );
 
-const MeetingStreamsWrapper = (): ReactElement => (
+const MeetingViewManager = (): ReactElement => (
 	<Suspense fallback={<ShimmerMeetingStreamsWrapper />}>
-		<LazyMeetingStreamsWrapper />
+		<LazyMeetingViewManager />
 	</Suspense>
 );
 
@@ -57,7 +54,7 @@ const MeetingSkeleton = (): ReactElement => {
 	return (
 		<CustomContainer orientation="horizontal" borderRadius="none">
 			<MeetingSidebar />
-			<MeetingStreamsWrapper />
+			<MeetingViewManager />
 		</CustomContainer>
 	);
 };

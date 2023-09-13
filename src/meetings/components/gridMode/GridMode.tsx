@@ -10,9 +10,9 @@ import React, { ReactElement, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
-import TestTile from './TestTile';
-import { getMeetingParticipantsByMeetingId } from '../../../../store/selectors/MeetingSelectors';
-import useStore from '../../../../store/Store';
+import { getMeetingParticipantsByMeetingId } from '../../../store/selectors/MeetingSelectors';
+import useStore from '../../../store/Store';
+import TestTile from '../TestTile';
 
 const Wrapper = styled(Container)`
 	position: relative;

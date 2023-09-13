@@ -9,18 +9,18 @@ import { UserEvent } from '@testing-library/user-event/setup/setup';
 import React from 'react';
 
 import FaceToFaceMode from './FaceToFaceMode';
-import { mockUseParams } from '../../../../../jest-mocks';
-import useStore from '../../../../store/Store';
+import { mockUseParams } from '../../../../jest-mocks';
+import useStore from '../../../store/Store';
 import {
 	createMockMeeting,
 	createMockMember,
 	createMockParticipants,
 	createMockRoom
-} from '../../../../tests/createMock';
-import { setup } from '../../../../tests/test-utils';
-import { MeetingBe, MeetingParticipant } from '../../../../types/network/models/meetingBeTypes';
-import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
-import { RootStore } from '../../../../types/store/StoreTypes';
+} from '../../../tests/createMock';
+import { setup } from '../../../tests/test-utils';
+import { MeetingBe, MeetingParticipant } from '../../../types/network/models/meetingBeTypes';
+import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
+import { RootStore } from '../../../types/store/StoreTypes';
 
 const groupRoom: RoomBe = createMockRoom({
 	id: 'room-test',
