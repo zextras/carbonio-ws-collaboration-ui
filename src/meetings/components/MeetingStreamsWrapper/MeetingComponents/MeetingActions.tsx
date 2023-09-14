@@ -150,11 +150,13 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 
 	const toggleAudioDropdown = useCallback(() => {
 		setIsAudioListOpen((prevState) => !prevState);
-	}, []);
+		if (isVideoListOpen) setIsVideoListOpen(false);
+	}, [isVideoListOpen]);
 
 	const toggleVideoDropdown = useCallback(() => {
 		setIsVideoListOpen((prevState) => !prevState);
-	}, []);
+		if (isAudioListOpen) setIsAudioListOpen(false);
+	}, [isAudioListOpen]);
 
 	const toggleAudioStream = useCallback(() => {
 		if (!audioStatus) {
