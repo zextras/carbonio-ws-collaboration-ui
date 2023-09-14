@@ -42,6 +42,7 @@ const SidebarIconButton = styled(IconButton)`
 
 const AccordionContainer = styled(Container)`
 	overflow-y: auto;
+	gap: 1px;
 `;
 
 const MeetingSidebar = (): ReactElement => {

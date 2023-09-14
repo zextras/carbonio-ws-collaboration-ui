@@ -17,6 +17,7 @@ import { SimpleTestTile } from '../TestTile';
 
 const FaceToFace = styled(Container)`
 	position: relative;
+	min-width: 18rem;
 `;
 
 const MyStreamContainer = styled(Container)`

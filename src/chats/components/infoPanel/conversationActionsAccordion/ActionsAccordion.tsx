@@ -87,7 +87,7 @@ export const ActionsAccordion: FC<ActionAccordionProps> = ({
 		arrayOfActions.push({
 			id: '1',
 			disableHover: true,
-			background: 'gray6',
+			background: isInsideMeeting ? 'text' : 'gray6',
 			CustomComponent: () => (
 				<MuteConversationAction
 					roomId={roomId}
@@ -103,7 +103,7 @@ export const ActionsAccordion: FC<ActionAccordionProps> = ({
 			arrayOfActions.push({
 				id: '2',
 				disableHover: true,
-				background: 'gray6',
+				background: isInsideMeeting ? 'text' : 'gray6',
 				CustomComponent: () => (
 					<EditConversationAction roomId={roomId} isInsideMeeting={isInsideMeeting} />
 				)
@@ -113,7 +113,7 @@ export const ActionsAccordion: FC<ActionAccordionProps> = ({
 			arrayOfActions.push({
 				id: '3',
 				disableHover: true,
-				background: 'gray6',
+				background: isInsideMeeting ? 'text' : 'gray6',
 				CustomComponent: () => (
 					<AddNewMemberAction
 						roomId={roomId}
@@ -130,7 +130,7 @@ export const ActionsAccordion: FC<ActionAccordionProps> = ({
 			arrayOfActions.push({
 				id: '4',
 				disableHover: true,
-				background: 'gray6',
+				background: isInsideMeeting ? 'text' : 'gray6',
 				CustomComponent: () => (
 					<ClearHistoryAction
 						roomId={roomId}
@@ -147,7 +147,7 @@ export const ActionsAccordion: FC<ActionAccordionProps> = ({
 			arrayOfActions.push({
 				id: '5',
 				disableHover: true,
-				background: 'gray6',
+				background: isInsideMeeting ? 'text' : 'gray6',
 				CustomComponent: () => (
 					<LeaveConversationAction
 						roomId={roomId}
@@ -164,7 +164,7 @@ export const ActionsAccordion: FC<ActionAccordionProps> = ({
 			arrayOfActions.push({
 				id: '6',
 				disableHover: true,
-				background: 'gray6',
+				background: isInsideMeeting ? 'text' : 'gray6',
 				CustomComponent: () => (
 					<DeleteConversationAction
 						roomId={roomId}
@@ -199,5 +199,12 @@ export const ActionsAccordion: FC<ActionAccordionProps> = ({
 		numberOfMembers
 	]);
 
-	return <CustomAccordion key="listAccordions" items={infoDetails} borderRadius="none" />;
+	return (
+		<CustomAccordion
+			key="listAccordions"
+			items={infoDetails}
+			borderRadius="none"
+			background={isInsideMeeting ? 'gray0' : 'gray5'}
+		/>
+	);
 };

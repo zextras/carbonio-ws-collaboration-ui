@@ -81,7 +81,7 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({
 			borderRadius="none"
 		>
 			<Container
-				background="gray5"
+				background="gray0"
 				orientation="horizontal"
 				height="fit"
 				width="100%"

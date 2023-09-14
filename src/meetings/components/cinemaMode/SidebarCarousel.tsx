@@ -49,8 +49,8 @@ const SidebarCarousel = (): ReactElement => {
 		<SidebarContainer
 			background="gray0"
 			width={carouselIsVisible ? '35%' : '0'}
-			minWidth={carouselIsVisible ? '150px' : '0'}
-			maxWidth="300px"
+			minWidth={carouselIsVisible ? '10.375rem' : '0'}
+			maxWidth="18.75rem"
 		>
 			<ChangeSidebarStatusButton>
 				<Tooltip
