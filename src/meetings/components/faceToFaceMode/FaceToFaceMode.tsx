@@ -22,7 +22,7 @@ const FaceToFace = styled(Container)`
 
 const MyStreamContainer = styled(Container)`
 	position: absolute;
-	top: 0;
+	top: -3.25rem;
 	right: -3.25rem;
 	transition: opacity 200ms linear;
 	z-index: 10;
