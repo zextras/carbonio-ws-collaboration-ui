@@ -16,8 +16,7 @@ import {
 	getNumberOfMeetingParticipants
 } from '../../../store/selectors/MeetingSelectors';
 import useStore from '../../../store/Store';
-import { MeetingParticipant } from '../../../types/network/models/meetingBeTypes';
-import { MeetingParticipantMap } from '../../../types/store/MeetingTypes';
+import { MeetingParticipant, MeetingParticipantMap } from '../../../types/store/MeetingTypes';
 
 const CustomContainer = styled(Container)`
 	position: absolute;

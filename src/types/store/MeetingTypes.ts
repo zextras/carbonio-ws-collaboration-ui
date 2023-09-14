@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import { MeetingParticipant, MeetingType } from '../network/models/meetingBeTypes';
+import { MeetingType, MeetingUserType } from '../network/models/meetingBeTypes';
 
 export type MeetingsMap = {
 	[roomId: string]: Meeting;
@@ -20,4 +20,12 @@ export type Meeting = {
 };
 export type MeetingParticipantMap = {
 	[userId: string]: MeetingParticipant;
+};
+
+export type MeetingParticipant = {
+	userId: string;
+	userType: MeetingUserType;
+	audioStreamOn?: boolean;
+	videoStreamOn?: boolean;
+	screenStreamOn?: boolean;
 };

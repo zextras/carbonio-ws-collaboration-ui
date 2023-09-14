@@ -9,17 +9,17 @@ export type MeetingBe = {
 	name: string;
 	roomId: string;
 	active: boolean;
-	participants: MeetingParticipant[];
+	participants: MeetingParticipantBe[];
 	createdAt: string;
 	meetingType: MeetingType;
 };
 
-export type MeetingParticipant = {
+export type MeetingParticipantBe = {
 	userId: string;
 	userType: MeetingUserType;
-	audioStreamOn?: boolean;
-	videoStreamOn?: boolean;
-	screenStreamOn?: boolean;
+	audioStreamEnabled?: boolean;
+	videoStreamEnabled?: boolean;
+	screenStreamEnabled?: boolean;
 };
 
 export enum MeetingUserType {

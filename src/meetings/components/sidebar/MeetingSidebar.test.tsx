@@ -19,8 +19,9 @@ import {
 	createMockRoom
 } from '../../../tests/createMock';
 import { setup } from '../../../tests/test-utils';
-import { MeetingBe, MeetingParticipant } from '../../../types/network/models/meetingBeTypes';
+import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
+import { MeetingParticipant } from '../../../types/store/MeetingTypes';
 import { RootStore } from '../../../types/store/StoreTypes';
 
 const groupRoom: RoomBe = createMockRoom({

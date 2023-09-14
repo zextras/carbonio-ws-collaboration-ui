@@ -6,7 +6,7 @@
 
 import { useMemo } from 'react';
 
-import { TileData } from '../meetings/components/TestTile';
+import { TileData } from '../meetings/components/Tile';
 import { getTiles } from '../store/selectors/MeetingSelectors';
 import useStore from '../store/Store';
 

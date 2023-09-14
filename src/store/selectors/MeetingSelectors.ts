@@ -6,10 +6,9 @@
 
 import { filter, find, forEach, size } from 'lodash';
 
-import { TileData } from '../../meetings/components/TestTile';
-import { MeetingParticipant } from '../../types/network/models/meetingBeTypes';
-import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
-import { Meeting, MeetingParticipantMap } from '../../types/store/MeetingTypes';
+import { TileData } from '../../meetings/components/Tile';
+import { STREAM_TYPE, Subscription } from '../../types/store/ActiveMeetingTypes';
+import { Meeting, MeetingParticipant, MeetingParticipantMap } from '../../types/store/MeetingTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 
 export const getMeeting = (store: RootStore, roomId: string): Meeting | undefined =>
@@ -102,6 +101,31 @@ export const getTiles = (store: RootStore, meetingId: string): TileData[] => {
 			}
 		});
 		return tiles;
+	}
+	return [];
+};
+
+export const getSubscriptions = (store: RootStore, meetingId: string): Subscription[] => {
+	const meeting = find(store.meetings, (meeting) => meeting.id === meetingId);
+	if (meeting) {
+		const subscriptions: Subscription[] = [];
+		forEach(meeting.participants, (participant) => {
+			if (participant.userId !== store.session.id) {
+				if (participant.videoStreamOn) {
+					subscriptions.push({
+						user_id: participant.userId,
+						type: STREAM_TYPE.VIDEO
+					});
+				}
+				if (participant.screenStreamOn) {
+					subscriptions.push({
+						user_id: participant.userId,
+						type: STREAM_TYPE.SCREEN
+					});
+				}
+			}
+		});
+		return subscriptions;
 	}
 	return [];
 };

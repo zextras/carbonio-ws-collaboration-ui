@@ -16,9 +16,10 @@ import {
 	createMockUser
 } from '../../tests/createMock';
 import { setup } from '../../tests/test-utils';
-import { MeetingBe, MeetingParticipant } from '../../types/network/models/meetingBeTypes';
+import { MeetingBe } from '../../types/network/models/meetingBeTypes';
 import { MemberBe, RoomBe, RoomType } from '../../types/network/models/roomBeTypes';
 import { UserBe } from '../../types/network/models/userBeTypes';
+import { MeetingParticipant } from '../../types/store/MeetingTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 
 const user1: UserBe = createMockUser({ id: 'user1Id', name: 'user 1' });

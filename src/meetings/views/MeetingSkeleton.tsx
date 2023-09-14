@@ -12,6 +12,7 @@ import styled from 'styled-components';
 import ShimmerMeetingSidebar from './shimmers/ShimmerMeetingSidebar';
 import useGeneralMeetingControls from '../../hooks/useGeneralMeetingControls';
 import { MeetingRoutesParams } from '../../hooks/useRouting';
+import useSubscriptions from '../../hooks/useSubscriptions';
 import {
 	getMeetingSidebarStatus,
 	getMeetingViewSelected
@@ -69,6 +70,7 @@ const MeetingSkeleton = (): ReactElement => {
 	const streamsWrapperRef = useRef<HTMLDivElement>(null);
 
 	useGeneralMeetingControls(meetingId);
+	useSubscriptions(meetingId);
 
 	const ViewToDisplay = useMemo(() => {
 		if (numberOfTiles <= 2) {

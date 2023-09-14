@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { STREAM_TYPE } from '../../store/ActiveMeetingTypes';
+import { STREAM_TYPE, Subscription } from '../../store/ActiveMeetingTypes';
 import { JoinSettings, MeetingUser } from '../models/meetingBeTypes';
 import {
 	CreateAudioOfferResponse,
@@ -66,8 +66,8 @@ interface IMeetingsApi {
 	): Promise<UpdateMediaOfferResponse>;
 	subscribeToMedia(
 		meetingId: string,
-		subscription: { user_id: string; type: STREAM_TYPE }[],
-		unsubscription: { user_id: string; type: STREAM_TYPE }[]
+		subscription: Subscription[],
+		unsubscription: Subscription[]
 	): Promise<SubscribeMediaResponse>;
 	createMediaAnswer(meetingId: string, sdpOffer: string): Promise<CreateMediaAnswerResponse>;
 }

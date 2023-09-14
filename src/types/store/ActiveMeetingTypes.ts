@@ -58,6 +58,11 @@ export enum STREAM_TYPE {
 	AUDIO = 'audio'
 }
 
+export type Subscription = {
+	user_id: string;
+	type: STREAM_TYPE;
+};
+
 export type StreamSubscription = {
 	type: STREAM_TYPE;
 	stream: MediaStream;

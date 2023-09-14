@@ -15,7 +15,7 @@ import {
 import { Connections } from './ConnectionsTypes';
 import { FasteningsMap } from './FasteningMessagesTypes';
 import { Marker, MarkersMap } from './MarkersTypes';
-import { MeetingsMap } from './MeetingTypes';
+import { MeetingParticipant, MeetingsMap } from './MeetingTypes';
 import {
 	AttachmentMessageType,
 	Message,
@@ -29,7 +29,7 @@ import { CapabilityList, Session } from './SessionTypes';
 import { UnreadsMap } from './UnreadsCounterTypes';
 import { UsersMap } from './UserTypes';
 import { PeerConnConfig } from '../../network/webRTC/PeerConnConfig';
-import { MeetingBe, MeetingParticipant } from '../network/models/meetingBeTypes';
+import { MeetingBe } from '../network/models/meetingBeTypes';
 import { MemberBe, RoomBe } from '../network/models/roomBeTypes';
 import { UserBe } from '../network/models/userBeTypes';
 import IWebSocketClient from '../network/websocket/IWebSocketClient';

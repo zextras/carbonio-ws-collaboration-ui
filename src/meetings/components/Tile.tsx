@@ -314,3 +314,8 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, modalProps }) => {
 };
 
 export default Tile;
+
+export type TileData = {
+	userId: string;
+	type: STREAM_TYPE;
+};

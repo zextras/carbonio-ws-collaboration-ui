@@ -29,7 +29,7 @@ import {
 	UpdateAudioStreamStatusResponse,
 	UpdateMediaOfferResponse
 } from '../../types/network/responses/meetingsResponses';
-import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
+import { STREAM_TYPE, Subscription } from '../../types/store/ActiveMeetingTypes';
 
 class MeetingsApi extends BaseAPI implements IMeetingsApi {
 	// Singleton design pattern
@@ -83,7 +83,13 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 	}
 
 	public getMeetingByMeetingId(meetingId: string): Promise<GetMeetingResponse> {
-		return this.fetchAPI(`meetings/${meetingId}`, RequestType.GET);
+		return this.fetchAPI(`meetings/${meetingId}`, RequestType.GET).then(
+			(resp: GetMeetingResponse) => {
+				const { addMeeting } = useStore.getState();
+				addMeeting(resp);
+				return resp;
+			}
+		);
 	}
 
 	public startMeeting(meetingId: string): Promise<StartMeetingResponse> {
@@ -105,6 +111,7 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 					settings.videoStreamEnabled,
 					devicesId.videoDevice
 				);
+			this.getMeetingByMeetingId(meetingId);
 			return resp;
 		});
 	}
@@ -182,8 +189,8 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 
 	public subscribeToMedia(
 		meetingId: string,
-		subscription: { user_id: string; type: STREAM_TYPE }[],
-		unsubscription: { user_id: string; type: STREAM_TYPE }[]
+		subscription: Subscription[],
+		unsubscription: Subscription[]
 	): Promise<SubscribeMediaResponse> {
 		return this.fetchAPI(`meetings/${meetingId}/media/subscribe`, RequestType.PUT, {
 			subscribe: subscription,
