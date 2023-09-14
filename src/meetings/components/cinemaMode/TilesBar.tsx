@@ -26,16 +26,16 @@ const TileContainer = styled(Container)`
 	gap: 1rem;
 `;
 
-const ArrowButtonUp = styled(IconButton)`
-	width: calc(100% - 1rem);
+const ButtonUpContainer = styled(Container)`
 	position: absolute;
 	top: 1rem;
+	width: calc(100% - 1rem);
 `;
 
-const ArrowButtonDown = styled(IconButton)`
-	width: calc(100% - 1rem);
+const ButtonDownContainer = styled(Container)`
 	position: absolute;
 	bottom: 1rem;
+	width: calc(100% - 1rem);
 `;
 
 const TilesBar = (): ReactElement => {
@@ -115,29 +115,35 @@ const TilesBar = (): ReactElement => {
 	return (
 		<TilesBarContainer mainAlignment="space-between">
 			{showButtons && (
-				<Tooltip label={prevButtonDisabled ? topLabel : scrollUpLabel} placement="left">
-					<ArrowButtonUp
-						conColor="gray6"
-						backgroundColor="text"
-						icon="ChevronUpOutline"
-						size="large"
-						onClick={clickPrevButton}
-						disabled={prevButtonDisabled}
-					/>
-				</Tooltip>
+				<ButtonUpContainer width="fill" height="fit">
+					<Tooltip label={prevButtonDisabled ? topLabel : scrollUpLabel} placement="left">
+						<IconButton
+							conColor="gray6"
+							backgroundColor="text"
+							icon="ChevronUpOutline"
+							size="large"
+							width="fill"
+							onClick={clickPrevButton}
+							disabled={prevButtonDisabled}
+						/>
+					</Tooltip>
+				</ButtonUpContainer>
 			)}
 			<TileContainer ref={tilesContainerRef}>{tilesToRender}</TileContainer>
 			{showButtons && (
-				<Tooltip label={prevButtonDisabled ? bottomLabel : scrollDownLabel} placement="left">
-					<ArrowButtonDown
-						conColor="gray6"
-						backgroundColor="text"
-						icon="ChevronDownOutline"
-						size="large"
-						onClick={clickNextButton}
-						disabled={nextButtonDisabled}
-					/>
-				</Tooltip>
+				<ButtonDownContainer width="fill" height="fit">
+					<Tooltip label={nextButtonDisabled ? bottomLabel : scrollDownLabel} placement="left">
+						<IconButton
+							conColor="gray6"
+							backgroundColor="text"
+							icon="ChevronDownOutline"
+							size="large"
+							width="fill"
+							onClick={clickNextButton}
+							disabled={nextButtonDisabled}
+						/>
+					</Tooltip>
+				</ButtonDownContainer>
 			)}
 		</TilesBarContainer>
 	);

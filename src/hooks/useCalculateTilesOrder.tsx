@@ -15,6 +15,8 @@ const useCalculateTilesOrder = (
 ): { centralTile: TileData; carouselTiles: TileData[] } => {
 	const tilesData: TileData[] = useStore((store) => getTiles(store, meetingId));
 
+	// TODO use this customHook to change the order of the tiles (pin and isTalking)
+
 	const centralTile = useMemo(() => tilesData[0], [tilesData]);
 	const carouselTiles = useMemo(() => tilesData.slice(1), [tilesData]);
 

@@ -18,7 +18,7 @@ const CinemaMode = (): ReactElement => {
 
 	return (
 		<Container data-testid="cinemaModeView">
-			<SimpleTestTile userId={centralTile.userId} />
+			<SimpleTestTile userId={centralTile?.userId} />
 		</Container>
 	);
 };
