@@ -16,6 +16,7 @@ import {
 	useTheme
 } from '@zextras/carbonio-design-system';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import { UsersApi } from '../../../network';
@@ -39,7 +40,7 @@ type modalTileProps = {
 };
 
 type TileProps = {
-	memberId: string | undefined;
+	userId: string | undefined;
 	meetingId: string | undefined;
 	// isScreenShare?: boolean;
 	modalProps?: modalTileProps;
@@ -121,13 +122,17 @@ const TextContainer = styled(Container)`
 	user-select: none;
 `;
 
-const Tile: React.FC<TileProps> = ({ memberId, meetingId, modalProps }) => {
-	const isSessionTile = useStore(getUserId) === memberId;
-	const userName = useStore((store) => getUserName(store, memberId || ''));
-	const audioStatus = useStore((store) => getParticipantAudioStatus(store, meetingId, memberId));
-	const videoStatus = useStore((store) => getParticipantVideoStatus(store, meetingId, memberId));
+const Tile: React.FC<TileProps> = ({ userId, meetingId, modalProps }) => {
+	const [t] = useTranslation();
+	const micOffLabel = t('meetings.interactions.yourMicIsDisabled', 'Your microphone is off');
+	const camOffLabel = t('meetings.interactions.yourCamIsDisabled', 'Your camera is off');
+
+	const isSessionTile = useStore(getUserId) === userId;
+	const userName = useStore((store) => getUserName(store, userId || ''));
+	const audioStatus = useStore((store) => getParticipantAudioStatus(store, meetingId, userId));
+	const videoStatus = useStore((store) => getParticipantVideoStatus(store, meetingId, userId));
 	const videoStream = useStore((store) =>
-		getStream(store, meetingId || '', memberId || '', STREAM_TYPE.VIDEO)
+		getStream(store, meetingId || '', userId || '', STREAM_TYPE.VIDEO)
 	);
 
 	const [picture, setPicture] = useState<false | string>(false);
@@ -135,14 +140,14 @@ const Tile: React.FC<TileProps> = ({ memberId, meetingId, modalProps }) => {
 	const streamRef = useRef<null | HTMLVideoElement>(null);
 
 	const userPictureUpdatedAt: string | undefined = useStore((state) =>
-		getUserPictureUpdatedAt(state, memberId || '')
+		getUserPictureUpdatedAt(state, userId || '')
 	);
 
 	const themeColor = useTheme();
 
 	useEffect(() => {
 		if (streamRef && streamRef.current) {
-			if (videoStream) {
+			if (videoStream && videoStatus) {
 				streamRef.current.srcObject = videoStream;
 			} else {
 				streamRef.current.srcObject = null;
@@ -152,11 +157,11 @@ const Tile: React.FC<TileProps> = ({ memberId, meetingId, modalProps }) => {
 
 	useEffect(() => {
 		if (userPictureUpdatedAt != null) {
-			setPicture(`${UsersApi.getURLUserPicture(memberId || '')}?${userPictureUpdatedAt}`);
+			setPicture(`${UsersApi.getURLUserPicture(userId || '')}?${userPictureUpdatedAt}`);
 		} else {
 			setPicture(false);
 		}
-	}, [memberId, userPictureUpdatedAt]);
+	}, [userId, userPictureUpdatedAt]);
 
 	const finalStreamRef = useMemo(() => {
 		if (modalProps) {
@@ -201,12 +206,12 @@ const Tile: React.FC<TileProps> = ({ memberId, meetingId, modalProps }) => {
 		[picture, userColor, userName]
 	);
 
-	const actionIcons = useMemo(
+	const mediaStatusIcons = useMemo(
 		() => (
 			<>
 				{!audioStreamEnabled && (
 					<>
-						<Tooltip label="Your microphone is off" disabled={!isSessionTile}>
+						<Tooltip label={micOffLabel} disabled={!isSessionTile}>
 							<CustomIconButton
 								icon="MicOffOutline"
 								iconColor="gray6"
@@ -219,7 +224,7 @@ const Tile: React.FC<TileProps> = ({ memberId, meetingId, modalProps }) => {
 					</>
 				)}
 				{!videoStreamEnabled && (
-					<Tooltip label="Your camera is off" disabled={!isSessionTile}>
+					<Tooltip label={camOffLabel} disabled={!isSessionTile}>
 						<CustomIconButton
 							icon="VideoOffOutline"
 							iconColor="gray6"
@@ -231,7 +236,7 @@ const Tile: React.FC<TileProps> = ({ memberId, meetingId, modalProps }) => {
 				)}
 			</>
 		),
-		[audioStreamEnabled, isSessionTile, videoStreamEnabled]
+		[audioStreamEnabled, camOffLabel, isSessionTile, micOffLabel, videoStreamEnabled]
 	);
 
 	// TODO uncomment when the actions on hover are implemented
@@ -280,7 +285,7 @@ const Tile: React.FC<TileProps> = ({ memberId, meetingId, modalProps }) => {
 					crossAlignment={'flex-start'}
 					height="fill"
 				>
-					{actionIcons}
+					{mediaStatusIcons}
 				</Row>
 				<Row
 					mainAlignment={'flex-end'}

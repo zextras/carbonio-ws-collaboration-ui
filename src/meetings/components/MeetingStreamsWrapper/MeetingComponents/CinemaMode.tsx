@@ -27,7 +27,7 @@ const CinemaMode = (): ReactElement => {
 	const videos = useMemo(
 		() =>
 			map(participants, (participant) => (
-				<Tile key={participant.userId} meetingId={meetingId} memberId={participant.userId} />
+				<Tile key={participant.userId} meetingId={meetingId} userId={participant.userId} />
 			)),
 		[meetingId, participants]
 	);

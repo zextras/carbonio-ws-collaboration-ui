@@ -68,7 +68,7 @@ const storeSetupMyTileAudioOnVideoOff = (): { user: UserEvent; store: RootStore 
 	store.addMeeting(meeting);
 	const { user } = setup(
 		<Tile
-			memberId={user1.id}
+			userId={user1.id}
 			meetingId={meeting.id}
 			modalProps={{
 				streamRef,
@@ -91,7 +91,7 @@ const storeSetupTileAudioOffAndVideoOn = (): { user: UserEvent; store: RootStore
 	store.addMeeting(meeting);
 	const { user } = setup(
 		<Tile
-			memberId={user2.id}
+			userId={user2.id}
 			meetingId={meeting.id}
 			modalProps={{
 				streamRef,
@@ -114,7 +114,7 @@ const storeSetupTileAudioOnAndVideoOff = (): { user: UserEvent; store: RootStore
 	store.addMeeting(meeting);
 	const { user } = setup(
 		<Tile
-			memberId={user3.id}
+			userId={user3.id}
 			meetingId={meeting.id}
 			modalProps={{
 				streamRef,

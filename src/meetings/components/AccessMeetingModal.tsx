@@ -347,7 +347,7 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 			>
 				<VideoTile width={wrapperWidth}>
 					<Tile
-						memberId={memberId}
+						userId={memberId}
 						meetingId={meeting?.id}
 						modalProps={{
 							streamRef: videoStreamRef,

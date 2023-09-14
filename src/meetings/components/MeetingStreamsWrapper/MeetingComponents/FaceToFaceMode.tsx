@@ -81,7 +81,7 @@ const FaceToFaceMode = (): ReactElement => {
 		() =>
 			centralParticipant ? (
 				<CentralTile width={centralTileSize.tileWidth} height="fit" background="text">
-					<Tile memberId={centralParticipant.userId} meetingId={meetingId} />
+					<Tile userId={centralParticipant.userId} meetingId={meetingId} />
 				</CentralTile>
 			) : (
 				<Text color="gray6" size="large">
@@ -99,7 +99,7 @@ const FaceToFaceMode = (): ReactElement => {
 				height="fit"
 				background="secondary"
 			>
-				<Tile memberId={localId} meetingId={meetingId} />
+				<Tile userId={localId} meetingId={meetingId} />
 			</MyStreamContainer>
 			{centralContentToDisplay}
 		</FaceToFace>
