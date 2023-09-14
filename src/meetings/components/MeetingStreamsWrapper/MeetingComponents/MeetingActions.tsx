@@ -4,16 +4,23 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Container, IconButton, MultiButton, Padding } from '@zextras/carbonio-design-system';
+import {
+	Container,
+	IconButton,
+	MultiButton,
+	Padding,
+	Tooltip
+} from '@zextras/carbonio-design-system';
 import { filter, map } from 'lodash';
 import React, { ReactElement, RefObject, useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled, { FlattenSimpleInterpolation } from 'styled-components';
 
 import useRouting, { PAGE_INFO_TYPE } from '../../../../hooks/useRouting';
 import { MeetingsApi } from '../../../../network';
 import {
-	getMeetingViewSelected,
+	/* getMeetingViewSelected, */
 	getSelectedAudioDeviceId,
 	getSelectedVideoDeviceId
 } from '../../../../store/selectors/ActiveMeetingSelectors';
@@ -23,7 +30,7 @@ import {
 } from '../../../../store/selectors/MeetingSelectors';
 import { getUserId } from '../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../store/Store';
-import { MeetingViewType, STREAM_TYPE } from '../../../../types/store/ActiveMeetingTypes';
+import { /* MeetingViewType, */ STREAM_TYPE } from '../../../../types/store/ActiveMeetingTypes';
 import { getAudioStream, getVideoStream } from '../../../../utils/UserMediaManager';
 
 const ActionsWrapper = styled(Container)`
@@ -44,20 +51,28 @@ type MeetingActionsProps = {
 };
 
 const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElement => {
+	const [t] = useTranslation();
+
+	const disableMicLabel = t('meeting.interactions.disableMicrophone', 'Disable microphone');
+	const enableMicLabel = t('meeting.interactions.enableMicrophone', 'Enable microphone');
+	const disableCamLabel = t('meeting.interactions.disableCamera', 'Disable camera');
+	const enableCamLabel = t('meeting.interactions.enableCamera', 'Enable camera');
+	const leaveMeetingLabel = t('meeting.interactions.leaveMeeting', 'Leave Meeting');
+
 	const { goToInfoPage } = useRouting();
 	const { meetingId }: Record<string, string> = useParams();
 
 	const setLocalStreams = useStore((store) => store.setLocalStreams);
 	const removeLocalStreams = useStore((store) => store.removeLocalStreams);
 	const changeStreamStatus = useStore((store) => store.changeStreamStatus);
-	const setMeetingViewSelected = useStore((store) => store.setMeetingViewSelected);
+	// const setMeetingViewSelected = useStore((store) => store.setMeetingViewSelected);
 	const setSelectedDeviceId = useStore((store) => store.setSelectedDeviceId);
 	const closeVideoOutConn = useStore((store) => store.closeVideoOutConn);
 	const createVideoOutConn = useStore((store) => store.createVideoOutConn);
 	const myUserId = useStore(getUserId);
 	const audioStatus = useStore((store) => getParticipantAudioStatus(store, meetingId, myUserId));
 	const videoStatus = useStore((store) => getParticipantVideoStatus(store, meetingId, myUserId));
-	const meetingViewSelected = useStore((store) => getMeetingViewSelected(store, meetingId));
+	// const meetingViewSelected = useStore((store) => getMeetingViewSelected(store, meetingId));
 	const selectedAudioDeviceId = useStore((store) => getSelectedAudioDeviceId(store, meetingId));
 	const selectedVideoDeviceId = useStore((store) => getSelectedVideoDeviceId(store, meetingId));
 	const videoOutConn = useStore((store) => store.activeMeeting[meetingId]?.videoOutConn);
@@ -69,6 +84,9 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 	const [isHoverActions, setIsHoverActions] = useState<boolean>(false);
 	const [audioMediaList, setAudioMediaList] = useState<[] | MediaDeviceInfo[]>([]);
 	const [videoMediaList, setVideoMediaList] = useState<[] | MediaDeviceInfo[]>([]);
+	const [isAudioListOpen, setIsAudioListOpen] = useState<boolean>(false);
+	const [isVideoListOpen, setIsVideoListOpen] = useState<boolean>(false);
+
 	let timeout: string | number | NodeJS.Timeout | undefined;
 
 	const handleHoverMouseMove = useCallback(
@@ -91,7 +109,13 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 	const handleHoverMouseStop = useCallback(() => {
 		streamsWrapperRef?.current?.removeEventListener('mousemove', handleHoverMouseMove);
 		if (!isHoverActions) setIsHoovering(false);
-	}, [streamsWrapperRef, isHoverActions, handleHoverMouseMove]);
+		if (isAudioListOpen) {
+			setIsAudioListOpen(false);
+		}
+		if (isVideoListOpen) {
+			setIsVideoListOpen(false);
+		}
+	}, [streamsWrapperRef, handleHoverMouseMove, isHoverActions, isAudioListOpen, isVideoListOpen]);
 
 	const handleMouseEnter = useCallback(() => setIsHoverActions(true), []);
 
@@ -124,6 +148,14 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 		removeLocalStreams
 	]);
 
+	const toggleAudioDropdown = useCallback(() => {
+		setIsAudioListOpen((prevState) => !prevState);
+	}, []);
+
+	const toggleVideoDropdown = useCallback(() => {
+		setIsVideoListOpen((prevState) => !prevState);
+	}, []);
+
 	const toggleAudioStream = useCallback(() => {
 		if (!audioStatus) {
 			getAudioStream(true, true, selectedAudioDeviceId).then((stream) => {
@@ -141,6 +173,7 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 		MeetingsApi.leaveMeeting(meetingId).then(() => goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED));
 	}, [meetingId, goToInfoPage]);
 
+	/*
 	const deleteMeeting = useCallback(() => {
 		MeetingsApi.deleteMeeting(meetingId).then(() => goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED));
 	}, [meetingId, goToInfoPage]);
@@ -151,6 +184,7 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 			meetingViewSelected === MeetingViewType.GRID ? MeetingViewType.CINEMA : MeetingViewType.GRID
 		);
 	}, [meetingId, meetingViewSelected, setMeetingViewSelected]);
+	*/
 
 	const mediaAudioList = useMemo(
 		() =>
@@ -272,28 +306,35 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 			onMouseLeave={handleMouseLeave}
 			isHoovering={isHoovering}
 		>
-			<MultiButton
-				iconColor="gray6"
-				backgroundColor="primary"
-				primaryIcon={audioStatus ? 'Mic' : 'MicOff'}
-				icon="ChevronUp"
-				onClick={toggleAudioStream}
-				items={mediaAudioList}
-				size="large"
-				shape="regular"
-			/>
-			<Padding right="16px" />
-			<MultiButton
-				iconColor="gray6"
-				backgroundColor="primary"
-				primaryIcon={videoStatus ? 'Video' : 'VideoOff'}
-				icon="ChevronUp"
-				onClick={toggleVideoStream}
-				items={mediaVideoList}
-				size="large"
-				shape="regular"
-			/>
-			<Padding right="16px" />
+			<Tooltip placement="top" label={audioStatus ? disableMicLabel : enableMicLabel}>
+				<MultiButton
+					iconColor="gray6"
+					backgroundColor="primary"
+					primaryIcon={audioStatus ? 'Mic' : 'MicOff'}
+					icon={isAudioListOpen ? 'ChevronDown' : 'ChevronUp'}
+					onClick={toggleAudioStream}
+					items={mediaAudioList}
+					size="large"
+					shape="regular"
+					dropdownProps={{ forceOpen: isAudioListOpen, onClick: toggleAudioDropdown }}
+				/>
+			</Tooltip>
+			<Padding right="1rem" />
+			<Tooltip placement="top" label={videoStatus ? disableCamLabel : enableCamLabel}>
+				<MultiButton
+					iconColor="gray6"
+					backgroundColor="primary"
+					primaryIcon={videoStatus ? 'Video' : 'VideoOff'}
+					icon={isVideoListOpen ? 'ChevronDown' : 'ChevronUp'}
+					onClick={toggleVideoStream}
+					items={mediaVideoList}
+					size="large"
+					shape="regular"
+					dropdownProps={{ forceOpen: isVideoListOpen, onClick: toggleVideoDropdown }}
+				/>
+			</Tooltip>
+			{/* 
+			<Padding right="1rem" />
 			<IconButton
 				iconColor="gray6"
 				backgroundColor="primary"
@@ -302,16 +343,16 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 				size="large"
 				disabled // TODO: enable when screen sharing will be available
 			/>
-			<Padding right="16px" />
+			<Padding right="1rem" />
 			<IconButton
 				size="large"
 				backgroundColor="primary"
 				iconColor="gray6"
-				icon={meetingViewSelected === MeetingViewType.GRID ? 'Grid' : 'CinemaView'}
+				icon={meetingViewSelected === MeetingViewType.GRID ? "Grid" : "CinemaView"}
 				onClick={toggleMeetingView}
 				disabled // TODO: enable when grid mode will be available
 			/>
-			<Padding right="16px" />
+			<Padding right="16px" />;
 			<IconButton
 				iconColor="gray6"
 				backgroundColor="primary"
@@ -319,14 +360,17 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 				onClick={deleteMeeting}
 				size="large"
 			/>
-			<Padding right="48px" />
-			<IconButton
-				iconColor="gray6"
-				backgroundColor="error"
-				icon="Hangup"
-				onClick={leaveMeeting}
-				size="large"
-			/>
+		*/}
+			<Padding right="3rem" />
+			<Tooltip placement="top" label={leaveMeetingLabel}>
+				<IconButton
+					iconColor="gray6"
+					backgroundColor="error"
+					icon="Hangup"
+					onClick={leaveMeeting}
+					size="large"
+				/>
+			</Tooltip>
 		</ActionsWrapper>
 	);
 };

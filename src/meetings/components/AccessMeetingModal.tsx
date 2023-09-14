@@ -54,10 +54,10 @@ const CustomModal = styled(Modal)`
 const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement => {
 	const [t] = useTranslation();
 	const enter = t('action.enter', 'Enter');
-	const disableAudioLabel = t('meeting.interactions.disableAudio', 'Disable Audio');
-	const enableAudioLabel = t('meeting.interactions.enableAudio', 'Enable Audio');
-	const disableVideoLabel = t('meeting.interactions.disableVideo', 'Disable Video');
-	const enableVideoLabel = t('meeting.interactions.enableVideo', 'Enable Video');
+	const disableMicLabel = t('meeting.interactions.disableMicrophone', 'Disable microphone');
+	const enableMicLabel = t('meeting.interactions.enableMicrophone', 'Enable microphone');
+	const disableCamLabel = t('meeting.interactions.disableCamera', 'Disable camera');
+	const enableCamLabel = t('meeting.interactions.enableCamera', 'Enable camera');
 	const playMicLabel = t('meeting.interactions.playMic', 'Start microphone testing');
 	const stopMicLabel = t('meeting.interactions.stopMic', 'Stop microphone testing');
 	const closeModalTooltip = t('action.close', 'Close');
@@ -353,10 +353,7 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 					width="fill"
 					orientation={'horizontal'}
 				>
-					<Tooltip
-						placement="top"
-						label={videoStreamEnabled ? disableVideoLabel : enableVideoLabel}
-					>
+					<Tooltip placement="top" label={videoStreamEnabled ? disableCamLabel : enableCamLabel}>
 						<MultiButton
 							primaryIcon={videoStreamEnabled ? 'Video' : 'VideoOff'}
 							size="large"
@@ -370,10 +367,7 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 						/>
 					</Tooltip>
 					<Padding left="1rem" />
-					<Tooltip
-						placement="top"
-						label={audioStreamEnabled ? disableAudioLabel : enableAudioLabel}
-					>
+					<Tooltip placement="top" label={audioStreamEnabled ? disableMicLabel : enableMicLabel}>
 						<MultiButton
 							primaryIcon={audioStreamEnabled ? 'Mic' : 'MicOff'}
 							size="large"
