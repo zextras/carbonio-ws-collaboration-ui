@@ -167,12 +167,23 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 				id: `device-${i}`,
 				label: videoItem.label ? videoItem.label : `device-${i}`,
 				onClick: (): void => {
-					toggleStreams(audioStreamEnabled, true, selectedAudioDevice, videoItem.deviceId);
+					if (videoStreamEnabled) {
+						toggleStreams(audioStreamEnabled, true, selectedAudioDevice, videoItem.deviceId);
+					} else {
+						setSelectedVideoDevice(videoItem.deviceId);
+					}
 				},
 				selected: videoItem.deviceId === selectedVideoDevice,
 				value: videoItem.deviceId
 			})),
-		[audioStreamEnabled, selectedAudioDevice, selectedVideoDevice, toggleStreams, videoMediaList]
+		[
+			audioStreamEnabled,
+			selectedAudioDevice,
+			selectedVideoDevice,
+			toggleStreams,
+			videoMediaList,
+			videoStreamEnabled
+		]
 	);
 
 	const mediaAudioList = useMemo(
@@ -181,12 +192,23 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 				id: `device-${i}`,
 				label: audioItem.label ? audioItem.label : `device-${i}`,
 				onClick: (): void => {
-					toggleStreams(true, videoStreamEnabled, audioItem.deviceId, selectedVideoDevice);
+					if (audioStreamEnabled) {
+						toggleStreams(true, videoStreamEnabled, audioItem.deviceId, selectedVideoDevice);
+					} else {
+						setSelectedAudioDevice(audioItem.deviceId);
+					}
 				},
 				selected: audioItem.deviceId === selectedAudioDevice,
 				value: audioItem.deviceId
 			})),
-		[audioMediaList, selectedAudioDevice, selectedVideoDevice, toggleStreams, videoStreamEnabled]
+		[
+			audioMediaList,
+			audioStreamEnabled,
+			selectedAudioDevice,
+			selectedVideoDevice,
+			toggleStreams,
+			videoStreamEnabled
+		]
 	);
 
 	const updateListOfDevices = useCallback(() => {

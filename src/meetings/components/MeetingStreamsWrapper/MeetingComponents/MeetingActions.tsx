@@ -12,7 +12,15 @@ import {
 	Tooltip
 } from '@zextras/carbonio-design-system';
 import { filter, map } from 'lodash';
-import React, { ReactElement, RefObject, useCallback, useEffect, useMemo, useState } from 'react';
+import React, {
+	ReactElement,
+	RefObject,
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState
+} from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled, { FlattenSimpleInterpolation } from 'styled-components';
@@ -64,7 +72,6 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 
 	const setLocalStreams = useStore((store) => store.setLocalStreams);
 	const removeLocalStreams = useStore((store) => store.removeLocalStreams);
-	const changeStreamStatus = useStore((store) => store.changeStreamStatus);
 	// const setMeetingViewSelected = useStore((store) => store.setMeetingViewSelected);
 	const setSelectedDeviceId = useStore((store) => store.setSelectedDeviceId);
 	const closeVideoOutConn = useStore((store) => store.closeVideoOutConn);
@@ -87,7 +94,22 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 	const [isAudioListOpen, setIsAudioListOpen] = useState<boolean>(false);
 	const [isVideoListOpen, setIsVideoListOpen] = useState<boolean>(false);
 
+	const audioDropdownRef = useRef<HTMLDivElement>(null);
+	const videoDropdownRef = useRef<HTMLDivElement>(null);
+
 	let timeout: string | number | NodeJS.Timeout | undefined;
+
+	const handleClickOutsideAudioDropdown = useCallback((e) => {
+		if (audioDropdownRef.current && !audioDropdownRef.current.contains(e.target)) {
+			setIsAudioListOpen(false);
+		}
+	}, []);
+
+	const handleClickOutsideVideoDropdown = useCallback((e) => {
+		if (videoDropdownRef.current && !videoDropdownRef.current.contains(e.target)) {
+			setIsVideoListOpen(false);
+		}
+	}, []);
 
 	const handleHoverMouseMove = useCallback(
 		(e) => {
@@ -121,32 +143,36 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 
 	const handleMouseLeave = useCallback(() => setIsHoverActions(false), []);
 
-	const toggleVideoStream = useCallback(() => {
-		if (!videoStatus) {
-			if (!videoOutConn) {
-				createVideoOutConn(meetingId, true, selectedVideoDeviceId);
+	const toggleVideoStream = useCallback(
+		(event) => {
+			event.stopPropagation();
+			if (!videoStatus) {
+				if (!videoOutConn) {
+					createVideoOutConn(meetingId, true, selectedVideoDeviceId);
+				} else {
+					getVideoStream(selectedVideoDeviceId).then((stream) => {
+						videoOutConn
+							?.updateLocalStreamTrack(stream)
+							.then(() => MeetingsApi.updateMediaOffer(meetingId, STREAM_TYPE.VIDEO, true));
+					});
+				}
 			} else {
-				getVideoStream(selectedVideoDeviceId).then((stream) => {
-					videoOutConn
-						?.updateLocalStreamTrack(stream)
-						.then(() => MeetingsApi.updateMediaOffer(meetingId, STREAM_TYPE.VIDEO, true));
-				});
+				closeVideoOutConn(meetingId);
+				MeetingsApi.updateMediaOffer(meetingId, STREAM_TYPE.VIDEO, false).then(() =>
+					removeLocalStreams(meetingId, STREAM_TYPE.VIDEO)
+				);
 			}
-		} else {
-			closeVideoOutConn(meetingId);
-			MeetingsApi.updateMediaOffer(meetingId, STREAM_TYPE.VIDEO, false).then(() =>
-				removeLocalStreams(meetingId, STREAM_TYPE.VIDEO)
-			);
-		}
-	}, [
-		videoStatus,
-		videoOutConn,
-		createVideoOutConn,
-		meetingId,
-		selectedVideoDeviceId,
-		closeVideoOutConn,
-		removeLocalStreams
-	]);
+		},
+		[
+			videoStatus,
+			videoOutConn,
+			createVideoOutConn,
+			meetingId,
+			selectedVideoDeviceId,
+			closeVideoOutConn,
+			removeLocalStreams
+		]
+	);
 
 	const toggleAudioDropdown = useCallback(() => {
 		setIsAudioListOpen((prevState) => !prevState);
@@ -158,18 +184,22 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 		if (isAudioListOpen) setIsAudioListOpen(false);
 	}, [isAudioListOpen]);
 
-	const toggleAudioStream = useCallback(() => {
-		if (!audioStatus) {
-			getAudioStream(true, true, selectedAudioDeviceId).then((stream) => {
-				bidirectionalAudioConn?.updateLocalStreamTrack(stream).then(() => {
-					MeetingsApi.updateAudioStreamStatus(meetingId, !audioStatus);
+	const toggleAudioStream = useCallback(
+		(event) => {
+			event.stopPropagation();
+			if (!audioStatus) {
+				getAudioStream(true, true, selectedAudioDeviceId).then((stream) => {
+					bidirectionalAudioConn?.updateLocalStreamTrack(stream).then(() => {
+						MeetingsApi.updateAudioStreamStatus(meetingId, !audioStatus);
+					});
 				});
-			});
-		} else {
-			bidirectionalAudioConn?.closeRtpSenderTrack();
-			MeetingsApi.updateAudioStreamStatus(meetingId, !audioStatus);
-		}
-	}, [audioStatus, bidirectionalAudioConn, meetingId, selectedAudioDeviceId]);
+			} else {
+				bidirectionalAudioConn?.closeRtpSenderTrack();
+				MeetingsApi.updateAudioStreamStatus(meetingId, !audioStatus);
+			}
+		},
+		[audioStatus, bidirectionalAudioConn, meetingId, selectedAudioDeviceId]
+	);
 
 	const leaveMeeting = useCallback(() => {
 		MeetingsApi.leaveMeeting(meetingId).then(() => goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED));
@@ -194,15 +224,12 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 				id: `device-${i}`,
 				label: audioItem.label ? audioItem.label : `device-${i}`,
 				onClick: (): void => {
-					setSelectedDeviceId(meetingId, STREAM_TYPE.AUDIO, audioItem.deviceId);
-					getAudioStream(true, true, audioItem.deviceId).then((stream) => {
-						bidirectionalAudioConn?.updateLocalStreamTrack(stream);
-						if (myUserId != null) {
-							changeStreamStatus(meetingId, myUserId, STREAM_TYPE.AUDIO, true);
-						}
-					});
-					if (!audioStatus) {
-						MeetingsApi.updateAudioStreamStatus(meetingId, !audioStatus).then();
+					if (audioStatus) {
+						getAudioStream(true, true, audioItem.deviceId).then((stream) => {
+							bidirectionalAudioConn?.updateLocalStreamTrack(stream);
+						});
+					} else {
+						setSelectedDeviceId(meetingId, STREAM_TYPE.AUDIO, audioItem.deviceId);
 					}
 				},
 				selected: audioItem.deviceId === selectedAudioDeviceId,
@@ -211,12 +238,10 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 		[
 			audioMediaList,
 			selectedAudioDeviceId,
-			setSelectedDeviceId,
-			meetingId,
 			audioStatus,
 			bidirectionalAudioConn,
-			myUserId,
-			changeStreamStatus
+			setSelectedDeviceId,
+			meetingId
 		]
 	);
 
@@ -226,28 +251,20 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 				id: `device-${i}`,
 				label: videoItem.label ? videoItem.label : `device-${i}`,
 				onClick: (): void => {
-					setSelectedDeviceId(meetingId, STREAM_TYPE.VIDEO, videoItem.deviceId);
-					if (!videoOutConn) {
-						createVideoOutConn(meetingId, true, videoItem.deviceId);
-					} else {
+					if (videoStatus) {
 						getVideoStream(videoItem.deviceId).then((stream) => {
 							const videoStream = stream;
 							videoOutConn?.updateLocalStreamTrack(stream).then(() => {
 								setLocalStreams(meetingId, STREAM_TYPE.VIDEO, videoStream);
 							});
 						});
+					} else {
+						setSelectedDeviceId(meetingId, STREAM_TYPE.VIDEO, videoItem.deviceId);
 					}
 				},
 				value: videoItem.deviceId
 			})),
-		[
-			videoMediaList,
-			setSelectedDeviceId,
-			meetingId,
-			videoOutConn,
-			createVideoOutConn,
-			setLocalStreams
-		]
+		[videoMediaList, videoStatus, videoOutConn, setLocalStreams, meetingId, setSelectedDeviceId]
 	);
 
 	useEffect(() => {
@@ -265,6 +282,32 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 			}
 		};
 	}, [handleHoverMouseMove, handleHoverMouseStop, isHoverActions, streamsWrapperRef]);
+
+	useEffect(() => {
+		let elRef: React.RefObject<HTMLDivElement> | null = streamsWrapperRef;
+		if (elRef.current) {
+			if (isAudioListOpen) {
+				elRef.current.addEventListener('mousedown', handleClickOutsideAudioDropdown);
+			}
+			if (isVideoListOpen) {
+				elRef.current.addEventListener('mousedown', handleClickOutsideVideoDropdown);
+			}
+		}
+
+		return (): void => {
+			if (elRef?.current) {
+				elRef.current.removeEventListener('mousedown', handleClickOutsideAudioDropdown);
+				elRef.current.removeEventListener('mousedown', handleClickOutsideVideoDropdown);
+				elRef = null;
+			}
+		};
+	}, [
+		handleClickOutsideAudioDropdown,
+		handleClickOutsideVideoDropdown,
+		isAudioListOpen,
+		isVideoListOpen,
+		streamsWrapperRef
+	]);
 
 	const updateListOfDevices = useCallback(() => {
 		navigator.mediaDevices
@@ -308,20 +351,6 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 			onMouseLeave={handleMouseLeave}
 			isHoovering={isHoovering}
 		>
-			<Tooltip placement="top" label={audioStatus ? disableMicLabel : enableMicLabel}>
-				<MultiButton
-					iconColor="gray6"
-					backgroundColor="primary"
-					primaryIcon={audioStatus ? 'Mic' : 'MicOff'}
-					icon={isAudioListOpen ? 'ChevronDown' : 'ChevronUp'}
-					onClick={toggleAudioStream}
-					items={mediaAudioList}
-					size="large"
-					shape="regular"
-					dropdownProps={{ forceOpen: isAudioListOpen, onClick: toggleAudioDropdown }}
-				/>
-			</Tooltip>
-			<Padding right="1rem" />
 			<Tooltip placement="top" label={videoStatus ? disableCamLabel : enableCamLabel}>
 				<MultiButton
 					iconColor="gray6"
@@ -332,7 +361,29 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 					items={mediaVideoList}
 					size="large"
 					shape="regular"
-					dropdownProps={{ forceOpen: isVideoListOpen, onClick: toggleVideoDropdown }}
+					dropdownProps={{
+						forceOpen: isVideoListOpen,
+						onClick: toggleVideoDropdown,
+						dropdownListRef: videoDropdownRef
+					}}
+				/>
+			</Tooltip>
+			<Padding right="1rem" />
+			<Tooltip placement="top" label={audioStatus ? disableMicLabel : enableMicLabel}>
+				<MultiButton
+					iconColor="gray6"
+					backgroundColor="primary"
+					primaryIcon={audioStatus ? 'Mic' : 'MicOff'}
+					icon={isAudioListOpen ? 'ChevronDown' : 'ChevronUp'}
+					onClick={toggleAudioStream}
+					items={mediaAudioList}
+					size="large"
+					shape="regular"
+					dropdownProps={{
+						forceOpen: isAudioListOpen,
+						onClick: toggleAudioDropdown,
+						dropdownListRef: audioDropdownRef
+					}}
 				/>
 			</Tooltip>
 			{/* 
