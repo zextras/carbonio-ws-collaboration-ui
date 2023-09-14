@@ -15,7 +15,7 @@ import useCalculateTilesOrder from '../../../hooks/useCalculateTilesOrder';
 import { MeetingRoutesParams } from '../../../hooks/useRouting';
 import { getMeetingSidebarStatus } from '../../../store/selectors/ActiveMeetingSelectors';
 import useStore from '../../../store/Store';
-import { SimpleTestTile } from '../TestTile';
+import Tile from '../Tile';
 
 const TilesBarContainer = styled(Container)`
 	padding: 3.24rem 1rem 3.25rem 0;
@@ -84,8 +84,8 @@ const TilesBar = (): ReactElement => {
 
 	const tilesToRender = useMemo(() => {
 		const selectedTiles = carouselTiles.slice(index, index + tilesForPage);
-		return map(selectedTiles, (tile) => <SimpleTestTile userId={tile.userId} />);
-	}, [carouselTiles, index, tilesForPage]);
+		return map(selectedTiles, (tile) => <Tile userId={tile.userId} meetingId={meetingId} />);
+	}, [carouselTiles, index, meetingId, tilesForPage]);
 
 	const clickPrevButton = useCallback(
 		() => setIndex((prev) => (prev - step > 0 ? prev - step : 0)),

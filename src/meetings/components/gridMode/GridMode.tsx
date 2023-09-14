@@ -13,7 +13,7 @@ import styled from 'styled-components';
 import { MeetingRoutesParams } from '../../../hooks/useRouting';
 import { getMeetingParticipantsByMeetingId } from '../../../store/selectors/MeetingSelectors';
 import useStore from '../../../store/Store';
-import TestTile from '../TestTile';
+import Tile from '../Tile';
 
 const Wrapper = styled(Container)`
 	position: relative;
@@ -25,7 +25,7 @@ const GridMode = (): ReactElement => {
 	const videos = useMemo(
 		() =>
 			map(participants, (participant) => (
-				<TestTile key={participant.userId} meetingId={meetingId} userId={participant.userId} />
+				<Tile key={participant.userId} meetingId={meetingId} userId={participant.userId} />
 			)),
 		[meetingId, participants]
 	);

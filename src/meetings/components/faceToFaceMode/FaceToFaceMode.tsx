@@ -12,8 +12,9 @@ import styled from 'styled-components';
 
 import { MeetingRoutesParams } from '../../../hooks/useRouting';
 import { getFirstParticipant } from '../../../store/selectors/MeetingSelectors';
+import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
-import { SimpleTestTile } from '../TestTile';
+import Tile from '../Tile';
 
 const FaceToFace = styled(Container)`
 	position: relative;
@@ -43,24 +44,25 @@ const FaceToFaceMode = (): ReactElement => {
 		'Waiting for participants to join...'
 	);
 
+	const localId = useStore(getUserId);
 	const centralParticipant = useStore((store) => getFirstParticipant(store, meetingId));
 
 	const centralContentToDisplay = useMemo(
 		() =>
 			centralParticipant ? (
-				<SimpleTestTile userId={'selectedId'} />
+				<Tile userId={centralParticipant.userId} meetingId={meetingId} />
 			) : (
 				<Text color="gray6" size="large">
 					{waitingParticipants}
 				</Text>
 			),
-		[centralParticipant, waitingParticipants]
+		[centralParticipant, meetingId, waitingParticipants]
 	);
 
 	return (
 		<FaceToFace data-testid="faceToFaceModeView">
 			<MyStreamContainer data-testid="myStreamContainer" background="text">
-				<SimpleTestTile userId={'myId'} />
+				<Tile userId={localId} meetingId={meetingId} />
 			</MyStreamContainer>
 			{centralContentToDisplay}
 		</FaceToFace>

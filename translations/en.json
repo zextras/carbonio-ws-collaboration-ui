@@ -149,6 +149,12 @@
         },
         "waitingParticipants": "Waiting for participants to join..."
     },
+    "meetings": {
+        "interactions": {
+            "yourCamIsDisabled": "Your camera is off",
+            "yourMicIsDisabled": "Your microphone is off"
+        }
+    },
     "message": {
         "deletedMessage": "Deleted message",
         "draft": "draft",

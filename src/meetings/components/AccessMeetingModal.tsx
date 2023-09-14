@@ -18,11 +18,17 @@ import React, { ReactElement, useCallback, useEffect, useMemo, useRef, useState 
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
+import Tile from './Tile';
 import useRouting, { PAGE_INFO_TYPE } from '../../hooks/useRouting';
 import { MeetingsApi } from '../../network';
-import { getRoomNameSelector, getRoomTypeSelector } from '../../store/selectors/RoomsSelectors';
+import { getMeeting } from '../../store/selectors/MeetingSelectors';
+import {
+	getRoomMembers,
+	getRoomNameSelector,
+	getRoomTypeSelector
+} from '../../store/selectors/RoomsSelectors';
 import useStore from '../../store/Store';
-import { RoomType } from '../../types/store/RoomTypes';
+import { Member, RoomType } from '../../types/store/RoomTypes';
 import { BrowserUtils } from '../../utils/BrowserUtils';
 import { getAudioAndVideo } from '../../utils/UserMediaManager';
 
@@ -39,11 +45,6 @@ const VideoTile = styled(Container)`
 	background: ${({ theme }): string => theme.palette.gray0.regular};
 	border-radius: 0.3125rem !important;
 	overflow: hidden;
-`;
-
-const VideoEl = styled.video`
-	min-width: 100%;
-	max-width: 100%;
 `;
 
 const CustomModal = styled(Modal)`
@@ -86,6 +87,10 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 	const { goToMeetingPage, goToInfoPage } = useRouting();
 
 	const roomType = useStore((store) => getRoomTypeSelector(store, roomId));
+
+	const sessionId: string | undefined = useStore((store) => store.session.id);
+	const roomMembers: Member[] | undefined = useStore((state) => getRoomMembers(state, roomId));
+	const meeting = useStore((store) => getMeeting(store, roomId));
 
 	const [videoStreamEnabled, setVideoStreamEnabled] = useState(false);
 	const [audioStreamEnabled, setAudioStreamEnabled] = useState(false);
@@ -160,6 +165,11 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 		},
 		[streamTrack]
 	);
+
+	const memberId: string | undefined = useMemo(() => {
+		const user: Member | undefined = find(roomMembers, (member) => member.userId === sessionId);
+		return user?.userId;
+	}, [roomMembers, sessionId]);
 
 	const mediaVideoList = useMemo(
 		() =>
@@ -318,7 +328,7 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 
 	return (
 		<CustomModal
-			background={'text'}
+			background={'gray0'}
 			open
 			size="small"
 			title={modalTitle}
@@ -336,23 +346,20 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 				mainAlignment="flex-start"
 			>
 				<VideoTile width={wrapperWidth}>
-					<VideoEl
-						playsInline
-						autoPlay
-						muted={videoPlayerTestMuted}
-						controls={false}
-						ref={videoStreamRef}
+					<Tile
+						userId={memberId}
+						meetingId={meeting?.id}
+						modalProps={{
+							streamRef: videoStreamRef,
+							streamMuted: videoPlayerTestMuted,
+							audioStreamEnabled,
+							videoStreamEnabled
+						}}
 					/>
 				</VideoTile>
 				<Padding top="1rem" />
 				<Text weight="bold">{joinMeetingDescription}</Text>
-				<Container
-					padding={{ top: '1rem' }}
-					ref={wrapperRef}
-					height="fit"
-					width="fill"
-					orientation={'horizontal'}
-				>
+				<Container padding={{ top: '1rem' }} height="fit" width="fill" orientation={'horizontal'}>
 					<Tooltip
 						placement="top"
 						label={videoStreamEnabled ? disableVideoLabel : enableVideoLabel}

@@ -11,7 +11,7 @@ import styled from 'styled-components';
 
 import useCalculateTilesOrder from '../../../hooks/useCalculateTilesOrder';
 import { MeetingRoutesParams } from '../../../hooks/useRouting';
-import { SimpleTestTile } from '../TestTile';
+import Tile from '../Tile';
 
 const CinemaContainer = styled(Container)`
 	min-width: 18.75rem;
@@ -23,7 +23,7 @@ const CinemaMode = (): ReactElement => {
 
 	return (
 		<CinemaContainer data-testid="cinemaModeView">
-			<SimpleTestTile userId={centralTile?.userId} />
+			<Tile userId={centralTile?.userId} meetingId={meetingId} />
 		</CinemaContainer>
 	);
 };
