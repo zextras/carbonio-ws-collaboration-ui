@@ -42,8 +42,8 @@ const TilesBar = (): ReactElement => {
 	const { meetingId }: MeetingRoutesParams = useParams();
 
 	const [t] = useTranslation();
-	const scrollUpLabel = t('tooltip.scrollListUp', 'Scroll list up');
-	const scrollDownLabel = t('tooltip.scrollListDown', 'Scroll list down');
+	const scrollUpLabel = t('tooltip.scrollUp', 'Scroll up');
+	const scrollDownLabel = t('tooltip.scrollDown', 'Scroll down');
 	const topLabel = t('tooltip.topOfList', 'Top of list');
 	const bottomLabel = t('tooltip.bottomOfList', 'Bottom of list');
 

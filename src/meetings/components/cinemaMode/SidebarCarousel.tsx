@@ -35,8 +35,14 @@ const SidebarCarousel = (): ReactElement => {
 	const { meetingId }: MeetingRoutesParams = useParams();
 
 	const [t] = useTranslation();
-	const collapseCarouselLabel = t('tooltip.collapseCarousel', 'Collapse');
-	const expandCarouselLabel = t('tooltip.expandCarousel', 'Expand');
+	const collapseCarouselLabel = t(
+		'tooltip.collapseParticipantsMeetingTooltip',
+		'Collapse participants list'
+	);
+	const expandCarouselLabel = t(
+		'tooltip.expandParticipantsListTooltip',
+		'Expand participants list'
+	);
 
 	const carouselIsVisible = useStore((store) => getMeetingCarouselVisibility(store, meetingId));
 	const setIsCarouselVisible = useStore((store) => store.setIsCarouseVisible);

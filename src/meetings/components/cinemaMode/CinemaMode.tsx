@@ -25,32 +25,30 @@ const CinemaMode = (): ReactElement => {
 
 	const sidebarStatus: boolean = useStore((store) => getMeetingSidebarStatus(store, meetingId));
 
-	const [centralTileSize, setCentralTileSize] = useState({ tileHeight: '0', tileWidth: '0' });
+	const [centralTileWidth, setCentralTileWidth] = useState('0');
 
 	const cinemaModeRef = useRef<null | HTMLDivElement>(null);
 
-	const getSizeOfCentralTile = useCallback(() => {
+	const getWidthOfCentralTile = useCallback(() => {
 		if (cinemaModeRef && cinemaModeRef.current) {
-			let tileHeight;
+			const tileHeight = (cinemaModeRef.current.offsetWidth / 16) * 9;
 			let tileWidth;
-			tileHeight = (cinemaModeRef.current.offsetWidth / 16) * 9;
 			tileWidth = cinemaModeRef.current.offsetWidth;
 			if (tileHeight >= cinemaModeRef.current.offsetHeight) {
-				tileHeight = cinemaModeRef.current.offsetHeight;
 				tileWidth = (cinemaModeRef.current.offsetHeight / 9) * 16;
 			}
-			setCentralTileSize({ tileHeight: `${tileHeight}px`, tileWidth: `${tileWidth}px` });
+			setCentralTileWidth(`${tileWidth}px`);
 		}
 	}, []);
 	useEffect(() => {
-		window.parent.addEventListener('resize', getSizeOfCentralTile);
-		return () => window.parent.removeEventListener('resize', getSizeOfCentralTile);
-	}, [getSizeOfCentralTile]);
-	useEffect(() => getSizeOfCentralTile(), [cinemaModeRef, getSizeOfCentralTile, sidebarStatus]);
+		window.parent.addEventListener('resize', getWidthOfCentralTile);
+		return () => window.parent.removeEventListener('resize', getWidthOfCentralTile);
+	}, [getWidthOfCentralTile]);
+	useEffect(() => getWidthOfCentralTile(), [cinemaModeRef, getWidthOfCentralTile, sidebarStatus]);
 
 	return (
 		<Container ref={cinemaModeRef}>
-			<CinemaContainer data-testid="cinemaModeView" width={centralTileSize.tileWidth} height="fit">
+			<CinemaContainer data-testid="cinemaModeView" width={centralTileWidth} height="fit">
 				<Tile userId={centralTile?.userId} meetingId={meetingId} />
 			</CinemaContainer>
 		</Container>

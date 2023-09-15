@@ -50,32 +50,30 @@ const FaceToFaceMode = (): ReactElement => {
 
 	const sidebarStatus: boolean = useStore((store) => getMeetingSidebarStatus(store, meetingId));
 
-	const [centralTileSize, setCentralTileSize] = useState({ tileHeight: '0', tileWidth: '0' });
+	const [centralTileWidth, setCentralTileWidth] = useState('0');
 
 	const faceToFaceRef = useRef<null | HTMLDivElement>(null);
 
-	const getSizeOfCentralTile = useCallback(() => {
+	const getWidthOfCentralTile = useCallback(() => {
 		if (faceToFaceRef && faceToFaceRef.current) {
-			let tileHeight;
+			const tileHeight = (faceToFaceRef.current.offsetWidth / 16) * 9;
 			let tileWidth;
-			tileHeight = (faceToFaceRef.current.offsetWidth / 16) * 9;
 			tileWidth = faceToFaceRef.current.offsetWidth;
 			if (tileHeight >= faceToFaceRef.current.offsetHeight) {
-				tileHeight = faceToFaceRef.current.offsetHeight;
 				tileWidth = (faceToFaceRef.current.offsetHeight / 9) * 16;
 			}
-			setCentralTileSize({ tileHeight: `${tileHeight}px`, tileWidth: `${tileWidth}px` });
+			setCentralTileWidth(`${tileWidth}px`);
 		}
 	}, []);
 	useEffect(() => {
-		window.parent.addEventListener('resize', getSizeOfCentralTile);
-		return () => window.parent.removeEventListener('resize', getSizeOfCentralTile);
-	}, [getSizeOfCentralTile]);
-	useEffect(() => getSizeOfCentralTile(), [faceToFaceRef, getSizeOfCentralTile, sidebarStatus]);
+		window.parent.addEventListener('resize', getWidthOfCentralTile);
+		return () => window.parent.removeEventListener('resize', getWidthOfCentralTile);
+	}, [getWidthOfCentralTile]);
+	useEffect(() => getWidthOfCentralTile(), [faceToFaceRef, getWidthOfCentralTile, sidebarStatus]);
 	const centralContentToDisplay = useMemo(
 		() =>
 			centralParticipant ? (
-				<CentralTile width={centralTileSize.tileWidth} height="fit" background="text">
+				<CentralTile width={centralTileWidth} height="fit" background="text">
 					<Tile userId={centralParticipant.userId} meetingId={meetingId} />
 				</CentralTile>
 			) : (
@@ -83,7 +81,7 @@ const FaceToFaceMode = (): ReactElement => {
 					{waitingParticipants}
 				</Text>
 			),
-		[centralParticipant, centralTileSize.tileWidth, meetingId, waitingParticipants]
+		[centralParticipant, centralTileWidth, meetingId, waitingParticipants]
 	);
 
 	return (
