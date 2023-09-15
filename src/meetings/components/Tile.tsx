@@ -116,11 +116,12 @@ const CustomIconButton = styled(IconButton)`
 `;
 
 const TextContainer = styled(Container)`
+	position: absolute;
+	max-width: 90%;
 	background-color: ${({ theme }): string => theme.palette.text.regular};
 	border-radius: 0.25rem;
 	padding: 0.25rem 0.5rem;
 	z-index: 2;
-	max-width: 100%;
 	user-select: none;
 `;
 
