@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
-import MeetingActions from './MeetingComponents/MeetingActions';
+import MeetingActions from './MeetingComponents/MeetingActions/MeetingActions';
 import MeetingViewManager from './MeetingComponents/MeetingViewManager';
 import { getMeetingSidebarStatus } from '../../../store/selectors/ActiveMeetingSelectors';
 import { getCustomLogo } from '../../../store/selectors/SessionSelectors';
@@ -85,7 +85,7 @@ const MeetingStreamsWrapper = (): ReactElement => {
 					</Tooltip>
 				</Container>
 			</Row>
-			<Row takeAvailableSpace={true} height="fill">
+			<Row takeAvailableSpace height="fill">
 				<MeetingViewManager />
 			</Row>
 			<MeetingActions streamsWrapperRef={streamsWrapperRef} />
