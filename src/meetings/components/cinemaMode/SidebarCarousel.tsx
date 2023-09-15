@@ -36,11 +36,11 @@ const SidebarCarousel = (): ReactElement => {
 
 	const [t] = useTranslation();
 	const collapseCarouselLabel = t(
-		'tooltip.collapseParticipantsMeetingTooltip',
+		'meeting.collapseParticipantsMeetingTooltip',
 		'Collapse participants list'
 	);
 	const expandCarouselLabel = t(
-		'tooltip.expandParticipantsListTooltip',
+		'meeting.expandParticipantsListTooltip',
 		'Expand participants list'
 	);
 

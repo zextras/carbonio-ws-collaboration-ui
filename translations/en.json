@@ -275,8 +275,8 @@
             "updatePicture": "Update picture",
             "uploadPicture": "Upload picture"
         },
-        "scrollListDown": "Scroll down",
-        "scrollListUp": "Scroll up",
+        "scrollDown": "Scroll down",
+        "scrollUp": "Scroll up",
         "selectEmoji": "Select emoji",
         "sendMessage": "Send message",
         "showConversationList": "Show conversations list",

@@ -72,7 +72,6 @@ const ActionContainer = styled(Container)`
 	height: auto;
 	aspect-ratio: 16/9;
 	position: absolute;
-	padding: 0.5rem;
 `;
 
 const VideoEl = styled.video`
@@ -287,6 +286,7 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, modalProps }) => {
 					mainAlignment={'flex-start'}
 					crossAlignment={'flex-start'}
 					height="fill"
+					padding="0.5rem"
 				>
 					{mediaStatusIcons}
 				</Row>
@@ -295,6 +295,7 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, modalProps }) => {
 					crossAlignment={'flex-end'}
 					height="fill"
 					takeAvailableSpace
+					padding="0.5rem"
 				>
 					<TextContainer width={'fit'} height={'fit'} overflow="ellipsis">
 						<Text color={'gray6'}>{userName}</Text>
