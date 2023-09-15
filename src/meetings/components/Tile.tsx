@@ -69,12 +69,15 @@ const CustomTile = styled(Container)`
 `;
 
 const ActionContainer = styled(Container)`
+	height: auto;
 	aspect-ratio: 16/9;
 	position: absolute;
 	padding: 0.5rem;
 `;
 
 const VideoEl = styled.video`
+	object-fit: cover;
+	aspect-ratio: 16/9;
 	width: inherit;
 	border-radius: 8px;
 	&:hover {
@@ -209,11 +212,11 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, modalProps }) => {
 	const mediaStatusIcons = useMemo(
 		() => (
 			<>
-				{!audioStreamEnabled && (
+				{!videoStreamEnabled && (
 					<>
-						<Tooltip label={micOffLabel} disabled={!isSessionTile}>
+						<Tooltip label={camOffLabel} disabled={!isSessionTile}>
 							<CustomIconButton
-								icon="MicOffOutline"
+								icon="VideoOffOutline"
 								iconColor="gray6"
 								backgroundColor="gray0"
 								size="large"
@@ -223,10 +226,10 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, modalProps }) => {
 						<Padding right="0.5rem" />
 					</>
 				)}
-				{!videoStreamEnabled && (
-					<Tooltip label={camOffLabel} disabled={!isSessionTile}>
+				{!audioStreamEnabled && (
+					<Tooltip label={micOffLabel} disabled={!isSessionTile}>
 						<CustomIconButton
-							icon="VideoOffOutline"
+							icon="MicOffOutline"
 							iconColor="gray6"
 							backgroundColor="gray0"
 							size="large"
