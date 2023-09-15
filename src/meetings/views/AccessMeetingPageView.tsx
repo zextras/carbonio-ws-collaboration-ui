@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Container } from '@zextras/carbonio-design-system';
+import { Container, useTheme } from '@zextras/carbonio-design-system';
 import React, { ReactElement, useMemo } from 'react';
 
 import { MEETINGS_PATH } from '../../constants/appConstants';
@@ -14,8 +14,12 @@ const AccessMeetingPageView = (): ReactElement => {
 	// Retrieve room information
 	const roomId: string = useMemo(() => document.location.pathname.split(MEETINGS_PATH)[1], []);
 
+	const theme = useTheme();
+
 	return (
-		<Container background={'gray1'}>{roomId && <AccessMeetingModal roomId={roomId} />}</Container>
+		<Container background={theme.palette.gray1.hover}>
+			{roomId && <AccessMeetingModal roomId={roomId} />}
+		</Container>
 	);
 };
 
