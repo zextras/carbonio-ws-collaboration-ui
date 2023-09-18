@@ -17,6 +17,10 @@ export enum MEETINGS_ROUTES {
 	MEETING = '/meeting/:meetingId',
 	INFO = '/infoPage/:infoType'
 }
+export type MeetingRoutesParams = {
+	meetingId: string;
+	infoType: PAGE_INFO_TYPE;
+};
 
 export enum PAGE_INFO_TYPE {
 	ERROR_PAGE = 'error_page',

@@ -169,13 +169,6 @@ export function wsEventsHandler(event: WsEvent): void {
 			if (mediaType === STREAM_TYPE.SCREEN) {
 				state.changeStreamStatus(event.meetingId, event.userId, STREAM_TYPE.SCREEN, event.active);
 			}
-			if (event.userId !== state.session.id && event.active) {
-				MeetingsApi.subscribeToMedia(
-					event.meetingId,
-					[{ user_id: event.userId, type: mediaType }],
-					[]
-				);
-			}
 			break;
 		}
 		case WsEventType.MEETING_AUDIO_ANSWERED: {
@@ -207,7 +200,7 @@ export function wsEventsHandler(event: WsEvent): void {
 			}
 			break;
 		}
-		case WsEventType.MEETING_PARTICIPANT_STREAMS: {
+		case WsEventType.MEETING_PARTICIPANT_SUBSCRIBED: {
 			const activeMeeting = state.activeMeeting[event.meetingId];
 			if (activeMeeting.videoInConn) {
 				activeMeeting.videoInConn.handleStreams(event.streams);

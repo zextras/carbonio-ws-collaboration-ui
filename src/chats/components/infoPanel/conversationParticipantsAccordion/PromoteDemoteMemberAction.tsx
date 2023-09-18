@@ -51,11 +51,10 @@ const PromoteDemoteMemberAction: FC<PromoteDemoteMemberProps> = ({
 		<Tooltip label={tooltipLabel}>
 			<IconButton
 				iconColor={isInsideMeeting ? 'gray0' : owner ? 'primary' : 'secondary'}
-				backgroundColor="gray6"
+				backgroundColor={isInsideMeeting ? 'text' : 'gray6'}
 				size={isInsideMeeting ? 'large' : 'extralarge'}
 				icon={owner ? 'Crown' : 'CrownOutline'}
 				onClick={owner ? demoteMember : promoteMember}
-				disabled={isSessionParticipant}
 			/>
 		</Tooltip>
 	);

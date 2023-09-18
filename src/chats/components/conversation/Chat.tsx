@@ -114,7 +114,7 @@ const Chat = ({ roomId, setInfoPanelOpen, isInsideMeeting }: ChatsProps): ReactE
 				<ConversationHeader roomId={roomId} setInfoPanelOpen={setInfoPanelOpen} />
 			)}
 			<MessagesList roomId={roomId} />
-			<ConversationFooter roomId={roomId} />
+			<ConversationFooter roomId={roomId} isInsideMeeting={isInsideMeeting} />
 		</CustomContainer>
 	);
 };

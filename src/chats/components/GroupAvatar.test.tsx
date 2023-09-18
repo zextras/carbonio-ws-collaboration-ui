@@ -11,8 +11,9 @@ import GroupAvatar from './GroupAvatar';
 import useStore from '../../store/Store';
 import { createMockMeeting, createMockParticipants, createMockRoom } from '../../tests/createMock';
 import { setup } from '../../tests/test-utils';
-import { MeetingBe, MeetingParticipant } from '../../types/network/models/meetingBeTypes';
+import { MeetingBe } from '../../types/network/models/meetingBeTypes';
 import { RoomBe } from '../../types/network/models/roomBeTypes';
+import { MeetingParticipant } from '../../types/store/MeetingTypes';
 
 const members = [
 	{

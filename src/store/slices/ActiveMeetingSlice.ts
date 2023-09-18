@@ -38,6 +38,7 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 					},
 					chatVisibility: MeetingChatVisibility.CLOSED,
 					meetingViewSelected: MeetingViewType.CINEMA,
+					isCarouselVisible: true,
 					// Peer connections
 					localStreams: {
 						selectedAudioDeviceId,
@@ -241,6 +242,17 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 			}),
 			false,
 			'AM/SET_SUBSCRIPTION'
+		);
+	},
+	setIsCarouseVisible: (meetingId: string, status: boolean): void => {
+		set(
+			produce((draft: RootStore) => {
+				if (draft.activeMeeting[meetingId]) {
+					draft.activeMeeting[meetingId].isCarouselVisible = status;
+				}
+			}),
+			false,
+			'AM/SET_MEETING_CAROUSEL_VISIBILITY'
 		);
 	}
 });

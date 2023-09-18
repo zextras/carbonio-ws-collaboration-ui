@@ -19,10 +19,15 @@ const ConversationFooterWrapper = styled(Container)`
 
 type ConversationFooterProps = {
 	roomId: string;
+	isInsideMeeting?: boolean;
 };
 
-const ConversationFooter: React.FC<ConversationFooterProps> = ({ roomId }) => (
-	<ConversationFooterWrapper height="fit" background={'gray6'} borderRadius="none">
+const ConversationFooter: React.FC<ConversationFooterProps> = ({ roomId, isInsideMeeting }) => (
+	<ConversationFooterWrapper
+		height="fit"
+		background={isInsideMeeting ? 'gray0' : 'gray6'}
+		borderRadius="none"
+	>
 		<ReferenceMessageView roomId={roomId} />
 		<UploadAttachmentManagerView roomId={roomId} />
 		<MessageComposer roomId={roomId} />

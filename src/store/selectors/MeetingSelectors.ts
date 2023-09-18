@@ -4,10 +4,11 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { filter, find, size } from 'lodash';
+import { filter, find, forEach, size } from 'lodash';
 
-import { MeetingParticipant } from '../../types/network/models/meetingBeTypes';
-import { Meeting, MeetingParticipantMap } from '../../types/store/MeetingTypes';
+import { TileData } from '../../meetings/components/Tile';
+import { STREAM_TYPE, Subscription } from '../../types/store/ActiveMeetingTypes';
+import { Meeting, MeetingParticipant, MeetingParticipantMap } from '../../types/store/MeetingTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 
 export const getMeeting = (store: RootStore, roomId: string): Meeting | undefined =>
@@ -53,19 +54,6 @@ export const getNumberOfMeetingParticipantsByMeetingId = (
 	meetingId: string
 ): number | undefined =>
 	size(find(store.meetings, (meeting) => meeting.id === meetingId)?.participants);
-
-export const getNumberOfTiles = (store: RootStore, meetingId: string): number => {
-	const meeting = find(store.meetings, (meeting) => meeting.id === meetingId);
-	if (meeting) {
-		const participantWithScreen = filter(
-			meeting.participants,
-			(participant) => participant.screenStreamOn === true
-		);
-		return size(meeting.participants) + size(participantWithScreen);
-	}
-	return 0;
-};
-
 export const getParticipantAudioStatus = (
 	store: RootStore,
 	meetingId: string | undefined,
@@ -93,4 +81,63 @@ export const getFirstParticipant = (
 ): MeetingParticipant | undefined => {
 	const meeting = find(store.meetings, (meeting) => meeting.id === meetingId);
 	return find(meeting?.participants, (participant) => participant.userId !== store.session.id);
+};
+
+export const getTiles = (store: RootStore, meetingId: string): TileData[] => {
+	const meeting = find(store.meetings, (meeting) => meeting.id === meetingId);
+	if (meeting) {
+		const tiles: TileData[] = [];
+		// TODO sort participants by joined time
+		forEach(meeting.participants, (participant) => {
+			tiles.push({
+				userId: participant.userId,
+				type: STREAM_TYPE.VIDEO
+			});
+			if (participant.screenStreamOn) {
+				tiles.push({
+					userId: participant.userId,
+					type: STREAM_TYPE.SCREEN
+				});
+			}
+		});
+		return tiles;
+	}
+	return [];
+};
+
+export const getSubscriptions = (store: RootStore, meetingId: string): Subscription[] => {
+	const meeting = find(store.meetings, (meeting) => meeting.id === meetingId);
+	if (meeting) {
+		const subscriptions: Subscription[] = [];
+		forEach(meeting.participants, (participant) => {
+			if (participant.userId !== store.session.id) {
+				if (participant.videoStreamOn) {
+					subscriptions.push({
+						user_id: participant.userId,
+						type: STREAM_TYPE.VIDEO
+					});
+				}
+				if (participant.screenStreamOn) {
+					subscriptions.push({
+						user_id: participant.userId,
+						type: STREAM_TYPE.SCREEN
+					});
+				}
+			}
+		});
+		return subscriptions;
+	}
+	return [];
+};
+
+export const getNumberOfTiles = (store: RootStore, meetingId: string): number => {
+	const meeting = find(store.meetings, (meeting) => meeting.id === meetingId);
+	if (meeting) {
+		const participantWithScreen = filter(
+			meeting.participants,
+			(participant) => participant.screenStreamOn === true
+		);
+		return size(meeting.participants) + size(participantWithScreen);
+	}
+	return 0;
 };
