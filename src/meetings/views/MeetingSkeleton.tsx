@@ -5,11 +5,10 @@
  */
 
 import { Container } from '@zextras/carbonio-design-system';
-import React, { lazy, ReactElement, Suspense, useMemo, useRef } from 'react';
+import React, { ReactElement, useMemo, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
-import ShimmerMeetingSidebar from './shimmers/ShimmerMeetingSidebar';
 import useGeneralMeetingControls from '../../hooks/useGeneralMeetingControls';
 import { MeetingRoutesParams } from '../../hooks/useRouting';
 import useSubscriptions from '../../hooks/useSubscriptions';
@@ -27,15 +26,7 @@ import SidebarCarousel from '../components/cinemaMode/SidebarCarousel';
 import FaceToFaceMode from '../components/faceToFaceMode/FaceToFaceMode';
 import GridMode from '../components/gridMode/GridMode';
 import MeetingActions from '../components/MeetingActions';
-
-const LazyMeetingSidebar = lazy(
-	() => import(/* webpackChunkName: "MeetingSidebar" */ '../components/sidebar/MeetingSidebar')
-);
-const MeetingSidebar = (): ReactElement => (
-	<Suspense fallback={<ShimmerMeetingSidebar />}>
-		<LazyMeetingSidebar />
-	</Suspense>
-);
+import MeetingSidebar from '../components/sidebar/MeetingSidebar';
 
 const SkeletonContainer = styled(Container)`
 	overflow: hidden;

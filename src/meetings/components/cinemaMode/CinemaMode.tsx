@@ -11,7 +11,10 @@ import styled from 'styled-components';
 
 import useCalculateTilesOrder from '../../../hooks/useCalculateTilesOrder';
 import { MeetingRoutesParams } from '../../../hooks/useRouting';
-import { getMeetingSidebarStatus } from '../../../store/selectors/ActiveMeetingSelectors';
+import {
+	getMeetingCarouselVisibility,
+	getMeetingSidebarStatus
+} from '../../../store/selectors/ActiveMeetingSelectors';
 import useStore from '../../../store/Store';
 import Tile from '../Tile';
 
@@ -24,6 +27,7 @@ const CinemaMode = (): ReactElement => {
 	const { centralTile } = useCalculateTilesOrder(meetingId);
 
 	const sidebarStatus: boolean = useStore((store) => getMeetingSidebarStatus(store, meetingId));
+	const carouselStatus = useStore((store) => getMeetingCarouselVisibility(store, meetingId));
 
 	const [centralTileWidth, setCentralTileWidth] = useState('0');
 
@@ -40,11 +44,16 @@ const CinemaMode = (): ReactElement => {
 			setCentralTileWidth(`${tileWidth}px`);
 		}
 	}, []);
+
 	useEffect(() => {
 		window.parent.addEventListener('resize', getWidthOfCentralTile);
 		return () => window.parent.removeEventListener('resize', getWidthOfCentralTile);
 	}, [getWidthOfCentralTile]);
-	useEffect(() => getWidthOfCentralTile(), [cinemaModeRef, getWidthOfCentralTile, sidebarStatus]);
+
+	useEffect(
+		() => getWidthOfCentralTile(),
+		[cinemaModeRef, getWidthOfCentralTile, sidebarStatus, carouselStatus]
+	);
 
 	return (
 		<Container ref={cinemaModeRef}>

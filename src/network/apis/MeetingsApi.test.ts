@@ -115,31 +115,30 @@ describe('Meetings API', () => {
 		});
 	});
 
-	// TODO Why is this test failing?
-	// test('joinMeeting is called correctly', async () => {
-	// 	fetchResponse.mockResolvedValueOnce(meetingMock);
-	// 	await meetingsApi.joinMeeting(
-	// 		meetingMock.id,
-	// 		{
-	// 			audioStreamEnabled: false,
-	// 			videoStreamEnabled: false
-	// 		},
-	// 		{}
-	// 	);
-	// 	// Check if fetch is called with the correct parameters
-	// 	expect(global.fetch).toHaveBeenCalledWith(`/services/chats/meetings/${meetingMock.id}/join`, {
-	// 		method: 'POST',
-	// 		headers,
-	// 		body: JSON.stringify({
-	// 			audioStreamEnabled: false,
-	// 			videoStreamEnabled: false
-	// 		})
-	// 	});
-	//
-	// 	// Check if store is correctly updated
-	// 	const store = useStore.getState();
-	// 	expect(store.activeMeeting[meetingMock.id]).toBeDefined();
-	// });
+	test('joinMeeting is called correctly', async () => {
+		fetchResponse.mockResolvedValue(meetingMock);
+		await meetingsApi.joinMeeting(
+			meetingMock.id,
+			{
+				audioStreamEnabled: false,
+				videoStreamEnabled: false
+			},
+			{}
+		);
+		// Check if fetch is called with the correct parameters
+		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/meetings/${meetingMock.id}/join`, {
+			method: 'POST',
+			headers,
+			body: JSON.stringify({
+				audioStreamEnabled: false,
+				videoStreamEnabled: false
+			})
+		});
+
+		// Check if store is correctly updated
+		const store = useStore.getState();
+		expect(store.activeMeeting[meetingMock.id]).toBeDefined();
+	});
 
 	test('leaveMeeting is called correctly', async () => {
 		fetchResponse.mockResolvedValueOnce(meetingMock);
