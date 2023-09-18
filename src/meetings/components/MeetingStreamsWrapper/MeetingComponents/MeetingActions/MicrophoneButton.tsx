@@ -62,6 +62,7 @@ const MicrophoneButton = ({
 					if (audioStatus) {
 						getAudioStream(true, true, audioItem.deviceId).then((stream) => {
 							bidirectionalAudioConn?.updateLocalStreamTrack(stream);
+							setSelectedDeviceId(meetingId, STREAM_TYPE.AUDIO, audioItem.deviceId);
 						});
 					} else {
 						setSelectedDeviceId(meetingId, STREAM_TYPE.AUDIO, audioItem.deviceId);

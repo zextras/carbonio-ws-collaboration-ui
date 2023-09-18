@@ -65,6 +65,7 @@ const CameraButton = ({
 						getVideoStream(videoItem.deviceId).then((stream) => {
 							videoOutConn?.updateLocalStreamTrack(stream).then(() => {
 								setLocalStreams(meetingId, STREAM_TYPE.VIDEO, stream);
+								setSelectedDeviceId(meetingId, STREAM_TYPE.VIDEO, videoItem.deviceId);
 							});
 						});
 					} else {
