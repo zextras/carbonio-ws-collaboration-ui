@@ -10,18 +10,16 @@ import React, { ReactElement, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { getMeetingParticipantsByMeetingId } from '../../../../store/selectors/MeetingSelectors';
-import useStore from '../../../../store/Store';
-import Tile from '../../Tile/Tile';
+import { MeetingRoutesParams } from '../../../hooks/useRouting';
+import { getMeetingParticipantsByMeetingId } from '../../../store/selectors/MeetingSelectors';
+import useStore from '../../../store/Store';
+import Tile from '../Tile';
 
-const CinemaModeWrapper = styled(Container)`
-	width: 20rem;
+const Wrapper = styled(Container)`
 	position: relative;
 `;
-
-const CinemaMode = (): ReactElement => {
-	const { meetingId }: Record<string, string> = useParams();
-
+const GridMode = (): ReactElement => {
+	const { meetingId }: MeetingRoutesParams = useParams();
 	const participants = useStore((store) => getMeetingParticipantsByMeetingId(store, meetingId));
 
 	const videos = useMemo(
@@ -33,10 +31,10 @@ const CinemaMode = (): ReactElement => {
 	);
 
 	return (
-		<CinemaModeWrapper data-testid="cinemaModeView" orientation="vertical">
+		<Wrapper data-testid="gridModeView" orientation="vertical">
 			{videos}
-		</CinemaModeWrapper>
+		</Wrapper>
 	);
 };
 
-export default CinemaMode;
+export default GridMode;

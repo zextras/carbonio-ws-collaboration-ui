@@ -19,18 +19,18 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import { UsersApi } from '../../../network';
-import { getStream } from '../../../store/selectors/ActiveMeetingSelectors';
+import { UsersApi } from '../../network';
+import { getStream } from '../../store/selectors/ActiveMeetingSelectors';
 import {
 	getParticipantAudioStatus,
 	getParticipantVideoStatus
-} from '../../../store/selectors/MeetingSelectors';
+} from '../../store/selectors/MeetingSelectors';
 // import { getUserId } from '../../../store/selectors/SessionSelectors';
-import { getUserId } from '../../../store/selectors/SessionSelectors';
-import { getUserName, getUserPictureUpdatedAt } from '../../../store/selectors/UsersSelectors';
-import useStore from '../../../store/Store';
-import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
-import { calculateAvatarColor } from '../../../utils/styleUtils';
+import { getUserId } from '../../store/selectors/SessionSelectors';
+import { getUserName, getUserPictureUpdatedAt } from '../../store/selectors/UsersSelectors';
+import useStore from '../../store/Store';
+import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
+import { calculateAvatarColor } from '../../utils/styleUtils';
 
 type modalTileProps = {
 	streamRef: React.MutableRefObject<HTMLVideoElement | null>;
@@ -69,12 +69,14 @@ const CustomTile = styled(Container)`
 `;
 
 const ActionContainer = styled(Container)`
+	height: auto;
 	aspect-ratio: 16/9;
 	position: absolute;
-	padding: 0.5rem;
 `;
 
 const VideoEl = styled.video`
+	object-fit: cover;
+	aspect-ratio: 16/9;
 	width: inherit;
 	border-radius: 8px;
 	&:hover {
@@ -114,11 +116,12 @@ const CustomIconButton = styled(IconButton)`
 `;
 
 const TextContainer = styled(Container)`
+	position: absolute;
+	max-width: 90%;
 	background-color: ${({ theme }): string => theme.palette.text.regular};
 	border-radius: 0.25rem;
 	padding: 0.25rem 0.5rem;
 	z-index: 2;
-	max-width: 100%;
 	user-select: none;
 `;
 
@@ -209,11 +212,11 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, modalProps }) => {
 	const mediaStatusIcons = useMemo(
 		() => (
 			<>
-				{!audioStreamEnabled && (
+				{!videoStreamEnabled && (
 					<>
-						<Tooltip label={micOffLabel} disabled={!isSessionTile}>
+						<Tooltip label={camOffLabel} disabled={!isSessionTile}>
 							<CustomIconButton
-								icon="MicOffOutline"
+								icon="VideoOffOutline"
 								iconColor="gray6"
 								backgroundColor="gray0"
 								size="large"
@@ -223,10 +226,10 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, modalProps }) => {
 						<Padding right="0.5rem" />
 					</>
 				)}
-				{!videoStreamEnabled && (
-					<Tooltip label={camOffLabel} disabled={!isSessionTile}>
+				{!audioStreamEnabled && (
+					<Tooltip label={micOffLabel} disabled={!isSessionTile}>
 						<CustomIconButton
-							icon="VideoOffOutline"
+							icon="MicOffOutline"
 							iconColor="gray6"
 							backgroundColor="gray0"
 							size="large"
@@ -284,6 +287,7 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, modalProps }) => {
 					mainAlignment={'flex-start'}
 					crossAlignment={'flex-start'}
 					height="fill"
+					padding="0.5rem"
 				>
 					{mediaStatusIcons}
 				</Row>
@@ -292,6 +296,7 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, modalProps }) => {
 					crossAlignment={'flex-end'}
 					height="fill"
 					takeAvailableSpace
+					padding="0.5rem"
 				>
 					<TextContainer width={'fit'} height={'fit'} overflow="ellipsis">
 						<Text color={'gray6'}>{userName}</Text>
@@ -314,3 +319,8 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, modalProps }) => {
 };
 
 export default Tile;
+
+export type TileData = {
+	userId: string;
+	type: STREAM_TYPE;
+};

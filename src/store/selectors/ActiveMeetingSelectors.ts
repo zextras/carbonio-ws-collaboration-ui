@@ -55,3 +55,6 @@ export const getStream = (
 
 export const getFirstStream = (store: RootStore, meetingId: string): MediaStream | undefined =>
 	sample(store.activeMeeting[meetingId]?.subscription)?.stream;
+
+export const getMeetingCarouselVisibility = (store: RootStore, meetingId: string): boolean =>
+	store.activeMeeting[meetingId]?.isCarouselVisible;

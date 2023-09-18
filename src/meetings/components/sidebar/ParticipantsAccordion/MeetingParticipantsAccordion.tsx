@@ -53,7 +53,7 @@ const MeetingParticipantsAccordion: FC<MeetingParticipantsAccordionProps> = ({ m
 			{
 				id: '1',
 				disableHover: true,
-				background: 'gray6',
+				background: 'text',
 				label: 'title',
 				CustomComponent: () => <MeetingParticipantsList meetingId={meetingId} />
 			}
@@ -76,7 +76,7 @@ const MeetingParticipantsAccordion: FC<MeetingParticipantsAccordionProps> = ({ m
 			crossAlignment="flex-start"
 			mainAlignment="flex-start"
 		>
-			<CustomAccordion items={infoDetails} borderRadius="none" />
+			<CustomAccordion items={infoDetails} borderRadius="none" background="gray0" />
 		</Container>
 	);
 };

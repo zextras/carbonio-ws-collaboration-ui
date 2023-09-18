@@ -14,10 +14,9 @@ import { usersNameListEqualityFn } from '../../../../store/equalityFunctions/Use
 import { getMeetingParticipantsByMeetingId } from '../../../../store/selectors/MeetingSelectors';
 import { getUsersSelector } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
-import { MeetingParticipant } from '../../../../types/network/models/meetingBeTypes';
-import { MeetingParticipantMap } from '../../../../types/store/MeetingTypes';
+import { MeetingParticipant, MeetingParticipantMap } from '../../../../types/store/MeetingTypes';
 import { UsersMap } from '../../../../types/store/UserTypes';
-import ParticipantElement from '../../HeaderMeetingButton/ParticipantElement';
+import ParticipantElement from '../../headerMeetingButton/ParticipantElement';
 
 type ParticipantsListProps = {
 	meetingId: string;

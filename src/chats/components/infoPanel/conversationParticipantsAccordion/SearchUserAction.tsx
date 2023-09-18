@@ -68,7 +68,7 @@ const SearchUserAction: FC<SearchUserProps> = ({ setFilteredInput, isInsideMeeti
 				CustomIcon={CustomElement}
 				onChange={handleFilterChange}
 				value={searchInput}
-				backgroundColor="gray5"
+				backgroundColor={isInsideMeeting ? 'gray0' : 'gray5'}
 			/>
 		</Container>
 	);

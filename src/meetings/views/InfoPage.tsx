@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { PAGE_INFO_TYPE } from '../../hooks/useRouting';
+import { MeetingRoutesParams, PAGE_INFO_TYPE } from '../../hooks/useRouting';
 
 const CustomContainer = styled(Container)`
 	z-index: 10;
@@ -41,7 +41,7 @@ const ErrorCode = styled(Container)`
 `;
 
 const InfoPage = (): ReactElement => {
-	const { infoType }: Record<string, InfoType> = useParams();
+	const { infoType }: MeetingRoutesParams = useParams();
 
 	const [t] = useTranslation();
 	let titleLabel;

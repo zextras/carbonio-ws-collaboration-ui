@@ -9,9 +9,9 @@ import produce from 'immer';
 import { find, forEach } from 'lodash';
 
 import { UsersApi } from '../../network';
-import { MeetingBe, MeetingParticipant } from '../../types/network/models/meetingBeTypes';
+import { MeetingBe, MeetingParticipantBe } from '../../types/network/models/meetingBeTypes';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
-import { MeetingParticipantMap } from '../../types/store/MeetingTypes';
+import { MeetingParticipant, MeetingParticipantMap } from '../../types/store/MeetingTypes';
 import { MeetingsSlice, RootStore } from '../../types/store/StoreTypes';
 
 export const useMeetingsStoreSlice = (set: (...any: any) => void): MeetingsSlice => ({
@@ -22,13 +22,13 @@ export const useMeetingsStoreSlice = (set: (...any: any) => void): MeetingsSlice
 				forEach(meetings, (meeting) => {
 					// Create a map of participants instead of an array
 					const participantsMap: MeetingParticipantMap = meeting.participants.reduce(
-						(acc: MeetingParticipantMap, participant: MeetingParticipant) => {
+						(acc: MeetingParticipantMap, participant: MeetingParticipantBe) => {
 							acc[participant.userId] = {
 								userId: participant.userId,
 								userType: participant.userType,
-								audioStreamOn: participant.audioStreamOn || false,
-								videoStreamOn: participant.videoStreamOn || false,
-								screenStreamOn: participant.screenStreamOn || false
+								audioStreamOn: participant.audioStreamEnabled || false,
+								videoStreamOn: participant.videoStreamEnabled || false,
+								screenStreamOn: participant.screenStreamEnabled || false
 							};
 							return acc;
 						},
@@ -62,13 +62,13 @@ export const useMeetingsStoreSlice = (set: (...any: any) => void): MeetingsSlice
 			produce((draft: RootStore) => {
 				// Create a map of participants instead of an array
 				const participantsMap: MeetingParticipantMap = meeting.participants.reduce(
-					(acc: MeetingParticipantMap, participant: MeetingParticipant) => {
+					(acc: MeetingParticipantMap, participant: MeetingParticipantBe) => {
 						acc[participant.userId] = {
 							userId: participant.userId,
 							userType: participant.userType,
-							audioStreamOn: participant.audioStreamOn || false,
-							videoStreamOn: participant.videoStreamOn || false,
-							screenStreamOn: participant.screenStreamOn || false
+							audioStreamOn: participant.audioStreamEnabled || false,
+							videoStreamOn: participant.videoStreamEnabled || false,
+							screenStreamOn: participant.screenStreamEnabled || false
 						};
 						return acc;
 					},

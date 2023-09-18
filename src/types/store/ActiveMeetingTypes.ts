@@ -14,6 +14,7 @@ export type ActiveMeeting = {
 	sidebarStatus: SidebarStatus;
 	chatVisibility: MeetingChatVisibility;
 	meetingViewSelected: MeetingViewType;
+	isCarouselVisible: boolean;
 	bidirectionalAudioConn?: IBidirectionalConnectionAudioInOut;
 	videoInConn?: IVideoInConnection;
 	videoOutConn?: IVideoOutConnection;
@@ -56,6 +57,11 @@ export enum STREAM_TYPE {
 	VIDEO = 'video',
 	AUDIO = 'audio'
 }
+
+export type Subscription = {
+	user_id: string;
+	type: STREAM_TYPE;
+};
 
 export type StreamSubscription = {
 	type: STREAM_TYPE;

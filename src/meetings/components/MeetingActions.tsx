@@ -10,33 +10,36 @@ import React, { ReactElement, RefObject, useCallback, useEffect, useMemo, useSta
 import { useParams } from 'react-router-dom';
 import styled, { FlattenSimpleInterpolation } from 'styled-components';
 
-import useRouting, { PAGE_INFO_TYPE } from '../../../../hooks/useRouting';
-import { MeetingsApi } from '../../../../network';
+import useRouting, { MeetingRoutesParams, PAGE_INFO_TYPE } from '../../hooks/useRouting';
+import { MeetingsApi } from '../../network';
 import {
 	getMeetingViewSelected,
 	getSelectedAudioDeviceId,
 	getSelectedVideoDeviceId
-} from '../../../../store/selectors/ActiveMeetingSelectors';
+} from '../../store/selectors/ActiveMeetingSelectors';
 import {
 	getParticipantAudioStatus,
 	getParticipantVideoStatus
-} from '../../../../store/selectors/MeetingSelectors';
-import { getUserId } from '../../../../store/selectors/SessionSelectors';
-import useStore from '../../../../store/Store';
-import { MeetingViewType, STREAM_TYPE } from '../../../../types/store/ActiveMeetingTypes';
-import { getAudioStream, getVideoStream } from '../../../../utils/UserMediaManager';
+} from '../../store/selectors/MeetingSelectors';
+import { getUserId } from '../../store/selectors/SessionSelectors';
+import useStore from '../../store/Store';
+import { MeetingViewType, STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
+import { getAudioStream, getVideoStream } from '../../utils/UserMediaManager';
 
-const ActionsWrapper = styled(Container)`
+const BarContainer = styled(Container)`
 	position: absolute;
 	bottom: 0;
-	left: calc(50% - 180px);
+	width: 100%;
 	transform: translateY(
 		${({ isHoovering }): string | FlattenSimpleInterpolation => (isHoovering ? '-1rem' : '5rem')}
 	);
 	transition: transform 200ms linear;
 	z-index: 40;
-	padding: 1rem;
+`;
+
+const ActionsWrapper = styled(Container)`
 	border-radius: 0.5rem;
+	padding: 1rem;
 `;
 
 type MeetingActionsProps = {
@@ -45,7 +48,7 @@ type MeetingActionsProps = {
 
 const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElement => {
 	const { goToInfoPage } = useRouting();
-	const { meetingId }: Record<string, string> = useParams();
+	const { meetingId }: MeetingRoutesParams = useParams();
 
 	const setLocalStreams = useStore((store) => store.setLocalStreams);
 	const removeLocalStreams = useStore((store) => store.removeLocalStreams);
@@ -263,71 +266,72 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 	}, [updateListOfDevices]);
 
 	return (
-		<ActionsWrapper
-			background={'text'}
-			width="fit"
-			height="fit"
-			orientation="horizontal"
-			onMouseEnter={handleMouseEnter}
-			onMouseLeave={handleMouseLeave}
-			isHoovering={isHoovering}
-		>
-			<MultiButton
-				iconColor="gray6"
-				backgroundColor="primary"
-				primaryIcon={audioStatus ? 'Mic' : 'MicOff'}
-				icon="ChevronUp"
-				onClick={toggleAudioStream}
-				items={mediaAudioList}
-				size="large"
-				shape="regular"
-			/>
-			<Padding right="16px" />
-			<MultiButton
-				iconColor="gray6"
-				backgroundColor="primary"
-				primaryIcon={videoStatus ? 'Video' : 'VideoOff'}
-				icon="ChevronUp"
-				onClick={toggleVideoStream}
-				items={mediaVideoList}
-				size="large"
-				shape="regular"
-			/>
-			<Padding right="16px" />
-			<IconButton
-				iconColor="gray6"
-				backgroundColor="primary"
-				icon="ScreenSharingOff" // TODO shareStatus ? 'ScreenSharingOn' : 'ScreenSharingOff'}
-				onClick={(): null => null}
-				size="large"
-				disabled // TODO: enable when screen sharing will be available
-			/>
-			<Padding right="16px" />
-			<IconButton
-				size="large"
-				backgroundColor="primary"
-				iconColor="gray6"
-				icon={meetingViewSelected === MeetingViewType.GRID ? 'Grid' : 'CinemaView'}
-				onClick={toggleMeetingView}
-				disabled // TODO: enable when grid mode will be available
-			/>
-			<Padding right="16px" />
-			<IconButton
-				iconColor="gray6"
-				backgroundColor="primary"
-				icon="MoreVertical"
-				onClick={deleteMeeting}
-				size="large"
-			/>
-			<Padding right="48px" />
-			<IconButton
-				iconColor="gray6"
-				backgroundColor="error"
-				icon="Hangup"
-				onClick={leaveMeeting}
-				size="large"
-			/>
-		</ActionsWrapper>
+		<BarContainer height="fit" isHoovering={isHoovering}>
+			<ActionsWrapper
+				background={'text'}
+				width="fit"
+				height="fit"
+				orientation="horizontal"
+				onMouseEnter={handleMouseEnter}
+				onMouseLeave={handleMouseLeave}
+			>
+				<MultiButton
+					iconColor="gray6"
+					backgroundColor="primary"
+					primaryIcon={audioStatus ? 'Mic' : 'MicOff'}
+					icon="ChevronUp"
+					onClick={toggleAudioStream}
+					items={mediaAudioList}
+					size="large"
+					shape="regular"
+				/>
+				<Padding right="16px" />
+				<MultiButton
+					iconColor="gray6"
+					backgroundColor="primary"
+					primaryIcon={videoStatus ? 'Video' : 'VideoOff'}
+					icon="ChevronUp"
+					onClick={toggleVideoStream}
+					items={mediaVideoList}
+					size="large"
+					shape="regular"
+				/>
+				<Padding right="16px" />
+				<IconButton
+					iconColor="gray6"
+					backgroundColor="primary"
+					icon="ScreenSharingOff" // TODO shareStatus ? 'ScreenSharingOn' : 'ScreenSharingOff'}
+					onClick={(): null => null}
+					size="large"
+					disabled // TODO: enable when screen sharing will be available
+				/>
+				<Padding right="16px" />
+				<IconButton
+					size="large"
+					backgroundColor="primary"
+					iconColor="gray6"
+					icon={meetingViewSelected === MeetingViewType.GRID ? 'Grid' : 'CinemaView'}
+					onClick={toggleMeetingView}
+					disabled // TODO: enable when grid mode will be available
+				/>
+				<Padding right="16px" />
+				<IconButton
+					iconColor="gray6"
+					backgroundColor="primary"
+					icon="MoreVertical"
+					onClick={deleteMeeting}
+					size="large"
+				/>
+				<Padding right="48px" />
+				<IconButton
+					iconColor="gray6"
+					backgroundColor="error"
+					icon="Hangup"
+					onClick={leaveMeeting}
+					size="large"
+				/>
+			</ActionsWrapper>
+		</BarContainer>
 	);
 };
 

@@ -13,7 +13,7 @@ import { UsersApi } from '../../../network';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import { getUserName, getUserPictureUpdatedAt } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
-import MeetingParticipantActions from '../Sidebar/ParticipantsAccordion/MeetingParticipantActions';
+import MeetingParticipantActions from '../sidebar/ParticipantsAccordion/MeetingParticipantActions';
 
 const CustomContainer = styled(Container)`
 	cursor: default;

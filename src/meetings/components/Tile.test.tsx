@@ -8,18 +8,19 @@ import { UserEvent } from '@testing-library/user-event/setup/setup';
 import React from 'react';
 
 import Tile from './Tile';
-import useStore from '../../../store/Store';
+import useStore from '../../store/Store';
 import {
 	createMockMeeting,
 	createMockParticipants,
 	createMockRoom,
 	createMockUser
-} from '../../../tests/createMock';
-import { setup } from '../../../tests/test-utils';
-import { MeetingBe, MeetingParticipant } from '../../../types/network/models/meetingBeTypes';
-import { MemberBe, RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
-import { UserBe } from '../../../types/network/models/userBeTypes';
-import { RootStore } from '../../../types/store/StoreTypes';
+} from '../../tests/createMock';
+import { setup } from '../../tests/test-utils';
+import { MeetingBe } from '../../types/network/models/meetingBeTypes';
+import { MemberBe, RoomBe, RoomType } from '../../types/network/models/roomBeTypes';
+import { UserBe } from '../../types/network/models/userBeTypes';
+import { MeetingParticipant } from '../../types/store/MeetingTypes';
+import { RootStore } from '../../types/store/StoreTypes';
 
 const user1: UserBe = createMockUser({ id: 'user1Id', name: 'user 1' });
 const user2: UserBe = createMockUser({ id: 'user2Id', name: 'user 2' });

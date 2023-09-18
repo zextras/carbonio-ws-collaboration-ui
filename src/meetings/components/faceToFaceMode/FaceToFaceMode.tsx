@@ -3,23 +3,21 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-
 import { Container, Text } from '@zextras/carbonio-design-system';
 import React, { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { getMeetingSidebarStatus } from '../../../../store/selectors/ActiveMeetingSelectors';
-import { getFirstParticipant } from '../../../../store/selectors/MeetingSelectors';
-import { getUserId } from '../../../../store/selectors/SessionSelectors';
-import useStore from '../../../../store/Store';
-import Tile from '../../Tile/Tile';
+import { getMeetingSidebarStatus } from '../../../store/selectors/ActiveMeetingSelectors';
+import { getFirstParticipant } from '../../../store/selectors/MeetingSelectors';
+import { getUserId } from '../../../store/selectors/SessionSelectors';
+import useStore from '../../../store/Store';
+import Tile from '../Tile';
 
 const FaceToFace = styled(Container)`
 	position: relative;
 `;
-
 const MyStreamContainer = styled(Container)`
 	position: absolute;
 	top: -2rem;
@@ -52,35 +50,33 @@ const FaceToFaceMode = (): ReactElement => {
 
 	const sidebarStatus: boolean = useStore((store) => getMeetingSidebarStatus(store, meetingId));
 
-	const [centralTileSize, setCentralTileSize] = useState({ tileHeight: '0', tileWidth: '0' });
+	const [centralTileWidth, setCentralTileWidth] = useState('0');
 
 	const faceToFaceRef = useRef<null | HTMLDivElement>(null);
 
-	const getSizeOfCentralTile = useCallback(() => {
+	const getWidthOfCentralTile = useCallback(() => {
 		if (faceToFaceRef && faceToFaceRef.current) {
-			let tileHeight;
+			console.log(faceToFaceRef.current);
+			console.log('width', faceToFaceRef.current.offsetWidth);
+			const tileHeight = (faceToFaceRef.current.offsetWidth / 16) * 9;
 			let tileWidth;
-			tileHeight = (faceToFaceRef.current.offsetWidth / 16) * 9;
 			tileWidth = faceToFaceRef.current.offsetWidth;
 			if (tileHeight >= faceToFaceRef.current.offsetHeight) {
-				tileHeight = faceToFaceRef.current.offsetHeight;
+				console.log('entro');
 				tileWidth = (faceToFaceRef.current.offsetHeight / 9) * 16;
 			}
-			setCentralTileSize({ tileHeight: `${tileHeight}px`, tileWidth: `${tileWidth}px` });
+			setCentralTileWidth(`${tileWidth}px`);
 		}
 	}, []);
-
 	useEffect(() => {
-		window.parent.addEventListener('resize', getSizeOfCentralTile);
-		return () => window.parent.removeEventListener('resize', getSizeOfCentralTile);
-	}, [getSizeOfCentralTile]);
-
-	useEffect(() => getSizeOfCentralTile(), [faceToFaceRef, getSizeOfCentralTile, sidebarStatus]);
-
+		window.parent.addEventListener('resize', getWidthOfCentralTile);
+		return () => window.parent.removeEventListener('resize', getWidthOfCentralTile);
+	}, [getWidthOfCentralTile]);
+	useEffect(() => getWidthOfCentralTile(), [faceToFaceRef, getWidthOfCentralTile, sidebarStatus]);
 	const centralContentToDisplay = useMemo(
 		() =>
 			centralParticipant ? (
-				<CentralTile width={centralTileSize.tileWidth} height="fit" background="text">
+				<CentralTile width={centralTileWidth} height="fit" background="text">
 					<Tile userId={centralParticipant.userId} meetingId={meetingId} />
 				</CentralTile>
 			) : (
@@ -88,7 +84,7 @@ const FaceToFaceMode = (): ReactElement => {
 					{waitingParticipants}
 				</Text>
 			),
-		[centralParticipant, centralTileSize.tileWidth, meetingId, waitingParticipants]
+		[centralParticipant, centralTileWidth, meetingId, waitingParticipants]
 	);
 
 	return (
@@ -105,5 +101,4 @@ const FaceToFaceMode = (): ReactElement => {
 		</FaceToFace>
 	);
 };
-
 export default FaceToFaceMode;

@@ -4,16 +4,12 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import {
-	MeetingBe,
-	MeetingParticipant,
-	MeetingType,
-	MeetingUserType
-} from '../types/network/models/meetingBeTypes';
+import { MeetingBe, MeetingType, MeetingUserType } from '../types/network/models/meetingBeTypes';
 import { MemberBe, RoomBe } from '../types/network/models/roomBeTypes';
 import { UserBe } from '../types/network/models/userBeTypes';
 import { FileToUpload } from '../types/store/ActiveConversationTypes';
 import { Marker, MarkerStatus, MarkerType } from '../types/store/MarkersTypes';
+import { MeetingParticipant } from '../types/store/MeetingTypes';
 import {
 	ConfigurationMessage,
 	DateMessage,

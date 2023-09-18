@@ -18,7 +18,7 @@ import React, { ReactElement, useCallback, useEffect, useMemo, useRef, useState 
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import Tile from './Tile/Tile';
+import Tile from './Tile';
 import useRouting, { PAGE_INFO_TYPE } from '../../hooks/useRouting';
 import { MeetingsApi } from '../../network';
 import { getMeeting } from '../../store/selectors/MeetingSelectors';

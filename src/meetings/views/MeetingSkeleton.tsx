@@ -5,60 +5,94 @@
  */
 
 import { Container } from '@zextras/carbonio-design-system';
-import React, { lazy, ReactElement, Suspense, useEffect } from 'react';
+import React, { ReactElement, useMemo, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
-import ShimmerMeetingSidebar from './shimmers/ShimmerMeetingSidebar';
-import ShimmerMeetingStreamsWrapper from './shimmers/ShimmerMeetingStreamsWrapper';
-import useRouting, { PAGE_INFO_TYPE } from '../../hooks/useRouting';
-import { getMeetingByMeetingId } from '../../store/selectors/MeetingSelectors';
+import useGeneralMeetingControls from '../../hooks/useGeneralMeetingControls';
+import { MeetingRoutesParams } from '../../hooks/useRouting';
+import useSubscriptions from '../../hooks/useSubscriptions';
+import {
+	getMeetingSidebarStatus,
+	getMeetingViewSelected
+} from '../../store/selectors/ActiveMeetingSelectors';
+import { getNumberOfTiles } from '../../store/selectors/MeetingSelectors';
+import { getCustomLogo } from '../../store/selectors/SessionSelectors';
 import useStore from '../../store/Store';
+import { MeetingViewType } from '../../types/store/ActiveMeetingTypes';
+import defaultLogo from '../assets/Logo.png';
+import CinemaMode from '../components/cinemaMode/CinemaMode';
+import SidebarCarousel from '../components/cinemaMode/SidebarCarousel';
+import FaceToFaceMode from '../components/faceToFaceMode/FaceToFaceMode';
+import GridMode from '../components/gridMode/GridMode';
+import MeetingActions from '../components/MeetingActions';
+import MeetingSidebar from '../components/sidebar/MeetingSidebar';
 
-const LazyMeetingSidebar = lazy(
-	() => import(/* webpackChunkName: "MeetingSidebar" */ '../components/Sidebar/MeetingSidebar')
-);
-
-const LazyMeetingStreamsWrapper = lazy(
-	() =>
-		import(
-			/* webpackChunkName: "MeetingStreamsWrapper" */ '../components/MeetingStreamsWrapper/MeetingStreamsWrapper'
-		)
-);
-
-const MeetingStreamsWrapper = (): ReactElement => (
-	<Suspense fallback={<ShimmerMeetingStreamsWrapper />}>
-		<LazyMeetingStreamsWrapper />
-	</Suspense>
-);
-
-const MeetingSidebar = (): ReactElement => (
-	<Suspense fallback={<ShimmerMeetingSidebar />}>
-		<LazyMeetingSidebar />
-	</Suspense>
-);
-
-const CustomContainer = styled(Container)`
+const SkeletonContainer = styled(Container)`
 	overflow: hidden;
 	height: 100vh;
 `;
 
-const MeetingSkeleton = (): ReactElement => {
-	const { meetingId }: Record<string, string> = useParams();
-	const meeting = useStore((store) => getMeetingByMeetingId(store, meetingId));
-	const { goToInfoPage } = useRouting();
+const ViewContainer = styled(Container)`
+	position: relative;
+	overflow-y: hidden;
+	padding: 4.25rem;
+`;
 
-	useEffect(() => {
-		if (!meeting) {
-			goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED);
+const LogoApp = styled(Container)`
+	position: absolute;
+	top: 1rem;
+	left: 1rem;
+	background-size: contain;
+	height: 1.3125rem;
+	width: 9.625rem;
+	background-repeat: no-repeat;
+	background-image: url(${({ customLogo }): string => customLogo || defaultLogo});
+`;
+
+const MeetingSkeleton = (): ReactElement => {
+	const { meetingId }: MeetingRoutesParams = useParams();
+
+	const meetingViewSelected = useStore((store) => getMeetingViewSelected(store, meetingId));
+	const sidebarStatus: boolean = useStore((store) => getMeetingSidebarStatus(store, meetingId));
+	const numberOfTiles = useStore((store) => getNumberOfTiles(store, meetingId));
+	const customLogo = useStore(getCustomLogo);
+
+	const streamsWrapperRef = useRef<HTMLDivElement>(null);
+
+	useGeneralMeetingControls(meetingId);
+	useSubscriptions(meetingId);
+
+	const ViewToDisplay = useMemo(() => {
+		if (numberOfTiles <= 2) {
+			return <FaceToFaceMode />;
 		}
-	}, [goToInfoPage, meeting]);
+		return meetingViewSelected === MeetingViewType.CINEMA ? <CinemaMode /> : <GridMode />;
+	}, [meetingViewSelected, numberOfTiles]);
+
+	const displayCarousel = useMemo(
+		() => meetingViewSelected === MeetingViewType.CINEMA && numberOfTiles > 2,
+		[meetingViewSelected, numberOfTiles]
+	);
 
 	return (
-		<CustomContainer orientation="horizontal" borderRadius="none">
+		<SkeletonContainer orientation="horizontal" borderRadius="none">
 			<MeetingSidebar />
-			<MeetingStreamsWrapper />
-		</CustomContainer>
+			<ViewContainer
+				ref={streamsWrapperRef}
+				background="gray0"
+				width={sidebarStatus ? 'fill' : '100%'}
+				borderRadius="none"
+				padding={{ all: 'large' }}
+				crossAlignment="center"
+				orientation="horizontal"
+			>
+				<LogoApp customLogo={customLogo} />
+				{ViewToDisplay}
+				<MeetingActions streamsWrapperRef={streamsWrapperRef} />
+			</ViewContainer>
+			{displayCarousel && <SidebarCarousel />}
+		</SkeletonContainer>
 	);
 };
 
