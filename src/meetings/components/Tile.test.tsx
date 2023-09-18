@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import { screen, waitFor } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event/setup/setup';
 import React from 'react';
 
@@ -143,28 +143,28 @@ describe('Tile test', () => {
 		const { user } = storeSetupMyTileAudioOnVideoOff();
 		const tile = screen.getByTestId('tile');
 		await user.hover(tile);
-		await waitFor(() => expect(screen.queryByTestId('hover_container')).not.toBeInTheDocument());
+		expect(screen.getByTestId('hover_container')).toBeInTheDocument();
 	});
 	test('user tile - audio on and video off', async () => {
-		storeSetupTileAudioOnAndVideoOff();
+		const { user } = storeSetupTileAudioOnAndVideoOff();
 		const videoIcon = screen.getByTestId('icon: VideoOffOutline');
 		expect(videoIcon).toBeVisible();
-		// const tile = screen.getByTestId('tile');
-		// await user.hover(tile);
+		const tile = screen.getByTestId('tile');
+		await user.hover(tile);
 		// const audioIcon = screen.getByTestId('icon: MicOffOutline');
 		// expect(audioIcon).toBeInTheDocument();
-		// const pinVideo = screen.getByTestId('icon: Pin3Outline');
-		// expect(pinVideo).toBeInTheDocument();
+		const pinVideo = screen.getByTestId('icon: Pin3Outline');
+		expect(pinVideo).toBeInTheDocument();
 	});
 	test('user tile - audio off and video on', async () => {
-		storeSetupTileAudioOffAndVideoOn();
+		const { user } = storeSetupTileAudioOffAndVideoOn();
 		expect(screen.queryByTestId('icon: VideoOffOutline')).not.toBeInTheDocument();
 		const audioIcon = screen.getByTestId('icon: MicOffOutline');
 		expect(audioIcon).toBeInTheDocument();
-		// const tile = screen.getByTestId('tile');
-		// await user.hover(tile);
+		const tile = screen.getByTestId('tile');
+		await user.hover(tile);
 		// expect(screen.getAllByTestId('icon: MicOffOutline')).toHaveLength(1);
-		// const pinVideo = screen.getByTestId('icon: Pin3Outline');
-		// expect(pinVideo).toBeInTheDocument();
+		const pinVideo = screen.getByTestId('icon: Pin3Outline');
+		expect(pinVideo).toBeInTheDocument();
 	});
 });

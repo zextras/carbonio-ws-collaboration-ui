@@ -10,7 +10,8 @@ import {
 	MeetingChatVisibility,
 	MeetingViewType,
 	STREAM_TYPE,
-	StreamsSubscriptionMap
+	StreamsSubscriptionMap,
+	TileData
 } from './ActiveMeetingTypes';
 import { Connections } from './ConnectionsTypes';
 import { FasteningsMap } from './FasteningMessagesTypes';
@@ -196,6 +197,7 @@ export type ActiveMeetingSlice = {
 	setSelectedDeviceId: (meetingId: string, streamType: STREAM_TYPE, deviceId: string) => void;
 	setSubscribedTracks: (meetingId: string, streams: StreamsSubscriptionMap) => void;
 	setIsCarouseVisible: (meetingId: string, status: boolean) => void;
+	setPinnedTile: (meetingId: string, tile: TileData | undefined) => void;
 };
 
 export type RootStore = UsersStoreSlice &

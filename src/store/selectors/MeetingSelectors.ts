@@ -6,8 +6,7 @@
 
 import { filter, find, forEach, size } from 'lodash';
 
-import { TileData } from '../../meetings/components/Tile';
-import { STREAM_TYPE, Subscription } from '../../types/store/ActiveMeetingTypes';
+import { STREAM_TYPE, Subscription, TileData } from '../../types/store/ActiveMeetingTypes';
 import { Meeting, MeetingParticipant, MeetingParticipantMap } from '../../types/store/MeetingTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 

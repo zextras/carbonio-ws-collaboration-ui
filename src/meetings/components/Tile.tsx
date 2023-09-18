@@ -8,7 +8,6 @@ import {
 	Avatar,
 	Container,
 	IconButton,
-	Padding,
 	Row,
 	Shimmer,
 	Text,
@@ -19,13 +18,13 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
+import usePinnedTile from '../../hooks/usePinnedTile';
 import { UsersApi } from '../../network';
 import { getStream } from '../../store/selectors/ActiveMeetingSelectors';
 import {
 	getParticipantAudioStatus,
 	getParticipantVideoStatus
 } from '../../store/selectors/MeetingSelectors';
-// import { getUserId } from '../../../store/selectors/SessionSelectors';
 import { getUserId } from '../../store/selectors/SessionSelectors';
 import { getUserName, getUserPictureUpdatedAt } from '../../store/selectors/UsersSelectors';
 import useStore from '../../store/Store';
@@ -42,7 +41,7 @@ type modalTileProps = {
 type TileProps = {
 	userId: string | undefined;
 	meetingId: string | undefined;
-	// isScreenShare?: boolean;
+	isScreenShare?: boolean;
 	modalProps?: modalTileProps;
 };
 
@@ -125,7 +124,7 @@ const TextContainer = styled(Container)`
 	user-select: none;
 `;
 
-const Tile: React.FC<TileProps> = ({ userId, meetingId, modalProps }) => {
+const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProps }) => {
 	const [t] = useTranslation();
 	const micOffLabel = t('meetings.interactions.yourMicIsDisabled', 'Your microphone is off');
 	const camOffLabel = t('meetings.interactions.yourCamIsDisabled', 'Your camera is off');
@@ -147,6 +146,12 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, modalProps }) => {
 	);
 
 	const themeColor = useTheme();
+
+	const { canUsePinFeature, isPinned, switchPinnedTile } = usePinnedTile(
+		meetingId || '',
+		userId || '',
+		isScreenShare
+	);
 
 	useEffect(() => {
 		if (streamRef && streamRef.current) {
@@ -213,18 +218,15 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, modalProps }) => {
 		() => (
 			<>
 				{!videoStreamEnabled && (
-					<>
-						<Tooltip label={camOffLabel} disabled={!isSessionTile}>
-							<CustomIconButton
-								icon="VideoOffOutline"
-								iconColor="gray6"
-								backgroundColor="gray0"
-								size="large"
-								onClick={null}
-							/>
-						</Tooltip>
-						<Padding right="0.5rem" />
-					</>
+					<Tooltip label={camOffLabel} disabled={!isSessionTile}>
+						<CustomIconButton
+							icon="VideoOffOutline"
+							iconColor="gray6"
+							backgroundColor="gray0"
+							size="large"
+							onClick={null}
+						/>
+					</Tooltip>
 				)}
 				{!audioStreamEnabled && (
 					<Tooltip label={micOffLabel} disabled={!isSessionTile}>
@@ -237,50 +239,66 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, modalProps }) => {
 						/>
 					</Tooltip>
 				)}
+				{canUsePinFeature && isPinned && (
+					<CustomIconButton
+						icon="Pin3Outline"
+						iconColor="gray6"
+						backgroundColor="gray0"
+						size="large"
+						onClick={null}
+					/>
+				)}
 			</>
 		),
-		[audioStreamEnabled, camOffLabel, isSessionTile, micOffLabel, videoStreamEnabled]
+		[
+			audioStreamEnabled,
+			camOffLabel,
+			canUsePinFeature,
+			isPinned,
+			isSessionTile,
+			micOffLabel,
+			videoStreamEnabled
+		]
 	);
 
-	// TODO uncomment when the actions on hover are implemented
-	/* const hoverContainer = useMemo(
-		() =>
-			!isSessionTile && (
-				<HoverContainer width="100%" data-testid="hover_container" orientation="horizontal">
-					{audioStreamEnabled && (
-						<>
-							<IconButton
-								icon="MicOffOutline"
-								iconColor="text"
-								backgroundColor="gray6"
-								size="large"
-								borderRadius="round"
-								customSize={{ iconSize: '1.5rem', paddingSize: '0.75rem' }}
-								onClick={null}
-							/>
-							<Padding right="1rem" />
-						</>
-					)}
+	const hoverContainer = useMemo(
+		() => (
+			<HoverContainer width="100%" data-testid="hover_container" orientation="horizontal">
+				{/* {audioStreamEnabled && ( */}
+				{/*	<> */}
+				{/*		<IconButton */}
+				{/*			icon="MicOffOutline" */}
+				{/*			iconColor="text" */}
+				{/*			backgroundColor="gray6" */}
+				{/*			size="large" */}
+				{/*			borderRadius="round" */}
+				{/*			customSize={{ iconSize: '1.5rem', paddingSize: '0.75rem' }} */}
+				{/*			onClick={null} */}
+				{/*		/> */}
+				{/*		<Padding right="1rem" /> */}
+				{/*	</> */}
+				{/* )} */}
+				{canUsePinFeature && (
 					<IconButton
-						icon="Pin3Outline"
+						icon={!isPinned ? 'Pin3Outline' : 'Unpin3Outline'}
 						iconColor="text"
 						backgroundColor="gray6"
 						size="large"
 						borderRadius="round"
 						customSize={{ iconSize: '1.5rem', paddingSize: '0.75rem' }}
-						onClick={null}
+						onClick={switchPinnedTile}
 					/>
-				</HoverContainer>
-			),
-		[audioStreamEnabled, isSessionTile]
-	); */
+				)}
+			</HoverContainer>
+		),
+		[canUsePinFeature, isPinned, switchPinnedTile]
+	);
+
+	const showHoverContainer = useMemo(() => canUsePinFeature, [canUsePinFeature]);
 
 	return (
 		<CustomTile background={'text'} data-testid="tile" width="100%">
-			{
-				// TODO uncomment when the actions on hover are implemented
-				/* {hoverContainer} */
-			}
+			{showHoverContainer && hoverContainer}
 			<ActionContainer orientation="horizontal">
 				<Row
 					orientation="horizontal"
@@ -288,6 +306,7 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, modalProps }) => {
 					crossAlignment={'flex-start'}
 					height="fill"
 					padding="0.5rem"
+					style={{ gap: '0.5rem' }}
 				>
 					{mediaStatusIcons}
 				</Row>
@@ -319,8 +338,3 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, modalProps }) => {
 };
 
 export default Tile;
-
-export type TileData = {
-	userId: string;
-	type: STREAM_TYPE;
-};
