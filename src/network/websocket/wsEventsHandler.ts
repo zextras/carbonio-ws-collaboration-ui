@@ -131,7 +131,8 @@ export function wsEventsHandler(event: WsEvent): void {
 				userId: event.userId,
 				userType: MeetingUserType.REGISTERED,
 				audioStreamOn: false,
-				videoStreamOn: false
+				videoStreamOn: false,
+				joinedAt: event.sentDate
 			});
 
 			// Send custom event to delete an incoming meeting notification if I joined the meeting from another session

@@ -30,7 +30,8 @@ const ongoingMeetingSetup = (): void => {
 		userId: 'userId',
 		userType: MeetingUserType.REGISTERED,
 		audioStreamOn: false,
-		videoStreamOn: false
+		videoStreamOn: false,
+		joinedAt: '2021-01-01T00:00:00.000Z'
 	});
 };
 

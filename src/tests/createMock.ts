@@ -162,5 +162,6 @@ export const createMockParticipants = (fields?: Record<string, any>): MeetingPar
 	userType: MeetingUserType.REGISTERED,
 	audioStreamOn: false,
 	videoStreamOn: false,
+	joinedAt: '2022-08-25T17:24:28.961+02:00',
 	...fields
 });
