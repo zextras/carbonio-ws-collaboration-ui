@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { filter, find, forEach, size } from 'lodash';
+import { filter, find, forEach, size, sortBy } from 'lodash';
 
 import { STREAM_TYPE, Subscription, TileData } from '../../types/store/ActiveMeetingTypes';
 import { Meeting, MeetingParticipant, MeetingParticipantMap } from '../../types/store/MeetingTypes';
@@ -86,8 +86,8 @@ export const getTiles = (store: RootStore, meetingId: string): TileData[] => {
 	const meeting = find(store.meetings, (meeting) => meeting.id === meetingId);
 	if (meeting) {
 		const tiles: TileData[] = [];
-		// TODO sort participants by joined time
-		forEach(meeting.participants, (participant) => {
+		const sortedParticipants = sortBy(meeting.participants, (participant) => participant.joinedAt);
+		forEach(sortedParticipants, (participant) => {
 			tiles.push({
 				userId: participant.userId,
 				type: STREAM_TYPE.VIDEO

@@ -11,8 +11,8 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
-import useCalculateTilesOrder from '../../../hooks/useCalculateTilesOrder';
 import { MeetingRoutesParams } from '../../../hooks/useRouting';
+import useTilesOrder from '../../../hooks/useTilesOrder';
 import { getMeetingSidebarStatus } from '../../../store/selectors/ActiveMeetingSelectors';
 import useStore from '../../../store/Store';
 import Tile from '../Tile';
@@ -73,7 +73,7 @@ const TilesBar = (): ReactElement => {
 		return () => window.removeEventListener('resize', handleResize);
 	}, [handleResize]);
 
-	const { carouselTiles } = useCalculateTilesOrder(meetingId);
+	const { carouselTiles } = useTilesOrder(meetingId);
 	const totalTiles = useMemo(() => size(carouselTiles), [carouselTiles]);
 	const step = useMemo(() => (totalTiles > 3 ? 3 : totalTiles), [totalTiles]);
 
