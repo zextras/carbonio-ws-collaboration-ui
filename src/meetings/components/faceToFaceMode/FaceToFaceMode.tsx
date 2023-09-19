@@ -56,13 +56,10 @@ const FaceToFaceMode = (): ReactElement => {
 
 	const getWidthOfCentralTile = useCallback(() => {
 		if (faceToFaceRef && faceToFaceRef.current) {
-			console.log(faceToFaceRef.current);
-			console.log('width', faceToFaceRef.current.offsetWidth);
 			const tileHeight = (faceToFaceRef.current.offsetWidth / 16) * 9;
 			let tileWidth;
 			tileWidth = faceToFaceRef.current.offsetWidth;
 			if (tileHeight >= faceToFaceRef.current.offsetHeight) {
-				console.log('entro');
 				tileWidth = (faceToFaceRef.current.offsetHeight / 9) * 16;
 			}
 			setCentralTileWidth(`${tileWidth}px`);
