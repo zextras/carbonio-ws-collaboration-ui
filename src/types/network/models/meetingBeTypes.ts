@@ -16,7 +16,6 @@ export type MeetingBe = {
 
 export type MeetingParticipantBe = {
 	userId: string;
-	userType: MeetingUserType;
 	audioStreamEnabled?: boolean;
 	videoStreamEnabled?: boolean;
 	screenStreamEnabled?: boolean;

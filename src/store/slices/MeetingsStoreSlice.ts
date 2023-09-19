@@ -25,7 +25,6 @@ export const useMeetingsStoreSlice = (set: (...any: any) => void): MeetingsSlice
 						(acc: MeetingParticipantMap, participant: MeetingParticipantBe) => {
 							acc[participant.userId] = {
 								userId: participant.userId,
-								userType: participant.userType,
 								audioStreamOn: participant.audioStreamEnabled || false,
 								videoStreamOn: participant.videoStreamEnabled || false,
 								screenStreamOn: participant.screenStreamEnabled || false
@@ -65,7 +64,6 @@ export const useMeetingsStoreSlice = (set: (...any: any) => void): MeetingsSlice
 					(acc: MeetingParticipantMap, participant: MeetingParticipantBe) => {
 						acc[participant.userId] = {
 							userId: participant.userId,
-							userType: participant.userType,
 							audioStreamOn: participant.audioStreamEnabled || false,
 							videoStreamOn: participant.videoStreamEnabled || false,
 							screenStreamOn: participant.screenStreamEnabled || false
@@ -139,7 +137,6 @@ export const useMeetingsStoreSlice = (set: (...any: any) => void): MeetingsSlice
 				if (meeting) {
 					meeting.participants[participant.userId] = {
 						userId: participant.userId,
-						userType: participant.userType,
 						audioStreamOn: participant.audioStreamOn || false,
 						videoStreamOn: participant.videoStreamOn || false,
 						screenStreamOn: participant.screenStreamOn || false

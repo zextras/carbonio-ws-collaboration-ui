@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import SubscriptionsManager from '../../../network/webRTC/SubscriptionsManager';
 import { STREAM_TYPE } from '../../store/ActiveMeetingTypes';
 
 export interface IPeerConnConfig {
@@ -45,6 +46,7 @@ export interface IVideoOutConnection extends IPeerConnection {
 
 export interface IVideoInConnection extends IPeerConnection {
 	onTrack: (ev: RTCTrackEvent) => void;
+	subscriptionManager: SubscriptionsManager;
 	handleStreams(streamsMap: { user_id: string; type: STREAM_TYPE }[]): void;
 	handleRemoteOffer(sdp: string): void;
 }

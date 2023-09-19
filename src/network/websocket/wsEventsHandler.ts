@@ -8,7 +8,7 @@ import { find } from 'lodash';
 
 import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
 import useStore from '../../store/Store';
-import { MeetingType, MeetingUserType } from '../../types/network/models/meetingBeTypes';
+import { MeetingType } from '../../types/network/models/meetingBeTypes';
 import { GetMeetingResponse } from '../../types/network/responses/meetingsResponses';
 import { GetRoomResponse } from '../../types/network/responses/roomsResponses';
 import { WsEvent, WsEventType } from '../../types/network/websocket/wsEvents';
@@ -129,7 +129,6 @@ export function wsEventsHandler(event: WsEvent): void {
 		case WsEventType.MEETING_JOINED: {
 			state.addParticipant(event.meetingId, {
 				userId: event.userId,
-				userType: MeetingUserType.REGISTERED,
 				audioStreamOn: false,
 				videoStreamOn: false
 			});
@@ -147,6 +146,14 @@ export function wsEventsHandler(event: WsEvent): void {
 		}
 		case WsEventType.MEETING_LEFT: {
 			state.removeParticipant(event.meetingId, event.userId);
+
+			// Update subscription manager
+			const subscriptionsManage =
+				state.activeMeeting[event.meetingId]?.videoInConn?.subscriptionManager;
+			if (subscriptionsManage) {
+				subscriptionsManage?.removePossibleSubscription(event.userId, STREAM_TYPE.VIDEO);
+				subscriptionsManage?.removePossibleSubscription(event.userId, STREAM_TYPE.SCREEN);
+			}
 			break;
 		}
 		case WsEventType.MEETING_STOPPED: {
@@ -168,6 +175,15 @@ export function wsEventsHandler(event: WsEvent): void {
 			}
 			if (mediaType === STREAM_TYPE.SCREEN) {
 				state.changeStreamStatus(event.meetingId, event.userId, STREAM_TYPE.SCREEN, event.active);
+			}
+
+			// Update subscription manager
+			const subscriptionsManage =
+				state.activeMeeting[event.meetingId]?.videoInConn?.subscriptionManager;
+			if (event.active) {
+				subscriptionsManage?.addPossibleSubscription(event.userId, mediaType);
+			} else {
+				subscriptionsManage?.removePossibleSubscription(event.userId, mediaType);
 			}
 			break;
 		}

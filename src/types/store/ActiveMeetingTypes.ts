@@ -63,6 +63,10 @@ export type Subscription = {
 	type: STREAM_TYPE;
 };
 
+export type SubscriptionMap = {
+	[subscriptionId: string]: Subscription;
+};
+
 export type StreamSubscription = {
 	type: STREAM_TYPE;
 	stream: MediaStream;

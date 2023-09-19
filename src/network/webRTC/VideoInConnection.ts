@@ -7,6 +7,7 @@
 import { forEach } from 'lodash';
 
 import { PeerConnConfig } from './PeerConnConfig';
+import SubscriptionsManager from './SubscriptionsManager';
 import useStore from '../../store/Store';
 import { IVideoInConnection } from '../../types/network/webRTC/webRTC';
 import { STREAM_TYPE, StreamsSubscriptionMap } from '../../types/store/ActiveMeetingTypes';
@@ -19,11 +20,14 @@ export default class VideoInConnection implements IVideoInConnection {
 
 	streams: MediaStream[] = [];
 
+	subscriptionManager: SubscriptionsManager;
+
 	constructor(meetingId: string) {
 		this.peerConn = new RTCPeerConnection(new PeerConnConfig().getConfig());
 		this.peerConn.ontrack = this.onTrack;
 		this.meetingId = meetingId;
 		this.streams = [];
+		this.subscriptionManager = new SubscriptionsManager(meetingId);
 	}
 
 	// Handle new tracks
@@ -71,5 +75,6 @@ export default class VideoInConnection implements IVideoInConnection {
 
 	closePeerConnection(): void {
 		this.peerConn?.close?.();
+		this.subscriptionManager.clean();
 	}
 }

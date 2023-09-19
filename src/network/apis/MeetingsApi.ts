@@ -111,7 +111,13 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 					settings.videoStreamEnabled,
 					devicesId.videoDevice
 				);
-			this.getMeetingByMeetingId(meetingId);
+			this.getMeetingByMeetingId(meetingId).then((meeting) => {
+				useStore
+					.getState()
+					.activeMeeting[meetingId]?.videoInConn?.subscriptionManager.updatePossibleSubscription(
+						meeting.participants
+					);
+			});
 			return resp;
 		});
 	}
