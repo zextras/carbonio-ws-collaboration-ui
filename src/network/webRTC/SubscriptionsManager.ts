@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { forEach } from 'lodash';
+import { clone, differenceWith, flatMap, forEach, isEqual } from 'lodash';
 
 import useStore from '../../store/Store';
 import { MeetingParticipantBe } from '../../types/network/models/meetingBeTypes';
@@ -14,9 +14,9 @@ import { MeetingsApi } from '../index';
 class SubscriptionsManager {
 	meetingId: string;
 
-	potentialSubscriptions: SubscriptionMap = {};
+	allStreams: SubscriptionMap = {};
 
-	realSubscription: SubscriptionMap = {};
+	subscriptions: SubscriptionMap = {};
 
 	constructor(meetingId: string) {
 		this.meetingId = meetingId;
@@ -27,45 +27,59 @@ class SubscriptionsManager {
 			if (participant.userId !== useStore.getState().session.id) {
 				if (participant.videoStreamEnabled) {
 					const subscriptionId = `${participant.userId}-${STREAM_TYPE.VIDEO}`;
-					this.potentialSubscriptions[subscriptionId] = {
+					this.allStreams[subscriptionId] = {
 						user_id: participant.userId,
 						type: STREAM_TYPE.VIDEO
 					};
 				}
 				if (participant.screenStreamEnabled) {
 					const subscriptionId = `${participant.userId}-${STREAM_TYPE.SCREEN}`;
-					this.potentialSubscriptions[subscriptionId] = {
+					this.allStreams[subscriptionId] = {
 						user_id: participant.userId,
 						type: STREAM_TYPE.SCREEN
 					};
 				}
 			}
 		});
+		this.updateSubscription();
 	}
 
 	public addPossibleSubscription(userId: string, type: STREAM_TYPE): void {
 		const subscriptionId = `${userId}-${type}`;
-		this.potentialSubscriptions[subscriptionId] = {
+		this.allStreams[subscriptionId] = {
 			user_id: userId,
 			type
 		};
+		this.updateSubscription();
 	}
 
 	public removePossibleSubscription(userId: string, type: STREAM_TYPE): void {
 		const subscriptionId = `${userId}-${type}`;
-		delete this.potentialSubscriptions[subscriptionId];
+		delete this.allStreams[subscriptionId];
+		this.updateSubscription();
 	}
 
 	updateSubscription(): void {
-		// TODO
-		const subscriptionToAsk: Subscription[] = [];
-		const subscriptionToUnset: Subscription[] = [];
-		MeetingsApi.subscribeToMedia(this.meetingId, subscriptionToAsk, subscriptionToUnset);
+		// Ask for all the possible subscriptions
+		const potentialSubs = flatMap(this.allStreams);
+		const realSubs = flatMap(this.subscriptions);
+
+		// Ask subscriptions that are not already asked and unset subscriptions that are not needed anymore
+		const subscriptionToAsk: Subscription[] = differenceWith(potentialSubs, realSubs, isEqual);
+		const subscriptionToUnset: Subscription[] = differenceWith(realSubs, potentialSubs, isEqual);
+
+		console.log('SUBSCRIPTIONS:');
+		console.log(subscriptionToAsk);
+		console.log(subscriptionToUnset);
+		if (subscriptionToAsk.length !== 0 || subscriptionToUnset.length !== 0) {
+			MeetingsApi.subscribeToMedia(this.meetingId, subscriptionToAsk, subscriptionToUnset);
+			this.subscriptions = clone(this.allStreams);
+		}
 	}
 
 	clean(): void {
-		this.potentialSubscriptions = {};
-		this.realSubscription = {};
+		this.allStreams = {};
+		this.subscriptions = {};
 	}
 }
 
