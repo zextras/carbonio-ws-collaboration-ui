@@ -96,8 +96,8 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 	const [audioStreamEnabled, setAudioStreamEnabled] = useState(false);
 	const [audioMediaList, setAudioMediaList] = useState<[] | MediaDeviceInfo[]>([]);
 	const [videoMediaList, setVideoMediaList] = useState<[] | MediaDeviceInfo[]>([]);
-	const [selectedAudioDevice, setSelectedAudioDevice] = useState('');
-	const [selectedVideoDevice, setSelectedVideoDevice] = useState('');
+	const [selectedAudioDevice, setSelectedAudioDevice] = useState<string | undefined>(undefined);
+	const [selectedVideoDevice, setSelectedVideoDevice] = useState<string | undefined>(undefined);
 	const [streamTrack, setStreamTrack] = useState<MediaStream | null>(null);
 	const [wrapperWidth, setWrapperWidth] = useState(0);
 	const [videoPlayerTestMuted, setVideoPlayerTestMuted] = useState(true);
@@ -120,7 +120,7 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 	);
 
 	const toggleStreams = useCallback(
-		(audio: boolean, video: boolean, audioId: string, videoId: string) => {
+		(audio: boolean, video: boolean, audioId: string | undefined, videoId: string | undefined) => {
 			if (streamTrack != null) {
 				const tracks = streamTrack.getTracks();
 				tracks.forEach((track) => track.stop());
