@@ -52,6 +52,10 @@ const HoverContainer = styled(Container)`
 	position: absolute;
 	background-color: rgba(255, 255, 255, 0.7);
 	z-index: 1;
+	-webkit-transition: opacity 200ms linear 300ms;
+	-moz-transition: opacity 200ms linear 300ms;
+	-o-transition: opacity 200ms linear 300ms;
+	transition: opacity 200ms linear 300ms;
 `;
 
 const CustomTile = styled(Container)`
@@ -67,7 +71,7 @@ const CustomTile = styled(Container)`
 	}
 `;
 
-const ActionContainer = styled(Container)`
+const InfoContainer = styled(Container)`
 	height: auto;
 	aspect-ratio: 16/9;
 	position: absolute;
@@ -128,6 +132,8 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 	const [t] = useTranslation();
 	const micOffLabel = t('meetings.interactions.yourMicIsDisabled', 'Your microphone is off');
 	const camOffLabel = t('meetings.interactions.yourCamIsDisabled', 'Your camera is off');
+	const pinVideoLabel = t('tooltip.pinVideo', 'Pin video');
+	const unpinVideoLabel = t('tooltip.unpinVideo', 'Unpin video');
 
 	const isSessionTile = useStore(getUserId) === userId;
 	const userName = useStore((store) => getUserName(store, userId || ''));
@@ -279,27 +285,32 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 				{/*	</> */}
 				{/* )} */}
 				{canUsePinFeature && (
-					<IconButton
-						icon={!isPinned ? 'Pin3Outline' : 'Unpin3Outline'}
-						iconColor="text"
-						backgroundColor="gray6"
-						size="large"
-						borderRadius="round"
-						customSize={{ iconSize: '1.5rem', paddingSize: '0.75rem' }}
-						onClick={switchPinnedTile}
-					/>
+					<Tooltip label={isPinned ? unpinVideoLabel : pinVideoLabel}>
+						<IconButton
+							icon={!isPinned ? 'Pin3Outline' : 'Unpin3Outline'}
+							iconColor="text"
+							backgroundColor="gray6"
+							size="large"
+							borderRadius="round"
+							customSize={{ iconSize: '1.5rem', paddingSize: '0.75rem' }}
+							onClick={switchPinnedTile}
+						/>
+					</Tooltip>
 				)}
 			</HoverContainer>
 		),
-		[canUsePinFeature, isPinned, switchPinnedTile]
+		[canUsePinFeature, isPinned, pinVideoLabel, switchPinnedTile, unpinVideoLabel]
 	);
 
-	const showHoverContainer = useMemo(() => canUsePinFeature, [canUsePinFeature]);
+	const showHoverContainer = useMemo(
+		() => !modalProps && canUsePinFeature,
+		[canUsePinFeature, modalProps]
+	);
 
 	return (
 		<CustomTile background={'text'} data-testid="tile" width="100%">
 			{showHoverContainer && hoverContainer}
-			<ActionContainer orientation="horizontal">
+			<InfoContainer orientation="horizontal">
 				<Row
 					orientation="horizontal"
 					mainAlignment={'flex-start'}
@@ -321,7 +332,7 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 						<Text color={'gray6'}>{userName}</Text>
 					</TextContainer>
 				</Row>
-			</ActionContainer>
+			</InfoContainer>
 			{videoStreamEnabled ? (
 				<VideoEl
 					playsInline

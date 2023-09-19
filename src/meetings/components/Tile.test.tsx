@@ -128,7 +128,7 @@ const storeSetupTileAudioOnAndVideoOff = (): { user: UserEvent; store: RootStore
 	return { user, store };
 };
 
-describe('Tile test', () => {
+describe('Tile test - enter meeting modal', () => {
 	test('my tile - everything is rendered correctly', () => {
 		storeSetupMyTileAudioOnVideoOff();
 		const videoIcon = screen.getByTestId('icon: VideoOffOutline');
@@ -143,28 +143,17 @@ describe('Tile test', () => {
 		const { user } = storeSetupMyTileAudioOnVideoOff();
 		const tile = screen.getByTestId('tile');
 		await user.hover(tile);
-		expect(screen.getByTestId('hover_container')).toBeInTheDocument();
+		expect(screen.queryByTestId('hover_container')).not.toBeInTheDocument();
 	});
 	test('user tile - audio on and video off', async () => {
-		const { user } = storeSetupTileAudioOnAndVideoOff();
+		storeSetupTileAudioOnAndVideoOff();
 		const videoIcon = screen.getByTestId('icon: VideoOffOutline');
 		expect(videoIcon).toBeVisible();
-		const tile = screen.getByTestId('tile');
-		await user.hover(tile);
-		// const audioIcon = screen.getByTestId('icon: MicOffOutline');
-		// expect(audioIcon).toBeInTheDocument();
-		const pinVideo = screen.getByTestId('icon: Pin3Outline');
-		expect(pinVideo).toBeInTheDocument();
 	});
 	test('user tile - audio off and video on', async () => {
-		const { user } = storeSetupTileAudioOffAndVideoOn();
+		storeSetupTileAudioOffAndVideoOn();
 		expect(screen.queryByTestId('icon: VideoOffOutline')).not.toBeInTheDocument();
 		const audioIcon = screen.getByTestId('icon: MicOffOutline');
 		expect(audioIcon).toBeInTheDocument();
-		const tile = screen.getByTestId('tile');
-		await user.hover(tile);
-		// expect(screen.getAllByTestId('icon: MicOffOutline')).toHaveLength(1);
-		const pinVideo = screen.getByTestId('icon: Pin3Outline');
-		expect(pinVideo).toBeInTheDocument();
 	});
 });
