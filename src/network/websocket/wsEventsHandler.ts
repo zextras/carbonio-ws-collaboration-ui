@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { find } from 'lodash';
+import { find, size } from 'lodash';
 
 import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
 import useStore from '../../store/Store';
@@ -148,6 +148,15 @@ export function wsEventsHandler(event: WsEvent): void {
 		}
 		case WsEventType.MEETING_LEFT: {
 			state.removeParticipant(event.meetingId, event.userId);
+
+			// Unset pin if the user left the meeting or if the meeting become a 1to1
+			const meeting = find(state.meetings, (meeting) => meeting.id === event.meetingId);
+			if (
+				event.userId === state.activeMeeting[event.meetingId]?.pinnedTile?.userId ||
+				size(meeting?.participants) < 3
+			) {
+				state.setPinnedTile(event.meetingId, undefined);
+			}
 			break;
 		}
 		case WsEventType.MEETING_STOPPED: {

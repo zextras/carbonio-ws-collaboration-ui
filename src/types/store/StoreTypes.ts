@@ -174,7 +174,6 @@ export type ActiveMeetingSlice = {
 	setMeetingParticipantsAccordionStatus: (roomId: string, status: boolean) => void;
 	setMeetingChatVisibility: (meetingId: string, visibilityStatus: MeetingChatVisibility) => void;
 	setMeetingViewSelected: (meetingId: string, viewType: MeetingViewType) => void;
-
 	meetingConnection: (
 		meetingId: string,
 		audioStreamEnabled: boolean,

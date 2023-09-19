@@ -123,6 +123,11 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 			produce((draft: RootStore) => {
 				if (draft.activeMeeting[meetingId]) {
 					draft.activeMeeting[meetingId].meetingViewSelected = viewType;
+
+					// Unset pin when switching to grid view
+					if (viewType === MeetingViewType.GRID) {
+						draft.setPinnedTile(meetingId, undefined);
+					}
 				}
 			}),
 			false,
