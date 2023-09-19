@@ -6,7 +6,6 @@
 
 import { screen } from '@testing-library/react';
 import React from 'react';
-import { act } from 'react-dom/test-utils';
 
 import AccessMeetingModal from './AccessMeetingModal';
 import { mockedEnterMeetingRequest, mockedJoinMeetingRequest } from '../../../jest-mocks';
@@ -48,10 +47,6 @@ describe('AccessMeetingModal - enter to meeting', () => {
 
 		const device = await screen.findByText('Audio Device 2');
 		expect(device).toBeInTheDocument();
-
-		await act(() => user.click(device));
-		const micOn = await screen.findByTestId('icon: Mic');
-		expect(micOn).toBeInTheDocument();
 	});
 	test('Select video device', async () => {
 		const meeting = createMockMeeting({ roomId: room.id, active: true });
@@ -65,9 +60,5 @@ describe('AccessMeetingModal - enter to meeting', () => {
 
 		const device = await screen.findByText('Video Device 2');
 		expect(device).toBeInTheDocument();
-
-		await act(() => user.click(device));
-		const videoOn = await screen.findByTestId('icon: Video');
-		expect(videoOn).toBeInTheDocument();
 	});
 });

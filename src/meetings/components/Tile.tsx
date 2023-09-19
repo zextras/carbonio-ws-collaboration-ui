@@ -74,6 +74,11 @@ const ActionContainer = styled(Container)`
 	position: absolute;
 `;
 
+const CustomContainer = styled(Container)`
+	aspect-ratio: 16/9;
+	position: absolute;
+`;
+
 const VideoEl = styled.video`
 	object-fit: cover;
 	aspect-ratio: 16/9;
@@ -165,13 +170,6 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, modalProps }) => {
 			setPicture(false);
 		}
 	}, [userId, userPictureUpdatedAt]);
-
-	const finalStreamRef = useMemo(() => {
-		if (modalProps) {
-			return modalProps.streamRef;
-		}
-		return streamRef;
-	}, [modalProps, streamRef]);
 
 	const audioStreamEnabled = useMemo(() => {
 		if (modalProps) {
@@ -303,16 +301,15 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, modalProps }) => {
 					</TextContainer>
 				</Row>
 			</ActionContainer>
-			{videoStreamEnabled ? (
-				<VideoEl
-					playsInline
-					autoPlay
-					muted={modalProps ? modalProps.streamMuted : true}
-					controls={false}
-					ref={finalStreamRef}
-				/>
-			) : (
-				<Container data-testid="avatar_box">{avatarComponent}</Container>
+			<VideoEl
+				playsInline
+				autoPlay
+				muted={modalProps ? modalProps.streamMuted : true}
+				controls={false}
+				ref={modalProps ? modalProps.streamRef : streamRef}
+			/>
+			{!videoStreamEnabled && (
+				<CustomContainer data-testid="avatar_box">{avatarComponent}</CustomContainer>
 			)}
 		</CustomTile>
 	);

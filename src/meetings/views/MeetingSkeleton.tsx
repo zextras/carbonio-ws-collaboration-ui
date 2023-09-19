@@ -25,7 +25,7 @@ import CinemaMode from '../components/cinemaMode/CinemaMode';
 import SidebarCarousel from '../components/cinemaMode/SidebarCarousel';
 import FaceToFaceMode from '../components/faceToFaceMode/FaceToFaceMode';
 import GridMode from '../components/gridMode/GridMode';
-import MeetingActions from '../components/MeetingActions';
+import MeetingActions from '../components/MeetingActions/MeetingActions';
 import MeetingSidebar from '../components/sidebar/MeetingSidebar';
 
 const SkeletonContainer = styled(Container)`
