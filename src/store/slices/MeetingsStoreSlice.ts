@@ -28,7 +28,8 @@ export const useMeetingsStoreSlice = (set: (...any: any) => void): MeetingsSlice
 								userType: participant.userType,
 								audioStreamOn: participant.audioStreamEnabled || false,
 								videoStreamOn: participant.videoStreamEnabled || false,
-								screenStreamOn: participant.screenStreamEnabled || false
+								screenStreamOn: participant.screenStreamEnabled || false,
+								joinedAt: participant.joinedAt
 							};
 							return acc;
 						},
@@ -68,7 +69,8 @@ export const useMeetingsStoreSlice = (set: (...any: any) => void): MeetingsSlice
 							userType: participant.userType,
 							audioStreamOn: participant.audioStreamEnabled || false,
 							videoStreamOn: participant.videoStreamEnabled || false,
-							screenStreamOn: participant.screenStreamEnabled || false
+							screenStreamOn: participant.screenStreamEnabled || false,
+							joinedAt: participant.joinedAt
 						};
 						return acc;
 					},
@@ -142,9 +144,9 @@ export const useMeetingsStoreSlice = (set: (...any: any) => void): MeetingsSlice
 						userType: participant.userType,
 						audioStreamOn: participant.audioStreamOn || false,
 						videoStreamOn: participant.videoStreamOn || false,
-						screenStreamOn: participant.screenStreamOn || false
+						screenStreamOn: participant.screenStreamOn || false,
+						joinedAt: participant.joinedAt
 					};
-
 					// Retrieve member information if he is unknown
 					if (!find(draft.users, (user) => user.id === participant.userId)) {
 						UsersApi.getDebouncedUser(participant.userId);

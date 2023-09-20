@@ -14,7 +14,8 @@ import {
 	MeetingChatVisibility,
 	MeetingViewType,
 	STREAM_TYPE,
-	StreamsSubscriptionMap
+	StreamsSubscriptionMap,
+	TileData
 } from '../../types/store/ActiveMeetingTypes';
 import { ActiveMeetingSlice, RootStore } from '../../types/store/StoreTypes';
 
@@ -122,6 +123,11 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 			produce((draft: RootStore) => {
 				if (draft.activeMeeting[meetingId]) {
 					draft.activeMeeting[meetingId].meetingViewSelected = viewType;
+
+					// Unset pin when switching to grid view
+					if (viewType === MeetingViewType.GRID) {
+						draft.setPinnedTile(meetingId, undefined);
+					}
 				}
 			}),
 			false,
@@ -253,6 +259,17 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 			}),
 			false,
 			'AM/SET_MEETING_CAROUSEL_VISIBILITY'
+		);
+	},
+	setPinnedTile: (meetingId: string, tile: TileData | undefined): void => {
+		set(
+			produce((draft: RootStore) => {
+				if (draft.activeMeeting[meetingId]) {
+					draft.activeMeeting[meetingId].pinnedTile = tile;
+				}
+			}),
+			false,
+			'AM/SET_PINNED_TILE'
 		);
 	}
 });

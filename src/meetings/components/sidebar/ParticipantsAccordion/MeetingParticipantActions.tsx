@@ -3,11 +3,12 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import { Container, Tooltip, Icon, Padding } from '@zextras/carbonio-design-system';
+import { Container, Tooltip, Icon, Padding, IconButton } from '@zextras/carbonio-design-system';
 import React, { FC, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import PromoteDemoteMemberAction from '../../../../chats/components/infoPanel/conversationParticipantsAccordion/PromoteDemoteMemberAction';
+import usePinnedTile from '../../../../hooks/usePinnedTile';
 import {
 	getParticipantAudioStatus,
 	getRoomIdByMeetingId
@@ -31,8 +32,8 @@ const MeetingParticipantActions: FC<ParticipantActionsProps> = ({ memberId, meet
 		'This participant is already muted'
 	);
 	// const muteForAllLabel = t('tooltip.muteForAll', 'Mute for all');
-	// const pinVideoLabel = t('tooltip.pinVideo', 'Pin video');
-	// const unpinVideoLabel = t('tooltip.unpinVideo', 'Unpin video');
+	const pinVideoLabel = t('tooltip.pinVideo', 'Pin video');
+	const unpinVideoLabel = t('tooltip.unpinVideo', 'Unpin video');
 	const userId: string | undefined = useStore((store) => getUserId(store));
 	const roomId: string | undefined = useStore((store) =>
 		getRoomIdByMeetingId(store, meetingId || '')
@@ -44,6 +45,8 @@ const MeetingParticipantActions: FC<ParticipantActionsProps> = ({ memberId, meet
 	const iAmOwner: boolean = useStore((state) =>
 		getMyOwnershipOfTheRoom(state, userId, roomId || '')
 	);
+
+	const { isPinned, switchPinnedTile, canUsePinFeature } = usePinnedTile(meetingId || '', memberId);
 
 	const isSessionParticipant: boolean = useMemo(() => memberId === userId, [memberId, userId]);
 
@@ -83,19 +86,17 @@ const MeetingParticipantActions: FC<ParticipantActionsProps> = ({ memberId, meet
 			{/*		size="large" */}
 			{/*	/> */}
 			{/* </Tooltip> */}
-
-			{/* TODO PIN VIDEO FEATURE */}
-			{/* {isSessionParticipant && ( */}
-			{/*	<Tooltip label={isPinned ? unpinVideoLabel : pinVideoLabel}> */}
-			{/*		<IconButton */}
-			{/*			iconColor="gray0" */}
-			{/*			backgroundColor="text" */}
-			{/*			icon={isPinned ? 'Unpin3Outline' : 'Pin3Outline'} */}
-			{/*			onClick={togglePin} */}
-			{/*			size="large" */}
-			{/*		/> */}
-			{/*	</Tooltip> */}
-			{/* )} */}
+			{canUsePinFeature && (
+				<Tooltip label={isPinned ? unpinVideoLabel : pinVideoLabel}>
+					<IconButton
+						iconColor="gray0"
+						backgroundColor="text"
+						icon={isPinned ? 'Unpin3Outline' : 'Pin3Outline'}
+						onClick={switchPinnedTile}
+						size="large"
+					/>
+				</Tooltip>
+			)}
 		</Container>
 	);
 };
