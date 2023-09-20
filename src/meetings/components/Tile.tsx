@@ -55,7 +55,7 @@ const HoverContainer = styled(Container)`
 	-webkit-transition: opacity 200ms linear 300ms;
 	-moz-transition: opacity 200ms linear 300ms;
 	-o-transition: opacity 200ms linear 300ms;
-	transition: opacity 200ms linear 300ms;
+	transition: opacity 100ms linear 200ms;
 `;
 
 const CustomTile = styled(Container)`
