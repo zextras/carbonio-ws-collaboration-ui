@@ -92,15 +92,16 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 	const roomMembers: Member[] | undefined = useStore((state) => getRoomMembers(state, roomId));
 	const meeting = useStore((store) => getMeeting(store, roomId));
 
-	const [videoStreamEnabled, setVideoStreamEnabled] = useState(false);
-	const [audioStreamEnabled, setAudioStreamEnabled] = useState(false);
+	const [videoStreamEnabled, setVideoStreamEnabled] = useState<boolean>(false);
+	const [audioStreamEnabled, setAudioStreamEnabled] = useState<boolean>(false);
 	const [audioMediaList, setAudioMediaList] = useState<[] | MediaDeviceInfo[]>([]);
 	const [videoMediaList, setVideoMediaList] = useState<[] | MediaDeviceInfo[]>([]);
 	const [selectedAudioDevice, setSelectedAudioDevice] = useState<string | undefined>(undefined);
 	const [selectedVideoDevice, setSelectedVideoDevice] = useState<string | undefined>(undefined);
 	const [streamTrack, setStreamTrack] = useState<MediaStream | null>(null);
-	const [wrapperWidth, setWrapperWidth] = useState(0);
-	const [videoPlayerTestMuted, setVideoPlayerTestMuted] = useState(true);
+	const [wrapperWidth, setWrapperWidth] = useState<number>(0);
+	const [videoPlayerTestMuted, setVideoPlayerTestMuted] = useState<boolean>(true);
+	const [enterButtonIsEnabled, setEnterButtonIsEnabled] = useState<boolean>(true);
 
 	const wrapperRef = useRef<HTMLDivElement>();
 	const videoStreamRef = useRef<HTMLVideoElement>(null);
@@ -112,6 +113,7 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 	useEffect(() => {
 		if (videoStreamRef.current) {
 			videoStreamRef.current.srcObject = streamTrack;
+			setEnterButtonIsEnabled(true);
 		}
 	}, [streamTrack, audioStreamEnabled, videoStreamEnabled]);
 	const modalTitle = useMemo(
@@ -133,6 +135,7 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 					setStreamTrack(stream);
 					setAudioStreamEnabled(audio);
 					setVideoStreamEnabled(video);
+					setEnterButtonIsEnabled(true);
 				});
 			} else {
 				getAudioAndVideo({ noiseSuppression: true, echoCancellation: true }).then(
@@ -159,6 +162,7 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 						setVideoStreamEnabled(video);
 						setSelectedVideoDevice(videoId);
 						setSelectedAudioDevice(audioId);
+						setEnterButtonIsEnabled(true);
 					})
 					.catch((e) => console.error(e));
 			}
@@ -177,6 +181,7 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 				id: `device-${i}`,
 				label: videoItem.label ? videoItem.label : `device-${i}`,
 				onClick: (): void => {
+					setEnterButtonIsEnabled(false);
 					if (videoStreamEnabled) {
 						toggleStreams(audioStreamEnabled, true, selectedAudioDevice, videoItem.deviceId);
 					} else {
@@ -202,6 +207,7 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 				id: `device-${i}`,
 				label: audioItem.label ? audioItem.label : `device-${i}`,
 				onClick: (): void => {
+					setEnterButtonIsEnabled(false);
 					if (audioStreamEnabled) {
 						toggleStreams(true, videoStreamEnabled, audioItem.deviceId, selectedVideoDevice);
 					} else {
@@ -270,6 +276,7 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 	}, [updateListOfDevices]);
 
 	const toggleVideo = useCallback(() => {
+		setEnterButtonIsEnabled(false);
 		toggleStreams(
 			audioStreamEnabled,
 			!videoStreamEnabled,
@@ -285,6 +292,7 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 	]);
 
 	const toggleAudio = useCallback(() => {
+		setEnterButtonIsEnabled(false);
 		toggleStreams(
 			!audioStreamEnabled,
 			videoStreamEnabled,
@@ -334,12 +342,13 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 					onClick={onToggleAudioTest}
 					disabled={!audioStreamEnabled}
 				/>
-				<Button label={enter} onClick={joinMeeting} />
+				<Button label={enter} onClick={joinMeeting} disabled={!enterButtonIsEnabled} />
 			</Container>
 		),
 		[
 			audioStreamEnabled,
 			enter,
+			enterButtonIsEnabled,
 			joinMeeting,
 			onToggleAudioTest,
 			playMicLabel,
