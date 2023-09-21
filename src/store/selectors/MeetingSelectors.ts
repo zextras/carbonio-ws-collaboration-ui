@@ -74,6 +74,16 @@ export const getParticipantVideoStatus = (
 	return participant?.videoStreamOn ?? false;
 };
 
+export const getParticipantScreenStatus = (
+	store: RootStore,
+	meetingId: string | undefined,
+	userId: string | undefined
+): boolean => {
+	const meeting = find(store.meetings, (meeting) => meeting.id === meetingId);
+	const participant = find(meeting?.participants, (participant) => participant.userId === userId);
+	return participant?.screenStreamOn ?? false;
+};
+
 export const getFirstParticipant = (
 	store: RootStore,
 	meetingId: string | undefined
