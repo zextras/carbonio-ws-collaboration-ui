@@ -6,6 +6,7 @@
 
 import {
 	IBidirectionalConnectionAudioInOut,
+	IScreenOutConnection,
 	IVideoInConnection,
 	IVideoOutConnection
 } from '../network/webRTC/webRTC';
@@ -14,7 +15,7 @@ export type ActiveMeeting = {
 	bidirectionalAudioConn?: IBidirectionalConnectionAudioInOut;
 	videoInConn?: IVideoInConnection;
 	videoOutConn?: IVideoOutConnection;
-	shareOutConn?: any;
+	screenOutConn?: IScreenOutConnection;
 	localStreams?: LocalStreams;
 	subscription: StreamsSubscriptionMap;
 	sidebarStatus: SidebarStatus;

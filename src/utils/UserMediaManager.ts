@@ -116,3 +116,21 @@ export const getAudioAndVideo = (
 				reject(err);
 			});
 	});
+
+/**
+ * Request the screen stream for the session
+ * https://developer.mozilla.org/en-US/docs/Web/API/Screen_Capture_API/Using_Screen_Capture
+ */
+export const getScreenStream = (): Promise<MediaStream> =>
+	new Promise((resolve, reject) => {
+		// TODO ask for audio? cursor?
+		navigator.mediaDevices
+			.getDisplayMedia({ video: true, audio: true })
+			.then((stream: MediaStream) => {
+				resolve(stream);
+			})
+			.catch((err) => {
+				console.error('Error while requesting screen track', err);
+				reject(err);
+			});
+	});

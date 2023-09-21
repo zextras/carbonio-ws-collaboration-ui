@@ -12,7 +12,7 @@ export interface IPeerConnConfig {
 }
 
 export interface IPeerConnection {
-	peerConn: RTCPeerConnection;
+	peerConn: RTCPeerConnection | null;
 	meetingId: string;
 	closePeerConnection(): void;
 }
@@ -22,9 +22,6 @@ export interface IBidirectionalConnectionAudioInOut extends IPeerConnection {
 	selectedAudioDeviceId: string | undefined;
 	initialAudioStatus: boolean;
 	oscillatorAudioTrack: MediaStreamTrack | undefined;
-	onTrack: (trackEvent: RTCTrackEvent) => void;
-	onNegotiationNeeded: () => void;
-	onIceConnectionStateChange: (ev: Event) => void;
 	handleRemoteAnswer(remoteAnswer: RTCSessionDescriptionInit): void;
 	updateLocalStreamTrack(mediaStreamTrack: MediaStream): Promise<MediaStreamTrack>;
 	updateRemoteStreamAudio(): void;
@@ -33,14 +30,17 @@ export interface IBidirectionalConnectionAudioInOut extends IPeerConnection {
 
 export interface IVideoOutConnection extends IPeerConnection {
 	rtpSender: RTCRtpSender | null;
-	localStreamVideoOutTrack: MediaStreamTrack | null;
 	selectedVideoDeviceId: string | undefined;
-	onNegotiationNeeded: () => void;
-	onIceConnectionStateChange: (ev: Event) => void;
 	handleRemoteAnswer(remoteAnswer: RTCSessionDescriptionInit): void;
 	handleOfferCreated(rtcSessionDescription: RTCSessionDescriptionInit): void;
 	updateLocalStreamTrack(mediaStreamTrack: MediaStream): Promise<MediaStreamTrack>;
 	closeRtpSenderTrack(): void;
+}
+
+export interface IScreenOutConnection extends IPeerConnection {
+	handleRemoteAnswer(remoteAnswer: RTCSessionDescriptionInit): void;
+	startScreenShare(): void;
+	stopScreenShare(): void;
 }
 
 export interface IVideoInConnection extends IPeerConnection {

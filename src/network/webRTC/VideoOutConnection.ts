@@ -18,8 +18,6 @@ export default class VideoOutConnection implements IVideoOutConnection {
 
 	rtpSender: RTCRtpSender | null;
 
-	localStreamVideoOutTrack: MediaStreamTrack | null;
-
 	selectedVideoDeviceId: string | undefined;
 
 	constructor(meetingId: string, videoStreamEnabled: boolean, selectedVideoDeviceId?: string) {
@@ -29,7 +27,6 @@ export default class VideoOutConnection implements IVideoOutConnection {
 
 		this.meetingId = meetingId;
 		this.rtpSender = null;
-		this.localStreamVideoOutTrack = null;
 		this.selectedVideoDeviceId = selectedVideoDeviceId;
 
 		if (videoStreamEnabled) {

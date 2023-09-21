@@ -8,6 +8,7 @@
 import produce from 'immer';
 
 import BidirectionalConnectionAudioInOut from '../../network/webRTC/BidirectionalConnectionAudioInOut';
+import ScreenOutConnection from '../../network/webRTC/ScreenOutConnection';
 import VideoInConnection from '../../network/webRTC/VideoInConnection';
 import VideoOutConnection from '../../network/webRTC/VideoOutConnection';
 import {
@@ -54,6 +55,7 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 					videoOutConn: videoStreamEnabled
 						? new VideoOutConnection(meetingId, videoStreamEnabled, selectedVideoDeviceId)
 						: undefined,
+					screenOutConn: new ScreenOutConnection(meetingId),
 					subscription: {}
 				};
 			}),
@@ -165,29 +167,6 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 			'AM/CLOSE_VIDEO_OUT_CONN'
 		);
 	},
-	createShareOutConn: (meetingId: string): void => {
-		set(
-			produce((draft: RootStore) => {
-				// TODO IMPLEMENT
-				const shareOutConn = new VideoInConnection(meetingId);
-				if (!draft.activeMeeting[meetingId].shareOutConn) {
-					draft.activeMeeting[meetingId].shareOutConn = shareOutConn;
-				}
-			}),
-			false,
-			'AM/SET_SHARE_OUT_CONN'
-		);
-	},
-	closeShareOutConn: (meetingId: string): void => {
-		set(
-			produce((draft: RootStore) => {
-				draft.activeMeeting[meetingId]?.shareOutConn?.closePeerConnection();
-			}),
-			false,
-			'AM/CLOSE_SHARE_OUT_CONN'
-		);
-	},
-
 	setLocalStreams: (meetingId: string, streamType: STREAM_TYPE, stream: MediaStream): void => {
 		set(
 			produce((draft: RootStore) => {
@@ -209,6 +188,11 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 	removeLocalStreams: (meetingId: string, streamType: STREAM_TYPE): void => {
 		set(
 			produce((draft: RootStore) => {
+				if (streamType === STREAM_TYPE.SCREEN) {
+					draft.activeMeeting[meetingId]?.localStreams?.[streamType]
+						?.getTracks()
+						.forEach((track) => track.stop());
+				}
 				delete draft.activeMeeting[meetingId].localStreams![streamType];
 			}),
 			false,

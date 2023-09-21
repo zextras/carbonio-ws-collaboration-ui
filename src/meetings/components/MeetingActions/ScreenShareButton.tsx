@@ -21,25 +21,15 @@ const ScreenShareButton = (): ReactElement => {
 	const { meetingId }: Record<string, string> = useParams();
 	const myUserId = useStore(getUserId);
 	const screenStatus = useStore((store) => getParticipantScreenStatus(store, meetingId, myUserId));
+	const screenOutConn = useStore((store) => store.activeMeeting[meetingId]?.screenOutConn);
 
 	const toggleScreenStream = useCallback(() => {
 		if (!screenStatus) {
-			// if (!videoOutConn) {
-			// 	createVideoOutConn(meetingId, true, selectedVideoDeviceId);
-			// } else {
-			// 	getVideoStream(selectedVideoDeviceId).then((stream) => {
-			// 		videoOutConn
-			// 			?.updateLocalStreamTrack(stream)
-			// 			.then(() => MeetingsApi.updateMediaOffer(meetingId, STREAM_TYPE.VIDEO, true));
-			// 	});
-			// }
+			screenOutConn?.startScreenShare();
 		} else {
-			// closeVideoOutConn(meetingId);
-			// MeetingsApi.updateMediaOffer(meetingId, STREAM_TYPE.SCREEN, false).then(() =>
-			// 	removeLocalStreams(meetingId, STREAM_TYPE.SCREEN)
-			// );
+			screenOutConn?.stopScreenShare();
 		}
-	}, [screenStatus]);
+	}, [screenOutConn, screenStatus]);
 
 	return (
 		<Tooltip placement="top" label={screenStatus ? disableScreenLabel : enableScreenLabel}>

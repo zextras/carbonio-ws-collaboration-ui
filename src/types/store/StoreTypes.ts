@@ -29,7 +29,6 @@ import { RoomsMap } from './RoomTypes';
 import { CapabilityList, Session } from './SessionTypes';
 import { UnreadsMap } from './UnreadsCounterTypes';
 import { UsersMap } from './UserTypes';
-import { PeerConnConfig } from '../../network/webRTC/PeerConnConfig';
 import { MeetingBe } from '../network/models/meetingBeTypes';
 import { MemberBe, RoomBe } from '../network/models/roomBeTypes';
 import { UserBe } from '../network/models/userBeTypes';
@@ -188,8 +187,6 @@ export type ActiveMeetingSlice = {
 		selectedVideoDeviceId?: string
 	) => void;
 	closeVideoOutConn: (meetingId: string) => void;
-	createShareOutConn: (meetingId: string, peerConnectionConfig: PeerConnConfig) => void;
-	closeShareOutConn: (meetingId: string) => void;
 	setLocalStreams: (meetingId: string, streamType: STREAM_TYPE, stream: MediaStream) => void;
 	removeLocalStreams: (meetingId: string, streamType: STREAM_TYPE) => void;
 	setMeetingSidebarStatus: (meetingId: string, status: boolean) => void;

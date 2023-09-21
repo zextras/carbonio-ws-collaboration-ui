@@ -193,9 +193,16 @@ export function wsEventsHandler(event: WsEvent): void {
 		}
 		case WsEventType.MEETING_SDP_ANSWERED: {
 			const activeMeeting = state.activeMeeting[event.meetingId];
-			if (activeMeeting.videoOutConn) {
-				if (event.mediaType.toLowerCase() === STREAM_TYPE.VIDEO) {
+			if (activeMeeting) {
+				const mediaType = event.mediaType.toLowerCase() as STREAM_TYPE;
+				if (mediaType === STREAM_TYPE.VIDEO && activeMeeting.videoOutConn) {
 					activeMeeting.videoOutConn.handleRemoteAnswer({
+						sdp: event.sdp,
+						type: 'answer'
+					});
+				}
+				if (mediaType === STREAM_TYPE.SCREEN) {
+					activeMeeting.screenOutConn?.handleRemoteAnswer({
 						sdp: event.sdp,
 						type: 'answer'
 					});
