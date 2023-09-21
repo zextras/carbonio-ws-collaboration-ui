@@ -22,7 +22,7 @@ class SubscriptionsManager {
 		this.meetingId = meetingId;
 	}
 
-	public updatePossibleSubscription(participants: MeetingParticipantBe[]): void {
+	public updateAllStreamMap(participants: MeetingParticipantBe[]): void {
 		forEach(participants, (participant) => {
 			if (participant.userId !== useStore.getState().session.id) {
 				if (participant.videoStreamEnabled) {
@@ -44,33 +44,31 @@ class SubscriptionsManager {
 		this.updateSubscription();
 	}
 
-	public addPossibleSubscription(userId: string, type: STREAM_TYPE): void {
-		const subscriptionId = `${userId}-${type}`;
-		this.allStreams[subscriptionId] = {
-			user_id: userId,
-			type
-		};
-		this.updateSubscription();
+	public addStreamToAsk(userId: string, type: STREAM_TYPE): void {
+		if (userId !== useStore.getState().session.id) {
+			const subscriptionId = `${userId}-${type}`;
+			this.allStreams[subscriptionId] = {
+				user_id: userId,
+				type
+			};
+			this.updateSubscription();
+		}
 	}
 
-	public removePossibleSubscription(userId: string, type: STREAM_TYPE): void {
+	public removeStreamToAsk(userId: string, type: STREAM_TYPE): void {
 		const subscriptionId = `${userId}-${type}`;
 		delete this.allStreams[subscriptionId];
 		this.updateSubscription();
 	}
 
-	updateSubscription(): void {
+	// Ask subscriptions that are not already asked and unset subscriptions that are not needed anymore
+	updateSubscription(subscriptionsToRequest?: Subscription[]): void {
 		// Ask for all the possible subscriptions
-		const potentialSubs = flatMap(this.allStreams);
+		const subsToRequest = subscriptionsToRequest || flatMap(this.allStreams);
 		const realSubs = flatMap(this.subscriptions);
 
-		// Ask subscriptions that are not already asked and unset subscriptions that are not needed anymore
-		const subscriptionToAsk: Subscription[] = differenceWith(potentialSubs, realSubs, isEqual);
-		const subscriptionToUnset: Subscription[] = differenceWith(realSubs, potentialSubs, isEqual);
-
-		console.log('SUBSCRIPTIONS:');
-		console.log(subscriptionToAsk);
-		console.log(subscriptionToUnset);
+		const subscriptionToAsk: Subscription[] = differenceWith(subsToRequest, realSubs, isEqual);
+		const subscriptionToUnset: Subscription[] = differenceWith(realSubs, subsToRequest, isEqual);
 		if (subscriptionToAsk.length !== 0 || subscriptionToUnset.length !== 0) {
 			MeetingsApi.subscribeToMedia(this.meetingId, subscriptionToAsk, subscriptionToUnset);
 			this.subscriptions = clone(this.allStreams);

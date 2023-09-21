@@ -18,7 +18,7 @@ const participants: MeetingParticipantBe[] = [
 describe('Test SubscriptionsManager', () => {
 	test('Populate potential subscriptions', () => {
 		const subscriptionsManager = new SubscriptionsManager('meetingId');
-		subscriptionsManager.updatePossibleSubscription(participants);
+		subscriptionsManager.updateAllStreamMap(participants);
 
 		expect(subscriptionsManager.allStreams).toEqual({
 			'user1-video': { user_id: 'user1', type: 'video' },
@@ -30,8 +30,8 @@ describe('Test SubscriptionsManager', () => {
 
 	test('Add potential subscription', () => {
 		const subscriptionsManager = new SubscriptionsManager('meetingId');
-		subscriptionsManager.updatePossibleSubscription(participants);
-		subscriptionsManager.addPossibleSubscription('user4', STREAM_TYPE.VIDEO);
+		subscriptionsManager.updateAllStreamMap(participants);
+		subscriptionsManager.addStreamToAsk('user4', STREAM_TYPE.VIDEO);
 
 		expect(subscriptionsManager.allStreams).toEqual({
 			'user1-video': { user_id: 'user1', type: 'video' },
@@ -44,8 +44,8 @@ describe('Test SubscriptionsManager', () => {
 
 	test('Remove potential subscription', () => {
 		const subscriptionsManager = new SubscriptionsManager('meetingId');
-		subscriptionsManager.updatePossibleSubscription(participants);
-		subscriptionsManager.removePossibleSubscription('user2', STREAM_TYPE.SCREEN);
+		subscriptionsManager.updateAllStreamMap(participants);
+		subscriptionsManager.removeStreamToAsk('user2', STREAM_TYPE.SCREEN);
 
 		expect(subscriptionsManager.allStreams).toEqual({
 			'user1-video': { user_id: 'user1', type: 'video' },

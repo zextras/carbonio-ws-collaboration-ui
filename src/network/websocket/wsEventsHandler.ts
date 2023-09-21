@@ -148,11 +148,11 @@ export function wsEventsHandler(event: WsEvent): void {
 			state.removeParticipant(event.meetingId, event.userId);
 
 			// Update subscription manager
-			const subscriptionsManage =
+			const subscriptionsManager =
 				state.activeMeeting[event.meetingId]?.videoInConn?.subscriptionManager;
-			if (subscriptionsManage) {
-				subscriptionsManage?.removePossibleSubscription(event.userId, STREAM_TYPE.VIDEO);
-				subscriptionsManage?.removePossibleSubscription(event.userId, STREAM_TYPE.SCREEN);
+			if (subscriptionsManager) {
+				subscriptionsManager?.removeStreamToAsk(event.userId, STREAM_TYPE.VIDEO);
+				subscriptionsManager?.removeStreamToAsk(event.userId, STREAM_TYPE.SCREEN);
 			}
 			break;
 		}
@@ -178,12 +178,12 @@ export function wsEventsHandler(event: WsEvent): void {
 			}
 
 			// Update subscription manager
-			const subscriptionsManage =
+			const subscriptionsManager =
 				state.activeMeeting[event.meetingId]?.videoInConn?.subscriptionManager;
 			if (event.active) {
-				subscriptionsManage?.addPossibleSubscription(event.userId, mediaType);
+				subscriptionsManager?.addStreamToAsk(event.userId, mediaType);
 			} else {
-				subscriptionsManage?.removePossibleSubscription(event.userId, mediaType);
+				subscriptionsManager?.removeStreamToAsk(event.userId, mediaType);
 			}
 			break;
 		}
