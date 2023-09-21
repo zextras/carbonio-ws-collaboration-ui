@@ -19,7 +19,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import Tile from './Tile';
-import useRouting, { PAGE_INFO_TYPE } from '../../hooks/useRouting';
+import useRouting from '../../hooks/useRouting';
 import { MeetingsApi } from '../../network';
 import { getMeeting } from '../../store/selectors/MeetingSelectors';
 import {
@@ -61,7 +61,6 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 	const enableCamLabel = t('meeting.interactions.enableCamera', 'Enable camera');
 	const playMicLabel = t('meeting.interactions.playMic', 'Start microphone testing');
 	const stopMicLabel = t('meeting.interactions.stopMic', 'Stop microphone testing');
-	const closeModalTooltip = t('action.close', 'Close');
 	const joinMeetingDescription = t(
 		'meeting.joinMeetingDescription',
 		'How do you want to join this meeting?'
@@ -84,7 +83,7 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 		{ meetingTitle: conversationTitle }
 	);
 
-	const { goToMeetingPage, goToInfoPage } = useRouting();
+	const { goToMeetingPage } = useRouting();
 
 	const roomType = useStore((store) => getRoomTypeSelector(store, roomId));
 
@@ -311,10 +310,6 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 		setVideoPlayerTestMuted((prevState) => !prevState);
 	}, []);
 
-	const onCloseHandler = useCallback(() => {
-		goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED);
-	}, [goToInfoPage]);
-
 	const joinMeeting = useCallback(() => {
 		MeetingsApi.enterMeeting(
 			roomId,
@@ -362,10 +357,8 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 			background={'gray0'}
 			open
 			size="small"
+			showCloseIcon={false}
 			title={modalTitle}
-			showCloseIcon
-			onClose={onCloseHandler}
-			closeIconTooltip={closeModalTooltip}
 			customFooter={modalFooter}
 		>
 			<Padding top="small" />
