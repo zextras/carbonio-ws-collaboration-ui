@@ -123,9 +123,8 @@ export const getAudioAndVideo = (
  */
 export const getScreenStream = (): Promise<MediaStream> =>
 	new Promise((resolve, reject) => {
-		// TODO ask for audio? cursor?
 		navigator.mediaDevices
-			.getDisplayMedia({ video: true, audio: true })
+			.getDisplayMedia({ video: true })
 			.then((stream: MediaStream) => {
 				resolve(stream);
 			})
