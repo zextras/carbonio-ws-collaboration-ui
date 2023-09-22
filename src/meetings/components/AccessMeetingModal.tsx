@@ -27,6 +27,7 @@ import {
 	getRoomNameSelector,
 	getRoomTypeSelector
 } from '../../store/selectors/RoomsSelectors';
+import { getUserName } from '../../store/selectors/UsersSelectors';
 import useStore from '../../store/Store';
 import { Member, RoomType } from '../../types/store/RoomTypes';
 import { BrowserUtils } from '../../utils/BrowserUtils';
@@ -115,10 +116,22 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 			setEnterButtonIsEnabled(true);
 		}
 	}, [streamTrack, audioStreamEnabled, videoStreamEnabled]);
+
 	const modalTitle = useMemo(
 		() => (roomType === RoomType.ONE_TO_ONE ? oneToOneTitle : groupTitle),
 		[groupTitle, oneToOneTitle, roomType]
 	);
+
+	const memberId: string | undefined = useMemo(() => {
+		const user: Member | undefined = find(roomMembers, (member) => member.userId === sessionId);
+		return user?.userId;
+	}, [roomMembers, sessionId]);
+	const userName = useStore((store) => getUserName(store, memberId || ''));
+
+	useEffect(() => {
+		if (userName === undefined) setEnterButtonIsEnabled(false);
+		else setEnterButtonIsEnabled(true);
+	}, [userName]);
 
 	const toggleStreams = useCallback(
 		(audio: boolean, video: boolean, audioId: string | undefined, videoId: string | undefined) => {
@@ -168,11 +181,6 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 		},
 		[streamTrack]
 	);
-
-	const memberId: string | undefined = useMemo(() => {
-		const user: Member | undefined = find(roomMembers, (member) => member.userId === sessionId);
-		return user?.userId;
-	}, [roomMembers, sessionId]);
 
 	const mediaVideoList = useMemo(
 		() =>
