@@ -69,6 +69,7 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 				draft.activeMeeting[meetingId]?.bidirectionalAudioConn?.closePeerConnection();
 				draft.activeMeeting[meetingId]?.videoInConn?.closePeerConnection();
 				draft.activeMeeting[meetingId]?.videoOutConn?.closePeerConnection();
+				draft.activeMeeting[meetingId]?.screenOutConn?.closePeerConnection();
 				delete draft.activeMeeting[meetingId];
 			}),
 			false,

@@ -92,12 +92,14 @@ export const getTiles = (store: RootStore, meetingId: string): TileData[] => {
 		forEach(sortedParticipants, (participant) => {
 			tiles.push({
 				userId: participant.userId,
-				type: STREAM_TYPE.VIDEO
+				type: STREAM_TYPE.VIDEO,
+				date: participant.joinedAt
 			});
 			if (participant.screenStreamOn) {
 				tiles.push({
 					userId: participant.userId,
-					type: STREAM_TYPE.SCREEN
+					type: STREAM_TYPE.SCREEN,
+					date: participant.dateScreenOn
 				});
 			}
 		});

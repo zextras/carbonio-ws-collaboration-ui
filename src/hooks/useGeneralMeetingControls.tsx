@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { find, isEqual, size } from 'lodash';
+import { filter, find, maxBy, size } from 'lodash';
 import { useCallback, useEffect } from 'react';
 
 import useRouting, { PAGE_INFO_TYPE } from './useRouting';
@@ -37,13 +37,27 @@ const useGeneralMeetingControls = (meetingId: string): void => {
 	// Handle pinned tile disappearance
 	useEffect(() => {
 		const pinnedTile = useStore.getState().activeMeeting[meetingId]?.pinnedTile;
-		const isDisappeared = !find(tiles, (tile) => isEqual(tile, pinnedTile));
-		if (isDisappeared) {
-			if (size(tiles) < 3 || pinnedTile?.type === STREAM_TYPE.VIDEO) {
-				useStore.getState().setPinnedTile(meetingId, undefined);
-			} else if (pinnedTile?.type === STREAM_TYPE.SCREEN) {
-				// TODO manage stack of pinned tiles
-				useStore.getState().setPinnedTile(meetingId, undefined);
+		if (pinnedTile) {
+			const { setPinnedTile } = useStore.getState();
+			// Remove pin in face to face mode
+			if (size(tiles) < 3) setPinnedTile(meetingId, undefined);
+			else {
+				const isDisappeared = !find(
+					tiles,
+					(tile) => tile.userId === pinnedTile?.userId && tile.type === pinnedTile?.type
+				);
+				if (isDisappeared) {
+					// Remove pin video if participant left
+					if (pinnedTile?.type === STREAM_TYPE.VIDEO) {
+						useStore.getState().setPinnedTile(meetingId, undefined);
+					}
+					// Remove pin screen if participant left or stopped sharing replacing with another screen
+					if (pinnedTile?.type === STREAM_TYPE.SCREEN) {
+						const allScreenShare = filter(tiles, (tile) => tile.type === STREAM_TYPE.SCREEN);
+						const screenToPin = maxBy(allScreenShare, (tile) => tile.date);
+						useStore.getState().setPinnedTile(meetingId, screenToPin);
+					}
+				}
 			}
 		}
 	}, [tiles, meetingId]);

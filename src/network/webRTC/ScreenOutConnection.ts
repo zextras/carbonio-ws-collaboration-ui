@@ -84,6 +84,7 @@ export default class ScreenOutConnection implements IScreenOutConnection {
 					this.rtpSender.replaceTrack(videoTrack).catch((reason) => console.warn(reason));
 				}
 			}
+			videoTrack.onended = (): void => this.stopScreenShare();
 			resolve(videoTrack);
 		});
 	}

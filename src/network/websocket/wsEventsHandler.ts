@@ -165,6 +165,11 @@ export function wsEventsHandler(event: WsEvent): void {
 		case WsEventType.MEETING_MEDIA_STREAM_CHANGED: {
 			const mediaType = event.mediaType.toLowerCase() as STREAM_TYPE;
 			state.changeStreamStatus(event.meetingId, event.userId, mediaType, event.active);
+
+			// Auto pin new screen share
+			if (mediaType === STREAM_TYPE.SCREEN && event.active) {
+				state.setPinnedTile(event.meetingId, { userId: event.userId, type: mediaType });
+			}
 			break;
 		}
 		case WsEventType.MEETING_AUDIO_ANSWERED: {

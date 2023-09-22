@@ -29,4 +29,5 @@ export type MeetingParticipant = {
 	videoStreamOn?: boolean;
 	screenStreamOn?: boolean;
 	joinedAt: string;
+	dateScreenOn?: string;
 };
