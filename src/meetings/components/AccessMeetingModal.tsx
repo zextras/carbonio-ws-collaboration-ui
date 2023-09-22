@@ -61,7 +61,6 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 	const enableCamLabel = t('meeting.interactions.enableCamera', 'Enable camera');
 	const playMicLabel = t('meeting.interactions.playMic', 'Start microphone testing');
 	const stopMicLabel = t('meeting.interactions.stopMic', 'Stop microphone testing');
-	const closeModalTooltip = t('action.close', 'Close');
 	const joinMeetingDescription = t(
 		'meeting.joinMeetingDescription',
 		'How do you want to join this meeting?'
@@ -353,18 +352,12 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 		]
 	);
 
-	const onHandleClose = useCallback(() => {
-		window.close();
-	}, []);
-
 	return (
 		<CustomModal
 			background={'gray0'}
 			open
 			size="small"
-			showCloseIcon
-			onClose={onHandleClose}
-			closeIconTooltip={closeModalTooltip}
+			showCloseIcon={false}
 			title={modalTitle}
 			customFooter={modalFooter}
 		>
