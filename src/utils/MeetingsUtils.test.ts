@@ -8,8 +8,10 @@ import {
 	calcTilesQuantity,
 	listOfTileToShow,
 	positionToStartOnNextButton,
-	positionToStartOnPrevButton
+	positionToStartOnPrevButton,
+	sendAudioFeedback
 } from './MeetingsUtils';
+import { EventName } from '../hooks/useEventListener';
 
 const us1 = 'us1'; // userId-screen
 const us2 = 'us2'; // userId-video
@@ -21,7 +23,7 @@ const us7 = 'us7';
 const us8 = 'us8';
 const streamsInMeeting = [us1, us2, us3, us4, us5, us6, us7, us8];
 
-describe('MeetingsUtils', () => {
+describe('MeetingsUtils - tiles order', () => {
 	test('Test calcTilesQuantity', () => {
 		expect(calcTilesQuantity(1140)).toBe(7);
 	});
@@ -98,5 +100,21 @@ describe('MeetingsUtils', () => {
 			const result = positionToStartOnNextButton(4, streamsInMeeting, null);
 			expect(result).toEqual(4);
 		});
+	});
+});
+
+describe('MeetingsUtils - audio feedback', () => {
+	test('test return of meetingIn notification', () => {
+		const mockAudio = jest
+			.spyOn(window.HTMLMediaElement.prototype, 'play')
+			.mockImplementation(() => Promise.resolve());
+
+		sendAudioFeedback(EventName.MEETING_JOIN_NOTIFICATION);
+		sendAudioFeedback(EventName.MEETING_AUDIO_ON);
+		sendAudioFeedback(EventName.MEETING_AUDIO_OFF);
+		sendAudioFeedback(EventName.MEETING_SCREENSHARE_NOTIFICATION);
+		sendAudioFeedback(EventName.MEETING_LEAVE_NOTIFICATION);
+
+		expect(mockAudio).toHaveBeenCalledTimes(5);
 	});
 });
