@@ -6,6 +6,7 @@
 
 import { screen } from '@testing-library/react';
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 
 import AccessMeetingModal from './AccessMeetingModal';
 import { mockedEnterMeetingRequest, mockedJoinMeetingRequest } from '../../../jest-mocks';
@@ -47,6 +48,15 @@ describe('AccessMeetingModal - enter to meeting', () => {
 
 		const device = await screen.findByText('Audio Device 2');
 		expect(device).toBeInTheDocument();
+		// not selected
+		expect(device).toHaveStyle('font-weight: 400');
+
+		await user.click(device);
+		await user.click(audioButtonSelect[1]);
+		const deviceSelected = await screen.findByText('Audio Device 2');
+		expect(deviceSelected).toBeInTheDocument();
+		// selected
+		expect(deviceSelected).toHaveStyle('font-weight: 700');
 	});
 	test('Select video device', async () => {
 		const meeting = createMockMeeting({ roomId: room.id, active: true });
@@ -60,5 +70,38 @@ describe('AccessMeetingModal - enter to meeting', () => {
 
 		const device = await screen.findByText('Video Device 2');
 		expect(device).toBeInTheDocument();
+		// not selected
+		expect(device).toHaveStyle('font-weight: 400');
+
+		await user.click(device);
+		await user.click(videoButtonSelect[0]);
+		const deviceSelected = await screen.findByText('Video Device 2');
+		expect(deviceSelected).toBeInTheDocument();
+		// selected
+		expect(deviceSelected).toHaveStyle('font-weight: 700');
+	});
+	test('turn on video', async () => {
+		const meeting = createMockMeeting({ roomId: room.id, active: true });
+		useStore.getState().addMeeting(meeting);
+		mockedJoinMeetingRequest.mockReturnValueOnce(meeting);
+
+		const { user } = setup(<AccessMeetingModal roomId={room.id} />);
+
+		const videoOff = screen.getByTestId('icon: VideoOff');
+		await act(() => user.click(videoOff));
+		const videoOn = await screen.findByTestId('icon: Video');
+		expect(videoOn).toBeInTheDocument();
+	});
+	test('turn on audio', async () => {
+		const meeting = createMockMeeting({ roomId: room.id, active: true });
+		useStore.getState().addMeeting(meeting);
+		mockedJoinMeetingRequest.mockReturnValueOnce(meeting);
+
+		const { user } = setup(<AccessMeetingModal roomId={room.id} />);
+
+		const audioOff = screen.getByTestId('icon: MicOff');
+		await act(() => user.click(audioOff));
+		const audioOn = await screen.findByTestId('icon: Mic');
+		expect(audioOn).toBeInTheDocument();
 	});
 });
