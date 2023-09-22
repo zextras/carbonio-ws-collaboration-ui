@@ -7,7 +7,7 @@
 import { filter, find, forEach, size, sortBy } from 'lodash';
 
 import { STREAM_TYPE, Subscription, TileData } from '../../types/store/ActiveMeetingTypes';
-import { Meeting, MeetingParticipant, MeetingParticipantMap } from '../../types/store/MeetingTypes';
+import { Meeting, MeetingParticipantMap } from '../../types/store/MeetingTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 
 export const getMeeting = (store: RootStore, roomId: string): Meeting | undefined =>
@@ -84,14 +84,6 @@ export const getParticipantScreenStatus = (
 	return participant?.screenStreamOn ?? false;
 };
 
-export const getFirstParticipant = (
-	store: RootStore,
-	meetingId: string | undefined
-): MeetingParticipant | undefined => {
-	const meeting = find(store.meetings, (meeting) => meeting.id === meetingId);
-	return find(meeting?.participants, (participant) => participant.userId !== store.session.id);
-};
-
 export const getTiles = (store: RootStore, meetingId: string): TileData[] => {
 	const meeting = find(store.meetings, (meeting) => meeting.id === meetingId);
 	if (meeting) {
@@ -112,6 +104,31 @@ export const getTiles = (store: RootStore, meetingId: string): TileData[] => {
 		return tiles;
 	}
 	return [];
+};
+
+export const getTheOnlyTile = (store: RootStore, meetingId: string): TileData | undefined => {
+	const meeting = find(store.meetings, (meeting) => meeting.id === meetingId);
+	const participant = find(
+		meeting?.participants,
+		(participant) => participant.userId !== store.session.id
+	);
+	if (participant) {
+		return {
+			userId: participant.userId,
+			type: STREAM_TYPE.VIDEO
+		};
+	}
+	const myScreenIsEnabled = find(
+		meeting?.participants,
+		(participant) => participant.userId === store.session.id && participant.screenStreamOn === true
+	);
+	if (myScreenIsEnabled) {
+		return {
+			userId: store.session.id!,
+			type: STREAM_TYPE.SCREEN
+		};
+	}
+	return undefined;
 };
 
 export const getSubscriptions = (store: RootStore, meetingId: string): Subscription[] => {

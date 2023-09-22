@@ -48,7 +48,10 @@ export const getStream = (
 	streamType: STREAM_TYPE
 ): MediaStream | undefined => {
 	if (userId === store.session.id) {
-		return store.activeMeeting[meetingId]?.localStreams?.video;
+		if (streamType === STREAM_TYPE.VIDEO)
+			return store.activeMeeting[meetingId]?.localStreams?.video;
+		if (streamType === STREAM_TYPE.SCREEN)
+			return store.activeMeeting[meetingId]?.localStreams?.screen;
 	}
 	const subscriptionId = `${userId}-${streamType}`;
 	return store.activeMeeting[meetingId]?.subscription[subscriptionId]?.stream;

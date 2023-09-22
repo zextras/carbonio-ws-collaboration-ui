@@ -251,6 +251,11 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 				if (draft.activeMeeting[meetingId]) {
 					draft.activeMeeting[meetingId].pinnedTile = tile;
 				}
+
+				// Set CINEMA MODE when pinning a tile in GRID MODE
+				if (draft.activeMeeting[meetingId].meetingViewSelected === MeetingViewType.GRID) {
+					draft.setMeetingViewSelected(meetingId, MeetingViewType.CINEMA);
+				}
 			}),
 			false,
 			'AM/SET_PINNED_TILE'

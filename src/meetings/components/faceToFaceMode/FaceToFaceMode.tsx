@@ -10,14 +10,16 @@ import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { getMeetingSidebarStatus } from '../../../store/selectors/ActiveMeetingSelectors';
-import { getFirstParticipant } from '../../../store/selectors/MeetingSelectors';
+import { getTheOnlyTile } from '../../../store/selectors/MeetingSelectors';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
+import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
 import Tile from '../Tile';
 
 const FaceToFace = styled(Container)`
 	position: relative;
 `;
+
 const MyStreamContainer = styled(Container)`
 	position: absolute;
 	top: -2rem;
@@ -44,7 +46,7 @@ const FaceToFaceMode = (): ReactElement => {
 		'Waiting for participants to join...'
 	);
 
-	const centralParticipant = useStore((store) => getFirstParticipant(store, meetingId));
+	const centralTile = useStore((store) => getTheOnlyTile(store, meetingId));
 
 	const localId = useStore(getUserId);
 
@@ -65,23 +67,30 @@ const FaceToFaceMode = (): ReactElement => {
 			setCentralTileWidth(`${tileWidth}px`);
 		}
 	}, []);
+
 	useEffect(() => {
 		window.parent.addEventListener('resize', getWidthOfCentralTile);
 		return () => window.parent.removeEventListener('resize', getWidthOfCentralTile);
 	}, [getWidthOfCentralTile]);
+
 	useEffect(() => getWidthOfCentralTile(), [faceToFaceRef, getWidthOfCentralTile, sidebarStatus]);
+
 	const centralContentToDisplay = useMemo(
 		() =>
-			centralParticipant ? (
+			centralTile ? (
 				<CentralTile width={centralTileWidth} height="fit" background="text">
-					<Tile userId={centralParticipant.userId} meetingId={meetingId} />
+					<Tile
+						userId={centralTile.userId}
+						meetingId={meetingId}
+						isScreenShare={centralTile.type === STREAM_TYPE.SCREEN}
+					/>
 				</CentralTile>
 			) : (
 				<Text color="gray6" size="large">
 					{waitingParticipants}
 				</Text>
 			),
-		[centralParticipant, centralTileWidth, meetingId, waitingParticipants]
+		[centralTile, centralTileWidth, meetingId, waitingParticipants]
 	);
 
 	return (

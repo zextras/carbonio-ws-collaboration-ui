@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { find, size } from 'lodash';
+import { find } from 'lodash';
 
 import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
 import useStore from '../../store/Store';
@@ -148,15 +148,6 @@ export function wsEventsHandler(event: WsEvent): void {
 		}
 		case WsEventType.MEETING_LEFT: {
 			state.removeParticipant(event.meetingId, event.userId);
-
-			// Unset pin if the user left the meeting or if the meeting become a 1to1
-			const meeting = find(state.meetings, (meeting) => meeting.id === event.meetingId);
-			if (
-				event.userId === state.activeMeeting[event.meetingId]?.pinnedTile?.userId ||
-				size(meeting?.participants) < 3
-			) {
-				state.setPinnedTile(event.meetingId, undefined);
-			}
 			break;
 		}
 		case WsEventType.MEETING_STOPPED: {
@@ -173,17 +164,12 @@ export function wsEventsHandler(event: WsEvent): void {
 		}
 		case WsEventType.MEETING_MEDIA_STREAM_CHANGED: {
 			const mediaType = event.mediaType.toLowerCase() as STREAM_TYPE;
-			if (mediaType === STREAM_TYPE.VIDEO) {
-				state.changeStreamStatus(event.meetingId, event.userId, STREAM_TYPE.VIDEO, event.active);
-			}
-			if (mediaType === STREAM_TYPE.SCREEN) {
-				state.changeStreamStatus(event.meetingId, event.userId, STREAM_TYPE.SCREEN, event.active);
-			}
+			state.changeStreamStatus(event.meetingId, event.userId, mediaType, event.active);
 			break;
 		}
 		case WsEventType.MEETING_AUDIO_ANSWERED: {
 			const activeMeeting = state.activeMeeting[event.meetingId];
-			if (activeMeeting.bidirectionalAudioConn) {
+			if (activeMeeting?.bidirectionalAudioConn) {
 				activeMeeting.bidirectionalAudioConn.handleRemoteAnswer({
 					sdp: event.sdp,
 					type: 'answer'
@@ -212,14 +198,14 @@ export function wsEventsHandler(event: WsEvent): void {
 		}
 		case WsEventType.MEETING_SDP_OFFERED: {
 			const activeMeeting = state.activeMeeting[event.meetingId];
-			if (activeMeeting.videoInConn) {
+			if (activeMeeting?.videoInConn) {
 				activeMeeting.videoInConn.handleRemoteOffer(event.sdp);
 			}
 			break;
 		}
 		case WsEventType.MEETING_PARTICIPANT_SUBSCRIBED: {
 			const activeMeeting = state.activeMeeting[event.meetingId];
-			if (activeMeeting.videoInConn) {
+			if (activeMeeting?.videoInConn) {
 				activeMeeting.videoInConn.handleStreams(event.streams);
 			}
 			break;
