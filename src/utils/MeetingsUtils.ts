@@ -4,6 +4,13 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { EventName } from '../hooks/useEventListener';
+import audioOff from '../meetings/assets/AudioOFF.mp3';
+import audioOn from '../meetings/assets/AudioON.mp3';
+import meetingIn from '../meetings/assets/MeetingIN.mp3';
+import meetingOut from '../meetings/assets/MeetingOUT.mp3';
+import screenshareOn from '../meetings/assets/ScreenShareON.mp3';
+
 export const calcTilesQuantity = (wrapperHeight: number): number =>
 	Math.floor(wrapperHeight / (144 + 8));
 
@@ -80,4 +87,26 @@ export const positionToStartOnNextButton = (
 	const lastIdx = streams.length - 1;
 	const idxStepToMove = lastIdx - lastPositionParsed;
 	return numOfTiles - idxStepToMove - 1;
+};
+
+export const sendAudioFeedback = (type: EventName): Promise<void> | undefined => {
+	switch (type) {
+		case EventName.MEETING_JOIN_NOTIFICATION: {
+			return new Audio(meetingIn).play();
+		}
+		case EventName.MEETING_LEAVE_NOTIFICATION: {
+			return new Audio(meetingOut).play();
+		}
+		case EventName.MEETING_AUDIO_ON: {
+			return new Audio(audioOn).play();
+		}
+		case EventName.MEETING_AUDIO_OFF: {
+			return new Audio(audioOff).play();
+		}
+		case EventName.MEETING_SCREENSHARE_NOTIFICATION: {
+			return new Audio(screenshareOn).play();
+		}
+		default:
+			return undefined;
+	}
 };

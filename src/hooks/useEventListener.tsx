@@ -15,7 +15,12 @@ import { Message } from '../types/store/MessageTypes';
 export enum EventName {
 	NEW_MESSAGE = 'newMessage',
 	INCOMING_MEETING = 'incomingMeeting',
-	REMOVED_MEETING_NOTIFICATION = 'removedMeetingNotification'
+	REMOVED_MEETING_NOTIFICATION = 'removedMeetingNotification',
+	MEETING_JOIN_NOTIFICATION = 'meetingJoinNotification',
+	MEETING_LEAVE_NOTIFICATION = 'meetingLeaveNotification',
+	MEETING_SCREENSHARE_NOTIFICATION = 'meetingScreenshareNotification',
+	MEETING_AUDIO_ON = 'meetingAudioOn',
+	MEETING_AUDIO_OFF = 'meetingAudioOff'
 }
 
 type CustomEvent =
