@@ -177,6 +177,12 @@ export function wsEventsHandler(event: WsEvent): void {
 				state.changeStreamStatus(event.meetingId, event.userId, STREAM_TYPE.SCREEN, event.active);
 			}
 
+			// Close video out connection if I'm the one who is being muted
+			if (event.userId === state.session.id && !event.active) {
+				state.closeVideoOutConn(event.meetingId);
+				state.removeLocalStreams(event.meetingId, STREAM_TYPE.VIDEO);
+			}
+
 			// Update subscription manager
 			const subscriptionsManager =
 				state.activeMeeting[event.meetingId]?.videoInConn?.subscriptionManager;
@@ -219,7 +225,7 @@ export function wsEventsHandler(event: WsEvent): void {
 		case WsEventType.MEETING_PARTICIPANT_SUBSCRIBED: {
 			const activeMeeting = state.activeMeeting[event.meetingId];
 			if (activeMeeting.videoInConn) {
-				activeMeeting.videoInConn.handleStreams(event.streams);
+				activeMeeting.videoInConn.handleParticipantsSubscribed(event.streams);
 			}
 			break;
 		}

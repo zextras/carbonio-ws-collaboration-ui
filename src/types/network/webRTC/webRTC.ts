@@ -47,6 +47,6 @@ export interface IVideoOutConnection extends IPeerConnection {
 export interface IVideoInConnection extends IPeerConnection {
 	onTrack: (ev: RTCTrackEvent) => void;
 	subscriptionManager: SubscriptionsManager;
-	handleStreams(streamsMap: { user_id: string; type: STREAM_TYPE }[]): void;
 	handleRemoteOffer(sdp: string): void;
+	handleParticipantsSubscribed(streamsMap: { user_id: string; type: STREAM_TYPE }[]): void;
 }

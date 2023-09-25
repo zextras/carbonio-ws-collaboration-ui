@@ -48,8 +48,6 @@ const CameraButton = ({
 	const selectedVideoDeviceId = useStore((store) => getSelectedVideoDeviceId(store, meetingId));
 	const createVideoOutConn = useStore((store) => store.createVideoOutConn);
 	const videoOutConn = useStore((store) => store.activeMeeting[meetingId]?.videoOutConn);
-	const closeVideoOutConn = useStore((store) => store.closeVideoOutConn);
-	const removeLocalStreams = useStore((store) => store.removeLocalStreams);
 	const setSelectedDeviceId = useStore((store) => store.setSelectedDeviceId);
 	const setLocalStreams = useStore((store) => store.setLocalStreams);
 
@@ -95,21 +93,10 @@ const CameraButton = ({
 					});
 				}
 			} else {
-				closeVideoOutConn(meetingId);
-				MeetingsApi.updateMediaOffer(meetingId, STREAM_TYPE.VIDEO, false).then(() =>
-					removeLocalStreams(meetingId, STREAM_TYPE.VIDEO)
-				);
+				MeetingsApi.updateMediaOffer(meetingId, STREAM_TYPE.VIDEO, false);
 			}
 		},
-		[
-			videoStatus,
-			videoOutConn,
-			createVideoOutConn,
-			meetingId,
-			selectedVideoDeviceId,
-			closeVideoOutConn,
-			removeLocalStreams
-		]
+		[videoStatus, videoOutConn, createVideoOutConn, meetingId, selectedVideoDeviceId]
 	);
 
 	const updateListOfDevices = useCallback(() => {

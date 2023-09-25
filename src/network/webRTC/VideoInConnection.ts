@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { forEach } from 'lodash';
+import { forEach, keyBy } from 'lodash';
 
 import { PeerConnConfig } from './PeerConnConfig';
 import SubscriptionsManager from './SubscriptionsManager';
@@ -18,35 +18,24 @@ export default class VideoInConnection implements IVideoInConnection {
 
 	meetingId: string;
 
-	streams: MediaStream[] = [];
-
 	subscriptionManager: SubscriptionsManager;
+
+	answerSdp: string | undefined;
+
+	streamsMap: { user_id: string; type: STREAM_TYPE }[];
 
 	constructor(meetingId: string) {
 		this.peerConn = new RTCPeerConnection(new PeerConnConfig().getConfig());
 		this.peerConn.ontrack = this.onTrack;
 		this.meetingId = meetingId;
-		this.streams = [];
 		this.subscriptionManager = new SubscriptionsManager(meetingId);
+		this.streamsMap = [];
 	}
 
-	// Handle new tracks
 	onTrack = (ev: RTCTrackEvent): void => {
-		this.streams = [...ev.streams];
+		console.log('onTrack', ev);
+		// this.updateStreams();
 	};
-
-	handleStreams(streamsMap: { user_id: string; type: STREAM_TYPE }[]): void {
-		const newStreams: StreamsSubscriptionMap = {};
-		forEach(streamsMap, (stream, key) => {
-			const streamsKey = `${stream.user_id}-${stream.type.toLowerCase()}`;
-			newStreams[streamsKey] = {
-				userId: stream.user_id,
-				type: stream.type.toLowerCase() as STREAM_TYPE,
-				stream: this.streams[key]
-			};
-		});
-		useStore.getState().setSubscribedTracks(this.meetingId, newStreams);
-	}
 
 	// Handle remote offer creating an answer and sending it to the remote peer
 	handleRemoteOffer(sdp: string): void {
@@ -62,6 +51,7 @@ export default class VideoInConnection implements IVideoInConnection {
 								.setLocalDescription(rtcSessionDesc)
 								.then(() => {
 									if (rtcSessionDesc.sdp) {
+										this.answerSdp = rtcSessionDesc.sdp;
 										MeetingsApi.createMediaAnswer(this.meetingId, rtcSessionDesc.sdp);
 									}
 								})
@@ -71,6 +61,33 @@ export default class VideoInConnection implements IVideoInConnection {
 				})
 				.catch((reason) => console.warn('setRemoteDescription failed', reason));
 		}
+	}
+
+	handleParticipantsSubscribed(streamsMap: { user_id: string; type: STREAM_TYPE }[]): void {
+		console.log('handleParticipantsSubscribed', streamsMap);
+		this.streamsMap = [...streamsMap];
+		this.updateStreams();
+	}
+
+	private updateStreams(): void {
+		const transceiversArray: RTCRtpTransceiver[] = this.peerConn.getTransceivers();
+		const mappedByMidTransceivers = keyBy(transceiversArray, (o) => o.mid);
+
+		console.log('streamsMap', this.streamsMap);
+		console.log('transceivers', mappedByMidTransceivers);
+
+		const newStreams: StreamsSubscriptionMap = {};
+		forEach(this.streamsMap, (stream, key) => {
+			const streamsKey = `${stream.user_id}-${stream.type.toLowerCase()}`;
+			const transceivers: any = mappedByMidTransceivers[key]; // TODO fix type
+			const tracks = transceivers ? [transceivers.receiver.track] : [];
+			newStreams[streamsKey] = {
+				userId: stream.user_id,
+				type: stream.type.toLowerCase() as STREAM_TYPE,
+				stream: new MediaStream(tracks)
+			};
+		});
+		useStore.getState().setSubscribedTracks(this.meetingId, newStreams);
 	}
 
 	closePeerConnection(): void {
