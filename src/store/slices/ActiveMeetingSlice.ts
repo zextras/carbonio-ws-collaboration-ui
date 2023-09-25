@@ -50,9 +50,11 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 						selectedAudioDeviceId
 					),
 					videoInConn: new VideoInConnection(meetingId),
-					videoOutConn: videoStreamEnabled
-						? new VideoOutConnection(meetingId, videoStreamEnabled, selectedVideoDeviceId)
-						: undefined,
+					videoOutConn: new VideoOutConnection(
+						meetingId,
+						videoStreamEnabled,
+						selectedVideoDeviceId
+					),
 					subscription: {}
 				};
 			}),
@@ -126,37 +128,6 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 			}),
 			false,
 			'AM/SET_VIEW_TYPE'
-		);
-	},
-
-	createVideoOutConn: (
-		meetingId: string,
-		videoStreamEnabled: boolean,
-		selectedVideoDeviceId?: string
-	): void => {
-		set(
-			produce((draft: RootStore) => {
-				const videoOutConn = new VideoOutConnection(
-					meetingId,
-					videoStreamEnabled,
-					selectedVideoDeviceId
-				);
-				draft.activeMeeting[meetingId].videoOutConn = videoOutConn;
-			}),
-			false,
-			'AM/SET_VIDEO_OUT_CONN'
-		);
-	},
-	closeVideoOutConn: (meetingId: string): void => {
-		set(
-			produce((draft: RootStore) => {
-				if (draft.activeMeeting[meetingId].videoOutConn) {
-					draft.activeMeeting[meetingId].videoOutConn?.closePeerConnection();
-					delete draft.activeMeeting[meetingId].videoOutConn;
-				}
-			}),
-			false,
-			'AM/CLOSE_VIDEO_OUT_CONN'
 		);
 	},
 	createShareOutConn: (meetingId: string): void => {

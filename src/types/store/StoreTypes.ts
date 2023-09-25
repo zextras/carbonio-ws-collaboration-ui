@@ -173,7 +173,6 @@ export type ActiveMeetingSlice = {
 	setMeetingParticipantsAccordionStatus: (roomId: string, status: boolean) => void;
 	setMeetingChatVisibility: (meetingId: string, visibilityStatus: MeetingChatVisibility) => void;
 	setMeetingViewSelected: (meetingId: string, viewType: MeetingViewType) => void;
-
 	meetingConnection: (
 		meetingId: string,
 		audioStreamEnabled: boolean,
@@ -182,12 +181,6 @@ export type ActiveMeetingSlice = {
 		selectedVideoDeviceId: string | undefined
 	) => void;
 	meetingDisconnection: (meetingId: string) => void;
-	createVideoOutConn: (
-		meetingId: string,
-		videoStreamEnabled: boolean,
-		selectedVideoDeviceId?: string
-	) => void;
-	closeVideoOutConn: (meetingId: string) => void;
 	createShareOutConn: (meetingId: string, peerConnectionConfig: PeerConnConfig) => void;
 	closeShareOutConn: (meetingId: string) => void;
 	setLocalStreams: (meetingId: string, streamType: STREAM_TYPE, stream: MediaStream) => void;

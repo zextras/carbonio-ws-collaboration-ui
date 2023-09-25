@@ -92,7 +92,7 @@ export type MeetingSDPAnsweredEvent = BasicMeetingEvent & {
 export type MeetingParticipantSubscribedEvent = BasicMeetingEvent & {
 	type: WsEventType.MEETING_PARTICIPANT_SUBSCRIBED;
 	userId: string;
-	streams: { user_id: string; type: STREAM_TYPE }[];
+	streams: { user_id: string; type: STREAM_TYPE; mid: string }[];
 };
 
 export type MeetingParticipantTalkingEvent = BasicMeetingEvent & {

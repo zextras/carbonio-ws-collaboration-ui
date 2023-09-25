@@ -22,7 +22,7 @@ export default class VideoInConnection implements IVideoInConnection {
 
 	answerSdp: string | undefined;
 
-	streamsMap: { user_id: string; type: STREAM_TYPE }[];
+	streamsMap: { user_id: string; type: STREAM_TYPE; mid: string }[];
 
 	constructor(meetingId: string) {
 		this.peerConn = new RTCPeerConnection(new PeerConnConfig().getConfig());
@@ -34,11 +34,11 @@ export default class VideoInConnection implements IVideoInConnection {
 
 	onTrack = (ev: RTCTrackEvent): void => {
 		console.log('onTrack', ev);
-		// this.updateStreams();
 	};
 
 	// Handle remote offer creating an answer and sending it to the remote peer
 	handleRemoteOffer(sdp: string): void {
+		console.log('handleRemoteOffer');
 		if (this.peerConn.signalingState !== 'have-remote-offer') {
 			const offer = new RTCSessionDescription({ sdp, type: 'offer' });
 			this.peerConn
@@ -63,7 +63,9 @@ export default class VideoInConnection implements IVideoInConnection {
 		}
 	}
 
-	handleParticipantsSubscribed(streamsMap: { user_id: string; type: STREAM_TYPE }[]): void {
+	handleParticipantsSubscribed(
+		streamsMap: { user_id: string; type: STREAM_TYPE; mid: string }[]
+	): void {
 		console.log('handleParticipantsSubscribed', streamsMap);
 		this.streamsMap = [...streamsMap];
 		this.updateStreams();
@@ -77,9 +79,9 @@ export default class VideoInConnection implements IVideoInConnection {
 		console.log('transceivers', mappedByMidTransceivers);
 
 		const newStreams: StreamsSubscriptionMap = {};
-		forEach(this.streamsMap, (stream, key) => {
+		forEach(this.streamsMap, (stream) => {
 			const streamsKey = `${stream.user_id}-${stream.type.toLowerCase()}`;
-			const transceivers: any = mappedByMidTransceivers[key]; // TODO fix type
+			const transceivers: any = mappedByMidTransceivers[stream.mid]; // TODO fix type
 			const tracks = transceivers ? [transceivers.receiver.track] : [];
 			newStreams[streamsKey] = {
 				userId: stream.user_id,

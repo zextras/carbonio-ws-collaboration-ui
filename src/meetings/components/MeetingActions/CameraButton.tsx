@@ -17,7 +17,6 @@ import React, {
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 
-import { MeetingsApi } from '../../../network';
 import { getSelectedVideoDeviceId } from '../../../store/selectors/ActiveMeetingSelectors';
 import { getParticipantVideoStatus } from '../../../store/selectors/MeetingSelectors';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
@@ -46,7 +45,6 @@ const CameraButton = ({
 
 	const videoStatus = useStore((store) => getParticipantVideoStatus(store, meetingId, myUserId));
 	const selectedVideoDeviceId = useStore((store) => getSelectedVideoDeviceId(store, meetingId));
-	const createVideoOutConn = useStore((store) => store.createVideoOutConn);
 	const videoOutConn = useStore((store) => store.activeMeeting[meetingId]?.videoOutConn);
 	const setSelectedDeviceId = useStore((store) => store.setSelectedDeviceId);
 	const setLocalStreams = useStore((store) => store.setLocalStreams);
@@ -83,20 +81,18 @@ const CameraButton = ({
 		(event) => {
 			event.stopPropagation();
 			if (!videoStatus) {
-				if (!videoOutConn) {
-					createVideoOutConn(meetingId, true, selectedVideoDeviceId);
-				} else {
-					getVideoStream(selectedVideoDeviceId).then((stream) => {
-						videoOutConn
-							?.updateLocalStreamTrack(stream)
-							.then(() => MeetingsApi.updateMediaOffer(meetingId, STREAM_TYPE.VIDEO, true));
-					});
-				}
+				videoOutConn?.startVideo(selectedVideoDeviceId);
+				// gestire il cambio del device sapendo che la classe è sempre esistente
+				// getVideoStream(selectedVideoDeviceId).then((stream) => {
+				// 	videoOutConn
+				// 		?.updateLocalStreamTrack(stream)
+				//		.then(() => MeetingsApi.updateMediaOffer(meetingId, STREAM_TYPE.VIDEO, true));
+				// });
 			} else {
-				MeetingsApi.updateMediaOffer(meetingId, STREAM_TYPE.VIDEO, false);
+				videoOutConn?.stopVideo();
 			}
 		},
-		[videoStatus, videoOutConn, createVideoOutConn, meetingId, selectedVideoDeviceId]
+		[videoStatus, videoOutConn, selectedVideoDeviceId]
 	);
 
 	const updateListOfDevices = useCallback(() => {

@@ -13,7 +13,7 @@ export interface IPeerConnConfig {
 }
 
 export interface IPeerConnection {
-	peerConn: RTCPeerConnection;
+	peerConn: RTCPeerConnection | null;
 	meetingId: string;
 	closePeerConnection(): void;
 }
@@ -34,13 +34,14 @@ export interface IBidirectionalConnectionAudioInOut extends IPeerConnection {
 
 export interface IVideoOutConnection extends IPeerConnection {
 	rtpSender: RTCRtpSender | null;
-	localStreamVideoOutTrack: MediaStreamTrack | null;
 	selectedVideoDeviceId: string | undefined;
+	startVideo(selectedVideoDeviceId?: string): void;
+	stopVideo(): void;
 	onNegotiationNeeded: () => void;
 	onIceConnectionStateChange: (ev: Event) => void;
 	handleRemoteAnswer(remoteAnswer: RTCSessionDescriptionInit): void;
 	handleOfferCreated(rtcSessionDescription: RTCSessionDescriptionInit): void;
-	updateLocalStreamTrack(mediaStreamTrack: MediaStream): Promise<MediaStreamTrack>;
+	updateLocalStreamTrack(mediaStreamTrack: MediaStream): Promise<MediaStreamTrack | undefined>;
 	closeRtpSenderTrack(): void;
 }
 
@@ -48,5 +49,7 @@ export interface IVideoInConnection extends IPeerConnection {
 	onTrack: (ev: RTCTrackEvent) => void;
 	subscriptionManager: SubscriptionsManager;
 	handleRemoteOffer(sdp: string): void;
-	handleParticipantsSubscribed(streamsMap: { user_id: string; type: STREAM_TYPE }[]): void;
+	handleParticipantsSubscribed(
+		streamsMap: { user_id: string; type: STREAM_TYPE; mid: string }[]
+	): void;
 }

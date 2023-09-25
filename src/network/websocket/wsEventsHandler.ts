@@ -179,7 +179,6 @@ export function wsEventsHandler(event: WsEvent): void {
 
 			// Close video out connection if I'm the one who is being muted
 			if (event.userId === state.session.id && !event.active) {
-				state.closeVideoOutConn(event.meetingId);
 				state.removeLocalStreams(event.meetingId, STREAM_TYPE.VIDEO);
 			}
 
