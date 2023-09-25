@@ -15,7 +15,7 @@ import { WsEvent, WsEventType } from '../../types/network/websocket/wsEvents';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
 import { RoomType } from '../../types/store/RoomTypes';
 import { wsDebug } from '../../utils/debug';
-import { sendAudioFeedback } from '../../utils/MeetingsUtils';
+import { MeetingSoundFeedback, sendAudioFeedback } from '../../utils/MeetingsUtils';
 import { MeetingsApi, RoomsApi } from '../index';
 
 export function wsEventsHandler(event: WsEvent): void {
@@ -149,7 +149,7 @@ export function wsEventsHandler(event: WsEvent): void {
 			// send audio feedback to other participants session user join
 			const activeMeeting = state.activeMeeting[event.meetingId];
 			if (activeMeeting && event.userId !== state.session.id) {
-				sendAudioFeedback(EventName.MEETING_JOIN_NOTIFICATION);
+				sendAudioFeedback(MeetingSoundFeedback.MEETING_JOIN_NOTIFICATION);
 			}
 			break;
 		}
@@ -168,7 +168,7 @@ export function wsEventsHandler(event: WsEvent): void {
 			// send audio feedback to other participants session user leave
 			const activeMeeting = state.activeMeeting[event.meetingId];
 			if (activeMeeting && event.userId !== state.session.id) {
-				sendAudioFeedback(EventName.MEETING_LEAVE_NOTIFICATION);
+				sendAudioFeedback(MeetingSoundFeedback.MEETING_LEAVE_NOTIFICATION);
 			}
 			break;
 		}
@@ -187,13 +187,14 @@ export function wsEventsHandler(event: WsEvent): void {
 			const activeMeeting = state.activeMeeting[event.meetingId];
 			if (activeMeeting && event.userId === state.session.id) {
 				event.active
-					? sendAudioFeedback(EventName.MEETING_AUDIO_ON)
-					: sendAudioFeedback(EventName.MEETING_AUDIO_OFF);
+					? sendAudioFeedback(MeetingSoundFeedback.MEETING_AUDIO_ON)
+					: sendAudioFeedback(MeetingSoundFeedback.MEETING_AUDIO_OFF);
 			}
 			break;
 		}
 		case WsEventType.MEETING_MEDIA_STREAM_CHANGED: {
 			const mediaType = event.mediaType.toLowerCase() as STREAM_TYPE;
+			const activeMeeting = state.activeMeeting[event.meetingId];
 			if (mediaType === STREAM_TYPE.VIDEO) {
 				state.changeStreamStatus(event.meetingId, event.userId, STREAM_TYPE.VIDEO, event.active);
 			}
@@ -201,7 +202,9 @@ export function wsEventsHandler(event: WsEvent): void {
 				state.changeStreamStatus(event.meetingId, event.userId, STREAM_TYPE.SCREEN, event.active);
 
 				// send audio feedback of session user screen sharing
-				sendAudioFeedback(EventName.MEETING_SCREENSHARE_NOTIFICATION);
+				if (activeMeeting) {
+					sendAudioFeedback(MeetingSoundFeedback.MEETING_SCREENSHARE_NOTIFICATION);
+				}
 			}
 			break;
 		}
