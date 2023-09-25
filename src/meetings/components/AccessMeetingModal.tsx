@@ -70,6 +70,11 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 		'Set your input devices by choosing them from dropdown menu'
 	);
 
+	const enterButtonDisabledTooltip = t(
+		'meeting.startModal.audioAndVideoLoading',
+		'Assets are loading'
+	);
+
 	const conversationTitle = useStore((store) => getRoomNameSelector(store, roomId));
 
 	const groupTitle = t(
@@ -348,12 +353,15 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 					onClick={onToggleAudioTest}
 					disabled={!audioStreamEnabled}
 				/>
-				<Button label={enter} onClick={joinMeeting} disabled={!enterButtonIsEnabled} />
+				<Tooltip label={enterButtonDisabledTooltip} disabled={enterButtonIsEnabled}>
+					<Button label={enter} onClick={joinMeeting} disabled={!enterButtonIsEnabled} />
+				</Tooltip>
 			</Container>
 		),
 		[
 			audioStreamEnabled,
 			enter,
+			enterButtonDisabledTooltip,
 			enterButtonIsEnabled,
 			joinMeeting,
 			onToggleAudioTest,
