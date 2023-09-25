@@ -27,7 +27,6 @@ import {
 	getRoomNameSelector,
 	getRoomTypeSelector
 } from '../../store/selectors/RoomsSelectors';
-import { getUserName } from '../../store/selectors/UsersSelectors';
 import useStore from '../../store/Store';
 import { Member, RoomType } from '../../types/store/RoomTypes';
 import { BrowserUtils } from '../../utils/BrowserUtils';
@@ -88,6 +87,8 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 
 	const roomType = useStore((store) => getRoomTypeSelector(store, roomId));
 
+	const chatsBeNetworkStatus = useStore(({ connections }) => connections.status.chats_be);
+	const websocketNetworkStatus = useStore(({ connections }) => connections.status.websocket);
 	const sessionId: string | undefined = useStore((store) => store.session.id);
 	const roomMembers: Member[] | undefined = useStore((state) => getRoomMembers(state, roomId));
 	const meeting = useStore((store) => getMeeting(store, roomId));
@@ -101,10 +102,18 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 	const [streamTrack, setStreamTrack] = useState<MediaStream | null>(null);
 	const [wrapperWidth, setWrapperWidth] = useState<number>(0);
 	const [videoPlayerTestMuted, setVideoPlayerTestMuted] = useState<boolean>(true);
-	const [enterButtonIsEnabled, setEnterButtonIsEnabled] = useState<boolean>(true);
+	const [enterButtonIsEnabled, setEnterButtonIsEnabled] = useState<boolean>(false);
 
 	const wrapperRef = useRef<HTMLDivElement>();
 	const videoStreamRef = useRef<HTMLVideoElement>(null);
+
+	useEffect(() => {
+		if (chatsBeNetworkStatus !== undefined && websocketNetworkStatus !== undefined) {
+			if (chatsBeNetworkStatus && websocketNetworkStatus) {
+				setEnterButtonIsEnabled(true);
+			} else setEnterButtonIsEnabled(false);
+		} else setEnterButtonIsEnabled(false);
+	}, [chatsBeNetworkStatus, websocketNetworkStatus]);
 
 	useEffect(() => {
 		if (wrapperRef.current) setWrapperWidth(wrapperRef.current.offsetWidth);
@@ -126,12 +135,6 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 		const user: Member | undefined = find(roomMembers, (member) => member.userId === sessionId);
 		return user?.userId;
 	}, [roomMembers, sessionId]);
-	const userName = useStore((store) => getUserName(store, memberId || ''));
-
-	useEffect(() => {
-		if (userName === undefined) setEnterButtonIsEnabled(false);
-		else setEnterButtonIsEnabled(true);
-	}, [userName]);
 
 	const toggleStreams = useCallback(
 		(audio: boolean, video: boolean, audioId: string | undefined, videoId: string | undefined) => {
