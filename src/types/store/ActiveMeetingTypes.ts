@@ -11,16 +11,17 @@ import {
 } from '../network/webRTC/webRTC';
 
 export type ActiveMeeting = {
-	sidebarStatus: SidebarStatus;
-	chatVisibility: MeetingChatVisibility;
-	meetingViewSelected: MeetingViewType;
-	isCarouselVisible: boolean;
 	bidirectionalAudioConn?: IBidirectionalConnectionAudioInOut;
 	videoInConn?: IVideoInConnection;
 	videoOutConn?: IVideoOutConnection;
 	shareOutConn?: any;
 	localStreams?: LocalStreams;
 	subscription: StreamsSubscriptionMap;
+	sidebarStatus: SidebarStatus;
+	chatVisibility: MeetingChatVisibility;
+	meetingViewSelected: MeetingViewType;
+	isCarouselVisible: boolean;
+	pinnedTile?: TileData;
 };
 
 export type ActiveMeetingMap = {
@@ -75,4 +76,9 @@ export type StreamSubscription = {
 
 export type StreamsSubscriptionMap = {
 	[id: string]: StreamSubscription;
+};
+
+export type TileData = {
+	userId: string;
+	type: STREAM_TYPE;
 };

@@ -19,6 +19,7 @@ export type MeetingParticipantBe = {
 	audioStreamEnabled?: boolean;
 	videoStreamEnabled?: boolean;
 	screenStreamEnabled?: boolean;
+	joinedAt: string;
 };
 
 export enum MeetingUserType {

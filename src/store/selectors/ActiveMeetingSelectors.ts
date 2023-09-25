@@ -8,7 +8,8 @@ import { sample } from 'lodash';
 import {
 	MeetingChatVisibility,
 	MeetingViewType,
-	STREAM_TYPE
+	STREAM_TYPE,
+	TileData
 } from '../../types/store/ActiveMeetingTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 
@@ -58,3 +59,6 @@ export const getFirstStream = (store: RootStore, meetingId: string): MediaStream
 
 export const getMeetingCarouselVisibility = (store: RootStore, meetingId: string): boolean =>
 	store.activeMeeting[meetingId]?.isCarouselVisible;
+
+export const getPinnedTile = (store: RootStore, meetingId: string): TileData | undefined =>
+	store.activeMeeting[meetingId]?.pinnedTile;

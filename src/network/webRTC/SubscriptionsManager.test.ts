@@ -9,10 +9,30 @@ import { MeetingParticipantBe } from '../../types/network/models/meetingBeTypes'
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
 
 const participants: MeetingParticipantBe[] = [
-	{ userId: 'user1', videoStreamEnabled: true, screenStreamEnabled: false },
-	{ userId: 'user2', videoStreamEnabled: false, screenStreamEnabled: true },
-	{ userId: 'user3', videoStreamEnabled: true, screenStreamEnabled: true },
-	{ userId: 'user4', videoStreamEnabled: false, screenStreamEnabled: false }
+	{
+		userId: 'user1',
+		videoStreamEnabled: true,
+		screenStreamEnabled: false,
+		joinedAt: '2021-09-01T10:00:00.000Z'
+	},
+	{
+		userId: 'user2',
+		videoStreamEnabled: false,
+		screenStreamEnabled: true,
+		joinedAt: '2021-09-01T10:00:00.000Z'
+	},
+	{
+		userId: 'user3',
+		videoStreamEnabled: true,
+		screenStreamEnabled: true,
+		joinedAt: '2021-09-01T10:00:00.000Z'
+	},
+	{
+		userId: 'user4',
+		videoStreamEnabled: false,
+		screenStreamEnabled: false,
+		joinedAt: '2021-09-01T10:00:00.000Z'
+	}
 ];
 
 describe('Test SubscriptionsManager', () => {

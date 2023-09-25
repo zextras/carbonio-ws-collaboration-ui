@@ -9,8 +9,8 @@ import React, { ReactElement, useCallback, useEffect, useRef, useState } from 'r
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
-import useCalculateTilesOrder from '../../../hooks/useCalculateTilesOrder';
 import { MeetingRoutesParams } from '../../../hooks/useRouting';
+import useTilesOrder from '../../../hooks/useTilesOrder';
 import {
 	getMeetingCarouselVisibility,
 	getMeetingSidebarStatus
@@ -24,7 +24,7 @@ const CinemaContainer = styled(Container)`
 
 const CinemaMode = (): ReactElement => {
 	const { meetingId }: MeetingRoutesParams = useParams();
-	const { centralTile } = useCalculateTilesOrder(meetingId);
+	const { centralTile } = useTilesOrder(meetingId);
 
 	const sidebarStatus: boolean = useStore((store) => getMeetingSidebarStatus(store, meetingId));
 	const carouselStatus = useStore((store) => getMeetingCarouselVisibility(store, meetingId));

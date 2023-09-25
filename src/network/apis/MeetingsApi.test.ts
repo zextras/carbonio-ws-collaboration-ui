@@ -29,7 +29,8 @@ const ongoingMeetingSetup = (): void => {
 	store.addParticipant(meetingMock.id, {
 		userId: 'userId',
 		audioStreamOn: false,
-		videoStreamOn: false
+		videoStreamOn: false,
+		joinedAt: '2021-01-01T00:00:00.000Z'
 	});
 };
 
