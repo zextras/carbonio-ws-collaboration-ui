@@ -193,12 +193,14 @@ export function wsEventsHandler(event: WsEvent): void {
 			}
 
 			// Update subscription manager
-			const subscriptionsManager =
-				state.activeMeeting[event.meetingId]?.videoInConn?.subscriptionManager;
-			if (event.active) {
-				subscriptionsManager?.addStreamToAsk(event.userId, mediaType);
-			} else {
-				subscriptionsManager?.removeStreamToAsk(event.userId, mediaType);
+			if (event.userId !== state.session.id) {
+				const subscriptionsManager =
+					state.activeMeeting[event.meetingId]?.videoInConn?.subscriptionManager;
+				if (event.active) {
+					subscriptionsManager?.addStreamToAsk(event.userId, mediaType);
+				} else {
+					subscriptionsManager?.removeStreamToAsk(event.userId, mediaType);
+				}
 			}
 			break;
 		}
