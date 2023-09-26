@@ -65,6 +65,8 @@ const setupBasicGroup = (): { user: UserEvent; store: RootStore } => {
 		result.current.setLoginInfo(user1.id, user1.name);
 		result.current.addRoom(groupRoom);
 		result.current.addMeeting(groupMeeting);
+		result.current.setChatsBeStatus(true);
+		result.current.setWebsocketStatus(true);
 		result.current.meetingConnection(groupMeeting.id, false, undefined, false, undefined);
 	});
 	mockUseParams.mockReturnValue({ meetingId: groupMeeting.id });

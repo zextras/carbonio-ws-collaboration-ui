@@ -113,14 +113,6 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 	const videoStreamRef = useRef<HTMLVideoElement>(null);
 
 	useEffect(() => {
-		if (chatsBeNetworkStatus !== undefined && websocketNetworkStatus !== undefined) {
-			if (chatsBeNetworkStatus && websocketNetworkStatus) {
-				setEnterButtonIsEnabled(true);
-			} else setEnterButtonIsEnabled(false);
-		} else setEnterButtonIsEnabled(false);
-	}, [chatsBeNetworkStatus, websocketNetworkStatus]);
-
-	useEffect(() => {
 		if (wrapperRef.current) setWrapperWidth(wrapperRef.current.offsetWidth);
 	}, [wrapperRef]);
 
@@ -130,6 +122,13 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 			setEnterButtonIsEnabled(true);
 		}
 	}, [streamTrack, audioStreamEnabled, videoStreamEnabled]);
+
+	const areNetworksUp = useMemo(() => {
+		if (chatsBeNetworkStatus !== undefined && websocketNetworkStatus !== undefined) {
+			return chatsBeNetworkStatus && websocketNetworkStatus;
+		}
+		return false;
+	}, [chatsBeNetworkStatus, websocketNetworkStatus]);
 
 	const modalTitle = useMemo(
 		() => (roomType === RoomType.ONE_TO_ONE ? oneToOneTitle : groupTitle),
@@ -353,12 +352,20 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 					onClick={onToggleAudioTest}
 					disabled={!audioStreamEnabled}
 				/>
-				<Tooltip label={enterButtonDisabledTooltip} disabled={enterButtonIsEnabled}>
-					<Button label={enter} onClick={joinMeeting} disabled={!enterButtonIsEnabled} />
+				<Tooltip
+					label={enterButtonDisabledTooltip}
+					disabled={areNetworksUp && enterButtonIsEnabled}
+				>
+					<Button
+						label={enter}
+						onClick={joinMeeting}
+						disabled={!(areNetworksUp && enterButtonIsEnabled)}
+					/>
 				</Tooltip>
 			</Container>
 		),
 		[
+			areNetworksUp,
 			audioStreamEnabled,
 			enter,
 			enterButtonDisabledTooltip,
