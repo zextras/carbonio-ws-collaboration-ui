@@ -5,7 +5,7 @@
  */
 
 import SubscriptionsManager from '../../../network/webRTC/SubscriptionsManager';
-import { STREAM_TYPE } from '../../store/ActiveMeetingTypes';
+import { StreamInfo } from '../models/meetingBeTypes';
 
 export interface IPeerConnConfig {
 	addIceServer(iceServer: RTCIceServer): void;
@@ -48,7 +48,5 @@ export interface IVideoInConnection extends IPeerConnection {
 	onTrack: (ev: RTCTrackEvent) => void;
 	subscriptionManager: SubscriptionsManager;
 	handleRemoteOffer(sdp: string): void;
-	handleParticipantsSubscribed(
-		streamsMap: { user_id: string; type: STREAM_TYPE; mid: string }[]
-	): void;
+	handleParticipantsSubscribed(streamsMap: StreamInfo[]): void;
 }

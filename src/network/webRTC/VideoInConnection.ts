@@ -9,6 +9,7 @@ import { forEach, keyBy } from 'lodash';
 import { PeerConnConfig } from './PeerConnConfig';
 import SubscriptionsManager from './SubscriptionsManager';
 import useStore from '../../store/Store';
+import { StreamInfo } from '../../types/network/models/meetingBeTypes';
 import { IVideoInConnection } from '../../types/network/webRTC/webRTC';
 import { STREAM_TYPE, StreamsSubscriptionMap } from '../../types/store/ActiveMeetingTypes';
 import { MeetingsApi } from '../index';
@@ -22,7 +23,7 @@ export default class VideoInConnection implements IVideoInConnection {
 
 	answerSdp: string | undefined;
 
-	streamsMap: { user_id: string; type: STREAM_TYPE; mid: string }[];
+	streamsMap: StreamInfo[];
 
 	constructor(meetingId: string) {
 		this.peerConn = new RTCPeerConnection(new PeerConnConfig().getConfig());
@@ -66,9 +67,7 @@ export default class VideoInConnection implements IVideoInConnection {
 			.catch((reason) => console.warn('setRemoteDescription failed', reason));
 	}
 
-	handleParticipantsSubscribed(
-		streamsMap: { user_id: string; type: STREAM_TYPE; mid: string }[]
-	): void {
+	handleParticipantsSubscribed(streamsMap: StreamInfo[]): void {
 		console.log('IN | ...handleParticipantsSubscribed');
 		this.streamsMap = [...streamsMap];
 		this.updateStreams();

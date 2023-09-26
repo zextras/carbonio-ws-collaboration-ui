@@ -51,9 +51,7 @@ export default class VideoOutConnection implements IVideoOutConnection {
 	stopVideo(): void {
 		console.log('OUT | Stop your video...');
 		this.closePeerConnection();
-		MeetingsApi.updateMediaOffer(this.meetingId, STREAM_TYPE.VIDEO, false).then(() => {
-			useStore.getState().removeLocalStreams(this.meetingId, STREAM_TYPE.VIDEO);
-		});
+		MeetingsApi.updateMediaOffer(this.meetingId, STREAM_TYPE.VIDEO, false);
 	}
 
 	// Create SDP offer, set it as local description and send it to the remote peer
@@ -124,6 +122,7 @@ export default class VideoOutConnection implements IVideoOutConnection {
 
 	closePeerConnection(): void {
 		console.log('OUT | ...closePeerConnection');
+		useStore.getState().removeLocalStreams(this.meetingId, STREAM_TYPE.VIDEO);
 		this.closeRtpSenderTrack();
 		this.peerConn?.close();
 		this.peerConn = null;
