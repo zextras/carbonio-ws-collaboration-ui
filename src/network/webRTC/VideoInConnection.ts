@@ -81,18 +81,20 @@ export default class VideoInConnection implements IVideoInConnection {
 		console.log('IN | ...streamsMap:', this.streamsMap);
 		console.log('IN | ...transceivers:', mappedByMidTransceivers);
 
-		const newStreams: StreamsSubscriptionMap = {};
-		forEach(this.streamsMap, (stream) => {
-			const streamsKey = `${stream.user_id}-${stream.type.toLowerCase()}`;
-			const transceivers: any = mappedByMidTransceivers[stream.mid]; // TODO fix type
-			const tracks = transceivers ? [transceivers.receiver.track] : [];
-			newStreams[streamsKey] = {
-				userId: stream.user_id,
-				type: stream.type.toLowerCase() as STREAM_TYPE,
-				stream: new MediaStream(tracks)
-			};
-		});
-		useStore.getState().setSubscribedTracks(this.meetingId, newStreams);
+		if (this.streamsMap.length === transceiversArray.length) {
+			const newStreams: StreamsSubscriptionMap = {};
+			forEach(this.streamsMap, (stream) => {
+				const streamsKey = `${stream.user_id}-${stream.type.toLowerCase()}`;
+				const transceivers: any = mappedByMidTransceivers[stream.mid]; // TODO fix type
+				const tracks = transceivers ? [transceivers.receiver.track] : [];
+				newStreams[streamsKey] = {
+					userId: stream.user_id,
+					type: stream.type.toLowerCase() as STREAM_TYPE,
+					stream: new MediaStream(tracks)
+				};
+			});
+			useStore.getState().setSubscribedTracks(this.meetingId, newStreams);
+		}
 	}
 
 	closePeerConnection(): void {
