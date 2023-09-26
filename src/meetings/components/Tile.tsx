@@ -86,7 +86,7 @@ const VideoEl = styled.video<{ isScreenShare: boolean }>`
 	aspect-ratio: 16/9;
 	width: inherit;
 	border-radius: 8px;
-	${({ isScreenShare }): string => (!isScreenShare ? 'object-fit: cover;' : '')}
+	${({ isScreenShare }): string | false => !isScreenShare && 'object-fit: cover;'}
 	&:hover {
 		${HoverContainer} {
 			opacity: 1;
