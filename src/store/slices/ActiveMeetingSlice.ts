@@ -180,6 +180,9 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 	removeLocalStreams: (meetingId: string, streamType: STREAM_TYPE): void => {
 		set(
 			produce((draft: RootStore) => {
+				if (streamType === STREAM_TYPE.VIDEO) {
+					draft.activeMeeting[meetingId].localStreams?.[streamType]?.getVideoTracks()[0].stop();
+				}
 				delete draft.activeMeeting[meetingId].localStreams![streamType];
 			}),
 			false,

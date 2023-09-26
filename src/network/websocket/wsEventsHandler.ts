@@ -187,11 +187,6 @@ export function wsEventsHandler(event: WsEvent): void {
 				state.changeStreamStatus(event.meetingId, event.userId, STREAM_TYPE.SCREEN, event.active);
 			}
 
-			// Close video out connection if I'm the one who is being muted
-			if (event.userId === state.session.id && !event.active) {
-				state.removeLocalStreams(event.meetingId, STREAM_TYPE.VIDEO);
-			}
-
 			// Update subscription manager
 			if (event.userId !== state.session.id) {
 				const subscriptionsManager =

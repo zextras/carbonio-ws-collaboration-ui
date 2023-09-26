@@ -30,44 +30,46 @@ export default class VideoInConnection implements IVideoInConnection {
 		this.meetingId = meetingId;
 		this.subscriptionManager = new SubscriptionsManager(meetingId);
 		this.streamsMap = [];
+		console.log('IN | Open to receive video...');
 	}
 
 	onTrack = (ev: RTCTrackEvent): void => {
-		console.log('IN ...onTrack', ev);
+		console.log('IN | ...onTrack', ev);
 		this.updateStreams();
 	};
 
 	// Handle remote offer creating an answer and sending it to the remote peer
 	handleRemoteOffer(sdp: string): void {
-		console.log('IN handleRemoteOffer...');
-		if (this.peerConn.signalingState !== 'have-remote-offer') {
-			const offer = new RTCSessionDescription({ sdp, type: 'offer' });
-			this.peerConn
-				.setRemoteDescription(offer)
-				.then(() => {
-					this.peerConn
-						.createAnswer()
-						.then((rtcSessionDesc: RTCSessionDescriptionInit) => {
-							this.peerConn
-								.setLocalDescription(rtcSessionDesc)
-								.then(() => {
-									if (rtcSessionDesc.sdp) {
-										this.answerSdp = rtcSessionDesc.sdp;
-										MeetingsApi.createMediaAnswer(this.meetingId, rtcSessionDesc.sdp);
-									}
-								})
-								.catch((reason) => console.warn('setLocalDescription failed', reason));
-						})
-						.catch((reason) => console.warn('createAnswer failed', reason));
-				})
-				.catch((reason) => console.warn('setRemoteDescription failed', reason));
-		}
+		console.log('IN | ...handleRemoteOffer');
+		const offer = new RTCSessionDescription({ sdp, type: 'offer' });
+		console.log('IN | ...setRemoteDescription');
+		this.peerConn
+			.setRemoteDescription(offer)
+			.then(() => {
+				this.peerConn
+					.createAnswer()
+					.then((rtcSessionDesc: RTCSessionDescriptionInit) => {
+						console.log('IN | ...setLocalDescription');
+						this.peerConn
+							.setLocalDescription(rtcSessionDesc)
+							.then(() => {
+								if (rtcSessionDesc.sdp) {
+									console.log('IN | ...createMediaAnswer');
+									this.answerSdp = rtcSessionDesc.sdp;
+									MeetingsApi.createMediaAnswer(this.meetingId, rtcSessionDesc.sdp);
+								}
+							})
+							.catch((reason) => console.warn('setLocalDescription failed', reason));
+					})
+					.catch((reason) => console.warn('createAnswer failed', reason));
+			})
+			.catch((reason) => console.warn('setRemoteDescription failed', reason));
 	}
 
 	handleParticipantsSubscribed(
 		streamsMap: { user_id: string; type: STREAM_TYPE; mid: string }[]
 	): void {
-		console.log('IN ...handleParticipantsSubscribed');
+		console.log('IN | ...handleParticipantsSubscribed');
 		this.streamsMap = [...streamsMap];
 		this.updateStreams();
 	}
@@ -76,8 +78,8 @@ export default class VideoInConnection implements IVideoInConnection {
 		const transceiversArray: RTCRtpTransceiver[] = this.peerConn.getTransceivers();
 		const mappedByMidTransceivers = keyBy(transceiversArray, (o) => o.mid);
 
-		console.log('IN ...streamsMap:', this.streamsMap);
-		console.log('IN ...transceivers:', mappedByMidTransceivers);
+		console.log('IN | ...streamsMap:', this.streamsMap);
+		console.log('IN | ...transceivers:', mappedByMidTransceivers);
 
 		const newStreams: StreamsSubscriptionMap = {};
 		forEach(this.streamsMap, (stream) => {
@@ -94,6 +96,7 @@ export default class VideoInConnection implements IVideoInConnection {
 	}
 
 	closePeerConnection(): void {
+		console.log('IN | ...closePeerConnection');
 		this.peerConn?.close?.();
 		this.subscriptionManager.clean();
 	}

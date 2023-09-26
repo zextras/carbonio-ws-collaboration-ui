@@ -40,7 +40,6 @@ export interface IVideoOutConnection extends IPeerConnection {
 	onNegotiationNeeded: () => void;
 	onIceConnectionStateChange: (ev: Event) => void;
 	handleRemoteAnswer(remoteAnswer: RTCSessionDescriptionInit): void;
-	handleOfferCreated(rtcSessionDescription: RTCSessionDescriptionInit): void;
 	updateLocalStreamTrack(mediaStreamTrack: MediaStream): Promise<MediaStreamTrack | undefined>;
 	closeRtpSenderTrack(): void;
 }

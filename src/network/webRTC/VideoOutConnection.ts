@@ -31,51 +31,52 @@ export default class VideoOutConnection implements IVideoOutConnection {
 	}
 
 	startVideo(selectedVideoDeviceId?: string): void {
-		console.log("OUT Start you're Video...");
+		console.log('OUT | Start your video...');
 		this.peerConn = new RTCPeerConnection(new PeerConnConfig().getConfig());
 		this.peerConn.onnegotiationneeded = this.onNegotiationNeeded;
 		this.peerConn.oniceconnectionstatechange = this.onIceConnectionStateChange;
+
 		if (selectedVideoDeviceId) {
 			this.selectedVideoDeviceId = selectedVideoDeviceId;
 		}
 
-		console.log('OUT ...getVideoStream');
+		console.log('OUT | ...getVideoStream');
 		getVideoStream(selectedVideoDeviceId).then((stream) => {
-			this.updateLocalStreamTrack(stream).then();
+			console.log('OUT | ...updateLocalStreamTrack');
+			this.updateLocalStreamTrack(stream);
 			useStore.getState().setLocalStreams(this.meetingId, STREAM_TYPE.VIDEO, stream);
 		});
 	}
 
 	stopVideo(): void {
+		console.log('OUT | Stop your video...');
 		this.closePeerConnection();
-		MeetingsApi.updateMediaOffer(this.meetingId, STREAM_TYPE.VIDEO, false);
+		MeetingsApi.updateMediaOffer(this.meetingId, STREAM_TYPE.VIDEO, false).then(() => {
+			useStore.getState().removeLocalStreams(this.meetingId, STREAM_TYPE.VIDEO);
+		});
 	}
 
 	// Create SDP offer, set it as local description and send it to the remote peer
 	onNegotiationNeeded = (): void => {
-		console.log('OUT ...onNegotiationNeeded');
-		if (this.peerConn) {
-			this.peerConn
-				.createOffer()
-				.then((rtcSessionDesc: RTCSessionDescriptionInit) => {
-					if (this.peerConn?.signalingState === 'stable') {
-						console.log('OUT ...setLocalDescription');
-						this.peerConn
-							.setLocalDescription(rtcSessionDesc)
-							.then(() => {
-								console.log('OUT ...send updateMediaOffer');
-								MeetingsApi.updateMediaOffer(
-									this.meetingId,
-									STREAM_TYPE.VIDEO,
-									true,
-									rtcSessionDesc.sdp
-								);
-							})
-							.catch((reason) => console.warn(reason));
-					}
-				})
-				.catch((reason) => console.warn('createOffer failed', reason));
-		}
+		console.log('OUT | ...onNegotiationNeeded');
+		this.peerConn
+			?.createOffer()
+			.then((rtcSessionDesc: RTCSessionDescriptionInit) => {
+				console.log('OUT | ...setLocalDescription');
+				this.peerConn
+					?.setLocalDescription(rtcSessionDesc)
+					.then(() => {
+						console.log('OUT | ...send updateMediaOffer');
+						MeetingsApi.updateMediaOffer(
+							this.meetingId,
+							STREAM_TYPE.VIDEO,
+							true,
+							rtcSessionDesc.sdp
+						);
+					})
+					.catch((reason) => console.warn(reason));
+			})
+			.catch((reason) => console.warn('createOffer failed', reason));
 	};
 
 	onIceConnectionStateChange = (ev: Event): void => {
@@ -88,21 +89,8 @@ export default class VideoOutConnection implements IVideoOutConnection {
 
 	// Handle remote answer to the SDP offer arrived from the signaling channel
 	handleRemoteAnswer(remoteAnswer: RTCSessionDescriptionInit): void {
-		if (this.peerConn?.signalingState !== 'have-remote-offer') {
-			const remoteDescription: RTCSessionDescription = new RTCSessionDescription(remoteAnswer);
-			this.peerConn?.setRemoteDescription(remoteDescription);
-		}
-	}
-
-	handleOfferCreated(rtcSessDesc: RTCSessionDescriptionInit): void {
-		if (this.peerConn?.signalingState === 'stable' && this.peerConn.localDescription == null) {
-			this.peerConn
-				.setLocalDescription(rtcSessDesc)
-				.then(() =>
-					MeetingsApi.updateMediaOffer(this.meetingId, STREAM_TYPE.VIDEO, true, rtcSessDesc.sdp)
-				)
-				.catch((reason) => console.warn('setLocalDescription failed', reason));
-		}
+		const remoteDescription: RTCSessionDescription = new RTCSessionDescription(remoteAnswer);
+		this.peerConn?.setRemoteDescription(remoteDescription);
 	}
 
 	// Stop the old track and add the new one without a new renegotiation
@@ -111,11 +99,13 @@ export default class VideoOutConnection implements IVideoOutConnection {
 			const videoTrack: MediaStreamTrack = mediaStreamTrack.getVideoTracks()[0];
 			if (this.peerConn) {
 				if (this.rtpSender == null) {
+					console.log('OUT | ...addTrack');
 					this.rtpSender = this.peerConn?.addTrack(
 						videoTrack,
 						mediaStreamTrack ?? new MediaStream()
 					);
 				} else if (this.rtpSender?.track) {
+					console.log('OUT | ...replaceTrack');
 					this.rtpSender.track.stop();
 					this.rtpSender.replaceTrack(videoTrack).catch((reason) => console.warn(reason));
 				}
@@ -125,12 +115,17 @@ export default class VideoOutConnection implements IVideoOutConnection {
 	}
 
 	closeRtpSenderTrack(): void {
-		this.rtpSender?.track?.stop();
-		this.rtpSender = null;
+		if (this.rtpSender) {
+			console.log('OUT | ...removeTrack');
+			this.peerConn?.removeTrack(this.rtpSender);
+			this.rtpSender = null;
+		}
 	}
 
 	closePeerConnection(): void {
+		console.log('OUT | ...closePeerConnection');
 		this.closeRtpSenderTrack();
 		this.peerConn?.close();
+		this.peerConn = null;
 	}
 }
