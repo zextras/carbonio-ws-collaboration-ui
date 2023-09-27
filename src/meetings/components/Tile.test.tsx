@@ -6,8 +6,10 @@
 import { screen } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event/setup/setup';
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 
 import Tile from './Tile';
+import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
 import useStore from '../../store/Store';
 import {
 	createMockMeeting,
@@ -19,6 +21,8 @@ import { setup } from '../../tests/test-utils';
 import { MeetingBe } from '../../types/network/models/meetingBeTypes';
 import { MemberBe, RoomBe, RoomType } from '../../types/network/models/roomBeTypes';
 import { UserBe } from '../../types/network/models/userBeTypes';
+import { WsEventType } from '../../types/network/websocket/wsEvents';
+import { MeetingParticipantTalkingEvent } from '../../types/network/websocket/wsMeetingEvents';
 import { MeetingParticipant } from '../../types/store/MeetingTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 
@@ -128,7 +132,7 @@ const storeSetupTileAudioOnAndVideoOff = (): { user: UserEvent; store: RootStore
 	return { user, store };
 };
 
-describe('Tile test - enter meeting modal', () => {
+describe('Tile test', () => {
 	test('my tile - everything is rendered correctly', () => {
 		storeSetupMyTileAudioOnVideoOff();
 		const videoIcon = screen.getByTestId('icon: VideoOffOutline');
@@ -155,5 +159,20 @@ describe('Tile test - enter meeting modal', () => {
 		expect(screen.queryByTestId('icon: VideoOffOutline')).not.toBeInTheDocument();
 		const audioIcon = screen.getByTestId('icon: MicOffOutline');
 		expect(audioIcon).toBeInTheDocument();
+	});
+	test('user tile - user is Talking', () => {
+		storeSetupTileAudioOnAndVideoOff();
+		const isTalkingEvent: MeetingParticipantTalkingEvent = {
+			sentDate: '2412412421',
+			meetingId: meeting.id,
+			type: WsEventType.MEETING_PARTICIPANT_TALKING,
+			userId: user3.id,
+			isTalking: true
+		};
+		act(() =>
+			sendCustomEvent({ name: EventName.MEETING_PARTICIPANT_TALKING, data: isTalkingEvent })
+		);
+		const tile = screen.getByTestId('tile');
+		expect(tile).toHaveStyle('outline: 2px solid #8bc34a;');
 	});
 });
