@@ -14,10 +14,11 @@ import {
 	Tooltip,
 	useTheme
 } from '@zextras/carbonio-design-system';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
+import useEventListener, { EventName } from '../../hooks/useEventListener';
 import usePinnedTile from '../../hooks/usePinnedTile';
 import { UsersApi } from '../../network';
 import { getStream } from '../../store/selectors/ActiveMeetingSelectors';
@@ -47,6 +48,7 @@ type TileProps = {
 
 const HoverContainer = styled(Container)`
 	aspect-ratio: 16/9;
+	border-radius: 8px;
 	height: auto;
 	opacity: 0;
 	position: absolute;
@@ -64,6 +66,8 @@ const CustomTile = styled(Container)`
 	height: auto;
 	min-width: 9.375rem;
 	border-radius: 8px;
+	${({ isTalking, theme }): string | false =>
+		isTalking && `outline: 2px solid ${theme.palette.success.regular};`}
 	&:hover {
 		${HoverContainer} {
 			opacity: 1;
@@ -147,16 +151,26 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 	const videoStream = useStore((store) =>
 		getStream(store, meetingId || '', userId || '', STREAM_TYPE.VIDEO)
 	);
-
-	const [picture, setPicture] = useState<false | string>(false);
-
-	const streamRef = useRef<null | HTMLVideoElement>(null);
-
 	const userPictureUpdatedAt: string | undefined = useStore((state) =>
 		getUserPictureUpdatedAt(state, userId || '')
 	);
 
+	const [picture, setPicture] = useState<false | string>(false);
+	const [isTalking, setIsTalking] = useState<boolean>(false);
+
+	const streamRef = useRef<null | HTMLVideoElement>(null);
 	const themeColor = useTheme();
+
+	const handleIsTalkingEvent = useCallback(
+		({ detail: isTalkingEvent }) => {
+			if (userId === isTalkingEvent.userId) {
+				setIsTalking(isTalkingEvent.isTalking);
+			}
+		},
+		[userId]
+	);
+
+	useEventListener(EventName.MEETING_PARTICIPANT_TALKING, handleIsTalkingEvent);
 
 	const { canUsePinFeature, isPinned, switchPinnedTile } = usePinnedTile(
 		meetingId || '',
@@ -306,7 +320,7 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 	);
 
 	return (
-		<CustomTile background={'text'} data-testid="tile" width="100%">
+		<CustomTile background={'text'} data-testid="tile" width="100%" isTalking={isTalking}>
 			{showHoverContainer && hoverContainer}
 			<InfoContainer orientation="horizontal">
 				<Row

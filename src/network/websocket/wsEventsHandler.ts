@@ -218,7 +218,10 @@ export function wsEventsHandler(event: WsEvent): void {
 			break;
 		}
 		case WsEventType.MEETING_PARTICIPANT_TALKING: {
-			// TODO
+			const activeMeeting = state.activeMeeting[event.meetingId];
+			if (activeMeeting.videoInConn) {
+				sendCustomEvent({ name: EventName.MEETING_PARTICIPANT_TALKING, data: event });
+			}
 			break;
 		}
 		case WsEventType.MEETING_PARTICIPANT_CLASHED: {
