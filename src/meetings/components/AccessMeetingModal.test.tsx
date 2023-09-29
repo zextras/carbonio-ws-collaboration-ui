@@ -97,6 +97,15 @@ describe('AccessMeetingModal - enter to meeting', () => {
 
 		const device = await screen.findByText('Audio Device 2');
 		expect(device).toBeInTheDocument();
+		// not selected
+		expect(device).toHaveStyle('font-weight: 400');
+
+		await user.click(device);
+		await user.click(audioButtonSelect[1]);
+		const deviceSelected = await screen.findByText('Audio Device 2');
+		expect(deviceSelected).toBeInTheDocument();
+		// selected
+		expect(deviceSelected).toHaveStyle('font-weight: 700');
 	});
 	test('Select video device', async () => {
 		mockedJoinMeetingRequest.mockReturnValueOnce(groupMeeting);
@@ -108,5 +117,34 @@ describe('AccessMeetingModal - enter to meeting', () => {
 
 		const device = await screen.findByText('Video Device 2');
 		expect(device).toBeInTheDocument();
+		// not selected
+		expect(device).toHaveStyle('font-weight: 400');
+
+		await user.click(device);
+		await user.click(videoButtonSelect[0]);
+		const deviceSelected = await screen.findByText('Video Device 2');
+		expect(deviceSelected).toBeInTheDocument();
+		// selected
+		expect(deviceSelected).toHaveStyle('font-weight: 700');
+	});
+	test('turn on video', async () => {
+		mockedJoinMeetingRequest.mockReturnValueOnce(groupMeeting);
+
+		const { user } = setupBasicGroup();
+
+		const videoOff = screen.getByTestId('icon: VideoOff');
+		await act(() => user.click(videoOff));
+		const videoOn = await screen.findByTestId('icon: Video');
+		expect(videoOn).toBeInTheDocument();
+	});
+	test('turn on audio', async () => {
+		mockedJoinMeetingRequest.mockReturnValueOnce(groupMeeting);
+
+		const { user } = setupBasicGroup();
+
+		const audioOff = screen.getByTestId('icon: MicOff');
+		await act(() => user.click(audioOff));
+		const audioOn = await screen.findByTestId('icon: Mic');
+		expect(audioOn).toBeInTheDocument();
 	});
 });
