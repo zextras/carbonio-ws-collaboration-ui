@@ -17,6 +17,7 @@ import React, {
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 
+import MeetingsApi from '../../../network/apis/MeetingsApi';
 import { getSelectedVideoDeviceId } from '../../../store/selectors/ActiveMeetingSelectors';
 import { getParticipantVideoStatus } from '../../../store/selectors/MeetingSelectors';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
@@ -87,19 +88,21 @@ const CameraButton = ({
 		(event) => {
 			event.stopPropagation();
 			if (!videoStatus) {
-				videoOutConn?.startVideo(selectedVideoDeviceId);
-				// gestire il cambio del device sapendo che la classe è sempre esistente
-				// getVideoStream(selectedVideoDeviceId).then((stream) => {
-				// 	videoOutConn
-				// 		?.updateLocalStreamTrack(stream)
-				//		.then(() => MeetingsApi.updateMediaOffer(meetingId, STREAM_TYPE.VIDEO, true));
-				// });
+				if (!videoOutConn?.peerConn) {
+					videoOutConn?.startVideo(selectedVideoDeviceId);
+				} else {
+					getVideoStream(selectedVideoDeviceId).then((stream) => {
+						videoOutConn
+							?.updateLocalStreamTrack(stream)
+							.then(() => MeetingsApi.updateMediaOffer(meetingId, STREAM_TYPE.VIDEO, true));
+					});
+				}
 			} else {
 				videoOutConn?.stopVideo();
 			}
 			setButtonStatus(false);
 		},
-		[videoStatus, videoOutConn, selectedVideoDeviceId]
+		[videoStatus, videoOutConn, selectedVideoDeviceId, meetingId]
 	);
 
 	const updateListOfDevices = useCallback(() => {

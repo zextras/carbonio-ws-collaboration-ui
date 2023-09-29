@@ -41,10 +41,10 @@ describe('Test SubscriptionsManager', () => {
 		subscriptionsManager.updateAllStreamMap(participants);
 
 		expect(subscriptionsManager.allStreams).toEqual({
-			'user1-video': { user_id: 'user1', type: 'video' },
-			'user2-screen': { user_id: 'user2', type: 'screen' },
-			'user3-video': { user_id: 'user3', type: 'video' },
-			'user3-screen': { user_id: 'user3', type: 'screen' }
+			'user1-video': { userId: 'user1', type: 'video' },
+			'user2-screen': { userId: 'user2', type: 'screen' },
+			'user3-video': { userId: 'user3', type: 'video' },
+			'user3-screen': { userId: 'user3', type: 'screen' }
 		});
 	});
 
@@ -54,11 +54,11 @@ describe('Test SubscriptionsManager', () => {
 		subscriptionsManager.addStreamToAsk('user4', STREAM_TYPE.VIDEO);
 
 		expect(subscriptionsManager.allStreams).toEqual({
-			'user1-video': { user_id: 'user1', type: 'video' },
-			'user2-screen': { user_id: 'user2', type: 'screen' },
-			'user3-video': { user_id: 'user3', type: 'video' },
-			'user3-screen': { user_id: 'user3', type: 'screen' },
-			'user4-video': { user_id: 'user4', type: 'video' }
+			'user1-video': { userId: 'user1', type: 'video' },
+			'user2-screen': { userId: 'user2', type: 'screen' },
+			'user3-video': { userId: 'user3', type: 'video' },
+			'user3-screen': { userId: 'user3', type: 'screen' },
+			'user4-video': { userId: 'user4', type: 'video' }
 		});
 	});
 
@@ -68,9 +68,9 @@ describe('Test SubscriptionsManager', () => {
 		subscriptionsManager.removeStreamToAsk('user2', STREAM_TYPE.SCREEN);
 
 		expect(subscriptionsManager.allStreams).toEqual({
-			'user1-video': { user_id: 'user1', type: 'video' },
-			'user3-video': { user_id: 'user3', type: 'video' },
-			'user3-screen': { user_id: 'user3', type: 'screen' }
+			'user1-video': { userId: 'user1', type: 'video' },
+			'user3-video': { userId: 'user3', type: 'video' },
+			'user3-screen': { userId: 'user3', type: 'screen' }
 		});
 	});
 });

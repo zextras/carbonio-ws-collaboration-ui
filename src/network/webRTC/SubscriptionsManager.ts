@@ -28,14 +28,14 @@ class SubscriptionsManager {
 				if (participant.videoStreamEnabled) {
 					const subscriptionId = `${participant.userId}-${STREAM_TYPE.VIDEO}`;
 					this.allStreams[subscriptionId] = {
-						user_id: participant.userId,
+						userId: participant.userId,
 						type: STREAM_TYPE.VIDEO
 					};
 				}
 				if (participant.screenStreamEnabled) {
 					const subscriptionId = `${participant.userId}-${STREAM_TYPE.SCREEN}`;
 					this.allStreams[subscriptionId] = {
-						user_id: participant.userId,
+						userId: participant.userId,
 						type: STREAM_TYPE.SCREEN
 					};
 				}
@@ -47,10 +47,7 @@ class SubscriptionsManager {
 	public addStreamToAsk(userId: string, type: STREAM_TYPE): void {
 		if (userId !== useStore.getState().session.id) {
 			const subscriptionId = `${userId}-${type}`;
-			this.allStreams[subscriptionId] = {
-				user_id: userId,
-				type
-			};
+			this.allStreams[subscriptionId] = { userId, type };
 			this.updateSubscription();
 		}
 	}

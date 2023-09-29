@@ -53,7 +53,15 @@ export type JoinSettings = {
 };
 
 export type StreamInfo = {
-	user_id: string;
+	userId: string;
 	type: STREAM_TYPE;
 	mid: string;
+};
+
+export type StreamMap = {
+	[key: string]: {
+		userId: string;
+		type: STREAM_TYPE;
+		stream: MediaStream;
+	};
 };

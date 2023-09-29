@@ -31,40 +31,30 @@ export default class VideoOutConnection implements IVideoOutConnection {
 	}
 
 	startVideo(selectedVideoDeviceId?: string): void {
-		console.log('OUT | Start your video...');
 		this.peerConn = new RTCPeerConnection(new PeerConnConfig().getConfig());
 		this.peerConn.onnegotiationneeded = this.onNegotiationNeeded;
 		this.peerConn.oniceconnectionstatechange = this.onIceConnectionStateChange;
 
-		if (selectedVideoDeviceId) {
-			this.selectedVideoDeviceId = selectedVideoDeviceId;
-		}
-
-		console.log('OUT | ...getVideoStream');
+		if (selectedVideoDeviceId) this.selectedVideoDeviceId = selectedVideoDeviceId;
 		getVideoStream(selectedVideoDeviceId).then((stream) => {
-			console.log('OUT | ...updateLocalStreamTrack');
 			this.updateLocalStreamTrack(stream);
 			useStore.getState().setLocalStreams(this.meetingId, STREAM_TYPE.VIDEO, stream);
 		});
 	}
 
 	stopVideo(): void {
-		console.log('OUT | Stop your video...');
 		this.closePeerConnection();
 		MeetingsApi.updateMediaOffer(this.meetingId, STREAM_TYPE.VIDEO, false);
 	}
 
 	// Create SDP offer, set it as local description and send it to the remote peer
 	onNegotiationNeeded = (): void => {
-		console.log('OUT | ...onNegotiationNeeded');
 		this.peerConn
 			?.createOffer()
 			.then((rtcSessionDesc: RTCSessionDescriptionInit) => {
-				console.log('OUT | ...setLocalDescription');
 				this.peerConn
 					?.setLocalDescription(rtcSessionDesc)
 					.then(() => {
-						console.log('OUT | ...send updateMediaOffer');
 						MeetingsApi.updateMediaOffer(
 							this.meetingId,
 							STREAM_TYPE.VIDEO,
@@ -97,13 +87,11 @@ export default class VideoOutConnection implements IVideoOutConnection {
 			const videoTrack: MediaStreamTrack = mediaStreamTrack.getVideoTracks()[0];
 			if (this.peerConn) {
 				if (this.rtpSender == null) {
-					console.log('OUT | ...addTrack');
 					this.rtpSender = this.peerConn?.addTrack(
 						videoTrack,
 						mediaStreamTrack ?? new MediaStream()
 					);
 				} else if (this.rtpSender?.track) {
-					console.log('OUT | ...replaceTrack');
 					this.rtpSender.track.stop();
 					this.rtpSender.replaceTrack(videoTrack).catch((reason) => console.warn(reason));
 				}
@@ -118,7 +106,6 @@ export default class VideoOutConnection implements IVideoOutConnection {
 	}
 
 	closePeerConnection(): void {
-		console.log('OUT | ...closePeerConnection');
 		useStore.getState().removeLocalStreams(this.meetingId, STREAM_TYPE.VIDEO);
 		this.closeRtpSenderTrack();
 		this.peerConn?.close();
