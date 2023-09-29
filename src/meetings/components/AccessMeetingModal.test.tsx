@@ -5,28 +5,80 @@
  */
 
 import { screen } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react-hooks';
+import { UserEvent } from '@testing-library/user-event/setup/setup';
 import React from 'react';
 
 import AccessMeetingModal from './AccessMeetingModal';
-import { mockedEnterMeetingRequest, mockedJoinMeetingRequest } from '../../../jest-mocks';
+import {
+	mockedEnterMeetingRequest,
+	mockedJoinMeetingRequest,
+	mockUseParams
+} from '../../../jest-mocks';
 import useStore from '../../store/Store';
-import { createMockMeeting, createMockRoom } from '../../tests/createMock';
+import {
+	createMockMeeting,
+	createMockParticipants,
+	createMockRoom,
+	createMockUser
+} from '../../tests/createMock';
 import { setup } from '../../tests/test-utils';
+import { MeetingBe } from '../../types/network/models/meetingBeTypes';
+import { MemberBe, RoomBe, RoomType } from '../../types/network/models/roomBeTypes';
+import { UserBe } from '../../types/network/models/userBeTypes';
+import { MeetingParticipant } from '../../types/store/MeetingTypes';
+import { RootStore } from '../../types/store/StoreTypes';
 
-const room = createMockRoom();
+const user1: UserBe = createMockUser({ id: 'user1Id', name: 'user 1' });
+const user2: UserBe = createMockUser({ id: 'user2Id', name: 'user 2' });
 
-beforeEach(() => {
-	const store = useStore.getState();
-	store.addRoom(room);
+const member1: MemberBe = { userId: user1.id, owner: true };
+const member2: MemberBe = { userId: user2.id, owner: false };
+
+const groupRoom: RoomBe = createMockRoom({
+	id: 'room-test',
+	type: RoomType.GROUP,
+	members: [member1, member2],
+	userSettings: { muted: false }
 });
+
+const user1Participant: MeetingParticipant = createMockParticipants({
+	userId: 'user1',
+	sessionId: 'sessionIdUser1'
+});
+
+const user2Participant: MeetingParticipant = createMockParticipants({
+	userId: 'user2',
+	sessionId: 'sessionIdUser2'
+});
+
+const groupMeeting: MeetingBe = createMockMeeting({
+	roomId: groupRoom.id,
+	participants: [user1Participant, user2Participant]
+});
+
+const setupBasicGroup = (): { user: UserEvent; store: RootStore } => {
+	const { result } = renderHook(() => useStore());
+	act(() => {
+		result.current.setUserInfo(user1);
+		result.current.setUserInfo(user2);
+		result.current.setLoginInfo(user1.id, user1.name);
+		result.current.addRoom(groupRoom);
+		result.current.addMeeting(groupMeeting);
+		result.current.setChatsBeStatus(true);
+		result.current.setWebsocketStatus(true);
+		result.current.meetingConnection(groupMeeting.id, false, undefined, false, undefined);
+	});
+	mockUseParams.mockReturnValue({ meetingId: groupMeeting.id });
+	const { user } = setup(<AccessMeetingModal roomId={groupRoom.id} />);
+	return { user, store: result.current };
+};
 
 describe('AccessMeetingModal - enter to meeting', () => {
 	test('Enter to meeting', async () => {
-		const meeting = createMockMeeting({ roomId: room.id, active: true });
-		useStore.getState().addMeeting(meeting);
 		mockedEnterMeetingRequest.mockReturnValueOnce('meetingId');
 
-		const { user } = setup(<AccessMeetingModal roomId={room.id} />);
+		const { user } = setupBasicGroup();
 
 		// Click on enter button to join the meeting
 		const enterButton = await screen.findByText('Enter');
@@ -36,11 +88,9 @@ describe('AccessMeetingModal - enter to meeting', () => {
 	});
 
 	test('Select audio device', async () => {
-		const meeting = createMockMeeting({ roomId: room.id, active: true });
-		useStore.getState().addMeeting(meeting);
-		mockedJoinMeetingRequest.mockReturnValueOnce(meeting);
+		mockedJoinMeetingRequest.mockReturnValueOnce(groupMeeting);
 
-		const { user } = setup(<AccessMeetingModal roomId={room.id} />);
+		const { user } = setupBasicGroup();
 
 		const audioButtonSelect = await screen.findAllByTestId('icon: ChevronDownOutline');
 		await user.click(audioButtonSelect[1]);
@@ -49,11 +99,9 @@ describe('AccessMeetingModal - enter to meeting', () => {
 		expect(device).toBeInTheDocument();
 	});
 	test('Select video device', async () => {
-		const meeting = createMockMeeting({ roomId: room.id, active: true });
-		useStore.getState().addMeeting(meeting);
-		mockedJoinMeetingRequest.mockReturnValueOnce(meeting);
+		mockedJoinMeetingRequest.mockReturnValueOnce(groupMeeting);
 
-		const { user } = setup(<AccessMeetingModal roomId={room.id} />);
+		const { user } = setupBasicGroup();
 
 		const videoButtonSelect = await screen.findAllByTestId('icon: ChevronDownOutline');
 		await user.click(videoButtonSelect[0]);
