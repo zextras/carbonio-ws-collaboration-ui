@@ -49,6 +49,12 @@ const CameraButton = ({
 	const setSelectedDeviceId = useStore((store) => store.setSelectedDeviceId);
 	const setLocalStreams = useStore((store) => store.setLocalStreams);
 
+	const [buttonStatus, setButtonStatus] = useState<boolean>(true);
+
+	useEffect(() => {
+		setButtonStatus(true);
+	}, [videoStatus]);
+
 	const [videoMediaList, setVideoMediaList] = useState<[] | MediaDeviceInfo[]>([]);
 
 	const mediaVideoList = useMemo(
@@ -91,6 +97,7 @@ const CameraButton = ({
 			} else {
 				videoOutConn?.stopVideo();
 			}
+			setButtonStatus(false);
 		},
 		[videoStatus, videoOutConn, selectedVideoDeviceId]
 	);
@@ -138,6 +145,7 @@ const CameraButton = ({
 					onClick: toggleVideoDropdown,
 					dropdownListRef: videoDropdownRef
 				}}
+				disabled={!buttonStatus}
 			/>
 		</Tooltip>
 	);

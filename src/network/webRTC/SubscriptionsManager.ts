@@ -68,11 +68,12 @@ class SubscriptionsManager {
 		const realSubs = flatMap(this.subscriptions);
 
 		const subscriptionToAsk: Subscription[] = differenceWith(subsToRequest, realSubs, isEqual);
-		const subscriptionToUnset: Subscription[] = differenceWith(realSubs, subsToRequest, isEqual);
-		if (subscriptionToAsk.length !== 0 || subscriptionToUnset.length !== 0) {
-			MeetingsApi.subscribeToMedia(this.meetingId, subscriptionToAsk, subscriptionToUnset);
-			this.subscriptions = clone(this.allStreams);
+		// For the moment, avoid to set unsubscribed streams
+		// const subscriptionToUnset: Subscription[] = differenceWith(realSubs, subsToRequest, isEqual);
+		if (subscriptionToAsk.length !== 0) {
+			MeetingsApi.subscribeToMedia(this.meetingId, subscriptionToAsk, []);
 		}
+		this.subscriptions = clone(this.allStreams);
 	}
 
 	clean(): void {

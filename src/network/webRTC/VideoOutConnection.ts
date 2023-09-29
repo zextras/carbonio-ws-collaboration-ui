@@ -113,11 +113,8 @@ export default class VideoOutConnection implements IVideoOutConnection {
 	}
 
 	closeRtpSenderTrack(): void {
-		if (this.rtpSender) {
-			console.log('OUT | ...removeTrack');
-			this.peerConn?.removeTrack(this.rtpSender);
-			this.rtpSender = null;
-		}
+		this.rtpSender?.track?.stop();
+		this.rtpSender = null;
 	}
 
 	closePeerConnection(): void {
