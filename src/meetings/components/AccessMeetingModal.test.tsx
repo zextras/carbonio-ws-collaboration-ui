@@ -8,7 +8,6 @@ import { screen } from '@testing-library/react';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { UserEvent } from '@testing-library/user-event/setup/setup';
 import React from 'react';
-import { act } from 'react-dom/test-utils';
 
 import AccessMeetingModal from './AccessMeetingModal';
 import {
@@ -129,11 +128,9 @@ describe('AccessMeetingModal - enter to meeting', () => {
 		expect(deviceSelected).toHaveStyle('font-weight: 700');
 	});
 	test('turn on video', async () => {
-		const meeting = createMockMeeting({ roomId: room.id, active: true });
-		useStore.getState().addMeeting(meeting);
-		mockedJoinMeetingRequest.mockReturnValueOnce(meeting);
+		mockedJoinMeetingRequest.mockReturnValueOnce(groupMeeting);
 
-		const { user } = setup(<AccessMeetingModal roomId={room.id} />);
+		const { user } = setupBasicGroup();
 
 		const videoOff = screen.getByTestId('icon: VideoOff');
 		await act(() => user.click(videoOff));
@@ -141,11 +138,9 @@ describe('AccessMeetingModal - enter to meeting', () => {
 		expect(videoOn).toBeInTheDocument();
 	});
 	test('turn on audio', async () => {
-		const meeting = createMockMeeting({ roomId: room.id, active: true });
-		useStore.getState().addMeeting(meeting);
-		mockedJoinMeetingRequest.mockReturnValueOnce(meeting);
+		mockedJoinMeetingRequest.mockReturnValueOnce(groupMeeting);
 
-		const { user } = setup(<AccessMeetingModal roomId={room.id} />);
+		const { user } = setupBasicGroup();
 
 		const audioOff = screen.getByTestId('icon: MicOff');
 		await act(() => user.click(audioOff));
