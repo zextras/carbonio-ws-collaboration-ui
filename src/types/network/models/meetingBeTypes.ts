@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { STREAM_TYPE } from '../../store/ActiveMeetingTypes';
+
 export type MeetingBe = {
 	id: string;
 	name: string;
@@ -16,7 +18,6 @@ export type MeetingBe = {
 
 export type MeetingParticipantBe = {
 	userId: string;
-	userType: MeetingUserType;
 	audioStreamEnabled?: boolean;
 	videoStreamEnabled?: boolean;
 	screenStreamEnabled?: boolean;
@@ -49,4 +50,18 @@ export type MeetingUser = {
 export type JoinSettings = {
 	audioStreamEnabled: boolean;
 	videoStreamEnabled: boolean;
+};
+
+export type StreamInfo = {
+	userId: string;
+	type: STREAM_TYPE;
+	mid: string;
+};
+
+export type StreamMap = {
+	[key: string]: {
+		userId: string;
+		type: STREAM_TYPE;
+		stream: MediaStream;
+	};
 };

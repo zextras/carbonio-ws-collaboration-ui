@@ -8,7 +8,7 @@ import { find, size } from 'lodash';
 
 import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
 import useStore from '../../store/Store';
-import { MeetingType, MeetingUserType } from '../../types/network/models/meetingBeTypes';
+import { MeetingType } from '../../types/network/models/meetingBeTypes';
 import { GetMeetingResponse } from '../../types/network/responses/meetingsResponses';
 import { GetRoomResponse } from '../../types/network/responses/roomsResponses';
 import { WsEvent, WsEventType } from '../../types/network/websocket/wsEvents';
@@ -130,7 +130,6 @@ export function wsEventsHandler(event: WsEvent): void {
 		case WsEventType.MEETING_JOINED: {
 			state.addParticipant(event.meetingId, {
 				userId: event.userId,
-				userType: MeetingUserType.REGISTERED,
 				audioStreamOn: false,
 				videoStreamOn: false,
 				joinedAt: event.sentDate
@@ -163,6 +162,14 @@ export function wsEventsHandler(event: WsEvent): void {
 				size(meeting?.participants) < 3
 			) {
 				state.setPinnedTile(event.meetingId, undefined);
+			}
+
+			// Update subscription manager
+			const subscriptionsManager =
+				state.activeMeeting[event.meetingId]?.videoInConn?.subscriptionManager;
+			if (subscriptionsManager) {
+				subscriptionsManager?.removeStreamToAsk(event.userId, STREAM_TYPE.VIDEO);
+				subscriptionsManager?.removeStreamToAsk(event.userId, STREAM_TYPE.SCREEN);
 			}
 
 			// send audio feedback to other participants session user leave
@@ -206,6 +213,17 @@ export function wsEventsHandler(event: WsEvent): void {
 					sendAudioFeedback(MeetingSoundFeedback.MEETING_SCREENSHARE_NOTIFICATION);
 				}
 			}
+
+			// Update subscription manager
+			if (event.userId !== state.session.id) {
+				const subscriptionsManager =
+					state.activeMeeting[event.meetingId]?.videoInConn?.subscriptionManager;
+				if (event.active) {
+					subscriptionsManager?.addStreamToAsk(event.userId, mediaType);
+				} else {
+					subscriptionsManager?.removeStreamToAsk(event.userId, mediaType);
+				}
+			}
 			break;
 		}
 		case WsEventType.MEETING_AUDIO_ANSWERED: {
@@ -240,7 +258,7 @@ export function wsEventsHandler(event: WsEvent): void {
 		case WsEventType.MEETING_PARTICIPANT_SUBSCRIBED: {
 			const activeMeeting = state.activeMeeting[event.meetingId];
 			if (activeMeeting?.videoInConn) {
-				activeMeeting.videoInConn.handleStreams(event.streams);
+				activeMeeting.videoInConn.handleParticipantsSubscribed(event.streams);
 			}
 			break;
 		}
