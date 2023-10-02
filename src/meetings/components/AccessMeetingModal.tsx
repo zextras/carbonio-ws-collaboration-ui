@@ -19,7 +19,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import Tile from './Tile';
-import useRouting, { PAGE_INFO_TYPE } from '../../hooks/useRouting';
+import useRouting from '../../hooks/useRouting';
 import { MeetingsApi } from '../../network';
 import { getMeeting } from '../../store/selectors/MeetingSelectors';
 import {
@@ -61,7 +61,6 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 	const enableCamLabel = t('meeting.interactions.enableCamera', 'Enable camera');
 	const playMicLabel = t('meeting.interactions.playMic', 'Start microphone testing');
 	const stopMicLabel = t('meeting.interactions.stopMic', 'Stop microphone testing');
-	const closeModalTooltip = t('action.close', 'Close');
 	const joinMeetingDescription = t(
 		'meeting.joinMeetingDescription',
 		'How do you want to join this meeting?'
@@ -69,6 +68,11 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 	const setInputDescription = t(
 		'meeting.setInputDescription',
 		'Set your input devices by choosing them from dropdown menu'
+	);
+
+	const enterButtonDisabledTooltip = t(
+		'meeting.startModal.audioAndVideoLoading',
+		'Assets are loading'
 	);
 
 	const conversationTitle = useStore((store) => getRoomNameSelector(store, roomId));
@@ -84,23 +88,26 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 		{ meetingTitle: conversationTitle }
 	);
 
-	const { goToMeetingPage, goToInfoPage } = useRouting();
+	const { goToMeetingPage } = useRouting();
 
 	const roomType = useStore((store) => getRoomTypeSelector(store, roomId));
 
+	const chatsBeNetworkStatus = useStore(({ connections }) => connections.status.chats_be);
+	const websocketNetworkStatus = useStore(({ connections }) => connections.status.websocket);
 	const sessionId: string | undefined = useStore((store) => store.session.id);
 	const roomMembers: Member[] | undefined = useStore((state) => getRoomMembers(state, roomId));
 	const meeting = useStore((store) => getMeeting(store, roomId));
 
-	const [videoStreamEnabled, setVideoStreamEnabled] = useState(false);
-	const [audioStreamEnabled, setAudioStreamEnabled] = useState(false);
+	const [videoStreamEnabled, setVideoStreamEnabled] = useState<boolean>(false);
+	const [audioStreamEnabled, setAudioStreamEnabled] = useState<boolean>(false);
 	const [audioMediaList, setAudioMediaList] = useState<[] | MediaDeviceInfo[]>([]);
 	const [videoMediaList, setVideoMediaList] = useState<[] | MediaDeviceInfo[]>([]);
 	const [selectedAudioDevice, setSelectedAudioDevice] = useState<string | undefined>(undefined);
 	const [selectedVideoDevice, setSelectedVideoDevice] = useState<string | undefined>(undefined);
 	const [streamTrack, setStreamTrack] = useState<MediaStream | null>(null);
-	const [wrapperWidth, setWrapperWidth] = useState(0);
-	const [videoPlayerTestMuted, setVideoPlayerTestMuted] = useState(true);
+	const [wrapperWidth, setWrapperWidth] = useState<number>(0);
+	const [videoPlayerTestMuted, setVideoPlayerTestMuted] = useState<boolean>(true);
+	const [enterButtonIsEnabled, setEnterButtonIsEnabled] = useState<boolean>(false);
 
 	const wrapperRef = useRef<HTMLDivElement>();
 	const videoStreamRef = useRef<HTMLVideoElement>(null);
@@ -112,12 +119,26 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 	useEffect(() => {
 		if (videoStreamRef.current) {
 			videoStreamRef.current.srcObject = streamTrack;
+			setEnterButtonIsEnabled(true);
 		}
 	}, [streamTrack, audioStreamEnabled, videoStreamEnabled]);
+
+	const areNetworksUp = useMemo(() => {
+		if (chatsBeNetworkStatus !== undefined && websocketNetworkStatus !== undefined) {
+			return chatsBeNetworkStatus && websocketNetworkStatus;
+		}
+		return false;
+	}, [chatsBeNetworkStatus, websocketNetworkStatus]);
+
 	const modalTitle = useMemo(
 		() => (roomType === RoomType.ONE_TO_ONE ? oneToOneTitle : groupTitle),
 		[groupTitle, oneToOneTitle, roomType]
 	);
+
+	const memberId: string | undefined = useMemo(() => {
+		const user: Member | undefined = find(roomMembers, (member) => member.userId === sessionId);
+		return user?.userId;
+	}, [roomMembers, sessionId]);
 
 	const toggleStreams = useCallback(
 		(audio: boolean, video: boolean, audioId: string | undefined, videoId: string | undefined) => {
@@ -133,6 +154,7 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 					setStreamTrack(stream);
 					setAudioStreamEnabled(audio);
 					setVideoStreamEnabled(video);
+					setEnterButtonIsEnabled(true);
 				});
 			} else {
 				getAudioAndVideo({ noiseSuppression: true, echoCancellation: true }).then(
@@ -159,6 +181,7 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 						setVideoStreamEnabled(video);
 						setSelectedVideoDevice(videoId);
 						setSelectedAudioDevice(audioId);
+						setEnterButtonIsEnabled(true);
 					})
 					.catch((e) => console.error(e));
 			}
@@ -166,17 +189,13 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 		[streamTrack]
 	);
 
-	const memberId: string | undefined = useMemo(() => {
-		const user: Member | undefined = find(roomMembers, (member) => member.userId === sessionId);
-		return user?.userId;
-	}, [roomMembers, sessionId]);
-
 	const mediaVideoList = useMemo(
 		() =>
 			map(videoMediaList, (videoItem: MediaDeviceInfo, i) => ({
 				id: `device-${i}`,
 				label: videoItem.label ? videoItem.label : `device-${i}`,
 				onClick: (): void => {
+					setEnterButtonIsEnabled(false);
 					if (videoStreamEnabled) {
 						toggleStreams(audioStreamEnabled, true, selectedAudioDevice, videoItem.deviceId);
 					} else {
@@ -202,6 +221,7 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 				id: `device-${i}`,
 				label: audioItem.label ? audioItem.label : `device-${i}`,
 				onClick: (): void => {
+					setEnterButtonIsEnabled(false);
 					if (audioStreamEnabled) {
 						toggleStreams(true, videoStreamEnabled, audioItem.deviceId, selectedVideoDevice);
 					} else {
@@ -270,6 +290,7 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 	}, [updateListOfDevices]);
 
 	const toggleVideo = useCallback(() => {
+		setEnterButtonIsEnabled(false);
 		toggleStreams(
 			audioStreamEnabled,
 			!videoStreamEnabled,
@@ -285,6 +306,7 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 	]);
 
 	const toggleAudio = useCallback(() => {
+		setEnterButtonIsEnabled(false);
 		toggleStreams(
 			!audioStreamEnabled,
 			videoStreamEnabled,
@@ -302,10 +324,6 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 	const onToggleAudioTest = useCallback(() => {
 		setVideoPlayerTestMuted((prevState) => !prevState);
 	}, []);
-
-	const onCloseHandler = useCallback(() => {
-		goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED);
-	}, [goToInfoPage]);
 
 	const joinMeeting = useCallback(() => {
 		MeetingsApi.enterMeeting(
@@ -334,12 +352,24 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 					onClick={onToggleAudioTest}
 					disabled={!audioStreamEnabled}
 				/>
-				<Button label={enter} onClick={joinMeeting} />
+				<Tooltip
+					label={enterButtonDisabledTooltip}
+					disabled={areNetworksUp && enterButtonIsEnabled}
+				>
+					<Button
+						label={enter}
+						onClick={joinMeeting}
+						disabled={!(areNetworksUp && enterButtonIsEnabled)}
+					/>
+				</Tooltip>
 			</Container>
 		),
 		[
+			areNetworksUp,
 			audioStreamEnabled,
 			enter,
+			enterButtonDisabledTooltip,
+			enterButtonIsEnabled,
 			joinMeeting,
 			onToggleAudioTest,
 			playMicLabel,
@@ -353,10 +383,8 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 			background={'gray0'}
 			open
 			size="small"
+			showCloseIcon={false}
 			title={modalTitle}
-			showCloseIcon
-			onClose={onCloseHandler}
-			closeIconTooltip={closeModalTooltip}
 			customFooter={modalFooter}
 		>
 			<Padding top="small" />
