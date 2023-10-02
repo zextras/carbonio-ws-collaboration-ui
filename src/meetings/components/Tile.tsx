@@ -47,6 +47,7 @@ type TileProps = {
 
 const HoverContainer = styled(Container)`
 	aspect-ratio: 16/9;
+	border-radius: 8px;
 	height: auto;
 	opacity: 0;
 	position: absolute;
