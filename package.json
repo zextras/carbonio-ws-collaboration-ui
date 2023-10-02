@@ -74,6 +74,7 @@
 		"@zextras/carbonio-design-system": "2.1.0",
 		"@zextras/carbonio-shell-ui": "3.0.2",
 		"@zextras/carbonio-ui-preview": "^1.1.0",
+        "darkreader": "^4.9.58",
 		"emoji-mart": "^5.1.0",
 		"identity-obj-proxy": "^3.0.0",
 		"immer": "^9.0.15",

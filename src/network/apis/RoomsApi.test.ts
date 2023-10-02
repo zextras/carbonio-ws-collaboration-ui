@@ -9,6 +9,7 @@ import { fetchResponse } from '../../../jest-mocks';
 import useStore from '../../store/Store';
 import {
 	createMockCapabilityList,
+	createMockMeeting,
 	createMockRoom,
 	createMockTextMessage
 } from '../../tests/createMock';
@@ -57,11 +58,16 @@ describe('Rooms API', () => {
 		headers.append('Content-Type', 'application/json');
 
 		// Check if fetch is called with the correct parameters
-		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/rooms`, {
+		expect(global.fetch).toHaveBeenNthCalledWith(1, `/services/chats/rooms`, {
 			method: 'POST',
 			headers,
 			body: JSON.stringify(roomToAdd)
 		});
+		expect(global.fetch).toHaveBeenNthCalledWith(
+			2,
+			`/services/chats/meetings`,
+			expect.objectContaining({ method: 'POST' })
+		);
 	});
 
 	test('getRoom is called correctly', async () => {
@@ -101,19 +107,27 @@ describe('Rooms API', () => {
 	});
 
 	test('deleteRoom is called correctly', async () => {
+		const room = createMockRoom();
+		const meeting = createMockMeeting({ roomId: room.id });
+		useStore.getState().addMeeting(meeting);
 		// Send deleteRoom request
-		await roomsApi.deleteRoom('roomId');
+		await roomsApi.deleteRoom(room.id);
 
 		// Set appropriate headers
 		const headers = new Headers();
 		headers.append('Content-Type', 'application/json');
 
 		// Check if fetch is called with the correct parameters
-		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/rooms/roomId`, {
+		expect(global.fetch).toHaveBeenNthCalledWith(1, `/services/chats/rooms/${room.id}`, {
 			method: 'DELETE',
 			headers,
 			body: undefined
 		});
+		expect(global.fetch).toHaveBeenNthCalledWith(
+			2,
+			`/services/chats/meetings/${meeting.id}`,
+			expect.objectContaining({ method: 'DELETE' })
+		);
 	});
 
 	test('getURLRoomPicture is called correctly', () => {

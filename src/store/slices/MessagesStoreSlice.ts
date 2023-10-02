@@ -315,7 +315,7 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 				// Add message to the end of list or replace a placeholder message
 				draft.messages[roomId].push(placeholderMessage);
 
-				sendCustomEvent(EventName.NEW_MESSAGE, placeholderMessage);
+				sendCustomEvent({ name: EventName.NEW_MESSAGE, data: placeholderMessage });
 			}),
 			false,
 			'MESSAGES/SET_PLACEHOLDER_MESSAGE'

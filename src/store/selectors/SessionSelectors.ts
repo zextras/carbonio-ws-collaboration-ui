@@ -23,3 +23,6 @@ export const getCapability = (
 	store.session.capabilities && store.session.capabilities[capabilityName];
 
 export const getUserId = (store: RootStore): string | undefined => store.session?.id;
+
+export const getCustomLogo = (store: RootStore): string | false | undefined =>
+	store.session?.customLogo;

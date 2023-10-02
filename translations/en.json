@@ -10,14 +10,18 @@
         "close": "Close",
         "copy": "Copy",
         "create": "Create",
+        "decline": "Decline",
+        "declineAll": "Decline all",
         "delete": "Delete",
         "download": "Download",
         "edit": "Edit",
         "editDetails": "Edit details",
         "editRoom": "Edit {{roomName}}",
         "editYourMessage": "Edit your message",
+        "enter": "Enter",
         "forward": "Forward",
         "forwarded": "forwarded",
+        "joinMeeting": "Join meeting",
         "leave": "Leave",
         "muteNotifications": "Mute notifications",
         "newChat": "New Chat",
@@ -46,6 +50,7 @@
         "stopUpload": "Stop upload",
         "uploadAborted": "Upload has been interrupted"
     },
+    "chat": "Chat",
     "configurationMessages": {
         "roomNameChanged": "{{name}} changed the title of this Group in \"<i>{{roomName}}</i>\"",
         "roomPictureDeleted": "{{name}} restored the default {{roomName}}'s image",
@@ -91,11 +96,66 @@
         "nameTooShort": "The title is an essential information",
         "topicTooLong": "Maximum topic length is 256 characters"
     },
+    "external": {
+        "nobodyInTheRoom": "It seems nobody is in this Room",
+        "roomIsEmpty": "This Room is empty"
+    },
     "feedback": {
         "historyCleared": "History cleared successfully!",
         "messageCopied": "Message copied",
         "notificationsActivatedForThisChat": "Notifications activated for this chat",
         "notificationsMutedForThisChat": "Notifications muted for this chat"
+    },
+    "keepInTouchWithColleagues": "Keep in touch with your colleagues or join your groups' meeting rooms",
+    "meeting": {
+        "activeMeetingTooltip": "There's an active meeting for this Group",
+        "collapseChat": "Collapse chat",
+        "collapseParticipantsMeetingTooltip": "Collapse participants list",
+        "expandChat": "Expand chat",
+        "expandParticipantsListTooltip": "Expand participants list",
+        "extendChat": "Extend chat",
+        "interactions": {
+            "cameraDisabled": "Camera disabled",
+            "cameraEnabled": "Camera enabled",
+            "disableCamera": "Disable camera",
+            "disableMicrophone": "Disable microphone",
+            "enableCamera": "Enable camera",
+            "enableMicrophone": "Enable microphone",
+            "leaveMeeting": "Leave Meeting",
+            "microphoneDisabled": "Microphone disabled",
+            "microphoneEnabled": "Microphone enabled",
+            "playMic": "Start microphone testing",
+            "stopMic": "Stop microphone testing"
+        },
+        "joinMeeting": "Join meeting",
+        "joinMeetingDescription": "How do you want to join this meeting?",
+        "minimizeChat": "Minimize chat",
+        "newMeetingNotification": {
+            "sendAQuickMessage": "Send a quick message",
+            "sendMessage": "Send message",
+            "userIsInvitingYou": "<strong>{{name}}</strong> is inviting you",
+            "writeAMessageToSendIt": "Write a message to send it"
+        },
+        "ongoingGroupMeetingTooltip": "You are already participating in this meeting",
+        "ongoingOneToOneMeetingTooltip": "You already have an active meeting with {{name}}",
+        "participantsList": {
+            "title": "One meeting's participant",
+            "title_plural": "{{count}} meeting's participants"
+        },
+        "setInputDescription": "Set your input devices by choosing them from dropdown menu",
+        "startMeeting": "Start meeting",
+        "startModal": {
+            "audioAndVideoLoading": "Assets are loading",
+            "enterOneToOneMeetingTitle": "Start meeting with {{meetingTitle}}",
+            "enterRoomMeetingTitle": "Participate to {{meetingTitle}} meeting"
+        },
+        "waitingParticipants": "Waiting for participants to join..."
+    },
+    "meetings": {
+        "interactions": {
+            "yourCamIsDisabled": "Your camera is off",
+            "yourMicIsDisabled": "Your microphone is off"
+        }
     },
     "message": {
         "deletedMessage": "Deleted message",
@@ -137,12 +197,18 @@
         "removeMember": "Remove member",
         "showPreviousConversationHistory": "Show previous conversation history"
     },
+    "notification": {
+        "meeting": {
+            "ended": "Meeting Ended"
+        }
+    },
     "participantsList": {
         "closeSearch": "Close search",
         "moreMembersAccordionTitle": "members",
         "noMatch": "There are no items that match this search",
         "oneMemberAccordionTitle": "One member",
-        "searchMembers": "Search members"
+        "searchMembers": "Search members",
+        "searchParticipants": "Search participants"
     },
     "settings": {
         "notifications": {
@@ -176,12 +242,18 @@
         "offline": "Offline",
         "online": "Online"
     },
+    "thanksForParticipating": "Thanks for participating",
     "titlePlaceholder": "Your Group's title",
     "tooltip": {
+        "bottomOfList": "Bottom of list",
         "clear": "Clear",
         "close": "Close",
+        "collapseCarousel": "Collapse",
+        "collapseSidebar": "Collapse sidebar",
         "demoteModerator": "Demote moderator",
         "disableModalButton": "Choose at least one address",
+        "expandCarousel": "Expand",
+        "expandSidebar": "Expand sidebar",
         "forwardedMessage": "Message forwarded from another chat",
         "goToPrivateChat": "Go to private chat",
         "iAmModerator": "You're a moderator",
@@ -193,7 +265,10 @@
         "messageRead": "Read",
         "messageReceived": "Received",
         "messageSent": "Sent",
+        "muteForAll": "Mute for all",
+        "participantAlreadyMuted": "This participant is already muted",
         "pending": "Pending",
+        "pinVideo": "Pin video",
         "promoteModerator": "Promote to moderator",
         "promoteSomeoneElseToModerator": "Before leaving you have to promote someone else to moderator",
         "removeToAddNewOne": "Remove someone to add new members",
@@ -202,9 +277,13 @@
             "updatePicture": "Update picture",
             "uploadPicture": "Upload picture"
         },
+        "scrollDown": "Scroll down",
+        "scrollUp": "Scroll up",
         "selectEmoji": "Select emoji",
         "sendMessage": "Send message",
         "showConversationList": "Show conversations list",
+        "topOfList": "Top of list",
+        "unpinVideo": "Unpin video",
         "uploadAttachment": "Upload an attachment",
         "uploading": "Uploading",
         "userAvatar": {
@@ -213,5 +292,6 @@
             "uploadAvatar": "Upload avatar"
         },
         "writeToSend": "Write a message to send it"
-    }
+    },
+    "tryLater": "Try later"
 }
