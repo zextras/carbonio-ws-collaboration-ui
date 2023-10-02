@@ -47,6 +47,7 @@ type TileProps = {
 
 const HoverContainer = styled(Container)`
 	aspect-ratio: 16/9;
+	border-radius: 0.5rem;
 	height: auto;
 	opacity: 0;
 	position: absolute;
@@ -63,7 +64,7 @@ const CustomTile = styled(Container)`
 	aspect-ratio: 16/9;
 	height: auto;
 	min-width: 9.375rem;
-	border-radius: 8px;
+	border-radius: 0.5rem;
 	&:hover {
 		${HoverContainer} {
 			opacity: 1;
@@ -86,7 +87,7 @@ const VideoEl = styled.video`
 	object-fit: cover;
 	aspect-ratio: 16/9;
 	width: inherit;
-	border-radius: 8px;
+	border-radius: 0.5rem;
 	&:hover {
 		${HoverContainer} {
 			opacity: 1;

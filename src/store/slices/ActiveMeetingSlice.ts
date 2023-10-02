@@ -169,6 +169,7 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 					};
 				} else {
 					draft.activeMeeting[meetingId].localStreams = {
+						...draft.activeMeeting[meetingId].localStreams,
 						[streamType]: stream
 					};
 				}
@@ -206,6 +207,7 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 					}
 				} else {
 					draft.activeMeeting[meetingId].localStreams = {
+						...draft.activeMeeting[meetingId].localStreams,
 						[streamType === STREAM_TYPE.AUDIO ? 'selectedAudioDeviceId' : 'selectedVideoDeviceId']:
 							deviceId
 					};
