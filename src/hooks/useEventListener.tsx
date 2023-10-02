@@ -8,7 +8,6 @@ import { useEffect, useRef } from 'react';
 
 import {
 	MeetingJoinedEvent,
-	MeetingParticipantTalkingEvent,
 	MeetingStartedEvent
 } from '../types/network/websocket/wsMeetingEvents';
 import { Message } from '../types/store/MessageTypes';
@@ -16,8 +15,7 @@ import { Message } from '../types/store/MessageTypes';
 export enum EventName {
 	NEW_MESSAGE = 'newMessage',
 	INCOMING_MEETING = 'incomingMeeting',
-	REMOVED_MEETING_NOTIFICATION = 'removedMeetingNotification',
-	MEETING_PARTICIPANT_TALKING = 'meetingParticipantTalking'
+	REMOVED_MEETING_NOTIFICATION = 'removedMeetingNotification'
 }
 
 type CustomEvent =
@@ -32,10 +30,6 @@ type CustomEvent =
 	| {
 			name: EventName.REMOVED_MEETING_NOTIFICATION;
 			data: MeetingJoinedEvent;
-	  }
-	| {
-			name: EventName.MEETING_PARTICIPANT_TALKING;
-			data: MeetingParticipantTalkingEvent;
 	  };
 
 export const sendCustomEvent = (event: CustomEvent): void => {

@@ -22,6 +22,7 @@ export type ActiveMeeting = {
 	meetingViewSelected: MeetingViewType;
 	isCarouselVisible: boolean;
 	pinnedTile?: TileData;
+	talkingUsers: string[];
 };
 
 export type ActiveMeetingMap = {
@@ -81,4 +82,8 @@ export type StreamsSubscriptionMap = {
 export type TileData = {
 	userId: string;
 	type: STREAM_TYPE;
+};
+
+export type talkingUsers = {
+	userId: string;
 };

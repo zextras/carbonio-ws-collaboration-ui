@@ -14,14 +14,13 @@ import {
 	Tooltip,
 	useTheme
 } from '@zextras/carbonio-design-system';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import useEventListener, { EventName } from '../../hooks/useEventListener';
 import usePinnedTile from '../../hooks/usePinnedTile';
 import { UsersApi } from '../../network';
-import { getStream } from '../../store/selectors/ActiveMeetingSelectors';
+import { getIfUserIsTalking, getStream } from '../../store/selectors/ActiveMeetingSelectors';
 import {
 	getParticipantAudioStatus,
 	getParticipantVideoStatus
@@ -154,23 +153,14 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 	const userPictureUpdatedAt: string | undefined = useStore((state) =>
 		getUserPictureUpdatedAt(state, userId || '')
 	);
+	const userIsTalking = useStore((store) =>
+		getIfUserIsTalking(store, meetingId || '', userId || '')
+	);
 
 	const [picture, setPicture] = useState<false | string>(false);
-	const [isTalking, setIsTalking] = useState<boolean>(false);
 
 	const streamRef = useRef<null | HTMLVideoElement>(null);
 	const themeColor = useTheme();
-
-	const handleIsTalkingEvent = useCallback(
-		({ detail: isTalkingEvent }) => {
-			if (userId === isTalkingEvent.userId) {
-				setIsTalking(isTalkingEvent.isTalking);
-			}
-		},
-		[userId]
-	);
-
-	useEventListener(EventName.MEETING_PARTICIPANT_TALKING, handleIsTalkingEvent);
 
 	const { canUsePinFeature, isPinned, switchPinnedTile } = usePinnedTile(
 		meetingId || '',
@@ -320,7 +310,7 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 	);
 
 	return (
-		<CustomTile background={'text'} data-testid="tile" width="100%" isTalking={isTalking}>
+		<CustomTile background={'text'} data-testid="tile" width="100%" isTalking={userIsTalking}>
 			{showHoverContainer && hoverContainer}
 			<InfoContainer orientation="horizontal">
 				<Row
