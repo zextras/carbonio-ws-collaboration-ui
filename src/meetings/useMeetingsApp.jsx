@@ -28,12 +28,7 @@ export default function useMeetingsApp() {
 			label: MEETINGS_NAME,
 			primaryBar: 'TeamOutline',
 			appView: ExternalMain,
-			// TODO WITH NEW SHELL: set standalone: true
-			standalone: {
-				hidePrimaryBar: true,
-				hideShellHeader: true,
-				allowUnauthenticated: true
-			}
+			focusMode: true
 		});
 	}, []);
 }

@@ -60,8 +60,12 @@ export enum STREAM_TYPE {
 }
 
 export type Subscription = {
-	user_id: string;
+	userId: string;
 	type: STREAM_TYPE;
+};
+
+export type SubscriptionMap = {
+	[subscriptionId: string]: Subscription;
 };
 
 export type StreamSubscription = {

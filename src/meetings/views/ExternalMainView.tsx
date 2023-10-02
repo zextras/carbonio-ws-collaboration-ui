@@ -8,7 +8,6 @@ import { disable, enable } from 'darkreader';
 import { createMemoryHistory } from 'history';
 import React, { lazy, ReactElement, Suspense, useEffect } from 'react';
 import { Route, Router, Switch } from 'react-router-dom';
-import { createGlobalStyle } from 'styled-components';
 
 import ShimmerEntryMeetingView from './shimmers/ShimmerEntryMeetingView';
 import { MEETINGS_ROUTES, ROUTES } from '../../hooks/useRouting';
@@ -41,16 +40,6 @@ const InfoPage = (): ReactElement => (
 		<LazyInfoPage />
 	</Suspense>
 );
-
-// TODO WITH NEW SHELL: remove
-const MeetingTempGlobalStyle = createGlobalStyle`
-	[data-testid="MainHeaderContainer"], .hjBWLK {
-	  display: none;
-	}
-	.ddayvo {
-	  max-height: 100%;
-	}
-`;
 
 const ExternalMainView = (): ReactElement => {
 	const history = createMemoryHistory();
@@ -92,7 +81,6 @@ const ExternalMainView = (): ReactElement => {
 
 	return (
 		<Router history={history}>
-			<MeetingTempGlobalStyle />
 			<Switch>
 				<Route exact path={ROUTES.MAIN} component={AccessMeetingPageView} />
 				<Route exact path={MEETINGS_ROUTES.MEETING} component={MeetingSkeleton} />

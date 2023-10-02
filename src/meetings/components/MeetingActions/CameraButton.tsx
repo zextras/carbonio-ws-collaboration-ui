@@ -17,7 +17,7 @@ import React, {
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 
-import { MeetingsApi } from '../../../network';
+import MeetingsApi from '../../../network/apis/MeetingsApi';
 import { getSelectedVideoDeviceId } from '../../../store/selectors/ActiveMeetingSelectors';
 import { getParticipantVideoStatus } from '../../../store/selectors/MeetingSelectors';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
@@ -46,12 +46,15 @@ const CameraButton = ({
 
 	const videoStatus = useStore((store) => getParticipantVideoStatus(store, meetingId, myUserId));
 	const selectedVideoDeviceId = useStore((store) => getSelectedVideoDeviceId(store, meetingId));
-	const createVideoOutConn = useStore((store) => store.createVideoOutConn);
 	const videoOutConn = useStore((store) => store.activeMeeting[meetingId]?.videoOutConn);
-	const closeVideoOutConn = useStore((store) => store.closeVideoOutConn);
-	const removeLocalStreams = useStore((store) => store.removeLocalStreams);
 	const setSelectedDeviceId = useStore((store) => store.setSelectedDeviceId);
 	const setLocalStreams = useStore((store) => store.setLocalStreams);
+
+	const [buttonStatus, setButtonStatus] = useState<boolean>(true);
+
+	useEffect(() => {
+		setButtonStatus(true);
+	}, [videoStatus]);
 
 	const [videoMediaList, setVideoMediaList] = useState<[] | MediaDeviceInfo[]>([]);
 
@@ -85,8 +88,8 @@ const CameraButton = ({
 		(event) => {
 			event.stopPropagation();
 			if (!videoStatus) {
-				if (!videoOutConn) {
-					createVideoOutConn(meetingId, true, selectedVideoDeviceId);
+				if (!videoOutConn?.peerConn) {
+					videoOutConn?.startVideo(selectedVideoDeviceId);
 				} else {
 					getVideoStream(selectedVideoDeviceId).then((stream) => {
 						videoOutConn
@@ -95,21 +98,11 @@ const CameraButton = ({
 					});
 				}
 			} else {
-				closeVideoOutConn(meetingId);
-				MeetingsApi.updateMediaOffer(meetingId, STREAM_TYPE.VIDEO, false).then(() =>
-					removeLocalStreams(meetingId, STREAM_TYPE.VIDEO)
-				);
+				videoOutConn?.stopVideo();
 			}
+			setButtonStatus(false);
 		},
-		[
-			videoStatus,
-			videoOutConn,
-			createVideoOutConn,
-			meetingId,
-			selectedVideoDeviceId,
-			closeVideoOutConn,
-			removeLocalStreams
-		]
+		[videoStatus, videoOutConn, selectedVideoDeviceId, meetingId]
 	);
 
 	const updateListOfDevices = useCallback(() => {
@@ -155,6 +148,7 @@ const CameraButton = ({
 					onClick: toggleVideoDropdown,
 					dropdownListRef: videoDropdownRef
 				}}
+				disabled={!buttonStatus}
 			/>
 		</Tooltip>
 	);
