@@ -16,12 +16,13 @@ import { STREAM_TYPE } from '../types/store/ActiveMeetingTypes';
 const useGeneralMeetingControls = (meetingId: string): void => {
 	const meeting = useStore((store) => getMeetingByMeetingId(store, meetingId));
 	const tiles = useStore((store) => getTiles(store, meetingId));
+	const setPinnedTile = useStore((store) => store.setPinnedTile);
 
 	const { goToInfoPage } = useRouting();
 
 	const leaveMeeting = useCallback(() => MeetingsApi.leaveMeeting(meetingId), [meetingId]);
 
-	// Redirect if meeting ended or some error occurred
+	// Redirect to info page if meeting ended or some error occurred
 	useEffect(() => {
 		if (!meeting) goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED);
 	}, [goToInfoPage, meeting]);
@@ -61,6 +62,21 @@ const useGeneralMeetingControls = (meetingId: string): void => {
 			}
 		}
 	}, [tiles, meetingId]);
+
+	// Pin screen share tile if I join a meeting with it (to do only once after join)
+	useEffect(() => {
+		const screenShareParticipant = find(
+			meeting?.participants,
+			(user) => user.screenStreamOn === true
+		);
+		if (screenShareParticipant) {
+			setPinnedTile(meetingId, {
+				userId: screenShareParticipant.userId,
+				type: STREAM_TYPE.SCREEN
+			});
+		}
+		// eslint-disable-next-line
+	}, [meetingId, setPinnedTile]);
 };
 
 export default useGeneralMeetingControls;
