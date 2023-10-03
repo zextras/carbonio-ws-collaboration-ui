@@ -296,7 +296,7 @@ jest.mock('./src/network', () => ({
 // MOCK MEDIADEVICES
 const mockedGetUserMediaPromise: jest.Mock = jest.fn(() => ({
 	getTracks: jest.fn(() => ({ forEach: jest.fn() })),
-  getAudioTracks: jest.fn(() => ({ forEach: jest.fn() }))
+	getAudioTracks: jest.fn(() => ({ forEach: jest.fn() }))
 }));
 const getUserMediaPromise = jest.fn(
 	async () =>

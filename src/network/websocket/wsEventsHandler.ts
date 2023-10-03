@@ -263,11 +263,12 @@ export function wsEventsHandler(event: WsEvent): void {
 			break;
 		}
 		case WsEventType.MEETING_PARTICIPANT_TALKING: {
-      const activeMeeting = state.activeMeeting[event.meetingId];
-      if (activeMeeting?.videoInConn) {
-        console.log(state.activeMeeting[event.meetingId].talkingUsers);
-        state.setTalkingUsers(event.meetingId, event.userId, event.isTalking);
-      }			break;
+			const activeMeeting = state.activeMeeting[event.meetingId];
+			if (activeMeeting?.videoInConn) {
+				console.log(state.activeMeeting[event.meetingId].talkingUsers);
+				state.setTalkingUsers(event.meetingId, event.userId, event.isTalking);
+			}
+			break;
 		}
 		case WsEventType.MEETING_PARTICIPANT_CLASHED: {
 			// TODO
