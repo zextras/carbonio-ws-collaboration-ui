@@ -240,7 +240,6 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 						draft.activeMeeting[meetingId].talkingUsers?.splice(index, 1);
 					}
 				}
-				console.log(draft.activeMeeting[meetingId].talkingUsers);
 			}),
 			false,
 			'AM/SET_IS_TALKING'
