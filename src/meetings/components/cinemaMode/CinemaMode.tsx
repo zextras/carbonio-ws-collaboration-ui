@@ -62,7 +62,7 @@ const CinemaMode = (): ReactElement => {
 				<Tile
 					userId={centralTile?.userId}
 					meetingId={meetingId}
-					isScreenShare={centralTile.type === STREAM_TYPE.SCREEN}
+					isScreenShare={centralTile?.type === STREAM_TYPE.SCREEN}
 				/>
 			</CinemaContainer>
 		</Container>
