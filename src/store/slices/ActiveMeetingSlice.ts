@@ -168,6 +168,7 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 					};
 				} else {
 					draft.activeMeeting[meetingId].localStreams = {
+						...draft.activeMeeting[meetingId].localStreams,
 						[streamType]: stream
 					};
 				}
@@ -205,6 +206,7 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 					}
 				} else {
 					draft.activeMeeting[meetingId].localStreams = {
+						...draft.activeMeeting[meetingId].localStreams,
 						[streamType === STREAM_TYPE.AUDIO ? 'selectedAudioDeviceId' : 'selectedVideoDeviceId']:
 							deviceId
 					};
@@ -223,26 +225,26 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 			'AM/SET_SUBSCRIPTION'
 		);
 	},
-	setTalkingUsers: (meetingId: string, userId: string, isTalking: boolean): void => {
-		set(
-			produce((draft: RootStore) => {
-				if (isTalking) {
-					// If flag is true, add the ID to the array if it's not already present
-					if (!draft.activeMeeting[meetingId].talkingUsers.includes(userId)) {
-						draft.activeMeeting[meetingId].talkingUsers.push(userId);
-					}
-				} else {
-					// If flag is false, remove the ID from the array if it's present
-					const index = draft.activeMeeting[meetingId].talkingUsers.indexOf(userId);
-					if (index !== -1) {
-						draft.activeMeeting[meetingId].talkingUsers?.splice(index, 1);
-					}
-				}
-			}),
-			false,
-			'AM/SET_IS_TALKING'
-		);
-	},
+  setTalkingUsers: (meetingId: string, userId: string, isTalking: boolean): void => {
+    set(
+      produce((draft: RootStore) => {
+        if (isTalking) {
+          // If flag is true, add the ID to the array if it's not already present
+          if (!draft.activeMeeting[meetingId].talkingUsers.includes(userId)) {
+            draft.activeMeeting[meetingId].talkingUsers.push(userId);
+          }
+        } else {
+          // If flag is false, remove the ID from the array if it's present
+          const index = draft.activeMeeting[meetingId].talkingUsers.indexOf(userId);
+          if (index !== -1) {
+            draft.activeMeeting[meetingId].talkingUsers?.splice(index, 1);
+          }
+        }
+      }),
+      false,
+      'AM/SET_IS_TALKING'
+    );
+  },
 	setIsCarouseVisible: (meetingId: string, status: boolean): void => {
 		set(
 			produce((draft: RootStore) => {
