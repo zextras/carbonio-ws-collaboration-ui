@@ -10,7 +10,7 @@ import meetingsApi from './MeetingsApi';
 import { fetchResponse } from '../../../jest-mocks';
 import useStore from '../../store/Store';
 import { createMockMeeting } from '../../tests/createMock';
-import { MeetingType, MeetingUserType } from '../../types/network/models/meetingBeTypes';
+import { MeetingType } from '../../types/network/models/meetingBeTypes';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
 
 const meetingMock = createMockMeeting();
@@ -28,7 +28,6 @@ const ongoingMeetingSetup = (): void => {
 	store.addMeeting(meetingMock);
 	store.addParticipant(meetingMock.id, {
 		userId: 'userId',
-		userType: MeetingUserType.REGISTERED,
 		audioStreamOn: false,
 		videoStreamOn: false,
 		joinedAt: '2021-01-01T00:00:00.000Z'

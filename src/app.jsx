@@ -47,6 +47,8 @@ const initApp = () => {
 			// CHATS BE: get all rooms list
 			RoomsApi.listRooms(true, true)
 				.then(() => {
+					// Set ChatsBe status to be truthy
+					store.setChatsBeStatus(true);
 					// Init xmppClient and webSocket after roomList request to avoid missing data (specially for the inbox request)
 					xmppClient.connect(resp[0].zmToken);
 					webSocket.connect();

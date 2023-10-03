@@ -141,13 +141,13 @@ export const getSubscriptions = (store: RootStore, meetingId: string): Subscript
 			if (participant.userId !== store.session.id) {
 				if (participant.videoStreamOn) {
 					subscriptions.push({
-						user_id: participant.userId,
+						userId: participant.userId,
 						type: STREAM_TYPE.VIDEO
 					});
 				}
 				if (participant.screenStreamOn) {
 					subscriptions.push({
-						user_id: participant.userId,
+						userId: participant.userId,
 						type: STREAM_TYPE.SCREEN
 					});
 				}

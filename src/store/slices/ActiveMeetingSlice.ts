@@ -52,9 +52,11 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 						selectedAudioDeviceId
 					),
 					videoInConn: new VideoInConnection(meetingId),
-					videoOutConn: videoStreamEnabled
-						? new VideoOutConnection(meetingId, videoStreamEnabled, selectedVideoDeviceId)
-						: undefined,
+					videoOutConn: new VideoOutConnection(
+						meetingId,
+						videoStreamEnabled,
+						selectedVideoDeviceId
+					),
 					screenOutConn: new ScreenOutConnection(meetingId),
 					subscription: {}
 				};
@@ -137,37 +139,6 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 			'AM/SET_VIEW_TYPE'
 		);
 	},
-
-	createVideoOutConn: (
-		meetingId: string,
-		videoStreamEnabled: boolean,
-		selectedVideoDeviceId?: string
-	): void => {
-		set(
-			produce((draft: RootStore) => {
-				const videoOutConn = new VideoOutConnection(
-					meetingId,
-					videoStreamEnabled,
-					selectedVideoDeviceId
-				);
-				draft.activeMeeting[meetingId].videoOutConn = videoOutConn;
-			}),
-			false,
-			'AM/SET_VIDEO_OUT_CONN'
-		);
-	},
-	closeVideoOutConn: (meetingId: string): void => {
-		set(
-			produce((draft: RootStore) => {
-				if (draft.activeMeeting[meetingId].videoOutConn) {
-					draft.activeMeeting[meetingId].videoOutConn?.closePeerConnection();
-					delete draft.activeMeeting[meetingId].videoOutConn;
-				}
-			}),
-			false,
-			'AM/CLOSE_VIDEO_OUT_CONN'
-		);
-	},
 	setLocalStreams: (meetingId: string, streamType: STREAM_TYPE, stream: MediaStream): void => {
 		set(
 			produce((draft: RootStore) => {
@@ -178,6 +149,7 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 					};
 				} else {
 					draft.activeMeeting[meetingId].localStreams = {
+						...draft.activeMeeting[meetingId].localStreams,
 						[streamType]: stream
 					};
 				}
@@ -189,7 +161,7 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 	removeLocalStreams: (meetingId: string, streamType: STREAM_TYPE): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (streamType === STREAM_TYPE.SCREEN) {
+				if (streamType === STREAM_TYPE.VIDEO || streamType === STREAM_TYPE.SCREEN) {
 					draft.activeMeeting[meetingId]?.localStreams?.[streamType]
 						?.getTracks()
 						.forEach((track) => track.stop());
@@ -217,6 +189,7 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 					}
 				} else {
 					draft.activeMeeting[meetingId].localStreams = {
+						...draft.activeMeeting[meetingId].localStreams,
 						[streamType === STREAM_TYPE.AUDIO ? 'selectedAudioDeviceId' : 'selectedVideoDeviceId']:
 							deviceId
 					};

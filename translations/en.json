@@ -147,6 +147,7 @@
         "setInputDescription": "Set your input devices by choosing them from dropdown menu",
         "startMeeting": "Start meeting",
         "startModal": {
+            "audioAndVideoLoading": "Assets are loading",
             "enterOneToOneMeetingTitle": "Start meeting with {{meetingTitle}}",
             "enterRoomMeetingTitle": "Participate to {{meetingTitle}} meeting"
         },

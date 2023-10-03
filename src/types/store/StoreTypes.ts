@@ -181,12 +181,6 @@ export type ActiveMeetingSlice = {
 		selectedVideoDeviceId: string | undefined
 	) => void;
 	meetingDisconnection: (meetingId: string) => void;
-	createVideoOutConn: (
-		meetingId: string,
-		videoStreamEnabled: boolean,
-		selectedVideoDeviceId?: string
-	) => void;
-	closeVideoOutConn: (meetingId: string) => void;
 	setLocalStreams: (meetingId: string, streamType: STREAM_TYPE, stream: MediaStream) => void;
 	removeLocalStreams: (meetingId: string, streamType: STREAM_TYPE) => void;
 	setMeetingSidebarStatus: (meetingId: string, status: boolean) => void;

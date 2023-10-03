@@ -4,7 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { STREAM_TYPE } from '../../store/ActiveMeetingTypes';
+import SubscriptionsManager from '../../../network/webRTC/SubscriptionsManager';
+import { StreamInfo } from '../models/meetingBeTypes';
 
 export interface IPeerConnConfig {
 	addIceServer(iceServer: RTCIceServer): void;
@@ -22,6 +23,9 @@ export interface IBidirectionalConnectionAudioInOut extends IPeerConnection {
 	selectedAudioDeviceId: string | undefined;
 	initialAudioStatus: boolean;
 	oscillatorAudioTrack: MediaStreamTrack | undefined;
+	onTrack: (trackEvent: RTCTrackEvent) => void;
+	onNegotiationNeeded: () => void;
+	onIceConnectionStateChange: (ev: Event) => void;
 	handleRemoteAnswer(remoteAnswer: RTCSessionDescriptionInit): void;
 	updateLocalStreamTrack(mediaStreamTrack: MediaStream): Promise<MediaStreamTrack>;
 	updateRemoteStreamAudio(): void;
@@ -31,9 +35,12 @@ export interface IBidirectionalConnectionAudioInOut extends IPeerConnection {
 export interface IVideoOutConnection extends IPeerConnection {
 	rtpSender: RTCRtpSender | null;
 	selectedVideoDeviceId: string | undefined;
+	onNegotiationNeeded: () => void;
+	onIceConnectionStateChange: (ev: Event) => void;
+	startVideo(selectedVideoDeviceId?: string): void;
+	stopVideo(): void;
 	handleRemoteAnswer(remoteAnswer: RTCSessionDescriptionInit): void;
-	handleOfferCreated(rtcSessionDescription: RTCSessionDescriptionInit): void;
-	updateLocalStreamTrack(mediaStreamTrack: MediaStream): Promise<MediaStreamTrack>;
+	updateLocalStreamTrack(mediaStreamTrack: MediaStream): Promise<MediaStreamTrack | undefined>;
 	closeRtpSenderTrack(): void;
 }
 
@@ -45,6 +52,7 @@ export interface IScreenOutConnection extends IPeerConnection {
 
 export interface IVideoInConnection extends IPeerConnection {
 	onTrack: (ev: RTCTrackEvent) => void;
-	handleStreams(streamsMap: { user_id: string; type: STREAM_TYPE }[]): void;
+	subscriptionManager: SubscriptionsManager;
 	handleRemoteOffer(sdp: string): void;
+	handleParticipantsSubscribed(streamsMap: StreamInfo[]): void;
 }
