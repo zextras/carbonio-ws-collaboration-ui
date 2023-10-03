@@ -157,7 +157,7 @@ export function wsEventsHandler(event: WsEvent): void {
 
 			// Update subscription manager
 			const subscriptionsManager =
-				state.activeMeeting[event.meetingId]?.videoInConn?.subscriptionManager;
+				state.activeMeeting[event.meetingId]?.videoScreenIn?.subscriptionManager;
 			if (subscriptionsManager) {
 				subscriptionsManager?.removeStreamToAsk(event.userId, STREAM_TYPE.VIDEO);
 				subscriptionsManager?.removeStreamToAsk(event.userId, STREAM_TYPE.SCREEN);
@@ -208,7 +208,7 @@ export function wsEventsHandler(event: WsEvent): void {
 			// Update subscription manager
 			if (event.userId !== state.session.id) {
 				const subscriptionsManager =
-					state.activeMeeting[event.meetingId]?.videoInConn?.subscriptionManager;
+					state.activeMeeting[event.meetingId]?.videoScreenIn?.subscriptionManager;
 				if (event.active) {
 					subscriptionsManager?.addStreamToAsk(event.userId, mediaType);
 				} else {
@@ -248,15 +248,15 @@ export function wsEventsHandler(event: WsEvent): void {
 		}
 		case WsEventType.MEETING_SDP_OFFERED: {
 			const activeMeeting = state.activeMeeting[event.meetingId];
-			if (activeMeeting?.videoInConn) {
-				activeMeeting.videoInConn.handleRemoteOffer(event.sdp);
+			if (activeMeeting?.videoScreenIn) {
+				activeMeeting.videoScreenIn.handleRemoteOffer(event.sdp);
 			}
 			break;
 		}
 		case WsEventType.MEETING_PARTICIPANT_SUBSCRIBED: {
 			const activeMeeting = state.activeMeeting[event.meetingId];
-			if (activeMeeting?.videoInConn) {
-				activeMeeting.videoInConn.handleParticipantsSubscribed(event.streams);
+			if (activeMeeting?.videoScreenIn) {
+				activeMeeting.videoScreenIn.handleParticipantsSubscribed(event.streams);
 			}
 			break;
 		}

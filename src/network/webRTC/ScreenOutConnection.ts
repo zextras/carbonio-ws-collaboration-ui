@@ -12,46 +12,38 @@ import { getScreenStream } from '../../utils/UserMediaManager';
 import MeetingsApi from '../apis/MeetingsApi';
 
 export default class ScreenOutConnection implements IScreenOutConnection {
-	meetingId: string;
-
 	peerConn: RTCPeerConnection | null;
+
+	meetingId: string;
 
 	rtpSender: RTCRtpSender | null;
 
 	constructor(meetingId: string) {
-		this.meetingId = meetingId;
 		this.peerConn = null;
+		this.meetingId = meetingId;
 		this.rtpSender = null;
-	}
-
-	private createPeerConnection(): void {
-		this.peerConn = new RTCPeerConnection(new PeerConnConfig().getConfig());
-		this.peerConn.onnegotiationneeded = this.onNegotiationNeeded;
-		this.peerConn.oniceconnectionstatechange = this.onIceConnectionStateChange;
 	}
 
 	// Create SDP offer, set it as local description and send it to the remote peer
 	private onNegotiationNeeded = (): void => {
-		if (this.peerConn) {
-			this.peerConn
-				.createOffer()
-				.then((rtcSessionDesc: RTCSessionDescriptionInit) => {
-					if (this.peerConn?.signalingState === 'stable') {
-						this.peerConn
-							.setLocalDescription(rtcSessionDesc)
-							.then(() => {
-								MeetingsApi.updateMediaOffer(
-									this.meetingId,
-									STREAM_TYPE.SCREEN,
-									true,
-									rtcSessionDesc.sdp
-								);
-							})
-							.catch((reason) => console.warn(reason));
-					}
-				})
-				.catch((reason) => console.warn('createOffer failed', reason));
-		}
+		this.peerConn
+			?.createOffer()
+			.then((rtcSessionDesc: RTCSessionDescriptionInit) => {
+				if (this.peerConn?.signalingState === 'stable') {
+					this.peerConn
+						.setLocalDescription(rtcSessionDesc)
+						.then(() => {
+							MeetingsApi.updateMediaOffer(
+								this.meetingId,
+								STREAM_TYPE.SCREEN,
+								true,
+								rtcSessionDesc.sdp
+							);
+						})
+						.catch((reason) => console.warn(reason));
+				}
+			})
+			.catch((reason) => console.warn('createOffer failed', reason));
 	};
 
 	private onIceConnectionStateChange = (ev: Event): void => {
@@ -62,15 +54,7 @@ export default class ScreenOutConnection implements IScreenOutConnection {
 		}
 	};
 
-	// Handle remote answer to the SDP offer arrived from the signaling channel
-	handleRemoteAnswer(remoteAnswer: RTCSessionDescriptionInit): void {
-		if (this.peerConn?.signalingState !== 'have-remote-offer') {
-			const remoteDescription: RTCSessionDescription = new RTCSessionDescription(remoteAnswer);
-			this.peerConn?.setRemoteDescription(remoteDescription);
-		}
-	}
-
-	updateLocalStreamTrack(mediaStreamTrack: MediaStream): Promise<MediaStreamTrack> {
+	private updateLocalStreamTrack(mediaStreamTrack: MediaStream): Promise<MediaStreamTrack> {
 		return new Promise((resolve) => {
 			const videoTrack: MediaStreamTrack = mediaStreamTrack.getVideoTracks()[0];
 			if (this.peerConn) {
@@ -89,23 +73,30 @@ export default class ScreenOutConnection implements IScreenOutConnection {
 		});
 	}
 
-	startScreenShare(): void {
-		this.createPeerConnection();
+	public startScreenShare(): void {
+		this.peerConn = new RTCPeerConnection(new PeerConnConfig().getConfig());
+		this.peerConn.onnegotiationneeded = this.onNegotiationNeeded;
+		this.peerConn.oniceconnectionstatechange = this.onIceConnectionStateChange;
+
 		getScreenStream().then((stream) => {
-			this.updateLocalStreamTrack(stream).then(() => {
-				useStore.getState().setLocalStreams(this.meetingId, STREAM_TYPE.SCREEN, stream);
-			});
+			this.updateLocalStreamTrack(stream);
+			useStore.getState().setLocalStreams(this.meetingId, STREAM_TYPE.SCREEN, stream);
 		});
 	}
 
-	stopScreenShare(): void {
-		MeetingsApi.updateMediaOffer(this.meetingId, STREAM_TYPE.SCREEN, false).then(() => {
-			this.closePeerConnection();
-			useStore.getState().removeLocalStreams(this.meetingId, STREAM_TYPE.SCREEN);
-		});
+	// Handle remote answer to the SDP offer arrived from the signaling channel
+	public handleRemoteAnswer(remoteAnswer: RTCSessionDescriptionInit): void {
+		const remoteDescription: RTCSessionDescription = new RTCSessionDescription(remoteAnswer);
+		this.peerConn?.setRemoteDescription(remoteDescription);
 	}
 
-	closePeerConnection(): void {
+	public stopScreenShare(): void {
+		this.closePeerConnection();
+		MeetingsApi.updateMediaOffer(this.meetingId, STREAM_TYPE.SCREEN, false);
+	}
+
+	public closePeerConnection(): void {
+		useStore.getState().removeLocalStreams(this.meetingId, STREAM_TYPE.SCREEN);
 		this.rtpSender?.track?.stop();
 		this.peerConn?.close();
 		this.peerConn = null;

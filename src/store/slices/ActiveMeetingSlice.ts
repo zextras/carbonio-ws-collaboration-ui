@@ -9,8 +9,8 @@ import produce from 'immer';
 
 import BidirectionalConnectionAudioInOut from '../../network/webRTC/BidirectionalConnectionAudioInOut';
 import ScreenOutConnection from '../../network/webRTC/ScreenOutConnection';
-import VideoInConnection from '../../network/webRTC/VideoInConnection';
 import VideoOutConnection from '../../network/webRTC/VideoOutConnection';
+import VideoScreenInConnection from '../../network/webRTC/VideoScreenInConnection';
 import {
 	MeetingChatVisibility,
 	MeetingViewType,
@@ -51,7 +51,7 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 						audioStreamEnabled,
 						selectedAudioDeviceId
 					),
-					videoInConn: new VideoInConnection(meetingId),
+					videoScreenIn: new VideoScreenInConnection(meetingId),
 					videoOutConn: new VideoOutConnection(
 						meetingId,
 						videoStreamEnabled,
@@ -69,7 +69,7 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 		set(
 			produce((draft: RootStore) => {
 				draft.activeMeeting[meetingId]?.bidirectionalAudioConn?.closePeerConnection();
-				draft.activeMeeting[meetingId]?.videoInConn?.closePeerConnection();
+				draft.activeMeeting[meetingId]?.videoScreenIn?.closePeerConnection();
 				draft.activeMeeting[meetingId]?.videoOutConn?.closePeerConnection();
 				draft.activeMeeting[meetingId]?.screenOutConn?.closePeerConnection();
 				delete draft.activeMeeting[meetingId];
