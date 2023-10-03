@@ -105,7 +105,7 @@ const storeSetupTileAudioOffAndVideoOn = (): { user: UserEvent; store: RootStore
 	return { user, store };
 };
 
-/* const setupActiveMeeting = (): void => {
+const setupActiveMeeting = (): void => {
 	const store: RootStore = useStore.getState();
 	store.setUserInfo(user1);
 	store.setUserInfo(user2);
@@ -113,7 +113,7 @@ const storeSetupTileAudioOffAndVideoOn = (): { user: UserEvent; store: RootStore
 	store.setLoginInfo(user1.id, user1.name);
 	store.addRoom(room);
 	store.addMeeting(meeting);
-	store.meetingConnection(meeting.id, true, undefined, false, undefined);
+	store.meetingConnection(meeting.id, true, 'audioId', false, undefined);
 	store.setTalkingUsers(meeting.id, user3.id, true);
 
 	setup(
@@ -128,7 +128,7 @@ const storeSetupTileAudioOffAndVideoOn = (): { user: UserEvent; store: RootStore
 			}}
 		/>
 	);
-}; */
+};
 
 const storeSetupTileAudioOnAndVideoOff = (): { user: UserEvent; store: RootStore } => {
 	const store: RootStore = useStore.getState();
@@ -182,9 +182,9 @@ describe('Tile test', () => {
 		expect(audioIcon).toBeInTheDocument();
 	});
 	// TODO
-	// test('user tile - user is Talking', () => {
-	//	setupActiveMeeting();
-	//	const tile = screen.getByTestId('tile');
-	//	expect(tile).toHaveStyle('outline: 2px solid #8bc34a;');
-	// });
+	test('user tile - user is Talking', () => {
+		setupActiveMeeting();
+		const tile = screen.getByTestId('tile');
+		expect(tile).toHaveStyle('outline: 2px solid #8bc34a;');
+	});
 });
