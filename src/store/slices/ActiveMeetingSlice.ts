@@ -51,9 +51,11 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 						selectedAudioDeviceId
 					),
 					videoInConn: new VideoInConnection(meetingId),
-					videoOutConn: videoStreamEnabled
-						? new VideoOutConnection(meetingId, videoStreamEnabled, selectedVideoDeviceId)
-						: undefined,
+					videoOutConn: new VideoOutConnection(
+						meetingId,
+						videoStreamEnabled,
+						selectedVideoDeviceId
+					),
 					subscription: {},
 					talkingUsers: []
 				};

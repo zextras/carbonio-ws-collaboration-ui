@@ -20,7 +20,7 @@ import styled from 'styled-components';
 
 import usePinnedTile from '../../hooks/usePinnedTile';
 import { UsersApi } from '../../network';
-import { getIfUserIsTalking, getStream } from '../../store/selectors/ActiveMeetingSelectors';
+import { getUserIsTalking, getStream } from '../../store/selectors/ActiveMeetingSelectors';
 import {
 	getParticipantAudioStatus,
 	getParticipantVideoStatus
@@ -66,7 +66,7 @@ const CustomTile = styled(Container)`
 	min-width: 9.375rem;
 	border-radius: 0.5rem;
 	${({ isTalking, theme }): string | false =>
-		isTalking && `outline: 2px solid ${theme.palette.success.regular};`}
+		isTalking && `outline: 0.125rem solid ${theme.palette.success.regular};`}
 	&:hover {
 		${HoverContainer} {
 			opacity: 1;
@@ -153,9 +153,7 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 	const userPictureUpdatedAt: string | undefined = useStore((state) =>
 		getUserPictureUpdatedAt(state, userId || '')
 	);
-	const userIsTalking = useStore((store) =>
-		getIfUserIsTalking(store, meetingId || '', userId || '')
-	);
+	const userIsTalking = useStore((store) => getUserIsTalking(store, meetingId || '', userId || ''));
 
 	const [picture, setPicture] = useState<false | string>(false);
 

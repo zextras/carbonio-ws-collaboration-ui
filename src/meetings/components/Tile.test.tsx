@@ -185,6 +185,6 @@ describe('Tile test', () => {
 	test('user tile - user is Talking', () => {
 		setupActiveMeeting();
 		const tile = screen.getByTestId('tile');
-		expect(tile).toHaveStyle('outline: 2px solid #8bc34a;');
+		expect(tile).toHaveStyle('outline: 0.125rem solid #8bc34a;');
 	});
 });

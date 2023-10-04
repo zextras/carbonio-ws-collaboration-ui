@@ -83,7 +83,3 @@ export type TileData = {
 	userId: string;
 	type: STREAM_TYPE;
 };
-
-export type talkingUsers = {
-	userId: string;
-};

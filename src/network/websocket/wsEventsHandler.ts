@@ -264,7 +264,7 @@ export function wsEventsHandler(event: WsEvent): void {
 		}
 		case WsEventType.MEETING_PARTICIPANT_TALKING: {
 			const activeMeeting = state.activeMeeting[event.meetingId];
-			if (activeMeeting?.videoInConn) {
+			if (activeMeeting) {
 				state.setTalkingUsers(event.meetingId, event.userId, event.isTalking);
 			}
 			break;
