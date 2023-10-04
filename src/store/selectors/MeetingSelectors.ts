@@ -93,13 +93,13 @@ export const getTiles = (store: RootStore, meetingId: string): TileData[] => {
 			tiles.push({
 				userId: participant.userId,
 				type: STREAM_TYPE.VIDEO,
-				date: participant.joinedAt
+				creationDate: participant.joinedAt
 			});
 			if (participant.screenStreamOn) {
 				tiles.push({
 					userId: participant.userId,
 					type: STREAM_TYPE.SCREEN,
-					date: participant.dateScreenOn
+					creationDate: participant.dateScreenOn
 				});
 			}
 		});

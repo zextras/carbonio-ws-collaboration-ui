@@ -82,5 +82,5 @@ export type StreamsSubscriptionMap = {
 export type TileData = {
 	userId: string;
 	type: STREAM_TYPE;
-	date?: string;
+	creationDate?: string;
 };

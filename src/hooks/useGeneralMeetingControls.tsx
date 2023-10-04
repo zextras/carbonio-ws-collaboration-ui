@@ -55,7 +55,7 @@ const useGeneralMeetingControls = (meetingId: string): void => {
 					// Remove pin screen if participant left or stopped sharing replacing with another screen
 					if (pinnedTile?.type === STREAM_TYPE.SCREEN) {
 						const allScreenShare = filter(tiles, (tile) => tile.type === STREAM_TYPE.SCREEN);
-						const screenToPin = maxBy(allScreenShare, (tile) => tile.date);
+						const screenToPin = maxBy(allScreenShare, (tile) => tile.creationDate);
 						useStore.getState().setPinnedTile(meetingId, screenToPin);
 					}
 				}

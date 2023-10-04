@@ -37,7 +37,7 @@ describe('useTilesOrder custom hook - ordered by joined time', () => {
 		expect(result.current.centralTile).toEqual({
 			userId: sessionUser.userId,
 			type: 'video',
-			date: sessionUser.joinedAt
+			creationDate: sessionUser.joinedAt
 		});
 		expect(result.current.carouselTiles).toEqual([]);
 	});
@@ -50,10 +50,10 @@ describe('useTilesOrder custom hook - ordered by joined time', () => {
 		expect(result.current.centralTile).toEqual({
 			userId: sessionUser.userId,
 			type: 'video',
-			date: sessionUser.joinedAt
+			creationDate: sessionUser.joinedAt
 		});
 		expect(result.current.carouselTiles).toEqual([
-			{ userId: participant1.userId, type: 'video', date: participant1.joinedAt }
+			{ userId: participant1.userId, type: 'video', creationDate: participant1.joinedAt }
 		]);
 	});
 
@@ -65,13 +65,13 @@ describe('useTilesOrder custom hook - ordered by joined time', () => {
 		expect(result.current.centralTile).toEqual({
 			userId: participant0.userId,
 			type: 'video',
-			date: participant0.joinedAt
+			creationDate: participant0.joinedAt
 		});
 		expect(result.current.carouselTiles).toEqual([
 			{
 				userId: sessionUser.userId,
 				type: 'video',
-				date: sessionUser.joinedAt
+				creationDate: sessionUser.joinedAt
 			}
 		]);
 	});
@@ -86,12 +86,12 @@ describe('useTilesOrder custom hook - ordered by joined time', () => {
 		expect(result.current.centralTile).toEqual({
 			userId: participant1.userId,
 			type: 'video',
-			date: participant1.joinedAt
+			creationDate: participant1.joinedAt
 		});
 		expect(result.current.carouselTiles).toEqual([
-			{ userId: participant2.userId, type: 'video', date: participant2.joinedAt },
-			{ userId: participant3.userId, type: 'video', date: participant3.joinedAt },
-			{ userId: participant4.userId, type: 'video', date: participant4.joinedAt }
+			{ userId: participant2.userId, type: 'video', creationDate: participant2.joinedAt },
+			{ userId: participant3.userId, type: 'video', creationDate: participant3.joinedAt },
+			{ userId: participant4.userId, type: 'video', creationDate: participant4.joinedAt }
 		]);
 
 		act(() => useStore.getState().addParticipant(meeting.id, participant5));
@@ -99,13 +99,13 @@ describe('useTilesOrder custom hook - ordered by joined time', () => {
 		expect(result.current.centralTile).toEqual({
 			userId: participant1.userId,
 			type: 'video',
-			date: participant1.joinedAt
+			creationDate: participant1.joinedAt
 		});
 		expect(result.current.carouselTiles).toEqual([
-			{ userId: participant2.userId, type: 'video', date: participant2.joinedAt },
-			{ userId: participant3.userId, type: 'video', date: participant3.joinedAt },
-			{ userId: participant4.userId, type: 'video', date: participant4.joinedAt },
-			{ userId: participant5.userId, type: 'video', date: participant5.joinedAt }
+			{ userId: participant2.userId, type: 'video', creationDate: participant2.joinedAt },
+			{ userId: participant3.userId, type: 'video', creationDate: participant3.joinedAt },
+			{ userId: participant4.userId, type: 'video', creationDate: participant4.joinedAt },
+			{ userId: participant5.userId, type: 'video', creationDate: participant5.joinedAt }
 		]);
 	});
 
@@ -122,11 +122,11 @@ describe('useTilesOrder custom hook - ordered by joined time', () => {
 		expect(result.current.centralTile).toEqual({
 			userId: participant1.userId,
 			type: 'video',
-			date: participant1.joinedAt
+			creationDate: participant1.joinedAt
 		});
 		expect(result.current.carouselTiles).toEqual([
-			{ userId: participant3.userId, type: 'video', date: participant3.joinedAt },
-			{ userId: participant4.userId, type: 'video', date: participant4.joinedAt }
+			{ userId: participant3.userId, type: 'video', creationDate: participant3.joinedAt },
+			{ userId: participant4.userId, type: 'video', creationDate: participant4.joinedAt }
 		]);
 	});
 });
@@ -147,12 +147,12 @@ describe('useTilesOrder custom hook - use pin feature', () => {
 		expect(result.current.centralTile).toEqual({
 			userId: participant3.userId,
 			type: 'video',
-			date: participant3.joinedAt
+			creationDate: participant3.joinedAt
 		});
 		expect(result.current.carouselTiles).toEqual([
-			{ userId: participant2.userId, type: 'video', date: participant2.joinedAt },
-			{ userId: participant1.userId, type: 'video', date: participant1.joinedAt },
-			{ userId: participant4.userId, type: 'video', date: participant4.joinedAt }
+			{ userId: participant2.userId, type: 'video', creationDate: participant2.joinedAt },
+			{ userId: participant1.userId, type: 'video', creationDate: participant1.joinedAt },
+			{ userId: participant4.userId, type: 'video', creationDate: participant4.joinedAt }
 		]);
 	});
 
@@ -172,12 +172,12 @@ describe('useTilesOrder custom hook - use pin feature', () => {
 		expect(result.current.centralTile).toEqual({
 			userId: participant3.userId,
 			type: 'video',
-			date: participant3.joinedAt
+			creationDate: participant3.joinedAt
 		});
 		expect(result.current.carouselTiles).toEqual([
-			{ userId: participant2.userId, type: 'video', date: participant2.joinedAt },
-			{ userId: participant1.userId, type: 'video', date: participant1.joinedAt },
-			{ userId: participant4.userId, type: 'video', date: participant4.joinedAt }
+			{ userId: participant2.userId, type: 'video', creationDate: participant2.joinedAt },
+			{ userId: participant1.userId, type: 'video', creationDate: participant1.joinedAt },
+			{ userId: participant4.userId, type: 'video', creationDate: participant4.joinedAt }
 		]);
 	});
 
@@ -195,11 +195,11 @@ describe('useTilesOrder custom hook - use pin feature', () => {
 		expect(result.current.centralTile).toEqual({
 			userId: participant1.userId,
 			type: 'video',
-			date: participant1.joinedAt
+			creationDate: participant1.joinedAt
 		});
 		expect(result.current.carouselTiles).toEqual([
-			{ userId: participant2.userId, type: 'video', date: participant2.joinedAt },
-			{ userId: participant4.userId, type: 'video', date: participant4.joinedAt }
+			{ userId: participant2.userId, type: 'video', creationDate: participant2.joinedAt },
+			{ userId: participant4.userId, type: 'video', creationDate: participant4.joinedAt }
 		]);
 	});
 
@@ -223,12 +223,12 @@ describe('useTilesOrder custom hook - use pin feature', () => {
 		expect(result.current.centralTile).toEqual({
 			userId: participant1.userId,
 			type: 'video',
-			date: participant1.joinedAt
+			creationDate: participant1.joinedAt
 		});
 		expect(result.current.carouselTiles).toEqual([
-			{ userId: participant2.userId, type: 'video', date: participant2.joinedAt },
-			{ userId: participant3.userId, type: 'video', date: participant3.joinedAt },
-			{ userId: participant4.userId, type: 'video', date: participant4.joinedAt }
+			{ userId: participant2.userId, type: 'video', creationDate: participant2.joinedAt },
+			{ userId: participant3.userId, type: 'video', creationDate: participant3.joinedAt },
+			{ userId: participant4.userId, type: 'video', creationDate: participant4.joinedAt }
 		]);
 	});
 
@@ -247,13 +247,13 @@ describe('useTilesOrder custom hook - use pin feature', () => {
 		expect(result.current.centralTile).toEqual({
 			userId: participant3.userId,
 			type: 'video',
-			date: participant3.joinedAt
+			creationDate: participant3.joinedAt
 		});
 		expect(result.current.carouselTiles).toEqual([
-			{ userId: participant2.userId, type: 'video', date: participant2.joinedAt },
-			{ userId: participant1.userId, type: 'video', date: participant1.joinedAt },
-			{ userId: participant4.userId, type: 'video', date: participant4.joinedAt },
-			{ userId: participant5.userId, type: 'video', date: participant5.joinedAt }
+			{ userId: participant2.userId, type: 'video', creationDate: participant2.joinedAt },
+			{ userId: participant1.userId, type: 'video', creationDate: participant1.joinedAt },
+			{ userId: participant4.userId, type: 'video', creationDate: participant4.joinedAt },
+			{ userId: participant5.userId, type: 'video', creationDate: participant5.joinedAt }
 		]);
 	});
 
@@ -273,11 +273,11 @@ describe('useTilesOrder custom hook - use pin feature', () => {
 		expect(result.current.centralTile).toEqual({
 			userId: participant3.userId,
 			type: 'video',
-			date: participant3.joinedAt
+			creationDate: participant3.joinedAt
 		});
 		expect(result.current.carouselTiles).toEqual([
-			{ userId: participant1.userId, type: 'video', date: participant1.joinedAt },
-			{ userId: participant4.userId, type: 'video', date: participant4.joinedAt }
+			{ userId: participant1.userId, type: 'video', creationDate: participant1.joinedAt },
+			{ userId: participant4.userId, type: 'video', creationDate: participant4.joinedAt }
 		]);
 	});
 });
