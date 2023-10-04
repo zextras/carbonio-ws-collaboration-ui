@@ -22,6 +22,7 @@ export type ActiveMeeting = {
 	meetingViewSelected: MeetingViewType;
 	isCarouselVisible: boolean;
 	pinnedTile?: TileData;
+	talkingUsers: string[];
 };
 
 export type ActiveMeetingMap = {

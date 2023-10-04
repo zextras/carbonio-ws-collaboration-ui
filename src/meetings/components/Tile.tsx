@@ -20,7 +20,7 @@ import styled from 'styled-components';
 
 import usePinnedTile from '../../hooks/usePinnedTile';
 import { UsersApi } from '../../network';
-import { getStream } from '../../store/selectors/ActiveMeetingSelectors';
+import { getUserIsTalking, getStream } from '../../store/selectors/ActiveMeetingSelectors';
 import {
 	getParticipantAudioStatus,
 	getParticipantVideoStatus
@@ -65,6 +65,8 @@ const CustomTile = styled(Container)`
 	height: auto;
 	min-width: 9.375rem;
 	border-radius: 0.5rem;
+	${({ isTalking, theme }): string | false =>
+		isTalking && `outline: 0.125rem solid ${theme.palette.success.regular};`}
 	&:hover {
 		${HoverContainer} {
 			opacity: 1;
@@ -148,15 +150,14 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 	const videoStream = useStore((store) =>
 		getStream(store, meetingId || '', userId || '', STREAM_TYPE.VIDEO)
 	);
+	const userPictureUpdatedAt: string | undefined = useStore((state) =>
+		getUserPictureUpdatedAt(state, userId || '')
+	);
+	const userIsTalking = useStore((store) => getUserIsTalking(store, meetingId || '', userId || ''));
 
 	const [picture, setPicture] = useState<false | string>(false);
 
 	const streamRef = useRef<null | HTMLVideoElement>(null);
-
-	const userPictureUpdatedAt: string | undefined = useStore((state) =>
-		getUserPictureUpdatedAt(state, userId || '')
-	);
-
 	const themeColor = useTheme();
 
 	const { canUsePinFeature, isPinned, switchPinnedTile } = usePinnedTile(
@@ -307,7 +308,7 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 	);
 
 	return (
-		<CustomTile background={'text'} data-testid="tile" width="100%">
+		<CustomTile background={'text'} data-testid="tile" width="100%" isTalking={userIsTalking}>
 			{showHoverContainer && hoverContainer}
 			<InfoContainer orientation="horizontal">
 				<Row
