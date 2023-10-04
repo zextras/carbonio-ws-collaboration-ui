@@ -10,7 +10,7 @@ import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { getMeetingSidebarStatus } from '../../../store/selectors/ActiveMeetingSelectors';
-import { getTheOnlyTile } from '../../../store/selectors/MeetingSelectors';
+import { getCentralTileData } from '../../../store/selectors/MeetingSelectors';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
@@ -46,7 +46,7 @@ const FaceToFaceMode = (): ReactElement => {
 		'Waiting for participants to join...'
 	);
 
-	const centralTile = useStore((store) => getTheOnlyTile(store, meetingId));
+	const centralTile = useStore((store) => getCentralTileData(store, meetingId));
 
 	const localId = useStore(getUserId);
 

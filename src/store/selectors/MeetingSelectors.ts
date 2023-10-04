@@ -108,7 +108,7 @@ export const getTiles = (store: RootStore, meetingId: string): TileData[] => {
 	return [];
 };
 
-export const getTheOnlyTile = (store: RootStore, meetingId: string): TileData | undefined => {
+export const getCentralTileData = (store: RootStore, meetingId: string): TileData | undefined => {
 	const meeting = find(store.meetings, (meeting) => meeting.id === meetingId);
 	const participant = find(
 		meeting?.participants,
