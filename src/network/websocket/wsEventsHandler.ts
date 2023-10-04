@@ -177,6 +177,9 @@ export function wsEventsHandler(event: WsEvent): void {
 			if (activeMeeting && event.userId !== state.session.id) {
 				sendAudioFeedback(MeetingSoundFeedback.MEETING_LEAVE_NOTIFICATION);
 			}
+
+			// if user is talking, delete his id from the isTalking array
+			state.setTalkingUsers(event.meetingId, event.userId, false);
 			break;
 		}
 		case WsEventType.MEETING_STOPPED: {
@@ -196,6 +199,9 @@ export function wsEventsHandler(event: WsEvent): void {
 				event.active
 					? sendAudioFeedback(MeetingSoundFeedback.MEETING_AUDIO_ON)
 					: sendAudioFeedback(MeetingSoundFeedback.MEETING_AUDIO_OFF);
+			}
+			if (activeMeeting && !event.active) {
+				state.setTalkingUsers(event.meetingId, event.userId, false);
 			}
 			break;
 		}
