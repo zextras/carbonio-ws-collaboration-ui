@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import { sample } from 'lodash';
+import { find, sample } from 'lodash';
 
 import {
 	MeetingChatVisibility,
@@ -65,3 +65,9 @@ export const getMeetingCarouselVisibility = (store: RootStore, meetingId: string
 
 export const getPinnedTile = (store: RootStore, meetingId: string): TileData | undefined =>
 	store.activeMeeting[meetingId]?.pinnedTile;
+
+export const getTalkingList = (store: RootStore, meetingId: string): string[] =>
+	store.activeMeeting[meetingId].talkingUsers;
+
+export const getUserIsTalking = (store: RootStore, meetingId: string, userId: string): boolean =>
+	find(store.activeMeeting[meetingId]?.talkingUsers, (user) => user === userId) !== undefined;
