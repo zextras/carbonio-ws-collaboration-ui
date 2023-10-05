@@ -15,6 +15,7 @@ import { MeetingRoutesParams } from '../../../hooks/useRouting';
 import useTilesOrder from '../../../hooks/useTilesOrder';
 import { getMeetingSidebarStatus } from '../../../store/selectors/ActiveMeetingSelectors';
 import useStore from '../../../store/Store';
+import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
 import Tile from '../Tile';
 
 const TilesBarContainer = styled(Container)`
@@ -84,7 +85,13 @@ const TilesBar = (): ReactElement => {
 
 	const tilesToRender = useMemo(() => {
 		const selectedTiles = carouselTiles.slice(index, index + tilesForPage);
-		return map(selectedTiles, (tile) => <Tile userId={tile.userId} meetingId={meetingId} />);
+		return map(selectedTiles, (tile) => (
+			<Tile
+				userId={tile.userId}
+				meetingId={meetingId}
+				isScreenShare={tile.type === STREAM_TYPE.SCREEN}
+			/>
+		));
 	}, [carouselTiles, index, meetingId, tilesForPage]);
 
 	const clickPrevButton = useCallback(

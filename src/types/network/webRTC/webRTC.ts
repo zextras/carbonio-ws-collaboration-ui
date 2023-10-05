@@ -37,15 +37,18 @@ export interface IVideoOutConnection extends IPeerConnection {
 	selectedVideoDeviceId: string | undefined;
 	startVideo(selectedVideoDeviceId?: string): void;
 	stopVideo(): void;
-	onNegotiationNeeded: () => void;
-	onIceConnectionStateChange: (ev: Event) => void;
 	handleRemoteAnswer(remoteAnswer: RTCSessionDescriptionInit): void;
 	updateLocalStreamTrack(mediaStreamTrack: MediaStream): Promise<MediaStreamTrack | undefined>;
-	closeRtpSenderTrack(): void;
 }
 
-export interface IVideoInConnection extends IPeerConnection {
-	onTrack: (ev: RTCTrackEvent) => void;
+export interface IScreenOutConnection extends IPeerConnection {
+	rtpSender: RTCRtpSender | null;
+	startScreenShare(): void;
+	handleRemoteAnswer(remoteAnswer: RTCSessionDescriptionInit): void;
+	stopScreenShare(): void;
+}
+
+export interface IVideoScreenInConnection extends IPeerConnection {
 	subscriptionManager: SubscriptionsManager;
 	handleRemoteOffer(sdp: string): void;
 	handleParticipantsSubscribed(streamsMap: StreamInfo[]): void;

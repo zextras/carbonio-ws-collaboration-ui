@@ -11,6 +11,7 @@ import styled, { FlattenSimpleInterpolation } from 'styled-components';
 import CameraButton from './CameraButton';
 import LeaveMeetingButton from './LeaveMeetingButton';
 import MicrophoneButton from './MicrophoneButton';
+import ScreenShareButton from './ScreenShareButton';
 
 const BarContainer = styled(Container)`
 	position: absolute;
@@ -26,6 +27,7 @@ const BarContainer = styled(Container)`
 const ActionsWrapper = styled(Container)`
 	padding: 1rem;
 	border-radius: 0.5rem;
+	gap: 1rem;
 `;
 
 type MeetingActionsProps = {
@@ -160,23 +162,13 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 					videoDropdownRef={videoDropdownRef}
 					setIsVideoListOpen={setIsVideoListOpen}
 				/>
-				<Padding right="1rem" />
 				<MicrophoneButton
 					audioDropdownRef={audioDropdownRef}
 					isAudioListOpen={isAudioListOpen}
 					setIsAudioListOpen={setIsAudioListOpen}
 				/>
-
+				<ScreenShareButton />
 				{/* 
-			<Padding right="1rem" />
-			<IconButton
-				iconColor="gray6"
-				backgroundColor="primary"
-				icon="ScreenSharingOff" // TODO shareStatus ? 'ScreenSharingOn' : 'ScreenSharingOff'}
-				onClick={(): null => null}
-				size="large"
-				disabled // TODO: enable when screen sharing will be available
-			/>
 			<Padding right="1rem" />
 			<IconButton
 				size="large"
@@ -195,7 +187,7 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 				size="large"
 			/>
 		*/}
-				<Padding right="3rem" />
+				<Padding right="1rem" />
 				<LeaveMeetingButton />
 			</ActionsWrapper>
 		</BarContainer>

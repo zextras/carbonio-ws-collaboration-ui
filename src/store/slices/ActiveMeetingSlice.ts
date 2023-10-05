@@ -8,8 +8,9 @@
 import produce from 'immer';
 
 import BidirectionalConnectionAudioInOut from '../../network/webRTC/BidirectionalConnectionAudioInOut';
-import VideoInConnection from '../../network/webRTC/VideoInConnection';
+import ScreenOutConnection from '../../network/webRTC/ScreenOutConnection';
 import VideoOutConnection from '../../network/webRTC/VideoOutConnection';
+import VideoScreenInConnection from '../../network/webRTC/VideoScreenInConnection';
 import {
 	MeetingChatVisibility,
 	MeetingViewType,
@@ -50,12 +51,13 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 						audioStreamEnabled,
 						selectedAudioDeviceId
 					),
-					videoInConn: new VideoInConnection(meetingId),
+					videoScreenIn: new VideoScreenInConnection(meetingId),
 					videoOutConn: new VideoOutConnection(
 						meetingId,
 						videoStreamEnabled,
 						selectedVideoDeviceId
 					),
+					screenOutConn: new ScreenOutConnection(meetingId),
 					subscription: {},
 					talkingUsers: []
 				};
@@ -68,8 +70,9 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 		set(
 			produce((draft: RootStore) => {
 				draft.activeMeeting[meetingId]?.bidirectionalAudioConn?.closePeerConnection();
-				draft.activeMeeting[meetingId]?.videoInConn?.closePeerConnection();
+				draft.activeMeeting[meetingId]?.videoScreenIn?.closePeerConnection();
 				draft.activeMeeting[meetingId]?.videoOutConn?.closePeerConnection();
+				draft.activeMeeting[meetingId]?.screenOutConn?.closePeerConnection();
 				delete draft.activeMeeting[meetingId];
 			}),
 			false,
@@ -137,29 +140,6 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 			'AM/SET_VIEW_TYPE'
 		);
 	},
-	createShareOutConn: (meetingId: string): void => {
-		set(
-			produce((draft: RootStore) => {
-				// TODO IMPLEMENT
-				const shareOutConn = new VideoInConnection(meetingId);
-				if (!draft.activeMeeting[meetingId].shareOutConn) {
-					draft.activeMeeting[meetingId].shareOutConn = shareOutConn;
-				}
-			}),
-			false,
-			'AM/SET_SHARE_OUT_CONN'
-		);
-	},
-	closeShareOutConn: (meetingId: string): void => {
-		set(
-			produce((draft: RootStore) => {
-				draft.activeMeeting[meetingId]?.shareOutConn?.closePeerConnection();
-			}),
-			false,
-			'AM/CLOSE_SHARE_OUT_CONN'
-		);
-	},
-
 	setLocalStreams: (meetingId: string, streamType: STREAM_TYPE, stream: MediaStream): void => {
 		set(
 			produce((draft: RootStore) => {
@@ -182,8 +162,10 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 	removeLocalStreams: (meetingId: string, streamType: STREAM_TYPE): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (streamType === STREAM_TYPE.VIDEO) {
-					draft.activeMeeting[meetingId].localStreams?.[streamType]?.getVideoTracks()[0].stop();
+				if (streamType === STREAM_TYPE.VIDEO || streamType === STREAM_TYPE.SCREEN) {
+					draft.activeMeeting[meetingId]?.localStreams?.[streamType]
+						?.getTracks()
+						.forEach((track) => track.stop());
 				}
 				delete draft.activeMeeting[meetingId].localStreams![streamType];
 			}),
@@ -263,6 +245,11 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 			produce((draft: RootStore) => {
 				if (draft.activeMeeting[meetingId]) {
 					draft.activeMeeting[meetingId].pinnedTile = tile;
+				}
+
+				// Set CINEMA MODE when pinning a tile in GRID MODE
+				if (draft.activeMeeting[meetingId].meetingViewSelected === MeetingViewType.GRID) {
+					draft.setMeetingViewSelected(meetingId, MeetingViewType.CINEMA);
 				}
 			}),
 			false,
