@@ -4,36 +4,156 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Container } from '@zextras/carbonio-design-system';
-import { map } from 'lodash';
-import React, { ReactElement, useMemo } from 'react';
+import { Container, IconButton, Tooltip } from '@zextras/carbonio-design-system';
+import { debounce, map, size } from 'lodash';
+import React, { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { MeetingRoutesParams } from '../../../hooks/useRouting';
-import { getMeetingParticipantsByMeetingId } from '../../../store/selectors/MeetingSelectors';
+import { getMeetingSidebarStatus } from '../../../store/selectors/ActiveMeetingSelectors';
+import { getTiles } from '../../../store/selectors/MeetingSelectors';
 import useStore from '../../../store/Store';
+import { STREAM_TYPE, TileData } from '../../../types/store/ActiveMeetingTypes';
 import Tile from '../Tile';
 
-const Wrapper = styled(Container)`
+const GridContainer = styled(Container)`
 	position: relative;
 `;
+
+const TileContainer = styled(Container)`
+	gap: 1rem;
+`;
+
+const ButtonUpContainer = styled(Container)`
+	position: absolute;
+	top: 0;
+	right: calc(-2.125rem / 2 - 2.125rem);
+	height: 40%;
+`;
+
+const ButtonDownContainer = styled(Container)`
+	position: absolute;
+	bottom: 0;
+	right: calc(-2.125rem / 2 - 2.125rem);
+	height: 40%;
+`;
+
 const GridMode = (): ReactElement => {
 	const { meetingId }: MeetingRoutesParams = useParams();
-	const participants = useStore((store) => getMeetingParticipantsByMeetingId(store, meetingId));
+	const tilesData: TileData[] = useStore((store) => getTiles(store, meetingId));
 
-	const videos = useMemo(
-		() =>
-			map(participants, (participant) => (
-				<Tile key={participant.userId} meetingId={meetingId} userId={participant.userId} />
-			)),
-		[meetingId, participants]
+	const [t] = useTranslation();
+	const scrollUpLabel = t('tooltip.scrollUp', 'Scroll up');
+	const scrollDownLabel = t('tooltip.scrollDown', 'Scroll down');
+	const topLabel = t('tooltip.topOfList', 'Top of list');
+	const bottomLabel = t('tooltip.bottomOfList', 'Bottom of list');
+
+	const sidebarStatus: boolean = useStore((store) => getMeetingSidebarStatus(store, meetingId));
+	const tilesContainerRef = useRef<HTMLDivElement>(null);
+
+	const [index, setIndex] = useState(0);
+	const [dimensions, setCarouselDimensions] = useState({ width: 0, height: 0 });
+
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	const handleResize = useCallback(
+		debounce((): void => {
+			if (tilesContainerRef.current) {
+				setCarouselDimensions({
+					width: tilesContainerRef.current.offsetWidth,
+					height: tilesContainerRef.current.offsetHeight
+				});
+			}
+		}, 100),
+		[]
 	);
 
+	useEffect(() => handleResize(), [handleResize, sidebarStatus]);
+
+	useEffect(() => {
+		window.addEventListener('resize', handleResize);
+		return () => window.removeEventListener('resize', handleResize);
+	}, [handleResize]);
+
+	const totalTiles = useMemo(() => size(tilesData), [tilesData]);
+	const step = 1;
+
+	const tilesForPage = useMemo(() => {
+		const tileHeight = (dimensions.width / 16) * 9 + 20;
+		return Math.floor(dimensions.height / tileHeight);
+	}, [dimensions]);
+
+	const tilesToRender = useMemo(() => {
+		const selectedTiles = tilesData.slice(index, index + tilesForPage);
+		return map(selectedTiles, (tile) => (
+			<Tile
+				userId={tile.userId}
+				meetingId={meetingId}
+				isScreenShare={tile.type === STREAM_TYPE.SCREEN}
+			/>
+		));
+	}, [tilesData, index, meetingId, tilesForPage]);
+
+	const clickPrevButton = useCallback(
+		() => setIndex((prev) => (prev - step > 0 ? prev - step : 0)),
+		[step]
+	);
+
+	const clickNextButton = useCallback(
+		() =>
+			setIndex((prev) =>
+				prev + step >= totalTiles - tilesForPage ? totalTiles - tilesForPage : prev + step
+			),
+		[step, tilesForPage, totalTiles]
+	);
+
+	const prevButtonDisabled = useMemo(() => index === 0, [index]);
+
+	const nextButtonDisabled = useMemo(
+		() => index === totalTiles - tilesForPage,
+		[index, tilesForPage, totalTiles]
+	);
+
+	const showButtons = useMemo(() => {
+		if (tilesForPage === 0) return false;
+		return totalTiles > tilesForPage;
+	}, [tilesForPage, totalTiles]);
+
 	return (
-		<Wrapper data-testid="gridModeView" orientation="vertical">
-			{videos}
-		</Wrapper>
+		<GridContainer data-testid="gridModeView" mainAlignment="space-between">
+			{showButtons && (
+				<ButtonUpContainer width="fit" height="fit">
+					<Tooltip label={prevButtonDisabled ? topLabel : scrollUpLabel} placement="left">
+						<IconButton
+							conColor="gray6"
+							backgroundColor="text"
+							icon="ChevronUpOutline"
+							size="large"
+							height="fill"
+							onClick={clickPrevButton}
+							disabled={prevButtonDisabled}
+						/>
+					</Tooltip>
+				</ButtonUpContainer>
+			)}
+			<TileContainer ref={tilesContainerRef}>{tilesToRender}</TileContainer>
+			{showButtons && (
+				<ButtonDownContainer width="fit" height="fit">
+					<Tooltip label={nextButtonDisabled ? bottomLabel : scrollDownLabel} placement="left">
+						<IconButton
+							conColor="gray6"
+							backgroundColor="text"
+							icon="ChevronDownOutline"
+							size="large"
+							width="fill"
+							onClick={clickNextButton}
+							disabled={nextButtonDisabled}
+						/>
+					</Tooltip>
+				</ButtonDownContainer>
+			)}
+		</GridContainer>
 	);
 };
 
