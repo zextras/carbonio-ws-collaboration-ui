@@ -13,6 +13,7 @@ import { MeetingBe, MeetingParticipantBe } from '../../types/network/models/meet
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
 import { MeetingParticipant, MeetingParticipantMap } from '../../types/store/MeetingTypes';
 import { MeetingsSlice, RootStore } from '../../types/store/StoreTypes';
+import { dateToISODate } from '../../utils/dateUtil';
 
 export const useMeetingsStoreSlice = (set: (...any: any) => void): MeetingsSlice => ({
 	meetings: {},
@@ -186,6 +187,9 @@ export const useMeetingsStoreSlice = (set: (...any: any) => void): MeetingsSlice
 							break;
 						case STREAM_TYPE.SCREEN:
 							draft.meetings[meeting.roomId].participants[userId].screenStreamOn = status;
+							draft.meetings[meeting.roomId].participants[userId].dateScreenOn = status
+								? dateToISODate(Date.now())
+								: undefined;
 							break;
 						default:
 							break;

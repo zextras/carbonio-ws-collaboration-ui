@@ -34,7 +34,11 @@ describe('useTilesOrder custom hook - ordered by joined time', () => {
 		useStore.getState().addParticipant(meeting.id, sessionUser);
 		const { result } = renderHook(() => useTilesOrder(meeting.id));
 
-		expect(result.current.centralTile).toEqual({ userId: 'id', type: 'video' });
+		expect(result.current.centralTile).toEqual({
+			userId: sessionUser.userId,
+			type: 'video',
+			creationDate: sessionUser.joinedAt
+		});
 		expect(result.current.carouselTiles).toEqual([]);
 	});
 
@@ -43,8 +47,14 @@ describe('useTilesOrder custom hook - ordered by joined time', () => {
 		useStore.getState().addParticipant(meeting.id, participant1);
 		const { result } = renderHook(() => useTilesOrder(meeting.id));
 
-		expect(result.current.centralTile).toEqual({ userId: 'id', type: 'video' });
-		expect(result.current.carouselTiles).toEqual([{ userId: '1', type: 'video' }]);
+		expect(result.current.centralTile).toEqual({
+			userId: sessionUser.userId,
+			type: 'video',
+			creationDate: sessionUser.joinedAt
+		});
+		expect(result.current.carouselTiles).toEqual([
+			{ userId: participant1.userId, type: 'video', creationDate: participant1.joinedAt }
+		]);
 	});
 
 	test('Two participants - I enter as second', () => {
@@ -52,8 +62,18 @@ describe('useTilesOrder custom hook - ordered by joined time', () => {
 		useStore.getState().addParticipant(meeting.id, sessionUser);
 		const { result } = renderHook(() => useTilesOrder(meeting.id));
 
-		expect(result.current.centralTile).toEqual({ userId: '0', type: 'video' });
-		expect(result.current.carouselTiles).toEqual([{ userId: 'id', type: 'video' }]);
+		expect(result.current.centralTile).toEqual({
+			userId: participant0.userId,
+			type: 'video',
+			creationDate: participant0.joinedAt
+		});
+		expect(result.current.carouselTiles).toEqual([
+			{
+				userId: sessionUser.userId,
+				type: 'video',
+				creationDate: sessionUser.joinedAt
+			}
+		]);
 	});
 
 	test('A new participant enters', () => {
@@ -63,21 +83,29 @@ describe('useTilesOrder custom hook - ordered by joined time', () => {
 		useStore.getState().addParticipant(meeting.id, participant3);
 		const { result } = renderHook(() => useTilesOrder(meeting.id));
 
-		expect(result.current.centralTile).toEqual({ userId: '1', type: 'video' });
+		expect(result.current.centralTile).toEqual({
+			userId: participant1.userId,
+			type: 'video',
+			creationDate: participant1.joinedAt
+		});
 		expect(result.current.carouselTiles).toEqual([
-			{ userId: '2', type: 'video' },
-			{ userId: '3', type: 'video' },
-			{ userId: '4', type: 'video' }
+			{ userId: participant2.userId, type: 'video', creationDate: participant2.joinedAt },
+			{ userId: participant3.userId, type: 'video', creationDate: participant3.joinedAt },
+			{ userId: participant4.userId, type: 'video', creationDate: participant4.joinedAt }
 		]);
 
 		act(() => useStore.getState().addParticipant(meeting.id, participant5));
 
-		expect(result.current.centralTile).toEqual({ userId: '1', type: 'video' });
+		expect(result.current.centralTile).toEqual({
+			userId: participant1.userId,
+			type: 'video',
+			creationDate: participant1.joinedAt
+		});
 		expect(result.current.carouselTiles).toEqual([
-			{ userId: '2', type: 'video' },
-			{ userId: '3', type: 'video' },
-			{ userId: '4', type: 'video' },
-			{ userId: '5', type: 'video' }
+			{ userId: participant2.userId, type: 'video', creationDate: participant2.joinedAt },
+			{ userId: participant3.userId, type: 'video', creationDate: participant3.joinedAt },
+			{ userId: participant4.userId, type: 'video', creationDate: participant4.joinedAt },
+			{ userId: participant5.userId, type: 'video', creationDate: participant5.joinedAt }
 		]);
 	});
 
@@ -91,10 +119,14 @@ describe('useTilesOrder custom hook - ordered by joined time', () => {
 
 		act(() => useStore.getState().removeParticipant(meeting.id, participant2.userId));
 
-		expect(result.current.centralTile).toEqual({ userId: '1', type: 'video' });
+		expect(result.current.centralTile).toEqual({
+			userId: participant1.userId,
+			type: 'video',
+			creationDate: participant1.joinedAt
+		});
 		expect(result.current.carouselTiles).toEqual([
-			{ userId: '3', type: 'video' },
-			{ userId: '4', type: 'video' }
+			{ userId: participant3.userId, type: 'video', creationDate: participant3.joinedAt },
+			{ userId: participant4.userId, type: 'video', creationDate: participant4.joinedAt }
 		]);
 	});
 });
@@ -112,11 +144,15 @@ describe('useTilesOrder custom hook - use pin feature', () => {
 			useStore.getState().setPinnedTile(meeting.id, { userId: '3', type: STREAM_TYPE.VIDEO })
 		);
 
-		expect(result.current.centralTile).toEqual({ userId: '3', type: 'video' });
+		expect(result.current.centralTile).toEqual({
+			userId: participant3.userId,
+			type: 'video',
+			creationDate: participant3.joinedAt
+		});
 		expect(result.current.carouselTiles).toEqual([
-			{ userId: '2', type: 'video' },
-			{ userId: '1', type: 'video' },
-			{ userId: '4', type: 'video' }
+			{ userId: participant2.userId, type: 'video', creationDate: participant2.joinedAt },
+			{ userId: participant1.userId, type: 'video', creationDate: participant1.joinedAt },
+			{ userId: participant4.userId, type: 'video', creationDate: participant4.joinedAt }
 		]);
 	});
 
@@ -133,11 +169,15 @@ describe('useTilesOrder custom hook - use pin feature', () => {
 		);
 		act(() => useStore.getState().setPinnedTile(meeting.id, undefined));
 
-		expect(result.current.centralTile).toEqual({ userId: '3', type: 'video' });
+		expect(result.current.centralTile).toEqual({
+			userId: participant3.userId,
+			type: 'video',
+			creationDate: participant3.joinedAt
+		});
 		expect(result.current.carouselTiles).toEqual([
-			{ userId: '2', type: 'video' },
-			{ userId: '1', type: 'video' },
-			{ userId: '4', type: 'video' }
+			{ userId: participant2.userId, type: 'video', creationDate: participant2.joinedAt },
+			{ userId: participant1.userId, type: 'video', creationDate: participant1.joinedAt },
+			{ userId: participant4.userId, type: 'video', creationDate: participant4.joinedAt }
 		]);
 	});
 
@@ -152,10 +192,14 @@ describe('useTilesOrder custom hook - use pin feature', () => {
 			useStore.getState().setPinnedTile(meeting.id, { userId: '3', type: STREAM_TYPE.VIDEO })
 		);
 
-		expect(result.current.centralTile).toEqual({ userId: '1', type: 'video' });
+		expect(result.current.centralTile).toEqual({
+			userId: participant1.userId,
+			type: 'video',
+			creationDate: participant1.joinedAt
+		});
 		expect(result.current.carouselTiles).toEqual([
-			{ userId: '2', type: 'video' },
-			{ userId: '4', type: 'video' }
+			{ userId: participant2.userId, type: 'video', creationDate: participant2.joinedAt },
+			{ userId: participant4.userId, type: 'video', creationDate: participant4.joinedAt }
 		]);
 	});
 
@@ -176,11 +220,15 @@ describe('useTilesOrder custom hook - use pin feature', () => {
 			useStore.getState().setPinnedTile(meeting.id, { userId: '1', type: STREAM_TYPE.VIDEO });
 		});
 
-		expect(result.current.centralTile).toEqual({ userId: '1', type: 'video' });
+		expect(result.current.centralTile).toEqual({
+			userId: participant1.userId,
+			type: 'video',
+			creationDate: participant1.joinedAt
+		});
 		expect(result.current.carouselTiles).toEqual([
-			{ userId: '2', type: 'video' },
-			{ userId: '3', type: 'video' },
-			{ userId: '4', type: 'video' }
+			{ userId: participant2.userId, type: 'video', creationDate: participant2.joinedAt },
+			{ userId: participant3.userId, type: 'video', creationDate: participant3.joinedAt },
+			{ userId: participant4.userId, type: 'video', creationDate: participant4.joinedAt }
 		]);
 	});
 
@@ -196,12 +244,16 @@ describe('useTilesOrder custom hook - use pin feature', () => {
 			useStore.getState().addParticipant(meeting.id, participant5);
 		});
 
-		expect(result.current.centralTile).toEqual({ userId: '3', type: 'video' });
+		expect(result.current.centralTile).toEqual({
+			userId: participant3.userId,
+			type: 'video',
+			creationDate: participant3.joinedAt
+		});
 		expect(result.current.carouselTiles).toEqual([
-			{ userId: '2', type: 'video' },
-			{ userId: '1', type: 'video' },
-			{ userId: '4', type: 'video' },
-			{ userId: '5', type: 'video' }
+			{ userId: participant2.userId, type: 'video', creationDate: participant2.joinedAt },
+			{ userId: participant1.userId, type: 'video', creationDate: participant1.joinedAt },
+			{ userId: participant4.userId, type: 'video', creationDate: participant4.joinedAt },
+			{ userId: participant5.userId, type: 'video', creationDate: participant5.joinedAt }
 		]);
 	});
 
@@ -218,10 +270,14 @@ describe('useTilesOrder custom hook - use pin feature', () => {
 			useStore.getState().removeParticipant(meeting.id, participant2.userId);
 		});
 
-		expect(result.current.centralTile).toEqual({ userId: '3', type: 'video' });
+		expect(result.current.centralTile).toEqual({
+			userId: participant3.userId,
+			type: 'video',
+			creationDate: participant3.joinedAt
+		});
 		expect(result.current.carouselTiles).toEqual([
-			{ userId: '1', type: 'video' },
-			{ userId: '4', type: 'video' }
+			{ userId: participant1.userId, type: 'video', creationDate: participant1.joinedAt },
+			{ userId: participant4.userId, type: 'video', creationDate: participant4.joinedAt }
 		]);
 	});
 });

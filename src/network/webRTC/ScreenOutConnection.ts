@@ -6,46 +6,22 @@
 
 import { PeerConnConfig } from './PeerConnConfig';
 import useStore from '../../store/Store';
-import { IVideoOutConnection } from '../../types/network/webRTC/webRTC';
+import { IScreenOutConnection } from '../../types/network/webRTC/webRTC';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
-import { getVideoStream } from '../../utils/UserMediaManager';
+import { getScreenStream } from '../../utils/UserMediaManager';
 import MeetingsApi from '../apis/MeetingsApi';
 
-export default class VideoOutConnection implements IVideoOutConnection {
+export default class ScreenOutConnection implements IScreenOutConnection {
 	peerConn: RTCPeerConnection | null;
 
 	meetingId: string;
 
 	rtpSender: RTCRtpSender | null;
 
-	selectedVideoDeviceId: string | undefined;
-
-	constructor(meetingId: string, videoStreamEnabled: boolean, selectedVideoDeviceId?: string) {
+	constructor(meetingId: string) {
 		this.peerConn = null;
 		this.meetingId = meetingId;
 		this.rtpSender = null;
-
-		if (videoStreamEnabled) {
-			this.startVideo(selectedVideoDeviceId);
-		}
-	}
-
-	public startVideo(selectedVideoDeviceId?: string): void {
-		this.peerConn = new RTCPeerConnection(new PeerConnConfig().getConfig());
-		this.peerConn.onnegotiationneeded = this.onNegotiationNeeded;
-		this.peerConn.oniceconnectionstatechange = this.onIceConnectionStateChange;
-
-		if (selectedVideoDeviceId) this.selectedVideoDeviceId = selectedVideoDeviceId;
-
-		getVideoStream(selectedVideoDeviceId).then((stream) => {
-			this.updateLocalStreamTrack(stream);
-			useStore.getState().setLocalStreams(this.meetingId, STREAM_TYPE.VIDEO, stream);
-		});
-	}
-
-	public stopVideo(): void {
-		this.closePeerConnection();
-		MeetingsApi.updateMediaOffer(this.meetingId, STREAM_TYPE.VIDEO, false);
 	}
 
 	// Create SDP offer, set it as local description and send it to the remote peer
@@ -53,17 +29,19 @@ export default class VideoOutConnection implements IVideoOutConnection {
 		this.peerConn
 			?.createOffer()
 			.then((rtcSessionDesc: RTCSessionDescriptionInit) => {
-				this.peerConn
-					?.setLocalDescription(rtcSessionDesc)
-					.then(() => {
-						MeetingsApi.updateMediaOffer(
-							this.meetingId,
-							STREAM_TYPE.VIDEO,
-							true,
-							rtcSessionDesc.sdp
-						);
-					})
-					.catch((reason) => console.warn(reason));
+				if (this.peerConn?.signalingState === 'stable') {
+					this.peerConn
+						.setLocalDescription(rtcSessionDesc)
+						.then(() => {
+							MeetingsApi.updateMediaOffer(
+								this.meetingId,
+								STREAM_TYPE.SCREEN,
+								true,
+								rtcSessionDesc.sdp
+							);
+						})
+						.catch((reason) => console.warn(reason));
+				}
 			})
 			.catch((reason) => console.warn('createOffer failed', reason));
 	};
@@ -76,13 +54,12 @@ export default class VideoOutConnection implements IVideoOutConnection {
 		}
 	};
 
-	// Stop the old track and add the new one without a new renegotiation
-	public updateLocalStreamTrack(mediaStreamTrack: MediaStream): Promise<MediaStreamTrack> {
+	private updateLocalStreamTrack(mediaStreamTrack: MediaStream): Promise<MediaStreamTrack> {
 		return new Promise((resolve) => {
 			const videoTrack: MediaStreamTrack = mediaStreamTrack.getVideoTracks()[0];
 			if (this.peerConn) {
 				if (this.rtpSender == null) {
-					this.rtpSender = this.peerConn?.addTrack(
+					this.rtpSender = this.peerConn.addTrack(
 						videoTrack,
 						mediaStreamTrack ?? new MediaStream()
 					);
@@ -91,7 +68,19 @@ export default class VideoOutConnection implements IVideoOutConnection {
 					this.rtpSender.replaceTrack(videoTrack).catch((reason) => console.warn(reason));
 				}
 			}
+			videoTrack.onended = (): void => this.stopScreenShare();
 			resolve(videoTrack);
+		});
+	}
+
+	public startScreenShare(): void {
+		this.peerConn = new RTCPeerConnection(new PeerConnConfig().getConfig());
+		this.peerConn.onnegotiationneeded = this.onNegotiationNeeded;
+		this.peerConn.oniceconnectionstatechange = this.onIceConnectionStateChange;
+
+		getScreenStream().then((stream) => {
+			this.updateLocalStreamTrack(stream);
+			useStore.getState().setLocalStreams(this.meetingId, STREAM_TYPE.SCREEN, stream);
 		});
 	}
 
@@ -101,11 +90,16 @@ export default class VideoOutConnection implements IVideoOutConnection {
 		this.peerConn?.setRemoteDescription(remoteDescription);
 	}
 
+	public stopScreenShare(): void {
+		this.closePeerConnection();
+		MeetingsApi.updateMediaOffer(this.meetingId, STREAM_TYPE.SCREEN, false);
+	}
+
 	public closePeerConnection(): void {
-		useStore.getState().removeLocalStreams(this.meetingId, STREAM_TYPE.VIDEO);
+		useStore.getState().removeLocalStreams(this.meetingId, STREAM_TYPE.SCREEN);
 		this.rtpSender?.track?.stop();
 		this.peerConn?.close();
-		this.rtpSender = null;
 		this.peerConn = null;
+		this.rtpSender = null;
 	}
 }

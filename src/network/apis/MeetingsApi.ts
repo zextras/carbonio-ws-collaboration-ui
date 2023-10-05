@@ -114,7 +114,7 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 			this.getMeetingByMeetingId(meetingId).then((meeting) => {
 				useStore
 					.getState()
-					.activeMeeting[meetingId]?.videoInConn?.subscriptionManager.updateAllStreamMap(
+					.activeMeeting[meetingId]?.videoScreenIn?.subscriptionManager.updateAllStreamMap(
 						meeting.participants
 					);
 			});

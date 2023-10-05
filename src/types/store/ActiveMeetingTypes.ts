@@ -6,15 +6,16 @@
 
 import {
 	IBidirectionalConnectionAudioInOut,
-	IVideoInConnection,
+	IScreenOutConnection,
+	IVideoScreenInConnection,
 	IVideoOutConnection
 } from '../network/webRTC/webRTC';
 
 export type ActiveMeeting = {
 	bidirectionalAudioConn?: IBidirectionalConnectionAudioInOut;
-	videoInConn?: IVideoInConnection;
+	videoScreenIn?: IVideoScreenInConnection;
 	videoOutConn?: IVideoOutConnection;
-	shareOutConn?: any;
+	screenOutConn?: IScreenOutConnection;
 	localStreams?: LocalStreams;
 	subscription: StreamsSubscriptionMap;
 	sidebarStatus: SidebarStatus;
@@ -22,6 +23,7 @@ export type ActiveMeeting = {
 	meetingViewSelected: MeetingViewType;
 	isCarouselVisible: boolean;
 	pinnedTile?: TileData;
+	talkingUsers: string[];
 };
 
 export type ActiveMeetingMap = {
@@ -81,4 +83,5 @@ export type StreamsSubscriptionMap = {
 export type TileData = {
 	userId: string;
 	type: STREAM_TYPE;
+	creationDate?: string;
 };

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { find, size } from 'lodash';
+import { find } from 'lodash';
 
 import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
 import useStore from '../../store/Store';
@@ -145,7 +145,7 @@ export function wsEventsHandler(event: WsEvent): void {
 				sendCustomEvent({ name: EventName.REMOVED_MEETING_NOTIFICATION, data: event });
 			}
 
-			// send audio feedback to other participants session user join
+			// Send audio feedback to other participants session user join
 			const activeMeeting = state.activeMeeting[event.meetingId];
 			if (activeMeeting && event.userId !== state.session.id) {
 				sendAudioFeedback(MeetingSoundFeedback.MEETING_JOIN_NOTIFICATION);
@@ -155,27 +155,23 @@ export function wsEventsHandler(event: WsEvent): void {
 		case WsEventType.MEETING_LEFT: {
 			state.removeParticipant(event.meetingId, event.userId);
 
-			// Unset pin if the user left the meeting or if the meeting become a 1to1
-			const meeting = find(state.meetings, (meeting) => meeting.id === event.meetingId);
-			if (
-				event.userId === state.activeMeeting[event.meetingId]?.pinnedTile?.userId ||
-				size(meeting?.participants) < 3
-			) {
-				state.setPinnedTile(event.meetingId, undefined);
-			}
-
 			// Update subscription manager
 			const subscriptionsManager =
-				state.activeMeeting[event.meetingId]?.videoInConn?.subscriptionManager;
+				state.activeMeeting[event.meetingId]?.videoScreenIn?.subscriptionManager;
 			if (subscriptionsManager) {
 				subscriptionsManager?.removeStreamToAsk(event.userId, STREAM_TYPE.VIDEO);
 				subscriptionsManager?.removeStreamToAsk(event.userId, STREAM_TYPE.SCREEN);
 			}
 
-			// send audio feedback to other participants session user leave
+			// Send audio feedback to other participants session user leave
 			const activeMeeting = state.activeMeeting[event.meetingId];
 			if (activeMeeting && event.userId !== state.session.id) {
 				sendAudioFeedback(MeetingSoundFeedback.MEETING_LEAVE_NOTIFICATION);
+			}
+
+			// if user is talking, delete his id from the isTalking array
+			if (activeMeeting) {
+				state.setTalkingUsers(event.meetingId, event.userId, false);
 			}
 			break;
 		}
@@ -190,34 +186,37 @@ export function wsEventsHandler(event: WsEvent): void {
 		case WsEventType.MEETING_AUDIO_STREAM_CHANGED: {
 			state.changeStreamStatus(event.meetingId, event.userId, STREAM_TYPE.AUDIO, event.active);
 
-			// send to session user audio feedback on audio status changes
+			// Send to session user audio feedback on audio status changes
 			const activeMeeting = state.activeMeeting[event.meetingId];
 			if (activeMeeting && event.userId === state.session.id) {
 				event.active
 					? sendAudioFeedback(MeetingSoundFeedback.MEETING_AUDIO_ON)
 					: sendAudioFeedback(MeetingSoundFeedback.MEETING_AUDIO_OFF);
 			}
+			if (activeMeeting && !event.active) {
+				state.setTalkingUsers(event.meetingId, event.userId, false);
+			}
 			break;
 		}
 		case WsEventType.MEETING_MEDIA_STREAM_CHANGED: {
 			const mediaType = event.mediaType.toLowerCase() as STREAM_TYPE;
-			const activeMeeting = state.activeMeeting[event.meetingId];
-			if (mediaType === STREAM_TYPE.VIDEO) {
-				state.changeStreamStatus(event.meetingId, event.userId, STREAM_TYPE.VIDEO, event.active);
-			}
-			if (mediaType === STREAM_TYPE.SCREEN) {
-				state.changeStreamStatus(event.meetingId, event.userId, STREAM_TYPE.SCREEN, event.active);
+			state.changeStreamStatus(event.meetingId, event.userId, mediaType, event.active);
 
-				// send audio feedback of session user screen sharing
-				if (activeMeeting) {
-					sendAudioFeedback(MeetingSoundFeedback.MEETING_SCREENSHARE_NOTIFICATION);
-				}
+			// Auto pin new screen share
+			if (mediaType === STREAM_TYPE.SCREEN && event.active) {
+				state.setPinnedTile(event.meetingId, { userId: event.userId, type: mediaType });
+			}
+
+			// Send audio feedback of session user screen sharing
+			const activeMeeting = state.activeMeeting[event.meetingId];
+			if (activeMeeting && mediaType === STREAM_TYPE.SCREEN) {
+				sendAudioFeedback(MeetingSoundFeedback.MEETING_SCREENSHARE_NOTIFICATION);
 			}
 
 			// Update subscription manager
 			if (event.userId !== state.session.id) {
 				const subscriptionsManager =
-					state.activeMeeting[event.meetingId]?.videoInConn?.subscriptionManager;
+					state.activeMeeting[event.meetingId]?.videoScreenIn?.subscriptionManager;
 				if (event.active) {
 					subscriptionsManager?.addStreamToAsk(event.userId, mediaType);
 				} else {
@@ -238,9 +237,16 @@ export function wsEventsHandler(event: WsEvent): void {
 		}
 		case WsEventType.MEETING_SDP_ANSWERED: {
 			const activeMeeting = state.activeMeeting[event.meetingId];
-			if (activeMeeting?.videoOutConn) {
-				if (event.mediaType.toLowerCase() === STREAM_TYPE.VIDEO) {
+			if (activeMeeting) {
+				const mediaType = event.mediaType.toLowerCase() as STREAM_TYPE;
+				if (mediaType === STREAM_TYPE.VIDEO && activeMeeting.videoOutConn) {
 					activeMeeting.videoOutConn.handleRemoteAnswer({
+						sdp: event.sdp,
+						type: 'answer'
+					});
+				}
+				if (mediaType === STREAM_TYPE.SCREEN) {
+					activeMeeting.screenOutConn?.handleRemoteAnswer({
 						sdp: event.sdp,
 						type: 'answer'
 					});
@@ -250,20 +256,23 @@ export function wsEventsHandler(event: WsEvent): void {
 		}
 		case WsEventType.MEETING_SDP_OFFERED: {
 			const activeMeeting = state.activeMeeting[event.meetingId];
-			if (activeMeeting?.videoInConn) {
-				activeMeeting.videoInConn.handleRemoteOffer(event.sdp);
+			if (activeMeeting?.videoScreenIn) {
+				activeMeeting.videoScreenIn.handleRemoteOffer(event.sdp);
 			}
 			break;
 		}
 		case WsEventType.MEETING_PARTICIPANT_SUBSCRIBED: {
 			const activeMeeting = state.activeMeeting[event.meetingId];
-			if (activeMeeting?.videoInConn) {
-				activeMeeting.videoInConn.handleParticipantsSubscribed(event.streams);
+			if (activeMeeting?.videoScreenIn) {
+				activeMeeting.videoScreenIn.handleParticipantsSubscribed(event.streams);
 			}
 			break;
 		}
 		case WsEventType.MEETING_PARTICIPANT_TALKING: {
-			// TODO
+			const activeMeeting = state.activeMeeting[event.meetingId];
+			if (activeMeeting) {
+				state.setTalkingUsers(event.meetingId, event.userId, event.isTalking);
+			}
 			break;
 		}
 		case WsEventType.MEETING_PARTICIPANT_CLASHED: {

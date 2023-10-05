@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import { sample } from 'lodash';
+import { find, sample } from 'lodash';
 
 import {
 	MeetingChatVisibility,
@@ -48,7 +48,10 @@ export const getStream = (
 	streamType: STREAM_TYPE
 ): MediaStream | undefined => {
 	if (userId === store.session.id) {
-		return store.activeMeeting[meetingId]?.localStreams?.video;
+		if (streamType === STREAM_TYPE.VIDEO)
+			return store.activeMeeting[meetingId]?.localStreams?.video;
+		if (streamType === STREAM_TYPE.SCREEN)
+			return store.activeMeeting[meetingId]?.localStreams?.screen;
 	}
 	const subscriptionId = `${userId}-${streamType}`;
 	return store.activeMeeting[meetingId]?.subscription[subscriptionId]?.stream;
@@ -62,3 +65,9 @@ export const getMeetingCarouselVisibility = (store: RootStore, meetingId: string
 
 export const getPinnedTile = (store: RootStore, meetingId: string): TileData | undefined =>
 	store.activeMeeting[meetingId]?.pinnedTile;
+
+export const getTalkingList = (store: RootStore, meetingId: string): string[] =>
+	store.activeMeeting[meetingId].talkingUsers;
+
+export const getUserIsTalking = (store: RootStore, meetingId: string, userId: string): boolean =>
+	find(store.activeMeeting[meetingId]?.talkingUsers, (user) => user === userId) !== undefined;

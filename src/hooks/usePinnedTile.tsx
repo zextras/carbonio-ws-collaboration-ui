@@ -29,8 +29,8 @@ const usePinnedTile = (
 		() =>
 			!!pinnedTile &&
 			pinnedTile.userId === userId &&
-			pinnedTile.type === STREAM_TYPE.VIDEO &&
-			!isScreenShare,
+			((pinnedTile.type === STREAM_TYPE.VIDEO && !isScreenShare) ||
+				(pinnedTile.type === STREAM_TYPE.SCREEN && isScreenShare)),
 		[pinnedTile, userId, isScreenShare]
 	);
 

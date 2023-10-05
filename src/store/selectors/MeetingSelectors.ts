@@ -7,7 +7,7 @@
 import { filter, find, forEach, size, sortBy } from 'lodash';
 
 import { STREAM_TYPE, Subscription, TileData } from '../../types/store/ActiveMeetingTypes';
-import { Meeting, MeetingParticipant, MeetingParticipantMap } from '../../types/store/MeetingTypes';
+import { Meeting, MeetingParticipantMap } from '../../types/store/MeetingTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 
 export const getMeeting = (store: RootStore, roomId: string): Meeting | undefined =>
@@ -74,12 +74,14 @@ export const getParticipantVideoStatus = (
 	return participant?.videoStreamOn ?? false;
 };
 
-export const getFirstParticipant = (
+export const getParticipantScreenStatus = (
 	store: RootStore,
-	meetingId: string | undefined
-): MeetingParticipant | undefined => {
+	meetingId: string | undefined,
+	userId: string | undefined
+): boolean => {
 	const meeting = find(store.meetings, (meeting) => meeting.id === meetingId);
-	return find(meeting?.participants, (participant) => participant.userId !== store.session.id);
+	const participant = find(meeting?.participants, (participant) => participant.userId === userId);
+	return participant?.screenStreamOn ?? false;
 };
 
 export const getTiles = (store: RootStore, meetingId: string): TileData[] => {
@@ -90,18 +92,45 @@ export const getTiles = (store: RootStore, meetingId: string): TileData[] => {
 		forEach(sortedParticipants, (participant) => {
 			tiles.push({
 				userId: participant.userId,
-				type: STREAM_TYPE.VIDEO
+				type: STREAM_TYPE.VIDEO,
+				creationDate: participant.joinedAt
 			});
 			if (participant.screenStreamOn) {
 				tiles.push({
 					userId: participant.userId,
-					type: STREAM_TYPE.SCREEN
+					type: STREAM_TYPE.SCREEN,
+					creationDate: participant.dateScreenOn
 				});
 			}
 		});
 		return tiles;
 	}
 	return [];
+};
+
+export const getCentralTileData = (store: RootStore, meetingId: string): TileData | undefined => {
+	const meeting = find(store.meetings, (meeting) => meeting.id === meetingId);
+	const participant = find(
+		meeting?.participants,
+		(participant) => participant.userId !== store.session.id
+	);
+	if (participant) {
+		return {
+			userId: participant.userId,
+			type: STREAM_TYPE.VIDEO
+		};
+	}
+	const myScreenIsEnabled = find(
+		meeting?.participants,
+		(participant) => participant.userId === store.session.id && participant.screenStreamOn === true
+	);
+	if (myScreenIsEnabled) {
+		return {
+			userId: store.session.id!,
+			type: STREAM_TYPE.SCREEN
+		};
+	}
+	return undefined;
 };
 
 export const getSubscriptions = (store: RootStore, meetingId: string): Subscription[] => {

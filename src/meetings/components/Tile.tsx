@@ -20,7 +20,7 @@ import styled from 'styled-components';
 
 import usePinnedTile from '../../hooks/usePinnedTile';
 import { UsersApi } from '../../network';
-import { getStream } from '../../store/selectors/ActiveMeetingSelectors';
+import { getUserIsTalking, getStream } from '../../store/selectors/ActiveMeetingSelectors';
 import {
 	getParticipantAudioStatus,
 	getParticipantVideoStatus
@@ -65,6 +65,8 @@ const CustomTile = styled(Container)`
 	height: auto;
 	min-width: 9.375rem;
 	border-radius: 0.5rem;
+	${({ isTalking, theme }): string | false =>
+		isTalking && `outline: 0.125rem solid ${theme.palette.success.regular};`}
 	&:hover {
 		${HoverContainer} {
 			opacity: 1;
@@ -83,8 +85,8 @@ const CustomContainer = styled(Container)`
 	position: absolute;
 `;
 
-const VideoEl = styled.video`
-	object-fit: cover;
+const VideoEl = styled.video<{ isScreenShare: boolean }>`
+	${({ isScreenShare }): string | false => !isScreenShare && 'object-fit: cover;'}
 	aspect-ratio: 16/9;
 	width: inherit;
 	border-radius: 0.5rem;
@@ -146,17 +148,21 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 	const audioStatus = useStore((store) => getParticipantAudioStatus(store, meetingId, userId));
 	const videoStatus = useStore((store) => getParticipantVideoStatus(store, meetingId, userId));
 	const videoStream = useStore((store) =>
-		getStream(store, meetingId || '', userId || '', STREAM_TYPE.VIDEO)
+		getStream(
+			store,
+			meetingId || '',
+			userId || '',
+			!isScreenShare ? STREAM_TYPE.VIDEO : STREAM_TYPE.SCREEN
+		)
 	);
+	const userPictureUpdatedAt: string | undefined = useStore((state) =>
+		getUserPictureUpdatedAt(state, userId || '')
+	);
+	const userIsTalking = useStore((store) => getUserIsTalking(store, meetingId || '', userId || ''));
 
 	const [picture, setPicture] = useState<false | string>(false);
 
 	const streamRef = useRef<null | HTMLVideoElement>(null);
-
-	const userPictureUpdatedAt: string | undefined = useStore((state) =>
-		getUserPictureUpdatedAt(state, userId || '')
-	);
-
 	const themeColor = useTheme();
 
 	const { canUsePinFeature, isPinned, switchPinnedTile } = usePinnedTile(
@@ -167,13 +173,13 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 
 	useEffect(() => {
 		if (streamRef && streamRef.current) {
-			if (videoStream && videoStatus) {
+			if (videoStream && (videoStatus || isScreenShare)) {
 				streamRef.current.srcObject = videoStream;
 			} else {
 				streamRef.current.srcObject = null;
 			}
 		}
-	}, [videoStatus, videoStream]);
+	}, [isScreenShare, videoStatus, videoStream]);
 
 	useEffect(() => {
 		if (userPictureUpdatedAt != null) {
@@ -184,18 +190,18 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 	}, [userId, userPictureUpdatedAt]);
 
 	const audioStreamEnabled = useMemo(() => {
-		if (modalProps) {
-			return modalProps.audioStreamEnabled;
-		}
+		if (modalProps) return modalProps.audioStreamEnabled;
+		if (isScreenShare) return true;
 		return audioStatus;
-	}, [audioStatus, modalProps]);
+	}, [audioStatus, isScreenShare, modalProps]);
 
 	const videoStreamEnabled = useMemo(() => {
 		if (modalProps) {
 			return modalProps.videoStreamEnabled;
 		}
+		if (isScreenShare) return true;
 		return videoStatus;
-	}, [modalProps, videoStatus]);
+	}, [isScreenShare, modalProps, videoStatus]);
 
 	const userColor = useMemo(() => {
 		const color = calculateAvatarColor(userName || '');
@@ -253,6 +259,15 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 						onClick={null}
 					/>
 				)}
+				{isScreenShare && (
+					<CustomIconButton
+						icon="ScreenSharingOnOutline"
+						iconColor="gray6"
+						backgroundColor="gray0"
+						size="large"
+						onClick={null}
+					/>
+				)}
 			</>
 		),
 		[
@@ -260,6 +275,7 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 			camOffLabel,
 			canUsePinFeature,
 			isPinned,
+			isScreenShare,
 			isSessionTile,
 			micOffLabel,
 			videoStreamEnabled
@@ -307,7 +323,12 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 	);
 
 	return (
-		<CustomTile background={'text'} data-testid="tile" width="100%">
+		<CustomTile
+			background={'text'}
+			data-testid="tile"
+			width="100%"
+			isTalking={userIsTalking && !isScreenShare}
+		>
 			{showHoverContainer && hoverContainer}
 			<InfoContainer orientation="horizontal">
 				<Row
@@ -338,6 +359,7 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 				muted={modalProps ? modalProps.streamMuted : true}
 				controls={false}
 				ref={modalProps ? modalProps.streamRef : streamRef}
+				isScreenShare={!!isScreenShare}
 			/>
 			{!videoStreamEnabled && (
 				<CustomContainer data-testid="avatar_box">{avatarComponent}</CustomContainer>

@@ -16,6 +16,7 @@ import {
 	getMeetingSidebarStatus
 } from '../../../store/selectors/ActiveMeetingSelectors';
 import useStore from '../../../store/Store';
+import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
 import Tile from '../Tile';
 
 const CinemaContainer = styled(Container)`
@@ -58,7 +59,11 @@ const CinemaMode = (): ReactElement => {
 	return (
 		<Container ref={cinemaModeRef}>
 			<CinemaContainer data-testid="cinemaModeView" width={centralTileWidth} height="fit">
-				<Tile userId={centralTile?.userId} meetingId={meetingId} />
+				<Tile
+					userId={centralTile?.userId}
+					meetingId={meetingId}
+					isScreenShare={centralTile?.type === STREAM_TYPE.SCREEN}
+				/>
 			</CinemaContainer>
 		</Container>
 	);
