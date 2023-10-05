@@ -24,7 +24,7 @@ import CinemaMode from '../components/cinemaMode/CinemaMode';
 import SidebarCarousel from '../components/cinemaMode/SidebarCarousel';
 import FaceToFaceMode from '../components/faceToFaceMode/FaceToFaceMode';
 import GridMode from '../components/gridMode/GridMode';
-import MeetingActions from '../components/MeetingActions/MeetingActions';
+import MeetingActionsBar from '../components/meetingActionsBar/MeetingActionsBar';
 import MeetingSidebar from '../components/sidebar/MeetingSidebar';
 
 const SkeletonContainer = styled(Container)`
@@ -87,7 +87,7 @@ const MeetingSkeleton = (): ReactElement => {
 			>
 				<LogoApp customLogo={customLogo} />
 				{ViewToDisplay}
-				<MeetingActions streamsWrapperRef={streamsWrapperRef} />
+				<MeetingActionsBar streamsWrapperRef={streamsWrapperRef} />
 			</ViewContainer>
 			{displayCarousel && <SidebarCarousel />}
 		</SkeletonContainer>

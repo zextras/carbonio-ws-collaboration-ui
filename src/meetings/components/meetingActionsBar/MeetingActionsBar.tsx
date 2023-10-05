@@ -12,6 +12,7 @@ import CameraButton from './CameraButton';
 import LeaveMeetingButton from './LeaveMeetingButton';
 import MicrophoneButton from './MicrophoneButton';
 import ScreenShareButton from './ScreenShareButton';
+import SwitchViewButton from './SwitchViewButton';
 
 const BarContainer = styled(Container)`
 	position: absolute;
@@ -34,7 +35,7 @@ type MeetingActionsProps = {
 	streamsWrapperRef: RefObject<HTMLDivElement>;
 };
 
-const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElement => {
+const MeetingActionsBar = ({ streamsWrapperRef }: MeetingActionsProps): ReactElement => {
 	// const meetingViewSelected = useStore((store) => getMeetingViewSelected(store, meetingId));
 
 	const [isHoovering, setIsHoovering] = useState<boolean>(false);
@@ -168,25 +169,7 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 					setIsAudioListOpen={setIsAudioListOpen}
 				/>
 				<ScreenShareButton />
-				{/* 
-			<Padding right="1rem" />
-			<IconButton
-				size="large"
-				backgroundColor="primary"
-				iconColor="gray6"
-				icon={meetingViewSelected === MeetingViewType.GRID ? "Grid" : "CinemaView"}
-				onClick={toggleMeetingView}
-				disabled // TODO: enable when grid mode will be available
-			/>
-			<Padding right="16px" />;
-			<IconButton
-				iconColor="gray6"
-				backgroundColor="primary"
-				icon="MoreVertical"
-				onClick={deleteMeeting}
-				size="large"
-			/>
-		*/}
+				<SwitchViewButton />
 				<Padding right="1rem" />
 				<LeaveMeetingButton />
 			</ActionsWrapper>
@@ -194,4 +177,4 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 	);
 };
 
-export default MeetingActions;
+export default MeetingActionsBar;
