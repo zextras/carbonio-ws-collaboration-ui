@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 import { Container, Text } from '@zextras/carbonio-design-system';
-import React, { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { ReactElement, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { getMeetingSidebarStatus } from '../../../store/selectors/ActiveMeetingSelectors';
+import useContainerDimensions from '../../../hooks/useContainerDimensions';
 import { getCentralTileData } from '../../../store/selectors/MeetingSelectors';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
@@ -50,30 +50,19 @@ const FaceToFaceMode = (): ReactElement => {
 
 	const localId = useStore(getUserId);
 
-	const sidebarStatus: boolean = useStore((store) => getMeetingSidebarStatus(store, meetingId));
-
-	const [centralTileWidth, setCentralTileWidth] = useState('0');
-
 	const faceToFaceRef = useRef<null | HTMLDivElement>(null);
 
-	const getWidthOfCentralTile = useCallback(() => {
-		if (faceToFaceRef && faceToFaceRef.current) {
-			const tileHeight = (faceToFaceRef.current.offsetWidth / 16) * 9;
-			let tileWidth;
-			tileWidth = faceToFaceRef.current.offsetWidth;
-			if (tileHeight >= faceToFaceRef.current.offsetHeight) {
-				tileWidth = (faceToFaceRef.current.offsetHeight / 9) * 16;
-			}
-			setCentralTileWidth(`${tileWidth}px`);
+	const faceToFaceDimensions = useContainerDimensions(faceToFaceRef);
+
+	const centralTileWidth = useMemo(() => {
+		const tileHeight = (faceToFaceDimensions.width / 16) * 9;
+		let tileWidth;
+		tileWidth = faceToFaceDimensions.width;
+		if (tileHeight >= faceToFaceDimensions.height) {
+			tileWidth = (faceToFaceDimensions.height / 9) * 16;
 		}
-	}, []);
-
-	useEffect(() => {
-		window.parent.addEventListener('resize', getWidthOfCentralTile);
-		return () => window.parent.removeEventListener('resize', getWidthOfCentralTile);
-	}, [getWidthOfCentralTile]);
-
-	useEffect(() => getWidthOfCentralTile(), [faceToFaceRef, getWidthOfCentralTile, sidebarStatus]);
+		return `${tileWidth}px`;
+	}, [faceToFaceDimensions]);
 
 	const centralContentToDisplay = useMemo(
 		() =>

@@ -5,14 +5,14 @@
  */
 
 import { Container, IconButton, Tooltip } from '@zextras/carbonio-design-system';
-import { debounce, map, size } from 'lodash';
-import React, { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { map, size } from 'lodash';
+import React, { ReactElement, useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
+import useContainerDimensions from '../../../hooks/useContainerDimensions';
 import { MeetingRoutesParams } from '../../../hooks/useRouting';
-import { getMeetingSidebarStatus } from '../../../store/selectors/ActiveMeetingSelectors';
 import { getTiles } from '../../../store/selectors/MeetingSelectors';
 import useStore from '../../../store/Store';
 import { STREAM_TYPE, TileData } from '../../../types/store/ActiveMeetingTypes';
@@ -50,31 +50,11 @@ const GridMode = (): ReactElement => {
 	const topLabel = t('tooltip.topOfList', 'Top of list');
 	const bottomLabel = t('tooltip.bottomOfList', 'Bottom of list');
 
-	const sidebarStatus: boolean = useStore((store) => getMeetingSidebarStatus(store, meetingId));
 	const tilesContainerRef = useRef<HTMLDivElement>(null);
 
 	const [index, setIndex] = useState(0);
-	const [dimensions, setCarouselDimensions] = useState({ width: 0, height: 0 });
 
-	// eslint-disable-next-line react-hooks/exhaustive-deps
-	const handleResize = useCallback(
-		debounce((): void => {
-			if (tilesContainerRef.current) {
-				setCarouselDimensions({
-					width: tilesContainerRef.current.offsetWidth,
-					height: tilesContainerRef.current.offsetHeight
-				});
-			}
-		}, 100),
-		[]
-	);
-
-	useEffect(() => handleResize(), [handleResize, sidebarStatus]);
-
-	useEffect(() => {
-		window.addEventListener('resize', handleResize);
-		return () => window.removeEventListener('resize', handleResize);
-	}, [handleResize]);
+	const dimensions = useContainerDimensions(tilesContainerRef);
 
 	const totalTiles = useMemo(() => size(tilesData), [tilesData]);
 	const step = 1;

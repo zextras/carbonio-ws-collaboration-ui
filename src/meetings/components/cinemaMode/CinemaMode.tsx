@@ -5,17 +5,13 @@
  */
 
 import { Container } from '@zextras/carbonio-design-system';
-import React, { ReactElement, useCallback, useEffect, useRef, useState } from 'react';
+import React, { ReactElement, useMemo, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
+import useContainerDimensions from '../../../hooks/useContainerDimensions';
 import { MeetingRoutesParams } from '../../../hooks/useRouting';
 import useTilesOrder from '../../../hooks/useTilesOrder';
-import {
-	getMeetingCarouselVisibility,
-	getMeetingSidebarStatus
-} from '../../../store/selectors/ActiveMeetingSelectors';
-import useStore from '../../../store/Store';
 import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
 import Tile from '../Tile';
 
@@ -25,36 +21,20 @@ const CinemaContainer = styled(Container)`
 
 const CinemaMode = (): ReactElement => {
 	const { meetingId }: MeetingRoutesParams = useParams();
-	const { centralTile } = useTilesOrder(meetingId);
-
-	const sidebarStatus: boolean = useStore((store) => getMeetingSidebarStatus(store, meetingId));
-	const carouselStatus = useStore((store) => getMeetingCarouselVisibility(store, meetingId));
-
-	const [centralTileWidth, setCentralTileWidth] = useState('0');
-
 	const cinemaModeRef = useRef<null | HTMLDivElement>(null);
 
-	const getWidthOfCentralTile = useCallback(() => {
-		if (cinemaModeRef && cinemaModeRef.current) {
-			const tileHeight = (cinemaModeRef.current.offsetWidth / 16) * 9;
-			let tileWidth;
-			tileWidth = cinemaModeRef.current.offsetWidth;
-			if (tileHeight >= cinemaModeRef.current.offsetHeight) {
-				tileWidth = (cinemaModeRef.current.offsetHeight / 9) * 16;
-			}
-			setCentralTileWidth(`${tileWidth}px`);
+	const { centralTile } = useTilesOrder(meetingId);
+	const cinemaModeDimensions = useContainerDimensions(cinemaModeRef);
+
+	const centralTileWidth = useMemo(() => {
+		const tileHeight = (cinemaModeDimensions.width / 16) * 9;
+		let tileWidth;
+		tileWidth = cinemaModeDimensions.width;
+		if (tileHeight >= cinemaModeDimensions.height) {
+			tileWidth = (cinemaModeDimensions.height / 9) * 16;
 		}
-	}, []);
-
-	useEffect(() => {
-		window.parent.addEventListener('resize', getWidthOfCentralTile);
-		return () => window.parent.removeEventListener('resize', getWidthOfCentralTile);
-	}, [getWidthOfCentralTile]);
-
-	useEffect(
-		() => getWidthOfCentralTile(),
-		[cinemaModeRef, getWidthOfCentralTile, sidebarStatus, carouselStatus]
-	);
+		return `${tileWidth}px`;
+	}, [cinemaModeDimensions]);
 
 	return (
 		<Container ref={cinemaModeRef}>
