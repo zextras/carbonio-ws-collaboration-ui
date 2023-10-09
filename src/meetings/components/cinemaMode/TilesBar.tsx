@@ -6,12 +6,13 @@
 
 import { Container, IconButton, Tooltip } from '@zextras/carbonio-design-system';
 import { map, size } from 'lodash';
-import React, { ReactElement, useCallback, useMemo, useRef, useState } from 'react';
+import React, { ReactElement, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import useContainerDimensions from '../../../hooks/useContainerDimensions';
+import usePagination from '../../../hooks/usePagination';
 import { MeetingRoutesParams } from '../../../hooks/useRouting';
 import useTilesOrder from '../../../hooks/useTilesOrder';
 import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
@@ -49,18 +50,23 @@ const TilesBar = (): ReactElement => {
 
 	const tilesContainerRef = useRef<HTMLDivElement>(null);
 
-	const [index, setIndex] = useState(0);
-
-	const dimensions = useContainerDimensions(tilesContainerRef);
 	const { carouselTiles } = useTilesOrder(meetingId);
 
+	const dimensions = useContainerDimensions(tilesContainerRef);
+
 	const totalTiles = useMemo(() => size(carouselTiles), [carouselTiles]);
-	const step = useMemo(() => (totalTiles > 3 ? 3 : totalTiles), [totalTiles]);
 
 	const tilesForPage = useMemo(() => {
 		const tileHeight = (dimensions.width / 16) * 9 + 20;
 		return Math.floor(dimensions.height / tileHeight);
 	}, [dimensions]);
+
+	const {
+		rowIndex: index,
+		prevButton,
+		nextButton,
+		showPaginationButtons
+	} = usePagination(totalTiles, tilesForPage, 3);
 
 	const tilesToRender = useMemo(() => {
 		const selectedTiles = carouselTiles.slice(index, index + tilesForPage);
@@ -73,60 +79,35 @@ const TilesBar = (): ReactElement => {
 		));
 	}, [carouselTiles, index, meetingId, tilesForPage]);
 
-	const clickPrevButton = useCallback(
-		() => setIndex((prev) => (prev - step > 0 ? prev - step : 0)),
-		[step]
-	);
-
-	const clickNextButton = useCallback(
-		() =>
-			setIndex((prev) =>
-				prev + step >= totalTiles - tilesForPage ? totalTiles - tilesForPage : prev + step
-			),
-		[step, tilesForPage, totalTiles]
-	);
-
-	const prevButtonDisabled = useMemo(() => index === 0, [index]);
-
-	const nextButtonDisabled = useMemo(
-		() => index === totalTiles - tilesForPage,
-		[index, tilesForPage, totalTiles]
-	);
-
-	const showButtons = useMemo(() => {
-		if (tilesForPage === 0) return false;
-		return totalTiles > tilesForPage;
-	}, [tilesForPage, totalTiles]);
-
 	return (
 		<TilesBarContainer mainAlignment="space-between">
-			{showButtons && (
+			{showPaginationButtons && (
 				<ButtonUpContainer width="fill" height="fit">
-					<Tooltip label={prevButtonDisabled ? topLabel : scrollUpLabel} placement="left">
+					<Tooltip label={prevButton.disabled ? topLabel : scrollUpLabel} placement="left">
 						<IconButton
-							conColor="gray6"
+							iconColor="gray6"
 							backgroundColor="text"
 							icon="ChevronUpOutline"
 							size="large"
 							width="fill"
-							onClick={clickPrevButton}
-							disabled={prevButtonDisabled}
+							onClick={prevButton.onClick}
+							disabled={prevButton.disabled}
 						/>
 					</Tooltip>
 				</ButtonUpContainer>
 			)}
 			<TileContainer ref={tilesContainerRef}>{tilesToRender}</TileContainer>
-			{showButtons && (
+			{showPaginationButtons && (
 				<ButtonDownContainer width="fill" height="fit">
-					<Tooltip label={nextButtonDisabled ? bottomLabel : scrollDownLabel} placement="left">
+					<Tooltip label={nextButton.disabled ? bottomLabel : scrollDownLabel} placement="left">
 						<IconButton
-							conColor="gray6"
+							iconColor="gray6"
 							backgroundColor="text"
 							icon="ChevronDownOutline"
 							size="large"
 							width="fill"
-							onClick={clickNextButton}
-							disabled={nextButtonDisabled}
+							onClick={nextButton.onClick}
+							disabled={nextButton.disabled}
 						/>
 					</Tooltip>
 				</ButtonDownContainer>
