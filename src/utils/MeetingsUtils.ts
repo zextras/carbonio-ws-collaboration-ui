@@ -39,3 +39,33 @@ export const sendAudioFeedback = (type: MeetingSoundFeedback): Promise<void> | u
 			return undefined;
 	}
 };
+
+export const maximiseRowsAndColumns = (
+	dimensions: { width: number; height: number },
+	tileWidth: number
+): { rows: number; columns: number } => {
+	const tileHeight = tileWidth * (9 / 16);
+	const rows = Math.floor(dimensions.height / tileHeight);
+	const columns = Math.floor(dimensions.width / tileWidth);
+
+	return { rows, columns };
+};
+
+export const maximiseTileSize = (
+	dimensions: { width: number; height: number },
+	numbersOfTiles: number
+): { tileWidth: number; rows: number; columns: number } => {
+	const containerRatio = dimensions.width / dimensions.height;
+	if (containerRatio > 16 / 9) {
+		// More wide than tall
+		// TODO
+	} else {
+		// More tall than wide
+		// TODO
+	}
+	const tileWidth = dimensions.width / numbersOfTiles;
+	const rows = 1;
+	const columns = 1;
+
+	return { tileWidth, rows, columns };
+};

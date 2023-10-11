@@ -5,7 +5,7 @@
  */
 
 import { Container, IconButton, Tooltip } from '@zextras/carbonio-design-system';
-import { map, size } from 'lodash';
+import { size } from 'lodash';
 import React, { ReactElement, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
@@ -14,16 +14,20 @@ import styled from 'styled-components';
 import useContainerDimensions from '../../../hooks/useContainerDimensions';
 import usePagination from '../../../hooks/usePagination';
 import { MeetingRoutesParams } from '../../../hooks/useRouting';
-import { getTiles } from '../../../store/selectors/MeetingSelectors';
+import { getNumberOfTiles, getTiles } from '../../../store/selectors/MeetingSelectors';
 import useStore from '../../../store/Store';
-import { STREAM_TYPE, TileData } from '../../../types/store/ActiveMeetingTypes';
+import { TileData } from '../../../types/store/ActiveMeetingTypes';
+import { maximiseRowsAndColumns, maximiseTileSize } from '../../../utils/MeetingsUtils';
 import Tile from '../Tile';
 
 const GridContainer = styled(Container)`
 	position: relative;
+	display: flex;
+	justify-content: center;
+	gap: 1rem;
 `;
 
-const TileContainer = styled(Container)`
+const RowContainer = styled(Container)`
 	gap: 1rem;
 `;
 
@@ -50,39 +54,70 @@ const GridMode = (): ReactElement => {
 	const topLabel = t('tooltip.topOfList', 'Top of list');
 	const bottomLabel = t('tooltip.bottomOfList', 'Bottom of list');
 
-	const tilesContainerRef = useRef<HTMLDivElement>(null);
+	const gridContainerRef = useRef<HTMLDivElement>(null);
+	const dimensions = useContainerDimensions(gridContainerRef);
 
 	const tilesData: TileData[] = useStore((store) => getTiles(store, meetingId));
+	const numberOfTiles = useStore((store) => getNumberOfTiles(store, meetingId));
 
-	const dimensions = useContainerDimensions(tilesContainerRef);
+	const { tileWidth, rows, columns, numberOfPages } = useMemo((): any => {
+		// Calculate a full density grid
+		let tileWidth = 200;
+		let { rows, columns } = maximiseRowsAndColumns(dimensions, tileWidth);
+		const numberOfPages = Math.ceil(numberOfTiles / (rows * columns));
 
-	const totalTiles = useMemo(() => size(tilesData), [tilesData]);
+		// If isn't necessary to paginate, recalculate rows and columns to best fit the tiles in the container
+		if (numberOfPages <= 1) {
+			const result = maximiseTileSize(dimensions, numberOfTiles);
+			tileWidth = result.tileWidth;
+			rows = result.rows;
+			columns = result.columns;
+		}
+		return { tileWidth, rows, columns, numberOfPages };
+	}, [dimensions, numberOfTiles]);
 
-	const tilesForPage = useMemo(() => {
-		const tileHeight = (dimensions.width / 16) * 9 + 20;
-		return Math.floor(dimensions.height / tileHeight);
-	}, [dimensions]);
+	const { rowIndex, prevButton, nextButton, showPaginationButtons } = usePagination(
+		numberOfPages > 1 ? Math.ceil(numberOfTiles / columns) : 0,
+		rows
+	);
 
-	const {
-		rowIndex: index,
-		prevButton,
-		nextButton,
-		showPaginationButtons
-	} = usePagination(totalTiles, tilesForPage);
+	const tilesToRender = useMemo(
+		() =>
+			numberOfPages <= 1
+				? tilesData
+				: tilesData.slice(rowIndex * columns, rowIndex * columns + rows * columns),
+		[numberOfPages, tilesData, rowIndex, columns, rows]
+	);
 
-	const tilesToRender = useMemo(() => {
-		const selectedTiles = tilesData.slice(index, index + tilesForPage);
-		return map(selectedTiles, (tile) => (
-			<Tile
-				userId={tile.userId}
-				meetingId={meetingId}
-				isScreenShare={tile.type === STREAM_TYPE.SCREEN}
-			/>
-		));
-	}, [tilesData, index, meetingId, tilesForPage]);
+	const rowsToRender = useMemo(() => {
+		const rowsArray = [];
+		for (let row = 0; row < rows; row += 1) {
+			const rowTiles = [];
+			for (let column = 0; column < columns; column += 1) {
+				const tileIndex = row * columns + column;
+				if (tileIndex < size(tilesToRender) && tilesToRender[tileIndex]) {
+					rowTiles.push(
+						<Container width={`${tileWidth}px`} height="fit">
+							<Tile
+								userId={tilesToRender[tileIndex].userId}
+								meetingId={meetingId}
+								key={`tile-${tileIndex}`}
+							/>
+						</Container>
+					);
+				}
+			}
+			rowsArray.push(
+				<RowContainer orientation="horizontal" height="fit" key={`row-${row}`}>
+					{rowTiles}
+				</RowContainer>
+			);
+		}
+		return rowsArray;
+	}, [rows, columns, tilesToRender, tileWidth, meetingId]);
 
 	return (
-		<GridContainer data-testid="gridModeView" mainAlignment="space-between">
+		<GridContainer data-testid="gridModeView" mainAlignment="space-between" ref={gridContainerRef}>
 			{showPaginationButtons && (
 				<ButtonUpContainer width="fit" height="fit">
 					<Tooltip label={prevButton.disabled ? topLabel : scrollUpLabel} placement="left">
@@ -98,7 +133,7 @@ const GridMode = (): ReactElement => {
 					</Tooltip>
 				</ButtonUpContainer>
 			)}
-			<TileContainer ref={tilesContainerRef}>{tilesToRender}</TileContainer>
+			{rowsToRender}
 			{showPaginationButtons && (
 				<ButtonDownContainer width="fit" height="fit">
 					<Tooltip label={nextButton.disabled ? bottomLabel : scrollDownLabel} placement="left">
