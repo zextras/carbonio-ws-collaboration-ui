@@ -21,6 +21,8 @@ import { messageActionType } from '../../../../types/store/ActiveConversationTyp
 import { RoomType } from '../../../../types/store/RoomTypes';
 import { User } from '../../../../types/store/UserTypes';
 
+const refBorderMsg = 'reference-border-message';
+
 const mockedRoom: RoomBe = createMockRoom({
 	id: 'roomId',
 	type: RoomType.GROUP
@@ -98,7 +100,7 @@ describe('Message reference displayed', () => {
 		const userName = screen.getByText(/User 1/i);
 		expect(userName).toBeInTheDocument();
 		expect(userName).toHaveStyle('color: #FFA726');
-		const borderComponent = await screen.findByTestId('reference-border-message');
+		const borderComponent = await screen.findByTestId(refBorderMsg);
 		expect(borderComponent).toBeInTheDocument();
 		expect(borderComponent).toHaveStyle('border-left: 0.25rem solid #FFA726');
 		const message = screen.getByText(/Text message used for test/i);
@@ -121,7 +123,7 @@ describe('Message reference displayed', () => {
 		const replyToMySelfLabel = screen.getByText(/Reply to yourself/i);
 		expect(replyToMySelfLabel).toBeInTheDocument();
 		expect(replyToMySelfLabel).toHaveStyle('color: #828282');
-		const borderComponent = await screen.findByTestId('reference-border-message');
+		const borderComponent = await screen.findByTestId(refBorderMsg);
 		expect(borderComponent).toBeInTheDocument();
 		expect(borderComponent).toHaveStyle('border-left: 0.25rem solid #EF9A9A');
 		const message = screen.getByText(/Text message sent by me/i);
@@ -143,7 +145,7 @@ describe('Message reference displayed', () => {
 		const editYourMessageLabel = screen.getByText(/Edit your message/i);
 		expect(editYourMessageLabel).toBeInTheDocument();
 		expect(editYourMessageLabel).toHaveStyle('color: #828282');
-		const borderComponent = await screen.findByTestId('reference-border-message');
+		const borderComponent = await screen.findByTestId(refBorderMsg);
 		expect(borderComponent).toBeInTheDocument();
 		expect(borderComponent).toHaveStyle('border-left: 0.25rem solid #EF9A9A');
 		const message = screen.getByText(/Text message sent by me/i);

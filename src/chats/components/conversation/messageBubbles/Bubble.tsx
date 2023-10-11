@@ -68,8 +68,6 @@ const BubbleContainer = styled(Container)`
 			? '0 0.25rem 0.25rem 0'
 			: centerMessageOfList
 			? '0 0.25rem 0.25rem 0'
-			: lastMessageOfList
-			? '0 0.25rem 0.25rem 0.25rem'
 			: '0 0.25rem 0.25rem 0.25rem'};
 `;
 

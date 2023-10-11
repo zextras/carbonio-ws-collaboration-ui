@@ -82,12 +82,13 @@ export const ActionsAccordion: FC<ActionAccordionProps> = ({
 
 	const infoDetails = useMemo(() => {
 		const arrayOfActions = [];
+		const bkgColor = isInsideMeeting ? 'text' : 'gray6';
 
 		// Mute conversation
 		arrayOfActions.push({
 			id: '1',
 			disableHover: true,
-			background: isInsideMeeting ? 'text' : 'gray6',
+			background: bkgColor,
 			CustomComponent: () => (
 				<MuteConversationAction
 					roomId={roomId}
@@ -103,7 +104,7 @@ export const ActionsAccordion: FC<ActionAccordionProps> = ({
 			arrayOfActions.push({
 				id: '2',
 				disableHover: true,
-				background: isInsideMeeting ? 'text' : 'gray6',
+				background: bkgColor,
 				CustomComponent: () => (
 					<EditConversationAction roomId={roomId} isInsideMeeting={isInsideMeeting} />
 				)
@@ -113,7 +114,7 @@ export const ActionsAccordion: FC<ActionAccordionProps> = ({
 			arrayOfActions.push({
 				id: '3',
 				disableHover: true,
-				background: isInsideMeeting ? 'text' : 'gray6',
+				background: bkgColor,
 				CustomComponent: () => (
 					<AddNewMemberAction
 						roomId={roomId}
@@ -130,7 +131,7 @@ export const ActionsAccordion: FC<ActionAccordionProps> = ({
 			arrayOfActions.push({
 				id: '4',
 				disableHover: true,
-				background: isInsideMeeting ? 'text' : 'gray6',
+				background: bkgColor,
 				CustomComponent: () => (
 					<ClearHistoryAction
 						roomId={roomId}
@@ -147,7 +148,7 @@ export const ActionsAccordion: FC<ActionAccordionProps> = ({
 			arrayOfActions.push({
 				id: '5',
 				disableHover: true,
-				background: isInsideMeeting ? 'text' : 'gray6',
+				background: bkgColor,
 				CustomComponent: () => (
 					<LeaveConversationAction
 						roomId={roomId}
@@ -164,7 +165,7 @@ export const ActionsAccordion: FC<ActionAccordionProps> = ({
 			arrayOfActions.push({
 				id: '6',
 				disableHover: true,
-				background: isInsideMeeting ? 'text' : 'gray6',
+				background: bkgColor,
 				CustomComponent: () => (
 					<DeleteConversationAction
 						roomId={roomId}

@@ -16,6 +16,8 @@ import { TextMessage } from '../../../../types/store/MessageTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
 import { RootStore } from '../../../../types/store/StoreTypes';
 
+const iconArrowIosDownward = 'icon: ArrowIosDownward';
+
 const mockedRoom: RoomBe = createMockRoom({
 	id: 'roomId',
 	type: RoomType.GROUP
@@ -32,7 +34,7 @@ describe('Bubble Contextual Menu - other user messages', () => {
 		const { user } = setup(
 			<BubbleContextualMenuDropDown message={simpleTextMessage} isMyMessage={false} />
 		);
-		const arrowButton = screen.getByTestId('icon: ArrowIosDownward');
+		const arrowButton = screen.getByTestId(iconArrowIosDownward);
 		await user.click(arrowButton);
 
 		// Actions
@@ -64,7 +66,7 @@ describe('Bubble Contextual Menu - other user messages', () => {
 		const { user } = setup(
 			<BubbleContextualMenuDropDown message={simpleTextMessage} isMyMessage={false} />
 		);
-		const arrowButton = screen.getByTestId('icon: ArrowIosDownward');
+		const arrowButton = screen.getByTestId(iconArrowIosDownward);
 		await user.click(arrowButton);
 
 		// Actions
@@ -95,7 +97,7 @@ describe('Bubble Contextual Menu - other user messages', () => {
 		const { user } = setup(
 			<BubbleContextualMenuDropDown message={simpleTextMessage} isMyMessage={false} />
 		);
-		const arrowButton = screen.getByTestId('icon: ArrowIosDownward');
+		const arrowButton = screen.getByTestId(iconArrowIosDownward);
 		await user.click(arrowButton);
 
 		// Actions
@@ -126,7 +128,7 @@ describe('Bubble Contextual Menu - other user messages', () => {
 		const { user } = setup(
 			<BubbleContextualMenuDropDown message={simpleTextMessage} isMyMessage={false} />
 		);
-		const arrowButton = screen.getByTestId('icon: ArrowIosDownward');
+		const arrowButton = screen.getByTestId(iconArrowIosDownward);
 		await user.click(arrowButton);
 
 		// Actions
@@ -161,7 +163,7 @@ describe('Bubble Contextual Menu - my messages', () => {
 		const { user } = setup(
 			<BubbleContextualMenuDropDown message={simpleTextMessage} isMyMessage />
 		);
-		const arrowButton = screen.getByTestId('icon: ArrowIosDownward');
+		const arrowButton = screen.getByTestId(iconArrowIosDownward);
 		await user.click(arrowButton);
 
 		// Actions
@@ -195,7 +197,7 @@ describe('Bubble Contextual Menu - my messages', () => {
 		const { user } = setup(
 			<BubbleContextualMenuDropDown message={simpleTextMessage} isMyMessage />
 		);
-		const arrowButton = screen.getByTestId('icon: ArrowIosDownward');
+		const arrowButton = screen.getByTestId(iconArrowIosDownward);
 		await user.click(arrowButton);
 
 		// Actions
@@ -228,7 +230,7 @@ describe('Bubble Contextual Menu - my messages', () => {
 		const { user } = setup(
 			<BubbleContextualMenuDropDown message={simpleTextMessage} isMyMessage />
 		);
-		const arrowButton = screen.getByTestId('icon: ArrowIosDownward');
+		const arrowButton = screen.getByTestId(iconArrowIosDownward);
 		await user.click(arrowButton);
 
 		// Actions
@@ -261,7 +263,7 @@ describe('Bubble Contextual Menu - my messages', () => {
 		const { user } = setup(
 			<BubbleContextualMenuDropDown message={simpleTextMessage} isMyMessage />
 		);
-		const arrowButton = screen.getByTestId('icon: ArrowIosDownward');
+		const arrowButton = screen.getByTestId(iconArrowIosDownward);
 		await user.click(arrowButton);
 
 		// Actions

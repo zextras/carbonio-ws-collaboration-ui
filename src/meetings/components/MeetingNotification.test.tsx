@@ -14,6 +14,9 @@ import { mockedSendChatMessage } from '../../tests/mockedXmppClient';
 import { setup } from '../../tests/test-utils';
 import { RoomType } from '../../types/store/RoomTypes';
 
+const sendAQuickMessage = 'Send a quick message';
+const joinMeeting = 'Join meeting';
+
 const user = createMockUser({ id: 'userId', name: 'User' });
 const room = createMockRoom({ id: 'roomId', type: RoomType.ONE_TO_ONE });
 const meeting = createMockMeeting({ id: 'meetingId', roomId: room.id });
@@ -38,12 +41,12 @@ describe('MeetingNotification', () => {
 		);
 
 		expect(screen.getByTitle(user.name)).toBeInTheDocument();
-		expect(screen.getByText('Send a quick message')).toBeInTheDocument();
+		expect(screen.getByText(sendAQuickMessage)).toBeInTheDocument();
 		expect(screen.getByTestId('icon: Navigation2')).toBeInTheDocument();
 		expect(screen.getByText('Decline')).toBeInTheDocument();
 		expect(screen.getByText('Decline')).not.toBeDisabled();
-		expect(screen.getByText('Join meeting')).toBeInTheDocument();
-		expect(screen.getByText('Join meeting')).not.toBeDisabled();
+		expect(screen.getByText(joinMeeting)).toBeInTheDocument();
+		expect(screen.getByText(joinMeeting)).not.toBeDisabled();
 	});
 
 	test('User can send a message clicking to the button Send message', async () => {
@@ -56,7 +59,7 @@ describe('MeetingNotification', () => {
 				stopMeetingSound={jest.fn()}
 			/>
 		);
-		await userEvent.type(screen.getByPlaceholderText('Send a quick message'), 'Hello');
+		await userEvent.type(screen.getByPlaceholderText(sendAQuickMessage), 'Hello');
 		await userEvent.click(screen.getByTestId('icon: Navigation2'));
 		expect(mockedSendChatMessage).toHaveBeenCalled();
 	});
@@ -71,7 +74,7 @@ describe('MeetingNotification', () => {
 				stopMeetingSound={jest.fn()}
 			/>
 		);
-		userEvent.type(screen.getByPlaceholderText('Send a quick message'), 'Hello{enter}');
+		userEvent.type(screen.getByPlaceholderText(sendAQuickMessage), 'Hello{enter}');
 		await waitFor(() => expect(mockedSendChatMessage).toHaveBeenCalled());
 	});
 
@@ -100,7 +103,7 @@ describe('MeetingNotification', () => {
 				stopMeetingSound={jest.fn()}
 			/>
 		);
-		await userEvent.click(screen.getByText('Join meeting'));
+		await userEvent.click(screen.getByText(joinMeeting));
 		expect(mockRemoveNotification).toHaveBeenCalled();
 	});
 });

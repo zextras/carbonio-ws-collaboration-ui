@@ -132,7 +132,7 @@ const ChatCreationContactsSelection = ({
 	const debouncedAutoComplete = useMemo(
 		() =>
 			debounce(() => {
-				autoCompleteGalRequest(inputRef.current?.value || '')
+				autoCompleteGalRequest(inputRef.current?.value ?? '')
 					.then((response: AutoCompleteGalResponse) => {
 						setLoading(false);
 						// Remove myself from the list

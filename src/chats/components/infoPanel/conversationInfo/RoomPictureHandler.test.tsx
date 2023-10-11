@@ -23,18 +23,20 @@ import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
 import { RootStore } from '../../../../types/store/StoreTypes';
 import { User } from '../../../../types/store/UserTypes';
 
+const pictureUpdatedAtTime = '2022-08-25T17:24:28.961+02:00';
+
 const user1Info: User = {
 	id: 'myId',
 	email: 'user1@domain.com',
 	name: 'User 1',
-	pictureUpdatedAt: '2022-08-25T17:24:28.961+02:00'
+	pictureUpdatedAt: pictureUpdatedAtTime
 };
 
 const user2Info: User = {
 	id: 'otherId',
 	email: 'user2@domain.com',
 	name: 'User 2',
-	pictureUpdatedAt: '2022-08-25T17:24:28.961+02:00',
+	pictureUpdatedAt: pictureUpdatedAtTime,
 	last_activity: 1642818965849
 };
 
@@ -53,7 +55,7 @@ const testRoom2: RoomBe = createMockRoom({
 	id: 'room-test',
 	name: 'A Group',
 	description: 'This is a beautiful description',
-	pictureUpdatedAt: '2022-08-25T17:24:28.961+02:00',
+	pictureUpdatedAt: pictureUpdatedAtTime,
 	type: RoomType.GROUP,
 	members: [
 		createMockMember({ userId: user1Info.id, owner: true }),
@@ -62,7 +64,7 @@ const testRoom2: RoomBe = createMockRoom({
 });
 
 const testRoom3: RoomBe = createMockRoom({
-	pictureUpdatedAt: '2022-08-25T17:24:28.961+02:00',
+	pictureUpdatedAt: pictureUpdatedAtTime,
 	type: RoomType.ONE_TO_ONE,
 	members: [createMockMember({ userId: user1Info.id }), createMockMember({ userId: user2Info.id })]
 });
@@ -239,7 +241,7 @@ describe('Room Picture Handler - one_to_one', () => {
 
 		// Simulate USER_PICTURE_CHANGED WebSocket event
 		act(() => {
-			store.setUserPictureUpdated(user2Info.id, '2022-08-25T17:24:28.961+02:00');
+			store.setUserPictureUpdated(user2Info.id, pictureUpdatedAtTime);
 		});
 
 		const pictureContainer = screen.getByTestId('picture_container');

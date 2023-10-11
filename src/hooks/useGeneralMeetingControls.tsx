@@ -41,8 +41,9 @@ const useGeneralMeetingControls = (meetingId: string): void => {
 		if (pinnedTile) {
 			const { setPinnedTile } = useStore.getState();
 			// Remove pin in face to face mode
-			if (size(tiles) < 3) setPinnedTile(meetingId, undefined);
-			else {
+			if (size(tiles) < 3) {
+				setPinnedTile(meetingId, undefined);
+			} else {
 				const isDisappeared = !find(
 					tiles,
 					(tile) => tile.userId === pinnedTile?.userId && tile.type === pinnedTile?.type

@@ -80,10 +80,8 @@ const ChatCreationModal = ({
 		} else {
 			setChatType(RoomType.ONE_TO_ONE);
 		}
-		if (open) {
-			if (inputRef.current) {
-				inputRef.current.focus();
-			}
+		if (open && inputRef.current) {
+			inputRef.current.focus();
 		}
 	}, [contactsSelected, open]);
 

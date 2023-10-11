@@ -24,6 +24,9 @@ import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
 import { UserBe } from '../../../../types/network/models/userBeTypes';
 import { MeetingParticipant } from '../../../../types/store/MeetingTypes';
 
+const iconChevronUp = 'icon: ChevronUp';
+const iconChevronDown = 'icon: ChevronDown';
+
 const user1Be: UserBe = {
 	id: 'user1',
 	email: 'user1@domain.com',
@@ -141,13 +144,13 @@ describe('Actions Accordion', () => {
 		expect(screen.getByText(/Mute notifications/i)).toBeVisible();
 
 		// Check store change
-		const closeAccordionButton = screen.getByTestId('icon: ChevronUp');
+		const closeAccordionButton = screen.getByTestId(iconChevronUp);
 		await user.click(closeAccordionButton);
 		expect(
 			useStore.getState().activeConversations[room.id].infoPanelStatus!.actionsAccordionIsOpened
 		).toBeFalsy();
 
-		const openAccordionButton = screen.getByTestId('icon: ChevronDown');
+		const openAccordionButton = screen.getByTestId(iconChevronDown);
 		await user.click(openAccordionButton);
 		expect(
 			useStore.getState().activeConversations[room.id].infoPanelStatus!.actionsAccordionIsOpened
@@ -162,7 +165,7 @@ describe('Actions Accordion', () => {
 
 		setup(<ActionsAccordion roomId={room.id} />);
 		expect(screen.getByText(/Mute notifications/i)).toBeVisible();
-		expect(screen.getByTestId('icon: ChevronUp')).toBeInTheDocument();
+		expect(screen.getByTestId(iconChevronUp)).toBeInTheDocument();
 	});
 
 	test('Initial accordion status: false', async () => {
@@ -173,7 +176,7 @@ describe('Actions Accordion', () => {
 
 		setup(<ActionsAccordion roomId={room.id} />);
 		expect(screen.queryByText(/Mute notifications/i)).not.toBeVisible();
-		expect(screen.getByTestId('icon: ChevronDown')).toBeInTheDocument();
+		expect(screen.getByTestId(iconChevronDown)).toBeInTheDocument();
 	});
 
 	test('A owner of a group should see add member disabled', () => {
@@ -261,9 +264,9 @@ describe('Actions Accordion - meeting', () => {
 		const { user } = setup(
 			<ActionsAccordion roomId={room.id} isInsideMeeting meetingId={meeting.id} />
 		);
-		const chevron = screen.getByTestId('icon: ChevronUp');
+		const chevron = screen.getByTestId(iconChevronUp);
 		await user.click(chevron);
-		const chevronDown = await screen.findByTestId('icon: ChevronDown');
+		const chevronDown = await screen.findByTestId(iconChevronDown);
 		expect(chevronDown).toBeInTheDocument();
 		expect(screen.getByText(/Mute Notifications/i)).toBeInTheDocument();
 		expect(screen.getByText(/Add New Members/i)).toBeInTheDocument();

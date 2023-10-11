@@ -27,6 +27,9 @@ import { setup } from '../../../../tests/test-utils';
 import { RoomType } from '../../../../types/network/models/roomBeTypes';
 import { User } from '../../../../types/store/UserTypes';
 
+const iconClose = 'icon: Close';
+const iconTrash2Outline = 'icon: Trash2Outline';
+
 const user1Info: User = {
 	id: 'user1',
 	email: 'user1@domain.com',
@@ -155,7 +158,7 @@ describe('participants actions - leave/delete conversation', () => {
 		await user.click(screen.getByTestId('icon: LogOut'));
 		expect(screen.getByTestId('leave_modal')).toBeInTheDocument();
 
-		await user.click(screen.getByTestId('icon: Close'));
+		await user.click(screen.getByTestId(iconClose));
 		expect(screen.queryByTestId('leave_modal')).not.toBeInTheDocument();
 	});
 	test('leave conversation', async () => {
@@ -196,10 +199,10 @@ describe('participants actions - leave/delete conversation', () => {
 				roomId={mockedRoom.id}
 			/>
 		);
-		await user.click(screen.getByTestId('icon: Trash2Outline'));
+		await user.click(screen.getByTestId(iconTrash2Outline));
 		expect(screen.getByTestId('delete_modal')).toBeInTheDocument();
 
-		await user.click(screen.getByTestId('icon: Close'));
+		await user.click(screen.getByTestId(iconClose));
 		expect(screen.queryByTestId('delete_modal')).not.toBeInTheDocument();
 	});
 	test('delete conversation', async () => {
@@ -220,7 +223,7 @@ describe('participants actions - leave/delete conversation', () => {
 			/>
 		);
 
-		user.click(screen.getByTestId('icon: Trash2Outline'));
+		user.click(screen.getByTestId(iconTrash2Outline));
 		const button = await screen.findByRole('button', { name: 'Delete' });
 		user.click(button);
 		await waitFor(() => expect(mockedDeleteRoomRequest).toBeCalled());
@@ -291,10 +294,10 @@ describe('participants actions - delete user', () => {
 			<RemoveMemberListAction roomId={mockedRoom.id} memberId={user2Info.id} />
 		);
 
-		await user.click(screen.getByTestId('icon: Trash2Outline'));
+		await user.click(screen.getByTestId(iconTrash2Outline));
 		expect(screen.getByTestId('delete_user_modal')).toBeInTheDocument();
 
-		await user.click(screen.getByTestId('icon: Close'));
+		await user.click(screen.getByTestId(iconClose));
 		expect(screen.queryByTestId('delete_user_modal')).not.toBeInTheDocument();
 	});
 
@@ -312,7 +315,7 @@ describe('participants actions - delete user', () => {
 			<RemoveMemberListAction roomId={mockedRoom.id} memberId={user2Info.id} />
 		);
 
-		user.click(screen.getByTestId('icon: Trash2Outline'));
+		user.click(screen.getByTestId(iconTrash2Outline));
 		const button = await screen.findByRole('button', { name: 'Remove' });
 
 		user.click(button);

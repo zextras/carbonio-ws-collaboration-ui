@@ -14,6 +14,8 @@ import { setup } from '../../../tests/test-utils';
 import { UserBe } from '../../../types/network/models/userBeTypes';
 import { RootStore } from '../../../types/store/StoreTypes';
 
+const pictureUpdatedAtTime = '2022-08-25T17:24:28.961+02:00';
+
 const userWithoutImage: UserBe = {
 	id: 'user1',
 	email: 'user1@domain.com',
@@ -28,7 +30,7 @@ const userWithImage: UserBe = {
 	name: 'User 1',
 	lastSeen: 1234567890,
 	statusMessage: "Hey there! I'm User 1",
-	pictureUpdatedAt: '2022-08-25T17:24:28.961+02:00'
+	pictureUpdatedAt: pictureUpdatedAtTime
 };
 
 describe('Settings view', () => {
@@ -49,7 +51,7 @@ describe('Settings view', () => {
 	test('Everything should be rendered - with image', async () => {
 		const store: RootStore = useStore.getState();
 		store.setUserInfo(userWithImage);
-		store.setUserPictureUpdated(userWithImage.id, '2022-08-25T17:24:28.961+02:00');
+		store.setUserPictureUpdated(userWithImage.id, pictureUpdatedAtTime);
 		store.setLoginInfo(userWithImage.id, userWithImage.name, userWithImage.name);
 		setup(<Settings id={userWithImage.id} />);
 
@@ -66,7 +68,7 @@ describe('Settings view', () => {
 	test('Delete a profile image', async () => {
 		const store: RootStore = useStore.getState();
 		store.setUserInfo(userWithImage);
-		store.setUserPictureUpdated(userWithImage.id, '2022-08-25T17:24:28.961+02:00');
+		store.setUserPictureUpdated(userWithImage.id, pictureUpdatedAtTime);
 		store.setLoginInfo(userWithImage.id, userWithImage.name, userWithImage.name);
 		const { user } = setup(<Settings id={userWithImage.id} />);
 		const pictureContainer = screen.getByTestId('picture_container');

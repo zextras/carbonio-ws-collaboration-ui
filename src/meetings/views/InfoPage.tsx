@@ -55,13 +55,6 @@ const InfoPage = (): ReactElement => {
 			descriptionLowerLabel = t('external.nobodyInTheRoom', 'It seems nobody is in this Room');
 			break;
 		case PAGE_INFO_TYPE.MEETING_ENDED:
-			titleLabel = t('notification.meeting.ended', 'Meeting Ended');
-			centralLabel = t('thanksForParticipating', 'Thanks for participating');
-			descriptionLowerLabel = t(
-				'keepInTouchWithColleagues',
-				"Keep in touch with your colleagues or join your groups' meeting rooms"
-			);
-			break;
 		default:
 			titleLabel = t('notification.meeting.ended', 'Meeting Ended');
 			centralLabel = t('thanksForParticipating', 'Thanks for participating');
@@ -69,6 +62,7 @@ const InfoPage = (): ReactElement => {
 				'keepInTouchWithColleagues',
 				"Keep in touch with your colleagues or join your groups' meeting rooms"
 			);
+			break;
 	}
 
 	return (
