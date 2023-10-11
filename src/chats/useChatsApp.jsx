@@ -4,9 +4,10 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import React, { lazy, Suspense, useEffect } from 'react';
+
 import { Container } from '@zextras/carbonio-design-system';
 import { addRoute, addSettingsView, Spinner } from '@zextras/carbonio-shell-ui';
-import React, { lazy, Suspense, useEffect } from 'react';
 
 import SecondaryBarSingleGroupsView from './components/secondaryBar/SecondaryBarSingleGroupsView';
 import { LogoBeta, LogoSettingsBeta } from './LogoBeta';

@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { act, screen, waitFor } from '@testing-library/react';
 import React from 'react';
+
+import { act, screen, waitFor } from '@testing-library/react';
 
 import RoomPictureHandler from './RoomPictureHandler';
 import {

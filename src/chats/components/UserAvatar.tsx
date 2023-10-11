@@ -4,9 +4,10 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import React, { useEffect, useMemo, useState } from 'react';
+
 import { Avatar, Container, Shimmer, Badge, useTheme } from '@zextras/carbonio-design-system';
 import { find } from 'lodash';
-import React, { useEffect, useMemo, useState } from 'react';
 import styled, { DefaultTheme } from 'styled-components';
 
 import { UsersApi } from '../../network';

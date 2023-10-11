@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { ACTION_TYPES, registerActions, removeActions } from '@zextras/carbonio-shell-ui';
 import React, { ReactElement, useEffect, useMemo, useState } from 'react';
+
+import { ACTION_TYPES, registerActions, removeActions } from '@zextras/carbonio-shell-ui';
 import { useTranslation } from 'react-i18next';
 
 import ChatCreationModal from './creationModal/ChatCreationModal';

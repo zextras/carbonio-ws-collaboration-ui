@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { screen, waitFor } from '@testing-library/react';
 import React from 'react';
+
+import { screen, waitFor } from '@testing-library/react';
 
 import MeetingNotification from './MeetingNotification';
 import useStore from '../../store/Store';

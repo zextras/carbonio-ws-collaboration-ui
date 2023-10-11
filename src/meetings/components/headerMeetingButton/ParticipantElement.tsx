@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Avatar, Container, Text, Shimmer, Row } from '@zextras/carbonio-design-system';
 import React, { FC, useEffect, useMemo, useState } from 'react';
+
+import { Avatar, Container, Text, Shimmer, Row } from '@zextras/carbonio-design-system';
 import styled from 'styled-components';
 
 import GoToPrivateChatAction from '../../../chats/components/infoPanel/conversationParticipantsAccordion/GoToPrivateChatAction';

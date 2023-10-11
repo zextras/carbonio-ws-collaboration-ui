@@ -5,8 +5,9 @@
  */
 /* eslint-disable no-nested-ternary */
 
-import { Container, Padding } from '@zextras/carbonio-design-system';
 import React, { FC, useMemo } from 'react';
+
+import { Container, Padding } from '@zextras/carbonio-design-system';
 import styled from 'styled-components';
 
 import AttachmentView from './AttachmentView';

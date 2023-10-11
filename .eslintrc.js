@@ -32,24 +32,6 @@ module.exports = {
 				allowArrowFunctions: true
 			}
 		],
-		'import/order': [
-			'error',
-			{
-				groups: [['builtin', 'external']],
-				pathGroups: [
-					{
-						pattern: 'react',
-						group: 'external',
-						position: 'before'
-					}
-				],
-				'newlines-between': 'always',
-				alphabetize: {
-					order: 'asc',
-					caseInsensitive: true
-				}
-			}
-		],
 		'notice/notice': [
 			'error',
 			{
@@ -67,14 +49,9 @@ module.exports = {
 				'**/utils/test-utils.tsx',
 				'jest-setup.ts'
 			],
-			extends: ['plugin:jest-dom/recommended', 'plugin:testing-library/react'],
 			rules: {
-				'testing-library/no-global-regexp-flag-in-query': 'error',
-				'testing-library/prefer-user-event': 'warn',
-				'import/no-extraneous-dependencies': 'off',
 				'testing-library/no-node-access': 'off',
-				'jest-dom/prefer-in-document': 'off',
-				'jest-dom/prefer-enabled-disabled': 'off'
+				'jest-dom/prefer-in-document': 'off'
 			}
 		}
 	],

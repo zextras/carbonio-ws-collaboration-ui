@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { addRoute } from '@zextras/carbonio-shell-ui';
 import React, { lazy, Suspense, useEffect } from 'react';
+
+import { addRoute } from '@zextras/carbonio-shell-ui';
 
 import ShimmerEntryMeetingView from './views/shimmers/ShimmerEntryMeetingView';
 import { MEETINGS_NAME, MEETINGS_ROUTE } from '../constants/appConstants';

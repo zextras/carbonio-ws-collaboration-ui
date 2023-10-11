@@ -4,9 +4,10 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import React, { FC, useCallback, useState } from 'react';
+
 import { Input, IconButton, Container, Tooltip } from '@zextras/carbonio-design-system';
 import { size } from 'lodash';
-import React, { FC, useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 type SearchUserProps = {

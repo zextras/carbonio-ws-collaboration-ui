@@ -4,10 +4,11 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import React, { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+
 import { Container } from '@zextras/carbonio-design-system';
 import { debounce, find, groupBy, map } from 'lodash';
 import moment from 'moment-timezone';
-import React, { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 
 import AnimationGlobalStyle from './messageBubbles/BubbleAnimationsGlobalStyle';

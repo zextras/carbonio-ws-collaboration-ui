@@ -4,9 +4,10 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import React, { lazy, ReactElement, Suspense, useEffect } from 'react';
+
 import { disable, enable } from 'darkreader';
 import { createMemoryHistory } from 'history';
-import React, { lazy, ReactElement, Suspense, useEffect } from 'react';
 import { Route, Router, Switch } from 'react-router-dom';
 
 import ShimmerEntryMeetingView from './shimmers/ShimmerEntryMeetingView';

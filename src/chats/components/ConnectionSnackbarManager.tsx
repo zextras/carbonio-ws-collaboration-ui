@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { SnackbarManager, Snackbar } from '@zextras/carbonio-design-system';
 import React, { ReactElement, useEffect, useMemo, useState } from 'react';
+
+import { SnackbarManager, Snackbar } from '@zextras/carbonio-design-system';
 
 import useStore from '../../store/Store';
 

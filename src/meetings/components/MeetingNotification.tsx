@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import React, { ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
+
 import {
 	Avatar,
 	Button,
@@ -14,7 +16,6 @@ import {
 	Tooltip
 } from '@zextras/carbonio-design-system';
 import { size } from 'lodash';
-import React, { ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
