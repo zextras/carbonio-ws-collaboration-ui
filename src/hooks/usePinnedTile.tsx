@@ -7,7 +7,7 @@
 import { useCallback, useMemo } from 'react';
 
 import { getPinnedTile } from '../store/selectors/ActiveMeetingSelectors';
-import { getNumberOfTiles } from '../store/selectors/MeetingSelectors';
+import { getTotalNumberOfTiles } from '../store/selectors/MeetingSelectors';
 import useStore from '../store/Store';
 import { STREAM_TYPE, TileData } from '../types/store/ActiveMeetingTypes';
 
@@ -23,7 +23,7 @@ const usePinnedTile = (
 ): usePinnedTileReturn => {
 	const pinnedTile: TileData | undefined = useStore((store) => getPinnedTile(store, meetingId));
 	const setPinnedTile = useStore((store) => store.setPinnedTile);
-	const numberOfTiles = useStore((store) => getNumberOfTiles(store, meetingId));
+	const numberOfTiles = useStore((store) => getTotalNumberOfTiles(store, meetingId));
 
 	const isPinned = useMemo(
 		() =>

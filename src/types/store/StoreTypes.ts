@@ -189,6 +189,8 @@ export type ActiveMeetingSlice = {
 	setIsCarouseVisible: (meetingId: string, status: boolean) => void;
 	setPinnedTile: (meetingId: string, tile: TileData | undefined) => void;
 	setTalkingUsers: (meetingId: string, userId: string, isTalking: boolean) => void;
+	setCarouselNumberOfTiles: (meetingId: string, numberOfTiles: number) => void;
+	setCarouselIndex: (meetingId: string, indexValue: number) => void;
 };
 
 export type RootStore = UsersStoreSlice &

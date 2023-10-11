@@ -15,7 +15,7 @@ import {
 	getMeetingSidebarStatus,
 	getMeetingViewSelected
 } from '../../store/selectors/ActiveMeetingSelectors';
-import { getNumberOfTiles } from '../../store/selectors/MeetingSelectors';
+import { getTotalNumberOfTiles } from '../../store/selectors/MeetingSelectors';
 import { getCustomLogo } from '../../store/selectors/SessionSelectors';
 import useStore from '../../store/Store';
 import { MeetingViewType } from '../../types/store/ActiveMeetingTypes';
@@ -26,6 +26,7 @@ import FaceToFaceMode from '../components/faceToFaceMode/FaceToFaceMode';
 import GridMode from '../components/gridMode/GridMode';
 import MeetingActions from '../components/MeetingActions/MeetingActions';
 import MeetingSidebar from '../components/sidebar/MeetingSidebar';
+import WhoIsSpeaking from '../components/WhoIsSpeaking';
 
 const SkeletonContainer = styled(Container)`
 	overflow: hidden;
@@ -54,7 +55,7 @@ const MeetingSkeleton = (): ReactElement => {
 
 	const meetingViewSelected = useStore((store) => getMeetingViewSelected(store, meetingId));
 	const sidebarStatus: boolean = useStore((store) => getMeetingSidebarStatus(store, meetingId));
-	const numberOfTiles = useStore((store) => getNumberOfTiles(store, meetingId));
+	const numberOfTiles = useStore((store) => getTotalNumberOfTiles(store, meetingId));
 	const customLogo = useStore(getCustomLogo);
 
 	const streamsWrapperRef = useRef<HTMLDivElement>(null);
@@ -86,6 +87,7 @@ const MeetingSkeleton = (): ReactElement => {
 				orientation="horizontal"
 			>
 				<LogoApp customLogo={customLogo} />
+				<WhoIsSpeaking />
 				{ViewToDisplay}
 				<MeetingActions streamsWrapperRef={streamsWrapperRef} />
 			</ViewContainer>

@@ -61,13 +61,19 @@ export const getFirstStream = (store: RootStore, meetingId: string): MediaStream
 	sample(store.activeMeeting[meetingId]?.subscription)?.stream;
 
 export const getMeetingCarouselVisibility = (store: RootStore, meetingId: string): boolean =>
-	store.activeMeeting[meetingId]?.isCarouselVisible;
+	store.activeMeeting[meetingId]?.carouselStatus.isCarouselVisible;
 
 export const getPinnedTile = (store: RootStore, meetingId: string): TileData | undefined =>
 	store.activeMeeting[meetingId]?.pinnedTile;
 
 export const getTalkingList = (store: RootStore, meetingId: string): string[] =>
-	store.activeMeeting[meetingId].talkingUsers;
+	store.activeMeeting[meetingId]?.talkingUsers;
 
 export const getUserIsTalking = (store: RootStore, meetingId: string, userId: string): boolean =>
 	find(store.activeMeeting[meetingId]?.talkingUsers, (user) => user === userId) !== undefined;
+
+export const getCarouselNumberOfTiles = (store: RootStore, meetingId: string): number =>
+	store.activeMeeting[meetingId]?.carouselStatus.carouselNumberOfTiles;
+
+export const getCarouselIndex = (store: RootStore, meetingId: string): number =>
+	store.activeMeeting[meetingId]?.carouselStatus.index;

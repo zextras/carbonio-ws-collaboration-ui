@@ -158,7 +158,7 @@ export const getSubscriptions = (store: RootStore, meetingId: string): Subscript
 	return [];
 };
 
-export const getNumberOfTiles = (store: RootStore, meetingId: string): number => {
+export const getTotalNumberOfTiles = (store: RootStore, meetingId: string): number => {
 	const meeting = find(store.meetings, (meeting) => meeting.id === meetingId);
 	if (meeting) {
 		const participantWithScreen = filter(
