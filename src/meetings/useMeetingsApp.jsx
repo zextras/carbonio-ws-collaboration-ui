@@ -11,13 +11,13 @@ import { addRoute } from '@zextras/carbonio-shell-ui';
 import ShimmerEntryMeetingView from './views/shimmers/ShimmerEntryMeetingView';
 import { MEETINGS_NAME, MEETINGS_ROUTE } from '../constants/appConstants';
 
-const LazyExternalMainView = lazy(() =>
-	import(/* webpackChunkName: "mainView" */ './views/ExternalMainView')
+const LazyMeetingMainView = lazy(() =>
+	import(/* webpackChunkName: "mainView" */ './views/MeetingMainView')
 );
 
-const ExternalMain = () => (
+const MeetingMain = () => (
 	<Suspense fallback={<ShimmerEntryMeetingView />}>
-		<LazyExternalMainView />
+		<LazyMeetingMainView />
 	</Suspense>
 );
 
@@ -28,7 +28,7 @@ export default function useMeetingsApp() {
 			visible: false,
 			label: MEETINGS_NAME,
 			primaryBar: 'TeamOutline',
-			appView: ExternalMain,
+			appView: MeetingMain,
 			focusMode: true
 		});
 	}, []);

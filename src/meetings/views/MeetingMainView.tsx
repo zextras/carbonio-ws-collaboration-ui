@@ -42,7 +42,7 @@ const InfoPage = (): ReactElement => (
 	</Suspense>
 );
 
-const ExternalMainView = (): ReactElement => {
+const MeetingMainView = (): ReactElement => {
 	const history = createMemoryHistory();
 	const setCustomLogo = useStore((store) => store.setCustomLogo);
 
@@ -91,4 +91,4 @@ const ExternalMainView = (): ReactElement => {
 	);
 };
 
-export default ExternalMainView;
+export default MeetingMainView;
