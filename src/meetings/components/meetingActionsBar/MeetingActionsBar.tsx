@@ -40,8 +40,6 @@ type MeetingActionsProps = {
 };
 
 const MeetingActionsBar = ({ streamsWrapperRef }: MeetingActionsProps): ReactElement => {
-	// const meetingViewSelected = useStore((store) => getMeetingViewSelected(store, meetingId));
-
 	const [isHoovering, setIsHoovering] = useState<boolean>(false);
 	const [isHoverActions, setIsHoverActions] = useState<boolean>(false);
 	const [isAudioListOpen, setIsAudioListOpen] = useState<boolean>(false);
@@ -95,19 +93,6 @@ const MeetingActionsBar = ({ streamsWrapperRef }: MeetingActionsProps): ReactEle
 	const handleMouseEnter = useCallback(() => setIsHoverActions(true), []);
 
 	const handleMouseLeave = useCallback(() => setIsHoverActions(false), []);
-
-	/*
-	const deleteMeeting = useCallback(() => {
-		MeetingsApi.deleteMeeting(meetingId).then(() => goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED));
-	}, [meetingId, goToInfoPage]);
-
-	const toggleMeetingView = useCallback(() => {
-		setMeetingViewSelected(
-			meetingId,
-			meetingViewSelected === MeetingViewType.GRID ? MeetingViewType.CINEMA : MeetingViewType.GRID
-		);
-	}, [meetingId, meetingViewSelected, setMeetingViewSelected]);
-	*/
 
 	useEffect(() => {
 		let elRef: React.RefObject<HTMLDivElement> | null = streamsWrapperRef;

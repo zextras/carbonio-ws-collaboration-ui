@@ -5,6 +5,7 @@
  */
 import { IconButton, Tooltip } from '@zextras/carbonio-design-system';
 import React, { ReactElement, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 
 import { getMeetingViewSelected } from '../../../store/selectors/ActiveMeetingSelectors';
@@ -14,6 +15,10 @@ import { MeetingViewType } from '../../../types/store/ActiveMeetingTypes';
 
 const SwitchViewButton = (): ReactElement | null => {
 	const { meetingId }: Record<string, string> = useParams();
+
+	const [t] = useTranslation();
+	const gridViewLabel = t('meeting.interactions.gridView', 'Grid view');
+	const cinemaViewLabel = t('meeting.interactions.', 'Cinema view');
 
 	const meetingViewSelected = useStore((store) => getMeetingViewSelected(store, meetingId));
 	const setMeetingViewSelected = useStore((store) => store.setMeetingViewSelected);
@@ -30,13 +35,13 @@ const SwitchViewButton = (): ReactElement | null => {
 	return (
 		<Tooltip
 			placement="top"
-			label={meetingViewSelected === MeetingViewType.GRID ? 'Go to cinema View' : 'Go to grid view'} // TODO
+			label={meetingViewSelected === MeetingViewType.GRID ? cinemaViewLabel : gridViewLabel}
 		>
 			<IconButton
 				size="large"
 				backgroundColor="primary"
 				iconColor="gray6"
-				icon={meetingViewSelected === MeetingViewType.GRID ? 'Grid' : 'CinemaView'}
+				icon={meetingViewSelected === MeetingViewType.GRID ? 'CinemaView' : 'Grid'}
 				onClick={switchMode}
 			/>
 		</Tooltip>

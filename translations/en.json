@@ -115,6 +115,7 @@
         "expandParticipantsListTooltip": "Expand participants list",
         "extendChat": "Extend chat",
         "interactions": {
+            "": "Cinema view",
             "cameraDisabled": "Camera disabled",
             "cameraEnabled": "Camera enabled",
             "disableCamera": "Disable camera",
@@ -123,6 +124,7 @@
             "enableCamera": "Enable camera",
             "enableMicrophone": "Enable microphone",
             "enableScreen": "Enable screen share",
+            "gridView": "Grid view",
             "leaveMeeting": "Leave Meeting",
             "microphoneDisabled": "Microphone disabled",
             "microphoneEnabled": "Microphone enabled",
