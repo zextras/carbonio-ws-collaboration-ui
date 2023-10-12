@@ -9,6 +9,7 @@ import { filter, find, forEach, size, sortBy } from 'lodash';
 import { STREAM_TYPE, TileData } from '../../types/store/ActiveMeetingTypes';
 import { Meeting, MeetingParticipantMap } from '../../types/store/MeetingTypes';
 import { RootStore } from '../../types/store/StoreTypes';
+import { dateToTimestamp } from '../../utils/dateUtil';
 
 export const getMeeting = (store: RootStore, roomId: string): Meeting | undefined =>
 	store.meetings[roomId];
@@ -88,7 +89,11 @@ export const getTiles = (store: RootStore, meetingId: string): TileData[] => {
 	const meeting = find(store.meetings, (meeting) => meeting.id === meetingId);
 	if (meeting) {
 		const tiles: TileData[] = [];
-		const sortedParticipants = sortBy(meeting.participants, (participant) => participant.joinedAt);
+		const sortedParticipants = sortBy(
+			meeting.participants,
+			(participant) => dateToTimestamp(participant.joinedAt),
+			['asc']
+		);
 		forEach(sortedParticipants, (participant) => {
 			tiles.push({
 				userId: participant.userId,

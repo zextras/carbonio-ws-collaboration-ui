@@ -17,7 +17,7 @@ import { MeetingRoutesParams } from '../../../hooks/useRouting';
 import { getNumberOfTiles, getTiles } from '../../../store/selectors/MeetingSelectors';
 import useStore from '../../../store/Store';
 import { TileData } from '../../../types/store/ActiveMeetingTypes';
-import { maximiseRowsAndColumns, maximiseTileSize } from '../../../utils/MeetingsUtils';
+import { calcGrid, maximiseRowsAndColumns, maximiseTileSize } from '../../../utils/MeetingsUtils';
 import Tile from '../Tile';
 
 const GridContainer = styled(Container)`
@@ -65,8 +65,9 @@ const GridMode = (): ReactElement => {
 
 	const { tileWidth, rows, columns, numberOfPages } = useMemo((): any => {
 		// Calculate a full density grid
-		let tileWidth = 200 + 16;
-		let { rows, columns } = maximiseRowsAndColumns(dimensions, tileWidth);
+		const minTileWidth = 300;
+		let { rows, columns } = maximiseRowsAndColumns(dimensions, minTileWidth);
+		let { tileWidth } = calcGrid(dimensions, rows, columns);
 		const numberOfPages = Math.ceil(numberOfTiles / (rows * columns));
 
 		// If isn't necessary to paginate, recalculate rows and columns to best fit the tiles in the container
@@ -100,7 +101,7 @@ const GridMode = (): ReactElement => {
 				const tileIndex = row * columns + column;
 				if (tileIndex < size(tilesToRender) && tilesToRender[tileIndex]) {
 					rowTiles.push(
-						<Container width={`${tileWidth}px`} height="fit">
+						<Container width={`${tileWidth}px`} height="fit" key={`tile-${tileIndex}-container`}>
 							<Tile
 								userId={tilesToRender[tileIndex].userId}
 								meetingId={meetingId}

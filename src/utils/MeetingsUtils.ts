@@ -43,10 +43,10 @@ export const sendAudioFeedback = (type: MeetingSoundFeedback): Promise<void> | u
 };
 
 export const maximiseRowsAndColumns = (dimensions: Dimensions, tileWidth: number): Grid => {
+	// 1rem (16px) of gap between tiles
 	const tileHeight = tileWidth * (9 / 16);
-	const rows = Math.floor(dimensions.height / tileHeight);
-	const columns = Math.floor(dimensions.width / tileWidth);
-
+	const rows = Math.floor(dimensions.height / (tileHeight + 16));
+	const columns = Math.floor(dimensions.width / (tileWidth + 16));
 	return { rows, columns };
 };
 
@@ -78,11 +78,11 @@ export const calcGrid = (
 	let tileHeight = 0;
 	if (tilesRatio > containerRatio) {
 		// Tiles are more wide than tall respect to the container
-		tileWidth = (dimensions.width - 16) / columns;
+		tileWidth = (dimensions.width - (16 * columns - 16)) / columns; // 16px of gap between tiles
 		tileHeight = tileWidth * (9 / 16);
 	} else {
 		// Tiles are more tall than wide respect to the container
-		tileHeight = (dimensions.height - 16) / rows;
+		tileHeight = (dimensions.height - (16 * rows - 16)) / rows; // 16px of gap between tiles
 		tileWidth = tileHeight * (16 / 9);
 	}
 	return {
