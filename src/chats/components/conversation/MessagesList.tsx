@@ -34,8 +34,6 @@ import useStore from '../../../store/Store';
 import { Message, MessageType, TextMessage } from '../../../types/store/MessageTypes';
 import { isBefore, now } from '../../../utils/dateUtil';
 
-const flexStart = 'flex-start';
-
 const Messages = styled(Container)`
 	position: relative;
 	overflow: hidden;
@@ -329,8 +327,8 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 				<Container
 					key={`messageList-${roomId}-${idx}`}
 					data-testid={`messageListRef${roomId}`}
-					mainAlignment={flexStart}
-					crossAlignment={flexStart}
+					mainAlignment="flex-start"
+					crossAlignment="flex-start"
 					height={'fit'}
 				>
 					{messageList}
@@ -383,15 +381,15 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 			ref={messageListRef}
 			id={`intersectionObserverRoot${roomId}`}
 			data-testid={`intersectionObserverRoot${roomId}`}
-			mainAlignment={flexStart}
-			crossAlignment={flexStart}
+			mainAlignment="flex-start"
+			crossAlignment="flex-start"
 		>
 			<AnimationGlobalStyle />
 			<MessagesListWrapper
 				ref={MessagesListWrapperRef}
 				id={`messageListRef${roomId}`}
-				mainAlignment={flexStart}
-				crossAlignment={flexStart}
+				mainAlignment="flex-start"
+				crossAlignment="flex-start"
 			>
 				{!hasMoreMessageToLoad && (
 					<MessageHistoryLoader messageHistoryLoaderRef={messageHistoryLoaderRef} />

@@ -21,7 +21,7 @@ const user1Test = 'user1@test.com';
 
 // Mock objects
 const zimbraUser1: ContactMatch = {
-	email: user1Test,
+	email: 'user1@test.com',
 	firstName: 'User',
 	fullName: 'User One',
 	lastName: 'One',
@@ -190,7 +190,7 @@ describe('Chat Creation Modal Contact Selector - search', () => {
 		const chipInput = await screen.findByTestId('chip_input_creation_modal');
 		await user.type(chipInput, `${zimbraUser1.firstName} ${zimbraUser1.lastName}`);
 		expect(screen.getByText(/User One/i)).toBeInTheDocument();
-		expect(screen.getByText(user1Test)).toBeInTheDocument();
+		expect(screen.getByText(zimbraUser1.email)).toBeInTheDocument();
 	});
 
 	test('Search an user with logged user inside the response', async () => {
@@ -210,7 +210,7 @@ describe('Chat Creation Modal Contact Selector - search', () => {
 		const chipInput = await screen.findByTestId('chip_input_creation_modal');
 		await user.type(chipInput, `User`);
 		expect(screen.queryByText(/User One/i)).not.toBeInTheDocument();
-		expect(screen.queryByText(user1Test)).not.toBeInTheDocument();
+		expect(screen.queryByText(zimbraUser1.email)).not.toBeInTheDocument();
 		// User Two is present because is not the logged user
 		expect(screen.getByText(/User Two/i)).toBeInTheDocument();
 		expect(screen.getByText('user2@test.com')).toBeInTheDocument();
