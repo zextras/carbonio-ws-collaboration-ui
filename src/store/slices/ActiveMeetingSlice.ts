@@ -40,6 +40,7 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 					},
 					chatVisibility: MeetingChatVisibility.CLOSED,
 					meetingViewSelected: MeetingViewType.CINEMA,
+					isCarouselVisible: true,
 					// Peer connections
 					localStreams: {
 						selectedAudioDeviceId,
@@ -58,7 +59,6 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 					),
 					screenOutConn: new ScreenOutConnection(meetingId),
 					subscription: {},
-					carouselStatus: { isCarouselVisible: true, carouselNumberOfTiles: 0, index: 0 },
 					talkingUsers: []
 				};
 			}),
@@ -233,7 +233,7 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 		set(
 			produce((draft: RootStore) => {
 				if (draft.activeMeeting[meetingId]) {
-					draft.activeMeeting[meetingId].carouselStatus.isCarouselVisible = status;
+					draft.activeMeeting[meetingId].isCarouselVisible = status;
 				}
 			}),
 			false,
@@ -254,28 +254,6 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 			}),
 			false,
 			'AM/SET_PINNED_TILE'
-		);
-	},
-	setCarouselNumberOfTiles: (meetingId: string, numberOfTiles: number): void => {
-		set(
-			produce((draft: RootStore) => {
-				if (draft.activeMeeting[meetingId]) {
-					draft.activeMeeting[meetingId].carouselStatus.carouselNumberOfTiles = numberOfTiles;
-				}
-			}),
-			false,
-			'AM/SET_NUMBER_OF_TILES'
-		);
-	},
-	setCarouselIndex: (meetingId: string, indexValue: number): void => {
-		set(
-			produce((draft: RootStore) => {
-				if (draft.activeMeeting[meetingId]) {
-					draft.activeMeeting[meetingId].carouselStatus.index = indexValue;
-				}
-			}),
-			false,
-			'AM/SET_CAROUSEL_INDEX'
 		);
 	}
 });

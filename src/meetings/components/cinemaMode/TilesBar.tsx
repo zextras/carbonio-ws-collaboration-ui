@@ -13,10 +13,7 @@ import styled from 'styled-components';
 
 import { MeetingRoutesParams } from '../../../hooks/useRouting';
 import useTilesOrder from '../../../hooks/useTilesOrder';
-import {
-	getCarouselNumberOfTiles,
-	getMeetingSidebarStatus
-} from '../../../store/selectors/ActiveMeetingSelectors';
+import { getMeetingSidebarStatus } from '../../../store/selectors/ActiveMeetingSelectors';
 import useStore from '../../../store/Store';
 import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
 import Tile from '../Tile';
@@ -51,13 +48,8 @@ const TilesBar = (): ReactElement => {
 	const topLabel = t('tooltip.topOfList', 'Top of list');
 	const bottomLabel = t('tooltip.bottomOfList', 'Bottom of list');
 
-	const carouselNumberOfTiles: number = useStore((store) =>
-		getCarouselNumberOfTiles(store, meetingId)
-	);
-	const setCarouselNumberOfTiles = useStore((store) => store.setCarouselNumberOfTiles);
 	const sidebarStatus: boolean = useStore((store) => getMeetingSidebarStatus(store, meetingId));
 	const tilesContainerRef = useRef<HTMLDivElement>(null);
-	const setCarouselIndex = useStore((store) => store.setCarouselIndex);
 
 	const [index, setIndex] = useState(0);
 	const [dimensions, setCarouselDimensions] = useState({ width: 0, height: 0 });
@@ -82,21 +74,17 @@ const TilesBar = (): ReactElement => {
 		return () => window.removeEventListener('resize', handleResize);
 	}, [handleResize]);
 
-	useEffect(() => {
-		const tileHeight = (dimensions.width / 16) * 9 + 20;
-		setCarouselNumberOfTiles(meetingId, Math.floor(dimensions.height / tileHeight));
-	}, [dimensions, meetingId, setCarouselNumberOfTiles]);
-
-	useEffect(() => {
-		setCarouselIndex(meetingId, index);
-	}, [index, meetingId, setCarouselIndex]);
-
 	const { carouselTiles } = useTilesOrder(meetingId);
 	const totalTiles = useMemo(() => size(carouselTiles), [carouselTiles]);
 	const step = useMemo(() => (totalTiles > 3 ? 3 : totalTiles), [totalTiles]);
 
+	const tilesForPage = useMemo(() => {
+		const tileHeight = (dimensions.width / 16) * 9 + 20;
+		return Math.floor(dimensions.height / tileHeight);
+	}, [dimensions]);
+
 	const tilesToRender = useMemo(() => {
-		const selectedTiles = carouselTiles.slice(index, index + carouselNumberOfTiles);
+		const selectedTiles = carouselTiles.slice(index, index + tilesForPage);
 		return map(selectedTiles, (tile) => (
 			<Tile
 				userId={tile.userId}
@@ -104,7 +92,7 @@ const TilesBar = (): ReactElement => {
 				isScreenShare={tile.type === STREAM_TYPE.SCREEN}
 			/>
 		));
-	}, [carouselTiles, index, meetingId, carouselNumberOfTiles]);
+	}, [carouselTiles, index, meetingId, tilesForPage]);
 
 	const clickPrevButton = useCallback(
 		() => setIndex((prev) => (prev - step > 0 ? prev - step : 0)),
@@ -114,24 +102,22 @@ const TilesBar = (): ReactElement => {
 	const clickNextButton = useCallback(
 		() =>
 			setIndex((prev) =>
-				prev + step >= totalTiles - carouselNumberOfTiles
-					? totalTiles - carouselNumberOfTiles
-					: prev + step
+				prev + step >= totalTiles - tilesForPage ? totalTiles - tilesForPage : prev + step
 			),
-		[step, carouselNumberOfTiles, totalTiles]
+		[step, tilesForPage, totalTiles]
 	);
 
 	const prevButtonDisabled = useMemo(() => index === 0, [index]);
 
 	const nextButtonDisabled = useMemo(
-		() => index === totalTiles - carouselNumberOfTiles,
-		[index, carouselNumberOfTiles, totalTiles]
+		() => index === totalTiles - tilesForPage,
+		[index, tilesForPage, totalTiles]
 	);
 
 	const showButtons = useMemo(() => {
-		if (carouselNumberOfTiles === 0) return false;
-		return totalTiles > carouselNumberOfTiles;
-	}, [carouselNumberOfTiles, totalTiles]);
+		if (tilesForPage === 0) return false;
+		return totalTiles > tilesForPage;
+	}, [tilesForPage, totalTiles]);
 
 	return (
 		<TilesBarContainer mainAlignment="space-between">

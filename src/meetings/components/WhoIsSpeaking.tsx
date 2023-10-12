@@ -14,10 +14,8 @@ import { MeetingRoutesParams } from '../../hooks/useRouting';
 import useTilesOrder from '../../hooks/useTilesOrder';
 import {
 	getMeetingCarouselVisibility,
-	getCarouselNumberOfTiles,
 	getMeetingViewSelected,
-	getTalkingList,
-	getCarouselIndex
+	getTalkingList
 } from '../../store/selectors/ActiveMeetingSelectors';
 import useStore from '../../store/Store';
 import { MeetingViewType } from '../../types/store/ActiveMeetingTypes';
@@ -30,43 +28,33 @@ const SpeakingListContainer = styled(Container)`
 
 const WhoIsSpeaking = (): ReactElement | null => {
 	const { meetingId }: MeetingRoutesParams = useParams();
-	const { centralTile, carouselTiles } = useTilesOrder(meetingId);
+	const { centralTile } = useTilesOrder(meetingId);
 	const talkingMap = useStore((store) => getTalkingList(store, meetingId));
 	const meetingViewSelected = useStore((store) => getMeetingViewSelected(store, meetingId));
 	const carouselIsVisible = useStore((store) => getMeetingCarouselVisibility(store, meetingId));
-	const carouselNumberOfTiles = useStore((store) => getCarouselNumberOfTiles(store, meetingId));
-	const index = useStore((store) => getCarouselIndex(store, meetingId));
 
 	const speakingList = useMemo(() => {
-		const list: string[] = [];
-		const selectedTiles = carouselTiles.slice(index, index + carouselNumberOfTiles);
+		const list: ReactElement[] = [];
 		map(talkingMap, (talkingId) => {
-			const talkingVisibleTile = selectedTiles.find((tile) => tile.userId === talkingId);
 			if (centralTile.userId !== talkingId) {
-				if ((carouselIsVisible && talkingVisibleTile === undefined) || !carouselIsVisible) {
-					list.push(talkingId);
-				}
+				list.push(<SpeakingElement userId={talkingId} />);
 			}
 		});
 		return list;
-	}, [carouselTiles, index, carouselNumberOfTiles, talkingMap, centralTile, carouselIsVisible]);
-
-	const speakingListComponent = useMemo(
-		() => map(speakingList, (speakerId) => <SpeakingElement userId={speakerId} />),
-		[speakingList]
-	);
+	}, [talkingMap, centralTile]);
 
 	const whoIsSpeakingHasToAppear = useMemo(
 		() =>
-			meetingViewSelected === MeetingViewType.CINEMA ||
-			meetingViewSelected === MeetingViewType.GRID,
-		[meetingViewSelected]
+			(meetingViewSelected === MeetingViewType.CINEMA ||
+				meetingViewSelected === MeetingViewType.GRID) &&
+			!carouselIsVisible,
+		[carouselIsVisible, meetingViewSelected]
 	);
 
 	return whoIsSpeakingHasToAppear ? (
 		<SpeakingListContainer height="fit" width="fit">
 			<Container mainAlignment="flex-end" crossAlignment="flex-end">
-				{speakingListComponent}
+				{speakingList}
 			</Container>
 		</SpeakingListContainer>
 	) : null;

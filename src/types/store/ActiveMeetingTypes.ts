@@ -21,19 +21,13 @@ export type ActiveMeeting = {
 	sidebarStatus: SidebarStatus;
 	chatVisibility: MeetingChatVisibility;
 	meetingViewSelected: MeetingViewType;
+	isCarouselVisible: boolean;
 	pinnedTile?: TileData;
-	carouselStatus: CarouselStatus;
 	talkingUsers: string[];
 };
 
 export type ActiveMeetingMap = {
 	[roomId: string]: ActiveMeeting;
-};
-
-export type CarouselStatus = {
-	isCarouselVisible: boolean;
-	carouselNumberOfTiles: number;
-	index: number;
 };
 
 export type SidebarStatus = {
