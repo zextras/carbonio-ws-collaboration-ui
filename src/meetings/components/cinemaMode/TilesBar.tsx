@@ -72,7 +72,7 @@ const TilesBar = (): ReactElement => {
 		const selectedTiles = carouselTiles.slice(index, index + tilesForPage);
 		return map(selectedTiles, (tile) => (
 			<Tile
-				key={`tile-${index}`}
+				key={`tile-${tile.userId}/${tile.type}`}
 				userId={tile.userId}
 				meetingId={meetingId}
 				isScreenShare={tile.type === STREAM_TYPE.SCREEN}

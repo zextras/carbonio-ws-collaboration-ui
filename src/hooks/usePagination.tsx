@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 type UsePaginationReturnType = {
 	rowIndex: number;
@@ -48,6 +48,13 @@ const usePagination = (
 		if (pageRows === 0) return false;
 		return totalRows > pageRows;
 	}, [pageRows, totalRows]);
+
+	// Update rowIndex when some tiles are removed and the rowIndex is near the end of the list
+	useEffect(() => {
+		if (rowIndex >= totalRows - pageRows && totalRows - pageRows >= 0) {
+			setRowIndex(totalRows - pageRows);
+		}
+	}, [pageRows, rowIndex, totalRows]);
 
 	return {
 		rowIndex,

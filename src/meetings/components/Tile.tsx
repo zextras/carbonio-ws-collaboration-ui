@@ -349,7 +349,7 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 					padding="0.5rem"
 				>
 					<TextContainer width={'fit'} height={'fit'} overflow="ellipsis">
-						<Text color={'gray6'}>{userName}</Text>
+						<Text color={'gray6'}>{userName || userId}</Text>
 					</TextContainer>
 				</Row>
 			</InfoContainer>
