@@ -4,10 +4,11 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import React from 'react';
+
 import { screen } from '@testing-library/react';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { size } from 'lodash';
-import React from 'react';
 
 import MessagesList from './MessagesList';
 import useStore from '../../../store/Store';
@@ -28,6 +29,9 @@ import {
 } from '../../../types/store/MessageTypes';
 import { RootStore } from '../../../types/store/StoreTypes';
 import { User } from '../../../types/store/UserTypes';
+
+const fromId = 'c755b1d5-08dd-49d8-bec8-59074090ef1b';
+const helloString = 'Hello guys!';
 
 const user2Be: User = {
 	id: 'user2',
@@ -117,7 +121,7 @@ const messages: TextMessage[] = [
 		date: 1665409408796,
 		type: MessageType.TEXT_MSG,
 		stanzaId: 'stanzaId-1111-409408-555555',
-		from: 'c755b1d5-08dd-49d8-bec8-59074090ef1b',
+		from: fromId,
 		text: '11111',
 		read: MarkerStatus.READ
 	},
@@ -127,7 +131,7 @@ const messages: TextMessage[] = [
 		date: 1665409408796,
 		type: MessageType.TEXT_MSG,
 		stanzaId: 'stanzaId-2222-409408-222222',
-		from: 'c755b1d5-08dd-49d8-bec8-59074090ef1b',
+		from: fromId,
 		text: '22222',
 		read: MarkerStatus.READ
 	},
@@ -137,7 +141,7 @@ const messages: TextMessage[] = [
 		date: 1665409408796,
 		type: MessageType.TEXT_MSG,
 		stanzaId: 'stanzaId-3333-409408-333333',
-		from: 'c755b1d5-08dd-49d8-bec8-59074090ef1b',
+		from: fromId,
 		text: '33333',
 		read: MarkerStatus.READ
 	},
@@ -147,7 +151,7 @@ const messages: TextMessage[] = [
 		date: 1665409408796,
 		type: MessageType.TEXT_MSG,
 		stanzaId: 'stanzaId-4444-409408-444444',
-		from: 'c755b1d5-08dd-49d8-bec8-59074090ef1b',
+		from: fromId,
 		text: '44444',
 		read: MarkerStatus.READ
 	}
@@ -224,7 +228,7 @@ describe('render list of messages with history loader visible for first time ope
 		const mockedRoom: RoomBe = createMockRoom();
 		const mockedTextMessage = createMockTextMessage({
 			roomId: mockedRoom.id,
-			text: 'Hello guys!'
+			text: helloString
 		});
 		const mockedDeletedMessage = createMockMessageFastening({
 			roomId: mockedRoom.id,
@@ -248,7 +252,7 @@ describe('render list of messages with history loader visible for first time ope
 		const mockedRoom: RoomBe = createMockRoom();
 		const mockedTextMessage = createMockTextMessage({
 			roomId: mockedRoom.id,
-			text: 'Hello guys!'
+			text: helloString
 		});
 		const mockedEditedMessage = createMockMessageFastening({
 			roomId: mockedRoom.id,
@@ -274,7 +278,7 @@ describe('render list of messages with history loader visible for first time ope
 		const mockedTextMessage = createMockTextMessage({
 			id: 'idSimpleTextMessage',
 			roomId: mockedRoom.id,
-			text: 'Hello guys!'
+			text: helloString
 		});
 		const mockedReplyTextMessage = createMockTextMessage({
 			id: 'idReplyTextMessage',
@@ -288,7 +292,7 @@ describe('render list of messages with history loader visible for first time ope
 		act(() => result.current.newMessage(mockedTextMessage));
 		act(() => result.current.newMessage(mockedReplyTextMessage));
 		setup(<MessagesList roomId={mockedRoom.id} />);
-		const messageBubble = screen.getAllByText('Hello guys!');
+		const messageBubble = screen.getAllByText(helloString);
 		expect(messageBubble.length).toBe(2);
 		const replyMessageBubble = screen.getByText('Hi David!');
 		expect(replyMessageBubble).toBeInTheDocument();
@@ -300,7 +304,7 @@ describe('render list of messages with history loader visible for first time ope
 		const mockedRoom: RoomBe = createMockRoom();
 		const mockedTextMessage = createMockTextMessage({
 			roomId: mockedRoom.id,
-			text: 'Hello guys!'
+			text: helloString
 		});
 		const mockedReplyTextMessage = createMockTextMessage({
 			id: 'idReplyTextMessage',
@@ -332,7 +336,7 @@ describe('render list of messages with history loader visible for first time ope
 		const mockedRoom: RoomBe = createMockRoom();
 		const mockedTextMessage = createMockTextMessage({
 			roomId: mockedRoom.id,
-			text: 'Hello guys!'
+			text: helloString
 		});
 		const mockedEditedMessage = createMockMessageFastening({
 			roomId: mockedRoom.id,

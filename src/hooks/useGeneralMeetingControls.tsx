@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { filter, find, maxBy, size } from 'lodash';
 import { useCallback, useEffect } from 'react';
+
+import { filter, find, maxBy, size } from 'lodash';
 
 import useRouting, { PAGE_INFO_TYPE } from './useRouting';
 import { MeetingsApi } from '../network';
@@ -41,8 +42,9 @@ const useGeneralMeetingControls = (meetingId: string): void => {
 		if (pinnedTile) {
 			const { setPinnedTile } = useStore.getState();
 			// Remove pin in face to face mode
-			if (size(tiles) < 3) setPinnedTile(meetingId, undefined);
-			else {
+			if (size(tiles) < 3) {
+				setPinnedTile(meetingId, undefined);
+			} else {
 				const isDisappeared = !find(
 					tiles,
 					(tile) => tile.userId === pinnedTile?.userId && tile.type === pinnedTile?.type

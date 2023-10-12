@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { act, screen } from '@testing-library/react';
 import React from 'react';
+
+import { act, screen } from '@testing-library/react';
 
 import ConversationInfo from './ConversationInfo';
 import ConversationInfoDetails from './ConversationInfoDetails';

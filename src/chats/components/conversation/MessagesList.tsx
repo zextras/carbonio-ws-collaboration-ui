@@ -4,10 +4,11 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import React, { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+
 import { Container } from '@zextras/carbonio-design-system';
 import { debounce, find, groupBy, map } from 'lodash';
 import moment from 'moment-timezone';
-import React, { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 
 import AnimationGlobalStyle from './messageBubbles/BubbleAnimationsGlobalStyle';
@@ -75,7 +76,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 	const historyLoaderObserver = useRef<IntersectionObserver>();
 	const messageListRef = useRef<HTMLDivElement>();
 	const MessagesListWrapperRef = useRef<HTMLDivElement>();
-	const listOfMessagesObservedRef = useRef<HTMLElement[]>([]);
+	const listOfMessagesObservedRef = useRef<React.RefObject<HTMLInputElement>[]>([]);
 	const messageHistoryLoaderRef = React.createRef<HTMLDivElement>();
 
 	const firstNewMessage = useFirstUnreadMessage(roomId);
@@ -164,7 +165,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 			);
 		}
 
-		listOfMessagesObservedRef.current.forEach((messageRef: any) => {
+		listOfMessagesObservedRef.current.forEach((messageRef: React.RefObject<HTMLInputElement>) => {
 			if (messageScrollPositionObserver.current && messageRef.current) {
 				messageScrollPositionObserver.current.observe(messageRef.current);
 			}
@@ -269,14 +270,13 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 			usersWritingList &&
 			usersWritingList.length > 0 &&
 			roomMessages.length > 0 &&
-			actualScrollPosition === roomMessages[roomMessages.length - 1].id
+			actualScrollPosition === roomMessages[roomMessages.length - 1].id &&
+			MessagesListWrapperRef.current
 		) {
-			if (MessagesListWrapperRef.current) {
-				MessagesListWrapperRef.current.scrollTo({
-					top: MessagesListWrapperRef.current.scrollHeight,
-					behavior: 'auto'
-				});
-			}
+			MessagesListWrapperRef.current.scrollTo({
+				top: MessagesListWrapperRef.current.scrollHeight,
+				behavior: 'auto'
+			});
 		}
 	}, [usersWritingList, actualScrollPosition, roomMessages]);
 
@@ -327,8 +327,8 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 				<Container
 					key={`messageList-${roomId}-${idx}`}
 					data-testid={`messageListRef${roomId}`}
-					mainAlignment={'flex-start'}
-					crossAlignment={'flex-start'}
+					mainAlignment="flex-start"
+					crossAlignment="flex-start"
 					height={'fit'}
 				>
 					{messageList}
@@ -381,15 +381,15 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 			ref={messageListRef}
 			id={`intersectionObserverRoot${roomId}`}
 			data-testid={`intersectionObserverRoot${roomId}`}
-			mainAlignment={'flex-start'}
-			crossAlignment={'flex-start'}
+			mainAlignment="flex-start"
+			crossAlignment="flex-start"
 		>
 			<AnimationGlobalStyle />
 			<MessagesListWrapper
 				ref={MessagesListWrapperRef}
 				id={`messageListRef${roomId}`}
-				mainAlignment={'flex-start'}
-				crossAlignment={'flex-start'}
+				mainAlignment="flex-start"
+				crossAlignment="flex-start"
 			>
 				{!hasMoreMessageToLoad && (
 					<MessageHistoryLoader messageHistoryLoaderRef={messageHistoryLoaderRef} />

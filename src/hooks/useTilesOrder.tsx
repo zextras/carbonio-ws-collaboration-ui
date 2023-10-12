@@ -5,8 +5,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { differenceWith, findIndex, intersectionWith, isEqual, size } from 'lodash';
 import { useEffect, useMemo, useState } from 'react';
+
+import { differenceWith, findIndex, intersectionWith, isEqual, size } from 'lodash';
 
 import { getPinnedTile } from '../store/selectors/ActiveMeetingSelectors';
 import { getTiles } from '../store/selectors/MeetingSelectors';

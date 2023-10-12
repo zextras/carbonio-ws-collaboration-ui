@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { pushHistory, replaceHistory } from '@zextras/carbonio-shell-ui';
 import { useCallback } from 'react';
+
+import { pushHistory, replaceHistory } from '@zextras/carbonio-shell-ui';
 import { useHistory } from 'react-router-dom';
 
 export enum ROUTES {

@@ -3,9 +3,10 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
+import React from 'react';
+
 import { screen, waitFor } from '@testing-library/react';
 import { act, renderHook } from '@testing-library/react-hooks';
-import React from 'react';
 
 import DeleteConversationAction from './DeleteConversationAction';
 import { mockedDeleteRoomRequest, mockGoToMainPage } from '../../../../../jest-mocks';

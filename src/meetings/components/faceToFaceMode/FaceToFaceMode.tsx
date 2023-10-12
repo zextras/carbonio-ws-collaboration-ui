@@ -3,8 +3,9 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import { Container, Text } from '@zextras/carbonio-design-system';
 import React, { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+
+import { Container, Text } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';

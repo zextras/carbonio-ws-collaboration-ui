@@ -4,6 +4,16 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import React, {
+	FunctionComponent,
+	ReactElement,
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState
+} from 'react';
+
 import {
 	Button,
 	ChipInput,
@@ -26,15 +36,6 @@ import {
 	size,
 	union
 } from 'lodash';
-import React, {
-	FunctionComponent,
-	ReactElement,
-	useCallback,
-	useEffect,
-	useMemo,
-	useRef,
-	useState
-} from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
