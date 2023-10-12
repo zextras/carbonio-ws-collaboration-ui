@@ -62,7 +62,7 @@ const GridMode = (): ReactElement => {
 
 	const { tileWidth, rows, columns, numberOfPages } = useMemo((): any => {
 		// Calculate a full density grid
-		let tileWidth = 200;
+		let tileWidth = 200 + 16;
 		let { rows, columns } = maximiseRowsAndColumns(dimensions, tileWidth);
 		const numberOfPages = Math.ceil(numberOfTiles / (rows * columns));
 
@@ -119,7 +119,7 @@ const GridMode = (): ReactElement => {
 	return (
 		<GridContainer data-testid="gridModeView" mainAlignment="space-between" ref={gridContainerRef}>
 			{showPaginationButtons && (
-				<ButtonUpContainer width="fit" height="fit">
+				<ButtonUpContainer>
 					<Tooltip label={prevButton.disabled ? topLabel : scrollUpLabel} placement="left">
 						<IconButton
 							conColor="gray6"
