@@ -6,6 +6,7 @@
 /* eslint-disable react/jsx-no-useless-fragment */
 
 import React, { Fragment, useMemo } from 'react';
+
 import { Trans, useTranslation } from 'react-i18next';
 
 import { getRoomNameSelector, getRoomTypeSelector } from '../store/selectors/RoomsSelectors';

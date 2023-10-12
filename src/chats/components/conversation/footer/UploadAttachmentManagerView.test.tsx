@@ -4,9 +4,10 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import React from 'react';
+
 import { act, fireEvent, screen } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event/setup/setup';
-import React from 'react';
 
 import MessageComposer from './MessageComposer';
 import UploadAttachmentManagerView from './UploadAttachmentManagerView';
@@ -25,6 +26,12 @@ import { FileToUpload } from '../../../../types/store/ActiveConversationTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
 import { RootStore } from '../../../../types/store/StoreTypes';
 import Chat from '../Chat';
+
+const add1Attachment = 'Add 1 attachment';
+const add2Attachments = 'Add 2 attachments';
+const genericDescription = 'generic description';
+const borderColor = 'border-color: #8bc34a';
+const localhostGenericUrl = 'localhost/generic/url';
 
 const mockedRoom: RoomBe = createMockRoom({
 	id: 'roomTest',
@@ -103,7 +110,7 @@ describe('Upload attachment view', () => {
 			`fileNoPreview-${pdfToUpload.file.name}-${pdfToUpload.fileId}`
 		);
 		expect(fileToUpload).toBeVisible();
-		const titleCounter = screen.queryByText('Add 1 attachment');
+		const titleCounter = screen.queryByText(add1Attachment);
 		expect(titleCounter).toBeInTheDocument();
 		await user.hover(fileToUpload);
 		const previewFileAction = screen.queryByTestId('icon: EyeOutline');
@@ -111,7 +118,7 @@ describe('Upload attachment view', () => {
 	});
 	test('input has text in it and user decides to upload one file from picker => files is shown as selected, the text in the input is set as description of the file and the input has focus', async () => {
 		const { user } = storeSetupAdvanced();
-		const inputText = 'generic description';
+		const inputText = genericDescription;
 		const composerTextArea = screen.getByRole('textbox');
 		await user.type(composerTextArea, inputText);
 		const textMessage = screen.queryByText(inputText);
@@ -121,12 +128,12 @@ describe('Upload attachment view', () => {
 		expect(inputSelector).not.toBeNull();
 		expect(inputSelector.files).toHaveLength(0);
 		await user.upload(inputSelector, attachmentToUpload);
-		const titleCounter = screen.queryByText('Add 1 attachment');
+		const titleCounter = screen.queryByText(add1Attachment);
 		expect(titleCounter).toBeInTheDocument();
 		expect(inputSelector.files).toHaveLength(1);
 		const fileWithPreview = await screen.findByTestId(/previewImage-/);
 		expect(fileWithPreview).toBeInTheDocument();
-		expect(fileWithPreview).toHaveStyle('border-color: #8bc34a');
+		expect(fileWithPreview).toHaveStyle(borderColor);
 		const updatedStore = useStore.getState();
 		const filesToAttachUpdated = updatedStore.activeConversations[mockedRoom.id].filesToAttach;
 		expect(filesToAttachUpdated?.length).toBe(1);
@@ -137,7 +144,7 @@ describe('Upload attachment view', () => {
 	});
 	test('input has text in it and user decides to upload more file from picker => first file is shown as selected, the text in the input is set as description of the file and the input has focus', async () => {
 		const { user } = storeSetupAdvanced();
-		const inputText = 'generic description';
+		const inputText = genericDescription;
 		const composerTextArea = await screen.findByTestId('textAreaComposer');
 		await user.type(composerTextArea, inputText);
 		const textMessage = await screen.findByText(/generic description/i);
@@ -160,7 +167,7 @@ describe('Upload attachment view', () => {
 		expect(titleCounter).toBeInTheDocument();
 		const fileWithPreview = await screen.findByTestId(/previewImage-Hello/);
 		expect(fileWithPreview).toBeInTheDocument();
-		expect(fileWithPreview).toHaveStyle('border-color: #8bc34a');
+		expect(fileWithPreview).toHaveStyle(borderColor);
 		const composer = await screen.findByTestId('textAreaComposer');
 		expect((composer as HTMLTextAreaElement).value).toBe(inputText);
 		const updatedStore = useStore.getState();
@@ -178,7 +185,7 @@ describe('Upload attachment view', () => {
 		const store = useStore.getState();
 		store.addRoom(mockedRoom);
 		const { user } = setup(<Chat roomId={mockedRoom.id} setInfoPanelOpen={jest.fn()} />);
-		const inputText = 'generic description';
+		const inputText = genericDescription;
 		const composerTextArea = screen.getByRole('textbox');
 		await user.type(composerTextArea, inputText);
 		const chatComponent = await screen.findByTestId('conversationCollapsedView');
@@ -189,13 +196,13 @@ describe('Upload attachment view', () => {
 		fireEvent.drop(dropContainer, { dataTransfer: { files: [imgToDrag] } });
 		const uploadManager = await screen.findByTestId('upload_attachment_manager');
 		expect(uploadManager).toBeInTheDocument();
-		const titleCounter = screen.queryByText('Add 1 attachment');
+		const titleCounter = screen.queryByText(add1Attachment);
 		expect(titleCounter).toBeInTheDocument();
 		const composerText = screen.queryByText(inputText);
 		expect(composerText).toBeInTheDocument();
 		const fileWithPreview = await screen.findByTestId(/previewImage-Hello/);
 		expect(fileWithPreview).toBeInTheDocument();
-		expect(fileWithPreview).toHaveStyle('border-color: #8bc34a');
+		expect(fileWithPreview).toHaveStyle(borderColor);
 		const updatedStore = useStore.getState();
 		const filesToAttachUpdated = updatedStore.activeConversations[mockedRoom.id].filesToAttach;
 		expect(filesToAttachUpdated?.length).toBe(1);
@@ -205,12 +212,12 @@ describe('Upload attachment view', () => {
 		const fileToUpload = {
 			file: imageFile,
 			fileId: 'genericImageId',
-			localUrl: 'localhost/generic/url',
+			localUrl: localhostGenericUrl,
 			description: '',
 			hasFocus: true
 		};
 		act(() => store.setFilesToAttach(mockedRoom.id, [fileToUpload]));
-		const inputText = 'generic description';
+		const inputText = genericDescription;
 		const composerTextArea = screen.getByRole('textbox');
 		await user.type(composerTextArea, inputText);
 		const addFromManager = await screen.findByTestId('addMoreFilesFromManager');
@@ -220,7 +227,7 @@ describe('Upload attachment view', () => {
 		const attachmentToUploadOne = new File(['Hello'], 'Hello', { type: 'image/png' });
 		await user.upload(inputSelector, [attachmentToUploadOne]);
 		expect(inputSelector.files).toHaveLength(1);
-		const titleCounter = screen.queryByText('Add 2 attachments');
+		const titleCounter = screen.queryByText(add2Attachments);
 		expect(titleCounter).toBeInTheDocument();
 		const fileWithPreview = await screen.findByTestId(/previewImage-Hello/);
 		expect(fileWithPreview).toBeInTheDocument();
@@ -233,7 +240,7 @@ describe('Upload attachment view', () => {
 			`previewImage-${imageFile.name}-${fileToUpload.fileId}`
 		);
 		expect(fileWithFocus).toBeInTheDocument();
-		expect(fileWithFocus).toHaveStyle('border-color: #8bc34a');
+		expect(fileWithFocus).toHaveStyle(borderColor);
 		const textMessage = screen.queryByText(inputText);
 		expect(textMessage).toBeInTheDocument();
 	});
@@ -242,12 +249,12 @@ describe('Upload attachment view', () => {
 		const fileToUpload = {
 			file: imageFile,
 			fileId: 'genericImageId',
-			localUrl: 'localhost/generic/url',
+			localUrl: localhostGenericUrl,
 			description: '',
 			hasFocus: true
 		};
 		act(() => store.setFilesToAttach(mockedRoom.id, [fileToUpload]));
-		const inputText = 'generic description';
+		const inputText = genericDescription;
 		const composerTextArea = screen.getByRole('textbox');
 		await user.type(composerTextArea, inputText);
 		const addFromManager = await screen.findByTestId('addMoreFilesFromManager');
@@ -276,7 +283,7 @@ describe('Upload attachment view', () => {
 			`previewImage-${imageFile.name}-${fileToUpload.fileId}`
 		);
 		expect(fileWithFocus).toBeInTheDocument();
-		expect(fileWithFocus).toHaveStyle('border-color: #8bc34a');
+		expect(fileWithFocus).toHaveStyle(borderColor);
 		const textMessage = screen.queryByText(inputText);
 		expect(textMessage).toBeInTheDocument();
 	});
@@ -285,12 +292,12 @@ describe('Upload attachment view', () => {
 		const fileToUpload = {
 			file: imageFile,
 			fileId: 'genericImageId',
-			localUrl: 'localhost/generic/url',
+			localUrl: localhostGenericUrl,
 			description: '',
 			hasFocus: true
 		};
 		act(() => store.setFilesToAttach(mockedRoom.id, [fileToUpload]));
-		const inputText = 'generic description';
+		const inputText = genericDescription;
 		const composerTextArea = screen.getByRole('textbox');
 		await user.type(composerTextArea, inputText);
 		const file = await screen.findByTestId(
@@ -312,7 +319,7 @@ describe('Upload attachment view', () => {
 		const { user, store } = storeSetupAdvanced();
 		const fileOne = createMockFileToUpload({ hasFocus: true });
 		act(() => store.setFilesToAttach(mockedRoom.id, [fileOne]));
-		const inputText = 'generic description';
+		const inputText = genericDescription;
 		const composerTextArea = screen.getByRole('textbox');
 		await user.type(composerTextArea, inputText);
 		expect(screen.queryByTestId('upload_attachment_manager')).toBeVisible();
@@ -337,7 +344,7 @@ describe('Upload attachment view', () => {
 			file: createMockFile({ name: 'there!', options: { type: 'image/png' } })
 		});
 		act(() => store.setFilesToAttach(mockedRoom.id, [fileOne, fileTwo, fileThree]));
-		const inputText = 'generic description';
+		const inputText = genericDescription;
 		const titleCounter = screen.queryByText('Add 3 attachments');
 		expect(titleCounter).toBeInTheDocument();
 		const composerTextArea = screen.getByRole('textbox');
@@ -353,9 +360,9 @@ describe('Upload attachment view', () => {
 			`previewImage-${fileTwo.file.name}-${fileTwo.fileId}`
 		);
 		expect(newFileSelected).toBeInTheDocument();
-		const titleCounterUpdated = screen.queryByText('Add 2 attachments');
+		const titleCounterUpdated = screen.queryByText(add2Attachments);
 		expect(titleCounterUpdated).toBeInTheDocument();
-		expect(newFileSelected).toHaveStyle('border-color: #8bc34a');
+		expect(newFileSelected).toHaveStyle(borderColor);
 		const composer = await screen.findByTestId('textAreaComposer');
 		expect((composer as HTMLTextAreaElement).value).toBe('');
 	});
@@ -368,7 +375,7 @@ describe('Upload attachment view', () => {
 			file: createMockFile({ name: 'Hello', options: { type: 'image/png' } })
 		});
 		act(() => store.setFilesToAttach(mockedRoom.id, [fileOne, fileTwo]));
-		const inputText = 'generic description';
+		const inputText = genericDescription;
 		const composerTextArea = screen.getByRole('textbox');
 		await user.type(composerTextArea, inputText);
 		const file = await screen.findByTestId(
@@ -378,13 +385,13 @@ describe('Upload attachment view', () => {
 		await user.hover(file);
 		const removeFileButton = await screen.findByTestId(`removeSingleFile-${fileTwo.fileId}`);
 		await user.click(removeFileButton);
-		const titleCounter = screen.queryByText('Add 1 attachment');
+		const titleCounter = screen.queryByText(add1Attachment);
 		expect(titleCounter).toBeInTheDocument();
 		const newFileSelected = await screen.findByTestId(
 			`previewImage-${fileOne.file.name}-${fileOne.fileId}`
 		);
 		expect(newFileSelected).toBeInTheDocument();
-		expect(newFileSelected).toHaveStyle('border-color: #8bc34a');
+		expect(newFileSelected).toHaveStyle(borderColor);
 		const composer = await screen.findByTestId('textAreaComposer');
 		expect((composer as HTMLTextAreaElement).value).toBe('file one description');
 	});
@@ -400,7 +407,7 @@ describe('Upload attachment view', () => {
 			file: createMockFile({ name: 'there!' })
 		});
 		act(() => store.setFilesToAttach(mockedRoom.id, [fileOne, fileTwo, fileThree]));
-		const inputText = 'generic description';
+		const inputText = genericDescription;
 		const composerTextArea = screen.getByRole('textbox');
 		await user.type(composerTextArea, inputText);
 		expect(screen.queryByTestId('upload_attachment_manager')).toBeVisible();
@@ -417,7 +424,7 @@ describe('Upload attachment view', () => {
 		const store = useStore.getState();
 		store.addRoom(mockedRoom);
 		const { user } = setup(<Chat roomId={mockedRoom.id} setInfoPanelOpen={jest.fn()} />);
-		const inputText = 'generic description';
+		const inputText = genericDescription;
 		const composerTextArea = screen.getByRole('textbox');
 		await user.type(composerTextArea, inputText);
 		const aA = screen.queryByText(inputText);
@@ -438,7 +445,7 @@ describe('Upload attachment view', () => {
 		expect(composerText).toBeInTheDocument();
 		const fileWithPreview = await screen.findByTestId(/previewImage-Hello/);
 		expect(fileWithPreview).toBeInTheDocument();
-		expect(fileWithPreview).toHaveStyle('border-color: #8bc34a');
+		expect(fileWithPreview).toHaveStyle(borderColor);
 		const updatedStore = useStore.getState();
 		const filesToAttachUpdated = updatedStore.activeConversations[mockedRoom.id].filesToAttach;
 		expect(filesToAttachUpdated?.length).toBe(4);
@@ -452,7 +459,7 @@ describe('Upload attachment view', () => {
 		const store = useStore.getState();
 		store.addRoom(mockedRoom);
 		const { user } = setup(<Chat roomId={mockedRoom.id} setInfoPanelOpen={jest.fn()} />);
-		const inputText = 'generic description';
+		const inputText = genericDescription;
 		const fileOne = createMockFileToUpload({
 			fileId: 'fileOne',
 			hasFocus: true,
@@ -461,7 +468,7 @@ describe('Upload attachment view', () => {
 		act(() => store.setFilesToAttach(mockedRoom.id, [fileOne]));
 		const composerTextArea = screen.getByRole('textbox');
 		await user.type(composerTextArea, inputText);
-		const titleCounter = screen.queryByText('Add 1 attachment');
+		const titleCounter = screen.queryByText(add1Attachment);
 		expect(titleCounter).toBeInTheDocument();
 		const chatComponent = await screen.findByTestId('conversationCollapsedView');
 		const imgOne = new File(['Hello'], 'Hello', { type: 'image/png' });
@@ -471,7 +478,7 @@ describe('Upload attachment view', () => {
 		fireEvent.drop(dropContainer, { dataTransfer: { files: [imgOne] } });
 		const uploadManager = await screen.findByTestId('upload_attachment_manager');
 		expect(uploadManager).toBeInTheDocument();
-		const titleCounterUpdated = screen.queryByText('Add 2 attachments');
+		const titleCounterUpdated = screen.queryByText(add2Attachments);
 		expect(titleCounterUpdated).toBeInTheDocument();
 		const composerText = screen.queryByText(inputText);
 		expect(composerText).toBeInTheDocument();
@@ -480,14 +487,14 @@ describe('Upload attachment view', () => {
 		const store = useStore.getState();
 		store.addRoom(mockedRoom);
 		const { user } = setup(<Chat roomId={mockedRoom.id} setInfoPanelOpen={jest.fn()} />);
-		const inputText = 'generic description';
+		const inputText = genericDescription;
 		const fileOne = createMockFileToUpload({
 			fileId: 'fileOne',
 			hasFocus: true,
 			file: createMockFile({ name: 'sunrise', options: { type: 'image/png' } })
 		});
 		act(() => store.setFilesToAttach(mockedRoom.id, [fileOne]));
-		const titleCounter = screen.queryByText('Add 1 attachment');
+		const titleCounter = screen.queryByText(add1Attachment);
 		expect(titleCounter).toBeInTheDocument();
 		const composerTextArea = screen.getByRole('textbox');
 		await user.type(composerTextArea, inputText);
@@ -536,7 +543,7 @@ describe('Upload attachment view', () => {
 			`previewImage-${fileTwo.file.name}-${fileTwo.fileId}`
 		);
 		expect(newFileSelected).toBeInTheDocument();
-		expect(newFileSelected).toHaveStyle('border-color: #8bc34a');
+		expect(newFileSelected).toHaveStyle(borderColor);
 		const updatedStore = useStore.getState();
 		const filesToAttachUpdated = updatedStore.activeConversations[mockedRoom.id].filesToAttach;
 		expect((filesToAttachUpdated as FileToUpload[])[0].description).toBe(inputText);
@@ -565,7 +572,7 @@ describe('Upload attachment view', () => {
 			`previewImage-${fileOne.file.name}-${fileOne.fileId}`
 		);
 		expect(fileOld).toBeInTheDocument();
-		expect(fileOld).toHaveStyle('border-color: #8bc34a');
+		expect(fileOld).toHaveStyle(borderColor);
 	});
 	test('Save description - input has text, file is selected and user press ENTER => description of the file will be saved, and message sent', async () => {
 		const { user, store } = storeSetupAdvanced();

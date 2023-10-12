@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Container, IconButton, Text, Tooltip } from '@zextras/carbonio-design-system';
 import React, { FC, useCallback, useMemo } from 'react';
+
+import { Container, IconButton, Text, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -70,6 +71,11 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({
 		[meetingChatVisibility]
 	);
 
+	const isChatOpenOrFullExpanded = useMemo(
+		() => chatIsOpen || chatFullExpanded,
+		[chatFullExpanded, chatIsOpen]
+	);
+
 	return (
 		<Container
 			key="MeetingConversationAccordion"
@@ -92,7 +98,7 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({
 					<Text>{chatLabel}</Text>
 				</Container>
 				<Container width="30%" orientation="horizontal" mainAlignment="flex-end">
-					{(chatIsOpen || chatFullExpanded) && (
+					{isChatOpenOrFullExpanded && (
 						<Tooltip label={!chatFullExpanded ? extendChatLabel : minimizeChatLabel}>
 							<IconButton
 								data-testid="toggleChatExpanded"
@@ -102,17 +108,17 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({
 							/>
 						</Tooltip>
 					)}
-					<Tooltip label={chatIsOpen || chatFullExpanded ? collapseChatLabel : expandChatLabel}>
+					<Tooltip label={isChatOpenOrFullExpanded ? collapseChatLabel : expandChatLabel}>
 						<IconButton
 							data-testid="toggleChatStatus"
-							icon={chatIsOpen || chatFullExpanded ? 'ChevronDown' : 'ChevronUp'}
+							icon={isChatOpenOrFullExpanded ? 'ChevronDown' : 'ChevronUp'}
 							size="large"
 							onClick={toggleChatStatus}
 						/>
 					</Tooltip>
 				</Container>
 			</Container>
-			{(chatIsOpen || chatFullExpanded) && (
+			{isChatOpenOrFullExpanded && (
 				<WrapperMeetingChat
 					chatFullExpanded={chatFullExpanded}
 					mainAlignment="flex-start"

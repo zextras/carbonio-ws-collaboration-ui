@@ -21,7 +21,7 @@ const useMessage = (roomId: string, messageId: string): Message | undefined => {
 		return getFasteningSelector(store, roomId, stanzaId);
 	});
 
-	const messageFastening = useMemo((): Message | undefined => {
+	return useMemo((): Message | undefined => {
 		if (message) {
 			if (fastening) {
 				switch (fastening.action) {
@@ -50,8 +50,6 @@ const useMessage = (roomId: string, messageId: string): Message | undefined => {
 		}
 		return undefined;
 	}, [message, fastening]);
-
-	return messageFastening;
 };
 
 export default useMessage;

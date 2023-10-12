@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Spinner } from '@zextras/carbonio-shell-ui';
 import React, { ReactElement } from 'react';
+
+import { Spinner } from '@zextras/carbonio-shell-ui';
 
 import useStore from '../../store/Store';
 import Settings from '../components/settings/Settings';

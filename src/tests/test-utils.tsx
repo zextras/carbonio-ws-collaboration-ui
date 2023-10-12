@@ -3,10 +3,11 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
+import React, { useMemo } from 'react';
+
 import { render, RenderOptions, RenderResult, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ModalManager, SnackbarManager, ThemeProvider } from '@zextras/carbonio-design-system';
-import React, { useMemo } from 'react';
 import { I18nextProvider } from 'react-i18next';
 
 import I18nTestFactory from './i18n-test-factory';

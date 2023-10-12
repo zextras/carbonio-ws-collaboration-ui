@@ -4,9 +4,10 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import React from 'react';
+
 import { screen, waitFor } from '@testing-library/react';
 import { act, renderHook } from '@testing-library/react-hooks';
-import React from 'react';
 
 import MuteConversationAction from './MuteConversationAction';
 import {

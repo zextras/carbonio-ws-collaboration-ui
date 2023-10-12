@@ -3,8 +3,9 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import { Container, Padding, Text } from '@zextras/carbonio-design-system';
 import React, { ReactElement } from 'react';
+
+import { Container, Padding, Text } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -55,13 +56,6 @@ const InfoPage = (): ReactElement => {
 			descriptionLowerLabel = t('external.nobodyInTheRoom', 'It seems nobody is in this Room');
 			break;
 		case PAGE_INFO_TYPE.MEETING_ENDED:
-			titleLabel = t('notification.meeting.ended', 'Meeting Ended');
-			centralLabel = t('thanksForParticipating', 'Thanks for participating');
-			descriptionLowerLabel = t(
-				'keepInTouchWithColleagues',
-				"Keep in touch with your colleagues or join your groups' meeting rooms"
-			);
-			break;
 		default:
 			titleLabel = t('notification.meeting.ended', 'Meeting Ended');
 			centralLabel = t('thanksForParticipating', 'Thanks for participating');
@@ -69,6 +63,7 @@ const InfoPage = (): ReactElement => {
 				'keepInTouchWithColleagues',
 				"Keep in touch with your colleagues or join your groups' meeting rooms"
 			);
+			break;
 	}
 
 	return (

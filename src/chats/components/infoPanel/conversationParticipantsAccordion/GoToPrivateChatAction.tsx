@@ -4,9 +4,10 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import React, { FC, useCallback } from 'react';
+
 import { IconButton, Tooltip } from '@zextras/carbonio-design-system';
 import { find } from 'lodash';
-import React, { FC, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import useRouting from '../../../../hooks/useRouting';

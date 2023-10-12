@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Container, useTheme } from '@zextras/carbonio-design-system';
 import React, { ReactElement, useMemo } from 'react';
+
+import { Container, useTheme } from '@zextras/carbonio-design-system';
 
 import { MEETINGS_PATH } from '../../constants/appConstants';
 import AccessMeetingModal from '../components/AccessMeetingModal';

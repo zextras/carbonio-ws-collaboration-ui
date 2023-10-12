@@ -4,9 +4,10 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import React from 'react';
+
 import { getUserAccount, getUserSettings } from '@zextras/carbonio-shell-ui';
 import moment from 'moment-timezone';
-import React from 'react';
 
 import ConnectionSnackbarManager from './chats/components/ConnectionSnackbarManager';
 import CounterBadgeUpdater from './chats/components/CounterBadgeUpdater';

@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Container } from '@zextras/carbonio-design-system';
 import React from 'react';
+
+import { Container } from '@zextras/carbonio-design-system';
 import styled from 'styled-components';
 
 import MessageComposer from './MessageComposer';

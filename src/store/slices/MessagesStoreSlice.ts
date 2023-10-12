@@ -47,10 +47,11 @@ const retrieveMessageUserInfo = (message: Message, users: UsersMap): void => {
 	} else if (message.type === MessageType.CONFIGURATION_MSG) {
 		if (!users[message.from]) UsersApi.getDebouncedUser(message.from);
 		if (
-			message.operation === OperationType.MEMBER_ADDED ||
-			message.operation === OperationType.MEMBER_REMOVED
+			(message.operation === OperationType.MEMBER_ADDED ||
+				message.operation === OperationType.MEMBER_REMOVED) &&
+			!users[message.value]
 		) {
-			if (!users[message.value]) UsersApi.getDebouncedUser(message.value);
+			UsersApi.getDebouncedUser(message.value);
 		}
 	}
 };

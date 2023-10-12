@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Container, Padding } from '@zextras/carbonio-design-system';
 import React, { ReactElement, RefObject, useCallback, useEffect, useRef, useState } from 'react';
+
+import { Container, Padding } from '@zextras/carbonio-design-system';
 import styled, { FlattenSimpleInterpolation } from 'styled-components';
 
 import CameraButton from './CameraButton';
