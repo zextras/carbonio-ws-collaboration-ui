@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Accordion, Container } from '@zextras/carbonio-design-system';
+import { Accordion, AccordionItemType, Container } from '@zextras/carbonio-design-system';
 import React, { FC, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -48,8 +48,8 @@ const MeetingParticipantsAccordion: FC<MeetingParticipantsAccordionProps> = ({ m
 		[accordionStatus, meetingId, setParticipantsAccordionStatus]
 	);
 
-	const infoDetails = useMemo(() => {
-		const arrayOfActions = [
+	const infoDetails = useMemo<AccordionItemType[]>(() => {
+		const arrayOfActions: AccordionItemType[] = [
 			{
 				id: '1',
 				disableHover: true,

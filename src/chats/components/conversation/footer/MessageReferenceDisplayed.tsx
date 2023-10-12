@@ -7,7 +7,7 @@
 import { Container, Text, Row, Padding, Avatar } from '@zextras/carbonio-design-system';
 import React, { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
+import styled, { DefaultTheme } from 'styled-components';
 
 import useMessage from '../../../../hooks/useMessage';
 import { getUserSelector } from '../../../../store/selectors/UsersSelectors';
@@ -17,8 +17,8 @@ import { TextMessage } from '../../../../types/store/MessageTypes';
 import { getThumbnailURL } from '../../../../utils/attachmentUtils';
 import { calculateAvatarColor } from '../../../../utils/styleUtils';
 
-const UserName = styled(Text)`
-	color: ${({ labelColor, theme }): string[] => theme.avatarColors[labelColor]};
+const UserName = styled(Text)<{ $labelColor: keyof DefaultTheme['avatarColors'] }>`
+	color: ${({ $labelColor, theme }): string => theme.avatarColors[$labelColor]};
 `;
 
 const ContactWrapper = styled.div`
@@ -27,9 +27,11 @@ const ContactWrapper = styled.div`
 	}
 `;
 
-const BorderContainer = styled(Container)`
-	border-left: ${({ customBorderColor, theme }): string =>
-		`0.25rem solid ${theme.avatarColors[customBorderColor]}`};
+const BorderContainer = styled(Container)<{
+	$customBorderColor: keyof DefaultTheme['avatarColors'];
+}>`
+	border-left: ${({ $customBorderColor, theme }): string =>
+		`0.25rem solid ${theme.avatarColors[$customBorderColor]}`};
 	border-radius: 0;
 `;
 
@@ -112,7 +114,7 @@ const MessageReferenceDisplayed: React.FC<MessageReferenceDisplayedProps> = ({
 			<BorderContainer
 				data-testid="reference-border-message"
 				orientation="horizontal"
-				customBorderColor={userColor}
+				$customBorderColor={userColor}
 				mainAlignment="flex-start"
 				padding={{ left: 'small' }}
 				width="fill"
@@ -136,7 +138,7 @@ const MessageReferenceDisplayed: React.FC<MessageReferenceDisplayedProps> = ({
 						</Text>
 						{myId !== referenceMessage.senderId && (
 							<ContactWrapper>
-								<UserName data-testid="reference-message-username" labelColor={userColor}>
+								<UserName data-testid="reference-message-username" $labelColor={userColor}>
 									{senderIdentifier}
 								</UserName>
 							</ContactWrapper>

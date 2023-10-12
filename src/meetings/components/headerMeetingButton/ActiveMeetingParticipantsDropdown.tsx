@@ -18,14 +18,14 @@ import {
 import useStore from '../../../store/Store';
 import { MeetingParticipant, MeetingParticipantMap } from '../../../types/store/MeetingTypes';
 
-const CustomContainer = styled(Container)`
+const CustomContainer = styled(Container)<{ $isDropdownOpen: boolean }>`
 	position: absolute;
-	z-index: ${({ isDropdownOpen }): string => (isDropdownOpen ? '11' : '-1')};
+	z-index: ${({ $isDropdownOpen }): string => ($isDropdownOpen ? '11' : '-1')};
 	top: 3.5rem;
 	right: 1rem;
 	box-shadow: 0 0 0.25rem rgba(166, 166, 166, 0.5);
 	border-radius: 1rem;
-	opacity: ${({ isDropdownOpen }): string => (isDropdownOpen ? '1' : '0')};
+	opacity: ${({ $isDropdownOpen }): string => ($isDropdownOpen ? '1' : '0')};
 `;
 
 const ListContainer = styled(Container)`
@@ -74,7 +74,7 @@ const ActiveMeetingParticipantsDropdown = ({
 			id="meeting-list-dropdown"
 			background="gray5"
 			width="20rem"
-			isDropdownOpen={isDropdownOpen}
+			$isDropdownOpen={isDropdownOpen}
 			mainAlignment="flex-start"
 			crossAlignment="flex-start"
 			padding={{ horizontal: '1rem', bottom: '0.75rem', top: '1rem' }}
