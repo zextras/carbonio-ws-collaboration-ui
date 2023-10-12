@@ -32,6 +32,7 @@ const ActionsWrapper = styled(Container)`
 	padding: 1rem;
 	border-radius: 0.5rem;
 	gap: 1rem;
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
 `;
 
 type MeetingActionsProps = {

@@ -35,14 +35,17 @@ const ButtonUpContainer = styled(Container)`
 	position: absolute;
 	top: 0;
 	right: calc(-2.125rem / 2 - 2.125rem);
-	height: 40%;
 `;
 
 const ButtonDownContainer = styled(Container)`
 	position: absolute;
 	bottom: 0;
 	right: calc(-2.125rem / 2 - 2.125rem);
-	height: 40%;
+`;
+
+const ChevronIconButton = styled(IconButton)`
+	width: 2.25rem;
+	height: calc((100vh - (4.25rem * 2) - 2rem) / 2);
 `;
 
 const GridMode = (): ReactElement => {
@@ -119,14 +122,13 @@ const GridMode = (): ReactElement => {
 	return (
 		<GridContainer data-testid="gridModeView" mainAlignment="space-between" ref={gridContainerRef}>
 			{showPaginationButtons && (
-				<ButtonUpContainer>
+				<ButtonUpContainer width="fit" height="fit">
 					<Tooltip label={prevButton.disabled ? topLabel : scrollUpLabel} placement="left">
-						<IconButton
-							conColor="gray6"
+						<ChevronIconButton
+							iconColor="gray6"
 							backgroundColor="text"
 							icon="ChevronUpOutline"
 							size="large"
-							height="fill"
 							onClick={prevButton.onClick}
 							disabled={prevButton.disabled}
 						/>
@@ -135,9 +137,9 @@ const GridMode = (): ReactElement => {
 			)}
 			{rowsToRender}
 			{showPaginationButtons && (
-				<ButtonDownContainer width="fit" height="fit">
+				<ButtonDownContainer width="fit" height="fitt">
 					<Tooltip label={nextButton.disabled ? bottomLabel : scrollDownLabel} placement="left">
-						<IconButton
+						<ChevronIconButton
 							conColor="gray6"
 							backgroundColor="text"
 							icon="ChevronDownOutline"
