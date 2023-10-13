@@ -24,8 +24,6 @@ import ProfileSettings from './ProfileSettings';
 import useLocalStorage from '../../../hooks/useLocalStorage';
 import { UsersApi } from '../../../network';
 
-type CreateSnackbarFn = typeof CreateSnackbarFn;
-
 type SettingsProps = {
 	id?: string | undefined;
 };

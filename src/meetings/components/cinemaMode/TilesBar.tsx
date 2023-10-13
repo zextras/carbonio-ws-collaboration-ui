@@ -126,7 +126,7 @@ const TilesBar = (): ReactElement => {
 				<ButtonUpContainer width="fill" height="fit">
 					<Tooltip label={prevButtonDisabled ? topLabel : scrollUpLabel} placement="left">
 						<IconButton
-							conColor="gray6"
+							iconColor="gray6"
 							backgroundColor="text"
 							icon="ChevronUpOutline"
 							size="large"
@@ -142,7 +142,7 @@ const TilesBar = (): ReactElement => {
 				<ButtonDownContainer width="fill" height="fit">
 					<Tooltip label={nextButtonDisabled ? bottomLabel : scrollDownLabel} placement="left">
 						<IconButton
-							conColor="gray6"
+							iconColor="gray6"
 							backgroundColor="text"
 							icon="ChevronDownOutline"
 							size="large"

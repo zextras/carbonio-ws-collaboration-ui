@@ -60,13 +60,13 @@ const GroupAvatar: React.FC<UserAvatarProps> = ({ roomId, unreadCount, draftMess
 
 	const themeColor = useTheme();
 
-	const [picture, setPicture] = useState<false | string>(false);
+	const [picture, setPicture] = useState<string>('');
 
 	useEffect(() => {
 		if (pictureUpdatedAt != null) {
 			setPicture(`${RoomsApi.getURLRoomPicture(roomId)}?${pictureUpdatedAt}`);
 		} else {
-			setPicture(false);
+			setPicture('');
 		}
 	}, [pictureUpdatedAt, roomId]);
 

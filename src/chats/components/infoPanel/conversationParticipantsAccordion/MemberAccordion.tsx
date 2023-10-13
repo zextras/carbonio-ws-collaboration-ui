@@ -6,7 +6,7 @@
 
 import React, { FC, useCallback, useMemo } from 'react';
 
-import { Accordion } from '@zextras/carbonio-design-system';
+import { Accordion, AccordionItemType } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -47,7 +47,7 @@ export const MemberAccordion: FC<ParticipantsAccordionProps> = ({ roomId }) => {
 	}, [moreMembersAccordionTitle, numberOfMembers, oneMemberAccordionTitle]);
 
 	const infoDetails = useMemo(() => {
-		const arrayOfActions = [
+		const arrayOfActions: AccordionItemType[] = [
 			{
 				id: '1',
 				disableHover: true,

@@ -133,8 +133,7 @@ const MicrophoneButton = ({
 	return (
 		<Tooltip placement="top" label={audioStatus ? disableMicLabel : enableMicLabel}>
 			<MultiButton
-				iconColor="gray6"
-				backgroundColor="primary"
+				background="primary"
 				primaryIcon={audioStatus ? 'Mic' : 'MicOff'}
 				icon={isAudioListOpen ? 'ChevronDown' : 'ChevronUp'}
 				onClick={toggleAudioStream}
@@ -144,7 +143,11 @@ const MicrophoneButton = ({
 				dropdownProps={{
 					forceOpen: isAudioListOpen,
 					onClick: toggleAudioDropdown,
-					dropdownListRef: audioDropdownRef
+					dropdownListRef: audioDropdownRef,
+					// TODO fix lint error
+					// eslint-disable-next-line react/jsx-no-useless-fragment
+					children: <></>,
+					items: mediaAudioList
 				}}
 			/>
 		</Tooltip>

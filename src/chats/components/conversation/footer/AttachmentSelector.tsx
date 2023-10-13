@@ -6,7 +6,13 @@
 
 import React, { useCallback, useEffect, useRef } from 'react';
 
-import { Container, Dropdown, IconButton, Tooltip } from '@zextras/carbonio-design-system';
+import {
+	Container,
+	Dropdown,
+	DropdownItem,
+	IconButton,
+	Tooltip
+} from '@zextras/carbonio-design-system';
 import { forEach } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -78,14 +84,14 @@ const AttachmentSelector: React.FC<AttachmentSelectorProps> = ({ roomId }) => {
 		}
 	}, [filesToUploadArray]);
 
-	const items = [
+	const items: DropdownItem[] = [
 		{
 			id: 'item1',
 			icon: 'Link2',
 			label: attachLinkLabel,
 			keepOpen: false,
 			disabled: true,
-			onClick: null
+			onClick: () => null
 		},
 		{
 			id: 'item2',
@@ -101,7 +107,7 @@ const AttachmentSelector: React.FC<AttachmentSelectorProps> = ({ roomId }) => {
 		<Container width="fit" height="fit" padding={{ right: 'extrasmall', bottom: '0.3125rem' }}>
 			<Tooltip label={uploadAttachmentTooltip} placement="top">
 				<Dropdown items={items} placement="top-end">
-					<IconButton icon="Attach" iconColor="gray1" size="large" />
+					<IconButton icon="Attach" iconColor="gray1" size="large" onClick={(): null => null} />
 				</Dropdown>
 			</Tooltip>
 			<InputSelector

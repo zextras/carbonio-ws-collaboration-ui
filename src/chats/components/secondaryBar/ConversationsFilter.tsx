@@ -82,7 +82,7 @@ const ConversationsFilter: FC<ConversationsFilterProps> = ({ expanded, setFilter
 						<IconButton
 							icon={searchInput.length > 0 ? 'CloseOutline' : 'FunnelOutline'}
 							size="large"
-							customSize={{ paddingSize: '0.25rem' }}
+							customSize={{ paddingSize: '0.25rem', iconSize: '' }}
 							onClick={resetFilter}
 						/>
 					</Tooltip>
@@ -112,7 +112,7 @@ const ConversationsFilter: FC<ConversationsFilterProps> = ({ expanded, setFilter
 				<IconButton
 					icon="FunnelOutline"
 					size="large"
-					customSize={{ paddingSize: '0.25rem' }}
+					customSize={{ paddingSize: '0.25rem', iconSize: '' }}
 					onClick={handleInputFocus}
 					backgroundColor="gray5"
 				/>

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { ReactElement } from 'react';
+import React, { MouseEventHandler, ReactElement } from 'react';
 
 import {
 	Avatar,
@@ -22,7 +22,7 @@ import { ContactInfo } from './ChatCreationContactsSelection';
 type ListParticipantProps = {
 	item: ContactInfo;
 	selected: boolean;
-	onClickCb: (item: ContactInfo) => void;
+	onClickCb: (item: ContactInfo) => MouseEventHandler<HTMLDivElement> | undefined;
 	isDisabled?: boolean;
 };
 

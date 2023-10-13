@@ -84,7 +84,7 @@ const ActiveMeetingParticipantsDropdown = ({
 			data-testid="participant_dropdown"
 		>
 			<Container width="fit" height="fit">
-				<Text color="gray0" size="0.875rem">
+				<Text color="gray0" size="small">
 					{participantsTitle}
 				</Text>
 				<Padding bottom="0.5rem" />

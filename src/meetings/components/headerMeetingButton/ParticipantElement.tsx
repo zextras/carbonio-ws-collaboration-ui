@@ -43,13 +43,13 @@ const ParticipantElement: FC<ParticipantElementProps> = ({
 		getUserPictureUpdatedAt(state, memberId)
 	);
 
-	const [picture, setPicture] = useState<false | string>(false);
+	const [picture, setPicture] = useState<string>('');
 
 	useEffect(() => {
 		if (userPictureUpdatedAt != null) {
 			setPicture(`${UsersApi.getURLUserPicture(memberId)}?${userPictureUpdatedAt}`);
 		} else {
-			setPicture(false);
+			setPicture('');
 		}
 	}, [memberId, userPictureUpdatedAt]);
 
@@ -57,7 +57,7 @@ const ParticipantElement: FC<ParticipantElementProps> = ({
 		() =>
 			memberName == null ? (
 				<Container width="fit" height="fit">
-					<Shimmer.Avatar height="2rem" width="2rem" />
+					<Shimmer.Avatar width="2rem" />
 				</Container>
 			) : (
 				<CustomAvatar label={memberName} shape="round" picture={picture} />

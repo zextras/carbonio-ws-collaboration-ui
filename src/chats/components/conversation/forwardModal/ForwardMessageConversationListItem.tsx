@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { FunctionComponent } from 'react';
+import React, { FunctionComponent, MouseEventHandler } from 'react';
 
 import { Avatar, Checkbox, Container, Padding, Row, Text } from '@zextras/carbonio-design-system';
 
@@ -19,7 +19,7 @@ import { RoomType } from '../../../../types/store/RoomTypes';
 type ForwardModalConversationListItemProps = {
 	roomId: string;
 	selected: boolean;
-	onClick: (id: string) => void;
+	onClick: (id: string) => MouseEventHandler<HTMLDivElement> | undefined;
 };
 const ForwardMessageConversationListItem: FunctionComponent<
 	ForwardModalConversationListItemProps

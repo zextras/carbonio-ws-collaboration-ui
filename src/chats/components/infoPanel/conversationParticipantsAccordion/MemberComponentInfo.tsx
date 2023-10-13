@@ -59,13 +59,13 @@ const MemberComponentInfo: FC<ParticipantsInfoProps> = ({ member, roomId }) => {
 		getCapability(store, CapabilityType.CAN_SEE_USERS_PRESENCE)
 	);
 
-	const [picture, setPicture] = useState<false | string>(false);
+	const [picture, setPicture] = useState<string>('');
 
 	useEffect(() => {
 		if (userPictureUpdatedAt != null) {
 			setPicture(`${UsersApi.getURLUserPicture(member.userId)}?${userPictureUpdatedAt}`);
 		} else {
-			setPicture(false);
+			setPicture('');
 		}
 	}, [member, userPictureUpdatedAt]);
 
@@ -86,10 +86,10 @@ const MemberComponentInfo: FC<ParticipantsInfoProps> = ({ member, roomId }) => {
 		() =>
 			memberName == null && memberEmail == null ? (
 				<Container width="fit" height="fit">
-					<Shimmer.Avatar height="2rem" width="2rem" />
+					<Shimmer.Avatar width="2rem" />
 				</Container>
 			) : (
-				<CustomAvatar label={memberName || memberEmail} shape="round" picture={picture} />
+				<CustomAvatar label={memberName || memberEmail || ''} shape="round" picture={picture} />
 			),
 		[memberEmail, memberName, picture]
 	);

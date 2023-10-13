@@ -136,8 +136,7 @@ const CameraButton = ({
 	return (
 		<Tooltip placement="top" label={videoStatus ? disableCamLabel : enableCamLabel}>
 			<MultiButton
-				iconColor="gray6"
-				backgroundColor="primary"
+				background="primary"
 				primaryIcon={videoStatus ? 'Video' : 'VideoOff'}
 				icon={isVideoListOpen ? 'ChevronDown' : 'ChevronUp'}
 				onClick={toggleVideoStream}
@@ -147,9 +146,14 @@ const CameraButton = ({
 				dropdownProps={{
 					forceOpen: isVideoListOpen,
 					onClick: toggleVideoDropdown,
-					dropdownListRef: videoDropdownRef
+					dropdownListRef: videoDropdownRef,
+					// TODO fix lint error
+					// eslint-disable-next-line react/jsx-no-useless-fragment
+					children: <></>,
+					items: mediaVideoList
 				}}
-				disabled={!buttonStatus}
+				disabledPrimary={!buttonStatus}
+				disabledSecondary={!buttonStatus}
 			/>
 		</Tooltip>
 	);

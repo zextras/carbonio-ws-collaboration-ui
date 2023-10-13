@@ -29,7 +29,7 @@ import {
 	CreateSnackbarFn
 } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import styled, { css, FlattenInterpolation, ThemeProps } from 'styled-components';
+import styled, { css, DefaultTheme, FlattenInterpolation, ThemeProps } from 'styled-components';
 
 import { UsersApi } from '../../../network';
 import { getCapability } from '../../../store/selectors/SessionSelectors';
@@ -50,34 +50,35 @@ type ProfileSettingsProps = {
 	toDelete: boolean;
 };
 
-type CreateSnackbarFn = typeof CreateSnackbarFn;
-
 const HoverContainer = styled(Container)`
 	opacity: 0;
 `;
 
-const BackgroundContainer = styled(Container)`
+const BackgroundContainer = styled(Container)<{
+	$hasHoverGradient: boolean;
+	$color: keyof DefaultTheme['avatarColors'];
+}>`
 	border-radius: 0;
-	background-color: ${({ color, theme }): string | false => `${theme.avatarColors[color]}`};
+	background-color: ${({ $color, theme }): string | false => `${theme.avatarColors[$color]}`};
 	&:hover {
 		background: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)),
-			${({ color, hasHoverGradient, theme }): string | false =>
-				hasHoverGradient && `${theme.avatarColors[color]}`};
+			${({ $color, $hasHoverGradient, theme }): string | false =>
+				$hasHoverGradient && `${theme.avatarColors[$color]}`};
 		background: -webkit-linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)),
-			${({ color, hasHoverGradient, theme }): string | false =>
-				hasHoverGradient && `${theme.avatarColors[color]}`};
+			${({ $color, $hasHoverGradient, theme }): string | false =>
+				$hasHoverGradient && `${theme.avatarColors[$color]}`};
 		background: -moz-linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)),
-			${({ color, hasHoverGradient, theme }): string | false =>
-				hasHoverGradient && `${theme.avatarColors[color]}`};
+			${({ $color, $hasHoverGradient, theme }): string | false =>
+				$hasHoverGradient && `${theme.avatarColors[$color]}`};
 		${HoverContainer} {
 			opacity: 1;
 		}
 	}
 `;
 
-const PictureContainer = styled(Container)`
+const PictureContainer = styled(Container)<{ $picture: string; $hasHover: boolean }>`
 	border-radius: 0;
-	background-image: url(${({ picture }): string => picture});
+	background-image: url(${({ $picture }): string => $picture});
 	background-size: cover;
 	background-position: center;
 	aspect-ratio: 1/1;
@@ -89,21 +90,15 @@ const PictureContainer = styled(Container)`
 	}
 
 	//  TODO: remove hasHover when the preview of the image is implemented
-	${({
-		hasHover,
-		picture
-	}: {
-		hasHover: boolean;
-		picture: string;
-	}): false | FlattenInterpolation<ThemeProps<any>> =>
-		hasHover &&
+	${({ $hasHover, $picture }): false | FlattenInterpolation<ThemeProps<any>> =>
+		$hasHover &&
 		css`
 			&:hover {
-				background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), url(${picture});
+				background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), url(${$picture});
 				background-image: -webkit-linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)),
-					url(${picture});
+					url(${$picture});
 				background-image: -moz-linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)),
-					url(${picture});
+					url(${$picture});
 				background-size: cover;
 				background-position: center;
 				aspect-ratio: 1/1;
@@ -119,13 +114,13 @@ const GradientContainer = styled(Container)`
 	background: linear-gradient(0deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0) 45%);
 `;
 
-const NameWrapText = styled(Text)`
+const NameWrapText = styled(Text)<{ $hasPicture: boolean }>`
 	white-space: unset;
 	overflow: unset;
 	text-overflow: unset;
 	word-break: break-word;
-	text-shadow: ${({ hasPicture }): string | false =>
-		hasPicture && '0.063rem 0.063rem 0.25rem #111'};
+	text-shadow: ${({ $hasPicture }): string | false =>
+		$hasPicture && '0.063rem 0.063rem 0.25rem #111'};
 `;
 
 const CustomText = styled(Text)`
@@ -226,7 +221,7 @@ const ProfileSettings: FC<ProfileSettingsProps> = ({
 					padding={{ left: 'large', bottom: 'large', right: 'large' }}
 					mainAlignment="flex-end"
 				>
-					<NameWrapText color="gray6" size="medium" hasPicture={!!tempPicture}>
+					<NameWrapText color="gray6" size="medium" $hasPicture={!!tempPicture}>
 						{memberName || memberEmail || ''}
 					</NameWrapText>
 					<Padding top="extrasmall" />
@@ -254,6 +249,7 @@ const ProfileSettings: FC<ProfileSettingsProps> = ({
 				>
 					<Tooltip placement="bottom" label={tempPicture ? updatePictureLabel : uploadPictureLabel}>
 						<FileLoader
+							onClick={(): null => null}
 							onChange={onChangeUserImage}
 							icon="Upload"
 							iconColor="gray6"
@@ -302,9 +298,8 @@ const ProfileSettings: FC<ProfileSettingsProps> = ({
 		() =>
 			tempPicture ? (
 				<PictureContainer
-					hasPicture={!!tempPicture}
-					picture={tempPicture}
-					hasHover
+					$picture={tempPicture}
+					$hasHover
 					mainAlignment="flex-end"
 					minHeight="15.625rem"
 					maxHeight="15.625rem"
@@ -319,8 +314,8 @@ const ProfileSettings: FC<ProfileSettingsProps> = ({
 				</PictureContainer>
 			) : (
 				<BackgroundContainer
-					color={calculateAvatarColor(memberName || '')}
-					hasHoverGradient
+					$color={calculateAvatarColor(memberName || '')}
+					$hasHoverGradient
 					minHeight="10rem"
 					maxHeight="10rem"
 					minWidth="22.938rem"
@@ -373,6 +368,7 @@ const ProfileSettings: FC<ProfileSettingsProps> = ({
 									label={tempPicture ? updatePictureLabel : uploadPictureLabel}
 								>
 									<CustomFileLoader
+										onClick={(): null => null}
 										onChange={onChangeUserImage}
 										label="Upload Avatar"
 										type="outlined"

@@ -101,13 +101,13 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ roomId, unreadCount, draftMessa
 
 	const themeColor = useTheme();
 
-	const [picture, setPicture] = useState<false | string>(false);
+	const [picture, setPicture] = useState<string>('');
 
 	useEffect(() => {
 		if (userPictureUpdatedAt != null && otherMember && otherMember.userId !== undefined) {
 			setPicture(`${UsersApi.getURLUserPicture(otherMember.userId)}?${userPictureUpdatedAt}`);
 		} else {
-			setPicture(false);
+			setPicture('');
 		}
 	}, [sessionId, otherMember, userPictureUpdatedAt, roomId]);
 
@@ -125,7 +125,7 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ roomId, unreadCount, draftMessa
 					<Container>
 						<Avatar
 							icon="Video"
-							label={userName}
+							label={userName ?? ''}
 							title={userName}
 							shape="round"
 							background={userColor}
@@ -137,7 +137,7 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ roomId, unreadCount, draftMessa
 				return (
 					<Avatar
 						icon="Edit2"
-						label={userName}
+						label={userName ?? ''}
 						title={userName}
 						shape="round"
 						background={userColor}
@@ -147,7 +147,7 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ roomId, unreadCount, draftMessa
 				return (
 					<Avatar
 						icon="BellOff"
-						label={userName}
+						label={userName ?? ''}
 						title={userName}
 						shape="round"
 						background={userColor}
@@ -157,7 +157,7 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ roomId, unreadCount, draftMessa
 				return (
 					<Avatar
 						data-testid={`${userName}-avatar`}
-						label={userName}
+						label={userName ?? ''}
 						title={userName}
 						shape="round"
 						background={userColor}

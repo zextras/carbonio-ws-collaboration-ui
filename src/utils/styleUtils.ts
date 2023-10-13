@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { type DefaultTheme } from 'styled-components';
+import { DefaultTheme } from 'styled-components';
 
 export const calculateAvatarColor = (label: string): keyof DefaultTheme['avatarColors'] => {
 	let sum = 0;
