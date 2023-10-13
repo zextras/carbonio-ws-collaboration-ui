@@ -208,8 +208,7 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 				requireUniqueChips
 				ChipComponent={ForwardMessageConversationChip}
 				confirmChipOnBlur={false}
-				confirmChipOnSpace={false}
-				separators={['']}
+				separators={[]}
 			/>
 			<Padding bottom="large" />
 			<Container height="9.375rem">
