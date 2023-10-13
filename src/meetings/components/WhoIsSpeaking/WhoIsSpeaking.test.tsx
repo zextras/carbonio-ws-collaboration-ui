@@ -3,8 +3,9 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import { screen } from '@testing-library/react';
 import React from 'react';
+
+import { screen } from '@testing-library/react';
 
 import WhoIsSpeaking from './WhoIsSpeaking';
 import { mockUseParams } from '../../../../jest-mocks';

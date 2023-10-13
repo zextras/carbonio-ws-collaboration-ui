@@ -3,9 +3,10 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
+import React, { ReactElement, useMemo } from 'react';
+
 import { Container } from '@zextras/carbonio-design-system';
 import { map } from 'lodash';
-import React, { ReactElement, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
