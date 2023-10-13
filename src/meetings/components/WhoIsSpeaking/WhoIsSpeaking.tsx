@@ -18,6 +18,7 @@ import {
 	getMeetingViewSelected,
 	getTalkingList
 } from '../../../store/selectors/ActiveMeetingSelectors';
+import { getTotalNumberOfTiles } from '../../../store/selectors/MeetingSelectors';
 import useStore from '../../../store/Store';
 import { MeetingViewType } from '../../../types/store/ActiveMeetingTypes';
 
@@ -25,6 +26,7 @@ const SpeakingListContainer = styled(Container)`
 	position: absolute;
 	top: 1rem;
 	right: 1rem;
+	z-index: 40;
 `;
 
 const WhoIsSpeaking = (): ReactElement | null => {
@@ -33,6 +35,7 @@ const WhoIsSpeaking = (): ReactElement | null => {
 	const talkingMap = useStore((store) => getTalkingList(store, meetingId));
 	const meetingViewSelected = useStore((store) => getMeetingViewSelected(store, meetingId));
 	const carouselIsVisible = useStore((store) => getMeetingCarouselVisibility(store, meetingId));
+	const numberOfTiles = useStore((store) => getTotalNumberOfTiles(store, meetingId));
 
 	const speakingList = useMemo(() => {
 		const list: ReactElement[] = [];
@@ -45,11 +48,8 @@ const WhoIsSpeaking = (): ReactElement | null => {
 	}, [talkingMap, centralTile]);
 
 	const whoIsSpeakingHasToAppear = useMemo(
-		() =>
-			(meetingViewSelected === MeetingViewType.CINEMA ||
-				meetingViewSelected === MeetingViewType.GRID) &&
-			!carouselIsVisible,
-		[carouselIsVisible, meetingViewSelected]
+		() => meetingViewSelected === MeetingViewType.CINEMA && !carouselIsVisible && numberOfTiles > 2,
+		[carouselIsVisible, meetingViewSelected, numberOfTiles]
 	);
 
 	return whoIsSpeakingHasToAppear ? (
