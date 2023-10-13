@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Avatar, Container, Shimmer, useTheme } from '@zextras/carbonio-design-system';
 import React, { useEffect, useMemo, useState } from 'react';
+
+import { Avatar, Container, Shimmer, useTheme } from '@zextras/carbonio-design-system';
 import styled, { DefaultTheme } from 'styled-components';
 
 import { AvatarBadge, AvatarContainer } from './UserAvatar';

@@ -143,17 +143,10 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 	setLocalStreams: (meetingId: string, streamType: STREAM_TYPE, stream: MediaStream): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (!draft.activeMeeting[meetingId]?.localStreams?.[streamType]) {
-					draft.activeMeeting[meetingId].localStreams = {
-						...draft.activeMeeting[meetingId].localStreams,
-						[streamType]: stream
-					};
-				} else {
-					draft.activeMeeting[meetingId].localStreams = {
-						...draft.activeMeeting[meetingId].localStreams,
-						[streamType]: stream
-					};
-				}
+				draft.activeMeeting[meetingId].localStreams = {
+					...draft.activeMeeting[meetingId].localStreams,
+					[streamType]: stream
+				};
 			}),
 			false,
 			'AM/SET_LOCAL_STREAM'

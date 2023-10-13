@@ -5,8 +5,9 @@
  */
 /* eslint-disable no-nested-ternary */
 
-import { Container, Padding } from '@zextras/carbonio-design-system';
 import React, { FC, useMemo } from 'react';
+
+import { Container, Padding } from '@zextras/carbonio-design-system';
 import styled from 'styled-components';
 
 import AttachmentView from './AttachmentView';
@@ -68,8 +69,6 @@ const BubbleContainer = styled(Container)`
 			? '0 0.25rem 0.25rem 0'
 			: centerMessageOfList
 			? '0 0.25rem 0.25rem 0'
-			: lastMessageOfList
-			? '0 0.25rem 0.25rem 0.25rem'
 			: '0 0.25rem 0.25rem 0.25rem'};
 `;
 

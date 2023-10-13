@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { screen } from '@testing-library/react';
 import React from 'react';
+
+import { screen } from '@testing-library/react';
 
 import CollapsedSidebarListItem from './CollapsedSidebarListItem';
 import useStore from '../../../store/Store';
@@ -14,6 +15,8 @@ import { setup } from '../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
 import { RootStore } from '../../../types/store/StoreTypes';
 import { User } from '../../../types/store/UserTypes';
+
+const backgroundColor = 'background-color: #cfd5dc';
 
 const user2Be: User = {
 	id: 'user2Id',
@@ -67,7 +70,7 @@ describe('Collapsed sidebar list item', () => {
 		setup(<CollapsedSidebarListItem roomId={mockedGroup.id} />);
 		const unreadBadge = screen.getByTestId('unreads_counter');
 		expect(unreadBadge).toBeVisible();
-		expect(unreadBadge).toHaveStyle('background-color: #cfd5dc');
+		expect(unreadBadge).toHaveStyle(backgroundColor);
 		const avatarWithNotificationMuted = screen.getByTestId('icon: BellOff');
 		expect(avatarWithNotificationMuted).toBeVisible();
 	});
@@ -82,7 +85,7 @@ describe('Collapsed sidebar list item', () => {
 		setup(<CollapsedSidebarListItem roomId={mockedGroup.id} />);
 		const unreadBadge = screen.getByTestId('unreads_counter');
 		expect(unreadBadge).toBeVisible();
-		expect(unreadBadge).toHaveStyle('background-color: #cfd5dc');
+		expect(unreadBadge).toHaveStyle(backgroundColor);
 		const avatarWithWithDraft = screen.getByTestId('icon: Edit2');
 		expect(avatarWithWithDraft).toBeVisible();
 	});
@@ -107,7 +110,7 @@ describe('Collapsed sidebar list item', () => {
 		setup(<CollapsedSidebarListItem roomId={mockedOneToOne.id} />);
 		const unreadBadge = screen.getByTestId('unreads_counter');
 		expect(unreadBadge).toBeVisible();
-		expect(unreadBadge).toHaveStyle('background-color: #cfd5dc');
+		expect(unreadBadge).toHaveStyle(backgroundColor);
 		const avatarWithNotificationMuted = screen.getByTestId('icon: BellOff');
 		expect(avatarWithNotificationMuted).toBeVisible();
 	});
@@ -122,7 +125,7 @@ describe('Collapsed sidebar list item', () => {
 		setup(<CollapsedSidebarListItem roomId={mockedOneToOne.id} />);
 		const unreadBadge = screen.getByTestId('unreads_counter');
 		expect(unreadBadge).toBeVisible();
-		expect(unreadBadge).toHaveStyle('background-color: #cfd5dc');
+		expect(unreadBadge).toHaveStyle(backgroundColor);
 		const avatarWithWithDraft = screen.getByTestId('icon: Edit2');
 		expect(avatarWithWithDraft).toBeVisible();
 	});

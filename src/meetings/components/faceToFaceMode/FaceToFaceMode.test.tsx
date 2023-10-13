@@ -4,9 +4,10 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import React from 'react';
+
 import { act, renderHook } from '@testing-library/react-hooks';
 import { UserEvent } from '@testing-library/user-event/setup/setup';
-import React from 'react';
 
 import FaceToFaceMode from './FaceToFaceMode';
 import { mockUseParams } from '../../../../jest-mocks';

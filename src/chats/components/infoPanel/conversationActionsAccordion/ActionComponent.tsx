@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import React, { FC } from 'react';
+
 import {
 	Container,
 	IconButton,
@@ -13,7 +15,6 @@ import {
 	Row,
 	Tooltip
 } from '@zextras/carbonio-design-system';
-import React, { FC } from 'react';
 import styled from 'styled-components';
 
 const CustomText = styled(Text)``;

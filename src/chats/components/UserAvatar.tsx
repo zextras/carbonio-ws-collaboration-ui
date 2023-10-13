@@ -4,9 +4,10 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import React, { useEffect, useMemo, useState } from 'react';
+
 import { Avatar, Container, Shimmer, Badge, useTheme } from '@zextras/carbonio-design-system';
 import { find } from 'lodash';
-import React, { useEffect, useMemo, useState } from 'react';
 import styled, { DefaultTheme } from 'styled-components';
 
 import { UsersApi } from '../../network';
@@ -86,15 +87,12 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ roomId, unreadCount, draftMessa
 	const sessionId: string | undefined = useStore((store) => store.session.id);
 	const roomMembers: Member[] | undefined = useStore((store) => getRoomMembers(store, roomId));
 	const otherMember = find(roomMembers, (member) => member.userId !== sessionId);
-	const userName: string | undefined = useStore((store) =>
-		getUserName(store, otherMember?.userId || '')
-	);
+	const idAvailable = otherMember?.userId ?? '';
+	const userName: string | undefined = useStore((store) => getUserName(store, idAvailable));
 	const roomMuted = useStore((state) => getRoomMutedSelector(state, roomId));
-	const memberOnline: boolean | undefined = useStore((store) =>
-		getUserOnline(store, otherMember?.userId || '')
-	);
+	const memberOnline: boolean | undefined = useStore((store) => getUserOnline(store, idAvailable));
 	const userPictureUpdatedAt: string | undefined = useStore((state) =>
-		getUserPictureUpdatedAt(state, otherMember?.userId || '')
+		getUserPictureUpdatedAt(state, idAvailable)
 	);
 	const canSeeUsersPresence = useStore((store) =>
 		getCapability(store, CapabilityType.CAN_SEE_USERS_PRESENCE)
@@ -114,59 +112,59 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ roomId, unreadCount, draftMessa
 	}, [sessionId, otherMember, userPictureUpdatedAt, roomId]);
 
 	const userColor = useMemo(() => {
-		const color = calculateAvatarColor(userName || '');
+		const color = calculateAvatarColor(userName ?? '');
 		return isMeetingActive
 			? `linear-gradient(0deg, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), ${themeColor.avatarColors[color]}`
 			: `${themeColor.avatarColors[color]}`;
 	}, [userName, isMeetingActive, themeColor.avatarColors]);
 
 	const avatarUser = useMemo(() => {
-		if (isMeetingActive) {
-			return (
-				<Container>
+		switch (true) {
+			case isMeetingActive:
+				return (
+					<Container>
+						<Avatar
+							icon="Video"
+							label={userName}
+							title={userName}
+							shape="round"
+							background={userColor}
+						/>
+						<ActiveMeetingDot />
+					</Container>
+				);
+			case draftMessage:
+				return (
 					<Avatar
-						icon="Video"
+						icon="Edit2"
 						label={userName}
 						title={userName}
 						shape="round"
 						background={userColor}
 					/>
-					<ActiveMeetingDot />
-				</Container>
-			);
+				);
+			case roomMuted:
+				return (
+					<Avatar
+						icon="BellOff"
+						label={userName}
+						title={userName}
+						shape="round"
+						background={userColor}
+					/>
+				);
+			default:
+				return (
+					<Avatar
+						data-testid={`${userName}-avatar`}
+						label={userName}
+						title={userName}
+						shape="round"
+						background={userColor}
+						picture={picture}
+					/>
+				);
 		}
-		if (draftMessage) {
-			return (
-				<Avatar
-					icon="Edit2"
-					label={userName}
-					title={userName}
-					shape="round"
-					background={userColor}
-				/>
-			);
-		}
-		if (roomMuted) {
-			return (
-				<Avatar
-					icon="BellOff"
-					label={userName}
-					title={userName}
-					shape="round"
-					background={userColor}
-				/>
-			);
-		}
-		return (
-			<Avatar
-				data-testid={`${userName}-avatar`}
-				label={userName}
-				title={userName}
-				shape="round"
-				background={userColor}
-				picture={picture}
-			/>
-		);
 	}, [isMeetingActive, draftMessage, roomMuted, userName, picture, userColor]);
 
 	return userName ? (

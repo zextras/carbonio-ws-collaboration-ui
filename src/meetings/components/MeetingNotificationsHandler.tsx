@@ -4,10 +4,11 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import React, { ReactElement, useCallback, useMemo, useState } from 'react';
+
 import { Button, Container, Portal } from '@zextras/carbonio-design-system';
 import { useCurrentRoute } from '@zextras/carbonio-shell-ui';
 import { find, map, remove, size } from 'lodash';
-import React, { ReactElement, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 

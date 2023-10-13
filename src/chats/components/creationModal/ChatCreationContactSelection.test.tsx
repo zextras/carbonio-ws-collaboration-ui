@@ -4,9 +4,10 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import React from 'react';
+
 import { act, screen, waitFor } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
-import React from 'react';
 
 import ChatCreationContactsSelection from './ChatCreationContactsSelection';
 import { mockedAutoCompleteGalRequest } from '../../../../jest-mocks';
@@ -15,6 +16,8 @@ import useStore from '../../../store/Store';
 import { createMockCapabilityList } from '../../../tests/createMock';
 import { setup } from '../../../tests/test-utils';
 import { Member } from '../../../types/store/RoomTypes';
+
+const user1Test = 'user1@test.com';
 
 // Mock objects
 const zimbraUser1: ContactMatch = {
@@ -187,7 +190,7 @@ describe('Chat Creation Modal Contact Selector - search', () => {
 		const chipInput = await screen.findByTestId('chip_input_creation_modal');
 		await user.type(chipInput, `${zimbraUser1.firstName} ${zimbraUser1.lastName}`);
 		expect(screen.getByText(/User One/i)).toBeInTheDocument();
-		expect(screen.getByText('user1@test.com')).toBeInTheDocument();
+		expect(screen.getByText(zimbraUser1.email)).toBeInTheDocument();
 	});
 
 	test('Search an user with logged user inside the response', async () => {
@@ -207,7 +210,7 @@ describe('Chat Creation Modal Contact Selector - search', () => {
 		const chipInput = await screen.findByTestId('chip_input_creation_modal');
 		await user.type(chipInput, `User`);
 		expect(screen.queryByText(/User One/i)).not.toBeInTheDocument();
-		expect(screen.queryByText('user1@test.com')).not.toBeInTheDocument();
+		expect(screen.queryByText(zimbraUser1.email)).not.toBeInTheDocument();
 		// User Two is present because is not the logged user
 		expect(screen.getByText(/User Two/i)).toBeInTheDocument();
 		expect(screen.getByText('user2@test.com')).toBeInTheDocument();

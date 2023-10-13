@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { render, screen } from '@testing-library/react';
 import { ReactElement } from 'react';
+
+import { render, screen } from '@testing-library/react';
 import { isElement, isElementOfType } from 'react-dom/test-utils';
 
 import { parseUrlOnMessage } from './parseUrlOnMessage';

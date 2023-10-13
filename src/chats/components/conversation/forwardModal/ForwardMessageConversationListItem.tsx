@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Avatar, Checkbox, Container, Padding, Row, Text } from '@zextras/carbonio-design-system';
 import React, { FunctionComponent } from 'react';
+
+import { Avatar, Checkbox, Container, Padding, Row, Text } from '@zextras/carbonio-design-system';
 
 import {
 	getRoomNameSelector,

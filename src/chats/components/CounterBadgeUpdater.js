@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { updatePrimaryBadge } from '@zextras/carbonio-shell-ui';
 import { useEffect } from 'react';
+
+import { updatePrimaryBadge } from '@zextras/carbonio-shell-ui';
 
 import { CHATS_ROUTE } from '../../constants/appConstants';
 import { getTotalUnreadCountSelector } from '../../store/selectors/UnreadsCounterSelectors';

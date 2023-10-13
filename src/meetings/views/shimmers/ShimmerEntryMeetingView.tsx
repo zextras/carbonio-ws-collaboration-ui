@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Container } from '@zextras/carbonio-design-system';
 import React, { ReactElement } from 'react';
+
+import { Container } from '@zextras/carbonio-design-system';
 
 import ShimmerMeetingSidebar from './ShimmerMeetingSidebar';
 import ShimmerMeetingStreamsWrapper from './ShimmerMeetingStreamsWrapper';

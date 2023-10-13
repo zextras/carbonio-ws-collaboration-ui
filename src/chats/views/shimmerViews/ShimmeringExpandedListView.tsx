@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Container, Shimmer, Padding } from '@zextras/carbonio-design-system';
 import React, { ReactElement } from 'react';
+
+import { Container, Shimmer, Padding } from '@zextras/carbonio-design-system';
 import styled from 'styled-components';
 
 const CustomContainer = styled(Container)`

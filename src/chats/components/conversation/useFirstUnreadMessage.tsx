@@ -3,8 +3,9 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import { filter, findIndex, size, slice } from 'lodash';
 import { useEffect, useState } from 'react';
+
+import { filter, findIndex, size, slice } from 'lodash';
 
 import {
 	getMyLastMarkerOfRoom,

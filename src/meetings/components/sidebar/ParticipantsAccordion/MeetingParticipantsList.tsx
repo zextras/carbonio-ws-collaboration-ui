@@ -3,9 +3,10 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
+import React, { FC, useEffect, useMemo, useState } from 'react';
+
 import { Container, Text } from '@zextras/carbonio-design-system';
 import { forEach, map, values } from 'lodash';
-import React, { FC, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
