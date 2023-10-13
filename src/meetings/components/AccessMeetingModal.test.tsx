@@ -86,7 +86,6 @@ describe('AccessMeetingModal - enter to meeting', () => {
 
 		expect(mockedEnterMeetingRequest).toBeCalled();
 	});
-
 	test('Select audio device', async () => {
 		mockedJoinMeetingRequest.mockReturnValueOnce(groupMeeting);
 
@@ -146,5 +145,29 @@ describe('AccessMeetingModal - enter to meeting', () => {
 		await act(() => user.click(audioOff));
 		const audioOn = await screen.findByTestId('icon: Mic');
 		expect(audioOn).toBeInTheDocument();
+	});
+	test('if networks connection are down, enter button should be disabled', async () => {
+		setupBasicGroup();
+
+		// shutting down one of the network dependencies
+		act(() => {
+			useStore.getState().setChatsBeStatus(false);
+		});
+
+		const enterButton = await screen.findByRole('button', { name: 'Enter' });
+		expect(enterButton).toBeDisabled();
+	});
+	test('Enter to meeting fails', async () => {
+		const error = jest.spyOn(console, 'error').mockImplementation();
+		mockedEnterMeetingRequest.mockRejectedValue('rejected');
+
+		const { user } = setupBasicGroup();
+
+		// Click on enter button to join the meeting
+		const enterButton = await screen.findByText('Enter');
+		await user.click(enterButton);
+
+		expect(error).toHaveBeenCalledWith('rejected', 'Error on joinMeeting');
+		error.mockReset();
 	});
 });

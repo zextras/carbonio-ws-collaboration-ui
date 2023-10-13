@@ -344,7 +344,7 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 
 	const modalFooter = useMemo(
 		() => (
-			<Container mainAlignment="space-between" orientation="horizontal">
+			<Container mainAlignment="space-between" orientation="horizontal" data-testid="modal_footer">
 				<Button
 					type="outlined"
 					backgroundColor={'text'}

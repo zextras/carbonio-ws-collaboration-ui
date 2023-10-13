@@ -10,15 +10,15 @@ import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import SpeakingElement from './SpeakingElement';
-import { MeetingRoutesParams } from '../../hooks/useRouting';
-import useTilesOrder from '../../hooks/useTilesOrder';
+import { MeetingRoutesParams } from '../../../hooks/useRouting';
+import useTilesOrder from '../../../hooks/useTilesOrder';
 import {
 	getMeetingCarouselVisibility,
 	getMeetingViewSelected,
 	getTalkingList
-} from '../../store/selectors/ActiveMeetingSelectors';
-import useStore from '../../store/Store';
-import { MeetingViewType } from '../../types/store/ActiveMeetingTypes';
+} from '../../../store/selectors/ActiveMeetingSelectors';
+import useStore from '../../../store/Store';
+import { MeetingViewType } from '../../../types/store/ActiveMeetingTypes';
 
 const SpeakingListContainer = styled(Container)`
 	position: absolute;
@@ -37,7 +37,7 @@ const WhoIsSpeaking = (): ReactElement | null => {
 		const list: ReactElement[] = [];
 		map(talkingMap, (talkingId) => {
 			if (centralTile.userId !== talkingId) {
-				list.push(<SpeakingElement userId={talkingId} />);
+				list.push(<SpeakingElement key={`${talkingId}-isTalking`} userId={talkingId} />);
 			}
 		});
 		return list;

@@ -7,8 +7,8 @@ import { Container, Padding } from '@zextras/carbonio-design-system';
 import React, { ReactElement } from 'react';
 import styled from 'styled-components';
 
-import { getUserName } from '../../store/selectors/UsersSelectors';
-import useStore from '../../store/Store';
+import { getUserName } from '../../../store/selectors/UsersSelectors';
+import useStore from '../../../store/Store';
 
 const CustomContainer = styled(Container)`
 	border-radius: 0.25rem;

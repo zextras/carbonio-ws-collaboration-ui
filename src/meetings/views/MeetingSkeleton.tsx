@@ -26,7 +26,7 @@ import FaceToFaceMode from '../components/faceToFaceMode/FaceToFaceMode';
 import GridMode from '../components/gridMode/GridMode';
 import MeetingActions from '../components/MeetingActions/MeetingActions';
 import MeetingSidebar from '../components/sidebar/MeetingSidebar';
-import WhoIsSpeaking from '../components/WhoIsSpeaking';
+import WhoIsSpeaking from '../components/WhoIsSpeaking/WhoIsSpeaking';
 
 const SkeletonContainer = styled(Container)`
 	overflow: hidden;
