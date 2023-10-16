@@ -14,8 +14,8 @@ import { getAudioStream } from '../../utils/UserMediaManager';
 import MeetingsApi from '../apis/MeetingsApi';
 
 export default class BidirectionalConnectionAudioInOut
-	implements IBidirectionalConnectionAudioInOut
-{
+	// eslint-disable-next-line prettier/prettier
+	implements IBidirectionalConnectionAudioInOut {
 	peerConn: RTCPeerConnection;
 
 	meetingId: string;

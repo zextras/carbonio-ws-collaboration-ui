@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import React, { ReactElement } from 'react';
+
 import {
 	Avatar,
 	Checkbox,
@@ -13,7 +15,6 @@ import {
 	Text,
 	Tooltip
 } from '@zextras/carbonio-design-system';
-import React, { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { ContactInfo } from './ChatCreationContactsSelection';

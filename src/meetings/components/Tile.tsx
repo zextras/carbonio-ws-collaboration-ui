@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+
 import {
 	Avatar,
 	Container,
@@ -14,7 +16,6 @@ import {
 	Tooltip,
 	useTheme
 } from '@zextras/carbonio-design-system';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 

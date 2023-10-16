@@ -4,9 +4,10 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import React, { ReactElement, useMemo, useRef } from 'react';
+
 import { Container, IconButton, Tooltip } from '@zextras/carbonio-design-system';
 import { size } from 'lodash';
-import React, { ReactElement, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';

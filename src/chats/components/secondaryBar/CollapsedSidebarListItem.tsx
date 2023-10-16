@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Container, Tooltip } from '@zextras/carbonio-design-system';
 import React, { useCallback } from 'react';
+
+import { Container, Tooltip } from '@zextras/carbonio-design-system';
 import styled from 'styled-components';
 
 import useRouting from '../../../hooks/useRouting';

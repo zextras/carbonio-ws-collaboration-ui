@@ -4,6 +4,15 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import React, {
+	ReactElement,
+	useCallback,
+	useEffect,
+	/* useContext, */ useMemo,
+	useRef,
+	useState
+} from 'react';
+
 import {
 	Button,
 	Container,
@@ -14,14 +23,6 @@ import {
 	CreateSnackbarFn, */
 	Tooltip
 } from '@zextras/carbonio-design-system';
-import React, {
-	ReactElement,
-	useCallback,
-	useEffect,
-	/* useContext, */ useMemo,
-	useRef,
-	useState
-} from 'react';
 import { useTranslation } from 'react-i18next';
 import styled, { DefaultTheme } from 'styled-components';
 

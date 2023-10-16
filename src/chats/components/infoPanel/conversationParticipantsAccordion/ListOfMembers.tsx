@@ -4,9 +4,10 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import React, { FC } from 'react';
+
 import { Container } from '@zextras/carbonio-design-system';
 import { map } from 'lodash';
-import React, { FC } from 'react';
 
 import MemberComponentInfo from './MemberComponentInfo';
 import { Member } from '../../../../types/store/RoomTypes';

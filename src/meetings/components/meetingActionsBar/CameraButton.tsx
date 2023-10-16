@@ -3,8 +3,6 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import { MultiButton, Tooltip } from '@zextras/carbonio-design-system';
-import { filter, map } from 'lodash';
 import React, {
 	Dispatch,
 	ReactElement,
@@ -14,6 +12,9 @@ import React, {
 	useMemo,
 	useState
 } from 'react';
+
+import { MultiButton, Tooltip } from '@zextras/carbonio-design-system';
+import { filter, map } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 

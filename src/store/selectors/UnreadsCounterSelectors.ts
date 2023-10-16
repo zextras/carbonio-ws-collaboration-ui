@@ -10,7 +10,7 @@ import { RootStore } from '../../types/store/StoreTypes';
 
 export const getTotalUnreadCountSelector = (store: RootStore): number => {
 	const sum = (amount: number, n: number): number => amount + n;
-	const totalUnreads = reduce(
+	return reduce(
 		map(store.unreads, (unread, key) => {
 			if (store.rooms[key] && !store.rooms[key].userSettings?.muted) {
 				return unread;
@@ -20,7 +20,6 @@ export const getTotalUnreadCountSelector = (store: RootStore): number => {
 		sum,
 		0
 	);
-	return totalUnreads;
 };
 
 export const getRoomUnreadsSelector = (store: RootStore, roomId: string): number =>

@@ -3,10 +3,11 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
+import React, { useMemo } from 'react';
+
 import { render, RenderOptions, RenderResult, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { SnackbarManager, ThemeProvider } from '@zextras/carbonio-design-system';
-import React, { useMemo } from 'react';
+import { ModalManager, SnackbarManager, ThemeProvider } from '@zextras/carbonio-design-system';
 import { I18nextProvider } from 'react-i18next';
 
 import I18nTestFactory from './i18n-test-factory';
@@ -24,7 +25,9 @@ const ProvidersWrapper = ({ children }: ProvidersWrapperProps): JSX.Element => {
 	return (
 		<I18nextProvider i18n={i18n}>
 			<ThemeProvider>
-				<SnackbarManager>{children}</SnackbarManager>
+				<ModalManager>
+					<SnackbarManager>{children}</SnackbarManager>
+				</ModalManager>
 			</ThemeProvider>
 		</I18nextProvider>
 	);

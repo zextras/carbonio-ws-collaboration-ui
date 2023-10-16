@@ -5,6 +5,7 @@
  */
 
 import { RefObject, useCallback, useEffect, useState } from 'react';
+
 import { useParams } from 'react-router-dom';
 
 import { MeetingRoutesParams } from './useRouting';

@@ -4,9 +4,10 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import React, { Dispatch, FC, SetStateAction, useCallback, useEffect, useRef } from 'react';
+
 import { Button, Checkbox, Container, Modal, Tooltip } from '@zextras/carbonio-design-system';
 import { size } from 'lodash';
-import React, { Dispatch, FC, SetStateAction, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Member } from '../../../../types/store/RoomTypes';

@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Container } from '@zextras/carbonio-design-system';
 import React, { ReactElement } from 'react';
+
+import { Container } from '@zextras/carbonio-design-system';
 
 const ShimmerMeetingSidebar = (): ReactElement => (
 	<Container background="text" width="35%" maxWidth="500px" borderRadius="none" />

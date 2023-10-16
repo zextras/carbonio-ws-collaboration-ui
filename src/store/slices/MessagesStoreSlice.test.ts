@@ -26,6 +26,9 @@ import { RoomType } from '../../types/store/RoomTypes';
 import { dateToTimestamp } from '../../utils/dateUtil';
 import useStore from '../Store';
 
+const dateOne = '2023-05-01 14:00';
+const dateTwo = '2023-05-01 14:01';
+
 describe('Test messages slice - newMessage', () => {
 	test('Arrive a text message as first', () => {
 		const newMessage = createMockTextMessage();
@@ -42,11 +45,11 @@ describe('Test messages slice - newMessage', () => {
 	test('Arrive a text message in a conversation already full of messages of the same day', () => {
 		const message0 = createMockTextMessage({
 			id: 'message0',
-			date: dateToTimestamp('2023-05-01 14:00')
+			date: dateToTimestamp(dateOne)
 		});
 		const message1 = createMockTextMessage({
 			id: 'message1',
-			date: dateToTimestamp('2023-05-01 14:01')
+			date: dateToTimestamp(dateTwo)
 		});
 		const newMessage = createMockTextMessage({
 			id: 'newMessage',
@@ -70,11 +73,11 @@ describe('Test messages slice - newMessage', () => {
 	test('Arrive a text message in a conversation already full of messages of the another day', () => {
 		const message0 = createMockTextMessage({
 			id: 'message0',
-			date: dateToTimestamp('2023-05-01 14:00')
+			date: dateToTimestamp(dateOne)
 		});
 		const message1 = createMockTextMessage({
 			id: 'message1',
-			date: dateToTimestamp('2023-05-01 14:01')
+			date: dateToTimestamp(dateTwo)
 		});
 		const newMessage = createMockTextMessage({
 			id: 'newMessage',
@@ -125,11 +128,11 @@ describe('Test messages slice - newInboxMessage', () => {
 	test('Arrive an inbox text message after a history request (also with different date)', () => {
 		const message0 = createMockTextMessage({
 			id: 'message0',
-			date: dateToTimestamp('2023-05-01 14:00')
+			date: dateToTimestamp(dateOne)
 		});
 		const message1 = createMockTextMessage({
 			id: 'message1',
-			date: dateToTimestamp('2023-05-01 14:01')
+			date: dateToTimestamp(dateTwo)
 		});
 		const inboxMessage = createMockTextMessage({
 			id: 'message1',
@@ -172,7 +175,7 @@ describe('Test messages slice - newInboxMessage', () => {
 	test('Arrive an inbox message of a room in which history is been cleared after message date', () => {
 		const room = createMockRoom({
 			userSettings: {
-				clearedAt: dateToTimestamp('2023-05-01 14:00')
+				clearedAt: dateToTimestamp(dateOne)
 			}
 		});
 		const inboxMessage = createMockTextMessage({
@@ -194,11 +197,11 @@ describe('Test messages slice - updateHistory', () => {
 	test('First update history after an inbox message (inbox message and last history message are from the same day)', () => {
 		const message0 = createMockTextMessage({
 			id: 'message0',
-			date: dateToTimestamp('2023-05-01 14:00')
+			date: dateToTimestamp(dateOne)
 		});
 		const message1 = createMockTextMessage({
 			id: 'message1',
-			date: dateToTimestamp('2023-05-01 14:01')
+			date: dateToTimestamp(dateTwo)
 		});
 		const inboxMessage = createMockTextMessage({
 			id: 'newMessage',
@@ -222,11 +225,11 @@ describe('Test messages slice - updateHistory', () => {
 	test("First update history after an inbox message (inbox message and last history message AREN'T from the same day)", () => {
 		const message0 = createMockTextMessage({
 			id: 'message0',
-			date: dateToTimestamp('2023-05-01 14:00')
+			date: dateToTimestamp(dateOne)
 		});
 		const message1 = createMockTextMessage({
 			id: 'message1',
-			date: dateToTimestamp('2023-05-01 14:01')
+			date: dateToTimestamp(dateTwo)
 		});
 		const inboxMessage = createMockTextMessage({
 			id: 'newMessage',
@@ -251,7 +254,7 @@ describe('Test messages slice - updateHistory', () => {
 	test('Last message of history is the inbox message', () => {
 		const message0 = createMockTextMessage({
 			id: 'message0',
-			date: dateToTimestamp('2023-05-01 14:00')
+			date: dateToTimestamp(dateOne)
 		});
 		const inboxMessage = createMockTextMessage({
 			id: 'newMessage',
@@ -274,7 +277,7 @@ describe('Test messages slice - updateHistory', () => {
 	test('Last message of history is the inbox message (but dates are not the same)', () => {
 		const message0 = createMockTextMessage({
 			id: 'message0',
-			date: dateToTimestamp('2023-05-01 14:00')
+			date: dateToTimestamp(dateOne)
 		});
 		const message1 = createMockTextMessage({
 			id: 'message1',
@@ -298,7 +301,7 @@ describe('Test messages slice - updateHistory', () => {
 	test('In the history response there are messages from different date', () => {
 		const message0 = createMockTextMessage({
 			id: 'message0',
-			date: dateToTimestamp('2023-05-01 14:00')
+			date: dateToTimestamp(dateOne)
 		});
 		const message1 = createMockTextMessage({
 			id: 'message1',
@@ -327,11 +330,11 @@ describe('Test messages slice - updateHistory', () => {
 	test('Load a history after another history', () => {
 		const message0 = createMockTextMessage({
 			id: 'message0',
-			date: dateToTimestamp('2023-05-01 14:00')
+			date: dateToTimestamp(dateOne)
 		});
 		const message1 = createMockTextMessage({
 			id: 'message1',
-			date: dateToTimestamp('2023-05-01 14:01')
+			date: dateToTimestamp(dateTwo)
 		});
 		const { result } = renderHook(() => useStore());
 		act(() => result.current.updateHistory(message0.roomId, [message0, message1]));
@@ -365,11 +368,11 @@ describe('Test messages slice - updateHistory', () => {
 	test('Arrive an history already loaded', () => {
 		const message0 = createMockTextMessage({
 			id: 'message0',
-			date: dateToTimestamp('2023-05-01 14:00')
+			date: dateToTimestamp(dateOne)
 		});
 		const message1 = createMockTextMessage({
 			id: 'message1',
-			date: dateToTimestamp('2023-05-01 14:01')
+			date: dateToTimestamp(dateTwo)
 		});
 		const { result } = renderHook(() => useStore());
 		act(() => {
@@ -427,7 +430,7 @@ describe('Test message slice - addCreateRoomMessage', () => {
 	test('Add a create room message to a group with cleared history', () => {
 		const room = createMockRoom({
 			type: RoomType.GROUP,
-			userSettings: { clearedAt: dateToTimestamp('2023-05-01 14:00') }
+			userSettings: { clearedAt: dateToTimestamp(dateOne) }
 		});
 		const message0 = createMockTextMessage({ id: 'message0' });
 		const message1 = createMockTextMessage({ id: 'message1' });

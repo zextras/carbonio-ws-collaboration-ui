@@ -31,6 +31,7 @@
         "replyToSomeone": "Reply to",
         "replyToYourself": "Reply to yourself",
         "scrollToBottom": "Scroll to bottom",
+        "understood": "Understood",
         "undo": "Undo"
     },
     "affiliationMessages": {
@@ -103,6 +104,11 @@
     "feedback": {
         "historyCleared": "History cleared successfully!",
         "messageCopied": "Message copied",
+        "networkProblem": {
+            "websocket": "Something went wrong while connecting with WEBSOCKET",
+            "wsc": "Something went wrong while connecting with WSC",
+            "xmpp": "Something went wrong while connecting with XMPP"
+        },
         "notificationsActivatedForThisChat": "Notifications activated for this chat",
         "notificationsMutedForThisChat": "Notifications muted for this chat"
     },

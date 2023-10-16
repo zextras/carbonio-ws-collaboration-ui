@@ -4,9 +4,10 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Container } from '@zextras/carbonio-design-system';
-import { addRoute, addSettingsView, Spinner } from '@zextras/carbonio-shell-ui';
 import React, { lazy, Suspense, useEffect } from 'react';
+
+import { Container, ModalManager } from '@zextras/carbonio-design-system';
+import { addRoute, addSettingsView, Spinner } from '@zextras/carbonio-shell-ui';
 
 import SecondaryBarSingleGroupsView from './components/secondaryBar/SecondaryBarSingleGroupsView';
 import { LogoBeta, LogoSettingsBeta } from './LogoBeta';
@@ -28,14 +29,24 @@ const ChatsMain = () => (
 			</Container>
 		}
 	>
-		<LazyMainView />
+		<ModalManager>
+			<LazyMainView />
+		</ModalManager>
 	</Suspense>
 );
-const SecondaryBar = ({ expanded }) => <SecondaryBarSingleGroupsView expanded={expanded} />;
+const SecondaryBar = (props) => (
+	<Suspense fallback={<Spinner />}>
+		<ModalManager>
+			<SecondaryBarSingleGroupsView {...props} />
+		</ModalManager>
+	</Suspense>
+);
 
 const SettingsView = () => (
 	<Suspense fallback={<Spinner />}>
-		<LazySettingsView />
+		<ModalManager>
+			<LazySettingsView />
+		</ModalManager>
 	</Suspense>
 );
 export default function useChatsApp() {

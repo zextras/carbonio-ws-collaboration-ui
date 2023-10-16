@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { fireEvent, screen } from '@testing-library/react';
 import React from 'react';
+
+import { fireEvent, screen } from '@testing-library/react';
 
 import AttachmentView from './AttachmentView';
 import { mockedGetImageThumbnailURL, mockedGetURLAttachment } from '../../../../../jest-mocks';

@@ -4,6 +4,17 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import React, {
+	Dispatch,
+	FC,
+	SetStateAction,
+	useCallback,
+	useContext,
+	useEffect,
+	useMemo,
+	useState
+} from 'react';
+
 import {
 	Container,
 	Text,
@@ -17,16 +28,6 @@ import {
 	SnackbarManagerContext,
 	CreateSnackbarFn
 } from '@zextras/carbonio-design-system';
-import React, {
-	Dispatch,
-	FC,
-	SetStateAction,
-	useCallback,
-	useContext,
-	useEffect,
-	useMemo,
-	useState
-} from 'react';
 import { useTranslation } from 'react-i18next';
 import styled, { css, FlattenInterpolation, ThemeProps } from 'styled-components';
 

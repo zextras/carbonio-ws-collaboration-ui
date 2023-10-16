@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import React, { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+
 import {
 	Button,
 	Container,
@@ -14,7 +16,6 @@ import {
 	Tooltip
 } from '@zextras/carbonio-design-system';
 import { filter, find, map } from 'lodash';
-import React, { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 

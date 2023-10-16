@@ -88,6 +88,23 @@ export const getAttachmentType = (attachmentType: string): 'pdf' | 'image' => {
 	return 'image';
 };
 
+export const getApplicationIcon = (fileType: string): string => {
+	switch (fileType.split('/')[1]) {
+		case 'pdf':
+			return 'FilePdfOutline';
+		case 'powerpoint':
+			return 'FilePresentationOutline';
+		case 'rft':
+		case 'zip':
+			return 'FileZipOutline';
+		case 'excel':
+		case 'x-excel':
+			return 'FileCalcOutline';
+		default:
+			return 'FileAppOutline';
+	}
+};
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const getAttachmentIcon = (fileType: string): string => {
 	switch (fileType.split('/')[0]) {
@@ -96,20 +113,7 @@ export const getAttachmentIcon = (fileType: string): string => {
 		case 'video':
 			return 'FileVideoOutline';
 		case 'application':
-			switch (fileType.split('/')[1]) {
-				case 'pdf':
-					return 'FilePdfOutline';
-				case 'powerpoint':
-					return 'FilePresentationOutline';
-				case 'rft':
-				case 'zip':
-					return 'FileZipOutline';
-				case 'excel':
-				case 'x-excel':
-					return 'FileCalcOutline';
-				default:
-					return 'FileAppOutline';
-			}
+			return getApplicationIcon(fileType);
 		case 'text':
 			return 'FileOutline';
 		case 'image':

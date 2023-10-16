@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Container } from '@zextras/carbonio-design-system';
 import React, { ReactElement, useEffect, useMemo } from 'react';
+
+import { Container } from '@zextras/carbonio-design-system';
 import { useParams } from 'react-router-dom';
 
 import ShimmeringConversationView from './shimmerViews/ShimmeringConversationView';
