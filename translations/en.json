@@ -121,9 +121,9 @@
         "expandParticipantsListTooltip": "Expand participants list",
         "extendChat": "Extend chat",
         "interactions": {
-            "": "Cinema view",
             "cameraDisabled": "Camera disabled",
             "cameraEnabled": "Camera enabled",
+            "cinemaView": "Cinema view",
             "disableCamera": "Disable camera",
             "disableMicrophone": "Disable microphone",
             "disableScreen": "Disable screen share",

@@ -64,7 +64,7 @@ const GridMode = (): ReactElement => {
 	const tilesData: TileData[] = useStore((store) => getTiles(store, meetingId));
 	const numberOfTiles = useStore((store) => getNumberOfTiles(store, meetingId));
 
-	const { tileWidth, rows, columns, numberOfPages } = useMemo((): any => {
+	const { tileWidth, rows, columns, numberOfPages } = useMemo(() => {
 		// Calculate a full density grid
 		const minTileWidth = 300;
 		let { rows, columns } = maximiseRowsAndColumns(dimensions, minTileWidth);

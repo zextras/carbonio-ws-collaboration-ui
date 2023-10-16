@@ -11,6 +11,7 @@ import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import useContainerDimensions from '../../../hooks/useContainerDimensions';
+import { MeetingRoutesParams } from '../../../hooks/useRouting';
 import { getCentralTileData } from '../../../store/selectors/MeetingSelectors';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
@@ -39,7 +40,7 @@ const CentralTile = styled(Container)`
 `;
 
 const FaceToFaceMode = (): ReactElement => {
-	const { meetingId }: Record<string, string> = useParams();
+	const { meetingId }: MeetingRoutesParams = useParams();
 
 	const [t] = useTranslation();
 	const waitingParticipants = t(

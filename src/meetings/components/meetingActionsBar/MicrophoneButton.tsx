@@ -19,6 +19,7 @@ import { filter, map } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 
+import { MeetingRoutesParams } from '../../../hooks/useRouting';
 import { MeetingsApi } from '../../../network';
 import { getSelectedAudioDeviceId } from '../../../store/selectors/ActiveMeetingSelectors';
 import { getParticipantAudioStatus } from '../../../store/selectors/MeetingSelectors';
@@ -43,7 +44,7 @@ const MicrophoneButton = ({
 	const disableMicLabel = t('meeting.interactions.disableMicrophone', 'Disable microphone');
 	const enableMicLabel = t('meeting.interactions.enableMicrophone', 'Enable microphone');
 
-	const { meetingId }: Record<string, string> = useParams();
+	const { meetingId }: MeetingRoutesParams = useParams();
 	const myUserId = useStore(getUserId);
 	const audioStatus = useStore((store) => getParticipantAudioStatus(store, meetingId, myUserId));
 	const selectedAudioDeviceId = useStore((store) => getSelectedAudioDeviceId(store, meetingId));
