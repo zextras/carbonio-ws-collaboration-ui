@@ -6,8 +6,7 @@
 
 import React, { ReactElement, RefObject, useCallback, useEffect, useRef, useState } from 'react';
 
-import { Container, IconButton, Padding } from '@zextras/carbonio-design-system';
-import { useParams } from 'react-router-dom';
+import { Container, Padding } from '@zextras/carbonio-design-system';
 import styled, { FlattenSimpleInterpolation } from 'styled-components';
 
 import CameraButton from './CameraButton';
@@ -15,8 +14,6 @@ import LeaveMeetingButton from './LeaveMeetingButton';
 import MicrophoneButton from './MicrophoneButton';
 import ScreenShareButton from './ScreenShareButton';
 import SwitchViewButton from './SwitchViewButton';
-import { MeetingRoutesParams } from '../../../hooks/useRouting';
-import useStore from '../../../store/Store';
 
 const BarContainer = styled(Container)`
 	position: absolute;
@@ -137,26 +134,6 @@ const MeetingActionsBar = ({ streamsWrapperRef }: MeetingActionsProps): ReactEle
 		streamsWrapperRef
 	]);
 
-	// TODO Only for grid tests
-	const { meetingId }: MeetingRoutesParams = useParams();
-	const [, setLastId] = useState<number>(0);
-	const addParticipant = useCallback((): void => {
-		setLastId((prev) => {
-			useStore.getState().addParticipant(meetingId, {
-				userId: (prev + 1).toString(),
-				joinedAt: new Date().toISOString()
-			});
-			return prev + 1;
-		});
-	}, [meetingId]);
-
-	const removeParticipant = useCallback((): void => {
-		setLastId((prev) => {
-			useStore.getState().removeParticipant(meetingId, prev.toString());
-			return prev - 1;
-		});
-	}, [meetingId]);
-
 	return (
 		<BarContainer height="fit" isHoovering={isHoovering}>
 			<ActionsWrapper
@@ -182,9 +159,6 @@ const MeetingActionsBar = ({ streamsWrapperRef }: MeetingActionsProps): ReactEle
 				<SwitchViewButton />
 				<Padding right="1rem" />
 				<LeaveMeetingButton />
-
-				<IconButton iconColor="gray6" icon="Plus" onClick={addParticipant} size="large" />
-				<IconButton iconColor="gray6" icon="Minus" onClick={removeParticipant} size="large" />
 			</ActionsWrapper>
 		</BarContainer>
 	);
