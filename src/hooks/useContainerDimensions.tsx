@@ -6,66 +6,26 @@
 
 import { RefObject, useCallback, useEffect, useState } from 'react';
 
-import { useParams } from 'react-router-dom';
-
-import { MeetingRoutesParams } from './useRouting';
-import {
-	getMeetingCarouselVisibility,
-	getMeetingSidebarStatus
-} from '../store/selectors/ActiveMeetingSelectors';
-import useStore from '../store/Store';
-
 const useContainerDimensions = (
 	elementRef: RefObject<HTMLDivElement>
 ): { width: number; height: number } => {
-	const { meetingId }: MeetingRoutesParams = useParams();
-	const sidebarStatus: boolean = useStore((store) => getMeetingSidebarStatus(store, meetingId));
-	const carouselStatus = useStore((store) => getMeetingCarouselVisibility(store, meetingId));
-
 	const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
-	const handleResize = useCallback(() => {
-		if (elementRef.current) {
-			setDimensions({
-				width: elementRef.current.offsetWidth,
-				height: elementRef.current.offsetHeight
-			});
-		}
-	}, [elementRef]);
-
-	useEffect(() => handleResize(), [handleResize, sidebarStatus, carouselStatus]);
+	const handleResize1 = useCallback((entries: ResizeObserverEntry[]): void => {
+		const { width, height } = entries[0].contentRect;
+		setDimensions({ width, height });
+	}, []);
 
 	useEffect(() => {
-		window.addEventListener('resize', handleResize);
-		return () => window.removeEventListener('resize', handleResize);
-	}, [handleResize]);
+		const observer = new ResizeObserver(handleResize1);
+		if (elementRef?.current) {
+			observer.observe(elementRef.current);
+		}
+		return () => {
+			observer?.disconnect();
+		};
+	}, [elementRef, handleResize1]);
 
 	return dimensions;
 };
-
-// TODO try ResizeObserver
-// https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver
-// const useContainerDimensions = (
-// 	elementRef: RefObject<HTMLDivElement>
-// ): { width: number; height: number } => {
-// 	const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
-//
-// 	const handleResize = useCallback((entries: ResizeObserverEntry[]): void => {
-// 		const { width, height } = entries[0].contentRect;
-// 		setDimensions({ width, height });
-// 	}, []);
-//
-// 	useEffect(() => {
-// 		const observer = new ResizeObserver(handleResize);
-// 		if (elementRef?.current) {
-// 			observer.observe(elementRef.current);
-// 		}
-// 		return (): void => {
-// 			observer?.disconnect();
-// 		};
-// 	}, [elementRef, handleResize]);
-//
-// 	return dimensions;
-// };
-
 export default useContainerDimensions;
