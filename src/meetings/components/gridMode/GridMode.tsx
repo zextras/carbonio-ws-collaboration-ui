@@ -17,7 +17,7 @@ import usePagination from '../../../hooks/usePagination';
 import { MeetingRoutesParams } from '../../../hooks/useRouting';
 import { getNumberOfTiles, getTiles } from '../../../store/selectors/MeetingSelectors';
 import useStore from '../../../store/Store';
-import { TileData } from '../../../types/store/ActiveMeetingTypes';
+import { STREAM_TYPE, TileData } from '../../../types/store/ActiveMeetingTypes';
 import { calcGrid, maximiseRowsAndColumns, maximiseTileSize } from '../../../utils/MeetingsUtils';
 import Tile from '../Tile';
 
@@ -109,6 +109,7 @@ const GridMode = (): ReactElement => {
 								userId={tilesToRender[tileIndex].userId}
 								meetingId={meetingId}
 								key={`tile-${tileIndex}`}
+								isScreenShare={tilesToRender[tileIndex].type === STREAM_TYPE.SCREEN}
 							/>
 						</Container>
 					);

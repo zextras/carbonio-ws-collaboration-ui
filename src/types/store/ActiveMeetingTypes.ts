@@ -22,7 +22,7 @@ export type ActiveMeeting = {
 	chatVisibility: MeetingChatVisibility;
 	meetingViewSelected: MeetingViewType;
 	isCarouselVisible: boolean;
-	pinnedTile?: TileData;
+	pinnedTile?: TileData & { previousViewType?: MeetingViewType };
 	talkingUsers: string[];
 };
 
