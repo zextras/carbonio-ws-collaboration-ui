@@ -26,6 +26,7 @@ const GridContainer = styled(Container)`
 	display: flex;
 	justify-content: center;
 	gap: 1rem;
+	padding: 3.25rem;
 `;
 
 const RowContainer = styled(Container)`
@@ -35,13 +36,14 @@ const RowContainer = styled(Container)`
 const ButtonUpContainer = styled(Container)`
 	position: absolute;
 	top: 0;
-	right: calc(-2.125rem / 2 - 2.125rem);
+	right: 0;
 `;
 
 const ButtonDownContainer = styled(Container)`
 	position: absolute;
 	bottom: 0;
-	right: calc(-2.125rem / 2 - 2.125rem);
+	right: 0;
+	z-index: 100;
 `;
 
 const ChevronIconButton = styled(IconButton)`

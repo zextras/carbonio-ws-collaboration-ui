@@ -20,12 +20,13 @@ import Tile from '../Tile';
 
 const FaceToFace = styled(Container)`
 	position: relative;
+	padding: 3.25rem;
 `;
 
 const MyStreamContainer = styled(Container)`
 	position: absolute;
-	top: -2rem;
-	right: -3.4rem;
+	top: 1rem;
+	right: 1rem;
 	transition: opacity 200ms linear;
 	border-radius: 8px;
 	z-index: 10;

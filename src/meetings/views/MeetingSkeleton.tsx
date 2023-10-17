@@ -12,17 +12,13 @@ import styled from 'styled-components';
 
 import useGeneralMeetingControls from '../../hooks/useGeneralMeetingControls';
 import { MeetingRoutesParams } from '../../hooks/useRouting';
-import {
-	getMeetingSidebarStatus,
-	getMeetingViewSelected
-} from '../../store/selectors/ActiveMeetingSelectors';
+import { getMeetingViewSelected } from '../../store/selectors/ActiveMeetingSelectors';
 import { getNumberOfTiles } from '../../store/selectors/MeetingSelectors';
 import { getCustomLogo } from '../../store/selectors/SessionSelectors';
 import useStore from '../../store/Store';
 import { MeetingViewType } from '../../types/store/ActiveMeetingTypes';
 import defaultLogo from '../assets/Logo.png';
 import CinemaMode from '../components/cinemaMode/CinemaMode';
-import SidebarCarousel from '../components/cinemaMode/SidebarCarousel';
 import FaceToFaceMode from '../components/faceToFaceMode/FaceToFaceMode';
 import GridMode from '../components/gridMode/GridMode';
 import MeetingActionsBar from '../components/meetingActionsBar/MeetingActionsBar';
@@ -36,7 +32,8 @@ const SkeletonContainer = styled(Container)`
 const ViewContainer = styled(Container)`
 	position: relative;
 	overflow-y: hidden;
-	padding: 4.25rem;
+	padding: 1rem;
+	flex-grow: 1;
 `;
 
 const LogoApp = styled(Container)`
@@ -54,7 +51,6 @@ const MeetingSkeleton = (): ReactElement => {
 	const { meetingId }: MeetingRoutesParams = useParams();
 
 	const meetingViewSelected = useStore((store) => getMeetingViewSelected(store, meetingId));
-	const sidebarStatus: boolean = useStore((store) => getMeetingSidebarStatus(store, meetingId));
 	const numberOfTiles = useStore((store) => getNumberOfTiles(store, meetingId));
 	const customLogo = useStore(getCustomLogo);
 
@@ -69,20 +65,12 @@ const MeetingSkeleton = (): ReactElement => {
 		return meetingViewSelected === MeetingViewType.CINEMA ? <CinemaMode /> : <GridMode />;
 	}, [meetingViewSelected, numberOfTiles]);
 
-	const displayCarousel = useMemo(
-		() => meetingViewSelected === MeetingViewType.CINEMA && numberOfTiles > 2,
-		[meetingViewSelected, numberOfTiles]
-	);
-
 	return (
 		<SkeletonContainer orientation="horizontal" borderRadius="none">
 			<MeetingSidebar />
 			<ViewContainer
 				ref={streamsWrapperRef}
 				background="gray0"
-				width={sidebarStatus ? 'fill' : '100%'}
-				borderRadius="none"
-				padding={{ all: 'large' }}
 				crossAlignment="center"
 				orientation="horizontal"
 			>
@@ -90,7 +78,6 @@ const MeetingSkeleton = (): ReactElement => {
 				{ViewToDisplay}
 				<MeetingActionsBar streamsWrapperRef={streamsWrapperRef} />
 			</ViewContainer>
-			{displayCarousel && <SidebarCarousel />}
 		</SkeletonContainer>
 	);
 };

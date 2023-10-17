@@ -15,12 +15,11 @@ import styled from 'styled-components';
 import useContainerDimensions from '../../../hooks/useContainerDimensions';
 import usePagination from '../../../hooks/usePagination';
 import { MeetingRoutesParams } from '../../../hooks/useRouting';
-import useTilesOrder from '../../../hooks/useTilesOrder';
-import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
+import { STREAM_TYPE, TileData } from '../../../types/store/ActiveMeetingTypes';
 import Tile from '../Tile';
 
 const TilesBarContainer = styled(Container)`
-	padding: 3.24rem 1rem 3.25rem 0;
+	padding: 3.24rem 1rem;
 	position: relative;
 `;
 
@@ -38,9 +37,13 @@ const ButtonDownContainer = styled(Container)`
 	position: absolute;
 	bottom: 1rem;
 	width: calc(100% - 1rem);
+	z-index: 100;
 `;
 
-const TilesBar = (): ReactElement => {
+type TilesBarProps = {
+	carouselTiles: TileData[];
+};
+const TilesBar = ({ carouselTiles }: TilesBarProps): ReactElement => {
 	const { meetingId }: MeetingRoutesParams = useParams();
 
 	const [t] = useTranslation();
@@ -50,8 +53,6 @@ const TilesBar = (): ReactElement => {
 	const bottomLabel = t('tooltip.bottomOfList', 'Bottom of list');
 
 	const tilesContainerRef = useRef<HTMLDivElement>(null);
-
-	const { carouselTiles } = useTilesOrder(meetingId);
 
 	const dimensions = useContainerDimensions(tilesContainerRef);
 
