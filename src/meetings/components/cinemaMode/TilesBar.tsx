@@ -19,7 +19,7 @@ import { STREAM_TYPE, TileData } from '../../../types/store/ActiveMeetingTypes';
 import Tile from '../Tile';
 
 const TilesBarContainer = styled(Container)`
-	padding: 3.24rem 1rem;
+	padding: 3.25rem 1rem;
 	position: relative;
 `;
 

@@ -11,20 +11,20 @@ const useContainerDimensions = (
 ): { width: number; height: number } => {
 	const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
-	const handleResize1 = useCallback((entries: ResizeObserverEntry[]): void => {
+	const handleResize = useCallback((entries: ResizeObserverEntry[]): void => {
 		const { width, height } = entries[0].contentRect;
 		setDimensions({ width, height });
 	}, []);
 
 	useEffect(() => {
-		const observer = new ResizeObserver(handleResize1);
+		const observer = new ResizeObserver(handleResize);
 		if (elementRef?.current) {
 			observer.observe(elementRef.current);
 		}
 		return () => {
 			observer?.disconnect();
 		};
-	}, [elementRef, handleResize1]);
+	}, [elementRef, handleResize]);
 
 	return dimensions;
 };

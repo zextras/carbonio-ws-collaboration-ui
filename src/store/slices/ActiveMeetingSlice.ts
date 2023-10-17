@@ -132,7 +132,7 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 
 					// Unset pin when switching to grid view
 					if (viewType === MeetingViewType.GRID) {
-						draft.setPinnedTile(meetingId, undefined);
+						draft.activeMeeting[meetingId].pinnedTile = undefined;
 					}
 				}
 			}),
