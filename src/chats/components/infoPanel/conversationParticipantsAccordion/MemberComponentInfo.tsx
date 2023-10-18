@@ -43,7 +43,13 @@ const MemberComponentInfo: FC<ParticipantsInfoProps> = ({ member, roomId }) => {
 	const [t] = useTranslation();
 	const userOnlineLabel: string = t('status.online', 'Online');
 	const userOfflineLabel: string = t('status.offline', 'Offline');
+	const youLabel = t('status.you', ' You');
+	const goToPrivateChatLabel = t(
+		'status.goToPrivateChat',
+		'Go to private chat to send a personal message'
+	);
 
+	const sessionId: string | undefined = useStore.getState().session.id;
 	const memberName: string | undefined = useStore((store) => getUserName(store, member.userId));
 	const memberEmail: string | undefined = useStore((store) => getUserEmail(store, member.userId));
 	const memberLastActivity: number | undefined = useStore((store) =>
@@ -78,8 +84,24 @@ const MemberComponentInfo: FC<ParticipantsInfoProps> = ({ member, roomId }) => {
 	const lastSeenLabel: string = t('status.lastSeen', `Last Seen ${lastSeen}`, { lastSeen });
 
 	const presenceLabel = useMemo(
-		() => (memberOnline ? userOnlineLabel : memberLastActivity ? lastSeenLabel : userOfflineLabel),
-		[memberOnline, memberLastActivity, userOnlineLabel, lastSeenLabel, userOfflineLabel]
+		() =>
+			sessionId === member.userId
+				? youLabel
+				: memberOnline
+				? userOnlineLabel
+				: memberLastActivity
+				? lastSeenLabel
+				: goToPrivateChatLabel,
+		[
+			sessionId,
+			member.userId,
+			youLabel,
+			memberOnline,
+			userOnlineLabel,
+			memberLastActivity,
+			lastSeenLabel,
+			goToPrivateChatLabel
+		]
 	);
 
 	const avatarElement = useMemo(

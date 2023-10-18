@@ -245,10 +245,12 @@
     },
     "status": {
         "areTyping": "are typing...",
+        "goToPrivateChat": "Go to private chat to send a personal message",
         "isTyping": "is typing...",
         "lastSeen": "Last seen {{lastSeen}}",
         "offline": "Offline",
-        "online": "Online"
+        "online": "Online",
+        "you": " You"
     },
     "thanksForParticipating": "Thanks for participating",
     "titlePlaceholder": "Your Group's title",
