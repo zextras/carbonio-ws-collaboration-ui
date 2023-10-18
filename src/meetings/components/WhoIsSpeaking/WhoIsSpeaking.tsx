@@ -40,7 +40,7 @@ const WhoIsSpeaking = (): ReactElement | null => {
 	const speakingList = useMemo(() => {
 		const list: ReactElement[] = [];
 		map(talkingMap, (talkingId) => {
-			if (centralTile.userId !== talkingId) {
+			if (centralTile.userId && centralTile.userId !== talkingId) {
 				list.push(<SpeakingElement key={`${talkingId}-isTalking`} userId={talkingId} />);
 			}
 		});
@@ -48,15 +48,22 @@ const WhoIsSpeaking = (): ReactElement | null => {
 	}, [talkingMap, centralTile]);
 
 	const whoIsSpeakingHasToAppear = useMemo(
-		() => meetingViewSelected === MeetingViewType.CINEMA && !carouselIsVisible && numberOfTiles > 2,
+		() =>
+			((meetingViewSelected === MeetingViewType.CINEMA && !carouselIsVisible) ||
+				meetingViewSelected === MeetingViewType.GRID) &&
+			numberOfTiles > 2,
 		[carouselIsVisible, meetingViewSelected, numberOfTiles]
 	);
 
 	return whoIsSpeakingHasToAppear ? (
-		<SpeakingListContainer height="fit" width="fit">
-			<Container mainAlignment="flex-end" crossAlignment="flex-end">
-				{speakingList}
-			</Container>
+		<SpeakingListContainer
+			height="fit"
+			width="fit"
+			mainAlignment="flex-end"
+			crossAlignment="flex-end"
+			gap="0.5rem"
+		>
+			{speakingList}
 		</SpeakingListContainer>
 	) : null;
 };

@@ -5,7 +5,7 @@
  */
 import React, { ReactElement } from 'react';
 
-import { Container, Padding } from '@zextras/carbonio-design-system';
+import { Container } from '@zextras/carbonio-design-system';
 import styled from 'styled-components';
 
 import { getUserName } from '../../../store/selectors/UsersSelectors';
@@ -22,17 +22,14 @@ type SpeakingElementProps = {
 const SpeakingElement = ({ userId }: SpeakingElementProps): ReactElement => {
 	const userName = useStore((store) => getUserName(store, userId));
 	return (
-		<>
-			<CustomContainer
-				width="fit"
-				height="fit"
-				padding={{ vertical: '0.5rem', horizontal: '1rem' }}
-				background="gray0"
-			>
-				{userName}
-			</CustomContainer>
-			<Padding bottom="0.5rem" />
-		</>
+		<CustomContainer
+			width="fit"
+			height="fit"
+			padding={{ vertical: '0.5rem', horizontal: '1rem' }}
+			background="gray0"
+		>
+			{userName}
+		</CustomContainer>
 	);
 };
 
