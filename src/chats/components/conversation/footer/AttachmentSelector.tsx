@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import {
 	Container,
@@ -84,24 +84,27 @@ const AttachmentSelector: React.FC<AttachmentSelectorProps> = ({ roomId }) => {
 		}
 	}, [filesToUploadArray]);
 
-	const items: DropdownItem[] = [
-		{
-			id: 'item1',
-			icon: 'Link2',
-			label: attachLinkLabel,
-			keepOpen: false,
-			disabled: true,
-			onClick: () => null
-		},
-		{
-			id: 'item2',
-			icon: 'MonitorOutline',
-			label: addLocalLabel,
-			keepOpen: false,
-			disabled: false,
-			onClick: handleClickAttachment
-		}
-	];
+	const items: DropdownItem[] = useMemo(
+		() => [
+			{
+				id: 'item1',
+				icon: 'Link2',
+				label: attachLinkLabel,
+				keepOpen: false,
+				disabled: true,
+				onClick: () => null
+			},
+			{
+				id: 'item2',
+				icon: 'MonitorOutline',
+				label: addLocalLabel,
+				keepOpen: false,
+				disabled: false,
+				onClick: handleClickAttachment
+			}
+		],
+		[addLocalLabel, attachLinkLabel, handleClickAttachment]
+	);
 
 	return (
 		<Container width="fit" height="fit" padding={{ right: 'extrasmall', bottom: '0.3125rem' }}>

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 
 import { Avatar, Container, Shimmer, Badge, useTheme } from '@zextras/carbonio-design-system';
 import { find } from 'lodash';
@@ -101,15 +101,12 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ roomId, unreadCount, draftMessa
 
 	const themeColor = useTheme();
 
-	const [picture, setPicture] = useState<string>('');
-
-	useEffect(() => {
+	const picture = useMemo(() => {
 		if (userPictureUpdatedAt != null && otherMember && otherMember.userId !== undefined) {
-			setPicture(`${UsersApi.getURLUserPicture(otherMember.userId)}?${userPictureUpdatedAt}`);
-		} else {
-			setPicture('');
+			return `${UsersApi.getURLUserPicture(otherMember.userId)}?${userPictureUpdatedAt}`;
 		}
-	}, [sessionId, otherMember, userPictureUpdatedAt, roomId]);
+		return '';
+	}, [otherMember, userPictureUpdatedAt]);
 
 	const userColor = useMemo(() => {
 		const color = calculateAvatarColor(userName ?? '');

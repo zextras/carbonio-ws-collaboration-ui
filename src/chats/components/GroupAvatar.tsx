@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 
 import { Avatar, Container, Shimmer, useTheme } from '@zextras/carbonio-design-system';
 import styled, { DefaultTheme } from 'styled-components';
@@ -60,15 +60,12 @@ const GroupAvatar: React.FC<UserAvatarProps> = ({ roomId, unreadCount, draftMess
 
 	const themeColor = useTheme();
 
-	const [picture, setPicture] = useState<string>('');
-
-	useEffect(() => {
+	const picture = useMemo(() => {
 		if (pictureUpdatedAt != null) {
-			setPicture(`${RoomsApi.getURLRoomPicture(roomId)}?${pictureUpdatedAt}`);
-		} else {
-			setPicture('');
+			return `${RoomsApi.getURLRoomPicture(roomId)}?${pictureUpdatedAt}`;
 		}
-	}, [pictureUpdatedAt, roomId]);
+		return '';
+	}, [roomId, pictureUpdatedAt]);
 
 	const userColor = useMemo(() => {
 		const color = calculateAvatarColor(roomName);

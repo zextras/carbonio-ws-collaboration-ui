@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { FC, useEffect, useMemo, useState } from 'react';
+import React, { FC, useMemo } from 'react';
 
 import { Avatar, Container, Padding, Text, Shimmer, Row } from '@zextras/carbonio-design-system';
 import moment from 'moment-timezone';
@@ -59,14 +59,11 @@ const MemberComponentInfo: FC<ParticipantsInfoProps> = ({ member, roomId }) => {
 		getCapability(store, CapabilityType.CAN_SEE_USERS_PRESENCE)
 	);
 
-	const [picture, setPicture] = useState<string>('');
-
-	useEffect(() => {
+	const picture = useMemo(() => {
 		if (userPictureUpdatedAt != null) {
-			setPicture(`${UsersApi.getURLUserPicture(member.userId)}?${userPictureUpdatedAt}`);
-		} else {
-			setPicture('');
+			return `${UsersApi.getURLUserPicture(member.userId)}?${userPictureUpdatedAt}`;
 		}
+		return '';
 	}, [member, userPictureUpdatedAt]);
 
 	const lastSeen: string | undefined = useMemo(() => {
