@@ -42,7 +42,6 @@ const CustomAvatar = styled(Avatar)`
 const MemberComponentInfo: FC<ParticipantsInfoProps> = ({ member, roomId }) => {
 	const [t] = useTranslation();
 	const userOnlineLabel: string = t('status.online', 'Online');
-	const userOfflineLabel: string = t('status.offline', 'Offline');
 	const youLabel = t('status.you', ' You');
 	const goToPrivateChatLabel = t(
 		'status.goToPrivateChat',
