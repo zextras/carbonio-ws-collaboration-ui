@@ -56,7 +56,8 @@
         "roomNameChanged": "{{name}} changed the title of this Group in \"<i>{{roomName}}</i>\"",
         "roomPictureDeleted": "{{name}} restored the default {{roomName}}'s image",
         "roomPictureUpdated": "{{name}} changed {{roomName}}'s image",
-        "roomTopicChanged": "{{name}} changed the topic of {{roomName}} in \"<i>{{topicName}}</i>\""
+        "roomTopicChanged": "{{name}} changed the topic of {{roomName}} in \"<i>{{topicName}}</i>\"",
+        "roomTopicRemoved": "{{name}} removed {{roomName}}'s topic"
     },
     "conversation": {
         "chooseConversationDescription": "Choose a conversation to start a chat",
