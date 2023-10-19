@@ -43,14 +43,21 @@ export const ConfigurationMessageLabel = ({
 	);
 
 	const roomDescriptionChangedLabel = useMemo(
-		() => (
-			<Trans
-				i18nKey={'configurationMessages.roomTopicChanged'}
-				defaults='{{nameToDisplay}} changed the topic of {{roomName}} in <i>"{{messageValue}}"</i>'
-				values={{ name: displayedActionMaker, roomName, topicName: message.value }}
-			/>
-		),
-		[displayedActionMaker, message.value, roomName]
+		() =>
+			message.value === '' ? (
+				t(
+					'configurationMessages.roomTopicRemoved',
+					`${displayedActionMaker} removed ${roomName}'s topic`,
+					{ name: displayedActionMaker, roomName }
+				)
+			) : (
+				<Trans
+					i18nKey={'configurationMessages.roomTopicChanged'}
+					defaults='{{nameToDisplay}} changed the topic of {{roomName}} in <i>"{{messageValue}}"</i>'
+					values={{ name: displayedActionMaker, roomName, topicName: message.value }}
+				/>
+			),
+		[displayedActionMaker, message.value, roomName, t]
 	);
 
 	const pictureUpdatedLabel = t(
