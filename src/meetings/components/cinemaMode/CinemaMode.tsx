@@ -73,7 +73,7 @@ const CinemaMode = (): ReactElement => {
 		if (tileHeight >= cinemaModeDimensions.height) {
 			tileWidth = (cinemaModeDimensions.height / 9) * 16;
 		}
-		return `${tileWidth}px`;
+		return `${tileWidth / 16}rem`;
 	}, [cinemaModeDimensions]);
 
 	const toggleCarousel = useCallback(() => {

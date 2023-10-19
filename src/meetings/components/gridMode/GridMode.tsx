@@ -107,7 +107,11 @@ const GridMode = (): ReactElement => {
 				const tileIndex = row * columns + column;
 				if (tileIndex < size(tilesToRender) && tilesToRender[tileIndex]) {
 					rowTiles.push(
-						<Container width={`${tileWidth}px`} height="fit" key={`tile-${tileIndex}-container`}>
+						<Container
+							width={`${tileWidth / 16}rem`}
+							height="fit"
+							key={`tile-${tileIndex}-container`}
+						>
 							<Tile
 								userId={tilesToRender[tileIndex].userId}
 								meetingId={meetingId}

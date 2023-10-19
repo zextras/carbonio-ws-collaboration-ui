@@ -64,7 +64,7 @@ const FaceToFaceMode = (): ReactElement => {
 		if (tileHeight >= faceToFaceDimensions.height) {
 			tileWidth = (faceToFaceDimensions.height / 9) * 16;
 		}
-		return `${tileWidth}px`;
+		return `${tileWidth / 16}rem`;
 	}, [faceToFaceDimensions]);
 
 	const centralContentToDisplay = useMemo(
