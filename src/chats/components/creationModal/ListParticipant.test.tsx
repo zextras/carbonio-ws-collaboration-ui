@@ -4,14 +4,15 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { screen } from '@testing-library/react';
 import React from 'react';
 
+import { screen } from '@testing-library/react';
+
 import ListParticipant from './ListParticipant';
-import { createMockContactInfo } from '../../../tests/createMock';
+import { createMockUser } from '../../../tests/createMock';
 import { setup } from '../../../tests/test-utils';
 
-const contactInfo = createMockContactInfo();
+const contactInfo = createMockUser();
 
 describe('List Participant', () => {
 	test('The email of participant list item is selectable', async () => {
