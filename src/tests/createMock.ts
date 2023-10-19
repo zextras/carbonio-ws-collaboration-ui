@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { ContactInfo } from '../chats/components/creationModal/ChatCreationContactsSelection';
 import { MeetingBe, MeetingType } from '../types/network/models/meetingBeTypes';
 import { MemberBe, RoomBe } from '../types/network/models/roomBeTypes';
 import { UserBe } from '../types/network/models/userBeTypes';
@@ -162,5 +163,12 @@ export const createMockParticipants = (fields?: GenericFieldsType): MeetingParti
 	audioStreamOn: false,
 	videoStreamOn: false,
 	joinedAt: timeStampString,
+	...fields
+});
+
+export const createMockContactInfo = (fields?: GenericFieldsType): ContactInfo => ({
+	id: 'id',
+	email: 'user@user.com',
+	name: 'Name',
 	...fields
 });
