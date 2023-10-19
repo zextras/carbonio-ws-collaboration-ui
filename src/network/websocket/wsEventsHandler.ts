@@ -29,6 +29,7 @@ export function wsEventsHandler(event: WsEvent): void {
 		}
 		case WsEventType.ROOM_CREATED: {
 			RoomsApi.getRoom(event.roomId).then((response: GetRoomResponse) => state.addRoom(response));
+			state.connections.xmppClient.setOnline();
 			break;
 		}
 		case WsEventType.ROOM_UPDATED: {
