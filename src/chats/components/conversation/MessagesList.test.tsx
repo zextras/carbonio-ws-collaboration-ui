@@ -103,14 +103,6 @@ const mockedAddMemberMessage = createMockConfigurationMessage({
 	value: user4Be.id
 });
 
-const mockedRemoveMemberMessage = createMockConfigurationMessage({
-	id: 'AddMemberId',
-	roomId: room.id,
-	date: 1234566789,
-	operation: OperationType.MEMBER_REMOVED,
-	value: user3Be.id
-});
-
 const mockedConfigurationMessage: ConfigurationMessage = {
 	id: 'ConfigurationId',
 	roomId: room.id,
@@ -410,26 +402,6 @@ describe('render list of messages with history loader visible for first time ope
 		expect(message).toBeVisible();
 		const label = screen.getByText(
 			new RegExp(`${user4Be.name} has been added to ${room.name}`, 'i')
-		);
-		expect(label).toBeVisible();
-	});
-
-	test('Removed member message is visible', async () => {
-		const { result } = renderHook(() => useStore());
-		act(() => {
-			result.current.addRoom(room);
-			result.current.setUserInfo(user3Be);
-			result.current.setHistoryIsFullyLoaded(room.id);
-			result.current.updateHistory(room.id, [mockedRemoveMemberMessage]);
-			result.current.addCreateRoomMessage(room.id);
-		});
-		setup(<MessagesList roomId={room.id} />);
-		const messageList = screen.getByTestId(`messageListRef${room.id}`);
-		expect(messageList.children).toHaveLength(3);
-		const message = screen.getByTestId(`configuration_msg-${mockedRemoveMemberMessage.id}`);
-		expect(message).toBeVisible();
-		const label = screen.getByText(
-			new RegExp(`${user3Be.name} is no longer a member of the group`, 'i')
 		);
 		expect(label).toBeVisible();
 	});

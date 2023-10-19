@@ -72,8 +72,8 @@ export const ConfigurationMessageLabel = ({
 	);
 	const memberRemovedLabel = t(
 		'affiliationMessages.memberRemoved',
-		`${affiliatedName} is no longer a member of the group`,
-		{ userName: affiliatedName }
+		`${affiliatedName} has been removed from ${roomName}`,
+		{ userName: affiliatedName, roomName }
 	);
 
 	const oneToOneCreatedLabel = t('affiliationMessages.oneToOneCreated', 'New Chat created!');
