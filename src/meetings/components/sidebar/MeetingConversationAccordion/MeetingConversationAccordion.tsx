@@ -13,6 +13,7 @@ import styled from 'styled-components';
 import papyrusDark from '../../../../chats/assets/papyrus-dark.png';
 import papyrus from '../../../../chats/assets/papyrus.png';
 import Chat from '../../../../chats/components/conversation/Chat';
+import { useDarkReaderStatus } from '../../../../hooks/useDarkReaderStatus';
 import { getMeetingChatVisibility } from '../../../../store/selectors/ActiveMeetingSelectors';
 import useStore from '../../../../store/Store';
 import { MeetingChatVisibility } from '../../../../types/store/ActiveMeetingTypes';
@@ -23,17 +24,10 @@ type MeetingConversationAccordionProps = {
 	isInsideMeeting: boolean;
 };
 
-const WrapperMeetingChat = styled(Container)`
+const WrapperMeetingChat = styled(Container)<{ $darkModeActive: boolean }>`
 	overflow: hidden;
-	background-image: url('${(props): string => {
-		// TODO FIX THEME SELECTION
-		/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
-		/* @ts-ignore */
-		if (props.theme === 'dark') {
-			return papyrusDark;
-		}
-		return papyrus;
-	}}');
+	background-image: url('${({ $darkModeActive }): string =>
+		$darkModeActive ? papyrusDark : papyrus}');
 `;
 
 const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({
@@ -50,6 +44,8 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({
 
 	const meetingChatVisibility = useStore((store) => getMeetingChatVisibility(store, meetingId));
 	const setMeetingChatVisibility = useStore((store) => store.setMeetingChatVisibility);
+
+	const isDarkModeEnabled = useDarkReaderStatus();
 
 	const toggleChatStatus = useCallback(() => {
 		setMeetingChatVisibility(
@@ -127,7 +123,12 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({
 				</Container>
 			</Container>
 			{isChatOpenOrFullExpanded && (
-				<WrapperMeetingChat mainAlignment="flex-start" height="fill">
+				<WrapperMeetingChat
+					data-testid="WrapperMeetingChat"
+					mainAlignment="flex-start"
+					height="fill"
+					$darkModeActive={isDarkModeEnabled}
+				>
 					<Chat
 						roomId={roomId}
 						setInfoPanelOpen={(): null => null}

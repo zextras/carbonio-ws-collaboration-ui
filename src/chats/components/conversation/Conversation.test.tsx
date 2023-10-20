@@ -13,6 +13,7 @@ import Conversation from './Conversation';
 import {
 	mockedDeleteRoomMemberRequest,
 	mockGoToMainPage,
+	mockIsEnabled,
 	mockUseMediaQueryCheck
 } from '../../../../jest-mocks';
 import useStore from '../../../store/Store';
@@ -77,6 +78,8 @@ describe('Conversation view', () => {
 		expect(infoPanelToggleVisibleAgain).toBeInTheDocument();
 	});
 	test('Display info panel and check data are visible', async () => {
+		// TODO FIND WHY THIS TEST REMOVING THE MOCKISENABLED RETURN VALUE WONT PASS ON SUITE
+		mockIsEnabled.mockReturnValueOnce(false);
 		mockUseMediaQueryCheck.mockReturnValueOnce(true);
 		const store = useStore.getState();
 		store.addRoom(testRoom);
@@ -119,5 +122,21 @@ describe('Conversation view', () => {
 		});
 		expect(mockedDeleteRoomMemberRequest).toHaveBeenCalledTimes(1);
 		expect(mockGoToMainPage).toHaveBeenCalledTimes(1);
+	});
+	test('Display conversation view with darkMode disabled', async () => {
+		mockIsEnabled.mockReturnValueOnce(false);
+		const store = useStore.getState();
+		store.addRoom(testRoom);
+		setup(<Conversation room={testRoom} />);
+		const ConversationWrapper = screen.getByTestId('ConversationWrapper');
+		expect(ConversationWrapper).toHaveStyle(`background-image: url('papyrus.png')`);
+	});
+	test('Display conversation view with darkMode enabled', async () => {
+		mockIsEnabled.mockReturnValueOnce(true);
+		const store = useStore.getState();
+		store.addRoom(testRoom);
+		setup(<Conversation room={testRoom} />);
+		const ConversationWrapper = screen.getByTestId('ConversationWrapper');
+		expect(ConversationWrapper).toHaveStyle(`background-image: url('papyrus-dark.png')`);
 	});
 });

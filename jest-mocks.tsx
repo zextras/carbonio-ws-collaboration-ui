@@ -4,13 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import {
-	Account,
-	AccountSettings,
-	AppRoute,
-	INotificationManager
-} from '@zextras/carbonio-shell-ui';
 import React, { ReactElement } from 'react';
+
+import { AccountSettings, AppRoute, INotificationManager } from '@zextras/carbonio-shell-ui';
 
 import { AutoCompleteGalResponse } from './src/network/soap/AutoCompleteRequest';
 import {
@@ -44,6 +40,8 @@ import {
 	GetUserResponse
 } from './src/types/network/responses/usersResponses';
 
+const noResultProvided = 'no result provided';
+
 // MOCKED SHELL UI
 export const mockNotify: jest.Mock = jest.fn();
 jest.mock('@zextras/carbonio-shell-ui', () => ({
@@ -54,7 +52,14 @@ jest.mock('@zextras/carbonio-shell-ui', () => ({
 		multipleNotify: () => null,
 		playSound: () => null
 	}),
-	getUserAccount: (): Account => ({
+	getUserAccount: (): {
+		identities: string;
+		displayName: string;
+		rights: { targets: any[] };
+		name: string;
+		id: string;
+		signatures: { signature: any[] };
+	} => ({
 		id: 'myId',
 		name: 'User 1',
 		displayName: 'User 1',
@@ -73,6 +78,13 @@ jest.mock('@zextras/carbonio-shell-ui', () => ({
 		route: 'chats',
 		app: 'Chats'
 	})
+}));
+
+export const mockIsEnabled: jest.Mock = jest.fn();
+
+jest.mock('darkReader', () => ({
+	matchMedia: jest.fn(),
+	isEnabled: mockIsEnabled
 }));
 
 export const RTCPeerConnection: jest.Mock = jest.fn();
@@ -105,7 +117,7 @@ jest.mock('./src/network/soap/AutoCompleteRequest', () => ({
 	autoCompleteGalRequest: (): Promise<AutoCompleteGalResponse> =>
 		new Promise((resolve, reject) => {
 			const result = mockedAutoCompleteGalRequest();
-			result ? resolve(result) : reject(new Error('no result provided'));
+			result ? resolve(result) : reject(new Error(noResultProvided));
 		})
 }));
 
@@ -148,90 +160,90 @@ jest.mock('./src/network', () => ({
 		addRoom: (): Promise<AddRoomResponse> =>
 			new Promise((resolve, reject) => {
 				const result = mockedAddRoomRequest();
-				result ? resolve(result) : reject(new Error('no result provided'));
+				result ? resolve(result) : reject(new Error(noResultProvided));
 			}),
 		getRoom: (): Promise<GetRoomResponse> =>
 			new Promise((resolve, reject) => {
 				const result = mockedGetRoomRequest();
-				result ? resolve(result) : reject(new Error('no result provided'));
+				result ? resolve(result) : reject(new Error(noResultProvided));
 			}),
 		deleteRoom: (): Promise<DeleteRoomResponse> =>
 			new Promise((resolve, reject) => {
 				const result = mockedDeleteRoomRequest();
-				result ? resolve(result) : reject(new Error('no result provided'));
+				result ? resolve(result) : reject(new Error(noResultProvided));
 			}),
 		clearRoomHistory: (): Promise<ClearRoomHistoryResponse> =>
 			new Promise((resolve, reject) => {
 				const result = mockedClearHistoryRequest();
-				result ? resolve(result) : reject(new Error('no result provided'));
+				result ? resolve(result) : reject(new Error(noResultProvided));
 			}),
 		getURLRoomPicture: (): string => 'image.jpeg',
 		updateRoomPicture: (): Promise<UpdateRoomPictureResponse> =>
 			new Promise((resolve, reject) => {
 				const result = mockedUpdateRoomPictureRequest();
-				result ? resolve(result) : reject(new Error('no result provided'));
+				result ? resolve(result) : reject(new Error(noResultProvided));
 			}),
 		deleteRoomPicture: (): Promise<DeleteRoomPictureResponse> =>
 			new Promise((resolve, reject) => {
 				const result = mockedDeleteRoomPictureRequest();
-				result ? resolve(result) : reject(new Error('no result provided'));
+				result ? resolve(result) : reject(new Error(noResultProvided));
 			}),
 		muteRoomNotification: (): Promise<MuteRoomResponse> =>
 			new Promise((resolve, reject) => {
 				const result = mockedMuteRoomNotificationRequest();
-				result ? resolve(result) : reject(new Error('no result provided'));
+				result ? resolve(result) : reject(new Error(noResultProvided));
 			}),
 		unmuteRoomNotification: (): Promise<UnmuteRoomResponse> =>
 			new Promise((resolve, reject) => {
 				const result = mockedUnmuteRoomNotificationRequest();
-				result ? resolve(result) : reject(new Error('no result provided'));
+				result ? resolve(result) : reject(new Error(noResultProvided));
 			}),
 		updateRoom: (): Promise<UpdateRoomResponse> =>
 			new Promise((resolve, reject) => {
 				const result = mockedUpdateRoomRequest();
-				result ? resolve(result) : reject(new Error('no result provided'));
+				result ? resolve(result) : reject(new Error(noResultProvided));
 			}),
 		deleteRoomMember: (): Promise<DeleteRoomMemberResponse> =>
 			new Promise((resolve, reject) => {
 				const result = mockedDeleteRoomMemberRequest();
-				result ? resolve(result) : reject(new Error('no result provided'));
+				result ? resolve(result) : reject(new Error(noResultProvided));
 			}),
 		promoteRoomMember: (): Promise<PromoteRoomMemberResponse> =>
 			new Promise((resolve, reject) => {
 				const result = mockedPromoteRoomMemberRequest();
-				result ? resolve(result) : reject(new Error('no result provided'));
+				result ? resolve(result) : reject(new Error(noResultProvided));
 			}),
 		demotesRoomMember: (): Promise<DemotesRoomMemberResponse> =>
 			new Promise((resolve, reject) => {
 				const result = mockedDemotesRoomMemberRequest();
-				result ? resolve(result) : reject(new Error('no result provided'));
+				result ? resolve(result) : reject(new Error(noResultProvided));
 			}),
 		addRoomMember: (): Promise<AddRoomMemberResponse> =>
 			new Promise((resolve, reject) => {
 				const result = mockedAddRoomMemberRequest();
-				result ? resolve(result) : reject(new Error('no result provided'));
+				result ? resolve(result) : reject(new Error(noResultProvided));
 			}),
 		forwardMessages: (): Promise<ForwardMessagesResponse> =>
 			new Promise((resolve, reject) => {
 				const result = mockedForwardMessagesRequest();
-				result ? resolve(result) : reject(new Error('no result provided'));
+				result ? resolve(result) : reject(new Error(noResultProvided));
 			}),
 		addRoomAttachment: (): Promise<AddRoomAttachmentResponse> =>
 			new Promise((resolve, reject) => {
 				const result = mockedAddRoomAttachmentRequest();
-				result ? resolve(result) : reject(new Error('no result provided'));
+				result ? resolve(result) : reject(new Error(noResultProvided));
 			})
 	},
 	UsersApi: {
 		getUser: (): Promise<GetUserResponse> =>
 			new Promise((resolve, reject) => {
 				const result = mockedGetUserRequest();
-				result ? resolve(result) : reject(new Error('no result provided'));
+				result ? resolve(result) : reject(new Error(noResultProvided));
 			}),
 		getUserPicture: (): Promise<GetUserPictureResponse> =>
 			new Promise((resolve, reject) => {
 				const result = mockedGetUserPictureRequest();
-				result ? resolve(result) : reject(new Error('no result provided'));
+				result ? resolve(result) : reject(new Error(noResultProvided));
 			}),
 		getURLUserPicture: (): string => 'image.url',
 		// eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -248,47 +260,47 @@ jest.mock('./src/network', () => ({
 		getMeeting: (): Promise<GetMeetingResponse> =>
 			new Promise((resolve, reject) => {
 				const result = mockedGetMeetingRequest();
-				result ? resolve(result) : reject(new Error('no result provided'));
+				result ? resolve(result) : reject(new Error(noResultProvided));
 			}),
 		getMeetingByMeetingId: (): Promise<GetMeetingResponse> =>
 			new Promise((resolve, reject) => {
 				const result = mockedGetMeetingRequest();
-				result ? resolve(result) : reject(new Error('no result provided'));
+				result ? resolve(result) : reject(new Error(noResultProvided));
 			}),
 		createPermanentMeeting: (): Promise<CreateMeetingResponse> =>
 			new Promise((resolve, reject) => {
 				const result = mockedCreateMeetingRequest();
-				result ? resolve(result) : reject(new Error('no result provided'));
+				result ? resolve(result) : reject(new Error(noResultProvided));
 			}),
 		startMeeting: (): Promise<StartMeetingResponse> =>
 			new Promise((resolve, reject) => {
 				const result = mockedStartMeetingRequest();
-				result ? resolve(result) : reject(new Error('no result provided'));
+				result ? resolve(result) : reject(new Error(noResultProvided));
 			}),
 		joinMeeting: (): Promise<JoinMeetingResponse> =>
 			new Promise((resolve, reject) => {
 				const result = mockedJoinMeetingRequest();
-				result ? resolve(result) : reject(new Error('no result provided'));
+				result ? resolve(result) : reject(new Error(noResultProvided));
 			}),
 		enterMeeting: (): Promise<string> =>
 			new Promise((resolve, reject) => {
 				const result = mockedEnterMeetingRequest();
-				result ? resolve(result) : reject(new Error('no result provided'));
+				result ? resolve(result) : reject(new Error(noResultProvided));
 			}),
 		leaveMeeting: (): Promise<LeaveMeetingResponse> =>
 			new Promise((resolve, reject) => {
 				const result = mockedLeaveMeetingRequest();
-				result ? resolve(result) : reject(new Error('no result provided'));
+				result ? resolve(result) : reject(new Error(noResultProvided));
 			}),
 		stopMeeting: (): Promise<StopMeetingResponse> =>
 			new Promise((resolve, reject) => {
 				const result = mockedStopMeetingRequest();
-				result ? resolve(result) : reject(new Error('no result provided'));
+				result ? resolve(result) : reject(new Error(noResultProvided));
 			}),
 		deleteMeeting: (): Promise<DeleteMeetingResponse> =>
 			new Promise((resolve, reject) => {
 				const result = mockedDeleteMeetingRequest();
-				result ? resolve(result) : reject(new Error('no result provided'));
+				result ? resolve(result) : reject(new Error(noResultProvided));
 			})
 	}
 }));
@@ -302,7 +314,7 @@ const getUserMediaPromise = jest.fn(
 	async () =>
 		new Promise<void>((resolve, reject) => {
 			const result = mockedGetUserMediaPromise();
-			result ? resolve(result) : reject(new Error('no result provided'));
+			result ? resolve(result) : reject(new Error(noResultProvided));
 		})
 );
 
@@ -348,7 +360,7 @@ const enumerateDevicesPromise = jest.fn(
 	async () =>
 		new Promise<void>((resolve, reject) => {
 			const result = mockedEnumerateDevicesPromise();
-			result ? resolve(result) : reject(new Error('no result provided'));
+			result ? resolve(result) : reject(new Error(noResultProvided));
 		})
 );
 
