@@ -30,6 +30,10 @@ import { UserBe } from '../../types/network/models/userBeTypes';
 import { MeetingParticipant } from '../../types/store/MeetingTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 
+const iconChevronDownOutline = 'icon: ChevronDownOutline';
+const audioDevice2 = 'Audio Device 2';
+const videoDevice2 = 'Video Device 2';
+
 const user1: UserBe = createMockUser({ id: 'user1Id', name: 'user 1' });
 const user2: UserBe = createMockUser({ id: 'user2Id', name: 'user 2' });
 
@@ -87,23 +91,22 @@ describe('AccessMeetingModal - enter to meeting', () => {
 
 		expect(mockedEnterMeetingRequest).toBeCalled();
 	});
-
 	test('Select audio device', async () => {
 		mockedJoinMeetingRequest.mockReturnValueOnce(groupMeeting);
 
 		const { user } = setupBasicGroup();
 
-		const audioButtonSelect = await screen.findAllByTestId('icon: ChevronDownOutline');
+		const audioButtonSelect = await screen.findAllByTestId(iconChevronDownOutline);
 		await user.click(audioButtonSelect[1]);
 
-		const device = await screen.findByText('Audio Device 2');
+		const device = await screen.findByText(audioDevice2);
 		expect(device).toBeInTheDocument();
 		// not selected
 		expect(device).toHaveStyle('font-weight: 400');
 
 		await user.click(device);
 		await user.click(audioButtonSelect[1]);
-		const deviceSelected = await screen.findByText('Audio Device 2');
+		const deviceSelected = await screen.findByText(audioDevice2);
 		expect(deviceSelected).toBeInTheDocument();
 		// selected
 		expect(deviceSelected).toHaveStyle('font-weight: 700');
@@ -113,17 +116,17 @@ describe('AccessMeetingModal - enter to meeting', () => {
 
 		const { user } = setupBasicGroup();
 
-		const videoButtonSelect = await screen.findAllByTestId('icon: ChevronDownOutline');
+		const videoButtonSelect = await screen.findAllByTestId(iconChevronDownOutline);
 		await user.click(videoButtonSelect[0]);
 
-		const device = await screen.findByText('Video Device 2');
+		const device = await screen.findByText(videoDevice2);
 		expect(device).toBeInTheDocument();
 		// not selected
 		expect(device).toHaveStyle('font-weight: 400');
 
 		await user.click(device);
 		await user.click(videoButtonSelect[0]);
-		const deviceSelected = await screen.findByText('Video Device 2');
+		const deviceSelected = await screen.findByText(videoDevice2);
 		expect(deviceSelected).toBeInTheDocument();
 		// selected
 		expect(deviceSelected).toHaveStyle('font-weight: 700');
@@ -147,5 +150,31 @@ describe('AccessMeetingModal - enter to meeting', () => {
 		await act(() => user.click(audioOff));
 		const audioOn = await screen.findByTestId('icon: Mic');
 		expect(audioOn).toBeInTheDocument();
+	});
+	test('Enter button is enabled after selection of video source', async () => {
+		mockedJoinMeetingRequest.mockReturnValueOnce(groupMeeting);
+
+		const { user } = setupBasicGroup();
+
+		const videoButtonSelect = await screen.findAllByTestId(iconChevronDownOutline);
+		await user.click(videoButtonSelect[0]);
+		const device = await screen.findByText(videoDevice2);
+		await user.click(device);
+
+		const enterButton = await screen.findByTestId('enterMeetingButton');
+		expect(enterButton).toBeEnabled();
+	});
+	test('Enter button is enabled after selection of audio source', async () => {
+		mockedJoinMeetingRequest.mockReturnValueOnce(groupMeeting);
+
+		const { user } = setupBasicGroup();
+
+		const audioButtonSelect = await screen.findAllByTestId(iconChevronDownOutline);
+		await user.click(audioButtonSelect[1]);
+		const device = await screen.findByText(audioDevice2);
+		await user.click(device);
+
+		const enterButton = screen.getByTestId('enterMeetingButton');
+		expect(enterButton).toBeEnabled();
 	});
 });

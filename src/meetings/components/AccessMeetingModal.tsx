@@ -196,8 +196,8 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 				id: `device-${i}`,
 				label: videoItem.label ? videoItem.label : `device-${i}`,
 				onClick: (): void => {
-					setEnterButtonIsEnabled(false);
 					if (videoStreamEnabled) {
+						setEnterButtonIsEnabled(false);
 						toggleStreams(audioStreamEnabled, true, selectedAudioDevice, videoItem.deviceId);
 					} else {
 						setSelectedVideoDevice(videoItem.deviceId);
@@ -222,8 +222,8 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 				id: `device-${i}`,
 				label: audioItem.label ? audioItem.label : `device-${i}`,
 				onClick: (): void => {
-					setEnterButtonIsEnabled(false);
 					if (audioStreamEnabled) {
+						setEnterButtonIsEnabled(false);
 						toggleStreams(true, videoStreamEnabled, audioItem.deviceId, selectedVideoDevice);
 					} else {
 						setSelectedAudioDevice(audioItem.deviceId);
@@ -358,6 +358,7 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 					disabled={areNetworksUp && enterButtonIsEnabled}
 				>
 					<Button
+						data-testid="enterMeetingButton"
 						label={enter}
 						onClick={joinMeeting}
 						disabled={!(areNetworksUp && enterButtonIsEnabled)}
