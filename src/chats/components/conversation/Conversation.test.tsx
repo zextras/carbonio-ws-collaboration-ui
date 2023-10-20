@@ -78,8 +78,6 @@ describe('Conversation view', () => {
 		expect(infoPanelToggleVisibleAgain).toBeInTheDocument();
 	});
 	test('Display info panel and check data are visible', async () => {
-		// TODO FIND WHY THIS TEST REMOVING THE MOCKISENABLED RETURN VALUE WONT PASS ON SUITE
-		mockIsEnabled.mockReturnValueOnce(false);
 		mockUseMediaQueryCheck.mockReturnValueOnce(true);
 		const store = useStore.getState();
 		store.addRoom(testRoom);
@@ -91,7 +89,7 @@ describe('Conversation view', () => {
 		const infoPanelToggle = screen.getByTestId('infoPanelToggle');
 		expect(infoPanelToggle).toBeInTheDocument();
 		await user.click(infoPanelToggle);
-		const conversationInfoPanelOpen = screen.getByTestId('conversationInfoPanelOpen');
+		const conversationInfoPanelOpen = await screen.findByTestId('conversationInfoPanelOpen');
 		expect(conversationInfoPanelOpen).toBeInTheDocument();
 		const userName = screen.getByText(/User 2/i);
 		expect(userName).toBeInTheDocument();
