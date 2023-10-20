@@ -46,11 +46,11 @@ type ExpandedSidebarListItemProps = {
 	roomId: string;
 };
 
-const ListItem = styled(Container)`
+const ListItem = styled(Container)<{ $selected: boolean }>`
 	cursor: pointer;
 	&:hover {
-		background-color: ${({ selected, theme }): string =>
-			selected ? theme.palette.highlight.regular : theme.palette.gray3.regular};
+		background-color: ${({ $selected, theme }): string =>
+			$selected ? theme.palette.highlight.regular : theme.palette.gray3.regular};
 	}
 	-webkit-user-select: none;
 	user-select: none;
@@ -205,6 +205,7 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 			mainAlignment="flex-start"
 			height="fit"
 			padding={{ all: 'small' }}
+			$selected={isConversationSelected}
 		>
 			<Row>
 				{roomType === RoomType.GROUP ? (

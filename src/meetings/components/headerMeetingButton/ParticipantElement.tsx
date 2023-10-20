@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { FC, useEffect, useMemo, useState } from 'react';
+import React, { FC, useMemo } from 'react';
 
 import { Avatar, Container, Text, Shimmer, Row } from '@zextras/carbonio-design-system';
 import styled from 'styled-components';
@@ -43,21 +43,18 @@ const ParticipantElement: FC<ParticipantElementProps> = ({
 		getUserPictureUpdatedAt(state, memberId)
 	);
 
-	const [picture, setPicture] = useState<false | string>(false);
-
-	useEffect(() => {
+	const picture = useMemo(() => {
 		if (userPictureUpdatedAt != null) {
-			setPicture(`${UsersApi.getURLUserPicture(memberId)}?${userPictureUpdatedAt}`);
-		} else {
-			setPicture(false);
+			return `${UsersApi.getURLUserPicture(memberId)}?${userPictureUpdatedAt}`;
 		}
+		return '';
 	}, [memberId, userPictureUpdatedAt]);
 
 	const avatarElement = useMemo(
 		() =>
 			memberName == null ? (
 				<Container width="fit" height="fit">
-					<Shimmer.Avatar height="2rem" width="2rem" />
+					<Shimmer.Avatar width="2rem" />
 				</Container>
 			) : (
 				<CustomAvatar label={memberName} shape="round" picture={picture} />

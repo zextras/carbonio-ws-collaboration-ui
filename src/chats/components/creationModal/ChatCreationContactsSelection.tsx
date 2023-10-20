@@ -207,7 +207,7 @@ const ChatCreationContactsSelection = ({
 				const clickCb =
 					(chipInputHasError && selected) || !chipInputHasError
 						? onClickListItem
-						: (): null => null;
+						: (item: ContactInfo) => () => null;
 				return (
 					<ListParticipant
 						item={item}
@@ -284,10 +284,12 @@ const ChatCreationContactsSelection = ({
 				value={chips}
 				onChange={removeContactFromChip}
 				requireUniqueChips
+				// TODO FIX CHIPS
+				/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
+				/* @ts-ignore */
 				maxChips={maxGroupMembers}
 				data-testid="chip_input_creation_modal"
 				confirmChipOnBlur={false}
-				confirmChipOnSpace={false}
 				separators={['']}
 				description={
 					size(contactsSelected) > 1 || !isCreationModal ? chipInputDescriptionLabel : ''

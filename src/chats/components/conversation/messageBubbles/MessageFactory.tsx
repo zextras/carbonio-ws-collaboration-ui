@@ -8,7 +8,7 @@ import React, { ReactElement, useMemo } from 'react';
 
 import { Container, Text } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
+import styled, { SimpleInterpolation } from 'styled-components';
 
 import Bubble from './Bubble';
 import ConfigurationBubble from './ConfigurationBubble';
@@ -22,12 +22,12 @@ type MessageProps = {
 	messageRoomId: string;
 	prevMessageIsFromSameSender: boolean;
 	nextMessageIsFromSameSender: boolean;
-	messageRef: React.RefObject<HTMLElement>;
+	messageRef: React.RefObject<HTMLDivElement>;
 	isFirstNewMessage: boolean;
-	messageListRef?: React.MutableRefObject<HTMLDivElement | undefined>;
+	messageListRef?: React.RefObject<HTMLDivElement | undefined>;
 };
 
-export const CustomMessage = styled(Container)`
+export const CustomMessage = styled(Container)<{ $dateMessage?: boolean }>`
 	width: fit-content;
 	white-space: pre-wrap;
 	word-break: break-word;
@@ -35,15 +35,15 @@ export const CustomMessage = styled(Container)`
 	height: auto;
 	margin: 0.625rem;
 	padding: 0.25em 1em;
-	${({ dateMessage }): string =>
-		dateMessage && 'border-radius: 1rem; box-shadow: 0 0 0.25rem rgba(166, 166, 166, 0.5);'}
+	${({ $dateMessage }): SimpleInterpolation =>
+		$dateMessage && 'border-radius: 1rem; box-shadow: 0 0 0.25rem rgba(166, 166, 166, 0.5);'}
 	margin: 0.625rem auto;
 	cursor: default;
 	-webkit-user-select: none;
 	user-select: none;
 	text-align: center;
-	background-color: ${({ theme, dateMessage }): string =>
-		dateMessage ? theme.palette.gray6.regular : theme.palette.gray5.regular};
+	background-color: ${({ theme, $dateMessage }): string =>
+		$dateMessage ? theme.palette.gray6.regular : theme.palette.gray5.regular};
 `;
 
 const MessageFactory = ({

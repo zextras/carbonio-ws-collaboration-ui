@@ -126,7 +126,7 @@ const MeetingNotification = ({
 					size="large"
 					label={userName}
 					title={userName}
-					picture={userPictureUpdatedAt ? picture : false}
+					picture={userPictureUpdatedAt ? picture : ''}
 				/>
 				<CustomText overflow="break-word">{userIsInvitingYouLabel}</CustomText>
 			</Container>

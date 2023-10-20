@@ -27,6 +27,7 @@ const DropBackground = styled(Container)`
 	left: 0.3125rem;
 	pointer-events: none;
 `;
+
 const BackDropLayoutInnerBox = styled(Container)`
 	background: ${(props): string => props.theme.palette.gray6.regular};
 	border-radius: 0.625rem;
@@ -64,10 +65,11 @@ const CustomIcon2 = styled(Icon)`
 `;
 
 type DropZoneAttachmentType = {
-	onDragOverEvent: (arg: () => void) => void;
-	onDropEvent: (arg: () => void) => void;
-	onDragLeaveEvent: (arg: () => void) => void;
+	onDropEvent: (event: React.DragEvent<HTMLElement>) => void;
+	onDragOverEvent: (event: React.DragEvent<HTMLElement>) => void;
+	onDragLeaveEvent: (event: React.DragEvent<HTMLElement> | DragEvent) => void;
 };
+
 const DropZoneView = ({
 	onDragOverEvent,
 	onDropEvent,

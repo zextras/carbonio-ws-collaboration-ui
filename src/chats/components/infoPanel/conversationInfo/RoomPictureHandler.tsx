@@ -18,7 +18,7 @@ import {
 } from '@zextras/carbonio-design-system';
 import moment from 'moment-timezone';
 import { useTranslation } from 'react-i18next';
-import styled, { css, DefaultTheme, FlattenInterpolation, ThemeProps } from 'styled-components';
+import styled, { css, DefaultTheme, FlattenSimpleInterpolation } from 'styled-components';
 
 import { RoomsApi, UsersApi } from '../../../../network';
 import {
@@ -40,8 +40,6 @@ import { RoomType } from '../../../../types/store/RoomTypes';
 import { CapabilityType } from '../../../../types/store/SessionTypes';
 import { calculateAvatarColor } from '../../../../utils/styleUtils';
 
-type CreateSnackbarFn = typeof CreateSnackbarFn;
-
 type RoomPictureProps = {
 	roomId: string;
 	memberId: string;
@@ -52,28 +50,31 @@ const HoverContainer = styled(Container)`
 	opacity: 0;
 `;
 
-const BackgroundContainer = styled(Container)`
+const BackgroundContainer = styled(Container)<{
+	$hasHoverGradient: boolean;
+	$color: keyof DefaultTheme['avatarColors'];
+}>`
 	border-radius: 0;
-	background-color: ${({ color, theme }): string | false => `${theme.avatarColors[color]}`};
+	background-color: ${({ $color, theme }): string | false => `${theme.avatarColors[$color]}`};
 	&:hover {
 		background: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)),
-			${({ color, hasHoverGradient, theme }): string | false =>
-				hasHoverGradient && `${theme.avatarColors[color]}`};
+			${({ $color, $hasHoverGradient, theme }): string | false =>
+				$hasHoverGradient && `${theme.avatarColors[$color]}`};
 		background: -webkit-linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)),
-			${({ color, hasHoverGradient, theme }): string | false =>
-				hasHoverGradient && `${theme.avatarColors[color]}`};
+			${({ $color, $hasHoverGradient, theme }): string | false =>
+				$hasHoverGradient && `${theme.avatarColors[$color]}`};
 		background: -moz-linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)),
-			${({ color, hasHoverGradient, theme }): string | false =>
-				hasHoverGradient && `${theme.avatarColors[color]}`};
+			${({ $color, $hasHoverGradient, theme }): string | false =>
+				$hasHoverGradient && `${theme.avatarColors[$color]}`};
 		${HoverContainer} {
 			opacity: 1;
 		}
 	}
 `;
 
-const PictureContainer = styled(Container)`
+const PictureContainer = styled(Container)<{ $picture: string; $hasHover: boolean }>`
 	border-radius: 0;
-	background-image: url(${({ picture }): string => picture});
+	background-image: url(${({ $picture }): string => $picture});
 	background-size: cover;
 	background-position: center;
 	aspect-ratio: 1/1;
@@ -85,21 +86,15 @@ const PictureContainer = styled(Container)`
 	}
 
 	//  TODO: remove hasHover when the preview of the image is implemented
-	${({
-		hasHover,
-		picture
-	}: {
-		hasHover: boolean;
-		picture: string;
-	}): false | FlattenInterpolation<ThemeProps<never>> =>
-		hasHover &&
+	${({ $hasHover, $picture }): false | FlattenSimpleInterpolation =>
+		$hasHover &&
 		css`
 			&:hover {
-				background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), url(${picture});
+				background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), url(${$picture});
 				background-image: -webkit-linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)),
-					url(${picture});
+					url(${$picture});
 				background-image: -moz-linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)),
-					url(${picture});
+					url(${$picture});
 				background-size: cover;
 				background-position: center;
 				aspect-ratio: 1/1;
@@ -115,19 +110,19 @@ const GradientContainer = styled(Container)`
 	background: linear-gradient(0deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0) 45%);
 `;
 
-const CustomText = styled(Text)`
+const CustomText = styled(Text)<{ $hasPicture: boolean }>`
 	text-overflow: ellipsis;
-	text-shadow: ${({ hasPicture }): string | false =>
-		hasPicture && '0.063rem 0.063rem 0.25rem #111'};
+	text-shadow: ${({ $hasPicture }): string | false =>
+		$hasPicture && '0.063rem 0.063rem 0.25rem #111'};
 `;
 
-const NameWrapText = styled(Text)`
+const NameWrapText = styled(Text)<{ $hasPicture: boolean }>`
 	white-space: unset;
 	overflow: unset;
 	text-overflow: unset;
 	word-break: break-word;
-	text-shadow: ${({ hasPicture }): string | false =>
-		hasPicture && '0.063rem 0.063rem 0.25rem #111'};
+	text-shadow: ${({ $hasPicture }): string | false =>
+		$hasPicture && '0.063rem 0.063rem 0.25rem #111'};
 `;
 
 const Presence = styled.div`
@@ -245,7 +240,7 @@ const RoomPictureHandler: FC<RoomPictureProps> = ({ memberId, roomType, roomId }
 					padding={{ left: 'large', bottom: 'large', right: 'large' }}
 					mainAlignment="flex-end"
 				>
-					<NameWrapText color="gray6" size="medium" hasPicture={!!picture}>
+					<NameWrapText color="gray6" size="medium" $hasPicture={!!picture}>
 						{memberName || memberEmail}
 					</NameWrapText>
 					<Padding top="extrasmall" />
@@ -253,7 +248,7 @@ const RoomPictureHandler: FC<RoomPictureProps> = ({ memberId, roomType, roomId }
 						<Container orientation="horizontal" mainAlignment="flex-start" height="fit">
 							{memberOnline && <Presence data-testid="user_presence_dot" />}
 							{memberOnline && <Padding right={'0.25rem'} />}
-							<CustomText size="small" color="gray6" hasPicture={!!picture}>
+							<CustomText size="small" color="gray6" $hasPicture={!!picture}>
 								{presenceLabel}
 							</CustomText>
 						</Container>
@@ -272,11 +267,11 @@ const RoomPictureHandler: FC<RoomPictureProps> = ({ memberId, roomType, roomId }
 				mainAlignment="flex-end"
 				padding={{ left: 'large', bottom: 'large', right: 'large' }}
 			>
-				<NameWrapText color="gray6" hasPicture={!!picture}>
+				<NameWrapText color="gray6" $hasPicture={!!picture}>
 					{roomName}
 				</NameWrapText>
 				<Padding top="extrasmall" />
-				<CustomText size="small" color="gray6" hasPicture={!!picture}>
+				<CustomText size="small" color="gray6" $hasPicture={!!picture}>
 					{numberOfParticipantsLabel}
 				</CustomText>
 			</Container>
@@ -353,6 +348,7 @@ const RoomPictureHandler: FC<RoomPictureProps> = ({ memberId, roomType, roomId }
 								iconColor="gray6"
 								size="large"
 								data-testid="upload_button"
+								onClick={(): null => null}
 							/>
 						</Tooltip>
 						{!!picture && (
@@ -390,10 +386,10 @@ const RoomPictureHandler: FC<RoomPictureProps> = ({ memberId, roomType, roomId }
 		<>
 			{!picture && (
 				<BackgroundContainer
-					color={calculateAvatarColor(
+					$color={calculateAvatarColor(
 						roomType === RoomType.ONE_TO_ONE ? memberName || '' : roomName
 					)}
-					hasHoverGradient={hasHoverGradient}
+					$hasHoverGradient={hasHoverGradient}
 					mainAlignment="flex-end"
 					minHeight="10rem"
 					maxHeight="10rem"
@@ -409,10 +405,9 @@ const RoomPictureHandler: FC<RoomPictureProps> = ({ memberId, roomType, roomId }
 			{picture && (
 				<Container background="gray6" height="fit">
 					<PictureContainer
-						hasPicture={!!picture}
-						picture={picture}
+						$picture={picture}
 						//  TODO: remove hasHover when the preview of the image is implemented
-						hasHover={roomType === RoomType.GROUP && iAmOwner}
+						$hasHover={roomType === RoomType.GROUP && iAmOwner}
 						mainAlignment="flex-end"
 						height="15.625rem"
 						data-testid="picture_container"

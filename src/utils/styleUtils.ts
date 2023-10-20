@@ -4,7 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-export const calculateAvatarColor = (label: string): string => {
+import { DefaultTheme } from 'styled-components';
+
+export const calculateAvatarColor = (label: string): keyof DefaultTheme['avatarColors'] => {
 	let sum = 0;
 	// eslint-disable-next-line no-plusplus
 	for (let i = 0; i < label.length; i++) {
