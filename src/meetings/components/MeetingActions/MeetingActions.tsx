@@ -148,7 +148,7 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 	]);
 
 	return (
-		<BarContainer height="fit" $isHoovering={isHoovering}>
+		<BarContainer height="fit" $isHoovering={isHoovering} data-testid="meeting-action-bar">
 			<ActionsWrapper
 				background={'text'}
 				width="fit"

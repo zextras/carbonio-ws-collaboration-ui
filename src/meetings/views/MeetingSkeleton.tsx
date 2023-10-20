@@ -85,6 +85,7 @@ const MeetingSkeleton = (): ReactElement => {
 				padding={{ all: 'large' }}
 				crossAlignment="center"
 				orientation="horizontal"
+				data-testid="meeting_view_container"
 			>
 				<LogoApp $customLogo={customLogo} />
 				{ViewToDisplay}
