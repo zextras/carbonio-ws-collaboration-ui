@@ -102,7 +102,7 @@ describe('Meeting sidebar', () => {
 		expect(MeetingParticipantsAccordion).not.toBeInTheDocument();
 	});
 
-	test('toggle Sidebar works correctly', async () => {
+	test('when user click the sidebar button, the sidebar closes', async () => {
 		const { user } = setupBasicOneToOne();
 
 		const sidebarButton = screen.getByTestId('sidebar_button');
