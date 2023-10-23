@@ -73,6 +73,7 @@ const MeetingSidebar = (): ReactElement => {
 			borderRadius="none"
 			crossAlignment="flex-start"
 			mainAlignment="space-between"
+			data-testid="meeting_sidebar"
 		>
 			{meetingChatVisibility !== MeetingChatVisibility.EXPANDED && (
 				<AccordionContainer

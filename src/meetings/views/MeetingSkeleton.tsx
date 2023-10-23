@@ -73,6 +73,7 @@ const MeetingSkeleton = (): ReactElement => {
 				background="gray0"
 				crossAlignment="center"
 				orientation="horizontal"
+				data-testid="meeting_view_container"
 			>
 				<LogoApp $customLogo={customLogo} />
 				{ViewToDisplay}
