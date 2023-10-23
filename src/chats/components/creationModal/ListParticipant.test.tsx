@@ -20,7 +20,7 @@ describe('List Participant', () => {
 			<ListParticipant
 				item={contactInfo}
 				selected={false}
-				onClickCb={(): null => null}
+				onClickCb={(): undefined => undefined}
 				isDisabled={false}
 			/>
 		);
@@ -32,7 +32,7 @@ describe('List Participant', () => {
 			<ListParticipant
 				item={contactInfo}
 				selected={false}
-				onClickCb={(): null => null}
+				onClickCb={(): undefined => undefined}
 				isDisabled={false}
 			/>
 		);

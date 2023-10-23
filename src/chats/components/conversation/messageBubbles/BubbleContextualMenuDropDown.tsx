@@ -336,6 +336,7 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 					size="small"
 					icon="ArrowIosDownward"
 					title={messageActionsTooltip}
+					onClick={(): null => null}
 				/>
 			</Dropdown>
 			{forwardMessageModalIsOpen && (

@@ -62,7 +62,13 @@ const MemberComponentActions: FC<ActionsProps> = ({ roomId, memberId }) => {
 			) : (
 				memberOwner && (
 					<Tooltip label={memberIsModeratorLabel}>
-						<IconButton iconColor="primary" size="extralarge" icon="Crown" disabled />
+						<IconButton
+							iconColor="primary"
+							size="extralarge"
+							icon="Crown"
+							disabled
+							onClick={(): null => null}
+						/>
 					</Tooltip>
 				)
 			)}

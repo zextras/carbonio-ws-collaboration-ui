@@ -56,7 +56,9 @@ type ConversationMessageComposerProps = {
 const BlockUploadButton = styled(IconButton)`
 	display: none;
 `;
+
 const LoadingSpinner = styled(Spinner)``;
+
 const UploadSpinnerWrapper = styled(Container)`
 	&:hover {
 		${BlockUploadButton} {
@@ -68,7 +70,9 @@ const UploadSpinnerWrapper = styled(Container)`
 	}
 `;
 
-type CreateSnackbarFn = typeof CreateSnackbarFn;
+const SendIconButton = styled(IconButton)<{ alt?: string }>``;
+
+const EmojiIconButton = styled(IconButton)<{ alt?: string }>``;
 
 const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId }) => {
 	const xmppClient = useStore(getXmppClient);
@@ -105,7 +109,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 	const createSnackbar: CreateSnackbarFn = useContext(SnackbarManagerContext);
 
 	const messageInputRef = useRef<HTMLTextAreaElement>();
-	const emojiButtonRef = useRef<HTMLButtonElement>();
+	const emojiButtonRef = useRef<HTMLDivElement>(null);
 	const emojiTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
 
 	const sendDisabled = useMemo(() => {
@@ -530,7 +534,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 	}, []);
 
 	useEffect(() => {
-		let refValue: HTMLButtonElement | undefined;
+		let refValue: HTMLDivElement;
 		if (emojiButtonRef.current) {
 			emojiButtonRef.current.addEventListener('mouseenter', mouseEnterEvent);
 			emojiButtonRef.current.addEventListener('mouseleave', mouseLeaveEvent);
@@ -571,7 +575,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 			<Container orientation="horizontal" crossAlignment="flex-end">
 				<Tooltip label={selectEmojiLabel}>
 					<Container width="fit" height="fit" padding={{ left: 'extrasmall', bottom: '0.3125rem' }}>
-						<IconButton
+						<EmojiIconButton
 							ref={emojiButtonRef}
 							iconColor="secondary"
 							size="large"
@@ -619,7 +623,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 						height="fit"
 						padding={{ right: 'extrasmall', bottom: '0.3125rem' }}
 					>
-						<IconButton
+						<SendIconButton
 							onClick={sendMessage}
 							iconColor="primary"
 							size="large"

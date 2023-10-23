@@ -15,12 +15,12 @@ import MicrophoneButton from './MicrophoneButton';
 import ScreenShareButton from './ScreenShareButton';
 import SwitchViewButton from './SwitchViewButton';
 
-const BarContainer = styled(Container)`
+const BarContainer = styled(Container)<{ $isHoovering: boolean }>`
 	position: absolute;
 	bottom: 0;
 	width: 100%;
 	transform: translateY(
-		${({ isHoovering }): string | FlattenSimpleInterpolation => (isHoovering ? '-1rem' : '5rem')}
+		${({ $isHoovering }): string | FlattenSimpleInterpolation => ($isHoovering ? '-1rem' : '5rem')}
 	);
 	transition: transform 200ms linear;
 	z-index: 40;
@@ -135,7 +135,7 @@ const MeetingActionsBar = ({ streamsWrapperRef }: MeetingActionsProps): ReactEle
 	]);
 
 	return (
-		<BarContainer height="fit" isHoovering={isHoovering}>
+		<BarContainer height="fit" $isHoovering={isHoovering}>
 			<ActionsWrapper
 				background={'text'}
 				width="fit"
@@ -143,7 +143,6 @@ const MeetingActionsBar = ({ streamsWrapperRef }: MeetingActionsProps): ReactEle
 				orientation="horizontal"
 				onMouseEnter={handleMouseEnter}
 				onMouseLeave={handleMouseLeave}
-				isHoovering={isHoovering}
 			>
 				<CameraButton
 					isVideoListOpen={isVideoListOpen}

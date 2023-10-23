@@ -36,7 +36,7 @@ const ViewContainer = styled(Container)`
 	flex-grow: 1;
 `;
 
-const LogoApp = styled(Container)`
+const LogoApp = styled(Container)<{ $customLogo: string | false | undefined }>`
 	position: absolute;
 	top: 1rem;
 	left: 1rem;
@@ -44,7 +44,7 @@ const LogoApp = styled(Container)`
 	height: 1.3125rem;
 	width: 9.625rem;
 	background-repeat: no-repeat;
-	background-image: url(${({ customLogo }): string => customLogo || defaultLogo});
+	background-image: url(${({ $customLogo }): string => $customLogo || defaultLogo});
 `;
 
 const MeetingSkeleton = (): ReactElement => {
@@ -74,7 +74,7 @@ const MeetingSkeleton = (): ReactElement => {
 				crossAlignment="center"
 				orientation="horizontal"
 			>
-				<LogoApp customLogo={customLogo} />
+				<LogoApp $customLogo={customLogo} />
 				{ViewToDisplay}
 				<MeetingActionsBar streamsWrapperRef={streamsWrapperRef} />
 			</ViewContainer>

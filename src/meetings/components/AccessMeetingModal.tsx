@@ -110,7 +110,7 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 	const [videoPlayerTestMuted, setVideoPlayerTestMuted] = useState<boolean>(true);
 	const [enterButtonIsEnabled, setEnterButtonIsEnabled] = useState<boolean>(false);
 
-	const wrapperRef = useRef<HTMLDivElement>();
+	const wrapperRef = useRef<HTMLDivElement>(null);
 	const videoStreamRef = useRef<HTMLVideoElement>(null);
 
 	useEffect(() => {
@@ -415,12 +415,17 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 						<MultiButton
 							primaryIcon={videoStreamEnabled ? 'Video' : 'VideoOff'}
 							size="large"
-							width="5rem"
 							shape="round"
-							iconColor="gray6"
-							backgroundColor="primary"
+							background="primary"
 							onClick={toggleVideo}
-							dropdownProps={{ width: 'fit', placement: 'bottom-end' }}
+							dropdownProps={{
+								width: 'fit',
+								placement: 'bottom-end',
+								items: mediaVideoList,
+								// TODO fix lint error
+								// eslint-disable-next-line react/jsx-no-useless-fragment
+								children: <></>
+							}}
 							items={mediaVideoList}
 						/>
 					</Tooltip>
@@ -430,10 +435,15 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 							primaryIcon={audioStreamEnabled ? 'Mic' : 'MicOff'}
 							size="large"
 							shape="round"
-							width="5rem"
-							iconColor="gray6"
-							backgroundColor="primary"
-							dropdownProps={{ width: 'fit', placement: 'bottom-start' }}
+							background="primary"
+							dropdownProps={{
+								width: 'fit',
+								placement: 'bottom-start',
+								items: mediaAudioList,
+								// TODO fix lint error
+								// eslint-disable-next-line react/jsx-no-useless-fragment
+								children: <></>
+							}}
 							onClick={toggleAudio}
 							items={mediaAudioList}
 						/>

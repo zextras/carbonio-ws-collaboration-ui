@@ -22,8 +22,6 @@ type MuteProps = {
 	emptyRoom?: boolean;
 };
 
-type CreateSnackbarFn = typeof CreateSnackbarFn;
-
 const MuteConversationAction: FC<MuteProps> = ({
 	roomId,
 	isInsideMeeting,

@@ -38,7 +38,7 @@
         "SomeoneElseCreatedOneToOne": "{{userName}} started a chat with you",
         "groupCreated": "{{roomName}} created!",
         "memberAdded": "{{userName}} has been added to {{roomName}}",
-        "memberRemoved": "{{userName}} has been removed from {{roomName}}",
+        "memberRemoved": "{{userName}} is no longer a member of the group",
         "oneToOneCreated": "New Chat created!",
         "youCreatedOneToOne": "You started a Chat with {{userName}}"
     },
@@ -248,10 +248,12 @@
     },
     "status": {
         "areTyping": "are typing...",
+        "goToPrivateChat": "Go to private chat to send a personal message",
         "isTyping": "is typing...",
         "lastSeen": "Last seen {{lastSeen}}",
         "offline": "Offline",
-        "online": "Online"
+        "online": "Online",
+        "you": " You"
     },
     "thanksForParticipating": "Thanks for participating",
     "titlePlaceholder": "Your Group's title",

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 
 import { Avatar, Container, Shimmer, Badge, useTheme } from '@zextras/carbonio-design-system';
 import { find } from 'lodash';
@@ -101,15 +101,12 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ roomId, unreadCount, draftMessa
 
 	const themeColor = useTheme();
 
-	const [picture, setPicture] = useState<false | string>(false);
-
-	useEffect(() => {
+	const picture = useMemo(() => {
 		if (userPictureUpdatedAt != null && otherMember && otherMember.userId !== undefined) {
-			setPicture(`${UsersApi.getURLUserPicture(otherMember.userId)}?${userPictureUpdatedAt}`);
-		} else {
-			setPicture(false);
+			return `${UsersApi.getURLUserPicture(otherMember.userId)}?${userPictureUpdatedAt}`;
 		}
-	}, [sessionId, otherMember, userPictureUpdatedAt, roomId]);
+		return '';
+	}, [otherMember, userPictureUpdatedAt]);
 
 	const userColor = useMemo(() => {
 		const color = calculateAvatarColor(userName ?? '');
@@ -125,7 +122,7 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ roomId, unreadCount, draftMessa
 					<Container>
 						<Avatar
 							icon="Video"
-							label={userName}
+							label={userName ?? ''}
 							title={userName}
 							shape="round"
 							background={userColor}
@@ -137,7 +134,7 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ roomId, unreadCount, draftMessa
 				return (
 					<Avatar
 						icon="Edit2"
-						label={userName}
+						label={userName ?? ''}
 						title={userName}
 						shape="round"
 						background={userColor}
@@ -147,7 +144,7 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ roomId, unreadCount, draftMessa
 				return (
 					<Avatar
 						icon="BellOff"
-						label={userName}
+						label={userName ?? ''}
 						title={userName}
 						shape="round"
 						background={userColor}
@@ -157,7 +154,7 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ roomId, unreadCount, draftMessa
 				return (
 					<Avatar
 						data-testid={`${userName}-avatar`}
-						label={userName}
+						label={userName ?? ''}
 						title={userName}
 						shape="round"
 						background={userColor}

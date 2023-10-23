@@ -35,8 +35,6 @@ import useStore from '../../../store/Store';
 import { AddRoomResponse } from '../../../types/network/responses/roomsResponses';
 import { RoomType } from '../../../types/store/RoomTypes';
 
-type CreateSnackbarFn = typeof CreateSnackbarFn;
-
 const ChatCreationModal = ({
 	open,
 	onClose

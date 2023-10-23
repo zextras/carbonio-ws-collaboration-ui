@@ -20,7 +20,7 @@ const ShimmeringCollapsedListView = (): ReactElement => (
 	<Container mainAlignment="flex-start" crossAlignment="flex-start">
 		<CustomContainer orientation="horizontal" mainAlignment="flex-start">
 			<Container crossAlignment="flex-start" padding="small">
-				<Shimmer.Avatar height="1.9375rem" width="1.9375rem" radius="0.0625rem" />
+				<Shimmer.Avatar width="1.9375rem" radius="0.0625rem" />
 			</Container>
 		</CustomContainer>
 		{[...Array(10)].map((x, i) => (
@@ -31,7 +31,7 @@ const ShimmeringCollapsedListView = (): ReactElement => (
 				padding="small"
 				key={i}
 			>
-				<Shimmer.Avatar height="2.5rem" width="2.5rem" radius="0.0625rem" />
+				<Shimmer.Avatar width="2.5rem" radius="0.0625rem" />
 			</Container>
 		))}
 	</Container>

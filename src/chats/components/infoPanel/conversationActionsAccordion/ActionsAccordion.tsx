@@ -6,7 +6,7 @@
 
 import React, { FC, useCallback, useMemo } from 'react';
 
-import { Accordion } from '@zextras/carbonio-design-system';
+import { Accordion, AccordionItemType } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -82,7 +82,7 @@ export const ActionsAccordion: FC<ActionAccordionProps> = ({
 	]);
 
 	const infoDetails = useMemo(() => {
-		const arrayOfActions = [];
+		const arrayOfActions: AccordionItemType[] = [];
 		const bkgColor = isInsideMeeting ? 'text' : 'gray6';
 
 		// Mute conversation

@@ -17,7 +17,15 @@ import papyrus from '../../assets/papyrus.png';
 import ConversationInfoPanel from '../infoPanel/ConversationInfoPanel';
 
 const ConversationWrapper = styled(Container)`
-	background-image: url('${(props): string => (props.theme === 'dark' ? papyrusDark : papyrus)}');
+	background-image: url('${(props): string => {
+		// TODO FIX THEME SELECTION
+		/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
+		/* @ts-ignore */
+		if (props.theme === 'dark') {
+			return papyrusDark;
+		}
+		return papyrus;
+	}}');
 `;
 
 const Conversation = ({ room }: ConversationProps): ReactElement => {
