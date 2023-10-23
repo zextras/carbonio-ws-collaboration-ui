@@ -13,6 +13,7 @@ import CameraButton from './CameraButton';
 import LeaveMeetingButton from './LeaveMeetingButton';
 import MicrophoneButton from './MicrophoneButton';
 import ScreenShareButton from './ScreenShareButton';
+import SwitchViewButton from './SwitchViewButton';
 
 const BarContainer = styled(Container)<{ $isHoovering: boolean }>`
 	position: absolute;
@@ -29,15 +30,14 @@ const ActionsWrapper = styled(Container)`
 	padding: 1rem;
 	border-radius: 0.5rem;
 	gap: 1rem;
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
 `;
 
 type MeetingActionsProps = {
 	streamsWrapperRef: RefObject<HTMLDivElement>;
 };
 
-const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElement => {
-	// const meetingViewSelected = useStore((store) => getMeetingViewSelected(store, meetingId));
-
+const MeetingActionsBar = ({ streamsWrapperRef }: MeetingActionsProps): ReactElement => {
 	const [isHoovering, setIsHoovering] = useState<boolean>(false);
 	const [isHoverActions, setIsHoverActions] = useState<boolean>(false);
 	const [isAudioListOpen, setIsAudioListOpen] = useState<boolean>(false);
@@ -91,19 +91,6 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 	const handleMouseEnter = useCallback(() => setIsHoverActions(true), []);
 
 	const handleMouseLeave = useCallback(() => setIsHoverActions(false), []);
-
-	/*
-	const deleteMeeting = useCallback(() => {
-		MeetingsApi.deleteMeeting(meetingId).then(() => goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED));
-	}, [meetingId, goToInfoPage]);
-
-	const toggleMeetingView = useCallback(() => {
-		setMeetingViewSelected(
-			meetingId,
-			meetingViewSelected === MeetingViewType.GRID ? MeetingViewType.CINEMA : MeetingViewType.GRID
-		);
-	}, [meetingId, meetingViewSelected, setMeetingViewSelected]);
-	*/
 
 	useEffect(() => {
 		let elRef: React.RefObject<HTMLDivElement> | null = streamsWrapperRef;
@@ -168,25 +155,7 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 					setIsAudioListOpen={setIsAudioListOpen}
 				/>
 				<ScreenShareButton />
-				{/* 
-			<Padding right="1rem" />
-			<IconButton
-				size="large"
-				backgroundColor="primary"
-				iconColor="gray6"
-				icon={meetingViewSelected === MeetingViewType.GRID ? "Grid" : "CinemaView"}
-				onClick={toggleMeetingView}
-				disabled // TODO: enable when grid mode will be available
-			/>
-			<Padding right="16px" />;
-			<IconButton
-				iconColor="gray6"
-				backgroundColor="primary"
-				icon="MoreVertical"
-				onClick={deleteMeeting}
-				size="large"
-			/>
-		*/}
+				<SwitchViewButton />
 				<Padding right="1rem" />
 				<LeaveMeetingButton />
 			</ActionsWrapper>
@@ -194,4 +163,4 @@ const MeetingActions = ({ streamsWrapperRef }: MeetingActionsProps): ReactElemen
 	);
 };
 
-export default MeetingActions;
+export default MeetingActionsBar;
