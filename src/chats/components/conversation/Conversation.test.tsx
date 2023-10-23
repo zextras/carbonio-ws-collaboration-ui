@@ -13,6 +13,7 @@ import Conversation from './Conversation';
 import {
 	mockedDeleteRoomMemberRequest,
 	mockGoToMainPage,
+	mockDarkReaderIsEnabled,
 	mockUseMediaQueryCheck
 } from '../../../../jest-mocks';
 import useStore from '../../../store/Store';
@@ -88,7 +89,7 @@ describe('Conversation view', () => {
 		const infoPanelToggle = screen.getByTestId('infoPanelToggle');
 		expect(infoPanelToggle).toBeInTheDocument();
 		await user.click(infoPanelToggle);
-		const conversationInfoPanelOpen = screen.getByTestId('conversationInfoPanelOpen');
+		const conversationInfoPanelOpen = await screen.findByTestId('conversationInfoPanelOpen');
 		expect(conversationInfoPanelOpen).toBeInTheDocument();
 		const userName = screen.getByText(/User 2/i);
 		expect(userName).toBeInTheDocument();
@@ -119,5 +120,21 @@ describe('Conversation view', () => {
 		});
 		expect(mockedDeleteRoomMemberRequest).toHaveBeenCalledTimes(1);
 		expect(mockGoToMainPage).toHaveBeenCalledTimes(1);
+	});
+	test('Display conversation view with darkMode disabled', async () => {
+		mockDarkReaderIsEnabled.mockReturnValueOnce(false);
+		const store = useStore.getState();
+		store.addRoom(testRoom);
+		setup(<Conversation room={testRoom} />);
+		const ConversationWrapper = screen.getByTestId('ConversationWrapper');
+		expect(ConversationWrapper).toHaveStyle(`background-image: url('papyrus.png')`);
+	});
+	test('Display conversation view with darkMode enabled', async () => {
+		mockDarkReaderIsEnabled.mockReturnValueOnce(true);
+		const store = useStore.getState();
+		store.addRoom(testRoom);
+		setup(<Conversation room={testRoom} />);
+		const ConversationWrapper = screen.getByTestId('ConversationWrapper');
+		expect(ConversationWrapper).toHaveStyle(`background-image: url('papyrus-dark.png')`);
 	});
 });
