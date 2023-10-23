@@ -152,7 +152,7 @@ const GridMode = (): ReactElement => {
 				<ButtonDownContainer width="fit" height="fitt" mainAlignment="flex-start">
 					<Tooltip label={nextButton.disabled ? bottomLabel : scrollDownLabel} placement="left">
 						<ChevronIconButton
-							conColor="gray6"
+							iconColor="gray6"
 							backgroundColor="text"
 							icon="ChevronDownOutline"
 							size="large"

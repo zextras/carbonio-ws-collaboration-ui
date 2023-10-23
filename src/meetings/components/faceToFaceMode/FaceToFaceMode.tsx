@@ -28,16 +28,16 @@ const MyStreamContainer = styled(Container)`
 	top: 1rem;
 	right: 1rem;
 	transition: opacity 200ms linear;
-	border-radius: 8px;
+	border-radius: 0.5rem;
 	z-index: 10;
 	&:hover {
 		opacity: 0;
 	}
-	box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+	box-shadow: 0 0 0.625rem rgba(0, 0, 0, 0.3);
 `;
 
 const CentralTile = styled(Container)`
-	border-radius: 8px;
+	border-radius: 0.5rem;
 `;
 
 const FaceToFaceMode = (): ReactElement => {
