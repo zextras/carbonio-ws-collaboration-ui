@@ -22,7 +22,7 @@ import {
 import useStore from '../../store/Store';
 import { Member } from '../../types/store/RoomTypes';
 import { CapabilityType } from '../../types/store/SessionTypes';
-import { calculateAvatarColor } from '../../utils/styleUtils';
+import { calcAvatarMeetingColor, calculateAvatarColor } from '../../utils/styleUtils';
 
 type UserAvatarProps = {
 	roomId: string;
@@ -111,7 +111,7 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ roomId, unreadCount, draftMessa
 	const userColor = useMemo(() => {
 		const color = calculateAvatarColor(userName ?? '');
 		return isMeetingActive
-			? `linear-gradient(0deg, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), ${themeColor.avatarColors[color]}`
+			? calcAvatarMeetingColor(themeColor.avatarColors[color])
 			: `${themeColor.avatarColors[color]}`;
 	}, [userName, isMeetingActive, themeColor.avatarColors]);
 
