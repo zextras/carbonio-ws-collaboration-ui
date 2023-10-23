@@ -3,18 +3,10 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
 
 import * as darkreader from 'darkreader';
 
-export const useDarkReaderStatus = (): boolean => {
-	const [isDarkModeEnabled, setIsDarkModeEnabled] = useState(false);
-
-	useEffect(() => {
-		setIsDarkModeEnabled(darkreader.isEnabled());
-	}, []);
-
-	return isDarkModeEnabled;
-};
+export const useDarkReaderStatus = (): boolean => useMemo(() => darkreader.isEnabled(), []);
 
 export default useDarkReaderStatus;
