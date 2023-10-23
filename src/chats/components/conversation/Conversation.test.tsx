@@ -13,7 +13,7 @@ import Conversation from './Conversation';
 import {
 	mockedDeleteRoomMemberRequest,
 	mockGoToMainPage,
-	mockIsEnabled,
+	mockDarkReaderIsEnabled,
 	mockUseMediaQueryCheck
 } from '../../../../jest-mocks';
 import useStore from '../../../store/Store';
@@ -122,7 +122,7 @@ describe('Conversation view', () => {
 		expect(mockGoToMainPage).toHaveBeenCalledTimes(1);
 	});
 	test('Display conversation view with darkMode disabled', async () => {
-		mockIsEnabled.mockReturnValueOnce(false);
+		mockDarkReaderIsEnabled.mockReturnValueOnce(false);
 		const store = useStore.getState();
 		store.addRoom(testRoom);
 		setup(<Conversation room={testRoom} />);
@@ -130,7 +130,7 @@ describe('Conversation view', () => {
 		expect(ConversationWrapper).toHaveStyle(`background-image: url('papyrus.png')`);
 	});
 	test('Display conversation view with darkMode enabled', async () => {
-		mockIsEnabled.mockReturnValueOnce(true);
+		mockDarkReaderIsEnabled.mockReturnValueOnce(true);
 		const store = useStore.getState();
 		store.addRoom(testRoom);
 		setup(<Conversation room={testRoom} />);

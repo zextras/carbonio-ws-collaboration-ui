@@ -10,7 +10,7 @@ import { screen } from '@testing-library/react';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { UserEvent } from '@testing-library/user-event/setup/setup';
 
-import { mockIsEnabled, mockUseParams } from '../../../../../jest-mocks';
+import { mockDarkReaderIsEnabled, mockUseParams } from '../../../../../jest-mocks';
 import useStore from '../../../../store/Store';
 import {
 	createMockMeeting,
@@ -94,7 +94,7 @@ describe('Meeting sidebar', () => {
 		expect(toggleChatBtn).toHaveStyle('height: fit');
 	});
 	test('Display meeting chat with darkMode disabled', async () => {
-		mockIsEnabled.mockReturnValueOnce(false);
+		mockDarkReaderIsEnabled.mockReturnValueOnce(false);
 		const { user } = setupBasicGroup();
 		const toggleChatBtn = screen.getByTestId('toggleChatStatus');
 		await user.click(toggleChatBtn);
@@ -102,7 +102,7 @@ describe('Meeting sidebar', () => {
 		expect(wrapperMeetingChat).toHaveStyle(`background-image: url('papyrus.png')`);
 	});
 	test('Display meeting chat with darkMode enabled', async () => {
-		mockIsEnabled.mockReturnValueOnce(true);
+		mockDarkReaderIsEnabled.mockReturnValueOnce(true);
 		const { user } = setupBasicGroup();
 		const toggleChatBtn = screen.getByTestId('toggleChatStatus');
 		await user.click(toggleChatBtn);

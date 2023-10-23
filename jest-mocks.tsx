@@ -80,11 +80,11 @@ jest.mock('@zextras/carbonio-shell-ui', () => ({
 	})
 }));
 
-export const mockIsEnabled: jest.Mock = jest.fn();
+export const mockDarkReaderIsEnabled: jest.Mock = jest.fn();
 
 jest.mock('darkreader', () => ({
 	matchMedia: jest.fn(),
-	isEnabled: mockIsEnabled
+	isEnabled: mockDarkReaderIsEnabled
 }));
 
 export const RTCPeerConnection: jest.Mock = jest.fn();

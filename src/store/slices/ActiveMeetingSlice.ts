@@ -79,7 +79,6 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 			'AM/MEETING_DISCONNECTION'
 		);
 	},
-
 	setMeetingSidebarStatus: (meetingId: string, status: boolean): void => {
 		set(
 			produce((draft: RootStore) => {
@@ -132,7 +131,7 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 
 					// Unset pin when switching to grid view
 					if (viewType === MeetingViewType.GRID) {
-						draft.setPinnedTile(meetingId, undefined);
+						draft.activeMeeting[meetingId].pinnedTile = undefined;
 					}
 				}
 			}),
@@ -237,12 +236,24 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 		set(
 			produce((draft: RootStore) => {
 				if (draft.activeMeeting[meetingId]) {
-					draft.activeMeeting[meetingId].pinnedTile = tile;
-				}
+					// Switch back to the previous view
+					const previousViewType = draft.activeMeeting[meetingId].pinnedTile?.previousViewType;
+					if (previousViewType) {
+						draft.activeMeeting[meetingId].meetingViewSelected = previousViewType;
+					}
 
-				// Set CINEMA MODE when pinning a tile in GRID MODE
-				if (draft.activeMeeting[meetingId].meetingViewSelected === MeetingViewType.GRID) {
-					draft.setMeetingViewSelected(meetingId, MeetingViewType.CINEMA);
+					draft.activeMeeting[meetingId].pinnedTile = tile;
+
+					// Pin a tile from GRID view the view to switch to CINEMA and set previousViewType to GRID
+					if (tile && draft.activeMeeting[meetingId].meetingViewSelected === MeetingViewType.GRID) {
+						// Set the view to switch to CINEMA
+						draft.activeMeeting[meetingId].meetingViewSelected = MeetingViewType.CINEMA;
+						// Set the previous view to GRID to switch back to it when unpinning
+						draft.activeMeeting[meetingId].pinnedTile = {
+							...tile,
+							previousViewType: MeetingViewType.GRID
+						};
+					}
 				}
 			}),
 			false,

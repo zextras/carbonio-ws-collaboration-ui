@@ -6,9 +6,10 @@
 
 import { filter, find, forEach, size, sortBy } from 'lodash';
 
-import { STREAM_TYPE, Subscription, TileData } from '../../types/store/ActiveMeetingTypes';
+import { STREAM_TYPE, TileData } from '../../types/store/ActiveMeetingTypes';
 import { Meeting, MeetingParticipantMap } from '../../types/store/MeetingTypes';
 import { RootStore } from '../../types/store/StoreTypes';
+import { dateToTimestamp } from '../../utils/dateUtil';
 
 export const getMeeting = (store: RootStore, roomId: string): Meeting | undefined =>
 	store.meetings[roomId];
@@ -88,7 +89,11 @@ export const getTiles = (store: RootStore, meetingId: string): TileData[] => {
 	const meeting = find(store.meetings, (meeting) => meeting.id === meetingId);
 	if (meeting) {
 		const tiles: TileData[] = [];
-		const sortedParticipants = sortBy(meeting.participants, (participant) => participant.joinedAt);
+		const sortedParticipants = sortBy(
+			meeting.participants,
+			(participant) => dateToTimestamp(participant.joinedAt),
+			['asc']
+		);
 		forEach(sortedParticipants, (participant) => {
 			tiles.push({
 				userId: participant.userId,
@@ -131,31 +136,6 @@ export const getCentralTileData = (store: RootStore, meetingId: string): TileDat
 		};
 	}
 	return undefined;
-};
-
-export const getSubscriptions = (store: RootStore, meetingId: string): Subscription[] => {
-	const meeting = find(store.meetings, (meeting) => meeting.id === meetingId);
-	if (meeting) {
-		const subscriptions: Subscription[] = [];
-		forEach(meeting.participants, (participant) => {
-			if (participant.userId !== store.session.id) {
-				if (participant.videoStreamOn) {
-					subscriptions.push({
-						userId: participant.userId,
-						type: STREAM_TYPE.VIDEO
-					});
-				}
-				if (participant.screenStreamOn) {
-					subscriptions.push({
-						userId: participant.userId,
-						type: STREAM_TYPE.SCREEN
-					});
-				}
-			}
-		});
-		return subscriptions;
-	}
-	return [];
 };
 
 export const getNumberOfTiles = (store: RootStore, meetingId: string): number => {
