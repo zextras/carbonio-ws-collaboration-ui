@@ -101,4 +101,14 @@ describe('Meeting sidebar', () => {
 		expect(chatAccordion).toBeVisible();
 		expect(MeetingParticipantsAccordion).not.toBeInTheDocument();
 	});
+
+	test('when user click the sidebar button, the sidebar closes', async () => {
+		const { user } = setupBasicOneToOne();
+
+		const sidebarButton = screen.getByTestId('sidebar_button');
+		await user.click(sidebarButton);
+
+		const closedSidebarButton = await screen.findByTestId('icon: ChevronRightOutline');
+		expect(closedSidebarButton).toBeVisible();
+	});
 });

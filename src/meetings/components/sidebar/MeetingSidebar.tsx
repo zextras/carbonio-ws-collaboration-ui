@@ -99,6 +99,7 @@ const MeetingSidebar = (): ReactElement => {
 						icon={sidebarIsVisible ? 'ChevronLeftOutline' : 'ChevronRightOutline'}
 						onClick={toggleSidebar}
 						size="large"
+						data-testid="sidebar_button"
 					/>
 				</Tooltip>
 			</ChangeSidebarStatusButton>

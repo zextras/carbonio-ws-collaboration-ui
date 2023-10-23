@@ -19,6 +19,7 @@ import { getMeetingCarouselVisibility } from '../../../store/selectors/ActiveMee
 import useStore from '../../../store/Store';
 import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
 import Tile from '../Tile';
+import WhoIsSpeaking from '../WhoIsSpeaking/WhoIsSpeaking';
 
 const CustomContainer = styled(Container)`
 	overflow: hidden;
@@ -83,6 +84,7 @@ const CinemaMode = (): ReactElement => {
 	return (
 		<Container orientation="horizontal">
 			<CustomContainer ref={cinemaModeRef}>
+				<WhoIsSpeaking centralTile={centralTile} />
 				<CinemaContainer data-testid="cinemaModeView" width={centralTileWidth} height="fit">
 					<Tile
 						userId={centralTile?.userId}
