@@ -20,7 +20,7 @@ import { setup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 import { MemberBe, RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
 import { UserBe } from '../../../types/network/models/userBeTypes';
-import { MeetingViewType } from '../../../types/store/ActiveMeetingTypes';
+import { MeetingViewType, STREAM_TYPE, TileData } from '../../../types/store/ActiveMeetingTypes';
 import { MeetingParticipant } from '../../../types/store/MeetingTypes';
 import { RootStore } from '../../../types/store/StoreTypes';
 
@@ -58,6 +58,17 @@ const meeting: MeetingBe = createMockMeeting({
 	roomId: room.id,
 	participants: [user1Participant, user2Participant, user3Participant]
 });
+
+const centralTileVideo: TileData = {
+	userId: user1.id,
+	type: STREAM_TYPE.VIDEO
+};
+
+const centralTileScreen: TileData = {
+	userId: user1.id,
+	type: STREAM_TYPE.SCREEN
+};
+
 const setupActiveMeeting = (): void => {
 	const store: RootStore = useStore.getState();
 	store.setUserInfo(user1);
@@ -71,15 +82,25 @@ const setupActiveMeeting = (): void => {
 	store.setIsCarouseVisible(meeting.id, false);
 	store.setTalkingUsers(meeting.id, user3.id, true);
 	store.setTalkingUsers(meeting.id, user2.id, true);
-
-	setup(<WhoIsSpeaking />);
+	store.setTalkingUsers(meeting.id, user1.id, true);
 };
 
 describe('Who is speaking', () => {
-	it('has to be rendered correctly', () => {
+	it('has to be rendered correctly - central tile is a video', () => {
 		mockUseParams.mockReturnValue({ meetingId: meeting.id });
 		setupActiveMeeting();
+		setup(<WhoIsSpeaking centralTile={centralTileVideo} />);
 
+		expect(screen.getByText(user3.name)).toBeVisible();
+		expect(screen.getByText(user2.name)).toBeVisible();
+	});
+
+	it('has to be rendered correctly - central tile is a screen', () => {
+		mockUseParams.mockReturnValue({ meetingId: meeting.id });
+		setupActiveMeeting();
+		setup(<WhoIsSpeaking centralTile={centralTileScreen} />);
+
+		expect(screen.getByText(user1.name)).toBeVisible();
 		expect(screen.getByText(user3.name)).toBeVisible();
 		expect(screen.getByText(user2.name)).toBeVisible();
 	});
