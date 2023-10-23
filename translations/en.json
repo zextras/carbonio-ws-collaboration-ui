@@ -38,7 +38,7 @@
         "SomeoneElseCreatedOneToOne": "{{userName}} started a chat with you",
         "groupCreated": "{{roomName}} created!",
         "memberAdded": "{{userName}} has been added to {{roomName}}",
-        "memberRemoved": "{{userName}} has been removed from {{roomName}}",
+        "memberRemoved": "{{userName}} is no longer a member of the group",
         "oneToOneCreated": "New Chat created!",
         "youCreatedOneToOne": "You started a Chat with {{userName}}"
     },
@@ -124,12 +124,14 @@
         "interactions": {
             "cameraDisabled": "Camera disabled",
             "cameraEnabled": "Camera enabled",
+            "cinemaView": "Cinema view",
             "disableCamera": "Disable camera",
             "disableMicrophone": "Disable microphone",
             "disableScreen": "Disable screen share",
             "enableCamera": "Enable camera",
             "enableMicrophone": "Enable microphone",
             "enableScreen": "Enable screen share",
+            "gridView": "Grid view",
             "leaveMeeting": "Leave Meeting",
             "microphoneDisabled": "Microphone disabled",
             "microphoneEnabled": "Microphone enabled",

@@ -9,7 +9,7 @@ import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event/setup/setup';
 
-import MeetingActions from './MeetingActions';
+import MeetingActionsBar from './MeetingActionsBar';
 import { mockUseParams } from '../../../../jest-mocks';
 import useStore from '../../../store/Store';
 import {
@@ -73,7 +73,7 @@ const storeBasicActiveMeetingSetup = (): void => {
 	store.addMeeting(meeting);
 	store.meetingConnection(meeting.id, false, undefined, false, undefined);
 	mockUseParams.mockReturnValue({ meetingId: meeting.id });
-	setup(<MeetingActions streamsWrapperRef={streamRef} />);
+	setup(<MeetingActionsBar streamsWrapperRef={streamRef} />);
 };
 
 const storeSetupGroupMeetingSkeleton = (): { user: UserEvent; store: RootStore } => {
@@ -95,7 +95,7 @@ describe('Meeting action bar', () => {
 	test('everything is rendered correctly', async () => {
 		storeBasicActiveMeetingSetup();
 		const buttons = await screen.findAllByRole('button');
-		expect(buttons).toHaveLength(6);
+		expect(buttons).toHaveLength(7);
 	});
 });
 
