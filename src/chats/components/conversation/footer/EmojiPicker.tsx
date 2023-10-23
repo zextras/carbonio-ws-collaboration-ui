@@ -63,7 +63,7 @@ const EmojiPicker: React.FC<EmojiPickerProps> = ({
 	emojiTimeoutRef,
 	...props
 }) => {
-	const ref = useRef<HTMLDivElement>();
+	const ref = useRef<HTMLDivElement>(null);
 
 	const mouseEnterEvent = useCallback(() => {
 		if (setShowEmojiPicker) {

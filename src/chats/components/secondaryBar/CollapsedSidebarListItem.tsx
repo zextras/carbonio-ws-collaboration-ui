@@ -23,11 +23,11 @@ type SidebarListItemProps = {
 	roomId: string;
 };
 
-const SidebarItem = styled(Container)`
+const SidebarItem = styled(Container)<{ $selected: boolean }>`
 	cursor: pointer;
 	&:hover {
-		background-color: ${({ theme, selected }): string =>
-			selected ? theme.palette.highlight.regular : theme.palette.gray3.regular};
+		background-color: ${({ theme, $selected }): string =>
+			$selected ? theme.palette.highlight.regular : theme.palette.gray3.regular};
 	}
 `;
 
@@ -47,6 +47,7 @@ const CollapsedSidebarListItem: React.FC<SidebarListItemProps> = ({ roomId }) =>
 			<SidebarItem
 				background={isConversationSelected ? 'highlight' : 'none'}
 				onClick={openConversation}
+				$selected={isConversationSelected}
 				orientation="horizontal"
 				mainAlignment="flex-start"
 				height="fit"

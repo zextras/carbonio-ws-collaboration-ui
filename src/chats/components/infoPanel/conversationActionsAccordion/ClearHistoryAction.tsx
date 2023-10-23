@@ -24,8 +24,6 @@ type ClearHistoryProps = {
 	iAmTheOnlyOwner?: boolean;
 };
 
-type CreateSnackbarFn = typeof CreateSnackbarFn;
-
 const ClearHistoryAction: FC<ClearHistoryProps> = ({
 	roomId,
 	roomType,

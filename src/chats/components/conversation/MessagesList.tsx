@@ -74,8 +74,8 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 
 	const messageScrollPositionObserver = useRef<IntersectionObserver>();
 	const historyLoaderObserver = useRef<IntersectionObserver>();
-	const messageListRef = useRef<HTMLDivElement>();
-	const MessagesListWrapperRef = useRef<HTMLDivElement>();
+	const messageListRef = useRef<HTMLDivElement>(null);
+	const MessagesListWrapperRef = useRef<HTMLDivElement>(null);
 	const listOfMessagesObservedRef = useRef<React.RefObject<HTMLInputElement>[]>([]);
 	const messageHistoryLoaderRef = React.createRef<HTMLDivElement>();
 
@@ -289,7 +289,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 		const list: JSX.Element[] = [];
 		map(dateMessageWrapped, (wrapper, idx) => {
 			const messageList = map(wrapper, (message: Message, index) => {
-				const messageRef = React.createRef<HTMLElement>();
+				const messageRef = React.createRef<HTMLDivElement>();
 				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 				// @ts-ignore
 				listOfMessagesObservedRef.current.push(messageRef);

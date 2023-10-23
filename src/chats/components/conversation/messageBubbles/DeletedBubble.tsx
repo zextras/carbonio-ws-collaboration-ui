@@ -9,7 +9,7 @@ import React, { FC } from 'react';
 import { Container, Text, Padding } from '@zextras/carbonio-design-system';
 import moment from 'moment-timezone';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
+import styled, { SimpleInterpolation } from 'styled-components';
 
 import { getPrefTimezoneSelector } from '../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../store/Store';
@@ -17,16 +17,16 @@ import { TextMessage } from '../../../../types/store/MessageTypes';
 
 type DeletedBubbleProps = {
 	message: TextMessage;
-	refEl: React.RefObject<HTMLElement>;
+	refEl: React.RefObject<HTMLDivElement>;
 };
 
-const BubbleDeletedContainer = styled(Container)`
+const BubbleDeletedContainer = styled(Container)<{ $isMyMessage: boolean }>`
 	margin-top: 0.25rem;
 	margin-bottom: 0.25rem;
-	${({ isMyMessage }): string => isMyMessage && 'margin-left: auto;'};
+	${({ $isMyMessage }): SimpleInterpolation => $isMyMessage && 'margin-left: auto;'};
 	box-shadow: 0 0 0.25rem rgba(166, 166, 166, 0.5);
-	border-radius: ${({ isMyMessage }): string =>
-		isMyMessage ? '0.25rem 0.25rem 0 0.25rem' : '0.25rem 0.25rem 0.25rem 0'};
+	border-radius: ${({ $isMyMessage }): string =>
+		$isMyMessage ? '0.25rem 0.25rem 0 0.25rem' : '0.25rem 0.25rem 0.25rem 0'};
 `;
 
 const CustomText = styled(Text)`
@@ -52,7 +52,7 @@ const DeletedBubble: FC<DeletedBubbleProps> = ({ message, refEl }) => {
 			orientation="horizontal"
 			padding={{ all: 'medium' }}
 			background={'gray3'}
-			isMyMessage={message.from === sessionId}
+			$isMyMessage={message.from === sessionId}
 			crossAlignment="baseline"
 		>
 			<CustomText color="secondary">{deletedMessageLabel}</CustomText>

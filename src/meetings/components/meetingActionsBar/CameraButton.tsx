@@ -18,6 +18,7 @@ import { filter, map } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 
+import { MeetingRoutesParams } from '../../../hooks/useRouting';
 import MeetingsApi from '../../../network/apis/MeetingsApi';
 import { getSelectedVideoDeviceId } from '../../../store/selectors/ActiveMeetingSelectors';
 import { getParticipantVideoStatus } from '../../../store/selectors/MeetingSelectors';
@@ -42,7 +43,7 @@ const CameraButton = ({
 	const disableCamLabel = t('meeting.interactions.disableCamera', 'Disable camera');
 	const enableCamLabel = t('meeting.interactions.enableCamera', 'Enable camera');
 
-	const { meetingId }: Record<string, string> = useParams();
+	const { meetingId }: MeetingRoutesParams = useParams();
 	const myUserId = useStore(getUserId);
 
 	const videoStatus = useStore((store) => getParticipantVideoStatus(store, meetingId, myUserId));
@@ -136,8 +137,7 @@ const CameraButton = ({
 	return (
 		<Tooltip placement="top" label={videoStatus ? disableCamLabel : enableCamLabel}>
 			<MultiButton
-				iconColor="gray6"
-				backgroundColor="primary"
+				background="primary"
 				primaryIcon={videoStatus ? 'Video' : 'VideoOff'}
 				icon={isVideoListOpen ? 'ChevronDown' : 'ChevronUp'}
 				onClick={toggleVideoStream}
@@ -147,9 +147,14 @@ const CameraButton = ({
 				dropdownProps={{
 					forceOpen: isVideoListOpen,
 					onClick: toggleVideoDropdown,
-					dropdownListRef: videoDropdownRef
+					dropdownListRef: videoDropdownRef,
+					// TODO fix lint error
+					// eslint-disable-next-line react/jsx-no-useless-fragment
+					children: <></>,
+					items: mediaVideoList
 				}}
-				disabled={!buttonStatus}
+				disabledPrimary={!buttonStatus}
+				disabledSecondary={!buttonStatus}
 			/>
 		</Tooltip>
 	);

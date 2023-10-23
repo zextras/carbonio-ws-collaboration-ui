@@ -18,7 +18,7 @@ import {
 	getMeetingViewSelected,
 	getTalkingList
 } from '../../../store/selectors/ActiveMeetingSelectors';
-import { getTotalNumberOfTiles } from '../../../store/selectors/MeetingSelectors';
+import { getNumberOfTiles } from '../../../store/selectors/MeetingSelectors';
 import useStore from '../../../store/Store';
 import { MeetingViewType } from '../../../types/store/ActiveMeetingTypes';
 
@@ -35,7 +35,7 @@ const WhoIsSpeaking = (): ReactElement | null => {
 	const talkingMap = useStore((store) => getTalkingList(store, meetingId));
 	const meetingViewSelected = useStore((store) => getMeetingViewSelected(store, meetingId));
 	const carouselIsVisible = useStore((store) => getMeetingCarouselVisibility(store, meetingId));
-	const numberOfTiles = useStore((store) => getTotalNumberOfTiles(store, meetingId));
+	const numberOfTiles = useStore((store) => getNumberOfTiles(store, meetingId));
 
 	const speakingList = useMemo(() => {
 		const list: ReactElement[] = [];

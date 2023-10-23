@@ -31,8 +31,6 @@ type EditConversationProps = {
 	roomId: string;
 };
 
-type CreateSnackbarFn = typeof CreateSnackbarFn;
-
 const EditConversationModal: FC<EditConversationProps> = ({
 	roomId,
 	closeModal,

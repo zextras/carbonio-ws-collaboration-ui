@@ -244,7 +244,7 @@ describe('Participant component info', () => {
 			act(() => store.setUserPresence('user1', true));
 			setup(<MemberComponentInfo member={members[0]} roomId={mockedRoom.id} />);
 
-			expect(screen.getByText(/Online/i)).toBeInTheDocument();
+			expect(screen.getByText(/You/i)).toBeInTheDocument();
 		});
 		test('Label should show Offline', () => {
 			const store = useStore.getState();
@@ -255,9 +255,11 @@ describe('Participant component info', () => {
 			store.setCapabilities(createMockCapabilityList({ canSeeUsersPresence: true }));
 			act(() => store.setUserPresence('user1', false));
 			mockedGetURLUserPicture.mockReturnValue('Imageurl.jpeg');
-			setup(<MemberComponentInfo member={members[0]} roomId={mockedRoom.id} />);
+			setup(<MemberComponentInfo member={members[1]} roomId={mockedRoom.id} />);
 
-			expect(screen.getByText(/Offline/i)).toBeInTheDocument();
+			expect(
+				screen.getByText(/Go to private chat to send a personal message/i)
+			).toBeInTheDocument();
 		});
 		test('Label should show "Last seen" phrase if last_activity is present', () => {
 			const store = useStore.getState();
@@ -285,7 +287,7 @@ describe('Participant component info', () => {
 
 			expect(screen.queryByText(/Online/i)).not.toBeInTheDocument();
 		});
-		test('Label should notshow Offline', () => {
+		test('Label should not show Offline', () => {
 			const store = useStore.getState();
 			store.setLoginInfo('user1', 'User 1');
 			store.addRoom(mockedRoom);

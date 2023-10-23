@@ -25,7 +25,15 @@ type MeetingConversationAccordionProps = {
 
 const WrapperMeetingChat = styled(Container)`
 	overflow: hidden;
-	background-image: url('${(props): string => (props.theme === 'dark' ? papyrusDark : papyrus)}');
+	background-image: url('${(props): string => {
+		// TODO FIX THEME SELECTION
+		/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
+		/* @ts-ignore */
+		if (props.theme === 'dark') {
+			return papyrusDark;
+		}
+		return papyrus;
+	}}');
 `;
 
 const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({
@@ -119,11 +127,7 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({
 				</Container>
 			</Container>
 			{isChatOpenOrFullExpanded && (
-				<WrapperMeetingChat
-					chatFullExpanded={chatFullExpanded}
-					mainAlignment="flex-start"
-					height="fill"
-				>
+				<WrapperMeetingChat mainAlignment="flex-start" height="fill">
 					<Chat
 						roomId={roomId}
 						setInfoPanelOpen={(): null => null}

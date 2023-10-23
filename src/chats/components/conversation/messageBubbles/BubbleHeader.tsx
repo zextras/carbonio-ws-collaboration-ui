@@ -7,7 +7,7 @@
 import React, { FC, useMemo } from 'react';
 
 import { Container, Text } from '@zextras/carbonio-design-system';
-import styled from 'styled-components';
+import styled, { DefaultTheme } from 'styled-components';
 
 import { getUserName } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
@@ -17,8 +17,8 @@ type BubbleHeaderProps = {
 	senderId: string;
 };
 
-const SenderText = styled(Text)`
-	color: ${({ userColor, theme }): string[] => theme.avatarColors[userColor]};
+const SenderText = styled(Text)<{ $userColor: keyof DefaultTheme['avatarColors'] }>`
+	color: ${({ $userColor, theme }): string => theme.avatarColors[$userColor]};
 `;
 
 const BubbleHeader: FC<BubbleHeaderProps> = ({ senderId }) => {
@@ -28,7 +28,7 @@ const BubbleHeader: FC<BubbleHeaderProps> = ({ senderId }) => {
 
 	return (
 		<Container crossAlignment="flex-start">
-			<SenderText userColor={userColor} weight="bold">
+			<SenderText $userColor={userColor} weight="bold">
 				{senderName}
 			</SenderText>
 		</Container>

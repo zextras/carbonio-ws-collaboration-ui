@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { forEach, indexOf, last, map, min, range } from 'lodash';
+
 import audioOff from '../meetings/assets/AudioOFF.mp3';
 import audioOn from '../meetings/assets/AudioON.mp3';
 import meetingIn from '../meetings/assets/MeetingIN.mp3';
@@ -38,4 +40,82 @@ export const sendAudioFeedback = (type: MeetingSoundFeedback): Promise<void> | u
 		default:
 			return undefined;
 	}
+};
+
+export const maximiseRowsAndColumns = (dimensions: Dimensions, tileWidth: number): Grid => {
+	// 1rem (16px) of gap between tiles
+	const tileHeight = tileWidth * (9 / 16);
+	const rows = Math.floor(dimensions.height / (tileHeight + 16));
+	const columns = Math.floor(dimensions.width / (tileWidth + 16));
+	return { rows, columns };
+};
+
+export const findAllPossiblePairs = (tiles: number): Grid[] => {
+	const rowIndices = range(2, tiles + 1);
+	const pairs = [{ rows: 1, columns: tiles }];
+	forEach(rowIndices, (rows) => {
+		const columnIndices = range(1, last(pairs)?.columns);
+		forEach(columnIndices, (columns): boolean => {
+			if (rows * columns >= tiles) {
+				pairs.push({ rows, columns });
+				return false;
+			}
+			return true;
+		});
+	});
+	return pairs;
+};
+
+export const calcGrid = (
+	dimensions: Dimensions,
+	rows: number,
+	columns: number
+): { area: number; tileWidth: number } => {
+	const tilesRatio = (16 * columns) / (9 * rows);
+	const containerRatio = dimensions.width / dimensions.height;
+
+	let tileWidth = 0;
+	let tileHeight = 0;
+	if (tilesRatio > containerRatio) {
+		// Tiles are more wide than tall respect to the container
+		tileWidth = (dimensions.width - (16 * columns - 16)) / columns; // 16px of gap between tiles
+		tileHeight = tileWidth * (9 / 16);
+	} else {
+		// Tiles are more tall than wide respect to the container
+		tileHeight = (dimensions.height - (16 * rows - 16)) / rows; // 16px of gap between tiles
+		tileWidth = tileHeight * (16 / 9);
+	}
+	return {
+		area: tileWidth * tileHeight,
+		tileWidth
+	};
+};
+
+export const maximiseTileSize = (
+	dimensions: Dimensions,
+	numbersOfTiles: number
+): { tileWidth: number; rows: number; columns: number } => {
+	const containerArea = dimensions.width * dimensions.height;
+
+	const pairs = findAllPossiblePairs(numbersOfTiles);
+	const grid = map(pairs, (pair) => calcGrid(dimensions, pair.rows, pair.columns));
+	const voids = map(grid, (tiles) =>
+		containerArea - tiles.area > 0 ? containerArea - tiles.area : Infinity
+	);
+
+	const minVoid = min(voids);
+	const minVoidAxes = pairs[indexOf(voids, minVoid)];
+	const minVoidGrid = grid[indexOf(voids, minVoid)];
+
+	return { tileWidth: minVoidGrid.tileWidth, rows: minVoidAxes.rows, columns: minVoidAxes.columns };
+};
+
+type Dimensions = {
+	width: number;
+	height: number;
+};
+
+type Grid = {
+	rows: number;
+	columns: number;
 };
