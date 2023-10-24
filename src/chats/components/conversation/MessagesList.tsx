@@ -32,7 +32,7 @@ import { getMessagesSelector } from '../../../store/selectors/MessagesSelectors'
 import { getPrefTimezoneSelector, getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { Message, MessageType, TextMessage } from '../../../types/store/MessageTypes';
-import { isBefore, now } from '../../../utils/dateUtil';
+import { isBefore } from '../../../utils/dateUtil';
 
 const Messages = styled(Container)`
 	position: relative;
@@ -63,7 +63,6 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 	const setIdMessageWhereScrollIsStopped = useStore(
 		(store) => store.setIdMessageWhereScrollIsStopped
 	);
-	const setHistoryLoadDisabled = useStore((store) => store.setHistoryLoadDisabled);
 	const setInputHasFocus = useStore((store) => store.setInputHasFocus);
 	const myUserId = useStore(getUserId);
 	const myLastMarker = useStore((store) => getMyLastMarkerOfRoom(store, roomId));
@@ -73,11 +72,9 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 	const [isLoadedFirstTime, setIsLoadedFirstTime] = useState(true);
 
 	const messageScrollPositionObserver = useRef<IntersectionObserver>();
-	const historyLoaderObserver = useRef<IntersectionObserver>();
 	const messageListRef = useRef<HTMLDivElement>(null);
 	const MessagesListWrapperRef = useRef<HTMLDivElement>(null);
 	const listOfMessagesObservedRef = useRef<React.RefObject<HTMLInputElement>[]>([]);
-	const messageHistoryLoaderRef = React.createRef<HTMLDivElement>();
 
 	const firstNewMessage = useFirstUnreadMessage(roomId);
 
@@ -112,18 +109,6 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 			readMessage(refId);
 		}, 150),
 		[setIdMessageWhereScrollIsStopped, readMessage, roomId]
-	);
-
-	// eslint-disable-next-line react-hooks/exhaustive-deps
-	const handleHistoryLoader = useCallback(
-		debounce(() => {
-			const date = roomMessages.length > 0 ? roomMessages[0].date : now();
-			if (!historyLoadedDisabled) {
-				xmppClient.requestHistory(roomId, date, 50, useStore.getState().unreads[roomId]);
-				setHistoryLoadDisabled(roomId, true);
-			}
-		}, 500),
-		[roomMessages.length, roomId, actualScrollPosition, historyLoadedDisabled]
 	);
 
 	const intersectionObserverCallback = useCallback(
@@ -173,57 +158,10 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [destroyObserver, intersectionObserverCallback]);
 
-	const historyLoaderIntersectionObserverCallback = useCallback(
-		([entry]) => {
-			if (entry.intersectionRatio === 1) {
-				handleHistoryLoader.cancel();
-				handleHistoryLoader();
-			}
-		},
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[
-			roomMessages.length,
-			messageListRef,
-			inputHasFocus,
-			actualScrollPosition,
-			historyLoadedDisabled
-		]
-	);
-
-	const historyLoaderDestroyObserver = useCallback(() => {
-		if (historyLoaderObserver.current) {
-			historyLoaderObserver.current && historyLoaderObserver.current.disconnect();
-		}
-	}, []);
-
-	const historyLoaderObserverInit = useCallback(() => {
-		if (messageListRef.current) {
-			historyLoaderObserver.current = new IntersectionObserver(
-				historyLoaderIntersectionObserverCallback,
-				{
-					root: messageListRef.current,
-					rootMargin: '0px',
-					threshold: 1
-				}
-			);
-		}
-
-		if (historyLoaderObserver.current && messageHistoryLoaderRef.current) {
-			historyLoaderObserver.current?.observe(messageHistoryLoaderRef.current);
-		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [historyLoaderDestroyObserver, intersectionObserverCallback]);
-
 	useEffect(() => {
 		observerInit();
 		return () => destroyObserver();
 	}, [destroyObserver, observerInit]);
-
-	useEffect(() => {
-		historyLoaderObserverInit();
-		return () => historyLoaderDestroyObserver();
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [destroyObserver, observerInit, roomMessages.length]);
 
 	useEffect(() => {
 		// set history is loaded for the first time
@@ -392,7 +330,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 				crossAlignment="flex-start"
 			>
 				{!hasMoreMessageToLoad && (
-					<MessageHistoryLoader messageHistoryLoaderRef={messageHistoryLoaderRef} />
+					<MessageHistoryLoader roomId={roomId} messageListRef={messageListRef} />
 				)}
 				{messagesWrapped}
 				{usersWritingList && <WritingBubble writingListNames={usersWritingList} />}

@@ -4,13 +4,20 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { ReactElement } from 'react';
+import React, { ReactElement, useCallback, useEffect, useRef } from 'react';
 
 import { Icon } from '@zextras/carbonio-design-system';
+import { debounce } from 'lodash';
 import styled from 'styled-components';
 
+import { getHistoryIsLoadedDisabled } from '../../../store/selectors/ActiveConversationsSelectors';
+import { getXmppClient } from '../../../store/selectors/ConnectionSelector';
+import useStore from '../../../store/Store';
+import { now } from '../../../utils/dateUtil';
+
 type MessageHistoryLoaderProps = {
-	messageHistoryLoaderRef: React.RefObject<HTMLDivElement>;
+	roomId: string;
+	messageListRef: React.RefObject<HTMLDivElement>;
 };
 
 const Loader = styled.div`
@@ -26,7 +33,6 @@ const Loader = styled.div`
 	@-webkit-keyframes spin { 0% {transform: scaleX(-1) rotate(0deg);} 100% {transform: scaleX(-1) rotate(360deg);} }
 	@keyframes spin { 0% {transform: scaleX(-1) rotate(0deg);} 100% {transform: scaleX(-1) rotate(360deg);} }
 	}
-
 	& svg {
 		position: relative;
 		top: 0.375rem;
@@ -43,13 +49,56 @@ const VisibilityContainer = styled.div`
 `;
 
 const MessageHistoryLoader = ({
-	messageHistoryLoaderRef
-}: MessageHistoryLoaderProps): ReactElement => (
-	<VisibilityContainer data-testid={'messageHistoryLoader'} ref={messageHistoryLoaderRef}>
-		<Loader>
-			<Icon icon="RefreshOutline" size="medium" />
-		</Loader>
-	</VisibilityContainer>
-);
+	roomId,
+	messageListRef
+}: MessageHistoryLoaderProps): ReactElement => {
+	const intersectionObserverRef = useRef<IntersectionObserver>();
+	const messageHistoryLoaderRef = React.createRef<HTMLDivElement>();
+
+	const xmppClient = useStore(getXmppClient);
+	const historyLoadedDisabled = useStore((store) => getHistoryIsLoadedDisabled(store, roomId));
+	const setHistoryLoadDisabled = useStore((store) => store.setHistoryLoadDisabled);
+
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	const handleHistoryLoader = useCallback(
+		debounce(() => {
+			const roomMessages = useStore.getState().messages[roomId];
+			const date = roomMessages.length > 0 ? roomMessages[0].date : now();
+			if (!historyLoadedDisabled) {
+				xmppClient.requestHistory(roomId, date, 50, useStore.getState().unreads[roomId]);
+				setHistoryLoadDisabled(roomId, true);
+			}
+		}, 500),
+		[roomId, historyLoadedDisabled]
+	);
+
+	useEffect(() => {
+		if (messageListRef?.current && messageHistoryLoaderRef?.current) {
+			intersectionObserverRef.current = new IntersectionObserver(
+				([entry]) => {
+					if (entry.intersectionRatio === 1) {
+						handleHistoryLoader.cancel();
+						handleHistoryLoader();
+					}
+				},
+				{
+					root: messageListRef.current,
+					rootMargin: '0px',
+					threshold: 1
+				}
+			);
+			intersectionObserverRef.current.observe(messageHistoryLoaderRef.current);
+		}
+		return () => intersectionObserverRef.current?.disconnect();
+	}, [handleHistoryLoader, messageHistoryLoaderRef, messageListRef]);
+
+	return (
+		<VisibilityContainer data-testid={'messageHistoryLoader'} ref={messageHistoryLoaderRef}>
+			<Loader>
+				<Icon icon="RefreshOutline" size="medium" />
+			</Loader>
+		</VisibilityContainer>
+	);
+};
 
 export default MessageHistoryLoader;
