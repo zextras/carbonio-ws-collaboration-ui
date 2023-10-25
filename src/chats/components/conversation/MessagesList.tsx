@@ -7,7 +7,7 @@
 import React, { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { Container } from '@zextras/carbonio-design-system';
-import { debounce, find, groupBy, map } from 'lodash';
+import { debounce, find, groupBy, last, map, size } from 'lodash';
 import moment from 'moment-timezone';
 import styled from 'styled-components';
 
@@ -31,7 +31,7 @@ import { getMyLastMarkerOfRoom } from '../../../store/selectors/MarkersSelectors
 import { getMessagesSelector } from '../../../store/selectors/MessagesSelectors';
 import { getPrefTimezoneSelector, getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
-import { Message, MessageType, TextMessage } from '../../../types/store/MessageTypes';
+import { Message, MessageType } from '../../../types/store/MessageTypes';
 import { isBefore } from '../../../utils/dateUtil';
 import { scrollToEnd, scrollToMessage } from '../../../utils/scrollUtils';
 
@@ -70,12 +70,11 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 	const timezone = useStore(getPrefTimezoneSelector);
 
 	const [showScrollButton, setShowScrollButton] = useState(false);
-	const [isLoadedFirstTime, setIsLoadedFirstTime] = useState(true);
 
 	const messageScrollPositionObserver = useRef<IntersectionObserver>();
 	const messageListRef = useRef<HTMLDivElement>(null);
 	const MessagesListWrapperRef = useRef<HTMLDivElement>(null);
-	const listOfMessagesObservedRef = useRef<React.RefObject<HTMLInputElement>[]>([]);
+	const listOfMessagesObservedRef = useRef<React.RefObject<HTMLDivElement>[]>([]);
 
 	const firstNewMessage = useFirstUnreadMessage(roomId);
 
@@ -114,13 +113,11 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 
 	const intersectionObserverCallback = useCallback(
 		(entries) => {
-			if (roomMessages.length > 1) {
-				const lastMsg = document.getElementById(
-					`message-${roomMessages[roomMessages.length - 1].id}`
-				);
-				const lastMsgRect = lastMsg ? lastMsg.getBoundingClientRect() : null;
+			if (size(roomMessages) > 1) {
+				const lastMsg = document.getElementById(`message-${last(roomMessages)?.id}`);
+				const lastMsgRect = lastMsg?.getBoundingClientRect();
 				setShowScrollButton(
-					lastMsgRect !== null && lastMsgRect.bottom >= document.documentElement.clientHeight
+					lastMsgRect != null && lastMsgRect?.bottom >= document.documentElement.clientHeight
 				);
 				entries.forEach((entry: IntersectionObserverEntry) => {
 					if (entry.isIntersecting) {
@@ -132,12 +129,6 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 		},
 		[roomMessages, debouncedSetterScrollPosition]
 	);
-
-	const destroyObserver = useCallback(() => {
-		if (messageScrollPositionObserver.current) {
-			messageScrollPositionObserver.current && messageScrollPositionObserver.current.disconnect();
-		}
-	}, []);
 
 	const observerInit = useCallback(() => {
 		if (messageListRef.current && messageListRef.current.clientHeight > 100) {
@@ -151,42 +142,38 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 			);
 		}
 
-		listOfMessagesObservedRef.current.forEach((messageRef: React.RefObject<HTMLInputElement>) => {
+		listOfMessagesObservedRef.current.forEach((messageRef: React.RefObject<HTMLDivElement>) => {
 			if (messageScrollPositionObserver.current && messageRef.current) {
 				messageScrollPositionObserver.current.observe(messageRef.current);
 			}
 		});
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [destroyObserver, intersectionObserverCallback]);
+	}, [intersectionObserverCallback]);
 
 	useEffect(() => {
 		observerInit();
-		return () => destroyObserver();
-	}, [destroyObserver, observerInit]);
+		return () => messageScrollPositionObserver.current?.disconnect();
+	}, [observerInit]);
 
+	// Keep the scroll position during when messages number changes
 	useEffect(() => {
-		// set history is loaded for the first time
-		if (isLoadedFirstTime) {
-			setIsLoadedFirstTime(false);
-		}
-
-		// first part scroll to end when the chat is loaded for the first time
-		if (!isLoadedFirstTime && !actualScrollPosition) {
+		// When the chat is loaded for the first time keep scroll to the bottom
+		if (!actualScrollPosition) {
 			scrollToEnd(MessagesListWrapperRef);
 		} else if (historyLoadedDisabled) {
-			// keep the scroll to the message where we stopped scroll because history loader appeared and is loading history
+			// Keep the scroll to the message where we stopped scroll because history loader appeared and is loading history
 			scrollToMessage(actualScrollPosition);
 		}
-	}, [roomMessages, isLoadedFirstTime, actualScrollPosition, historyLoadedDisabled]);
+	}, [roomMessages, actualScrollPosition, historyLoadedDisabled]);
 
+	// Read last message when user enters for the first time in a conversation
 	useEffect(() => {
-		if (!actualScrollPosition && roomMessages.length >= 1 && !isLoadedFirstTime && inputHasFocus) {
-			const lastMessage = roomMessages[roomMessages.length - 1];
+		if (!actualScrollPosition && size(roomMessages) > 0 && inputHasFocus) {
+			const lastMessage = last(roomMessages);
 			if (lastMessage) {
 				readMessage(lastMessage.id);
 			}
 		}
-	}, [isLoadedFirstTime, roomMessages, actualScrollPosition, readMessage, inputHasFocus]);
+	}, [roomMessages, actualScrollPosition, readMessage, inputHasFocus]);
 
 	// Scroll to the previous position after have changed the conversation
 	useEffect(() => {
@@ -199,10 +186,9 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 	// Scroll all the way down when the is writing label appears to make it always visible
 	useEffect(() => {
 		if (
-			usersWritingList &&
-			usersWritingList.length > 0 &&
-			roomMessages.length > 0 &&
-			actualScrollPosition === roomMessages[roomMessages.length - 1].id
+			size(usersWritingList) > 0 &&
+			size(roomMessages) > 0 &&
+			actualScrollPosition === last(roomMessages)?.id
 		) {
 			scrollToEnd(MessagesListWrapperRef);
 		}
@@ -214,29 +200,23 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 	);
 
 	const messagesWrapped = useMemo(() => {
-		const list: JSX.Element[] = [];
-		map(dateMessageWrapped, (wrapper, idx) => {
+		listOfMessagesObservedRef.current = [];
+		return map(dateMessageWrapped, (wrapper, idx) => {
 			const messageList = map(wrapper, (message: Message, index) => {
 				const messageRef = React.createRef<HTMLDivElement>();
-				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-				// @ts-ignore
 				listOfMessagesObservedRef.current.push(messageRef);
-				let prevMessageIsFromSameSender;
-				let nextMessageIsFromSameSender;
 
 				const prevMessage = wrapper[index - 1];
-				if (message.type === MessageType.TEXT_MSG && prevMessage?.type === MessageType.TEXT_MSG) {
-					prevMessageIsFromSameSender = (prevMessage as TextMessage).from === message.from;
-				} else {
-					prevMessageIsFromSameSender = false;
-				}
+				const prevMessageIsFromSameSender =
+					message.type === MessageType.TEXT_MSG &&
+					prevMessage?.type === MessageType.TEXT_MSG &&
+					prevMessage.from === message.from;
 
 				const nextMessage = wrapper[index + 1];
-				if (message.type === MessageType.TEXT_MSG && nextMessage?.type === MessageType.TEXT_MSG) {
-					nextMessageIsFromSameSender = nextMessage.from === message.from;
-				} else {
-					nextMessageIsFromSameSender = false;
-				}
+				const nextMessageIsFromSameSender =
+					message.type === MessageType.TEXT_MSG &&
+					nextMessage?.type === MessageType.TEXT_MSG &&
+					nextMessage.from === message.from;
 
 				return (
 					<MessageFactory
@@ -251,7 +231,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 					/>
 				);
 			});
-			list.push(
+			return (
 				<Container
 					key={`messageList-${roomId}-${idx}`}
 					data-testid={`messageListRef${roomId}`}
@@ -263,7 +243,6 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 				</Container>
 			);
 		});
-		return list;
 	}, [dateMessageWrapped, firstNewMessage, roomId]);
 
 	const handleClickScrollButton = useCallback(() => {

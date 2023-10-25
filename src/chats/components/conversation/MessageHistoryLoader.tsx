@@ -7,7 +7,7 @@
 import React, { ReactElement, useCallback, useEffect, useRef } from 'react';
 
 import { Icon } from '@zextras/carbonio-design-system';
-import { debounce } from 'lodash';
+import { debounce, first } from 'lodash';
 import styled from 'styled-components';
 
 import { getHistoryIsLoadedDisabled } from '../../../store/selectors/ActiveConversationsSelectors';
@@ -63,7 +63,7 @@ const MessageHistoryLoader = ({
 	const handleHistoryLoader = useCallback(
 		debounce(() => {
 			const roomMessages = useStore.getState().messages[roomId];
-			const date = roomMessages.length > 0 ? roomMessages[0].date : now();
+			const date = first(roomMessages)?.date ?? now();
 			if (!historyLoadedDisabled) {
 				xmppClient.requestHistory(roomId, date, 50, useStore.getState().unreads[roomId]);
 				setHistoryLoadDisabled(roomId, true);
