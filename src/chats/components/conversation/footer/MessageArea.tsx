@@ -4,11 +4,13 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { Ref } from 'react';
+import React, { MutableRefObject, useCallback, useEffect } from 'react';
 
 import { useTranslation } from 'react-i18next';
 import styled, { css, FlattenSimpleInterpolation } from 'styled-components';
 
+import { getInputHasFocus } from '../../../../store/selectors/ActiveConversationsSelectors';
+import useStore from '../../../../store/Store';
 import { SIZES } from '../../../../types/generics';
 
 const MessageTextarea = styled.textarea`
@@ -74,30 +76,46 @@ const MessageTextarea = styled.textarea`
 `;
 
 type MessageAreaPros = {
-	textareaRef: Ref<HTMLTextAreaElement>;
+	roomId: string;
+	textareaRef: MutableRefObject<HTMLTextAreaElement | null>;
 	message: string;
 	onInput: (e: never) => void;
 	composerIsFull: boolean;
 	handleKeyDownTextarea: (e: never) => void;
 	handleOnBlur: (e: never) => void;
-	handleOnFocus: (e: never) => void;
 	handleOnPaste: (e: never) => void;
 	isDisabled: boolean;
 };
 
 const MessageArea: React.FC<MessageAreaPros> = ({
+	roomId,
 	textareaRef,
 	message,
 	onInput,
 	composerIsFull,
 	handleKeyDownTextarea,
 	handleOnBlur,
-	handleOnFocus,
 	handleOnPaste,
 	isDisabled
 }) => {
 	const [t] = useTranslation();
 	const messageComposerLabel = t('tooltip.messageComposer', 'Message composer');
+
+	const inputHasFocus = useStore((store) => getInputHasFocus(store, roomId));
+	const setInputHasFocus = useStore((store) => store.setInputHasFocus);
+
+	useEffect(() => {
+		if (inputHasFocus) {
+			textareaRef.current?.focus();
+			// Focus the end of the input if there is a draft message
+			textareaRef.current?.setSelectionRange(message.length, message.length);
+		}
+	}, [inputHasFocus, message.length, textareaRef]);
+
+	const handleOnFocus = useCallback(
+		() => setInputHasFocus(roomId, true),
+		[roomId, setInputHasFocus]
+	);
 
 	return (
 		<MessageTextarea
