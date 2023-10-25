@@ -39,7 +39,6 @@ import {
 	getReferenceMessage
 } from '../../../../store/selectors/ActiveConversationsSelectors';
 import { getXmppClient } from '../../../../store/selectors/ConnectionSelector';
-import { getRoomUnreadsSelector } from '../../../../store/selectors/UnreadsCounterSelectors';
 import useStore from '../../../../store/Store';
 import { Emoji } from '../../../../types/generics';
 import { AddRoomAttachmentResponse } from '../../../../types/network/responses/roomsResponses';
@@ -91,7 +90,6 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 	const setDraftMessage = useStore((store) => store.setDraftMessage);
 	const addDescriptionToFileToAttach = useStore((store) => store.addDescriptionToFileToAttach);
 	const unsetFilesToAttach = useStore((store) => store.unsetFilesToAttach);
-	const unreadMessagesCount = useStore((store) => getRoomUnreadsSelector(store, roomId));
 	const filesToUploadArray = useStore((store) => getFilesToUploadArray(store, roomId));
 	const setFilesToAttach = useStore((store) => store.setFilesToAttach);
 
@@ -475,8 +473,8 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 		checkMaxLengthAndSetMessage(messageInputRef.current?.value || '');
 	}, [textMessage, checkMaxLengthAndSetMessage]);
 
+	// Reset values when roomId changes
 	useEffect(() => {
-		if (unreadMessagesCount <= 0) messageInputRef.current?.focus();
 		const messageRef = messageInputRef.current;
 		return () => {
 			setTextMessage('');
@@ -485,8 +483,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 				messageRef.style.height = '0';
 			}
 		};
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [roomId, sendStopWriting, xmppClient]);
+	}, [roomId]);
 
 	const mouseEnterEvent = useCallback(() => {
 		if (emojiButtonRef.current) {

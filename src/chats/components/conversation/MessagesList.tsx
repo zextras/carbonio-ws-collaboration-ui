@@ -154,17 +154,6 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 		return () => messageScrollPositionObserver.current?.disconnect();
 	}, [observerInit]);
 
-	// Keep the scroll position during when messages number changes
-	useEffect(() => {
-		// When the chat is loaded for the first time keep scroll to the bottom
-		if (!actualScrollPosition) {
-			scrollToEnd(MessagesListWrapperRef);
-		} else if (historyLoadedDisabled) {
-			// Keep the scroll to the message where we stopped scroll because history loader appeared and is loading history
-			scrollToMessage(actualScrollPosition);
-		}
-	}, [roomMessages, actualScrollPosition, historyLoadedDisabled]);
-
 	// Read last message when user enters for the first time in a conversation
 	useEffect(() => {
 		if (!actualScrollPosition && size(roomMessages) > 0 && inputHasFocus) {
@@ -175,11 +164,16 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 		}
 	}, [roomMessages, actualScrollPosition, readMessage, inputHasFocus]);
 
-	// Scroll to the previous position after have changed the conversation
+	// Manage initial scroll position
 	useEffect(() => {
-		const actualPosition = useStore.getState().activeConversations[roomId]?.scrollPositionMessageId;
-		if (actualPosition) {
-			scrollToMessage(actualPosition);
+		const store = useStore.getState();
+		if (store.unreads[roomId] > 0) {
+			scrollToEnd(MessagesListWrapperRef);
+		} else {
+			const actualPosition = store.activeConversations[roomId]?.scrollPositionMessageId;
+			if (actualPosition) {
+				scrollToMessage(actualPosition);
+			}
 		}
 	}, [roomId]);
 
@@ -193,6 +187,17 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 			scrollToEnd(MessagesListWrapperRef);
 		}
 	}, [usersWritingList, actualScrollPosition, roomMessages]);
+
+	// Keep the scroll position when messages number changes
+	useEffect(() => {
+		// When the chat is loaded for the first time keep scroll to the bottom
+		if (!actualScrollPosition) {
+			scrollToEnd(MessagesListWrapperRef);
+		} else if (historyLoadedDisabled) {
+			// Keep the scroll to the message where we stopped scroll because history loader appeared and is loading history
+			scrollToMessage(actualScrollPosition);
+		}
+	}, [roomMessages, actualScrollPosition, historyLoadedDisabled]);
 
 	const dateMessageWrapped = useMemo(
 		() => groupBy(roomMessages, (message) => moment.tz(message.date, timezone).format('YYMMDD')),
@@ -257,9 +262,9 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 		// if we scrolled up in the history
 		(messageFromEvent) => {
 			if (
-				roomMessages.length > 0 &&
+				size(roomMessages) > 0 &&
 				messageFromEvent.detail.roomId === roomId &&
-				(actualScrollPosition === roomMessages[roomMessages.length - 1].id ||
+				(actualScrollPosition === last(roomMessages)?.id ||
 					(messageFromEvent.detail.type === MessageType.TEXT_MSG &&
 						messageFromEvent.detail.from === myUserId))
 			) {

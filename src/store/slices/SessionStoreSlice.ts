@@ -53,11 +53,11 @@ export const useSessionStoreSlice = (set: (...any: any) => void): SessionStoreSl
 			'SESSION/SET_CAPABILITIES'
 		);
 	},
-	setSelectedRoomOneToOneGroup: (id: string): void => {
+	setSelectedRoomOneToOneGroup: (roomId: string): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (draft.session && draft.session?.selectedRoomOneToOneGroup !== id) {
-					draft.session.selectedRoomOneToOneGroup = id;
+				if (draft.session && draft.session?.selectedRoomOneToOneGroup !== roomId) {
+					draft.session.selectedRoomOneToOneGroup = roomId;
 				}
 			}),
 			false,

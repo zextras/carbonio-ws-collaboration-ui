@@ -12,6 +12,7 @@ import styled, { css, FlattenSimpleInterpolation } from 'styled-components';
 import { getInputHasFocus } from '../../../../store/selectors/ActiveConversationsSelectors';
 import useStore from '../../../../store/Store';
 import { SIZES } from '../../../../types/generics';
+import useFirstUnreadMessage from '../useFirstUnreadMessage';
 
 const MessageTextarea = styled.textarea`
 	box-sizing: border-box;
@@ -103,6 +104,19 @@ const MessageArea: React.FC<MessageAreaPros> = ({
 
 	const inputHasFocus = useStore((store) => getInputHasFocus(store, roomId));
 	const setInputHasFocus = useStore((store) => store.setInputHasFocus);
+
+	const firstNewMessage = useFirstUnreadMessage(roomId);
+
+	// Focus input when roomId changes: but if there are unread messages wait to calculate the first unread message
+	useEffect(() => {
+		if (
+			!useStore.getState().unreads[roomId] ||
+			useStore.getState().unreads[roomId] === 0 ||
+			firstNewMessage
+		) {
+			textareaRef.current?.focus();
+		}
+	}, [firstNewMessage, roomId, textareaRef]);
 
 	useEffect(() => {
 		if (inputHasFocus) {
