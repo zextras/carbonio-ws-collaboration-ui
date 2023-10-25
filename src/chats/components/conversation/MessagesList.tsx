@@ -33,6 +33,7 @@ import { getPrefTimezoneSelector, getUserId } from '../../../store/selectors/Ses
 import useStore from '../../../store/Store';
 import { Message, MessageType, TextMessage } from '../../../types/store/MessageTypes';
 import { isBefore } from '../../../utils/dateUtil';
+import { scrollToEnd, scrollToMessage } from '../../../utils/scrollUtils';
 
 const Messages = styled(Container)`
 	position: relative;
@@ -171,16 +172,10 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 
 		// first part scroll to end when the chat is loaded for the first time
 		if (!isLoadedFirstTime && !actualScrollPosition) {
-			if (MessagesListWrapperRef.current) {
-				MessagesListWrapperRef.current.scrollTo({
-					top: MessagesListWrapperRef.current.scrollHeight,
-					behavior: 'auto'
-				});
-			}
+			scrollToEnd(MessagesListWrapperRef);
 		} else if (historyLoadedDisabled) {
 			// keep the scroll to the message where we stopped scroll because history loader appeared and is loading history
-			const messageRef = window.document.getElementById(`message-${actualScrollPosition}`);
-			messageRef?.scrollIntoView({ block: 'end' });
+			scrollToMessage(actualScrollPosition);
 		}
 	}, [roomMessages, isLoadedFirstTime, actualScrollPosition, historyLoadedDisabled]);
 
@@ -193,28 +188,23 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 		}
 	}, [isLoadedFirstTime, roomMessages, actualScrollPosition, readMessage, inputHasFocus]);
 
+	// Scroll to the previous position after have changed the conversation
 	useEffect(() => {
-		// scroll to the previous position after have changed the conversation
 		const actualPosition = useStore.getState().activeConversations[roomId]?.scrollPositionMessageId;
 		if (actualPosition) {
-			const messageRef = window.document.getElementById(`message-${actualPosition}`);
-			messageRef?.scrollIntoView({ block: 'end' });
+			scrollToMessage(actualPosition);
 		}
 	}, [roomId]);
 
+	// Scroll all the way down when the is writing label appears to make it always visible
 	useEffect(() => {
-		// Scroll all the way down when the is writing label appears to make it always visible
 		if (
 			usersWritingList &&
 			usersWritingList.length > 0 &&
 			roomMessages.length > 0 &&
-			actualScrollPosition === roomMessages[roomMessages.length - 1].id &&
-			MessagesListWrapperRef.current
+			actualScrollPosition === roomMessages[roomMessages.length - 1].id
 		) {
-			MessagesListWrapperRef.current.scrollTo({
-				top: MessagesListWrapperRef.current.scrollHeight,
-				behavior: 'auto'
-			});
+			scrollToEnd(MessagesListWrapperRef);
 		}
 	}, [usersWritingList, actualScrollPosition, roomMessages]);
 
@@ -277,11 +267,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 	}, [dateMessageWrapped, firstNewMessage, roomId]);
 
 	const handleClickScrollButton = useCallback(() => {
-		MessagesListWrapperRef?.current &&
-			MessagesListWrapperRef.current.scrollTo({
-				top: MessagesListWrapperRef.current.scrollHeight,
-				behavior: 'auto'
-			});
+		scrollToEnd(MessagesListWrapperRef);
 		setInputHasFocus(roomId, true);
 	}, [MessagesListWrapperRef, roomId, setInputHasFocus]);
 
@@ -299,12 +285,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 						messageFromEvent.detail.from === myUserId))
 			) {
 				setTimeout(() => {
-					if (MessagesListWrapperRef.current) {
-						MessagesListWrapperRef.current.scrollTo({
-							top: MessagesListWrapperRef.current.scrollHeight,
-							behavior: 'auto'
-						});
-					}
+					scrollToEnd(MessagesListWrapperRef);
 				}, 200);
 			}
 		},
