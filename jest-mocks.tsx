@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { ReactElement } from 'react';
+import React, { ReactElement, RefObject } from 'react';
 
 import { AccountSettings, AppRoute, INotificationManager } from '@zextras/carbonio-shell-ui';
 
@@ -472,3 +472,10 @@ Object.defineProperty(window, 'IntersectionObserver', {
 		disconnect: intersectionObserverMockDisconnect
 	}))
 });
+
+export const mockedScrollToEnd = jest.fn();
+export const mockedScrollToMessage = jest.fn();
+jest.mock('./src/utils/scrollUtils', () => ({
+	scrollToEnd: mockedScrollToEnd,
+	scrollToMessage: mockedScrollToMessage
+}));

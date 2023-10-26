@@ -167,13 +167,11 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 	// Manage initial scroll position
 	useEffect(() => {
 		const store = useStore.getState();
-		if (store.unreads[roomId] > 0) {
+		const actualPosition = store.activeConversations[roomId]?.scrollPositionMessageId;
+		if (store.unreads[roomId] > 0 || !actualPosition) {
 			scrollToEnd(MessagesListWrapperRef);
 		} else {
-			const actualPosition = store.activeConversations[roomId]?.scrollPositionMessageId;
-			if (actualPosition) {
-				scrollToMessage(actualPosition);
-			}
+			scrollToMessage(actualPosition);
 		}
 	}, [roomId]);
 
