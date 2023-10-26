@@ -448,6 +448,7 @@ Object.defineProperty(window, 'MediaStream', {
 		};
 	})
 });
+
 Object.defineProperty(window, 'open', {
 	value: jest.fn()
 });
@@ -456,4 +457,18 @@ Object.defineProperty(window, 'open', {
 // this is a statement to use when there's a video tag with the muted prop
 Object.defineProperty(HTMLMediaElement.prototype, 'muted', {
 	set: jest.fn()
+});
+
+export const intersectionObserverMockObserve = jest.fn();
+export const intersectionObserverMockDisconnect = jest.fn();
+Object.defineProperty(window, 'IntersectionObserver', {
+	writable: true,
+	value: jest.fn().mockImplementation((callback, options) => ({
+		thresholds: options.threshold,
+		root: options.root,
+		rootMargin: options.rootMargin,
+		observe: intersectionObserverMockObserve,
+		unobserve: jest.fn(),
+		disconnect: intersectionObserverMockDisconnect
+	}))
 });
