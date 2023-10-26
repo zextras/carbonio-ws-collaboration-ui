@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Container, Text } from '@zextras/carbonio-design-system';
 import React, { FC, useMemo } from 'react';
+
+import { Container, Text } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -18,7 +19,7 @@ import { dateString } from '../../../../utils/dateUtil';
 
 type DateMsgProps = {
 	message: DateMessage;
-	refEl: React.RefObject<HTMLElement>;
+	refEl: React.RefObject<HTMLDivElement>;
 };
 
 const CustomMessageWrapper = styled(Container)`
@@ -44,7 +45,7 @@ const DateBubble: FC<DateMsgProps> = ({ message, refEl }) => {
 				mainAlignment={'flex-start'}
 				crossAlignment={'flex-start'}
 				key={message.id}
-				dateMessage
+				$dateMessage
 				data-testid={`date_msg-${message.id}`}
 			>
 				<Text color={'gray1'}>{dateLabel}</Text>

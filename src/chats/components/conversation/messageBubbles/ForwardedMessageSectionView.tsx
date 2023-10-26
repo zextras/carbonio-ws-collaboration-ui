@@ -4,10 +4,11 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Container, Row, Text, Tooltip } from '@zextras/carbonio-design-system';
 import React, { FC, useMemo } from 'react';
+
+import { Container, Row, Text, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
+import styled, { DefaultTheme } from 'styled-components';
 
 import AttachmentSmallView from './AttachmentSmallView';
 import BubbleFooter from './BubbleFooter';
@@ -17,9 +18,11 @@ import useStore from '../../../../store/Store';
 import { ForwardedInfo, TextMessage } from '../../../../types/store/MessageTypes';
 import { calculateAvatarColor } from '../../../../utils/styleUtils';
 
-const ForwardMessageContainer = styled(Container)`
-	border-left: ${({ userBorderColor, theme }): string =>
-		`0.25rem solid ${theme.avatarColors[userBorderColor]}`};
+const ForwardMessageContainer = styled(Container)<{
+	$userBorderColor: keyof DefaultTheme['avatarColors'];
+}>`
+	border-left: ${({ $userBorderColor, theme }): string =>
+		`0.25rem solid ${theme.avatarColors[$userBorderColor]}`};
 	border-radius: 0 0.25rem 0.25rem 0;
 `;
 
@@ -58,7 +61,7 @@ const ForwardedMessageSectionView: FC<ForwardedMessageSectionViewProps> = ({
 				background={isMyMessage ? '#C4D5EF' : 'gray5'}
 				padding={{ horizontal: 'small', vertical: 'small' }}
 				orientation="horizontal"
-				userBorderColor={userColor}
+				$userBorderColor={userColor}
 				crossAlignment="flex-start"
 			>
 				{message.attachment && (

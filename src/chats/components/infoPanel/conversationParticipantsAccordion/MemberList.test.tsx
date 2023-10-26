@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { screen, act } from '@testing-library/react';
 import React from 'react';
+
+import { screen, act } from '@testing-library/react';
 
 import MemberList from './MemberList';
 import { mockedGetUserPictureRequest } from '../../../../../jest-mocks';

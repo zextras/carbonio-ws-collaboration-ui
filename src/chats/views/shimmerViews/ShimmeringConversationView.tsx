@@ -4,31 +4,27 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Container, Padding, Shimmer } from '@zextras/carbonio-design-system';
 import React, { ReactElement } from 'react';
-import styled, { css, FlattenInterpolation, ThemeProps } from 'styled-components';
 
-const CustomContainer = styled(Container)`
+import { Container, Padding, Shimmer } from '@zextras/carbonio-design-system';
+import styled, { css, DefaultTheme, FlattenInterpolation, ThemeProps } from 'styled-components';
+
+const CustomContainer = styled(Container)<{
+	$isBottomContainer?: boolean;
+	$isTopContainer?: boolean;
+}>`
 	min-height: 3rem;
 	max-height: 3.25rem;
 	background-color: ${({ theme }): string => theme.palette.gray5.regular};
 	border-bottom: 0.0625rem solid ${({ theme }): string => theme.palette.gray6.active};
-	${({
-		isBottomContainer
-	}: {
-		isBottomContainer: boolean;
-	}): false | FlattenInterpolation<ThemeProps<never>> =>
-		isBottomContainer &&
+	${({ $isBottomContainer }): FlattenInterpolation<ThemeProps<DefaultTheme>> | false | undefined =>
+		$isBottomContainer &&
 		css`
 			background-color: ${({ theme }): string => theme.palette.gray4.regular};
 			border-top: 0.0625rem solid ${({ theme }): string => theme.palette.gray6.active};
 		`};
-	${({
-		isTopContainer
-	}: {
-		isTopContainer: boolean;
-	}): false | FlattenInterpolation<ThemeProps<never>> =>
-		isTopContainer &&
+	${({ $isTopContainer }): FlattenInterpolation<ThemeProps<DefaultTheme>> | false | undefined =>
+		$isTopContainer &&
 		css`
 			background-color: ${({ theme }): string => theme.palette.gray4.regular};
 		`};
@@ -99,7 +95,7 @@ const ShimmeringConversationView = (): ReactElement => (
 			orientation="horizontal"
 			height="3rem"
 			padding={{ left: 'large', right: 'large' }}
-			isTopContainer
+			$isTopContainer
 		>
 			<Container crossAlignment="flex-start">
 				<Shimmer.Text width="20%" height="1.5rem" />
@@ -117,7 +113,7 @@ const ShimmeringConversationView = (): ReactElement => (
 					<RepliedMessageContainer orientation="horizontal">
 						<SmallContainer height="fill" width="0.25rem" />
 						<Padding right="small" />
-						<Shimmer.Avatar height="2.8125rem" width="2.8125rem" radius="0.5rem" />
+						<Shimmer.Avatar width="2.8125rem" radius="0.5rem" />
 						<Padding right="small" />
 						<Container height="fit" crossAlignment="flex-start">
 							<Shimmer.Text width="20%" height="1rem" />
@@ -155,7 +151,7 @@ const ShimmeringConversationView = (): ReactElement => (
 					<RepliedMessageContainer orientation="horizontal">
 						<SmallContainer height="fill" width="0.25rem" />
 						<Padding right="small" />
-						<Shimmer.Avatar height="2.8125rem" width="2.8125rem" radius="0.5rem" />
+						<Shimmer.Avatar width="2.8125rem" radius="0.5rem" />
 						<Padding right="small" />
 						<Container height="fit" crossAlignment="flex-start">
 							<Shimmer.Text width="20%" height="1rem" />
@@ -189,7 +185,7 @@ const ShimmeringConversationView = (): ReactElement => (
 			orientation="horizontal"
 			height="3.25rem"
 			padding={{ left: 'small', right: 'small' }}
-			isBottomContainer
+			$isBottomContainer
 		>
 			<Container crossAlignment="flex-start" width="fit">
 				<Shimmer.Avatar size="medium" radius="0.0625rem" />

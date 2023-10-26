@@ -3,9 +3,10 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
+import React from 'react';
+
 import { screen } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event/setup/setup';
-import React from 'react';
 
 import Tile from './Tile';
 import useStore from '../../store/Store';
@@ -22,6 +23,9 @@ import { UserBe } from '../../types/network/models/userBeTypes';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
 import { MeetingParticipant } from '../../types/store/MeetingTypes';
 import { RootStore } from '../../types/store/StoreTypes';
+
+const iconVideoOffOutline = 'icon: VideoOffOutline';
+const iconMicOffOutline = 'icon: MicOffOutline';
 
 const user1: UserBe = createMockUser({ id: 'user1Id', name: 'user 1' });
 const user2: UserBe = createMockUser({ id: 'user2Id', name: 'user 2' });
@@ -168,9 +172,9 @@ const storeSetupTileAudioOnAndVideoOff = (): { user: UserEvent; store: RootStore
 describe('Tile test - enter meeting modal', () => {
 	test('my tile - everything is rendered correctly', () => {
 		storeSetupMyTileAudioOnVideoOff();
-		const videoIcon = screen.getByTestId('icon: VideoOffOutline');
+		const videoIcon = screen.getByTestId(iconVideoOffOutline);
 		expect(videoIcon).toBeVisible();
-		expect(screen.queryByTestId('icon: MicOffOutline')).not.toBeInTheDocument();
+		expect(screen.queryByTestId(iconMicOffOutline)).not.toBeInTheDocument();
 		const name = screen.getByText(user1.name);
 		expect(name).toBeInTheDocument();
 		const avatar = screen.getByTestId('avatar_box');
@@ -184,13 +188,13 @@ describe('Tile test - enter meeting modal', () => {
 	});
 	test('user tile - audio on and video off', async () => {
 		storeSetupTileAudioOnAndVideoOff();
-		const videoIcon = screen.getByTestId('icon: VideoOffOutline');
+		const videoIcon = screen.getByTestId(iconVideoOffOutline);
 		expect(videoIcon).toBeVisible();
 	});
 	test('user tile - audio off and video on', async () => {
 		storeSetupTileAudioOffAndVideoOn();
-		expect(screen.queryByTestId('icon: VideoOffOutline')).not.toBeInTheDocument();
-		const audioIcon = screen.getByTestId('icon: MicOffOutline');
+		expect(screen.queryByTestId(iconVideoOffOutline)).not.toBeInTheDocument();
+		const audioIcon = screen.getByTestId(iconMicOffOutline);
 		expect(audioIcon).toBeInTheDocument();
 	});
 	test('user tile - user is Talking', () => {
@@ -204,8 +208,8 @@ describe('Tile test - on meeting', () => {
 	test('My tile - audio and video off ', async () => {
 		storeBasicActiveMeetingSetup();
 		setup(<Tile userId={user1.id} meetingId={meeting.id} />);
-		expect(screen.getByTestId('icon: MicOffOutline')).toBeInTheDocument();
-		expect(screen.getByTestId('icon: VideoOffOutline')).toBeInTheDocument();
+		expect(screen.getByTestId(iconMicOffOutline)).toBeInTheDocument();
+		expect(screen.getByTestId(iconVideoOffOutline)).toBeInTheDocument();
 	});
 
 	test('My tile - audio and video on ', async () => {
@@ -214,23 +218,23 @@ describe('Tile test - on meeting', () => {
 		store.changeStreamStatus(meeting.id, user1.id, STREAM_TYPE.AUDIO, true);
 		store.changeStreamStatus(meeting.id, user1.id, STREAM_TYPE.VIDEO, true);
 		setup(<Tile userId={user1.id} meetingId={meeting.id} />);
-		expect(screen.queryByTestId('icon: MicOffOutline')).not.toBeInTheDocument();
-		expect(screen.queryByTestId('icon: VideoOffOutline')).not.toBeInTheDocument();
+		expect(screen.queryByTestId(iconMicOffOutline)).not.toBeInTheDocument();
+		expect(screen.queryByTestId(iconVideoOffOutline)).not.toBeInTheDocument();
 	});
 
 	test('My tile - screen share on', async () => {
 		storeBasicActiveMeetingSetup();
 		setup(<Tile userId={user1.id} meetingId={meeting.id} isScreenShare />);
-		expect(screen.queryByTestId('icon: MicOffOutline')).not.toBeInTheDocument();
-		expect(screen.queryByTestId('icon: VideoOffOutline')).not.toBeInTheDocument();
+		expect(screen.queryByTestId(iconMicOffOutline)).not.toBeInTheDocument();
+		expect(screen.queryByTestId(iconVideoOffOutline)).not.toBeInTheDocument();
 		expect(screen.getByTestId('icon: ScreenSharingOnOutline')).toBeInTheDocument();
 	});
 
 	test('User tile - audio and video off ', async () => {
 		storeBasicActiveMeetingSetup();
 		setup(<Tile userId={user2.id} meetingId={meeting.id} />);
-		expect(screen.getByTestId('icon: MicOffOutline')).toBeInTheDocument();
-		expect(screen.getByTestId('icon: VideoOffOutline')).toBeInTheDocument();
+		expect(screen.getByTestId(iconMicOffOutline)).toBeInTheDocument();
+		expect(screen.getByTestId(iconVideoOffOutline)).toBeInTheDocument();
 	});
 
 	test('User tile - audio and video on ', async () => {
@@ -239,15 +243,15 @@ describe('Tile test - on meeting', () => {
 		store.changeStreamStatus(meeting.id, user2.id, STREAM_TYPE.AUDIO, true);
 		store.changeStreamStatus(meeting.id, user2.id, STREAM_TYPE.VIDEO, true);
 		setup(<Tile userId={user2.id} meetingId={meeting.id} />);
-		expect(screen.queryByTestId('icon: MicOffOutline')).not.toBeInTheDocument();
-		expect(screen.queryByTestId('icon: VideoOffOutline')).not.toBeInTheDocument();
+		expect(screen.queryByTestId(iconMicOffOutline)).not.toBeInTheDocument();
+		expect(screen.queryByTestId(iconVideoOffOutline)).not.toBeInTheDocument();
 	});
 
 	test('User tile - screen share on', async () => {
 		storeBasicActiveMeetingSetup();
 		setup(<Tile userId={user1.id} meetingId={meeting.id} isScreenShare />);
-		expect(screen.queryByTestId('icon: MicOffOutline')).not.toBeInTheDocument();
-		expect(screen.queryByTestId('icon: VideoOffOutline')).not.toBeInTheDocument();
+		expect(screen.queryByTestId(iconMicOffOutline)).not.toBeInTheDocument();
+		expect(screen.queryByTestId(iconVideoOffOutline)).not.toBeInTheDocument();
 		expect(screen.getByTestId('icon: ScreenSharingOnOutline')).toBeInTheDocument();
 	});
 });

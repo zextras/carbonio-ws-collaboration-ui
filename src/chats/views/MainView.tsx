@@ -5,6 +5,7 @@
  */
 
 import React, { lazy, ReactElement } from 'react';
+
 import { Route, Switch, useRouteMatch } from 'react-router-dom';
 
 import { ROUTES } from '../../hooks/useRouting';

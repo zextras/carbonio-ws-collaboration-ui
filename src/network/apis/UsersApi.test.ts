@@ -11,6 +11,9 @@ import useStore from '../../store/Store';
 import { createMockCapabilityList, createMockUser } from '../../tests/createMock';
 import { UserBe } from '../../types/network/models/userBeTypes';
 
+const contentType = 'Content-Type';
+const applicationJson = 'application/json';
+
 const user: UserBe = createMockUser({ id: 'userId1' });
 const user2: UserBe = createMockUser({ id: 'userId2' });
 
@@ -25,7 +28,7 @@ describe('Users API', () => {
 
 		// Set appropriate headers
 		const headers = new Headers();
-		headers.append('Content-Type', 'application/json');
+		headers.append(contentType, applicationJson);
 
 		// Check if fetch is called with the correct parameters
 		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/users/${user.id}`, {
@@ -46,7 +49,7 @@ describe('Users API', () => {
 
 		// Set appropriate headers
 		const headers = new Headers();
-		headers.append('Content-Type', 'application/json');
+		headers.append(contentType, applicationJson);
 
 		// Check if fetch is called with the correct parameters
 		expect(global.fetch).toHaveBeenCalledWith(
@@ -76,7 +79,7 @@ describe('Users API', () => {
 
 		// Set appropriate headers
 		const headers = new Headers();
-		headers.append('Content-Type', 'application/json');
+		headers.append(contentType, applicationJson);
 
 		// Check if fetch is called with the correct parameters
 		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/users/${user.id}/picture`, {
@@ -122,7 +125,7 @@ describe('Users API', () => {
 
 		// Set appropriate headers
 		const headers = new Headers();
-		headers.append('Content-Type', 'application/json');
+		headers.append(contentType, applicationJson);
 
 		// Check if fetch is called with the correct parameters
 		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/users/${user.id}/picture`, {

@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Avatar, Container, IconButton, Padding, Tooltip } from '@zextras/carbonio-design-system';
 import React, { FC, useCallback, useMemo } from 'react';
+
+import { Avatar, Container, IconButton, Padding, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -14,13 +15,13 @@ import { AttachmentsApi } from '../../../../network';
 import { AttachmentMessageType } from '../../../../types/store/MessageTypes';
 import { getThumbnailURL, isPreviewSupported } from '../../../../utils/attachmentUtils';
 
-const HoverContainer = styled(Container)`
+const HoverContainer = styled(Container)<{ $isGenericFile: boolean }>`
 	z-index: 1;
 	position: absolute;
 	opacity: 0;
 	border-radius: 0.5rem;
-	background-color: ${({ isGenericFile }): string =>
-		isGenericFile ? 'rgba(0, 0, 0, 0.8);' : 'rgba(0, 0, 0, 0.6);'};
+	background-color: ${({ $isGenericFile }): string =>
+		$isGenericFile ? 'rgba(0, 0, 0, 0.8);' : 'rgba(0, 0, 0, 0.6);'};
 `;
 
 const CustomPadding = styled(Padding)`
@@ -80,7 +81,7 @@ const AttachmentSmallView: FC<AttachmentSmallViewProps> = ({ attachment }) => {
 				width="3rem"
 				mainAlignment="center"
 				crossAlignment="center"
-				isGenericFile={!previewSupported}
+				$isGenericFile={!previewSupported}
 			>
 				<Tooltip label={previewSupported ? previewActionLabel : downloadActionLabel}>
 					{previewSupported ? (

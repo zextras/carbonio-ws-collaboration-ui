@@ -18,6 +18,7 @@ import { wsDebug } from '../../utils/debug';
 import { MeetingSoundFeedback, sendAudioFeedback } from '../../utils/MeetingsUtils';
 import { MeetingsApi, RoomsApi } from '../index';
 
+// eslint-disable-next-line sonarjs/cognitive-complexity
 export function wsEventsHandler(event: WsEvent): void {
 	const state = useStore.getState();
 
@@ -28,6 +29,7 @@ export function wsEventsHandler(event: WsEvent): void {
 		}
 		case WsEventType.ROOM_CREATED: {
 			RoomsApi.getRoom(event.roomId).then((response: GetRoomResponse) => state.addRoom(response));
+			state.connections.xmppClient.setOnline();
 			break;
 		}
 		case WsEventType.ROOM_UPDATED: {

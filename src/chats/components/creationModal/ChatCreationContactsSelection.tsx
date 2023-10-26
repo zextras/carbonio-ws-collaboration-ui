@@ -4,6 +4,16 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import React, {
+	Dispatch,
+	ReactElement,
+	SetStateAction,
+	useCallback,
+	useEffect,
+	useMemo,
+	useState
+} from 'react';
+
 import { ChipInput, Container, List, Padding, Text } from '@zextras/carbonio-design-system';
 import { Spinner } from '@zextras/carbonio-shell-ui';
 import {
@@ -19,15 +29,6 @@ import {
 	size,
 	union
 } from 'lodash';
-import React, {
-	Dispatch,
-	ReactElement,
-	SetStateAction,
-	useCallback,
-	useEffect,
-	useMemo,
-	useState
-} from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -132,7 +133,7 @@ const ChatCreationContactsSelection = ({
 	const debouncedAutoComplete = useMemo(
 		() =>
 			debounce(() => {
-				autoCompleteGalRequest(inputRef.current?.value || '')
+				autoCompleteGalRequest(inputRef.current?.value ?? '')
 					.then((response: AutoCompleteGalResponse) => {
 						setLoading(false);
 						// Remove myself from the list
@@ -206,7 +207,7 @@ const ChatCreationContactsSelection = ({
 				const clickCb =
 					(chipInputHasError && selected) || !chipInputHasError
 						? onClickListItem
-						: (): null => null;
+						: (item: ContactInfo) => () => null;
 				return (
 					<ListParticipant
 						item={item}
@@ -283,6 +284,9 @@ const ChatCreationContactsSelection = ({
 				value={chips}
 				onChange={removeContactFromChip}
 				requireUniqueChips
+				// TODO FIX CHIPS
+				/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
+				/* @ts-ignore */
 				maxChips={maxGroupMembers}
 				data-testid="chip_input_creation_modal"
 				confirmChipOnBlur={false}

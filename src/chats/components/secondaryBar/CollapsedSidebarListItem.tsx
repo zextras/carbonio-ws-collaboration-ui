@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Container, Tooltip } from '@zextras/carbonio-design-system';
 import React, { useCallback } from 'react';
+
+import { Container, Tooltip } from '@zextras/carbonio-design-system';
 import styled from 'styled-components';
 
 import useRouting from '../../../hooks/useRouting';
@@ -22,11 +23,11 @@ type SidebarListItemProps = {
 	roomId: string;
 };
 
-const SidebarItem = styled(Container)`
+const SidebarItem = styled(Container)<{ $selected: boolean }>`
 	cursor: pointer;
 	&:hover {
-		background-color: ${({ theme, selected }): string =>
-			selected ? theme.palette.highlight.regular : theme.palette.gray3.regular};
+		background-color: ${({ theme, $selected }): string =>
+			$selected ? theme.palette.highlight.regular : theme.palette.gray3.regular};
 	}
 `;
 
@@ -46,6 +47,7 @@ const CollapsedSidebarListItem: React.FC<SidebarListItemProps> = ({ roomId }) =>
 			<SidebarItem
 				background={isConversationSelected ? 'highlight' : 'none'}
 				onClick={openConversation}
+				$selected={isConversationSelected}
 				orientation="horizontal"
 				mainAlignment="flex-start"
 				height="fit"

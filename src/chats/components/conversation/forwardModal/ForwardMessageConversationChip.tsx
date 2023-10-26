@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Chip } from '@zextras/carbonio-design-system';
 import React, { FunctionComponent, ReactElement } from 'react';
+
+import { Chip } from '@zextras/carbonio-design-system';
 
 import {
 	getRoomNameSelector,

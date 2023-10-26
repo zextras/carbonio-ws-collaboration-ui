@@ -4,10 +4,11 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import React, { useCallback, useContext, useMemo, useRef } from 'react';
+
 import { Container, Icon, IconButton, Text, Tooltip } from '@zextras/carbonio-design-system';
 import { PreviewsManagerContext } from '@zextras/carbonio-ui-preview';
 import { forEach, map } from 'lodash';
-import React, { useCallback, useContext, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -58,18 +59,18 @@ const PreviewContainer = styled(Container)`
 	}
 `;
 
-const LocalFile = styled(Container)`
+const LocalFile = styled(Container)<{ $hasFocus: boolean }>`
 	border-radius: 0.625rem;
 	border: 0.125rem solid
-		${({ hasFocus, theme }): string => (hasFocus ? theme.palette.success.regular : 'transparent')};
+		${({ $hasFocus, theme }): string => ($hasFocus ? theme.palette.success.regular : 'transparent')};
 `;
 
-const PreviewLocalFile = styled(Container)`
+const PreviewLocalFile = styled(Container)<{ $hasFocus: boolean; $bkgUrl: string }>`
 	border-radius: 0.625rem;
 	border: 0.125rem solid
-		${({ hasFocus, theme }): string => (hasFocus ? theme.palette.success.regular : 'transparent')};
-	background: ${({ bkgUrl, theme }): string =>
-		`center / contain no-repeat url('${bkgUrl}'), ${theme.palette.gray0.regular}`};
+		${({ $hasFocus, theme }): string => ($hasFocus ? theme.palette.success.regular : 'transparent')};
+	background: ${({ $bkgUrl, theme }): string =>
+		`center / contain no-repeat url('${$bkgUrl}'), ${theme.palette.gray0.regular}`};
 `;
 
 const FileCloseIconButton = styled(IconButton)`
@@ -97,7 +98,7 @@ const FileListContainer = styled(Container)`
 	}
 `;
 
-const CustomIcon = styled(Icon)`
+const CustomIcon = styled(Icon)<{ title?: string }>`
 	height: 2.625rem;
 	width: 2.625rem;
 `;
@@ -222,7 +223,6 @@ const UploadAttachmentManagerView: React.FC<UploadAttachmentManagerViewProps> = 
 						data-testid={`previewFileUpload-${file.file.name}-${file.fileId}`}
 						height="6.25rem"
 						width="6.25rem"
-						hasFocus={file.hasFocus}
 						onClick={(): void => editFileDescription(file.fileId, file.description)}
 					>
 						<HoverActions>
@@ -233,7 +233,7 @@ const UploadAttachmentManagerView: React.FC<UploadAttachmentManagerViewProps> = 
 									borderRadius="round"
 									icon="Close"
 									size="small"
-									onClick={(ev: Event): void => removeFile(ev, file.fileId)}
+									onClick={(ev): void => removeFile(ev, file.fileId)}
 								/>
 							</Tooltip>
 							{displayPreview && (
@@ -255,14 +255,14 @@ const UploadAttachmentManagerView: React.FC<UploadAttachmentManagerViewProps> = 
 								height="6.25rem"
 								width="6.25rem"
 								background="gray2"
-								hasFocus={file.hasFocus}
+								$hasFocus={file.hasFocus}
 							>
 								<CustomIcon
 									icon={getAttachmentIcon(file.file.type)}
 									height="2.625rem"
 									width="2.625rem"
 									color="secondary"
-									label={file.file.name}
+									title={file.file.name}
 								/>
 							</LocalFile>
 						) : (
@@ -272,8 +272,8 @@ const UploadAttachmentManagerView: React.FC<UploadAttachmentManagerViewProps> = 
 								width="6.25rem"
 								minHeight="6.25rem"
 								minWidth="6.25rem"
-								bkgUrl={file.localUrl}
-								hasFocus={file.hasFocus}
+								$bkgUrl={file.localUrl}
+								$hasFocus={file.hasFocus}
 							/>
 						)}
 					</PreviewContainer>

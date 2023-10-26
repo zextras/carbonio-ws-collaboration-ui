@@ -4,27 +4,24 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Container } from '@zextras/carbonio-design-system';
 import React, { ReactElement, useMemo, useRef } from 'react';
+
+import { Container } from '@zextras/carbonio-design-system';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import useGeneralMeetingControls from '../../hooks/useGeneralMeetingControls';
 import { MeetingRoutesParams } from '../../hooks/useRouting';
-import {
-	getMeetingSidebarStatus,
-	getMeetingViewSelected
-} from '../../store/selectors/ActiveMeetingSelectors';
+import { getMeetingViewSelected } from '../../store/selectors/ActiveMeetingSelectors';
 import { getNumberOfTiles } from '../../store/selectors/MeetingSelectors';
 import { getCustomLogo } from '../../store/selectors/SessionSelectors';
 import useStore from '../../store/Store';
 import { MeetingViewType } from '../../types/store/ActiveMeetingTypes';
 import defaultLogo from '../assets/Logo.png';
 import CinemaMode from '../components/cinemaMode/CinemaMode';
-import SidebarCarousel from '../components/cinemaMode/SidebarCarousel';
 import FaceToFaceMode from '../components/faceToFaceMode/FaceToFaceMode';
 import GridMode from '../components/gridMode/GridMode';
-import MeetingActions from '../components/MeetingActions/MeetingActions';
+import MeetingActionsBar from '../components/meetingActionsBar/MeetingActionsBar';
 import MeetingSidebar from '../components/sidebar/MeetingSidebar';
 
 const SkeletonContainer = styled(Container)`
@@ -35,10 +32,11 @@ const SkeletonContainer = styled(Container)`
 const ViewContainer = styled(Container)`
 	position: relative;
 	overflow-y: hidden;
-	padding: 4.25rem;
+	padding: 1rem;
+	flex-grow: 1;
 `;
 
-const LogoApp = styled(Container)`
+const LogoApp = styled(Container)<{ $customLogo: string | false | undefined }>`
 	position: absolute;
 	top: 1rem;
 	left: 1rem;
@@ -46,14 +44,13 @@ const LogoApp = styled(Container)`
 	height: 1.3125rem;
 	width: 9.625rem;
 	background-repeat: no-repeat;
-	background-image: url(${({ customLogo }): string => customLogo || defaultLogo});
+	background-image: url(${({ $customLogo }): string => $customLogo || defaultLogo});
 `;
 
 const MeetingSkeleton = (): ReactElement => {
 	const { meetingId }: MeetingRoutesParams = useParams();
 
 	const meetingViewSelected = useStore((store) => getMeetingViewSelected(store, meetingId));
-	const sidebarStatus: boolean = useStore((store) => getMeetingSidebarStatus(store, meetingId));
 	const numberOfTiles = useStore((store) => getNumberOfTiles(store, meetingId));
 	const customLogo = useStore(getCustomLogo);
 
@@ -68,28 +65,20 @@ const MeetingSkeleton = (): ReactElement => {
 		return meetingViewSelected === MeetingViewType.CINEMA ? <CinemaMode /> : <GridMode />;
 	}, [meetingViewSelected, numberOfTiles]);
 
-	const displayCarousel = useMemo(
-		() => meetingViewSelected === MeetingViewType.CINEMA && numberOfTiles > 2,
-		[meetingViewSelected, numberOfTiles]
-	);
-
 	return (
 		<SkeletonContainer orientation="horizontal" borderRadius="none">
 			<MeetingSidebar />
 			<ViewContainer
 				ref={streamsWrapperRef}
 				background="gray0"
-				width={sidebarStatus ? 'fill' : '100%'}
-				borderRadius="none"
-				padding={{ all: 'large' }}
 				crossAlignment="center"
 				orientation="horizontal"
+				data-testid="meeting_view_container"
 			>
-				<LogoApp customLogo={customLogo} />
+				<LogoApp $customLogo={customLogo} />
 				{ViewToDisplay}
-				<MeetingActions streamsWrapperRef={streamsWrapperRef} />
+				<MeetingActionsBar streamsWrapperRef={streamsWrapperRef} />
 			</ViewContainer>
-			{displayCarousel && <SidebarCarousel />}
 		</SkeletonContainer>
 	);
 };

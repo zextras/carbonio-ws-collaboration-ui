@@ -38,7 +38,7 @@
         "SomeoneElseCreatedOneToOne": "{{userName}} started a chat with you",
         "groupCreated": "{{roomName}} created!",
         "memberAdded": "{{userName}} has been added to {{roomName}}",
-        "memberRemoved": "{{userName}} has been removed from {{roomName}}",
+        "memberRemoved": "{{userName}} is no longer a member of the group",
         "oneToOneCreated": "New Chat created!",
         "youCreatedOneToOne": "You started a Chat with {{userName}}"
     },
@@ -56,7 +56,8 @@
         "roomNameChanged": "{{name}} changed the title of this Group in \"<i>{{roomName}}</i>\"",
         "roomPictureDeleted": "{{name}} restored the default {{roomName}}'s image",
         "roomPictureUpdated": "{{name}} changed {{roomName}}'s image",
-        "roomTopicChanged": "{{name}} changed the topic of {{roomName}} in \"<i>{{topicName}}</i>\""
+        "roomTopicChanged": "{{name}} changed the topic of {{roomName}} in \"<i>{{topicName}}</i>\"",
+        "roomTopicRemoved": "{{name}} removed {{roomName}}'s topic"
     },
     "conversation": {
         "chooseConversationDescription": "Choose a conversation to start a chat",
@@ -123,12 +124,14 @@
         "interactions": {
             "cameraDisabled": "Camera disabled",
             "cameraEnabled": "Camera enabled",
+            "cinemaView": "Cinema view",
             "disableCamera": "Disable camera",
             "disableMicrophone": "Disable microphone",
             "disableScreen": "Disable screen share",
             "enableCamera": "Enable camera",
             "enableMicrophone": "Enable microphone",
             "enableScreen": "Enable screen share",
+            "gridView": "Grid view",
             "leaveMeeting": "Leave Meeting",
             "microphoneDisabled": "Microphone disabled",
             "microphoneEnabled": "Microphone enabled",
@@ -245,10 +248,12 @@
     },
     "status": {
         "areTyping": "are typing...",
+        "goToPrivateChat": "Go to private chat to send a personal message",
         "isTyping": "is typing...",
         "lastSeen": "Last seen {{lastSeen}}",
         "offline": "Offline",
-        "online": "Online"
+        "online": "Online",
+        "you": " You"
     },
     "thanksForParticipating": "Thanks for participating",
     "titlePlaceholder": "Your Group's title",

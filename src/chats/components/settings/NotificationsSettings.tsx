@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Checkbox, Container, Divider, Padding, Text } from '@zextras/carbonio-design-system';
 import React, { Dispatch, FC, SetStateAction, useCallback } from 'react';
+
+import { Checkbox, Container, Divider, Padding, Text } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
 type NotificationsSettingsProps = {

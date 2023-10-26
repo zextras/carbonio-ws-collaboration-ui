@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Accordion, AccordionItemType, Container } from '@zextras/carbonio-design-system';
 import React, { FC, useCallback, useMemo } from 'react';
+
+import { Accordion, AccordionItemType, Container } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 

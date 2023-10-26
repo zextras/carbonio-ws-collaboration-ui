@@ -4,9 +4,10 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import React, { FC, useMemo } from 'react';
+
 import { Avatar, Container, Padding, Text, Shimmer, Row } from '@zextras/carbonio-design-system';
 import moment from 'moment-timezone';
-import React, { FC, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -41,8 +42,13 @@ const CustomAvatar = styled(Avatar)`
 const MemberComponentInfo: FC<ParticipantsInfoProps> = ({ member, roomId }) => {
 	const [t] = useTranslation();
 	const userOnlineLabel: string = t('status.online', 'Online');
-	const userOfflineLabel: string = t('status.offline', 'Offline');
+	const youLabel = t('status.you', ' You');
+	const goToPrivateChatLabel = t(
+		'status.goToPrivateChat',
+		'Go to private chat to send a personal message'
+	);
 
+	const sessionId: string | undefined = useStore.getState().session.id;
 	const memberName: string | undefined = useStore((store) => getUserName(store, member.userId));
 	const memberEmail: string | undefined = useStore((store) => getUserEmail(store, member.userId));
 	const memberLastActivity: number | undefined = useStore((store) =>
@@ -58,14 +64,11 @@ const MemberComponentInfo: FC<ParticipantsInfoProps> = ({ member, roomId }) => {
 		getCapability(store, CapabilityType.CAN_SEE_USERS_PRESENCE)
 	);
 
-	const [picture, setPicture] = useState<false | string>(false);
-
-	useEffect(() => {
+	const picture = useMemo(() => {
 		if (userPictureUpdatedAt != null) {
-			setPicture(`${UsersApi.getURLUserPicture(member.userId)}?${userPictureUpdatedAt}`);
-		} else {
-			setPicture(false);
+			return `${UsersApi.getURLUserPicture(member.userId)}?${userPictureUpdatedAt}`;
 		}
+		return '';
 	}, [member, userPictureUpdatedAt]);
 
 	const lastSeen: string | undefined = useMemo(() => {
@@ -77,18 +80,34 @@ const MemberComponentInfo: FC<ParticipantsInfoProps> = ({ member, roomId }) => {
 	const lastSeenLabel: string = t('status.lastSeen', `Last Seen ${lastSeen}`, { lastSeen });
 
 	const presenceLabel = useMemo(
-		() => (memberOnline ? userOnlineLabel : memberLastActivity ? lastSeenLabel : userOfflineLabel),
-		[memberOnline, memberLastActivity, userOnlineLabel, lastSeenLabel, userOfflineLabel]
+		() =>
+			sessionId === member.userId
+				? youLabel
+				: memberOnline
+				? userOnlineLabel
+				: memberLastActivity
+				? lastSeenLabel
+				: goToPrivateChatLabel,
+		[
+			sessionId,
+			member.userId,
+			youLabel,
+			memberOnline,
+			userOnlineLabel,
+			memberLastActivity,
+			lastSeenLabel,
+			goToPrivateChatLabel
+		]
 	);
 
 	const avatarElement = useMemo(
 		() =>
 			memberName == null && memberEmail == null ? (
 				<Container width="fit" height="fit">
-					<Shimmer.Avatar height="2rem" width="2rem" />
+					<Shimmer.Avatar width="2rem" />
 				</Container>
 			) : (
-				<CustomAvatar label={memberName || memberEmail} shape="round" picture={picture} />
+				<CustomAvatar label={memberName || memberEmail || ''} shape="round" picture={picture} />
 			),
 		[memberEmail, memberName, picture]
 	);

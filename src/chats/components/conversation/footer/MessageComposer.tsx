@@ -4,6 +4,16 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import React, {
+	BaseSyntheticEvent,
+	useCallback,
+	useContext,
+	useEffect,
+	useMemo,
+	useRef,
+	useState
+} from 'react';
+
 import {
 	Container,
 	CreateSnackbarFn,
@@ -14,15 +24,6 @@ import {
 	Tooltip
 } from '@zextras/carbonio-design-system';
 import { debounce, find, forEach, map, throttle } from 'lodash';
-import React, {
-	BaseSyntheticEvent,
-	useCallback,
-	useContext,
-	useEffect,
-	useMemo,
-	useRef,
-	useState
-} from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -55,7 +56,9 @@ type ConversationMessageComposerProps = {
 const BlockUploadButton = styled(IconButton)`
 	display: none;
 `;
+
 const LoadingSpinner = styled(Spinner)``;
+
 const UploadSpinnerWrapper = styled(Container)`
 	&:hover {
 		${BlockUploadButton} {
@@ -67,7 +70,9 @@ const UploadSpinnerWrapper = styled(Container)`
 	}
 `;
 
-type CreateSnackbarFn = typeof CreateSnackbarFn;
+const SendIconButton = styled(IconButton)<{ alt?: string }>``;
+
+const EmojiIconButton = styled(IconButton)<{ alt?: string }>``;
 
 const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId }) => {
 	const xmppClient = useStore(getXmppClient);
@@ -92,10 +97,10 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 	const filesToUploadArray = useStore((store) => getFilesToUploadArray(store, roomId));
 	const setFilesToAttach = useStore((store) => store.setFilesToAttach);
 
-	const completeReferenceMessage = useMessage(roomId, referenceMessage?.messageId || '');
+	const completeReferenceMessage = useMessage(roomId, referenceMessage?.messageId ?? '');
 
 	const [listAbortController, setListAbortController] = useState<AbortController[]>([]);
-	const [textMessage, setTextMessage] = useState(draftMessage || '');
+	const [textMessage, setTextMessage] = useState(draftMessage ?? '');
 	const [isUploading, setIsUploading] = useState(false);
 	const [noMoreCharsOnInputComposer, setNoMoreCharsOnInputComposer] = useState(false);
 	const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -104,7 +109,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 	const createSnackbar: CreateSnackbarFn = useContext(SnackbarManagerContext);
 
 	const messageInputRef = useRef<HTMLTextAreaElement>();
-	const emojiButtonRef = useRef<HTMLButtonElement>();
+	const emojiButtonRef = useRef<HTMLDivElement>(null);
 	const emojiTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
 
 	const sendDisabled = useMemo(() => {
@@ -311,9 +316,8 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 						// If a text message (not an attachment description) is completely removed, open the delete dialog
 						if (message === '' && !referenceMessage.attachment) {
 							setDeleteMessageModalStatus(true);
-						}
-						// Avoid to send correction if text doesn't change
-						else {
+						} else {
+							// Avoid to send correction if text doesn't change
 							if (completeReferenceMessage.text !== message) {
 								xmppClient.sendChatMessageEdit(roomId, message, referenceMessage.stanzaId);
 							}
@@ -346,10 +350,12 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 
 	// Set focus on input after closing DeleteMessageModal
 	useEffect(() => {
-		if (referenceMessage?.actionType === messageActionType.EDIT && !deleteMessageModalStatus) {
-			if (messageInputRef?.current) {
-				messageInputRef.current?.focus();
-			}
+		if (
+			referenceMessage?.actionType === messageActionType.EDIT &&
+			!deleteMessageModalStatus &&
+			messageInputRef?.current
+		) {
+			messageInputRef.current?.focus();
 		}
 	}, [referenceMessage, deleteMessageModalStatus]);
 
@@ -445,20 +451,18 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 
 						// LINUX OS AND BROWSER ARE FIREFOX/CHROME
 						// WIN OS AND BROWSER ARE CHROME/FIREFOX
-						if (isLinux || isWin) {
-							if (isFirefoxBrowser || isChromeBrowser || chromeVersion) {
-								mapFiles(listOfFiles, includeFiles);
-							} else {
-								console.error(`Browser not support copy/paste function ${navigator}`);
-							}
-						}
-						// MAC OS AND BROWSER ARE CHROME/FIREFOX/SAFARI
-						else if (isMac) {
-							if (isChromeBrowser || chromeVersion || isFirefoxBrowser || isSafariBrowser) {
-								mapFiles(listOfFiles, includeFiles);
-							} else {
-								console.error(`Browser not support copy/paste function ${navigator}`);
-							}
+						if (isLinux || (isWin && isFirefoxBrowser) || isChromeBrowser || chromeVersion) {
+							mapFiles(listOfFiles, includeFiles);
+						} else if (
+							// MAC OS AND BROWSER ARE CHROME/FIREFOX/SAFARI
+							(isMac && isChromeBrowser) ||
+							chromeVersion ||
+							isFirefoxBrowser ||
+							isSafariBrowser
+						) {
+							mapFiles(listOfFiles, includeFiles);
+						} else {
+							console.error(`Browser not support copy/paste function ${navigator}`);
 						}
 					}
 				}
@@ -530,7 +534,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 	}, []);
 
 	useEffect(() => {
-		let refValue: HTMLButtonElement | undefined;
+		let refValue: HTMLDivElement;
 		if (emojiButtonRef.current) {
 			emojiButtonRef.current.addEventListener('mouseenter', mouseEnterEvent);
 			emojiButtonRef.current.addEventListener('mouseleave', mouseLeaveEvent);
@@ -571,7 +575,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 			<Container orientation="horizontal" crossAlignment="flex-end">
 				<Tooltip label={selectEmojiLabel}>
 					<Container width="fit" height="fit" padding={{ left: 'extrasmall', bottom: '0.3125rem' }}>
-						<IconButton
+						<EmojiIconButton
 							ref={emojiButtonRef}
 							iconColor="secondary"
 							size="large"
@@ -619,7 +623,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 						height="fit"
 						padding={{ right: 'extrasmall', bottom: '0.3125rem' }}
 					>
-						<IconButton
+						<SendIconButton
 							onClick={sendMessage}
 							iconColor="primary"
 							size="large"

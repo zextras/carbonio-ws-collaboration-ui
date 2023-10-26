@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import React, { useCallback, useMemo } from 'react';
+
 import {
 	Badge,
 	Container,
@@ -14,7 +16,6 @@ import {
 	Tooltip
 } from '@zextras/carbonio-design-system';
 import { map } from 'lodash';
-import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -45,11 +46,11 @@ type ExpandedSidebarListItemProps = {
 	roomId: string;
 };
 
-const ListItem = styled(Container)`
+const ListItem = styled(Container)<{ $selected: boolean }>`
 	cursor: pointer;
 	&:hover {
-		background-color: ${({ selected, theme }): string =>
-			selected ? theme.palette.highlight.regular : theme.palette.gray3.regular};
+		background-color: ${({ $selected, theme }): string =>
+			$selected ? theme.palette.highlight.regular : theme.palette.gray3.regular};
 	}
 	-webkit-user-select: none;
 	user-select: none;
@@ -68,7 +69,7 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 	const lastMessageId: string | undefined = useStore((state) =>
 		getLastMessageIdSelector(state, roomId)
 	);
-	const lastMessageOfRoom: Message | undefined = useMessage(roomId, lastMessageId || '');
+	const lastMessageOfRoom: Message | undefined = useMessage(roomId, lastMessageId ?? '');
 	const unreadMessagesCount = useStore((store) => getRoomUnreadsSelector(store, roomId));
 	const roomType = useStore((state) => getRoomTypeSelector(state, roomId));
 	const roomName = useStore((state) => getRoomNameSelector(state, roomId));
@@ -132,42 +133,45 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 	);
 
 	const messageToDisplay = useMemo((): JSX.Element | string | undefined => {
-		if ((usersWritingList && usersWritingList.length === 0) || !usersWritingList) {
-			if (lastMessageOfRoom) {
-				switch (lastMessageOfRoom.type) {
-					case MessageType.TEXT_MSG: {
-						if (lastMessageOfRoom.deleted) {
-							return deletedMessageLabel;
-						}
-						const text =
-							lastMessageOfRoom.attachment && lastMessageOfRoom.text === ''
-								? lastMessageOfRoom.attachment.name
-								: lastMessageOfRoom.text;
-						if (
-							roomType === RoomType.GROUP &&
-							lastMessageOfRoom.from !== sessionId &&
-							userNameOfLastMessageOfRoom
-						) {
-							return `${userNameOfLastMessageOfRoom.split(/(\s+)/)[0]}: ${text}`;
-						}
-						return text;
+		if (
+			((usersWritingList && usersWritingList.length === 0) || !usersWritingList) &&
+			lastMessageOfRoom
+		) {
+			switch (lastMessageOfRoom.type) {
+				case MessageType.TEXT_MSG: {
+					if (lastMessageOfRoom.deleted) {
+						return deletedMessageLabel;
 					}
-					case MessageType.CONFIGURATION_MSG:
-						return <ConfigurationMessageLabel message={lastMessageOfRoom} />;
-					default:
-						return `affiliation message to replace`;
+					const text =
+						lastMessageOfRoom.attachment && lastMessageOfRoom.text === ''
+							? lastMessageOfRoom.attachment.name
+							: lastMessageOfRoom.text;
+					if (
+						roomType === RoomType.GROUP &&
+						lastMessageOfRoom.from !== sessionId &&
+						userNameOfLastMessageOfRoom
+					) {
+						return `${userNameOfLastMessageOfRoom.split(/(\s+)/)[0]}: ${text}`;
+					}
+					return text;
 				}
+				case MessageType.CONFIGURATION_MSG:
+					return <ConfigurationMessageLabel message={lastMessageOfRoom} />;
+				default:
+					return `affiliation message to replace`;
 			}
 		}
-		if (usersWritingList && usersWritingList.length === 1) {
-			return `${usersWritingList[0].split(/(\s+)/)[0]} ${isTypingLabel}`;
-		}
-		if (usersWritingList && usersWritingList.length > 1) {
-			const usersWritingListNames: string[] = [];
-			map(usersWritingList, (user) => {
-				usersWritingListNames.push(user.split(/(\s+)/)[0]);
-			});
-			return `${usersWritingListNames.join(', ')} ${areTypingLabel}`;
+		if (usersWritingList) {
+			if (usersWritingList.length === 1) {
+				return `${usersWritingList[0].split(/(\s+)/)[0]} ${isTypingLabel}`;
+			}
+			if (usersWritingList.length > 1) {
+				const usersWritingListNames: string[] = [];
+				map(usersWritingList, (user) => {
+					usersWritingListNames.push(user.split(/(\s+)/)[0]);
+				});
+				return `${usersWritingListNames.join(', ')} ${areTypingLabel}`;
+			}
 		}
 		return undefined;
 	}, [
@@ -201,6 +205,7 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 			mainAlignment="flex-start"
 			height="fit"
 			padding={{ all: 'small' }}
+			$selected={isConversationSelected}
 		>
 			<Row>
 				{roomType === RoomType.GROUP ? (

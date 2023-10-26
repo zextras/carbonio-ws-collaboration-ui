@@ -5,9 +5,10 @@
  */
 /* eslint-disable no-nested-ternary */
 
-import { Container, Padding } from '@zextras/carbonio-design-system';
 import React, { FC, useMemo } from 'react';
-import styled from 'styled-components';
+
+import { Container, Padding } from '@zextras/carbonio-design-system';
+import styled, { SimpleInterpolation } from 'styled-components';
 
 import AttachmentView from './AttachmentView';
 import BubbleContextualMenuDropDown, {
@@ -31,8 +32,8 @@ type BubbleProps = {
 	message: TextMessage;
 	prevMessageIsFromSameSender: boolean;
 	nextMessageIsFromSameSender: boolean;
-	messageRef: React.RefObject<HTMLElement>;
-	messageListRef?: React.MutableRefObject<HTMLDivElement | undefined>;
+	messageRef: React.RefObject<HTMLDivElement>;
+	messageListRef?: React.RefObject<HTMLDivElement | undefined>;
 };
 
 const DropDownWrapper = styled(Container)`
@@ -40,11 +41,17 @@ const DropDownWrapper = styled(Container)`
 	z-index: ${Z_INDEX_RANK.DROPDOWN_CXT};
 `;
 
-const BubbleContainer = styled(Container)`
+const BubbleContainer = styled(Container)<{
+	$isMyMessage: boolean;
+	$messageAttachment: boolean;
+	$firstMessageOfList: boolean;
+	$centerMessageOfList: boolean;
+	$lastMessageOfList: boolean;
+}>`
 	margin-top: 0.25rem;
 	margin-bottom: 0.25rem;
-	${({ messageAttachment }): string | false => !messageAttachment && 'width: fit-content;'};
-	${({ isMyMessage }): string => isMyMessage && 'margin-left: auto;'};
+	${({ $messageAttachment }): string | false => !$messageAttachment && 'width: fit-content;'};
+	${({ $isMyMessage }): SimpleInterpolation => $isMyMessage && 'margin-left: auto;'};
 	box-shadow: 0 0 0.25rem rgba(166, 166, 166, 0.5);
 
 	&:hover {
@@ -53,23 +60,21 @@ const BubbleContainer = styled(Container)`
 		}
 	}
 	border-radius: ${({
-		isMyMessage,
-		firstMessageOfList,
-		centerMessageOfList,
-		lastMessageOfList
+		$isMyMessage,
+		$firstMessageOfList,
+		$centerMessageOfList,
+		$lastMessageOfList
 	}): string =>
-		isMyMessage
-			? firstMessageOfList
+		$isMyMessage
+			? $firstMessageOfList
 				? '0.25rem 0.25rem 0 0.25rem'
-				: centerMessageOfList || lastMessageOfList
+				: $centerMessageOfList || $lastMessageOfList
 				? '0.25rem 0 0 0.25rem'
 				: '0.25rem 0 0.25rem 0.25rem'
-			: firstMessageOfList
+			: $firstMessageOfList
 			? '0 0.25rem 0.25rem 0'
-			: centerMessageOfList
+			: $centerMessageOfList
 			? '0 0.25rem 0.25rem 0'
-			: lastMessageOfList
-			? '0 0.25rem 0.25rem 0.25rem'
 			: '0 0.25rem 0.25rem 0.25rem'};
 `;
 
@@ -118,11 +123,11 @@ const Bubble: FC<BubbleProps> = ({
 			maxWidth={messageAttachment && !message.forwarded ? '60%' : '75%'}
 			padding={{ all: 'medium' }}
 			background={isMyMessage ? 'highlight' : 'gray6'}
-			isMyMessage={isMyMessage}
-			firstMessageOfList={!prevMessageIsFromSameSender && nextMessageIsFromSameSender}
-			centerMessageOfList={prevMessageIsFromSameSender && nextMessageIsFromSameSender}
-			lastMessageOfList={prevMessageIsFromSameSender && !nextMessageIsFromSameSender}
-			messageAttachment={messageAttachment !== undefined}
+			$isMyMessage={isMyMessage}
+			$firstMessageOfList={!prevMessageIsFromSameSender && nextMessageIsFromSameSender}
+			$centerMessageOfList={prevMessageIsFromSameSender && nextMessageIsFromSameSender}
+			$lastMessageOfList={prevMessageIsFromSameSender && !nextMessageIsFromSameSender}
+			$messageAttachment={messageAttachment !== undefined}
 		>
 			{message.read !== MarkerStatus.PENDING && (
 				<DropDownWrapper padding={{ all: 'none' }}>

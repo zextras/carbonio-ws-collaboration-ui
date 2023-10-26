@@ -3,13 +3,15 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
+import React, { ReactElement, useMemo, useRef } from 'react';
+
 import { Container, Text } from '@zextras/carbonio-design-system';
-import React, { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { getMeetingSidebarStatus } from '../../../store/selectors/ActiveMeetingSelectors';
+import useContainerDimensions from '../../../hooks/useContainerDimensions';
+import { MeetingRoutesParams } from '../../../hooks/useRouting';
 import { getCentralTileData } from '../../../store/selectors/MeetingSelectors';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
@@ -18,27 +20,28 @@ import Tile from '../Tile';
 
 const FaceToFace = styled(Container)`
 	position: relative;
+	padding: 3.25rem;
 `;
 
 const MyStreamContainer = styled(Container)`
 	position: absolute;
-	top: -2rem;
-	right: -3.4rem;
+	top: 1rem;
+	right: 1rem;
 	transition: opacity 200ms linear;
-	border-radius: 8px;
+	border-radius: 0.5rem;
 	z-index: 10;
 	&:hover {
 		opacity: 0;
 	}
-	box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+	box-shadow: 0 0 0.625rem rgba(0, 0, 0, 0.3);
 `;
 
 const CentralTile = styled(Container)`
-	border-radius: 8px;
+	border-radius: 0.5rem;
 `;
 
 const FaceToFaceMode = (): ReactElement => {
-	const { meetingId }: Record<string, string> = useParams();
+	const { meetingId }: MeetingRoutesParams = useParams();
 
 	const [t] = useTranslation();
 	const waitingParticipants = t(
@@ -50,30 +53,19 @@ const FaceToFaceMode = (): ReactElement => {
 
 	const localId = useStore(getUserId);
 
-	const sidebarStatus: boolean = useStore((store) => getMeetingSidebarStatus(store, meetingId));
-
-	const [centralTileWidth, setCentralTileWidth] = useState('0');
-
 	const faceToFaceRef = useRef<null | HTMLDivElement>(null);
 
-	const getWidthOfCentralTile = useCallback(() => {
-		if (faceToFaceRef && faceToFaceRef.current) {
-			const tileHeight = (faceToFaceRef.current.offsetWidth / 16) * 9;
-			let tileWidth;
-			tileWidth = faceToFaceRef.current.offsetWidth;
-			if (tileHeight >= faceToFaceRef.current.offsetHeight) {
-				tileWidth = (faceToFaceRef.current.offsetHeight / 9) * 16;
-			}
-			setCentralTileWidth(`${tileWidth}px`);
+	const faceToFaceDimensions = useContainerDimensions(faceToFaceRef);
+
+	const centralTileWidth = useMemo(() => {
+		const tileHeight = (faceToFaceDimensions.width / 16) * 9;
+		let tileWidth;
+		tileWidth = faceToFaceDimensions.width;
+		if (tileHeight >= faceToFaceDimensions.height) {
+			tileWidth = (faceToFaceDimensions.height / 9) * 16;
 		}
-	}, []);
-
-	useEffect(() => {
-		window.parent.addEventListener('resize', getWidthOfCentralTile);
-		return () => window.parent.removeEventListener('resize', getWidthOfCentralTile);
-	}, [getWidthOfCentralTile]);
-
-	useEffect(() => getWidthOfCentralTile(), [faceToFaceRef, getWidthOfCentralTile, sidebarStatus]);
+		return `${tileWidth / 16}rem`;
+	}, [faceToFaceDimensions]);
 
 	const centralContentToDisplay = useMemo(
 		() =>

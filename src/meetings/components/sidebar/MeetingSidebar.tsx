@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Container, IconButton, Tooltip } from '@zextras/carbonio-design-system';
 import React, { ReactElement, useCallback } from 'react';
+
+import { Container, IconButton, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -72,6 +73,7 @@ const MeetingSidebar = (): ReactElement => {
 			borderRadius="none"
 			crossAlignment="flex-start"
 			mainAlignment="space-between"
+			data-testid="meeting_sidebar"
 		>
 			{meetingChatVisibility !== MeetingChatVisibility.EXPANDED && (
 				<AccordionContainer
@@ -97,6 +99,7 @@ const MeetingSidebar = (): ReactElement => {
 						icon={sidebarIsVisible ? 'ChevronLeftOutline' : 'ChevronRightOutline'}
 						onClick={toggleSidebar}
 						size="large"
+						data-testid="sidebar_button"
 					/>
 				</Tooltip>
 			</ChangeSidebarStatusButton>

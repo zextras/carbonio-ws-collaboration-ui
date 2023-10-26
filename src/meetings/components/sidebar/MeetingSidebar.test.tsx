@@ -4,10 +4,11 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import React from 'react';
+
 import { screen } from '@testing-library/react';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { UserEvent } from '@testing-library/user-event/setup/setup';
-import React from 'react';
 
 import MeetingSidebar from './MeetingSidebar';
 import { mockUseParams } from '../../../../jest-mocks';
@@ -99,5 +100,15 @@ describe('Meeting sidebar', () => {
 		expect(actionsAccordions).toBeVisible();
 		expect(chatAccordion).toBeVisible();
 		expect(MeetingParticipantsAccordion).not.toBeInTheDocument();
+	});
+
+	test('when user click the sidebar button, the sidebar closes', async () => {
+		const { user } = setupBasicOneToOne();
+
+		const sidebarButton = screen.getByTestId('sidebar_button');
+		await user.click(sidebarButton);
+
+		const closedSidebarButton = await screen.findByTestId('icon: ChevronRightOutline');
+		expect(closedSidebarButton).toBeVisible();
 	});
 });

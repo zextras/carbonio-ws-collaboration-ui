@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import React, { useMemo } from 'react';
+
 import { Avatar, Container, Shimmer, useTheme } from '@zextras/carbonio-design-system';
-import React, { useEffect, useMemo, useState } from 'react';
 import styled, { DefaultTheme } from 'styled-components';
 
 import { AvatarBadge, AvatarContainer } from './UserAvatar';
@@ -17,7 +18,7 @@ import {
 	getRoomNameSelector
 } from '../../store/selectors/RoomsSelectors';
 import useStore from '../../store/Store';
-import { calculateAvatarColor } from '../../utils/styleUtils';
+import { calcAvatarMeetingColor, calculateAvatarColor } from '../../utils/styleUtils';
 
 type UserAvatarProps = {
 	roomId: string;
@@ -59,20 +60,17 @@ const GroupAvatar: React.FC<UserAvatarProps> = ({ roomId, unreadCount, draftMess
 
 	const themeColor = useTheme();
 
-	const [picture, setPicture] = useState<false | string>(false);
-
-	useEffect(() => {
+	const picture = useMemo(() => {
 		if (pictureUpdatedAt != null) {
-			setPicture(`${RoomsApi.getURLRoomPicture(roomId)}?${pictureUpdatedAt}`);
-		} else {
-			setPicture(false);
+			return `${RoomsApi.getURLRoomPicture(roomId)}?${pictureUpdatedAt}`;
 		}
-	}, [pictureUpdatedAt, roomId]);
+		return '';
+	}, [roomId, pictureUpdatedAt]);
 
 	const userColor = useMemo(() => {
 		const color = calculateAvatarColor(roomName);
 		return isMeetingActive
-			? `linear-gradient(0deg, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), ${themeColor.avatarColors[color]}`
+			? calcAvatarMeetingColor(themeColor.avatarColors[color])
 			: `${themeColor.avatarColors[color]}`;
 	}, [isMeetingActive, roomName, themeColor.avatarColors]);
 

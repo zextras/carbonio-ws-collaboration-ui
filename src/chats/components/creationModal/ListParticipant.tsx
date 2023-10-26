@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import React, { MouseEventHandler, ReactElement } from 'react';
+
 import {
 	Avatar,
 	Checkbox,
@@ -13,17 +15,21 @@ import {
 	Text,
 	Tooltip
 } from '@zextras/carbonio-design-system';
-import React, { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 
 import { ContactInfo } from './ChatCreationContactsSelection';
 
 type ListParticipantProps = {
 	item: ContactInfo;
 	selected: boolean;
-	onClickCb: (item: ContactInfo) => void;
+	onClickCb: (item: ContactInfo) => MouseEventHandler<HTMLDivElement> | undefined;
 	isDisabled?: boolean;
 };
+
+const SelectableText = styled(Text)`
+	user-select: text;
+`;
 
 const ListParticipant = ({
 	item,
@@ -59,9 +65,13 @@ const ListParticipant = ({
 						<Container crossAlignment="flex-start" width="fit">
 							<Text size="small">{item.name}</Text>
 							<Padding top="extrasmall" />
-							<Text size="extrasmall" color="gray1">
+							<SelectableText
+								data-testid={`${item.id}-emailSelectable`}
+								size="extrasmall"
+								color="gray1"
+							>
 								{item.email}
-							</Text>
+							</SelectableText>
 						</Container>
 					</Row>
 				</Container>

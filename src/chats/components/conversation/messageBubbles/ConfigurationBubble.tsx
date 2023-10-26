@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Text } from '@zextras/carbonio-design-system';
 import React, { FC } from 'react';
+
+import { Text } from '@zextras/carbonio-design-system';
 
 import { CustomMessage } from './MessageFactory';
 import { ConfigurationMessage } from '../../../../types/store/MessageTypes';
@@ -13,7 +14,7 @@ import { ConfigurationMessageLabel } from '../../../../utils/ConfigurationMessag
 
 type ConfigurationMsgProps = {
 	message: ConfigurationMessage;
-	refEl: React.RefObject<HTMLElement>;
+	refEl: React.RefObject<HTMLDivElement>;
 };
 
 const ConfigurationBubble: FC<ConfigurationMsgProps> = ({ message, refEl }) => (
@@ -24,7 +25,6 @@ const ConfigurationBubble: FC<ConfigurationMsgProps> = ({ message, refEl }) => (
 		crossAlignment={'flex-start'}
 		borderColor="gray3"
 		key={message.id}
-		serviceMessage
 		data-testid={`configuration_msg-${message.id}`}
 	>
 		<Text color={'gray1'} overflow="break-word">

@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { act, screen } from '@testing-library/react';
 import React from 'react';
+
+import { act, screen } from '@testing-library/react';
 
 import MemberComponentInfo from './MemberComponentInfo';
 import { mockedGetURLUserPicture } from '../../../../../jest-mocks';
@@ -15,6 +16,10 @@ import { setup } from '../../../../tests/test-utils';
 import { RoomType } from '../../../../types/network/models/roomBeTypes';
 import { UserBe } from '../../../../types/network/models/userBeTypes';
 import { User } from '../../../../types/store/UserTypes';
+
+const iconCrown = 'icon: Crown';
+const iconLogOut = 'icon: LogOut';
+const iconMessageCircleOutline = 'icon: MessageCircleOutline';
 
 const user1Info: User = {
 	id: 'user1',
@@ -120,11 +125,11 @@ describe('Participant component info', () => {
 			store.setUserInfo(user1Be);
 			setup(<MemberComponentInfo member={members[0]} roomId={mockedRoomOneOwner.id} />);
 
-			const iAmOwnerAction = screen.getByTestId('icon: Crown');
+			const iAmOwnerAction = screen.getByTestId(iconCrown);
 			expect(iAmOwnerAction).toBeInTheDocument();
 			expect(iAmOwnerAction).not.toHaveAttribute('disabled', true);
 
-			const logoutAction = screen.getByTestId('icon: LogOut');
+			const logoutAction = screen.getByTestId(iconLogOut);
 			expect(logoutAction).toBeInTheDocument();
 			expect(logoutAction).not.toHaveAttribute('disabled', true);
 		});
@@ -138,11 +143,11 @@ describe('Participant component info', () => {
 			const participantName = screen.getByText(/User 1/i);
 			expect(participantName).toBeInTheDocument();
 
-			const iAmOwnerAction = screen.getByTestId('icon: Crown');
+			const iAmOwnerAction = screen.getByTestId(iconCrown);
 			expect(iAmOwnerAction).toBeInTheDocument();
 			expect(iAmOwnerAction).not.toHaveAttribute('disabled', true);
 
-			const logoutAction = screen.getByTestId('icon: LogOut');
+			const logoutAction = screen.getByTestId(iconLogOut);
 			expect(logoutAction).toBeInTheDocument();
 		});
 		test('The user is an owner and sees a normal user inside list', () => {
@@ -155,7 +160,7 @@ describe('Participant component info', () => {
 			const participantName = screen.getByText(/User 2/i);
 			expect(participantName).toBeInTheDocument();
 
-			const goToChatAction = screen.getByTestId('icon: MessageCircleOutline');
+			const goToChatAction = screen.getByTestId(iconMessageCircleOutline);
 			expect(goToChatAction).toBeInTheDocument();
 
 			const isOwnerAction = screen.getByTestId('icon: CrownOutline');
@@ -174,10 +179,10 @@ describe('Participant component info', () => {
 			const participantName = screen.getByText(/User 3/i);
 			expect(participantName).toBeInTheDocument();
 
-			const goToChatAction = screen.getByTestId('icon: MessageCircleOutline');
+			const goToChatAction = screen.getByTestId(iconMessageCircleOutline);
 			expect(goToChatAction).toBeInTheDocument();
 
-			const isOwnerAction = screen.getByTestId('icon: Crown');
+			const isOwnerAction = screen.getByTestId(iconCrown);
 			expect(isOwnerAction).toBeInTheDocument();
 
 			const deleteUserAction = screen.getByTestId('icon: Trash2Outline');
@@ -195,7 +200,7 @@ describe('Participant component info', () => {
 			const participantName = screen.getByText(/User 2/i);
 			expect(participantName).toBeInTheDocument();
 
-			const logoutAction = screen.getByTestId('icon: LogOut');
+			const logoutAction = screen.getByTestId(iconLogOut);
 			expect(logoutAction).toBeInTheDocument();
 		});
 		test('the user is not an owner and sees an owner inside list', () => {
@@ -208,10 +213,10 @@ describe('Participant component info', () => {
 			const participantName = screen.getByText(/User 1/i);
 			expect(participantName).toBeInTheDocument();
 
-			const goToChatAction = screen.getByTestId('icon: MessageCircleOutline');
+			const goToChatAction = screen.getByTestId(iconMessageCircleOutline);
 			expect(goToChatAction).toBeInTheDocument();
 
-			const isOwnerAction = screen.getByTestId('icon: Crown');
+			const isOwnerAction = screen.getByTestId(iconCrown);
 			expect(isOwnerAction).toBeInTheDocument();
 		});
 		test('The user is not an owner and sees a normal user inside list', () => {
@@ -224,7 +229,7 @@ describe('Participant component info', () => {
 			const participantName = screen.getByText(/User 4/i);
 			expect(participantName).toBeInTheDocument();
 
-			const goToChatAction = screen.getByTestId('icon: MessageCircleOutline');
+			const goToChatAction = screen.getByTestId(iconMessageCircleOutline);
 			expect(goToChatAction).toBeInTheDocument();
 		});
 	});
@@ -239,7 +244,7 @@ describe('Participant component info', () => {
 			act(() => store.setUserPresence('user1', true));
 			setup(<MemberComponentInfo member={members[0]} roomId={mockedRoom.id} />);
 
-			expect(screen.getByText(/Online/i)).toBeInTheDocument();
+			expect(screen.getByText(/You/i)).toBeInTheDocument();
 		});
 		test('Label should show Offline', () => {
 			const store = useStore.getState();
@@ -250,9 +255,11 @@ describe('Participant component info', () => {
 			store.setCapabilities(createMockCapabilityList({ canSeeUsersPresence: true }));
 			act(() => store.setUserPresence('user1', false));
 			mockedGetURLUserPicture.mockReturnValue('Imageurl.jpeg');
-			setup(<MemberComponentInfo member={members[0]} roomId={mockedRoom.id} />);
+			setup(<MemberComponentInfo member={members[1]} roomId={mockedRoom.id} />);
 
-			expect(screen.getByText(/Offline/i)).toBeInTheDocument();
+			expect(
+				screen.getByText(/Go to private chat to send a personal message/i)
+			).toBeInTheDocument();
 		});
 		test('Label should show "Last seen" phrase if last_activity is present', () => {
 			const store = useStore.getState();
@@ -280,7 +287,7 @@ describe('Participant component info', () => {
 
 			expect(screen.queryByText(/Online/i)).not.toBeInTheDocument();
 		});
-		test('Label should notshow Offline', () => {
+		test('Label should not show Offline', () => {
 			const store = useStore.getState();
 			store.setLoginInfo('user1', 'User 1');
 			store.addRoom(mockedRoom);

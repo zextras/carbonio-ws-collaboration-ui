@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { SnackbarManagerContext, CreateSnackbarFn } from '@zextras/carbonio-design-system';
 import React, { FC, useCallback, useContext, useMemo } from 'react';
+
+import { SnackbarManagerContext, CreateSnackbarFn } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
 import ActionComponent from './ActionComponent';
@@ -20,8 +21,6 @@ type MuteProps = {
 	roomType?: string;
 	emptyRoom?: boolean;
 };
-
-type CreateSnackbarFn = typeof CreateSnackbarFn;
 
 const MuteConversationAction: FC<MuteProps> = ({
 	roomId,

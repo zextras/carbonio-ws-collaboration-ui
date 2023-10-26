@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { MultiButton, Tooltip } from '@zextras/carbonio-design-system';
-import { filter, map } from 'lodash';
 import React, {
 	Dispatch,
 	ReactElement,
@@ -15,9 +13,13 @@ import React, {
 	useMemo,
 	useState
 } from 'react';
+
+import { MultiButton, Tooltip } from '@zextras/carbonio-design-system';
+import { filter, map } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 
+import { MeetingRoutesParams } from '../../../hooks/useRouting';
 import { MeetingsApi } from '../../../network';
 import { getSelectedAudioDeviceId } from '../../../store/selectors/ActiveMeetingSelectors';
 import { getParticipantAudioStatus } from '../../../store/selectors/MeetingSelectors';
@@ -42,7 +44,7 @@ const MicrophoneButton = ({
 	const disableMicLabel = t('meeting.interactions.disableMicrophone', 'Disable microphone');
 	const enableMicLabel = t('meeting.interactions.enableMicrophone', 'Enable microphone');
 
-	const { meetingId }: Record<string, string> = useParams();
+	const { meetingId }: MeetingRoutesParams = useParams();
 	const myUserId = useStore(getUserId);
 	const audioStatus = useStore((store) => getParticipantAudioStatus(store, meetingId, myUserId));
 	const selectedAudioDeviceId = useStore((store) => getSelectedAudioDeviceId(store, meetingId));
@@ -132,8 +134,7 @@ const MicrophoneButton = ({
 	return (
 		<Tooltip placement="top" label={audioStatus ? disableMicLabel : enableMicLabel}>
 			<MultiButton
-				iconColor="gray6"
-				backgroundColor="primary"
+				background="primary"
 				primaryIcon={audioStatus ? 'Mic' : 'MicOff'}
 				icon={isAudioListOpen ? 'ChevronDown' : 'ChevronUp'}
 				onClick={toggleAudioStream}
@@ -143,7 +144,11 @@ const MicrophoneButton = ({
 				dropdownProps={{
 					forceOpen: isAudioListOpen,
 					onClick: toggleAudioDropdown,
-					dropdownListRef: audioDropdownRef
+					dropdownListRef: audioDropdownRef,
+					// TODO fix lint error
+					// eslint-disable-next-line react/jsx-no-useless-fragment
+					children: <></>,
+					items: mediaAudioList
 				}}
 			/>
 		</Tooltip>

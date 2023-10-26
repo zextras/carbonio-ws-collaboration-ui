@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Icon } from '@zextras/carbonio-design-system';
 import React, { ReactElement } from 'react';
+
+import { Icon } from '@zextras/carbonio-design-system';
 import styled from 'styled-components';
 
 type MessageHistoryLoaderProps = {

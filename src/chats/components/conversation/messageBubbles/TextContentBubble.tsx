@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Container, Text } from '@zextras/carbonio-design-system';
 import React, { FC, ReactElement } from 'react';
+
+import { Container, Text } from '@zextras/carbonio-design-system';
 import styled from 'styled-components';
 
 const MessageText = styled(Container)`
@@ -36,7 +37,7 @@ type TextContentBubbleProps = {
 };
 
 const TextContentBubble: FC<TextContentBubbleProps> = ({ textContent }) => (
-	<MessageText color="secondary" size="small" crossAlignment="flex-start">
+	<MessageText color="secondary" crossAlignment="flex-start">
 		<MessageContent>
 			<Text overflow="break-word">{textContent}</Text>
 		</MessageContent>

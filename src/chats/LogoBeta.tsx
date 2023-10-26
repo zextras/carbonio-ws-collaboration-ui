@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Container, Icon, IconButton } from '@zextras/carbonio-design-system';
 import React, { useCallback } from 'react';
+
+import { Container, Icon, IconButton } from '@zextras/carbonio-design-system';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 

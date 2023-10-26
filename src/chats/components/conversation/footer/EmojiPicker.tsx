@@ -6,11 +6,6 @@
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import data from '@emoji-mart/data';
-import { Container } from '@zextras/carbonio-design-system';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import { Picker } from 'emoji-mart';
 import React, {
 	Dispatch,
 	MutableRefObject,
@@ -19,6 +14,12 @@ import React, {
 	useEffect,
 	useRef
 } from 'react';
+
+import data from '@emoji-mart/data';
+import { Container } from '@zextras/carbonio-design-system';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import { Picker } from 'emoji-mart';
 import styled from 'styled-components';
 
 import { Emoji, Z_INDEX_RANK } from '../../../../types/generics';
@@ -62,7 +63,7 @@ const EmojiPicker: React.FC<EmojiPickerProps> = ({
 	emojiTimeoutRef,
 	...props
 }) => {
-	const ref = useRef<HTMLDivElement>();
+	const ref = useRef<HTMLDivElement>(null);
 
 	const mouseEnterEvent = useCallback(() => {
 		if (setShowEmojiPicker) {

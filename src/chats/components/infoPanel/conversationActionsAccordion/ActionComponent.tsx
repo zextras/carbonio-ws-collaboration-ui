@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import React, { FC } from 'react';
+
 import {
 	Container,
 	IconButton,
@@ -11,20 +13,20 @@ import {
 	Text,
 	Icon,
 	Row,
-	Tooltip
+	Tooltip,
+	PaddingObj
 } from '@zextras/carbonio-design-system';
-import React, { FC } from 'react';
-import styled from 'styled-components';
+import styled, { DefaultTheme } from 'styled-components';
 
 const CustomText = styled(Text)``;
 
-const CustomIconButton = styled(IconButton)`
-	background-color: ${({ theme, backgroundColor }): string =>
-		theme.palette[backgroundColor].regular} !important;
+const CustomIconButton = styled(IconButton)<{ $backgroundColor: keyof DefaultTheme['palette'] }>`
+	background-color: ${({ theme, $backgroundColor }): string =>
+		theme.palette[$backgroundColor].regular} !important;
 	color: ${({ theme }): string => theme.palette.gray6.regular} !important;
 	&:hover {
-		background-color: ${({ theme, backgroundColor }): string =>
-			theme.palette[backgroundColor].regular} !important;
+		background-color: ${({ theme, $backgroundColor }): string =>
+			theme.palette[$backgroundColor].regular} !important;
 		color: ${({ theme }): string => theme.palette.gray6.regular} !important;
 	}
 `;
@@ -33,12 +35,15 @@ const CustomIcon = styled(Icon)`
 	padding-right: 0.5rem;
 `;
 
-const ActionContainer = styled(Container)`
+const ActionContainer = styled(Container)<{
+	$actionColor: keyof DefaultTheme['palette'];
+	disabled?: boolean;
+}>`
 	border-radius: 0.5rem;
 	height: fit-content;
 	cursor: pointer;
 	&:hover {
-		background-color: ${({ theme, actionColor }): string => theme.palette[actionColor].regular};
+		background-color: ${({ theme, $actionColor }): string => theme.palette[$actionColor].regular};
 		${CustomIcon} {
 			color: ${({ theme }): string => theme.palette.gray6.regular} !important;
 		}
@@ -61,9 +66,9 @@ const CustomActionContainer = styled(Container)`
 
 type ActionProps = {
 	icon: string;
-	actionColor: string;
+	actionColor: keyof DefaultTheme['palette'];
 	label: string;
-	padding: { top?: string; bottom?: string };
+	padding: PaddingObj;
 	withArrow?: boolean;
 	action: () => void;
 	isDisabled?: boolean;
@@ -92,8 +97,8 @@ const ActionComponent: FC<ActionProps> = ({
 				data-testid={idComponent || 'action'}
 				orientation="horizontal"
 				width="fill"
-				actionColor={actionColor}
-				onClick={!isDisabled ? action : null}
+				$actionColor={actionColor}
+				onClick={!isDisabled ? action : (): null => null}
 				disabled={isDisabled}
 			>
 				<CustomContainer orientation="horizontal" mainAlignment="flex-start">
@@ -103,7 +108,7 @@ const ActionComponent: FC<ActionProps> = ({
 							icon={icon}
 							iconColor="gray6"
 							size="medium"
-							backgroundColor={actionColor}
+							$backgroundColor={actionColor}
 							onClick={action}
 							disabled={isDisabled}
 						/>

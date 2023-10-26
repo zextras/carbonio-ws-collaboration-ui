@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { PreviewsManagerContext } from '@zextras/carbonio-ui-preview';
 import { useCallback, useContext, useMemo } from 'react';
+
+import { PreviewsManagerContext } from '@zextras/carbonio-ui-preview';
 import { useTranslation } from 'react-i18next';
 
 import { AttachmentsApi } from '../network';

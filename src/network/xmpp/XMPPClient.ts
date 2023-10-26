@@ -5,7 +5,7 @@
  */
 
 import { find, forEach } from 'lodash';
-import { Strophe, $pres, $iq, $msg, StropheConnection, StropheConnectionStatus } from 'strophe.js';
+import { $iq, $msg, $pres, Strophe, StropheConnection, StropheConnectionStatus } from 'strophe.js';
 import { v4 as uuidGenerator } from 'uuid';
 
 import { onComposingMessageStanza } from './handlers/composingMessageHandler';
@@ -17,20 +17,22 @@ import {
 	onRequestSingleMessage
 } from './handlers/historyMessageHandler';
 import {
-	onInboxMessageStanza,
 	onGetInboxResponse,
+	onInboxMessageStanza,
 	onSetInboxResponse
 } from './handlers/inboxMessageHandler';
 import { onGetLastActivityResponse } from './handlers/lastActivityHandler';
 import { onNewMessageStanza } from './handlers/newMessageHandler';
 import { onPresenceStanza } from './handlers/presenceHandler';
 import { onGetRosterResponse } from './handlers/rosterHandler';
-import { onSmartMarkers, onDisplayedMessageStanza } from './handlers/smartMarkersHandler';
-import { carbonizeMUC, carbonize } from './utility/decodeJid';
+import { onDisplayedMessageStanza, onSmartMarkers } from './handlers/smartMarkersHandler';
+import { carbonize, carbonizeMUC } from './utility/decodeJid';
 import useStore from '../../store/Store';
 import IXMPPClient from '../../types/network/xmpp/IXMPPClient';
 import { dateToISODate } from '../../utils/dateUtil';
 import { xmppDebug } from '../../utils/debug';
+
+const jabberData = 'jabber:x:data';
 
 class XMPPClient implements IXMPPClient {
 	private connection: StropheConnection;
@@ -360,9 +362,8 @@ class XMPPClient implements IXMPPClient {
 			.c('before');
 		if (this.connection && this.connection.connected) {
 			this.connection.sendIQ(iq, onRequestHistory.bind(this, unread), onErrorStanza);
-		}
-		// If XMPP is offline, save request to perform it later
-		else if (!find(this.requestsQueue, (request) => request.roomId === roomId)) {
+		} else if (!find(this.requestsQueue, (request) => request.roomId === roomId)) {
+			// If XMPP is offline, save request to perform it later
 			this.requestsQueue.push({ iq, callback: onRequestHistory.bind(this, unread), roomId });
 		}
 	}
@@ -375,7 +376,7 @@ class XMPPClient implements IXMPPClient {
 		if (this.connection && this.connection.connected) {
 			const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
 				.c('query', { xmlns: Strophe.NS.MAM })
-				.c('x', { xmlns: 'jabber:x:data' })
+				.c('x', { xmlns: jabberData })
 				.c('field', { var: 'from_id' })
 				.c('value')
 				.t(olderMessageId)
@@ -396,7 +397,7 @@ class XMPPClient implements IXMPPClient {
 		if (this.connection && this.connection.connected) {
 			const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
 				.c('query', { xmlns: Strophe.NS.MAM, queryid: MamRequestType.REPLIED })
-				.c('x', { xmlns: 'jabber:x:data' })
+				.c('x', { xmlns: jabberData })
 				.c('field', { var: 'from_id' })
 				.c('value')
 				.t(messageSubjectOfReplyId)
@@ -417,7 +418,7 @@ class XMPPClient implements IXMPPClient {
 		return new Promise((resolve, reject) => {
 			const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
 				.c('query', { xmlns: Strophe.NS.MAM, queryid: MamRequestType.FORWARDED })
-				.c('x', { xmlns: 'jabber:x:data' })
+				.c('x', { xmlns: jabberData })
 				.c('field', { var: 'from_id' })
 				.c('value')
 				.t(messageToForwardStanzaId)

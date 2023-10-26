@@ -4,12 +4,13 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import React from 'react';
+
 import { screen } from '@testing-library/react';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { UserEvent } from '@testing-library/user-event/setup/setup';
-import React from 'react';
 
-import { mockUseParams } from '../../../../../jest-mocks';
+import { mockDarkReaderIsEnabled, mockUseParams } from '../../../../../jest-mocks';
 import useStore from '../../../../store/Store';
 import {
 	createMockMeeting,
@@ -91,5 +92,21 @@ describe('Meeting sidebar', () => {
 		expect(chatAccordion).toHaveStyle('height: 100%');
 		await user.click(toggleChatBtn);
 		expect(toggleChatBtn).toHaveStyle('height: fit');
+	});
+	test('Display meeting chat with darkMode disabled', async () => {
+		mockDarkReaderIsEnabled.mockReturnValueOnce(false);
+		const { user } = setupBasicGroup();
+		const toggleChatBtn = screen.getByTestId('toggleChatStatus');
+		await user.click(toggleChatBtn);
+		const wrapperMeetingChat = screen.getByTestId('WrapperMeetingChat');
+		expect(wrapperMeetingChat).toHaveStyle(`background-image: url('papyrus.png')`);
+	});
+	test('Display meeting chat with darkMode enabled', async () => {
+		mockDarkReaderIsEnabled.mockReturnValueOnce(true);
+		const { user } = setupBasicGroup();
+		const toggleChatBtn = screen.getByTestId('toggleChatStatus');
+		await user.click(toggleChatBtn);
+		const wrapperMeetingChat = screen.getByTestId('WrapperMeetingChat');
+		expect(wrapperMeetingChat).toHaveStyle(`background-image: url('papyrus-dark.png')`);
 	});
 });

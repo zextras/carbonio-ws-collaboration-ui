@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { screen } from '@testing-library/react';
 import React from 'react';
+
+import { screen } from '@testing-library/react';
 
 import Bubble from './Bubble';
 import { mockedGetImageThumbnailURL } from '../../../../../jest-mocks';
@@ -16,6 +17,8 @@ import { RoomBe } from '../../../../types/network/models/roomBeTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
 import { RootStore } from '../../../../types/store/StoreTypes';
 import { User } from '../../../../types/store/UserTypes';
+
+const previewUrl = 'preview-url';
 
 const user1Be: User = {
 	id: 'user1',
@@ -72,6 +75,7 @@ const mockedAttachmentMessageB = createMockTextMessage({
 		area: '34x23'
 	}
 });
+
 const mockedAttachmentMessageKb = createMockTextMessage({
 	roomId: mockedRoom.id,
 	from: user1Be.id,
@@ -83,6 +87,7 @@ const mockedAttachmentMessageKb = createMockTextMessage({
 		area: '350x240'
 	}
 });
+
 const mockedAttachmentMessageMb = createMockTextMessage({
 	roomId: mockedRoom.id,
 	from: user1Be.id,
@@ -94,6 +99,7 @@ const mockedAttachmentMessageMb = createMockTextMessage({
 		area: '34x23'
 	}
 });
+
 const mockedAttachmentMessageGb = createMockTextMessage({
 	roomId: mockedRoom.id,
 	from: user1Be.id,
@@ -131,7 +137,7 @@ describe('Message bubble component visualization', () => {
 				message={mockedRepliedTextMessage}
 				prevMessageIsFromSameSender={false}
 				nextMessageIsFromSameSender={false}
-				messageRef={React.createRef<HTMLElement>()}
+				messageRef={React.createRef<HTMLDivElement>()}
 			/>
 		);
 		const insideText = screen.getByText(
@@ -145,13 +151,13 @@ describe('Message bubble component visualization', () => {
 		const store: RootStore = useStore.getState();
 		store.addRoom(mockedRoom);
 		store.newMessage(mockedAttachmentMessageKb);
-		mockedGetImageThumbnailURL.mockReturnValue('preview-url');
+		mockedGetImageThumbnailURL.mockReturnValue(previewUrl);
 		setup(
 			<Bubble
 				message={mockedAttachmentMessageKb}
 				prevMessageIsFromSameSender={false}
 				nextMessageIsFromSameSender={false}
-				messageRef={React.createRef<HTMLElement>()}
+				messageRef={React.createRef<HTMLDivElement>()}
 			/>
 		);
 		expect(screen.getByTestId('attachmentImg')).toBeInTheDocument();
@@ -159,13 +165,13 @@ describe('Message bubble component visualization', () => {
 	test('Hover on image reply', async () => {
 		const store: RootStore = useStore.getState();
 		store.addRoom(mockedRoom);
-		mockedGetImageThumbnailURL.mockReturnValue('preview-url');
+		mockedGetImageThumbnailURL.mockReturnValue(previewUrl);
 		const { user } = setup(
 			<Bubble
 				message={mockedRepliedTextMessageWithAttachment}
 				prevMessageIsFromSameSender={false}
 				nextMessageIsFromSameSender={false}
-				messageRef={React.createRef<HTMLElement>()}
+				messageRef={React.createRef<HTMLDivElement>()}
 			/>
 		);
 		await user.hover(screen.getByTestId('hover-container'));
@@ -178,13 +184,13 @@ describe('Attachment footer', () => {
 		const store: RootStore = useStore.getState();
 		store.addRoom(mockedRoom);
 		store.newMessage(mockedAttachmentMessageB);
-		mockedGetImageThumbnailURL.mockReturnValue('preview-url');
+		mockedGetImageThumbnailURL.mockReturnValue(previewUrl);
 		setup(
 			<Bubble
 				message={mockedAttachmentMessageB}
 				prevMessageIsFromSameSender={false}
 				nextMessageIsFromSameSender={false}
-				messageRef={React.createRef<HTMLElement>()}
+				messageRef={React.createRef<HTMLDivElement>()}
 			/>
 		);
 		const extensionFile = screen.getByText(/PNG • 21B/i);
@@ -194,13 +200,13 @@ describe('Attachment footer', () => {
 		const store: RootStore = useStore.getState();
 		store.addRoom(mockedRoom);
 		store.newMessage(mockedAttachmentMessageKb);
-		mockedGetImageThumbnailURL.mockReturnValue('preview-url');
+		mockedGetImageThumbnailURL.mockReturnValue(previewUrl);
 		setup(
 			<Bubble
 				message={mockedAttachmentMessageKb}
 				prevMessageIsFromSameSender={false}
 				nextMessageIsFromSameSender={false}
-				messageRef={React.createRef<HTMLElement>()}
+				messageRef={React.createRef<HTMLDivElement>()}
 			/>
 		);
 		const extensionFile = screen.getByText(/PNG • 20.91KB/i);
@@ -210,13 +216,13 @@ describe('Attachment footer', () => {
 		const store: RootStore = useStore.getState();
 		store.addRoom(mockedRoom);
 		store.newMessage(mockedAttachmentMessageMb);
-		mockedGetImageThumbnailURL.mockReturnValue('preview-url');
+		mockedGetImageThumbnailURL.mockReturnValue(previewUrl);
 		setup(
 			<Bubble
 				message={mockedAttachmentMessageMb}
 				prevMessageIsFromSameSender={false}
 				nextMessageIsFromSameSender={false}
-				messageRef={React.createRef<HTMLElement>()}
+				messageRef={React.createRef<HTMLDivElement>()}
 			/>
 		);
 		const extensionFile = screen.getByText(/PNG • 3.19MB/i);
@@ -226,13 +232,13 @@ describe('Attachment footer', () => {
 		const store: RootStore = useStore.getState();
 		store.addRoom(mockedRoom);
 		store.newMessage(mockedAttachmentMessageGb);
-		mockedGetImageThumbnailURL.mockReturnValue('preview-url');
+		mockedGetImageThumbnailURL.mockReturnValue(previewUrl);
 		setup(
 			<Bubble
 				message={mockedAttachmentMessageGb}
 				prevMessageIsFromSameSender={false}
 				nextMessageIsFromSameSender={false}
-				messageRef={React.createRef<HTMLElement>()}
+				messageRef={React.createRef<HTMLDivElement>()}
 			/>
 		);
 		const extensionFile = screen.getByText(/PNG • 5.31GB/i);

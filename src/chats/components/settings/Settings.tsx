@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import React, { FC, useCallback, useContext, useEffect, useState } from 'react';
+
 import {
 	Container,
 	CreateSnackbarFn,
@@ -15,15 +17,12 @@ import {
 	// @ts-ignore
 	SettingsHeader
 } from '@zextras/carbonio-shell-ui';
-import React, { FC, useCallback, useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import NotificationsSettings from './NotificationsSettings';
 import ProfileSettings from './ProfileSettings';
 import useLocalStorage from '../../../hooks/useLocalStorage';
 import { UsersApi } from '../../../network';
-
-type CreateSnackbarFn = typeof CreateSnackbarFn;
 
 type SettingsProps = {
 	id?: string | undefined;

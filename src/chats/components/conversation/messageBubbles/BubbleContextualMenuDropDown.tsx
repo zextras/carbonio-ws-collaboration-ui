@@ -5,9 +5,10 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import React, { FC, useCallback, useContext, useMemo, useState } from 'react';
+
 import { Dropdown, IconButton, SnackbarManagerContext } from '@zextras/carbonio-design-system';
 import { size } from 'lodash';
-import React, { FC, useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled, { css, FlattenSimpleInterpolation } from 'styled-components';
 
@@ -335,6 +336,7 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 					size="small"
 					icon="ArrowIosDownward"
 					title={messageActionsTooltip}
+					onClick={(): null => null}
 				/>
 			</Dropdown>
 			{forwardMessageModalIsOpen && (

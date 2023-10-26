@@ -3,12 +3,13 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import { IconButton, Tooltip } from '@zextras/carbonio-design-system';
 import React, { ReactElement, useCallback } from 'react';
+
+import { IconButton, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 
-import useRouting, { PAGE_INFO_TYPE } from '../../../hooks/useRouting';
+import useRouting, { MeetingRoutesParams, PAGE_INFO_TYPE } from '../../../hooks/useRouting';
 import { MeetingsApi } from '../../../network';
 
 const LeaveMeetingButton = (): ReactElement => {
@@ -17,7 +18,7 @@ const LeaveMeetingButton = (): ReactElement => {
 	const leaveMeetingLabel = t('meeting.interactions.leaveMeeting', 'Leave Meeting');
 
 	const { goToInfoPage } = useRouting();
-	const { meetingId }: Record<string, string> = useParams();
+	const { meetingId }: MeetingRoutesParams = useParams();
 
 	const leaveMeeting = useCallback(() => {
 		MeetingsApi.leaveMeeting(meetingId).then(() => goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED));

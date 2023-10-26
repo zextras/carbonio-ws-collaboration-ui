@@ -4,7 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { type DefaultTheme } from 'styled-components';
+import { parseToHsl, toColorString } from 'polished';
+import { HslColor } from 'polished/lib/types/color';
+import { DefaultTheme } from 'styled-components';
 
 export const calculateAvatarColor = (label: string): keyof DefaultTheme['avatarColors'] => {
 	let sum = 0;
@@ -14,3 +16,13 @@ export const calculateAvatarColor = (label: string): keyof DefaultTheme['avatarC
 	}
 	return `avatar_${(sum % 50) + 1}`;
 };
+
+export function calcAvatarMeetingColor(fromColor: string): string {
+	const fromHsl = parseToHsl(fromColor);
+	const highlightRegular: HslColor = {
+		hue: Math.round(fromHsl.hue) + 1,
+		saturation: (Math.round(fromHsl.saturation * 100) - 1) / 100,
+		lightness: Math.min(Math.round(fromHsl.lightness * 100 - 40), 90) / 100
+	};
+	return toColorString(highlightRegular);
+}

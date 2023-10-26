@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+
 import {
 	Avatar,
 	Container,
@@ -14,7 +16,6 @@ import {
 	Tooltip,
 	useTheme
 } from '@zextras/carbonio-design-system';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -59,14 +60,14 @@ const HoverContainer = styled(Container)`
 	transition: opacity 100ms linear 200ms;
 `;
 
-const CustomTile = styled(Container)`
+const CustomTile = styled(Container)<{ $isTalking: boolean }>`
 	position: relative;
 	aspect-ratio: 16/9;
 	height: auto;
 	min-width: 9.375rem;
 	border-radius: 0.5rem;
-	${({ isTalking, theme }): string | false =>
-		isTalking && `outline: 0.125rem solid ${theme.palette.success.regular};`}
+	${({ $isTalking, theme }): string | false =>
+		$isTalking && `outline: 0.125rem solid ${theme.palette.success.regular};`}
 	&:hover {
 		${HoverContainer} {
 			opacity: 1;
@@ -217,13 +218,15 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 					shape="round"
 					size="extralarge"
 					background={userColor}
-					picture={picture}
+					picture={picture || ''}
 				/>
 			) : (
 				<StyledShimmerAvatar />
 			),
 		[picture, userColor, userName]
 	);
+
+	const placeHolderFn = (): null => null;
 
 	const mediaStatusIcons = useMemo(
 		() => (
@@ -235,7 +238,7 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 							iconColor="gray6"
 							backgroundColor="gray0"
 							size="large"
-							onClick={null}
+							onClick={placeHolderFn}
 						/>
 					</Tooltip>
 				)}
@@ -246,7 +249,7 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 							iconColor="gray6"
 							backgroundColor="gray0"
 							size="large"
-							onClick={null}
+							onClick={placeHolderFn}
 						/>
 					</Tooltip>
 				)}
@@ -256,7 +259,7 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 						iconColor="gray6"
 						backgroundColor="gray0"
 						size="large"
-						onClick={null}
+						onClick={placeHolderFn}
 					/>
 				)}
 				{isScreenShare && (
@@ -265,7 +268,7 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 						iconColor="gray6"
 						backgroundColor="gray0"
 						size="large"
-						onClick={null}
+						onClick={placeHolderFn}
 					/>
 				)}
 			</>
@@ -327,7 +330,7 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 			background={'text'}
 			data-testid="tile"
 			width="100%"
-			isTalking={userIsTalking && !isScreenShare}
+			$isTalking={userIsTalking && !isScreenShare}
 		>
 			{showHoverContainer && hoverContainer}
 			<InfoContainer orientation="horizontal">
@@ -348,7 +351,7 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 					takeAvailableSpace
 					padding="0.5rem"
 				>
-					<TextContainer width={'fit'} height={'fit'} overflow="ellipsis">
+					<TextContainer width={'fit'} height={'fit'}>
 						<Text color={'gray6'}>{userName}</Text>
 					</TextContainer>
 				</Row>

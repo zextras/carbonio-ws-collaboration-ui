@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import React, { FC, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+
 import {
 	Button,
 	Container,
@@ -14,7 +16,6 @@ import {
 	CreateSnackbarFn,
 	Tooltip
 } from '@zextras/carbonio-design-system';
-import React, { FC, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { RoomsApi } from '../../../../network';
@@ -29,8 +30,6 @@ type EditConversationProps = {
 	closeModal: () => void;
 	roomId: string;
 };
-
-type CreateSnackbarFn = typeof CreateSnackbarFn;
 
 const EditConversationModal: FC<EditConversationProps> = ({
 	roomId,

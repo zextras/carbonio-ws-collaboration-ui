@@ -4,6 +4,16 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import React, {
+	FunctionComponent,
+	ReactElement,
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState
+} from 'react';
+
 import {
 	Button,
 	ChipInput,
@@ -26,15 +36,6 @@ import {
 	size,
 	union
 } from 'lodash';
-import React, {
-	FunctionComponent,
-	ReactElement,
-	useCallback,
-	useEffect,
-	useMemo,
-	useRef,
-	useState
-} from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -204,8 +205,14 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 				placeholder={inputPlaceholder}
 				onInputType={handleChangeText}
 				value={chips}
+				// TODO FIX CHIPS
+				/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
+				/* @ts-ignore */
 				onChange={removeContactFromChip}
 				requireUniqueChips
+				// TODO FIX CHIPS
+				/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
+				/* @ts-ignore */
 				ChipComponent={ForwardMessageConversationChip}
 				confirmChipOnBlur={false}
 				separators={[]}

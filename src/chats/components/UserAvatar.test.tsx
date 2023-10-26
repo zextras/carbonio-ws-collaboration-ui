@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { act, screen } from '@testing-library/react';
 import React from 'react';
+
+import { act, screen } from '@testing-library/react';
 
 import UserAvatar from './UserAvatar';
 import useStore from '../../store/Store';
@@ -21,6 +22,11 @@ import { MeetingBe } from '../../types/network/models/meetingBeTypes';
 import { RoomBe, RoomType } from '../../types/network/models/roomBeTypes';
 import { MeetingParticipant } from '../../types/store/MeetingTypes';
 import { User } from '../../types/store/UserTypes';
+
+const hiString = 'hi everyone!';
+const bgGrayDot = 'background-color: #cfd5dc';
+const bgGreenDot = 'background-color: #8bc34a';
+const iconBellOff = 'icon: BellOff';
 
 const user1Info: User = {
 	id: 'user1',
@@ -145,7 +151,7 @@ describe('User avatar', () => {
 			expect(avatar).toBeVisible();
 			const presenceDot = screen.getByTestId('user_presence_dot');
 			expect(presenceDot).toBeVisible();
-			expect(presenceDot).toHaveStyle('background-color: #cfd5dc');
+			expect(presenceDot).toHaveStyle(bgGrayDot);
 		});
 		test('User presence dot should be green and shows he is online', async () => {
 			const store = useStore.getState();
@@ -159,7 +165,7 @@ describe('User avatar', () => {
 			expect(avatar).toBeVisible();
 			const presenceDot = screen.getByTestId('user_presence_dot');
 			expect(presenceDot).toBeVisible();
-			expect(presenceDot).toHaveStyle('background-color: #8bc34a');
+			expect(presenceDot).toHaveStyle(bgGreenDot);
 		});
 	});
 
@@ -173,11 +179,11 @@ describe('User avatar', () => {
 			store.setRoomMuted(room.id);
 			store.setCapabilities(createMockCapabilityList({ canSeeUsersPresence: true }));
 			setup(<UserAvatar roomId={room.id} draftMessage={false} />);
-			const iconOff = screen.getByTestId('icon: BellOff');
+			const iconOff = screen.getByTestId(iconBellOff);
 			expect(iconOff).toBeVisible();
 			const presenceDot = screen.getByTestId('user_presence_dot');
 			expect(presenceDot).toBeVisible();
-			expect(presenceDot).toHaveStyle('background-color: #8bc34a');
+			expect(presenceDot).toHaveStyle(bgGreenDot);
 		});
 		test('Check if the conversation has notifications disabled and user is offline', () => {
 			const store = useStore.getState();
@@ -187,11 +193,11 @@ describe('User avatar', () => {
 			store.setRoomMuted(room.id);
 			store.setCapabilities(createMockCapabilityList({ canSeeUsersPresence: true }));
 			setup(<UserAvatar roomId={room.id} draftMessage={false} />);
-			const iconOff = screen.getByTestId('icon: BellOff');
+			const iconOff = screen.getByTestId(iconBellOff);
 			expect(iconOff).toBeVisible();
 			const presenceDot = screen.getByTestId('user_presence_dot');
 			expect(presenceDot).toBeVisible();
-			expect(presenceDot).toHaveStyle('background-color: #cfd5dc');
+			expect(presenceDot).toHaveStyle(bgGrayDot);
 		});
 		test('Check if the conversation has notifications enabled and user is online', () => {
 			const store = useStore.getState();
@@ -205,7 +211,7 @@ describe('User avatar', () => {
 			expect(userAvatar).toBeVisible();
 			const presenceDot = screen.getByTestId('user_presence_dot');
 			expect(presenceDot).toBeVisible();
-			expect(presenceDot).toHaveStyle('background-color: #8bc34a');
+			expect(presenceDot).toHaveStyle(bgGreenDot);
 		});
 		test('Check if the conversation has notifications enabled and user is offline', () => {
 			const store = useStore.getState();
@@ -218,7 +224,7 @@ describe('User avatar', () => {
 			expect(userAvatar).toBeVisible();
 			const presenceDot = screen.getByTestId('user_presence_dot');
 			expect(presenceDot).toBeVisible();
-			expect(presenceDot).toHaveStyle('background-color: #cfd5dc');
+			expect(presenceDot).toHaveStyle(bgGrayDot);
 		});
 		test('Check if user has notifications disabled', () => {
 			const store = useStore.getState();
@@ -226,7 +232,7 @@ describe('User avatar', () => {
 			store.setLoginInfo(user1Info.id, user1Info.email, user1Info.name);
 			store.setUserInfo(user2Info);
 			setup(<UserAvatar roomId={roomMuted.id} draftMessage={false} />);
-			const userAvatarWithNotificationMuted = screen.getByTestId('icon: BellOff');
+			const userAvatarWithNotificationMuted = screen.getByTestId(iconBellOff);
 			expect(userAvatarWithNotificationMuted).toBeVisible();
 		});
 		test('Check if user has notifications disabled in a chat with an ongoing meeting', () => {
@@ -247,7 +253,7 @@ describe('User avatar', () => {
 			store.addRoom(room);
 			store.setLoginInfo(user1Info.id, user1Info.email, user1Info.name);
 			store.setUserInfo(user2Info);
-			store.setDraftMessage(room.id, false, 'hi everyone!');
+			store.setDraftMessage(room.id, false, hiString);
 			setup(<UserAvatar roomId={room.id} draftMessage />);
 			const userAvatarWithDraft = screen.getByTestId('icon: Edit2');
 			expect(userAvatarWithDraft).toBeVisible();
@@ -257,7 +263,7 @@ describe('User avatar', () => {
 			store.addRoom(roomMuted);
 			store.setLoginInfo(user1Info.id, user1Info.email, user1Info.name);
 			store.setUserInfo(user2Info);
-			store.setDraftMessage(room.id, false, 'hi everyone!');
+			store.setDraftMessage(room.id, false, hiString);
 			setup(<UserAvatar roomId={room.id} draftMessage />);
 			const userAvatarWithDraft = screen.getByTestId('icon: Edit2');
 			expect(userAvatarWithDraft).toBeVisible();
@@ -268,7 +274,7 @@ describe('User avatar', () => {
 			store.addMeeting(meeting);
 			store.setLoginInfo(user1Info.id, user1Info.email, user1Info.name);
 			store.setUserInfo(user2Info);
-			store.setDraftMessage(room.id, false, 'hi everyone!');
+			store.setDraftMessage(room.id, false, hiString);
 			setup(<UserAvatar roomId={room.id} draftMessage />);
 			const userAvatarWithDraft = screen.getByTestId('icon: Video');
 			expect(userAvatarWithDraft).toBeVisible();

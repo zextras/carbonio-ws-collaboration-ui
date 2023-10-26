@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { screen } from '@testing-library/react';
 import React from 'react';
+
+import { screen } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
 
 import MeetingNotificationsHandler from './MeetingNotificationsHandler';
@@ -21,6 +22,8 @@ import {
 	MeetingStartedEvent
 } from '../../types/network/websocket/wsMeetingEvents';
 import { RoomType } from '../../types/store/RoomTypes';
+
+const declineAll = 'Decline all';
 
 const room = createMockRoom({ id: 'roomId', type: RoomType.ONE_TO_ONE });
 const meeting = createMockMeeting({ id: 'meetingId', roomId: room.id });
@@ -83,17 +86,17 @@ describe('MeetingNotificationsHandler', () => {
 		setup(<MeetingNotificationsHandler />);
 		addIncomingMeetingNotification(room, meeting);
 		addIncomingMeetingNotification(room1, meeting1);
-		expect(screen.getByText('Decline all')).toBeInTheDocument();
+		expect(screen.getByText(declineAll)).toBeInTheDocument();
 	});
 
 	test('All notifications are removed when button Decline all is clicked', async () => {
 		const { user } = setup(<MeetingNotificationsHandler />);
 		addIncomingMeetingNotification(room, meeting);
 		addIncomingMeetingNotification(room1, meeting1);
-		expect(screen.getByText('Decline all')).toBeInTheDocument();
+		expect(screen.getByText(declineAll)).toBeInTheDocument();
 		expect(screen.getAllByTestId('incoming_call_notification')).toHaveLength(2);
 
-		await user.click(screen.getByText('Decline all'));
+		await user.click(screen.getByText(declineAll));
 		expect(screen.queryByTestId('incoming_call_notification')).not.toBeInTheDocument();
 		expect(screen.queryByTestId('incoming_call_notification_portal')).not.toBeInTheDocument();
 	});

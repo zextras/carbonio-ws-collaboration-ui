@@ -4,12 +4,14 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import React, { lazy, ReactElement, Suspense, useEffect } from 'react';
+
 import { disable, enable } from 'darkreader';
 import { createMemoryHistory } from 'history';
-import React, { lazy, ReactElement, Suspense, useEffect } from 'react';
 import { Route, Router, Switch } from 'react-router-dom';
 
 import ShimmerEntryMeetingView from './shimmers/ShimmerEntryMeetingView';
+import { useDarkReaderStatus } from '../../hooks/useDarkReaderStatus';
 import { MEETINGS_ROUTES, ROUTES } from '../../hooks/useRouting';
 import useStore from '../../store/Store';
 
@@ -45,6 +47,8 @@ const MeetingMainView = (): ReactElement => {
 	const history = createMemoryHistory();
 	const setCustomLogo = useStore((store) => store.setCustomLogo);
 
+	const isDarkModeEnabled = useDarkReaderStatus();
+
 	useEffect(() => {
 		fetch('/zx/login/v3/config')
 			.then((response) => response.json())
@@ -59,25 +63,32 @@ const MeetingMainView = (): ReactElement => {
 	}, [setCustomLogo]);
 
 	useEffect(() => {
-		enable(
-			{
-				sepia: 0
-			},
-			{
-				ignoreImageAnalysis: ['.no-dr-invert *'],
-				invert: [],
-				css: `
+		if (!isDarkModeEnabled) {
+			enable(
+				{
+					sepia: 0
+				},
+				{
+					ignoreImageAnalysis: ['.no-dr-invert *'],
+					invert: [],
+					css: `
 		.tox, .force-white-bg, .tox-swatches-menu, .tox .tox-edit-area__iframe {
 			background-color: #fff !important;
 			background: #fff !important;
 		}
 	`,
-				ignoreInlineStyle: ['.tox-menu *'],
-				disableStyleSheetsProxy: false
+					ignoreInlineStyle: ['.tox-menu *'],
+					disableStyleSheetsProxy: false
+				}
+			);
+		}
+
+		return () => {
+			if (!isDarkModeEnabled) {
+				isDarkModeEnabled && disable();
 			}
-		);
-		return () => disable();
-	}, []);
+		};
+	}, [isDarkModeEnabled]);
 
 	return (
 		<Router history={history}>

@@ -12,14 +12,10 @@ export function onErrorStanza(stanza: Element): true {
 	const query = stanza.getElementsByTagName('query')[0];
 	if (query) {
 		const xmlns = query.getAttribute('xmlns');
-		switch (xmlns) {
-			case Strophe.NS.LAST_ACTIVITY: {
-				xmppDebug('<--- Error on request last activity of user');
-				break;
-			}
-			default: {
-				xmppDebug(`<--- Error`, stanza);
-			}
+		if (xmlns === Strophe.NS.LAST_ACTIVITY) {
+			xmppDebug('<--- Error on request last activity of user');
+		} else {
+			xmppDebug(`<--- Error`, stanza);
 		}
 	} else {
 		xmppDebug(`<--- Error`, stanza);

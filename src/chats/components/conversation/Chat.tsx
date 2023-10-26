@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Container } from '@zextras/carbonio-design-system';
-import { forEach } from 'lodash';
 import React, {
 	Dispatch,
 	ReactElement,
@@ -14,6 +12,9 @@ import React, {
 	useEffect,
 	useState
 } from 'react';
+
+import { Container } from '@zextras/carbonio-design-system';
+import { forEach } from 'lodash';
 import styled from 'styled-components';
 
 import ConversationHeader from './ConversationHeader';

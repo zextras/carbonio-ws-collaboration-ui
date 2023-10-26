@@ -4,11 +4,12 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+
 import { Container, Icon, IconButton, Row, Text, Tooltip } from '@zextras/carbonio-design-system';
 import { split } from 'lodash';
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
+import styled, { DefaultTheme, SimpleInterpolation } from 'styled-components';
 
 import AttachmentSmallView from './AttachmentSmallView';
 import usePreview from '../../../../hooks/usePreview';
@@ -35,10 +36,10 @@ const CustomIconButton = styled(IconButton)`
 	background-color: rgba(255, 255, 255, 0);
 `;
 
-const PreviewContainer = styled(Container)`
-	${({ isLoaded }): string => isLoaded && `background: black;`};
-	${({ previewError, theme }): string =>
-		previewError &&
+const PreviewContainer = styled(Container)<{ $isLoaded: boolean; $previewError: boolean }>`
+	${({ $isLoaded }): SimpleInterpolation => $isLoaded && `background: black;`};
+	${({ $previewError, theme }): SimpleInterpolation =>
+		$previewError &&
 		`border-radius: 0.25rem;
 		background: ${theme.palette.gray5.regular};`};
 	position: relative;
@@ -50,16 +51,20 @@ const PreviewContainer = styled(Container)`
 	}
 `;
 
-const PreviewErrorContainer = styled(Container)`
-	${({ imgWidth, maxWidth }): string | false =>
-		imgWidth === 0
-			? `width: ${maxWidth * 0.063}rem;`
-			: maxWidth === 0
+const PreviewErrorContainer = styled(Container)<{
+	$imgWidth: number;
+	$imgHeight: number;
+	$maxWidth: number;
+}>`
+	${({ $imgWidth, $maxWidth }): string | false =>
+		$imgWidth === 0
+			? `width: ${$maxWidth * 0.063}rem;`
+			: $maxWidth === 0
 			? 'width: 100%'
-			: `width: min(${imgWidth * 0.063}rem, ${maxWidth * 0.063}rem);`};
-	${({ imgWidth, imgHeight }): string | false =>
-		imgWidth !== 0
-			? `aspect-ratio: ${imgWidth * 0.063}/${imgHeight * 0.063};`
+			: `width: min(${$imgWidth * 0.063}rem, ${$maxWidth * 0.063}rem);`};
+	${({ $imgWidth, $imgHeight }): string | false =>
+		$imgWidth !== 0
+			? `aspect-ratio: ${$imgWidth * 0.063}/${$imgHeight * 0.063};`
 			: 'aspect-ratio: 1;'};
 	max-height: 37.5rem;
 `;
@@ -98,9 +103,11 @@ const TextContainer = styled(Container)`
 	position: absolute;
 `;
 
-const FileContainer = styled(Container)`
-	border-left: ${({ userBorderColor, theme }): string =>
-		`0.25rem solid ${theme.avatarColors[userBorderColor]}`};
+const FileContainer = styled(Container)<{
+	$userBorderColor: keyof DefaultTheme['avatarColors'] | string;
+}>`
+	border-left: ${({ $userBorderColor, theme }): string =>
+		`0.25rem solid ${theme.avatarColors[$userBorderColor as keyof DefaultTheme['avatarColors']]}`};
 	border-radius: 0 0.25rem 0.25rem 0;
 `;
 
@@ -108,7 +115,7 @@ type AttachmentViewProps = {
 	attachment: AttachmentMessageType;
 	isMyMessage?: boolean;
 	from: string;
-	messageListRef?: React.MutableRefObject<HTMLDivElement | undefined>;
+	messageListRef?: React.RefObject<HTMLDivElement | undefined>;
 };
 
 const AttachmentView: FC<AttachmentViewProps> = ({
@@ -239,16 +246,16 @@ const AttachmentView: FC<AttachmentViewProps> = ({
 				width={'fill'}
 				height={'fit'}
 				borderRadius="half"
-				isLoaded={isPreviewLoaded}
-				previewError={previewError}
+				$isLoaded={isPreviewLoaded}
+				$previewError={previewError}
 				data-testid="preview-container"
 			>
 				{previewError ? (
 					<PreviewErrorContainer
 						background="gray5"
-						imgWidth={Number(dimensions[0])}
-						imgHeight={Number(dimensions[1])}
-						maxWidth={attachmentBubbleMaxWidth}
+						$imgWidth={Number(dimensions[0])}
+						$imgHeight={Number(dimensions[1])}
+						$maxWidth={attachmentBubbleMaxWidth}
 					>
 						<Icon size="large" icon="Image" color="gray2" />
 					</PreviewErrorContainer>
@@ -277,7 +284,7 @@ const AttachmentView: FC<AttachmentViewProps> = ({
 			padding={{ horizontal: 'small', vertical: 'small' }}
 			orientation="horizontal"
 			crossAlignment="flex-start"
-			userBorderColor={isMyMessage ? '#C4D5EF' : userColor}
+			$userBorderColor={isMyMessage ? '#C4D5EF' : userColor}
 		>
 			<Row>
 				<AttachmentSmallView attachment={attachment} />

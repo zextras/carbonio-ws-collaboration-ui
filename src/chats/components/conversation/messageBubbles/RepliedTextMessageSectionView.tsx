@@ -4,12 +4,13 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import React, { FC, useCallback, useMemo } from 'react';
+
 import { Container, Padding, Row, Text } from '@zextras/carbonio-design-system';
 import { useUserSettings } from '@zextras/carbonio-shell-ui';
 import { find } from 'lodash';
-import React, { FC, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
+import styled, { DefaultTheme } from 'styled-components';
 
 import AttachmentSmallView from './AttachmentSmallView';
 import BubbleFooter from './BubbleFooter';
@@ -25,9 +26,11 @@ type RepliedTextMessageSectionViewProps = {
 	isMyMessage: boolean;
 };
 
-const RepliedTextMessageContainer = styled(Container)`
-	border-left: ${({ userBorderColor, theme }): string =>
-		`0.25rem solid ${theme.avatarColors[userBorderColor]}`};
+const RepliedTextMessageContainer = styled(Container)<{
+	$userBorderColor: keyof DefaultTheme['avatarColors'];
+}>`
+	border-left: ${({ $userBorderColor, theme }): string =>
+		`0.25rem solid ${theme.avatarColors[$userBorderColor]}`};
 	border-radius: 0 0.25rem 0.25rem 0;
 	cursor: pointer;
 `;
@@ -146,7 +149,7 @@ const RepliedTextMessageSectionView: FC<RepliedTextMessageSectionViewProps> = ({
 				padding={{ horizontal: 'small', vertical: 'small' }}
 				orientation="horizontal"
 				crossAlignment="flex-start"
-				userBorderColor={userColor}
+				$userBorderColor={userColor}
 				onClick={scrollTo}
 			>
 				{repliedMessage.attachment && (

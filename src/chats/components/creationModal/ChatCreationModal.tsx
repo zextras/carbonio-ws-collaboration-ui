@@ -4,6 +4,16 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import React, {
+	ReactElement,
+	useCallback,
+	useContext,
+	useEffect,
+	useMemo,
+	useRef,
+	useState
+} from 'react';
+
 import {
 	Button,
 	Container,
@@ -15,15 +25,6 @@ import {
 	Tooltip
 } from '@zextras/carbonio-design-system';
 import { find, map, size } from 'lodash';
-import React, {
-	ReactElement,
-	useCallback,
-	useContext,
-	useEffect,
-	useMemo,
-	useRef,
-	useState
-} from 'react';
 import { useTranslation } from 'react-i18next';
 
 import ChatCreationContactsSelection, { ContactSelected } from './ChatCreationContactsSelection';
@@ -33,8 +34,6 @@ import { RoomsApi } from '../../../network';
 import useStore from '../../../store/Store';
 import { AddRoomResponse } from '../../../types/network/responses/roomsResponses';
 import { RoomType } from '../../../types/store/RoomTypes';
-
-type CreateSnackbarFn = typeof CreateSnackbarFn;
 
 const ChatCreationModal = ({
 	open,
@@ -80,10 +79,8 @@ const ChatCreationModal = ({
 		} else {
 			setChatType(RoomType.ONE_TO_ONE);
 		}
-		if (open) {
-			if (inputRef.current) {
-				inputRef.current.focus();
-			}
+		if (open && inputRef.current) {
+			inputRef.current.focus();
 		}
 	}, [contactsSelected, open]);
 

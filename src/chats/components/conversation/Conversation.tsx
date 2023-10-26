@@ -4,23 +4,28 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Container } from '@zextras/carbonio-design-system';
 import React, { ReactElement, useEffect, useState } from 'react';
+
+import { Container } from '@zextras/carbonio-design-system';
 import styled from 'styled-components';
 
 import Chat from './Chat';
+import { useDarkReaderStatus } from '../../../hooks/useDarkReaderStatus';
 import useMediaQueryCheck from '../../../hooks/useMediaQueryCheck';
 import { ConversationProps } from '../../../types/store/RoomTypes';
 import papyrusDark from '../../assets/papyrus-dark.png';
 import papyrus from '../../assets/papyrus.png';
 import ConversationInfoPanel from '../infoPanel/ConversationInfoPanel';
 
-const ConversationWrapper = styled(Container)`
-	background-image: url('${(props): string => (props.theme === 'dark' ? papyrusDark : papyrus)}');
+const ConversationWrapper = styled(Container)<{ $darkModeActive: boolean }>`
+	background-image: url('${({ $darkModeActive }): string =>
+		$darkModeActive ? papyrusDark : papyrus}');
 `;
 
 const Conversation = ({ room }: ConversationProps): ReactElement => {
 	const isDesktopView = useMediaQueryCheck();
+	const isDarkModeEnabled = useDarkReaderStatus();
+
 	const [infoPanelOpen, setInfoPanelOpen] = useState(false);
 
 	useEffect(() => {
@@ -30,7 +35,12 @@ const Conversation = ({ room }: ConversationProps): ReactElement => {
 	}, [isDesktopView]);
 
 	return (
-		<ConversationWrapper mainAlignment="flex-start" orientation="horizontal">
+		<ConversationWrapper
+			data-testid="ConversationWrapper"
+			mainAlignment="flex-start"
+			orientation="horizontal"
+			$darkModeActive={isDarkModeEnabled}
+		>
 			{(isDesktopView || !infoPanelOpen) && (
 				<Chat roomId={room.id} setInfoPanelOpen={setInfoPanelOpen} />
 			)}
