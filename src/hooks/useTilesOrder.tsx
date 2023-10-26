@@ -9,16 +9,36 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { differenceWith, findIndex, intersectionWith, isEqual, size } from 'lodash';
 
-import { getPinnedTile } from '../store/selectors/ActiveMeetingSelectors';
+import { getPinnedTile, getTalkingList } from '../store/selectors/ActiveMeetingSelectors';
 import { getTiles } from '../store/selectors/MeetingSelectors';
 import useStore from '../store/Store';
 import { TileData } from '../types/store/ActiveMeetingTypes';
+import { orderSpeakingTiles } from '../utils/MeetingsUtils';
 
-const useTilesOrder = (meetingId: string): { centralTile: TileData; carouselTiles: TileData[] } => {
+const useTilesOrder = (
+	meetingId: string
+): { centralTile: TileData; carouselTiles: TileData[]; orderedTiles: TileData[] } => {
 	const tilesData: TileData[] = useStore((store) => getTiles(store, meetingId));
 	const pinnedTile: TileData | undefined = useStore((store) => getPinnedTile(store, meetingId));
+	const isTalkingList = useStore((store) => getTalkingList(store, meetingId));
 
 	const [tiles, setTiles] = useState<TileData[]>(tilesData);
+	const [firstIsTalking, setFirstIsTalking] = useState<string>('');
+
+	useEffect(() => {
+		if (isTalkingList) {
+			setFirstIsTalking(isTalkingList[0]);
+		}
+	}, [isTalkingList]);
+
+	useEffect(() => {
+		const timer = setTimeout(() => {
+			if (size(isTalkingList) !== 0 && isTalkingList[0] === firstIsTalking) {
+				setTiles((tiles) => orderSpeakingTiles(tiles, isTalkingList[0], pinnedTile));
+			}
+		}, 2000);
+		return () => clearTimeout(timer);
+	}, [firstIsTalking, isTalkingList, pinnedTile]);
 
 	// Swap new pinned tile with the first tile
 	useEffect(() => {
@@ -55,8 +75,9 @@ const useTilesOrder = (meetingId: string): { centralTile: TileData; carouselTile
 
 	const centralTile = useMemo(() => tiles[0], [tiles]);
 	const carouselTiles = useMemo(() => tiles.slice(1), [tiles]);
+	const orderedTiles = useMemo(() => tiles, [tiles]);
 
-	return { centralTile, carouselTiles };
+	return { centralTile, carouselTiles, orderedTiles };
 };
 
 export default useTilesOrder;

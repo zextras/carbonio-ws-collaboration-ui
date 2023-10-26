@@ -111,6 +111,7 @@ beforeAll(() => {
 });
 
 afterEach(() => {
+	jest.runOnlyPendingTimers();
 	jest.useRealTimers();
 	jest.restoreAllMocks();
 	act(() => {
