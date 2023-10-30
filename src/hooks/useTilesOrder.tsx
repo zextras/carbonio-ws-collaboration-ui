@@ -7,7 +7,15 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { differenceWith, findIndex, first, intersectionWith, isEqual, size } from 'lodash';
+import {
+	debounce,
+	differenceWith,
+	findIndex,
+	first,
+	intersectionWith,
+	isEqual,
+	size
+} from 'lodash';
 
 import { getPinnedTile, getTalkingList } from '../store/selectors/ActiveMeetingSelectors';
 import { getTiles } from '../store/selectors/MeetingSelectors';
@@ -55,29 +63,28 @@ const useTilesOrder = (meetingId: string): { centralTile: TileData; carouselTile
 		}
 	}, [tilesData, tiles]);
 
-	// swap handlers
 	const checkIfIsStillTalking = useCallback(
 		(prevFirstIsTalking) => {
-			if (first(isTalkingList) === prevFirstIsTalking) {
+			const isTalkingUsers = useStore.getState().activeMeeting[meetingId].talkingUsers;
+			if (
+				first(isTalkingUsers) === prevFirstIsTalking &&
+				(!pinnedTile ||
+					pinnedTile.userId !== isTalkingUsers[0] ||
+					pinnedTile.type === STREAM_TYPE.SCREEN)
+			) {
 				setTiles((tiles) => orderSpeakingTiles(tiles, prevFirstIsTalking, !!pinnedTile));
 			}
 		},
-		[isTalkingList, pinnedTile]
+		[meetingId, pinnedTile]
 	);
-
+	// swap tiles handler based on who is talking
 	useEffect(() => {
-		const timer = setTimeout(() => {
-			if (
-				size(isTalkingList) > 0 &&
-				(!pinnedTile ||
-					pinnedTile.userId !== isTalkingList[0] ||
-					pinnedTile.type === STREAM_TYPE.SCREEN)
-			) {
-				checkIfIsStillTalking(isTalkingList[0]);
-			}
-		}, 2000);
-		return () => clearTimeout(timer);
-	}, [checkIfIsStillTalking, isTalkingList, pinnedTile, pinnedTile?.type, pinnedTile?.userId]);
+		const debounceIsTalking = debounce(checkIfIsStillTalking, 2000);
+		if (size(isTalkingList) > 0) {
+			debounceIsTalking(isTalkingList[0]);
+		}
+		return () => debounceIsTalking.cancel();
+	}, [checkIfIsStillTalking, isTalkingList]);
 
 	const centralTile = useMemo(() => tiles[0], [tiles]);
 	const carouselTiles = useMemo(() => tiles.slice(1), [tiles]);
