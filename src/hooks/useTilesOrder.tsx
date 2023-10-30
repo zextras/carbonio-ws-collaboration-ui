@@ -5,40 +5,22 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { differenceWith, findIndex, intersectionWith, isEqual, size } from 'lodash';
+import { differenceWith, findIndex, first, intersectionWith, isEqual, size } from 'lodash';
 
 import { getPinnedTile, getTalkingList } from '../store/selectors/ActiveMeetingSelectors';
 import { getTiles } from '../store/selectors/MeetingSelectors';
 import useStore from '../store/Store';
-import { TileData } from '../types/store/ActiveMeetingTypes';
+import { STREAM_TYPE, TileData } from '../types/store/ActiveMeetingTypes';
 import { orderSpeakingTiles } from '../utils/MeetingsUtils';
 
-const useTilesOrder = (
-	meetingId: string
-): { centralTile: TileData; carouselTiles: TileData[]; orderedTiles: TileData[] } => {
+const useTilesOrder = (meetingId: string): { centralTile: TileData; carouselTiles: TileData[] } => {
 	const tilesData: TileData[] = useStore((store) => getTiles(store, meetingId));
 	const pinnedTile: TileData | undefined = useStore((store) => getPinnedTile(store, meetingId));
 	const isTalkingList = useStore((store) => getTalkingList(store, meetingId));
 
 	const [tiles, setTiles] = useState<TileData[]>(tilesData);
-	const [firstIsTalking, setFirstIsTalking] = useState<string>('');
-
-	useEffect(() => {
-		if (isTalkingList) {
-			setFirstIsTalking(isTalkingList[0]);
-		}
-	}, [isTalkingList]);
-
-	useEffect(() => {
-		const timer = setTimeout(() => {
-			if (size(isTalkingList) !== 0 && isTalkingList[0] === firstIsTalking) {
-				setTiles((tiles) => orderSpeakingTiles(tiles, isTalkingList[0], pinnedTile));
-			}
-		}, 2000);
-		return () => clearTimeout(timer);
-	}, [firstIsTalking, isTalkingList, pinnedTile]);
 
 	// Swap new pinned tile with the first tile
 	useEffect(() => {
@@ -73,11 +55,34 @@ const useTilesOrder = (
 		}
 	}, [tilesData, tiles]);
 
+	// swap handlers
+	const checkIfIsStillTalking = useCallback(
+		(prevFirstIsTalking) => {
+			if (first(isTalkingList) === prevFirstIsTalking) {
+				setTiles((tiles) => orderSpeakingTiles(tiles, prevFirstIsTalking, !!pinnedTile));
+			}
+		},
+		[isTalkingList, pinnedTile]
+	);
+
+	useEffect(() => {
+		const timer = setTimeout(() => {
+			if (
+				size(isTalkingList) > 0 &&
+				(!pinnedTile ||
+					pinnedTile.userId !== isTalkingList[0] ||
+					pinnedTile.type === STREAM_TYPE.SCREEN)
+			) {
+				checkIfIsStillTalking(isTalkingList[0]);
+			}
+		}, 2000);
+		return () => clearTimeout(timer);
+	}, [checkIfIsStillTalking, isTalkingList, pinnedTile, pinnedTile?.type, pinnedTile?.userId]);
+
 	const centralTile = useMemo(() => tiles[0], [tiles]);
 	const carouselTiles = useMemo(() => tiles.slice(1), [tiles]);
-	const orderedTiles = useMemo(() => tiles, [tiles]);
 
-	return { centralTile, carouselTiles, orderedTiles };
+	return { centralTile, carouselTiles };
 };
 
 export default useTilesOrder;

@@ -296,7 +296,7 @@ describe('useTilesOrder custom hook - ordered by who is speaking', () => {
 			jest.advanceTimersByTime(1000);
 		});
 
-		expect(result.current.orderedTiles[1]).toEqual({
+		expect(result.current.carouselTiles[0]).toEqual({
 			userId: participant1.userId,
 			type: 'video',
 			creationDate: participant1.joinedAt
@@ -306,7 +306,7 @@ describe('useTilesOrder custom hook - ordered by who is speaking', () => {
 			jest.advanceTimersByTime(2000);
 		});
 
-		expect(result.current.orderedTiles[1]).toEqual({
+		expect(result.current.carouselTiles[0]).toEqual({
 			userId: participant3.userId,
 			type: 'video',
 			creationDate: participant3.joinedAt

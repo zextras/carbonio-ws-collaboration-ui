@@ -212,7 +212,7 @@ describe('MeetingsUtils', () => {
 				{ userId: 'user2', type: STREAM_TYPE.VIDEO },
 				{ userId: 'user3', type: STREAM_TYPE.VIDEO }
 			];
-			const orderedTiles = orderSpeakingTiles(meetingTiles, 'user3', undefined);
+			const orderedTiles = orderSpeakingTiles(meetingTiles, 'user3', false);
 			expect(orderedTiles[0]?.userId).toBe('user3');
 			expect(orderedTiles[1]?.userId).toBe('user1');
 			expect(orderedTiles[2]?.userId).toBe('user2');
@@ -223,7 +223,7 @@ describe('MeetingsUtils', () => {
 				{ userId: 'user2', type: STREAM_TYPE.VIDEO },
 				{ userId: 'user3', type: STREAM_TYPE.VIDEO }
 			];
-			const orderedTiles = orderSpeakingTiles(meetingTiles, 'user2', undefined);
+			const orderedTiles = orderSpeakingTiles(meetingTiles, 'user2', false);
 			expect(orderedTiles[0]?.userId).toBe('user2');
 			expect(orderedTiles[1]?.userId).toBe('user1');
 			expect(orderedTiles[2]?.userId).toBe('user3');
@@ -238,7 +238,7 @@ describe('MeetingsUtils', () => {
 				{ userId: 'user6', type: STREAM_TYPE.AUDIO },
 				{ userId: 'user7', type: STREAM_TYPE.VIDEO }
 			];
-			const orderedTiles = orderSpeakingTiles(meetingTiles, 'user6', undefined);
+			const orderedTiles = orderSpeakingTiles(meetingTiles, 'user6', false);
 			expect(orderedTiles[0]?.userId).toBe('user6');
 			expect(orderedTiles[1]?.userId).toBe('user1');
 			expect(orderedTiles[2]?.userId).toBe('user2');
@@ -253,10 +253,7 @@ describe('MeetingsUtils', () => {
 				{ userId: 'user2', type: STREAM_TYPE.VIDEO },
 				{ userId: 'user3', type: STREAM_TYPE.VIDEO }
 			];
-			const orderedTiles = orderSpeakingTiles(meetingTiles, 'user3', {
-				userId: 'user1',
-				type: STREAM_TYPE.VIDEO
-			});
+			const orderedTiles = orderSpeakingTiles(meetingTiles, 'user3', true);
 			expect(orderedTiles[0]?.userId).toBe('user1');
 			expect(orderedTiles[1]?.userId).toBe('user3');
 			expect(orderedTiles[2]?.userId).toBe('user2');
@@ -268,10 +265,7 @@ describe('MeetingsUtils', () => {
 				{ userId: 'user2', type: STREAM_TYPE.VIDEO },
 				{ userId: 'user3', type: STREAM_TYPE.VIDEO }
 			];
-			const orderedTiles = orderSpeakingTiles(meetingTiles, 'user2', {
-				userId: 'user3',
-				type: STREAM_TYPE.VIDEO
-			});
+			const orderedTiles = orderSpeakingTiles(meetingTiles, 'user2', true);
 			expect(orderedTiles[0]).toEqual({ userId: 'user3', type: STREAM_TYPE.SCREEN });
 			expect(orderedTiles[1]?.userId).toBe('user2');
 			expect(orderedTiles[2]?.userId).toBe('user1');
@@ -288,17 +282,11 @@ describe('MeetingsUtils', () => {
 				{ userId: 'user6', type: STREAM_TYPE.AUDIO },
 				{ userId: 'user7', type: STREAM_TYPE.VIDEO }
 			];
-			const orderedTiles = orderSpeakingTiles(meetingTiles, 'user5', {
-				userId: 'user1',
-				type: STREAM_TYPE.SCREEN
-			});
+			const orderedTiles = orderSpeakingTiles(meetingTiles, 'user5', true);
 			expect(orderedTiles).toHaveLength(8);
 			expect(orderedTiles[1]).toEqual({ userId: 'user5', type: STREAM_TYPE.VIDEO });
 
-			const newOrderTiles = orderSpeakingTiles(orderedTiles, 'user2', {
-				userId: 'user1',
-				type: STREAM_TYPE.SCREEN
-			});
+			const newOrderTiles = orderSpeakingTiles(orderedTiles, 'user2', true);
 			expect(newOrderTiles).toHaveLength(8);
 			expect(newOrderTiles[1]).toEqual({ userId: 'user2', type: STREAM_TYPE.AUDIO });
 			expect(newOrderTiles[2]).toEqual({ userId: 'user5', type: STREAM_TYPE.VIDEO });

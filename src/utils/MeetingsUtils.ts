@@ -119,29 +119,23 @@ type Dimensions = {
 export const orderSpeakingTiles = (
 	meetingTiles: TileData[],
 	speakingId: string,
-	pinnedTile?: TileData
+	pinnedTile: boolean
 ): TileData[] => {
-	let orderedTiles: TileData[] = [];
 	const elementToBeMoved = find(
 		meetingTiles,
 		(tile) => tile.userId === speakingId && tile.type !== STREAM_TYPE.SCREEN
 	);
-	const arrayWithoutElement =
-		elementToBeMoved !== undefined && without(meetingTiles, elementToBeMoved);
-	if (elementToBeMoved !== undefined && arrayWithoutElement) {
-		if (pinnedTile === undefined) {
+	if (elementToBeMoved != null) {
+		const arrayWithoutElement = without(meetingTiles, elementToBeMoved);
+		if (!pinnedTile) {
 			// if there's no pinned tile the speaking tile has to be the first on the list
-			orderedTiles = concat(elementToBeMoved, arrayWithoutElement);
-		} else {
-			// if there's a pinned tile put the speaker on the second position
-			const firstTile = arrayWithoutElement[0];
-			const arrayWithoutPinnedTile = arrayWithoutElement.slice(1);
-			if (arrayWithoutPinnedTile) {
-				orderedTiles = concat(firstTile, elementToBeMoved, arrayWithoutPinnedTile);
-			}
+			return concat(elementToBeMoved, arrayWithoutElement);
 		}
+		// if there's a pinned tile put the speaker on the second position
+		arrayWithoutElement.splice(1, 0, elementToBeMoved);
+		return arrayWithoutElement;
 	}
-	return orderedTiles;
+	return meetingTiles;
 };
 
 type Grid = {
