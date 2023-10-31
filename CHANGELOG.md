@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.2](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.0.1...v0.0.2) (2023-10-31)
+
+
+### Features
+
+* added component for who is speaking refs: WSC-1087 ([#137](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/137)) ([7eca184](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/7eca1842d843156aadf157123173a6082bd0a3bd))
+* change default meeting view to grid view ref: WSC-1121 ([#150](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/150)) ([2b99570](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/2b995709a26af905395fb96d9450eb6e1af98313))
+* changed presence string in member list refs: WSC-690 ([#140](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/140)) ([5061f6b](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/5061f6baf06dbf2657414f3c8b5e5d9ceb15424f))
+* changed remove member label refs: WSC-1095 ([#142](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/142)) ([9b3d00d](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/9b3d00de53f4e21291808a257476456e3533b5c5))
+* check on active meeting ([#141](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/141)) ([436a1fc](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/436a1fc9515c55af44ea15c3dc1c273028f25685))
+* grid view for meetings ref: WSC-900 ([#138](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/138)) ([3236da4](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/3236da470f979570dc9b27c9e7a33c44e28ad4bf))
+* handle isTalking border on tiles refs: WSC-1067 ([#126](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/126)) ([7518680](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/7518680615b331c955f6e4ab4606ca95913ec4b6)), closes [#3](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/3) [#9](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/9) [#48](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/48) [#53](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/53) [#55](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/55)
+* improve removal of topic in group conversation WSC-910 ([#139](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/139)) ([ae20a9a](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/ae20a9ae0312dd28ea68b0811f62f8e165e8d2e6))
+* meetings implementation ([#132](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/132)) ([eaa27ed](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/eaa27ed9990defb7f270d0b69c494ae0d60f673a)), closes [#3](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/3) [#9](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/9) [#48](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/48) [#53](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/53) [#55](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/55)
+* screen-share ref: WSC-977 ([#124](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/124)) ([2e8d11d](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/2e8d11db3ee254f4892a8fae5f9d44b71b07477e)), closes [#3](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/3) [#9](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/9) [#48](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/48) [#53](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/53) [#55](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/55)
+* set email value to be selectable from the user refs: WSC-1071 ([#135](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/135)) ([fe9690f](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/fe9690fe8af9231809c1591479e291bbbe644f7e))
+
+
+### Bug Fixes
+
+* ellipse attachment name ([#151](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/151)) ([fedce39](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/fedce3969a3b509eb27900dd8d2e710365df247b))
+* fix enter button disabled while selecting resource in access meeting modal refs: WSC-1098 ([#147](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/147)) ([c07cfc2](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/c07cfc293c9404a0dd722192b968ffb272cbe701))
+* fixed background on meeting avatar refs: WSC-1113 ([#146](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/146)) ([7a0dc75](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/7a0dc75401f24888ad2ff112a98fc42e8345241c))
+* resolve background color by using darkreader from shell refs:WSC-1091 ([#145](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/145)) ([b8123fb](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/b8123fb77eeea6c8e4bd419bf44afb4f2c058fe6))
+
 ### 0.0.1 (2023-10-02)
 
 
