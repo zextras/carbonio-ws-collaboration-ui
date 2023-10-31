@@ -1,0 +1,57 @@
+/*
+ * SPDX-FileCopyrightText: 2023 Zextras <https://www.zextras.com>
+ *
+ * SPDX-License-Identifier: AGPL-3.0-only
+ */
+import React, { ReactElement } from 'react';
+
+import {
+	Account,
+	AccountSettings,
+	AppRoute,
+	INotificationManager
+} from '@zextras/carbonio-shell-ui';
+
+export const USER_SETTINGS: AccountSettings = {
+	attrs: {},
+	props: [],
+	prefs: {
+		zimbraPrefTimeZoneId: 'UTC'
+	}
+};
+
+export const ROUTE_SETTINGS: AppRoute = {
+	id: 'chats',
+	route: 'chats',
+	app: 'Chats'
+};
+
+export const ACCOUNT: Account = {
+	id: 'myId',
+	name: 'User 1',
+	displayName: 'User 1',
+	signatures: { signature: [] },
+	identities: '',
+	rights: { targets: [] }
+};
+
+export const mockNotify: jest.Mock = jest.fn();
+
+export const NOTIFICATION_MANAGER = {
+	showPopup: jest.fn(),
+	notify: mockNotify,
+	multipleNotify: jest.fn(),
+	playSound: jest.fn()
+};
+
+export const useUserSettings = (): AccountSettings => USER_SETTINGS;
+
+export const useCurrentRoute = (): AppRoute | undefined => ROUTE_SETTINGS;
+
+export const getUserAccount = (): Account => ACCOUNT;
+
+export const getNotificationManager = (): INotificationManager => NOTIFICATION_MANAGER;
+
+export const SettingsHeader = (): ReactElement => <div>settings header</div>;
+
+export const Spinner = (): ReactElement => <div>spinner</div>;

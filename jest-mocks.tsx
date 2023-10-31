@@ -4,10 +4,6 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { ReactElement } from 'react';
-
-import { AccountSettings, AppRoute, INotificationManager } from '@zextras/carbonio-shell-ui';
-
 import { AutoCompleteGalResponse } from './src/network/soap/AutoCompleteRequest';
 import {
 	CreateMeetingResponse,
@@ -41,44 +37,6 @@ import {
 } from './src/types/network/responses/usersResponses';
 
 const noResultProvided = 'no result provided';
-
-// MOCKED SHELL UI
-export const mockNotify: jest.Mock = jest.fn();
-jest.mock('@zextras/carbonio-shell-ui', () => ({
-	Spinner: (): ReactElement => <div>spinner</div>,
-	getNotificationManager: (): INotificationManager => ({
-		showPopup: () => null,
-		notify: mockNotify,
-		multipleNotify: () => null,
-		playSound: () => null
-	}),
-	getUserAccount: (): {
-		identities: string;
-		displayName: string;
-		rights: { targets: any[] };
-		name: string;
-		id: string;
-		signatures: { signature: any[] };
-	} => ({
-		id: 'myId',
-		name: 'User 1',
-		displayName: 'User 1',
-		signatures: { signature: [] },
-		identities: '',
-		rights: { targets: [] }
-	}),
-	SettingsHeader: (): ReactElement => <div>settings header</div>,
-	useUserSettings: (): AccountSettings => ({
-		attrs: {},
-		props: [{ name: '', zimlet: '', _content: '' }],
-		prefs: {}
-	}),
-	useCurrentRoute: (): AppRoute => ({
-		id: 'chats',
-		route: 'chats',
-		app: 'Chats'
-	})
-}));
 
 export const mockDarkReaderIsEnabled: jest.Mock = jest.fn();
 

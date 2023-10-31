@@ -5,7 +5,7 @@
  */
 
 import displayMessageBrowserNotification from './displayMessageBrowserNotification';
-import { mockNotify } from '../../../../jest-mocks';
+import { mockNotify } from '../../../../__mocks__/@zextras/carbonio-shell-ui';
 import useStore from '../../../store/Store';
 import {
 	createMockMeeting,
