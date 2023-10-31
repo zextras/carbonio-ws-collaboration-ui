@@ -40,9 +40,7 @@ const useTilesOrder = (meetingId: string): { centralTile: TileData; carouselTile
 				);
 				if (tileToMoveIndex !== -1) {
 					const newTiles = [...tiles];
-					const tileToMove = newTiles[tileToMoveIndex];
-					newTiles[tileToMoveIndex] = newTiles[0];
-					newTiles[0] = tileToMove;
+					[newTiles[0], newTiles[tileToMoveIndex]] = [newTiles[tileToMoveIndex], newTiles[0]];
 					return newTiles;
 				}
 				return tiles;
