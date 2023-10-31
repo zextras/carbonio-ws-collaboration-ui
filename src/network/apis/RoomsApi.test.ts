@@ -9,10 +9,14 @@ import { fetchResponse } from '../../../jest-mocks';
 import useStore from '../../store/Store';
 import {
 	createMockCapabilityList,
+	createMockMeeting,
 	createMockRoom,
 	createMockTextMessage
 } from '../../tests/createMock';
 import { dateToISODate } from '../../utils/dateUtil';
+
+const contentType = 'Content-Type';
+const applicationJson = 'application/json';
 
 describe('Rooms API', () => {
 	test('listRooms is called correctly', async () => {
@@ -23,7 +27,7 @@ describe('Rooms API', () => {
 
 		// Set appropriate headers
 		const headers = new Headers();
-		headers.append('Content-Type', 'application/json');
+		headers.append(contentType, applicationJson);
 
 		// Check if fetch is called with the correct parameters
 		expect(global.fetch).toHaveBeenCalledWith(
@@ -54,14 +58,19 @@ describe('Rooms API', () => {
 
 		// Set appropriate headers
 		const headers = new Headers();
-		headers.append('Content-Type', 'application/json');
+		headers.append(contentType, applicationJson);
 
 		// Check if fetch is called with the correct parameters
-		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/rooms`, {
+		expect(global.fetch).toHaveBeenNthCalledWith(1, `/services/chats/rooms`, {
 			method: 'POST',
 			headers,
 			body: JSON.stringify(roomToAdd)
 		});
+		expect(global.fetch).toHaveBeenNthCalledWith(
+			2,
+			`/services/chats/meetings`,
+			expect.objectContaining({ method: 'POST' })
+		);
 	});
 
 	test('getRoom is called correctly', async () => {
@@ -72,7 +81,7 @@ describe('Rooms API', () => {
 
 		// Set appropriate headers
 		const headers = new Headers();
-		headers.append('Content-Type', 'application/json');
+		headers.append(contentType, applicationJson);
 
 		// Check if fetch is called with the correct parameters
 		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/rooms/room0`, {
@@ -90,7 +99,7 @@ describe('Rooms API', () => {
 
 		// Set appropriate headers
 		const headers = new Headers();
-		headers.append('Content-Type', 'application/json');
+		headers.append(contentType, applicationJson);
 
 		// Check if fetch is called with the correct parameters
 		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/rooms/room0`, {
@@ -101,19 +110,27 @@ describe('Rooms API', () => {
 	});
 
 	test('deleteRoom is called correctly', async () => {
+		const room = createMockRoom();
+		const meeting = createMockMeeting({ roomId: room.id });
+		useStore.getState().addMeeting(meeting);
 		// Send deleteRoom request
-		await roomsApi.deleteRoom('roomId');
+		await roomsApi.deleteRoom(room.id);
 
 		// Set appropriate headers
 		const headers = new Headers();
-		headers.append('Content-Type', 'application/json');
+		headers.append(contentType, applicationJson);
 
 		// Check if fetch is called with the correct parameters
-		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/rooms/roomId`, {
+		expect(global.fetch).toHaveBeenNthCalledWith(1, `/services/chats/rooms/${room.id}`, {
 			method: 'DELETE',
 			headers,
 			body: undefined
 		});
+		expect(global.fetch).toHaveBeenNthCalledWith(
+			2,
+			`/services/chats/meetings/${meeting.id}`,
+			expect.objectContaining({ method: 'DELETE' })
+		);
 	});
 
 	test('getURLRoomPicture is called correctly', () => {
@@ -128,7 +145,7 @@ describe('Rooms API', () => {
 
 		// Set appropriate headers
 		const headers = new Headers();
-		headers.append('Content-Type', 'application/json');
+		headers.append(contentType, applicationJson);
 
 		// Check if fetch is called with the correct parameters
 		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/rooms/roomId/picture`, {
@@ -174,7 +191,7 @@ describe('Rooms API', () => {
 
 		// Set appropriate headers
 		const headers = new Headers();
-		headers.append('Content-Type', 'application/json');
+		headers.append(contentType, applicationJson);
 
 		// Check if fetch is called with the correct parameters
 		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/rooms/roomId/picture`, {
@@ -190,7 +207,7 @@ describe('Rooms API', () => {
 
 		// Set appropriate headers
 		const headers = new Headers();
-		headers.append('Content-Type', 'application/json');
+		headers.append(contentType, applicationJson);
 
 		// Check if fetch is called with the correct parameters
 		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/rooms/roomId/mute`, {
@@ -206,7 +223,7 @@ describe('Rooms API', () => {
 
 		// Set appropriate headers
 		const headers = new Headers();
-		headers.append('Content-Type', 'application/json');
+		headers.append(contentType, applicationJson);
 
 		// Check if fetch is called with the correct parameters
 		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/rooms/roomId/mute`, {
@@ -222,7 +239,7 @@ describe('Rooms API', () => {
 
 		// Set appropriate headers
 		const headers = new Headers();
-		headers.append('Content-Type', 'application/json');
+		headers.append(contentType, applicationJson);
 
 		// Check if fetch is called with the correct parameters
 		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/rooms/roomId/clear`, {
@@ -238,7 +255,7 @@ describe('Rooms API', () => {
 
 		// Set appropriate headers
 		const headers = new Headers();
-		headers.append('Content-Type', 'application/json');
+		headers.append(contentType, applicationJson);
 
 		// Check if fetch is called with the correct parameters
 		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/rooms/roomId/members`, {
@@ -259,7 +276,7 @@ describe('Rooms API', () => {
 
 		// Set appropriate headers
 		const headers = new Headers();
-		headers.append('Content-Type', 'application/json');
+		headers.append(contentType, applicationJson);
 
 		// Check if fetch is called with the correct parameters
 		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/rooms/roomId/members`, {
@@ -275,7 +292,7 @@ describe('Rooms API', () => {
 
 		// Set appropriate headers
 		const headers = new Headers();
-		headers.append('Content-Type', 'application/json');
+		headers.append(contentType, applicationJson);
 
 		// Check if fetch is called with the correct parameters
 		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/rooms/roomId/members/userId`, {
@@ -291,7 +308,7 @@ describe('Rooms API', () => {
 
 		// Set appropriate headers
 		const headers = new Headers();
-		headers.append('Content-Type', 'application/json');
+		headers.append(contentType, applicationJson);
 
 		// Check if fetch is called with the correct parameters
 		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/rooms/roomId/members/userId/owner`, {
@@ -307,7 +324,7 @@ describe('Rooms API', () => {
 
 		// Set appropriate headers
 		const headers = new Headers();
-		headers.append('Content-Type', 'application/json');
+		headers.append(contentType, applicationJson);
 
 		// Check if fetch is called with the correct parameters
 		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/rooms/roomId/members/userId/owner`, {
@@ -323,7 +340,7 @@ describe('Rooms API', () => {
 
 		// Set appropriate headers
 		const headers = new Headers();
-		headers.append('Content-Type', 'application/json');
+		headers.append(contentType, applicationJson);
 
 		// Check if fetch is called with the correct parameters
 		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/rooms/roomId/attachments`, {
@@ -339,7 +356,7 @@ describe('Rooms API', () => {
 
 		// Set appropriate headers
 		const headers = new Headers();
-		headers.append('Content-Type', 'application/json');
+		headers.append(contentType, applicationJson);
 
 		// Check if fetch is called with the correct parameters
 		expect(global.fetch).toHaveBeenCalledWith(
@@ -419,7 +436,7 @@ describe('Rooms API', () => {
 
 		// Set appropriate headers
 		const headers = new Headers();
-		headers.append('Content-Type', 'application/json');
+		headers.append(contentType, applicationJson);
 
 		// Check if fetch is called with the correct parameters
 		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/rooms/roomId/forward`, {

@@ -30,7 +30,7 @@ export function onNewMessageStanza(this: IXMPPClient, message: Element): true {
 						// Set my message as read
 						this.readMessage(newMessage.roomId, newMessage.id);
 					} else {
-						sendCustomEvent(EventName.NEW_MESSAGE, newMessage);
+						sendCustomEvent({ name: EventName.NEW_MESSAGE, data: newMessage });
 						store.incrementUnreadCount(newMessage.roomId);
 						displayMessageBrowserNotification(newMessage);
 					}
@@ -44,7 +44,6 @@ export function onNewMessageStanza(this: IXMPPClient, message: Element): true {
 							newMessage.id
 						);
 					}
-
 					break;
 				}
 				case MessageType.CONFIGURATION_MSG: {
@@ -52,7 +51,7 @@ export function onNewMessageStanza(this: IXMPPClient, message: Element): true {
 					if (newMessage.from === sessionId) {
 						this.readMessage(newMessage.roomId, newMessage.id);
 					} else {
-						sendCustomEvent(EventName.NEW_MESSAGE, newMessage);
+						sendCustomEvent({ name: EventName.NEW_MESSAGE, data: newMessage });
 						store.incrementUnreadCount(newMessage.roomId);
 					}
 					break;

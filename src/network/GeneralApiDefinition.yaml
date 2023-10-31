@@ -1,0 +1,1447 @@
+openapi: 3.0.3
+info:
+  title: Zextras Carbonio Chats CE Api
+  description: Zextras Carbonio Chats CE HTTP APIs definition.
+  version: 0.3.0
+  contact:
+    email: smokybeans@zextras.com
+servers:
+  - url: http://localhost:10000
+tags:
+  - name: Rooms
+  - name: Members
+  - name: Users
+  - name: Attachments
+  - name: Health
+  - name: Miscellaneous
+  - name: Authentication
+paths:
+  /health:
+    get:
+      tags:
+        - Health
+      summary: Returns the general service status
+      operationId: getHealthStatus
+      responses:
+        200:
+          $ref: '#/components/responses/200HealthStatusResponse'
+  /health/live:
+    get:
+      tags:
+        - Health
+      summary: Returns 204 if the service is alive
+      operationId: isLive
+      responses:
+        204:
+          $ref: '#/components/responses/204IsLiveResponse'
+  /health/ready:
+    get:
+      tags:
+        - Health
+      summary: Returns 204 if the service is ready to receive requests
+      operationId: isReady
+      responses:
+        204:
+          $ref: '#/components/responses/204IsReadyResponse'
+        429:
+          $ref: '#/components/responses/429IsReadyResponse'
+        500:
+          $ref: '#/components/responses/500IsReadyResponse'
+  /rooms:
+    get:
+      tags:
+        - Rooms
+      summary: Retrieves a list of every room the user has access to
+      operationId: listRoom
+      parameters:
+        - $ref: '#/components/parameters/queryRoomsExtraFields'
+      responses:
+        200:
+          $ref: '#/components/responses/200ListRoomResponse'
+    post:
+      tags:
+        - Rooms
+      summary: Insert a room of the specified type
+      description: |
+        Inserts a room of the specified type. The user performing the request will be included in the final members
+        list if not specified. If the room is a one to one, only a single member can be specified and name and
+        description are replaced with an empty string. If the room is not a one to
+        one, there must be at least two members specified.
+      operationId: insertRoom
+      requestBody:
+        $ref: '#/components/requestBodies/InsertRoomRequest'
+      responses:
+        201:
+          $ref: '#/components/responses/201InsertRoomResponse'
+        400:
+          $ref: '#/components/responses/400BadRequestResponse'
+        403:
+          $ref: '#/components/responses/403ForbiddenResponse'
+        409:
+          $ref: '#/components/responses/409Conflict'
+  /rooms/{roomId}:
+    get:
+      tags:
+        - Rooms
+      summary: Retrieves the requested room
+      operationId: getRoom
+      parameters:
+        - $ref: '#/components/parameters/pathRoomId'
+      responses:
+        200:
+          $ref: '#/components/responses/200GetRoomResponse'
+        403:
+          $ref: '#/components/responses/403ForbiddenResponse'
+        404:
+          $ref: '#/components/responses/404NotFoundResponse'
+    put:
+      tags:
+        - Rooms
+      summary: Updates a room information
+      operationId: updateRoom
+      parameters:
+        - $ref: '#/components/parameters/pathRoomId'
+      requestBody:
+        $ref: '#/components/requestBodies/UpdateRoomRequest'
+      responses:
+        200:
+          $ref: '#/components/responses/200UpdateRoomResponse'
+        400:
+          $ref: '#/components/responses/400BadRequestResponse'
+        403:
+          $ref: '#/components/responses/403ForbiddenResponse'
+        404:
+          $ref: '#/components/responses/404NotFoundResponse'
+    delete:
+      tags:
+        - Rooms
+      summary: Deletes the specified room
+      operationId: deleteRoom
+      parameters:
+        - $ref: '#/components/parameters/pathRoomId'
+      responses:
+        204:
+          $ref: '#/components/responses/204DeleteRoomResponse'
+        403:
+          $ref: '#/components/responses/403ForbiddenResponse'
+  /rooms/{roomId}/picture:
+    get:
+      tags:
+        - Rooms
+      summary: Retrieves the room picture
+      operationId: getRoomPicture
+      parameters:
+        - $ref: '#/components/parameters/pathRoomId'
+      responses:
+        200:
+          $ref: '#/components/responses/200GetRoomPictureResponse'
+        403:
+          $ref: '#/components/responses/403ForbiddenResponse'
+        404:
+          $ref: '#/components/responses/404NotFoundResponse'
+    put:
+      tags:
+        - Rooms
+      summary: Uploads and sets a new room picture
+      operationId: updateRoomPicture
+      parameters:
+        - $ref: '#/components/parameters/pathRoomId'
+        - $ref: '#/components/parameters/headerFileName'
+        - $ref: '#/components/parameters/headerMimeType'
+      requestBody:
+        $ref: '#/components/requestBodies/UpdateRoomPictureRequest'
+      responses:
+        204:
+          $ref: '#/components/responses/204UpdateRoomPictureResponse'
+    delete:
+      tags:
+        - Rooms
+      summary: Delete the room picture
+      operationId: deleteRoomPicture
+      parameters:
+        - $ref: '#/components/parameters/pathRoomId'
+      responses:
+        204:
+          $ref: '#/components/responses/204DeleteRoomPictureResponse'
+        401:
+          $ref: '#/components/responses/401UnauthorizedResponse'
+        403:
+          $ref: '#/components/responses/403ForbiddenResponse'
+        404:
+          $ref: '#/components/responses/404NotFoundResponse'
+
+  /rooms/{roomId}/mute:
+    put:
+      tags:
+        - Rooms
+      summary: Mutes notification for the specified room
+      operationId: muteRoom
+      parameters:
+        - $ref: '#/components/parameters/pathRoomId'
+      responses:
+        204:
+          $ref: '#/components/responses/204MuteRoomResponse'
+        403:
+          $ref: '#/components/responses/403ForbiddenResponse'
+        404:
+          $ref: '#/components/responses/404NotFoundResponse'
+    delete:
+      tags:
+        - Rooms
+      summary: Unmutes notification for the specified room
+      operationId: unmuteRoom
+      parameters:
+        - $ref: '#/components/parameters/pathRoomId'
+      responses:
+        204:
+          $ref: '#/components/responses/204UnmuteRoomResponse'
+        403:
+          $ref: '#/components/responses/403ForbiddenResponse'
+        404:
+          $ref: '#/components/responses/404NotFoundResponse'
+  /rooms/{roomId}/clear:
+    put:
+      tags:
+        - Rooms
+      summary: Clears all messages for the specified room
+      operationId: clearRoomHistory
+      parameters:
+        - $ref: '#/components/parameters/pathRoomId'
+      responses:
+        200:
+          $ref: '#/components/responses/200ClearRoomResponse'
+        403:
+          $ref: '#/components/responses/403ForbiddenResponse'
+        404:
+          $ref: '#/components/responses/404NotFoundResponse'
+  /rooms/{roomId}/hash:
+    put:
+      tags:
+        - Rooms
+      summary: Resets the specified room hash
+      operationId: resetRoomHash
+      parameters:
+        - $ref: '#/components/parameters/pathRoomId'
+      responses:
+        200:
+          $ref: '#/components/responses/200ResetRoomHashResponse'
+        403:
+          $ref: '#/components/responses/403ForbiddenResponse'
+        404:
+          $ref: '#/components/responses/404NotFoundResponse'
+  /rooms/{roomId}/members:
+    get:
+      tags:
+        - Rooms
+        - Members
+      summary: Retrieves every member to the given room
+      operationId: listRoomMember
+      parameters:
+        - $ref: '#/components/parameters/pathRoomId'
+      responses:
+        200:
+          $ref: '#/components/responses/200ListRoomMemberResponse'
+        403:
+          $ref: '#/components/responses/403ForbiddenResponse'
+        404:
+          $ref: '#/components/responses/404NotFoundResponse'
+    post:
+      tags:
+        - Rooms
+        - Members
+      summary: Adds or invites the specified user to the room
+      description: |
+        Adds the specified user to the room. This can only be performed by an owner of the given room
+      operationId: insertRoomMember
+      parameters:
+        - $ref: '#/components/parameters/pathRoomId'
+      requestBody:
+        $ref: '#/components/requestBodies/InsertRoomMemberRequest'
+      responses:
+        201:
+          $ref: '#/components/responses/200InsertRoomMemberResponse'
+        400:
+          $ref: '#/components/responses/400BadRequestResponse'
+        403:
+          $ref: '#/components/responses/403ForbiddenResponse'
+  /rooms/{roomId}/members/{userId}:
+    delete:
+      tags:
+        - Rooms
+        - Members
+      summary: Removes a member from the room
+      description: |
+        Removes a member from the specified room. If the specified user is different from
+        the requester, this action is considered as a kick
+      operationId: deleteRoomMember
+      parameters:
+        - $ref: '#/components/parameters/pathRoomId'
+        - $ref: '#/components/parameters/pathUserId'
+      responses:
+        204:
+          $ref: '#/components/responses/204DeleteRoomMemberResponse'
+        403:
+          $ref: '#/components/responses/403ForbiddenResponse'
+  /rooms/{roomId}/members/{userId}/owner:
+    put:
+      tags:
+        - Members
+      summary: Promotes a member to owner
+      operationId: updateToOwner
+      parameters:
+        - $ref: '#/components/parameters/pathRoomId'
+        - $ref: '#/components/parameters/pathUserId'
+      responses:
+        204:
+          $ref: '#/components/responses/204UpdateToOwnerResponse'
+        404:
+          $ref: '#/components/responses/404NotFoundResponse'
+        403:
+          $ref: '#/components/responses/403ForbiddenResponse'
+    delete:
+      tags:
+        - Members
+      summary: Demotes a member from owner to normal member
+      operationId: deleteOwner
+      parameters:
+        - $ref: '#/components/parameters/pathRoomId'
+        - $ref: '#/components/parameters/pathUserId'
+      responses:
+        204:
+          $ref: '#/components/responses/204DeleteOwnerResponse'
+        404:
+          $ref: '#/components/responses/404NotFoundResponse'
+        403:
+          $ref: '#/components/responses/403ForbiddenResponse'
+  /users:
+    get:
+      tags:
+        - Users
+      summary: Retrieves users
+      operationId: getUsers
+      parameters:
+        - $ref: '#/components/parameters/queryUserIds'
+      responses:
+        200:
+          $ref: '#/components/responses/200GetUsersByIdsResponse'
+  /users/capabilities:
+    get:
+      tags:
+        - Users
+      summary: Retrieve current user capabilities
+      operationId: getCapabilities
+      responses:
+        200:
+          $ref: '#/components/responses/200GetCapabilities'
+        401:
+          $ref: '#/components/responses/401UnauthorizedResponse'
+  /users/{userId}:
+    get:
+      tags:
+        - Users
+      summary: Retrieves a user
+      operationId: getUser
+      parameters:
+        - $ref: '#/components/parameters/pathUserId'
+      responses:
+        200:
+          $ref: '#/components/responses/200GetUserResponse'
+        404:
+          $ref: '#/components/responses/404NotFoundResponse'
+  /users/{userId}/picture:
+    get:
+      tags:
+        - Users
+      summary: Retrieves the user picture
+      operationId: getUserPicture
+      parameters:
+        - $ref: '#/components/parameters/pathUserId'
+      responses:
+        200:
+          $ref: '#/components/responses/200GetUserPictureResponse'
+        401:
+          $ref: '#/components/responses/401UnauthorizedResponse'
+        404:
+          $ref: '#/components/responses/404NotFoundResponse'
+    put:
+      tags:
+        - Users
+      summary: Uploads and sets a new user picture
+      operationId: updateUserPicture
+      parameters:
+        - $ref: '#/components/parameters/pathUserId'
+        - $ref: '#/components/parameters/headerFileName'
+        - $ref: '#/components/parameters/headerMimeType'
+      requestBody:
+        $ref: '#/components/requestBodies/UpdateUserPictureRequest'
+      responses:
+        204:
+          $ref: '#/components/responses/204UpdateUserPictureResponse'
+        400:
+          $ref: '#/components/responses/400BadRequestResponse'
+        401:
+          $ref: '#/components/responses/401UnauthorizedResponse'
+        403:
+          $ref: '#/components/responses/403ForbiddenResponse'
+    delete:
+      tags:
+        - Users
+      summary: Delete the user picture
+      operationId: deleteUserPicture
+      parameters:
+        - $ref: '#/components/parameters/pathUserId'
+      responses:
+        204:
+          $ref: '#/components/responses/204DeleteUserPictureResponse'
+        401:
+          $ref: '#/components/responses/401UnauthorizedResponse'
+        403:
+          $ref: '#/components/responses/403ForbiddenResponse'
+        404:
+          $ref: '#/components/responses/404NotFoundResponse'
+  /rooms/{roomId}/attachments:
+    get:
+      tags:
+        - Rooms
+        - Attachments
+      summary: Retrieves paged list of metadata of every attachment uploaded to the room  and the filter for the next page
+      operationId: listRoomAttachmentInfo
+      parameters:
+        - $ref: '#/components/parameters/pathRoomId'
+        - $ref: '#/components/parameters/queryPageItemsNumber'
+        - $ref: '#/components/parameters/queryPageFilter'
+      responses:
+        200:
+          $ref: '#/components/responses/200ListRoomAttachmentInfoResponse'
+        401:
+          $ref: '#/components/responses/401UnauthorizedResponse'
+        403:
+          $ref: '#/components/responses/403ForbiddenResponse'
+        404:
+          $ref: '#/components/responses/404NotFoundResponse'
+    post:
+      tags:
+        - Rooms
+        - Attachments
+      summary: Insert an attachment
+      operationId: insertAttachment
+      parameters:
+        - $ref: '#/components/parameters/pathRoomId'
+        - $ref: '#/components/parameters/headerFileName'
+        - $ref: '#/components/parameters/headerMimeType'
+        - $ref: '#/components/parameters/headerDescription'
+        - $ref: '#/components/parameters/headerMessageId'
+        - $ref: '#/components/parameters/headerReplyId'
+      requestBody:
+        $ref: '#/components/requestBodies/InsertAttachmentRequest'
+      responses:
+        201:
+          $ref: '#/components/responses/201InsertAttachmentResponse'
+        413:
+          $ref: '#/components/responses/413PayloadTooLargeResponse'
+  /rooms/{roomId}/forward:
+    post:
+      tags:
+        - Rooms
+        - Attachments
+      summary: Message forwarding
+      operationId: forwardMessages
+      parameters:
+        - $ref: '#/components/parameters/pathRoomId'
+      requestBody:
+        $ref: '#/components/requestBodies/ForwardMessagesRequest'
+      responses:
+        204:
+          $ref: '#/components/responses/204ForwardMessagesResponse'
+        401:
+          $ref: '#/components/responses/401UnauthorizedResponse'
+        403:
+          $ref: '#/components/responses/403ForbiddenResponse'
+        404:
+          $ref: '#/components/responses/404NotFoundResponse'
+  /attachments/{fileId}:
+    delete:
+      tags:
+        - Attachments
+      summary: Deletes an uploaded attachment
+      operationId: deleteAttachment
+      parameters:
+        - $ref: '#/components/parameters/pathFileId'
+      responses:
+        204:
+          $ref: '#/components/responses/204DeleteAttachmentResponse'
+        403:
+          $ref: '#/components/responses/403ForbiddenResponse'
+    get:
+      tags:
+        - Attachments
+      summary: Retrieves info related to an uploaded attachment
+      operationId: getAttachmentInfo
+      parameters:
+        - $ref: '#/components/parameters/pathFileId'
+      responses:
+        200:
+          $ref: '#/components/responses/200GetAttachmentInfoResponse'
+        403:
+          $ref: '#/components/responses/403ForbiddenResponse'
+        404:
+          $ref: '#/components/responses/404NotFoundResponse'
+  /attachments/{fileId}/download:
+    get:
+      tags:
+        - Attachments
+      summary: Retrieves an uploaded attachment
+      operationId: getAttachment
+      parameters:
+        - $ref: '#/components/parameters/pathFileId'
+      responses:
+        200:
+          $ref: '#/components/responses/200GetAttachmentResponse'
+        403:
+          $ref: '#/components/responses/403ForbiddenResponse'
+        404:
+          $ref: '#/components/responses/404NotFoundResponse'
+/preview/image/{fileId}/{area}/:
+  get:
+    tags:
+      - Preview
+    summary: Get image preview
+    description: |
+      Creates and returns a preview of the image fetched by id
+      with the given size, quality and format
+      - **fileId**: UUID of the image        
+      - **quality**: quality of the output image
+      (the higher you go the slower the process)
+      - **output_format**: format of the output image
+      - **area**: width of the output image (>=0) x
+      height of the output image (>=0), width x height => 100x200.
+      The first is width, the latter height, the order is important!
+      - **crop**: True will crop the picture starting from the borders.
+      This option will lose information, leaving it False will scale and
+      have borders to fill the requested size.
+    operationId: getImagePreview
+    parameters:
+      - $ref: '#/components/parameters/pathFileId'
+      - $ref: '#/components/parameters/pathPreviewArea'
+      - $ref: '#/components/parameters/queryImageQuality'
+      - $ref: '#/components/parameters/queryImageType'
+      - $ref: '#/components/parameters/queryImageCrop'
+    responses:
+      200:
+        $ref: '#/components/responses/200PreviewFileResponse'
+      400:
+        $ref: '#/components/responses/400BadRequestResponse'
+      404:
+        $ref: '#/components/responses/404NotFoundResponse'
+  /preview/image/{fileId}/{area}/thumbnail:
+    get:
+      tags:
+        - Preview
+      summary: Get image thumbnail
+      description: |
+        Creates and returns a preview of the image fetched by id
+        with the given size, quality and format
+        - **fileId**: UUID of the image        
+        - **quality**: quality of the output image
+        (the higher you go the slower the process)
+        - **output_format**: format of the output image
+        - **area**: width of the output image (>=0) x
+        height of the output image (>=0), width x height => 100x200.
+        The first is width, the latter height, the order is important!
+        - **shape**: Rounded and Rectangular are currently supported.
+      operationId: getImageThumbnail
+      parameters:
+        - $ref: '#/components/parameters/pathFileId'
+        - $ref: '#/components/parameters/pathPreviewArea'
+        - $ref: '#/components/parameters/queryImageQuality'
+        - $ref: '#/components/parameters/queryImageType'
+        - $ref: '#/components/parameters/queryImageShape'
+      responses:
+        200:
+          $ref: '#/components/responses/200PreviewFileResponse'
+        400:
+          $ref: '#/components/responses/400BadRequestResponse'
+        404:
+          $ref: '#/components/responses/404NotFoundResponse'
+  /preview/pdf/{fileId}/:
+    get:
+      tags:
+        - Preview
+      summary: Get pdf preview
+      description: |
+        Creates and returns a preview of the pdf fetched by id, 
+        the pdf file will contain the first and last page given. With default values
+        it will return a pdf with all the pages.
+        - **fileId**: UUID of the pdf        
+        - **first_page**: integer value of first page to preview (n>=1)
+        - **last_page**: integer value of last page to preview (0 = last of the original pdf)
+      operationId: getPdfPreview
+      parameters:
+        - $ref: '#/components/parameters/pathFileId'
+        - $ref: '#/components/parameters/queryFirstPage'
+        - $ref: '#/components/parameters/queryLastPage'
+      responses:
+        200:
+          $ref: '#/components/responses/200PreviewFileResponse'
+        400:
+          $ref: '#/components/responses/400BadRequestResponse'
+        404:
+          $ref: '#/components/responses/404NotFoundResponse'
+  /preview/pdf/{fileId}/{area}/thumbnail:
+    get:
+      tags:
+        - Preview
+      summary: Get pdf thumbnail
+      description: |
+        Creates and returns a preview of the pdf fetched by id
+        with the given size, quality and format
+        - **fileId**: UUID of the pdf        
+        - **quality**: quality of the output image
+        (the higher you go the slower the process)
+        - **output_format**: format of the output image
+        - **area**: width of the output image (>=0) x
+        height of the output image (>=0), width x height => 100x200.
+        The first is width, the latter height, the order is important!
+        - **shape**: Rounded and Rectangular are currently supported.
+      operationId: getPdfThumbnail
+      parameters:
+        - $ref: '#/components/parameters/pathFileId'
+        - $ref: '#/components/parameters/pathPreviewArea'
+        - $ref: '#/components/parameters/queryImageQuality'
+        - $ref: '#/components/parameters/queryImageType'
+        - $ref: '#/components/parameters/queryImageShape'
+      responses:
+        200:
+          $ref: '#/components/responses/200PreviewFileResponse'
+        400:
+          $ref: '#/components/responses/400BadRequestResponse'
+        404:
+          $ref: '#/components/responses/404NotFoundResponse'
+  /supported:
+    get:
+      tags:
+        - Miscellaneous
+      summary: Retrieves the supported versions list
+      operationId: getSupportedVersions
+      responses:
+        200:
+          $ref: '#/components/responses/200GetSupportedVersionsResponse'
+  /auth/token:
+    get:
+      tags:
+        - Authentication
+      summary: Retrives the authenticated tokens
+      operationId: getTokens
+      responses:
+        200:
+          $ref: '#/components/responses/200GetTokensResponse'
+        401:
+          $ref: '#/components/responses/401UnauthorizedResponse'
+        404:
+          $ref: '#/components/responses/404NotFoundResponse'
+components:
+  parameters:
+    pathRoomId:
+      in: path
+      name: roomId
+      description: room identifier
+      schema:
+        type: string
+        format: uuid
+      required: true
+      allowEmptyValue: false
+    pathPreviewArea:
+      in: path
+      name: area
+      schema:
+        title: Area
+        type: string
+      required: true
+      queryImageQuality:
+        in: query
+        name: quality
+        schema:
+          allOf:
+            - $ref: '#/components/schemas/ImageQualityEnum'
+          default: medium
+        required: false
+      queryImageType:
+        in: query
+        name: output_format
+        schema:
+          allOf:
+            - $ref: '#/components/schemas/ImageTypeEnum'
+          default: medium
+        required: false
+      queryImageCrop:
+        in: query
+        name: crop
+        schema:
+          title: Crop
+          type: boolean
+          default: false
+        required: false
+      queryImageShape:
+        in: query
+        name: shape
+        schema:
+          allOf:
+            - $ref: '#/components/schemas/ImageShapeEnum'
+          default: Rectangular
+        required: false
+      queryFirstPage:
+        in: query
+        name: firstPage
+        schema:
+          title: FirstPage
+          type: integer
+        required: false
+      queryLastPage:
+        in: query
+        name: lastPage
+        schema:
+          title: LastPage
+          type: integer
+        required: false
+    pathUserId:
+      in: path
+      name: userId
+      description: user identifier
+      schema:
+        type: string
+        format: uuid
+      required: true
+      allowEmptyValue: false
+    headerFileName:
+      in: header
+      name: fileName
+      description: file name
+      schema:
+        type: string
+      required: true
+      allowEmptyValue: false
+    headerMimeType:
+      in: header
+      name: mimeType
+      description: content type
+      schema:
+        type: string
+      required: true
+      allowEmptyValue: false
+    headerDescription:
+      in: header
+      name: description
+      description: description
+      schema:
+        type: string
+      required: false
+      allowEmptyValue: true
+    headerMessageId:
+      in: header
+      name: messageId
+      description: description
+      schema:
+        type: string
+      required: false
+      allowEmptyValue: true
+    headerReplyId:
+      in: header
+      name: replyId
+      description: identifier of the message being replied to
+      schema:
+        type: string
+      required: false
+      allowEmptyValue: true
+    queryPageItemsNumber:
+      in: query
+      name: itemsNumber
+      description: number of page items
+      schema:
+        type: integer
+        default: 10
+      required: false
+    queryPageFilter:
+      in: query
+      name: filter
+      description: pagination filter
+      schema:
+        type: string
+      required: false
+    queryRoomsExtraFields:
+      in: query
+      name: extraFields
+      description: Rooms extra fields
+      schema:
+        type: array
+        items:
+          $ref: '#/components/schemas/RoomExtraField'
+      required: false
+    queryUserIds:
+      in: query
+      name: userIds
+      description: List of ids (max 10) of the users to retrieve
+      required: true
+      schema:
+        type: array
+        maxItems: 10
+        items:
+          type: string
+  requestBodies:
+    InsertRoomRequest:
+      description: room to insert
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RoomCreationFields'
+    UpdateRoomRequest:
+      description: room fields to update
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RoomEditableFields'
+    UpdateRoomPictureRequest:
+      description: image to set
+      required: true
+      content:
+        application/octet-stream:
+          schema:
+            type: string
+            format: binary
+    InsertRoomMemberRequest:
+      description: member to add or invite
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MemberToInsert'
+    InsertAttachmentRequest:
+      description: file stream
+      required: true
+      content:
+        application/octet-stream:
+          schema:
+            type: string
+            format: binary
+    UpdateUserPictureRequest:
+      description: image to set
+      required: true
+      content:
+        application/octet-stream:
+          schema:
+            type: string
+            format: binary
+    ForwardMessagesRequest:
+      description: Messages forwarding request
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ForwardMessagesList'
+
+  responses:
+    200HealthStatusResponse:
+      description: General status of the service and its dependencies
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/HealthStatus'
+    204IsLiveResponse:
+      description: The service is alive
+    204IsReadyResponse:
+      description: The service is ready to receive requests
+    429IsReadyResponse:
+      description: The service is ready but some non-fundamental dependencies are not reachable
+    500IsReadyResponse:
+      description: The service is not yet ready to receive requests
+    200ListRoomResponse:
+      description: List of every room that the user has access to
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Room'
+    201InsertRoomResponse:
+      description: The newly created room
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Room'
+    200GetRoomResponse:
+      description: Requested room
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Room'
+    200UpdateRoomResponse:
+      description: Updated room
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Room'
+    204DeleteRoomResponse:
+      description: Room was deleted correctly or it never existed
+    200GetRoomPictureResponse:
+      description: The requested picture
+      content:
+        application/octet-stream:
+          schema:
+            type: string
+            format: binary
+    204UpdateRoomPictureResponse:
+      description: Room picture was changed correctly
+    204DeleteRoomPictureResponse:
+      description: Room picture was deleted correctly
+    204MuteRoomResponse:
+      description: Room was muted correctly
+    204UnmuteRoomResponse:
+      description: Room was unmuted correctly
+    200ClearRoomResponse:
+      description: Cleaning date of messages
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClearedDate'
+    200ResetRoomHashResponse:
+      description: Room's hash
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Hash'
+    200ListRoomMemberResponse:
+      description: The room members list
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Member'
+    200InsertRoomMemberResponse:
+      description: The member added or invited
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MemberInserted'
+    204DeleteRoomMemberResponse:
+      description: The member was deleted correctly or it never existed
+    204UpdateToOwnerResponse:
+      description: The member was promoted
+    204DeleteOwnerResponse:
+      description: The member was demoted
+    200GetCapabilities:
+      description: User capabilities
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Capabilities'
+    200GetUserResponse:
+      description: Requested user
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/User'
+    200GetUserPictureResponse:
+      description: The requested picture
+      content:
+        application/octet-stream:
+          schema:
+            type: string
+            format: binary
+    200GetUsersByIdsResponse:
+      description: The requested users list
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/User'
+    204UpdateUserPictureResponse:
+      description: User picture was changed correctly
+    204DeleteUserPictureResponse:
+      description: User picture was deleted correctly
+    201InsertAttachmentResponse:
+      description: File identifier
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Id'
+    200ListRoomAttachmentInfoResponse:
+      description: Paged list of metadata of every attachment uploaded to the room
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AttachmentsPagination'
+    204DeleteAttachmentResponse:
+      description: The file was deleted correctly
+    200GetAttachmentInfoResponse:
+      description: Attachment informations
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Attachment'
+    200GetAttachmentResponse:
+      description: The requested file
+      content:
+        application/octet-stream:
+          schema:
+            type: string
+            format: binary
+    200PreviewFileResponse:
+      description: The preview of the requested file
+      content:
+        application/octet-stream:
+          schema:
+            type: string
+            format: binary
+    200GetSupportedVersionsResponse:
+      description: |
+        The supported versions list.
+        Each element indicates the highest revision for that supported major version.
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              type: string
+    200GetTokensResponse:
+      description: The authenticated tokens.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Token'
+    204ForwardMessagesResponse:
+      description: successfully forwarded the messages
+    400BadRequestResponse:
+      description: The request had wrong or missing parameters
+    401UnauthorizedResponse:
+      description: User not authorized
+    403ForbiddenResponse:
+      description: The requester could not access the resource
+    404NotFoundResponse:
+      description: The requested resource was not found
+    409Conflict:
+      description: The request conflict with the current state
+    413PayloadTooLargeResponse:
+      description: The request had a payload that was too big
+    502BadGatewayResponse:
+      description: The service was unavailable
+  schemas:
+    Error:
+      type: object
+      description: Error object returned from requests with developer mode active
+      properties:
+        traceId:
+          type: string
+          description: random hash used to identify the error within logs
+          readOnly: true
+        message:
+          type: string
+          description: a message describing the error
+          readOnly: true
+    HealthStatus:
+      type: object
+      description: Health status of the service and its dependencies
+      properties:
+        isLive:
+          type: boolean
+          description: describes if the service is alive
+          readOnly: true
+        status:
+          $ref: '#/components/schemas/HealthStatusType'
+        dependencies:
+          type: array
+          description: health of this service dependencies
+          items:
+            $ref: '#/components/schemas/DependencyHealth'
+    HealthStatusType:
+      type: string
+      description: Health status types
+      enum:
+        - ok
+        - warn
+        - error
+    DependencyHealth:
+      type: object
+      description: Health status of a service dependency
+      properties:
+        name:
+          $ref: '#/components/schemas/DependencyHealthType'
+        isHealthy:
+          type: boolean
+          description: whether the dependency is available and operative
+          readOnly: true
+    DependencyHealthType:
+      type: string
+      description: Health dependency types
+      enum:
+        - database
+        - xmpp_server
+        - event_dispatcher
+        - storage_service
+        - previewer_service
+        - authentication_service
+        - profiling_service
+        - videoserver_service
+    Id:
+      type: object
+      description: Identifier object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+          description: identifier
+      required: [ id ]
+    ClearedDate:
+      type: object
+      properties:
+        clearedAt:
+          type: string
+          format: date-time
+          readOnly: true
+          description: date since messages were cleared
+      required: [ clearedAt ]
+    Hash:
+      type: object
+      description: Hash object
+      properties:
+        hash:
+          type: string
+          description: hash
+      required: [ hash ]
+    Capabilities:
+      type: object
+      properties:
+        canSeeMessageReads:
+          type: boolean
+          description: indicates whether it can see if the messages have been read
+        canSeeUsersPresence:
+          type: boolean
+          description: indicates whether it can see the presence of the other users
+        canVideoCall:
+          type: boolean
+          description: indicates whether it can access video calls
+        canVideoCallRecord:
+          type: boolean
+          description: indicates whether it can record video calls
+        canUseVirtualBackground:
+          type: boolean
+          description: indicates whether it can use a virtual background
+        editMessageTimeLimitInMinutes:
+          type: integer
+          description: limit of minutes within which a message can be edited
+        deleteMessageTimeLimitInMinutes:
+          type: integer
+          description: limit of minutes within which a message can be deleted
+        maxGroupMembers:
+          type: integer
+          description: maximum number of users who can be members of a group
+        maxRoomImageSizeInKb:
+          type: integer
+          description: maximum size for a room image in kB
+        maxUserImageSizeInKb:
+          type: integer
+          description: maximum size for a user image in kB
+      required:
+        - canSeeMessageReads
+        - canSeeUsersPresence
+        - canVideoCall
+        - canVideoCallRecord
+        - canUseVirtualBackground
+        - editMessageTimeLimitInMinutes
+        - deleteMessageTimeLimitInMinutes
+        - maxGroupMembers
+        - maxRoomImageSizeInKb
+        - maxUserImageSizeInKb
+    User:
+      type: object
+      description: User data
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+          description: user's id
+        email:
+          type: string
+          format: email
+          readOnly: true
+          description: user's email
+        name:
+          type: string
+          readOnly: true
+          description: user's name
+        pictureUpdatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+          description: |
+            user profile picture update timestamp,
+            returned only if the room picture was set at least once
+        statusMessage:
+          type: string
+          description: the user's status message
+      required: [ id, email, name ]
+    RoomType:
+      type: string
+      description: Managed room types
+      enum:
+        - group
+        - one_to_one
+    RoomEditableFields:
+      type: object
+      description: Room fields that can be updated
+      properties:
+        name:
+          type: string
+          description: room name
+          minLength: 1
+          maxLength: 128
+        description:
+          type: string
+          minLength: 0
+          maxLength: 256
+          description: room description
+      required: [ name, description ]
+    RoomCreationFields:
+      type: object
+      description: Room fields for its creation
+      allOf:
+        - $ref: '#/components/schemas/RoomEditableFields'
+        - type: object
+          properties:
+            type:
+              $ref: '#/components/schemas/RoomType'
+      properties:
+        membersIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+          description: members identifiers list to be subscribed to the room
+      required: [ type ]
+    Room:
+      type: object
+      description: Room data
+      allOf:
+        - $ref: '#/components/schemas/RoomCreationFields'
+        - type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+              readOnly: true
+              description: room identifier
+            hash:
+              type: string
+              readOnly: true
+              description: an hash that can be used to compose the room's link
+            createdAt:
+              type: string
+              format: date-time
+              readOnly: true
+              description: entity creation date
+            updatedAt:
+              type: string
+              format: date-time
+              readOnly: true
+              description: entity update date
+            pictureUpdatedAt:
+              type: string
+              format: date-time
+              readOnly: true
+              description: |
+                room profile picture update timestamp,
+                returned only if the room picture was set at least once
+            children:
+              type: array
+              items:
+                $ref: '#/components/schemas/Room'
+            members:
+              type: array
+              items:
+                $ref: '#/components/schemas/Member'
+              description: list of users subscribed to the room
+            userSettings:
+              $ref: '#/components/schemas/RoomUserSettings'
+      required: [ id, hash, createdAt, updatedAt ]
+    RoomUserSettings:
+      type: object
+      description: Preferences that an user has set for a room
+      properties:
+        muted:
+          type: boolean
+          description: indicates whether the user has muted
+        clearedAt:
+          type: string
+          format: date-time
+          description: |
+            room clear history date,
+            returned only if the room clear history has been cleared at least once
+      required: [ muted, clearedAt ]
+    RoomExtraField:
+      type: string
+      description: Room extra fields
+      enum:
+        - members
+        - settings
+    Member:
+      type: object
+      description: Information about a user's role in the room
+      properties:
+        userId:
+          type: string
+          format: uuid
+          description: user identifier
+        owner:
+          type: boolean
+          default: false
+          description: indicates whether it is the owner
+        temporary:
+          type: boolean
+          default: false
+          readOnly: true
+          description: indicates whether it is temporary
+        external:
+          type: boolean
+          default: false
+          readOnly: true
+          description: indicates whether it is external user
+      required: [ userId, owner, temporary, external ]
+    MemberToInsert:
+      type: object
+      description: Information about the member to insert in the room
+      allOf:
+        - $ref: '#/components/schemas/Member'
+        - type: object
+          properties:
+            historyCleared:
+              type: boolean
+              description: |
+                indicates whether it can see previous messages,
+                after it has been added to the room
+          required: [ userId, owner, temporary, external, historyCleared ]
+    MemberInserted:
+      type: object
+      description: Information about the member to inserted in the room
+      allOf:
+        - $ref: '#/components/schemas/Member'
+        - type: object
+          properties:
+            clearedAt:
+              type: string
+              format: date-time
+              description: |
+                room clear history timestamp,
+                returned only if the room history has been cleared at least once
+          required: [ userId, owner, temporary, external, clearedAt ]
+    Attachment:
+      type: object
+      description: Attachment of a message
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+          description: identifier
+        name:
+          type: string
+          description: file name
+        size:
+          type: integer
+          format: int64
+          readOnly: true
+          description: file length
+        mimeType:
+          type: string
+          readOnly: true
+          description: mime type
+        userId:
+          type: string
+          format: uuid
+          readOnly: true
+          description: identifier of updated user
+        roomId:
+          type: string
+          format: uuid
+          readOnly: true
+          description: identifier of destination room
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+          description: creation date
+      required: [ id, name, size, mimeType, userId, roomId ]
+    AttachmentsPagination:
+      type: object
+      description: Attachment pagination
+      properties:
+        filter:
+          type: string
+          description: filter for the next page
+        attachments:
+          type: array
+          description: paged list of attachments metadata
+          items:
+            $ref: '#/components/schemas/Attachment'
+    Token:
+      type: object
+      description: authenticated tokens
+      properties:
+        zmToken:
+          type: string
+          description: ZM token
+    ImageQualityEnum:
+      title: ImageQualityEnum
+      enum:
+        - Lowest
+        - Low
+        - Medium
+        - High
+        - Highest
+      type: string
+      description: Class representing all the image quality accepted values
+    ImageTypeEnum:
+      title: ImageTypeEnum
+      enum:
+        - Jpeg
+        - Png
+      type: string
+      description: Class representing all the image type accepted values
+    ImageShapeEnum:
+      title: ImageShapeEnum
+      enum:
+        - Rounded
+        - Rectangular
+      type: string
+      description: Class representing all the image shape accepted values
+    JoinSettingsByRoom:
+      type: object
+      description: Room data
+      allOf:
+        - $ref: '../meeting/meeting-api.yaml#/components/schemas/JoinSettings'
+    ForwardMessagesList:
+      type: array
+      description: Room data
+      items:
+        $ref: '#/components/schemas/ForwardMessage'
+    ForwardMessage:
+      type: object
+      description: Message to forward
+      properties:
+        originalMessage:
+          type: string
+          readOnly: true
+          description: XML message to forward
+        originalMessageSentAt:
+          type: string
+          format: date-time
+          readOnly: true
+          description: date and time the original message was sent
+        description:
+          type: string
+          readOnly: true
+          description: description of the forwarded message
+      required: [ originalMessage ]

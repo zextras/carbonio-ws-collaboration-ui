@@ -7,6 +7,9 @@
 import attachmentsApi from './AttachmentsApi';
 import { AttachmentType, ImageQuality, ImageShape } from '../../types/network/apis/IAttachmentsApi';
 
+const contentType = 'Content-Type';
+const applicationJson = 'application/json';
+
 describe('Attachments API', () => {
 	test('deleteAttachment is called correctly', async () => {
 		// Send deleteAttachment request
@@ -14,7 +17,7 @@ describe('Attachments API', () => {
 
 		// Set appropriate headers
 		const headers = new Headers();
-		headers.append('Content-Type', 'application/json');
+		headers.append(contentType, applicationJson);
 
 		// Check if fetch is called with the correct parameters
 		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/attachments/fileId`, {
@@ -30,7 +33,7 @@ describe('Attachments API', () => {
 
 		// Set appropriate headers
 		const headers = new Headers();
-		headers.append('Content-Type', 'application/json');
+		headers.append(contentType, applicationJson);
 
 		// Check if fetch is called with the correct parameters
 		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/attachments/fileId`, {
@@ -51,7 +54,7 @@ describe('Attachments API', () => {
 
 		// Set appropriate headers
 		const headers = new Headers();
-		headers.append('Content-Type', 'application/json');
+		headers.append(contentType, applicationJson);
 
 		// Check if fetch is called with the correct parameters
 		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/attachments/fileId/download`, {
@@ -67,7 +70,7 @@ describe('Attachments API', () => {
 
 		// Set appropriate headers
 		const headers = new Headers();
-		headers.append('Content-Type', 'application/json');
+		headers.append(contentType, applicationJson);
 
 		// Check if fetch is called with the correct parameters
 		expect(global.fetch).toHaveBeenCalledWith(
@@ -92,7 +95,7 @@ describe('Attachments API', () => {
 
 		// Set appropriate headers
 		const headers = new Headers();
-		headers.append('Content-Type', 'application/json');
+		headers.append(contentType, applicationJson);
 
 		// Check if fetch is called with the correct parameters
 		expect(global.fetch).toHaveBeenCalledWith(
@@ -111,7 +114,7 @@ describe('Attachments API', () => {
 
 		// Set appropriate headers
 		const headers = new Headers();
-		headers.append('Content-Type', 'application/json');
+		headers.append(contentType, applicationJson);
 
 		// Check if fetch is called with the correct parameters
 		expect(global.fetch).toHaveBeenCalledWith(
@@ -136,7 +139,7 @@ describe('Attachments API', () => {
 
 		// Set appropriate headers
 		const headers = new Headers();
-		headers.append('Content-Type', 'application/json');
+		headers.append(contentType, applicationJson);
 
 		// Check if fetch is called with the correct parameters
 		expect(global.fetch).toHaveBeenCalledWith(

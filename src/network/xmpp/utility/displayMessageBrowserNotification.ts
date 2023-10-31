@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 import { getNotificationManager, replaceHistory } from '@zextras/carbonio-shell-ui';
+import { isEmpty } from 'lodash';
 
 import { CHATS_ROUTE } from '../../../constants/appConstants';
 import useStore from '../../../store/Store';
@@ -18,6 +19,7 @@ const displayMessageBrowserNotification = (message: TextMessage): void => {
 		store.activeConversations[message.roomId].inputHasFocus;
 	const room = store.rooms[message.roomId];
 	const roomIsMuted = room?.userSettings?.muted;
+	const isMeetingTab = !isEmpty(store.activeMeeting);
 
 	let notificationsAreActive;
 	const ChatsNotificationsSettings: string | null = window.parent.localStorage.getItem(
@@ -38,7 +40,14 @@ const displayMessageBrowserNotification = (message: TextMessage): void => {
 		notificationsAreActive = true;
 	}
 
-	if (notMyMessage && !inputIsFocused && room && !roomIsMuted && notificationsAreActive) {
+	if (
+		notMyMessage &&
+		!inputIsFocused &&
+		room &&
+		!roomIsMuted &&
+		!isMeetingTab &&
+		notificationsAreActive
+	) {
 		const sender = store.users[message.from];
 		const title = room.type === RoomType.ONE_TO_ONE ? sender.name || sender.email || '' : room.name;
 		const text = message.attachment && message.text === '' ? message.attachment.name : message.text;

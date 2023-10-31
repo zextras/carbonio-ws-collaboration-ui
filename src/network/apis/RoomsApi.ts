@@ -39,6 +39,7 @@ import {
 import { ChangeUserPictureResponse } from '../../types/network/responses/usersResponses';
 import { TextMessage } from '../../types/store/MessageTypes';
 import { dateToISODate } from '../../utils/dateUtil';
+import { MeetingsApi } from '../index';
 import HistoryAccumulator from '../xmpp/utility/HistoryAccumulator';
 
 class RoomsApi extends BaseAPI implements IRoomsApi {
@@ -68,7 +69,11 @@ class RoomsApi extends BaseAPI implements IRoomsApi {
 	}
 
 	public addRoom(room: RoomCreationFields): Promise<AddRoomResponse> {
-		return this.fetchAPI('rooms', RequestType.POST, room);
+		return this.fetchAPI('rooms', RequestType.POST, room).then((response: AddRoomResponse) => {
+			// Create a permanent meeting for the room when it is created
+			MeetingsApi.createPermanentMeeting(response.id);
+			return response;
+		});
 	}
 
 	public getRoom(roomId: string): Promise<GetRoomResponse> {
@@ -83,7 +88,16 @@ class RoomsApi extends BaseAPI implements IRoomsApi {
 	}
 
 	public deleteRoom(roomId: string): Promise<DeleteRoomResponse> {
-		return this.fetchAPI(`rooms/${roomId}`, RequestType.DELETE);
+		return this.fetchAPI(`rooms/${roomId}`, RequestType.DELETE).then(
+			(response: DeleteRoomResponse) => {
+				// Delete the associated permanent meeting
+				const meeting = useStore.getState().meetings[roomId];
+				if (meeting) {
+					MeetingsApi.deleteMeeting(meeting.id);
+				}
+				return response;
+			}
+		);
 	}
 
 	public getURLRoomPicture = (roomId: string): string =>

@@ -81,5 +81,14 @@ export const useSessionStoreSlice = (set: (...any: any) => void): SessionStoreSl
 			false,
 			'SESSION/SET_FILTER_FOCUS'
 		);
+	},
+	setCustomLogo: (logo: string | false): void => {
+		set(
+			produce((draft: RootStore) => {
+				draft.session.customLogo = logo;
+			}),
+			false,
+			'SESSION/SET_CUSTOM_LOGO'
+		);
 	}
 });

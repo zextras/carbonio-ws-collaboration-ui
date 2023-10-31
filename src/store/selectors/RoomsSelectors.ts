@@ -45,7 +45,8 @@ export const getRoomNameSelector = (state: RootStore, id: string): string => {
 export const getRoomTypeSelector = (state: RootStore, id: string): RoomType =>
 	state.rooms[id]?.type;
 export const getRoomDescriptionSelector = (state: RootStore, id: string): string =>
-	state.rooms[id].description || '';
+	state.rooms[id]?.description || '';
+
 export const getRoomMutedSelector = (state: RootStore, id: string): boolean | undefined =>
 	state.rooms[id]?.userSettings?.muted;
 
@@ -70,9 +71,9 @@ export const getMyOwnershipOfTheRoom = (
 	sessionId: string | undefined,
 	roomId: string
 ): boolean => {
-	if (state.rooms[roomId].members != null && sessionId != null) {
+	if (state.rooms[roomId]?.members != null && sessionId != null) {
 		const sessionMember = find(
-			state.rooms[roomId].members,
+			state.rooms[roomId]?.members,
 			(member) => member.userId === sessionId
 		);
 		if (sessionMember != null) {
@@ -84,8 +85,8 @@ export const getMyOwnershipOfTheRoom = (
 };
 
 export const getOwner = (state: RootStore, roomId: string, userId: string): boolean => {
-	if (state.rooms[roomId].members != null) {
-		const user = find(state.rooms[roomId].members, (member) => member.userId === userId);
+	if (state.rooms[roomId]?.members != null) {
+		const user = find(state.rooms[roomId]?.members, (member) => member.userId === userId);
 		if (user != null) {
 			return user.owner;
 		}
@@ -95,17 +96,17 @@ export const getOwner = (state: RootStore, roomId: string, userId: string): bool
 };
 
 export const getNumberOfOwnersOfTheRoom = (state: RootStore, roomId: string): number => {
-	if (state.rooms[roomId].members != null) {
-		return countBy(state.rooms[roomId].members, (member) => member.owner).true;
+	if (state.rooms[roomId]?.members != null) {
+		return countBy(state.rooms[roomId]?.members, (member) => member.owner).true;
 	}
 	return 0;
 };
 
 export const getRoomMembers = (state: RootStore, roomId: string): Member[] | undefined =>
-	state.rooms[roomId].members;
+	state.rooms[roomId]?.members;
 
 export const getNumbersOfRoomMembers = (state: RootStore, roomId: string): number =>
-	size(state.rooms[roomId].members);
+	size(state.rooms[roomId]?.members);
 
 export const getPictureUpdatedAt = (state: RootStore, roomId: string): string | undefined =>
 	state.rooms[roomId]?.pictureUpdatedAt;

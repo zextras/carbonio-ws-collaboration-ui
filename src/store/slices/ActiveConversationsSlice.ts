@@ -228,10 +228,7 @@ export const useActiveConversationsSlice = (
 	setFileFocusedToModify: (roomId: string, fileTempId: string, active: boolean): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (
-					draft.activeConversations[roomId].filesToAttach &&
-					draft.activeConversations[roomId].filesToAttach
-				) {
+				if (draft.activeConversations[roomId].filesToAttach) {
 					forEach(draft.activeConversations[roomId].filesToAttach, (file) => {
 						if (file.fileId === fileTempId) {
 							file.hasFocus = active;

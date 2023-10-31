@@ -4,10 +4,12 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { MeetingBe, MeetingType } from '../types/network/models/meetingBeTypes';
 import { MemberBe, RoomBe } from '../types/network/models/roomBeTypes';
 import { UserBe } from '../types/network/models/userBeTypes';
 import { FileToUpload } from '../types/store/ActiveConversationTypes';
 import { Marker, MarkerStatus, MarkerType } from '../types/store/MarkersTypes';
+import { MeetingParticipant } from '../types/store/MeetingTypes';
 import {
 	ConfigurationMessage,
 	DateMessage,
@@ -21,13 +23,15 @@ import { CapabilityList } from '../types/store/SessionTypes';
 
 type GenericFieldsType = Record<string, string | boolean | number | object | object[]>;
 
+const timeStampString = '2022-08-25T17:24:28.961+02:00';
+
 export const createMockRoom = (fields?: GenericFieldsType): RoomBe => ({
 	id: 'id',
 	name: 'name',
 	description: 'description',
 	type: RoomType.GROUP,
-	createdAt: '2022-08-25T17:24:28.961+02:00',
-	updatedAt: '2022-08-25T17:24:28.961+02:00',
+	createdAt: timeStampString,
+	updatedAt: timeStampString,
 	members: [],
 	userSettings: {
 		muted: false
@@ -126,14 +130,12 @@ export const pdfFile = new File(['doc'], 'doc.pdf', {
 	type: 'application/pdf'
 });
 
-export const createMockFile = (fields?: { name: string; options?: GenericFieldsType }): File => {
-	const newFile = fields
+export const createMockFile = (fields?: { name: string; options?: GenericFieldsType }): File =>
+	fields
 		? new File(['lotsOfBite'], fields.name, { ...fields.options })
 		: new File(['sunrise'], 'sunrise.png', {
 				type: 'image/png'
 		  });
-	return newFile;
-};
 
 export const createMockFileToUpload = (fields?: GenericFieldsType): FileToUpload => ({
 	fileId: 'genericImageId',
@@ -141,5 +143,24 @@ export const createMockFileToUpload = (fields?: GenericFieldsType): FileToUpload
 	localUrl: 'localhost/generic/url',
 	description: '',
 	hasFocus: false,
+	...fields
+});
+
+export const createMockMeeting = (fields?: GenericFieldsType): MeetingBe => ({
+	id: 'meetingId',
+	name: '',
+	roomId: 'roomId',
+	active: true,
+	participants: [],
+	createdAt: timeStampString,
+	meetingType: MeetingType.PERMANENT,
+	...fields
+});
+
+export const createMockParticipants = (fields?: GenericFieldsType): MeetingParticipant => ({
+	userId: 'userId',
+	audioStreamOn: false,
+	videoStreamOn: false,
+	joinedAt: timeStampString,
 	...fields
 });

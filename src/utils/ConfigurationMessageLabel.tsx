@@ -6,6 +6,7 @@
 /* eslint-disable react/jsx-no-useless-fragment */
 
 import React, { Fragment, useMemo } from 'react';
+
 import { Trans, useTranslation } from 'react-i18next';
 
 import { getRoomNameSelector, getRoomTypeSelector } from '../store/selectors/RoomsSelectors';
@@ -42,14 +43,21 @@ export const ConfigurationMessageLabel = ({
 	);
 
 	const roomDescriptionChangedLabel = useMemo(
-		() => (
-			<Trans
-				i18nKey={'configurationMessages.roomTopicChanged'}
-				defaults='{{nameToDisplay}} changed the topic of {{roomName}} in <i>"{{messageValue}}"</i>'
-				values={{ name: displayedActionMaker, roomName, topicName: message.value }}
-			/>
-		),
-		[displayedActionMaker, message.value, roomName]
+		() =>
+			message.value === '' ? (
+				t(
+					'configurationMessages.roomTopicRemoved',
+					`${displayedActionMaker} removed ${roomName}'s topic`,
+					{ name: displayedActionMaker, roomName }
+				)
+			) : (
+				<Trans
+					i18nKey={'configurationMessages.roomTopicChanged'}
+					defaults='{{nameToDisplay}} changed the topic of {{roomName}} in <i>"{{messageValue}}"</i>'
+					values={{ name: displayedActionMaker, roomName, topicName: message.value }}
+				/>
+			),
+		[displayedActionMaker, message.value, roomName, t]
 	);
 
 	const pictureUpdatedLabel = t(
@@ -71,8 +79,8 @@ export const ConfigurationMessageLabel = ({
 	);
 	const memberRemovedLabel = t(
 		'affiliationMessages.memberRemoved',
-		`${affiliatedName} has been removed from ${roomName}`,
-		{ userName: affiliatedName, roomName }
+		`${affiliatedName} is no longer a member of the group`,
+		{ userName: affiliatedName }
 	);
 
 	const oneToOneCreatedLabel = t('affiliationMessages.oneToOneCreated', 'New Chat created!');
