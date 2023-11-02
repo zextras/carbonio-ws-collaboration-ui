@@ -11,6 +11,9 @@ import {
 	AppRoute,
 	INotificationManager
 } from '@zextras/carbonio-shell-ui';
+import { createMemoryHistory } from 'history';
+
+const history = createMemoryHistory();
 
 export const USER_SETTINGS: AccountSettings = {
 	attrs: {},
@@ -44,6 +47,22 @@ export const NOTIFICATION_MANAGER = {
 	playSound: jest.fn()
 };
 
+function pushHistoryMock(location: string | Location): void {
+	if (typeof location === 'string') {
+		history.push(location);
+	} else {
+		history.push({ ...location, pathname: location.pathname });
+	}
+}
+
+function replaceHistoryMock(location: string | Location): void {
+	if (typeof location === 'string') {
+		history.replace(location);
+	} else {
+		history.replace({ ...location, pathname: location.pathname });
+	}
+}
+
 export const useUserSettings = (): AccountSettings => USER_SETTINGS;
 
 export const useCurrentRoute = (): AppRoute | undefined => ROUTE_SETTINGS;
@@ -55,3 +74,7 @@ export const getNotificationManager = (): INotificationManager => NOTIFICATION_M
 export const SettingsHeader = (): ReactElement => <div>settings header</div>;
 
 export const Spinner = (): ReactElement => <div>spinner</div>;
+
+export const pushHistory = jest.fn(pushHistoryMock);
+
+export const replaceHistory = jest.fn(replaceHistoryMock);
