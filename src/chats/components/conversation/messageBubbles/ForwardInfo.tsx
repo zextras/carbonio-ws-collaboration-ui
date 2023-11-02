@@ -36,13 +36,17 @@ const ForwardInfo: FC<ForwardInfoProps> = ({ info }) => {
 		<Container padding={{ bottom: 'small' }} orientation="horizontal" mainAlignment="flex-start">
 			{info.count > 1 && (
 				<Tooltip label={forwardedMultipleTimesLabel}>
-					<Padding right="small">
+					<Padding right="extrasmall">
 						<Icon icon="ForwardMultipleTimes" size="small" color="secondary" />
 					</Padding>
 				</Tooltip>
 			)}
+			<Text color="secondary" size="small" weight="bold">
+				{originallySentByLabel}
+			</Text>
+			<Padding right="extrasmall" />
 			<Text color="secondary" size="small">
-				{originallySentByLabel} {forwardUsername} ({messageDate} - {messageTime})
+				{forwardUsername} ({messageDate} - {messageTime})
 			</Text>
 		</Container>
 	);
