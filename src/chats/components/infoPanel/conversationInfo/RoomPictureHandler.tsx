@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { FC, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { FC, useCallback, useContext, useMemo } from 'react';
 
 import {
 	Container,
@@ -16,6 +16,7 @@ import {
 	Tooltip,
 	CreateSnackbarFn
 } from '@zextras/carbonio-design-system';
+import { PreviewsManagerContext } from '@zextras/carbonio-ui-preview';
 import moment from 'moment-timezone';
 import { useTranslation } from 'react-i18next';
 import styled, { css, DefaultTheme, FlattenSimpleInterpolation } from 'styled-components';
@@ -72,7 +73,7 @@ const BackgroundContainer = styled(Container)<{
 	}
 `;
 
-const PictureContainer = styled(Container)<{ $picture: string; $hasHover: boolean }>`
+const PictureContainer = styled(Container)<{ $picture: string }>`
 	border-radius: 0;
 	background-image: url(${({ $picture }): string => $picture});
 	background-size: cover;
@@ -85,25 +86,23 @@ const PictureContainer = styled(Container)<{ $picture: string; $hasHover: boolea
 		z-index: 1;
 	}
 
-	//  TODO: remove hasHover when the preview of the image is implemented
-	${({ $hasHover, $picture }): false | FlattenSimpleInterpolation =>
-		$hasHover &&
-		css`
-			&:hover {
+	&:hover {
+		${({ $picture }): false | FlattenSimpleInterpolation =>
+			css`
 				background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), url(${$picture});
 				background-image: -webkit-linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)),
 					url(${$picture});
 				background-image: -moz-linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)),
 					url(${$picture});
-				background-size: cover;
-				background-position: center;
-				aspect-ratio: 1/1;
+			`}
+		background-size: cover;
+		background-position: center;
+		aspect-ratio: 1/1;
 
-				${HoverContainer} {
-					opacity: 1;
-				}
-			}
-		`}
+		${HoverContainer} {
+			opacity: 1;
+		}
+	}
 `;
 
 const GradientContainer = styled(Container)`
@@ -167,6 +166,7 @@ const RoomPictureHandler: FC<RoomPictureProps> = ({ memberId, roomType, roomId }
 		'settings.room.deletedImageCorrectly',
 		'Group avatar has been successfully reset to the original one'
 	);
+	const closeLabel = t('action.close', 'Close');
 
 	const sessionId: string | undefined = useStore((store) => store.session.id);
 	const iAmOwner: boolean = useStore((state) => getMyOwnershipOfTheRoom(state, sessionId, roomId));
@@ -187,24 +187,15 @@ const RoomPictureHandler: FC<RoomPictureProps> = ({ memberId, roomType, roomId }
 
 	const createSnackbar: CreateSnackbarFn = useContext(SnackbarManagerContext);
 
-	const [picture, setPicture] = useState<false | string>(false);
-
-	useEffect(() => {
-		if (roomType === RoomType.ONE_TO_ONE) {
-			if (userPictureUpdatedAt != null) {
-				setPicture(`${UsersApi.getURLUserPicture(memberId)}?${userPictureUpdatedAt}`);
-			} else {
-				setPicture(false);
-			}
+	const picture = useMemo(() => {
+		if (roomType === RoomType.ONE_TO_ONE && userPictureUpdatedAt) {
+			return `${UsersApi.getURLUserPicture(memberId)}?${userPictureUpdatedAt}`;
 		}
-		if (roomType === RoomType.GROUP) {
-			if (roomPictureUpdatedAt != null) {
-				setPicture(`${RoomsApi.getURLRoomPicture(roomId)}?${roomPictureUpdatedAt}`);
-			} else {
-				setPicture(false);
-			}
+		if (roomType === RoomType.GROUP && roomPictureUpdatedAt) {
+			return `${RoomsApi.getURLRoomPicture(roomId)}?${roomPictureUpdatedAt}`;
 		}
-	}, [memberId, roomPictureUpdatedAt, roomId, roomType, userPictureUpdatedAt]);
+		return false;
+	}, [memberId, roomId, roomPictureUpdatedAt, roomType, userPictureUpdatedAt]);
 
 	const hasHoverGradient = useMemo(
 		() => roomType === RoomType.GROUP && iAmOwner,
@@ -326,6 +317,22 @@ const RoomPictureHandler: FC<RoomPictureProps> = ({ memberId, roomType, roomId }
 			});
 	}, [createSnackbar, deletedImageSnackbar, errorDeleteImageSnackbar, roomId]);
 
+	const { createPreview } = useContext(PreviewsManagerContext);
+	const onPreviewClick = useCallback(() => {
+		if (picture) {
+			createPreview({
+				previewType: 'image',
+				filename: roomName || memberName || '',
+				closeAction: {
+					id: 'close-action',
+					icon: 'ArrowBackOutline',
+					tooltipLabel: closeLabel
+				},
+				src: picture
+			});
+		}
+	}, [picture, createPreview, roomName, memberName, closeLabel]);
+
 	const hoverContainer = useMemo(
 		() => (
 			<Container height="fit">
@@ -364,63 +371,68 @@ const RoomPictureHandler: FC<RoomPictureProps> = ({ memberId, roomType, roomId }
 						)}
 					</HoverContainer>
 				)}
-
-				{/* TODO: this is for the preview handling of the image
-				hasPicture && (
+				{picture && (
 					<HoverContainer
 						mainAlignment="flex-end"
 						crossAlignment="center"
 						// TODO: check this measures and convert them to rem
-						height={roomType === RoomType.Group ? (iAmOwner ? '103px' : '147px') : '147px'}
+						height={roomType === RoomType.GROUP ? (iAmOwner ? '103px' : '147px') : '147px'}
 					>
-						<IconButton icon="EyeOutline" iconColor="gray6" size="extralarge" />
+						<IconButton
+							icon="EyeOutline"
+							iconColor="gray6"
+							size="extralarge"
+							shape="round"
+							onClick={onPreviewClick}
+						/>
 					</HoverContainer>
-				) */}
+				)}
 			</Container>
 		),
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[picture, iAmOwner, onDeleteGroupImage, roomType]
+		[
+			roomType,
+			iAmOwner,
+			roomPictureUpdatedAt,
+			updatePictureLabel,
+			uploadPictureLabel,
+			handleGroupPictureChange,
+			picture,
+			resetPictureLabel,
+			onDeleteGroupImage,
+			onPreviewClick
+		]
 	);
 
-	return (
-		<>
-			{!picture && (
-				<BackgroundContainer
-					$color={calculateAvatarColor(
-						roomType === RoomType.ONE_TO_ONE ? memberName || '' : roomName
-					)}
-					$hasHoverGradient={hasHoverGradient}
-					mainAlignment="flex-end"
-					minHeight="10rem"
-					maxHeight="10rem"
-					data-testid="background_container"
-				>
-					<GradientContainer>
-						{hoverContainer}
-						{roomType === RoomType.ONE_TO_ONE && userInfo}
-						{roomType === RoomType.GROUP && roomInfo}
-					</GradientContainer>
-				</BackgroundContainer>
-			)}
-			{picture && (
-				<Container background="gray6" height="fit">
-					<PictureContainer
-						$picture={picture}
-						//  TODO: remove hasHover when the preview of the image is implemented
-						$hasHover={roomType === RoomType.GROUP && iAmOwner}
-						mainAlignment="flex-end"
-						height="15.625rem"
-						data-testid="picture_container"
-					>
-						<GradientContainer>
-							{hoverContainer}
-							{roomType === RoomType.ONE_TO_ONE && userInfo}
-							{roomType === RoomType.GROUP && roomInfo}
-						</GradientContainer>
-					</PictureContainer>
-				</Container>
-			)}
-		</>
+	return !picture ? (
+		<BackgroundContainer
+			$color={calculateAvatarColor(roomType === RoomType.ONE_TO_ONE ? memberName || '' : roomName)}
+			$hasHoverGradient={hasHoverGradient}
+			mainAlignment="flex-end"
+			minHeight="10rem"
+			maxHeight="10rem"
+			data-testid="background_container"
+		>
+			<GradientContainer>
+				{hoverContainer}
+				{roomType === RoomType.ONE_TO_ONE && userInfo}
+				{roomType === RoomType.GROUP && roomInfo}
+			</GradientContainer>
+		</BackgroundContainer>
+	) : (
+		<Container background="gray6" height="fit">
+			<PictureContainer
+				$picture={picture}
+				mainAlignment="flex-end"
+				height="15.625rem"
+				data-testid="picture_container"
+			>
+				<GradientContainer>
+					{hoverContainer}
+					{roomType === RoomType.ONE_TO_ONE && userInfo}
+					{roomType === RoomType.GROUP && roomInfo}
+				</GradientContainer>
+			</PictureContainer>
+		</Container>
 	);
 };
 
