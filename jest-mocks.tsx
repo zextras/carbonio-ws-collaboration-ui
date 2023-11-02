@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { ReactElement } from 'react';
+import React, { ReactElement, RefObject } from 'react';
 
 import { AccountSettings, AppRoute, INotificationManager } from '@zextras/carbonio-shell-ui';
 
@@ -448,6 +448,7 @@ Object.defineProperty(window, 'MediaStream', {
 		};
 	})
 });
+
 Object.defineProperty(window, 'open', {
 	value: jest.fn()
 });
@@ -457,3 +458,24 @@ Object.defineProperty(window, 'open', {
 Object.defineProperty(HTMLMediaElement.prototype, 'muted', {
 	set: jest.fn()
 });
+
+export const intersectionObserverMockObserve = jest.fn();
+export const intersectionObserverMockDisconnect = jest.fn();
+Object.defineProperty(window, 'IntersectionObserver', {
+	writable: true,
+	value: jest.fn().mockImplementation((callback, options) => ({
+		thresholds: options.threshold,
+		root: options.root,
+		rootMargin: options.rootMargin,
+		observe: intersectionObserverMockObserve,
+		unobserve: jest.fn(),
+		disconnect: intersectionObserverMockDisconnect
+	}))
+});
+
+export const mockedScrollToEnd = jest.fn();
+export const mockedScrollToMessage = jest.fn();
+jest.mock('./src/utils/scrollUtils', () => ({
+	scrollToEnd: mockedScrollToEnd,
+	scrollToMessage: mockedScrollToMessage
+}));
