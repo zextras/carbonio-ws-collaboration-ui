@@ -11,7 +11,6 @@ import {
 	CreateSnackbarFn,
 	FileLoader,
 	IconButton,
-	Padding,
 	SnackbarManagerContext,
 	Text,
 	Tooltip
@@ -34,15 +33,6 @@ import { CapabilityType } from '../../../../types/store/SessionTypes';
 type RoomPictureProps = {
 	roomId: string;
 };
-
-const NameWrapText = styled(Text)<{ $hasPicture: boolean }>`
-	white-space: unset;
-	overflow: unset;
-	text-overflow: unset;
-	word-break: break-word;
-	text-shadow: ${({ $hasPicture }): string | false =>
-		$hasPicture && '0.063rem 0.063rem 0.25rem #111'};
-`;
 
 const CustomText = styled(Text)<{ $hasPicture: boolean }>`
 	text-overflow: ellipsis;
@@ -119,24 +109,13 @@ const GroupRoomPictureHandler: FC<RoomPictureProps> = ({ roomId }) => {
 		return false;
 	}, [roomId, roomPictureUpdatedAt]);
 
-	const roomInfo = useMemo(
+	const description = useMemo(
 		() => (
-			<Container
-				orientation="vertical"
-				crossAlignment="flex-start"
-				mainAlignment="flex-end"
-				padding={{ left: 'large', bottom: 'large', right: 'large' }}
-			>
-				<NameWrapText color="gray6" $hasPicture={!!picture}>
-					{roomName}
-				</NameWrapText>
-				<Padding top="extrasmall" />
-				<CustomText size="small" color="gray6" $hasPicture={!!picture}>
-					{numberOfParticipantsLabel}
-				</CustomText>
-			</Container>
+			<CustomText size="small" color="gray6" $hasPicture={!!picture}>
+				{numberOfParticipantsLabel}
+			</CustomText>
 		),
-		[picture, roomName, numberOfParticipantsLabel]
+		[picture, numberOfParticipantsLabel]
 	);
 
 	const createSnackbar: CreateSnackbarFn = useContext(SnackbarManagerContext);
@@ -242,7 +221,7 @@ const GroupRoomPictureHandler: FC<RoomPictureProps> = ({ roomId }) => {
 	return (
 		<RoomPictureHandler
 			title={roomName}
-			conversationInfo={roomInfo}
+			description={description}
 			picture={picture}
 			moreHoverActions={hoverActions}
 		/>

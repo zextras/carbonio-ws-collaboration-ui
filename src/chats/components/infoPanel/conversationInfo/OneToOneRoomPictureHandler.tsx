@@ -38,15 +38,6 @@ const Presence = styled.div`
 	margin-right: 0.1875rem;
 `;
 
-const NameWrapText = styled(Text)<{ $hasPicture: boolean }>`
-	white-space: unset;
-	overflow: unset;
-	text-overflow: unset;
-	word-break: break-word;
-	text-shadow: ${({ $hasPicture }): string | false =>
-		$hasPicture && '0.063rem 0.063rem 0.25rem #111'};
-`;
-
 const CustomText = styled(Text)<{ $hasPicture: boolean }>`
 	text-overflow: ellipsis;
 	text-shadow: ${({ $hasPicture }): string | false =>
@@ -93,37 +84,25 @@ const OneToOneRoomPictureHandler: FC<RoomPictureProps> = ({ memberId }) => {
 		return false;
 	}, [memberId, userPictureUpdatedAt]);
 
-	const userInfo = useMemo(
-		() => (
-			<Container orientation="horizontal">
-				<Container
-					crossAlignment="flex-start"
-					padding={{ left: 'large', bottom: 'large', right: 'large' }}
-					mainAlignment="flex-end"
-				>
-					<NameWrapText color="gray6" size="medium" $hasPicture={!!picture}>
-						{memberName || memberEmail}
-					</NameWrapText>
-					<Padding top="extrasmall" />
-					{canSeeUsersPresence && (
-						<Container orientation="horizontal" mainAlignment="flex-start" height="fit">
-							{memberOnline && <Presence data-testid="user_presence_dot" />}
-							{memberOnline && <Padding right={'0.25rem'} />}
-							<CustomText size="small" color="gray6" $hasPicture={!!picture}>
-								{presenceLabel}
-							</CustomText>
-						</Container>
-					)}
+	const description = useMemo(() => {
+		if (canSeeUsersPresence) {
+			return (
+				<Container orientation="horizontal" mainAlignment="flex-start" height="fit">
+					{memberOnline && <Presence data-testid="user_presence_dot" />}
+					{memberOnline && <Padding right={'0.25rem'} />}
+					<CustomText size="small" color="gray6" $hasPicture={!!picture}>
+						{presenceLabel}
+					</CustomText>
 				</Container>
-			</Container>
-		),
-		[picture, memberName, memberEmail, canSeeUsersPresence, memberOnline, presenceLabel]
-	);
+			);
+		}
+		return null;
+	}, [picture, canSeeUsersPresence, memberOnline, presenceLabel]);
 
 	return (
 		<RoomPictureHandler
 			title={memberName || memberEmail || ''}
-			conversationInfo={userInfo}
+			description={description}
 			picture={picture}
 		/>
 	);

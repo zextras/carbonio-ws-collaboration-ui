@@ -6,7 +6,7 @@
 
 import React, { FC, useCallback, useContext, useMemo } from 'react';
 
-import { Container, IconButton } from '@zextras/carbonio-design-system';
+import { Container, Padding, Text } from '@zextras/carbonio-design-system';
 import { PreviewsManagerContext } from '@zextras/carbonio-ui-preview';
 import { useTranslation } from 'react-i18next';
 import styled, { css, DefaultTheme, FlattenSimpleInterpolation } from 'styled-components';
@@ -15,26 +15,13 @@ import { calculateAvatarColor } from '../../../../utils/styleUtils';
 
 type RoomPictureProps = {
 	title: string;
-	conversationInfo: React.ReactNode;
+	description: React.ReactNode | null;
 	picture: string | false;
 	moreHoverActions?: React.ReactNode;
 };
 
 const HoverContainer = styled(Container)`
 	opacity: 0;
-`;
-
-const HoverAction = styled(Container)`
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	transform: translate(-50%, -50%);
-`;
-
-const CustomIconButton = styled(IconButton)`
-	&:hover {
-		background-color: rgba(0, 0, 0, 0.5);
-	}
 `;
 
 const BackgroundContainer = styled(Container)<{
@@ -68,6 +55,7 @@ const PictureContainer = styled(Container)<{ $picture: string }>`
 	background-position: center;
 	aspect-ratio: 1/1;
 	z-index: 2;
+	cursor: pointer;
 
 	&:after {
 		background-color: ${({ theme }): string => `${theme.palette.gray6.regular}`};
@@ -97,9 +85,25 @@ const GradientContainer = styled(Container)`
 	background: linear-gradient(0deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0) 45%);
 `;
 
+const InfoContainer = styled(Container)`
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	cursor: default;
+`;
+
+const NameWrapText = styled(Text)<{ $hasPicture: boolean }>`
+	white-space: unset;
+	overflow: unset;
+	text-overflow: unset;
+	word-break: break-word;
+	text-shadow: ${({ $hasPicture }): string | false =>
+		$hasPicture && '0.063rem 0.063rem 0.25rem #111'};
+`;
+
 const RoomPictureHandler: FC<RoomPictureProps> = ({
 	title,
-	conversationInfo,
+	description,
 	picture,
 	moreHoverActions
 }) => {
@@ -122,24 +126,36 @@ const RoomPictureHandler: FC<RoomPictureProps> = ({
 		}
 	}, [picture, createPreview, title, closeLabel]);
 
+	const preventDefault = useCallback((e) => e.preventDefault(), []);
+
 	const hoverContainer = useMemo(
 		() => (
-			<HoverContainer height="fit">
+			<HoverContainer height="fit" onClick={preventDefault}>
 				{moreHoverActions}
-				{!!picture && (
-					<HoverAction width="fit" height="fit">
-						<CustomIconButton
-							icon="EyeOutline"
-							iconColor="gray6"
-							size="extralarge"
-							shape="round"
-							onClick={onPreviewClick}
-						/>
-					</HoverAction>
-				)}
 			</HoverContainer>
 		),
-		[moreHoverActions, picture, onPreviewClick]
+		[moreHoverActions, preventDefault]
+	);
+
+	const conversationInfo = useMemo(
+		() => (
+			<InfoContainer
+				orientation="vertical"
+				crossAlignment="flex-start"
+				mainAlignment="flex-end"
+				padding={{ left: 'large', bottom: 'large', right: 'large' }}
+				width="fit"
+				height="fit"
+				onClick={preventDefault}
+			>
+				<NameWrapText color="gray6" size="medium" $hasPicture={!!picture}>
+					{title}
+				</NameWrapText>
+				<Padding top="extrasmall" />
+				{description}
+			</InfoContainer>
+		),
+		[preventDefault, picture, title, description]
 	);
 
 	return !picture ? (
@@ -163,6 +179,7 @@ const RoomPictureHandler: FC<RoomPictureProps> = ({
 				mainAlignment="flex-end"
 				height="15.625rem"
 				data-testid="picture_container"
+				onClick={onPreviewClick}
 			>
 				<GradientContainer>
 					{hoverContainer}
