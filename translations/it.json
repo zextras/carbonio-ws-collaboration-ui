@@ -1,0 +1,312 @@
+{
+    "action": {
+        "activateNotifications": "Abilita notifiche",
+        "addAttachment": "Aggiungi allegato",
+        "addNewMembers": "Aggiungi nuovi partecipanti",
+        "clearHistory": "Cancella cronologia",
+        "close": "Chiudi",
+        "copy": "Copia",
+        "create": "Crea",
+        "delete": "Elimina",
+        "download": "Scarica",
+        "edit": "Modifica",
+        "editYourMessage": "Modifica il tuo messaggio",
+        "forward": "Inoltra",
+        "forwarded": "inoltrati",
+        "leave": "Abbandona",
+        "muteNotifications": "Silenzia notifiche",
+        "preview": "Anteprima",
+        "removeUser": "Rimuovi",
+        "reply": "Rispondi",
+        "replyToSomeone": "Rispondi a",
+        "replyToYourself": "Rispondi al tuo messaggio",
+        "undo": "Annulla",
+        "addMoreAttachments": "Aggiungi {{counter}} allegati",
+        "addNewMembersTo": "Aggiungi nuovi partecipanti a {{roomName}}",
+        "addSingleAttachment": "Aggiungi {{counter}} allegato",
+        "editDetails": "Modifica dettagli",
+        "editRoom": "Modifica {{roomName}}",
+        "newChat": "Nuova Conversazione",
+        "scrollToBottom": "Scorri in fondo",
+        "decline": "Rifiuta",
+        "enter": "Accedi",
+        "joinMeeting": "Partecipa alla riunione",
+        "declineAll": "Rifiuta tutto",
+        "understood": "Ho capito"
+    },
+    "conversationInfo": {
+        "title": "Titolo",
+        "topic": "Argomento",
+        "actionAccordionTitle": "Azioni",
+        "email": "Email",
+        "info": "Info",
+        "messages": "Messaggi",
+        "name": "Nome",
+        "status": "Stato"
+    },
+    "date": {
+        "yesterday": "Ieri",
+        "today": "Oggi"
+    },
+    "message": {
+        "draft": "bozza",
+        "deletedMessage": "Messaggi eliminati",
+        "edited": "modificato"
+    },
+    "modal": {
+        "creation": {
+            "newGroup": "Nuovo gruppo",
+            "contactList": "Seleziona più di un indirizzo per creare un Gruppo",
+            "inputPlaceholder": "Inizia a digitare o scegli un indirizzo",
+            "newChat": "Nuova Chat",
+            "description": "Le chat sono conversazioni tra due persone che ti aiutano a restare in contatto con i tuoi colleghi. Puoi creare un Gruppo includendo più di due partecipanti",
+            "addUserLimit": {
+                "limitReached": "Hai selezionato il numero massimo di membri per un gruppo",
+                "users_0": "Puoi aggiungere un solo membro",
+                "users_1": "Puoi aggiungere altri {{count}} membri",
+                "users_2": ""
+            }
+        },
+        "removeMember": "Rimuovi membro",
+        "showPreviousConversationHistory": "Mostra cronologia della conversazione precedente",
+        "deleteRoom": "Elimina Stanza",
+        "deleteUserDescription": "Vuoi rimuovere questo partecipante?",
+        "leaveGroup": "Abbandona il Gruppo",
+        "clearHistoryDescription": "Stai per cancellare la cronologia della conversazione, questa azione è irreversibile. La cronologia degli altri partecipanti non sarà cancellata.",
+        "deleteGroup": "Elimina Gruppo",
+        "deleteGroupLabel": "Vuoi eliminare questo Gruppo?",
+        "deleteMessageTitle": "Vuoi eliminare i messaggi selezionati?",
+        "deleteRoomLabel": "Vuoi eliminare questa Stanza?",
+        "forward": {
+            "chooseAtLeastOneChat": "Seleziona almeno una chat",
+            "inputPlaceholder": "Inizia a digitare o scegli una chat",
+            "description": "Scegli la chat a cui inoltrare il messaggio",
+            "title": "Inoltra messaggio da {{chatName}}"
+        },
+        "leaveAndDelete": "Abbandona e elimina Gruppo",
+        "leaveGroupLabel": "Vuoi abbandonare questo Gruppo?",
+        "leaveRoom": "Abbandona Stanza",
+        "leaveRoomLabel": "Vuoi abbandonare questa Stanza?",
+        "deleteMessageTitleDescription": "Stai per cancellare il messaggio, questo non sarà più disponibile"
+    },
+    "participantsList": {
+        "closeSearch": "Chiudi ricerca",
+        "moreMembersAccordionTitle": "partecipanti",
+        "noMatch": "Non ci sono elementi che corrispondono alla ricerca",
+        "oneMemberAccordionTitle": "Un partecipante",
+        "searchMembers": "Cerca membri",
+        "searchParticipants": "Cerca partecipanti"
+    },
+    "tooltip": {
+        "clear": "Elimina",
+        "leaveConversation": "Abbandona conversazione",
+        "messageComposer": "Compositore messaggi",
+        "messageRead": "Letto",
+        "messageSent": "Inviato",
+        "uploading": "Caricamento",
+        "close": "Chiudi",
+        "goToPrivateChat": "Vai alla conversazione privata",
+        "room": {
+            "uploadPicture": "Carica immagine",
+            "resetPicture": "Ripristina immagine",
+            "updatePicture": "Aggiorna immagine"
+        },
+        "selectEmoji": "Seleziona emoji",
+        "sendMessage": "Invia messaggio",
+        "disableModalButton": "Scegli almeno un indirizzo",
+        "forwardedMessage": "Messaggio inoltrato da un'altra chat",
+        "iAmModerator": "Sei un moderatore",
+        "leaveAndDelete": "Abbandona ed elimina la conversazione",
+        "memberIsModerator": "Questo partecipante è un moderatore",
+        "messageReceived": "Ricevuto",
+        "promoteModerator": "Promuovi a moderatore",
+        "writeToSend": "Scrivi un messaggio per inviarlo",
+        "uploadAttachment": "Carica allegato",
+        "demoteModerator": "Retrocedi moderatore",
+        "userAvatar": {
+            "resetAvatar": "Ripristina immagine profilo",
+            "updateAvatar": "Aggiorna immagine profilo",
+            "uploadAvatar": "Carica immagine profilo"
+        },
+        "messageActions": "Opzioni messaggio",
+        "promoteSomeoneElseToModerator": "Prima di abbandonare devi promuovere qualcun'altro a moderatore",
+        "showConversationList": "Mostra lista delle chat",
+        "muteForAll": "Silenzia tutto",
+        "unpinVideo": "Rimuovi video",
+        "collapseCarousel": "Riduci",
+        "expandCarousel": "Espandi",
+        "pending": "In attesa",
+        "pinVideo": "Fissa video",
+        "collapseSidebar": "Comprimi barra laterale",
+        "scrollDown": "Scorrere verso il basso",
+        "scrollUp": "Scorrere verso l'alto",
+        "topOfList": "In cima alla lista",
+        "bottomOfList": "In fondo all'elenco",
+        "expandSidebar": "Espandi barra laterale",
+        "participantAlreadyMuted": "Questo partecipante è già mutato",
+        "removeToAddNewOne": "Rimuovi qualcuno per aggiungere nuovi membri"
+    },
+    "attachments": {
+        "addFromLocal": "Aggiungi da locale",
+        "attachLinkFiles": "Allega link pubblico da Files",
+        "stopUpload": "Sospendi caricamento",
+        "dropHereDescription": "Trascina qui gli allegati per aggiungerli velocemente alla chat",
+        "errorUploadingFile": "Qualcosa è andato storto durante il caricamento di {{file}}",
+        "uploadAborted": "Il caricamento è stato interrotto",
+        "dragAndDrop": "Modalità Drag&Drop"
+    },
+    "conversation": {
+        "chooseConversationDescription": "Scegli una conversazione per iniziare una Chat",
+        "keepInTouchTitle": "Restiamo in contatto!",
+        "newMessage": "Nuovo messaggio",
+        "emptyListDescription": "La lista di Chat e Gruppi apparirà qui",
+        "emptyListTitle": "Questa lista è vuota",
+        "mockCreateChatDescription": "interagisci, comunica e collabora con i tuoi colleghi condividendo informazioni e allegati",
+        "mockCreateChatTitle": "Crea una nuova chat utilizzando il bottone crea",
+        "newMessages": "Nuovi messaggi"
+    },
+    "editModal": {
+        "groupDescriptionDetails": "Descrive l'argomento del Gruppo",
+        "confirm": "Modifica dettagli",
+        "confirmDisabled": "Non hai modificato nulla",
+        "groupNameDetails": "È richiesto e identifica il Gruppo",
+        "nameTooShort": "Il titolo è un' informazione essenziale",
+        "topicTooLong": "La lunghezza massima dell'argomento è di 256 caratteri",
+        "errorDisabled": "Controlla le informazioni inserite",
+        "nameTooLong": "La lunghezza massima del titolo è di 128 caratteri"
+    },
+    "feedback": {
+        "historyCleared": "Cronologia eliminata con successo!",
+        "notificationsActivatedForThisChat": "Notifiche attive per questa conversazione",
+        "notificationsMutedForThisChat": "Notifiche silenziate per questa chat",
+        "messageCopied": "Messaggio copiato",
+        "networkProblem": {
+            "wsc": "Qualcosa è andato storto durante la connessione con WSC",
+            "xmpp": "Qualcosa è andato storto durante la connessione con XMPP",
+            "websocket": "Qualcosa è andato storto durante la connessione con WEBSOCKET"
+        }
+    },
+    "settings": {
+        "notifications": {
+            "checkboxLabel": "Notifiche desktop",
+            "title": "Notifiche",
+            "description": "Imposta le preferenze per le notifiche di Chats."
+        },
+        "profile": {
+            "errorGenericResponse": "Qualcosa è andato storto. Per favore riprova",
+            "title": "Profilo",
+            "maximumDimension": "Dimensione massima: {{size}}kb",
+            "pictureSizeTooLarge": "Qualcosa è andato storto, ricorda che la dimensione massima per l'immagine avatar è {{size}}kb",
+            "updatedPictureCorrectly": "Nuovo avatar caricato con successo",
+            "deletedUserImageCorrectly": "Avatar ripristinato con successo alla versione originale",
+            "description": "Scegli una foto profilo da mostrare agli altri utenti, l'immagine verrà centrata automaticamente.",
+            "statusLabel": "Il tuo stato apparirà qui"
+        },
+        "save": "Modifiche salvate correttamente",
+        "title": "Impostazioni chat",
+        "room": {
+            "deletedUserImageCorrectly": "Avatar ripristinato con successo alla versione originale",
+            "pictureSizeTooLarge": "Qualcosa è andato storto, ricorda che la dimensione massima per l'immagine avatar di un Gruppo è {{size}}kb",
+            "updatedPictureCorrectly": "Nuovo avatar caricato con successo",
+            "deletedImageCorrectly": "L'immagine profilo del gruppo è stata ripristinata con successo alla versione originale"
+        }
+    },
+    "status": {
+        "lastSeen": "Ultima visualizzazione {{lastSeen}}",
+        "offline": "Disconnesso",
+        "online": "Online",
+        "isTyping": "sta digitando…",
+        "areTyping": "stanno digitando…",
+        "goToPrivateChat": "Vai alla chat privata per inviare un messaggio personale",
+        "you": " Tu"
+    },
+    "affiliationMessages": {
+        "SomeoneElseCreatedOneToOne": "{{userName}} ha iniziato una conversazione con te",
+        "groupCreated": "{{roomName}} creata!",
+        "memberAdded": "{{userName}} è stato aggiunto a {{roomName}}",
+        "memberRemoved": "{{userName}} non è più membro del gruppo",
+        "oneToOneCreated": "Nuova conversazione creata!",
+        "youCreatedOneToOne": "Hai iniziato una Chat con {{userName}}"
+    },
+    "configurationMessages": {
+        "roomPictureDeleted": "{{name}} ha ripristinato l'immagine predefinita di {{roomName}}",
+        "roomPictureUpdated": "{{name}} ha modificato l'immagine di {{roomName}}",
+        "roomTopicChanged": "{{name}} ha modificato l'argomento di {{roomName}} in \"<i>{{topicName}}</i>\"",
+        "roomNameChanged": "{{name}} ha modificato il titolo di questo Gruppo in \"<i>{{roomName}}</i>\"",
+        "roomTopicRemoved": "{{name}} ha rimosso l'argomento trattato da {{roomName}}"
+    },
+    "conversationFilter": {
+        "closeTooltip": "Chiudi filtro",
+        "filterTooltip": "Filtra lista",
+        "label": "Digita qualcosa per filtrare la lista"
+    },
+    "titlePlaceholder": "Il titolo del tuo Gruppo",
+    "chat": "Chat",
+    "meeting": {
+        "interactions": {
+            "cameraDisabled": "Fotocamera disabilitata",
+            "cameraEnabled": "Fotocamera attivata",
+            "enableCamera": "Abilita fotocamera",
+            "enableMicrophone": "Abilita microfono",
+            "microphoneEnabled": "Microfono attivato",
+            "cinemaView": "Vista Cinema",
+            "disableMicrophone": "Disabilita microfono",
+            "disableCamera": "Disabilita telecamera",
+            "gridView": "Vista griglia",
+            "leaveMeeting": "Abbandona Meeting",
+            "microphoneDisabled": "Microfono disabilitato",
+            "playMic": "Avvia il test del microfono",
+            "enableScreen": "Abilita condivisione schermo",
+            "disableScreen": "Disabilita condivisione schermo",
+            "stopMic": "Ferma il test del microfono"
+        },
+        "joinMeeting": "Partecipa alla riunione",
+        "newMeetingNotification": {
+            "sendMessage": "Invia messaggio",
+            "writeAMessageToSendIt": "Scrivi un messaggio per inviarlo",
+            "sendAQuickMessage": "Invia un messaggio rapido",
+            "userIsInvitingYou": "<strong>{{name}}</strong> ti sta invitando"
+        },
+        "waitingParticipants": "In attesa che i partecipanti arrivino…",
+        "startModal": {
+            "enterRoomMeetingTitle": "Partecipa al meeting {{meetingTitle}}",
+            "audioAndVideoLoading": "Le risorse sono in caricamento",
+            "enterOneToOneMeetingTitle": "Inizia meeting {{meetingTitle}}"
+        },
+        "activeMeetingTooltip": "C'è un meeting attivo per questo Gruppo",
+        "collapseChat": "Comprimi chat",
+        "collapseParticipantsMeetingTooltip": "Comprimi elenco dei partecipanti",
+        "expandChat": "Espandi chat",
+        "expandParticipantsListTooltip": "Espandi elenco dei partecipanti",
+        "extendChat": "Estendi la chat",
+        "ongoingGroupMeetingTooltip": "Stai già partecipando a questo meeting",
+        "ongoingOneToOneMeetingTooltip": "Hai già un meeting attivo con {{name}}",
+        "joinMeetingDescription": "Come vuoi accedere a questo meeting?",
+        "minimizeChat": "Riduci la chat",
+        "participantsList": {
+            "title_0": "Un partecipante al meeting",
+            "title_1": "{{count}} partecipanti al meeting",
+            "title_2": ""
+        },
+        "setInputDescription": "Imposta i tuoi dispositivi di input scegliendoli dal menù a tendina",
+        "startMeeting": "Avvia meeting"
+    },
+    "tryLater": "Riprova più tardi",
+    "external": {
+        "nobodyInTheRoom": "Sembra non esserci nessuno in questa Stanza",
+        "roomIsEmpty": "Questa Stanza è vuota"
+    },
+    "meetings": {
+        "interactions": {
+            "yourCamIsDisabled": "La tua webcam è disattiva",
+            "yourMicIsDisabled": "Il tuo microfono è disattivato"
+        }
+    },
+    "notification": {
+        "meeting": {
+            "ended": "Riunione Terminata"
+        }
+    },
+    "thanksForParticipating": "Grazie per aver partecipato",
+    "keepInTouchWithColleagues": "Rimani in contatto con i tuoi colleghi o unisciti alle sale riunioni dei tuoi gruppi"
+}

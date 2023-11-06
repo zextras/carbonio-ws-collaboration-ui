@@ -1,0 +1,85 @@
+{
+    "action": {
+        "preview": "Előnézet",
+        "copy": "Másolat",
+        "delete": "Töröl",
+        "edit": "Szerkesztés",
+        "forward": "Továbbítás",
+        "reply": "Válasz",
+        "forwarded": "továbbított",
+        "activateNotifications": "Értesítések aktiválása",
+        "addNewMembers": "Új tagok hozzáadása",
+        "addAttachment": "Csatolt állomány hozzáadása",
+        "addMoreAttachments": "{{counter}} melléklet hozzáadása",
+        "close": "Bezárás",
+        "create": "Létrehoz",
+        "editYourMessage": "Az üzenet szerkesztése",
+        "leave": "Távozás",
+        "muteNotifications": "Értesítések némítása",
+        "replyToSomeone": "Válasz a következőnek",
+        "replyToYourself": "Válaszolj magadnak",
+        "undo": "Visszavonás",
+        "addNewMembersTo": "Új tagok hozzáadása a következőhöz: {{roomName}}",
+        "addSingleAttachment": "{{counter}} melléklet hozzáadása",
+        "clearHistory": "Előzmények törlése",
+        "decline": "Elutasítás",
+        "declineAll": "Összes elutasítása",
+        "download": "Letöltés",
+        "editDetails": "Részletek szerkesztése",
+        "editRoom": "{{roomName}} szerkesztése",
+        "enter": "Belép",
+        "joinMeeting": "Belépés az értekezletre",
+        "newChat": "Új csevegés",
+        "removeUser": "Eltávolítás",
+        "scrollToBottom": "Görgessen az aljára"
+    },
+    "conversationInfo": {
+        "email": "E-mail",
+        "name": "Név",
+        "status": "Státusz"
+    },
+    "status": {
+        "offline": "Nem elérhető",
+        "online": "Online"
+    },
+    "settings": {
+        "notifications": {
+            "title": "Értesítések"
+        }
+    },
+    "tooltip": {
+        "clear": "Törlés",
+        "messageSent": "Elküldött üzenetek"
+    },
+    "message": {
+        "draft": "piszkozat",
+        "edited": "szerkesztve",
+        "deletedMessage": "Törölt üzenet"
+    },
+    "attachments": {
+        "addFromLocal": "Hozzáadás a helyi mappából",
+        "attachLinkFiles": "Nyilvános hivatkozás csatolása fájlokból"
+    },
+    "modal": {
+        "showPreviousConversationHistory": "Korábbi beszélgetési előzmények megjelenítése"
+    },
+    "notification": {
+        "meeting": {
+            "ended": "Az értekezlet véget ért"
+        }
+    },
+    "meeting": {
+        "interactions": {
+            "cameraEnabled": "Kamera engedélyezve",
+            "cameraDisabled": "Kamera letiltva"
+        }
+    },
+    "external": {
+        "nobodyInTheRoom": "Úgy tűnik, senki sincs ebben a szobában",
+        "roomIsEmpty": "Ez a szoba üres"
+    },
+    "feedback": {
+        "notificationsActivatedForThisChat": "Értesítések aktiválva ehhez a csevegéshez",
+        "notificationsMutedForThisChat": "Értesítések elnémítva ehhez a csevegéshez"
+    }
+}
