@@ -34,7 +34,7 @@ export const ACCOUNT: Account = {
 	name: 'User 1',
 	displayName: 'User 1',
 	signatures: { signature: [] },
-	identities: '',
+	identities: { identity: [] },
 	rights: { targets: [] }
 };
 
