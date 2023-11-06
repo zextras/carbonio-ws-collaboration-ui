@@ -6,7 +6,15 @@
 
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 
-import { Container, Icon, IconButton, Row, Text, Tooltip } from '@zextras/carbonio-design-system';
+import {
+	Container,
+	Icon,
+	IconButton,
+	Row,
+	Text,
+	TextWithTooltip,
+	Tooltip
+} from '@zextras/carbonio-design-system';
 import { split } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import styled, { DefaultTheme, SimpleInterpolation } from 'styled-components';
@@ -201,9 +209,9 @@ const AttachmentView: FC<AttachmentViewProps> = ({
 				mainAlignment="flex-end"
 				crossAlignment="flex-start"
 			>
-				<Text color={isPreviewLoaded && !previewError ? 'gray6' : 'gray1'} overflow="break-word">
+				<TextWithTooltip color={isPreviewLoaded && !previewError ? 'gray6' : 'gray1'}>
 					{attachment.name}
-				</Text>
+				</TextWithTooltip>
 			</TextContainer>
 		),
 		[attachment.name, isPreviewLoaded, previewError]

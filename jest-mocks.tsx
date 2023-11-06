@@ -285,3 +285,10 @@ jest.mock('./src/network', () => ({
 			})
 	}
 }));
+
+export const mockedScrollToEnd = jest.fn();
+export const mockedScrollToMessage = jest.fn();
+jest.mock('./src/utils/scrollUtils', () => ({
+	scrollToEnd: mockedScrollToEnd,
+	scrollToMessage: mockedScrollToMessage
+}));

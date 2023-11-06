@@ -39,6 +39,9 @@ const getUserMediaPromise = jest.fn(
 		})
 );
 
+export const intersectionObserverMockObserve = jest.fn();
+export const intersectionObserverMockDisconnect = jest.fn();
+
 export const mockedEnumerateDevicesPromise: jest.Mock = jest.fn(() => [
 	{
 		deviceId: 'audioDefault',
@@ -191,9 +194,9 @@ beforeAll(() => {
 			thresholds: options.threshold,
 			root: options.root,
 			rootMargin: options.rootMargin,
-			observe: jest.fn(),
+			observe: intersectionObserverMockObserve,
 			unobserve: jest.fn(),
-			disconnect: jest.fn()
+			disconnect: intersectionObserverMockDisconnect
 		}))
 	});
 
@@ -241,6 +244,7 @@ beforeAll(() => {
 });
 
 afterEach(() => {
+	jest.runOnlyPendingTimers();
 	jest.useRealTimers();
 	jest.restoreAllMocks();
 	act(() => {

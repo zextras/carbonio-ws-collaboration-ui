@@ -281,3 +281,35 @@ describe('useTilesOrder custom hook - use pin feature', () => {
 		]);
 	});
 });
+
+describe('useTilesOrder custom hook - ordered by who is speaking', () => {
+	test('flow of a user that speaks for more than 2 seconds, then stops, a tile get pinned and another user speaks for at least two seconds', () => {
+		useStore.getState().addParticipant(meeting.id, participant4);
+		useStore.getState().addParticipant(meeting.id, participant2);
+		useStore.getState().addParticipant(meeting.id, participant1);
+		useStore.getState().addParticipant(meeting.id, participant3);
+		const { result } = renderHook(() => useTilesOrder(meeting.id));
+
+		act(() => {
+			useStore.getState().setPinnedTile(meeting.id, { userId: '2', type: STREAM_TYPE.VIDEO });
+			useStore.getState().setTalkingUsers(meeting.id, participant3.userId, true);
+			jest.advanceTimersByTime(1000);
+		});
+
+		expect(result.current.carouselTiles[0]).toEqual({
+			userId: participant1.userId,
+			type: 'video',
+			creationDate: participant1.joinedAt
+		});
+
+		act(() => {
+			jest.advanceTimersByTime(2000);
+		});
+
+		expect(result.current.carouselTiles[0]).toEqual({
+			userId: participant3.userId,
+			type: 'video',
+			creationDate: participant3.joinedAt
+		});
+	});
+});

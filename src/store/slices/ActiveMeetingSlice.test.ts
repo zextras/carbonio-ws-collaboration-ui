@@ -27,14 +27,14 @@ describe('Active Meeting Slice', () => {
 		expect(result.current.activeMeeting[meetingId].chatVisibility).toBe(
 			MeetingChatVisibility.CLOSED
 		);
-		expect(result.current.activeMeeting[meetingId].meetingViewSelected).toBe(
-			MeetingViewType.CINEMA
-		);
-
 		act(() => result.current.meetingDisconnection(meetingId));
 		expect(result.current.activeMeeting[meetingId]).toBeUndefined();
 	});
-
+	test('Meeting default view is GRID', () => {
+		const { result } = renderHook(() => useStore());
+		act(() => result.current.meetingConnection(meetingId, false, undefined, false, undefined));
+		expect(result.current.activeMeeting[meetingId].meetingViewSelected).toBe(MeetingViewType.GRID);
+	});
 	test('Change sidebar status', () => {
 		const { result } = renderHook(() => useStore());
 		act(() => result.current.meetingConnection(meetingId, false, undefined, false, undefined));
