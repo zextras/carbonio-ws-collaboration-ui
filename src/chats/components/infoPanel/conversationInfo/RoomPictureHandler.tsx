@@ -126,15 +126,15 @@ const RoomPictureHandler: FC<RoomPictureProps> = ({
 		}
 	}, [picture, createPreview, title, closeLabel]);
 
-	const preventDefault = useCallback((e) => e.preventDefault(), []);
+	const stopPropagation = useCallback((e) => e.stopPropagation(), []);
 
 	const hoverContainer = useMemo(
 		() => (
-			<HoverContainer height="fit" onClick={preventDefault}>
+			<HoverContainer height="fit" onClick={stopPropagation}>
 				{moreHoverActions}
 			</HoverContainer>
 		),
-		[moreHoverActions, preventDefault]
+		[moreHoverActions, stopPropagation]
 	);
 
 	const conversationInfo = useMemo(
@@ -146,7 +146,7 @@ const RoomPictureHandler: FC<RoomPictureProps> = ({
 				padding={{ left: 'large', bottom: 'large', right: 'large' }}
 				width="fit"
 				height="fit"
-				onClick={preventDefault}
+				onClick={stopPropagation}
 			>
 				<NameWrapText color="gray6" size="medium" $hasPicture={!!picture}>
 					{title}
@@ -155,7 +155,7 @@ const RoomPictureHandler: FC<RoomPictureProps> = ({
 				{description}
 			</InfoContainer>
 		),
-		[preventDefault, picture, title, description]
+		[stopPropagation, picture, title, description]
 	);
 
 	return !picture ? (
