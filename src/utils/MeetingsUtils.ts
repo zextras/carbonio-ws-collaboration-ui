@@ -4,13 +4,14 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { forEach, indexOf, last, map, min, range } from 'lodash';
+import { concat, find, forEach, indexOf, last, map, min, range, without } from 'lodash';
 
 import audioOff from '../meetings/assets/AudioOFF.mp3';
 import audioOn from '../meetings/assets/AudioON.mp3';
 import meetingIn from '../meetings/assets/MeetingIN.mp3';
 import meetingOut from '../meetings/assets/MeetingOUT.mp3';
 import screenshareOn from '../meetings/assets/ScreenShareON.mp3';
+import { STREAM_TYPE, TileData } from '../types/store/ActiveMeetingTypes';
 
 export enum MeetingSoundFeedback {
 	MEETING_JOIN_NOTIFICATION = 'meetingJoinNotification',
@@ -113,6 +114,28 @@ export const maximiseTileSize = (
 type Dimensions = {
 	width: number;
 	height: number;
+};
+
+export const orderSpeakingTiles = (
+	meetingTiles: TileData[],
+	speakingId: string,
+	pinnedTile: boolean
+): TileData[] => {
+	const elementToBeMoved = find(
+		meetingTiles,
+		(tile) => tile.userId === speakingId && tile.type !== STREAM_TYPE.SCREEN
+	);
+	if (elementToBeMoved != null) {
+		const arrayWithoutElement = without(meetingTiles, elementToBeMoved);
+		if (!pinnedTile) {
+			// if there's no pinned tile the speaking tile has to be the first on the list
+			return concat(elementToBeMoved, arrayWithoutElement);
+		}
+		// if there's a pinned tile put the speaker on the second position
+		arrayWithoutElement.splice(1, 0, elementToBeMoved);
+		return arrayWithoutElement;
+	}
+	return meetingTiles;
 };
 
 type Grid = {
