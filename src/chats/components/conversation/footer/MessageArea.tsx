@@ -6,6 +6,7 @@
 
 import React, { MutableRefObject, useCallback, useEffect } from 'react';
 
+import { size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import styled, { css, FlattenSimpleInterpolation } from 'styled-components';
 
@@ -122,9 +123,10 @@ const MessageArea: React.FC<MessageAreaPros> = ({
 		if (inputHasFocus) {
 			textareaRef.current?.focus();
 			// Focus the end of the input if there is a draft message
-			textareaRef.current?.setSelectionRange(message.length, message.length);
+			const messageLength = size(textareaRef.current?.value);
+			textareaRef.current?.setSelectionRange(messageLength, messageLength);
 		}
-	}, [inputHasFocus, message.length, textareaRef]);
+	}, [inputHasFocus, textareaRef]);
 
 	const handleOnFocus = useCallback(
 		() => setInputHasFocus(roomId, true),
