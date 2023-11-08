@@ -130,7 +130,7 @@ const setupActiveMeeting = (): void => {
 	store.addRoom(room);
 	store.addMeeting(meeting);
 	store.meetingConnection(meeting.id, true, 'audioId', false, undefined);
-	store.setTalkingUsers(meeting.id, user3.id, true);
+	store.setTalkingUser(meeting.id, user3.id, true);
 
 	setup(
 		<Tile
@@ -243,7 +243,9 @@ describe('Tile test - on meeting', () => {
 		store.changeStreamStatus(meeting.id, user2.id, STREAM_TYPE.AUDIO, true);
 		store.changeStreamStatus(meeting.id, user2.id, STREAM_TYPE.VIDEO, true);
 		setup(<Tile userId={user2.id} meetingId={meeting.id} />);
-		expect(screen.queryByTestId(iconMicOffOutline)).not.toBeInTheDocument();
+		// the login user is a moderator, so he can see the mute button
+		const micIcons = await screen.findAllByTestId(iconMicOffOutline);
+		expect(micIcons).toHaveLength(1);
 		expect(screen.queryByTestId(iconVideoOffOutline)).not.toBeInTheDocument();
 	});
 

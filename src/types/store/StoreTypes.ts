@@ -187,7 +187,7 @@ export type ActiveMeetingSlice = {
 	setSubscribedTracks: (meetingId: string, streams: StreamsSubscriptionMap) => void;
 	setIsCarouseVisible: (meetingId: string, status: boolean) => void;
 	setPinnedTile: (meetingId: string, tile: TileData | undefined) => void;
-	setTalkingUsers: (meetingId: string, userId: string, isTalking: boolean) => void;
+	setTalkingUser: (meetingId: string, userId: string, isTalking: boolean) => void;
 };
 
 export type RootStore = UsersStoreSlice &
