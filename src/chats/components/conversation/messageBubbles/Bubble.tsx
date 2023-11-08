@@ -16,7 +16,7 @@ import BubbleContextualMenuDropDown, {
 } from './BubbleContextualMenuDropDown';
 import BubbleFooter from './BubbleFooter';
 import BubbleHeader from './BubbleHeader';
-import ForwardedTextMessageSectionView from './ForwardedMessageSectionView';
+import ForwardInfo from './ForwardInfo';
 import RepliedTextMessageSectionView from './RepliedTextMessageSectionView';
 import TextContentBubble from './TextContentBubble';
 import { getMessageAttachment } from '../../../../store/selectors/MessagesSelectors';
@@ -140,20 +140,14 @@ const Bubble: FC<BubbleProps> = ({
 					<Padding bottom="small" />
 				</>
 			)}
+			{message.forwarded && <ForwardInfo info={message.forwarded} />}
 			{message.repliedMessage && (
 				<RepliedTextMessageSectionView
 					repliedMessageRef={message.repliedMessage}
 					isMyMessage={isMyMessage}
 				/>
 			)}
-			{message.forwarded && (
-				<ForwardedTextMessageSectionView
-					message={message}
-					forwardedInfo={message.forwarded}
-					isMyMessage={isMyMessage}
-				/>
-			)}
-			{messageAttachment && !message.forwarded && (
+			{messageAttachment && (
 				<>
 					<AttachmentView
 						attachment={messageAttachment}
@@ -164,12 +158,11 @@ const Bubble: FC<BubbleProps> = ({
 					<Padding bottom="0.5rem" />
 				</>
 			)}
-			{!message.forwarded && <TextContentBubble textContent={messageFormatted} />}
+			<TextContentBubble textContent={messageFormatted} />
 			<BubbleFooter
 				isMyMessage={isMyMessage}
 				date={message.date}
 				messageRead={message.read}
-				forwarded={message.forwarded}
 				isEdited={message?.edited}
 				messageExtension={extension}
 				messageSize={size}
