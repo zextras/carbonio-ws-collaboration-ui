@@ -2,7 +2,8 @@
     "conversation": {
         "keepInTouchTitle": "連絡を取り合いましょう！",
         "newMessage": "新しいメッセージ",
-        "chooseConversationDescription": "会話を選択してチャットを開始します"
+        "chooseConversationDescription": "会話を選択してチャットを開始します",
+        "newMessages": "新しいメッセージ"
     },
     "conversationInfo": {
         "actionAccordionTitle": "操作",
@@ -47,7 +48,16 @@
         },
         "selectEmoji": "絵文字を選択する",
         "sendMessage": "メッセージを送る",
-        "uploading": "アップロードしています"
+        "uploading": "アップロードしています",
+        "demoteModerator": "モデレーターの降格",
+        "promoteModerator": "モデレーターに昇格",
+        "messageActions": "メッセージの操作",
+        "collapseCarousel": "崩壊する",
+        "expandCarousel": "拡張する",
+        "muteForAll": "全員ミュートにする",
+        "pending": "保留",
+        "pinVideo": "ビデオをピン留めする",
+        "unpinVideo": "動画のピン止めを解除する"
     },
     "action": {
         "activateNotifications": "通知を有効にする",
@@ -70,7 +80,10 @@
         "reply": "返信する",
         "replyToSomeone": "返信先",
         "replyToYourself": "自分に返信する",
-        "undo": "元に戻す"
+        "undo": "元に戻す",
+        "decline": "拒否する",
+        "enter": "参加する",
+        "joinMeeting": "会議に参加する"
     },
     "attachments": {
         "addFromLocal": "ローカルから追加する",
@@ -90,7 +103,9 @@
         "deleteUserDescription": "本当にこのメンバーを削除しますか？",
         "leaveGroup": "グループから退会する",
         "removeMember": "メンバーを削除する",
-        "showPreviousConversationHistory": "以前の会話履歴を表示"
+        "showPreviousConversationHistory": "以前の会話履歴を表示",
+        "deleteMessageTitleDescription": "メッセージの内容全体を削除すると、そのメッセージは利用できなくなるため、削除されます。",
+        "deleteMessageTitle": "選択したメッセージを削除しますか?"
     },
     "participantsList": {
         "closeSearch": "検索を閉じる",
@@ -99,6 +114,37 @@
     "status": {
         "lastSeen": "最終閲覧 {{lastSeen}}",
         "offline": "オフライン",
-        "online": "オンライン"
-    }
+        "online": "オンライン",
+        "isTyping": "が入力しています…"
+    },
+    "chat": "チャット",
+    "external": {
+        "nobodyInTheRoom": "このルームには誰もいないようです",
+        "roomIsEmpty": "このルームは空です"
+    },
+    "meeting": {
+        "interactions": {
+            "cameraDisabled": "カメラが無効です",
+            "cameraEnabled": "カメラが有効になりました",
+            "enableCamera": "カメラを有効にする",
+            "enableMicrophone": "マイクを有効にする",
+            "microphoneEnabled": "マイクが有効になりました"
+        },
+        "joinMeeting": "会議に参加する",
+        "newMeetingNotification": {
+            "sendMessage": "メッセージを送信する"
+        }
+    },
+    "meetings": {
+        "interactions": {
+            "yourCamIsDisabled": "カメラがオフです"
+        }
+    },
+    "notification": {
+        "meeting": {
+            "ended": "会議が終了しました"
+        }
+    },
+    "thanksForParticipating": "参加していただきありがとうございます",
+    "tryLater": "後で試す"
 }
