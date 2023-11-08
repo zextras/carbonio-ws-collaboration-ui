@@ -18,7 +18,8 @@
         "reply": "Reply",
         "replyToSomeone": "Reply to",
         "replyToYourself": "Reply to yourself",
-        "undo": "Undo"
+        "undo": "Undo",
+        "enter": "Enter"
     },
     "settings": {
         "profile": {
@@ -69,6 +70,23 @@
     "tooltip": {
         "close": "Close",
         "leaveConversation": "Leave conversation",
-        "messageRead": "Read"
+        "messageRead": "Read",
+        "unpinVideo": "Unpin video",
+        "collapseCarousel": "Collapse",
+        "expandCarousel": "Expand",
+        "muteForAll": "Mute for all",
+        "pinVideo": "Pin video"
+    },
+    "chat": "Chat",
+    "meeting": {
+        "interactions": {
+            "enableCamera": "Enable camera",
+            "enableMicrophone": "Enable microphone"
+        }
+    },
+    "meetings": {
+        "interactions": {
+            "yourCamIsDisabled": "Your camera is off"
+        }
     }
 }
