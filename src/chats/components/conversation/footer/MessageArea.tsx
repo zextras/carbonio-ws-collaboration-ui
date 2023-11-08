@@ -30,6 +30,7 @@ const MessageTextarea = styled.textarea`
 	max-height: calc(50vh - ${SIZES.SPACE_FOR_ELEMENTS_VISIBLE_ON_MESSAGE_LIST});
 	width: 100%;
 	scrollbar-color: ${({ theme }): string => theme.palette.gray3.regular} transparent;
+	line-height: 1.1;
 
 	@keyframes inputFull {
 		0% {
