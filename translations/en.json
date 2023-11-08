@@ -171,7 +171,9 @@
     "message": {
         "deletedMessage": "Deleted message",
         "draft": "draft",
-        "edited": "edited"
+        "edited": "edited",
+        "forwardedMultipleTimes": "Forwarded multiple times",
+        "originallySentBy": "Originally sent by:"
     },
     "modal": {
         "clearHistoryDescription": "You're cleaning your conversation history, please note that this action is irreversible. The history will be deleted for you and not for the other members.",

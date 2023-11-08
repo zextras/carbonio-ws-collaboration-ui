@@ -14,14 +14,11 @@ import styled from 'styled-components';
 import { getPrefTimezoneSelector } from '../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../store/Store';
 import { MarkerStatus } from '../../../../types/store/MarkersTypes';
-import { ForwardedInfo } from '../../../../types/store/MessageTypes';
 
 type BubbleFooterProps = {
 	date: number;
 	isMyMessage?: boolean;
 	messageRead?: MarkerStatus;
-	forwarded?: ForwardedInfo;
-	dateAndTime?: boolean;
 	messageType?: string;
 	messageExtension?: string;
 	messageSize?: string;
@@ -37,14 +34,11 @@ const BubbleFooter: FC<BubbleFooterProps> = ({
 	date,
 	isMyMessage = false,
 	messageRead,
-	forwarded,
-	dateAndTime = false,
 	messageExtension,
 	messageSize,
 	isEdited
 }) => {
 	const [t] = useTranslation();
-	const forwardedLabel = t('action.forwarded', 'forwarded');
 	const editedLabel = t('message.edited', 'edited');
 
 	const { ackIcon, ackIconColor } = useMemo(() => {
@@ -103,13 +97,6 @@ const BubbleFooter: FC<BubbleFooterProps> = ({
 						</ItalicText>
 					</Container>
 				)}
-				{forwarded && (
-					<Container width="fit">
-						<ItalicText color="secondary" size="extrasmall">
-							{forwardedLabel}
-						</ItalicText>
-					</Container>
-				)}
 				{isMyMessage && messageRead && (
 					<Tooltip label={dropdownTooltip}>
 						<Padding width="fit" right="small">
@@ -118,7 +105,7 @@ const BubbleFooter: FC<BubbleFooterProps> = ({
 					</Tooltip>
 				)}
 				<Text color="secondary" size="small">
-					{dateAndTime && `${messageDate} • `} {messageTime}
+					{messageTime}
 				</Text>
 			</Container>
 		</Container>
