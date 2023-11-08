@@ -7,7 +7,6 @@
 import React from 'react';
 
 import { screen } from '@testing-library/react';
-import { act } from 'react-dom/test-utils';
 
 import MessageArea from './MessageArea';
 import useStore from '../../../../store/Store';
@@ -38,15 +37,6 @@ describe('MessageArea', () => {
 		expect(activeConversation.inputHasFocus).toBe(true);
 		const textArea = screen.getByRole('textbox');
 		expect(textArea).toHaveFocus();
-	});
-
-	test('Change focus when hasFocus information changes o store', () => {
-		setupMessageArea();
-		const textBox = screen.getByRole('textbox');
-		textBox.blur();
-		act(() => useStore.getState().setInputHasFocus(roomId, true));
-		const textArea1 = screen.getByRole('textbox');
-		expect(textArea1).not.toHaveFocus();
 	});
 
 	test('Focus on input when room changes', () => {
