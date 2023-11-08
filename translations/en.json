@@ -160,7 +160,7 @@
             "enterOneToOneMeetingTitle": "Start meeting with {{meetingTitle}}",
             "enterRoomMeetingTitle": "Participate to {{meetingTitle}} meeting"
         },
-        "waitingParticipants": "Waiting for participants to join..."
+        "waitingParticipants": "Waiting for participants to join…"
     },
     "meetings": {
         "interactions": {
@@ -247,9 +247,9 @@
         "title": "Chats settings"
     },
     "status": {
-        "areTyping": "are typing...",
+        "areTyping": "are typing…",
         "goToPrivateChat": "Go to private chat to send a personal message",
-        "isTyping": "is typing...",
+        "isTyping": "is typing…",
         "lastSeen": "Last seen {{lastSeen}}",
         "offline": "Offline",
         "online": "Online",

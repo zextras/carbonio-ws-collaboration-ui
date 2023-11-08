@@ -20,12 +20,15 @@
         "removeUser": "xoá",
         "reply": "Trả lời",
         "replyToSomeone": "Trả lời đến",
-        "replyToYourself": "Trả lời đến chính bạn"
+        "replyToYourself": "Trả lời đến chính bạn",
+        "decline": "Từ chối",
+        "enter": "Vào"
     },
     "conversation": {
         "newMessage": "Thư mới",
         "chooseConversationDescription": "Chọn cuộc hội thoại để bắt đầu trò chuyện",
-        "keepInTouchTitle": "Hãy giữ liên lạc!"
+        "keepInTouchTitle": "Hãy giữ liên lạc!",
+        "newMessages": "Tin nhắn mới"
     },
     "tooltip": {
         "room": {
@@ -39,7 +42,14 @@
         "goToPrivateChat": "Đi đến cuộc trò chuyện riêng tư",
         "messageComposer": "Người soạn tin nhắn",
         "messageRead": "Đọc",
-        "messageSent": "Gửi đi"
+        "messageSent": "Gửi đi",
+        "collapseCarousel": "Thu gọn",
+        "expandCarousel": "Mở rộng",
+        "messageActions": "Các tác vụ tin nhắn",
+        "muteForAll": "Tắt tiếng tất cả",
+        "pending": "Đang chờ xử lý",
+        "pinVideo": "Ghim Video",
+        "unpinVideo": "Bỏ ghim Video"
     },
     "attachments": {
         "addFromLocal": "Thêm vào từ thiết bị cục bộ",
@@ -98,6 +108,36 @@
     "status": {
         "lastSeen": "Lần xem cuối {{lastSeen}}",
         "offline": "Ngoại tuyến",
-        "online": "Trực tuyến"
-    }
+        "online": "Trực tuyến",
+        "isTyping": "đang gõ…"
+    },
+    "chat": "Cuộc Trò chuyện",
+    "external": {
+        "nobodyInTheRoom": "Có vẻ không có ai trong phòng",
+        "roomIsEmpty": "Phòng này rỗng"
+    },
+    "meeting": {
+        "newMeetingNotification": {
+            "sendMessage": "Gửi tin nhắn"
+        },
+        "interactions": {
+            "cameraDisabled": "Tắt Camera",
+            "cameraEnabled": "Bật Camera",
+            "enableCamera": "Bật Camera",
+            "enableMicrophone": "Bật microphone",
+            "microphoneEnabled": "Đã bật Microphone"
+        }
+    },
+    "meetings": {
+        "interactions": {
+            "yourCamIsDisabled": "Camera của bạn tắt"
+        }
+    },
+    "notification": {
+        "meeting": {
+            "ended": "Cuộc họp đã kết thúc"
+        }
+    },
+    "thanksForParticipating": "Cảm ơn bạn đã tham gia",
+    "tryLater": "Thử lại sau"
 }
