@@ -35,7 +35,7 @@ const PickerWrapper = styled(Container)<{ $isInsideMeeting?: boolean }>`
 	animation: showEmoji 0.2s ease-in 0s 1;
 
 	// set height of emojiPicker when is small or large device
-	@media (max-height: 768px) {
+	@media (max-height: 48rem) {
 		max-height: 18.125rem;
 	}
 
