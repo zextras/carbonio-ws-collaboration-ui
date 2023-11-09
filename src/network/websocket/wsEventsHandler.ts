@@ -201,9 +201,9 @@ export function wsEventsHandler(event: WsEvent): void {
 			}
 
 			// mute the tile if someone performed this state on me
-			// TODO for now suppose that userid is the user that has been muted
 			if (activeMeeting && event.userId === state.session.id && !event.active) {
 				activeMeeting.bidirectionalAudioConn?.closeRtpSenderTrack();
+				sendCustomEvent({ name: EventName.MEMBER_MUTED, data: event });
 			}
 			break;
 		}

@@ -294,33 +294,33 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 		() => (
 			<HoverContainer width="100%" data-testid="hover_container" orientation="horizontal">
 				{!isScreenShare && muteForAllHasToAppear && (
-					<>
-						<Tooltip label={muteForAllLabel}>
-							<IconButton
-								icon="MicOffOutline"
-								iconColor="text"
-								backgroundColor="gray6"
-								size="large"
-								borderRadius="round"
-								customSize={{ iconSize: '1.5rem', paddingSize: '0.75rem' }}
-								onClick={muteForAll}
-							/>
-						</Tooltip>
-						<Padding right="1rem" />
-					</>
-				)}
-				{canUsePinFeature && (
-					<Tooltip label={isPinned ? unpinVideoLabel : pinVideoLabel}>
+					<Tooltip label={muteForAllLabel}>
 						<IconButton
-							icon={!isPinned ? 'Pin3Outline' : 'Unpin3Outline'}
+							icon="MicOffOutline"
 							iconColor="text"
 							backgroundColor="gray6"
 							size="large"
 							borderRadius="round"
 							customSize={{ iconSize: '1.5rem', paddingSize: '0.75rem' }}
-							onClick={switchPinnedTile}
+							onClick={muteForAll}
 						/>
 					</Tooltip>
+				)}
+				{canUsePinFeature && (
+					<>
+						<Padding left="1rem" />
+						<Tooltip label={isPinned ? unpinVideoLabel : pinVideoLabel}>
+							<IconButton
+								icon={!isPinned ? 'Pin3Outline' : 'Unpin3Outline'}
+								iconColor="text"
+								backgroundColor="gray6"
+								size="large"
+								borderRadius="round"
+								customSize={{ iconSize: '1.5rem', paddingSize: '0.75rem' }}
+								onClick={switchPinnedTile}
+							/>
+						</Tooltip>
+					</>
 				)}
 			</HoverContainer>
 		),
@@ -338,8 +338,8 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 	);
 
 	const showHoverContainer = useMemo(
-		() => !modalProps && canUsePinFeature,
-		[canUsePinFeature, modalProps]
+		() => !modalProps && (canUsePinFeature || muteForAllHasToAppear),
+		[canUsePinFeature, modalProps, muteForAllHasToAppear]
 	);
 
 	return (

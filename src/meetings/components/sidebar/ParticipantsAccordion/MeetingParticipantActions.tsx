@@ -29,10 +29,8 @@ const MeetingParticipantActions: FC<ParticipantActionsProps> = ({ memberId, meet
 		'tooltip.memberIsModerator',
 		'This member is a moderator'
 	);
-	const participantAlreadyMutedLabel = t(
-		'tooltip.participantAlreadyMuted',
-		'This participant is already muted'
-	);
+	const participantMutedLabel = t('tooltip.participantMuted', 'This participant is muted');
+	const youAreMutedLabel = t('tooltip.youAreAlreadyMuted', "You're muted");
 	const muteForAllLabel = t('tooltip.muteForAll', 'Mute for all');
 	const pinVideoLabel = t('tooltip.pinVideo', 'Pin video');
 	const unpinVideoLabel = t('tooltip.unpinVideo', 'Unpin video');
@@ -74,7 +72,7 @@ const MeetingParticipantActions: FC<ParticipantActionsProps> = ({ memberId, meet
 				)
 			)}
 			{!participantAudioStatus && (
-				<Tooltip label={participantAlreadyMutedLabel}>
+				<Tooltip label={isSessionParticipant ? youAreMutedLabel : participantMutedLabel}>
 					<Padding all="0.5rem">
 						<Icon icon="MicOff" size="medium" />
 					</Padding>

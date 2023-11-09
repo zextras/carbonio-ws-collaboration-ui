@@ -4,17 +4,23 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { ReactElement, useMemo, useRef } from 'react';
+import React, { ReactElement, useCallback, useContext, useMemo, useRef } from 'react';
 
-import { Container } from '@zextras/carbonio-design-system';
+import {
+	Container,
+	CreateSnackbarFn,
+	SnackbarManagerContext
+} from '@zextras/carbonio-design-system';
+import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
+import useEventListener, { EventName } from '../../hooks/useEventListener';
 import useGeneralMeetingControls from '../../hooks/useGeneralMeetingControls';
 import { MeetingRoutesParams } from '../../hooks/useRouting';
 import { getMeetingViewSelected } from '../../store/selectors/ActiveMeetingSelectors';
 import { getNumberOfTiles } from '../../store/selectors/MeetingSelectors';
-import { getCustomLogo } from '../../store/selectors/SessionSelectors';
+import { getCustomLogo, getUserId } from '../../store/selectors/SessionSelectors';
 import useStore from '../../store/Store';
 import { MeetingViewType } from '../../types/store/ActiveMeetingTypes';
 import defaultLogo from '../assets/Logo.png';
@@ -48,8 +54,16 @@ const LogoApp = styled(Container)<{ $customLogo: string | false | undefined }>`
 `;
 
 const MeetingSkeleton = (): ReactElement => {
+	const [t] = useTranslation();
+	const mutedByModerator = t(
+		'snackbar.mutedByModerator',
+		"You've been muted by a moderator, unmute yourself to speak"
+	);
+	const okLabel = t('action.ok', 'Ok');
+
 	const { meetingId }: MeetingRoutesParams = useParams();
 
+	const sessionId: string | undefined = useStore((store) => getUserId(store));
 	const meetingViewSelected = useStore((store) => getMeetingViewSelected(store, meetingId));
 	const numberOfTiles = useStore((store) => getNumberOfTiles(store, meetingId));
 	const customLogo = useStore(getCustomLogo);
@@ -64,6 +78,24 @@ const MeetingSkeleton = (): ReactElement => {
 		}
 		return meetingViewSelected === MeetingViewType.CINEMA ? <CinemaMode /> : <GridMode />;
 	}, [meetingViewSelected, numberOfTiles]);
+
+	const createSnackbar: CreateSnackbarFn = useContext(SnackbarManagerContext);
+
+	const handleMutedEvent = useCallback(
+		({ detail: mutedEvent }) => {
+			if (mutedEvent.userId === sessionId && mutedEvent.moderatorId !== undefined) {
+				createSnackbar({
+					key: new Date().toLocaleString(),
+					type: 'info',
+					label: mutedByModerator,
+					actionLabel: okLabel,
+					disableAutoHide: true
+				});
+			}
+		},
+		[createSnackbar, mutedByModerator, okLabel, sessionId]
+	);
+	useEventListener(EventName.MEMBER_MUTED, handleMutedEvent);
 
 	return (
 		<SkeletonContainer orientation="horizontal" borderRadius="none">

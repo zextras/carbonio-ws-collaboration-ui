@@ -6,6 +6,8 @@
 
 import { useCallback, useMemo } from 'react';
 
+import { useTranslation } from 'react-i18next';
+
 import { MeetingsApi } from '../network';
 import {
 	getParticipantAudioStatus,
@@ -26,6 +28,8 @@ const useMuteForAll = (
 	meetingId: string | undefined,
 	userIdToMute: string | undefined
 ): useMuteForAllReturn => {
+	const [t] = useTranslation();
+
 	const sessionId: string | undefined = useStore((store) => getUserId(store));
 	const participantAudioStatus = useStore((store) =>
 		getParticipantAudioStatus(store, meetingId || '', userIdToMute)

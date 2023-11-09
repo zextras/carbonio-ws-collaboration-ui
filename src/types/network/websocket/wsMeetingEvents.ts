@@ -60,6 +60,7 @@ export type MeetingAudioStreamChangedEvent = BasicMeetingEvent & {
 	type: WsEventType.MEETING_AUDIO_STREAM_CHANGED;
 	active: boolean;
 	userId: string; // ora è sessionId
+	moderatorId?: string;
 };
 
 export type MeetingMediaStreamChangedEvent = BasicMeetingEvent & {
