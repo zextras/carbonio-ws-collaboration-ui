@@ -19,6 +19,8 @@ const MessageTextarea = styled.textarea`
 	flex: 1;
 	padding: 0.5rem 0;
 	height: 1.25rem;
+	min-height: 1.25rem;
+	max-height: calc(50vh - ${SIZES.SPACE_FOR_ELEMENTS_VISIBLE_ON_MESSAGE_LIST});
 	font-family: 'Segoe UI', 'Lucida Sans', sans-serif;
 	font-size: ${({ theme }): string => theme.sizes.font.medium};
 	resize: none;
@@ -26,7 +28,6 @@ const MessageTextarea = styled.textarea`
 	cursor: auto;
 	border: none;
 	overflow-y: scroll;
-	max-height: calc(50vh - ${SIZES.SPACE_FOR_ELEMENTS_VISIBLE_ON_MESSAGE_LIST});
 	scrollbar-color: ${({ theme }): string => theme.palette.gray3.regular} transparent;
 	line-height: 1.1;
 

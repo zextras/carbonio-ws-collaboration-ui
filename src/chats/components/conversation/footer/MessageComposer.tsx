@@ -48,6 +48,7 @@ import { BrowserUtils } from '../../../../utils/BrowserUtils';
 
 type ConversationMessageComposerProps = {
 	roomId: string;
+	isInsideMeeting?: boolean;
 };
 
 const BlockUploadButton = styled(IconButton)`
@@ -71,7 +72,10 @@ const SendIconButton = styled(IconButton)<{ alt?: string }>``;
 
 const EmojiIconButton = styled(IconButton)<{ alt?: string }>``;
 
-const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId }) => {
+const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
+	roomId,
+	isInsideMeeting
+}) => {
 	const xmppClient = useStore(getXmppClient);
 
 	const [t] = useTranslation();
@@ -520,6 +524,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 					onEmojiSelect={insertEmojiInMessage}
 					setShowEmojiPicker={setShowEmojiPicker}
 					emojiTimeoutRef={emojiTimeoutRef}
+					isInsideMeeting={isInsideMeeting}
 				/>
 			)}
 			<Container
