@@ -325,9 +325,17 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 		[canUsePinFeature, modalProps]
 	);
 
+	const tileSubscriptionId = useMemo(() => {
+		if (videoStreamEnabled || isScreenShare) {
+			return `tile-${!isScreenShare ? STREAM_TYPE.VIDEO : STREAM_TYPE.SCREEN}-${userId}`;
+		}
+		return 'tile';
+	}, [isScreenShare, userId, videoStreamEnabled]);
+
 	return (
 		<CustomTile
 			background={'text'}
+			id={tileSubscriptionId}
 			data-testid="tile"
 			width="100%"
 			$isTalking={userIsTalking && !isScreenShare}

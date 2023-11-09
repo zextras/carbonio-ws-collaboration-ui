@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import React, { ReactElement, useMemo, useRef } from 'react';
+import React, { ReactElement, useEffect, useMemo, useRef } from 'react';
 
 import { Container, Text } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
@@ -12,10 +12,16 @@ import styled from 'styled-components';
 
 import useContainerDimensions from '../../../hooks/useContainerDimensions';
 import { MeetingRoutesParams } from '../../../hooks/useRouting';
-import { getCentralTileData } from '../../../store/selectors/MeetingSelectors';
+import { getVideoScreenIn } from '../../../store/selectors/ActiveMeetingSelectors';
+import {
+	getCentralTileData,
+	getParticipantScreenStatus,
+	getParticipantVideoStatus
+} from '../../../store/selectors/MeetingSelectors';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
-import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
+import { STREAM_TYPE, SubscriptionMap } from '../../../types/store/ActiveMeetingTypes';
+import { mapToSubscriptionMap } from '../../../utils/MeetingsUtils';
 import Tile from '../Tile';
 
 const FaceToFace = styled(Container)`
@@ -50,12 +56,32 @@ const FaceToFaceMode = (): ReactElement => {
 	);
 
 	const centralTile = useStore((store) => getCentralTileData(store, meetingId));
+	const centralTileVideoStatus = useStore((store) =>
+		getParticipantVideoStatus(store, meetingId, centralTile?.userId)
+	);
+	const centralTileScreenStatus = useStore((store) =>
+		getParticipantScreenStatus(store, meetingId, centralTile?.userId)
+	);
 
 	const localId = useStore(getUserId);
+	const videoScreenIn = useStore((store) => getVideoScreenIn(store, meetingId));
 
 	const faceToFaceRef = useRef<null | HTMLDivElement>(null);
 
 	const faceToFaceDimensions = useContainerDimensions(faceToFaceRef);
+
+	useEffect(() => {
+		if (centralTile && (centralTileVideoStatus || centralTileScreenStatus)) {
+			const tilesDataToSubscribe: SubscriptionMap = {};
+			mapToSubscriptionMap(tilesDataToSubscribe, centralTile.userId, centralTile.type);
+			videoScreenIn?.subscriptionManager.updateSubscription(tilesDataToSubscribe);
+		}
+	}, [
+		centralTile,
+		centralTileScreenStatus,
+		centralTileVideoStatus,
+		videoScreenIn?.subscriptionManager
+	]);
 
 	const centralTileWidth = useMemo(() => {
 		const tileHeight = (faceToFaceDimensions.width / 16) * 9;

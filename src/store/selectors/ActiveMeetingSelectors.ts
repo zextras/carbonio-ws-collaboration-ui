@@ -5,6 +5,7 @@
  */
 import { find, sample } from 'lodash';
 
+import { IVideoScreenInConnection } from '../../types/network/webRTC/webRTC';
 import {
 	MeetingChatVisibility,
 	MeetingViewType,
@@ -71,3 +72,8 @@ export const getTalkingList = (store: RootStore, meetingId: string): string[] =>
 
 export const getUserIsTalking = (store: RootStore, meetingId: string, userId: string): boolean =>
 	find(store.activeMeeting[meetingId]?.talkingUsers, (user) => user === userId) !== undefined;
+
+export const getVideoScreenIn = (
+	store: RootStore,
+	meetingId: string
+): IVideoScreenInConnection | undefined => store.activeMeeting[meetingId]?.videoScreenIn;

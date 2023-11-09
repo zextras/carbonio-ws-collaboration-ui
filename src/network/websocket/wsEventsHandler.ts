@@ -161,8 +161,8 @@ export function wsEventsHandler(event: WsEvent): void {
 			const subscriptionsManager =
 				state.activeMeeting[event.meetingId]?.videoScreenIn?.subscriptionManager;
 			if (subscriptionsManager) {
-				subscriptionsManager?.removeStreamToAsk(event.userId, STREAM_TYPE.VIDEO);
-				subscriptionsManager?.removeStreamToAsk(event.userId, STREAM_TYPE.SCREEN);
+				subscriptionsManager.removeSubscription(event.userId, STREAM_TYPE.VIDEO);
+				subscriptionsManager.removeSubscription(event.userId, STREAM_TYPE.SCREEN);
 			}
 
 			// Send audio feedback to other participants session user leave
@@ -220,9 +220,9 @@ export function wsEventsHandler(event: WsEvent): void {
 				const subscriptionsManager =
 					state.activeMeeting[event.meetingId]?.videoScreenIn?.subscriptionManager;
 				if (event.active) {
-					subscriptionsManager?.addStreamToAsk(event.userId, mediaType);
+					subscriptionsManager?.addSubscription(event.userId, mediaType);
 				} else {
-					subscriptionsManager?.removeStreamToAsk(event.userId, mediaType);
+					subscriptionsManager?.removeSubscription(event.userId, mediaType);
 				}
 			}
 			break;

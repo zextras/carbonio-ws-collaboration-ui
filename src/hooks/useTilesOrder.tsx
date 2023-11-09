@@ -17,16 +17,25 @@ import {
 	size
 } from 'lodash';
 
-import { getPinnedTile, getTalkingList } from '../store/selectors/ActiveMeetingSelectors';
+import {
+	getPinnedTile,
+	getTalkingList,
+	getMeetingCarouselVisibility,
+	getVideoScreenIn
+} from '../store/selectors/ActiveMeetingSelectors';
 import { getTiles } from '../store/selectors/MeetingSelectors';
+import { getUserId } from '../store/selectors/SessionSelectors';
 import useStore from '../store/Store';
 import { STREAM_TYPE, TileData } from '../types/store/ActiveMeetingTypes';
-import { orderSpeakingTiles } from '../utils/MeetingsUtils';
+import { orderSpeakingTiles, visibleStreamToSubscribe } from '../utils/MeetingsUtils';
 
 const useTilesOrder = (meetingId: string): { centralTile: TileData; carouselTiles: TileData[] } => {
 	const tilesData: TileData[] = useStore((store) => getTiles(store, meetingId));
 	const pinnedTile: TileData | undefined = useStore((store) => getPinnedTile(store, meetingId));
 	const isTalkingList = useStore((store) => getTalkingList(store, meetingId));
+	const myUserId = useStore(getUserId);
+	const videoScreenIn = useStore((store) => getVideoScreenIn(store, meetingId));
+	const carouselIsVisible = useStore((store) => getMeetingCarouselVisibility(store, meetingId));
 
 	const [tiles, setTiles] = useState<TileData[]>(tilesData);
 
@@ -56,6 +65,7 @@ const useTilesOrder = (meetingId: string): { centralTile: TileData; carouselTile
 				return [...tiles, ...newTiles];
 			});
 		}
+
 		if (size(tilesData) < size(tiles)) {
 			setTiles((tiles) => intersectionWith(tiles, tilesData, isEqual));
 		}
@@ -75,6 +85,7 @@ const useTilesOrder = (meetingId: string): { centralTile: TileData; carouselTile
 		},
 		[meetingId, pinnedTile]
 	);
+
 	// swap tiles handler based on who is talking
 	useEffect(() => {
 		const debounceIsTalking = debounce(checkIfIsStillTalking, 2000);
@@ -83,6 +94,13 @@ const useTilesOrder = (meetingId: string): { centralTile: TileData; carouselTile
 		}
 		return () => debounceIsTalking.cancel();
 	}, [checkIfIsStillTalking, isTalkingList]);
+
+	useEffect(() => {
+		setTimeout(() => {
+			const tilesDataToSubscribe = visibleStreamToSubscribe(myUserId, meetingId);
+			videoScreenIn?.subscriptionManager.updateSubscription(tilesDataToSubscribe);
+		}, 500);
+	}, [meetingId, myUserId, videoScreenIn?.subscriptionManager, carouselIsVisible, tiles]);
 
 	const centralTile = useMemo(() => tiles[0], [tiles]);
 	const carouselTiles = useMemo(() => tiles.slice(1), [tiles]);

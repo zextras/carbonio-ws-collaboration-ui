@@ -11,7 +11,8 @@ import audioOn from '../meetings/assets/AudioON.mp3';
 import meetingIn from '../meetings/assets/MeetingIN.mp3';
 import meetingOut from '../meetings/assets/MeetingOUT.mp3';
 import screenshareOn from '../meetings/assets/ScreenShareON.mp3';
-import { STREAM_TYPE, TileData } from '../types/store/ActiveMeetingTypes';
+import useStore from '../store/Store';
+import { STREAM_TYPE, SubscriptionMap, TileData } from '../types/store/ActiveMeetingTypes';
 
 export enum MeetingSoundFeedback {
 	MEETING_JOIN_NOTIFICATION = 'meetingJoinNotification',
@@ -109,6 +110,46 @@ export const maximiseTileSize = (
 	const minVoidGrid = grid[indexOf(voids, minVoid)];
 
 	return { tileWidth: minVoidGrid.tileWidth, rows: minVoidAxes.rows, columns: minVoidAxes.columns };
+};
+
+export const mapToSubscriptionMap = (
+	mapToFill: SubscriptionMap,
+	userId: string,
+	type: STREAM_TYPE
+): SubscriptionMap => {
+	// eslint-disable-next-line no-param-reassign
+	mapToFill[`${userId}-${type}`] = {
+		userId,
+		type
+	};
+	return mapToFill;
+};
+
+export const visibleStreamToSubscribe = (
+	myUserId: string | undefined,
+	meetingId: string
+): SubscriptionMap => {
+	const visibleTiles = document.querySelectorAll('[id^="tile-"]');
+	const tilesDataToSubscribe: SubscriptionMap = {};
+	const participants = find(
+		useStore.getState().meetings,
+		(meeting) => meeting.id === meetingId
+	)?.participants;
+	forEach(visibleTiles, (tile) => {
+		const streamType = tile?.id.split('-')[1];
+		const userId = tile?.id.split(`tile-${streamType}-`)[1];
+		if (myUserId === userId) return;
+		if (
+			participants &&
+			participants[userId] &&
+			((streamType === STREAM_TYPE.SCREEN && !participants[userId].screenStreamOn) ||
+				(streamType === STREAM_TYPE.VIDEO && !participants[userId].videoStreamOn))
+		) {
+			return;
+		}
+		mapToSubscriptionMap(tilesDataToSubscribe, userId, streamType as STREAM_TYPE);
+	});
+	return tilesDataToSubscribe;
 };
 
 type Dimensions = {
