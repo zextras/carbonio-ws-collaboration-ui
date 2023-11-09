@@ -3,14 +3,14 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import React, { FC, useCallback, useMemo } from 'react';
+import React, { FC, useMemo } from 'react';
 
 import { Container, Tooltip, Icon, Padding, IconButton } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
 import PromoteDemoteMemberAction from '../../../../chats/components/infoPanel/conversationParticipantsAccordion/PromoteDemoteMemberAction';
+import useMuteForAll from '../../../../hooks/useMuteForAll';
 import usePinnedTile from '../../../../hooks/usePinnedTile';
-import { MeetingsApi } from '../../../../network';
 import {
 	getParticipantAudioStatus,
 	getRoomIdByMeetingId
@@ -51,18 +51,8 @@ const MeetingParticipantActions: FC<ParticipantActionsProps> = ({ memberId, meet
 	const { isPinned, switchPinnedTile, canUsePinFeature } = usePinnedTile(meetingId || '', memberId);
 
 	const isSessionParticipant: boolean = useMemo(() => memberId === userId, [memberId, userId]);
-	const amIModerator = useStore((store) => getMyOwnershipOfTheRoom(store, userId, roomId || ''));
 
-	const muteForAllHasToAppear = useMemo(
-		() => participantAudioStatus && amIModerator && !isSessionParticipant,
-		[amIModerator, participantAudioStatus, isSessionParticipant]
-	);
-
-	const muteForAll = useCallback(() => {
-		if (meetingId !== undefined && participantAudioStatus) {
-			MeetingsApi.updateAudioStreamStatus(meetingId, false, memberId);
-		}
-	}, [participantAudioStatus, meetingId, memberId]);
+	const { muteForAllHasToAppear, muteForAll } = useMuteForAll(meetingId, memberId);
 
 	return (
 		<Container width="fit" height="fit" orientation="horizontal">

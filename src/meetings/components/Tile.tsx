@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import {
 	Avatar,
@@ -20,15 +20,14 @@ import {
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
+import useMuteForAll from '../../hooks/useMuteForAll';
 import usePinnedTile from '../../hooks/usePinnedTile';
-import { MeetingsApi, UsersApi } from '../../network';
+import { UsersApi } from '../../network';
 import { getUserIsTalking, getStream } from '../../store/selectors/ActiveMeetingSelectors';
 import {
 	getParticipantAudioStatus,
-	getParticipantVideoStatus,
-	getRoomIdByMeetingId
+	getParticipantVideoStatus
 } from '../../store/selectors/MeetingSelectors';
-import { getMyOwnershipOfTheRoom } from '../../store/selectors/RoomsSelectors';
 import { getUserId } from '../../store/selectors/SessionSelectors';
 import { getUserName, getUserPictureUpdatedAt } from '../../store/selectors/UsersSelectors';
 import useStore from '../../store/Store';
@@ -141,12 +140,12 @@ const TextContainer = styled(Container)`
 `;
 
 const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProps }) => {
-	const sessionId: string | undefined = useStore((store) => store.session.id);
 	const [t] = useTranslation();
 	const micOffLabel = t('meetings.interactions.yourMicIsDisabled', 'Your microphone is off');
 	const camOffLabel = t('meetings.interactions.yourCamIsDisabled', 'Your camera is off');
 	const pinVideoLabel = t('tooltip.pinVideo', 'Pin video');
 	const unpinVideoLabel = t('tooltip.unpinVideo', 'Unpin video');
+	const muteForAllLabel = t('tooltip.muteForAll', 'Mute for all');
 
 	const isSessionTile = useStore(getUserId) === userId;
 	const userName = useStore((store) => getUserName(store, userId || ''));
@@ -164,8 +163,6 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 		getUserPictureUpdatedAt(state, userId || '')
 	);
 	const userIsTalking = useStore((store) => getUserIsTalking(store, meetingId || '', userId || ''));
-	const roomid = useStore((store) => getRoomIdByMeetingId(store, meetingId || ''));
-	const amIModerator = useStore((store) => getMyOwnershipOfTheRoom(store, sessionId, roomid || ''));
 
 	const [picture, setPicture] = useState<false | string>(false);
 
@@ -178,11 +175,7 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 		isScreenShare
 	);
 
-	const muteForAll = useCallback(() => {
-		if (meetingId !== undefined && audioStatus) {
-			MeetingsApi.updateAudioStreamStatus(meetingId, false, userId);
-		}
-	}, [audioStatus, meetingId, userId]);
+	const { muteForAllHasToAppear, muteForAll } = useMuteForAll(meetingId, userId);
 
 	useEffect(() => {
 		if (streamRef && streamRef.current) {
@@ -236,11 +229,6 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 				<StyledShimmerAvatar />
 			),
 		[picture, userColor, userName]
-	);
-
-	const muteForAllHasToAppear = useMemo(
-		() => audioStreamEnabled && amIModerator && !isScreenShare && userId !== sessionId,
-		[amIModerator, audioStreamEnabled, isScreenShare, sessionId, userId]
 	);
 
 	const placeHolderFn = (): null => null;
@@ -305,17 +293,19 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 	const hoverContainer = useMemo(
 		() => (
 			<HoverContainer width="100%" data-testid="hover_container" orientation="horizontal">
-				{muteForAllHasToAppear && (
+				{!isScreenShare && muteForAllHasToAppear && (
 					<>
-						<IconButton
-							icon="MicOffOutline"
-							iconColor="text"
-							backgroundColor="gray6"
-							size="large"
-							borderRadius="round"
-							customSize={{ iconSize: '1.5rem', paddingSize: '0.75rem' }}
-							onClick={muteForAll}
-						/>
+						<Tooltip label={muteForAllLabel}>
+							<IconButton
+								icon="MicOffOutline"
+								iconColor="text"
+								backgroundColor="gray6"
+								size="large"
+								borderRadius="round"
+								customSize={{ iconSize: '1.5rem', paddingSize: '0.75rem' }}
+								onClick={muteForAll}
+							/>
+						</Tooltip>
 						<Padding right="1rem" />
 					</>
 				)}
@@ -335,13 +325,15 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 			</HoverContainer>
 		),
 		[
+			isScreenShare,
+			muteForAllHasToAppear,
+			muteForAllLabel,
+			muteForAll,
 			canUsePinFeature,
 			isPinned,
-			muteForAll,
-			muteForAllHasToAppear,
+			unpinVideoLabel,
 			pinVideoLabel,
-			switchPinnedTile,
-			unpinVideoLabel
+			switchPinnedTile
 		]
 	);
 
