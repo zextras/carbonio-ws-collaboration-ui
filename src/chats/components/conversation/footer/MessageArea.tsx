@@ -129,7 +129,7 @@ const MessageArea: React.FC<MessageAreaPros> = ({
 	useEffect(() => {
 		if (textareaRef.current) {
 			textareaRef.current.style.height = '';
-			if (textareaRef.current.scrollHeight >= textareaRef.current.clientHeight) {
+			if (textareaRef.current.scrollHeight > textareaRef.current.clientHeight) {
 				textareaRef.current.style.height = `${textareaRef.current.scrollHeight - 16}px`;
 			} else {
 				textareaRef.current.style.height = '1.25rem';
