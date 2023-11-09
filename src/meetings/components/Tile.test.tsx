@@ -9,6 +9,7 @@ import { screen } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event/setup/setup';
 
 import Tile from './Tile';
+import { mockedUpdateAudioStreamStatusRequest } from '../../../jest-mocks';
 import useStore from '../../store/Store';
 import {
 	createMockMeeting,
@@ -72,7 +73,18 @@ const storeBasicActiveMeetingSetup = (): void => {
 	store.setUserInfo(user3);
 	store.addRoom(room);
 	store.addMeeting(meeting);
-	store.meetingConnection(meeting.id, false, undefined, false, undefined);
+	store.meetingConnection(meeting.id, true, undefined, false, undefined);
+};
+
+const notModeratorActiveMeetingSetup = (): void => {
+	const store: RootStore = useStore.getState();
+	store.setLoginInfo(user2.id, user2.name);
+	store.setUserInfo(user1);
+	store.setUserInfo(user2);
+	store.setUserInfo(user3);
+	store.addRoom(room);
+	store.addMeeting(meeting);
+	store.meetingConnection(meeting.id, true, undefined, false, undefined);
 };
 
 const storeSetupMyTileAudioOnVideoOff = (): { user: UserEvent; store: RootStore } => {
@@ -255,5 +267,52 @@ describe('Tile test - on meeting', () => {
 		expect(screen.queryByTestId(iconMicOffOutline)).not.toBeInTheDocument();
 		expect(screen.queryByTestId(iconVideoOffOutline)).not.toBeInTheDocument();
 		expect(screen.getByTestId('icon: ScreenSharingOnOutline')).toBeInTheDocument();
+	});
+});
+
+describe('Tile actions', () => {
+	test('mute for all appears and works if I am a moderator', async () => {
+		mockedUpdateAudioStreamStatusRequest.mockReturnValueOnce('muted');
+		storeBasicActiveMeetingSetup();
+		const store: RootStore = useStore.getState();
+		store.changeStreamStatus(meeting.id, user2.id, STREAM_TYPE.AUDIO, true);
+		store.changeStreamStatus(meeting.id, user2.id, STREAM_TYPE.VIDEO, true);
+		const { user } = setup(<Tile userId={user2.id} meetingId={meeting.id} />);
+
+		const hoverContainer = screen.getByTestId('hover_container');
+		user.hover(hoverContainer);
+
+		const muteForAll = await screen.findByTestId(iconMicOffOutline);
+		expect(muteForAll).toBeVisible();
+		user.click(muteForAll);
+
+		// the only icon is the one that appears when a user is muted
+		expect(await screen.findAllByTestId(iconMicOffOutline)).toHaveLength(1);
+	});
+
+	test('mute for all does not appear if it is my tile', async () => {
+		storeBasicActiveMeetingSetup();
+		const store: RootStore = useStore.getState();
+		store.changeStreamStatus(meeting.id, user1.id, STREAM_TYPE.AUDIO, true);
+		store.changeStreamStatus(meeting.id, user1.id, STREAM_TYPE.VIDEO, true);
+		const { user } = setup(<Tile userId={user1.id} meetingId={meeting.id} />);
+
+		const hoverContainer = screen.getByTestId('hover_container');
+		user.hover(hoverContainer);
+
+		expect(screen.queryByTestId(iconMicOffOutline)).not.toBeInTheDocument();
+	});
+
+	test('mute for all does not appear if I am not a moderator', async () => {
+		notModeratorActiveMeetingSetup();
+		const store: RootStore = useStore.getState();
+		store.changeStreamStatus(meeting.id, user1.id, STREAM_TYPE.AUDIO, true);
+		store.changeStreamStatus(meeting.id, user1.id, STREAM_TYPE.VIDEO, true);
+		const { user } = setup(<Tile userId={user1.id} meetingId={meeting.id} />);
+
+		const hoverContainer = screen.getByTestId('hover_container');
+		user.hover(hoverContainer);
+
+		expect(screen.queryByTestId(iconMicOffOutline)).not.toBeInTheDocument();
 	});
 });
