@@ -22,8 +22,6 @@ type useMuteForAllReturn = {
 	muteForAll: () => void;
 };
 
-// userIdToMute: user who has to be muted
-
 const useMuteForAll = (
 	meetingId: string | undefined,
 	userIdToMute: string | undefined

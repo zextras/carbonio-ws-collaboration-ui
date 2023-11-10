@@ -70,16 +70,9 @@ const MeetingSkeleton = (): ReactElement => {
 
 	const streamsWrapperRef = useRef<HTMLDivElement>(null);
 
-	useGeneralMeetingControls(meetingId);
-
-	const ViewToDisplay = useMemo(() => {
-		if (numberOfTiles <= 2) {
-			return <FaceToFaceMode />;
-		}
-		return meetingViewSelected === MeetingViewType.CINEMA ? <CinemaMode /> : <GridMode />;
-	}, [meetingViewSelected, numberOfTiles]);
-
 	const createSnackbar: CreateSnackbarFn = useContext(SnackbarManagerContext);
+
+	useGeneralMeetingControls(meetingId);
 
 	const handleMutedEvent = useCallback(
 		({ detail: mutedEvent }) => {
@@ -96,6 +89,13 @@ const MeetingSkeleton = (): ReactElement => {
 		[createSnackbar, mutedByModerator, okLabel, sessionId]
 	);
 	useEventListener(EventName.MEMBER_MUTED, handleMutedEvent);
+
+	const ViewToDisplay = useMemo(() => {
+		if (numberOfTiles <= 2) {
+			return <FaceToFaceMode />;
+		}
+		return meetingViewSelected === MeetingViewType.CINEMA ? <CinemaMode /> : <GridMode />;
+	}, [meetingViewSelected, numberOfTiles]);
 
 	return (
 		<SkeletonContainer orientation="horizontal" borderRadius="none">
