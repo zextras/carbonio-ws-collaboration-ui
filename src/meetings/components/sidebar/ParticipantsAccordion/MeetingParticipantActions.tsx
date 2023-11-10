@@ -29,6 +29,7 @@ const MeetingParticipantActions: FC<ParticipantActionsProps> = ({ memberId, meet
 		'tooltip.memberIsModerator',
 		'This member is a moderator'
 	);
+	const iAmModeratorLabel: string = t('tooltip.iAmModerator', "You're a moderator");
 	const participantMutedLabel = t('tooltip.participantMuted', 'This participant is muted');
 	const youAreMutedLabel = t('tooltip.youAreAlreadyMuted', "You're muted");
 	const muteForAllLabel = t('tooltip.muteForAll', 'Mute for all');
@@ -54,19 +55,18 @@ const MeetingParticipantActions: FC<ParticipantActionsProps> = ({ memberId, meet
 
 	return (
 		<Container width="fit" height="fit" orientation="horizontal">
-			{iAmOwner ? (
+			{iAmOwner && !isSessionParticipant ? (
 				<PromoteDemoteMemberAction
 					memberId={memberId}
 					roomId={roomId || ''}
-					isSessionParticipant={isSessionParticipant}
 					owner={memberOwner}
 					isInsideMeeting
 				/>
 			) : (
 				memberOwner && (
-					<Tooltip label={memberIsModeratorLabel}>
+					<Tooltip label={isSessionParticipant ? iAmModeratorLabel : memberIsModeratorLabel}>
 						<Padding all="0.5rem">
-							<Icon icon="Crown" size="medium" />
+							<Icon icon="Crown" size="medium" color="gray1" />
 						</Padding>
 					</Tooltip>
 				)
@@ -74,7 +74,7 @@ const MeetingParticipantActions: FC<ParticipantActionsProps> = ({ memberId, meet
 			{!participantAudioStatus && (
 				<Tooltip label={isSessionParticipant ? youAreMutedLabel : participantMutedLabel}>
 					<Padding all="0.5rem">
-						<Icon icon="MicOff" size="medium" />
+						<Icon icon="MicOff" size="medium" color="gray1" />
 					</Padding>
 				</Tooltip>
 			)}

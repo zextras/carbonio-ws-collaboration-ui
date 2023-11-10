@@ -12,7 +12,6 @@ import { useTranslation } from 'react-i18next';
 import { RoomsApi } from '../../../../network';
 
 type PromoteDemoteMemberProps = {
-	isSessionParticipant: boolean;
 	owner: boolean;
 	memberId: string;
 	roomId: string;
@@ -20,23 +19,17 @@ type PromoteDemoteMemberProps = {
 };
 
 const PromoteDemoteMemberAction: FC<PromoteDemoteMemberProps> = ({
-	isSessionParticipant,
 	owner,
 	memberId,
 	roomId,
 	isInsideMeeting
 }) => {
 	const [t] = useTranslation();
-	const iAmModeratorLabel: string = t('tooltip.iAmModerator', "You're a moderator");
 	const demoteModeratorLabel: string = t('tooltip.demoteModerator', 'Demote moderator');
 	const promoteModeratorLabel: string = t('tooltip.promoteModerator', 'Promote to moderator');
 
 	// eslint-disable-next-line no-nested-ternary
-	const tooltipLabel = isSessionParticipant
-		? iAmModeratorLabel
-		: owner
-		? demoteModeratorLabel
-		: promoteModeratorLabel;
+	const tooltipLabel = owner ? demoteModeratorLabel : promoteModeratorLabel;
 
 	const promoteMember = useCallback(
 		() => RoomsApi.promoteRoomMember(roomId, memberId),
@@ -53,7 +46,7 @@ const PromoteDemoteMemberAction: FC<PromoteDemoteMemberProps> = ({
 			<IconButton
 				iconColor={isInsideMeeting ? 'gray0' : owner ? 'primary' : 'secondary'}
 				backgroundColor={isInsideMeeting ? 'text' : 'gray6'}
-				size={isInsideMeeting ? 'large' : 'extralarge'}
+				size={isInsideMeeting ? 'medium' : 'extralarge'}
 				icon={owner ? 'Crown' : 'CrownOutline'}
 				onClick={owner ? demoteMember : promoteMember}
 			/>
