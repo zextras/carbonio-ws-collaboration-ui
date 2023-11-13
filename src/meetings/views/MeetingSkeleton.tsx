@@ -20,7 +20,7 @@ import useGeneralMeetingControls from '../../hooks/useGeneralMeetingControls';
 import { MeetingRoutesParams } from '../../hooks/useRouting';
 import { getMeetingViewSelected } from '../../store/selectors/ActiveMeetingSelectors';
 import { getNumberOfTiles } from '../../store/selectors/MeetingSelectors';
-import { getCustomLogo, getUserId } from '../../store/selectors/SessionSelectors';
+import { getCustomLogo } from '../../store/selectors/SessionSelectors';
 import useStore from '../../store/Store';
 import { MeetingViewType } from '../../types/store/ActiveMeetingTypes';
 import defaultLogo from '../assets/Logo.png';
@@ -63,7 +63,6 @@ const MeetingSkeleton = (): ReactElement => {
 
 	const { meetingId }: MeetingRoutesParams = useParams();
 
-	const sessionId: string | undefined = useStore((store) => getUserId(store));
 	const meetingViewSelected = useStore((store) => getMeetingViewSelected(store, meetingId));
 	const numberOfTiles = useStore((store) => getNumberOfTiles(store, meetingId));
 	const customLogo = useStore(getCustomLogo);
@@ -74,20 +73,15 @@ const MeetingSkeleton = (): ReactElement => {
 
 	useGeneralMeetingControls(meetingId);
 
-	const handleMutedEvent = useCallback(
-		({ detail: mutedEvent }) => {
-			if (mutedEvent.userId === sessionId && mutedEvent.moderatorId !== undefined) {
-				createSnackbar({
-					key: new Date().toLocaleString(),
-					type: 'info',
-					label: mutedByModerator,
-					actionLabel: okLabel,
-					disableAutoHide: true
-				});
-			}
-		},
-		[createSnackbar, mutedByModerator, okLabel, sessionId]
-	);
+	const handleMutedEvent = useCallback(() => {
+		createSnackbar({
+			key: new Date().toLocaleString(),
+			type: 'info',
+			label: mutedByModerator,
+			actionLabel: okLabel,
+			disableAutoHide: true
+		});
+	}, [createSnackbar, mutedByModerator, okLabel]);
 	useEventListener(EventName.MEMBER_MUTED, handleMutedEvent);
 
 	const ViewToDisplay = useMemo(() => {

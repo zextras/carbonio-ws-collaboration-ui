@@ -28,7 +28,6 @@ const PromoteDemoteMemberAction: FC<PromoteDemoteMemberProps> = ({
 	const demoteModeratorLabel: string = t('tooltip.demoteModerator', 'Demote moderator');
 	const promoteModeratorLabel: string = t('tooltip.promoteModerator', 'Promote to moderator');
 
-	// eslint-disable-next-line no-nested-ternary
 	const tooltipLabel = owner ? demoteModeratorLabel : promoteModeratorLabel;
 
 	const promoteMember = useCallback(
