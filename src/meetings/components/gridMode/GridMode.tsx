@@ -142,7 +142,7 @@ const GridMode = (): ReactElement => {
 
 	useEffect(() => {
 		const tilesDataToSubscribe: SubscriptionMap = {};
-		if (tilesToRender.length > 0) {
+		if (tilesToRender.length >= 3) {
 			forEach(tilesToRender, (tile) => {
 				if (myUserId === tile.userId) return;
 				mapToSubscriptionMap(tilesDataToSubscribe, tile.userId, tile.type);

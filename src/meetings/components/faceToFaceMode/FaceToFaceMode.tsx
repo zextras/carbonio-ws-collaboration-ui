@@ -6,6 +6,7 @@
 import React, { ReactElement, useEffect, useMemo, useRef } from 'react';
 
 import { Container, Text } from '@zextras/carbonio-design-system';
+import { size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -74,14 +75,11 @@ const FaceToFaceMode = (): ReactElement => {
 		if (centralTile && (centralTileVideoStatus || centralTileScreenStatus)) {
 			const tilesDataToSubscribe: SubscriptionMap = {};
 			mapToSubscriptionMap(tilesDataToSubscribe, centralTile.userId, centralTile.type);
-			videoScreenIn?.subscriptionManager.updateSubscription(tilesDataToSubscribe);
+			if (size(videoScreenIn?.subscriptionManager.subscriptions) <= 1) {
+				videoScreenIn?.subscriptionManager.updateSubscription(tilesDataToSubscribe);
+			}
 		}
-	}, [
-		centralTile,
-		centralTileScreenStatus,
-		centralTileVideoStatus,
-		videoScreenIn?.subscriptionManager
-	]);
+	}, [centralTile, centralTileScreenStatus, centralTileVideoStatus, videoScreenIn]);
 
 	const centralTileWidth = useMemo(() => {
 		const tileHeight = (faceToFaceDimensions.width / 16) * 9;

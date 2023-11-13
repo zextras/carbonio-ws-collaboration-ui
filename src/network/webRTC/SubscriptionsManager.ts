@@ -37,28 +37,22 @@ class SubscriptionsManager {
 			useStore.getState().meetings,
 			(meeting) => meeting.id === this.meetingId
 		)?.participants;
-		forEach(
-			differenceWith(
-				typeReq === SUBS_ACTION.ADD ? baseSubs : subsToRequire,
-				typeReq === SUBS_ACTION.ADD ? subsToRequire : baseSubs
-			),
-			(sub) => {
-				if (
-					participants &&
-					participants[sub.userId] &&
-					((sub.type === STREAM_TYPE.VIDEO && participants[sub.userId].videoStreamOn) ||
-						(sub.type === STREAM_TYPE.SCREEN && participants[sub.userId].screenStreamOn))
-				) {
-					if (typeReq === SUBS_ACTION.ADD) {
-						toAdd.push(sub);
-					} else {
-						toRemove.push(sub);
-						// eslint-disable-next-line no-param-reassign
-						delete this.subscriptions[`${sub.userId}-${sub.type}`];
-					}
+		const possibleToAdd = differenceWith(subsToRequire, baseSubs, isEqual);
+		const possibleToRem = differenceWith(baseSubs, subsToRequire, isEqual);
+		forEach(typeReq === SUBS_ACTION.ADD ? possibleToAdd : possibleToRem, (sub) => {
+			if (
+				participants &&
+				participants[sub.userId] &&
+				((sub.type === STREAM_TYPE.VIDEO && participants[sub.userId].videoStreamOn) ||
+					(sub.type === STREAM_TYPE.SCREEN && participants[sub.userId].screenStreamOn))
+			) {
+				if (typeReq === SUBS_ACTION.ADD) {
+					toAdd.push(sub);
+				} else {
+					toRemove.push(sub);
 				}
 			}
-		);
+		});
 	}
 
 	public addSubscription(userId: string, type: STREAM_TYPE): void {
@@ -86,19 +80,20 @@ class SubscriptionsManager {
 	public updateSubscription(subscriptionsToRequest?: SubscriptionMap): void {
 		const flatSubsToRequire = flatMap(subscriptionsToRequest);
 		const subs = flatMap(this.subscriptions);
-		if (!isEqual(flatSubsToRequire, subs)) {
+		if (!isEqual(flatSubsToRequire, subs) && !this.pendingRequest) {
 			const toAdd: Subscription[] = [];
 			const toRemove: Subscription[] = [];
 			this.filterSubscription(subs, flatSubsToRequire, toAdd, toRemove, SUBS_ACTION.ADD);
 			this.filterSubscription(subs, flatSubsToRequire, toAdd, toRemove, SUBS_ACTION.REMOVE);
-			if ((toAdd.length > 0 || toRemove.length > 0) && !this.pendingRequest) {
+
+			if (toAdd.length > 0 || toRemove.length > 0) {
 				this.pendingRequest = true;
 				MeetingsApi.subscribeToMedia(this.meetingId, toAdd, toRemove).then(() => {
-					this.pendingRequest = false;
 					forEach(toRemove, (sub) => delete this.subscriptions[`${sub.userId}-${sub.type}`]);
 					forEach(toAdd, (sub) => {
 						this.subscriptions[`${sub.userId}-${sub.type}`] = sub;
 					});
+					this.pendingRequest = false;
 				});
 			}
 		}

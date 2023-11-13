@@ -18,9 +18,9 @@ import {
 } from 'lodash';
 
 import {
+	getMeetingCarouselVisibility,
 	getPinnedTile,
 	getTalkingList,
-	getMeetingCarouselVisibility,
 	getVideoScreenIn
 } from '../store/selectors/ActiveMeetingSelectors';
 import { getTiles } from '../store/selectors/MeetingSelectors';
@@ -100,7 +100,7 @@ const useTilesOrder = (meetingId: string): { centralTile: TileData; carouselTile
 			const tilesDataToSubscribe = visibleStreamToSubscribe(myUserId, meetingId);
 			videoScreenIn?.subscriptionManager.updateSubscription(tilesDataToSubscribe);
 		}, 500);
-	}, [meetingId, myUserId, videoScreenIn?.subscriptionManager, carouselIsVisible, tiles]);
+	}, [meetingId, myUserId, videoScreenIn, carouselIsVisible, tiles]);
 
 	const centralTile = useMemo(() => tiles[0], [tiles]);
 	const carouselTiles = useMemo(() => tiles.slice(1), [tiles]);
