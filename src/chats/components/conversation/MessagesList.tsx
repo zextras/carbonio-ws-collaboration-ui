@@ -177,10 +177,17 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 
 	// Scroll all the way down when the is writing label appears to make it always visible
 	useEffect(() => {
+		const lastMsg =
+			roomMessages.length > 0
+				? document.getElementById(`message-${roomMessages[roomMessages.length - 1].id}`)
+				: null;
+		const lastMsgRect = lastMsg ? lastMsg.getBoundingClientRect() : null;
 		if (
 			size(usersWritingList) > 0 &&
 			size(roomMessages) > 0 &&
-			actualScrollPosition === last(roomMessages)?.id
+			actualScrollPosition === last(roomMessages)?.id &&
+			lastMsgRect !== null &&
+			lastMsgRect.bottom === document.documentElement.clientHeight
 		) {
 			scrollToEnd(MessagesListWrapperRef);
 		}
