@@ -5,19 +5,29 @@
  */
 
 import { act, renderHook } from '@testing-library/react-hooks';
+import { find, last } from 'lodash';
 
 import {
-	createMockAffiliationMessage,
+	createMockConfigurationMessage,
 	createMockMarker,
 	createMockMember,
 	createMockRoom,
 	createMockTextMessage
 } from '../../tests/createMock';
 import { MarkerStatus } from '../../types/store/MarkersTypes';
-import { AffiliationMessage, MessageType, TextMessage } from '../../types/store/MessageTypes';
+import {
+	ConfigurationMessage,
+	DateMessage,
+	MessageType,
+	OperationType,
+	TextMessage
+} from '../../types/store/MessageTypes';
 import { RoomType } from '../../types/store/RoomTypes';
 import { dateToTimestamp } from '../../utils/dateUtil';
 import useStore from '../Store';
+
+const dateOne = '2023-05-01 14:00';
+const dateTwo = '2023-05-01 14:01';
 
 describe('Test messages slice - newMessage', () => {
 	test('Arrive a text message as first', () => {
@@ -35,11 +45,11 @@ describe('Test messages slice - newMessage', () => {
 	test('Arrive a text message in a conversation already full of messages of the same day', () => {
 		const message0 = createMockTextMessage({
 			id: 'message0',
-			date: dateToTimestamp('2023-05-01 14:00')
+			date: dateToTimestamp(dateOne)
 		});
 		const message1 = createMockTextMessage({
 			id: 'message1',
-			date: dateToTimestamp('2023-05-01 14:01')
+			date: dateToTimestamp(dateTwo)
 		});
 		const newMessage = createMockTextMessage({
 			id: 'newMessage',
@@ -63,11 +73,11 @@ describe('Test messages slice - newMessage', () => {
 	test('Arrive a text message in a conversation already full of messages of the another day', () => {
 		const message0 = createMockTextMessage({
 			id: 'message0',
-			date: dateToTimestamp('2023-05-01 14:00')
+			date: dateToTimestamp(dateOne)
 		});
 		const message1 = createMockTextMessage({
 			id: 'message1',
-			date: dateToTimestamp('2023-05-01 14:01')
+			date: dateToTimestamp(dateTwo)
 		});
 		const newMessage = createMockTextMessage({
 			id: 'newMessage',
@@ -89,8 +99,8 @@ describe('Test messages slice - newMessage', () => {
 		expect(messages[newMessage.roomId][4]).toBe(newMessage);
 	});
 
-	test('Arrive an affiliate message as first', () => {
-		const newMessage = createMockAffiliationMessage();
+	test('Arrive an configuration message as first', () => {
+		const newMessage = createMockConfigurationMessage({ operation: OperationType.MEMBER_ADDED });
 		const { result } = renderHook(() => useStore());
 		act(() => result.current.newMessage(newMessage));
 		expect(result.current.messages[newMessage.roomId]).not.toBeNull();
@@ -118,11 +128,11 @@ describe('Test messages slice - newInboxMessage', () => {
 	test('Arrive an inbox text message after a history request (also with different date)', () => {
 		const message0 = createMockTextMessage({
 			id: 'message0',
-			date: dateToTimestamp('2023-05-01 14:00')
+			date: dateToTimestamp(dateOne)
 		});
 		const message1 = createMockTextMessage({
 			id: 'message1',
-			date: dateToTimestamp('2023-05-01 14:01')
+			date: dateToTimestamp(dateTwo)
 		});
 		const inboxMessage = createMockTextMessage({
 			id: 'message1',
@@ -165,7 +175,7 @@ describe('Test messages slice - newInboxMessage', () => {
 	test('Arrive an inbox message of a room in which history is been cleared after message date', () => {
 		const room = createMockRoom({
 			userSettings: {
-				clearedAt: dateToTimestamp('2023-05-01 14:00')
+				clearedAt: dateToTimestamp(dateOne)
 			}
 		});
 		const inboxMessage = createMockTextMessage({
@@ -187,11 +197,11 @@ describe('Test messages slice - updateHistory', () => {
 	test('First update history after an inbox message (inbox message and last history message are from the same day)', () => {
 		const message0 = createMockTextMessage({
 			id: 'message0',
-			date: dateToTimestamp('2023-05-01 14:00')
+			date: dateToTimestamp(dateOne)
 		});
 		const message1 = createMockTextMessage({
 			id: 'message1',
-			date: dateToTimestamp('2023-05-01 14:01')
+			date: dateToTimestamp(dateTwo)
 		});
 		const inboxMessage = createMockTextMessage({
 			id: 'newMessage',
@@ -215,11 +225,11 @@ describe('Test messages slice - updateHistory', () => {
 	test("First update history after an inbox message (inbox message and last history message AREN'T from the same day)", () => {
 		const message0 = createMockTextMessage({
 			id: 'message0',
-			date: dateToTimestamp('2023-05-01 14:00')
+			date: dateToTimestamp(dateOne)
 		});
 		const message1 = createMockTextMessage({
 			id: 'message1',
-			date: dateToTimestamp('2023-05-01 14:01')
+			date: dateToTimestamp(dateTwo)
 		});
 		const inboxMessage = createMockTextMessage({
 			id: 'newMessage',
@@ -244,7 +254,7 @@ describe('Test messages slice - updateHistory', () => {
 	test('Last message of history is the inbox message', () => {
 		const message0 = createMockTextMessage({
 			id: 'message0',
-			date: dateToTimestamp('2023-05-01 14:00')
+			date: dateToTimestamp(dateOne)
 		});
 		const inboxMessage = createMockTextMessage({
 			id: 'newMessage',
@@ -267,7 +277,7 @@ describe('Test messages slice - updateHistory', () => {
 	test('Last message of history is the inbox message (but dates are not the same)', () => {
 		const message0 = createMockTextMessage({
 			id: 'message0',
-			date: dateToTimestamp('2023-05-01 14:00')
+			date: dateToTimestamp(dateOne)
 		});
 		const message1 = createMockTextMessage({
 			id: 'message1',
@@ -291,7 +301,7 @@ describe('Test messages slice - updateHistory', () => {
 	test('In the history response there are messages from different date', () => {
 		const message0 = createMockTextMessage({
 			id: 'message0',
-			date: dateToTimestamp('2023-05-01 14:00')
+			date: dateToTimestamp(dateOne)
 		});
 		const message1 = createMockTextMessage({
 			id: 'message1',
@@ -320,11 +330,11 @@ describe('Test messages slice - updateHistory', () => {
 	test('Load a history after another history', () => {
 		const message0 = createMockTextMessage({
 			id: 'message0',
-			date: dateToTimestamp('2023-05-01 14:00')
+			date: dateToTimestamp(dateOne)
 		});
 		const message1 = createMockTextMessage({
 			id: 'message1',
-			date: dateToTimestamp('2023-05-01 14:01')
+			date: dateToTimestamp(dateTwo)
 		});
 		const { result } = renderHook(() => useStore());
 		act(() => result.current.updateHistory(message0.roomId, [message0, message1]));
@@ -358,11 +368,11 @@ describe('Test messages slice - updateHistory', () => {
 	test('Arrive an history already loaded', () => {
 		const message0 = createMockTextMessage({
 			id: 'message0',
-			date: dateToTimestamp('2023-05-01 14:00')
+			date: dateToTimestamp(dateOne)
 		});
 		const message1 = createMockTextMessage({
 			id: 'message1',
-			date: dateToTimestamp('2023-05-01 14:01')
+			date: dateToTimestamp(dateTwo)
 		});
 		const { result } = renderHook(() => useStore());
 		act(() => {
@@ -394,9 +404,9 @@ describe('Test message slice - addCreateRoomMessage', () => {
 
 		expect(result.current.messages[room.id]).toHaveLength(4);
 		expect(result.current.messages[room.id][0].type).toBe(MessageType.DATE_MSG);
-		const createRoomMessage = result.current.messages[room.id][1] as AffiliationMessage;
-		expect(createRoomMessage.type).toBe(MessageType.AFFILIATION_MSG);
-		expect(createRoomMessage.as).toBe('creation');
+		const createRoomMessage = result.current.messages[room.id][1] as ConfigurationMessage;
+		expect(createRoomMessage.type).toBe(MessageType.CONFIGURATION_MSG);
+		expect(createRoomMessage.operation).toBe(OperationType.ROOM_CREATION);
 	});
 
 	test('Add a create room message to a single conversation', () => {
@@ -412,7 +422,7 @@ describe('Test message slice - addCreateRoomMessage', () => {
 		});
 
 		expect(result.current.messages[room.id]).toHaveLength(3);
-		const dateMessage = result.current.messages[room.id][0] as AffiliationMessage;
+		const dateMessage = result.current.messages[room.id][0] as DateMessage;
 		expect(dateMessage.type).toBe(MessageType.DATE_MSG);
 		expect(result.current.messages[room.id][1]).toBe(message0);
 	});
@@ -420,7 +430,7 @@ describe('Test message slice - addCreateRoomMessage', () => {
 	test('Add a create room message to a group with cleared history', () => {
 		const room = createMockRoom({
 			type: RoomType.GROUP,
-			userSettings: { clearedAt: dateToTimestamp('2023-05-01 14:00') }
+			userSettings: { clearedAt: dateToTimestamp(dateOne) }
 		});
 		const message0 = createMockTextMessage({ id: 'message0' });
 		const message1 = createMockTextMessage({ id: 'message1' });
@@ -433,7 +443,7 @@ describe('Test message slice - addCreateRoomMessage', () => {
 		});
 
 		expect(result.current.messages[room.id]).toHaveLength(3);
-		const dateMessage = result.current.messages[room.id][0] as AffiliationMessage;
+		const dateMessage = result.current.messages[room.id][0] as DateMessage;
 		expect(dateMessage.type).toBe(MessageType.DATE_MSG);
 		expect(result.current.messages[room.id][1]).toBe(message0);
 	});
@@ -561,5 +571,47 @@ describe('Test message slice - setRepliedMessage', () => {
 
 		const textMessage = result.current.messages[message.roomId][1] as TextMessage;
 		expect(textMessage.repliedMessage).toBe(message);
+	});
+
+	test('Add a placeholder message', () => {
+		const placeholderMessageFields = {
+			roomId: 'roomId',
+			id: 'placeholderMessageId',
+			text: 'placeholderMessageText',
+			replyTo: 'replyToMessageId'
+		};
+		const { result } = renderHook(() => useStore());
+		act(() => {
+			result.current.setPlaceholderMessage(placeholderMessageFields);
+		});
+
+		const storeMessage = last(
+			result.current.messages[placeholderMessageFields.roomId]
+		) as TextMessage;
+		expect(storeMessage.id).toBe('placeholderMessageId');
+		expect(storeMessage.text).toBe('placeholderMessageText');
+		expect(storeMessage.replyTo).toBe('replyToMessageId');
+	});
+
+	test('Remove a placeholder message', () => {
+		const placeholderMessageFields = {
+			roomId: 'roomId',
+			id: 'placeholderMessageId',
+			text: 'placeholderMessageText',
+			replyTo: 'replyToMessageId'
+		};
+		const { result } = renderHook(() => useStore());
+		act(() => {
+			result.current.setPlaceholderMessage(placeholderMessageFields);
+			result.current.removePlaceholderMessage(
+				placeholderMessageFields.roomId,
+				placeholderMessageFields.id
+			);
+		});
+
+		const messageOnStore = find(result.current.messages[placeholderMessageFields.roomId], {
+			id: placeholderMessageFields.id
+		});
+		expect(messageOnStore).toBeUndefined();
 	});
 });

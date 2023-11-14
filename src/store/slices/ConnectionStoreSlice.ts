@@ -6,6 +6,7 @@
  */
 
 import produce from 'immer';
+import { forEach } from 'lodash';
 
 import IWebSocketClient from '../../types/network/websocket/IWebSocketClient';
 import IXMPPClient from '../../types/network/xmpp/IXMPPClient';
@@ -60,6 +61,23 @@ export const useConnectionsStoreSlice = (set: (...any: any) => void): Connection
 			}),
 			false,
 			'CONNECTIONS/SET_WEBSOCKET_STATUS'
+		);
+	},
+	resetXmppData: (): void => {
+		set(
+			produce((draft: RootStore) => {
+				forEach(draft.users, (user) => {
+					draft.users[user.id].online = undefined;
+					draft.users[user.id].last_activity = undefined;
+				});
+				draft.messages = {};
+				draft.markers = {};
+				draft.fastenings = {};
+				draft.activeConversations = {};
+				draft.unreads = {};
+			}),
+			false,
+			'CONNECTIONS/RESET_XMPP_DATA'
 		);
 	}
 });

@@ -24,7 +24,6 @@ export const useRoomsStoreSlice = (set: (...any: any) => void): RoomsStoreSlice 
 						name: roomBe.name,
 						description: roomBe.description,
 						type: roomBe.type,
-						hash: roomBe.hash,
 						createdAt: roomBe.createdAt,
 						updatedAt: roomBe.createdAt,
 						pictureUpdatedAt: roomBe.pictureUpdatedAt,
@@ -62,10 +61,9 @@ export const useRoomsStoreSlice = (set: (...any: any) => void): RoomsStoreSlice 
 			produce((draft: RootStore) => {
 				draft.rooms[roomBe.id] = {
 					id: roomBe.id,
-					name: roomBe.name,
-					description: roomBe.description,
+					name: roomBe.name || '',
+					description: roomBe.description || '',
 					type: roomBe.type,
-					hash: roomBe.hash,
 					createdAt: roomBe.createdAt,
 					updatedAt: roomBe.createdAt,
 					pictureUpdatedAt: roomBe.pictureUpdatedAt,
@@ -120,13 +118,17 @@ export const useRoomsStoreSlice = (set: (...any: any) => void): RoomsStoreSlice 
 			'ROOMS/CHANGE_DESCRIPTION'
 		);
 	},
-	setRoomNameAndDescription: (id: string, newName: string, newDescription: string): void => {
+	setRoomNameAndDescription: (
+		id: string,
+		newName: string | undefined,
+		newDescription: string | undefined
+	): void => {
 		set(
 			produce((draft: RootStore) => {
 				draft.rooms[id] = {
 					...draft.rooms[id],
-					name: newName,
-					description: newDescription
+					name: newName || '',
+					description: newDescription || ''
 				};
 			}),
 			false,
@@ -161,7 +163,6 @@ export const useRoomsStoreSlice = (set: (...any: any) => void): RoomsStoreSlice 
 		set(
 			produce((draft: RootStore) => {
 				if (draft.rooms[id].members == null) draft.rooms[id].members = [];
-				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 				draft.rooms[id].members!.push(member);
 
 				// Retrieve member information if he is unknown
@@ -181,7 +182,6 @@ export const useRoomsStoreSlice = (set: (...any: any) => void): RoomsStoreSlice 
 					userId &&
 					find(draft.rooms[id].members, { userId })
 				) {
-					// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 					remove(draft.rooms[id].members!, { userId });
 				}
 			}),
@@ -196,7 +196,6 @@ export const useRoomsStoreSlice = (set: (...any: any) => void): RoomsStoreSlice 
 				if (memberToPromote) {
 					memberToPromote.owner = true;
 					const index = findIndex(draft.rooms[id].members, { userId });
-					// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 					draft.rooms[id].members!.splice(index, 1, memberToPromote);
 				}
 			}),
@@ -211,7 +210,6 @@ export const useRoomsStoreSlice = (set: (...any: any) => void): RoomsStoreSlice 
 				if (memberToDemote) {
 					memberToDemote.owner = false;
 					const index = findIndex(draft.rooms[id].members, { userId });
-					// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 					draft.rooms[id].members!.splice(index, 1, memberToDemote);
 				}
 			}),

@@ -6,21 +6,36 @@
  */
 
 import produce from 'immer';
-import { concat, find, first, forEach, last, map, orderBy, remove, size, uniqBy } from 'lodash';
+import {
+	concat,
+	find,
+	findIndex,
+	first,
+	forEach,
+	last,
+	map,
+	orderBy,
+	remove,
+	size,
+	uniqBy
+} from 'lodash';
 
+import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
 import { UsersApi } from '../../network';
-import { calcReads } from '../../network/xmpp/utility/decodeXMPPMessageStanza';
 import { MarkerStatus } from '../../types/store/MarkersTypes';
 import {
-	AffiliationMessage,
+	ConfigurationMessage,
 	Message,
 	MessageList,
 	MessageType,
+	OperationType,
+	PlaceholderFields,
 	TextMessage
 } from '../../types/store/MessageTypes';
 import { RoomType } from '../../types/store/RoomTypes';
 import { MessagesStoreSlice, RootStore } from '../../types/store/StoreTypes';
 import { UsersMap } from '../../types/store/UserTypes';
+import { calcReads } from '../../utils/calcReads';
 import { datesAreFromTheSameDay, isBefore, isStrictlyBefore } from '../../utils/dateUtil';
 
 // Retrieve user information about userId in the various type of message (only if it is unknown)
@@ -29,10 +44,15 @@ const retrieveMessageUserInfo = (message: Message, users: UsersMap): void => {
 		if (!users[message.from]) UsersApi.getDebouncedUser(message.from);
 		if (message.forwarded && !users[message.forwarded.from])
 			UsersApi.getDebouncedUser(message.forwarded.from);
-	} else if (message.type === MessageType.AFFILIATION_MSG) {
-		if (!users[message.userId]) UsersApi.getDebouncedUser(message.userId);
 	} else if (message.type === MessageType.CONFIGURATION_MSG) {
 		if (!users[message.from]) UsersApi.getDebouncedUser(message.from);
+		if (
+			(message.operation === OperationType.MEMBER_ADDED ||
+				message.operation === OperationType.MEMBER_REMOVED) &&
+			!users[message.value]
+		) {
+			UsersApi.getDebouncedUser(message.value);
+		}
 	}
 };
 
@@ -55,8 +75,19 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 					});
 				}
 
-				// Add message to the end of list
-				draft.messages[message.roomId].push(message);
+				// Add message to the end of list or replace a placeholder message
+				const placeholderMessageIndex = findIndex(draft.messages[message.roomId], {
+					id: message.id
+				});
+				if (placeholderMessageIndex !== -1) {
+					const newMessage = {
+						...draft.messages[message.roomId][placeholderMessageIndex],
+						...message
+					};
+					draft.messages[message.roomId].splice(placeholderMessageIndex, 1, newMessage);
+				} else {
+					draft.messages[message.roomId].push(message);
+				}
 
 				// Retrieve user information
 				retrieveMessageUserInfo(message, draft.users);
@@ -156,7 +187,9 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 				const firstMessageDate = first(draft.messages[roomId])?.date;
 				const creationMessage = find(
 					draft.messages[roomId],
-					(message) => message.type === MessageType.AFFILIATION_MSG && message.as === 'creation'
+					(message) =>
+						message.type === MessageType.CONFIGURATION_MSG &&
+						message.operation === OperationType.ROOM_CREATION
 				);
 				const historyIsBeenCleared = !!draft.rooms[roomId].userSettings?.clearedAt;
 				// Add creation message only if the room is a non-empty group without the history cleared
@@ -166,13 +199,15 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 					!creationMessage &&
 					!historyIsBeenCleared
 				) {
-					const creationMsg: AffiliationMessage = {
+					const creationMsg: ConfigurationMessage = {
 						id: `creationMessage${firstMessageDate + 1}`,
 						roomId,
 						date: firstMessageDate + 1,
-						type: MessageType.AFFILIATION_MSG,
-						as: 'creation',
-						userId: ''
+						type: MessageType.CONFIGURATION_MSG,
+						operation: OperationType.ROOM_CREATION,
+						value: '',
+						from: '',
+						read: MarkerStatus.READ
 					};
 					draft.messages[roomId].splice(1, 0, creationMsg);
 				}
@@ -185,11 +220,19 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 		set(
 			produce((draft: RootStore) => {
 				if (!draft.messages[roomId]) draft.messages[roomId] = [];
+
 				draft.messages[roomId] = map(draft.messages[roomId], (message: Message) => {
-					if (message.type !== MessageType.TEXT_MSG || message.read === MarkerStatus.READ) {
-						return message;
+					// Updating text and configuration messages which are not read yet
+					const readable =
+						message.type === MessageType.TEXT_MSG || message.type === MessageType.CONFIGURATION_MSG;
+
+					if (
+						readable &&
+						(message.read === MarkerStatus.UNREAD || message.read === MarkerStatus.READ_BY_SOMEONE)
+					) {
+						message.read = calcReads(message.date, roomId);
 					}
-					message.read = calcReads(message.date, roomId);
+
 					return message;
 				});
 			}),
@@ -217,6 +260,75 @@ export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStore
 			}),
 			false,
 			'MESSAGES/SET_REPLIED_MESSAGE'
+		);
+	},
+	setPlaceholderMessage: ({
+		roomId,
+		id,
+		text,
+		replyTo,
+		attachment,
+		forwarded
+	}: PlaceholderFields): void => {
+		set(
+			produce((draft: RootStore) => {
+				const placeholderMessage: TextMessage = {
+					id,
+					stanzaId: `placeholder_${id}`,
+					roomId,
+					date: Date.now(),
+					type: MessageType.TEXT_MSG,
+					from: draft.session.id!,
+					text,
+					read: MarkerStatus.PENDING,
+					replyTo,
+					attachment,
+					forwarded
+				};
+
+				// Initialize messages list if it does not exist
+				if (!draft.messages[roomId]) draft.messages[roomId] = [];
+
+				// Add date message if the new message has a different date than the previous one
+				const lastMessageDate = last(draft.messages[roomId])?.date || 0;
+				if (!datesAreFromTheSameDay(lastMessageDate, placeholderMessage.date)) {
+					draft.messages[roomId].push({
+						id: `dateMessage${placeholderMessage.date - 2}`,
+						roomId,
+						date: placeholderMessage.date - 2,
+						type: MessageType.DATE_MSG
+					});
+				}
+
+				// Request message subject of reply
+				const messageSubjectOfReplyId = placeholderMessage.replyTo;
+				if (messageSubjectOfReplyId) {
+					const messageSubjectOfReply = find(
+						draft.messages[roomId],
+						(message) =>
+							message.type === MessageType.TEXT_MSG && message.stanzaId === messageSubjectOfReplyId
+					) as TextMessage;
+					if (messageSubjectOfReply) {
+						placeholderMessage.repliedMessage = messageSubjectOfReply;
+					}
+				}
+
+				// Add message to the end of list or replace a placeholder message
+				draft.messages[roomId].push(placeholderMessage);
+
+				sendCustomEvent({ name: EventName.NEW_MESSAGE, data: placeholderMessage });
+			}),
+			false,
+			'MESSAGES/SET_PLACEHOLDER_MESSAGE'
+		);
+	},
+	removePlaceholderMessage: (roomId: string, messageId: string): void => {
+		set(
+			produce((draft: RootStore) => {
+				remove(draft.messages[roomId], (message) => message.id === messageId);
+			}),
+			false,
+			'MESSAGES/REMOVE_PLACEHOLDER_MESSAGE'
 		);
 	}
 });

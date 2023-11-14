@@ -26,29 +26,22 @@ interface IAttachmentsApi {
 		fileId: string,
 		area: string,
 		quality?: string,
-		shape?: string,
 		format?: string
 	): Promise<GetImageResponse>;
-	getImagePreviewURL(
-		fileId: string,
-		area: string,
-		quality?: string,
-		shape?: string,
-		format?: string
-	): string;
+	getImagePreviewURL(fileId: string, area: string, quality?: string, format?: string): string;
 	getImageThumbnail(
 		fileId: string,
 		area: string,
 		quality?: string,
-		shape?: string,
-		format?: string
+		format?: string,
+		shape?: string
 	): Promise<GetImageThumbnailResponse>;
 	getImageThumbnailURL(
 		fileId: string,
 		area: string,
 		quality?: string,
-		shape?: string,
-		format?: string
+		format?: string,
+		shape?: string
 	): string;
 	getPdfPreview(fileId: string, firsPage?: number, lastPage?: number): Promise<GetPdfResponse>;
 	getPdfPreviewURL(fileId: string, firsPage?: number, lastPage?: number): string;
@@ -76,9 +69,12 @@ export enum ImageQuality {
 	HIGHEST = 'Highest'
 }
 
-export enum ImageType {
+export enum AttachmentType {
 	JPEG = 'Jpeg',
-	PNG = 'Png'
+	PNG = 'Png',
+	GIF = 'Gif',
+	WEBP = 'Webp',
+	PDF = 'pdf'
 }
 
 export enum ImageShape {

@@ -4,146 +4,49 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Attachment } from '../models/attachmentTypes';
-import { MemberBe } from '../models/roomBeTypes';
+import { WsConversationEvent } from './wsConversationEvents';
+import { WsMeetingEvent } from './wsMeetingEvents';
 
 export enum WsEventType {
+	INITIALIZATION = 'websocketConnected',
 	PONG = 'pong',
-	ROOM_CREATED = 'roomCreated',
-	ROOM_UPDATED = 'roomUpdated',
-	ROOM_DELETED = 'roomDeleted',
-	ROOM_OWNER_CHANGED = 'roomOwnerChanged',
-	ROOM_PICTURE_CHANGED = 'roomPictureChanged',
-	ROOM_PICTURE_DELETED = 'roomPictureDeleted',
-	ROOM_MEMBER_ADDED = 'roomMemberAdded',
-	ROOM_MEMBER_REMOVED = 'roomMemberRemoved',
-	ATTACHMENT_ADDED = 'attachmentAdded',
-	ATTACHMENT_REMOVED = 'attachmentRemoved',
-	ROOM_MUTED = 'roomMuted',
-	ROOM_UNMUTED = 'roomUnmuted',
-	USER_PICTURE_CHANGED = 'userPictureChanged',
-	USER_PICTURE_DELETED = 'userPictureDeleted',
-	ROOM_HISTORY_CLEARED = 'roomHistoryCleared',
-	INITIALIZATION = 'websocketConnected'
+	ROOM_CREATED = 'ROOM_CREATED',
+	ROOM_UPDATED = 'ROOM_UPDATED',
+	ROOM_DELETED = 'ROOM_DELETED',
+	ROOM_OWNER_PROMOTED = 'ROOM_OWNER_PROMOTED',
+	ROOM_OWNER_DEMOTED = 'ROOM_OWNER_DEMOTED',
+	ROOM_PICTURE_CHANGED = 'ROOM_PICTURE_CHANGED',
+	ROOM_PICTURE_DELETED = 'ROOM_PICTURE_DELETED',
+	ROOM_MEMBER_ADDED = 'ROOM_MEMBER_ADDED',
+	ROOM_MEMBER_REMOVED = 'ROOM_MEMBER_REMOVED',
+	ROOM_MUTED = 'ROOM_MUTED',
+	ROOM_UNMUTED = 'ROOM_UNMUTED',
+	USER_PICTURE_CHANGED = 'USER_PICTURE_CHANGED',
+	USER_PICTURE_DELETED = 'USER_PICTURE_DELETED',
+	ROOM_HISTORY_CLEARED = 'ROOM_HISTORY_CLEARED',
+	MEETING_CREATED = 'MEETING_CREATED',
+	MEETING_STARTED = 'MEETING_STARTED',
+	MEETING_JOINED = 'MEETING_PARTICIPANT_JOINED',
+	MEETING_LEFT = 'MEETING_PARTICIPANT_LEFT',
+	MEETING_STOPPED = 'MEETING_STOPPED',
+	MEETING_DELETED = 'MEETING_DELETED',
+	MEETING_AUDIO_STREAM_CHANGED = 'MEETING_AUDIO_STREAM_CHANGED',
+	MEETING_MEDIA_STREAM_CHANGED = 'MEETING_MEDIA_STREAM_CHANGED',
+	MEETING_AUDIO_ANSWERED = 'MEETING_AUDIO_ANSWERED',
+	MEETING_SDP_OFFERED = 'MEETING_SDP_OFFERED',
+	MEETING_SDP_ANSWERED = 'MEETING_SDP_ANSWERED',
+	MEETING_PARTICIPANT_SUBSCRIBED = 'MEETING_PARTICIPANT_SUBSCRIBED',
+	MEETING_PARTICIPANT_TALKING = 'MEETING_PARTICIPANT_TALKING',
+	MEETING_PARTICIPANT_CLASHED = 'MEETING_PARTICIPANT_CLASHED'
 }
 
-export type WsEvent =
-	| PongEvent
-	| RoomCreatedEvent
-	| RoomUpdatedEvent
-	| RoomDeletedEvent
-	| RoomOwnerChangedEvent
-	| RoomPictureChangedEvent
-	| RoomPictureDeletedEvent
-	| RoomMemberAddedEvent
-	| RoomMemberRemovedEvent
-	| AttachmentAddedEvent
-	| AttachmentRemovedEvent
-	| RoomMutedEvent
-	| RoomUnmutedEvent
-	| UserPictureChangedEvent
-	| UserPictureDeletedEvent
-	| RoomHistoryClearedEvent
-	| InitializationEvent;
+export type WsEvent = InitializationEvent | PongEvent | WsConversationEvent | WsMeetingEvent;
 
 export type InitializationEvent = {
 	type: WsEventType.INITIALIZATION;
-	sessionId: string;
+	queueId: string;
 };
 
 export type PongEvent = {
 	type: WsEventType.PONG;
-	sessionId: string;
-};
-
-type BasicEvent = {
-	id: string;
-	type: WsEventType;
-	from: string;
-	sentDate: string;
-	sessionId: string;
-};
-
-export type RoomCreatedEvent = BasicEvent & {
-	type: WsEventType.ROOM_CREATED;
-	roomId: string;
-};
-
-export type RoomUpdatedEvent = BasicEvent & {
-	type: WsEventType.ROOM_UPDATED;
-	roomId: string;
-	name: string;
-	description: string;
-};
-
-export type RoomDeletedEvent = BasicEvent & {
-	type: WsEventType.ROOM_DELETED;
-	roomId: string;
-};
-
-export type RoomOwnerChangedEvent = BasicEvent & {
-	type: WsEventType.ROOM_OWNER_CHANGED;
-	roomId: string;
-	userId: string;
-	owner: boolean;
-};
-
-export type RoomPictureChangedEvent = BasicEvent & {
-	type: WsEventType.ROOM_PICTURE_CHANGED;
-	roomId: string;
-};
-
-export type RoomPictureDeletedEvent = BasicEvent & {
-	type: WsEventType.ROOM_PICTURE_DELETED;
-	roomId: string;
-};
-
-export type RoomMemberAddedEvent = BasicEvent & {
-	type: WsEventType.ROOM_MEMBER_ADDED;
-	roomId: string;
-	member: MemberBe;
-};
-
-export type RoomMemberRemovedEvent = BasicEvent & {
-	type: WsEventType.ROOM_MEMBER_REMOVED;
-	roomId: string;
-	userId: string;
-};
-
-export type AttachmentAddedEvent = BasicEvent & {
-	type: WsEventType.ATTACHMENT_ADDED;
-	roomId: string;
-	attachment: Attachment;
-};
-
-export type AttachmentRemovedEvent = BasicEvent & {
-	type: WsEventType.ATTACHMENT_REMOVED;
-	roomId: string;
-	fileId: string;
-};
-
-export type RoomMutedEvent = BasicEvent & {
-	type: WsEventType.ROOM_MUTED;
-	roomId: string;
-};
-
-export type RoomUnmutedEvent = BasicEvent & {
-	type: WsEventType.ROOM_UNMUTED;
-	roomId: string;
-};
-
-export type UserPictureChangedEvent = BasicEvent & {
-	type: WsEventType.USER_PICTURE_CHANGED;
-	userId: string;
-};
-
-export type UserPictureDeletedEvent = BasicEvent & {
-	type: WsEventType.USER_PICTURE_DELETED;
-	userId: string;
-};
-
-export type RoomHistoryClearedEvent = BasicEvent & {
-	type: WsEventType.ROOM_HISTORY_CLEARED;
-	roomId: string;
-	clearedAt: string;
 };

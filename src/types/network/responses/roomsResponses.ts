@@ -31,8 +31,6 @@ export type ClearRoomHistoryResponse = {
 	clearedAt: string;
 };
 
-export type ResetRoomHashResponse = ''; // TODO
-
 export type GetRoomMembersResponse = ''; // TODO
 
 export type AddRoomMemberResponse = MemberBe;

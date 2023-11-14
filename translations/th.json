@@ -12,7 +12,16 @@
         "leaveConversation": "ออกจากการสนทนา",
         "messageComposer": "ผู้เขียนข้อความ",
         "messageRead": "อ่าน",
-        "messageSent": "ส่งแล้ว"
+        "messageSent": "ส่งแล้ว",
+        "demoteModerator": "ลดระดับผู้ดูแล",
+        "promoteModerator": "เลื่อนระดับเป็นผู้ดูแล",
+        "messageActions": "การดำเนินการกับข้อความ",
+        "collapseCarousel": "ย่อ",
+        "expandCarousel": "ขยาย",
+        "muteForAll": "ปิดเสียงทั้งหมด",
+        "pending": "ที่ค้างอยู่",
+        "pinVideo": "ปักหมุดวิดีโอ",
+        "unpinVideo": "ยกเลิกการปักหมุดวิดีโอ"
     },
     "action": {
         "undo": "เลิกทำ",
@@ -35,7 +44,10 @@
         "removeUser": "เอาออก",
         "reply": "ตอบกลับ",
         "replyToSomeone": "ตอบกลับไปยัง",
-        "replyToYourself": "ตอบกลับไปยังตัวของคุณเอง"
+        "replyToYourself": "ตอบกลับไปยังตัวของคุณเอง",
+        "decline": "ปฏิเสธ",
+        "enter": "เข้าสู่การประชุม",
+        "joinMeeting": "เข้าร่วมการประชุม"
     },
     "attachments": {
         "addFromLocal": "เพิ่มจาก local",
@@ -57,12 +69,14 @@
     "status": {
         "lastSeen": "ดูครั้งล่าสุด {{lastSeen}}",
         "offline": "ออฟไลน์",
-        "online": "ออนไลน์"
+        "online": "ออนไลน์",
+        "isTyping": "กำลังพิมพ์…"
     },
     "conversation": {
         "chooseConversationDescription": "เลือกการสนทนาเพื่อเริ่มการแชท",
         "keepInTouchTitle": "เรามาติดต่อกันเถอะ!",
-        "newMessage": "ข้อความใหม่"
+        "newMessage": "ข้อความใหม่",
+        "newMessages": "ข้อความใหม่"
     },
     "conversationInfo": {
         "actionAccordionTitle": "การดำเนินการ",
@@ -98,10 +112,42 @@
         "deleteUserDescription": "คุณแน่ใจหรือไม่ว่าต้องการลบสมาชิกคนนี้ออก?",
         "leaveGroup": "ออกจากกลุ่ม",
         "removeMember": "ลบสมาชิก",
-        "showPreviousConversationHistory": "แสดงประวัติการสนทนาก่อนหน้า"
+        "showPreviousConversationHistory": "แสดงประวัติการสนทนาก่อนหน้า",
+        "deleteMessageTitleDescription": "หากคุณลบเนื้อหาทั้งหมดของข้อความ เนื้อหานั้นจะไม่สามารถใช้งานได้อีกต่อไปและจะถูกลบออก",
+        "deleteMessageTitle": "ลบข้อความที่เลือกหรือไม่?"
     },
     "participantsList": {
         "closeSearch": "ปิดการค้นหา",
         "moreMembersAccordionTitle": "สมาชิก"
-    }
+    },
+    "chat": "แชท",
+    "external": {
+        "roomIsEmpty": "ห้องนี้ว่าง",
+        "nobodyInTheRoom": "ดูเหมือนว่าไม่มีใครอยู่ในห้องนี้"
+    },
+    "meeting": {
+        "newMeetingNotification": {
+            "sendMessage": "ส่งข้อความ"
+        },
+        "interactions": {
+            "cameraDisabled": "ปิดใช้งานกล้องถ่ายรูป",
+            "cameraEnabled": "เปิดใช้งานกล้องถ่ายรูป",
+            "enableCamera": "เปิดกล้อง",
+            "enableMicrophone": "เปิดไมโครโฟน",
+            "microphoneEnabled": "เปิดใช้งานไมโครโฟน"
+        },
+        "joinMeeting": "เข้าร่วมการประชุม"
+    },
+    "meetings": {
+        "interactions": {
+            "yourCamIsDisabled": "กล้องของคุณปิดอยู่"
+        }
+    },
+    "notification": {
+        "meeting": {
+            "ended": "สิ้นสุดการประชุมแล้ว"
+        }
+    },
+    "thanksForParticipating": "ขอขอบคุณที่เข้าร่วม",
+    "tryLater": "ลองในภายหลัง"
 }

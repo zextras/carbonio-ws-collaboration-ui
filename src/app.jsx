@@ -4,57 +4,21 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Container } from '@zextras/carbonio-design-system';
-import {
-	addRoute,
-	addSettingsView,
-	getUserAccount,
-	getUserSettings,
-	Spinner
-} from '@zextras/carbonio-shell-ui';
-import moment from 'moment-timezone';
-import React, { lazy, Suspense, useEffect } from 'react';
+import React from 'react';
 
-import ConnectionSnackbarManager from './components/ConnectionSnackbarManager';
-import CounterBadgeUpdater from './components/CounterBadgeUpdater';
-import RegisterCreationButton from './components/RegisterCreationButton';
-import SecondaryBarSingleGroupsView from './components/secondaryBar/SecondaryBarSingleGroupsView';
-import { CHATS_ROUTE, PRODUCT_NAME } from './constants/appConstants';
-import { LogoBeta, LogoSettingsBeta } from './LogoBeta';
-import { RoomsApi, SessionApi } from './network';
+import { getUserAccount, getUserSettings } from '@zextras/carbonio-shell-ui';
+import moment from 'moment-timezone';
+
+import ConnectionSnackbarManager from './chats/components/ConnectionSnackbarManager';
+import CounterBadgeUpdater from './chats/components/CounterBadgeUpdater';
+import RegisterCreationButton from './chats/components/RegisterCreationButton';
+import useChatsApp from './chats/useChatsApp';
+import MeetingNotificationHandler from './meetings/components/MeetingNotificationsHandler';
+import useMeetingsApp from './meetings/useMeetingsApp';
+import { MeetingsApi, RoomsApi, SessionApi } from './network';
 import { WebSocketClient } from './network/websocket/WebSocketClient';
 import XMPPClient from './network/xmpp/XMPPClient';
 import useStore from './store/Store';
-import AccessMeetingView from './views/AccessMeetingView';
-import ShimmeringConversationView from './views/shimmerViews/ShimmeringConversationView';
-import ShimmeringInfoPanelView from './views/shimmerViews/ShimmeringInfoPanelView';
-
-const LazyMainView = lazy(() => import(/* webpackChunkName: "mainView" */ './views/MainView'));
-
-const LazySettingsView = lazy(() =>
-	import(/* webpackChunkName: "settingsView" */ './views/SettingsView')
-);
-
-const Main = () => (
-	<Suspense
-		fallback={
-			<Container mainAlignment="flex-start" orientation="horizontal">
-				<ShimmeringConversationView />
-				<ShimmeringInfoPanelView />
-			</Container>
-		}
-	>
-		<LazyMainView />
-	</Suspense>
-);
-
-const SettingsView = () => (
-	<Suspense fallback={<Spinner />}>
-		<LazySettingsView />
-	</Suspense>
-);
-
-const SecondaryBar = ({ expanded }) => <SecondaryBarSingleGroupsView expanded={expanded} />;
 
 const initApp = () => {
 	const { id, name, displayName } = getUserAccount();
@@ -84,11 +48,14 @@ const initApp = () => {
 			// CHATS BE: get all rooms list
 			RoomsApi.listRooms(true, true)
 				.then(() => {
+					// Set ChatsBe status to be truthy
+					store.setChatsBeStatus(true);
 					// Init xmppClient and webSocket after roomList request to avoid missing data (specially for the inbox request)
 					xmppClient.connect(resp[0].zmToken);
 					webSocket.connect();
 				})
 				.catch(() => store.setChatsBeStatus(false));
+			MeetingsApi.listMeetings();
 		})
 		.catch(() => store.setChatsBeStatus(false));
 };
@@ -100,40 +67,15 @@ const initApp = () => {
 initApp();
 
 export default function App() {
-	useEffect(() => {
-		addRoute({
-			route: CHATS_ROUTE,
-			visible: true,
-			label: PRODUCT_NAME,
-			primaryBar: LogoBeta,
-			appView: Main,
-			secondaryBar: SecondaryBar
-		});
-		addRoute({
-			route: 'external',
-			visible: false,
-			label: PRODUCT_NAME,
-			primaryBar: 'TeamOutline',
-			appView: () => <AccessMeetingView />,
-			standalone: {
-				hidePrimaryBar: true,
-				hideShellHeader: true,
-				allowUnauthenticated: true
-			}
-		});
-		addSettingsView({
-			icon: LogoSettingsBeta,
-			route: CHATS_ROUTE,
-			label: PRODUCT_NAME,
-			component: SettingsView
-		});
-	}, []);
+	useChatsApp();
+	useMeetingsApp();
 
 	return (
 		<>
 			<RegisterCreationButton />
 			<ConnectionSnackbarManager />
 			<CounterBadgeUpdater />
+			<MeetingNotificationHandler />
 		</>
 	);
 }

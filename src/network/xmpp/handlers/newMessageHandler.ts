@@ -24,18 +24,15 @@ export function onNewMessageStanza(this: IXMPPClient, message: Element): true {
 
 			switch (newMessage.type) {
 				case MessageType.TEXT_MSG: {
-					sendCustomEvent(EventName.NEW_MESSAGE, newMessage);
 					store.newMessage(newMessage);
-					displayMessageBrowserNotification(newMessage);
 
-					// when I send a message as soon it's returned as Stanza we send the reads for ourselves
 					if (newMessage.from === sessionId) {
+						// Set my message as read
 						this.readMessage(newMessage.roomId, newMessage.id);
-					}
-
-					// Increment unread counter
-					if (newMessage.from !== sessionId) {
+					} else {
+						sendCustomEvent({ name: EventName.NEW_MESSAGE, data: newMessage });
 						store.incrementUnreadCount(newMessage.roomId);
+						displayMessageBrowserNotification(newMessage);
 					}
 
 					// Request message subject of reply
@@ -49,9 +46,14 @@ export function onNewMessageStanza(this: IXMPPClient, message: Element): true {
 					}
 					break;
 				}
-				case MessageType.AFFILIATION_MSG:
 				case MessageType.CONFIGURATION_MSG: {
 					store.newMessage(newMessage);
+					if (newMessage.from === sessionId) {
+						this.readMessage(newMessage.roomId, newMessage.id);
+					} else {
+						sendCustomEvent({ name: EventName.NEW_MESSAGE, data: newMessage });
+						store.incrementUnreadCount(newMessage.roomId);
+					}
 					break;
 				}
 				case MessageType.FASTENING: {

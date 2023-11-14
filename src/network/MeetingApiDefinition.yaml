@@ -1,0 +1,458 @@
+# SPDX-FileCopyrightText: 2023 Zextras <https://www.zextras.com>
+#
+# SPDX-License-Identifier: AGPL-3.0-only
+
+openapi: 3.0.3
+info:
+  title: Zextras Carbonio Workstream Collaboration CE Meeting Api
+  description: Zextras Carbonio Workstream Collaboration CE Meeting HTTP APIs definition.
+  version: 0.3.2
+  contact:
+    email: smokybeans@zextras.com
+servers:
+  - url: http://localhost:10000
+tags:
+  - name: Meetings
+paths:
+  /meetings:
+    get:
+      tags:
+        - Meetings
+      summary: Retrieves a list of every meeting the user has access to
+      operationId: listMeeting
+      responses:
+        200:
+          $ref: '#/components/responses/200ListMeetingResponse'
+    post:
+      tags:
+        - Meetings
+      summary: Creates a new meeting
+      operationId: createMeeting
+      requestBody:
+        $ref: '#/components/requestBodies/CreateMeetingRequest'
+      responses:
+        200:
+          $ref: '#/components/responses/200CreateMeetingResponse'
+  /meetings/{meetingId}:
+    get:
+      tags:
+        - Meetings
+      summary: Retrieves the requested meeting
+      operationId: getMeeting
+      parameters:
+        - $ref: '#/components/parameters/pathMeetingId'
+      responses:
+        200:
+          $ref: '#/components/responses/200GetMeetingResponse'
+        401:
+          $ref: '#/components/responses/401UnauthorizedResponse'
+        403:
+          $ref: '#/components/responses/403ForbiddenResponse'
+        404:
+          $ref: '#/components/responses/404NotFoundResponse'
+    delete:
+      tags:
+        - Meetings
+      summary: Deletes the requested meeting
+      operationId: deleteMeeting
+      parameters:
+        - $ref: '#/components/parameters/pathMeetingId'
+      responses:
+        204:
+          $ref: '#/components/responses/204DeleteMeetingResponse'
+        401:
+          $ref: '#/components/responses/401UnauthorizedResponse'
+        403:
+          $ref: '#/components/responses/403ForbiddenResponse'
+        404:
+          $ref: '#/components/responses/404NotFoundResponse'
+  /meetings/{meetingId}/start:
+    post:
+      tags:
+        - Meetings
+      summary: Stars the current meeting
+      operationId: startMeeting
+      parameters:
+        - $ref: '#/components/parameters/pathMeetingId'
+      responses:
+        204:
+          $ref: '#/components/responses/204StartMeetingResponse'
+        401:
+          $ref: '#/components/responses/401UnauthorizedResponse'
+        403:
+          $ref: '#/components/responses/403ForbiddenResponse'
+        404:
+          $ref: '#/components/responses/404NotFoundResponse'
+  /meetings/{meetingId}/stop:
+    post:
+      tags:
+        - Meetings
+      summary: Stops the current meeting
+      operationId: stopMeeting
+      parameters:
+        - $ref: '#/components/parameters/pathMeetingId'
+      responses:
+        204:
+          $ref: '#/components/responses/204StopMeetingResponse'
+        401:
+          $ref: '#/components/responses/401UnauthorizedResponse'
+        403:
+          $ref: '#/components/responses/403ForbiddenResponse'
+        404:
+          $ref: '#/components/responses/404NotFoundResponse'
+  /meetings/{meetingId}/join:
+    post:
+      tags:
+        - Meetings
+      summary: adds the current user to the specified meeting
+      operationId: joinMeeting
+      parameters:
+        - $ref: '#/components/parameters/pathMeetingId'
+      requestBody:
+        $ref: '#/components/requestBodies/JoinMeetingRequest'
+      responses:
+        204:
+          $ref: '#/components/responses/204JoinMeetingResponse'
+        401:
+          $ref: '#/components/responses/401UnauthorizedResponse'
+        403:
+          $ref: '#/components/responses/403ForbiddenResponse'
+        404:
+          $ref: '#/components/responses/404NotFoundResponse'
+  /meetings/{meetingId}/leave:
+    post:
+      tags:
+        - Meetings
+      summary: remove the current user to the specified meeting
+      operationId: leaveMeeting
+      parameters:
+        - $ref: '#/components/parameters/pathMeetingId'
+      responses:
+        204:
+          $ref: '#/components/responses/204LeaveMeetingResponse'
+        401:
+          $ref: '#/components/responses/401UnauthorizedResponse'
+        403:
+          $ref: '#/components/responses/403ForbiddenResponse'
+        404:
+          $ref: '#/components/responses/404NotFoundResponse'
+  /meetings/{meetingId}/sessions/{sessionId}/video:
+    put:
+      tags:
+        - Meetings
+      summary: update video stream status for the current session
+      operationId: updateVideoStream
+      parameters:
+        - $ref: '#/components/parameters/pathMeetingId'
+        - $ref: '#/components/parameters/pathSessionId'
+      requestBody:
+        $ref: '#/components/requestBodies/UpdateVideoStreamRequest'
+      responses:
+        204:
+          $ref: '#/components/responses/204VideoStreamResponse'
+        401:
+          $ref: '#/components/responses/401UnauthorizedResponse'
+        403:
+          $ref: '#/components/responses/403ForbiddenResponse'
+        404:
+          $ref: '#/components/responses/404NotFoundResponse'
+  /meetings/{meetingId}/sessions/{sessionId}/audio:
+    put:
+      tags:
+        - Meetings
+      summary: update audio stream status for the current session
+      operationId: updateAudioStream
+      parameters:
+        - $ref: '#/components/parameters/pathMeetingId'
+        - $ref: '#/components/parameters/pathSessionId'
+      requestBody:
+        $ref: '#/components/requestBodies/UpdateAudioStreamRequest'
+      responses:
+        204:
+          $ref: '#/components/responses/204AudioStreamResponse'
+        401:
+          $ref: '#/components/responses/401UnauthorizedResponse'
+        403:
+          $ref: '#/components/responses/403ForbiddenResponse'
+        404:
+          $ref: '#/components/responses/404NotFoundResponse'
+  /meetings/{meetingId}/sessions/{sessionId}/screen:
+    put:
+      tags:
+        - Meetings
+      summary: update screen stream status for the current session
+      operationId: updateScreenStream
+      parameters:
+        - $ref: '#/components/parameters/pathMeetingId'
+        - $ref: '#/components/parameters/pathSessionId'
+      requestBody:
+        $ref: '#/components/requestBodies/UpdateScreenStreamRequest'
+      responses:
+        204:
+          $ref: '#/components/responses/204ScreenStreamResponse'
+        401:
+          $ref: '#/components/responses/401UnauthorizedResponse'
+        403:
+          $ref: '#/components/responses/403ForbiddenResponse'
+        404:
+          $ref: '#/components/responses/404NotFoundResponse'
+
+components:
+  parameters:
+    pathMeetingId:
+      in: path
+      name: meetingId
+      description: meeting identifier
+      schema:
+        type: string
+        format: uuid
+      required: true
+      allowEmptyValue: false
+    pathSessionId:
+      in: path
+      name: sessionId
+      description: session identifier
+      schema:
+        type: string
+      required: true
+      allowEmptyValue: false
+
+  requestBodies:
+    JoinMeetingRequest:
+      description: user request containing its streams settings to join a meeting
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/JoinSettings'
+    CreateMeetingRequest:
+      description: Data to create a new meeting
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/NewMeetingData'
+    UpdateVideoStreamRequest:
+      description: user request to update a meeting stream status
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/VideoStreamSettings'
+    UpdateAudioStreamRequest:
+      description: user request to update a meeting stream status
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AudioStreamSettings'
+    UpdateScreenStreamRequest:
+      description: user request to update a meeting stream status
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ScreenStreamSettings'
+
+  responses:
+    200CreateMeetingResponse:
+      description: The meeting just created
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Meeting'
+    200ListMeetingResponse:
+      description: List of every meeting that the user has access to
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Meeting'
+    200GetMeetingResponse:
+      description: Gets the requested meeting data
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Meeting'
+    204StartMeetingResponse:
+      description: The meeting was started successfully
+    204StopMeetingResponse:
+      description: The meeting was stopped successfully
+    204DeleteMeetingResponse:
+      description: The meeting was deleted successfully
+    204JoinMeetingResponse:
+      description: The user joined the meeting successfully
+    204LeaveMeetingResponse:
+      description: The user exited the meeting successfully
+    204AudioStreamResponse:
+      description: The status of audio stream changed successfully
+    204VideoStreamResponse:
+      description: The status of video stream changed successfully
+    204ScreenStreamResponse:
+      description: The status of screen stream changed successfully
+
+    400BadRequestResponse:
+      description: The request had wrong or missing parameters
+    401UnauthorizedResponse:
+      description: User not authorized
+    403ForbiddenResponse:
+      description: The requester could not access the resource
+    404NotFoundResponse:
+      description: The requested resource was not found
+    409Conflict:
+      description: The request conflict with the current state
+  schemas:
+    NewMeetingData:
+      type: object
+      properties:
+        name:
+          type: string
+        users:
+          type: array
+          items:
+            $ref: '#/components/schemas/MeetingUser'
+        roomId:
+          type: string
+          format: uuid
+        meetingType:
+          description: 'Defines the type of meeting, if permanent it will never be automatically deleted,
+          if scheduled it will be removed after the expiration is passed'
+          $ref: '#/components/schemas/MeetingType'
+        expiration:
+          description: 'This field is only used for scheduled meetings to indicate when the meeting will
+            no more be necessary'
+          type: string
+          format: date-time
+      required:
+        - name
+    Room:
+      type: object
+      description: Room data for a meeting
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+          description: room identifier
+        type:
+          $ref: "../chats/chats-api.yaml#/components/schemas/RoomType"
+        name:
+          type: string
+          readOnly: true
+          description: room name
+        description:
+          type: string
+          description: room description
+          readOnly: true
+    MeetingUser:
+      type: object
+      description: Defines a user in the access list of a meeting
+      properties:
+        userId:
+          type: string
+          format: uuid
+          description: user identifier
+        userType:
+          $ref: '#/components/schemas/MeetingUserType'
+    MeetingType:
+      type: string
+      enum:
+        - permanent
+        - scheduled
+    MeetingUserType:
+      type: string
+      enum:
+        - moderator
+        - registered
+    Participant:
+      description: Meeting participant data
+      allOf:
+        - $ref: '#/components/schemas/MeetingUser'
+        - type: object
+          properties:
+            audioStreamOn:
+              type: boolean
+              readOnly: true
+              description: indicates if the audio stream is on
+            videoStreamOn:
+              type: boolean
+              readOnly: true
+              description: indicates if the video stream is on
+            screenStreamOn:
+              type: boolean
+              readOnly: true
+              description: indicates if the screen share stream is on
+    Meeting:
+      type: object
+      description: Meeting data
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+          description: meeting identifier
+        name:
+          type: string
+          description: The meeting name
+        roomId:
+          type: string
+          format: uuid
+          readOnly: true
+          description: room identifier
+        active:
+          description: Indicates if the meeting is active
+          type: boolean
+        participants:
+          type: array
+          items:
+            $ref: '#/components/schemas/Participant'
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+          description: entity creation date
+        meetingType:
+          $ref: '#/components/schemas/MeetingType'
+    JoinSettings:
+      type: object
+      description: user's streams settings to join a meeting
+      properties:
+        audioStreamEnabled:
+          type: boolean
+          default: false
+          readOnly: true
+          description: indicates the audio stream status to join the meeting
+        videoStreamEnabled:
+          type: boolean
+          default: false
+          readOnly: true
+          description: indicates the video stream status to join the meeting
+      required: [ audioStreamEnabled, videoStreamEnabled ]
+    VideoStreamSettings:
+      type: object
+      description: settings to apply on user's video stream
+      properties:
+        enabled:
+          type: boolean
+          readOnly: true
+          description: indicates the status to change the video stream to
+      required: [ enabled ]
+    AudioStreamSettings:
+      type: object
+      description: settings to apply on user's audio stream
+      properties:
+        enabled:
+          type: boolean
+          readOnly: true
+          description: indicates the status to change the audio stream to
+      required: [ enabled ]
+    ScreenStreamSettings:
+      type: object
+      description: settings to apply on user's screen stream
+      properties:
+        enabled:
+          type: boolean
+          readOnly: true
+          description: indicates the status to change the screen stream to
+      required: [ enabled ]

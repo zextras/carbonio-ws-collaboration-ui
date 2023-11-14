@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { v4 as uuidGenerator } from 'uuid';
+
 import BaseAPI from './BaseAPI';
 import useStore from '../../store/Store';
 import { RequestType } from '../../types/network/apis/IBaseAPI';
@@ -30,7 +32,6 @@ import {
 	ListRoomsResponse,
 	MuteRoomResponse,
 	PromoteRoomMemberResponse,
-	ResetRoomHashResponse,
 	UnmuteRoomResponse,
 	UpdateRoomPictureResponse,
 	UpdateRoomResponse
@@ -38,6 +39,7 @@ import {
 import { ChangeUserPictureResponse } from '../../types/network/responses/usersResponses';
 import { TextMessage } from '../../types/store/MessageTypes';
 import { dateToISODate } from '../../utils/dateUtil';
+import { MeetingsApi } from '../index';
 import HistoryAccumulator from '../xmpp/utility/HistoryAccumulator';
 
 class RoomsApi extends BaseAPI implements IRoomsApi {
@@ -67,7 +69,11 @@ class RoomsApi extends BaseAPI implements IRoomsApi {
 	}
 
 	public addRoom(room: RoomCreationFields): Promise<AddRoomResponse> {
-		return this.fetchAPI('rooms', RequestType.POST, room);
+		return this.fetchAPI('rooms', RequestType.POST, room).then((response: AddRoomResponse) => {
+			// Create a permanent meeting for the room when it is created
+			MeetingsApi.createPermanentMeeting(response.id);
+			return response;
+		});
 	}
 
 	public getRoom(roomId: string): Promise<GetRoomResponse> {
@@ -82,7 +88,16 @@ class RoomsApi extends BaseAPI implements IRoomsApi {
 	}
 
 	public deleteRoom(roomId: string): Promise<DeleteRoomResponse> {
-		return this.fetchAPI(`rooms/${roomId}`, RequestType.DELETE);
+		return this.fetchAPI(`rooms/${roomId}`, RequestType.DELETE).then(
+			(response: DeleteRoomResponse) => {
+				// Delete the associated permanent meeting
+				const meeting = useStore.getState().meetings[roomId];
+				if (meeting) {
+					MeetingsApi.deleteMeeting(meeting.id);
+				}
+				return response;
+			}
+		);
 	}
 
 	public getURLRoomPicture = (roomId: string): string =>
@@ -119,10 +134,6 @@ class RoomsApi extends BaseAPI implements IRoomsApi {
 
 	public clearRoomHistory(roomId: string): Promise<ClearRoomHistoryResponse> {
 		return this.fetchAPI(`rooms/${roomId}/clear`, RequestType.PUT);
-	}
-
-	public resetRoomHash(roomId: string): Promise<ResetRoomHashResponse> {
-		return this.fetchAPI(`rooms/${roomId}/hash`, RequestType.PUT);
 	}
 
 	public getRoomMembers(roomId: string): Promise<GetRoomMembersResponse> {
@@ -166,13 +177,37 @@ class RoomsApi extends BaseAPI implements IRoomsApi {
 		optionalFields: {
 			description?: string;
 			replyId?: string;
+			area?: string;
 		},
 		signal?: AbortSignal
 	): Promise<AddRoomAttachmentResponse> {
+		const uuid = uuidGenerator();
+		// Set a placeholder message into the store
+		useStore.getState().setPlaceholderMessage({
+			roomId,
+			id: uuid,
+			text: optionalFields.description || '',
+			replyTo: optionalFields.replyId,
+			attachment: {
+				id: 'placeholderFileId',
+				name: file.name,
+				mimeType: file.type,
+				size: file.size,
+				area: optionalFields.area
+			}
+		});
+
 		return this.uploadFileFetchAPI(`rooms/${roomId}/attachments`, RequestType.POST, file, signal, {
 			description: optionalFields.description,
-			replyId: optionalFields.replyId
-		});
+			replyId: optionalFields.replyId,
+			messageId: uuid,
+			area: optionalFields.area
+		})
+			.then((resp: AddRoomAttachmentResponse) => resp)
+			.catch((error) => {
+				useStore.getState().removePlaceholderMessage(roomId, uuid);
+				return error;
+			});
 	}
 
 	public forwardMessages(

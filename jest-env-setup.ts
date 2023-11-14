@@ -25,6 +25,69 @@ failOnConsole({
 		/Controlled error/gi.test(errorMessage)
 });
 
+const noResultProvided = 'no result provided';
+
+const mockedGetUserMediaPromise: jest.Mock = jest.fn(() => ({
+	getTracks: jest.fn(() => ({ forEach: jest.fn() })),
+	getAudioTracks: jest.fn(() => ({ forEach: jest.fn() }))
+}));
+const getUserMediaPromise = jest.fn(
+	async () =>
+		new Promise<void>((resolve, reject) => {
+			const result = mockedGetUserMediaPromise();
+			result ? resolve(result) : reject(new Error(noResultProvided));
+		})
+);
+
+export const intersectionObserverMockObserve = jest.fn();
+export const intersectionObserverMockDisconnect = jest.fn();
+
+export const mockedEnumerateDevicesPromise: jest.Mock = jest.fn(() => [
+	{
+		deviceId: 'audioDefault',
+		kind: 'audioinput',
+		label: 'Audio Default',
+		groupId: 'default'
+	},
+	{
+		deviceId: 'audioDevice1',
+		kind: 'audioinput',
+		label: 'Audio Device 1',
+		groupId: 'device1'
+	},
+	{
+		deviceId: 'audioDevice2',
+		kind: 'audioinput',
+		label: 'Audio Device 2',
+		groupId: 'device2'
+	},
+	{
+		deviceId: 'videoDefault',
+		kind: 'videoinput',
+		label: 'Video Default',
+		groupId: 'default'
+	},
+	{
+		deviceId: 'videoDevice 1',
+		kind: 'videoinput',
+		label: 'Video Device 1',
+		groupId: 'device1'
+	},
+	{
+		deviceId: 'videoDevice 2',
+		kind: 'videoinput',
+		label: 'Video Device 2',
+		groupId: 'device2'
+	}
+]);
+const enumerateDevicesPromise = jest.fn(
+	async () =>
+		new Promise<void>((resolve, reject) => {
+			const result = mockedEnumerateDevicesPromise();
+			result ? resolve(result) : reject(new Error(noResultProvided));
+		})
+);
+
 beforeEach(() => {
 	jest.useFakeTimers();
 	// Do not useFakeTimers with `whatwg-fetch` if using mocked server
@@ -40,6 +103,76 @@ beforeAll(() => {
 
 	// define browser objects non available in jest
 	// https://jestjs.io/docs/en/manual-mocks#mocking-methods-which-are-not-implemented-in-jsdom
+
+	// MOCK NAVIGATOR MEDIADEVICES
+	Object.defineProperty(global.navigator, 'mediaDevices', {
+		value: {
+			getUserMedia: getUserMediaPromise,
+			enumerateDevices: enumerateDevicesPromise,
+			addEventListener: jest.fn(),
+			removeEventListener: jest.fn()
+		}
+	});
+
+	// MOCK HTMLMEDIAELEMENT.PROTOTYPE
+	// this is a statement to use when there's a video tag with the muted prop
+	Object.defineProperty(HTMLMediaElement.prototype, 'muted', {
+		set: jest.fn()
+	});
+
+	Object.defineProperty(window, 'RTCPeerConnection', {
+		value: jest.fn(function RTCPeerConnectionMock() {
+			return {
+				addTrack: jest.fn()
+			};
+		})
+	});
+
+	Object.defineProperty(window, 'AudioContext', {
+		writable: true,
+		value: jest.fn(function AudioContextMock() {
+			return {
+				createOscillator: (): any => ({
+					connect: () => ({
+						stream: {
+							getAudioTracks: () => [MediaStream]
+						}
+					}),
+					start: jest.fn()
+				}),
+				createMediaStreamDestination: jest.fn()
+			};
+		})
+	});
+
+	Object.defineProperty(window, 'MediaStream', {
+		writable: true,
+		value: jest.fn(function MediaStreamMock() {
+			return {
+				stream: (): any => ({
+					getAudioTracks: jest.fn(),
+					addTrack: jest.fn()
+				}),
+				getAudioTracks: (): any[] => [MediaStream],
+				addTrack: jest.fn()
+			};
+		})
+	});
+	Object.defineProperty(window, 'open', {
+		value: jest.fn()
+	});
+
+	// This mock makes uuid/v4 to always generate the same uuid "00000000-0000-4000-8000-000000000000"
+	Object.defineProperty(window, 'crypto', {
+		value: {
+			getRandomValues: (arr: string[]) => {
+				const byteValues = new Uint8Array(arr.length);
+				byteValues.fill(0);
+				return byteValues;
+			}
+		}
+	});
+
 	Object.defineProperty(window, 'matchMedia', {
 		writable: true,
 		value: jest.fn().mockImplementation((query) => ({
@@ -61,6 +194,15 @@ beforeAll(() => {
 			thresholds: options.threshold,
 			root: options.root,
 			rootMargin: options.rootMargin,
+			observe: intersectionObserverMockObserve,
+			unobserve: jest.fn(),
+			disconnect: intersectionObserverMockDisconnect
+		}))
+	});
+
+	Object.defineProperty(window, 'ResizeObserver', {
+		writable: true,
+		value: jest.fn().mockImplementation(() => ({
 			observe: jest.fn(),
 			unobserve: jest.fn(),
 			disconnect: jest.fn()
@@ -102,6 +244,7 @@ beforeAll(() => {
 });
 
 afterEach(() => {
+	jest.runOnlyPendingTimers();
 	jest.useRealTimers();
 	jest.restoreAllMocks();
 	act(() => {

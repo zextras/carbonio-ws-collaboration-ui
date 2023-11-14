@@ -12,12 +12,7 @@ export type MessageMap = {
 
 export type MessageList = Message[];
 
-export type Message =
-	| TextMessage
-	| AffiliationMessage
-	| ConfigurationMessage
-	| DateMessage
-	| MessageFastening;
+export type Message = TextMessage | ConfigurationMessage | DateMessage | MessageFastening;
 
 export type BasicMessage = {
 	id: string;
@@ -39,22 +34,23 @@ export type TextMessage = BasicMessage & {
 	attachment?: AttachmentMessageType;
 };
 
-export type AffiliationMessage = BasicMessage & {
-	type: MessageType.AFFILIATION_MSG;
-	userId: string;
-	as: string;
-};
-
 export type ConfigurationMessage = BasicMessage & {
 	type: MessageType.CONFIGURATION_MSG;
-	operation:
-		| 'roomNameChanged'
-		| 'roomDescriptionChanged'
-		| 'roomPictureUpdated'
-		| 'roomPictureDeleted';
+	operation: OperationType;
 	value: string;
 	from: string;
+	read: MarkerStatus;
 };
+
+export enum OperationType {
+	ROOM_NAME_CHANGED = 'roomNameChanged',
+	ROOM_DESCRIPTION_CHANGED = 'roomDescriptionChanged',
+	ROOM_PICTURE_UPDATED = 'roomPictureUpdated',
+	ROOM_PICTURE_DELETED = 'roomPictureDeleted',
+	MEMBER_ADDED = 'memberAdded',
+	MEMBER_REMOVED = 'memberRemoved',
+	ROOM_CREATION = 'roomCreation'
+}
 
 export type DateMessage = BasicMessage & {
 	type: MessageType.DATE_MSG;
@@ -68,7 +64,6 @@ export type MessageFastening = BasicMessage & {
 };
 export enum MessageType {
 	TEXT_MSG = 'text',
-	DELETED_MSG = 'deleted',
 	AFFILIATION_MSG = 'affiliation',
 	CONFIGURATION_MSG = 'configuration',
 	DATE_MSG = 'date',
@@ -87,4 +82,14 @@ export type AttachmentMessageType = {
 	name: string;
 	mimeType: string;
 	size: number;
+	area?: string;
+};
+
+export type PlaceholderFields = {
+	id: string;
+	roomId: string;
+	text: string;
+	replyTo?: string;
+	forwarded?: ForwardedInfo;
+	attachment?: AttachmentMessageType;
 };

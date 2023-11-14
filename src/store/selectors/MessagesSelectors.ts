@@ -4,32 +4,60 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { filter, find, forEach, orderBy, size } from 'lodash';
+import { filter, find, forEach, includes, orderBy, size } from 'lodash';
 
-import { Message, MessageType, TextMessage } from '../../types/store/MessageTypes';
+import {
+	AttachmentMessageType,
+	ConfigurationMessage,
+	Message,
+	MessageType,
+	TextMessage
+} from '../../types/store/MessageTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 
-export const getMessagesSelector = (state: RootStore, roomId: string): Message[] =>
-	state.messages[roomId] ? state.messages[roomId] : [];
+export const getMessagesSelector = (store: RootStore, roomId: string): Message[] =>
+	store.messages[roomId] ? store.messages[roomId] : [];
 
-export const getTextMessagesSelector = (state: RootStore, roomId: string): TextMessage[] =>
+export const getTextMessagesSelector = (store: RootStore, roomId: string): TextMessage[] =>
 	filter(
-		state.messages[roomId],
+		store.messages[roomId],
 		(message) => message.type === MessageType.TEXT_MSG
 	) as TextMessage[];
 
-export const getLastMessageIdSelector = (state: RootStore, roomId: string): string | undefined => {
-	if (state.messages[roomId] && state.messages[roomId][state.messages[roomId].length - 1]) {
-		return state.messages[roomId][state.messages[roomId].length - 1].id;
+export const getReadableMessagesSelector = (
+	store: RootStore,
+	roomId: string
+): (TextMessage | ConfigurationMessage)[] =>
+	filter(store.messages[roomId], (message) =>
+		includes([MessageType.TEXT_MSG, MessageType.CONFIGURATION_MSG], message.type)
+	) as TextMessage[];
+
+export const getLastTextMessageIdSelector = (
+	store: RootStore,
+	roomId: string
+): string | undefined => {
+	const textMessages = filter(
+		store.messages[roomId],
+		(message) => message.type === MessageType.TEXT_MSG
+	);
+	if (textMessages && textMessages[textMessages.length - 1]) {
+		return textMessages[textMessages.length - 1].id;
+	}
+	return undefined;
+};
+
+export const getLastMessageIdSelector = (store: RootStore, roomId: string): string | undefined => {
+	if (store.messages[roomId] && store.messages[roomId][store.messages[roomId].length - 1]) {
+		return store.messages[roomId][store.messages[roomId].length - 1].id;
 	}
 	return undefined;
 };
 
 export const getMessageSelector = (
-	state: RootStore,
+	store: RootStore,
 	roomId: string,
 	messageId: string | undefined
-): Message | undefined => find(state.messages[roomId], (message) => message.id === messageId);
+): Message | undefined => find(store.messages[roomId], (message) => message.id === messageId);
 
 export const getRoomIdsOrderedLastMessage = (
 	store: RootStore
@@ -53,5 +81,16 @@ export const getRoomIdsOrderedLastMessage = (
 	return orderBy(listOfConvByLastMessage, ['lastMessageTimestamp'], ['desc']);
 };
 
-export const roomIsEmpty = (state: RootStore, roomId: string): boolean =>
-	size(state.messages[roomId]) === 0;
+export const roomIsEmpty = (store: RootStore, roomId: string): boolean =>
+	size(store.messages[roomId]) === 0;
+
+export const getMessageAttachment = (
+	store: RootStore,
+	message: TextMessage
+): AttachmentMessageType | undefined => {
+	const textMessage = find(
+		store.messages[message.roomId],
+		(mex) => mex.id === message.id
+	) as TextMessage;
+	return textMessage?.attachment;
+};

@@ -8,9 +8,11 @@ import create, { SetState } from 'zustand';
 import { devtools } from 'zustand/middleware';
 
 import { useActiveConversationsSlice } from './slices/ActiveConversationsSlice';
+import { useActiveMeetingSlice } from './slices/ActiveMeetingSlice';
 import { useConnectionsStoreSlice } from './slices/ConnectionStoreSlice';
 import { useFasteningMessagesSlice } from './slices/FasteningMessagesSlice';
 import { useMarkersStoreSlice } from './slices/MarkersStoreSlice';
+import { useMeetingsStoreSlice } from './slices/MeetingsStoreSlice';
 import { useMessagesStoreSlice } from './slices/MessagesStoreSlice';
 import { useRoomsStoreSlice } from './slices/RoomsStoreSlice';
 import { useSessionStoreSlice } from './slices/SessionStoreSlice';
@@ -29,7 +31,9 @@ const useStore = create<RootStore>(
 			...useActiveConversationsSlice(set),
 			...useConnectionsStoreSlice(set),
 			...useUnreadsCountStoreSlice(set),
-			...useFasteningMessagesSlice(set)
+			...useFasteningMessagesSlice(set),
+			...useMeetingsStoreSlice(set),
+			...useActiveMeetingSlice(set)
 		}),
 		{ name: 'carbonio-ws-collaboration-ui' }
 	)
