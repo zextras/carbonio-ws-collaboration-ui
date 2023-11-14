@@ -181,7 +181,7 @@ const ConversationHeaderMeetingButton = ({
 	}, [closeDropdown, ref]);
 
 	return (
-		<Container orientation="horizontal">
+		<Container orientation="horizontal" data-testid="ConversationHeaderMeetingButton">
 			{/* {roomType === RoomType.GROUP && (
 				<Container orientation="horizontal" width="fit">
 					<IconButton

@@ -59,9 +59,7 @@ const ConversationHeader = ({
 					</Text>
 				</Container>
 				<Container orientation="horizontal" width="fit" style={{ minWidth: 'fit-content' }}>
-					{!canVideoCall && ( // TODO change check in canVideoCall &&
-						<ConversationHeaderMeetingButton roomId={roomId} />
-					)}
+					{canVideoCall && <ConversationHeaderMeetingButton roomId={roomId} />}
 					{!isDesktopView && (
 						<Tooltip label={infoTooltip}>
 							<IconButton
