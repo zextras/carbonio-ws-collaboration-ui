@@ -111,7 +111,6 @@ export const useActiveConversationsSlice = (
 			'AC/REMOVE_REFERENCE_MESSAGE_VIEW'
 		);
 	},
-	setPinnedMessage: (roomId: string, message: object) => ({ id: roomId, ms: message }),
 	setIdMessageWhereScrollIsStopped: (roomId: string, messageId: string): void => {
 		set(
 			produce((draft: RootStore) => {

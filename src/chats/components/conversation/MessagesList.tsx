@@ -7,7 +7,7 @@
 import React, { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { Container } from '@zextras/carbonio-design-system';
-import { debounce, find, groupBy, map } from 'lodash';
+import { debounce, find, groupBy, last, map, size } from 'lodash';
 import moment from 'moment-timezone';
 import styled from 'styled-components';
 
@@ -31,8 +31,9 @@ import { getMyLastMarkerOfRoom } from '../../../store/selectors/MarkersSelectors
 import { getMessagesSelector } from '../../../store/selectors/MessagesSelectors';
 import { getPrefTimezoneSelector, getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
-import { Message, MessageType, TextMessage } from '../../../types/store/MessageTypes';
-import { isBefore, now } from '../../../utils/dateUtil';
+import { Message, MessageType } from '../../../types/store/MessageTypes';
+import { isBefore } from '../../../utils/dateUtil';
+import { scrollToEnd, scrollToMessage } from '../../../utils/scrollUtils';
 
 const Messages = styled(Container)`
 	position: relative;
@@ -63,21 +64,17 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 	const setIdMessageWhereScrollIsStopped = useStore(
 		(store) => store.setIdMessageWhereScrollIsStopped
 	);
-	const setHistoryLoadDisabled = useStore((store) => store.setHistoryLoadDisabled);
 	const setInputHasFocus = useStore((store) => store.setInputHasFocus);
 	const myUserId = useStore(getUserId);
 	const myLastMarker = useStore((store) => getMyLastMarkerOfRoom(store, roomId));
 	const timezone = useStore(getPrefTimezoneSelector);
 
 	const [showScrollButton, setShowScrollButton] = useState(false);
-	const [isLoadedFirstTime, setIsLoadedFirstTime] = useState(true);
 
 	const messageScrollPositionObserver = useRef<IntersectionObserver>();
-	const historyLoaderObserver = useRef<IntersectionObserver>();
 	const messageListRef = useRef<HTMLDivElement>(null);
 	const MessagesListWrapperRef = useRef<HTMLDivElement>(null);
-	const listOfMessagesObservedRef = useRef<React.RefObject<HTMLInputElement>[]>([]);
-	const messageHistoryLoaderRef = React.createRef<HTMLDivElement>();
+	const listOfMessagesObservedRef = useRef<React.RefObject<HTMLDivElement>[]>([]);
 
 	const firstNewMessage = useFirstUnreadMessage(roomId);
 
@@ -114,27 +111,13 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 		[setIdMessageWhereScrollIsStopped, readMessage, roomId]
 	);
 
-	// eslint-disable-next-line react-hooks/exhaustive-deps
-	const handleHistoryLoader = useCallback(
-		debounce(() => {
-			const date = roomMessages.length > 0 ? roomMessages[0].date : now();
-			if (!historyLoadedDisabled) {
-				xmppClient.requestHistory(roomId, date, 50, useStore.getState().unreads[roomId]);
-				setHistoryLoadDisabled(roomId, true);
-			}
-		}, 500),
-		[roomMessages.length, roomId, actualScrollPosition, historyLoadedDisabled]
-	);
-
 	const intersectionObserverCallback = useCallback(
 		(entries) => {
-			if (roomMessages.length > 1) {
-				const lastMsg = document.getElementById(
-					`message-${roomMessages[roomMessages.length - 1].id}`
-				);
-				const lastMsgRect = lastMsg ? lastMsg.getBoundingClientRect() : null;
+			if (size(roomMessages) > 1) {
+				const lastMsg = document.getElementById(`message-${last(roomMessages)?.id}`);
+				const lastMsgRect = lastMsg?.getBoundingClientRect();
 				setShowScrollButton(
-					lastMsgRect !== null && lastMsgRect.bottom >= document.documentElement.clientHeight
+					lastMsgRect != null && lastMsgRect?.bottom >= document.documentElement.clientHeight
 				);
 				entries.forEach((entry: IntersectionObserverEntry) => {
 					if (entry.isIntersecting) {
@@ -146,12 +129,6 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 		},
 		[roomMessages, debouncedSetterScrollPosition]
 	);
-
-	const destroyObserver = useCallback(() => {
-		if (messageScrollPositionObserver.current) {
-			messageScrollPositionObserver.current && messageScrollPositionObserver.current.disconnect();
-		}
-	}, []);
 
 	const observerInit = useCallback(() => {
 		if (messageListRef.current && messageListRef.current.clientHeight > 100) {
@@ -165,120 +142,60 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 			);
 		}
 
-		listOfMessagesObservedRef.current.forEach((messageRef: React.RefObject<HTMLInputElement>) => {
+		listOfMessagesObservedRef.current.forEach((messageRef: React.RefObject<HTMLDivElement>) => {
 			if (messageScrollPositionObserver.current && messageRef.current) {
 				messageScrollPositionObserver.current.observe(messageRef.current);
 			}
 		});
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [destroyObserver, intersectionObserverCallback]);
-
-	const historyLoaderIntersectionObserverCallback = useCallback(
-		([entry]) => {
-			if (entry.intersectionRatio === 1) {
-				handleHistoryLoader.cancel();
-				handleHistoryLoader();
-			}
-		},
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[
-			roomMessages.length,
-			messageListRef,
-			inputHasFocus,
-			actualScrollPosition,
-			historyLoadedDisabled
-		]
-	);
-
-	const historyLoaderDestroyObserver = useCallback(() => {
-		if (historyLoaderObserver.current) {
-			historyLoaderObserver.current && historyLoaderObserver.current.disconnect();
-		}
-	}, []);
-
-	const historyLoaderObserverInit = useCallback(() => {
-		if (messageListRef.current) {
-			historyLoaderObserver.current = new IntersectionObserver(
-				historyLoaderIntersectionObserverCallback,
-				{
-					root: messageListRef.current,
-					rootMargin: '0px',
-					threshold: 1
-				}
-			);
-		}
-
-		if (historyLoaderObserver.current && messageHistoryLoaderRef.current) {
-			historyLoaderObserver.current?.observe(messageHistoryLoaderRef.current);
-		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [historyLoaderDestroyObserver, intersectionObserverCallback]);
+	}, [intersectionObserverCallback]);
 
 	useEffect(() => {
 		observerInit();
-		return () => destroyObserver();
-	}, [destroyObserver, observerInit]);
+		return () => messageScrollPositionObserver.current?.disconnect();
+	}, [observerInit]);
 
+	// Read last message when user enters for the first time in a conversation
 	useEffect(() => {
-		historyLoaderObserverInit();
-		return () => historyLoaderDestroyObserver();
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [destroyObserver, observerInit, roomMessages.length]);
-
-	useEffect(() => {
-		// set history is loaded for the first time
-		if (isLoadedFirstTime) {
-			setIsLoadedFirstTime(false);
-		}
-
-		// first part scroll to end when the chat is loaded for the first time
-		if (!isLoadedFirstTime && !actualScrollPosition) {
-			if (MessagesListWrapperRef.current) {
-				MessagesListWrapperRef.current.scrollTo({
-					top: MessagesListWrapperRef.current.scrollHeight,
-					behavior: 'auto'
-				});
-			}
-		} else if (historyLoadedDisabled) {
-			// keep the scroll to the message where we stopped scroll because history loader appeared and is loading history
-			const messageRef = window.document.getElementById(`message-${actualScrollPosition}`);
-			messageRef?.scrollIntoView({ block: 'end' });
-		}
-	}, [roomMessages, isLoadedFirstTime, actualScrollPosition, historyLoadedDisabled]);
-
-	useEffect(() => {
-		if (!actualScrollPosition && roomMessages.length >= 1 && !isLoadedFirstTime && inputHasFocus) {
-			const lastMessage = roomMessages[roomMessages.length - 1];
+		if (!actualScrollPosition && size(roomMessages) > 0 && inputHasFocus) {
+			const lastMessage = last(roomMessages);
 			if (lastMessage) {
 				readMessage(lastMessage.id);
 			}
 		}
-	}, [isLoadedFirstTime, roomMessages, actualScrollPosition, readMessage, inputHasFocus]);
+	}, [roomMessages, actualScrollPosition, readMessage, inputHasFocus]);
 
+	// Manage initial scroll position
 	useEffect(() => {
-		// scroll to the previous position after have changed the conversation
-		const actualPosition = useStore.getState().activeConversations[roomId]?.scrollPositionMessageId;
-		if (actualPosition) {
-			const messageRef = window.document.getElementById(`message-${actualPosition}`);
-			messageRef?.scrollIntoView({ block: 'end' });
+		const store = useStore.getState();
+		const actualPosition = store.activeConversations[roomId]?.scrollPositionMessageId;
+		if (store.unreads[roomId] > 0 || !actualPosition) {
+			scrollToEnd(MessagesListWrapperRef);
+		} else {
+			scrollToMessage(actualPosition);
 		}
 	}, [roomId]);
 
+	// Scroll all the way down when the is writing label appears to make it always visible
 	useEffect(() => {
-		// Scroll all the way down when the is writing label appears to make it always visible
 		if (
-			usersWritingList &&
-			usersWritingList.length > 0 &&
-			roomMessages.length > 0 &&
-			actualScrollPosition === roomMessages[roomMessages.length - 1].id &&
-			MessagesListWrapperRef.current
+			size(usersWritingList) > 0 &&
+			size(roomMessages) > 0 &&
+			actualScrollPosition === last(roomMessages)?.id
 		) {
-			MessagesListWrapperRef.current.scrollTo({
-				top: MessagesListWrapperRef.current.scrollHeight,
-				behavior: 'auto'
-			});
+			scrollToEnd(MessagesListWrapperRef);
 		}
 	}, [usersWritingList, actualScrollPosition, roomMessages]);
+
+	// Keep the scroll position when messages number changes
+	useEffect(() => {
+		// When the chat is loaded for the first time keep scroll to the bottom
+		if (!actualScrollPosition) {
+			scrollToEnd(MessagesListWrapperRef);
+		} else if (historyLoadedDisabled) {
+			// Keep the scroll to the message where we stopped scroll because history loader appeared and is loading history
+			scrollToMessage(actualScrollPosition);
+		}
+	}, [roomMessages, actualScrollPosition, historyLoadedDisabled]);
 
 	const dateMessageWrapped = useMemo(
 		() => groupBy(roomMessages, (message) => moment.tz(message.date, timezone).format('YYMMDD')),
@@ -286,29 +203,23 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 	);
 
 	const messagesWrapped = useMemo(() => {
-		const list: JSX.Element[] = [];
-		map(dateMessageWrapped, (wrapper, idx) => {
+		listOfMessagesObservedRef.current = [];
+		return map(dateMessageWrapped, (wrapper, idx) => {
 			const messageList = map(wrapper, (message: Message, index) => {
 				const messageRef = React.createRef<HTMLDivElement>();
-				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-				// @ts-ignore
 				listOfMessagesObservedRef.current.push(messageRef);
-				let prevMessageIsFromSameSender;
-				let nextMessageIsFromSameSender;
 
 				const prevMessage = wrapper[index - 1];
-				if (message.type === MessageType.TEXT_MSG && prevMessage?.type === MessageType.TEXT_MSG) {
-					prevMessageIsFromSameSender = (prevMessage as TextMessage).from === message.from;
-				} else {
-					prevMessageIsFromSameSender = false;
-				}
+				const prevMessageIsFromSameSender =
+					message.type === MessageType.TEXT_MSG &&
+					prevMessage?.type === MessageType.TEXT_MSG &&
+					prevMessage.from === message.from;
 
 				const nextMessage = wrapper[index + 1];
-				if (message.type === MessageType.TEXT_MSG && nextMessage?.type === MessageType.TEXT_MSG) {
-					nextMessageIsFromSameSender = nextMessage.from === message.from;
-				} else {
-					nextMessageIsFromSameSender = false;
-				}
+				const nextMessageIsFromSameSender =
+					message.type === MessageType.TEXT_MSG &&
+					nextMessage?.type === MessageType.TEXT_MSG &&
+					nextMessage.from === message.from;
 
 				return (
 					<MessageFactory
@@ -323,7 +234,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 					/>
 				);
 			});
-			list.push(
+			return (
 				<Container
 					key={`messageList-${roomId}-${idx}`}
 					data-testid={`messageListRef${roomId}`}
@@ -335,15 +246,10 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 				</Container>
 			);
 		});
-		return list;
 	}, [dateMessageWrapped, firstNewMessage, roomId]);
 
 	const handleClickScrollButton = useCallback(() => {
-		MessagesListWrapperRef?.current &&
-			MessagesListWrapperRef.current.scrollTo({
-				top: MessagesListWrapperRef.current.scrollHeight,
-				behavior: 'auto'
-			});
+		scrollToEnd(MessagesListWrapperRef);
 		setInputHasFocus(roomId, true);
 	}, [MessagesListWrapperRef, roomId, setInputHasFocus]);
 
@@ -354,19 +260,14 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 		// if we scrolled up in the history
 		(messageFromEvent) => {
 			if (
-				roomMessages.length > 0 &&
+				size(roomMessages) > 0 &&
 				messageFromEvent.detail.roomId === roomId &&
-				(actualScrollPosition === roomMessages[roomMessages.length - 1].id ||
+				(actualScrollPosition === last(roomMessages)?.id ||
 					(messageFromEvent.detail.type === MessageType.TEXT_MSG &&
 						messageFromEvent.detail.from === myUserId))
 			) {
 				setTimeout(() => {
-					if (MessagesListWrapperRef.current) {
-						MessagesListWrapperRef.current.scrollTo({
-							top: MessagesListWrapperRef.current.scrollHeight,
-							behavior: 'auto'
-						});
-					}
+					scrollToEnd(MessagesListWrapperRef);
 				}, 200);
 			}
 		},
@@ -392,7 +293,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 				crossAlignment="flex-start"
 			>
 				{!hasMoreMessageToLoad && (
-					<MessageHistoryLoader messageHistoryLoaderRef={messageHistoryLoaderRef} />
+					<MessageHistoryLoader roomId={roomId} messageListRef={messageListRef} />
 				)}
 				{messagesWrapped}
 				{usersWritingList && <WritingBubble writingListNames={usersWritingList} />}

@@ -39,7 +39,7 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 						participantsAccordionIsOpened: false
 					},
 					chatVisibility: MeetingChatVisibility.CLOSED,
-					meetingViewSelected: MeetingViewType.CINEMA,
+					meetingViewSelected: MeetingViewType.GRID,
 					isCarouselVisible: true,
 					// Peer connections
 					localStreams: {

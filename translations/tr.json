@@ -20,17 +20,38 @@
         "reply": "Yanıtla",
         "replyToSomeone": "Yanıtla",
         "replyToYourself": "Kendine yanıtla",
-        "undo": "Geri al"
+        "undo": "Geri al",
+        "scrollToBottom": "En alta git",
+        "newChat": "Yeni Sohbet",
+        "editRoom": "{{roomName}} odasını düzenle",
+        "editDetails": "Detayları düzenle",
+        "addSingleAttachment": "{{counter}} eklenti ekle",
+        "addNewMembersTo": "{{roomName}} odasına yeni üyeler ekle",
+        "addMoreAttachments": "{{counter}} eklenti ekle",
+        "decline": "Reddet",
+        "joinMeeting": "Toplantıya katıl",
+        "enter": "Giriş",
+        "declineAll": "Tümünü reddet",
+        "understood": "Anlaşıldı"
     },
     "attachments": {
         "addFromLocal": "Lokalden ekle",
         "attachLinkFiles": "Dosyalar'dan genel bağlantı ekle",
-        "stopUpload": "Yüklemeyi durdur"
+        "stopUpload": "Yüklemeyi durdur",
+        "dragAndDrop": "Sürükle ve Bırak Modu",
+        "dropHereDescription": "Bu sohbete hızlı bir şekilde eklemek için eklerinizi buraya bırakın",
+        "errorUploadingFile": "{{file}} yüklenirken bir sorun oluştu",
+        "uploadAborted": "Yükleme kesintiye uğradı"
     },
     "conversation": {
         "chooseConversationDescription": "Bir sohbet başlatmak için görüşme seçin",
         "keepInTouchTitle": "Haberleşelim!",
-        "newMessage": "Yeni mesaj"
+        "newMessage": "Yeni mesaj",
+        "emptyListDescription": "Sohbetler ve Gruplar burada listelenir",
+        "emptyListTitle": "Bu liste boş",
+        "mockCreateChatDescription": "Bilgi ve ekleri paylaşarak çalışma arkadaşlarınızla etkileşim ve iletişim kurun, işbirliği yapın",
+        "mockCreateChatTitle": "Oluştur düğmesini kullanarak yeni bir sohbet oluşturun",
+        "newMessages": "Yeni mesajlar"
     },
     "conversationInfo": {
         "actionAccordionTitle": "Eylemler",
@@ -43,15 +64,29 @@
         "topic": "Konu tanımı"
     },
     "date": {
-        "yesterday": "Dün"
+        "yesterday": "Dün",
+        "today": "Bugün"
     },
     "editModal": {
-        "groupDescriptionDetails": "Grubun konusunu açıklar"
+        "groupDescriptionDetails": "Grubun konusunu açıklar",
+        "confirm": "Detayları düzenle",
+        "confirmDisabled": "Değişiklik yapmadınız",
+        "errorDisabled": "Girilen bilgileri kontrol edin",
+        "groupNameDetails": "Gereklidir ve Grubu tanımlar",
+        "nameTooLong": "Maksimum başlık uzunluğu 128 karakterdir",
+        "topicTooLong": "Maksimum başlık uzunluğu 128 karakterdir",
+        "nameTooShort": "Başlık önemli bir bilgidir"
     },
     "feedback": {
         "historyCleared": "Geçmiş başarıyla temizlendi!",
         "notificationsActivatedForThisChat": "Bu sohbet için bildirimler etkinleştirildi",
-        "notificationsMutedForThisChat": "Bu sohbet için bildirimler kapatıldı"
+        "notificationsMutedForThisChat": "Bu sohbet için bildirimler kapatıldı",
+        "messageCopied": "Mesaj kopyalandı",
+        "networkProblem": {
+            "wsc": "WSC ile bağlantı kurulurken bir hata oluştu",
+            "xmpp": "XMPP ile bağlantı kurulurken bir hata oluştu",
+            "websocket": "WEBSOCKET ile bağlantı kurulurken bir hata oluştu"
+        }
     },
     "message": {
         "deletedMessage": "Silinmiş mesaj",
@@ -63,28 +98,75 @@
         "deleteUserDescription": "Bu üyeyi çıkartmak istediğinize emin misiniz?",
         "leaveGroup": "Gruptan ayrıl",
         "removeMember": "Üyeyi kaldır",
-        "showPreviousConversationHistory": "Önceki görüşme geçmişini göster"
+        "showPreviousConversationHistory": "Önceki görüşme geçmişini göster",
+        "creation": {
+            "newChat": "Yeni Sohbet",
+            "contactList": "Grup oluşturmak için bir adresten fazlasını seçin",
+            "inputPlaceholder": "Yazmaya başlayın veya bir adres seçin",
+            "newGroup": "Yeni Grup",
+            "description": "Sohbetler, kişilerinizle iletişimde kalmanıza yardımcı olan bire bir konuşmalardır. İkiden fazla adres ekleyerek Grup oluşturabilirsiniz",
+            "addUserLimit": {
+                "limitReached": "Bir grup için maksimum üye sayısını seçtiniz",
+                "users": "Son bir üye ekleyebilirsiniz",
+                "users_plural": "Başka {{count}} üye ekleyebilirsiniz"
+            }
+        },
+        "deleteGroup": "Grubu Sil",
+        "deleteGroupLabel": "Bu Grubu silmek istediğinizden emin misiniz?",
+        "deleteMessageTitle": "Seçili mesaj silinsin mi?",
+        "deleteRoomLabel": "Bu Oda'yı silmek istediğinizden emin misiniz?",
+        "forward": {
+            "chooseAtLeastOneChat": "En az bir sohbet seçin",
+            "description": "Mesajı iletmek için bir hedef sohbet seçin",
+            "inputPlaceholder": "Yazmaya başlayın veya bir sohbet seçin",
+            "title": "{{chatName}} adlı kişiden mesajı ilet"
+        },
+        "leaveAndDelete": "Gruptan ayrıl ve sil",
+        "leaveGroupLabel": "Grup'tan ayrılmak istediğinize emin misiniz?",
+        "leaveRoom": "Odadan Çık",
+        "leaveRoomLabel": "Odadan ayrılmak istediğinize emin misiniz?",
+        "deleteMessageTitleDescription": "Mesajı siliyorsunuz, artık kullanılamayacak",
+        "clearHistoryDescription": "Konuşma geçmişinizi temizlemek üzeresiniz, bu işlemin geri alınamayacağını unutmayın. Geçmiş bilgisi sizin için silinecek, diğer üyelerin geçmiş bilgisi silinmeyecek."
     },
     "participantsList": {
         "closeSearch": "Aramayı kapat",
-        "moreMembersAccordionTitle": "Üyeler"
+        "moreMembersAccordionTitle": "Üyeler",
+        "oneMemberAccordionTitle": "Bir Üye",
+        "searchMembers": "Üyeleri Ara",
+        "noMatch": "Bu aramayla eşleşen hiçbir öğe yok",
+        "searchParticipants": "Katılımcıları ara"
     },
     "settings": {
         "notifications": {
             "checkboxLabel": "Masaüstü bildirimleri",
-            "title": "Bildirimler"
+            "title": "Bildirimler",
+            "description": "Sohbet bildirimleri için tercihlerinizi belirleyin."
         },
         "profile": {
             "errorGenericResponse": "Bir sorun oluştu. Lütfen tekrar deneyin",
-            "title": "Profil"
+            "title": "Profil",
+            "deletedUserImageCorrectly": "Profil resmi başarıyla orijinaline sıfırlandı",
+            "maximumDimension": "Maksimum boyut: {{size}}kb",
+            "pictureSizeTooLarge": "Bir sorun oluştu, profil resmi için maksimum boyutun {{size}}kb olduğunu unutmayın",
+            "statusLabel": "Durumunuz burada görünecek",
+            "updatedPictureCorrectly": "Yeni profil resmi başarıyla yüklendi",
+            "description": "Diğer kullanıcıların göreceği bir profil resmi seçin, resim otomatik olarak ortalanacak."
         },
         "save": "Değişiklikler başarıyla kaydedildi",
-        "title": "Sohbet ayarları"
+        "title": "Sohbet ayarları",
+        "room": {
+            "deletedImageCorrectly": "Grup profil resmi başarıyla orijinaline sıfırlandı",
+            "deletedUserImageCorrectly": "Profil resmi başarıyla orijinaline sıfırlandı",
+            "pictureSizeTooLarge": "Bir sorun oluştu, Grup profil resmi için maksimum boyutun {{size}}kb olduğunu unutmayın",
+            "updatedPictureCorrectly": "Yeni profil resmi başarıyla yüklendi"
+        }
     },
     "status": {
         "lastSeen": "Son görülme {{lastSeen}}",
         "offline": "Çevrimdışı",
-        "online": "Çevrim içi"
+        "online": "Çevrim içi",
+        "areTyping": "yazıyorlar…",
+        "isTyping": "yazıyor…"
     },
     "tooltip": {
         "clear": "Temizle",
@@ -95,10 +177,131 @@
         "messageRead": "Okunmuş",
         "messageSent": "Gönderildi",
         "room": {
-            "uploadPicture": "Resim yükle"
+            "uploadPicture": "Resim yükle",
+            "resetPicture": "Resmi sıfırla",
+            "updatePicture": "Resmi güncelle"
         },
         "selectEmoji": "Emoji seç",
         "sendMessage": "Mesaj gönder",
-        "uploading": "Yükleniyor"
-    }
+        "uploading": "Yükleniyor",
+        "demoteModerator": "Moderatör yetkisini düşür",
+        "disableModalButton": "En az bir adres seçin",
+        "forwardedMessage": "Başka bir sohbetten iletilen mesaj",
+        "iAmModerator": "Moderatörsünüz",
+        "leaveAndDelete": "Ayrıl ve görüşmeyi sil",
+        "memberIsModerator": "Bu üye bir moderatördür",
+        "messageActions": "Mesaj işlemleri",
+        "messageReceived": "Alındı",
+        "promoteModerator": "Moderatör yetkileri ver",
+        "promoteSomeoneElseToModerator": "Ayrılmadan önce başka birini moderatör olarak belirlemeniz gerekir",
+        "uploadAttachment": "Bir eklenti yükle",
+        "userAvatar": {
+            "resetAvatar": "Profil resmini sıfırla",
+            "updateAvatar": "Profil resmini güncelle",
+            "uploadAvatar": "Profil resmi yükle"
+        },
+        "showConversationList": "Konuşma listesini göster",
+        "writeToSend": "Göndermek için bir mesaj yazın",
+        "muteForAll": "Herkes için sessiz",
+        "pending": "Bekliyor",
+        "pinVideo": "Görüntüyü Sabitle",
+        "unpinVideo": "Videoyu sabitleme",
+        "collapseCarousel": "Küçült",
+        "expandCarousel": "Genişlet",
+        "bottomOfList": "Listenin sonu",
+        "collapseSidebar": "Kenar çubuğunu daralt",
+        "expandSidebar": "Kenar Çubuğunu genişlet",
+        "participantAlreadyMuted": "Bu katılımcı zaten sessize alınmış",
+        "removeToAddNewOne": "Yeni üye eklemek için birini kaldırın",
+        "scrollDown": "Aşağı kaydır",
+        "scrollUp": "Yukarı kaydır",
+        "topOfList": "Listenin başı"
+    },
+    "affiliationMessages": {
+        "memberAdded": "{{userName}}, {{roomName}} odasına eklendi",
+        "groupCreated": "{{roomName}} oluşturuldu!",
+        "SomeoneElseCreatedOneToOne": "{{userName}} sizinle sohbet etmeye başladı",
+        "oneToOneCreated": "Yeni Sohbet oluşturuldu!",
+        "youCreatedOneToOne": "{{userName}} ile Sohbet başlattınız",
+        "memberRemoved": "{{userName}}, {{roomName}} odasından kaldırıldı"
+    },
+    "configurationMessages": {
+        "roomPictureDeleted": "{{name}} varsayılan {{roomName}} resmini geri yükledi",
+        "roomPictureUpdated": "{{name}}, {{roomName}} resmini değiştirdi",
+        "roomTopicChanged": "{{name}}, {{roomName}} odasının \"<i>{{topicName}}</i>\" konusunu değiştirdi",
+        "roomNameChanged": "{{name}}, \"<i>{{roomName}}</i>\" içinde bu Grubun başlığını değiştirdi"
+    },
+    "conversationFilter": {
+        "closeTooltip": "Filtreyi Kapat",
+        "label": "Listeyi filtrelemek için yazın",
+        "filterTooltip": "Listeyi filtrele"
+    },
+    "titlePlaceholder": "Grubunuzun başlığı",
+    "chat": "Sohbet",
+    "external": {
+        "nobodyInTheRoom": "Bu Oda'da kimse yok",
+        "roomIsEmpty": "Bu Oda boş"
+    },
+    "meeting": {
+        "interactions": {
+            "cameraDisabled": "Kamera kapalı",
+            "cameraEnabled": "Kamera açık",
+            "enableCamera": "Kamerayı etkinleştir",
+            "enableMicrophone": "Mikrofonu etkinleştir",
+            "microphoneEnabled": "Mikrofon açık",
+            "cinemaView": "Sinema görünümü",
+            "disableCamera": "Kamerayı devre dışı bırak",
+            "disableMicrophone": "Mikrofonu devre dışı bırak",
+            "disableScreen": "Ekran paylaşımını devre dışı bırak",
+            "enableScreen": "Ekran paylaşımını etkinleştir",
+            "gridView": "Izgara Görünüm",
+            "leaveMeeting": "Toplantıdan Ayrıl",
+            "microphoneDisabled": "Mikrofon kapalı",
+            "playMic": "Mikrofon testini başlat",
+            "stopMic": "Mikrofon testini durdur"
+        },
+        "joinMeeting": "Toplantıya katıl",
+        "newMeetingNotification": {
+            "sendMessage": "Mesaj gönder",
+            "writeAMessageToSendIt": "Göndermek için bir mesaj yazın",
+            "sendAQuickMessage": "Hızlı mesaj gönderin",
+            "userIsInvitingYou": "<strong>{{name}}</strong> sizi davet ediyor"
+        },
+        "activeMeetingTooltip": "Bu Grup için aktif bir toplantı var",
+        "collapseChat": "Sohbeti daralt",
+        "collapseParticipantsMeetingTooltip": "Katılımcı listesini daralt",
+        "expandChat": "Sohbeti genişlet",
+        "expandParticipantsListTooltip": "Katılımcı listesini genişlet",
+        "extendChat": "Sohbeti uzat",
+        "joinMeetingDescription": "Bu toplantıya nasıl katılmak istiyorsunuz?",
+        "minimizeChat": "Sohbeti simge durumuna",
+        "ongoingGroupMeetingTooltip": "Bu toplantıya zaten katılıyorsunuz",
+        "ongoingOneToOneMeetingTooltip": "{{name}} ile zaten etkin bir toplantınız var",
+        "participantsList": {
+            "title": "Bir toplantı katılımcısı",
+            "title_plural": "{{count}} toplantı katılımcısı"
+        },
+        "setInputDescription": "Giriş cihazlarınızı açılır menüden seçerek ayarlayın",
+        "startMeeting": "Toplantıyı Başlat",
+        "startModal": {
+            "audioAndVideoLoading": "Varlıklar yükleniyor",
+            "enterOneToOneMeetingTitle": "{{meetingTitle}} ile toplantıya başla",
+            "enterRoomMeetingTitle": "{{meetingTitle}} toplantısına katıl"
+        },
+        "waitingParticipants": "Katılımcıların katılması bekleniyor…"
+    },
+    "meetings": {
+        "interactions": {
+            "yourCamIsDisabled": "Kameranız kapalı",
+            "yourMicIsDisabled": "Mikrofonunuz kapalı"
+        }
+    },
+    "notification": {
+        "meeting": {
+            "ended": "Toplantı Bitti"
+        }
+    },
+    "tryLater": "Sonra deneyin",
+    "thanksForParticipating": "Katıldığınız için teşekkürler",
+    "keepInTouchWithColleagues": "İş arkadaşlarınızla iletişimde kalın veya gruplarınızın toplantı odalarına katılın"
 }

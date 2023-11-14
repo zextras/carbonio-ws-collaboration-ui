@@ -104,7 +104,6 @@ export type ActiveConversationsSlice = {
 	activeConversations: ActiveConversationsMap;
 	setDraftMessage: (roomId: string, sent: boolean, message?: string) => void;
 	setIdMessageWhereScrollIsStopped: (roomId: string, messageId: string) => void;
-	setPinnedMessage: (roomId: string, message: object) => void;
 	setInputHasFocus: (roomId: string, hasFocus: boolean) => void;
 	setIsWriting: (roomId: string, userId: string, writingStatus: boolean) => void;
 	setReferenceMessage: (
