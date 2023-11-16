@@ -4,25 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, {
-	ReactElement,
-	useCallback,
-	useEffect,
-	/* useContext, */ useMemo,
-	useRef,
-	useState
-} from 'react';
+import React, { ReactElement, useCallback, useEffect, useRef, useState } from 'react';
 
-import {
-	Button,
-	Container,
-	Icon,
-	IconButton,
-	Padding,
-	/* SnackbarManagerContext,
-	CreateSnackbarFn, */
-	Tooltip
-} from '@zextras/carbonio-design-system';
+import { Button, Container, Icon, IconButton, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 import styled, { DefaultTheme } from 'styled-components';
 
@@ -83,6 +67,11 @@ const ConversationHeaderMeetingButton = ({
 
 	const startMeeting = t('meeting.startMeeting', 'Start meeting');
 	const joinMeeting = t('meeting.joinMeeting', 'Join meeting');
+	const restartMeeting = t('meeting.restartMeeting', 'Restart meeting');
+	const activeSessionTooltip = t(
+		'meeting.tooltip.activeSessionTooltip',
+		'You have an active session in this meeting'
+	);
 	const expandParticipantsListTooltip = t(
 		'meeting.expandParticipantsListTooltip',
 		'Expand participants list'
@@ -90,15 +79,6 @@ const ConversationHeaderMeetingButton = ({
 	const collapseParticipantsMeetingTooltip = t(
 		'meeting.collapseParticipantsMeetingTooltip',
 		'Collapse participants list'
-	);
-	const ongoingOneToOneMeetingTooltip = t(
-		'meeting.ongoingOneToOneMeetingTooltip',
-		`You already have an active meeting with ${roomName}`,
-		{ name: roomName }
-	);
-	const ongoingGroupMeetingTooltip = t(
-		'meeting.ongoingGroupMeetingTooltip',
-		'You are already participating in this meeting'
 	);
 	const activeMeetingTooltip = t(
 		'meeting.activeMeetingTooltip',
@@ -114,31 +94,6 @@ const ConversationHeaderMeetingButton = ({
 	const ref = useRef<HTMLDivElement>(null);
 
 	// const createSnackbar: CreateSnackbarFn = useContext(SnackbarManagerContext);
-
-	const disableOngoingMeetingButton: boolean = useMemo(
-		() => meetingIsActive && amIParticipating,
-		[amIParticipating, meetingIsActive]
-	);
-
-	const meetingButtonTooltip = useMemo(
-		() =>
-			meetingIsActive
-				? amIParticipating
-					? roomType === RoomType.ONE_TO_ONE
-						? ongoingOneToOneMeetingTooltip
-						: ongoingGroupMeetingTooltip
-					: joinMeeting
-				: startMeeting,
-		[
-			amIParticipating,
-			joinMeeting,
-			meetingIsActive,
-			ongoingGroupMeetingTooltip,
-			ongoingOneToOneMeetingTooltip,
-			roomType,
-			startMeeting
-		]
-	);
 
 	const openMeeting = useCallback(() => window.open(`${MEETINGS_PATH}${roomId}`), [roomId]);
 
@@ -193,55 +148,71 @@ const ConversationHeaderMeetingButton = ({
 					<Padding right="0.5rem" />
 				</Container>
 			)} */}
-			<Tooltip label={meetingButtonTooltip} placement="top" maxWidth="40rem">
-				<Container height="fit" width="fit">
-					<CustomButton
-						onClick={openMeeting}
-						label={meetingIsActive ? joinMeeting : startMeeting}
-						color="secondary"
-						width="fit"
-						disabled={disableOngoingMeetingButton}
-						data-testid="join_meeting_button"
-					/>
-				</Container>
-			</Tooltip>
-			{roomType !== RoomType.ONE_TO_ONE && meetingIsActive && (
-				<Container orientation="horizontal" width="fit">
-					<Container width="fit" padding={{ left: '0.5rem', right: '0.5rem' }}>
-						<Container background="gray3" width="0.063rem" />
+			<CustomButton
+				onClick={openMeeting}
+				label={
+					meetingIsActive
+						? roomType === RoomType.GROUP
+							? joinMeeting
+							: restartMeeting
+						: startMeeting
+				}
+				color="secondary"
+				width="fit"
+				data-testid="join_meeting_button"
+			/>
+			{meetingIsActive &&
+				(roomType === RoomType.GROUP ? (
+					<Container orientation="horizontal" width="fit" gap="0.5rem" padding={{ left: '1rem' }}>
+						{amIParticipating && (
+							<Tooltip label={activeSessionTooltip}>
+								<Container width="fit">
+									<Icon size="large" icon="CastOutline" color="secondary" />
+								</Container>
+							</Tooltip>
+						)}
+						<Tooltip label={activeMeetingTooltip} placement="top">
+							<CustomActiveMeetingContainer width="fit">
+								<Icon
+									color="secondary"
+									icon="VideoOutline"
+									size="large"
+									data-testid="video_button"
+								/>
+								<ActiveMeetingDot />
+							</CustomActiveMeetingContainer>
+						</Tooltip>
+						<Tooltip
+							label={
+								isDropdownOpen ? collapseParticipantsMeetingTooltip : expandParticipantsListTooltip
+							}
+							placement="top"
+						>
+							<IconButton
+								icon={isDropdownOpen ? 'ChevronUp' : 'ChevronDown'}
+								iconColor="secondary"
+								customSize={{ iconSize: '1.25rem', paddingSize: '0.125rem' }}
+								onClick={toggleDropdown}
+								data-testid="participant_list_button"
+							/>
+						</Tooltip>
 					</Container>
-					<Tooltip label={activeMeetingTooltip} placement="top">
-						<CustomActiveMeetingContainer width="fit">
-							<Icon color="secondary" icon="VideoOutline" size="large" data-testid="video_button" />
-							<ActiveMeetingDot />
-						</CustomActiveMeetingContainer>
-					</Tooltip>
-					<Padding right="0.5rem" />
-					<Tooltip
-						label={
-							isDropdownOpen ? collapseParticipantsMeetingTooltip : expandParticipantsListTooltip
-						}
-						placement="top"
-					>
-						<IconButton
-							icon={isDropdownOpen ? 'ChevronUp' : 'ChevronDown'}
-							iconColor="secondary"
-							customSize={{ iconSize: '1.25rem', paddingSize: '0.125rem' }}
-							onClick={toggleDropdown}
-							data-testid="participant_list_button"
-						/>
-					</Tooltip>
-				</Container>
-			)}
-			{
-				<Container ref={ref} width="fit" height="fit">
-					<ActiveMeetingParticipantsDropdown
-						isDropdownOpen={isDropdownOpen}
-						setIsDropdownOpen={setIsDropdownOpen}
-						roomId={roomId}
-					/>
-				</Container>
-			}
+				) : (
+					amIParticipating && (
+						<Container orientation="horizontal" width="fit" gap="0.5rem" padding={{ left: '1rem' }}>
+							<Tooltip label={activeSessionTooltip}>
+								<Icon size="large" icon="CastOutline" color="secondary" />
+							</Tooltip>
+						</Container>
+					)
+				))}
+			<Container ref={ref} width="fit" height="fit">
+				<ActiveMeetingParticipantsDropdown
+					isDropdownOpen={isDropdownOpen}
+					setIsDropdownOpen={setIsDropdownOpen}
+					roomId={roomId}
+				/>
+			</Container>
 		</Container>
 	);
 };
