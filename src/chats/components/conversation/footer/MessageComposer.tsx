@@ -39,13 +39,17 @@ import {
 	getReferenceMessage
 } from '../../../../store/selectors/ActiveConversationsSelectors';
 import { getXmppClient } from '../../../../store/selectors/ConnectionSelector';
+import { getLastMessageIdSelector } from '../../../../store/selectors/MessagesSelectors';
+import { getCapability, getUserId } from '../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../store/Store';
 import { Emoji } from '../../../../types/generics';
 import { AddRoomAttachmentResponse } from '../../../../types/network/responses/roomsResponses';
 import { FileToUpload, messageActionType } from '../../../../types/store/ActiveConversationTypes';
-import { MessageType } from '../../../../types/store/MessageTypes';
+import { Message, MessageType } from '../../../../types/store/MessageTypes';
+import { CapabilityType } from '../../../../types/store/SessionTypes';
 import { isAttachmentImage, uid } from '../../../../utils/attachmentUtils';
 import { BrowserUtils } from '../../../../utils/BrowserUtils';
+import { canPerformAction } from '../../../../utils/MessageActionsUtils';
 
 type ConversationMessageComposerProps = {
 	roomId: string;
@@ -83,6 +87,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 	const uploadAbortedLabel = t('attachments.uploadAborted', 'Upload has been interrupted');
 	const stopUploadLabel = t('attachments.stopUpload', 'Stop upload');
 
+	const myUserId = useStore(getUserId);
 	const referenceMessage = useStore((store) => getReferenceMessage(store, roomId));
 	const draftMessage = useStore((store) => getDraftMessage(store, roomId));
 	const unsetReferenceMessage = useStore((store) => store.unsetReferenceMessage);
@@ -92,6 +97,14 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 	const unsetFilesToAttach = useStore((store) => store.unsetFilesToAttach);
 	const filesToUploadArray = useStore((store) => getFilesToUploadArray(store, roomId));
 	const setFilesToAttach = useStore((store) => store.setFilesToAttach);
+	const lastMessageId: string | undefined = useStore((state) =>
+		getLastMessageIdSelector(state, roomId)
+	);
+	const editMessageTimeLimitInMinutes = useStore((store) =>
+		getCapability(store, CapabilityType.EDIT_MESSAGE_TIME_LIMIT)
+	) as number;
+	const lastMessageOfRoom: Message | undefined = useMessage(roomId, lastMessageId ?? '');
+	const setReferenceMessage = useStore((store) => store.setReferenceMessage);
 
 	const completeReferenceMessage = useMessage(roomId, referenceMessage?.messageId ?? '');
 
@@ -358,12 +371,42 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 			if (!sendDisabled && e.key === 'Enter' && !e.shiftKey) {
 				e.preventDefault();
 				sendMessage();
+			} else if (
+				e.key === 'ArrowUp' &&
+				!e.shiftKey &&
+				lastMessageOfRoom !== undefined &&
+				lastMessageOfRoom.type === MessageType.TEXT_MSG &&
+				canPerformAction(
+					lastMessageOfRoom,
+					lastMessageOfRoom.from === myUserId,
+					editMessageTimeLimitInMinutes
+				)
+			) {
+				setDraftMessage(lastMessageOfRoom.roomId, false, lastMessageOfRoom.text);
+				setReferenceMessage(
+					lastMessageOfRoom.roomId,
+					lastMessageOfRoom.id,
+					lastMessageOfRoom.from,
+					lastMessageOfRoom.stanzaId,
+					messageActionType.EDIT,
+					lastMessageOfRoom.attachment
+				);
 			} else {
 				sendThrottleIsWriting();
 				sendDebouncedPause();
 			}
 		},
-		[sendDisabled, sendMessage, sendThrottleIsWriting, sendDebouncedPause]
+		[
+			sendDisabled,
+			lastMessageOfRoom,
+			myUserId,
+			editMessageTimeLimitInMinutes,
+			sendMessage,
+			setDraftMessage,
+			setReferenceMessage,
+			sendThrottleIsWriting,
+			sendDebouncedPause
+		]
 	);
 
 	const insertEmojiInMessage = useCallback(
