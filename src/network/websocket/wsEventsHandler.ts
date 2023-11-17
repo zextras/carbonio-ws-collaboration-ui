@@ -219,7 +219,9 @@ export function wsEventsHandler(event: WsEvent): void {
 			if (event.userId !== state.session.id) {
 				const subscriptionsManager =
 					state.activeMeeting[event.meetingId]?.videoScreenIn?.subscriptionManager;
-				if (!event.active) {
+				if (event.active) {
+					subscriptionsManager?.addSubscription(event.userId, mediaType);
+				} else {
 					subscriptionsManager?.removeSubscription(event.userId, mediaType);
 				}
 			}

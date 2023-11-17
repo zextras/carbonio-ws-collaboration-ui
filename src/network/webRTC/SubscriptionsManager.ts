@@ -60,12 +60,15 @@ class SubscriptionsManager {
 			userId !== useStore.getState().session.id &&
 			!find(this.subscriptions, (sub) => sub.userId === userId)
 		) {
-			const tilesDataToSubscribe: SubscriptionMap = {};
-			tilesDataToSubscribe[`${userId}-${type}`] = {
+			const sub = {
 				userId,
 				type
 			};
-			this.updateSubscription(tilesDataToSubscribe);
+			this.pendingRequest = true;
+			MeetingsApi.subscribeToMedia(this.meetingId, [sub], []).then(() => {
+				this.subscriptions[`${userId}-${type}`] = sub;
+				this.pendingRequest = false;
+			});
 		}
 	}
 

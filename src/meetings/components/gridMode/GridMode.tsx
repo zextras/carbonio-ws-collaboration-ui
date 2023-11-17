@@ -142,14 +142,14 @@ const GridMode = (): ReactElement => {
 
 	useEffect(() => {
 		const tilesDataToSubscribe: SubscriptionMap = {};
-		if (tilesToRender.length >= 3) {
+		if (tilesToRender.length > 0) {
 			forEach(tilesToRender, (tile) => {
 				if (myUserId === tile.userId) return;
 				mapToSubscriptionMap(tilesDataToSubscribe, tile.userId, tile.type);
 			});
 			videoScreenIn?.subscriptionManager.updateSubscription(tilesDataToSubscribe);
 		}
-	}, [meetingId, myUserId, tilesToRender, videoScreenIn]);
+	}, [meetingId, myUserId, tilesToRender, videoScreenIn, rowIndex, dimensions, rowsToRender]);
 
 	return (
 		<GridContainer data-testid="gridModeView" mainAlignment="space-between" ref={gridContainerRef}>

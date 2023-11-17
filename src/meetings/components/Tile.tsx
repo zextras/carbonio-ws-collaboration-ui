@@ -335,7 +335,6 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 	return (
 		<CustomTile
 			background={'text'}
-			id={tileSubscriptionId}
 			data-testid="tile"
 			width="100%"
 			$isTalking={userIsTalking && !isScreenShare}
@@ -367,6 +366,7 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 			<VideoEl
 				playsInline
 				autoPlay
+				key={`video-${tileSubscriptionId}`}
 				muted={modalProps ? modalProps.streamMuted : true}
 				controls={false}
 				ref={modalProps ? modalProps.streamRef : streamRef}
