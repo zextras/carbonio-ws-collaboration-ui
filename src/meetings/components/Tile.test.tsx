@@ -255,7 +255,7 @@ describe('Tile test - on meeting', () => {
 		store.changeStreamStatus(meeting.id, user2.id, STREAM_TYPE.AUDIO, true);
 		store.changeStreamStatus(meeting.id, user2.id, STREAM_TYPE.VIDEO, true);
 		setup(<Tile userId={user2.id} meetingId={meeting.id} />);
-		// the login user is a moderator, so he can see the mute button
+		// the logged user is a moderator, so he can see the mute button
 		const micIcons = await screen.findAllByTestId(iconMicOffOutline);
 		expect(micIcons).toHaveLength(1);
 		expect(screen.queryByTestId(iconVideoOffOutline)).not.toBeInTheDocument();
