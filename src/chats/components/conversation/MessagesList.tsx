@@ -176,15 +176,6 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 	}, [roomId]);
 
 	// Scroll all the way down when the is writing label appears to make it always visible
-	useEffect(() => {
-		if (
-			size(usersWritingList) > 0 &&
-			size(roomMessages) > 0 &&
-			actualScrollPosition === last(roomMessages)?.id
-		) {
-			scrollToEnd(MessagesListWrapperRef);
-		}
-	}, [usersWritingList, actualScrollPosition, roomMessages]);
 
 	// Keep the scroll position when messages number changes
 	useEffect(() => {
@@ -296,7 +287,13 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 					<MessageHistoryLoader roomId={roomId} messageListRef={messageListRef} />
 				)}
 				{messagesWrapped}
-				{usersWritingList && <WritingBubble writingListNames={usersWritingList} />}
+				{usersWritingList && (
+					<WritingBubble
+						writingListNames={usersWritingList}
+						roomId={roomId}
+						MessageListWrapperRef={MessagesListWrapperRef}
+					/>
+				)}
 			</MessagesListWrapper>
 			{showScrollButton && <ScrollButton roomId={roomId} onClickCb={handleClickScrollButton} />}
 		</Messages>

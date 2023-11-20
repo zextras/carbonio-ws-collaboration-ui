@@ -69,7 +69,7 @@ describe('Meeting sidebar', () => {
 		const composer = await screen.findByTestId('textAreaComposer');
 		expect(composer).toBeInTheDocument();
 		await user.click(toggleChatBtn);
-		expect(chatAccordion).toHaveStyle('height: fit');
+		expect(chatAccordion).toHaveStyle('height: 2.75rem');
 	});
 	test('open - expand - collapse chat accordion', async () => {
 		const { user } = setupBasicGroup();

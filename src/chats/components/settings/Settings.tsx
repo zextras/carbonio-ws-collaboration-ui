@@ -96,6 +96,7 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 						hideButton: true,
 						autoHideTimeout: 5000
 					});
+					return Promise.reject();
 				});
 		}
 
@@ -121,6 +122,7 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 						hideButton: true,
 						autoHideTimeout: 5000
 					});
+					return Promise.reject();
 				});
 		}
 
@@ -140,6 +142,7 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 			setNotificationsStorage({ DesktopNotifications: desktopNotifications });
 			setIsEnabled(false);
 		}
+		return Promise.resolve();
 	}, [
 		picture,
 		deletePicture,
