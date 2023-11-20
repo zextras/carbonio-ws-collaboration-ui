@@ -115,7 +115,7 @@
     },
     "keepInTouchWithColleagues": "Keep in touch with your colleagues or join your groups' meeting rooms",
     "meeting": {
-        "activeMeetingTooltip": "There's an active meeting for this Group",
+        "activeMeetingTooltip": "There's an active meeting for this Conversation",
         "collapseChat": "Collapse chat",
         "collapseParticipantsMeetingTooltip": "Collapse participants list",
         "continueActiveSession": "Continue the meeting in the new window",
@@ -158,6 +158,7 @@
             "title_plural": "{{count}} meeting's participants"
         },
         "presentActiveSession": "There is another active session",
+        "rejoinMeeting": "Rejoin meeting",
         "restartMeeting": "Restart meeting",
         "setInputDescription": "Set your input devices by choosing them from dropdown menu",
         "startMeeting": "Start meeting",
