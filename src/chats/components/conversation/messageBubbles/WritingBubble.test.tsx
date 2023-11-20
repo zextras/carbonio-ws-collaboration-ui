@@ -39,15 +39,25 @@ const room: RoomBe = createMockRoom({
 	]
 });
 
+const ref = React.createRef<HTMLDivElement>();
+
 describe('Display is typing list', () => {
 	test('Renders the writing bubble with a single user', () => {
-		setup(<WritingBubble writingListNames={[user1.name]} />);
+		setup(
+			<WritingBubble writingListNames={[user1.name]} roomId={room.id} MessageListWrapperRef={ref} />
+		);
 		const paoloIsWriting = screen.getByText(/Paolo Rossi is typing/i);
 		expect(paoloIsWriting).toBeInTheDocument();
 	});
 
 	test('Renders the writing bubble with multiple users', () => {
-		setup(<WritingBubble writingListNames={[user1.name, user2.name]} />);
+		setup(
+			<WritingBubble
+				writingListNames={[user1.name, user2.name]}
+				roomId={room.id}
+				MessageListWrapperRef={ref}
+			/>
+		);
 		const paoloIsWriting = screen.getByText(new RegExp(user1.name, 'i'));
 		expect(paoloIsWriting).toBeInTheDocument();
 		const robertoIsWriting = screen.getByText(new RegExp(user2.name, 'i'));
