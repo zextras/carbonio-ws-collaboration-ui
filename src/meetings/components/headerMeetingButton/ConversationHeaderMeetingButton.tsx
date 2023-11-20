@@ -106,7 +106,7 @@ const ConversationHeaderMeetingButton = ({
 		() =>
 			meetingIsActive
 				? amIParticipating
-					? roomType === RoomType.ONE_TO_ONE && meetingParticipantsNumber === 1
+					? meetingParticipantsNumber === 1
 						? restartMeeting
 						: rejoinMeeting
 					: joinMeeting
@@ -118,7 +118,6 @@ const ConversationHeaderMeetingButton = ({
 			meetingParticipantsNumber,
 			rejoinMeeting,
 			restartMeeting,
-			roomType,
 			startMeeting
 		]
 	);
