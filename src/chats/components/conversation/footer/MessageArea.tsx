@@ -3,6 +3,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
+/* eslint-disable no-param-reassign */
 
 import React, { MutableRefObject, useCallback, useEffect } from 'react';
 
@@ -15,20 +16,19 @@ import { SIZES } from '../../../../types/generics';
 import useFirstUnreadMessage from '../useFirstUnreadMessage';
 
 const MessageTextarea = styled.textarea`
-	box-sizing: border-box;
+	flex: 1;
+	padding: 0.5rem 0;
+	height: 1.25rem;
+	min-height: 1.25rem;
+	max-height: calc(50vh - ${SIZES.SPACE_FOR_ELEMENTS_VISIBLE_ON_MESSAGE_LIST});
+	line-height: 1.1;
 	font-family: 'Segoe UI', 'Lucida Sans', sans-serif;
 	font-size: ${({ theme }): string => theme.sizes.font.medium};
 	resize: none;
 	-webkit-user-select: text;
 	cursor: auto;
-	height: 2.875rem;
-	min-height: 2.875rem;
-	padding-top: 0.9375rem;
 	border: none;
-	vertical-align: text-top;
 	overflow-y: scroll;
-	max-height: calc(50vh - ${SIZES.SPACE_FOR_ELEMENTS_VISIBLE_ON_MESSAGE_LIST});
-	width: 100%;
 	scrollbar-color: ${({ theme }): string => theme.palette.gray3.regular} transparent;
 
 	@keyframes inputFull {
@@ -121,10 +121,26 @@ const MessageArea: React.FC<MessageAreaPros> = ({
 	useEffect(() => {
 		if (inputHasFocus) {
 			textareaRef.current?.focus();
-			// Focus the end of the input if there is a draft message
-			textareaRef.current?.setSelectionRange(message.length, message.length);
+			// Focus the end of the input if there is a draft message;
+			if (textareaRef.current) {
+				const textAreaValue = textareaRef.current.value;
+				textareaRef.current.value = '';
+				textareaRef.current.value = textAreaValue;
+			}
 		}
-	}, [inputHasFocus, message.length, textareaRef]);
+	}, [inputHasFocus, textareaRef]);
+
+	// Increase height when there are more lines
+	useEffect(() => {
+		if (textareaRef.current) {
+			textareaRef.current.style.height = '';
+			if (textareaRef.current.scrollHeight > textareaRef.current.clientHeight) {
+				textareaRef.current.style.height = `${textareaRef.current.scrollHeight - 16}px`;
+			} else {
+				textareaRef.current.style.height = '1.25rem';
+			}
+		}
+	}, [message, textareaRef]);
 
 	const handleOnFocus = useCallback(
 		() => setInputHasFocus(roomId, true),
