@@ -24,18 +24,18 @@ import styled from 'styled-components';
 
 import { Emoji, Z_INDEX_RANK } from '../../../../types/generics';
 
-const PickerWrapper = styled(Container)`
+const PickerWrapper = styled(Container)<{ $isInsideMeeting?: boolean }>`
 	z-index: ${Z_INDEX_RANK.EMOJI_PICKER};
 	position: absolute;
 	bottom: 3.4375rem;
 	left: 0.5rem;
-	height: 27.1875rem;
+	height: ${({ $isInsideMeeting }): string => ($isInsideMeeting ? '18.125rem' : '27.1875rem')};
 	width: 22rem;
 	transform-origin: bottom left;
 	animation: showEmoji 0.2s ease-in 0s 1;
 
 	// set height of emojiPicker when is small or large device
-	@media (height <= 62.5rem) {
+	@media (max-height: 48rem) {
 		max-height: 18.125rem;
 	}
 
@@ -55,12 +55,14 @@ type EmojiPickerProps = {
 	onEmojiSelect: (emoji: Emoji) => void;
 	setShowEmojiPicker?: Dispatch<SetStateAction<boolean>>;
 	emojiTimeoutRef?: MutableRefObject<NodeJS.Timeout | undefined>;
+	isInsideMeeting?: boolean;
 };
 
 const EmojiPicker: React.FC<EmojiPickerProps> = ({
 	onEmojiSelect,
 	setShowEmojiPicker,
 	emojiTimeoutRef,
+	isInsideMeeting,
 	...props
 }) => {
 	const ref = useRef<HTMLDivElement>(null);
@@ -103,7 +105,7 @@ const EmojiPicker: React.FC<EmojiPickerProps> = ({
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
-	return <PickerWrapper ref={ref} data-testid="emojiPicker" />;
+	return <PickerWrapper ref={ref} data-testid="emojiPicker" $isInsideMeeting={isInsideMeeting} />;
 };
 
 export default EmojiPicker;

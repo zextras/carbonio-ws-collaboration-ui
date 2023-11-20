@@ -107,7 +107,7 @@ const AttachmentSelector: React.FC<AttachmentSelectorProps> = ({ roomId }) => {
 	);
 
 	return (
-		<Container width="fit" height="fit" padding={{ right: 'extrasmall', bottom: '0.3125rem' }}>
+		<Container width="fit" height="fit">
 			<Tooltip label={uploadAttachmentTooltip} placement="top">
 				<Dropdown items={items} placement="top-end">
 					<IconButton icon="Attach" iconColor="gray1" size="large" onClick={(): null => null} />
