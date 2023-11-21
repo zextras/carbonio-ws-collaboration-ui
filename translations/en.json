@@ -116,9 +116,10 @@
     },
     "keepInTouchWithColleagues": "Keep in touch with your colleagues or join your groups' meeting rooms",
     "meeting": {
-        "activeMeetingTooltip": "There's an active meeting for this Group",
+        "activeMeetingTooltip": "There's an active meeting for this Conversation",
         "collapseChat": "Collapse chat",
         "collapseParticipantsMeetingTooltip": "Collapse participants list",
+        "continueActiveSession": "Continue the meeting in the new window",
         "expandChat": "Expand chat",
         "expandParticipantsListTooltip": "Expand participants list",
         "extendChat": "Extend chat",
@@ -148,18 +149,27 @@
             "userIsInvitingYou": "<strong>{{name}}</strong> is inviting you",
             "writeAMessageToSendIt": "Write a message to send it"
         },
+        "noMoreActiveSession": "There cannot be more than one active session of the same meeting",
+        "noTwoActiveSession": "Two active sessions of the same meeting cannot coexist",
         "ongoingGroupMeetingTooltip": "You are already participating in this meeting",
         "ongoingOneToOneMeetingTooltip": "You already have an active meeting with {{name}}",
+        "openedInAnotherWindow": "This meeting is already open in another window",
         "participantsList": {
             "title": "One meeting's participant",
             "title_plural": "{{count}} meeting's participants"
         },
+        "presentActiveSession": "There is another active session",
+        "rejoinMeeting": "Rejoin meeting",
+        "restartMeeting": "Restart meeting",
         "setInputDescription": "Set your input devices by choosing them from dropdown menu",
         "startMeeting": "Start meeting",
         "startModal": {
             "audioAndVideoLoading": "Assets are loading",
             "enterOneToOneMeetingTitle": "Start meeting with {{meetingTitle}}",
             "enterRoomMeetingTitle": "Participate to {{meetingTitle}} meeting"
+        },
+        "tooltip": {
+            "activeSessionTooltip": "You have an active session in this meeting"
         },
         "waitingParticipants": "Waiting for participants to join…"
     },

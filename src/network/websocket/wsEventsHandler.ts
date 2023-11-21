@@ -291,7 +291,10 @@ export function wsEventsHandler(event: WsEvent): void {
 			break;
 		}
 		case WsEventType.MEETING_PARTICIPANT_CLASHED: {
-			// TODO
+			const activeMeeting = state.activeMeeting[event.meetingId];
+			if (activeMeeting) {
+				sendCustomEvent({ name: EventName.MEETING_PARTICIPANT_CLASHED, data: event });
+			}
 			break;
 		}
 		default:

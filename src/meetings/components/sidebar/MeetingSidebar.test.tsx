@@ -76,6 +76,7 @@ const setupBasicOneToOne = (): { user: UserEvent; store: RootStore } => {
 	act(() => {
 		result.current.addRoom(oneToOneRoom);
 		result.current.addMeeting(oneToOneMeeting);
+		result.current.meetingConnection(oneToOneMeeting.id, false, 'audioId', false, 'videoId');
 	});
 	mockUseParams.mockReturnValue({ meetingId: oneToOneMeeting.id });
 	const { user } = setup(<MeetingSidebar />);
@@ -100,6 +101,15 @@ describe('Meeting sidebar', () => {
 		expect(actionsAccordions).toBeVisible();
 		expect(chatAccordion).toBeVisible();
 		expect(MeetingParticipantsAccordion).not.toBeInTheDocument();
+	});
+
+	test('toggle Sidebar', async () => {
+		const { user } = setupBasicOneToOne();
+		const button = screen.getByTestId('icon: ChevronLeftOutline');
+		expect(button).toBeInTheDocument();
+		await user.click(button);
+		const sidebarClosed = await screen.findByTestId('icon: ChevronRightOutline');
+		expect(sidebarClosed).toBeInTheDocument();
 	});
 
 	test('when user click the sidebar button, the sidebar closes', async () => {
