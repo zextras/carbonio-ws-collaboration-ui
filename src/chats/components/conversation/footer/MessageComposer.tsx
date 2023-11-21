@@ -18,7 +18,6 @@ import {
 	Container,
 	CreateSnackbarFn,
 	IconButton,
-	Padding,
 	SnackbarManagerContext,
 	Spinner,
 	Tooltip
@@ -49,6 +48,7 @@ import { BrowserUtils } from '../../../../utils/BrowserUtils';
 
 type ConversationMessageComposerProps = {
 	roomId: string;
+	isInsideMeeting?: boolean;
 };
 
 const BlockUploadButton = styled(IconButton)`
@@ -72,7 +72,10 @@ const SendIconButton = styled(IconButton)<{ alt?: string }>``;
 
 const EmojiIconButton = styled(IconButton)<{ alt?: string }>``;
 
-const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId }) => {
+const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
+	roomId,
+	isInsideMeeting
+}) => {
 	const xmppClient = useStore(getXmppClient);
 
 	const [t] = useTranslation();
@@ -128,31 +131,18 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 		});
 	}, [listAbortController, uploadAbortedLabel, createSnackbar]);
 
-	const checkMaxLengthAndSetMessage = useCallback(
-		(textareaValue: string): void => {
-			if (textareaValue.length > 4096) {
-				setTextMessage(textareaValue.slice(0, 4096));
-				// todo fix selection place when user is modifying in the middle of the components
-				// const cursorPosition = messageInputRef.current.selectionStart;
-				// messageInputRef.current.setSelectionRange(cursorPosition, cursorPosition);
-				setNoMoreCharsOnInputComposer(true);
-			} else {
-				setNoMoreCharsOnInputComposer(false);
-				setTextMessage(textareaValue);
-				if (messageInputRef.current) {
-					messageInputRef.current.style.height = '';
-					if (messageInputRef.current.scrollHeight >= messageInputRef.current.clientHeight) {
-						messageInputRef.current.style.height = `${messageInputRef.current.scrollHeight + 1}px`;
-						messageInputRef.current.style.paddingBottom = '0.75rem';
-					} else {
-						messageInputRef.current.style.paddingBottom = '0';
-						messageInputRef.current.style.paddingTop = '0.9375rem';
-					}
-				}
-			}
-		},
-		[messageInputRef]
-	);
+	const checkMaxLengthAndSetMessage = useCallback((textareaValue: string): void => {
+		if (textareaValue.length > 4096) {
+			setTextMessage(textareaValue.slice(0, 4096));
+			// todo fix selection place when user is modifying in the middle of the components
+			// const cursorPosition = messageInputRef.current.selectionStart;
+			// messageInputRef.current.setSelectionRange(cursorPosition, cursorPosition);
+			setNoMoreCharsOnInputComposer(true);
+		} else {
+			setNoMoreCharsOnInputComposer(false);
+			setTextMessage(textareaValue);
+		}
+	}, []);
 
 	const uploadAttachmentPromise = (
 		file: FileToUpload,
@@ -281,7 +271,6 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 			unsetFilesToAttach(roomId);
 			setDraftMessage(roomId, true);
 			setTextMessage('');
-			if (messageInputRef.current) messageInputRef.current.style.height = '';
 			if (referenceMessage) unsetReferenceMessage(roomId);
 
 			uploadFilesInOrder
@@ -325,7 +314,6 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 			}
 			setDraftMessage(roomId, true);
 			setTextMessage('');
-			if (messageInputRef.current) messageInputRef.current.style.height = '';
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [
@@ -480,7 +468,6 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 			setTextMessage('');
 			if (messageRef) {
 				messageRef.value = '';
-				messageRef.style.height = '0';
 			}
 		};
 	}, [roomId]);
@@ -537,11 +524,17 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 					onEmojiSelect={insertEmojiInMessage}
 					setShowEmojiPicker={setShowEmojiPicker}
 					emojiTimeoutRef={emojiTimeoutRef}
+					isInsideMeeting={isInsideMeeting}
 				/>
 			)}
-			<Container orientation="horizontal" crossAlignment="flex-end">
+			<Container
+				orientation="horizontal"
+				crossAlignment="flex-end"
+				gap="0.25rem"
+				padding={{ all: 'small' }}
+			>
 				<Tooltip label={selectEmojiLabel}>
-					<Container width="fit" height="fit" padding={{ left: 'extrasmall', bottom: '0.3125rem' }}>
+					<Container width="fit" height="fit">
 						<EmojiIconButton
 							ref={emojiButtonRef}
 							iconColor="secondary"
@@ -552,7 +545,6 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 						/>
 					</Container>
 				</Tooltip>
-				<Padding right={'0.25rem'} />
 				<MessageArea
 					roomId={roomId}
 					textareaRef={messageInputRef}
@@ -567,11 +559,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 				{showAttachFileButton && <AttachmentSelector roomId={roomId} />}
 				{isUploading && (
 					<Tooltip label={stopUploadLabel} placement="top">
-						<UploadSpinnerWrapper
-							width="2.25rem"
-							height="2.5625rem"
-							padding={{ bottom: '0.3125rem' }}
-						>
+						<UploadSpinnerWrapper width="2.25rem" height="2.5625rem">
 							<LoadingSpinner color="primary" title={uploadingLabel} />
 							<BlockUploadButton
 								onClick={abortUploadRequest}
@@ -583,20 +571,14 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 					</Tooltip>
 				)}
 				<Tooltip label={sendDisabled ? writeToSendTooltip : sendMessageLabel} placement="top">
-					<Container
-						width="fit"
-						height="fit"
-						padding={{ right: 'extrasmall', bottom: '0.3125rem' }}
-					>
-						<SendIconButton
-							onClick={sendMessage}
-							iconColor="primary"
-							size="large"
-							icon="Navigation2"
-							alt={sendDisabled ? writeToSendTooltip : sendMessageLabel}
-							disabled={sendDisabled}
-						/>
-					</Container>
+					<SendIconButton
+						onClick={sendMessage}
+						iconColor="primary"
+						size="large"
+						icon="Navigation2"
+						alt={sendDisabled ? writeToSendTooltip : sendMessageLabel}
+						disabled={sendDisabled}
+					/>
 				</Tooltip>
 			</Container>
 			{deleteMessageModalStatus && (

@@ -23,6 +23,9 @@ type MeetingConversationAccordionProps = {
 	meetingId: string;
 	isInsideMeeting: boolean;
 };
+const ChatContainer = styled(Container)`
+	transition: height 0.3s ease, min-height 0.3s ease;
+`;
 
 const WrapperMeetingChat = styled(Container)<{ $darkModeActive: boolean }>`
 	overflow: hidden;
@@ -81,12 +84,12 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({
 	);
 
 	return (
-		<Container
+		<ChatContainer
 			key="MeetingConversationAccordion"
 			data-testid="MeetingConversationAccordion"
-			mainAlignment="flex-end"
-			maxHeight={chatFullExpanded ? '100%' : chatIsOpen ? '50%' : 'fit'}
-			height={chatFullExpanded ? '100%' : chatIsOpen ? '50%' : 'fit'}
+			mainAlignment="flex-start"
+			height={chatFullExpanded ? '100%' : chatIsOpen ? '50%' : '2.75rem'}
+			minHeight={chatFullExpanded ? '100%' : chatIsOpen ? '50%' : '2.75rem'}
 			width="100%"
 			borderRadius="none"
 		>
@@ -136,7 +139,7 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({
 					/>
 				</WrapperMeetingChat>
 			)}
-		</Container>
+		</ChatContainer>
 	);
 };
 
