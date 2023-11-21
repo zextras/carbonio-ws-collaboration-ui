@@ -33,6 +33,7 @@ const MemberComponentActions: FC<ActionsProps> = ({ roomId, memberId }) => {
 		'tooltip.memberIsModerator',
 		'This member is a moderator'
 	);
+	const iAmModeratorLabel: string = t('tooltip.iAmModerator', "You're a moderator");
 
 	const sessionId: string | undefined = useStore((state) => state.session.id);
 	const numberOfOwners: number = useStore(
@@ -52,16 +53,11 @@ const MemberComponentActions: FC<ActionsProps> = ({ roomId, memberId }) => {
 		<Container orientation="horizontal" mainAlignment="flex-end">
 			{!isSessionParticipant && <GoToPrivateChatAction memberId={memberId} />}
 
-			{iAmOwner ? (
-				<PromoteDemoteMemberAction
-					memberId={memberId}
-					roomId={roomId}
-					isSessionParticipant={isSessionParticipant}
-					owner={memberOwner}
-				/>
+			{iAmOwner && !isSessionParticipant ? (
+				<PromoteDemoteMemberAction memberId={memberId} roomId={roomId} owner={memberOwner} />
 			) : (
 				memberOwner && (
-					<Tooltip label={memberIsModeratorLabel}>
+					<Tooltip label={isSessionParticipant ? iAmModeratorLabel : memberIsModeratorLabel}>
 						<IconButton
 							iconColor="primary"
 							size="extralarge"

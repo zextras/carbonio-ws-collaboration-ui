@@ -201,7 +201,7 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 			'AM/SET_SUBSCRIPTION'
 		);
 	},
-	setTalkingUsers: (meetingId: string, userId: string, isTalking: boolean): void => {
+	setTalkingUser: (meetingId: string, userId: string, isTalking: boolean): void => {
 		set(
 			produce((draft: RootStore) => {
 				if (isTalking) {

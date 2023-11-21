@@ -56,7 +56,8 @@ interface IMeetingsApi {
 	createAudioOffer(meetingId: string, sdpOffer: string): Promise<CreateAudioOfferResponse>;
 	updateAudioStreamStatus(
 		meetingId: string,
-		enabled: boolean
+		enabled: boolean,
+		userToModerate?: string
 	): Promise<UpdateAudioStreamStatusResponse>;
 	updateMediaOffer(
 		meetingId: string,
