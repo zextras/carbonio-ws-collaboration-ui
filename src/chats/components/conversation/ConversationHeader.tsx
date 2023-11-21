@@ -55,15 +55,14 @@ const ConversationHeader = ({
 			background="gray5"
 			borderRadius="none"
 			orientation="horizontal"
+			mainAlignment="space-between"
 			padding={{ vertical: 'medium', horizontal: 'large' }}
 		>
 			<Row takeAvailableSpace mainAlignment="flex-start">
-				<TextWithTooltip>{roomName}</TextWithTooltip>
+				<TextWithTooltip overflow="ellipsis">{roomName}</TextWithTooltip>
 			</Row>
-			<Row>
-				{!canVideoCall && ( // TODO change check in canVideoCall &&
-					<ConversationHeaderMeetingButton roomId={roomId} />
-				)}
+			<Row orientation="horizontal" width="fit" style={{ minWidth: 'fit-content' }}>
+				{canVideoCall && <ConversationHeaderMeetingButton roomId={roomId} />}
 				{!isDesktopView && (
 					<Tooltip label={infoTooltip}>
 						<IconButton

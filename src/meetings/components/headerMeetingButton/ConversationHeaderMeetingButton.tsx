@@ -147,7 +147,7 @@ const ConversationHeaderMeetingButton = ({
 	}, [closeDropdown, ref]);
 
 	return (
-		<Container orientation="horizontal">
+		<Container orientation="horizontal" data-testid="ConversationHeaderMeetingButton">
 			<Tooltip label={activeSessionTooltip} placement="top" disabled={!amIParticipating}>
 				<CustomButton
 					onClick={openMeeting}

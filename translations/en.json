@@ -25,6 +25,7 @@
         "leave": "Leave",
         "muteNotifications": "Mute notifications",
         "newChat": "New Chat",
+        "ok": "Ok",
         "preview": "Preview",
         "removeUser": "Remove",
         "reply": "Reply",
@@ -258,6 +259,9 @@
         "save": "Edits saved correctly",
         "title": "Chats settings"
     },
+    "snackbar": {
+        "mutedByModerator": "You've been muted by a moderator, unmute yourself to speak"
+    },
     "status": {
         "areTyping": "are typing…",
         "goToPrivateChat": "Go to private chat to send a personal message",
@@ -291,7 +295,7 @@
         "messageReceived": "Received",
         "messageSent": "Sent",
         "muteForAll": "Mute for all",
-        "participantAlreadyMuted": "This participant is already muted",
+        "participantMuted": "This participant is muted",
         "pending": "Pending",
         "pinVideo": "Pin video",
         "promoteModerator": "Promote to moderator",
@@ -316,7 +320,8 @@
             "updateAvatar": "Update avatar",
             "uploadAvatar": "Upload avatar"
         },
-        "writeToSend": "Write a message to send it"
+        "writeToSend": "Write a message to send it",
+        "youAreAlreadyMuted": "You're muted"
     },
     "tryLater": "Try later"
 }
