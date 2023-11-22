@@ -354,16 +354,14 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 		[checkMaxLengthAndSetMessage]
 	);
 
-	const handleKeyDown = useCallback(
+	const handkeKeyUp = useCallback(
 		(e: KeyboardEvent) => {
-			if (!sendDisabled && e.key === 'Enter' && !e.shiftKey) {
-				e.preventDefault();
-				sendMessage();
-			} else if (
+			if (
 				e.key === 'ArrowUp' &&
 				!e.shiftKey &&
 				lastMessageOfRoom !== undefined &&
 				lastMessageOfRoom.type === MessageType.TEXT_MSG &&
+				textMessage === '' &&
 				canPerformAction(
 					lastMessageOfRoom,
 					lastMessageOfRoom.from === myUserId,
@@ -379,22 +377,29 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 					messageActionType.EDIT,
 					lastMessageOfRoom.attachment
 				);
+			}
+		},
+		[
+			editMessageTimeLimitInMinutes,
+			lastMessageOfRoom,
+			myUserId,
+			setDraftMessage,
+			setReferenceMessage,
+			textMessage
+		]
+	);
+
+	const handleKeyDown = useCallback(
+		(e: KeyboardEvent) => {
+			if (!sendDisabled && e.key === 'Enter' && !e.shiftKey) {
+				e.preventDefault();
+				sendMessage();
 			} else {
 				sendThrottleIsWriting();
 				sendDebouncedPause();
 			}
 		},
-		[
-			sendDisabled,
-			lastMessageOfRoom,
-			myUserId,
-			editMessageTimeLimitInMinutes,
-			sendMessage,
-			setDraftMessage,
-			setReferenceMessage,
-			sendThrottleIsWriting,
-			sendDebouncedPause
-		]
+		[sendDisabled, sendMessage, sendThrottleIsWriting, sendDebouncedPause]
 	);
 
 	const insertEmojiInMessage = useCallback(
@@ -595,6 +600,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 					onInput={handleTypingMessage}
 					composerIsFull={noMoreCharsOnInputComposer}
 					handleKeyDownTextarea={handleKeyDown}
+					handleKeyUpTextarea={handkeKeyUp}
 					handleOnBlur={handleOnBlur}
 					handleOnPaste={handlePaste}
 					isDisabled={isDisabledWhileAttachingFile}
