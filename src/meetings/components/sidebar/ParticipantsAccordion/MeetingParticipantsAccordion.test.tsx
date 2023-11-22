@@ -7,10 +7,14 @@ import React from 'react';
 
 import { screen } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event/setup/setup';
+import { act } from 'react-dom/test-utils';
 
 import MeetingParticipantsAccordion from './MeetingParticipantsAccordion';
 import MeetingParticipantsList from './MeetingParticipantsList';
-import { mockedPromoteRoomMemberRequest } from '../../../../../jest-mocks';
+import {
+	mockedPromoteRoomMemberRequest,
+	mockedUpdateAudioStreamStatusRequest
+} from '../../../../../jest-mocks';
 import useStore from '../../../../store/Store';
 import {
 	createMockMeeting,
@@ -22,6 +26,7 @@ import { setup } from '../../../../tests/test-utils';
 import { MeetingBe } from '../../../../types/network/models/meetingBeTypes';
 import { MemberBe, RoomBe } from '../../../../types/network/models/roomBeTypes';
 import { UserBe } from '../../../../types/network/models/userBeTypes';
+import { STREAM_TYPE } from '../../../../types/store/ActiveMeetingTypes';
 import { MeetingParticipant } from '../../../../types/store/MeetingTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
 import { RootStore } from '../../../../types/store/StoreTypes';
@@ -61,7 +66,8 @@ const storeSetupGroupMeetingModerator = (): { user: UserEvent; store: RootStore 
 	});
 	const user2Participant: MeetingParticipant = createMockParticipants({
 		userId: user2.id,
-		sessionId: 'sessionIdUser2'
+		sessionId: 'sessionIdUser2',
+		audioStreamOn: true
 	});
 	const meeting: MeetingBe = createMockMeeting({
 		roomId: room.id,
@@ -72,11 +78,17 @@ const storeSetupGroupMeetingModerator = (): { user: UserEvent; store: RootStore 
 	return { user, store };
 };
 
-// setup of the store of a Participant element that is not a moderator, but I'm a moderator
-const storeSetupParticipantModerator = (): { user: UserEvent; store: RootStore } => {
+// setup of the store of a Participant list and I'm a moderator
+
+const user2: UserBe = createMockUser({ id: 'user2Id', name: 'user 2' });
+
+const storeSetupParticipantModerator = (): {
+	meeting: MeetingBe;
+	user: UserEvent;
+	store: RootStore;
+} => {
 	const store: RootStore = useStore.getState();
 	const user1: UserBe = createMockUser({ id: 'user1Id', name: 'user 1' });
-	const user2: UserBe = createMockUser({ id: 'user2Id', name: 'user 2' });
 
 	const member1: MemberBe = { userId: user1.id, owner: true };
 	const member2: MemberBe = { userId: user2.id, owner: false };
@@ -105,12 +117,14 @@ const storeSetupParticipantModerator = (): { user: UserEvent; store: RootStore }
 		participants: [user1Participant, user2Participant]
 	});
 	store.addMeeting(meeting);
+	store.meetingConnection(meeting.id, false, undefined, false, undefined);
+
 	const { user } = setup(<MeetingParticipantsList meetingId={meeting.id} />);
-	return { user, store };
+	return { meeting, user, store };
 };
 
 describe("Meeting Participants Accordion - moderator's side", () => {
-	test('everything is rendered correctly', async () => {
+	test('toggle of the Participants accordion and render of the elements', async () => {
 		const { user } = storeSetupGroupMeetingModerator();
 		const chevron = screen.getByTestId('icon: ChevronDown');
 		await user.click(chevron);
@@ -184,5 +198,25 @@ describe("Meeting Participants Accordion - moderator's side", () => {
 		user.click(closeButton);
 		const placeholderText1 = await screen.findByText(/There are no items that match this search/i);
 		expect(placeholderText1).not.toBeInTheDocument();
+	});
+
+	test('mute a member if you are a moderator', async () => {
+		mockedUpdateAudioStreamStatusRequest.mockReturnValueOnce('muted');
+		const { meeting, user, store } = storeSetupParticipantModerator();
+
+		act(() => {
+			store.changeStreamStatus(meeting.id, user2.id, STREAM_TYPE.AUDIO, true);
+		});
+
+		const muteButton = screen.getByTestId('icon: MicOffOutline');
+
+		expect(muteButton).toBeInTheDocument();
+		expect(muteButton).toBeEnabled();
+
+		user.click(muteButton);
+
+		const micOff = await screen.findByTestId('icon: MicOff');
+
+		expect(micOff).toBeVisible();
 	});
 });
