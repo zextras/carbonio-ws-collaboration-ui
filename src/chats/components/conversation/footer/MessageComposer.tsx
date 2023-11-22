@@ -354,7 +354,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 		[checkMaxLengthAndSetMessage]
 	);
 
-	const handkeKeyUp = useCallback(
+	const handleKeyUp = useCallback(
 		(e: KeyboardEvent) => {
 			if (
 				e.key === 'ArrowUp' &&
@@ -600,7 +600,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 					onInput={handleTypingMessage}
 					composerIsFull={noMoreCharsOnInputComposer}
 					handleKeyDownTextarea={handleKeyDown}
-					handleKeyUpTextarea={handkeKeyUp}
+					handleKeyUpTextarea={handleKeyUp}
 					handleOnBlur={handleOnBlur}
 					handleOnPaste={handlePaste}
 					isDisabled={isDisabledWhileAttachingFile}
