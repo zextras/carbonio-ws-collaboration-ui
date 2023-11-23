@@ -292,7 +292,7 @@ describe('useTilesOrder custom hook - ordered by who is speaking', () => {
 
 		act(() => {
 			useStore.getState().setPinnedTile(meeting.id, { userId: '2', type: STREAM_TYPE.VIDEO });
-			useStore.getState().setTalkingUsers(meeting.id, participant3.userId, true);
+			useStore.getState().setTalkingUser(meeting.id, participant3.userId, true);
 			jest.advanceTimersByTime(1000);
 		});
 
