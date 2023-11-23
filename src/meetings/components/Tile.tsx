@@ -10,6 +10,7 @@ import {
 	Avatar,
 	Container,
 	IconButton,
+	Padding,
 	Row,
 	Shimmer,
 	Text,
@@ -19,6 +20,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
+import useMuteForAll from '../../hooks/useMuteForAll';
 import usePinnedTile from '../../hooks/usePinnedTile';
 import { UsersApi } from '../../network';
 import { getUserIsTalking, getStream } from '../../store/selectors/ActiveMeetingSelectors';
@@ -143,6 +145,7 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 	const camOffLabel = t('meetings.interactions.yourCamIsDisabled', 'Your camera is off');
 	const pinVideoLabel = t('tooltip.pinVideo', 'Pin video');
 	const unpinVideoLabel = t('tooltip.unpinVideo', 'Unpin video');
+	const muteForAllLabel = t('tooltip.muteForAll', 'Mute for all');
 
 	const isSessionTile = useStore(getUserId) === userId;
 	const userName = useStore((store) => getUserName(store, userId || ''));
@@ -171,6 +174,8 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 		userId || '',
 		isScreenShare
 	);
+
+	const { muteForAllHasToAppear, muteForAll } = useMuteForAll(meetingId, userId);
 
 	useEffect(() => {
 		if (streamRef && streamRef.current) {
@@ -208,6 +213,16 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 		const color = calculateAvatarColor(userName || '');
 		return `${themeColor.avatarColors[color]}`;
 	}, [userName, themeColor.avatarColors]);
+
+	const canUseMuteForAll = useMemo(
+		() => !isScreenShare && muteForAllHasToAppear,
+		[isScreenShare, muteForAllHasToAppear]
+	);
+
+	const showHoverContainer = useMemo(
+		() => !modalProps && (canUsePinFeature || muteForAllHasToAppear),
+		[canUsePinFeature, modalProps, muteForAllHasToAppear]
+	);
 
 	const avatarComponent = useMemo(
 		() =>
@@ -288,20 +303,20 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 	const hoverContainer = useMemo(
 		() => (
 			<HoverContainer width="100%" data-testid="hover_container" orientation="horizontal">
-				{/* {audioStreamEnabled && ( */}
-				{/*	<> */}
-				{/*		<IconButton */}
-				{/*			icon="MicOffOutline" */}
-				{/*			iconColor="text" */}
-				{/*			backgroundColor="gray6" */}
-				{/*			size="large" */}
-				{/*			borderRadius="round" */}
-				{/*			customSize={{ iconSize: '1.5rem', paddingSize: '0.75rem' }} */}
-				{/*			onClick={null} */}
-				{/*		/> */}
-				{/*		<Padding right="1rem" /> */}
-				{/*	</> */}
-				{/* )} */}
+				{canUseMuteForAll && (
+					<Tooltip label={muteForAllLabel}>
+						<IconButton
+							icon="MicOffOutline"
+							iconColor="text"
+							backgroundColor="gray6"
+							size="large"
+							borderRadius="round"
+							customSize={{ iconSize: '1.5rem', paddingSize: '0.75rem' }}
+							onClick={muteForAll}
+						/>
+					</Tooltip>
+				)}
+				{canUseMuteForAll && canUsePinFeature && <Padding right="1rem" />}
 				{canUsePinFeature && (
 					<Tooltip label={isPinned ? unpinVideoLabel : pinVideoLabel}>
 						<IconButton
@@ -317,12 +332,16 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 				)}
 			</HoverContainer>
 		),
-		[canUsePinFeature, isPinned, pinVideoLabel, switchPinnedTile, unpinVideoLabel]
-	);
-
-	const showHoverContainer = useMemo(
-		() => !modalProps && canUsePinFeature,
-		[canUsePinFeature, modalProps]
+		[
+			canUseMuteForAll,
+			muteForAllLabel,
+			muteForAll,
+			canUsePinFeature,
+			isPinned,
+			unpinVideoLabel,
+			pinVideoLabel,
+			switchPinnedTile
+		]
 	);
 
 	return (

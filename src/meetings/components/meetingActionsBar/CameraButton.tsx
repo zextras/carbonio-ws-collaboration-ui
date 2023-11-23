@@ -148,9 +148,6 @@ const CameraButton = ({
 					forceOpen: isVideoListOpen,
 					onClick: toggleVideoDropdown,
 					dropdownListRef: videoDropdownRef,
-					// TODO fix lint error
-					// eslint-disable-next-line react/jsx-no-useless-fragment
-					children: <></>,
 					items: mediaVideoList
 				}}
 				disabledPrimary={!buttonStatus}

@@ -59,7 +59,8 @@ export type MeetingDeletedEvent = BasicMeetingEvent & {
 export type MeetingAudioStreamChangedEvent = BasicMeetingEvent & {
 	type: WsEventType.MEETING_AUDIO_STREAM_CHANGED;
 	active: boolean;
-	userId: string; // ora è sessionId
+	userId: string;
+	moderatorId?: string;
 };
 
 export type MeetingMediaStreamChangedEvent = BasicMeetingEvent & {
@@ -103,6 +104,4 @@ export type MeetingParticipantTalkingEvent = BasicMeetingEvent & {
 
 export type MeetingParticipantClashedEvent = BasicMeetingEvent & {
 	type: WsEventType.MEETING_PARTICIPANT_CLASHED;
-	userId: string;
-	isTalking: boolean;
 };

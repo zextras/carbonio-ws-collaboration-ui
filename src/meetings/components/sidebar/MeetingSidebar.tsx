@@ -27,6 +27,7 @@ import { RoomType } from '../../../types/store/RoomTypes';
 
 const SidebarContainer = styled(Container)`
 	position: relative;
+	transition: width 0.3s ease, min-width 0.3s ease;
 `;
 
 const ChangeSidebarStatusButton = styled.div`
@@ -43,7 +44,6 @@ const SidebarIconButton = styled(IconButton)`
 
 const AccordionContainer = styled(Container)`
 	overflow-y: auto;
-	gap: 1px;
 `;
 
 const MeetingSidebar = (): ReactElement => {
@@ -72,15 +72,11 @@ const MeetingSidebar = (): ReactElement => {
 			maxWidth="500px"
 			borderRadius="none"
 			crossAlignment="flex-start"
-			mainAlignment="space-between"
+			mainAlignment="flex-end"
 			data-testid="meeting_sidebar"
 		>
 			{meetingChatVisibility !== MeetingChatVisibility.EXPANDED && (
-				<AccordionContainer
-					height={meetingChatVisibility === MeetingChatVisibility.OPEN ? '50%' : 'fill'}
-					maxHeight={meetingChatVisibility === MeetingChatVisibility.OPEN ? '50%' : 'fill'}
-					mainAlignment="flex-start"
-				>
+				<AccordionContainer mainAlignment="flex-start" flexGrow="1" gap="gap: 1px">
 					<ActionsAccordion roomId={roomId || ''} isInsideMeeting meetingId={meetingId} />
 					{roomType !== RoomType.ONE_TO_ONE && (
 						<MeetingParticipantsAccordion meetingId={meetingId} />

@@ -4,14 +4,20 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { FC } from 'react';
+import React, { FC, useEffect } from 'react';
 
 import { Container, Text } from '@zextras/carbonio-design-system';
+import { last, size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
+import useStore from '../../../../store/Store';
+import { scrollToEnd } from '../../../../utils/scrollUtils';
+
 type WritingBubbleProps = {
+	roomId: string;
 	writingListNames: string[];
+	MessageListWrapperRef: React.RefObject<HTMLDivElement>;
 };
 
 const BubbleWritingContainer = styled(Container)`
@@ -37,9 +43,11 @@ const CustomText = styled(Text)`
 	padding-right: 0.1875rem;
 `;
 
-// TODO ADD TEST
-
-const WritingBubble: FC<WritingBubbleProps> = ({ writingListNames }) => {
+const WritingBubble: FC<WritingBubbleProps> = ({
+	writingListNames,
+	MessageListWrapperRef,
+	roomId
+}) => {
 	const [t] = useTranslation();
 	const isWritingLabel = t('status.isTyping', 'is typing...');
 	const areWritingLabel = t('status.areTyping', 'are typing...');
@@ -50,6 +58,18 @@ const WritingBubble: FC<WritingBubbleProps> = ({ writingListNames }) => {
 				? `${writingListNames.toString()} ${isWritingLabel}`
 				: `${writingListNames.join(', ')} ${areWritingLabel}`
 			: null;
+
+	useEffect(() => {
+		const roomMessages = useStore.getState().messages[roomId];
+		const actualScrollPosition =
+			useStore.getState().activeConversations[roomId]?.scrollPositionMessageId;
+		if (
+			(size(roomMessages) > 0 && actualScrollPosition === last(roomMessages)?.id) ||
+			!actualScrollPosition
+		) {
+			scrollToEnd(MessageListWrapperRef);
+		}
+	}, [MessageListWrapperRef, roomId]);
 
 	return writingListNames.length > 0 ? (
 		<BubbleWritingContainer

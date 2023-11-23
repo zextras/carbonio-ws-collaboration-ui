@@ -10,7 +10,8 @@ import { Container, IconButton, Text, Tooltip } from '@zextras/carbonio-design-s
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import RoomPictureHandler from './RoomPictureHandler';
+import GroupRoomPictureHandler from './GroupRoomPictureHandler';
+import OneToOneRoomPictureHandler from './OneToOneRoomPictureHandler';
 import useMediaQueryCheck from '../../../../hooks/useMediaQueryCheck';
 import { getRoomMembers } from '../../../../store/selectors/RoomsSelectors';
 import useStore from '../../../../store/Store';
@@ -46,10 +47,12 @@ const ConversationInfo: FC<ConversationInfoProps> = ({ roomId, roomType, setInfo
 		return '';
 	}, [roomMembers, roomType, sessionId]);
 
-	const infoAvatar = useMemo(
-		() => <RoomPictureHandler roomId={roomId} roomType={roomType} memberId={memberId} />,
-		[roomType, memberId, roomId]
-	);
+	const infoAvatar = useMemo(() => {
+		if (roomType === RoomType.ONE_TO_ONE) {
+			return <OneToOneRoomPictureHandler memberId={memberId} />;
+		}
+		return <GroupRoomPictureHandler roomId={roomId} />;
+	}, [roomType, memberId, roomId]);
 
 	const toggleMessageList = useCallback(() => {
 		setInfoPanelOpen(false);

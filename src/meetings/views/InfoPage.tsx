@@ -25,7 +25,6 @@ const MainTextWrapper = styled(Container)`
 	font-size: 2.25rem;
 	margin-top: 1.875rem;
 	font-weight: bold;
-	text-transform: capitalize;
 `;
 
 const ErrorWrapper = styled(Container)`
@@ -54,6 +53,17 @@ const InfoPage = (): ReactElement => {
 			titleLabel = t('external.roomIsEmpty', 'This Room is empty');
 			centralLabel = t('tryLater', 'Try later');
 			descriptionLowerLabel = t('external.nobodyInTheRoom', 'It seems nobody is in this Room');
+			break;
+		case PAGE_INFO_TYPE.ALREADY_ACTIVE_MEETING_SESSION:
+			titleLabel = t(
+				'meeting.openedInAnotherWindow',
+				'This meeting is already open in another window'
+			);
+			centralLabel = t('meeting.continueActiveSession', 'Continue the meeting in the new window');
+			descriptionLowerLabel = t(
+				'meeting.noMoreActiveSession',
+				'There cannot be more than one active session of the same meeting'
+			);
 			break;
 		case PAGE_INFO_TYPE.MEETING_ENDED:
 		default:

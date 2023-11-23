@@ -9,8 +9,10 @@ import {
 	maximiseRowsAndColumns,
 	maximiseTileSize,
 	MeetingSoundFeedback,
+	orderSpeakingTiles,
 	sendAudioFeedback
 } from './MeetingsUtils';
+import { STREAM_TYPE, TileData } from '../types/store/ActiveMeetingTypes';
 
 describe('MeetingsUtils', () => {
 	describe('Audio feedback', () => {
@@ -200,6 +202,94 @@ describe('MeetingsUtils', () => {
 			const { rows, columns } = maximiseTileSize({ width: 1200, height: 900 }, 8);
 			expect(rows).toBe(3);
 			expect(columns).toBe(3);
+		});
+	});
+
+	describe('orderSpeakingTiles', () => {
+		test('in a 3 people meeting, when there is no pinned tile and the last one is speaking, it goes on top of the list', () => {
+			const meetingTiles: TileData[] = [
+				{ userId: 'user1', type: STREAM_TYPE.VIDEO },
+				{ userId: 'user2', type: STREAM_TYPE.VIDEO },
+				{ userId: 'user3', type: STREAM_TYPE.VIDEO }
+			];
+			const orderedTiles = orderSpeakingTiles(meetingTiles, 'user3', false);
+			expect(orderedTiles[0]?.userId).toBe('user3');
+			expect(orderedTiles[1]?.userId).toBe('user1');
+			expect(orderedTiles[2]?.userId).toBe('user2');
+		});
+		test('in a 3 people meeting, when there is no pinned tile and the second one is speaking, it goes on top of the list', () => {
+			const meetingTiles: TileData[] = [
+				{ userId: 'user1', type: STREAM_TYPE.VIDEO },
+				{ userId: 'user2', type: STREAM_TYPE.VIDEO },
+				{ userId: 'user3', type: STREAM_TYPE.VIDEO }
+			];
+			const orderedTiles = orderSpeakingTiles(meetingTiles, 'user2', false);
+			expect(orderedTiles[0]?.userId).toBe('user2');
+			expect(orderedTiles[1]?.userId).toBe('user1');
+			expect(orderedTiles[2]?.userId).toBe('user3');
+		});
+		test('in a 7 people meeting, when there is no pinned tile and the sixth one is speaking, it goes on top of the list', () => {
+			const meetingTiles: TileData[] = [
+				{ userId: 'user1', type: STREAM_TYPE.VIDEO },
+				{ userId: 'user2', type: STREAM_TYPE.AUDIO },
+				{ userId: 'user3', type: STREAM_TYPE.VIDEO },
+				{ userId: 'user4', type: STREAM_TYPE.AUDIO },
+				{ userId: 'user5', type: STREAM_TYPE.VIDEO },
+				{ userId: 'user6', type: STREAM_TYPE.AUDIO },
+				{ userId: 'user7', type: STREAM_TYPE.VIDEO }
+			];
+			const orderedTiles = orderSpeakingTiles(meetingTiles, 'user6', false);
+			expect(orderedTiles[0]?.userId).toBe('user6');
+			expect(orderedTiles[1]?.userId).toBe('user1');
+			expect(orderedTiles[2]?.userId).toBe('user2');
+			expect(orderedTiles[3]?.userId).toBe('user3');
+			expect(orderedTiles[4]?.userId).toBe('user4');
+			expect(orderedTiles[5]?.userId).toBe('user5');
+			expect(orderedTiles[6]?.userId).toBe('user7');
+		});
+		test('in a 3 people meeting, when there is a pinned tile and the last one is speaking, it goes on the second place of the list', () => {
+			const meetingTiles: TileData[] = [
+				{ userId: 'user1', type: STREAM_TYPE.VIDEO },
+				{ userId: 'user2', type: STREAM_TYPE.VIDEO },
+				{ userId: 'user3', type: STREAM_TYPE.VIDEO }
+			];
+			const orderedTiles = orderSpeakingTiles(meetingTiles, 'user3', true);
+			expect(orderedTiles[0]?.userId).toBe('user1');
+			expect(orderedTiles[1]?.userId).toBe('user3');
+			expect(orderedTiles[2]?.userId).toBe('user2');
+		});
+		test('in a 3 people meeting, when there is a screenshare and the second one is speaking, it goes on the second place of the list', () => {
+			const meetingTiles: TileData[] = [
+				{ userId: 'user3', type: STREAM_TYPE.SCREEN },
+				{ userId: 'user1', type: STREAM_TYPE.VIDEO },
+				{ userId: 'user2', type: STREAM_TYPE.VIDEO },
+				{ userId: 'user3', type: STREAM_TYPE.VIDEO }
+			];
+			const orderedTiles = orderSpeakingTiles(meetingTiles, 'user2', true);
+			expect(orderedTiles[0]).toEqual({ userId: 'user3', type: STREAM_TYPE.SCREEN });
+			expect(orderedTiles[1]?.userId).toBe('user2');
+			expect(orderedTiles[2]?.userId).toBe('user1');
+			expect(orderedTiles[3]?.userId).toBe('user3');
+		});
+		test('more than one swapping does not break the tile list', () => {
+			const meetingTiles: TileData[] = [
+				{ userId: 'user1', type: STREAM_TYPE.SCREEN },
+				{ userId: 'user1', type: STREAM_TYPE.VIDEO },
+				{ userId: 'user2', type: STREAM_TYPE.AUDIO },
+				{ userId: 'user3', type: STREAM_TYPE.VIDEO },
+				{ userId: 'user4', type: STREAM_TYPE.AUDIO },
+				{ userId: 'user5', type: STREAM_TYPE.VIDEO },
+				{ userId: 'user6', type: STREAM_TYPE.AUDIO },
+				{ userId: 'user7', type: STREAM_TYPE.VIDEO }
+			];
+			const orderedTiles = orderSpeakingTiles(meetingTiles, 'user5', true);
+			expect(orderedTiles).toHaveLength(8);
+			expect(orderedTiles[1]).toEqual({ userId: 'user5', type: STREAM_TYPE.VIDEO });
+
+			const newOrderTiles = orderSpeakingTiles(orderedTiles, 'user2', true);
+			expect(newOrderTiles).toHaveLength(8);
+			expect(newOrderTiles[1]).toEqual({ userId: 'user2', type: STREAM_TYPE.AUDIO });
+			expect(newOrderTiles[2]).toEqual({ userId: 'user5', type: STREAM_TYPE.VIDEO });
 		});
 	});
 });

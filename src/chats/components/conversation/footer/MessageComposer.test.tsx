@@ -50,6 +50,8 @@ const marioPicture = createMockFile({ name: 'Mario', options: { type: 'image/png
 const luigiPicture = createMockFile({ name: 'Luigi', options: { type: 'image/png' } });
 const peachPicture = createMockFile({ name: 'Peach', options: { type: 'image/png' } });
 
+const draftMessage = 'I am a draft message';
+
 describe('MessageComposer', () => {
 	test('Open/close emoji picker by hovering it', async () => {
 		const { user } = setup(<MessageComposer roomId={'roomId'} />);
@@ -92,6 +94,189 @@ describe('MessageComposer', () => {
 		expect(screen.getByTestId(iconNavigator2).parentNode).toBeDisabled();
 	});
 
+	test('Select file button', async () => {
+		const { user } = setup(<MessageComposer roomId={'roomId'} />);
+		const selectFileButton = screen.getByTestId('icon: Attach');
+		expect(selectFileButton).toBeVisible();
+
+		// Button status while user writes
+		const textArea = screen.getByRole('textbox');
+		await user.type(textArea, ' hi! ');
+		expect(selectFileButton).toBeVisible();
+	});
+
+	test('User type some text in the composer => text is displayed and button to send si enabled', async () => {
+		const { user } = setup(<MessageComposer roomId={'roomId'} />);
+		const textArea = screen.getByRole('textbox');
+		await user.type(textArea, ' hi! ');
+		expect(screen.getByTestId(iconNavigator2).parentNode).not.toBeDisabled();
+		const textAreaUpdated = screen.getByRole('textbox');
+		expect((textAreaUpdated as HTMLTextAreaElement).value).toBe(' hi! ');
+	});
+
+	test('User copy/paste some text in the text input', async () => {
+		const { user } = storeSetupAdvanced();
+		const textToPaste = 'some generic text';
+		await user.paste(textToPaste);
+		const composer = await screen.findByTestId('textAreaComposer');
+		expect((composer as HTMLTextAreaElement).value).toBe(textToPaste);
+		const uploadManager = screen.queryByTestId('upload_attachment_manager');
+		expect(uploadManager).not.toBeInTheDocument();
+	});
+
+	test('input has text and user paste other text => text will be concatenated to the previous in the input', async () => {
+		const { user } = storeSetupAdvanced();
+		const initialText = initText;
+		const textToPaste = 'some generic text';
+		const composerTextArea = screen.getByRole('textbox');
+		await user.type(composerTextArea, initialText);
+		composerTextArea.focus();
+		await user.paste(textToPaste);
+		const composer = await screen.findByTestId('textAreaComposer');
+		expect((composer as HTMLTextAreaElement).value).toBe(`${initialText}${textToPaste}`);
+		const uploadManager = screen.queryByTestId('upload_attachment_manager');
+		expect(uploadManager).not.toBeInTheDocument();
+	});
+
+	test('User copy/paste an image in the text input', async () => {
+		const navigatorSetter = jest.spyOn(navigator, 'platform', 'get');
+		navigatorSetter.mockReturnValue('MacIntel');
+		storeSetupAdvanced();
+		const composerTextArea = screen.getByRole('textbox');
+		const eventProperties = {
+			clipboardData: {
+				getData: jest.fn(),
+				files: [marioPicture]
+			}
+		};
+		const pasteEvent = createEvent.paste(composerTextArea, eventProperties);
+		fireEvent(composerTextArea, pasteEvent);
+		const composer = await screen.findByTestId('textAreaComposer');
+		expect((composer as HTMLTextAreaElement).value).toBe('');
+		const updatedStore = useStore.getState();
+		const { filesToAttach } = updatedStore.activeConversations[mockedRoom.id];
+		expect(filesToAttach?.length).toBe(1);
+		const imageCopied = await screen.findByTestId(
+			`previewImage-${(filesToAttach as FileToUpload[])[0].file.name}-${
+				(filesToAttach as FileToUpload[])[0].fileId
+			}`
+		);
+		const uploadManager = screen.queryByTestId('upload_attachment_manager');
+		expect(uploadManager).toBeInTheDocument();
+		expect(imageCopied).toBeInTheDocument();
+		expect(imageCopied).toHaveStyle(borderColor);
+	});
+
+	test('User copy/paste multiple images in the text input', async () => {
+		const navigatorSetter = jest.spyOn(navigator, 'platform', 'get');
+		navigatorSetter.mockReturnValue('MacIntel');
+		storeSetupAdvanced();
+		const composerTextArea = screen.getByRole('textbox');
+		const eventProperties = {
+			clipboardData: {
+				getData: jest.fn(),
+				files: [marioPicture, luigiPicture, peachPicture]
+			}
+		};
+		const pasteEvent = createEvent.paste(composerTextArea, eventProperties);
+		fireEvent(composerTextArea, pasteEvent);
+		const composer = await screen.findByTestId('textAreaComposer');
+		expect((composer as HTMLTextAreaElement).value).toBe('');
+		const updatedStore = useStore.getState();
+		const { filesToAttach } = updatedStore.activeConversations[mockedRoom.id];
+		expect(filesToAttach?.length).toBe(3);
+		const imageCopied = await screen.findByTestId(
+			`previewImage-${(filesToAttach as FileToUpload[])[0].file.name}-${
+				(filesToAttach as FileToUpload[])[0].fileId
+			}`
+		);
+		const uploadManager = screen.queryByTestId('upload_attachment_manager');
+		expect(uploadManager).toBeInTheDocument();
+		expect(imageCopied).toBeInTheDocument();
+		expect(imageCopied).toHaveStyle(borderColor);
+	});
+
+	test('input has text and user paste an image => upload manger will display the image selected with the input focused with the text', async () => {
+		const navigatorSetter = jest.spyOn(navigator, 'platform', 'get');
+		navigatorSetter.mockReturnValue('MacIntel');
+		const { user } = storeSetupAdvanced();
+		const initialText = initText;
+		const composerTextArea = screen.getByRole('textbox');
+		await user.type(composerTextArea, initialText);
+		const eventProperties = {
+			clipboardData: {
+				getData: jest.fn(),
+				files: [marioPicture]
+			}
+		};
+		const pasteEvent = createEvent.paste(composerTextArea, eventProperties);
+		fireEvent(composerTextArea, pasteEvent);
+		const updatedStore = useStore.getState();
+		const { filesToAttach } = updatedStore.activeConversations[mockedRoom.id];
+		expect(filesToAttach?.length).toBe(1);
+		const imageCopied = await screen.findByTestId(
+			`previewImage-${(filesToAttach as FileToUpload[])[0].file.name}-${
+				(filesToAttach as FileToUpload[])[0].fileId
+			}`
+		);
+		const composer = await screen.findByTestId('textAreaComposer');
+		expect((composer as HTMLTextAreaElement).value).toBe(initialText);
+		expect(imageCopied).toBeInTheDocument();
+		expect(imageCopied).toHaveStyle(borderColor);
+	});
+
+	test('input has text and user paste more images => upload manger will display the first image selected with the input focused with the text', async () => {
+		const navigatorSetter = jest.spyOn(navigator, 'platform', 'get');
+		navigatorSetter.mockReturnValue('MacIntel');
+		const { user } = storeSetupAdvanced();
+		const initialText = initText;
+		const composerTextArea = screen.getByRole('textbox');
+		await user.type(composerTextArea, initialText);
+		const eventProperties = {
+			clipboardData: {
+				getData: jest.fn(),
+				files: [marioPicture, luigiPicture, peachPicture]
+			}
+		};
+		const pasteEvent = createEvent.paste(composerTextArea, eventProperties);
+		fireEvent(composerTextArea, pasteEvent);
+		const updatedStore = useStore.getState();
+		const { filesToAttach } = updatedStore.activeConversations[mockedRoom.id];
+		expect(filesToAttach?.length).toBe(3);
+		const imageCopied = await screen.findByTestId(
+			`previewImage-${(filesToAttach as FileToUpload[])[0].file.name}-${
+				(filesToAttach as FileToUpload[])[0].fileId
+			}`
+		);
+		const composer = await screen.findByTestId('textAreaComposer');
+		expect((composer as HTMLTextAreaElement).value).toBe(initialText);
+		expect(imageCopied).toBeInTheDocument();
+		expect(imageCopied).toHaveStyle(borderColor);
+	});
+
+	test('User can reply to a message attaching a file', async () => {
+		const store = useStore.getState();
+
+		// Set reply message
+		store.setReferenceMessage(
+			mockedRoom.id,
+			'messageId',
+			'senderId',
+			'stanzaId',
+			messageActionType.REPLY
+		);
+
+		setup(<MessageComposer roomId={mockedRoom.id} />);
+
+		const attachFileButton = screen.getByTestId('icon: Attach');
+		expect(attachFileButton).not.toHaveAttribute('disabled', true);
+
+		const sendButton = screen.getByTestId(iconNavigator2);
+		expect(sendButton).not.toHaveAttribute('disabled', true);
+	});
+});
+
+describe('MessageComposer - send message', () => {
 	test('Send a message', async () => {
 		const { user } = setup(<MessageComposer roomId={'roomId'} />);
 		const textArea = screen.getByRole('textbox');
@@ -152,160 +337,10 @@ describe('MessageComposer', () => {
 		const updatedStore = useStore.getState();
 		expect(updatedStore.activeConversations[mockedRoom.id].filesToAttach).toBeUndefined();
 	});
+});
 
-	test('Select file button', async () => {
-		const { user } = setup(<MessageComposer roomId={'roomId'} />);
-		const selectFileButton = screen.getByTestId('icon: Attach');
-		expect(selectFileButton).toBeVisible();
-
-		// Button status while user writes
-		const textArea = screen.getByRole('textbox');
-		await user.type(textArea, ' hi! ');
-		expect(selectFileButton).toBeVisible();
-	});
-	test('User type some text in the composer => text is displayed and button to send si enabled', async () => {
-		const { user } = setup(<MessageComposer roomId={'roomId'} />);
-		const textArea = screen.getByRole('textbox');
-		await user.type(textArea, ' hi! ');
-		expect(screen.getByTestId(iconNavigator2).parentNode).not.toBeDisabled();
-		const textAreaUpdated = screen.getByRole('textbox');
-		expect((textAreaUpdated as HTMLTextAreaElement).value).toBe(' hi! ');
-	});
-	test('User copy/paste some text in the text input', async () => {
-		const { user } = storeSetupAdvanced();
-		const textToPaste = 'some generic text';
-		await user.paste(textToPaste);
-		const composer = await screen.findByTestId('textAreaComposer');
-		expect((composer as HTMLTextAreaElement).value).toBe(textToPaste);
-		const uploadManager = screen.queryByTestId('upload_attachment_manager');
-		expect(uploadManager).not.toBeInTheDocument();
-	});
-	test('input has text and user paste other text => text will be concatenated to the previous in the input', async () => {
-		const { user } = storeSetupAdvanced();
-		const initialText = initText;
-		const textToPaste = 'some generic text';
-		const composerTextArea = screen.getByRole('textbox');
-		await user.type(composerTextArea, initialText);
-		composerTextArea.focus();
-		await user.paste(textToPaste);
-		const composer = await screen.findByTestId('textAreaComposer');
-		expect((composer as HTMLTextAreaElement).value).toBe(`${initialText}${textToPaste}`);
-		const uploadManager = screen.queryByTestId('upload_attachment_manager');
-		expect(uploadManager).not.toBeInTheDocument();
-	});
-	test('User copy/paste an image in the text input', async () => {
-		const navigatorSetter = jest.spyOn(navigator, 'platform', 'get');
-		navigatorSetter.mockReturnValue('MacIntel');
-		storeSetupAdvanced();
-		const composerTextArea = screen.getByRole('textbox');
-		const eventProperties = {
-			clipboardData: {
-				getData: jest.fn(),
-				files: [marioPicture]
-			}
-		};
-		const pasteEvent = createEvent.paste(composerTextArea, eventProperties);
-		fireEvent(composerTextArea, pasteEvent);
-		const composer = await screen.findByTestId('textAreaComposer');
-		expect((composer as HTMLTextAreaElement).value).toBe('');
-		const updatedStore = useStore.getState();
-		const { filesToAttach } = updatedStore.activeConversations[mockedRoom.id];
-		expect(filesToAttach?.length).toBe(1);
-		const imageCopied = await screen.findByTestId(
-			`previewImage-${(filesToAttach as FileToUpload[])[0].file.name}-${
-				(filesToAttach as FileToUpload[])[0].fileId
-			}`
-		);
-		const uploadManager = screen.queryByTestId('upload_attachment_manager');
-		expect(uploadManager).toBeInTheDocument();
-		expect(imageCopied).toBeInTheDocument();
-		expect(imageCopied).toHaveStyle(borderColor);
-	});
-	test('User copy/paste multiple images in the text input', async () => {
-		const navigatorSetter = jest.spyOn(navigator, 'platform', 'get');
-		navigatorSetter.mockReturnValue('MacIntel');
-		storeSetupAdvanced();
-		const composerTextArea = screen.getByRole('textbox');
-		const eventProperties = {
-			clipboardData: {
-				getData: jest.fn(),
-				files: [marioPicture, luigiPicture, peachPicture]
-			}
-		};
-		const pasteEvent = createEvent.paste(composerTextArea, eventProperties);
-		fireEvent(composerTextArea, pasteEvent);
-		const composer = await screen.findByTestId('textAreaComposer');
-		expect((composer as HTMLTextAreaElement).value).toBe('');
-		const updatedStore = useStore.getState();
-		const { filesToAttach } = updatedStore.activeConversations[mockedRoom.id];
-		expect(filesToAttach?.length).toBe(3);
-		const imageCopied = await screen.findByTestId(
-			`previewImage-${(filesToAttach as FileToUpload[])[0].file.name}-${
-				(filesToAttach as FileToUpload[])[0].fileId
-			}`
-		);
-		const uploadManager = screen.queryByTestId('upload_attachment_manager');
-		expect(uploadManager).toBeInTheDocument();
-		expect(imageCopied).toBeInTheDocument();
-		expect(imageCopied).toHaveStyle(borderColor);
-	});
-	test('input has text and user paste an image => upload manger will display the image selected with the input focused with the text', async () => {
-		const navigatorSetter = jest.spyOn(navigator, 'platform', 'get');
-		navigatorSetter.mockReturnValue('MacIntel');
-		const { user } = storeSetupAdvanced();
-		const initialText = initText;
-		const composerTextArea = screen.getByRole('textbox');
-		await user.type(composerTextArea, initialText);
-		const eventProperties = {
-			clipboardData: {
-				getData: jest.fn(),
-				files: [marioPicture]
-			}
-		};
-		const pasteEvent = createEvent.paste(composerTextArea, eventProperties);
-		fireEvent(composerTextArea, pasteEvent);
-		const updatedStore = useStore.getState();
-		const { filesToAttach } = updatedStore.activeConversations[mockedRoom.id];
-		expect(filesToAttach?.length).toBe(1);
-		const imageCopied = await screen.findByTestId(
-			`previewImage-${(filesToAttach as FileToUpload[])[0].file.name}-${
-				(filesToAttach as FileToUpload[])[0].fileId
-			}`
-		);
-		const composer = await screen.findByTestId('textAreaComposer');
-		expect((composer as HTMLTextAreaElement).value).toBe(initialText);
-		expect(imageCopied).toBeInTheDocument();
-		expect(imageCopied).toHaveStyle(borderColor);
-	});
-	test('input has text and user paste more images => upload manger will display the first image selected with the input focused with the text', async () => {
-		const navigatorSetter = jest.spyOn(navigator, 'platform', 'get');
-		navigatorSetter.mockReturnValue('MacIntel');
-		const { user } = storeSetupAdvanced();
-		const initialText = initText;
-		const composerTextArea = screen.getByRole('textbox');
-		await user.type(composerTextArea, initialText);
-		const eventProperties = {
-			clipboardData: {
-				getData: jest.fn(),
-				files: [marioPicture, luigiPicture, peachPicture]
-			}
-		};
-		const pasteEvent = createEvent.paste(composerTextArea, eventProperties);
-		fireEvent(composerTextArea, pasteEvent);
-		const updatedStore = useStore.getState();
-		const { filesToAttach } = updatedStore.activeConversations[mockedRoom.id];
-		expect(filesToAttach?.length).toBe(3);
-		const imageCopied = await screen.findByTestId(
-			`previewImage-${(filesToAttach as FileToUpload[])[0].file.name}-${
-				(filesToAttach as FileToUpload[])[0].fileId
-			}`
-		);
-		const composer = await screen.findByTestId('textAreaComposer');
-		expect((composer as HTMLTextAreaElement).value).toBe(initialText);
-		expect(imageCopied).toBeInTheDocument();
-		expect(imageCopied).toHaveStyle(borderColor);
-	});
-	test('test paste some text at the end of the text present in the composer', async () => {
+describe('MessageComposer - paste on textbox', () => {
+	test('Paste some text at the end of the text present in the composer', async () => {
 		const navigatorSetter = jest.spyOn(navigator, 'platform', 'get');
 		navigatorSetter.mockReturnValue('MacIntel');
 		const { user } = storeSetupAdvanced();
@@ -316,7 +351,8 @@ describe('MessageComposer', () => {
 		const composerUpdated = screen.getByRole('textbox');
 		expect((composerUpdated as HTMLTextAreaElement).value).toBe('we are gonna see later');
 	});
-	test('test paste some text in the middle of the text present in the composer', async () => {
+
+	test('Paste some text in the middle of the text present in the composer', async () => {
 		const navigatorSetter = jest.spyOn(navigator, 'platform', 'get');
 		navigatorSetter.mockReturnValue('MacIntel');
 		const { user } = storeSetupAdvanced();
@@ -330,7 +366,8 @@ describe('MessageComposer', () => {
 		const composerUpdated = screen.getByRole('textbox');
 		expect((composerUpdated as HTMLTextAreaElement).value).toBe('we are gonna check later');
 	});
-	test('test paste some text at the beginning of the text present in the composer', async () => {
+
+	test('Paste some text at the beginning of the text present in the composer', async () => {
 		const navigatorSetter = jest.spyOn(navigator, 'platform', 'get');
 		navigatorSetter.mockReturnValue('MacIntel');
 		const { user } = storeSetupAdvanced();
@@ -341,7 +378,8 @@ describe('MessageComposer', () => {
 		const composerUpdated = screen.getByRole('textbox');
 		expect((composerUpdated as HTMLTextAreaElement).value).toBe('Hi Sam');
 	});
-	test('test paste single attachment at the beginning of the text present in the composer', async () => {
+
+	test('Paste single attachment at the beginning of the text present in the composer', async () => {
 		const navigatorSetter = jest.spyOn(navigator, 'platform', 'get');
 		navigatorSetter.mockReturnValue('MacIntel');
 		const { user } = storeSetupAdvanced();
@@ -370,7 +408,8 @@ describe('MessageComposer', () => {
 		expect(imageCopied).toBeInTheDocument();
 		expect(imageCopied).toHaveStyle(borderColor);
 	});
-	test('test paste single attachment at the end of the text present in the composer', async () => {
+
+	test('Paste single attachment at the end of the text present in the composer', async () => {
 		const navigatorSetter = jest.spyOn(navigator, 'platform', 'get');
 		navigatorSetter.mockReturnValue('MacIntel');
 		const { user } = storeSetupAdvanced();
@@ -398,7 +437,8 @@ describe('MessageComposer', () => {
 		expect(imageCopied).toBeInTheDocument();
 		expect(imageCopied).toHaveStyle(borderColor);
 	});
-	test('test paste single attachment in the middle of the text present in the composer', async () => {
+
+	test('Paste single attachment in the middle of the text present in the composer', async () => {
 		const navigatorSetter = jest.spyOn(navigator, 'platform', 'get');
 		navigatorSetter.mockReturnValue('MacIntel');
 		const { user } = storeSetupAdvanced();
@@ -427,7 +467,8 @@ describe('MessageComposer', () => {
 		expect(imageCopied).toBeInTheDocument();
 		expect(imageCopied).toHaveStyle(borderColor);
 	});
-	test('test paste more attachments at the beginning of the text present in the composer', async () => {
+
+	test('Paste more attachments at the beginning of the text present in the composer', async () => {
 		const navigatorSetter = jest.spyOn(navigator, 'platform', 'get');
 		navigatorSetter.mockReturnValue('MacIntel');
 		const { user } = storeSetupAdvanced();
@@ -456,7 +497,8 @@ describe('MessageComposer', () => {
 		expect(imageCopied).toBeInTheDocument();
 		expect(imageCopied).toHaveStyle(borderColor);
 	});
-	test('test paste more attachments at the end of the text present in the composer', async () => {
+
+	test('Paste more attachments at the end of the text present in the composer', async () => {
 		const navigatorSetter = jest.spyOn(navigator, 'platform', 'get');
 		navigatorSetter.mockReturnValue('MacIntel');
 		const { user } = storeSetupAdvanced();
@@ -484,7 +526,8 @@ describe('MessageComposer', () => {
 		expect(imageCopied).toBeInTheDocument();
 		expect(imageCopied).toHaveStyle(borderColor);
 	});
-	test('test paste more attachments in the middle of the text present in the composer', async () => {
+
+	test('Paste more attachments in the middle of the text present in the composer', async () => {
 		const navigatorSetter = jest.spyOn(navigator, 'platform', 'get');
 		navigatorSetter.mockReturnValue('MacIntel');
 		const { user } = storeSetupAdvanced();
@@ -512,38 +555,6 @@ describe('MessageComposer', () => {
 		);
 		expect(imageCopied).toBeInTheDocument();
 		expect(imageCopied).toHaveStyle(borderColor);
-	});
-
-	test('User can reply to a message attaching a file', async () => {
-		const store = useStore.getState();
-
-		// Set reply message
-		store.setReferenceMessage(
-			mockedRoom.id,
-			'messageId',
-			'senderId',
-			'stanzaId',
-			messageActionType.REPLY
-		);
-
-		setup(<MessageComposer roomId={mockedRoom.id} />);
-
-		const attachFileButton = screen.getByTestId('icon: Attach');
-		expect(attachFileButton).not.toHaveAttribute('disabled', true);
-
-		const sendButton = screen.getByTestId(iconNavigator2);
-		expect(sendButton).not.toHaveAttribute('disabled', true);
-	});
-
-	test('The composer should have the draft message in the text area on opening the conversation', () => {
-		const store = useStore.getState();
-		store.addRoom(mockedRoom);
-		store.setDraftMessage(mockedRoom.id, false, "I'm a draft!");
-
-		setup(<MessageComposer roomId={mockedRoom.id} />);
-
-		const composerTextArea = screen.getByRole('textbox');
-		expect((composerTextArea as HTMLTextAreaElement).value).toBe("I'm a draft!");
 	});
 });
 
@@ -592,5 +603,29 @@ describe('MessageComposer - isWriting events', () => {
 		const sendButton = screen.getByTestId(iconNavigator2);
 		await user.click(sendButton);
 		expect(mockedSendPaused).toBeCalledTimes(1);
+	});
+});
+
+describe('MessageComposer - draft message', () => {
+	test('The composer should have the draft message in the text area on opening the conversation', () => {
+		const store = useStore.getState();
+		store.addRoom(mockedRoom);
+		store.setDraftMessage(mockedRoom.id, false, draftMessage);
+
+		setup(<MessageComposer roomId={mockedRoom.id} />);
+
+		const composerTextArea = screen.getByRole('textbox');
+		expect((composerTextArea as HTMLTextAreaElement).value).toBe(draftMessage);
+	});
+
+	test('The cursor position is in the end of the draft message on opening the conversation', () => {
+		const store = useStore.getState();
+		store.addRoom(mockedRoom);
+		store.setDraftMessage(mockedRoom.id, false, draftMessage);
+
+		setup(<MessageComposer roomId={mockedRoom.id} />);
+
+		const composerTextArea = screen.getByRole('textbox');
+		expect((composerTextArea as HTMLTextAreaElement).selectionStart).toBe(draftMessage.length);
 	});
 });

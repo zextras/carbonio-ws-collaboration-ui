@@ -173,7 +173,7 @@ export function wsEventsHandler(event: WsEvent): void {
 
 			// if user is talking, delete his id from the isTalking array
 			if (activeMeeting) {
-				state.setTalkingUsers(event.meetingId, event.userId, false);
+				state.setTalkingUser(event.meetingId, event.userId, false);
 			}
 			break;
 		}
@@ -195,8 +195,21 @@ export function wsEventsHandler(event: WsEvent): void {
 					? sendAudioFeedback(MeetingSoundFeedback.MEETING_AUDIO_ON)
 					: sendAudioFeedback(MeetingSoundFeedback.MEETING_AUDIO_OFF);
 			}
+			// if user is talking, delete his id from the isTalking array
 			if (activeMeeting && !event.active) {
-				state.setTalkingUsers(event.meetingId, event.userId, false);
+				state.setTalkingUser(event.meetingId, event.userId, false);
+			}
+
+			// mute the tile if someone performed this state on me
+			if (
+				activeMeeting &&
+				event.userId === state.session.id &&
+				!event.active &&
+				event.moderatorId !== undefined
+			) {
+				activeMeeting.bidirectionalAudioConn?.closeRtpSenderTrack();
+				// custom event to show snackbar
+				sendCustomEvent({ name: EventName.MEMBER_MUTED, data: event });
 			}
 			break;
 		}
@@ -273,12 +286,15 @@ export function wsEventsHandler(event: WsEvent): void {
 		case WsEventType.MEETING_PARTICIPANT_TALKING: {
 			const activeMeeting = state.activeMeeting[event.meetingId];
 			if (activeMeeting) {
-				state.setTalkingUsers(event.meetingId, event.userId, event.isTalking);
+				state.setTalkingUser(event.meetingId, event.userId, event.isTalking);
 			}
 			break;
 		}
 		case WsEventType.MEETING_PARTICIPANT_CLASHED: {
-			// TODO
+			const activeMeeting = state.activeMeeting[event.meetingId];
+			if (activeMeeting) {
+				sendCustomEvent({ name: EventName.MEETING_PARTICIPANT_CLASHED, data: event });
+			}
 			break;
 		}
 		default:

@@ -11,7 +11,6 @@ export type ActiveConversation = {
 	scrollPositionMessageId?: string;
 	isHistoryFullyLoaded?: boolean;
 	isHistoryLoadDisabled?: boolean;
-	pinnedMessage?: object;
 	inputHasFocus?: boolean;
 	isWritingList?: string[];
 	referenceMessage?: ReferenceMessage | undefined;

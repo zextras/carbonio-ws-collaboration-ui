@@ -11,6 +11,7 @@ import { act, renderHook } from '@testing-library/react-hooks';
 import { size } from 'lodash';
 
 import MessagesList from './MessagesList';
+import { mockedScrollToEnd, mockedScrollToMessage } from '../../../../jest-mocks';
 import useStore from '../../../store/Store';
 import {
 	createMockConfigurationMessage,
@@ -18,7 +19,7 @@ import {
 	createMockRoom,
 	createMockTextMessage
 } from '../../../tests/createMock';
-import { setup, triggerObserver } from '../../../tests/test-utils';
+import { setup } from '../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
 import { MarkerStatus } from '../../../types/store/MarkersTypes';
 import {
@@ -197,7 +198,6 @@ describe('render list of messages with history loader visible for first time ope
 		const messageList = screen.getByTestId(`intersectionObserverRoot${room.id}`);
 		expect(messageList).toBeVisible();
 		const messageHistoryLoader = screen.getByTestId('messageHistoryLoader');
-		triggerObserver(messageHistoryLoader);
 		expect(messageHistoryLoader).toBeVisible();
 	});
 
@@ -432,5 +432,34 @@ describe('render list of messages with history loader visible for first time ope
 			new RegExp(`${user3Be.name} is no longer a member of the group`, 'i')
 		);
 		expect(label).toBeVisible();
+	});
+});
+
+describe('Scroll position', () => {
+	test('Opening a conversation for the first time sets scroll to the bottom', () => {
+		const store = useStore.getState();
+		store.addRoom(room);
+		setup(<MessagesList roomId={room.id} />);
+		expect(mockedScrollToEnd).toBeCalled();
+	});
+
+	test('Opening an already opened conversation sets scroll to the previous position', () => {
+		const store = useStore.getState();
+		store.addRoom(room);
+		store.updateHistory(room.id, messages);
+		store.setIdMessageWhereScrollIsStopped(room.id, messages[0].id);
+		setup(<MessagesList roomId={room.id} />);
+		expect(mockedScrollToMessage).toBeCalled();
+		expect(mockedScrollToMessage).toBeCalledWith(messages[0].id);
+	});
+
+	test('Opening an already opened conversation with unread messages sets scroll to the bottom', () => {
+		const store = useStore.getState();
+		store.addRoom(room);
+		store.updateHistory(room.id, messages);
+		store.setIdMessageWhereScrollIsStopped(room.id, messages[0].id);
+		store.addUnreadCount(room.id, 1);
+		setup(<MessagesList roomId={room.id} />);
+		expect(mockedScrollToEnd).toBeCalled();
 	});
 });

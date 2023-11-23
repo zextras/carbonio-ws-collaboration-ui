@@ -6,19 +6,15 @@
 
 import React from 'react';
 
-import { act, screen, waitFor } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 
-import RoomPictureHandler from './RoomPictureHandler';
+import GroupRoomPictureHandler from './GroupRoomPictureHandler';
 import {
 	mockedDeleteRoomPictureRequest,
 	mockedUpdateRoomPictureRequest
 } from '../../../../../jest-mocks';
 import useStore from '../../../../store/Store';
-import {
-	createMockCapabilityList,
-	createMockMember,
-	createMockRoom
-} from '../../../../tests/createMock';
+import { createMockMember, createMockRoom } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
 import { RootStore } from '../../../../types/store/StoreTypes';
@@ -64,12 +60,6 @@ const testRoom2: RoomBe = createMockRoom({
 	]
 });
 
-const testRoom3: RoomBe = createMockRoom({
-	pictureUpdatedAt: pictureUpdatedAtTime,
-	type: RoomType.ONE_TO_ONE,
-	members: [createMockMember({ userId: user1Info.id }), createMockMember({ userId: user2Info.id })]
-});
-
 describe('Room Picture Handler - groups', () => {
 	test('everything should be rendered - no image', async () => {
 		const store: RootStore = useStore.getState();
@@ -77,9 +67,7 @@ describe('Room Picture Handler - groups', () => {
 		store.setUserInfo(user1Info);
 		store.setUserInfo(user2Info);
 		store.setLoginInfo(user1Info.id, user1Info.name);
-		const { user } = setup(
-			<RoomPictureHandler roomId={testRoom.id} memberId="" roomType={RoomType.GROUP} />
-		);
+		const { user } = setup(<GroupRoomPictureHandler roomId={testRoom.id} />);
 
 		const backgroundContainer = screen.getByTestId('background_container');
 		await user.hover(backgroundContainer);
@@ -98,9 +86,7 @@ describe('Room Picture Handler - groups', () => {
 		store.setUserInfo(user1Info);
 		store.setUserInfo(user2Info);
 		store.setLoginInfo(user1Info.id, user1Info.name);
-		const { user } = setup(
-			<RoomPictureHandler roomId={testRoom.id} memberId="" roomType={RoomType.GROUP} />
-		);
+		const { user } = setup(<GroupRoomPictureHandler roomId={testRoom2.id} />);
 
 		const pictureContainer = screen.getByTestId('picture_container');
 		await user.hover(pictureContainer);
@@ -124,9 +110,7 @@ describe('Room Picture Handler - groups', () => {
 		store.setUserInfo(user1Info);
 		store.setUserInfo(user2Info);
 		store.setLoginInfo(user1Info.id, user1Info.name);
-		const { user } = setup(
-			<RoomPictureHandler roomId={testRoom.id} memberId="" roomType={RoomType.GROUP} />
-		);
+		const { user } = setup(<GroupRoomPictureHandler roomId={testRoom.id} />);
 
 		const backgroundContainer = screen.getByTestId('background_container');
 		user.hover(backgroundContainer);
@@ -154,9 +138,7 @@ describe('Room Picture Handler - groups', () => {
 		store.setUserInfo(user1Info);
 		store.setUserInfo(user2Info);
 		store.setLoginInfo(user1Info.id, user1Info.name);
-		const { user } = setup(
-			<RoomPictureHandler roomId={testRoom.id} memberId="" roomType={RoomType.GROUP} />
-		);
+		const { user } = setup(<GroupRoomPictureHandler roomId={testRoom2.id} />);
 
 		const pictureContainer = await screen.findByTestId('picture_container');
 		expect(pictureContainer).toBeInTheDocument();
@@ -179,9 +161,7 @@ describe('Room Picture Handler - groups', () => {
 		store.setLoginInfo(user1Info.id, user1Info.name);
 
 		mockedDeleteRoomPictureRequest.mockReturnValueOnce('deleted');
-		const { user } = setup(
-			<RoomPictureHandler roomId={testRoom.id} memberId="" roomType={RoomType.GROUP} />
-		);
+		const { user } = setup(<GroupRoomPictureHandler roomId={testRoom2.id} />);
 
 		const pictureContainer = await screen.findByTestId('picture_container');
 		expect(pictureContainer).toBeInTheDocument();
@@ -206,9 +186,7 @@ describe('Room Picture Handler - groups', () => {
 		store.setLoginInfo(user1Info.id, user1Info.name);
 
 		mockedDeleteRoomPictureRequest.mockRejectedValueOnce('not deleted');
-		const { user } = setup(
-			<RoomPictureHandler roomId={testRoom.id} memberId="" roomType={RoomType.GROUP} />
-		);
+		const { user } = setup(<GroupRoomPictureHandler roomId={testRoom.id} />);
 
 		const pictureContainer = await screen.findByTestId('picture_container');
 		expect(pictureContainer).toBeInTheDocument();
@@ -222,70 +200,5 @@ describe('Room Picture Handler - groups', () => {
 		expect(snackbar).toBeVisible();
 
 		expect(pictureContainer).toBeInTheDocument();
-	});
-});
-
-describe('Room Picture Handler - one_to_one', () => {
-	test('everything should be rendered - with image', async () => {
-		const store: RootStore = useStore.getState();
-		store.addRoom(testRoom3);
-		store.setUserInfo(user1Info);
-		store.setUserInfo(user2Info);
-		store.setLoginInfo(user1Info.id, user1Info.name);
-		const { user } = setup(
-			<RoomPictureHandler
-				roomId={testRoom3.id}
-				memberId={user2Info.id}
-				roomType={RoomType.ONE_TO_ONE}
-			/>
-		);
-
-		// Simulate USER_PICTURE_CHANGED WebSocket event
-		act(() => {
-			store.setUserPictureUpdated(user2Info.id, pictureUpdatedAtTime);
-		});
-
-		const pictureContainer = screen.getByTestId('picture_container');
-		await user.hover(pictureContainer);
-
-		const userName = screen.getByText(new RegExp(`${user2Info.name}`, 'i'));
-
-		expect(userName).toBeInTheDocument();
-	});
-	test('label should show "Last seen" phrase if last_activity is present', () => {
-		const store: RootStore = useStore.getState();
-		store.addRoom(testRoom3);
-		store.setUserInfo(user1Info);
-		store.setUserInfo(user2Info);
-		store.setLoginInfo(user1Info.id, user1Info.name);
-		store.setCapabilities(createMockCapabilityList({ canSeeUsersPresence: true }));
-		act(() => store.setUserLastActivity(user2Info.id, 1642818617000));
-		setup(
-			<RoomPictureHandler
-				roomId={testRoom3.id}
-				memberId={user2Info.id}
-				roomType={RoomType.ONE_TO_ONE}
-			/>
-		);
-
-		// last activity is 2022/01/22 at 03:30:17
-		expect(screen.getByText(/Last seen 01\/22\/2022/i)).toBeInTheDocument();
-	});
-	test('label should show "Online"', () => {
-		const store: RootStore = useStore.getState();
-		store.addRoom(testRoom3);
-		store.setUserInfo(user1Info);
-		store.setUserInfo(user2Info);
-		store.setLoginInfo(user1Info.id, user1Info.name);
-		store.setCapabilities(createMockCapabilityList({ canSeeUsersPresence: true }));
-		act(() => store.setUserPresence(user2Info.id, true));
-		setup(
-			<RoomPictureHandler
-				roomId={testRoom3.id}
-				memberId={user2Info.id}
-				roomType={RoomType.ONE_TO_ONE}
-			/>
-		);
-		expect(screen.getByTestId('user_presence_dot')).toBeInTheDocument();
 	});
 });

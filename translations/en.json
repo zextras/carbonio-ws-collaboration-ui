@@ -25,6 +25,7 @@
         "leave": "Leave",
         "muteNotifications": "Mute notifications",
         "newChat": "New Chat",
+        "ok": "Ok",
         "preview": "Preview",
         "removeUser": "Remove",
         "reply": "Reply",
@@ -115,9 +116,10 @@
     },
     "keepInTouchWithColleagues": "Keep in touch with your colleagues or join your groups' meeting rooms",
     "meeting": {
-        "activeMeetingTooltip": "There's an active meeting for this Group",
+        "activeMeetingTooltip": "There's an active meeting for this Conversation",
         "collapseChat": "Collapse chat",
         "collapseParticipantsMeetingTooltip": "Collapse participants list",
+        "continueActiveSession": "Continue the meeting in the new window",
         "expandChat": "Expand chat",
         "expandParticipantsListTooltip": "Expand participants list",
         "extendChat": "Extend chat",
@@ -147,12 +149,18 @@
             "userIsInvitingYou": "<strong>{{name}}</strong> is inviting you",
             "writeAMessageToSendIt": "Write a message to send it"
         },
+        "noMoreActiveSession": "There cannot be more than one active session of the same meeting",
+        "noTwoActiveSession": "Two active sessions of the same meeting cannot coexist",
         "ongoingGroupMeetingTooltip": "You are already participating in this meeting",
         "ongoingOneToOneMeetingTooltip": "You already have an active meeting with {{name}}",
+        "openedInAnotherWindow": "This meeting is already open in another window",
         "participantsList": {
             "title": "One meeting's participant",
             "title_plural": "{{count}} meeting's participants"
         },
+        "presentActiveSession": "There is another active session",
+        "rejoinMeeting": "Rejoin meeting",
+        "restartMeeting": "Restart meeting",
         "setInputDescription": "Set your input devices by choosing them from dropdown menu",
         "startMeeting": "Start meeting",
         "startModal": {
@@ -160,7 +168,10 @@
             "enterOneToOneMeetingTitle": "Start meeting with {{meetingTitle}}",
             "enterRoomMeetingTitle": "Participate to {{meetingTitle}} meeting"
         },
-        "waitingParticipants": "Waiting for participants to join..."
+        "tooltip": {
+            "activeSessionTooltip": "You have an active session in this meeting"
+        },
+        "waitingParticipants": "Waiting for participants to join…"
     },
     "meetings": {
         "interactions": {
@@ -171,7 +182,9 @@
     "message": {
         "deletedMessage": "Deleted message",
         "draft": "draft",
-        "edited": "edited"
+        "edited": "edited",
+        "forwardedMultipleTimes": "Forwarded multiple times",
+        "originallySentBy": "Originally sent by:"
     },
     "modal": {
         "clearHistoryDescription": "You're cleaning your conversation history, please note that this action is irreversible. The history will be deleted for you and not for the other members.",
@@ -246,10 +259,13 @@
         "save": "Edits saved correctly",
         "title": "Chats settings"
     },
+    "snackbar": {
+        "mutedByModerator": "You've been muted by a moderator, unmute yourself to speak"
+    },
     "status": {
-        "areTyping": "are typing...",
+        "areTyping": "are typing…",
         "goToPrivateChat": "Go to private chat to send a personal message",
-        "isTyping": "is typing...",
+        "isTyping": "is typing…",
         "lastSeen": "Last seen {{lastSeen}}",
         "offline": "Offline",
         "online": "Online",
@@ -279,7 +295,7 @@
         "messageReceived": "Received",
         "messageSent": "Sent",
         "muteForAll": "Mute for all",
-        "participantAlreadyMuted": "This participant is already muted",
+        "participantMuted": "This participant is muted",
         "pending": "Pending",
         "pinVideo": "Pin video",
         "promoteModerator": "Promote to moderator",
@@ -304,7 +320,8 @@
             "updateAvatar": "Update avatar",
             "uploadAvatar": "Upload avatar"
         },
-        "writeToSend": "Write a message to send it"
+        "writeToSend": "Write a message to send it",
+        "youAreAlreadyMuted": "You're muted"
     },
     "tryLater": "Try later"
 }

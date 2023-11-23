@@ -9,6 +9,7 @@ import { Container, Tooltip, Icon, Padding, IconButton } from '@zextras/carbonio
 import { useTranslation } from 'react-i18next';
 
 import PromoteDemoteMemberAction from '../../../../chats/components/infoPanel/conversationParticipantsAccordion/PromoteDemoteMemberAction';
+import useMuteForAll from '../../../../hooks/useMuteForAll';
 import usePinnedTile from '../../../../hooks/usePinnedTile';
 import {
 	getParticipantAudioStatus,
@@ -28,11 +29,10 @@ const MeetingParticipantActions: FC<ParticipantActionsProps> = ({ memberId, meet
 		'tooltip.memberIsModerator',
 		'This member is a moderator'
 	);
-	const participantAlreadyMutedLabel = t(
-		'tooltip.participantAlreadyMuted',
-		'This participant is already muted'
-	);
-	// const muteForAllLabel = t('tooltip.muteForAll', 'Mute for all');
+	const iAmModeratorLabel: string = t('tooltip.iAmModerator', "You're a moderator");
+	const participantMutedLabel = t('tooltip.participantMuted', 'This participant is muted');
+	const youAreMutedLabel = t('tooltip.youAreAlreadyMuted', "You're muted");
+	const muteForAllLabel = t('tooltip.muteForAll', 'Mute for all');
 	const pinVideoLabel = t('tooltip.pinVideo', 'Pin video');
 	const unpinVideoLabel = t('tooltip.unpinVideo', 'Unpin video');
 	const userId: string | undefined = useStore((store) => getUserId(store));
@@ -51,42 +51,44 @@ const MeetingParticipantActions: FC<ParticipantActionsProps> = ({ memberId, meet
 
 	const isSessionParticipant: boolean = useMemo(() => memberId === userId, [memberId, userId]);
 
+	const { muteForAllHasToAppear, muteForAll } = useMuteForAll(meetingId, memberId);
+
 	return (
 		<Container width="fit" height="fit" orientation="horizontal">
-			{iAmOwner ? (
+			{iAmOwner && !isSessionParticipant ? (
 				<PromoteDemoteMemberAction
 					memberId={memberId}
 					roomId={roomId || ''}
-					isSessionParticipant={isSessionParticipant}
 					owner={memberOwner}
 					isInsideMeeting
 				/>
 			) : (
 				memberOwner && (
-					<Tooltip label={memberIsModeratorLabel}>
+					<Tooltip label={isSessionParticipant ? iAmModeratorLabel : memberIsModeratorLabel}>
 						<Padding all="0.5rem">
-							<Icon icon="Crown" size="medium" />
+							<Icon icon="Crown" size="medium" color="gray1" />
 						</Padding>
 					</Tooltip>
 				)
 			)}
 			{!participantAudioStatus && (
-				<Tooltip label={participantAlreadyMutedLabel}>
+				<Tooltip label={isSessionParticipant ? youAreMutedLabel : participantMutedLabel}>
 					<Padding all="0.5rem">
-						<Icon icon="MicOff" size="medium" />
+						<Icon icon="MicOff" size="medium" color="gray1" />
 					</Padding>
 				</Tooltip>
 			)}
-			{/*	TODO MUTE FOR ALL FEATURE */}
-			{/* <Tooltip label={muteForAllLabel}> */}
-			{/*	<IconButton */}
-			{/*		iconColor="gray0" */}
-			{/*		backgroundColor="text" */}
-			{/*		icon="MicOffOutline" */}
-			{/*		onClick={() => {}) */}
-			{/*		size="large" */}
-			{/*	/> */}
-			{/* </Tooltip> */}
+			{muteForAllHasToAppear && (
+				<Tooltip label={muteForAllLabel}>
+					<IconButton
+						iconColor="gray0"
+						backgroundColor="text"
+						icon="MicOffOutline"
+						onClick={muteForAll}
+						size="medium"
+					/>
+				</Tooltip>
+			)}
 			{canUsePinFeature && (
 				<Tooltip label={isPinned ? unpinVideoLabel : pinVideoLabel}>
 					<IconButton

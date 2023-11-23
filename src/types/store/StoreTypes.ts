@@ -104,7 +104,6 @@ export type ActiveConversationsSlice = {
 	activeConversations: ActiveConversationsMap;
 	setDraftMessage: (roomId: string, sent: boolean, message?: string) => void;
 	setIdMessageWhereScrollIsStopped: (roomId: string, messageId: string) => void;
-	setPinnedMessage: (roomId: string, message: object) => void;
 	setInputHasFocus: (roomId: string, hasFocus: boolean) => void;
 	setIsWriting: (roomId: string, userId: string, writingStatus: boolean) => void;
 	setReferenceMessage: (
@@ -188,7 +187,7 @@ export type ActiveMeetingSlice = {
 	setSubscribedTracks: (meetingId: string, streams: StreamsSubscriptionMap) => void;
 	setIsCarouseVisible: (meetingId: string, status: boolean) => void;
 	setPinnedTile: (meetingId: string, tile: TileData | undefined) => void;
-	setTalkingUsers: (meetingId: string, userId: string, isTalking: boolean) => void;
+	setTalkingUser: (meetingId: string, userId: string, isTalking: boolean) => void;
 };
 
 export type RootStore = UsersStoreSlice &
