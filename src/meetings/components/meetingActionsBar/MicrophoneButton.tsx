@@ -145,9 +145,6 @@ const MicrophoneButton = ({
 					forceOpen: isAudioListOpen,
 					onClick: toggleAudioDropdown,
 					dropdownListRef: audioDropdownRef,
-					// TODO fix lint error
-					// eslint-disable-next-line react/jsx-no-useless-fragment
-					children: <></>,
 					items: mediaAudioList
 				}}
 			/>
