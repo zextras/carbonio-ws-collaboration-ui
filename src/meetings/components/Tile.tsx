@@ -231,7 +231,7 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		timeout = setTimeout(() => {
 			setIsHoovering(false);
-		}, 4000);
+		}, 2000);
 	}, [isHoovering]);
 
 	useEffect(() => {
@@ -328,7 +328,7 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 		() => (
 			<HoverContainer width="100%" data-testid="hover_container" orientation="horizontal">
 				{canUseMuteForAll && (
-					<Tooltip label={muteForAllLabel}>
+					<Tooltip label={muteForAllLabel} disabled={!isHoovering}>
 						<IconButton
 							icon="MicOffOutline"
 							iconColor="text"
@@ -342,7 +342,7 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 				)}
 				{canUseMuteForAll && canUsePinFeature && <Padding right="1rem" />}
 				{canUsePinFeature && (
-					<Tooltip label={isPinned ? unpinVideoLabel : pinVideoLabel}>
+					<Tooltip label={isPinned ? unpinVideoLabel : pinVideoLabel} disabled={!isHoovering}>
 						<IconButton
 							icon={!isPinned ? 'Pin3Outline' : 'Unpin3Outline'}
 							iconColor="text"
@@ -359,6 +359,7 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 		[
 			canUseMuteForAll,
 			muteForAllLabel,
+			isHoovering,
 			muteForAll,
 			canUsePinFeature,
 			isPinned,
