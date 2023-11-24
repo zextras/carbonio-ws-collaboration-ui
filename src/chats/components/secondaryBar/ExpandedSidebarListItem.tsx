@@ -31,13 +31,14 @@ import {
 	getRoomNameSelector,
 	getRoomTypeSelector
 } from '../../../store/selectors/RoomsSelectors';
-import { getSelectedConversation } from '../../../store/selectors/SessionSelectors';
+import { getCapability, getSelectedConversation } from '../../../store/selectors/SessionSelectors';
 import { getRoomUnreadsSelector } from '../../../store/selectors/UnreadsCounterSelectors';
 import { getUserName } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
 import { MarkerStatus } from '../../../types/store/MarkersTypes';
 import { Message, MessageType } from '../../../types/store/MessageTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
+import { CapabilityType } from '../../../types/store/SessionTypes';
 import { ConfigurationMessageLabel } from '../../../utils/ConfigurationMessageLabel';
 import GroupAvatar from '../GroupAvatar';
 import UserAvatar from '../UserAvatar';
@@ -84,6 +85,9 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 	);
 	const roomMuted = useStore((state) => getRoomMutedSelector(state, roomId));
 	const draftMessage = useStore((store) => getDraftMessage(store, roomId));
+	const canSeeMessageReads = useStore((store) =>
+		getCapability(store, CapabilityType.CAN_SEE_MESSAGE_READS)
+	);
 
 	const ackIcon = useMemo(() => {
 		if (
@@ -130,6 +134,16 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 	const draftTooltip = useMemo(
 		() => `${draftLabel.toUpperCase()}: ${draftMessage}`,
 		[draftMessage, draftLabel]
+	);
+
+	const showMessageReads = useMemo(
+		() =>
+			canSeeMessageReads ||
+			(!canSeeMessageReads &&
+				lastMessageOfRoom &&
+				lastMessageOfRoom.type === MessageType.TEXT_MSG &&
+				lastMessageOfRoom.read === MarkerStatus.PENDING),
+		[canSeeMessageReads, lastMessageOfRoom]
 	);
 
 	const messageToDisplay = useMemo((): JSX.Element | string | undefined => {
@@ -238,7 +252,7 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 										</Container>
 									</Tooltip>
 								)}
-								{!draftMessage && ackIcon && (
+								{!draftMessage && ackIcon && showMessageReads && (
 									<Tooltip label={dropdownTooltip}>
 										<Container width="fit" padding={{ right: 'extrasmall' }}>
 											{ackIcon}

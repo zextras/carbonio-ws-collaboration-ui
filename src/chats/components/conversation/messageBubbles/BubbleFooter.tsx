@@ -23,6 +23,7 @@ type BubbleFooterProps = {
 	messageExtension?: string;
 	messageSize?: string;
 	isEdited?: boolean;
+	canSeeMessageReads?: boolean | number;
 };
 
 const ItalicText = styled(Text)`
@@ -36,7 +37,8 @@ const BubbleFooter: FC<BubbleFooterProps> = ({
 	messageRead,
 	messageExtension,
 	messageSize,
-	isEdited
+	isEdited,
+	canSeeMessageReads
 }) => {
 	const [t] = useTranslation();
 	const editedLabel = t('message.edited', 'edited');
@@ -57,7 +59,6 @@ const BubbleFooter: FC<BubbleFooterProps> = ({
 	}, [messageRead]);
 
 	const timezone = useStore(getPrefTimezoneSelector);
-	const messageDate = moment.tz(date, timezone).format('DD MMM YY');
 	const messageTime = moment.tz(date, timezone).format('HH:mm');
 
 	const dropdownTooltip = useMemo(() => {
@@ -97,7 +98,7 @@ const BubbleFooter: FC<BubbleFooterProps> = ({
 						</ItalicText>
 					</Container>
 				)}
-				{isMyMessage && messageRead && (
+				{isMyMessage && messageRead && canSeeMessageReads && (
 					<Tooltip label={dropdownTooltip}>
 						<Padding width="fit" right="small">
 							<Icon size="small" icon={ackIcon} color={ackIconColor} />
