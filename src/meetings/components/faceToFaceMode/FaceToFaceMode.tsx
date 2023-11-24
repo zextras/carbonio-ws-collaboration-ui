@@ -90,6 +90,7 @@ const FaceToFaceMode = (): ReactElement => {
 			<MyStreamContainer
 				data-testid="myStreamContainer"
 				width="30%"
+				maxWidth="25rem"
 				height="fit"
 				background="secondary"
 			>
