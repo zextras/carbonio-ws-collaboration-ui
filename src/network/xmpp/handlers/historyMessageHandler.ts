@@ -69,7 +69,7 @@ export function onHistoryMessageStanza(message: Element): true {
 				break;
 			}
 			default:
-				console.log('Unknown MAM request type ');
+				xmppDebug('Unknown MAM request type');
 		}
 	}
 	return true;
@@ -95,7 +95,6 @@ export function onRequestHistory(
 	unread: number | undefined,
 	stanza: Element
 ): void {
-	xmppDebug(`<--- End request history`);
 	const from = getRequiredAttribute(stanza, 'from');
 	const roomId = getId(from);
 	const fin = getRequiredTagElement(stanza, 'fin');
