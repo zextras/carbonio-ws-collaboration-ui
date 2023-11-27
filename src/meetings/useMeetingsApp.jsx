@@ -9,6 +9,7 @@ import React, { lazy, Suspense, useEffect } from 'react';
 import { addRoute } from '@zextras/carbonio-shell-ui';
 
 import ShimmerEntryMeetingView from './views/shimmers/ShimmerEntryMeetingView';
+import ConnectionSnackbarManager from '../chats/components/ConnectionSnackbarManager';
 import { MEETINGS_NAME, MEETINGS_ROUTE } from '../constants/appConstants';
 
 const LazyMeetingMainView = lazy(() =>
@@ -17,6 +18,7 @@ const LazyMeetingMainView = lazy(() =>
 
 const MeetingMain = () => (
 	<Suspense fallback={<ShimmerEntryMeetingView />}>
+		<ConnectionSnackbarManager />
 		<LazyMeetingMainView />
 	</Suspense>
 );
