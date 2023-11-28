@@ -16,7 +16,7 @@ const ConnectionSnackbarManager = (): ReactElement | null => {
 	const actionLabel = t('action.understood', 'Understood');
 	const networkProblemLabel = t(
 		'feedback.networkProblems',
-		'There may be problems using this module, please try again later.'
+		'There may be problems using this module, please try to refresh the page.'
 	);
 
 	const chatsBeNetworkStatus = useStore(({ connections }) => connections.status.chats_be);
