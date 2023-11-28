@@ -290,7 +290,7 @@ const ChatCreationContactsSelection = ({
 				maxChips={maxGroupMembers}
 				data-testid="chip_input_creation_modal"
 				confirmChipOnBlur={false}
-				separators={['']}
+				separators={[]}
 				description={
 					size(contactsSelected) > 1 || !isCreationModal ? chipInputDescriptionLabel : ''
 				}
