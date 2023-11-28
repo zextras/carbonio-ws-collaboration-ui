@@ -12,7 +12,7 @@ export const canPerformAction = (
 	isMyMessage: boolean,
 	actionTimeLimitInMinutes: number,
 	actionType?: messageActionType
-): boolean | 0 => {
+): boolean => {
 	const inTime =
 		!actionTimeLimitInMinutes || Date.now() <= message.date + actionTimeLimitInMinutes * 60000;
 	if (actionType === messageActionType.EDIT && message.type === MessageType.TEXT_MSG)
