@@ -365,7 +365,8 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 				canPerformAction(
 					lastMessageOfRoom,
 					lastMessageOfRoom.from === myUserId,
-					editMessageTimeLimitInMinutes
+					editMessageTimeLimitInMinutes,
+					messageActionType.EDIT
 				)
 			) {
 				setDraftMessage(lastMessageOfRoom.roomId, false, lastMessageOfRoom.text);

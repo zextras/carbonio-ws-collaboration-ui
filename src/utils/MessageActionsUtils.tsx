@@ -14,8 +14,7 @@ export const canPerformAction = (
 	actionType?: messageActionType
 ): boolean | 0 => {
 	const inTime =
-		!actionTimeLimitInMinutes ||
-		(actionTimeLimitInMinutes && Date.now() <= message.date + actionTimeLimitInMinutes * 60000);
+		!actionTimeLimitInMinutes || Date.now() <= message.date + actionTimeLimitInMinutes * 60000;
 	if (actionType === messageActionType.EDIT && message.type === MessageType.TEXT_MSG)
 		return isMyMessage && inTime && !message.forwarded;
 	return isMyMessage && inTime;
