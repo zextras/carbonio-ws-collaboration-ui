@@ -63,4 +63,11 @@ describe('TextContentBubble', () => {
 		const text = screen.getByText(/😀/);
 		expect(text).toHaveStyle(biggerFontSize);
 	});
+
+	test('Text is composed by numbers and its dimension is normal', () => {
+		const textContent = '12';
+		setup(<TextContentBubble textContent={[textContent]} />);
+		const text = screen.getByText(textContent);
+		expect(text).toHaveStyle(normalFontSize);
+	});
 });

@@ -43,7 +43,7 @@ type TextContentBubbleProps = {
 
 const TextContentBubble: FC<TextContentBubbleProps> = ({ textContent }) => {
 	const isEmojiString = useMemo(() => {
-		const regexEmoji = /[\p{Emoji}]/u;
+		const regexEmoji = /\p{Extended_Pictographic}/u;
 		const text = join(textContent, '').replace(/\s+/g, '');
 		const emojiMatches = filter([...text], (char) => regexEmoji.test(char));
 		return size(emojiMatches) > 0 && size(emojiMatches) < 4 && size(text) === size(emojiMatches);
