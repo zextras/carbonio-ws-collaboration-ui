@@ -39,7 +39,7 @@ const ConnectionSnackbarManager = (): ReactElement | null => {
 	) {
 		return (
 			<Snackbar
-				open={!chatsBeNetworkStatus}
+				open={!chatsBeNetworkStatus || !xmppNetworkStatus || !websocketNetworkStatus}
 				onClose={(): void => setSnackbarManuallyClosed(true)}
 				actionLabel={actionLabel}
 				disableAutoHide

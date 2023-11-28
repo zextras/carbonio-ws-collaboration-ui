@@ -38,6 +38,18 @@ describe('ConnectionSnackbarManager', () => {
 		expect(snackbar).toBeInTheDocument();
 	});
 
+	test('Snackbar is shown when there is only websocket problem and other two connection are established', async () => {
+		setup(<ConnectionSnackbarManager />);
+		const store = useStore.getState();
+		act(() => {
+			store.setChatsBeStatus(true);
+			store.setWebsocketStatus(false);
+			store.setXmppStatus(true);
+		});
+		const snackbar = await screen.findByTestId('snackbar');
+		expect(snackbar).toBeInTheDocument();
+	});
+
 	test('Snackbar disappears when websocket problem is resolved', async () => {
 		setup(<ConnectionSnackbarManager />);
 		const store = useStore.getState();
