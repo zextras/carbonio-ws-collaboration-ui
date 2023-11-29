@@ -422,10 +422,7 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 							dropdownProps={{
 								width: 'fit',
 								placement: 'bottom-end',
-								items: mediaVideoList,
-								// TODO fix lint error
-								// eslint-disable-next-line react/jsx-no-useless-fragment
-								children: <></>
+								items: mediaVideoList
 							}}
 							items={mediaVideoList}
 						/>
@@ -440,10 +437,7 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 							dropdownProps={{
 								width: 'fit',
 								placement: 'bottom-start',
-								items: mediaAudioList,
-								// TODO fix lint error
-								// eslint-disable-next-line react/jsx-no-useless-fragment
-								children: <></>
+								items: mediaAudioList
 							}}
 							onClick={toggleAudio}
 							items={mediaAudioList}

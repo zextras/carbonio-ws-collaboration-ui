@@ -6,7 +6,13 @@
 
 import React, { Dispatch, ReactElement, SetStateAction, useCallback } from 'react';
 
-import { Container, IconButton, Text, Tooltip } from '@zextras/carbonio-design-system';
+import {
+	Container,
+	IconButton,
+	Row,
+	TextWithTooltip,
+	Tooltip
+} from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -44,38 +50,32 @@ const ConversationHeader = ({
 	}, [setInfoPanelOpen]);
 
 	return (
-		<Container height="fit">
-			<RoomInfoHeader
-				height="3rem"
-				background="gray5"
-				borderRadius="none"
-				orientation="horizontal"
-				mainAlignment="space-between"
-				padding={{ vertical: 'medium', horizontal: 'large' }}
-			>
-				<Container crossAlignment="flex-start" maxWidth="94%">
-					<Text title={roomName} overflow="ellipsis">
-						{roomName}
-					</Text>
-				</Container>
-				<Container orientation="horizontal" width="fit" style={{ minWidth: 'fit-content' }}>
-					{!canVideoCall && ( // TODO change check in canVideoCall &&
-						<ConversationHeaderMeetingButton roomId={roomId} />
-					)}
-					{!isDesktopView && (
-						<Tooltip label={infoTooltip}>
-							<IconButton
-								data-testid="infoPanelToggle"
-								onClick={toggleInfoPanel}
-								iconColor="secondary"
-								size="large"
-								icon="InfoOutline"
-							/>
-						</Tooltip>
-					)}
-				</Container>
-			</RoomInfoHeader>
-		</Container>
+		<RoomInfoHeader
+			height="3rem"
+			background="gray5"
+			borderRadius="none"
+			orientation="horizontal"
+			mainAlignment="space-between"
+			padding={{ vertical: 'medium', horizontal: 'large' }}
+		>
+			<Row takeAvailableSpace mainAlignment="flex-start">
+				<TextWithTooltip overflow="ellipsis">{roomName}</TextWithTooltip>
+			</Row>
+			<Row orientation="horizontal" width="fit" style={{ minWidth: 'fit-content' }}>
+				{canVideoCall && <ConversationHeaderMeetingButton roomId={roomId} />}
+				{!isDesktopView && (
+					<Tooltip label={infoTooltip}>
+						<IconButton
+							data-testid="infoPanelToggle"
+							onClick={toggleInfoPanel}
+							iconColor="secondary"
+							size="large"
+							icon="InfoOutline"
+						/>
+					</Tooltip>
+				)}
+			</Row>
+		</RoomInfoHeader>
 	);
 };
 

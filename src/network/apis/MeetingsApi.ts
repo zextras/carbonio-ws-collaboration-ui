@@ -167,10 +167,12 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 
 	public updateAudioStreamStatus(
 		meetingId: string,
-		enabled: boolean
+		enabled: boolean,
+		userToModerate?: string
 	): Promise<UpdateAudioStreamStatusResponse> {
 		return this.fetchAPI(`meetings/${meetingId}/audio`, RequestType.PUT, {
-			enabled
+			enabled,
+			userToModerate
 		});
 	}
 

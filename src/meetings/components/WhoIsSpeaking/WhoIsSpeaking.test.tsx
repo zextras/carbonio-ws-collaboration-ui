@@ -80,9 +80,9 @@ const setupActiveMeeting = (): void => {
 	store.meetingConnection(meeting.id, false, undefined, false, undefined);
 	store.setMeetingViewSelected(meeting.id, MeetingViewType.CINEMA);
 	store.setIsCarouseVisible(meeting.id, false);
-	store.setTalkingUsers(meeting.id, user3.id, true);
-	store.setTalkingUsers(meeting.id, user2.id, true);
-	store.setTalkingUsers(meeting.id, user1.id, true);
+	store.setTalkingUser(meeting.id, user3.id, true);
+	store.setTalkingUser(meeting.id, user2.id, true);
+	store.setTalkingUser(meeting.id, user1.id, true);
 };
 
 describe('Who is speaking', () => {

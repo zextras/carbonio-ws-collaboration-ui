@@ -13,6 +13,7 @@ import {
 	LeaveMeetingResponse,
 	StartMeetingResponse,
 	StopMeetingResponse,
+	UpdateAudioStreamStatusResponse,
 	SubscribeMediaResponse
 } from './src/types/network/responses/meetingsResponses';
 import {
@@ -137,6 +138,7 @@ export const mockedStopMeetingRequest: jest.Mock = jest.fn();
 export const mockedDeleteMeetingRequest: jest.Mock = jest.fn();
 export const mockedAddRoomAttachmentRequest: jest.Mock = jest.fn();
 export const mockedSubscribeToMediaRequest: jest.Mock = jest.fn();
+export const mockedUpdateAudioStreamStatusRequest: jest.Mock = jest.fn();
 
 jest.mock('./src/network', () => ({
 	RoomsApi: {
@@ -283,6 +285,11 @@ jest.mock('./src/network', () => ({
 		deleteMeeting: (): Promise<DeleteMeetingResponse> =>
 			new Promise((resolve, reject) => {
 				const result = mockedDeleteMeetingRequest();
+				result ? resolve(result) : reject(new Error(noResultProvided));
+			}),
+		updateAudioStreamStatus: (): Promise<UpdateAudioStreamStatusResponse> =>
+			new Promise((resolve, reject) => {
+				const result = mockedUpdateAudioStreamStatusRequest();
 				result ? resolve(result) : reject(new Error(noResultProvided));
 			}),
 		subscribeToMedia: (): Promise<SubscribeMediaResponse> =>

@@ -215,7 +215,7 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 				/* @ts-ignore */
 				ChipComponent={ForwardMessageConversationChip}
 				confirmChipOnBlur={false}
-				separators={['']}
+				separators={[]}
 			/>
 			<Padding bottom="large" />
 			<Container height="9.375rem">

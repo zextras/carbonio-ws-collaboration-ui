@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.3](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.0.2...v0.0.3) (2023-11-23)
+
+
+### Features
+
+* add transitions to sidebar, carousel and meeting chat ref: WSC-986 ([#160](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/160)) ([37b46c0](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/37b46c0e0f0c50a740f31940298d750cbfdc6f65))
+* handle mute for all refs: WSC-1133 ([#163](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/163)) ([60d28d1](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/60d28d1b071824741e478e68ac7b12f501fac93f))
+* let user to rejoin an active meeting ref: WSC-1086 ([#168](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/168)) ([1d89e77](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/1d89e77d1fabc5c494039f3797cb8169ca428a22))
+* managed swap of tiles refs: WSC-1081 ([#149](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/149)) ([25cbc4d](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/25cbc4d8e4dd20fa09fc76b39b68b704457a01c7))
+* meetingButton is available only when canVideoCall capability is enabled ref: WSC-1114 ([#166](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/166)) ([df17f74](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/df17f744558387cc757435794756d8411bc5f7c3))
+* preview action on info panel avatars ref: WSC-448 ([#158](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/158)) ([126d776](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/126d776cd6a26e8a19cad93ae4b3223b5364bdbd))
+* update forwarded message layout ref: WSC-908 ([#157](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/157)) ([58ffdf0](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/58ffdf079a68df8e2bdd55324ce8d4be92d0b090))
+* updates the input behavior when the user enters a conversation ref: WSC-1088 ([#148](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/148)) ([abd8289](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/abd828983109abe3352dfba5ef2eac4f19dd0416))
+
+
+### Bug Fixes
+
+* cursor input doesn't keep the right position while editing a message ref: WSC-1136 ([#161](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/161)) ([edec04f](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/edec04fd48b8cae235da70c4fa2a13b88bdc6a5b))
+* fixed scroll tick refs: WSC-915 ([#165](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/165)) ([99f7904](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/99f790468a53964a3ae4d3946d44be8c9012fee8))
+* fixed settings modal that do not close on save refs: WSC-1135 ([#164](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/164)) ([b7c45b7](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/b7c45b7fa382500f3bae3dc98cb3086d19cf95b9))
+* input change height when an emoji is added WSC-805 ([#162](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/162)) ([30e0c92](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/30e0c92f3d50f0c27cf23737bd38a5cf21c04cab))
+
 ### [0.0.2](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.0.1...v0.0.2) (2023-10-31)
 
 

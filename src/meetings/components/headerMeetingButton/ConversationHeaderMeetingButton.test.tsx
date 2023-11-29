@@ -165,7 +165,7 @@ describe('Conversation header meeting button - one to one', () => {
 	test('everything is rendered correctly - meeting started', () => {
 		storeSetupOneToOneMeeting();
 		const disabledButton = screen.getByTestId('join_meeting_button');
-		expect(disabledButton).toBeDisabled();
+		expect(disabledButton).toBeEnabled();
 	});
 });
 
@@ -179,7 +179,7 @@ describe('Conversation header meeting button - group', () => {
 	test('everything is rendered correctly - meeting started', () => {
 		storeSetupGroupMeeting();
 		const disabledButton = screen.getByTestId('join_meeting_button');
-		expect(disabledButton).toBeDisabled();
+		expect(disabledButton).toBeEnabled();
 		const videoButton = screen.getByTestId('video_button');
 		expect(videoButton).toBeVisible();
 		const participantListButton = screen.getByTestId('participant_list_button');

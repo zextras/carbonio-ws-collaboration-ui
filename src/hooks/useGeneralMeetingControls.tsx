@@ -8,6 +8,7 @@ import { useCallback, useEffect } from 'react';
 
 import { filter, find, maxBy, size } from 'lodash';
 
+import useEventListener, { EventName } from './useEventListener';
 import useRouting, { PAGE_INFO_TYPE } from './useRouting';
 import { MeetingsApi } from '../network';
 import { getMeetingByMeetingId, getTiles } from '../store/selectors/MeetingSelectors';
@@ -18,6 +19,7 @@ const useGeneralMeetingControls = (meetingId: string): void => {
 	const meeting = useStore((store) => getMeetingByMeetingId(store, meetingId));
 	const tiles = useStore((store) => getTiles(store, meetingId));
 	const setPinnedTile = useStore((store) => store.setPinnedTile);
+	const meetingDisconnection = useStore((store) => store.meetingDisconnection);
 
 	const { goToInfoPage } = useRouting();
 
@@ -79,6 +81,16 @@ const useGeneralMeetingControls = (meetingId: string): void => {
 		}
 		// eslint-disable-next-line
 	}, [meetingId, setPinnedTile]);
+
+	const meetingParticipantClashedHandler = useCallback(
+		(event) => {
+			meetingDisconnection(event.detail.meetingId);
+			goToInfoPage(PAGE_INFO_TYPE.ALREADY_ACTIVE_MEETING_SESSION);
+		},
+		[goToInfoPage, meetingDisconnection]
+	);
+
+	useEventListener(EventName.MEETING_PARTICIPANT_CLASHED, meetingParticipantClashedHandler);
 };
 
 export default useGeneralMeetingControls;

@@ -11,7 +11,11 @@ import { screen } from '@testing-library/react';
 import ConversationHeader from './ConversationHeader';
 import { mockUseMediaQueryCheck } from '../../../../jest-mocks';
 import useStore from '../../../store/Store';
-import { createMockMember, createMockRoom } from '../../../tests/createMock';
+import {
+	createMockCapabilityList,
+	createMockMember,
+	createMockRoom
+} from '../../../tests/createMock';
 import { setup } from '../../../tests/test-utils';
 import { RoomBe } from '../../../types/network/models/roomBeTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
@@ -42,5 +46,21 @@ describe('Conversation header test', () => {
 		mockUseMediaQueryCheck.mockReturnValueOnce(true);
 		setup(<ConversationHeader roomId={mockedRoom.id} setInfoPanelOpen={jest.fn()} />);
 		expect(screen.queryByTestId('icon: InfoOutline')).toBeNull();
+	});
+
+	test('Meeting button is displayed when canVideoCall capability is set to true', async () => {
+		const store: RootStore = useStore.getState();
+		store.addRoom(mockedRoom);
+		store.setCapabilities(createMockCapabilityList({ canVideoCall: true }));
+		setup(<ConversationHeader roomId={mockedRoom.id} setInfoPanelOpen={jest.fn()} />);
+		expect(screen.getByTestId('ConversationHeaderMeetingButton')).toBeInTheDocument();
+	});
+
+	test("Meeting button isn't displayed when canVideoCall capability is set to false", async () => {
+		const store: RootStore = useStore.getState();
+		store.addRoom(mockedRoom);
+		store.setCapabilities(createMockCapabilityList({ canVideoCall: false }));
+		setup(<ConversationHeader roomId={mockedRoom.id} setInfoPanelOpen={jest.fn()} />);
+		expect(screen.queryByTestId('ConversationHeaderMeetingButton')).not.toBeInTheDocument();
 	});
 });
