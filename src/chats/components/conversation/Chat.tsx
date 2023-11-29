@@ -96,12 +96,17 @@ const Chat = ({ roomId, setInfoPanelOpen, isInsideMeeting }: ChatsProps): ReactE
 		setDropzoneEnabled(false);
 	}, []);
 
+	const handleOnDragStart = useCallback((ev) => {
+		ev.preventDefault();
+	}, []);
+
 	return (
 		<CustomContainer
 			data-testid="conversationCollapsedView"
 			width={isDesktopView && !isInsideMeeting ? '70%' : '100%'}
 			minWidth="70%"
 			mainAlignment="flex-start"
+			onDragStart={handleOnDragStart}
 			onDragOver={handleOnDragOver}
 		>
 			{dropzoneEnabled && (
