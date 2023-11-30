@@ -11,12 +11,7 @@ import { useTranslation } from 'react-i18next';
 
 import { AttachmentsApi } from '../network';
 import { AttachmentMessageType } from '../types/store/MessageTypes';
-import {
-	getAttachmentExtension,
-	getAttachmentSize,
-	getAttachmentType,
-	getAttachmentURL
-} from '../utils/attachmentUtils';
+import { getAttachmentInfo, getAttachmentType, getAttachmentURL } from '../utils/attachmentUtils';
 
 export type UsePreviewHook = {
 	onPreviewClick: () => void;
@@ -26,11 +21,8 @@ const usePreview = (attachment: AttachmentMessageType): UsePreviewHook => {
 	const [t] = useTranslation();
 	const { createPreview } = useContext(PreviewsManagerContext);
 
-	const extension = getAttachmentExtension(attachment.mimeType)?.toUpperCase();
-
 	const attachmentType = getAttachmentType(attachment.mimeType);
-
-	const size = useMemo(() => getAttachmentSize(attachment.size), [attachment]);
+	const { extension, size } = getAttachmentInfo(attachment.mimeType, attachment.size);
 
 	const attachmentURL = useMemo(
 		() => getAttachmentURL(attachment.id, attachment.mimeType),
@@ -53,7 +45,7 @@ const usePreview = (attachment: AttachmentMessageType): UsePreviewHook => {
 			createPreview({
 				previewType: attachmentType,
 				filename: attachment.name,
-				extension,
+				extension: extension?.toUpperCase(),
 				size,
 				actions: [
 					{

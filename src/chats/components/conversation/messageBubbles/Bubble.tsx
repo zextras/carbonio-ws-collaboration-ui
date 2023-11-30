@@ -26,6 +26,7 @@ import { Z_INDEX_RANK } from '../../../../types/generics';
 import { MarkerStatus } from '../../../../types/store/MarkersTypes';
 import { TextMessage } from '../../../../types/store/MessageTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
+import { getAttachmentInfo } from '../../../../utils/attachmentUtils';
 import { parseUrlOnMessage } from '../../../../utils/parseUrlOnMessage';
 
 type BubbleProps = {
@@ -91,27 +92,10 @@ const Bubble: FC<BubbleProps> = ({
 	const messageAttachment = useStore((store) => getMessageAttachment(store, message));
 	const messageFormatted = useMemo(() => parseUrlOnMessage(message.text), [message.text]);
 
-	const extension = useMemo(
-		() => messageAttachment && messageAttachment.mimeType.split('/')[1]?.toUpperCase(),
-		[messageAttachment]
+	const { extension, size } = getAttachmentInfo(
+		messageAttachment?.mimeType,
+		messageAttachment?.size
 	);
-
-	const size = useMemo(() => {
-		if (messageAttachment) {
-			if (messageAttachment.size < 1024) {
-				return `${messageAttachment.size}B`;
-			}
-			if (messageAttachment.size < 1024 * 1024) {
-				return `${(messageAttachment.size / 1024).toFixed(2)}KB`;
-			}
-			if (messageAttachment.size < 1024 * 1024 * 1024) {
-				return `${(messageAttachment.size / 1024 / 1024).toFixed(2)}MB`;
-			}
-			return `${(messageAttachment.size / 1024 / 1024 / 1024).toFixed(2)}GB`;
-		}
-		return undefined;
-	}, [messageAttachment]);
-
 	return (
 		<BubbleContainer
 			id={`message-${message.id}`}
