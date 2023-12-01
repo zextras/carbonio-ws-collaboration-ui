@@ -53,12 +53,17 @@ const BubblesWrapper = (): JSX.Element | null => {
 	const Bubbles = useMemo(
 		() =>
 			map(messageIdsList, (messageId) => (
-				<MeetingBubble messageId={messageId} setMessageIdToRemove={setMessageIdToRemove} />
+				<MeetingBubble
+					messageId={messageId}
+					setMessageIdToRemove={setMessageIdToRemove}
+					key={messageId}
+				/>
 			)),
 		[messageIdsList]
 	);
 
 	useEventListener(EventName.NEW_MESSAGE, newMessageHandler);
+
 	return !sidebarIsVisible ? (
 		<WrapperContainer mainAlignment={'flex-start'} crossAlignment={'flex-start'}>
 			{Bubbles}

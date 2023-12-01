@@ -83,7 +83,6 @@ const MeetingBubble: FC<MeetingBubbleProps> = ({ messageId, setMessageIdToRemove
 		<BubbleContainer
 			id={`message-${messageId}`}
 			data-testid={`Bubble-${messageId}`}
-			key={messageId}
 			height="fit"
 			width="fit"
 			padding={{ all: 'medium' }}
