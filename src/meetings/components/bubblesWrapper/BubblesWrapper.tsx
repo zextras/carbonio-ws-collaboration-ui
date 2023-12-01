@@ -14,21 +14,23 @@ import MeetingBubble from './MeetingBubble';
 import useEventListener, { EventName } from '../../../hooks/useEventListener';
 import { MeetingRoutesParams } from '../../../hooks/useRouting';
 import { getMeetingSidebarStatus } from '../../../store/selectors/ActiveMeetingSelectors';
-import { getRoomIdByMeetingId } from '../../../store/selectors/MeetingSelectors';
 import useStore from '../../../store/Store';
 import { MessageType } from '../../../types/store/MessageTypes';
 
-const CustomContainer = styled(Container)`
+const WrapperContainer = styled(Container)`
+	position: absolute;
+	top: 3.3125rem;
+	left: 4.25rem;
 	z-index: 3;
 	width: 370px;
 `;
 const BubblesWrapper = (): JSX.Element | null => {
 	const { meetingId }: MeetingRoutesParams = useParams();
 
-	const roomId = useStore((store) => getRoomIdByMeetingId(store, meetingId));
-
 	const [messageIdsList, setMessageIdsList] = useState<string[]>([]);
 	const [messageIdToRemove, setMessageIdToRemove] = useState<string>('');
+
+	const sidebarIsVisible: boolean = useStore((store) => getMeetingSidebarStatus(store, meetingId));
 
 	const newMessageHandler = useCallback(
 		({ detail: messageFromEvent }) => {
@@ -51,22 +53,16 @@ const BubblesWrapper = (): JSX.Element | null => {
 	const Bubbles = useMemo(
 		() =>
 			map(messageIdsList, (messageId) => (
-				<MeetingBubble
-					messageId={messageId}
-					setMessageIdToRemove={setMessageIdToRemove}
-					roomId={roomId || ''}
-				/>
+				<MeetingBubble messageId={messageId} setMessageIdToRemove={setMessageIdToRemove} />
 			)),
-		[messageIdsList, roomId]
+		[messageIdsList]
 	);
 
 	useEventListener(EventName.NEW_MESSAGE, newMessageHandler);
-
-	const sidebarIsVisible: boolean = useStore((store) => getMeetingSidebarStatus(store, meetingId));
 	return !sidebarIsVisible ? (
-		<CustomContainer mainAlignment={'flex-start'} crossAlignment={'flex-start'}>
+		<WrapperContainer mainAlignment={'flex-start'} crossAlignment={'flex-start'}>
 			{Bubbles}
-		</CustomContainer>
+		</WrapperContainer>
 	) : null;
 };
 

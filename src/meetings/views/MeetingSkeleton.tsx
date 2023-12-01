@@ -24,7 +24,7 @@ import { getCustomLogo } from '../../store/selectors/SessionSelectors';
 import useStore from '../../store/Store';
 import { MeetingViewType } from '../../types/store/ActiveMeetingTypes';
 import defaultLogo from '../assets/Logo.png';
-import BubblesWrapper from '../components/bubbleWrapper/BubblesWrapper';
+import BubblesWrapper from '../components/bubblesWrapper/BubblesWrapper';
 import CinemaMode from '../components/cinemaMode/CinemaMode';
 import FaceToFaceMode from '../components/faceToFaceMode/FaceToFaceMode';
 import GridMode from '../components/gridMode/GridMode';
@@ -52,12 +52,6 @@ const LogoApp = styled(Container)<{ $customLogo: string | false | undefined }>`
 	width: 9.625rem;
 	background-repeat: no-repeat;
 	background-image: url(${({ $customLogo }): string => $customLogo || defaultLogo});
-`;
-
-const CustomWrapper = styled(Container)`
-	position: absolute;
-	top: 3.3125rem;
-	left: 4.25rem;
 `;
 
 const MeetingSkeleton = (): ReactElement => {
@@ -98,15 +92,6 @@ const MeetingSkeleton = (): ReactElement => {
 		return meetingViewSelected === MeetingViewType.CINEMA ? <CinemaMode /> : <GridMode />;
 	}, [meetingViewSelected, numberOfTiles]);
 
-	const Wrapper = useMemo(
-		() => (
-			<CustomWrapper width={'fit'} mainAlignment={'flex-start'}>
-				<BubblesWrapper />
-			</CustomWrapper>
-		),
-		[]
-	);
-
 	return (
 		<SkeletonContainer orientation="horizontal" borderRadius="none">
 			<MeetingSidebar />
@@ -118,7 +103,7 @@ const MeetingSkeleton = (): ReactElement => {
 				data-testid="meeting_view_container"
 			>
 				<LogoApp $customLogo={customLogo} />
-				{Wrapper}
+				<BubblesWrapper />
 				{ViewToDisplay}
 				<MeetingActionsBar streamsWrapperRef={streamsWrapperRef} />
 			</ViewContainer>
