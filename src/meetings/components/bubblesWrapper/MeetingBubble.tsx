@@ -3,7 +3,15 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import React, { Dispatch, FC, SetStateAction, useCallback, useEffect, useMemo } from 'react';
+import React, {
+	Dispatch,
+	FC,
+	SetStateAction,
+	useCallback,
+	useEffect,
+	useMemo,
+	useState
+} from 'react';
 
 import { Container, Padding } from '@zextras/carbonio-design-system';
 import { useParams } from 'react-router-dom';
@@ -32,12 +40,42 @@ import { parseUrlOnMessage } from '../../../utils/parseUrlOnMessage';
 
 const BubbleContainer = styled(Container)<{
 	$messageAttachment: boolean;
+	$isVisible: boolean;
 }>`
 	margin-top: 0.25rem;
 	margin-bottom: 0.25rem;
 	${({ $messageAttachment }): string | false => !$messageAttachment && 'width: fit-content;'};
 	box-shadow: 0 0 0.625rem rgba(0, 0, 0, 0.3);
 	border-radius: 0 0.25rem 0.25rem 0;
+	cursor: pointer;
+	animation: ${({ $isVisible }): string =>
+		$isVisible
+			? 'enterAnimation 0.5s ease 0s 1 normal forwards'
+			: 'leaveAnimation 0.5s ease 0s 1 normal forwards'};
+
+	@keyframes enterAnimation {
+		0% {
+			opacity: 0;
+			transform: translateX(-50px);
+		}
+
+		100% {
+			opacity: 1;
+			transform: translateX(0);
+		}
+	}
+
+	@keyframes leaveAnimation {
+		0% {
+			opacity: 1;
+			transform: translateX(0);
+		}
+
+		100% {
+			opacity: 0;
+			transform: translateX(-50px);
+		}
+	}
 `;
 
 type MeetingBubbleProps = {
@@ -55,6 +93,8 @@ const MeetingBubble: FC<MeetingBubbleProps> = ({ messageId, setMessageIdToRemove
 	const setMeetingSidebarStatus = useStore((store) => store.setMeetingSidebarStatus);
 	const meetingChatVisibility = useStore((store) => getMeetingChatVisibility(store, meetingId));
 	const setMeetingChatVisibility = useStore((store) => store.setMeetingChatVisibility);
+
+	const [isVisible, setIsVisible] = useState(true);
 
 	const { extension, size } = getAttachmentInfo(
 		messageAttachment?.mimeType,
@@ -75,8 +115,14 @@ const MeetingBubble: FC<MeetingBubbleProps> = ({ messageId, setMessageIdToRemove
 
 	useEffect(() => {
 		setTimeout(() => {
+			setIsVisible(false);
+		}, 3500);
+	}, []);
+
+	useEffect(() => {
+		setTimeout(() => {
 			setMessageIdToRemove(messageId);
-		}, 3000);
+		}, 4000);
 	}, [messageId, setMessageIdToRemove]);
 
 	return message?.type === MessageType.TEXT_MSG ? (
@@ -88,6 +134,7 @@ const MeetingBubble: FC<MeetingBubbleProps> = ({ messageId, setMessageIdToRemove
 			padding={{ all: 'medium' }}
 			background={'gray0'}
 			$messageAttachment={messageAttachment !== undefined}
+			$isVisible={isVisible}
 			onClick={onClickHandler}
 		>
 			{roomType !== RoomType.ONE_TO_ONE && (
