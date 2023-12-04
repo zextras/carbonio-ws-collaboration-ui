@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import {
 	Avatar,
@@ -62,7 +62,7 @@ const HoverContainer = styled(Container)`
 	transition: opacity 100ms linear 200ms;
 `;
 
-const CustomTile = styled(Container)<{ $isTalking: boolean }>`
+const CustomTile = styled(Container)<{ $isTalking: boolean; $isHovering: boolean }>`
 	position: relative;
 	aspect-ratio: 16/9;
 	height: auto;
@@ -72,7 +72,7 @@ const CustomTile = styled(Container)<{ $isTalking: boolean }>`
 		$isTalking && `outline: 0.125rem solid ${theme.palette.success.regular};`}
 	&:hover {
 		${HoverContainer} {
-			opacity: 1;
+			opacity: ${({ $isHovering }): number => ($isHovering ? 1 : 0)};
 		}
 	}
 `;
@@ -93,11 +93,6 @@ const VideoEl = styled.video<{ isScreenShare: boolean }>`
 	aspect-ratio: 16/9;
 	width: inherit;
 	border-radius: 0.5rem;
-	&:hover {
-		${HoverContainer} {
-			opacity: 1;
-		}
-	}
 `;
 
 const StyledAvatar = styled(Avatar)`
@@ -165,6 +160,7 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 	const userIsTalking = useStore((store) => getUserIsTalking(store, meetingId || '', userId || ''));
 
 	const [picture, setPicture] = useState<false | string>(false);
+	const [isHoovering, setIsHoovering] = useState<boolean>(false);
 
 	const streamRef = useRef<null | HTMLVideoElement>(null);
 	const themeColor = useTheme();
@@ -175,7 +171,11 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 		isScreenShare
 	);
 
+	const hoverRef = useRef<HTMLDivElement>(null);
+
 	const { muteForAllHasToAppear, muteForAll } = useMuteForAll(meetingId, userId);
+
+	let timeout: string | number | NodeJS.Timeout | undefined;
 
 	useEffect(() => {
 		if (streamRef && streamRef.current) {
@@ -223,6 +223,30 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 		() => !modalProps && (canUsePinFeature || muteForAllHasToAppear),
 		[canUsePinFeature, modalProps, muteForAllHasToAppear]
 	);
+
+	const handleHoverMouseMove = useCallback(() => {
+		clearTimeout(timeout);
+		setIsHoovering(true);
+
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		timeout = setTimeout(() => {
+			setIsHoovering(false);
+		}, 2000);
+	}, [isHoovering]);
+
+	useEffect(() => {
+		let elRef: React.RefObject<HTMLDivElement> | null = hoverRef;
+		if (elRef?.current) {
+			elRef.current.addEventListener('mousemove', handleHoverMouseMove);
+		}
+
+		return (): void => {
+			if (elRef?.current) {
+				elRef.current.removeEventListener('mousemove', handleHoverMouseMove);
+				elRef = null;
+			}
+		};
+	}, [handleHoverMouseMove]);
 
 	const avatarComponent = useMemo(
 		() =>
@@ -304,7 +328,7 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 		() => (
 			<HoverContainer width="100%" data-testid="hover_container" orientation="horizontal">
 				{canUseMuteForAll && (
-					<Tooltip label={muteForAllLabel}>
+					<Tooltip label={muteForAllLabel} disabled={!isHoovering}>
 						<IconButton
 							icon="MicOffOutline"
 							iconColor="text"
@@ -318,7 +342,7 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 				)}
 				{canUseMuteForAll && canUsePinFeature && <Padding right="1rem" />}
 				{canUsePinFeature && (
-					<Tooltip label={isPinned ? unpinVideoLabel : pinVideoLabel}>
+					<Tooltip label={isPinned ? unpinVideoLabel : pinVideoLabel} disabled={!isHoovering}>
 						<IconButton
 							icon={!isPinned ? 'Pin3Outline' : 'Unpin3Outline'}
 							iconColor="text"
@@ -335,6 +359,7 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 		[
 			canUseMuteForAll,
 			muteForAllLabel,
+			isHoovering,
 			muteForAll,
 			canUsePinFeature,
 			isPinned,
@@ -350,6 +375,8 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 			data-testid="tile"
 			width="100%"
 			$isTalking={userIsTalking && !isScreenShare}
+			ref={hoverRef}
+			$isHovering={isHoovering}
 		>
 			{showHoverContainer && hoverContainer}
 			<InfoContainer orientation="horizontal">

@@ -16,6 +16,7 @@ import ConversationsFilter from './ConversationsFilter';
 import ExpandedSidebarListItem from './ExpandedSidebarListItem';
 import { roomsListSecondaryBarLengthEqualityFn } from '../../../store/equalityFunctions/MessagesEqualityFunctions';
 import { getRoomIdsOrderedLastMessage } from '../../../store/selectors/MessagesSelectors';
+import { getUserId } from '../../../store/selectors/SessionSelectors';
 import { getUsersSelector } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
 import { Member } from '../../../types/store/RoomTypes';
@@ -43,7 +44,7 @@ const SecondaryBarSingleGroupsView: React.FC<SecondaryBarSingleGroupsView> = ({ 
 	const showConversationList = t('tooltip.showConversationList', 'Show conversations list');
 	const noMatchLabel = t('participantsList.noMatch', 'There are no items that match this search');
 
-	const sessionId: string | undefined = useStore((store) => store.session.id);
+	const sessionId: string | undefined = useStore(getUserId);
 	const roomsIds = useStore<{ roomId: string; roomType: string; lastMessageTimestamp: number }[]>(
 		getRoomIdsOrderedLastMessage,
 		roomsListSecondaryBarLengthEqualityFn
@@ -81,7 +82,9 @@ const SecondaryBarSingleGroupsView: React.FC<SecondaryBarSingleGroupsView> = ({ 
 							: users[0].userId
 						: '';
 					const userName = useStore.getState().users[userId].name;
-					const userEmail = useStore.getState().users[userId].email.split('@')[0];
+					const userEmail = useStore.getState().users[userId].email
+						? useStore.getState().users[userId].email.split('@')[0]
+						: '';
 					if (
 						userName.toLocaleLowerCase().includes(filteredInput.toLocaleLowerCase()) ||
 						userEmail.toLocaleLowerCase().includes(filteredInput.toLocaleLowerCase())

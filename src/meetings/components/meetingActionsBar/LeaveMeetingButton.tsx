@@ -21,7 +21,9 @@ const LeaveMeetingButton = (): ReactElement => {
 	const { meetingId }: MeetingRoutesParams = useParams();
 
 	const leaveMeeting = useCallback(() => {
-		MeetingsApi.leaveMeeting(meetingId).then(() => goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED));
+		MeetingsApi.leaveMeeting(meetingId).then(() => {
+			goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED);
+		});
 	}, [meetingId, goToInfoPage]);
 
 	return (
