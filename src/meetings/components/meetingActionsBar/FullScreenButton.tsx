@@ -26,7 +26,7 @@ const FullScreenButton = (): ReactElement => {
 
 	const [isFullScreenEnabled, setIsFullScreenEnabled] = useState(false);
 
-	const _checkFullScreenStatus = (): void =>
+	const checkFullScreenStatus = (): void =>
 		window.parent.document.fullscreenElement /* || window.parent.document.webkitFullscreenElement */
 			? setIsFullScreenEnabled(true)
 			: setIsFullScreenEnabled(false);
@@ -56,7 +56,7 @@ const FullScreenButton = (): ReactElement => {
 
 	useEffect(() => {
 		window.parent.addEventListener('keydown', checkKeyPress, true);
-		window.parent.document.onfullscreenchange = _checkFullScreenStatus;
+		window.parent.document.onfullscreenchange = checkFullScreenStatus;
 		return window.parent.removeEventListener('keydown', checkKeyPress);
 	}, [checkKeyPress]);
 

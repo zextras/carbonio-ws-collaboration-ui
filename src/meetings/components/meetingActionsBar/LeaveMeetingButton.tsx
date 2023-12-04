@@ -22,9 +22,6 @@ const LeaveMeetingButton = (): ReactElement => {
 
 	const leaveMeeting = useCallback(() => {
 		MeetingsApi.leaveMeeting(meetingId).then(() => {
-			if (window.parent.document.fullscreenElement) {
-				window.parent.document.exitFullscreen();
-			}
 			goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED);
 		});
 	}, [meetingId, goToInfoPage]);
