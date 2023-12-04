@@ -11,14 +11,20 @@ import { screen } from '@testing-library/react';
 import Bubble from './Bubble';
 import { mockedGetImageThumbnailURL } from '../../../../../jest-mocks';
 import useStore from '../../../../store/Store';
-import { createMockRoom, createMockTextMessage } from '../../../../tests/createMock';
+import {
+	createMockCapabilityList,
+	createMockRoom,
+	createMockTextMessage
+} from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe } from '../../../../types/network/models/roomBeTypes';
+import { MarkerStatus } from '../../../../types/store/MarkersTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
 import { RootStore } from '../../../../types/store/StoreTypes';
 import { User } from '../../../../types/store/UserTypes';
 
 const previewUrl = 'preview-url';
+const iconDoneAll = 'icon: DoneAll';
 
 const user1Be: User = {
 	id: 'user1',
@@ -126,6 +132,36 @@ const mockedRepliedTextMessageWithAttachment = createMockTextMessage({
 			area: '34x23'
 		}
 	})
+});
+
+const mockedTextMessageSentByMe = createMockTextMessage({
+	id: 'idSimpleTextMessage',
+	roomId: mockedRoom.id,
+	read: MarkerStatus.READ,
+	from: user1Be.id
+});
+
+const mockedTextMessageUnread = createMockTextMessage({
+	id: 'idSimpleTextMessage',
+	roomId: mockedRoom.id,
+	from: user1Be.id,
+	text: 'Hello guys! Does anyone know what happened to Luigi?'
+});
+
+const mockedTextMessageReadBySomeone = createMockTextMessage({
+	id: 'idSimpleTextMessage',
+	roomId: mockedRoom.id,
+	read: MarkerStatus.READ_BY_SOMEONE,
+	from: user1Be.id,
+	text: 'This is a message'
+});
+
+const mockedTextMessagePending = createMockTextMessage({
+	id: 'idSimpleTextMessage',
+	roomId: mockedRoom.id,
+	read: MarkerStatus.PENDING,
+	from: user1Be.id,
+	text: 'This is a message'
 });
 
 describe('Message bubble component visualization', () => {
@@ -243,5 +279,139 @@ describe('Attachment footer', () => {
 		);
 		const extensionFile = screen.getByText(/PNG • 5.31GB/i);
 		expect(extensionFile).toBeInTheDocument();
+	});
+	test('Display reads for a message sent from me, me - user can see reads', () => {
+		const store: RootStore = useStore.getState();
+		store.addRoom(mockedRoom);
+		store.newMessage(mockedTextMessageSentByMe);
+		store.setLoginInfo(user1Be.id, user1Be.name);
+		store.setCapabilities(createMockCapabilityList({ canSeeMessageReads: true }));
+		setup(
+			<Bubble
+				message={mockedTextMessageSentByMe}
+				prevMessageIsFromSameSender={false}
+				nextMessageIsFromSameSender={false}
+				messageRef={React.createRef<HTMLDivElement>()}
+			/>
+		);
+		const ackIcon = screen.getByTestId(iconDoneAll);
+		expect(ackIcon).toBeInTheDocument();
+	});
+	test('Display someone reads for a message sent from me - user can see reads', () => {
+		const store: RootStore = useStore.getState();
+		store.addRoom(mockedRoom);
+		store.newMessage(mockedTextMessageReadBySomeone);
+		store.setLoginInfo(user1Be.id, user1Be.name);
+		store.setCapabilities(createMockCapabilityList({ canSeeMessageReads: true }));
+		setup(
+			<Bubble
+				message={mockedTextMessageReadBySomeone}
+				prevMessageIsFromSameSender={false}
+				nextMessageIsFromSameSender={false}
+				messageRef={React.createRef<HTMLDivElement>()}
+			/>
+		);
+		const ackIcon = screen.getByTestId(iconDoneAll);
+		expect(ackIcon).toBeInTheDocument();
+	});
+	test('Display unread message sent from me - user can see reads', () => {
+		const store: RootStore = useStore.getState();
+		store.addRoom(mockedRoom);
+		store.newMessage(mockedTextMessageUnread);
+		store.setLoginInfo(user1Be.id, user1Be.name);
+		store.setCapabilities(createMockCapabilityList({ canSeeMessageReads: true }));
+		setup(
+			<Bubble
+				message={mockedTextMessageUnread}
+				prevMessageIsFromSameSender={false}
+				nextMessageIsFromSameSender={false}
+				messageRef={React.createRef<HTMLDivElement>()}
+			/>
+		);
+		const ackIcon = screen.getByTestId('icon: Checkmark');
+		expect(ackIcon).toBeInTheDocument();
+	});
+	test('Display reads for a message sent from me, me - user cannot see reads', () => {
+		const store: RootStore = useStore.getState();
+		store.addRoom(mockedRoom);
+		store.newMessage(mockedTextMessageSentByMe);
+		store.setLoginInfo(user1Be.id, user1Be.name);
+		store.setCapabilities(createMockCapabilityList({ canSeeMessageReads: false }));
+		setup(
+			<Bubble
+				message={mockedTextMessageSentByMe}
+				prevMessageIsFromSameSender={false}
+				nextMessageIsFromSameSender={false}
+				messageRef={React.createRef<HTMLDivElement>()}
+			/>
+		);
+		expect(screen.queryByTestId(iconDoneAll)).not.toBeInTheDocument();
+	});
+	test('Display someone reads for a message sent from me - user can see reads', () => {
+		const store: RootStore = useStore.getState();
+		store.addRoom(mockedRoom);
+		store.newMessage(mockedTextMessageReadBySomeone);
+		store.setLoginInfo(user1Be.id, user1Be.name);
+		store.setCapabilities(createMockCapabilityList({ canSeeMessageReads: true }));
+		setup(
+			<Bubble
+				message={mockedTextMessageReadBySomeone}
+				prevMessageIsFromSameSender={false}
+				nextMessageIsFromSameSender={false}
+				messageRef={React.createRef<HTMLDivElement>()}
+			/>
+		);
+		const ackIcon = screen.getByTestId(iconDoneAll);
+		expect(ackIcon).toBeInTheDocument();
+	});
+	test('Display unread message sent from me - user cannot see reads', () => {
+		const store: RootStore = useStore.getState();
+		store.addRoom(mockedRoom);
+		store.newMessage(mockedTextMessageUnread);
+		store.setLoginInfo(user1Be.id, user1Be.name);
+		store.setCapabilities(createMockCapabilityList({ canSeeMessageReads: false }));
+		setup(
+			<Bubble
+				message={mockedTextMessageUnread}
+				prevMessageIsFromSameSender={false}
+				nextMessageIsFromSameSender={false}
+				messageRef={React.createRef<HTMLDivElement>()}
+			/>
+		);
+		expect(screen.queryByTestId('icon: Checkmark')).not.toBeInTheDocument();
+	});
+	test('Display pending status for message sent from me - user can see reads', () => {
+		const store: RootStore = useStore.getState();
+		store.addRoom(mockedRoom);
+		store.newMessage(mockedTextMessagePending);
+		store.setLoginInfo(user1Be.id, user1Be.name);
+		store.setCapabilities(createMockCapabilityList({ canSeeMessageReads: true }));
+		setup(
+			<Bubble
+				message={mockedTextMessagePending}
+				prevMessageIsFromSameSender={false}
+				nextMessageIsFromSameSender={false}
+				messageRef={React.createRef<HTMLDivElement>()}
+			/>
+		);
+		const ackIcon = screen.getByTestId('icon: ClockOutline');
+		expect(ackIcon).toBeInTheDocument();
+	});
+	test('Display pending status for message sent from me - user cannot see reads', () => {
+		const store: RootStore = useStore.getState();
+		store.addRoom(mockedRoom);
+		store.newMessage(mockedTextMessagePending);
+		store.setLoginInfo(user1Be.id, user1Be.name);
+		store.setCapabilities(createMockCapabilityList({ canSeeMessageReads: false }));
+		setup(
+			<Bubble
+				message={mockedTextMessagePending}
+				prevMessageIsFromSameSender={false}
+				nextMessageIsFromSameSender={false}
+				messageRef={React.createRef<HTMLDivElement>()}
+			/>
+		);
+		const ackIcon = screen.getByTestId('icon: ClockOutline');
+		expect(ackIcon).toBeInTheDocument();
 	});
 });
