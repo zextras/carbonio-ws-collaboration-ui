@@ -156,6 +156,14 @@ const mockedTextMessageReadBySomeone = createMockTextMessage({
 	text: 'This is a message'
 });
 
+const mockedTextMessagePending = createMockTextMessage({
+	id: 'idSimpleTextMessage',
+	roomId: mockedRoom.id,
+	read: MarkerStatus.PENDING,
+	from: user1Be.id,
+	text: 'This is a message'
+});
+
 describe('Message bubble component visualization', () => {
 	test('Display replied text message', () => {
 		const store: RootStore = useStore.getState();
@@ -344,7 +352,7 @@ describe('Attachment footer', () => {
 		store.addRoom(mockedRoom);
 		store.newMessage(mockedTextMessageReadBySomeone);
 		store.setLoginInfo(user1Be.id, user1Be.name);
-		store.setCapabilities(createMockCapabilityList({ canSeeMessageReads: false }));
+		store.setCapabilities(createMockCapabilityList({ canSeeMessageReads: true }));
 		setup(
 			<Bubble
 				message={mockedTextMessageReadBySomeone}
@@ -353,7 +361,8 @@ describe('Attachment footer', () => {
 				messageRef={React.createRef<HTMLDivElement>()}
 			/>
 		);
-		expect(screen.queryByTestId(iconDoneAll)).not.toBeInTheDocument();
+		const ackIcon = screen.getByTestId(iconDoneAll);
+		expect(ackIcon).toBeInTheDocument();
 	});
 	test('Display unread message sent from me - user cannot see reads', () => {
 		const store: RootStore = useStore.getState();
@@ -370,5 +379,39 @@ describe('Attachment footer', () => {
 			/>
 		);
 		expect(screen.queryByTestId('icon: Checkmark')).not.toBeInTheDocument();
+	});
+	test('Display pending status for message sent from me - user can see reads', () => {
+		const store: RootStore = useStore.getState();
+		store.addRoom(mockedRoom);
+		store.newMessage(mockedTextMessagePending);
+		store.setLoginInfo(user1Be.id, user1Be.name);
+		store.setCapabilities(createMockCapabilityList({ canSeeMessageReads: true }));
+		setup(
+			<Bubble
+				message={mockedTextMessagePending}
+				prevMessageIsFromSameSender={false}
+				nextMessageIsFromSameSender={false}
+				messageRef={React.createRef<HTMLDivElement>()}
+			/>
+		);
+		const ackIcon = screen.getByTestId('icon: ClockOutline');
+		expect(ackIcon).toBeInTheDocument();
+	});
+	test('Display pending status for message sent from me - user cannot see reads', () => {
+		const store: RootStore = useStore.getState();
+		store.addRoom(mockedRoom);
+		store.newMessage(mockedTextMessagePending);
+		store.setLoginInfo(user1Be.id, user1Be.name);
+		store.setCapabilities(createMockCapabilityList({ canSeeMessageReads: false }));
+		setup(
+			<Bubble
+				message={mockedTextMessagePending}
+				prevMessageIsFromSameSender={false}
+				nextMessageIsFromSameSender={false}
+				messageRef={React.createRef<HTMLDivElement>()}
+			/>
+		);
+		const ackIcon = screen.getByTestId('icon: ClockOutline');
+		expect(ackIcon).toBeInTheDocument();
 	});
 });

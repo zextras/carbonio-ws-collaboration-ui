@@ -139,8 +139,7 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 	const showMessageReads = useMemo(
 		() =>
 			canSeeMessageReads ||
-			(!canSeeMessageReads &&
-				lastMessageOfRoom &&
+			(lastMessageOfRoom &&
 				lastMessageOfRoom.type === MessageType.TEXT_MSG &&
 				lastMessageOfRoom.read === MarkerStatus.PENDING),
 		[canSeeMessageReads, lastMessageOfRoom]

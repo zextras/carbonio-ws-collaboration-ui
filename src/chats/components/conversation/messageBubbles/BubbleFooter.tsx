@@ -98,13 +98,15 @@ const BubbleFooter: FC<BubbleFooterProps> = ({
 						</ItalicText>
 					</Container>
 				)}
-				{isMyMessage && messageRead && canSeeMessageReads && (
-					<Tooltip label={dropdownTooltip}>
-						<Padding width="fit" right="small">
-							<Icon size="small" icon={ackIcon} color={ackIconColor} />
-						</Padding>
-					</Tooltip>
-				)}
+				{isMyMessage &&
+					messageRead &&
+					(canSeeMessageReads || messageRead === MarkerStatus.PENDING) && (
+						<Tooltip label={dropdownTooltip}>
+							<Padding width="fit" right="small">
+								<Icon size="small" icon={ackIcon} color={ackIconColor} />
+							</Padding>
+						</Tooltip>
+					)}
 				<Text color="secondary" size="small">
 					{messageTime}
 				</Text>
