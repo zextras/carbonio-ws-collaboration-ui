@@ -291,7 +291,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 					unsetFilesToAttach(roomId);
 					setIsUploading(false);
 				})
-				.catch(() => console.log('error'));
+				.catch((error) => console.log(error));
 		} else {
 			if (referenceMessage && completeReferenceMessage?.type === MessageType.TEXT_MSG) {
 				switch (referenceMessage.actionType) {

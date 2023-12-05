@@ -9,7 +9,6 @@ import { Strophe } from 'strophe.js';
 import useStore from '../../../store/Store';
 import { Marker, MarkerType } from '../../../types/store/MarkersTypes';
 import { now } from '../../../utils/dateUtil';
-import { xmppDebug } from '../../../utils/debug';
 import { getId, getResource } from '../utility/decodeJid';
 import { decodeMarker } from '../utility/decodeMarker';
 import { getRequiredAttribute, getTagElement } from '../utility/decodeStanza';
@@ -30,7 +29,6 @@ export function onSmartMarkers(stanza: Element): true {
 }
 
 export function onDisplayedMessageStanza(message: Element): true {
-	xmppDebug(`<--- displayed message`);
 	const displayed = getTagElement(message, 'displayed');
 	if (displayed) {
 		const from = getRequiredAttribute(message, 'from');

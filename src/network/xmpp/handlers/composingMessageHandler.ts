@@ -8,7 +8,6 @@ import { debounce } from 'lodash';
 
 import useStore from '../../../store/Store';
 import { RootStore } from '../../../types/store/StoreTypes';
-import { xmppDebug } from '../../../utils/debug';
 import { getId, getResource } from '../utility/decodeJid';
 import { getRequiredAttribute } from '../utility/decodeStanza';
 
@@ -23,8 +22,6 @@ const debouncedStopWriting = debounce(
 	7000
 );
 export function onComposingMessageStanza(message: Element): true {
-	xmppDebug('<--- composing message');
-
 	const fromAttribute = getRequiredAttribute(message, 'from');
 	const roomId = getId(fromAttribute);
 	const resource = getResource(fromAttribute);

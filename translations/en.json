@@ -111,6 +111,7 @@
             "wsc": "Something went wrong while connecting with WSC",
             "xmpp": "Something went wrong while connecting with XMPP"
         },
+        "networkProblems": "There may be problems using this module, please try to refresh the page.",
         "notificationsActivatedForThisChat": "Notifications activated for this chat",
         "notificationsMutedForThisChat": "Notifications muted for this chat"
     },
