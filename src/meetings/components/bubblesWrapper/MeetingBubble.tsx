@@ -24,7 +24,7 @@ import ForwardInfo from '../../../chats/components/conversation/messageBubbles/F
 import RepliedTextMessageSectionView from '../../../chats/components/conversation/messageBubbles/RepliedTextMessageSectionView';
 import TextContentBubble from '../../../chats/components/conversation/messageBubbles/TextContentBubble';
 import { MeetingRoutesParams } from '../../../hooks/useRouting';
-import { getMeetingChatVisibility } from '../../../store/selectors/ActiveMeetingSelectors';
+import { getInputHasFocus } from '../../../store/selectors/ActiveConversationsSelectors';
 import { getRoomIdByMeetingId } from '../../../store/selectors/MeetingSelectors';
 import {
 	getMessageAttachment,
@@ -91,8 +91,9 @@ const MeetingBubble: FC<MeetingBubbleProps> = ({ messageId, setMessageIdToRemove
 	const roomType = useStore<RoomType>((store) => getRoomTypeSelector(store, roomId || ''));
 	const messageAttachment = useStore((store) => getMessageAttachment(store, message));
 	const setMeetingSidebarStatus = useStore((store) => store.setMeetingSidebarStatus);
-	const meetingChatVisibility = useStore((store) => getMeetingChatVisibility(store, meetingId));
 	const setMeetingChatVisibility = useStore((store) => store.setMeetingChatVisibility);
+	const setInputHasFocus = useStore((store) => store.setInputHasFocus);
+	const inputHasFocus = useStore((store) => getInputHasFocus(store, roomId || ''));
 
 	const [isVisible, setIsVisible] = useState(true);
 
@@ -108,10 +109,18 @@ const MeetingBubble: FC<MeetingBubbleProps> = ({ messageId, setMessageIdToRemove
 
 	const onClickHandler = useCallback(() => {
 		setMeetingSidebarStatus(meetingId, true);
-		if (meetingChatVisibility === MeetingChatVisibility.CLOSED) {
-			setMeetingChatVisibility(meetingId, MeetingChatVisibility.OPEN);
+		setMeetingChatVisibility(meetingId, MeetingChatVisibility.OPEN);
+		if (!inputHasFocus) {
+			setInputHasFocus(roomId || '', true);
 		}
-	}, [meetingChatVisibility, meetingId, setMeetingChatVisibility, setMeetingSidebarStatus]);
+	}, [
+		inputHasFocus,
+		meetingId,
+		roomId,
+		setInputHasFocus,
+		setMeetingChatVisibility,
+		setMeetingSidebarStatus
+	]);
 
 	useEffect(() => {
 		setTimeout(() => {
