@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { find, forEach } from 'lodash';
-import { $iq, $msg, $pres, Strophe, StropheConnection, StropheConnectionStatus } from 'strophe.js';
+import { debounce, find, forEach } from 'lodash';
+import { $iq, $msg, $pres, Strophe } from 'strophe.js';
 import { v4 as uuidGenerator } from 'uuid';
 
 import { onComposingMessageStanza } from './handlers/composingMessageHandler';
@@ -165,15 +165,15 @@ class XMPPClient implements IXMPPClient {
 		this.requestsQueue = [];
 	}
 
-	private tryReconnection(): void {
-		xmppDebug(`Retry reconnection in: ${this.reconnectionTime}`);
+	private tryReconnection = debounce(() => {
+		xmppDebug(`Try reconnection in: ${this.reconnectionTime}`);
 		setTimeout(() => {
 			if (this.token && this.connectionStatus !== Strophe.Status.CONNECTING) {
 				this.connect(this.token);
 			}
 		}, this.reconnectionTime);
 		this.reconnectionTime = this.reconnectionTime * 2 + 1000;
-	}
+	}, 200);
 
 	public connect(token: string): void {
 		this.token = token;
