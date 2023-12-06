@@ -27,7 +27,14 @@ const useGeneralMeetingControls = (meetingId: string): void => {
 
 	// Redirect to info page if meeting ended or some error occurred
 	useEffect(() => {
-		if (!meeting) goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED);
+		if (!meeting) {
+			goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED);
+		}
+		return () => {
+			if (window.parent.document.fullscreenElement) {
+				window.parent.document.exitFullscreen();
+			}
+		};
 	}, [goToInfoPage, meeting]);
 
 	// Leave meeting on window close

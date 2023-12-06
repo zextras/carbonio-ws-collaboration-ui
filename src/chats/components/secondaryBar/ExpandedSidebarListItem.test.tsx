@@ -11,6 +11,7 @@ import { screen } from '@testing-library/react';
 import ExpandedSidebarListItem from './ExpandedSidebarListItem';
 import useStore from '../../../store/Store';
 import {
+	createMockCapabilityList,
 	createMockConfigurationMessage,
 	createMockMember,
 	createMockRoom,
@@ -26,6 +27,8 @@ import {
 } from '../../../types/store/MessageTypes';
 import { RootStore } from '../../../types/store/StoreTypes';
 import { User } from '../../../types/store/UserTypes';
+
+const iconDoneAll = 'icon: DoneAll';
 
 const user2Be: User = {
 	id: 'user2Id',
@@ -130,10 +133,52 @@ const mockedConfigurationMessage: ConfigurationMessage = {
 };
 
 describe('Expanded sidebar list item', () => {
+	test('Group - user cannot see message reads - I sent a message but it is in pending state', async () => {
+		const store: RootStore = useStore.getState();
+		store.addRoom(mockedGroup);
+		store.setLoginInfo(user1Be.id, user1Be.name);
+		store.setCapabilities(createMockCapabilityList({ canSeeMessageReads: false }));
+		store.setUserInfo(user1Be);
+		store.setPlaceholderMessage({
+			roomId: mockedTextMessageUnread.roomId,
+			id: mockedTextMessageUnread.id,
+			text: mockedTextMessageUnread.text
+		});
+		setup(<ExpandedSidebarListItem roomId={mockedGroup.id} />);
+		const ackIcon = screen.getByTestId('icon: ClockOutline');
+		const message = screen.getByText(mockedTextMessageUnread.text);
+		expect(ackIcon).toBeInTheDocument();
+		expect(message).toBeInTheDocument();
+	});
+	test('Group - user cannot see message reads - I sent a message', async () => {
+		const store: RootStore = useStore.getState();
+		store.addRoom(mockedGroup);
+		store.setLoginInfo(user1Be.id, user1Be.name);
+		store.setCapabilities(createMockCapabilityList({ canSeeMessageReads: false }));
+		store.setUserInfo(user1Be);
+		store.newMessage(mockedTextMessageUnread);
+		setup(<ExpandedSidebarListItem roomId={mockedGroup.id} />);
+		expect(screen.queryByTestId('icon: Checkmark')).not.toBeInTheDocument();
+		const message = screen.getByText(mockedTextMessageUnread.text);
+		expect(message).toBeInTheDocument();
+	});
+	test('Group - user cannot see message reads - I sent a message and someone read it', async () => {
+		const store: RootStore = useStore.getState();
+		store.addRoom(mockedGroup);
+		store.setLoginInfo(user1Be.id, user1Be.name);
+		store.setCapabilities(createMockCapabilityList({ canSeeMessageReads: false }));
+		store.setUserInfo(user1Be);
+		store.newMessage(mockedTextMessageReadBySomeone);
+		setup(<ExpandedSidebarListItem roomId={mockedGroup.id} />);
+		expect(screen.queryByTestId(iconDoneAll)).not.toBeInTheDocument();
+		const message = screen.getByText(mockedTextMessageReadBySomeone.text);
+		expect(message).toBeInTheDocument();
+	});
 	test('Group - I sent a message but it is in pending state', async () => {
 		const store: RootStore = useStore.getState();
 		store.addRoom(mockedGroup);
 		store.setLoginInfo(user1Be.id, user1Be.name);
+		store.setCapabilities(createMockCapabilityList({ canSeeMessageReads: true }));
 		store.setUserInfo(user1Be);
 		store.setPlaceholderMessage({
 			roomId: mockedTextMessageUnread.roomId,
@@ -150,6 +195,7 @@ describe('Expanded sidebar list item', () => {
 		const store: RootStore = useStore.getState();
 		store.addRoom(mockedGroup);
 		store.setLoginInfo(user1Be.id, user1Be.name);
+		store.setCapabilities(createMockCapabilityList({ canSeeMessageReads: true }));
 		store.setUserInfo(user1Be);
 		store.newMessage(mockedTextMessageUnread);
 		setup(<ExpandedSidebarListItem roomId={mockedGroup.id} />);
@@ -162,10 +208,11 @@ describe('Expanded sidebar list item', () => {
 		const store: RootStore = useStore.getState();
 		store.addRoom(mockedGroup);
 		store.setLoginInfo(user1Be.id, user1Be.name);
+		store.setCapabilities(createMockCapabilityList({ canSeeMessageReads: true }));
 		store.setUserInfo(user1Be);
 		store.newMessage(mockedTextMessageReadBySomeone);
 		setup(<ExpandedSidebarListItem roomId={mockedGroup.id} />);
-		const ackIcon = screen.getByTestId('icon: DoneAll');
+		const ackIcon = screen.getByTestId(iconDoneAll);
 		const message = screen.getByText(mockedTextMessageReadBySomeone.text);
 		expect(ackIcon).toBeInTheDocument();
 		expect(message).toBeInTheDocument();
@@ -174,10 +221,11 @@ describe('Expanded sidebar list item', () => {
 		const store: RootStore = useStore.getState();
 		store.addRoom(mockedGroup);
 		store.setLoginInfo(user1Be.id, user1Be.name);
+		store.setCapabilities(createMockCapabilityList({ canSeeMessageReads: true }));
 		store.setUserInfo(user1Be);
 		store.newMessage(mockedTextMessageRead);
 		setup(<ExpandedSidebarListItem roomId={mockedGroup.id} />);
-		const ackIcon = screen.getByTestId('icon: DoneAll');
+		const ackIcon = screen.getByTestId(iconDoneAll);
 		const message = screen.getByText(mockedTextMessageRead.text);
 		expect(ackIcon).toBeInTheDocument();
 		expect(message).toBeInTheDocument();
@@ -212,7 +260,6 @@ describe('Expanded sidebar list item', () => {
 		store.setUserInfo(user4Be);
 		store.newMessage(mockedAddMemberMessage);
 		setup(<ExpandedSidebarListItem roomId={mockedGroup.id} />);
-
 		expect(
 			screen.getByText(new RegExp(`${user4Be.name} has been added to ${mockedGroup.name}`, 'i'))
 		).toBeVisible();
@@ -235,11 +282,26 @@ describe('Expanded sidebar list item', () => {
 		const store: RootStore = useStore.getState();
 		store.addRoom(mockedOneToOne);
 		store.setLoginInfo(user1Be.id, user1Be.name);
+		store.setCapabilities(createMockCapabilityList({ canSeeMessageReads: true }));
+		store.setUserInfo(user1Be);
+		store.newMessage(mockedTextMessageSentByMe);
+		setup(<ExpandedSidebarListItem roomId={mockedOneToOne.id} />);
+		const messageDisplayed = screen.getByText(`${mockedTextMessageSentByMe.text}`);
+		const ackIcon = screen.getByTestId(iconDoneAll);
+		expect(ackIcon).toBeInTheDocument();
+		expect(messageDisplayed).toBeInTheDocument();
+	});
+	test('One to one - user cannot see message reads - I sent a message', async () => {
+		const store: RootStore = useStore.getState();
+		store.addRoom(mockedOneToOne);
+		store.setLoginInfo(user1Be.id, user1Be.name);
+		store.setCapabilities(createMockCapabilityList({ canSeeMessageReads: false }));
 		store.setUserInfo(user1Be);
 		store.newMessage(mockedTextMessageSentByMe);
 		setup(<ExpandedSidebarListItem roomId={mockedOneToOne.id} />);
 		const messageDisplayed = screen.getByText(`${mockedTextMessageSentByMe.text}`);
 		expect(messageDisplayed).toBeInTheDocument();
+		expect(screen.queryByTestId(iconDoneAll)).not.toBeInTheDocument();
 	});
 	test('One to one - user2 sent a message', async () => {
 		const store: RootStore = useStore.getState();

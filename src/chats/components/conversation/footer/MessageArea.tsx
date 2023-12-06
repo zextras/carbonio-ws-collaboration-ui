@@ -83,6 +83,7 @@ type MessageAreaPros = {
 	onInput: (e: never) => void;
 	composerIsFull: boolean;
 	handleKeyDownTextarea: (e: never) => void;
+	handleKeyUpTextarea: (e: never) => void;
 	handleOnBlur: (e: never) => void;
 	handleOnPaste: (e: never) => void;
 	isDisabled: boolean;
@@ -95,6 +96,7 @@ const MessageArea: React.FC<MessageAreaPros> = ({
 	onInput,
 	composerIsFull,
 	handleKeyDownTextarea,
+	handleKeyUpTextarea,
 	handleOnBlur,
 	handleOnPaste,
 	isDisabled
@@ -153,6 +155,7 @@ const MessageArea: React.FC<MessageAreaPros> = ({
 			ref={textareaRef}
 			value={message}
 			onKeyDown={handleKeyDownTextarea}
+			onKeyUp={handleKeyUpTextarea}
 			onChange={onInput}
 			onFocus={handleOnFocus}
 			onBlur={handleOnBlur}

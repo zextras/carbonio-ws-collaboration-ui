@@ -9,6 +9,7 @@ import React, { lazy, Suspense, useEffect } from 'react';
 import { Container, ModalManager } from '@zextras/carbonio-design-system';
 import { addRoute, addSettingsView, Spinner } from '@zextras/carbonio-shell-ui';
 
+import ConnectionSnackbarManager from './components/ConnectionSnackbarManager';
 import SecondaryBarSingleGroupsView from './components/secondaryBar/SecondaryBarSingleGroupsView';
 import { LogoBeta, LogoSettingsBeta } from './LogoBeta';
 import ShimmeringConversationView from './views/shimmerViews/ShimmeringConversationView';
@@ -30,6 +31,7 @@ const ChatsMain = () => (
 		}
 	>
 		<ModalManager>
+			<ConnectionSnackbarManager />
 			<LazyMainView />
 		</ModalManager>
 	</Suspense>

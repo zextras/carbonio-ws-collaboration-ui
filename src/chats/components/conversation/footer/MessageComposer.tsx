@@ -38,13 +38,17 @@ import {
 	getReferenceMessage
 } from '../../../../store/selectors/ActiveConversationsSelectors';
 import { getXmppClient } from '../../../../store/selectors/ConnectionSelector';
+import { getLastMessageIdSelector } from '../../../../store/selectors/MessagesSelectors';
+import { getCapability, getUserId } from '../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../store/Store';
 import { Emoji } from '../../../../types/generics';
 import { AddRoomAttachmentResponse } from '../../../../types/network/responses/roomsResponses';
 import { FileToUpload, messageActionType } from '../../../../types/store/ActiveConversationTypes';
-import { MessageType } from '../../../../types/store/MessageTypes';
+import { Message, MessageType } from '../../../../types/store/MessageTypes';
+import { CapabilityType } from '../../../../types/store/SessionTypes';
 import { isAttachmentImage, uid } from '../../../../utils/attachmentUtils';
 import { BrowserUtils } from '../../../../utils/BrowserUtils';
+import { canPerformAction } from '../../../../utils/MessageActionsUtils';
 
 type ConversationMessageComposerProps = {
 	roomId: string;
@@ -86,6 +90,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 	const uploadAbortedLabel = t('attachments.uploadAborted', 'Upload has been interrupted');
 	const stopUploadLabel = t('attachments.stopUpload', 'Stop upload');
 
+	const myUserId = useStore(getUserId);
 	const referenceMessage = useStore((store) => getReferenceMessage(store, roomId));
 	const draftMessage = useStore((store) => getDraftMessage(store, roomId));
 	const unsetReferenceMessage = useStore((store) => store.unsetReferenceMessage);
@@ -95,6 +100,14 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 	const unsetFilesToAttach = useStore((store) => store.unsetFilesToAttach);
 	const filesToUploadArray = useStore((store) => getFilesToUploadArray(store, roomId));
 	const setFilesToAttach = useStore((store) => store.setFilesToAttach);
+	const lastMessageId: string | undefined = useStore((state) =>
+		getLastMessageIdSelector(state, roomId)
+	);
+	const editMessageTimeLimitInMinutes = useStore((store) =>
+		getCapability(store, CapabilityType.EDIT_MESSAGE_TIME_LIMIT)
+	) as number;
+	const lastMessageOfRoom: Message | undefined = useMessage(roomId, lastMessageId ?? '');
+	const setReferenceMessage = useStore((store) => store.setReferenceMessage);
 
 	const completeReferenceMessage = useMessage(roomId, referenceMessage?.messageId ?? '');
 
@@ -278,7 +291,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 					unsetFilesToAttach(roomId);
 					setIsUploading(false);
 				})
-				.catch(() => console.log('error'));
+				.catch((error) => console.log(error));
 		} else {
 			if (referenceMessage && completeReferenceMessage?.type === MessageType.TEXT_MSG) {
 				switch (referenceMessage.actionType) {
@@ -339,6 +352,42 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 			checkMaxLengthAndSetMessage(e.target.value);
 		},
 		[checkMaxLengthAndSetMessage]
+	);
+
+	const handleKeyUp = useCallback(
+		(e: KeyboardEvent) => {
+			if (
+				e.key === 'ArrowUp' &&
+				!e.shiftKey &&
+				lastMessageOfRoom !== undefined &&
+				lastMessageOfRoom.type === MessageType.TEXT_MSG &&
+				textMessage === '' &&
+				canPerformAction(
+					lastMessageOfRoom,
+					lastMessageOfRoom.from === myUserId,
+					editMessageTimeLimitInMinutes,
+					messageActionType.EDIT
+				)
+			) {
+				setDraftMessage(lastMessageOfRoom.roomId, false, lastMessageOfRoom.text);
+				setReferenceMessage(
+					lastMessageOfRoom.roomId,
+					lastMessageOfRoom.id,
+					lastMessageOfRoom.from,
+					lastMessageOfRoom.stanzaId,
+					messageActionType.EDIT,
+					lastMessageOfRoom.attachment
+				);
+			}
+		},
+		[
+			editMessageTimeLimitInMinutes,
+			lastMessageOfRoom,
+			myUserId,
+			setDraftMessage,
+			setReferenceMessage,
+			textMessage
+		]
 	);
 
 	const handleKeyDown = useCallback(
@@ -552,6 +601,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 					onInput={handleTypingMessage}
 					composerIsFull={noMoreCharsOnInputComposer}
 					handleKeyDownTextarea={handleKeyDown}
+					handleKeyUpTextarea={handleKeyUp}
 					handleOnBlur={handleOnBlur}
 					handleOnPaste={handlePaste}
 					isDisabled={isDisabledWhileAttachingFile}

@@ -8,7 +8,6 @@ import useStore from '../../../store/Store';
 import IXMPPClient from '../../../types/network/xmpp/IXMPPClient';
 import { MessageType } from '../../../types/store/MessageTypes';
 import { dateToTimestamp, now } from '../../../utils/dateUtil';
-import { xmppDebug } from '../../../utils/debug';
 import { getRequiredAttribute, getRequiredTagElement } from '../utility/decodeStanza';
 import { decodeXMPPMessageStanza } from '../utility/decodeXMPPMessageStanza';
 
@@ -64,13 +63,9 @@ export function onInboxMessageStanza(this: IXMPPClient, message: Element): true 
 }
 
 export function onGetInboxResponse(stanza: Element): true {
-	console.log('Get inbox:', stanza);
 	return true;
 }
 
 export function onSetInboxResponse(stanza: Element): true {
-	// TODO how to use this data?
-	const unread_messages = stanza.getElementsByTagName('unread-messages')[0]?.textContent;
-	xmppDebug(`<--- End inbox request, unread: ${unread_messages}`);
 	return true;
 }
