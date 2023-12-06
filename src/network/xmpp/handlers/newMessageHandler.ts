@@ -6,13 +6,12 @@
 
 import { EventName, sendCustomEvent } from '../../../hooks/useEventListener';
 import useStore from '../../../store/Store';
-import IXMPPClient from '../../../types/network/xmpp/IXMPPClient';
 import { MessageType } from '../../../types/store/MessageTypes';
 import { getTagElement } from '../utility/decodeStanza';
 import { decodeXMPPMessageStanza } from '../utility/decodeXMPPMessageStanza';
 import displayMessageBrowserNotification from '../utility/displayMessageBrowserNotification';
 
-export function onNewMessageStanza(this: IXMPPClient, message: Element): true {
+export function onNewMessageStanza(message: Element): true {
 	const resultElement = getTagElement(message, 'result');
 	if (resultElement == null) {
 		const newMessage = decodeXMPPMessageStanza(message);
@@ -26,7 +25,7 @@ export function onNewMessageStanza(this: IXMPPClient, message: Element): true {
 
 					if (newMessage.from === sessionId) {
 						// Set my message as read
-						this.readMessage(newMessage.roomId, newMessage.id);
+						store.connections.xmppClient.readMessage(newMessage.roomId, newMessage.id);
 					} else {
 						sendCustomEvent({ name: EventName.NEW_MESSAGE, data: newMessage });
 						store.incrementUnreadCount(newMessage.roomId);
@@ -36,7 +35,7 @@ export function onNewMessageStanza(this: IXMPPClient, message: Element): true {
 					// Request message subject of reply
 					const messageSubjectOfReplyId = newMessage.replyTo;
 					if (messageSubjectOfReplyId) {
-						this.requestMessageSubjectOfReply(
+						store.connections.xmppClient.requestMessageSubjectOfReply(
 							newMessage.roomId,
 							messageSubjectOfReplyId,
 							newMessage.id
@@ -47,7 +46,7 @@ export function onNewMessageStanza(this: IXMPPClient, message: Element): true {
 				case MessageType.CONFIGURATION_MSG: {
 					store.newMessage(newMessage);
 					if (newMessage.from === sessionId) {
-						this.readMessage(newMessage.roomId, newMessage.id);
+						store.connections.xmppClient.readMessage(newMessage.roomId, newMessage.id);
 					} else {
 						sendCustomEvent({ name: EventName.NEW_MESSAGE, data: newMessage });
 						store.incrementUnreadCount(newMessage.roomId);
