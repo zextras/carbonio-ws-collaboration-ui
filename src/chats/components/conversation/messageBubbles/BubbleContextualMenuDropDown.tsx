@@ -22,6 +22,7 @@ import { messageActionType } from '../../../../types/store/ActiveConversationTyp
 import { TextMessage } from '../../../../types/store/MessageTypes';
 import { CapabilityType } from '../../../../types/store/SessionTypes';
 import { isPreviewSupported } from '../../../../utils/attachmentUtils';
+import { canPerformAction } from '../../../../utils/MessageActionsUtils';
 import ForwardMessageModal from '../forwardModal/ForwardMessageModal';
 
 export const BubbleContextualMenuDropDownWrapper = styled.div<{
@@ -200,21 +201,16 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 		}
 	}, [message.attachment]);
 
-	const canBeEdited = useMemo(() => {
-		const inTime =
-			!editMessageTimeLimitInMinutes ||
-			(editMessageTimeLimitInMinutes &&
-				Date.now() <= message.date + editMessageTimeLimitInMinutes * 60000);
-		return isMyMessage && inTime && !message.forwarded;
-	}, [editMessageTimeLimitInMinutes, isMyMessage, message.date, message.forwarded]);
+	const canBeEdited = useMemo(
+		() =>
+			canPerformAction(message, isMyMessage, editMessageTimeLimitInMinutes, messageActionType.EDIT),
+		[editMessageTimeLimitInMinutes, isMyMessage, message]
+	);
 
-	const canBeDeleted = useMemo(() => {
-		const inTime =
-			!deleteMessageTimeLimitInMinutes ||
-			(deleteMessageTimeLimitInMinutes &&
-				Date.now() <= message.date + deleteMessageTimeLimitInMinutes * 60000);
-		return isMyMessage && inTime;
-	}, [deleteMessageTimeLimitInMinutes, isMyMessage, message.date]);
+	const canBeDeleted = useMemo(
+		() => canPerformAction(message, isMyMessage, deleteMessageTimeLimitInMinutes),
+		[deleteMessageTimeLimitInMinutes, isMyMessage, message]
+	);
 
 	const canBePreviewed = useMemo(
 		() => message.attachment && isPreviewSupported(message.attachment.mimeType),
@@ -225,6 +221,16 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 
 	const contextualMenuActions = useMemo(() => {
 		const actions: DropDownActionType[] = [];
+
+		// Edit functionality
+		if (canBeEdited) {
+			actions.push({
+				id: 'Edit',
+				label: editActionLabel,
+				onClick: editMessageAction,
+				disabled: size(filesToUploadArray) > 0
+			});
+		}
 
 		// Reply functionality
 		actions.push({
@@ -254,16 +260,6 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 			label: copyActionLabel,
 			onClick: copyMessageAction
 		});
-
-		// Edit functionality
-		if (canBeEdited) {
-			actions.push({
-				id: 'Edit',
-				label: editActionLabel,
-				onClick: editMessageAction,
-				disabled: size(filesToUploadArray) > 0
-			});
-		}
 
 		// Delete functionality
 		if (canBeDeleted) {

@@ -241,6 +241,10 @@ beforeAll(() => {
 	};
 
 	Element.prototype.scrollTo = jest.fn();
+
+	Object.defineProperty(window.parent.document.documentElement, 'requestFullscreen', {
+		value: jest.fn()
+	});
 });
 
 afterEach(() => {

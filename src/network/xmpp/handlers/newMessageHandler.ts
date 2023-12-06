@@ -8,13 +8,11 @@ import { EventName, sendCustomEvent } from '../../../hooks/useEventListener';
 import useStore from '../../../store/Store';
 import IXMPPClient from '../../../types/network/xmpp/IXMPPClient';
 import { MessageType } from '../../../types/store/MessageTypes';
-import { xmppDebug } from '../../../utils/debug';
 import { getTagElement } from '../utility/decodeStanza';
 import { decodeXMPPMessageStanza } from '../utility/decodeXMPPMessageStanza';
 import displayMessageBrowserNotification from '../utility/displayMessageBrowserNotification';
 
 export function onNewMessageStanza(this: IXMPPClient, message: Element): true {
-	xmppDebug(`<--- new message`);
 	const resultElement = getTagElement(message, 'result');
 	if (resultElement == null) {
 		const newMessage = decodeXMPPMessageStanza(message);

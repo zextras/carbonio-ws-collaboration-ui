@@ -45,7 +45,7 @@ export class WebSocketClient implements IWebSocketClient {
 		const wsUrl = '/services/chats/events';
 		// Creating WebSocket
 		this._webSocket = new WebSocket(`wss://${window.location.hostname}${wsUrl}`);
-		wsDebug('New WebSocket connection...');
+		wsDebug('WebSocket connection...');
 
 		// Attach handler
 		this._webSocket.onopen = this._onOpen;
@@ -66,11 +66,10 @@ export class WebSocketClient implements IWebSocketClient {
 	}
 
 	_onOpen = (): void => {
-		wsDebug('open event');
+		wsDebug('...connected!');
 		this._reconnectionTime = 0;
 		// Start sending ping every n seconds
 		this._pingInterval = window.setInterval(() => {
-			wsDebug('--> ping');
 			this.send({ type: 'ping' });
 			this._disconnectionCheckFunction();
 		}, this._pingTime);
@@ -80,7 +79,7 @@ export class WebSocketClient implements IWebSocketClient {
 	};
 
 	_onClose = (): void => {
-		wsDebug('close event');
+		wsDebug('WebSocket closed.');
 		// Stop sending ping
 		clearInterval(this._pingInterval);
 
@@ -94,17 +93,15 @@ export class WebSocketClient implements IWebSocketClient {
 		if (typeof e.data === 'string') {
 			const event: WsEvent = JSON.parse(e.data);
 			if (event.type === WsEventType.PONG) {
-				wsDebug('<-- pong');
 				this._disconnectionCheckFunction.cancel();
 			} else {
-				wsDebug(`<--- ${event.type}`);
 				wsEventsHandler(event);
 			}
 		}
 	};
 
 	_tryReconnection(): void {
-		wsDebug(`Retry reconnection in: ${this._reconnectionTime}`);
+		wsDebug(`Retry connection in: ${this._reconnectionTime}`);
 		setTimeout(() => {
 			if (!includes([WsReadyState.OPEN, WsReadyState.CONNECTING], this._webSocket?.readyState)) {
 				this.connect();

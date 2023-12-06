@@ -3,13 +3,12 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-
 import React from 'react';
 
 import { screen, waitFor } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react-hooks';
 import { UserEvent } from '@testing-library/user-event/setup/setup';
 
-import MeetingActionsBar from './MeetingActionsBar';
 import { mockUseParams } from '../../../../jest-mocks';
 import useStore from '../../../store/Store';
 import {
@@ -20,10 +19,10 @@ import {
 } from '../../../tests/createMock';
 import { setup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
-import { MemberBe, RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
+import { MemberBe, RoomBe } from '../../../types/network/models/roomBeTypes';
 import { UserBe } from '../../../types/network/models/userBeTypes';
 import { MeetingParticipant } from '../../../types/store/MeetingTypes';
-import { RootStore } from '../../../types/store/StoreTypes';
+import { RoomType } from '../../../types/store/RoomTypes';
 import MeetingSkeleton from '../../views/MeetingSkeleton';
 
 const user1: UserBe = createMockUser({ id: 'user1Id', name: 'user 1' });
@@ -48,64 +47,51 @@ const user1Participant: MeetingParticipant = createMockParticipants({
 	userId: user1.id,
 	sessionId: 'sessionIdUser1'
 });
+
 const user3Participant: MeetingParticipant = createMockParticipants({
 	userId: user3.id,
 	sessionId: 'sessionIdUser3'
 });
+
 const user2Participant: MeetingParticipant = createMockParticipants({
 	userId: user2.id,
 	sessionId: 'sessionIdUser2'
 });
+
 const meeting: MeetingBe = createMockMeeting({
 	roomId: room.id,
 	participants: [user1Participant, user2Participant, user3Participant]
 });
 
-const streamRef = React.createRef<HTMLDivElement>();
-
-const storeBasicActiveMeetingSetup = (): void => {
-	const store: RootStore = useStore.getState();
-	store.setLoginInfo(user1.id, user1.name);
-	store.setUserInfo(user1);
-	store.setUserInfo(user2);
-	store.setUserInfo(user3);
-	store.addRoom(room);
-	store.addMeeting(meeting);
-	store.meetingConnection(meeting.id, false, undefined, false, undefined);
-	mockUseParams.mockReturnValue({ meetingId: meeting.id });
-	setup(<MeetingActionsBar streamsWrapperRef={streamRef} />);
-};
-
-const storeSetupGroupMeetingSkeleton = (): { user: UserEvent; store: RootStore } => {
-	const store: RootStore = useStore.getState();
-	store.setLoginInfo(user1.id, user1.name);
-	store.setUserInfo(user1);
-	store.setUserInfo(user2);
-	store.setUserInfo(user3);
-	store.addRoom(room);
-	store.addMeeting(meeting);
-	store.meetingConnection(meeting.id, false, undefined, false, undefined);
+const storeSetupGroupMeetingSkeleton = (): { user: UserEvent } => {
+	const { result } = renderHook(() => useStore());
+	act(() => {
+		result.current.setUserInfo(user1);
+		result.current.setUserInfo(user2);
+		result.current.setUserInfo(user3);
+		result.current.setLoginInfo(user1.id, user1.name);
+		result.current.addRoom(room);
+		result.current.addMeeting(meeting);
+		result.current.meetingConnection(meeting.id, false, undefined, false, undefined);
+	});
 	mockUseParams.mockReturnValue({ meetingId: meeting.id });
 	const { user } = setup(<MeetingSkeleton />);
 
-	return { store, user };
+	return { user };
 };
 
-describe('Meeting action bar', () => {
-	test('everything is rendered correctly', async () => {
-		storeBasicActiveMeetingSetup();
-		const buttons = await screen.findAllByRole('button');
-		expect(buttons).toHaveLength(8);
-	});
-});
-
-describe('Meeting action bar interaction with skeleton', () => {
-	test('hover on different elements of the skeleton makes action bar appear and disappear', async () => {
+describe('Meeting action bar - Fullscreen button interaction', () => {
+	test('Enable full screen and sidebar must be closed', async () => {
+		jest.spyOn(console, 'error');
 		const { user } = storeSetupGroupMeetingSkeleton();
-		const meetingActionBar = await screen.findByTestId('meeting-action-bar');
-		await waitFor(() => user.hover(screen.getByTestId('meeting_sidebar')));
-		expect(meetingActionBar).toHaveStyle('transform: translateY( 5rem )');
-		await waitFor(() => user.hover(screen.getByTestId('meeting_view_container')));
-		expect(meetingActionBar).toHaveStyle('transform: translateY( -1rem )');
+		await waitFor(() => user.hover(screen.getByTestId('meeting-action-bar')));
+		const fullScreenButton = await screen.findByTestId('fullscreen-button');
+		await waitFor(() => {
+			act(() => {
+				user.click(fullScreenButton);
+			});
+		});
+		const meetingSidebar = screen.queryByTestId('meeting_sidebar');
+		expect(meetingSidebar).toHaveStyle('width: 0');
 	});
 });

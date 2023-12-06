@@ -10,6 +10,7 @@ import { Container, Padding } from '@zextras/carbonio-design-system';
 import styled, { FlattenSimpleInterpolation } from 'styled-components';
 
 import CameraButton from './CameraButton';
+import FullScreenButton from './FullScreenButton';
 import LeaveMeetingButton from './LeaveMeetingButton';
 import MicrophoneButton from './MicrophoneButton';
 import ScreenShareButton from './ScreenShareButton';
@@ -155,6 +156,7 @@ const MeetingActionsBar = ({ streamsWrapperRef }: MeetingActionsProps): ReactEle
 					setIsAudioListOpen={setIsAudioListOpen}
 				/>
 				<ScreenShareButton />
+				<FullScreenButton />
 				<SwitchViewButton />
 				<Padding right="1rem" />
 				<LeaveMeetingButton />
