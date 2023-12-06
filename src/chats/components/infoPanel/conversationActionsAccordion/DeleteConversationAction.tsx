@@ -58,6 +58,7 @@ const DeleteConversationAction: FC<DeleteProps> = ({ roomId, type, numberOfMembe
 					closeModal={closeModal}
 					type={type}
 					numberOfMembers={numberOfMembers}
+					roomId={roomId}
 				/>
 			)}
 		</Container>
