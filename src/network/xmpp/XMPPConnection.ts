@@ -23,7 +23,7 @@ export enum XMPPRequestType {
 	IQ = 'IQ'
 }
 
-type XMPPRequest = {
+export type XMPPRequest = {
 	type: XMPPRequestType;
 	elem: Element;
 	callback?: (stanza: Element) => void;

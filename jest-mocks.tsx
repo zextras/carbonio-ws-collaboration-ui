@@ -36,6 +36,7 @@ import {
 	GetUserPictureResponse,
 	GetUserResponse
 } from './src/types/network/responses/usersResponses';
+import { XMPPRequest } from "./src/network/xmpp/XMPPConnection";
 
 const noResultProvided = 'no result provided';
 
@@ -299,4 +300,19 @@ export const mockedScrollToMessage = jest.fn();
 jest.mock('./src/utils/scrollUtils', () => ({
 	scrollToEnd: mockedScrollToEnd,
 	scrollToMessage: mockedScrollToMessage
+}));
+
+export const mockedXmppConnect = jest.fn();
+export const mockedXmppSend = jest.fn();
+jest.mock('./src/network/xmpp/XMPPConnection', () => ({
+	__esModule: true,
+	default: jest.fn(() => ({
+		connect: mockedXmppConnect,
+		send: mockedXmppSend
+	})),
+	XMPPRequestType: {
+		IQ: 'IQ',
+		PRESENCE: 'PRESENCE',
+		MESSAGE: 'MESSAGE'
+	}
 }));
