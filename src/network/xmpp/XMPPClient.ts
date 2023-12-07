@@ -4,11 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { find, forEach } from 'lodash';
 import { $iq, $msg, $pres, Strophe } from 'strophe.js';
 import { v4 as uuidGenerator } from 'uuid';
 
-import { onErrorStanza } from './handlers/errorHandler';
 import {
 	MamRequestType,
 	onRequestHistory,
@@ -29,21 +27,11 @@ const jabberData = 'jabber:x:data';
 class XMPPClient implements IXMPPClient {
 	private xmppConnection: XMPPConnection;
 
-	private requestsQueue: RequestType[] = [];
-
 	constructor() {
 		this.xmppConnection = new XMPPConnection(() => {
-			// Receive list of my subscription
 			this.getContactList();
-			// Send my presence and start receiving others
 			this.setOnline();
-			// Request inbox data: last message of every chat and unread messages count
 			this.setInbox();
-			// Send history queued requests
-			forEach(this.requestsQueue, ({ iq, callback }) =>
-				this.xmppConnection.send(XMPPRequestType.IQ, iq, callback)
-			);
-			this.requestsQueue = [];
 		});
 
 		// Useful namespaces
@@ -74,31 +62,33 @@ class XMPPClient implements IXMPPClient {
 	 * PRESENCE:
 	 * I receive presence events only from users who are on my contact list with a bidirectional subscription.
 	 * Automatically, when one_to_one conversation with a certain user starts, this user is added to my contact list,
-	 * I'm subscribed to his changes and he is subscribed to my changes.
+	 * I'm subscribed to his changes, and he is subscribed to my changes.
 	 * For offline contact, request last activity.
 	 */
 
 	// Request my contact list
 	public getContactList(): void {
-		if (this.xmppConnection.isConnected()) {
-			const iq = $iq({ type: 'get' }).c('query', { xmlns: Strophe.NS.ROSTER });
-			this.xmppConnection.send(XMPPRequestType.IQ, iq, onGetRosterResponse);
-		}
+		const iq = $iq({ type: 'get' }).c('query', { xmlns: Strophe.NS.ROSTER });
+		this.xmppConnection.send({
+			type: XMPPRequestType.IQ,
+			elem: iq,
+			callback: onGetRosterResponse
+		});
 	}
 
 	// Send my 'presence' event to all my contacts
 	public setOnline(): void {
-		if (this.xmppConnection.isConnected()) {
-			this.xmppConnection.send(XMPPRequestType.PRESENCE, $pres());
-		}
+		this.xmppConnection.send({ type: XMPPRequestType.PRESENCE, elem: $pres() });
 	}
 
 	// Request last activity date of a particular user
 	public getLastActivity(jid: string): void {
-		if (this.xmppConnection.isConnected()) {
-			const iq = $iq({ type: 'get', to: jid }).c('query', { xmlns: Strophe.NS.LAST_ACTIVITY });
-			this.xmppConnection.send(XMPPRequestType.IQ, iq, onGetLastActivityResponse);
-		}
+		const iq = $iq({ type: 'get', to: jid }).c('query', { xmlns: Strophe.NS.LAST_ACTIVITY });
+		this.xmppConnection.send({
+			type: XMPPRequestType.IQ,
+			elem: iq,
+			callback: onGetLastActivityResponse
+		});
 	}
 
 	/**
@@ -108,18 +98,22 @@ class XMPPClient implements IXMPPClient {
 
 	// Request the supported form
 	public getInbox(): void {
-		if (this.xmppConnection.isConnected()) {
-			const iq = $iq({ type: 'get' }).c('inbox', { xmlns: Strophe.NS.INBOX });
-			this.xmppConnection.send(XMPPRequestType.IQ, iq, onGetInboxResponse);
-		}
+		const iq = $iq({ type: 'get' }).c('inbox', { xmlns: Strophe.NS.INBOX });
+		this.xmppConnection.send({
+			type: XMPPRequestType.IQ,
+			elem: iq,
+			callback: onGetInboxResponse
+		});
 	}
 
 	// Fetch the inbox and get initial information:
 	public setInbox(): void {
-		if (this.xmppConnection.isConnected()) {
-			const iq = $iq({ type: 'set' }).c('inbox', { xmlns: Strophe.NS.INBOX });
-			this.xmppConnection.send(XMPPRequestType.IQ, iq, onSetInboxResponse);
-		}
+		const iq = $iq({ type: 'set' }).c('inbox', { xmlns: Strophe.NS.INBOX });
+		this.xmppConnection.send({
+			type: XMPPRequestType.IQ,
+			elem: iq,
+			callback: onSetInboxResponse
+		});
 	}
 
 	/**
@@ -129,19 +123,16 @@ class XMPPClient implements IXMPPClient {
 
 	// Send a text message
 	sendChatMessage(roomId: string, message: string): void {
-		if (this.xmppConnection.isConnected()) {
-			const uuid = uuidGenerator();
-			// Set a placeholder message into the store
-			useStore.getState().setPlaceholderMessage({ roomId, id: uuid, text: message });
+		const uuid = uuidGenerator();
+		// Set a placeholder message into the store
+		useStore.getState().setPlaceholderMessage({ roomId, id: uuid, text: message });
 
-			// Send the message to xmpp server
-			const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat', id: uuid })
-				.c('body')
-				.t(message)
-				.up()
-				.c('markable', { xmlns: Strophe.NS.MARKERS });
-			this.xmppConnection.send(XMPPRequestType.MESSAGE, msg);
-		}
+		const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat', id: uuid })
+			.c('body')
+			.t(message)
+			.up()
+			.c('markable', { xmlns: Strophe.NS.MARKERS });
+		this.xmppConnection.send({ type: XMPPRequestType.MESSAGE, elem: msg });
 	}
 
 	/**
@@ -154,24 +145,22 @@ class XMPPClient implements IXMPPClient {
 		replyTo: string,
 		replyMessageId: string
 	): void {
-		if (this.xmppConnection.isConnected()) {
-			const to = `${carbonize(replyTo)}/${carbonizeMUC(roomId)}}`;
-			const uuid = uuidGenerator();
+		const to = `${carbonize(replyTo)}/${carbonizeMUC(roomId)}}`;
+		const uuid = uuidGenerator();
 
-			// Set a placeholder message into the store
-			useStore
-				.getState()
-				.setPlaceholderMessage({ roomId, id: uuid, text: message, replyTo: replyMessageId });
+		// Set a placeholder message into the store
+		useStore
+			.getState()
+			.setPlaceholderMessage({ roomId, id: uuid, text: message, replyTo: replyMessageId });
 
-			const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat', id: uuid })
-				.c('body')
-				.t(message)
-				.up()
-				.c('markable', { xmlns: Strophe.NS.MARKERS })
-				.up()
-				.c('reply', { to, id: replyMessageId, xmlns: Strophe.NS.REPLY });
-			this.xmppConnection.send(XMPPRequestType.MESSAGE, msg);
-		}
+		const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat', id: uuid })
+			.c('body')
+			.t(message)
+			.up()
+			.c('markable', { xmlns: Strophe.NS.MARKERS })
+			.up()
+			.c('reply', { to, id: replyMessageId, xmlns: Strophe.NS.REPLY });
+		this.xmppConnection.send({ type: XMPPRequestType.MESSAGE, elem: msg });
 	}
 
 	/**
@@ -179,13 +168,11 @@ class XMPPClient implements IXMPPClient {
 	 * Documentation: https://esl.github.io/MongooseDocs/latest/modules/mod_mam/#retraction-on-the-stanza-id
 	 */
 	sendChatMessageDeletion(roomId: string, messageStanzaId: string): void {
-		if (this.xmppConnection.isConnected()) {
-			const uuid = uuidGenerator();
-			const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat', id: uuid })
-				.c('apply-to', { id: messageStanzaId, xmlns: Strophe.NS.XMPP_FASTEN })
-				.c('retract', { xmlns: Strophe.NS.XMPP_RETRACT });
-			this.xmppConnection.send(XMPPRequestType.MESSAGE, msg);
-		}
+		const uuid = uuidGenerator();
+		const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat', id: uuid })
+			.c('apply-to', { id: messageStanzaId, xmlns: Strophe.NS.XMPP_FASTEN })
+			.c('retract', { xmlns: Strophe.NS.XMPP_RETRACT });
+		this.xmppConnection.send({ type: XMPPRequestType.MESSAGE, elem: msg });
 	}
 
 	/**
@@ -193,29 +180,25 @@ class XMPPClient implements IXMPPClient {
 	 * Documentation: https://xmpp.org/extensions/xep-0422.html
 	 */
 	sendChatMessageEdit(roomId: string, message: string, messageStanzaId: string): void {
-		if (this.xmppConnection.isConnected()) {
-			const uuid = uuidGenerator();
-			const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat', id: uuid })
-				.c('apply-to', { id: messageStanzaId, xmlns: Strophe.NS.XMPP_FASTEN })
-				.c('edit', { xmlns: Strophe.NS.ZEXTRAS_EDIT })
-				.up()
-				.c('external', { name: 'body' })
-				.up()
-				.up()
-				.c('body')
-				.t(message);
-			this.xmppConnection.send(XMPPRequestType.MESSAGE, msg);
-		}
+		const uuid = uuidGenerator();
+		const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat', id: uuid })
+			.c('apply-to', { id: messageStanzaId, xmlns: Strophe.NS.XMPP_FASTEN })
+			.c('edit', { xmlns: Strophe.NS.ZEXTRAS_EDIT })
+			.up()
+			.c('external', { name: 'body' })
+			.up()
+			.up()
+			.c('body')
+			.t(message);
+		this.xmppConnection.send({ type: XMPPRequestType.MESSAGE, elem: msg });
 	}
 
 	// Request the full history of a room
 	requestFullHistory(roomId: string): void {
-		if (this.xmppConnection.isConnected()) {
-			const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) }).c('query', {
-				xmlns: Strophe.NS.MAM
-			});
-			this.xmppConnection.send(XMPPRequestType.IQ, iq, onRequestHistory);
-		}
+		const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) }).c('query', {
+			xmlns: Strophe.NS.MAM
+		});
+		this.xmppConnection.send({ type: XMPPRequestType.IQ, elem: iq, callback: onRequestHistory });
 	}
 
 	// Request n messages before end date but not before start date
@@ -247,18 +230,11 @@ class XMPPClient implements IXMPPClient {
 			.t(quantity)
 			.up()
 			.c('before');
-		if (this.xmppConnection.isConnected()) {
-			this.xmppConnection.send(XMPPRequestType.IQ, iq, (stanza) =>
-				onRequestHistory(stanza, unread)
-			);
-		} else if (!find(this.requestsQueue, (request) => request.roomId === roomId)) {
-			// If XMPP is offline, save request to perform it later
-			this.requestsQueue.push({
-				iq,
-				callback: (stanza) => onRequestHistory(stanza, unread),
-				roomId
-			});
-		}
+		this.xmppConnection.send({
+			type: XMPPRequestType.IQ,
+			elem: iq,
+			callback: (stanza) => onRequestHistory(stanza, unread)
+		});
 	}
 
 	requestHistoryBetweenTwoMessage(
@@ -266,20 +242,22 @@ class XMPPClient implements IXMPPClient {
 		olderMessageId: string,
 		newerMessageId: string
 	): void {
-		if (this.xmppConnection.isConnected()) {
-			const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
-				.c('query', { xmlns: Strophe.NS.MAM })
-				.c('x', { xmlns: jabberData })
-				.c('field', { var: 'from_id' })
-				.c('value')
-				.t(olderMessageId)
-				.up()
-				.up()
-				.c('field', { var: 'to_id' })
-				.c('value')
-				.t(newerMessageId);
-			this.xmppConnection.send(XMPPRequestType.IQ, iq, onRequestHistory);
-		}
+		const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
+			.c('query', { xmlns: Strophe.NS.MAM })
+			.c('x', { xmlns: jabberData })
+			.c('field', { var: 'from_id' })
+			.c('value')
+			.t(olderMessageId)
+			.up()
+			.up()
+			.c('field', { var: 'to_id' })
+			.c('value')
+			.t(newerMessageId);
+		this.xmppConnection.send({
+			type: XMPPRequestType.IQ,
+			elem: iq,
+			callback: onRequestHistory
+		});
 	}
 
 	requestMessageSubjectOfReply(
@@ -287,22 +265,22 @@ class XMPPClient implements IXMPPClient {
 		messageSubjectOfReplyId: string,
 		replyMessageId: string
 	): void {
-		if (this.xmppConnection.isConnected()) {
-			const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
-				.c('query', { xmlns: Strophe.NS.MAM, queryid: MamRequestType.REPLIED })
-				.c('x', { xmlns: jabberData })
-				.c('field', { var: 'from_id' })
-				.c('value')
-				.t(messageSubjectOfReplyId)
-				.up()
-				.up()
-				.c('field', { var: 'to_id' })
-				.c('value')
-				.t(messageSubjectOfReplyId);
-			this.xmppConnection.send(XMPPRequestType.IQ, iq, (stanza) =>
-				onRequestSingleMessage(stanza, replyMessageId)
-			);
-		}
+		const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
+			.c('query', { xmlns: Strophe.NS.MAM, queryid: MamRequestType.REPLIED })
+			.c('x', { xmlns: jabberData })
+			.c('field', { var: 'from_id' })
+			.c('value')
+			.t(messageSubjectOfReplyId)
+			.up()
+			.up()
+			.c('field', { var: 'to_id' })
+			.c('value')
+			.t(messageSubjectOfReplyId);
+		this.xmppConnection.send({
+			type: XMPPRequestType.IQ,
+			elem: iq,
+			callback: (stanza) => onRequestSingleMessage(stanza, replyMessageId)
+		});
 	}
 
 	requestMessageToForward(roomId: string, messageToForwardStanzaId: string): Promise<Element> {
@@ -318,9 +296,11 @@ class XMPPClient implements IXMPPClient {
 				.c('field', { var: 'to_id' })
 				.c('value')
 				.t(messageToForwardStanzaId);
-			this.xmppConnection.send(XMPPRequestType.IQ, iq, resolve, (stanzaError) => {
-				onErrorStanza(stanzaError);
-				reject(stanzaError);
+			this.xmppConnection.send({
+				type: XMPPRequestType.IQ,
+				elem: iq,
+				callback: resolve,
+				errorCallback: reject
 			});
 		});
 	}
@@ -332,22 +312,18 @@ class XMPPClient implements IXMPPClient {
 
 	// Send "I'm typing" information to all the users on the room
 	sendIsWriting(roomId: string): void {
-		if (this.xmppConnection.isConnected()) {
-			const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat' }).c('composing', {
-				xmlns: Strophe.NS.CHAT_STATE
-			});
-			this.xmppConnection.send(XMPPRequestType.MESSAGE, msg);
-		}
+		const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat' }).c('composing', {
+			xmlns: Strophe.NS.CHAT_STATE
+		});
+		this.xmppConnection.send({ type: XMPPRequestType.MESSAGE, elem: msg });
 	}
 
 	// Sending a paused event to all users on the room
 	sendPaused(roomId: string): void {
-		if (this.xmppConnection.isConnected()) {
-			const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat' }).c('paused', {
-				xmlns: Strophe.NS.CHAT_STATE
-			});
-			this.xmppConnection.send(XMPPRequestType.MESSAGE, msg);
-		}
+		const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat' }).c('paused', {
+			xmlns: Strophe.NS.CHAT_STATE
+		});
+		this.xmppConnection.send({ type: XMPPRequestType.MESSAGE, elem: msg });
 	}
 
 	/**
@@ -357,31 +333,21 @@ class XMPPClient implements IXMPPClient {
 
 	// Send confirmation that I read a certain message
 	readMessage(roomId: string, messageId: string): void {
-		if (this.xmppConnection.isConnected()) {
-			const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat' }).c('displayed', {
-				xmlns: Strophe.NS.MARKERS,
-				id: messageId
-			});
-			this.xmppConnection.send(XMPPRequestType.MESSAGE, msg);
-		}
+		const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat' }).c('displayed', {
+			xmlns: Strophe.NS.MARKERS,
+			id: messageId
+		});
+		this.xmppConnection.send({ type: XMPPRequestType.MESSAGE, elem: msg });
 	}
 
 	// Request last message read date of all the members of a room
 	lastMarkers(roomId: string): void {
-		if (this.xmppConnection.isConnected()) {
-			const iq = $iq({ type: 'get' }).c('query', {
-				xmlns: Strophe.NS.SMART_MARKERS,
-				peer: carbonizeMUC(roomId)
-			});
-			this.xmppConnection.send(XMPPRequestType.IQ, iq, onSmartMarkers);
-		}
+		const iq = $iq({ type: 'get' }).c('query', {
+			xmlns: Strophe.NS.SMART_MARKERS,
+			peer: carbonizeMUC(roomId)
+		});
+		this.xmppConnection.send({ type: XMPPRequestType.IQ, elem: iq, callback: onSmartMarkers });
 	}
 }
 
 export default XMPPClient;
-
-type RequestType = {
-	iq: Element;
-	callback: (stanza: Element) => void;
-	roomId: string;
-};

@@ -151,7 +151,5 @@ export function onRequestSingleMessage(stanza: Element, messageWithResponseId: s
 	const referenceMessageId = Strophe.getText(getRequiredTagElement(stanza, 'first'));
 	const referenceMessage = HistoryAccumulator.returnReferenceForRepliedMessage(referenceMessageId);
 	const store: RootStore = useStore.getState();
-	if (referenceMessage) {
-		store.setRepliedMessage(referenceMessage.roomId, messageWithResponseId, referenceMessage);
-	}
+	store.setRepliedMessage(referenceMessage.roomId, messageWithResponseId, referenceMessage);
 }

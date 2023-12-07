@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { debounce } from 'lodash';
+import { debounce, forEach } from 'lodash';
 import { Strophe } from 'strophe.js';
 
 import { onComposingMessageStanza } from './handlers/composingMessageHandler';
@@ -22,18 +22,27 @@ export enum XMPPRequestType {
 	PRESENCE = 'PRESENCE',
 	IQ = 'IQ'
 }
-class XMPPConnection {
-	private connection: StropheConnection;
 
+type XMPPRequest = {
+	type: XMPPRequestType;
+	elem: Element;
+	callback?: (stanza: Element) => void;
+	errorCallback?: (stanza: Element) => void;
+};
+class XMPPConnection {
 	private token: string | undefined;
+
+	private connection: StropheConnection;
 
 	private connectionStatus: StropheConnectionStatus | undefined;
 
 	private reconnectionTime = 0;
 
-	private initFunction: () => void;
+	private initFunction: VoidFunction;
 
-	constructor(initFunction: () => void) {
+	private requestsQueue: XMPPRequest[] = [];
+
+	constructor(initFunction: VoidFunction) {
 		this.initFunction = initFunction;
 
 		// Init XMPP connection
@@ -53,6 +62,7 @@ class XMPPConnection {
 	private onConnectionStatus(statusCode: StropheConnectionStatus): void {
 		const { setXmppStatus } = useStore.getState();
 		this.connectionStatus = statusCode;
+
 		switch (statusCode) {
 			case Strophe.Status.ERROR: {
 				xmppDebug('Connection error');
@@ -126,6 +136,10 @@ class XMPPConnection {
 		this.connection.addHandler(onDisplayedMessageStanza, Strophe.NS.MARKERS, 'message');
 
 		this.initFunction();
+
+		// Send all requests that were saved while XMPP was offline
+		forEach(this.requestsQueue, (request) => this.send(request));
+		this.requestsQueue = [];
 	}
 
 	private tryReconnection = debounce(() => {
@@ -140,34 +154,33 @@ class XMPPConnection {
 
 	public connect(token: string): void {
 		this.token = token;
-		const store = useStore.getState();
-		const jid = `${store.session.id}@carbonio`;
+		const userId = useStore.getState().session.id;
+		const jid = `${userId}@carbonio`;
 		this.connection.connect(jid, token, this.onConnectionStatus.bind(this));
 	}
 
-	public isConnected(): boolean {
-		return this.connection && this.connectionStatus === Strophe.Status.CONNECTED;
-	}
-
-	public send(
-		requestType: XMPPRequestType,
-		elem: Element,
-		callback?: (stanza: Element) => unknown,
-		errorCallback?: (stanza: Element) => unknown
-	): void {
-		this.connection.sendIQ(elem, callback);
-		switch (requestType) {
-			case XMPPRequestType.MESSAGE:
-				this.connection.send(elem);
-				break;
-			case XMPPRequestType.PRESENCE:
-				this.connection.sendPresence(elem);
-				break;
-			case XMPPRequestType.IQ:
-				this.connection.sendIQ(elem, callback, errorCallback ?? onErrorStanza);
-				break;
-			default:
-				throw new Error('Unhandled request type');
+	public send(request: XMPPRequest): void {
+		if (this.connection && this.connectionStatus === Strophe.Status.CONNECTED) {
+			switch (request.type) {
+				case XMPPRequestType.MESSAGE:
+					this.connection.send(request.elem);
+					break;
+				case XMPPRequestType.PRESENCE:
+					this.connection.sendPresence(request.elem);
+					break;
+				case XMPPRequestType.IQ:
+					this.connection.sendIQ(
+						request.elem,
+						request.callback,
+						request.errorCallback ?? onErrorStanza
+					);
+					break;
+				default:
+					throw new Error('Unhandled request type');
+			}
+		} else {
+			// If XMPP is offline, save request to perform it later
+			this.requestsQueue.push(request);
 		}
 	}
 }
