@@ -34,11 +34,11 @@ const BubblesWrapper = (): JSX.Element | null => {
 
 	const newMessageHandler = useCallback(
 		({ detail: messageFromEvent }) => {
-			if (messageFromEvent.type === MessageType.TEXT_MSG) {
+			if (!sidebarIsVisible && messageFromEvent.type === MessageType.TEXT_MSG) {
 				setMessageIdsList([messageFromEvent.id, ...messageIdsList]);
 			}
 		},
-		[messageIdsList]
+		[messageIdsList, sidebarIsVisible]
 	);
 
 	useEffect(() => {
