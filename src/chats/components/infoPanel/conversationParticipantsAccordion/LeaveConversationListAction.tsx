@@ -99,6 +99,7 @@ const LeaveConversationListAction: FC<LeaveConversationProps> = ({
 					closeModal={closeDeleteConversationModal}
 					type={RoomType.GROUP}
 					numberOfMembers={numberOfMembers}
+					roomId={roomId}
 				/>
 			)}
 			{leaveConversationModalOpen && (
