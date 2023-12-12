@@ -24,7 +24,6 @@ import { getCustomLogo } from '../../store/selectors/SessionSelectors';
 import useStore from '../../store/Store';
 import { MeetingViewType } from '../../types/store/ActiveMeetingTypes';
 import defaultLogo from '../assets/Logo.png';
-import BubblesWrapper from '../components/bubblesWrapper/BubblesWrapper';
 import CinemaMode from '../components/cinemaMode/CinemaMode';
 import FaceToFaceMode from '../components/faceToFaceMode/FaceToFaceMode';
 import GridMode from '../components/gridMode/GridMode';
@@ -103,7 +102,6 @@ const MeetingSkeleton = (): ReactElement => {
 				data-testid="meeting_view_container"
 			>
 				<LogoApp $customLogo={customLogo} />
-				<BubblesWrapper />
 				{ViewToDisplay}
 				<MeetingActionsBar streamsWrapperRef={streamsWrapperRef} />
 			</ViewContainer>

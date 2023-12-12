@@ -3,15 +3,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import React, {
-	Dispatch,
-	FC,
-	SetStateAction,
-	useCallback,
-	useEffect,
-	useMemo,
-	useState
-} from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { Container, Padding } from '@zextras/carbonio-design-system';
 import { useParams } from 'react-router-dom';
@@ -80,10 +72,10 @@ const BubbleContainer = styled(Container)<{
 
 type MeetingBubbleProps = {
 	messageId: string;
-	setMessageIdToRemove: Dispatch<SetStateAction<string>>;
+	handleBubbleRemove: (messageIdToRemove: string) => void;
 };
 
-const MeetingBubble: FC<MeetingBubbleProps> = ({ messageId, setMessageIdToRemove }) => {
+const MeetingBubble: FC<MeetingBubbleProps> = ({ messageId, handleBubbleRemove }) => {
 	const { meetingId }: MeetingRoutesParams = useParams();
 
 	const roomId = useStore((store) => getRoomIdByMeetingId(store, meetingId));
@@ -125,14 +117,11 @@ const MeetingBubble: FC<MeetingBubbleProps> = ({ messageId, setMessageIdToRemove
 	useEffect(() => {
 		setTimeout(() => {
 			setIsVisible(false);
+			setTimeout(() => {
+				handleBubbleRemove(messageId);
+			}, 500);
 		}, 3500);
-	}, []);
-
-	useEffect(() => {
-		setTimeout(() => {
-			setMessageIdToRemove(messageId);
-		}, 4000);
-	}, [messageId, setMessageIdToRemove]);
+	}, [messageId, handleBubbleRemove]);
 
 	return message?.type === MessageType.TEXT_MSG ? (
 		<BubbleContainer
