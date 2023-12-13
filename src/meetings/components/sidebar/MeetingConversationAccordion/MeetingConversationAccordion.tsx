@@ -6,7 +6,7 @@
 
 import React, { FC, useCallback, useMemo } from 'react';
 
-import { Container, IconButton, Text, Tooltip } from '@zextras/carbonio-design-system';
+import { Badge, Container, IconButton, Row, Text, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -15,6 +15,8 @@ import papyrus from '../../../../chats/assets/papyrus.png';
 import Chat from '../../../../chats/components/conversation/Chat';
 import { useDarkReaderStatus } from '../../../../hooks/useDarkReaderStatus';
 import { getMeetingChatVisibility } from '../../../../store/selectors/ActiveMeetingSelectors';
+import { getRoomMutedSelector } from '../../../../store/selectors/RoomsSelectors';
+import { getRoomUnreadsSelector } from '../../../../store/selectors/UnreadsCounterSelectors';
 import useStore from '../../../../store/Store';
 import { MeetingChatVisibility } from '../../../../types/store/ActiveMeetingTypes';
 
@@ -45,6 +47,8 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({
 	const collapseChatLabel = t('meeting.collapseChat', 'Collapse chat');
 	const chatLabel = t('chat', 'Chat');
 
+	const unreadMessagesCount = useStore((store) => getRoomUnreadsSelector(store, roomId || ''));
+	const roomMuted = useStore((state) => getRoomMutedSelector(state, roomId));
 	const meetingChatVisibility = useStore((store) => getMeetingChatVisibility(store, meetingId));
 	const setMeetingChatVisibility = useStore((store) => store.setMeetingChatVisibility);
 
@@ -83,6 +87,16 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({
 		[chatFullExpanded, chatIsOpen]
 	);
 
+	const UnreadCounter = useMemo(
+		() =>
+			unreadMessagesCount > 0 ? (
+				<Row padding={{ left: 'small' }} mainAlignment="center" crossAlignment="center">
+					<Badge value={unreadMessagesCount} type={!roomMuted ? 'unread' : 'read'} />
+				</Row>
+			) : null,
+		[unreadMessagesCount, roomMuted]
+	);
+
 	return (
 		<ChatContainer
 			key="MeetingConversationAccordion"
@@ -115,6 +129,7 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({
 							/>
 						</Tooltip>
 					)}
+					{!isChatOpenOrFullExpanded && UnreadCounter}
 					<Tooltip label={isChatOpenOrFullExpanded ? collapseChatLabel : expandChatLabel}>
 						<IconButton
 							data-testid="toggleChatStatus"
