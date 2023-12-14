@@ -7,6 +7,7 @@
 import React, { FunctionComponent, MouseEventHandler } from 'react';
 
 import { Avatar, Checkbox, Container, Padding, Row, Text } from '@zextras/carbonio-design-system';
+import styled from 'styled-components';
 
 import {
 	getRoomNameSelector,
@@ -15,6 +16,12 @@ import {
 } from '../../../../store/selectors/RoomsSelectors';
 import useStore from '../../../../store/Store';
 import { RoomType } from '../../../../types/store/RoomTypes';
+
+const CustomRow = styled(Row)`
+	overflow-x: hidden;
+	text-overflow: ellipsis;
+	width: calc(100%);
+`;
 
 type ForwardModalConversationListItemProps = {
 	roomId: string;
@@ -34,7 +41,7 @@ const ForwardMessageConversationListItem: FunctionComponent<
 				onClick={onClick(roomId)}
 				orientation="horizontal"
 				mainAlignment="flex-start"
-				width="fill"
+				width="26.75rem"
 			>
 				<Row>
 					<Checkbox value={selected} />
@@ -45,8 +52,10 @@ const ForwardMessageConversationListItem: FunctionComponent<
 							shape={roomType === RoomType.ONE_TO_ONE ? 'round' : 'square'}
 						/>
 					</Padding>
-					<Text>{roomName}</Text>
 				</Row>
+				<CustomRow mainAlignment="flex-start" takeAvailableSpace>
+					<Text>{roomName}</Text>
+				</CustomRow>
 			</Container>
 		</Padding>
 	);
