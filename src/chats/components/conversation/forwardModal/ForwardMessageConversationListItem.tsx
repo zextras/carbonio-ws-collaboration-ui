@@ -20,7 +20,6 @@ import { RoomType } from '../../../../types/store/RoomTypes';
 const CustomRow = styled(Row)`
 	overflow-x: hidden;
 	text-overflow: ellipsis;
-	width: calc(100%);
 `;
 
 type ForwardModalConversationListItemProps = {
