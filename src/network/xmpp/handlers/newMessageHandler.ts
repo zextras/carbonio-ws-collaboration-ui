@@ -17,6 +17,7 @@ export function onNewMessageStanza(message: Element): true {
 		const newMessage = decodeXMPPMessageStanza(message);
 		if (newMessage) {
 			const store = useStore.getState();
+			const { xmppClient } = store.connections;
 			const sessionId: string | undefined = useStore.getState().session.id;
 
 			switch (newMessage.type) {
@@ -25,7 +26,7 @@ export function onNewMessageStanza(message: Element): true {
 
 					if (newMessage.from === sessionId) {
 						// Set my message as read
-						store.connections.xmppClient.readMessage(newMessage.roomId, newMessage.id);
+						xmppClient.readMessage(newMessage.roomId, newMessage.id);
 					} else {
 						sendCustomEvent({ name: EventName.NEW_MESSAGE, data: newMessage });
 						store.incrementUnreadCount(newMessage.roomId);
@@ -35,7 +36,7 @@ export function onNewMessageStanza(message: Element): true {
 					// Request message subject of reply
 					const messageSubjectOfReplyId = newMessage.replyTo;
 					if (messageSubjectOfReplyId) {
-						store.connections.xmppClient.requestMessageSubjectOfReply(
+						xmppClient.requestMessageSubjectOfReply(
 							newMessage.roomId,
 							messageSubjectOfReplyId,
 							newMessage.id
@@ -46,7 +47,7 @@ export function onNewMessageStanza(message: Element): true {
 				case MessageType.CONFIGURATION_MSG: {
 					store.newMessage(newMessage);
 					if (newMessage.from === sessionId) {
-						store.connections.xmppClient.readMessage(newMessage.roomId, newMessage.id);
+						xmppClient.readMessage(newMessage.roomId, newMessage.id);
 					} else {
 						sendCustomEvent({ name: EventName.NEW_MESSAGE, data: newMessage });
 						store.incrementUnreadCount(newMessage.roomId);

@@ -95,6 +95,7 @@ export function onRequestHistory(stanza: Element, unread?: number): void {
 	const fin = getRequiredTagElement(stanza, 'fin');
 	const isHistoryFullyLoaded = fin.getAttribute('complete');
 	const store = useStore.getState();
+	const { xmppClient } = store.connections;
 
 	const historyMessages = HistoryAccumulator.returnHistory(roomId);
 
@@ -112,12 +113,7 @@ export function onRequestHistory(stanza: Element, unread?: number): void {
 		const unreadNotLoaded = unread - size(textMessages);
 		if (unreadNotLoaded > 0) {
 			// Request 5 more messages to avoid a new history request when user scrolls to the first new message
-			store.connections.xmppClient.requestHistory(
-				roomId,
-				historyMessages[0].date,
-				unreadNotLoaded + 5,
-				unread
-			);
+			xmppClient.requestHistory(roomId, historyMessages[0].date, unreadNotLoaded + 5, unread);
 		}
 	}
 
@@ -135,16 +131,12 @@ export function onRequestHistory(stanza: Element, unread?: number): void {
 	forEach(historyMessages, (message) => {
 		const messageSubjectOfReplyId = (message as TextMessage).replyTo;
 		if (messageSubjectOfReplyId) {
-			store.connections.xmppClient.requestMessageSubjectOfReply(
-				message.roomId,
-				messageSubjectOfReplyId,
-				message.id
-			);
+			xmppClient.requestMessageSubjectOfReply(message.roomId, messageSubjectOfReplyId, message.id);
 		}
 	});
 
 	// Update last marker
-	store.connections.xmppClient.lastMarkers(roomId);
+	xmppClient.lastMarkers(roomId);
 }
 
 export function onRequestSingleMessage(stanza: Element, messageWithResponseId: string): void {

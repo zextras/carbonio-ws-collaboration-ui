@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { debounce, forEach } from 'lodash';
+import { debounce, forEach, size } from 'lodash';
 import { Strophe } from 'strophe.js';
 
 import { onComposingMessageStanza } from './handlers/composingMessageHandler';
@@ -138,8 +138,10 @@ class XMPPConnection {
 		this.initFunction();
 
 		// Send all requests that were saved while XMPP was offline
-		forEach(this.requestsQueue, (request) => this.send(request));
-		this.requestsQueue = [];
+		if (size(this.requestsQueue) > 0) {
+			forEach(this.requestsQueue, (request) => this.send(request));
+			this.requestsQueue = [];
+		}
 	}
 
 	private tryReconnection = debounce(() => {
