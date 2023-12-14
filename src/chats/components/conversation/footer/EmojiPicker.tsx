@@ -17,8 +17,6 @@ import React, {
 
 import data from '@emoji-mart/data';
 import { Container } from '@zextras/carbonio-design-system';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
 import { Picker } from 'emoji-mart';
 import styled from 'styled-components';
 
@@ -33,6 +31,7 @@ const PickerWrapper = styled(Container)<{ $isInsideMeeting?: boolean }>`
 	width: 22rem;
 	transform-origin: bottom left;
 	animation: showEmoji 0.2s ease-in 0s 1;
+	flex-wrap: wrap;
 
 	// set height of emojiPicker when is small or large device
 	@media (max-height: 48rem) {
@@ -105,7 +104,15 @@ const EmojiPicker: React.FC<EmojiPickerProps> = ({
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
-	return <PickerWrapper ref={ref} data-testid="emojiPicker" $isInsideMeeting={isInsideMeeting} />;
+	return (
+		<PickerWrapper
+			ref={ref}
+			data-testid="emojiPicker"
+			$isInsideMeeting={isInsideMeeting}
+			mainAlignment={'flex-end'}
+			crossAlignment={'flex-start'}
+		/>
+	);
 };
 
 export default EmojiPicker;

@@ -42,6 +42,33 @@ export const getAttachmentExtension = (attachmentType: string): string | undefin
 	}
 };
 
+export const getAttachmentInfo = (
+	messageMimeType: string | undefined,
+	messageSize: number | undefined
+): { extension: string | undefined; size: string | undefined } => {
+	let size;
+	let extension;
+	if (messageMimeType !== undefined) {
+		extension = messageMimeType.split('/')[1]?.toUpperCase();
+	} else {
+		extension = undefined;
+	}
+	if (messageSize !== undefined) {
+		if (messageSize < 1024) {
+			size = `${messageSize}B`;
+		} else if (messageSize < 1024 * 1024) {
+			size = `${(messageSize / 1024).toFixed(2)}KB`;
+		} else if (messageSize < 1024 * 1024 * 1024) {
+			size = `${(messageSize / 1024 / 1024).toFixed(2)}MB`;
+		} else {
+			size = `${(messageSize / 1024 / 1024 / 1024).toFixed(2)}GB`;
+		}
+	} else {
+		size = undefined;
+	}
+	return { extension, size };
+};
+
 // returns the thumbnail's url of the attachment
 export const getThumbnailURL = (attachmentId: string, mimeType: string): string | undefined => {
 	if (isPreviewSupported(mimeType)) {
@@ -121,22 +148,6 @@ export const getAttachmentIcon = (fileType: string): string => {
 		default:
 			return 'FileOutline';
 	}
-};
-
-export const getAttachmentSize = (attachmentSize: number): string | undefined => {
-	if (attachmentSize) {
-		if (attachmentSize < 1024) {
-			return `${attachmentSize}B`;
-		}
-		if (attachmentSize < 1024 * 1024) {
-			return `${(attachmentSize / 1024).toFixed(2)}KB`;
-		}
-		if (attachmentSize < 1024 * 1024 * 1024) {
-			return `${(attachmentSize / 1024 / 1024).toFixed(2)}MB`;
-		}
-		return `${(attachmentSize / 1024 / 1024 / 1024).toFixed(2)}GB`;
-	}
-	return undefined;
 };
 
 // generates random id format 'aaaaaaaa'-'aaaa'-'aaaa'-'aaaa'-'aaaaaaaaaaaa'

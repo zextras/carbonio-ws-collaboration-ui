@@ -9,6 +9,8 @@ import React, { FC, useMemo } from 'react';
 import { Container, Modal, Text } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
+import { getMeetingActive } from '../../../../store/selectors/MeetingSelectors';
+import useStore from '../../../../store/Store';
 import { RoomType } from '../../../../types/store/RoomTypes';
 
 type DeleteModalProps = {
@@ -17,6 +19,7 @@ type DeleteModalProps = {
 	closeModal: () => void;
 	type: string;
 	numberOfMembers: number;
+	roomId: string;
 };
 
 const DeleteConversationModal: FC<DeleteModalProps> = ({
@@ -24,7 +27,8 @@ const DeleteConversationModal: FC<DeleteModalProps> = ({
 	deleteConversation,
 	closeModal,
 	type,
-	numberOfMembers
+	numberOfMembers,
+	roomId
 }) => {
 	const [t] = useTranslation();
 	const deleteConversationButtonLabel = t('action.delete', 'Delete');
@@ -40,13 +44,33 @@ const DeleteConversationModal: FC<DeleteModalProps> = ({
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [type]);
 
+	const isMeetingActive = useStore((store) => getMeetingActive(store, roomId));
+
 	const deleteConversationDescriptionLabel = useMemo(() => {
 		if (type === RoomType.GROUP) {
-			return t('modal.deleteGroupLabel', 'Are you sure to delete this Group?');
+			const confirmDeleteGroupLabel = t(
+				'modal.deleteGroupLabel',
+				'This action will affect all Group members and cannot be undone. Are you sure you want to delete this Group?'
+			);
+			if (isMeetingActive) {
+				const deleteGroupMeetingOngoingLabel = t(
+					'modal.deleteGroupMeetingOngoingLabel',
+					'There is currently an active meeting. Deleting the Group will end the meeting without any warning.'
+				);
+				return (
+					<>
+						{deleteGroupMeetingOngoingLabel}
+						<br />
+						<br />
+						{confirmDeleteGroupLabel}
+					</>
+				);
+			}
+			return confirmDeleteGroupLabel;
 		}
 		return t('modal.deleteRoomLabel', 'Are you sure to delete this Room?');
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [type]);
+	}, [type, isMeetingActive]);
 
 	return (
 		<Modal
@@ -62,7 +86,7 @@ const DeleteConversationModal: FC<DeleteModalProps> = ({
 			data-testid="delete_modal"
 		>
 			<Container padding={{ vertical: 'large' }}>
-				<Text>{deleteConversationDescriptionLabel}</Text>
+				<Text overflow="break-word">{deleteConversationDescriptionLabel}</Text>
 			</Container>
 		</Modal>
 	);

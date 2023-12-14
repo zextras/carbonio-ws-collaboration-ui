@@ -24,6 +24,7 @@ import { getRoomTypeSelector } from '../../../store/selectors/RoomsSelectors';
 import useStore from '../../../store/Store';
 import { MeetingChatVisibility } from '../../../types/store/ActiveMeetingTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
+import BubblesWrapper from '../bubblesWrapper/BubblesWrapper';
 
 const SidebarContainer = styled(Container)`
 	position: relative;
@@ -68,15 +69,15 @@ const MeetingSidebar = (): ReactElement => {
 		<SidebarContainer
 			background="text"
 			width={sidebarIsVisible ? '35%' : '0'}
-			minWidth={sidebarIsVisible ? '370px' : '0'}
-			maxWidth="500px"
+			minWidth={sidebarIsVisible ? '23.125rem' : '0'}
+			maxWidth="31.25rem"
 			borderRadius="none"
 			crossAlignment="flex-start"
 			mainAlignment="flex-end"
 			data-testid="meeting_sidebar"
 		>
 			{meetingChatVisibility !== MeetingChatVisibility.EXPANDED && (
-				<AccordionContainer mainAlignment="flex-start" flexGrow="1" gap="gap: 1px">
+				<AccordionContainer mainAlignment="flex-start" flexGrow="1" gap="gap: 0.063rem">
 					<ActionsAccordion roomId={roomId || ''} isInsideMeeting meetingId={meetingId} />
 					{roomType !== RoomType.ONE_TO_ONE && (
 						<MeetingParticipantsAccordion meetingId={meetingId} />
@@ -99,6 +100,7 @@ const MeetingSidebar = (): ReactElement => {
 					/>
 				</Tooltip>
 			</ChangeSidebarStatusButton>
+			{!sidebarIsVisible && <BubblesWrapper />}
 		</SidebarContainer>
 	);
 };
