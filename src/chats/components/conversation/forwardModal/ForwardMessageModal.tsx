@@ -17,6 +17,7 @@ import React, {
 import {
 	Button,
 	ChipInput,
+	ChipItem,
 	Container,
 	List,
 	Modal,
@@ -86,7 +87,7 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 	const [inputValue, setInputValue] = useState('');
 	const [selected, setSelected] = useState<{ [id: string]: boolean }>({});
 	const [chatList, setChatList] = useState<{ id: string }[]>([]);
-	const [chips, setChips] = useState<{ id: string }[]>([]);
+	const [chips, setChips] = useState<ChipItem<unknown>[]>([]);
 
 	// Update conversation list on filter updating
 	useEffect(() => {
@@ -132,10 +133,10 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 	);
 
 	const removeContactFromChip = useCallback(
-		(newArrayChips: { id: string }[]) => {
-			setSelected(mapValues(keyBy(newArrayChips, 'id'), () => true));
-			const differenceChip = difference(chips, newArrayChips)[0];
-			if (size(chips) > size(newArrayChips) && differenceChip) {
+		(items: ChipItem<unknown>[]) => {
+			setSelected(mapValues(keyBy(items, 'id'), () => true));
+			const differenceChip = difference(chips, items)[0];
+			if (size(chips) > size(items) && differenceChip) {
 				setChips((chips) => differenceBy(chips, [differenceChip], 'id'));
 			}
 		},
@@ -205,14 +206,8 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 				placeholder={inputPlaceholder}
 				onInputType={handleChangeText}
 				value={chips}
-				// TODO FIX CHIPS
-				/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
-				/* @ts-ignore */
 				onChange={removeContactFromChip}
 				requireUniqueChips
-				// TODO FIX CHIPS
-				/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
-				/* @ts-ignore */
 				ChipComponent={ForwardMessageConversationChip}
 				confirmChipOnBlur={false}
 				separators={[]}

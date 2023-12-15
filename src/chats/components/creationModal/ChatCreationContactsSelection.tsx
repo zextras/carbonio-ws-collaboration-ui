@@ -77,7 +77,7 @@ const ChatCreationContactsSelection = ({
 	const maxMembers = useStore((store) => getCapability(store, CapabilityType.MAX_GROUP_MEMBERS));
 
 	const maxGroupMembers = useMemo(
-		() => (isCreationModal && typeof maxMembers === 'number' ? maxMembers - 1 : maxMembers),
+		() => (isCreationModal && typeof maxMembers === 'number' ? maxMembers - 1 : undefined),
 		[isCreationModal, maxMembers]
 	);
 
@@ -179,6 +179,7 @@ const ChatCreationContactsSelection = ({
 				label: item.name,
 				value: item
 			};
+			console.log(newChip);
 			setContactSelected((contacts: ContactSelected) =>
 				contacts[item.id] ? omit(contacts, item.id) : { ...contacts, [item.id]: item }
 			);
@@ -284,9 +285,6 @@ const ChatCreationContactsSelection = ({
 				value={chips}
 				onChange={removeContactFromChip}
 				requireUniqueChips
-				// TODO FIX CHIPS
-				/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
-				/* @ts-ignore */
 				maxChips={maxGroupMembers}
 				data-testid="chip_input_creation_modal"
 				confirmChipOnBlur={false}
