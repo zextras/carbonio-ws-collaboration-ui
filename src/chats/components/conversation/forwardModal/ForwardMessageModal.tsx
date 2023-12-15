@@ -83,6 +83,7 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 	const chooseOneChatLabel = t('modal.forward.chooseAtLeastOneChat', 'Choose at least one chat');
 
 	const inputRef = useRef<HTMLInputElement>(null);
+	const modalRef = useRef<HTMLDivElement>(null);
 	const [inputValue, setInputValue] = useState('');
 	const [selected, setSelected] = useState<{ [id: string]: boolean }>({});
 	const [chatList, setChatList] = useState<{ id: string }[]>([]);
@@ -158,6 +159,7 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 						roomId={item.id}
 						selected={selected}
 						onClick={onClickListItem}
+						modalRef={modalRef?.current?.children[1].children[0]}
 					/>
 				),
 		[onClickListItem]
@@ -193,6 +195,7 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 			size="small"
 			customFooter={modalFooter}
 			closeIconTooltip={closeLabel}
+			ref={modalRef}
 		>
 			<Text overflow="break-word" size="small">
 				{modalDescription}
