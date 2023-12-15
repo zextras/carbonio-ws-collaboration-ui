@@ -179,7 +179,6 @@ const ChatCreationContactsSelection = ({
 				label: item.name,
 				value: item
 			};
-			console.log(newChip);
 			setContactSelected((contacts: ContactSelected) =>
 				contacts[item.id] ? omit(contacts, item.id) : { ...contacts, [item.id]: item }
 			);
