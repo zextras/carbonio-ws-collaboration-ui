@@ -6,19 +6,19 @@
 
 import { forEach } from 'lodash';
 
+import useStore from '../../../store/Store';
 import { getRequiredAttribute } from '../utility/decodeStanza';
-import XMPPClient from '../XMPPClient';
 
 /**
  * ROSTER (XEP-0012)
  * Documentation: https://xmpp.org/extensions/xep-0162.html
  */
 
-export function onGetRosterResponse(this: XMPPClient, stanza: Element): boolean {
+export function onGetRosterResponse(stanza: Element): boolean {
 	const contacts = stanza.getElementsByTagName('item');
 	forEach(contacts, (contact) => {
 		const jid = getRequiredAttribute(contact, 'jid');
-		this.getLastActivity(jid);
+		useStore.getState().connections.xmppClient.getLastActivity(jid);
 	});
 	return true;
 }
