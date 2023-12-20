@@ -7,9 +7,8 @@
 import { Strophe } from 'strophe.js';
 
 import useStore from '../../../store/Store';
-import XMPPClient from '../XMPPClient';
 
-export function onPresenceStanza(this: XMPPClient, stanza: Element): true {
+export function onPresenceStanza(stanza: Element): true {
 	const store = useStore.getState();
 	const from = Strophe.getNodeFromJid(stanza.getAttribute('from'));
 	const type = stanza.getAttribute('type');
@@ -18,7 +17,7 @@ export function onPresenceStanza(this: XMPPClient, stanza: Element): true {
 	// If user goes offline, request his last activity
 	if (type != null) {
 		const jid = Strophe.getBareJidFromJid(stanza.getAttribute('from'));
-		this.getLastActivity(jid);
+		store.connections.xmppClient.getLastActivity(jid);
 	}
 	// TODO SEND PAUSE ISWRITING WHEN USER GOES OFFLINE
 	return true;

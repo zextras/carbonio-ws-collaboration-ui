@@ -5,7 +5,6 @@
  */
 
 import useStore from '../../../store/Store';
-import IXMPPClient from '../../../types/network/xmpp/IXMPPClient';
 import { MessageType } from '../../../types/store/MessageTypes';
 import { dateToTimestamp, now } from '../../../utils/dateUtil';
 import { getRequiredAttribute, getRequiredTagElement } from '../utility/decodeStanza';
@@ -16,7 +15,7 @@ import { decodeXMPPMessageStanza } from '../utility/decodeXMPPMessageStanza';
  * Documentation: https://xmpp.org/extensions/xep-0430.html
  */
 
-export function onInboxMessageStanza(this: IXMPPClient, message: Element): true {
+export function onInboxMessageStanza(message: Element): true {
 	const result = getRequiredTagElement(message, 'result');
 	const date = getRequiredAttribute(getRequiredTagElement(result, 'delay'), 'stamp');
 	const insideMessage = getRequiredTagElement(result, 'message');
@@ -26,6 +25,7 @@ export function onInboxMessageStanza(this: IXMPPClient, message: Element): true 
 	if (inboxMessage) {
 		const unreadMessagesOfSingleConversation = getRequiredAttribute(result, 'unread');
 		const store = useStore.getState();
+		const { xmppClient } = store.connections;
 		store.addUnreadCount(inboxMessage.roomId, parseInt(unreadMessagesOfSingleConversation, 10));
 
 		switch (inboxMessage.type) {
@@ -34,7 +34,7 @@ export function onInboxMessageStanza(this: IXMPPClient, message: Element): true 
 
 				// Request message subject of reply
 				if (inboxMessage.replyTo) {
-					this.requestMessageSubjectOfReply(
+					xmppClient.requestMessageSubjectOfReply(
 						inboxMessage.roomId,
 						inboxMessage.replyTo,
 						inboxMessage.id
@@ -43,7 +43,7 @@ export function onInboxMessageStanza(this: IXMPPClient, message: Element): true 
 
 				// Ask smart markers to update Check icon
 				if (inboxMessage.from === sessionId) {
-					this.lastMarkers(inboxMessage.roomId);
+					xmppClient.lastMarkers(inboxMessage.roomId);
 				}
 				break;
 			case MessageType.CONFIGURATION_MSG: {
@@ -53,7 +53,7 @@ export function onInboxMessageStanza(this: IXMPPClient, message: Element): true 
 			case MessageType.FASTENING:
 				store.addFastening(inboxMessage);
 				// Last inboxMessage is a fastening, we need to request more messages to display the real last one
-				this.requestHistory(inboxMessage.roomId, now(), 3);
+				xmppClient.requestHistory(inboxMessage.roomId, now(), 3);
 				break;
 			default:
 				break;
