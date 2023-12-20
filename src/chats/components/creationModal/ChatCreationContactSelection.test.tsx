@@ -17,8 +17,6 @@ import { createMockCapabilityList } from '../../../tests/createMock';
 import { setup } from '../../../tests/test-utils';
 import { Member } from '../../../types/store/RoomTypes';
 
-const user1Test = 'user1@test.com';
-
 // Mock objects
 const zimbraUser1: ContactMatch = {
 	email: 'user1@test.com',
@@ -236,9 +234,11 @@ describe('Chat Creation Modal Contact Selector - search', () => {
 		const chipInput = await screen.findByTestId('chip_input_creation_modal');
 		// here I check that the chip exist and is the one related to user1
 		const user1Chip = chipInput.children[0].children[0];
+		const userName = user1Chip.children[1].children[0].children[0].innerHTML;
+
 		expect(chipInput.children[0].children).toHaveLength(3);
 		expect(user1Chip).toBeInTheDocument();
-		expect(user1Chip.id).toBe(zimbraUser1.zimbraId);
+		expect(userName).toBe(`${zimbraUser1.firstName} ${zimbraUser1.lastName}`);
 
 		const removeButton = await screen.findByTestId('icon: Close');
 		user.click(removeButton);
@@ -265,8 +265,6 @@ describe('Chat Creation Modal Contact Selector - search', () => {
 		const userComponent = await screen.findByText(zimbraUser1.fullName);
 		user.click(userComponent);
 		const chipInput = await screen.findByTestId('chip_input_creation_modal');
-		const user1Chip = chipInput.children[0].children[0];
-		expect(user1Chip.id).toBe(zimbraUser1.zimbraId);
 		user.click(userComponent);
 		const chipInput1 = await screen.findByTestId('chip_input_creation_modal');
 

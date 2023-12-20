@@ -175,16 +175,15 @@ const ChatCreationContactsSelection = ({
 	const onClickListItem = useCallback(
 		(item: ContactInfo) => () => {
 			const newChip: ChipInfo = {
-				id: item.id,
-				label: item.name,
-				value: item
+				value: item,
+				label: item.name || item.email
 			};
 			setContactSelected((contacts: ContactSelected) =>
 				contacts[item.id] ? omit(contacts, item.id) : { ...contacts, [item.id]: item }
 			);
 			setChips((chips) =>
-				find(chips, (chip) => chip.id === item.id)
-					? differenceBy(chips, [newChip], 'id')
+				find(chips, (chip) => chip.value.id === item.id)
+					? differenceBy(chips, [newChip], 'value.id')
 					: union(chips, [newChip])
 			);
 		},
@@ -207,7 +206,7 @@ const ChatCreationContactsSelection = ({
 				const clickCb =
 					(chipInputHasError && selected) || !chipInputHasError
 						? onClickListItem
-						: (item: ContactInfo) => () => null;
+						: () => () => null;
 				return (
 					<ListParticipant
 						item={item}
@@ -224,8 +223,8 @@ const ChatCreationContactsSelection = ({
 		(newChips) => {
 			const differenceChip = difference(chips, newChips)[0];
 			if (size(chips) > size(newChips) && differenceChip) {
-				setContactSelected((contacts: ContactSelected) => omit(contacts, differenceChip.id));
-				setChips((chips) => differenceBy(chips, [differenceChip], 'id'));
+				setContactSelected((contacts: ContactSelected) => omit(contacts, differenceChip.value.id));
+				setChips((chips) => differenceBy(chips, [differenceChip], 'value.id'));
 			}
 		},
 		[chips, setContactSelected]
@@ -309,9 +308,8 @@ export type ContactInfo = {
 };
 
 export type ChipInfo = {
-	id: string;
-	label: string;
 	value: ContactInfo;
+	label: string;
 };
 
 export type ContactSelected = {

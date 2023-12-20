@@ -16,12 +16,12 @@ import {
 import useStore from '../../../../store/Store';
 import { RoomType } from '../../../../types/store/RoomTypes';
 
-const ForwardMessageConversationChip: ComponentType<ChipItem<unknown>> | undefined = (
+const ForwardMessageConversationChip: ComponentType<ChipItem<{ id: string }>> | undefined = (
 	props
 ): ReactElement => {
-	const roomName = useStore((state) => getRoomNameSelector(state, props.id || ''));
-	const picture: string | undefined = useStore((state) => getRoomURLPicture(state, props.id || ''));
-	const roomType: string = useStore((state) => getRoomTypeSelector(state, props.id || ''));
+	const roomName = useStore((state) => getRoomNameSelector(state, props.value?.id || ''));
+	const picture = useStore((state) => getRoomURLPicture(state, props.value?.id || ''));
+	const roomType = useStore((state) => getRoomTypeSelector(state, props.value?.id || ''));
 
 	return (
 		<Chip

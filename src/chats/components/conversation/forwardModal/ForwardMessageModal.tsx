@@ -25,18 +25,7 @@ import {
 	Text,
 	Tooltip
 } from '@zextras/carbonio-design-system';
-import {
-	difference,
-	differenceBy,
-	find,
-	keyBy,
-	map,
-	mapValues,
-	omit,
-	remove,
-	size,
-	union
-} from 'lodash';
+import { difference, differenceBy, find, keyBy, map, mapValues, omit, remove, size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -87,7 +76,7 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 	const [inputValue, setInputValue] = useState('');
 	const [selected, setSelected] = useState<{ [id: string]: boolean }>({});
 	const [chatList, setChatList] = useState<{ id: string }[]>([]);
-	const [chips, setChips] = useState<ChipItem<unknown>[]>([]);
+	const [chips, setChips] = useState<ChipItem<{ id: string }>[]>([]);
 
 	// Update conversation list on filter updating
 	useEffect(() => {
@@ -118,10 +107,15 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 	const onClickListItem = useCallback(
 		(roomId: string) => () => {
 			select(roomId);
-			setChips((chips) =>
-				find(chips, (chip) => chip.id === roomId)
-					? differenceBy(chips, [{ id: roomId }], 'id')
-					: union(chips, [{ id: roomId }])
+			const newChip = {
+				value: {
+					id: roomId
+				}
+			};
+			setChips((oldChips) =>
+				find(oldChips, (chip) => chip.value?.id === roomId)
+					? differenceBy(oldChips, [newChip], 'value.id')
+					: [...oldChips, newChip]
 			);
 
 			if (inputRef.current) {
@@ -133,11 +127,11 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 	);
 
 	const removeContactFromChip = useCallback(
-		(items: ChipItem<unknown>[]) => {
-			setSelected(mapValues(keyBy(items, 'id'), () => true));
+		(items: ChipItem<{ id: string }>[]) => {
+			setSelected(mapValues(keyBy(items, 'value.id'), () => true));
 			const differenceChip = difference(chips, items)[0];
 			if (size(chips) > size(items) && differenceChip) {
-				setChips((chips) => differenceBy(chips, [differenceChip], 'id'));
+				setChips((chips) => differenceBy(chips, [differenceChip], 'value.id'));
 			}
 		},
 		[chips]
