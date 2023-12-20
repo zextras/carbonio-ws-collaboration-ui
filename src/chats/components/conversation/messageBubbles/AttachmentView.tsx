@@ -78,6 +78,9 @@ const PreviewErrorContainer = styled(Container)<{
 `;
 
 const AttachmentImg = styled.img<{
+	src: string;
+	onLoad: () => void;
+	onError: () => void;
 	isPreviewLoaded: boolean;
 	width: number;
 	height: number;

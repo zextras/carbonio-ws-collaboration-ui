@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { MutableRefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import {
 	Avatar,
@@ -88,7 +88,14 @@ const CustomContainer = styled(Container)`
 	position: absolute;
 `;
 
-const VideoEl = styled.video<{ isScreenShare: boolean }>`
+const VideoEl = styled.video<{
+	playsInline: boolean;
+	autoPlay: boolean;
+	muted: boolean;
+	controls: boolean;
+	ref: MutableRefObject<HTMLVideoElement | null>;
+	isScreenShare: boolean;
+}>`
 	${({ isScreenShare }): string | false => !isScreenShare && 'object-fit: cover;'}
 	aspect-ratio: 16/9;
 	width: inherit;
