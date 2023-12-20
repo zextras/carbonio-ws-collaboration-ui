@@ -4,9 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { waitFor } from '@testing-library/react';
-import { act, renderHook } from '@testing-library/react-hooks';
-import { size } from 'lodash';
+import { act } from '@testing-library/react-hooks';
 
 import SubscriptionsManager from './SubscriptionsManager';
 import { mockedSubscribeToMediaRequest } from '../../../jest-mocks';
@@ -19,8 +17,11 @@ import {
 } from '../../tests/createMock';
 import { MeetingBe, MeetingParticipantBe } from '../../types/network/models/meetingBeTypes';
 import { RoomBe, RoomType } from '../../types/network/models/roomBeTypes';
-import { STREAM_TYPE, SubscriptionMap } from '../../types/store/ActiveMeetingTypes';
+import { WsEventType } from '../../types/network/websocket/wsEvents';
+import { MeetingMediaStreamChangedEvent } from '../../types/network/websocket/wsMeetingEvents';
+import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
 import { User } from '../../types/store/UserTypes';
+import { wsEventsHandler } from '../websocket/wsEventsHandler';
 
 const user1Info: User = {
 	id: 'user1',
@@ -43,32 +44,29 @@ const groupRoom: RoomBe = createMockRoom({
 
 const user1Participant: MeetingParticipantBe = createMockParticipants({
 	userId: 'user1',
-	sessionId: 'sessionIdUser1',
-	videoStreamEnabled: true
+	videoStreamEnabled: true,
+	screenStreamEnabled: true
 });
 
 const user2Participant: MeetingParticipantBe = createMockParticipants({
 	userId: 'user2',
-	sessionId: 'sessionIdUser2',
-	videoStreamEnabled: true
+	videoStreamEnabled: true,
+	screenStreamEnabled: true
 });
 
 const user3Participant: MeetingParticipantBe = createMockParticipants({
 	userId: 'user3',
-	sessionId: 'sessionIdUser3',
 	videoStreamEnabled: true
 });
 
 const user4Participant: MeetingParticipantBe = createMockParticipants({
 	userId: 'user4',
-	sessionId: 'sessionIdUser4',
 	videoStreamEnabled: true
 });
 
 const user5Participant: MeetingParticipantBe = createMockParticipants({
 	userId: 'user5',
-	sessionId: 'sessionIdUser5',
-	videoStreamEnabled: true
+	videoStreamEnabled: false
 });
 
 const groupMeeting: MeetingBe = createMockMeeting({
@@ -82,77 +80,165 @@ const groupMeeting: MeetingBe = createMockMeeting({
 	]
 });
 
-const participantsMapped: SubscriptionMap = {
-	'user1-video': {
-		userId: 'user1',
-		type: STREAM_TYPE.VIDEO
-	},
-	'user2-video': {
-		userId: 'user2',
-		type: STREAM_TYPE.VIDEO
-	},
-	'user3-video': {
-		userId: 'user3',
-		type: STREAM_TYPE.VIDEO
-	},
-	'user4-video': {
-		userId: 'user4',
-		type: STREAM_TYPE.VIDEO
-	}
-};
+const subscribeUrl = '/services/chats/meetings/meetingId/media/subscribe';
+
+beforeEach(() => {
+	act(() => {
+		const store = useStore.getState();
+		store.setLoginInfo(user1Info.id, user1Info.email, user1Info.name);
+		store.addRoom(groupRoom);
+		store.addMeeting(groupMeeting);
+		store.meetingConnection(groupMeeting.id, false, undefined, false, undefined);
+	});
+});
 
 describe('Test SubscriptionsManager', () => {
-	test('Populate potential subscriptions', async () => {
-		const { result } = renderHook(() => useStore());
-		act(() => {
-			result.current.setLoginInfo(user1Info.id, user1Info.email, user1Info.name);
-			result.current.addRoom(groupRoom);
-			result.current.addMeeting(groupMeeting);
-			result.current.meetingConnection(groupMeeting.id, false, undefined, false, undefined);
-		});
-		mockedSubscribeToMediaRequest.mockReturnValue(true);
-		const subscriptionsManager = new SubscriptionsManager('meetingId');
-		subscriptionsManager.updateSubscription(participantsMapped);
-		await waitFor(() => {
-			expect(subscriptionsManager.subscriptions).toEqual(participantsMapped);
-		});
+	test('Request all streams subscriptions', async () => {
+		mockedSubscribeToMediaRequest.mockResolvedValue(true);
+		const subscriptionsManager = new SubscriptionsManager(groupMeeting.id);
+		subscriptionsManager.updateSubscription([
+			{ userId: 'user1', type: STREAM_TYPE.VIDEO },
+			{ userId: 'user1', type: STREAM_TYPE.SCREEN },
+			{ userId: 'user2', type: STREAM_TYPE.VIDEO },
+			{ userId: 'user2', type: STREAM_TYPE.SCREEN },
+			{ userId: 'user3', type: STREAM_TYPE.VIDEO },
+			{ userId: 'user4', type: STREAM_TYPE.VIDEO },
+			{ userId: 'user5', type: STREAM_TYPE.VIDEO }
+		]);
+		expect(fetch).toHaveBeenCalledTimes(1);
+		expect(fetch).toHaveBeenCalledWith(
+			subscribeUrl,
+			expect.objectContaining({
+				body: JSON.stringify({
+					subscribe: [
+						{ userId: 'user2', type: STREAM_TYPE.VIDEO },
+						{ userId: 'user2', type: STREAM_TYPE.SCREEN },
+						{ userId: 'user3', type: STREAM_TYPE.VIDEO },
+						{ userId: 'user4', type: STREAM_TYPE.VIDEO }
+					],
+					unsubscribe: []
+				})
+			})
+		);
 	});
 
-	test('Add single subscription', async () => {
-		const { result } = renderHook(() => useStore());
-		act(() => {
-			result.current.setLoginInfo(user1Info.id, user1Info.email, user1Info.name);
-			result.current.addRoom(groupRoom);
-			result.current.addMeeting(groupMeeting);
-			result.current.meetingConnection(groupMeeting.id, false, undefined, false, undefined);
-		});
-		mockedSubscribeToMediaRequest.mockReturnValue('ujji');
-		const subscriptionsManager = new SubscriptionsManager('meetingId');
-		subscriptionsManager.subscriptions = participantsMapped;
-		console.log(subscriptionsManager.subscriptions);
-		subscriptionsManager.addSubscription('user5', STREAM_TYPE.VIDEO);
-		const addedSubscription = {
+	test('Subscribe only to some streams', async () => {
+		const subscriptionsManager = new SubscriptionsManager(groupMeeting.id);
+		subscriptionsManager.updateSubscription([
+			{ userId: 'user1', type: STREAM_TYPE.VIDEO },
+			{ userId: 'user2', type: STREAM_TYPE.VIDEO },
+			{ userId: 'user2', type: STREAM_TYPE.SCREEN },
+			{ userId: 'user5', type: STREAM_TYPE.VIDEO }
+		]);
+		expect(fetch).toHaveBeenCalledTimes(1);
+		expect(fetch).toHaveBeenCalledWith(
+			subscribeUrl,
+			expect.objectContaining({
+				body: JSON.stringify({
+					subscribe: [
+						{ userId: 'user2', type: STREAM_TYPE.VIDEO },
+						{ userId: 'user2', type: STREAM_TYPE.SCREEN }
+					],
+					unsubscribe: []
+				})
+			})
+		);
+	});
+
+	test('Add and remove subscriptions', async () => {
+		const subscriptionsManager = new SubscriptionsManager(groupMeeting.id);
+		subscriptionsManager.subscriptions = [
+			{ userId: 'user2', type: STREAM_TYPE.VIDEO },
+			{ userId: 'user2', type: STREAM_TYPE.SCREEN }
+		];
+
+		subscriptionsManager.updateSubscription([
+			{ userId: 'user1', type: STREAM_TYPE.SCREEN },
+			{ userId: 'user2', type: STREAM_TYPE.VIDEO },
+			{ userId: 'user3', type: STREAM_TYPE.VIDEO },
+			{ userId: 'user4', type: STREAM_TYPE.VIDEO }
+		]);
+
+		expect(fetch).toHaveBeenCalledWith(
+			subscribeUrl,
+			expect.objectContaining({
+				body: JSON.stringify({
+					subscribe: [
+						{ userId: 'user3', type: STREAM_TYPE.VIDEO },
+						{ userId: 'user4', type: STREAM_TYPE.VIDEO }
+					],
+					unsubscribe: [{ userId: 'user2', type: STREAM_TYPE.SCREEN }]
+				})
+			})
+		);
+	});
+
+	test('Subscribed stream sets video off', async () => {
+		const subscriptionsManager = new SubscriptionsManager(groupMeeting.id);
+
+		subscriptionsManager.subscriptions = [
+			{ userId: 'user1', type: STREAM_TYPE.VIDEO },
+			{ userId: 'user2', type: STREAM_TYPE.VIDEO },
+			{ userId: 'user2', type: STREAM_TYPE.SCREEN }
+		];
+
+		subscriptionsManager.removeSubscription({ userId: 'user2', type: STREAM_TYPE.VIDEO });
+
+		expect(fetch).toHaveBeenCalledWith(
+			subscribeUrl,
+			expect.objectContaining({
+				body: JSON.stringify({
+					subscribe: [],
+					unsubscribe: [{ userId: 'user2', type: STREAM_TYPE.VIDEO }]
+				})
+			})
+		);
+	});
+
+	test('Only one video subscribed sets video off', async () => {
+		const subscriptionsManager = new SubscriptionsManager(groupMeeting.id);
+
+		subscriptionsManager.subscriptions = [{ userId: 'user2', type: STREAM_TYPE.VIDEO }];
+
+		subscriptionsManager.removeSubscription({ userId: 'user2', type: STREAM_TYPE.VIDEO });
+
+		expect(fetch).toHaveBeenCalledWith(
+			subscribeUrl,
+			expect.objectContaining({
+				body: JSON.stringify({
+					subscribe: [],
+					unsubscribe: [{ userId: 'user2', type: STREAM_TYPE.VIDEO }]
+				})
+			})
+		);
+	});
+
+	test('Not subscribed stream sets video on', async () => {
+		const subscriptionsManager = new SubscriptionsManager(groupMeeting.id);
+
+		subscriptionsManager.subscriptions = [
+			{ userId: 'user2', type: STREAM_TYPE.VIDEO },
+			{ userId: 'user2', type: STREAM_TYPE.SCREEN }
+		];
+
+		wsEventsHandler({
+			type: WsEventType.MEETING_MEDIA_STREAM_CHANGED,
 			userId: 'user5',
-			type: STREAM_TYPE.VIDEO
-		};
-		await waitFor(() => {
-			expect(size(subscriptionsManager.subscriptions)).toEqual(5);
-		});
-		expect(subscriptionsManager.subscriptions['user5-video']).toEqual(addedSubscription);
-	});
+			meetingId: groupMeeting.id,
+			mediaType: STREAM_TYPE.VIDEO,
+			active: true
+		} as MeetingMediaStreamChangedEvent);
 
-	test('Remove single subscription', () => {
-		const { result } = renderHook(() => useStore());
-		act(() => {
-			result.current.addRoom(groupRoom);
-			result.current.addMeeting(groupMeeting);
-			result.current.meetingConnection(groupMeeting.id, false, undefined, false, undefined);
-		});
-		const subscriptionsManager = new SubscriptionsManager('meetingId');
-		subscriptionsManager.subscriptions = participantsMapped;
-		subscriptionsManager.removeSubscription('user1', STREAM_TYPE.VIDEO);
-		const updatedSubscription = { ...subscriptionsManager.subscriptions };
-		delete updatedSubscription['user1-video'];
-		expect(subscriptionsManager.subscriptions).toEqual(updatedSubscription);
+		subscriptionsManager.addSubscription({ userId: 'user5', type: STREAM_TYPE.VIDEO });
+
+		expect(fetch).toHaveBeenCalledWith(
+			subscribeUrl,
+			expect.objectContaining({
+				body: JSON.stringify({
+					subscribe: [{ userId: 'user5', type: STREAM_TYPE.VIDEO }],
+					unsubscribe: []
+				})
+			})
+		);
 	});
 });

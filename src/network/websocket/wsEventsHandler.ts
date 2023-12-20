@@ -158,12 +158,12 @@ export function wsEventsHandler(event: WsEvent): void {
 			state.removeParticipant(event.meetingId, event.userId);
 
 			// Update subscription manager
-			const subscriptionsManager =
-				state.activeMeeting[event.meetingId]?.videoScreenIn?.subscriptionManager;
-			if (subscriptionsManager) {
-				subscriptionsManager.removeSubscription(event.userId, STREAM_TYPE.VIDEO);
-				subscriptionsManager.removeSubscription(event.userId, STREAM_TYPE.SCREEN);
-			}
+			// const subscriptionsManager =
+			// 	state.activeMeeting[event.meetingId]?.videoScreenIn?.subscriptionManager;
+			// if (subscriptionsManager) {
+			// 	subscriptionsManager.removeSubscription(event.userId, STREAM_TYPE.VIDEO);
+			// 	subscriptionsManager.removeSubscription(event.userId, STREAM_TYPE.SCREEN);
+			// }
 
 			// Send audio feedback to other participants session user leave
 			const activeMeeting = state.activeMeeting[event.meetingId];
@@ -215,6 +215,17 @@ export function wsEventsHandler(event: WsEvent): void {
 		}
 		case WsEventType.MEETING_MEDIA_STREAM_CHANGED: {
 			const mediaType = event.mediaType.toLowerCase() as STREAM_TYPE;
+
+			// Update subscription manager
+			if (event.userId !== state.session.id) {
+				const subscriptionsManager =
+					state.activeMeeting[event.meetingId]?.videoScreenIn?.subscriptionManager;
+				const sub = { userId: event.userId, type: mediaType };
+				if (!event.active) {
+					subscriptionsManager?.removeSubscription(sub);
+				}
+			}
+
 			state.changeStreamStatus(event.meetingId, event.userId, mediaType, event.active);
 
 			// Auto pin new screen share
@@ -232,12 +243,12 @@ export function wsEventsHandler(event: WsEvent): void {
 			if (event.userId !== state.session.id) {
 				const subscriptionsManager =
 					state.activeMeeting[event.meetingId]?.videoScreenIn?.subscriptionManager;
+				const sub = { userId: event.userId, type: mediaType };
 				if (event.active) {
-					subscriptionsManager?.addSubscription(event.userId, mediaType);
-				} else {
-					subscriptionsManager?.removeSubscription(event.userId, mediaType);
+					subscriptionsManager?.addSubscription(sub);
 				}
 			}
+
 			break;
 		}
 		case WsEventType.MEETING_AUDIO_ANSWERED: {

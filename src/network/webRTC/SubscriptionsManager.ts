@@ -4,106 +4,123 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { differenceWith, find, flatMap, forEach, isEqual } from 'lodash';
+import { concat, differenceWith, filter, find, isEqual, size } from 'lodash';
 
 import useStore from '../../store/Store';
-import { STREAM_TYPE, Subscription, SubscriptionMap } from '../../types/store/ActiveMeetingTypes';
+import { STREAM_TYPE, Subscription } from '../../types/store/ActiveMeetingTypes';
 import { MeetingsApi } from '../index';
-
-const enum SUBS_ACTION {
-	ADD = 'add',
-	REMOVE = 'remove'
-}
 
 class SubscriptionsManager {
 	meetingId: string;
 
-	subscriptions: SubscriptionMap = {};
+	myUserId: string | undefined;
 
-	pendingRequest = false;
+	subscriptions: Subscription[] = [];
+
+	isRequesting = false;
+
+	pendingRequests: (Subscription[] | undefined)[] = [];
 
 	constructor(meetingId: string) {
 		this.meetingId = meetingId;
+		this.myUserId = useStore.getState().session.id;
 	}
 
-	public filterSubscription(
-		baseSubs: Subscription[],
-		subsToRequire: Subscription[],
-		toAdd: Subscription[],
-		toRemove: Subscription[],
-		typeReq: SUBS_ACTION
-	): void {
+	private filterSubscription(desiderata: Subscription[]): Subscription[] {
 		const participants = find(
 			useStore.getState().meetings,
 			(meeting) => meeting.id === this.meetingId
 		)?.participants;
-		const possibleToAdd = differenceWith(subsToRequire, baseSubs, isEqual);
-		const possibleToRem = differenceWith(baseSubs, subsToRequire, isEqual);
-		forEach(typeReq === SUBS_ACTION.ADD ? possibleToAdd : possibleToRem, (sub) => {
-			if (
-				participants &&
-				participants[sub.userId] &&
-				((sub.type === STREAM_TYPE.VIDEO && participants[sub.userId].videoStreamOn) ||
-					(sub.type === STREAM_TYPE.SCREEN && participants[sub.userId].screenStreamOn))
-			) {
-				if (typeReq === SUBS_ACTION.ADD) {
-					toAdd.push(sub);
-				} else {
-					toRemove.push(sub);
-				}
-			}
+		return filter(desiderata, (sub) => {
+			const meetingParticipant = participants?.[sub.userId];
+			const isMyStream = meetingParticipant?.userId === this.myUserId;
+			const isVideoSubOn = sub.type === STREAM_TYPE.VIDEO && !!meetingParticipant?.videoStreamOn;
+			const isScreenSubOn = sub.type === STREAM_TYPE.SCREEN && !!meetingParticipant?.screenStreamOn;
+			return !isMyStream && (isVideoSubOn || isScreenSubOn);
 		});
 	}
 
-	public addSubscription(userId: string, type: STREAM_TYPE): void {
-		if (
-			userId !== useStore.getState().session.id &&
-			!find(this.subscriptions, (sub) => sub.userId === userId)
-		) {
-			const sub = {
-				userId,
-				type
-			};
-			this.pendingRequest = true;
-			MeetingsApi.subscribeToMedia(this.meetingId, [sub], []).then(() => {
-				this.subscriptions[`${userId}-${type}`] = sub;
-				this.pendingRequest = false;
-			});
+	private subscribeToMedia(
+		subscriptionToAdd: Subscription[],
+		subscriptionToRemove: Subscription[]
+	): void {
+		if (size(subscriptionToAdd) > 0 || size(subscriptionToRemove) > 0) {
+			this.isRequesting = true;
+			MeetingsApi.subscribeToMedia(this.meetingId, subscriptionToAdd, subscriptionToRemove)
+				.then(() => {
+					this.subscriptions = concat(this.subscriptions, subscriptionToAdd);
+					this.subscriptions = differenceWith(this.subscriptions, subscriptionToRemove, isEqual);
+
+					this.isRequesting = false;
+					// Perform next pending request
+					if (size(this.pendingRequests) > 0) {
+						const nextRequest = this.pendingRequests.shift();
+						if (nextRequest) {
+							this.updateSubscription(nextRequest);
+						}
+					}
+				})
+				.catch(() => {
+					this.isRequesting = false;
+					// Perform next pending request
+					if (size(this.pendingRequests) > 0) {
+						const nextRequest = this.pendingRequests.shift();
+						if (nextRequest) {
+							this.updateSubscription(nextRequest);
+						}
+					}
+				});
 		}
 	}
 
-	public removeSubscription(userId: string, type: STREAM_TYPE): void {
-		const subscriptionId = `${userId}-${type}`;
-		if (userId !== useStore.getState().session.id) {
-			delete this.subscriptions[subscriptionId];
+	public removeSubscription(subToRemove: Subscription): void {
+		if (
+			find(
+				this.subscriptions,
+				(sub) => sub.userId === subToRemove.userId && sub.type === subToRemove.type
+			)
+		) {
+			const subsToRem = filter(
+				this.subscriptions,
+				(sub) => sub.userId !== subToRemove.userId || sub.type !== subToRemove.type
+			);
+			this.updateSubscription(subsToRem);
+		}
+	}
+
+	public addSubscription(subToAdd: Subscription): void {
+		if (
+			!find(
+				this.subscriptions,
+				(sub) => sub.userId === subToAdd.userId && sub.type === subToAdd.type
+			)
+		) {
+			this.updateSubscription([...this.subscriptions, subToAdd]);
 		}
 	}
 
 	// Ask subscriptions that are not already asked and unset subscriptions that are not needed anymore
-	public updateSubscription(subscriptionsToRequest?: SubscriptionMap): void {
-		const flatSubsToRequire = flatMap(subscriptionsToRequest);
-		const subs = flatMap(this.subscriptions);
-		if (!isEqual(flatSubsToRequire, subs) && !this.pendingRequest) {
-			const toAdd: Subscription[] = [];
-			const toRemove: Subscription[] = [];
-			this.filterSubscription(subs, flatSubsToRequire, toAdd, toRemove, SUBS_ACTION.ADD);
-			this.filterSubscription(subs, flatSubsToRequire, toAdd, toRemove, SUBS_ACTION.REMOVE);
+	public updateSubscription(subsToRequest: Subscription[]): void {
+		// console.log(subsToRequest);
+		// If a subscription is performing, the new request is pushed in a queue performed after the current one
+		if (this.isRequesting) {
+			this.pendingRequests.push(subsToRequest);
+			return;
+		}
 
-			if (toAdd.length > 0 || toRemove.length > 0) {
-				this.pendingRequest = true;
-				MeetingsApi.subscribeToMedia(this.meetingId, toAdd, toRemove).then(() => {
-					forEach(toRemove, (sub) => delete this.subscriptions[`${sub.userId}-${sub.type}`]);
-					forEach(toAdd, (sub) => {
-						this.subscriptions[`${sub.userId}-${sub.type}`] = sub;
-					});
-					this.pendingRequest = false;
-				});
-			}
+		if (!isEqual(subsToRequest, this.subscriptions)) {
+			const subToAdd = this.filterSubscription(
+				differenceWith(subsToRequest, this.subscriptions, isEqual)
+			);
+			const subToRemove = this.filterSubscription(
+				differenceWith(this.subscriptions, subsToRequest, isEqual)
+			);
+			this.subscribeToMedia(subToAdd, subToRemove);
 		}
 	}
 
 	clean(): void {
-		this.subscriptions = {};
+		this.subscriptions = [];
 	}
 }
 

@@ -7,7 +7,7 @@
 import React, { ReactElement, useEffect, useMemo, useRef } from 'react';
 
 import { Container, IconButton, Tooltip } from '@zextras/carbonio-design-system';
-import { forEach, map, size } from 'lodash';
+import { map, size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -18,8 +18,7 @@ import { MeetingRoutesParams } from '../../../hooks/useRouting';
 import { getVideoScreenIn } from '../../../store/selectors/ActiveMeetingSelectors';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
-import { STREAM_TYPE, SubscriptionMap, TileData } from '../../../types/store/ActiveMeetingTypes';
-import { mapToSubscriptionMap } from '../../../utils/MeetingsUtils';
+import { STREAM_TYPE, TileData } from '../../../types/store/ActiveMeetingTypes';
 import Tile from '../Tile';
 
 const TilesBarContainer = styled(Container)`
@@ -97,19 +96,28 @@ const TilesBar = ({ carouselTiles, centralTile }: TilesBarProps): ReactElement =
 		[meetingId, tilesDataToRender]
 	);
 
+	// Subscribe tiles' stream
 	useEffect(() => {
+		// if (tilesDataToRender.length > 0) {
+		// 	const tilesDataToSubscribe: SubscriptionMap = {};
+		// 	forEach(tilesDataToRender, (tile) => {
+		// 		if (myUserId === tile.userId) return;
+		// 		mapToSubscriptionMap(tilesDataToSubscribe, tile.userId, tile.type);
+		// 	});
+		// 	if (myUserId !== centralTile.userId) {
+		// 		mapToSubscriptionMap(tilesDataToSubscribe, centralTile.userId, centralTile.type);
+		// 	}
+		// 	videoScreenIn?.subscriptionManager.updateSubscription(tilesDataToSubscribe);
+		// }
 		if (tilesDataToRender.length > 0) {
-			const tilesDataToSubscribe: SubscriptionMap = {};
-			forEach(tilesDataToRender, (tile) => {
-				if (myUserId === tile.userId) return;
-				mapToSubscriptionMap(tilesDataToSubscribe, tile.userId, tile.type);
-			});
-			if (myUserId !== centralTile.userId) {
-				mapToSubscriptionMap(tilesDataToSubscribe, centralTile.userId, centralTile.type);
-			}
-			videoScreenIn?.subscriptionManager.updateSubscription(tilesDataToSubscribe);
+			const subscriptions = map(tilesDataToRender, (value) => ({
+				userId: value.userId,
+				type: value.type
+			}));
+			subscriptions.push({ userId: centralTile.userId, type: centralTile.type });
+			videoScreenIn?.subscriptionManager.updateSubscription(subscriptions);
 		}
-	}, [meetingId, myUserId, videoScreenIn, tilesDataToRender, centralTile, dimensions, totalTiles]);
+	}, [videoScreenIn, tilesDataToRender, centralTile]);
 
 	return (
 		<TilesBarContainer mainAlignment="space-between">

@@ -7,7 +7,7 @@
 import React, { ReactElement, useEffect, useMemo, useRef } from 'react';
 
 import { Container, IconButton, Tooltip } from '@zextras/carbonio-design-system';
-import { forEach, size } from 'lodash';
+import { map, size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -17,15 +17,9 @@ import usePagination from '../../../hooks/usePagination';
 import { MeetingRoutesParams } from '../../../hooks/useRouting';
 import { getVideoScreenIn } from '../../../store/selectors/ActiveMeetingSelectors';
 import { getNumberOfTiles, getTiles } from '../../../store/selectors/MeetingSelectors';
-import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
-import { STREAM_TYPE, SubscriptionMap, TileData } from '../../../types/store/ActiveMeetingTypes';
-import {
-	calcGrid,
-	mapToSubscriptionMap,
-	maximiseRowsAndColumns,
-	maximiseTileSize
-} from '../../../utils/MeetingsUtils';
+import { STREAM_TYPE, TileData } from '../../../types/store/ActiveMeetingTypes';
+import { calcGrid, maximiseRowsAndColumns, maximiseTileSize } from '../../../utils/MeetingsUtils';
 import Tile from '../Tile';
 
 const GridContainer = styled(Container)`
@@ -76,7 +70,6 @@ const GridMode = (): ReactElement => {
 	const tilesData: TileData[] = useStore((store) => getTiles(store, meetingId));
 	const numberOfTiles = useStore((store) => getNumberOfTiles(store, meetingId));
 	const videoScreenIn = useStore((store) => getVideoScreenIn(store, meetingId));
-	const myUserId = useStore(getUserId);
 
 	const { tileWidth, rows, columns, numberOfPages } = useMemo(() => {
 		// Calculate a full density grid
@@ -141,15 +134,22 @@ const GridMode = (): ReactElement => {
 	}, [rows, columns, tilesToRender, tileWidth, meetingId]);
 
 	useEffect(() => {
-		const tilesDataToSubscribe: SubscriptionMap = {};
+		// const tilesDataToSubscribe: SubscriptionMap = {};
+		// if (tilesToRender.length > 0) {
+		// 	forEach(tilesToRender, (tile) => {
+		// 		if (myUserId === tile.userId) return;
+		// 		mapToSubscriptionMap(tilesDataToSubscribe, tile.userId, tile.type);
+		// 	});
+		// 	videoScreenIn?.subscriptionManager.updateSubscription(tilesDataToSubscribe);
+		// }
 		if (tilesToRender.length > 0) {
-			forEach(tilesToRender, (tile) => {
-				if (myUserId === tile.userId) return;
-				mapToSubscriptionMap(tilesDataToSubscribe, tile.userId, tile.type);
-			});
-			videoScreenIn?.subscriptionManager.updateSubscription(tilesDataToSubscribe);
+			const subscriptions = map(tilesToRender, (value) => ({
+				userId: value.userId,
+				type: value.type
+			}));
+			videoScreenIn?.subscriptionManager.updateSubscription(subscriptions);
 		}
-	}, [meetingId, myUserId, tilesToRender, videoScreenIn, rowIndex, dimensions, rowsToRender]);
+	}, [tilesToRender, videoScreenIn]);
 
 	return (
 		<GridContainer data-testid="gridModeView" mainAlignment="space-between" ref={gridContainerRef}>

@@ -6,7 +6,6 @@
 import React, { ReactElement, useEffect, useMemo, useRef } from 'react';
 
 import { Container, Text } from '@zextras/carbonio-design-system';
-import { size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -14,15 +13,10 @@ import styled from 'styled-components';
 import useContainerDimensions from '../../../hooks/useContainerDimensions';
 import { MeetingRoutesParams } from '../../../hooks/useRouting';
 import { getVideoScreenIn } from '../../../store/selectors/ActiveMeetingSelectors';
-import {
-	getCentralTileData,
-	getParticipantScreenStatus,
-	getParticipantVideoStatus
-} from '../../../store/selectors/MeetingSelectors';
+import { getCentralTileData } from '../../../store/selectors/MeetingSelectors';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
-import { STREAM_TYPE, SubscriptionMap } from '../../../types/store/ActiveMeetingTypes';
-import { mapToSubscriptionMap } from '../../../utils/MeetingsUtils';
+import { STREAM_TYPE, Subscription } from '../../../types/store/ActiveMeetingTypes';
 import Tile from '../Tile';
 
 const FaceToFace = styled(Container)`
@@ -57,12 +51,6 @@ const FaceToFaceMode = (): ReactElement => {
 	);
 
 	const centralTile = useStore((store) => getCentralTileData(store, meetingId));
-	const centralTileVideoStatus = useStore((store) =>
-		getParticipantVideoStatus(store, meetingId, centralTile?.userId)
-	);
-	const centralTileScreenStatus = useStore((store) =>
-		getParticipantScreenStatus(store, meetingId, centralTile?.userId)
-	);
 
 	const localId = useStore(getUserId);
 	const videoScreenIn = useStore((store) => getVideoScreenIn(store, meetingId));
@@ -72,14 +60,16 @@ const FaceToFaceMode = (): ReactElement => {
 	const faceToFaceDimensions = useContainerDimensions(faceToFaceRef);
 
 	useEffect(() => {
-		if (centralTile && (centralTileVideoStatus || centralTileScreenStatus)) {
-			const tilesDataToSubscribe: SubscriptionMap = {};
-			mapToSubscriptionMap(tilesDataToSubscribe, centralTile.userId, centralTile.type);
-			if (size(videoScreenIn?.subscriptionManager.subscriptions) <= 1) {
-				videoScreenIn?.subscriptionManager.updateSubscription(tilesDataToSubscribe);
-			}
+		if (centralTile) {
+			// const tilesDataToSubscribe: SubscriptionMap = {};
+			// mapToSubscriptionMap(tilesDataToSubscribe, centralTile.userId, centralTile.type);
+			// if (size(videoScreenIn?.subscriptionManager.subscriptions) <= 1) {
+			// 	videoScreenIn?.subscriptionManager.updateSubscription(tilesDataToSubscribe);
+			// }
+			const subscription: Subscription = { userId: centralTile.userId, type: centralTile.type };
+			videoScreenIn?.subscriptionManager.updateSubscription([subscription]);
 		}
-	}, [centralTile, centralTileScreenStatus, centralTileVideoStatus, videoScreenIn]);
+	}, [centralTile, videoScreenIn]);
 
 	const centralTileWidth = useMemo(() => {
 		const tileHeight = (faceToFaceDimensions.width / 16) * 9;

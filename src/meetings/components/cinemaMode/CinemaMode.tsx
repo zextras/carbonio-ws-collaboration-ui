@@ -21,8 +21,7 @@ import {
 } from '../../../store/selectors/ActiveMeetingSelectors';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
-import { STREAM_TYPE, SubscriptionMap } from '../../../types/store/ActiveMeetingTypes';
-import { mapToSubscriptionMap } from '../../../utils/MeetingsUtils';
+import { STREAM_TYPE, Subscription } from '../../../types/store/ActiveMeetingTypes';
 import Tile from '../Tile';
 import WhoIsSpeaking from '../WhoIsSpeaking/WhoIsSpeaking';
 
@@ -90,10 +89,12 @@ const CinemaMode = (): ReactElement => {
 	}, [carouselIsVisible, meetingId, setIsCarouselVisible]);
 
 	useEffect(() => {
-		if (!carouselIsVisible && myUserId !== centralTile.userId) {
-			const tilesDataToSubscribe: SubscriptionMap = {};
-			mapToSubscriptionMap(tilesDataToSubscribe, centralTile.userId, centralTile.type);
-			videoScreenIn?.subscriptionManager.updateSubscription(tilesDataToSubscribe);
+		if (!carouselIsVisible) {
+			// const tilesDataToSubscribe: SubscriptionMap = {};
+			// mapToSubscriptionMap(tilesDataToSubscribe, centralTile.userId, centralTile.type);
+			// videoScreenIn?.subscriptionManager.updateSubscription(tilesDataToSubscribe);
+			const subscription: Subscription = { userId: centralTile.userId, type: centralTile.type };
+			videoScreenIn?.subscriptionManager.updateSubscription([subscription]);
 		}
 	}, [carouselIsVisible, centralTile, myUserId, videoScreenIn]);
 
