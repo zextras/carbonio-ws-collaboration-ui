@@ -98,7 +98,7 @@
 	"carbonio": {
 		"name": "carbonio-ws-collaboration-ui",
 		"display": "Chats",
-		"priority": 9,
+		"priority": 404,
 		"attrKey": "carbonioFeatureChatsEnabled",
 		"type": "carbonio",
 		"translations_repository": "git@github.com:Zextras/carbonio-ws-collaboration-ui-i18n.git"
