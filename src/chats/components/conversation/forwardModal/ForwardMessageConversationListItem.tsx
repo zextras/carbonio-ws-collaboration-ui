@@ -6,7 +6,14 @@
 
 import React, { FunctionComponent, MouseEventHandler } from 'react';
 
-import { Avatar, Checkbox, Container, Padding, Row, Text } from '@zextras/carbonio-design-system';
+import {
+	Avatar,
+	Checkbox,
+	Container,
+	Padding,
+	Row,
+	TextWithTooltip
+} from '@zextras/carbonio-design-system';
 
 import {
 	getRoomNameSelector,
@@ -21,6 +28,7 @@ type ForwardModalConversationListItemProps = {
 	selected: boolean;
 	onClick: (id: string) => MouseEventHandler<HTMLDivElement> | undefined;
 };
+
 const ForwardMessageConversationListItem: FunctionComponent<
 	ForwardModalConversationListItemProps
 > = ({ roomId, selected, onClick }) => {
@@ -29,13 +37,14 @@ const ForwardMessageConversationListItem: FunctionComponent<
 	const roomType: string = useStore((state) => getRoomTypeSelector(state, roomId));
 
 	return (
-		<Padding vertical="small">
-			<Container
-				onClick={onClick(roomId)}
-				orientation="horizontal"
-				mainAlignment="flex-start"
-				width="fill"
-			>
+		<Container
+			onClick={onClick(roomId)}
+			orientation="horizontal"
+			mainAlignment="flex-start"
+			padding={{ vertical: 'small' }}
+			width="fill"
+		>
+			<Row>
 				<Row>
 					<Checkbox value={selected} />
 					<Padding horizontal="small">
@@ -45,10 +54,14 @@ const ForwardMessageConversationListItem: FunctionComponent<
 							shape={roomType === RoomType.ONE_TO_ONE ? 'round' : 'square'}
 						/>
 					</Padding>
-					<Text>{roomName}</Text>
 				</Row>
-			</Container>
-		</Padding>
+				<Row mainAlignment="flex-start" takeAvailableSpace wrap="nowrap">
+					<Container width="fill" crossAlignment="flex-start">
+						<TextWithTooltip>{roomName}</TextWithTooltip>
+					</Container>
+				</Row>
+			</Row>
+		</Container>
 	);
 };
 

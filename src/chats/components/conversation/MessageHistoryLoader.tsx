@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { ReactElement, useCallback, useEffect, useRef } from 'react';
+import React, { ReactElement, RefObject, useCallback, useEffect, useRef } from 'react';
 
 import { Icon } from '@zextras/carbonio-design-system';
 import { debounce, first } from 'lodash';
@@ -43,7 +43,11 @@ const Loader = styled.div`
 	}
 `;
 
-const VisibilityContainer = styled.div`
+const VisibilityContainer = styled.div<{
+	children: ReactElement;
+	'data-testid': string;
+	ref: RefObject<HTMLDivElement>;
+}>`
 	width: 100%;
 	text-align: center;
 `;
