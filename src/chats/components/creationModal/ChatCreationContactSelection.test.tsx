@@ -231,21 +231,24 @@ describe('Chat Creation Modal Contact Selector - search', () => {
 		const userComponent = screen.getByText(zimbraUser1.fullName);
 		user.click(userComponent);
 
-		const chipInput = await screen.findByTestId('chip_input_creation_modal');
-		// here I check that the chip exist and is the one related to user1
-		const user1Chip = chipInput.children[0].children[0];
-		const userName = user1Chip.children[1].children[0].children[0].innerHTML;
+		await screen.findByTestId('chip_input_creation_modal');
 
-		expect(chipInput.children[0].children).toHaveLength(3);
-		expect(user1Chip).toBeInTheDocument();
-		expect(userName).toBe(`${zimbraUser1.firstName} ${zimbraUser1.lastName}`);
+		const name = await screen.findAllByText(`${zimbraUser1.firstName} ${zimbraUser1.lastName}`);
+		console.log(name.length);
+		// here I check that the chip exist and is the one related to user1
+		await waitFor(() => expect(name).toHaveLength(2));
 
 		const removeButton = await screen.findByTestId('icon: Close');
 		user.click(removeButton);
-		const chipInput1 = await screen.findByTestId('chip_input_creation_modal');
+
+		await screen.findByTestId('chip_input_creation_modal');
+
+		const nameUpdated = await screen.findAllByText(
+			`${zimbraUser1.firstName} ${zimbraUser1.lastName}`
+		);
 
 		// the chip should not be in the document
-		expect(chipInput1.children[0].children).toHaveLength(2);
+		expect(nameUpdated).toHaveLength(1);
 	});
 
 	test('Add and remove chip by clicking the same component', async () => {
@@ -264,11 +267,20 @@ describe('Chat Creation Modal Contact Selector - search', () => {
 
 		const userComponent = await screen.findByText(zimbraUser1.fullName);
 		user.click(userComponent);
-		const chipInput = await screen.findByTestId('chip_input_creation_modal');
-		user.click(userComponent);
-		const chipInput1 = await screen.findByTestId('chip_input_creation_modal');
+		const name = await screen.findAllByText(`${zimbraUser1.firstName} ${zimbraUser1.lastName}`);
 
-		expect(chipInput1.children[0].children).toHaveLength(2);
+		await waitFor(() => expect(name).toHaveLength(1));
+
+		user.click(userComponent);
+
+		await screen.findByTestId('chip_input_creation_modal');
+
+		const nameUpdated = await screen.findAllByText(
+			`${zimbraUser1.firstName} ${zimbraUser1.lastName}`
+		);
+
+		// the chip should not be in the document
+		expect(nameUpdated).toHaveLength(1);
 	});
 });
 

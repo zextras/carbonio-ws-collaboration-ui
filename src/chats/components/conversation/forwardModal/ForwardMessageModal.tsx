@@ -114,7 +114,7 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 			};
 			setChips((oldChips) =>
 				find(oldChips, (chip) => chip.value?.id === roomId)
-					? differenceBy(oldChips, [newChip], 'value.id')
+					? differenceBy(oldChips, [newChip], (chip) => chip.value?.id)
 					: [...oldChips, newChip]
 			);
 
@@ -131,7 +131,7 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 			setSelected(mapValues(keyBy(items, 'value.id'), () => true));
 			const differenceChip = difference(chips, items)[0];
 			if (size(chips) > size(items) && differenceChip) {
-				setChips((chips) => differenceBy(chips, [differenceChip], 'value.id'));
+				setChips((chips) => differenceBy(chips, [differenceChip], (chip) => chip.value?.id));
 			}
 		},
 		[chips]

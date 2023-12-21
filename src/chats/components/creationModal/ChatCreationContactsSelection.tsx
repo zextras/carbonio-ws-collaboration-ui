@@ -14,7 +14,14 @@ import React, {
 	useState
 } from 'react';
 
-import { ChipInput, Container, List, Padding, Text } from '@zextras/carbonio-design-system';
+import {
+	ChipInput,
+	ChipItem,
+	Container,
+	List,
+	Padding,
+	Text
+} from '@zextras/carbonio-design-system';
 import { Spinner } from '@zextras/carbonio-shell-ui';
 import {
 	debounce,
@@ -82,7 +89,7 @@ const ChatCreationContactsSelection = ({
 	);
 
 	const [result, setResult] = useState<ContactMatch[]>([]);
-	const [chips, setChips] = useState<ChipInfo[]>([]);
+	const [chips, setChips] = useState<ChipItem<ContactInfo>[]>([]);
 	const [loading, setLoading] = useState<boolean>(false);
 	const [error, setError] = useState<boolean>(false);
 
@@ -174,7 +181,7 @@ const ChatCreationContactsSelection = ({
 
 	const onClickListItem = useCallback(
 		(item: ContactInfo) => () => {
-			const newChip: ChipInfo = {
+			const newChip: ChipItem<ContactInfo> = {
 				value: item,
 				label: item.name || item.email
 			};
@@ -182,8 +189,8 @@ const ChatCreationContactsSelection = ({
 				contacts[item.id] ? omit(contacts, item.id) : { ...contacts, [item.id]: item }
 			);
 			setChips((chips) =>
-				find(chips, (chip) => chip.value.id === item.id)
-					? differenceBy(chips, [newChip], 'value.id')
+				find(chips, (chip) => chip.value?.id === item.id)
+					? differenceBy(chips, [newChip], (chip) => chip.value?.id)
 					: union(chips, [newChip])
 			);
 		},
@@ -223,8 +230,10 @@ const ChatCreationContactsSelection = ({
 		(newChips) => {
 			const differenceChip = difference(chips, newChips)[0];
 			if (size(chips) > size(newChips) && differenceChip) {
-				setContactSelected((contacts: ContactSelected) => omit(contacts, differenceChip.value.id));
-				setChips((chips) => differenceBy(chips, [differenceChip], 'value.id'));
+				setContactSelected((contacts: ContactSelected) =>
+					omit(contacts, differenceChip.value?.id as string)
+				);
+				setChips((chips) => differenceBy(chips, [differenceChip], (chip) => chip.value?.id));
 			}
 		},
 		[chips, setContactSelected]
@@ -305,11 +314,6 @@ export type ContactInfo = {
 	id: string;
 	name: string;
 	email: string;
-};
-
-export type ChipInfo = {
-	value: ContactInfo;
-	label: string;
 };
 
 export type ContactSelected = {
