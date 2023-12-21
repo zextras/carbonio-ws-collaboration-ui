@@ -5,7 +5,7 @@
  */
 import React from 'react';
 
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event/setup/setup';
 
 import Tile from './Tile';
@@ -195,8 +195,8 @@ describe('Tile test - enter meeting modal', () => {
 	test('my tile - hover on tile', async () => {
 		const { user } = storeSetupMyTileAudioOnVideoOff();
 		const tile = screen.getByTestId('tile');
-		await user.hover(tile);
-		expect(screen.queryByTestId('hover_container')).not.toBeInTheDocument();
+		user.hover(tile);
+		await waitFor(() => expect(screen.queryByTestId('hover_container')).not.toBeInTheDocument());
 	});
 	test('user tile - audio on and video off', async () => {
 		storeSetupTileAudioOnAndVideoOff();
@@ -300,7 +300,7 @@ describe('Tile actions', () => {
 		const hoverContainer = screen.getByTestId('hover_container');
 		user.hover(hoverContainer);
 
-		expect(screen.queryByTestId(iconMicOffOutline)).not.toBeInTheDocument();
+		await waitFor(() => expect(screen.queryByTestId(iconMicOffOutline)).not.toBeInTheDocument());
 	});
 
 	test('mute for all does not appear if I am not a moderator', async () => {
@@ -313,6 +313,6 @@ describe('Tile actions', () => {
 		const hoverContainer = screen.getByTestId('hover_container');
 		user.hover(hoverContainer);
 
-		expect(screen.queryByTestId(iconMicOffOutline)).not.toBeInTheDocument();
+		await waitFor(() => expect(screen.queryByTestId(iconMicOffOutline)).not.toBeInTheDocument());
 	});
 });

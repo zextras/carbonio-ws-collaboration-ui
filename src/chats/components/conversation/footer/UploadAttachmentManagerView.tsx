@@ -20,9 +20,8 @@ import useStore from '../../../../store/Store';
 import { FileToUpload } from '../../../../types/store/ActiveConversationTypes';
 import {
 	canDisplayPreviewOnLoad,
-	getAttachmentExtension,
 	getAttachmentIcon,
-	getAttachmentSize,
+	getAttachmentInfo,
 	getAttachmentType,
 	uid
 } from '../../../../utils/attachmentUtils';
@@ -191,11 +190,12 @@ const UploadAttachmentManagerView: React.FC<UploadAttachmentManagerViewProps> = 
 
 	const previewClick = useCallback(
 		(file) => {
-			createPreview({
+			const { extension, size } = getAttachmentInfo(file.file.type, file.file.size);
+			return createPreview({
 				previewType: getAttachmentType(file.file.type),
 				filename: file.file.name,
-				extension: getAttachmentExtension(file.file.type)?.toUpperCase(),
-				size: getAttachmentSize(file.file.size),
+				extension: extension?.toUpperCase(),
+				size,
 				closeAction: {
 					id: 'close-action',
 					icon: 'ArrowBackOutline',

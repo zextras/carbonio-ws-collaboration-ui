@@ -21,11 +21,14 @@ import RepliedTextMessageSectionView from './RepliedTextMessageSectionView';
 import TextContentBubble from './TextContentBubble';
 import { getMessageAttachment } from '../../../../store/selectors/MessagesSelectors';
 import { getRoomTypeSelector } from '../../../../store/selectors/RoomsSelectors';
+import { getCapability } from '../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../store/Store';
 import { Z_INDEX_RANK } from '../../../../types/generics';
 import { MarkerStatus } from '../../../../types/store/MarkersTypes';
 import { TextMessage } from '../../../../types/store/MessageTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
+import { CapabilityType } from '../../../../types/store/SessionTypes';
+import { getAttachmentInfo } from '../../../../utils/attachmentUtils';
 import { parseUrlOnMessage } from '../../../../utils/parseUrlOnMessage';
 
 type BubbleProps = {
@@ -90,28 +93,14 @@ const Bubble: FC<BubbleProps> = ({
 	const isMyMessage = mySessionId === message.from;
 	const messageAttachment = useStore((store) => getMessageAttachment(store, message));
 	const messageFormatted = useMemo(() => parseUrlOnMessage(message.text), [message.text]);
-
-	const extension = useMemo(
-		() => messageAttachment && messageAttachment.mimeType.split('/')[1]?.toUpperCase(),
-		[messageAttachment]
+	const canSeeMessageReads = useStore((store) =>
+		getCapability(store, CapabilityType.CAN_SEE_MESSAGE_READS)
 	);
 
-	const size = useMemo(() => {
-		if (messageAttachment) {
-			if (messageAttachment.size < 1024) {
-				return `${messageAttachment.size}B`;
-			}
-			if (messageAttachment.size < 1024 * 1024) {
-				return `${(messageAttachment.size / 1024).toFixed(2)}KB`;
-			}
-			if (messageAttachment.size < 1024 * 1024 * 1024) {
-				return `${(messageAttachment.size / 1024 / 1024).toFixed(2)}MB`;
-			}
-			return `${(messageAttachment.size / 1024 / 1024 / 1024).toFixed(2)}GB`;
-		}
-		return undefined;
-	}, [messageAttachment]);
-
+	const { extension, size } = getAttachmentInfo(
+		messageAttachment?.mimeType,
+		messageAttachment?.size
+	);
 	return (
 		<BubbleContainer
 			id={`message-${message.id}`}
@@ -166,6 +155,7 @@ const Bubble: FC<BubbleProps> = ({
 				isEdited={message?.edited}
 				messageExtension={extension}
 				messageSize={size}
+				canSeeMessageReads={canSeeMessageReads}
 			/>
 		</BubbleContainer>
 	);

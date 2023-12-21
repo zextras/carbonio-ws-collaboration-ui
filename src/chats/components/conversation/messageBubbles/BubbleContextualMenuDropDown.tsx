@@ -5,12 +5,12 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { FC, useCallback, useContext, useMemo, useState } from 'react';
+import React, { FC, ReactElement, useCallback, useContext, useMemo, useState } from 'react';
 
 import { Dropdown, IconButton, SnackbarManagerContext } from '@zextras/carbonio-design-system';
 import { size } from 'lodash';
 import { useTranslation } from 'react-i18next';
-import styled, { css, FlattenSimpleInterpolation } from 'styled-components';
+import styled, { css, DefaultTheme, FlattenSimpleInterpolation } from 'styled-components';
 
 import usePreview from '../../../../hooks/usePreview';
 import { AttachmentsApi } from '../../../../network';
@@ -22,12 +22,15 @@ import { messageActionType } from '../../../../types/store/ActiveConversationTyp
 import { TextMessage } from '../../../../types/store/MessageTypes';
 import { CapabilityType } from '../../../../types/store/SessionTypes';
 import { isPreviewSupported } from '../../../../utils/attachmentUtils';
+import { canPerformAction } from '../../../../utils/MessageActionsUtils';
 import ForwardMessageModal from '../forwardModal/ForwardMessageModal';
 
 export const BubbleContextualMenuDropDownWrapper = styled.div<{
+	children: ReactElement;
+	'data-testid': string;
 	isActive: boolean;
-	theme: any;
 	isMyMessage: boolean;
+	theme?: DefaultTheme | undefined;
 }>`
 	position: absolute;
 	display: flex;
@@ -200,21 +203,16 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 		}
 	}, [message.attachment]);
 
-	const canBeEdited = useMemo(() => {
-		const inTime =
-			!editMessageTimeLimitInMinutes ||
-			(editMessageTimeLimitInMinutes &&
-				Date.now() <= message.date + editMessageTimeLimitInMinutes * 60000);
-		return isMyMessage && inTime && !message.forwarded;
-	}, [editMessageTimeLimitInMinutes, isMyMessage, message.date, message.forwarded]);
+	const canBeEdited = useMemo(
+		() =>
+			canPerformAction(message, isMyMessage, editMessageTimeLimitInMinutes, messageActionType.EDIT),
+		[editMessageTimeLimitInMinutes, isMyMessage, message]
+	);
 
-	const canBeDeleted = useMemo(() => {
-		const inTime =
-			!deleteMessageTimeLimitInMinutes ||
-			(deleteMessageTimeLimitInMinutes &&
-				Date.now() <= message.date + deleteMessageTimeLimitInMinutes * 60000);
-		return isMyMessage && inTime;
-	}, [deleteMessageTimeLimitInMinutes, isMyMessage, message.date]);
+	const canBeDeleted = useMemo(
+		() => canPerformAction(message, isMyMessage, deleteMessageTimeLimitInMinutes),
+		[deleteMessageTimeLimitInMinutes, isMyMessage, message]
+	);
 
 	const canBePreviewed = useMemo(
 		() => message.attachment && isPreviewSupported(message.attachment.mimeType),
@@ -225,6 +223,16 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 
 	const contextualMenuActions = useMemo(() => {
 		const actions: DropDownActionType[] = [];
+
+		// Edit functionality
+		if (canBeEdited) {
+			actions.push({
+				id: 'Edit',
+				label: editActionLabel,
+				onClick: editMessageAction,
+				disabled: size(filesToUploadArray) > 0
+			});
+		}
 
 		// Reply functionality
 		actions.push({
@@ -254,16 +262,6 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 			label: copyActionLabel,
 			onClick: copyMessageAction
 		});
-
-		// Edit functionality
-		if (canBeEdited) {
-			actions.push({
-				id: 'Edit',
-				label: editActionLabel,
-				onClick: editMessageAction,
-				disabled: size(filesToUploadArray) > 0
-			});
-		}
 
 		// Delete functionality
 		if (canBeDeleted) {
@@ -322,31 +320,33 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 			isMyMessage={isMyMessage}
 			isActive={dropdownActive}
 		>
-			<Dropdown
-				data-testid={`cxtMenuDropdown-${message.id}`}
-				items={contextualMenuActions}
-				onOpen={onDropdownOpen}
-				onClose={onDropdownClose}
-				disableRestoreFocus
-				disablePortal
-				placement="right-start"
-			>
-				<IconButton
-					iconColor="currentColor"
-					size="small"
-					icon="ArrowIosDownward"
-					title={messageActionsTooltip}
-					onClick={(): null => null}
-				/>
-			</Dropdown>
-			{forwardMessageModalIsOpen && (
-				<ForwardMessageModal
-					open={forwardMessageModalIsOpen}
-					onClose={onCloseForwardMessageModal}
-					roomId={message.roomId}
-					message={message}
-				/>
-			)}
+			<>
+				<Dropdown
+					data-testid={`cxtMenuDropdown-${message.id}`}
+					items={contextualMenuActions}
+					onOpen={onDropdownOpen}
+					onClose={onDropdownClose}
+					disableRestoreFocus
+					disablePortal
+					placement="right-start"
+				>
+					<IconButton
+						iconColor="currentColor"
+						size="small"
+						icon="ArrowIosDownward"
+						title={messageActionsTooltip}
+						onClick={(): null => null}
+					/>
+				</Dropdown>
+				{forwardMessageModalIsOpen && (
+					<ForwardMessageModal
+						open={forwardMessageModalIsOpen}
+						onClose={onCloseForwardMessageModal}
+						roomId={message.roomId}
+						message={message}
+					/>
+				)}
+			</>
 		</BubbleContextualMenuDropDownWrapper>
 	);
 };

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { RefObject, useCallback, useEffect, useMemo, useRef } from 'react';
 
 import {
 	Container,
@@ -26,7 +26,13 @@ type AttachmentSelectorProps = {
 	roomId: string;
 };
 
-const InputSelector = styled.input`
+const InputSelector = styled.input<{
+	onChange: (ev: any) => void;
+	type: string;
+	multiple: boolean;
+	hidden: boolean;
+	ref: RefObject<HTMLInputElement>;
+}>`
 	cursor: pointer;
 	opacity: 0;
 	z-index: 2;

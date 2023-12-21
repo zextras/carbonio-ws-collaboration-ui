@@ -16,7 +16,6 @@ import { getId } from '../utility/decodeJid';
 import { getAttribute, getRequiredAttribute, getRequiredTagElement } from '../utility/decodeStanza';
 import { decodeXMPPMessageStanza } from '../utility/decodeXMPPMessageStanza';
 import HistoryAccumulator from '../utility/HistoryAccumulator';
-import XMPPClient from '../XMPPClient';
 
 /**
  * MESSAGE ARCHIVE MANAGEMENT (XEP-0313)
@@ -69,7 +68,7 @@ export function onHistoryMessageStanza(message: Element): true {
 				break;
 			}
 			default:
-				console.log('Unknown MAM request type ');
+				xmppDebug('Unknown MAM request type');
 		}
 	}
 	return true;
@@ -90,17 +89,13 @@ export function onHistoryMessageStanza(message: Element): true {
  * 6- Updates the last message read of all the members of a room
  *
  * */
-export function onRequestHistory(
-	this: XMPPClient,
-	unread: number | undefined,
-	stanza: Element
-): void {
-	xmppDebug(`<--- End request history`);
+export function onRequestHistory(stanza: Element, unread?: number): void {
 	const from = getRequiredAttribute(stanza, 'from');
 	const roomId = getId(from);
 	const fin = getRequiredTagElement(stanza, 'fin');
 	const isHistoryFullyLoaded = fin.getAttribute('complete');
 	const store = useStore.getState();
+	const { xmppClient } = store.connections;
 
 	const historyMessages = HistoryAccumulator.returnHistory(roomId);
 
@@ -118,7 +113,7 @@ export function onRequestHistory(
 		const unreadNotLoaded = unread - size(textMessages);
 		if (unreadNotLoaded > 0) {
 			// Request 5 more messages to avoid a new history request when user scrolls to the first new message
-			this.requestHistory(roomId, historyMessages[0].date, unreadNotLoaded + 5, unread);
+			xmppClient.requestHistory(roomId, historyMessages[0].date, unreadNotLoaded + 5, unread);
 		}
 	}
 
@@ -136,15 +131,15 @@ export function onRequestHistory(
 	forEach(historyMessages, (message) => {
 		const messageSubjectOfReplyId = (message as TextMessage).replyTo;
 		if (messageSubjectOfReplyId) {
-			this.requestMessageSubjectOfReply(message.roomId, messageSubjectOfReplyId, message.id);
+			xmppClient.requestMessageSubjectOfReply(message.roomId, messageSubjectOfReplyId, message.id);
 		}
 	});
 
 	// Update last marker
-	this.lastMarkers(roomId);
+	xmppClient.lastMarkers(roomId);
 }
 
-export function onRequestSingleMessage(messageWithResponseId: string, stanza: Element): void {
+export function onRequestSingleMessage(stanza: Element, messageWithResponseId: string): void {
 	const referenceMessageId = Strophe.getText(getRequiredTagElement(stanza, 'first'));
 	const referenceMessage = HistoryAccumulator.returnReferenceForRepliedMessage(referenceMessageId);
 	const store: RootStore = useStore.getState();

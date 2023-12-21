@@ -15,7 +15,18 @@ import useStore from '../../../../store/Store';
 import { SIZES } from '../../../../types/generics';
 import useFirstUnreadMessage from '../useFirstUnreadMessage';
 
-const MessageTextarea = styled.textarea`
+const MessageTextarea = styled.textarea<{
+	ref: MutableRefObject<HTMLTextAreaElement | null>;
+	value: string;
+	onKeyDown: (e: never) => void;
+	onKeyUp: (e: never) => void;
+	onChange: (e: never) => void;
+	onFocus: (e: never) => void;
+	onBlur: (e: never) => void;
+	onPaste: (e: never) => void;
+	composerIsFull: boolean;
+	disabled: boolean;
+}>`
 	flex: 1;
 	padding: 0.5rem 0;
 	height: 1.25rem;
@@ -83,6 +94,7 @@ type MessageAreaPros = {
 	onInput: (e: never) => void;
 	composerIsFull: boolean;
 	handleKeyDownTextarea: (e: never) => void;
+	handleKeyUpTextarea: (e: never) => void;
 	handleOnBlur: (e: never) => void;
 	handleOnPaste: (e: never) => void;
 	isDisabled: boolean;
@@ -95,6 +107,7 @@ const MessageArea: React.FC<MessageAreaPros> = ({
 	onInput,
 	composerIsFull,
 	handleKeyDownTextarea,
+	handleKeyUpTextarea,
 	handleOnBlur,
 	handleOnPaste,
 	isDisabled
@@ -153,6 +166,7 @@ const MessageArea: React.FC<MessageAreaPros> = ({
 			ref={textareaRef}
 			value={message}
 			onKeyDown={handleKeyDownTextarea}
+			onKeyUp={handleKeyUpTextarea}
 			onChange={onInput}
 			onFocus={handleOnFocus}
 			onBlur={handleOnBlur}

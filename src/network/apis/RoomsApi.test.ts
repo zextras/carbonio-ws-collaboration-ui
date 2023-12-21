@@ -14,6 +14,9 @@ import {
 	createMockTextMessage
 } from '../../tests/createMock';
 import { dateToISODate } from '../../utils/dateUtil';
+import { getTagElement } from '../xmpp/utility/decodeStanza';
+import HistoryAccumulator from '../xmpp/utility/HistoryAccumulator';
+import { textMessageFromHistory } from '../xmpp/xmppMessageExamples';
 
 const contentType = 'Content-Type';
 const applicationJson = 'application/json';
@@ -433,6 +436,41 @@ describe('Rooms API', () => {
 			originalMessageSentAt: dateToISODate(message.date)
 		};
 		await roomsApi.forwardMessages(['roomId'], [message]);
+
+		// Set appropriate headers
+		const headers = new Headers();
+		headers.append(contentType, applicationJson);
+
+		// Check if fetch is called with the correct parameters
+		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/rooms/roomId/forward`, {
+			method: 'POST',
+			headers,
+			body: JSON.stringify([forwardedMessage])
+		});
+	});
+
+	test('forwardMessages - edited message - is called correctly', async () => {
+		// Send addRoom request
+		const messageEdited = createMockTextMessage();
+		const msgToParse = textMessageFromHistory.replace(
+			'2023-03-20T13:58:29.599694Z',
+			dateToISODate(messageEdited.date)
+		);
+		const parser = new DOMParser();
+		const xmlParsed: any = parser.parseFromString(msgToParse, 'application/xml');
+		const result = getTagElement(xmlParsed, 'result');
+		const messageParsed = getTagElement(result!, 'message');
+		const messageResult = getTagElement(result!, 'message');
+		messageResult!.getElementsByTagName('body')[0].innerHTML = messageEdited.text;
+
+		HistoryAccumulator.addReferenceForForwardedMessage(messageEdited.stanzaId, messageParsed!);
+
+		const forwardedMessage = {
+			originalMessage: messageResult?.outerHTML,
+			originalMessageSentAt: dateToISODate(messageEdited.date)
+		};
+
+		await roomsApi.forwardMessages(['roomId'], [messageEdited]);
 
 		// Set appropriate headers
 		const headers = new Headers();

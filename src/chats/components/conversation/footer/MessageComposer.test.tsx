@@ -8,16 +8,23 @@ import React from 'react';
 
 import { createEvent, fireEvent, screen, waitFor } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event/setup/setup';
+import { act } from 'react-dom/test-utils';
 
 import MessageComposer from './MessageComposer';
 import UploadAttachmentManagerView from './UploadAttachmentManagerView';
 import { mockedAddRoomAttachmentRequest } from '../../../../../jest-mocks';
 import useStore from '../../../../store/Store';
-import { createMockFile, createMockMember, createMockRoom } from '../../../../tests/createMock';
+import {
+	createMockFile,
+	createMockMember,
+	createMockRoom,
+	createMockTextMessage
+} from '../../../../tests/createMock';
 import { mockedSendIsWriting, mockedSendPaused } from '../../../../tests/mockedXmppClient';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe } from '../../../../types/network/models/roomBeTypes';
 import { FileToUpload, messageActionType } from '../../../../types/store/ActiveConversationTypes';
+import { Message } from '../../../../types/store/MessageTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
 import { RootStore } from '../../../../types/store/StoreTypes';
 
@@ -34,9 +41,29 @@ const mockedRoom: RoomBe = createMockRoom({
 	]
 });
 
+const mockedMessage: Message = createMockTextMessage({
+	from: 'idPaolo',
+	roomId: mockedRoom.id,
+	date: Date.now()
+});
+
 const storeSetupAdvanced = (): { user: UserEvent; store: RootStore } => {
 	const store = useStore.getState();
 	store.addRoom(mockedRoom);
+	const { user } = setup(
+		<>
+			<UploadAttachmentManagerView roomId={mockedRoom.id} />
+			<MessageComposer roomId={mockedRoom.id} />
+		</>
+	);
+	return { user, store };
+};
+
+const storeSetupGroup = (): { user: UserEvent; store: RootStore } => {
+	const store = useStore.getState();
+	store.setLoginInfo('idPaolo', 'Paolo');
+	store.addRoom(mockedRoom);
+	store.newMessage(mockedMessage);
 	const { user } = setup(
 		<>
 			<UploadAttachmentManagerView roomId={mockedRoom.id} />
@@ -627,5 +654,37 @@ describe('MessageComposer - draft message', () => {
 
 		const composerTextArea = screen.getByRole('textbox');
 		expect((composerTextArea as HTMLTextAreaElement).selectionStart).toBe(draftMessage.length);
+	});
+
+	test('ArrowUp triggers edit when last message is sent by me', async () => {
+		const { user } = storeSetupGroup();
+
+		user.keyboard('{ArrowUp}');
+
+		const composerTextArea = screen.getByRole('textbox');
+		const store = useStore.getState();
+		console.log(store.activeConversations[mockedRoom.id]);
+		await waitFor(() =>
+			expect((composerTextArea as HTMLTextAreaElement).selectionStart).toBe(
+				mockedMessage.text.length
+			)
+		);
+		await waitFor(() => expect((composerTextArea as HTMLTextAreaElement).value).toBe('Hi'));
+	});
+
+	test('ArrowUp do not triggers edit when last message is not mine', async () => {
+		const { user, store } = storeSetupGroup();
+
+		const messageByRoberto: Message = createMockTextMessage({
+			from: 'idRoberto',
+			roomId: mockedRoom.id,
+			date: Date.now()
+		});
+		act(() => store.newMessage(messageByRoberto));
+
+		user.keyboard('{ArrowUp}');
+
+		const composerTextArea = screen.getByRole('textbox');
+		await waitFor(() => expect((composerTextArea as HTMLTextAreaElement).value).toBe(''));
 	});
 });

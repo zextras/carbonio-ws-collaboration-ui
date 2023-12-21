@@ -3,28 +3,32 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-
 import React from 'react';
 
 import { screen, waitFor } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event/setup/setup';
+import { act } from 'react-dom/test-utils';
 
-import MeetingActionsBar from './MeetingActionsBar';
+import BubblesWrapper from './BubblesWrapper';
 import { mockUseParams } from '../../../../jest-mocks';
+import { EventName, sendCustomEvent } from '../../../hooks/useEventListener';
 import useStore from '../../../store/Store';
 import {
 	createMockMeeting,
 	createMockParticipants,
 	createMockRoom,
+	createMockTextMessage,
 	createMockUser
 } from '../../../tests/createMock';
 import { setup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 import { MemberBe, RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
 import { UserBe } from '../../../types/network/models/userBeTypes';
+import { MeetingChatVisibility } from '../../../types/store/ActiveMeetingTypes';
+import { MarkerStatus } from '../../../types/store/MarkersTypes';
 import { MeetingParticipant } from '../../../types/store/MeetingTypes';
+import { MessageType } from '../../../types/store/MessageTypes';
 import { RootStore } from '../../../types/store/StoreTypes';
-import MeetingSkeleton from '../../views/MeetingSkeleton';
 
 const user1: UserBe = createMockUser({ id: 'user1Id', name: 'user 1' });
 const user2: UserBe = createMockUser({ id: 'user2Id', name: 'user 2' });
@@ -61,9 +65,18 @@ const meeting: MeetingBe = createMockMeeting({
 	participants: [user1Participant, user2Participant, user3Participant]
 });
 
-const streamRef = React.createRef<HTMLDivElement>();
+const message = createMockTextMessage({
+	id: '1111-409408-555555',
+	roomId: room.id,
+	date: 1665409408796,
+	type: MessageType.TEXT_MSG,
+	stanzaId: 'stanzaId-1111-409408-555555',
+	from: user2.id,
+	text: '11111',
+	read: MarkerStatus.READ
+});
 
-const storeBasicActiveMeetingSetup = (): void => {
+const storeBasicActiveMeetingSetup = (): { user: UserEvent; store: RootStore } => {
 	const store: RootStore = useStore.getState();
 	store.setLoginInfo(user1.id, user1.name);
 	store.setUserInfo(user1);
@@ -72,40 +85,46 @@ const storeBasicActiveMeetingSetup = (): void => {
 	store.addRoom(room);
 	store.addMeeting(meeting);
 	store.meetingConnection(meeting.id, false, undefined, false, undefined);
+	store.setMeetingSidebarStatus(meeting.id, false);
 	mockUseParams.mockReturnValue({ meetingId: meeting.id });
-	setup(<MeetingActionsBar streamsWrapperRef={streamRef} />);
-};
-
-const storeSetupGroupMeetingSkeleton = (): { user: UserEvent; store: RootStore } => {
-	const store: RootStore = useStore.getState();
-	store.setLoginInfo(user1.id, user1.name);
-	store.setUserInfo(user1);
-	store.setUserInfo(user2);
-	store.setUserInfo(user3);
-	store.addRoom(room);
-	store.addMeeting(meeting);
-	store.meetingConnection(meeting.id, false, undefined, false, undefined);
-	mockUseParams.mockReturnValue({ meetingId: meeting.id });
-	const { user } = setup(<MeetingSkeleton />);
+	const { user } = setup(<BubblesWrapper />);
 
 	return { store, user };
 };
 
-describe('Meeting action bar', () => {
-	test('everything is rendered correctly', async () => {
-		storeBasicActiveMeetingSetup();
-		const buttons = await screen.findAllByRole('button');
-		expect(buttons).toHaveLength(8);
-	});
-});
+describe('BubblesWrapper', () => {
+	test('when a message arrives It should be displayed for 3 seconds and then disappear', async () => {
+		const { store } = storeBasicActiveMeetingSetup();
 
-describe('Meeting action bar interaction with skeleton', () => {
-	test('hover on different elements of the skeleton makes action bar appear and disappear', async () => {
-		const { user } = storeSetupGroupMeetingSkeleton();
-		const meetingActionBar = await screen.findByTestId('meeting-action-bar');
-		await waitFor(() => user.hover(screen.getByTestId('meeting_sidebar')));
-		expect(meetingActionBar).toHaveStyle('transform: translateY( 5rem )');
-		await waitFor(() => user.hover(screen.getByTestId('meeting_view_container')));
-		expect(meetingActionBar).toHaveStyle('transform: translateY( -1rem )');
+		act(() => {
+			store.newMessage(message);
+			sendCustomEvent({ name: EventName.NEW_MESSAGE, data: message });
+		});
+		const messageBubble = await screen.findByTestId(`Bubble-${message.id}`);
+		expect(messageBubble).toBeVisible();
+
+		act(() => {
+			jest.advanceTimersByTime(4000);
+		});
+
+		await waitFor(() =>
+			expect(screen.queryByTestId(`Bubble-${message.id}`)).not.toBeInTheDocument()
+		);
+	});
+
+	test('clicking a bubble that appears in a meeting opens sidebar and chat accordion', async () => {
+		const { store, user } = storeBasicActiveMeetingSetup();
+
+		act(() => {
+			store.newMessage(message);
+			sendCustomEvent({ name: EventName.NEW_MESSAGE, data: message });
+		});
+		const messageBubble = await screen.findByTestId(`Bubble-${message.id}`);
+
+		await user.click(messageBubble);
+
+		const updatedStore = useStore.getState();
+		expect(updatedStore.activeMeeting[meeting.id].sidebarStatus.sidebarIsOpened).toBeTruthy();
+		expect(updatedStore.activeMeeting[meeting.id].chatVisibility).toBe(MeetingChatVisibility.OPEN);
 	});
 });

@@ -86,11 +86,14 @@ export const roomIsEmpty = (store: RootStore, roomId: string): boolean =>
 
 export const getMessageAttachment = (
 	store: RootStore,
-	message: TextMessage
+	message: Message | undefined
 ): AttachmentMessageType | undefined => {
-	const textMessage = find(
-		store.messages[message.roomId],
-		(mex) => mex.id === message.id
-	) as TextMessage;
-	return textMessage?.attachment;
+	if (message?.type === MessageType.TEXT_MSG) {
+		const textMessage = find(
+			store.messages[message.roomId],
+			(mex) => mex.id === message.id
+		) as TextMessage;
+		return textMessage?.attachment;
+	}
+	return undefined;
 };

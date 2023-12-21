@@ -9,7 +9,6 @@ import React from 'react';
 import { getUserAccount, getUserSettings } from '@zextras/carbonio-shell-ui';
 import moment from 'moment-timezone';
 
-import ConnectionSnackbarManager from './chats/components/ConnectionSnackbarManager';
 import CounterBadgeUpdater from './chats/components/CounterBadgeUpdater';
 import RegisterCreationButton from './chats/components/RegisterCreationButton';
 import useChatsApp from './chats/useChatsApp';
@@ -73,7 +72,6 @@ export default function App() {
 	return (
 		<>
 			<RegisterCreationButton />
-			<ConnectionSnackbarManager />
 			<CounterBadgeUpdater />
 			<MeetingNotificationHandler />
 		</>
