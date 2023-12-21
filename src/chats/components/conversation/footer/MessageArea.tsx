@@ -15,7 +15,18 @@ import useStore from '../../../../store/Store';
 import { SIZES } from '../../../../types/generics';
 import useFirstUnreadMessage from '../useFirstUnreadMessage';
 
-const MessageTextarea = styled.textarea`
+const MessageTextarea = styled.textarea<{
+	ref: MutableRefObject<HTMLTextAreaElement | null>;
+	value: string;
+	onKeyDown: (e: never) => void;
+	onKeyUp: (e: never) => void;
+	onChange: (e: never) => void;
+	onFocus: (e: never) => void;
+	onBlur: (e: never) => void;
+	onPaste: (e: never) => void;
+	composerIsFull: boolean;
+	disabled: boolean;
+}>`
 	flex: 1;
 	padding: 0.5rem 0;
 	height: 1.25rem;
