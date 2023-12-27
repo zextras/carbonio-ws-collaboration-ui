@@ -2,6 +2,34 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.9.0](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.0.8...v0.9.0) (2023-12-22)
+
+### [0.0.8](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.0.7...v0.0.8) (2023-12-22)
+
+### [0.0.4](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.0.3...v0.0.4) (2023-12-21)
+
+
+### Features
+
+* add check on delete modal when meeting is active refs: WSC-1139 ([#180](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/180)) ([2d5047d](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/2d5047d74dcb16394e29bb110fba0e3de2c5856a))
+* added bubble on meeting refs: WSC-820 ([#181](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/181)) ([3271ad3](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/3271ad3d117aba4ea2c2fa12245c636a0310c6b6))
+* added shortcut for edit last message sent refs: WSC-393 ([#169](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/169)) ([41ff946](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/41ff9468d2b285c031241e20b3231cac31c0c2cb))
+* added timing on hover refs: WSC-1152 ([#174](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/174)) ([6f61dbb](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/6f61dbb0e4c4f859026741ecf5f818603d78ad66))
+* enhance emoji only messages ref: WSC-1181 ([#177](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/177)) ([f709789](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/f709789fce5c1a74b2d6a532d15af4212c4e7f41))
+* full screen functionality, users will be now able to use fullsc… ([#170](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/170)) ([aae22c9](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/aae22c9360e269714820b74e26dae60c7c7600f0))
+* handle capability to hide or display message reads refs: WSC-406 ([#175](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/175)) ([a5573ed](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/a5573eda7ff02632813761fc0c58bdd09c2754b6))
+* improve warning snackbars WSC-1182 ([#178](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/178)) ([f66d992](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/f66d9928f5db4b77ed5cbc011cb0e4a2f1be67ef))
+
+
+### Bug Fixes
+
+* fix reference of forward edited message refs: WSC-1183 ([#182](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/182)) ([70d3d27](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/70d3d27201dbe2858a6c616f522ed3029c1a4192))
+* fixed breaking list refs: WSC-1112 ([#176](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/176)) ([17e4dba](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/17e4dba98ad20d615ab9825b0a0b8e1f6b22b1eb))
+* fixed dropzone opening on dragging messages refs: WSC-1153 ([#179](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/179)) ([0aea2f9](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/0aea2f9b26fb68f8aeef97d1df13dc43b5b94599))
+* fixed wrong emoji picker placement refs: WSC-1174 ([#183](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/183)) ([8577bc6](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/8577bc6b4606cc195dbcebbc87f840b6db4b6063))
+* fixed wrong layout on forward modal refs: WSC-1187 ([#185](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/185)) ([818a185](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/818a185a0a733fb08009ec8416bd258729a0b294))
+* hidden bubble wrapper when there are no new messages refs: WSC-1210 ([#188](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/188)) ([b84024b](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/b84024ba21775bdb8ca7a9231ba4e7979f789f2d))
+
 ### [0.0.3](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.0.2...v0.0.3) (2023-11-23)
 
 
