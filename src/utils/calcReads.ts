@@ -15,26 +15,25 @@ import { Member } from '../types/store/RoomTypes';
 export function calcReads(messageDate: number, roomId: string): MarkerStatus {
 	const roomMessages: Message[] = useStore.getState().messages[roomId];
 	const roomMarkers: RoomMarkers = useStore.getState().markers[roomId];
-	const members: Member[] | undefined = useStore.getState().rooms[roomId]
-		? useStore.getState().rooms[roomId].members
-		: [];
+	const members: Member[] | undefined = useStore.getState().rooms[roomId]?.members || [];
 
-	const readBy: string[] = [];
 	let read: MarkerStatus = MarkerStatus.UNREAD;
 
-	if (roomMarkers != null && members != null && size(members) > 0) {
+	if (!!roomMarkers && size(members) > 0) {
+		const readBy: string[] = [];
 		forEach(roomMarkers, (marker: Marker, userId: string) => {
+			const sessionId = useStore.getState().session.id;
 			const markedMessage = find(
 				roomMessages,
 				(message: Message) => message.id === marker.messageId
 			) as TextMessage;
-			if (markedMessage && isBefore(messageDate, markedMessage.date)) {
+			if (marker.from !== sessionId && markedMessage && isBefore(messageDate, markedMessage.date)) {
 				readBy.push(userId);
 			}
 		});
 
-		if (size(readBy) > 1) {
-			if (size(readBy) >= size(members)) {
+		if (size(readBy) > 0) {
+			if (size(readBy) >= size(members) - 1) {
 				read = MarkerStatus.READ;
 			} else {
 				read = MarkerStatus.READ_BY_SOMEONE;
