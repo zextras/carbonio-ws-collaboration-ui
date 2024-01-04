@@ -229,10 +229,9 @@ const ChatCreationContactsSelection = ({
 	const removeContactFromChip = useCallback(
 		(newChips) => {
 			const differenceChip = difference(chips, newChips)[0];
-			if (size(chips) > size(newChips) && differenceChip) {
-				setContactSelected((contacts: ContactSelected) =>
-					omit(contacts, differenceChip.value?.id as string)
-				);
+			const differenceChipId = differenceChip.value?.id;
+			if (size(chips) > size(newChips) && differenceChipId !== undefined) {
+				setContactSelected((contacts: ContactSelected) => omit(contacts, differenceChipId));
 				setChips((chips) => differenceBy(chips, [differenceChip], (chip) => chip.value?.id));
 			}
 		},
