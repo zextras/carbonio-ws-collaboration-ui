@@ -128,7 +128,12 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 
 	const removeContactFromChip = useCallback(
 		(items: ChipItem<{ id: string }>[]) => {
-			setSelected(mapValues(keyBy(items, 'value.id'), () => true));
+			setSelected(
+				mapValues(
+					keyBy(items, (item) => item.value?.id),
+					() => true
+				)
+			);
 			const differenceChip = difference(chips, items)[0];
 			if (size(chips) > size(items) && differenceChip) {
 				setChips((chips) => differenceBy(chips, [differenceChip], (chip) => chip.value?.id));
