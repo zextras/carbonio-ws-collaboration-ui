@@ -227,7 +227,7 @@ const ChatCreationContactsSelection = ({
 	);
 
 	const removeContactFromChip = useCallback(
-		(newChips) => {
+		(newChips: ChipItem<ContactInfo>[]) => {
 			const differenceChip = difference(chips, newChips)[0];
 			const differenceChipId = differenceChip.value?.id;
 			if (size(chips) > size(newChips) && differenceChipId !== undefined) {
