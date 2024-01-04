@@ -145,15 +145,15 @@ const MeetingBubble: FC<MeetingBubbleProps> = ({ messageId, handleBubbleRemove }
 	}, [handleHoverMouse, handleLeaveMouse]);
 
 	useEffect(() => {
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		timeout = setTimeout(() => {
-			if (!isHovering) {
+		if (!isHovering) {
+			// eslint-disable-next-line react-hooks/exhaustive-deps
+			timeout = setTimeout(() => {
 				setIsVisible(false);
 				setTimeout(() => {
 					handleBubbleRemove(messageId);
 				}, 500);
-			}
-		}, 3500);
+			}, 3500);
+		}
 	}, [messageId, handleBubbleRemove, isHovering]);
 
 	return message?.type === MessageType.TEXT_MSG ? (
