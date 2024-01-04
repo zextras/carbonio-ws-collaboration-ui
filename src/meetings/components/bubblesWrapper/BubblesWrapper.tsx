@@ -13,12 +13,12 @@ import MeetingBubble from './MeetingBubble';
 import useEventListener, { EventName } from '../../../hooks/useEventListener';
 import { MessageType } from '../../../types/store/MessageTypes';
 
-const WrapperContainer = styled(Container)`
+const WrapperContainer = styled(Container)<{ $messageIdsList: string[] }>`
 	position: absolute;
 	top: 3.3125rem;
 	left: 4.25rem;
 	z-index: 3;
-	width: 23.125rem;
+	width: ${({ $messageIdsList }): string => ($messageIdsList.length !== 0 ? '23.125rem' : '0')};
 `;
 
 const BubblesWrapper = (): JSX.Element => {
@@ -53,7 +53,11 @@ const BubblesWrapper = (): JSX.Element => {
 	useEventListener(EventName.NEW_MESSAGE, newMessageHandler);
 
 	return (
-		<WrapperContainer mainAlignment={'flex-start'} crossAlignment={'flex-start'}>
+		<WrapperContainer
+			mainAlignment={'flex-start'}
+			crossAlignment={'flex-start'}
+			$messageIdsList={messageIdsList}
+		>
 			{Bubbles}
 		</WrapperContainer>
 	);
