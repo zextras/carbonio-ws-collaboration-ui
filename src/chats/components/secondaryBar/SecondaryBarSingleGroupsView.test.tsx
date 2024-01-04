@@ -7,6 +7,7 @@
 import React from 'react';
 
 import { screen } from '@testing-library/react';
+import { UserEvent } from '@testing-library/user-event/setup/setup';
 
 import SecondaryBarSingleGroupsView from './SecondaryBarSingleGroupsView';
 import useStore from '../../../store/Store';
@@ -15,6 +16,9 @@ import { setup } from '../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
 import { RootStore } from '../../../types/store/StoreTypes';
 import { User } from '../../../types/store/UserTypes';
+
+const iconCloseOutline = 'icon: CloseOutline';
+const iconFunnelOutline = 'icon: FunnelOutline';
 
 const user1Be: User = {
 	id: 'user1Id',
@@ -74,64 +78,73 @@ const mockedOneToOne2: RoomBe = createMockRoom({
 	members: [createMockMember({ userId: user1Be.id }), createMockMember({ userId: user3Be.id })]
 });
 
+const secondaryBarSetup = (status: boolean): { user: UserEvent; store: RootStore } => {
+	const store: RootStore = useStore.getState();
+	store.setLoginInfo(user1Be.id, user1Be.name);
+	store.addRoom(mockedGroup1);
+	store.addRoom(mockedOneToOne1);
+	store.addRoom(mockedGroup2);
+	store.addRoom(mockedOneToOne2);
+	store.setUserInfo(user1Be);
+	store.setUserInfo(user2Be);
+	store.setUserInfo(user3Be);
+	const { user } = setup(<SecondaryBarSingleGroupsView expanded={status} />);
+	return { user, store };
+};
+
 describe('Secondary Bar', () => {
 	test('everything is rendered correctly', async () => {
-		const store: RootStore = useStore.getState();
-		store.setLoginInfo(user1Be.id, user1Be.name);
-		store.addRoom(mockedGroup1);
-		store.addRoom(mockedOneToOne1);
-		store.addRoom(mockedGroup2);
-		store.addRoom(mockedOneToOne2);
-		store.setUserInfo(user1Be);
-		store.setUserInfo(user2Be);
-		store.setUserInfo(user3Be);
-		setup(<SecondaryBarSingleGroupsView expanded />);
+		secondaryBarSetup(true);
 		const listNotFiltered = await screen.findByTestId('conversations_list_filtered');
 		expect(listNotFiltered.children).toHaveLength(4);
 	});
-	test('the filter shows only what the user types', async () => {
-		const store: RootStore = useStore.getState();
-		store.setLoginInfo(user1Be.id, user1Be.name);
-		store.addRoom(mockedGroup1);
-		store.addRoom(mockedOneToOne1);
-		store.addRoom(mockedGroup2);
-		store.addRoom(mockedOneToOne2);
-		store.setUserInfo(user1Be);
-		store.setUserInfo(user2Be);
-		store.setUserInfo(user3Be);
-		const { user } = setup(<SecondaryBarSingleGroupsView expanded />);
+	test('User filter conversations and expect only groups to be visible', async () => {
+		const { user } = secondaryBarSetup(true);
 
 		// user search a group conversation
 		const textArea = screen.getByRole('textbox');
 		await user.type(textArea, 'Group of');
 		const list = await screen.findByTestId('conversations_list_filtered');
 		expect(list.children).toHaveLength(2);
-		const closeButton = screen.getByTestId('icon: CloseOutline');
+		const closeButton = screen.getByTestId(iconCloseOutline);
 		expect(closeButton).toBeInTheDocument();
 
 		// user click the close button
 		await user.click(closeButton);
 		expect(textArea).toHaveValue('');
-		const funnelButton = screen.getByTestId('icon: FunnelOutline');
+		const funnelButton = screen.getByTestId(iconFunnelOutline);
 		expect(funnelButton).toBeInTheDocument();
-
+	});
+	test('User filter conversations and expect both groups and oneToOne to be visible', async () => {
+		const { user } = secondaryBarSetup(true);
 		// user search a one to one conversation
+		const textArea = screen.getByRole('textbox');
 		await user.type(textArea, 'User');
 		const list2 = await screen.findByTestId('conversations_list_filtered');
+		expect(list2.children).toHaveLength(4);
+		const closeButton = screen.getByTestId(iconCloseOutline);
+		expect(closeButton).toBeInTheDocument();
+		await user.click(closeButton);
+		expect(textArea).toHaveValue('');
+		const funnelButton = screen.getByTestId(iconFunnelOutline);
+		expect(funnelButton).toBeInTheDocument();
+	});
+	test('User filter conversations by an name and expect to see oneToOne and all the groups where the string match', async () => {
+		const { user } = secondaryBarSetup(true);
+		// user search a one to one conversation
+		const textArea = screen.getByRole('textbox');
+		await user.type(textArea, 'User3');
+		const list2 = await screen.findByTestId('conversations_list_filtered');
 		expect(list2.children).toHaveLength(2);
+		const closeButton = screen.getByTestId(iconCloseOutline);
+		expect(closeButton).toBeInTheDocument();
+		await user.click(closeButton);
+		expect(textArea).toHaveValue('');
+		const funnelButton = screen.getByTestId(iconFunnelOutline);
+		expect(funnelButton).toBeInTheDocument();
 	});
 	test("the filter doesn't find any match", async () => {
-		const store: RootStore = useStore.getState();
-		store.setLoginInfo(user1Be.id, user1Be.name);
-		store.addRoom(mockedGroup1);
-		store.addRoom(mockedOneToOne1);
-		store.addRoom(mockedGroup2);
-		store.addRoom(mockedOneToOne2);
-		store.setUserInfo(user1Be);
-		store.setUserInfo(user2Be);
-		store.setUserInfo(user3Be);
-		const { user } = setup(<SecondaryBarSingleGroupsView expanded />);
-
+		const { user } = secondaryBarSetup(true);
 		const textArea = screen.getByRole('textbox');
 		await user.type(textArea, 'Hello');
 		const list = await screen.findByTestId('conversations_list_filtered');
@@ -140,17 +153,8 @@ describe('Secondary Bar', () => {
 		expect(noMatchText).toBeInTheDocument();
 	});
 	test('Collapsed sidebar view', () => {
-		const store: RootStore = useStore.getState();
-		store.setLoginInfo(user1Be.id, user1Be.name);
-		store.addRoom(mockedGroup1);
-		store.addRoom(mockedOneToOne1);
-		store.addRoom(mockedGroup2);
-		store.addRoom(mockedOneToOne2);
-		store.setUserInfo(user1Be);
-		store.setUserInfo(user2Be);
-		store.setUserInfo(user3Be);
-		setup(<SecondaryBarSingleGroupsView expanded={false} />);
-		const funnelButton = screen.getByTestId('icon: FunnelOutline');
+		secondaryBarSetup(false);
+		const funnelButton = screen.getByTestId(iconFunnelOutline);
 		expect(funnelButton).toBeInTheDocument();
 	});
 });
