@@ -1,6 +1,6 @@
 {
 	"name": "carbonio-ws-collaboration-ui",
-	"version": "0.0.3",
+	"version": "0.9.0",
 	"description": "Chats Module for Zextras Carbonio",
 	"main": "src/app.jsx",
 	"scripts": {
@@ -54,9 +54,9 @@
 		"babel-plugin-transform-react-remove-prop-types": "0.4.24",
 		"eslint": "^8.13.0",
 		"eslint-plugin-import": "^2.22.1",
-		"eslint-plugin-jest-dom": "^4.0.2",
+		"eslint-plugin-jest-dom": "^5.0.2",
 		"eslint-plugin-notice": "^0.9.10",
-		"eslint-plugin-testing-library": "^5.5.1",
+		"eslint-plugin-testing-library": "^6.1.0",
 		"eslint-plugin-unused-imports": "^2.0.0",
 		"history": "4.9.0",
 		"husky": "^8.0.1",
@@ -73,7 +73,7 @@
 		"@emoji-mart/data": "^1.0.2",
 		"@testing-library/react-hooks": "^8.0.1",
 		"@zextras/carbonio-design-system": "^4.0.0",
-		"@zextras/carbonio-shell-ui": "^4.0.1",
+		"@zextras/carbonio-shell-ui": "^5.0.2",
 		"@zextras/carbonio-ui-preview": "^1.2.2",
 		"darkreader": "^4.9.58",
 		"emoji-mart": "^5.1.0",
@@ -98,7 +98,7 @@
 	"carbonio": {
 		"name": "carbonio-ws-collaboration-ui",
 		"display": "Chats",
-		"priority": 9,
+		"priority": 404,
 		"attrKey": "carbonioFeatureChatsEnabled",
 		"type": "carbonio",
 		"translations_repository": "git@github.com:Zextras/carbonio-ws-collaboration-ui-i18n.git"
