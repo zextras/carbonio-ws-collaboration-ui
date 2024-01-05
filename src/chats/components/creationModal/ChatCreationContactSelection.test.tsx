@@ -234,7 +234,6 @@ describe('Chat Creation Modal Contact Selector - search', () => {
 		await screen.findByTestId('chip_input_creation_modal');
 
 		const name = await screen.findAllByText(`${zimbraUser1.firstName} ${zimbraUser1.lastName}`);
-		console.log(name.length);
 		// here I check that the chip exist and is the one related to user1
 		await waitFor(() => expect(name).toHaveLength(2));
 
