@@ -91,7 +91,7 @@ const MeetingBubble: FC<MeetingBubbleProps> = ({ messageId, handleBubbleRemove }
 	const [isHovering, setIsHovering] = useState(false);
 
 	const hoverRef = useRef<HTMLDivElement>(null);
-	let timeout: string | number | NodeJS.Timeout | undefined;
+	const timer = useRef<NodeJS.Timeout>();
 
 	const { extension, size } = getAttachmentInfo(
 		messageAttachment?.mimeType,
@@ -119,10 +119,10 @@ const MeetingBubble: FC<MeetingBubbleProps> = ({ messageId, handleBubbleRemove }
 	]);
 
 	const handleHoverMouse = useCallback(() => {
-		clearTimeout(timeout);
+		clearTimeout(timer.current);
 
 		setIsHovering(true);
-	}, [timeout]);
+	}, [timer]);
 
 	const handleLeaveMouse = useCallback(() => {
 		setIsHovering(false);
@@ -147,13 +147,16 @@ const MeetingBubble: FC<MeetingBubbleProps> = ({ messageId, handleBubbleRemove }
 	useEffect(() => {
 		if (!isHovering) {
 			// eslint-disable-next-line react-hooks/exhaustive-deps
-			timeout = setTimeout(() => {
+			timer.current = setTimeout(() => {
 				setIsVisible(false);
 				setTimeout(() => {
 					handleBubbleRemove(messageId);
 				}, 500);
 			}, 3500);
 		}
+		return () => {
+			clearTimeout(timer.current);
+		};
 	}, [messageId, handleBubbleRemove, isHovering]);
 
 	return message?.type === MessageType.TEXT_MSG ? (
