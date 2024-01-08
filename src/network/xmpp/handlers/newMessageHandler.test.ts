@@ -9,7 +9,7 @@ import { size } from 'lodash';
 import { onNewMessageStanza } from './newMessageHandler';
 import useStore from '../../../store/Store';
 import { createMockMessageFastening, createMockTextMessage } from '../../../tests/createMock';
-import { xmppClient } from '../../../tests/mockedXmppClient';
+import { mockedReadMessage, xmppClient } from '../../../tests/mockedXmppClient';
 import {
 	DateMessage,
 	MessageFastening,
@@ -142,5 +142,12 @@ describe('XMPP newMessageHandler', () => {
 		expect(roomFastening[editFastening.originalStanzaId]).toBeDefined();
 		expect(size(roomFastening[editFastening.originalStanzaId])).toBe(1);
 		expect(roomFastening[editFastening.originalStanzaId][0].id).toBe(editFastening.id);
+	});
+
+	test('readMessage is not called for my own text messages', () => {
+		const message = createMockTextMessage({ text: 'Hi!' });
+		const messageXMPP = createXMPPTextMessage(message);
+		onNewMessageStanza.call(xmppClient, messageXMPP);
+		expect(mockedReadMessage).not.toHaveBeenCalled();
 	});
 });

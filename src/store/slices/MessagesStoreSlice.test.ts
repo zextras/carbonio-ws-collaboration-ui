@@ -499,7 +499,7 @@ describe('Test message slice - updateUnreadMessages', () => {
 		let storedMessage0;
 		let storedMessage1;
 		// user1 reads message0
-		act(() => result.current.updateMarkers([marker0_user1], room.id));
+		act(() => result.current.updateMarkers(room.id, [marker0_user1]));
 		act(() => result.current.updateUnreadMessages(room.id));
 		storedMessage0 = result.current.messages[room.id][1] as TextMessage;
 		expect(storedMessage0.read).toBe(MarkerStatus.READ_BY_SOMEONE);
@@ -507,7 +507,7 @@ describe('Test message slice - updateUnreadMessages', () => {
 		expect(storedMessage1.read).toBe(MarkerStatus.UNREAD);
 
 		// user2 reads message0
-		act(() => result.current.updateMarkers([marker0_user2], room.id));
+		act(() => result.current.updateMarkers(room.id, [marker0_user2]));
 		act(() => result.current.updateUnreadMessages(room.id));
 		storedMessage0 = result.current.messages[room.id][1] as TextMessage;
 		expect(storedMessage0.read).toBe(MarkerStatus.READ);
@@ -515,7 +515,7 @@ describe('Test message slice - updateUnreadMessages', () => {
 		expect(storedMessage1.read).toBe(MarkerStatus.UNREAD);
 
 		// user0 reads message1
-		act(() => result.current.updateMarkers([marker1_user0], room.id));
+		act(() => result.current.updateMarkers(room.id, [marker1_user0]));
 		act(() => result.current.updateUnreadMessages(room.id));
 		storedMessage0 = result.current.messages[room.id][1] as TextMessage;
 		expect(storedMessage0.read).toBe(MarkerStatus.READ);
