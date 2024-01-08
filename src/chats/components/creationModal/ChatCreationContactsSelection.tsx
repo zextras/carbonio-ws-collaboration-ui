@@ -14,7 +14,14 @@ import React, {
 	useState
 } from 'react';
 
-import { ChipInput, Container, List, Padding, Text } from '@zextras/carbonio-design-system';
+import {
+	ChipInput,
+	ChipItem,
+	Container,
+	List,
+	Padding,
+	Text
+} from '@zextras/carbonio-design-system';
 import { Spinner } from '@zextras/carbonio-shell-ui';
 import {
 	debounce,
@@ -77,12 +84,12 @@ const ChatCreationContactsSelection = ({
 	const maxMembers = useStore((store) => getCapability(store, CapabilityType.MAX_GROUP_MEMBERS));
 
 	const maxGroupMembers = useMemo(
-		() => (isCreationModal && typeof maxMembers === 'number' ? maxMembers - 1 : maxMembers),
+		() => (isCreationModal && typeof maxMembers === 'number' ? maxMembers - 1 : undefined),
 		[isCreationModal, maxMembers]
 	);
 
 	const [result, setResult] = useState<ContactMatch[]>([]);
-	const [chips, setChips] = useState<ChipInfo[]>([]);
+	const [chips, setChips] = useState<ChipItem<ContactInfo>[]>([]);
 	const [loading, setLoading] = useState<boolean>(false);
 	const [error, setError] = useState<boolean>(false);
 
@@ -174,17 +181,16 @@ const ChatCreationContactsSelection = ({
 
 	const onClickListItem = useCallback(
 		(item: ContactInfo) => () => {
-			const newChip: ChipInfo = {
-				id: item.id,
-				label: item.name,
-				value: item
+			const newChip: ChipItem<ContactInfo> = {
+				value: item,
+				label: item.name || item.email
 			};
 			setContactSelected((contacts: ContactSelected) =>
 				contacts[item.id] ? omit(contacts, item.id) : { ...contacts, [item.id]: item }
 			);
 			setChips((chips) =>
-				find(chips, (chip) => chip.id === item.id)
-					? differenceBy(chips, [newChip], 'id')
+				find(chips, (chip) => chip.value?.id === item.id)
+					? differenceBy(chips, [newChip], (chip) => chip.value?.id)
 					: union(chips, [newChip])
 			);
 		},
@@ -207,7 +213,7 @@ const ChatCreationContactsSelection = ({
 				const clickCb =
 					(chipInputHasError && selected) || !chipInputHasError
 						? onClickListItem
-						: (item: ContactInfo) => () => null;
+						: () => () => null;
 				return (
 					<ListParticipant
 						item={item}
@@ -221,11 +227,12 @@ const ChatCreationContactsSelection = ({
 	);
 
 	const removeContactFromChip = useCallback(
-		(newChips) => {
+		(newChips: ChipItem<ContactInfo>[]) => {
 			const differenceChip = difference(chips, newChips)[0];
-			if (size(chips) > size(newChips) && differenceChip) {
-				setContactSelected((contacts: ContactSelected) => omit(contacts, differenceChip.id));
-				setChips((chips) => differenceBy(chips, [differenceChip], 'id'));
+			const differenceChipId = differenceChip.value?.id;
+			if (size(chips) > size(newChips) && differenceChipId !== undefined) {
+				setContactSelected((contacts: ContactSelected) => omit(contacts, differenceChipId));
+				setChips((chips) => differenceBy(chips, [differenceChip], (chip) => chip.value?.id));
 			}
 		},
 		[chips, setContactSelected]
@@ -284,9 +291,6 @@ const ChatCreationContactsSelection = ({
 				value={chips}
 				onChange={removeContactFromChip}
 				requireUniqueChips
-				// TODO FIX CHIPS
-				/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
-				/* @ts-ignore */
 				maxChips={maxGroupMembers}
 				data-testid="chip_input_creation_modal"
 				confirmChipOnBlur={false}
@@ -309,12 +313,6 @@ export type ContactInfo = {
 	id: string;
 	name: string;
 	email: string;
-};
-
-export type ChipInfo = {
-	id: string;
-	label: string;
-	value: ContactInfo;
 };
 
 export type ContactSelected = {
