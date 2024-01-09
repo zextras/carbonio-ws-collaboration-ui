@@ -51,7 +51,8 @@ module.exports = {
 			],
 			rules: {
 				'testing-library/no-node-access': 'off',
-				'jest-dom/prefer-in-document': 'off'
+				'jest-dom/prefer-in-document': 'off',
+				'import/no-extraneous-dependencies': 'off'
 			}
 		}
 	],

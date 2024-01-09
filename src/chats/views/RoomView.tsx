@@ -11,7 +11,6 @@ import { useParams } from 'react-router-dom';
 
 import ShimmeringConversationView from './shimmerViews/ShimmeringConversationView';
 import ShimmeringInfoPanelView from './shimmerViews/ShimmeringInfoPanelView';
-import { roomMainInfoEqualityFn } from '../../store/equalityFunctions/RoomsEqualityFunctions';
 import { getRoomSelector } from '../../store/selectors/RoomsSelectors';
 import useStore from '../../store/Store';
 import Conversation from '../components/conversation/Conversation';
@@ -32,7 +31,7 @@ const RoomView = (): ReactElement => {
 		setSelectedRoomOneToOneGroup(selectedRoomId);
 	}, [selectedRoomId, setSelectedRoomOneToOneGroup]);
 
-	const room = useStore((store) => getRoomSelector(store, selectedRoomId), roomMainInfoEqualityFn);
+	const room = useStore((store) => getRoomSelector(store, selectedRoomId));
 
 	if (!room) {
 		return (

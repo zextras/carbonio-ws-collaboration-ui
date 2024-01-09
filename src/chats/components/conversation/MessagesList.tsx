@@ -10,6 +10,7 @@ import { Container } from '@zextras/carbonio-design-system';
 import { debounce, find, groupBy, last, map, size } from 'lodash';
 import moment from 'moment-timezone';
 import styled from 'styled-components';
+import { useShallow } from 'zustand/react/shallow';
 
 import AnimationGlobalStyle from './messageBubbles/BubbleAnimationsGlobalStyle';
 import MessageFactory from './messageBubbles/MessageFactory';
@@ -18,7 +19,6 @@ import MessageHistoryLoader from './MessageHistoryLoader';
 import ScrollButton from './ScrollButton';
 import useFirstUnreadMessage from './useFirstUnreadMessage';
 import useEventListener, { EventName } from '../../../hooks/useEventListener';
-import { messageWhereScrollIsStoppedEqualityFn } from '../../../store/equalityFunctions/ActiveConversationsEqualityFunctions';
 import {
 	getHistoryIsFullyLoaded,
 	getHistoryIsLoadedDisabled,
@@ -56,8 +56,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 	const roomMessages = useStore((store) => getMessagesSelector(store, roomId));
 	const usersWritingList = useStore((store) => getRoomIsWritingList(store, roomId));
 	const actualScrollPosition = useStore(
-		(store) => getIdMessageWhereScrollIsStopped(store, roomId),
-		messageWhereScrollIsStoppedEqualityFn
+		useShallow((store) => getIdMessageWhereScrollIsStopped(store, roomId))
 	);
 	const hasMoreMessageToLoad = useStore((store) => getHistoryIsFullyLoaded(store, roomId));
 	const historyLoadedDisabled = useStore((store) => getHistoryIsLoadedDisabled(store, roomId));

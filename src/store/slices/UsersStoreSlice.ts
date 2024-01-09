@@ -6,11 +6,12 @@
  */
 
 import produce from 'immer';
+import { StateCreator } from 'zustand';
 
 import { UserBe } from '../../types/network/models/userBeTypes';
 import { RootStore, UsersStoreSlice } from '../../types/store/StoreTypes';
 
-export const useUsersStoreSlice = (set: (...any: any) => void): UsersStoreSlice => ({
+export const useUsersStoreSlice: StateCreator<UsersStoreSlice> = (set: (...any: any) => void) => ({
 	users: {},
 	setUserInfo: (user: UserBe): void => {
 		set(

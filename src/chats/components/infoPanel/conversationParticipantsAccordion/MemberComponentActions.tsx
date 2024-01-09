@@ -8,12 +8,12 @@ import React, { FC, useMemo } from 'react';
 
 import { Container, IconButton, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
+import { useShallow } from 'zustand/react/shallow';
 
 import GoToPrivateChatAction from './GoToPrivateChatAction';
 import LeaveConversationListAction from './LeaveConversationListAction';
 import PromoteDemoteMemberAction from './PromoteDemoteMemberAction';
 import RemoveMemberListAction from './RemoveMemberListAction';
-import { roomHasMoreThanTwoOwnerEqualityFn } from '../../../../store/equalityFunctions/RoomsEqualityFunctions';
 import {
 	getOwner,
 	getMyOwnershipOfTheRoom,
@@ -36,10 +36,7 @@ const MemberComponentActions: FC<ActionsProps> = ({ roomId, memberId }) => {
 	const iAmModeratorLabel: string = t('tooltip.iAmModerator', "You're a moderator");
 
 	const sessionId: string | undefined = useStore((state) => state.session.id);
-	const numberOfOwners: number = useStore(
-		(state) => getNumberOfOwnersOfTheRoom(state, roomId),
-		roomHasMoreThanTwoOwnerEqualityFn
-	);
+	const numberOfOwners = useStore(useShallow((state) => getNumberOfOwnersOfTheRoom(state, roomId)));
 	const numberOfMembers: number = useStore((state) => getNumbersOfRoomMembers(state, roomId));
 	const memberOwner: boolean = useStore((store) => getOwner(store, roomId, memberId));
 	const iAmOwner: boolean = useStore((state) => getMyOwnershipOfTheRoom(state, sessionId, roomId));

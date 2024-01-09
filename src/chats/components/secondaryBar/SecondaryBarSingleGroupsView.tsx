@@ -14,7 +14,6 @@ import styled from 'styled-components';
 import CollapsedSidebarListItem from './CollapsedSidebarListItem';
 import ConversationsFilter from './ConversationsFilter';
 import ExpandedSidebarListItem from './ExpandedSidebarListItem';
-import { roomsListSecondaryBarLengthEqualityFn } from '../../../store/equalityFunctions/MessagesEqualityFunctions';
 import { getRoomIdsOrderedLastMessage } from '../../../store/selectors/MessagesSelectors';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import { getUsersSelector } from '../../../store/selectors/UsersSelectors';
@@ -46,8 +45,7 @@ const SecondaryBarSingleGroupsView: React.FC<SecondaryBarSingleGroupsView> = ({ 
 
 	const sessionId: string | undefined = useStore(getUserId);
 	const roomsIds = useStore<{ roomId: string; roomType: string; lastMessageTimestamp: number }[]>(
-		getRoomIdsOrderedLastMessage,
-		roomsListSecondaryBarLengthEqualityFn
+		getRoomIdsOrderedLastMessage
 	);
 	const users = useStore(getUsersSelector);
 

@@ -6,6 +6,7 @@
  */
 
 import produce from 'immer';
+import { StateCreator } from 'zustand';
 
 import BidirectionalConnectionAudioInOut from '../../network/webRTC/BidirectionalConnectionAudioInOut';
 import ScreenOutConnection from '../../network/webRTC/ScreenOutConnection';
@@ -20,7 +21,9 @@ import {
 } from '../../types/store/ActiveMeetingTypes';
 import { ActiveMeetingSlice, RootStore } from '../../types/store/StoreTypes';
 
-export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeetingSlice => ({
+export const useActiveMeetingSlice: StateCreator<ActiveMeetingSlice> = (
+	set: (...any: any) => void
+) => ({
 	activeMeeting: {},
 	meetingConnection: (
 		meetingId: string,

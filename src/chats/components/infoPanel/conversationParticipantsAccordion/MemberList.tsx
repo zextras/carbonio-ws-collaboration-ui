@@ -10,11 +10,10 @@ import { Container, Text } from '@zextras/carbonio-design-system';
 import { forEach } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+import { useShallow } from 'zustand/react/shallow';
 
 import ListOfMembers from './ListOfMembers';
 import SearchUserAction from './SearchUserAction';
-import { roomMembersLengthFn } from '../../../../store/equalityFunctions/RoomsEqualityFunctions';
-import { usersNameListEqualityFn } from '../../../../store/equalityFunctions/UsersEqualityFunctions';
 import { getRoomMembers } from '../../../../store/selectors/RoomsSelectors';
 import { getUsersSelector } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
@@ -33,10 +32,9 @@ const MemberList: FC<ParticipantsListProps> = ({ roomId }) => {
 	const [t] = useTranslation();
 	const noMatchLabel = t('participantsList.noMatch', 'There are no items that match this search');
 	const members: Member[] | undefined = useStore(
-		(state) => getRoomMembers(state, roomId),
-		roomMembersLengthFn
+		useShallow((state) => getRoomMembers(state, roomId))
 	);
-	const users: UsersMap = useStore(getUsersSelector, usersNameListEqualityFn);
+	const users: UsersMap = useStore(useShallow(getUsersSelector));
 	const [filteredContactList, setFilteredContactList] = useState<Member[] | undefined>([]);
 	const [filteredInput, setFilteredInput] = useState('');
 

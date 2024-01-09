@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import create, { SetState } from 'zustand';
+import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 
 import { useActiveConversationsSlice } from './slices/ActiveConversationsSlice';
@@ -20,20 +20,20 @@ import { useUnreadsCountStoreSlice } from './slices/UnreadsCounterStoreSlice';
 import { useUsersStoreSlice } from './slices/UsersStoreSlice';
 import { RootStore } from '../types/store/StoreTypes';
 
-const useStore = create<RootStore>(
+const useStore = create<RootStore>()(
 	devtools(
-		(set: SetState<any>) => ({
-			...useUsersStoreSlice(set),
-			...useRoomsStoreSlice(set),
-			...useMessagesStoreSlice(set),
-			...useSessionStoreSlice(set),
-			...useMarkersStoreSlice(set),
-			...useActiveConversationsSlice(set),
-			...useConnectionsStoreSlice(set),
-			...useUnreadsCountStoreSlice(set),
-			...useFasteningMessagesSlice(set),
-			...useMeetingsStoreSlice(set),
-			...useActiveMeetingSlice(set)
+		(...set) => ({
+			...useUsersStoreSlice(...set),
+			...useRoomsStoreSlice(...set),
+			...useMessagesStoreSlice(...set),
+			...useSessionStoreSlice(...set),
+			...useMarkersStoreSlice(...set),
+			...useActiveConversationsSlice(...set),
+			...useConnectionsStoreSlice(...set),
+			...useUnreadsCountStoreSlice(...set),
+			...useFasteningMessagesSlice(...set),
+			...useMeetingsStoreSlice(...set),
+			...useActiveMeetingSlice(...set)
 		}),
 		{ name: 'carbonio-ws-collaboration-ui' }
 	)

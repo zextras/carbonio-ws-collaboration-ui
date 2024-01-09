@@ -7,13 +7,14 @@
 
 import produce from 'immer';
 import { find, findIndex, forEach, remove } from 'lodash';
+import { StateCreator } from 'zustand';
 
 import { UsersApi } from '../../network';
 import { MemberBe, RoomBe } from '../../types/network/models/roomBeTypes';
 import { RoomsStoreSlice, RootStore } from '../../types/store/StoreTypes';
 import { isBefore } from '../../utils/dateUtil';
 
-export const useRoomsStoreSlice = (set: (...any: any) => void): RoomsStoreSlice => ({
+export const useRoomsStoreSlice: StateCreator<RoomsStoreSlice> = (set: (...any: any) => void) => ({
 	rooms: {},
 	setRooms: (roomsBe: RoomBe[]): void => {
 		set(

@@ -20,21 +20,3 @@ export const usersNameListEqualityFn = (oldState: UsersMap, newState: UsersMap):
 	}
 	return false;
 };
-
-export const usersNameEmailEqualityFn = (oldState: UsersMap, newState: UsersMap): boolean => {
-	if (size(oldState) === size(newState)) {
-		// eslint-disable-next-line consistent-return
-		forEach(oldState, (user) => {
-			if (user.name !== newState[user.id]?.name || user.email !== newState[user.id]?.email) {
-				return false;
-			}
-		});
-		return true;
-	}
-	return false;
-};
-
-export const userNameEqualityFn = (
-	oldState: string | undefined,
-	newState: string | undefined
-): boolean => oldState === newState;

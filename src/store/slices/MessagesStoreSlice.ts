@@ -19,6 +19,7 @@ import {
 	size,
 	uniqBy
 } from 'lodash';
+import { StateCreator } from 'zustand';
 
 import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
 import { UsersApi } from '../../network';
@@ -56,7 +57,9 @@ const retrieveMessageUserInfo = (message: Message, users: UsersMap): void => {
 	}
 };
 
-export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStoreSlice => ({
+export const useMessagesStoreSlice: StateCreator<MessagesStoreSlice> = (
+	set: (...any: any) => void
+) => ({
 	messages: {},
 	newMessage: (message: Message): void => {
 		set(

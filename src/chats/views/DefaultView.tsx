@@ -7,14 +7,14 @@
 import React, { ReactElement } from 'react';
 
 import { Container } from '@zextras/carbonio-design-system';
+import { useShallow } from 'zustand/react/shallow';
 
 import DefaultUserView from './DefaultUserView';
-import { roomsListLengthEqualityFn } from '../../store/equalityFunctions/RoomsEqualityFunctions';
 import { getRoomIdsList } from '../../store/selectors/RoomsSelectors';
 import useStore from '../../store/Store';
 
 const DefaultView = (): ReactElement => {
-	const roomsIds = useStore<string[]>(getRoomIdsList, roomsListLengthEqualityFn);
+	const roomsIds = useStore<string[]>(useShallow(getRoomIdsList));
 
 	return (
 		<Container mainAlignment="flex-start">
