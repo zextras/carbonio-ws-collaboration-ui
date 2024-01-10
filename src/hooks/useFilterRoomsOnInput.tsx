@@ -30,19 +30,20 @@ export const useFilterRoomsOnInput = (
 			setFilteredConversationsIds(roomsIds);
 		} else {
 			const { users, rooms } = useStore.getState();
-			const filteredConversations: FilteredConversation[] = [];
+			const filteredGroups: FilteredConversation[] = [];
+			const filteredOneToOne: FilteredConversation[] = [];
 			map(roomsIds, (room) => {
 				if (room.roomType === 'group') {
 					const { name, members } = rooms[room.roomId];
 					if (name?.toLocaleLowerCase().includes(filteredInput)) {
-						filteredConversations.push(room);
+						filteredGroups.push(room);
 					} else {
 						members?.every((member) => {
 							if (
 								users[member.userId].name.toLocaleLowerCase().includes(filteredInput) ||
 								users[member.userId].email.toLocaleLowerCase().includes(filteredInput)
 							) {
-								filteredConversations.push(room);
+								filteredGroups.push(room);
 								return false;
 							}
 							return true;
@@ -58,11 +59,11 @@ export const useFilterRoomsOnInput = (
 					const userName = users[userId].name.toLocaleLowerCase();
 					const userEmail = users[userId].email?.split('@')[0].toLocaleLowerCase();
 					if (userName.includes(filteredInput) || userEmail.includes(filteredInput)) {
-						filteredConversations.push(room);
+						filteredOneToOne.push(room);
 					}
 				}
 			});
-			setFilteredConversationsIds(filteredConversations);
+			setFilteredConversationsIds([...filteredOneToOne, ...filteredGroups]);
 		}
 	}, [filteredInput, roomsIds, sessionId]);
 
