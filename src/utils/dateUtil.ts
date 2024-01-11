@@ -11,6 +11,10 @@ export const setDateDefault = (timezoneId: string, locale: string): void => {
 	moment.locale(locale);
 };
 
+// Transform generic date format into a readable format
+export const getCalendarTime = (date: Date | string | number): string =>
+	moment(date).calendar().toLowerCase();
+
 export const now = (): number => moment().valueOf();
 
 // Transform generic date format into Unix timestamp (milliseconds)

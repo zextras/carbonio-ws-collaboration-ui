@@ -7,7 +7,6 @@
 import React, { FC, useMemo } from 'react';
 
 import { Container, Padding, Text } from '@zextras/carbonio-design-system';
-import moment from 'moment-timezone';
 import { useTranslation } from 'react-i18next';
 import styled, { DefaultTheme } from 'styled-components';
 
@@ -23,6 +22,7 @@ import {
 } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
 import { CapabilityType } from '../../../../types/store/SessionTypes';
+import { getCalendarTime } from '../../../../utils/dateUtil';
 
 type RoomPictureProps = {
 	memberId: string;
@@ -63,12 +63,10 @@ const OneToOneRoomPictureHandler: FC<RoomPictureProps> = ({ memberId }) => {
 		getUserPictureUpdatedAt(state, memberId)
 	);
 
-	const lastSeen: string | undefined = useMemo(() => {
-		if (memberLastActivity) {
-			return moment(memberLastActivity).calendar().toLocaleLowerCase();
-		}
-		return undefined;
-	}, [memberLastActivity]);
+	const lastSeen: string = useMemo(
+		() => (memberLastActivity ? getCalendarTime(memberLastActivity) : ''),
+		[memberLastActivity]
+	);
 
 	const lastSeenLabel: string = t('status.lastSeen', `Last seen ${lastSeen}`, { lastSeen });
 
