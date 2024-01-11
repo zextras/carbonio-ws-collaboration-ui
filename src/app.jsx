@@ -18,22 +18,20 @@ import { MeetingsApi, RoomsApi, SessionApi } from './network';
 import { WebSocketClient } from './network/websocket/WebSocketClient';
 import XMPPClient from './network/xmpp/XMPPClient';
 import useStore from './store/Store';
+import { setDateDefault } from './utils/dateUtil';
 
 const initApp = () => {
 	const { id, name, displayName } = getUserAccount();
-	const { settings } = getUserSettings();
+	const settings = getUserSettings();
 
 	// STORE: init with user session main infos
 	const store = useStore.getState();
 	store.setLoginInfo(id, name, displayName);
 
 	// SET TIMEZONE and LOCALE
-	settings?.prefs?.zimbraPrefTimeZoneId
-		? store.setUserPrefTimezone(settings?.prefs?.zimbraPrefTimeZoneId)
-		: store.setUserPrefTimezone(moment.tz.guess());
-	if (settings?.prefs?.zimbraPrefLocale) {
-		moment.locale(settings.prefs.zimbraPrefLocale);
-	}
+	const timezoneId = settings.prefs?.zimbraPrefTimeZoneId || moment.tz.guess();
+	setDateDefault(timezoneId, settings.prefs?.zimbraPrefLocale);
+	store.setUserPrefTimezone(timezoneId);
 
 	// Create and set into store XMPPClient and WebSocketClient instances
 	// to avoid errors when views are rendered

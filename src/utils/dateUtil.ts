@@ -6,6 +6,11 @@
 
 import moment from 'moment-timezone';
 
+export const setDateDefault = (timezoneId: string, locale: string): void => {
+	moment.tz.setDefault(timezoneId);
+	moment.locale(locale);
+};
+
 export const now = (): number => moment().valueOf();
 
 // Transform generic date format into Unix timestamp (milliseconds)
