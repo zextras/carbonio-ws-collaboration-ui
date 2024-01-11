@@ -50,9 +50,7 @@ const SecondaryBarSingleGroupsView: React.FC<SecondaryBarSingleGroupsView> = ({ 
 	const showConversationList = t('tooltip.showConversationList', 'Show conversations list');
 	const noMatchLabel = t('participantsList.noMatch', 'There are no items that match this search');
 
-	const roomsIds = useStore<FilteredConversation[]>(
-		getRoomsInfoOrderedLastMessage
-	);
+	const roomsIds = useStore<FilteredConversation[]>(getRoomsInfoOrderedLastMessage);
 	const users = useStore(getUsersSelector);
 
 	const { filteredConversationsIds, setFilteredInput } = useFilterRoomsOnInput(roomsIds);
