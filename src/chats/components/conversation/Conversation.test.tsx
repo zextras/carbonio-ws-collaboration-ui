@@ -63,7 +63,7 @@ describe('Conversation view', () => {
 		mockUseMediaQueryCheck.mockReturnValueOnce(true);
 		const store = useStore.getState();
 		store.addRoom(testRoom);
-		const { user } = setup(<Conversation room={testRoom} />);
+		const { user } = setup(<Conversation roomId={testRoom.id} />);
 		const conversationCollapsedView = screen.getByTestId('conversationCollapsedView');
 		expect(conversationCollapsedView).toBeInTheDocument();
 		const infoPanelToggle = screen.getByTestId('infoPanelToggle');
@@ -83,7 +83,7 @@ describe('Conversation view', () => {
 		store.addRoom(testRoom);
 		store.setLoginInfo(user1Info.id, user1Info.email, user1Info.name);
 		store.setUserInfo(user2Info);
-		const { user } = setup(<Conversation room={testRoom} />);
+		const { user } = setup(<Conversation roomId={testRoom.id} />);
 		const conversationCollapsedView = screen.getByTestId('conversationCollapsedView');
 		expect(conversationCollapsedView).toBeInTheDocument();
 		const infoPanelToggle = screen.getByTestId('infoPanelToggle');
@@ -107,7 +107,7 @@ describe('Conversation view', () => {
 		store.setUserInfo(user2Info);
 		mockedDeleteRoomMemberRequest.mockReturnValueOnce('you left the conversation');
 		mockGoToMainPage.mockReturnValueOnce('main page');
-		const { user } = setup(<Conversation room={testRoom} />);
+		const { user } = setup(<Conversation roomId={testRoom.id} />);
 		expect(screen.getByText(/Leave Group/i)).toBeInTheDocument();
 		await user.click(screen.getByText(/Leave Group/i));
 		const leaveModal = screen.getByTestId('leave_modal');
@@ -125,7 +125,7 @@ describe('Conversation view', () => {
 		mockDarkReaderIsEnabled.mockReturnValueOnce(false);
 		const store = useStore.getState();
 		store.addRoom(testRoom);
-		setup(<Conversation room={testRoom} />);
+		setup(<Conversation roomId={testRoom.id} />);
 		const ConversationWrapper = screen.getByTestId('ConversationWrapper');
 		expect(ConversationWrapper).toHaveStyle(`background-image: url('papyrus.png')`);
 	});
@@ -133,7 +133,7 @@ describe('Conversation view', () => {
 		mockDarkReaderIsEnabled.mockReturnValueOnce(true);
 		const store = useStore.getState();
 		store.addRoom(testRoom);
-		setup(<Conversation room={testRoom} />);
+		setup(<Conversation roomId={testRoom.id} />);
 		const ConversationWrapper = screen.getByTestId('ConversationWrapper');
 		expect(ConversationWrapper).toHaveStyle(`background-image: url('papyrus-dark.png')`);
 	});

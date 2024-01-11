@@ -18,7 +18,7 @@ export const useFilterRoomsOnInput = (
 	setFilteredInput: Dispatch<SetStateAction<string>>;
 	filteredConversationsIds: { roomId: string; roomType: string; lastMessageTimestamp: number }[];
 } => {
-	const sessionId: string | undefined = useStore(getUserId);
+	const sessionId = useStore(getUserId);
 
 	const [filteredConversationsIds, setFilteredConversationsIds] = useState<
 		{ roomId: string; roomType: string; lastMessageTimestamp: number }[]

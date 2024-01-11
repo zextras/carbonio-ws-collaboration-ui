@@ -22,7 +22,7 @@ const ConversationWrapper = styled(Container)<{ $darkModeActive: boolean }>`
 		$darkModeActive ? papyrusDark : papyrus}');
 `;
 
-const Conversation = ({ room }: ConversationProps): ReactElement => {
+const Conversation = ({ roomId }: ConversationProps): ReactElement => {
 	const isDesktopView = useMediaQueryCheck();
 	const isDarkModeEnabled = useDarkReaderStatus();
 
@@ -42,11 +42,11 @@ const Conversation = ({ room }: ConversationProps): ReactElement => {
 			$darkModeActive={isDarkModeEnabled}
 		>
 			{(isDesktopView || !infoPanelOpen) && (
-				<Chat roomId={room.id} setInfoPanelOpen={setInfoPanelOpen} />
+				<Chat roomId={roomId} setInfoPanelOpen={setInfoPanelOpen} />
 			)}
 			{(isDesktopView || infoPanelOpen) && (
 				<ConversationInfoPanel
-					roomId={room.id}
+					roomId={roomId}
 					setInfoPanelOpen={setInfoPanelOpen}
 					infoPanelOpen={infoPanelOpen}
 				/>
