@@ -16,31 +16,31 @@ describe('date utils', () => {
 		// actual date
 		// should return today
 		const actualDate = moment.tz();
-		const todayString = dateString(+actualDate, timezone);
+		const todayString = dateString(+actualDate);
 		expect(todayString).toBe('Today');
 
 		// date minus almost 1 day
 		// should return yesterday
 		const minusAlmost1Date = +actualDate - 90000000;
-		const almostYesterdayString = dateString(+minusAlmost1Date, timezone);
+		const almostYesterdayString = dateString(+minusAlmost1Date);
 		expect(almostYesterdayString).toBe('Yesterday');
 
 		// date minus 1 day
 		// should return yesterday
 		const minus1Date = +actualDate - 86400000;
-		const yesterdayString = dateString(+minus1Date, timezone);
+		const yesterdayString = dateString(+minus1Date);
 		expect(yesterdayString).toBe('Yesterday');
 
 		// date minus 3 days, 23 hours, 59 min, 50 sec
 		// should return a day of a week
 		const minusAlmost4Date = +actualDate - 345599000;
-		const almost4DaysString = dateString(+minusAlmost4Date, timezone);
+		const almost4DaysString = dateString(+minusAlmost4Date);
 		expect(almost4DaysString).toBe(moment.tz(minusAlmost4Date, timezone).format('dddd'));
 
 		// date minus 4 days
 		// should return a day of the week
 		const minus4Date = +actualDate - 345600000;
-		const fourDaysString = dateString(+minus4Date, timezone);
+		const fourDaysString = dateString(+minus4Date);
 		expect(fourDaysString).toBe(moment.tz(minus4Date, timezone).format('dddd'));
 
 		// to check if the date are the same
@@ -49,13 +49,13 @@ describe('date utils', () => {
 		// date minus 7 days
 		// should return a complete date
 		const minus7Date = +actualDate - 604800000;
-		const sevenDaysString = dateString(+minus7Date, timezone);
+		const sevenDaysString = dateString(+minus7Date);
 		expect(sevenDaysString).toBe(moment.tz(minus7Date, timezone).format('MMMM D YYYY'));
 
 		// date minus one year
 		// should return a complete date
 		const oneYearBefore = +actualDate - 31536000000;
-		const oneYearString = dateString(+oneYearBefore, timezone);
+		const oneYearString = dateString(+oneYearBefore);
 		expect(oneYearString).toBe(moment.tz(oneYearBefore, timezone).format('MMMM D YYYY'));
 	});
 });

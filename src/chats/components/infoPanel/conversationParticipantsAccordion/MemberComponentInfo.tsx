@@ -7,7 +7,6 @@
 import React, { FC, useMemo } from 'react';
 
 import { Avatar, Container, Padding, Text, Shimmer, Row } from '@zextras/carbonio-design-system';
-import moment from 'moment-timezone';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -24,6 +23,7 @@ import {
 import useStore from '../../../../store/Store';
 import { Member } from '../../../../types/store/RoomTypes';
 import { CapabilityType } from '../../../../types/store/SessionTypes';
+import { getCalendarTime } from '../../../../utils/dateUtil';
 
 type ParticipantsInfoProps = {
 	member: Member;
@@ -71,12 +71,11 @@ const MemberComponentInfo: FC<ParticipantsInfoProps> = ({ member, roomId }) => {
 		return '';
 	}, [member, userPictureUpdatedAt]);
 
-	const lastSeen: string | undefined = useMemo(() => {
-		if (memberLastActivity) {
-			return moment(memberLastActivity).calendar().toLocaleLowerCase();
-		}
-		return undefined;
-	}, [memberLastActivity]);
+	const lastSeen: string = useMemo(
+		() => (memberLastActivity ? getCalendarTime(memberLastActivity) : ''),
+		[memberLastActivity]
+	);
+
 	const lastSeenLabel: string = t('status.lastSeen', `Last Seen ${lastSeen}`, { lastSeen });
 
 	const presenceLabel = useMemo(

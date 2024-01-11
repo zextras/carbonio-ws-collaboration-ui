@@ -7,13 +7,12 @@
 import React, { FC } from 'react';
 
 import { Container, Text, Padding } from '@zextras/carbonio-design-system';
-import moment from 'moment-timezone';
 import { useTranslation } from 'react-i18next';
 import styled, { SimpleInterpolation } from 'styled-components';
 
-import { getPrefTimezoneSelector } from '../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../store/Store';
 import { TextMessage } from '../../../../types/store/MessageTypes';
+import { formatDate } from '../../../../utils/dateUtil';
 
 type DeletedBubbleProps = {
 	message: TextMessage;
@@ -37,9 +36,8 @@ const CustomText = styled(Text)`
 const DeletedBubble: FC<DeletedBubbleProps> = ({ message, refEl }) => {
 	const [t] = useTranslation();
 	const deletedMessageLabel = t('message.deletedMessage', 'Deleted message');
-	const timezone = useStore(getPrefTimezoneSelector);
 	const sessionId: string | undefined = useStore((store) => store.session.id);
-	const messageTime = moment.tz(message.date, timezone).format('HH:mm');
+	const messageTime = formatDate(message.date, 'HH:mm');
 
 	return (
 		<BubbleDeletedContainer

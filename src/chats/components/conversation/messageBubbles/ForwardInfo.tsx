@@ -7,13 +7,12 @@
 import React, { FC } from 'react';
 
 import { Container, Icon, Padding, Text, Tooltip } from '@zextras/carbonio-design-system';
-import moment from 'moment-timezone';
 import { useTranslation } from 'react-i18next';
 
-import { getPrefTimezoneSelector } from '../../../../store/selectors/SessionSelectors';
 import { getUserName } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
 import { ForwardedInfo } from '../../../../types/store/MessageTypes';
+import { formatDate } from '../../../../utils/dateUtil';
 
 type ForwardInfoProps = {
 	info: ForwardedInfo;
@@ -28,9 +27,8 @@ const ForwardInfo: FC<ForwardInfoProps> = ({ info }) => {
 		'Forwarded multiple times'
 	);
 
-	const timezone = useStore(getPrefTimezoneSelector);
-	const messageDate = moment.tz(info.date, timezone).format('DD MMM YY');
-	const messageTime = moment.tz(info.date, timezone).format('HH:mm');
+	const messageDate = formatDate(info.date, 'DD MMM YY');
+	const messageTime = formatDate(info.date, 'HH:mm');
 
 	return (
 		<Container padding={{ bottom: 'small' }} orientation="horizontal" mainAlignment="flex-start">

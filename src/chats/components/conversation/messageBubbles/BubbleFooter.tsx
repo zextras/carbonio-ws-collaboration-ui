@@ -7,13 +7,11 @@
 import React, { FC, useMemo } from 'react';
 
 import { Container, Icon, Padding, Text, Tooltip } from '@zextras/carbonio-design-system';
-import moment from 'moment-timezone';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import { getPrefTimezoneSelector } from '../../../../store/selectors/SessionSelectors';
-import useStore from '../../../../store/Store';
 import { MarkerStatus } from '../../../../types/store/MarkersTypes';
+import { formatDate } from '../../../../utils/dateUtil';
 
 type BubbleFooterProps = {
 	date: number;
@@ -58,8 +56,7 @@ const BubbleFooter: FC<BubbleFooterProps> = ({
 		}
 	}, [messageRead]);
 
-	const timezone = useStore(getPrefTimezoneSelector);
-	const messageTime = moment.tz(date, timezone).format('HH:mm');
+	const messageTime = useMemo(() => formatDate(date, 'HH:mm'), [date]);
 
 	const dropdownTooltip = useMemo(() => {
 		switch (messageRead) {

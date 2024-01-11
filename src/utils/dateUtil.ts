@@ -6,47 +6,49 @@
 
 import moment from 'moment-timezone';
 
+/**
+ * Utility functions for date manipulation.
+ * Accepted date formats:
+ * - Date (native JS Date object)
+ * - ISO Date ("YYYY-MM-DDTHH:mm:ss.sssZ")
+ * - Unix timestamp (milliseconds)
+ */
+
+type DateType = Date | string | number;
+
 export const setDateDefault = (timezoneId: string, locale: string): void => {
 	moment.tz.setDefault(timezoneId);
 	moment.locale(locale);
 };
 
-// Transform generic date format into a readable format
-export const getCalendarTime = (date: Date | string | number): string =>
-	moment(date).calendar().toLowerCase();
+export const formatDate = (date: DateType, format: string): string => moment(date).format(format);
+
+export const getCalendarTime = (date: DateType): string => moment(date).calendar().toLowerCase();
 
 export const now = (): number => moment().valueOf();
 
 // Transform generic date format into Unix timestamp (milliseconds)
-export const dateToTimestamp = (date: Date | string | number): number => moment(date).valueOf();
+export const dateToTimestamp = (date: DateType): number => moment(date).valueOf();
 
 // Transform generic date format into ISO Date (format accept from XMPP)
-export const dateToISODate = (date: Date | number | string): string =>
-	moment(date).format('YYYY-MM-DDTHH:mm:ss.SSSZ');
+export const dateToISODate = (date: DateType): string =>
+	formatDate(date, 'YYYY-MM-DDTHH:mm:ss.sssZ');
 
-export const displayTimestamp = (timestamp: Date | string | number): string =>
-	moment(timestamp).format('HH:mm:ss DD-MM-YYYY');
-
-export const isBefore = (previousDate: number | string, nextDate: number | string): boolean =>
+export const isBefore = (previousDate: DateType, nextDate: DateType): boolean =>
 	moment(previousDate).isSameOrBefore(nextDate);
 
-export const isStrictlyBefore = (
-	previousDate: number | string,
-	nextDate: number | string
-): boolean => moment(previousDate).isBefore(nextDate);
+export const isStrictlyBefore = (previousDate: DateType, nextDate: DateType): boolean =>
+	moment(previousDate).isBefore(nextDate);
 
-// It returns true if the two dates represent the same day
-export const datesAreFromTheSameDay = (
-	date1: Date | number | string,
-	date2: Date | number | string
-): boolean => moment(date1).format('YYYY-MM-DD') === moment(date2).format('YYYY-MM-DD');
+export const datesAreFromTheSameDay = (date1: DateType, date2: DateType): boolean =>
+	formatDate(date1, 'YYYY-MM-DD') === formatDate(date2, 'YYYY-MM-DD');
 
 // it transforms a ms date to a string one
-export const dateString = (actualDate: string | number, timezone: string): string => {
+export const dateString = (actualDate: DateType): string => {
 	// date of today
-	const today = moment().tz(timezone);
+	const today = moment();
 	// date in exam
-	const dateDay = moment.tz(actualDate, timezone);
+	const dateDay = moment(actualDate);
 	// date of six days before today
 	const dateSixDaysBefore = moment(today).subtract(6, 'days');
 
@@ -66,5 +68,5 @@ export const dateString = (actualDate: string | number, timezone: string): strin
 	if (isBetweenTodayAndSixDaysBefore) {
 		return dateDay.format('dddd');
 	}
-	return moment.tz(actualDate, timezone).format('MMMM D YYYY');
+	return moment(actualDate).format('MMMM D YYYY');
 };
