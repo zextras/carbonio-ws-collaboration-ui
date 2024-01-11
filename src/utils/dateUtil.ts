@@ -32,7 +32,7 @@ export const dateToTimestamp = (date: DateType): number => moment(date).valueOf(
 
 // Transform generic date format into ISO Date (format accept from XMPP)
 export const dateToISODate = (date: DateType): string =>
-	formatDate(date, 'YYYY-MM-DDTHH:mm:ss.sssZ');
+	formatDate(date, 'YYYY-MM-DDTHH:mm:ss.SSSZ');
 
 export const isBefore = (previousDate: DateType, nextDate: DateType): boolean =>
 	moment(previousDate).isSameOrBefore(nextDate);
