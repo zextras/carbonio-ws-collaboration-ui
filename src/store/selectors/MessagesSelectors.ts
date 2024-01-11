@@ -6,6 +6,7 @@
 
 import { filter, find, forEach, includes, orderBy, size } from 'lodash';
 
+import { FilteredConversation } from '../../chats/components/secondaryBar/SecondaryBarSingleGroupsView';
 import {
 	AttachmentMessageType,
 	ConfigurationMessage,
@@ -76,6 +77,23 @@ export const getRoomIdsOrderedLastMessage = (
 			roomId: room.id,
 			roomType: room.type,
 			lastMessageTimestamp: lastMessage ? lastMessage.date : 0
+		});
+	});
+	return orderBy(listOfConvByLastMessage, ['lastMessageTimestamp'], ['desc']);
+};
+
+export const getRoomsInfoOrderedLastMessage = (store: RootStore): FilteredConversation[] => {
+	const listOfConvByLastMessage: FilteredConversation[] = [];
+	// check to remove and tell BE to improve because if a user is removed from a room
+	// the messages of this always came back and trigger error
+	forEach(store.rooms, (room) => {
+		const lastMessage =
+			store.messages[room.id] && store.messages[room.id][store.messages[room.id].length - 1];
+		listOfConvByLastMessage.push({
+			roomId: room.id,
+			roomType: room.type,
+			lastMessageTimestamp: lastMessage ? lastMessage.date : 0,
+			members: room.members || []
 		});
 	});
 	return orderBy(listOfConvByLastMessage, ['lastMessageTimestamp'], ['desc']);
