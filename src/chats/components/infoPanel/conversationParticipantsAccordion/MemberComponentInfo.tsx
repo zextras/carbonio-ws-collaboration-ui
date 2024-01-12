@@ -6,7 +6,15 @@
 
 import React, { FC, useMemo } from 'react';
 
-import { Avatar, Container, Padding, Text, Shimmer, Row } from '@zextras/carbonio-design-system';
+import {
+	Avatar,
+	Container,
+	Padding,
+	Text,
+	Shimmer,
+	Row,
+	TextWithTooltip
+} from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -120,9 +128,9 @@ const MemberComponentInfo: FC<ParticipantsInfoProps> = ({ member, roomId }) => {
 					</Text>
 					<Padding top="extrasmall" />
 					{canSeeUsersPresence && (
-						<Text size="extrasmall" color="secondary" overflow="ellipsis">
+						<TextWithTooltip size="extrasmall" color="secondary">
 							{presenceLabel}
-						</Text>
+						</TextWithTooltip>
 					)}
 				</Container>
 			</Row>

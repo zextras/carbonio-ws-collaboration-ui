@@ -16,9 +16,12 @@ import moment from 'moment-timezone';
 
 type DateType = Date | string | number;
 
-export const setDateDefault = (timezoneId: string, locale: string): void => {
-	moment.tz.setDefault(timezoneId);
-	moment.locale(locale);
+export const setDateDefault = (
+	timezoneId: string | undefined,
+	locale: string | undefined
+): void => {
+	moment.tz.setDefault(timezoneId || moment.tz.guess());
+	moment.locale(locale || 'en');
 };
 
 export const formatDate = (date: DateType, format: string): string => moment(date).format(format);

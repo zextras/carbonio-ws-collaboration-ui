@@ -91,7 +91,6 @@ export type SessionStoreSlice = {
 	setSessionId: (sessionId: string) => void;
 	setCapabilities: (capabilities: CapabilityList) => void;
 	setSelectedRoomOneToOneGroup: (id: string) => void;
-	setUserPrefTimezone: (timezoneId: string) => void;
 	setCustomLogo: (logo: string | false) => void;
 };
 

@@ -7,7 +7,6 @@
 import React from 'react';
 
 import { getUserAccount, getUserSettings } from '@zextras/carbonio-shell-ui';
-import moment from 'moment-timezone';
 
 import CounterBadgeUpdater from './chats/components/CounterBadgeUpdater';
 import RegisterCreationButton from './chats/components/RegisterCreationButton';
@@ -22,16 +21,14 @@ import { setDateDefault } from './utils/dateUtils';
 
 const initApp = () => {
 	const { id, name, displayName } = getUserAccount();
-	const settings = getUserSettings();
+	const { prefs } = getUserSettings();
 
 	// STORE: init with user session main infos
 	const store = useStore.getState();
 	store.setLoginInfo(id, name, displayName);
 
 	// SET TIMEZONE and LOCALE
-	const timezoneId = settings.prefs?.zimbraPrefTimeZoneId || moment.tz.guess();
-	setDateDefault(timezoneId, settings.prefs?.zimbraPrefLocale);
-	store.setUserPrefTimezone(timezoneId);
+	setDateDefault(prefs?.zimbraPrefTimeZoneId, prefs?.zimbraPrefLocale);
 
 	// Create and set into store XMPPClient and WebSocketClient instances
 	// to avoid errors when views are rendered
