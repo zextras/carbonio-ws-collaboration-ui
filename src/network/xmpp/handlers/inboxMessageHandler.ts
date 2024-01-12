@@ -6,7 +6,7 @@
 
 import useStore from '../../../store/Store';
 import { MessageType } from '../../../types/store/MessageTypes';
-import { dateToTimestamp, now } from '../../../utils/dateUtil';
+import { dateToTimestamp, now } from '../../../utils/dateUtils';
 import { getRequiredAttribute, getRequiredTagElement } from '../utility/decodeStanza';
 import { decodeXMPPMessageStanza } from '../utility/decodeXMPPMessageStanza';
 

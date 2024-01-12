@@ -18,7 +18,7 @@ import { MeetingsApi, RoomsApi, SessionApi } from './network';
 import { WebSocketClient } from './network/websocket/WebSocketClient';
 import XMPPClient from './network/xmpp/XMPPClient';
 import useStore from './store/Store';
-import { setDateDefault } from './utils/dateUtil';
+import { setDateDefault } from './utils/dateUtils';
 
 const initApp = () => {
 	const { id, name, displayName } = getUserAccount();

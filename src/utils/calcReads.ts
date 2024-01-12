@@ -6,7 +6,7 @@
 
 import { find, forEach, size } from 'lodash';
 
-import { isBefore } from './dateUtil';
+import { isBefore } from './dateUtils';
 import useStore from '../store/Store';
 import { Marker, MarkerStatus, RoomMarkers } from '../types/store/MarkersTypes';
 import { Message, TextMessage } from '../types/store/MessageTypes';

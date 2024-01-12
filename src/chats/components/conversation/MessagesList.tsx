@@ -31,7 +31,7 @@ import { getMessagesSelector } from '../../../store/selectors/MessagesSelectors'
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { Message, MessageType } from '../../../types/store/MessageTypes';
-import { formatDate, isBefore } from '../../../utils/dateUtil';
+import { formatDate, isBefore } from '../../../utils/dateUtils';
 import { scrollToEnd, scrollToMessage } from '../../../utils/scrollUtils';
 
 const Messages = styled(Container)`

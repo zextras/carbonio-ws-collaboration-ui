@@ -9,7 +9,7 @@ import { filter, find, size } from 'lodash';
 
 import { Message, MessageType } from '../../types/store/MessageTypes';
 import { RootStore, UnreadsCounterSlice } from '../../types/store/StoreTypes';
-import { isBefore } from '../../utils/dateUtil';
+import { isBefore } from '../../utils/dateUtils';
 
 export const useUnreadsCountStoreSlice = (set: (...any: any) => void): UnreadsCounterSlice => ({
 	unreads: {},

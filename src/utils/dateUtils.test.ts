@@ -7,7 +7,13 @@
 import { now } from 'moment';
 import moment from 'moment-timezone';
 
-import { dateString, dateToISODate, dateToTimestamp, formatDate, setDateDefault } from './dateUtil';
+import {
+	dateString,
+	dateToISODate,
+	dateToTimestamp,
+	formatDate,
+	setDateDefault
+} from './dateUtils';
 import useStore from '../store/Store';
 
 beforeEach(() => {

@@ -11,7 +11,7 @@ import useFirstUnreadMessage from './useFirstUnreadMessage';
 import useStore from '../../../store/Store';
 import { createMockMarker, createMockRoom, createMockTextMessage } from '../../../tests/createMock';
 import { MessageType } from '../../../types/store/MessageTypes';
-import { dateToTimestamp } from '../../../utils/dateUtil';
+import { dateToTimestamp } from '../../../utils/dateUtils';
 
 const myUserId = 'myUserId';
 const room = createMockRoom();

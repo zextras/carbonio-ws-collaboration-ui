@@ -13,7 +13,7 @@ import styled from 'styled-components';
 import { CustomMessage } from './MessageFactory';
 import { Z_INDEX_RANK } from '../../../../types/generics';
 import { DateMessage } from '../../../../types/store/MessageTypes';
-import { dateString } from '../../../../utils/dateUtil';
+import { dateString } from '../../../../utils/dateUtils';
 
 type DateMsgProps = {
 	message: DateMessage;

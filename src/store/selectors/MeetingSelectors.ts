@@ -9,7 +9,7 @@ import { filter, find, forEach, size, sortBy } from 'lodash';
 import { STREAM_TYPE, TileData } from '../../types/store/ActiveMeetingTypes';
 import { Meeting, MeetingParticipantMap } from '../../types/store/MeetingTypes';
 import { RootStore } from '../../types/store/StoreTypes';
-import { dateToTimestamp } from '../../utils/dateUtil';
+import { dateToTimestamp } from '../../utils/dateUtils';
 
 export const getMeeting = (store: RootStore, roomId: string): Meeting | undefined =>
 	store.meetings[roomId];

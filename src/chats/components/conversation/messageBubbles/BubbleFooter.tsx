@@ -11,7 +11,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import { MarkerStatus } from '../../../../types/store/MarkersTypes';
-import { formatDate } from '../../../../utils/dateUtil';
+import { formatDate } from '../../../../utils/dateUtils';
 
 type BubbleFooterProps = {
 	date: number;

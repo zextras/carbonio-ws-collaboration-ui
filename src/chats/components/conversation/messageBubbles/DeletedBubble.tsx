@@ -12,7 +12,7 @@ import styled, { SimpleInterpolation } from 'styled-components';
 
 import useStore from '../../../../store/Store';
 import { TextMessage } from '../../../../types/store/MessageTypes';
-import { formatDate } from '../../../../utils/dateUtil';
+import { formatDate } from '../../../../utils/dateUtils';
 
 type DeletedBubbleProps = {
 	message: TextMessage;

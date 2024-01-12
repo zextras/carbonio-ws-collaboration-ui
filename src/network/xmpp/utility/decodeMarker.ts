@@ -5,7 +5,7 @@
  */
 /* eslint-disable */
 
-import { dateToTimestamp } from '../../../utils/dateUtil';
+import { dateToTimestamp } from '../../../utils/dateUtils';
 import { getId } from './decodeJid';
 import { Marker, MarkerType } from '../../../types/store/MarkersTypes';
 import { getRequiredAttribute } from './decodeStanza';

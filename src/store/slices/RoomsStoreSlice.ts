@@ -11,7 +11,7 @@ import { find, findIndex, forEach, remove } from 'lodash';
 import { UsersApi } from '../../network';
 import { MemberBe, RoomBe } from '../../types/network/models/roomBeTypes';
 import { RoomsStoreSlice, RootStore } from '../../types/store/StoreTypes';
-import { isBefore } from '../../utils/dateUtil';
+import { isBefore } from '../../utils/dateUtils';
 
 export const useRoomsStoreSlice = (set: (...any: any) => void): RoomsStoreSlice => ({
 	rooms: {},

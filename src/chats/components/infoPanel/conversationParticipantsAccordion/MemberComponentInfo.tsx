@@ -23,7 +23,7 @@ import {
 import useStore from '../../../../store/Store';
 import { Member } from '../../../../types/store/RoomTypes';
 import { CapabilityType } from '../../../../types/store/SessionTypes';
-import { getCalendarTime } from '../../../../utils/dateUtil';
+import { getCalendarTime } from '../../../../utils/dateUtils';
 
 type ParticipantsInfoProps = {
 	member: Member;

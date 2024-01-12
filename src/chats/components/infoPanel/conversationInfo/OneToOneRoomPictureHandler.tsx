@@ -22,7 +22,7 @@ import {
 } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
 import { CapabilityType } from '../../../../types/store/SessionTypes';
-import { getCalendarTime } from '../../../../utils/dateUtil';
+import { getCalendarTime } from '../../../../utils/dateUtils';
 
 type RoomPictureProps = {
 	memberId: string;
