@@ -14,6 +14,7 @@ import styled from 'styled-components';
 import CollapsedSidebarListItem from './CollapsedSidebarListItem';
 import ConversationsFilter from './ConversationsFilter';
 import ExpandedSidebarListItem from './ExpandedSidebarListItem';
+import VirtualRoomsButton from './VirtualRoomTemporaryWidget/VirtualRoomsButton';
 import { roomsListSecondaryBarLengthEqualityFn } from '../../../store/equalityFunctions/MessagesEqualityFunctions';
 import { getRoomIdsOrderedLastMessage } from '../../../store/selectors/MessagesSelectors';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
@@ -37,6 +38,13 @@ const ConversationFilterContainer = styled(Container)`
 	position: sticky;
 	top: 0;
 	z-index: 1;
+`;
+
+const VirtualRoomContainer = styled(Container)`
+	height: fit-content;
+	position: sticky;
+	bottom: 0;
+	z-index: 3;
 `;
 
 const SecondaryBarSingleGroupsView: React.FC<SecondaryBarSingleGroupsView> = ({ expanded }) => {
@@ -130,7 +138,7 @@ const SecondaryBarSingleGroupsView: React.FC<SecondaryBarSingleGroupsView> = ({ 
 						<ShimmeringCollapsedListView />
 					)
 				) : (
-					<Container height="fit">
+					<Container mainAlignment="flex-start">
 						<ConversationFilterContainer>
 							<ConversationsFilter
 								expanded={expanded}
@@ -138,8 +146,13 @@ const SecondaryBarSingleGroupsView: React.FC<SecondaryBarSingleGroupsView> = ({ 
 								key="conversations_filter_item"
 							/>
 						</ConversationFilterContainer>
-						<Container height="fit" data-testid="conversations_list_filtered">
-							{listOfRooms}
+						<Container mainAlignment="space-between">
+							<Container height="fit" data-testid="conversations_list_filtered">
+								{listOfRooms}
+							</Container>
+							<VirtualRoomContainer>
+								<VirtualRoomsButton />
+							</VirtualRoomContainer>
 						</Container>
 					</Container>
 				)

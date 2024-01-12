@@ -164,6 +164,21 @@
         "presentActiveSession": "There is another active session",
         "rejoinMeeting": "Rejoin meeting",
         "restartMeeting": "Restart meeting",
+        "scheduledMeetingLabel": "Your Virtual Rooms",
+        "scheduledMeetings": {
+            "VirtualRoomNameRequiredTooltip": "Virtual Room’s name is required",
+            "cancelTooltip": "Cancel",
+            "copyVirtualRoomLink": "Virtual Room's link copied",
+            "copyVirtualRoomTooltip": "Copy Virtual Room's link",
+            "createVirtualRoomTooltip": "Create new Virtual Room",
+            "deleteMeetingModalDescription": "You are deleting this Virtual Room, if it has active meetings, it will be interrupted and no one will be able to access it anymore. Proceed?",
+            "deleteMeetingModalTitle": "Delete {{roomName}} Virtual Room",
+            "deleteVirtualRoom": "Virtual Room deleted successfully",
+            "deleteVirtualRoomTooltip": "Delete Virtual Room",
+            "newVirtualRoom": "New Virtual Room’s name*",
+            "noVirtualRooms": "The Rooms you create will be shown here",
+            "virtualRoomLabel": "Your Virtual Rooms"
+        },
         "setInputDescription": "Set your input devices by choosing them from dropdown menu",
         "startMeeting": "Start meeting",
         "startModal": {
