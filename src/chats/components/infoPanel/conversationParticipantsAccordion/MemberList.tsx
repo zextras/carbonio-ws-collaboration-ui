@@ -10,7 +10,6 @@ import { Container, Text } from '@zextras/carbonio-design-system';
 import { forEach } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { useShallow } from 'zustand/react/shallow';
 
 import ListOfMembers from './ListOfMembers';
 import SearchUserAction from './SearchUserAction';
@@ -32,7 +31,7 @@ const MemberList: FC<ParticipantsListProps> = ({ roomId }) => {
 	const [t] = useTranslation();
 	const noMatchLabel = t('participantsList.noMatch', 'There are no items that match this search');
 	const members: Member[] | undefined = useStore((state) => getRoomMembers(state, roomId));
-	const users: UsersMap = useStore(useShallow(getUsersSelector));
+	const users: UsersMap = useStore(getUsersSelector);
 	const [filteredContactList, setFilteredContactList] = useState<Member[] | undefined>([]);
 	const [filteredInput, setFilteredInput] = useState('');
 
