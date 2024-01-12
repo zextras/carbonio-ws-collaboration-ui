@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { Container, Padding } from '@zextras/carbonio-design-system';
 import { useParams } from 'react-router-dom';
@@ -88,6 +88,10 @@ const MeetingBubble: FC<MeetingBubbleProps> = ({ messageId, handleBubbleRemove }
 	const inputHasFocus = useStore((store) => getInputHasFocus(store, roomId || ''));
 
 	const [isVisible, setIsVisible] = useState(true);
+	const [isHovering, setIsHovering] = useState(false);
+
+	const hoverRef = useRef<HTMLDivElement>(null);
+	const timer = useRef<NodeJS.Timeout>();
 
 	const { extension, size } = getAttachmentInfo(
 		messageAttachment?.mimeType,
@@ -114,14 +118,45 @@ const MeetingBubble: FC<MeetingBubbleProps> = ({ messageId, handleBubbleRemove }
 		setMeetingSidebarStatus
 	]);
 
+	const handleHoverMouse = useCallback(() => {
+		clearTimeout(timer.current);
+
+		setIsHovering(true);
+	}, [timer]);
+
+	const handleLeaveMouse = useCallback(() => {
+		setIsHovering(false);
+	}, []);
+
 	useEffect(() => {
-		setTimeout(() => {
-			setIsVisible(false);
-			setTimeout(() => {
-				handleBubbleRemove(messageId);
-			}, 500);
-		}, 3500);
-	}, [messageId, handleBubbleRemove]);
+		let elRef: React.RefObject<HTMLDivElement> | null = hoverRef;
+		if (elRef?.current) {
+			elRef.current.addEventListener('mouseenter', handleHoverMouse);
+			elRef.current.addEventListener('mouseleave', handleLeaveMouse);
+		}
+
+		return (): void => {
+			if (elRef?.current) {
+				elRef.current.removeEventListener('mouseenter', handleHoverMouse);
+				elRef.current.removeEventListener('mouseleave', handleLeaveMouse);
+				elRef = null;
+			}
+		};
+	}, [handleHoverMouse, handleLeaveMouse]);
+
+	useEffect(() => {
+		if (!isHovering) {
+			timer.current = setTimeout(() => {
+				setIsVisible(false);
+				setTimeout(() => {
+					handleBubbleRemove(messageId);
+				}, 500);
+			}, 3500);
+		}
+		return () => {
+			clearTimeout(timer.current);
+		};
+	}, [messageId, handleBubbleRemove, isHovering]);
 
 	return message?.type === MessageType.TEXT_MSG ? (
 		<BubbleContainer
@@ -134,6 +169,7 @@ const MeetingBubble: FC<MeetingBubbleProps> = ({ messageId, handleBubbleRemove }
 			$messageAttachment={messageAttachment !== undefined}
 			$isVisible={isVisible}
 			onClick={onClickHandler}
+			ref={hoverRef}
 		>
 			{roomType !== RoomType.ONE_TO_ONE && (
 				<>
