@@ -146,7 +146,6 @@ const MeetingBubble: FC<MeetingBubbleProps> = ({ messageId, handleBubbleRemove }
 
 	useEffect(() => {
 		if (!isHovering) {
-			// eslint-disable-next-line react-hooks/exhaustive-deps
 			timer.current = setTimeout(() => {
 				setIsVisible(false);
 				setTimeout(() => {
