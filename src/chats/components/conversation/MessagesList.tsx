@@ -10,7 +10,6 @@ import { Container } from '@zextras/carbonio-design-system';
 import { debounce, find, groupBy, last, map, size } from 'lodash';
 import moment from 'moment-timezone';
 import styled from 'styled-components';
-import { useShallow } from 'zustand/react/shallow';
 
 import AnimationGlobalStyle from './messageBubbles/BubbleAnimationsGlobalStyle';
 import MessageFactory from './messageBubbles/MessageFactory';
@@ -55,9 +54,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 	const inputHasFocus = useStore((store) => getInputHasFocus(store, roomId));
 	const roomMessages = useStore((store) => getMessagesSelector(store, roomId));
 	const usersWritingList = useStore((store) => getRoomIsWritingList(store, roomId));
-	const actualScrollPosition = useStore(
-		useShallow((store) => getIdMessageWhereScrollIsStopped(store, roomId))
-	);
+	const actualScrollPosition = useStore((store) => getIdMessageWhereScrollIsStopped(store, roomId));
 	const hasMoreMessageToLoad = useStore((store) => getHistoryIsFullyLoaded(store, roomId));
 	const historyLoadedDisabled = useStore((store) => getHistoryIsLoadedDisabled(store, roomId));
 	const setIdMessageWhereScrollIsStopped = useStore(

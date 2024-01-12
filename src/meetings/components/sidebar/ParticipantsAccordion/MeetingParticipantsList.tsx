@@ -9,7 +9,6 @@ import { Container, Text } from '@zextras/carbonio-design-system';
 import { forEach, map, values } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { useShallow } from 'zustand/react/shallow';
 
 import SearchUserAction from '../../../../chats/components/infoPanel/conversationParticipantsAccordion/SearchUserAction';
 import { getMeetingParticipantsByMeetingId } from '../../../../store/selectors/MeetingSelectors';
@@ -37,7 +36,7 @@ const MeetingParticipantsList: FC<ParticipantsListProps> = ({ meetingId }) => {
 	const meetingParticipants: MeetingParticipantMap | undefined = useStore((store) =>
 		getMeetingParticipantsByMeetingId(store, meetingId)
 	);
-	const users: UsersMap = useStore(useShallow(getUsersSelector));
+	const users: UsersMap = useStore(getUsersSelector);
 	const [filteredContactList, setFilteredContactList] = useState<MeetingParticipant[] | undefined>(
 		values(meetingParticipants)
 	);

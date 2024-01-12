@@ -31,9 +31,7 @@ const CustomContainer = styled(Container)`
 const MemberList: FC<ParticipantsListProps> = ({ roomId }) => {
 	const [t] = useTranslation();
 	const noMatchLabel = t('participantsList.noMatch', 'There are no items that match this search');
-	const members: Member[] | undefined = useStore(
-		useShallow((state) => getRoomMembers(state, roomId))
-	);
+	const members: Member[] | undefined = useStore((state) => getRoomMembers(state, roomId));
 	const users: UsersMap = useStore(useShallow(getUsersSelector));
 	const [filteredContactList, setFilteredContactList] = useState<Member[] | undefined>([]);
 	const [filteredInput, setFilteredInput] = useState('');
