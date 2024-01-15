@@ -37,7 +37,7 @@ import { RoomType } from '../../types/store/RoomTypes';
 import { MessagesStoreSlice, RootStore } from '../../types/store/StoreTypes';
 import { UsersMap } from '../../types/store/UserTypes';
 import { calcReads } from '../../utils/calcReads';
-import { datesAreFromTheSameDay, isBefore, isStrictlyBefore } from '../../utils/dateUtil';
+import { datesAreFromTheSameDay, isBefore, isStrictlyBefore } from '../../utils/dateUtils';
 
 // Retrieve user information about userId in the various type of message (only if it is unknown)
 const retrieveMessageUserInfo = (message: Message, users: UsersMap): void => {

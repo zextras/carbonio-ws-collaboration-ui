@@ -8,7 +8,7 @@ import { Strophe } from 'strophe.js';
 
 import useStore from '../../../store/Store';
 import { Marker, MarkerType } from '../../../types/store/MarkersTypes';
-import { now } from '../../../utils/dateUtil';
+import { now } from '../../../utils/dateUtils';
 import { getId, getResource } from '../utility/decodeJid';
 import { decodeMarker } from '../utility/decodeMarker';
 import { getRequiredAttribute, getTagElement } from '../utility/decodeStanza';

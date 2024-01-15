@@ -7,7 +7,6 @@
 import React, { useEffect } from 'react';
 
 import { useUserAccount, useUserSettings } from '@zextras/carbonio-shell-ui';
-import moment from 'moment-timezone';
 
 import CounterBadgeUpdater from './chats/components/CounterBadgeUpdater';
 import RegisterCreationButton from './chats/components/RegisterCreationButton';
@@ -18,6 +17,7 @@ import { MeetingsApi, RoomsApi, SessionApi } from './network';
 import { WebSocketClient } from './network/websocket/WebSocketClient';
 import XMPPClient from './network/xmpp/XMPPClient';
 import useStore from './store/Store';
+import { setDateDefault } from './utils/dateUtils';
 
 export default function App() {
 	const setLoginInfo = useStore((state) => state.setLoginInfo);
@@ -27,7 +27,7 @@ export default function App() {
 	const setChatsBeStatus = useStore((state) => state.setChatsBeStatus);
 
 	const userAccount = useUserAccount();
-	const settings = useUserSettings();
+	const { prefs } = useUserSettings();
 
 	// STORE: init with user session main infos
 	useEffect(
@@ -37,13 +37,8 @@ export default function App() {
 
 	// SET TIMEZONE and LOCALE
 	useEffect(() => {
-		settings?.prefs?.zimbraPrefTimeZoneId
-			? setUserPrefTimezone(settings?.prefs?.zimbraPrefTimeZoneId)
-			: setUserPrefTimezone(moment.tz.guess());
-		if (settings?.prefs?.zimbraPrefLocale) {
-			moment.locale(settings.prefs.zimbraPrefLocale);
-		}
-	}, [setUserPrefTimezone, settings]);
+		setDateDefault(prefs?.zimbraPrefTimeZoneId, prefs?.zimbraPrefLocale);
+	}, [setUserPrefTimezone, prefs]);
 
 	// NETWORKS: init XMPP and WebSocket clients
 	useEffect(() => {

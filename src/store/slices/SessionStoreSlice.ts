@@ -15,7 +15,6 @@ export const useSessionStoreSlice: StateCreator<SessionStoreSlice> = (
 	set: (...any: any) => void
 ) => ({
 	session: {
-		userPrefTimeZone: '',
 		filterHasFocus: false
 	},
 	setLoginInfo: (id: string, name: string, displayName?: string): void => {
@@ -30,7 +29,6 @@ export const useSessionStoreSlice: StateCreator<SessionStoreSlice> = (
 						xmpp: undefined,
 						websocket: undefined
 					},
-					userPrefTimeZone: draft.session.userPrefTimeZone,
 					filterHasFocus: draft.session.filterHasFocus
 				};
 			}),
@@ -65,15 +63,6 @@ export const useSessionStoreSlice: StateCreator<SessionStoreSlice> = (
 			}),
 			false,
 			'SESSION/SET_SELECTED_ROOM_ONE_TO_ONE_GROUP'
-		);
-	},
-	setUserPrefTimezone: (timezoneId: string): void => {
-		set(
-			produce((draft: RootStore) => {
-				draft.session.userPrefTimeZone = timezoneId;
-			}),
-			false,
-			'SESSION/SET_USER_PREF_TIMEZONE'
 		);
 	},
 	setFilterHasFocus: (hasFocus: boolean): void => {

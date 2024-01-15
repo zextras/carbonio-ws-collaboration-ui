@@ -23,7 +23,7 @@ import {
 	TextMessage
 } from '../../types/store/MessageTypes';
 import { RoomType } from '../../types/store/RoomTypes';
-import { dateToTimestamp } from '../../utils/dateUtil';
+import { dateToTimestamp } from '../../utils/dateUtils';
 import useStore from '../Store';
 
 const dateOne = '2023-05-01 14:00';

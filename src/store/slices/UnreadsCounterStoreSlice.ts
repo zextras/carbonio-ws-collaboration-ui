@@ -10,7 +10,7 @@ import { StateCreator } from 'zustand';
 
 import { Message, MessageType } from '../../types/store/MessageTypes';
 import { RootStore, UnreadsCounterSlice } from '../../types/store/StoreTypes';
-import { isBefore } from '../../utils/dateUtil';
+import { isBefore } from '../../utils/dateUtils';
 
 export const useUnreadsCountStoreSlice: StateCreator<UnreadsCounterSlice> = (
 	set: (...any: any) => void

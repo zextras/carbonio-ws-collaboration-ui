@@ -17,7 +17,6 @@ export type Session = {
 		websocket: boolean | undefined;
 	};
 	selectedRoomOneToOneGroup?: string;
-	userPrefTimeZone: string;
 	filterHasFocus: boolean;
 	customLogo?: string | false;
 };

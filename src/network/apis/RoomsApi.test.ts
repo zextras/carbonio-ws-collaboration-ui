@@ -13,7 +13,7 @@ import {
 	createMockRoom,
 	createMockTextMessage
 } from '../../tests/createMock';
-import { dateToISODate } from '../../utils/dateUtil';
+import { dateToISODate } from '../../utils/dateUtils';
 import { getTagElement } from '../xmpp/utility/decodeStanza';
 import HistoryAccumulator from '../xmpp/utility/HistoryAccumulator';
 import { textMessageFromHistory } from '../xmpp/xmppMessageExamples';

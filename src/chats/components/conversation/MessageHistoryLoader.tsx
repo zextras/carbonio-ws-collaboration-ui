@@ -13,7 +13,7 @@ import styled from 'styled-components';
 import { getHistoryIsLoadedDisabled } from '../../../store/selectors/ActiveConversationsSelectors';
 import { getXmppClient } from '../../../store/selectors/ConnectionSelector';
 import useStore from '../../../store/Store';
-import { now } from '../../../utils/dateUtil';
+import { now } from '../../../utils/dateUtils';
 
 type MessageHistoryLoaderProps = {
 	roomId: string;
