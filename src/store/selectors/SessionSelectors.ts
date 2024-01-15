@@ -12,8 +12,6 @@ export const getSelectedRoomId = (store: RootStore): string | undefined =>
 export const getSelectedConversation = (store: RootStore, roomId: string): boolean =>
 	store.session.selectedRoomOneToOneGroup === roomId;
 
-export const getPrefTimezoneSelector = (store: RootStore): string => store.session.userPrefTimeZone;
-
 export const getSidebarFilterHasFocus = (store: RootStore): boolean => store.session.filterHasFocus;
 
 export const getCapability = (

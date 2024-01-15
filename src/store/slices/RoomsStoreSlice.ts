@@ -12,7 +12,7 @@ import { StateCreator } from 'zustand';
 import { UsersApi } from '../../network';
 import { MemberBe, RoomBe } from '../../types/network/models/roomBeTypes';
 import { RoomsStoreSlice, RootStore } from '../../types/store/StoreTypes';
-import { isBefore } from '../../utils/dateUtil';
+import { isBefore } from '../../utils/dateUtils';
 
 export const useRoomsStoreSlice: StateCreator<RoomsStoreSlice> = (set: (...any: any) => void) => ({
 	rooms: {},

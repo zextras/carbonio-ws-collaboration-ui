@@ -14,7 +14,7 @@ import { MeetingBe, MeetingParticipantBe } from '../../types/network/models/meet
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
 import { MeetingParticipant, MeetingParticipantMap } from '../../types/store/MeetingTypes';
 import { MeetingsSlice, RootStore } from '../../types/store/StoreTypes';
-import { dateToISODate } from '../../utils/dateUtil';
+import { dateToISODate } from '../../utils/dateUtils';
 
 export const useMeetingsStoreSlice: StateCreator<MeetingsSlice> = (set: (...any: any) => void) => ({
 	meetings: {},
