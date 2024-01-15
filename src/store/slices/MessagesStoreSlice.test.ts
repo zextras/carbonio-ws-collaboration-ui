@@ -472,12 +472,6 @@ describe('Test message slice - updateUnreadMessages', () => {
 		from: 'user1'
 	});
 
-	const marker0_user0 = createMockMarker({
-		from: 'user0',
-		messageId: message0.id,
-		markerDate: 1662541295393
-	});
-
 	const marker0_user1 = createMockMarker({
 		from: 'user1',
 		messageId: message0.id,
@@ -496,25 +490,16 @@ describe('Test message slice - updateUnreadMessages', () => {
 		markerDate: 1662541297393
 	});
 
-	const marker1_user1 = createMockMarker({
-		from: 'user1',
-		messageId: message1.id,
-		markerDate: 1662541297393
-	});
-
 	test('Tests updateUnreadMessages', () => {
 		const { result } = renderHook(() => useStore());
 		act(() => result.current.addRoom(room));
 		// Message list: [DATE, MESSAGE0, DATE, MESSAGE1]
 		act(() => result.current.updateHistory(room.id, [message0, message1]));
 
-		// Simulation of onNewMessageStanza method: user0 send an ack of his own message0
-		act(() => result.current.updateMarkers([marker0_user0], room.id));
-
 		let storedMessage0;
 		let storedMessage1;
 		// user1 reads message0
-		act(() => result.current.updateMarkers([marker0_user1], room.id));
+		act(() => result.current.updateMarkers(room.id, [marker0_user1]));
 		act(() => result.current.updateUnreadMessages(room.id));
 		storedMessage0 = result.current.messages[room.id][1] as TextMessage;
 		expect(storedMessage0.read).toBe(MarkerStatus.READ_BY_SOMEONE);
@@ -522,18 +507,15 @@ describe('Test message slice - updateUnreadMessages', () => {
 		expect(storedMessage1.read).toBe(MarkerStatus.UNREAD);
 
 		// user2 reads message0
-		act(() => result.current.updateMarkers([marker0_user2], room.id));
+		act(() => result.current.updateMarkers(room.id, [marker0_user2]));
 		act(() => result.current.updateUnreadMessages(room.id));
 		storedMessage0 = result.current.messages[room.id][1] as TextMessage;
 		expect(storedMessage0.read).toBe(MarkerStatus.READ);
 		storedMessage1 = result.current.messages[room.id][3] as TextMessage;
 		expect(storedMessage1.read).toBe(MarkerStatus.UNREAD);
 
-		// user1 after sent the message set as read it to simulate the onNewMessageStanza method
-		act(() => result.current.updateMarkers([marker1_user1], room.id));
-
 		// user0 reads message1
-		act(() => result.current.updateMarkers([marker1_user0], room.id));
+		act(() => result.current.updateMarkers(room.id, [marker1_user0]));
 		act(() => result.current.updateUnreadMessages(room.id));
 		storedMessage0 = result.current.messages[room.id][1] as TextMessage;
 		expect(storedMessage0.read).toBe(MarkerStatus.READ);

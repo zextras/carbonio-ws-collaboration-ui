@@ -97,7 +97,7 @@ export type SessionStoreSlice = {
 
 export type MarkersStoreSlice = {
 	markers: MarkersMap;
-	updateMarkers: (markers: Marker[], roomId: string) => void;
+	updateMarkers: (roomId: string, markers: Marker[]) => void;
 };
 
 export type ActiveConversationsSlice = {
