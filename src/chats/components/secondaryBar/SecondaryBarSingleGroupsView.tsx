@@ -17,10 +17,11 @@ import ExpandedSidebarListItem from './ExpandedSidebarListItem';
 import VirtualRoomsButton from './VirtualRoomTemporaryWidget/VirtualRoomsButton';
 import { roomsListSecondaryBarLengthEqualityFn } from '../../../store/equalityFunctions/MessagesEqualityFunctions';
 import { getRoomIdsOrderedLastMessage } from '../../../store/selectors/MessagesSelectors';
-import { getUserId } from '../../../store/selectors/SessionSelectors';
+import { getCapability, getUserId } from '../../../store/selectors/SessionSelectors';
 import { getUsersSelector } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
 import { Member } from '../../../types/store/RoomTypes';
+import { CapabilityType } from '../../../types/store/SessionTypes';
 import DefaultUserSidebarView from '../../views/DefaultUserSidebarView';
 import ShimmeringCollapsedListView from '../../views/shimmerViews/ShimmeringCollapsedListView';
 import ShimmeringExpandedListView from '../../views/shimmerViews/ShimmeringExpandedListView';
@@ -52,6 +53,7 @@ const SecondaryBarSingleGroupsView: React.FC<SecondaryBarSingleGroupsView> = ({ 
 	const showConversationList = t('tooltip.showConversationList', 'Show conversations list');
 	const noMatchLabel = t('participantsList.noMatch', 'There are no items that match this search');
 
+	const canVideoCall = useStore((store) => getCapability(store, CapabilityType.CAN_VIDEO_CALL));
 	const sessionId: string | undefined = useStore(getUserId);
 	const roomsIds = useStore<{ roomId: string; roomType: string; lastMessageTimestamp: number }[]>(
 		getRoomIdsOrderedLastMessage,
@@ -150,9 +152,11 @@ const SecondaryBarSingleGroupsView: React.FC<SecondaryBarSingleGroupsView> = ({ 
 							<Container height="fit" data-testid="conversations_list_filtered">
 								{listOfRooms}
 							</Container>
-							<VirtualRoomContainer>
-								<VirtualRoomsButton />
-							</VirtualRoomContainer>
+							{canVideoCall && (
+								<VirtualRoomContainer>
+									<VirtualRoomsButton />
+								</VirtualRoomContainer>
+							)}
 						</Container>
 					</Container>
 				)
@@ -160,7 +164,7 @@ const SecondaryBarSingleGroupsView: React.FC<SecondaryBarSingleGroupsView> = ({ 
 				expanded && <DefaultUserSidebarView />
 			),
 
-		[expanded, listOfRooms, roomsIds.length, users]
+		[canVideoCall, expanded, listOfRooms, roomsIds.length, users]
 	);
 
 	return expanded ? (
