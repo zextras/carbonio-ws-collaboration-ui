@@ -11,8 +11,7 @@ import { useParams } from 'react-router-dom';
 
 import ShimmeringConversationView from './shimmerViews/ShimmeringConversationView';
 import ShimmeringInfoPanelView from './shimmerViews/ShimmeringInfoPanelView';
-import { roomMainInfoEqualityFn } from '../../store/equalityFunctions/RoomsEqualityFunctions';
-import { getRoomSelector } from '../../store/selectors/RoomsSelectors';
+import { getRoomTypeSelector } from '../../store/selectors/RoomsSelectors';
 import useStore from '../../store/Store';
 import Conversation from '../components/conversation/Conversation';
 
@@ -20,21 +19,20 @@ import Conversation from '../components/conversation/Conversation';
 const RoomView = (): ReactElement => {
 	// Retrieve room id from url
 	const params: { roomId?: string } = useParams();
-	const setSelectedRoomOneToOneGroup = useStore((state) => state.setSelectedRoomOneToOneGroup);
-
 	const selectedRoomId: string = useMemo(
 		() => (params && params.roomId ? decodeURIComponent(params.roomId) : ''),
 		[params]
 	);
+
+	const setSelectedRoomOneToOneGroup = useStore((state) => state.setSelectedRoomOneToOneGroup);
+	const roomType = useStore((store) => getRoomTypeSelector(store, selectedRoomId));
 
 	// Keep selectedRoomOneToOneGroup update
 	useEffect(() => {
 		setSelectedRoomOneToOneGroup(selectedRoomId);
 	}, [selectedRoomId, setSelectedRoomOneToOneGroup]);
 
-	const room = useStore((store) => getRoomSelector(store, selectedRoomId), roomMainInfoEqualityFn);
-
-	if (!room) {
+	if (!roomType) {
 		return (
 			<Container mainAlignment="flex-start" orientation="horizontal">
 				<ShimmeringConversationView />
@@ -42,7 +40,7 @@ const RoomView = (): ReactElement => {
 			</Container>
 		);
 	}
-	return <Conversation room={room} />;
+	return <Conversation roomId={selectedRoomId} />;
 };
 
 export default RoomView;

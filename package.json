@@ -93,7 +93,7 @@
 		"strophe.js": "1.6.2",
 		"styled-components": "5.3.11",
 		"uuid": "^9.0.0",
-		"zustand": "^3.7.2"
+		"zustand": "^4.4.7"
 	},
 	"carbonio": {
 		"name": "carbonio-ws-collaboration-ui",

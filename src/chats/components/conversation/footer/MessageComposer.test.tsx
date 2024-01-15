@@ -1,3 +1,4 @@
+/* eslint-disable testing-library/prefer-user-event */
 /*
  * SPDX-FileCopyrightText: 2022 Zextras <https://www.zextras.com>
  *
@@ -138,7 +139,7 @@ describe('MessageComposer', () => {
 		await user.type(textArea, ' hi! ');
 		expect(screen.getByTestId(iconNavigator2).parentNode).not.toBeDisabled();
 		const textAreaUpdated = screen.getByRole('textbox');
-		expect((textAreaUpdated as HTMLTextAreaElement).value).toBe(' hi! ');
+		expect(textAreaUpdated as HTMLTextAreaElement).toHaveValue(' hi! ');
 	});
 
 	test('User copy/paste some text in the text input', async () => {
@@ -376,7 +377,7 @@ describe('MessageComposer - paste on textbox', () => {
 		await user.type(composerTextArea, initialText);
 		await user.paste('later');
 		const composerUpdated = screen.getByRole('textbox');
-		expect((composerUpdated as HTMLTextAreaElement).value).toBe('we are gonna see later');
+		expect(composerUpdated as HTMLTextAreaElement).toHaveValue('we are gonna see later');
 	});
 
 	test('Paste some text in the middle of the text present in the composer', async () => {
@@ -391,7 +392,7 @@ describe('MessageComposer - paste on textbox', () => {
 		);
 		await user.paste('check ');
 		const composerUpdated = screen.getByRole('textbox');
-		expect((composerUpdated as HTMLTextAreaElement).value).toBe('we are gonna check later');
+		expect(composerUpdated as HTMLTextAreaElement).toHaveValue('we are gonna check later');
 	});
 
 	test('Paste some text at the beginning of the text present in the composer', async () => {
@@ -403,7 +404,7 @@ describe('MessageComposer - paste on textbox', () => {
 		await user.type(composerTextArea, `${initialText}{arrowleft}{arrowleft}{arrowleft}`);
 		await user.paste('Hi ');
 		const composerUpdated = screen.getByRole('textbox');
-		expect((composerUpdated as HTMLTextAreaElement).value).toBe('Hi Sam');
+		expect(composerUpdated as HTMLTextAreaElement).toHaveValue('Hi Sam');
 	});
 
 	test('Paste single attachment at the beginning of the text present in the composer', async () => {
@@ -423,7 +424,7 @@ describe('MessageComposer - paste on textbox', () => {
 		const pasteEvent = createEvent.paste(composerTextArea, eventProperties);
 		fireEvent(composerTextArea, pasteEvent);
 		const composerUpdated = screen.getByRole('textbox');
-		expect((composerUpdated as HTMLTextAreaElement).value).toBe('Hi');
+		expect(composerUpdated as HTMLTextAreaElement).toHaveValue('Hi');
 		const updatedStore = useStore.getState();
 		const { filesToAttach } = updatedStore.activeConversations[mockedRoom.id];
 		expect(filesToAttach?.length).toBe(1);
@@ -452,7 +453,7 @@ describe('MessageComposer - paste on textbox', () => {
 		const pasteEvent = createEvent.paste(composerTextArea, eventProperties);
 		fireEvent(composerTextArea, pasteEvent);
 		const composerUpdated = screen.getByRole('textbox');
-		expect((composerUpdated as HTMLTextAreaElement).value).toBe('Hi');
+		expect(composerUpdated as HTMLTextAreaElement).toHaveValue('Hi');
 		const updatedStore = useStore.getState();
 		const { filesToAttach } = updatedStore.activeConversations[mockedRoom.id];
 		expect(filesToAttach?.length).toBe(1);
@@ -482,7 +483,7 @@ describe('MessageComposer - paste on textbox', () => {
 		const pasteEvent = createEvent.paste(composerTextArea, eventProperties);
 		fireEvent(composerTextArea, pasteEvent);
 		const composerUpdated = screen.getByRole('textbox');
-		expect((composerUpdated as HTMLTextAreaElement).value).toBe('Hi Red');
+		expect(composerUpdated as HTMLTextAreaElement).toHaveValue('Hi Red');
 		const updatedStore = useStore.getState();
 		const { filesToAttach } = updatedStore.activeConversations[mockedRoom.id];
 		expect(filesToAttach?.length).toBe(1);
@@ -512,7 +513,7 @@ describe('MessageComposer - paste on textbox', () => {
 		const pasteEvent = createEvent.paste(composerTextArea, eventProperties);
 		fireEvent(composerTextArea, pasteEvent);
 		const composerUpdated = screen.getByRole('textbox');
-		expect((composerUpdated as HTMLTextAreaElement).value).toBe('Hi');
+		expect(composerUpdated as HTMLTextAreaElement).toHaveValue('Hi');
 		const updatedStore = useStore.getState();
 		const { filesToAttach } = updatedStore.activeConversations[mockedRoom.id];
 		expect(filesToAttach?.length).toBe(3);
@@ -541,7 +542,7 @@ describe('MessageComposer - paste on textbox', () => {
 		const pasteEvent = createEvent.paste(composerTextArea, eventProperties);
 		fireEvent(composerTextArea, pasteEvent);
 		const composerUpdated = screen.getByRole('textbox');
-		expect((composerUpdated as HTMLTextAreaElement).value).toBe('Hi');
+		expect(composerUpdated as HTMLTextAreaElement).toHaveValue('Hi');
 		const updatedStore = useStore.getState();
 		const { filesToAttach } = updatedStore.activeConversations[mockedRoom.id];
 		expect(filesToAttach?.length).toBe(3);
@@ -571,7 +572,7 @@ describe('MessageComposer - paste on textbox', () => {
 		const pasteEvent = createEvent.paste(composerTextArea, eventProperties);
 		fireEvent(composerTextArea, pasteEvent);
 		const composerUpdated = screen.getByRole('textbox');
-		expect((composerUpdated as HTMLTextAreaElement).value).toBe('Hi Red');
+		expect(composerUpdated as HTMLTextAreaElement).toHaveValue('Hi Red');
 		const updatedStore = useStore.getState();
 		const { filesToAttach } = updatedStore.activeConversations[mockedRoom.id];
 		expect(filesToAttach?.length).toBe(3);
@@ -642,7 +643,7 @@ describe('MessageComposer - draft message', () => {
 		setup(<MessageComposer roomId={mockedRoom.id} />);
 
 		const composerTextArea = screen.getByRole('textbox');
-		expect((composerTextArea as HTMLTextAreaElement).value).toBe(draftMessage);
+		expect(composerTextArea as HTMLTextAreaElement).toHaveValue(draftMessage);
 	});
 
 	test('The cursor position is in the end of the draft message on opening the conversation', () => {

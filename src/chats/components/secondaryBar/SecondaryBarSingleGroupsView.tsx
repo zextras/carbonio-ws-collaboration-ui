@@ -15,7 +15,6 @@ import CollapsedSidebarListItem from './CollapsedSidebarListItem';
 import ConversationsFilter from './ConversationsFilter';
 import ExpandedSidebarListItem from './ExpandedSidebarListItem';
 import { useFilterRoomsOnInput } from '../../../hooks/useFilterRoomsOnInput';
-import { roomsListSecondaryBarLengthEqualityFn } from '../../../store/equalityFunctions/MessagesEqualityFunctions';
 import { getRoomsInfoOrderedLastMessage } from '../../../store/selectors/MessagesSelectors';
 import { getUsersSelector } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
@@ -51,10 +50,7 @@ const SecondaryBarSingleGroupsView: React.FC<SecondaryBarSingleGroupsView> = ({ 
 	const showConversationList = t('tooltip.showConversationList', 'Show conversations list');
 	const noMatchLabel = t('participantsList.noMatch', 'There are no items that match this search');
 
-	const roomsIds = useStore<FilteredConversation[]>(
-		getRoomsInfoOrderedLastMessage,
-		roomsListSecondaryBarLengthEqualityFn
-	);
+	const roomsIds = useStore<FilteredConversation[]>(getRoomsInfoOrderedLastMessage);
 	const users = useStore(getUsersSelector);
 
 	const { filteredConversationsIds, setFilteredInput } = useFilterRoomsOnInput(roomsIds);
