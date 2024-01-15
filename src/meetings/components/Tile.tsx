@@ -182,7 +182,7 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 
 	const { muteForAllHasToAppear, muteForAll } = useMuteForAll(meetingId, userId);
 
-	let timeout: string | number | NodeJS.Timeout | undefined;
+	const timeout = useRef<NodeJS.Timeout>();
 
 	useEffect(() => {
 		if (streamRef && streamRef.current) {
@@ -232,14 +232,14 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 	);
 
 	const handleHoverMouseMove = useCallback(() => {
-		clearTimeout(timeout);
+		clearTimeout(timeout.current);
 		setIsHoovering(true);
 
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-		timeout = setTimeout(() => {
+		timeout.current = setTimeout(() => {
 			setIsHoovering(false);
 		}, 2000);
-	}, [isHoovering]);
+	}, []);
 
 	useEffect(() => {
 		let elRef: React.RefObject<HTMLDivElement> | null = hoverRef;

@@ -90,7 +90,7 @@ const PictureContainer = styled(Container)<{ $picture: string; $hasHover: boolea
 	}
 
 	//  TODO: remove hasHover when the preview of the image is implemented
-	${({ $hasHover, $picture }): false | FlattenInterpolation<ThemeProps<any>> =>
+	${({ $hasHover, $picture }): false | FlattenInterpolation<ThemeProps<DefaultTheme>> =>
 		$hasHover &&
 		css`
 			&:hover {
@@ -142,10 +142,10 @@ const ProfileSettings: FC<ProfileSettingsProps> = ({
 	setToDelete,
 	toDelete
 }) => {
-	const memberName: string | undefined = useStore((state) => getUserName(state, sessionId || ''));
-	const memberEmail: string | undefined = useStore((state) => getUserEmail(state, sessionId || ''));
+	const memberName: string | undefined = useStore((state) => getUserName(state, sessionId ?? ''));
+	const memberEmail: string | undefined = useStore((state) => getUserEmail(state, sessionId ?? ''));
 	const userPictureUpdatedAt: string | undefined = useStore((state) =>
-		getUserPictureUpdatedAt(state, sessionId || '')
+		getUserPictureUpdatedAt(state, sessionId ?? '')
 	);
 	const maxUserImageSize = useStore((store) =>
 		getCapability(store, CapabilityType.MAX_USER_IMAGE_SIZE)
@@ -179,7 +179,7 @@ const ProfileSettings: FC<ProfileSettingsProps> = ({
 	useEffect(() => {
 		if (!picture && !toDelete) {
 			if (userPictureUpdatedAt != null) {
-				setTempPicture(`${UsersApi.getURLUserPicture(sessionId || '')}?${userPictureUpdatedAt}`);
+				setTempPicture(`${UsersApi.getURLUserPicture(sessionId ?? '')}?${userPictureUpdatedAt}`);
 			} else {
 				setTempPicture(false);
 			}
@@ -222,7 +222,7 @@ const ProfileSettings: FC<ProfileSettingsProps> = ({
 					mainAlignment="flex-end"
 				>
 					<NameWrapText color="gray6" size="medium" $hasPicture={!!tempPicture}>
-						{memberName || memberEmail || ''}
+						{memberName ?? memberEmail ?? ''}
 					</NameWrapText>
 					<Padding top="extrasmall" />
 					<Container orientation="horizontal" mainAlignment="flex-start" height="fit">
@@ -314,7 +314,7 @@ const ProfileSettings: FC<ProfileSettingsProps> = ({
 				</PictureContainer>
 			) : (
 				<BackgroundContainer
-					$color={calculateAvatarColor(memberName || '')}
+					$color={calculateAvatarColor(memberName ?? '')}
 					$hasHoverGradient
 					minHeight="10rem"
 					maxHeight="10rem"

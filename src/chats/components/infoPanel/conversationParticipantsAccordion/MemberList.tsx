@@ -13,8 +13,6 @@ import styled from 'styled-components';
 
 import ListOfMembers from './ListOfMembers';
 import SearchUserAction from './SearchUserAction';
-import { roomMembersLengthFn } from '../../../../store/equalityFunctions/RoomsEqualityFunctions';
-import { usersNameListEqualityFn } from '../../../../store/equalityFunctions/UsersEqualityFunctions';
 import { getRoomMembers } from '../../../../store/selectors/RoomsSelectors';
 import { getUsersSelector } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
@@ -32,11 +30,8 @@ const CustomContainer = styled(Container)`
 const MemberList: FC<ParticipantsListProps> = ({ roomId }) => {
 	const [t] = useTranslation();
 	const noMatchLabel = t('participantsList.noMatch', 'There are no items that match this search');
-	const members: Member[] | undefined = useStore(
-		(state) => getRoomMembers(state, roomId),
-		roomMembersLengthFn
-	);
-	const users: UsersMap = useStore(getUsersSelector, usersNameListEqualityFn);
+	const members: Member[] | undefined = useStore((state) => getRoomMembers(state, roomId));
+	const users: UsersMap = useStore(getUsersSelector);
 	const [filteredContactList, setFilteredContactList] = useState<Member[] | undefined>([]);
 	const [filteredInput, setFilteredInput] = useState('');
 

@@ -38,5 +38,5 @@ export type RoomsMap = {
 };
 
 export type ConversationProps = {
-	room: Room;
+	roomId: string;
 };

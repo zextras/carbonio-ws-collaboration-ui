@@ -7,14 +7,17 @@
 
 import produce from 'immer';
 import { forEach } from 'lodash';
+import { StateCreator } from 'zustand';
 
 import IWebSocketClient from '../../types/network/websocket/IWebSocketClient';
 import IXMPPClient from '../../types/network/xmpp/IXMPPClient';
 import { ConnectionsStoreSlice, RootStore } from '../../types/store/StoreTypes';
 
-export const useConnectionsStoreSlice = (set: (...any: any) => void): ConnectionsStoreSlice => ({
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+export const useConnectionsStoreSlice: StateCreator<ConnectionsStoreSlice> = (
+	set: (...any: any) => void
+) => ({
 	connections: {
 		status: {}
 	},

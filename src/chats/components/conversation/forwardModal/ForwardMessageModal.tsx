@@ -17,6 +17,7 @@ import React, {
 import {
 	Button,
 	ChipInput,
+	ChipItem,
 	Container,
 	List,
 	Modal,
@@ -24,18 +25,7 @@ import {
 	Text,
 	Tooltip
 } from '@zextras/carbonio-design-system';
-import {
-	difference,
-	differenceBy,
-	find,
-	keyBy,
-	map,
-	mapValues,
-	omit,
-	remove,
-	size,
-	union
-} from 'lodash';
+import { difference, differenceBy, find, keyBy, map, mapValues, omit, remove, size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -86,7 +76,7 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 	const [inputValue, setInputValue] = useState('');
 	const [selected, setSelected] = useState<{ [id: string]: boolean }>({});
 	const [chatList, setChatList] = useState<{ id: string }[]>([]);
-	const [chips, setChips] = useState<{ id: string }[]>([]);
+	const [chips, setChips] = useState<ChipItem<{ id: string }>[]>([]);
 
 	// Update conversation list on filter updating
 	useEffect(() => {
@@ -117,10 +107,15 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 	const onClickListItem = useCallback(
 		(roomId: string) => () => {
 			select(roomId);
-			setChips((chips) =>
-				find(chips, (chip) => chip.id === roomId)
-					? differenceBy(chips, [{ id: roomId }], 'id')
-					: union(chips, [{ id: roomId }])
+			const newChip = {
+				value: {
+					id: roomId
+				}
+			};
+			setChips((oldChips) =>
+				find(oldChips, (chip) => chip.value?.id === roomId)
+					? differenceBy(oldChips, [newChip], (chip) => chip.value?.id)
+					: [...oldChips, newChip]
 			);
 
 			if (inputRef.current) {
@@ -132,11 +127,16 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 	);
 
 	const removeContactFromChip = useCallback(
-		(newArrayChips: { id: string }[]) => {
-			setSelected(mapValues(keyBy(newArrayChips, 'id'), () => true));
-			const differenceChip = difference(chips, newArrayChips)[0];
-			if (size(chips) > size(newArrayChips) && differenceChip) {
-				setChips((chips) => differenceBy(chips, [differenceChip], 'id'));
+		(items: ChipItem<{ id: string }>[]) => {
+			setSelected(
+				mapValues(
+					keyBy(items, (item) => item.value?.id),
+					() => true
+				)
+			);
+			const differenceChip = difference(chips, items)[0];
+			if (size(chips) > size(items) && differenceChip) {
+				setChips((chips) => differenceBy(chips, [differenceChip], (chip) => chip.value?.id));
 			}
 		},
 		[chips]
@@ -205,14 +205,8 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 				placeholder={inputPlaceholder}
 				onInputType={handleChangeText}
 				value={chips}
-				// TODO FIX CHIPS
-				/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
-				/* @ts-ignore */
 				onChange={removeContactFromChip}
 				requireUniqueChips
-				// TODO FIX CHIPS
-				/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
-				/* @ts-ignore */
 				ChipComponent={ForwardMessageConversationChip}
 				confirmChipOnBlur={false}
 				separators={[]}

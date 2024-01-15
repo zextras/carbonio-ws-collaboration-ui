@@ -6,11 +6,14 @@
  */
 
 import produce from 'immer';
+import { StateCreator } from 'zustand';
 
 import { CapabilityList } from '../../types/store/SessionTypes';
 import { RootStore, SessionStoreSlice } from '../../types/store/StoreTypes';
 
-export const useSessionStoreSlice = (set: (...any: any) => void): SessionStoreSlice => ({
+export const useSessionStoreSlice: StateCreator<SessionStoreSlice> = (
+	set: (...any: any) => void
+) => ({
 	session: {
 		userPrefTimeZone: '',
 		filterHasFocus: false

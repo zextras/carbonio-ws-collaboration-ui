@@ -18,7 +18,6 @@ import MessageHistoryLoader from './MessageHistoryLoader';
 import ScrollButton from './ScrollButton';
 import useFirstUnreadMessage from './useFirstUnreadMessage';
 import useEventListener, { EventName } from '../../../hooks/useEventListener';
-import { messageWhereScrollIsStoppedEqualityFn } from '../../../store/equalityFunctions/ActiveConversationsEqualityFunctions';
 import {
 	getHistoryIsFullyLoaded,
 	getHistoryIsLoadedDisabled,
@@ -55,10 +54,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 	const inputHasFocus = useStore((store) => getInputHasFocus(store, roomId));
 	const roomMessages = useStore((store) => getMessagesSelector(store, roomId));
 	const usersWritingList = useStore((store) => getRoomIsWritingList(store, roomId));
-	const actualScrollPosition = useStore(
-		(store) => getIdMessageWhereScrollIsStopped(store, roomId),
-		messageWhereScrollIsStoppedEqualityFn
-	);
+	const actualScrollPosition = useStore((store) => getIdMessageWhereScrollIsStopped(store, roomId));
 	const hasMoreMessageToLoad = useStore((store) => getHistoryIsFullyLoaded(store, roomId));
 	const historyLoadedDisabled = useStore((store) => getHistoryIsLoadedDisabled(store, roomId));
 	const setIdMessageWhereScrollIsStopped = useStore(

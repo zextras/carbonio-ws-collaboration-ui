@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 
 import { Container, Text } from '@zextras/carbonio-design-system';
 import { map, size } from 'lodash';
@@ -14,9 +14,8 @@ import styled from 'styled-components';
 import CollapsedSidebarListItem from './CollapsedSidebarListItem';
 import ConversationsFilter from './ConversationsFilter';
 import ExpandedSidebarListItem from './ExpandedSidebarListItem';
-import { roomsListSecondaryBarLengthEqualityFn } from '../../../store/equalityFunctions/MessagesEqualityFunctions';
-import { getRoomIdsOrderedLastMessage } from '../../../store/selectors/MessagesSelectors';
-import { getUserId } from '../../../store/selectors/SessionSelectors';
+import { useFilterRoomsOnInput } from '../../../hooks/useFilterRoomsOnInput';
+import { getRoomsInfoOrderedLastMessage } from '../../../store/selectors/MessagesSelectors';
 import { getUsersSelector } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
 import { Member } from '../../../types/store/RoomTypes';
@@ -26,6 +25,13 @@ import ShimmeringExpandedListView from '../../views/shimmerViews/ShimmeringExpan
 
 type SecondaryBarSingleGroupsView = {
 	expanded: boolean;
+};
+
+export type FilteredConversation = {
+	roomId: string;
+	roomType: string;
+	lastMessageTimestamp: number;
+	members: Member[];
 };
 
 const CustomContainer = styled(Container)`
@@ -44,58 +50,10 @@ const SecondaryBarSingleGroupsView: React.FC<SecondaryBarSingleGroupsView> = ({ 
 	const showConversationList = t('tooltip.showConversationList', 'Show conversations list');
 	const noMatchLabel = t('participantsList.noMatch', 'There are no items that match this search');
 
-	const sessionId: string | undefined = useStore(getUserId);
-	const roomsIds = useStore<{ roomId: string; roomType: string; lastMessageTimestamp: number }[]>(
-		getRoomIdsOrderedLastMessage,
-		roomsListSecondaryBarLengthEqualityFn
-	);
+	const roomsIds = useStore<FilteredConversation[]>(getRoomsInfoOrderedLastMessage);
 	const users = useStore(getUsersSelector);
 
-	const [filteredConversationsIds, setFilteredConversationsIds] = useState<
-		{ roomId: string; roomType: string; lastMessageTimestamp: number }[]
-	>([]);
-	const [filteredInput, setFilteredInput] = useState('');
-
-	useEffect(() => {
-		if (filteredInput === '') {
-			setFilteredConversationsIds(roomsIds);
-		} else {
-			const filteredConversations: {
-				roomId: string;
-				roomType: string;
-				lastMessageTimestamp: number;
-			}[] = [];
-			map(roomsIds, (room) => {
-				if (room.roomType === 'group') {
-					const roomName = useStore.getState().rooms[room.roomId].name;
-					if (
-						roomName &&
-						roomName.toLocaleLowerCase().includes(filteredInput.toLocaleLowerCase())
-					) {
-						filteredConversations.push(room);
-					}
-				} else {
-					const users: Member[] | undefined = useStore.getState().rooms[room.roomId].members;
-					const userId = users
-						? users[0].userId === sessionId
-							? users[1].userId
-							: users[0].userId
-						: '';
-					const userName = useStore.getState().users[userId].name;
-					const userEmail = useStore.getState().users[userId].email
-						? useStore.getState().users[userId].email.split('@')[0]
-						: '';
-					if (
-						userName.toLocaleLowerCase().includes(filteredInput.toLocaleLowerCase()) ||
-						userEmail.toLocaleLowerCase().includes(filteredInput.toLocaleLowerCase())
-					) {
-						filteredConversations.push(room);
-					}
-				}
-			});
-			setFilteredConversationsIds(filteredConversations);
-		}
-	}, [filteredInput, roomsIds, sessionId]);
+	const { filteredConversationsIds, setFilteredInput } = useFilterRoomsOnInput(roomsIds);
 
 	const ListItem = useMemo(
 		() => (expanded ? ExpandedSidebarListItem : CollapsedSidebarListItem),
@@ -147,7 +105,7 @@ const SecondaryBarSingleGroupsView: React.FC<SecondaryBarSingleGroupsView> = ({ 
 				expanded && <DefaultUserSidebarView />
 			),
 
-		[expanded, listOfRooms, roomsIds.length, users]
+		[expanded, listOfRooms, roomsIds.length, setFilteredInput, users]
 	);
 
 	return expanded ? (
