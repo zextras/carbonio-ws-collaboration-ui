@@ -18,8 +18,8 @@ import useTilesOrder from '../../../hooks/useTilesOrder';
 import { getMeetingCarouselVisibility } from '../../../store/selectors/ActiveMeetingSelectors';
 import useStore from '../../../store/Store';
 import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
-import Tile from '../Tile';
-import WhoIsSpeaking from '../WhoIsSpeaking/WhoIsSpeaking';
+import Tile from '../tile/Tile';
+import WhoIsSpeaking from '../whoIsSpeaking/WhoIsSpeaking';
 
 const CustomContainer = styled(Container)`
 	overflow: hidden;
