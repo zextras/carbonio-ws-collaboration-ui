@@ -4,5 +4,11 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+// Network mocks
 import './network';
 import './XMPPConnection';
+import './AutoCompleteGal';
+
+// Hooks mocks
+import './useRouting';
+import './useMediaQueryCheck';

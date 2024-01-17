@@ -10,10 +10,10 @@ import { act, screen, waitFor } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 
 import ChatCreationContactsSelection from './ChatCreationContactsSelection';
-import { mockedAutoCompleteGalRequest } from '../../../../jest-mocks';
 import { ContactMatch } from '../../../network/soap/AutoCompleteRequest';
 import useStore from '../../../store/Store';
 import { createMockCapabilityList } from '../../../tests/createMock';
+import { mockedAutoCompleteGalRequest } from '../../../tests/mocks/AutoCompleteGal';
 import { setup } from '../../../tests/test-utils';
 import { Member } from '../../../types/store/RoomTypes';
 
