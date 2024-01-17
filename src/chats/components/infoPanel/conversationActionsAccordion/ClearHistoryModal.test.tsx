@@ -9,9 +9,9 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 
 import ClearHistoryModal from './ClearHistoryModal';
-import { mockedClearHistoryRequest } from '../../../../../jest-mocks';
 import useStore from '../../../../store/Store';
 import { createMockRoom } from '../../../../tests/createMock';
+import { mockedClearHistoryRequest } from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe } from '../../../../types/network/models/roomBeTypes';
 

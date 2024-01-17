@@ -10,8 +10,9 @@ import { act, screen } from '@testing-library/react';
 
 import ConversationInfo from './ConversationInfo';
 import ConversationInfoDetails from './ConversationInfoDetails';
-import { mockedGetUserPictureRequest, mockUseMediaQueryCheck } from '../../../../../jest-mocks';
+import { mockUseMediaQueryCheck } from '../../../../../jest-mocks';
 import useStore from '../../../../store/Store';
+import { mockedGetUserPictureRequest } from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
 import { UserBe } from '../../../../types/network/models/userBeTypes';

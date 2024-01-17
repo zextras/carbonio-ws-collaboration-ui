@@ -13,17 +13,16 @@ import GoToPrivateChatAction from './GoToPrivateChatAction';
 import LeaveConversationListAction from './LeaveConversationListAction';
 import MemberComponentInfo from './MemberComponentInfo';
 import RemoveMemberListAction from './RemoveMemberListAction';
+import { mockGoToMainPage, mockGoToRoomPage } from '../../../../../jest-mocks';
+import useStore from '../../../../store/Store';
+import { createMockRoom } from '../../../../tests/createMock';
 import {
 	mockedAddRoomRequest,
 	mockedDeleteRoomMemberRequest,
 	mockedDeleteRoomRequest,
 	mockedDemotesRoomMemberRequest,
-	mockedPromoteRoomMemberRequest,
-	mockGoToMainPage,
-	mockGoToRoomPage
-} from '../../../../../jest-mocks';
-import useStore from '../../../../store/Store';
-import { createMockRoom } from '../../../../tests/createMock';
+	mockedPromoteRoomMemberRequest
+} from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 import { RoomType } from '../../../../types/network/models/roomBeTypes';
 import { User } from '../../../../types/store/UserTypes';

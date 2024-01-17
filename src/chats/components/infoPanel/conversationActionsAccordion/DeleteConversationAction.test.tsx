@@ -9,9 +9,10 @@ import { screen, waitFor } from '@testing-library/react';
 import { act, renderHook } from '@testing-library/react-hooks';
 
 import DeleteConversationAction from './DeleteConversationAction';
-import { mockedDeleteRoomRequest, mockGoToMainPage } from '../../../../../jest-mocks';
+import { mockGoToMainPage } from '../../../../../jest-mocks';
 import useStore from '../../../../store/Store';
 import { createMockRoom } from '../../../../tests/createMock';
+import { mockedDeleteRoomRequest } from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe } from '../../../../types/network/models/roomBeTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';

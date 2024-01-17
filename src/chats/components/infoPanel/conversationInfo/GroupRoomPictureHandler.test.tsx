@@ -9,12 +9,12 @@ import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 
 import GroupRoomPictureHandler from './GroupRoomPictureHandler';
+import useStore from '../../../../store/Store';
+import { createMockMember, createMockRoom } from '../../../../tests/createMock';
 import {
 	mockedDeleteRoomPictureRequest,
 	mockedUpdateRoomPictureRequest
-} from '../../../../../jest-mocks';
-import useStore from '../../../../store/Store';
-import { createMockMember, createMockRoom } from '../../../../tests/createMock';
+} from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
 import { RootStore } from '../../../../types/store/StoreTypes';

@@ -10,12 +10,12 @@ import { screen, waitFor } from '@testing-library/react';
 import { act, renderHook } from '@testing-library/react-hooks';
 
 import MuteConversationAction from './MuteConversationAction';
+import useStore from '../../../../store/Store';
+import { createMockMember, createMockRoom } from '../../../../tests/createMock';
 import {
 	mockedMuteRoomNotificationRequest,
 	mockedUnmuteRoomNotificationRequest
-} from '../../../../../jest-mocks';
-import useStore from '../../../../store/Store';
-import { createMockMember, createMockRoom } from '../../../../tests/createMock';
+} from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
 

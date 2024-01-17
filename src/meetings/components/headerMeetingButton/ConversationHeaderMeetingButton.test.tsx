@@ -11,7 +11,7 @@ import { UserEvent } from '@testing-library/user-event/setup/setup';
 import { act } from 'react-dom/test-utils';
 
 import ConversationHeaderMeetingButton from './ConversationHeaderMeetingButton';
-import { mockedAddRoomRequest, mockGoToRoomPage } from '../../../../jest-mocks';
+import { mockGoToRoomPage } from '../../../../jest-mocks';
 import useStore from '../../../store/Store';
 import {
 	createMockMeeting,
@@ -19,6 +19,7 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../../tests/createMock';
+import { mockedAddRoomRequest } from '../../../tests/mocks/network';
 import { setup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 import { RoomBe } from '../../../types/network/models/roomBeTypes';

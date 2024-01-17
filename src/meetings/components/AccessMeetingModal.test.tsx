@@ -11,11 +11,7 @@ import { act, renderHook } from '@testing-library/react-hooks';
 import { UserEvent } from '@testing-library/user-event/setup/setup';
 
 import AccessMeetingModal from './AccessMeetingModal';
-import {
-	mockedEnterMeetingRequest,
-	mockedJoinMeetingRequest,
-	mockUseParams
-} from '../../../jest-mocks';
+import { mockUseParams } from '../../../jest-mocks';
 import useStore from '../../store/Store';
 import {
 	createMockMeeting,
@@ -23,6 +19,7 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../tests/createMock';
+import { mockedEnterMeetingRequest, mockedJoinMeetingRequest } from '../../tests/mocks/network';
 import { setup } from '../../tests/test-utils';
 import { MeetingBe } from '../../types/network/models/meetingBeTypes';
 import { MemberBe, RoomBe, RoomType } from '../../types/network/models/roomBeTypes';

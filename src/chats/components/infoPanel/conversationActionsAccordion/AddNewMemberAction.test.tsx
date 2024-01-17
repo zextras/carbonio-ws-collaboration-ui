@@ -10,13 +10,11 @@ import { screen, waitFor } from '@testing-library/react';
 import { act, renderHook } from '@testing-library/react-hooks';
 
 import AddNewMemberAction from './AddNewMemberAction';
-import {
-	mockedAddRoomMemberRequest,
-	mockedAutoCompleteGalRequest
-} from '../../../../../jest-mocks';
+import { mockedAutoCompleteGalRequest } from '../../../../../jest-mocks';
 import { ContactMatch } from '../../../../network/soap/AutoCompleteRequest';
 import useStore from '../../../../store/Store';
 import { createMockRoom } from '../../../../tests/createMock';
+import { mockedAddRoomMemberRequest } from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 import { RoomType } from '../../../../types/network/models/roomBeTypes';
 import { User } from '../../../../types/store/UserTypes';

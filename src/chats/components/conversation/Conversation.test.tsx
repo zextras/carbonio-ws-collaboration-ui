@@ -11,13 +11,13 @@ import { act } from 'react-dom/test-utils';
 
 import Conversation from './Conversation';
 import {
-	mockedDeleteRoomMemberRequest,
 	mockGoToMainPage,
 	mockDarkReaderIsEnabled,
 	mockUseMediaQueryCheck
 } from '../../../../jest-mocks';
 import useStore from '../../../store/Store';
 import { createMockMember, createMockRoom } from '../../../tests/createMock';
+import { mockedDeleteRoomMemberRequest } from '../../../tests/mocks/network';
 import { setup } from '../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
 import { User } from '../../../types/store/UserTypes';

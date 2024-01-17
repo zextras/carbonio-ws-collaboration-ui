@@ -10,7 +10,7 @@ import { act, screen, waitFor } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 
 import ChatCreationModal from './ChatCreationModal';
-import { mockedAddRoomRequest, mockedAutoCompleteGalRequest } from '../../../../jest-mocks';
+import { mockedAutoCompleteGalRequest } from '../../../../jest-mocks';
 import { ContactMatch } from '../../../network/soap/AutoCompleteRequest';
 import useStore from '../../../store/Store';
 import {
@@ -18,6 +18,7 @@ import {
 	createMockMember,
 	createMockRoom
 } from '../../../tests/createMock';
+import { mockedAddRoomRequest } from '../../../tests/mocks/network';
 import { setup } from '../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
 
