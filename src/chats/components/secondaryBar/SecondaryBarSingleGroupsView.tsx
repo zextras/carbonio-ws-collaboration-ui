@@ -154,7 +154,7 @@ const SecondaryBarSingleGroupsView: React.FC<SecondaryBarSingleGroupsView> = ({ 
 							</Container>
 							{canVideoCall && (
 								<VirtualRoomContainer>
-									<VirtualRoomsButton />
+									<VirtualRoomsButton expanded={expanded} />
 								</VirtualRoomContainer>
 							)}
 						</Container>

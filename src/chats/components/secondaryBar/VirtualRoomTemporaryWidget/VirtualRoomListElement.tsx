@@ -108,7 +108,11 @@ const VirtualRoomListElement: FC<virtualRoomElementProps> = ({
 	}, []);
 
 	return (
-		<Container padding="0.5rem" orientation="horizontal" mainAlignment="space-between">
+		<Container
+			padding={{ horizontal: '0.5rem', vertical: '0.75rem' }}
+			orientation="horizontal"
+			mainAlignment="space-between"
+		>
 			<Row takeAvailableSpace mainAlignment="flex-start">
 				<Text>{room}</Text>
 			</Row>

@@ -40,9 +40,13 @@ const CustomContainer = styled(Container)`
 	width: 21.875rem;
 	max-height: 31.25rem;
 	bottom: 3rem;
-	left: 4rem;
+	left: 3.6rem;
 	border-radius: 0.5rem;
 	box-shadow: 0 0 4px 0 rgba(166, 166, 166, 0.5);
+`;
+
+const ListContainer = styled(Container)`
+	overflow-y: scroll;
 `;
 
 const CustomIconButton = styled(IconButton)`
@@ -227,7 +231,7 @@ const VirtualRoomsList: FC<virtualRoomsListProps> = ({
 	return listVisibility ? (
 		<CustomContainer background="gray6" height="fit" padding="0.5rem" ref={popupRef}>
 			{inputSection}
-			{listSection}
+			<ListContainer>{listSection}</ListContainer>
 		</CustomContainer>
 	) : null;
 };

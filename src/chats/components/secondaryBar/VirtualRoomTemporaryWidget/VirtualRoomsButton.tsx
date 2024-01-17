@@ -3,14 +3,18 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import React, { ReactElement, useCallback, useRef, useState } from 'react';
+import React, { FC, useCallback, useRef, useState } from 'react';
 
-import { Button, Container } from '@zextras/carbonio-design-system';
+import { Button, Container, IconButton, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
 import VirtualRoomsList from './VirtualRoomsList';
 
-const VirtualRoomsButton = (): ReactElement => {
+type virtualRoomsButtonProps = {
+	expanded: boolean;
+};
+
+const VirtualRoomsButton: FC<virtualRoomsButtonProps> = ({ expanded }) => {
 	const [t] = useTranslation();
 	const virtualRoomsLabel = t('meeting.scheduledMeetings.virtualRoomLabel', 'Your Virtual Rooms');
 
@@ -22,7 +26,7 @@ const VirtualRoomsButton = (): ReactElement => {
 		setListVisibility((prevState: boolean) => !prevState);
 	}, []);
 
-	return (
+	return expanded ? (
 		<>
 			<Container padding="0.5rem" background="gray5">
 				<Button
@@ -40,6 +44,20 @@ const VirtualRoomsButton = (): ReactElement => {
 				parentRef={parentRef}
 			/>
 		</>
+	) : (
+		<Container height="3rem" background="gray5">
+			<Tooltip label={virtualRoomsLabel}>
+				<IconButton
+					icon="VideoOutline"
+					size="large"
+					// customSize={{ paddingSize: '0.25rem', iconSize: '' }}
+					onClick={handleOnClick}
+					type="outlined"
+					iconColor="primary"
+					backgroundColor="gray6"
+				/>
+			</Tooltip>
+		</Container>
 	);
 };
 
