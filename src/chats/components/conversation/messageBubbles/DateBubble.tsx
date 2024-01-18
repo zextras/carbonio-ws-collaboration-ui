@@ -11,11 +11,9 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import { CustomMessage } from './MessageFactory';
-import { getPrefTimezoneSelector } from '../../../../store/selectors/SessionSelectors';
-import useStore from '../../../../store/Store';
 import { Z_INDEX_RANK } from '../../../../types/generics';
 import { DateMessage } from '../../../../types/store/MessageTypes';
-import { dateString } from '../../../../utils/dateUtil';
+import { dateString } from '../../../../utils/dateUtils';
 
 type DateMsgProps = {
 	message: DateMessage;
@@ -30,13 +28,14 @@ const CustomMessageWrapper = styled(Container)`
 
 const DateBubble: FC<DateMsgProps> = ({ message, refEl }) => {
 	const [t] = useTranslation();
-	const timezone = useStore(getPrefTimezoneSelector);
+
 	const dateLabel = useMemo(() => {
-		const date = dateString(message.date, timezone);
+		const date = dateString(message.date);
 		if (date === 'Today') return t('date.today', 'Today');
 		if (date === 'Yesterday') return t('date.yesterday', 'Yesterday');
 		return date;
-	}, [message, t, timezone]);
+	}, [message, t]);
+
 	return (
 		<CustomMessageWrapper>
 			<CustomMessage

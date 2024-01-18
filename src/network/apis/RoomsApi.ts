@@ -38,7 +38,7 @@ import {
 } from '../../types/network/responses/roomsResponses';
 import { ChangeUserPictureResponse } from '../../types/network/responses/usersResponses';
 import { TextMessage } from '../../types/store/MessageTypes';
-import { dateToISODate } from '../../utils/dateUtil';
+import { dateToISODate } from '../../utils/dateUtils';
 import { MeetingsApi } from '../index';
 import HistoryAccumulator from '../xmpp/utility/HistoryAccumulator';
 
