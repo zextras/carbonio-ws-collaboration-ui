@@ -12,3 +12,8 @@ import './AutoCompleteGal';
 // Hooks mocks
 import './useRouting';
 import './useMediaQueryCheck';
+
+// Global mocks
+import './global';
+
+import './scrollUtils';

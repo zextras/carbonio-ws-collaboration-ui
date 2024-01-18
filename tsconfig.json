@@ -4,7 +4,7 @@
     "src/**/*.ts",
     "src/**/*.tsx",
     "src/types/network/xmpp/decs.d.ts",
-    "./jest-setup.ts"
+    "./src/tests/jest-env-setup.ts"
   ],
   "exclude": [
     "node_modules"

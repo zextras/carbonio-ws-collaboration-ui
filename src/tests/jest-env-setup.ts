@@ -8,8 +8,8 @@ import '@testing-library/jest-dom/extend-expect';
 import { act, configure } from '@testing-library/react';
 import failOnConsole from 'jest-fail-on-console';
 
-import useStore from './src/store/Store';
-import { xmppClient } from './src/tests/mockedXmppClient';
+import { xmppClient } from './mockedXmppClient';
+import useStore from '../store/Store';
 
 configure({
 	asyncUtilTimeout: 2000

@@ -10,7 +10,7 @@ import { screen, waitFor } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
 
 import Conversation from './Conversation';
-import { mockDarkReaderIsEnabled } from '../../../../jest-mocks';
+import { isEnabled } from '../../../../__mocks__/darkreader';
 import useStore from '../../../store/Store';
 import { createMockMember, createMockRoom } from '../../../tests/createMock';
 import { mockedDeleteRoomMemberRequest } from '../../../tests/mocks/network';
@@ -120,7 +120,7 @@ describe('Conversation view', () => {
 		expect(mockGoToMainPage).toHaveBeenCalledTimes(1);
 	});
 	test('Display conversation view with darkMode disabled', async () => {
-		mockDarkReaderIsEnabled.mockReturnValueOnce(false);
+		isEnabled.mockReturnValueOnce(false);
 		const store = useStore.getState();
 		store.addRoom(testRoom);
 		setup(<Conversation roomId={testRoom.id} />);
@@ -128,7 +128,7 @@ describe('Conversation view', () => {
 		expect(ConversationWrapper).toHaveStyle(`background-image: url('papyrus.png')`);
 	});
 	test('Display conversation view with darkMode enabled', async () => {
-		mockDarkReaderIsEnabled.mockReturnValueOnce(true);
+		isEnabled.mockReturnValueOnce(true);
 		const store = useStore.getState();
 		store.addRoom(testRoom);
 		setup(<Conversation roomId={testRoom.id} />);

@@ -7,11 +7,10 @@
 import React from 'react';
 
 import MessageHistoryLoader from './MessageHistoryLoader';
-import {} from '../../../../jest-mocks';
 import {
 	intersectionObserverMockDisconnect,
 	intersectionObserverMockObserve
-} from '../../../../jest-env-setup';
+} from '../../../tests/jest-env-setup';
 import { setup } from '../../../tests/test-utils';
 
 describe('MessageHistoryLoader - IntersectionObserver behaviour', () => {

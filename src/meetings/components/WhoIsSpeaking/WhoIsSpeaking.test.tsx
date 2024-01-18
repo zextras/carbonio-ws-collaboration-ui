@@ -8,7 +8,7 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 
 import WhoIsSpeaking from './WhoIsSpeaking';
-import { mockUseParams } from '../../../../jest-mocks';
+import { useParams } from '../../../../__mocks__/react-router';
 import useStore from '../../../store/Store';
 import {
 	createMockMeeting,
@@ -87,7 +87,7 @@ const setupActiveMeeting = (): void => {
 
 describe('Who is speaking', () => {
 	it('has to be rendered correctly - central tile is a video', () => {
-		mockUseParams.mockReturnValue({ meetingId: meeting.id });
+		useParams.mockReturnValue({ meetingId: meeting.id });
 		setupActiveMeeting();
 		setup(<WhoIsSpeaking centralTile={centralTileVideo} />);
 
@@ -96,7 +96,7 @@ describe('Who is speaking', () => {
 	});
 
 	it('has to be rendered correctly - central tile is a screen', () => {
-		mockUseParams.mockReturnValue({ meetingId: meeting.id });
+		useParams.mockReturnValue({ meetingId: meeting.id });
 		setupActiveMeeting();
 		setup(<WhoIsSpeaking centralTile={centralTileScreen} />);
 

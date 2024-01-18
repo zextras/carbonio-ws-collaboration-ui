@@ -10,7 +10,7 @@ import { UserEvent } from '@testing-library/user-event/setup/setup';
 import { act } from 'react-dom/test-utils';
 
 import BubblesWrapper from './BubblesWrapper';
-import { mockUseParams } from '../../../../jest-mocks';
+import { useParams } from '../../../../__mocks__/react-router';
 import { EventName, sendCustomEvent } from '../../../hooks/useEventListener';
 import useStore from '../../../store/Store';
 import {
@@ -86,7 +86,7 @@ const storeBasicActiveMeetingSetup = (): { user: UserEvent; store: RootStore } =
 	store.addMeeting(meeting);
 	store.meetingConnection(meeting.id, false, undefined, false, undefined);
 	store.setMeetingSidebarStatus(meeting.id, false);
-	mockUseParams.mockReturnValue({ meetingId: meeting.id });
+	useParams.mockReturnValue({ meetingId: meeting.id });
 	const { user } = setup(<BubblesWrapper />);
 
 	return { store, user };
