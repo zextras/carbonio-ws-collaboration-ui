@@ -10,7 +10,7 @@ import MessageHistoryLoader from './MessageHistoryLoader';
 import {
 	intersectionObserverMockDisconnect,
 	intersectionObserverMockObserve
-} from '../../../tests/jest-env-setup';
+} from '../../../tests/mocks/global';
 import { setup } from '../../../tests/test-utils';
 
 describe('MessageHistoryLoader - IntersectionObserver behaviour', () => {
