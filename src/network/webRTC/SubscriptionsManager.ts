@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { concat, differenceWith, filter, find, isEqual, size } from 'lodash';
+import { concat, differenceWith, filter, find, isEqual, remove, size } from 'lodash';
 
 import useStore from '../../store/Store';
 import { STREAM_TYPE, Subscription } from '../../types/store/ActiveMeetingTypes';
@@ -73,6 +73,11 @@ class SubscriptionsManager {
 		}
 	}
 
+	// We delete the subscription when user leave the meeting
+	public deleteSubscription(subIdToDelete: string): void {
+		remove(this.subscriptions, (sub) => sub.userId === subIdToDelete);
+	}
+
 	public removeSubscription(subToRemove: Subscription): void {
 		if (
 			find(
@@ -101,7 +106,6 @@ class SubscriptionsManager {
 
 	// Ask subscriptions that are not already asked and unset subscriptions that are not needed anymore
 	public updateSubscription(subsToRequest: Subscription[]): void {
-		// console.log(subsToRequest);
 		// If a subscription is performing, the new request is pushed in a queue performed after the current one
 		if (this.isRequesting) {
 			this.pendingRequests.push(subsToRequest);

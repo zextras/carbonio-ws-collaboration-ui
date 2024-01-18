@@ -70,6 +70,7 @@ const GridMode = (): ReactElement => {
 	const tilesData: TileData[] = useStore((store) => getTiles(store, meetingId));
 	const numberOfTiles = useStore((store) => getNumberOfTiles(store, meetingId));
 	const videoScreenIn = useStore((store) => getVideoScreenIn(store, meetingId));
+	const setUpdateSubscription = useStore((store) => store.setUpdateSubscription);
 
 	const { tileWidth, rows, columns, numberOfPages } = useMemo(() => {
 		// Calculate a full density grid
@@ -134,22 +135,14 @@ const GridMode = (): ReactElement => {
 	}, [rows, columns, tilesToRender, tileWidth, meetingId]);
 
 	useEffect(() => {
-		// const tilesDataToSubscribe: SubscriptionMap = {};
-		// if (tilesToRender.length > 0) {
-		// 	forEach(tilesToRender, (tile) => {
-		// 		if (myUserId === tile.userId) return;
-		// 		mapToSubscriptionMap(tilesDataToSubscribe, tile.userId, tile.type);
-		// 	});
-		// 	videoScreenIn?.subscriptionManager.updateSubscription(tilesDataToSubscribe);
-		// }
 		if (tilesToRender.length > 0) {
 			const subscriptions = map(tilesToRender, (value) => ({
 				userId: value.userId,
 				type: value.type
 			}));
-			videoScreenIn?.subscriptionManager.updateSubscription(subscriptions);
+			setUpdateSubscription(meetingId, subscriptions);
 		}
-	}, [tilesToRender, videoScreenIn]);
+	}, [meetingId, setUpdateSubscription, tilesToRender, videoScreenIn]);
 
 	return (
 		<GridContainer data-testid="gridModeView" mainAlignment="space-between" ref={gridContainerRef}>

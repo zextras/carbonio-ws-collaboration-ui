@@ -58,6 +58,7 @@ const CinemaMode = (): ReactElement => {
 	const setIsCarouselVisible = useStore((store) => store.setIsCarouseVisible);
 	const videoScreenIn = useStore((store) => getVideoScreenIn(store, meetingId));
 	const myUserId = useStore(getUserId);
+	const setUpdateSubscription = useStore((store) => store.setUpdateSubscription);
 
 	const [t] = useTranslation();
 	const collapseCarouselLabel = t(
@@ -90,13 +91,10 @@ const CinemaMode = (): ReactElement => {
 
 	useEffect(() => {
 		if (!carouselIsVisible) {
-			// const tilesDataToSubscribe: SubscriptionMap = {};
-			// mapToSubscriptionMap(tilesDataToSubscribe, centralTile.userId, centralTile.type);
-			// videoScreenIn?.subscriptionManager.updateSubscription(tilesDataToSubscribe);
 			const subscription: Subscription = { userId: centralTile.userId, type: centralTile.type };
-			videoScreenIn?.subscriptionManager.updateSubscription([subscription]);
+			setUpdateSubscription(meetingId, [subscription]);
 		}
-	}, [carouselIsVisible, centralTile, myUserId, videoScreenIn]);
+	}, [carouselIsVisible, centralTile, meetingId, myUserId, setUpdateSubscription, videoScreenIn]);
 
 	return (
 		<Container orientation="horizontal">

@@ -54,6 +54,7 @@ const FaceToFaceMode = (): ReactElement => {
 
 	const localId = useStore(getUserId);
 	const videoScreenIn = useStore((store) => getVideoScreenIn(store, meetingId));
+	const setUpdateSubscription = useStore((store) => store.setUpdateSubscription);
 
 	const faceToFaceRef = useRef<null | HTMLDivElement>(null);
 
@@ -61,15 +62,10 @@ const FaceToFaceMode = (): ReactElement => {
 
 	useEffect(() => {
 		if (centralTile) {
-			// const tilesDataToSubscribe: SubscriptionMap = {};
-			// mapToSubscriptionMap(tilesDataToSubscribe, centralTile.userId, centralTile.type);
-			// if (size(videoScreenIn?.subscriptionManager.subscriptions) <= 1) {
-			// 	videoScreenIn?.subscriptionManager.updateSubscription(tilesDataToSubscribe);
-			// }
 			const subscription: Subscription = { userId: centralTile.userId, type: centralTile.type };
-			videoScreenIn?.subscriptionManager.updateSubscription([subscription]);
+			setUpdateSubscription(meetingId, [subscription]);
 		}
-	}, [centralTile, videoScreenIn]);
+	}, [centralTile, meetingId, setUpdateSubscription, videoScreenIn]);
 
 	const centralTileWidth = useMemo(() => {
 		const tileHeight = (faceToFaceDimensions.width / 16) * 9;

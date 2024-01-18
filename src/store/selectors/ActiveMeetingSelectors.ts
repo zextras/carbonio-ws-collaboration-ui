@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import { find, sample } from 'lodash';
+import { find } from 'lodash';
 
 import { IVideoScreenInConnection } from '../../types/network/webRTC/webRTC';
 import {
@@ -33,9 +33,6 @@ export const getMeetingChatVisibility = (
 export const getMeetingViewSelected = (store: RootStore, meetingId: string): MeetingViewType =>
 	store.activeMeeting[meetingId]?.meetingViewSelected;
 
-export const getLocalVideoSteam = (store: RootStore, meetingId: string): MediaStream | undefined =>
-	store.activeMeeting[meetingId]?.localStreams?.video;
-
 export const getSelectedAudioDeviceId = (store: RootStore, meetingId: string): string | undefined =>
 	store.activeMeeting[meetingId]?.localStreams?.selectedAudioDeviceId;
 
@@ -57,9 +54,6 @@ export const getStream = (
 	const subscriptionId = `${userId}-${streamType}`;
 	return store.activeMeeting[meetingId]?.subscription[subscriptionId]?.stream;
 };
-
-export const getFirstStream = (store: RootStore, meetingId: string): MediaStream | undefined =>
-	sample(store.activeMeeting[meetingId]?.subscription)?.stream;
 
 export const getMeetingCarouselVisibility = (store: RootStore, meetingId: string): boolean =>
 	store.activeMeeting[meetingId]?.isCarouselVisible;

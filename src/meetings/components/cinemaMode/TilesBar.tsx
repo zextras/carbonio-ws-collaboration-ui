@@ -16,7 +16,6 @@ import useContainerDimensions from '../../../hooks/useContainerDimensions';
 import usePagination from '../../../hooks/usePagination';
 import { MeetingRoutesParams } from '../../../hooks/useRouting';
 import { getVideoScreenIn } from '../../../store/selectors/ActiveMeetingSelectors';
-import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { STREAM_TYPE, TileData } from '../../../types/store/ActiveMeetingTypes';
 import Tile from '../Tile';
@@ -57,8 +56,8 @@ const TilesBar = ({ carouselTiles, centralTile }: TilesBarProps): ReactElement =
 	const topLabel = t('tooltip.topOfList', 'Top of list');
 	const bottomLabel = t('tooltip.bottomOfList', 'Bottom of list');
 
-	const myUserId = useStore(getUserId);
 	const videoScreenIn = useStore((store) => getVideoScreenIn(store, meetingId));
+	const setUpdateSubscription = useStore((store) => store.setUpdateSubscription);
 
 	const tilesContainerRef = useRef<HTMLDivElement>(null);
 
@@ -98,26 +97,15 @@ const TilesBar = ({ carouselTiles, centralTile }: TilesBarProps): ReactElement =
 
 	// Subscribe tiles' stream
 	useEffect(() => {
-		// if (tilesDataToRender.length > 0) {
-		// 	const tilesDataToSubscribe: SubscriptionMap = {};
-		// 	forEach(tilesDataToRender, (tile) => {
-		// 		if (myUserId === tile.userId) return;
-		// 		mapToSubscriptionMap(tilesDataToSubscribe, tile.userId, tile.type);
-		// 	});
-		// 	if (myUserId !== centralTile.userId) {
-		// 		mapToSubscriptionMap(tilesDataToSubscribe, centralTile.userId, centralTile.type);
-		// 	}
-		// 	videoScreenIn?.subscriptionManager.updateSubscription(tilesDataToSubscribe);
-		// }
 		if (tilesDataToRender.length > 0) {
 			const subscriptions = map(tilesDataToRender, (value) => ({
 				userId: value.userId,
 				type: value.type
 			}));
 			subscriptions.push({ userId: centralTile.userId, type: centralTile.type });
-			videoScreenIn?.subscriptionManager.updateSubscription(subscriptions);
+			setUpdateSubscription(meetingId, subscriptions);
 		}
-	}, [videoScreenIn, tilesDataToRender, centralTile]);
+	}, [videoScreenIn, tilesDataToRender, centralTile, meetingId, setUpdateSubscription]);
 
 	return (
 		<TilesBarContainer mainAlignment="space-between">
