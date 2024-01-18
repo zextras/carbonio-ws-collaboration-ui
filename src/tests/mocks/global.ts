@@ -4,10 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-// Define browser objects non available in jest
+// Define browser objects that aren't available in Jest
 // https://jestjs.io/docs/en/manual-mocks#mocking-methods-which-are-not-implemented-in-jsdom
 
-// Fetch mock
 export const fetchResponse: jest.Mock = jest.fn(() => ({}));
 Object.defineProperty(global, 'fetch', {
 	value: jest.fn(() =>
@@ -19,15 +18,13 @@ Object.defineProperty(global, 'fetch', {
 	)
 });
 
-// URL mock
 Object.defineProperty(global, 'URL', {
 	value: {
 		createObjectURL: jest.fn()
 	}
 });
 
-// navigator mock
-export const mockedEnumerateDevicesPromise: jest.Mock = jest.fn(() => [
+export const mockedDevicesList = jest.fn(() => [
 	{
 		deviceId: 'audioDefault',
 		kind: 'audioinput',
@@ -65,77 +62,57 @@ export const mockedEnumerateDevicesPromise: jest.Mock = jest.fn(() => [
 		groupId: 'device2'
 	}
 ]);
-
-const mockedGetUserMediaPromise: jest.Mock = jest.fn(() => ({
-	getTracks: jest.fn(() => ({ forEach: jest.fn() })),
-	getAudioTracks: jest.fn(() => ({ forEach: jest.fn() }))
-}));
-const getUserMediaPromise = jest.fn(
-	async () =>
-		new Promise<void>((resolve, reject) => {
-			const result = mockedGetUserMediaPromise();
-			result ? resolve(result) : reject(new Error('no result provided'));
-		})
-);
-
 Object.defineProperty(global.navigator, 'mediaDevices', {
 	value: {
-		getUserMedia: getUserMediaPromise,
-		enumerateDevices: jest.fn(
-			() =>
-				new Promise<void>((resolve, reject) => {
-					const result = mockedEnumerateDevicesPromise();
-					result ? resolve(result) : reject(new Error('no result provided'));
-				})
+		getUserMedia: jest.fn(() =>
+			Promise.resolve({
+				getTracks: jest.fn(() => ({ forEach: jest.fn() })),
+				getAudioTracks: jest.fn(() => ({ forEach: jest.fn() }))
+			})
 		),
+		enumerateDevices: jest.fn(() => Promise.resolve(mockedDevicesList())),
 		addEventListener: jest.fn(),
 		removeEventListener: jest.fn()
 	}
 });
 
-// MOCK HTMLMEDIAELEMENT.PROTOTYPE
 Object.defineProperty(HTMLMediaElement.prototype, 'muted', {
 	set: jest.fn()
 });
 
 Object.defineProperty(window, 'RTCPeerConnection', {
-	value: jest.fn(function RTCPeerConnectionMock() {
-		return {
-			addTrack: jest.fn()
-		};
-	})
+	value: jest.fn(() => ({
+		addTrack: jest.fn()
+	}))
 });
 
 Object.defineProperty(window, 'AudioContext', {
 	writable: true,
-	value: jest.fn(function AudioContextMock() {
-		return {
-			createOscillator: (): any => ({
-				connect: () => ({
-					stream: {
-						getAudioTracks: () => [MediaStream]
-					}
-				}),
-				start: jest.fn()
+	value: jest.fn(() => ({
+		createOscillator: (): any => ({
+			connect: () => ({
+				stream: {
+					getAudioTracks: () => [MediaStream]
+				}
 			}),
-			createMediaStreamDestination: jest.fn()
-		};
-	})
+			start: jest.fn()
+		}),
+		createMediaStreamDestination: jest.fn()
+	}))
 });
 
 Object.defineProperty(window, 'MediaStream', {
 	writable: true,
-	value: jest.fn(function MediaStreamMock() {
-		return {
-			stream: (): any => ({
-				getAudioTracks: jest.fn(),
-				addTrack: jest.fn()
-			}),
-			getAudioTracks: (): any[] => [MediaStream],
+	value: jest.fn(() => ({
+		stream: (): any => ({
+			getAudioTracks: jest.fn(),
 			addTrack: jest.fn()
-		};
-	})
+		}),
+		getAudioTracks: (): any[] => [MediaStream],
+		addTrack: jest.fn()
+	}))
 });
+
 Object.defineProperty(window, 'open', {
 	value: jest.fn()
 });
@@ -165,7 +142,6 @@ Object.defineProperty(window, 'matchMedia', {
 	}))
 });
 
-// mock a simplified Intersection Observer
 export const intersectionObserverMockObserve = jest.fn();
 export const intersectionObserverMockDisconnect = jest.fn();
 Object.defineProperty(window, 'IntersectionObserver', {
@@ -189,11 +165,6 @@ Object.defineProperty(window, 'ResizeObserver', {
 	}))
 });
 
-Object.defineProperty(window.HTMLElement.prototype, 'scrollIntoView', {
-	writable: true,
-	value: jest.fn()
-});
-
 let mockedStore: Record<string, unknown> = {};
 Object.defineProperty(window, 'localStorage', {
 	writable: true,
@@ -211,7 +182,7 @@ Object.defineProperty(window, 'localStorage', {
 	}
 });
 
-window.resizeTo = function resizeTo(width, height): void {
+window.resizeTo = function resizeTo(width: number, height: number): void {
 	Object.assign(this, {
 		innerWidth: width,
 		innerHeight: height,
@@ -219,8 +190,6 @@ window.resizeTo = function resizeTo(width, height): void {
 		outerHeight: height
 	}).dispatchEvent(new this.Event('resize'));
 };
-
-Element.prototype.scrollTo = jest.fn();
 
 Object.defineProperty(window.parent.document.documentElement, 'requestFullscreen', {
 	value: jest.fn()

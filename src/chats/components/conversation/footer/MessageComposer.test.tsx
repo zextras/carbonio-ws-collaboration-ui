@@ -663,8 +663,6 @@ describe('MessageComposer - draft message', () => {
 		user.keyboard('{ArrowUp}');
 
 		const composerTextArea = screen.getByRole('textbox');
-		const store = useStore.getState();
-		console.log(store.activeConversations[mockedRoom.id]);
 		await waitFor(() =>
 			expect((composerTextArea as HTMLTextAreaElement).selectionStart).toBe(
 				mockedMessage.text.length
