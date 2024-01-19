@@ -21,7 +21,6 @@ import { setDateDefault } from './utils/dateUtils';
 
 export default function App() {
 	const setLoginInfo = useStore((state) => state.setLoginInfo);
-	const setUserPrefTimezone = useStore((state) => state.setUserPrefTimezone);
 	const setXmppClient = useStore((state) => state.setXmppClient);
 	const setWebSocketClient = useStore((state) => state.setWebSocketClient);
 	const setChatsBeStatus = useStore((state) => state.setChatsBeStatus);
@@ -38,7 +37,7 @@ export default function App() {
 	// SET TIMEZONE and LOCALE
 	useEffect(() => {
 		setDateDefault(prefs?.zimbraPrefTimeZoneId, prefs?.zimbraPrefLocale);
-	}, [setUserPrefTimezone, prefs]);
+	}, [prefs]);
 
 	// NETWORKS: init XMPP and WebSocket clients
 	useEffect(() => {
