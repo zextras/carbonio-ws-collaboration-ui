@@ -3,5 +3,5 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-export const matchMedia = jest.fn();
-export const isEnabled: jest.Mock = jest.fn();
+export const mockDarkReaderIsEnabled = jest.fn();
+export const isEnabled: jest.Mock = mockDarkReaderIsEnabled;
