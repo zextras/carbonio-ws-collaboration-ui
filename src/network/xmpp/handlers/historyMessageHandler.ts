@@ -10,7 +10,7 @@ import { Strophe } from 'strophe.js';
 import useStore from '../../../store/Store';
 import { MessageType, TextMessage } from '../../../types/store/MessageTypes';
 import { RootStore } from '../../../types/store/StoreTypes';
-import { dateToTimestamp } from '../../../utils/dateUtil';
+import { dateToTimestamp } from '../../../utils/dateUtils';
 import { xmppDebug } from '../../../utils/debug';
 import { getId } from '../utility/decodeJid';
 import { getAttribute, getRequiredAttribute, getRequiredTagElement } from '../utility/decodeStanza';

@@ -24,10 +24,7 @@ export function onNewMessageStanza(message: Element): true {
 				case MessageType.TEXT_MSG: {
 					store.newMessage(newMessage);
 
-					if (newMessage.from === sessionId) {
-						// Set my message as read
-						xmppClient.readMessage(newMessage.roomId, newMessage.id);
-					} else {
+					if (newMessage.from !== sessionId) {
 						sendCustomEvent({ name: EventName.NEW_MESSAGE, data: newMessage });
 						store.incrementUnreadCount(newMessage.roomId);
 						displayMessageBrowserNotification(newMessage);
@@ -46,9 +43,7 @@ export function onNewMessageStanza(message: Element): true {
 				}
 				case MessageType.CONFIGURATION_MSG: {
 					store.newMessage(newMessage);
-					if (newMessage.from === sessionId) {
-						xmppClient.readMessage(newMessage.roomId, newMessage.id);
-					} else {
+					if (newMessage.from !== sessionId) {
 						sendCustomEvent({ name: EventName.NEW_MESSAGE, data: newMessage });
 						store.incrementUnreadCount(newMessage.roomId);
 					}

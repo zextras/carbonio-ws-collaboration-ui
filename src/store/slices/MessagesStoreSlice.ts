@@ -19,6 +19,7 @@ import {
 	size,
 	uniqBy
 } from 'lodash';
+import { StateCreator } from 'zustand';
 
 import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
 import { UsersApi } from '../../network';
@@ -36,7 +37,7 @@ import { RoomType } from '../../types/store/RoomTypes';
 import { MessagesStoreSlice, RootStore } from '../../types/store/StoreTypes';
 import { UsersMap } from '../../types/store/UserTypes';
 import { calcReads } from '../../utils/calcReads';
-import { datesAreFromTheSameDay, isBefore, isStrictlyBefore } from '../../utils/dateUtil';
+import { datesAreFromTheSameDay, isBefore, isStrictlyBefore } from '../../utils/dateUtils';
 
 // Retrieve user information about userId in the various type of message (only if it is unknown)
 const retrieveMessageUserInfo = (message: Message, users: UsersMap): void => {
@@ -56,7 +57,9 @@ const retrieveMessageUserInfo = (message: Message, users: UsersMap): void => {
 	}
 };
 
-export const useMessagesStoreSlice = (set: (...any: any) => void): MessagesStoreSlice => ({
+export const useMessagesStoreSlice: StateCreator<MessagesStoreSlice> = (
+	set: (...any: any) => void
+) => ({
 	messages: {},
 	newMessage: (message: Message): void => {
 		set(

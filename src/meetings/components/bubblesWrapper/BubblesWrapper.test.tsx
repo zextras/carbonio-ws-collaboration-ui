@@ -121,7 +121,7 @@ describe('BubblesWrapper', () => {
 		});
 		const messageBubble = await screen.findByTestId(`Bubble-${message.id}`);
 
-		await user.click(messageBubble);
+		await waitFor(() => user.click(messageBubble));
 
 		const updatedStore = useStore.getState();
 		expect(updatedStore.activeMeeting[meeting.id].sidebarStatus.sidebarIsOpened).toBeTruthy();

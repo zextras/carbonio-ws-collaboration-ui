@@ -20,7 +20,7 @@ import { carbonize, carbonizeMUC } from './utility/decodeJid';
 import XMPPConnection, { XMPPRequestType } from './XMPPConnection';
 import useStore from '../../store/Store';
 import IXMPPClient from '../../types/network/xmpp/IXMPPClient';
-import { dateToISODate } from '../../utils/dateUtil';
+import { dateToISODate } from '../../utils/dateUtils';
 
 const jabberData = 'jabber:x:data';
 

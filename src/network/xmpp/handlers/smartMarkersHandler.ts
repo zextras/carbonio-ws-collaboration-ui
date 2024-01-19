@@ -8,7 +8,7 @@ import { Strophe } from 'strophe.js';
 
 import useStore from '../../../store/Store';
 import { Marker, MarkerType } from '../../../types/store/MarkersTypes';
-import { now } from '../../../utils/dateUtil';
+import { now } from '../../../utils/dateUtils';
 import { getId, getResource } from '../utility/decodeJid';
 import { decodeMarker } from '../utility/decodeMarker';
 import { getRequiredAttribute, getTagElement } from '../utility/decodeStanza';
@@ -21,7 +21,7 @@ export function onSmartMarkers(stanza: Element): true {
 			decodeMarker(marker)
 		);
 		const store = useStore.getState();
-		store.updateMarkers(markers, roomId);
+		store.updateMarkers(roomId, markers);
 		store.updateUnreadMessages(roomId);
 		store.updateUnreadCount(roomId);
 	}
@@ -40,7 +40,7 @@ export function onDisplayedMessageStanza(message: Element): true {
 			type: MarkerType.DISPLAYED
 		};
 		const store = useStore.getState();
-		store.updateMarkers([displayedMessage], roomId);
+		store.updateMarkers(roomId, [displayedMessage]);
 		store.updateUnreadMessages(roomId);
 
 		// Update unread counter

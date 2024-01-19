@@ -23,7 +23,7 @@ import {
 	TextMessage
 } from '../../../types/store/MessageTypes';
 import { calcReads } from '../../../utils/calcReads';
-import { dateToTimestamp, now } from '../../../utils/dateUtil';
+import { dateToTimestamp, now } from '../../../utils/dateUtils';
 import { unicodeToChar } from '../../../utils/textUtils';
 
 type OptionalParameters = {

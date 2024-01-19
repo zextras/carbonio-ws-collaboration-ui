@@ -7,15 +7,16 @@
 
 import produce from 'immer';
 import { find, forEach } from 'lodash';
+import { StateCreator } from 'zustand';
 
 import { UsersApi } from '../../network';
 import { MeetingBe, MeetingParticipantBe } from '../../types/network/models/meetingBeTypes';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
 import { MeetingParticipant, MeetingParticipantMap } from '../../types/store/MeetingTypes';
 import { MeetingsSlice, RootStore } from '../../types/store/StoreTypes';
-import { dateToISODate } from '../../utils/dateUtil';
+import { dateToISODate } from '../../utils/dateUtils';
 
-export const useMeetingsStoreSlice = (set: (...any: any) => void): MeetingsSlice => ({
+export const useMeetingsStoreSlice: StateCreator<MeetingsSlice> = (set: (...any: any) => void) => ({
 	meetings: {},
 	setMeetings: (meetings: MeetingBe[]): void => {
 		set(
