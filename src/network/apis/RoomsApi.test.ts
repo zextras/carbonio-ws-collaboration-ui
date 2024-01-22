@@ -5,7 +5,6 @@
  */
 
 import roomsApi from './RoomsApi';
-import { fetchResponse } from '../../../jest-mocks';
 import useStore from '../../store/Store';
 import {
 	createMockCapabilityList,
@@ -13,6 +12,7 @@ import {
 	createMockRoom,
 	createMockTextMessage
 } from '../../tests/createMock';
+import { fetchResponse } from '../../tests/mocks/global';
 import { dateToISODate } from '../../utils/dateUtils';
 import { getTagElement } from '../xmpp/utility/decodeStanza';
 import HistoryAccumulator from '../xmpp/utility/HistoryAccumulator';

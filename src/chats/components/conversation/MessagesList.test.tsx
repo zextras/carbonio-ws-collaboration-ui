@@ -11,7 +11,6 @@ import { act, renderHook } from '@testing-library/react-hooks';
 import { size } from 'lodash';
 
 import MessagesList from './MessagesList';
-import { mockedScrollToEnd, mockedScrollToMessage } from '../../../../jest-mocks';
 import useStore from '../../../store/Store';
 import {
 	createMockConfigurationMessage,
@@ -19,6 +18,7 @@ import {
 	createMockRoom,
 	createMockTextMessage
 } from '../../../tests/createMock';
+import { mockedScrollToEnd, mockedScrollToMessage } from '../../../tests/mocks/scrollUtils';
 import { setup } from '../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
 import { MarkerStatus } from '../../../types/store/MarkersTypes';

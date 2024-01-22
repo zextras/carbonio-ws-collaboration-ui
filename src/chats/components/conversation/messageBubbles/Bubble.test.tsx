@@ -9,13 +9,13 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 
 import Bubble from './Bubble';
-import { mockedGetImageThumbnailURL } from '../../../../../jest-mocks';
 import useStore from '../../../../store/Store';
 import {
 	createMockCapabilityList,
 	createMockRoom,
 	createMockTextMessage
 } from '../../../../tests/createMock';
+import { mockedGetImageThumbnailURL } from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe } from '../../../../types/network/models/roomBeTypes';
 import { MarkerStatus } from '../../../../types/store/MarkersTypes';

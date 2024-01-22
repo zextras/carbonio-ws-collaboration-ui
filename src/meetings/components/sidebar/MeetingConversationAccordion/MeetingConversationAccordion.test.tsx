@@ -10,7 +10,8 @@ import { screen } from '@testing-library/react';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { UserEvent } from '@testing-library/user-event/setup/setup';
 
-import { mockDarkReaderIsEnabled, mockUseParams } from '../../../../../jest-mocks';
+import { mockDarkReaderIsEnabled } from '../../../../../__mocks__/darkreader';
+import { useParams } from '../../../../../__mocks__/react-router';
 import useStore from '../../../../store/Store';
 import {
 	createMockMeeting,
@@ -52,7 +53,7 @@ const setupBasicGroup = (): { user: UserEvent; store: RootStore } => {
 		result.current.addMeeting(groupMeeting);
 		result.current.meetingConnection(groupMeeting.id, false, undefined, false, undefined);
 	});
-	mockUseParams.mockReturnValue({ meetingId: groupMeeting.id });
+	useParams.mockReturnValue({ meetingId: groupMeeting.id });
 	const { user } = setup(<MeetingSidebar />);
 	return { user, store: result.current };
 };

@@ -13,7 +13,6 @@ import { act } from 'react-dom/test-utils';
 
 import MessageComposer from './MessageComposer';
 import UploadAttachmentManagerView from './UploadAttachmentManagerView';
-import { mockedAddRoomAttachmentRequest } from '../../../../../jest-mocks';
 import useStore from '../../../../store/Store';
 import {
 	createMockFile,
@@ -22,6 +21,7 @@ import {
 	createMockTextMessage
 } from '../../../../tests/createMock';
 import { mockedSendIsWriting, mockedSendPaused } from '../../../../tests/mockedXmppClient';
+import { mockedAddRoomAttachmentRequest } from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe } from '../../../../types/network/models/roomBeTypes';
 import { FileToUpload, messageActionType } from '../../../../types/store/ActiveConversationTypes';
@@ -663,8 +663,6 @@ describe('MessageComposer - draft message', () => {
 		user.keyboard('{ArrowUp}');
 
 		const composerTextArea = screen.getByRole('textbox');
-		const store = useStore.getState();
-		console.log(store.activeConversations[mockedRoom.id]);
 		await waitFor(() =>
 			expect((composerTextArea as HTMLTextAreaElement).selectionStart).toBe(
 				mockedMessage.text.length
