@@ -5,7 +5,16 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { FC, ReactElement, useCallback, useContext, useMemo, useState } from 'react';
+import React, {
+	FC,
+	ReactElement,
+	useCallback,
+	useContext,
+	useEffect,
+	useMemo,
+	useRef,
+	useState
+} from 'react';
 
 import { Dropdown, IconButton, SnackbarManagerContext } from '@zextras/carbonio-design-system';
 import { size } from 'lodash';
@@ -132,12 +141,25 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 	const [forwardMessageModalIsOpen, setForwardMessageModalIsOpen] = useState<boolean>(false);
 	const createSnackbar: any = useContext(SnackbarManagerContext);
 
+	const dropDownRef = useRef<HTMLDivElement>(null);
+
 	const { onPreviewClick } = usePreview(
 		message.attachment || { id: '', name: '', mimeType: '', size: 0 }
 	);
 
 	const onDropdownOpen = useCallback(() => setDropdownActive(true), [setDropdownActive]);
 	const onDropdownClose = useCallback(() => setDropdownActive(false), [setDropdownActive]);
+
+	const closeDropdownOnScroll = useCallback(
+		() => dropdownActive && dropDownRef.current?.click(),
+		[dropdownActive]
+	);
+
+	useEffect(() => {
+		const messageListRef = window.document.getElementById(`messageListRef${message.roomId}`);
+		messageListRef?.addEventListener('scroll', closeDropdownOnScroll);
+		return () => messageListRef?.removeEventListener('scroll', closeDropdownOnScroll);
+	}, [closeDropdownOnScroll, message.roomId]);
 
 	const onOpenForwardMessageModal = useCallback(
 		() => setForwardMessageModalIsOpen(true),
@@ -329,6 +351,7 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 					disableRestoreFocus
 					disablePortal
 					placement="right-start"
+					ref={dropDownRef}
 				>
 					<IconButton
 						iconColor="currentColor"
