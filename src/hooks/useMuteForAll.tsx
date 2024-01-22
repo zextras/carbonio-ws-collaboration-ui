@@ -4,7 +4,10 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { useCallback, useMemo } from 'react';
+import { useCallback, useContext, useMemo } from 'react';
+
+import { CreateSnackbarFn, SnackbarManagerContext } from '@zextras/carbonio-design-system';
+import { useTranslation } from 'react-i18next';
 
 import { MeetingsApi } from '../network';
 import {
@@ -24,12 +27,20 @@ const useMuteForAll = (
 	meetingId: string | undefined,
 	userIdToMute: string | undefined
 ): useMuteForAllReturn => {
+	const [t] = useTranslation();
+	const errorSnackbar = t(
+		'settings.profile.errorGenericResponse',
+		'Something went wrong. Please retry'
+	);
+
 	const sessionId: string | undefined = useStore((store) => getUserId(store));
 	const participantAudioStatus = useStore((store) =>
 		getParticipantAudioStatus(store, meetingId || '', userIdToMute)
 	);
 	const roomId = useStore((store) => getRoomIdByMeetingId(store, meetingId || ''));
 	const amIModerator = useStore((store) => getMyOwnershipOfTheRoom(store, sessionId, roomId || ''));
+
+	const createSnackbar: CreateSnackbarFn = useContext(SnackbarManagerContext);
 
 	const muteForAllHasToAppear = useMemo(
 		() => participantAudioStatus && amIModerator && userIdToMute !== sessionId,
@@ -38,9 +49,15 @@ const useMuteForAll = (
 
 	const muteForAll = useCallback(() => {
 		if (meetingId !== undefined && participantAudioStatus) {
-			MeetingsApi.updateAudioStreamStatus(meetingId, false, userIdToMute);
+			MeetingsApi.updateAudioStreamStatus(meetingId, false, userIdToMute).catch(() => {
+				createSnackbar({
+					key: new Date().toLocaleString(),
+					type: 'error',
+					label: errorSnackbar
+				});
+			});
 		}
-	}, [meetingId, participantAudioStatus, userIdToMute]);
+	}, [createSnackbar, errorSnackbar, meetingId, participantAudioStatus, userIdToMute]);
 
 	return { muteForAllHasToAppear, muteForAll };
 };

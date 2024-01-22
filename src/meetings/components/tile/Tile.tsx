@@ -116,7 +116,6 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 		clearTimeout(timeout.current);
 		setIsHoovering(true);
 
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 		timeout.current = setTimeout(() => {
 			setIsHoovering(false);
 		}, 2000);
