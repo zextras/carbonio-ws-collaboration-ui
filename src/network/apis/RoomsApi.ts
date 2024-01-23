@@ -70,6 +70,7 @@ class RoomsApi extends BaseAPI implements IRoomsApi {
 
 	public addRoom(room: RoomCreationFields): Promise<AddRoomResponse> {
 		return this.fetchAPI('rooms', RequestType.POST, room).then((response: AddRoomResponse) => {
+			// TODO create scheduled meeting for temporary rooms
 			// Create a permanent meeting for the room when it is created
 			MeetingsApi.createPermanentMeeting(response.id);
 			return response;

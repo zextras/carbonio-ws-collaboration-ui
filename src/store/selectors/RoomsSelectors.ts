@@ -21,7 +21,7 @@ export const getRoomIdsList = (state: RootStore): string[] => {
 };
 
 export const getScheduledRoomIdsOrderedByCreation = (store: RootStore): string[] => {
-	const filteredRooms = filter(store.rooms, (room) => room.type === RoomType.TEMPORARY);
+	const filteredRooms = filter(store.rooms, (room) => room.type === RoomType.GROUP);
 	const orderedRooms = orderBy(filteredRooms, ['createdAt'], ['asc']);
 	return map(orderedRooms, (room) => room.id);
 };

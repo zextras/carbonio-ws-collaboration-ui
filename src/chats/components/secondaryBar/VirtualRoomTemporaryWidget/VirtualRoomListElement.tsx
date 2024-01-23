@@ -63,8 +63,8 @@ const VirtualRoomListElement: FC<virtualRoomElementProps> = ({ roomId, modalRef 
 	);
 	const modalTitle = t(
 		'meeting.scheduledMeetings.deleteMeetingModalTitle',
-		`Delete ${room} Virtual Room`,
-		{ roomName: room }
+		`Delete ${room.name} Virtual Room`,
+		{ roomName: room.name }
 	);
 
 	const [showModal, setShowModal] = useState(false);
@@ -81,21 +81,30 @@ const VirtualRoomListElement: FC<virtualRoomElementProps> = ({ roomId, modalRef 
 		});
 	}, [createSnackbar, deleteVirtualRoomSnackbar, roomId]);
 
-	// TODO copy link handling
 	const handleCopyLink = useCallback(() => {
-		console.log('HERE HANDLE THE COPY OF THE LINK', room.meetingId);
+		const link = `${window.location.origin}/carbonio/${MEETINGS_PATH}${room.id}`;
+		if (window.parent.navigator.clipboard) {
+			window.parent.navigator.clipboard.writeText(link);
+		} else {
+			const input = window.document.createElement('input');
+			input.setAttribute('value', link);
+			window.parent.document.body.appendChild(input);
+			input.select();
+			window.parent.document.execCommand('copy');
+			window.parent.document.body.removeChild(input);
+		}
 		createSnackbar({
 			key: new Date().toLocaleString(),
 			type: 'info',
 			label: copyVirtualRoomLinkSnackbar,
 			hideButton: true
 		});
-	}, [room.meetingId, createSnackbar, copyVirtualRoomLinkSnackbar]);
+	}, [room.id, createSnackbar, copyVirtualRoomLinkSnackbar]);
 
-	// TODO tooltip handling
-	const handleEnterRoom = useCallback(() => {
-		window.open(`${MEETINGS_PATH}${room.id}`);
-	}, [room.id]);
+	const handleEnterRoom = useCallback(
+		() => window.open(`/carbonio/${MEETINGS_PATH}${room.id}`),
+		[room.id]
+	);
 
 	const handleModalOpening = useCallback(() => setShowModal((prevState) => !prevState), []);
 

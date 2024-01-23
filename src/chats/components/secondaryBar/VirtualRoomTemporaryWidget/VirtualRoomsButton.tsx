@@ -38,11 +38,9 @@ const VirtualRoomsButton: FC<virtualRoomsButtonProps> = ({ expanded }) => {
 					ref={parentRef}
 				/>
 			</Container>
-			<VirtualRoomsList
-				listVisibility={listVisibility}
-				setListVisibility={setListVisibility}
-				parentRef={parentRef}
-			/>
+			{listVisibility && (
+				<VirtualRoomsList setListVisibility={setListVisibility} parentRef={parentRef} />
+			)}
 		</>
 	) : (
 		<Container height="3rem" background="gray5">
@@ -50,7 +48,6 @@ const VirtualRoomsButton: FC<virtualRoomsButtonProps> = ({ expanded }) => {
 				<IconButton
 					icon="VideoOutline"
 					size="large"
-					// customSize={{ paddingSize: '0.25rem', iconSize: '' }}
 					onClick={handleOnClick}
 					type="outlined"
 					iconColor="primary"

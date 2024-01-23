@@ -14,25 +14,18 @@ import React, {
 	useState
 } from 'react';
 
-import {
-	Container,
-	Input,
-	Row,
-	Text,
-	IconButton,
-	Padding,
-	Tooltip
-} from '@zextras/carbonio-design-system';
-import { map } from 'lodash';
+import { Container, Input, Row, Text, IconButton, Tooltip } from '@zextras/carbonio-design-system';
+import { map, size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import VirtualRoomListElement from './VirtualRoomListElement';
+import { RoomsApi } from '../../../../network';
 import { getScheduledRoomIdsOrderedByCreation } from '../../../../store/selectors/RoomsSelectors';
 import useStore from '../../../../store/Store';
+import { RoomType } from '../../../../types/store/RoomTypes';
 
 type virtualRoomsListProps = {
-	listVisibility: boolean;
 	setListVisibility: Dispatch<SetStateAction<boolean>>;
 	parentRef: React.RefObject<HTMLDivElement>;
 };
@@ -55,11 +48,7 @@ const CustomIconButton = styled(IconButton)`
 	border-radius: 0.125rem;
 `;
 
-const VirtualRoomsList: FC<virtualRoomsListProps> = ({
-	listVisibility,
-	setListVisibility,
-	parentRef
-}) => {
+const VirtualRoomsList: FC<virtualRoomsListProps> = ({ setListVisibility, parentRef }) => {
 	const [t] = useTranslation();
 
 	const virtualRoomNameInput = t(
@@ -99,20 +88,24 @@ const VirtualRoomsList: FC<virtualRoomsListProps> = ({
 			}
 			if (
 				(modalRef.current && modalRef.current.contains(event.target)) ||
-				(listVisibility && parentRef.current && parentRef.current.contains(event.target))
+				(parentRef.current && parentRef.current.contains(event.target))
 			) {
 				setListVisibility(true);
 			} else if (popupRef.current && !popupRef.current.contains(event.target)) {
 				setListVisibility(false);
 			}
 		},
-		[listVisibility, parentRef, setListVisibility]
+		[parentRef, setListVisibility]
 	);
 
 	const handleCreateButtonClick = useCallback(() => {
-		// TODO create virtual room
-		// RoomsApi.addRoom();
-		console.log('Created virtual room');
+		// TODO: test with group creation
+		RoomsApi.addRoom({
+			name: textRef.current?.value ?? '',
+			description: '',
+			type: RoomType.GROUP,
+			membersIds: ['67286969-2713-48b0-901c-117c896ae50f', '2415efc7-8822-46f4-b34b-e86d12ba4d59']
+		});
 	}, []);
 
 	const handleDeleteNameClick = useCallback(() => {
@@ -124,7 +117,7 @@ const VirtualRoomsList: FC<virtualRoomsListProps> = ({
 	}, []);
 
 	const handleOnChangeInput = useCallback(() => {
-		if (textRef.current && textRef.current.value.length !== 0) {
+		if (size(textRef.current?.value) > 0) {
 			setCanCreateVirtualRoom(true);
 		} else {
 			setCanCreateVirtualRoom(false);
@@ -144,10 +137,9 @@ const VirtualRoomsList: FC<virtualRoomsListProps> = ({
 						onChange={handleOnChangeInput}
 					/>
 				</Row>
-				<Row width="fit" orientation="horizontal">
+				<Row width="fit" orientation="horizontal" gap="0.5rem" padding={{ horizontal: '0.5rem' }}>
 					{inputHasFocus && (
 						<>
-							<Padding right="0.5rem" />
 							<Tooltip label={cancelTooltip}>
 								<CustomIconButton
 									size="large"
@@ -157,7 +149,6 @@ const VirtualRoomsList: FC<virtualRoomsListProps> = ({
 									onClick={handleDeleteNameClick}
 								/>
 							</Tooltip>
-							<Padding right="0.5rem" />
 							<Tooltip label={canCreateVirtualRoom ? createTooltip : roomNameRequiredTooltip}>
 								<CustomIconButton
 									size="large"
@@ -168,7 +159,6 @@ const VirtualRoomsList: FC<virtualRoomsListProps> = ({
 									disabled={!canCreateVirtualRoom}
 								/>
 							</Tooltip>
-							<Padding right="0.5rem" />
 						</>
 					)}
 				</Row>
@@ -219,12 +209,12 @@ const VirtualRoomsList: FC<virtualRoomsListProps> = ({
 		};
 	}, [handleMouseUp]);
 
-	return listVisibility ? (
+	return (
 		<CustomContainer background="gray6" height="fit" padding="0.5rem" ref={popupRef}>
 			{inputSection}
 			<ListContainer>{listSection}</ListContainer>
 		</CustomContainer>
-	) : null;
+	);
 };
 
 export default VirtualRoomsList;
