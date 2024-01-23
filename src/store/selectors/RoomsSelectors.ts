@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { countBy, find, forEach, size } from 'lodash';
+import { countBy, filter, find, forEach, map, orderBy, size } from 'lodash';
 
 import { RoomsApi, UsersApi } from '../../network';
 import { Member, Room, RoomsMap, RoomType } from '../../types/store/RoomTypes';
@@ -18,6 +18,12 @@ export const getRoomIdsList = (state: RootStore): string[] => {
 		idsList.push(room.id);
 	});
 	return idsList;
+};
+
+export const getScheduledRoomIdsOrderedByCreation = (store: RootStore): string[] => {
+	const filteredRooms = filter(store.rooms, (room) => room.type === RoomType.TEMPORARY);
+	const orderedRooms = orderBy(filteredRooms, ['createdAt'], ['asc']);
+	return map(orderedRooms, (room) => room.id);
 };
 
 export const getRoomSelector = (state: RootStore, id: string): Room => state.rooms[id];

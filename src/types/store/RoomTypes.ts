@@ -14,6 +14,7 @@ export type Room = {
 	pictureUpdatedAt?: string;
 	members?: Member[];
 	userSettings?: RoomUserSettings;
+	meetingId?: string;
 };
 
 export enum RoomType {

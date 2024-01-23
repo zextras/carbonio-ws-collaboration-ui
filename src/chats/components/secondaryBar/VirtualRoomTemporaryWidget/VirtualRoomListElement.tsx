@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { Dispatch, FC, SetStateAction, useCallback, useContext, useState } from 'react';
+import React, { FC, useCallback, useContext, useState } from 'react';
 
 import {
 	Container,
@@ -17,14 +17,16 @@ import {
 	Modal,
 	Tooltip
 } from '@zextras/carbonio-design-system';
-import { map } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
+import { MEETINGS_PATH } from '../../../../constants/appConstants';
+import { RoomsApi } from '../../../../network';
+import { getRoomSelector } from '../../../../store/selectors/RoomsSelectors';
+import useStore from '../../../../store/Store';
+
 type virtualRoomElementProps = {
-	virtualRoomsList: string[];
-	setVirtualRoomsList: Dispatch<SetStateAction<string[]>>;
-	room: string;
+	roomId: string;
 	modalRef: React.RefObject<HTMLDivElement>;
 };
 
@@ -32,12 +34,9 @@ const CustomIconButton = styled(IconButton)`
 	border-radius: 0.125rem;
 `;
 
-const VirtualRoomListElement: FC<virtualRoomElementProps> = ({
-	virtualRoomsList,
-	setVirtualRoomsList,
-	room,
-	modalRef
-}) => {
+const VirtualRoomListElement: FC<virtualRoomElementProps> = ({ roomId, modalRef }) => {
+	const room = useStore((state) => getRoomSelector(state, roomId));
+
 	const [t] = useTranslation();
 
 	const deleteVirtualRoomTooltip = t(
@@ -71,41 +70,34 @@ const VirtualRoomListElement: FC<virtualRoomElementProps> = ({
 	const [showModal, setShowModal] = useState(false);
 	const createSnackbar: CreateSnackbarFn = useContext(SnackbarManagerContext);
 
-	// TODO store deletion handling
 	const handleDeleteRoom = useCallback(() => {
-		const list: string[] = [];
-		map(virtualRoomsList, (element) => {
-			if (element !== room) list.push(element);
+		RoomsApi.deleteRoom(roomId).then(() => {
+			createSnackbar({
+				key: new Date().toLocaleString(),
+				type: 'success',
+				label: deleteVirtualRoomSnackbar,
+				hideButton: true
+			});
 		});
-		setVirtualRoomsList(list);
-		createSnackbar({
-			key: new Date().toLocaleString(),
-			type: 'success',
-			label: deleteVirtualRoomSnackbar,
-			hideButton: true
-		});
-	}, [createSnackbar, deleteVirtualRoomSnackbar, room, setVirtualRoomsList, virtualRoomsList]);
+	}, [createSnackbar, deleteVirtualRoomSnackbar, roomId]);
 
 	// TODO copy link handling
 	const handleCopyLink = useCallback(() => {
-		console.log('HERE HANDLE THE COPY OF THE LINK');
+		console.log('HERE HANDLE THE COPY OF THE LINK', room.meetingId);
 		createSnackbar({
 			key: new Date().toLocaleString(),
 			type: 'info',
 			label: copyVirtualRoomLinkSnackbar,
 			hideButton: true
 		});
-	}, [createSnackbar, copyVirtualRoomLinkSnackbar]);
+	}, [room.meetingId, createSnackbar, copyVirtualRoomLinkSnackbar]);
 
-	// TODO enter or rejoin meeting handling
 	// TODO tooltip handling
 	const handleEnterRoom = useCallback(() => {
-		console.log('HERE HANDLE ENTERING THE ROOM');
-	}, []);
+		window.open(`${MEETINGS_PATH}${room.id}`);
+	}, [room.id]);
 
-	const handleModalOpening = useCallback(() => {
-		setShowModal((prevState) => !prevState);
-	}, []);
+	const handleModalOpening = useCallback(() => setShowModal((prevState) => !prevState), []);
 
 	return (
 		<Container
@@ -114,7 +106,7 @@ const VirtualRoomListElement: FC<virtualRoomElementProps> = ({
 			mainAlignment="space-between"
 		>
 			<Row takeAvailableSpace mainAlignment="flex-start">
-				<Text>{room}</Text>
+				<Text>{room.name}</Text>
 			</Row>
 			<Row>
 				<Tooltip label={deleteVirtualRoomTooltip}>

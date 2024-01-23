@@ -28,6 +28,8 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import VirtualRoomListElement from './VirtualRoomListElement';
+import { getScheduledRoomIdsOrderedByCreation } from '../../../../store/selectors/RoomsSelectors';
+import useStore from '../../../../store/Store';
 
 type virtualRoomsListProps = {
 	listVisibility: boolean;
@@ -79,8 +81,7 @@ const VirtualRoomsList: FC<virtualRoomsListProps> = ({
 		'Virtual Room’s name is required'
 	);
 
-	// TODO store handling
-	const [virtualRoomList, setVirtualRoomList] = useState<string[]>([]);
+	const virtualRoomList = useStore(getScheduledRoomIdsOrderedByCreation);
 	const [inputHasFocus, setInputHasFocus] = useState(false);
 	const [canCreateVirtualRoom, setCanCreateVirtualRoom] = useState(false);
 
@@ -108,14 +109,11 @@ const VirtualRoomsList: FC<virtualRoomsListProps> = ({
 		[listVisibility, parentRef, setListVisibility]
 	);
 
-	// TODO store creation handling
 	const handleCreateButtonClick = useCallback(() => {
-		if (textRef.current) {
-			setVirtualRoomList([textRef.current.value, ...virtualRoomList]);
-			textRef.current.value = '';
-			textRef.current.focus();
-		}
-	}, [virtualRoomList]);
+		// TODO create virtual room
+		// RoomsApi.addRoom();
+		console.log('Created virtual room');
+	}, []);
 
 	const handleDeleteNameClick = useCallback(() => {
 		if (textRef.current) {
@@ -189,17 +187,10 @@ const VirtualRoomsList: FC<virtualRoomsListProps> = ({
 		]
 	);
 
-	// TODO store list handling
 	const virtualRoomListSection = useMemo(
 		() =>
 			map(virtualRoomList, (room) => (
-				<VirtualRoomListElement
-					room={room}
-					virtualRoomsList={virtualRoomList}
-					setVirtualRoomsList={setVirtualRoomList}
-					modalRef={modalRef}
-					key={`listItem-${room}`}
-				/>
+				<VirtualRoomListElement roomId={room} modalRef={modalRef} key={`listItem-${room}`} />
 			)),
 		[virtualRoomList]
 	);
