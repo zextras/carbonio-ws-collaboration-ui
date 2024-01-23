@@ -34,12 +34,19 @@ export enum MeetingType {
 	SCHEDULED = 'scheduled'
 }
 
-export type CreateMeetingData = {
+export type CreatePermanentMeetingData = {
+	name: '';
+	users: [];
+	roomId: string;
+	meetingType: MeetingType.PERMANENT;
+};
+
+export type CreateScheduledMeetingData = {
 	name: string;
 	users: MeetingUser[];
 	roomId: string;
-	meetingType: MeetingType;
-	expiration?: number;
+	meetingType: MeetingType.SCHEDULED;
+	expiration?: string;
 };
 
 export type MeetingUser = {

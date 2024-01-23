@@ -30,7 +30,7 @@ interface IMeetingsApi {
 		name: string,
 		users: MeetingUser[],
 		roomId: string,
-		expiration?: number
+		expiration?: string
 	): Promise<CreateMeetingResponse>;
 	getMeeting(roomId: string): Promise<GetMeetingResponse>;
 	getMeetingByMeetingId(meetingId: string): Promise<GetMeetingResponse>;

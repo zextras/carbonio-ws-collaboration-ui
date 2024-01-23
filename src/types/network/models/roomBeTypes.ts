@@ -19,7 +19,8 @@ export type RoomBe = {
 
 export enum RoomType {
 	ONE_TO_ONE = 'one_to_one',
-	GROUP = 'group'
+	GROUP = 'group',
+	TEMPORARY = 'temporary'
 }
 
 export type RoomCreationFields =
@@ -32,6 +33,9 @@ export type RoomCreationFields =
 			name: string; // min: 1, max: 128
 			description: string; // min: 0, max: 256
 			membersIds: string[]; // minItems: 1 (not include creator id)
+	  }
+	| {
+			type: RoomType.TEMPORARY;
 	  };
 
 export type RoomEditableFields = {
