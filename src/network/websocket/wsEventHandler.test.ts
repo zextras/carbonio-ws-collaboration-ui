@@ -9,7 +9,6 @@ import { renderHook } from '@testing-library/react-hooks';
 import { act } from 'react-dom/test-utils';
 
 import { wsEventsHandler } from './wsEventsHandler';
-import { mockedGetMeetingRequest, mockedGetRoomRequest } from '../../../jest-mocks';
 import useStore from '../../store/Store';
 import {
 	createMockMeeting,
@@ -17,6 +16,7 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../tests/createMock';
+import { mockedGetMeetingRequest, mockedGetRoomRequest } from '../../tests/mocks/network';
 import { MeetingBe } from '../../types/network/models/meetingBeTypes';
 import { MemberBe, RoomBe } from '../../types/network/models/roomBeTypes';
 import { UserBe } from '../../types/network/models/userBeTypes';

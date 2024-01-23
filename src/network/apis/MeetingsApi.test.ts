@@ -7,9 +7,9 @@
 import { size } from 'lodash';
 
 import meetingsApi from './MeetingsApi';
-import { fetchResponse } from '../../../jest-mocks';
 import useStore from '../../store/Store';
 import { createMockMeeting } from '../../tests/createMock';
+import { fetchResponse } from '../../tests/mocks/global';
 import { MeetingType } from '../../types/network/models/meetingBeTypes';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
 

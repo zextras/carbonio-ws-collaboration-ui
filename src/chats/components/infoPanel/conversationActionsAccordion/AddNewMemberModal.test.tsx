@@ -9,9 +9,9 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 
 import AddNewMemberModal from './AddNewMemberModal';
-import { mockedAutoCompleteGalRequest } from '../../../../../jest-mocks';
 import useStore from '../../../../store/Store';
 import { createMockMember, createMockRoom } from '../../../../tests/createMock';
+import { mockedAutoCompleteGalRequest } from '../../../../tests/mocks/AutoCompleteGal';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
 import { RootStore } from '../../../../types/store/StoreTypes';
