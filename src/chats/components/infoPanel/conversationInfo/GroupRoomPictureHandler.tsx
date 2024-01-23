@@ -4,16 +4,16 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { FC, useCallback, useContext, useMemo } from 'react';
+import React, { FC, useCallback, useMemo } from 'react';
 
 import {
 	Container,
 	CreateSnackbarFn,
 	FileLoader,
 	IconButton,
-	SnackbarManagerContext,
 	Text,
-	Tooltip
+	Tooltip,
+	useSnackbar
 } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -118,7 +118,7 @@ const GroupRoomPictureHandler: FC<RoomPictureProps> = ({ roomId }) => {
 		[picture, numberOfParticipantsLabel]
 	);
 
-	const createSnackbar: CreateSnackbarFn = useContext(SnackbarManagerContext);
+	const createSnackbar: CreateSnackbarFn = useSnackbar();
 
 	const handleGroupPictureChange = useCallback(
 		(e) => {

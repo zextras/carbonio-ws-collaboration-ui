@@ -4,14 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { FC, useCallback, useContext, useEffect, useState } from 'react';
+import React, { FC, useCallback, useEffect, useState } from 'react';
 
-import {
-	Container,
-	CreateSnackbarFn,
-	Padding,
-	SnackbarManagerContext
-} from '@zextras/carbonio-design-system';
+import { Container, CreateSnackbarFn, Padding, useSnackbar } from '@zextras/carbonio-design-system';
 import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore
@@ -37,7 +32,7 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 		'Something went Wrong. Please Retry'
 	);
 
-	const createSnackbar: CreateSnackbarFn = useContext(SnackbarManagerContext);
+	const createSnackbar: CreateSnackbarFn = useSnackbar();
 
 	const [notificationsStorage, setNotificationsStorage] = useLocalStorage<{
 		DesktopNotifications: boolean;

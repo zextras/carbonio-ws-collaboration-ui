@@ -7,7 +7,6 @@
 import React, {
 	BaseSyntheticEvent,
 	useCallback,
-	useContext,
 	useEffect,
 	useMemo,
 	useRef,
@@ -18,9 +17,9 @@ import {
 	Container,
 	CreateSnackbarFn,
 	IconButton,
-	SnackbarManagerContext,
 	Spinner,
-	Tooltip
+	Tooltip,
+	useSnackbar
 } from '@zextras/carbonio-design-system';
 import { debounce, find, forEach, map, size, throttle } from 'lodash';
 import { useTranslation } from 'react-i18next';
@@ -118,7 +117,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 	const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 	const [deleteMessageModalStatus, setDeleteMessageModalStatus] = useState(false);
 
-	const createSnackbar: CreateSnackbarFn = useContext(SnackbarManagerContext);
+	const createSnackbar: CreateSnackbarFn = useSnackbar();
 
 	const messageInputRef = useRef<HTMLTextAreaElement>(null);
 	const emojiButtonRef = useRef<HTMLDivElement>(null);
