@@ -56,6 +56,7 @@ const useTilesOrder = (meetingId: string): { centralTile: TileData; carouselTile
 				return [...tiles, ...newTiles];
 			});
 		}
+
 		if (size(tilesData) < size(tiles)) {
 			setTiles((tiles) => intersectionWith(tiles, tilesData, isEqual));
 		}
@@ -75,6 +76,7 @@ const useTilesOrder = (meetingId: string): { centralTile: TileData; carouselTile
 		},
 		[meetingId, pinnedTile]
 	);
+
 	// swap tiles handler based on who is talking
 	useEffect(() => {
 		const debounceIsTalking = debounce(checkIfIsStillTalking, 2000);
