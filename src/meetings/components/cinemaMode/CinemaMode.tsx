@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { ReactElement, useRef, useMemo, useCallback } from 'react';
+import React, { ReactElement, useRef, useMemo, useCallback, useEffect } from 'react';
 
 import { Container, IconButton, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
@@ -15,9 +15,13 @@ import TilesBar from './TilesBar';
 import useContainerDimensions from '../../../hooks/useContainerDimensions';
 import { MeetingRoutesParams } from '../../../hooks/useRouting';
 import useTilesOrder from '../../../hooks/useTilesOrder';
-import { getMeetingCarouselVisibility } from '../../../store/selectors/ActiveMeetingSelectors';
+import {
+	getMeetingCarouselVisibility,
+	getVideoScreenIn
+} from '../../../store/selectors/ActiveMeetingSelectors';
+import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
-import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
+import { STREAM_TYPE, Subscription } from '../../../types/store/ActiveMeetingTypes';
 import Tile from '../Tile';
 import WhoIsSpeaking from '../WhoIsSpeaking/WhoIsSpeaking';
 
@@ -52,6 +56,9 @@ const CinemaMode = (): ReactElement => {
 
 	const carouselIsVisible = useStore((store) => getMeetingCarouselVisibility(store, meetingId));
 	const setIsCarouselVisible = useStore((store) => store.setIsCarouseVisible);
+	const videoScreenIn = useStore((store) => getVideoScreenIn(store, meetingId));
+	const myUserId = useStore(getUserId);
+	const setUpdateSubscription = useStore((store) => store.setUpdateSubscription);
 
 	const [t] = useTranslation();
 	const collapseCarouselLabel = t(
@@ -81,6 +88,13 @@ const CinemaMode = (): ReactElement => {
 	const toggleCarousel = useCallback(() => {
 		setIsCarouselVisible(meetingId, !carouselIsVisible);
 	}, [carouselIsVisible, meetingId, setIsCarouselVisible]);
+
+	useEffect(() => {
+		if (!carouselIsVisible) {
+			const subscription: Subscription = { userId: centralTile.userId, type: centralTile.type };
+			setUpdateSubscription(meetingId, [subscription]);
+		}
+	}, [carouselIsVisible, centralTile, meetingId, myUserId, setUpdateSubscription, videoScreenIn]);
 
 	return (
 		<Container orientation="horizontal">
@@ -114,7 +128,7 @@ const CinemaMode = (): ReactElement => {
 						/>
 					</Tooltip>
 				</ChangeSidebarStatusButton>
-				{carouselIsVisible && <TilesBar carouselTiles={carouselTiles} />}
+				{carouselIsVisible && <TilesBar carouselTiles={carouselTiles} centralTile={centralTile} />}
 			</CarouselContainer>
 		</Container>
 	);

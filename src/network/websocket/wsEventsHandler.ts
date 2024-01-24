@@ -13,6 +13,7 @@ import { GetMeetingResponse } from '../../types/network/responses/meetingsRespon
 import { GetRoomResponse } from '../../types/network/responses/roomsResponses';
 import { WsEvent, WsEventType } from '../../types/network/websocket/wsEvents';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
+import { MeetingParticipant } from '../../types/store/MeetingTypes';
 import { RoomType } from '../../types/store/RoomTypes';
 import { wsDebug } from '../../utils/debug';
 import { MeetingSoundFeedback, sendAudioFeedback } from '../../utils/MeetingsUtils';
@@ -130,12 +131,13 @@ export function wsEventsHandler(event: WsEvent): void {
 			break;
 		}
 		case WsEventType.MEETING_JOINED: {
-			state.addParticipant(event.meetingId, {
+			const newParticipant: MeetingParticipant = {
 				userId: event.userId,
 				audioStreamOn: false,
 				videoStreamOn: false,
 				joinedAt: event.sentDate
-			});
+			};
+			state.addParticipant(event.meetingId, newParticipant);
 
 			// Send custom event to delete an incoming meeting notification if I joined the meeting from another session
 			const meeting = find(state.meetings, (meeting) => meeting.id === event.meetingId);
@@ -158,12 +160,7 @@ export function wsEventsHandler(event: WsEvent): void {
 			state.removeParticipant(event.meetingId, event.userId);
 
 			// Update subscription manager
-			const subscriptionsManager =
-				state.activeMeeting[event.meetingId]?.videoScreenIn?.subscriptionManager;
-			if (subscriptionsManager) {
-				subscriptionsManager?.removeStreamToAsk(event.userId, STREAM_TYPE.VIDEO);
-				subscriptionsManager?.removeStreamToAsk(event.userId, STREAM_TYPE.SCREEN);
-			}
+			state.setDeleteSubscription(event.meetingId, event.userId);
 
 			// Send audio feedback to other participants session user leave
 			const activeMeeting = state.activeMeeting[event.meetingId];
@@ -215,6 +212,15 @@ export function wsEventsHandler(event: WsEvent): void {
 		}
 		case WsEventType.MEETING_MEDIA_STREAM_CHANGED: {
 			const mediaType = event.mediaType.toLowerCase() as STREAM_TYPE;
+
+			// Update subscription manager
+			if (event.userId !== state.session.id) {
+				const sub = { userId: event.userId, type: mediaType };
+				if (!event.active) {
+					state.setRemoveSubscription(event.meetingId, sub);
+				}
+			}
+
 			state.changeStreamStatus(event.meetingId, event.userId, mediaType, event.active);
 
 			// Auto pin new screen share
@@ -230,14 +236,12 @@ export function wsEventsHandler(event: WsEvent): void {
 
 			// Update subscription manager
 			if (event.userId !== state.session.id) {
-				const subscriptionsManager =
-					state.activeMeeting[event.meetingId]?.videoScreenIn?.subscriptionManager;
+				const sub = { userId: event.userId, type: mediaType };
 				if (event.active) {
-					subscriptionsManager?.addStreamToAsk(event.userId, mediaType);
-				} else {
-					subscriptionsManager?.removeStreamToAsk(event.userId, mediaType);
+					state.setAddSubscription(event.meetingId, sub);
 				}
 			}
+
 			break;
 		}
 		case WsEventType.MEETING_AUDIO_ANSWERED: {

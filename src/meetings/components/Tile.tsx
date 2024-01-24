@@ -376,6 +376,13 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 		]
 	);
 
+	const tileSubscriptionId = useMemo(() => {
+		if (videoStreamEnabled || isScreenShare) {
+			return `tile-${!isScreenShare ? STREAM_TYPE.VIDEO : STREAM_TYPE.SCREEN}-${userId}`;
+		}
+		return 'tile';
+	}, [isScreenShare, userId, videoStreamEnabled]);
+
 	return (
 		<CustomTile
 			background={'text'}
@@ -412,6 +419,7 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 			<VideoEl
 				playsInline
 				autoPlay
+				key={`video-${tileSubscriptionId}`}
 				muted={modalProps ? modalProps.streamMuted : true}
 				controls={false}
 				ref={modalProps ? modalProps.streamRef : streamRef}
