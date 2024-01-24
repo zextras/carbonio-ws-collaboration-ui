@@ -9,9 +9,9 @@ import React from 'react';
 import { act, screen } from '@testing-library/react';
 
 import MemberComponentInfo from './MemberComponentInfo';
-import { mockedGetURLUserPicture } from '../../../../../jest-mocks';
 import useStore from '../../../../store/Store';
 import { createMockCapabilityList, createMockRoom } from '../../../../tests/createMock';
+import { mockedGetURLUserPicture } from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 import { RoomType } from '../../../../types/network/models/roomBeTypes';
 import { UserBe } from '../../../../types/network/models/userBeTypes';

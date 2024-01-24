@@ -8,7 +8,7 @@ import { onGetLastActivityResponse } from './handlers/lastActivityHandler';
 import { onGetRosterResponse } from './handlers/rosterHandler';
 import XMPPClient from './XMPPClient';
 import { XMPPRequestType } from './XMPPConnection';
-import { mockedXmppConnect, mockedXmppSend } from '../../../jest-mocks';
+import { mockedXmppConnect, mockedXmppSend } from '../../tests/mocks/XMPPConnection';
 
 describe('XMPPClient', () => {
 	test('connect is called with the correct params', () => {

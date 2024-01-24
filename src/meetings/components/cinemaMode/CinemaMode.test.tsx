@@ -3,13 +3,13 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-
 import React from 'react';
 
+import { screen } from '@testing-library/react';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { UserEvent } from '@testing-library/user-event/setup/setup';
 
-import FaceToFaceMode from './FaceToFaceMode';
+import CinemaMode from './CinemaMode';
 import { useParams } from '../../../../__mocks__/react-router';
 import useStore from '../../../store/Store';
 import {
@@ -44,9 +44,19 @@ const user2Participant: MeetingParticipant = createMockParticipants({
 	sessionId: 'sessionIdUser2'
 });
 
+const user3Participant: MeetingParticipant = createMockParticipants({
+	userId: 'user3',
+	sessionId: 'sessionIdUser3'
+});
+
+const user4Participant: MeetingParticipant = createMockParticipants({
+	userId: 'user4',
+	sessionId: 'sessionIdUser4'
+});
+
 const groupMeeting: MeetingBe = createMockMeeting({
 	roomId: groupRoom.id,
-	participants: [user1Participant, user2Participant]
+	participants: [user1Participant, user2Participant, user3Participant, user4Participant]
 });
 
 const setupBasicGroupMeeting = (): { user: UserEvent; store: RootStore } => {
@@ -57,12 +67,14 @@ const setupBasicGroupMeeting = (): { user: UserEvent; store: RootStore } => {
 		result.current.meetingConnection(groupMeeting.id, false, undefined, false, undefined);
 	});
 	useParams.mockReturnValue({ meetingId: groupMeeting.id });
-	const { user } = setup(<FaceToFaceMode />);
+	const { user } = setup(<CinemaMode />);
 	return { user, store: result.current };
 };
 
-describe('MeetingViewManager', () => {
-	test('It should display the faceToFace component', async () => {
+describe('CinemaMode', () => {
+	test('It should display the CinemaMode component', async () => {
 		setupBasicGroupMeeting();
+		const cinemaModeView = await screen.findByTestId('cinemaModeView');
+		expect(cinemaModeView).toBeInTheDocument();
 	});
 });

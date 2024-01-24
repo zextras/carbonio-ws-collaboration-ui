@@ -10,7 +10,6 @@ import { UserEvent } from '@testing-library/user-event/setup/setup';
 import { act } from 'react-dom/test-utils';
 
 import Tile from './Tile';
-import { mockedUpdateAudioStreamStatusRequest } from '../../../../jest-mocks';
 import useStore from '../../../store/Store';
 import {
 	createMockMeeting,
@@ -18,6 +17,7 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../../tests/createMock';
+import { mockedUpdateAudioStreamStatusRequest } from '../../../tests/mocks/network';
 import { setup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 import { MemberBe, RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';

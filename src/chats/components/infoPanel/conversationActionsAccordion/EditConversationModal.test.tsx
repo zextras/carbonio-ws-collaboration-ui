@@ -9,9 +9,9 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 
 import EditConversationModal from './EditConversationModal';
-import { mockedUpdateRoomRequest } from '../../../../../jest-mocks';
 import useStore from '../../../../store/Store';
 import { createMockMember, createMockRoom } from '../../../../tests/createMock';
+import { mockedUpdateRoomRequest } from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
 import { RootStore } from '../../../../types/store/StoreTypes';

@@ -9,13 +9,13 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 
 import ConversationHeader from './ConversationHeader';
-import { mockUseMediaQueryCheck } from '../../../../jest-mocks';
 import useStore from '../../../store/Store';
 import {
 	createMockCapabilityList,
 	createMockMember,
 	createMockRoom
 } from '../../../tests/createMock';
+import { mockUseMediaQueryCheck } from '../../../tests/mocks/useMediaQueryCheck';
 import { setup } from '../../../tests/test-utils';
 import { RoomBe } from '../../../types/network/models/roomBeTypes';
 import { RoomType } from '../../../types/store/RoomTypes';

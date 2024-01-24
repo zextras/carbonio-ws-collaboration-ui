@@ -5,9 +5,9 @@
  */
 
 import sessionApi from './SessionApi';
-import { fetchResponse } from '../../../jest-mocks';
 import useStore from '../../store/Store';
 import { createMockCapabilityList } from '../../tests/createMock';
+import { fetchResponse } from '../../tests/mocks/global';
 
 describe('Session API', () => {
 	test('getToken is called correctly', async () => {
