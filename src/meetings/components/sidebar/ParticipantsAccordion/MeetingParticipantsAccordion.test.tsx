@@ -11,10 +11,6 @@ import { act } from 'react-dom/test-utils';
 
 import MeetingParticipantsAccordion from './MeetingParticipantsAccordion';
 import MeetingParticipantsList from './MeetingParticipantsList';
-import {
-	mockedPromoteRoomMemberRequest,
-	mockedUpdateAudioStreamStatusRequest
-} from '../../../../../jest-mocks';
 import useStore from '../../../../store/Store';
 import {
 	createMockMeeting,
@@ -22,6 +18,10 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../../../tests/createMock';
+import {
+	mockedPromoteRoomMemberRequest,
+	mockedUpdateAudioStreamStatusRequest
+} from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 import { MeetingBe } from '../../../../types/network/models/meetingBeTypes';
 import { MemberBe, RoomBe } from '../../../../types/network/models/roomBeTypes';

@@ -10,7 +10,7 @@ import { act, renderHook } from '@testing-library/react-hooks';
 import { UserEvent } from '@testing-library/user-event/setup/setup';
 
 import FaceToFaceMode from './FaceToFaceMode';
-import { mockUseParams } from '../../../../jest-mocks';
+import { useParams } from '../../../../__mocks__/react-router';
 import useStore from '../../../store/Store';
 import {
 	createMockMeeting,
@@ -56,7 +56,7 @@ const setupBasicGroupMeeting = (): { user: UserEvent; store: RootStore } => {
 		result.current.addMeeting(groupMeeting);
 		result.current.meetingConnection(groupMeeting.id, false, undefined, false, undefined);
 	});
-	mockUseParams.mockReturnValue({ meetingId: groupMeeting.id });
+	useParams.mockReturnValue({ meetingId: groupMeeting.id });
 	const { user } = setup(<FaceToFaceMode />);
 	return { user, store: result.current };
 };

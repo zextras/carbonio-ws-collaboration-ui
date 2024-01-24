@@ -9,7 +9,7 @@ import { screen, waitFor } from '@testing-library/react';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { UserEvent } from '@testing-library/user-event/setup/setup';
 
-import { mockUseParams } from '../../../../jest-mocks';
+import { useParams } from '../../../../__mocks__/react-router';
 import useStore from '../../../store/Store';
 import {
 	createMockMeeting,
@@ -74,7 +74,7 @@ const storeSetupGroupMeetingSkeleton = (): { user: UserEvent } => {
 		result.current.addMeeting(meeting);
 		result.current.meetingConnection(meeting.id, false, undefined, false, undefined);
 	});
-	mockUseParams.mockReturnValue({ meetingId: meeting.id });
+	useParams.mockReturnValue({ meetingId: meeting.id });
 	const { user } = setup(<MeetingSkeleton />);
 
 	return { user };

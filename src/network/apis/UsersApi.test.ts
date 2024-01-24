@@ -6,9 +6,9 @@
 import { size } from 'lodash';
 
 import usersApi from './UsersApi';
-import { fetchResponse } from '../../../jest-mocks';
 import useStore from '../../store/Store';
 import { createMockCapabilityList, createMockUser } from '../../tests/createMock';
+import { fetchResponse } from '../../tests/mocks/global';
 import { UserBe } from '../../types/network/models/userBeTypes';
 
 const contentType = 'Content-Type';

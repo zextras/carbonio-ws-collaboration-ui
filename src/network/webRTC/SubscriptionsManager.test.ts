@@ -7,7 +7,6 @@
 import { act } from '@testing-library/react-hooks';
 
 import SubscriptionsManager from './SubscriptionsManager';
-import { mockedSubscribeToMediaRequest } from '../../../jest-mocks';
 import useStore from '../../store/Store';
 import {
 	createMockMeeting,
@@ -15,6 +14,7 @@ import {
 	createMockParticipants,
 	createMockRoom
 } from '../../tests/createMock';
+import { mockedSubscribeToMediaRequest } from '../../tests/mocks/network';
 import { MeetingBe, MeetingParticipantBe } from '../../types/network/models/meetingBeTypes';
 import { RoomBe, RoomType } from '../../types/network/models/roomBeTypes';
 import { WsEventType } from '../../types/network/websocket/wsEvents';

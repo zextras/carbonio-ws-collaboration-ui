@@ -10,7 +10,7 @@ import { screen, waitFor } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event/setup/setup';
 
 import MeetingActionsBar from './MeetingActionsBar';
-import { mockUseParams } from '../../../../jest-mocks';
+import { useParams } from '../../../../__mocks__/react-router';
 import useStore from '../../../store/Store';
 import {
 	createMockMeeting,
@@ -72,7 +72,7 @@ const storeBasicActiveMeetingSetup = (): void => {
 	store.addRoom(room);
 	store.addMeeting(meeting);
 	store.meetingConnection(meeting.id, false, undefined, false, undefined);
-	mockUseParams.mockReturnValue({ meetingId: meeting.id });
+	useParams.mockReturnValue({ meetingId: meeting.id });
 	setup(<MeetingActionsBar streamsWrapperRef={streamRef} />);
 };
 
@@ -85,7 +85,7 @@ const storeSetupGroupMeetingSkeleton = (): { user: UserEvent; store: RootStore }
 	store.addRoom(room);
 	store.addMeeting(meeting);
 	store.meetingConnection(meeting.id, false, undefined, false, undefined);
-	mockUseParams.mockReturnValue({ meetingId: meeting.id });
+	useParams.mockReturnValue({ meetingId: meeting.id });
 	const { user } = setup(<MeetingSkeleton />);
 
 	return { store, user };
