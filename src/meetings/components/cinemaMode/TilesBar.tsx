@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { ReactElement, useMemo, useRef } from 'react';
+import React, { ReactElement, useEffect, useMemo, useRef } from 'react';
 
 import { Container, IconButton, Tooltip } from '@zextras/carbonio-design-system';
 import { map, size } from 'lodash';
@@ -15,6 +15,8 @@ import styled from 'styled-components';
 import useContainerDimensions from '../../../hooks/useContainerDimensions';
 import usePagination from '../../../hooks/usePagination';
 import { MeetingRoutesParams } from '../../../hooks/useRouting';
+import { getVideoScreenIn } from '../../../store/selectors/ActiveMeetingSelectors';
+import useStore from '../../../store/Store';
 import { STREAM_TYPE, TileData } from '../../../types/store/ActiveMeetingTypes';
 import Tile from '../Tile';
 
@@ -42,8 +44,10 @@ const ButtonDownContainer = styled(Container)`
 
 type TilesBarProps = {
 	carouselTiles: TileData[];
+	centralTile: TileData;
 };
-const TilesBar = ({ carouselTiles }: TilesBarProps): ReactElement => {
+
+const TilesBar = ({ carouselTiles, centralTile }: TilesBarProps): ReactElement => {
 	const { meetingId }: MeetingRoutesParams = useParams();
 
 	const [t] = useTranslation();
@@ -51,6 +55,9 @@ const TilesBar = ({ carouselTiles }: TilesBarProps): ReactElement => {
 	const scrollDownLabel = t('tooltip.scrollDown', 'Scroll down');
 	const topLabel = t('tooltip.topOfList', 'Top of list');
 	const bottomLabel = t('tooltip.bottomOfList', 'Bottom of list');
+
+	const videoScreenIn = useStore((store) => getVideoScreenIn(store, meetingId));
+	const setUpdateSubscription = useStore((store) => store.setUpdateSubscription);
 
 	const tilesContainerRef = useRef<HTMLDivElement>(null);
 
@@ -70,17 +77,35 @@ const TilesBar = ({ carouselTiles }: TilesBarProps): ReactElement => {
 		showPaginationButtons
 	} = usePagination(totalTiles, tilesForPage, 3);
 
-	const tilesToRender = useMemo(() => {
-		const selectedTiles = carouselTiles.slice(index, index + tilesForPage);
-		return map(selectedTiles, (tile) => (
-			<Tile
-				key={`tile-${tile.userId}/${tile.type}`}
-				userId={tile.userId}
-				meetingId={meetingId}
-				isScreenShare={tile.type === STREAM_TYPE.SCREEN}
-			/>
-		));
-	}, [carouselTiles, index, meetingId, tilesForPage]);
+	const tilesDataToRender = useMemo(
+		() => carouselTiles.slice(index, index + tilesForPage),
+		[carouselTiles, index, tilesForPage]
+	);
+
+	const tilesToRender = useMemo(
+		() =>
+			map(tilesDataToRender, (tile) => (
+				<Tile
+					key={`tile-${tile.userId}/${tile.type}`}
+					userId={tile.userId}
+					meetingId={meetingId}
+					isScreenShare={tile.type === STREAM_TYPE.SCREEN}
+				/>
+			)),
+		[meetingId, tilesDataToRender]
+	);
+
+	// Subscribe tiles' stream
+	useEffect(() => {
+		if (tilesDataToRender.length > 0) {
+			const subscriptions = map(tilesDataToRender, (value) => ({
+				userId: value.userId,
+				type: value.type
+			}));
+			subscriptions.push({ userId: centralTile.userId, type: centralTile.type });
+			setUpdateSubscription(meetingId, subscriptions);
+		}
+	}, [videoScreenIn, tilesDataToRender, centralTile, meetingId, setUpdateSubscription]);
 
 	return (
 		<TilesBarContainer mainAlignment="space-between">
