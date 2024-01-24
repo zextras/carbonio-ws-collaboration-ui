@@ -20,7 +20,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import { MEETINGS_PATH } from '../../../../constants/appConstants';
+import { CHATS_ROUTE, MEETINGS_PATH } from '../../../../constants/appConstants';
 import { RoomsApi } from '../../../../network';
 import { getRoomSelector } from '../../../../store/selectors/RoomsSelectors';
 import useStore from '../../../../store/Store';
@@ -66,23 +66,35 @@ const VirtualRoomListElement: FC<virtualRoomElementProps> = ({ roomId, modalRef 
 		`Delete ${room.name} Virtual Room`,
 		{ roomName: room.name }
 	);
+	const errorSnackbar = t(
+		'settings.profile.errorGenericResponse',
+		'Something went wrong. Please retry'
+	);
 
 	const [showModal, setShowModal] = useState(false);
 	const createSnackbar: CreateSnackbarFn = useContext(SnackbarManagerContext);
 
 	const handleDeleteRoom = useCallback(() => {
-		RoomsApi.deleteRoom(roomId).then(() => {
-			createSnackbar({
-				key: new Date().toLocaleString(),
-				type: 'success',
-				label: deleteVirtualRoomSnackbar,
-				hideButton: true
+		RoomsApi.deleteRoom(roomId)
+			.then(() => {
+				createSnackbar({
+					key: new Date().toLocaleString(),
+					type: 'success',
+					label: deleteVirtualRoomSnackbar,
+					hideButton: true
+				});
+			})
+			.catch(() => {
+				createSnackbar({
+					key: new Date().toLocaleString(),
+					label: errorSnackbar,
+					hideButton: true
+				});
 			});
-		});
-	}, [createSnackbar, deleteVirtualRoomSnackbar, roomId]);
+	}, [createSnackbar, deleteVirtualRoomSnackbar, errorSnackbar, roomId]);
 
 	const handleCopyLink = useCallback(() => {
-		const link = `${window.location.origin}/carbonio/${MEETINGS_PATH}${room.id}`;
+		const link = `${window.location.href.split(CHATS_ROUTE)[0]}${MEETINGS_PATH}${room.id}`;
 		if (window.parent.navigator.clipboard) {
 			window.parent.navigator.clipboard.writeText(link);
 		} else {
@@ -101,10 +113,7 @@ const VirtualRoomListElement: FC<virtualRoomElementProps> = ({ roomId, modalRef 
 		});
 	}, [room.id, createSnackbar, copyVirtualRoomLinkSnackbar]);
 
-	const handleEnterRoom = useCallback(
-		() => window.open(`/carbonio/${MEETINGS_PATH}${room.id}`),
-		[room.id]
-	);
+	const handleEnterRoom = useCallback(() => window.open(`${MEETINGS_PATH}${room.id}`), [room.id]);
 
 	const handleModalOpening = useCallback(() => setShowModal((prevState) => !prevState), []);
 

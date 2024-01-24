@@ -8,13 +8,23 @@ import React, {
 	FC,
 	SetStateAction,
 	useCallback,
+	useContext,
 	useEffect,
 	useMemo,
 	useRef,
 	useState
 } from 'react';
 
-import { Container, Input, Row, Text, IconButton, Tooltip } from '@zextras/carbonio-design-system';
+import {
+	Container,
+	Input,
+	Row,
+	Text,
+	IconButton,
+	Tooltip,
+	CreateSnackbarFn,
+	SnackbarManagerContext
+} from '@zextras/carbonio-design-system';
 import { map, size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -59,7 +69,6 @@ const VirtualRoomsList: FC<virtualRoomsListProps> = ({ setListVisibility, parent
 		'meeting.scheduledMeetings.noVirtualRooms',
 		'The Rooms you create will be shown here'
 	);
-
 	const cancelTooltip = t('meeting.scheduledMeetings.cancelTooltip', 'Cancel');
 	const createTooltip = t(
 		'meeting.scheduledMeetings.createVirtualRoomTooltip',
@@ -68,6 +77,10 @@ const VirtualRoomsList: FC<virtualRoomsListProps> = ({ setListVisibility, parent
 	const roomNameRequiredTooltip = t(
 		'meeting.scheduledMeetings.VirtualRoomNameRequiredTooltip',
 		'Virtual Room’s name is required'
+	);
+	const errorSnackbar = t(
+		'settings.profile.errorGenericResponse',
+		'Something went wrong. Please retry'
 	);
 
 	const virtualRoomList = useStore(getScheduledRoomIdsOrderedByCreation);
@@ -78,6 +91,8 @@ const VirtualRoomsList: FC<virtualRoomsListProps> = ({ setListVisibility, parent
 	const textRef = useRef<HTMLInputElement>(null);
 	const popupRef = useRef<HTMLDivElement>(null);
 	const modalRef = useRef<HTMLDivElement>(null);
+
+	const createSnackbar: CreateSnackbarFn = useContext(SnackbarManagerContext);
 
 	const handleMouseUp = useCallback(
 		(event) => {
@@ -99,14 +114,33 @@ const VirtualRoomsList: FC<virtualRoomsListProps> = ({ setListVisibility, parent
 	);
 
 	const handleCreateButtonClick = useCallback(() => {
-		// TODO: test with group creation
+		// TODO: use temporary room
 		RoomsApi.addRoom({
 			name: textRef.current?.value ?? '',
 			description: '',
 			type: RoomType.GROUP,
 			membersIds: ['67286969-2713-48b0-901c-117c896ae50f', '2415efc7-8822-46f4-b34b-e86d12ba4d59']
-		});
-	}, []);
+		})
+			.then(() => {
+				textRef.current!.value = '';
+				setInputHasFocus(false);
+				setCanCreateVirtualRoom(false);
+				createSnackbar({
+					key: new Date().toLocaleString(),
+					type: 'success',
+					label: 'Virtual Room created successfully', // TODO
+					hideButton: true
+				});
+			})
+			.catch(() => {
+				createSnackbar({
+					key: new Date().toLocaleString(),
+					type: 'error',
+					label: errorSnackbar,
+					hideButton: true
+				});
+			});
+	}, [createSnackbar, errorSnackbar]);
 
 	const handleDeleteNameClick = useCallback(() => {
 		if (textRef.current) {
@@ -137,31 +171,29 @@ const VirtualRoomsList: FC<virtualRoomsListProps> = ({ setListVisibility, parent
 						onChange={handleOnChangeInput}
 					/>
 				</Row>
-				<Row width="fit" orientation="horizontal" gap="0.5rem" padding={{ horizontal: '0.5rem' }}>
-					{inputHasFocus && (
-						<>
-							<Tooltip label={cancelTooltip}>
-								<CustomIconButton
-									size="large"
-									icon="CloseOutline"
-									iconColor="gray6"
-									backgroundColor="secondary"
-									onClick={handleDeleteNameClick}
-								/>
-							</Tooltip>
-							<Tooltip label={canCreateVirtualRoom ? createTooltip : roomNameRequiredTooltip}>
-								<CustomIconButton
-									size="large"
-									icon="CheckmarkOutline"
-									iconColor="gray6"
-									backgroundColor="primary"
-									onClick={handleCreateButtonClick}
-									disabled={!canCreateVirtualRoom}
-								/>
-							</Tooltip>
-						</>
-					)}
-				</Row>
+				{inputHasFocus && (
+					<Row width="fit" orientation="horizontal" gap="0.5rem" padding={{ horizontal: '0.5rem' }}>
+						<Tooltip label={cancelTooltip}>
+							<CustomIconButton
+								size="large"
+								icon="CloseOutline"
+								iconColor="gray6"
+								backgroundColor="secondary"
+								onClick={handleDeleteNameClick}
+							/>
+						</Tooltip>
+						<Tooltip label={canCreateVirtualRoom ? createTooltip : roomNameRequiredTooltip}>
+							<CustomIconButton
+								size="large"
+								icon="CheckmarkOutline"
+								iconColor="gray6"
+								backgroundColor="primary"
+								onClick={handleCreateButtonClick}
+								disabled={!canCreateVirtualRoom}
+							/>
+						</Tooltip>
+					</Row>
+				)}
 			</Container>
 		),
 		[
