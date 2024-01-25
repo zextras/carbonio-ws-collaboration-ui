@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { useCallback, useContext, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 
-import { CreateSnackbarFn, SnackbarManagerContext } from '@zextras/carbonio-design-system';
+import { CreateSnackbarFn, useSnackbar } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
 import { MeetingsApi } from '../network';
@@ -40,7 +40,7 @@ const useMuteForAll = (
 	const roomId = useStore((store) => getRoomIdByMeetingId(store, meetingId || ''));
 	const amIModerator = useStore((store) => getMyOwnershipOfTheRoom(store, sessionId, roomId || ''));
 
-	const createSnackbar: CreateSnackbarFn = useContext(SnackbarManagerContext);
+	const createSnackbar: CreateSnackbarFn = useSnackbar();
 
 	const muteForAllHasToAppear = useMemo(
 		() => participantAudioStatus && amIModerator && userIdToMute !== sessionId,
