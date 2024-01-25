@@ -31,7 +31,7 @@ import styled from 'styled-components';
 
 import VirtualRoomListElement from './VirtualRoomListElement';
 import { RoomsApi } from '../../../../network';
-import { getScheduledRoomIdsOrderedByCreation } from '../../../../store/selectors/RoomsSelectors';
+import { getTemporaryRoomIdsOrderedByCreation } from '../../../../store/selectors/RoomsSelectors';
 import useStore from '../../../../store/Store';
 import { RoomType } from '../../../../types/store/RoomTypes';
 
@@ -78,7 +78,7 @@ const VirtualRoomsList: FC<virtualRoomsListProps> = ({ setListVisibility, parent
 		'Something went wrong. Please retry'
 	);
 
-	const virtualRoomList = useStore(getScheduledRoomIdsOrderedByCreation);
+	const virtualRoomList = useStore(getTemporaryRoomIdsOrderedByCreation);
 	const [inputHasFocus, setInputHasFocus] = useState(false);
 	const [canCreateVirtualRoom, setCanCreateVirtualRoom] = useState(false);
 	const [nameError, setNameError] = useState(false);
@@ -110,12 +110,9 @@ const VirtualRoomsList: FC<virtualRoomsListProps> = ({ setListVisibility, parent
 	);
 
 	const handleCreateButtonClick = useCallback(() => {
-		// TODO: use temporary room
 		RoomsApi.addRoom({
 			name: textRef.current?.value ?? '',
-			description: '',
-			type: RoomType.GROUP,
-			membersIds: ['67286969-2713-48b0-901c-117c896ae50f', '2415efc7-8822-46f4-b34b-e86d12ba4d59']
+			type: RoomType.TEMPORARY
 		})
 			.then(() => {
 				textRef.current!.value = '';

@@ -20,8 +20,8 @@ export const getRoomIdsList = (state: RootStore): string[] => {
 	return idsList;
 };
 
-export const getScheduledRoomIdsOrderedByCreation = (store: RootStore): string[] => {
-	const filteredRooms = filter(store.rooms, (room) => room.type === RoomType.GROUP);
+export const getTemporaryRoomIdsOrderedByCreation = (store: RootStore): string[] => {
+	const filteredRooms = filter(store.rooms, (room) => room.type === RoomType.TEMPORARY);
 	const orderedRooms = orderBy(filteredRooms, ['createdAt'], ['desc']);
 	return map(orderedRooms, (room) => room.id);
 };
