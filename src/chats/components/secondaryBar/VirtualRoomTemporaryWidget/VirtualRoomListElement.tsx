@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { FC, useCallback, useContext, useState } from 'react';
+import React, { FC, useCallback, useContext, useMemo, useState } from 'react';
 
 import {
 	Container,
@@ -21,7 +21,10 @@ import styled from 'styled-components';
 
 import { CHATS_ROUTE, MEETINGS_PATH } from '../../../../constants/appConstants';
 import { RoomsApi } from '../../../../network';
-import { getMyMeetingParticipation } from '../../../../store/selectors/MeetingSelectors';
+import {
+	getMeetingActive,
+	getMyMeetingParticipation
+} from '../../../../store/selectors/MeetingSelectors';
 import { getRoomSelector } from '../../../../store/selectors/RoomsSelectors';
 import useStore from '../../../../store/Store';
 
@@ -36,7 +39,8 @@ const CustomIconButton = styled(IconButton)`
 
 const VirtualRoomListElement: FC<virtualRoomElementProps> = ({ roomId, modalRef }) => {
 	const room = useStore((state) => getRoomSelector(state, roomId));
-	const amIPartecipating = useStore((state) => getMyMeetingParticipation(state, roomId));
+	const meetingIsActive: boolean = useStore((store) => getMeetingActive(store, roomId));
+	const amIParticipating = useStore((state) => getMyMeetingParticipation(state, roomId));
 
 	const [t] = useTranslation();
 
@@ -63,6 +67,7 @@ const VirtualRoomListElement: FC<virtualRoomElementProps> = ({ roomId, modalRef 
 		'settings.profile.errorGenericResponse',
 		'Something went wrong. Please retry'
 	);
+	const startMeeting = t('meeting.startMeeting', 'Start meeting');
 	const joinMeeting = t('meeting.joinMeeting', 'Join meeting');
 	const rejoinMeeting = t('meeting.rejoinMeeting', 'Rejoin meeting');
 
@@ -110,6 +115,11 @@ const VirtualRoomListElement: FC<virtualRoomElementProps> = ({ roomId, modalRef 
 
 	const handleEnterRoom = useCallback(() => window.open(`${MEETINGS_PATH}${room.id}`), [room.id]);
 
+	const enterRoomTooltip = useMemo(
+		() => (meetingIsActive ? (amIParticipating ? rejoinMeeting : joinMeeting) : startMeeting),
+		[amIParticipating, joinMeeting, meetingIsActive, rejoinMeeting, startMeeting]
+	);
+
 	const handleModalOpening = useCallback(() => setShowModal((prevState) => !prevState), []);
 
 	return (
@@ -136,12 +146,7 @@ const VirtualRoomListElement: FC<virtualRoomElementProps> = ({ roomId, modalRef 
 						onClick={handleCopyLink}
 					/>
 				</Tooltip>
-				<Tooltip
-					label={
-						// TODO gestisci tooltip come su pulsante per meeting su header della conversazione
-						amIPartecipating ? rejoinMeeting : joinMeeting
-					}
-				>
+				<Tooltip label={enterRoomTooltip}>
 					<CustomIconButton
 						customSize={{ iconSize: '1.25rem', paddingSize: '0.125rem' }}
 						icon="ArrowForwardOutline"
