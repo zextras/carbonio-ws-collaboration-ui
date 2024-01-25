@@ -4,13 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { FC, useCallback, useContext, useMemo, useState } from 'react';
+import React, { FC, useCallback, useMemo, useState } from 'react';
 
-import {
-	Container,
-	SnackbarManagerContext,
-	CreateSnackbarFn
-} from '@zextras/carbonio-design-system';
+import { Container, CreateSnackbarFn, useSnackbar } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
 import ActionComponent from './ActionComponent';
@@ -50,7 +46,8 @@ const ClearHistoryAction: FC<ClearHistoryProps> = ({
 
 	const closeModal = useCallback(() => setClearHistoryModalOpen(false), []);
 
-	const createSnackbar: CreateSnackbarFn = useContext(SnackbarManagerContext);
+	const createSnackbar: CreateSnackbarFn = useSnackbar();
+
 	const successfulSnackbar = useCallback(
 		() =>
 			createSnackbar({

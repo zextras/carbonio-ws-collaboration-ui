@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { FC, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 
 import {
 	Button,
@@ -12,9 +12,9 @@ import {
 	Input,
 	Modal,
 	Padding,
-	SnackbarManagerContext,
 	CreateSnackbarFn,
-	Tooltip
+	Tooltip,
+	useSnackbar
 } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
@@ -58,7 +58,7 @@ const EditConversationModal: FC<EditConversationProps> = ({
 	const [newDescription, setNewDescription] = useState<string>('');
 	const [buttonDisabled, setButtonDisabled] = useState<boolean>(true);
 
-	const createSnackbar: CreateSnackbarFn = useContext(SnackbarManagerContext);
+	const createSnackbar: CreateSnackbarFn = useSnackbar();
 
 	const nameError = useMemo(() => newName.length === 0 || newName.length > 128, [newName]);
 	const descriptionError = useMemo(() => newDescription.length > 256, [newDescription]);
