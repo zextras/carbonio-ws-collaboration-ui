@@ -40,33 +40,25 @@ const VirtualRoomListElement: FC<virtualRoomElementProps> = ({ roomId, modalRef 
 
 	const [t] = useTranslation();
 
-	const deleteVirtualRoomTooltip = t(
-		'meeting.scheduledMeetings.deleteVirtualRoomTooltip',
-		'Delete Virtual Room'
-	);
-	const copyVirtualRoomTooltip = t(
-		'meeting.scheduledMeetings.copyVirtualRoomTooltip',
-		"Copy Virtual Room's link"
-	);
+	const deleteVirtualRoomTooltip = t('meeting.virtual.deleteTooltip', 'Delete Virtual Room');
+	const copyVirtualRoomTooltip = t('meeting.virtual.copyTooltip', "Copy Virtual Room's link");
 	const copyVirtualRoomLinkSnackbar = t(
-		'meeting.scheduledMeetings.copyVirtualRoomLink',
+		'meeting.virtual.copyLinkSnackbar',
 		"Virtual Room's link copied"
 	);
 	const deleteVirtualRoomSnackbar = t(
-		'meeting.scheduledMeetings.deleteVirtualRoom',
+		'meeting.virtual.deleteSnackbar',
 		'Virtual Room deleted successfully'
 	);
 	const closeLabel = t('action.close', 'Close');
 	const deleteVirtualRoomLabel = t('action.delete', 'Delete');
 	const deleteVirtualRoomDescription = t(
-		'meeting.scheduledMeetings.deleteMeetingModalDescription',
+		'meeting.virtual.deleteModalDescription',
 		'You are deleting this Virtual Room, if it has active meetings, it will be interrupted and no one will be able to access it anymore. Proceed?'
 	);
-	const modalTitle = t(
-		'meeting.scheduledMeetings.deleteMeetingModalTitle',
-		`Delete ${room.name} Virtual Room`,
-		{ roomName: room.name }
-	);
+	const modalTitle = t('meeting.virtual.deleteModalTitle', `Delete ${room.name} Virtual Room`, {
+		roomName: room.name
+	});
 	const errorSnackbar = t(
 		'settings.profile.errorGenericResponse',
 		'Something went wrong. Please retry'
@@ -144,7 +136,12 @@ const VirtualRoomListElement: FC<virtualRoomElementProps> = ({ roomId, modalRef 
 						onClick={handleCopyLink}
 					/>
 				</Tooltip>
-				<Tooltip label={amIPartecipating ? rejoinMeeting : joinMeeting}>
+				<Tooltip
+					label={
+						// TODO gestisci tooltip come su pulsante per meeting su header della conversazione
+						amIPartecipating ? rejoinMeeting : joinMeeting
+					}
+				>
 					<CustomIconButton
 						customSize={{ iconSize: '1.25rem', paddingSize: '0.125rem' }}
 						icon="ArrowForwardOutline"

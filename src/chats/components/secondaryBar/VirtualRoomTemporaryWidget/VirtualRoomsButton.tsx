@@ -16,7 +16,7 @@ type virtualRoomsButtonProps = {
 
 const VirtualRoomsButton: FC<virtualRoomsButtonProps> = ({ expanded }) => {
 	const [t] = useTranslation();
-	const virtualRoomsLabel = t('meeting.scheduledMeetings.virtualRoomLabel', 'Your Virtual Rooms');
+	const virtualRoomsLabel = t('meeting.virtual.buttonLabel', 'Your Virtual Rooms');
 
 	const [listVisibility, setListVisibility] = useState(false);
 

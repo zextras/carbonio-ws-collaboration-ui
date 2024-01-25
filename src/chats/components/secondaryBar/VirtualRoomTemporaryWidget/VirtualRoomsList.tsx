@@ -61,24 +61,18 @@ const CustomIconButton = styled(IconButton)`
 const VirtualRoomsList: FC<virtualRoomsListProps> = ({ setListVisibility, parentRef }) => {
 	const [t] = useTranslation();
 
-	const virtualRoomNameInput = t(
-		'meeting.scheduledMeetings.newVirtualRoom',
-		'New Virtual Room’s name*'
-	);
+	const virtualRoomNameInput = t('meeting.virtual.creationInput', 'New Virtual Room’s name*');
 	const noVirtualRoomsLabel = t(
-		'meeting.scheduledMeetings.noVirtualRooms',
+		'meeting.virtual.emptyState',
 		'The Rooms you create will be shown here'
 	);
-	const cancelTooltip = t('meeting.scheduledMeetings.cancelTooltip', 'Cancel');
-	const createTooltip = t(
-		'meeting.scheduledMeetings.createVirtualRoomTooltip',
-		'Create new Virtual Room'
-	);
+	const cancelTooltip = t('action.cancel', 'Cancel');
+	const createTooltip = t('meeting.virtual.createTooltip', 'Create new Virtual Room');
 	const roomNameRequiredTooltip = t(
-		'meeting.scheduledMeetings.VirtualRoomNameRequiredTooltip',
+		'meeting.virtual.nameRequiredTooltip',
 		'Virtual Room’s name is required'
 	);
-	const invalidNameString = t('meeting.scheduledMeetings.invalidName', 'Invalid name');
+	const invalidNameString = t('meeting.virtual.invalidNameTooltip', 'Invalid name');
 	const errorSnackbar = t(
 		'settings.profile.errorGenericResponse',
 		'Something went wrong. Please retry'
