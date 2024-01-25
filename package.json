@@ -72,8 +72,8 @@
 	"dependencies": {
 		"@emoji-mart/data": "^1.0.2",
 		"@testing-library/react-hooks": "^8.0.1",
-		"@zextras/carbonio-design-system": "^4.0.0",
-		"@zextras/carbonio-shell-ui": "^5.0.2",
+		"@zextras/carbonio-design-system": "^4.1.0",
+		"@zextras/carbonio-shell-ui": "^5.1.0",
 		"@zextras/carbonio-ui-preview": "^1.2.2",
 		"emoji-mart": "^5.1.0",
 		"identity-obj-proxy": "^3.0.0",
@@ -91,7 +91,7 @@
 		"react-router-dom": "5.2.0",
 		"strophe.js": "1.6.2",
 		"styled-components": "5.3.11",
-		"uuid": "^9.0.0",
+		"uuid": "^9.0.1",
 		"zustand": "^4.4.7"
 	},
 	"carbonio": {

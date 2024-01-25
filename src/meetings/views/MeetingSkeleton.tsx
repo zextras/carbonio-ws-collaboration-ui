@@ -4,13 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { ReactElement, useCallback, useContext, useMemo, useRef } from 'react';
+import React, { ReactElement, useCallback, useMemo, useRef } from 'react';
 
-import {
-	Container,
-	CreateSnackbarFn,
-	SnackbarManagerContext
-} from '@zextras/carbonio-design-system';
+import { Container, CreateSnackbarFn, useSnackbar } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -69,7 +65,7 @@ const MeetingSkeleton = (): ReactElement => {
 
 	const streamsWrapperRef = useRef<HTMLDivElement>(null);
 
-	const createSnackbar: CreateSnackbarFn = useContext(SnackbarManagerContext);
+	const createSnackbar: CreateSnackbarFn = useSnackbar();
 
 	useGeneralMeetingControls(meetingId);
 
