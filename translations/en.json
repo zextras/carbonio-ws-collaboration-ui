@@ -175,6 +175,7 @@
             "deleteMeetingModalTitle": "Delete {{roomName}} Virtual Room",
             "deleteVirtualRoom": "Virtual Room deleted successfully",
             "deleteVirtualRoomTooltip": "Delete Virtual Room",
+            "invalidName": "Invalid name",
             "newVirtualRoom": "New Virtual Room’s name*",
             "noVirtualRooms": "The Rooms you create will be shown here",
             "virtualRoomLabel": "Your Virtual Rooms"

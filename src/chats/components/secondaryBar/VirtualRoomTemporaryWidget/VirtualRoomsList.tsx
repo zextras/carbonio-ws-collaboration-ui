@@ -78,6 +78,7 @@ const VirtualRoomsList: FC<virtualRoomsListProps> = ({ setListVisibility, parent
 		'meeting.scheduledMeetings.VirtualRoomNameRequiredTooltip',
 		'Virtual Room’s name is required'
 	);
+	const invalidNameString = t('meeting.scheduledMeetings.invalidName', 'Invalid name');
 	const errorSnackbar = t(
 		'settings.profile.errorGenericResponse',
 		'Something went wrong. Please retry'
@@ -86,6 +87,7 @@ const VirtualRoomsList: FC<virtualRoomsListProps> = ({ setListVisibility, parent
 	const virtualRoomList = useStore(getScheduledRoomIdsOrderedByCreation);
 	const [inputHasFocus, setInputHasFocus] = useState(false);
 	const [canCreateVirtualRoom, setCanCreateVirtualRoom] = useState(false);
+	const [nameError, setNameError] = useState(false);
 
 	const inputRef = useRef<HTMLDivElement>(null);
 	const textRef = useRef<HTMLInputElement>(null);
@@ -125,12 +127,6 @@ const VirtualRoomsList: FC<virtualRoomsListProps> = ({ setListVisibility, parent
 				textRef.current!.value = '';
 				setInputHasFocus(false);
 				setCanCreateVirtualRoom(false);
-				createSnackbar({
-					key: new Date().toLocaleString(),
-					type: 'success',
-					label: 'Virtual Room created successfully', // TODO
-					hideButton: true
-				});
 			})
 			.catch(() => {
 				createSnackbar({
@@ -147,19 +143,25 @@ const VirtualRoomsList: FC<virtualRoomsListProps> = ({ setListVisibility, parent
 			textRef.current.value = '';
 			textRef.current.focus();
 			setCanCreateVirtualRoom(false);
+			setNameError(false);
 		}
 	}, []);
 
 	const handleOnChangeInput = useCallback(() => {
-		if (size(textRef.current?.value) > 0) {
-			setCanCreateVirtualRoom(true);
-		} else {
+		const textSize = size(textRef.current?.value);
+		if (textSize <= 0) {
 			setCanCreateVirtualRoom(false);
+			setNameError(false);
+		} else if (textSize < 128) {
+			setCanCreateVirtualRoom(true);
+			setNameError(false);
+		} else {
+			textRef.current!.value = textRef.current!.value.slice(0, 128);
+			setCanCreateVirtualRoom(false);
+			setNameError(true);
 		}
 	}, []);
 
-	// TODO error handling: when name is too long the input should became red and
-	//  the create button should be disabled with "Invalid name" tooltip
 	const inputSection = useMemo(
 		() => (
 			<Container orientation="horizontal" ref={inputRef}>
@@ -169,6 +171,7 @@ const VirtualRoomsList: FC<virtualRoomsListProps> = ({ setListVisibility, parent
 						label={virtualRoomNameInput}
 						inputRef={textRef}
 						onChange={handleOnChangeInput}
+						hasError={nameError}
 					/>
 				</Row>
 				{inputHasFocus && (
@@ -182,7 +185,15 @@ const VirtualRoomsList: FC<virtualRoomsListProps> = ({ setListVisibility, parent
 								onClick={handleDeleteNameClick}
 							/>
 						</Tooltip>
-						<Tooltip label={canCreateVirtualRoom ? createTooltip : roomNameRequiredTooltip}>
+						<Tooltip
+							label={
+								nameError
+									? invalidNameString
+									: canCreateVirtualRoom
+									? createTooltip
+									: roomNameRequiredTooltip
+							}
+						>
 							<CustomIconButton
 								size="large"
 								icon="CheckmarkOutline"
@@ -204,6 +215,8 @@ const VirtualRoomsList: FC<virtualRoomsListProps> = ({ setListVisibility, parent
 			handleDeleteNameClick,
 			handleOnChangeInput,
 			inputHasFocus,
+			invalidNameString,
+			nameError,
 			roomNameRequiredTooltip,
 			virtualRoomNameInput
 		]
