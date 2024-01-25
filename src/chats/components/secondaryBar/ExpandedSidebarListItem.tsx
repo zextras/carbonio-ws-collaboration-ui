@@ -171,7 +171,7 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 				case MessageType.CONFIGURATION_MSG:
 					return <ConfigurationMessageLabel message={lastMessageOfRoom} />;
 				default:
-					return `affiliation message to replace`;
+					return ``;
 			}
 		}
 		if (usersWritingList) {

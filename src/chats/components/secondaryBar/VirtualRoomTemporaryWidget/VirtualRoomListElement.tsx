@@ -10,7 +10,6 @@ import {
 	Container,
 	CreateSnackbarFn,
 	IconButton,
-	Padding,
 	Row,
 	SnackbarManagerContext,
 	Text,
@@ -22,6 +21,7 @@ import styled from 'styled-components';
 
 import { CHATS_ROUTE, MEETINGS_PATH } from '../../../../constants/appConstants';
 import { RoomsApi } from '../../../../network';
+import { getMyMeetingParticipation } from '../../../../store/selectors/MeetingSelectors';
 import { getRoomSelector } from '../../../../store/selectors/RoomsSelectors';
 import useStore from '../../../../store/Store';
 
@@ -36,6 +36,7 @@ const CustomIconButton = styled(IconButton)`
 
 const VirtualRoomListElement: FC<virtualRoomElementProps> = ({ roomId, modalRef }) => {
 	const room = useStore((state) => getRoomSelector(state, roomId));
+	const amIPartecipating = useStore((state) => getMyMeetingParticipation(state, roomId));
 
 	const [t] = useTranslation();
 
@@ -70,6 +71,8 @@ const VirtualRoomListElement: FC<virtualRoomElementProps> = ({ roomId, modalRef 
 		'settings.profile.errorGenericResponse',
 		'Something went wrong. Please retry'
 	);
+	const joinMeeting = t('meeting.joinMeeting', 'Join meeting');
+	const rejoinMeeting = t('meeting.rejoinMeeting', 'Rejoin meeting');
 
 	const [showModal, setShowModal] = useState(false);
 	const createSnackbar: CreateSnackbarFn = useContext(SnackbarManagerContext);
@@ -126,7 +129,7 @@ const VirtualRoomListElement: FC<virtualRoomElementProps> = ({ roomId, modalRef 
 			<Row takeAvailableSpace mainAlignment="flex-start">
 				<Text>{room.name}</Text>
 			</Row>
-			<Row>
+			<Row gap="0.25rem">
 				<Tooltip label={deleteVirtualRoomTooltip}>
 					<CustomIconButton
 						customSize={{ iconSize: '1.25rem', paddingSize: '0.125rem' }}
@@ -134,7 +137,6 @@ const VirtualRoomListElement: FC<virtualRoomElementProps> = ({ roomId, modalRef 
 						onClick={handleModalOpening}
 					/>
 				</Tooltip>
-				<Padding right="0.25rem" />
 				<Tooltip label={copyVirtualRoomTooltip}>
 					<CustomIconButton
 						customSize={{ iconSize: '1.25rem', paddingSize: '0.125rem' }}
@@ -142,12 +144,13 @@ const VirtualRoomListElement: FC<virtualRoomElementProps> = ({ roomId, modalRef 
 						onClick={handleCopyLink}
 					/>
 				</Tooltip>
-				<Padding right="0.25rem" />
-				<CustomIconButton
-					customSize={{ iconSize: '1.25rem', paddingSize: '0.125rem' }}
-					icon="ArrowForwardOutline"
-					onClick={handleEnterRoom}
-				/>
+				<Tooltip label={amIPartecipating ? rejoinMeeting : joinMeeting}>
+					<CustomIconButton
+						customSize={{ iconSize: '1.25rem', paddingSize: '0.125rem' }}
+						icon="ArrowForwardOutline"
+						onClick={handleEnterRoom}
+					/>
+				</Tooltip>
 			</Row>
 			<Modal
 				title={modalTitle}
