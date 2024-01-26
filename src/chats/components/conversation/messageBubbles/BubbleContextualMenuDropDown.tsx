@@ -23,7 +23,10 @@ import styled, { css, DefaultTheme, FlattenSimpleInterpolation } from 'styled-co
 
 import usePreview from '../../../../hooks/usePreview';
 import { AttachmentsApi } from '../../../../network';
-import { getFilesToUploadArray } from '../../../../store/selectors/ActiveConversationsSelectors';
+import {
+	getFilesToUploadArray,
+	getReferenceMessage
+} from '../../../../store/selectors/ActiveConversationsSelectors';
 import { getXmppClient } from '../../../../store/selectors/ConnectionSelector';
 import { getCapability } from '../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../store/Store';
@@ -134,7 +137,9 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 	const editMessageTimeLimitInMinutes = useStore((store) =>
 		getCapability(store, CapabilityType.EDIT_MESSAGE_TIME_LIMIT)
 	) as number;
+	const referenceMessage = useStore((store) => getReferenceMessage(store, message.roomId));
 	const setReferenceMessage = useStore((store) => store.setReferenceMessage);
+	const unsetReferenceMessage = useStore((store) => store.unsetReferenceMessage);
 	const setDraftMessage = useStore((store) => store.setDraftMessage);
 	const filesToUploadArray = useStore((store) => getFilesToUploadArray(store, message.roomId));
 	const [dropdownActive, setDropdownActive] = useState(false);
@@ -161,10 +166,11 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 		return () => messageListRef?.removeEventListener('scroll', closeDropdownOnScroll);
 	}, [closeDropdownOnScroll, message.roomId]);
 
-	const onOpenForwardMessageModal = useCallback(
-		() => setForwardMessageModalIsOpen(true),
-		[setForwardMessageModalIsOpen]
-	);
+	const onOpenForwardMessageModal = useCallback(() => {
+		setDraftMessage(message.roomId, false, '');
+		unsetReferenceMessage(message.roomId);
+		setForwardMessageModalIsOpen(true);
+	}, [message.roomId, setDraftMessage, unsetReferenceMessage]);
 
 	const onCloseForwardMessageModal = useCallback(
 		() => setForwardMessageModalIsOpen(false),
@@ -225,6 +231,20 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 		}
 	}, [message.attachment]);
 
+	const replyMessageAction = useCallback(() => {
+		if (referenceMessage?.actionType !== messageActionType.REPLY) {
+			setDraftMessage(message.roomId, false, '');
+		}
+		setReferenceMessage(
+			message.roomId,
+			message.id,
+			message.from,
+			message.stanzaId,
+			messageActionType.REPLY,
+			message.attachment
+		);
+	}, [message, referenceMessage?.actionType, setDraftMessage, setReferenceMessage]);
+
 	const canBeEdited = useMemo(
 		() =>
 			canPerformAction(message, isMyMessage, editMessageTimeLimitInMinutes, messageActionType.EDIT),
@@ -232,8 +252,10 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 	);
 
 	const canBeDeleted = useMemo(
-		() => canPerformAction(message, isMyMessage, deleteMessageTimeLimitInMinutes),
-		[deleteMessageTimeLimitInMinutes, isMyMessage, message]
+		() =>
+			canPerformAction(message, isMyMessage, deleteMessageTimeLimitInMinutes) &&
+			referenceMessage?.messageId !== message.id,
+		[deleteMessageTimeLimitInMinutes, isMyMessage, message, referenceMessage]
 	);
 
 	const canBePreviewed = useMemo(
@@ -260,15 +282,7 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 		actions.push({
 			id: 'Reply',
 			label: replyActionLabel,
-			onClick: () =>
-				setReferenceMessage(
-					message.roomId,
-					message.id,
-					message.from,
-					message.stanzaId,
-					messageActionType.REPLY,
-					message.attachment
-				)
+			onClick: replyMessageAction
 		});
 
 		// Forward message in another chat
@@ -314,17 +328,16 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 
 		return actions;
 	}, [
+		canBeEdited,
 		replyActionLabel,
+		replyMessageAction,
+		forwardActionLabel,
+		onOpenForwardMessageModal,
 		copyActionLabel,
 		copyMessageAction,
-		canBeEdited,
 		canBeDeleted,
 		canBePreviewed,
 		canBeDownloaded,
-		setReferenceMessage,
-		message,
-		forwardActionLabel,
-		onOpenForwardMessageModal,
 		editActionLabel,
 		editMessageAction,
 		filesToUploadArray,

@@ -13,6 +13,7 @@ import useStore from '../../../../store/Store';
 import { createMockRoom, createMockTextMessage } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe } from '../../../../types/network/models/roomBeTypes';
+import { messageActionType } from '../../../../types/store/ActiveConversationTypes';
 import { TextMessage } from '../../../../types/store/MessageTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
 import { RootStore } from '../../../../types/store/StoreTypes';
@@ -282,5 +283,63 @@ describe('Bubble Contextual Menu - my messages', () => {
 		expect(downloadAction).toBeInTheDocument();
 		const previewAction = screen.queryByText(/Preview/i);
 		expect(previewAction).toBeInTheDocument();
+	});
+
+	test('if that message is being edited, the delete action should not be present', async () => {
+		const simpleTextMessage: TextMessage = createMockTextMessage({
+			roomId: mockedRoom.id,
+			from: mySessionId,
+			date: Date.now() - 60
+		});
+		const store: RootStore = useStore.getState();
+		store.setSessionId(mySessionId);
+		store.addRoom(mockedRoom);
+		store.newMessage(simpleTextMessage);
+		store.setDraftMessage(simpleTextMessage.roomId, false, simpleTextMessage.text);
+		store.setReferenceMessage(
+			simpleTextMessage.roomId,
+			simpleTextMessage.id,
+			simpleTextMessage.from,
+			simpleTextMessage.stanzaId,
+			messageActionType.EDIT,
+			simpleTextMessage.attachment
+		);
+
+		const { user } = setup(
+			<BubbleContextualMenuDropDown message={simpleTextMessage} isMyMessage />
+		);
+		const arrowButton = screen.getByTestId(iconArrowIosDownward);
+		await user.click(arrowButton);
+
+		expect(screen.queryByText(/Delete/i)).not.toBeInTheDocument();
+	});
+
+	test('if that message is being replied, the delete action should not be present', async () => {
+		const simpleTextMessage: TextMessage = createMockTextMessage({
+			roomId: mockedRoom.id,
+			from: mySessionId,
+			date: Date.now() - 60
+		});
+		const store: RootStore = useStore.getState();
+		store.setSessionId(mySessionId);
+		store.addRoom(mockedRoom);
+		store.newMessage(simpleTextMessage);
+		store.setDraftMessage(simpleTextMessage.roomId, false, simpleTextMessage.text);
+		store.setReferenceMessage(
+			simpleTextMessage.roomId,
+			simpleTextMessage.id,
+			simpleTextMessage.from,
+			simpleTextMessage.stanzaId,
+			messageActionType.REPLY,
+			simpleTextMessage.attachment
+		);
+
+		const { user } = setup(
+			<BubbleContextualMenuDropDown message={simpleTextMessage} isMyMessage />
+		);
+		const arrowButton = screen.getByTestId(iconArrowIosDownward);
+		await user.click(arrowButton);
+
+		expect(screen.queryByText(/Delete/i)).not.toBeInTheDocument();
 	});
 });

@@ -7,7 +7,6 @@
 import React from 'react';
 
 import { screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 
 import ReferenceMessageView from './ReferenceMessageView';
 import useStore from '../../../../store/Store';
@@ -45,17 +44,16 @@ const mockedMessage = createMockTextMessage({
 });
 
 describe('Reply to a message by opening the contextual menu', () => {
-	test('Display the contextual menu of a message', () => {
+	test('Display the contextual menu of a message', async () => {
 		const store: RootStore = useStore.getState();
 		store.addRoom(mockedRoom);
 		store.newMessage(mockedMessage);
-		setup(<MessagesList roomId={mockedRoom.id} />);
+		const { user } = setup(<MessagesList roomId={mockedRoom.id} />);
 		const messageBubble = screen.getByTestId(`Bubble-${mockedMessage.id}`);
 		expect(messageBubble).toBeVisible();
-		userEvent.hover(messageBubble);
-		// TODO fix test
-		// const ctxMenu = screen.getByTestId(`cxtMenu-${simpleTextMessage.id}-iconOpen`);
-		// expect(ctxMenu).toBeVisible();
+		await user.hover(messageBubble);
+		const ctxMenu = screen.getByTestId(`cxtMenu-${mockedMessage.id}-iconOpen`);
+		expect(ctxMenu).toBeVisible();
 	});
 	test('Display of reference message shows correctly', () => {
 		const store: RootStore = useStore.getState();
