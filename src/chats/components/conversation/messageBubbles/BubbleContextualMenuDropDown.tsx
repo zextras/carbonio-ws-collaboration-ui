@@ -210,7 +210,9 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 	}, [message.attachment]);
 
 	const replyMessageAction = useCallback(() => {
-		setDraftMessage(message.roomId, false, '');
+		if (referenceMessage?.actionType !== messageActionType.REPLY) {
+			setDraftMessage(message.roomId, false, '');
+		}
 		setReferenceMessage(
 			message.roomId,
 			message.id,
@@ -219,7 +221,7 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 			messageActionType.REPLY,
 			message.attachment
 		);
-	}, [message, setDraftMessage, setReferenceMessage]);
+	}, [message, referenceMessage?.actionType, setDraftMessage, setReferenceMessage]);
 
 	const canBeEdited = useMemo(
 		() =>
