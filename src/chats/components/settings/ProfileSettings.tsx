@@ -9,7 +9,6 @@ import React, {
 	FC,
 	SetStateAction,
 	useCallback,
-	useContext,
 	useEffect,
 	useMemo,
 	useState
@@ -25,8 +24,8 @@ import {
 	Shimmer,
 	Tooltip,
 	IconButton,
-	SnackbarManagerContext,
-	CreateSnackbarFn
+	CreateSnackbarFn,
+	useSnackbar
 } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 import styled, { css, DefaultTheme, FlattenInterpolation, ThemeProps } from 'styled-components';
@@ -151,7 +150,7 @@ const ProfileSettings: FC<ProfileSettingsProps> = ({
 		getCapability(store, CapabilityType.MAX_USER_IMAGE_SIZE)
 	);
 
-	const createSnackbar: CreateSnackbarFn = useContext(SnackbarManagerContext);
+	const createSnackbar: CreateSnackbarFn = useSnackbar();
 
 	const [t] = useTranslation();
 	const imageSizeTooLargeSnackbar = t(

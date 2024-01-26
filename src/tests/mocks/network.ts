@@ -12,6 +12,7 @@ import {
 	LeaveMeetingResponse,
 	StartMeetingResponse,
 	StopMeetingResponse,
+	SubscribeMediaResponse,
 	UpdateAudioStreamStatusResponse
 } from '../../types/network/responses/meetingsResponses';
 import {
@@ -68,8 +69,8 @@ export const mockedLeaveMeetingRequest: jest.Mock = jest.fn();
 export const mockedStopMeetingRequest: jest.Mock = jest.fn();
 export const mockedDeleteMeetingRequest: jest.Mock = jest.fn();
 export const mockedAddRoomAttachmentRequest: jest.Mock = jest.fn();
-
 export const mockedUpdateAudioStreamStatusRequest: jest.Mock = jest.fn();
+export const mockedSubscribeToMediaRequest: jest.Mock = jest.fn();
 
 jest.mock('../../network', () => {
 	const noResultProvided = 'no result provided';
@@ -222,6 +223,11 @@ jest.mock('../../network', () => {
 			updateAudioStreamStatus: (): Promise<UpdateAudioStreamStatusResponse> =>
 				new Promise((resolve, reject) => {
 					const result = mockedUpdateAudioStreamStatusRequest();
+					result ? resolve(result) : reject(new Error(noResultProvided));
+				}),
+			subscribeToMedia: (): Promise<SubscribeMediaResponse> =>
+				new Promise((resolve, reject) => {
+					const result = mockedSubscribeToMediaRequest();
 					result ? resolve(result) : reject(new Error(noResultProvided));
 				})
 		}

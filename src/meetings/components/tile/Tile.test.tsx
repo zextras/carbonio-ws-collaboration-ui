@@ -7,23 +7,24 @@ import React from 'react';
 
 import { screen, waitFor } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event/setup/setup';
+import { act } from 'react-dom/test-utils';
 
 import Tile from './Tile';
-import useStore from '../../store/Store';
+import useStore from '../../../store/Store';
 import {
 	createMockMeeting,
 	createMockParticipants,
 	createMockRoom,
 	createMockUser
-} from '../../tests/createMock';
-import { mockedUpdateAudioStreamStatusRequest } from '../../tests/mocks/network';
-import { setup } from '../../tests/test-utils';
-import { MeetingBe } from '../../types/network/models/meetingBeTypes';
-import { MemberBe, RoomBe, RoomType } from '../../types/network/models/roomBeTypes';
-import { UserBe } from '../../types/network/models/userBeTypes';
-import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
-import { MeetingParticipant } from '../../types/store/MeetingTypes';
-import { RootStore } from '../../types/store/StoreTypes';
+} from '../../../tests/createMock';
+import { mockedUpdateAudioStreamStatusRequest } from '../../../tests/mocks/network';
+import { setup } from '../../../tests/test-utils';
+import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
+import { MemberBe, RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
+import { UserBe } from '../../../types/network/models/userBeTypes';
+import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
+import { MeetingParticipant } from '../../../types/store/MeetingTypes';
+import { RootStore } from '../../../types/store/StoreTypes';
 
 const iconVideoOffOutline = 'icon: VideoOffOutline';
 const iconMicOffOutline = 'icon: MicOffOutline';
@@ -275,16 +276,29 @@ describe('Tile actions', () => {
 		mockedUpdateAudioStreamStatusRequest.mockReturnValueOnce('muted');
 		storeBasicActiveMeetingSetup();
 		const store: RootStore = useStore.getState();
-		store.changeStreamStatus(meeting.id, user2.id, STREAM_TYPE.AUDIO, true);
-		store.changeStreamStatus(meeting.id, user2.id, STREAM_TYPE.VIDEO, true);
+		act(() => {
+			store.changeStreamStatus(meeting.id, user2.id, STREAM_TYPE.AUDIO, true);
+			store.changeStreamStatus(meeting.id, user2.id, STREAM_TYPE.VIDEO, true);
+		});
+
 		const { user } = setup(<Tile userId={user2.id} meetingId={meeting.id} />);
 
 		const hoverContainer = screen.getByTestId('hover_container');
-		user.hover(hoverContainer);
+
+		act(() => {
+			user.hover(hoverContainer);
+		});
 
 		const muteForAll = await screen.findByTestId(iconMicOffOutline);
 		expect(muteForAll).toBeVisible();
 		user.click(muteForAll);
+
+		const muteModal = await screen.findByTestId('mute_for_all_modal');
+		expect(muteModal).toBeInTheDocument();
+
+		const confirmButton = await screen.findByRole('button', { name: 'Mute for all' });
+
+		user.click(confirmButton);
 
 		// the only icon is the one that appears when a user is muted
 		expect(await screen.findAllByTestId(iconMicOffOutline)).toHaveLength(1);

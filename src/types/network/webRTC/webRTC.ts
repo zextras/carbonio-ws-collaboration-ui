@@ -52,4 +52,5 @@ export interface IVideoScreenInConnection extends IPeerConnection {
 	subscriptionManager: SubscriptionsManager;
 	handleRemoteOffer(sdp: string): void;
 	handleParticipantsSubscribed(streamsMap: StreamInfo[]): void;
+	removeStream(streamKey: string): void;
 }

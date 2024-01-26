@@ -222,6 +222,7 @@
         "leaveGroupLabel": "Are you sure to leave this Group?",
         "leaveRoom": "Leave Room",
         "leaveRoomLabel": "Are you sure to leave this Room?",
+        "muteForAllDescription": "By muting the user, all the participants won't hear the user anymore. Only muted user can be unmute himself. Proceed?",
         "removeMember": "Remove member",
         "showPreviousConversationHistory": "Show previous conversation history"
     },

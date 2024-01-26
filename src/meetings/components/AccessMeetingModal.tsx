@@ -19,7 +19,7 @@ import { filter, find, map } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import Tile from './Tile';
+import Tile from './tile/Tile';
 import useRouting from '../../hooks/useRouting';
 import { MeetingsApi } from '../../network';
 import { getMeeting } from '../../store/selectors/MeetingSelectors';

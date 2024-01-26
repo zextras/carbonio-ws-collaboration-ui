@@ -54,6 +54,25 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 			.catch((reason) => console.warn('setRemoteDescription failed', reason));
 	}
 
+	public handleParticipantsSubscribed(streamsMap: StreamInfo[]): void {
+		forEach(streamsMap, (stream) => {
+			const streamsKey = `${stream.userId}-${stream.type.toLowerCase()}`;
+			this.streamsMap[streamsKey] = {
+				...this.streamsMap[streamsKey],
+				userId: stream.userId,
+				type: stream.type.toLowerCase() as STREAM_TYPE
+			};
+		});
+		this.updateStreams();
+	}
+
+	public removeStream = (streamKey: string): void => {
+		forEach(this.streamsMap, () => {
+			delete this.streamsMap[`${streamKey}-${STREAM_TYPE.VIDEO}`];
+			delete this.streamsMap[`${streamKey}-${STREAM_TYPE.SCREEN}`];
+		});
+	};
+
 	private onTrack = (ev: RTCTrackEvent): void => {
 		forEach(ev.streams, (stream) => {
 			const userId = stream.id.split('/')[0];
@@ -68,18 +87,6 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 		});
 		this.updateStreams();
 	};
-
-	public handleParticipantsSubscribed(streamsMap: StreamInfo[]): void {
-		forEach(streamsMap, (stream) => {
-			const streamsKey = `${stream.userId}-${stream.type.toLowerCase()}`;
-			this.streamsMap[streamsKey] = {
-				...this.streamsMap[streamsKey],
-				userId: stream.userId,
-				type: stream.type.toLowerCase() as STREAM_TYPE
-			};
-		});
-		this.updateStreams();
-	}
 
 	private updateStreams(): void {
 		const completeStreams = filter(this.streamsMap, (stream) => !!stream.stream && !!stream.userId);
