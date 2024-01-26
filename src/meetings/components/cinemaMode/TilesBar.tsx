@@ -18,7 +18,7 @@ import { MeetingRoutesParams } from '../../../hooks/useRouting';
 import { getVideoScreenIn } from '../../../store/selectors/ActiveMeetingSelectors';
 import useStore from '../../../store/Store';
 import { STREAM_TYPE, TileData } from '../../../types/store/ActiveMeetingTypes';
-import Tile from '../Tile';
+import Tile from '../tile/Tile';
 
 const TilesBarContainer = styled(Container)`
 	padding: 3.25rem 1rem;

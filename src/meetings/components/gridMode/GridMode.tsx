@@ -20,7 +20,7 @@ import { getNumberOfTiles, getTiles } from '../../../store/selectors/MeetingSele
 import useStore from '../../../store/Store';
 import { STREAM_TYPE, TileData } from '../../../types/store/ActiveMeetingTypes';
 import { calcGrid, maximiseRowsAndColumns, maximiseTileSize } from '../../../utils/MeetingsUtils';
-import Tile from '../Tile';
+import Tile from '../tile/Tile';
 
 const GridContainer = styled(Container)`
 	position: relative;
