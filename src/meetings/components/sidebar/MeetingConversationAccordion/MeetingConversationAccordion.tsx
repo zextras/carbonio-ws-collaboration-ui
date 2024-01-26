@@ -23,7 +23,6 @@ import { MeetingChatVisibility } from '../../../../types/store/ActiveMeetingType
 type MeetingConversationAccordionProps = {
 	roomId: string;
 	meetingId: string;
-	isInsideMeeting: boolean;
 };
 const ChatContainer = styled(Container)`
 	transition: height 0.3s ease, min-height 0.3s ease;
@@ -37,8 +36,7 @@ const WrapperMeetingChat = styled(Container)<{ $darkModeActive: boolean }>`
 
 const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({
 	roomId,
-	meetingId,
-	isInsideMeeting
+	meetingId
 }) => {
 	const [t] = useTranslation();
 	const extendChatLabel = t('meeting.extendChat', 'Extend chat');
@@ -147,11 +145,7 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({
 					height="fill"
 					$darkModeActive={isDarkModeEnabled}
 				>
-					<Chat
-						roomId={roomId}
-						setInfoPanelOpen={(): null => null}
-						isInsideMeeting={isInsideMeeting}
-					/>
+					<Chat roomId={roomId} setInfoPanelOpen={(): null => null} />
 				</WrapperMeetingChat>
 			)}
 		</ChatContainer>

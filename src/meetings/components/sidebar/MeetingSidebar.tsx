@@ -84,7 +84,7 @@ const MeetingSidebar = (): ReactElement => {
 					)}
 				</AccordionContainer>
 			)}
-			<MeetingConversationAccordion roomId={roomId || ''} meetingId={meetingId} isInsideMeeting />
+			<MeetingConversationAccordion roomId={roomId || ''} meetingId={meetingId} />
 			<ChangeSidebarStatusButton>
 				<Tooltip
 					label={sidebarIsVisible ? collapseSidebarLabel : expandSidebarLabel}
