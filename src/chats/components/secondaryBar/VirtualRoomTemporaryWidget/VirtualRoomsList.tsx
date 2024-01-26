@@ -8,6 +8,7 @@ import React, {
 	FC,
 	SetStateAction,
 	useCallback,
+	useContext,
 	useEffect,
 	useMemo,
 	useRef,
@@ -20,17 +21,21 @@ import {
 	Row,
 	Text,
 	IconButton,
-	Padding,
-	Tooltip
+	Tooltip,
+	CreateSnackbarFn,
+	SnackbarManagerContext
 } from '@zextras/carbonio-design-system';
-import { map } from 'lodash';
+import { map, size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import VirtualRoomListElement from './VirtualRoomListElement';
+import { RoomsApi } from '../../../../network';
+import { getTemporaryRoomIdsOrderedByCreation } from '../../../../store/selectors/RoomsSelectors';
+import useStore from '../../../../store/Store';
+import { RoomType } from '../../../../types/store/RoomTypes';
 
 type virtualRoomsListProps = {
-	listVisibility: boolean;
 	setListVisibility: Dispatch<SetStateAction<boolean>>;
 	parentRef: React.RefObject<HTMLDivElement>;
 };
@@ -53,41 +58,37 @@ const CustomIconButton = styled(IconButton)`
 	border-radius: 0.125rem;
 `;
 
-const VirtualRoomsList: FC<virtualRoomsListProps> = ({
-	listVisibility,
-	setListVisibility,
-	parentRef
-}) => {
+const VirtualRoomsList: FC<virtualRoomsListProps> = ({ setListVisibility, parentRef }) => {
 	const [t] = useTranslation();
 
-	const virtualRoomNameInput = t(
-		'meeting.scheduledMeetings.newVirtualRoom',
-		'New Virtual Room’s name*'
-	);
+	const virtualRoomNameInput = t('meeting.virtual.creationInput', 'New Virtual Room’s name*');
 	const noVirtualRoomsLabel = t(
-		'meeting.scheduledMeetings.noVirtualRooms',
+		'meeting.virtual.emptyState',
 		'The Rooms you create will be shown here'
 	);
-
-	const cancelTooltip = t('meeting.scheduledMeetings.cancelTooltip', 'Cancel');
-	const createTooltip = t(
-		'meeting.scheduledMeetings.createVirtualRoomTooltip',
-		'Create new Virtual Room'
-	);
+	const cancelTooltip = t('action.cancel', 'Cancel');
+	const createTooltip = t('meeting.virtual.createTooltip', 'Create new Virtual Room');
 	const roomNameRequiredTooltip = t(
-		'meeting.scheduledMeetings.VirtualRoomNameRequiredTooltip',
+		'meeting.virtual.nameRequiredTooltip',
 		'Virtual Room’s name is required'
 	);
+	const invalidNameString = t('meeting.virtual.invalidNameTooltip', 'Invalid name');
+	const errorSnackbar = t(
+		'settings.profile.errorGenericResponse',
+		'Something went wrong. Please retry'
+	);
 
-	// TODO store handling
-	const [virtualRoomList, setVirtualRoomList] = useState<string[]>([]);
+	const virtualRoomList = useStore(getTemporaryRoomIdsOrderedByCreation);
 	const [inputHasFocus, setInputHasFocus] = useState(false);
 	const [canCreateVirtualRoom, setCanCreateVirtualRoom] = useState(false);
+	const [nameError, setNameError] = useState(false);
 
 	const inputRef = useRef<HTMLDivElement>(null);
 	const textRef = useRef<HTMLInputElement>(null);
 	const popupRef = useRef<HTMLDivElement>(null);
 	const modalRef = useRef<HTMLDivElement>(null);
+
+	const createSnackbar: CreateSnackbarFn = useContext(SnackbarManagerContext);
 
 	const handleMouseUp = useCallback(
 		(event) => {
@@ -98,43 +99,60 @@ const VirtualRoomsList: FC<virtualRoomsListProps> = ({
 			}
 			if (
 				(modalRef.current && modalRef.current.contains(event.target)) ||
-				(listVisibility && parentRef.current && parentRef.current.contains(event.target))
+				(parentRef.current && parentRef.current.contains(event.target))
 			) {
 				setListVisibility(true);
 			} else if (popupRef.current && !popupRef.current.contains(event.target)) {
 				setListVisibility(false);
 			}
 		},
-		[listVisibility, parentRef, setListVisibility]
+		[parentRef, setListVisibility]
 	);
 
-	// TODO store creation handling
 	const handleCreateButtonClick = useCallback(() => {
-		if (textRef.current) {
-			setVirtualRoomList([textRef.current.value, ...virtualRoomList]);
-			textRef.current.value = '';
-			textRef.current.focus();
-		}
-	}, [virtualRoomList]);
+		RoomsApi.addRoom({
+			name: textRef.current?.value ?? '',
+			type: RoomType.TEMPORARY
+		})
+			.then(() => {
+				textRef.current!.value = '';
+				setInputHasFocus(false);
+				setCanCreateVirtualRoom(false);
+			})
+			.catch(() => {
+				createSnackbar({
+					key: new Date().toLocaleString(),
+					type: 'error',
+					label: errorSnackbar,
+					hideButton: true
+				});
+			});
+	}, [createSnackbar, errorSnackbar]);
 
 	const handleDeleteNameClick = useCallback(() => {
 		if (textRef.current) {
 			textRef.current.value = '';
 			textRef.current.focus();
 			setCanCreateVirtualRoom(false);
+			setNameError(false);
 		}
 	}, []);
 
 	const handleOnChangeInput = useCallback(() => {
-		if (textRef.current && textRef.current.value.length !== 0) {
-			setCanCreateVirtualRoom(true);
-		} else {
+		const textSize = size(textRef.current?.value);
+		if (textSize <= 0) {
 			setCanCreateVirtualRoom(false);
+			setNameError(false);
+		} else if (textSize < 128) {
+			setCanCreateVirtualRoom(true);
+			setNameError(false);
+		} else {
+			textRef.current!.value = textRef.current!.value.slice(0, 128);
+			setCanCreateVirtualRoom(false);
+			setNameError(true);
 		}
 	}, []);
 
-	// TODO error handling: when name is too long the input should became red and
-	//  the create button should be disabled with "Invalid name" tooltip
 	const inputSection = useMemo(
 		() => (
 			<Container orientation="horizontal" ref={inputRef}>
@@ -144,36 +162,40 @@ const VirtualRoomsList: FC<virtualRoomsListProps> = ({
 						label={virtualRoomNameInput}
 						inputRef={textRef}
 						onChange={handleOnChangeInput}
+						hasError={nameError}
 					/>
 				</Row>
-				<Row width="fit" orientation="horizontal">
-					{inputHasFocus && (
-						<>
-							<Padding right="0.5rem" />
-							<Tooltip label={cancelTooltip}>
-								<CustomIconButton
-									size="large"
-									icon="CloseOutline"
-									iconColor="gray6"
-									backgroundColor="secondary"
-									onClick={handleDeleteNameClick}
-								/>
-							</Tooltip>
-							<Padding right="0.5rem" />
-							<Tooltip label={canCreateVirtualRoom ? createTooltip : roomNameRequiredTooltip}>
-								<CustomIconButton
-									size="large"
-									icon="CheckmarkOutline"
-									iconColor="gray6"
-									backgroundColor="primary"
-									onClick={handleCreateButtonClick}
-									disabled={!canCreateVirtualRoom}
-								/>
-							</Tooltip>
-							<Padding right="0.5rem" />
-						</>
-					)}
-				</Row>
+				{inputHasFocus && (
+					<Row width="fit" orientation="horizontal" gap="0.5rem" padding={{ horizontal: '0.5rem' }}>
+						<Tooltip label={cancelTooltip}>
+							<CustomIconButton
+								size="large"
+								icon="CloseOutline"
+								iconColor="gray6"
+								backgroundColor="secondary"
+								onClick={handleDeleteNameClick}
+							/>
+						</Tooltip>
+						<Tooltip
+							label={
+								nameError
+									? invalidNameString
+									: canCreateVirtualRoom
+									? createTooltip
+									: roomNameRequiredTooltip
+							}
+						>
+							<CustomIconButton
+								size="large"
+								icon="CheckmarkOutline"
+								iconColor="gray6"
+								backgroundColor="primary"
+								onClick={handleCreateButtonClick}
+								disabled={!canCreateVirtualRoom}
+							/>
+						</Tooltip>
+					</Row>
+				)}
 			</Container>
 		),
 		[
@@ -184,22 +206,17 @@ const VirtualRoomsList: FC<virtualRoomsListProps> = ({
 			handleDeleteNameClick,
 			handleOnChangeInput,
 			inputHasFocus,
+			invalidNameString,
+			nameError,
 			roomNameRequiredTooltip,
 			virtualRoomNameInput
 		]
 	);
 
-	// TODO store list handling
 	const virtualRoomListSection = useMemo(
 		() =>
 			map(virtualRoomList, (room) => (
-				<VirtualRoomListElement
-					room={room}
-					virtualRoomsList={virtualRoomList}
-					setVirtualRoomsList={setVirtualRoomList}
-					modalRef={modalRef}
-					key={`listItem-${room}`}
-				/>
+				<VirtualRoomListElement roomId={room} modalRef={modalRef} key={`listItem-${room}`} />
 			)),
 		[virtualRoomList]
 	);
@@ -228,12 +245,12 @@ const VirtualRoomsList: FC<virtualRoomsListProps> = ({
 		};
 	}, [handleMouseUp]);
 
-	return listVisibility ? (
+	return (
 		<CustomContainer background="gray6" height="fit" padding="0.5rem" ref={popupRef}>
 			{inputSection}
 			<ListContainer>{listSection}</ListContainer>
 		</CustomContainer>
-	) : null;
+	);
 };
 
 export default VirtualRoomsList;

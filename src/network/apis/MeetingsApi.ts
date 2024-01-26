@@ -11,8 +11,7 @@ import IMeetingsApi from '../../types/network/apis/IMeetingsApi';
 import {
 	CreateMeetingData,
 	JoinSettings,
-	MeetingType,
-	MeetingUser
+	MeetingType
 } from '../../types/network/models/meetingBeTypes';
 import {
 	CreateAudioOfferResponse,
@@ -50,32 +49,17 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 		});
 	}
 
-	private createMeeting(createMeetingData: CreateMeetingData): Promise<CreateMeetingResponse> {
-		return this.fetchAPI(`meetings`, RequestType.POST, createMeetingData);
-	}
-
-	public createPermanentMeeting(roomId: string): Promise<CreateMeetingResponse> {
-		return this.createMeeting({
-			name: '',
-			users: [],
-			roomId,
-			meetingType: MeetingType.PERMANENT
-		});
-	}
-
-	public createScheduledMeeting(
-		name: string,
-		users: MeetingUser[],
+	public createMeeting(
 		roomId: string,
-		expiration?: number
+		meetingType: MeetingType,
+		expiration?: string
 	): Promise<CreateMeetingResponse> {
-		return this.createMeeting({
-			name,
-			users,
+		const createMeetingData: CreateMeetingData = {
 			roomId,
-			meetingType: MeetingType.SCHEDULED,
+			meetingType,
 			expiration
-		});
+		};
+		return this.fetchAPI(`meetings`, RequestType.POST, createMeetingData);
 	}
 
 	public getMeeting(roomId: string): Promise<GetMeetingResponse> {
@@ -136,7 +120,7 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 				this.joinMeeting(meeting.id, settings, devicesId).then(() => meeting.id)
 			);
 		}
-		return this.createPermanentMeeting(roomId).then((response) =>
+		return this.createMeeting(roomId, MeetingType.PERMANENT).then((response) =>
 			this.startMeeting(response.id).then(() =>
 				this.joinMeeting(response.id, settings, devicesId).then(() => response.id)
 			)

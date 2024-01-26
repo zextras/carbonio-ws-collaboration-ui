@@ -16,8 +16,8 @@ import ConversationsFilter from './ConversationsFilter';
 import ExpandedSidebarListItem from './ExpandedSidebarListItem';
 import VirtualRoomsButton from './VirtualRoomTemporaryWidget/VirtualRoomsButton';
 import { useFilterRoomsOnInput } from '../../../hooks/useFilterRoomsOnInput';
-import { getRoomsInfoOrderedLastMessage } from '../../../store/selectors/MessagesSelectors';
-import { getCapability, getUserId } from '../../../store/selectors/SessionSelectors';
+import { getOneToOneAndGroupsInfoOrderedByLastMessage } from '../../../store/selectors/MessagesSelectors';
+import { getCapability } from '../../../store/selectors/SessionSelectors';
 import { getUsersSelector } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
 import { Member } from '../../../types/store/RoomTypes';
@@ -61,8 +61,7 @@ const SecondaryBarSingleGroupsView: React.FC<SecondaryBarSingleGroupsView> = ({ 
 	const noMatchLabel = t('participantsList.noMatch', 'There are no items that match this search');
 
 	const canVideoCall = useStore((store) => getCapability(store, CapabilityType.CAN_VIDEO_CALL));
-	const sessionId: string | undefined = useStore(getUserId);
-	const roomsIds = useStore<FilteredConversation[]>(getRoomsInfoOrderedLastMessage);
+	const roomsIds = useStore<FilteredConversation[]>(getOneToOneAndGroupsInfoOrderedByLastMessage);
 	const users = useStore(getUsersSelector);
 
 	const { filteredConversationsIds, setFilteredInput } = useFilterRoomsOnInput(roomsIds);

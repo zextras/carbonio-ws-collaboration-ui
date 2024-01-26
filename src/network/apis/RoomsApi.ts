@@ -10,10 +10,12 @@ import BaseAPI from './BaseAPI';
 import useStore from '../../store/Store';
 import { RequestType } from '../../types/network/apis/IBaseAPI';
 import IRoomsApi from '../../types/network/apis/IRoomsApi';
+import { MeetingType } from '../../types/network/models/meetingBeTypes';
 import {
 	AddMemberFields,
 	RoomCreationFields,
-	RoomEditableFields
+	RoomEditableFields,
+	RoomType
 } from '../../types/network/models/roomBeTypes';
 import {
 	AddRoomAttachmentResponse,
@@ -70,8 +72,10 @@ class RoomsApi extends BaseAPI implements IRoomsApi {
 
 	public addRoom(room: RoomCreationFields): Promise<AddRoomResponse> {
 		return this.fetchAPI('rooms', RequestType.POST, room).then((response: AddRoomResponse) => {
-			// Create a permanent meeting for the room when it is created
-			MeetingsApi.createPermanentMeeting(response.id);
+			// Create meeting for the created room
+			const meetingType =
+				room.type === RoomType.TEMPORARY ? MeetingType.SCHEDULED : MeetingType.PERMANENT;
+			MeetingsApi.createMeeting(response.id, meetingType);
 			return response;
 		});
 	}

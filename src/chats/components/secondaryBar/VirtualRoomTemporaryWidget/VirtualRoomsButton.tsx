@@ -16,7 +16,7 @@ type virtualRoomsButtonProps = {
 
 const VirtualRoomsButton: FC<virtualRoomsButtonProps> = ({ expanded }) => {
 	const [t] = useTranslation();
-	const virtualRoomsLabel = t('meeting.scheduledMeetings.virtualRoomLabel', 'Your Virtual Rooms');
+	const virtualRoomsLabel = t('meeting.virtual.buttonLabel', 'Your Virtual Rooms');
 
 	const [listVisibility, setListVisibility] = useState(false);
 
@@ -38,11 +38,9 @@ const VirtualRoomsButton: FC<virtualRoomsButtonProps> = ({ expanded }) => {
 					ref={parentRef}
 				/>
 			</Container>
-			<VirtualRoomsList
-				listVisibility={listVisibility}
-				setListVisibility={setListVisibility}
-				parentRef={parentRef}
-			/>
+			{listVisibility && (
+				<VirtualRoomsList setListVisibility={setListVisibility} parentRef={parentRef} />
+			)}
 		</>
 	) : (
 		<Container height="3rem" background="gray5">
@@ -50,7 +48,6 @@ const VirtualRoomsButton: FC<virtualRoomsButtonProps> = ({ expanded }) => {
 				<IconButton
 					icon="VideoOutline"
 					size="large"
-					// customSize={{ paddingSize: '0.25rem', iconSize: '' }}
 					onClick={handleOnClick}
 					type="outlined"
 					iconColor="primary"
