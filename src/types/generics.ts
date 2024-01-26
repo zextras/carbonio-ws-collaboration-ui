@@ -15,8 +15,8 @@ export type Emoji = {
 };
 
 export enum Z_INDEX_RANK {
-	DATE_STICKY_LABEL = 2,
-	DROPDOWN_CXT = 3,
+	DATE_STICKY_LABEL = 3,
+	DROPDOWN_CXT = 2,
 	EMOJI_PICKER = 10
 }
 
