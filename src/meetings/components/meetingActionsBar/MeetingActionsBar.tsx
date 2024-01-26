@@ -80,7 +80,9 @@ const MeetingActionsBar = ({ streamsWrapperRef }: MeetingActionsProps): ReactEle
 
 	const handleHoverMouseStop = useCallback(() => {
 		streamsWrapperRef?.current?.removeEventListener('mousemove', handleHoverMouseMove);
-		if (!isHoverActions) setIsHoovering(false);
+		if (!isHoverActions) {
+			setIsHoovering(false);
+		}
 		if (isAudioListOpen) {
 			setIsAudioListOpen(false);
 		}

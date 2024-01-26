@@ -22,8 +22,8 @@ import {
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { STREAM_TYPE, Subscription } from '../../../types/store/ActiveMeetingTypes';
-import Tile from '../Tile';
-import WhoIsSpeaking from '../WhoIsSpeaking/WhoIsSpeaking';
+import Tile from '../tile/Tile';
+import WhoIsSpeaking from '../whoIsSpeaking/WhoIsSpeaking';
 
 const CustomContainer = styled(Container)`
 	overflow: hidden;

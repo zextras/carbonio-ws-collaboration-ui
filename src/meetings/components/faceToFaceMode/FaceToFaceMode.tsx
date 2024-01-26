@@ -17,7 +17,7 @@ import { getCentralTileData } from '../../../store/selectors/MeetingSelectors';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { STREAM_TYPE, Subscription } from '../../../types/store/ActiveMeetingTypes';
-import Tile from '../Tile';
+import Tile from '../tile/Tile';
 
 const FaceToFace = styled(Container)`
 	position: relative;

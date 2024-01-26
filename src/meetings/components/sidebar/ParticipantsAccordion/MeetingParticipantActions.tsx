@@ -3,11 +3,12 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import React, { FC, useMemo } from 'react';
+import React, { FC, useCallback, useMemo, useState } from 'react';
 
 import { Container, Tooltip, Icon, Padding, IconButton } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
+import MuteForAllModal from './MuteForAllModal';
 import PromoteDemoteMemberAction from '../../../../chats/components/infoPanel/conversationParticipantsAccordion/PromoteDemoteMemberAction';
 import useMuteForAll from '../../../../hooks/useMuteForAll';
 import usePinnedTile from '../../../../hooks/usePinnedTile';
@@ -35,6 +36,7 @@ const MeetingParticipantActions: FC<ParticipantActionsProps> = ({ memberId, meet
 	const muteForAllLabel = t('tooltip.muteForAll', 'Mute for all');
 	const pinVideoLabel = t('tooltip.pinVideo', 'Pin video');
 	const unpinVideoLabel = t('tooltip.unpinVideo', 'Unpin video');
+
 	const userId: string | undefined = useStore((store) => getUserId(store));
 	const roomId: string | undefined = useStore((store) =>
 		getRoomIdByMeetingId(store, meetingId || '')
@@ -47,11 +49,21 @@ const MeetingParticipantActions: FC<ParticipantActionsProps> = ({ memberId, meet
 		getMyOwnershipOfTheRoom(state, userId, roomId || '')
 	);
 
+	const [muteForAllModalIsOpen, setMuteForAllModalIsOpen] = useState(false);
+
 	const { isPinned, switchPinnedTile, canUsePinFeature } = usePinnedTile(meetingId || '', memberId);
 
 	const isSessionParticipant: boolean = useMemo(() => memberId === userId, [memberId, userId]);
 
 	const { muteForAllHasToAppear, muteForAll } = useMuteForAll(meetingId, memberId);
+
+	const openMuteForAllModal = useCallback(() => {
+		setMuteForAllModalIsOpen(true);
+	}, []);
+
+	const closeMuteForAllModal = useCallback(() => {
+		setMuteForAllModalIsOpen(false);
+	}, []);
 
 	return (
 		<Container width="fit" height="fit" orientation="horizontal">
@@ -84,7 +96,7 @@ const MeetingParticipantActions: FC<ParticipantActionsProps> = ({ memberId, meet
 						iconColor="gray0"
 						backgroundColor="text"
 						icon="MicOffOutline"
-						onClick={muteForAll}
+						onClick={openMuteForAllModal}
 						size="medium"
 					/>
 				</Tooltip>
@@ -99,6 +111,13 @@ const MeetingParticipantActions: FC<ParticipantActionsProps> = ({ memberId, meet
 						size="large"
 					/>
 				</Tooltip>
+			)}
+			{muteForAllModalIsOpen && (
+				<MuteForAllModal
+					isOpen={muteForAllModalIsOpen}
+					closeModal={closeMuteForAllModal}
+					muteForAll={muteForAll}
+				/>
 			)}
 		</Container>
 	);
