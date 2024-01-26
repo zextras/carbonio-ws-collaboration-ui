@@ -4,14 +4,14 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { FC, useCallback, useContext, useMemo, useState } from 'react';
+import React, { FC, useCallback, useMemo, useState } from 'react';
 
 import {
 	Container,
 	CreateSnackbarFn,
 	IconButton,
 	Row,
-	SnackbarManagerContext,
+	useSnackbar,
 	Text,
 	Modal,
 	Tooltip
@@ -72,7 +72,7 @@ const VirtualRoomListElement: FC<virtualRoomElementProps> = ({ roomId, modalRef 
 	const rejoinMeeting = t('meeting.rejoinMeeting', 'Rejoin meeting');
 
 	const [showModal, setShowModal] = useState(false);
-	const createSnackbar: CreateSnackbarFn = useContext(SnackbarManagerContext);
+	const createSnackbar: CreateSnackbarFn = useSnackbar();
 
 	const handleDeleteRoom = useCallback(() => {
 		RoomsApi.deleteRoom(roomId)

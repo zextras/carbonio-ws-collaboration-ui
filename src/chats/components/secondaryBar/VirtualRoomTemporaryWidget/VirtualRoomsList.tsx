@@ -8,7 +8,6 @@ import React, {
 	FC,
 	SetStateAction,
 	useCallback,
-	useContext,
 	useEffect,
 	useMemo,
 	useRef,
@@ -23,7 +22,7 @@ import {
 	IconButton,
 	Tooltip,
 	CreateSnackbarFn,
-	SnackbarManagerContext
+	useSnackbar
 } from '@zextras/carbonio-design-system';
 import { map, size } from 'lodash';
 import { useTranslation } from 'react-i18next';
@@ -88,7 +87,7 @@ const VirtualRoomsList: FC<virtualRoomsListProps> = ({ setListVisibility, parent
 	const popupRef = useRef<HTMLDivElement>(null);
 	const modalRef = useRef<HTMLDivElement>(null);
 
-	const createSnackbar: CreateSnackbarFn = useContext(SnackbarManagerContext);
+	const createSnackbar: CreateSnackbarFn = useSnackbar();
 
 	const handleMouseUp = useCallback(
 		(event) => {
