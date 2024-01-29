@@ -10,6 +10,7 @@ import React, {
 	SetStateAction,
 	useCallback,
 	useEffect,
+	useMemo,
 	useState
 } from 'react';
 
@@ -21,6 +22,7 @@ import ConversationHeader from './ConversationHeader';
 import DropZoneView from './DropZoneView';
 import ConversationFooter from './footer/ConversationFooter';
 import MessagesList from './MessagesList';
+import { MEETINGS_PATH } from '../../../constants/appConstants';
 import useMediaQueryCheck from '../../../hooks/useMediaQueryCheck';
 import {
 	getFilesToUploadArray,
@@ -37,16 +39,16 @@ const CustomContainer = styled(Container)`
 type ChatsProps = {
 	roomId: string;
 	setInfoPanelOpen: Dispatch<SetStateAction<boolean>>;
-	isInsideMeeting?: boolean;
 };
 
-const Chat = ({ roomId, setInfoPanelOpen, isInsideMeeting }: ChatsProps): ReactElement => {
+const Chat = ({ roomId, setInfoPanelOpen }: ChatsProps): ReactElement => {
 	const filesToUploadArray = useStore((store) => getFilesToUploadArray(store, roomId));
 	const setFilesToAttach = useStore((store) => store.setFilesToAttach);
 	const setInputHasFocus = useStore((store) => store.setInputHasFocus);
 	const referenceMessage = useStore((store) => getReferenceMessage(store, roomId));
 
 	const isDesktopView = useMediaQueryCheck();
+	const isInsideMeeting = useMemo(() => window.location.pathname.includes(MEETINGS_PATH), []);
 	const [dropzoneEnabled, setDropzoneEnabled] = useState(false);
 
 	useEffect(() => {
