@@ -14,11 +14,14 @@ import styled from 'styled-components';
 import CollapsedSidebarListItem from './CollapsedSidebarListItem';
 import ConversationsFilter from './ConversationsFilter';
 import ExpandedSidebarListItem from './ExpandedSidebarListItem';
+// import VirtualRoomsButton from './VirtualRoomTemporaryWidget/VirtualRoomsButton';
 import { useFilterRoomsOnInput } from '../../../hooks/useFilterRoomsOnInput';
-import { getRoomsInfoOrderedLastMessage } from '../../../store/selectors/MessagesSelectors';
+import { getOneToOneAndGroupsInfoOrderedByLastMessage } from '../../../store/selectors/MessagesSelectors';
+// import { getCapability } from '../../../store/selectors/SessionSelectors';
 import { getUsersSelector } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
 import { Member } from '../../../types/store/RoomTypes';
+// import { CapabilityType } from '../../../types/store/SessionTypes';
 import DefaultUserSidebarView from '../../views/DefaultUserSidebarView';
 import ShimmeringCollapsedListView from '../../views/shimmerViews/ShimmeringCollapsedListView';
 import ShimmeringExpandedListView from '../../views/shimmerViews/ShimmeringExpandedListView';
@@ -45,12 +48,20 @@ const ConversationFilterContainer = styled(Container)`
 	z-index: 1;
 `;
 
+/* const VirtualRoomContainer = styled(Container)`
+	height: fit-content;
+	position: sticky;
+	bottom: 0;
+	z-index: 3;
+`; */
+
 const SecondaryBarSingleGroupsView: React.FC<SecondaryBarSingleGroupsView> = ({ expanded }) => {
 	const [t] = useTranslation();
 	const showConversationList = t('tooltip.showConversationList', 'Show conversations list');
 	const noMatchLabel = t('participantsList.noMatch', 'There are no items that match this search');
 
-	const roomsIds = useStore<FilteredConversation[]>(getRoomsInfoOrderedLastMessage);
+	// const canVideoCall = useStore((store) => getCapability(store, CapabilityType.CAN_VIDEO_CALL));
+	const roomsIds = useStore<FilteredConversation[]>(getOneToOneAndGroupsInfoOrderedByLastMessage);
 	const users = useStore(getUsersSelector);
 
 	const { filteredConversationsIds, setFilteredInput } = useFilterRoomsOnInput(roomsIds);
@@ -88,7 +99,7 @@ const SecondaryBarSingleGroupsView: React.FC<SecondaryBarSingleGroupsView> = ({ 
 						<ShimmeringCollapsedListView />
 					)
 				) : (
-					<Container height="fit">
+					<Container mainAlignment="flex-start">
 						<ConversationFilterContainer>
 							<ConversationsFilter
 								expanded={expanded}
@@ -96,8 +107,15 @@ const SecondaryBarSingleGroupsView: React.FC<SecondaryBarSingleGroupsView> = ({ 
 								key="conversations_filter_item"
 							/>
 						</ConversationFilterContainer>
-						<Container height="fit" data-testid="conversations_list_filtered">
-							{listOfRooms}
+						<Container mainAlignment="space-between">
+							<Container height="fit" data-testid="conversations_list_filtered">
+								{listOfRooms}
+							</Container>
+							{/* canVideoCall && (
+								<VirtualRoomContainer>
+									<VirtualRoomsButton expanded={expanded} />
+								</VirtualRoomContainer>
+							) */}
 						</Container>
 					</Container>
 				)
@@ -105,7 +123,7 @@ const SecondaryBarSingleGroupsView: React.FC<SecondaryBarSingleGroupsView> = ({ 
 				expanded && <DefaultUserSidebarView />
 			),
 
-		[expanded, listOfRooms, roomsIds.length, setFilteredInput, users]
+		[/* canVideoCall */ expanded, listOfRooms, roomsIds.length, setFilteredInput, users]
 	);
 
 	return expanded ? (

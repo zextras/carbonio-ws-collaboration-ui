@@ -5,7 +5,7 @@
  */
 
 import { STREAM_TYPE, Subscription } from '../../store/ActiveMeetingTypes';
-import { JoinSettings, MeetingUser } from '../models/meetingBeTypes';
+import { JoinSettings, MeetingType } from '../models/meetingBeTypes';
 import {
 	CreateAudioOfferResponse,
 	CreateMediaAnswerResponse,
@@ -25,12 +25,10 @@ import {
 interface IMeetingsApi {
 	listMeetings(): Promise<ListMeetingsResponse>;
 	// Create meeting with the creation of the room
-	createPermanentMeeting(roomId: string): Promise<CreateMeetingResponse>;
-	createScheduledMeeting(
-		name: string,
-		users: MeetingUser[],
+	createMeeting(
 		roomId: string,
-		expiration?: number
+		meetingType: MeetingType,
+		expiration?: string
 	): Promise<CreateMeetingResponse>;
 	getMeeting(roomId: string): Promise<GetMeetingResponse>;
 	getMeetingByMeetingId(meetingId: string): Promise<GetMeetingResponse>;

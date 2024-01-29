@@ -29,7 +29,8 @@ export const useRoomsStoreSlice: StateCreator<RoomsStoreSlice> = (set: (...any: 
 						updatedAt: roomBe.createdAt,
 						pictureUpdatedAt: roomBe.pictureUpdatedAt,
 						members: roomBe.members,
-						userSettings: roomBe.userSettings
+						userSettings: roomBe.userSettings,
+						meetingId: roomBe.meetingId
 					};
 
 					// Retrieve members information if they are unknown
@@ -69,7 +70,8 @@ export const useRoomsStoreSlice: StateCreator<RoomsStoreSlice> = (set: (...any: 
 					updatedAt: roomBe.createdAt,
 					pictureUpdatedAt: roomBe.pictureUpdatedAt,
 					members: roomBe.members,
-					userSettings: roomBe.userSettings
+					userSettings: roomBe.userSettings,
+					meetingId: roomBe.meetingId
 				};
 
 				// Retrieve members information if they are unknown
