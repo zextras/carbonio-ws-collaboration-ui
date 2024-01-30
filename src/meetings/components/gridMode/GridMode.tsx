@@ -19,7 +19,12 @@ import { getVideoScreenIn } from '../../../store/selectors/ActiveMeetingSelector
 import { getNumberOfTiles, getTiles } from '../../../store/selectors/MeetingSelectors';
 import useStore from '../../../store/Store';
 import { STREAM_TYPE, TileData } from '../../../types/store/ActiveMeetingTypes';
-import { calcGrid, maximiseRowsAndColumns, maximiseTileSize } from '../../../utils/MeetingsUtils';
+import {
+	calcGrid,
+	calcTileScaleDivisor,
+	maximiseRowsAndColumns,
+	maximiseTileSize
+} from '../../../utils/MeetingsUtils';
 import Tile from '../tile/Tile';
 
 const GridContainer = styled(Container)`
@@ -111,7 +116,7 @@ const GridMode = (): ReactElement => {
 				if (tileIndex < size(tilesToRender) && tilesToRender[tileIndex]) {
 					rowTiles.push(
 						<Container
-							width={`${tileWidth / 16}rem`}
+							width={`${tileWidth / calcTileScaleDivisor()}rem`}
 							height="fit"
 							key={`tile-${tileIndex}-container`}
 						>

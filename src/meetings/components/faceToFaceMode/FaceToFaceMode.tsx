@@ -17,6 +17,7 @@ import { getCentralTileData } from '../../../store/selectors/MeetingSelectors';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { STREAM_TYPE, Subscription } from '../../../types/store/ActiveMeetingTypes';
+import { calcTileScaleDivisor } from '../../../utils/MeetingsUtils';
 import Tile from '../tile/Tile';
 
 const FaceToFace = styled(Container)`
@@ -74,7 +75,7 @@ const FaceToFaceMode = (): ReactElement => {
 		if (tileHeight >= faceToFaceDimensions.height) {
 			tileWidth = (faceToFaceDimensions.height / 9) * 16;
 		}
-		return `${tileWidth / 16}rem`;
+		return `${tileWidth / calcTileScaleDivisor()}rem`;
 	}, [faceToFaceDimensions]);
 
 	const centralContentToDisplay = useMemo(

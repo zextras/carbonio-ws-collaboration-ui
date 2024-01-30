@@ -142,3 +142,10 @@ type Grid = {
 	rows: number;
 	columns: number;
 };
+
+export const calcTileScaleDivisor = (): number => {
+	const localStorage = JSON.parse(window.parent.localStorage.getItem('settings') || '');
+	const percentage = 100 - localStorage['settings.appearance_setting.scaling'];
+	const proportionalNumber = (16 * percentage) / 100;
+	return 16 - proportionalNumber;
+};

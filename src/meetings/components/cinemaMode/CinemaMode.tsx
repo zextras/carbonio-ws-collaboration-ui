@@ -22,6 +22,7 @@ import {
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { STREAM_TYPE, Subscription } from '../../../types/store/ActiveMeetingTypes';
+import { calcTileScaleDivisor } from '../../../utils/MeetingsUtils';
 import Tile from '../tile/Tile';
 import WhoIsSpeaking from '../whoIsSpeaking/WhoIsSpeaking';
 
@@ -82,7 +83,7 @@ const CinemaMode = (): ReactElement => {
 		if (tileHeight >= cinemaModeDimensions.height) {
 			tileWidth = (cinemaModeDimensions.height / 9) * 16;
 		}
-		return `${tileWidth / 16}rem`;
+		return `${tileWidth / calcTileScaleDivisor()}rem`;
 	}, [cinemaModeDimensions]);
 
 	const toggleCarousel = useCallback(() => {
