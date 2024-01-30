@@ -13,7 +13,8 @@ import {
 	MultiButton,
 	Padding,
 	Text,
-	Tooltip
+	Tooltip,
+	useTheme
 } from '@zextras/carbonio-design-system';
 import { filter, find, map } from 'lodash';
 import { useTranslation } from 'react-i18next';
@@ -88,6 +89,8 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 		`Start meeting with ${conversationTitle}`,
 		{ meetingTitle: conversationTitle }
 	);
+
+	const theme = useTheme();
 
 	const { goToMeetingPage } = useRouting();
 
@@ -381,74 +384,76 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 	);
 
 	return (
-		<CustomModal
-			background={'gray0'}
-			open
-			size="small"
-			showCloseIcon={false}
-			title={modalTitle}
-			customFooter={modalFooter}
-		>
-			<Padding top="small" />
-			<Container
-				padding={{ top: 'small' }}
-				ref={wrapperRef}
-				height="fit"
-				width="fill"
-				mainAlignment="flex-start"
+		<Container background={theme.palette.gray1.hover}>
+			<CustomModal
+				background={'gray0'}
+				open
+				size="small"
+				showCloseIcon={false}
+				title={modalTitle}
+				customFooter={modalFooter}
 			>
-				<VideoTile width={wrapperWidth}>
-					<Tile
-						userId={memberId}
-						meetingId={meeting?.id}
-						modalProps={{
-							streamRef: videoStreamRef,
-							streamMuted: videoPlayerTestMuted,
-							audioStreamEnabled,
-							videoStreamEnabled
-						}}
-					/>
-				</VideoTile>
-				<Padding top="1rem" />
-				<Text weight="bold">{joinMeetingDescription}</Text>
-				<Container padding={{ top: '1rem' }} height="fit" width="fill" orientation={'horizontal'}>
-					<Tooltip placement="top" label={videoStreamEnabled ? disableCamLabel : enableCamLabel}>
-						<MultiButton
-							primaryIcon={videoStreamEnabled ? 'Video' : 'VideoOff'}
-							size="large"
-							shape="round"
-							background="primary"
-							onClick={toggleVideo}
-							dropdownProps={{
-								width: 'fit',
-								placement: 'bottom-end',
-								items: mediaVideoList
+				<Padding top="small" />
+				<Container
+					padding={{ top: 'small' }}
+					ref={wrapperRef}
+					height="fit"
+					width="fill"
+					mainAlignment="flex-start"
+				>
+					<VideoTile width={wrapperWidth}>
+						<Tile
+							userId={memberId}
+							meetingId={meeting?.id}
+							modalProps={{
+								streamRef: videoStreamRef,
+								streamMuted: videoPlayerTestMuted,
+								audioStreamEnabled,
+								videoStreamEnabled
 							}}
-							items={mediaVideoList}
 						/>
-					</Tooltip>
-					<Padding left="1rem" />
-					<Tooltip placement="top" label={audioStreamEnabled ? disableMicLabel : enableMicLabel}>
-						<MultiButton
-							primaryIcon={audioStreamEnabled ? 'Mic' : 'MicOff'}
-							size="large"
-							shape="round"
-							background="primary"
-							dropdownProps={{
-								width: 'fit',
-								placement: 'bottom-start',
-								items: mediaAudioList
-							}}
-							onClick={toggleAudio}
-							items={mediaAudioList}
-						/>
-					</Tooltip>
+					</VideoTile>
+					<Padding top="1rem" />
+					<Text weight="bold">{joinMeetingDescription}</Text>
+					<Container padding={{ top: '1rem' }} height="fit" width="fill" orientation={'horizontal'}>
+						<Tooltip placement="top" label={videoStreamEnabled ? disableCamLabel : enableCamLabel}>
+							<MultiButton
+								primaryIcon={videoStreamEnabled ? 'Video' : 'VideoOff'}
+								size="large"
+								shape="round"
+								background="primary"
+								onClick={toggleVideo}
+								dropdownProps={{
+									width: 'fit',
+									placement: 'bottom-end',
+									items: mediaVideoList
+								}}
+								items={mediaVideoList}
+							/>
+						</Tooltip>
+						<Padding left="1rem" />
+						<Tooltip placement="top" label={audioStreamEnabled ? disableMicLabel : enableMicLabel}>
+							<MultiButton
+								primaryIcon={audioStreamEnabled ? 'Mic' : 'MicOff'}
+								size="large"
+								shape="round"
+								background="primary"
+								dropdownProps={{
+									width: 'fit',
+									placement: 'bottom-start',
+									items: mediaAudioList
+								}}
+								onClick={toggleAudio}
+								items={mediaAudioList}
+							/>
+						</Tooltip>
+					</Container>
+					<Padding bottom="1rem" />
+					<Text size="small">{setInputDescription}</Text>
+					<Padding bottom="1rem" />
 				</Container>
-				<Padding bottom="1rem" />
-				<Text size="small">{setInputDescription}</Text>
-				<Padding bottom="1rem" />
-			</Container>
-		</CustomModal>
+			</CustomModal>
+		</Container>
 	);
 };
 

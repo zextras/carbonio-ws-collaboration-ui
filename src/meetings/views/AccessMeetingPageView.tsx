@@ -6,22 +6,26 @@
 
 import React, { ReactElement, useMemo } from 'react';
 
-import { Container, useTheme } from '@zextras/carbonio-design-system';
+import { Container } from '@zextras/carbonio-design-system';
 
 import { MEETINGS_PATH } from '../../constants/appConstants';
+import { getRoomExistsSelector } from '../../store/selectors/RoomsSelectors';
+import useStore from '../../store/Store';
 import AccessMeetingModal from '../components/AccessMeetingModal';
 
 const AccessMeetingPageView = (): ReactElement => {
 	// Retrieve room information
 	const roomId: string = useMemo(() => document.location.pathname.split(MEETINGS_PATH)[1], []);
 
-	const theme = useTheme();
+	const areRoomsDataAvailable = useStore(({ connections }) => connections.status.chats_be);
+	const canUserAccessToRoom = useStore((store) => getRoomExistsSelector(store, roomId));
 
-	return (
-		<Container background={theme.palette.gray1.hover}>
-			{roomId && <AccessMeetingModal roomId={roomId} />}
-		</Container>
+	const AccessComponent = useMemo(
+		() => (canUserAccessToRoom ? <AccessMeetingModal roomId={roomId} /> : <div>Waiting room</div>),
+		[canUserAccessToRoom, roomId]
 	);
+
+	return <Container background="gray0">{areRoomsDataAvailable && AccessComponent}</Container>;
 };
 
 export default AccessMeetingPageView;
