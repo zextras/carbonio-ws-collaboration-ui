@@ -144,8 +144,14 @@ type Grid = {
 };
 
 export const calcTileScaleDivisor = (): number => {
-	const localStorage = JSON.parse(window.parent.localStorage.getItem('settings') || '');
-	const percentage = 100 - localStorage['settings.appearance_setting.scaling'];
-	const proportionalNumber = (16 * percentage) / 100;
-	return 16 - proportionalNumber;
+	const localStorage = window.parent.localStorage.getItem('settings');
+	if (localStorage) {
+		const settingsStorage = JSON.parse(window.parent.localStorage.getItem('settings') || '')[
+			'settings.appearance_setting.scaling'
+		];
+		const percentage = 100 - settingsStorage;
+		const proportionalNumber = (16 * percentage) / 100;
+		return 16 - proportionalNumber;
+	}
+	return 16;
 };
