@@ -12,6 +12,7 @@ import React, {
 	SetStateAction,
 	useCallback,
 	useEffect,
+	useMemo,
 	useRef
 } from 'react';
 
@@ -21,13 +22,14 @@ import { Picker } from 'emoji-mart';
 import styled from 'styled-components';
 
 import { Emoji, Z_INDEX_RANK } from '../../../../types/generics';
+import { calcScaleDivisor } from '../../../../utils/styleUtils';
 
-const PickerWrapper = styled(Container)<{ $isInsideMeeting?: boolean }>`
+const PickerWrapper = styled(Container)<{ $scaleHeight?: number }>`
 	z-index: ${Z_INDEX_RANK.EMOJI_PICKER};
 	position: absolute;
 	bottom: 3.4375rem;
 	left: 0.5rem;
-	height: ${({ $isInsideMeeting }): string => ($isInsideMeeting ? '18.125rem' : '27.1875rem')};
+	height: ${({ $scaleHeight }): string => `${$scaleHeight}rem`};
 	width: 22rem;
 	transform-origin: bottom left;
 	animation: showEmoji 0.2s ease-in 0s 1;
@@ -49,6 +51,9 @@ const PickerWrapper = styled(Container)<{ $isInsideMeeting?: boolean }>`
 		}
 	}
 `;
+
+// 290
+// 435
 
 type EmojiPickerProps = {
 	onEmojiSelect: (emoji: Emoji) => void;
@@ -98,6 +103,11 @@ const EmojiPicker: React.FC<EmojiPickerProps> = ({
 		};
 	}, [setShowEmojiPicker, emojiTimeoutRef, mouseEnterEvent, mouseLeaveEvent]);
 
+	const scaleHeight = useMemo(
+		() => (isInsideMeeting ? 290 / calcScaleDivisor() : 435 / calcScaleDivisor()),
+		[isInsideMeeting]
+	);
+
 	useEffect(() => {
 		// eslint-disable-next-line no-new
 		new Picker({ previewPosition: 'none', ...props, onEmojiSelect, data, ref });
@@ -108,7 +118,7 @@ const EmojiPicker: React.FC<EmojiPickerProps> = ({
 		<PickerWrapper
 			ref={ref}
 			data-testid="emojiPicker"
-			$isInsideMeeting={isInsideMeeting}
+			$scaleHeight={scaleHeight}
 			mainAlignment={'flex-end'}
 			crossAlignment={'flex-start'}
 		/>
