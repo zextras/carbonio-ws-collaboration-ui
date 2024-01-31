@@ -19,7 +19,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import { CHATS_ROUTE, MEETINGS_PATH } from '../../../../constants/appConstants';
+import useRoomMeeting from '../../../../hooks/useRoomMeeting';
 import { RoomsApi } from '../../../../network';
 import {
 	getMeetingActive,
@@ -73,6 +73,7 @@ const VirtualRoomListElement: FC<virtualRoomElementProps> = ({ roomId, modalRef 
 
 	const [showModal, setShowModal] = useState(false);
 	const createSnackbar: CreateSnackbarFn = useSnackbar();
+	const { openMeeting, copyMeetingLink } = useRoomMeeting(roomId);
 
 	const handleDeleteRoom = useCallback(() => {
 		RoomsApi.deleteRoom(roomId)
@@ -94,26 +95,14 @@ const VirtualRoomListElement: FC<virtualRoomElementProps> = ({ roomId, modalRef 
 	}, [createSnackbar, deleteVirtualRoomSnackbar, errorSnackbar, roomId]);
 
 	const handleCopyLink = useCallback(() => {
-		const link = `${window.location.href.split(CHATS_ROUTE)[0]}${MEETINGS_PATH}${room.id}`;
-		if (window.parent.navigator.clipboard) {
-			window.parent.navigator.clipboard.writeText(link);
-		} else {
-			const input = window.document.createElement('input');
-			input.setAttribute('value', link);
-			window.parent.document.body.appendChild(input);
-			input.select();
-			window.parent.document.execCommand('copy');
-			window.parent.document.body.removeChild(input);
-		}
+		copyMeetingLink();
 		createSnackbar({
 			key: new Date().toLocaleString(),
 			type: 'info',
 			label: copyVirtualRoomLinkSnackbar,
 			hideButton: true
 		});
-	}, [room.id, createSnackbar, copyVirtualRoomLinkSnackbar]);
-
-	const handleEnterRoom = useCallback(() => window.open(`${MEETINGS_PATH}${room.id}`), [room.id]);
+	}, [copyMeetingLink, createSnackbar, copyVirtualRoomLinkSnackbar]);
 
 	const enterRoomTooltip = useMemo(
 		() => (meetingIsActive ? (amIParticipating ? rejoinMeeting : joinMeeting) : startMeeting),
@@ -150,7 +139,7 @@ const VirtualRoomListElement: FC<virtualRoomElementProps> = ({ roomId, modalRef 
 					<CustomIconButton
 						customSize={{ iconSize: '1.25rem', paddingSize: '0.125rem' }}
 						icon="ArrowForwardOutline"
-						onClick={handleEnterRoom}
+						onClick={openMeeting}
 					/>
 				</Tooltip>
 			</Row>

@@ -49,7 +49,7 @@ export default function App() {
 		Promise.all([SessionApi.getToken(), SessionApi.getCapabilities()])
 			.then((resp) => {
 				// CHATS BE: get all rooms list
-				RoomsApi.listRooms(true, true)
+				Promise.all([RoomsApi.listRooms(true, true)], MeetingsApi.listMeetings())
 					.then(() => {
 						setChatsBeStatus(true);
 						// Init xmppClient and webSocket after roomList request to avoid missing data (specially for the inbox request)
@@ -57,7 +57,6 @@ export default function App() {
 						webSocket.connect();
 					})
 					.catch(() => setChatsBeStatus(false));
-				MeetingsApi.listMeetings();
 			})
 			.catch(() => setChatsBeStatus(false));
 	}, [setChatsBeStatus, setWebSocketClient, setXmppClient]);

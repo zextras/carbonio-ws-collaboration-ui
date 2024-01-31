@@ -9,23 +9,24 @@ import React, { ReactElement, useMemo } from 'react';
 import { Container } from '@zextras/carbonio-design-system';
 
 import { MEETINGS_PATH } from '../../constants/appConstants';
-import { getRoomExistsSelector } from '../../store/selectors/RoomsSelectors';
+import { getMeetingExists, getRoomIdFromMeeting } from '../../store/selectors/MeetingSelectors';
 import useStore from '../../store/Store';
 import AccessMeetingModal from '../components/AccessMeetingModal';
 
 const AccessMeetingPageView = (): ReactElement => {
-	// Retrieve room information
-	const roomId: string = useMemo(() => document.location.pathname.split(MEETINGS_PATH)[1], []);
+	const meetingId = useMemo(() => document.location.pathname.split(MEETINGS_PATH)[1], []);
+	const roomId = useStore((store) => getRoomIdFromMeeting(store, meetingId) || ``);
 
-	const areRoomsDataAvailable = useStore(({ connections }) => connections.status.chats_be);
-	const canUserAccessToRoom = useStore((store) => getRoomExistsSelector(store, roomId));
+	const areMeetingsDataAvailable = useStore(({ connections }) => connections.status.chats_be);
+	const canUserAccessToMeeting = useStore((store) => getMeetingExists(store, meetingId));
 
 	const AccessComponent = useMemo(
-		() => (canUserAccessToRoom ? <AccessMeetingModal roomId={roomId} /> : <div>Waiting room</div>),
-		[canUserAccessToRoom, roomId]
+		() =>
+			canUserAccessToMeeting ? <AccessMeetingModal roomId={roomId} /> : <div>Waiting room</div>,
+		[canUserAccessToMeeting, roomId]
 	);
 
-	return <Container background="gray0">{areRoomsDataAvailable && AccessComponent}</Container>;
+	return <Container background="gray0">{areMeetingsDataAvailable && AccessComponent}</Container>;
 };
 
 export default AccessMeetingPageView;

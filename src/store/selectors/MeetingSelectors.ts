@@ -20,8 +20,15 @@ export const getMeetingByMeetingId = (store: RootStore, meetingId: string): Meet
 export const getRoomIdByMeetingId = (store: RootStore, meetingId: string): string | undefined =>
 	find(store.meetings, (meeting) => meeting.id === meetingId)?.roomId;
 
+export const getMeetingExists = (store: RootStore, meetingId: string): boolean =>
+	!!find(store.meetings, (meeting) => meeting.id === meetingId);
+
+export const getRoomIdFromMeeting = (store: RootStore, meetingId: string): string | undefined =>
+	find(store.meetings, (meeting) => meeting.id === meetingId)?.roomId;
+
 export const getMeetingActive = (store: RootStore, roomId: string): boolean =>
 	store.meetings[roomId] && store.meetings[roomId].active;
+
 export const getMeetingParticipants = (
 	store: RootStore,
 	roomId: string

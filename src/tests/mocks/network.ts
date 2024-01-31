@@ -185,7 +185,7 @@ jest.mock('../../network', () => {
 					const result = mockedGetMeetingRequest();
 					result ? resolve(result) : reject(new Error(noResultProvided));
 				}),
-			createPermanentMeeting: (): Promise<CreateMeetingResponse> =>
+			createMeeting: (): Promise<CreateMeetingResponse> =>
 				new Promise((resolve, reject) => {
 					const result = mockedCreateMeetingRequest();
 					result ? resolve(result) : reject(new Error(noResultProvided));

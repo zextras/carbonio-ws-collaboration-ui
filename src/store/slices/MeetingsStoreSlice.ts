@@ -53,6 +53,12 @@ export const useMeetingsStoreSlice: StateCreator<MeetingsSlice> = (set: (...any:
 							UsersApi.getDebouncedUser(participant.userId);
 						}
 					});
+
+					// Set meetingId on room data
+					draft.rooms[meeting.roomId] = {
+						...draft.rooms[meeting.roomId],
+						meetingId: meeting.id
+					};
 				});
 			}),
 			false,
@@ -92,6 +98,12 @@ export const useMeetingsStoreSlice: StateCreator<MeetingsSlice> = (set: (...any:
 						UsersApi.getDebouncedUser(participant.userId);
 					}
 				});
+
+				// Set meetingId on room data
+				draft.rooms[meeting.roomId] = {
+					...draft.rooms[meeting.roomId],
+					meetingId: meeting.id
+				};
 			}),
 			false,
 			'MEETINGS/ADD'

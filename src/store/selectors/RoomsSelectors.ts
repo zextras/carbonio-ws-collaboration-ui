@@ -28,8 +28,6 @@ export const getTemporaryRoomIdsOrderedByCreation = (store: RootStore): string[]
 
 export const getRoomSelector = (state: RootStore, id: string): Room => state.rooms[id];
 
-export const getRoomExistsSelector = (state: RootStore, id: string): boolean => !!state.rooms[id];
-
 export const getRoomNameSelector = (state: RootStore, id: string): string => {
 	const room: Room = state.rooms[id];
 	if (!room) return '';
@@ -134,3 +132,6 @@ export const getRoomURLPicture = (state: RootStore, roomId: string): string | un
 	}
 	return room.pictureUpdatedAt && RoomsApi.getURLRoomPicture(room.id);
 };
+
+export const getMeetingIdFromRoom = (state: RootStore, roomId: string): string | undefined =>
+	state.rooms[roomId]?.meetingId;
