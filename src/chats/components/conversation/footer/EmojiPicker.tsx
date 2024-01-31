@@ -52,9 +52,6 @@ const PickerWrapper = styled(Container)<{ $scaleHeight?: number }>`
 	}
 `;
 
-// 290
-// 435
-
 type EmojiPickerProps = {
 	onEmojiSelect: (emoji: Emoji) => void;
 	setShowEmojiPicker?: Dispatch<SetStateAction<boolean>>;
