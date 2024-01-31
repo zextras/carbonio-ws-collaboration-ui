@@ -19,6 +19,7 @@ import {
 	CreateMeetingResponse,
 	DeleteMeetingResponse,
 	GetMeetingResponse,
+	GetScheduledMeetingNameResponse,
 	JoinMeetingResponse,
 	LeaveMeetingResponse,
 	ListMeetingsResponse,
@@ -191,6 +192,11 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 		return this.fetchAPI(`meetings/${meetingId}/media/answer`, RequestType.PUT, {
 			sdp: sdpAnswer
 		});
+	}
+
+	public getScheduledMeetingName(meetingId: string): Promise<GetScheduledMeetingNameResponse> {
+		// TODO
+		return this.fetchAPI(`meetings/scheduled/${meetingId}`, RequestType.GET);
 	}
 }
 

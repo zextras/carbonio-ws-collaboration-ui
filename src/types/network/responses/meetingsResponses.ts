@@ -31,3 +31,5 @@ export type UpdateMediaOfferResponse = Response;
 export type SubscribeMediaResponse = Response;
 
 export type CreateMediaAnswerResponse = Response;
+
+export type GetScheduledMeetingNameResponse = string;

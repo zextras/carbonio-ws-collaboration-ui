@@ -65,6 +65,12 @@ const InfoPage = (): ReactElement => {
 				'There cannot be more than one active session of the same meeting'
 			);
 			break;
+		case PAGE_INFO_TYPE.ERROR_PAGE:
+			// TODO define the correct labels
+			titleLabel = t('', 'Error');
+			centralLabel = t('', 'Error');
+			descriptionLowerLabel = t('', 'Error');
+			break;
 		case PAGE_INFO_TYPE.MEETING_ENDED:
 		default:
 			titleLabel = t('notification.meeting.ended', 'Meeting Ended');

@@ -12,6 +12,7 @@ import {
 	CreateMeetingResponse,
 	DeleteMeetingResponse,
 	GetMeetingResponse,
+	GetScheduledMeetingNameResponse,
 	JoinMeetingResponse,
 	LeaveMeetingResponse,
 	ListMeetingsResponse,
@@ -69,6 +70,8 @@ interface IMeetingsApi {
 		unsubscription: Subscription[]
 	): Promise<SubscribeMediaResponse>;
 	createMediaAnswer(meetingId: string, sdpOffer: string): Promise<CreateMediaAnswerResponse>;
+	// Scheduled meetings
+	getScheduledMeetingName(meetingId: string): Promise<GetScheduledMeetingNameResponse>;
 }
 
 export default IMeetingsApi;
