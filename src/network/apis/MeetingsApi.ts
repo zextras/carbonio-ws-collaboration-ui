@@ -14,6 +14,7 @@ import {
 	MeetingType
 } from '../../types/network/models/meetingBeTypes';
 import {
+	AcceptWaitingUserResponse,
 	CreateAudioOfferResponse,
 	CreateMediaAnswerResponse,
 	CreateMeetingResponse,
@@ -21,7 +22,9 @@ import {
 	GetMeetingResponse,
 	GetScheduledMeetingNameResponse,
 	JoinMeetingResponse,
+	JoinWaitingRoomResponse,
 	LeaveMeetingResponse,
+	LeaveWaitingRoomResponse,
 	ListMeetingsResponse,
 	StartMeetingResponse,
 	StopMeetingResponse,
@@ -195,8 +198,39 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 	}
 
 	public getScheduledMeetingName(meetingId: string): Promise<GetScheduledMeetingNameResponse> {
-		// TODO
-		return this.fetchAPI(`meetings/scheduled/${meetingId}`, RequestType.GET);
+		// TODO real implementation
+		console.log('getScheduledMeetingName', meetingId);
+		return new Promise((resolve) => {
+			resolve(`Meeting title`);
+		});
+	}
+
+	public joinWaitingRoom(meetingId: string): Promise<JoinWaitingRoomResponse> {
+		// TODO real implementation
+		console.log('joinWaitingRoom', meetingId);
+		return new Promise((resolve) => {
+			resolve({ status: 202 });
+		});
+	}
+
+	public leaveWaitingRoom(meetingId: string): Promise<LeaveWaitingRoomResponse> {
+		// TODO real implementation
+		console.log('leaveWaitingRoom', meetingId);
+		return new Promise((resolve) => {
+			resolve({ status: 200 });
+		});
+	}
+
+	public acceptWaitingUser(
+		meetingId: string,
+		userId: string,
+		accept: boolean
+	): Promise<AcceptWaitingUserResponse> {
+		// TODO real implementation
+		console.log('acceptWaitingUser', meetingId, userId, accept);
+		return new Promise((resolve) => {
+			resolve({ accepted: accept });
+		});
 	}
 }
 
