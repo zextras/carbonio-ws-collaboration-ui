@@ -38,4 +38,6 @@ export type JoinWaitingRoomResponse = { status: number };
 
 export type LeaveWaitingRoomResponse = { status: number };
 
+export type GetWaitingListResponse = string[];
+
 export type AcceptWaitingUserResponse = { accepted: boolean };

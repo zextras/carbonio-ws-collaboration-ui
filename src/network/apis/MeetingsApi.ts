@@ -21,6 +21,7 @@ import {
 	DeleteMeetingResponse,
 	GetMeetingResponse,
 	GetScheduledMeetingNameResponse,
+	GetWaitingListResponse,
 	JoinMeetingResponse,
 	JoinWaitingRoomResponse,
 	LeaveMeetingResponse,
@@ -218,6 +219,14 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 		console.log('leaveWaitingRoom', meetingId);
 		return new Promise((resolve) => {
 			resolve({ status: 200 });
+		});
+	}
+
+	public getWaitingList(meetingId: string): Promise<GetWaitingListResponse> {
+		// TODO real implementation
+		console.log('getWaitingList', meetingId);
+		return new Promise((resolve) => {
+			resolve(['fa61cbab-fba1-4cf3-b26a-945ea648dcb2', 'b4e34652-c178-4475-aeaf-df0358f07c20']);
 		});
 	}
 

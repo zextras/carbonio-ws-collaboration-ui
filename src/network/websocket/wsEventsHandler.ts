@@ -3,6 +3,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
+/* eslint-disable sonarjs/max-switch-cases */
 
 import { find } from 'lodash';
 
@@ -19,7 +20,6 @@ import { wsDebug } from '../../utils/debug';
 import { MeetingSoundFeedback, sendAudioFeedback } from '../../utils/MeetingsUtils';
 import { MeetingsApi, RoomsApi } from '../index';
 
-// eslint-disable-next-line sonarjs/cognitive-complexity
 export function wsEventsHandler(event: WsEvent): void {
 	const state = useStore.getState();
 
@@ -299,6 +299,20 @@ export function wsEventsHandler(event: WsEvent): void {
 			if (activeMeeting) {
 				sendCustomEvent({ name: EventName.MEETING_PARTICIPANT_CLASHED, data: event });
 			}
+			break;
+		}
+		case WsEventType.MEETING_USER_WAITING_LIST_JOINED: {
+			// TODO add user to waiting list
+			break;
+		}
+		case WsEventType.MEETING_USER_ACCEPTED: {
+			// TODO remove user from waiting list in moderator session
+			//  and let him join the meeting with a custom event
+			break;
+		}
+		case WsEventType.MEETING_USER_REJECTED: {
+			// TODO remove user from waiting list in moderator session
+			//  and send him to info page with a custom event
 			break;
 		}
 		default:

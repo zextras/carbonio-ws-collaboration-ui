@@ -14,6 +14,7 @@ import {
 	DeleteMeetingResponse,
 	GetMeetingResponse,
 	GetScheduledMeetingNameResponse,
+	GetWaitingListResponse,
 	JoinMeetingResponse,
 	JoinWaitingRoomResponse,
 	LeaveMeetingResponse,
@@ -77,6 +78,7 @@ interface IMeetingsApi {
 	getScheduledMeetingName(meetingId: string): Promise<GetScheduledMeetingNameResponse>;
 	joinWaitingRoom(meetingId: string): Promise<JoinWaitingRoomResponse>;
 	leaveWaitingRoom(meetingId: string): Promise<LeaveWaitingRoomResponse>;
+	getWaitingList(meetingId: string): Promise<GetWaitingListResponse>;
 	acceptWaitingUser(
 		meetingId: string,
 		userId: string,
