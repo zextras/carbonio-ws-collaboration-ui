@@ -4,13 +4,15 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { FC, useEffect } from 'react';
+import React, { FC, useEffect, useMemo } from 'react';
 
 import { Container, Text } from '@zextras/carbonio-design-system';
-import { last, size } from 'lodash';
+import { last, map, size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
+import { MEETINGS_PATH } from '../../../../constants/appConstants';
+import { getMeetingActive } from '../../../../store/selectors/MeetingSelectors';
 import useStore from '../../../../store/Store';
 import { scrollToEnd } from '../../../../utils/scrollUtils';
 
@@ -51,13 +53,27 @@ const WritingBubble: FC<WritingBubbleProps> = ({
 	const [t] = useTranslation();
 	const isWritingLabel = t('status.isTyping', 'is typing...');
 	const areWritingLabel = t('status.areTyping', 'are typing...');
+
+	const meetingIsActive: boolean = useStore((store) => getMeetingActive(store, roomId));
+	const isInsideMeeting = useMemo(() => window.location.pathname.includes(MEETINGS_PATH), []);
+
+	const writingListLabel = useMemo(() => {
+		if (writingListNames.length === 1) {
+			return `${writingListNames.toString()} ${isWritingLabel}`;
+		}
+		if (meetingIsActive && isInsideMeeting) {
+			const usersWritingListNames: string[] = [];
+			map(writingListNames, (user) => {
+				usersWritingListNames.push(user.split(/(\s+)/)[0]);
+			});
+			return `${usersWritingListNames.join(', ')} ${areWritingLabel}`;
+		}
+		return `${writingListNames.join(', ')} ${areWritingLabel}`;
+	}, [areWritingLabel, isInsideMeeting, isWritingLabel, meetingIsActive, writingListNames]);
+
 	const writingUsersLabel =
 		// eslint-disable-next-line no-nested-ternary
-		writingListNames.length > 0
-			? writingListNames.length === 1
-				? `${writingListNames.toString()} ${isWritingLabel}`
-				: `${writingListNames.join(', ')} ${areWritingLabel}`
-			: null;
+		writingListNames.length > 0 ? writingListLabel : null;
 
 	useEffect(() => {
 		const roomMessages = useStore.getState().messages[roomId];
