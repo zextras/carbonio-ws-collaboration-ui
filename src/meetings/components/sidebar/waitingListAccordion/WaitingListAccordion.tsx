@@ -13,8 +13,8 @@ import styled from 'styled-components';
 
 import WaitingUser from './WaitingUser';
 import { getWaitingListAccordionStatus } from '../../../../store/selectors/ActiveMeetingSelectors';
-import { getRoomIdByMeetingId } from '../../../../store/selectors/MeetingSelectors';
-import { getMyOwnershipOfTheRoom } from '../../../../store/selectors/RoomsSelectors';
+import { getRoomIdByMeetingId, getWaitingList } from '../../../../store/selectors/MeetingSelectors';
+import { getOwnershipOfTheRoom } from '../../../../store/selectors/RoomsSelectors';
 import useStore from '../../../../store/Store';
 
 const CustomAccordion = styled(Accordion)`
@@ -30,15 +30,11 @@ const WaitingListAccordion: FC<WaitingListAccordionProps> = ({ meetingId }) => {
 	const [t] = useTranslation();
 	const accordionTitle = t('', 'Waiting list');
 
-	const waitingList = useMemo(
-		() => ['fa61cbab-fba1-4cf3-b26a-945ea648dcb2', 'b4e34652-c178-4475-aeaf-df0358f07c20'],
-		[]
-	);
+	const waitingList = useStore((store) => getWaitingList(store, meetingId));
 	const accordionStatus = useStore((state) => getWaitingListAccordionStatus(state, meetingId));
 	const setParticipantsAccordionStatus = useStore((state) => state.setWaitingListAccordionStatus);
-	const sessionId = useStore((store) => store.session.id);
 	const roomId = useStore((store) => getRoomIdByMeetingId(store, meetingId));
-	const amIModerator = useStore((store) => getMyOwnershipOfTheRoom(store, sessionId, roomId || ''));
+	const amIModerator = useStore((store) => getOwnershipOfTheRoom(store, roomId || ''));
 
 	const toggleAccordionStatus = useCallback(
 		() => setParticipantsAccordionStatus(meetingId, !accordionStatus),

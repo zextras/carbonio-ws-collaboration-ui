@@ -164,6 +164,9 @@ export type MeetingsSlice = {
 		stream: STREAM_TYPE,
 		status: boolean
 	) => void;
+	setWaitingList: (meetingId: string, waitingList: string[]) => void;
+	addUserToWaitingList: (meetingId: string, userId: string) => void;
+	removeUserFromWaitingList: (meetingId: string, userId: string) => void;
 };
 
 export type ActiveMeetingSlice = {

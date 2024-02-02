@@ -226,7 +226,9 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 		// TODO real implementation
 		console.log('getWaitingList', meetingId);
 		return new Promise((resolve) => {
-			resolve(['fa61cbab-fba1-4cf3-b26a-945ea648dcb2', 'b4e34652-c178-4475-aeaf-df0358f07c20']);
+			const resp = ['fa61cbab-fba1-4cf3-b26a-945ea648dcb2', 'b4e34652-c178-4475-aeaf-df0358f07c20'];
+			useStore.getState().setWaitingList(meetingId, resp);
+			resolve(resp);
 		});
 	}
 
