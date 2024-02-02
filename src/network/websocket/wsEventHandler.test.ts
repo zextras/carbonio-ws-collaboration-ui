@@ -129,4 +129,10 @@ describe('wsEventHandler', () => {
 
 		await waitFor(() => expect(result.current.meetings[roomWithoutMe.id]).toBeUndefined());
 	});
+
+	describe('Waiting room events', () => {
+		test.todo('An user joins the waiting room');
+		test.todo('An user is accepted in the waiting room');
+		test.todo('An user is rejected in the waiting room');
+	});
 });

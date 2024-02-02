@@ -271,4 +271,10 @@ describe('Meetings API', () => {
 			})
 		});
 	});
+
+	test.todo('getScheduledMeetingName is called correctly');
+	test.todo('joinWaitingRoom is called correctly');
+	test.todo('leaveWaitingRoom is called correctly');
+	test.todo('getWaitingList is called correctly');
+	test.todo('acceptWaitingUser is called correctly');
 });

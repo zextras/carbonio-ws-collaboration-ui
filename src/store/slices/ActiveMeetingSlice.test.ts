@@ -77,6 +77,21 @@ describe('Active Meeting Slice', () => {
 		).toBeTruthy();
 	});
 
+	test('Change waiting list accordion status', () => {
+		const { result } = renderHook(() => useStore());
+		act(() => result.current.meetingConnection(meetingId, false, undefined, false, undefined));
+
+		act(() => result.current.setWaitingListAccordionStatus(meetingId, false));
+		expect(
+			result.current.activeMeeting[meetingId].sidebarStatus.waitingListAccordionIsOpened
+		).toBeFalsy();
+
+		act(() => result.current.setWaitingListAccordionStatus(meetingId, true));
+		expect(
+			result.current.activeMeeting[meetingId].sidebarStatus.waitingListAccordionIsOpened
+		).toBeTruthy();
+	});
+
 	test('Change chat visibility ', () => {
 		const { result } = renderHook(() => useStore());
 		act(() => result.current.meetingConnection(meetingId, false, undefined, false, undefined));

@@ -83,4 +83,12 @@ describe('Test components slice', () => {
 		act(() => result.current.deleteMeeting(mockMeeting1.id));
 		expect(size(result.current.meetings)).toBe(2);
 	});
+
+	describe('Waiting List', () => {
+		test.todo('Set a new waiting list');
+		test.todo('Add a user to an empty waiting list in which the user is not present');
+		test.todo('Add a user to a waiting list in which the user is already present');
+		test.todo('Remove a user from a waiting list in which the user is present');
+		test.todo('Remove a user from a waiting list in which the user is not present');
+	});
 });
