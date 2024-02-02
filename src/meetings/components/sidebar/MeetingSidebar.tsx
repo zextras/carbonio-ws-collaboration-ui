@@ -13,6 +13,7 @@ import styled from 'styled-components';
 
 import MeetingConversationAccordion from './MeetingConversationAccordion/MeetingConversationAccordion';
 import MeetingParticipantsAccordion from './ParticipantsAccordion/MeetingParticipantsAccordion';
+import WaitingListAccordion from './waitingListAccordion/WaitingListAccordion';
 import { ActionsAccordion } from '../../../chats/components/infoPanel/conversationActionsAccordion/ActionsAccordion';
 import { MeetingRoutesParams } from '../../../hooks/useRouting';
 import {
@@ -79,6 +80,7 @@ const MeetingSidebar = (): ReactElement => {
 			{meetingChatVisibility !== MeetingChatVisibility.EXPANDED && (
 				<AccordionContainer mainAlignment="flex-start" flexGrow="1" gap="gap: 0.063rem">
 					<ActionsAccordion roomId={roomId || ''} isInsideMeeting meetingId={meetingId} />
+					{roomType === RoomType.TEMPORARY && <WaitingListAccordion meetingId={meetingId} />}
 					{roomType !== RoomType.ONE_TO_ONE && (
 						<MeetingParticipantsAccordion meetingId={meetingId} />
 					)}

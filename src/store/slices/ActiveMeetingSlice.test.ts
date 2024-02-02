@@ -22,7 +22,8 @@ describe('Active Meeting Slice', () => {
 		expect(result.current.activeMeeting[meetingId].sidebarStatus).toStrictEqual({
 			sidebarIsOpened: true,
 			actionsAccordionIsOpened: true,
-			participantsAccordionIsOpened: false
+			participantsAccordionIsOpened: false,
+			waitingListAccordionIsOpened: true
 		});
 		expect(result.current.activeMeeting[meetingId].chatVisibility).toBe(
 			MeetingChatVisibility.CLOSED
