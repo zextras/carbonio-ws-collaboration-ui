@@ -10,6 +10,7 @@ import { screen } from '@testing-library/react';
 import WaitingUser from './WaitingUser';
 import useStore from '../../../../store/Store';
 import { createMockUser } from '../../../../tests/createMock';
+import { mockedAcceptWaitingUserRequest } from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 
 const user1 = createMockUser({ id: 'user1', name: 'user1' });
@@ -25,16 +26,34 @@ describe('WaitingUser tests', () => {
 		const name = screen.getByText(user1.name);
 		expect(name).toBeInTheDocument();
 	});
+
 	test('If user is not found, should render a shimmer', () => {
 		setup(<WaitingUser meetingId="meetingId" userId={user2.id} />);
 		const shimmer = screen.getByTestId('avatarShimmer');
 		expect(shimmer).toBeInTheDocument();
 	});
+
 	test('Should render the accept and reject buttons', () => {
 		setup(<WaitingUser meetingId="meetingId" userId={user1.id} />);
 		const acceptButtonIcon = screen.getByTestId('icon: AcceptanceMeetingOutline');
 		const rejectButtonIcon = screen.getByTestId('icon: KickMeetingOutline');
 		expect(acceptButtonIcon).toBeInTheDocument();
 		expect(rejectButtonIcon).toBeInTheDocument();
+	});
+
+	test('Moderator clicks on accept button', async () => {
+		mockedAcceptWaitingUserRequest.mockResolvedValue({});
+		const { user } = setup(<WaitingUser meetingId="meetingId" userId={user1.id} />);
+		const acceptButton = screen.getByTestId('icon: AcceptanceMeetingOutline');
+		await user.click(acceptButton);
+		expect(mockedAcceptWaitingUserRequest).toBeCalledWith('meetingId', user1.id, true);
+	});
+
+	test('Moderator clicks on reject button', async () => {
+		mockedAcceptWaitingUserRequest.mockResolvedValue({});
+		const { user } = setup(<WaitingUser meetingId="meetingId" userId={user1.id} />);
+		const acceptButton = screen.getByTestId('icon: KickMeetingOutline');
+		await user.click(acceptButton);
+		expect(mockedAcceptWaitingUserRequest).toBeCalledWith('meetingId', user1.id, false);
 	});
 });

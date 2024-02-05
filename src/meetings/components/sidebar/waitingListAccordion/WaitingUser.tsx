@@ -79,6 +79,7 @@ const WaitingUser: FC<WaitingUserProps> = ({ meetingId, userId }) => {
 
 	return (
 		<CustomContainer
+			data-testid="waitingUser"
 			orientation="horizontal"
 			width="fill"
 			padding={{ top: 'medium', right: 'small', bottom: 'medium' }}

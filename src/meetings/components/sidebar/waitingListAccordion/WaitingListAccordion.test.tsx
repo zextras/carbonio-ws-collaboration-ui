@@ -61,4 +61,21 @@ describe('WaitingListAccordion tests', () => {
 		setup(<WaitingListAccordion meetingId={meeting.id} />);
 		expect(screen.queryByText(/Waiting list/i)).not.toBeInTheDocument();
 	});
+
+	test('Toggle accordion status', async () => {
+		const iconUp = 'icon: ChevronUp';
+		const iconDown = 'icon: ChevronDown';
+
+		const store = useStore.getState();
+		store.promoteMemberToModerator(room.id, user1.id);
+		store.addUserToWaitingList(meeting.id, user2.id);
+		const { user } = setup(<WaitingListAccordion meetingId={meeting.id} />);
+		expect(screen.getByTestId(iconUp)).toBeVisible();
+
+		await user.click(screen.getByTestId(iconUp));
+		expect(screen.getByTestId(iconDown)).toBeVisible();
+
+		await user.click(screen.getByTestId(iconDown));
+		expect(screen.getByTestId(iconUp)).toBeVisible();
+	});
 });
