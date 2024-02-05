@@ -7,6 +7,7 @@
 import React from 'react';
 
 import { screen } from '@testing-library/react';
+import { act } from 'react-dom/test-utils';
 
 import WaitingListAccordion from './WaitingListAccordion';
 import useStore from '../../../../store/Store';
@@ -77,5 +78,23 @@ describe('WaitingListAccordion tests', () => {
 
 		await user.click(screen.getByTestId(iconDown));
 		expect(screen.getByTestId(iconUp)).toBeVisible();
+	});
+
+	test('Badge counter is visible if the accordion is closed', () => {
+		const store = useStore.getState();
+		store.promoteMemberToModerator(room.id, user1.id);
+		store.addUserToWaitingList(meeting.id, user2.id);
+		setup(<WaitingListAccordion meetingId={meeting.id} />);
+		act(() => store.setWaitingListAccordionStatus(meeting.id, false));
+		expect(screen.getByText('1')).toBeVisible();
+	});
+
+	test("Badge counter isn't visible if the accordion is open", () => {
+		const store = useStore.getState();
+		store.promoteMemberToModerator(room.id, user1.id);
+		store.addUserToWaitingList(meeting.id, user2.id);
+		setup(<WaitingListAccordion meetingId={meeting.id} />);
+		act(() => store.setWaitingListAccordionStatus(meeting.id, true));
+		expect(screen.queryByText('1')).not.toBeInTheDocument();
 	});
 });

@@ -65,7 +65,7 @@ const WaitingListAccordion: FC<WaitingListAccordionProps> = ({ meetingId }) => {
 		[accordionStatus, meetingId, setParticipantsAccordionStatus]
 	);
 
-	const items = useMemo(() => {
+	const items: AccordionItemType[] = useMemo(() => {
 		const waitingUsers: AccordionItemType[] = map(waitingList, (userId) => ({
 			id: `waitingUser-${userId}`,
 			disableHover: true,
@@ -79,7 +79,9 @@ const WaitingListAccordion: FC<WaitingListAccordionProps> = ({ meetingId }) => {
 				open: accordionStatus,
 				items: waitingUsers,
 				onOpen: toggleAccordionStatus,
-				onClose: toggleAccordionStatus
+				onClose: toggleAccordionStatus,
+				badgeCounter: accordionStatus ? undefined : waitingUsers.length,
+				badgeType: 'unread'
 			}
 		];
 	}, [accordionStatus, accordionTitle, meetingId, toggleAccordionStatus, waitingList]);
