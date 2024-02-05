@@ -8,4 +8,5 @@ describe('WaitingListAccordion tests', () => {
 	test.todo("Accordion isn't visible if the user is not a moderator");
 	test.todo("Accordion is visible if there aren't waiting users");
 	test.todo('Toggle the accordion status');
+	test.todo('Create a snackbar when a new user is added to the waiting list');
 });

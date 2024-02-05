@@ -6,12 +6,18 @@
 
 import React, { FC, useCallback, useMemo } from 'react';
 
-import { Accordion, AccordionItemType } from '@zextras/carbonio-design-system';
+import {
+	Accordion,
+	AccordionItemType,
+	CreateSnackbarFn,
+	useSnackbar
+} from '@zextras/carbonio-design-system';
 import { map, size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import WaitingUser from './WaitingUser';
+import useEventListener, { EventName } from '../../../../hooks/useEventListener';
 import { getWaitingListAccordionStatus } from '../../../../store/selectors/ActiveMeetingSelectors';
 import { getRoomIdByMeetingId, getWaitingList } from '../../../../store/selectors/MeetingSelectors';
 import { getOwnershipOfTheRoom } from '../../../../store/selectors/RoomsSelectors';
@@ -29,12 +35,30 @@ type WaitingListAccordionProps = {
 const WaitingListAccordion: FC<WaitingListAccordionProps> = ({ meetingId }) => {
 	const [t] = useTranslation();
 	const accordionTitle = t('', 'Waiting list');
+	const snackbarLabel = t('', 'There seems to be someone in the waiting room');
 
 	const waitingList = useStore((store) => getWaitingList(store, meetingId));
 	const accordionStatus = useStore((state) => getWaitingListAccordionStatus(state, meetingId));
 	const setParticipantsAccordionStatus = useStore((state) => state.setWaitingListAccordionStatus);
 	const roomId = useStore((store) => getRoomIdByMeetingId(store, meetingId));
 	const amIModerator = useStore((store) => getOwnershipOfTheRoom(store, roomId || ''));
+
+	const createSnackbar: CreateSnackbarFn = useSnackbar();
+	const newWaitingUser = useCallback(
+		({ detail: newWaitingUserEvent }) => {
+			if (newWaitingUserEvent.meetingId === meetingId && amIModerator) {
+				createSnackbar({
+					key: new Date().toLocaleString(),
+					type: 'info',
+					label: snackbarLabel,
+					hideButton: true
+				});
+			}
+		},
+		[amIModerator, createSnackbar, meetingId, snackbarLabel]
+	);
+
+	useEventListener(EventName.NEW_WAITING_USER, newWaitingUser);
 
 	const toggleAccordionStatus = useCallback(
 		() => setParticipantsAccordionStatus(meetingId, !accordionStatus),

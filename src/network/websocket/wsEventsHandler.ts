@@ -9,6 +9,7 @@ import { find } from 'lodash';
 
 import { MEETINGS_PATH } from '../../constants/appConstants';
 import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
+import displayWaitingListNotification from '../../meetings/components/sidebar/waitingListAccordion/displayWaitingListNotification';
 import useStore from '../../store/Store';
 import { MeetingType } from '../../types/network/models/meetingBeTypes';
 import { GetMeetingResponse } from '../../types/network/responses/meetingsResponses';
@@ -24,7 +25,7 @@ import { MeetingsApi, RoomsApi } from '../index';
 export function wsEventsHandler(event: WsEvent): void {
 	const state = useStore.getState();
 	const inThisMeetingTab = (meetingId: string): boolean =>
-		window.location.pathname.includes(`${MEETINGS_PATH}/${meetingId}`) &&
+		window.location.pathname.includes(`${MEETINGS_PATH}${meetingId}`) &&
 		!!state.activeMeeting[meetingId];
 	const isMyId = (userId: string): boolean => userId === state.session.id;
 
@@ -304,7 +305,9 @@ export function wsEventsHandler(event: WsEvent): void {
 			// TODO check if event arrive correctly
 			if (inThisMeetingTab(event.meetingId)) {
 				state.addUserToWaitingList(event.meetingId, event.userId);
-				// notifiche
+				displayWaitingListNotification(event.meetingId);
+				// Custom event to display snackbar
+				sendCustomEvent({ name: EventName.NEW_WAITING_USER, data: event });
 			}
 			break;
 		}

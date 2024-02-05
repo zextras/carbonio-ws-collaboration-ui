@@ -245,7 +245,7 @@ export const useMeetingsStoreSlice: StateCreator<MeetingsSlice> = (set: (...any:
 				const meeting = find(draft.meetings, (meeting) => meeting.id === meetingId);
 				if (meeting) {
 					const index = draft.meetings[meeting.roomId].waitingList?.indexOf(userId);
-					if (index && index !== -1) {
+					if (index !== undefined && index !== -1) {
 						draft.meetings[meeting.roomId].waitingList?.splice(index, 1);
 					}
 				}
