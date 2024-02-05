@@ -7,7 +7,7 @@
 import { act, renderHook } from '@testing-library/react-hooks';
 import { size } from 'lodash';
 
-import { createMockMeeting, createMockParticipants } from '../../tests/createMock';
+import { createMockMeeting, createMockParticipants, createMockRoom } from '../../tests/createMock';
 import useStore from '../Store';
 
 const mockParticipant0 = createMockParticipants({
@@ -40,6 +40,9 @@ const mockMeeting2 = createMockMeeting({
 	participants: [mockParticipant1],
 	createdAt: '2022-08-25T19:34:28.961+02:00'
 });
+
+const temporaryRoom = createMockRoom();
+const scheduleMeeting = createMockMeeting({ roomId: temporaryRoom.id });
 
 describe('Test components slice', () => {
 	test('setMeetings setter', () => {
@@ -85,10 +88,89 @@ describe('Test components slice', () => {
 	});
 
 	describe('Waiting List', () => {
-		test.todo('Set a new waiting list');
-		test.todo('Add a user to an empty waiting list in which the user is not present');
-		test.todo('Add a user to a waiting list in which the user is already present');
-		test.todo('Remove a user from a waiting list in which the user is present');
-		test.todo('Remove a user from a waiting list in which the user is not present');
+		test('Set a waiting list from scratch', () => {
+			const { result } = renderHook(() => useStore());
+			act(() => {
+				result.current.addRoom(temporaryRoom);
+				result.current.addMeeting(scheduleMeeting);
+				result.current.setWaitingList(scheduleMeeting.id, ['userId0', 'userId1']);
+			});
+
+			// Check store data
+			const { waitingList } = result.current.meetings[temporaryRoom.id];
+			expect(waitingList).not.toBeNull();
+			expect(size(waitingList)).toBe(2);
+		});
+
+		test('Replace existing waiting list', () => {
+			const { result } = renderHook(() => useStore());
+			act(() => {
+				result.current.addRoom(temporaryRoom);
+				result.current.addMeeting(scheduleMeeting);
+				result.current.setWaitingList(scheduleMeeting.id, ['userId0', 'userId1']);
+				result.current.setWaitingList(scheduleMeeting.id, ['userId2', 'userId3']);
+			});
+
+			// Check store data
+			const { waitingList } = result.current.meetings[temporaryRoom.id];
+			expect(waitingList).not.toBeNull();
+			expect(size(waitingList)).toBe(2);
+		});
+
+		test('Add a user to an empty waiting list in which the user is not present', () => {
+			const { result } = renderHook(() => useStore());
+			act(() => {
+				result.current.addRoom(temporaryRoom);
+				result.current.addMeeting(scheduleMeeting);
+				result.current.addUserToWaitingList(scheduleMeeting.id, 'userId0');
+			});
+
+			// Check store data
+			const { waitingList } = result.current.meetings[temporaryRoom.id];
+			expect(waitingList).not.toBeNull();
+			expect(size(waitingList)).toBe(1);
+		});
+
+		test('Add a user to a waiting list in which the user is already present', () => {
+			const { result } = renderHook(() => useStore());
+			act(() => {
+				result.current.addRoom(temporaryRoom);
+				result.current.addMeeting(scheduleMeeting);
+				result.current.setWaitingList(scheduleMeeting.id, ['userId0', 'userId1']);
+				result.current.addUserToWaitingList(scheduleMeeting.id, 'userId0');
+			});
+
+			const { waitingList } = result.current.meetings[temporaryRoom.id];
+			expect(waitingList).not.toBeNull();
+			expect(size(waitingList)).toBe(2);
+		});
+
+		test('Remove a user from a waiting list in which the user is present', () => {
+			const { result } = renderHook(() => useStore());
+			act(() => {
+				result.current.addRoom(temporaryRoom);
+				result.current.addMeeting(scheduleMeeting);
+				result.current.setWaitingList(scheduleMeeting.id, ['userId0', 'userId1']);
+				result.current.removeUserFromWaitingList(scheduleMeeting.id, 'userId0');
+			});
+
+			const { waitingList } = result.current.meetings[temporaryRoom.id];
+			expect(waitingList).not.toBeNull();
+			expect(size(waitingList)).toBe(1);
+		});
+
+		test('Remove a user from a waiting list in which the user is not present', () => {
+			const { result } = renderHook(() => useStore());
+			act(() => {
+				result.current.addRoom(temporaryRoom);
+				result.current.addMeeting(scheduleMeeting);
+				result.current.setWaitingList(scheduleMeeting.id, ['userId0', 'userId1']);
+				result.current.removeUserFromWaitingList(scheduleMeeting.id, 'userId2');
+			});
+
+			const { waitingList } = result.current.meetings[temporaryRoom.id];
+			expect(waitingList).not.toBeNull();
+			expect(size(waitingList)).toBe(2);
+		});
 	});
 });
