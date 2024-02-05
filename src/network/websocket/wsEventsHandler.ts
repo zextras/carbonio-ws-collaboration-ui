@@ -306,11 +306,13 @@ export function wsEventsHandler(event: WsEvent): void {
 			break;
 		}
 		case WsEventType.MEETING_USER_ACCEPTED: {
+			sendCustomEvent({ name: EventName.MEETING_USER_ACCEPTED, data: event });
 			// TODO remove user from waiting list in moderator session
 			//  and let him join the meeting with a custom event
 			break;
 		}
 		case WsEventType.MEETING_USER_REJECTED: {
+			sendCustomEvent({ name: EventName.MEETING_USER_REJECTED, data: event });
 			// TODO remove user from waiting list in moderator session
 			//  and send him to info page with a custom event
 			break;

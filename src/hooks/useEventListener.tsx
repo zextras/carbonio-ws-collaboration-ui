@@ -10,7 +10,9 @@ import {
 	MeetingAudioStreamChangedEvent,
 	MeetingJoinedEvent,
 	MeetingParticipantClashedEvent,
-	MeetingStartedEvent
+	MeetingStartedEvent,
+	MeetingUserAcceptedEvent,
+	MeetingUserRejectedEvent
 } from '../types/network/websocket/wsMeetingEvents';
 import { Message } from '../types/store/MessageTypes';
 
@@ -19,7 +21,9 @@ export enum EventName {
 	INCOMING_MEETING = 'incomingMeeting',
 	REMOVED_MEETING_NOTIFICATION = 'removedMeetingNotification',
 	MEMBER_MUTED = 'memberMuted',
-	MEETING_PARTICIPANT_CLASHED = 'meetingParticipantClashed'
+	MEETING_PARTICIPANT_CLASHED = 'meetingParticipantClashed',
+	MEETING_USER_ACCEPTED = 'meetingUserAccepted',
+	MEETING_USER_REJECTED = 'meetingUserRejected'
 }
 
 export type NewMessageEvent = {
@@ -47,12 +51,24 @@ export type MemberMutedEvent = {
 	data: MeetingAudioStreamChangedEvent;
 };
 
+export type MeetingAcceptedEvent = {
+	name: EventName.MEETING_USER_ACCEPTED;
+	data: MeetingUserAcceptedEvent;
+};
+
+export type MeetingRejectedEvent = {
+	name: EventName.MEETING_USER_REJECTED;
+	data: MeetingUserRejectedEvent;
+};
+
 type CustomEvent =
 	| NewMessageEvent
 	| IncomingMeetingEvent
 	| RemovedMeetingNotificationEvent
 	| MemberMutedEvent
-	| ParticipantClashedEvent;
+	| ParticipantClashedEvent
+	| MeetingAcceptedEvent
+	| MeetingRejectedEvent;
 
 export const sendCustomEvent = (event: CustomEvent): void => {
 	window.dispatchEvent(new CustomEvent(event.name, { detail: event.data }));

@@ -12,8 +12,8 @@ import { MEETINGS_PATH } from '../../constants/appConstants';
 import { MeetingsApi } from '../../network';
 import { getRoomIdFromMeeting } from '../../store/selectors/MeetingSelectors';
 import useStore from '../../store/Store';
-import AccessMeetingModal from '../components/AccessMeetingModal';
-import WaitingRoom from '../components/waitingRoom/WaitingRoom';
+import AccessMeetingModal from '../components/meetingAccessPoints/accessModal/AccessMeetingModal';
+import WaitingRoom from '../components/meetingAccessPoints/waitingRoom/WaitingRoom';
 
 const AccessMeetingPageView = (): ReactElement => {
 	const meetingId = useMemo(() => document.location.pathname.split(MEETINGS_PATH)[1], []);

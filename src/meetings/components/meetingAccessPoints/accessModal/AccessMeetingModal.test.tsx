@@ -11,21 +11,24 @@ import { act, renderHook } from '@testing-library/react-hooks';
 import { UserEvent } from '@testing-library/user-event/setup/setup';
 
 import AccessMeetingModal from './AccessMeetingModal';
-import { useParams } from '../../../__mocks__/react-router';
-import useStore from '../../store/Store';
+import { useParams } from '../../../../../__mocks__/react-router';
+import useStore from '../../../../store/Store';
 import {
 	createMockMeeting,
 	createMockParticipants,
 	createMockRoom,
 	createMockUser
-} from '../../tests/createMock';
-import { mockedEnterMeetingRequest, mockedJoinMeetingRequest } from '../../tests/mocks/network';
-import { setup } from '../../tests/test-utils';
-import { MeetingBe } from '../../types/network/models/meetingBeTypes';
-import { MemberBe, RoomBe, RoomType } from '../../types/network/models/roomBeTypes';
-import { UserBe } from '../../types/network/models/userBeTypes';
-import { MeetingParticipant } from '../../types/store/MeetingTypes';
-import { RootStore } from '../../types/store/StoreTypes';
+} from '../../../../tests/createMock';
+import {
+	mockedEnterMeetingRequest,
+	mockedJoinMeetingRequest
+} from '../../../../tests/mocks/network';
+import { setup } from '../../../../tests/test-utils';
+import { MeetingBe } from '../../../../types/network/models/meetingBeTypes';
+import { MemberBe, RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
+import { UserBe } from '../../../../types/network/models/userBeTypes';
+import { MeetingParticipant } from '../../../../types/store/MeetingTypes';
+import { RootStore } from '../../../../types/store/StoreTypes';
 
 const iconChevronDownOutline = 'icon: ChevronDownOutline';
 const audioDevice2 = 'Audio Device 2';
