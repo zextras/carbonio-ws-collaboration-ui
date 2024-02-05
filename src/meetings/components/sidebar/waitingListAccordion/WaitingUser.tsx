@@ -40,7 +40,7 @@ const WaitingUser: FC<WaitingUserProps> = ({ meetingId, userId }) => {
 	const [t] = useTranslation();
 	// TODO keys
 	const waitingToEnterLabel = t('', 'Waiting to enter');
-	const acceptButtonTooltip = t('', 'Let user it');
+	const acceptButtonTooltip = t('', 'Let user in');
 	const rejectButtonTooltip = t('', 'Reject user');
 
 	const memberName: string | undefined = useStore((store) => getUserName(store, userId));
@@ -61,7 +61,7 @@ const WaitingUser: FC<WaitingUserProps> = ({ meetingId, userId }) => {
 				<CustomAvatar label={memberName} shape="round" picture={picture} />
 			) : (
 				<Container width="fit" height="fit">
-					<Shimmer.Avatar width="2rem" />
+					<Shimmer.Avatar width="2rem" data-testid="avatarShimmer" />
 				</Container>
 			),
 		[memberName, picture]

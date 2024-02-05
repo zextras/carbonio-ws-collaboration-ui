@@ -145,7 +145,7 @@ describe('wsEventHandler', () => {
 		store.setLoginInfo(user1.id, 'user1');
 		store.addRoom(temporaryRoom);
 		store.addMeeting(scheduledMeeting);
-		store.meetingConnection(meeting.id, false, undefined, false, undefined);
+		store.meetingConnection(scheduledMeeting.id, false, undefined, false, undefined);
 	});
 	describe('Waiting room events', () => {
 		test("An user joins the waiting room while I'm in the meeting tab", () => {
