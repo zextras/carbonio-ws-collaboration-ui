@@ -20,32 +20,32 @@ const textHistory = [
 	createMockTextMessage({
 		id: 'messageId0',
 		roomId: room.id,
-		date: dateToTimestamp('01 May 2023 14:00')
+		date: dateToTimestamp(new Date('01 May 2023 14:00'))
 	}),
 	createMockTextMessage({
 		id: 'messageId1',
 		roomId: room.id,
-		date: dateToTimestamp('01 May 2023 14:01')
+		date: dateToTimestamp(new Date('01 May 2023 14:01'))
 	}),
 	createMockTextMessage({
 		id: 'messageId2',
 		roomId: room.id,
-		date: dateToTimestamp('01 May 2023 14:02')
+		date: dateToTimestamp(new Date('01 May 2023 14:02'))
 	}),
 	createMockTextMessage({
 		id: 'messageId3',
 		roomId: room.id,
-		date: dateToTimestamp('01 May 2023 14:03')
+		date: dateToTimestamp(new Date('01 May 2023 14:03'))
 	}),
 	createMockTextMessage({
 		id: 'messageId4',
 		roomId: room.id,
-		date: dateToTimestamp('01 May 2023 14:04')
+		date: dateToTimestamp(new Date('01 May 2023 14:04'))
 	}),
 	createMockTextMessage({
 		id: 'messageId5',
 		roomId: room.id,
-		date: dateToTimestamp('01 May 2023 14:05')
+		date: dateToTimestamp(new Date('01 May 2023 14:05'))
 	})
 ];
 
@@ -53,35 +53,35 @@ const complexHistory = [
 	createMockTextMessage({
 		id: 'messageId0',
 		roomId: room.id,
-		date: dateToTimestamp('01 May 2023 14:00')
+		date: dateToTimestamp(new Date('01 May 2023 14:00'))
 	}),
 	createMockTextMessage({
 		id: 'messageId1',
 		roomId: room.id,
-		date: dateToTimestamp('01 May 2023 14:01'),
+		date: dateToTimestamp(new Date('01 May 2023 14:01')),
 		from: myUserId
 	}),
 	createMockTextMessage({
 		id: 'messageId2',
 		roomId: room.id,
-		date: dateToTimestamp('01 May 2023 14:02'),
+		date: dateToTimestamp(new Date('01 May 2023 14:02')),
 		deleted: true
 	}),
 	createMockTextMessage({
 		id: 'messageId3',
 		roomId: room.id,
-		date: dateToTimestamp('01 May 2023 14:03')
+		date: dateToTimestamp(new Date('01 May 2023 14:03'))
 	}),
 	createMockTextMessage({
 		id: 'messageId4',
 		roomId: room.id,
-		date: dateToTimestamp('01 May 2023 14:04'),
+		date: dateToTimestamp(new Date('01 May 2023 14:04')),
 		type: MessageType.CONFIGURATION_MSG
 	}),
 	createMockTextMessage({
 		id: 'messageId5',
 		roomId: room.id,
-		date: dateToTimestamp('01 May 2023 14:05'),
+		date: dateToTimestamp(new Date('01 May 2023 14:05')),
 		from: myUserId
 	})
 ];
