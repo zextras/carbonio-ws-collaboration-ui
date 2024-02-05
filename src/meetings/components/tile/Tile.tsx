@@ -145,6 +145,13 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 		};
 	}, [handleHoverMouseMove]);
 
+	useEffect(
+		() => (): void => {
+			timeout.current && clearTimeout(timeout.current);
+		},
+		[]
+	);
+
 	return (
 		<CustomTile
 			background={'text'}
