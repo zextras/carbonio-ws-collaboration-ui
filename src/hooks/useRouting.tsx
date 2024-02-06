@@ -24,7 +24,7 @@ export type MeetingRoutesParams = {
 };
 
 export enum PAGE_INFO_TYPE {
-	HUNG_UP_PAGE = 'hung_up_page',
+	HANG_UP_PAGE = 'hang_up_page',
 	NEXT_TIME_PAGE = 'next_tile_page',
 	ROOM_EMPTY = 'room_empty',
 	MEETING_ENDED = 'meeting_ended',

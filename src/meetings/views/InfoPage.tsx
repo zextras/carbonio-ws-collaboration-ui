@@ -65,7 +65,7 @@ const InfoPage = (): ReactElement => {
 				'There cannot be more than one active session of the same meeting'
 			);
 			break;
-		case PAGE_INFO_TYPE.HUNG_UP_PAGE:
+		case PAGE_INFO_TYPE.HANG_UP_PAGE:
 			titleLabel = t('', 'You hung up');
 			centralLabel = t('', 'Maybe next time');
 			descriptionLowerLabel = t('', 'We look forward to seeing you participate in future meetings');

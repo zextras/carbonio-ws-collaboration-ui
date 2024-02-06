@@ -31,6 +31,17 @@ const WaitingRoom: FC<WaitingRoomProps> = ({ meetingId }) => {
 	const [t] = useTranslation();
 	const playMicLabel = t('meeting.interactions.playMic', 'Start microphone testing');
 	const stopMicLabel = t('meeting.interactions.stopMic', 'Stop microphone testing');
+	const setInputDevicesLabel = t('', 'Set your input devices by choosing them from dropdown menu');
+	const enterInAFewMomentsLabel = t('', 'You will enter the meeting in a few moments');
+	const clickOnReadyLabel = t('', 'Click on “READY TO PARTICIPATE” to enter the meeting');
+	const hangUpLabel = t('', 'Hang up');
+	const readyToParticipateLabel = t('', 'Ready to participate');
+	const areYouReadyLabel = t('', 'Are you ready? Make yourself comfortable.');
+	const whenYouAreReadyLabel = t('', 'When you are ready, get comfortable.');
+	const aModeratorWillLetYouEnterLabel = t(
+		'',
+		'A moderator will let you into the meeting as soon as possible.'
+	);
 
 	const roomId = useStore((store) => getRoomIdByMeetingId(store, meetingId));
 	const [streamTrack, setStreamTrack] = useState<MediaStream | null>(null);
@@ -38,7 +49,7 @@ const WaitingRoom: FC<WaitingRoomProps> = ({ meetingId }) => {
 	const [videoPlayerTestMuted, setVideoPlayerTestMuted] = useState<boolean>(true);
 	const [meetingName, setMeetingName] = useState<string>('');
 	const [wrapperWidth, setWrapperWidth] = useState<number>((window.innerWidth * 0.33) / 16);
-	const [userIsReady, setUserIsready] = useState<boolean>(false);
+	const [userIsReady, setUserIsReady] = useState<boolean>(false);
 	const [selectedDevicesId, setSelectedDevicesId] = useState<{
 		audio: string | undefined;
 		video: string | undefined;
@@ -49,8 +60,9 @@ const WaitingRoom: FC<WaitingRoomProps> = ({ meetingId }) => {
 	}>({ audio: false, video: false });
 	const { goToInfoPage, goToMeetingPage } = useRouting();
 
-	const title = `How do you want to join ${meetingName} meeting?`;
-	const subtitle = 'Set your input devices by choosing them from dropdown menu';
+	const howToJoinMeeting = t('', `How do you want to join ${meetingName} meeting?`, {
+		meetingName
+	});
 
 	const videoStreamRef = useRef<HTMLVideoElement>(null);
 
@@ -59,7 +71,7 @@ const WaitingRoom: FC<WaitingRoomProps> = ({ meetingId }) => {
 	}, []);
 
 	const handleHungUp = useCallback(() => {
-		goToInfoPage(PAGE_INFO_TYPE.HUNG_UP_PAGE);
+		goToInfoPage(PAGE_INFO_TYPE.HANG_UP_PAGE);
 	}, [goToInfoPage]);
 
 	// TODO handle the change of the width in case of resize from settings
@@ -67,10 +79,10 @@ const WaitingRoom: FC<WaitingRoomProps> = ({ meetingId }) => {
 		setWrapperWidth((window.innerWidth * 0.33) / 16);
 	}, []);
 
-	const joinMeetingRoom = useCallback(() => {
+	const joinWaitingRoom = useCallback(() => {
 		MeetingsApi.joinWaitingRoom(meetingId).then(() => {
 			console.log('Joined Waiting Room');
-			setUserIsready(true);
+			setUserIsReady(true);
 		});
 	}, [meetingId]);
 
@@ -122,10 +134,10 @@ const WaitingRoom: FC<WaitingRoomProps> = ({ meetingId }) => {
 	return (
 		<Container mainAlignment="center" crossAlignment="center">
 			<Text size="extralarge" weight="bold">
-				{title}
+				{howToJoinMeeting}
 			</Text>
 			<Padding bottom={'0.5rem'} />
-			<Text>{subtitle}</Text>
+			<Text>{setInputDevicesLabel}</Text>
 			<Padding bottom={'1rem'} />
 			<Container orientation="horizontal" height="fit" width={'fit'}>
 				<LocalMediaHandler
@@ -155,16 +167,12 @@ const WaitingRoom: FC<WaitingRoomProps> = ({ meetingId }) => {
 				/>
 			</Container>
 			<Padding bottom={'1.5rem'} />
-			<Text size="large">
-				{userIsReady
-					? 'You will enter the meeting in a few moments'
-					: 'Click on “READY TO PARTICIPATE” to enter the meeting'}
-			</Text>
+			<Text size="large">{userIsReady ? enterInAFewMomentsLabel : clickOnReadyLabel}</Text>
 			<Padding bottom={'1.5rem'} />
 			<Container orientation="horizontal" height="fit" width="fit">
 				<CustomButton
 					backgroundColor={'error'}
-					label={'Hang up'}
+					label={hangUpLabel}
 					icon="PhoneOff"
 					iconPlacement="right"
 					onClick={handleHungUp}
@@ -176,10 +184,10 @@ const WaitingRoom: FC<WaitingRoomProps> = ({ meetingId }) => {
 						<Padding right={'1rem'} />
 						<CustomButton
 							backgroundColor={'success'}
-							label={'Ready to participate'}
+							label={readyToParticipateLabel}
 							icon="CheckmarkOutline"
 							iconPlacement="right"
-							onClick={joinMeetingRoom}
+							onClick={joinWaitingRoom}
 							size="extralarge"
 							disabled={!enterButtonIsEnabled}
 						/>
@@ -188,13 +196,9 @@ const WaitingRoom: FC<WaitingRoomProps> = ({ meetingId }) => {
 			</Container>
 
 			<Padding bottom={'1.5rem'} />
-			<Text>
-				{userIsReady
-					? 'Are you ready? Make yourself comfortable.'
-					: 'When you are ready, get comfortable.'}
-			</Text>
+			<Text>{userIsReady ? areYouReadyLabel : whenYouAreReadyLabel}</Text>
 			<Padding bottom={'0.5rem'} />
-			<Text>A moderator will let you into the meeting as soon as possible.</Text>
+			<Text>{aModeratorWillLetYouEnterLabel}</Text>
 		</Container>
 	);
 };
