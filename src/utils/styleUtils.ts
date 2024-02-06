@@ -30,9 +30,7 @@ export function calcAvatarMeetingColor(fromColor: string): string {
 export const calcScaleDivisor = (): number => {
 	const localStorage = window.parent.localStorage.getItem('settings');
 	if (localStorage) {
-		const settingsStorage = JSON.parse(window.parent.localStorage.getItem('settings') || '')[
-			'settings.appearance_setting.scaling'
-		];
+		const settingsStorage = JSON.parse(localStorage)['settings.appearance_setting.scaling'];
 		const percentage = 100 - settingsStorage;
 		const proportionalNumber = (16 * percentage) / 100;
 		return 16 - proportionalNumber;
