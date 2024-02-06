@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { ReactElement, useCallback, useMemo, useState } from 'react';
+import React, { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { Button, Container, Portal } from '@zextras/carbonio-design-system';
 import { useCurrentRoute } from '@zextras/carbonio-shell-ui';
@@ -46,10 +46,13 @@ const MeetingNotificationsHandler = (): ReactElement => {
 	const [notificationArray, setNotificationArray] = useState<MeetingStartedEvent[]>([]);
 	const [meetingSound, setMeetingSound] = useState(true);
 
+	const timeout = useRef<NodeJS.Timeout>();
+
 	const addNotification = useCallback(({ detail: meetingStartedEvent }) => {
+		clearTimeout(timeout.current);
 		setNotificationArray((prev) => [meetingStartedEvent, ...prev]);
 		setMeetingSound(true);
-		setTimeout(() => setMeetingSound(false), 12000);
+		timeout.current = setTimeout(() => setMeetingSound(false), 12000);
 	}, []);
 
 	const removeNotification = useCallback((notificationId: string): void => {
@@ -104,6 +107,13 @@ const MeetingNotificationsHandler = (): ReactElement => {
 		[notificationArray, currentRoute]
 	);
 
+	useEffect(
+		() => (): void => {
+			timeout.current && clearTimeout(timeout.current);
+		},
+		[]
+	);
+
 	return (
 		<Portal show={displayPortal}>
 			<PortalContainer
@@ -121,7 +131,7 @@ const MeetingNotificationsHandler = (): ReactElement => {
 				</CustomContainer>
 				{meetingSound && size(notificationArray) > 0 && (
 					// eslint-disable-next-line jsx-a11y/media-has-caption
-					<audio autoPlay loop>
+					<audio data-testid="meeting_notification_audio" autoPlay loop>
 						<source id="src_mp3" type="audio/mp3" src={meetingNotificationRingMp3} />
 						<source id="src_ogg" type="audio/ogg" src={meetingNotificationRingOgg} />
 					</audio>

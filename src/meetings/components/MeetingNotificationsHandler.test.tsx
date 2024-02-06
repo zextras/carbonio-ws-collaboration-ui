@@ -77,12 +77,27 @@ describe('MeetingNotificationsHandler', () => {
 		setup(<MeetingNotificationsHandler />);
 		addIncomingMeetingNotification(room, meeting);
 		expect(screen.getByTestId('incoming_call_notification')).toBeInTheDocument();
-
 		act(() => useStore.getState().deleteMeeting(meeting.id));
+		const audioTag = screen.queryByTestId('meeting_notification_audio');
 		expect(screen.queryByTestId('incoming_call_notification')).not.toBeInTheDocument();
+		expect(audioTag).not.toBeInTheDocument();
 	});
 
-	test("Button 'Decline all' is rendered when there are more than one notification", () => {
+	// TODO test to add for bug WSC-1265
+	// test('A notification is removed when meeting is stopped because an user leaves it', () => {
+	// 	setup(<MeetingNotificationsHandler />);
+	// 	addIncomingMeetingNotification(room, meeting);
+	// 	expect(screen.getByTestId('incoming_call_notification')).toBeInTheDocument();
+	// 	act(() => {
+	// 		// jest.advanceTimersByTime(4000);
+	// 		useStore.getState().stopMeeting(meeting.id);
+	// 	});
+	// 	const audioTag = screen.queryByTestId('meeting_notification_audio');
+	// 	expect(screen.queryByTestId('incoming_call_notification')).not.toBeInTheDocument();
+	// 	expect(audioTag).not.toBeInTheDocument();
+	// });
+
+	test("Button 'Decline all' is rendered when there are more than one notification", async () => {
 		setup(<MeetingNotificationsHandler />);
 		addIncomingMeetingNotification(room, meeting);
 		addIncomingMeetingNotification(room1, meeting1);
@@ -97,7 +112,9 @@ describe('MeetingNotificationsHandler', () => {
 		expect(screen.getAllByTestId('incoming_call_notification')).toHaveLength(2);
 
 		await user.click(screen.getByText(declineAll));
+		const audioTag = screen.queryByTestId('meeting_notification_audio');
 		expect(screen.queryByTestId('incoming_call_notification')).not.toBeInTheDocument();
 		expect(screen.queryByTestId('incoming_call_notification_portal')).not.toBeInTheDocument();
+		expect(audioTag).not.toBeInTheDocument();
 	});
 });
