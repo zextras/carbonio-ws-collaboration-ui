@@ -33,6 +33,7 @@ type WaitingListAccordionProps = {
 };
 
 const WaitingListAccordion: FC<WaitingListAccordionProps> = ({ meetingId }) => {
+	// TODO translations key
 	const [t] = useTranslation();
 	const accordionTitle = t('', 'Waiting list');
 	const snackbarLabel = t('', 'There seems to be someone in the waiting room');

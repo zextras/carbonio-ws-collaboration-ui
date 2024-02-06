@@ -220,6 +220,13 @@ export const useMeetingsStoreSlice: StateCreator<MeetingsSlice> = (set: (...any:
 				const meeting = find(draft.meetings, (meeting) => meeting.id === meetingId);
 				if (meeting) {
 					draft.meetings[meeting.roomId].waitingList = waitingList;
+
+					// Retrieve waiting users information if they are unknown
+					forEach(waitingList, (userId) => {
+						if (!find(draft.users, (user) => user.id === userId)) {
+							UsersApi.getDebouncedUser(userId);
+						}
+					});
 				}
 			}),
 			false,
@@ -233,6 +240,11 @@ export const useMeetingsStoreSlice: StateCreator<MeetingsSlice> = (set: (...any:
 				if (meeting && !includes(meeting.waitingList, userId)) {
 					if (!meeting.waitingList) draft.meetings[meeting.roomId].waitingList = [];
 					draft.meetings[meeting.roomId].waitingList?.push(userId);
+
+					// Retrieve waiting user information if ut is unknown
+					if (!find(draft.users, (user) => user.id === userId)) {
+						UsersApi.getDebouncedUser(userId);
+					}
 				}
 			}),
 			false,

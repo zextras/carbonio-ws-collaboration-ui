@@ -7,6 +7,7 @@
 import React, { ReactElement, useCallback } from 'react';
 
 import { Container, IconButton, Tooltip } from '@zextras/carbonio-design-system';
+import { includes } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -79,9 +80,13 @@ const MeetingSidebar = (): ReactElement => {
 		>
 			{meetingChatVisibility !== MeetingChatVisibility.EXPANDED && (
 				<AccordionContainer mainAlignment="flex-start" flexGrow="1" gap="gap: 0.063rem">
-					<ActionsAccordion roomId={roomId || ''} isInsideMeeting meetingId={meetingId} />
-					{roomType === RoomType.TEMPORARY && <WaitingListAccordion meetingId={meetingId} />}
-					{roomType !== RoomType.ONE_TO_ONE && (
+					{includes([RoomType.ONE_TO_ONE, RoomType.GROUP], roomType) && (
+						<ActionsAccordion roomId={roomId || ''} isInsideMeeting meetingId={meetingId} />
+					)}
+					{includes([RoomType.TEMPORARY], roomType) && (
+						<WaitingListAccordion meetingId={meetingId} />
+					)}
+					{includes([RoomType.GROUP, RoomType.TEMPORARY], roomType) && (
 						<MeetingParticipantsAccordion meetingId={meetingId} />
 					)}
 				</AccordionContainer>
