@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { find } from 'lodash';
+
 import BaseAPI from './BaseAPI';
 import useStore from '../../store/Store';
 import { RequestType } from '../../types/network/apis/IBaseAPI';
@@ -34,6 +36,8 @@ import {
 	UpdateMediaOfferResponse
 } from '../../types/network/responses/meetingsResponses';
 import { STREAM_TYPE, Subscription } from '../../types/store/ActiveMeetingTypes';
+import { RoomType } from '../../types/store/RoomTypes';
+import { RoomsApi } from '../index';
 
 class MeetingsApi extends BaseAPI implements IMeetingsApi {
 	// Singleton design pattern
@@ -127,9 +131,19 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 	}
 
 	public leaveMeeting(meetingId: string): Promise<LeaveMeetingResponse> {
+		const room = find(useStore.getState().rooms, (room) => room.meetingId === meetingId);
+		const iAmNotOwner = find(
+			room?.members,
+			(member) => member.userId === useStore.getState().session.id && !member.owner
+		);
 		return this.fetchAPI(`meetings/${meetingId}/leave`, RequestType.POST).then(
 			(resp: LeaveMeetingResponse) => {
 				useStore.getState().meetingDisconnection(meetingId);
+
+				// Leave temporary room when a member leaves the scheduled meeting
+				if (room?.type === RoomType.TEMPORARY && iAmNotOwner) {
+					RoomsApi.deleteRoomMember(room.id, useStore.getState().session.id || '');
+				}
 				return resp;
 			}
 		);
