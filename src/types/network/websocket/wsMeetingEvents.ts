@@ -24,7 +24,9 @@ export type WsMeetingEvent =
 	| MeetingParticipantClashedEvent
 	| MeetingUserWaitingListJoinedEvent
 	| MeetingUserAcceptedEvent
-	| MeetingUserRejectedEvent;
+	| MeetingUserRejectedEvent
+	// TODO change name of the event
+	| MeetingUserWaitingListRejoinedEvent;
 
 type BasicMeetingEvent = {
 	sentDate: string;
@@ -123,5 +125,11 @@ export type MeetingUserAcceptedEvent = BasicMeetingEvent & {
 
 export type MeetingUserRejectedEvent = BasicMeetingEvent & {
 	type: WsEventType.MEETING_USER_REJECTED;
+	userId: string;
+};
+
+// TODO change name of the event
+export type MeetingUserWaitingListRejoinedEvent = BasicMeetingEvent & {
+	type: WsEventType.MEETING_USER_WAITING_LIST_REJOINED;
 	userId: string;
 };

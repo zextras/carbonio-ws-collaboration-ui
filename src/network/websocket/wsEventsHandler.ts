@@ -317,6 +317,11 @@ export function wsEventsHandler(event: WsEvent): void {
 			//  and send him to info page with a custom event
 			break;
 		}
+		// TODO change name of the event
+		case WsEventType.MEETING_USER_WAITING_LIST_REJOINED: {
+			sendCustomEvent({ name: EventName.MEETING_REJOINED_WAITING_ROOM, data: event });
+			break;
+		}
 		default:
 			wsDebug('Unhandled event', event);
 			break;

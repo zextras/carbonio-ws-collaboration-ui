@@ -25,7 +25,6 @@ const CustomButton = styled(Button)`
 type WaitingRoomProps = {
 	meetingId: string;
 };
-// 516 : 1439 = x : 100
 const WaitingRoom: FC<WaitingRoomProps> = ({ meetingId }) => {
 	const [t] = useTranslation();
 	const playMicLabel = t('meeting.interactions.playMic', 'Start microphone testing');
@@ -128,8 +127,14 @@ const WaitingRoom: FC<WaitingRoomProps> = ({ meetingId }) => {
 		goToInfoPage(PAGE_INFO_TYPE.NEXT_TIME_PAGE);
 	}, [goToInfoPage]);
 
+	const handleRejoin = useCallback(() => {
+		goToInfoPage(PAGE_INFO_TYPE.ALREADY_ACTIVE_WAITING_ROOM_SESSION);
+	}, [goToInfoPage]);
+
 	useEventListener(EventName.MEETING_USER_ACCEPTED, handleAcceptance);
 	useEventListener(EventName.MEETING_USER_REJECTED, handleRejected);
+	// TODO change name of the event
+	useEventListener(EventName.MEETING_REJOINED_WAITING_ROOM, handleRejoin);
 
 	useEffect(() => {
 		window.addEventListener('resize', handleResize);
