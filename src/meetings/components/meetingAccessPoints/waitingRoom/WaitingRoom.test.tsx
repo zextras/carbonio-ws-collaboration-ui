@@ -87,7 +87,7 @@ describe('Waiting room', () => {
 		const enterButton = await screen.findByText(readyButtonLabel);
 		await act(() => user.click(enterButton));
 
-		const changedString = await screen.findByText('Are you ready? Make yourself comfortable.');
+		const changedString = await screen.findByText('Everything is set! Make yourself comfortable.');
 		expect(changedString).toBeInTheDocument();
 	});
 	test('user is accepted in the scheduled meeting', async () => {
@@ -120,7 +120,7 @@ describe('Waiting room', () => {
 		const enterButton = await screen.findByText(readyButtonLabel);
 		await act(() => user.click(enterButton));
 
-		const changedString = await screen.findByText('Are you ready? Make yourself comfortable.');
+		const changedString = await screen.findByText('Everything is set! Make yourself comfortable.');
 		expect(changedString).toBeInTheDocument();
 
 		await waitFor(() =>

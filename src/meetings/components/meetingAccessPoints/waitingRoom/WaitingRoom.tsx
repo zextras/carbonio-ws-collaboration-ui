@@ -18,28 +18,42 @@ import useStore from '../../../../store/Store';
 import AccessTile from '../mediaHandlers/AccessTile';
 import LocalMediaHandler from '../mediaHandlers/LocalMediaHandler';
 
-const CustomButton = styled(Button)<{ $userIsReady?: boolean }>`
-	width: ${({ $userIsReady }): string => ($userIsReady ? '36rem' : '17.5rem')};
+const CustomButton = styled(Button)`
 	border-radius: 0.125rem;
 `;
 
 type WaitingRoomProps = {
 	meetingId: string;
 };
-
+// 516 : 1439 = x : 100
 const WaitingRoom: FC<WaitingRoomProps> = ({ meetingId }) => {
 	const [t] = useTranslation();
 	const playMicLabel = t('meeting.interactions.playMic', 'Start microphone testing');
 	const stopMicLabel = t('meeting.interactions.stopMic', 'Stop microphone testing');
-	const setInputDevicesLabel = t('', 'Set your input devices by choosing them from dropdown menu');
-	const enterInAFewMomentsLabel = t('', 'You will enter the meeting in a few moments');
-	const clickOnReadyLabel = t('', 'Click on “READY TO PARTICIPATE” to enter the meeting');
-	const hangUpLabel = t('', 'Hang up');
-	const readyToParticipateLabel = t('', 'Ready to participate');
-	const areYouReadyLabel = t('', 'Are you ready? Make yourself comfortable.');
-	const whenYouAreReadyLabel = t('', 'When you are ready, get comfortable.');
+	const setInputDevicesLabel = t(
+		'meeting.waitingRoom.setInputs',
+		'Set your input devices by choosing them from dropdown menu'
+	);
+	const enterInAFewMomentsLabel = t(
+		'meeting.waitingRoom.readyHint',
+		'You will enter the meeting in a few moments'
+	);
+	const clickOnReadyLabel = t(
+		'meeting.waitingRoom.welcomeHint',
+		'Click on “READY TO PARTICIPATE” to enter the meeting'
+	);
+	const hangUpLabel = t('meeting.waitingRoom.hangUp', 'Hang up');
+	const readyToParticipateLabel = t('meeting.waitingRoom.ready', 'Ready to participate');
+	const areYouReadyLabel = t(
+		'meeting.waitingRoom.readyCaption',
+		'Everything is set! Make yourself comfortable.'
+	);
+	const whenYouAreReadyLabel = t(
+		'meeting.waitingRoom.welcomeCaption',
+		'When you are ready, get comfortable.'
+	);
 	const aModeratorWillLetYouEnterLabel = t(
-		'',
+		'meeting.waitingRoom.nextStep',
 		'A moderator will let you into the meeting as soon as possible.'
 	);
 
@@ -60,9 +74,13 @@ const WaitingRoom: FC<WaitingRoomProps> = ({ meetingId }) => {
 	}>({ audio: false, video: false });
 	const { goToInfoPage, goToMeetingPage } = useRouting();
 
-	const howToJoinMeeting = t('', `How do you want to join ${meetingName} meeting?`, {
-		meetingName
-	});
+	const howToJoinMeeting = t(
+		'meeting.waitingRoom.title',
+		`How do you want to join ${meetingName} meeting?`,
+		{
+			meetingName
+		}
+	);
 
 	const videoStreamRef = useRef<HTMLVideoElement>(null);
 
@@ -169,15 +187,14 @@ const WaitingRoom: FC<WaitingRoomProps> = ({ meetingId }) => {
 			<Padding bottom={'1.5rem'} />
 			<Text size="large">{userIsReady ? enterInAFewMomentsLabel : clickOnReadyLabel}</Text>
 			<Padding bottom={'1.5rem'} />
-			<Container orientation="horizontal" height="fit" width="fit">
+			<Container orientation="horizontal" height="fit" width={`36%`}>
 				<CustomButton
 					backgroundColor={'error'}
 					label={hangUpLabel}
 					icon="PhoneOff"
 					iconPlacement="right"
 					onClick={handleHungUp}
-					size="extralarge"
-					$userIsReady={userIsReady}
+					width="fill"
 				/>
 				{!userIsReady && (
 					<>
@@ -188,7 +205,7 @@ const WaitingRoom: FC<WaitingRoomProps> = ({ meetingId }) => {
 							icon="CheckmarkOutline"
 							iconPlacement="right"
 							onClick={joinWaitingRoom}
-							size="extralarge"
+							width="fill"
 							disabled={!enterButtonIsEnabled}
 						/>
 					</>
