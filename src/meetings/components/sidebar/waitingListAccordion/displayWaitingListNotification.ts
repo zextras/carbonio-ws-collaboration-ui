@@ -18,12 +18,17 @@ const displayWaitingListNotification = (meetingId: string): void => {
 	);
 
 	if (iAmOwner) {
-		// TODO translations keys
 		getNotificationManager().notify({
 			showPopup: true,
 			playSound: true,
-			title: i18next.t('', 'There seems to be someone in the Waiting Room'),
-			message: i18next.t('', 'New user is waiting to enter')
+			title: i18next.t(
+				'meeting.browserNotification.waitingTitle',
+				'There seems to be someone in the Waiting Room'
+			),
+			message: i18next.t(
+				'meeting.browserNotification.waitingMessage',
+				'New user is waiting to enter the meeting'
+			)
 		});
 	}
 };

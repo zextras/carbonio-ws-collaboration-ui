@@ -38,10 +38,9 @@ type WaitingUserProps = {
 
 const WaitingUser: FC<WaitingUserProps> = ({ meetingId, userId }) => {
 	const [t] = useTranslation();
-	// TODO keys
-	const waitingToEnterLabel = t('', 'Waiting to enter');
-	const acceptButtonTooltip = t('', 'Let user in');
-	const rejectButtonTooltip = t('', 'Reject user');
+	const waitingToEnterLabel = t('meeting.sidebar.waitingCaption', 'Waiting to enter');
+	const acceptButtonTooltip = t('meeting.sidebar.tooltip.waitingAccept', 'Let user in');
+	const rejectButtonTooltip = t('meeting.sidebar.tooltip.waitingReject', 'Reject user');
 
 	const memberName: string | undefined = useStore((store) => getUserName(store, userId));
 
@@ -78,12 +77,7 @@ const WaitingUser: FC<WaitingUserProps> = ({ meetingId, userId }) => {
 	);
 
 	return (
-		<CustomContainer
-			data-testid="waitingUser"
-			orientation="horizontal"
-			width="fill"
-			padding={{ top: 'medium', right: 'small', bottom: 'medium' }}
-		>
+		<CustomContainer data-testid="waitingUser" orientation="horizontal" width="fill">
 			{avatarElement}
 			<Row takeAvailableSpace wrap="nowrap" height="100%">
 				<Container orientation="vertical" crossAlignment="flex-start" padding={{ left: 'small' }}>

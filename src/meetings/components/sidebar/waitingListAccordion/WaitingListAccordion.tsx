@@ -9,6 +9,7 @@ import React, { FC, useCallback, useMemo } from 'react';
 import {
 	Accordion,
 	AccordionItemType,
+	Container,
 	CreateSnackbarFn,
 	useSnackbar
 } from '@zextras/carbonio-design-system';
@@ -33,10 +34,12 @@ type WaitingListAccordionProps = {
 };
 
 const WaitingListAccordion: FC<WaitingListAccordionProps> = ({ meetingId }) => {
-	// TODO translations key
 	const [t] = useTranslation();
-	const accordionTitle = t('', 'Waiting list');
-	const snackbarLabel = t('', 'There seems to be someone in the waiting room');
+	const accordionTitle = t('meeting.sidebar.waitingList', 'Waiting list');
+	const snackbarLabel = t(
+		'meeting.snackbar.waitingInfo',
+		'There seems to be someone in the waiting room'
+	);
 
 	const waitingList = useStore((store) => getWaitingList(store, meetingId));
 	const accordionStatus = useStore((state) => getWaitingListAccordionStatus(state, meetingId));
@@ -49,7 +52,7 @@ const WaitingListAccordion: FC<WaitingListAccordionProps> = ({ meetingId }) => {
 		({ detail: newWaitingUserEvent }) => {
 			if (newWaitingUserEvent.meetingId === meetingId && amIModerator) {
 				createSnackbar({
-					key: new Date().toLocaleString(),
+					key: 'newWaitingUser',
 					type: 'info',
 					label: snackbarLabel,
 					hideButton: true
@@ -66,24 +69,32 @@ const WaitingListAccordion: FC<WaitingListAccordionProps> = ({ meetingId }) => {
 		[accordionStatus, meetingId, setParticipantsAccordionStatus]
 	);
 
-	const items: AccordionItemType[] = useMemo(() => {
-		const waitingUsers: AccordionItemType[] = map(waitingList, (userId) => ({
-			id: `waitingUser-${userId}`,
-			disableHover: true,
-			background: 'text',
-			CustomComponent: () => <WaitingUser meetingId={meetingId} userId={userId} />
-		}));
+	const items = useMemo(() => {
+		const waitingListContainer: AccordionItemType[] = [
+			{
+				id: 'waitingListContainer',
+				disableHover: true,
+				background: 'text',
+				CustomComponent: () => (
+					<Container padding={{ vertical: 'large', right: 'small' }} gap="0.5rem">
+						{map(waitingList, (userId) => (
+							<WaitingUser meetingId={meetingId} userId={userId} />
+						))}
+					</Container>
+				)
+			}
+		];
 		return [
 			{
 				id: 'waitingListAccordion',
 				label: accordionTitle,
 				open: accordionStatus,
-				items: waitingUsers,
+				items: waitingListContainer,
 				onOpen: toggleAccordionStatus,
 				onClose: toggleAccordionStatus,
-				badgeCounter: accordionStatus ? undefined : waitingUsers.length,
+				badgeCounter: accordionStatus ? undefined : waitingList.length,
 				badgeType: 'unread'
-			}
+			} as AccordionItemType
 		];
 	}, [accordionStatus, accordionTitle, meetingId, toggleAccordionStatus, waitingList]);
 

@@ -120,6 +120,10 @@
     "keepInTouchWithColleagues": "Keep in touch with your colleagues or join your groups' meeting rooms",
     "meeting": {
         "activeMeetingTooltip": "There's an active meeting for this Conversation",
+        "browserNotification": {
+            "waitingMessage": "New user is waiting to enter the meeting",
+            "waitingTitle": "There seems to be someone in the Waiting Room"
+        },
         "collapseChat": "Collapse chat",
         "collapseParticipantsMeetingTooltip": "Collapse participants list",
         "continueActiveSession": "Continue the meeting in the new window",
@@ -168,6 +172,17 @@
         "restartMeeting": "Restart meeting",
         "scheduledMeetingLabel": "Your Virtual Rooms",
         "setInputDescription": "Set your input devices by choosing them from dropdown menu",
+        "sidebar": {
+            "tooltip": {
+                "waitingAccept": "Let user in",
+                "waitingReject": "Reject user"
+            },
+            "waitingCaption": "Waiting to enter",
+            "waitingList": "Waiting list"
+        },
+        "snackbar": {
+            "waitingInfo": "There seems to be someone in the waiting room"
+        },
         "startMeeting": "Start meeting",
         "startModal": {
             "audioAndVideoLoading": "Assets are loading",
