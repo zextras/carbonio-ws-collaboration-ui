@@ -26,6 +26,7 @@ import {
 } from '../../../../store/selectors/RoomsSelectors';
 import useStore from '../../../../store/Store';
 import { RoomType } from '../../../../types/store/RoomTypes';
+import { freeMediaResources } from '../../../../utils/MeetingsUtils';
 import AccessTile from '../mediaHandlers/AccessTile';
 import LocalMediaHandler from '../mediaHandlers/LocalMediaHandler';
 
@@ -133,6 +134,7 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 	}, []);
 
 	const joinMeeting = useCallback(() => {
+		freeMediaResources(streamTrack);
 		MeetingsApi.enterMeeting(
 			roomId,
 			{
@@ -144,11 +146,12 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 			.then((meetingId) => goToMeetingPage(meetingId))
 			.catch((err) => console.error(err, 'Error on joinMeeting'));
 	}, [
+		streamTrack,
 		roomId,
 		mediaDevicesEnabled.video,
 		mediaDevicesEnabled.audio,
-		selectedDevicesId.video,
 		selectedDevicesId.audio,
+		selectedDevicesId.video,
 		goToMeetingPage
 	]);
 

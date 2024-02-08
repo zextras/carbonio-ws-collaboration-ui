@@ -18,6 +18,7 @@ import { filter, find, map } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 import { BrowserUtils } from '../../../../utils/BrowserUtils';
+import { freeMediaResources } from '../../../../utils/MeetingsUtils';
 import { getAudioAndVideo } from '../../../../utils/UserMediaManager';
 
 type LocalMediaHandlerProps = {
@@ -52,10 +53,7 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 
 	const toggleStreams = useCallback(
 		(audio: boolean, video: boolean, audioId: string | undefined, videoId: string | undefined) => {
-			if (streamTrack != null) {
-				const tracks = streamTrack.getTracks();
-				tracks.forEach((track) => track.stop());
-			}
+			freeMediaResources(streamTrack);
 
 			if (!audio && !video) {
 				getAudioAndVideo(true, false).then((stream: MediaStream) => {
