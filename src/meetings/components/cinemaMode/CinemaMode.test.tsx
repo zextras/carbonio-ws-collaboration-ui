@@ -67,6 +67,7 @@ const setupBasicGroupMeeting = (): { user: UserEvent; store: RootStore } => {
 		result.current.meetingConnection(groupMeeting.id, false, undefined, false, undefined);
 	});
 	useParams.mockReturnValue({ meetingId: groupMeeting.id });
+	localStorage.setItem('settings', JSON.stringify({ 'settings.appearance_setting.scaling': 100 }));
 	const { user } = setup(<CinemaMode />);
 	return { user, store: result.current };
 };

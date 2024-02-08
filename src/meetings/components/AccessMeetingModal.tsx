@@ -53,6 +53,10 @@ const CustomModal = styled(Modal)`
 	user-select: none;
 `;
 
+const CustomContainer = styled(Container)`
+	overflow-x: hidden;
+`;
+
 const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement => {
 	const [t] = useTranslation();
 	const enter = t('action.enter', 'Enter');
@@ -114,8 +118,8 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 	const videoStreamRef = useRef<HTMLVideoElement>(null);
 
 	useEffect(() => {
-		if (wrapperRef.current) setWrapperWidth(wrapperRef.current.offsetWidth);
-	}, [wrapperRef]);
+		if (wrapperRef.current) setWrapperWidth(wrapperRef.current.offsetWidth - 1);
+	}, []);
 
 	useEffect(() => {
 		if (videoStreamRef.current) {
@@ -396,7 +400,7 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 			customFooter={modalFooter}
 		>
 			<Padding top="small" />
-			<Container
+			<CustomContainer
 				padding={{ top: 'small' }}
 				ref={wrapperRef}
 				height="fit"
@@ -453,7 +457,7 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 				<Padding bottom="1rem" />
 				<Text size="small">{setInputDescription}</Text>
 				<Padding bottom="1rem" />
-			</Container>
+			</CustomContainer>
 		</CustomModal>
 	);
 };
