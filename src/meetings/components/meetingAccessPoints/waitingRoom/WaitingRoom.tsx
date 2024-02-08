@@ -128,7 +128,7 @@ const WaitingRoom: FC<WaitingRoomProps> = ({ meetingId }) => {
 	}, [goToInfoPage]);
 
 	const handleRejoin = useCallback(() => {
-		goToInfoPage(PAGE_INFO_TYPE.ALREADY_ACTIVE_WAITING_ROOM_SESSION);
+		goToInfoPage(PAGE_INFO_TYPE.ALREADY_ACTIVE_MEETING_SESSION);
 	}, [goToInfoPage]);
 
 	useEventListener(EventName.MEETING_USER_ACCEPTED, handleAcceptance);
