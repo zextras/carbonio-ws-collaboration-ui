@@ -54,6 +54,10 @@ const CustomModal = styled(Modal)`
 	user-select: none;
 `;
 
+const CustomContainer = styled(Container)`
+	overflow-x: hidden;
+`;
+
 const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement => {
 	const [t] = useTranslation();
 	const enter = t('action.enter', 'Enter');
@@ -117,8 +121,8 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 	const videoStreamRef = useRef<HTMLVideoElement>(null);
 
 	useEffect(() => {
-		if (wrapperRef.current) setWrapperWidth(wrapperRef.current.offsetWidth);
-	}, [wrapperRef]);
+		if (wrapperRef.current) setWrapperWidth(wrapperRef.current.offsetWidth - 1);
+	}, []);
 
 	useEffect(() => {
 		if (videoStreamRef.current) {
@@ -144,12 +148,16 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 		return user?.userId;
 	}, [roomMembers, sessionId]);
 
+	const freeMediaResources = useCallback(() => {
+		if (streamTrack != null) {
+			const tracks = streamTrack.getTracks();
+			tracks.forEach((track) => track.stop());
+		}
+	}, [streamTrack]);
+
 	const toggleStreams = useCallback(
 		(audio: boolean, video: boolean, audioId: string | undefined, videoId: string | undefined) => {
-			if (streamTrack != null) {
-				const tracks = streamTrack.getTracks();
-				tracks.forEach((track) => track.stop());
-			}
+			freeMediaResources();
 
 			if (!audio && !video) {
 				getAudioAndVideo(true, false).then((stream: MediaStream) => {
@@ -190,7 +198,7 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 					.catch((e) => console.error(e));
 			}
 		},
-		[streamTrack]
+		[freeMediaResources]
 	);
 
 	const mediaVideoList = useMemo(
@@ -330,6 +338,7 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 	}, []);
 
 	const joinMeeting = useCallback(() => {
+		freeMediaResources();
 		MeetingsApi.enterMeeting(
 			roomId,
 			{ videoStreamEnabled, audioStreamEnabled },
@@ -338,6 +347,7 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 			.then((meetingId) => goToMeetingPage(meetingId))
 			.catch((err) => console.error(err, 'Error on joinMeeting'));
 	}, [
+		freeMediaResources,
 		roomId,
 		videoStreamEnabled,
 		audioStreamEnabled,
@@ -394,7 +404,7 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 				customFooter={modalFooter}
 			>
 				<Padding top="small" />
-				<Container
+				<CustomContainer
 					padding={{ top: 'small' }}
 					ref={wrapperRef}
 					height="fit"
@@ -451,7 +461,7 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 					<Padding bottom="1rem" />
 					<Text size="small">{setInputDescription}</Text>
 					<Padding bottom="1rem" />
-				</Container>
+				</CustomContainer>
 			</CustomModal>
 		</Container>
 	);
