@@ -61,7 +61,7 @@ const ConversationHeader = ({
 			<Row takeAvailableSpace mainAlignment="flex-start">
 				<TextWithTooltip overflow="ellipsis">{roomName}</TextWithTooltip>
 			</Row>
-			<Row orientation="horizontal" width="fit" style={{ minWidth: 'fit-content' }}>
+			<Container orientation="horizontal" width="fit" style={{ minWidth: 'fit-content' }}>
 				{canVideoCall && <ConversationHeaderMeetingButton roomId={roomId} />}
 				{!isDesktopView && (
 					<Tooltip label={infoTooltip}>
@@ -74,7 +74,7 @@ const ConversationHeader = ({
 						/>
 					</Tooltip>
 				)}
-			</Row>
+			</Container>
 		</RoomInfoHeader>
 	);
 };
