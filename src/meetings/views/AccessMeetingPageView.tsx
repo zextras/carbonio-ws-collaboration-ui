@@ -11,6 +11,7 @@ import { Container } from '@zextras/carbonio-design-system';
 import { MEETINGS_PATH } from '../../constants/appConstants';
 import { MeetingsApi } from '../../network';
 import { getRoomIdFromMeeting } from '../../store/selectors/MeetingSelectors';
+import { getOwnershipOfTheRoom } from '../../store/selectors/RoomsSelectors';
 import useStore from '../../store/Store';
 import AccessMeetingModal from '../components/meetingAccessPoints/accessModal/AccessMeetingModal';
 import WaitingRoom from '../components/meetingAccessPoints/waitingRoom/WaitingRoom';
@@ -21,12 +22,19 @@ const AccessMeetingPageView = (): ReactElement => {
 	const roomId = useStore((store) => getRoomIdFromMeeting(store, meetingId) || ``);
 
 	const [canUserAccessMeeting, setCanUserAccessMeeting] = useState<boolean | undefined>(undefined);
+	const amIModerator = useStore((store) => getOwnershipOfTheRoom(store, roomId || ''));
 
 	useEffect(() => {
 		MeetingsApi.getMeetingByMeetingId(meetingId)
 			.then(() => setCanUserAccessMeeting(true))
 			.catch(() => setCanUserAccessMeeting(false));
 	}, [meetingId]);
+
+	useEffect(() => {
+		if (canUserAccessMeeting && amIModerator) {
+			MeetingsApi.getWaitingList(meetingId);
+		}
+	}, [amIModerator, canUserAccessMeeting, meetingId]);
 
 	return (
 		<Container background="gray0">

@@ -9,6 +9,8 @@ import { renderHook } from '@testing-library/react-hooks';
 import { act } from 'react-dom/test-utils';
 
 import { wsEventsHandler } from './wsEventsHandler';
+import { mockNotify } from '../../../__mocks__/@zextras/carbonio-shell-ui';
+import { CHATS_ROUTE, MEETINGS_PATH } from '../../constants/appConstants';
 import useStore from '../../store/Store';
 import {
 	createMockMeeting,
@@ -17,7 +19,7 @@ import {
 	createMockUser
 } from '../../tests/createMock';
 import { mockedGetMeetingRequest, mockedGetRoomRequest } from '../../tests/mocks/network';
-import { MeetingBe } from '../../types/network/models/meetingBeTypes';
+import { MeetingBe, MeetingType } from '../../types/network/models/meetingBeTypes';
 import { MemberBe, RoomBe } from '../../types/network/models/roomBeTypes';
 import { UserBe } from '../../types/network/models/userBeTypes';
 import {
@@ -34,7 +36,7 @@ const user3: UserBe = createMockUser({ id: 'user3Id', name: 'user 3' });
 
 const member1: MemberBe = {
 	userId: user1.id,
-	owner: false,
+	owner: true,
 	temporary: false,
 	external: false
 };
@@ -86,6 +88,13 @@ const roomWithoutMe: RoomBe = createMockRoom({
 	meetingId: meeting.id
 });
 
+const temporaryRoom: RoomBe = createMockRoom({ type: RoomType.TEMPORARY, members: [member1] });
+
+const scheduledMeeting: MeetingBe = createMockMeeting({
+	roomId: 'id',
+	type: MeetingType.SCHEDULED
+});
+
 describe('wsEventHandler', () => {
 	test('Room Member Added in a room with an ongoing meeting', async () => {
 		const { result } = renderHook(() => useStore());
@@ -109,6 +118,7 @@ describe('wsEventHandler', () => {
 		} as RoomMemberAddedEvent);
 		await waitFor(() => expect(result.current.meetings[room.id]).not.toBeUndefined());
 	});
+
 	test('Room Member Removed in a room with an ongoing meeting', async () => {
 		const { result } = renderHook(() => useStore());
 		act(() => {
@@ -128,5 +138,66 @@ describe('wsEventHandler', () => {
 		});
 
 		await waitFor(() => expect(result.current.meetings[roomWithoutMe.id]).toBeUndefined());
+	});
+
+	beforeEach(() => {
+		const store = useStore.getState();
+		store.setLoginInfo(user1.id, 'user1');
+		store.addRoom(temporaryRoom);
+		store.addMeeting(scheduledMeeting);
+		store.meetingConnection(scheduledMeeting.id, false, undefined, false, undefined);
+	});
+	describe('Waiting room events', () => {
+		test("An user joins the waiting room while I'm in the meeting tab", () => {
+			window.history.pushState({}, '', `${MEETINGS_PATH}${scheduledMeeting.id}`);
+			wsEventsHandler({
+				type: WsEventType.MEETING_USER_WAITING_LIST_JOINED,
+				meetingId: scheduledMeeting.id,
+				userId: user1.id,
+				sentDate: '123456789'
+			});
+			const { waitingList } = useStore.getState().meetings[temporaryRoom.id];
+			expect(waitingList).toContain(user1.id);
+			expect(mockNotify).toBeCalled();
+		});
+
+		test("An user joins the waiting room while I'm in the chats tab", () => {
+			window.history.pushState({}, '', CHATS_ROUTE);
+			wsEventsHandler({
+				type: WsEventType.MEETING_USER_WAITING_LIST_JOINED,
+				meetingId: scheduledMeeting.id,
+				userId: user1.id,
+				sentDate: '123456789'
+			});
+			const { waitingList } = useStore.getState().meetings[temporaryRoom.id];
+			expect(waitingList).toBeUndefined();
+			expect(mockNotify).not.toBeCalled();
+		});
+
+		test('An user is accepted in the waiting room', () => {
+			window.history.pushState({}, '', `${MEETINGS_PATH}${scheduledMeeting.id}`);
+			useStore.getState().addUserToWaitingList(scheduledMeeting.id, user1.id);
+			wsEventsHandler({
+				type: WsEventType.MEETING_USER_ACCEPTED,
+				meetingId: scheduledMeeting.id,
+				userId: user1.id,
+				sentDate: '123456789'
+			});
+			const { waitingList } = useStore.getState().meetings[temporaryRoom.id];
+			expect(waitingList).not.toContain(user1.id);
+		});
+
+		test('An user is rejected in the waiting room', () => {
+			window.history.pushState({}, '', `${MEETINGS_PATH}${scheduledMeeting.id}`);
+			useStore.getState().addUserToWaitingList(scheduledMeeting.id, user1.id);
+			wsEventsHandler({
+				type: WsEventType.MEETING_USER_REJECTED,
+				meetingId: scheduledMeeting.id,
+				userId: user1.id,
+				sentDate: '123456789'
+			});
+			const { waitingList } = useStore.getState().meetings[temporaryRoom.id];
+			expect(waitingList).not.toContain(user1.id);
+		});
 	});
 });

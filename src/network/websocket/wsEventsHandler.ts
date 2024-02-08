@@ -7,7 +7,9 @@
 
 import { find } from 'lodash';
 
+import { MEETINGS_PATH } from '../../constants/appConstants';
 import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
+import displayWaitingListNotification from '../../meetings/components/sidebar/waitingListAccordion/displayWaitingListNotification';
 import useStore from '../../store/Store';
 import { MeetingType } from '../../types/network/models/meetingBeTypes';
 import { GetMeetingResponse } from '../../types/network/responses/meetingsResponses';
@@ -22,6 +24,10 @@ import { MeetingsApi, RoomsApi } from '../index';
 
 export function wsEventsHandler(event: WsEvent): void {
 	const state = useStore.getState();
+	const inThisMeetingTab = (meetingId: string): boolean =>
+		window.location.pathname.includes(`${MEETINGS_PATH}${meetingId}`) &&
+		!!state.activeMeeting[meetingId];
+	const isMyId = (userId: string): boolean => userId === state.session.id;
 
 	switch (event.type) {
 		case WsEventType.INITIALIZATION: {
@@ -150,8 +156,7 @@ export function wsEventsHandler(event: WsEvent): void {
 			}
 
 			// Send audio feedback to other participants session user join
-			const activeMeeting = state.activeMeeting[event.meetingId];
-			if (activeMeeting && event.userId !== state.session.id) {
+			if (inThisMeetingTab(event.meetingId) && !isMyId(event.userId)) {
 				sendAudioFeedback(MeetingSoundFeedback.MEETING_JOIN_NOTIFICATION);
 			}
 			break;
@@ -162,14 +167,13 @@ export function wsEventsHandler(event: WsEvent): void {
 			// Update subscription manager
 			state.setDeleteSubscription(event.meetingId, event.userId);
 
-			// Send audio feedback to other participants session user leave
-			const activeMeeting = state.activeMeeting[event.meetingId];
-			if (activeMeeting && event.userId !== state.session.id) {
-				sendAudioFeedback(MeetingSoundFeedback.MEETING_LEAVE_NOTIFICATION);
-			}
+			if (inThisMeetingTab(event.meetingId)) {
+				// Send audio feedback to other participants session user leave
+				if (!isMyId(event.userId)) {
+					sendAudioFeedback(MeetingSoundFeedback.MEETING_LEAVE_NOTIFICATION);
+				}
 
-			// if user is talking, delete his id from the isTalking array
-			if (activeMeeting) {
+				// if user is talking, delete his id from the isTalking array
 				state.setTalkingUser(event.meetingId, event.userId, false);
 			}
 			break;
@@ -185,28 +189,26 @@ export function wsEventsHandler(event: WsEvent): void {
 		case WsEventType.MEETING_AUDIO_STREAM_CHANGED: {
 			state.changeStreamStatus(event.meetingId, event.userId, STREAM_TYPE.AUDIO, event.active);
 
-			// Send to session user audio feedback on audio status changes
-			const activeMeeting = state.activeMeeting[event.meetingId];
-			if (activeMeeting && event.userId === state.session.id) {
-				event.active
-					? sendAudioFeedback(MeetingSoundFeedback.MEETING_AUDIO_ON)
-					: sendAudioFeedback(MeetingSoundFeedback.MEETING_AUDIO_OFF);
-			}
-			// if user is talking, delete his id from the isTalking array
-			if (activeMeeting && !event.active) {
-				state.setTalkingUser(event.meetingId, event.userId, false);
-			}
+			if (inThisMeetingTab(event.meetingId)) {
+				// If user is talking, delete his id from the isTalking array
+				if (!event.active) {
+					state.setTalkingUser(event.meetingId, event.userId, false);
+				}
 
-			// mute the tile if someone performed this state on me
-			if (
-				activeMeeting &&
-				event.userId === state.session.id &&
-				!event.active &&
-				event.moderatorId !== undefined
-			) {
-				activeMeeting.bidirectionalAudioConn?.closeRtpSenderTrack();
-				// custom event to show snackbar
-				sendCustomEvent({ name: EventName.MEMBER_MUTED, data: event });
+				if (isMyId(event.userId)) {
+					// Send to session user audio feedback on audio status changes
+					event.active
+						? sendAudioFeedback(MeetingSoundFeedback.MEETING_AUDIO_ON)
+						: sendAudioFeedback(MeetingSoundFeedback.MEETING_AUDIO_OFF);
+
+					// Mute the tile if someone performed this state on me
+					if (!event.active && !!event.moderatorId) {
+						const activeMeeting = state.activeMeeting[event.meetingId];
+						activeMeeting.bidirectionalAudioConn?.closeRtpSenderTrack();
+						// Custom event to show snackbar
+						sendCustomEvent({ name: EventName.MEMBER_MUTED, data: event });
+					}
+				}
 			}
 			break;
 		}
@@ -214,7 +216,7 @@ export function wsEventsHandler(event: WsEvent): void {
 			const mediaType = event.mediaType.toLowerCase() as STREAM_TYPE;
 
 			// Update subscription manager
-			if (event.userId !== state.session.id) {
+			if (!isMyId(event.userId)) {
 				const sub = { userId: event.userId, type: mediaType };
 				if (!event.active) {
 					state.setRemoveSubscription(event.meetingId, sub);
@@ -229,13 +231,12 @@ export function wsEventsHandler(event: WsEvent): void {
 			}
 
 			// Send audio feedback of session user screen sharing
-			const activeMeeting = state.activeMeeting[event.meetingId];
-			if (activeMeeting && mediaType === STREAM_TYPE.SCREEN) {
+			if (inThisMeetingTab(event.meetingId) && mediaType === STREAM_TYPE.SCREEN) {
 				sendAudioFeedback(MeetingSoundFeedback.MEETING_SCREENSHARE_NOTIFICATION);
 			}
 
 			// Update subscription manager
-			if (event.userId !== state.session.id) {
+			if (!isMyId(event.userId)) {
 				const sub = { userId: event.userId, type: mediaType };
 				if (event.active) {
 					state.setAddSubscription(event.meetingId, sub);
@@ -245,9 +246,9 @@ export function wsEventsHandler(event: WsEvent): void {
 			break;
 		}
 		case WsEventType.MEETING_AUDIO_ANSWERED: {
-			const activeMeeting = state.activeMeeting[event.meetingId];
-			if (activeMeeting?.bidirectionalAudioConn) {
-				activeMeeting.bidirectionalAudioConn.handleRemoteAnswer({
+			if (inThisMeetingTab(event.meetingId)) {
+				const activeMeeting = state.activeMeeting[event.meetingId];
+				activeMeeting.bidirectionalAudioConn?.handleRemoteAnswer({
 					sdp: event.sdp,
 					type: 'answer'
 				});
@@ -255,11 +256,11 @@ export function wsEventsHandler(event: WsEvent): void {
 			break;
 		}
 		case WsEventType.MEETING_SDP_ANSWERED: {
-			const activeMeeting = state.activeMeeting[event.meetingId];
-			if (activeMeeting) {
+			if (inThisMeetingTab(event.meetingId)) {
 				const mediaType = event.mediaType.toLowerCase() as STREAM_TYPE;
-				if (mediaType === STREAM_TYPE.VIDEO && activeMeeting.videoOutConn) {
-					activeMeeting.videoOutConn.handleRemoteAnswer({
+				const activeMeeting = state.activeMeeting[event.meetingId];
+				if (mediaType === STREAM_TYPE.VIDEO) {
+					activeMeeting.videoOutConn?.handleRemoteAnswer({
 						sdp: event.sdp,
 						type: 'answer'
 					});
@@ -274,16 +275,16 @@ export function wsEventsHandler(event: WsEvent): void {
 			break;
 		}
 		case WsEventType.MEETING_SDP_OFFERED: {
-			const activeMeeting = state.activeMeeting[event.meetingId];
-			if (activeMeeting?.videoScreenIn) {
-				activeMeeting.videoScreenIn.handleRemoteOffer(event.sdp);
+			if (inThisMeetingTab(event.meetingId)) {
+				const activeMeeting = state.activeMeeting[event.meetingId];
+				activeMeeting.videoScreenIn?.handleRemoteOffer(event.sdp);
 			}
 			break;
 		}
 		case WsEventType.MEETING_PARTICIPANT_SUBSCRIBED: {
-			const activeMeeting = state.activeMeeting[event.meetingId];
-			if (activeMeeting?.videoScreenIn) {
-				activeMeeting.videoScreenIn.handleParticipantsSubscribed(event.streams);
+			if (inThisMeetingTab(event.meetingId)) {
+				const activeMeeting = state.activeMeeting[event.meetingId];
+				activeMeeting.videoScreenIn?.handleParticipantsSubscribed(event.streams);
 			}
 			break;
 		}
@@ -295,26 +296,37 @@ export function wsEventsHandler(event: WsEvent): void {
 			break;
 		}
 		case WsEventType.MEETING_PARTICIPANT_CLASHED: {
-			const activeMeeting = state.activeMeeting[event.meetingId];
-			if (activeMeeting) {
+			if (inThisMeetingTab(event.meetingId)) {
 				sendCustomEvent({ name: EventName.MEETING_PARTICIPANT_CLASHED, data: event });
 			}
 			break;
 		}
 		case WsEventType.MEETING_USER_WAITING_LIST_JOINED: {
-			// TODO add user to waiting list
+			// TODO check if event arrive correctly
+			if (inThisMeetingTab(event.meetingId)) {
+				state.addUserToWaitingList(event.meetingId, event.userId);
+				displayWaitingListNotification(event.meetingId);
+				// Custom event to display snackbar
+				sendCustomEvent({ name: EventName.NEW_WAITING_USER, data: event });
+			}
 			break;
 		}
 		case WsEventType.MEETING_USER_ACCEPTED: {
+			// TODO let user joins the meeting with a custom event
+			if (inThisMeetingTab(event.meetingId)) {
+				state.removeUserFromWaitingList(event.meetingId, event.userId);
+			}
+			console.log('User accepted');
 			sendCustomEvent({ name: EventName.MEETING_USER_ACCEPTED, data: event });
-			// TODO remove user from waiting list in moderator session
-			//  and let him join the meeting with a custom event
 			break;
 		}
 		case WsEventType.MEETING_USER_REJECTED: {
 			sendCustomEvent({ name: EventName.MEETING_USER_REJECTED, data: event });
-			// TODO remove user from waiting list in moderator session
-			//  and send him to info page with a custom event
+			// TODO send user to info page with a custom event
+			if (inThisMeetingTab(event.meetingId)) {
+				state.removeUserFromWaitingList(event.meetingId, event.userId);
+			}
+			console.log('User rejected');
 			break;
 		}
 		// TODO change name of the event

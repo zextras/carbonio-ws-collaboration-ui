@@ -164,11 +164,15 @@ export type MeetingsSlice = {
 		stream: STREAM_TYPE,
 		status: boolean
 	) => void;
+	setWaitingList: (meetingId: string, waitingList: string[]) => void;
+	addUserToWaitingList: (meetingId: string, userId: string) => void;
+	removeUserFromWaitingList: (meetingId: string, userId: string) => void;
 };
 
 export type ActiveMeetingSlice = {
 	activeMeeting: ActiveMeetingMap;
 	setMeetingActionsAccordionStatus: (roomId: string, status: boolean) => void;
+	setWaitingListAccordionStatus: (roomId: string, status: boolean) => void;
 	setMeetingParticipantsAccordionStatus: (roomId: string, status: boolean) => void;
 	setMeetingChatVisibility: (meetingId: string, visibilityStatus: MeetingChatVisibility) => void;
 	setMeetingViewSelected: (meetingId: string, viewType: MeetingViewType) => void;

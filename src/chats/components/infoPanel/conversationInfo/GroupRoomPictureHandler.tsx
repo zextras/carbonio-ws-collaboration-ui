@@ -21,7 +21,7 @@ import styled from 'styled-components';
 import RoomPictureHandler from './RoomPictureHandler';
 import { RoomsApi } from '../../../../network';
 import {
-	getMyOwnershipOfTheRoom,
+	getOwnershipOfTheRoom,
 	getNumbersOfRoomMembers,
 	getPictureUpdatedAt,
 	getRoomNameSelector
@@ -92,8 +92,7 @@ const GroupRoomPictureHandler: FC<RoomPictureProps> = ({ roomId }) => {
 	const roomPictureUpdatedAt: string | undefined = useStore((state) =>
 		getPictureUpdatedAt(state, roomId)
 	);
-	const sessionId: string | undefined = useStore((store) => store.session.id);
-	const iAmOwner: boolean = useStore((state) => getMyOwnershipOfTheRoom(state, sessionId, roomId));
+	const iAmOwner: boolean = useStore((state) => getOwnershipOfTheRoom(state, roomId));
 
 	const numberOfParticipantsLabel = useMemo(() => {
 		if (numberOfMembers === 1) {
