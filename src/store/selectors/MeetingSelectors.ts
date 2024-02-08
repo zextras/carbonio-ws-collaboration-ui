@@ -156,3 +156,11 @@ export const getNumberOfTiles = (store: RootStore, meetingId: string): number =>
 	}
 	return 0;
 };
+
+export const getWaitingList = (store: RootStore, meetingId: string): string[] => {
+	const meeting = find(store.meetings, (meeting) => meeting.id === meetingId);
+	if (meeting) {
+		return meeting.waitingList || [];
+	}
+	return [];
+};

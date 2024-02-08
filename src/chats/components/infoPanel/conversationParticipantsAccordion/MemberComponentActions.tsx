@@ -15,7 +15,7 @@ import PromoteDemoteMemberAction from './PromoteDemoteMemberAction';
 import RemoveMemberListAction from './RemoveMemberListAction';
 import {
 	getOwner,
-	getMyOwnershipOfTheRoom,
+	getOwnershipOfTheRoom,
 	getNumberOfOwnersOfTheRoom,
 	getNumbersOfRoomMembers
 } from '../../../../store/selectors/RoomsSelectors';
@@ -38,7 +38,7 @@ const MemberComponentActions: FC<ActionsProps> = ({ roomId, memberId }) => {
 	const numberOfOwners = useStore((state) => getNumberOfOwnersOfTheRoom(state, roomId));
 	const numberOfMembers: number = useStore((state) => getNumbersOfRoomMembers(state, roomId));
 	const memberOwner: boolean = useStore((store) => getOwner(store, roomId, memberId));
-	const iAmOwner: boolean = useStore((state) => getMyOwnershipOfTheRoom(state, sessionId, roomId));
+	const iAmOwner: boolean = useStore((state) => getOwnershipOfTheRoom(state, roomId));
 
 	const isSessionParticipant: boolean = useMemo(
 		() => memberId === sessionId,

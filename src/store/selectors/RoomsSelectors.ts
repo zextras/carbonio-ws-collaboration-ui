@@ -73,16 +73,13 @@ export const getRoomMainInfoSelector = (state: RootStore, id: string): RoomMainI
 	muted: state.rooms[id]?.userSettings?.muted
 });
 
-export const getMyOwnershipOfTheRoom = (
+export const getOwnershipOfTheRoom = (
 	state: RootStore,
-	sessionId: string | undefined,
-	roomId: string
+	roomId: string,
+	userId = state.session.id
 ): boolean => {
-	if (state.rooms[roomId]?.members != null && sessionId != null) {
-		const sessionMember = find(
-			state.rooms[roomId]?.members,
-			(member) => member.userId === sessionId
-		);
+	if (state.rooms[roomId]?.members != null && userId != null) {
+		const sessionMember = find(state.rooms[roomId]?.members, (member) => member.userId === userId);
 		if (sessionMember != null) {
 			return sessionMember.owner;
 		}

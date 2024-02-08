@@ -25,7 +25,19 @@ import {
 	Text,
 	Tooltip
 } from '@zextras/carbonio-design-system';
-import { difference, differenceBy, find, keyBy, map, mapValues, omit, remove, size } from 'lodash';
+import {
+	difference,
+	differenceBy,
+	filter,
+	find,
+	includes,
+	keyBy,
+	map,
+	mapValues,
+	omit,
+	remove,
+	size
+} from 'lodash';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -36,6 +48,7 @@ import { getRoomIdsOrderedLastMessage } from '../../../../store/selectors/Messag
 import { getRoomNameSelector } from '../../../../store/selectors/RoomsSelectors';
 import useStore from '../../../../store/Store';
 import { TextMessage } from '../../../../types/store/MessageTypes';
+import { RoomType } from '../../../../types/store/RoomTypes';
 
 const CustomContainer = styled(Container)`
 	cursor: default;
@@ -81,11 +94,14 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 	// Update conversation list on filter updating
 	useEffect(() => {
 		let roomList: { id: string }[];
+		const singleAndGroup = filter(rooms, (room) =>
+			includes([RoomType.ONE_TO_ONE, RoomType.GROUP], room.roomType)
+		);
 		if (inputValue === '') {
-			roomList = map(rooms, (room) => ({ id: room.roomId }));
+			roomList = map(singleAndGroup, (room) => ({ id: room.roomId }));
 		} else {
 			roomList = [];
-			map(rooms, ({ roomId }) => {
+			map(singleAndGroup, ({ roomId }) => {
 				const roomName = getRoomNameSelector(useStore.getState(), roomId);
 				if (roomName.toLocaleLowerCase().includes(inputValue.toLocaleLowerCase())) {
 					roomList.push({ id: roomId });
