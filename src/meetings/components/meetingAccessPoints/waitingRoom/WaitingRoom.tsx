@@ -156,13 +156,14 @@ const WaitingRoom: FC<WaitingRoomProps> = ({ meetingId }) => {
 
 	return (
 		<Container mainAlignment="center" crossAlignment="center">
-			<Text size="extralarge" weight="bold">
-				{howToJoinMeeting}
-			</Text>
-			<Padding bottom={'0.5rem'} />
-			<Text>{setInputDevicesLabel}</Text>
-			<Padding bottom={'1rem'} />
-			<Container orientation="horizontal" height="fit" width={'fit'}>
+			<Container width="fit" height="fit" gap="0.5rem">
+				<Text size="extralarge" weight="bold">
+					{howToJoinMeeting}
+				</Text>
+				<Text>{setInputDevicesLabel}</Text>
+			</Container>
+			<Padding bottom="1rem" />
+			<Container orientation="horizontal" height="fit" width="fit" gap="1rem">
 				<LocalMediaHandler
 					streamTrack={streamTrack}
 					setStreamTrack={setStreamTrack}
@@ -172,29 +173,28 @@ const WaitingRoom: FC<WaitingRoomProps> = ({ meetingId }) => {
 					mediaDevicesEnabled={mediaDevicesEnabled}
 					setMediaDevicesEnabled={setMediaDevicesEnabled}
 				/>
-				<Padding right={'1rem'} />
 				<Button
 					type="outlined"
-					backgroundColor={'text'}
+					backgroundColor="text"
 					label={videoPlayerTestMuted ? playMicLabel : stopMicLabel}
 					onClick={onToggleAudioTest}
 					disabled={!mediaDevicesEnabled.audio}
 				/>
 			</Container>
-			<Padding bottom={'1rem'} />
-			<Container height={'fit'} width={`${wrapperWidth}rem`} minWidth={'25rem'}>
+			<Padding bottom="1rem" />
+			<Container height="fit" width={`${wrapperWidth}rem`} minWidth="25rem">
 				<AccessTile
 					videoStreamRef={videoStreamRef}
 					videoPlayerTestMuted={videoPlayerTestMuted}
 					mediaDevicesEnabled={mediaDevicesEnabled}
 				/>
 			</Container>
-			<Padding bottom={'1.5rem'} />
+			<Padding bottom="1.5rem" />
 			<Text size="large">{userIsReady ? enterInAFewMomentsLabel : clickOnReadyLabel}</Text>
-			<Padding bottom={'1.5rem'} />
-			<Container orientation="horizontal" height="fit" width={`36%`}>
+			<Padding bottom="1.5rem" />
+			<Container orientation="horizontal" height="fit" width="36%">
 				<CustomButton
-					backgroundColor={'error'}
+					backgroundColor="error"
 					label={hangUpLabel}
 					icon="PhoneOff"
 					iconPlacement="right"
@@ -203,9 +203,9 @@ const WaitingRoom: FC<WaitingRoomProps> = ({ meetingId }) => {
 				/>
 				{!userIsReady && (
 					<>
-						<Padding right={'1rem'} />
+						<Padding right="1rem" />
 						<CustomButton
-							backgroundColor={'success'}
+							backgroundColor="success"
 							label={readyToParticipateLabel}
 							icon="CheckmarkOutline"
 							iconPlacement="right"
@@ -216,10 +216,9 @@ const WaitingRoom: FC<WaitingRoomProps> = ({ meetingId }) => {
 					</>
 				)}
 			</Container>
-
-			<Padding bottom={'1.5rem'} />
+			<Padding bottom="1.5rem" />
 			<Text>{userIsReady ? areYouReadyLabel : whenYouAreReadyLabel}</Text>
-			<Padding bottom={'0.5rem'} />
+			<Padding bottom="0.5rem" />
 			<Text>{aModeratorWillLetYouEnterLabel}</Text>
 		</Container>
 	);
