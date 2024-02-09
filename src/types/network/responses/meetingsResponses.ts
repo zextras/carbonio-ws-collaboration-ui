@@ -34,8 +34,6 @@ export type CreateMediaAnswerResponse = Response;
 
 export type GetScheduledMeetingNameResponse = string;
 
-export type LeaveWaitingRoomResponse = { status: number };
-
-export type GetWaitingListResponse = string[];
+export type GetWaitingListResponse = { users: string[] };
 
 export type AcceptWaitingUserResponse = { accepted: boolean };

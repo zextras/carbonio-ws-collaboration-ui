@@ -26,7 +26,6 @@ import {
 	GetWaitingListResponse,
 	JoinMeetingResponse,
 	LeaveMeetingResponse,
-	LeaveWaitingRoomResponse,
 	ListMeetingsResponse,
 	StartMeetingResponse,
 	StopMeetingResponse,
@@ -221,17 +220,16 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 		});
 	}
 
-	// TODO miss implementation
-	public leaveWaitingRoom(meetingId: string): Promise<LeaveWaitingRoomResponse> {
-		console.log('leaveWaitingRoom', meetingId);
-		return new Promise((resolve) => {
-			resolve(new Response());
+	public leaveWaitingRoom(meetingId: string): Promise<AcceptWaitingUserResponse> {
+		const userId = useStore.getState().session.id;
+		return this.fetchAPI(`meetings/${meetingId}/queue/${userId}`, RequestType.POST, {
+			status: 'REJECTED'
 		});
 	}
 
 	public getWaitingList(meetingId: string): Promise<GetWaitingListResponse> {
 		return this.fetchAPI(`meetings/${meetingId}/queue`, RequestType.GET).then((resp) => {
-			useStore.getState().setWaitingList(meetingId, resp);
+			useStore.getState().setWaitingList(meetingId, resp.users);
 			return resp;
 		});
 	}
