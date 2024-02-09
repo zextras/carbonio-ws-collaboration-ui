@@ -103,7 +103,16 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 						settings.videoStreamEnabled,
 						devicesId.videoDevice
 					);
-				this.getMeetingByMeetingId(meetingId);
+				this.getMeetingByMeetingId(meetingId).then((meeting) => {
+					if (meeting.meetingType === MeetingType.SCHEDULED) {
+						const room = find(useStore.getState().rooms, (room) => room.meetingId === meetingId);
+						const iAmOwner = find(
+							room?.members,
+							(member) => member.userId === useStore.getState().session.id && member.owner
+						);
+						if (iAmOwner) this.getWaitingList(meetingId);
+					}
+				});
 			}
 			return resp;
 		});

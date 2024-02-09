@@ -7,11 +7,11 @@
 import React, { ReactElement, useEffect, useMemo, useState } from 'react';
 
 import { Container } from '@zextras/carbonio-design-system';
+import { find } from 'lodash';
 
 import { MEETINGS_PATH } from '../../constants/appConstants';
 import { MeetingsApi } from '../../network';
-import { getMeetingType, getRoomIdFromMeeting } from '../../store/selectors/MeetingSelectors';
-import { getOwnershipOfTheRoom } from '../../store/selectors/RoomsSelectors';
+import { getRoomIdFromMeeting } from '../../store/selectors/MeetingSelectors';
 import useStore from '../../store/Store';
 import { MeetingType } from '../../types/network/models/meetingBeTypes';
 import AccessMeetingModal from '../components/meetingAccessPoints/accessModal/AccessMeetingModal';
@@ -21,25 +21,26 @@ const AccessMeetingPageView = (): ReactElement => {
 	const meetingId = useMemo(() => document.location.pathname.split(MEETINGS_PATH)[1], []);
 
 	const roomId = useStore((store) => getRoomIdFromMeeting(store, meetingId) || ``);
-	const amIModerator = useStore((store) => getOwnershipOfTheRoom(store, roomId || ''));
-	const meetingType = useStore((store) => getMeetingType(store, meetingId));
 
 	const [hasUserDirectAccess, setHasUserDirectAccess] = useState<boolean | undefined>(undefined);
 
 	useEffect(() => {
 		MeetingsApi.getMeetingByMeetingId(meetingId)
-			.then(() => setHasUserDirectAccess(true))
+			.then((meeting) => {
+				const room = find(useStore.getState().rooms, (room) => room.meetingId === meetingId);
+				const iAmOwner = find(
+					room?.members,
+					(member) => member.userId === useStore.getState().session.id && member.owner
+				);
+				if (meeting.meetingType === MeetingType.PERMANENT || iAmOwner) {
+					setHasUserDirectAccess(true);
+				} else {
+					setHasUserDirectAccess(false);
+				}
+			})
 			.catch(() => setHasUserDirectAccess(false));
 	}, [meetingId]);
 
-	useEffect(() => {
-		if (meetingType === MeetingType.SCHEDULED && hasUserDirectAccess && amIModerator) {
-			MeetingsApi.getWaitingList(meetingId);
-		}
-	}, [amIModerator, hasUserDirectAccess, meetingId, meetingType]);
-
-	// TODO - move getWaiting list after the join
-	// TODO - scheduled member have to be redirected to the waiting room
 	return (
 		<Container background="gray0">
 			{hasUserDirectAccess === true && <AccessMeetingModal roomId={roomId} />}
