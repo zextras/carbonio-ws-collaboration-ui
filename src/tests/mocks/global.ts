@@ -67,7 +67,8 @@ Object.defineProperty(global.navigator, 'mediaDevices', {
 		getUserMedia: jest.fn(() =>
 			Promise.resolve({
 				getTracks: jest.fn(() => ({ forEach: jest.fn() })),
-				getAudioTracks: jest.fn(() => ({ forEach: jest.fn() }))
+				getAudioTracks: jest.fn(() => ({ forEach: jest.fn() })),
+				getVideoTracks: jest.fn(() => ({ forEach: jest.fn() }))
 			})
 		),
 		enumerateDevices: jest.fn(() => Promise.resolve(mockedDevicesList())),
@@ -163,23 +164,6 @@ Object.defineProperty(window, 'ResizeObserver', {
 		unobserve: jest.fn(),
 		disconnect: jest.fn()
 	}))
-});
-
-let mockedStore: Record<string, unknown> = {};
-Object.defineProperty(window, 'localStorage', {
-	writable: true,
-	value: {
-		getItem: jest.fn().mockImplementation((key) => mockedStore[key] || null),
-		setItem: jest.fn().mockImplementation((key, value) => {
-			mockedStore[key] = value.toString();
-		}),
-		removeItem: jest.fn().mockImplementation((key) => {
-			delete mockedStore[key];
-		}),
-		clear() {
-			mockedStore = {};
-		}
-	}
 });
 
 window.resizeTo = function resizeTo(width: number, height: number): void {

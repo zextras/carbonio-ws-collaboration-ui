@@ -142,3 +142,10 @@ type Grid = {
 	rows: number;
 	columns: number;
 };
+
+export const freeMediaResources = (streamTrack: MediaStream | null): void => {
+	if (streamTrack != null) {
+		const tracks = streamTrack.getTracks();
+		tracks.forEach((track) => track.stop());
+	}
+};

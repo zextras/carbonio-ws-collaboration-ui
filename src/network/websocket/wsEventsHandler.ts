@@ -317,14 +317,21 @@ export function wsEventsHandler(event: WsEvent): void {
 				state.removeUserFromWaitingList(event.meetingId, event.userId);
 			}
 			console.log('User accepted');
+			sendCustomEvent({ name: EventName.MEETING_USER_ACCEPTED, data: event });
 			break;
 		}
 		case WsEventType.MEETING_USER_REJECTED: {
+			sendCustomEvent({ name: EventName.MEETING_USER_REJECTED, data: event });
 			// TODO send user to info page with a custom event
 			if (inThisMeetingTab(event.meetingId)) {
 				state.removeUserFromWaitingList(event.meetingId, event.userId);
 			}
 			console.log('User rejected');
+			break;
+		}
+		// TODO change name of the event
+		case WsEventType.MEETING_USER_WAITING_LIST_REJOINED: {
+			sendCustomEvent({ name: EventName.MEETING_REJOINED_WAITING_ROOM, data: event });
 			break;
 		}
 		default:

@@ -65,11 +65,21 @@ const InfoPage = (): ReactElement => {
 				'There cannot be more than one active session of the same meeting'
 			);
 			break;
-		case PAGE_INFO_TYPE.ERROR_PAGE:
-			// TODO define the correct labels
-			titleLabel = t('', 'Error');
-			centralLabel = t('', 'Error');
-			descriptionLowerLabel = t('', 'Error');
+		case PAGE_INFO_TYPE.HANG_UP_PAGE:
+			titleLabel = t('meeting.infoPage.title.hangUp', 'You hung up!');
+			centralLabel = t('meeting.infoPage.slogan.hangUp', 'Maybe next time');
+			descriptionLowerLabel = t(
+				'meeting.infoPage.description.hangUp',
+				'We look forward to seeing you participate in future meetings'
+			);
+			break;
+		case PAGE_INFO_TYPE.NEXT_TIME_PAGE:
+			titleLabel = t('meeting.infoPage.title.rejected', 'Maybe next time');
+			centralLabel = t('meeting.infoPage.slogan.rejected', 'Your access has been refused');
+			descriptionLowerLabel = t(
+				'meeting.infoPage.description.rejected',
+				'The moderators have decided to deny your access to the meeting'
+			);
 			break;
 		case PAGE_INFO_TYPE.MEETING_ENDED:
 		default:

@@ -130,6 +130,20 @@
         "expandChat": "Expand chat",
         "expandParticipantsListTooltip": "Expand participants list",
         "extendChat": "Extend chat",
+        "infoPage": {
+            "description": {
+                "hangUp": "We look forward to seeing you participate in future meetings",
+                "rejected": "The moderators have decided to deny your access to the meeting"
+            },
+            "slogan": {
+                "hangUp": "Maybe next time",
+                "rejected": "Your access has been refused"
+            },
+            "title": {
+                "hangUp": "You hung up!",
+                "rejected": "Maybe next time"
+            }
+        },
         "interactions": {
             "cameraDisabled": "Camera disabled",
             "cameraEnabled": "Camera enabled",
@@ -207,7 +221,18 @@
             "invalidNameTooltip": "Invalid name",
             "nameRequiredTooltip": "Virtual Room’s name is required"
         },
-        "waitingParticipants": "Waiting for participants to join…"
+        "waitingParticipants": "Waiting for participants to join…",
+        "waitingRoom": {
+            "hangUp": "Hang up",
+            "nextStep": "A moderator will let you into the meeting as soon as possible.",
+            "ready": "Ready to participate",
+            "readyCaption": "Everything is set! Make yourself comfortable.",
+            "readyHint": "You will enter the meeting in a few moments",
+            "setInputs": "Set your input devices by choosing them from dropdown menu",
+            "title": "How do you want to join {{meetingName}} meeting?",
+            "welcomeCaption": "When you are ready, get comfortable.",
+            "welcomeHint": "Click on “READY TO PARTICIPATE” to enter the meeting"
+        }
     },
     "meetings": {
         "interactions": {
