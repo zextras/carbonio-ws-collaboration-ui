@@ -40,4 +40,4 @@ export type LeaveWaitingRoomResponse = { status: number };
 
 export type GetWaitingListResponse = string[];
 
-export type AcceptWaitingUserResponse = Response;
+export type AcceptWaitingUserResponse = { accepted: boolean };
