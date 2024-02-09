@@ -329,9 +329,8 @@ export function wsEventsHandler(event: WsEvent): void {
 			console.log('User rejected');
 			break;
 		}
-		// TODO change name of the event
-		case WsEventType.MEETING_USER_WAITING_LIST_REJOINED: {
-			sendCustomEvent({ name: EventName.MEETING_REJOINED_WAITING_ROOM, data: event });
+		case WsEventType.MEETING_WAITING_PARTICIPANT_CLASHED: {
+			sendCustomEvent({ name: EventName.MEETING_WAITING_PARTICIPANT_CLASHED, data: event });
 			break;
 		}
 		default:

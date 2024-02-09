@@ -13,8 +13,8 @@ import {
 	MeetingStartedEvent,
 	MeetingUserAcceptedEvent,
 	MeetingUserRejectedEvent,
-	MeetingUserWaitingListRejoinedEvent,
-	MeetingUserWaitingListJoinedEvent
+	MeetingUserWaitingListJoinedEvent,
+	MeetingWaitingParticipantClashed
 } from '../types/network/websocket/wsMeetingEvents';
 import { Message } from '../types/store/MessageTypes';
 
@@ -27,7 +27,7 @@ export enum EventName {
 	NEW_WAITING_USER = 'newWaitingUser',
 	MEETING_USER_ACCEPTED = 'meetingUserAccepted',
 	MEETING_USER_REJECTED = 'meetingUserRejected',
-	MEETING_REJOINED_WAITING_ROOM = 'meetingRejoinedWaitingRoom'
+	MEETING_WAITING_PARTICIPANT_CLASHED = 'meetingWaitingParticipantClashed'
 }
 
 export type NewMessageEvent = {
@@ -70,9 +70,9 @@ export type MeetingRejectedEvent = {
 	data: MeetingUserRejectedEvent;
 };
 
-export type MeetingRejoinedWaitingRoomEvent = {
-	name: EventName.MEETING_REJOINED_WAITING_ROOM;
-	data: MeetingUserWaitingListRejoinedEvent;
+export type MeetingWaitingParticipantClashedEvent = {
+	name: EventName.MEETING_WAITING_PARTICIPANT_CLASHED;
+	data: MeetingWaitingParticipantClashed;
 };
 
 type CustomEvent =
@@ -84,7 +84,7 @@ type CustomEvent =
 	| NewWaitingUserEvent
 	| MeetingAcceptedEvent
 	| MeetingRejectedEvent
-	| MeetingRejoinedWaitingRoomEvent;
+	| MeetingWaitingParticipantClashedEvent;
 
 export const sendCustomEvent = (event: CustomEvent): void => {
 	window.dispatchEvent(new CustomEvent(event.name, { detail: event.data }));

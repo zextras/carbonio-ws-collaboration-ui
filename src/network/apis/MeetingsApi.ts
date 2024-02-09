@@ -212,37 +212,35 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 		});
 	}
 
+	// TODO miss implementation
 	public getScheduledMeetingName(meetingId: string): Promise<GetScheduledMeetingNameResponse> {
-		// TODO real implementation
 		console.log('getScheduledMeetingName', meetingId);
 		return new Promise((resolve) => {
 			resolve(`Meeting title`);
 		});
 	}
 
+	// TODO same ad join, check if it's possible to merge
 	public joinWaitingRoom(meetingId: string): Promise<JoinWaitingRoomResponse> {
-		// TODO real implementation
-		console.log('joinWaitingRoom', meetingId);
-		return new Promise((resolve) => {
-			resolve({ status: 202 });
-		});
+		return this.fetchAPI(`meetings/${meetingId}/join`, RequestType.POST, {});
 	}
 
+	// TODO same ad reject, see if be can do a different call
 	public leaveWaitingRoom(meetingId: string): Promise<LeaveWaitingRoomResponse> {
-		// TODO real implementation
-		console.log('leaveWaitingRoom', meetingId);
-		return new Promise((resolve) => {
-			resolve({ status: 200 });
-		});
+		return this.fetchAPI(
+			`meetings/${meetingId}/queue/${useStore.getState().session.sessionId}`,
+			RequestType.POST,
+			{
+				status: 'REJECTED'
+			}
+		);
 	}
 
+	// 400
 	public getWaitingList(meetingId: string): Promise<GetWaitingListResponse> {
-		// TODO real implementation
-		console.log('getWaitingList', meetingId);
-		return new Promise((resolve) => {
-			const resp = ['fa61cbab-fba1-4cf3-b26a-945ea648dcb2', 'b4e34652-c178-4475-aeaf-df0358f07c20'];
+		return this.fetchAPI(`meetings/${meetingId}/queue`, RequestType.GET).then((resp) => {
 			useStore.getState().setWaitingList(meetingId, resp);
-			resolve(resp);
+			return resp;
 		});
 	}
 
@@ -251,10 +249,9 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 		userId: string,
 		accept: boolean
 	): Promise<AcceptWaitingUserResponse> {
-		// TODO real implementation
-		console.log('acceptWaitingUser', meetingId, userId, accept);
-		return new Promise((resolve) => {
-			resolve({ accepted: accept });
+		const status = accept ? 'ACCEPTED' : 'REJECTED';
+		return this.fetchAPI(`meetings/${meetingId}/queue/${userId}`, RequestType.POST, {
+			status
 		});
 	}
 }

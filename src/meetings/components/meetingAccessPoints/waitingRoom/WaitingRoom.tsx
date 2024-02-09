@@ -88,8 +88,11 @@ const WaitingRoom: FC<WaitingRoomProps> = ({ meetingId }) => {
 	}, []);
 
 	const handleHungUp = useCallback(() => {
+		if (userIsReady) {
+			MeetingsApi.leaveWaitingRoom(meetingId);
+		}
 		goToInfoPage(PAGE_INFO_TYPE.HANG_UP_PAGE);
-	}, [goToInfoPage]);
+	}, [goToInfoPage, meetingId, userIsReady]);
 
 	// TODO handle the change of the width in case of resize from settings
 	const handleResize = useCallback(() => {
@@ -124,11 +127,8 @@ const WaitingRoom: FC<WaitingRoomProps> = ({ meetingId }) => {
 	]);
 
 	const handleRejected = useCallback(() => {
-		if (userIsReady) {
-			MeetingsApi.leaveWaitingRoom(meetingId);
-		}
 		goToInfoPage(PAGE_INFO_TYPE.NEXT_TIME_PAGE);
-	}, [goToInfoPage, meetingId, userIsReady]);
+	}, [goToInfoPage]);
 
 	const handleRejoin = useCallback(() => {
 		goToInfoPage(PAGE_INFO_TYPE.ALREADY_ACTIVE_MEETING_SESSION);
@@ -136,8 +136,7 @@ const WaitingRoom: FC<WaitingRoomProps> = ({ meetingId }) => {
 
 	useEventListener(EventName.MEETING_USER_ACCEPTED, handleAcceptance);
 	useEventListener(EventName.MEETING_USER_REJECTED, handleRejected);
-	// TODO change name of the event
-	useEventListener(EventName.MEETING_REJOINED_WAITING_ROOM, handleRejoin);
+	useEventListener(EventName.MEETING_WAITING_PARTICIPANT_CLASHED, handleRejoin);
 
 	useEffect(() => {
 		window.addEventListener('resize', handleResize);
