@@ -18,7 +18,7 @@ jest.mock('../../hooks/useRouting', () => ({
 	})),
 	PAGE_INFO_TYPE: {
 		HANG_UP_PAGE: 'hang_up_page',
-		NEXT_TIME_PAGE: 'next_tile_page',
+		NEXT_TIME_PAGE: 'next_time_page',
 		ROOM_EMPTY: 'room_empty',
 		MEETING_ENDED: 'meeting_ended',
 		ALREADY_ACTIVE_MEETING_SESSION: 'already_active_meeting_session'
