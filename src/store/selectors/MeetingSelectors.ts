@@ -26,6 +26,9 @@ export const getMeetingExists = (store: RootStore, meetingId: string): boolean =
 export const getRoomIdFromMeeting = (store: RootStore, meetingId: string): string | undefined =>
 	find(store.meetings, (meeting) => meeting.id === meetingId)?.roomId;
 
+export const getMeetingType = (store: RootStore, meetingId: string): string | undefined =>
+	find(store.meetings, (meeting) => meeting.id === meetingId)?.meetingType;
+
 export const getMeetingActive = (store: RootStore, roomId: string): boolean =>
 	store.meetings[roomId] && store.meetings[roomId].active;
 

@@ -124,8 +124,11 @@ const WaitingRoom: FC<WaitingRoomProps> = ({ meetingId }) => {
 	]);
 
 	const handleRejected = useCallback(() => {
+		if (userIsReady) {
+			MeetingsApi.leaveWaitingRoom(meetingId);
+		}
 		goToInfoPage(PAGE_INFO_TYPE.NEXT_TIME_PAGE);
-	}, [goToInfoPage]);
+	}, [goToInfoPage, meetingId, userIsReady]);
 
 	const handleRejoin = useCallback(() => {
 		goToInfoPage(PAGE_INFO_TYPE.ALREADY_ACTIVE_MEETING_SESSION);

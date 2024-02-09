@@ -12,7 +12,7 @@ export type CreateMeetingResponse = MeetingBe;
 
 export type GetMeetingResponse = MeetingBe;
 
-export type StartMeetingResponse = Response;
+export type StartMeetingResponse = MeetingBe;
 
 export type JoinMeetingResponse = MeetingBe;
 
@@ -40,4 +40,4 @@ export type LeaveWaitingRoomResponse = { status: number };
 
 export type GetWaitingListResponse = string[];
 
-export type AcceptWaitingUserResponse = { accepted: boolean };
+export type AcceptWaitingUserResponse = Response;

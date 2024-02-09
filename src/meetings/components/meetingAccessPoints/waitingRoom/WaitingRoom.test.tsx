@@ -18,7 +18,8 @@ import { createMockMeeting, createMockRoom, createMockUser } from '../../../../t
 import {
 	mockedEnterMeetingRequest,
 	mockedGetScheduledMeetingName,
-	mockedJoinWaitingRoom
+	mockedJoinWaitingRoom,
+	mockedLeaveWaitingRoomRequest
 } from '../../../../tests/mocks/network';
 import { mockGoToInfoPage, mockGoToMeetingPage } from '../../../../tests/mocks/useRouting';
 import { setup } from '../../../../tests/test-utils';
@@ -115,6 +116,7 @@ describe('Waiting room', () => {
 	test('user is rejected by a moderator', async () => {
 		mockedJoinWaitingRoom.mockReturnValue('joined');
 		mockedEnterMeetingRequest.mockReturnValue('accepted insideMeeting');
+		mockedLeaveWaitingRoomRequest.mockReturnValue('left Waiting Room');
 		const { user } = setupBasicGroup();
 
 		const enterButton = await screen.findByText(readyButtonLabel);

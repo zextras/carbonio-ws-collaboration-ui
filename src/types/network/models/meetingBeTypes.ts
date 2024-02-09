@@ -35,6 +35,7 @@ export enum MeetingType {
 }
 
 export type CreateMeetingData = {
+	name?: string;
 	roomId: string;
 	meetingType: MeetingType;
 	expiration?: string;
