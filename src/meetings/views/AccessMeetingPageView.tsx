@@ -27,17 +27,10 @@ const AccessMeetingPageView = (): ReactElement => {
 	const [hasUserDirectAccess, setHasUserDirectAccess] = useState<boolean | undefined>(undefined);
 
 	useEffect(() => {
-		setHasUserDirectAccess(true);
 		MeetingsApi.getMeetingByMeetingId(meetingId)
-			.then((resp) => {
-				if (resp.meetingType === MeetingType.PERMANENT || amIModerator) {
-					setHasUserDirectAccess(true);
-				} else {
-					setHasUserDirectAccess(false);
-				}
-			})
+			.then(() => setHasUserDirectAccess(true))
 			.catch(() => setHasUserDirectAccess(false));
-	}, [amIModerator, meetingId]);
+	}, [meetingId]);
 
 	useEffect(() => {
 		if (meetingType === MeetingType.SCHEDULED && hasUserDirectAccess && amIModerator) {
@@ -45,6 +38,8 @@ const AccessMeetingPageView = (): ReactElement => {
 		}
 	}, [amIModerator, hasUserDirectAccess, meetingId, meetingType]);
 
+	// TODO - move getWaiting list after the join
+	// TODO - scheduled member have to be redirected to the waiting room
 	return (
 		<Container background="gray0">
 			{hasUserDirectAccess === true && <AccessMeetingModal roomId={roomId} />}

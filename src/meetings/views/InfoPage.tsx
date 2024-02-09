@@ -82,7 +82,6 @@ const InfoPage = (): ReactElement => {
 			);
 			break;
 		case PAGE_INFO_TYPE.MEETING_ENDED:
-		default:
 			titleLabel = t('notification.meeting.ended', 'Meeting Ended');
 			centralLabel = t('thanksForParticipating', 'Thanks for participating');
 			descriptionLowerLabel = t(
@@ -90,6 +89,14 @@ const InfoPage = (): ReactElement => {
 				"Keep in touch with your colleagues or join your groups' meeting rooms"
 			);
 			break;
+		// TODO: add the correct translation
+		case PAGE_INFO_TYPE.MEETING_NOT_FOUND:
+		default: {
+			titleLabel = t('', 'Meeting not found');
+			centralLabel = t('', 'The meeting you are looking for does not exist');
+			descriptionLowerLabel = t('', 'Please check the meeting link and try again');
+			break;
+		}
 	}
 
 	return (

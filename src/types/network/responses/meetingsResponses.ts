@@ -14,7 +14,7 @@ export type GetMeetingResponse = MeetingBe;
 
 export type StartMeetingResponse = MeetingBe;
 
-export type JoinMeetingResponse = MeetingBe;
+export type JoinMeetingResponse = { status: 'ACCEPTED' | 'WAITING' };
 
 export type LeaveMeetingResponse = Response;
 
@@ -33,8 +33,6 @@ export type SubscribeMediaResponse = Response;
 export type CreateMediaAnswerResponse = Response;
 
 export type GetScheduledMeetingNameResponse = string;
-
-export type JoinWaitingRoomResponse = { status: number };
 
 export type LeaveWaitingRoomResponse = { status: number };
 

@@ -301,8 +301,8 @@ export function wsEventsHandler(event: WsEvent): void {
 			}
 			break;
 		}
+		// TODO CHECK
 		case WsEventType.MEETING_USER_WAITING_LIST_JOINED: {
-			// TODO check if event arrive correctly
 			if (inThisMeetingTab(event.meetingId)) {
 				state.addUserToWaitingList(event.meetingId, event.userId);
 				displayWaitingListNotification(event.meetingId);
@@ -311,26 +311,26 @@ export function wsEventsHandler(event: WsEvent): void {
 			}
 			break;
 		}
+		// TODO CHECK
 		case WsEventType.MEETING_USER_ACCEPTED: {
-			// TODO let user joins the meeting with a custom event
 			if (inThisMeetingTab(event.meetingId)) {
 				state.removeUserFromWaitingList(event.meetingId, event.userId);
+				sendCustomEvent({ name: EventName.MEETING_USER_ACCEPTED, data: event });
 			}
-			console.log('User accepted');
-			sendCustomEvent({ name: EventName.MEETING_USER_ACCEPTED, data: event });
 			break;
 		}
+		// TODO CHECK
 		case WsEventType.MEETING_USER_REJECTED: {
-			sendCustomEvent({ name: EventName.MEETING_USER_REJECTED, data: event });
-			// TODO send user to info page with a custom event
 			if (inThisMeetingTab(event.meetingId)) {
 				state.removeUserFromWaitingList(event.meetingId, event.userId);
+				sendCustomEvent({ name: EventName.MEETING_USER_REJECTED, data: event });
 			}
-			console.log('User rejected');
 			break;
 		}
 		case WsEventType.MEETING_WAITING_PARTICIPANT_CLASHED: {
-			sendCustomEvent({ name: EventName.MEETING_WAITING_PARTICIPANT_CLASHED, data: event });
+			if (inThisMeetingTab(event.meetingId)) {
+				sendCustomEvent({ name: EventName.MEETING_WAITING_PARTICIPANT_CLASHED, data: event });
+			}
 			break;
 		}
 		default:

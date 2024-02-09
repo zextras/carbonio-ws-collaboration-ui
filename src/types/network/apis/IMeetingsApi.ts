@@ -16,7 +16,6 @@ import {
 	GetScheduledMeetingNameResponse,
 	GetWaitingListResponse,
 	JoinMeetingResponse,
-	JoinWaitingRoomResponse,
 	LeaveMeetingResponse,
 	LeaveWaitingRoomResponse,
 	ListMeetingsResponse,
@@ -76,7 +75,6 @@ interface IMeetingsApi {
 	createMediaAnswer(meetingId: string, sdpOffer: string): Promise<CreateMediaAnswerResponse>;
 	// Scheduled meetings
 	getScheduledMeetingName(meetingId: string): Promise<GetScheduledMeetingNameResponse>;
-	joinWaitingRoom(meetingId: string): Promise<JoinWaitingRoomResponse>;
 	leaveWaitingRoom(meetingId: string): Promise<LeaveWaitingRoomResponse>;
 	getWaitingList(meetingId: string): Promise<GetWaitingListResponse>;
 	acceptWaitingUser(

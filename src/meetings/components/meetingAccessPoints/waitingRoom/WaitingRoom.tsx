@@ -13,8 +13,6 @@ import styled from 'styled-components';
 import useEventListener, { EventName } from '../../../../hooks/useEventListener';
 import useRouting, { PAGE_INFO_TYPE } from '../../../../hooks/useRouting';
 import { MeetingsApi } from '../../../../network';
-import { getRoomIdByMeetingId } from '../../../../store/selectors/MeetingSelectors';
-import useStore from '../../../../store/Store';
 import AccessTile from '../mediaHandlers/AccessTile';
 import LocalMediaHandler from '../mediaHandlers/LocalMediaHandler';
 
@@ -56,7 +54,6 @@ const WaitingRoom: FC<WaitingRoomProps> = ({ meetingId }) => {
 		'A moderator will let you into the meeting as soon as possible.'
 	);
 
-	const roomId = useStore((store) => getRoomIdByMeetingId(store, meetingId));
 	const [streamTrack, setStreamTrack] = useState<MediaStream | null>(null);
 	const [enterButtonIsEnabled, setEnterButtonIsEnabled] = useState<boolean>(false);
 	const [videoPlayerTestMuted, setVideoPlayerTestMuted] = useState<boolean>(true);
@@ -71,60 +68,56 @@ const WaitingRoom: FC<WaitingRoomProps> = ({ meetingId }) => {
 		audio: boolean;
 		video: boolean;
 	}>({ audio: false, video: false });
+
 	const { goToInfoPage, goToMeetingPage } = useRouting();
 
 	const howToJoinMeeting = t(
 		'meeting.waitingRoom.title',
 		`How do you want to join ${meetingName} meeting?`,
-		{
-			meetingName
-		}
+		{ meetingName }
 	);
 
 	const videoStreamRef = useRef<HTMLVideoElement>(null);
+
+	useEffect(() => {
+		MeetingsApi.getScheduledMeetingName(meetingId)
+			.then((name) => setMeetingName(name))
+			.catch(() => goToInfoPage(PAGE_INFO_TYPE.MEETING_NOT_FOUND));
+	}, [goToInfoPage, meetingId]);
 
 	const onToggleAudioTest = useCallback(() => {
 		setVideoPlayerTestMuted((prevState) => !prevState);
 	}, []);
 
+	const joinMeeting = useCallback(
+		() =>
+			MeetingsApi.joinMeeting(
+				meetingId,
+				{
+					videoStreamEnabled: mediaDevicesEnabled.video,
+					audioStreamEnabled: mediaDevicesEnabled.audio
+				},
+				{ audioDevice: selectedDevicesId.audio, videoDevice: selectedDevicesId.video }
+			),
+		[mediaDevicesEnabled, meetingId, selectedDevicesId]
+	);
+
+	const joinWaitingRoom = useCallback(() => {
+		joinMeeting()
+			.then(() => setUserIsReady(true))
+			.catch((err) => console.error(err, 'Error on joinWaitingRoom'));
+	}, [joinMeeting]);
+
 	const handleHungUp = useCallback(() => {
-		if (userIsReady) {
-			MeetingsApi.leaveWaitingRoom(meetingId);
-		}
+		if (userIsReady) MeetingsApi.leaveWaitingRoom(meetingId);
 		goToInfoPage(PAGE_INFO_TYPE.HANG_UP_PAGE);
 	}, [goToInfoPage, meetingId, userIsReady]);
 
-	// TODO handle the change of the width in case of resize from settings
-	const handleResize = useCallback(() => {
-		setWrapperWidth((window.innerWidth * 0.33) / 16);
-	}, []);
-
-	const joinWaitingRoom = useCallback(() => {
-		MeetingsApi.joinWaitingRoom(meetingId).then(() => {
-			console.log('Joined Waiting Room');
-			setUserIsReady(true);
-		});
-	}, [meetingId]);
-
 	const handleAcceptance = useCallback(() => {
-		MeetingsApi.enterMeeting(
-			roomId || '',
-			{
-				videoStreamEnabled: mediaDevicesEnabled.video,
-				audioStreamEnabled: mediaDevicesEnabled.audio
-			},
-			{ audioDevice: selectedDevicesId.audio, videoDevice: selectedDevicesId.video }
-		)
-			.then((meetingId) => goToMeetingPage(meetingId))
+		joinMeeting()
+			.then(() => goToMeetingPage(meetingId))
 			.catch((err) => console.error(err, 'Error on joinMeeting'));
-	}, [
-		goToMeetingPage,
-		mediaDevicesEnabled.audio,
-		mediaDevicesEnabled.video,
-		roomId,
-		selectedDevicesId.audio,
-		selectedDevicesId.video
-	]);
+	}, [goToMeetingPage, joinMeeting, meetingId]);
 
 	const handleRejected = useCallback(() => {
 		goToInfoPage(PAGE_INFO_TYPE.NEXT_TIME_PAGE);
@@ -137,6 +130,11 @@ const WaitingRoom: FC<WaitingRoomProps> = ({ meetingId }) => {
 	useEventListener(EventName.MEETING_USER_ACCEPTED, handleAcceptance);
 	useEventListener(EventName.MEETING_USER_REJECTED, handleRejected);
 	useEventListener(EventName.MEETING_WAITING_PARTICIPANT_CLASHED, handleRejoin);
+
+	// TODO handle the change of the width in case of resize from settings
+	const handleResize = useCallback(() => {
+		setWrapperWidth((window.innerWidth * 0.33) / 16);
+	}, []);
 
 	useEffect(() => {
 		window.addEventListener('resize', handleResize);
@@ -152,10 +150,6 @@ const WaitingRoom: FC<WaitingRoomProps> = ({ meetingId }) => {
 		}
 	}, [streamTrack, mediaDevicesEnabled.audio, mediaDevicesEnabled.video]);
 
-	useEffect(() => {
-		MeetingsApi.getScheduledMeetingName(meetingId).then((name) => setMeetingName(name));
-	}, [goToInfoPage, meetingId]);
-
 	return (
 		<Container mainAlignment="center" crossAlignment="center">
 			<Container width="fit" height="fit" gap="0.5rem">
@@ -164,8 +158,13 @@ const WaitingRoom: FC<WaitingRoomProps> = ({ meetingId }) => {
 				</Text>
 				<Text>{setInputDevicesLabel}</Text>
 			</Container>
-			<Padding bottom="1rem" />
-			<Container orientation="horizontal" height="fit" width="fit" gap="1rem">
+			<Container
+				orientation="horizontal"
+				height="fit"
+				width="fit"
+				gap="1rem"
+				padding={{ vertical: '1rem' }}
+			>
 				<LocalMediaHandler
 					streamTrack={streamTrack}
 					setStreamTrack={setStreamTrack}
@@ -183,7 +182,6 @@ const WaitingRoom: FC<WaitingRoomProps> = ({ meetingId }) => {
 					disabled={!mediaDevicesEnabled.audio}
 				/>
 			</Container>
-			<Padding bottom="1rem" />
 			<Container height="fit" width={`${wrapperWidth}rem`} minWidth="25rem">
 				<AccessTile
 					videoStreamRef={videoStreamRef}
@@ -193,8 +191,13 @@ const WaitingRoom: FC<WaitingRoomProps> = ({ meetingId }) => {
 			</Container>
 			<Padding bottom="1.5rem" />
 			<Text size="large">{userIsReady ? enterInAFewMomentsLabel : clickOnReadyLabel}</Text>
-			<Padding bottom="1.5rem" />
-			<Container orientation="horizontal" height="fit" width="36%">
+			<Container
+				orientation="horizontal"
+				height="fit"
+				width="36%"
+				padding={{ vertical: '1.5rem' }}
+				gap="1rem"
+			>
 				<CustomButton
 					backgroundColor="error"
 					label={hangUpLabel}
@@ -204,24 +207,21 @@ const WaitingRoom: FC<WaitingRoomProps> = ({ meetingId }) => {
 					width="fill"
 				/>
 				{!userIsReady && (
-					<>
-						<Padding right="1rem" />
-						<CustomButton
-							backgroundColor="success"
-							label={readyToParticipateLabel}
-							icon="CheckmarkOutline"
-							iconPlacement="right"
-							onClick={joinWaitingRoom}
-							width="fill"
-							disabled={!enterButtonIsEnabled}
-						/>
-					</>
+					<CustomButton
+						backgroundColor="success"
+						label={readyToParticipateLabel}
+						icon="CheckmarkOutline"
+						iconPlacement="right"
+						onClick={joinWaitingRoom}
+						width="fill"
+						disabled={!enterButtonIsEnabled}
+					/>
 				)}
 			</Container>
-			<Padding bottom="1.5rem" />
-			<Text>{userIsReady ? areYouReadyLabel : whenYouAreReadyLabel}</Text>
-			<Padding bottom="0.5rem" />
-			<Text>{aModeratorWillLetYouEnterLabel}</Text>
+			<Container height="fit" gap="0.5rem">
+				<Text>{userIsReady ? areYouReadyLabel : whenYouAreReadyLabel}</Text>
+				<Text>{aModeratorWillLetYouEnterLabel}</Text>
+			</Container>
 		</Container>
 	);
 };

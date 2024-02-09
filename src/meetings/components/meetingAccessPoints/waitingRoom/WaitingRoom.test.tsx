@@ -18,7 +18,7 @@ import { createMockMeeting, createMockRoom, createMockUser } from '../../../../t
 import {
 	mockedEnterMeetingRequest,
 	mockedGetScheduledMeetingName,
-	mockedJoinWaitingRoom
+	mockedJoinMeetingRequest
 } from '../../../../tests/mocks/network';
 import { mockGoToInfoPage, mockGoToMeetingPage } from '../../../../tests/mocks/useRouting';
 import { setup } from '../../../../tests/test-utils';
@@ -81,7 +81,7 @@ describe('Waiting room', () => {
 		expect(mockGoToInfoPage).toBeCalledWith(PAGE_INFO_TYPE.HANG_UP_PAGE);
 	});
 	test('user is ready to participate', async () => {
-		mockedJoinWaitingRoom.mockReturnValue('joined Waiting Room');
+		mockedJoinMeetingRequest.mockReturnValue('joined Waiting Room');
 		const { user } = setupBasicGroup();
 
 		const enterButton = await screen.findByText(readyButtonLabel);
@@ -91,7 +91,7 @@ describe('Waiting room', () => {
 		expect(changedString).toBeInTheDocument();
 	});
 	test('user is accepted in the scheduled meeting', async () => {
-		mockedJoinWaitingRoom.mockReturnValue('joined');
+		mockedJoinMeetingRequest.mockReturnValue('joined');
 		mockedEnterMeetingRequest.mockReturnValue('accepted insideMeeting');
 		const { user } = setupBasicGroup();
 
@@ -113,7 +113,7 @@ describe('Waiting room', () => {
 		await waitFor(() => expect(mockGoToMeetingPage).toBeCalled());
 	});
 	test('user is rejected by a moderator', async () => {
-		mockedJoinWaitingRoom.mockReturnValue('joined');
+		mockedJoinMeetingRequest.mockReturnValue('joined');
 		mockedEnterMeetingRequest.mockReturnValue('accepted insideMeeting');
 		const { user } = setupBasicGroup();
 

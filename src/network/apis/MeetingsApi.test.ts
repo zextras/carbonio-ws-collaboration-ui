@@ -115,7 +115,8 @@ describe('Meetings API', () => {
 	});
 
 	test('joinMeeting is called correctly', async () => {
-		fetchResponse.mockResolvedValue(meetingMock);
+		fetchResponse.mockResolvedValueOnce({ status: 'ACCEPTED' });
+		fetchResponse.mockResolvedValueOnce(meetingMock);
 		await meetingsApi.joinMeeting(
 			meetingMock.id,
 			{

@@ -25,7 +25,6 @@ import {
 	GetScheduledMeetingNameResponse,
 	GetWaitingListResponse,
 	JoinMeetingResponse,
-	JoinWaitingRoomResponse,
 	LeaveMeetingResponse,
 	LeaveWaitingRoomResponse,
 	ListMeetingsResponse,
@@ -95,16 +94,18 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 		devicesId: { audioDevice?: string; videoDevice?: string }
 	): Promise<JoinMeetingResponse> {
 		return this.fetchAPI(`meetings/${meetingId}/join`, RequestType.POST, settings).then((resp) => {
-			useStore
-				.getState()
-				.meetingConnection(
-					meetingId,
-					settings.audioStreamEnabled,
-					devicesId.audioDevice,
-					settings.videoStreamEnabled,
-					devicesId.videoDevice
-				);
-			this.getMeetingByMeetingId(meetingId);
+			if (resp.status === 'ACCEPTED') {
+				useStore
+					.getState()
+					.meetingConnection(
+						meetingId,
+						settings.audioStreamEnabled,
+						devicesId.audioDevice,
+						settings.videoStreamEnabled,
+						devicesId.videoDevice
+					);
+				this.getMeetingByMeetingId(meetingId);
+			}
 			return resp;
 		});
 	}
@@ -220,23 +221,14 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 		});
 	}
 
-	// TODO same ad join, check if it's possible to merge
-	public joinWaitingRoom(meetingId: string): Promise<JoinWaitingRoomResponse> {
-		return this.fetchAPI(`meetings/${meetingId}/join`, RequestType.POST, {});
-	}
-
-	// TODO same ad reject, see if be can do a different call
+	// TODO miss implementation
 	public leaveWaitingRoom(meetingId: string): Promise<LeaveWaitingRoomResponse> {
-		return this.fetchAPI(
-			`meetings/${meetingId}/queue/${useStore.getState().session.sessionId}`,
-			RequestType.POST,
-			{
-				status: 'REJECTED'
-			}
-		);
+		console.log('leaveWaitingRoom', meetingId);
+		return new Promise((resolve) => {
+			resolve(new Response());
+		});
 	}
 
-	// 400
 	public getWaitingList(meetingId: string): Promise<GetWaitingListResponse> {
 		return this.fetchAPI(`meetings/${meetingId}/queue`, RequestType.GET).then((resp) => {
 			useStore.getState().setWaitingList(meetingId, resp);
