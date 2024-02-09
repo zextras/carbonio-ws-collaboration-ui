@@ -78,7 +78,7 @@ const WaitingListAccordion: FC<WaitingListAccordionProps> = ({ meetingId }) => {
 				CustomComponent: () => (
 					<Container padding={{ vertical: 'large', right: 'small' }} gap="0.5rem">
 						{map(waitingList, (userId) => (
-							<WaitingUser meetingId={meetingId} userId={userId} />
+							<WaitingUser meetingId={meetingId} userId={userId} key={userId} />
 						))}
 					</Container>
 				)

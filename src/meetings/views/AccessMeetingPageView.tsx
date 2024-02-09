@@ -24,24 +24,31 @@ const AccessMeetingPageView = (): ReactElement => {
 	const amIModerator = useStore((store) => getOwnershipOfTheRoom(store, roomId || ''));
 	const meetingType = useStore((store) => getMeetingType(store, meetingId));
 
-	const [canUserAccessMeeting, setCanUserAccessMeeting] = useState<boolean | undefined>(undefined);
+	const [hasUserDirectAccess, setHasUserDirectAccess] = useState<boolean | undefined>(undefined);
 
 	useEffect(() => {
+		setHasUserDirectAccess(true);
 		MeetingsApi.getMeetingByMeetingId(meetingId)
-			.then(() => setCanUserAccessMeeting(true))
-			.catch(() => setCanUserAccessMeeting(false));
-	}, [meetingId]);
+			.then((resp) => {
+				if (resp.meetingType === MeetingType.PERMANENT || amIModerator) {
+					setHasUserDirectAccess(true);
+				} else {
+					setHasUserDirectAccess(false);
+				}
+			})
+			.catch(() => setHasUserDirectAccess(false));
+	}, [amIModerator, meetingId]);
 
 	useEffect(() => {
-		if (meetingType === MeetingType.SCHEDULED && canUserAccessMeeting && amIModerator) {
+		if (meetingType === MeetingType.SCHEDULED && hasUserDirectAccess && amIModerator) {
 			MeetingsApi.getWaitingList(meetingId);
 		}
-	}, [amIModerator, canUserAccessMeeting, meetingId, meetingType]);
+	}, [amIModerator, hasUserDirectAccess, meetingId, meetingType]);
 
 	return (
 		<Container background="gray0">
-			{canUserAccessMeeting === true && <AccessMeetingModal roomId={roomId} />}
-			{canUserAccessMeeting === false && <WaitingRoom meetingId={meetingId} />}
+			{hasUserDirectAccess === true && <AccessMeetingModal roomId={roomId} />}
+			{hasUserDirectAccess === false && <WaitingRoom meetingId={meetingId} />}
 		</Container>
 	);
 };

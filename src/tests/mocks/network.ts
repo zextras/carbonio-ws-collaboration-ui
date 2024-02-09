@@ -75,6 +75,7 @@ export const mockedSubscribeToMediaRequest: jest.Mock = jest.fn();
 export const mockedAcceptWaitingUserRequest: jest.Mock = jest.fn();
 export const mockedGetScheduledMeetingName: jest.Mock = jest.fn();
 export const mockedJoinWaitingRoom: jest.Mock = jest.fn();
+export const mockedLeaveWaitingRoomRequest: jest.Mock = jest.fn();
 
 jest.mock('../../network', () => {
 	const noResultProvided = 'no result provided';
@@ -252,6 +253,11 @@ jest.mock('../../network', () => {
 			joinWaitingRoom: (): Promise<SubscribeMediaResponse> =>
 				new Promise((resolve, reject) => {
 					const result = mockedJoinWaitingRoom();
+					result ? resolve(result) : reject(new Error(noResultProvided));
+				}),
+			leaveWaitingRoom: (): Promise<SubscribeMediaResponse> =>
+				new Promise((resolve, reject) => {
+					const result = mockedLeaveWaitingRoomRequest();
 					result ? resolve(result) : reject(new Error(noResultProvided));
 				})
 		}
