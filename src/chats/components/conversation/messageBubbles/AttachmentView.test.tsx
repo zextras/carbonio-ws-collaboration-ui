@@ -40,6 +40,22 @@ describe('Attachment view', () => {
 		expect(mockedGetURLAttachment).toHaveBeenCalled();
 	});
 
+	test('file with long mimeType visualization', () => {
+		const genericAttachment: AttachmentMessageType = {
+			id: 'genericAttachmentId',
+			name: 'generic.docx',
+			mimeType: 'application/openxmlformats-officedocument.wordprocessingml.document',
+			size: 21412
+		};
+		setup(<AttachmentView attachment={genericAttachment} from={'from'} />);
+		const genericIcon = screen.getByTestId('icon: FileTextOutline');
+		expect(genericIcon).toBeVisible();
+		const fileName = screen.getByText(genericAttachment.name);
+		expect(fileName).toBeVisible();
+		const extension = screen.getByText(/DOCX/i);
+		expect(extension).toBeInTheDocument();
+	});
+
 	test('attachment visualization with preview', async () => {
 		const imageAttachment: AttachmentMessageType = {
 			id: 'pngAttachmentId',
