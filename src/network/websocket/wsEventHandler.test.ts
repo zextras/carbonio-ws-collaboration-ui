@@ -151,7 +151,7 @@ describe('wsEventHandler', () => {
 		test("An user joins the waiting room while I'm in the meeting tab", () => {
 			window.history.pushState({}, '', `${MEETINGS_PATH}${scheduledMeeting.id}`);
 			wsEventsHandler({
-				type: WsEventType.MEETING_USER_WAITING_LIST_JOINED,
+				type: WsEventType.MEETING_WAITING_PARTICIPANT_JOINED,
 				meetingId: scheduledMeeting.id,
 				userId: user1.id,
 				sentDate: '123456789'
@@ -164,7 +164,7 @@ describe('wsEventHandler', () => {
 		test("An user joins the waiting room while I'm in the chats tab", () => {
 			window.history.pushState({}, '', CHATS_ROUTE);
 			wsEventsHandler({
-				type: WsEventType.MEETING_USER_WAITING_LIST_JOINED,
+				type: WsEventType.MEETING_WAITING_PARTICIPANT_JOINED,
 				meetingId: scheduledMeeting.id,
 				userId: user1.id,
 				sentDate: '123456789'

@@ -79,9 +79,13 @@ const WaitingRoom: FC<WaitingRoomProps> = ({ meetingId }) => {
 
 	const videoStreamRef = useRef<HTMLVideoElement>(null);
 
+	// TODO API response is not right, it should return a string
 	useEffect(() => {
 		MeetingsApi.getScheduledMeetingName(meetingId)
-			.then((name) => setMeetingName(name))
+			.then((name) => {
+				console.log(name);
+				setMeetingName(name);
+			})
 			.catch(() => goToInfoPage(PAGE_INFO_TYPE.MEETING_NOT_FOUND));
 	}, [goToInfoPage, meetingId]);
 

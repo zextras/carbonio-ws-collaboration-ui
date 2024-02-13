@@ -18,9 +18,10 @@ export default abstract class BaseAPI implements IBaseAPI {
 	public fetchAPI(
 		endpoint: string,
 		method: RequestType,
-		data?: Record<string, unknown> | Array<Record<string, unknown>>
+		data?: Record<string, unknown> | Array<Record<string, unknown>>,
+		publicAPI?: boolean
 	): Promise<any> {
-		const URL = this.url + endpoint;
+		const URL = publicAPI ? endpoint : this.url + endpoint;
 		const headers = new Headers();
 		headers.append('Content-Type', 'application/json');
 

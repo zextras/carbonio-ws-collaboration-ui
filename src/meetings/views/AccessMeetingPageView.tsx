@@ -20,26 +20,31 @@ import WaitingRoom from '../components/meetingAccessPoints/waitingRoom/WaitingRo
 const AccessMeetingPageView = (): ReactElement => {
 	const meetingId = useMemo(() => document.location.pathname.split(MEETINGS_PATH)[1], []);
 
+	const chatsBeNetworkStatus = useStore(({ connections }) => connections.status.chats_be);
 	const roomId = useStore((store) => getRoomIdFromMeeting(store, meetingId) || ``);
 
 	const [hasUserDirectAccess, setHasUserDirectAccess] = useState<boolean | undefined>(undefined);
 
 	useEffect(() => {
-		MeetingsApi.getMeetingByMeetingId(meetingId)
-			.then((meeting) => {
-				const room = find(useStore.getState().rooms, (room) => room.meetingId === meetingId);
-				const iAmOwner = find(
-					room?.members,
-					(member) => member.userId === useStore.getState().session.id && member.owner
-				);
-				if (meeting.meetingType === MeetingType.PERMANENT || iAmOwner) {
-					setHasUserDirectAccess(true);
-				} else {
-					setHasUserDirectAccess(false);
-				}
-			})
-			.catch(() => setHasUserDirectAccess(false));
-	}, [meetingId]);
+		if (chatsBeNetworkStatus) {
+			MeetingsApi.getMeetingByMeetingId(meetingId)
+				.then((meeting) => {
+					const room = find(useStore.getState().rooms, (room) => room.meetingId === meetingId);
+					const iAmOwner = find(
+						room?.members,
+						(member) => member.userId === useStore.getState().session.id && member.owner
+					);
+					// Modal access for permanent meeting and scheduled owners
+					if (meeting.meetingType === MeetingType.PERMANENT || iAmOwner) {
+						setHasUserDirectAccess(true);
+					} else {
+						// Waiting room access for external and scheduled member
+						setHasUserDirectAccess(false);
+					}
+				})
+				.catch(() => setHasUserDirectAccess(false));
+		}
+	}, [chatsBeNetworkStatus, meetingId]);
 
 	return (
 		<Container background="gray0">

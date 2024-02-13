@@ -13,8 +13,8 @@ import {
 	MeetingStartedEvent,
 	MeetingUserAcceptedEvent,
 	MeetingUserRejectedEvent,
-	MeetingUserWaitingListJoinedEvent,
-	MeetingWaitingParticipantClashed
+	MeetingWaitingParticipantClashed,
+	MeetingWaitingParticipantJoinedEvent
 } from '../types/network/websocket/wsMeetingEvents';
 import { Message } from '../types/store/MessageTypes';
 
@@ -57,7 +57,7 @@ export type MemberMutedEvent = {
 
 export type NewWaitingUserEvent = {
 	name: EventName.NEW_WAITING_USER;
-	data: MeetingUserWaitingListJoinedEvent;
+	data: MeetingWaitingParticipantJoinedEvent;
 };
 
 export type MeetingAcceptedEvent = {

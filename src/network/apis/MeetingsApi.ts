@@ -59,11 +59,13 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 	public createMeeting(
 		roomId: string,
 		meetingType: MeetingType,
+		name: string,
 		expiration?: string
 	): Promise<CreateMeetingResponse> {
 		const createMeetingData: CreateMeetingData = {
 			roomId,
 			meetingType,
+			name,
 			expiration
 		};
 		return this.fetchAPI(`meetings`, RequestType.POST, createMeetingData);
@@ -132,7 +134,8 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 				this.joinMeeting(meeting.id, settings, devicesId).then(() => meeting.id)
 			);
 		}
-		return this.createMeeting(roomId, MeetingType.PERMANENT).then((response) =>
+		const roomName = useStore.getState().rooms[roomId]?.name || '';
+		return this.createMeeting(roomId, MeetingType.PERMANENT, roomName).then((response) =>
 			this.startMeeting(response.id).then(() =>
 				this.joinMeeting(response.id, settings, devicesId).then(() => response.id)
 			)
@@ -221,12 +224,9 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 		});
 	}
 
-	// TODO miss implementation
+	// TODO API response is not right, it should return a string
 	public getScheduledMeetingName(meetingId: string): Promise<GetScheduledMeetingNameResponse> {
-		console.log('getScheduledMeetingName', meetingId);
-		return new Promise((resolve) => {
-			resolve(`Meeting title`);
-		});
+		return this.fetchAPI(`public/meetings/${meetingId}`, RequestType.GET, undefined, true);
 	}
 
 	public leaveWaitingRoom(meetingId: string): Promise<AcceptWaitingUserResponse> {

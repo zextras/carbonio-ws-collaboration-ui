@@ -22,7 +22,7 @@ export type WsMeetingEvent =
 	| MeetingParticipantSubscribedEvent
 	| MeetingParticipantTalkingEvent
 	| MeetingParticipantClashedEvent
-	| MeetingUserWaitingListJoinedEvent
+	| MeetingWaitingParticipantJoinedEvent
 	| MeetingUserAcceptedEvent
 	| MeetingUserRejectedEvent
 	| MeetingWaitingParticipantClashed;
@@ -110,10 +110,8 @@ export type MeetingParticipantClashedEvent = BasicMeetingEvent & {
 	type: WsEventType.MEETING_PARTICIPANT_CLASHED;
 };
 
-// TODO check scheduled meeting events
-
-export type MeetingUserWaitingListJoinedEvent = BasicMeetingEvent & {
-	type: WsEventType.MEETING_USER_WAITING_LIST_JOINED;
+export type MeetingWaitingParticipantJoinedEvent = BasicMeetingEvent & {
+	type: WsEventType.MEETING_WAITING_PARTICIPANT_JOINED;
 	userId: string;
 };
 

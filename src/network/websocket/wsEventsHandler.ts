@@ -25,8 +25,7 @@ import { MeetingsApi, RoomsApi } from '../index';
 export function wsEventsHandler(event: WsEvent): void {
 	const state = useStore.getState();
 	const inThisMeetingTab = (meetingId: string): boolean =>
-		window.location.pathname.includes(`${MEETINGS_PATH}${meetingId}`) &&
-		!!state.activeMeeting[meetingId];
+		window.location.pathname.includes(`${MEETINGS_PATH}${meetingId}`);
 	const isMyId = (userId: string): boolean => userId === state.session.id;
 
 	switch (event.type) {
@@ -301,8 +300,7 @@ export function wsEventsHandler(event: WsEvent): void {
 			}
 			break;
 		}
-		// TODO CHECK
-		case WsEventType.MEETING_USER_WAITING_LIST_JOINED: {
+		case WsEventType.MEETING_WAITING_PARTICIPANT_JOINED: {
 			if (inThisMeetingTab(event.meetingId)) {
 				state.addUserToWaitingList(event.meetingId, event.userId);
 				displayWaitingListNotification(event.meetingId);
@@ -311,7 +309,6 @@ export function wsEventsHandler(event: WsEvent): void {
 			}
 			break;
 		}
-		// TODO CHECK
 		case WsEventType.MEETING_USER_ACCEPTED: {
 			if (inThisMeetingTab(event.meetingId)) {
 				state.removeUserFromWaitingList(event.meetingId, event.userId);
@@ -319,7 +316,6 @@ export function wsEventsHandler(event: WsEvent): void {
 			}
 			break;
 		}
-		// TODO CHECK
 		case WsEventType.MEETING_USER_REJECTED: {
 			if (inThisMeetingTab(event.meetingId)) {
 				state.removeUserFromWaitingList(event.meetingId, event.userId);
