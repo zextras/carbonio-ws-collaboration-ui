@@ -41,6 +41,10 @@ const CustomContainer = styled(Container)`
 	cursor: default;
 `;
 
+const CustomText = styled(Text)`
+	text-align: center;
+`;
+
 const ConversationFilterContainer = styled(Container)`
 	height: fit-content;
 	position: sticky;
@@ -79,10 +83,14 @@ const SecondaryBarSingleGroupsView: React.FC<SecondaryBarSingleGroupsView> = ({ 
 			});
 		} else {
 			list.push(
-				<CustomContainer mainAlignment="flex-start" padding={{ top: '2rem' }} key="no_match_item">
-					<Text color="gray1" size="small" weight="light">
+				<CustomContainer
+					mainAlignment="flex-start"
+					padding={{ vertical: '2rem', horizontal: '1rem' }}
+					key="no_match_item"
+				>
+					<CustomText color="gray1" size="small" weight="light" overflow="break-word">
 						{noMatchLabel}
-					</Text>
+					</CustomText>
 				</CustomContainer>
 			);
 		}
