@@ -46,17 +46,18 @@ export default function App() {
 		const webSocket = new WebSocketClient();
 		setWebSocketClient(webSocket);
 
-		Promise.all([SessionApi.getToken(), SessionApi.getCapabilities()])
+		Promise.all([
+			SessionApi.getToken(),
+			SessionApi.getCapabilities(),
+			RoomsApi.listRooms(true, true),
+			MeetingsApi.listMeetings()
+		])
 			.then((resp) => {
-				// CHATS BE: get all rooms list
-				Promise.all([RoomsApi.listRooms(true, true)], MeetingsApi.listMeetings())
-					.then(() => {
-						setChatsBeStatus(true);
-						// Init xmppClient and webSocket after roomList request to avoid missing data (specially for the inbox request)
-						xmppClient.connect(resp[0].zmToken);
-						webSocket.connect();
-					})
-					.catch(() => setChatsBeStatus(false));
+				setChatsBeStatus(true);
+
+				// Init xmppClient and webSocket after roomList request to avoid missing data (specially for the inbox request)
+				xmppClient.connect(resp[0].zmToken);
+				webSocket.connect();
 			})
 			.catch(() => setChatsBeStatus(false));
 	}, [setChatsBeStatus, setWebSocketClient, setXmppClient]);

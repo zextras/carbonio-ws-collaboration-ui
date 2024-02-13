@@ -13,9 +13,11 @@ import useStore from '../store/Store';
 import { MeetingType } from '../types/network/models/meetingBeTypes';
 import { RoomType } from '../types/store/RoomTypes';
 
-const useRoomMeeting = (
-	roomId: string
-): { openMeeting: () => void; copyMeetingLink: () => void } => {
+type RoomMeetingHookType = {
+	openMeeting: () => void;
+	copyMeetingLink: () => void;
+};
+const useRoomMeeting = (roomId: string): RoomMeetingHookType => {
 	const roomType = useStore((store) => getRoomTypeSelector(store, roomId));
 	const meetingId = useStore((store) => getMeetingIdFromRoom(store, roomId));
 
@@ -26,13 +28,9 @@ const useRoomMeeting = (
 		else {
 			const meetingType =
 				roomType === RoomType.TEMPORARY ? MeetingType.SCHEDULED : MeetingType.PERMANENT;
-			MeetingsApi.createMeeting(roomId, meetingType)
-				.then((meeting) => {
-					window.open(`${MEETINGS_PATH}${meeting.id}`);
-				})
-				.catch((error) => {
-					console.error(error);
-				});
+			MeetingsApi.createMeeting(roomId, meetingType).then((meeting) =>
+				window.open(`${MEETINGS_PATH}${meeting.id}`)
+			);
 		}
 	}, [meetingId, meetingLink, roomId, roomType]);
 

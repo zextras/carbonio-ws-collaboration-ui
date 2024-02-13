@@ -13,6 +13,7 @@ import styled from 'styled-components';
 import useEventListener, { EventName } from '../../../../hooks/useEventListener';
 import useRouting, { PAGE_INFO_TYPE } from '../../../../hooks/useRouting';
 import { MeetingsApi } from '../../../../network';
+import { calcScaleDivisor } from '../../../../utils/styleUtils';
 import AccessTile from '../mediaHandlers/AccessTile';
 import LocalMediaHandler from '../mediaHandlers/LocalMediaHandler';
 
@@ -82,10 +83,7 @@ const WaitingRoom: FC<WaitingRoomProps> = ({ meetingId }) => {
 	// TODO API response is not right, it should return a string
 	useEffect(() => {
 		MeetingsApi.getScheduledMeetingName(meetingId)
-			.then((name) => {
-				console.log(name);
-				setMeetingName(name);
-			})
+			.then((name) => setMeetingName(name))
 			.catch(() => goToInfoPage(PAGE_INFO_TYPE.MEETING_NOT_FOUND));
 	}, [goToInfoPage, meetingId]);
 
@@ -135,9 +133,8 @@ const WaitingRoom: FC<WaitingRoomProps> = ({ meetingId }) => {
 	useEventListener(EventName.MEETING_USER_REJECTED, handleRejected);
 	useEventListener(EventName.MEETING_WAITING_PARTICIPANT_CLASHED, handleRejoin);
 
-	// TODO handle the change of the width in case of resize from settings
 	const handleResize = useCallback(() => {
-		setWrapperWidth((window.innerWidth * 0.33) / 16);
+		setWrapperWidth((window.innerWidth * 0.33) / calcScaleDivisor());
 	}, []);
 
 	useEffect(() => {

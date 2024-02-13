@@ -313,4 +313,50 @@ describe('Meetings API', () => {
 			})
 		});
 	});
+
+	test('leaveWaitingRoom is called correctly', async () => {
+		fetchResponse.mockResolvedValueOnce({ status: 'ACCEPTED' });
+		await meetingsApi.leaveWaitingRoom(meetingMock.id);
+
+		// Check if fetch is called with the correct parameters
+		expect(global.fetch).toHaveBeenCalledWith(
+			`/services/chats/meetings/${meetingMock.id}/queue/${userId}`,
+			{
+				method: 'POST',
+				headers,
+				body: JSON.stringify({
+					status: 'REJECTED'
+				})
+			}
+		);
+	});
+
+	test('getWaitingList is called correctly', async () => {
+		fetchResponse.mockResolvedValueOnce({ users: [userId] });
+		await meetingsApi.getWaitingList(meetingMock.id);
+
+		// Check if fetch is called with the correct parameters
+		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/meetings/${meetingMock.id}/queue`, {
+			method: 'GET',
+			headers,
+			body: undefined
+		});
+	});
+
+	test('acceptWaitingUser is called correctly', async () => {
+		fetchResponse.mockResolvedValueOnce({ status: 'ACCEPTED' });
+		await meetingsApi.acceptWaitingUser(meetingMock.id, userId, true);
+
+		// Check if fetch is called with the correct parameters
+		expect(global.fetch).toHaveBeenCalledWith(
+			`/services/chats/meetings/${meetingMock.id}/queue/${userId}`,
+			{
+				method: 'POST',
+				headers,
+				body: JSON.stringify({
+					status: 'ACCEPTED'
+				})
+			}
+		);
+	});
 });

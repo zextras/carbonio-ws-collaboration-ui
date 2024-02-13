@@ -10,24 +10,37 @@ import { screen } from '@testing-library/react';
 
 import ForwardMessageModal from './ForwardMessageModal';
 import useStore from '../../../../store/Store';
-import { createMockRoom, createMockTextMessage } from '../../../../tests/createMock';
+import {
+	createMockRoom,
+	createMockTextMessage,
+	createMockUser
+} from '../../../../tests/createMock';
 import { mockedForwardMessagesRequest } from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe } from '../../../../types/network/models/roomBeTypes';
+import { RoomType } from '../../../../types/store/RoomTypes';
 import { RootStore } from '../../../../types/store/StoreTypes';
 
 const testRoom: RoomBe = createMockRoom({ id: 'roomTest', name: 'Test room' });
 
 const messageToForward = createMockTextMessage({ roomId: testRoom.id });
 
-const chat: RoomBe = createMockRoom({ id: 'chat', name: 'Chat' });
-const chat2: RoomBe = createMockRoom({ id: 'chat2', name: 'Chat 2' });
+const chat: RoomBe = createMockRoom({ id: 'chat', name: 'Chat', type: RoomType.ONE_TO_ONE });
+const chat2: RoomBe = createMockRoom({ id: 'chat2', name: 'Chat 2', type: RoomType.GROUP });
+const chat3: RoomBe = createMockRoom({ id: 'chat3', name: 'Chat 3', type: RoomType.TEMPORARY });
 
+const sessionUser = createMockUser({ id: 'id', name: 'Name' });
+const defaultSetupStore = (): void => {
+	const store: RootStore = useStore.getState();
+	store.setLoginInfo(sessionUser.id, sessionUser.name);
+	store.addRoom(testRoom);
+	store.addRoom(chat);
+	store.addRoom(chat2);
+	store.addRoom(chat3);
+};
 describe('Forward Message Modal', () => {
 	test('All elements are rendered', () => {
-		const store: RootStore = useStore.getState();
-		store.addRoom(testRoom);
-		store.addRoom(chat2);
+		defaultSetupStore();
 		setup(
 			<ForwardMessageModal
 				open
@@ -49,9 +62,7 @@ describe('Forward Message Modal', () => {
 	});
 
 	test("Current conversation isn't displayed in the list", () => {
-		const store: RootStore = useStore.getState();
-		store.addRoom(testRoom);
-		store.addRoom(chat);
+		defaultSetupStore();
 		setup(
 			<ForwardMessageModal
 				open
@@ -66,10 +77,25 @@ describe('Forward Message Modal', () => {
 		expect(list).toHaveTextContent(chat.name!);
 	});
 
+	test('Only single and group conversations are displayed', () => {
+		defaultSetupStore();
+		setup(
+			<ForwardMessageModal
+				open
+				onClose={jest.fn()}
+				roomId={testRoom.id}
+				message={messageToForward}
+			/>
+		);
+
+		const list = screen.getByTestId('list_forward_modal');
+		expect(list).toHaveTextContent(chat.name!);
+		expect(list).toHaveTextContent(chat2.name!);
+		expect(list).not.toHaveTextContent(chat3.name!);
+	});
+
 	test('Forward a message', async () => {
-		const store: RootStore = useStore.getState();
-		store.addRoom(testRoom);
-		store.addRoom(chat);
+		defaultSetupStore();
 		const { user } = setup(
 			<ForwardMessageModal
 				open
@@ -95,10 +121,7 @@ describe('Forward Message Modal', () => {
 	});
 
 	test('Forward a message to multiple conversations', async () => {
-		const store: RootStore = useStore.getState();
-		store.addRoom(testRoom);
-		store.addRoom(chat);
-		store.addRoom(chat2);
+		defaultSetupStore();
 		const { user } = setup(
 			<ForwardMessageModal
 				open
@@ -126,9 +149,7 @@ describe('Forward Message Modal', () => {
 	});
 
 	test('Close modal after forward someone else message', async () => {
-		const store: RootStore = useStore.getState();
-		store.addRoom(testRoom);
-		store.addRoom(chat);
+		defaultSetupStore();
 
 		const onClose = jest.fn();
 		const { user } = setup(
@@ -144,11 +165,8 @@ describe('Forward Message Modal', () => {
 	});
 
 	test('Close modal after forward my message', async () => {
-		const store: RootStore = useStore.getState();
-		store.addRoom(testRoom);
-		store.addRoom(chat);
-		store.setLoginInfo('id', 'Name');
-		const messageToForward = createMockTextMessage({ roomId: testRoom.id, from: 'id' });
+		defaultSetupStore();
+		const messageToForward = createMockTextMessage({ roomId: testRoom.id, from: sessionUser.id });
 
 		const onClose = jest.fn();
 		const { user } = setup(

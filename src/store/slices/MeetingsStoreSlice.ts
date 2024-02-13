@@ -220,7 +220,6 @@ export const useMeetingsStoreSlice: StateCreator<MeetingsSlice> = (set: (...any:
 				const meeting = find(draft.meetings, (meeting) => meeting.id === meetingId);
 				if (meeting) {
 					draft.meetings[meeting.roomId].waitingList = waitingList;
-
 					// Retrieve waiting users information if they are unknown
 					forEach(waitingList, (userId) => {
 						if (!find(draft.users, (user) => user.id === userId)) {

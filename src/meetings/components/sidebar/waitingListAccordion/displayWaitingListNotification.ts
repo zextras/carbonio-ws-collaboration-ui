@@ -3,8 +3,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import { getNotificationManager } from '@zextras/carbonio-shell-ui';
-import i18next from 'i18next';
+import { t, getNotificationManager } from '@zextras/carbonio-shell-ui';
 import { find } from 'lodash';
 
 import useStore from '../../../../store/Store';
@@ -21,11 +20,11 @@ const displayWaitingListNotification = (meetingId: string): void => {
 		getNotificationManager().notify({
 			showPopup: true,
 			playSound: true,
-			title: i18next.t(
+			title: t(
 				'meeting.browserNotification.waitingTitle',
 				'There seems to be someone in the Waiting Room'
 			),
-			message: i18next.t(
+			message: t(
 				'meeting.browserNotification.waitingMessage',
 				'New user is waiting to enter the meeting'
 			)
