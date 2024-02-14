@@ -6,12 +6,15 @@
  */
 import produce from 'immer';
 import { filter, find, size } from 'lodash';
+import { StateCreator } from 'zustand';
 
 import { Message, MessageType } from '../../types/store/MessageTypes';
 import { RootStore, UnreadsCounterSlice } from '../../types/store/StoreTypes';
-import { isBefore } from '../../utils/dateUtil';
+import { isBefore } from '../../utils/dateUtils';
 
-export const useUnreadsCountStoreSlice = (set: (...any: any) => void): UnreadsCounterSlice => ({
+export const useUnreadsCountStoreSlice: StateCreator<UnreadsCounterSlice> = (
+	set: (...any: any) => void
+) => ({
 	unreads: {},
 	addUnreadCount: (roomId: string, counter: number): void => {
 		set(

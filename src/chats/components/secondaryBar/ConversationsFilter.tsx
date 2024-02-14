@@ -47,7 +47,7 @@ const ConversationsFilter: FC<ConversationsFilterProps> = ({ expanded, setFilter
 	const handleFilterChange = useCallback(
 		(ev: React.FormEvent<HTMLInputElement>): void => {
 			setSearchInput(ev.currentTarget.value);
-			setFilteredInput(ev.currentTarget.value);
+			setFilteredInput(ev.currentTarget.value.toLocaleLowerCase());
 		},
 		[setFilteredInput]
 	);

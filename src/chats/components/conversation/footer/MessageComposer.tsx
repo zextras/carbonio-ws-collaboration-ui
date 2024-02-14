@@ -7,7 +7,6 @@
 import React, {
 	BaseSyntheticEvent,
 	useCallback,
-	useContext,
 	useEffect,
 	useMemo,
 	useRef,
@@ -18,9 +17,9 @@ import {
 	Container,
 	CreateSnackbarFn,
 	IconButton,
-	SnackbarManagerContext,
 	Spinner,
-	Tooltip
+	Tooltip,
+	useSnackbar
 } from '@zextras/carbonio-design-system';
 import { debounce, find, forEach, map, size, throttle } from 'lodash';
 import { useTranslation } from 'react-i18next';
@@ -28,7 +27,7 @@ import styled from 'styled-components';
 
 import AttachmentSelector from './AttachmentSelector';
 import DeleteMessageModal from './DeleteMessageModal';
-import EmojiPicker from './EmojiPicker';
+import EmojiSelector from './EmojiSelector';
 import MessageArea from './MessageArea';
 import useMessage from '../../../../hooks/useMessage';
 import { RoomsApi } from '../../../../network';
@@ -41,7 +40,6 @@ import { getXmppClient } from '../../../../store/selectors/ConnectionSelector';
 import { getLastMessageIdSelector } from '../../../../store/selectors/MessagesSelectors';
 import { getCapability, getUserId } from '../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../store/Store';
-import { Emoji } from '../../../../types/generics';
 import { AddRoomAttachmentResponse } from '../../../../types/network/responses/roomsResponses';
 import { FileToUpload, messageActionType } from '../../../../types/store/ActiveConversationTypes';
 import { Message, MessageType } from '../../../../types/store/MessageTypes';
@@ -52,7 +50,6 @@ import { canPerformAction } from '../../../../utils/MessageActionsUtils';
 
 type ConversationMessageComposerProps = {
 	roomId: string;
-	isInsideMeeting?: boolean;
 };
 
 const BlockUploadButton = styled(IconButton)`
@@ -74,17 +71,11 @@ const UploadSpinnerWrapper = styled(Container)`
 
 const SendIconButton = styled(IconButton)<{ alt?: string }>``;
 
-const EmojiIconButton = styled(IconButton)<{ alt?: string }>``;
-
-const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
-	roomId,
-	isInsideMeeting
-}) => {
+const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId }) => {
 	const xmppClient = useStore(getXmppClient);
 
 	const [t] = useTranslation();
 	const writeToSendTooltip = t('tooltip.writeToSend', 'Write a message to send it');
-	const selectEmojiLabel = t('tooltip.selectEmoji', 'Select emoji');
 	const sendMessageLabel = t('tooltip.sendMessage', 'Send message');
 	const uploadingLabel = t('tooltip.uploading', 'Uploading');
 	const uploadAbortedLabel = t('attachments.uploadAborted', 'Upload has been interrupted');
@@ -115,14 +106,11 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 	const [textMessage, setTextMessage] = useState(draftMessage ?? '');
 	const [isUploading, setIsUploading] = useState(false);
 	const [noMoreCharsOnInputComposer, setNoMoreCharsOnInputComposer] = useState(false);
-	const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 	const [deleteMessageModalStatus, setDeleteMessageModalStatus] = useState(false);
 
-	const createSnackbar: CreateSnackbarFn = useContext(SnackbarManagerContext);
+	const createSnackbar: CreateSnackbarFn = useSnackbar();
 
 	const messageInputRef = useRef<HTMLTextAreaElement>(null);
-	const emojiButtonRef = useRef<HTMLDivElement>(null);
-	const emojiTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
 
 	const sendDisabled = useMemo(() => {
 		// Send button is always enabled if user is editing
@@ -258,7 +246,6 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 
 	const sendMessage = useCallback((): void => {
 		sendStopWriting();
-		if (showEmojiPicker) setShowEmojiPicker(false);
 		const message = textMessage.trim();
 		if (filesToUploadArray) {
 			const abortControllerList: AbortController[] = [];
@@ -403,22 +390,6 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 		[sendDisabled, sendMessage, sendThrottleIsWriting, sendDebouncedPause]
 	);
 
-	const insertEmojiInMessage = useCallback(
-		(emoji: Emoji): void => {
-			if (messageInputRef.current) {
-				const position = messageInputRef.current.selectionStart;
-				const prevPosition = messageInputRef.current.value.slice(0, position);
-				const nextPosition = messageInputRef.current.value.slice(position);
-				const text = `${prevPosition}${emoji.native}${nextPosition}`;
-				checkMaxLengthAndSetMessage(text);
-				const cursorMiddlePosition = emoji.native.length + position;
-				messageInputRef.current.focus();
-				messageInputRef.current.setSelectionRange(cursorMiddlePosition, cursorMiddlePosition);
-			}
-		},
-		[checkMaxLengthAndSetMessage]
-	);
-
 	const handleOnBlur = useCallback(() => {
 		if (size(textMessage) > 0) {
 			setDraftMessage(roomId, false, textMessage);
@@ -521,36 +492,6 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 		};
 	}, [roomId]);
 
-	const mouseEnterEvent = useCallback(() => {
-		if (emojiButtonRef.current) {
-			clearTimeout(emojiTimeoutRef.current);
-			setShowEmojiPicker(true);
-		}
-	}, []);
-
-	const mouseLeaveEvent = useCallback(() => {
-		if (emojiButtonRef.current) {
-			emojiTimeoutRef.current = setTimeout(() => {
-				setShowEmojiPicker(false);
-			}, 300);
-		}
-	}, []);
-
-	useEffect(() => {
-		let refValue: HTMLDivElement;
-		if (emojiButtonRef.current) {
-			emojiButtonRef.current.addEventListener('mouseenter', mouseEnterEvent);
-			emojiButtonRef.current.addEventListener('mouseleave', mouseLeaveEvent);
-			refValue = emojiButtonRef.current;
-		}
-		return () => {
-			if (refValue) {
-				refValue.removeEventListener('mouseenter', mouseEnterEvent);
-				refValue.removeEventListener('mouseleave', mouseLeaveEvent);
-			}
-		};
-	}, [mouseEnterEvent, mouseLeaveEvent]);
-
 	const isDisabledWhileAttachingFile = useMemo(() => {
 		if (filesToUploadArray) {
 			return !find(filesToUploadArray, (file) => file.hasFocus);
@@ -567,70 +508,50 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({
 	);
 
 	return (
-		<Container height="fit">
-			{showEmojiPicker && (
-				<EmojiPicker
-					onEmojiSelect={insertEmojiInMessage}
-					setShowEmojiPicker={setShowEmojiPicker}
-					emojiTimeoutRef={emojiTimeoutRef}
-					isInsideMeeting={isInsideMeeting}
-				/>
-			)}
-			<Container
-				orientation="horizontal"
-				crossAlignment="flex-end"
-				gap="0.25rem"
-				padding={{ all: 'small' }}
-			>
-				<Tooltip label={selectEmojiLabel}>
-					<Container width="fit" height="fit">
-						<EmojiIconButton
-							ref={emojiButtonRef}
-							iconColor="secondary"
+		<Container
+			height="fit"
+			orientation="horizontal"
+			crossAlignment="flex-end"
+			gap="0.25rem"
+			padding={{ all: 'small' }}
+		>
+			<EmojiSelector messageInputRef={messageInputRef} setMessage={checkMaxLengthAndSetMessage} />
+			<MessageArea
+				roomId={roomId}
+				textareaRef={messageInputRef}
+				message={textMessage}
+				onInput={handleTypingMessage}
+				composerIsFull={noMoreCharsOnInputComposer}
+				handleKeyDownTextarea={handleKeyDown}
+				handleKeyUpTextarea={handleKeyUp}
+				handleOnBlur={handleOnBlur}
+				handleOnPaste={handlePaste}
+				isDisabled={isDisabledWhileAttachingFile}
+			/>
+			{showAttachFileButton && <AttachmentSelector roomId={roomId} />}
+			{isUploading && (
+				<Tooltip label={stopUploadLabel} placement="top">
+					<UploadSpinnerWrapper width="2.25rem" height="2.5625rem">
+						<LoadingSpinner color="primary" title={uploadingLabel} />
+						<BlockUploadButton
+							onClick={abortUploadRequest}
+							iconColor="gray0"
 							size="large"
-							icon="SmileOutline"
-							alt={selectEmojiLabel}
-							onClick={(): null => null}
+							icon="CloseOutline"
 						/>
-					</Container>
+					</UploadSpinnerWrapper>
 				</Tooltip>
-				<MessageArea
-					roomId={roomId}
-					textareaRef={messageInputRef}
-					message={textMessage}
-					onInput={handleTypingMessage}
-					composerIsFull={noMoreCharsOnInputComposer}
-					handleKeyDownTextarea={handleKeyDown}
-					handleKeyUpTextarea={handleKeyUp}
-					handleOnBlur={handleOnBlur}
-					handleOnPaste={handlePaste}
-					isDisabled={isDisabledWhileAttachingFile}
+			)}
+			<Tooltip label={sendDisabled ? writeToSendTooltip : sendMessageLabel} placement="top">
+				<SendIconButton
+					onClick={sendMessage}
+					iconColor="primary"
+					size="large"
+					icon="Navigation2"
+					alt={sendDisabled ? writeToSendTooltip : sendMessageLabel}
+					disabled={sendDisabled}
 				/>
-				{showAttachFileButton && <AttachmentSelector roomId={roomId} />}
-				{isUploading && (
-					<Tooltip label={stopUploadLabel} placement="top">
-						<UploadSpinnerWrapper width="2.25rem" height="2.5625rem">
-							<LoadingSpinner color="primary" title={uploadingLabel} />
-							<BlockUploadButton
-								onClick={abortUploadRequest}
-								iconColor="gray0"
-								size="large"
-								icon="CloseOutline"
-							/>
-						</UploadSpinnerWrapper>
-					</Tooltip>
-				)}
-				<Tooltip label={sendDisabled ? writeToSendTooltip : sendMessageLabel} placement="top">
-					<SendIconButton
-						onClick={sendMessage}
-						iconColor="primary"
-						size="large"
-						icon="Navigation2"
-						alt={sendDisabled ? writeToSendTooltip : sendMessageLabel}
-						disabled={sendDisabled}
-					/>
-				</Tooltip>
-			</Container>
+			</Tooltip>
 			{deleteMessageModalStatus && (
 				<DeleteMessageModal
 					roomId={roomId}

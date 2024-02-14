@@ -9,7 +9,10 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 
 import AttachmentSmallView from './AttachmentSmallView';
-import { mockedGetImageThumbnailURL, mockedGetURLAttachment } from '../../../../../jest-mocks';
+import {
+	mockedGetImageThumbnailURL,
+	mockedGetURLAttachment
+} from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 import { AttachmentMessageType } from '../../../../types/store/MessageTypes';
 

@@ -4,78 +4,127 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { clone, differenceWith, flatMap, forEach, isEqual } from 'lodash';
+import { concat, differenceWith, filter, find, isEqual, remove, size } from 'lodash';
 
 import useStore from '../../store/Store';
-import { MeetingParticipantBe } from '../../types/network/models/meetingBeTypes';
-import { STREAM_TYPE, Subscription, SubscriptionMap } from '../../types/store/ActiveMeetingTypes';
+import { STREAM_TYPE, Subscription } from '../../types/store/ActiveMeetingTypes';
 import { MeetingsApi } from '../index';
 
 class SubscriptionsManager {
 	meetingId: string;
 
-	allStreams: SubscriptionMap = {};
+	myUserId: string | undefined;
 
-	subscriptions: SubscriptionMap = {};
+	subscriptions: Subscription[] = [];
+
+	isRequesting = false;
+
+	pendingRequests: (Subscription[] | undefined)[] = [];
 
 	constructor(meetingId: string) {
 		this.meetingId = meetingId;
+		this.myUserId = useStore.getState().session.id;
 	}
 
-	public updateAllStreamMap(participants: MeetingParticipantBe[]): void {
-		forEach(participants, (participant) => {
-			if (participant.userId !== useStore.getState().session.id) {
-				if (participant.videoStreamEnabled) {
-					const subscriptionId = `${participant.userId}-${STREAM_TYPE.VIDEO}`;
-					this.allStreams[subscriptionId] = {
-						userId: participant.userId,
-						type: STREAM_TYPE.VIDEO
-					};
-				}
-				if (participant.screenStreamEnabled) {
-					const subscriptionId = `${participant.userId}-${STREAM_TYPE.SCREEN}`;
-					this.allStreams[subscriptionId] = {
-						userId: participant.userId,
-						type: STREAM_TYPE.SCREEN
-					};
-				}
-			}
+	private filterSubscription(desiderata: Subscription[]): Subscription[] {
+		const participants = find(
+			useStore.getState().meetings,
+			(meeting) => meeting.id === this.meetingId
+		)?.participants;
+		return filter(desiderata, (sub) => {
+			const meetingParticipant = participants?.[sub.userId];
+			const isMyStream = meetingParticipant?.userId === this.myUserId;
+			const isVideoSubOn = sub.type === STREAM_TYPE.VIDEO && !!meetingParticipant?.videoStreamOn;
+			const isScreenSubOn = sub.type === STREAM_TYPE.SCREEN && !!meetingParticipant?.screenStreamOn;
+			return !isMyStream && (isVideoSubOn || isScreenSubOn);
 		});
-		this.updateSubscription();
 	}
 
-	public addStreamToAsk(userId: string, type: STREAM_TYPE): void {
-		if (userId !== useStore.getState().session.id) {
-			const subscriptionId = `${userId}-${type}`;
-			this.allStreams[subscriptionId] = { userId, type };
-			this.updateSubscription();
+	private subscribeToMedia(
+		subscriptionToAdd: Subscription[],
+		subscriptionToRemove: Subscription[]
+	): void {
+		if (size(subscriptionToAdd) > 0 || size(subscriptionToRemove) > 0) {
+			this.isRequesting = true;
+			MeetingsApi.subscribeToMedia(this.meetingId, subscriptionToAdd, subscriptionToRemove)
+				.then(() => {
+					this.subscriptions = concat(this.subscriptions, subscriptionToAdd);
+					this.subscriptions = differenceWith(this.subscriptions, subscriptionToRemove, isEqual);
+
+					this.isRequesting = false;
+					// Perform next pending request
+					if (size(this.pendingRequests) > 0) {
+						const nextRequest = this.pendingRequests.shift();
+						if (nextRequest) {
+							this.updateSubscription(nextRequest);
+						}
+					}
+				})
+				.catch(() => {
+					this.isRequesting = false;
+					// Perform next pending request
+					if (size(this.pendingRequests) > 0) {
+						const nextRequest = this.pendingRequests.shift();
+						if (nextRequest) {
+							this.updateSubscription(nextRequest);
+						}
+					}
+				});
 		}
 	}
 
-	public removeStreamToAsk(userId: string, type: STREAM_TYPE): void {
-		const subscriptionId = `${userId}-${type}`;
-		delete this.allStreams[subscriptionId];
-		this.updateSubscription();
+	// We delete the subscription when user leave the meeting
+	public deleteSubscription(subIdToDelete: string): void {
+		remove(this.subscriptions, (sub) => sub.userId === subIdToDelete);
+	}
+
+	public removeSubscription(subToRemove: Subscription): void {
+		if (
+			find(
+				this.subscriptions,
+				(sub) => sub.userId === subToRemove.userId && sub.type === subToRemove.type
+			)
+		) {
+			const subsToRem = filter(
+				this.subscriptions,
+				(sub) => sub.userId !== subToRemove.userId || sub.type !== subToRemove.type
+			);
+			this.updateSubscription(subsToRem);
+		}
+	}
+
+	public addSubscription(subToAdd: Subscription): void {
+		if (
+			!find(
+				this.subscriptions,
+				(sub) => sub.userId === subToAdd.userId && sub.type === subToAdd.type
+			)
+		) {
+			this.updateSubscription([...this.subscriptions, subToAdd]);
+		}
 	}
 
 	// Ask subscriptions that are not already asked and unset subscriptions that are not needed anymore
-	updateSubscription(subscriptionsToRequest?: Subscription[]): void {
-		// Ask for all the possible subscriptions
-		const subsToRequest = subscriptionsToRequest || flatMap(this.allStreams);
-		const realSubs = flatMap(this.subscriptions);
-
-		const subscriptionToAsk: Subscription[] = differenceWith(subsToRequest, realSubs, isEqual);
-		// For the moment, avoid to set unsubscribed streams
-		// const subscriptionToUnset: Subscription[] = differenceWith(realSubs, subsToRequest, isEqual);
-		if (subscriptionToAsk.length !== 0) {
-			MeetingsApi.subscribeToMedia(this.meetingId, subscriptionToAsk, []);
+	public updateSubscription(subsToRequest: Subscription[]): void {
+		// If a subscription is performing, the new request is pushed in a queue performed after the current one
+		if (this.isRequesting) {
+			this.pendingRequests.push(subsToRequest);
+			return;
 		}
-		this.subscriptions = clone(this.allStreams);
+
+		if (!isEqual(subsToRequest, this.subscriptions)) {
+			const subToAdd = this.filterSubscription(
+				differenceWith(subsToRequest, this.subscriptions, isEqual)
+			);
+			const subToRemove = this.filterSubscription(
+				differenceWith(this.subscriptions, subsToRequest, isEqual)
+			);
+			this.subscribeToMedia(subToAdd, subToRemove);
+		}
 	}
 
 	clean(): void {
-		this.allStreams = {};
-		this.subscriptions = {};
+		this.subscriptions = [];
 	}
 }
 

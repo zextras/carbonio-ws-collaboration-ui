@@ -8,7 +8,6 @@ import React, { ReactElement, useCallback, useEffect, useMemo, useRef, useState 
 
 import { Container } from '@zextras/carbonio-design-system';
 import { debounce, find, groupBy, last, map, size } from 'lodash';
-import moment from 'moment-timezone';
 import styled from 'styled-components';
 
 import AnimationGlobalStyle from './messageBubbles/BubbleAnimationsGlobalStyle';
@@ -18,7 +17,6 @@ import MessageHistoryLoader from './MessageHistoryLoader';
 import ScrollButton from './ScrollButton';
 import useFirstUnreadMessage from './useFirstUnreadMessage';
 import useEventListener, { EventName } from '../../../hooks/useEventListener';
-import { messageWhereScrollIsStoppedEqualityFn } from '../../../store/equalityFunctions/ActiveConversationsEqualityFunctions';
 import {
 	getHistoryIsFullyLoaded,
 	getHistoryIsLoadedDisabled,
@@ -29,10 +27,10 @@ import {
 import { getXmppClient } from '../../../store/selectors/ConnectionSelector';
 import { getMyLastMarkerOfRoom } from '../../../store/selectors/MarkersSelectors';
 import { getMessagesSelector } from '../../../store/selectors/MessagesSelectors';
-import { getPrefTimezoneSelector, getUserId } from '../../../store/selectors/SessionSelectors';
+import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { Message, MessageType } from '../../../types/store/MessageTypes';
-import { isBefore } from '../../../utils/dateUtil';
+import { formatDate, isBefore } from '../../../utils/dateUtils';
 import { scrollToEnd, scrollToMessage } from '../../../utils/scrollUtils';
 
 const Messages = styled(Container)`
@@ -55,10 +53,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 	const inputHasFocus = useStore((store) => getInputHasFocus(store, roomId));
 	const roomMessages = useStore((store) => getMessagesSelector(store, roomId));
 	const usersWritingList = useStore((store) => getRoomIsWritingList(store, roomId));
-	const actualScrollPosition = useStore(
-		(store) => getIdMessageWhereScrollIsStopped(store, roomId),
-		messageWhereScrollIsStoppedEqualityFn
-	);
+	const actualScrollPosition = useStore((store) => getIdMessageWhereScrollIsStopped(store, roomId));
 	const hasMoreMessageToLoad = useStore((store) => getHistoryIsFullyLoaded(store, roomId));
 	const historyLoadedDisabled = useStore((store) => getHistoryIsLoadedDisabled(store, roomId));
 	const setIdMessageWhereScrollIsStopped = useStore(
@@ -67,7 +62,6 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 	const setInputHasFocus = useStore((store) => store.setInputHasFocus);
 	const myUserId = useStore(getUserId);
 	const myLastMarker = useStore((store) => getMyLastMarkerOfRoom(store, roomId));
-	const timezone = useStore(getPrefTimezoneSelector);
 
 	const [showScrollButton, setShowScrollButton] = useState(false);
 
@@ -189,8 +183,8 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 	}, [roomMessages, actualScrollPosition, historyLoadedDisabled]);
 
 	const dateMessageWrapped = useMemo(
-		() => groupBy(roomMessages, (message) => moment.tz(message.date, timezone).format('YYMMDD')),
-		[roomMessages, timezone]
+		() => groupBy(roomMessages, (message) => formatDate(message.date, 'YYMMDD')),
+		[roomMessages]
 	);
 
 	const messagesWrapped = useMemo(() => {

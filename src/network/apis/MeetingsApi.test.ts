@@ -7,9 +7,9 @@
 import { size } from 'lodash';
 
 import meetingsApi from './MeetingsApi';
-import { fetchResponse } from '../../../jest-mocks';
 import useStore from '../../store/Store';
 import { createMockMeeting } from '../../tests/createMock';
+import { fetchResponse } from '../../tests/mocks/global';
 import { MeetingType } from '../../types/network/models/meetingBeTypes';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
 
@@ -62,16 +62,14 @@ describe('Meetings API', () => {
 		);
 	});
 
-	test('createPermanentMeeting is called correctly', async () => {
+	test('createMeeting is called correctly', async () => {
 		fetchResponse.mockResolvedValueOnce(meetingMock);
-		await meetingsApi.createPermanentMeeting('roomId');
+		await meetingsApi.createMeeting('roomId', MeetingType.PERMANENT);
 		// Check if fetch is called with the correct parameters
 		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/meetings`, {
 			method: 'POST',
 			headers,
 			body: JSON.stringify({
-				name: '',
-				users: [],
 				roomId: 'roomId',
 				meetingType: MeetingType.PERMANENT
 			})

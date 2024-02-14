@@ -14,11 +14,13 @@ export type Room = {
 	pictureUpdatedAt?: string;
 	members?: Member[];
 	userSettings?: RoomUserSettings;
+	meetingId?: string;
 };
 
 export enum RoomType {
 	ONE_TO_ONE = 'one_to_one',
-	GROUP = 'group'
+	GROUP = 'group',
+	TEMPORARY = 'temporary'
 }
 
 export type Member = {
@@ -38,5 +40,5 @@ export type RoomsMap = {
 };
 
 export type ConversationProps = {
-	room: Room;
+	roomId: string;
 };

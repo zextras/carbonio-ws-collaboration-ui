@@ -11,6 +11,7 @@ import {
 	MeetingViewType,
 	STREAM_TYPE,
 	StreamsSubscriptionMap,
+	Subscription,
 	TileData
 } from './ActiveMeetingTypes';
 import { Connections } from './ConnectionsTypes';
@@ -91,13 +92,12 @@ export type SessionStoreSlice = {
 	setSessionId: (sessionId: string) => void;
 	setCapabilities: (capabilities: CapabilityList) => void;
 	setSelectedRoomOneToOneGroup: (id: string) => void;
-	setUserPrefTimezone: (timezoneId: string) => void;
 	setCustomLogo: (logo: string | false) => void;
 };
 
 export type MarkersStoreSlice = {
 	markers: MarkersMap;
-	updateMarkers: (markers: Marker[], roomId: string) => void;
+	updateMarkers: (roomId: string, markers: Marker[]) => void;
 };
 
 export type ActiveConversationsSlice = {
@@ -188,6 +188,10 @@ export type ActiveMeetingSlice = {
 	setIsCarouseVisible: (meetingId: string, status: boolean) => void;
 	setPinnedTile: (meetingId: string, tile: TileData | undefined) => void;
 	setTalkingUser: (meetingId: string, userId: string, isTalking: boolean) => void;
+	setRemoveSubscription: (meetingId: string, subToRemove: Subscription) => void;
+	setAddSubscription: (meetingId: string, subToAdd: Subscription) => void;
+	setUpdateSubscription: (meetingId: string, subsToRequest: Subscription[]) => void;
+	setDeleteSubscription: (meetingId: string, subIdToDelete: string) => void;
 };
 
 export type RootStore = UsersStoreSlice &

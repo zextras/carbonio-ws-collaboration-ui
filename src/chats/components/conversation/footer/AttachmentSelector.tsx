@@ -27,7 +27,7 @@ type AttachmentSelectorProps = {
 };
 
 const InputSelector = styled.input<{
-	onChange: (ev: any) => void;
+	onChange: (ev: React.ChangeEvent<HTMLInputElement>) => void;
 	type: string;
 	multiple: boolean;
 	hidden: boolean;

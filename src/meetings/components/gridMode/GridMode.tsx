@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { ReactElement, useMemo, useRef } from 'react';
+import React, { ReactElement, useEffect, useMemo, useRef } from 'react';
 
 import { Container, IconButton, Tooltip } from '@zextras/carbonio-design-system';
-import { size } from 'lodash';
+import { map, size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -15,11 +15,13 @@ import styled from 'styled-components';
 import useContainerDimensions from '../../../hooks/useContainerDimensions';
 import usePagination from '../../../hooks/usePagination';
 import { MeetingRoutesParams } from '../../../hooks/useRouting';
+import { getVideoScreenIn } from '../../../store/selectors/ActiveMeetingSelectors';
 import { getNumberOfTiles, getTiles } from '../../../store/selectors/MeetingSelectors';
 import useStore from '../../../store/Store';
 import { STREAM_TYPE, TileData } from '../../../types/store/ActiveMeetingTypes';
 import { calcGrid, maximiseRowsAndColumns, maximiseTileSize } from '../../../utils/MeetingsUtils';
-import Tile from '../Tile';
+import { calcScaleDivisor } from '../../../utils/styleUtils';
+import Tile from '../tile/Tile';
 
 const GridContainer = styled(Container)`
 	position: relative;
@@ -68,6 +70,8 @@ const GridMode = (): ReactElement => {
 
 	const tilesData: TileData[] = useStore((store) => getTiles(store, meetingId));
 	const numberOfTiles = useStore((store) => getNumberOfTiles(store, meetingId));
+	const videoScreenIn = useStore((store) => getVideoScreenIn(store, meetingId));
+	const setUpdateSubscription = useStore((store) => store.setUpdateSubscription);
 
 	const { tileWidth, rows, columns, numberOfPages } = useMemo(() => {
 		// Calculate a full density grid
@@ -108,7 +112,7 @@ const GridMode = (): ReactElement => {
 				if (tileIndex < size(tilesToRender) && tilesToRender[tileIndex]) {
 					rowTiles.push(
 						<Container
-							width={`${tileWidth / 16}rem`}
+							width={`${tileWidth / calcScaleDivisor()}rem`}
 							height="fit"
 							key={`tile-${tileIndex}-container`}
 						>
@@ -130,6 +134,16 @@ const GridMode = (): ReactElement => {
 		}
 		return rowsArray;
 	}, [rows, columns, tilesToRender, tileWidth, meetingId]);
+
+	useEffect(() => {
+		if (tilesToRender.length > 0) {
+			const subscriptions = map(tilesToRender, (value) => ({
+				userId: value.userId,
+				type: value.type
+			}));
+			setUpdateSubscription(meetingId, subscriptions);
+		}
+	}, [meetingId, setUpdateSubscription, tilesToRender, videoScreenIn]);
 
 	return (
 		<GridContainer data-testid="gridModeView" mainAlignment="space-between" ref={gridContainerRef}>

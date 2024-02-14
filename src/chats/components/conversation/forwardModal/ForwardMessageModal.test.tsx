@@ -9,9 +9,9 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 
 import ForwardMessageModal from './ForwardMessageModal';
-import { mockedForwardMessagesRequest } from '../../../../../jest-mocks';
 import useStore from '../../../../store/Store';
 import { createMockRoom, createMockTextMessage } from '../../../../tests/createMock';
+import { mockedForwardMessagesRequest } from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe } from '../../../../types/network/models/roomBeTypes';
 import { RootStore } from '../../../../types/store/StoreTypes';

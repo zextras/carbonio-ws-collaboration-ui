@@ -6,13 +6,16 @@
  */
 import produce from 'immer';
 import { forEach } from 'lodash';
+import { StateCreator } from 'zustand';
 
 import { Marker } from '../../types/store/MarkersTypes';
 import { MarkersStoreSlice, RootStore } from '../../types/store/StoreTypes';
 
-export const useMarkersStoreSlice = (set: (...any: any) => void): MarkersStoreSlice => ({
+export const useMarkersStoreSlice: StateCreator<MarkersStoreSlice> = (
+	set: (...any: any) => void
+) => ({
 	markers: {},
-	updateMarkers: (markers: Marker[], roomId: string): void => {
+	updateMarkers: (roomId: string, markers: Marker[]): void => {
 		set(
 			produce((draft: RootStore) => {
 				if (!draft.markers[roomId]) draft.markers[roomId] = {};

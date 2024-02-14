@@ -84,7 +84,7 @@ const ConversationHeaderMeetingButton = ({
 	);
 	const activeMeetingTooltip = t(
 		'meeting.activeMeetingTooltip',
-		"There's an active meeting for this Conversation"
+		"There's an active meeting for this Chat"
 	);
 
 	const roomType: RoomType = useStore((store) => getRoomTypeSelector(store, roomId));

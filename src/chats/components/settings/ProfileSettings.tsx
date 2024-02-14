@@ -9,7 +9,6 @@ import React, {
 	FC,
 	SetStateAction,
 	useCallback,
-	useContext,
 	useEffect,
 	useMemo,
 	useState
@@ -25,8 +24,8 @@ import {
 	Shimmer,
 	Tooltip,
 	IconButton,
-	SnackbarManagerContext,
-	CreateSnackbarFn
+	CreateSnackbarFn,
+	useSnackbar
 } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 import styled, { css, DefaultTheme, FlattenInterpolation, ThemeProps } from 'styled-components';
@@ -90,7 +89,7 @@ const PictureContainer = styled(Container)<{ $picture: string; $hasHover: boolea
 	}
 
 	//  TODO: remove hasHover when the preview of the image is implemented
-	${({ $hasHover, $picture }): false | FlattenInterpolation<ThemeProps<any>> =>
+	${({ $hasHover, $picture }): false | FlattenInterpolation<ThemeProps<DefaultTheme>> =>
 		$hasHover &&
 		css`
 			&:hover {
@@ -142,16 +141,16 @@ const ProfileSettings: FC<ProfileSettingsProps> = ({
 	setToDelete,
 	toDelete
 }) => {
-	const memberName: string | undefined = useStore((state) => getUserName(state, sessionId || ''));
-	const memberEmail: string | undefined = useStore((state) => getUserEmail(state, sessionId || ''));
+	const memberName: string | undefined = useStore((state) => getUserName(state, sessionId ?? ''));
+	const memberEmail: string | undefined = useStore((state) => getUserEmail(state, sessionId ?? ''));
 	const userPictureUpdatedAt: string | undefined = useStore((state) =>
-		getUserPictureUpdatedAt(state, sessionId || '')
+		getUserPictureUpdatedAt(state, sessionId ?? '')
 	);
 	const maxUserImageSize = useStore((store) =>
 		getCapability(store, CapabilityType.MAX_USER_IMAGE_SIZE)
 	);
 
-	const createSnackbar: CreateSnackbarFn = useContext(SnackbarManagerContext);
+	const createSnackbar: CreateSnackbarFn = useSnackbar();
 
 	const [t] = useTranslation();
 	const imageSizeTooLargeSnackbar = t(
@@ -179,7 +178,7 @@ const ProfileSettings: FC<ProfileSettingsProps> = ({
 	useEffect(() => {
 		if (!picture && !toDelete) {
 			if (userPictureUpdatedAt != null) {
-				setTempPicture(`${UsersApi.getURLUserPicture(sessionId || '')}?${userPictureUpdatedAt}`);
+				setTempPicture(`${UsersApi.getURLUserPicture(sessionId ?? '')}?${userPictureUpdatedAt}`);
 			} else {
 				setTempPicture(false);
 			}
@@ -222,7 +221,7 @@ const ProfileSettings: FC<ProfileSettingsProps> = ({
 					mainAlignment="flex-end"
 				>
 					<NameWrapText color="gray6" size="medium" $hasPicture={!!tempPicture}>
-						{memberName || memberEmail || ''}
+						{memberName ?? memberEmail ?? ''}
 					</NameWrapText>
 					<Padding top="extrasmall" />
 					<Container orientation="horizontal" mainAlignment="flex-start" height="fit">
@@ -314,7 +313,7 @@ const ProfileSettings: FC<ProfileSettingsProps> = ({
 				</PictureContainer>
 			) : (
 				<BackgroundContainer
-					$color={calculateAvatarColor(memberName || '')}
+					$color={calculateAvatarColor(memberName ?? '')}
 					$hasHoverGradient
 					minHeight="10rem"
 					maxHeight="10rem"

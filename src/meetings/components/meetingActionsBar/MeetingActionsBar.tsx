@@ -47,7 +47,7 @@ const MeetingActionsBar = ({ streamsWrapperRef }: MeetingActionsProps): ReactEle
 	const audioDropdownRef = useRef<HTMLDivElement>(null);
 	const videoDropdownRef = useRef<HTMLDivElement>(null);
 
-	let timeout: string | number | NodeJS.Timeout | undefined;
+	const timeout = useRef<NodeJS.Timeout>();
 
 	const handleClickOutsideAudioDropdown = useCallback((e) => {
 		if (audioDropdownRef.current && !audioDropdownRef.current.contains(e.target)) {
@@ -63,12 +63,11 @@ const MeetingActionsBar = ({ streamsWrapperRef }: MeetingActionsProps): ReactEle
 
 	const handleHoverMouseMove = useCallback(
 		(e) => {
-			clearTimeout(timeout);
 			if (!isHoovering) {
+				timeout.current && clearTimeout(timeout.current);
 				setIsHoovering(true);
 				if (!isHoverActions) {
-					// eslint-disable-next-line react-hooks/exhaustive-deps
-					timeout = setTimeout(() => {
+					timeout.current = setTimeout(() => {
 						const NewEvent = new CustomEvent('mouseStop', { bubbles: true, cancelable: true });
 						e.target.dispatchEvent(NewEvent);
 					}, 2000);
@@ -80,7 +79,9 @@ const MeetingActionsBar = ({ streamsWrapperRef }: MeetingActionsProps): ReactEle
 
 	const handleHoverMouseStop = useCallback(() => {
 		streamsWrapperRef?.current?.removeEventListener('mousemove', handleHoverMouseMove);
-		if (!isHoverActions) setIsHoovering(false);
+		if (!isHoverActions) {
+			setIsHoovering(false);
+		}
 		if (isAudioListOpen) {
 			setIsAudioListOpen(false);
 		}
@@ -134,6 +135,13 @@ const MeetingActionsBar = ({ streamsWrapperRef }: MeetingActionsProps): ReactEle
 		isVideoListOpen,
 		streamsWrapperRef
 	]);
+
+	useEffect(
+		() => (): void => {
+			timeout.current && clearTimeout(timeout.current);
+		},
+		[]
+	);
 
 	return (
 		<BarContainer height="fit" $isHoovering={isHoovering} data-testid="meeting-action-bar">

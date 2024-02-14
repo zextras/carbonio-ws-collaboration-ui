@@ -7,11 +7,14 @@
 
 import produce from 'immer';
 import { find, orderBy } from 'lodash';
+import { StateCreator } from 'zustand';
 
 import { MessageFastening } from '../../types/store/MessageTypes';
 import { RootStore, FasteningMessagesSlice } from '../../types/store/StoreTypes';
 
-export const useFasteningMessagesSlice = (set: (...any: any) => void): FasteningMessagesSlice => ({
+export const useFasteningMessagesSlice: StateCreator<FasteningMessagesSlice> = (
+	set: (...any: any) => void
+) => ({
 	fastenings: {},
 	addFastening: (fastening: MessageFastening): void => {
 		set(

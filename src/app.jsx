@@ -4,10 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 
-import { getUserAccount, getUserSettings } from '@zextras/carbonio-shell-ui';
-import moment from 'moment-timezone';
+import { useUserAccount, useUserSettings } from '@zextras/carbonio-shell-ui';
 
 import CounterBadgeUpdater from './chats/components/CounterBadgeUpdater';
 import RegisterCreationButton from './chats/components/RegisterCreationButton';
@@ -18,54 +17,51 @@ import { MeetingsApi, RoomsApi, SessionApi } from './network';
 import { WebSocketClient } from './network/websocket/WebSocketClient';
 import XMPPClient from './network/xmpp/XMPPClient';
 import useStore from './store/Store';
-
-const initApp = () => {
-	const { id, name, displayName } = getUserAccount();
-	const { settings } = getUserSettings();
-
-	// STORE: init with user session main infos
-	const store = useStore.getState();
-	store.setLoginInfo(id, name, displayName);
-
-	// SET TIMEZONE and LOCALE
-	settings?.prefs?.zimbraPrefTimeZoneId
-		? store.setUserPrefTimezone(settings?.prefs?.zimbraPrefTimeZoneId)
-		: store.setUserPrefTimezone(moment.tz.guess());
-	if (settings?.prefs?.zimbraPrefLocale) {
-		moment.locale(settings.prefs.zimbraPrefLocale);
-	}
-
-	// Create and set into store XMPPClient and WebSocketClient instances
-	// to avoid errors when views are rendered
-	const xmppClient = new XMPPClient();
-	store.setXmppClient(xmppClient);
-	const webSocket = new WebSocketClient();
-	store.setWebSocketClient(webSocket);
-
-	Promise.all([SessionApi.getToken(), SessionApi.getCapabilities()])
-		.then((resp) => {
-			// CHATS BE: get all rooms list
-			RoomsApi.listRooms(true, true)
-				.then(() => {
-					// Set ChatsBe status to be truthy
-					store.setChatsBeStatus(true);
-					// Init xmppClient and webSocket after roomList request to avoid missing data (specially for the inbox request)
-					xmppClient.connect(resp[0].zmToken);
-					webSocket.connect();
-				})
-				.catch(() => store.setChatsBeStatus(false));
-			MeetingsApi.listMeetings();
-		})
-		.catch(() => store.setChatsBeStatus(false));
-};
-
-/*
-	TODO: move initApp inside App
-	but not now because there is a shell bug that makes mount App more that once
- */
-initApp();
+import { setDateDefault } from './utils/dateUtils';
 
 export default function App() {
+	const setLoginInfo = useStore((state) => state.setLoginInfo);
+	const setXmppClient = useStore((state) => state.setXmppClient);
+	const setWebSocketClient = useStore((state) => state.setWebSocketClient);
+	const setChatsBeStatus = useStore((state) => state.setChatsBeStatus);
+
+	const userAccount = useUserAccount();
+	const { prefs } = useUserSettings();
+
+	// STORE: init with user session main infos
+	useEffect(
+		() => setLoginInfo(userAccount.id, userAccount.name, userAccount.displayName),
+		[setLoginInfo, userAccount]
+	);
+
+	// SET TIMEZONE and LOCALE
+	useEffect(() => {
+		setDateDefault(prefs?.zimbraPrefTimeZoneId, prefs?.zimbraPrefLocale);
+	}, [prefs]);
+
+	// NETWORKS: init XMPP and WebSocket clients
+	useEffect(() => {
+		const xmppClient = new XMPPClient();
+		setXmppClient(xmppClient);
+		const webSocket = new WebSocketClient();
+		setWebSocketClient(webSocket);
+
+		Promise.all([SessionApi.getToken(), SessionApi.getCapabilities()])
+			.then((resp) => {
+				// CHATS BE: get all rooms list
+				RoomsApi.listRooms(true, true)
+					.then(() => {
+						setChatsBeStatus(true);
+						// Init xmppClient and webSocket after roomList request to avoid missing data (specially for the inbox request)
+						xmppClient.connect(resp[0].zmToken);
+						webSocket.connect();
+					})
+					.catch(() => setChatsBeStatus(false));
+				MeetingsApi.listMeetings();
+			})
+			.catch(() => setChatsBeStatus(false));
+	}, [setChatsBeStatus, setWebSocketClient, setXmppClient]);
+
 	useChatsApp();
 	useMeetingsApp();
 

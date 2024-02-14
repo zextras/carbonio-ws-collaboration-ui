@@ -35,11 +35,9 @@ export enum MeetingType {
 }
 
 export type CreateMeetingData = {
-	name: string;
-	users: MeetingUser[];
 	roomId: string;
 	meetingType: MeetingType;
-	expiration?: number;
+	expiration?: string;
 };
 
 export type MeetingUser = {

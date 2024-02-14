@@ -11,11 +11,7 @@ import { act, renderHook } from '@testing-library/react-hooks';
 import { UserEvent } from '@testing-library/user-event/setup/setup';
 
 import AccessMeetingModal from './AccessMeetingModal';
-import {
-	mockedEnterMeetingRequest,
-	mockedJoinMeetingRequest,
-	mockUseParams
-} from '../../../jest-mocks';
+import { useParams } from '../../../__mocks__/react-router';
 import useStore from '../../store/Store';
 import {
 	createMockMeeting,
@@ -23,6 +19,7 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../tests/createMock';
+import { mockedEnterMeetingRequest, mockedJoinMeetingRequest } from '../../tests/mocks/network';
 import { setup } from '../../tests/test-utils';
 import { MeetingBe } from '../../types/network/models/meetingBeTypes';
 import { MemberBe, RoomBe, RoomType } from '../../types/network/models/roomBeTypes';
@@ -74,7 +71,7 @@ const setupBasicGroup = (): { user: UserEvent; store: RootStore } => {
 		result.current.setWebsocketStatus(true);
 		result.current.meetingConnection(groupMeeting.id, false, undefined, false, undefined);
 	});
-	mockUseParams.mockReturnValue({ meetingId: groupMeeting.id });
+	useParams.mockReturnValue({ meetingId: groupMeeting.id });
 	const { user } = setup(<AccessMeetingModal roomId={groupRoom.id} />);
 	return { user, store: result.current };
 };

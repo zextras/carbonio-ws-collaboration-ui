@@ -6,6 +6,7 @@
  */
 
 import produce from 'immer';
+import { StateCreator } from 'zustand';
 
 import BidirectionalConnectionAudioInOut from '../../network/webRTC/BidirectionalConnectionAudioInOut';
 import ScreenOutConnection from '../../network/webRTC/ScreenOutConnection';
@@ -16,11 +17,14 @@ import {
 	MeetingViewType,
 	STREAM_TYPE,
 	StreamsSubscriptionMap,
+	Subscription,
 	TileData
 } from '../../types/store/ActiveMeetingTypes';
 import { ActiveMeetingSlice, RootStore } from '../../types/store/StoreTypes';
 
-export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeetingSlice => ({
+export const useActiveMeetingSlice: StateCreator<ActiveMeetingSlice> = (
+	set: (...any: any) => void
+) => ({
 	activeMeeting: {},
 	meetingConnection: (
 		meetingId: string,
@@ -258,6 +262,51 @@ export const useActiveMeetingSlice = (set: (...any: any) => void): ActiveMeeting
 			}),
 			false,
 			'AM/SET_PINNED_TILE'
+		);
+	},
+	setRemoveSubscription: (meetingId: string, subToRemove: Subscription): void => {
+		set(
+			produce((draft: RootStore) => {
+				draft.activeMeeting[meetingId]?.videoScreenIn?.subscriptionManager.removeSubscription(
+					subToRemove
+				);
+			}),
+			false,
+			'AM/REMOVE_SUB'
+		);
+	},
+	setAddSubscription: (meetingId: string, subToAdd: Subscription): void => {
+		set(
+			produce((draft: RootStore) => {
+				draft.activeMeeting[meetingId]?.videoScreenIn?.subscriptionManager.addSubscription(
+					subToAdd
+				);
+			}),
+			false,
+			'AM/ADD_SUB'
+		);
+	},
+	setUpdateSubscription: (meetingId: string, subsToRequest: Subscription[]): void => {
+		set(
+			produce((draft: RootStore) => {
+				draft.activeMeeting[meetingId]?.videoScreenIn?.subscriptionManager.updateSubscription(
+					subsToRequest
+				);
+			}),
+			false,
+			'AM/UPDATE_SUB'
+		);
+	},
+	setDeleteSubscription: (meetingId: string, subIdToDelete: string): void => {
+		set(
+			produce((draft: RootStore) => {
+				draft.activeMeeting[meetingId]?.videoScreenIn?.subscriptionManager.deleteSubscription(
+					subIdToDelete
+				);
+				draft.activeMeeting[meetingId]?.videoScreenIn?.removeStream(subIdToDelete);
+			}),
+			false,
+			'AM/DELETE_SUB'
 		);
 	}
 });

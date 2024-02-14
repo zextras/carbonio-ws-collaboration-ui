@@ -11,7 +11,7 @@ import { act, renderHook } from '@testing-library/react-hooks';
 import { UserEvent } from '@testing-library/user-event/setup/setup';
 
 import MeetingSidebar from './MeetingSidebar';
-import { mockUseParams } from '../../../../jest-mocks';
+import { useParams } from '../../../../__mocks__/react-router';
 import useStore from '../../../store/Store';
 import {
 	createMockMeeting,
@@ -66,7 +66,7 @@ const setupBasicGroup = (): { user: UserEvent; store: RootStore } => {
 		result.current.addRoom(groupRoom);
 		result.current.addMeeting(groupMeeting);
 	});
-	mockUseParams.mockReturnValue({ meetingId: groupMeeting.id });
+	useParams.mockReturnValue({ meetingId: groupMeeting.id });
 	const { user } = setup(<MeetingSidebar />);
 	return { user, store: result.current };
 };
@@ -78,7 +78,7 @@ const setupBasicOneToOne = (): { user: UserEvent; store: RootStore } => {
 		result.current.addMeeting(oneToOneMeeting);
 		result.current.meetingConnection(oneToOneMeeting.id, false, 'audioId', false, 'videoId');
 	});
-	mockUseParams.mockReturnValue({ meetingId: oneToOneMeeting.id });
+	useParams.mockReturnValue({ meetingId: oneToOneMeeting.id });
 	const { user } = setup(<MeetingSidebar />);
 	return { user, store: result.current };
 };

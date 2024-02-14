@@ -10,9 +10,9 @@ import { screen, waitFor } from '@testing-library/react';
 import { act, renderHook } from '@testing-library/react-hooks';
 
 import ClearHistoryAction from './ClearHistoryAction';
-import { mockedClearHistoryRequest } from '../../../../../jest-mocks';
 import useStore from '../../../../store/Store';
 import { createMockRoom, createMockTextMessage } from '../../../../tests/createMock';
+import { mockedClearHistoryRequest } from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 import { RoomType } from '../../../../types/network/models/roomBeTypes';
 import { User } from '../../../../types/store/UserTypes';

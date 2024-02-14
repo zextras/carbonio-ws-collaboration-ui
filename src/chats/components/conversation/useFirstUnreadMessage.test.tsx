@@ -11,7 +11,7 @@ import useFirstUnreadMessage from './useFirstUnreadMessage';
 import useStore from '../../../store/Store';
 import { createMockMarker, createMockRoom, createMockTextMessage } from '../../../tests/createMock';
 import { MessageType } from '../../../types/store/MessageTypes';
-import { dateToTimestamp } from '../../../utils/dateUtil';
+import { dateToTimestamp } from '../../../utils/dateUtils';
 
 const myUserId = 'myUserId';
 const room = createMockRoom();
@@ -20,32 +20,32 @@ const textHistory = [
 	createMockTextMessage({
 		id: 'messageId0',
 		roomId: room.id,
-		date: dateToTimestamp('01 May 2023 14:00')
+		date: dateToTimestamp(new Date('01 May 2023 14:00'))
 	}),
 	createMockTextMessage({
 		id: 'messageId1',
 		roomId: room.id,
-		date: dateToTimestamp('01 May 2023 14:01')
+		date: dateToTimestamp(new Date('01 May 2023 14:01'))
 	}),
 	createMockTextMessage({
 		id: 'messageId2',
 		roomId: room.id,
-		date: dateToTimestamp('01 May 2023 14:02')
+		date: dateToTimestamp(new Date('01 May 2023 14:02'))
 	}),
 	createMockTextMessage({
 		id: 'messageId3',
 		roomId: room.id,
-		date: dateToTimestamp('01 May 2023 14:03')
+		date: dateToTimestamp(new Date('01 May 2023 14:03'))
 	}),
 	createMockTextMessage({
 		id: 'messageId4',
 		roomId: room.id,
-		date: dateToTimestamp('01 May 2023 14:04')
+		date: dateToTimestamp(new Date('01 May 2023 14:04'))
 	}),
 	createMockTextMessage({
 		id: 'messageId5',
 		roomId: room.id,
-		date: dateToTimestamp('01 May 2023 14:05')
+		date: dateToTimestamp(new Date('01 May 2023 14:05'))
 	})
 ];
 
@@ -53,35 +53,35 @@ const complexHistory = [
 	createMockTextMessage({
 		id: 'messageId0',
 		roomId: room.id,
-		date: dateToTimestamp('01 May 2023 14:00')
+		date: dateToTimestamp(new Date('01 May 2023 14:00'))
 	}),
 	createMockTextMessage({
 		id: 'messageId1',
 		roomId: room.id,
-		date: dateToTimestamp('01 May 2023 14:01'),
+		date: dateToTimestamp(new Date('01 May 2023 14:01')),
 		from: myUserId
 	}),
 	createMockTextMessage({
 		id: 'messageId2',
 		roomId: room.id,
-		date: dateToTimestamp('01 May 2023 14:02'),
+		date: dateToTimestamp(new Date('01 May 2023 14:02')),
 		deleted: true
 	}),
 	createMockTextMessage({
 		id: 'messageId3',
 		roomId: room.id,
-		date: dateToTimestamp('01 May 2023 14:03')
+		date: dateToTimestamp(new Date('01 May 2023 14:03'))
 	}),
 	createMockTextMessage({
 		id: 'messageId4',
 		roomId: room.id,
-		date: dateToTimestamp('01 May 2023 14:04'),
+		date: dateToTimestamp(new Date('01 May 2023 14:04')),
 		type: MessageType.CONFIGURATION_MSG
 	}),
 	createMockTextMessage({
 		id: 'messageId5',
 		roomId: room.id,
-		date: dateToTimestamp('01 May 2023 14:05'),
+		date: dateToTimestamp(new Date('01 May 2023 14:05')),
 		from: myUserId
 	})
 ];
@@ -106,7 +106,7 @@ describe('useFirstUnreadMessage with text messages', () => {
 	test('User some messages', () => {
 		// Mark last message as read
 		const myLastMarker = createMockMarker({ from: myUserId, messageId: 'messageId3' });
-		useStore.getState().updateMarkers([myLastMarker], room.id);
+		useStore.getState().updateMarkers(room.id, [myLastMarker]);
 		useStore.getState().updateUnreadMessages(room.id);
 		useStore.getState().updateUnreadCount(room.id);
 		// Check number unread
@@ -122,7 +122,7 @@ describe('useFirstUnreadMessage with text messages', () => {
 			from: myUserId,
 			messageId: last(textHistory)?.id || ''
 		});
-		useStore.getState().updateMarkers([myLastMarker], room.id);
+		useStore.getState().updateMarkers(room.id, [myLastMarker]);
 		useStore.getState().updateUnreadMessages(room.id);
 		useStore.getState().updateUnreadCount(room.id);
 		// Check number unread
@@ -135,7 +135,7 @@ describe('useFirstUnreadMessage with text messages', () => {
 	test('Reading a message after first access', () => {
 		// Mark last message as read
 		const myLastMarker = createMockMarker({ from: myUserId, messageId: 'messageId2' });
-		useStore.getState().updateMarkers([myLastMarker], room.id);
+		useStore.getState().updateMarkers(room.id, [myLastMarker]);
 		useStore.getState().updateUnreadMessages(room.id);
 		useStore.getState().updateUnreadCount(room.id);
 		// Check number unread
@@ -165,7 +165,7 @@ describe('useFirstUnreadMessage with all types of messages', () => {
 	test('User last read is his message and after there is a deleted message', () => {
 		// Mark last message as read
 		const myLastMarker = createMockMarker({ from: myUserId, messageId: 'messageId1' });
-		useStore.getState().updateMarkers([myLastMarker], room.id);
+		useStore.getState().updateMarkers(room.id, [myLastMarker]);
 		useStore.getState().updateUnreadMessages(room.id);
 		useStore.getState().updateUnreadCount(room.id);
 		// Check number unread
@@ -181,7 +181,7 @@ describe('useFirstUnreadMessage with all types of messages', () => {
 			from: myUserId,
 			messageId: last(complexHistory)?.id || ''
 		});
-		useStore.getState().updateMarkers([myLastMarker], room.id);
+		useStore.getState().updateMarkers(room.id, [myLastMarker]);
 		useStore.getState().updateUnreadMessages(room.id);
 		useStore.getState().updateUnreadCount(room.id);
 		// Check number unread
@@ -194,7 +194,7 @@ describe('useFirstUnreadMessage with all types of messages', () => {
 	test('Reading a message before a configuration message', () => {
 		// Mark last message as read
 		const myLastMarker = createMockMarker({ from: myUserId, messageId: 'messageId3' });
-		useStore.getState().updateMarkers([myLastMarker], room.id);
+		useStore.getState().updateMarkers(room.id, [myLastMarker]);
 		useStore.getState().updateUnreadMessages(room.id);
 		useStore.getState().updateUnreadCount(room.id);
 		// Check number unread

@@ -7,14 +7,15 @@
 
 import produce from 'immer';
 import { find, findIndex, forEach, remove } from 'lodash';
+import { StateCreator } from 'zustand';
 
 import { FileToUpload, messageActionType } from '../../types/store/ActiveConversationTypes';
 import { AttachmentMessageType } from '../../types/store/MessageTypes';
 import { ActiveConversationsSlice, RootStore } from '../../types/store/StoreTypes';
 
-export const useActiveConversationsSlice = (
+export const useActiveConversationsSlice: StateCreator<ActiveConversationsSlice> = (
 	set: (...any: any) => void
-): ActiveConversationsSlice => ({
+) => ({
 	activeConversations: {},
 	setInputHasFocus: (roomId: string, hasFocus: boolean): void => {
 		set(

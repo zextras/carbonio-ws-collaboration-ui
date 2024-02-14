@@ -4,15 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, {
-	ReactElement,
-	useCallback,
-	useContext,
-	useEffect,
-	useMemo,
-	useRef,
-	useState
-} from 'react';
+import React, { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import {
 	Button,
@@ -20,9 +12,9 @@ import {
 	CreateSnackbarFn,
 	Modal,
 	Padding,
-	SnackbarManagerContext,
 	Text,
-	Tooltip
+	Tooltip,
+	useSnackbar
 } from '@zextras/carbonio-design-system';
 import { find, map, size } from 'lodash';
 import { useTranslation } from 'react-i18next';
@@ -69,7 +61,7 @@ const ChatCreationModal = ({
 	const [topic, setTopic] = useState<string>('');
 	const [isPending, setIsPending] = useState<boolean>(false);
 
-	const createSnackbar: CreateSnackbarFn = useContext(SnackbarManagerContext);
+	const createSnackbar: CreateSnackbarFn = useSnackbar();
 
 	const { goToRoomPage } = useRouting();
 

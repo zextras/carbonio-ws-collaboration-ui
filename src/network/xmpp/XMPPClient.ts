@@ -20,7 +20,7 @@ import { carbonize, carbonizeMUC } from './utility/decodeJid';
 import XMPPConnection, { XMPPRequestType } from './XMPPConnection';
 import useStore from '../../store/Store';
 import IXMPPClient from '../../types/network/xmpp/IXMPPClient';
-import { dateToISODate } from '../../utils/dateUtil';
+import { dateToISODate } from '../../utils/dateUtils';
 
 const jabberData = 'jabber:x:data';
 
@@ -208,7 +208,7 @@ class XMPPClient implements IXMPPClient {
 		// Ask for ${QUANTITY} messages before end date but not before start date
 		const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
 			.c('query', { xmlns: Strophe.NS.MAM, queryid: MamRequestType.HISTORY })
-			.c('x', { type: 'submit' })
+			.c('x', { type: 'submit', xmlns: jabberData })
 			.c('field', { var: 'FORM_TYPE', type: 'hidden' })
 			.c('value')
 			.t('urn:xmpp:mam:2')

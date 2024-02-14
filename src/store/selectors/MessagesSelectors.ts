@@ -6,6 +6,7 @@
 
 import { filter, find, forEach, includes, orderBy, size } from 'lodash';
 
+import { FilteredConversation } from '../../chats/components/secondaryBar/SecondaryBarSingleGroupsView';
 import {
 	AttachmentMessageType,
 	ConfigurationMessage,
@@ -13,6 +14,7 @@ import {
 	MessageType,
 	TextMessage
 } from '../../types/store/MessageTypes';
+import { RoomType } from '../../types/store/RoomTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 
 export const getMessagesSelector = (store: RootStore, roomId: string): Message[] =>
@@ -76,6 +78,29 @@ export const getRoomIdsOrderedLastMessage = (
 			roomId: room.id,
 			roomType: room.type,
 			lastMessageTimestamp: lastMessage ? lastMessage.date : 0
+		});
+	});
+	return orderBy(listOfConvByLastMessage, ['lastMessageTimestamp'], ['desc']);
+};
+
+export const getOneToOneAndGroupsInfoOrderedByLastMessage = (
+	store: RootStore
+): FilteredConversation[] => {
+	const listOfConvByLastMessage: FilteredConversation[] = [];
+	// check to remove and tell BE to improve because if a user is removed from a room
+	// the messages of this always came back and trigger error
+	const filteredRooms = filter(
+		store.rooms,
+		(room) => room.type === RoomType.GROUP || room.type === RoomType.ONE_TO_ONE
+	);
+	forEach(filteredRooms, (room) => {
+		const lastMessage =
+			store.messages[room.id] && store.messages[room.id][store.messages[room.id].length - 1];
+		listOfConvByLastMessage.push({
+			roomId: room.id,
+			roomType: room.type,
+			lastMessageTimestamp: lastMessage ? lastMessage.date : 0,
+			members: room.members || []
 		});
 	});
 	return orderBy(listOfConvByLastMessage, ['lastMessageTimestamp'], ['desc']);

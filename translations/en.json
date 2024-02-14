@@ -6,6 +6,7 @@
         "addNewMembers": "Add new members",
         "addNewMembersTo": "Add new members to {{roomName}}",
         "addSingleAttachment": "Add {{counter}} attachment",
+        "cancel": "Cancel",
         "clearHistory": "Clear history",
         "close": "Close",
         "copy": "Copy",
@@ -164,6 +165,7 @@
         "presentActiveSession": "There is another active session",
         "rejoinMeeting": "Rejoin meeting",
         "restartMeeting": "Restart meeting",
+        "scheduledMeetingLabel": "Your Virtual Rooms",
         "setInputDescription": "Set your input devices by choosing them from dropdown menu",
         "startMeeting": "Start meeting",
         "startModal": {
@@ -173,6 +175,21 @@
         },
         "tooltip": {
             "activeSessionTooltip": "You have an active session in this meeting"
+        },
+        "virtual": {
+            "buttonLabel": "Your Virtual Rooms",
+            "copyLinkSnackbar": "Virtual Room's link copied",
+            "copyLinkTooltip": "Copy Virtual Room's link",
+            "copyTooltip": "Copy Virtual Room's link",
+            "createTooltip": "Create new Virtual Room",
+            "creationInput": "New Virtual Room’s name*",
+            "deleteModalDescription": "You are deleting this Virtual Room, if it has active meetings, it will be interrupted and no one will be able to access it anymore. Proceed?",
+            "deleteModalTitle": "Delete {{roomName}} Virtual Room",
+            "deleteSnackbar": "Virtual Room deleted successfully",
+            "deleteTooltip": "Delete Virtual Room",
+            "emptyState": "The Rooms you create will be shown here",
+            "invalidNameTooltip": "Invalid name",
+            "nameRequiredTooltip": "Virtual Room’s name is required"
         },
         "waitingParticipants": "Waiting for participants to join…"
     },
@@ -222,6 +239,7 @@
         "leaveGroupLabel": "Are you sure to leave this Group?",
         "leaveRoom": "Leave Room",
         "leaveRoomLabel": "Are you sure to leave this Room?",
+        "muteForAllDescription": "By muting the user, all the participants won't hear the user anymore. Only muted user can be unmute himself. Proceed?",
         "removeMember": "Remove member",
         "showPreviousConversationHistory": "Show previous conversation history"
     },
