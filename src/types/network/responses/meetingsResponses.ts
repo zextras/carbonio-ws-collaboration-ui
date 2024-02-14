@@ -32,7 +32,7 @@ export type SubscribeMediaResponse = Response;
 
 export type CreateMediaAnswerResponse = Response;
 
-export type GetScheduledMeetingNameResponse = string;
+export type GetScheduledMeetingNameResponse = { name: string };
 
 export type GetWaitingListResponse = { users: string[] };
 

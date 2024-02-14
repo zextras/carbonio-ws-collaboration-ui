@@ -23,9 +23,15 @@ const CustomButton = styled(Button)`
 
 type WaitingRoomProps = {
 	meetingId: string;
+	meetingName: string;
 };
-const WaitingRoom: FC<WaitingRoomProps> = ({ meetingId }) => {
+const WaitingRoom: FC<WaitingRoomProps> = ({ meetingId, meetingName }) => {
 	const [t] = useTranslation();
+	const howToJoinMeeting = t(
+		'meeting.waitingRoom.title',
+		`How do you want to join ${meetingName} meeting?`,
+		{ meetingName }
+	);
 	const playMicLabel = t('meeting.interactions.playMic', 'Start microphone testing');
 	const stopMicLabel = t('meeting.interactions.stopMic', 'Stop microphone testing');
 	const setInputDevicesLabel = t(
@@ -58,7 +64,6 @@ const WaitingRoom: FC<WaitingRoomProps> = ({ meetingId }) => {
 	const [streamTrack, setStreamTrack] = useState<MediaStream | null>(null);
 	const [enterButtonIsEnabled, setEnterButtonIsEnabled] = useState<boolean>(false);
 	const [videoPlayerTestMuted, setVideoPlayerTestMuted] = useState<boolean>(true);
-	const [meetingName, setMeetingName] = useState<string>('');
 	const [wrapperWidth, setWrapperWidth] = useState<number>((window.innerWidth * 0.33) / 16);
 	const [userIsReady, setUserIsReady] = useState<boolean>(false);
 	const [selectedDevicesId, setSelectedDevicesId] = useState<{
@@ -72,20 +77,7 @@ const WaitingRoom: FC<WaitingRoomProps> = ({ meetingId }) => {
 
 	const { goToInfoPage, goToMeetingPage } = useRouting();
 
-	const howToJoinMeeting = t(
-		'meeting.waitingRoom.title',
-		`How do you want to join ${meetingName} meeting?`,
-		{ meetingName }
-	);
-
 	const videoStreamRef = useRef<HTMLVideoElement>(null);
-
-	// TODO API response is not right, it should return a string
-	useEffect(() => {
-		MeetingsApi.getScheduledMeetingName(meetingId)
-			.then((name) => setMeetingName(name))
-			.catch(() => goToInfoPage(PAGE_INFO_TYPE.MEETING_NOT_FOUND));
-	}, [goToInfoPage, meetingId]);
 
 	const onToggleAudioTest = useCallback(() => {
 		setVideoPlayerTestMuted((prevState) => !prevState);
@@ -106,9 +98,12 @@ const WaitingRoom: FC<WaitingRoomProps> = ({ meetingId }) => {
 
 	const joinWaitingRoom = useCallback(() => {
 		joinMeeting()
-			.then(() => setUserIsReady(true))
+			.then((resp) => {
+				if (resp.status === 'WAITING') setUserIsReady(true);
+				if (resp.status === 'ACCEPTED') goToMeetingPage(meetingId);
+			})
 			.catch((err) => console.error(err, 'Error on joinWaitingRoom'));
-	}, [joinMeeting]);
+	}, [goToMeetingPage, joinMeeting, meetingId]);
 
 	const handleHungUp = useCallback(() => {
 		if (userIsReady) MeetingsApi.leaveWaitingRoom(meetingId);

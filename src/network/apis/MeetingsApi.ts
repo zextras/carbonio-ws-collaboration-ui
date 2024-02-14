@@ -105,7 +105,7 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 						settings.videoStreamEnabled,
 						devicesId.videoDevice
 					);
-				this.getMeetingByMeetingId(meetingId).then((meeting) => {
+				return this.getMeetingByMeetingId(meetingId).then((meeting) => {
 					if (meeting.meetingType === MeetingType.SCHEDULED) {
 						const room = find(useStore.getState().rooms, (room) => room.meetingId === meetingId);
 						const iAmOwner = find(
@@ -114,6 +114,7 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 						);
 						if (iAmOwner) this.getWaitingList(meetingId);
 					}
+					return resp;
 				});
 			}
 			return resp;
@@ -224,9 +225,8 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 		});
 	}
 
-	// TODO API response is not right, it should return a string
 	public getScheduledMeetingName(meetingId: string): Promise<GetScheduledMeetingNameResponse> {
-		return this.fetchAPI(`public/meetings/${meetingId}`, RequestType.GET, undefined, true);
+		return this.fetchAPI(`public/meetings/${meetingId}`, RequestType.GET, undefined);
 	}
 
 	public leaveWaitingRoom(meetingId: string): Promise<AcceptWaitingUserResponse> {
