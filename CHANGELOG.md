@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.9.1](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.9.0...v0.9.1) (2024-02-14)
+
+
+### Features
+
+* added mute for all modal and small refactor refs: WSC-1127 ([#212](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/212)) ([8c2e342](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/8c2e342c48d39d440998cb3481cebcd07d773e13))
+* handle of stacking actions on messages refs: WSC-807 ([#220](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/220)) ([fdb8a27](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/fdb8a2733d7679c2cc10a391ad3984b354c218fd))
+* hover on bubble makes it stay refs: WSC-1209 ([#206](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/206)) ([72785d7](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/72785d77fbf35603354ed12e4da4a2bdb0218206))
+* improved no match string layout refs: WSC-1272 ([#230](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/230)) ([fbad276](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/fbad2769abe0689d347b7e09091968133b3424f1))
+* scheduled meeting list visualisation refs: WSC-1166 ([#217](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/217)) ([13c1482](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/13c148284f7c9416b0f85f29667aa06be9100925)), closes [#219](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/219)
+* show profile picture on creation modal ([#226](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/226)) ([6439e39](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/6439e39fc0a612485591932b574dc0e514487d0f))
+* user can filter group and single chats when using filter action… ([#207](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/207)) ([dd817e2](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/dd817e2b865f4a137dc43282ae4243724a0c529e))
+
+
+### Bug Fixes
+
+* add xmlns attribute to XMPP mam request ([#215](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/215)) ([206f15b](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/206f15be02c6b7690d221d2b153802b7292e01eb))
+* fixed graphics on resize by settings refs: WSC-1221 ([#222](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/222)) ([ef44f09](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/ef44f093d62ec2e7ed1a671c4376f85746a76437))
+* fixed use of chipinput refs: WSC-1120 ([#187](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/187)) ([d4b23e1](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/d4b23e16788093deda5bda79c5ad3ae290dfc19e))
+* free stream audio or video when enter the meeting ([#224](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/224)) ([ffb9260](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/ffb9260de4d9f49c511d2bc90b3b701a5eafdb88))
+* hide message dropdown on scroll ref: WSC-960 ([#216](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/216)) ([9f4650b](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/9f4650b5b5576a3d209483c4204313f21aeee901))
+* manage responsiveness of chat's header ref: WSC-1266 ([#227](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/227)) ([a8fb38b](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/a8fb38bb08f0e5870e53c7bb7cb696185774487a))
+* update dependencies refs:WSC-1249 ([#218](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/218)) ([0ea99e4](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/0ea99e4b92aeddf3ab38669334401c76b82a9951))
+* using wrong locale and timezone ref: WSC-1223 ([#210](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/210)) ([0acca45](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/0acca457a23b8b5422ebf6f50871e6efdde42367))
+
 ## [0.9.0](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.0.8...v0.9.0) (2023-12-22)
 
 ### [0.0.8](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.0.7...v0.0.8) (2023-12-22)
