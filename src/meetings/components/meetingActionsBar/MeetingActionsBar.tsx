@@ -6,7 +6,7 @@
 
 import React, { ReactElement, RefObject, useCallback, useEffect, useRef, useState } from 'react';
 
-import { Container, Padding } from '@zextras/carbonio-design-system';
+import { Container } from '@zextras/carbonio-design-system';
 import styled, { FlattenSimpleInterpolation } from 'styled-components';
 
 import CameraButton from './CameraButton';
@@ -18,7 +18,7 @@ import SwitchViewButton from './SwitchViewButton';
 
 const BarContainer = styled(Container)<{ $isHoovering: boolean }>`
 	position: absolute;
-	bottom: 0;
+	bottom: -1rem;
 	width: 100%;
 	transform: translateY(
 		${({ $isHoovering }): string | FlattenSimpleInterpolation => ($isHoovering ? '-1rem' : '5rem')}
@@ -144,7 +144,13 @@ const MeetingActionsBar = ({ streamsWrapperRef }: MeetingActionsProps): ReactEle
 	);
 
 	return (
-		<BarContainer height="fit" $isHoovering={isHoovering} data-testid="meeting-action-bar">
+		<BarContainer
+			height="fit"
+			$isHoovering={isHoovering}
+			data-testid="meeting-action-bar"
+			padding={{ horizontal: '3.25rem' }}
+			orientation="horizontal"
+		>
 			<ActionsWrapper
 				background={'text'}
 				width="fit"
@@ -166,9 +172,8 @@ const MeetingActionsBar = ({ streamsWrapperRef }: MeetingActionsProps): ReactEle
 				<ScreenShareButton />
 				<FullScreenButton />
 				<SwitchViewButton />
-				<Padding right="1rem" />
-				<LeaveMeetingButton />
 			</ActionsWrapper>
+			<LeaveMeetingButton />
 		</BarContainer>
 	);
 };

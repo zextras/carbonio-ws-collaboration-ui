@@ -5,13 +5,18 @@
  */
 import React, { ReactElement, useCallback } from 'react';
 
-import { IconButton, Tooltip } from '@zextras/carbonio-design-system';
+import { Container, IconButton, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
+import styled from 'styled-components';
 
 import useRouting, { MeetingRoutesParams, PAGE_INFO_TYPE } from '../../../hooks/useRouting';
 import { MeetingsApi } from '../../../network';
 
+const CustomContainer = styled(Container)`
+	position: absolute;
+	right: 3.25rem;
+`;
 const LeaveMeetingButton = (): ReactElement => {
 	const [t] = useTranslation();
 
@@ -27,15 +32,17 @@ const LeaveMeetingButton = (): ReactElement => {
 	}, [meetingId, goToInfoPage]);
 
 	return (
-		<Tooltip placement="top" label={leaveMeetingLabel}>
-			<IconButton
-				iconColor="gray6"
-				backgroundColor="error"
-				icon="Hangup"
-				onClick={leaveMeeting}
-				size="large"
-			/>
-		</Tooltip>
+		<CustomContainer width="fit">
+			<Tooltip placement="top" label={leaveMeetingLabel}>
+				<IconButton
+					iconColor="gray6"
+					backgroundColor="error"
+					icon="Hangup"
+					onClick={leaveMeeting}
+					size="large"
+				/>
+			</Tooltip>
+		</CustomContainer>
 	);
 };
 

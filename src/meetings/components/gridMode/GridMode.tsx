@@ -21,6 +21,7 @@ import useStore from '../../../store/Store';
 import { STREAM_TYPE, TileData } from '../../../types/store/ActiveMeetingTypes';
 import { calcGrid, maximiseRowsAndColumns, maximiseTileSize } from '../../../utils/MeetingsUtils';
 import { calcScaleDivisor } from '../../../utils/styleUtils';
+import { MeetingViewProps } from '../../views/MeetingSkeleton';
 import Tile from '../tile/Tile';
 
 const GridContainer = styled(Container)`
@@ -56,7 +57,7 @@ const ChevronIconButton = styled(IconButton)`
 	max-height: 15rem;
 `;
 
-const GridMode = (): ReactElement => {
+const GridMode = ({ children }: MeetingViewProps): ReactElement => {
 	const { meetingId }: MeetingRoutesParams = useParams();
 
 	const [t] = useTranslation();
@@ -177,6 +178,7 @@ const GridMode = (): ReactElement => {
 					</Tooltip>
 				</ButtonDownContainer>
 			)}
+			{children}
 		</GridContainer>
 	);
 };
