@@ -69,7 +69,7 @@
 		"@zextras/carbonio-ui-preview": "^1.2.2",
 		"emoji-mart": "^5.1.0",
 		"identity-obj-proxy": "^3.0.0",
-		"immer": "^9.0.15",
+		"immer": "^10.0.3",
 		"lodash": "4.17.21",
 		"moment": "^2.29.1",
 		"moment-timezone": "^0.5.34",
