@@ -82,7 +82,7 @@ const BubbleFooter: FC<BubbleFooterProps> = ({
 		>
 			<Row takeAvailableSpace mainAlignment="flex-start" padding={{ right: 'medium' }}>
 				{messageExtension && messageSize && (
-					<Text color="secondary" size="small" overflow="ellipsis">
+					<Text color="secondary" size="small">
 						{messageExtension} • {messageSize}
 					</Text>
 				)}
