@@ -10,7 +10,7 @@ import { find, findIndex, forEach, remove } from 'lodash';
 import { StateCreator } from 'zustand';
 
 import { FileToUpload, messageActionType } from '../../types/store/ActiveConversationTypes';
-import { AttachmentMessageType } from '../../types/store/MessageTypes';
+import { AttachmentMessageType, TextMessage } from '../../types/store/MessageTypes';
 import { ActiveConversationsSlice, RootStore } from '../../types/store/StoreTypes';
 
 export const useActiveConversationsSlice: StateCreator<ActiveConversationsSlice> = (
@@ -329,6 +329,34 @@ export const useActiveConversationsSlice: StateCreator<ActiveConversationsSlice>
 			}),
 			false,
 			'AC/UNSET_FILES_TO_ATTACH'
+		);
+	},
+	setForwardMessageList: (roomId: string, message: TextMessage): void => {
+		set(
+			produce((draft: RootStore) => {
+				if (!draft.activeConversations[roomId]) draft.activeConversations[roomId] = {};
+				if (draft.activeConversations[roomId].forwardMessageList) {
+					draft.activeConversations[roomId].forwardMessageList = [
+						...draft.activeConversations[roomId].forwardMessageList!,
+						message
+					];
+				} else {
+					draft.activeConversations[roomId].forwardMessageList = [message];
+				}
+			}),
+			false,
+			'AC/SET_FORWARD_MODE'
+		);
+	},
+	unsetForwardMessageList: (roomId: string): void => {
+		set(
+			produce((draft: RootStore) => {
+				if (draft.activeConversations[roomId]) {
+					delete draft.activeConversations[roomId].forwardMessageList;
+				}
+			}),
+			false,
+			'AC/UNSET_FORWARD_MESSAGE_LIST'
 		);
 	}
 });

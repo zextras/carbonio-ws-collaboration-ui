@@ -28,12 +28,14 @@ import styled from 'styled-components';
 import AttachmentSelector from './AttachmentSelector';
 import DeleteMessageModal from './DeleteMessageModal';
 import EmojiSelector from './EmojiSelector';
+import ForwardFooter from './forwardFooter';
 import MessageArea from './MessageArea';
 import useMessage from '../../../../hooks/useMessage';
 import { RoomsApi } from '../../../../network';
 import {
 	getDraftMessage,
 	getFilesToUploadArray,
+	getForwardList,
 	getReferenceMessage
 } from '../../../../store/selectors/ActiveConversationsSelectors';
 import { getXmppClient } from '../../../../store/selectors/ConnectionSelector';
@@ -91,6 +93,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 	const unsetFilesToAttach = useStore((store) => store.unsetFilesToAttach);
 	const filesToUploadArray = useStore((store) => getFilesToUploadArray(store, roomId));
 	const setFilesToAttach = useStore((store) => store.setFilesToAttach);
+	const forwardMessageList = useStore((store) => getForwardList(store, roomId));
 	const lastMessageId: string | undefined = useStore((state) =>
 		getLastMessageIdSelector(state, roomId)
 	);
@@ -507,7 +510,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 		[filesToUploadArray, isUploading, referenceMessage]
 	);
 
-	return (
+	return forwardMessageList === undefined ? (
 		<Container
 			height="fit"
 			orientation="horizontal"
@@ -560,6 +563,8 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 				/>
 			)}
 		</Container>
+	) : (
+		<ForwardFooter roomId={roomId} />
 	);
 };
 

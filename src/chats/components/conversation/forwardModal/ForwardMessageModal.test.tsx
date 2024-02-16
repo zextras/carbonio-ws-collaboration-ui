@@ -33,7 +33,7 @@ describe('Forward Message Modal', () => {
 				open
 				onClose={jest.fn()}
 				roomId={testRoom.id}
-				message={messageToForward}
+				messagesToForward={[messageToForward]}
 			/>
 		);
 
@@ -57,7 +57,7 @@ describe('Forward Message Modal', () => {
 				open
 				onClose={jest.fn()}
 				roomId={testRoom.id}
-				message={messageToForward}
+				messagesToForward={[messageToForward]}
 			/>
 		);
 
@@ -75,7 +75,7 @@ describe('Forward Message Modal', () => {
 				open
 				onClose={jest.fn()}
 				roomId={testRoom.id}
-				message={messageToForward}
+				messagesToForward={[messageToForward]}
 			/>
 		);
 
@@ -104,7 +104,7 @@ describe('Forward Message Modal', () => {
 				open
 				onClose={jest.fn()}
 				roomId={testRoom.id}
-				message={messageToForward}
+				messagesToForward={[messageToForward]}
 			/>
 		);
 
@@ -132,7 +132,12 @@ describe('Forward Message Modal', () => {
 
 		const onClose = jest.fn();
 		const { user } = setup(
-			<ForwardMessageModal open onClose={onClose} roomId={testRoom.id} message={messageToForward} />
+			<ForwardMessageModal
+				open
+				onClose={onClose}
+				roomId={testRoom.id}
+				messagesToForward={[messageToForward]}
+			/>
 		);
 
 		// Forward to Test Room
@@ -152,7 +157,12 @@ describe('Forward Message Modal', () => {
 
 		const onClose = jest.fn();
 		const { user } = setup(
-			<ForwardMessageModal open onClose={onClose} roomId={testRoom.id} message={messageToForward} />
+			<ForwardMessageModal
+				open
+				onClose={onClose}
+				roomId={testRoom.id}
+				messagesToForward={[messageToForward]}
+			/>
 		);
 
 		// Forward to Test Room

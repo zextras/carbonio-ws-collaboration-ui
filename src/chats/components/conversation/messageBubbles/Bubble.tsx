@@ -5,7 +5,7 @@
  */
 /* eslint-disable no-nested-ternary */
 
-import React, { FC, useMemo } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { Container, Padding } from '@zextras/carbonio-design-system';
 import styled, { SimpleInterpolation } from 'styled-components';
@@ -19,6 +19,10 @@ import BubbleHeader from './BubbleHeader';
 import ForwardInfo from './ForwardInfo';
 import RepliedTextMessageSectionView from './RepliedTextMessageSectionView';
 import TextContentBubble from './TextContentBubble';
+import {
+	getForwardList,
+	isMessageInForwardList
+} from '../../../../store/selectors/ActiveConversationsSelectors';
 import { getMessageAttachment } from '../../../../store/selectors/MessagesSelectors';
 import { getRoomTypeSelector } from '../../../../store/selectors/RoomsSelectors';
 import { getCapability } from '../../../../store/selectors/SessionSelectors';
@@ -42,6 +46,18 @@ type BubbleProps = {
 const DropDownWrapper = styled(Container)`
 	position: relative;
 	z-index: ${Z_INDEX_RANK.DROPDOWN_CXT};
+`;
+
+const ForwardContainer = styled(Container)<{
+	$forwardIsActive: boolean;
+	$hoverIsActive: boolean;
+}>`
+	${({ $forwardIsActive }): string | false =>
+		$forwardIsActive && 'background: rgba(213, 227, 246, 0.50);'};
+	&:hover {
+		${({ $hoverIsActive }): string | false =>
+			$hoverIsActive && 'background: rgba(230, 230, 230, 0.50); cursor: pointer;'};
+	}
 `;
 
 const BubbleContainer = styled(Container)<{
@@ -93,71 +109,116 @@ const Bubble: FC<BubbleProps> = ({
 	const isMyMessage = mySessionId === message.from;
 	const messageAttachment = useStore((store) => getMessageAttachment(store, message));
 	const messageFormatted = useMemo(() => parseUrlOnMessage(message.text), [message.text]);
+	const forwardMessageList = useStore((store) => getForwardList(store, message.roomId));
+	const setForwardList = useStore((store) => store.setForwardMessageList);
+	const messageInForwardList: boolean = useStore((store) =>
+		isMessageInForwardList(store, message.roomId, message)
+	);
 	const canSeeMessageReads = useStore((store) =>
 		getCapability(store, CapabilityType.CAN_SEE_MESSAGE_READS)
 	);
+
+	const forwardContainerRef = useRef<HTMLDivElement>(null);
 
 	const { extension, size } = getAttachmentInfo(
 		messageAttachment?.mimeType,
 		messageAttachment?.size
 	);
+
+	const handleAddForwardMessage = useCallback(() => {
+		if (!messageInForwardList) {
+			setForwardList(message.roomId, message);
+		}
+	}, [message, messageInForwardList, setForwardList]);
+
+	useEffect(() => {
+		let refValue: HTMLDivElement | null = null;
+		if (forwardMessageList !== undefined && forwardContainerRef.current) {
+			forwardContainerRef.current.addEventListener('click', handleAddForwardMessage);
+			refValue = forwardContainerRef.current;
+		}
+		return () => {
+			if (refValue) {
+				refValue.removeEventListener('click', handleAddForwardMessage);
+			}
+		};
+	}, [forwardMessageList, handleAddForwardMessage, messageRef]);
+
+	const forwardIsActive = useMemo(
+		() => forwardMessageList !== undefined && messageInForwardList,
+		[forwardMessageList, messageInForwardList]
+	);
+
+	const hoverIsActive = useMemo(
+		() => forwardMessageList !== undefined && !messageInForwardList,
+		[forwardMessageList, messageInForwardList]
+	);
+
 	return (
-		<BubbleContainer
-			id={`message-${message.id}`}
-			ref={messageRef}
-			data-testid={`Bubble-${message.id}`}
-			key={message.id}
-			height="fit"
-			width="fit"
-			maxWidth={messageAttachment && !message.forwarded ? '60%' : '75%'}
-			padding={{ all: 'medium' }}
-			background={isMyMessage ? 'highlight' : 'gray6'}
-			$isMyMessage={isMyMessage}
-			$firstMessageOfList={!prevMessageIsFromSameSender && nextMessageIsFromSameSender}
-			$centerMessageOfList={prevMessageIsFromSameSender && nextMessageIsFromSameSender}
-			$lastMessageOfList={prevMessageIsFromSameSender && !nextMessageIsFromSameSender}
-			$messageAttachment={messageAttachment !== undefined}
+		<ForwardContainer
+			width="fill"
+			crossAlignment="flex-start"
+			ref={forwardContainerRef}
+			$forwardIsActive={forwardIsActive}
+			$hoverIsActive={hoverIsActive}
 		>
-			{message.read !== MarkerStatus.PENDING && (
-				<DropDownWrapper padding={{ all: 'none' }}>
-					<BubbleContextualMenuDropDown message={message} isMyMessage={isMyMessage} />
-				</DropDownWrapper>
-			)}
-			{!isMyMessage && roomType !== RoomType.ONE_TO_ONE && !prevMessageIsFromSameSender && (
-				<>
-					<BubbleHeader senderId={message.from} />
-					<Padding bottom="small" />
-				</>
-			)}
-			{message.forwarded && <ForwardInfo info={message.forwarded} />}
-			{message.repliedMessage && (
-				<RepliedTextMessageSectionView
-					repliedMessageRef={message.repliedMessage}
-					isMyMessage={isMyMessage}
-				/>
-			)}
-			{messageAttachment && (
-				<>
-					<AttachmentView
-						attachment={messageAttachment}
+			<BubbleContainer
+				id={`message-${message.id}`}
+				ref={messageRef}
+				data-testid={`Bubble-${message.id}`}
+				key={message.id}
+				height="fit"
+				width="fit"
+				maxWidth={messageAttachment && !message.forwarded ? '60%' : '75%'}
+				padding={{ all: 'medium' }}
+				background={isMyMessage ? 'highlight' : 'gray6'}
+				$isMyMessage={isMyMessage}
+				$firstMessageOfList={!prevMessageIsFromSameSender && nextMessageIsFromSameSender}
+				$centerMessageOfList={prevMessageIsFromSameSender && nextMessageIsFromSameSender}
+				$lastMessageOfList={prevMessageIsFromSameSender && !nextMessageIsFromSameSender}
+				$messageAttachment={messageAttachment !== undefined}
+			>
+				{message.read !== MarkerStatus.PENDING && (
+					<DropDownWrapper padding={{ all: 'none' }}>
+						<BubbleContextualMenuDropDown message={message} isMyMessage={isMyMessage} />
+					</DropDownWrapper>
+				)}
+				{!isMyMessage && roomType !== RoomType.ONE_TO_ONE && !prevMessageIsFromSameSender && (
+					<>
+						<BubbleHeader senderId={message.from} />
+						<Padding bottom="small" />
+					</>
+				)}
+				{message.forwarded && <ForwardInfo info={message.forwarded} />}
+				{message.repliedMessage && (
+					<RepliedTextMessageSectionView
+						repliedMessageRef={message.repliedMessage}
 						isMyMessage={isMyMessage}
-						from={message.from}
-						messageListRef={messageListRef}
 					/>
-					<Padding bottom="0.5rem" />
-				</>
-			)}
-			<TextContentBubble textContent={messageFormatted} />
-			<BubbleFooter
-				isMyMessage={isMyMessage}
-				date={message.date}
-				messageRead={message.read}
-				isEdited={message?.edited}
-				messageExtension={extension}
-				messageSize={size}
-				canSeeMessageReads={canSeeMessageReads}
-			/>
-		</BubbleContainer>
+				)}
+				{messageAttachment && (
+					<>
+						<AttachmentView
+							attachment={messageAttachment}
+							isMyMessage={isMyMessage}
+							from={message.from}
+							messageListRef={messageListRef}
+						/>
+						<Padding bottom="0.5rem" />
+					</>
+				)}
+				<TextContentBubble textContent={messageFormatted} />
+				<BubbleFooter
+					isMyMessage={isMyMessage}
+					date={message.date}
+					messageRead={message.read}
+					isEdited={message?.edited}
+					messageExtension={extension}
+					messageSize={size}
+					canSeeMessageReads={canSeeMessageReads}
+				/>
+			</BubbleContainer>
+		</ForwardContainer>
 	);
 };
 
