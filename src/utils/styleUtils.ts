@@ -26,3 +26,14 @@ export function calcAvatarMeetingColor(fromColor: string): string {
 	};
 	return toColorString(highlightRegular);
 }
+
+export const calcScaleDivisor = (): number => {
+	const localStorage = window.parent.localStorage.getItem('settings');
+	if (localStorage) {
+		const settingsStorage = JSON.parse(localStorage)['settings.appearance_setting.scaling'];
+		const percentage = 100 - settingsStorage;
+		const proportionalNumber = (16 * percentage) / 100;
+		return 16 - proportionalNumber;
+	}
+	return 16;
+};

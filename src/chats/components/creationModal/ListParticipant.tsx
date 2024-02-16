@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { MouseEventHandler, ReactElement } from 'react';
+import React, { MouseEventHandler, ReactElement, useMemo } from 'react';
 
 import {
 	Avatar,
@@ -19,6 +19,9 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import { ContactInfo } from './ChatCreationContactsSelection';
+import { UsersApi } from '../../../network';
+import { getUserPictureUpdatedAt } from '../../../store/selectors/UsersSelectors';
+import useStore from '../../../store/Store';
 
 type ListParticipantProps = {
 	item: ContactInfo;
@@ -43,6 +46,16 @@ const ListParticipant = ({
 		'Remove someone to add new members'
 	);
 
+	const userPictureUpdatedAt: string | undefined = useStore((state) =>
+		getUserPictureUpdatedAt(state, item.id)
+	);
+
+	const picture = useMemo(
+		() =>
+			userPictureUpdatedAt ? `${UsersApi.getURLUserPicture(item.id)}?${userPictureUpdatedAt}` : '',
+		[item.id, userPictureUpdatedAt]
+	);
+
 	return (
 		<Padding vertical="small">
 			<Tooltip disabled={!isDisabled} label={removeToAddNewOneLabel}>
@@ -60,7 +73,7 @@ const ListParticipant = ({
 							disabled={!selected && isDisabled}
 						/>
 						<Padding horizontal="small">
-							<Avatar label={item.name} />
+							<Avatar label={item.name} picture={picture} />
 						</Padding>
 						<Container crossAlignment="flex-start" width="fit">
 							<Text size="small">{item.name}</Text>
