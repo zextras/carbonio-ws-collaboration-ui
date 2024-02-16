@@ -125,7 +125,7 @@ const ChatCreationModal = ({
 							description: topic,
 							type: chatType,
 							membersIds: ids
-					  };
+						};
 			RoomsApi.addRoom(creationFields)
 				.then((response: AddRoomResponse) => {
 					setIsPending(false);

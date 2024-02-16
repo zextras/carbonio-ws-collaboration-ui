@@ -72,13 +72,13 @@ const BubbleContainer = styled(Container)<{
 			? $firstMessageOfList
 				? '0.25rem 0.25rem 0 0.25rem'
 				: $centerMessageOfList || $lastMessageOfList
-				? '0.25rem 0 0 0.25rem'
-				: '0.25rem 0 0.25rem 0.25rem'
+					? '0.25rem 0 0 0.25rem'
+					: '0.25rem 0 0.25rem 0.25rem'
 			: $firstMessageOfList
-			? '0 0.25rem 0.25rem 0'
-			: $centerMessageOfList
-			? '0 0.25rem 0.25rem 0'
-			: '0 0.25rem 0.25rem 0.25rem'};
+				? '0 0.25rem 0.25rem 0'
+				: $centerMessageOfList
+					? '0 0.25rem 0.25rem 0'
+					: '0 0.25rem 0.25rem 0.25rem'};
 `;
 
 const Bubble: FC<BubbleProps> = ({

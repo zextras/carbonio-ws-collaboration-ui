@@ -10,7 +10,6 @@ module.exports = {
 	rules: {
 		camelcase: 'off',
 		'no-console': 'off',
-		'no-prototype-builtins': 'off',
 		eqeqeq: ['error', 'smart'],
 		'react/jsx-wrap-multilines': 'warn',
 		'@typescript-eslint/no-shadow': ['off'],
@@ -21,24 +20,17 @@ module.exports = {
 			}
 		],
 		'react/jsx-no-useless-fragment': 'error',
-		'import/no-unresolved': 'off',
-		'import/namespace': 'off',
 		'import/no-cycle': 'off',
-		'no-nested-ternary': 'off',
+		'no-nested-ternary': 'warn',
 		'class-methods-use-this': 'off',
-		'react/jsx-no-bind': [
-			'warn',
-			{
-				allowArrowFunctions: true
-			}
-		],
 		'notice/notice': [
 			'error',
 			{
 				templateFile: './notice.template.ts'
 			}
 		],
-		'sonarjs/cognitive-complexity': 'warn'
+		'sonarjs/cognitive-complexity': 'warn',
+		'@typescript-eslint/no-explicit-any': 'warn'
 	},
 	overrides: [
 		{

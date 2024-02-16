@@ -36,7 +36,9 @@ const CinemaContainer = styled(Container)`
 
 const CarouselContainer = styled(Container)`
 	position: relative;
-	transition: width 0.3s ease, min-width 0.3s ease;
+	transition:
+		width 0.3s ease,
+		min-width 0.3s ease;
 `;
 
 const ChangeSidebarStatusButton = styled.div`

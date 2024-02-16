@@ -152,14 +152,13 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 	const ListItem = useMemo(
 		() =>
 			// eslint-disable-next-line react/display-name
-			({ item, selected }: { item: { id: string }; selected: boolean }) =>
-				(
-					<ForwardMessageConversationListItem
-						roomId={item.id}
-						selected={selected}
-						onClick={onClickListItem}
-					/>
-				),
+			({ item, selected }: { item: { id: string }; selected: boolean }) => (
+				<ForwardMessageConversationListItem
+					roomId={item.id}
+					selected={selected}
+					onClick={onClickListItem}
+				/>
+			),
 		[onClickListItem]
 	);
 

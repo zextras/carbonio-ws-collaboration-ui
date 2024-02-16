@@ -171,7 +171,7 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 									deviceId: { exact: audioId },
 									noiseSuppression: true,
 									echoCancellation: true
-							  }
+								}
 							: { noiseSuppression: true, echoCancellation: true }
 						: false,
 					video ? (videoId ? { deviceId: { exact: videoId } } : true) : false

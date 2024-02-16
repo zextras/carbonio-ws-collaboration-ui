@@ -80,8 +80,8 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 		lastMessageOfRoom && lastMessageOfRoom.type === MessageType.TEXT_MSG
 			? getUserName(store, lastMessageOfRoom.from)
 			: lastMessageOfRoom && lastMessageOfRoom.type === MessageType.CONFIGURATION_MSG
-			? getUserName(store, lastMessageOfRoom.from)
-			: ''
+				? getUserName(store, lastMessageOfRoom.from)
+				: ''
 	);
 	const roomMuted = useStore((state) => getRoomMutedSelector(state, roomId));
 	const draftMessage = useStore((store) => getDraftMessage(store, roomId));

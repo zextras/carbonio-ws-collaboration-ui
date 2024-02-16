@@ -27,7 +27,7 @@ const displayMessageBrowserNotification = (message: TextMessage): void => {
 	);
 	if (
 		ChatsNotificationsSettings &&
-		JSON.parse(ChatsNotificationsSettings).hasOwnProperty('DesktopNotifications')
+		Object.hasOwn(JSON.parse(ChatsNotificationsSettings), 'DesktopNotifications')
 	) {
 		notificationsAreActive = JSON.parse(ChatsNotificationsSettings).DesktopNotifications;
 	} else {

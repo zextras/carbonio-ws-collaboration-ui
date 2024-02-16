@@ -6,7 +6,8 @@
 
 import React from 'react';
 
-import { screen, waitFor } from '@testing-library/react';
+import { screen } from '@testing-library/react';
+import { act } from '@testing-library/react-hooks';
 
 import MeetingNotification from './MeetingNotification';
 import useStore from '../../store/Store';
@@ -29,6 +30,7 @@ beforeEach(() => {
 	store.addRoom(room);
 	store.addMeeting(meeting);
 });
+
 describe('MeetingNotification', () => {
 	test('Everything is rendered correctly', () => {
 		setup(
@@ -75,8 +77,10 @@ describe('MeetingNotification', () => {
 				stopMeetingSound={jest.fn()}
 			/>
 		);
-		userEvent.type(screen.getByPlaceholderText(sendAQuickMessage), 'Hello{enter}');
-		await waitFor(() => expect(mockedSendChatMessage).toHaveBeenCalled());
+		await act(async () => {
+			await userEvent.type(screen.getByPlaceholderText(sendAQuickMessage), 'Hello{enter}');
+		});
+		expect(mockedSendChatMessage).toHaveBeenCalled();
 	});
 
 	test('Declining a meeting removes the notification', async () => {

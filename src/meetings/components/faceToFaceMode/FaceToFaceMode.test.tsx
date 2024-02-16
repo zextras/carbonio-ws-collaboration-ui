@@ -7,7 +7,7 @@
 import React from 'react';
 
 import { act, renderHook } from '@testing-library/react-hooks';
-import { UserEvent } from '@testing-library/user-event/setup/setup';
+import { UserEvent } from '@testing-library/user-event';
 
 import FaceToFaceMode from './FaceToFaceMode';
 import { useParams } from '../../../../__mocks__/react-router';

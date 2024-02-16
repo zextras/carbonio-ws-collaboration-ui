@@ -18,8 +18,8 @@ import { CHATS_ROUTE, PRODUCT_NAME } from '../constants/appConstants';
 
 const LazyMainView = lazy(() => import(/* webpackChunkName: "mainView" */ './views/MainView'));
 
-const LazySettingsView = lazy(() =>
-	import(/* webpackChunkName: "settingsView" */ './views/SettingsView')
+const LazySettingsView = lazy(
+	() => import(/* webpackChunkName: "settingsView" */ './views/SettingsView')
 );
 const ChatsMain = () => (
 	<Suspense

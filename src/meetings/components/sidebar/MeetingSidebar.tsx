@@ -28,7 +28,9 @@ import BubblesWrapper from '../bubblesWrapper/BubblesWrapper';
 
 const SidebarContainer = styled(Container)`
 	position: relative;
-	transition: width 0.3s ease, min-width 0.3s ease;
+	transition:
+		width 0.3s ease,
+		min-width 0.3s ease;
 `;
 
 const ChangeSidebarStatusButton = styled.div`

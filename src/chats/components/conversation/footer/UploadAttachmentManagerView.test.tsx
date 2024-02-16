@@ -7,7 +7,7 @@
 import React from 'react';
 
 import { act, fireEvent, screen } from '@testing-library/react';
-import { UserEvent } from '@testing-library/user-event/setup/setup';
+import { UserEvent } from '@testing-library/user-event';
 
 import MessageComposer from './MessageComposer';
 import UploadAttachmentManagerView from './UploadAttachmentManagerView';
