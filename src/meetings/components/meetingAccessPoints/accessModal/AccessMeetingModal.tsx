@@ -134,7 +134,6 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 	}, []);
 
 	const joinMeeting = useCallback(() => {
-		freeMediaResources(streamTrack);
 		MeetingsApi.enterMeeting(
 			roomId,
 			{
@@ -143,7 +142,10 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 			},
 			{ audioDevice: selectedDevicesId.audio, videoDevice: selectedDevicesId.video }
 		)
-			.then((meetingId) => goToMeetingPage(meetingId))
+			.then((meetingId) => {
+				freeMediaResources(streamTrack);
+				goToMeetingPage(meetingId);
+			})
 			.catch((err) => console.error(err, 'Error on joinMeeting'));
 	}, [
 		streamTrack,

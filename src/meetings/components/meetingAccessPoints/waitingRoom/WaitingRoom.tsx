@@ -13,6 +13,7 @@ import styled from 'styled-components';
 import useEventListener, { EventName } from '../../../../hooks/useEventListener';
 import useRouting, { PAGE_INFO_TYPE } from '../../../../hooks/useRouting';
 import { MeetingsApi } from '../../../../network';
+import { freeMediaResources } from '../../../../utils/MeetingsUtils';
 import { calcScaleDivisor } from '../../../../utils/styleUtils';
 import AccessTile from '../mediaHandlers/AccessTile';
 import LocalMediaHandler from '../mediaHandlers/LocalMediaHandler';
@@ -112,9 +113,12 @@ const WaitingRoom: FC<WaitingRoomProps> = ({ meetingId, meetingName }) => {
 
 	const handleAcceptance = useCallback(() => {
 		joinMeeting()
-			.then(() => goToMeetingPage(meetingId))
+			.then(() => {
+				freeMediaResources(streamTrack);
+				goToMeetingPage(meetingId);
+			})
 			.catch((err) => console.error(err, 'Error on joinMeeting'));
-	}, [goToMeetingPage, joinMeeting, meetingId]);
+	}, [goToMeetingPage, joinMeeting, meetingId, streamTrack]);
 
 	const handleRejected = useCallback(() => {
 		goToInfoPage(PAGE_INFO_TYPE.NEXT_TIME_PAGE);
