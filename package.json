@@ -33,7 +33,6 @@
 		"@testing-library/jest-dom": "^5.16.4",
 		"@testing-library/react": "^12.1.5",
 		"@testing-library/user-event": "^14.5.2",
-		"@types/history": "4.7.8",
 		"@types/jest": "^29.5.12",
 		"@types/lodash": "4.14.202",
 		"@types/react": "16.9.56",
@@ -83,7 +82,7 @@
 		"strophe.js": "1.6.2",
 		"styled-components": "5.3.11",
 		"uuid": "^9.0.1",
-		"zustand": "^4.4.7"
+		"zustand": "^4.5.0"
 	},
 	"carbonio": {
 		"name": "carbonio-ws-collaboration-ui",
