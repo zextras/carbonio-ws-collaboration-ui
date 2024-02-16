@@ -49,7 +49,7 @@ export const mockedUnmuteRoomNotificationRequest: jest.Mock = jest.fn();
 export const mockedUpdateRoomRequest: jest.Mock = jest.fn();
 export const mockedGetUserRequest: jest.Mock = jest.fn();
 export const mockedGetUserPictureRequest: jest.Mock = jest.fn();
-export const mockedGetURLUserPicture: jest.Mock = jest.fn();
+export const mockedGetURLUserPicture: jest.Mock = jest.fn(() => 'image.jpeg');
 export const mockedGetDebouncedUserRequest: jest.Mock = jest.fn();
 export const mockedGetURLAttachment: jest.Mock = jest.fn();
 export const mockedGetImageURL: jest.Mock = jest.fn();
@@ -168,7 +168,7 @@ jest.mock('../../network', () => {
 					const result = mockedGetUserPictureRequest();
 					result ? resolve(result) : reject(new Error(noResultProvided));
 				}),
-			getURLUserPicture: (): string => 'image.url',
+			getURLUserPicture: mockedGetURLUserPicture,
 			getDebouncedUser: jest.fn()
 		},
 		AttachmentsApi: {
