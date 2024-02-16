@@ -37,10 +37,14 @@ const LeaveMeetingButton = (): ReactElement => {
 	const [active, setActive] = useState(false);
 	const [buttonLabel, setButtonLabel] = useState('');
 
-	const activeButton = useCallback((event) => {
-		event.stopPropagation();
-		setActive(true);
-	}, []);
+	const activeButton = useCallback(
+		(event) => {
+			event.stopPropagation();
+			setActive(true);
+			setButtonLabel(leaveMeetingButtonLabel);
+		},
+		[leaveMeetingButtonLabel]
+	);
 
 	const leaveMeeting = useCallback(
 		(event) => {
@@ -53,18 +57,15 @@ const LeaveMeetingButton = (): ReactElement => {
 	);
 
 	useEffect(() => {
-		const handleClick = (): void => setActive(false);
+		const handleClick = (): void => {
+			setActive(false);
+			setTimeout(() => setButtonLabel(''), 800);
+		};
 		document.addEventListener('click', handleClick);
 		return () => {
 			document.removeEventListener('click', handleClick);
 		};
 	}, []);
-
-	// Delay the button label change to let transition animation on close
-	useEffect(() => {
-		if (active) setButtonLabel(leaveMeetingButtonLabel);
-		else setTimeout(() => setButtonLabel(''), 800);
-	}, [active, leaveMeetingButtonLabel, leaveMeetingLabel]);
 
 	return (
 		<CustomContainer width="fit">
