@@ -138,6 +138,7 @@
             "enableMicrophone": "Enable microphone",
             "enableScreen": "Enable screen share",
             "gridView": "Grid view",
+            "leaveConfirmation": "Leave Meeting?",
             "leaveMeeting": "Leave Meeting",
             "microphoneDisabled": "Microphone disabled",
             "microphoneEnabled": "Microphone enabled",

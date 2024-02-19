@@ -29,7 +29,7 @@ const CustomButton = styled(Button)<{ $active: boolean }>`
 const LeaveMeetingButton = (): ReactElement => {
 	const [t] = useTranslation();
 	const leaveMeetingLabel = t('meeting.interactions.leaveMeeting', 'Leave Meeting');
-	const leaveMeetingButtonLabel = t('', 'Leave Meeting?'); // TODO
+	const leaveMeetingButtonLabel = t('meeting.interactions.leaveConfirmation', 'Leave Meeting?');
 
 	const { goToInfoPage } = useRouting();
 	const { meetingId }: MeetingRoutesParams = useParams();
