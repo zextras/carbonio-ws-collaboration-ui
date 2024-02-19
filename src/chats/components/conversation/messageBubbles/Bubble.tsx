@@ -7,7 +7,8 @@
 
 import React, { FC, useCallback, useEffect, useMemo, useRef } from 'react';
 
-import { Container, Padding } from '@zextras/carbonio-design-system';
+import { Container, CreateSnackbarFn, Padding, useSnackbar } from '@zextras/carbonio-design-system';
+import { useTranslation } from 'react-i18next';
 import styled, { SimpleInterpolation } from 'styled-components';
 
 import AttachmentView from './AttachmentView';
@@ -21,7 +22,8 @@ import RepliedTextMessageSectionView from './RepliedTextMessageSectionView';
 import TextContentBubble from './TextContentBubble';
 import {
 	getForwardList,
-	isMessageInForwardList
+	isMessageInForwardList,
+	maxForwardLimitNotReached
 } from '../../../../store/selectors/ActiveConversationsSelectors';
 import { getMessageAttachment } from '../../../../store/selectors/MessagesSelectors';
 import { getRoomTypeSelector } from '../../../../store/selectors/RoomsSelectors';
@@ -54,12 +56,11 @@ const ForwardContainer = styled(Container)<{
 }>`
 	padding-left: 0.4375rem;
 	padding-right: 0.4375rem;
-	cursor: pointer;
 	${({ $forwardIsActive }): string | false =>
-		$forwardIsActive && 'background: rgba(213, 227, 246, 0.50);'};
+		$forwardIsActive && 'background: rgba(213, 227, 246, 0.50); cursor: pointer;'};
 	&:hover {
 		${({ $hoverIsActive }): string | false =>
-			$hoverIsActive && 'background: rgba(230, 230, 230, 0.50);'};
+			$hoverIsActive && 'background: rgba(230, 230, 230, 0.50); cursor: pointer;'};
 	}
 `;
 
@@ -107,6 +108,12 @@ const Bubble: FC<BubbleProps> = ({
 	messageRef,
 	messageListRef
 }) => {
+	const [t] = useTranslation();
+	const maxNumberReached = t(
+		'',
+		'The maximum number of messages that can be forwarded at the same time has been reached'
+	);
+
 	const mySessionId = useStore((store) => store.session.id);
 	const roomType = useStore<RoomType>((store) => getRoomTypeSelector(store, message.roomId));
 	const isMyMessage = mySessionId === message.from;
@@ -114,6 +121,9 @@ const Bubble: FC<BubbleProps> = ({
 	const messageFormatted = useMemo(() => parseUrlOnMessage(message.text), [message.text]);
 	const forwardMessageList = useStore((store) => getForwardList(store, message.roomId));
 	const setForwardList = useStore((store) => store.setForwardMessageList);
+	const isForwardLimitNotReached: boolean = useStore((store) =>
+		maxForwardLimitNotReached(store, message.roomId)
+	);
 	const unsetForwardMessageList = useStore((store) => store.unsetForwardMessageList);
 	const messageInForwardList: boolean = useStore((store) =>
 		isMessageInForwardList(store, message.roomId, message)
@@ -124,18 +134,36 @@ const Bubble: FC<BubbleProps> = ({
 
 	const forwardContainerRef = useRef<HTMLDivElement>(null);
 
+	const createSnackbar: CreateSnackbarFn = useSnackbar();
+
 	const { extension, size } = getAttachmentInfo(
 		messageAttachment?.mimeType,
 		messageAttachment?.size
 	);
 
 	const handleAddForwardMessage = useCallback(() => {
-		if (!messageInForwardList) {
-			setForwardList(message.roomId, message);
-		} else {
+		if (messageInForwardList) {
 			unsetForwardMessageList(message.roomId, message);
+		} else if (!isForwardLimitNotReached) {
+			createSnackbar({
+				key: new Date().toLocaleString(),
+				type: 'warning',
+				label: maxNumberReached,
+				hideButton: true,
+				autoHideTimeout: 3000
+			});
+		} else {
+			setForwardList(message.roomId, message);
 		}
-	}, [message, messageInForwardList, setForwardList, unsetForwardMessageList]);
+	}, [
+		createSnackbar,
+		isForwardLimitNotReached,
+		maxNumberReached,
+		message,
+		messageInForwardList,
+		setForwardList,
+		unsetForwardMessageList
+	]);
 
 	useEffect(() => {
 		let refValue: HTMLDivElement | null = null;
@@ -150,16 +178,14 @@ const Bubble: FC<BubbleProps> = ({
 		};
 	}, [forwardMessageList, handleAddForwardMessage, messageRef]);
 
-	console.log(forwardMessageList);
-
 	const forwardIsActive = useMemo(
 		() => forwardMessageList !== undefined && messageInForwardList,
 		[forwardMessageList, messageInForwardList]
 	);
 
 	const hoverIsActive = useMemo(
-		() => forwardMessageList !== undefined && !messageInForwardList,
-		[forwardMessageList, messageInForwardList]
+		() => forwardMessageList !== undefined && !messageInForwardList && isForwardLimitNotReached,
+		[forwardMessageList, isForwardLimitNotReached, messageInForwardList]
 	);
 
 	return (
