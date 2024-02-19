@@ -39,7 +39,9 @@ const Messages = styled(Container)`
 `;
 
 const MessagesListWrapper = styled(Container)`
-	padding: 0.9375rem;
+	padding-top: 0.9375rem;
+	padding-bottom: 0.9375rem;
+	padding-left: 0.4375rem;
 	overflow-y: scroll;
 	align-self: auto;
 `;

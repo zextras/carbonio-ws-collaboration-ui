@@ -52,6 +52,8 @@ const ForwardContainer = styled(Container)<{
 	$forwardIsActive: boolean;
 	$hoverIsActive: boolean;
 }>`
+	padding-left: 0.4375rem;
+	padding-right: 0.4375rem;
 	${({ $forwardIsActive }): string | false =>
 		$forwardIsActive && 'background: rgba(213, 227, 246, 0.50);'};
 	&:hover {
