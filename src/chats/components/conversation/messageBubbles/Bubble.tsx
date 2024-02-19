@@ -196,6 +196,7 @@ const Bubble: FC<BubbleProps> = ({
 			ref={forwardContainerRef}
 			$forwardIsActive={forwardIsActive}
 			$hoverIsActive={hoverIsActive}
+			data-testid="forward_bubble_container"
 		>
 			<BubbleContainer
 				id={`message-${message.id}`}

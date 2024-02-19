@@ -48,6 +48,13 @@ const mockedMessage: Message = createMockTextMessage({
 	date: Date.now()
 });
 
+const otherMockedMessage: Message = createMockTextMessage({
+	from: 'idPaolo',
+	roomId: mockedRoom.id,
+	date: Date.now(),
+	text: 'Hi 2'
+});
+
 const storeSetupAdvanced = (): { user: UserEvent; store: RootStore } => {
 	const store = useStore.getState();
 	store.addRoom(mockedRoom);
@@ -685,5 +692,49 @@ describe('MessageComposer - draft message', () => {
 
 		const composerTextArea = screen.getByRole('textbox');
 		await waitFor(() => expect((composerTextArea as HTMLTextAreaElement).value).toBe(''));
+	});
+});
+
+describe('forward footer', () => {
+	test('adding a message to the forward list triggers the footer', async () => {
+		const store = useStore.getState();
+		store.addRoom(mockedRoom);
+		store.newMessage(mockedMessage);
+		store.setForwardMessageList(mockedRoom.id, mockedMessage);
+
+		setup(<MessageComposer roomId={mockedRoom.id} />);
+
+		const forwardButton = await screen.findByRole('button', { name: 'Forward' });
+		expect(forwardButton).toBeInTheDocument();
+	});
+
+	test('adding more than a message to the forward list triggers the footer with the updated label', async () => {
+		const store = useStore.getState();
+		store.addRoom(mockedRoom);
+		store.newMessage(mockedMessage);
+		store.newMessage(otherMockedMessage);
+		store.setForwardMessageList(mockedRoom.id, mockedMessage);
+		store.setForwardMessageList(mockedRoom.id, otherMockedMessage);
+		setup(<MessageComposer roomId={mockedRoom.id} />);
+
+		const forwardButton = await screen.findByRole('button', { name: 'forward 2 messages' });
+		expect(forwardButton).toBeInTheDocument();
+	});
+
+	test('clicking the exit button restore the normal composer', async () => {
+		const store = useStore.getState();
+		store.addRoom(mockedRoom);
+		store.newMessage(mockedMessage);
+		store.newMessage(otherMockedMessage);
+		store.setForwardMessageList(mockedRoom.id, mockedMessage);
+		store.setForwardMessageList(mockedRoom.id, otherMockedMessage);
+		const { user } = setup(<MessageComposer roomId={mockedRoom.id} />);
+
+		const exitButton = await screen.findByRole('button', { name: 'Exit Selection Mode' });
+		expect(exitButton).toBeInTheDocument();
+
+		await user.click(exitButton);
+
+		expect(screen.queryByRole('button', { name: 'Exit Selection Mode' })).not.toBeInTheDocument();
 	});
 });

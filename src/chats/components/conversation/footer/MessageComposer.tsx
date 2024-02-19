@@ -28,7 +28,7 @@ import styled from 'styled-components';
 import AttachmentSelector from './AttachmentSelector';
 import DeleteMessageModal from './DeleteMessageModal';
 import EmojiSelector from './EmojiSelector';
-import ForwardFooter from './forwardFooter';
+import ForwardFooter from './ForwardFooter';
 import MessageArea from './MessageArea';
 import useMessage from '../../../../hooks/useMessage';
 import { RoomsApi } from '../../../../network';
