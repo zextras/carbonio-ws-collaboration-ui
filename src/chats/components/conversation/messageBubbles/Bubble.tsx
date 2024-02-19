@@ -54,11 +54,12 @@ const ForwardContainer = styled(Container)<{
 }>`
 	padding-left: 0.4375rem;
 	padding-right: 0.4375rem;
+	cursor: pointer;
 	${({ $forwardIsActive }): string | false =>
 		$forwardIsActive && 'background: rgba(213, 227, 246, 0.50);'};
 	&:hover {
 		${({ $hoverIsActive }): string | false =>
-			$hoverIsActive && 'background: rgba(230, 230, 230, 0.50); cursor: pointer;'};
+			$hoverIsActive && 'background: rgba(230, 230, 230, 0.50);'};
 	}
 `;
 
@@ -113,6 +114,7 @@ const Bubble: FC<BubbleProps> = ({
 	const messageFormatted = useMemo(() => parseUrlOnMessage(message.text), [message.text]);
 	const forwardMessageList = useStore((store) => getForwardList(store, message.roomId));
 	const setForwardList = useStore((store) => store.setForwardMessageList);
+	const unsetForwardMessageList = useStore((store) => store.unsetForwardMessageList);
 	const messageInForwardList: boolean = useStore((store) =>
 		isMessageInForwardList(store, message.roomId, message)
 	);
@@ -130,8 +132,10 @@ const Bubble: FC<BubbleProps> = ({
 	const handleAddForwardMessage = useCallback(() => {
 		if (!messageInForwardList) {
 			setForwardList(message.roomId, message);
+		} else {
+			unsetForwardMessageList(message.roomId, message);
 		}
-	}, [message, messageInForwardList, setForwardList]);
+	}, [message, messageInForwardList, setForwardList, unsetForwardMessageList]);
 
 	useEffect(() => {
 		let refValue: HTMLDivElement | null = null;
@@ -145,6 +149,8 @@ const Bubble: FC<BubbleProps> = ({
 			}
 		};
 	}, [forwardMessageList, handleAddForwardMessage, messageRef]);
+
+	console.log(forwardMessageList);
 
 	const forwardIsActive = useMemo(
 		() => forwardMessageList !== undefined && messageInForwardList,

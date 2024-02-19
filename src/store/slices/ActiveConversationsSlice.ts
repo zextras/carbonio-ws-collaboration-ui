@@ -6,7 +6,7 @@
  */
 
 import produce from 'immer';
-import { find, findIndex, forEach, remove } from 'lodash';
+import { find, findIndex, forEach, orderBy, remove } from 'lodash';
 import { StateCreator } from 'zustand';
 
 import { FileToUpload, messageActionType } from '../../types/store/ActiveConversationTypes';
@@ -336,10 +336,11 @@ export const useActiveConversationsSlice: StateCreator<ActiveConversationsSlice>
 			produce((draft: RootStore) => {
 				if (!draft.activeConversations[roomId]) draft.activeConversations[roomId] = {};
 				if (draft.activeConversations[roomId].forwardMessageList) {
-					draft.activeConversations[roomId].forwardMessageList = [
-						...draft.activeConversations[roomId].forwardMessageList!,
-						message
-					];
+					draft.activeConversations[roomId].forwardMessageList = orderBy(
+						[...draft.activeConversations[roomId].forwardMessageList!, message],
+						['date'],
+						['asc']
+					);
 				} else {
 					draft.activeConversations[roomId].forwardMessageList = [message];
 				}
@@ -348,11 +349,21 @@ export const useActiveConversationsSlice: StateCreator<ActiveConversationsSlice>
 			'AC/SET_FORWARD_MODE'
 		);
 	},
-	unsetForwardMessageList: (roomId: string): void => {
+	unsetForwardMessageList: (roomId: string, message?: TextMessage): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (draft.activeConversations[roomId]) {
-					delete draft.activeConversations[roomId].forwardMessageList;
+				if (draft.activeConversations[roomId].forwardMessageList) {
+					if (message) {
+						remove(
+							draft.activeConversations[roomId].forwardMessageList!,
+							(element) => element.id === message.id
+						);
+						if (draft.activeConversations[roomId].forwardMessageList?.length === 0) {
+							delete draft.activeConversations[roomId].forwardMessageList;
+						}
+					} else {
+						delete draft.activeConversations[roomId].forwardMessageList;
+					}
 				}
 			}),
 			false,

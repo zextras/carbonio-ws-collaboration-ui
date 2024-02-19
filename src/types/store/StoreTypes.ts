@@ -126,7 +126,7 @@ export type ActiveConversationsSlice = {
 	removeFileToAttach: (roomId: string, fileTempId: string) => void;
 	unsetFilesToAttach: (roomId: string) => void;
 	setForwardMessageList: (roomId: string, message: TextMessage) => void;
-	unsetForwardMessageList: (roomId: string) => void;
+	unsetForwardMessageList: (roomId: string, message?: TextMessage) => void;
 };
 
 export type ConnectionsStoreSlice = {
