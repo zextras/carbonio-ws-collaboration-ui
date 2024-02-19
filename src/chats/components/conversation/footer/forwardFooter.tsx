@@ -19,7 +19,7 @@ type ForwardFooterProps = {
 const ForwardFooter: FC<ForwardFooterProps> = ({ roomId }) => {
 	const [t] = useTranslation();
 
-	const exitSelectionMode = t('', 'Exit Selection Mode');
+	const exitSelectionMode = t('conversation.selectionMode.exit', 'Exit Selection Mode');
 	const forward = t('action.forward', 'Forward');
 
 	const forwardMessageList = useStore((store) => getForwardList(store, roomId));
@@ -31,13 +31,18 @@ const ForwardFooter: FC<ForwardFooterProps> = ({ roomId }) => {
 		if (forwardMessageList === undefined) return 0;
 		return forwardMessageList.length;
 	}, [forwardMessageList]);
+	const multipleForward = t(
+		'conversation.selectionMode.multipleForward',
+		`forward ${forwardMessagesCounter} messages`,
+		{
+			numberOfMessages: forwardMessagesCounter
+		}
+	);
 
 	const forwardLabel = useMemo(() => {
 		if (forwardMessagesCounter === 1) return forward;
-		return t('', `forward ${forwardMessagesCounter} messages`, {
-			numberOfMessages: forwardMessagesCounter
-		});
-	}, [forward, forwardMessagesCounter, t]);
+		return multipleForward;
+	}, [forward, forwardMessagesCounter, multipleForward]);
 
 	const handleUnsetForwardMode = useCallback(() => {
 		unsetForwardList(roomId);

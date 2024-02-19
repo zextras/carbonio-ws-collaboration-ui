@@ -111,7 +111,7 @@ const Bubble: FC<BubbleProps> = ({
 }) => {
 	const [t] = useTranslation();
 	const maxNumberReached = t(
-		'',
+		'conversation.selectionMode.maxSelected',
 		'The maximum number of messages that can be forwarded at the same time has been reached'
 	);
 
