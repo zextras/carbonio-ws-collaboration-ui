@@ -54,6 +54,7 @@ const ForwardContainer = styled(Container)<{
 	$forwardIsActive: boolean;
 	$hoverIsActive: boolean;
 }>`
+	border-radius: 0;
 	padding-left: 0.4375rem;
 	padding-right: 0.4375rem;
 	${({ $forwardIsActive }): string | false =>
