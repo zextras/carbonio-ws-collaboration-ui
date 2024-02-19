@@ -173,7 +173,7 @@ const MeetingActionsBar = ({ streamsWrapperRef }: MeetingActionsProps): ReactEle
 				<FullScreenButton />
 				<SwitchViewButton />
 			</ActionsWrapper>
-			<LeaveMeetingButton />
+			<LeaveMeetingButton isHoovering={isHoovering} />
 		</BarContainer>
 	);
 };

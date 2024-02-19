@@ -23,13 +23,13 @@ beforeAll(() => {
 });
 describe('LeaveMeetingButton', () => {
 	test('Default button status: closed', () => {
-		setup(<LeaveMeetingButton />);
+		setup(<LeaveMeetingButton isHoovering={true} />);
 		const text = screen.queryByText(leaveMeetingButtonText);
 		expect(text).not.toBeInTheDocument();
 	});
 
 	test('User clicks the button once: it should be open', async () => {
-		const { user } = setup(<LeaveMeetingButton />);
+		const { user } = setup(<LeaveMeetingButton isHoovering={true} />);
 		const button = screen.getByRole('button');
 		await user.click(button);
 		const text = screen.getByText(leaveMeetingButtonText);
@@ -38,7 +38,7 @@ describe('LeaveMeetingButton', () => {
 
 	test('User clicks twice the button: leaveMeeting should be called', async () => {
 		mockedLeaveMeetingRequest.mockResolvedValueOnce('Meeting left');
-		const { user } = setup(<LeaveMeetingButton />);
+		const { user } = setup(<LeaveMeetingButton isHoovering={true} />);
 		const button = screen.getByRole('button');
 		await user.click(button);
 		await user.click(button);

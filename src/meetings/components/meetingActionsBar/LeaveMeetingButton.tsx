@@ -18,15 +18,21 @@ const CustomContainer = styled(Container)`
 	right: 3.25rem;
 	> div > button > div {
 		text-transform: capitalize !important;
+		font-size: 0.9rem !important;
 	}
 `;
 
 const CustomButton = styled(Button)<{ $active: boolean }>`
-	transition: max-width 1s ease;
-	height: 2.5rem;
+	transition: max-width 1s ease 0s;
+	height: 2.25rem;
 	max-width: ${({ $active }): string => ($active ? '20rem;' : '2.5rem')};
 `;
-const LeaveMeetingButton = (): ReactElement => {
+
+type LeaveMeetingButtonProps = {
+	isHoovering: boolean;
+};
+
+const LeaveMeetingButton = ({ isHoovering }: LeaveMeetingButtonProps): ReactElement => {
 	const [t] = useTranslation();
 	const leaveMeetingLabel = t('meeting.interactions.leaveMeeting', 'Leave Meeting');
 	const leaveMeetingButtonLabel = t('meeting.interactions.leaveConfirmation', 'Leave Meeting?');
@@ -66,6 +72,13 @@ const LeaveMeetingButton = (): ReactElement => {
 			document.removeEventListener('click', handleClick);
 		};
 	}, []);
+
+	useEffect(() => {
+		if (!isHoovering) {
+			setActive(false);
+			setTimeout(() => setButtonLabel(''), 800);
+		}
+	}, [isHoovering]);
 
 	return (
 		<CustomContainer width="fit">
