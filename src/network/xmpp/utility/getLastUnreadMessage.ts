@@ -22,8 +22,9 @@ export function getLastUnreadMessage(roomId: string): string | undefined {
 		const myMarker = markers[roomId]?.[session.id!]?.messageId;
 		if (myMarker) {
 			const myMarkedMessage = find(messages[roomId], (message: Message) => message.id === myMarker);
-			if (myMarkedMessage && !isBefore(lastMessage.date, myMarkedMessage?.date))
+			if (myMarkedMessage && !isBefore(lastMessage.date, myMarkedMessage?.date)) {
 				return lastMessage.id;
+			}
 			return undefined;
 		}
 		return lastMessage.id;
