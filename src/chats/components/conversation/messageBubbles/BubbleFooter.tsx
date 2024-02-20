@@ -6,7 +6,15 @@
 
 import React, { FC, useMemo } from 'react';
 
-import { Container, Icon, Padding, Row, Text, Tooltip } from '@zextras/carbonio-design-system';
+import {
+	Container,
+	Icon,
+	Padding,
+	Row,
+	Text,
+	TextWithTooltip,
+	Tooltip
+} from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -82,9 +90,9 @@ const BubbleFooter: FC<BubbleFooterProps> = ({
 		>
 			<Row takeAvailableSpace mainAlignment="flex-start" padding={{ right: 'medium' }}>
 				{messageExtension && messageSize && (
-					<Text color="secondary" size="small">
+					<TextWithTooltip color="secondary" size="small">
 						{messageExtension} • {messageSize}
-					</Text>
+					</TextWithTooltip>
 				)}
 			</Row>
 			<Row orientation="horizontal" width="fit">
