@@ -25,6 +25,7 @@ import usePreview from '../../../../hooks/usePreview';
 import { AttachmentsApi } from '../../../../network';
 import {
 	getFilesToUploadArray,
+	getForwardList,
 	getReferenceMessage
 } from '../../../../store/selectors/ActiveConversationsSelectors';
 import { getXmppClient } from '../../../../store/selectors/ConnectionSelector';
@@ -140,6 +141,7 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 	const setReferenceMessage = useStore((store) => store.setReferenceMessage);
 	const unsetReferenceMessage = useStore((store) => store.unsetReferenceMessage);
 	const setDraftMessage = useStore((store) => store.setDraftMessage);
+	const forwardList = useStore((store) => getForwardList(store, message.roomId));
 	const setForwardList = useStore((store) => store.setForwardMessageList);
 	const unsetForwardList = useStore((store) => store.unsetForwardMessageList);
 
@@ -250,6 +252,8 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 		unsetForwardList
 	]);
 
+	const forwardHastoAppear = useMemo(() => forwardList === undefined, [forwardList]);
+
 	const canBeEdited = useMemo(
 		() =>
 			canPerformAction(message, isMyMessage, editMessageTimeLimitInMinutes, messageActionType.EDIT),
@@ -291,11 +295,13 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 		});
 
 		// Forward message in another chat
-		actions.push({
-			id: 'forward',
-			label: forwardActionLabel,
-			onClick: setForwardModeOn
-		});
+		if (forwardHastoAppear) {
+			actions.push({
+				id: 'forward',
+				label: forwardActionLabel,
+				onClick: setForwardModeOn
+			});
+		}
 
 		// Copy the text of a text message to the clipboard
 		actions.push({
@@ -336,8 +342,7 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 		canBeEdited,
 		replyActionLabel,
 		replyMessageAction,
-		forwardActionLabel,
-		setForwardModeOn,
+		forwardHastoAppear,
 		copyActionLabel,
 		copyMessageAction,
 		canBeDeleted,
@@ -346,6 +351,8 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 		editActionLabel,
 		editMessageAction,
 		filesToUploadArray,
+		forwardActionLabel,
+		setForwardModeOn,
 		deleteActionLabel,
 		deleteMessageAction,
 		previewActionLabel,
