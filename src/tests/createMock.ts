@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { v4 as uuidGenerator } from 'uuid';
-
 import {
 	MeetingBe,
 	MeetingParticipantBe,
@@ -45,7 +43,7 @@ export const createMockRoom = (fields?: GenericFieldsType): RoomBe => ({
 });
 
 export const createMockTextMessage = (fields?: GenericFieldsType): TextMessage => ({
-	id: uuidGenerator(),
+	id: 'id',
 	roomId: 'roomId',
 	date: 1661441294393,
 	type: MessageType.TEXT_MSG,
