@@ -10,7 +10,8 @@ import {
 	MeetingAudioStreamChangedEvent,
 	MeetingJoinedEvent,
 	MeetingParticipantClashedEvent,
-	MeetingStartedEvent
+	MeetingStartedEvent,
+	MeetingStoppedEvent
 } from '../types/network/websocket/wsMeetingEvents';
 import { Message } from '../types/store/MessageTypes';
 
@@ -34,7 +35,7 @@ export type IncomingMeetingEvent = {
 
 export type RemovedMeetingNotificationEvent = {
 	name: EventName.REMOVED_MEETING_NOTIFICATION;
-	data: MeetingJoinedEvent;
+	data: MeetingJoinedEvent | MeetingStoppedEvent;
 };
 
 export type ParticipantClashedEvent = {

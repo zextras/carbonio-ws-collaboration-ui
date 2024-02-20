@@ -16,7 +16,7 @@ import { createMockMeeting, createMockRoom } from '../../tests/createMock';
 import { setup } from '../../tests/test-utils';
 import { MeetingBe } from '../../types/network/models/meetingBeTypes';
 import { RoomBe } from '../../types/network/models/roomBeTypes';
-import { WsEventType } from '../../types/network/websocket/wsEvents';
+import { WsEvent, WsEventType } from '../../types/network/websocket/wsEvents';
 import {
 	MeetingJoinedEvent,
 	MeetingStartedEvent
@@ -52,11 +52,11 @@ describe('MeetingNotificationsHandler', () => {
 		expect(notifications).not.toBeInTheDocument();
 	});
 
-	// test('A notification is rendered when a MeetingCreatedEvent is received', () => {
-	// 	setup(<MeetingNotificationsHandler />);
-	// 	addIncomingMeetingNotification(room, meeting);
-	// 	expect(screen.getByTestId('incoming_call_notification_portal')).toBeInTheDocument();
-	// });
+	test('A notification is rendered when a MeetingCreatedEvent is received', () => {
+		setup(<MeetingNotificationsHandler />);
+		addIncomingMeetingNotification(room, meeting);
+		expect(screen.getByTestId('incoming_call_notification_portal')).toBeInTheDocument();
+	});
 
 	test('A notification is removed when a JoinMeetingEvent is received', () => {
 		setup(<MeetingNotificationsHandler />);
@@ -83,19 +83,20 @@ describe('MeetingNotificationsHandler', () => {
 		expect(audioTag).not.toBeInTheDocument();
 	});
 
-	// TODO test to add for bug WSC-1265
-	// test('A notification is removed when meeting is stopped because an user leaves it', () => {
-	// 	setup(<MeetingNotificationsHandler />);
-	// 	addIncomingMeetingNotification(room, meeting);
-	// 	expect(screen.getByTestId('incoming_call_notification')).toBeInTheDocument();
-	// 	act(() => {
-	// 		// jest.advanceTimersByTime(4000);
-	// 		useStore.getState().stopMeeting(meeting.id);
-	// 	});
-	// 	const audioTag = screen.queryByTestId('meeting_notification_audio');
-	// 	expect(screen.queryByTestId('incoming_call_notification')).not.toBeInTheDocument();
-	// 	expect(audioTag).not.toBeInTheDocument();
-	// });
+	test('A notification of 1to1 meeting is removed when is stopped because the other user leaves it', () => {
+		setup(<MeetingNotificationsHandler />);
+		addIncomingMeetingNotification(room, meeting);
+		const meetingStoppedEvent: WsEvent = {
+			type: WsEventType.MEETING_STOPPED,
+			sentDate: '123456789',
+			meetingId: meeting.id
+		};
+		act(() =>
+			sendCustomEvent({ name: EventName.REMOVED_MEETING_NOTIFICATION, data: meetingStoppedEvent })
+		);
+		const notificationPortal = screen.queryByTestId('incoming_call_notification_portal');
+		expect(notificationPortal).not.toBeInTheDocument();
+	});
 
 	test("Button 'Decline all' is rendered when there are more than one notification", async () => {
 		setup(<MeetingNotificationsHandler />);
