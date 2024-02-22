@@ -92,16 +92,16 @@ const WaitingUser: FC<WaitingUserProps> = ({ meetingId, userId }) => {
 			<Container orientation="horizontal" width="fit" gap="0.5rem">
 				<Tooltip label={acceptButtonTooltip} placement="top">
 					<IconButton
-						icon="AcceptanceMeetingOutline"
+						icon="CheckmarkOutline"
 						size="large"
-						backgroundColor="primary"
+						backgroundColor="success"
 						iconColor="gray6"
 						onClick={acceptWaitingUser}
 					/>
 				</Tooltip>
 				<Tooltip label={rejectButtonTooltip} placement="top">
 					<IconButton
-						icon="KickMeetingOutline"
+						icon="CloseOutline"
 						size="large"
 						backgroundColor="error"
 						iconColor="gray6"

@@ -35,8 +35,8 @@ describe('WaitingUser tests', () => {
 
 	test('Should render the accept and reject buttons', () => {
 		setup(<WaitingUser meetingId="meetingId" userId={user1.id} />);
-		const acceptButtonIcon = screen.getByTestId('icon: AcceptanceMeetingOutline');
-		const rejectButtonIcon = screen.getByTestId('icon: KickMeetingOutline');
+		const acceptButtonIcon = screen.getByTestId('icon: CheckmarkOutline');
+		const rejectButtonIcon = screen.getByTestId('icon: CloseOutline');
 		expect(acceptButtonIcon).toBeInTheDocument();
 		expect(rejectButtonIcon).toBeInTheDocument();
 	});
@@ -44,7 +44,7 @@ describe('WaitingUser tests', () => {
 	test('Moderator clicks on accept button', async () => {
 		mockedAcceptWaitingUserRequest.mockResolvedValue({});
 		const { user } = setup(<WaitingUser meetingId="meetingId" userId={user1.id} />);
-		const acceptButton = screen.getByTestId('icon: AcceptanceMeetingOutline');
+		const acceptButton = screen.getByTestId('icon: CheckmarkOutline');
 		await user.click(acceptButton);
 		expect(mockedAcceptWaitingUserRequest).toBeCalledWith('meetingId', user1.id, true);
 	});
@@ -52,7 +52,7 @@ describe('WaitingUser tests', () => {
 	test('Moderator clicks on reject button', async () => {
 		mockedAcceptWaitingUserRequest.mockResolvedValue({});
 		const { user } = setup(<WaitingUser meetingId="meetingId" userId={user1.id} />);
-		const acceptButton = screen.getByTestId('icon: KickMeetingOutline');
+		const acceptButton = screen.getByTestId('icon: CloseOutline');
 		await user.click(acceptButton);
 		expect(mockedAcceptWaitingUserRequest).toBeCalledWith('meetingId', user1.id, false);
 	});
