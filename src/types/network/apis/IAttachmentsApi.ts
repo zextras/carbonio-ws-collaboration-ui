@@ -74,7 +74,16 @@ export enum AttachmentType {
 	PNG = 'Png',
 	GIF = 'Gif',
 	WEBP = 'Webp',
-	PDF = 'pdf'
+	PDF = 'pdf',
+	DOCX = 'docx',
+	PPTX = 'pptx',
+	XLSX = 'xlsx',
+	MPKG = 'mpkg',
+	ODP = 'odp',
+	ODS = 'ods',
+	ODT = 'odt',
+	PPT = 'ppt',
+	XLS = 'xls'
 }
 
 export enum ImageShape {
