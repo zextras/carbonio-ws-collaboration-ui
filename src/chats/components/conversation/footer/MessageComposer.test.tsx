@@ -700,9 +700,12 @@ describe('forward footer', () => {
 		const store = useStore.getState();
 		store.addRoom(mockedRoom);
 		store.newMessage(mockedMessage);
-		store.setForwardMessageList(mockedRoom.id, mockedMessage);
 
 		setup(<MessageComposer roomId={mockedRoom.id} />);
+
+		act(() => {
+			store.setForwardMessageList(mockedRoom.id, mockedMessage);
+		});
 
 		const forwardButton = await screen.findByRole('button', { name: 'Forward' });
 		expect(forwardButton).toBeInTheDocument();
@@ -714,8 +717,11 @@ describe('forward footer', () => {
 		store.newMessage(mockedMessage);
 		store.newMessage(otherMockedMessage);
 		store.setForwardMessageList(mockedRoom.id, mockedMessage);
-		store.setForwardMessageList(mockedRoom.id, otherMockedMessage);
 		setup(<MessageComposer roomId={mockedRoom.id} />);
+
+		act(() => {
+			store.setForwardMessageList(mockedRoom.id, otherMockedMessage);
+		});
 
 		const forwardButton = await screen.findByRole('button', { name: 'forward 2 messages' });
 		expect(forwardButton).toBeInTheDocument();

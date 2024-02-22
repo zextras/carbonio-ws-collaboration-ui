@@ -487,8 +487,8 @@ describe('forward mode', () => {
 		await user.hover(forwardContainer[1]);
 		expect(forwardContainer[1]).toHaveStyle('background: rgba(230, 230, 230, 0.50)');
 
-		act(() => {
-			result.current.setForwardMessageList(room.id, messages[1]);
+		await act(async () => {
+			await user.click(forwardContainer[1]);
 		});
 
 		expect(forwardContainer[1]).toHaveStyle('background: rgba(213, 227, 246, 0.50)');
