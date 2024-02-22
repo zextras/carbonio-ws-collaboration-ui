@@ -55,14 +55,9 @@ const member3: MemberBe = {
 	external: false
 };
 
-const user3Participant: MeetingParticipant = createMockParticipants({
-	userId: user3.id,
-	sessionId: 'sessionIdUser3'
-});
-const user2Participant: MeetingParticipant = createMockParticipants({
-	userId: user2.id,
-	sessionId: 'sessionIdUser2'
-});
+const user3Participant: MeetingParticipant = createMockParticipants({ userId: user3.id });
+const user2Participant: MeetingParticipant = createMockParticipants({ userId: user2.id });
+const user1Participant: MeetingParticipant = createMockParticipants({ userId: user1.id });
 
 const meeting: MeetingBe = createMockMeeting({
 	id: 'meetingId',
@@ -92,7 +87,8 @@ const temporaryRoom: RoomBe = createMockRoom({ type: RoomType.TEMPORARY, members
 
 const scheduledMeeting: MeetingBe = createMockMeeting({
 	roomId: 'id',
-	type: MeetingType.SCHEDULED
+	type: MeetingType.SCHEDULED,
+	participants: [user1Participant]
 });
 
 describe('wsEventHandler', () => {
@@ -170,7 +166,7 @@ describe('wsEventHandler', () => {
 				sentDate: '123456789'
 			});
 			const { waitingList } = useStore.getState().meetings[temporaryRoom.id];
-			expect(waitingList).toBeUndefined();
+			expect(waitingList).toContain(user1.id);
 			expect(mockNotify).not.toBeCalled();
 		});
 

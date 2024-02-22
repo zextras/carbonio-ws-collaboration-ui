@@ -143,6 +143,14 @@ const WaitingRoom: FC<WaitingRoomProps> = ({ meetingId, meetingName }) => {
 		};
 	}, [handleResize]);
 
+	// Leave waiting list on window close
+	useEffect(() => {
+		window.parent.addEventListener('beforeunload', handleHungUp);
+		return () => {
+			window.parent.removeEventListener('beforeunload', handleHungUp);
+		};
+	}, [handleHungUp]);
+
 	useEffect(() => {
 		if (videoStreamRef.current) {
 			videoStreamRef.current.srcObject = streamTrack;

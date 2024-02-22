@@ -19,7 +19,7 @@ const displayWaitingListNotification = (meetingId: string): void => {
 	if (iAmOwner) {
 		getNotificationManager().notify({
 			showPopup: true,
-			playSound: true,
+			playSound: false,
 			title: t(
 				'meeting.browserNotification.waitingTitle',
 				'There seems to be someone in the Waiting Room'

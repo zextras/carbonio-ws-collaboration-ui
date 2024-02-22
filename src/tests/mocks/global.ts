@@ -178,3 +178,8 @@ window.resizeTo = function resizeTo(width: number, height: number): void {
 Object.defineProperty(window.parent.document.documentElement, 'requestFullscreen', {
 	value: jest.fn()
 });
+
+export const mockPlayAudio = jest.fn();
+global.Audio = jest.fn().mockImplementation(() => ({
+	play: mockPlayAudio
+}));

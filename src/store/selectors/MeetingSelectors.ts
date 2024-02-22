@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { filter, find, forEach, size, sortBy } from 'lodash';
+import { filter, find, forEach, reduce, size, sortBy } from 'lodash';
 
 import { STREAM_TYPE, TileData } from '../../types/store/ActiveMeetingTypes';
 import { Meeting, MeetingParticipantMap } from '../../types/store/MeetingTypes';
@@ -166,4 +166,19 @@ export const getWaitingList = (store: RootStore, meetingId: string): string[] =>
 		return meeting.waitingList || [];
 	}
 	return [];
+};
+
+export const getWaitingListSizeForMyVirtualMeeting = (store: RootStore): number => {
+	const myMeetings = filter(store.meetings, (meeting) => {
+		const userIsParticipant = find(
+			meeting.participants,
+			(participant) => participant.userId === store.session.id
+		);
+		const userIsOwner = find(
+			store.rooms[meeting.roomId]?.members,
+			(member) => member.userId === store.session.id && member.owner
+		);
+		return !!userIsParticipant && !!userIsOwner;
+	});
+	return reduce(myMeetings, (acc, meeting) => acc + size(meeting.waitingList || []), 0);
 };

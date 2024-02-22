@@ -12,22 +12,22 @@ import {
 	orderSpeakingTiles,
 	sendAudioFeedback
 } from './MeetingsUtils';
+import { mockPlayAudio } from '../tests/mocks/global';
 import { STREAM_TYPE, TileData } from '../types/store/ActiveMeetingTypes';
 
 describe('MeetingsUtils', () => {
 	describe('Audio feedback', () => {
 		test('test return of meetingIn notification', () => {
-			const mockAudio = jest
-				.spyOn(window.HTMLMediaElement.prototype, 'play')
-				.mockImplementation(() => Promise.resolve());
+			mockPlayAudio.mockImplementation(() => Promise.resolve());
 
 			sendAudioFeedback(MeetingSoundFeedback.MEETING_JOIN_NOTIFICATION);
 			sendAudioFeedback(MeetingSoundFeedback.MEETING_AUDIO_ON);
 			sendAudioFeedback(MeetingSoundFeedback.MEETING_AUDIO_OFF);
 			sendAudioFeedback(MeetingSoundFeedback.MEETING_SCREENSHARE_NOTIFICATION);
 			sendAudioFeedback(MeetingSoundFeedback.MEETING_LEAVE_NOTIFICATION);
+			sendAudioFeedback(MeetingSoundFeedback.NEW_WAITING_USER);
 
-			expect(mockAudio).toHaveBeenCalledTimes(5);
+			expect(mockPlayAudio).toHaveBeenCalledTimes(6);
 		});
 	});
 

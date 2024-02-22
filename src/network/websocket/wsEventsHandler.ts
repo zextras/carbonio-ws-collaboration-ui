@@ -301,23 +301,40 @@ export function wsEventsHandler(event: WsEvent): void {
 			break;
 		}
 		case WsEventType.MEETING_WAITING_PARTICIPANT_JOINED: {
-			if (inThisMeetingTab(event.meetingId)) {
+			const meeting = find(state.meetings, (meeting) => meeting.id === event.meetingId);
+			const userIsParticipant = find(
+				meeting?.participants,
+				(participant) => participant.userId === useStore.getState().session.id
+			);
+			if (userIsParticipant) {
 				state.addUserToWaitingList(event.meetingId, event.userId);
-				displayWaitingListNotification(event.meetingId);
-				// Custom event to display snackbar
 				sendCustomEvent({ name: EventName.NEW_WAITING_USER, data: event });
+				if (inThisMeetingTab(event.meetingId)) {
+					displayWaitingListNotification(event.meetingId);
+					sendAudioFeedback(MeetingSoundFeedback.NEW_WAITING_USER);
+				}
 			}
 			break;
 		}
 		case WsEventType.MEETING_USER_ACCEPTED: {
-			if (inThisMeetingTab(event.meetingId)) {
+			const meeting = find(state.meetings, (meeting) => meeting.id === event.meetingId);
+			const userIsParticipant = find(
+				meeting?.participants,
+				(participant) => participant.userId === useStore.getState().session.id
+			);
+			if (userIsParticipant) {
 				state.removeUserFromWaitingList(event.meetingId, event.userId);
 				sendCustomEvent({ name: EventName.MEETING_USER_ACCEPTED, data: event });
 			}
 			break;
 		}
 		case WsEventType.MEETING_USER_REJECTED: {
-			if (inThisMeetingTab(event.meetingId)) {
+			const meeting = find(state.meetings, (meeting) => meeting.id === event.meetingId);
+			const userIsParticipant = find(
+				meeting?.participants,
+				(participant) => participant.userId === useStore.getState().session.id
+			);
+			if (userIsParticipant) {
 				state.removeUserFromWaitingList(event.meetingId, event.userId);
 				sendCustomEvent({ name: EventName.MEETING_USER_REJECTED, data: event });
 			}

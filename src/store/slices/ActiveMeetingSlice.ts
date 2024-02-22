@@ -227,9 +227,9 @@ export const useActiveMeetingSlice: StateCreator<ActiveMeetingSlice> = (
 					}
 				} else {
 					// If flag is false, remove the ID from the array if it's present
-					const index = draft.activeMeeting[meetingId].talkingUsers.indexOf(userId);
+					const index = draft.activeMeeting[meetingId]?.talkingUsers.indexOf(userId);
 					if (index !== -1) {
-						draft.activeMeeting[meetingId].talkingUsers?.splice(index, 1);
+						draft.activeMeeting[meetingId]?.talkingUsers?.splice(index, 1);
 					}
 				}
 			}),

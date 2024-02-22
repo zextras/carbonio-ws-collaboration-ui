@@ -10,6 +10,7 @@ import { useUserAccount, useUserSettings } from '@zextras/carbonio-shell-ui';
 
 import CounterBadgeUpdater from './chats/components/CounterBadgeUpdater';
 import RegisterCreationButton from './chats/components/RegisterCreationButton';
+import WaitingListSnackbar from './chats/components/settings/WaitingListSnackbar';
 import useChatsApp from './chats/useChatsApp';
 import MeetingNotificationHandler from './meetings/components/MeetingNotificationsHandler';
 import useMeetingsApp from './meetings/useMeetingsApp';
@@ -70,6 +71,7 @@ export default function App() {
 			<RegisterCreationButton />
 			<CounterBadgeUpdater />
 			<MeetingNotificationHandler />
+			<WaitingListSnackbar />
 		</>
 	);
 }
