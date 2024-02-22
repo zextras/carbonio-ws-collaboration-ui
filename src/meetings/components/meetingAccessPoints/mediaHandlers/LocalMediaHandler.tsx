@@ -50,6 +50,8 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 
 	const [audioMediaList, setAudioMediaList] = useState<[] | MediaDeviceInfo[]>([]);
 	const [videoMediaList, setVideoMediaList] = useState<[] | MediaDeviceInfo[]>([]);
+	const [audioListOpen, setAudioListOpen] = useState<boolean>(false);
+	const [videoListOpen, setVideoListOpen] = useState<boolean>(false);
 
 	const toggleStreams = useCallback(
 		(audio: boolean, video: boolean, audioId: string | undefined, videoId: string | undefined) => {
@@ -108,6 +110,7 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 				onClick: (): void => {
 					if (mediaDevicesEnabled.video) {
 						setEnterButtonIsEnabled(false);
+						setVideoListOpen(false);
 						toggleStreams(
 							mediaDevicesEnabled.audio,
 							true,
@@ -141,6 +144,7 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 				onClick: (): void => {
 					if (mediaDevicesEnabled.audio) {
 						setEnterButtonIsEnabled(false);
+						setAudioListOpen(false);
 						toggleStreams(
 							true,
 							mediaDevicesEnabled.video,
@@ -218,6 +222,14 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 		selectedDevicesId.video
 	]);
 
+	const toggleAudioDropdown = useCallback(() => {
+		setAudioListOpen((prevState) => !prevState);
+	}, [setAudioListOpen]);
+
+	const toggleVideoDropdown = useCallback(() => {
+		setVideoListOpen((prevState) => !prevState);
+	}, [setVideoListOpen]);
+
 	useEffect(() => {
 		if (BrowserUtils.isFirefox()) {
 			navigator.mediaDevices.enumerateDevices().then((list) => {
@@ -253,11 +265,14 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 			<Tooltip placement="top" label={mediaDevicesEnabled.video ? disableCamLabel : enableCamLabel}>
 				<MultiButton
 					primaryIcon={mediaDevicesEnabled.video ? 'Video' : 'VideoOff'}
+					icon={videoListOpen ? 'ChevronUpOutline' : 'ChevronDownOutline'}
 					size="large"
 					shape="round"
 					background={'primary'}
 					onClick={toggleVideo}
 					dropdownProps={{
+						forceOpen: videoListOpen,
+						onClick: toggleVideoDropdown,
 						width: 'fit',
 						placement: 'bottom-end',
 						items: mediaVideoList
@@ -269,10 +284,13 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 			<Tooltip placement="top" label={mediaDevicesEnabled.audio ? disableMicLabel : enableMicLabel}>
 				<MultiButton
 					primaryIcon={mediaDevicesEnabled.audio ? 'Mic' : 'MicOff'}
+					icon={audioListOpen ? 'ChevronUpOutline' : 'ChevronDownOutline'}
 					size="large"
 					shape="round"
 					background={'primary'}
 					dropdownProps={{
+						forceOpen: audioListOpen,
+						onClick: toggleAudioDropdown,
 						width: 'fit',
 						placement: 'bottom-start',
 						items: mediaAudioList

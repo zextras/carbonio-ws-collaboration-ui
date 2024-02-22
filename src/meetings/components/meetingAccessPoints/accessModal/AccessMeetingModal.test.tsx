@@ -125,7 +125,10 @@ describe('AccessMeetingModal - enter to meeting', () => {
 		expect(device).toHaveStyle(normalFontWeight);
 
 		await user.click(device);
-		await user.click(audioButtonSelect[1]);
+
+		const audioButtonSelectUpdated = await screen.findAllByTestId(iconChevronDownOutline);
+
+		await user.click(audioButtonSelectUpdated[1]);
 		const deviceSelected = await screen.findByText(audioDevice2);
 		expect(deviceSelected).toBeInTheDocument();
 		// selected
@@ -145,7 +148,10 @@ describe('AccessMeetingModal - enter to meeting', () => {
 		expect(device).toHaveStyle(normalFontWeight);
 
 		await user.click(device);
-		await user.click(videoButtonSelect[0]);
+
+		const videoButtonSelectUpdated = await screen.findAllByTestId(iconChevronDownOutline);
+
+		await user.click(videoButtonSelectUpdated[0]);
 		const deviceSelected = await screen.findByText(videoDevice2);
 		expect(deviceSelected).toBeInTheDocument();
 		// selected
