@@ -34,6 +34,11 @@ const ActionsWrapper = styled(Container)`
 	box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
 `;
 
+const SecondActionsWrapper = styled(ActionsWrapper)`
+	position: absolute;
+	right: 3.25rem;
+`;
+
 type MeetingActionsProps = {
 	streamsWrapperRef: RefObject<HTMLDivElement>;
 };
@@ -152,7 +157,7 @@ const MeetingActionsBar = ({ streamsWrapperRef }: MeetingActionsProps): ReactEle
 			orientation="horizontal"
 		>
 			<ActionsWrapper
-				background={'text'}
+				background="text"
 				width="fit"
 				height="fit"
 				orientation="horizontal"
@@ -173,7 +178,16 @@ const MeetingActionsBar = ({ streamsWrapperRef }: MeetingActionsProps): ReactEle
 				<FullScreenButton />
 				<SwitchViewButton />
 			</ActionsWrapper>
-			<LeaveMeetingButton isHoovering={isHoovering} />
+			<SecondActionsWrapper
+				background="text"
+				width="fit"
+				height="fit"
+				orientation="horizontal"
+				onMouseEnter={handleMouseEnter}
+				onMouseLeave={handleMouseLeave}
+			>
+				<LeaveMeetingButton isHoovering={isHoovering} />
+			</SecondActionsWrapper>
 		</BarContainer>
 	);
 };
