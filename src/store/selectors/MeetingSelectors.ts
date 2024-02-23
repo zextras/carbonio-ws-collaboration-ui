@@ -22,6 +22,10 @@ export const getRoomIdByMeetingId = (store: RootStore, meetingId: string): strin
 
 export const getMeetingActive = (store: RootStore, roomId: string): boolean =>
 	store.meetings[roomId] && store.meetings[roomId].active;
+
+export const getMeetingActiveByMeetingId = (store: RootStore, meetingId: string): boolean =>
+	!!find(store.meetings, (meeting) => meeting.id === meetingId)?.active;
+
 export const getMeetingParticipants = (
 	store: RootStore,
 	roomId: string
@@ -54,6 +58,7 @@ export const getNumberOfMeetingParticipantsByMeetingId = (
 	meetingId: string
 ): number | undefined =>
 	size(find(store.meetings, (meeting) => meeting.id === meetingId)?.participants);
+
 export const getParticipantAudioStatus = (
 	store: RootStore,
 	meetingId: string | undefined,
