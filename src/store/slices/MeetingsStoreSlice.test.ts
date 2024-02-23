@@ -100,6 +100,8 @@ describe('Test components slice', () => {
 			const { waitingList } = result.current.meetings[temporaryRoom.id];
 			expect(waitingList).not.toBeNull();
 			expect(size(waitingList)).toBe(2);
+			expect(waitingList).toContain('userId0');
+			expect(waitingList).toContain('userId1');
 		});
 
 		test('Replace existing waiting list', () => {
@@ -115,6 +117,10 @@ describe('Test components slice', () => {
 			const { waitingList } = result.current.meetings[temporaryRoom.id];
 			expect(waitingList).not.toBeNull();
 			expect(size(waitingList)).toBe(2);
+			expect(waitingList).not.toContain('userId0');
+			expect(waitingList).not.toContain('userId1');
+			expect(waitingList).toContain('userId2');
+			expect(waitingList).toContain('userId3');
 		});
 
 		test('Add a user to an empty waiting list in which the user is not present', () => {
@@ -129,6 +135,7 @@ describe('Test components slice', () => {
 			const { waitingList } = result.current.meetings[temporaryRoom.id];
 			expect(waitingList).not.toBeNull();
 			expect(size(waitingList)).toBe(1);
+			expect(waitingList).toContain('userId0');
 		});
 
 		test('Add a user to a waiting list in which the user is already present', () => {
@@ -143,6 +150,8 @@ describe('Test components slice', () => {
 			const { waitingList } = result.current.meetings[temporaryRoom.id];
 			expect(waitingList).not.toBeNull();
 			expect(size(waitingList)).toBe(2);
+			expect(waitingList).toContain('userId0');
+			expect(waitingList).toContain('userId1');
 		});
 
 		test('Remove a user from a waiting list in which the user is present', () => {
@@ -157,6 +166,8 @@ describe('Test components slice', () => {
 			const { waitingList } = result.current.meetings[temporaryRoom.id];
 			expect(waitingList).not.toBeNull();
 			expect(size(waitingList)).toBe(1);
+			expect(waitingList).toContain('userId1');
+			expect(waitingList).not.toContain('userId0');
 		});
 
 		test('Remove a user from a waiting list in which the user is not present', () => {
@@ -171,6 +182,9 @@ describe('Test components slice', () => {
 			const { waitingList } = result.current.meetings[temporaryRoom.id];
 			expect(waitingList).not.toBeNull();
 			expect(size(waitingList)).toBe(2);
+			expect(waitingList).toContain('userId0');
+			expect(waitingList).toContain('userId1');
+			expect(waitingList).not.toContain('userId2');
 		});
 	});
 });
