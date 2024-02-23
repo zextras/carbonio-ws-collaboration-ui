@@ -4,71 +4,53 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import { useMemo } from 'react';
 
-import { map } from 'lodash';
+import { find, map } from 'lodash';
 
 import { FilteredConversation } from '../chats/components/secondaryBar/SecondaryBarSingleGroupsView';
+import { getOneToOneAndGroupsInfoOrderedByLastMessage } from '../store/selectors/MessagesSelectors';
 import { getUserId } from '../store/selectors/SessionSelectors';
+import { getUsersSelector } from '../store/selectors/UsersSelectors';
 import useStore from '../store/Store';
 
-export const useFilterRoomsOnInput = (
-	roomsIds: FilteredConversation[]
-): {
-	setFilteredInput: Dispatch<SetStateAction<string>>;
-	filteredConversationsIds: { roomId: string; roomType: string; lastMessageTimestamp: number }[];
-} => {
+export const useFilterRoomsOnInput = (filteredInput: string): FilteredConversation[] => {
+	const roomsInfo = useStore<FilteredConversation[]>(getOneToOneAndGroupsInfoOrderedByLastMessage);
 	const sessionId = useStore(getUserId);
+	const users = useStore(getUsersSelector);
 
-	const [filteredConversationsIds, setFilteredConversationsIds] = useState<
-		{ roomId: string; roomType: string; lastMessageTimestamp: number }[]
-	>([]);
-	const [filteredInput, setFilteredInput] = useState('');
+	return useMemo(() => {
+		if (filteredInput === '') return roomsInfo;
 
-	useEffect(() => {
-		if (filteredInput === '') {
-			setFilteredConversationsIds(roomsIds);
-		} else {
-			const { users, rooms } = useStore.getState();
-			const filteredGroups: FilteredConversation[] = [];
-			const filteredOneToOne: FilteredConversation[] = [];
-			map(roomsIds, (room) => {
-				if (room.roomType === 'group') {
-					const { name, members } = rooms[room.roomId];
-					if (name?.toLocaleLowerCase().includes(filteredInput)) {
-						filteredGroups.push(room);
-					} else {
-						members?.every((member) => {
-							if (
-								users[member.userId].name.toLocaleLowerCase().includes(filteredInput) ||
-								users[member.userId].email.toLocaleLowerCase().includes(filteredInput)
-							) {
-								filteredGroups.push(room);
-								return false;
-							}
-							return true;
-						});
-					}
+		const filteredGroups: FilteredConversation[] = [];
+		const filteredOneToOne: FilteredConversation[] = [];
+		map(roomsInfo, (room) => {
+			if (room.roomType === 'group') {
+				if (room.name.toLocaleLowerCase().includes(filteredInput)) {
+					filteredGroups.push(room);
 				} else {
-					const { members } = rooms[room.roomId];
-					const userId = members
-						? members[0].userId === sessionId
-							? members[1].userId
-							: members[0].userId
-						: '';
-					const userName = users[userId].name.toLocaleLowerCase();
-					const userEmail = users[userId].email?.split('@')[0].toLocaleLowerCase();
-					if (userName.includes(filteredInput) || userEmail.includes(filteredInput)) {
+					room.members.every((member) => {
+						if (
+							users[member.userId]?.name?.toLocaleLowerCase().includes(filteredInput) ||
+							users[member.userId]?.email?.split('@')[0].toLocaleLowerCase().includes(filteredInput)
+						) {
+							filteredGroups.push(room);
+							return false;
+						}
+						return true;
+					});
+				}
+			} else {
+				const userId = find(room.members, (member) => member.userId !== sessionId)?.userId;
+				if (userId) {
+					const userName = users[userId]?.name?.toLocaleLowerCase();
+					const userEmail = users[userId]?.email?.split('@')[0].toLocaleLowerCase();
+					if (userName?.includes(filteredInput) || userEmail?.includes(filteredInput)) {
 						filteredOneToOne.push(room);
 					}
 				}
-			});
-			setFilteredConversationsIds([...filteredOneToOne, ...filteredGroups]);
-		}
-	}, [filteredInput, roomsIds, sessionId]);
-
-	return {
-		filteredConversationsIds,
-		setFilteredInput
-	};
+			}
+		});
+		return [...filteredOneToOne, ...filteredGroups];
+	}, [filteredInput, roomsInfo, sessionId, users]);
 };
