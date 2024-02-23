@@ -321,25 +321,15 @@ export function wsEventsHandler(event: WsEvent): void {
 			break;
 		}
 		case WsEventType.MEETING_USER_ACCEPTED: {
-			const meeting = find(state.meetings, (meeting) => meeting.id === event.meetingId);
-			const userIsParticipant = find(
-				meeting?.participants,
-				(participant) => participant.userId === useStore.getState().session.id
-			);
-			if (userIsParticipant) {
-				state.removeUserFromWaitingList(event.meetingId, event.userId);
+			state.removeUserFromWaitingList(event.meetingId, event.userId);
+			if (inThisMeetingTab(event.meetingId)) {
 				sendCustomEvent({ name: EventName.MEETING_USER_ACCEPTED, data: event });
 			}
 			break;
 		}
 		case WsEventType.MEETING_USER_REJECTED: {
-			const meeting = find(state.meetings, (meeting) => meeting.id === event.meetingId);
-			const userIsParticipant = find(
-				meeting?.participants,
-				(participant) => participant.userId === useStore.getState().session.id
-			);
-			if (userIsParticipant) {
-				state.removeUserFromWaitingList(event.meetingId, event.userId);
+			state.removeUserFromWaitingList(event.meetingId, event.userId);
+			if (inThisMeetingTab(event.meetingId)) {
 				sendCustomEvent({ name: EventName.MEETING_USER_REJECTED, data: event });
 			}
 			break;
