@@ -11,6 +11,7 @@ import {
 	MeetingJoinedEvent,
 	MeetingParticipantClashedEvent,
 	MeetingStartedEvent,
+	MeetingStoppedEvent,
 	MeetingUserAcceptedEvent,
 	MeetingUserRejectedEvent,
 	MeetingWaitingParticipantClashed,
@@ -42,7 +43,7 @@ export type IncomingMeetingEvent = {
 
 export type RemovedMeetingNotificationEvent = {
 	name: EventName.REMOVED_MEETING_NOTIFICATION;
-	data: MeetingJoinedEvent;
+	data: MeetingJoinedEvent | MeetingStoppedEvent;
 };
 
 export type ParticipantClashedEvent = {
