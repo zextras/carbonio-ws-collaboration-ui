@@ -64,6 +64,7 @@ export const mockedDevicesList = jest.fn(() => [
 		groupId: 'device2'
 	}
 ]);
+
 Object.defineProperty(global.navigator, 'mediaDevices', {
 	value: {
 		getUserMedia: jest.fn(() =>
