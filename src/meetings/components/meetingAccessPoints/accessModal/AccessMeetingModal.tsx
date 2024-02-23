@@ -105,6 +105,7 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 
 	const wrapperRef = useRef<HTMLDivElement>(null);
 	const videoStreamRef = useRef<HTMLVideoElement>(null);
+	const meetingAccessRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
 		if (wrapperRef.current) setWrapperWidth(wrapperRef.current.offsetWidth);
@@ -203,6 +204,7 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 				showCloseIcon={false}
 				title={modalTitle}
 				customFooter={modalFooter}
+				ref={meetingAccessRef}
 			>
 				<Padding top="small" />
 				<Container
@@ -230,6 +232,7 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 						setSelectedDevicesId={setSelectedDevicesId}
 						mediaDevicesEnabled={mediaDevicesEnabled}
 						setMediaDevicesEnabled={setMediaDevicesEnabled}
+						meetingAccessRef={meetingAccessRef}
 					/>
 					<Padding bottom="1rem" />
 					<Text size="small">{setInputDescription}</Text>

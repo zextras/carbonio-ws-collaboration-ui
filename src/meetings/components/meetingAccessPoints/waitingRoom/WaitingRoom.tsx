@@ -79,6 +79,7 @@ const WaitingRoom: FC<WaitingRoomProps> = ({ meetingId, meetingName }) => {
 	const { goToInfoPage, goToMeetingPage } = useRouting();
 
 	const videoStreamRef = useRef<HTMLVideoElement>(null);
+	const meetingAccessRef = useRef<HTMLDivElement>(null);
 
 	const onToggleAudioTest = useCallback(() => {
 		setVideoPlayerTestMuted((prevState) => !prevState);
@@ -159,7 +160,7 @@ const WaitingRoom: FC<WaitingRoomProps> = ({ meetingId, meetingName }) => {
 	}, [streamTrack, mediaDevicesEnabled.audio, mediaDevicesEnabled.video]);
 
 	return (
-		<Container mainAlignment="center" crossAlignment="center">
+		<Container mainAlignment="center" crossAlignment="center" ref={meetingAccessRef}>
 			<Container width="fit" height="fit" gap="0.5rem">
 				<Text size="extralarge" weight="bold">
 					{howToJoinMeeting}
@@ -181,6 +182,7 @@ const WaitingRoom: FC<WaitingRoomProps> = ({ meetingId, meetingName }) => {
 					setSelectedDevicesId={setSelectedDevicesId}
 					mediaDevicesEnabled={mediaDevicesEnabled}
 					setMediaDevicesEnabled={setMediaDevicesEnabled}
+					meetingAccessRef={meetingAccessRef}
 				/>
 				<Button
 					type="outlined"

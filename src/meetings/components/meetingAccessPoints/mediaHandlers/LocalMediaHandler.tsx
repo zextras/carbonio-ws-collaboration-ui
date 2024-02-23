@@ -6,10 +6,12 @@
 import React, {
 	Dispatch,
 	FC,
+	RefObject,
 	SetStateAction,
 	useCallback,
 	useEffect,
 	useMemo,
+	useRef,
 	useState
 } from 'react';
 
@@ -31,6 +33,7 @@ type LocalMediaHandlerProps = {
 	>;
 	mediaDevicesEnabled: { audio: boolean; video: boolean };
 	setMediaDevicesEnabled: Dispatch<SetStateAction<{ audio: boolean; video: boolean }>>;
+	meetingAccessRef: RefObject<HTMLDivElement>;
 };
 
 const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
@@ -40,7 +43,8 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 	selectedDevicesId,
 	setSelectedDevicesId,
 	mediaDevicesEnabled,
-	setMediaDevicesEnabled
+	setMediaDevicesEnabled,
+	meetingAccessRef
 }) => {
 	const [t] = useTranslation();
 	const disableCamLabel = t('meeting.interactions.disableCamera', 'Disable camera');
@@ -52,6 +56,9 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 	const [videoMediaList, setVideoMediaList] = useState<[] | MediaDeviceInfo[]>([]);
 	const [audioListOpen, setAudioListOpen] = useState<boolean>(false);
 	const [videoListOpen, setVideoListOpen] = useState<boolean>(false);
+
+	const audioDropdownRef = useRef<HTMLDivElement>(null);
+	const videoDropdownRef = useRef<HTMLDivElement>(null);
 
 	const toggleStreams = useCallback(
 		(audio: boolean, video: boolean, audioId: string | undefined, videoId: string | undefined) => {
@@ -188,39 +195,47 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 			.catch();
 	}, []);
 
-	const toggleVideo = useCallback(() => {
-		setEnterButtonIsEnabled(false);
-		toggleStreams(
+	const toggleVideo = useCallback(
+		(event) => {
+			event.stopPropagation();
+			setEnterButtonIsEnabled(false);
+			toggleStreams(
+				mediaDevicesEnabled.audio,
+				!mediaDevicesEnabled.video,
+				selectedDevicesId.audio,
+				selectedDevicesId.video
+			);
+		},
+		[
+			setEnterButtonIsEnabled,
+			toggleStreams,
 			mediaDevicesEnabled.audio,
-			!mediaDevicesEnabled.video,
-			selectedDevicesId.audio,
-			selectedDevicesId.video
-		);
-	}, [
-		setEnterButtonIsEnabled,
-		toggleStreams,
-		mediaDevicesEnabled.audio,
-		mediaDevicesEnabled.video,
-		selectedDevicesId.audio,
-		selectedDevicesId.video
-	]);
-
-	const toggleAudio = useCallback(() => {
-		setEnterButtonIsEnabled(false);
-		toggleStreams(
-			!mediaDevicesEnabled.audio,
 			mediaDevicesEnabled.video,
 			selectedDevicesId.audio,
 			selectedDevicesId.video
-		);
-	}, [
-		setEnterButtonIsEnabled,
-		toggleStreams,
-		mediaDevicesEnabled.audio,
-		mediaDevicesEnabled.video,
-		selectedDevicesId.audio,
-		selectedDevicesId.video
-	]);
+		]
+	);
+
+	const toggleAudio = useCallback(
+		(event) => {
+			event.stopPropagation();
+			setEnterButtonIsEnabled(false);
+			toggleStreams(
+				!mediaDevicesEnabled.audio,
+				mediaDevicesEnabled.video,
+				selectedDevicesId.audio,
+				selectedDevicesId.video
+			);
+		},
+		[
+			setEnterButtonIsEnabled,
+			toggleStreams,
+			mediaDevicesEnabled.audio,
+			mediaDevicesEnabled.video,
+			selectedDevicesId.audio,
+			selectedDevicesId.video
+		]
+	);
 
 	const toggleAudioDropdown = useCallback(() => {
 		setAudioListOpen((prevState) => !prevState);
@@ -260,6 +275,45 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 		};
 	}, [updateListOfDevices]);
 
+	const handleClickOutsideAudioDropdown = useCallback((e) => {
+		if (audioDropdownRef.current && !audioDropdownRef.current.contains(e.target)) {
+			setAudioListOpen(false);
+		}
+	}, []);
+
+	const handleClickOutsideVideoDropdown = useCallback((e) => {
+		if (videoDropdownRef.current && !videoDropdownRef.current.contains(e.target)) {
+			setVideoListOpen(false);
+		}
+	}, []);
+
+	useEffect(() => {
+		let elRef: React.RefObject<HTMLDivElement> | null = meetingAccessRef;
+		if (elRef?.current) {
+			if (audioListOpen) {
+				elRef.current.addEventListener('mousedown', handleClickOutsideAudioDropdown);
+			}
+			if (videoListOpen) {
+				elRef.current.addEventListener('mousedown', handleClickOutsideVideoDropdown);
+			}
+		}
+
+		return (): void => {
+			if (elRef?.current) {
+				elRef.current.removeEventListener('mousedown', handleClickOutsideAudioDropdown);
+				elRef.current.addEventListener('mousedown', handleClickOutsideVideoDropdown);
+
+				elRef = null;
+			}
+		};
+	}, [
+		audioListOpen,
+		handleClickOutsideAudioDropdown,
+		handleClickOutsideVideoDropdown,
+		meetingAccessRef,
+		videoListOpen
+	]);
+
 	return (
 		<Container height="fit" width="fit" orientation={'horizontal'}>
 			<Tooltip placement="top" label={mediaDevicesEnabled.video ? disableCamLabel : enableCamLabel}>
@@ -275,7 +329,8 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 						onClick: toggleVideoDropdown,
 						width: 'fit',
 						placement: 'bottom-end',
-						items: mediaVideoList
+						items: mediaVideoList,
+						dropdownListRef: videoDropdownRef
 					}}
 					items={mediaVideoList}
 				/>
@@ -293,7 +348,8 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 						onClick: toggleAudioDropdown,
 						width: 'fit',
 						placement: 'bottom-start',
-						items: mediaAudioList
+						items: mediaAudioList,
+						dropdownListRef: audioDropdownRef
 					}}
 					onClick={toggleAudio}
 					items={mediaAudioList}
