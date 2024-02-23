@@ -18,6 +18,7 @@ export type Meeting = {
 	createdAt: string;
 	meetingType: MeetingType;
 };
+
 export type MeetingParticipantMap = {
 	[userId: string]: MeetingParticipant;
 };

@@ -3,12 +3,13 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import React, { ReactElement, useCallback, useEffect, useState } from 'react';
+import React, { ReactElement, useCallback, useEffect } from 'react';
 
 import { IconButton, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 
+import useFullScreen from '../../../hooks/useFullScreen';
 import { MeetingRoutesParams } from '../../../hooks/useRouting';
 import { getMeetingSidebarStatus } from '../../../store/selectors/ActiveMeetingSelectors';
 import useStore from '../../../store/Store';
@@ -24,53 +25,40 @@ const FullScreenButton = (): ReactElement => {
 	const sidebarIsVisible: boolean = useStore((store) => getMeetingSidebarStatus(store, meetingId));
 	const setMeetingSidebarStatus = useStore((store) => store.setMeetingSidebarStatus);
 
-	const [isFullScreenEnabled, setIsFullScreenEnabled] = useState(false);
-
-	const checkFullScreenStatus = (): void =>
-		window.parent.document.fullscreenElement /* || window.parent.document.webkitFullscreenElement */
-			? setIsFullScreenEnabled(true)
-			: setIsFullScreenEnabled(false);
+	const { isFullScreen, toggleFullScreen } = useFullScreen();
 
 	const checkKeyPress = useCallback(
 		(e: KeyboardEvent): void => {
 			if (e.key === 'F11') {
 				e.preventDefault();
-				if (!isFullScreenEnabled && !window.parent.document.fullscreenElement) {
-					window.parent.document.documentElement.requestFullscreen();
-				} else if (window.parent.document.exitFullscreen) {
-					window.parent.document.exitFullscreen();
-				}
+				toggleFullScreen();
 			}
 		},
-		[isFullScreenEnabled]
+		[toggleFullScreen]
 	);
 
-	const toggleFullScreen = useCallback((): void => {
-		if (sidebarIsVisible && !isFullScreenEnabled) {
+	const toggleFullScreenFn = useCallback((): void => {
+		if (sidebarIsVisible && !isFullScreen) {
 			setMeetingSidebarStatus(meetingId, false);
 		}
-		!window.parent.document.fullscreenElement
-			? window.parent.document.documentElement.requestFullscreen()
-			: window.parent.document.exitFullscreen();
-	}, [sidebarIsVisible, isFullScreenEnabled, setMeetingSidebarStatus, meetingId]);
+		toggleFullScreen();
+	}, [sidebarIsVisible, isFullScreen, toggleFullScreen, setMeetingSidebarStatus, meetingId]);
 
 	useEffect(() => {
-		window.parent.addEventListener('keydown', checkKeyPress, true);
-		window.parent.document.onfullscreenchange = checkFullScreenStatus;
-		return window.parent.removeEventListener('keydown', checkKeyPress);
+		window.addEventListener('keydown', checkKeyPress, true);
+		return () => {
+			window.removeEventListener('keydown', checkKeyPress);
+		};
 	}, [checkKeyPress]);
 
 	return (
-		<Tooltip
-			placement="top"
-			label={isFullScreenEnabled ? disableFullScreenLabel : enableFullScreenLabel}
-		>
+		<Tooltip placement="top" label={isFullScreen ? disableFullScreenLabel : enableFullScreenLabel}>
 			<IconButton
-				data-testid="fullscreen-button"
+				data-testid={isFullScreen ? 'exit-fullscreen-button' : 'fullscreen-button'}
 				iconColor="gray6"
 				backgroundColor="primary"
-				icon={isFullScreenEnabled ? 'Collapse' : 'Expand'}
-				onClick={toggleFullScreen}
+				icon={isFullScreen ? 'Collapse' : 'Expand'}
+				onClick={toggleFullScreenFn}
 				size="large"
 			/>
 		</Tooltip>
