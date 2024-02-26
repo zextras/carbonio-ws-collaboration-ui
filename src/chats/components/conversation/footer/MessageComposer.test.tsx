@@ -11,6 +11,7 @@ import { createEvent, fireEvent, screen, waitFor } from '@testing-library/react'
 import { UserEvent } from '@testing-library/user-event/setup/setup';
 import { act } from 'react-dom/test-utils';
 
+import ConversationFooter from './ConversationFooter';
 import MessageComposer from './MessageComposer';
 import UploadAttachmentManagerView from './UploadAttachmentManagerView';
 import useStore from '../../../../store/Store';
@@ -701,7 +702,7 @@ describe('forward footer', () => {
 		store.addRoom(mockedRoom);
 		store.newMessage(mockedMessage);
 
-		setup(<MessageComposer roomId={mockedRoom.id} />);
+		setup(<ConversationFooter roomId={mockedRoom.id} />);
 
 		act(() => {
 			store.setForwardMessageList(mockedRoom.id, mockedMessage);
@@ -717,7 +718,7 @@ describe('forward footer', () => {
 		store.newMessage(mockedMessage);
 		store.newMessage(otherMockedMessage);
 		store.setForwardMessageList(mockedRoom.id, mockedMessage);
-		setup(<MessageComposer roomId={mockedRoom.id} />);
+		setup(<ConversationFooter roomId={mockedRoom.id} />);
 
 		act(() => {
 			store.setForwardMessageList(mockedRoom.id, otherMockedMessage);
@@ -734,7 +735,7 @@ describe('forward footer', () => {
 		store.newMessage(otherMockedMessage);
 		store.setForwardMessageList(mockedRoom.id, mockedMessage);
 		store.setForwardMessageList(mockedRoom.id, otherMockedMessage);
-		const { user } = setup(<MessageComposer roomId={mockedRoom.id} />);
+		const { user } = setup(<ConversationFooter roomId={mockedRoom.id} />);
 
 		const exitButton = await screen.findByRole('button', { name: 'Exit Selection Mode' });
 		expect(exitButton).toBeInTheDocument();
