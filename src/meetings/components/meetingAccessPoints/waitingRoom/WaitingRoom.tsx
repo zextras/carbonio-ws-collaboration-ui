@@ -108,9 +108,10 @@ const WaitingRoom: FC<WaitingRoomProps> = ({ meetingId, meetingName }) => {
 	}, [goToMeetingPage, joinMeeting, meetingId]);
 
 	const handleHungUp = useCallback(() => {
+		freeMediaResources(streamTrack);
 		if (userIsReady) MeetingsApi.leaveWaitingRoom(meetingId);
 		goToInfoPage(PAGE_INFO_TYPE.HANG_UP_PAGE);
-	}, [goToInfoPage, meetingId, userIsReady]);
+	}, [goToInfoPage, meetingId, streamTrack, userIsReady]);
 
 	const handleAcceptance = useCallback(() => {
 		joinMeeting()
@@ -122,8 +123,9 @@ const WaitingRoom: FC<WaitingRoomProps> = ({ meetingId, meetingName }) => {
 	}, [goToMeetingPage, joinMeeting, meetingId, streamTrack]);
 
 	const handleRejected = useCallback(() => {
+		freeMediaResources(streamTrack);
 		goToInfoPage(PAGE_INFO_TYPE.NEXT_TIME_PAGE);
-	}, [goToInfoPage]);
+	}, [goToInfoPage, streamTrack]);
 
 	const handleRejoin = useCallback(() => {
 		goToInfoPage(PAGE_INFO_TYPE.ALREADY_ACTIVE_MEETING_SESSION);
