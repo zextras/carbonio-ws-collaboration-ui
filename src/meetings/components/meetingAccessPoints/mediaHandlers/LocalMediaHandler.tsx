@@ -117,7 +117,6 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 				onClick: (): void => {
 					if (mediaDevicesEnabled.video) {
 						setEnterButtonIsEnabled(false);
-						setVideoListOpen(false);
 						toggleStreams(
 							mediaDevicesEnabled.audio,
 							true,
@@ -151,7 +150,6 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 				onClick: (): void => {
 					if (mediaDevicesEnabled.audio) {
 						setEnterButtonIsEnabled(false);
-						setAudioListOpen(false);
 						toggleStreams(
 							true,
 							mediaDevicesEnabled.video,
