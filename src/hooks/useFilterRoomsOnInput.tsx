@@ -22,17 +22,18 @@ export const useFilterRoomsOnInput = (filteredInput: string): FilteredConversati
 	return useMemo(() => {
 		if (filteredInput === '') return roomsInfo;
 
+		const filter = filteredInput.toLocaleLowerCase();
 		const filteredGroups: FilteredConversation[] = [];
 		const filteredOneToOne: FilteredConversation[] = [];
 		map(roomsInfo, (room) => {
 			if (room.roomType === 'group') {
-				if (room.name.toLocaleLowerCase().includes(filteredInput)) {
+				if (room.name.toLocaleLowerCase().includes(filter)) {
 					filteredGroups.push(room);
 				} else {
 					room.members.every((member) => {
 						if (
-							users[member.userId]?.name?.toLocaleLowerCase().includes(filteredInput) ||
-							users[member.userId]?.email?.split('@')[0].toLocaleLowerCase().includes(filteredInput)
+							users[member.userId]?.name?.toLocaleLowerCase().includes(filter) ||
+							users[member.userId]?.email?.split('@')[0].toLocaleLowerCase().includes(filter)
 						) {
 							filteredGroups.push(room);
 							return false;
@@ -45,7 +46,7 @@ export const useFilterRoomsOnInput = (filteredInput: string): FilteredConversati
 				if (userId) {
 					const userName = users[userId]?.name?.toLocaleLowerCase();
 					const userEmail = users[userId]?.email?.split('@')[0].toLocaleLowerCase();
-					if (userName?.includes(filteredInput) || userEmail?.includes(filteredInput)) {
+					if (userName?.includes(filter) || userEmail?.includes(filter)) {
 						filteredOneToOne.push(room);
 					}
 				}
