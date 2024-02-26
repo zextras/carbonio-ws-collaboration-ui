@@ -8,6 +8,8 @@
 // https://jestjs.io/docs/en/manual-mocks#mocking-methods-which-are-not-implemented-in-jsdom
 
 export const fetchResponse: jest.Mock = jest.fn(() => ({}));
+export const requestFullscreen = jest.fn();
+
 Object.defineProperty(global, 'fetch', {
 	value: jest.fn(() =>
 		Promise.resolve({
@@ -176,7 +178,7 @@ window.resizeTo = function resizeTo(width: number, height: number): void {
 	}).dispatchEvent(new this.Event('resize'));
 };
 
-Object.defineProperty(window.parent.document.documentElement, 'requestFullscreen', {
+Object.defineProperty(document.documentElement, 'requestFullscreen', {
 	value: jest.fn()
 });
 
