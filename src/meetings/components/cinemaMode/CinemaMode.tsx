@@ -23,11 +23,13 @@ import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { STREAM_TYPE, Subscription } from '../../../types/store/ActiveMeetingTypes';
 import { calcScaleDivisor } from '../../../utils/styleUtils';
+import { MeetingViewProps } from '../../views/MeetingSkeleton';
 import Tile from '../tile/Tile';
 import WhoIsSpeaking from '../whoIsSpeaking/WhoIsSpeaking';
 
 const CustomContainer = styled(Container)`
 	overflow: hidden;
+	position: relative;
 `;
 
 const CinemaContainer = styled(Container)`
@@ -52,7 +54,7 @@ const SidebarIconButton = styled(IconButton)`
 	height: 15rem;
 `;
 
-const CinemaMode = (): ReactElement => {
+const CinemaMode = ({ children }: MeetingViewProps): ReactElement => {
 	const { meetingId }: MeetingRoutesParams = useParams();
 
 	const carouselIsVisible = useStore((store) => getMeetingCarouselVisibility(store, meetingId));
@@ -99,7 +101,7 @@ const CinemaMode = (): ReactElement => {
 
 	return (
 		<Container orientation="horizontal">
-			<CustomContainer ref={cinemaModeRef}>
+			<CustomContainer ref={cinemaModeRef} padding={{ vertical: '3.25rem' }}>
 				<WhoIsSpeaking centralTile={centralTile} />
 				<CinemaContainer data-testid="cinemaModeView" width={centralTileWidth} height="fit">
 					<Tile
@@ -108,6 +110,7 @@ const CinemaMode = (): ReactElement => {
 						isScreenShare={centralTile?.type === STREAM_TYPE.SCREEN}
 					/>
 				</CinemaContainer>
+				{children}
 			</CustomContainer>
 			<CarouselContainer
 				background="gray0"
