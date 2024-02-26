@@ -74,8 +74,8 @@ const InfoPage = (): ReactElement => {
 			);
 			break;
 		case PAGE_INFO_TYPE.NEXT_TIME_PAGE:
-			titleLabel = t('meeting.infoPage.title.rejected', 'Maybe next time');
-			centralLabel = t('meeting.infoPage.slogan.rejected', 'Your access has been refused');
+			titleLabel = t('meeting.infoPage.title.rejected', 'Your access has been refused');
+			centralLabel = t('meeting.infoPage.slogan.rejected', 'Maybe next time');
 			descriptionLowerLabel = t(
 				'meeting.infoPage.description.rejected',
 				'The moderators have decided to deny your access to the meeting'
@@ -89,12 +89,17 @@ const InfoPage = (): ReactElement => {
 				"Keep in touch with your colleagues or join your groups' meeting rooms"
 			);
 			break;
-		// TODO: add the correct translation
 		case PAGE_INFO_TYPE.MEETING_NOT_FOUND:
 		default: {
-			titleLabel = t('', 'Meeting not found');
-			centralLabel = t('', 'The meeting you are looking for does not exist');
-			descriptionLowerLabel = t('', 'Please check the meeting link and try again');
+			titleLabel = t(
+				'meeting.infoPage.title.meetingNotFound',
+				'The meeting you are looking for does not exist'
+			);
+			centralLabel = t('meeting.infoPage.slogan.meetingNotFound', 'Try later');
+			descriptionLowerLabel = t(
+				'meeting.infoPage.description.meetingNotFound',
+				'Please check the meeting link and try again'
+			);
 			break;
 		}
 	}
