@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { filter, find, forEach, size, sortBy } from 'lodash';
+import { filter, find, forEach, reduce, size, sortBy } from 'lodash';
 
 import { STREAM_TYPE, TileData } from '../../types/store/ActiveMeetingTypes';
 import { Meeting, MeetingParticipantMap } from '../../types/store/MeetingTypes';
@@ -19,6 +19,15 @@ export const getMeetingByMeetingId = (store: RootStore, meetingId: string): Meet
 
 export const getRoomIdByMeetingId = (store: RootStore, meetingId: string): string | undefined =>
 	find(store.meetings, (meeting) => meeting.id === meetingId)?.roomId;
+
+export const getMeetingExists = (store: RootStore, meetingId: string): boolean =>
+	!!find(store.meetings, (meeting) => meeting.id === meetingId);
+
+export const getRoomIdFromMeeting = (store: RootStore, meetingId: string): string | undefined =>
+	find(store.meetings, (meeting) => meeting.id === meetingId)?.roomId;
+
+export const getMeetingType = (store: RootStore, meetingId: string): string | undefined =>
+	find(store.meetings, (meeting) => meeting.id === meetingId)?.meetingType;
 
 export const getMeetingActive = (store: RootStore, roomId: string): boolean =>
 	store.meetings[roomId] && store.meetings[roomId].active;
@@ -153,4 +162,27 @@ export const getNumberOfTiles = (store: RootStore, meetingId: string): number =>
 		return size(meeting.participants) + size(participantWithScreen);
 	}
 	return 0;
+};
+
+export const getWaitingList = (store: RootStore, meetingId: string): string[] => {
+	const meeting = find(store.meetings, (meeting) => meeting.id === meetingId);
+	if (meeting) {
+		return meeting.waitingList || [];
+	}
+	return [];
+};
+
+export const getWaitingListSizeForMyVirtualMeeting = (store: RootStore): number => {
+	const myMeetings = filter(store.meetings, (meeting) => {
+		const userIsParticipant = find(
+			meeting.participants,
+			(participant) => participant.userId === store.session.id
+		);
+		const userIsOwner = find(
+			store.rooms[meeting.roomId]?.members,
+			(member) => member.userId === store.session.id && member.owner
+		);
+		return !!userIsParticipant && !!userIsOwner;
+	});
+	return reduce(myMeetings, (acc, meeting) => acc + size(meeting.waitingList || []), 0);
 };

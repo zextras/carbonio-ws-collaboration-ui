@@ -5,6 +5,7 @@
  */
 
 import {
+	AcceptWaitingUserResponse,
 	CreateMeetingResponse,
 	DeleteMeetingResponse,
 	GetMeetingResponse,
@@ -71,6 +72,9 @@ export const mockedDeleteMeetingRequest: jest.Mock = jest.fn();
 export const mockedAddRoomAttachmentRequest: jest.Mock = jest.fn();
 export const mockedUpdateAudioStreamStatusRequest: jest.Mock = jest.fn();
 export const mockedSubscribeToMediaRequest: jest.Mock = jest.fn();
+export const mockedAcceptWaitingUserRequest: jest.Mock = jest.fn();
+export const mockedGetScheduledMeetingName: jest.Mock = jest.fn();
+export const mockedLeaveWaitingRoomRequest: jest.Mock = jest.fn();
 
 jest.mock('../../network', () => {
 	const noResultProvided = 'no result provided';
@@ -185,7 +189,7 @@ jest.mock('../../network', () => {
 					const result = mockedGetMeetingRequest();
 					result ? resolve(result) : reject(new Error(noResultProvided));
 				}),
-			createPermanentMeeting: (): Promise<CreateMeetingResponse> =>
+			createMeeting: (): Promise<CreateMeetingResponse> =>
 				new Promise((resolve, reject) => {
 					const result = mockedCreateMeetingRequest();
 					result ? resolve(result) : reject(new Error(noResultProvided));
@@ -228,6 +232,26 @@ jest.mock('../../network', () => {
 			subscribeToMedia: (): Promise<SubscribeMediaResponse> =>
 				new Promise((resolve, reject) => {
 					const result = mockedSubscribeToMediaRequest();
+					result ? resolve(result) : reject(new Error(noResultProvided));
+				}),
+			acceptWaitingUser(
+				meetingId: string,
+				userId: string,
+				accept: boolean
+			): Promise<AcceptWaitingUserResponse> {
+				return new Promise((resolve, reject) => {
+					const result = mockedAcceptWaitingUserRequest(meetingId, userId, accept);
+					result ? resolve(result) : reject(new Error(noResultProvided));
+				});
+			},
+			getScheduledMeetingName: (): Promise<SubscribeMediaResponse> =>
+				new Promise((resolve, reject) => {
+					const result = mockedGetScheduledMeetingName();
+					result ? resolve(result) : reject(new Error(noResultProvided));
+				}),
+			leaveWaitingRoom: (): Promise<SubscribeMediaResponse> =>
+				new Promise((resolve, reject) => {
+					const result = mockedLeaveWaitingRoomRequest();
 					result ? resolve(result) : reject(new Error(noResultProvided));
 				})
 		}
