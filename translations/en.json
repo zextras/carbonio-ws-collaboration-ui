@@ -70,7 +70,12 @@
         "mockCreateChatDescription": "Interact, communicate and collaborate with your colleagues by sharing information and attachments",
         "mockCreateChatTitle": "Create a new chat using the create button",
         "newMessage": "New message",
-        "newMessages": "New messages"
+        "newMessages": "New messages",
+        "selectionMode": {
+            "exit": "Exit Selection Mode",
+            "maxSelected": "The maximum number of messages that can be forwarded at the same time has been reached",
+            "multipleForward": "forward {{numberOfMessages}} messages"
+        }
     },
     "conversationFilter": {
         "closeTooltip": "Close filter",
@@ -160,6 +165,7 @@
             "enableMicrophone": "Enable microphone",
             "enableScreen": "Enable screen share",
             "gridView": "Grid view",
+            "leaveConfirmation": "Leave Meeting?",
             "leaveMeeting": "Leave Meeting",
             "microphoneDisabled": "Microphone disabled",
             "microphoneEnabled": "Microphone enabled",
