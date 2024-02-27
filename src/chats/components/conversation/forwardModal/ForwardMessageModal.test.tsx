@@ -86,7 +86,7 @@ describe('Forward Message Modal', () => {
 				open
 				onClose={jest.fn()}
 				roomId={testRoom.id}
-				message={messageToForward}
+				messagesToForward={[messageToForward]}
 			/>
 		);
 
