@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import { Container, Text } from '@zextras/carbonio-design-system';
 import { map, size } from 'lodash';
@@ -32,6 +32,7 @@ type SecondaryBarSingleGroupsView = {
 
 export type FilteredConversation = {
 	roomId: string;
+	name: string;
 	roomType: string;
 	lastMessageTimestamp: number;
 	members: Member[];
@@ -68,7 +69,9 @@ const SecondaryBarSingleGroupsView: React.FC<SecondaryBarSingleGroupsView> = ({ 
 	const roomsIds = useStore<FilteredConversation[]>(getOneToOneAndGroupsInfoOrderedByLastMessage);
 	const users = useStore(getUsersSelector);
 
-	const { filteredConversationsIds, setFilteredInput } = useFilterRoomsOnInput(roomsIds);
+	const [filteredInput, setFilteredInput] = useState('');
+
+	const filteredConversationsIds = useFilterRoomsOnInput(filteredInput);
 
 	const ListItem = useMemo(
 		() => (expanded ? ExpandedSidebarListItem : CollapsedSidebarListItem),
