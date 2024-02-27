@@ -25,6 +25,9 @@ export const getMeetingParticipantsAccordionStatus = (
 	meetingId: string
 ): boolean => store.activeMeeting[meetingId]?.sidebarStatus.participantsAccordionIsOpened;
 
+export const getWaitingListAccordionStatus = (store: RootStore, meetingId: string): boolean =>
+	store.activeMeeting[meetingId]?.sidebarStatus.waitingListAccordionIsOpened;
+
 export const getMeetingChatVisibility = (
 	store: RootStore,
 	meetingId: string

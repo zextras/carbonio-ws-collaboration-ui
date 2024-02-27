@@ -40,7 +40,8 @@ export const useActiveMeetingSlice: StateCreator<ActiveMeetingSlice> = (
 					sidebarStatus: {
 						sidebarIsOpened: true,
 						actionsAccordionIsOpened: true,
-						participantsAccordionIsOpened: false
+						participantsAccordionIsOpened: false,
+						waitingListAccordionIsOpened: true
 					},
 					chatVisibility: MeetingChatVisibility.CLOSED,
 					meetingViewSelected: MeetingViewType.GRID,
@@ -103,6 +104,17 @@ export const useActiveMeetingSlice: StateCreator<ActiveMeetingSlice> = (
 			}),
 			false,
 			'AM/SET_MEETING_ACTIONS_ACCORDION_STATUS'
+		);
+	},
+	setWaitingListAccordionStatus: (meetingId: string, status: boolean): void => {
+		set(
+			produce((draft: RootStore) => {
+				if (draft.activeMeeting[meetingId]) {
+					draft.activeMeeting[meetingId].sidebarStatus.waitingListAccordionIsOpened = status;
+				}
+			}),
+			false,
+			'AM/SET_WAITING_LIST_ACCORDION_STATUS'
 		);
 	},
 	setMeetingParticipantsAccordionStatus: (meetingId: string, status: boolean): void => {
@@ -215,9 +227,9 @@ export const useActiveMeetingSlice: StateCreator<ActiveMeetingSlice> = (
 					}
 				} else {
 					// If flag is false, remove the ID from the array if it's present
-					const index = draft.activeMeeting[meetingId].talkingUsers.indexOf(userId);
+					const index = draft.activeMeeting[meetingId]?.talkingUsers.indexOf(userId);
 					if (index !== -1) {
-						draft.activeMeeting[meetingId].talkingUsers?.splice(index, 1);
+						draft.activeMeeting[meetingId]?.talkingUsers?.splice(index, 1);
 					}
 				}
 			}),

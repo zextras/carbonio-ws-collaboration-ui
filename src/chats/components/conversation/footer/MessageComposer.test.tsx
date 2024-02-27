@@ -11,6 +11,7 @@ import { createEvent, fireEvent, screen, waitFor } from '@testing-library/react'
 import { UserEvent } from '@testing-library/user-event';
 import { act } from 'react-dom/test-utils';
 
+import ConversationFooter from './ConversationFooter';
 import MessageComposer from './MessageComposer';
 import UploadAttachmentManagerView from './UploadAttachmentManagerView';
 import useStore from '../../../../store/Store';
@@ -46,6 +47,13 @@ const mockedMessage: Message = createMockTextMessage({
 	from: 'idPaolo',
 	roomId: mockedRoom.id,
 	date: Date.now()
+});
+
+const otherMockedMessage: Message = createMockTextMessage({
+	from: 'idPaolo',
+	roomId: mockedRoom.id,
+	date: Date.now(),
+	text: 'Hi 2'
 });
 
 const storeSetupAdvanced = (): { user: UserEvent; store: RootStore } => {
@@ -685,5 +693,55 @@ describe('MessageComposer - draft message', () => {
 
 		const composerTextArea = screen.getByRole('textbox');
 		await waitFor(() => expect((composerTextArea as HTMLTextAreaElement).value).toBe(''));
+	});
+});
+
+describe('forward footer', () => {
+	test('adding a message to the forward list triggers the footer', async () => {
+		const store = useStore.getState();
+		store.addRoom(mockedRoom);
+		store.newMessage(mockedMessage);
+
+		setup(<ConversationFooter roomId={mockedRoom.id} />);
+
+		act(() => {
+			store.setForwardMessageList(mockedRoom.id, mockedMessage);
+		});
+
+		const forwardButton = await screen.findByRole('button', { name: 'Forward' });
+		expect(forwardButton).toBeInTheDocument();
+	});
+
+	test('adding more than a message to the forward list triggers the footer with the updated label', async () => {
+		const store = useStore.getState();
+		store.addRoom(mockedRoom);
+		store.newMessage(mockedMessage);
+		store.newMessage(otherMockedMessage);
+		store.setForwardMessageList(mockedRoom.id, mockedMessage);
+		setup(<ConversationFooter roomId={mockedRoom.id} />);
+
+		act(() => {
+			store.setForwardMessageList(mockedRoom.id, otherMockedMessage);
+		});
+
+		const forwardButton = await screen.findByRole('button', { name: 'forward 2 messages' });
+		expect(forwardButton).toBeInTheDocument();
+	});
+
+	test('clicking the exit button restore the normal composer', async () => {
+		const store = useStore.getState();
+		store.addRoom(mockedRoom);
+		store.newMessage(mockedMessage);
+		store.newMessage(otherMockedMessage);
+		store.setForwardMessageList(mockedRoom.id, mockedMessage);
+		store.setForwardMessageList(mockedRoom.id, otherMockedMessage);
+		const { user } = setup(<ConversationFooter roomId={mockedRoom.id} />);
+
+		const exitButton = await screen.findByRole('button', { name: 'Exit Selection Mode' });
+		expect(exitButton).toBeInTheDocument();
+
+		await user.click(exitButton);
+
+		expect(screen.queryByRole('button', { name: 'Exit Selection Mode' })).not.toBeInTheDocument();
 	});
 });

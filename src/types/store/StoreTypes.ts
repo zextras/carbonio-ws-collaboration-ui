@@ -125,6 +125,8 @@ export type ActiveConversationsSlice = {
 	removeDescriptionToFileToAttach: (roomId: string, fileTempId: string) => void;
 	removeFileToAttach: (roomId: string, fileTempId: string) => void;
 	unsetFilesToAttach: (roomId: string) => void;
+	setForwardMessageList: (roomId: string, message: TextMessage) => void;
+	unsetForwardMessageList: (roomId: string, message?: TextMessage) => void;
 };
 
 export type ConnectionsStoreSlice = {
@@ -164,11 +166,15 @@ export type MeetingsSlice = {
 		stream: STREAM_TYPE,
 		status: boolean
 	) => void;
+	setWaitingList: (meetingId: string, waitingList: string[]) => void;
+	addUserToWaitingList: (meetingId: string, userId: string) => void;
+	removeUserFromWaitingList: (meetingId: string, userId: string) => void;
 };
 
 export type ActiveMeetingSlice = {
 	activeMeeting: ActiveMeetingMap;
 	setMeetingActionsAccordionStatus: (roomId: string, status: boolean) => void;
+	setWaitingListAccordionStatus: (roomId: string, status: boolean) => void;
 	setMeetingParticipantsAccordionStatus: (roomId: string, status: boolean) => void;
 	setMeetingChatVisibility: (meetingId: string, visibilityStatus: MeetingChatVisibility) => void;
 	setMeetingViewSelected: (meetingId: string, viewType: MeetingViewType) => void;

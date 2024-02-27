@@ -1,4 +1,5 @@
 {
+    "": "Error",
     "action": {
         "activateNotifications": "Activate notifications",
         "addAttachment": "Add attachment",
@@ -69,7 +70,12 @@
         "mockCreateChatDescription": "Interact, communicate and collaborate with your colleagues by sharing information and attachments",
         "mockCreateChatTitle": "Create a new chat using the create button",
         "newMessage": "New message",
-        "newMessages": "New messages"
+        "newMessages": "New messages",
+        "selectionMode": {
+            "exit": "Exit Selection Mode",
+            "maxSelected": "The maximum number of messages that can be forwarded at the same time has been reached",
+            "multipleForward": "forward {{numberOfMessages}} messages"
+        }
     },
     "conversationFilter": {
         "closeTooltip": "Close filter",
@@ -119,12 +125,33 @@
     "keepInTouchWithColleagues": "Keep in touch with your colleagues or join your groups' meeting rooms",
     "meeting": {
         "activeMeetingTooltip": "There's an active meeting for this Conversation",
+        "browserNotification": {
+            "waitingMessage": "New user is waiting to enter the meeting",
+            "waitingTitle": "There seems to be someone in the Waiting Room"
+        },
         "collapseChat": "Collapse chat",
         "collapseParticipantsMeetingTooltip": "Collapse participants list",
         "continueActiveSession": "Continue the meeting in the new window",
         "expandChat": "Expand chat",
         "expandParticipantsListTooltip": "Expand participants list",
         "extendChat": "Extend chat",
+        "infoPage": {
+            "description": {
+                "hangUp": "We look forward to seeing you participate in future meetings",
+                "meetingNotFound": "Please check the meeting link and try again",
+                "rejected": "The moderators have decided to deny your access to the meeting"
+            },
+            "slogan": {
+                "hangUp": "Maybe next time",
+                "meetingNotFound": "Try later",
+                "rejected": "Maybe next time"
+            },
+            "title": {
+                "hangUp": "You hung up!",
+                "meetingNotFound": "The meeting you are looking for does not exist",
+                "rejected": "Your access has been refused"
+            }
+        },
         "interactions": {
             "cameraDisabled": "Camera disabled",
             "cameraEnabled": "Camera enabled",
@@ -138,6 +165,7 @@
             "enableMicrophone": "Enable microphone",
             "enableScreen": "Enable screen share",
             "gridView": "Grid view",
+            "leaveConfirmation": "Leave Meeting?",
             "leaveMeeting": "Leave Meeting",
             "microphoneDisabled": "Microphone disabled",
             "microphoneEnabled": "Microphone enabled",
@@ -167,6 +195,17 @@
         "restartMeeting": "Restart meeting",
         "scheduledMeetingLabel": "Your Virtual Rooms",
         "setInputDescription": "Set your input devices by choosing them from dropdown menu",
+        "sidebar": {
+            "tooltip": {
+                "waitingAccept": "Let user in",
+                "waitingReject": "Reject user"
+            },
+            "waitingCaption": "Waiting to enter",
+            "waitingList": "Waiting list"
+        },
+        "snackbar": {
+            "waitingInfo": "There seems to be someone in the waiting room"
+        },
         "startMeeting": "Start meeting",
         "startModal": {
             "audioAndVideoLoading": "Assets are loading",
@@ -191,7 +230,18 @@
             "invalidNameTooltip": "Invalid name",
             "nameRequiredTooltip": "Virtual Room’s name is required"
         },
-        "waitingParticipants": "Waiting for participants to join…"
+        "waitingParticipants": "Waiting for participants to join…",
+        "waitingRoom": {
+            "hangUp": "Hang up",
+            "nextStep": "A moderator will let you into the meeting as soon as possible.",
+            "ready": "Ready to participate",
+            "readyCaption": "Everything is set! Make yourself comfortable.",
+            "readyHint": "You will enter the meeting in a few moments",
+            "setInputs": "Set your input devices by choosing them from dropdown menu",
+            "title": "How do you want to join {{meetingName}} meeting?",
+            "welcomeCaption": "When you are ready, get comfortable.",
+            "welcomeHint": "Click on “READY TO PARTICIPATE” to enter the meeting"
+        }
     },
     "meetings": {
         "interactions": {
@@ -309,7 +359,7 @@
         "goToPrivateChat": "Go to private chat",
         "iAmModerator": "You're a moderator",
         "leaveAndDelete": "Leave and delete the conversation",
-        "leaveConversation": "Leave conversation",
+        "leaveConversation": "Leave Group",
         "memberIsModerator": "This member is a moderator",
         "messageActions": "Message actions",
         "messageComposer": "Message composer",

@@ -40,7 +40,7 @@ const LeaveConversationListAction: FC<LeaveConversationProps> = ({
 		'tooltip.promoteSomeoneElseToModerator',
 		'Before leaving you have to promote someone else to moderator'
 	);
-	const leaveConversationLabel: string = t('tooltip.leaveConversation', 'Leave conversation');
+	const leaveConversationLabel: string = t('tooltip.leaveConversation', 'Leave Group');
 
 	const tooltipLabel =
 		// eslint-disable-next-line no-nested-ternary

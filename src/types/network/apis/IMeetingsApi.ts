@@ -7,11 +7,14 @@
 import { STREAM_TYPE, Subscription } from '../../store/ActiveMeetingTypes';
 import { JoinSettings, MeetingType } from '../models/meetingBeTypes';
 import {
+	AcceptWaitingUserResponse,
 	CreateAudioOfferResponse,
 	CreateMediaAnswerResponse,
 	CreateMeetingResponse,
 	DeleteMeetingResponse,
 	GetMeetingResponse,
+	GetScheduledMeetingNameResponse,
+	GetWaitingListResponse,
 	JoinMeetingResponse,
 	LeaveMeetingResponse,
 	ListMeetingsResponse,
@@ -69,6 +72,15 @@ interface IMeetingsApi {
 		unsubscription: Subscription[]
 	): Promise<SubscribeMediaResponse>;
 	createMediaAnswer(meetingId: string, sdpOffer: string): Promise<CreateMediaAnswerResponse>;
+	// Scheduled meetings
+	getScheduledMeetingName(meetingId: string): Promise<GetScheduledMeetingNameResponse>;
+	leaveWaitingRoom(meetingId: string): Promise<AcceptWaitingUserResponse>;
+	getWaitingList(meetingId: string): Promise<GetWaitingListResponse>;
+	acceptWaitingUser(
+		meetingId: string,
+		userId: string,
+		accept: boolean
+	): Promise<AcceptWaitingUserResponse>;
 }
 
 export default IMeetingsApi;

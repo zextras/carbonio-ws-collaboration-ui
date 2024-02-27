@@ -13,6 +13,7 @@ import MeetingNotification from './MeetingNotification';
 import useStore from '../../store/Store';
 import { createMockMeeting, createMockRoom, createMockUser } from '../../tests/createMock';
 import { mockedSendChatMessage } from '../../tests/mockedXmppClient';
+import { mockedCreateMeetingRequest } from '../../tests/mocks/network';
 import { setup } from '../../tests/test-utils';
 import { RoomType } from '../../types/store/RoomTypes';
 
@@ -99,6 +100,7 @@ describe('MeetingNotification', () => {
 
 	test('Joining a meeting removes the notification', async () => {
 		jest.spyOn(window, 'open').mockImplementation(() => null);
+		mockedCreateMeetingRequest.mockResolvedValueOnce(meeting);
 		const { user: userEvent } = setup(
 			<MeetingNotification
 				id={'notificationId'}

@@ -5,10 +5,11 @@
  */
 import React from 'react';
 
-import { screen, waitFor } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { UserEvent } from '@testing-library/user-event';
 
+import FullScreenButton from './FullScreenButton';
 import { useParams } from '../../../../__mocks__/react-router';
 import useStore from '../../../store/Store';
 import {
@@ -17,13 +18,13 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../../tests/createMock';
+import { requestFullscreen } from '../../../tests/mocks/global';
 import { setup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 import { MemberBe, RoomBe } from '../../../types/network/models/roomBeTypes';
 import { UserBe } from '../../../types/network/models/userBeTypes';
 import { MeetingParticipant } from '../../../types/store/MeetingTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
-import MeetingSkeleton from '../../views/MeetingSkeleton';
 
 const user1: UserBe = createMockUser({ id: 'user1Id', name: 'user 1' });
 const user2: UserBe = createMockUser({ id: 'user2Id', name: 'user 2' });
@@ -63,7 +64,7 @@ const meeting: MeetingBe = createMockMeeting({
 	participants: [user1Participant, user2Participant, user3Participant]
 });
 
-const storeSetupGroupMeetingSkeleton = (): { user: UserEvent } => {
+const storeSetupGroupMeeting = (): { user: UserEvent } => {
 	const { result } = renderHook(() => useStore());
 	act(() => {
 		result.current.setUserInfo(user1);
@@ -75,23 +76,19 @@ const storeSetupGroupMeetingSkeleton = (): { user: UserEvent } => {
 		result.current.meetingConnection(meeting.id, false, undefined, false, undefined);
 	});
 	useParams.mockReturnValue({ meetingId: meeting.id });
-	const { user } = setup(<MeetingSkeleton />);
+	const { user } = setup(<FullScreenButton />);
 
 	return { user };
 };
 
 describe('Meeting action bar - Fullscreen button interaction', () => {
-	test('Enable full screen and sidebar must be closed', async () => {
-		jest.spyOn(console, 'error');
-		const { user } = storeSetupGroupMeetingSkeleton();
-		await waitFor(() => user.hover(screen.getByTestId('meeting-action-bar')));
+	test('Check full screen mode is set correctly', async () => {
+		const mockRequestFullscreen = jest
+			.spyOn(document.documentElement, 'requestFullscreen')
+			.mockImplementation(requestFullscreen);
+		const { user } = storeSetupGroupMeeting();
 		const fullScreenButton = await screen.findByTestId('fullscreen-button');
-		await waitFor(() => {
-			act(() => {
-				user.click(fullScreenButton);
-			});
-		});
-		const meetingSidebar = screen.queryByTestId('meeting_sidebar');
-		expect(meetingSidebar).toHaveStyle('width: 0');
+		await user.click(fullScreenButton);
+		expect(mockRequestFullscreen).toHaveBeenCalledTimes(1);
 	});
 });

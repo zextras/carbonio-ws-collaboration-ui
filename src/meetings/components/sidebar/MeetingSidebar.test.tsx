@@ -70,7 +70,6 @@ const setupBasicGroup = (): { user: UserEvent; store: RootStore } => {
 	const { user } = setup(<MeetingSidebar />);
 	return { user, store: result.current };
 };
-
 const setupBasicOneToOne = (): { user: UserEvent; store: RootStore } => {
 	const { result } = renderHook(() => useStore());
 	act(() => {
@@ -84,15 +83,30 @@ const setupBasicOneToOne = (): { user: UserEvent; store: RootStore } => {
 };
 
 describe('Meeting sidebar', () => {
-	test('all elements rendered in a group meeting', () => {
+	test('OneToOne meeting has Action and Chat accordions ', async () => {
+		setupBasicOneToOne();
+		const actionsAccordions = screen.getByText(/Actions/);
+		const waitingListAccordion = screen.queryByText(/Waiting List/);
+		const participantsAccordion = screen.queryByTestId('MeetingParticipantsAccordion');
+		const chatAccordion = screen.getByText(/Chat/);
+		expect(actionsAccordions).toBeInTheDocument();
+		expect(waitingListAccordion).not.toBeInTheDocument();
+		expect(participantsAccordion).not.toBeInTheDocument();
+		expect(chatAccordion).toBeInTheDocument();
+	});
+
+	test('Group meeting has Action, Participant and Chat accordions ', async () => {
 		setupBasicGroup();
 		const actionsAccordions = screen.getByText(/Actions/);
+		const waitingListAccordion = screen.queryByText(/Waiting List/);
 		const participantsAccordion = screen.getByTestId('MeetingParticipantsAccordion');
 		const chatAccordion = screen.getByText(/Chat/);
-		expect(actionsAccordions).toBeVisible();
-		expect(participantsAccordion).toBeVisible();
-		expect(chatAccordion).toBeVisible();
+		expect(actionsAccordions).toBeInTheDocument();
+		expect(waitingListAccordion).not.toBeInTheDocument();
+		expect(participantsAccordion).toBeInTheDocument();
+		expect(chatAccordion).toBeInTheDocument();
 	});
+
 	test('one to one meeting - participant accordion must not be present', () => {
 		setupBasicOneToOne();
 		const MeetingParticipantsAccordion = screen.queryByTestId('MeetingParticipantsAccordion');

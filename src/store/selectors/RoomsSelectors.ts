@@ -73,16 +73,13 @@ export const getRoomMainInfoSelector = (state: RootStore, id: string): RoomMainI
 	muted: state.rooms[id]?.userSettings?.muted
 });
 
-export const getMyOwnershipOfTheRoom = (
+export const getOwnershipOfTheRoom = (
 	state: RootStore,
-	sessionId: string | undefined,
-	roomId: string
+	roomId: string,
+	userId = state.session.id
 ): boolean => {
-	if (state.rooms[roomId]?.members != null && sessionId != null) {
-		const sessionMember = find(
-			state.rooms[roomId]?.members,
-			(member) => member.userId === sessionId
-		);
+	if (state.rooms[roomId]?.members != null && userId != null) {
+		const sessionMember = find(state.rooms[roomId]?.members, (member) => member.userId === userId);
 		if (sessionMember != null) {
 			return sessionMember.owner;
 		}
@@ -132,3 +129,6 @@ export const getRoomURLPicture = (state: RootStore, roomId: string): string | un
 	}
 	return room.pictureUpdatedAt && RoomsApi.getURLRoomPicture(room.id);
 };
+
+export const getMeetingIdFromRoom = (state: RootStore, roomId: string): string | undefined =>
+	state.rooms[roomId]?.meetingId;
