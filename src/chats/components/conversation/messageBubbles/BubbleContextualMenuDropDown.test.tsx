@@ -149,6 +149,24 @@ describe('Bubble Contextual Menu - other user messages', () => {
 		const previewAction = screen.queryByText(/Preview/i);
 		expect(previewAction).toBeInTheDocument();
 	});
+
+	test('if forward mode is active, the forward action should not be present', async () => {
+		const simpleTextMessage: TextMessage = createMockTextMessage({ roomId: mockedRoom.id });
+
+		const store: RootStore = useStore.getState();
+		store.setSessionId(mySessionId);
+		store.addRoom(mockedRoom);
+		store.newMessage(simpleTextMessage);
+		store.setForwardMessageList(mockedRoom.id, simpleTextMessage);
+
+		const { user } = setup(
+			<BubbleContextualMenuDropDown message={simpleTextMessage} isMyMessage={false} />
+		);
+		const arrowButton = screen.getByTestId(iconArrowIosDownward);
+		await user.click(arrowButton);
+
+		expect(screen.queryByText(/Forward/i)).not.toBeInTheDocument();
+	});
 });
 
 describe('Bubble Contextual Menu - my messages', () => {
@@ -341,5 +359,26 @@ describe('Bubble Contextual Menu - my messages', () => {
 		await user.click(arrowButton);
 
 		expect(screen.queryByText(/Delete/i)).not.toBeInTheDocument();
+	});
+
+	test('if forward mode is active, the forward action should not be present', async () => {
+		const simpleTextMessage: TextMessage = createMockTextMessage({
+			roomId: mockedRoom.id,
+			from: mySessionId,
+			date: Date.now() - 60
+		});
+		const store: RootStore = useStore.getState();
+		store.setSessionId(mySessionId);
+		store.addRoom(mockedRoom);
+		store.newMessage(simpleTextMessage);
+		store.setForwardMessageList(mockedRoom.id, simpleTextMessage);
+
+		const { user } = setup(
+			<BubbleContextualMenuDropDown message={simpleTextMessage} isMyMessage />
+		);
+		const arrowButton = screen.getByTestId(iconArrowIosDownward);
+		await user.click(arrowButton);
+
+		expect(screen.queryByText(/Forward/i)).not.toBeInTheDocument();
 	});
 });

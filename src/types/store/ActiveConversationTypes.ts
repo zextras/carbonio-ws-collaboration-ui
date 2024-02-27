@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { AttachmentMessageType } from './MessageTypes';
+import { AttachmentMessageType, TextMessage } from './MessageTypes';
 
 export type ActiveConversation = {
 	draftMessage?: string | undefined;
@@ -16,6 +16,7 @@ export type ActiveConversation = {
 	referenceMessage?: ReferenceMessage | undefined;
 	infoPanelStatus?: InfoPanelStatus;
 	filesToAttach?: FileToUpload[] | undefined;
+	forwardMessageList?: TextMessage[];
 };
 
 export type ActiveConversationsMap = {

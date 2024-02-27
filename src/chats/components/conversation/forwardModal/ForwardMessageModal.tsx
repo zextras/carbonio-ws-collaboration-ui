@@ -45,14 +45,14 @@ type ForwardMessageModalProps = {
 	open: boolean;
 	onClose: () => void;
 	roomId: string;
-	message: TextMessage;
+	messagesToForward: TextMessage[] | undefined;
 };
 
 const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 	open,
 	onClose,
 	roomId,
-	message
+	messagesToForward
 }): ReactElement => {
 	const roomName = useStore((state) => getRoomNameSelector(state, roomId));
 	const rooms = useStore(getRoomIdsOrderedLastMessage);
@@ -144,10 +144,10 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 
 	const forwardMessage = useCallback(() => {
 		const roomsId = map(selected, (key, value) => value);
-		RoomsApi.forwardMessages(roomsId, [message])
+		RoomsApi.forwardMessages(roomsId, messagesToForward || [])
 			.then(() => onClose())
 			.catch(() => onClose());
-	}, [message, onClose, selected]);
+	}, [messagesToForward, onClose, selected]);
 
 	const ListItem = useMemo(
 		() =>

@@ -19,6 +19,8 @@ import { RootStore } from '../../../../types/store/StoreTypes';
 const testRoom: RoomBe = createMockRoom({ id: 'roomTest', name: 'Test room' });
 
 const messageToForward = createMockTextMessage({ roomId: testRoom.id });
+const messageToForward2 = createMockTextMessage({ roomId: testRoom.id });
+const messageToForward3 = createMockTextMessage({ roomId: testRoom.id });
 
 const chat: RoomBe = createMockRoom({ id: 'chat', name: 'Chat' });
 const chat2: RoomBe = createMockRoom({ id: 'chat2', name: 'Chat 2' });
@@ -33,7 +35,7 @@ describe('Forward Message Modal', () => {
 				open
 				onClose={jest.fn()}
 				roomId={testRoom.id}
-				message={messageToForward}
+				messagesToForward={[messageToForward]}
 			/>
 		);
 
@@ -57,7 +59,7 @@ describe('Forward Message Modal', () => {
 				open
 				onClose={jest.fn()}
 				roomId={testRoom.id}
-				message={messageToForward}
+				messagesToForward={[messageToForward]}
 			/>
 		);
 
@@ -75,7 +77,35 @@ describe('Forward Message Modal', () => {
 				open
 				onClose={jest.fn()}
 				roomId={testRoom.id}
-				message={messageToForward}
+				messagesToForward={[messageToForward]}
+			/>
+		);
+
+		// Type on ChipInput to trigger a new autoCompleteGalRequest
+		const chipInput = await screen.findByTestId('chip_input_forward_modal');
+		await user.type(chipInput, chat.name![0]);
+
+		// Add Chip on ChipInput
+		const conversationComponent = await screen.findByText(chat.name!);
+		await user.click(conversationComponent);
+
+		const footerButton = await screen.findByTestId('forward_button');
+		expect(footerButton).not.toHaveAttribute('disabled', true);
+
+		await user.click(footerButton);
+		expect(mockedForwardMessagesRequest).toHaveBeenCalledTimes(1);
+	});
+
+	test('Forward more than one message', async () => {
+		const store: RootStore = useStore.getState();
+		store.addRoom(testRoom);
+		store.addRoom(chat);
+		const { user } = setup(
+			<ForwardMessageModal
+				open
+				onClose={jest.fn()}
+				roomId={testRoom.id}
+				messagesToForward={[messageToForward, messageToForward2, messageToForward3]}
 			/>
 		);
 
@@ -104,7 +134,38 @@ describe('Forward Message Modal', () => {
 				open
 				onClose={jest.fn()}
 				roomId={testRoom.id}
-				message={messageToForward}
+				messagesToForward={[messageToForward]}
+			/>
+		);
+
+		// Select Test Room conversation
+		const chipInput = await screen.findByTestId('chip_input_forward_modal');
+		await user.type(chipInput, chat.name![0]);
+		const conversationComponent = await screen.findByText(chat.name!);
+		await user.click(conversationComponent);
+
+		// Select Test Room 2 conversation
+		await user.type(chipInput, chat2.name![0]);
+		const conversation2Component = await screen.findByText(chat2.name!);
+		await user.click(conversation2Component);
+
+		const footerButton = await screen.findByTestId('forward_button');
+		await user.click(footerButton);
+
+		expect(mockedForwardMessagesRequest).toHaveBeenCalledTimes(1);
+	});
+
+	test('Forward more than one message to multiple conversations', async () => {
+		const store: RootStore = useStore.getState();
+		store.addRoom(testRoom);
+		store.addRoom(chat);
+		store.addRoom(chat2);
+		const { user } = setup(
+			<ForwardMessageModal
+				open
+				onClose={jest.fn()}
+				roomId={testRoom.id}
+				messagesToForward={[messageToForward, messageToForward2, messageToForward3]}
 			/>
 		);
 
@@ -132,7 +193,12 @@ describe('Forward Message Modal', () => {
 
 		const onClose = jest.fn();
 		const { user } = setup(
-			<ForwardMessageModal open onClose={onClose} roomId={testRoom.id} message={messageToForward} />
+			<ForwardMessageModal
+				open
+				onClose={onClose}
+				roomId={testRoom.id}
+				messagesToForward={[messageToForward]}
+			/>
 		);
 
 		// Forward to Test Room
@@ -152,7 +218,12 @@ describe('Forward Message Modal', () => {
 
 		const onClose = jest.fn();
 		const { user } = setup(
-			<ForwardMessageModal open onClose={onClose} roomId={testRoom.id} message={messageToForward} />
+			<ForwardMessageModal
+				open
+				onClose={onClose}
+				roomId={testRoom.id}
+				messagesToForward={[messageToForward]}
+			/>
 		);
 
 		// Forward to Test Room
