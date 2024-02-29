@@ -71,7 +71,8 @@ describe('Meetings API', () => {
 			headers,
 			body: JSON.stringify({
 				roomId: 'roomId',
-				meetingType: MeetingType.PERMANENT
+				meetingType: MeetingType.PERMANENT,
+				name: ''
 			})
 		});
 	});

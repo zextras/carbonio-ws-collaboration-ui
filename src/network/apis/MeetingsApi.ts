@@ -57,6 +57,7 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 		const createMeetingData: CreateMeetingData = {
 			roomId,
 			meetingType,
+			name: '',
 			expiration
 		};
 		return this.fetchAPI(`meetings`, RequestType.POST, createMeetingData);
