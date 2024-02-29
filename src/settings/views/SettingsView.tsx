@@ -9,7 +9,7 @@ import React, { ReactElement } from 'react';
 import { Spinner } from '@zextras/carbonio-shell-ui';
 
 import useStore from '../../store/Store';
-import Settings from '../components/settings/Settings';
+import Settings from '../components/Settings';
 
 const SettingsView = (): ReactElement => {
 	const id: string | undefined = useStore((store) => store.session.id);

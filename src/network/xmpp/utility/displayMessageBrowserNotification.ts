@@ -41,6 +41,22 @@ const displayMessageBrowserNotification = (message: TextMessage): void => {
 		notificationsAreActive = true;
 	}
 
+	let notificationsShouldPlay;
+	if (
+		ChatsNotificationsSettings &&
+		JSON.parse(ChatsNotificationsSettings).hasOwnProperty('DesktopNotificationsSounds')
+	) {
+		notificationsShouldPlay = JSON.parse(ChatsNotificationsSettings).DesktopNotificationsSounds;
+	} else {
+		window.parent.localStorage.setItem(
+			'ChatsNotificationsSettings',
+			JSON.stringify({
+				DesktopNotificationsSounds: true
+			})
+		);
+		notificationsShouldPlay = true;
+	}
+
 	if (
 		notMyMessage &&
 		!inputIsFocused &&
@@ -60,7 +76,7 @@ const displayMessageBrowserNotification = (message: TextMessage): void => {
 
 		getNotificationManager().notify({
 			showPopup: true,
-			playSound: true,
+			playSound: notificationsShouldPlay,
 			title,
 			message: textMessage,
 			onClick: (): void => {

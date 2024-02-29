@@ -16,8 +16,8 @@ import { useTranslation } from 'react-i18next';
 
 import NotificationsSettings from './NotificationsSettings';
 import ProfileSettings from './ProfileSettings';
-import useLocalStorage from '../../../hooks/useLocalStorage';
-import { UsersApi } from '../../../network';
+import useLocalStorage from '../../hooks/useLocalStorage';
+import { UsersApi } from '../../network';
 
 type SettingsProps = {
 	id?: string | undefined;
@@ -36,35 +36,62 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 
 	const [notificationsStorage, setNotificationsStorage] = useLocalStorage<{
 		DesktopNotifications: boolean;
+		DesktopNotificationsSounds: boolean;
+		WaitingRoomAccessNotifications: boolean;
+		WaitingRoomAccessNotificationsSounds: boolean;
 	}>('ChatsNotificationsSettings', {
-		DesktopNotifications: true
+		DesktopNotifications: true,
+		DesktopNotificationsSounds: true,
+		WaitingRoomAccessNotifications: true,
+		WaitingRoomAccessNotificationsSounds: true
 	});
 
 	const [picture, setPicture] = useState<false | File>(false);
 	const [deletePicture, setDeletePicture] = useState<boolean>(false);
+	const [isEnabled, setIsEnabled] = useState<boolean>(false);
 	const [desktopNotifications, setDesktopNotifications] = useState<boolean>(
 		notificationsStorage.DesktopNotifications
 	);
-	const [isEnabled, setIsEnabled] = useState<boolean>(false);
+	const [desktopNotificationsSounds, setDesktopNotificationsSounds] = useState<boolean>(
+		notificationsStorage.DesktopNotificationsSounds
+	);
+	const [waitingRoomAccessNotifications, setWaitingRoomAccessNotifications] = useState<boolean>(
+		notificationsStorage.WaitingRoomAccessNotifications
+	);
+	const [waitingRoomAccessNotificationsSounds, setWaitingRoomAccessNotificationsSounds] =
+		useState<boolean>(notificationsStorage.WaitingRoomAccessNotificationsSounds);
 
 	// set the isEnabled value when changed
 	useEffect(() => {
 		if (
 			!!picture ||
 			deletePicture ||
-			notificationsStorage.DesktopNotifications !== desktopNotifications
+			notificationsStorage.DesktopNotifications !== desktopNotifications ||
+			notificationsStorage.DesktopNotificationsSounds !== desktopNotificationsSounds ||
+			notificationsStorage.WaitingRoomAccessNotifications !== waitingRoomAccessNotifications ||
+			notificationsStorage.WaitingRoomAccessNotificationsSounds !==
+				waitingRoomAccessNotificationsSounds
 		) {
 			setIsEnabled(true);
 		} else {
 			setIsEnabled(false);
 		}
-	}, [deletePicture, desktopNotifications, notificationsStorage, picture]);
+	}, [
+		deletePicture,
+		desktopNotifications,
+		desktopNotificationsSounds,
+		notificationsStorage,
+		picture,
+		waitingRoomAccessNotifications,
+		waitingRoomAccessNotificationsSounds
+	]);
 
 	// sets all the values that has been changed to false and set the default values to the localStorage ones
 	const onClose = useCallback(() => {
 		setPicture(false);
 		setDeletePicture(false);
 		setDesktopNotifications(notificationsStorage.DesktopNotifications);
+		setDesktopNotificationsSounds(notificationsStorage.DesktopNotificationsSounds);
 	}, [notificationsStorage]);
 
 	// saves the elements that have been modified
@@ -122,10 +149,21 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 		}
 
 		// if a user turn off/on the desktopNotifications
-		if (notificationsStorage.DesktopNotifications !== desktopNotifications) {
+		if (
+			notificationsStorage.DesktopNotifications !== desktopNotifications ||
+			notificationsStorage.DesktopNotificationsSounds !== desktopNotificationsSounds ||
+			notificationsStorage.WaitingRoomAccessNotifications !== waitingRoomAccessNotifications ||
+			notificationsStorage.WaitingRoomAccessNotificationsSounds !==
+				waitingRoomAccessNotificationsSounds
+		) {
 			localStorage.setItem(
 				'ChatsNotificationsSettings',
-				JSON.stringify({ DesktopNotifications: desktopNotifications })
+				JSON.stringify({
+					DesktopNotifications: desktopNotifications,
+					DesktopNotificationsSounds: desktopNotificationsSounds,
+					WaitingRoomAccessNotifications: waitingRoomAccessNotifications,
+					WaitingRoomAccessNotificationsSounds: waitingRoomAccessNotificationsSounds
+				})
 			);
 			createSnackbar({
 				key: new Date().toLocaleString(),
@@ -134,18 +172,30 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 				hideButton: true,
 				autoHideTimeout: 5000
 			});
-			setNotificationsStorage({ DesktopNotifications: desktopNotifications });
+			setNotificationsStorage({
+				DesktopNotifications: desktopNotifications,
+				DesktopNotificationsSounds: desktopNotificationsSounds,
+				WaitingRoomAccessNotifications: waitingRoomAccessNotifications,
+				WaitingRoomAccessNotificationsSounds: waitingRoomAccessNotificationsSounds
+			});
+
 			setIsEnabled(false);
 		}
 		return Promise.resolve();
 	}, [
 		picture,
 		deletePicture,
-		notificationsStorage,
+		notificationsStorage.DesktopNotifications,
+		notificationsStorage.DesktopNotificationsSounds,
+		notificationsStorage.WaitingRoomAccessNotifications,
+		notificationsStorage.WaitingRoomAccessNotificationsSounds,
 		desktopNotifications,
+		desktopNotificationsSounds,
+		waitingRoomAccessNotifications,
+		waitingRoomAccessNotificationsSounds,
+		id,
 		createSnackbar,
 		saveSettingsSnackbar,
-		id,
 		errorDeleteImageSnackbar,
 		setNotificationsStorage
 	]);
@@ -179,6 +229,12 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 				<NotificationsSettings
 					desktopNotifications={desktopNotifications}
 					setDesktopNotifications={setDesktopNotifications}
+					desktopNotificationsSounds={desktopNotificationsSounds}
+					setDesktopNotificationsSounds={setDesktopNotificationsSounds}
+					waitingRoomAccessNotifications={waitingRoomAccessNotifications}
+					setWaitingRoomAccessNotifications={setWaitingRoomAccessNotifications}
+					waitingRoomAccessNotificationsSounds={waitingRoomAccessNotificationsSounds}
+					setWaitingRoomAccessNotificationsSounds={setWaitingRoomAccessNotificationsSounds}
 				/>
 			</Container>
 		</Container>

@@ -9,9 +9,9 @@ import React, { ReactElement, useEffect, useState } from 'react';
 import { Snackbar } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
-import useEventListener, { EventName } from '../../../hooks/useEventListener';
-import { getWaitingListSizeForMyVirtualMeeting } from '../../../store/selectors/MeetingSelectors';
-import useStore from '../../../store/Store';
+import useEventListener, { EventName } from '../../hooks/useEventListener';
+import { getWaitingListSizeForMyVirtualMeeting } from '../../store/selectors/MeetingSelectors';
+import useStore from '../../store/Store';
 
 const WaitingListSnackbar = (): ReactElement | null => {
 	const [t] = useTranslation();

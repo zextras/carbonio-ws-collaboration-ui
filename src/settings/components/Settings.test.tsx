@@ -10,10 +10,10 @@ import { screen } from '@testing-library/react';
 
 import NotificationsSettings from './NotificationsSettings';
 import Settings from './Settings';
-import useStore from '../../../store/Store';
-import { setup } from '../../../tests/test-utils';
-import { UserBe } from '../../../types/network/models/userBeTypes';
-import { RootStore } from '../../../types/store/StoreTypes';
+import useStore from '../../store/Store';
+import { setup } from '../../tests/test-utils';
+import { UserBe } from '../../types/network/models/userBeTypes';
+import { RootStore } from '../../types/store/StoreTypes';
 
 const pictureUpdatedAtTime = '2022-08-25T17:24:28.961+02:00';
 
@@ -87,15 +87,35 @@ describe('Settings view', () => {
 		store.setUserInfo(userWithImage);
 		store.setLoginInfo(userWithImage.id, userWithImage.name, userWithImage.name);
 		setup(
-			<NotificationsSettings desktopNotifications={false} setDesktopNotifications={jest.fn()} />
+			<NotificationsSettings
+				desktopNotifications={false}
+				setDesktopNotifications={jest.fn()}
+				setDesktopNotificationsSounds={jest.fn()}
+				desktopNotificationsSounds
+				setWaitingRoomAccessNotifications={jest.fn()}
+				setWaitingRoomAccessNotificationsSounds={jest.fn()}
+				waitingRoomAccessNotifications
+				waitingRoomAccessNotificationsSounds
+			/>
 		);
-		expect(screen.getByTestId('icon: Square')).toBeInTheDocument();
+		expect(screen.getAllByTestId('icon: Square')[0]).toBeInTheDocument();
 	});
 	test('notification checkbox not active', async () => {
 		const store: RootStore = useStore.getState();
 		store.setUserInfo(userWithImage);
 		store.setLoginInfo(userWithImage.id, userWithImage.name, userWithImage.name);
-		setup(<NotificationsSettings desktopNotifications setDesktopNotifications={jest.fn()} />);
-		expect(screen.getByTestId('icon: CheckmarkSquare')).toBeInTheDocument();
+		setup(
+			<NotificationsSettings
+				desktopNotifications
+				setDesktopNotifications={jest.fn()}
+				setDesktopNotificationsSounds={jest.fn()}
+				desktopNotificationsSounds
+				setWaitingRoomAccessNotifications={jest.fn()}
+				setWaitingRoomAccessNotificationsSounds={jest.fn()}
+				waitingRoomAccessNotifications
+				waitingRoomAccessNotificationsSounds
+			/>
+		);
+		expect(screen.getAllByTestId('icon: CheckmarkSquare')[0]).toBeInTheDocument();
 	});
 });

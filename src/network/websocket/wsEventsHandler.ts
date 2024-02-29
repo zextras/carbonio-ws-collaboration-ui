@@ -310,12 +310,28 @@ export function wsEventsHandler(event: WsEvent): void {
 				meeting?.participants,
 				(participant) => participant.userId === useStore.getState().session.id
 			);
+			const ChatsNotificationsSettings: string | null = window.parent.localStorage.getItem(
+				'ChatsNotificationsSettings'
+			);
 			if (userIsParticipant) {
 				state.addUserToWaitingList(event.meetingId, event.userId);
-				sendCustomEvent({ name: EventName.NEW_WAITING_USER, data: event });
-				if (inThisMeetingTab(event.meetingId)) {
-					displayWaitingListNotification(event.meetingId);
-					sendAudioFeedback(MeetingSoundFeedback.NEW_WAITING_USER);
+				if (
+					ChatsNotificationsSettings &&
+					JSON.parse(ChatsNotificationsSettings).hasOwnProperty('WaitingRoomAccessNotifications') &&
+					JSON.parse(ChatsNotificationsSettings).WaitingRoomAccessNotifications
+				) {
+					sendCustomEvent({ name: EventName.NEW_WAITING_USER, data: event });
+					if (inThisMeetingTab(event.meetingId)) {
+						displayWaitingListNotification(event.meetingId);
+						if (
+							JSON.parse(ChatsNotificationsSettings).hasOwnProperty(
+								'WaitingRoomAccessNotificationsSounds'
+							) &&
+							JSON.parse(ChatsNotificationsSettings).WaitingRoomAccessNotificationsSounds
+						) {
+							sendAudioFeedback(MeetingSoundFeedback.NEW_WAITING_USER);
+						}
+					}
 				}
 			}
 			break;

@@ -146,6 +146,15 @@ describe('wsEventHandler', () => {
 	describe('Waiting room events', () => {
 		test("An user joins the waiting room while I'm in the meeting tab", () => {
 			window.history.pushState({}, '', `${MEETINGS_PATH}${scheduledMeeting.id}`);
+			localStorage.setItem(
+				'ChatsNotificationsSettings',
+				JSON.stringify({
+					DesktopNotifications: true,
+					DesktopNotificationsSounds: true,
+					WaitingRoomAccessNotifications: true,
+					WaitingRoomAccessNotificationsSounds: true
+				})
+			);
 			wsEventsHandler({
 				type: WsEventType.MEETING_WAITING_PARTICIPANT_JOINED,
 				meetingId: scheduledMeeting.id,
