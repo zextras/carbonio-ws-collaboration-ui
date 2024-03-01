@@ -109,9 +109,8 @@ describe('Settings view', () => {
 				setUpdatedNotificationsSettings={jest.fn()}
 			/>
 		);
-		const desktopNotificationsCheckbox = screen.getByTestId('desktop_notifications_checkbox')
-			.children[0].children[0];
-		expect(desktopNotificationsCheckbox).toHaveAttribute(dataTestid, 'icon: CheckmarkSquare');
+		const checkbox = screen.getByTestId('desktop_notifications_checkbox').children[0].children[0];
+		expect(checkbox).toHaveAttribute(dataTestid, 'icon: CheckmarkSquare');
 	});
 
 	test('desktop notification checkbox not active', async () => {
@@ -124,9 +123,8 @@ describe('Settings view', () => {
 				setUpdatedNotificationsSettings={jest.fn()}
 			/>
 		);
-		const desktopNotificationsCheckbox = screen.getByTestId('desktop_notifications_checkbox')
-			.children[0].children[0];
-		expect(desktopNotificationsCheckbox).toHaveAttribute(dataTestid, 'icon: Square');
+		const checkbox = screen.getByTestId('desktop_notifications_checkbox').children[0].children[0];
+		expect(checkbox).toHaveAttribute(dataTestid, 'icon: Square');
 	});
 
 	test('desktop notification sounds switch active', async () => {
@@ -139,9 +137,9 @@ describe('Settings view', () => {
 				setUpdatedNotificationsSettings={jest.fn()}
 			/>
 		);
-		const desktopNotificationsCheckbox = screen.getByTestId('desktop_notifications_sounds_switch')
-			.children[0].children[0];
-		expect(desktopNotificationsCheckbox).toHaveAttribute(dataTestid, 'icon: ToggleRight');
+		const switchElement = screen.getByTestId('desktop_notifications_sounds_switch').children[0]
+			.children[0];
+		expect(switchElement).toHaveAttribute(dataTestid, 'icon: ToggleRight');
 	});
 
 	test('desktop notification sounds switch not active', async () => {
@@ -154,9 +152,9 @@ describe('Settings view', () => {
 				setUpdatedNotificationsSettings={jest.fn()}
 			/>
 		);
-		const desktopNotificationsCheckbox = screen.getByTestId('desktop_notifications_sounds_switch')
-			.children[0].children[0];
-		expect(desktopNotificationsCheckbox).toHaveAttribute(dataTestid, 'icon: ToggleLeftOutline');
+		const switchElement = screen.getByTestId('desktop_notifications_sounds_switch').children[0]
+			.children[0];
+		expect(switchElement).toHaveAttribute(dataTestid, 'icon: ToggleLeftOutline');
 	});
 
 	test('waiting room access notifications active', async () => {
@@ -169,10 +167,9 @@ describe('Settings view', () => {
 				setUpdatedNotificationsSettings={jest.fn()}
 			/>
 		);
-		const desktopNotificationsCheckbox = screen.getByTestId(
-			'waiting_room_access_notifications_checkbox'
-		).children[0].children[0];
-		expect(desktopNotificationsCheckbox).toHaveAttribute(dataTestid, 'icon: CheckmarkSquare');
+		const checkbox = screen.getByTestId('waiting_room_access_notifications_checkbox').children[0]
+			.children[0];
+		expect(checkbox).toHaveAttribute(dataTestid, 'icon: CheckmarkSquare');
 	});
 
 	test('waiting room access notifications not active', async () => {
@@ -185,10 +182,9 @@ describe('Settings view', () => {
 				setUpdatedNotificationsSettings={jest.fn()}
 			/>
 		);
-		const desktopNotificationsCheckbox = screen.getByTestId(
-			'waiting_room_access_notifications_checkbox'
-		).children[0].children[0];
-		expect(desktopNotificationsCheckbox).toHaveAttribute(dataTestid, 'icon: Square');
+		const checkbox = screen.getByTestId('waiting_room_access_notifications_checkbox').children[0]
+			.children[0];
+		expect(checkbox).toHaveAttribute(dataTestid, 'icon: Square');
 	});
 
 	test('waiting room access notifications sounds active', async () => {
@@ -201,9 +197,9 @@ describe('Settings view', () => {
 				setUpdatedNotificationsSettings={jest.fn()}
 			/>
 		);
-		const desktopNotificationsCheckbox = screen.getByTestId('waiting_room_access_sounds_switch')
-			.children[0].children[0];
-		expect(desktopNotificationsCheckbox).toHaveAttribute(dataTestid, 'icon: ToggleRight');
+		const switchElement = screen.getByTestId('waiting_room_access_sounds_switch').children[0]
+			.children[0];
+		expect(switchElement).toHaveAttribute(dataTestid, 'icon: ToggleRight');
 	});
 
 	test('waiting room access notifications sounds not active', async () => {
@@ -216,8 +212,8 @@ describe('Settings view', () => {
 				setUpdatedNotificationsSettings={jest.fn()}
 			/>
 		);
-		const desktopNotificationsCheckbox = screen.getByTestId('waiting_room_access_sounds_switch')
-			.children[0].children[0];
-		expect(desktopNotificationsCheckbox).toHaveAttribute(dataTestid, 'icon: ToggleLeftOutline');
+		const switchElement = screen.getByTestId('waiting_room_access_sounds_switch').children[0]
+			.children[0];
+		expect(switchElement).toHaveAttribute(dataTestid, 'icon: ToggleLeftOutline');
 	});
 });
