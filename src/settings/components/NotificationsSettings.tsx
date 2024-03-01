@@ -88,7 +88,7 @@ const NotificationsSettings: FC<NotificationsSettingsProps> = ({
 							value={updatedNotificationsSettings.DesktopNotifications}
 							onClick={onChangeNotificationCheckbox}
 							label={notificationsCheckboxLabel}
-							data-testid="checkbox"
+							data-testid="desktop_notifications_checkbox"
 						/>
 						<Switch
 							disabled={!updatedNotificationsSettings.DesktopNotifications}
@@ -104,7 +104,7 @@ const NotificationsSettings: FC<NotificationsSettingsProps> = ({
 							value={updatedNotificationsSettings.WaitingRoomAccessNotifications}
 							onClick={onChangeWaitingRoomAccessNotificationCheckbox}
 							label="Allow notifications"
-							data-testid="checkbox"
+							data-testid="waiting_room_access_notifications_checkbox"
 						/>
 						<Switch
 							disabled={!updatedNotificationsSettings.WaitingRoomAccessNotifications}
@@ -112,7 +112,7 @@ const NotificationsSettings: FC<NotificationsSettingsProps> = ({
 							value={updatedNotificationsSettings.WaitingRoomAccessNotificationsSounds}
 							onClick={onChangeWaitingRoomAccessNotificationSoundsSwitch}
 							label="Enable notification sounds"
-							data-testid="desktop_notifications_sounds_switch"
+							data-testid="waiting_room_access_sounds_switch"
 						/>
 					</Container>
 				</Padding>
