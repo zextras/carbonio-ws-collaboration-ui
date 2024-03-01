@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.9.2](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.9.1...v0.9.2) (2024-02-29)
+
+
+### Bug Fixes
+
+* hotfix avoid undefined meetings name ([3ca3497](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/3ca3497099e1145bbcab359f45c066c2f6282be8))
+
 ### [0.9.1](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.9.0...v0.9.1) (2024-02-14)
 
 
