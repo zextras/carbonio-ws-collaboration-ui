@@ -18,6 +18,7 @@ import NotificationsSettings from './NotificationsSettings';
 import ProfileSettings from './ProfileSettings';
 import useLocalStorage from '../../../hooks/useLocalStorage';
 import { UsersApi } from '../../../network';
+import RecordingSettings from '../../../RecordingSettings';
 
 type SettingsProps = {
 	id?: string | undefined;
@@ -151,12 +152,7 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 	]);
 
 	return (
-		<Container
-			mainAlignment="flex-start"
-			background={'gray5'}
-			style={{ overflowY: 'auto' }}
-			data-testid="settings_container"
-		>
+		<Container data-testid="settings_container">
 			<SettingsHeader
 				onSave={saveSettings}
 				onCancel={onClose}
@@ -164,6 +160,9 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 				title={settingsTitle}
 			/>
 			<Container
+				mainAlignment="baseline"
+				crossAlignment="baseline"
+				style={{ overflowY: 'auto' }}
 				height="fit"
 				background={'gray5'}
 				padding={{ vertical: 'large', horizontal: 'medium' }}
@@ -180,6 +179,8 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 					desktopNotifications={desktopNotifications}
 					setDesktopNotifications={setDesktopNotifications}
 				/>
+				<Padding bottom="large" />
+				<RecordingSettings />
 			</Container>
 		</Container>
 	);
