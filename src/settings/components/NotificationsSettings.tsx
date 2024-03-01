@@ -29,6 +29,8 @@ const NotificationsSettings: FC<NotificationsSettingsProps> = ({
 }) => {
 	const [t] = useTranslation();
 	const sectionTitle = t('settings.notifications.title', 'Notifications');
+	const generalTitle = t('', 'General');
+	const waitingRoomTitle = t('', 'Waiting Room access notifications');
 	const sectionDescription = t(
 		'settings.notifications.description',
 		'Set your preferences for Chats notifications.'
@@ -37,6 +39,9 @@ const NotificationsSettings: FC<NotificationsSettingsProps> = ({
 		'settings.notifications.checkboxLabel',
 		'Desktop notifications'
 	);
+	const notificationsSwitchLabel = t('', 'Enable Desktop notification sounds');
+	const waitingRoomCheckboxLabel = t('', 'Allow notifications');
+	const waitingRoomSwitchLabel = t('', 'Enable notification sounds');
 
 	const onChangeNotificationCheckbox = useCallback(() => {
 		setUpdatedNotificationsSettings((prevState) => ({
@@ -82,7 +87,7 @@ const NotificationsSettings: FC<NotificationsSettingsProps> = ({
 						<Text overflow="break-word" size={'small'}>
 							{sectionDescription}
 						</Text>
-						<Text overflow="break-word">General</Text>
+						<Text overflow="break-word">{generalTitle}</Text>
 						<Checkbox
 							defaultChecked={updatedNotificationsSettings.DesktopNotifications}
 							value={updatedNotificationsSettings.DesktopNotifications}
@@ -95,15 +100,15 @@ const NotificationsSettings: FC<NotificationsSettingsProps> = ({
 							defaultChecked={updatedNotificationsSettings.DesktopNotificationsSounds}
 							value={updatedNotificationsSettings.DesktopNotificationsSounds}
 							onClick={onChangeNotificationSoundsSwitch}
-							label="Enable Desktop notification sounds"
+							label={notificationsSwitchLabel}
 							data-testid="desktop_notifications_sounds_switch"
 						/>
-						<Text overflow="break-word">Waiting Room access notifications</Text>
+						<Text overflow="break-word">{waitingRoomTitle}</Text>
 						<Checkbox
 							defaultChecked={updatedNotificationsSettings.WaitingRoomAccessNotifications}
 							value={updatedNotificationsSettings.WaitingRoomAccessNotifications}
 							onClick={onChangeWaitingRoomAccessNotificationCheckbox}
-							label="Allow notifications"
+							label={waitingRoomCheckboxLabel}
 							data-testid="waiting_room_access_notifications_checkbox"
 						/>
 						<Switch
@@ -111,7 +116,7 @@ const NotificationsSettings: FC<NotificationsSettingsProps> = ({
 							defaultChecked={updatedNotificationsSettings.WaitingRoomAccessNotificationsSounds}
 							value={updatedNotificationsSettings.WaitingRoomAccessNotificationsSounds}
 							onClick={onChangeWaitingRoomAccessNotificationSoundsSwitch}
-							label="Enable notification sounds"
+							label={waitingRoomSwitchLabel}
 							data-testid="waiting_room_access_sounds_switch"
 						/>
 					</Container>
