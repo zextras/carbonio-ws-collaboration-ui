@@ -76,7 +76,7 @@ class RoomsApi extends BaseAPI implements IRoomsApi {
 			// Create meeting for the created room
 			const meetingType =
 				room.type === RoomType.TEMPORARY ? MeetingType.SCHEDULED : MeetingType.PERMANENT;
-			MeetingsApi.createMeeting(response.id, meetingType, response.name);
+			MeetingsApi.createMeeting(response.id, meetingType, response.name || '');
 			return response;
 		});
 	}
