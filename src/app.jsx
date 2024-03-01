@@ -10,6 +10,7 @@ import { useUserAccount, useUserSettings } from '@zextras/carbonio-shell-ui';
 
 import CounterBadgeUpdater from './chats/components/CounterBadgeUpdater';
 import RegisterCreationButton from './chats/components/RegisterCreationButton';
+import WaitingListSnackbar from './chats/components/settings/WaitingListSnackbar';
 import useChatsApp from './chats/useChatsApp';
 import MeetingNotificationHandler from './meetings/components/MeetingNotificationsHandler';
 import useMeetingsApp from './meetings/useMeetingsApp';
@@ -46,18 +47,18 @@ export default function App() {
 		const webSocket = new WebSocketClient();
 		setWebSocketClient(webSocket);
 
-		Promise.all([SessionApi.getToken(), SessionApi.getCapabilities()])
+		Promise.all([
+			SessionApi.getToken(),
+			SessionApi.getCapabilities(),
+			RoomsApi.listRooms(true, true),
+			MeetingsApi.listMeetings()
+		])
 			.then((resp) => {
-				// CHATS BE: get all rooms list
-				RoomsApi.listRooms(true, true)
-					.then(() => {
-						setChatsBeStatus(true);
-						// Init xmppClient and webSocket after roomList request to avoid missing data (specially for the inbox request)
-						xmppClient.connect(resp[0].zmToken);
-						webSocket.connect();
-					})
-					.catch(() => setChatsBeStatus(false));
-				MeetingsApi.listMeetings();
+				setChatsBeStatus(true);
+
+				// Init xmppClient and webSocket after roomList request to avoid missing data (specially for the inbox request)
+				xmppClient.connect(resp[0].zmToken);
+				webSocket.connect();
 			})
 			.catch(() => setChatsBeStatus(false));
 	}, [setChatsBeStatus, setWebSocketClient, setXmppClient]);
@@ -70,6 +71,7 @@ export default function App() {
 			<RegisterCreationButton />
 			<CounterBadgeUpdater />
 			<MeetingNotificationHandler />
+			<WaitingListSnackbar />
 		</>
 	);
 }

@@ -34,6 +34,7 @@ export type SidebarStatus = {
 	sidebarIsOpened: boolean;
 	participantsAccordionIsOpened: boolean;
 	actionsAccordionIsOpened: boolean;
+	waitingListAccordionIsOpened: boolean;
 };
 
 export enum MeetingViewType {

@@ -16,7 +16,7 @@ import {
 	getParticipantAudioStatus,
 	getRoomIdByMeetingId
 } from '../../../../store/selectors/MeetingSelectors';
-import { getMyOwnershipOfTheRoom, getOwner } from '../../../../store/selectors/RoomsSelectors';
+import { getOwnershipOfTheRoom, getOwner } from '../../../../store/selectors/RoomsSelectors';
 import { getUserId } from '../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../store/Store';
 
@@ -45,9 +45,7 @@ const MeetingParticipantActions: FC<ParticipantActionsProps> = ({ memberId, meet
 		getParticipantAudioStatus(store, meetingId || '', memberId)
 	);
 	const memberOwner: boolean = useStore((store) => getOwner(store, roomId || '', memberId));
-	const iAmOwner: boolean = useStore((state) =>
-		getMyOwnershipOfTheRoom(state, userId, roomId || '')
-	);
+	const iAmOwner: boolean = useStore((state) => getOwnershipOfTheRoom(state, roomId || '', userId));
 
 	const [muteForAllModalIsOpen, setMuteForAllModalIsOpen] = useState(false);
 

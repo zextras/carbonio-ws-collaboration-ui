@@ -22,7 +22,8 @@ describe('Active Meeting Slice', () => {
 		expect(result.current.activeMeeting[meetingId].sidebarStatus).toStrictEqual({
 			sidebarIsOpened: true,
 			actionsAccordionIsOpened: true,
-			participantsAccordionIsOpened: false
+			participantsAccordionIsOpened: false,
+			waitingListAccordionIsOpened: true
 		});
 		expect(result.current.activeMeeting[meetingId].chatVisibility).toBe(
 			MeetingChatVisibility.CLOSED
@@ -73,6 +74,21 @@ describe('Active Meeting Slice', () => {
 		act(() => result.current.setMeetingParticipantsAccordionStatus(meetingId, true));
 		expect(
 			result.current.activeMeeting[meetingId].sidebarStatus.participantsAccordionIsOpened
+		).toBeTruthy();
+	});
+
+	test('Change waiting list accordion status', () => {
+		const { result } = renderHook(() => useStore());
+		act(() => result.current.meetingConnection(meetingId, false, undefined, false, undefined));
+
+		act(() => result.current.setWaitingListAccordionStatus(meetingId, false));
+		expect(
+			result.current.activeMeeting[meetingId].sidebarStatus.waitingListAccordionIsOpened
+		).toBeFalsy();
+
+		act(() => result.current.setWaitingListAccordionStatus(meetingId, true));
+		expect(
+			result.current.activeMeeting[meetingId].sidebarStatus.waitingListAccordionIsOpened
 		).toBeTruthy();
 	});
 

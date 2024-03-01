@@ -18,6 +18,7 @@ import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { STREAM_TYPE, Subscription } from '../../../types/store/ActiveMeetingTypes';
 import { calcScaleDivisor } from '../../../utils/styleUtils';
+import { MeetingViewProps } from '../../views/MeetingSkeleton';
 import Tile from '../tile/Tile';
 
 const FaceToFace = styled(Container)`
@@ -42,7 +43,7 @@ const CentralTile = styled(Container)`
 	border-radius: 0.5rem;
 `;
 
-const FaceToFaceMode = (): ReactElement => {
+const FaceToFaceMode = ({ children }: MeetingViewProps): ReactElement => {
 	const { meetingId }: MeetingRoutesParams = useParams();
 
 	const [t] = useTranslation();
@@ -108,6 +109,7 @@ const FaceToFaceMode = (): ReactElement => {
 				<Tile userId={localId} meetingId={meetingId} />
 			</MyStreamContainer>
 			{centralContentToDisplay}
+			{children}
 		</FaceToFace>
 	);
 };

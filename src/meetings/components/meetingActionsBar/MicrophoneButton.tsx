@@ -134,6 +134,7 @@ const MicrophoneButton = ({
 	return (
 		<Tooltip placement="top" label={audioStatus ? disableMicLabel : enableMicLabel}>
 			<MultiButton
+				data-testid="microphone-button"
 				background="primary"
 				primaryIcon={audioStatus ? 'Mic' : 'MicOff'}
 				icon={isAudioListOpen ? 'ChevronDown' : 'ChevronUp'}

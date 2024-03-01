@@ -42,6 +42,7 @@ import { ChangeUserPictureResponse } from '../../types/network/responses/usersRe
 import { TextMessage } from '../../types/store/MessageTypes';
 import { dateToISODate } from '../../utils/dateUtils';
 import { MeetingsApi } from '../index';
+import { getLastUnreadMessage } from '../xmpp/utility/getLastUnreadMessage';
 import HistoryAccumulator from '../xmpp/utility/HistoryAccumulator';
 
 class RoomsApi extends BaseAPI implements IRoomsApi {
@@ -75,7 +76,7 @@ class RoomsApi extends BaseAPI implements IRoomsApi {
 			// Create meeting for the created room
 			const meetingType =
 				room.type === RoomType.TEMPORARY ? MeetingType.SCHEDULED : MeetingType.PERMANENT;
-			MeetingsApi.createMeeting(response.id, meetingType);
+			MeetingsApi.createMeeting(response.id, meetingType, response.name || '');
 			return response;
 		});
 	}
@@ -92,13 +93,11 @@ class RoomsApi extends BaseAPI implements IRoomsApi {
 	}
 
 	public deleteRoom(roomId: string): Promise<DeleteRoomResponse> {
+		const meetingId = useStore.getState().rooms[roomId]?.meetingId;
 		return this.fetchAPI(`rooms/${roomId}`, RequestType.DELETE).then(
 			(response: DeleteRoomResponse) => {
-				// Delete the associated permanent meeting
-				const meeting = useStore.getState().meetings[roomId];
-				if (meeting) {
-					MeetingsApi.deleteMeeting(meeting.id);
-				}
+				// Delete the associated meeting
+				if (meetingId) MeetingsApi.deleteMeeting(meetingId);
 				return response;
 			}
 		);
@@ -185,9 +184,14 @@ class RoomsApi extends BaseAPI implements IRoomsApi {
 		},
 		signal?: AbortSignal
 	): Promise<AddRoomAttachmentResponse> {
+		const { connections, setPlaceholderMessage } = useStore.getState();
+		// Read messages before sending a new one
+		const lastMessageId = getLastUnreadMessage(roomId);
+		if (lastMessageId) connections.xmppClient.readMessage(roomId, lastMessageId);
+
 		const uuid = uuidGenerator();
 		// Set a placeholder message into the store
-		useStore.getState().setPlaceholderMessage({
+		setPlaceholderMessage({
 			roomId,
 			id: uuid,
 			text: optionalFields.description || '',

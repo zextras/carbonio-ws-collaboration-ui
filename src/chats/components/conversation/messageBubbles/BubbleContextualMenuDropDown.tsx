@@ -25,6 +25,7 @@ import usePreview from '../../../../hooks/usePreview';
 import { AttachmentsApi } from '../../../../network';
 import {
 	getFilesToUploadArray,
+	getForwardList,
 	getReferenceMessage
 } from '../../../../store/selectors/ActiveConversationsSelectors';
 import { getXmppClient } from '../../../../store/selectors/ConnectionSelector';
@@ -35,7 +36,6 @@ import { TextMessage } from '../../../../types/store/MessageTypes';
 import { CapabilityType } from '../../../../types/store/SessionTypes';
 import { isPreviewSupported } from '../../../../utils/attachmentUtils';
 import { canPerformAction } from '../../../../utils/MessageActionsUtils';
-import ForwardMessageModal from '../forwardModal/ForwardMessageModal';
 
 export const BubbleContextualMenuDropDownWrapper = styled.div<{
 	children: ReactElement;
@@ -141,9 +141,12 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 	const setReferenceMessage = useStore((store) => store.setReferenceMessage);
 	const unsetReferenceMessage = useStore((store) => store.unsetReferenceMessage);
 	const setDraftMessage = useStore((store) => store.setDraftMessage);
+	const forwardList = useStore((store) => getForwardList(store, message.roomId));
+	const setForwardList = useStore((store) => store.setForwardMessageList);
+	const unsetForwardList = useStore((store) => store.unsetForwardMessageList);
+
 	const filesToUploadArray = useStore((store) => getFilesToUploadArray(store, message.roomId));
 	const [dropdownActive, setDropdownActive] = useState(false);
-	const [forwardMessageModalIsOpen, setForwardMessageModalIsOpen] = useState<boolean>(false);
 	const createSnackbar: any = useContext(SnackbarManagerContext);
 
 	const dropDownRef = useRef<HTMLDivElement>(null);
@@ -166,16 +169,11 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 		return () => messageListRef?.removeEventListener('scroll', closeDropdownOnScroll);
 	}, [closeDropdownOnScroll, message.roomId]);
 
-	const onOpenForwardMessageModal = useCallback(() => {
+	const setForwardModeOn = useCallback(() => {
 		setDraftMessage(message.roomId, false, '');
 		unsetReferenceMessage(message.roomId);
-		setForwardMessageModalIsOpen(true);
-	}, [message.roomId, setDraftMessage, unsetReferenceMessage]);
-
-	const onCloseForwardMessageModal = useCallback(
-		() => setForwardMessageModalIsOpen(false),
-		[setForwardMessageModalIsOpen]
-	);
+		setForwardList(message.roomId, message);
+	}, [message, setDraftMessage, setForwardList, unsetReferenceMessage]);
 
 	const copyMessageAction = useCallback(() => {
 		if (window.parent.navigator.clipboard) {
@@ -197,6 +195,7 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 	}, [createSnackbar, message.text, successfulCopySnackbar]);
 
 	const editMessageAction = useCallback(() => {
+		unsetForwardList(message.roomId);
 		setDraftMessage(message.roomId, false, message.text);
 		setReferenceMessage(
 			message.roomId,
@@ -206,9 +205,10 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 			messageActionType.EDIT,
 			message.attachment
 		);
-	}, [message, setDraftMessage, setReferenceMessage]);
+	}, [message, setDraftMessage, setReferenceMessage, unsetForwardList]);
 
 	const deleteMessageAction = useCallback(() => {
+		unsetForwardList(message.roomId);
 		if (message.attachment) {
 			AttachmentsApi.deleteAttachment(message.attachment.id).then(() =>
 				xmppClient.sendChatMessageDeletion(message.roomId, message.stanzaId)
@@ -216,7 +216,7 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 		} else {
 			xmppClient.sendChatMessageDeletion(message.roomId, message.stanzaId);
 		}
-	}, [message.attachment, message.stanzaId, message.roomId, xmppClient]);
+	}, [message.attachment, message.stanzaId, message.roomId, xmppClient, unsetForwardList]);
 
 	const downloadAction = useCallback(() => {
 		if (message.attachment) {
@@ -232,6 +232,7 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 	}, [message.attachment]);
 
 	const replyMessageAction = useCallback(() => {
+		unsetForwardList(message.roomId);
 		if (referenceMessage?.actionType !== messageActionType.REPLY) {
 			setDraftMessage(message.roomId, false, '');
 		}
@@ -243,7 +244,15 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 			messageActionType.REPLY,
 			message.attachment
 		);
-	}, [message, referenceMessage?.actionType, setDraftMessage, setReferenceMessage]);
+	}, [
+		message,
+		referenceMessage?.actionType,
+		setDraftMessage,
+		setReferenceMessage,
+		unsetForwardList
+	]);
+
+	const forwardHastoAppear = useMemo(() => forwardList === undefined, [forwardList]);
 
 	const canBeEdited = useMemo(
 		() =>
@@ -286,11 +295,13 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 		});
 
 		// Forward message in another chat
-		actions.push({
-			id: 'forward',
-			label: forwardActionLabel,
-			onClick: onOpenForwardMessageModal
-		});
+		if (forwardHastoAppear) {
+			actions.push({
+				id: 'forward',
+				label: forwardActionLabel,
+				onClick: setForwardModeOn
+			});
+		}
 
 		// Copy the text of a text message to the clipboard
 		actions.push({
@@ -331,8 +342,7 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 		canBeEdited,
 		replyActionLabel,
 		replyMessageAction,
-		forwardActionLabel,
-		onOpenForwardMessageModal,
+		forwardHastoAppear,
 		copyActionLabel,
 		copyMessageAction,
 		canBeDeleted,
@@ -341,6 +351,8 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 		editActionLabel,
 		editMessageAction,
 		filesToUploadArray,
+		forwardActionLabel,
+		setForwardModeOn,
 		deleteActionLabel,
 		deleteMessageAction,
 		previewActionLabel,
@@ -355,34 +367,24 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 			isMyMessage={isMyMessage}
 			isActive={dropdownActive}
 		>
-			<>
-				<Dropdown
-					data-testid={`cxtMenuDropdown-${message.id}`}
-					items={contextualMenuActions}
-					onOpen={onDropdownOpen}
-					onClose={onDropdownClose}
-					disableRestoreFocus
-					disablePortal
-					placement="right-start"
-					ref={dropDownRef}
-				>
-					<IconButton
-						iconColor="currentColor"
-						size="small"
-						icon="ArrowIosDownward"
-						title={messageActionsTooltip}
-						onClick={(): null => null}
-					/>
-				</Dropdown>
-				{forwardMessageModalIsOpen && (
-					<ForwardMessageModal
-						open={forwardMessageModalIsOpen}
-						onClose={onCloseForwardMessageModal}
-						roomId={message.roomId}
-						message={message}
-					/>
-				)}
-			</>
+			<Dropdown
+				data-testid={`cxtMenuDropdown-${message.id}`}
+				items={contextualMenuActions}
+				onOpen={onDropdownOpen}
+				onClose={onDropdownClose}
+				disableRestoreFocus
+				disablePortal
+				placement="right-start"
+				ref={dropDownRef}
+			>
+				<IconButton
+					iconColor="currentColor"
+					size="small"
+					icon="ArrowIosDownward"
+					title={messageActionsTooltip}
+					onClick={(): null => null}
+				/>
+			</Dropdown>
 		</BubbleContextualMenuDropDownWrapper>
 	);
 };

@@ -6,7 +6,7 @@
 
 import React, { ReactElement, RefObject, useCallback, useEffect, useRef, useState } from 'react';
 
-import { Container, Padding } from '@zextras/carbonio-design-system';
+import { Container } from '@zextras/carbonio-design-system';
 import styled, { FlattenSimpleInterpolation } from 'styled-components';
 
 import CameraButton from './CameraButton';
@@ -18,7 +18,7 @@ import SwitchViewButton from './SwitchViewButton';
 
 const BarContainer = styled(Container)<{ $isHoovering: boolean }>`
 	position: absolute;
-	bottom: 0;
+	bottom: -1rem;
 	width: 100%;
 	transform: translateY(
 		${({ $isHoovering }): string | FlattenSimpleInterpolation => ($isHoovering ? '-1rem' : '5rem')}
@@ -32,6 +32,11 @@ const ActionsWrapper = styled(Container)`
 	border-radius: 0.5rem;
 	gap: 1rem;
 	box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+`;
+
+const SecondActionsWrapper = styled(ActionsWrapper)`
+	position: absolute;
+	right: 3.25rem;
 `;
 
 type MeetingActionsProps = {
@@ -144,9 +149,15 @@ const MeetingActionsBar = ({ streamsWrapperRef }: MeetingActionsProps): ReactEle
 	);
 
 	return (
-		<BarContainer height="fit" $isHoovering={isHoovering} data-testid="meeting-action-bar">
+		<BarContainer
+			height="fit"
+			$isHoovering={isHoovering}
+			data-testid="meeting-action-bar"
+			padding={{ horizontal: '3.25rem' }}
+			orientation="horizontal"
+		>
 			<ActionsWrapper
-				background={'text'}
+				background="text"
 				width="fit"
 				height="fit"
 				orientation="horizontal"
@@ -166,9 +177,17 @@ const MeetingActionsBar = ({ streamsWrapperRef }: MeetingActionsProps): ReactEle
 				<ScreenShareButton />
 				<FullScreenButton />
 				<SwitchViewButton />
-				<Padding right="1rem" />
-				<LeaveMeetingButton />
 			</ActionsWrapper>
+			<SecondActionsWrapper
+				background="text"
+				width="fit"
+				height="fit"
+				orientation="horizontal"
+				onMouseEnter={handleMouseEnter}
+				onMouseLeave={handleMouseLeave}
+			>
+				<LeaveMeetingButton isHoovering={isHoovering} />
+			</SecondActionsWrapper>
 		</BarContainer>
 	);
 };

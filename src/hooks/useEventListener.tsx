@@ -10,7 +10,12 @@ import {
 	MeetingAudioStreamChangedEvent,
 	MeetingJoinedEvent,
 	MeetingParticipantClashedEvent,
-	MeetingStartedEvent
+	MeetingStartedEvent,
+	MeetingStoppedEvent,
+	MeetingUserAcceptedEvent,
+	MeetingUserRejectedEvent,
+	MeetingWaitingParticipantClashed,
+	MeetingWaitingParticipantJoinedEvent
 } from '../types/network/websocket/wsMeetingEvents';
 import { Message } from '../types/store/MessageTypes';
 
@@ -19,7 +24,11 @@ export enum EventName {
 	INCOMING_MEETING = 'incomingMeeting',
 	REMOVED_MEETING_NOTIFICATION = 'removedMeetingNotification',
 	MEMBER_MUTED = 'memberMuted',
-	MEETING_PARTICIPANT_CLASHED = 'meetingParticipantClashed'
+	MEETING_PARTICIPANT_CLASHED = 'meetingParticipantClashed',
+	NEW_WAITING_USER = 'newWaitingUser',
+	MEETING_USER_ACCEPTED = 'meetingUserAccepted',
+	MEETING_USER_REJECTED = 'meetingUserRejected',
+	MEETING_WAITING_PARTICIPANT_CLASHED = 'meetingWaitingParticipantClashed'
 }
 
 export type NewMessageEvent = {
@@ -34,7 +43,7 @@ export type IncomingMeetingEvent = {
 
 export type RemovedMeetingNotificationEvent = {
 	name: EventName.REMOVED_MEETING_NOTIFICATION;
-	data: MeetingJoinedEvent;
+	data: MeetingJoinedEvent | MeetingStoppedEvent;
 };
 
 export type ParticipantClashedEvent = {
@@ -47,12 +56,36 @@ export type MemberMutedEvent = {
 	data: MeetingAudioStreamChangedEvent;
 };
 
+export type NewWaitingUserEvent = {
+	name: EventName.NEW_WAITING_USER;
+	data: MeetingWaitingParticipantJoinedEvent;
+};
+
+export type MeetingAcceptedEvent = {
+	name: EventName.MEETING_USER_ACCEPTED;
+	data: MeetingUserAcceptedEvent;
+};
+
+export type MeetingRejectedEvent = {
+	name: EventName.MEETING_USER_REJECTED;
+	data: MeetingUserRejectedEvent;
+};
+
+export type MeetingWaitingParticipantClashedEvent = {
+	name: EventName.MEETING_WAITING_PARTICIPANT_CLASHED;
+	data: MeetingWaitingParticipantClashed;
+};
+
 type CustomEvent =
 	| NewMessageEvent
 	| IncomingMeetingEvent
 	| RemovedMeetingNotificationEvent
 	| MemberMutedEvent
-	| ParticipantClashedEvent;
+	| ParticipantClashedEvent
+	| NewWaitingUserEvent
+	| MeetingAcceptedEvent
+	| MeetingRejectedEvent
+	| MeetingWaitingParticipantClashedEvent;
 
 export const sendCustomEvent = (event: CustomEvent): void => {
 	window.dispatchEvent(new CustomEvent(event.name, { detail: event.data }));

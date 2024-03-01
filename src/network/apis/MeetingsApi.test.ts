@@ -8,10 +8,11 @@ import { size } from 'lodash';
 
 import meetingsApi from './MeetingsApi';
 import useStore from '../../store/Store';
-import { createMockMeeting } from '../../tests/createMock';
+import { createMockMeeting, createMockMember, createMockRoom } from '../../tests/createMock';
 import { fetchResponse } from '../../tests/mocks/global';
 import { MeetingType } from '../../types/network/models/meetingBeTypes';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
+import { RoomType } from '../../types/store/RoomTypes';
 
 const meetingMock = createMockMeeting();
 const meetingMock1 = createMockMeeting({ id: 'meetingId1', roomId: 'roomId1' });
@@ -64,7 +65,7 @@ describe('Meetings API', () => {
 
 	test('createMeeting is called correctly', async () => {
 		fetchResponse.mockResolvedValueOnce(meetingMock);
-		await meetingsApi.createMeeting('roomId', MeetingType.PERMANENT);
+		await meetingsApi.createMeeting('roomId', MeetingType.PERMANENT, '');
 		// Check if fetch is called with the correct parameters
 		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/meetings`, {
 			method: 'POST',
@@ -115,7 +116,8 @@ describe('Meetings API', () => {
 	});
 
 	test('joinMeeting is called correctly', async () => {
-		fetchResponse.mockResolvedValue(meetingMock);
+		fetchResponse.mockResolvedValueOnce({ status: 'ACCEPTED' });
+		fetchResponse.mockResolvedValueOnce(meetingMock);
 		await meetingsApi.joinMeeting(
 			meetingMock.id,
 			{
@@ -153,6 +155,46 @@ describe('Meetings API', () => {
 		// Check if store is correctly updated
 		const store = useStore.getState();
 		expect(store.activeMeeting[meetingMock.id]).not.toBeDefined();
+	});
+
+	test('When a member leaves a scheduled meeting, he is also removed from temporary room', async () => {
+		const temporaryRoom = createMockRoom({
+			meetingId: meetingMock.id,
+			type: RoomType.TEMPORARY,
+			members: [createMockMember({ userId })]
+		});
+		const store = useStore.getState();
+		store.addRoom(temporaryRoom);
+
+		fetchResponse.mockResolvedValueOnce(meetingMock);
+		await meetingsApi.leaveMeeting(meetingMock.id);
+
+		// Check if fetch is called with the correct parameters
+		expect(global.fetch).toBeCalledTimes(2);
+
+		// Check if store is correctly updated
+		const updatedStore = useStore.getState();
+		expect(updatedStore.rooms[meetingMock.roomId]).not.toBeDefined();
+	});
+
+	test("When an owner leaves a scheduled meeting, he isn't removed from temporary room", async () => {
+		const temporaryRoom = createMockRoom({
+			meetingId: meetingMock.id,
+			type: RoomType.TEMPORARY,
+			members: [createMockMember({ userId, owner: true })]
+		});
+		const store = useStore.getState();
+		store.addRoom(temporaryRoom);
+
+		fetchResponse.mockResolvedValueOnce(meetingMock);
+		await meetingsApi.leaveMeeting(meetingMock.id);
+
+		// Check if fetch is called with the correct parameters
+		expect(global.fetch).toBeCalledTimes(1);
+
+		// Check if store is correctly updated
+		const updatedStore = useStore.getState();
+		expect(updatedStore.rooms[temporaryRoom.id]).toBeDefined();
 	});
 
 	test('stopMeeting is called correctly', async () => {
@@ -271,5 +313,51 @@ describe('Meetings API', () => {
 				enabled: false
 			})
 		});
+	});
+
+	test('leaveWaitingRoom is called correctly', async () => {
+		fetchResponse.mockResolvedValueOnce({ status: 'ACCEPTED' });
+		await meetingsApi.leaveWaitingRoom(meetingMock.id);
+
+		// Check if fetch is called with the correct parameters
+		expect(global.fetch).toHaveBeenCalledWith(
+			`/services/chats/meetings/${meetingMock.id}/queue/${userId}`,
+			{
+				method: 'POST',
+				headers,
+				body: JSON.stringify({
+					status: 'REJECTED'
+				})
+			}
+		);
+	});
+
+	test('getWaitingList is called correctly', async () => {
+		fetchResponse.mockResolvedValueOnce({ users: [userId] });
+		await meetingsApi.getWaitingList(meetingMock.id);
+
+		// Check if fetch is called with the correct parameters
+		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/meetings/${meetingMock.id}/queue`, {
+			method: 'GET',
+			headers,
+			body: undefined
+		});
+	});
+
+	test('acceptWaitingUser is called correctly', async () => {
+		fetchResponse.mockResolvedValueOnce({ status: 'ACCEPTED' });
+		await meetingsApi.acceptWaitingUser(meetingMock.id, userId, true);
+
+		// Check if fetch is called with the correct parameters
+		expect(global.fetch).toHaveBeenCalledWith(
+			`/services/chats/meetings/${meetingMock.id}/queue/${userId}`,
+			{
+				method: 'POST',
+				headers,
+				body: JSON.stringify({
+					status: 'ACCEPTED'
+				})
+			}
+		);
 	});
 });
