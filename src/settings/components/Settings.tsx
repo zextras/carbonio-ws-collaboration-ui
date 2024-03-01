@@ -6,7 +6,7 @@
 
 import React, { FC, useCallback, useEffect, useState } from 'react';
 
-import { Container, CreateSnackbarFn, Padding, useSnackbar } from '@zextras/carbonio-design-system';
+import { Container, CreateSnackbarFn, useSnackbar } from '@zextras/carbonio-design-system';
 import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore
@@ -76,84 +76,63 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 		setUpdatedNotificationsSettings(notificationsStorage);
 	}, [notificationsStorage]);
 
+	const successSnackbar = useCallback(() => {
+		createSnackbar({
+			key: new Date().toLocaleString(),
+			type: 'info',
+			label: saveSettingsSnackbar,
+			hideButton: true,
+			autoHideTimeout: 5000
+		});
+	}, [createSnackbar, saveSettingsSnackbar]);
+
+	const errorSnackbar = useCallback(() => {
+		createSnackbar({
+			key: new Date().toLocaleString(),
+			type: 'error',
+			label: errorDeleteImageSnackbar,
+			hideButton: true,
+			autoHideTimeout: 5000
+		});
+	}, [createSnackbar, errorDeleteImageSnackbar]);
+
 	// saves the elements that have been modified
 	const saveSettings = useCallback(() => {
 		// if a user change the picture
 		if (picture) {
 			UsersApi.changeUserPicture(id || '', picture)
 				.then(() => {
-					createSnackbar({
-						key: new Date().toLocaleString(),
-						type: 'info',
-						label: saveSettingsSnackbar,
-						hideButton: true,
-						autoHideTimeout: 5000
-					});
 					setPicture(false);
 					setIsEnabled(false);
 				})
-				.catch(() => {
-					createSnackbar({
-						key: new Date().toLocaleString(),
-						type: 'error',
-						label: errorDeleteImageSnackbar,
-						hideButton: true,
-						autoHideTimeout: 5000
-					});
-					return Promise.reject();
-				});
+				.catch(() => Promise.reject().then(errorSnackbar));
 		}
 
 		// if a user delete the pictures
 		if (deletePicture) {
 			UsersApi.deleteUserPicture(id || '')
 				.then(() => {
-					createSnackbar({
-						key: new Date().toLocaleString(),
-						type: 'info',
-						label: saveSettingsSnackbar,
-						hideButton: true,
-						autoHideTimeout: 5000
-					});
 					setDeletePicture(false);
 					setIsEnabled(false);
 				})
-				.catch(() => {
-					createSnackbar({
-						key: new Date().toLocaleString(),
-						type: 'error',
-						label: errorDeleteImageSnackbar,
-						hideButton: true,
-						autoHideTimeout: 5000
-					});
-					return Promise.reject();
-				});
+				.catch(() => Promise.reject().then(errorSnackbar));
 		}
 
-		// if a user turn off/on the desktopNotifications
+		// if a user changes the notifications' settings
 		if (!isEqual(notificationsStorage, updatedNotificationsSettings)) {
-			createSnackbar({
-				key: new Date().toLocaleString(),
-				type: 'info',
-				label: saveSettingsSnackbar,
-				hideButton: true,
-				autoHideTimeout: 5000
-			});
 			setNotificationsStorage(updatedNotificationsSettings);
-
 			setIsEnabled(false);
 		}
-		return Promise.resolve();
+		return Promise.resolve().then(successSnackbar);
 	}, [
 		picture,
 		deletePicture,
 		notificationsStorage,
+		updatedNotificationsSettings,
+		successSnackbar,
 		id,
-		createSnackbar,
-		saveSettingsSnackbar,
-		errorDeleteImageSnackbar,
-		setNotificationsStorage,
-		updatedNotificationsSettings
+		errorSnackbar,
+		setNotificationsStorage
 	]);
 
 	return (
@@ -173,6 +152,7 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 				height="fit"
 				background={'gray5'}
 				padding={{ vertical: 'large', horizontal: 'medium' }}
+				gap="1rem"
 			>
 				<ProfileSettings
 					picture={picture}
@@ -181,7 +161,6 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 					setToDelete={setDeletePicture}
 					toDelete={deletePicture}
 				/>
-				<Padding bottom="large" />
 				<NotificationsSettings
 					updatedNotificationsSettings={updatedNotificationsSettings}
 					setUpdatedNotificationsSettings={setUpdatedNotificationsSettings}
