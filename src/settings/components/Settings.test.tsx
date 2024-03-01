@@ -12,6 +12,7 @@ import NotificationsSettings from './NotificationsSettings';
 import Settings from './Settings';
 import useStore from '../../store/Store';
 import { setup } from '../../tests/test-utils';
+import { NotificationsSettingsType } from '../../types/generics';
 import { UserBe } from '../../types/network/models/userBeTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 
@@ -32,6 +33,20 @@ const userWithImage: UserBe = {
 	lastSeen: 1234567890,
 	statusMessage: "Hey there! I'm User 1",
 	pictureUpdatedAt: pictureUpdatedAtTime
+};
+
+const notificationsSettingsObject: NotificationsSettingsType = {
+	DesktopNotifications: true,
+	DesktopNotificationsSounds: true,
+	WaitingRoomAccessNotifications: true,
+	WaitingRoomAccessNotificationsSounds: true
+};
+
+const notificationsSettingsObjectFalse: NotificationsSettingsType = {
+	DesktopNotifications: false,
+	DesktopNotificationsSounds: false,
+	WaitingRoomAccessNotifications: false,
+	WaitingRoomAccessNotificationsSounds: false
 };
 
 describe('Settings view', () => {
@@ -88,17 +103,11 @@ describe('Settings view', () => {
 		store.setLoginInfo(userWithImage.id, userWithImage.name, userWithImage.name);
 		setup(
 			<NotificationsSettings
-				desktopNotifications={false}
-				setDesktopNotifications={jest.fn()}
-				setDesktopNotificationsSounds={jest.fn()}
-				desktopNotificationsSounds
-				setWaitingRoomAccessNotifications={jest.fn()}
-				setWaitingRoomAccessNotificationsSounds={jest.fn()}
-				waitingRoomAccessNotifications
-				waitingRoomAccessNotificationsSounds
+				updatedNotificationsSettings={notificationsSettingsObject}
+				setUpdatedNotificationsSettings={jest.fn()}
 			/>
 		);
-		expect(screen.getAllByTestId('icon: Square')[0]).toBeInTheDocument();
+		expect(screen.getAllByTestId('icon: CheckmarkSquare')[0]).toBeInTheDocument();
 	});
 	test('notification checkbox not active', async () => {
 		const store: RootStore = useStore.getState();
@@ -106,16 +115,10 @@ describe('Settings view', () => {
 		store.setLoginInfo(userWithImage.id, userWithImage.name, userWithImage.name);
 		setup(
 			<NotificationsSettings
-				desktopNotifications
-				setDesktopNotifications={jest.fn()}
-				setDesktopNotificationsSounds={jest.fn()}
-				desktopNotificationsSounds
-				setWaitingRoomAccessNotifications={jest.fn()}
-				setWaitingRoomAccessNotificationsSounds={jest.fn()}
-				waitingRoomAccessNotifications
-				waitingRoomAccessNotificationsSounds
+				updatedNotificationsSettings={notificationsSettingsObjectFalse}
+				setUpdatedNotificationsSettings={jest.fn()}
 			/>
 		);
-		expect(screen.getAllByTestId('icon: CheckmarkSquare')[0]).toBeInTheDocument();
+		expect(screen.getAllByTestId('icon: Square')[0]).toBeInTheDocument();
 	});
 });

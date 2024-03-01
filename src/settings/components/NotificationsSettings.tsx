@@ -16,26 +16,16 @@ import {
 } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
+import { NotificationsSettingsType } from '../../types/generics';
+
 type NotificationsSettingsProps = {
-	desktopNotifications: boolean;
-	setDesktopNotifications: Dispatch<SetStateAction<boolean>>;
-	desktopNotificationsSounds: boolean;
-	setDesktopNotificationsSounds: Dispatch<SetStateAction<boolean>>;
-	waitingRoomAccessNotifications: boolean;
-	setWaitingRoomAccessNotifications: Dispatch<SetStateAction<boolean>>;
-	waitingRoomAccessNotificationsSounds: boolean;
-	setWaitingRoomAccessNotificationsSounds: Dispatch<SetStateAction<boolean>>;
+	updatedNotificationsSettings: NotificationsSettingsType;
+	setUpdatedNotificationsSettings: Dispatch<SetStateAction<NotificationsSettingsType>>;
 };
 
 const NotificationsSettings: FC<NotificationsSettingsProps> = ({
-	desktopNotifications,
-	setDesktopNotifications,
-	desktopNotificationsSounds,
-	setDesktopNotificationsSounds,
-	waitingRoomAccessNotifications,
-	setWaitingRoomAccessNotifications,
-	waitingRoomAccessNotificationsSounds,
-	setWaitingRoomAccessNotificationsSounds
+	updatedNotificationsSettings,
+	setUpdatedNotificationsSettings
 }) => {
 	const [t] = useTranslation();
 	const sectionTitle = t('settings.notifications.title', 'Notifications');
@@ -49,36 +39,32 @@ const NotificationsSettings: FC<NotificationsSettingsProps> = ({
 	);
 
 	const onChangeNotificationCheckbox = useCallback(() => {
-		if (desktopNotifications) {
-			setDesktopNotifications(false);
-		} else {
-			setDesktopNotifications(true);
-		}
-	}, [desktopNotifications, setDesktopNotifications]);
-
-	const onChangeWaitingRoomAccessNotificationSoundsSwitch = useCallback(() => {
-		if (waitingRoomAccessNotificationsSounds) {
-			setWaitingRoomAccessNotificationsSounds(false);
-		} else {
-			setWaitingRoomAccessNotificationsSounds(true);
-		}
-	}, [setWaitingRoomAccessNotificationsSounds, waitingRoomAccessNotificationsSounds]);
-
-	const onChangeWaitingRoomAccessNotificationCheckbox = useCallback(() => {
-		if (waitingRoomAccessNotifications) {
-			setWaitingRoomAccessNotifications(false);
-		} else {
-			setWaitingRoomAccessNotifications(true);
-		}
-	}, [setWaitingRoomAccessNotifications, waitingRoomAccessNotifications]);
+		setUpdatedNotificationsSettings((prevState) => ({
+			...prevState,
+			DesktopNotifications: !prevState.DesktopNotifications
+		}));
+	}, [setUpdatedNotificationsSettings]);
 
 	const onChangeNotificationSoundsSwitch = useCallback(() => {
-		if (desktopNotificationsSounds) {
-			setDesktopNotificationsSounds(false);
-		} else {
-			setDesktopNotificationsSounds(true);
-		}
-	}, [desktopNotificationsSounds, setDesktopNotificationsSounds]);
+		setUpdatedNotificationsSettings((prevState) => ({
+			...prevState,
+			DesktopNotificationsSounds: !prevState.DesktopNotificationsSounds
+		}));
+	}, [setUpdatedNotificationsSettings]);
+
+	const onChangeWaitingRoomAccessNotificationSoundsSwitch = useCallback(() => {
+		setUpdatedNotificationsSettings((prevState) => ({
+			...prevState,
+			WaitingRoomAccessNotificationsSounds: !prevState.WaitingRoomAccessNotificationsSounds
+		}));
+	}, [setUpdatedNotificationsSettings]);
+
+	const onChangeWaitingRoomAccessNotificationCheckbox = useCallback(() => {
+		setUpdatedNotificationsSettings((prevState) => ({
+			...prevState,
+			WaitingRoomAccessNotifications: !prevState.WaitingRoomAccessNotifications
+		}));
+	}, [setUpdatedNotificationsSettings]);
 
 	return (
 		<Container
@@ -98,32 +84,32 @@ const NotificationsSettings: FC<NotificationsSettingsProps> = ({
 						</Text>
 						<Text overflow="break-word">General</Text>
 						<Checkbox
-							defaultChecked={desktopNotifications}
-							value={desktopNotifications}
+							defaultChecked={updatedNotificationsSettings.DesktopNotifications}
+							value={updatedNotificationsSettings.DesktopNotifications}
 							onClick={onChangeNotificationCheckbox}
 							label={notificationsCheckboxLabel}
 							data-testid="checkbox"
 						/>
 						<Switch
-							disabled={!desktopNotifications}
-							defaultChecked={desktopNotificationsSounds}
-							value={desktopNotificationsSounds}
+							disabled={!updatedNotificationsSettings.DesktopNotifications}
+							defaultChecked={updatedNotificationsSettings.DesktopNotificationsSounds}
+							value={updatedNotificationsSettings.DesktopNotificationsSounds}
 							onClick={onChangeNotificationSoundsSwitch}
 							label="Enable Desktop notification sounds"
 							data-testid="desktop_notifications_sounds_switch"
 						/>
 						<Text overflow="break-word">Waiting Room access notifications</Text>
 						<Checkbox
-							defaultChecked={waitingRoomAccessNotifications}
-							value={waitingRoomAccessNotifications}
+							defaultChecked={updatedNotificationsSettings.WaitingRoomAccessNotifications}
+							value={updatedNotificationsSettings.WaitingRoomAccessNotifications}
 							onClick={onChangeWaitingRoomAccessNotificationCheckbox}
 							label="Allow notifications"
 							data-testid="checkbox"
 						/>
 						<Switch
-							disabled={!waitingRoomAccessNotifications}
-							defaultChecked={waitingRoomAccessNotificationsSounds}
-							value={waitingRoomAccessNotificationsSounds}
+							disabled={!updatedNotificationsSettings.WaitingRoomAccessNotifications}
+							defaultChecked={updatedNotificationsSettings.WaitingRoomAccessNotificationsSounds}
+							value={updatedNotificationsSettings.WaitingRoomAccessNotificationsSounds}
 							onClick={onChangeWaitingRoomAccessNotificationSoundsSwitch}
 							label="Enable notification sounds"
 							data-testid="desktop_notifications_sounds_switch"
