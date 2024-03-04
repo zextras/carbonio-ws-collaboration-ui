@@ -12,6 +12,7 @@ import MeetingSidebar from './MeetingSidebar';
 import { useParams } from '../../../../__mocks__/react-router';
 import useStore from '../../../store/Store';
 import {
+	createMockCapabilityList,
 	createMockMeeting,
 	createMockMember,
 	createMockParticipants,
@@ -94,6 +95,7 @@ const scheduledMeeting: MeetingBe = createMockMeeting({
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo(sessionUser.id, sessionUser.name);
+	store.setCapabilities(createMockCapabilityList({ canVideoCallRecord: true }));
 	store.setRooms([oneToOneRoom, groupRoom, temporaryRoom, temporaryRoomMod]);
 	store.setMeetings([oneToOneMeeting, groupMeeting, scheduledMeeting, scheduledMeetingMod]);
 	store.meetingConnection(oneToOneMeeting.id, false, 'audioId', false, 'videoId');
@@ -158,6 +160,14 @@ describe('Meeting sidebar', () => {
 		expect(waitingListAccordion).not.toBeInTheDocument();
 		expect(participantsAccordion).toBeInTheDocument();
 		expect(chatAccordion).toBeInTheDocument();
+	});
+
+	test('Recording accordion is not visible with recording capability set to false', async () => {
+		useParams.mockReturnValue({ meetingId: oneToOneMeeting.id });
+		useStore.getState().setCapabilities(createMockCapabilityList({ canVideoCallRecord: false }));
+		const { user } = setup(<MeetingSidebar />);
+		const recordingAccordion = screen.queryByText(/Recording/);
+		expect(recordingAccordion).not.toBeInTheDocument();
 	});
 
 	test('toggle Sidebar', async () => {

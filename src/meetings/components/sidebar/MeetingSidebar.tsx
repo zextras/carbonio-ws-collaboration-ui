@@ -27,9 +27,11 @@ import {
 	getOwnershipOfTheRoom,
 	getRoomTypeSelector
 } from '../../../store/selectors/RoomsSelectors';
+import { getCapability } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { MeetingChatVisibility } from '../../../types/store/ActiveMeetingTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
+import { CapabilityType } from '../../../types/store/SessionTypes';
 import BubblesWrapper from '../bubblesWrapper/BubblesWrapper';
 
 const SidebarContainer = styled(Container)`
@@ -66,7 +68,9 @@ const MeetingSidebar = (): ReactElement => {
 	const meetingChatVisibility = useStore((store) => getMeetingChatVisibility(store, meetingId));
 	const sidebarIsVisible: boolean = useStore((store) => getMeetingSidebarStatus(store, meetingId));
 	const setMeetingSidebarStatus = useStore((store) => store.setMeetingSidebarStatus);
-
+	const canVideoCallRecord = useStore((store) =>
+		getCapability(store, CapabilityType.CAN_VIDEO_CALL_RECORD)
+	);
 	const toggleSidebar = useCallback(
 		() => setMeetingSidebarStatus(meetingId, !sidebarIsVisible),
 		[setMeetingSidebarStatus, meetingId, sidebarIsVisible]
@@ -77,7 +81,10 @@ const MeetingSidebar = (): ReactElement => {
 		[roomType]
 	);
 
-	const showRecordingAccordion = useMemo(() => amIModerator, [amIModerator]);
+	const showRecordingAccordion = useMemo(
+		() => canVideoCallRecord && amIModerator,
+		[amIModerator, canVideoCallRecord]
+	);
 
 	const showWaitingListAccordion = useMemo(
 		() => includes([RoomType.TEMPORARY], roomType) && amIModerator,
