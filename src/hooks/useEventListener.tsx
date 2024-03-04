@@ -28,7 +28,8 @@ export enum EventName {
 	NEW_WAITING_USER = 'newWaitingUser',
 	MEETING_USER_ACCEPTED = 'meetingUserAccepted',
 	MEETING_USER_REJECTED = 'meetingUserRejected',
-	MEETING_WAITING_PARTICIPANT_CLASHED = 'meetingWaitingParticipantClashed'
+	MEETING_WAITING_PARTICIPANT_CLASHED = 'meetingWaitingParticipantClashed',
+	MEETING_STOPPED = 'meetingStopped'
 }
 
 export type NewMessageEvent = {
@@ -76,6 +77,11 @@ export type MeetingWaitingParticipantClashedEvent = {
 	data: MeetingWaitingParticipantClashed;
 };
 
+export type MeetingStoppedUseEvent = {
+	name: EventName.MEETING_STOPPED;
+	data: MeetingStoppedEvent;
+};
+
 type CustomEvent =
 	| NewMessageEvent
 	| IncomingMeetingEvent
@@ -85,7 +91,8 @@ type CustomEvent =
 	| NewWaitingUserEvent
 	| MeetingAcceptedEvent
 	| MeetingRejectedEvent
-	| MeetingWaitingParticipantClashedEvent;
+	| MeetingWaitingParticipantClashedEvent
+	| MeetingStoppedUseEvent;
 
 export const sendCustomEvent = (event: CustomEvent): void => {
 	window.dispatchEvent(new CustomEvent(event.name, { detail: event.data }));

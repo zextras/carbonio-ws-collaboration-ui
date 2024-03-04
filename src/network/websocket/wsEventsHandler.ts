@@ -26,7 +26,9 @@ export function wsEventsHandler(event: WsEvent): void {
 	const state = useStore.getState();
 	const inThisMeetingTab = (meetingId: string): boolean =>
 		window.location.pathname.includes(`${MEETINGS_PATH}${meetingId}`);
-	const isMyId = (userId: string): boolean => userId === state.session.id;
+	const sessionId = state.session.id;
+
+	const isMyId = (userId: string): boolean => userId === sessionId;
 
 	switch (event.type) {
 		case WsEventType.INITIALIZATION: {
@@ -63,7 +65,7 @@ export function wsEventsHandler(event: WsEvent): void {
 			break;
 		}
 		case WsEventType.ROOM_MEMBER_ADDED: {
-			if (event.userId === state.session.id) {
+			if (event.userId === sessionId) {
 				RoomsApi.getRoom(event.roomId).then((response: GetRoomResponse) => {
 					state.addRoom(response);
 					if (response.meetingId) {
@@ -81,7 +83,7 @@ export function wsEventsHandler(event: WsEvent): void {
 			break;
 		}
 		case WsEventType.ROOM_MEMBER_REMOVED: {
-			if (event.userId === state.session.id) {
+			if (event.userId === sessionId) {
 				if (state.meetings[event.roomId] !== undefined) {
 					state.deleteMeeting(state.meetings[event.roomId].id);
 				}
@@ -129,7 +131,7 @@ export function wsEventsHandler(event: WsEvent): void {
 			// Send custom event to open an incoming meeting notification
 			const meeting = find(state.meetings, (meeting) => meeting.id === event.meetingId);
 			const room = find(state.rooms, (room) => room.id === meeting?.roomId);
-			const isMeetingStartedByMe = event.starterUser === state.session.id;
+			const isMeetingStartedByMe = event.starterUser === sessionId;
 			if (room?.type === RoomType.ONE_TO_ONE && !isMeetingStartedByMe) {
 				sendCustomEvent({ name: EventName.INCOMING_MEETING, data: event });
 			}
@@ -149,7 +151,7 @@ export function wsEventsHandler(event: WsEvent): void {
 			if (
 				meeting &&
 				state.rooms[meeting.roomId]?.type === RoomType.ONE_TO_ONE &&
-				event.userId === state.session.id
+				event.userId === sessionId
 			) {
 				sendCustomEvent({ name: EventName.REMOVED_MEETING_NOTIFICATION, data: event });
 			}
@@ -181,6 +183,15 @@ export function wsEventsHandler(event: WsEvent): void {
 			const meeting = find(state.meetings, (meeting) => meeting.id === event.meetingId);
 			if (meeting && state.rooms[meeting.roomId]?.type === RoomType.ONE_TO_ONE) {
 				sendCustomEvent({ name: EventName.REMOVED_MEETING_NOTIFICATION, data: event });
+			}
+			if (
+				meeting &&
+				find(
+					state.meetings[meeting.roomId].waitingList,
+					(userWaitingId) => userWaitingId === sessionId
+				)
+			) {
+				sendCustomEvent({ name: EventName.MEETING_STOPPED, data: event });
 			}
 			state.stopMeeting(event.meetingId);
 			break;
