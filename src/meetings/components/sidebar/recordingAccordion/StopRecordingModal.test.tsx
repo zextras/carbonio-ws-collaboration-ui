@@ -4,11 +4,6 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React from 'react';
-
-import { screen } from '@testing-library/react';
-
-import RecordingAccordion from './RecordingAccordion';
 import useStore from '../../../../store/Store';
 import {
 	createMockMeeting,
@@ -16,7 +11,6 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../../../tests/createMock';
-import { setup } from '../../../../tests/test-utils';
 import { MeetingBe, MeetingType } from '../../../../types/network/models/meetingBeTypes';
 import { RoomBe } from '../../../../types/network/models/roomBeTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
@@ -40,23 +34,10 @@ beforeEach(() => {
 	store.addMeeting(meeting);
 	store.meetingConnection(meeting.id, false, undefined, false, undefined);
 });
-describe('RecordingAccordion tests', () => {
-	test('Toggle accordion status', async () => {
-		const iconUp = 'icon: ChevronUp';
-		const iconDown = 'icon: ChevronDown';
-		const { user } = setup(<RecordingAccordion meetingId={meeting.id} />);
-		expect(screen.getByTestId(iconUp)).toBeVisible();
+describe('StopRecording tests', () => {
+	test.todo('Stop recording without modifying the recording name');
 
-		await user.click(screen.getByTestId(iconUp));
-		expect(screen.getByTestId(iconDown)).toBeVisible();
+	test.todo('Stop recording with a modified recording name');
 
-		await user.click(screen.getByTestId(iconDown));
-		expect(screen.getByTestId(iconUp)).toBeVisible();
-	});
-
-	test.todo("Recording can only be started if there isn't an active recording");
-
-	test.todo('Recording can only be stopped when there is an active recording');
-
-	test.todo('When user clicks on the start button the recording starts');
+	test.todo('Recording name reset on closing and reopening the stop recording modal');
 });
