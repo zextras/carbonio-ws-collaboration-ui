@@ -29,19 +29,31 @@ const NotificationsSettings: FC<NotificationsSettingsProps> = ({
 }) => {
 	const [t] = useTranslation();
 	const sectionTitle = t('settings.notifications.title', 'Notifications');
-	const generalTitle = t('', 'General');
-	const waitingRoomTitle = t('', 'Waiting Room access notifications');
+	const generalTitle = t('settings.notifications.subtitle.general', 'General');
+	const waitingRoomTitle = t(
+		'settings.notifications.subtitle.waitingRoom',
+		'Waiting Room access notifications'
+	);
 	const sectionDescription = t(
 		'settings.notifications.description',
 		'Set your preferences for Chats notifications.'
 	);
 	const notificationsCheckboxLabel = t(
-		'settings.notifications.checkboxLabel',
-		'Desktop notifications'
+		'settings.notifications.checkbox.desktop',
+		'Allow Desktop notifications'
 	);
-	const notificationsSwitchLabel = t('', 'Enable Desktop notification sounds');
-	const waitingRoomCheckboxLabel = t('', 'Allow notifications');
-	const waitingRoomSwitchLabel = t('', 'Enable notification sounds');
+	const notificationsSwitchLabel = t(
+		'settings.notifications.toggleSounds.desktop',
+		'Enable Desktop notification sounds'
+	);
+	const waitingRoomCheckboxLabel = t(
+		'settings.notifications.checkbox.waitingRoom',
+		'Allow notifications'
+	);
+	const waitingRoomSwitchLabel = t(
+		'settings.notifications.toggleSounds.waitingRoom',
+		'Enable notification sounds'
+	);
 
 	const onChangeNotificationCheckbox = useCallback(() => {
 		setUpdatedNotificationsSettings((prevState) => ({
