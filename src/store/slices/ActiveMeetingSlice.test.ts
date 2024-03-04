@@ -23,7 +23,8 @@ describe('Active Meeting Slice', () => {
 			sidebarIsOpened: true,
 			actionsAccordionIsOpened: true,
 			participantsAccordionIsOpened: false,
-			waitingListAccordionIsOpened: true
+			waitingListAccordionIsOpened: true,
+			recordingAccordionIsOpened: true
 		});
 		expect(result.current.activeMeeting[meetingId].chatVisibility).toBe(
 			MeetingChatVisibility.CLOSED
@@ -89,6 +90,21 @@ describe('Active Meeting Slice', () => {
 		act(() => result.current.setWaitingListAccordionStatus(meetingId, true));
 		expect(
 			result.current.activeMeeting[meetingId].sidebarStatus.waitingListAccordionIsOpened
+		).toBeTruthy();
+	});
+
+	test('Change recording accordion status', () => {
+		const { result } = renderHook(() => useStore());
+		act(() => result.current.meetingConnection(meetingId, false, undefined, false, undefined));
+
+		act(() => result.current.setRecordingAccordionStatus(meetingId, false));
+		expect(
+			result.current.activeMeeting[meetingId].sidebarStatus.recordingAccordionIsOpened
+		).toBeFalsy();
+
+		act(() => result.current.setRecordingAccordionStatus(meetingId, true));
+		expect(
+			result.current.activeMeeting[meetingId].sidebarStatus.recordingAccordionIsOpened
 		).toBeTruthy();
 	});
 

@@ -4,11 +4,14 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { FC, useMemo } from 'react';
+import React, { FC, useCallback, useMemo } from 'react';
 
 import { Accordion, AccordionItemType, Container } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+
+import { getRecordingAccordionStatus } from '../../../../store/selectors/ActiveMeetingSelectors';
+import useStore from '../../../../store/Store';
 
 const CustomAccordion = styled(Accordion)`
 	-webkit-user-select: none;
@@ -21,8 +24,16 @@ type RecordingAccordionProps = {
 
 const RecordingAccordion: FC<RecordingAccordionProps> = ({ meetingId }) => {
 	const [t] = useTranslation();
-	// TODO: Add translations
-	const accordionTitle = t('', `${meetingId}`);
+	// TODO: Add translation keys
+	const accordionTitle = t('', 'Recording');
+
+	const accordionStatus = useStore((state) => getRecordingAccordionStatus(state, meetingId));
+	const setAccordionStatus = useStore((state) => state.setRecordingAccordionStatus);
+
+	const toggleAccordionStatus = useCallback(
+		() => setAccordionStatus(meetingId, !accordionStatus),
+		[accordionStatus, meetingId, setAccordionStatus]
+	);
 
 	const items = useMemo(() => {
 		const recordingContainer: AccordionItemType[] = [
@@ -32,7 +43,7 @@ const RecordingAccordion: FC<RecordingAccordionProps> = ({ meetingId }) => {
 				background: 'text',
 				CustomComponent: () => (
 					<Container padding={{ vertical: 'large', right: 'small' }} gap="0.5rem">
-						Recording accordion
+						accordion
 					</Container>
 				)
 			}
@@ -41,13 +52,13 @@ const RecordingAccordion: FC<RecordingAccordionProps> = ({ meetingId }) => {
 			{
 				id: 'recordingAccordion',
 				label: accordionTitle,
-				// open: accordionStatus,
-				items: recordingContainer
-				// onOpen: toggleAccordionStatus,
-				// onClose: toggleAccordionStatus
+				open: accordionStatus,
+				items: recordingContainer,
+				onOpen: toggleAccordionStatus,
+				onClose: toggleAccordionStatus
 			} as AccordionItemType
 		];
-	}, [accordionTitle]);
+	}, [accordionStatus, accordionTitle, toggleAccordionStatus]);
 
 	return <CustomAccordion items={items} borderRadius="none" background="gray0" />;
 };
