@@ -17,7 +17,9 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import StopRecordingModal from './StopRecordingModal';
+import { MeetingsApi } from '../../../../network';
 import { getRecordingAccordionStatus } from '../../../../store/selectors/ActiveMeetingSelectors';
+import { getMeetingRecordingTimestamp } from '../../../../store/selectors/MeetingSelectors';
 import useStore from '../../../../store/Store';
 
 const CustomAccordion = styled(Accordion)`
@@ -37,11 +39,10 @@ const RecordingAccordion: FC<RecordingAccordionProps> = ({ meetingId }) => {
 	const startButtonLabel = t('', 'Start');
 	const stopButtonLabel = t('', 'Stop');
 
+	const recordingTimestamp = useStore((state) => getMeetingRecordingTimestamp(state, meetingId));
 	const accordionStatus = useStore((state) => getRecordingAccordionStatus(state, meetingId));
 	const setAccordionStatus = useStore((state) => state.setRecordingAccordionStatus);
 
-	// TODO: link to store when APIs are available
-	const [recordingStatus, setRecordingStatus] = useState(false);
 	const [isStopRecordingModalOpen, setIsStopRecordingModalOpen] = useState(false);
 
 	const openModal = useCallback(() => setIsStopRecordingModalOpen(true), []);
@@ -54,10 +55,8 @@ const RecordingAccordion: FC<RecordingAccordionProps> = ({ meetingId }) => {
 	);
 
 	const startRecording = useCallback(() => {
-		// TODO
-		// MeetingsApi.startRecording(meetingId, recordingName, path);
-		setRecordingStatus(true);
-	}, []);
+		MeetingsApi.startRecording(meetingId);
+	}, [meetingId]);
 
 	const items = useMemo(() => {
 		const recordingContainer: AccordionItemType[] = [
@@ -77,14 +76,14 @@ const RecordingAccordion: FC<RecordingAccordionProps> = ({ meetingId }) => {
 								color="success"
 								label={startButtonLabel}
 								onClick={startRecording}
-								disabled={recordingStatus}
+								disabled={!!recordingTimestamp}
 							/>
 							<Button
 								width="fill"
 								color="error"
 								label={stopButtonLabel}
 								onClick={openModal}
-								disabled={!recordingStatus}
+								disabled={!recordingTimestamp}
 							/>
 						</Container>
 						<Text>{accordionDescription}</Text>
@@ -106,7 +105,7 @@ const RecordingAccordion: FC<RecordingAccordionProps> = ({ meetingId }) => {
 		accordionDescription,
 		accordionStatus,
 		accordionTitle,
-		recordingStatus,
+		recordingTimestamp,
 		startButtonLabel,
 		startRecording,
 		stopButtonLabel,

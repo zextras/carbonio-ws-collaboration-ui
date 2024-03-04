@@ -9,6 +9,7 @@ import React, { ReactElement, useCallback, useMemo, useState } from 'react';
 import { Container, Input, Modal, ModalFooter, Text } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
+import { MeetingsApi } from '../../../../network';
 import { getRoomIdByMeetingId } from '../../../../store/selectors/MeetingSelectors';
 import { getRoomNameSelector } from '../../../../store/selectors/RoomsSelectors';
 import useStore from '../../../../store/Store';
@@ -53,10 +54,9 @@ const StopRecordingModal = ({
 	}, []);
 
 	const stopRecording = useCallback(() => {
-		// TODO
-		// MeetingsApi.stopRecording(meetingId, recordingName, path);
+		MeetingsApi.stopRecording(meetingId, recordingName, '/');
 		closeModal();
-	}, [closeModal]);
+	}, [closeModal, meetingId, recordingName]);
 
 	const onCloseModal = useCallback(() => {
 		closeModal();

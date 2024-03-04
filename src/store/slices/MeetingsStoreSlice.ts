@@ -44,7 +44,8 @@ export const useMeetingsStoreSlice: StateCreator<MeetingsSlice> = (set: (...any:
 						active: meeting.active,
 						participants: participantsMap,
 						createdAt: meeting.createdAt,
-						meetingType: meeting.meetingType
+						meetingType: meeting.meetingType,
+						startRecordingTimestamp: meeting.startRecordingTimestamp
 					};
 
 					// Retrieve participants information if they are unknown
@@ -90,7 +91,8 @@ export const useMeetingsStoreSlice: StateCreator<MeetingsSlice> = (set: (...any:
 					active: meeting.active,
 					participants: participantsMap,
 					createdAt: meeting.createdAt,
-					meetingType: meeting.meetingType
+					meetingType: meeting.meetingType,
+					startRecordingTimestamp: meeting.startRecordingTimestamp
 				};
 
 				// Retrieve participants information if they are unknown
@@ -263,6 +265,30 @@ export const useMeetingsStoreSlice: StateCreator<MeetingsSlice> = (set: (...any:
 			}),
 			false,
 			'AM/REMOVE_USER_FROM_WAITING_LIST'
+		);
+	},
+	startRecording: (meetingId: string, startRecordingTimestamp: string): void => {
+		set(
+			produce((draft: RootStore) => {
+				const meeting = find(draft.meetings, (meeting) => meeting.id === meetingId);
+				if (meeting) {
+					draft.meetings[meeting.roomId].startRecordingTimestamp = startRecordingTimestamp;
+				}
+			}),
+			false,
+			'AM/START_RECORDING'
+		);
+	},
+	stopRecording: (meetingId: string): void => {
+		set(
+			produce((draft: RootStore) => {
+				const meeting = find(draft.meetings, (meeting) => meeting.id === meetingId);
+				if (meeting) {
+					draft.meetings[meeting.roomId].startRecordingTimestamp = undefined;
+				}
+			}),
+			false,
+			'AM/STOP_RECORDING'
 		);
 	}
 });

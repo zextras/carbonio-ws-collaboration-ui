@@ -169,6 +169,8 @@ export type MeetingsSlice = {
 	setWaitingList: (meetingId: string, waitingList: string[]) => void;
 	addUserToWaitingList: (meetingId: string, userId: string) => void;
 	removeUserFromWaitingList: (meetingId: string, userId: string) => void;
+	startRecording: (meetingId: string, startRecordingTimestamp: string) => void;
+	stopRecording: (meetingId: string) => void;
 };
 
 export type ActiveMeetingSlice = {

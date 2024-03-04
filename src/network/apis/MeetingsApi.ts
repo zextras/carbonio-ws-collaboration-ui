@@ -28,7 +28,9 @@ import {
 	LeaveMeetingResponse,
 	ListMeetingsResponse,
 	StartMeetingResponse,
+	StartRecordingResponse,
 	StopMeetingResponse,
+	StopRecordingResponse,
 	SubscribeMediaResponse,
 	UpdateAudioStreamStatusResponse,
 	UpdateMediaOfferResponse
@@ -252,6 +254,23 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 		return this.fetchAPI(`meetings/${meetingId}/queue/${userId}`, RequestType.POST, {
 			status
 		});
+	}
+
+	startRecording(meetingId: string): Promise<StartRecordingResponse> {
+		// TODO move to event handler
+		useStore.getState().startRecording(meetingId, new Date().toISOString());
+		return Promise.resolve(new Response());
+	}
+
+	stopRecording(
+		meetingId: string,
+		recordingName: string,
+		path: string
+	): Promise<StopRecordingResponse> {
+		// TODO move to event handler
+		console.log('stopRecording', recordingName, path);
+		useStore.getState().stopRecording(meetingId);
+		return Promise.resolve(new Response());
 	}
 }
 
