@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import React, { ReactElement } from 'react';
+import React, { Dispatch, FC, SetStateAction, useCallback } from 'react';
 
 import {
 	Button,
@@ -16,12 +16,35 @@ import {
 } from '@zextras/carbonio-design-system';
 import styled from 'styled-components';
 
+import { MeetingStorageType } from './types/generics';
+
 const CustomButton = styled(Button)`
 	border-radius: 0.125rem;
 `;
 
-const RecordingSettings = (): ReactElement => {
-	const t = 0;
+type MeetingSettingsProps = {
+	meetingMediaDefaults: MeetingStorageType;
+	setMeetingMediaDefaults: Dispatch<SetStateAction<MeetingStorageType>>;
+};
+
+const MeetingSettings: FC<MeetingSettingsProps> = ({
+	meetingMediaDefaults,
+	setMeetingMediaDefaults
+}) => {
+	const setMicrophoneEnabled = useCallback(() => {
+		setMeetingMediaDefaults((prevState) => ({
+			...prevState,
+			EnableMicrophone: !prevState.EnableMicrophone
+		}));
+	}, [setMeetingMediaDefaults]);
+
+	const setCameraEnabled = useCallback(() => {
+		setMeetingMediaDefaults((prevState) => ({
+			...prevState,
+			EnableCamera: !prevState.EnableCamera
+		}));
+	}, [setMeetingMediaDefaults]);
+
 	return (
 		<Container
 			background={'gray6'}
@@ -39,20 +62,16 @@ const RecordingSettings = (): ReactElement => {
 						your preferences before joining every meeting.
 					</Text>
 					<Checkbox
-						defaultChecked
-						value
-						onClick={(): void => {
-							console.log('TODO');
-						}}
+						defaultChecked={meetingMediaDefaults.EnableMicrophone}
+						value={meetingMediaDefaults.EnableMicrophone}
+						onClick={setMicrophoneEnabled}
 						label="Enable microphone"
 						data-testid="checkbox"
 					/>
 					<Checkbox
-						defaultChecked
-						value
-						onClick={(): void => {
-							console.log('TODO');
-						}}
+						defaultChecked={meetingMediaDefaults.EnableCamera}
+						value={meetingMediaDefaults.EnableCamera}
+						onClick={setCameraEnabled}
 						label="Enable camera"
 						data-testid="checkbox"
 					/>
@@ -62,7 +81,7 @@ const RecordingSettings = (): ReactElement => {
 					<Text weight="bold">Recording</Text>
 					<Container orientation="horizontal" width="100%" height="fit" mainAlignment="flex-start">
 						<Container width="15.625rem">
-							<Input backgroundColor={'gray5'} value={t} disabled label="label" />
+							<Input backgroundColor={'gray5'} value={'0'} disabled label="label" />
 						</Container>
 						<Padding left="medium" />
 						<CustomButton
@@ -94,4 +113,4 @@ const RecordingSettings = (): ReactElement => {
 	);
 };
 
-export default RecordingSettings;
+export default MeetingSettings;

@@ -12,13 +12,15 @@ import {
 	// @ts-ignore
 	SettingsHeader
 } from '@zextras/carbonio-shell-ui';
+import { isEqual } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 import NotificationsSettings from './NotificationsSettings';
 import ProfileSettings from './ProfileSettings';
 import useLocalStorage from '../../../hooks/useLocalStorage';
+import MeetingSettings from '../../../MeetingSettings';
 import { UsersApi } from '../../../network';
-import RecordingSettings from '../../../RecordingSettings';
+import { MeetingStorageType } from '../../../types/generics';
 
 type SettingsProps = {
 	id?: string | undefined;
@@ -40,6 +42,13 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 	}>('ChatsNotificationsSettings', {
 		DesktopNotifications: true
 	});
+	const [meetingStorage, setMeetingStorage] = useLocalStorage<MeetingStorageType>(
+		'ChatsMeetingSettings',
+		{
+			EnableMicrophone: true,
+			EnableCamera: true
+		}
+	);
 
 	const [picture, setPicture] = useState<false | File>(false);
 	const [deletePicture, setDeletePicture] = useState<boolean>(false);
@@ -48,25 +57,39 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 	);
 	const [isEnabled, setIsEnabled] = useState<boolean>(false);
 
+	const [meetingMediaDefaults, setMeetingMediaDefaults] = useState<MeetingStorageType>({
+		EnableMicrophone: meetingStorage.EnableMicrophone,
+		EnableCamera: meetingStorage.EnableCamera
+	});
+
 	// set the isEnabled value when changed
 	useEffect(() => {
 		if (
 			!!picture ||
 			deletePicture ||
-			notificationsStorage.DesktopNotifications !== desktopNotifications
+			notificationsStorage.DesktopNotifications !== desktopNotifications ||
+			!isEqual(meetingStorage, meetingMediaDefaults)
 		) {
 			setIsEnabled(true);
 		} else {
 			setIsEnabled(false);
 		}
-	}, [deletePicture, desktopNotifications, notificationsStorage, picture]);
+	}, [
+		deletePicture,
+		desktopNotifications,
+		meetingMediaDefaults,
+		meetingStorage,
+		notificationsStorage,
+		picture
+	]);
 
 	// sets all the values that has been changed to false and set the default values to the localStorage ones
 	const onClose = useCallback(() => {
 		setPicture(false);
 		setDeletePicture(false);
 		setDesktopNotifications(notificationsStorage.DesktopNotifications);
-	}, [notificationsStorage]);
+		setMeetingMediaDefaults(meetingStorage);
+	}, [meetingStorage, notificationsStorage.DesktopNotifications]);
 
 	// saves the elements that have been modified
 	const saveSettings = useCallback(() => {
@@ -138,17 +161,26 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 			setNotificationsStorage({ DesktopNotifications: desktopNotifications });
 			setIsEnabled(false);
 		}
+
+		if (!isEqual(meetingStorage, meetingMediaDefaults)) {
+			setMeetingStorage(meetingMediaDefaults);
+			setIsEnabled(false);
+		}
+
 		return Promise.resolve();
 	}, [
 		picture,
 		deletePicture,
-		notificationsStorage,
+		notificationsStorage.DesktopNotifications,
 		desktopNotifications,
+		meetingStorage,
+		meetingMediaDefaults,
+		id,
 		createSnackbar,
 		saveSettingsSnackbar,
-		id,
 		errorDeleteImageSnackbar,
-		setNotificationsStorage
+		setNotificationsStorage,
+		setMeetingStorage
 	]);
 
 	return (
@@ -180,7 +212,10 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 					setDesktopNotifications={setDesktopNotifications}
 				/>
 				<Padding bottom="large" />
-				<RecordingSettings />
+				<MeetingSettings
+					meetingMediaDefaults={meetingMediaDefaults}
+					setMeetingMediaDefaults={setMeetingMediaDefaults}
+				/>
 			</Container>
 		</Container>
 	);
