@@ -6,7 +6,7 @@
 
 import React, { ReactElement, useCallback, useMemo, useRef } from 'react';
 
-import { Container, CreateSnackbarFn, useSnackbar } from '@zextras/carbonio-design-system';
+import { Container, CreateSnackbarFn, Text, useSnackbar } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -15,7 +15,10 @@ import useEventListener, { EventName } from '../../hooks/useEventListener';
 import useGeneralMeetingControls from '../../hooks/useGeneralMeetingControls';
 import { MeetingRoutesParams } from '../../hooks/useRouting';
 import { getMeetingViewSelected } from '../../store/selectors/ActiveMeetingSelectors';
-import { getNumberOfTiles } from '../../store/selectors/MeetingSelectors';
+import {
+	getMeetingRecordingTimestamp,
+	getNumberOfTiles
+} from '../../store/selectors/MeetingSelectors';
 import { getCustomLogo } from '../../store/selectors/SessionSelectors';
 import useStore from '../../store/Store';
 import { MeetingViewType } from '../../types/store/ActiveMeetingTypes';
@@ -48,6 +51,13 @@ const LogoApp = styled(Container)<{ $customLogo: string | false | undefined }>`
 	background-repeat: no-repeat;
 	background-image: url(${({ $customLogo }): string => $customLogo || defaultLogo});
 `;
+
+const RecordingContainer = styled(Container)`
+	position: absolute;
+	top: 0;
+	border-radius: 0px 0px 20px 20px;
+`;
+
 export type MeetingViewProps = {
 	children?: ReactElement;
 };
@@ -59,12 +69,15 @@ const MeetingSkeleton = (): ReactElement => {
 		"You've been muted by a moderator, unmute yourself to speak"
 	);
 	const okLabel = t('action.ok', 'Ok');
+	// TODO translation key
+	const meetingRecorded = t('', 'This meeting is being recorded');
 
 	const { meetingId }: MeetingRoutesParams = useParams();
 
 	const meetingViewSelected = useStore((store) => getMeetingViewSelected(store, meetingId));
 	const numberOfTiles = useStore((store) => getNumberOfTiles(store, meetingId));
 	const customLogo = useStore(getCustomLogo);
+	const recordingTimestamp = useStore((state) => getMeetingRecordingTimestamp(state, meetingId));
 
 	const streamsWrapperRef = useRef<HTMLDivElement>(null);
 
@@ -101,6 +114,16 @@ const MeetingSkeleton = (): ReactElement => {
 				orientation="horizontal"
 				data-testid="meeting_view_container"
 			>
+				{!!recordingTimestamp && (
+					<RecordingContainer
+						height="fit"
+						width="fit"
+						background="error"
+						padding={{ horizontal: 'extralarge', vertical: 'extrasmall' }}
+					>
+						<Text>{meetingRecorded}</Text>
+					</RecordingContainer>
+				)}
 				<LogoApp $customLogo={customLogo} />
 				<ViewToDisplay>
 					<MeetingActionsBar streamsWrapperRef={streamsWrapperRef} />

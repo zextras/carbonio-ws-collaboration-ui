@@ -6,7 +6,15 @@
 
 import React, { ReactElement, useCallback, useMemo, useState } from 'react';
 
-import { Container, Input, Modal, ModalFooter, Text } from '@zextras/carbonio-design-system';
+import {
+	Container,
+	CreateSnackbarFn,
+	Input,
+	Modal,
+	ModalFooter,
+	Text,
+	useSnackbar
+} from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
 import { MeetingsApi } from '../../../../network';
@@ -38,6 +46,10 @@ const StopRecordingModal = ({
 	const recordingInputDescription: string = t('', 'The recording will be saved in "/".');
 	const stopButtonLabel = t('', 'Stop');
 	const closeLabel = t('action.close', 'Close');
+	const errorSnackbarLabel = t(
+		'',
+		'It is not possible to stop the registration, please contact your system administrator.'
+	);
 
 	const roomId = useStore((state) => getRoomIdByMeetingId(state, meetingId));
 	const roomName = useStore((state) => getRoomNameSelector(state, roomId || ''));
@@ -48,20 +60,30 @@ const StopRecordingModal = ({
 	);
 	const [recordingName, setRecordingName] = useState(defaultRecordingName);
 
-	const onNameChange = useCallback((e) => {
-		// TODO: character limit
-		if (e.target.value.length <= 129) setRecordingName(e.target.value);
-	}, []);
+	const createSnackbar: CreateSnackbarFn = useSnackbar();
 
-	const stopRecording = useCallback(() => {
-		MeetingsApi.stopRecording(meetingId, recordingName, '/');
-		closeModal();
-	}, [closeModal, meetingId, recordingName]);
+	const onNameChange = useCallback((e) => {
+		if (e.target.value.length < 128) setRecordingName(e.target.value);
+	}, []);
 
 	const onCloseModal = useCallback(() => {
 		closeModal();
 		setRecordingName(defaultRecordingName);
 	}, [closeModal, defaultRecordingName]);
+
+	const stopRecording = useCallback(() => {
+		MeetingsApi.stopRecording(meetingId, recordingName, '/')
+			.then(() => onCloseModal())
+			.catch(() => {
+				createSnackbar({
+					key: new Date().toLocaleString(),
+					type: 'warning',
+					label: errorSnackbarLabel,
+					hideButton: true
+				});
+				onCloseModal();
+			});
+	}, [createSnackbar, errorSnackbarLabel, meetingId, onCloseModal, recordingName]);
 
 	return (
 		<Modal

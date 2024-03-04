@@ -4,18 +4,22 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { FC, useCallback, useMemo, useState } from 'react';
+import React, { FC, ReactElement, useCallback, useMemo, useState } from 'react';
 
 import {
 	Accordion,
+	AccordionItem,
 	AccordionItemType,
 	Button,
 	Container,
-	Text
+	CreateSnackbarFn,
+	Text,
+	useSnackbar
 } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
+import RecordingTimer from './RecordingTimer';
 import StopRecordingModal from './StopRecordingModal';
 import { MeetingsApi } from '../../../../network';
 import { getRecordingAccordionStatus } from '../../../../store/selectors/ActiveMeetingSelectors';
@@ -38,10 +42,16 @@ const RecordingAccordion: FC<RecordingAccordionProps> = ({ meetingId }) => {
 	const accordionDescription = t('', 'How the recording works');
 	const startButtonLabel = t('', 'Start');
 	const stopButtonLabel = t('', 'Stop');
+	const errorSnackbarLabel = t(
+		'',
+		'It is not possible to start the registration, please contact your system administrator.'
+	);
 
 	const recordingTimestamp = useStore((state) => getMeetingRecordingTimestamp(state, meetingId));
 	const accordionStatus = useStore((state) => getRecordingAccordionStatus(state, meetingId));
 	const setAccordionStatus = useStore((state) => state.setRecordingAccordionStatus);
+
+	const createSnackbar: CreateSnackbarFn = useSnackbar();
 
 	const [isStopRecordingModalOpen, setIsStopRecordingModalOpen] = useState(false);
 
@@ -55,10 +65,22 @@ const RecordingAccordion: FC<RecordingAccordionProps> = ({ meetingId }) => {
 	);
 
 	const startRecording = useCallback(() => {
-		MeetingsApi.startRecording(meetingId);
-	}, [meetingId]);
+		MeetingsApi.startRecording(meetingId).catch(() => {
+			createSnackbar({
+				key: new Date().toLocaleString(),
+				type: 'warning',
+				label: errorSnackbarLabel,
+				hideButton: true
+			});
+		});
+	}, [createSnackbar, errorSnackbarLabel, meetingId]);
 
 	const items = useMemo(() => {
+		const Header = ({ item }: { item: AccordionItemType }): ReactElement => (
+			<AccordionItem item={item}>
+				{recordingTimestamp && <RecordingTimer timestamp={recordingTimestamp} />}
+			</AccordionItem>
+		);
 		const recordingContainer: AccordionItemType[] = [
 			{
 				id: 'recordingContainer',
@@ -96,21 +118,22 @@ const RecordingAccordion: FC<RecordingAccordionProps> = ({ meetingId }) => {
 				id: 'recordingAccordion',
 				label: accordionTitle,
 				open: accordionStatus,
+				CustomComponent: Header,
 				items: recordingContainer,
 				onOpen: toggleAccordionStatus,
 				onClose: toggleAccordionStatus
 			} as AccordionItemType
 		];
 	}, [
-		accordionDescription,
-		accordionStatus,
 		accordionTitle,
-		recordingTimestamp,
+		accordionStatus,
+		toggleAccordionStatus,
 		startButtonLabel,
 		startRecording,
+		recordingTimestamp,
 		stopButtonLabel,
 		openModal,
-		toggleAccordionStatus
+		accordionDescription
 	]);
 
 	return (
