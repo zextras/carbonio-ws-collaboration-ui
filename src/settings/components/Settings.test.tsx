@@ -12,9 +12,9 @@ import NotificationsSettings from './NotificationsSettings';
 import Settings from './Settings';
 import useStore from '../../store/Store';
 import { setup } from '../../tests/test-utils';
-import { NotificationsSettingsType } from '../../types/generics';
 import { UserBe } from '../../types/network/models/userBeTypes';
 import { RootStore } from '../../types/store/StoreTypes';
+import { NotificationsSettingsType } from '../../utils/localStorageUtils';
 
 const pictureUpdatedAtTime = '2022-08-25T17:24:28.961+02:00';
 

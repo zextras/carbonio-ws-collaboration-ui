@@ -19,7 +19,7 @@ import NotificationsSettings from './NotificationsSettings';
 import ProfileSettings from './ProfileSettings';
 import useLocalStorage from '../../hooks/useLocalStorage';
 import { UsersApi } from '../../network';
-import { NotificationsSettingsType } from '../../types/generics';
+import { NotificationsSettingsType } from '../../utils/localStorageUtils';
 
 type SettingsProps = {
 	id?: string | undefined;

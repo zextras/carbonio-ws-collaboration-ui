@@ -14,13 +14,6 @@ export type Emoji = {
 	unified: string;
 };
 
-export type NotificationsSettingsType = {
-	DesktopNotifications: boolean;
-	DesktopNotificationsSounds: boolean;
-	WaitingRoomAccessNotifications: boolean;
-	WaitingRoomAccessNotificationsSounds: boolean;
-};
-
 export enum Z_INDEX_RANK {
 	DATE_STICKY_LABEL = 3,
 	DROPDOWN_CXT = 2,

@@ -19,6 +19,11 @@ import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
 import { MeetingParticipant } from '../../types/store/MeetingTypes';
 import { RoomType } from '../../types/store/RoomTypes';
 import { wsDebug } from '../../utils/debug';
+import {
+	getLocalStorageItem,
+	LOCAL_STORAGE_NAMES,
+	NotificationsSettingsType
+} from '../../utils/localStorageUtils';
 import { MeetingSoundFeedback, sendAudioFeedback } from '../../utils/MeetingsUtils';
 import { MeetingsApi, RoomsApi } from '../index';
 
@@ -310,25 +315,16 @@ export function wsEventsHandler(event: WsEvent): void {
 				meeting?.participants,
 				(participant) => participant.userId === useStore.getState().session.id
 			);
-			const ChatsNotificationsSettings: string | null = window.parent.localStorage.getItem(
-				'ChatsNotificationsSettings'
+			const ChatsNotificationsSettings: NotificationsSettingsType = getLocalStorageItem(
+				LOCAL_STORAGE_NAMES.NOTIFICATIONS
 			);
 			if (userIsParticipant) {
 				state.addUserToWaitingList(event.meetingId, event.userId);
-				if (
-					ChatsNotificationsSettings &&
-					JSON.parse(ChatsNotificationsSettings).hasOwnProperty('WaitingRoomAccessNotifications') &&
-					JSON.parse(ChatsNotificationsSettings).WaitingRoomAccessNotifications
-				) {
+				if (ChatsNotificationsSettings.WaitingRoomAccessNotifications) {
 					sendCustomEvent({ name: EventName.NEW_WAITING_USER, data: event });
 					if (inThisMeetingTab(event.meetingId)) {
 						displayWaitingListNotification(event.meetingId);
-						if (
-							JSON.parse(ChatsNotificationsSettings).hasOwnProperty(
-								'WaitingRoomAccessNotificationsSounds'
-							) &&
-							JSON.parse(ChatsNotificationsSettings).WaitingRoomAccessNotificationsSounds
-						) {
+						if (ChatsNotificationsSettings.WaitingRoomAccessNotificationsSounds) {
 							sendAudioFeedback(MeetingSoundFeedback.NEW_WAITING_USER);
 						}
 					}

@@ -16,7 +16,7 @@ import {
 } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
-import { NotificationsSettingsType } from '../../types/generics';
+import { NotificationsSettingsType } from '../../utils/localStorageUtils';
 
 type NotificationsSettingsProps = {
 	updatedNotificationsSettings: NotificationsSettingsType;
