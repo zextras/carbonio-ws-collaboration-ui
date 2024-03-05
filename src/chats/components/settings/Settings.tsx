@@ -10,7 +10,8 @@ import { Container, CreateSnackbarFn, Padding, useSnackbar } from '@zextras/carb
 import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore
-	SettingsHeader
+	SettingsHeader,
+	useIntegratedFunction
 } from '@zextras/carbonio-shell-ui';
 import { isEqual } from 'lodash';
 import { useTranslation } from 'react-i18next';
@@ -49,6 +50,10 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 			EnableCamera: true
 		}
 	);
+	const [recordingStorage, setRecordingStorage] = useLocalStorage('ChatsRecordingSettings', {
+		name: 'Home',
+		id: 'LOCAL_ROOT'
+	});
 
 	const [picture, setPicture] = useState<false | File>(false);
 	const [deletePicture, setDeletePicture] = useState<boolean>(false);
@@ -61,6 +66,30 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 		EnableMicrophone: meetingStorage.EnableMicrophone,
 		EnableCamera: meetingStorage.EnableCamera
 	});
+	const [recordingDefaults, setRecordingDefaults] = useState({
+		name: recordingStorage.name,
+		id: recordingStorage.id
+	});
+
+	const [getNode, getNodeAvailable] = useIntegratedFunction('get-node');
+
+	useEffect(() => {
+		if (recordingStorage && getNodeAvailable) {
+			getNode(recordingStorage.id).then((result: { rootId: string }) => {
+				if (result.rootId === 'TRASH_ROOT') {
+					setRecordingStorage({ name: 'Home', id: 'LOCAL_ROOT' });
+					setRecordingDefaults({ name: 'Home', id: 'LOCAL_ROOT' });
+				}
+			});
+		}
+	}, [getNode, getNodeAvailable, recordingStorage, setRecordingStorage]);
+
+	/*
+    * setRecordingStorage({
+          name: nodes[0].id === 'LOCAL_ROOT' ? 'Home' : nodes[0].name,
+          id: nodes[0].id
+        });
+        * */
 
 	// set the isEnabled value when changed
 	useEffect(() => {
@@ -68,7 +97,8 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 			!!picture ||
 			deletePicture ||
 			notificationsStorage.DesktopNotifications !== desktopNotifications ||
-			!isEqual(meetingStorage, meetingMediaDefaults)
+			!isEqual(meetingStorage, meetingMediaDefaults) ||
+			!isEqual(recordingStorage, recordingDefaults)
 		) {
 			setIsEnabled(true);
 		} else {
@@ -79,8 +109,10 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 		desktopNotifications,
 		meetingMediaDefaults,
 		meetingStorage,
-		notificationsStorage,
-		picture
+		notificationsStorage.DesktopNotifications,
+		picture,
+		recordingDefaults,
+		recordingStorage
 	]);
 
 	// sets all the values that has been changed to false and set the default values to the localStorage ones
@@ -89,7 +121,8 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 		setDeletePicture(false);
 		setDesktopNotifications(notificationsStorage.DesktopNotifications);
 		setMeetingMediaDefaults(meetingStorage);
-	}, [meetingStorage, notificationsStorage.DesktopNotifications]);
+		setRecordingStorage({ name: 'Home', id: 'LOCAL_ROOT' });
+	}, [meetingStorage, notificationsStorage.DesktopNotifications, setRecordingStorage]);
 
 	// saves the elements that have been modified
 	const saveSettings = useCallback(() => {
@@ -167,6 +200,10 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 			setIsEnabled(false);
 		}
 
+		if (!isEqual(recordingStorage, recordingDefaults)) {
+			setRecordingStorage(recordingDefaults);
+		}
+
 		return Promise.resolve();
 	}, [
 		picture,
@@ -175,12 +212,15 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 		desktopNotifications,
 		meetingStorage,
 		meetingMediaDefaults,
+		recordingStorage,
+		recordingDefaults,
 		id,
 		createSnackbar,
 		saveSettingsSnackbar,
 		errorDeleteImageSnackbar,
 		setNotificationsStorage,
-		setMeetingStorage
+		setMeetingStorage,
+		setRecordingStorage
 	]);
 
 	return (
@@ -215,9 +255,12 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 				<MeetingSettings
 					meetingMediaDefaults={meetingMediaDefaults}
 					setMeetingMediaDefaults={setMeetingMediaDefaults}
+					recordingDefaults={recordingDefaults}
+					setRecordingDefaults={setRecordingDefaults}
 				/>
 			</Container>
 		</Container>
 	);
 };
+
 export default Settings;

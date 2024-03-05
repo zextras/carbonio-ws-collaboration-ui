@@ -79,4 +79,11 @@ export const pushHistory = jest.fn(pushHistoryMock);
 
 export const replaceHistory = jest.fn(replaceHistoryMock);
 
+const integratedFunctions = {
+	getNode: {},
+	getNodeAvailable: false,
+	filesSelectFilesAction: {},
+	filesSelectFilesActionAvailable: false
+};
+export const useIntegratedFunction = jest.fn(() => [integratedFunctions]);
 export const t = (key: string, value: string): string => value;

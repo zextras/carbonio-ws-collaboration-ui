@@ -5,32 +5,31 @@
  */
 import React, { Dispatch, FC, SetStateAction, useCallback } from 'react';
 
-import {
-	Button,
-	Checkbox,
-	Container,
-	Divider,
-	Input,
-	Padding,
-	Text
-} from '@zextras/carbonio-design-system';
-import styled from 'styled-components';
+import { Checkbox, Container, Divider, Padding, Text } from '@zextras/carbonio-design-system';
 
+import RecordingSettings from './RecordingSettings';
+import { getCapability } from './store/selectors/SessionSelectors';
+import useStore from './store/Store';
 import { MeetingStorageType } from './types/generics';
-
-const CustomButton = styled(Button)`
-	border-radius: 0.125rem;
-`;
+import { CapabilityType } from './types/store/SessionTypes';
 
 type MeetingSettingsProps = {
 	meetingMediaDefaults: MeetingStorageType;
 	setMeetingMediaDefaults: Dispatch<SetStateAction<MeetingStorageType>>;
+	recordingDefaults: { name: string; id: string };
+	setRecordingDefaults: Dispatch<SetStateAction<{ name: string; id: string }>>;
 };
 
 const MeetingSettings: FC<MeetingSettingsProps> = ({
 	meetingMediaDefaults,
-	setMeetingMediaDefaults
+	setMeetingMediaDefaults,
+	recordingDefaults,
+	setRecordingDefaults
 }) => {
+	const canRecordVideo = useStore((store) =>
+		getCapability(store, CapabilityType.CAN_VIDEO_CALL_RECORD)
+	);
+
 	const setMicrophoneEnabled = useCallback(() => {
 		setMeetingMediaDefaults((prevState) => ({
 			...prevState,
@@ -76,38 +75,15 @@ const MeetingSettings: FC<MeetingSettingsProps> = ({
 						data-testid="checkbox"
 					/>
 				</Container>
-				<Divider color="gray2" />
-				<Container crossAlignment="flex-start" gap="1rem">
-					<Text weight="bold">Recording</Text>
-					<Container orientation="horizontal" width="100%" height="fit" mainAlignment="flex-start">
-						<Container width="15.625rem">
-							<Input backgroundColor={'gray5'} value={'0'} disabled label="label" />
-						</Container>
-						<Padding left="medium" />
-						<CustomButton
-							width="fit"
-							label="browse"
-							color="primary"
-							type="outlined"
-							onClick={(): void => {
-								console.log('TODO');
-							}}
+				{canRecordVideo && (
+					<>
+						<Divider color="gray2" />
+						<RecordingSettings
+							recordingDefaults={recordingDefaults}
+							setRecordingDefaults={setRecordingDefaults}
 						/>
-						<Padding left="medium" />
-						<CustomButton
-							width="fit"
-							label="reset"
-							color="secondary"
-							type="outlined"
-							onClick={(): void => {
-								console.log('TODO');
-							}}
-						/>
-					</Container>
-					<Text size="small" overflow="break-word">
-						Set a custom folder where to save the recordings of the meetings you stop.
-					</Text>
-				</Container>
+					</>
+				)}
 			</Container>
 		</Container>
 	);
