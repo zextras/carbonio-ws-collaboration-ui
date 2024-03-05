@@ -34,27 +34,6 @@ const StopRecordingModal = ({
 	closeModal,
 	meetingId
 }: StopRecordingModalProps): ReactElement => {
-	// TODO: translation keys
-	const [t] = useTranslation();
-	const title: string = t('', 'Stop recording');
-	const descriptionLabel: string = t(
-		'',
-		'You are going to stop the recording. You can start a new one at any time.'
-	);
-	const recordingInputLabel: string = t('', 'Recording Name*');
-	// TODO: retrieve path from local storage
-	const recordingInputDescription: string = t('', 'The recording will be saved in "/".');
-	const stopButtonLabel = t('', 'Stop');
-	const closeLabel = t('action.close', 'Close');
-	const recordingStopped = t(
-		'',
-		'You will find [FileName] in [/ folderPath] as soon as it is available'
-	);
-	const errorSnackbarLabel = t(
-		'',
-		'It is not possible to stop the registration, please contact your system administrator.'
-	);
-
 	const roomId = useStore((state) => getRoomIdByMeetingId(state, meetingId));
 	const roomName = useStore((state) => getRoomNameSelector(state, roomId || ''));
 
@@ -63,6 +42,31 @@ const StopRecordingModal = ({
 		[roomName]
 	);
 	const [recordingName, setRecordingName] = useState(defaultRecordingName);
+	const folderPath = '/path/path/path'; // TODO: retrieve path from local storage
+
+	// TODO: translation keys
+	const [t] = useTranslation();
+	const title: string = t('', 'Stop recording');
+	const descriptionLabel: string = t(
+		'',
+		'You are going to stop the recording. You can start a new one at any time.'
+	);
+	const recordingInputLabel: string = t('', 'Recording Name*');
+	const recordingInputDescription: string = t(
+		'',
+		`The recording will be saved in "${folderPath}".`
+	);
+	const stopButtonLabel = t('', 'Stop');
+	const closeLabel = t('action.close', 'Close');
+	const recordingStopped = t(
+		'',
+		`You will find ${recordingName} in ${folderPath} as soon as it is available`,
+		{ fileName: recordingName, folderPath }
+	);
+	const errorSnackbarLabel = t(
+		'',
+		'It is not possible to stop the registration, please contact your system administrator.'
+	);
 
 	const createSnackbar: CreateSnackbarFn = useSnackbar();
 
@@ -76,7 +80,7 @@ const StopRecordingModal = ({
 	}, [closeModal, defaultRecordingName]);
 
 	const stopRecording = useCallback(() => {
-		MeetingsApi.stopRecording(meetingId, recordingName, '/')
+		MeetingsApi.stopRecording(meetingId, recordingName, folderPath)
 			.then(() => {
 				createSnackbar({
 					key: new Date().toLocaleString(),

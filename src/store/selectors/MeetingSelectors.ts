@@ -194,3 +194,8 @@ export const getMeetingRecordingTimestamp = (
 	const meeting = find(store.meetings, (meeting) => meeting.id === meetingId);
 	return meeting?.startRecordingTimestamp;
 };
+
+export const getIsMeetingRecording = (store: RootStore, meetingId: string): boolean => {
+	const meeting = find(store.meetings, (meeting) => meeting.id === meetingId);
+	return !!meeting?.startRecordingTimestamp;
+};
