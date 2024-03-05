@@ -9,13 +9,15 @@ import { Button, Container, Input, Padding, Text } from '@zextras/carbonio-desig
 import { useIntegratedFunction } from '@zextras/carbonio-shell-ui';
 import styled from 'styled-components';
 
+import { MeetingRecordingType } from './types/generics';
+
 const CustomButton = styled(Button)`
 	border-radius: 0.125rem;
 `;
 
 type RecordingSettingsProps = {
-	recordingDefaults: { name: string; id: string };
-	setRecordingDefaults: Dispatch<SetStateAction<{ name: string; id: string }>>;
+	recordingDefaults: MeetingRecordingType;
+	setRecordingDefaults: Dispatch<SetStateAction<MeetingRecordingType>>;
 };
 const RecordingSettings: FC<RecordingSettingsProps> = ({
 	recordingDefaults,

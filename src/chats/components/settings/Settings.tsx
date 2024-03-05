@@ -21,7 +21,7 @@ import ProfileSettings from './ProfileSettings';
 import useLocalStorage from '../../../hooks/useLocalStorage';
 import MeetingSettings from '../../../MeetingSettings';
 import { UsersApi } from '../../../network';
-import { MeetingStorageType } from '../../../types/generics';
+import { MeetingRecordingType, MeetingStorageType } from '../../../types/generics';
 
 type SettingsProps = {
 	id?: string | undefined;
@@ -50,10 +50,13 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 			EnableCamera: true
 		}
 	);
-	const [recordingStorage, setRecordingStorage] = useLocalStorage('ChatsRecordingSettings', {
-		name: 'Home',
-		id: 'LOCAL_ROOT'
-	});
+	const [recordingStorage, setRecordingStorage] = useLocalStorage<MeetingRecordingType>(
+		'ChatsRecordingSettings',
+		{
+			name: 'Home',
+			id: 'LOCAL_ROOT'
+		}
+	);
 
 	const [picture, setPicture] = useState<false | File>(false);
 	const [deletePicture, setDeletePicture] = useState<boolean>(false);
@@ -66,7 +69,7 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 		EnableMicrophone: meetingStorage.EnableMicrophone,
 		EnableCamera: meetingStorage.EnableCamera
 	});
-	const [recordingDefaults, setRecordingDefaults] = useState({
+	const [recordingDefaults, setRecordingDefaults] = useState<MeetingRecordingType>({
 		name: recordingStorage.name,
 		id: recordingStorage.id
 	});
@@ -83,13 +86,6 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 			});
 		}
 	}, [getNode, getNodeAvailable, recordingStorage, setRecordingStorage]);
-
-	/*
-    * setRecordingStorage({
-          name: nodes[0].id === 'LOCAL_ROOT' ? 'Home' : nodes[0].name,
-          id: nodes[0].id
-        });
-        * */
 
 	// set the isEnabled value when changed
 	useEffect(() => {
@@ -195,13 +191,16 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 			setIsEnabled(false);
 		}
 
+		// if a user changes his media default for meetings
 		if (!isEqual(meetingStorage, meetingMediaDefaults)) {
 			setMeetingStorage(meetingMediaDefaults);
 			setIsEnabled(false);
 		}
 
+		// if a user changes his recording folder
 		if (!isEqual(recordingStorage, recordingDefaults)) {
 			setRecordingStorage(recordingDefaults);
+			setIsEnabled(false);
 		}
 
 		return Promise.resolve();
