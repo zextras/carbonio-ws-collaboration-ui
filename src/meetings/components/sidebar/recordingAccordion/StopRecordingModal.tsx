@@ -46,6 +46,10 @@ const StopRecordingModal = ({
 	const recordingInputDescription: string = t('', 'The recording will be saved in "/".');
 	const stopButtonLabel = t('', 'Stop');
 	const closeLabel = t('action.close', 'Close');
+	const recordingStopped = t(
+		'',
+		'You will find [FileName] in [/ folderPath] as soon as it is available'
+	);
 	const errorSnackbarLabel = t(
 		'',
 		'It is not possible to stop the registration, please contact your system administrator.'
@@ -73,7 +77,15 @@ const StopRecordingModal = ({
 
 	const stopRecording = useCallback(() => {
 		MeetingsApi.stopRecording(meetingId, recordingName, '/')
-			.then(() => onCloseModal())
+			.then(() => {
+				createSnackbar({
+					key: new Date().toLocaleString(),
+					type: 'info',
+					label: recordingStopped,
+					hideButton: true
+				});
+				onCloseModal();
+			})
 			.catch(() => {
 				createSnackbar({
 					key: new Date().toLocaleString(),
@@ -83,7 +95,14 @@ const StopRecordingModal = ({
 				});
 				onCloseModal();
 			});
-	}, [createSnackbar, errorSnackbarLabel, meetingId, onCloseModal, recordingName]);
+	}, [
+		createSnackbar,
+		errorSnackbarLabel,
+		meetingId,
+		onCloseModal,
+		recordingName,
+		recordingStopped
+	]);
 
 	return (
 		<Modal

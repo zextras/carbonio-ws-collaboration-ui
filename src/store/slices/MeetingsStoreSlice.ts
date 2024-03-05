@@ -45,7 +45,8 @@ export const useMeetingsStoreSlice: StateCreator<MeetingsSlice> = (set: (...any:
 						participants: participantsMap,
 						createdAt: meeting.createdAt,
 						meetingType: meeting.meetingType,
-						startRecordingTimestamp: meeting.startRecordingTimestamp
+						startRecordingTimestamp: meeting.startRecordingTimestamp,
+						startRecordingUserId: meeting.startRecordingUserId
 					};
 
 					// Retrieve participants information if they are unknown
@@ -92,7 +93,8 @@ export const useMeetingsStoreSlice: StateCreator<MeetingsSlice> = (set: (...any:
 					participants: participantsMap,
 					createdAt: meeting.createdAt,
 					meetingType: meeting.meetingType,
-					startRecordingTimestamp: meeting.startRecordingTimestamp
+					startRecordingTimestamp: meeting.startRecordingTimestamp,
+					startRecordingUserId: meeting.startRecordingUserId
 				};
 
 				// Retrieve participants information if they are unknown
@@ -267,12 +269,17 @@ export const useMeetingsStoreSlice: StateCreator<MeetingsSlice> = (set: (...any:
 			'AM/REMOVE_USER_FROM_WAITING_LIST'
 		);
 	},
-	startRecording: (meetingId: string, startRecordingTimestamp: string): void => {
+	startRecording: (
+		meetingId: string,
+		startRecordingTimestamp: string,
+		startRecordingUserId: string
+	): void => {
 		set(
 			produce((draft: RootStore) => {
 				const meeting = find(draft.meetings, (meeting) => meeting.id === meetingId);
 				if (meeting) {
 					draft.meetings[meeting.roomId].startRecordingTimestamp = startRecordingTimestamp;
+					draft.meetings[meeting.roomId].startRecordingUserId = startRecordingUserId;
 				}
 			}),
 			false,
@@ -285,6 +292,7 @@ export const useMeetingsStoreSlice: StateCreator<MeetingsSlice> = (set: (...any:
 				const meeting = find(draft.meetings, (meeting) => meeting.id === meetingId);
 				if (meeting) {
 					draft.meetings[meeting.roomId].startRecordingTimestamp = undefined;
+					draft.meetings[meeting.roomId].startRecordingUserId = undefined;
 				}
 			}),
 			false,

@@ -45,13 +45,13 @@ describe('RecordingAccordion tests', () => {
 		const iconUp = 'icon: ChevronUp';
 		const iconDown = 'icon: ChevronDown';
 		const { user } = setup(<RecordingAccordion meetingId={meeting.id} />);
-		expect(screen.getByTestId(iconUp)).toBeVisible();
-
-		await user.click(screen.getByTestId(iconUp));
 		expect(screen.getByTestId(iconDown)).toBeVisible();
 
 		await user.click(screen.getByTestId(iconDown));
 		expect(screen.getByTestId(iconUp)).toBeVisible();
+
+		await user.click(screen.getByTestId(iconUp));
+		expect(screen.getByTestId(iconDown)).toBeVisible();
 	});
 
 	test.todo("Recording can only be started if there isn't an active recording");

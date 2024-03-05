@@ -340,6 +340,20 @@ export function wsEventsHandler(event: WsEvent): void {
 			}
 			break;
 		}
+		case WsEventType.MEETING_RECORDING_STARTED: {
+			state.startRecording(event.meetingId, event.sentDate, event.userId);
+			if (inThisMeetingTab(event.meetingId)) {
+				sendCustomEvent({ name: EventName.MEETING_RECORDING_STARTED, data: event });
+			}
+			break;
+		}
+		case WsEventType.MEETING_RECORDING_STOPPED: {
+			state.stopRecording(event.meetingId);
+			if (inThisMeetingTab(event.meetingId)) {
+				sendCustomEvent({ name: EventName.MEETING_RECORDING_STOPPED, data: event });
+			}
+			break;
+		}
 		default:
 			wsDebug('Unhandled event', event);
 			break;

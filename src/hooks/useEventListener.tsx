@@ -10,6 +10,8 @@ import {
 	MeetingAudioStreamChangedEvent,
 	MeetingJoinedEvent,
 	MeetingParticipantClashedEvent,
+	MeetingRecordingStartedEvent,
+	MeetingRecordingStoppedEvent,
 	MeetingStartedEvent,
 	MeetingStoppedEvent,
 	MeetingUserAcceptedEvent,
@@ -28,7 +30,9 @@ export enum EventName {
 	NEW_WAITING_USER = 'newWaitingUser',
 	MEETING_USER_ACCEPTED = 'meetingUserAccepted',
 	MEETING_USER_REJECTED = 'meetingUserRejected',
-	MEETING_WAITING_PARTICIPANT_CLASHED = 'meetingWaitingParticipantClashed'
+	MEETING_WAITING_PARTICIPANT_CLASHED = 'meetingWaitingParticipantClashed',
+	MEETING_RECORDING_STARTED = 'meetingRecordingStarted',
+	MEETING_RECORDING_STOPPED = 'meetingRecordingStopped'
 }
 
 export type NewMessageEvent = {
@@ -76,6 +80,16 @@ export type MeetingWaitingParticipantClashedEvent = {
 	data: MeetingWaitingParticipantClashed;
 };
 
+export type RecordingStartedEvent = {
+	name: EventName.MEETING_RECORDING_STARTED;
+	data: MeetingRecordingStartedEvent;
+};
+
+export type RecordingStoppedEvent = {
+	name: EventName.MEETING_RECORDING_STOPPED;
+	data: MeetingRecordingStoppedEvent;
+};
+
 type CustomEvent =
 	| NewMessageEvent
 	| IncomingMeetingEvent
@@ -85,7 +99,9 @@ type CustomEvent =
 	| NewWaitingUserEvent
 	| MeetingAcceptedEvent
 	| MeetingRejectedEvent
-	| MeetingWaitingParticipantClashedEvent;
+	| MeetingWaitingParticipantClashedEvent
+	| RecordingStartedEvent
+	| RecordingStoppedEvent;
 
 export const sendCustomEvent = (event: CustomEvent): void => {
 	window.dispatchEvent(new CustomEvent(event.name, { detail: event.data }));

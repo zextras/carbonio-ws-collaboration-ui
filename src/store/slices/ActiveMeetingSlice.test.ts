@@ -24,7 +24,7 @@ describe('Active Meeting Slice', () => {
 			actionsAccordionIsOpened: true,
 			participantsAccordionIsOpened: false,
 			waitingListAccordionIsOpened: true,
-			recordingAccordionIsOpened: true
+			recordingAccordionIsOpened: false
 		});
 		expect(result.current.activeMeeting[meetingId].chatVisibility).toBe(
 			MeetingChatVisibility.CLOSED

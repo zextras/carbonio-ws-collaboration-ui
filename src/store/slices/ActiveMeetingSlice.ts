@@ -42,7 +42,7 @@ export const useActiveMeetingSlice: StateCreator<ActiveMeetingSlice> = (
 						actionsAccordionIsOpened: true,
 						participantsAccordionIsOpened: false,
 						waitingListAccordionIsOpened: true,
-						recordingAccordionIsOpened: true
+						recordingAccordionIsOpened: false
 					},
 					chatVisibility: MeetingChatVisibility.CLOSED,
 					meetingViewSelected: MeetingViewType.GRID,
