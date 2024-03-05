@@ -20,6 +20,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import RecordingTimer from './RecordingTimer';
+import StartRecordingUser from './StartRecordingUser';
 import StopRecordingModal from './StopRecordingModal';
 import { MeetingsApi } from '../../../../network';
 import { getRecordingAccordionStatus } from '../../../../store/selectors/ActiveMeetingSelectors';
@@ -76,41 +77,44 @@ const RecordingAccordion: FC<RecordingAccordionProps> = ({ meetingId }) => {
 	}, [createSnackbar, errorSnackbarLabel, meetingId]);
 
 	const items = useMemo(() => {
-		const Header = ({ item }: { item: AccordionItemType }): ReactElement => (
+		const RecordingHeader = ({ item }: { item: AccordionItemType }): ReactElement => (
 			<AccordionItem item={item}>
 				{recordingTimestamp && <RecordingTimer timestamp={recordingTimestamp} />}
 			</AccordionItem>
 		);
-		const recordingContainer: AccordionItemType[] = [
+		const RecordingContainer = (): ReactElement => (
+			<Container
+				crossAlignment="flex-start"
+				padding={{ vertical: 'large', right: 'small' }}
+				gap="0.5rem"
+			>
+				<StartRecordingUser meetingId={meetingId} />
+				<Container orientation="horizontal" gap="0.5rem">
+					<Button
+						width="fill"
+						color="success"
+						label={startButtonLabel}
+						onClick={startRecording}
+						disabled={!!recordingTimestamp}
+					/>
+					<Button
+						width="fill"
+						color="error"
+						label={stopButtonLabel}
+						onClick={openModal}
+						disabled={!recordingTimestamp}
+					/>
+				</Container>
+				<Text>{accordionDescription}</Text>
+			</Container>
+		);
+
+		const recordingItem: AccordionItemType[] = [
 			{
 				id: 'recordingContainer',
 				disableHover: true,
 				background: 'text',
-				CustomComponent: () => (
-					<Container
-						crossAlignment="flex-start"
-						padding={{ vertical: 'large', right: 'small' }}
-						gap="0.5rem"
-					>
-						<Container orientation="horizontal" gap="0.5rem">
-							<Button
-								width="fill"
-								color="success"
-								label={startButtonLabel}
-								onClick={startRecording}
-								disabled={!!recordingTimestamp}
-							/>
-							<Button
-								width="fill"
-								color="error"
-								label={stopButtonLabel}
-								onClick={openModal}
-								disabled={!recordingTimestamp}
-							/>
-						</Container>
-						<Text>{accordionDescription}</Text>
-					</Container>
-				)
+				CustomComponent: RecordingContainer
 			}
 		];
 		return [
@@ -118,8 +122,8 @@ const RecordingAccordion: FC<RecordingAccordionProps> = ({ meetingId }) => {
 				id: 'recordingAccordion',
 				label: accordionTitle,
 				open: accordionStatus,
-				CustomComponent: Header,
-				items: recordingContainer,
+				CustomComponent: RecordingHeader,
+				items: recordingItem,
 				onOpen: toggleAccordionStatus,
 				onClose: toggleAccordionStatus
 			} as AccordionItemType
@@ -128,9 +132,10 @@ const RecordingAccordion: FC<RecordingAccordionProps> = ({ meetingId }) => {
 		accordionTitle,
 		accordionStatus,
 		toggleAccordionStatus,
+		recordingTimestamp,
+		meetingId,
 		startButtonLabel,
 		startRecording,
-		recordingTimestamp,
 		stopButtonLabel,
 		openModal,
 		accordionDescription

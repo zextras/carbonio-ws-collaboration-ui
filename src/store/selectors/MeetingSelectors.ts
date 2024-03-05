@@ -199,3 +199,11 @@ export const getIsMeetingRecording = (store: RootStore, meetingId: string): bool
 	const meeting = find(store.meetings, (meeting) => meeting.id === meetingId);
 	return !!meeting?.startRecordingTimestamp;
 };
+
+export const getStartRecordingUserId = (
+	store: RootStore,
+	meetingId: string
+): string | undefined => {
+	const meeting = find(store.meetings, (meeting) => meeting.id === meetingId);
+	return meeting?.startRecordingUserId;
+};
