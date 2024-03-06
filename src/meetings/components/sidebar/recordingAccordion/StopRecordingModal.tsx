@@ -42,7 +42,7 @@ const StopRecordingModal = ({
 		[roomName]
 	);
 	const [recordingName, setRecordingName] = useState(defaultRecordingName);
-	const folderPath = '/path/path/path'; // TODO: retrieve path from local storage
+	const folder = { id: 'LOCAL_ROOT', name: 'Home' }; // TODO: retrieve path from local storage
 
 	// TODO: translation keys
 	const [t] = useTranslation();
@@ -54,14 +54,15 @@ const StopRecordingModal = ({
 	const recordingInputLabel: string = t('', 'Recording Name*');
 	const recordingInputDescription: string = t(
 		'',
-		`The recording will be saved in "${folderPath}".`
+		`The recording will be saved in "/${folder.name}".`,
+		{ folderName: folder.name }
 	);
 	const stopButtonLabel = t('', 'Stop');
 	const closeLabel = t('action.close', 'Close');
 	const recordingStopped = t(
 		'',
-		`You will find ${recordingName} in ${folderPath} as soon as it is available`,
-		{ fileName: recordingName, folderPath }
+		`You will find ${recordingName} in /${folder.name} as soon as it is available`,
+		{ fileName: recordingName, folderName: folder.name }
 	);
 	const errorSnackbarLabel = t(
 		'',
@@ -80,7 +81,7 @@ const StopRecordingModal = ({
 	}, [closeModal, defaultRecordingName]);
 
 	const stopRecording = useCallback(() => {
-		MeetingsApi.stopRecording(meetingId, recordingName, folderPath)
+		MeetingsApi.stopRecording(meetingId, recordingName, folder.id)
 			.then(() => {
 				createSnackbar({
 					key: new Date().toLocaleString(),
@@ -102,6 +103,7 @@ const StopRecordingModal = ({
 	}, [
 		createSnackbar,
 		errorSnackbarLabel,
+		folder.id,
 		meetingId,
 		onCloseModal,
 		recordingName,

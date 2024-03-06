@@ -34,7 +34,7 @@ beforeEach(() => {
 	store.addMeeting(meeting);
 	store.meetingConnection(meeting.id, false, undefined, false, undefined);
 });
-describe('StopRecording tests', () => {
+describe('StopRecordingModal tests', () => {
 	test.todo('Stop recording without modifying the recording name');
 
 	test.todo('Stop recording with a modified recording name');

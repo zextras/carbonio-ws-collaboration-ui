@@ -6,19 +6,24 @@
 
 import React, { ReactElement } from 'react';
 
-import { Container, Icon } from '@zextras/carbonio-design-system';
+import { Container, Icon, Text } from '@zextras/carbonio-design-system';
+
+import useTimer from '../../../../hooks/useTimer';
 
 type RecordingTimerProps = {
 	timestamp: string;
 };
 
 const RecordingTimer = ({ timestamp }: RecordingTimerProps): ReactElement => {
-	// TODO timer logic
-	console.log(timestamp);
+	const { hours, minutes, seconds } = useTimer(timestamp);
 
 	return (
-		<Container width="fit">
-			<Icon icon="Video" color="error" />
+		<Container width="fit" orientation="horizontal" gap="0.5rem">
+			<Icon icon="Video" color="error" size="large" />
+			<Text>
+				{hours !== '00' && `${hours}:`}
+				{minutes}:{seconds}
+			</Text>
 		</Container>
 	);
 };
