@@ -6,6 +6,7 @@
 import React, { Dispatch, FC, SetStateAction, useCallback } from 'react';
 
 import { Checkbox, Container, Divider, Padding, Text } from '@zextras/carbonio-design-system';
+import { useTranslation } from 'react-i18next';
 
 import RecordingSettings from './RecordingSettings';
 import { getCapability } from './store/selectors/SessionSelectors';
@@ -26,6 +27,15 @@ const MeetingSettings: FC<MeetingSettingsProps> = ({
 	recordingDefaults,
 	setRecordingDefaults
 }) => {
+	const [t] = useTranslation();
+	const meetingSectionLabel = t('', 'Meetings');
+	const enableMicLabel = t('meeting.interactions.enableMicrophone', 'Enable microphone');
+	const enableCamLabel = t('meeting.interactions.enableCamera', 'Enable camera');
+	const meetingSectionDescription = t(
+		'',
+		'Set your audio and video preferences to enter the meetings. You can always customize your preferences before joining every meeting.'
+	);
+
 	const canRecordVideo = useStore((store) =>
 		getCapability(store, CapabilityType.CAN_VIDEO_CALL_RECORD)
 	);
@@ -48,41 +58,37 @@ const MeetingSettings: FC<MeetingSettingsProps> = ({
 		<Container
 			background={'gray6'}
 			padding={{ horizontal: 'medium', bottom: 'medium' }}
-			data-testid="notification_container"
+			data-testid="meeting_settings_container"
 		>
 			<Container crossAlignment="flex-start" gap="1rem">
 				<Padding top="large">
-					<Text weight="bold">Meetings</Text>
+					<Text weight="bold">{meetingSectionLabel}</Text>
 				</Padding>
 				<Divider color="gray2" />
 				<Container mainAlignment="flex-start" crossAlignment="flex-start" gap="1rem">
 					<Text overflow="break-word" size={'small'}>
-						Set your audio and video preferences to enter the meetings. You can always customize
-						your preferences before joining every meeting.
+						{meetingSectionDescription}
 					</Text>
 					<Checkbox
 						defaultChecked={meetingMediaDefaults.EnableMicrophone}
 						value={meetingMediaDefaults.EnableMicrophone}
 						onClick={setMicrophoneEnabled}
-						label="Enable microphone"
-						data-testid="checkbox"
+						label={enableMicLabel}
+						data-testid="microphone_checkbox"
 					/>
 					<Checkbox
 						defaultChecked={meetingMediaDefaults.EnableCamera}
 						value={meetingMediaDefaults.EnableCamera}
 						onClick={setCameraEnabled}
-						label="Enable camera"
-						data-testid="checkbox"
+						label={enableCamLabel}
+						data-testid="camera_checkbox"
 					/>
 				</Container>
 				{canRecordVideo && (
-					<>
-						<Divider color="gray2" />
-						<RecordingSettings
-							recordingDefaults={recordingDefaults}
-							setRecordingDefaults={setRecordingDefaults}
-						/>
-					</>
+					<RecordingSettings
+						recordingDefaults={recordingDefaults}
+						setRecordingDefaults={setRecordingDefaults}
+					/>
 				)}
 			</Container>
 		</Container>

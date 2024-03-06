@@ -23,6 +23,11 @@ export const USER_SETTINGS: AccountSettings = {
 	}
 };
 
+const getNode = jest.fn(() => Promise.resolve({ name: 'root', id: 'ROOT_ID' }));
+const getNodeAvailable = true;
+const filesSelectFilesAction = jest.fn();
+const filesSelectFilesActionAvailable = true;
+
 export const ROUTE_SETTINGS: AppRoute = {
 	id: 'chats',
 	route: 'chats',
@@ -78,12 +83,10 @@ export const Spinner = (): ReactElement => <div>spinner</div>;
 export const pushHistory = jest.fn(pushHistoryMock);
 
 export const replaceHistory = jest.fn(replaceHistoryMock);
-
-const integratedFunctions = {
-	getNode: {},
-	getNodeAvailable: false,
-	filesSelectFilesAction: {},
-	filesSelectFilesActionAvailable: false
-};
-export const useIntegratedFunction = jest.fn(() => [integratedFunctions]);
+export const useIntegratedFunction = jest.fn(() => [
+	getNode,
+	getNodeAvailable,
+	filesSelectFilesAction,
+	filesSelectFilesActionAvailable
+]);
 export const t = (key: string, value: string): string => value;
