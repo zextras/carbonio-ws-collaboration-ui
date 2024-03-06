@@ -31,23 +31,13 @@ const displayMessageBrowserNotification = (message: TextMessage): void => {
 		LOCAL_STORAGE_NAMES.NOTIFICATIONS
 	);
 
-	let notificationsAreActive = true;
-	if (ChatsNotificationsSettings) {
-		notificationsAreActive = ChatsNotificationsSettings.DesktopNotifications;
-	}
-
-	let notificationsShouldPlay = true;
-	if (ChatsNotificationsSettings) {
-		notificationsShouldPlay = ChatsNotificationsSettings.DesktopNotificationsSounds;
-	}
-
 	if (
 		notMyMessage &&
 		!inputIsFocused &&
 		room &&
 		!roomIsMuted &&
 		((!isMeetingTab && isOneToOneGroupMessage) || (isMeetingTab && !isOneToOneGroupMessage)) &&
-		notificationsAreActive
+		ChatsNotificationsSettings.DesktopNotifications
 	) {
 		const sender = store.users[message.from];
 		const title = room.type === RoomType.ONE_TO_ONE ? sender.name || sender.email || '' : room.name;
@@ -60,7 +50,7 @@ const displayMessageBrowserNotification = (message: TextMessage): void => {
 
 		getNotificationManager().notify({
 			showPopup: true,
-			playSound: notificationsShouldPlay,
+			playSound: ChatsNotificationsSettings.DesktopNotificationsSounds,
 			title,
 			message: textMessage,
 			onClick: (): void => {
