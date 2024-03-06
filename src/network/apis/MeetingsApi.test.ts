@@ -361,7 +361,36 @@ describe('Meetings API', () => {
 		);
 	});
 
-	test.todo('startRecording is called correctly');
+	test('startRecording is called correctly', async () => {
+		fetchResponse.mockResolvedValueOnce({});
+		await meetingsApi.startRecording(meetingMock.id);
 
-	test.todo('stopRecording is called correctly');
+		// Check if fetch is called with the correct parameters
+		expect(global.fetch).toHaveBeenCalledWith(
+			`/services/chats/meetings/${meetingMock.id}/startRecording`,
+			{
+				method: 'POST',
+				headers,
+				body: undefined
+			}
+		);
+	});
+
+	test('stopRecording is called correctly', async () => {
+		fetchResponse.mockResolvedValueOnce({});
+		await meetingsApi.stopRecording(meetingMock.id, 'recordingName', 'folderId');
+
+		// Check if fetch is called with the correct parameters
+		expect(global.fetch).toHaveBeenCalledWith(
+			`/services/chats/meetings/${meetingMock.id}/stopRecording`,
+			{
+				method: 'POST',
+				headers,
+				body: JSON.stringify({
+					name: 'recordingName',
+					folderId: 'folderId'
+				})
+			}
+		);
+	});
 });

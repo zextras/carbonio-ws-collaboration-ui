@@ -45,8 +45,8 @@ export const useMeetingsStoreSlice: StateCreator<MeetingsSlice> = (set: (...any:
 						participants: participantsMap,
 						createdAt: meeting.createdAt,
 						meetingType: meeting.meetingType,
-						startRecordingTimestamp: meeting.startRecordingTimestamp,
-						startRecordingUserId: meeting.startRecordingUserId
+						recStartedAt: meeting.recStartedAt,
+						recUserId: meeting.recUserId
 					};
 
 					// Retrieve participants information if they are unknown
@@ -93,8 +93,8 @@ export const useMeetingsStoreSlice: StateCreator<MeetingsSlice> = (set: (...any:
 					participants: participantsMap,
 					createdAt: meeting.createdAt,
 					meetingType: meeting.meetingType,
-					startRecordingTimestamp: meeting.startRecordingTimestamp,
-					startRecordingUserId: meeting.startRecordingUserId
+					recStartedAt: meeting.recStartedAt,
+					recUserId: meeting.recUserId
 				};
 
 				// Retrieve participants information if they are unknown
@@ -278,8 +278,8 @@ export const useMeetingsStoreSlice: StateCreator<MeetingsSlice> = (set: (...any:
 			produce((draft: RootStore) => {
 				const meeting = find(draft.meetings, (meeting) => meeting.id === meetingId);
 				if (meeting) {
-					draft.meetings[meeting.roomId].startRecordingTimestamp = startRecordingTimestamp;
-					draft.meetings[meeting.roomId].startRecordingUserId = startRecordingUserId;
+					draft.meetings[meeting.roomId].recStartedAt = startRecordingTimestamp;
+					draft.meetings[meeting.roomId].recUserId = startRecordingUserId;
 				}
 			}),
 			false,
@@ -291,8 +291,8 @@ export const useMeetingsStoreSlice: StateCreator<MeetingsSlice> = (set: (...any:
 			produce((draft: RootStore) => {
 				const meeting = find(draft.meetings, (meeting) => meeting.id === meetingId);
 				if (meeting) {
-					draft.meetings[meeting.roomId].startRecordingTimestamp = undefined;
-					draft.meetings[meeting.roomId].startRecordingUserId = undefined;
+					draft.meetings[meeting.roomId].recStartedAt = undefined;
+					draft.meetings[meeting.roomId].recUserId = undefined;
 				}
 			}),
 			false,

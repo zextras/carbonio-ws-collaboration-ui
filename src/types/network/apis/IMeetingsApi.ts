@@ -88,7 +88,7 @@ interface IMeetingsApi {
 	stopRecording(
 		meetingId: string,
 		recordingName: string,
-		path: string
+		folderId: string
 	): Promise<StopRecordingResponse>;
 }
 

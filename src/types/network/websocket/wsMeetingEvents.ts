@@ -134,7 +134,6 @@ export type MeetingWaitingParticipantClashed = BasicMeetingEvent & {
 
 export type MeetingRecordingStartedEvent = BasicMeetingEvent & {
 	type: WsEventType.MEETING_RECORDING_STARTED;
-	recordingTimestamp: string;
 	userId: string;
 };
 

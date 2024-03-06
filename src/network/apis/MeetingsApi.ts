@@ -35,11 +35,9 @@ import {
 	UpdateAudioStreamStatusResponse,
 	UpdateMediaOfferResponse
 } from '../../types/network/responses/meetingsResponses';
-import { WsEventType } from '../../types/network/websocket/wsEvents';
 import { STREAM_TYPE, Subscription } from '../../types/store/ActiveMeetingTypes';
 import { RoomType } from '../../types/store/RoomTypes';
 import { RoomsApi } from '../index';
-import { wsEventsHandler } from '../websocket/wsEventsHandler';
 
 class MeetingsApi extends BaseAPI implements IMeetingsApi {
 	// Singleton design pattern
@@ -259,31 +257,18 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 	}
 
 	startRecording(meetingId: string): Promise<StartRecordingResponse> {
-		// TODO remove
-		wsEventsHandler({
-			type: WsEventType.MEETING_RECORDING_STARTED,
-			meetingId,
-			sentDate: new Date().toISOString(),
-			recordingTimestamp: new Date().toISOString(),
-			userId: useStore.getState().session.id!
-		});
-		return Promise.resolve(new Response());
+		return this.fetchAPI(`meetings/${meetingId}/startRecording`, RequestType.POST);
 	}
 
 	stopRecording(
 		meetingId: string,
 		recordingName: string,
-		path: string
+		folderId: string
 	): Promise<StopRecordingResponse> {
-		// TODO remove
-		console.log('Recording stopped', recordingName, path);
-		wsEventsHandler({
-			type: WsEventType.MEETING_RECORDING_STOPPED,
-			meetingId,
-			sentDate: new Date().toISOString(),
-			userId: useStore.getState().session.id!
+		return this.fetchAPI(`meetings/${meetingId}/stopRecording`, RequestType.POST, {
+			name: recordingName,
+			folderId
 		});
-		return Promise.resolve(new Response());
 	}
 }
 
