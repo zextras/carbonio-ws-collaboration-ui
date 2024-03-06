@@ -196,4 +196,39 @@ describe('wsEventHandler', () => {
 			expect(waitingList).not.toContain(user1.id);
 		});
 	});
+
+	beforeEach(() => {
+		const store = useStore.getState();
+		store.setLoginInfo(user1.id, 'user1');
+		store.addRoom(temporaryRoom);
+		store.addMeeting(scheduledMeeting);
+		store.meetingConnection(scheduledMeeting.id, false, undefined, false, undefined);
+	});
+	describe('Recording events', () => {
+		test('Recording started', () => {
+			window.history.pushState({}, '', `${MEETINGS_PATH}${scheduledMeeting.id}`);
+			wsEventsHandler({
+				type: WsEventType.MEETING_RECORDING_STARTED,
+				meetingId: scheduledMeeting.id,
+				userId: user1.id,
+				sentDate: '123456789'
+			});
+			const { recStartedAt, recUserId } = useStore.getState().meetings[temporaryRoom.id];
+			expect(recStartedAt).toBe('123456789');
+			expect(recUserId).toBe(user1.id);
+		});
+
+		test('Recording stopped', () => {
+			window.history.pushState({}, '', `${MEETINGS_PATH}${scheduledMeeting.id}`);
+			wsEventsHandler({
+				type: WsEventType.MEETING_RECORDING_STOPPED,
+				meetingId: scheduledMeeting.id,
+				userId: user1.id,
+				sentDate: '123456789'
+			});
+			const { recStartedAt, recUserId } = useStore.getState().meetings[temporaryRoom.id];
+			expect(recStartedAt).toBeUndefined();
+			expect(recUserId).toBeUndefined();
+		});
+	});
 });
