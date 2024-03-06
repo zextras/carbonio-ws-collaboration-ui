@@ -184,13 +184,7 @@ export function wsEventsHandler(event: WsEvent): void {
 			if (meeting && state.rooms[meeting.roomId]?.type === RoomType.ONE_TO_ONE) {
 				sendCustomEvent({ name: EventName.REMOVED_MEETING_NOTIFICATION, data: event });
 			}
-			if (
-				meeting &&
-				find(
-					state.meetings[meeting.roomId].waitingList,
-					(userWaitingId) => userWaitingId === sessionId
-				)
-			) {
+			if (inThisMeetingTab(event.meetingId)) {
 				sendCustomEvent({ name: EventName.MEETING_STOPPED, data: event });
 			}
 			state.stopMeeting(event.meetingId);
