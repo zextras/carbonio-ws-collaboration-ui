@@ -59,7 +59,8 @@ const RecordingInfo = ({ meetingId }: RecordingInfoProps): ReactElement | null =
 		(event) => {
 			if (event.detail.userId !== useStore.getState().session.id) {
 				// TODO: translation key
-				const moderatorName = useStore.getState().users[event.detail.userId]?.name;
+				const moderator = useStore.getState().users[event.detail.userId];
+				const moderatorName = moderator?.name || moderator?.email || '';
 				const recordingStopped = t(
 					'',
 					`${moderatorName} stopped the registration of this meeting`,

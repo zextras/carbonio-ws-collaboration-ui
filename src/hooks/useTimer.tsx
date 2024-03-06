@@ -15,7 +15,10 @@ type UseTimerReturn = {
 };
 
 const useTimer = (date: string | number | Date): UseTimerReturn => {
-	const [timespan, setTimespan] = useState(Date.now() - dateToTimestamp(date));
+	const [timespan, setTimespan] = useState(() => {
+		const difference = Date.now() - dateToTimestamp(date);
+		return difference > 0 ? difference : 0;
+	});
 
 	useEffect(() => {
 		let interval: NodeJS.Timeout;
