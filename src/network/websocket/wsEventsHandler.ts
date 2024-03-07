@@ -315,7 +315,6 @@ export function wsEventsHandler(event: WsEvent): void {
 				sendCustomEvent({ name: EventName.NEW_WAITING_USER, data: event });
 				if (inThisMeetingTab(event.meetingId)) {
 					displayWaitingListNotification(event.meetingId);
-					sendAudioFeedback(MeetingSoundFeedback.NEW_WAITING_USER);
 				}
 			}
 			break;
