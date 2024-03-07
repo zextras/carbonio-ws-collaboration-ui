@@ -19,7 +19,7 @@ import NotificationsSettings from './NotificationsSettings';
 import ProfileSettings from './ProfileSettings';
 import useLocalStorage from '../../hooks/useLocalStorage';
 import { UsersApi } from '../../network';
-import { NotificationsSettingsType } from '../../utils/localStorageUtils';
+import { LOCAL_STORAGE_NAMES, NotificationsSettingsType } from '../../utils/localStorageUtils';
 
 type SettingsProps = {
 	id?: string | undefined;
@@ -37,7 +37,7 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 	const createSnackbar: CreateSnackbarFn = useSnackbar();
 
 	const [notificationsStorage, setNotificationsStorage] =
-		useLocalStorage<NotificationsSettingsType>('ChatsNotificationsSettings', {
+		useLocalStorage<NotificationsSettingsType>(LOCAL_STORAGE_NAMES.NOTIFICATIONS, {
 			DesktopNotifications: true,
 			DesktopNotificationsSounds: true,
 			WaitingRoomAccessNotifications: true,

@@ -5,7 +5,7 @@
  */
 
 export enum LOCAL_STORAGE_NAMES {
-	NOTIFICATIONS = 'ChatsNotificationsSettings'
+	NOTIFICATIONS = 'ChatsSettingsNotifications'
 }
 
 export type NotificationsSettingsType = {
