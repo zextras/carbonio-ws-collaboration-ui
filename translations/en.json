@@ -311,9 +311,20 @@
     },
     "settings": {
         "notifications": {
-            "checkboxLabel": "Desktop notifications",
+            "checkbox": {
+                "desktop": "Allow Desktop notifications",
+                "waitingRoom": "Allow notifications"
+            },
             "description": "Set your preferences for Chats notifications.",
-            "title": "Notifications"
+            "subtitle": {
+                "general": "General",
+                "waitingRoom": "Waiting Room access notifications"
+            },
+            "title": "Notifications",
+            "toggleSounds": {
+                "desktop": "Enable Desktop notification sounds",
+                "waitingRoom": "Enable notification sounds"
+            }
         },
         "profile": {
             "deletedUserImageCorrectly": "Avatar has been successfully reset to the original one",

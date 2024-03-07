@@ -10,13 +10,14 @@ import { useAuthenticated, useUserAccount, useUserSettings } from '@zextras/carb
 
 import CounterBadgeUpdater from './chats/components/CounterBadgeUpdater';
 import RegisterCreationButton from './chats/components/RegisterCreationButton';
-import WaitingListSnackbar from './chats/components/settings/WaitingListSnackbar';
 import useChatsApp from './chats/useChatsApp';
 import MeetingNotificationHandler from './meetings/components/MeetingNotificationsHandler';
 import useMeetingsApp from './meetings/useMeetingsApp';
 import { MeetingsApi, RoomsApi, SessionApi } from './network';
 import { WebSocketClient } from './network/websocket/WebSocketClient';
 import XMPPClient from './network/xmpp/XMPPClient';
+import WaitingListSnackbar from './settings/components/WaitingListSnackbar';
+import useSettingsApp from './settings/useSettingsApp';
 import useStore from './store/Store';
 import { setDateDefault } from './utils/dateUtils';
 
@@ -67,6 +68,7 @@ export default function App() {
 
 	useChatsApp();
 	useMeetingsApp();
+	useSettingsApp();
 
 	return (
 		<>
