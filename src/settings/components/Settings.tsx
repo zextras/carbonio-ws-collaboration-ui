@@ -6,7 +6,7 @@
 
 import React, { FC, useCallback, useEffect, useState } from 'react';
 
-import { Container, CreateSnackbarFn, Padding, useSnackbar } from '@zextras/carbonio-design-system';
+import { Container, CreateSnackbarFn, useSnackbar } from '@zextras/carbonio-design-system';
 import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore
@@ -16,12 +16,17 @@ import {
 import { isEqual } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
+import MeetingSettings from './MeetingSettings';
 import NotificationsSettings from './NotificationsSettings';
 import ProfileSettings from './ProfileSettings';
-import useLocalStorage from '../../../hooks/useLocalStorage';
-import MeetingSettings from '../../../MeetingSettings';
-import { UsersApi } from '../../../network';
-import { MeetingRecordingType, MeetingStorageType } from '../../../types/generics';
+import useLocalStorage from '../../hooks/useLocalStorage';
+import { UsersApi } from '../../network';
+import {
+	LOCAL_STORAGE_NAMES,
+	MeetingRecordingType,
+	MeetingStorageType,
+	NotificationsSettingsType
+} from '../../utils/localStorageUtils';
 
 type SettingsProps = {
 	id?: string | undefined;
@@ -38,32 +43,26 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 
 	const createSnackbar: CreateSnackbarFn = useSnackbar();
 
-	const [notificationsStorage, setNotificationsStorage] = useLocalStorage<{
-		DesktopNotifications: boolean;
-	}>('ChatsNotificationsSettings', {
-		DesktopNotifications: true
-	});
+	const [notificationsStorage, setNotificationsStorage] =
+		useLocalStorage<NotificationsSettingsType>(LOCAL_STORAGE_NAMES.NOTIFICATIONS);
 	const [meetingStorage, setMeetingStorage] = useLocalStorage<MeetingStorageType>(
-		'ChatsMeetingSettings',
-		{
-			EnableMicrophone: true,
-			EnableCamera: true
-		}
+		LOCAL_STORAGE_NAMES.MEETINGS
 	);
 	const [recordingStorage, setRecordingStorage] = useLocalStorage<MeetingRecordingType>(
-		'ChatsRecordingSettings',
-		{
-			name: 'Home',
-			id: 'LOCAL_ROOT'
-		}
+		LOCAL_STORAGE_NAMES.RECORDING
 	);
 
 	const [picture, setPicture] = useState<false | File>(false);
 	const [deletePicture, setDeletePicture] = useState<boolean>(false);
-	const [desktopNotifications, setDesktopNotifications] = useState<boolean>(
-		notificationsStorage.DesktopNotifications
-	);
 	const [isEnabled, setIsEnabled] = useState<boolean>(false);
+	const [updatedNotificationsSettings, setUpdatedNotificationsSettings] =
+		useState<NotificationsSettingsType>({
+			DesktopNotifications: notificationsStorage.DesktopNotifications,
+			DesktopNotificationsSounds: notificationsStorage.DesktopNotificationsSounds,
+			WaitingRoomAccessNotifications: notificationsStorage.WaitingRoomAccessNotifications,
+			WaitingRoomAccessNotificationsSounds:
+				notificationsStorage.WaitingRoomAccessNotificationsSounds
+		});
 
 	const [meetingMediaDefaults, setMeetingMediaDefaults] = useState<MeetingStorageType>({
 		EnableMicrophone: meetingStorage.EnableMicrophone,
@@ -92,7 +91,7 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 		if (
 			!!picture ||
 			deletePicture ||
-			notificationsStorage.DesktopNotifications !== desktopNotifications ||
+			!isEqual(notificationsStorage, updatedNotificationsSettings) ||
 			!isEqual(meetingStorage, meetingMediaDefaults) ||
 			!isEqual(recordingStorage, recordingDefaults)
 		) {
@@ -102,23 +101,43 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 		}
 	}, [
 		deletePicture,
-		desktopNotifications,
 		meetingMediaDefaults,
 		meetingStorage,
-		notificationsStorage.DesktopNotifications,
+		notificationsStorage,
 		picture,
 		recordingDefaults,
-		recordingStorage
+		recordingStorage,
+		updatedNotificationsSettings
 	]);
 
 	// sets all the values that has been changed to false and set the default values to the localStorage ones
 	const onClose = useCallback(() => {
 		setPicture(false);
 		setDeletePicture(false);
-		setDesktopNotifications(notificationsStorage.DesktopNotifications);
+		setUpdatedNotificationsSettings(notificationsStorage);
 		setMeetingMediaDefaults(meetingStorage);
 		setRecordingStorage({ name: 'Home', id: 'LOCAL_ROOT' });
-	}, [meetingStorage, notificationsStorage.DesktopNotifications, setRecordingStorage]);
+	}, [meetingStorage, notificationsStorage, setRecordingStorage]);
+
+	const successSnackbar = useCallback(() => {
+		createSnackbar({
+			key: new Date().toLocaleString(),
+			type: 'info',
+			label: saveSettingsSnackbar,
+			hideButton: true,
+			autoHideTimeout: 5000
+		});
+	}, [createSnackbar, saveSettingsSnackbar]);
+
+	const errorSnackbar = useCallback(() => {
+		createSnackbar({
+			key: new Date().toLocaleString(),
+			type: 'error',
+			label: errorDeleteImageSnackbar,
+			hideButton: true,
+			autoHideTimeout: 5000
+		});
+	}, [createSnackbar, errorDeleteImageSnackbar]);
 
 	// saves the elements that have been modified
 	const saveSettings = useCallback(() => {
@@ -126,68 +145,25 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 		if (picture) {
 			UsersApi.changeUserPicture(id || '', picture)
 				.then(() => {
-					createSnackbar({
-						key: new Date().toLocaleString(),
-						type: 'info',
-						label: saveSettingsSnackbar,
-						hideButton: true,
-						autoHideTimeout: 5000
-					});
 					setPicture(false);
 					setIsEnabled(false);
 				})
-				.catch(() => {
-					createSnackbar({
-						key: new Date().toLocaleString(),
-						type: 'error',
-						label: errorDeleteImageSnackbar,
-						hideButton: true,
-						autoHideTimeout: 5000
-					});
-					return Promise.reject();
-				});
+				.catch(() => Promise.reject().then(errorSnackbar));
 		}
 
 		// if a user delete the pictures
 		if (deletePicture) {
 			UsersApi.deleteUserPicture(id || '')
 				.then(() => {
-					createSnackbar({
-						key: new Date().toLocaleString(),
-						type: 'info',
-						label: saveSettingsSnackbar,
-						hideButton: true,
-						autoHideTimeout: 5000
-					});
 					setDeletePicture(false);
 					setIsEnabled(false);
 				})
-				.catch(() => {
-					createSnackbar({
-						key: new Date().toLocaleString(),
-						type: 'error',
-						label: errorDeleteImageSnackbar,
-						hideButton: true,
-						autoHideTimeout: 5000
-					});
-					return Promise.reject();
-				});
+				.catch(() => Promise.reject().then(errorSnackbar));
 		}
 
-		// if a user turn off/on the desktopNotifications
-		if (notificationsStorage.DesktopNotifications !== desktopNotifications) {
-			localStorage.setItem(
-				'ChatsNotificationsSettings',
-				JSON.stringify({ DesktopNotifications: desktopNotifications })
-			);
-			createSnackbar({
-				key: new Date().toLocaleString(),
-				type: 'info',
-				label: saveSettingsSnackbar,
-				hideButton: true,
-				autoHideTimeout: 5000
-			});
-			setNotificationsStorage({ DesktopNotifications: desktopNotifications });
+		// if a user changes the notifications' settings
+		if (!isEqual(notificationsStorage, updatedNotificationsSettings)) {
+			setNotificationsStorage(updatedNotificationsSettings);
 			setIsEnabled(false);
 		}
 
@@ -203,27 +179,31 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 			setIsEnabled(false);
 		}
 
-		return Promise.resolve();
+		return Promise.resolve().then(successSnackbar);
 	}, [
 		picture,
 		deletePicture,
-		notificationsStorage.DesktopNotifications,
-		desktopNotifications,
+		notificationsStorage,
+		updatedNotificationsSettings,
 		meetingStorage,
 		meetingMediaDefaults,
 		recordingStorage,
 		recordingDefaults,
+		successSnackbar,
 		id,
-		createSnackbar,
-		saveSettingsSnackbar,
-		errorDeleteImageSnackbar,
+		errorSnackbar,
 		setNotificationsStorage,
 		setMeetingStorage,
 		setRecordingStorage
 	]);
 
 	return (
-		<Container data-testid="settings_container">
+		<Container
+			mainAlignment="flex-start"
+			background={'gray5'}
+			style={{ overflowY: 'auto' }}
+			data-testid="settings_container"
+		>
 			<SettingsHeader
 				onSave={saveSettings}
 				onCancel={onClose}
@@ -237,6 +217,7 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 				height="fit"
 				background={'gray5'}
 				padding={{ vertical: 'large', horizontal: 'medium' }}
+				gap="1rem"
 			>
 				<ProfileSettings
 					picture={picture}
@@ -245,12 +226,10 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 					setToDelete={setDeletePicture}
 					toDelete={deletePicture}
 				/>
-				<Padding bottom="large" />
 				<NotificationsSettings
-					desktopNotifications={desktopNotifications}
-					setDesktopNotifications={setDesktopNotifications}
+					updatedNotificationsSettings={updatedNotificationsSettings}
+					setUpdatedNotificationsSettings={setUpdatedNotificationsSettings}
 				/>
-				<Padding bottom="large" />
 				<MeetingSettings
 					meetingMediaDefaults={meetingMediaDefaults}
 					setMeetingMediaDefaults={setMeetingMediaDefaults}

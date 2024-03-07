@@ -11,11 +11,12 @@ import { act } from 'react-dom/test-utils';
 
 import NotificationsSettings from './NotificationsSettings';
 import Settings from './Settings';
-import useStore from '../../../store/Store';
-import { createMockCapabilityList } from '../../../tests/createMock';
-import { setup } from '../../../tests/test-utils';
-import { UserBe } from '../../../types/network/models/userBeTypes';
-import { RootStore } from '../../../types/store/StoreTypes';
+import useStore from '../../store/Store';
+import { createMockCapabilityList } from '../../tests/createMock';
+import { setup } from '../../tests/test-utils';
+import { UserBe } from '../../types/network/models/userBeTypes';
+import { RootStore } from '../../types/store/StoreTypes';
+import { NotificationsSettingsType } from '../../utils/localStorageUtils';
 
 const pictureUpdatedAtTime = '2022-08-25T17:24:28.961+02:00';
 
@@ -37,6 +38,22 @@ const userWithImage: UserBe = {
 	statusMessage: "Hey there! I'm User 1",
 	pictureUpdatedAt: pictureUpdatedAtTime
 };
+
+const notificationsSettingsObject: NotificationsSettingsType = {
+	DesktopNotifications: true,
+	DesktopNotificationsSounds: true,
+	WaitingRoomAccessNotifications: true,
+	WaitingRoomAccessNotificationsSounds: true
+};
+
+const notificationsSettingsObjectFalse: NotificationsSettingsType = {
+	DesktopNotifications: false,
+	DesktopNotificationsSounds: false,
+	WaitingRoomAccessNotifications: false,
+	WaitingRoomAccessNotificationsSounds: false
+};
+
+const dataTestid = 'data-testid';
 
 describe('Settings view', () => {
 	test('Everything should be rendered - no image', async () => {
@@ -86,21 +103,122 @@ describe('Settings view', () => {
 		expect(resetButton).not.toBeEnabled();
 	});
 
-	test('notification checkbox active', async () => {
+	test('desktop notification checkbox active', async () => {
 		const store: RootStore = useStore.getState();
 		store.setUserInfo(userWithImage);
 		store.setLoginInfo(userWithImage.id, userWithImage.name, userWithImage.name);
 		setup(
-			<NotificationsSettings desktopNotifications={false} setDesktopNotifications={jest.fn()} />
+			<NotificationsSettings
+				updatedNotificationsSettings={notificationsSettingsObject}
+				setUpdatedNotificationsSettings={jest.fn()}
+			/>
 		);
-		expect(screen.getByTestId(squareIcon)).toBeInTheDocument();
+		const checkbox = screen.getByTestId('desktop_notifications_checkbox').children[0].children[0];
+		expect(checkbox).toHaveAttribute(dataTestid, 'icon: CheckmarkSquare');
 	});
-	test('notification checkbox not active', async () => {
+
+	test('desktop notification checkbox not active', async () => {
 		const store: RootStore = useStore.getState();
 		store.setUserInfo(userWithImage);
 		store.setLoginInfo(userWithImage.id, userWithImage.name, userWithImage.name);
-		setup(<NotificationsSettings desktopNotifications setDesktopNotifications={jest.fn()} />);
-		expect(screen.getByTestId('icon: CheckmarkSquare')).toBeInTheDocument();
+		setup(
+			<NotificationsSettings
+				updatedNotificationsSettings={notificationsSettingsObjectFalse}
+				setUpdatedNotificationsSettings={jest.fn()}
+			/>
+		);
+		const checkbox = screen.getByTestId('desktop_notifications_checkbox').children[0].children[0];
+		expect(checkbox).toHaveAttribute(dataTestid, squareIcon);
+	});
+
+	test('desktop notification sounds switch active', async () => {
+		const store: RootStore = useStore.getState();
+		store.setUserInfo(userWithImage);
+		store.setLoginInfo(userWithImage.id, userWithImage.name, userWithImage.name);
+		setup(
+			<NotificationsSettings
+				updatedNotificationsSettings={notificationsSettingsObject}
+				setUpdatedNotificationsSettings={jest.fn()}
+			/>
+		);
+		const switchElement = screen.getByTestId('desktop_notifications_sounds_switch').children[0]
+			.children[0];
+		expect(switchElement).toHaveAttribute(dataTestid, 'icon: ToggleRight');
+	});
+
+	test('desktop notification sounds switch not active', async () => {
+		const store: RootStore = useStore.getState();
+		store.setUserInfo(userWithImage);
+		store.setLoginInfo(userWithImage.id, userWithImage.name, userWithImage.name);
+		setup(
+			<NotificationsSettings
+				updatedNotificationsSettings={notificationsSettingsObjectFalse}
+				setUpdatedNotificationsSettings={jest.fn()}
+			/>
+		);
+		const switchElement = screen.getByTestId('desktop_notifications_sounds_switch').children[0]
+			.children[0];
+		expect(switchElement).toHaveAttribute(dataTestid, 'icon: ToggleLeftOutline');
+	});
+
+	test('waiting room access notifications active', async () => {
+		const store: RootStore = useStore.getState();
+		store.setUserInfo(userWithImage);
+		store.setLoginInfo(userWithImage.id, userWithImage.name, userWithImage.name);
+		setup(
+			<NotificationsSettings
+				updatedNotificationsSettings={notificationsSettingsObject}
+				setUpdatedNotificationsSettings={jest.fn()}
+			/>
+		);
+		const checkbox = screen.getByTestId('waiting_room_access_notifications_checkbox').children[0]
+			.children[0];
+		expect(checkbox).toHaveAttribute(dataTestid, 'icon: CheckmarkSquare');
+	});
+
+	test('waiting room access notifications not active', async () => {
+		const store: RootStore = useStore.getState();
+		store.setUserInfo(userWithImage);
+		store.setLoginInfo(userWithImage.id, userWithImage.name, userWithImage.name);
+		setup(
+			<NotificationsSettings
+				updatedNotificationsSettings={notificationsSettingsObjectFalse}
+				setUpdatedNotificationsSettings={jest.fn()}
+			/>
+		);
+		const checkbox = screen.getByTestId('waiting_room_access_notifications_checkbox').children[0]
+			.children[0];
+		expect(checkbox).toHaveAttribute(dataTestid, squareIcon);
+	});
+
+	test('waiting room access notifications sounds active', async () => {
+		const store: RootStore = useStore.getState();
+		store.setUserInfo(userWithImage);
+		store.setLoginInfo(userWithImage.id, userWithImage.name, userWithImage.name);
+		setup(
+			<NotificationsSettings
+				updatedNotificationsSettings={notificationsSettingsObject}
+				setUpdatedNotificationsSettings={jest.fn()}
+			/>
+		);
+		const switchElement = screen.getByTestId('waiting_room_access_sounds_switch').children[0]
+			.children[0];
+		expect(switchElement).toHaveAttribute(dataTestid, 'icon: ToggleRight');
+	});
+
+	test('waiting room access notifications sounds not active', async () => {
+		const store: RootStore = useStore.getState();
+		store.setUserInfo(userWithImage);
+		store.setLoginInfo(userWithImage.id, userWithImage.name, userWithImage.name);
+		setup(
+			<NotificationsSettings
+				updatedNotificationsSettings={notificationsSettingsObjectFalse}
+				setUpdatedNotificationsSettings={jest.fn()}
+			/>
+		);
+		const switchElement = screen.getByTestId('waiting_room_access_sounds_switch').children[0]
+			.children[0];
+		expect(switchElement).toHaveAttribute(dataTestid, 'icon: ToggleLeftOutline');
 	});
 });
 

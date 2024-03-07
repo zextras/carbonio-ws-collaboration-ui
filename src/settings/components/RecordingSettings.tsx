@@ -10,7 +10,7 @@ import { useIntegratedFunction } from '@zextras/carbonio-shell-ui';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import { MeetingRecordingType } from './types/generics';
+import { MeetingRecordingType } from '../../utils/localStorageUtils';
 
 const CustomButton = styled(Button)`
 	border-radius: 0.125rem;

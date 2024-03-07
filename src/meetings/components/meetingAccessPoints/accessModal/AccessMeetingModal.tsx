@@ -26,8 +26,8 @@ import {
 	getRoomTypeSelector
 } from '../../../../store/selectors/RoomsSelectors';
 import useStore from '../../../../store/Store';
-import { MeetingStorageType } from '../../../../types/generics';
 import { RoomType } from '../../../../types/store/RoomTypes';
+import { LOCAL_STORAGE_NAMES, MeetingStorageType } from '../../../../utils/localStorageUtils';
 import { freeMediaResources } from '../../../../utils/MeetingsUtils';
 import AccessTile from '../mediaHandlers/AccessTile';
 import LocalMediaHandler from '../mediaHandlers/LocalMediaHandler';
@@ -93,11 +93,7 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 	const websocketNetworkStatus = useStore(({ connections }) => connections.status.websocket);
 
 	const [meetingStorage, setMeetingStorage] = useLocalStorage<MeetingStorageType>(
-		'ChatsMeetingSettings',
-		{
-			EnableMicrophone: true,
-			EnableCamera: true
-		}
+		LOCAL_STORAGE_NAMES.MEETINGS
 	);
 
 	const [streamTrack, setStreamTrack] = useState<MediaStream | null>(null);

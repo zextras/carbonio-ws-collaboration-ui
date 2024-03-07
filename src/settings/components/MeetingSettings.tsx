@@ -9,10 +9,10 @@ import { Checkbox, Container, Divider, Padding, Text } from '@zextras/carbonio-d
 import { useTranslation } from 'react-i18next';
 
 import RecordingSettings from './RecordingSettings';
-import { getCapability } from './store/selectors/SessionSelectors';
-import useStore from './store/Store';
-import { MeetingStorageType } from './types/generics';
-import { CapabilityType } from './types/store/SessionTypes';
+import { getCapability } from '../../store/selectors/SessionSelectors';
+import useStore from '../../store/Store';
+import { CapabilityType } from '../../types/store/SessionTypes';
+import { MeetingStorageType } from '../../utils/localStorageUtils';
 
 type MeetingSettingsProps = {
 	meetingMediaDefaults: MeetingStorageType;
