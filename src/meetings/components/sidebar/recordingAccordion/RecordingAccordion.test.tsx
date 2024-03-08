@@ -35,6 +35,9 @@ const meeting: MeetingBe = createMockMeeting({
 	type: MeetingType.SCHEDULED
 });
 
+const iconUp = 'icon: ChevronUp';
+const iconDown = 'icon: ChevronDown';
+
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo(user1.id, 'user1');
@@ -44,8 +47,6 @@ beforeEach(() => {
 });
 describe('RecordingAccordion tests', () => {
 	test('Toggle accordion status', async () => {
-		const iconUp = 'icon: ChevronUp';
-		const iconDown = 'icon: ChevronDown';
 		const { user } = setup(<RecordingAccordion meetingId={meeting.id} />);
 		expect(screen.getByTestId(iconDown)).toBeVisible();
 
@@ -91,5 +92,21 @@ describe('RecordingAccordion tests', () => {
 		await waitFor(() => user.click(startButton));
 
 		expect(mockedStartRecordingRequest).toBeCalled();
+	});
+
+	test('Show a snackbar when the start recording request fails', async () => {
+		mockedStartRecordingRequest.mockRejectedValueOnce({});
+		const { user } = setup(<RecordingAccordion meetingId={meeting.id} />);
+
+		const chevron = screen.getByTestId(iconDown);
+		await user.click(chevron);
+
+		const startButton = await screen.findByTestId('startRecordingButton');
+		await waitFor(() => user.click(startButton));
+
+		const snackbar = await screen.findByText(
+			'It is not possible to start the registration, please contact your system administrator.'
+		);
+		expect(snackbar).toBeVisible();
 	});
 });
