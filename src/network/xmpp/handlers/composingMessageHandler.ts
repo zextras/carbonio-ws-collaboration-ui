@@ -38,7 +38,10 @@ export function onComposingMessageStanza(message: Element): true {
 			debouncedStopWriting(store, roomId, from);
 		}
 		// User stopped writing
-		if (!composing && stopComposing) store.setIsWriting(roomId, from, false);
+		if (!composing && stopComposing) {
+			debouncedStopWriting.cancel();
+			store.setIsWriting(roomId, from, false);
+		}
 	}
 
 	return true;

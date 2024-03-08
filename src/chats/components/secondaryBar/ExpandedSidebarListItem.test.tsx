@@ -6,9 +6,14 @@
 
 import React from 'react';
 
-import { screen } from '@testing-library/react';
+import { act, screen } from '@testing-library/react';
 
 import ExpandedSidebarListItem from './ExpandedSidebarListItem';
+import { onComposingMessageStanza } from '../../../network/xmpp/handlers/composingMessageHandler';
+import {
+	composingStanza,
+	pausedStanza
+} from '../../../network/xmpp/handlers/composingMessageHandler.test';
 import useStore from '../../../store/Store';
 import {
 	createMockCapabilityList,
@@ -17,6 +22,7 @@ import {
 	createMockRoom,
 	createMockTextMessage
 } from '../../../tests/createMock';
+import { xmppClient } from '../../../tests/mockedXmppClient';
 import { setup } from '../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
 import { MarkerStatus } from '../../../types/store/MarkersTypes';
@@ -131,6 +137,19 @@ const mockedConfigurationMessage: ConfigurationMessage = {
 	from: user1Be.id,
 	read: MarkerStatus.READ
 };
+
+const mockedAttachmentMessage = createMockTextMessage({
+	roomId: mockedGroup.id,
+	from: user1Be.id,
+	attachment: {
+		id: 'pngAttachmentId',
+		name: 'image.png',
+		mimeType: 'image/png',
+		size: 21412,
+		area: '350x240'
+	},
+	read: MarkerStatus.READ
+});
 
 describe('Expanded sidebar list item', () => {
 	test('Group - user cannot see message reads - I sent a message but it is in pending state', async () => {
@@ -278,6 +297,42 @@ describe('Expanded sidebar list item', () => {
 			)
 		).toBeVisible();
 	});
+	test('Group - while user is typing nothing else is display if last message is an attachment', async () => {
+		const store: RootStore = useStore.getState();
+		store.addRoom(mockedGroup);
+		store.setLoginInfo(user1Be.id, user1Be.name);
+		store.setUserInfo(user2Be);
+		store.newMessage(mockedAttachmentMessage);
+		store.setIsWriting(mockedGroup.id, user2Be.id, true);
+		setup(<ExpandedSidebarListItem roomId={mockedGroup.id} />);
+		const imageIcon = screen.queryByTestId('icon: FileTextOutline');
+		expect(imageIcon).not.toBeInTheDocument();
+	});
+	test('Group - last message sent by me, read by all and someone is typing -> after typing everything is display correct', async () => {
+		const store: RootStore = useStore.getState();
+		store.addRoom(mockedGroup);
+		store.setLoginInfo(user1Be.id, user1Be.name);
+		store.setUserInfo(user2Be);
+		store.setUserInfo(user4Be);
+		store.setCapabilities(createMockCapabilityList({ canSeeMessageReads: true }));
+		store.newMessage(mockedTextMessageSentByMe);
+		setup(<ExpandedSidebarListItem roomId={mockedGroup.id} />);
+		act(() => {
+			const composingMessage = composingStanza(mockedGroup.id, user4Be.id);
+			onComposingMessageStanza.call(xmppClient, composingMessage);
+		});
+		expect(screen.getByText(`${user4Be.name} is typing...`));
+		jest.advanceTimersByTime(3000);
+		act(() => {
+			const stopWritingMessage = pausedStanza(mockedGroup.id, user4Be.id);
+			onComposingMessageStanza.call(xmppClient, stopWritingMessage);
+		});
+		jest.advanceTimersByTime(7000);
+		const ackIcon = screen.getByTestId(iconDoneAll);
+		expect(ackIcon).toBeInTheDocument();
+		const messageContent = screen.getByText(new RegExp(`${mockedTextMessageSentByMe.text}`, 'i'));
+		expect(messageContent).toBeInTheDocument();
+	});
 	test('One to one - I sent a message', async () => {
 		const store: RootStore = useStore.getState();
 		store.addRoom(mockedOneToOne);
@@ -325,5 +380,40 @@ describe('Expanded sidebar list item', () => {
 		expect(IconWithDraft).toBeVisible();
 		const lastMessageOfConversation = screen.getByText(mockedTextMessageSentByOther.text);
 		expect(lastMessageOfConversation).toBeVisible();
+	});
+	test('One to one - while user is typing nothing else is display if last message is an attachment', async () => {
+		const store: RootStore = useStore.getState();
+		store.addRoom(mockedOneToOne);
+		store.setLoginInfo(user1Be.id, user1Be.name);
+		store.setUserInfo(user2Be);
+		store.newMessage(mockedAttachmentMessage);
+		store.setIsWriting(mockedOneToOne.id, user2Be.id, true);
+		setup(<ExpandedSidebarListItem roomId={mockedOneToOne.id} />);
+		const imageIcon = screen.queryByTestId('icon: FileTextOutline');
+		expect(imageIcon).not.toBeInTheDocument();
+	});
+	test('One to one - last message sent by me, read by all and someone is typing -> after typing everything is display correct', async () => {
+		const store: RootStore = useStore.getState();
+		store.addRoom(mockedOneToOne);
+		store.setLoginInfo(user1Be.id, user1Be.name);
+		store.setUserInfo(user2Be);
+		store.setCapabilities(createMockCapabilityList({ canSeeMessageReads: true }));
+		store.newMessage(mockedTextMessageSentByMe);
+		setup(<ExpandedSidebarListItem roomId={mockedOneToOne.id} />);
+		act(() => {
+			const composingMessage = composingStanza(mockedOneToOne.id, user2Be.id);
+			onComposingMessageStanza.call(xmppClient, composingMessage);
+		});
+		expect(screen.getByText(`${user2Be.name} is typing...`));
+		jest.advanceTimersByTime(3000);
+		act(() => {
+			const stopWritingMessage = pausedStanza(mockedOneToOne.id, user2Be.id);
+			onComposingMessageStanza.call(xmppClient, stopWritingMessage);
+		});
+		jest.advanceTimersByTime(7000);
+		const ackIcon = screen.getByTestId(iconDoneAll);
+		expect(ackIcon).toBeInTheDocument();
+		const messageContent = screen.getByText(new RegExp(`${mockedTextMessageSentByMe.text}`, 'i'));
+		expect(messageContent).toBeInTheDocument();
 	});
 });
