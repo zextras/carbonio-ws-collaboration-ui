@@ -91,6 +91,7 @@ const RecordingAccordion: FC<RecordingAccordionProps> = ({ meetingId }) => {
 				<StartRecordingUser meetingId={meetingId} />
 				<Container orientation="horizontal" gap="0.5rem">
 					<Button
+						data-testid="startRecordingButton"
 						width="fill"
 						color="success"
 						label={startButtonLabel}
@@ -98,6 +99,7 @@ const RecordingAccordion: FC<RecordingAccordionProps> = ({ meetingId }) => {
 						disabled={!!recordingTimestamp}
 					/>
 					<Button
+						data-testid="stopRecordingButton"
 						width="fill"
 						color="error"
 						label={stopButtonLabel}

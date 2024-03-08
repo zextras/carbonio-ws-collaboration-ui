@@ -4,6 +4,11 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import React from 'react';
+
+import { act, screen } from '@testing-library/react';
+
+import StopRecordingModal from './StopRecordingModal';
 import useStore from '../../../../store/Store';
 import {
 	createMockMeeting,
@@ -11,9 +16,12 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../../../tests/createMock';
+import { mockedStopRecordingRequest } from '../../../../tests/mocks/network';
+import { setup } from '../../../../tests/test-utils';
 import { MeetingBe, MeetingType } from '../../../../types/network/models/meetingBeTypes';
 import { RoomBe } from '../../../../types/network/models/roomBeTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
+import { formatDate } from '../../../../utils/dateUtils';
 
 const user1 = createMockUser({ id: 'user1', name: 'user1' });
 
@@ -35,9 +43,56 @@ beforeEach(() => {
 	store.meetingConnection(meeting.id, false, undefined, false, undefined);
 });
 describe('StopRecordingModal tests', () => {
-	test.todo('Stop recording without modifying the recording name');
+	test('Stop recording without modifying the recording name', async () => {
+		mockedStopRecordingRequest.mockResolvedValueOnce({});
+		const { user } = setup(
+			<StopRecordingModal isOpen closeModal={jest.fn} meetingId={meeting.id} />
+		);
+		act(() => {
+			user.click(screen.getByText('Stop'));
+		});
 
-	test.todo('Stop recording with a modified recording name');
+		const defaultRecordingName = `Rec ${formatDate(new Date(), 'YYYY-MM-DD HHmm')} ${
+			room.name
+		}`.replaceAll(' ', '_');
+		const snackbar = await screen.findByText(
+			`You will find ${defaultRecordingName} in /Home as soon as it is available`
+		);
+		expect(snackbar).toBeVisible();
+		expect(mockedStopRecordingRequest).toBeCalled();
+	});
 
-	test.todo('Recording name reset on closing and reopening the stop recording modal');
+	test('Stop recording with a modified recording name', async () => {
+		mockedStopRecordingRequest.mockResolvedValueOnce({});
+		const { user } = setup(
+			<StopRecordingModal isOpen closeModal={jest.fn} meetingId={meeting.id} />
+		);
+		const newName = 'NewRecordingName';
+		await user.clear(screen.getByRole('textbox'));
+		await user.type(screen.getByRole('textbox'), newName);
+		act(() => {
+			user.click(screen.getByText('Stop'));
+		});
+
+		const snackbar = await screen.findByText(
+			`You will find ${newName} in /Home as soon as it is available`
+		);
+		expect(snackbar).toBeVisible();
+		expect(mockedStopRecordingRequest).toBeCalled();
+	});
+
+	test('SHow a snackbar when the stop recording request fails', async () => {
+		mockedStopRecordingRequest.mockRejectedValueOnce({});
+		const { user } = setup(
+			<StopRecordingModal isOpen closeModal={jest.fn} meetingId={meeting.id} />
+		);
+		act(() => {
+			user.click(screen.getByText('Stop'));
+		});
+
+		const snackbar = await screen.findByText(
+			'It is not possible to stop the registration, please contact your system administrator.'
+		);
+		expect(snackbar).toBeVisible();
+	});
 });

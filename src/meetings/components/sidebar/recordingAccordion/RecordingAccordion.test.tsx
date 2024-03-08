@@ -6,7 +6,8 @@
 
 import React from 'react';
 
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
+import { act } from 'react-dom/test-utils';
 
 import RecordingAccordion from './RecordingAccordion';
 import useStore from '../../../../store/Store';
@@ -16,6 +17,7 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../../../tests/createMock';
+import { mockedStartRecordingRequest } from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 import { MeetingBe, MeetingType } from '../../../../types/network/models/meetingBeTypes';
 import { RoomBe } from '../../../../types/network/models/roomBeTypes';
@@ -54,9 +56,40 @@ describe('RecordingAccordion tests', () => {
 		expect(screen.getByTestId(iconDown)).toBeVisible();
 	});
 
-	test.todo("Recording can only be started if there isn't an active recording");
+	test("User can only start the recording if it isn't already active", async () => {
+		setup(<RecordingAccordion meetingId={meeting.id} />);
+		const startButton = await screen.findByTestId('startRecordingButton');
+		const stopButton = await screen.findByTestId('stopRecordingButton');
 
-	test.todo('Recording can only be stopped when there is an active recording');
+		expect(startButton).toBeEnabled();
+		expect(stopButton).toBeDisabled();
+	});
 
-	test.todo('When user clicks on the start button the recording starts');
+	test("User can only stop the recording if it's already active", async () => {
+		setup(<RecordingAccordion meetingId={meeting.id} />);
+
+		act(() => {
+			useStore.getState().startRecording(meeting.id, '32423423', 'user1');
+		});
+
+		const startButton = await screen.findByTestId('startRecordingButton');
+		const stopButton = await screen.findByTestId('stopRecordingButton');
+
+		expect(startButton).toBeDisabled();
+		expect(stopButton).toBeEnabled();
+	});
+
+	test('When user clicks on the start button the recording starts', async () => {
+		mockedStartRecordingRequest.mockResolvedValueOnce({});
+		const { user } = setup(<RecordingAccordion meetingId={meeting.id} />);
+
+		const iconChevronDown = 'icon: ChevronDown';
+		const chevron = screen.getByTestId(iconChevronDown);
+		await user.click(chevron);
+
+		const startButton = await screen.findByTestId('startRecordingButton');
+		await waitFor(() => user.click(startButton));
+
+		expect(mockedStartRecordingRequest).toBeCalled();
+	});
 });
