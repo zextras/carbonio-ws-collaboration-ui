@@ -8,18 +8,27 @@ import React, { RefObject, useCallback, useEffect, useMemo, useRef } from 'react
 
 import {
 	Container,
+	CreateSnackbarFn,
 	Dropdown,
 	DropdownItem,
 	IconButton,
-	Tooltip
+	Tooltip,
+	useSnackbar
 } from '@zextras/carbonio-design-system';
+import { useIntegratedFunction } from '@zextras/carbonio-shell-ui';
 import { forEach } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import { getFilesToUploadArray } from '../../../../store/selectors/ActiveConversationsSelectors';
+import { getXmppClient } from '../../../../store/selectors/ConnectionSelector';
+import {
+	getRoomNameSelector,
+	getRoomTypeSelector
+} from '../../../../store/selectors/RoomsSelectors';
 import useStore from '../../../../store/Store';
 import { FileToUpload } from '../../../../types/store/ActiveConversationTypes';
+import { RoomType } from '../../../../types/store/RoomTypes';
 import { uid } from '../../../../utils/attachmentUtils';
 
 type AttachmentSelectorProps = {
@@ -48,10 +57,25 @@ const AttachmentSelector: React.FC<AttachmentSelectorProps> = ({ roomId }) => {
 	const uploadAttachmentTooltip = t('tooltip.uploadAttachment', 'Upload an attachment');
 	const attachLinkLabel = t('attachments.attachLinkFiles', 'Attach public link from Files');
 	const addLocalLabel = t('attachments.addFromLocal', 'Add from local');
+	const errorSnackbar = t(
+		'settings.profile.errorGenericResponse',
+		'Something went wrong. Please retry'
+	);
+	const chooseFileLabel = t('', 'Choose file');
+	const shareLabel = t('', 'Share public link');
 
+	const xmppClient = useStore((store) => getXmppClient(store));
+	const roomName = useStore((store) => getRoomNameSelector(store, roomId));
+	const roomType = useStore((store) => getRoomTypeSelector(store, roomId));
 	const setInputHasFocus = useStore((store) => store.setInputHasFocus);
 	const setFilesToAttach = useStore((store) => store.setFilesToAttach);
 	const filesToUploadArray = useStore((store) => getFilesToUploadArray(store, roomId));
+
+	const [filesSelectFilesAction, filesSelectFilesActionAvailable] =
+		useIntegratedFunction('select-nodes');
+	const [getLink, functionCheck] = useIntegratedFunction('get-link');
+
+	const createSnackbar: CreateSnackbarFn = useSnackbar();
 
 	const fileSelectorInputRef = useRef<HTMLInputElement>(null);
 
@@ -90,6 +114,48 @@ const AttachmentSelector: React.FC<AttachmentSelectorProps> = ({ roomId }) => {
 		}
 	}, [filesToUploadArray]);
 
+	const confirmAction = useCallback(
+		(nodes) => {
+			const date = new Date().toLocaleString();
+			let myDescription;
+			if (roomType === RoomType.ONE_TO_ONE) {
+				myDescription = `Generated from ${roomName}'s chat on ${date}`;
+			} else {
+				myDescription = `Generated from ${roomName} on ${date}`;
+			}
+			if (functionCheck) {
+				getLink({ node: nodes[0], type: 'createLink', description: myDescription })
+					.then((result: { url: string }) => {
+						xmppClient.sendChatMessage(roomId, result.url);
+					})
+					.catch(() => {
+						createSnackbar({
+							key: new Date().toLocaleString(),
+							type: 'error',
+							label: errorSnackbar
+						});
+					});
+			}
+		},
+		[createSnackbar, errorSnackbar, functionCheck, getLink, roomId, roomName, roomType, xmppClient]
+	);
+
+	const actionTarget = useMemo(
+		() => ({
+			title: chooseFileLabel,
+			confirmAction,
+			confirmLabel: shareLabel,
+			allowFiles: true,
+			allowFolders: false,
+			maxSelection: 1
+		}),
+		[chooseFileLabel, confirmAction, shareLabel]
+	);
+
+	const handleClickPublicLink = useCallback(() => {
+		filesSelectFilesAction(actionTarget);
+	}, [actionTarget, filesSelectFilesAction]);
+
 	const items: DropdownItem[] = useMemo(
 		() => [
 			{
@@ -97,8 +163,8 @@ const AttachmentSelector: React.FC<AttachmentSelectorProps> = ({ roomId }) => {
 				icon: 'Link2',
 				label: attachLinkLabel,
 				keepOpen: false,
-				disabled: true,
-				onClick: () => null
+				disabled: !functionCheck || !filesSelectFilesActionAvailable,
+				onClick: handleClickPublicLink
 			},
 			{
 				id: 'item2',
@@ -109,7 +175,14 @@ const AttachmentSelector: React.FC<AttachmentSelectorProps> = ({ roomId }) => {
 				onClick: handleClickAttachment
 			}
 		],
-		[addLocalLabel, attachLinkLabel, handleClickAttachment]
+		[
+			addLocalLabel,
+			attachLinkLabel,
+			filesSelectFilesActionAvailable,
+			functionCheck,
+			handleClickAttachment,
+			handleClickPublicLink
+		]
 	);
 
 	return (

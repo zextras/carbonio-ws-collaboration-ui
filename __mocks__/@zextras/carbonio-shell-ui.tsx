@@ -23,6 +23,12 @@ export const USER_SETTINGS: AccountSettings = {
 	}
 };
 
+const getNode = jest.fn(() => Promise.resolve({ name: 'root', id: 'ROOT_ID' }));
+const getNodeAvailable = true;
+const filesSelectFilesAction = jest.fn();
+const filesSelectFilesActionAvailable = true;
+const getLink = jest.fn(() => 'link');
+const functionCheck = true;
 export const ROUTE_SETTINGS: AppRoute = {
 	id: 'chats',
 	route: 'chats',
@@ -80,3 +86,12 @@ export const pushHistory = jest.fn(pushHistoryMock);
 export const replaceHistory = jest.fn(replaceHistoryMock);
 
 export const t = (key: string, value: string): string => value;
+
+export const useIntegratedFunction = jest.fn(() => [
+	getNode,
+	getNodeAvailable,
+	filesSelectFilesAction,
+	filesSelectFilesActionAvailable,
+	getLink,
+	functionCheck
+]);
