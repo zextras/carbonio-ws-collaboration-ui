@@ -7,6 +7,7 @@
 import React, { ReactElement, useEffect, useMemo, useState } from 'react';
 
 import { Container } from '@zextras/carbonio-design-system';
+import { useAuthenticated } from '@zextras/carbonio-shell-ui';
 import { find } from 'lodash';
 
 import { MEETINGS_PATH } from '../../constants/appConstants';
@@ -28,6 +29,11 @@ const AccessMeetingPageView = (): ReactElement => {
 	const [meetingName, setMeetingName] = useState<string>('');
 
 	const { goToInfoPage } = useRouting();
+	const authenticated = useAuthenticated();
+
+	useEffect(() => {
+		if (!authenticated) goToInfoPage(PAGE_INFO_TYPE.UNAUTHENTICATED);
+	}, [authenticated, goToInfoPage]);
 
 	useEffect(() => {
 		if (chatsBeNetworkStatus) {
