@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { UserEvent } from '@testing-library/user-event/setup/setup';
 
@@ -107,7 +107,7 @@ describe('AccessMeetingModal - enter to meeting', () => {
 
 		// Click on enter button to join the meeting
 		const enterButton = await screen.findByText('Enter');
-		await user.click(enterButton);
+		await waitFor(() => user.click(enterButton));
 
 		expect(mockedEnterMeetingRequest).toBeCalled();
 	});
@@ -117,18 +117,18 @@ describe('AccessMeetingModal - enter to meeting', () => {
 		const { user } = setupBasicGroup();
 
 		const audioButtonSelect = await screen.findAllByTestId(iconChevronDownOutline);
-		await user.click(audioButtonSelect[1]);
+		await waitFor(() => user.click(audioButtonSelect[1]));
 
 		const device = await screen.findByText(audioDevice2);
 		expect(device).toBeInTheDocument();
 		// not selected
 		expect(device).toHaveStyle(normalFontWeight);
 
-		await user.click(device);
+		await waitFor(() => user.click(device));
 
 		const audioButtonSelectUpdated = await screen.findAllByTestId(iconChevronDownOutline);
 
-		await user.click(audioButtonSelectUpdated[1]);
+		await waitFor(() => user.click(audioButtonSelectUpdated[1]));
 		const deviceSelected = await screen.findByText(audioDevice2);
 		expect(deviceSelected).toBeInTheDocument();
 		// selected
@@ -140,18 +140,18 @@ describe('AccessMeetingModal - enter to meeting', () => {
 		const { user } = setupBasicGroup();
 
 		const videoButtonSelect = await screen.findAllByTestId(iconChevronDownOutline);
-		await user.click(videoButtonSelect[0]);
+		await waitFor(() => user.click(videoButtonSelect[0]));
 
 		const device = await screen.findByText(videoDevice2);
 		expect(device).toBeInTheDocument();
 		// not selected
 		expect(device).toHaveStyle(normalFontWeight);
 
-		await user.click(device);
+		await waitFor(() => user.click(device));
 
 		const videoButtonSelectUpdated = await screen.findAllByTestId(iconChevronDownOutline);
 
-		await user.click(videoButtonSelectUpdated[0]);
+		await waitFor(() => user.click(videoButtonSelectUpdated[0]));
 		const deviceSelected = await screen.findByText(videoDevice2);
 		expect(deviceSelected).toBeInTheDocument();
 		// selected
@@ -159,6 +159,10 @@ describe('AccessMeetingModal - enter to meeting', () => {
 	});
 	test('turn on video', async () => {
 		mockedJoinMeetingRequest.mockReturnValueOnce(groupMeeting);
+		localStorage.setItem(
+			'ChatsMeetingSettings',
+			JSON.stringify({ EnableCamera: false, EnableMicrophone: true })
+		);
 
 		const { user } = setupBasicGroup();
 
@@ -169,6 +173,10 @@ describe('AccessMeetingModal - enter to meeting', () => {
 	});
 	test('Select video device after turning on video', async () => {
 		mockedJoinMeetingRequest.mockReturnValueOnce(groupMeeting);
+		localStorage.setItem(
+			'ChatsMeetingSettings',
+			JSON.stringify({ EnableCamera: false, EnableMicrophone: true })
+		);
 
 		const { user } = setupBasicGroup();
 
@@ -196,6 +204,10 @@ describe('AccessMeetingModal - enter to meeting', () => {
 	});
 	test('turn on audio', async () => {
 		mockedJoinMeetingRequest.mockReturnValueOnce(groupMeeting);
+		localStorage.setItem(
+			'ChatsMeetingSettings',
+			JSON.stringify({ EnableCamera: true, EnableMicrophone: false })
+		);
 
 		const { user } = setupBasicGroup();
 
@@ -206,7 +218,10 @@ describe('AccessMeetingModal - enter to meeting', () => {
 	});
 	test('Select audio device after turning on audio', async () => {
 		mockedJoinMeetingRequest.mockReturnValueOnce(groupMeeting);
-
+		localStorage.setItem(
+			'ChatsMeetingSettings',
+			JSON.stringify({ EnableCamera: true, EnableMicrophone: false })
+		);
 		const { user } = setupBasicGroup();
 
 		const audioOff = screen.getByTestId(iconMicOff);
@@ -234,6 +249,12 @@ describe('AccessMeetingModal - enter to meeting', () => {
 	test('try audio', async () => {
 		const { user } = setupBasicGroup();
 
+		mockedJoinMeetingRequest.mockReturnValueOnce(groupMeeting);
+		localStorage.setItem(
+			'ChatsMeetingSettings',
+			JSON.stringify({ EnableCamera: true, EnableMicrophone: false })
+		);
+
 		const audioOff = screen.getByTestId(iconMicOff);
 		await act(() => user.click(audioOff));
 		const audioOn = await screen.findByTestId('icon: Mic');
@@ -247,6 +268,11 @@ describe('AccessMeetingModal - enter to meeting', () => {
 	test('Enter button is enabled after selection of video source', async () => {
 		mockedJoinMeetingRequest.mockReturnValueOnce(groupMeeting);
 
+		mockedJoinMeetingRequest.mockReturnValueOnce(groupMeeting);
+		localStorage.setItem(
+			'ChatsMeetingSettings',
+			JSON.stringify({ EnableCamera: false, EnableMicrophone: false })
+		);
 		const { user } = setupBasicGroup();
 
 		const videoButtonSelect = await screen.findAllByTestId(iconChevronDownOutline);

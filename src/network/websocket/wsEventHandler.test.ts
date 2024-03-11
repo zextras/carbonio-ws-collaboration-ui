@@ -29,6 +29,7 @@ import {
 import { WsEventType } from '../../types/network/websocket/wsEvents';
 import { MeetingParticipant } from '../../types/store/MeetingTypes';
 import { RoomType } from '../../types/store/RoomTypes';
+import { LOCAL_STORAGE_NAMES } from '../../utils/localStorageUtils';
 
 const user1: UserBe = createMockUser({ id: 'user1Id', name: 'user 1' });
 const user2: UserBe = createMockUser({ id: 'user2Id', name: 'user 2' });
@@ -146,6 +147,15 @@ describe('wsEventHandler', () => {
 	describe('Waiting room events', () => {
 		test("An user joins the waiting room while I'm in the meeting tab", () => {
 			window.history.pushState({}, '', `${MEETINGS_PATH}${scheduledMeeting.id}`);
+			localStorage.setItem(
+				LOCAL_STORAGE_NAMES.NOTIFICATIONS,
+				JSON.stringify({
+					DesktopNotifications: true,
+					DesktopNotificationsSounds: true,
+					WaitingRoomAccessNotifications: true,
+					WaitingRoomAccessNotificationsSounds: true
+				})
+			);
 			wsEventsHandler({
 				type: WsEventType.MEETING_WAITING_PARTICIPANT_JOINED,
 				meetingId: scheduledMeeting.id,

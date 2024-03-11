@@ -30,16 +30,16 @@ import {
 import { useTranslation } from 'react-i18next';
 import styled, { css, DefaultTheme, FlattenInterpolation, ThemeProps } from 'styled-components';
 
-import { UsersApi } from '../../../network';
-import { getCapability } from '../../../store/selectors/SessionSelectors';
+import { UsersApi } from '../../network';
+import { getCapability } from '../../store/selectors/SessionSelectors';
 import {
 	getUserEmail,
 	getUserName,
 	getUserPictureUpdatedAt
-} from '../../../store/selectors/UsersSelectors';
-import useStore from '../../../store/Store';
-import { CapabilityType } from '../../../types/store/SessionTypes';
-import { calculateAvatarColor } from '../../../utils/styleUtils';
+} from '../../store/selectors/UsersSelectors';
+import useStore from '../../store/Store';
+import { CapabilityType } from '../../types/store/SessionTypes';
+import { calculateAvatarColor } from '../../utils/styleUtils';
 
 type ProfileSettingsProps = {
 	picture: File | false;
