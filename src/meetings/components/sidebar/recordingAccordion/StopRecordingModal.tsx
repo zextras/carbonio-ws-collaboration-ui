@@ -22,6 +22,7 @@ import { getRoomIdByMeetingId } from '../../../../store/selectors/MeetingSelecto
 import { getRoomNameSelector } from '../../../../store/selectors/RoomsSelectors';
 import useStore from '../../../../store/Store';
 import { formatDate } from '../../../../utils/dateUtils';
+import { getLocalStorageItem, LOCAL_STORAGE_NAMES } from '../../../../utils/localStorageUtils';
 
 type StopRecordingModalProps = {
 	isOpen: boolean;
@@ -42,7 +43,7 @@ const StopRecordingModal = ({
 		[roomName]
 	);
 	const [recordingName, setRecordingName] = useState(defaultRecordingName);
-	const folder = { id: 'LOCAL_ROOT', name: 'Home' }; // TODO: retrieve path from local storage
+	const folder = getLocalStorageItem(LOCAL_STORAGE_NAMES.RECORDING);
 
 	// TODO: translation keys
 	const [t] = useTranslation();
