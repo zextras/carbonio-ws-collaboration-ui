@@ -10,6 +10,11 @@ import { CHATS_ROUTE } from '../../../constants/appConstants';
 import useStore from '../../../store/Store';
 import { TextMessage } from '../../../types/store/MessageTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
+import {
+	getLocalStorageItem,
+	LOCAL_STORAGE_NAMES,
+	NotificationsSettingsType
+} from '../../../utils/localStorageUtils';
 
 const displayMessageBrowserNotification = (message: TextMessage): void => {
 	const store = useStore.getState();
@@ -22,24 +27,9 @@ const displayMessageBrowserNotification = (message: TextMessage): void => {
 	const isMeetingTab = !isEmpty(store.activeMeeting);
 	const isOneToOneGroupMessage = includes([RoomType.ONE_TO_ONE, RoomType.GROUP], room?.type);
 
-	let notificationsAreActive;
-	const ChatsNotificationsSettings: string | null = window.parent.localStorage.getItem(
-		'ChatsNotificationsSettings'
+	const ChatsNotificationsSettings: NotificationsSettingsType = getLocalStorageItem(
+		LOCAL_STORAGE_NAMES.NOTIFICATIONS
 	);
-	if (
-		ChatsNotificationsSettings &&
-		JSON.parse(ChatsNotificationsSettings).hasOwnProperty('DesktopNotifications')
-	) {
-		notificationsAreActive = JSON.parse(ChatsNotificationsSettings).DesktopNotifications;
-	} else {
-		window.parent.localStorage.setItem(
-			'ChatsNotificationsSettings',
-			JSON.stringify({
-				DesktopNotifications: true
-			})
-		);
-		notificationsAreActive = true;
-	}
 
 	if (
 		notMyMessage &&
@@ -47,7 +37,7 @@ const displayMessageBrowserNotification = (message: TextMessage): void => {
 		room &&
 		!roomIsMuted &&
 		((!isMeetingTab && isOneToOneGroupMessage) || (isMeetingTab && !isOneToOneGroupMessage)) &&
-		notificationsAreActive
+		ChatsNotificationsSettings.DesktopNotifications
 	) {
 		const sender = store.users[message.from];
 		const title = room.type === RoomType.ONE_TO_ONE ? sender.name || sender.email || '' : room.name;
@@ -60,7 +50,7 @@ const displayMessageBrowserNotification = (message: TextMessage): void => {
 
 		getNotificationManager().notify({
 			showPopup: true,
-			playSound: true,
+			playSound: ChatsNotificationsSettings.DesktopNotificationsSounds,
 			title,
 			message: textMessage,
 			onClick: (): void => {
