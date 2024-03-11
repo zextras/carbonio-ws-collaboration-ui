@@ -1,3 +1,4 @@
+/* eslint-disable prefer-template */
 /*
  * SPDX-FileCopyrightText: 2023 Zextras <https://www.zextras.com>
  *
@@ -8,17 +9,9 @@ import { useEffect, useState } from 'react';
 
 import { dateToTimestamp } from '../utils/dateUtils';
 
-type UseTimerReturn = {
-	hours: string;
-	minutes: string;
-	seconds: string;
-};
-
-const useTimer = (date: string | number | Date): UseTimerReturn => {
-	const [timespan, setTimespan] = useState(() => {
-		const difference = Date.now() - dateToTimestamp(date);
-		return difference > 0 ? difference : 0;
-	});
+const useTimer = (date: string | number | Date): string => {
+	const difference = Date.now() - dateToTimestamp(date);
+	const [timespan, setTimespan] = useState(() => (difference > 0 ? difference : 0));
 
 	useEffect(() => {
 		let interval: NodeJS.Timeout;
@@ -30,17 +23,19 @@ const useTimer = (date: string | number | Date): UseTimerReturn => {
 		return () => clearInterval(interval);
 	}, [date]);
 
-	const hours = Math.floor(timespan / (1000 * 60 * 60));
+	const hours = Math.floor(timespan / (1000 * 60 * 60))
+		.toString()
+		.padStart(2, '0');
 
-	const minutes = Math.floor((timespan / (1000 * 60)) % 60);
+	const minutes = Math.floor((timespan / (1000 * 60)) % 60)
+		.toString()
+		.padStart(2, '0');
 
-	const seconds = Math.floor((timespan / 1000) % 60);
+	const seconds = Math.floor((timespan / 1000) % 60)
+		.toString()
+		.padStart(2, '0');
 
-	return {
-		hours: hours.toString().padStart(2, '0'),
-		minutes: minutes.toString().padStart(2, '0'),
-		seconds: seconds.toString().padStart(2, '0')
-	};
+	return `${hours !== '00' ? hours + ':' : ''}${minutes}:${seconds}`;
 };
 
 export default useTimer;

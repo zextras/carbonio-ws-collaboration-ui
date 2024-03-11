@@ -15,15 +15,12 @@ type RecordingTimerProps = {
 };
 
 const RecordingTimer = ({ timestamp }: RecordingTimerProps): ReactElement => {
-	const { hours, minutes, seconds } = useTimer(timestamp);
+	const timer = useTimer(timestamp);
 
 	return (
 		<Container width="fit" orientation="horizontal" gap="0.5rem">
 			<Icon icon="Video" color="error" size="large" />
-			<Text>
-				{hours !== '00' && `${hours}:`}
-				{minutes}:{seconds}
-			</Text>
+			<Text>{timer}</Text>
 		</Container>
 	);
 };
