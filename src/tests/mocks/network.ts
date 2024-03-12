@@ -12,7 +12,9 @@ import {
 	JoinMeetingResponse,
 	LeaveMeetingResponse,
 	StartMeetingResponse,
+	StartRecordingResponse,
 	StopMeetingResponse,
+	StopRecordingResponse,
 	SubscribeMediaResponse,
 	UpdateAudioStreamStatusResponse
 } from '../../types/network/responses/meetingsResponses';
@@ -75,6 +77,8 @@ export const mockedSubscribeToMediaRequest: jest.Mock = jest.fn();
 export const mockedAcceptWaitingUserRequest: jest.Mock = jest.fn();
 export const mockedGetScheduledMeetingName: jest.Mock = jest.fn();
 export const mockedLeaveWaitingRoomRequest: jest.Mock = jest.fn();
+export const mockedStartRecordingRequest: jest.Mock = jest.fn();
+export const mockedStopRecordingRequest: jest.Mock = jest.fn();
 
 jest.mock('../../network', () => {
 	const noResultProvided = 'no result provided';
@@ -252,6 +256,16 @@ jest.mock('../../network', () => {
 			leaveWaitingRoom: (): Promise<SubscribeMediaResponse> =>
 				new Promise((resolve, reject) => {
 					const result = mockedLeaveWaitingRoomRequest();
+					result ? resolve(result) : reject(new Error(noResultProvided));
+				}),
+			startRecording: (): Promise<StartRecordingResponse> =>
+				new Promise((resolve, reject) => {
+					const result = mockedStartRecordingRequest();
+					result ? resolve(result) : reject(new Error(noResultProvided));
+				}),
+			stopRecording: (): Promise<StopRecordingResponse> =>
+				new Promise((resolve, reject) => {
+					const result = mockedStopRecordingRequest();
 					result ? resolve(result) : reject(new Error(noResultProvided));
 				})
 		}

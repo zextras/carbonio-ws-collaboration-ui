@@ -13,8 +13,7 @@ import styled from 'styled-components';
 
 import WaitingUser from './WaitingUser';
 import { getWaitingListAccordionStatus } from '../../../../store/selectors/ActiveMeetingSelectors';
-import { getRoomIdByMeetingId, getWaitingList } from '../../../../store/selectors/MeetingSelectors';
-import { getOwnershipOfTheRoom } from '../../../../store/selectors/RoomsSelectors';
+import { getWaitingList } from '../../../../store/selectors/MeetingSelectors';
 import useStore from '../../../../store/Store';
 
 const CustomAccordion = styled(Accordion)`
@@ -33,8 +32,6 @@ const WaitingListAccordion: FC<WaitingListAccordionProps> = ({ meetingId }) => {
 	const waitingList = useStore((store) => getWaitingList(store, meetingId));
 	const accordionStatus = useStore((state) => getWaitingListAccordionStatus(state, meetingId));
 	const setParticipantsAccordionStatus = useStore((state) => state.setWaitingListAccordionStatus);
-	const roomId = useStore((store) => getRoomIdByMeetingId(store, meetingId));
-	const amIModerator = useStore((store) => getOwnershipOfTheRoom(store, roomId || ''));
 
 	const toggleAccordionStatus = useCallback(
 		() => setParticipantsAccordionStatus(meetingId, !accordionStatus),
@@ -70,7 +67,7 @@ const WaitingListAccordion: FC<WaitingListAccordionProps> = ({ meetingId }) => {
 		];
 	}, [accordionStatus, accordionTitle, meetingId, toggleAccordionStatus, waitingList]);
 
-	if (!amIModerator || size(waitingList) === 0) return null;
+	if (size(waitingList) === 0) return null;
 	return <CustomAccordion items={items} borderRadius="none" background="gray0" />;
 };
 
