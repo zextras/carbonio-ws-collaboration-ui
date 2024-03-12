@@ -38,13 +38,15 @@ type RecordingAccordionProps = {
 
 const RecordingAccordion: FC<RecordingAccordionProps> = ({ meetingId }) => {
 	const [t] = useTranslation();
-	// TODO: Add translation keys
-	const accordionTitle = t('', 'Recording');
-	const accordionDescription = t('', 'How the recording works');
-	const startButtonLabel = t('', 'Start');
-	const stopButtonLabel = t('', 'Stop');
+	const accordionTitle = t('meeting.sidebar.recording.title', 'Recording');
+	const accordionDescription = t(
+		'meeting.sidebar.recording.description',
+		'The recording will be saved in the Files space of the moderator who stopped it.'
+	);
+	const startButtonLabel = t('meeting.sidebar.recording.action.start', 'Start');
+	const stopButtonLabel = t('meeting.sidebar.recording.action.stop', 'Stop');
 	const errorSnackbarLabel = t(
-		'',
+		'meeting.recordingStart.failureSnackbar',
 		'It is not possible to start the registration, please contact your system administrator.'
 	);
 
@@ -107,7 +109,7 @@ const RecordingAccordion: FC<RecordingAccordionProps> = ({ meetingId }) => {
 						disabled={!recordingTimestamp}
 					/>
 				</Container>
-				<Text>{accordionDescription}</Text>
+				<Text overflow="break-word">{accordionDescription}</Text>
 			</Container>
 		);
 

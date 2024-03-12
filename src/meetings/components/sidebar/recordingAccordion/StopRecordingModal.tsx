@@ -45,28 +45,27 @@ const StopRecordingModal = ({
 	const [recordingName, setRecordingName] = useState(defaultRecordingName);
 	const folder = getLocalStorageItem(LOCAL_STORAGE_NAMES.RECORDING);
 
-	// TODO: translation keys
 	const [t] = useTranslation();
-	const title: string = t('', 'Stop recording');
+	const title: string = t('meeting.recordingModal.title', 'Stop recording');
 	const descriptionLabel: string = t(
-		'',
+		'meeting.recordingModal.description',
 		'You are going to stop the recording. You can start a new one at any time.'
 	);
-	const recordingInputLabel: string = t('', 'Recording Name*');
+	const recordingInputLabel: string = t('meeting.recordingModal.inputLabel', 'Recording Name');
 	const recordingInputDescription: string = t(
-		'',
-		`The recording will be saved in "/${folder.name}".`,
+		'meeting.recordingModal.caption',
+		`The recording will be saved in "${folder.name}".`,
 		{ folderName: folder.name }
 	);
-	const stopButtonLabel = t('', 'Stop');
+	const stopButtonLabel = t('meeting.recordingModal.confirmationAction', 'Stop');
 	const closeLabel = t('action.close', 'Close');
 	const recordingStopped = t(
-		'',
-		`You will find ${recordingName} in /${folder.name} as soon as it is available`,
-		{ fileName: recordingName, folderName: folder.name }
+		'meeting.recordingStop.successSnackbar.stopper',
+		`You will find ${recordingName} in ${folder.name} as soon as it is available`,
+		{ recordingName, folderName: folder.name }
 	);
 	const errorSnackbarLabel = t(
-		'',
+		'meeting.recordingStop.failureSnackbar',
 		'It is not possible to stop the registration, please contact your system administrator.'
 	);
 
@@ -131,7 +130,7 @@ const StopRecordingModal = ({
 			<Container padding={{ vertical: 'large' }} gap="1rem">
 				<Text overflow="break-word">{descriptionLabel}</Text>
 				<Input
-					label={recordingInputLabel}
+					label={`${recordingInputLabel}*`}
 					description={recordingInputDescription}
 					value={recordingName}
 					onChange={onNameChange}

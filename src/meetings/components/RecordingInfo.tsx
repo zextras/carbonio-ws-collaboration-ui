@@ -30,16 +30,15 @@ type RecordingInfoProps = {
 
 const RecordingInfo = ({ meetingId }: RecordingInfoProps): ReactElement | null => {
 	const roomId = useStore((state) => getRoomIdByMeetingId(state, meetingId));
-	const roomsName = useStore((state) => getRoomNameSelector(state, roomId || ''));
+	const roomName = useStore((state) => getRoomNameSelector(state, roomId || ''));
 	const isMeetingRecording = useStore((state) => getIsMeetingRecording(state, meetingId));
 
-	// TODO translation key
 	const [t] = useTranslation();
-	const meetingIsBeenRecordedLabel = t('', 'This meeting is being recorded');
+	const meetingIsBeenRecordedLabel = t('meeting.recordingHint', 'This meeting is being recorded');
 	const recordingStarted = t(
-		'',
-		`The recording of the "Chats WEB ${roomsName}" meeting has started`,
-		{ meetingName: roomsName }
+		'meeting.recordingStart.successSnackbar',
+		`The recording of the "${roomName}" meeting has started`,
+		{ meetingName: roomName }
 	);
 
 	const createSnackbar: CreateSnackbarFn = useSnackbar();
@@ -58,11 +57,10 @@ const RecordingInfo = ({ meetingId }: RecordingInfoProps): ReactElement | null =
 	const handleRecordingStopped = useCallback(
 		(event) => {
 			if (event.detail.userId !== useStore.getState().session.id) {
-				// TODO: translation key
 				const moderator = useStore.getState().users[event.detail.userId];
 				const moderatorName = moderator?.name || moderator?.email || '';
 				const recordingStopped = t(
-					'',
+					'meeting.recordingStop.successSnackbar.participants',
 					`${moderatorName} stopped the registration of this meeting`,
 					{
 						moderatorName

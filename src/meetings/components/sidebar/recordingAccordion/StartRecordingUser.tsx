@@ -25,9 +25,11 @@ type StartRecordingUserProps = {
 };
 
 const StartRecordingUser = ({ meetingId }: StartRecordingUserProps): ReactElement | null => {
-	// TODO: Add translation keys
 	const [t] = useTranslation();
-	const hasStartedRecordingLabel = t('', 'has started recording');
+	const hasStartedRecordingLabel = t(
+		'meeting.sidebar.recording.moderatorInfo',
+		'has started recording'
+	);
 
 	const startRecordingUserId = useStore((state) => getStartRecordingUserId(state, meetingId)) || '';
 	const memberName: string | undefined = useStore((store) =>

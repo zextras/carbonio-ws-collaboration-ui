@@ -1,5 +1,4 @@
 {
-    "": "Error",
     "action": {
         "activateNotifications": "Activate notifications",
         "addAttachment": "Add attachment",
@@ -194,11 +193,39 @@
             "title_plural": "{{count}} meeting's participants"
         },
         "presentActiveSession": "There is another active session",
+        "recordingHint": "This meeting is being recorded",
+        "recordingModal": {
+            "caption": "The recording will be saved in \"{{folderName}}\".",
+            "confirmationAction": "Stop",
+            "description": "You are going to stop the recording. You can start a new one at any time.",
+            "inputLabel": "Recording Name",
+            "title": "Stop recording"
+        },
+        "recordingStart": {
+            "failureSnackbar": "It is not possible to start the registration, please contact your system administrator.",
+            "successSnackbar": "The recording of the \"{{roomName}}\" meeting has started"
+        },
+        "recordingStop": {
+            "failureSnackbar": "It is not possible to stop the registration, please contact your system administrator.",
+            "successSnackbar": {
+                "participants": "{{moderatorName}} stopped the registration of this meeting",
+                "stopper": "You will find {{recordingName}} in {{folderName}} as soon as it is available"
+            }
+        },
         "rejoinMeeting": "Rejoin meeting",
         "restartMeeting": "Restart meeting",
         "scheduledMeetingLabel": "Your Virtual Rooms",
         "setInputDescription": "Set your input devices by choosing them from dropdown menu",
         "sidebar": {
+            "recording": {
+                "action": {
+                    "start": "Start",
+                    "stop": "Stop"
+                },
+                "description": "The recording will be saved in the Files space of the moderator who stopped it.",
+                "moderatorInfo": "has started recording",
+                "title": "Recording"
+            },
             "tooltip": {
                 "waitingAccept": "Let user in",
                 "waitingReject": "Reject user"
@@ -310,6 +337,10 @@
         "searchParticipants": "Search participants"
     },
     "settings": {
+        "meetings": {
+            "description": "Set your audio and video preferences to enter the meetings. You can always customize your preferences before joining every meeting.",
+            "title": "Meetings"
+        },
         "notifications": {
             "checkbox": {
                 "desktop": "Allow Desktop notifications",
@@ -335,6 +366,13 @@
             "statusLabel": "Your status will appear here",
             "title": "Profile",
             "updatedPictureCorrectly": "New avatar has been successfully uploaded"
+        },
+        "recording": {
+            "browseAction": "Browse",
+            "description": "Set a custom folder where to save the recordings of the meetings you stop.",
+            "inputLabel": "Destination folder",
+            "resetAction": "Reset",
+            "title": "Recording"
         },
         "room": {
             "deletedImageCorrectly": "Group avatar has been successfully reset to the original one",

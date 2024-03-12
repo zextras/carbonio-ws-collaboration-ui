@@ -28,11 +28,11 @@ const MeetingSettings: FC<MeetingSettingsProps> = ({
 	setRecordingDefaults
 }) => {
 	const [t] = useTranslation();
-	const meetingSectionLabel = t('', 'Meetings');
+	const meetingSectionLabel = t('settings.meetings.title', 'Meetings');
 	const enableMicLabel = t('meeting.interactions.enableMicrophone', 'Enable microphone');
 	const enableCamLabel = t('meeting.interactions.enableCamera', 'Enable camera');
 	const meetingSectionDescription = t(
-		'',
+		'settings.meetings.description',
 		'Set your audio and video preferences to enter the meetings. You can always customize your preferences before joining every meeting.'
 	);
 

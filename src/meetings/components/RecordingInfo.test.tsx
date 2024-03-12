@@ -72,7 +72,7 @@ describe('RecordingInfo tests', () => {
 		});
 
 		const snackbar = await screen.findByText(
-			`The recording of the "Chats WEB ${room.name}" meeting has started`
+			`The recording of the "${room.name}" meeting has started`
 		);
 		expect(snackbar).toBeVisible();
 	});

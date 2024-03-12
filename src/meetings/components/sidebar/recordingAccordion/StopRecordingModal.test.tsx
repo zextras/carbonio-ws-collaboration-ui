@@ -56,7 +56,7 @@ describe('StopRecordingModal tests', () => {
 			room.name
 		}`.replaceAll(' ', '_');
 		const snackbar = await screen.findByText(
-			`You will find ${defaultRecordingName} in /Home as soon as it is available`
+			`You will find ${defaultRecordingName} in Home as soon as it is available`
 		);
 		expect(snackbar).toBeVisible();
 		expect(mockedStopRecordingRequest).toBeCalled();
@@ -75,7 +75,7 @@ describe('StopRecordingModal tests', () => {
 		});
 
 		const snackbar = await screen.findByText(
-			`You will find ${newName} in /Home as soon as it is available`
+			`You will find ${newName} in Home as soon as it is available`
 		);
 		expect(snackbar).toBeVisible();
 		expect(mockedStopRecordingRequest).toBeCalled();
