@@ -89,6 +89,17 @@ const InfoPage = (): ReactElement => {
 				"Keep in touch with your colleagues or join your groups' meeting rooms"
 			);
 			break;
+		case PAGE_INFO_TYPE.UNAUTHENTICATED:
+			titleLabel = t('meeting.infoPage.title.notAuthenticatedUser', 'You are not authenticated');
+			centralLabel = t(
+				'meeting.infoPage.slogan.notAuthenticatedUser',
+				'login to access the meeting'
+			);
+			descriptionLowerLabel = t(
+				'meeting.infoPage.description.notAuthenticatedUser',
+				'You cannot join the meeting if you are not authenticated with your account'
+			);
+			break;
 		case PAGE_INFO_TYPE.MEETING_NOT_FOUND:
 		default: {
 			titleLabel = t(
@@ -124,5 +135,3 @@ const InfoPage = (): ReactElement => {
 };
 
 export default InfoPage;
-
-export type InfoType = 'room_empty' | 'meeting_ended';
