@@ -19,8 +19,12 @@ import { useTranslation } from 'react-i18next';
 import MeetingSettings from './MeetingSettings';
 import NotificationsSettings from './NotificationsSettings';
 import ProfileSettings from './ProfileSettings';
+import RecordingSettings from './RecordingSettings';
 import useLocalStorage from '../../hooks/useLocalStorage';
 import { UsersApi } from '../../network';
+import { getCapability } from '../../store/selectors/SessionSelectors';
+import useStore from '../../store/Store';
+import { CapabilityType } from '../../types/store/SessionTypes';
 import {
 	LOCAL_STORAGE_NAMES,
 	MeetingRecordingType,
@@ -39,6 +43,10 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 	const errorDeleteImageSnackbar = t(
 		'settings.profile.errorGenericResponse',
 		'Something went Wrong. Please Retry'
+	);
+
+	const canRecordVideo = useStore((store) =>
+		getCapability(store, CapabilityType.CAN_VIDEO_CALL_RECORD)
 	);
 
 	const createSnackbar: CreateSnackbarFn = useSnackbar();
@@ -233,9 +241,13 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 				<MeetingSettings
 					meetingMediaDefaults={meetingMediaDefaults}
 					setMeetingMediaDefaults={setMeetingMediaDefaults}
-					recordingDefaults={recordingDefaults}
-					setRecordingDefaults={setRecordingDefaults}
 				/>
+				{canRecordVideo && (
+					<RecordingSettings
+						recordingDefaults={recordingDefaults}
+						setRecordingDefaults={setRecordingDefaults}
+					/>
+				)}
 			</Container>
 		</Container>
 	);

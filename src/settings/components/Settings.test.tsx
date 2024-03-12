@@ -223,11 +223,10 @@ describe('Settings view', () => {
 });
 
 describe('Meeting settings', () => {
-	test('Meeting section with recording enabled', () => {
+	test('Meeting section checkboxes', () => {
 		const store: RootStore = useStore.getState();
 		store.setUserInfo(userWithoutImage);
 		store.setLoginInfo(userWithoutImage.id, userWithoutImage.name, userWithoutImage.name);
-		store.setCapabilities(createMockCapabilityList());
 		setup(<Settings id={userWithoutImage.id} />);
 
 		const meetingContainer = screen.getByTestId('meeting_settings_container');
@@ -237,26 +236,6 @@ describe('Meeting settings', () => {
 		const camCheckbox = screen.getByTestId('camera_checkbox');
 		expect(micCheckbox).toBeInTheDocument();
 		expect(camCheckbox).toBeInTheDocument();
-
-		const recordingContainer = screen.getByTestId('recording_container');
-		expect(recordingContainer).toBeInTheDocument();
-	});
-	test('Meeting section with recording disabled', () => {
-		const store: RootStore = useStore.getState();
-		store.setUserInfo(userWithoutImage);
-		store.setLoginInfo(userWithoutImage.id, userWithoutImage.name, userWithoutImage.name);
-		store.setCapabilities(createMockCapabilityList({ canVideoCallRecord: false }));
-		setup(<Settings id={userWithoutImage.id} />);
-
-		const meetingContainer = screen.getByTestId('meeting_settings_container');
-		expect(meetingContainer).toBeInTheDocument();
-
-		const micCheckbox = screen.getByTestId('microphone_checkbox');
-		const camCheckbox = screen.getByTestId('camera_checkbox');
-		expect(micCheckbox).toBeInTheDocument();
-		expect(camCheckbox).toBeInTheDocument();
-
-		expect(screen.queryByTestId('recording_container')).not.toBeInTheDocument();
 	});
 	test('Change meeting media settings', async () => {
 		const store: RootStore = useStore.getState();
@@ -276,6 +255,30 @@ describe('Meeting settings', () => {
 		const squareIcons = await screen.findAllByTestId(squareIcon);
 		await waitFor(() => expect(squareIcons).toHaveLength(2));
 	});
+});
+
+describe('Recording settings', () => {
+	test('Recording enabled', () => {
+		const store: RootStore = useStore.getState();
+		store.setUserInfo(userWithoutImage);
+		store.setLoginInfo(userWithoutImage.id, userWithoutImage.name, userWithoutImage.name);
+		store.setCapabilities(createMockCapabilityList());
+		setup(<Settings id={userWithoutImage.id} />);
+
+		const recordingContainer = screen.getByTestId('recording_settings_container');
+		expect(recordingContainer).toBeInTheDocument();
+	});
+	test('Meeting section with recording disabled', () => {
+		const store: RootStore = useStore.getState();
+		store.setUserInfo(userWithoutImage);
+		store.setLoginInfo(userWithoutImage.id, userWithoutImage.name, userWithoutImage.name);
+		store.setCapabilities(createMockCapabilityList({ canVideoCallRecord: false }));
+		setup(<Settings id={userWithoutImage.id} />);
+
+		const recordingContainer = screen.queryByTestId('recording_settings_container');
+		expect(recordingContainer).not.toBeInTheDocument();
+	});
+
 	test('Reset recording folder', async () => {
 		const store: RootStore = useStore.getState();
 		store.setUserInfo(userWithoutImage);

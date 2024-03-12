@@ -8,24 +8,16 @@ import React, { Dispatch, FC, SetStateAction, useCallback } from 'react';
 import { Checkbox, Container, Divider, Padding, Text } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
-import RecordingSettings from './RecordingSettings';
-import { getCapability } from '../../store/selectors/SessionSelectors';
-import useStore from '../../store/Store';
-import { CapabilityType } from '../../types/store/SessionTypes';
 import { MeetingStorageType } from '../../utils/localStorageUtils';
 
 type MeetingSettingsProps = {
 	meetingMediaDefaults: MeetingStorageType;
 	setMeetingMediaDefaults: Dispatch<SetStateAction<MeetingStorageType>>;
-	recordingDefaults: { name: string; id: string };
-	setRecordingDefaults: Dispatch<SetStateAction<{ name: string; id: string }>>;
 };
 
 const MeetingSettings: FC<MeetingSettingsProps> = ({
 	meetingMediaDefaults,
-	setMeetingMediaDefaults,
-	recordingDefaults,
-	setRecordingDefaults
+	setMeetingMediaDefaults
 }) => {
 	const [t] = useTranslation();
 	const meetingSectionLabel = t('settings.meetings.title', 'Meetings');
@@ -34,10 +26,6 @@ const MeetingSettings: FC<MeetingSettingsProps> = ({
 	const meetingSectionDescription = t(
 		'settings.meetings.description',
 		'Set your audio and video preferences to enter the meetings. You can always customize your preferences before joining every meeting.'
-	);
-
-	const canRecordVideo = useStore((store) =>
-		getCapability(store, CapabilityType.CAN_VIDEO_CALL_RECORD)
 	);
 
 	const setMicrophoneEnabled = useCallback(() => {
@@ -84,12 +72,6 @@ const MeetingSettings: FC<MeetingSettingsProps> = ({
 						data-testid="camera_checkbox"
 					/>
 				</Container>
-				{canRecordVideo && (
-					<RecordingSettings
-						recordingDefaults={recordingDefaults}
-						setRecordingDefaults={setRecordingDefaults}
-					/>
-				)}
 			</Container>
 		</Container>
 	);

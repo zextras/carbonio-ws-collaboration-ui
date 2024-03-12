@@ -73,10 +73,19 @@ const RecordingSettings: FC<RecordingSettingsProps> = ({
 
 	if (filesSelectFilesActionAvailable) {
 		return (
-			<>
-				<Divider color="gray2" />
+			<Container
+				background={'gray6'}
+				padding={{ horizontal: 'medium', bottom: 'medium' }}
+				data-testid="recording_settings_container"
+			>
 				<Container crossAlignment="flex-start" gap="1rem" data-testid="recording_container">
-					<Text weight="bold">{recordingSectionLabel}</Text>
+					<Padding top="large">
+						<Text weight="bold">{recordingSectionLabel}</Text>
+					</Padding>
+					<Divider color="gray2" />
+					<Text size="small" overflow="break-word">
+						{recordingDescription}
+					</Text>
 					<Container orientation="horizontal" width="100%" height="fit" mainAlignment="flex-start">
 						<Container width="15.625rem">
 							<CustomInput
@@ -104,11 +113,8 @@ const RecordingSettings: FC<RecordingSettingsProps> = ({
 							onClick={handleReset}
 						/>
 					</Container>
-					<Text size="small" overflow="break-word">
-						{recordingDescription}
-					</Text>
 				</Container>
-			</>
+			</Container>
 		);
 	}
 	return null;
