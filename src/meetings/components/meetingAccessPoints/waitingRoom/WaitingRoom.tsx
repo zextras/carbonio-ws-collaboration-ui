@@ -131,9 +131,14 @@ const WaitingRoom: FC<WaitingRoomProps> = ({ meetingId, meetingName }) => {
 		goToInfoPage(PAGE_INFO_TYPE.ALREADY_ACTIVE_MEETING_SESSION);
 	}, [goToInfoPage]);
 
+	const handleMeetingEnded = useCallback(() => {
+		goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED);
+	}, [goToInfoPage]);
+
 	useEventListener(EventName.MEETING_USER_ACCEPTED, handleAcceptance);
 	useEventListener(EventName.MEETING_USER_REJECTED, handleRejected);
 	useEventListener(EventName.MEETING_WAITING_PARTICIPANT_CLASHED, handleRejoin);
+	useEventListener(EventName.MEETING_STOPPED, handleMeetingEnded);
 
 	const handleResize = useCallback(() => {
 		setWrapperWidth((window.innerWidth * 0.33) / calcScaleDivisor());

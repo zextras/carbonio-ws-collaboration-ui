@@ -260,7 +260,8 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 									</Tooltip>
 								)}
 								{lastMessageOfRoom?.type === MessageType.TEXT_MSG &&
-									lastMessageOfRoom.attachment && (
+									lastMessageOfRoom.attachment &&
+									!usersWritingList && (
 										<Container width="fit" padding={{ right: 'extrasmall' }}>
 											<Icon size="small" icon="FileTextOutline" color="gray" />
 										</Container>

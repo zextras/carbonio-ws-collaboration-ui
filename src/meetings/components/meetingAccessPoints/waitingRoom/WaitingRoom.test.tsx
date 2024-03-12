@@ -32,6 +32,7 @@ const user1: UserBe = createMockUser({ id: 'user1Id', name: 'user 1' });
 const user2: UserBe = createMockUser({ id: 'user2Id', name: 'user 2' });
 
 const readyButtonLabel = 'Ready to participate';
+const acceptedInMeeting = 'accepted insideMeeting';
 
 const member1: MemberBe = { userId: user1.id, owner: true };
 
@@ -90,7 +91,7 @@ describe('Waiting room', () => {
 	});
 	test('user is accepted in the scheduled meeting', async () => {
 		mockedJoinMeetingRequest.mockReturnValue('joined');
-		mockedEnterMeetingRequest.mockReturnValue('accepted insideMeeting');
+		mockedEnterMeetingRequest.mockReturnValue(acceptedInMeeting);
 		const { user } = setupBasicGroup();
 
 		const enterButton = await screen.findByText(readyButtonLabel);
@@ -108,11 +109,11 @@ describe('Waiting room', () => {
 			})
 		);
 
-		await waitFor(() => expect(mockGoToMeetingPage).toBeCalled());
+		expect(mockGoToMeetingPage).toBeCalled();
 	});
 	test('user is rejected by a moderator', async () => {
 		mockedJoinMeetingRequest.mockReturnValue({ status: 'WAITING' });
-		mockedEnterMeetingRequest.mockReturnValue('accepted insideMeeting');
+		mockedEnterMeetingRequest.mockReturnValue(acceptedInMeeting);
 		const { user } = setupBasicGroup();
 
 		const enterButton = await screen.findByText(readyButtonLabel);
@@ -133,7 +134,41 @@ describe('Waiting room', () => {
 			})
 		);
 
-		await waitFor(() => expect(mockGoToInfoPage).toBeCalledWith(PAGE_INFO_TYPE.NEXT_TIME_PAGE));
+		expect(mockGoToInfoPage).toBeCalledWith(PAGE_INFO_TYPE.NEXT_TIME_PAGE);
+	});
+	test('user is waiting, not ready and the meeting and it finish before he can enter', async () => {
+		setupBasicGroup();
+		await waitFor(() => {
+			sendCustomEvent({
+				name: EventName.MEETING_STOPPED,
+				data: {
+					type: WsEventType.MEETING_STOPPED,
+					sentDate: '1234567',
+					meetingId: groupMeeting.id
+				}
+			});
+		});
+
+		expect(mockGoToInfoPage).toBeCalledWith(PAGE_INFO_TYPE.MEETING_ENDED);
+	});
+	test('user is ready to participate and the meeting finish before he can enter', async () => {
+		mockedJoinMeetingRequest.mockReturnValue({ status: 'WAITING' });
+		mockedEnterMeetingRequest.mockReturnValue(acceptedInMeeting);
+		const { user } = setupBasicGroup();
+		const enterButton = await screen.findByText(readyButtonLabel);
+		await act(() => user.click(enterButton));
+		await waitFor(() => {
+			sendCustomEvent({
+				name: EventName.MEETING_STOPPED,
+				data: {
+					type: WsEventType.MEETING_STOPPED,
+					sentDate: '1234567',
+					meetingId: groupMeeting.id
+				}
+			});
+		});
+
+		expect(mockGoToInfoPage).toBeCalledWith(PAGE_INFO_TYPE.MEETING_ENDED);
 	});
 	test('try audio', async () => {
 		const { user } = setupBasicGroup();

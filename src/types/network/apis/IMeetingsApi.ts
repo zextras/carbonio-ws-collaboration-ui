@@ -31,6 +31,7 @@ interface IMeetingsApi {
 	createMeeting(
 		roomId: string,
 		meetingType: MeetingType,
+		name: string,
 		expiration?: string
 	): Promise<CreateMeetingResponse>;
 	getMeeting(roomId: string): Promise<GetMeetingResponse>;

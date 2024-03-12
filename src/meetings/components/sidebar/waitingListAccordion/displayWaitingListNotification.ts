@@ -7,6 +7,12 @@ import { t, getNotificationManager } from '@zextras/carbonio-shell-ui';
 import { find } from 'lodash';
 
 import useStore from '../../../../store/Store';
+import {
+	getLocalStorageItem,
+	LOCAL_STORAGE_NAMES,
+	NotificationsSettingsType
+} from '../../../../utils/localStorageUtils';
+import { MeetingSoundFeedback, sendAudioFeedback } from '../../../../utils/MeetingsUtils';
 
 const displayWaitingListNotification = (meetingId: string): void => {
 	const store = useStore.getState();
@@ -16,9 +22,13 @@ const displayWaitingListNotification = (meetingId: string): void => {
 		(member) => member.userId === store.session.id && member.owner
 	);
 
+	const ChatsNotificationsSettings: NotificationsSettingsType = getLocalStorageItem(
+		LOCAL_STORAGE_NAMES.NOTIFICATIONS
+	);
+
 	if (iAmOwner) {
 		getNotificationManager().notify({
-			showPopup: true,
+			showPopup: ChatsNotificationsSettings.WaitingRoomAccessNotifications,
 			playSound: false,
 			title: t(
 				'meeting.browserNotification.waitingTitle',
@@ -29,6 +39,9 @@ const displayWaitingListNotification = (meetingId: string): void => {
 				'New user is waiting to enter the meeting'
 			)
 		});
+	}
+	if (ChatsNotificationsSettings.WaitingRoomAccessNotificationsSounds) {
+		sendAudioFeedback(MeetingSoundFeedback.NEW_WAITING_USER);
 	}
 };
 

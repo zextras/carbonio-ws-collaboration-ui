@@ -8,7 +8,11 @@ import { useCallback, useMemo } from 'react';
 
 import { CHATS_ROUTE, MEETINGS_PATH } from '../constants/appConstants';
 import { MeetingsApi } from '../network';
-import { getMeetingIdFromRoom, getRoomTypeSelector } from '../store/selectors/RoomsSelectors';
+import {
+	getMeetingIdFromRoom,
+	getRoomNameSelector,
+	getRoomTypeSelector
+} from '../store/selectors/RoomsSelectors';
 import useStore from '../store/Store';
 import { MeetingType } from '../types/network/models/meetingBeTypes';
 import { RoomType } from '../types/store/RoomTypes';
@@ -19,6 +23,7 @@ type RoomMeetingHookType = {
 };
 const useRoomMeeting = (roomId: string): RoomMeetingHookType => {
 	const roomType = useStore((store) => getRoomTypeSelector(store, roomId));
+	const roomName = useStore((store) => getRoomNameSelector(store, roomId));
 	const meetingId = useStore((store) => getMeetingIdFromRoom(store, roomId));
 
 	const meetingLink = useMemo(() => `${MEETINGS_PATH}${meetingId}`, [meetingId]);
@@ -28,11 +33,12 @@ const useRoomMeeting = (roomId: string): RoomMeetingHookType => {
 		else {
 			const meetingType =
 				roomType === RoomType.TEMPORARY ? MeetingType.SCHEDULED : MeetingType.PERMANENT;
-			MeetingsApi.createMeeting(roomId, meetingType).then((meeting) =>
+			const meetingName = roomType === RoomType.ONE_TO_ONE ? '' : roomName;
+			MeetingsApi.createMeeting(roomId, meetingType, meetingName).then((meeting) =>
 				window.open(`${MEETINGS_PATH}${meeting.id}`)
 			);
 		}
-	}, [meetingId, meetingLink, roomId, roomType]);
+	}, [meetingId, meetingLink, roomId, roomName, roomType]);
 
 	const copyMeetingLink = useCallback(() => {
 		const separator = window.location.href.includes(CHATS_ROUTE) ? CHATS_ROUTE : MEETINGS_PATH;
