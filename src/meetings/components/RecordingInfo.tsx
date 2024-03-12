@@ -63,7 +63,7 @@ const RecordingInfo = ({ meetingId }: RecordingInfoProps): ReactElement | null =
 					'meeting.recordingStop.successSnackbar.participants',
 					`${moderatorName} stopped the registration of this meeting`,
 					{
-						moderatorName
+						userName: moderatorName
 					}
 				);
 				createSnackbar({

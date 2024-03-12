@@ -12,6 +12,7 @@ import {
 	Input,
 	Modal,
 	ModalFooter,
+	Padding,
 	Text,
 	useSnackbar
 } from '@zextras/carbonio-design-system';
@@ -52,7 +53,15 @@ const StopRecordingModal = ({
 		'You are going to stop the recording. You can start a new one at any time.'
 	);
 	const recordingInputLabel: string = t('meeting.recordingModal.inputLabel', 'Recording Name');
-	const recordingInputDescription: string = t(
+	const filenameIsRequiredLabel = t(
+		'meeting.recordingModal.requiredNameError',
+		'The recording file name is required'
+	);
+	const filenameIsTooLongLabel = t(
+		'meeting.recordingModal.exceededCharsError',
+		'The recording file name must not exceed 128 characters'
+	);
+	const recordingCaption: string = t(
 		'meeting.recordingModal.caption',
 		`The recording will be saved in "${folder.name}".`,
 		{ folderName: folder.name }
@@ -72,7 +81,7 @@ const StopRecordingModal = ({
 	const createSnackbar: CreateSnackbarFn = useSnackbar();
 
 	const onNameChange = useCallback((e) => {
-		if (e.target.value.length < 128) setRecordingName(e.target.value);
+		if (e.target.value.length < 129) setRecordingName(e.target.value);
 	}, []);
 
 	const onCloseModal = useCallback(() => {
@@ -110,6 +119,12 @@ const StopRecordingModal = ({
 		recordingStopped
 	]);
 
+	const inputDescription = useMemo(() => {
+		if (recordingName === '') return filenameIsRequiredLabel;
+		if (recordingName.length >= 128) return filenameIsTooLongLabel;
+		return '';
+	}, [filenameIsTooLongLabel, filenameIsRequiredLabel, recordingName]);
+
 	return (
 		<Modal
 			size="small"
@@ -123,19 +138,25 @@ const StopRecordingModal = ({
 					onConfirm={stopRecording}
 					confirmLabel={stopButtonLabel}
 					confirmColor="error"
-					confirmDisabled={recordingName === ''}
+					confirmDisabled={recordingName === '' || recordingName.length >= 128}
 				/>
 			}
 		>
-			<Container padding={{ vertical: 'large' }} gap="1rem">
+			<Container padding={{ vertical: 'large' }} crossAlignment="flex-start">
 				<Text overflow="break-word">{descriptionLabel}</Text>
+				<Padding top="large" />
 				<Input
 					label={`${recordingInputLabel}*`}
-					description={recordingInputDescription}
 					value={recordingName}
 					onChange={onNameChange}
 					backgroundColor="gray5"
+					hasError={recordingName === '' || recordingName.length >= 128}
+					description={inputDescription}
 				/>
+				<Padding top="small" />
+				<Text color="gray1" size="small">
+					{recordingCaption}
+				</Text>
 			</Container>
 		</Modal>
 	);

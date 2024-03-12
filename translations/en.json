@@ -198,7 +198,9 @@
             "caption": "The recording will be saved in \"{{folderName}}\".",
             "confirmationAction": "Stop",
             "description": "You are going to stop the recording. You can start a new one at any time.",
+            "exceededCharsError": "The recording file name must not exceed 128 characters",
             "inputLabel": "Recording Name",
+            "requiredNameError": "The recording file name is required",
             "title": "Stop recording"
         },
         "recordingStart": {
@@ -208,7 +210,7 @@
         "recordingStop": {
             "failureSnackbar": "It is not possible to stop the registration, please contact your system administrator.",
             "successSnackbar": {
-                "participants": "{{moderatorName}} stopped the registration of this meeting",
+                "participants": "{{userName}} stopped the registration of this meeting",
                 "stopper": "You will find {{recordingName}} in {{folderName}} as soon as it is available"
             }
         },
