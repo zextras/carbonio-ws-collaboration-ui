@@ -112,7 +112,24 @@ describe('Rooms API', () => {
 		});
 	});
 
-	test('deleteRoom is called correctly', async () => {
+	test('deleteRoom without an associated meeting is called correctly', async () => {
+		const room = createMockRoom();
+		// Send deleteRoom request
+		await roomsApi.deleteRoom(room.id);
+
+		// Set appropriate headers
+		const headers = new Headers();
+		headers.append(contentType, applicationJson);
+
+		// Check if fetch is called with the correct parameters
+		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/rooms/${room.id}`, {
+			method: 'DELETE',
+			headers,
+			body: undefined
+		});
+	});
+
+	test('deleteRoom with an associated meeting is called correctly', async () => {
 		const room = createMockRoom();
 		const meeting = createMockMeeting({ roomId: room.id });
 		useStore.getState().addMeeting(meeting);
@@ -124,16 +141,17 @@ describe('Rooms API', () => {
 		headers.append(contentType, applicationJson);
 
 		// Check if fetch is called with the correct parameters
-		expect(global.fetch).toHaveBeenNthCalledWith(1, `/services/chats/rooms/${room.id}`, {
+		expect(global.fetch).toHaveBeenNthCalledWith(
+			1,
+			`/services/chats/meetings/${meeting.id}`,
+			expect.objectContaining({ method: 'DELETE' })
+		);
+
+		expect(global.fetch).toHaveBeenNthCalledWith(2, `/services/chats/rooms/${room.id}`, {
 			method: 'DELETE',
 			headers,
 			body: undefined
 		});
-		expect(global.fetch).toHaveBeenNthCalledWith(
-			2,
-			`/services/chats/meetings/${meeting.id}`,
-			expect.objectContaining({ method: 'DELETE' })
-		);
 	});
 
 	test('getURLRoomPicture is called correctly', () => {
