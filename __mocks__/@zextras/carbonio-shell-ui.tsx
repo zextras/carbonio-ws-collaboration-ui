@@ -13,6 +13,15 @@ import {
 } from '@zextras/carbonio-shell-ui';
 import { createMemoryHistory } from 'history';
 
+import {
+	filesSelectFilesAction,
+	filesSelectFilesActionAvailable,
+	functionCheck,
+	getLink,
+	getNode,
+	getNodeAvailable
+} from './carbonio-files-ui';
+
 const history = createMemoryHistory();
 
 export const USER_SETTINGS: AccountSettings = {
@@ -23,12 +32,6 @@ export const USER_SETTINGS: AccountSettings = {
 	}
 };
 
-const getNode = jest.fn(() => Promise.resolve({ name: 'root', id: 'ROOT_ID' }));
-const getNodeAvailable = true;
-const filesSelectFilesAction = jest.fn();
-const filesSelectFilesActionAvailable = true;
-const getLink = jest.fn(() => 'link');
-const functionCheck = true;
 export const ROUTE_SETTINGS: AppRoute = {
 	id: 'chats',
 	route: 'chats',

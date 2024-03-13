@@ -61,8 +61,8 @@ const AttachmentSelector: React.FC<AttachmentSelectorProps> = ({ roomId }) => {
 		'settings.profile.errorGenericResponse',
 		'Something went wrong. Please retry'
 	);
-	const chooseFileLabel = t('', 'Choose file');
-	const shareLabel = t('', 'Share public link');
+	const chooseFileLabel = t('attachments.integrations.chooseFile', 'Choose file');
+	const shareLabel = t('attachments.integrations.shareLink', 'Share public link');
 
 	const xmppClient = useStore((store) => getXmppClient(store));
 	const roomName = useStore((store) => getRoomNameSelector(store, roomId));
