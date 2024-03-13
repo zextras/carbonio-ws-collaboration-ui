@@ -51,6 +51,10 @@
         "dragAndDrop": "Drag&Drop mode",
         "dropHereDescription": "Drop here your attachments to quickly add them to this chat",
         "errorUploadingFile": "Something went wrong uploading {{file}}",
+        "integrations": {
+            "chooseFile": "Choose file",
+            "shareLink": "Share public link"
+        },
         "stopUpload": "Stop upload",
         "uploadAborted": "Upload has been interrupted"
     },
