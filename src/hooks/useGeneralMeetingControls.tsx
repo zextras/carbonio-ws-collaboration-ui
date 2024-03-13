@@ -37,6 +37,7 @@ const useGeneralMeetingControls = (meetingId: string): void => {
 	// Redirect to info page if meeting ended or some error occurred
 	useEffect(() => {
 		if (!isMeetingActive) {
+			meetingDisconnection(meetingId);
 			goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED);
 		}
 		return () => {
@@ -44,7 +45,7 @@ const useGeneralMeetingControls = (meetingId: string): void => {
 				window.parent.document.exitFullscreen();
 			}
 		};
-	}, [goToInfoPage, isMeetingActive]);
+	}, [goToInfoPage, isMeetingActive, meetingDisconnection, meetingId]);
 
 	// Leave meeting on window close
 	useEffect(() => {
