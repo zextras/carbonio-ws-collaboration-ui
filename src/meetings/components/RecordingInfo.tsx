@@ -11,11 +11,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import useEventListener, { EventName } from '../../hooks/useEventListener';
-import {
-	getIsMeetingRecording,
-	getRoomIdByMeetingId
-} from '../../store/selectors/MeetingSelectors';
-import { getRoomNameSelector } from '../../store/selectors/RoomsSelectors';
+import { getIsMeetingRecording } from '../../store/selectors/MeetingSelectors';
 import useStore from '../../store/Store';
 
 const RecordingContainer = styled(Container)`
@@ -29,28 +25,35 @@ type RecordingInfoProps = {
 };
 
 const RecordingInfo = ({ meetingId }: RecordingInfoProps): ReactElement | null => {
-	const roomId = useStore((state) => getRoomIdByMeetingId(state, meetingId));
-	const roomName = useStore((state) => getRoomNameSelector(state, roomId || ''));
-	const isMeetingRecording = useStore((state) => getIsMeetingRecording(state, meetingId));
-
 	const [t] = useTranslation();
 	const meetingIsBeenRecordedLabel = t('meeting.recordingHint', 'This meeting is being recorded');
-	const recordingStarted = t(
-		'meeting.recordingStart.successSnackbar',
-		`The recording of the "${roomName}" meeting has started`,
-		{ meetingName: roomName }
-	);
+
+	const isMeetingRecording = useStore((state) => getIsMeetingRecording(state, meetingId));
 
 	const createSnackbar: CreateSnackbarFn = useSnackbar();
 
-	const handleRecordingStarted = useCallback(() => {
-		createSnackbar({
-			key: new Date().toLocaleString(),
-			type: 'info',
-			label: recordingStarted,
-			hideButton: true
-		});
-	}, [createSnackbar, recordingStarted]);
+	const handleRecordingStarted = useCallback(
+		(event) => {
+			if (event.detail.userId !== useStore.getState().session.id) {
+				const moderator = useStore.getState().users[event.detail.userId];
+				const moderatorName = moderator?.name || moderator?.email || '';
+				const recordingStarted = t(
+					'meeting.recordingStart.successSnackbar.participants',
+					`${moderatorName} started the registration of this meeting`,
+					{
+						userName: moderatorName
+					}
+				);
+				createSnackbar({
+					key: new Date().toLocaleString(),
+					type: 'info',
+					label: recordingStarted,
+					hideButton: true
+				});
+			}
+		},
+		[createSnackbar, t]
+	);
 
 	useEventListener(EventName.MEETING_RECORDING_STARTED, handleRecordingStarted);
 

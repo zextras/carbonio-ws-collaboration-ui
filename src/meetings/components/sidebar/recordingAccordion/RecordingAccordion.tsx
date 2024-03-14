@@ -32,6 +32,10 @@ const CustomAccordion = styled(Accordion)`
 	user-select: none;
 `;
 
+const CustomContainer = styled(Container)`
+	cursor: default;
+`;
+
 type RecordingAccordionProps = {
 	meetingId: string;
 };
@@ -45,6 +49,10 @@ const RecordingAccordion: FC<RecordingAccordionProps> = ({ meetingId }) => {
 	);
 	const startButtonLabel = t('meeting.sidebar.recording.action.start', 'Start');
 	const stopButtonLabel = t('meeting.sidebar.recording.action.stop', 'Stop');
+	const successSnackbarLabel = t(
+		'meeting.recordingStart.successSnackbar.starter',
+		'You have started the registration of this meeting'
+	);
 	const errorSnackbarLabel = t(
 		'meeting.recordingStart.failureSnackbar',
 		'It is not possible to start the registration, please contact your system administrator.'
@@ -68,15 +76,24 @@ const RecordingAccordion: FC<RecordingAccordionProps> = ({ meetingId }) => {
 	);
 
 	const startRecording = useCallback(() => {
-		MeetingsApi.startRecording(meetingId).catch(() => {
-			createSnackbar({
-				key: new Date().toLocaleString(),
-				type: 'warning',
-				label: errorSnackbarLabel,
-				hideButton: true
+		MeetingsApi.startRecording(meetingId)
+			.then(() => {
+				createSnackbar({
+					key: new Date().toLocaleString(),
+					type: 'info',
+					label: successSnackbarLabel,
+					hideButton: true
+				});
+			})
+			.catch(() => {
+				createSnackbar({
+					key: new Date().toLocaleString(),
+					type: 'warning',
+					label: errorSnackbarLabel,
+					hideButton: true
+				});
 			});
-		});
-	}, [createSnackbar, errorSnackbarLabel, meetingId]);
+	}, [createSnackbar, errorSnackbarLabel, meetingId, successSnackbarLabel]);
 
 	const items = useMemo(() => {
 		const RecordingHeader = ({ item }: { item: AccordionItemType }): ReactElement => (
@@ -85,7 +102,7 @@ const RecordingAccordion: FC<RecordingAccordionProps> = ({ meetingId }) => {
 			</AccordionItem>
 		);
 		const RecordingContainer = (): ReactElement => (
-			<Container
+			<CustomContainer
 				crossAlignment="flex-start"
 				padding={{ vertical: 'large', right: 'small' }}
 				gap="0.5rem"
@@ -110,7 +127,7 @@ const RecordingAccordion: FC<RecordingAccordionProps> = ({ meetingId }) => {
 					/>
 				</Container>
 				<Text overflow="break-word">{accordionDescription}</Text>
-			</Container>
+			</CustomContainer>
 		);
 
 		const recordingItem: AccordionItemType[] = [

@@ -7,13 +7,14 @@
 import React, { ReactElement, useCallback, useMemo, useState } from 'react';
 
 import {
+	Button,
 	Container,
 	CreateSnackbarFn,
 	Input,
 	Modal,
-	ModalFooter,
 	Padding,
 	Text,
+	Tooltip,
 	useSnackbar
 } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
@@ -122,8 +123,33 @@ const StopRecordingModal = ({
 	const inputDescription = useMemo(() => {
 		if (recordingName === '') return filenameIsRequiredLabel;
 		if (recordingName.length >= 128) return filenameIsTooLongLabel;
-		return '';
+		return undefined;
 	}, [filenameIsTooLongLabel, filenameIsRequiredLabel, recordingName]);
+
+	const CustomFooter = useMemo(
+		() => (
+			<Tooltip
+				label={
+					recordingName === ''
+						? filenameIsRequiredLabel
+						: recordingName.length >= 128
+						? filenameIsTooLongLabel
+						: ''
+				}
+				placement="right"
+			>
+				<Container crossAlignment="flex-end">
+					<Button
+						color="error"
+						label={stopButtonLabel}
+						onClick={stopRecording}
+						disabled={recordingName === '' || recordingName.length >= 128}
+					/>
+				</Container>
+			</Tooltip>
+		),
+		[filenameIsRequiredLabel, filenameIsTooLongLabel, recordingName, stopButtonLabel, stopRecording]
+	);
 
 	return (
 		<Modal
@@ -133,16 +159,9 @@ const StopRecordingModal = ({
 			showCloseIcon
 			onClose={onCloseModal}
 			closeIconTooltip={closeLabel}
-			customFooter={
-				<ModalFooter
-					onConfirm={stopRecording}
-					confirmLabel={stopButtonLabel}
-					confirmColor="error"
-					confirmDisabled={recordingName === '' || recordingName.length >= 128}
-				/>
-			}
+			customFooter={CustomFooter}
 		>
-			<Container padding={{ vertical: 'large' }} crossAlignment="flex-start">
+			<Container crossAlignment="flex-start">
 				<Text overflow="break-word">{descriptionLabel}</Text>
 				<Padding top="large" />
 				<Input

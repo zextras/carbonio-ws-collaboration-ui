@@ -57,7 +57,7 @@ describe('RecordingInfo tests', () => {
 		expect(screen.queryByText('This meeting is being recorded')).toBeVisible();
 	});
 
-	test('A snackbar appears when the recording starts', async () => {
+	test('A snackbar appears when the recording starts by another moderator', async () => {
 		setup(<RecordingInfo meetingId={meeting.id} />);
 		act(() => {
 			sendCustomEvent({
@@ -65,19 +65,37 @@ describe('RecordingInfo tests', () => {
 				data: {
 					type: WsEventType.MEETING_RECORDING_STARTED,
 					meetingId: meeting.id,
-					userId: user1.id,
+					userId: user2.id,
 					sentDate: new Date().toISOString()
 				}
 			});
 		});
 
 		const snackbar = await screen.findByText(
-			`The recording of the "${room.name}" meeting has started`
+			`${user2.name} started the registration of this meeting`
 		);
 		expect(snackbar).toBeVisible();
 	});
 
-	test('A snackbar appears when the recording stops by another user', async () => {
+	test("A snackbar doesn't appear when the recording is started by me", () => {
+		setup(<RecordingInfo meetingId={meeting.id} />);
+		act(() => {
+			sendCustomEvent({
+				name: EventName.MEETING_RECORDING_STOPPED,
+				data: {
+					type: WsEventType.MEETING_RECORDING_STOPPED,
+					meetingId: meeting.id,
+					userId: user1.id,
+					sentDate: new Date().toISOString()
+				}
+			});
+		});
+
+		const snackbar = screen.queryByText(`${user1.name} started the registration of this meeting`);
+		expect(snackbar).not.toBeInTheDocument();
+	});
+
+	test('A snackbar appears when the recording stops by another moderator', async () => {
 		setup(<RecordingInfo meetingId={meeting.id} />);
 		act(() => {
 			sendCustomEvent({
@@ -97,7 +115,7 @@ describe('RecordingInfo tests', () => {
 		expect(snackbar).toBeVisible();
 	});
 
-	test(" A snackbar doesn't appear when the recording is stopped by me", () => {
+	test("A snackbar doesn't appear when the recording is stopped by me", () => {
 		setup(<RecordingInfo meetingId={meeting.id} />);
 		act(() => {
 			sendCustomEvent({

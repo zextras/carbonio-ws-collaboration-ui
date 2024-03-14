@@ -205,7 +205,10 @@
         },
         "recordingStart": {
             "failureSnackbar": "It is not possible to start the registration, please contact your system administrator.",
-            "successSnackbar": "The recording of the \"{{roomName}}\" meeting has started"
+            "successSnackbar": {
+                "participants": "{{userName}} started the registration of this meeting",
+                "starter": "You have started the registration of this meeting"
+            }
         },
         "recordingStop": {
             "failureSnackbar": "It is not possible to stop the registration, please contact your system administrator.",
