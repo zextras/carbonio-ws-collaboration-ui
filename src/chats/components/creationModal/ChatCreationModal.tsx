@@ -50,6 +50,7 @@ const ChatCreationModal = ({
 		'settings.profile.errorGenericResponse',
 		'Something went Wrong. Please Retry'
 	);
+	const setPlaceholderRoom = useStore((state) => state.setPlaceholderRoom);
 
 	const inputRef = useRef<HTMLInputElement>(null);
 
@@ -110,15 +111,12 @@ const ChatCreationModal = ({
 					room.type === RoomType.ONE_TO_ONE &&
 					!!find(room.members, (member) => member.userId === userId)
 			);
-			if (oneToOneChatExist) {
-				goToRoomPage(oneToOneChatExist.id);
-			} else {
-				useStore.getState().setPlaceholderRoom(userId);
-				goToRoomPage(`placeholder-${userId}`);
-			}
+			const roomId = oneToOneChatExist?.id || `placeholder-${userId}`;
+			if (!oneToOneChatExist) setPlaceholderRoom(userId);
 			onModalClose();
+			goToRoomPage(roomId);
 		},
-		[goToRoomPage, onModalClose]
+		[goToRoomPage, onModalClose, setPlaceholderRoom]
 	);
 
 	const onCreateGroup = useCallback(

@@ -18,7 +18,7 @@ import { RootStore } from '../../../../types/store/StoreTypes';
 
 const testRoom: RoomBe = createMockRoom({
 	id: 'room-test',
-	name: '',
+	name: 'Name',
 	description: 'A description',
 	type: RoomType.GROUP,
 	members: [createMockMember({ userId: 'myId' })]
@@ -171,12 +171,10 @@ describe('Edit group Details Modal', () => {
 		expect(descriptionLabel).toHaveAttribute('color', 'error');
 		expect(editButton).not.toBeEnabled();
 	});
-	// TODO
-	test.skip('user modify a field and press edit button', async () => {
-		// TODO this test is incomplete
+	test('user modify a field and press edit button', async () => {
 		mockedUpdateRoomRequest.mockReturnValue({
-			id: 'room-test',
-			name: '',
+			id: testRoom.id,
+			name: testRoom.name,
 			description: 'This is a new description',
 			type: RoomType.GROUP,
 			members: [createMockMember({ userId: 'myId' })]
@@ -186,9 +184,9 @@ describe('Edit group Details Modal', () => {
 		const { user } = setup(
 			<EditConversationModal editModalOpen closeModal={jest.fn} roomId={testRoom.id} />
 		);
-		const editButton = screen.getByTestId('edit_button');
 		const descriptionInput = screen.getByTestId('description_input');
 		await user.type(descriptionInput, 'This is a new description');
+		const editButton = screen.getByTestId('edit_button');
 		expect(editButton).toBeEnabled();
 	});
 });
