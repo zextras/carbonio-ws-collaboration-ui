@@ -18,7 +18,7 @@ import styled from 'styled-components';
 
 import useMediaQueryCheck from '../../../hooks/useMediaQueryCheck';
 import ConversationHeaderMeetingButton from '../../../meetings/components/headerMeetingButton/ConversationHeaderMeetingButton';
-import { getRoomNameSelector } from '../../../store/selectors/RoomsSelectors';
+import { getIsPlaceholderRoom, getRoomNameSelector } from '../../../store/selectors/RoomsSelectors';
 import { getCapability } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { CapabilityType } from '../../../types/store/SessionTypes';
@@ -42,6 +42,7 @@ const ConversationHeader = ({
 	const infoTooltip = t('conversationInfo.info', 'Info');
 	const roomName = useStore((state) => getRoomNameSelector(state, roomId)) || '';
 	const canVideoCall = useStore((store) => getCapability(store, CapabilityType.CAN_VIDEO_CALL));
+	const isPlaceholderRoom = useStore((state) => getIsPlaceholderRoom(state, roomId));
 
 	const isDesktopView = useMediaQueryCheck();
 
@@ -62,7 +63,7 @@ const ConversationHeader = ({
 				<TextWithTooltip overflow="ellipsis">{roomName}</TextWithTooltip>
 			</Row>
 			<Container orientation="horizontal" width="fit" style={{ minWidth: 'fit-content' }}>
-				{canVideoCall && <ConversationHeaderMeetingButton roomId={roomId} />}
+				{canVideoCall && !isPlaceholderRoom && <ConversationHeaderMeetingButton roomId={roomId} />}
 				{!isDesktopView && (
 					<Tooltip label={infoTooltip}>
 						<IconButton

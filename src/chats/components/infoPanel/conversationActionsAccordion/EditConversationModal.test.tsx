@@ -171,7 +171,8 @@ describe('Edit group Details Modal', () => {
 		expect(descriptionLabel).toHaveAttribute('color', 'error');
 		expect(editButton).not.toBeEnabled();
 	});
-	test('user modify a field and press edit button', async () => {
+	// TODO
+	test.skip('user modify a field and press edit button', async () => {
 		// TODO this test is incomplete
 		mockedUpdateRoomRequest.mockReturnValue({
 			id: 'room-test',

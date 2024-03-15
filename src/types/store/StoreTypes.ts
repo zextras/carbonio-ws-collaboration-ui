@@ -67,6 +67,7 @@ export type RoomsStoreSlice = {
 	setClearedAt: (roomId: string, clearedAt: string) => void;
 	setRoomPictureUpdated: (id: string, date: string) => void;
 	setRoomPictureDeleted: (id: string) => void;
+	setPlaceholderRoom: (userId: string) => void;
 };
 
 export type MessagesStoreSlice = {

@@ -15,6 +15,7 @@ export type Room = {
 	members?: Member[];
 	userSettings?: RoomUserSettings;
 	meetingId?: string;
+	placeholder?: boolean;
 };
 
 export enum RoomType {
