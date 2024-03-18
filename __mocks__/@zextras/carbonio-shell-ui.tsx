@@ -13,6 +13,15 @@ import {
 } from '@zextras/carbonio-shell-ui';
 import { createMemoryHistory } from 'history';
 
+import {
+	filesSelectFilesAction,
+	filesSelectFilesActionAvailable,
+	functionCheck,
+	getLink,
+	getNode,
+	getNodeAvailable
+} from './carbonio-files-ui';
+
 const history = createMemoryHistory();
 
 export const USER_SETTINGS: AccountSettings = {
@@ -90,3 +99,12 @@ export const useIntegratedFunction = jest.fn(() => [
 	filesSelectFilesActionAvailable
 ]);
 export const t = (key: string, value: string): string => value;
+
+export const useIntegratedFunction = jest.fn(() => [
+	getNode,
+	getNodeAvailable,
+	filesSelectFilesAction,
+	filesSelectFilesActionAvailable,
+	getLink,
+	functionCheck
+]);
