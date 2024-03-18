@@ -13,15 +13,17 @@ import useStore from '../../../store/Store';
 import {
 	createMockCapabilityList,
 	createMockMember,
-	createMockRoom
+	createMockRoom,
+	createMockUser
 } from '../../../tests/createMock';
 import { mockUseMediaQueryCheck } from '../../../tests/mocks/useMediaQueryCheck';
 import { setup } from '../../../tests/test-utils';
-import { RoomBe } from '../../../types/network/models/roomBeTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 import { RootStore } from '../../../types/store/StoreTypes';
 
-const mockedRoom: RoomBe = createMockRoom({
+const user1 = createMockUser({ id: 'user1Id', name: 'User 1' });
+
+const mockedRoom = createMockRoom({
 	id: 'roomTest',
 	type: RoomType.GROUP,
 	name: 'name',
@@ -31,18 +33,20 @@ const mockedRoom: RoomBe = createMockRoom({
 	]
 });
 
+beforeEach(() => {
+	const store: RootStore = useStore.getState();
+	store.addRoom(mockedRoom);
+	store.setPlaceholderRoom(user1.id);
+});
 describe('Conversation header test', () => {
 	test('Width of the screen is smaller than 1024 px', async () => {
-		const store: RootStore = useStore.getState();
-		store.addRoom(mockedRoom);
 		mockUseMediaQueryCheck.mockReturnValueOnce(false);
 		setup(<ConversationHeader roomId={mockedRoom.id} setInfoPanelOpen={jest.fn()} />);
 		const infoIcon = screen.getByTestId('icon: InfoOutline');
 		expect(infoIcon).toBeInTheDocument();
 	});
+
 	test('Width of the screen is bigger than 1024 px', async () => {
-		const store: RootStore = useStore.getState();
-		store.addRoom(mockedRoom);
 		mockUseMediaQueryCheck.mockReturnValueOnce(true);
 		setup(<ConversationHeader roomId={mockedRoom.id} setInfoPanelOpen={jest.fn()} />);
 		expect(screen.queryByTestId('icon: InfoOutline')).toBeNull();
@@ -50,7 +54,6 @@ describe('Conversation header test', () => {
 
 	test('Meeting button is displayed when canVideoCall capability is set to true', async () => {
 		const store: RootStore = useStore.getState();
-		store.addRoom(mockedRoom);
 		store.setCapabilities(createMockCapabilityList({ canVideoCall: true }));
 		setup(<ConversationHeader roomId={mockedRoom.id} setInfoPanelOpen={jest.fn()} />);
 		expect(screen.getByTestId('ConversationHeaderMeetingButton')).toBeInTheDocument();
@@ -58,9 +61,15 @@ describe('Conversation header test', () => {
 
 	test("Meeting button isn't displayed when canVideoCall capability is set to false", async () => {
 		const store: RootStore = useStore.getState();
-		store.addRoom(mockedRoom);
 		store.setCapabilities(createMockCapabilityList({ canVideoCall: false }));
 		setup(<ConversationHeader roomId={mockedRoom.id} setInfoPanelOpen={jest.fn()} />);
+		expect(screen.queryByTestId('ConversationHeaderMeetingButton')).not.toBeInTheDocument();
+	});
+
+	test("Meeting button isn't displayed when the room is a placeholder", async () => {
+		const store: RootStore = useStore.getState();
+		store.setCapabilities(createMockCapabilityList({ canVideoCall: true }));
+		setup(<ConversationHeader roomId={`placeholder-${user1.id}`} setInfoPanelOpen={jest.fn()} />);
 		expect(screen.queryByTestId('ConversationHeaderMeetingButton')).not.toBeInTheDocument();
 	});
 });
