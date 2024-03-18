@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { pushHistory } from '@zextras/carbonio-shell-ui';
 import { find } from 'lodash';
 import { $iq, $msg, $pres, Strophe } from 'strophe.js';
 import { v4 as uuidGenerator } from 'uuid';
@@ -21,10 +20,8 @@ import { onSmartMarkers } from './handlers/smartMarkersHandler';
 import { carbonize, carbonizeMUC } from './utility/decodeJid';
 import { getLastUnreadMessage } from './utility/getLastUnreadMessage';
 import XMPPConnection, { XMPPRequestType } from './XMPPConnection';
-import { ROUTES } from '../../hooks/useRouting';
 import useStore from '../../store/Store';
 import IXMPPClient from '../../types/network/xmpp/IXMPPClient';
-import { RoomType } from '../../types/store/RoomTypes';
 import { dateToISODate } from '../../utils/dateUtils';
 import { RoomsApi } from '../index';
 
@@ -131,7 +128,9 @@ class XMPPClient implements IXMPPClient {
 	sendChatMessage(roomId: string, message: string): void {
 		const placeholderRoom = roomId.split('placeholder-');
 		if (placeholderRoom[1]) {
-			this.sendChatMessageAfterRoomCreation(placeholderRoom[1], message);
+			RoomsApi.replacePlaceholderRoom(placeholderRoom[1], message).then((response) => {
+				this.sendChatMessage(response.id, message);
+			});
 			return;
 		}
 
@@ -149,21 +148,6 @@ class XMPPClient implements IXMPPClient {
 			.up()
 			.c('markable', { xmlns: Strophe.NS.MARKERS });
 		this.xmppConnection.send({ type: XMPPRequestType.MESSAGE, elem: msg });
-	}
-
-	sendChatMessageAfterRoomCreation(userId: string, message: string): void {
-		const { setPlaceholderMessage, replacePlaceholderRoom } = useStore.getState();
-		setPlaceholderMessage({
-			roomId: `placeholder-${userId}`,
-			id: uuidGenerator(),
-			text: message
-		});
-
-		RoomsApi.addRoom({ type: RoomType.ONE_TO_ONE, membersIds: [userId] }).then((response) => {
-			this.sendChatMessage(response.id, message);
-			replacePlaceholderRoom(userId, response.id);
-			pushHistory(ROUTES.ROOM.replace(':roomId', response.id));
-		});
 	}
 
 	/**

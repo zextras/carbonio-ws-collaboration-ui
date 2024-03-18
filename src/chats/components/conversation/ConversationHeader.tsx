@@ -53,6 +53,7 @@ const ConversationHeader = ({
 	return (
 		<RoomInfoHeader
 			height="3rem"
+			minHeight="3rem"
 			background="gray5"
 			borderRadius="none"
 			orientation="horizontal"
