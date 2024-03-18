@@ -7,13 +7,15 @@
 import React from 'react';
 
 import { screen } from '@testing-library/react';
+import { act } from 'react-dom/test-utils';
 
 import ConversationHeader from './ConversationHeader';
 import useStore from '../../../store/Store';
 import {
 	createMockCapabilityList,
 	createMockMember,
-	createMockRoom
+	createMockRoom,
+	createMockUser
 } from '../../../tests/createMock';
 import { mockUseMediaQueryCheck } from '../../../tests/mocks/useMediaQueryCheck';
 import { setup } from '../../../tests/test-utils';
@@ -21,13 +23,25 @@ import { RoomBe } from '../../../types/network/models/roomBeTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 import { RootStore } from '../../../types/store/StoreTypes';
 
+const mockRobertoUser = createMockUser({
+	id: 'idRoberto',
+	email: 'roberto@user.com',
+	name: 'Roberto'
+});
+
+const mockPaoloUser = createMockUser({
+	id: 'idPaolo',
+	email: 'paolo@user.com',
+	name: 'Paolo'
+});
+
 const mockedRoom: RoomBe = createMockRoom({
 	id: 'roomTest',
 	type: RoomType.GROUP,
 	name: 'name',
 	members: [
-		createMockMember({ userId: 'idPaolo', owner: true }),
-		createMockMember({ userId: 'idRoberto' })
+		createMockMember({ userId: mockPaoloUser.id, owner: true }),
+		createMockMember({ userId: mockRobertoUser.id })
 	]
 });
 
@@ -62,5 +76,27 @@ describe('Conversation header test', () => {
 		store.setCapabilities(createMockCapabilityList({ canVideoCall: false }));
 		setup(<ConversationHeader roomId={mockedRoom.id} setInfoPanelOpen={jest.fn()} />);
 		expect(screen.queryByTestId('ConversationHeaderMeetingButton')).not.toBeInTheDocument();
+	});
+
+	test('is writing appears when someone is writing and disappear if not', async () => {
+		const store: RootStore = useStore.getState();
+		act(() => {
+			store.addRoom(mockedRoom);
+			store.setLoginInfo(mockPaoloUser.id, 'Paolo');
+			store.setUserInfo(mockRobertoUser);
+			store.setIsWriting(mockedRoom.id, mockRobertoUser.id, true);
+		});
+
+		setup(<ConversationHeader roomId={mockedRoom.id} setInfoPanelOpen={jest.fn()} />);
+
+		const isWriting = await screen.findByTestId('is_writing_text');
+		expect(isWriting).toBeInTheDocument();
+
+		act(() => {
+			store.setIsWriting(mockedRoom.id, mockRobertoUser.id, false);
+			jest.advanceTimersByTime(4000);
+		});
+
+		expect(isWriting).not.toBeVisible();
 	});
 });

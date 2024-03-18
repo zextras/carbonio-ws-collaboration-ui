@@ -17,7 +17,8 @@ import {
 	createMockMeeting,
 	createMockMember,
 	createMockParticipants,
-	createMockRoom
+	createMockRoom,
+	createMockUser
 } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
 import { MeetingBe } from '../../../../types/network/models/meetingBeTypes';
@@ -26,18 +27,28 @@ import { MeetingParticipant } from '../../../../types/store/MeetingTypes';
 import { RootStore } from '../../../../types/store/StoreTypes';
 import MeetingSidebar from '../MeetingSidebar';
 
+const mockUser1 = createMockUser({
+	id: 'user1',
+	name: 'User 1'
+});
+
+const mockUser2 = createMockUser({
+	id: 'user2',
+	name: 'User 2'
+});
+
 const groupRoom: RoomBe = createMockRoom({
 	id: 'room-test',
 	type: RoomType.GROUP,
 	members: [
-		createMockMember({ userId: 'user1', owner: true }),
-		createMockMember({ userId: 'user2', owner: true })
+		createMockMember({ userId: mockUser1.id, owner: true }),
+		createMockMember({ userId: mockUser2.id, owner: true })
 	],
 	userSettings: { muted: false }
 });
 
 const user1Participant: MeetingParticipant = createMockParticipants({
-	userId: 'user1',
+	userId: mockUser1.id,
 	sessionId: 'sessionIdUser1'
 });
 
@@ -49,6 +60,8 @@ const groupMeeting: MeetingBe = createMockMeeting({
 const setupBasicGroup = (): { user: UserEvent; store: RootStore } => {
 	const { result } = renderHook(() => useStore());
 	act(() => {
+		result.current.setLoginInfo(mockUser1.id, mockUser1.name);
+		result.current.setUserInfo(mockUser2);
 		result.current.addRoom(groupRoom);
 		result.current.addMeeting(groupMeeting);
 		result.current.meetingConnection(groupMeeting.id, false, undefined, false, undefined);
@@ -109,5 +122,28 @@ describe('Meeting sidebar', () => {
 		await user.click(toggleChatBtn);
 		const wrapperMeetingChat = screen.getByTestId('WrapperMeetingChat');
 		expect(wrapperMeetingChat).toHaveStyle(`background-image: url('papyrus-dark.png')`);
+	});
+
+	test('title of the accordion changes when a user is writing', async () => {
+		const { store } = setupBasicGroup();
+
+		const chatTitle = screen.getByTestId('chat_title');
+		expect(chatTitle).toBeVisible();
+
+		act(() => {
+			store.setIsWriting(groupRoom.id, mockUser2.id, true);
+		});
+
+		const isWritingText = await screen.findByTestId('is_writing_title');
+		expect(isWritingText).toBeVisible();
+		expect(chatTitle).not.toBeVisible();
+
+		act(() => {
+			store.setIsWriting(groupRoom.id, mockUser2.id, false);
+			jest.advanceTimersByTime(4000);
+		});
+
+		expect(isWritingText).not.toBeVisible();
+		expect(chatTitle).toBeVisible();
 	});
 });

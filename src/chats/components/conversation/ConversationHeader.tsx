@@ -135,6 +135,7 @@ const ConversationHeader = ({
 							size="small"
 							color="secondary"
 							$isWritingIsVisible={isWritingIsDefined}
+							data-testid="is_writing_text"
 						>
 							{writingLabel}
 						</CustomIsWritingText>
