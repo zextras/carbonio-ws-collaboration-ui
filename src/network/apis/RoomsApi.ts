@@ -214,7 +214,7 @@ class RoomsApi extends BaseAPI implements IRoomsApi {
 			.then((resp: AddRoomAttachmentResponse) => resp)
 			.catch((error) => {
 				useStore.getState().removePlaceholderMessage(roomId, uuid);
-				return error;
+				return Promise.reject(error);
 			});
 	}
 
