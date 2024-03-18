@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { pushHistory } from '@zextras/carbonio-shell-ui';
 import { find } from 'lodash';
 import { $iq, $msg, $pres, Strophe } from 'strophe.js';
 import { v4 as uuidGenerator } from 'uuid';
@@ -20,9 +21,12 @@ import { onSmartMarkers } from './handlers/smartMarkersHandler';
 import { carbonize, carbonizeMUC } from './utility/decodeJid';
 import { getLastUnreadMessage } from './utility/getLastUnreadMessage';
 import XMPPConnection, { XMPPRequestType } from './XMPPConnection';
+import { ROUTES } from '../../hooks/useRouting';
 import useStore from '../../store/Store';
 import IXMPPClient from '../../types/network/xmpp/IXMPPClient';
+import { RoomType } from '../../types/store/RoomTypes';
 import { dateToISODate } from '../../utils/dateUtils';
+import { RoomsApi } from '../index';
 
 const jabberData = 'jabber:x:data';
 
@@ -125,6 +129,12 @@ class XMPPClient implements IXMPPClient {
 
 	// Send a text message
 	sendChatMessage(roomId: string, message: string): void {
+		const placeholderRoom = roomId.split('placeholder-');
+		if (placeholderRoom[1]) {
+			this.sendChatMessageAfterRoomCreation(placeholderRoom[1], message);
+			return;
+		}
+
 		// Read messages before sending a new one
 		const lastMessageId = getLastUnreadMessage(roomId);
 		if (lastMessageId) this.readMessage(roomId, lastMessageId);
@@ -139,6 +149,21 @@ class XMPPClient implements IXMPPClient {
 			.up()
 			.c('markable', { xmlns: Strophe.NS.MARKERS });
 		this.xmppConnection.send({ type: XMPPRequestType.MESSAGE, elem: msg });
+	}
+
+	sendChatMessageAfterRoomCreation(userId: string, message: string): void {
+		const { setPlaceholderMessage, replacePlaceholderRoom } = useStore.getState();
+		setPlaceholderMessage({
+			roomId: `placeholder-${userId}`,
+			id: uuidGenerator(),
+			text: message
+		});
+
+		RoomsApi.addRoom({ type: RoomType.ONE_TO_ONE, membersIds: [userId] }).then((response) => {
+			this.sendChatMessage(response.id, message);
+			replacePlaceholderRoom(userId, response.id);
+			pushHistory(ROUTES.ROOM.replace(':roomId', response.id));
+		});
 	}
 
 	/**
@@ -322,6 +347,9 @@ class XMPPClient implements IXMPPClient {
 
 	// Send "I'm typing" information to all the users on the room
 	sendIsWriting(roomId: string): void {
+		// Avoid sending isWriting events to placeholder rooms
+		if (useStore.getState().rooms[roomId]?.placeholder) return;
+
 		const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat' }).c('composing', {
 			xmlns: Strophe.NS.CHAT_STATE
 		});
@@ -330,6 +358,9 @@ class XMPPClient implements IXMPPClient {
 
 	// Sending a paused event to all users on the room
 	sendPaused(roomId: string): void {
+		// Avoid sending paused events to placeholder rooms
+		if (useStore.getState().rooms[roomId]?.placeholder) return;
+
 		const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat' }).c('paused', {
 			xmlns: Strophe.NS.CHAT_STATE
 		});

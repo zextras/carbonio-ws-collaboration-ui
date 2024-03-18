@@ -299,5 +299,18 @@ export const useRoomsStoreSlice: StateCreator<RoomsStoreSlice> = (set: (...any: 
 			false,
 			'ROOMS/SET_PLACEHOLDER_ROOM'
 		);
+	},
+	replacePlaceholderRoom: (userId: string, newRoomId: string): void => {
+		set(
+			produce((draft: RootStore) => {
+				const placeholderRoomId = `placeholder-${userId}`;
+				draft.rooms[newRoomId] = draft.rooms[placeholderRoomId];
+				delete draft.rooms[placeholderRoomId];
+				delete draft.messages[placeholderRoomId];
+				delete draft.activeConversations[placeholderRoomId];
+			}),
+			false,
+			'ROOMS/CREATE_AND_REPLACE_PLACEHOLDER_ROOM'
+		);
 	}
 });
