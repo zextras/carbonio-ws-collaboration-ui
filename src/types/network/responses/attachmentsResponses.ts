@@ -19,3 +19,5 @@ export type GetPdfResponse = Response;
 export type GetImageThumbnailResponse = Blob;
 
 export type GetPdfThumbnailResponse = Response;
+
+export type ImageSize = { width: number; height: number };

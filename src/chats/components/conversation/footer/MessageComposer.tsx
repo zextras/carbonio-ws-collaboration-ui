@@ -30,7 +30,7 @@ import DeleteMessageModal from './DeleteMessageModal';
 import EmojiSelector from './EmojiSelector';
 import MessageArea from './MessageArea';
 import useMessage from '../../../../hooks/useMessage';
-import { RoomsApi } from '../../../../network';
+import { AttachmentsApi, RoomsApi } from '../../../../network';
 import {
 	getDraftMessage,
 	getFilesToUploadArray,
@@ -181,8 +181,6 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 		}
 	};
 
-	// TODO NON VA PIU IL FERMA UPLOAD E NON CARICA UNO IN FILA ALL'ALTRO COSI COME È ORA
-
 	const uploadAttachmentPromise = (file: FileToUpload, controller: AbortController): any => {
 		const fileName = file.file.name;
 		const { signal } = controller;
@@ -195,7 +193,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 		// we have to check if it's supported by the previewer or not
 		// if it's not supported we can avoid to send the area field
 		if (isImage) {
-			return getImageSize(file.localUrl)
+			return AttachmentsApi.getImageSize(file.localUrl)
 				.then((res) =>
 					RoomsApi.addRoomAttachment(
 						roomId,

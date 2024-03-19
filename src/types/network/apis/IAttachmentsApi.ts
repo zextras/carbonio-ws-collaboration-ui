@@ -11,7 +11,8 @@ import {
 	GetImageResponse,
 	GetImageThumbnailResponse,
 	GetPdfResponse,
-	GetPdfThumbnailResponse
+	GetPdfThumbnailResponse,
+	ImageSize
 } from '../responses/attachmentsResponses';
 
 interface IAttachmentsApi {
@@ -59,6 +60,7 @@ interface IAttachmentsApi {
 		shape?: string,
 		format?: string
 	): string;
+	getImageSize(url: string): Promise<ImageSize>;
 }
 
 export enum ImageQuality {
