@@ -35,13 +35,34 @@ const mockPaoloUser = createMockUser({
 	name: 'Paolo'
 });
 
+const mockLucaUser = createMockUser({
+	id: 'idLuca',
+	email: 'Luca@user.com',
+	name: 'Luca'
+});
+
+const mockGianniUser = createMockUser({
+	id: 'idGianni',
+	email: 'gianni@user.com',
+	name: 'Gianni'
+});
+
+const mockQuintoUser = createMockUser({
+	id: 'idQuinto',
+	email: 'quinto@user.com',
+	name: 'Quinto'
+});
+
 const mockedRoom: RoomBe = createMockRoom({
 	id: 'roomTest',
 	type: RoomType.GROUP,
 	name: 'name',
 	members: [
 		createMockMember({ userId: mockPaoloUser.id, owner: true }),
-		createMockMember({ userId: mockRobertoUser.id })
+		createMockMember({ userId: mockRobertoUser.id }),
+		createMockMember({ userId: mockLucaUser.id }),
+		createMockMember({ userId: mockGianniUser.id }),
+		createMockMember({ userId: mockQuintoUser.id })
 	]
 });
 
@@ -98,5 +119,27 @@ describe('Conversation header test', () => {
 		});
 
 		expect(isWriting).not.toBeVisible();
+	});
+
+	test('is writing label for four or more users that are writing', async () => {
+		const store: RootStore = useStore.getState();
+		act(() => {
+			store.addRoom(mockedRoom);
+			store.setLoginInfo(mockPaoloUser.id, 'Paolo');
+			store.setUserInfo(mockRobertoUser);
+			store.setUserInfo(mockLucaUser);
+			store.setUserInfo(mockGianniUser);
+			store.setUserInfo(mockQuintoUser);
+
+			store.setIsWriting(mockedRoom.id, mockRobertoUser.id, true);
+			store.setIsWriting(mockedRoom.id, mockGianniUser.id, true);
+			store.setIsWriting(mockedRoom.id, mockLucaUser.id, true);
+			store.setIsWriting(mockedRoom.id, mockQuintoUser.id, true);
+		});
+
+		setup(<ConversationHeader roomId={mockedRoom.id} setInfoPanelOpen={jest.fn()} />);
+
+		const isWriting = await screen.findByText(/Roberto and 3 others are typing.../i);
+		expect(isWriting).toBeInTheDocument();
 	});
 });

@@ -37,12 +37,18 @@ const mockUser2 = createMockUser({
 	name: 'User 2'
 });
 
+const mockUser3 = createMockUser({
+	id: 'user3',
+	name: 'User 3'
+});
+
 const groupRoom: RoomBe = createMockRoom({
 	id: 'room-test',
 	type: RoomType.GROUP,
 	members: [
 		createMockMember({ userId: mockUser1.id, owner: true }),
-		createMockMember({ userId: mockUser2.id, owner: true })
+		createMockMember({ userId: mockUser2.id, owner: true }),
+		createMockMember({ userId: mockUser3.id, owner: true })
 	],
 	userSettings: { muted: false }
 });
@@ -145,5 +151,16 @@ describe('Meeting sidebar', () => {
 
 		expect(isWritingText).not.toBeVisible();
 		expect(chatTitle).toBeVisible();
+	});
+	test('title of the accordion when two or more users are typing', async () => {
+		const { store } = setupBasicGroup();
+
+		act(() => {
+			store.setIsWriting(groupRoom.id, mockUser2.id, true);
+			store.setIsWriting(groupRoom.id, mockUser3.id, true);
+		});
+
+		const isWritingText = await screen.findByText(/2 people are typing.../i);
+		expect(isWritingText).toBeVisible();
 	});
 });
