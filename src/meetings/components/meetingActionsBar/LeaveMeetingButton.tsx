@@ -41,8 +41,6 @@ const LeaveMeetingButton = ({ isHoovering }: LeaveMeetingButtonProps): ReactElem
 	const [active, setActive] = useState(false);
 	const [buttonLabel, setButtonLabel] = useState('');
 
-	console.log(buttonLabel);
-
 	const activeButton = useCallback(
 		(event) => {
 			event.stopPropagation();
