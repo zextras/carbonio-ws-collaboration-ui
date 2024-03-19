@@ -71,6 +71,7 @@ interface IRoomsApi {
 		roomsId: string[],
 		messagesToForward: TextMessage[]
 	): Promise<ForwardMessagesResponse>;
+	replacePlaceholderRoom(userId: string, text: string, file?: File): Promise<AddRoomResponse>;
 }
 
 export default IRoomsApi;
