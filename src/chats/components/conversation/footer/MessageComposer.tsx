@@ -71,25 +71,6 @@ const UploadSpinnerWrapper = styled(Container)`
 
 const SendIconButton = styled(IconButton)<{ alt?: string }>``;
 
-const getImageSize = (url: string): Promise<{ width: number; height: number }> =>
-	new Promise((resolve, reject) => {
-		try {
-			const img = new Image();
-
-			img.addEventListener(
-				'load',
-				() => {
-					resolve({ width: img.naturalWidth, height: img.naturalHeight });
-				},
-				{ once: true }
-			);
-
-			img.src = url;
-		} catch (err) {
-			reject(err);
-		}
-	});
-
 const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId }) => {
 	const xmppClient = useStore(getXmppClient);
 
