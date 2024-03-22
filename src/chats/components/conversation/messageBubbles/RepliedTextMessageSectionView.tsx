@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next';
 import styled, { DefaultTheme } from 'styled-components';
 
 import AttachmentSmallView from './AttachmentSmallView';
+import { ANIMATION_STYLES } from './BubbleAnimationsGlobalStyle';
 import BubbleFooter from './BubbleFooter';
 import BubbleHeader from './BubbleHeader';
 import useMessage from '../../../../hooks/useMessage';
@@ -77,49 +78,43 @@ const RepliedTextMessageSectionView: FC<RepliedTextMessageSectionViewProps> = ({
 		);
 	};
 
+	const setStyle = useCallback(
+		(otherMessageStyle: ANIMATION_STYLES, myMessageStyle: ANIMATION_STYLES) => {
+			const messageScrollTo = window.parent.document.getElementById(`message-${repliedMessage.id}`);
+			if (messageScrollTo) {
+				const childNode = messageScrollTo.childNodes[0] as HTMLElement;
+				childNode.style.animation = `${
+					sessionId && sessionId !== replyUserInfo?.id ? otherMessageStyle : myMessageStyle
+				} 1.2s 0.2s ease-in-out`;
+				messageScrollTo.style.animation = `${
+					sessionId && sessionId !== replyUserInfo?.id ? otherMessageStyle : myMessageStyle
+				} 1.2s 0.2s ease-in-out`;
+			}
+		},
+		[repliedMessage.id, replyUserInfo, sessionId]
+	);
+
 	const scrollTo = useCallback(() => {
 		const messageScrollTo = window.parent.document.getElementById(`message-${repliedMessage.id}`);
 		if (messageScrollTo && replyUserInfo) {
 			if (!isInViewport(messageScrollTo)) messageScrollTo.scrollIntoView({ block: 'center' });
-			const childNode = messageScrollTo.childNodes[0] as HTMLElement;
 			switch (darkModeSettings) {
 				case 'enabled': {
-					childNode.style.animation = `${
-						sessionId && sessionId !== replyUserInfo.id
-							? 'highlightothersmessagebubbledark'
-							: 'highlightmymessagebubbledark'
-					} 1.2s 0.2s ease-in-out`;
-					messageScrollTo.style.animation = `${
-						sessionId && sessionId !== replyUserInfo.id
-							? 'highlightothersmessagebubbledark'
-							: 'highlightmymessagebubbledark'
-					} 1.2s 0.2s ease-in-out`;
+					setStyle(
+						ANIMATION_STYLES.HIGHLIGHT_MESSAGE_DARK,
+						ANIMATION_STYLES.HIGHLIGHT_MY_MESSAGE_DARK
+					);
 					break;
 				}
 				case 'disabled': {
-					childNode.style.animation = `${
-						sessionId && sessionId !== replyUserInfo.id
-							? 'highlightothersmessagebubblelight'
-							: 'highlightmymessagebubblelight'
-					} 1.2s 0.2s ease-in-out`;
-					messageScrollTo.style.animation = `${
-						sessionId && sessionId !== replyUserInfo.id
-							? 'highlightothersmessagebubblelight'
-							: 'highlightmymessagebubblelight'
-					} 1.2s 0.2s ease-in-out`;
+					setStyle(
+						ANIMATION_STYLES.HIGHLIGHT_MESSAGE_LIGHT,
+						ANIMATION_STYLES.HIGHLIGHT_MY_MESSAGE_LIGHT
+					);
 					break;
 				}
 				case 'auto': {
-					childNode.style.animation = `${
-						sessionId && sessionId !== replyUserInfo.id
-							? 'highlightothersmessagebubble'
-							: 'highlightmymessagebubble'
-					} 1.2s 0.2s ease-in-out`;
-					messageScrollTo.style.animation = `${
-						sessionId && sessionId !== replyUserInfo.id
-							? 'highlightothersmessagebubble'
-							: 'highlightmymessagebubble'
-					} 1.2s 0.2s ease-in-out`;
+					setStyle(ANIMATION_STYLES.HIGHLIGHT_MESSAGE, ANIMATION_STYLES.HIGHLIGHT_MY_MESSAGE);
 					break;
 				}
 				default:
@@ -130,7 +125,7 @@ const RepliedTextMessageSectionView: FC<RepliedTextMessageSectionViewProps> = ({
 				(messageScrollTo.firstChild as HTMLElement).style.animation = '';
 			}, 1400);
 		}
-	}, [repliedMessage.id, replyUserInfo, darkModeSettings, sessionId]);
+	}, [repliedMessage.id, replyUserInfo, darkModeSettings, setStyle]);
 
 	const textToShow = useMemo(() => {
 		if (repliedMessage.type === MessageType.TEXT_MSG) {
