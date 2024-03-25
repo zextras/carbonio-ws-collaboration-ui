@@ -40,7 +40,10 @@ const displayWaitingListNotification = (meetingId: string): void => {
 			)
 		});
 	}
-	if (ChatsNotificationsSettings.WaitingRoomAccessNotificationsSounds) {
+	if (
+		ChatsNotificationsSettings.WaitingRoomAccessNotifications &&
+		ChatsNotificationsSettings.WaitingRoomAccessNotificationsSounds
+	) {
 		sendAudioFeedback(MeetingSoundFeedback.NEW_WAITING_USER);
 	}
 };
