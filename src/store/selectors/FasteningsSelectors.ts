@@ -14,7 +14,7 @@ export const getFasteningSelector = (
 	roomId: string,
 	stanzaId: string
 ): MessageFastening | undefined => {
-	if (state.fastenings[roomId] && state.fastenings[roomId][stanzaId]) {
+	if (state.fastenings?.[roomId]?.[stanzaId]) {
 		return last(state.fastenings[roomId][stanzaId]);
 	}
 	return undefined;
