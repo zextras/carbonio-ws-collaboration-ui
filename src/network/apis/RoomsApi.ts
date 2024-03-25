@@ -17,7 +17,6 @@ import {
 	RoomEditableFields,
 	RoomType
 } from '../../types/network/models/roomBeTypes';
-import { DeleteMeetingResponse } from '../../types/network/responses/meetingsResponses';
 import {
 	AddRoomAttachmentResponse,
 	AddRoomMemberResponse,
@@ -94,13 +93,17 @@ class RoomsApi extends BaseAPI implements IRoomsApi {
 	}
 
 	public deleteRoom(roomId: string): Promise<DeleteRoomResponse> {
+		return this.fetchAPI(`rooms/${roomId}`, RequestType.DELETE);
+	}
+
+	public deleteRoomAndMeeting(roomId: string): Promise<DeleteRoomResponse> {
 		const meetingId = useStore.getState().rooms[roomId]?.meetingId;
-		const deleteRoom = (): Promise<DeleteMeetingResponse> =>
-			this.fetchAPI(`rooms/${roomId}`, RequestType.DELETE);
 		if (meetingId) {
-			return MeetingsApi.deleteMeeting(meetingId).then(deleteRoom).catch(deleteRoom);
+			return MeetingsApi.deleteMeeting(meetingId)
+				.then(() => this.deleteRoom(roomId))
+				.catch(() => this.deleteRoom(roomId));
 		}
-		return deleteRoom();
+		return this.deleteRoom(roomId);
 	}
 
 	public getURLRoomPicture = (roomId: string): string =>

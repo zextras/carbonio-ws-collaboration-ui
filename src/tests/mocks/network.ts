@@ -95,6 +95,11 @@ jest.mock('../../network', () => {
 					const result = mockedDeleteRoomRequest();
 					result ? resolve(result) : reject(new Error(noResultProvided));
 				}),
+			deleteRoomAndMeeting: (): Promise<DeleteRoomResponse> =>
+				new Promise((resolve, reject) => {
+					const result = mockedDeleteRoomRequest();
+					result ? resolve(result) : reject(new Error(noResultProvided));
+				}),
 			clearRoomHistory: (): Promise<ClearRoomHistoryResponse> =>
 				new Promise((resolve, reject) => {
 					const result = mockedClearHistoryRequest();

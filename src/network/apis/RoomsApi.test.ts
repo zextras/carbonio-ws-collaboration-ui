@@ -112,7 +112,7 @@ describe('Rooms API', () => {
 		});
 	});
 
-	test('deleteRoom without an associated meeting is called correctly', async () => {
+	test('deleteRoom is called correctly', async () => {
 		const room = createMockRoom();
 		// Send deleteRoom request
 		await roomsApi.deleteRoom(room.id);
@@ -129,12 +129,29 @@ describe('Rooms API', () => {
 		});
 	});
 
-	test('deleteRoom with an associated meeting is called correctly', async () => {
+	test('deleteRoomAndMeeting without an associated meeting is called correctly', async () => {
+		const room = createMockRoom();
+		// Send deleteRoom request
+		await roomsApi.deleteRoomAndMeeting(room.id);
+
+		// Set appropriate headers
+		const headers = new Headers();
+		headers.append(contentType, applicationJson);
+
+		// Check if fetch is called with the correct parameters
+		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/rooms/${room.id}`, {
+			method: 'DELETE',
+			headers,
+			body: undefined
+		});
+	});
+
+	test('deleteRoomAndMeeting with an associated meeting is called correctly', async () => {
 		const room = createMockRoom();
 		const meeting = createMockMeeting({ roomId: room.id });
 		useStore.getState().addMeeting(meeting);
 		// Send deleteRoom request
-		await roomsApi.deleteRoom(room.id);
+		await roomsApi.deleteRoomAndMeeting(room.id);
 
 		// Set appropriate headers
 		const headers = new Headers();
