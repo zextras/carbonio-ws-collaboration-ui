@@ -16,7 +16,7 @@ export const useIsWritingLabel = (
 	roomId: string,
 	isInsideSidebar?: boolean
 ): string | undefined => {
-	const [t] = useTranslation();
+	const { t } = useTranslation();
 	const isTypingLabel = t('status.isTyping', 'is typing...');
 	const areTypingLabel = t('status.areTyping', 'are typing...');
 

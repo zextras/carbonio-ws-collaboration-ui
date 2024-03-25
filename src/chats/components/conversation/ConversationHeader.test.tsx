@@ -90,7 +90,6 @@ describe('Conversation header test', () => {
 		setup(<ConversationHeader roomId={mockedRoom.id} setInfoPanelOpen={jest.fn()} />);
 		expect(screen.getByTestId('ConversationHeaderMeetingButton')).toBeInTheDocument();
 	});
-
 	test("Meeting button isn't displayed when canVideoCall capability is set to false", async () => {
 		const store: RootStore = useStore.getState();
 		store.addRoom(mockedRoom);
@@ -98,12 +97,14 @@ describe('Conversation header test', () => {
 		setup(<ConversationHeader roomId={mockedRoom.id} setInfoPanelOpen={jest.fn()} />);
 		expect(screen.queryByTestId('ConversationHeaderMeetingButton')).not.toBeInTheDocument();
 	});
+});
 
+describe('isWriting functionality', () => {
 	test('is writing appears when someone is writing and disappear if not', async () => {
 		const store: RootStore = useStore.getState();
 		act(() => {
 			store.addRoom(mockedRoom);
-			store.setLoginInfo(mockPaoloUser.id, 'Paolo');
+			store.setLoginInfo(mockPaoloUser.id, mockPaoloUser.name);
 			store.setUserInfo(mockRobertoUser);
 			store.setIsWriting(mockedRoom.id, mockRobertoUser.id, true);
 		});
@@ -125,7 +126,7 @@ describe('Conversation header test', () => {
 		const store: RootStore = useStore.getState();
 		act(() => {
 			store.addRoom(mockedRoom);
-			store.setLoginInfo(mockPaoloUser.id, 'Paolo');
+			store.setLoginInfo(mockPaoloUser.id, mockPaoloUser.name);
 			store.setUserInfo(mockRobertoUser);
 			store.setUserInfo(mockLucaUser);
 			store.setUserInfo(mockGianniUser);
@@ -139,7 +140,7 @@ describe('Conversation header test', () => {
 
 		setup(<ConversationHeader roomId={mockedRoom.id} setInfoPanelOpen={jest.fn()} />);
 
-		const isWriting = await screen.findByText(/Roberto and 3 others are typing.../i);
+		const isWriting = await screen.findByText(`${mockRobertoUser.name} and 3 others are typing...`);
 		expect(isWriting).toBeInTheDocument();
 	});
 });

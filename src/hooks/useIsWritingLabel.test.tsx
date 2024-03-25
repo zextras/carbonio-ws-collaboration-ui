@@ -8,7 +8,12 @@ import { renderHook } from '@testing-library/react-hooks';
 
 import { useIsWritingLabel } from './useIsWritingLabel';
 import useStore from '../store/Store';
-import { createMockMember, createMockRoom } from '../tests/createMock';
+import {
+	createMockMeeting,
+	createMockMember,
+	createMockParticipants,
+	createMockRoom
+} from '../tests/createMock';
 import { RoomBe, RoomType } from '../types/network/models/roomBeTypes';
 import { UserBe } from '../types/network/models/userBeTypes';
 import { RootStore } from '../types/store/StoreTypes';
@@ -57,6 +62,20 @@ const testRoom: RoomBe = createMockRoom({
 		createMockMember({ userId: user5Info.id })
 	]
 });
+
+const mockMeeting = createMockMeeting({
+	roomId: testRoom.id,
+	participants: [
+		createMockParticipants({ userId: user2Info.id }),
+		createMockParticipants({ userId: user1Info.id })
+	]
+});
+
+jest.mock('react-i18next', () => ({
+	useTranslation: (): { t: (str: string) => string } => ({
+		t: (str: string): string => str
+	})
+}));
 
 describe('useIsWritingLabel', () => {
 	test('one user is writing', () => {

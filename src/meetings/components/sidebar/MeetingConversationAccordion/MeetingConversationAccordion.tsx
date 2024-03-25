@@ -4,17 +4,17 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { FC, useCallback, useMemo } from 'react';
 
-import { Badge, Container, IconButton, Row, Text, Tooltip } from '@zextras/carbonio-design-system';
+import { Badge, Container, IconButton, Row, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
+import MeetingChatAccordionTitle from './MeetingChatAccordionTitle';
 import papyrusDark from '../../../../chats/assets/papyrus-dark.png';
 import papyrus from '../../../../chats/assets/papyrus.png';
 import Chat from '../../../../chats/components/conversation/Chat';
 import { useDarkReaderStatus } from '../../../../hooks/useDarkReaderStatus';
-import { useIsWritingLabel } from '../../../../hooks/useIsWritingLabel';
 import { getMeetingChatVisibility } from '../../../../store/selectors/ActiveMeetingSelectors';
 import { getRoomMutedSelector } from '../../../../store/selectors/RoomsSelectors';
 import { getRoomUnreadsSelector } from '../../../../store/selectors/UnreadsCounterSelectors';
@@ -35,25 +35,6 @@ const WrapperMeetingChat = styled(Container)<{ $darkModeActive: boolean }>`
 		$darkModeActive ? papyrusDark : papyrus}');
 `;
 
-const IsWritingLabelText = styled(Text)<{
-	$isWritingIsVisible: boolean;
-}>`
-	opacity: 0;
-	transition: opacity 0.3s ease;
-	${({ $isWritingIsVisible }: { $isWritingIsVisible: boolean }): string | false =>
-		$isWritingIsVisible && 'opacity: 1;'}
-`;
-
-const ChatLabelText = styled(Text)<{
-	$isWritingIsVisible: boolean;
-}>`
-	position: absolute;
-	opacity: 1;
-	transition: opacity 0.3s ease;
-	${({ $isWritingIsVisible }: { $isWritingIsVisible: boolean }): string | false =>
-		$isWritingIsVisible && 'opacity: 0;'}
-`;
-
 const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({
 	roomId,
 	meetingId
@@ -63,26 +44,11 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({
 	const minimizeChatLabel = t('meeting.minimizeChat', 'Minimize chat');
 	const expandChatLabel = t('meeting.expandChat', 'Expand chat');
 	const collapseChatLabel = t('meeting.collapseChat', 'Collapse chat');
-	const chatLabel = t('chat', 'Chat');
 
 	const unreadMessagesCount = useStore((store) => getRoomUnreadsSelector(store, roomId || ''));
 	const roomMuted = useStore((state) => getRoomMutedSelector(state, roomId));
 	const meetingChatVisibility = useStore((store) => getMeetingChatVisibility(store, meetingId));
 	const setMeetingChatVisibility = useStore((store) => store.setMeetingChatVisibility);
-
-	const isWritingLabel = useIsWritingLabel(roomId, true);
-	const [isWritingIsDefined, setIsWritingIsDefined] = useState(false);
-	const [writingLabel, setWritingLabel] = useState('');
-
-	useEffect(() => {
-		if (isWritingLabel === undefined) {
-			setIsWritingIsDefined(false);
-			setTimeout(() => setWritingLabel(''), 400);
-		} else {
-			setIsWritingIsDefined(true);
-			setWritingLabel(isWritingLabel);
-		}
-	}, [isWritingLabel]);
 
 	const isDarkModeEnabled = useDarkReaderStatus();
 
@@ -147,26 +113,7 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({
 				borderRadius="none"
 				padding={{ vertical: 'extrasmall', left: 'large', right: 'medium' }}
 			>
-				<Container width="70%" crossAlignment="flex-start">
-					{
-						<ChatLabelText
-							overflow="ellipsis"
-							$isWritingIsVisible={isWritingIsDefined}
-							data-testid="chat_title"
-						>
-							{chatLabel}
-						</ChatLabelText>
-					}
-					{
-						<IsWritingLabelText
-							overflow="ellipsis"
-							$isWritingIsVisible={isWritingIsDefined}
-							data-testid="is_writing_title"
-						>
-							{writingLabel}
-						</IsWritingLabelText>
-					}
-				</Container>
+				<MeetingChatAccordionTitle roomId={roomId} />
 				<Container width="30%" orientation="horizontal" mainAlignment="flex-end">
 					{isChatOpenOrFullExpanded && (
 						<Tooltip label={!chatFullExpanded ? extendChatLabel : minimizeChatLabel}>

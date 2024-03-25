@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { UserEvent } from '@testing-library/user-event/setup/setup';
 
@@ -88,7 +88,7 @@ describe('Meeting sidebar', () => {
 		expect(chatAccordion).toHaveStyle('height: 50%');
 		const composer = await screen.findByTestId('textAreaComposer');
 		expect(composer).toBeInTheDocument();
-		await user.click(toggleChatBtn);
+		await waitFor(() => user.click(toggleChatBtn));
 		expect(chatAccordion).toHaveStyle('height: 2.75rem');
 	});
 	test('open - expand - collapse chat accordion', async () => {
@@ -96,10 +96,10 @@ describe('Meeting sidebar', () => {
 		const toggleChatBtn = screen.getByTestId('toggleChatStatus');
 		await user.click(toggleChatBtn);
 		const toggleChatExpanded = screen.getByTestId('toggleChatExpanded');
-		await user.click(toggleChatExpanded);
+		await waitFor(() => user.click(toggleChatExpanded));
 		const chatAccordion = await screen.findByTestId('MeetingConversationAccordion');
 		expect(chatAccordion).toHaveStyle('height: 100%');
-		await user.click(toggleChatExpanded);
+		await waitFor(() => user.click(toggleChatExpanded));
 		expect(chatAccordion).toHaveStyle('height: 50%');
 	});
 	test('open - expand - close chat accordion', async () => {
@@ -107,17 +107,17 @@ describe('Meeting sidebar', () => {
 		const toggleChatBtn = screen.getByTestId('toggleChatStatus');
 		await user.click(toggleChatBtn);
 		const toggleChatExpanded = screen.getByTestId('toggleChatExpanded');
-		await user.click(toggleChatExpanded);
+		await waitFor(() => user.click(toggleChatExpanded));
 		const chatAccordion = await screen.findByTestId('MeetingConversationAccordion');
 		expect(chatAccordion).toHaveStyle('height: 100%');
-		await user.click(toggleChatBtn);
+		await waitFor(() => user.click(toggleChatBtn));
 		expect(toggleChatBtn).toHaveStyle('height: fit');
 	});
 	test('Display meeting chat with darkMode disabled', async () => {
 		mockDarkReaderIsEnabled.mockReturnValueOnce(false);
 		const { user } = setupBasicGroup();
 		const toggleChatBtn = screen.getByTestId('toggleChatStatus');
-		await user.click(toggleChatBtn);
+		await waitFor(() => user.click(toggleChatBtn));
 		const wrapperMeetingChat = screen.getByTestId('WrapperMeetingChat');
 		expect(wrapperMeetingChat).toHaveStyle(`background-image: url('papyrus.png')`);
 	});
@@ -125,7 +125,7 @@ describe('Meeting sidebar', () => {
 		mockDarkReaderIsEnabled.mockReturnValueOnce(true);
 		const { user } = setupBasicGroup();
 		const toggleChatBtn = screen.getByTestId('toggleChatStatus');
-		await user.click(toggleChatBtn);
+		await waitFor(() => user.click(toggleChatBtn));
 		const wrapperMeetingChat = screen.getByTestId('WrapperMeetingChat');
 		expect(wrapperMeetingChat).toHaveStyle(`background-image: url('papyrus-dark.png')`);
 	});
@@ -162,5 +162,13 @@ describe('Meeting sidebar', () => {
 
 		const isWritingText = await screen.findByText(/2 people are typing.../i);
 		expect(isWritingText).toBeVisible();
+
+		act(() => {
+			store.setIsWriting(groupRoom.id, mockUser2.id, false);
+			store.setIsWriting(groupRoom.id, mockUser3.id, false);
+			jest.advanceTimersByTime(4000);
+		});
+
+		expect(isWritingText).not.toBeVisible();
 	});
 });
