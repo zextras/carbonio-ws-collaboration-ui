@@ -141,8 +141,8 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 		[canSeeMessageReads, lastMessageOfRoom]
 	);
 
-	const messageToDisplay = useMemo((): JSX.Element | string | undefined => {
-		if (isWritingLabel === undefined && lastMessageOfRoom) {
+	const setLastMessageRoomText = useMemo(() => {
+		if (lastMessageOfRoom) {
 			switch (lastMessageOfRoom.type) {
 				case MessageType.TEXT_MSG: {
 					if (lastMessageOfRoom.deleted) {
@@ -168,18 +168,18 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 					return 'Message to replace';
 			}
 		}
+		return undefined;
+	}, [deletedMessageLabel, lastMessageOfRoom, roomType, sessionId, userNameOfLastMessageOfRoom]);
+
+	const messageToDisplay = useMemo((): JSX.Element | string | undefined => {
+		if (isWritingLabel === undefined && lastMessageOfRoom) {
+			return setLastMessageRoomText;
+		}
 		if (isWritingLabel !== undefined) {
 			return isWritingLabel;
 		}
 		return undefined;
-	}, [
-		isWritingLabel,
-		lastMessageOfRoom,
-		roomType,
-		sessionId,
-		userNameOfLastMessageOfRoom,
-		deletedMessageLabel
-	]);
+	}, [isWritingLabel, lastMessageOfRoom, setLastMessageRoomText]);
 
 	const UnreadCounter = useMemo(
 		() =>
