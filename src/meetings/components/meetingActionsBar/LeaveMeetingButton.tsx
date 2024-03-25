@@ -63,13 +63,17 @@ const LeaveMeetingButton = ({ isHoovering }: LeaveMeetingButtonProps): ReactElem
 	useEffect(() => {
 		const handleClick = (): void => {
 			setActive(false);
-			setTimeout(() => setButtonLabel(''), 800);
+			setTimeout(() => {
+				if (buttonLabel.length !== 0) {
+					setButtonLabel('');
+				}
+			}, 800);
 		};
 		document.addEventListener('click', handleClick);
 		return () => {
 			document.removeEventListener('click', handleClick);
 		};
-	}, []);
+	}, [buttonLabel]);
 
 	useEffect(() => {
 		if (!isHoovering) {
