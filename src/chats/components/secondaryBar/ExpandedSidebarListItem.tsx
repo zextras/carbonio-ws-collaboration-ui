@@ -15,16 +15,13 @@ import {
 	Text,
 	Tooltip
 } from '@zextras/carbonio-design-system';
-import { map } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
+import { useIsWritingLabel } from '../../../hooks/useIsWritingLabel';
 import useMessage from '../../../hooks/useMessage';
 import useRouting from '../../../hooks/useRouting';
-import {
-	getDraftMessage,
-	getRoomIsWritingList
-} from '../../../store/selectors/ActiveConversationsSelectors';
+import { getDraftMessage } from '../../../store/selectors/ActiveConversationsSelectors';
 import { getLastMessageIdSelector } from '../../../store/selectors/MessagesSelectors';
 import {
 	getRoomMutedSelector,
@@ -59,8 +56,6 @@ const ListItem = styled(Container)<{ $selected: boolean }>`
 
 const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomId }) => {
 	const [t] = useTranslation();
-	const isTypingLabel = t('status.isTyping', 'is typing...');
-	const areTypingLabel = t('status.areTyping', 'are typing...');
 	const draftLabel = t('message.draft', 'draft');
 	const deletedMessageLabel = t('message.deletedMessage', 'Deleted message');
 
@@ -74,7 +69,6 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 	const unreadMessagesCount = useStore((store) => getRoomUnreadsSelector(store, roomId));
 	const roomType = useStore((state) => getRoomTypeSelector(state, roomId));
 	const roomName = useStore((state) => getRoomNameSelector(state, roomId));
-	const usersWritingList = useStore((state) => getRoomIsWritingList(state, roomId));
 	const isConversationSelected = useStore((state) => getSelectedConversation(state, roomId));
 	const userNameOfLastMessageOfRoom = useStore((store) =>
 		lastMessageOfRoom && lastMessageOfRoom.type === MessageType.TEXT_MSG
@@ -89,13 +83,15 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 		getCapability(store, CapabilityType.CAN_SEE_MESSAGE_READS)
 	);
 
+	const isWritingLabel = useIsWritingLabel(roomId, true);
+
 	const ackIcon = useMemo(() => {
 		if (
 			lastMessageOfRoom &&
 			lastMessageOfRoom.type === MessageType.TEXT_MSG &&
 			!lastMessageOfRoom.deleted &&
 			lastMessageOfRoom.from === sessionId &&
-			!usersWritingList
+			!isWritingLabel
 		) {
 			switch (lastMessageOfRoom.read) {
 				case MarkerStatus.READ:
@@ -111,7 +107,7 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 			}
 		}
 		return undefined;
-	}, [lastMessageOfRoom, sessionId, usersWritingList]);
+	}, [lastMessageOfRoom, sessionId, isWritingLabel]);
 
 	const dropdownTooltip = useMemo(() => {
 		if (
@@ -178,26 +174,14 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 	}, [deletedMessageLabel, lastMessageOfRoom, roomType, sessionId, userNameOfLastMessageOfRoom]);
 
 	const messageToDisplay = useMemo((): JSX.Element | string | undefined => {
-		if (
-			((usersWritingList && usersWritingList.length === 0) || !usersWritingList) &&
-			lastMessageOfRoom
-		) {
+		if (isWritingLabel === undefined && lastMessageOfRoom) {
 			return setLastMessageRoomText;
 		}
-		if (usersWritingList) {
-			if (usersWritingList.length === 1) {
-				return `${usersWritingList[0].split(/(\s+)/)[0]} ${isTypingLabel}`;
-			}
-			if (usersWritingList.length > 1) {
-				const usersWritingListNames: string[] = [];
-				map(usersWritingList, (user) => {
-					usersWritingListNames.push(user.split(/(\s+)/)[0]);
-				});
-				return `${usersWritingListNames.join(', ')} ${areTypingLabel}`;
-			}
+		if (isWritingLabel !== undefined) {
+			return isWritingLabel;
 		}
 		return undefined;
-	}, [usersWritingList, lastMessageOfRoom, setLastMessageRoomText, isTypingLabel, areTypingLabel]);
+	}, [isWritingLabel, lastMessageOfRoom, setLastMessageRoomText]);
 
 	const UnreadCounter = useMemo(
 		() =>
@@ -261,7 +245,7 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 								)}
 								{lastMessageOfRoom?.type === MessageType.TEXT_MSG &&
 									lastMessageOfRoom.attachment &&
-									!usersWritingList && (
+									!isWritingLabel && (
 										<Container width="fit" padding={{ right: 'extrasmall' }}>
 											<Icon size="small" icon="FileTextOutline" color="gray" />
 										</Container>
