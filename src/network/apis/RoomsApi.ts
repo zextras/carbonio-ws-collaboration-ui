@@ -193,7 +193,7 @@ class RoomsApi extends BaseAPI implements IRoomsApi {
 		if (placeholderRoom[1]) {
 			return this.replacePlaceholderRoom(
 				placeholderRoom[1],
-				optionalFields.description || '',
+				optionalFields.description ?? '',
 				file
 			).then((response) => {
 				this.addRoomAttachment(response.id, file, optionalFields, signal);

@@ -34,7 +34,7 @@ const GoToPrivateChatAction: FC<GoToPrivateChatProps> = ({ memberId, isParticipa
 				room.type === RoomType.ONE_TO_ONE &&
 				!!find(room.members, (user) => user.userId === memberId)
 		);
-		const roomId = oneToOneChatExist?.id || `placeholder-${memberId}`;
+		const roomId = oneToOneChatExist?.id ?? `placeholder-${memberId}`;
 		if (!oneToOneChatExist) setPlaceholderRoom(memberId);
 		goToRoomPage(roomId);
 	}, [goToRoomPage, memberId, setPlaceholderRoom]);

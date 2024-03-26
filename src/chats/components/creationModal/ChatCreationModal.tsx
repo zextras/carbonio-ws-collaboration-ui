@@ -111,7 +111,7 @@ const ChatCreationModal = ({
 					room.type === RoomType.ONE_TO_ONE &&
 					!!find(room.members, (member) => member.userId === userId)
 			);
-			const roomId = oneToOneChatExist?.id || `placeholder-${userId}`;
+			const roomId = oneToOneChatExist?.id ?? `placeholder-${userId}`;
 			if (!oneToOneChatExist) setPlaceholderRoom(userId);
 			onModalClose();
 			goToRoomPage(roomId);

@@ -32,13 +32,13 @@ export const getRoomNameSelector = (state: RootStore, id: string): string => {
 	const room: Room = state.rooms[id];
 	if (!room) return '';
 	if (room.type === RoomType.ONE_TO_ONE) {
-		const otherUser = find(room.members || [], (member) => member.userId !== state.session.id);
+		const otherUser = find(room.members ?? [], (member) => member.userId !== state.session.id);
 		if (size(room.members) > 0 && otherUser) {
 			return state.users[otherUser.userId]?.name || state.users[otherUser.userId]?.email || '';
 		}
 		return '';
 	}
-	return state.rooms[id].name || '';
+	return state.rooms[id].name ?? '';
 };
 
 export const getRoomTypeSelector = (state: RootStore, id: string): RoomType =>
@@ -127,4 +127,4 @@ export const getMeetingIdFromRoom = (state: RootStore, roomId: string): string |
 	state.rooms[roomId]?.meetingId;
 
 export const getIsPlaceholderRoom = (state: RootStore, roomId: string): boolean =>
-	state.rooms[roomId]?.placeholder || false;
+	state.rooms[roomId]?.placeholder ?? false;
