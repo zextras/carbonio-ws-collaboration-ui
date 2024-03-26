@@ -199,6 +199,7 @@ export const ActionsAccordion: FC<ActionAccordionProps> = ({
 	return (
 		<CustomAccordion
 			key="listAccordions"
+			data-testid="actionsAccordion"
 			items={infoDetails}
 			borderRadius="none"
 			background={isInsideMeeting ? 'gray0' : 'gray5'}

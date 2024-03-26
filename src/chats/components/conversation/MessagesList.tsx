@@ -12,7 +12,6 @@ import styled from 'styled-components';
 
 import AnimationGlobalStyle from './messageBubbles/BubbleAnimationsGlobalStyle';
 import MessageFactory from './messageBubbles/MessageFactory';
-import WritingBubble from './messageBubbles/WritingBubble';
 import MessageHistoryLoader from './MessageHistoryLoader';
 import ScrollButton from './ScrollButton';
 import useFirstUnreadMessage from './useFirstUnreadMessage';
@@ -21,8 +20,7 @@ import {
 	getHistoryIsFullyLoaded,
 	getHistoryIsLoadedDisabled,
 	getIdMessageWhereScrollIsStopped,
-	getInputHasFocus,
-	getRoomIsWritingList
+	getInputHasFocus
 } from '../../../store/selectors/ActiveConversationsSelectors';
 import { getXmppClient } from '../../../store/selectors/ConnectionSelector';
 import { getMyLastMarkerOfRoom } from '../../../store/selectors/MarkersSelectors';
@@ -54,7 +52,6 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 	const xmppClient = useStore(getXmppClient);
 	const inputHasFocus = useStore((store) => getInputHasFocus(store, roomId));
 	const roomMessages = useStore((store) => getMessagesSelector(store, roomId));
-	const usersWritingList = useStore((store) => getRoomIsWritingList(store, roomId));
 	const actualScrollPosition = useStore((store) => getIdMessageWhereScrollIsStopped(store, roomId));
 	const hasMoreMessageToLoad = useStore((store) => getHistoryIsFullyLoaded(store, roomId));
 	const historyLoadedDisabled = useStore((store) => getHistoryIsLoadedDisabled(store, roomId));
@@ -283,13 +280,6 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 					<MessageHistoryLoader roomId={roomId} messageListRef={messageListRef} />
 				)}
 				{messagesWrapped}
-				{usersWritingList && (
-					<WritingBubble
-						writingListNames={usersWritingList}
-						roomId={roomId}
-						MessageListWrapperRef={MessagesListWrapperRef}
-					/>
-				)}
 			</MessagesListWrapper>
 			{showScrollButton && <ScrollButton roomId={roomId} onClickCb={handleClickScrollButton} />}
 		</Messages>

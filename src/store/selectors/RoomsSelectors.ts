@@ -32,20 +32,13 @@ export const getRoomNameSelector = (state: RootStore, id: string): string => {
 	const room: Room = state.rooms[id];
 	if (!room) return '';
 	if (room.type === RoomType.ONE_TO_ONE) {
-		const otherUserId = room.members
-			? room.members.length > 1
-				? state.session.id === room.members[0].userId
-					? room.members[1].userId
-					: room.members[0].userId
-				: null
-			: null;
-		return otherUserId && state.users[otherUserId]
-			? state.users[otherUserId].name ||
-					state.users[otherUserId].email ||
-					state.users[otherUserId].id
-			: room.name || '';
+		const otherUser = find(room.members ?? [], (member) => member.userId !== state.session.id);
+		if (size(room.members) > 0 && otherUser) {
+			return state.users[otherUser.userId]?.name || state.users[otherUser.userId]?.email || '';
+		}
+		return '';
 	}
-	return state.rooms[id].name || state.rooms[id].id;
+	return state.rooms[id].name ?? '';
 };
 
 export const getRoomTypeSelector = (state: RootStore, id: string): RoomType =>
@@ -132,3 +125,6 @@ export const getRoomURLPicture = (state: RootStore, roomId: string): string | un
 
 export const getMeetingIdFromRoom = (state: RootStore, roomId: string): string | undefined =>
 	state.rooms[roomId]?.meetingId;
+
+export const getIsPlaceholderRoom = (state: RootStore, roomId: string): boolean =>
+	state.rooms[roomId]?.placeholder ?? false;
