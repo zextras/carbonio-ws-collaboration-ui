@@ -7,7 +7,7 @@
 import React from 'react';
 
 import { screen } from '@testing-library/react';
-import { UserEvent } from '@testing-library/user-event/setup/setup';
+import { UserEvent } from '@testing-library/user-event';
 
 import SecondaryBarSingleGroupsView from './SecondaryBarSingleGroupsView';
 import useStore from '../../../store/Store';

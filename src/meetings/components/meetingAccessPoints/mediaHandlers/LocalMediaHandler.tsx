@@ -86,7 +86,7 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 									deviceId: { exact: audioId },
 									noiseSuppression: true,
 									echoCancellation: true
-							  }
+								}
 							: { noiseSuppression: true, echoCancellation: true }
 						: false,
 					video ? (videoId ? { deviceId: { exact: videoId } } : true) : false

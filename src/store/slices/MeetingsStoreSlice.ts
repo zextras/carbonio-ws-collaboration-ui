@@ -5,7 +5,7 @@
  */
 /* eslint-disable no-param-reassign */
 
-import produce from 'immer';
+import { produce } from 'immer';
 import { find, forEach, includes } from 'lodash';
 import { StateCreator } from 'zustand';
 

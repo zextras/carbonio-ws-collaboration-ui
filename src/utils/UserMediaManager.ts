@@ -52,14 +52,14 @@ export const getAudioStream = (
 						echoCancellation,
 						autoGainControl: false
 					}
-			  }
+				}
 			: {
 					audio: {
 						autoGainControl: false,
 						noiseSuppression,
 						echoCancellation
 					}
-			  };
+				};
 		navigator.mediaDevices
 			.getUserMedia(constraints)
 			.then((stream: MediaStream) => {

@@ -11,8 +11,8 @@ import { addSettingsView, Spinner } from '@zextras/carbonio-shell-ui';
 import { LogoSettingsBeta } from '../chats/LogoBeta';
 import { CHATS_ROUTE, PRODUCT_NAME } from '../constants/appConstants';
 
-const LazySettingsView = lazy(() =>
-	import(/* webpackChunkName: "settingsView" */ './views/SettingsView')
+const LazySettingsView = lazy(
+	() => import(/* webpackChunkName: "settingsView" */ './views/SettingsView')
 );
 
 const SettingsView = () => (

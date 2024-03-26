@@ -48,8 +48,8 @@ const LeaveConversationAction: FC<LeaveProps> = ({
 			!iAmOneOfOwner
 				? { top: 'small', bottom: 'large' }
 				: isInsideMeeting
-				? { top: 'small', bottom: 'large' }
-				: { top: 'small' },
+					? { top: 'small', bottom: 'large' }
+					: { top: 'small' },
 		[iAmOneOfOwner, isInsideMeeting]
 	);
 

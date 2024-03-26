@@ -12,8 +12,8 @@ import ShimmerEntryMeetingView from './views/shimmers/ShimmerEntryMeetingView';
 import ConnectionSnackbarManager from '../chats/components/ConnectionSnackbarManager';
 import { MEETINGS_NAME, MEETINGS_ROUTE } from '../constants/appConstants';
 
-const LazyMeetingMainView = lazy(() =>
-	import(/* webpackChunkName: "mainView" */ './views/MeetingMainView')
+const LazyMeetingMainView = lazy(
+	() => import(/* webpackChunkName: "mainView" */ './views/MeetingMainView')
 );
 
 const MeetingMain = () => (

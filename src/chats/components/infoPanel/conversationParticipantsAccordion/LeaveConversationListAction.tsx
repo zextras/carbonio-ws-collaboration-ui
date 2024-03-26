@@ -47,8 +47,8 @@ const LeaveConversationListAction: FC<LeaveConversationProps> = ({
 		iAmOwner && numberOfMembers === 1
 			? leaveAndDeleteLabel
 			: numberOfOwners === 1 && iAmOwner
-			? promoteSomeoneElseToModeratorLabel
-			: leaveConversationLabel;
+				? promoteSomeoneElseToModeratorLabel
+				: leaveConversationLabel;
 
 	const sessionUserId = useStore((store) => store.session.id);
 

@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { createEvent, fireEvent, screen, waitFor } from '@testing-library/react';
-import { UserEvent } from '@testing-library/user-event/setup/setup';
+import { UserEvent } from '@testing-library/user-event';
 import { act } from 'react-dom/test-utils';
 
 import ConversationFooter from './ConversationFooter';

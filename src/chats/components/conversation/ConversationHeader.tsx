@@ -74,10 +74,10 @@ const CustomTextWithTooltip = styled(TextWithTooltip)<{
 		$isWritingIsVisible
 			? css`
 					animation: slideUp 0.4s ease forwards;
-			  `
+				`
 			: css`
 					animation: slideDown 0.4s ease 0.3s;
-			  `};
+				`};
 `;
 
 const CustomIsWritingText = styled(Text)`

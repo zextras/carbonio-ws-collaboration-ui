@@ -220,7 +220,7 @@ const ChatCreationContactsSelection = ({
 			isCreationModal
 				? typeof maxGroupMembers === 'number' && maxGroupMembers <= size(contactsSelected)
 				: typeof maxGroupMembers === 'number' &&
-				  maxGroupMembers - size(members) <= size(contactsSelected),
+					maxGroupMembers - size(members) <= size(contactsSelected),
 		[isCreationModal, contactsSelected, maxGroupMembers, members]
 	);
 

@@ -181,8 +181,8 @@ const VirtualRoomsList: FC<virtualRoomsListProps> = ({ setListVisibility, parent
 								nameError
 									? invalidNameString
 									: canCreateVirtualRoom
-									? createTooltip
-									: roomNameRequiredTooltip
+										? createTooltip
+										: roomNameRequiredTooltip
 							}
 						>
 							<CustomIconButton

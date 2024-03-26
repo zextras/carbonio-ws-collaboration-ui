@@ -91,10 +91,10 @@ const MemberComponentInfo: FC<ParticipantsInfoProps> = ({ member, roomId }) => {
 			sessionId === member.userId
 				? youLabel
 				: memberOnline
-				? userOnlineLabel
-				: memberLastActivity
-				? lastSeenLabel
-				: goToPrivateChatLabel,
+					? userOnlineLabel
+					: memberLastActivity
+						? lastSeenLabel
+						: goToPrivateChatLabel,
 		[
 			sessionId,
 			member.userId,

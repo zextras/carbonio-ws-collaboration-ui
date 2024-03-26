@@ -98,7 +98,7 @@ export const getThumbnailURL = (attachmentId: string, mimeType: string): string 
 					ImageQuality.LOW,
 					getAttachmentExtension(mimeType),
 					ImageShape.RECTANGULAR
-			  );
+				);
 	}
 	return undefined;
 };
@@ -113,7 +113,7 @@ export const getAttachmentURL = (attachmentId: string, mimeType: string): string
 					'0x0',
 					ImageQuality.HIGH,
 					getAttachmentExtension(mimeType)
-			  );
+				);
 	}
 	return undefined;
 };

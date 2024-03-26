@@ -6,7 +6,7 @@
 import React, { useMemo } from 'react';
 
 import { render, RenderOptions, RenderResult, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { userEvent } from '@testing-library/user-event';
 import { ModalManager, SnackbarManager, ThemeProvider } from '@zextras/carbonio-design-system';
 import { I18nextProvider } from 'react-i18next';
 

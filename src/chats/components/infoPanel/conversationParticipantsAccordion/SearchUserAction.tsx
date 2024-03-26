@@ -46,8 +46,8 @@ const SearchUserAction: FC<SearchUserProps> = ({ setFilteredInput, isInsideMeeti
 					size(searchInput) > 0
 						? closeSearchTooltip
 						: isInsideMeeting
-						? searchParticipantLabel
-						: searchMemberLabel
+							? searchParticipantLabel
+							: searchMemberLabel
 				}
 			>
 				<IconButton
