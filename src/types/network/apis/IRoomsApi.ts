@@ -35,6 +35,7 @@ interface IRoomsApi {
 	getRoom(roomId: string): Promise<GetRoomResponse>;
 	updateRoom(roomId: string, editableFields: RoomEditableFields): Promise<UpdateRoomResponse>;
 	deleteRoom(roomId: string): Promise<DeleteRoomResponse>;
+	deleteRoomAndMeeting(roomId: string): Promise<DeleteRoomResponse>;
 	// Room picture
 	getURLRoomPicture(roomId: string): string;
 	getRoomPicture(roomId: string): Promise<GetRoomPictureResponse>;
