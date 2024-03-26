@@ -18,6 +18,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
+import useLocalStorage from '../../../../hooks/useLocalStorage';
 import useRouting from '../../../../hooks/useRouting';
 import { MeetingsApi } from '../../../../network';
 import {
@@ -26,6 +27,7 @@ import {
 } from '../../../../store/selectors/RoomsSelectors';
 import useStore from '../../../../store/Store';
 import { RoomType } from '../../../../types/store/RoomTypes';
+import { LOCAL_STORAGE_NAMES, MeetingStorageType } from '../../../../utils/localStorageUtils';
 import { freeMediaResources } from '../../../../utils/MeetingsUtils';
 import AccessTile from '../mediaHandlers/AccessTile';
 import LocalMediaHandler from '../mediaHandlers/LocalMediaHandler';
@@ -87,9 +89,13 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 	const { goToMeetingPage } = useRouting();
 
 	const roomType = useStore((store) => getRoomTypeSelector(store, roomId));
-
 	const chatsBeNetworkStatus = useStore(({ connections }) => connections.status.chats_be);
 	const websocketNetworkStatus = useStore(({ connections }) => connections.status.websocket);
+
+	const [meetingStorage, setMeetingStorage] = useLocalStorage<MeetingStorageType>(
+		LOCAL_STORAGE_NAMES.MEETINGS
+	);
+
 	const [streamTrack, setStreamTrack] = useState<MediaStream | null>(null);
 	const [wrapperWidth, setWrapperWidth] = useState<number>(0);
 	const [videoPlayerTestMuted, setVideoPlayerTestMuted] = useState<boolean>(true);
@@ -101,7 +107,7 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 	const [mediaDevicesEnabled, setMediaDevicesEnabled] = useState<{
 		audio: boolean;
 		video: boolean;
-	}>({ audio: false, video: false });
+	}>({ audio: meetingStorage.EnableMicrophone, video: meetingStorage.EnableCamera });
 
 	const wrapperRef = useRef<HTMLDivElement>(null);
 	const videoStreamRef = useRef<HTMLVideoElement>(null);
@@ -144,17 +150,22 @@ const AccessMeetingModal = ({ roomId }: AccessMeetingModalProps): ReactElement =
 			{ audioDevice: selectedDevicesId.audio, videoDevice: selectedDevicesId.video }
 		)
 			.then((meetingId) => {
+				setMeetingStorage({
+					EnableMicrophone: mediaDevicesEnabled.audio,
+					EnableCamera: mediaDevicesEnabled.video
+				});
 				freeMediaResources(streamTrack);
 				goToMeetingPage(meetingId);
 			})
 			.catch((err) => console.error(err, 'Error on joinMeeting'));
 	}, [
-		streamTrack,
 		roomId,
 		mediaDevicesEnabled.video,
 		mediaDevicesEnabled.audio,
 		selectedDevicesId.audio,
 		selectedDevicesId.video,
+		setMeetingStorage,
+		streamTrack,
 		goToMeetingPage
 	]);
 

@@ -87,7 +87,6 @@ export const Spinner = (): ReactElement => <div>spinner</div>;
 export const pushHistory = jest.fn(pushHistoryMock);
 
 export const replaceHistory = jest.fn(replaceHistoryMock);
-
 export const t = (key: string, value: string): string => value;
 
 export const useIntegratedFunction = jest.fn(() => [

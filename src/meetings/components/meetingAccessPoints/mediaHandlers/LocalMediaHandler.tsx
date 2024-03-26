@@ -109,6 +109,16 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 		]
 	);
 
+	useEffect(() => {
+		toggleStreams(
+			mediaDevicesEnabled.audio,
+			mediaDevicesEnabled.video,
+			selectedDevicesId.audio,
+			selectedDevicesId.video
+		);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
+
 	const mediaVideoList = useMemo(
 		() =>
 			map(videoMediaList, (videoItem: MediaDeviceInfo, i) => ({

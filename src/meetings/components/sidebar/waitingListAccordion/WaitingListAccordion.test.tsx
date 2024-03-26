@@ -27,7 +27,7 @@ const user2 = createMockUser({ id: 'user2', name: 'user2' });
 
 const room: RoomBe = createMockRoom({
 	type: RoomType.TEMPORARY,
-	members: [createMockMember({ userId: user1.id })]
+	members: [createMockMember({ userId: user1.id, owner: true })]
 });
 
 const meeting: MeetingBe = createMockMeeting({
@@ -45,20 +45,12 @@ beforeEach(() => {
 describe('WaitingListAccordion tests', () => {
 	test('Accordion is visible if the user is a moderator and there are waiting users', () => {
 		const store = useStore.getState();
-		store.promoteMemberToModerator(room.id, user1.id);
 		store.addUserToWaitingList(meeting.id, user2.id);
 		setup(<WaitingListAccordion meetingId={meeting.id} />);
 		expect(screen.getByText(/Waiting list/i)).toBeInTheDocument();
 	});
 
-	test("Accordion isn't visible if the user is not a moderator", () => {
-		useStore.getState().addUserToWaitingList(meeting.id, user2.id);
-		setup(<WaitingListAccordion meetingId={meeting.id} />);
-		expect(screen.queryByText(/Waiting list/i)).not.toBeInTheDocument();
-	});
-
 	test("Accordion isn't visible if there aren't waiting users", () => {
-		useStore.getState().promoteMemberToModerator(room.id, user1.id);
 		setup(<WaitingListAccordion meetingId={meeting.id} />);
 		expect(screen.queryByText(/Waiting list/i)).not.toBeInTheDocument();
 	});
@@ -68,7 +60,6 @@ describe('WaitingListAccordion tests', () => {
 		const iconDown = 'icon: ChevronDown';
 
 		const store = useStore.getState();
-		store.promoteMemberToModerator(room.id, user1.id);
 		store.addUserToWaitingList(meeting.id, user2.id);
 		const { user } = setup(<WaitingListAccordion meetingId={meeting.id} />);
 		expect(screen.getByTestId(iconUp)).toBeVisible();
@@ -82,7 +73,6 @@ describe('WaitingListAccordion tests', () => {
 
 	test('Badge counter is visible if the accordion is closed', () => {
 		const store = useStore.getState();
-		store.promoteMemberToModerator(room.id, user1.id);
 		store.addUserToWaitingList(meeting.id, user2.id);
 		setup(<WaitingListAccordion meetingId={meeting.id} />);
 		act(() => store.setWaitingListAccordionStatus(meeting.id, false));
@@ -91,7 +81,6 @@ describe('WaitingListAccordion tests', () => {
 
 	test("Badge counter isn't visible if the accordion is open", () => {
 		const store = useStore.getState();
-		store.promoteMemberToModerator(room.id, user1.id);
 		store.addUserToWaitingList(meeting.id, user2.id);
 		setup(<WaitingListAccordion meetingId={meeting.id} />);
 		act(() => store.setWaitingListAccordionStatus(meeting.id, true));

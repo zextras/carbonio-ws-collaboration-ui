@@ -10,16 +10,27 @@ import { Container, CreateSnackbarFn, useSnackbar } from '@zextras/carbonio-desi
 import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore
-	SettingsHeader
+	SettingsHeader,
+	useIntegratedFunction
 } from '@zextras/carbonio-shell-ui';
 import { isEqual } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
+import MeetingSettings from './MeetingSettings';
 import NotificationsSettings from './NotificationsSettings';
 import ProfileSettings from './ProfileSettings';
+import RecordingSettings from './RecordingSettings';
 import useLocalStorage from '../../hooks/useLocalStorage';
 import { UsersApi } from '../../network';
-import { LOCAL_STORAGE_NAMES, NotificationsSettingsType } from '../../utils/localStorageUtils';
+import { getCapability } from '../../store/selectors/SessionSelectors';
+import useStore from '../../store/Store';
+import { CapabilityType } from '../../types/store/SessionTypes';
+import {
+	LOCAL_STORAGE_NAMES,
+	MeetingRecordingType,
+	MeetingStorageType,
+	NotificationsSettingsType
+} from '../../utils/localStorageUtils';
 
 type SettingsProps = {
 	id?: string | undefined;
@@ -34,15 +45,20 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 		'Something went Wrong. Please Retry'
 	);
 
+	const canRecordVideo = useStore((store) =>
+		getCapability(store, CapabilityType.CAN_VIDEO_CALL_RECORD)
+	);
+
 	const createSnackbar: CreateSnackbarFn = useSnackbar();
 
 	const [notificationsStorage, setNotificationsStorage] =
-		useLocalStorage<NotificationsSettingsType>(LOCAL_STORAGE_NAMES.NOTIFICATIONS, {
-			DesktopNotifications: true,
-			DesktopNotificationsSounds: true,
-			WaitingRoomAccessNotifications: true,
-			WaitingRoomAccessNotificationsSounds: true
-		});
+		useLocalStorage<NotificationsSettingsType>(LOCAL_STORAGE_NAMES.NOTIFICATIONS);
+	const [meetingStorage, setMeetingStorage] = useLocalStorage<MeetingStorageType>(
+		LOCAL_STORAGE_NAMES.MEETINGS
+	);
+	const [recordingStorage, setRecordingStorage] = useLocalStorage<MeetingRecordingType>(
+		LOCAL_STORAGE_NAMES.RECORDING
+	);
 
 	const [picture, setPicture] = useState<false | File>(false);
 	const [deletePicture, setDeletePicture] = useState<boolean>(false);
@@ -56,25 +72,60 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 				notificationsStorage.WaitingRoomAccessNotificationsSounds
 		});
 
+	const [meetingMediaDefaults, setMeetingMediaDefaults] = useState<MeetingStorageType>({
+		EnableMicrophone: meetingStorage.EnableMicrophone,
+		EnableCamera: meetingStorage.EnableCamera
+	});
+	const [recordingDefaults, setRecordingDefaults] = useState<MeetingRecordingType>({
+		name: recordingStorage.name,
+		id: recordingStorage.id
+	});
+
+	const [getNode, getNodeAvailable] = useIntegratedFunction('get-node');
+
+	useEffect(() => {
+		if (recordingStorage && getNodeAvailable) {
+			getNode(recordingStorage.id).then((result: { rootId: string }) => {
+				if (result.rootId === 'TRASH_ROOT') {
+					setRecordingStorage({ name: 'Home', id: 'LOCAL_ROOT' });
+					setRecordingDefaults({ name: 'Home', id: 'LOCAL_ROOT' });
+				}
+			});
+		}
+	}, [getNode, getNodeAvailable, recordingStorage, setRecordingStorage]);
+
 	// set the isEnabled value when changed
 	useEffect(() => {
 		if (
 			!!picture ||
 			deletePicture ||
-			!isEqual(notificationsStorage, updatedNotificationsSettings)
+			!isEqual(notificationsStorage, updatedNotificationsSettings) ||
+			!isEqual(meetingStorage, meetingMediaDefaults) ||
+			!isEqual(recordingStorage, recordingDefaults)
 		) {
 			setIsEnabled(true);
 		} else {
 			setIsEnabled(false);
 		}
-	}, [deletePicture, notificationsStorage, picture, updatedNotificationsSettings]);
+	}, [
+		deletePicture,
+		meetingMediaDefaults,
+		meetingStorage,
+		notificationsStorage,
+		picture,
+		recordingDefaults,
+		recordingStorage,
+		updatedNotificationsSettings
+	]);
 
 	// sets all the values that has been changed to false and set the default values to the localStorage ones
 	const onClose = useCallback(() => {
 		setPicture(false);
 		setDeletePicture(false);
 		setUpdatedNotificationsSettings(notificationsStorage);
-	}, [notificationsStorage]);
+		setMeetingMediaDefaults(meetingStorage);
+		setRecordingStorage({ name: 'Home', id: 'LOCAL_ROOT' });
+	}, [meetingStorage, notificationsStorage, setRecordingStorage]);
 
 	const successSnackbar = useCallback(() => {
 		createSnackbar({
@@ -123,16 +174,35 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 			setNotificationsStorage(updatedNotificationsSettings);
 			setIsEnabled(false);
 		}
+
+		// if a user changes his media default for meetings
+		if (!isEqual(meetingStorage, meetingMediaDefaults)) {
+			setMeetingStorage(meetingMediaDefaults);
+			setIsEnabled(false);
+		}
+
+		// if a user changes his recording folder
+		if (!isEqual(recordingStorage, recordingDefaults)) {
+			setRecordingStorage(recordingDefaults);
+			setIsEnabled(false);
+		}
+
 		return Promise.resolve().then(successSnackbar);
 	}, [
 		picture,
 		deletePicture,
 		notificationsStorage,
 		updatedNotificationsSettings,
+		meetingStorage,
+		meetingMediaDefaults,
+		recordingStorage,
+		recordingDefaults,
 		successSnackbar,
 		id,
 		errorSnackbar,
-		setNotificationsStorage
+		setNotificationsStorage,
+		setMeetingStorage,
+		setRecordingStorage
 	]);
 
 	return (
@@ -149,6 +219,9 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 				title={settingsTitle}
 			/>
 			<Container
+				mainAlignment="baseline"
+				crossAlignment="baseline"
+				style={{ overflowY: 'auto' }}
 				height="fit"
 				background={'gray5'}
 				padding={{ vertical: 'large', horizontal: 'medium' }}
@@ -165,8 +238,19 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 					updatedNotificationsSettings={updatedNotificationsSettings}
 					setUpdatedNotificationsSettings={setUpdatedNotificationsSettings}
 				/>
+				<MeetingSettings
+					meetingMediaDefaults={meetingMediaDefaults}
+					setMeetingMediaDefaults={setMeetingMediaDefaults}
+				/>
+				{canRecordVideo && (
+					<RecordingSettings
+						recordingDefaults={recordingDefaults}
+						setRecordingDefaults={setRecordingDefaults}
+					/>
+				)}
 			</Container>
 		</Container>
 	);
 };
+
 export default Settings;

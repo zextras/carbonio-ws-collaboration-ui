@@ -44,7 +44,9 @@ export const useMeetingsStoreSlice: StateCreator<MeetingsSlice> = (set: (...any:
 						active: meeting.active,
 						participants: participantsMap,
 						createdAt: meeting.createdAt,
-						meetingType: meeting.meetingType
+						meetingType: meeting.meetingType,
+						recStartedAt: meeting.recStartedAt,
+						recUserId: meeting.recUserId
 					};
 
 					// Retrieve participants information if they are unknown
@@ -90,7 +92,9 @@ export const useMeetingsStoreSlice: StateCreator<MeetingsSlice> = (set: (...any:
 					active: meeting.active,
 					participants: participantsMap,
 					createdAt: meeting.createdAt,
-					meetingType: meeting.meetingType
+					meetingType: meeting.meetingType,
+					recStartedAt: meeting.recStartedAt,
+					recUserId: meeting.recUserId
 				};
 
 				// Retrieve participants information if they are unknown
@@ -263,6 +267,36 @@ export const useMeetingsStoreSlice: StateCreator<MeetingsSlice> = (set: (...any:
 			}),
 			false,
 			'AM/REMOVE_USER_FROM_WAITING_LIST'
+		);
+	},
+	startRecording: (
+		meetingId: string,
+		startRecordingTimestamp: string,
+		startRecordingUserId: string
+	): void => {
+		set(
+			produce((draft: RootStore) => {
+				const meeting = find(draft.meetings, (meeting) => meeting.id === meetingId);
+				if (meeting) {
+					draft.meetings[meeting.roomId].recStartedAt = startRecordingTimestamp;
+					draft.meetings[meeting.roomId].recUserId = startRecordingUserId;
+				}
+			}),
+			false,
+			'AM/START_RECORDING'
+		);
+	},
+	stopRecording: (meetingId: string): void => {
+		set(
+			produce((draft: RootStore) => {
+				const meeting = find(draft.meetings, (meeting) => meeting.id === meetingId);
+				if (meeting) {
+					draft.meetings[meeting.roomId].recStartedAt = undefined;
+					draft.meetings[meeting.roomId].recUserId = undefined;
+				}
+			}),
+			false,
+			'AM/STOP_RECORDING'
 		);
 	}
 });

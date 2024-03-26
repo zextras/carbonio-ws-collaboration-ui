@@ -24,6 +24,7 @@ import CinemaMode from '../components/cinemaMode/CinemaMode';
 import FaceToFaceMode from '../components/faceToFaceMode/FaceToFaceMode';
 import GridMode from '../components/gridMode/GridMode';
 import MeetingActionsBar from '../components/meetingActionsBar/MeetingActionsBar';
+import RecordingInfo from '../components/RecordingInfo';
 import MeetingSidebar from '../components/sidebar/MeetingSidebar';
 
 const SkeletonContainer = styled(Container)`
@@ -81,7 +82,6 @@ const MeetingSkeleton = (): ReactElement => {
 			disableAutoHide: true
 		});
 	}, [createSnackbar, mutedByModerator, okLabel]);
-
 	useEventListener(EventName.MEMBER_MUTED, handleMutedEvent);
 
 	const ViewToDisplay = useMemo(() => {
@@ -101,6 +101,7 @@ const MeetingSkeleton = (): ReactElement => {
 				orientation="horizontal"
 				data-testid="meeting_view_container"
 			>
+				<RecordingInfo meetingId={meetingId} />
 				<LogoApp $customLogo={customLogo} />
 				<ViewToDisplay>
 					<MeetingActionsBar streamsWrapperRef={streamsWrapperRef} />

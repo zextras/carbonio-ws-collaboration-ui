@@ -28,7 +28,9 @@ import {
 	LeaveMeetingResponse,
 	ListMeetingsResponse,
 	StartMeetingResponse,
+	StartRecordingResponse,
 	StopMeetingResponse,
+	StopRecordingResponse,
 	SubscribeMediaResponse,
 	UpdateAudioStreamStatusResponse,
 	UpdateMediaOfferResponse
@@ -251,6 +253,21 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 		const status = accept ? 'ACCEPTED' : 'REJECTED';
 		return this.fetchAPI(`meetings/${meetingId}/queue/${userId}`, RequestType.POST, {
 			status
+		});
+	}
+
+	startRecording(meetingId: string): Promise<StartRecordingResponse> {
+		return this.fetchAPI(`meetings/${meetingId}/startRecording`, RequestType.POST);
+	}
+
+	stopRecording(
+		meetingId: string,
+		recordingName: string,
+		folderId: string
+	): Promise<StopRecordingResponse> {
+		return this.fetchAPI(`meetings/${meetingId}/stopRecording`, RequestType.POST, {
+			name: recordingName,
+			folderId
 		});
 	}
 }
