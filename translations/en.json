@@ -357,6 +357,8 @@
         "goToPrivateChat": "Go to private chat to send a personal message",
         "isTyping": "is typing…",
         "lastSeen": "Last seen {{lastSeen}}",
+        "nameAndNumberOfPeopleAreTyping": "{{userName}} and {{numberOfUsers}} others are typing...",
+        "numberOfPeopleAreTyping": "{{numberOfUsers}} people are typing...",
         "offline": "Offline",
         "online": "Online",
         "you": " You"

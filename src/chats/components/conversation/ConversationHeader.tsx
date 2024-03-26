@@ -4,18 +4,27 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { Dispatch, ReactElement, SetStateAction, useCallback } from 'react';
+import React, {
+	Dispatch,
+	ReactElement,
+	SetStateAction,
+	useCallback,
+	useEffect,
+	useState
+} from 'react';
 
 import {
 	Container,
 	IconButton,
 	Row,
 	TextWithTooltip,
+	Text,
 	Tooltip
 } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
+import styled, { css, FlattenSimpleInterpolation } from 'styled-components';
 
+import { useIsWritingLabel } from '../../../hooks/useIsWritingLabel';
 import useMediaQueryCheck from '../../../hooks/useMediaQueryCheck';
 import ConversationHeaderMeetingButton from '../../../meetings/components/headerMeetingButton/ConversationHeaderMeetingButton';
 import { getRoomNameSelector } from '../../../store/selectors/RoomsSelectors';
@@ -34,6 +43,50 @@ const RoomInfoHeader = styled(Container)`
 	user-select: none;
 `;
 
+const CustomTextWithTooltip = styled(TextWithTooltip)<{
+	$isWritingIsVisible: boolean;
+}>`
+	@keyframes slideUp {
+		0% {
+			transform: translateY(0.44rem);
+		}
+
+		100% {
+			transform: translateY(0);
+		}
+	}
+
+	@keyframes slideDown {
+		0% {
+			transform: translateY(-0.44rem);
+		}
+
+		100% {
+			transform: translateY(0);
+		}
+	}
+
+	${({
+		$isWritingIsVisible
+	}: {
+		$isWritingIsVisible: boolean;
+	}): false | FlattenSimpleInterpolation =>
+		$isWritingIsVisible
+			? css`
+					animation: slideUp 0.4s ease forwards;
+			  `
+			: css`
+					animation: slideDown 0.4s ease 0.3s;
+			  `};
+`;
+
+const CustomIsWritingText = styled(Text)`
+	opacity: 0;
+	transition: opacity 0.2s ease;
+	${({ $isWritingIsVisible }: { $isWritingIsVisible: boolean }): string | false =>
+		$isWritingIsVisible && 'opacity: 1;'}
+`;
+
 const ConversationHeader = ({
 	roomId,
 	setInfoPanelOpen
@@ -42,6 +95,20 @@ const ConversationHeader = ({
 	const infoTooltip = t('conversationInfo.info', 'Info');
 	const roomName = useStore((state) => getRoomNameSelector(state, roomId)) || '';
 	const canVideoCall = useStore((store) => getCapability(store, CapabilityType.CAN_VIDEO_CALL));
+
+	const isWritingLabel = useIsWritingLabel(roomId);
+	const [isWritingIsDefined, setIsWritingIsDefined] = useState(false);
+	const [writingLabel, setWritingLabel] = useState('');
+
+	useEffect(() => {
+		if (isWritingLabel === undefined) {
+			setIsWritingIsDefined(false);
+			setTimeout(() => setWritingLabel(''), 300);
+		} else {
+			setIsWritingIsDefined(true);
+			setWritingLabel(isWritingLabel);
+		}
+	}, [isWritingLabel]);
 
 	const isDesktopView = useMediaQueryCheck();
 
@@ -59,7 +126,19 @@ const ConversationHeader = ({
 			padding={{ vertical: 'medium', horizontal: 'large' }}
 		>
 			<Row takeAvailableSpace mainAlignment="flex-start">
-				<TextWithTooltip overflow="ellipsis">{roomName}</TextWithTooltip>
+				<Container orientation="vertical" width="fit" height=" fit" crossAlignment="flex-start">
+					<CustomTextWithTooltip overflow="ellipsis" $isWritingIsVisible={isWritingIsDefined}>
+						{roomName}
+					</CustomTextWithTooltip>
+					<CustomIsWritingText
+						size="small"
+						color="secondary"
+						$isWritingIsVisible={isWritingIsDefined}
+						data-testid="is_writing_text"
+					>
+						{writingLabel}
+					</CustomIsWritingText>
+				</Container>
 			</Row>
 			<Container orientation="horizontal" width="fit" style={{ minWidth: 'fit-content' }}>
 				{canVideoCall && <ConversationHeaderMeetingButton roomId={roomId} />}
