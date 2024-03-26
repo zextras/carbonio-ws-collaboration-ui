@@ -6,6 +6,15 @@
 
 import { createGlobalStyle } from 'styled-components';
 
+export enum ANIMATION_STYLES {
+	HIGHLIGHT_MY_MESSAGE_DARK = 'highlightmymessagebubbledark',
+	HIGHLIGHT_MESSAGE_DARK = 'highlightothersmessagebubbledark',
+	HIGHLIGHT_MY_MESSAGE_LIGHT = 'highlightmymessagebubblelight',
+	HIGHLIGHT_MESSAGE_LIGHT = 'highlightothersmessagebubblelight',
+	HIGHLIGHT_MY_MESSAGE = 'highlightmymessagebubble',
+	HIGHLIGHT_MESSAGE = 'highlightothersmessagebubble'
+}
+
 const AnimationGlobalStyle = createGlobalStyle`
   @keyframes highlightmymessagebubbledark {
     0%, 100% {

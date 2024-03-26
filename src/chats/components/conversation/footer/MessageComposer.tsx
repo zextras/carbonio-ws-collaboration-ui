@@ -30,7 +30,7 @@ import DeleteMessageModal from './DeleteMessageModal';
 import EmojiSelector from './EmojiSelector';
 import MessageArea from './MessageArea';
 import useMessage from '../../../../hooks/useMessage';
-import { RoomsApi } from '../../../../network';
+import { AttachmentsApi, RoomsApi } from '../../../../network';
 import {
 	getDraftMessage,
 	getFilesToUploadArray,
@@ -145,10 +145,24 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 		}
 	}, []);
 
-	const uploadAttachmentPromise = (
-		file: FileToUpload,
-		controller: AbortController
-	): Promise<AddRoomAttachmentResponse | void> => {
+	const errorHandler = (reason: DOMException, fileName: string): void => {
+		if (reason.name !== 'AbortError') {
+			const errorString = t(
+				'attachments.errorUploadingFile',
+				`Something went wrong uploading ${fileName}`,
+				{ file: fileName }
+			);
+			createSnackbar({
+				key: new Date().toLocaleString(),
+				type: 'error',
+				label: errorString,
+				actionLabel: 'UNDERSTOOD',
+				disableAutoHide: true
+			});
+		}
+	};
+
+	const uploadAttachmentPromise = (file: FileToUpload, controller: AbortController): any => {
 		const fileName = file.file.name;
 		const { signal } = controller;
 
@@ -157,44 +171,11 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 
 		// get the attachment type
 		const isImage = isAttachmentImage(file.file.type);
-
-		const errorHandler = (reason: DOMException): void => {
-			if (reason.name !== 'AbortError') {
-				const errorString = t(
-					'attachments.errorUploadingFile',
-					`Something went wrong uploading ${fileName}`,
-					{ file: fileName }
-				);
-				createSnackbar({
-					key: new Date().toLocaleString(),
-					type: 'error',
-					label: errorString,
-					actionLabel: 'UNDERSTOOD',
-					disableAutoHide: true
-				});
-			}
-		};
-
 		// we have to check if it's supported by the previewer or not
 		// if it's not supported we can avoid to send the area field
 		if (isImage) {
-			const getImageSize = (url: string): Promise<{ width: number; height: number }> =>
-				new Promise((resolve) => {
-					const img = new Image();
-
-					img.addEventListener(
-						'load',
-						() => {
-							resolve({ width: img.naturalWidth, height: img.naturalHeight });
-						},
-						{ once: true }
-					);
-
-					img.src = url;
-				});
-
-			return getImageSize(file.localUrl)
-				.then((res) => {
+			return AttachmentsApi.getImageSize(file.localUrl)
+				.then((res) =>
 					RoomsApi.addRoomAttachment(
 						roomId,
 						file.file,
@@ -205,10 +186,12 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 						},
 						signal
 					).catch((reason: DOMException) => {
-						errorHandler(reason);
-					});
-				})
-				.catch();
+						errorHandler(reason, fileName);
+					})
+				)
+				.catch((err) => {
+					Promise.reject(new Error(`Upload error for ${fileName}, reason: ${err}`));
+				});
 		}
 		return RoomsApi.addRoomAttachment(
 			roomId,
@@ -219,7 +202,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 			},
 			signal
 		).catch((reason: DOMException) => {
-			errorHandler(reason);
+			errorHandler(reason, fileName);
 		});
 	};
 

@@ -95,14 +95,17 @@ class RoomsApi extends BaseAPI implements IRoomsApi {
 	}
 
 	public deleteRoom(roomId: string): Promise<DeleteRoomResponse> {
+		return this.fetchAPI(`rooms/${roomId}`, RequestType.DELETE);
+	}
+
+	public deleteRoomAndMeeting(roomId: string): Promise<DeleteRoomResponse> {
 		const meetingId = useStore.getState().rooms[roomId]?.meetingId;
-		return this.fetchAPI(`rooms/${roomId}`, RequestType.DELETE).then(
-			(response: DeleteRoomResponse) => {
-				// Delete the associated meeting
-				if (meetingId) MeetingsApi.deleteMeeting(meetingId);
-				return response;
-			}
-		);
+		if (meetingId) {
+			return MeetingsApi.deleteMeeting(meetingId)
+				.then(() => this.deleteRoom(roomId))
+				.catch(() => this.deleteRoom(roomId));
+		}
+		return this.deleteRoom(roomId);
 	}
 
 	public getURLRoomPicture = (roomId: string): string =>
@@ -228,7 +231,7 @@ class RoomsApi extends BaseAPI implements IRoomsApi {
 			.then((resp: AddRoomAttachmentResponse) => resp)
 			.catch((error) => {
 				useStore.getState().removePlaceholderMessage(roomId, uuid);
-				return error;
+				return Promise.reject(error);
 			});
 	}
 

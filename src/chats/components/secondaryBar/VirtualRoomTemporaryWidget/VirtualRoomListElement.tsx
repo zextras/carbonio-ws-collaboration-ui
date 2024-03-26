@@ -76,7 +76,7 @@ const VirtualRoomListElement: FC<virtualRoomElementProps> = ({ roomId, modalRef 
 	const { openMeeting, copyMeetingLink } = useRoomMeeting(roomId);
 
 	const handleDeleteRoom = useCallback(() => {
-		RoomsApi.deleteRoom(roomId)
+		RoomsApi.deleteRoomAndMeeting(roomId)
 			.then(() => {
 				createSnackbar({
 					key: new Date().toLocaleString(),

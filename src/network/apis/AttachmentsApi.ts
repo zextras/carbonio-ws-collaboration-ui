@@ -14,7 +14,8 @@ import {
 	GetImageResponse,
 	GetImageThumbnailResponse,
 	GetPdfResponse,
-	GetPdfThumbnailResponse
+	GetPdfThumbnailResponse,
+	ImageSize
 } from '../../types/network/responses/attachmentsResponses';
 
 class AttachmentsApi extends BaseAPI implements IAttachmentsApi {
@@ -172,6 +173,26 @@ class AttachmentsApi extends BaseAPI implements IAttachmentsApi {
 		}
 		return `${window.document.location.origin}/services/chats/preview/pdf/${fileId}/${area}/thumbnail/${params}`;
 	};
+
+	public getImageSize(url: string): Promise<ImageSize> {
+		return new Promise((resolve, reject) => {
+			try {
+				const img = new Image();
+
+				img.addEventListener(
+					'load',
+					() => {
+						resolve({ width: img.naturalWidth, height: img.naturalHeight });
+					},
+					{ once: true }
+				);
+
+				img.src = url;
+			} catch (err) {
+				reject(err);
+			}
+		});
+	}
 }
 
 export default AttachmentsApi.getInstance();

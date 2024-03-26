@@ -145,11 +145,8 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 		[canSeeMessageReads, lastMessageOfRoom]
 	);
 
-	const messageToDisplay = useMemo((): JSX.Element | string | undefined => {
-		if (
-			((usersWritingList && usersWritingList.length === 0) || !usersWritingList) &&
-			lastMessageOfRoom
-		) {
+	const setLastMessageRoomText = useMemo(() => {
+		if (lastMessageOfRoom) {
 			switch (lastMessageOfRoom.type) {
 				case MessageType.TEXT_MSG: {
 					if (lastMessageOfRoom.deleted) {
@@ -174,6 +171,16 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 					return '';
 			}
 		}
+		return undefined;
+	}, [deletedMessageLabel, lastMessageOfRoom, roomType, sessionId, userNameOfLastMessageOfRoom]);
+
+	const messageToDisplay = useMemo((): JSX.Element | string | undefined => {
+		if (
+			((usersWritingList && usersWritingList.length === 0) || !usersWritingList) &&
+			lastMessageOfRoom
+		) {
+			return setLastMessageRoomText;
+		}
 		if (usersWritingList) {
 			if (usersWritingList.length === 1) {
 				return `${usersWritingList[0].split(/(\s+)/)[0]} ${isTypingLabel}`;
@@ -187,16 +194,7 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 			}
 		}
 		return undefined;
-	}, [
-		usersWritingList,
-		lastMessageOfRoom,
-		roomType,
-		sessionId,
-		userNameOfLastMessageOfRoom,
-		deletedMessageLabel,
-		isTypingLabel,
-		areTypingLabel
-	]);
+	}, [usersWritingList, lastMessageOfRoom, setLastMessageRoomText, isTypingLabel, areTypingLabel]);
 
 	const UnreadCounter = useMemo(
 		() =>
