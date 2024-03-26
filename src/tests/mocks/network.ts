@@ -162,6 +162,11 @@ jest.mock('../../network', () => {
 				new Promise((resolve, reject) => {
 					const result = mockedAddRoomAttachmentRequest();
 					result ? resolve(result) : reject(new Error(noResultProvided));
+				}),
+			replacePlaceholderRoom: (): Promise<AddRoomResponse> =>
+				new Promise((resolve, reject) => {
+					const result = mockedAddRoomRequest();
+					result ? resolve(result) : reject(new Error(noResultProvided));
 				})
 		},
 		UsersApi: {

@@ -13,7 +13,7 @@ import { ActionsAccordion } from './conversationActionsAccordion/ActionsAccordio
 import ConversationInfo from './conversationInfo/ConversationInfo';
 import ConversationInfoDetails from './conversationInfo/ConversationInfoDetails';
 import { MemberAccordion } from './conversationParticipantsAccordion/MemberAccordion';
-import { getRoomTypeSelector } from '../../../store/selectors/RoomsSelectors';
+import { getRoomTypeSelector, getIsPlaceholderRoom } from '../../../store/selectors/RoomsSelectors';
 import useStore from '../../../store/Store';
 import { RoomType } from '../../../types/store/RoomTypes';
 
@@ -47,6 +47,7 @@ const ConversationInfoPanel: FC<ConversationProps> = ({
 	setInfoPanelOpen
 }) => {
 	const roomType: string = useStore((state) => getRoomTypeSelector(state, roomId));
+	const isPlaceholderRoom = useStore((state) => getIsPlaceholderRoom(state, roomId));
 
 	return (
 		<CustomContainer
@@ -59,7 +60,7 @@ const ConversationInfoPanel: FC<ConversationProps> = ({
 			</ConversationInfoContainer>
 			<AccordionsContainer>
 				<ConversationInfoDetails roomId={roomId} roomType={roomType} />
-				<ActionsAccordion roomId={roomId} />
+				{!isPlaceholderRoom && <ActionsAccordion roomId={roomId} />}
 				{roomType !== RoomType.ONE_TO_ONE && <MemberAccordion roomId={roomId} />}
 			</AccordionsContainer>
 		</CustomContainer>

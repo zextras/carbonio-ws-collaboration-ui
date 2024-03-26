@@ -13,6 +13,7 @@ import {
 	createMockTextMessage
 } from '../../tests/createMock';
 import { fetchResponse } from '../../tests/mocks/global';
+import { RoomType } from '../../types/store/RoomTypes';
 import { dateToISODate } from '../../utils/dateUtils';
 import { getTagElement } from '../xmpp/utility/decodeStanza';
 import HistoryAccumulator from '../xmpp/utility/HistoryAccumulator';
@@ -20,6 +21,7 @@ import { textMessageFromHistory } from '../xmpp/xmppMessageExamples';
 
 const contentType = 'Content-Type';
 const applicationJson = 'application/json';
+const applicationPdf = 'application/pdf';
 
 describe('Rooms API', () => {
 	test('listRooms is called correctly', async () => {
@@ -409,7 +411,7 @@ describe('Rooms API', () => {
 
 	test('addRoomAttachment is called correctly', async () => {
 		// Send addRoomAttachments request
-		const testFile = new File([], 'file.pdf', { type: 'application/pdf' });
+		const testFile = new File([], 'file.pdf', { type: applicationPdf });
 		const { signal } = new AbortController();
 		const area = '0x0';
 		await roomsApi.addRoomAttachment('roomId', testFile, { area }, signal);
@@ -432,7 +434,7 @@ describe('Rooms API', () => {
 
 	test('addRoomAttachment is called correctly with optionalParams', async () => {
 		// Send addRoomAttachments request
-		const testFile = new File([], 'file.pdf', { type: 'application/pdf' });
+		const testFile = new File([], 'file.pdf', { type: applicationPdf });
 		const { signal } = new AbortController();
 		const area = '0x0';
 		await roomsApi.addRoomAttachment(
@@ -460,6 +462,29 @@ describe('Rooms API', () => {
 			headers,
 			body: new ArrayBuffer(0),
 			signal
+		});
+	});
+
+	test('addRoomAttachment is called correctly with placeholderRoom', async () => {
+		fetchResponse.mockResolvedValueOnce(createMockRoom({ id: 'room0' }));
+		fetchResponse.mockResolvedValueOnce(createMockMeeting({ id: 'meeting0' }));
+		// Send addRoomAttachments request
+		const testFile = new File([], 'file.pdf', { type: applicationPdf });
+		const { signal } = new AbortController();
+		const area = '0x0';
+		await roomsApi.addRoomAttachment('placeholder-userId', testFile, { area }, signal);
+
+		// Set appropriate headers
+		const headers = new Headers();
+		headers.append(contentType, applicationJson);
+
+		expect(global.fetch).toHaveBeenNthCalledWith(1, `/services/chats/rooms`, {
+			method: 'POST',
+			headers,
+			body: JSON.stringify({
+				type: RoomType.ONE_TO_ONE,
+				membersIds: ['userId']
+			})
 		});
 	});
 
@@ -516,6 +541,28 @@ describe('Rooms API', () => {
 			method: 'POST',
 			headers,
 			body: JSON.stringify([forwardedMessage])
+		});
+	});
+
+	test('replacePlaceholderRoom is called correctly', async () => {
+		// Send replacePlaceholderRoom request
+		const room = createMockRoom({ id: 'room0' });
+		const testFile = new File([], 'file.pdf', { type: applicationPdf });
+		fetchResponse.mockResolvedValueOnce(room);
+		await roomsApi.replacePlaceholderRoom('userId', 'text', testFile);
+
+		// Set appropriate headers
+		const headers = new Headers();
+		headers.append(contentType, applicationJson);
+
+		// Check if fetch is called with the correct parameters
+		expect(global.fetch).toHaveBeenNthCalledWith(1, `/services/chats/rooms`, {
+			method: 'POST',
+			headers,
+			body: JSON.stringify({
+				type: RoomType.ONE_TO_ONE,
+				membersIds: ['userId']
+			})
 		});
 	});
 });
