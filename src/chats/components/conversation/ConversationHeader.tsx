@@ -130,16 +130,14 @@ const ConversationHeader = ({
 					<CustomTextWithTooltip overflow="ellipsis" $isWritingIsVisible={isWritingIsDefined}>
 						{roomName}
 					</CustomTextWithTooltip>
-					{
-						<CustomIsWritingText
-							size="small"
-							color="secondary"
-							$isWritingIsVisible={isWritingIsDefined}
-							data-testid="is_writing_text"
-						>
-							{writingLabel}
-						</CustomIsWritingText>
-					}
+					<CustomIsWritingText
+						size="small"
+						color="secondary"
+						$isWritingIsVisible={isWritingIsDefined}
+						data-testid="is_writing_text"
+					>
+						{writingLabel}
+					</CustomIsWritingText>
 				</Container>
 			</Row>
 			<Container orientation="horizontal" width="fit" style={{ minWidth: 'fit-content' }}>

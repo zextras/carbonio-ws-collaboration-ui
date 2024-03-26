@@ -55,24 +55,20 @@ const MeetingChatAccordionTitle: FC<MeetingChatAccordionTitleProps> = ({ roomId 
 
 	return (
 		<Container width="70%" crossAlignment="flex-start">
-			{
-				<ChatLabelText
-					overflow="ellipsis"
-					$isWritingIsVisible={isWritingIsDefined}
-					data-testid="chat_title"
-				>
-					{chatLabel}
-				</ChatLabelText>
-			}
-			{
-				<IsWritingLabelText
-					overflow="ellipsis"
-					$isWritingIsVisible={isWritingIsDefined}
-					data-testid="is_writing_title"
-				>
-					{writingLabel}
-				</IsWritingLabelText>
-			}
+			<ChatLabelText
+				overflow="ellipsis"
+				$isWritingIsVisible={isWritingIsDefined}
+				data-testid="chat_title"
+			>
+				{chatLabel}
+			</ChatLabelText>
+			<IsWritingLabelText
+				overflow="ellipsis"
+				$isWritingIsVisible={isWritingIsDefined}
+				data-testid="is_writing_title"
+			>
+				{writingLabel}
+			</IsWritingLabelText>
 		</Container>
 	);
 };
