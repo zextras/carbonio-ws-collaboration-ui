@@ -21,7 +21,12 @@ import {
 	createMockRoom,
 	createMockTextMessage
 } from '../../../../tests/createMock';
-import { mockedSendIsWriting, mockedSendPaused } from '../../../../tests/mockedXmppClient';
+import {
+	mockedSendChatMessageEdit,
+	mockedSendChatMessageReply,
+	mockedSendIsWriting,
+	mockedSendPaused
+} from '../../../../tests/mockedXmppClient';
 import {
 	mockedAddRoomAttachmentRequest,
 	mockedImageSizeRequest
@@ -335,6 +340,7 @@ describe('MessageComposer', () => {
 		await user.type(textArea, textToSend);
 		const sendButton = screen.getByTestId(iconNavigator2);
 		await user.click(sendButton);
+		await waitFor(() => expect(mockedSendChatMessageReply).toHaveBeenCalled());
 	});
 
 	test('User can edit a message and send it', async () => {
@@ -359,9 +365,11 @@ describe('MessageComposer', () => {
 		await user.type(textArea, ' hi! ');
 		const sendButton = screen.getByTestId(iconNavigator2);
 		await user.click(sendButton);
+
+		await waitFor(() => expect(mockedSendChatMessageEdit).toHaveBeenCalled());
 	});
 
-	test('User can edit a message and send it as empty so the message get deleted', async () => {
+	test('User can edit a message and send it as empty to trigger delete modal message', async () => {
 		const store = useStore.getState();
 
 		store.addRoom(mockedRoom);
@@ -383,6 +391,9 @@ describe('MessageComposer', () => {
 		await user.clear(textArea);
 		const sendButton = screen.getByTestId(iconNavigator2);
 		await user.click(sendButton);
+
+		const deleteModalTitle = await screen.findByText(`Delete selected message?`);
+		expect(deleteModalTitle).toBeInTheDocument();
 	});
 });
 
