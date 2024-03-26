@@ -22,7 +22,10 @@ import {
 	createMockTextMessage
 } from '../../../../tests/createMock';
 import { mockedSendIsWriting, mockedSendPaused } from '../../../../tests/mockedXmppClient';
-import { mockedAddRoomAttachmentRequest } from '../../../../tests/mocks/network';
+import {
+	mockedAddRoomAttachmentRequest,
+	mockedImageSizeRequest
+} from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe } from '../../../../types/network/models/roomBeTypes';
 import { FileToUpload, messageActionType } from '../../../../types/store/ActiveConversationTypes';
@@ -325,6 +328,8 @@ describe('MessageComposer - send message', () => {
 
 	test('Send a message with attachment - image', async () => {
 		mockedAddRoomAttachmentRequest.mockReturnValue('attachmentId');
+		mockedImageSizeRequest.mockReturnValue({ width: 10, height: 10 });
+
 		const testImageFile = new File(['hello'], 'hello.png', { type: 'image/png' });
 		const { user } = storeSetupAdvanced();
 
@@ -334,9 +339,11 @@ describe('MessageComposer - send message', () => {
 		await waitFor(() => expect(input.files).toHaveLength(1));
 
 		const sendButton = screen.getByTestId(iconNavigator2);
-		await user.click(sendButton);
+		await waitFor(() => user.click(sendButton));
 
 		const updatedStore = useStore.getState();
+		expect(mockedImageSizeRequest).toHaveBeenCalledTimes(1);
+		expect(mockedAddRoomAttachmentRequest).toHaveBeenCalledTimes(1);
 		expect(updatedStore.activeConversations[mockedRoom.id].filesToAttach).toBeUndefined();
 	});
 
@@ -354,6 +361,7 @@ describe('MessageComposer - send message', () => {
 		await waitFor(() => user.click(sendButton));
 
 		const updatedStore = useStore.getState();
+		expect(mockedAddRoomAttachmentRequest).toHaveBeenCalledTimes(1);
 		expect(updatedStore.activeConversations[mockedRoom.id].filesToAttach).toBeUndefined();
 	});
 
@@ -371,6 +379,7 @@ describe('MessageComposer - send message', () => {
 		await waitFor(() => user.click(sendButton));
 
 		const updatedStore = useStore.getState();
+		expect(mockedAddRoomAttachmentRequest).toHaveBeenCalledTimes(1);
 		expect(updatedStore.activeConversations[mockedRoom.id].filesToAttach).toBeUndefined();
 	});
 });

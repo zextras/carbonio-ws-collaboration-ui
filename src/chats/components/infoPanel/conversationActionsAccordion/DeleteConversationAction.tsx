@@ -35,7 +35,7 @@ const DeleteConversationAction: FC<DeleteProps> = ({ roomId, type, numberOfMembe
 	const { goToMainPage } = useRouting();
 
 	const deleteConversation = useCallback(
-		() => RoomsApi.deleteRoom(roomId).then(() => goToMainPage()),
+		() => RoomsApi.deleteRoomAndMeeting(roomId).then(() => goToMainPage()),
 		[goToMainPage, roomId]
 	);
 
