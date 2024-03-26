@@ -313,6 +313,77 @@ describe('MessageComposer', () => {
 		const sendButton = screen.getByTestId(iconNavigator2);
 		expect(sendButton).not.toHaveAttribute('disabled', true);
 	});
+
+	test('User can reply to a message with a message and send it', async () => {
+		const store = useStore.getState();
+		const textToSend = 'hi!';
+		store.addRoom(mockedRoom);
+		store.updateHistory(mockedRoom.id, [mockedMessage]);
+
+		// Set reply message
+		store.setReferenceMessage(
+			mockedRoom.id,
+			mockedMessage.id,
+			mockedMessage.from,
+			mockedMessage.stanzaId,
+			messageActionType.REPLY
+		);
+
+		const { user } = setup(<MessageComposer roomId={mockedRoom.id} />);
+
+		const textArea = screen.getByRole('textbox');
+		await user.type(textArea, textToSend);
+		const sendButton = screen.getByTestId(iconNavigator2);
+		await user.click(sendButton);
+	});
+
+	test('User can edit a message and send it', async () => {
+		const store = useStore.getState();
+
+		store.addRoom(mockedRoom);
+		store.setLoginInfo('idPaolo', 'Paolo');
+		store.updateHistory(mockedRoom.id, [mockedMessage]);
+
+		// Set reply message
+		store.setReferenceMessage(
+			mockedRoom.id,
+			mockedMessage.id,
+			mockedMessage.from,
+			mockedMessage.stanzaId,
+			messageActionType.EDIT
+		);
+
+		const { user } = setup(<MessageComposer roomId={mockedRoom.id} />);
+
+		const textArea = screen.getByRole('textbox');
+		await user.type(textArea, ' hi! ');
+		const sendButton = screen.getByTestId(iconNavigator2);
+		await user.click(sendButton);
+	});
+
+	test('User can edit a message and send it as empty so the message get deleted', async () => {
+		const store = useStore.getState();
+
+		store.addRoom(mockedRoom);
+		store.setLoginInfo('idPaolo', 'Paolo');
+		store.updateHistory(mockedRoom.id, [mockedMessage]);
+
+		// Set reply message
+		store.setReferenceMessage(
+			mockedRoom.id,
+			mockedMessage.id,
+			mockedMessage.from,
+			mockedMessage.stanzaId,
+			messageActionType.EDIT
+		);
+
+		const { user } = setup(<MessageComposer roomId={mockedRoom.id} />);
+
+		const textArea = screen.getByRole('textbox');
+		await user.clear(textArea);
+		const sendButton = screen.getByTestId(iconNavigator2);
+		await user.click(sendButton);
+	});
 });
 
 describe('MessageComposer - send message', () => {
