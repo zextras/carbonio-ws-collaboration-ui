@@ -21,8 +21,16 @@ import {
 	createMockRoom,
 	createMockTextMessage
 } from '../../../../tests/createMock';
-import { mockedSendIsWriting, mockedSendPaused } from '../../../../tests/mockedXmppClient';
-import { mockedAddRoomAttachmentRequest } from '../../../../tests/mocks/network';
+import {
+	mockedSendChatMessageEdit,
+	mockedSendChatMessageReply,
+	mockedSendIsWriting,
+	mockedSendPaused
+} from '../../../../tests/mockedXmppClient';
+import {
+	mockedAddRoomAttachmentRequest,
+	mockedImageSizeRequest
+} from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe } from '../../../../types/network/models/roomBeTypes';
 import { FileToUpload, messageActionType } from '../../../../types/store/ActiveConversationTypes';
@@ -310,6 +318,83 @@ describe('MessageComposer', () => {
 		const sendButton = screen.getByTestId(iconNavigator2);
 		expect(sendButton).not.toHaveAttribute('disabled', true);
 	});
+
+	test('User can reply to a message with a message and send it', async () => {
+		const store = useStore.getState();
+		const textToSend = 'hi!';
+		store.addRoom(mockedRoom);
+		store.updateHistory(mockedRoom.id, [mockedMessage]);
+
+		// Set reply message
+		store.setReferenceMessage(
+			mockedRoom.id,
+			mockedMessage.id,
+			mockedMessage.from,
+			mockedMessage.stanzaId,
+			messageActionType.REPLY
+		);
+
+		const { user } = setup(<MessageComposer roomId={mockedRoom.id} />);
+
+		const textArea = screen.getByRole('textbox');
+		await user.type(textArea, textToSend);
+		const sendButton = screen.getByTestId(iconNavigator2);
+		await user.click(sendButton);
+		await waitFor(() => expect(mockedSendChatMessageReply).toHaveBeenCalled());
+	});
+
+	test('User can edit a message and send it', async () => {
+		const store = useStore.getState();
+
+		store.addRoom(mockedRoom);
+		store.setLoginInfo('idPaolo', 'Paolo');
+		store.updateHistory(mockedRoom.id, [mockedMessage]);
+
+		// Set reply message
+		store.setReferenceMessage(
+			mockedRoom.id,
+			mockedMessage.id,
+			mockedMessage.from,
+			mockedMessage.stanzaId,
+			messageActionType.EDIT
+		);
+
+		const { user } = setup(<MessageComposer roomId={mockedRoom.id} />);
+
+		const textArea = screen.getByRole('textbox');
+		await user.type(textArea, ' hi! ');
+		const sendButton = screen.getByTestId(iconNavigator2);
+		await user.click(sendButton);
+
+		await waitFor(() => expect(mockedSendChatMessageEdit).toHaveBeenCalled());
+	});
+
+	test('User can edit a message and send it as empty to trigger delete modal message', async () => {
+		const store = useStore.getState();
+
+		store.addRoom(mockedRoom);
+		store.setLoginInfo('idPaolo', 'Paolo');
+		store.updateHistory(mockedRoom.id, [mockedMessage]);
+
+		// Set reply message
+		store.setReferenceMessage(
+			mockedRoom.id,
+			mockedMessage.id,
+			mockedMessage.from,
+			mockedMessage.stanzaId,
+			messageActionType.EDIT
+		);
+
+		const { user } = setup(<MessageComposer roomId={mockedRoom.id} />);
+
+		const textArea = screen.getByRole('textbox');
+		await user.clear(textArea);
+		const sendButton = screen.getByTestId(iconNavigator2);
+		await user.click(sendButton);
+
+		const deleteModalTitle = await screen.findByText(`Delete selected message?`);
+		expect(deleteModalTitle).toBeInTheDocument();
+	});
 });
 
 describe('MessageComposer - send message', () => {
@@ -325,6 +410,8 @@ describe('MessageComposer - send message', () => {
 
 	test('Send a message with attachment - image', async () => {
 		mockedAddRoomAttachmentRequest.mockReturnValue('attachmentId');
+		mockedImageSizeRequest.mockReturnValue({ width: 10, height: 10 });
+
 		const testImageFile = new File(['hello'], 'hello.png', { type: 'image/png' });
 		const { user } = storeSetupAdvanced();
 
@@ -334,9 +421,11 @@ describe('MessageComposer - send message', () => {
 		await waitFor(() => expect(input.files).toHaveLength(1));
 
 		const sendButton = screen.getByTestId(iconNavigator2);
-		await user.click(sendButton);
+		await waitFor(() => user.click(sendButton));
 
 		const updatedStore = useStore.getState();
+		expect(mockedImageSizeRequest).toHaveBeenCalledTimes(1);
+		expect(mockedAddRoomAttachmentRequest).toHaveBeenCalledTimes(1);
 		expect(updatedStore.activeConversations[mockedRoom.id].filesToAttach).toBeUndefined();
 	});
 
@@ -354,6 +443,7 @@ describe('MessageComposer - send message', () => {
 		await waitFor(() => user.click(sendButton));
 
 		const updatedStore = useStore.getState();
+		expect(mockedAddRoomAttachmentRequest).toHaveBeenCalledTimes(1);
 		expect(updatedStore.activeConversations[mockedRoom.id].filesToAttach).toBeUndefined();
 	});
 
@@ -371,6 +461,7 @@ describe('MessageComposer - send message', () => {
 		await waitFor(() => user.click(sendButton));
 
 		const updatedStore = useStore.getState();
+		expect(mockedAddRoomAttachmentRequest).toHaveBeenCalledTimes(1);
 		expect(updatedStore.activeConversations[mockedRoom.id].filesToAttach).toBeUndefined();
 	});
 });

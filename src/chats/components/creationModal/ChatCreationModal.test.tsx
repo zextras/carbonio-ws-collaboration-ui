@@ -73,7 +73,7 @@ describe('Chat Creation Modal', () => {
 		expect(footerButton).toHaveAttribute('disabled');
 	});
 
-	test('Create a Chat', async () => {
+	test('Creating a 1to1 Chat add a placeholder room', async () => {
 		const { user } = setup(<ChatCreationModal open onClose={jest.fn()} />);
 
 		mockedAutoCompleteGalRequest.mockReturnValueOnce([zimbraUser1]);
@@ -89,18 +89,16 @@ describe('Chat Creation Modal', () => {
 		const footerButton = await screen.findByTestId('create_button');
 		expect(footerButton).not.toHaveAttribute('disabled', true);
 
-		mockedAddRoomRequest.mockReturnValue({
-			id: 'room-id',
-			name: '',
-			description: '',
-			type: RoomType.ONE_TO_ONE,
-			createdAt: 'created',
-			updatedAt: 'updated',
-			pictureUpdatedAt: 'pictureUpdatedAt'
-		});
 		user.click(footerButton);
 		await waitFor(() => expect(footerButton).not.toHaveAttribute('disabled', true));
-		expect(mockedAddRoomRequest).toHaveBeenCalled();
+		const placeholderRoom = useStore.getState().rooms[`placeholder-${zimbraUser1.zimbraId}`];
+		expect(placeholderRoom).toEqual(
+			expect.objectContaining({
+				id: `placeholder-${zimbraUser1.zimbraId}`,
+				type: RoomType.ONE_TO_ONE,
+				placeholder: true
+			})
+		);
 	});
 
 	test('Create a group', async () => {
@@ -143,6 +141,33 @@ describe('Chat Creation Modal', () => {
 		user.click(footerButton);
 		await waitFor(() => expect(footerButton).not.toHaveAttribute('disabled', true));
 		expect(mockedAddRoomRequest).toHaveBeenCalled();
+	});
+
+	test('Error on creating a group displaying a snackbar', async () => {
+		const { result } = renderHook(() => useStore());
+		act(() => result.current.setCapabilities(createMockCapabilityList({ maxGroupMembers: 5 })));
+		const { user } = setup(<ChatCreationModal open onClose={jest.fn()} />);
+
+		mockedAutoCompleteGalRequest.mockReturnValueOnce([zimbraUser1, zimbraUser2]);
+
+		// Add zimbraUser1 and zimbraUser2 chips
+		const chipInput = await screen.findByTestId('chip_input_creation_modal');
+		user.type(chipInput, zimbraUser1.fullName[0]);
+		const user1Component = await screen.findByText(zimbraUser1.fullName);
+		user.click(user1Component);
+		const chipInput1 = await screen.findByTestId('chip_input_creation_modal');
+		user.type(chipInput1, zimbraUser2.fullName[0]);
+		const user2Component = await screen.findByText(zimbraUser2.fullName);
+		user.click(user2Component);
+
+		const footerButton = await screen.findByTestId('create_button');
+		expect(footerButton).toBeEnabled();
+
+		mockedAddRoomRequest.mockRejectedValueOnce({});
+		user.click(footerButton);
+		await waitFor(() => expect(footerButton).not.toHaveAttribute('disabled', true));
+		const snackbar = await screen.findByText(/Something went Wrong. Please Retry/i);
+		expect(snackbar).toBeInTheDocument();
 	});
 
 	test('title and topic fields are filled properly', async () => {

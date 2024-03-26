@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { GetImageResponse } from '../../types/network/responses/attachmentsResponses';
 import {
 	AcceptWaitingUserResponse,
 	CreateMeetingResponse,
@@ -75,6 +76,7 @@ export const mockedSubscribeToMediaRequest: jest.Mock = jest.fn();
 export const mockedAcceptWaitingUserRequest: jest.Mock = jest.fn();
 export const mockedGetScheduledMeetingName: jest.Mock = jest.fn();
 export const mockedLeaveWaitingRoomRequest: jest.Mock = jest.fn();
+export const mockedImageSizeRequest: jest.Mock = jest.fn();
 
 jest.mock('../../network', () => {
 	const noResultProvided = 'no result provided';
@@ -91,6 +93,11 @@ jest.mock('../../network', () => {
 					result ? resolve(result) : reject(new Error(noResultProvided));
 				}),
 			deleteRoom: (): Promise<DeleteRoomResponse> =>
+				new Promise((resolve, reject) => {
+					const result = mockedDeleteRoomRequest();
+					result ? resolve(result) : reject(new Error(noResultProvided));
+				}),
+			deleteRoomAndMeeting: (): Promise<DeleteRoomResponse> =>
 				new Promise((resolve, reject) => {
 					const result = mockedDeleteRoomRequest();
 					result ? resolve(result) : reject(new Error(noResultProvided));
@@ -155,6 +162,11 @@ jest.mock('../../network', () => {
 				new Promise((resolve, reject) => {
 					const result = mockedAddRoomAttachmentRequest();
 					result ? resolve(result) : reject(new Error(noResultProvided));
+				}),
+			replacePlaceholderRoom: (): Promise<AddRoomResponse> =>
+				new Promise((resolve, reject) => {
+					const result = mockedAddRoomRequest();
+					result ? resolve(result) : reject(new Error(noResultProvided));
 				})
 		},
 		UsersApi: {
@@ -176,7 +188,12 @@ jest.mock('../../network', () => {
 			getImagePreviewURL: mockedGetImageURL,
 			getImageThumbnailURL: mockedGetImageThumbnailURL,
 			getPdfPreviewURL: mockedGetPdfURL,
-			getPdfThumbnailURL: mockedGetPdfThumbnailURL
+			getPdfThumbnailURL: mockedGetPdfThumbnailURL,
+			getImageSize: (): Promise<GetImageResponse> =>
+				new Promise((resolve, reject) => {
+					const result = mockedImageSizeRequest();
+					result ? resolve(result) : reject(new Error(noResultProvided));
+				})
 		},
 		MeetingsApi: {
 			getMeeting: (): Promise<GetMeetingResponse> =>

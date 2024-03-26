@@ -36,6 +36,9 @@ dist/
 # JetBrains IDE
 .idea/
 
+# VsCode IDE
+.vscode/
+
 # Unit test reports
 TEST*.xml
 

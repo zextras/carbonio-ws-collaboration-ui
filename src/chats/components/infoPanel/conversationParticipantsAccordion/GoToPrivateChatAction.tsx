@@ -11,9 +11,7 @@ import { find } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 import useRouting from '../../../../hooks/useRouting';
-import { RoomsApi } from '../../../../network';
 import useStore from '../../../../store/Store';
-import { AddRoomResponse } from '../../../../types/network/responses/roomsResponses';
 import { RoomType } from '../../../../types/store/RoomTypes';
 
 type GoToPrivateChatProps = {
@@ -25,6 +23,8 @@ const GoToPrivateChatAction: FC<GoToPrivateChatProps> = ({ memberId, isParticipa
 	const [t] = useTranslation();
 	const goToPrivateChatLabel: string = t('tooltip.goToPrivateChat', 'Go to private chat');
 
+	const setPlaceholderRoom = useStore((state) => state.setPlaceholderRoom);
+
 	const { goToRoomPage } = useRouting();
 
 	const goToUserRoom = useCallback(() => {
@@ -34,16 +34,10 @@ const GoToPrivateChatAction: FC<GoToPrivateChatProps> = ({ memberId, isParticipa
 				room.type === RoomType.ONE_TO_ONE &&
 				!!find(room.members, (user) => user.userId === memberId)
 		);
-		if (oneToOneChatExist) {
-			goToRoomPage(oneToOneChatExist.id);
-		} else {
-			RoomsApi.addRoom({
-				type: RoomType.ONE_TO_ONE,
-				membersIds: [memberId]
-			}).then((response: AddRoomResponse) => goToRoomPage(response.id));
-		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [memberId]);
+		const roomId = oneToOneChatExist?.id ?? `placeholder-${memberId}`;
+		if (!oneToOneChatExist) setPlaceholderRoom(memberId);
+		goToRoomPage(roomId);
+	}, [goToRoomPage, memberId, setPlaceholderRoom]);
 
 	return (
 		<Tooltip label={goToPrivateChatLabel}>

@@ -8,6 +8,8 @@ import { onGetLastActivityResponse } from './handlers/lastActivityHandler';
 import { onGetRosterResponse } from './handlers/rosterHandler';
 import XMPPClient from './XMPPClient';
 import { XMPPRequestType } from './XMPPConnection';
+import { createMockRoom } from '../../tests/createMock';
+import { mockedAddRoomRequest } from '../../tests/mocks/network';
 import { mockedXmppConnect, mockedXmppSend } from '../../tests/mocks/XMPPConnection';
 
 describe('XMPPClient', () => {
@@ -57,5 +59,13 @@ describe('XMPPClient', () => {
 			type: XMPPRequestType.MESSAGE,
 			elem: expect.any(Object)
 		});
+	});
+
+	test('sendChatMessage to a placeholder should create a room', () => {
+		mockedAddRoomRequest.mockReturnValueOnce(createMockRoom({ id: 'roomId123' }));
+		const xmppClient = new XMPPClient();
+		xmppClient.sendChatMessage('placeholder-roomId123', 'Hello, world!');
+
+		expect(mockedAddRoomRequest).toBeCalled();
 	});
 });

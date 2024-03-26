@@ -64,7 +64,7 @@ const LeaveConversationListAction: FC<LeaveConversationProps> = ({
 	}, [goToMainPage, roomId, sessionUserId]);
 
 	const deleteConversation = useCallback(
-		() => RoomsApi.deleteRoom(roomId).then(() => goToMainPage()),
+		() => RoomsApi.deleteRoomAndMeeting(roomId).then(() => goToMainPage()),
 		[goToMainPage, roomId]
 	);
 
