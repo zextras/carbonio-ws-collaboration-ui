@@ -1,0 +1,104 @@
+{
+    "action": {
+        "removeUser": "Remove",
+        "activateNotifications": "Activate notifications",
+        "addNewMembers": "Add new members",
+        "clearHistory": "Clear history",
+        "close": "Close",
+        "copy": "Copy",
+        "create": "Create",
+        "delete": "Delete",
+        "download": "Download",
+        "edit": "Edit",
+        "editYourMessage": "Edit your message",
+        "forward": "Forward",
+        "forwarded": "forwarded",
+        "leave": "Leave",
+        "muteNotifications": "Mute notifications",
+        "reply": "Reply",
+        "replyToSomeone": "Reply to",
+        "replyToYourself": "Reply to yourself",
+        "undo": "Undo",
+        "enter": "Enter",
+        "ok": "Ok",
+        "cancel": "Cancel"
+    },
+    "settings": {
+        "profile": {
+            "title": "Profile",
+            "errorGenericResponse": "Something went wrong. Please retry"
+        },
+        "notifications": {
+            "title": "Notifications",
+            "subtitle": {
+                "general": "General"
+            }
+        },
+        "meetings": {
+            "title": "Meetings",
+            "description": "Set your audio and video preferences to enter the meetings. You can always customize your preferences before joining every meeting."
+        }
+    },
+    "conversation": {
+        "newMessage": "New message"
+    },
+    "conversationInfo": {
+        "email": "Email",
+        "info": "Info",
+        "name": "Name",
+        "status": "Status",
+        "title": "Title",
+        "topic": "Topic"
+    },
+    "date": {
+        "yesterday": "Yesterday"
+    },
+    "editModal": {
+        "groupDescriptionDetails": "It describes the subject of the Group"
+    },
+    "feedback": {
+        "historyCleared": "History cleared successfully!",
+        "notificationsActivatedForThisChat": "Notifications activated for this chat",
+        "notificationsMutedForThisChat": "Notifications muted for this chat"
+    },
+    "message": {
+        "deletedMessage": "Deleted message"
+    },
+    "modal": {
+        "creation": {
+            "newGroup": "New Group"
+        },
+        "showPreviousConversationHistory": "Show previous conversation history",
+        "leaveGroup": "Leave conversation"
+    },
+    "status": {
+        "lastSeen": "Last seen {{lastSeen}}",
+        "offline": "Offline",
+        "online": "Online"
+    },
+    "tooltip": {
+        "close": "Close",
+        "leaveConversation": "Leave conversation",
+        "messageRead": "Read",
+        "unpinVideo": "Unpin video",
+        "collapseCarousel": "Collapse",
+        "expandCarousel": "Expand",
+        "muteForAll": "Mute for all",
+        "pinVideo": "Pin video"
+    },
+    "chat": "Chat",
+    "meeting": {
+        "interactions": {
+            "enableCamera": "Enable camera",
+            "enableMicrophone": "Enable microphone"
+        }
+    },
+    "meetings": {
+        "interactions": {
+            "yourCamIsDisabled": "Your camera is off"
+        }
+    },
+    "snackbar": {
+        "mutedByModerator": "You've been muted by a moderator, unmute yourself to speak"
+    }
+}

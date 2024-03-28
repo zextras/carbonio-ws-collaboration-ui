@@ -1,0 +1,29 @@
+{
+    "action": {
+        "copy": "نسخ",
+        "delete": "حذف",
+        "edit": "تحرير",
+        "forward": "إعادة توجيه",
+        "reply": "الرد",
+        "cancel": "إلغاء"
+    },
+    "conversationInfo": {
+        "email": "البريد الإلكتروني",
+        "name": "الاسم",
+        "status": "الحالة"
+    },
+    "settings": {
+        "notifications": {
+            "title": "إعلامات",
+            "subtitle": {
+                "general": "عام"
+            }
+        }
+    },
+    "status": {
+        "online": "متصل"
+    },
+    "tooltip": {
+        "clear": "مسح"
+    }
+}

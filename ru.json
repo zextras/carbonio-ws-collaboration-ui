@@ -1,0 +1,363 @@
+{
+    "attachments": {
+        "stopUpload": "Остановить загрузку",
+        "addFromLocal": "Добавить из локального",
+        "attachLinkFiles": "Прикрепите публичную ссылку из Files",
+        "dragAndDrop": "Режим Drag&Drop",
+        "dropHereDescription": "Перетащите сюда свои вложения, чтобы быстро добавить их в этот чат",
+        "errorUploadingFile": "Что-то пошло не так при загрузке {{file}}",
+        "uploadAborted": "Загрузка была прервана",
+        "integrations": {
+            "chooseFile": "Выбрать файл",
+            "shareLink": "Поделиться публичной ссылкой"
+        }
+    },
+    "feedback": {
+        "historyCleared": "История очищена!",
+        "notificationsActivatedForThisChat": "Уведомления включены для этого Чата",
+        "notificationsMutedForThisChat": "Отключить уведомления для этого чата",
+        "messageCopied": "Сообщение скопировано",
+        "networkProblem": {
+            "websocket": "Что-то пошло не так при подключении к WEBSOCKET",
+            "wsc": "Что-то пошло не так при подключении к WSC",
+            "xmpp": "Что-то пошло не так при подключении по XMPP"
+        }
+    },
+    "message": {
+        "deletedMessage": "Удаленное сообщение",
+        "draft": "черновик",
+        "edited": "отредактировано"
+    },
+    "modal": {
+        "leaveGroup": "Выйти из Группы",
+        "creation": {
+            "newGroup": "Новая группа",
+            "contactList": "Для создания группы необходимо выбрать еще адреса",
+            "description": "Chats — это мессенджер один на один, который помогает вам оставаться на связи с коллегами. Вы можете создать группу, добавив более двух адресов",
+            "inputPlaceholder": "Начните печатать или выберите адрес",
+            "newChat": "Новый чат",
+            "addUserLimit": {
+                "limitReached": "Вы выбрали максимальное количество участников в группе",
+                "users_0": "Вы можете добавить 1 участника",
+                "users_1": "Вы можете добавить {{count}}пользователя",
+                "users_2": "Вы можете добавить {{count}} пользователей"
+            }
+        },
+        "deleteRoom": "Удалить конференц-зал",
+        "deleteUserDescription": "Вы уверены, что хотите удалить этого пользователя?",
+        "removeMember": "Удалить участника",
+        "showPreviousConversationHistory": "Показать предыдущую историю чата",
+        "deleteGroup": "Удалить Группу",
+        "deleteGroupLabel": "Вы уверены, что хотите удалить эту группу?",
+        "deleteMessageTitle": "Удалить выбранное сообщение?",
+        "deleteMessageTitleDescription": "Вы удаляете сообщение, оно больше не доступно",
+        "deleteRoomLabel": "Вы уверены, что хотите удалить эту комнату?",
+        "forward": {
+            "chooseAtLeastOneChat": "Выберите хотя бы один чат",
+            "description": "Выберите чат, чтобы переслать сообщение",
+            "inputPlaceholder": "Начните печатать или выберите чат",
+            "title": "Переслать сообщение от {{chatName}}"
+        },
+        "leaveAndDelete": "Выйти и удалить группу",
+        "leaveGroupLabel": "Вы уверены, что хотите выйти из Группы?",
+        "leaveRoom": "Выйти из Комнаты",
+        "leaveRoomLabel": "Вы уверены, что хотите выйти из этой Комнаты?",
+        "clearHistoryDescription": "Вы очищаете историю чата. Обратите внимание, что это действие необратимо. История будет удалена для вас, а не для других участников."
+    },
+    "action": {
+        "activateNotifications": "Включить уведомления",
+        "addAttachment": "Прикрепить вложение",
+        "addNewMembers": "Добавить новых участников",
+        "clearHistory": "Очистить историю чата",
+        "close": "Закрыть",
+        "copy": "Копия",
+        "create": "Создать",
+        "delete": "Удалить",
+        "download": "Загрузить",
+        "edit": "Редактировать",
+        "editYourMessage": "Редактировать сообщение",
+        "forward": "Переслать",
+        "forwarded": "переадресовано",
+        "leave": "Покинуть",
+        "muteNotifications": "Отключить уведомления",
+        "preview": "Предварительный просмотр",
+        "removeUser": "Удалить",
+        "reply": "Ответить",
+        "replyToSomeone": "Ответить",
+        "replyToYourself": "Ответить",
+        "undo": "Отменить",
+        "addMoreAttachments": "Добавить {{counter}} вложений",
+        "addNewMembersTo": "Добавить новых участников в {{roomName}}",
+        "addSingleAttachment": "Добавить вложение {{counter}}",
+        "editRoom": "Редактировать {{roomName}}",
+        "editDetails": "Редактировать",
+        "newChat": "Новый чат",
+        "scrollToBottom": "Прокрутите вниз",
+        "decline": "Отклонить",
+        "enter": "Войти",
+        "joinMeeting": "Присоединиться к встрече",
+        "declineAll": "Отклонить все",
+        "understood": "Понятно",
+        "ok": "Ок",
+        "cancel": "Отменить"
+    },
+    "conversation": {
+        "chooseConversationDescription": "Выберите беседу, чтобы начать чат",
+        "keepInTouchTitle": "Будем на связи!",
+        "newMessage": "Новое сообщение",
+        "emptyListDescription": "Здесь будут отображаться чаты и группы",
+        "emptyListTitle": "Этот список пуст",
+        "mockCreateChatDescription": "Взаимодействуйте, общайтесь и сотрудничайте со своими коллегами, делясь информацией и вложениями",
+        "mockCreateChatTitle": "Создайте новый чат с помощью кнопки «Создать»",
+        "newMessages": "Новые сообщения",
+        "selectionMode": {
+            "exit": "Выйти из режима выбора"
+        }
+    },
+    "conversationInfo": {
+        "actionAccordionTitle": "Действия",
+        "email": "Электронная почта",
+        "info": "Информация",
+        "messages": "Сообщения",
+        "name": "имя",
+        "status": "статусу",
+        "title": "Заголовок",
+        "topic": "Тема"
+    },
+    "date": {
+        "yesterday": "Вчера",
+        "today": "Сегодня"
+    },
+    "editModal": {
+        "groupDescriptionDetails": "Описание темы Группы",
+        "confirm": "Редактировать детали",
+        "confirmDisabled": "Вы ничего не изменили",
+        "errorDisabled": "Проверьте введенную информацию",
+        "nameTooLong": "Максимальная длина заголовка — 128 символов",
+        "nameTooShort": "Название является важной информацией",
+        "topicTooLong": "Максимальная длина темы — 256 символов",
+        "groupNameDetails": "Требуется и идентифицирует группу"
+    },
+    "participantsList": {
+        "closeSearch": "Закрыть поиск",
+        "moreMembersAccordionTitle": "участники",
+        "noMatch": "Нет элементов, соответствующих этому запросу",
+        "oneMemberAccordionTitle": "Один участник",
+        "searchMembers": "Поиск участников",
+        "searchParticipants": "Поиск участников"
+    },
+    "settings": {
+        "notifications": {
+            "title": "Оповещения",
+            "description": "Установите свои предпочтения для уведомлений чатов.",
+            "subtitle": {
+                "general": "Основные"
+            }
+        },
+        "profile": {
+            "errorGenericResponse": "Что-то пошло не так. Пожалуйста повторите",
+            "title": "Параметры пользователя",
+            "deletedUserImageCorrectly": "Аватар успешно сброшен на исходный",
+            "description": "Выберите аватар, который будут видеть другие пользователи, изображение будет центрировано автоматически.",
+            "maximumDimension": "Максимальный размер: {{size}} кб",
+            "pictureSizeTooLarge": "Что-то пошло не так, помните, что максимальный размер изображения аватара {{size}}kb",
+            "statusLabel": "Ваш статус появится здесь",
+            "updatedPictureCorrectly": "Новый аватар успешно загружен"
+        },
+        "save": "Правки сохранены",
+        "title": "Настройки Чатов",
+        "room": {
+            "deletedImageCorrectly": "Аватар группы успешно сброшен на исходный",
+            "deletedUserImageCorrectly": "Аватар успешно сброшен на исходный",
+            "pictureSizeTooLarge": "Что-то пошло не так, помните, что максимальный размер изображения аватара группы составляет {{size}}kb",
+            "updatedPictureCorrectly": "Новый аватар успешно загружен"
+        },
+        "meetings": {
+            "title": "Встречи",
+            "description": "Установите свои аудио и видео предпочтения для участия в собраниях. Вы всегда можете настроить свои предпочтения перед тем, как присоединиться к каждой встрече."
+        },
+        "recording": {
+            "title": "Запись",
+            "inputLabel": "Папка назначения"
+        }
+    },
+    "status": {
+        "lastSeen": "Последнее посещение {{lastSeen}}",
+        "offline": "Не в сети",
+        "online": "В сети",
+        "areTyping": "пишут…",
+        "isTyping": "пишет…",
+        "you": " Вы",
+        "goToPrivateChat": "Зайдите в чат, чтобы отправить личное сообщение"
+    },
+    "tooltip": {
+        "clear": "Удалить",
+        "close": "Закрыть",
+        "goToPrivateChat": "Перейти в личный чат",
+        "leaveConversation": "Покинуть беседу",
+        "messageComposer": "Средство создания сообщения",
+        "messageRead": "Читать",
+        "messageSent": "Отправленные",
+        "room": {
+            "uploadPicture": "Загрузить картинку",
+            "resetPicture": "Сбросить картинку",
+            "updatePicture": "Обновить картинку"
+        },
+        "selectEmoji": "Выбрать emoji",
+        "sendMessage": "Отправить сообщение",
+        "uploading": "Выгрузка",
+        "demoteModerator": "Понизить статус модератора",
+        "disableModalButton": "Выберите хотя бы один адрес",
+        "forwardedMessage": "Сообщение переадресовано из другого чата",
+        "iAmModerator": "Вы модератор",
+        "leaveAndDelete": "Выйти и удалить чат",
+        "memberIsModerator": "Этот участник является модератором",
+        "messageReceived": "Получено",
+        "promoteModerator": "Повысить статус до модератора",
+        "promoteSomeoneElseToModerator": "Прежде чем выйти, вы должны назначить кого-нибудь модератором",
+        "showConversationList": "Показать список чатов",
+        "uploadAttachment": "Загрузить вложение",
+        "userAvatar": {
+            "resetAvatar": "Сбросить аватар",
+            "updateAvatar": "Обновить аватар",
+            "uploadAvatar": "Загрузить аватар"
+        },
+        "writeToSend": "Напишите сообщение, чтобы отправить его",
+        "messageActions": "Действия с сообщениями",
+        "collapseCarousel": "Свернуть",
+        "expandCarousel": "Расширить",
+        "muteForAll": "Отключить звук для всех",
+        "pending": "Ждет решения",
+        "pinVideo": "Закрепить видео",
+        "unpinVideo": "Открепить видео",
+        "bottomOfList": "Внизу списка",
+        "expandSidebar": "Развернуть боковое меню",
+        "removeToAddNewOne": "Удалите кого-либо, чтобы добавить новых участников",
+        "collapseSidebar": "Свернуть боковую панель",
+        "scrollDown": "Прокрутить вниз",
+        "scrollUp": "Прокрутить вверх",
+        "topOfList": "Вверху списка"
+    },
+    "affiliationMessages": {
+        "SomeoneElseCreatedOneToOne": "{{userName}} начал(а) с вами чат",
+        "groupCreated": "{{roomName}} создана!",
+        "memberAdded": "{{userName}} добавлен(а) в {{roomName}}",
+        "memberRemoved": "{{userName}} был удален(а) из {{roomName}}",
+        "oneToOneCreated": "Создан новый чат!",
+        "youCreatedOneToOne": "Вы начали чат с {{userName}}"
+    },
+    "configurationMessages": {
+        "roomNameChanged": "{{name}} изменил(а) название этой группы на \"<i>{{roomName}}</i>\"",
+        "roomPictureDeleted": "{{name}} восстановил(а) изображение {{roomName}} по умолчанию",
+        "roomPictureUpdated": "{{name}} изменил(а) изображение {{roomName}}",
+        "roomTopicChanged": "{{name}} изменил(а) тему {{roomName}} \"<i>{{topicName}}</i>\"",
+        "roomTopicRemoved": "{{name}} удалил тему {{roomName}}"
+    },
+    "conversationFilter": {
+        "closeTooltip": "Закрыть фильтры",
+        "filterTooltip": "Список фильтров",
+        "label": "Начните печатать, чтобы отфильтровать список"
+    },
+    "titlePlaceholder": "Название вашей группы",
+    "chat": "Чат",
+    "meeting": {
+        "interactions": {
+            "cameraDisabled": "Камера отключена",
+            "cameraEnabled": "Камера включена",
+            "enableCamera": "Включить камеру",
+            "enableMicrophone": "Включить микрофон",
+            "microphoneEnabled": "Микрофон включен",
+            "disableCamera": "Отключить камеру",
+            "disableMicrophone": "Отключить микрофон",
+            "disableScreen": "Отключить демонстрацию экрана",
+            "enableScreen": "Включить демонстрацию экрана",
+            "gridView": "Вид сетка",
+            "playMic": "Начать проверку микрофона",
+            "stopMic": "Закончить проверку микрофона",
+            "leaveMeeting": "Покинул встречу",
+            "microphoneDisabled": "Микрофон отключен"
+        },
+        "joinMeeting": "Присоединиться к встрече",
+        "newMeetingNotification": {
+            "sendMessage": "Отправить сообщение",
+            "writeAMessageToSendIt": "Напишите сообщение, чтобы отправить его",
+            "sendAQuickMessage": "Отправить короткое сообщение",
+            "userIsInvitingYou": "<strong>{{name}}</strong> приглашает вас"
+        },
+        "collapseChat": "Скрыть чат",
+        "collapseParticipantsMeetingTooltip": "Скрыть список участников",
+        "activeMeetingTooltip": "В этой группе есть активная встреча",
+        "expandChat": "Развернуть чат",
+        "expandParticipantsListTooltip": "Развернуть список участников",
+        "startModal": {
+            "enterRoomMeetingTitle": "Примите участие во встрече {{meeting Title}}",
+            "enterOneToOneMeetingTitle": "Начать встречу с {{meetingTitle}}",
+            "audioAndVideoLoading": "Ресурсы загружаются"
+        },
+        "waitingParticipants": "Участники присоединяются…",
+        "ongoingOneToOneMeetingTooltip": "У вас уже есть активная встреча с {{name}}",
+        "participantsList": {
+            "title_0": "{{count}} Участник",
+            "title_1": "{{count}} Участника",
+            "title_2": "{{count}} Участников"
+        },
+        "ongoingGroupMeetingTooltip": "Вы уже участвуете в этой встрече",
+        "joinMeetingDescription": "Каким образом вы хотите присоединиться к этой встрече?",
+        "minimizeChat": "Свернуть чат",
+        "setInputDescription": "Установите устройства ввода, выбрав их из раскрывающегося меню.",
+        "startMeeting": "Начать встречу",
+        "virtual": {
+            "deleteTooltip": "Удалить Комнату"
+        },
+        "sidebar": {
+            "waitingCaption": "В ожидании входа",
+            "tooltip": {
+                "waitingAccept": "Разрешить вход",
+                "waitingReject": "Отклонить вход пользователя"
+            },
+            "recording": {
+                "title": "Запись",
+                "description": "Запись будет сохранена в Files в папке модератора, который остановил запись."
+            }
+        },
+        "snackbar": {
+            "waitingInfo": "Кажется, в комнате ожидания кто-то есть"
+        },
+        "browserNotification": {
+            "waitingTitle": "Кажется, в комнате ожидания кто-то есть"
+        },
+        "waitingRoom": {
+            "hangUp": "Повесить трубку"
+        },
+        "recordingHint": "Идет запись",
+        "recordingModal": {
+            "title": "Остановить запись",
+            "description": "Вы собираетесь остановить запись. Вы можете начать новую запись в любой момент.",
+            "inputLabel": "Название записи"
+        },
+        "recordingStart": {
+            "failureSnackbar": "Невозможно начать запись, обратитесь к системному администратору."
+        }
+    },
+    "thanksForParticipating": "До встречи",
+    "external": {
+        "nobodyInTheRoom": "В этой Комнате никого нет",
+        "roomIsEmpty": "Эта Виртуальная комната пустая"
+    },
+    "meetings": {
+        "interactions": {
+            "yourCamIsDisabled": "Ваша камера выключена",
+            "yourMicIsDisabled": "Ваш микрофон выключен"
+        }
+    },
+    "notification": {
+        "meeting": {
+            "ended": "Встреча завершена"
+        }
+    },
+    "tryLater": "Попробуй позже",
+    "keepInTouchWithColleagues": "Будьте на связи с коллегами или присоединяйтесь к переговорным комнатам ваших групп",
+    "snackbar": {
+        "mutedByModerator": "Модератор отключил звук, включите звук чтобы говорить"
+    }
+}

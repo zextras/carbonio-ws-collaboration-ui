@@ -1,0 +1,304 @@
+{
+    "attachments": {
+        "addFromLocal": "लोकल से लगाएँ",
+        "attachLinkFiles": "फाइलों से पब्लिक लिंक अटैच करें",
+        "stopUpload": "अपलोड बंद करें",
+        "errorUploadingFile": "{{file}} अपलोड करने में कोई गड़बड़ी हुई",
+        "uploadAborted": "अपलोड रुक गया है",
+        "dragAndDrop": "खींचें और छोड़ें मोड",
+        "dropHereDescription": "इस चैट में तुरंत जोड़ने के लिए अपने अटैचमेंट यहाँ छोड़ें",
+        "integrations": {
+            "chooseFile": "फाइल चुनें",
+            "shareLink": "पब्लिक लिंक शेयर करें"
+        }
+    },
+    "settings": {
+        "notifications": {
+            "title": "अधिसूचनाएं",
+            "description": "चैट सूचनाओं के लिए अपने फेव्रेट सेट करें।",
+            "subtitle": {
+                "general": "सामान्य"
+            }
+        },
+        "profile": {
+            "errorGenericResponse": "कुछ गड़बड़ हुई। दोबारा कोशिश करें",
+            "title": "प्रोफ़ाइल",
+            "deletedUserImageCorrectly": "अवतार को ओरिजिनल में रीसेट कर दिया गया है",
+            "maximumDimension": "अधिकतम डायमेंन्शन: {{size}}kb",
+            "pictureSizeTooLarge": "कुछ गड़बड़ हुई, याद रखें कि अवतार की फोटो के लिए अधिकतम साइज़ {{size}}kb है",
+            "description": "कोई ऐसा अवतार चुनें जो दूसरे यूज़र देखेंगे, फोटो अपने आप सेंटर हो जाएगी।",
+            "statusLabel": "आपका स्टेटस यहाँ दिखाई देगा",
+            "updatedPictureCorrectly": "नया अवतार अपलोड कर दिया गया है"
+        },
+        "save": "बदलाव ठीक से सेव हो गए",
+        "title": "Chats सेटिंग्स",
+        "room": {
+            "updatedPictureCorrectly": "नया अवतार अपलोड कर दिया गया है",
+            "deletedImageCorrectly": "ग्रुप अवतार को ओरिजिनल में रीसेट कर दिया गया है",
+            "deletedUserImageCorrectly": "अवतार को ओरिजिनल में रीसेट कर दिया गया है",
+            "pictureSizeTooLarge": "कुछ गड़बड़ हुई, याद रखें कि ग्रुप अवतार की फोटो के लिए अधिकतम साइज़ {{size}}kb है"
+        },
+        "meetings": {
+            "description": "मीटिंग्स में आने के लिए अपने औडियो और विडियो प्रेफेरेंस सेट करें। आप कोई भी मीटिंग जॉइन करने से पहले अपने प्रेफेरेंस कस्टमाइज़ कर सकते हैं।",
+            "title": "मीटिंग्स"
+        },
+        "recording": {
+            "inputLabel": "गंतव्य फोल्डर",
+            "title": "रिकॉर्डिंग"
+        }
+    },
+    "action": {
+        "activateNotifications": "अधिसूचनाएं चालू करें",
+        "addAttachment": "संलग्नक लगाएं",
+        "addNewMembers": "नए मेम्बर जोड़ें",
+        "clearHistory": "हिस्ट्री क्लियर करें",
+        "close": "बंद करें",
+        "copy": "कॉपी करें",
+        "create": "बनाएँ",
+        "delete": "डिलीट करें",
+        "download": "डाऊनलोड करें",
+        "edit": "बदलाव करें",
+        "editYourMessage": "अपना मैसेज एडिट करें",
+        "forward": "फॉरवर्ड करें",
+        "forwarded": "अग्रेषित किया गया",
+        "leave": "छोड़ें",
+        "muteNotifications": "नोटिफ़िकेशन की आवाज़ बंद करें",
+        "preview": "प्रीव्यू",
+        "removeUser": "हटाएँ",
+        "reply": "रिप्लाई करें",
+        "replyToSomeone": "इन्हें रिप्लाई दें",
+        "replyToYourself": "खुद को रिप्लाई दें",
+        "undo": "अनडू करें",
+        "addMoreAttachments": "{{counter}} अटैचमेंट जोड़ें",
+        "editRoom": "{{roomName}} बदलें",
+        "newChat": "नई चैट",
+        "editDetails": "जानकारी बदलें",
+        "addSingleAttachment": "{{counter}} अटैचमेंट जोड़ें",
+        "addNewMembersTo": "{{roomName}} में नए सदस्य जोड़ें",
+        "scrollToBottom": "स्क्रॉल करके नीचे जाएँ",
+        "decline": "अस्वीकार करना",
+        "enter": "एंटर करें",
+        "joinMeeting": "मीटिंग में शामिल हों",
+        "ok": "ठीक है",
+        "cancel": "कैंसल करें"
+    },
+    "conversation": {
+        "chooseConversationDescription": "कोई चैट शुरू करने के लिए कोई बात-चीत चुनें",
+        "keepInTouchTitle": "चलिए हम संपर्क में रहते हैं!",
+        "newMessage": "नया मैसेज",
+        "emptyListDescription": "चैट और ग्रुप यहां लिस्ट में दिखाई देंगे",
+        "emptyListTitle": "यह लिस्ट खाली है",
+        "mockCreateChatDescription": "जानकारी और अटैचमेंट शेयर करके अपने ऑफिस के लोगों से बात-चीत करें और साथ में काम करें",
+        "mockCreateChatTitle": "बनाएँ बटन का उपयोग करके एक नई चैट बनाएं",
+        "newMessages": "नए मैसेज",
+        "selectionMode": {
+            "exit": "सिलेक्शन मोड से बाहर जाएँ"
+        }
+    },
+    "conversationInfo": {
+        "actionAccordionTitle": "एक्शन्स",
+        "email": "ईमेल",
+        "info": "जानकारी",
+        "messages": "मैसेज",
+        "name": "नाम",
+        "status": "स्थिति",
+        "title": "शीर्षक",
+        "topic": "विषय"
+    },
+    "date": {
+        "yesterday": "कल",
+        "today": "आज"
+    },
+    "editModal": {
+        "groupDescriptionDetails": "यह ग्रुप के विषय के बारे में बताता है",
+        "errorDisabled": "एंटर की गई जानकारी की जाँच करें",
+        "nameTooShort": "शीर्षक एक जरूरी जानकारी है",
+        "topicTooLong": "विषय की अधिकतम लंबाई 256 कैरक्टर है",
+        "confirm": "जानकारी बदलें",
+        "confirmDisabled": "आपने कुछ भी नहीं बदला है",
+        "groupNameDetails": "यह जरूरी है और ग्रुप की पहचान करता है",
+        "nameTooLong": "अधिकतम टाइटल लंबाई 128 कैरक्टर है"
+    },
+    "feedback": {
+        "historyCleared": "हिस्ट्री साफ हो गई!",
+        "notificationsActivatedForThisChat": "इस चैट के लिए अधिसूचनाएं चालू हो गईं",
+        "notificationsMutedForThisChat": "इस चैट के लिए नोटिफ़िकेशन की आवाज़ बंद हो गई हैं",
+        "messageCopied": "मैसेज कॉपी किया गया"
+    },
+    "message": {
+        "deletedMessage": "डिलीट किया मैसेज",
+        "draft": "ड्राफ़्ट",
+        "edited": "एडिट किया"
+    },
+    "modal": {
+        "deleteRoom": "Room डिलीट करें",
+        "deleteUserDescription": "क्या आप वाकई में इस मेम्बर को हटाना चाहते हैं?",
+        "leaveGroup": "ग्रुप छोड़ें",
+        "removeMember": "मेम्बर को हटाएँ",
+        "showPreviousConversationHistory": "बात-चीत की पिछली हिस्ट्री दिखाएँ",
+        "creation": {
+            "newChat": "नई चैट",
+            "newGroup": "नया समूह",
+            "contactList": "कोई ग्रुप बनाने के लिए एक एड्रेस से ज़्यादा चुनें",
+            "description": "चैट सीधी बात-चीत है जिससे आप अपने कांटैक्ट्स से बात कर सकते हैं। आप दो से ज़्यादा एड्रेस लेकर एक ग्रुप बना सकते हैं",
+            "inputPlaceholder": "कोई एड्रेस चुनने के लिए टाइप करना शुरू करें"
+        },
+        "deleteGroup": "ग्रुप डिलीट करें",
+        "deleteGroupLabel": "क्या आप वाकई में इस ग्रुप को डिलीट करना चाहते हैं?",
+        "deleteMessageTitle": "चुने गए मैसेज डिलीट करें?",
+        "deleteRoomLabel": "क्या आप वाकई में इस Room को डिलीट करना चाहते हैं?",
+        "forward": {
+            "description": "मैसेज आगे भेजने के लिए कोई टार्गेट चैट चुनें",
+            "inputPlaceholder": "टाइप करना शुरू करें या कोई चैट चुनें",
+            "chooseAtLeastOneChat": "कम से कम एक चैट चुनें",
+            "title": "{{chatName}} से मैसेज फॉरवर्ड करें"
+        },
+        "leaveGroupLabel": "क्या आप वाकई में इस ग्रुप को छोड़ना चाहते हैं?",
+        "leaveRoom": "रूम छोड़ें",
+        "clearHistoryDescription": "आप अपनी बात-चीत की हिस्ट्री साफ करने वाले हैं, याद रखें कि इस काम को वापस नहीं लिया जा सकेगा।",
+        "deleteMessageTitleDescription": "यदि आप मैसेज की पूरी कंटेन्ट को हटा देंगे तो इसके बाद यह उपलब्ध नहीं होगा और इसलिए डिलीट कर दिया जाएगा।",
+        "leaveAndDelete": "ग्रुप छोड़ें और डिलीट कर दें",
+        "leaveRoomLabel": "क्या आप वाकई में इस रूम को छोड़ना चाहते हैं?"
+    },
+    "participantsList": {
+        "closeSearch": "सर्च बंद करें",
+        "moreMembersAccordionTitle": "सदस्य",
+        "noMatch": "इस सर्च से मिलता कोई आइटम नहीं है",
+        "oneMemberAccordionTitle": "एक मेम्बर",
+        "searchMembers": "मेम्बर्स सर्च करें"
+    },
+    "status": {
+        "lastSeen": "पिछली बार देखा गया / गई {{lastSeen}}",
+        "offline": "ऑफ़लाइन",
+        "online": "ऑनलाइन",
+        "areTyping": "टाइप कर रहे हैं…",
+        "isTyping": "टाइप कर रहा है…"
+    },
+    "tooltip": {
+        "clear": "साफ़ करें",
+        "close": "बंद करें",
+        "goToPrivateChat": "प्राइवेट चैट में जाएँ",
+        "leaveConversation": "बात-चीत छोड़ें",
+        "messageComposer": "कम्पोज़र को मैसेज करें",
+        "messageRead": "पढ़ें",
+        "messageSent": "प्रेषित",
+        "room": {
+            "uploadPicture": "फोटो अपलोड करें",
+            "resetPicture": "फोटो रीसेट करें",
+            "updatePicture": "फोटो अपडेट करें"
+        },
+        "selectEmoji": "ईमोजी चुनें",
+        "sendMessage": "मैसेज भेजें",
+        "uploading": "अपलोड हो रहा है",
+        "demoteModerator": "मॉडरेटर को डिमोट करें",
+        "disableModalButton": "कम से कम एक एड्रेस चुनें",
+        "forwardedMessage": "किसी दूसरी चैट से फॉरवर्ड किया मैसेज",
+        "iAmModerator": "आप एक मॉडरेटर हैं",
+        "leaveAndDelete": "बातचीत को छोड़ें और डिलीट करें",
+        "memberIsModerator": "यह मेम्बर एक मॉडरेटर है",
+        "messageActions": "मैसेज एक्शन",
+        "promoteSomeoneElseToModerator": "मॉडरेटर को छोड़ने के लिए किसी और को प्रोमोट करें",
+        "showConversationList": "बातचीत लिस्ट दिखाएँ",
+        "uploadAttachment": "कोई अटैचमेंट अपलोड करें",
+        "userAvatar": {
+            "updateAvatar": "अवतार अपडेट करें",
+            "uploadAvatar": "अवतार अपलोड करें",
+            "resetAvatar": "अवतार रीसेट करें"
+        },
+        "writeToSend": "भेजने के लिए कोई मैसेज लिखें",
+        "messageReceived": "मिल गया",
+        "promoteModerator": "प्रोमोट करके मॉडरेटर बनाएँ",
+        "muteForAll": "सभी के लिए आवाज़ बंद करें",
+        "pending": "लंबित",
+        "pinVideo": "विडियो पिन करें",
+        "collapseCarousel": "नीचे करें",
+        "expandCarousel": "बड़ा करें",
+        "unpinVideo": "विडियो अनपिन करें"
+    },
+    "affiliationMessages": {
+        "groupCreated": "{{roomName}} बनाया गया!",
+        "memberAdded": "{{userName}} को {{roomName}} में जोड़ दिया गया है",
+        "oneToOneCreated": "नई चैट बनाई गई!",
+        "memberRemoved": "{{userName}} को {{roomName}} से हटा दिया गया है",
+        "youCreatedOneToOne": "आपने {{userName}} के साथ चैट शुरू कर दी है",
+        "SomeoneElseCreatedOneToOne": "{{userName}} ने आपके साथ चैट शुरू की"
+    },
+    "configurationMessages": {
+        "roomNameChanged": "{{name}} ने \"<i>{{roomName}}</i>\" में इस ग्रुप का नाम बदल दिया",
+        "roomPictureDeleted": "{{name}} ने डिफ़ॉल्ट {{roomName}}फोटो वापस सेट की",
+        "roomPictureUpdated": "{{name}} ने {{roomName}}की फोटो बदल दी",
+        "roomTopicChanged": "{{name}} ने \"<i>{{topicName}}</i>\" में {{roomName}} का टॉपिक बदल दिया"
+    },
+    "conversationFilter": {
+        "closeTooltip": "फ़िल्टर बंद करें",
+        "filterTooltip": "फ़िल्टर लिस्ट",
+        "label": "लिस्ट फ़िल्टर करने के लिए टाइप करें"
+    },
+    "titlePlaceholder": "आपके ग्रुप का शीर्षक",
+    "chat": "चैट करें",
+    "meeting": {
+        "interactions": {
+            "cameraEnabled": "कैमरा चालू",
+            "cameraDisabled": "कैमरा बंद",
+            "enableCamera": "कैमरा चालू करें",
+            "enableMicrophone": "माइक्रोफोन चालू करें",
+            "microphoneEnabled": "माइक्रोफोन चालू"
+        },
+        "joinMeeting": "मीटिंग में शामिल हों",
+        "newMeetingNotification": {
+            "sendMessage": "मैसेज भेजें",
+            "writeAMessageToSendIt": "भेजने के लिए कोई मैसेज लिखें"
+        },
+        "virtual": {
+            "deleteTooltip": "Virtual Room डिलीट करें"
+        },
+        "sidebar": {
+            "waitingCaption": "अंदर आने के इंतज़ार में",
+            "tooltip": {
+                "waitingAccept": "यूज़र को अंदर आने दें",
+                "waitingReject": "यूज़र को रिजेक्ट करें"
+            },
+            "recording": {
+                "title": "रिकॉर्डिंग",
+                "description": "रिकॉर्डिंग को उस मॉडरेटर के Files स्पेस में सेव किया जाएगा जिसने इसे रोका था।"
+            }
+        },
+        "snackbar": {
+            "waitingInfo": "ऐसा लग रहा है कि Waiting Room में कोई है"
+        },
+        "browserNotification": {
+            "waitingTitle": "ऐसा लग रहा है कि Waiting Room में कोई है"
+        },
+        "waitingRoom": {
+            "hangUp": "हैंग अप करें"
+        },
+        "recordingHint": "मीटिंग रिकॉर्ड हो रही है",
+        "recordingModal": {
+            "title": "रिकॉर्डिंग बंद करें",
+            "description": "आप रिकॉर्डिंग रोकने जा रहे हैं। आप कभी भी नई रिकॉर्डिंग शुरू कर सकते हैं।",
+            "inputLabel": "रिकॉर्डिंग नाम"
+        },
+        "recordingStart": {
+            "failureSnackbar": "रजिस्ट्रेशन फिर से शुरू करना संभव नहीं है, कृपया अपने सिस्टम एडमिनिस्ट्रेटर से संपर्क करें।"
+        }
+    },
+    "external": {
+        "nobodyInTheRoom": "ऐसा लगता है इस Room में कोई नहीं है",
+        "roomIsEmpty": "यह Room खाली है"
+    },
+    "meetings": {
+        "interactions": {
+            "yourCamIsDisabled": "आपका कैमरा बंद है"
+        }
+    },
+    "notification": {
+        "meeting": {
+            "ended": "मीटिंग खत्म हो गई"
+        }
+    },
+    "thanksForParticipating": "भाग लेने के लिए थैंक्स",
+    "tryLater": "बाद में कोशिश करें",
+    "snackbar": {
+        "mutedByModerator": "मॉडरेटर ने आपका माइक बंद कर दिया है, बोलने के लिए अपना माइक चालू करें"
+    }
+}

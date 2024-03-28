@@ -1,0 +1,304 @@
+{
+    "action": {
+        "preview": "Voorbeeld",
+        "removeUser": "Verwijderen",
+        "activateNotifications": "Berichten inschakelen",
+        "addAttachment": "Bijlage toevoegen",
+        "addNewMembers": "Nieuwe leden toevoegen",
+        "clearHistory": "Historiek wissen",
+        "close": "Sluiten",
+        "copy": "Kopieren",
+        "create": "Creëren",
+        "delete": "Verwijderen",
+        "download": "Downloaden",
+        "edit": "Bewerken",
+        "editYourMessage": "Bewerk uw bericht",
+        "forward": "Doorsturen",
+        "forwarded": "doorgestuurd",
+        "leave": "Verlaten",
+        "muteNotifications": "Meldingen dempen",
+        "reply": "Antwoorden",
+        "replyToSomeone": "Antwoord aan",
+        "replyToYourself": "Antwoord aan uzelf",
+        "undo": "Ongedaan maken",
+        "addMoreAttachments": "Voeg {{counter}} bijlagen toe",
+        "addNewMembersTo": "Nieuwe leden toevoegen aan {{roomName}}",
+        "addSingleAttachment": "Voeg {{counter}} bijlage toe",
+        "editDetails": "Details bewerken",
+        "editRoom": "{{roomName}} bewerken",
+        "newChat": "Nieuw gesprek",
+        "scrollToBottom": "Naar beneden schuiven",
+        "decline": "Weigeren",
+        "enter": "Bevestigen",
+        "joinMeeting": "Deelnemen aan vergadering",
+        "ok": "OK",
+        "cancel": "Abbrechen"
+    },
+    "conversation": {
+        "keepInTouchTitle": "Laten we contact houden!",
+        "newMessage": "Nieuw bericht",
+        "chooseConversationDescription": "Kies een gesprek om een chat te beginnen",
+        "emptyListDescription": "Chats en groepen worden hier weergegeven",
+        "emptyListTitle": "Deze lijst is leeg",
+        "mockCreateChatDescription": "Interageer, communiceer en werk samen met je collega 's door informatie en bijlagen te delen",
+        "mockCreateChatTitle": "Maak een nieuwe chat met behulp van de knop Maken",
+        "newMessages": "﻿Nieuwe berichten",
+        "selectionMode": {
+            "exit": "Selectiemodus verlaten"
+        }
+    },
+    "conversationInfo": {
+        "actionAccordionTitle": "Acties",
+        "name": "Naam",
+        "status": "Status",
+        "title": "Titel",
+        "topic": "Onderwerp",
+        "email": "E-mail",
+        "info": "Info",
+        "messages": "Berichten"
+    },
+    "date": {
+        "yesterday": "Gisteren",
+        "today": "Vandaag"
+    },
+    "editModal": {
+        "groupDescriptionDetails": "Het omschrijft het onderwerp van de Groep",
+        "confirm": "Details bewerken",
+        "confirmDisabled": "Je hebt niets veranderd",
+        "errorDisabled": "Controleer de ingevoerde informatie",
+        "nameTooLong": "Maximale titellengte is 128 tekens",
+        "nameTooShort": "De titel is een essentiële informatie",
+        "topicTooLong": "Maximale onderwerplengte is 256 tekens",
+        "groupNameDetails": "Het is vereist en identificeert de groep"
+    },
+    "feedback": {
+        "historyCleared": "Historiek met succes gewist!",
+        "notificationsActivatedForThisChat": "Berichten ingeschakeld voor deze chat",
+        "notificationsMutedForThisChat": "Meldingen voor deze chat gedempt",
+        "messageCopied": "Bericht gekopieerd"
+    },
+    "modal": {
+        "leaveGroup": "Groep verlaten",
+        "deleteRoom": "Ruimte verwijderen",
+        "deleteUserDescription": "Weet u zeker dat u dit lid wilt verwijderen?",
+        "removeMember": "Lid verwijderen",
+        "showPreviousConversationHistory": "Vorige gesprekshistoriek tonen",
+        "creation": {
+            "contactList": "Selecteer meer dan een adres om een groep aan te maken",
+            "inputPlaceholder": "Begin met typen of kies een adres",
+            "newChat": "Nieuw gesprek",
+            "newGroup": "Nieuwe Groep",
+            "description": "Chats zijn één-op-één gesprekken die u helpen om in contact te blijven met uw contacten. U kunt een groep maken door meer dan twee adressen op te nemen"
+        },
+        "deleteGroup": "Groep verwijderen",
+        "deleteGroupLabel": "Weet u zeker dat u de Groep wilt verwijderen?",
+        "deleteMessageTitle": "Geselecteerd bericht verwijderen?",
+        "deleteMessageTitleDescription": "Als u de volledige inhoud van het bericht verwijdert, is deze niet langer beschikbaar en wordt deze bijgevolg verwijderd.",
+        "deleteRoomLabel": "Weet u zeker dat u de Kamer wilt verwijderen?",
+        "forward": {
+            "chooseAtLeastOneChat": "Kies ten minste één chat",
+            "description": "Kies een doelchat om het bericht door te sturen",
+            "inputPlaceholder": "Begin met typen of kies een chat",
+            "title": "Bericht doorsturen van {{chatName}}"
+        },
+        "leaveAndDelete": "Groep verlaten en verwijderen",
+        "leaveRoom": "Kamer verlaten",
+        "clearHistoryDescription": "U staat op het punt uw gespreksgeschiedenis op te ruimen, onthoud dat deze actie niet ongedaan kan worden gemaakt. De geschiedenis van andere leden wordt niet gewist.",
+        "leaveGroupLabel": "Weet u zeker dat u deze Groep wilt verlaten?",
+        "leaveRoomLabel": "Weet u zeker dat u de Kamer wilt verlaten?"
+    },
+    "participantsList": {
+        "closeSearch": "Zoeken sluiten",
+        "moreMembersAccordionTitle": "leden",
+        "noMatch": "Er zijn geen items die overeenkomen met deze zoekopdracht",
+        "oneMemberAccordionTitle": "Een lid",
+        "searchMembers": "Leden zoeken"
+    },
+    "settings": {
+        "notifications": {
+            "title": "kennisgevingen",
+            "description": "Stel uw voorkeuren in voor chatsmeldingen.",
+            "subtitle": {
+                "general": "Algemeen"
+            }
+        },
+        "save": "Bewerkingen correct opgeslagen",
+        "profile": {
+            "errorGenericResponse": "Er is iets misgegaan. Probeer het opnieuw",
+            "title": "Profiel",
+            "deletedUserImageCorrectly": "Avatar is met succes gereset naar de originele",
+            "maximumDimension": "Maximale afmeting: {{size}}kb",
+            "statusLabel": "Uw status verschijnt hier",
+            "updatedPictureCorrectly": "Nieuwe avatar is met succes geüpload",
+            "description": "Kies een avatar die andere gebruikers zullen zien, de afbeelding wordt automatisch gecentreerd.",
+            "pictureSizeTooLarge": "Er is iets misgegaan, onthoud dat de maximale grootte voor een avatarafbeelding {{size}}kb is"
+        },
+        "title": "Chats instellingen",
+        "room": {
+            "deletedImageCorrectly": "Groep avatar is met succes gereset naar de originele",
+            "deletedUserImageCorrectly": "Avatar is met succes gereset naar de originele",
+            "updatedPictureCorrectly": "Nieuwe avatar is met succes geüpload",
+            "pictureSizeTooLarge": "Er is iets misgegaan, onthoud dat de maximale grootte voor de avatarafbeelding van een Groep {{size}}kb is"
+        },
+        "meetings": {
+            "title": "Meetings",
+            "description": "Stel uw audio- en video-voorkeuren in om de vergaderingen binnen te gaan. U kunt uw voorkeuren altijd aanpassen voordat u aan een vergadering deelneemt."
+        },
+        "recording": {
+            "inputLabel": "Bestemmingsmap",
+            "title": "Opname"
+        }
+    },
+    "status": {
+        "lastSeen": "Laatst bekeken {{lastSeen}}",
+        "offline": "Offline",
+        "online": "Online",
+        "areTyping": "zijn aan het typen…",
+        "isTyping": "is aan het typen …"
+    },
+    "tooltip": {
+        "leaveConversation": "Gesprek verlaten",
+        "messageComposer": "Samensteller bericht",
+        "messageRead": "Gelezen",
+        "messageSent": "Verstuurd",
+        "room": {
+            "uploadPicture": "Afbeelding uploaden",
+            "resetPicture": "Afbeelding resetten",
+            "updatePicture": "Afbeelding bijwerken"
+        },
+        "uploading": "Wordt geüpload",
+        "clear": "Wissen",
+        "close": "Sluiten",
+        "goToPrivateChat": "Naar private chat gaan",
+        "selectEmoji": "Emoji selecteren",
+        "sendMessage": "Bericht versturen",
+        "demoteModerator": "Moderator degraderen",
+        "iAmModerator": "U bent een moderator",
+        "leaveAndDelete": "Verlaat en verwijder het gesprek",
+        "messageActions": "Berichtacties",
+        "promoteModerator": "Tot moderator bevorderen",
+        "showConversationList": "Gesprekslijst tonen",
+        "uploadAttachment": "Een bijlage uploaden",
+        "userAvatar": {
+            "resetAvatar": "Avatar resetten",
+            "updateAvatar": "Avatar bijwerken",
+            "uploadAvatar": "Avatar uploaden"
+        },
+        "writeToSend": "Schrijf een bericht om het te verzenden",
+        "disableModalButton": "Kies ten minste één adres",
+        "forwardedMessage": "Bericht doorgestuurd vanuit een andere chat",
+        "memberIsModerator": "Dit lid is een moderator",
+        "messageReceived": "Ontvangen",
+        "promoteSomeoneElseToModerator": "Bevorder iemand anders tot moderator om te vertrekken",
+        "collapseCarousel": "Uitklappen",
+        "expandCarousel": "Uitklappen",
+        "muteForAll": "Geluid uitzetten voor alle",
+        "pending": "In afwachting",
+        "pinVideo": "Video vastpinnen",
+        "unpinVideo": "Video unpinnen"
+    },
+    "attachments": {
+        "addFromLocal": "Toevoegen van lokaal",
+        "attachLinkFiles": "Openbare link bijvoegen vanuit Bestanden",
+        "stopUpload": "Upload stoppen",
+        "dragAndDrop": "Drag&Drop-modus",
+        "dropHereDescription": "Drop hier uw bijlagen om ze snel aan dit gesprek toe te voegen",
+        "errorUploadingFile": "Er is iets misgegaan bij het uploaden van {{file}}",
+        "uploadAborted": "Uploaden is onderbroken",
+        "integrations": {
+            "chooseFile": "Bestand kiezen",
+            "shareLink": "Publieke link delen"
+        }
+    },
+    "message": {
+        "deletedMessage": "Verwijderd bericht",
+        "draft": "concept",
+        "edited": "bewerkt"
+    },
+    "affiliationMessages": {
+        "SomeoneElseCreatedOneToOne": "{{userName}} heeft een chat met je gestart",
+        "groupCreated": "{{roomName}} aangemaakt!",
+        "memberAdded": "{{userName}} is toegevoegd aan {{roomName}}",
+        "memberRemoved": "{{userName}} is verwijderd uit {{roomName}}",
+        "oneToOneCreated": "Nieuwe chat aangemaakt!",
+        "youCreatedOneToOne": "Je bent een chat gestart met {{userName}}"
+    },
+    "configurationMessages": {
+        "roomNameChanged": "{{name}} heeft de titel van deze groep gewijzigd in \"<i>{{roomName}}</i>\"",
+        "roomPictureUpdated": "{{name}} heeft de afbeelding van {{roomName}} gewijzigd",
+        "roomTopicChanged": "{{name}} heeft het onderwerp van {{roomName}} gewijzigd in \"<i>{{topicName}}</i>\"",
+        "roomPictureDeleted": "{{name}} heeft de standaardafbeelding van {{roomName}} hersteld"
+    },
+    "conversationFilter": {
+        "closeTooltip": "Sluit filter",
+        "filterTooltip": "Filter lijst",
+        "label": "Typ om lijst te filteren"
+    },
+    "titlePlaceholder": "De titel van uw Groep",
+    "chat": "Chat",
+    "meeting": {
+        "interactions": {
+            "enableCamera": "Camera inschakelen",
+            "enableMicrophone": "Microfoon inschakelen",
+            "microphoneEnabled": "Microfoon geactiveerd",
+            "cameraDisabled": "Camera uitgeschakeld",
+            "cameraEnabled": "Camera geactiveerd"
+        },
+        "joinMeeting": "Deelnemen aan vergadering",
+        "newMeetingNotification": {
+            "sendMessage": "Bericht versturen",
+            "writeAMessageToSendIt": "Schrijf een bericht om het te verzenden"
+        },
+        "virtual": {
+            "deleteTooltip": "Virtuele ruimte verwijderen"
+        },
+        "sidebar": {
+            "waitingCaption": "Wachtend om binnen te gaan",
+            "tooltip": {
+                "waitingAccept": "Laat gebruiker binnen",
+                "waitingReject": "Gebruiker afwijzen"
+            },
+            "recording": {
+                "title": "Opname",
+                "description": "De opname wordt opgeslagen in de Bestandsruimte van de moderator die de opname heeft gestopt."
+            }
+        },
+        "snackbar": {
+            "waitingInfo": "Er schijnt iemand in de Wachtruimte te zijn"
+        },
+        "browserNotification": {
+            "waitingTitle": "Er schijnt iemand in de Wachtruimte te zijn"
+        },
+        "waitingRoom": {
+            "hangUp": "Ophangen"
+        },
+        "recordingHint": "Deze vergadering wordt opgenomen",
+        "recordingStart": {
+            "failureSnackbar": "Het is niet mogelijk om de registratie te starten, neem contact op met uw systeemadministrator."
+        },
+        "recordingModal": {
+            "title": "Opname stoppen",
+            "description": "U gaat de opname stoppen. U kunt op elk moment een nieuwe beginnen.",
+            "inputLabel": "Naam opname"
+        }
+    },
+    "meetings": {
+        "interactions": {
+            "yourCamIsDisabled": "Uw camera staat uit"
+        }
+    },
+    "notification": {
+        "meeting": {
+            "ended": "Meeting beëindigd"
+        }
+    },
+    "thanksForParticipating": "Bedankt voor uw deelname",
+    "external": {
+        "nobodyInTheRoom": "Het lijkt erop dat er niemand in deze Ruimte is",
+        "roomIsEmpty": "Deze Ruimte is leeg"
+    },
+    "tryLater": "Probeer later",
+    "snackbar": {
+        "mutedByModerator": "U bent gedempt door een moderator, zet het geluid zelf weer aan om te spreken"
+    }
+}
