@@ -1,0 +1,304 @@
+{
+    "conversationInfo": {
+        "topic": "主题",
+        "actionAccordionTitle": "操作项",
+        "email": "电子邮件",
+        "info": "信息",
+        "messages": "消息",
+        "name": "名称",
+        "status": "状态",
+        "title": "标题"
+    },
+    "date": {
+        "yesterday": "昨天",
+        "today": "今天"
+    },
+    "editModal": {
+        "groupDescriptionDetails": "描述群组主题",
+        "topicTooLong": "最大主题长度为256个字符",
+        "confirm": "编辑详情",
+        "confirmDisabled": "您尚未更改任何东西",
+        "errorDisabled": "检查输入的信息",
+        "nameTooShort": "标题为必要信息",
+        "groupNameDetails": "这是必要信息且将用于标识群组",
+        "nameTooLong": "最大标题长度为128个字符"
+    },
+    "feedback": {
+        "historyCleared": "历史记录清除成功！",
+        "notificationsActivatedForThisChat": "已为此聊天激活消息通知",
+        "notificationsMutedForThisChat": "已为此聊天静音消息通知",
+        "messageCopied": "已复制消息"
+    },
+    "message": {
+        "deletedMessage": "已删除消息",
+        "draft": "草稿",
+        "edited": "已编辑"
+    },
+    "modal": {
+        "deleteRoom": "删除房间",
+        "deleteUserDescription": "确定要移除该成员吗？",
+        "leaveGroup": "离开群组",
+        "removeMember": "移除成员",
+        "showPreviousConversationHistory": "显示之前的对话历史记录",
+        "creation": {
+            "contactList": "选择多个地址以创建一个群组",
+            "description": "聊天是一对一的会话，可帮助您与联系人保持联系。您可通过纳入两个以上的地址来创建一个群组",
+            "newChat": "新聊天",
+            "newGroup": "新群组",
+            "inputPlaceholder": "开始输入或选择地址"
+        },
+        "deleteGroup": "删除群组",
+        "deleteGroupLabel": "确定要删除此群组吗？",
+        "deleteMessageTitle": "删除所选消息？",
+        "deleteMessageTitleDescription": "如果移除消息的全部内容，其将不再可用并将被删除。",
+        "deleteRoomLabel": "确定要删除此房间吗？",
+        "forward": {
+            "chooseAtLeastOneChat": "选择至少一个聊天",
+            "description": "选择要转发消息的目标聊天",
+            "title": "从{{chatName}}转发消息",
+            "inputPlaceholder": "开始输入或选择聊天"
+        },
+        "leaveGroupLabel": "确定要离开此群组吗？",
+        "leaveRoomLabel": "确定要离开此房间吗？",
+        "clearHistoryDescription": "您即将清空自己的对话历史记录，此操作将无法撤销。其他成员的历史记录将不会删除。",
+        "leaveAndDelete": "离开并删除群组",
+        "leaveRoom": "离开房间"
+    },
+    "participantsList": {
+        "closeSearch": "关闭搜索",
+        "moreMembersAccordionTitle": "成员",
+        "noMatch": "没有匹配此搜索的项目",
+        "oneMemberAccordionTitle": "一名成员",
+        "searchMembers": "搜索成员"
+    },
+    "settings": {
+        "notifications": {
+            "title": "通知",
+            "description": "设置您的聊天消息通知偏好。",
+            "subtitle": {
+                "general": "通用"
+            }
+        },
+        "profile": {
+            "errorGenericResponse": "出现错误。请重试",
+            "title": "档案",
+            "deletedUserImageCorrectly": "头像已成功重置为原始选项",
+            "description": "选择一个其他用户能够看到的头像，图像将自动居中。",
+            "maximumDimension": "最大大小：{{size}}kb",
+            "pictureSizeTooLarge": "出现错误，头像图像的最大大小为{{size}}kb",
+            "statusLabel": "您的状态将在此处展示",
+            "updatedPictureCorrectly": "新头像已成功上传"
+        },
+        "save": "编辑保存正确",
+        "title": "聊天设置",
+        "room": {
+            "deletedImageCorrectly": "群组头像已成功重置为原始选项",
+            "updatedPictureCorrectly": "新头像已成功上传",
+            "deletedUserImageCorrectly": "头像已成功重置为原始选项",
+            "pictureSizeTooLarge": "出现错误，群组头像图像的最大大小为{{size}}kb"
+        },
+        "meetings": {
+            "title": "会议",
+            "description": "设置音频和视频首选项以进入会议。在加入每个会议之前您都可以随时自定义首选项。"
+        },
+        "recording": {
+            "title": "录制",
+            "inputLabel": "目标文件夹"
+        }
+    },
+    "status": {
+        "lastSeen": "上次出现{{lastSeen}}",
+        "offline": "离线",
+        "online": "在线",
+        "areTyping": "正在输入...",
+        "isTyping": "正在输入…"
+    },
+    "tooltip": {
+        "clear": "清除",
+        "close": "关闭",
+        "goToPrivateChat": "转到私密聊天",
+        "leaveConversation": "离开对话",
+        "messageComposer": "消息编辑器",
+        "messageRead": "读取",
+        "messageSent": "已发送",
+        "room": {
+            "uploadPicture": "上传图片",
+            "resetPicture": "重置图片",
+            "updatePicture": "更新图片"
+        },
+        "selectEmoji": "选择表情符号",
+        "sendMessage": "发送消息",
+        "uploading": "上传中",
+        "demoteModerator": "降级主持人",
+        "disableModalButton": "选择至少一个地址",
+        "forwardedMessage": "消息从另一聊天转发",
+        "iAmModerator": "您是主持人",
+        "leaveAndDelete": "离开并删除对话",
+        "memberIsModerator": "该成员是主持人",
+        "messageActions": "消息操作",
+        "messageReceived": "已接收",
+        "promoteModerator": "晋升主持人",
+        "promoteSomeoneElseToModerator": "将他人晋升为主持人后离开",
+        "showConversationList": "显示对话列表",
+        "uploadAttachment": "上传附件",
+        "userAvatar": {
+            "resetAvatar": "重置头像",
+            "updateAvatar": "更新头像",
+            "uploadAvatar": "上传头像"
+        },
+        "writeToSend": "撰写消息以发送",
+        "collapseCarousel": "收起",
+        "muteForAll": "对所有人静音",
+        "pending": "未定",
+        "pinVideo": "放入视频",
+        "unpinVideo": "取消固定视频",
+        "expandCarousel": "展开"
+    },
+    "action": {
+        "activateNotifications": "激活消息通知",
+        "addAttachment": "添加附件",
+        "addNewMembers": "添加新成员",
+        "clearHistory": "清除历史记录",
+        "close": "关闭",
+        "copy": "复制",
+        "create": "创建",
+        "delete": "删除",
+        "download": "下载",
+        "edit": "编辑",
+        "editYourMessage": "编辑您的消息",
+        "forward": "转发",
+        "forwarded": "已转发",
+        "leave": "离开",
+        "muteNotifications": "静音通知",
+        "preview": "预览",
+        "removeUser": "移除",
+        "reply": "回复",
+        "replyToSomeone": "回复",
+        "replyToYourself": "回复自己",
+        "undo": "撤消",
+        "editDetails": "编辑详情",
+        "editRoom": "编辑{{roomName}}",
+        "newChat": "新聊天",
+        "scrollToBottom": "滑至底部",
+        "addMoreAttachments": "添加{{counter}}个附件",
+        "addNewMembersTo": "添加新成员至{{roomName}}",
+        "addSingleAttachment": "添加{{counter}}个附件",
+        "decline": "拒绝",
+        "enter": "进入",
+        "joinMeeting": "加入会议",
+        "ok": "OK",
+        "cancel": "取消"
+    },
+    "attachments": {
+        "addFromLocal": "从本地添加",
+        "attachLinkFiles": "从文件附加公开链接",
+        "stopUpload": "停止上传",
+        "dragAndDrop": "拖放模式",
+        "dropHereDescription": "在此处拖入您的附件以将其快速添加至此聊天",
+        "errorUploadingFile": "上传{{file}}时出错",
+        "uploadAborted": "上传已中断",
+        "integrations": {
+            "chooseFile": "选择文件",
+            "shareLink": "分享公开链接"
+        }
+    },
+    "conversation": {
+        "chooseConversationDescription": "选择要进行聊天的会话",
+        "keepInTouchTitle": "让我们保持联系！",
+        "newMessage": "新消息",
+        "emptyListDescription": "聊天和群组将以列表形式在此展示",
+        "emptyListTitle": "此列表为空",
+        "mockCreateChatDescription": "通过共享信息和附件来与同事进行互动、沟通以及合作",
+        "mockCreateChatTitle": "使用创建按钮新建聊天",
+        "newMessages": "新消息",
+        "selectionMode": {
+            "exit": "退出选择模式"
+        }
+    },
+    "titlePlaceholder": "您的群组标题",
+    "affiliationMessages": {
+        "SomeoneElseCreatedOneToOne": "{{userName}}发起了与您之间的聊天",
+        "groupCreated": "{{roomName}}已创建！",
+        "memberAdded": "{{userName}}已添加至{{roomName}}",
+        "memberRemoved": "{{userName}}已从{{roomName}}中移除",
+        "oneToOneCreated": "新聊天已创建！",
+        "youCreatedOneToOne": "您发起了与{{userName}}之间的聊天"
+    },
+    "conversationFilter": {
+        "closeTooltip": "关闭过滤条件",
+        "filterTooltip": "过滤列表",
+        "label": "输入以过滤列表"
+    },
+    "configurationMessages": {
+        "roomTopicChanged": "{{name}}已在“<i>{{topicName}}</i>”中更改了{{roomName}}的主题",
+        "roomPictureDeleted": "{{name}}回复了默认{{roomName}}图像",
+        "roomPictureUpdated": "{{name}}更改了{{roomName}}图像",
+        "roomNameChanged": "{{name}}已在“<i>{{roomName}}</i>”中更改了此群组的标题"
+    },
+    "chat": "聊天",
+    "external": {
+        "nobodyInTheRoom": "似乎房间中没有人",
+        "roomIsEmpty": "此房间为空"
+    },
+    "meeting": {
+        "interactions": {
+            "microphoneEnabled": "麦克风已启用",
+            "cameraDisabled": "摄像头已禁用",
+            "cameraEnabled": "摄像头已启用",
+            "enableCamera": "启用相机",
+            "enableMicrophone": "启用麦克风"
+        },
+        "joinMeeting": "加入会议",
+        "newMeetingNotification": {
+            "sendMessage": "发送消息",
+            "writeAMessageToSendIt": "撰写消息以发送"
+        },
+        "virtual": {
+            "deleteTooltip": "删除虚拟房间"
+        },
+        "sidebar": {
+            "waitingCaption": "等待进入",
+            "tooltip": {
+                "waitingAccept": "允许用户进入",
+                "waitingReject": "拒绝用户"
+            },
+            "recording": {
+                "title": "录制",
+                "description": "录制将被保存在将其停止的主持人的文件空间中。"
+            }
+        },
+        "snackbar": {
+            "waitingInfo": "等待房间中似乎有用户"
+        },
+        "browserNotification": {
+            "waitingTitle": "等待房间中似乎有用户"
+        },
+        "waitingRoom": {
+            "hangUp": "挂断"
+        },
+        "recordingHint": "正在录制此会议",
+        "recordingStart": {
+            "failureSnackbar": "无法开始注册，请联系您的系统管理员。"
+        },
+        "recordingModal": {
+            "title": "停止录制",
+            "description": "您即将停止录制。您可随时开始新录制。",
+            "inputLabel": "录制名称"
+        }
+    },
+    "meetings": {
+        "interactions": {
+            "yourCamIsDisabled": "您的相机已关闭"
+        }
+    },
+    "notification": {
+        "meeting": {
+            "ended": "会议已结束"
+        }
+    },
+    "tryLater": "稍后再试",
+    "thanksForParticipating": "感谢参与",
+    "snackbar": {
+        "mutedByModerator": "您已被主持人静音，请取消静音以说话"
+    }
+}

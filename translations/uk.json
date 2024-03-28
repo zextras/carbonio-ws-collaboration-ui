@@ -1,0 +1,65 @@
+{
+    "action": {
+        "delete": "Видалити",
+        "edit": "Редагувати",
+        "forward": "Переслати",
+        "reply": "Відповісти",
+        "activateNotifications": "Включити сповіщення",
+        "addAttachment": "Додати вкладення",
+        "addMoreAttachments": "Додати {{counter}} вкладень",
+        "addNewMembers": "Додайте нових учасників",
+        "addNewMembersTo": "Додайте нових учасників до {{roomName}}",
+        "addSingleAttachment": "Додати вкладення {{counter}}",
+        "clearHistory": "Очистити історію",
+        "undo": "Відмінити",
+        "create": "Створити",
+        "decline": "Відхилити",
+        "close": "Закрити",
+        "declineAll": "Відхилити все",
+        "copy": "Копіювати",
+        "download": "Завантажити",
+        "editYourMessage": "Відредагуйте своє повідомлення",
+        "preview": "Попередній перегляд",
+        "cancel": "Скасувати"
+    },
+    "conversationInfo": {
+        "email": "Електронна пошта",
+        "name": "Ім’я",
+        "status": "Стан",
+        "info": "Інформація"
+    },
+    "settings": {
+        "notifications": {
+            "title": "Сповіщення",
+            "subtitle": {
+                "general": "Загальні"
+            }
+        },
+        "save": "Зміни збережено"
+    },
+    "status": {
+        "offline": "Відсутній",
+        "online": "Онлайн"
+    },
+    "tooltip": {
+        "clear": "Очистити",
+        "close": "Закрити",
+        "collapseCarousel": "Згорнути",
+        "demoteModerator": "Розжалувати модератора",
+        "goToPrivateChat": "Перейти до приватного чату",
+        "messageActions": "Дії з повідомленнями",
+        "promoteModerator": "Підвищити до модератора"
+    },
+    "conversation": {
+        "newMessage": "Нове повідомлення"
+    },
+    "message": {
+        "edited": "відредаговано",
+        "deletedMessage": "Видалене повідомлення"
+    },
+    "modal": {
+        "deleteMessageTitle": "Видалити вибране повідомлення?",
+        "removeMember": "Видалити учасника",
+        "showPreviousConversationHistory": "Показати історію попередніх розмов"
+    }
+}

@@ -1,0 +1,197 @@
+{
+    "action": {
+        "close": "Đóng",
+        "undo": "Hoàn tác",
+        "activateNotifications": "Kích hoạt thông báo",
+        "addAttachment": "Thêm đính kèm",
+        "addNewMembers": "Thêm thành viên mới",
+        "clearHistory": "Xoá lịch sử",
+        "copy": "Sao chép",
+        "create": "Tạo",
+        "delete": "Xoá",
+        "download": "Tải xuống",
+        "edit": "Chỉnh sửa",
+        "editYourMessage": "Chỉnh sửa thông điệp của bạn",
+        "forward": "Chuyển tiếp",
+        "forwarded": "đã chuyển tiếp",
+        "leave": "Rời đi",
+        "muteNotifications": "Tắt thông báo",
+        "preview": "Xem trước",
+        "removeUser": "xoá",
+        "reply": "Trả lời",
+        "replyToSomeone": "Trả lời đến",
+        "replyToYourself": "Trả lời đến chính bạn",
+        "decline": "Từ chối",
+        "enter": "Vào",
+        "ok": "OK",
+        "cancel": "Huỷ"
+    },
+    "conversation": {
+        "newMessage": "Thư mới",
+        "chooseConversationDescription": "Chọn cuộc hội thoại để bắt đầu trò chuyện",
+        "keepInTouchTitle": "Hãy giữ liên lạc!",
+        "newMessages": "Tin nhắn mới",
+        "selectionMode": {
+            "exit": "Thoát khỏi chế độ đã chọn"
+        }
+    },
+    "tooltip": {
+        "room": {
+            "uploadPicture": "Tải ảnh lên"
+        },
+        "selectEmoji": "Chọn biểu tượng Emoji",
+        "sendMessage": "Gửi tin nhắn",
+        "uploading": "Đang tải lên",
+        "clear": "Xoá",
+        "close": "Đóng",
+        "goToPrivateChat": "Đi đến cuộc trò chuyện riêng tư",
+        "messageComposer": "Người soạn tin nhắn",
+        "messageRead": "Đọc",
+        "messageSent": "Gửi đi",
+        "collapseCarousel": "Thu gọn",
+        "expandCarousel": "Mở rộng",
+        "messageActions": "Các tác vụ tin nhắn",
+        "muteForAll": "Tắt tiếng tất cả",
+        "pending": "Đang chờ xử lý",
+        "pinVideo": "Ghim Video",
+        "unpinVideo": "Bỏ ghim Video"
+    },
+    "attachments": {
+        "addFromLocal": "Thêm vào từ thiết bị cục bộ",
+        "attachLinkFiles": "Đính kèm liên kết công khai từ tệp",
+        "stopUpload": "Dừng tải lên",
+        "integrations": {
+            "chooseFile": "Chọn tệp (File)",
+            "shareLink": "Chia sẻ liên kết công khai"
+        }
+    },
+    "conversationInfo": {
+        "actionAccordionTitle": "Thao tác",
+        "email": "Email",
+        "info": "Thông tin",
+        "messages": "Tin nhắn",
+        "name": "Tên",
+        "status": "Trạng thái",
+        "title": "Tiêu đề",
+        "topic": "Chủ đề"
+    },
+    "date": {
+        "yesterday": "Hôm qua"
+    },
+    "editModal": {
+        "groupDescriptionDetails": "Nó mô tả chủ đề của nhóm"
+    },
+    "feedback": {
+        "historyCleared": "Xoá lịch sử thành công!",
+        "notificationsActivatedForThisChat": "Thông báo được kích hoạt cho cuộc trò chuyện này",
+        "notificationsMutedForThisChat": "Thông báo sẽ tắt cho cuộc trò chuyện này"
+    },
+    "message": {
+        "deletedMessage": "Xoá thông điệp",
+        "draft": "bản nháp",
+        "edited": "biên tập"
+    },
+    "modal": {
+        "deleteRoom": "Xoá phòng",
+        "deleteUserDescription": "Bạn có chắc chắn muốn xoá thành viên này?",
+        "leaveGroup": "Rời Nhóm",
+        "removeMember": "Xoá thành viên",
+        "showPreviousConversationHistory": "Hiển thị lịch sử các cuộc hội thoại trước"
+    },
+    "participantsList": {
+        "closeSearch": "Đóng tìm kiếm",
+        "moreMembersAccordionTitle": "thành viên"
+    },
+    "settings": {
+        "notifications": {
+            "title": "Các thông báo",
+            "subtitle": {
+                "general": "Chung"
+            }
+        },
+        "profile": {
+            "errorGenericResponse": "Có lỗi xảy ra, vui lòng thử lại",
+            "title": "Hồ sơ"
+        },
+        "save": "Chỉnh sửa được lưu chính xác",
+        "title": "Cài đặt cuộc trò chuyện",
+        "meetings": {
+            "title": "Các cuộc họp",
+            "description": "Đặt tùy chọn âm thanh và video của bạn để tham gia cuộc họp. Bạn luôn có thể tùy chỉnh tùy chọn của mình trước khi tham gia bất kỳ cuộc họp nào."
+        },
+        "recording": {
+            "title": "đang ghi",
+            "inputLabel": "Thư mục đích"
+        }
+    },
+    "status": {
+        "lastSeen": "Lần xem cuối {{lastSeen}}",
+        "offline": "Ngoại tuyến",
+        "online": "Trực tuyến",
+        "isTyping": "đang gõ…"
+    },
+    "chat": "Cuộc Trò chuyện",
+    "external": {
+        "nobodyInTheRoom": "Có vẻ không có ai trong phòng",
+        "roomIsEmpty": "Phòng này rỗng"
+    },
+    "meeting": {
+        "newMeetingNotification": {
+            "sendMessage": "Gửi tin nhắn"
+        },
+        "interactions": {
+            "cameraDisabled": "Tắt Camera",
+            "cameraEnabled": "Bật Camera",
+            "enableCamera": "Bật Camera",
+            "enableMicrophone": "Bật microphone",
+            "microphoneEnabled": "Đã bật Microphone"
+        },
+        "virtual": {
+            "deleteTooltip": "Xoá phòng ảo"
+        },
+        "sidebar": {
+            "waitingCaption": "Đang đợi để vào",
+            "tooltip": {
+                "waitingAccept": "Cho phép người dùng vào",
+                "waitingReject": "Từ chối người dùng"
+            },
+            "recording": {
+                "title": "đang ghi",
+                "description": "Bản ghi sẽ được lưu trong không gian tệp của người kiểm duyệt đã dừng nó."
+            }
+        },
+        "snackbar": {
+            "waitingInfo": "Dường như có ai trong phòng chờ"
+        },
+        "browserNotification": {
+            "waitingTitle": "Dường như có ai trong phòng chờ"
+        },
+        "waitingRoom": {
+            "hangUp": "Nhấc máy"
+        },
+        "recordingHint": "Cuộp họp đang được ghi",
+        "recordingStart": {
+            "failureSnackbar": "Không thể bắt đầu đăng ký, vui lòng liên hệ với quản trị viên hệ thống của bạn."
+        },
+        "recordingModal": {
+            "title": "Dừng ghi",
+            "description": "Bạn sẽ dừng ghi. Bạn có thể bắt đầu bản ghi mới bất cứ lúc nào.",
+            "inputLabel": "Tên bản ghi"
+        }
+    },
+    "meetings": {
+        "interactions": {
+            "yourCamIsDisabled": "Camera của bạn tắt"
+        }
+    },
+    "notification": {
+        "meeting": {
+            "ended": "Cuộc họp đã kết thúc"
+        }
+    },
+    "thanksForParticipating": "Cảm ơn bạn đã tham gia",
+    "tryLater": "Thử lại sau",
+    "snackbar": {
+        "mutedByModerator": "Bạn đã bị người kiểm duyệt tắt tiếng, hãy tự bật tiếng để nói"
+    }
+}

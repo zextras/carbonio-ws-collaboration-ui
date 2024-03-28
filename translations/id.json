@@ -1,0 +1,204 @@
+{
+    "tooltip": {
+        "selectEmoji": "Pilih emoji",
+        "sendMessage": "Kirim pesan",
+        "uploading": "Mengunggah",
+        "clear": "Hapus",
+        "close": "Tutup",
+        "goToPrivateChat": "Buka chat privat",
+        "leaveConversation": "Keluar dari percakapan",
+        "messageComposer": "Tulis pesan",
+        "messageRead": "Dibaca",
+        "messageSent": "Terkirim",
+        "room": {
+            "uploadPicture": "Unggah gambar"
+        },
+        "demoteModerator": "Turunkan moderator",
+        "promoteModerator": "Promosikan ke moderator",
+        "messageActions": "Tindakan pesan",
+        "collapseCarousel": "Ciutkan",
+        "expandCarousel": "Perluas",
+        "muteForAll": "Bisukan untuk semua",
+        "pending": "Tertunda",
+        "pinVideo": "Sematkan video",
+        "unpinVideo": "Lepas pin video"
+    },
+    "action": {
+        "activateNotifications": "Aktifkan notifikasi",
+        "addAttachment": "Tambahkan lampiran",
+        "addNewMembers": "Tambahkan anggota baru",
+        "clearHistory": "Bersihkan riwayat",
+        "close": "Tutup",
+        "copy": "Salin",
+        "create": "Buat",
+        "delete": "Hapus",
+        "download": "Unduh",
+        "edit": "Edit",
+        "editYourMessage": "Edit pesan Anda",
+        "forward": "Teruskan",
+        "forwarded": "diteruskan",
+        "leave": "Keluar",
+        "muteNotifications": "Matikan notifikasi",
+        "preview": "Pratinjau",
+        "removeUser": "Hapus",
+        "reply": "Balas",
+        "replyToSomeone": "Balas ke",
+        "replyToYourself": "Balas ke diri sendiri",
+        "undo": "Urungkan",
+        "decline": "Tolak",
+        "enter": "Masuk",
+        "joinMeeting": "Gabung ke rapat",
+        "ok": "Ok",
+        "cancel": "Batal"
+    },
+    "attachments": {
+        "addFromLocal": "Tambahkan dari lokal",
+        "attachLinkFiles": "Lampirkan tautan publik dari Files",
+        "stopUpload": "Hentikan unggahan",
+        "integrations": {
+            "chooseFile": "Pilih file",
+            "shareLink": "Bagikan tautan publik"
+        }
+    },
+    "conversation": {
+        "chooseConversationDescription": "Pilih percakapan untuk memulai obrolan",
+        "keepInTouchTitle": "Tetap terhubung!",
+        "newMessage": "Pesan baru",
+        "newMessages": "pesan baru",
+        "selectionMode": {
+            "exit": "Keluar dari mode pemilihan"
+        }
+    },
+    "conversationInfo": {
+        "info": "Info",
+        "actionAccordionTitle": "Tindakan",
+        "messages": "Pesan",
+        "email": "Email",
+        "name": "Nama",
+        "status": "Status",
+        "title": "Judul",
+        "topic": "Topik"
+    },
+    "date": {
+        "yesterday": "Kemarin"
+    },
+    "editModal": {
+        "groupDescriptionDetails": "Nama tersebut mendeskripsikan subjek Grup"
+    },
+    "feedback": {
+        "historyCleared": "Riwayat berhasil dihapus!",
+        "notificationsActivatedForThisChat": "Notifikasi diaktifkan untuk obrolan ini",
+        "notificationsMutedForThisChat": "Notifikasi dimatikan untuk obrolan ini"
+    },
+    "message": {
+        "deletedMessage": "Pesan yang dihapus",
+        "draft": "draf",
+        "edited": "diedit"
+    },
+    "modal": {
+        "deleteRoom": "Hapus Ruang",
+        "deleteUserDescription": "Anda yakin ingin menghapus anggota ini?",
+        "leaveGroup": "Keluar dari Grup",
+        "removeMember": "Hapus anggota",
+        "showPreviousConversationHistory": "Tampilkan riwayat percakapan sebelumnya",
+        "deleteMessageTitleDescription": "Jika Anda menghapus seluruh konten pesan, pesan tersebut tidak akan lagi tersedia dan akibatnya akan dihapus.",
+        "deleteMessageTitle": "Hapus pesan yang dipilih?"
+    },
+    "participantsList": {
+        "closeSearch": "Tutup pencarian",
+        "moreMembersAccordionTitle": "anggota"
+    },
+    "settings": {
+        "notifications": {
+            "title": "Notifikasi",
+            "subtitle": {
+                "general": "Umum"
+            }
+        },
+        "profile": {
+            "errorGenericResponse": "Terjadi kesalahan. Harap coba lagi",
+            "title": "Profil"
+        },
+        "save": "Hasil edit disimpan dengan benar",
+        "title": "Pengaturan Chats",
+        "meetings": {
+            "description": "Tetapkan preferensi audio dan video untuk masuk ke rapat. Anda dapat menyesuaikan preferensi kapan saja sebelum bergabung ke setiap rapat.",
+            "title": "Rapat"
+        },
+        "recording": {
+            "inputLabel": "Folder tujuan",
+            "title": "Rekaman"
+        }
+    },
+    "status": {
+        "lastSeen": "Terakhir dilihat {{lastSeen}}",
+        "offline": "Offline",
+        "online": "Online",
+        "isTyping": "mengetik…"
+    },
+    "external": {
+        "nobodyInTheRoom": "Tampaknya tak ada seorangpun di Ruang ini",
+        "roomIsEmpty": "Ruang ini kosong"
+    },
+    "meeting": {
+        "joinMeeting": "Gabung ke rapat",
+        "interactions": {
+            "cameraDisabled": "Kamera dinonaktifkan",
+            "cameraEnabled": "Kamera diaktifkan",
+            "enableCamera": "Aktifkan kamera",
+            "enableMicrophone": "Aktifkan mikrofon",
+            "microphoneEnabled": "Mikrofon diaktifkan"
+        },
+        "newMeetingNotification": {
+            "sendMessage": "Kirim pesan"
+        },
+        "virtual": {
+            "deleteTooltip": "Hapus Ruang Virtual"
+        },
+        "sidebar": {
+            "waitingCaption": "Menunggu masuk",
+            "tooltip": {
+                "waitingAccept": "Izinkan pengguna masuk",
+                "waitingReject": "Tolak pengguna"
+            },
+            "recording": {
+                "title": "Rekaman",
+                "description": "Rekaman akan disimpan di ruang Files moderator yang menghentikannya."
+            }
+        },
+        "snackbar": {
+            "waitingInfo": "Tampaknya ada seseorang di Ruang Tunggu"
+        },
+        "browserNotification": {
+            "waitingTitle": "Tampaknya ada seseorang di Ruang Tunggu"
+        },
+        "waitingRoom": {
+            "hangUp": "Tutup"
+        },
+        "recordingHint": "Rapat ini direkam",
+        "recordingStart": {
+            "failureSnackbar": "Registrasi tak bisa dimulai. Harap hubungi administrator sistem."
+        },
+        "recordingModal": {
+            "title": "Hentikan rekaman",
+            "description": "Anda akan menghentikan rekaman. Anda bisa memulai yang baru kapan saja.",
+            "inputLabel": "Nama Rekaman"
+        }
+    },
+    "thanksForParticipating": "Terima kasih telah berpartisipasi",
+    "tryLater": "Coba nanti",
+    "chat": "Obrolan",
+    "meetings": {
+        "interactions": {
+            "yourCamIsDisabled": "Kamera Anda nonaktif"
+        }
+    },
+    "notification": {
+        "meeting": {
+            "ended": "Rapat Berakhir"
+        }
+    },
+    "snackbar": {
+        "mutedByModerator": "Suara Anda dimatikan oleh moderator. Nyalakan suara Anda sendiri untuk berbicara"
+    }
+}

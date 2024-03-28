@@ -1,0 +1,28 @@
+{
+    "action": {
+        "edit": "ویرایش",
+        "copy": "ایجاد رونوشت",
+        "create": "ایجاد",
+        "decline": "امتناع",
+        "delete": "حذف",
+        "download": "دانلود",
+        "forward": "ارسال",
+        "preview": "پیش نمایش",
+        "reply": "پاسخ",
+        "ok": "تصویب",
+        "cancel": "لغو"
+    },
+    "conversationInfo": {
+        "actionAccordionTitle": "اقدامات",
+        "email": "نامه‌ها",
+        "name": "نام"
+    },
+    "attachments": {
+        "addFromLocal": "افزودن از حافظه دستگاه",
+        "stopUpload": "توقف آپلود"
+    },
+    "tooltip": {
+        "clear": "پاک کردن",
+        "uploading": "در حال آپلود"
+    }
+}
