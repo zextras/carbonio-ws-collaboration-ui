@@ -13,49 +13,48 @@ import displayMessageBrowserNotification from '../utility/displayMessageBrowserN
 
 export function onNewMessageStanza(message: Element): true {
 	const resultElement = getTagElement(message, 'result');
-	if (resultElement == null) {
-		const newMessage = decodeXMPPMessageStanza(message);
-		if (newMessage) {
-			const store = useStore.getState();
-			const { xmppClient } = store.connections;
-			const sessionId: string | undefined = useStore.getState().session.id;
+	const newMessage = decodeXMPPMessageStanza(message);
 
-			switch (newMessage.type) {
-				case MessageType.TEXT_MSG: {
-					store.newMessage(newMessage);
+	if (resultElement == null && newMessage) {
+		const store = useStore.getState();
+		const { xmppClient } = store.connections;
+		const sessionId: string | undefined = useStore.getState().session.id;
 
-					if (newMessage.from !== sessionId) {
-						sendCustomEvent({ name: EventName.NEW_MESSAGE, data: newMessage });
-						store.incrementUnreadCount(newMessage.roomId);
-						displayMessageBrowserNotification(newMessage);
-					}
+		switch (newMessage.type) {
+			case MessageType.TEXT_MSG: {
+				store.newMessage(newMessage);
 
-					// Request message subject of reply
-					const messageSubjectOfReplyId = newMessage.replyTo;
-					if (messageSubjectOfReplyId) {
-						xmppClient.requestMessageSubjectOfReply(
-							newMessage.roomId,
-							messageSubjectOfReplyId,
-							newMessage.id
-						);
-					}
-					break;
+				if (newMessage.from !== sessionId) {
+					sendCustomEvent({ name: EventName.NEW_MESSAGE, data: newMessage });
+					store.incrementUnreadCount(newMessage.roomId);
+					displayMessageBrowserNotification(newMessage);
 				}
-				case MessageType.CONFIGURATION_MSG: {
-					store.newMessage(newMessage);
-					if (newMessage.from !== sessionId) {
-						sendCustomEvent({ name: EventName.NEW_MESSAGE, data: newMessage });
-						store.incrementUnreadCount(newMessage.roomId);
-					}
-					break;
+
+				// Request message subject of reply
+				const messageSubjectOfReplyId = newMessage.replyTo;
+				if (messageSubjectOfReplyId) {
+					xmppClient.requestMessageSubjectOfReply(
+						newMessage.roomId,
+						messageSubjectOfReplyId,
+						newMessage.id
+					);
 				}
-				case MessageType.FASTENING: {
-					store.addFastening(newMessage);
-					break;
+				break;
+			}
+			case MessageType.CONFIGURATION_MSG: {
+				store.newMessage(newMessage);
+				if (newMessage.from !== sessionId) {
+					sendCustomEvent({ name: EventName.NEW_MESSAGE, data: newMessage });
+					store.incrementUnreadCount(newMessage.roomId);
 				}
-				default: {
-					break;
-				}
+				break;
+			}
+			case MessageType.FASTENING: {
+				store.addFastening(newMessage);
+				break;
+			}
+			default: {
+				break;
 			}
 		}
 	}

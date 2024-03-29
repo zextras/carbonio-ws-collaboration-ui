@@ -44,33 +44,31 @@ class SubscriptionsManager {
 		subscriptionToAdd: Subscription[],
 		subscriptionToRemove: Subscription[]
 	): void {
-		if (size(subscriptionToAdd) > 0 || size(subscriptionToRemove) > 0) {
-			this.isRequesting = true;
-			MeetingsApi.subscribeToMedia(this.meetingId, subscriptionToAdd, subscriptionToRemove)
-				.then(() => {
-					this.subscriptions = concat(this.subscriptions, subscriptionToAdd);
-					this.subscriptions = differenceWith(this.subscriptions, subscriptionToRemove, isEqual);
+		this.isRequesting = true;
+		MeetingsApi.subscribeToMedia(this.meetingId, subscriptionToAdd, subscriptionToRemove)
+			.then(() => {
+				this.subscriptions = concat(this.subscriptions, subscriptionToAdd);
+				this.subscriptions = differenceWith(this.subscriptions, subscriptionToRemove, isEqual);
 
-					this.isRequesting = false;
-					// Perform next pending request
-					if (size(this.pendingRequests) > 0) {
-						const nextRequest = this.pendingRequests.shift();
-						if (nextRequest) {
-							this.updateSubscription(nextRequest);
-						}
+				this.isRequesting = false;
+				// Perform next pending request
+				if (size(this.pendingRequests) > 0) {
+					const nextRequest = this.pendingRequests.shift();
+					if (nextRequest) {
+						this.updateSubscription(nextRequest);
 					}
-				})
-				.catch(() => {
-					this.isRequesting = false;
-					// Perform next pending request
-					if (size(this.pendingRequests) > 0) {
-						const nextRequest = this.pendingRequests.shift();
-						if (nextRequest) {
-							this.updateSubscription(nextRequest);
-						}
+				}
+			})
+			.catch(() => {
+				this.isRequesting = false;
+				// Perform next pending request
+				if (size(this.pendingRequests) > 0) {
+					const nextRequest = this.pendingRequests.shift();
+					if (nextRequest) {
+						this.updateSubscription(nextRequest);
 					}
-				});
-		}
+				}
+			});
 	}
 
 	// We delete the subscription when user leave the meeting
@@ -119,7 +117,9 @@ class SubscriptionsManager {
 			const subToRemove = this.filterSubscription(
 				differenceWith(this.subscriptions, subsToRequest, isEqual)
 			);
-			this.subscribeToMedia(subToAdd, subToRemove);
+			if (size(subToAdd) > 0 || size(subToRemove) > 0) {
+				this.subscribeToMedia(subToAdd, subToRemove);
+			}
 		}
 	}
 

@@ -58,28 +58,20 @@ const useGeneralMeetingControls = (meetingId: string): void => {
 	// Handle pinned tile disappearance
 	useEffect(() => {
 		const pinnedTile = useStore.getState().activeMeeting[meetingId]?.pinnedTile;
+		const isDisappeared = !find(
+			tiles,
+			(tile) => tile.userId === pinnedTile?.userId && tile.type === pinnedTile?.type
+		);
 		if (pinnedTile) {
 			const { setPinnedTile } = useStore.getState();
-			// Remove pin in face to face mode
-			if (size(tiles) < 3) {
+			// Remove pin in face to face mode || Remove pin video if participant left
+			if (size(tiles) < 3 || (isDisappeared && pinnedTile?.type === STREAM_TYPE.VIDEO)) {
 				setPinnedTile(meetingId, undefined);
-			} else {
-				const isDisappeared = !find(
-					tiles,
-					(tile) => tile.userId === pinnedTile?.userId && tile.type === pinnedTile?.type
-				);
-				if (isDisappeared) {
-					// Remove pin video if participant left
-					if (pinnedTile?.type === STREAM_TYPE.VIDEO) {
-						useStore.getState().setPinnedTile(meetingId, undefined);
-					}
-					// Remove pin screen if participant left or stopped sharing replacing with another screen
-					if (pinnedTile?.type === STREAM_TYPE.SCREEN) {
-						const allScreenShare = filter(tiles, (tile) => tile.type === STREAM_TYPE.SCREEN);
-						const screenToPin = maxBy(allScreenShare, (tile) => tile.creationDate);
-						useStore.getState().setPinnedTile(meetingId, screenToPin);
-					}
-				}
+			} else if (isDisappeared && pinnedTile?.type === STREAM_TYPE.SCREEN) {
+				// Remove pin screen if participant left or stopped sharing replacing with another screen
+				const allScreenShare = filter(tiles, (tile) => tile.type === STREAM_TYPE.SCREEN);
+				const screenToPin = maxBy(allScreenShare, (tile) => tile.creationDate);
+				setPinnedTile(meetingId, screenToPin);
 			}
 		}
 	}, [tiles, meetingId]);
