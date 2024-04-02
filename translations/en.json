@@ -176,8 +176,8 @@
             "leaveMeeting": "Leave Meeting",
             "microphoneDisabled": "Microphone disabled",
             "microphoneEnabled": "Microphone enabled",
-            "playMic": "Start microphone testing",
-            "stopMic": "Stop microphone testing"
+            "playMic": "Start mic test",
+            "stopMic": "Stop mic test"
         },
         "joinMeeting": "Join meeting",
         "joinMeetingDescription": "How do you want to join this meeting?",
