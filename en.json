@@ -327,7 +327,8 @@
         "leaveRoom": "Leave Room",
         "leaveRoomLabel": "Are you sure to leave this Room?",
         "removeMember": "Remove member",
-        "showPreviousConversationHistory": "Show previous chat history"
+        "showPreviousConversationHistory": "Show previous chat history",
+        "muteForAllDescription": "By muting the user, all participants will no longer hear the user. Only the muted user can unmute. Proceed?"
     },
     "notification": {
         "meeting": {
@@ -399,7 +400,9 @@
         "lastSeen": "Last seen {{lastSeen}}",
         "offline": "Offline",
         "online": "Online",
-        "you": " You"
+        "you": "You",
+        "nameAndNumberOfPeopleAreTyping": "{{userName}} and {{numberOfUsers}} others are typing…",
+        "numberOfPeopleAreTyping": "{{numberOfUsers}} people are typing…"
     },
     "thanksForParticipating": "Thanks for participating",
     "titlePlaceholder": "Your Group's title",

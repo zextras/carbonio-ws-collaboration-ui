@@ -57,7 +57,8 @@
         "leaveRoomLabel": "Êtes-vous sûr de vouloir quitter cette Salle ?",
         "clearHistoryDescription": "Vous nettoyez l'historique de vos conversations, veuillez noter que cette action est irréversible. L'historique sera supprimé pour vous et non pour les autres membres.",
         "leaveGroupLabel": "Êtes-vous sûr de vouloir quitter ce Groupe ?",
-        "deleteGroupMeetingOngoingLabel": "Une réunion est actuellement en cours. La suppression du groupe mettra fin à la réunion sans avertissement."
+        "deleteGroupMeetingOngoingLabel": "Une réunion est actuellement en cours. La suppression du groupe mettra fin à la réunion sans avertissement.",
+        "muteForAllDescription": "En mettant l'utilisateur en sourdine, les participants ne l'entendront plus. Seul l'utilisateur en sourdine peut rétablir le son. Voulez-vous continuer ?"
     },
     "settings": {
         "save": "Les modifications ont été enregistrées correctement",
@@ -114,7 +115,7 @@
         "close": "Fermer",
         "copy": "Copier",
         "create": "Créer",
-        "delete": "Effacer",
+        "delete": "Supprimer",
         "download": "Télécharger",
         "edit": "Modifier",
         "editYourMessage": "Modifier votre message",
@@ -206,7 +207,9 @@
         "areTyping": "écrit…",
         "isTyping": "est en train d'écrire…",
         "you": " Vous",
-        "goToPrivateChat": "Aller en discussion privée pour envoyer un message personnel"
+        "goToPrivateChat": "Aller en discussion privée pour envoyer un message personnel",
+        "nameAndNumberOfPeopleAreTyping": "{{userName}} et {{numberOfUsers}} autres écrivent…",
+        "numberOfPeopleAreTyping": "{{numberOfUsers}} personnes écrivent…"
     },
     "tooltip": {
         "clear": "Effacer",
