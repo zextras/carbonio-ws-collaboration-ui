@@ -16,7 +16,8 @@ import {
 	createMockMeeting,
 	createMockMember,
 	createMockParticipants,
-	createMockRoom
+	createMockRoom,
+	createMockUser
 } from '../../../tests/createMock';
 import { setup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
@@ -24,33 +25,38 @@ import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
 import { MeetingParticipant } from '../../../types/store/MeetingTypes';
 import { RootStore } from '../../../types/store/StoreTypes';
 
+const user1 = createMockUser({ id: 'user1', name: 'User 1' });
+const user2 = createMockUser({ id: 'user2', name: 'User 2' });
+const user3 = createMockUser({ id: 'user3', name: 'User 3' });
+const user4 = createMockUser({ id: 'user4', name: 'User 4' });
+
 const groupRoom: RoomBe = createMockRoom({
 	id: 'room-test',
 	type: RoomType.GROUP,
 	members: [
-		createMockMember({ userId: 'user1', owner: true }),
-		createMockMember({ userId: 'user2', owner: true })
+		createMockMember({ userId: user1.id, owner: true }),
+		createMockMember({ userId: user2.id, owner: true })
 	],
 	userSettings: { muted: false }
 });
 
 const user1Participant: MeetingParticipant = createMockParticipants({
-	userId: 'user1',
+	userId: user1.id,
 	sessionId: 'sessionIdUser1'
 });
 
 const user2Participant: MeetingParticipant = createMockParticipants({
-	userId: 'user2',
+	userId: user2.id,
 	sessionId: 'sessionIdUser2'
 });
 
 const user3Participant: MeetingParticipant = createMockParticipants({
-	userId: 'user3',
+	userId: user3.id,
 	sessionId: 'sessionIdUser3'
 });
 
 const user4Participant: MeetingParticipant = createMockParticipants({
-	userId: 'user4',
+	userId: user4.id,
 	sessionId: 'sessionIdUser4'
 });
 
