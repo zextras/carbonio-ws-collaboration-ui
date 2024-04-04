@@ -16,8 +16,7 @@ import { MeetingsApi } from '../../network';
 import { getRoomIdFromMeeting } from '../../store/selectors/MeetingSelectors';
 import useStore from '../../store/Store';
 import { MeetingType } from '../../types/network/models/meetingBeTypes';
-import AccessMeetingModal from '../components/meetingAccessPoints/accessModal/AccessMeetingModal';
-import WaitingRoom from '../components/meetingAccessPoints/waitingRoom/WaitingRoom';
+import AccessMeetingPage from '../components/meetingAccessPoints/accessModal/AccessMeetingPage';
 
 const AccessMeetingPageView = (): ReactElement => {
 	const meetingId = useMemo(() => document.location.pathname.split(MEETINGS_PATH)[1], []);
@@ -67,10 +66,12 @@ const AccessMeetingPageView = (): ReactElement => {
 
 	return (
 		<Container background="gray0">
-			{hasUserDirectAccess === true && <AccessMeetingModal roomId={roomId} />}
-			{hasUserDirectAccess === false && (
-				<WaitingRoom meetingId={meetingId} meetingName={meetingName} />
-			)}
+			<AccessMeetingPage
+				hasUserDirectAccess={hasUserDirectAccess}
+				meetingId={meetingId}
+				roomId={roomId}
+				meetingName={meetingName}
+			/>
 		</Container>
 	);
 };

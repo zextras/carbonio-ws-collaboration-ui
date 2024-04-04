@@ -5,7 +5,16 @@
  */
 import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { Button, Container, Icon, Row, Text, Tooltip } from '@zextras/carbonio-design-system';
+import {
+	Button,
+	Container,
+	Icon,
+	IconButton,
+	Padding,
+	Row,
+	Text,
+	Tooltip
+} from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -50,6 +59,7 @@ const AccessMeetingPage: FC<AccessMeetingPageProps> = ({
 	const enter = t('action.enter', 'Enter');
 	const leave = t('action.leave', 'Leave');
 	const readyLabel = t('', "You're ready!");
+	const leaveMeetingLabel = t('meeting.interactions.leaveMeeting', 'Leave Meeting');
 	const groupTitle = t(
 		'meeting.startModal.enterRoomMeetingTitle',
 		`Participate to ${conversationTitle} meeting`,
@@ -104,7 +114,6 @@ const AccessMeetingPage: FC<AccessMeetingPageProps> = ({
 	const [wrapperWidth, setWrapperWidth] = useState<number>((window.innerWidth * 0.33) / 16);
 	const [videoPlayerTestMuted, setVideoPlayerTestMuted] = useState<boolean>(true);
 	const [userIsReady, setUserIsReady] = useState<boolean>(false);
-	const [buttonWidth, setButtonWidth] = useState(0);
 	const [selectedDevicesId, setSelectedDevicesId] = useState<{
 		audio: string | undefined;
 		video: string | undefined;
@@ -117,10 +126,10 @@ const AccessMeetingPage: FC<AccessMeetingPageProps> = ({
 	const { goToInfoPage, goToMeetingPage } = useRouting();
 
 	const videoStreamRef = useRef<HTMLVideoElement>(null);
-	const meetingAccessRef = useRef<HTMLDivElement>(null);
 
 	const accessTitle = useMemo(() => {
 		const roomTypeTitle = roomType === RoomType.ONE_TO_ONE ? oneToOneTitle : groupTitle;
+		if (hasUserDirectAccess === undefined) return '';
 		if (hasUserDirectAccess) return roomTypeTitle;
 		return userIsReady ? enterInAFewMomentsLabel : clickOnReadyLabel;
 	}, [
@@ -225,9 +234,7 @@ const AccessMeetingPage: FC<AccessMeetingPageProps> = ({
 	const handleResize = useCallback(() => {
 		setPageWidth(window.innerWidth);
 		setWrapperWidth((window.innerWidth * 0.33) / calcScaleDivisor());
-		const percentage = pageWidth <= 1024 ? 0.62 : 0.28;
-		setButtonWidth(((window.innerWidth * percentage - 8) / 2) * 0.06);
-	}, [pageWidth]);
+	}, []);
 
 	const handleLeave = useCallback(() => {
 		freeMediaResources(streamTrack);
@@ -251,8 +258,7 @@ const AccessMeetingPage: FC<AccessMeetingPageProps> = ({
 
 	useEffect(() => {
 		setPageWidth(window.innerWidth);
-		const percentage = window.innerWidth <= 1024 ? 0.62 : 0.28;
-		setButtonWidth(((window.innerWidth * percentage - 8) / 2) * 0.06);
+		setWrapperWidth((window.innerWidth * 0.33) / calcScaleDivisor());
 	}, []);
 
 	useEffect(() => {
@@ -268,6 +274,7 @@ const AccessMeetingPage: FC<AccessMeetingPageProps> = ({
 	useEventListener(EventName.MEETING_STOPPED, handleMeetingEnded);
 
 	const enterButton = useMemo(() => {
+		if (hasUserDirectAccess === undefined) return undefined;
 		if (hasUserDirectAccess)
 			return (
 				<Tooltip
@@ -316,8 +323,93 @@ const AccessMeetingPage: FC<AccessMeetingPageProps> = ({
 		userIsReady
 	]);
 
+	const buttonsWrapper = useMemo(
+		() => (
+			<Container
+				height="fit"
+				orientation="horizontal"
+				gap="1rem"
+				mainAlignment={handleResizeAlignment}
+			>
+				<Row width={`50%`} minWidth="14rem">
+					<Button
+						width="fill"
+						type="outlined"
+						backgroundColor="text"
+						icon="Mic"
+						iconPlacement="right"
+						label={videoPlayerTestMuted ? playMicLabel : stopMicLabel}
+						onClick={onToggleAudioTest}
+						disabled={!mediaDevicesEnabled.audio}
+					/>
+				</Row>
+				<Row width={`50%`} minWidth="14rem">
+					{enterButton}
+				</Row>
+			</Container>
+		),
+		[
+			enterButton,
+			handleResizeAlignment,
+			mediaDevicesEnabled.audio,
+			onToggleAudioTest,
+			playMicLabel,
+			stopMicLabel,
+			videoPlayerTestMuted
+		]
+	);
+
+	const leaveButton = useMemo(() => {
+		if (hasUserDirectAccess === undefined) {
+			return undefined;
+		}
+		return (
+			!hasUserDirectAccess && (
+				<CustomContainer
+					height="fit"
+					width="fit"
+					mainAlignment="flex-end"
+					crossAlignment="flex-start"
+				>
+					{handlePageOrientation !== 'vertical' ? (
+						<Button
+							backgroundColor="error"
+							label={leave}
+							icon="LogOut"
+							iconPlacement="right"
+							onClick={handleLeave}
+						/>
+					) : (
+						<Tooltip label={leaveMeetingLabel}>
+							<IconButton backgroundColor="error" icon="LogOut" onClick={handleLeave} />
+						</Tooltip>
+					)}
+				</CustomContainer>
+			)
+		);
+	}, [handleLeave, handlePageOrientation, hasUserDirectAccess, leave, leaveMeetingLabel]);
+
+	const waitingRoomLabels = useMemo(() => {
+		if (hasUserDirectAccess === undefined) return undefined;
+		return (
+			!hasUserDirectAccess && (
+				<Container height="fit" crossAlignment={handleResizeAlignment}>
+					<Text>{userIsReady ? areYouReadyLabel : whenYouAreReadyLabel}</Text>
+					<Text>{aModeratorWillLetYouEnterLabel}</Text>
+				</Container>
+			)
+		);
+	}, [
+		aModeratorWillLetYouEnterLabel,
+		areYouReadyLabel,
+		handleResizeAlignment,
+		hasUserDirectAccess,
+		userIsReady,
+		whenYouAreReadyLabel
+	]);
+
 	return (
-		<Container ref={meetingAccessRef}>
+		<Container>
 			<Container mainAlignment="center" crossAlignment="center" gap="1.5rem">
 				<Text size="extralarge" weight="bold">
 					{accessTitle}
@@ -330,73 +422,36 @@ const AccessMeetingPage: FC<AccessMeetingPageProps> = ({
 					crossAlignment="center"
 					gap="2rem"
 				>
-					<Container height="fit" width={`${wrapperWidth}rem`} minWidth="31.875rem">
+					<Container height="fit" width={`${wrapperWidth}rem`} minWidth="35rem">
 						<AccessTile
 							videoStreamRef={videoStreamRef}
 							videoPlayerTestMuted={videoPlayerTestMuted}
 							mediaDevicesEnabled={mediaDevicesEnabled}
 						/>
 					</Container>
-					<Container mainAlignment="center" crossAlignment="center" gap="2rem">
-						<Container height="fit" crossAlignment={handleResizeAlignment}>
-							<Text size="large">{howToJoinMeeting}</Text>
-							<Text>{setInputDevicesLabel}</Text>
+					<Container mainAlignment="flex-start" crossAlignment="flex-start" gap="1rem">
+						<Container mainAlignment="center" crossAlignment="center" gap="2rem">
+							<Container height="fit" crossAlignment={handleResizeAlignment}>
+								<Text size="large">{howToJoinMeeting}</Text>
+								<Padding bottom="0.25rem" />
+								<Text>{setInputDevicesLabel}</Text>
+							</Container>
+							<LocalMediaHandler
+								streamTrack={streamTrack}
+								setStreamTrack={setStreamTrack}
+								setEnterButtonIsEnabled={setEnterButtonIsEnabled}
+								selectedDevicesId={selectedDevicesId}
+								setSelectedDevicesId={setSelectedDevicesId}
+								mediaDevicesEnabled={mediaDevicesEnabled}
+								setMediaDevicesEnabled={setMediaDevicesEnabled}
+							/>
+							{buttonsWrapper}
 						</Container>
-						<LocalMediaHandler
-							streamTrack={streamTrack}
-							setStreamTrack={setStreamTrack}
-							setEnterButtonIsEnabled={setEnterButtonIsEnabled}
-							selectedDevicesId={selectedDevicesId}
-							setSelectedDevicesId={setSelectedDevicesId}
-							mediaDevicesEnabled={mediaDevicesEnabled}
-							setMediaDevicesEnabled={setMediaDevicesEnabled}
-							meetingAccessRef={meetingAccessRef}
-						/>
-						<Container
-							height="fit"
-							orientation="horizontal"
-							gap="1rem"
-							mainAlignment={handleResizeAlignment}
-						>
-							<Row width={`${buttonWidth}rem`} minWidth="14rem">
-								<Button
-									width="fill"
-									type="outlined"
-									backgroundColor="text"
-									icon="Mic"
-									iconPlacement="right"
-									label={videoPlayerTestMuted ? playMicLabel : stopMicLabel}
-									onClick={onToggleAudioTest}
-									disabled={!mediaDevicesEnabled.audio}
-								/>
-							</Row>
-							<Row width={`${buttonWidth}rem`} minWidth="14rem">
-								{enterButton}
-							</Row>
-						</Container>
-						<Container height="fit" crossAlignment={handleResizeAlignment}>
-							<Text>{userIsReady ? areYouReadyLabel : whenYouAreReadyLabel}</Text>
-							<Text>{aModeratorWillLetYouEnterLabel}</Text>
-						</Container>
+						{waitingRoomLabels}
 					</Container>
 				</Container>
 			</Container>
-			{!hasUserDirectAccess && (
-				<CustomContainer
-					height="fit"
-					width="fit"
-					mainAlignment="flex-end"
-					crossAlignment="flex-start"
-				>
-					<Button
-						backgroundColor="error"
-						label={leave}
-						icon="LogOut"
-						iconPlacement="right"
-						onClick={handleLeave}
-					/>
-				</CustomContainer>
-			)}
+			{leaveButton}
 		</Container>
 	);
 };
