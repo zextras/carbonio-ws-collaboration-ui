@@ -35,7 +35,8 @@ const addIncomingMeetingNotification = (room: RoomBe, meeting: MeetingBe): void 
 		sentDate: '2412412421',
 		meetingId: meeting.id,
 		type: WsEventType.MEETING_STARTED,
-		starterUser: room.id
+		starterUser: room.id,
+		startedAt: '2024-04-04T15:42:22.932426Z'
 	};
 	const store = useStore.getState();
 	act(() => {

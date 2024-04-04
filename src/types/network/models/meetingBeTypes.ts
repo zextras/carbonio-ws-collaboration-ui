@@ -14,6 +14,7 @@ export type MeetingBe = {
 	participants: MeetingParticipantBe[];
 	createdAt: string;
 	meetingType: MeetingType;
+	startedAt?: string;
 };
 
 export type MeetingParticipantBe = {

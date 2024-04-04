@@ -16,8 +16,10 @@ import {
 	getMeetingParticipants,
 	getNumberOfMeetingParticipants
 } from '../../../store/selectors/MeetingSelectors';
+import { getMeetingIdFromRoom } from '../../../store/selectors/RoomsSelectors';
 import useStore from '../../../store/Store';
 import { MeetingParticipant, MeetingParticipantMap } from '../../../types/store/MeetingTypes';
+import MeetingDuration from '../meetingActionsBar/MeetingDuration';
 
 const CustomContainer = styled(Container)<{ $isDropdownOpen: boolean }>`
 	position: absolute;
@@ -49,6 +51,7 @@ const ActiveMeetingParticipantsDropdown = ({
 	const meetingParticipants: MeetingParticipantMap | undefined = useStore((store) =>
 		getMeetingParticipants(store, roomId)
 	);
+	const meetingId = useStore((store) => getMeetingIdFromRoom(store, roomId));
 
 	const participantsTitle = t(
 		'meeting.participantsList.title',
@@ -83,11 +86,17 @@ const ActiveMeetingParticipantsDropdown = ({
 			maxHeight="50%"
 			data-testid="participant_dropdown"
 		>
-			<Container width="fit" height="fit">
+			<Container
+				width="fill"
+				height="fit"
+				orientation="horizontal"
+				mainAlignment="space-between"
+				padding={{ bottom: '0.5rem' }}
+			>
 				<Text color="gray0" size="small">
 					{participantsTitle}
 				</Text>
-				<Padding bottom="0.5rem" />
+				<MeetingDuration meetingId={meetingId} />
 			</Container>
 			<Divider />
 			<Padding bottom="0.75rem" />
