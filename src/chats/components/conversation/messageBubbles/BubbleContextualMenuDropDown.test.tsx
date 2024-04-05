@@ -27,6 +27,11 @@ const mockedRoom: RoomBe = createMockRoom({
 
 const mySessionId = 'mySessionId';
 
+beforeEach(() => {
+	const store: RootStore = useStore.getState();
+	store.setSessionId(mySessionId);
+	store.addRoom(mockedRoom);
+});
 describe('Bubble Contextual Menu - other user messages', () => {
 	test('Simple text message', async () => {
 		const simpleTextMessage: TextMessage = createMockTextMessage({ roomId: mockedRoom.id });
@@ -62,9 +67,7 @@ describe('Bubble Contextual Menu - other user messages', () => {
 			replyTo: 'replyToId',
 			repliedMessage: createMockTextMessage({ id: 'replyToId', roomId: mockedRoom.id })
 		});
-		const store: RootStore = useStore.getState();
-		store.addRoom(mockedRoom);
-		store.newMessage(simpleTextMessage);
+		useStore.getState().newMessage(simpleTextMessage);
 		const { user } = setup(
 			<BubbleContextualMenuDropDown message={simpleTextMessage} isMyMessage={false} />
 		);
@@ -93,9 +96,7 @@ describe('Bubble Contextual Menu - other user messages', () => {
 			roomId: mockedRoom.id,
 			forwarded: { id: 'forwardedId', date: 1661441294393, text: 'Forwarded text!' }
 		});
-		const store: RootStore = useStore.getState();
-		store.addRoom(mockedRoom);
-		store.newMessage(simpleTextMessage);
+		useStore.getState().newMessage(simpleTextMessage);
 		const { user } = setup(
 			<BubbleContextualMenuDropDown message={simpleTextMessage} isMyMessage={false} />
 		);
@@ -124,9 +125,7 @@ describe('Bubble Contextual Menu - other user messages', () => {
 			roomId: mockedRoom.id,
 			attachment: { id: 'id', name: 'file', mimeType: 'image/png', size: 122312 }
 		});
-		const store: RootStore = useStore.getState();
-		store.addRoom(mockedRoom);
-		store.newMessage(simpleTextMessage);
+		useStore.getState().newMessage(simpleTextMessage);
 		const { user } = setup(
 			<BubbleContextualMenuDropDown message={simpleTextMessage} isMyMessage={false} />
 		);
@@ -150,12 +149,10 @@ describe('Bubble Contextual Menu - other user messages', () => {
 		expect(previewAction).toBeInTheDocument();
 	});
 
-	test('if forward mode is active, the forward action should not be present', async () => {
+	test('If forward mode is active, the forward action should not be present', async () => {
 		const simpleTextMessage: TextMessage = createMockTextMessage({ roomId: mockedRoom.id });
 
 		const store: RootStore = useStore.getState();
-		store.setSessionId(mySessionId);
-		store.addRoom(mockedRoom);
 		store.newMessage(simpleTextMessage);
 		store.setForwardMessageList(mockedRoom.id, simpleTextMessage);
 
@@ -167,6 +164,37 @@ describe('Bubble Contextual Menu - other user messages', () => {
 
 		expect(screen.queryByText(/Forward/i)).not.toBeInTheDocument();
 	});
+
+	test('Reply a message after starting an edit should reset the input', async () => {
+		const simpleTextMessage: TextMessage = createMockTextMessage({
+			roomId: mockedRoom.id,
+			from: mySessionId,
+			date: Date.now() - 60
+		});
+		const store: RootStore = useStore.getState();
+		store.newMessage(simpleTextMessage);
+		store.setDraftMessage(simpleTextMessage.roomId, false, simpleTextMessage.text);
+		store.setReferenceMessage(
+			simpleTextMessage.roomId,
+			simpleTextMessage.id,
+			simpleTextMessage.from,
+			simpleTextMessage.stanzaId,
+			messageActionType.EDIT,
+			simpleTextMessage.attachment
+		);
+
+		const { user } = setup(
+			<BubbleContextualMenuDropDown message={simpleTextMessage} isMyMessage={false} />
+		);
+		const arrowButton = screen.getByTestId(iconArrowIosDownward);
+		await user.click(arrowButton);
+
+		const replyAction = screen.getByText(/Reply/i);
+		await user.click(replyAction);
+
+		const { draftMessage } = useStore.getState().activeConversations[simpleTextMessage.roomId];
+		expect(draftMessage).toBe('');
+	});
 });
 
 describe('Bubble Contextual Menu - my messages', () => {
@@ -176,10 +204,7 @@ describe('Bubble Contextual Menu - my messages', () => {
 			from: mySessionId,
 			date: Date.now() - 60
 		});
-		const store: RootStore = useStore.getState();
-		store.setSessionId(mySessionId);
-		store.addRoom(mockedRoom);
-		store.newMessage(simpleTextMessage);
+		useStore.getState().newMessage(simpleTextMessage);
 		const { user } = setup(
 			<BubbleContextualMenuDropDown message={simpleTextMessage} isMyMessage />
 		);
@@ -211,9 +236,7 @@ describe('Bubble Contextual Menu - my messages', () => {
 			replyTo: 'replyToId',
 			repliedMessage: createMockTextMessage({ id: 'replyToId', roomId: mockedRoom.id })
 		});
-		const store: RootStore = useStore.getState();
-		store.addRoom(mockedRoom);
-		store.newMessage(simpleTextMessage);
+		useStore.getState().newMessage(simpleTextMessage);
 		const { user } = setup(
 			<BubbleContextualMenuDropDown message={simpleTextMessage} isMyMessage />
 		);
@@ -244,9 +267,7 @@ describe('Bubble Contextual Menu - my messages', () => {
 			date: Date.now() - 60,
 			forwarded: { id: 'forwardedId', date: 1661441294393, text: 'Forwarded text!' }
 		});
-		const store: RootStore = useStore.getState();
-		store.addRoom(mockedRoom);
-		store.newMessage(simpleTextMessage);
+		useStore.getState().newMessage(simpleTextMessage);
 		const { user } = setup(
 			<BubbleContextualMenuDropDown message={simpleTextMessage} isMyMessage />
 		);
@@ -277,9 +298,7 @@ describe('Bubble Contextual Menu - my messages', () => {
 			date: Date.now() - 60,
 			attachment: { id: 'id', name: 'file', mimeType: 'image/png', size: 122312 }
 		});
-		const store: RootStore = useStore.getState();
-		store.addRoom(mockedRoom);
-		store.newMessage(simpleTextMessage);
+		useStore.getState().newMessage(simpleTextMessage);
 		const { user } = setup(
 			<BubbleContextualMenuDropDown message={simpleTextMessage} isMyMessage />
 		);
@@ -310,8 +329,6 @@ describe('Bubble Contextual Menu - my messages', () => {
 			date: Date.now() - 60
 		});
 		const store: RootStore = useStore.getState();
-		store.setSessionId(mySessionId);
-		store.addRoom(mockedRoom);
 		store.newMessage(simpleTextMessage);
 		store.setDraftMessage(simpleTextMessage.roomId, false, simpleTextMessage.text);
 		store.setReferenceMessage(
@@ -339,8 +356,6 @@ describe('Bubble Contextual Menu - my messages', () => {
 			date: Date.now() - 60
 		});
 		const store: RootStore = useStore.getState();
-		store.setSessionId(mySessionId);
-		store.addRoom(mockedRoom);
 		store.newMessage(simpleTextMessage);
 		store.setDraftMessage(simpleTextMessage.roomId, false, simpleTextMessage.text);
 		store.setReferenceMessage(
@@ -368,8 +383,6 @@ describe('Bubble Contextual Menu - my messages', () => {
 			date: Date.now() - 60
 		});
 		const store: RootStore = useStore.getState();
-		store.setSessionId(mySessionId);
-		store.addRoom(mockedRoom);
 		store.newMessage(simpleTextMessage);
 		store.setForwardMessageList(mockedRoom.id, simpleTextMessage);
 
