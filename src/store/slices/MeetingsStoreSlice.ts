@@ -124,13 +124,13 @@ export const useMeetingsStoreSlice: StateCreator<MeetingsSlice> = (set: (...any:
 			'MEETINGS/DELETE'
 		);
 	},
-	startMeeting: (meetingId: string): void => {
+	startMeeting: (meetingId: string, startedAt: string): void => {
 		set(
 			produce((draft: RootStore) => {
 				const meeting = find(draft.meetings, (meeting) => meeting.id === meetingId);
 				if (meeting) {
 					draft.meetings[meeting.roomId].active = true;
-					draft.meetings[meeting.roomId].startedAt = meeting.startedAt;
+					draft.meetings[meeting.roomId].startedAt = startedAt;
 				}
 			}),
 			false,
