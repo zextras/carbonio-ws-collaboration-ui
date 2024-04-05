@@ -13,48 +13,51 @@ import displayMessageBrowserNotification from '../utility/displayMessageBrowserN
 
 export function onNewMessageStanza(message: Element): true {
 	const resultElement = getTagElement(message, 'result');
-	const newMessage = decodeXMPPMessageStanza(message);
 
-	if (resultElement == null && newMessage) {
-		const store = useStore.getState();
-		const { xmppClient } = store.connections;
-		const sessionId: string | undefined = useStore.getState().session.id;
+	if (resultElement == null) {
+		const newMessage = decodeXMPPMessageStanza(message);
 
-		switch (newMessage.type) {
-			case MessageType.TEXT_MSG: {
-				store.newMessage(newMessage);
+		if (newMessage) {
+			const store = useStore.getState();
+			const { xmppClient } = store.connections;
+			const sessionId: string | undefined = useStore.getState().session.id;
 
-				if (newMessage.from !== sessionId) {
-					sendCustomEvent({ name: EventName.NEW_MESSAGE, data: newMessage });
-					store.incrementUnreadCount(newMessage.roomId);
-					displayMessageBrowserNotification(newMessage);
+			switch (newMessage.type) {
+				case MessageType.TEXT_MSG: {
+					store.newMessage(newMessage);
+
+					if (newMessage.from !== sessionId) {
+						sendCustomEvent({ name: EventName.NEW_MESSAGE, data: newMessage });
+						store.incrementUnreadCount(newMessage.roomId);
+						displayMessageBrowserNotification(newMessage);
+					}
+
+					// Request message subject of reply
+					const messageSubjectOfReplyId = newMessage.replyTo;
+					if (messageSubjectOfReplyId) {
+						xmppClient.requestMessageSubjectOfReply(
+							newMessage.roomId,
+							messageSubjectOfReplyId,
+							newMessage.id
+						);
+					}
+					break;
 				}
-
-				// Request message subject of reply
-				const messageSubjectOfReplyId = newMessage.replyTo;
-				if (messageSubjectOfReplyId) {
-					xmppClient.requestMessageSubjectOfReply(
-						newMessage.roomId,
-						messageSubjectOfReplyId,
-						newMessage.id
-					);
+				case MessageType.CONFIGURATION_MSG: {
+					store.newMessage(newMessage);
+					if (newMessage.from !== sessionId) {
+						sendCustomEvent({ name: EventName.NEW_MESSAGE, data: newMessage });
+						store.incrementUnreadCount(newMessage.roomId);
+					}
+					break;
 				}
-				break;
-			}
-			case MessageType.CONFIGURATION_MSG: {
-				store.newMessage(newMessage);
-				if (newMessage.from !== sessionId) {
-					sendCustomEvent({ name: EventName.NEW_MESSAGE, data: newMessage });
-					store.incrementUnreadCount(newMessage.roomId);
+				case MessageType.FASTENING: {
+					store.addFastening(newMessage);
+					break;
 				}
-				break;
-			}
-			case MessageType.FASTENING: {
-				store.addFastening(newMessage);
-				break;
-			}
-			default: {
-				break;
+				default: {
+					break;
+				}
 			}
 		}
 	}
