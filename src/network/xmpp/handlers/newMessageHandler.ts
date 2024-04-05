@@ -13,8 +13,10 @@ import displayMessageBrowserNotification from '../utility/displayMessageBrowserN
 
 export function onNewMessageStanza(message: Element): true {
 	const resultElement = getTagElement(message, 'result');
+
 	if (resultElement == null) {
 		const newMessage = decodeXMPPMessageStanza(message);
+
 		if (newMessage) {
 			const store = useStore.getState();
 			const { xmppClient } = store.connections;

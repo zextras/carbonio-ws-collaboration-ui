@@ -53,12 +53,11 @@ const CameraButton = ({
 	const setLocalStreams = useStore((store) => store.setLocalStreams);
 
 	const [buttonStatus, setButtonStatus] = useState<boolean>(true);
+	const [videoMediaList, setVideoMediaList] = useState<[] | MediaDeviceInfo[]>([]);
 
 	useEffect(() => {
 		setButtonStatus(true);
 	}, [videoStatus]);
-
-	const [videoMediaList, setVideoMediaList] = useState<[] | MediaDeviceInfo[]>([]);
 
 	const mediaVideoList = useMemo(
 		() =>
@@ -138,6 +137,7 @@ const CameraButton = ({
 		<Tooltip placement="top" label={videoStatus ? disableCamLabel : enableCamLabel}>
 			<MultiButton
 				background="primary"
+				data-testid="cameraButton"
 				primaryIcon={videoStatus ? 'Video' : 'VideoOff'}
 				icon={isVideoListOpen ? 'ChevronDown' : 'ChevronUp'}
 				onClick={toggleVideoStream}

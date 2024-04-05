@@ -102,7 +102,7 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ roomId, unreadCount, draftMessa
 	const themeColor = useTheme();
 
 	const picture = useMemo(() => {
-		if (userPictureUpdatedAt != null && otherMember && otherMember.userId !== undefined) {
+		if (userPictureUpdatedAt != null && otherMember?.userId !== undefined) {
 			return `${UsersApi.getURLUserPicture(otherMember.userId)}?${userPictureUpdatedAt}`;
 		}
 		return '';
@@ -164,20 +164,22 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ roomId, unreadCount, draftMessa
 		}
 	}, [isMeetingActive, draftMessage, roomMuted, userName, picture, userColor]);
 
+	const canShowPresence = useMemo(
+		() => !unreadCount && canSeeUsersPresence,
+		[canSeeUsersPresence, unreadCount]
+	);
+
 	return userName ? (
 		<AvatarContainer data-testid="avatar_box" width="fit">
 			{avatarUser}
-			{unreadCount ? (
+			{unreadCount && (
 				<AvatarBadge
 					data-testid="unreads_counter"
 					value={unreadCount}
 					type={!roomMuted ? 'unread' : 'read'}
 				/>
-			) : (
-				canSeeUsersPresence && (
-					<Presence data-testid="user_presence_dot" memberOnline={memberOnline} />
-				)
 			)}
+			{canShowPresence && <Presence data-testid="user_presence_dot" memberOnline={memberOnline} />}
 		</AvatarContainer>
 	) : (
 		<Shimmer.Avatar data-testid="shimmer_avatar" size="medium" />
