@@ -70,16 +70,15 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 						tracks.forEach((track) => track.stop());
 					}
 				);
+				const kindOfAudioDevice = audioId
+					? {
+							deviceId: { exact: audioId },
+							noiseSuppression: true,
+							echoCancellation: true
+					  }
+					: { noiseSuppression: true, echoCancellation: true };
 				getAudioAndVideo(
-					audio
-						? audioId
-							? {
-									deviceId: { exact: audioId },
-									noiseSuppression: true,
-									echoCancellation: true
-							  }
-							: { noiseSuppression: true, echoCancellation: true }
-						: false,
+					audio ? kindOfAudioDevice : false,
 					video ? (videoId ? { deviceId: { exact: videoId } } : true) : false
 				)
 					.then((stream: MediaStream) => {
@@ -256,13 +255,15 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 				</Tooltip>
 				<Padding left="1rem" />
 				<Select
+					data-testid={'camera-select'}
 					items={mediaVideoList}
 					onChange={onChangeVideoSource}
 					selection={videoSelected}
 					multiple={false}
 					placement="bottom-end"
 					showCheckbox={false}
-					background="gray0"
+					background={'gray0'}
+					disablePortal
 				/>
 			</Container>
 			<Padding bottom="1rem" />
@@ -280,13 +281,15 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 				</Tooltip>
 				<Padding left="1rem" />
 				<Select
+					data-testid={'audio-select'}
 					items={mediaAudioList}
 					onChange={onChangeAudioSource}
 					selection={audioSelected}
 					multiple={false}
 					placement="bottom-end"
 					showCheckbox={false}
-					background="gray0"
+					background={'gray0'}
+					disablePortal
 				/>
 			</Container>
 		</Container>

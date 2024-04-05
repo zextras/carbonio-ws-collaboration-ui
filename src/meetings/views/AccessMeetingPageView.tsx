@@ -16,7 +16,7 @@ import { MeetingsApi } from '../../network';
 import { getRoomIdFromMeeting } from '../../store/selectors/MeetingSelectors';
 import useStore from '../../store/Store';
 import { MeetingType } from '../../types/network/models/meetingBeTypes';
-import AccessMeetingPage from '../components/meetingAccessPoints/accessModal/AccessMeetingPage';
+import AccessMeetingPage from '../components/meetingAccessPoint/AccessMeetingPage';
 
 const AccessMeetingPageView = (): ReactElement => {
 	const meetingId = useMemo(() => document.location.pathname.split(MEETINGS_PATH)[1], []);

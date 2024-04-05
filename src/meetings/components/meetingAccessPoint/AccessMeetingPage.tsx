@@ -18,19 +18,16 @@ import {
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import useEventListener, { EventName } from '../../../../hooks/useEventListener';
-import useRouting, { PAGE_INFO_TYPE } from '../../../../hooks/useRouting';
-import { MeetingsApi } from '../../../../network';
-import {
-	getRoomNameSelector,
-	getRoomTypeSelector
-} from '../../../../store/selectors/RoomsSelectors';
-import useStore from '../../../../store/Store';
-import { RoomType } from '../../../../types/store/RoomTypes';
-import { freeMediaResources } from '../../../../utils/MeetingsUtils';
-import { calcScaleDivisor } from '../../../../utils/styleUtils';
-import AccessTile from '../mediaHandlers/AccessTile';
-import LocalMediaHandler from '../mediaHandlers/LocalMediaHandler';
+import AccessTile from './mediaHandlers/AccessTile';
+import LocalMediaHandler from './mediaHandlers/LocalMediaHandler';
+import useEventListener, { EventName } from '../../../hooks/useEventListener';
+import useRouting, { PAGE_INFO_TYPE } from '../../../hooks/useRouting';
+import { MeetingsApi } from '../../../network';
+import { getRoomNameSelector, getRoomTypeSelector } from '../../../store/selectors/RoomsSelectors';
+import useStore from '../../../store/Store';
+import { RoomType } from '../../../types/store/RoomTypes';
+import { freeMediaResources } from '../../../utils/MeetingsUtils';
+import { calcScaleDivisor } from '../../../utils/styleUtils';
 
 type AccessMeetingPageProps = {
 	hasUserDirectAccess: boolean | undefined;
@@ -163,19 +160,6 @@ const AccessMeetingPage: FC<AccessMeetingPageProps> = ({
 		setVideoPlayerTestMuted((prevState) => !prevState);
 	}, []);
 
-	const joinMeeting = useCallback(
-		() =>
-			MeetingsApi.joinMeeting(
-				meetingId,
-				{
-					videoStreamEnabled: mediaDevicesEnabled.video,
-					audioStreamEnabled: mediaDevicesEnabled.audio
-				},
-				{ audioDevice: selectedDevicesId.audio, videoDevice: selectedDevicesId.video }
-			),
-		[mediaDevicesEnabled, meetingId, selectedDevicesId]
-	);
-
 	const enterMeeting = useCallback(() => {
 		MeetingsApi.enterMeeting(
 			roomId,
@@ -200,23 +184,25 @@ const AccessMeetingPage: FC<AccessMeetingPageProps> = ({
 		goToMeetingPage
 	]);
 
-	const joinWaitingRoom = useCallback(() => {
-		joinMeeting()
+	// handle waiting room flow and events
+	const waitingRoomHandler = useCallback(() => {
+		MeetingsApi.joinMeeting(
+			meetingId,
+			{
+				videoStreamEnabled: mediaDevicesEnabled.video,
+				audioStreamEnabled: mediaDevicesEnabled.audio
+			},
+			{ audioDevice: selectedDevicesId.audio, videoDevice: selectedDevicesId.video }
+		)
 			.then((resp) => {
 				if (resp.status === 'WAITING') setUserIsReady(true);
-				if (resp.status === 'ACCEPTED') goToMeetingPage(meetingId);
+				if (resp.status === 'ACCEPTED') {
+					freeMediaResources(streamTrack);
+					goToMeetingPage(meetingId);
+				}
 			})
-			.catch((err) => console.error(err, 'Error on joinWaitingRoom'));
-	}, [goToMeetingPage, joinMeeting, meetingId]);
-
-	const handleAcceptance = useCallback(() => {
-		joinMeeting()
-			.then(() => {
-				freeMediaResources(streamTrack);
-				goToMeetingPage(meetingId);
-			})
-			.catch((err) => console.error(err, 'Error on joinMeeting'));
-	}, [goToMeetingPage, joinMeeting, meetingId, streamTrack]);
+			.catch((err) => console.error(err, 'Error on waitingRoomHandler'));
+	}, [goToMeetingPage, mediaDevicesEnabled, meetingId, selectedDevicesId, streamTrack]);
 
 	const handleRejected = useCallback(() => {
 		freeMediaResources(streamTrack);
@@ -231,22 +217,16 @@ const AccessMeetingPage: FC<AccessMeetingPageProps> = ({
 		goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED);
 	}, [goToInfoPage]);
 
-	const handleResize = useCallback(() => {
-		setPageWidth(window.innerWidth);
-		setWrapperWidth((window.innerWidth * 0.33) / calcScaleDivisor());
-	}, []);
-
 	const handleLeave = useCallback(() => {
 		freeMediaResources(streamTrack);
 		if (userIsReady) MeetingsApi.leaveWaitingRoom(meetingId);
 		goToInfoPage(PAGE_INFO_TYPE.HANG_UP_PAGE);
 	}, [goToInfoPage, meetingId, streamTrack, userIsReady]);
 
-	useEffect(() => {
-		window.addEventListener('resize', handleResize);
-
-		return () => window.removeEventListener('resize', handleResize);
-	}, [handleResize]);
+	useEventListener(EventName.MEETING_USER_ACCEPTED, waitingRoomHandler);
+	useEventListener(EventName.MEETING_USER_REJECTED, handleRejected);
+	useEventListener(EventName.MEETING_WAITING_PARTICIPANT_CLASHED, handleRejoin);
+	useEventListener(EventName.MEETING_STOPPED, handleMeetingEnded);
 
 	// Leave waiting list on window close
 	useEffect(() => {
@@ -256,22 +236,30 @@ const AccessMeetingPage: FC<AccessMeetingPageProps> = ({
 		};
 	}, [handleLeave]);
 
+	// resize handling
+	const handleResize = useCallback(() => {
+		setPageWidth(window.innerWidth);
+		setWrapperWidth((window.innerWidth * 0.33) / calcScaleDivisor());
+	}, []);
+
+	useEffect(() => {
+		window.addEventListener('resize', handleResize);
+
+		return () => window.removeEventListener('resize', handleResize);
+	}, [handleResize]);
+
 	useEffect(() => {
 		setPageWidth(window.innerWidth);
 		setWrapperWidth((window.innerWidth * 0.33) / calcScaleDivisor());
 	}, []);
 
+	// handle change of video stream
 	useEffect(() => {
 		if (videoStreamRef.current) {
 			videoStreamRef.current.srcObject = streamTrack;
 			setEnterButtonIsEnabled(true);
 		}
 	}, [streamTrack, mediaDevicesEnabled.audio, mediaDevicesEnabled.video]);
-
-	useEventListener(EventName.MEETING_USER_ACCEPTED, handleAcceptance);
-	useEventListener(EventName.MEETING_USER_REJECTED, handleRejected);
-	useEventListener(EventName.MEETING_WAITING_PARTICIPANT_CLASHED, handleRejoin);
-	useEventListener(EventName.MEETING_STOPPED, handleMeetingEnded);
 
 	const enterButton = useMemo(() => {
 		if (hasUserDirectAccess === undefined) return undefined;
@@ -297,7 +285,7 @@ const AccessMeetingPage: FC<AccessMeetingPageProps> = ({
 					label={readyToParticipateLabel}
 					icon="CheckmarkOutline"
 					iconPlacement="right"
-					onClick={joinWaitingRoom}
+					onClick={waitingRoomHandler}
 					width="fill"
 					disabled={!enterButtonIsEnabled}
 				/>
@@ -317,7 +305,7 @@ const AccessMeetingPage: FC<AccessMeetingPageProps> = ({
 		enterButtonIsEnabled,
 		enterMeeting,
 		hasUserDirectAccess,
-		joinWaitingRoom,
+		waitingRoomHandler,
 		readyLabel,
 		readyToParticipateLabel,
 		userIsReady
