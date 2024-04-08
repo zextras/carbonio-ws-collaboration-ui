@@ -32,7 +32,13 @@ const MeetingDuration = ({ meetingId }: MeetingDurationProps): ReactElement | nu
 	if (!meetingId || !meetingStartedAt) return null;
 	return (
 		<Tooltip label={meetingDurationLabel} placement="top">
-			<CustomContainer orientation="horizontal" width="fit" crossAlignment="flex-end" gap="0.25rem">
+			<CustomContainer
+				orientation="horizontal"
+				width="fit"
+				crossAlignment="flex-end"
+				gap="0.25rem"
+				data-testid="meeting_duration_component"
+			>
 				<Icon icon="ClockOutline" color="gray0" size="medium" />
 				<Text color="gray0" size="small">
 					{timer}

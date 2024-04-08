@@ -26,19 +26,22 @@ const mockMeeting0 = createMockMeeting({
 	id: 'meetingId0',
 	roomId: 'roomId0',
 	participants: [mockParticipant0, mockParticipant1],
-	createdAt: '2022-08-25T17:24:28.961+02:00'
+	createdAt: '2022-08-25T17:24:28.961+02:00',
+	active: true,
+	startedAt: '2022-09-25T18:25:29.961+02:00'
 });
 const mockMeeting1 = createMockMeeting({
 	id: 'meetingId1',
 	roomId: 'roomId1',
 	participants: [mockParticipant0],
-	createdAt: '2022-08-25T18:25:29.961+02:00'
+	createdAt: '2022-08-26T18:25:29.961+02:00',
+	active: false
 });
 const mockMeeting2 = createMockMeeting({
 	id: 'meetingId2',
 	roomId: 'roomId2',
 	participants: [mockParticipant1],
-	createdAt: '2022-08-25T19:34:28.961+02:00'
+	createdAt: '2022-08-27T19:34:28.961+02:00'
 });
 
 const temporaryRoom = createMockRoom();
@@ -51,13 +54,18 @@ describe('Test components slice', () => {
 
 		// Check store data
 		expect(size(result.current.meetings)).toBe(3);
-		expect(result.current.meetings[mockMeeting0.roomId]).not.toBeNull();
-		expect(result.current.meetings[mockMeeting0.roomId].id).toBe(mockMeeting0.id);
-		expect(result.current.meetings[mockMeeting0.roomId].roomId).toBe(mockMeeting0.roomId);
-		expect(size(result.current.meetings[mockMeeting0.roomId].participants)).toBe(
-			size(mockMeeting0.participants)
-		);
-		expect(result.current.meetings[mockMeeting0.roomId].createdAt).toBe(mockMeeting0.createdAt);
+		const meeting0 = result.current.meetings[mockMeeting0.roomId];
+		expect(meeting0).not.toBeNull();
+		expect(meeting0.id).toBe(mockMeeting0.id);
+		expect(meeting0.roomId).toBe(mockMeeting0.roomId);
+		expect(size(meeting0.participants)).toBe(size(mockMeeting0.participants));
+		expect(meeting0.createdAt).toBe(mockMeeting0.createdAt);
+		expect(meeting0.active).toBeTruthy();
+		expect(meeting0.startedAt).toBe(mockMeeting0.startedAt);
+
+		const meeting1 = result.current.meetings[mockMeeting1.roomId];
+		expect(meeting1.active).toBeFalsy();
+		expect(meeting1.startedAt).toBeUndefined();
 	});
 
 	test('addMeeting setter', () => {
@@ -65,13 +73,14 @@ describe('Test components slice', () => {
 		act(() => result.current.addMeeting(mockMeeting0));
 
 		// Check store data
-		expect(result.current.meetings[mockMeeting0.roomId]).not.toBeNull();
-		expect(result.current.meetings[mockMeeting0.roomId].id).toBe(mockMeeting0.id);
-		expect(result.current.meetings[mockMeeting0.roomId].roomId).toBe(mockMeeting0.roomId);
-		expect(size(result.current.meetings[mockMeeting0.roomId].participants)).toBe(
-			size(mockMeeting0.participants)
-		);
-		expect(result.current.meetings[mockMeeting0.roomId].createdAt).toBe(mockMeeting0.createdAt);
+		const meeting0 = result.current.meetings[mockMeeting0.roomId];
+		expect(meeting0).not.toBeNull();
+		expect(meeting0.id).toBe(mockMeeting0.id);
+		expect(meeting0.roomId).toBe(mockMeeting0.roomId);
+		expect(size(meeting0.participants)).toBe(size(mockMeeting0.participants));
+		expect(meeting0.createdAt).toBe(mockMeeting0.createdAt);
+		expect(meeting0.active).toBeTruthy();
+		expect(meeting0.startedAt).toBe(mockMeeting0.startedAt);
 	});
 
 	test('Combination of set components, add components, and remove components setters', () => {
@@ -85,6 +94,32 @@ describe('Test components slice', () => {
 
 		act(() => result.current.deleteMeeting(mockMeeting1.id));
 		expect(size(result.current.meetings)).toBe(2);
+	});
+
+	test('Start a meeting', () => {
+		const { result } = renderHook(() => useStore());
+		act(() => {
+			result.current.addMeeting(mockMeeting1);
+			result.current.startMeeting(mockMeeting1.id, '2022-08-25T18:25:29.961+02:00');
+		});
+
+		// Check store data
+		const meeting1 = result.current.meetings[mockMeeting1.roomId];
+		expect(meeting1.active).toBeTruthy();
+		expect(meeting1.startedAt).toBe('2022-08-25T18:25:29.961+02:00');
+	});
+
+	test('Stop a meeting', () => {
+		const { result } = renderHook(() => useStore());
+		act(() => {
+			result.current.addMeeting(mockMeeting0);
+			result.current.stopMeeting(mockMeeting0.id);
+		});
+
+		// Check store data
+		const meeting0 = result.current.meetings[mockMeeting0.roomId];
+		expect(meeting0.active).toBeFalsy();
+		expect(meeting0.startedAt).toBeUndefined();
 	});
 
 	describe('Waiting List', () => {
