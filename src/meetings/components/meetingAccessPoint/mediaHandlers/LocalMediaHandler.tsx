@@ -77,10 +77,8 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 							echoCancellation: true
 					  }
 					: { noiseSuppression: true, echoCancellation: true };
-				getAudioAndVideo(
-					audio ? kindOfAudioDevice : false,
-					video ? (videoId ? { deviceId: { exact: videoId } } : true) : false
-				)
+				const kindOfVideoDevice = videoId ? { deviceId: { exact: videoId } } : true;
+				getAudioAndVideo(audio ? kindOfAudioDevice : false, video ? kindOfVideoDevice : false)
 					.then((stream: MediaStream) => {
 						setStreamTrack(stream);
 						setMediaDevicesEnabled({ audio, video });
@@ -154,12 +152,12 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 	);
 
 	const videoSelected = useMemo(
-		() => find(mediaVideoList, ['value', selectedDevicesId.video]) || mediaVideoList[0],
+		() => find(mediaVideoList, ['value', selectedDevicesId.video]) ?? mediaVideoList[0],
 		[mediaVideoList, selectedDevicesId.video]
 	);
 
 	const audioSelected = useMemo(
-		() => find(mediaAudioList, ['value', selectedDevicesId.audio]) || mediaAudioList[0],
+		() => find(mediaAudioList, ['value', selectedDevicesId.audio]) ?? mediaAudioList[0],
 		[mediaAudioList, selectedDevicesId.audio]
 	);
 
