@@ -22,13 +22,18 @@
         "replyToSomeone": "Trả lời đến",
         "replyToYourself": "Trả lời đến chính bạn",
         "decline": "Từ chối",
-        "enter": "Vào"
+        "enter": "Vào",
+        "ok": "OK",
+        "cancel": "Huỷ"
     },
     "conversation": {
         "newMessage": "Thư mới",
         "chooseConversationDescription": "Chọn cuộc hội thoại để bắt đầu trò chuyện",
         "keepInTouchTitle": "Hãy giữ liên lạc!",
-        "newMessages": "Tin nhắn mới"
+        "newMessages": "Tin nhắn mới",
+        "selectionMode": {
+            "exit": "Thoát khỏi chế độ đã chọn"
+        }
     },
     "tooltip": {
         "room": {
@@ -54,7 +59,11 @@
     "attachments": {
         "addFromLocal": "Thêm vào từ thiết bị cục bộ",
         "attachLinkFiles": "Đính kèm liên kết công khai từ tệp",
-        "stopUpload": "Dừng tải lên"
+        "stopUpload": "Dừng tải lên",
+        "integrations": {
+            "chooseFile": "Chọn tệp (File)",
+            "shareLink": "Chia sẻ liên kết công khai"
+        }
     },
     "conversationInfo": {
         "actionAccordionTitle": "Thao tác",
@@ -95,15 +104,25 @@
     },
     "settings": {
         "notifications": {
-            "checkboxLabel": "Hiển thị cảnh báo màn hình",
-            "title": "Các thông báo"
+            "title": "Các thông báo",
+            "subtitle": {
+                "general": "Chung"
+            }
         },
         "profile": {
             "errorGenericResponse": "Có lỗi xảy ra, vui lòng thử lại",
             "title": "Hồ sơ"
         },
         "save": "Chỉnh sửa được lưu chính xác",
-        "title": "Cài đặt cuộc trò chuyện"
+        "title": "Cài đặt cuộc trò chuyện",
+        "meetings": {
+            "title": "Các cuộc họp",
+            "description": "Đặt tùy chọn âm thanh và video của bạn để tham gia cuộc họp. Bạn luôn có thể tùy chỉnh tùy chọn của mình trước khi tham gia bất kỳ cuộc họp nào."
+        },
+        "recording": {
+            "title": "đang ghi",
+            "inputLabel": "Thư mục đích"
+        }
     },
     "status": {
         "lastSeen": "Lần xem cuối {{lastSeen}}",
@@ -126,6 +145,38 @@
             "enableCamera": "Bật Camera",
             "enableMicrophone": "Bật microphone",
             "microphoneEnabled": "Đã bật Microphone"
+        },
+        "virtual": {
+            "deleteTooltip": "Xoá phòng ảo"
+        },
+        "sidebar": {
+            "waitingCaption": "Đang đợi để vào",
+            "tooltip": {
+                "waitingAccept": "Cho phép người dùng vào",
+                "waitingReject": "Từ chối người dùng"
+            },
+            "recording": {
+                "title": "đang ghi",
+                "description": "Bản ghi sẽ được lưu trong không gian tệp của người kiểm duyệt đã dừng nó."
+            }
+        },
+        "snackbar": {
+            "waitingInfo": "Dường như có ai trong phòng chờ"
+        },
+        "browserNotification": {
+            "waitingTitle": "Dường như có ai trong phòng chờ"
+        },
+        "waitingRoom": {
+            "hangUp": "Nhấc máy"
+        },
+        "recordingHint": "Cuộp họp đang được ghi",
+        "recordingStart": {
+            "failureSnackbar": "Không thể bắt đầu đăng ký, vui lòng liên hệ với quản trị viên hệ thống của bạn."
+        },
+        "recordingModal": {
+            "title": "Dừng ghi",
+            "description": "Bạn sẽ dừng ghi. Bạn có thể bắt đầu bản ghi mới bất cứ lúc nào.",
+            "inputLabel": "Tên bản ghi"
         }
     },
     "meetings": {
@@ -139,5 +190,8 @@
         }
     },
     "thanksForParticipating": "Cảm ơn bạn đã tham gia",
-    "tryLater": "Thử lại sau"
+    "tryLater": "Thử lại sau",
+    "snackbar": {
+        "mutedByModerator": "Bạn đã bị người kiểm duyệt tắt tiếng, hãy tự bật tiếng để nói"
+    }
 }

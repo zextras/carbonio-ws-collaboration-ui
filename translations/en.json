@@ -1,5 +1,4 @@
 {
-    "": "Error",
     "action": {
         "activateNotifications": "Activate notifications",
         "addAttachment": "Add attachment",
@@ -7,7 +6,6 @@
         "addNewMembers": "Add new members",
         "addNewMembersTo": "Add new members to {{roomName}}",
         "addSingleAttachment": "Add {{counter}} attachment",
-        "cancel": "Cancel",
         "clearHistory": "Clear history",
         "close": "Close",
         "copy": "Copy",
@@ -35,7 +33,8 @@
         "replyToYourself": "Reply to yourself",
         "scrollToBottom": "Scroll to bottom",
         "understood": "Understood",
-        "undo": "Undo"
+        "undo": "Undo",
+        "cancel": "Cancel"
     },
     "affiliationMessages": {
         "SomeoneElseCreatedOneToOne": "{{userName}} started a chat with you",
@@ -51,12 +50,12 @@
         "dragAndDrop": "Drag&Drop mode",
         "dropHereDescription": "Drop here your attachments to quickly add them to this chat",
         "errorUploadingFile": "Something went wrong uploading {{file}}",
+        "stopUpload": "Stop upload",
+        "uploadAborted": "Upload has been interrupted",
         "integrations": {
             "chooseFile": "Choose file",
             "shareLink": "Share public link"
-        },
-        "stopUpload": "Stop upload",
-        "uploadAborted": "Upload has been interrupted"
+        }
     },
     "chat": "Chat",
     "configurationMessages": {
@@ -67,7 +66,7 @@
         "roomTopicRemoved": "{{name}} removed {{roomName}}'s topic"
     },
     "conversation": {
-        "chooseConversationDescription": "Choose a conversation to start a chat",
+        "chooseConversationDescription": "Choose a chat to start a conversation",
         "emptyListDescription": "Chats and Groups will appear listed here",
         "emptyListTitle": "This list is empty",
         "keepInTouchTitle": "Let's keep in touch!",
@@ -76,9 +75,9 @@
         "newMessage": "New message",
         "newMessages": "New messages",
         "selectionMode": {
-            "exit": "Exit Selection Mode",
             "maxSelected": "The maximum number of messages that can be forwarded at the same time has been reached",
-            "multipleForward": "forward {{numberOfMessages}} messages"
+            "multipleForward": "forward {{numberOfMessages}} messages",
+            "exit": "Exit selection mode"
         }
     },
     "conversationFilter": {
@@ -128,37 +127,13 @@
     },
     "keepInTouchWithColleagues": "Keep in touch with your colleagues or join your groups' meeting rooms",
     "meeting": {
-        "activeMeetingTooltip": "There's an active meeting for this Conversation",
-        "browserNotification": {
-            "waitingMessage": "New user is waiting to enter the meeting",
-            "waitingTitle": "There seems to be someone in the Waiting Room"
-        },
+        "activeMeetingTooltip": "There's an active meeting for this Chat",
         "collapseChat": "Collapse chat",
         "collapseParticipantsMeetingTooltip": "Collapse participants list",
         "continueActiveSession": "Continue the meeting in the new window",
         "expandChat": "Expand chat",
         "expandParticipantsListTooltip": "Expand participants list",
         "extendChat": "Extend chat",
-        "infoPage": {
-            "description": {
-                "hangUp": "We look forward to seeing you participate in future meetings",
-                "meetingNotFound": "Please check the meeting link and try again",
-                "notAuthenticatedUser": "You cannot join the meeting if you are not authenticated with your account",
-                "rejected": "The moderators have decided to deny your access to the meeting"
-            },
-            "slogan": {
-                "hangUp": "Maybe next time",
-                "meetingNotFound": "Try later",
-                "notAuthenticatedUser": "login to access the meeting",
-                "rejected": "Maybe next time"
-            },
-            "title": {
-                "hangUp": "You hung up!",
-                "meetingNotFound": "The meeting you are looking for does not exist",
-                "notAuthenticatedUser": "You are not authenticated",
-                "rejected": "Your access has been refused"
-            }
-        },
         "interactions": {
             "cameraDisabled": "Camera disabled",
             "cameraEnabled": "Camera enabled",
@@ -172,10 +147,10 @@
             "enableMicrophone": "Enable microphone",
             "enableScreen": "Enable screen share",
             "gridView": "Grid view",
-            "leaveConfirmation": "Leave Meeting?",
             "leaveMeeting": "Leave Meeting",
             "microphoneDisabled": "Microphone disabled",
             "microphoneEnabled": "Microphone enabled",
+            "leaveConfirmation": "Leave meeting?",
             "playMic": "Start mic test",
             "stopMic": "Stop mic test"
         },
@@ -200,19 +175,7 @@
         "presentActiveSession": "There is another active session",
         "rejoinMeeting": "Rejoin meeting",
         "restartMeeting": "Restart meeting",
-        "scheduledMeetingLabel": "Your Virtual Rooms",
         "setInputDescription": "Set your input devices by choosing them from dropdown menu",
-        "sidebar": {
-            "tooltip": {
-                "waitingAccept": "Let user in",
-                "waitingReject": "Reject user"
-            },
-            "waitingCaption": "Waiting to enter",
-            "waitingList": "Waiting list"
-        },
-        "snackbar": {
-            "waitingInfo": "There seems to be someone in the waiting room"
-        },
         "startMeeting": "Start meeting",
         "startModal": {
             "audioAndVideoLoading": "Assets are loading",
@@ -222,32 +185,99 @@
         "tooltip": {
             "activeSessionTooltip": "You have an active session in this meeting"
         },
-        "virtual": {
-            "buttonLabel": "Your Virtual Rooms",
-            "copyLinkSnackbar": "Virtual Room's link copied",
-            "copyLinkTooltip": "Copy Virtual Room's link",
-            "copyTooltip": "Copy Virtual Room's link",
-            "createTooltip": "Create new Virtual Room",
-            "creationInput": "New Virtual Room’s name*",
-            "deleteModalDescription": "You are deleting this Virtual Room, if it has active meetings, it will be interrupted and no one will be able to access it anymore. Proceed?",
-            "deleteModalTitle": "Delete {{roomName}} Virtual Room",
-            "deleteSnackbar": "Virtual Room deleted successfully",
-            "deleteTooltip": "Delete Virtual Room",
-            "emptyState": "The Rooms you create will be shown here",
-            "invalidNameTooltip": "Invalid name",
-            "nameRequiredTooltip": "Virtual Room’s name is required"
-        },
         "waitingParticipants": "Waiting for participants to join…",
+        "virtual": {
+            "creationInput": "New Virtual Room’s name*",
+            "buttonLabel": "your virtual rooms",
+            "emptyState": "Virtual Rooms you create will be shown here.",
+            "deleteTooltip": "Delete Virtual Room",
+            "copyLinkTooltip": "Copy Virtual Room’s link",
+            "nameRequiredTooltip": "Virtual Room’s name is required",
+            "createTooltip": "Create new Virtual Room",
+            "invalidNameTooltip": "Invalid name",
+            "deleteModalDescription": "You are deleting this Virtual Room, if it has active meetings, it will be interrupted and no one will be able to access it anymore. Proceed?",
+            "copyLinkSnackbar": "Virtual Room’s link copied",
+            "deleteSnackbar": "Virtual Room deleted successfully",
+            "deleteModalTitle": "Delete {{roomName}} Virtual Room"
+        },
+        "sidebar": {
+            "waitingList": "Waiting list",
+            "waitingCaption": "Waiting to enter",
+            "tooltip": {
+                "waitingAccept": "Let user in",
+                "waitingReject": "Reject user"
+            },
+            "recording": {
+                "title": "Recording",
+                "moderatorInfo": "has started recording",
+                "action": {
+                    "start": "START",
+                    "stop": "STOP"
+                },
+                "description": "The recording will be saved in the Files space of the moderator who stopped it."
+            }
+        },
+        "snackbar": {
+            "waitingInfo": "There seems to be someone in the Waiting Room"
+        },
+        "browserNotification": {
+            "waitingTitle": "There seems to be someone in the Waiting Room",
+            "waitingMessage": "New user is waiting to enter the meeting"
+        },
         "waitingRoom": {
-            "hangUp": "Hang up",
-            "nextStep": "A moderator will let you into the meeting as soon as possible.",
-            "ready": "Ready to participate",
-            "readyCaption": "Everything is set! Make yourself comfortable.",
-            "readyHint": "You will enter the meeting in a few moments",
-            "setInputs": "Set your input devices by choosing them from dropdown menu",
             "title": "How do you want to join {{meetingName}} meeting?",
-            "welcomeCaption": "When you are ready, get comfortable.",
-            "welcomeHint": "Click on “READY TO PARTICIPATE” to enter the meeting"
+            "setInputs": "Set your input devices by choosing them from dropdown menu",
+            "welcomeHint": "Click on “READY TO PARTICIPATE” to enter the meeting",
+            "readyHint": "You will enter the meeting in a few moments",
+            "hangUp": "Hang up",
+            "ready": "Ready to participate",
+            "welcomeCaption": "When you're ready, get comfortable.",
+            "nextStep": "A moderator will let you into the meeting as soon as possible.",
+            "readyCaption": "Everything is set! Make yourself comfortable."
+        },
+        "infoPage": {
+            "title": {
+                "hangUp": "You hung up!",
+                "rejected": "You access has been refused",
+                "meetingNotFound": "The meeting you are looking for does not exist",
+                "notAuthenticatedUser": "You are not authenticated"
+            },
+            "slogan": {
+                "hangUp": "Maybe next time",
+                "rejected": "Maybe next time",
+                "meetingNotFound": "try later",
+                "notAuthenticatedUser": "LOGIN TO ACCESS THE MEETING"
+            },
+            "description": {
+                "hangUp": "We look forward to seeing you participate in future meetings",
+                "rejected": "The moderators have decided to deny your access to the meeting",
+                "meetingNotFound": "Please check the meeting link and try again",
+                "notAuthenticatedUser": "You cannot join the meeting if you are not authenticated with your account"
+            }
+        },
+        "recordingHint": "This meeting is being recorded",
+        "recordingStart": {
+            "successSnackbar": {
+                "participants": "{{userName}} started the registration of this meeting",
+                "starter": "You have started the registration of this meeting"
+            },
+            "failureSnackbar": "It is not possible to start the registration, please contact your system administrator."
+        },
+        "recordingModal": {
+            "title": "Stop recording",
+            "description": "You are going to stop the recording. You can start a new one at any time.",
+            "inputLabel": "Recording Name",
+            "caption": "The recording will be saved in {{folderName}} folder on Files. Go to Settings > Chats > Recording to change the destination folder.",
+            "confirmationAction": "STOP",
+            "requiredNameError": "The recording file name is required",
+            "exceededCharsError": "The recording file name must not exceed 128 characters"
+        },
+        "recordingStop": {
+            "successSnackbar": {
+                "stopper": "You will find {{recordingName}} in {{folderName}} as soon as it is available",
+                "participants": "{{userName}} stopped the registration of this meeting"
+            },
+            "failureSnackbar": "It is not possible to stop the registration, please contact your system administrator."
         }
     },
     "meetings": {
@@ -264,7 +294,7 @@
         "originallySentBy": "Originally sent by:"
     },
     "modal": {
-        "clearHistoryDescription": "You're cleaning your conversation history, please note that this action is irreversible. The history will be deleted for you and not for the other members.",
+        "clearHistoryDescription": "You're cleaning your chat history, please note that this action is irreversible. The history will be deleted for you and not for the other members.",
         "creation": {
             "addUserLimit": {
                 "limitReached": "You have selected the maximum number of members for a group",
@@ -296,9 +326,9 @@
         "leaveGroupLabel": "Are you sure to leave this Group?",
         "leaveRoom": "Leave Room",
         "leaveRoomLabel": "Are you sure to leave this Room?",
-        "muteForAllDescription": "By muting the user, all the participants won't hear the user anymore. Only muted user can be unmute himself. Proceed?",
         "removeMember": "Remove member",
-        "showPreviousConversationHistory": "Show previous conversation history"
+        "showPreviousConversationHistory": "Show previous chat history",
+        "muteForAllDescription": "By muting the user, all participants will no longer hear the user. Only the muted user can unmute. Proceed?"
     },
     "notification": {
         "meeting": {
@@ -315,19 +345,19 @@
     },
     "settings": {
         "notifications": {
-            "checkbox": {
-                "desktop": "Allow Desktop notifications",
-                "waitingRoom": "Allow notifications"
-            },
             "description": "Set your preferences for Chats notifications.",
+            "title": "Notifications",
             "subtitle": {
                 "general": "General",
                 "waitingRoom": "Waiting Room access notifications"
             },
-            "title": "Notifications",
             "toggleSounds": {
                 "desktop": "Enable Desktop notification sounds",
                 "waitingRoom": "Enable notification sounds"
+            },
+            "checkbox": {
+                "waitingRoom": "Allow notifications",
+                "desktop": "Allow Desktop notifications"
             }
         },
         "profile": {
@@ -347,7 +377,18 @@
             "updatedPictureCorrectly": "New avatar has been successfully uploaded"
         },
         "save": "Edits saved correctly",
-        "title": "Chats settings"
+        "title": "Chats settings",
+        "meetings": {
+            "title": "Meetings",
+            "description": "Set your audio and video preferences to enter the meetings. You can always customize your preferences before joining every meeting."
+        },
+        "recording": {
+            "title": "Recording",
+            "description": "Set a custom folder where to save the recordings of the meetings you stop.",
+            "inputLabel": "Destination folder",
+            "browseAction": "BROWSE",
+            "resetAction": "RESET"
+        }
     },
     "snackbar": {
         "mutedByModerator": "You've been muted by a moderator, unmute yourself to speak"
@@ -357,11 +398,11 @@
         "goToPrivateChat": "Go to private chat to send a personal message",
         "isTyping": "is typing…",
         "lastSeen": "Last seen {{lastSeen}}",
-        "nameAndNumberOfPeopleAreTyping": "{{userName}} and {{numberOfUsers}} others are typing...",
-        "numberOfPeopleAreTyping": "{{numberOfUsers}} people are typing...",
         "offline": "Offline",
         "online": "Online",
-        "you": " You"
+        "you": "You",
+        "nameAndNumberOfPeopleAreTyping": "{{userName}} and {{numberOfUsers}} others are typing…",
+        "numberOfPeopleAreTyping": "{{numberOfUsers}} people are typing…"
     },
     "thanksForParticipating": "Thanks for participating",
     "titlePlaceholder": "Your Group's title",
@@ -378,7 +419,7 @@
         "forwardedMessage": "Message forwarded from another chat",
         "goToPrivateChat": "Go to private chat",
         "iAmModerator": "You're a moderator",
-        "leaveAndDelete": "Leave and delete the conversation",
+        "leaveAndDelete": "Leave and delete the chat",
         "leaveConversation": "Leave Group",
         "memberIsModerator": "This member is a moderator",
         "messageActions": "Message actions",
@@ -402,7 +443,7 @@
         "scrollUp": "Scroll up",
         "selectEmoji": "Select emoji",
         "sendMessage": "Send message",
-        "showConversationList": "Show conversations list",
+        "showConversationList": "Show chat list",
         "topOfList": "Top of list",
         "unpinVideo": "Unpin video",
         "uploadAttachment": "Upload an attachment",

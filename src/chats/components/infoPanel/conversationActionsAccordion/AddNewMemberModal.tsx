@@ -45,7 +45,7 @@ const AddNewMemberModal: FC<AddNewMemberProps> = ({
 	});
 	const showConversationHistoryLabel = t(
 		'modal.showPreviousConversationHistory',
-		'Show previous conversation history'
+		'Show previous chat history'
 	);
 	const addNewMemberButtonLabel = t('action.addNewMembers', 'Add new members');
 	const closeLabel = t('action.close', 'Close');

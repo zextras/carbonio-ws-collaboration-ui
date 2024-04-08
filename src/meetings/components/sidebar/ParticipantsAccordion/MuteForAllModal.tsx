@@ -21,7 +21,7 @@ const MuteForAllModal: FC<muteForAllModalProps> = ({ isOpen, closeModal, muteFor
 	const closeLabel = t('action.close', 'Close');
 	const muteForAllDescription = t(
 		'modal.muteForAllDescription',
-		"By muting the user, all the participants won't hear the user anymore. Only muted user can be unmute himself. Proceed?"
+		'By muting the user, all participants will no longer hear the user. Only the muted user can unmute. Proceed?'
 	);
 
 	const muteForAllAction = useCallback(() => {
