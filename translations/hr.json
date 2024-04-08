@@ -19,7 +19,9 @@
         "reply": "Odgovor",
         "replyToSomeone": "Odgovori",
         "replyToYourself": "Odgovori sebi",
-        "undo": "Vrati"
+        "undo": "Vrati",
+        "ok": "U redu",
+        "cancel": "Odustani"
     },
     "meeting": {
         "interactions": {
@@ -87,17 +89,31 @@
     },
     "settings": {
         "notifications": {
-            "checkboxLabel": "Obavijesti na radnoj površini",
-            "title": "Obavijesti"
+            "title": "Obavijesti",
+            "subtitle": {
+                "general": "Općenito"
+            }
         },
         "profile": {
             "errorGenericResponse": "Nešto je pošlo po zlu. Pokušaj ponovo",
             "title": "Profil"
+        },
+        "meetings": {
+            "title": "Sastanci",
+            "description": "Postavi svoje audio i video postavke za ulazak na sastanke. Uvijek možeš prilagoditi svoje postavke prije nego što se pridružiš sastanku."
         }
     },
     "status": {
         "lastSeen": "Zadnja aktivnost {{lastSeen}}",
         "offline": "Izvan mreže",
         "online": "Na mreži"
+    },
+    "snackbar": {
+        "mutedByModerator": "Utišani ste od strane moderatora, za razgovor ponovo uključi mikrofon"
+    },
+    "attachments": {
+        "integrations": {
+            "chooseFile": "Odaberi datoteku"
+        }
     }
 }

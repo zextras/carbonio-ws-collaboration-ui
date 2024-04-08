@@ -47,18 +47,27 @@
         "undo": "Urungkan",
         "decline": "Tolak",
         "enter": "Masuk",
-        "joinMeeting": "Gabung ke rapat"
+        "joinMeeting": "Gabung ke rapat",
+        "ok": "Ok",
+        "cancel": "Batal"
     },
     "attachments": {
         "addFromLocal": "Tambahkan dari lokal",
         "attachLinkFiles": "Lampirkan tautan publik dari Files",
-        "stopUpload": "Hentikan unggahan"
+        "stopUpload": "Hentikan unggahan",
+        "integrations": {
+            "chooseFile": "Pilih file",
+            "shareLink": "Bagikan tautan publik"
+        }
     },
     "conversation": {
         "chooseConversationDescription": "Pilih percakapan untuk memulai obrolan",
         "keepInTouchTitle": "Tetap terhubung!",
         "newMessage": "Pesan baru",
-        "newMessages": "pesan baru"
+        "newMessages": "pesan baru",
+        "selectionMode": {
+            "exit": "Keluar dari mode pemilihan"
+        }
     },
     "conversationInfo": {
         "info": "Info",
@@ -101,15 +110,25 @@
     },
     "settings": {
         "notifications": {
-            "checkboxLabel": "Notifikasi Desktop",
-            "title": "Notifikasi"
+            "title": "Notifikasi",
+            "subtitle": {
+                "general": "Umum"
+            }
         },
         "profile": {
             "errorGenericResponse": "Terjadi kesalahan. Harap coba lagi",
             "title": "Profil"
         },
         "save": "Hasil edit disimpan dengan benar",
-        "title": "Pengaturan Chats"
+        "title": "Pengaturan Chats",
+        "meetings": {
+            "description": "Tetapkan preferensi audio dan video untuk masuk ke rapat. Anda dapat menyesuaikan preferensi kapan saja sebelum bergabung ke setiap rapat.",
+            "title": "Rapat"
+        },
+        "recording": {
+            "inputLabel": "Folder tujuan",
+            "title": "Rekaman"
+        }
     },
     "status": {
         "lastSeen": "Terakhir dilihat {{lastSeen}}",
@@ -132,6 +151,38 @@
         },
         "newMeetingNotification": {
             "sendMessage": "Kirim pesan"
+        },
+        "virtual": {
+            "deleteTooltip": "Hapus Ruang Virtual"
+        },
+        "sidebar": {
+            "waitingCaption": "Menunggu masuk",
+            "tooltip": {
+                "waitingAccept": "Izinkan pengguna masuk",
+                "waitingReject": "Tolak pengguna"
+            },
+            "recording": {
+                "title": "Rekaman",
+                "description": "Rekaman akan disimpan di ruang Files moderator yang menghentikannya."
+            }
+        },
+        "snackbar": {
+            "waitingInfo": "Tampaknya ada seseorang di Ruang Tunggu"
+        },
+        "browserNotification": {
+            "waitingTitle": "Tampaknya ada seseorang di Ruang Tunggu"
+        },
+        "waitingRoom": {
+            "hangUp": "Tutup"
+        },
+        "recordingHint": "Rapat ini direkam",
+        "recordingStart": {
+            "failureSnackbar": "Registrasi tak bisa dimulai. Harap hubungi administrator sistem."
+        },
+        "recordingModal": {
+            "title": "Hentikan rekaman",
+            "description": "Anda akan menghentikan rekaman. Anda bisa memulai yang baru kapan saja.",
+            "inputLabel": "Nama Rekaman"
         }
     },
     "thanksForParticipating": "Terima kasih telah berpartisipasi",
@@ -146,5 +197,8 @@
         "meeting": {
             "ended": "Rapat Berakhir"
         }
+    },
+    "snackbar": {
+        "mutedByModerator": "Suara Anda dimatikan oleh moderator. Nyalakan suara Anda sendiri untuk berbicara"
     }
 }

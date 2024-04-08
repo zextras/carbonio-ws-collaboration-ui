@@ -3,7 +3,8 @@
         "forward": "Eteenpäin",
         "preview": "Esikatselu",
         "removeUser": "Poista",
-        "reply": "Vastaa"
+        "reply": "Vastaa",
+        "ok": "Ok"
     },
     "attachments": {
         "addFromLocal": "Lisää paikallisesta"
