@@ -228,7 +228,7 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 		} else {
 			updateListOfDevices();
 		}
-	}, [mediaDevicesEnabled.audio, updateListOfDevices, mediaDevicesEnabled.video]);
+	}, [mediaDevicesEnabled, updateListOfDevices]);
 
 	useEffect(() => {
 		navigator.mediaDevices.addEventListener('devicechange', updateListOfDevices);

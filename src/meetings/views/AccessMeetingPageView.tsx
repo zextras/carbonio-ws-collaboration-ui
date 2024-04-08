@@ -13,7 +13,6 @@ import { find } from 'lodash';
 import { MEETINGS_PATH } from '../../constants/appConstants';
 import useRouting, { PAGE_INFO_TYPE } from '../../hooks/useRouting';
 import { MeetingsApi } from '../../network';
-import { getRoomIdFromMeeting } from '../../store/selectors/MeetingSelectors';
 import useStore from '../../store/Store';
 import { MeetingType } from '../../types/network/models/meetingBeTypes';
 import AccessMeetingPage from '../components/meetingAccessPoint/AccessMeetingPage';
@@ -22,8 +21,6 @@ const AccessMeetingPageView = (): ReactElement => {
 	const meetingId = useMemo(() => document.location.pathname.split(MEETINGS_PATH)[1], []);
 
 	const chatsBeNetworkStatus = useStore(({ connections }) => connections.status.chats_be);
-	const roomId = useStore((store) => getRoomIdFromMeeting(store, meetingId) || ``);
-
 	const [hasUserDirectAccess, setHasUserDirectAccess] = useState<boolean | undefined>(undefined);
 	const [meetingName, setMeetingName] = useState<string>('');
 
@@ -66,12 +63,7 @@ const AccessMeetingPageView = (): ReactElement => {
 
 	return (
 		<Container background="gray0">
-			<AccessMeetingPage
-				hasUserDirectAccess={hasUserDirectAccess}
-				meetingId={meetingId}
-				roomId={roomId}
-				meetingName={meetingName}
-			/>
+			<AccessMeetingPage hasUserDirectAccess={hasUserDirectAccess} meetingName={meetingName} />
 		</Container>
 	);
 };

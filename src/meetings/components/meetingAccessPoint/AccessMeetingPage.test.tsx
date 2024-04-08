@@ -100,12 +100,7 @@ const setupGroupWithBeStatusUndefined = (): { user: UserEvent; store: RootStore 
 	});
 	useParams.mockReturnValue({ meetingId: groupMeeting.id });
 	const { user } = setup(
-		<AccessMeetingPage
-			meetingId={groupMeeting.id}
-			meetingName={groupMeeting.name}
-			hasUserDirectAccess={canAccessMeeting}
-			roomId={groupRoom.id}
-		/>
+		<AccessMeetingPage meetingName={groupMeeting.name} hasUserDirectAccess={canAccessMeeting} />
 	);
 	return { user, store: result.current };
 };
@@ -124,12 +119,7 @@ const setupBasicGroup = (): { user: UserEvent; store: RootStore } => {
 	});
 	useParams.mockReturnValue({ meetingId: groupMeeting.id });
 	const { user } = setup(
-		<AccessMeetingPage
-			meetingId={groupMeeting.id}
-			meetingName={groupMeeting.name}
-			hasUserDirectAccess={canAccessMeeting}
-			roomId={groupRoom.id}
-		/>
+		<AccessMeetingPage meetingName={groupMeeting.name} hasUserDirectAccess={canAccessMeeting} />
 	);
 	return { user, store: result.current };
 };
@@ -154,12 +144,7 @@ const setupForWaitingRoom = (): { user: UserEvent; store: RootStore } => {
 	});
 	useParams.mockReturnValue({ meetingId: groupForWaitingRoom.id });
 	const { user } = setup(
-		<AccessMeetingPage
-			meetingId={meetingForWaitingRoom.id}
-			meetingName={meetingForWaitingRoom.name}
-			hasUserDirectAccess={false}
-			roomId={groupForWaitingRoom.id}
-		/>
+		<AccessMeetingPage meetingName={meetingForWaitingRoom.name} hasUserDirectAccess={false} />
 	);
 	return { user, store: result.current };
 };

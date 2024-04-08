@@ -3,26 +3,18 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 
-import {
-	Button,
-	Container,
-	Icon,
-	IconButton,
-	Padding,
-	Row,
-	Text,
-	Tooltip
-} from '@zextras/carbonio-design-system';
+import { Container, Button, Tooltip, IconButton, Text } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import AccessTile from './mediaHandlers/AccessTile';
-import LocalMediaHandler from './mediaHandlers/LocalMediaHandler';
+import AccessMeetingPageMediaSection from './AccessMeetingPageMediaSection';
+import { MEETINGS_PATH } from '../../../constants/appConstants';
 import useEventListener, { EventName } from '../../../hooks/useEventListener';
 import useRouting, { PAGE_INFO_TYPE } from '../../../hooks/useRouting';
 import { MeetingsApi } from '../../../network';
+import { getRoomIdFromMeeting } from '../../../store/selectors/MeetingSelectors';
 import { getRoomNameSelector, getRoomTypeSelector } from '../../../store/selectors/RoomsSelectors';
 import useStore from '../../../store/Store';
 import { RoomType } from '../../../types/store/RoomTypes';
@@ -31,8 +23,6 @@ import { calcScaleDivisor } from '../../../utils/styleUtils';
 
 type AccessMeetingPageProps = {
 	hasUserDirectAccess: boolean | undefined;
-	meetingId: string;
-	roomId: string;
 	meetingName: string;
 };
 
@@ -41,21 +31,13 @@ const CustomContainer = styled(Container)`
 	left: 4rem;
 	bottom: 3rem;
 `;
-const AccessMeetingPage: FC<AccessMeetingPageProps> = ({
-	hasUserDirectAccess,
-	roomId,
-	meetingName,
-	meetingId
-}) => {
+const AccessMeetingPage: FC<AccessMeetingPageProps> = ({ hasUserDirectAccess, meetingName }) => {
 	const [t] = useTranslation();
+	const meetingId = useMemo(() => document.location.pathname.split(MEETINGS_PATH)[1], []);
+	const roomId = useStore((store) => getRoomIdFromMeeting(store, meetingId) || ``);
 	const conversationTitle = useStore((store) => getRoomNameSelector(store, roomId));
 
-	const playMicLabel = t('meeting.interactions.playMic', 'Start mic test');
-	const stopMicLabel = t('meeting.interactions.stopMic', 'Stop mic test');
-	const readyToParticipateLabel = t('meeting.waitingRoom.ready', 'Ready to participate');
-	const enter = t('action.enter', 'Enter');
 	const leave = t('action.leave', 'Leave');
-	const readyLabel = t('meeting.waitingRoom.userIsReady', "You're ready!");
 	const leaveMeetingLabel = t('meeting.interactions.leaveMeeting', 'Leave Meeting');
 	const groupTitle = t(
 		'meeting.startModal.enterRoomMeetingTitle',
@@ -67,34 +49,9 @@ const AccessMeetingPage: FC<AccessMeetingPageProps> = ({
 		`Start meeting with ${conversationTitle}`,
 		{ meetingTitle: conversationTitle }
 	);
-	const howToJoinMeeting = t(
-		'meeting.waitingRoom.title',
-		`How do you want to join ${meetingName || conversationTitle} meeting?`,
-		{ meetingName: meetingName || conversationTitle }
-	);
-	const setInputDevicesLabel = t(
-		'meeting.waitingRoom.setInputs',
-		'Set your input devices by choosing them from dropdown menu'
-	);
 	const clickOnReadyLabel = t(
 		'meeting.waitingRoom.welcomeHint',
 		'Click on “READY TO PARTICIPATE” to enter the meeting'
-	);
-	const areYouReadyLabel = t(
-		'meeting.waitingRoom.readyCaption',
-		'Everything is set! Make yourself comfortable.'
-	);
-	const whenYouAreReadyLabel = t(
-		'meeting.waitingRoom.welcomeCaption',
-		'When you are ready, get comfortable.'
-	);
-	const aModeratorWillLetYouEnterLabel = t(
-		'meeting.waitingRoom.nextStep',
-		'A moderator will let you into the meeting as soon as possible.'
-	);
-	const enterButtonDisabledTooltip = t(
-		'meeting.startModal.audioAndVideoLoading',
-		'Assets are loading'
 	);
 	const enterInAFewMomentsLabel = t(
 		'meeting.waitingRoom.readyHint',
@@ -102,27 +59,13 @@ const AccessMeetingPage: FC<AccessMeetingPageProps> = ({
 	);
 
 	const roomType = useStore((store) => getRoomTypeSelector(store, roomId));
-	const chatsBeNetworkStatus = useStore(({ connections }) => connections.status.chats_be);
-	const websocketNetworkStatus = useStore(({ connections }) => connections.status.websocket);
 
 	const [streamTrack, setStreamTrack] = useState<MediaStream | null>(null);
-	const [enterButtonIsEnabled, setEnterButtonIsEnabled] = useState<boolean>(false);
 	const [pageWidth, setPageWidth] = useState(window.innerWidth);
 	const [wrapperWidth, setWrapperWidth] = useState<number>((window.innerWidth * 0.33) / 16);
-	const [videoPlayerTestMuted, setVideoPlayerTestMuted] = useState<boolean>(true);
 	const [userIsReady, setUserIsReady] = useState<boolean>(false);
-	const [selectedDevicesId, setSelectedDevicesId] = useState<{
-		audio: string | undefined;
-		video: string | undefined;
-	}>({ audio: undefined, video: undefined });
-	const [mediaDevicesEnabled, setMediaDevicesEnabled] = useState<{
-		audio: boolean;
-		video: boolean;
-	}>({ audio: false, video: false });
 
-	const { goToInfoPage, goToMeetingPage } = useRouting();
-
-	const videoStreamRef = useRef<HTMLVideoElement>(null);
+	const { goToInfoPage } = useRouting();
 
 	const accessTitle = useMemo(() => {
 		const roomTypeTitle = roomType === RoomType.ONE_TO_ONE ? oneToOneTitle : groupTitle;
@@ -144,66 +87,6 @@ const AccessMeetingPage: FC<AccessMeetingPageProps> = ({
 		[pageWidth]
 	);
 
-	const handleResizeAlignment = useMemo(
-		() => (handlePageOrientation === 'vertical' ? 'center' : 'flex-start'),
-		[handlePageOrientation]
-	);
-
-	const areNetworksUp = useMemo(() => {
-		if (chatsBeNetworkStatus !== undefined && websocketNetworkStatus !== undefined) {
-			return chatsBeNetworkStatus && websocketNetworkStatus;
-		}
-		return false;
-	}, [chatsBeNetworkStatus, websocketNetworkStatus]);
-
-	const onToggleAudioTest = useCallback(() => {
-		setVideoPlayerTestMuted((prevState) => !prevState);
-	}, []);
-
-	const enterMeeting = useCallback(() => {
-		MeetingsApi.enterMeeting(
-			roomId,
-			{
-				videoStreamEnabled: mediaDevicesEnabled.video,
-				audioStreamEnabled: mediaDevicesEnabled.audio
-			},
-			{ audioDevice: selectedDevicesId.audio, videoDevice: selectedDevicesId.video }
-		)
-			.then((meetingId) => {
-				freeMediaResources(streamTrack);
-				goToMeetingPage(meetingId);
-			})
-			.catch((err) => console.error(err, 'Error on joinMeeting'));
-	}, [
-		streamTrack,
-		roomId,
-		mediaDevicesEnabled.video,
-		mediaDevicesEnabled.audio,
-		selectedDevicesId.audio,
-		selectedDevicesId.video,
-		goToMeetingPage
-	]);
-
-	// handle waiting room flow and events
-	const waitingRoomHandler = useCallback(() => {
-		MeetingsApi.joinMeeting(
-			meetingId,
-			{
-				videoStreamEnabled: mediaDevicesEnabled.video,
-				audioStreamEnabled: mediaDevicesEnabled.audio
-			},
-			{ audioDevice: selectedDevicesId.audio, videoDevice: selectedDevicesId.video }
-		)
-			.then((resp) => {
-				if (resp.status === 'WAITING') setUserIsReady(true);
-				if (resp.status === 'ACCEPTED') {
-					freeMediaResources(streamTrack);
-					goToMeetingPage(meetingId);
-				}
-			})
-			.catch((err) => console.error(err, 'Error on waitingRoomHandler'));
-	}, [goToMeetingPage, mediaDevicesEnabled, meetingId, selectedDevicesId, streamTrack]);
-
 	const handleRejected = useCallback(() => {
 		freeMediaResources(streamTrack);
 		goToInfoPage(PAGE_INFO_TYPE.NEXT_TIME_PAGE);
@@ -214,8 +97,10 @@ const AccessMeetingPage: FC<AccessMeetingPageProps> = ({
 	}, [goToInfoPage]);
 
 	const handleMeetingEnded = useCallback(() => {
-		goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED);
-	}, [goToInfoPage]);
+		if (!hasUserDirectAccess) {
+			goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED);
+		}
+	}, [goToInfoPage, hasUserDirectAccess]);
 
 	const handleLeave = useCallback(() => {
 		freeMediaResources(streamTrack);
@@ -223,7 +108,6 @@ const AccessMeetingPage: FC<AccessMeetingPageProps> = ({
 		goToInfoPage(PAGE_INFO_TYPE.HANG_UP_PAGE);
 	}, [goToInfoPage, meetingId, streamTrack, userIsReady]);
 
-	useEventListener(EventName.MEETING_USER_ACCEPTED, waitingRoomHandler);
 	useEventListener(EventName.MEETING_USER_REJECTED, handleRejected);
 	useEventListener(EventName.MEETING_WAITING_PARTICIPANT_CLASHED, handleRejoin);
 	useEventListener(EventName.MEETING_STOPPED, handleMeetingEnded);
@@ -252,100 +136,6 @@ const AccessMeetingPage: FC<AccessMeetingPageProps> = ({
 		setPageWidth(window.innerWidth);
 		setWrapperWidth((window.innerWidth * 0.33) / calcScaleDivisor());
 	}, []);
-
-	// handle change of video stream
-	useEffect(() => {
-		if (videoStreamRef.current) {
-			videoStreamRef.current.srcObject = streamTrack;
-			setEnterButtonIsEnabled(true);
-		}
-	}, [streamTrack, mediaDevicesEnabled.audio, mediaDevicesEnabled.video]);
-
-	const enterButton = useMemo(() => {
-		if (hasUserDirectAccess === undefined) return undefined;
-		if (hasUserDirectAccess)
-			return (
-				<Tooltip
-					label={enterButtonDisabledTooltip}
-					disabled={areNetworksUp && enterButtonIsEnabled}
-				>
-					<Button
-						data-testid="enterMeetingButton"
-						width="fill"
-						label={enter}
-						onClick={enterMeeting}
-						disabled={!(areNetworksUp && enterButtonIsEnabled)}
-					/>
-				</Tooltip>
-			);
-		if (!userIsReady)
-			return (
-				<Button
-					backgroundColor="success"
-					label={readyToParticipateLabel}
-					icon="CheckmarkOutline"
-					iconPlacement="right"
-					onClick={waitingRoomHandler}
-					width="fill"
-					disabled={!enterButtonIsEnabled}
-				/>
-			);
-		return (
-			<Container orientation="horizontal" gap="0.5rem" mainAlignment="flex-start">
-				<Icon icon="CheckmarkCircle2" color="success" size="large" />
-				<Text weight="bold" size="extralarge">
-					{readyLabel}
-				</Text>
-			</Container>
-		);
-	}, [
-		areNetworksUp,
-		enter,
-		enterButtonDisabledTooltip,
-		enterButtonIsEnabled,
-		enterMeeting,
-		hasUserDirectAccess,
-		waitingRoomHandler,
-		readyLabel,
-		readyToParticipateLabel,
-		userIsReady
-	]);
-
-	const buttonsWrapper = useMemo(
-		() => (
-			<Container
-				height="fit"
-				orientation="horizontal"
-				gap="1rem"
-				mainAlignment={handleResizeAlignment}
-			>
-				<Row width={`50%`} minWidth="14rem">
-					<Button
-						width="fill"
-						type="outlined"
-						backgroundColor="text"
-						icon="Mic"
-						iconPlacement="right"
-						label={videoPlayerTestMuted ? playMicLabel : stopMicLabel}
-						onClick={onToggleAudioTest}
-						disabled={!mediaDevicesEnabled.audio}
-					/>
-				</Row>
-				<Row width={`50%`} minWidth="14rem">
-					{enterButton}
-				</Row>
-			</Container>
-		),
-		[
-			enterButton,
-			handleResizeAlignment,
-			mediaDevicesEnabled.audio,
-			onToggleAudioTest,
-			playMicLabel,
-			stopMicLabel,
-			videoPlayerTestMuted
-		]
-	);
 
 	const leaveButton = useMemo(() => {
 		if (hasUserDirectAccess === undefined) {
@@ -377,67 +167,22 @@ const AccessMeetingPage: FC<AccessMeetingPageProps> = ({
 		);
 	}, [handleLeave, handlePageOrientation, hasUserDirectAccess, leave, leaveMeetingLabel]);
 
-	const waitingRoomLabels = useMemo(() => {
-		if (hasUserDirectAccess === undefined) return undefined;
-		return (
-			!hasUserDirectAccess && (
-				<Container height="fit" crossAlignment={handleResizeAlignment}>
-					<Text>{userIsReady ? areYouReadyLabel : whenYouAreReadyLabel}</Text>
-					<Text>{aModeratorWillLetYouEnterLabel}</Text>
-				</Container>
-			)
-		);
-	}, [
-		aModeratorWillLetYouEnterLabel,
-		areYouReadyLabel,
-		handleResizeAlignment,
-		hasUserDirectAccess,
-		userIsReady,
-		whenYouAreReadyLabel
-	]);
-
 	return (
 		<Container>
 			<Container mainAlignment="center" crossAlignment="center" gap="1.5rem">
 				<Text size="extralarge" weight="bold">
 					{accessTitle}
 				</Text>
-				<Container
-					orientation={handlePageOrientation}
-					height="fit"
-					width="fit"
-					mainAlignment="center"
-					crossAlignment="center"
-					gap="2rem"
-				>
-					<Container height="fit" width={`${wrapperWidth}rem`} minWidth="35rem">
-						<AccessTile
-							videoStreamRef={videoStreamRef}
-							videoPlayerTestMuted={videoPlayerTestMuted}
-							mediaDevicesEnabled={mediaDevicesEnabled}
-						/>
-					</Container>
-					<Container mainAlignment="flex-start" crossAlignment="flex-start" gap="1rem">
-						<Container mainAlignment="center" crossAlignment="center" gap="2rem">
-							<Container height="fit" crossAlignment={handleResizeAlignment}>
-								<Text size="large">{howToJoinMeeting}</Text>
-								<Padding bottom="0.25rem" />
-								<Text>{setInputDevicesLabel}</Text>
-							</Container>
-							<LocalMediaHandler
-								streamTrack={streamTrack}
-								setStreamTrack={setStreamTrack}
-								setEnterButtonIsEnabled={setEnterButtonIsEnabled}
-								selectedDevicesId={selectedDevicesId}
-								setSelectedDevicesId={setSelectedDevicesId}
-								mediaDevicesEnabled={mediaDevicesEnabled}
-								setMediaDevicesEnabled={setMediaDevicesEnabled}
-							/>
-							{buttonsWrapper}
-						</Container>
-						{waitingRoomLabels}
-					</Container>
-				</Container>
+				<AccessMeetingPageMediaSection
+					streamTrack={streamTrack}
+					setStreamTrack={setStreamTrack}
+					hasUserDirectAccess={hasUserDirectAccess}
+					handlePageOrientation={handlePageOrientation}
+					userIsReady={userIsReady}
+					setUserIsReady={setUserIsReady}
+					meetingName={meetingName}
+					wrapperWidth={wrapperWidth}
+				/>
 			</Container>
 			{leaveButton}
 		</Container>

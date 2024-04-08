@@ -247,7 +247,7 @@
         "startMeeting": "Start meeting",
         "startModal": {
             "audioAndVideoLoading": "Assets are loading",
-            "enterOneToOneMeetingTitle": "Start meeting with {{meetingTitle}}",
+            "enterOneToOneMeetingTitle": "Join meeting with {{meetingTitle}}",
             "enterRoomMeetingTitle": "Participate to {{meetingTitle}} meeting"
         },
         "tooltip": {
