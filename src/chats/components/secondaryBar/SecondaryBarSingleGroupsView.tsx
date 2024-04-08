@@ -62,7 +62,7 @@ const VirtualRoomContainer = styled(Container)`
 
 const SecondaryBarSingleGroupsView: React.FC<SecondaryBarSingleGroupsView> = ({ expanded }) => {
 	const [t] = useTranslation();
-	const showConversationList = t('tooltip.showConversationList', 'Show conversations list');
+	const showConversationList = t('tooltip.showConversationList', 'Show chat list');
 	const noMatchLabel = t('participantsList.noMatch', 'There are no items that match this search');
 
 	const canVideoCall = useStore((store) => getCapability(store, CapabilityType.CAN_VIDEO_CALL));

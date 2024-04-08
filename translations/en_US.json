@@ -19,7 +19,9 @@
         "replyToSomeone": "Reply to",
         "replyToYourself": "Reply to yourself",
         "undo": "Undo",
-        "enter": "Enter"
+        "enter": "Enter",
+        "ok": "Ok",
+        "cancel": "Cancel"
     },
     "settings": {
         "profile": {
@@ -27,8 +29,14 @@
             "errorGenericResponse": "Something went wrong. Please retry"
         },
         "notifications": {
-            "checkboxLabel": "Desktop notifications",
-            "title": "Notifications"
+            "title": "Notifications",
+            "subtitle": {
+                "general": "General"
+            }
+        },
+        "meetings": {
+            "title": "Meetings",
+            "description": "Set your audio and video preferences to enter the meetings. You can always customize your preferences before joining every meeting."
         }
     },
     "conversation": {
@@ -60,7 +68,8 @@
         "creation": {
             "newGroup": "New Group"
         },
-        "showPreviousConversationHistory": "Show previous conversation history"
+        "showPreviousConversationHistory": "Show previous conversation history",
+        "leaveGroup": "Leave conversation"
     },
     "status": {
         "lastSeen": "Last seen {{lastSeen}}",
@@ -88,5 +97,8 @@
         "interactions": {
             "yourCamIsDisabled": "Your camera is off"
         }
+    },
+    "snackbar": {
+        "mutedByModerator": "You've been muted by a moderator, unmute yourself to speak"
     }
 }
