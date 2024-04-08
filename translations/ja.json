@@ -3,7 +3,10 @@
         "keepInTouchTitle": "連絡を取り合いましょう！",
         "newMessage": "新しいメッセージ",
         "chooseConversationDescription": "会話を選択してチャットを開始します",
-        "newMessages": "新しいメッセージ"
+        "newMessages": "新しいメッセージ",
+        "selectionMode": {
+            "exit": "選択モードを終了する"
+        }
     },
     "conversationInfo": {
         "actionAccordionTitle": "操作",
@@ -25,15 +28,25 @@
     },
     "settings": {
         "notifications": {
-            "checkboxLabel": "デスクトップ通知",
-            "title": "通知"
+            "title": "通知",
+            "subtitle": {
+                "general": "一般設定"
+            }
         },
         "profile": {
             "errorGenericResponse": "エラーが発生しました。再度お試しください",
             "title": "プロファイル"
         },
         "save": "編集内容が保存されました",
-        "title": "チャットの設定"
+        "title": "チャットの設定",
+        "meetings": {
+            "title": "会議",
+            "description": "オーディオとビデオを設定して、会議に参加しましょう。あらゆる会議に参加する前に、いつでも設定をカスタマイズできます。"
+        },
+        "recording": {
+            "title": "録音中",
+            "inputLabel": "宛先フォルダ"
+        }
     },
     "tooltip": {
         "goToPrivateChat": "プライベートチャットに進む",
@@ -83,12 +96,18 @@
         "undo": "元に戻す",
         "decline": "拒否する",
         "enter": "参加する",
-        "joinMeeting": "会議に参加する"
+        "joinMeeting": "会議に参加する",
+        "ok": "Ok",
+        "cancel": "キャンセル"
     },
     "attachments": {
         "addFromLocal": "ローカルから追加する",
         "attachLinkFiles": "ファイルからパブリックリンクを添付する",
-        "stopUpload": "アップロードを停止する"
+        "stopUpload": "アップロードを停止する",
+        "integrations": {
+            "chooseFile": "ファイルを選ぶ",
+            "shareLink": "パブリックリンクを共有する"
+        }
     },
     "date": {
         "yesterday": "昨日"
@@ -133,6 +152,38 @@
         "joinMeeting": "会議に参加する",
         "newMeetingNotification": {
             "sendMessage": "メッセージを送信する"
+        },
+        "virtual": {
+            "deleteTooltip": "バーチャルルームバーチャル"
+        },
+        "sidebar": {
+            "waitingCaption": "入室するのを待っています",
+            "tooltip": {
+                "waitingAccept": "ユーザーをさせる",
+                "waitingReject": "ユーザーを拒否する"
+            },
+            "recording": {
+                "title": "録音中",
+                "description": "録音は、停止したモデレーターのファイルスペースに保存されます。"
+            }
+        },
+        "snackbar": {
+            "waitingInfo": "待合室に誰かいるようです"
+        },
+        "browserNotification": {
+            "waitingTitle": "待合室に誰かいるようです"
+        },
+        "waitingRoom": {
+            "hangUp": "電話を切る"
+        },
+        "recordingHint": "この会議は記録されています",
+        "recordingStart": {
+            "failureSnackbar": "登録を開始することはできません。システム管理者に連絡してください。"
+        },
+        "recordingModal": {
+            "title": "録音を停止する",
+            "description": "録音を停止します。 いつでも新らたに録音開始できます。",
+            "inputLabel": "録音名"
         }
     },
     "meetings": {
@@ -146,5 +197,8 @@
         }
     },
     "thanksForParticipating": "参加していただきありがとうございます",
-    "tryLater": "後で試す"
+    "tryLater": "後で試す",
+    "snackbar": {
+        "mutedByModerator": "モデレーターによってミュートされています。話すにはミュートを解除してください"
+    }
 }

@@ -43,7 +43,7 @@ const DefaultUserView: FC<newUserViewProps> = ({ roomsIds }): ReactElement => {
 	const keepInTouchTitle = t('conversation.keepInTouchTitle', "Let's keep in touch!");
 	const chooseConversationDescription = t(
 		'conversation.chooseConversationDescription',
-		'Choose a conversation to start a chat'
+		'Choose a chat to start a conversation'
 	);
 
 	return (

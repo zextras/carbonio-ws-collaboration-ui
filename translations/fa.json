@@ -8,7 +8,9 @@
         "download": "دانلود",
         "forward": "ارسال",
         "preview": "پیش نمایش",
-        "reply": "پاسخ"
+        "reply": "پاسخ",
+        "ok": "تصویب",
+        "cancel": "لغو"
     },
     "conversationInfo": {
         "actionAccordionTitle": "اقدامات",
