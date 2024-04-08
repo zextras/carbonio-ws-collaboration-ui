@@ -53,8 +53,8 @@ describe('Bubble Contextual Menu - other user messages', () => {
 		expect(forwardAction).toBeInTheDocument();
 		const editAction = screen.queryByText(/Edit/i);
 		expect(editAction).not.toBeInTheDocument();
-		const deleteAction = screen.queryByText(/Delete/i);
-		expect(deleteAction).not.toBeInTheDocument();
+		const deleteForAllAction = screen.queryByText(/Delete for all/i);
+		expect(deleteForAllAction).not.toBeInTheDocument();
 		const downloadAction = screen.queryByText(/Download/i);
 		expect(downloadAction).not.toBeInTheDocument();
 		const previewAction = screen.queryByText(/Preview/i);
@@ -83,8 +83,8 @@ describe('Bubble Contextual Menu - other user messages', () => {
 		expect(forwardAction).toBeInTheDocument();
 		const editAction = screen.queryByText(/Edit/i);
 		expect(editAction).not.toBeInTheDocument();
-		const deleteAction = screen.queryByText(/Delete/i);
-		expect(deleteAction).not.toBeInTheDocument();
+		const deleteForAllAction = screen.queryByText(/Delete for all/i);
+		expect(deleteForAllAction).not.toBeInTheDocument();
 		const downloadAction = screen.queryByText(/Download/i);
 		expect(downloadAction).not.toBeInTheDocument();
 		const previewAction = screen.queryByText(/Preview/i);
@@ -112,8 +112,8 @@ describe('Bubble Contextual Menu - other user messages', () => {
 		expect(forwardAction).toBeInTheDocument();
 		const editAction = screen.queryByText(/Edit/i);
 		expect(editAction).not.toBeInTheDocument();
-		const deleteAction = screen.queryByText(/Delete/i);
-		expect(deleteAction).not.toBeInTheDocument();
+		const deleteForAllAction = screen.queryByText(/Delete for all/i);
+		expect(deleteForAllAction).not.toBeInTheDocument();
 		const downloadAction = screen.queryByText(/Download/i);
 		expect(downloadAction).not.toBeInTheDocument();
 		const previewAction = screen.queryByText(/Preview/i);
@@ -141,8 +141,8 @@ describe('Bubble Contextual Menu - other user messages', () => {
 		expect(forwardAction).toBeInTheDocument();
 		const editAction = screen.queryByText(/Edit/i);
 		expect(editAction).not.toBeInTheDocument();
-		const deleteAction = screen.queryByText(/Delete/i);
-		expect(deleteAction).not.toBeInTheDocument();
+		const deleteForAllAction = screen.queryByText(/Delete for all/i);
+		expect(deleteForAllAction).not.toBeInTheDocument();
 		const downloadAction = screen.queryByText(/Download/i);
 		expect(downloadAction).toBeInTheDocument();
 		const previewAction = screen.queryByText(/Preview/i);
@@ -220,8 +220,8 @@ describe('Bubble Contextual Menu - my messages', () => {
 		expect(forwardAction).toBeInTheDocument();
 		const editAction = screen.queryByText(/Edit/i);
 		expect(editAction).toBeInTheDocument();
-		const deleteAction = screen.getByText(/Delete/i);
-		expect(deleteAction).toBeInTheDocument();
+		const deleteForAllAction = screen.getByText(/Delete for all/i);
+		expect(deleteForAllAction).toBeInTheDocument();
 		const downloadAction = screen.queryByText(/Download/i);
 		expect(downloadAction).not.toBeInTheDocument();
 		const previewAction = screen.queryByText(/Preview/i);
@@ -252,8 +252,8 @@ describe('Bubble Contextual Menu - my messages', () => {
 		expect(forwardAction).toBeInTheDocument();
 		const editAction = screen.queryByText(/Edit/i);
 		expect(editAction).toBeInTheDocument();
-		const deleteAction = screen.getByText(/Delete/i);
-		expect(deleteAction).toBeInTheDocument();
+		const deleteForAllAction = screen.getByText(/Delete for all/i);
+		expect(deleteForAllAction).toBeInTheDocument();
 		const downloadAction = screen.queryByText(/Download/i);
 		expect(downloadAction).not.toBeInTheDocument();
 		const previewAction = screen.queryByText(/Preview/i);
@@ -283,8 +283,8 @@ describe('Bubble Contextual Menu - my messages', () => {
 		expect(forwardAction).toBeInTheDocument();
 		const editAction = screen.queryByText(/Edit/i);
 		expect(editAction).not.toBeInTheDocument();
-		const deleteAction = screen.queryByTestId(/Delete/i);
-		expect(deleteAction).not.toBeInTheDocument();
+		const deleteForAllAction = screen.queryByTestId(/Delete for all/i);
+		expect(deleteForAllAction).not.toBeInTheDocument();
 		const downloadAction = screen.queryByText(/Download/i);
 		expect(downloadAction).not.toBeInTheDocument();
 		const previewAction = screen.queryByText(/Preview/i);
@@ -314,15 +314,15 @@ describe('Bubble Contextual Menu - my messages', () => {
 		expect(forwardAction).toBeInTheDocument();
 		const editAction = screen.queryByText(/Edit/i);
 		expect(editAction).toBeInTheDocument();
-		const deleteAction = screen.queryByText(/Delete/i);
-		expect(deleteAction).toBeInTheDocument();
+		const deleteForAllAction = screen.queryByText(/Delete for all/i);
+		expect(deleteForAllAction).toBeInTheDocument();
 		const downloadAction = screen.queryByText(/Download/i);
 		expect(downloadAction).toBeInTheDocument();
 		const previewAction = screen.queryByText(/Preview/i);
 		expect(previewAction).toBeInTheDocument();
 	});
 
-	test('if that message is being edited, the delete action should not be present', async () => {
+	test('if that message is being edited, the delete for all action should not be present', async () => {
 		const simpleTextMessage: TextMessage = createMockTextMessage({
 			roomId: mockedRoom.id,
 			from: mySessionId,
@@ -346,7 +346,7 @@ describe('Bubble Contextual Menu - my messages', () => {
 		const arrowButton = screen.getByTestId(iconArrowIosDownward);
 		await user.click(arrowButton);
 
-		expect(screen.queryByText(/Delete/i)).not.toBeInTheDocument();
+		expect(screen.queryByText(/Delete for all/i)).not.toBeInTheDocument();
 	});
 
 	test('if that message is being replied, the delete action should not be present', async () => {
@@ -373,7 +373,7 @@ describe('Bubble Contextual Menu - my messages', () => {
 		const arrowButton = screen.getByTestId(iconArrowIosDownward);
 		await user.click(arrowButton);
 
-		expect(screen.queryByText(/Delete/i)).not.toBeInTheDocument();
+		expect(screen.queryByText(/Delete for all/i)).not.toBeInTheDocument();
 	});
 
 	test('if forward mode is active, the forward action should not be present', async () => {
