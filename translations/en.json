@@ -152,13 +152,14 @@
                 "rejected": "Maybe next time"
             },
             "title": {
-                "hangUp": "You hung up!",
+                "hangUp": "You left the waiting room",
                 "meetingNotFound": "The meeting you are looking for does not exist",
                 "notAuthenticatedUser": "You are not authenticated",
                 "rejected": "You access has been refused"
             }
         },
         "interactions": {
+            "camDevice": "Camera device",
             "cameraDisabled": "Camera disabled",
             "cameraEnabled": "Camera enabled",
             "cinemaView": "Cinema view",
@@ -173,6 +174,7 @@
             "gridView": "Grid view",
             "leaveConfirmation": "Leave meeting?",
             "leaveMeeting": "Leave Meeting",
+            "micDevice": "Microphone device",
             "microphoneDisabled": "Microphone disabled",
             "microphoneEnabled": "Microphone enabled",
             "playMic": "Start mic test",

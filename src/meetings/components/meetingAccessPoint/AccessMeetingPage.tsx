@@ -87,6 +87,12 @@ const AccessMeetingPage: FC<AccessMeetingPageProps> = ({ hasUserDirectAccess, me
 		[pageWidth]
 	);
 
+	// resize handling
+	const handleResize = useCallback(() => {
+		setPageWidth(window.innerWidth);
+		setWrapperWidth((window.innerWidth * 0.33) / calcScaleDivisor());
+	}, []);
+
 	const handleRejected = useCallback(() => {
 		freeMediaResources(streamTrack);
 		goToInfoPage(PAGE_INFO_TYPE.NEXT_TIME_PAGE);
@@ -98,6 +104,7 @@ const AccessMeetingPage: FC<AccessMeetingPageProps> = ({ hasUserDirectAccess, me
 
 	const handleMeetingEnded = useCallback(() => {
 		if (!hasUserDirectAccess) {
+			console.log('AAA');
 			goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED);
 		}
 	}, [goToInfoPage, hasUserDirectAccess]);
@@ -119,12 +126,6 @@ const AccessMeetingPage: FC<AccessMeetingPageProps> = ({ hasUserDirectAccess, me
 			window.parent.removeEventListener('beforeunload', handleLeave);
 		};
 	}, [handleLeave]);
-
-	// resize handling
-	const handleResize = useCallback(() => {
-		setPageWidth(window.innerWidth);
-		setWrapperWidth((window.innerWidth * 0.33) / calcScaleDivisor());
-	}, []);
 
 	useEffect(() => {
 		window.addEventListener('resize', handleResize);

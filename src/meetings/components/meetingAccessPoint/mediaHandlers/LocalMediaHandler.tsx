@@ -47,6 +47,8 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 	const enableCamLabel = t('meeting.interactions.enableCamera', 'Enable camera');
 	const disableMicLabel = t('meeting.interactions.disableMicrophone', 'Disable microphone');
 	const enableMicLabel = t('meeting.interactions.enableMicrophone', 'Enable microphone');
+	const camDeviceLabel = t('meeting.interactions.camDevice', 'Camera device');
+	const micDeviceLabel = t('meeting.interactions.micDevice', 'Microphone device');
 
 	const [audioMediaList, setAudioMediaList] = useState<[] | MediaDeviceInfo[]>([]);
 	const [videoMediaList, setVideoMediaList] = useState<[] | MediaDeviceInfo[]>([]);
@@ -253,6 +255,7 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 				</Tooltip>
 				<Padding left="1rem" />
 				<Select
+					label={camDeviceLabel}
 					data-testid={'camera-select'}
 					items={mediaVideoList}
 					onChange={onChangeVideoSource}
@@ -260,7 +263,7 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 					multiple={false}
 					placement="bottom-end"
 					showCheckbox={false}
-					background={'gray0'}
+					background={'text'}
 					disablePortal
 				/>
 			</Container>
@@ -279,6 +282,7 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 				</Tooltip>
 				<Padding left="1rem" />
 				<Select
+					label={micDeviceLabel}
 					data-testid={'audio-select'}
 					items={mediaAudioList}
 					onChange={onChangeAudioSource}
@@ -286,7 +290,7 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 					multiple={false}
 					placement="bottom-end"
 					showCheckbox={false}
-					background={'gray0'}
+					background={'text'}
 					disablePortal
 				/>
 			</Container>

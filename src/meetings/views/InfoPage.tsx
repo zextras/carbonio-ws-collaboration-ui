@@ -66,7 +66,7 @@ const InfoPage = (): ReactElement => {
 			);
 			break;
 		case PAGE_INFO_TYPE.HANG_UP_PAGE:
-			titleLabel = t('meeting.infoPage.title.hangUp', 'You hung up!');
+			titleLabel = t('meeting.infoPage.title.hangUp', 'You left the waiting room');
 			centralLabel = t('meeting.infoPage.slogan.hangUp', 'Maybe next time');
 			descriptionLowerLabel = t(
 				'meeting.infoPage.description.hangUp',
