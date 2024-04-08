@@ -233,7 +233,7 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 
 	const replyMessageAction = useCallback(() => {
 		unsetForwardList(message.roomId);
-		if (referenceMessage?.actionType !== messageActionType.REPLY) {
+		if (referenceMessage?.actionType === messageActionType.EDIT) {
 			setDraftMessage(message.roomId, false, '');
 		}
 		setReferenceMessage(
