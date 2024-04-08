@@ -6,13 +6,19 @@
         "errorUploadingFile": "{{file}} अपलोड करने में कोई गड़बड़ी हुई",
         "uploadAborted": "अपलोड रुक गया है",
         "dragAndDrop": "खींचें और छोड़ें मोड",
-        "dropHereDescription": "इस चैट में तुरंत जोड़ने के लिए अपने अटैचमेंट यहाँ छोड़ें"
+        "dropHereDescription": "इस चैट में तुरंत जोड़ने के लिए अपने अटैचमेंट यहाँ छोड़ें",
+        "integrations": {
+            "chooseFile": "फाइल चुनें",
+            "shareLink": "पब्लिक लिंक शेयर करें"
+        }
     },
     "settings": {
         "notifications": {
             "title": "अधिसूचनाएं",
-            "checkboxLabel": "डेस्कटॉप अधिसूचनाएं",
-            "description": "चैट सूचनाओं के लिए अपने फेव्रेट सेट करें।"
+            "description": "चैट सूचनाओं के लिए अपने फेव्रेट सेट करें।",
+            "subtitle": {
+                "general": "सामान्य"
+            }
         },
         "profile": {
             "errorGenericResponse": "कुछ गड़बड़ हुई। दोबारा कोशिश करें",
@@ -31,6 +37,14 @@
             "deletedImageCorrectly": "ग्रुप अवतार को ओरिजिनल में रीसेट कर दिया गया है",
             "deletedUserImageCorrectly": "अवतार को ओरिजिनल में रीसेट कर दिया गया है",
             "pictureSizeTooLarge": "कुछ गड़बड़ हुई, याद रखें कि ग्रुप अवतार की फोटो के लिए अधिकतम साइज़ {{size}}kb है"
+        },
+        "meetings": {
+            "description": "मीटिंग्स में आने के लिए अपने औडियो और विडियो प्रेफेरेंस सेट करें। आप कोई भी मीटिंग जॉइन करने से पहले अपने प्रेफेरेंस कस्टमाइज़ कर सकते हैं।",
+            "title": "मीटिंग्स"
+        },
+        "recording": {
+            "inputLabel": "गंतव्य फोल्डर",
+            "title": "रिकॉर्डिंग"
         }
     },
     "action": {
@@ -64,7 +78,9 @@
         "scrollToBottom": "स्क्रॉल करके नीचे जाएँ",
         "decline": "अस्वीकार करना",
         "enter": "एंटर करें",
-        "joinMeeting": "मीटिंग में शामिल हों"
+        "joinMeeting": "मीटिंग में शामिल हों",
+        "ok": "ठीक है",
+        "cancel": "कैंसल करें"
     },
     "conversation": {
         "chooseConversationDescription": "कोई चैट शुरू करने के लिए कोई बात-चीत चुनें",
@@ -74,7 +90,10 @@
         "emptyListTitle": "यह लिस्ट खाली है",
         "mockCreateChatDescription": "जानकारी और अटैचमेंट शेयर करके अपने ऑफिस के लोगों से बात-चीत करें और साथ में काम करें",
         "mockCreateChatTitle": "बनाएँ बटन का उपयोग करके एक नई चैट बनाएं",
-        "newMessages": "नए मैसेज"
+        "newMessages": "नए मैसेज",
+        "selectionMode": {
+            "exit": "सिलेक्शन मोड से बाहर जाएँ"
+        }
     },
     "conversationInfo": {
         "actionAccordionTitle": "एक्शन्स",
@@ -229,6 +248,38 @@
         "newMeetingNotification": {
             "sendMessage": "मैसेज भेजें",
             "writeAMessageToSendIt": "भेजने के लिए कोई मैसेज लिखें"
+        },
+        "virtual": {
+            "deleteTooltip": "Virtual Room डिलीट करें"
+        },
+        "sidebar": {
+            "waitingCaption": "अंदर आने के इंतज़ार में",
+            "tooltip": {
+                "waitingAccept": "यूज़र को अंदर आने दें",
+                "waitingReject": "यूज़र को रिजेक्ट करें"
+            },
+            "recording": {
+                "title": "रिकॉर्डिंग",
+                "description": "रिकॉर्डिंग को उस मॉडरेटर के Files स्पेस में सेव किया जाएगा जिसने इसे रोका था।"
+            }
+        },
+        "snackbar": {
+            "waitingInfo": "ऐसा लग रहा है कि Waiting Room में कोई है"
+        },
+        "browserNotification": {
+            "waitingTitle": "ऐसा लग रहा है कि Waiting Room में कोई है"
+        },
+        "waitingRoom": {
+            "hangUp": "हैंग अप करें"
+        },
+        "recordingHint": "मीटिंग रिकॉर्ड हो रही है",
+        "recordingModal": {
+            "title": "रिकॉर्डिंग बंद करें",
+            "description": "आप रिकॉर्डिंग रोकने जा रहे हैं। आप कभी भी नई रिकॉर्डिंग शुरू कर सकते हैं।",
+            "inputLabel": "रिकॉर्डिंग नाम"
+        },
+        "recordingStart": {
+            "failureSnackbar": "रजिस्ट्रेशन फिर से शुरू करना संभव नहीं है, कृपया अपने सिस्टम एडमिनिस्ट्रेटर से संपर्क करें।"
         }
     },
     "external": {
@@ -246,5 +297,8 @@
         }
     },
     "thanksForParticipating": "भाग लेने के लिए थैंक्स",
-    "tryLater": "बाद में कोशिश करें"
+    "tryLater": "बाद में कोशिश करें",
+    "snackbar": {
+        "mutedByModerator": "मॉडरेटर ने आपका माइक बंद कर दिया है, बोलने के लिए अपना माइक चालू करें"
+    }
 }

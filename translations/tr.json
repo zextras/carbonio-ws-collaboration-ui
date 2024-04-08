@@ -32,7 +32,9 @@
         "joinMeeting": "Toplantıya katıl",
         "enter": "Giriş",
         "declineAll": "Tümünü reddet",
-        "understood": "Anlaşıldı"
+        "understood": "Anlaşıldı",
+        "ok": "Tamam",
+        "cancel": "İptal"
     },
     "attachments": {
         "addFromLocal": "Lokalden ekle",
@@ -41,7 +43,11 @@
         "dragAndDrop": "Sürükle ve Bırak Modu",
         "dropHereDescription": "Bu sohbete hızlı bir şekilde eklemek için eklerinizi buraya bırakın",
         "errorUploadingFile": "{{file}} yüklenirken bir sorun oluştu",
-        "uploadAborted": "Yükleme kesintiye uğradı"
+        "uploadAborted": "Yükleme kesintiye uğradı",
+        "integrations": {
+            "chooseFile": "Dosya seçin",
+            "shareLink": "Genel bağlantı paylaş"
+        }
     },
     "conversation": {
         "chooseConversationDescription": "Bir sohbet başlatmak için görüşme seçin",
@@ -51,7 +57,10 @@
         "emptyListTitle": "Bu liste boş",
         "mockCreateChatDescription": "Bilgi ve ekleri paylaşarak çalışma arkadaşlarınızla etkileşim ve iletişim kurun, işbirliği yapın",
         "mockCreateChatTitle": "Oluştur düğmesini kullanarak yeni bir sohbet oluşturun",
-        "newMessages": "Yeni mesajlar"
+        "newMessages": "Yeni mesajlar",
+        "selectionMode": {
+            "exit": "Seçme modundan çık"
+        }
     },
     "conversationInfo": {
         "actionAccordionTitle": "Eylemler",
@@ -86,12 +95,15 @@
             "wsc": "WSC ile bağlantı kurulurken bir hata oluştu",
             "xmpp": "XMPP ile bağlantı kurulurken bir hata oluştu",
             "websocket": "WEBSOCKET ile bağlantı kurulurken bir hata oluştu"
-        }
+        },
+        "networkProblems": "Bu modülü kullanırken sorunlar olabilir, lütfen sayfayı yenilemeyi deneyin."
     },
     "message": {
         "deletedMessage": "Silinmiş mesaj",
         "draft": "taslak",
-        "edited": "düzenlendi"
+        "edited": "düzenlendi",
+        "forwardedMultipleTimes": "Birden çok kez iletildi",
+        "originallySentBy": "İlk gönderen:"
     },
     "modal": {
         "deleteRoom": "Odayı Sil",
@@ -112,7 +124,7 @@
             }
         },
         "deleteGroup": "Grubu Sil",
-        "deleteGroupLabel": "Bu Grubu silmek istediğinizden emin misiniz?",
+        "deleteGroupLabel": "Bu eylem tüm Grup üyelerini etkiler ve geri alınamaz. Bu Grubu silmek istediğinizden emin misiniz?",
         "deleteMessageTitle": "Seçili mesaj silinsin mi?",
         "deleteRoomLabel": "Bu Oda'yı silmek istediğinizden emin misiniz?",
         "forward": {
@@ -126,7 +138,8 @@
         "leaveRoom": "Odadan Çık",
         "leaveRoomLabel": "Odadan ayrılmak istediğinize emin misiniz?",
         "deleteMessageTitleDescription": "Mesajı siliyorsunuz, artık kullanılamayacak",
-        "clearHistoryDescription": "Konuşma geçmişinizi temizlemek üzeresiniz, bu işlemin geri alınamayacağını unutmayın. Geçmiş bilgisi sizin için silinecek, diğer üyelerin geçmiş bilgisi silinmeyecek."
+        "clearHistoryDescription": "Konuşma geçmişinizi temizlemek üzeresiniz, bu işlemin geri alınamayacağını unutmayın. Geçmiş bilgisi sizin için silinecek, diğer üyelerin geçmiş bilgisi silinmeyecek.",
+        "deleteGroupMeetingOngoingLabel": "Şu anda aktif bir toplantı var. Grubu silerseniz toplantı uyarı vermeden sonlandırılacak."
     },
     "participantsList": {
         "closeSearch": "Aramayı kapat",
@@ -138,9 +151,11 @@
     },
     "settings": {
         "notifications": {
-            "checkboxLabel": "Masaüstü bildirimleri",
             "title": "Bildirimler",
-            "description": "Sohbet bildirimleri için tercihlerinizi belirleyin."
+            "description": "Sohbet bildirimleri için tercihlerinizi belirleyin.",
+            "subtitle": {
+                "general": "Genel"
+            }
         },
         "profile": {
             "errorGenericResponse": "Bir sorun oluştu. Lütfen tekrar deneyin",
@@ -159,6 +174,14 @@
             "deletedUserImageCorrectly": "Profil resmi başarıyla orijinaline sıfırlandı",
             "pictureSizeTooLarge": "Bir sorun oluştu, Grup profil resmi için maksimum boyutun {{size}}kb olduğunu unutmayın",
             "updatedPictureCorrectly": "Yeni profil resmi başarıyla yüklendi"
+        },
+        "meetings": {
+            "title": "Toplantılar",
+            "description": "Toplantılara katılırken kullanacağınız ses ve görüntü tercihlerinizi ayarlayın. Her toplantıya katılmadan önce tercihlerinizi değiştirebilirsiniz."
+        },
+        "recording": {
+            "inputLabel": "Hedef klasör",
+            "title": "Kayıt yapılıyor"
         }
     },
     "status": {
@@ -166,7 +189,9 @@
         "offline": "Çevrimdışı",
         "online": "Çevrim içi",
         "areTyping": "yazıyorlar…",
-        "isTyping": "yazıyor…"
+        "isTyping": "yazıyor…",
+        "goToPrivateChat": "Kişisel mesaj göndermek için özel sohbete gidin",
+        "you": " Siz"
     },
     "tooltip": {
         "clear": "Temizle",
@@ -211,11 +236,12 @@
         "bottomOfList": "Listenin sonu",
         "collapseSidebar": "Kenar çubuğunu daralt",
         "expandSidebar": "Kenar Çubuğunu genişlet",
-        "participantAlreadyMuted": "Bu katılımcı zaten sessize alınmış",
         "removeToAddNewOne": "Yeni üye eklemek için birini kaldırın",
         "scrollDown": "Aşağı kaydır",
         "scrollUp": "Yukarı kaydır",
-        "topOfList": "Listenin başı"
+        "topOfList": "Listenin başı",
+        "participantMuted": "Bu katılımcının sesi kapatıldı",
+        "youAreAlreadyMuted": "Sesiniz kapatıldı"
     },
     "affiliationMessages": {
         "memberAdded": "{{userName}}, {{roomName}} odasına eklendi",
@@ -223,13 +249,14 @@
         "SomeoneElseCreatedOneToOne": "{{userName}} sizinle sohbet etmeye başladı",
         "oneToOneCreated": "Yeni Sohbet oluşturuldu!",
         "youCreatedOneToOne": "{{userName}} ile Sohbet başlattınız",
-        "memberRemoved": "{{userName}}, {{roomName}} odasından kaldırıldı"
+        "memberRemoved": "{{userName}} artık grubun bir üyesi değil"
     },
     "configurationMessages": {
         "roomPictureDeleted": "{{name}} varsayılan {{roomName}} resmini geri yükledi",
         "roomPictureUpdated": "{{name}}, {{roomName}} resmini değiştirdi",
         "roomTopicChanged": "{{name}}, {{roomName}} odasının \"<i>{{topicName}}</i>\" konusunu değiştirdi",
-        "roomNameChanged": "{{name}}, \"<i>{{roomName}}</i>\" içinde bu Grubun başlığını değiştirdi"
+        "roomNameChanged": "{{name}}, \"<i>{{roomName}}</i>\" içinde bu Grubun başlığını değiştirdi",
+        "roomTopicRemoved": "{{name}}, {{roomName}}adlı odanın konusunu kaldırdı"
     },
     "conversationFilter": {
         "closeTooltip": "Filtreyi Kapat",
@@ -258,7 +285,10 @@
             "leaveMeeting": "Toplantıdan Ayrıl",
             "microphoneDisabled": "Mikrofon kapalı",
             "playMic": "Mikrofon testini başlat",
-            "stopMic": "Mikrofon testini durdur"
+            "stopMic": "Mikrofon testini durdur",
+            "disableFullScreen": "Tam ekran modunu devre dışı bırak",
+            "enableFullScreen": "Tam ekran modunu etkinleştir",
+            "leaveConfirmation": "Toplantıdan çıkılsın mı?"
         },
         "joinMeeting": "Toplantıya katıl",
         "newMeetingNotification": {
@@ -267,7 +297,7 @@
             "sendAQuickMessage": "Hızlı mesaj gönderin",
             "userIsInvitingYou": "<strong>{{name}}</strong> sizi davet ediyor"
         },
-        "activeMeetingTooltip": "Bu Grup için aktif bir toplantı var",
+        "activeMeetingTooltip": "Bu Sohbet için aktif bir toplantı var",
         "collapseChat": "Sohbeti daralt",
         "collapseParticipantsMeetingTooltip": "Katılımcı listesini daralt",
         "expandChat": "Sohbeti genişlet",
@@ -288,7 +318,81 @@
             "enterOneToOneMeetingTitle": "{{meetingTitle}} ile toplantıya başla",
             "enterRoomMeetingTitle": "{{meetingTitle}} toplantısına katıl"
         },
-        "waitingParticipants": "Katılımcıların katılması bekleniyor…"
+        "waitingParticipants": "Katılımcıların katılması bekleniyor…",
+        "virtual": {
+            "deleteTooltip": "Sanal Odayı sil",
+            "createTooltip": "Yeni Sanal Oda Oluştur",
+            "invalidNameTooltip": "Geçersiz ad",
+            "deleteSnackbar": "Sanal Oda başarıyla silindi",
+            "buttonLabel": "sanal odalarınız",
+            "emptyState": "Oluşturduğunuz Sanal Odalar burada gösterilecektir.",
+            "copyLinkTooltip": "Sanal Oda'nın bağlantısını kopyalayın",
+            "nameRequiredTooltip": "Sanal Oda'nın adı gereklidir",
+            "copyLinkSnackbar": "Sanal Oda'nın bağlantısı kopyalandı",
+            "deleteModalTitle": "{{roomName}} Sanal Odayı Sil",
+            "creationInput": "Yeni Sanal Oda'nın adı*",
+            "deleteModalDescription": "Bu Sanal Odayı siliyorsunuz, aktif toplantılar varsa kesintiye uğrayacak ve artık kimse erişemeyecek. Devam edilsin mi?"
+        },
+        "continueActiveSession": "Toplantıya yeni pencerede devam edin",
+        "openedInAnotherWindow": "Bu toplantı zaten başka bir pencerede açık",
+        "presentActiveSession": "Başka bir aktif oturum var",
+        "rejoinMeeting": "Toplantıya yeniden katıl",
+        "tooltip": {
+            "activeSessionTooltip": "Bu toplantıda etkin bir oturumunuz var"
+        },
+        "restartMeeting": "Toplantıyı yeniden başlat",
+        "noMoreActiveSession": "Aynı toplantının birden fazla etkin oturumu olamaz",
+        "noTwoActiveSession": "Aynı toplantının iki etkin oturumu bir arada bulunamaz",
+        "sidebar": {
+            "waitingCaption": "Girmek için bekleniyor",
+            "tooltip": {
+                "waitingAccept": "Kullanıcı girişine izin ver",
+                "waitingReject": "Kullanıcıyı reddet"
+            },
+            "waitingList": "Bekleme listesi",
+            "recording": {
+                "title": "Kayıt yapılıyor",
+                "description": "Ses Kayıt dosyası kayıt işlemini durduran moderatörün Dosyalar alanına kaydedilecek."
+            }
+        },
+        "snackbar": {
+            "waitingInfo": "Bekleme Odasında bekleyen kişi var"
+        },
+        "browserNotification": {
+            "waitingTitle": "Bekleme Odasında bekleyen kişi var",
+            "waitingMessage": "Yeni kullanıcı toplantıya girmek için bekliyor"
+        },
+        "waitingRoom": {
+            "setInputs": "Giriş cihazlarınızı açılır menüden seçerek ayarlayın",
+            "hangUp": "Kapat",
+            "title": "{{meetingName}} toplantısına nasıl katılmak istersiniz?",
+            "welcomeHint": "Toplantıya girmek için \"KATILMAYA HAZIR\" a tıklayın",
+            "readyHint": "Toplantıya birkaç dakika içinde gireceksiniz",
+            "ready": "Katılmaya hazır",
+            "welcomeCaption": "Hazır olduğunuzda.",
+            "nextStep": "Bir moderatör en kısa sürede toplantıya girmenize izin verecektir.",
+            "readyCaption": "Her şey hazır! Rahatınıza bakın."
+        },
+        "infoPage": {
+            "title": {
+                "hangUp": "Kapattınız!"
+            },
+            "slogan": {
+                "hangUp": "Bir dahaki sefere artık"
+            },
+            "description": {
+                "hangUp": "Gelecekteki toplantılara katılmanızı dört gözle bekliyoruz"
+            }
+        },
+        "recordingHint": "Bu toplantı kayıt ediliyor",
+        "recordingStart": {
+            "failureSnackbar": "Kayıt işlemi başlatılamadı, lütfen sistem yöneticinizle görüşün."
+        },
+        "recordingModal": {
+            "title": "Ses kaydını durdur",
+            "description": "Ses kayıt işlemini durduruyorsunuz. İstediğiniz zaman yeni kayıt başlatabilirsiniz.",
+            "inputLabel": "Ses Kayıt Adı"
+        }
     },
     "meetings": {
         "interactions": {
@@ -303,5 +407,8 @@
     },
     "tryLater": "Sonra deneyin",
     "thanksForParticipating": "Katıldığınız için teşekkürler",
-    "keepInTouchWithColleagues": "İş arkadaşlarınızla iletişimde kalın veya gruplarınızın toplantı odalarına katılın"
+    "keepInTouchWithColleagues": "İş arkadaşlarınızla iletişimde kalın veya gruplarınızın toplantı odalarına katılın",
+    "snackbar": {
+        "mutedByModerator": "Moderatör tarafından sesiniz kapatıldı, konuşmak için sesinizi açın"
+    }
 }
