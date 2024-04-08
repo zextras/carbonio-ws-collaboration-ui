@@ -55,7 +55,7 @@ const AccessMeetingPage: FC<AccessMeetingPageProps> = ({
 	const readyToParticipateLabel = t('meeting.waitingRoom.ready', 'Ready to participate');
 	const enter = t('action.enter', 'Enter');
 	const leave = t('action.leave', 'Leave');
-	const readyLabel = t('', "You're ready!");
+	const readyLabel = t('meeting.waitingRoom.userIsReady', "You're ready!");
 	const leaveMeetingLabel = t('meeting.interactions.leaveMeeting', 'Leave Meeting');
 	const groupTitle = t(
 		'meeting.startModal.enterRoomMeetingTitle',
