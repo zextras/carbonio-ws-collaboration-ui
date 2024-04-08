@@ -161,7 +161,12 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 	useEffect(() => {
 		const store = useStore.getState();
 		const actualPosition = store.activeConversations[roomId]?.scrollPositionMessageId;
-		if (store.unreads[roomId] > 0 || !actualPosition) {
+		const lastMsg = last(store.messages[roomId])?.id;
+		if (
+			store.unreads[roomId] > 0 ||
+			!actualPosition ||
+			(lastMsg === actualPosition && store.unreads[roomId] === 0)
+		) {
 			scrollToEnd(MessagesListWrapperRef);
 		} else {
 			scrollToMessage(actualPosition);
