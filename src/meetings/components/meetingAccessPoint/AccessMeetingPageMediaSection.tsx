@@ -59,7 +59,7 @@ const AccessMeetingPageMediaSection: FC<AccessMeetingPageMediaSectionProps> = ({
 }) => {
 	const [t] = useTranslation();
 	const meetingId = useMemo(() => document.location.pathname.split(MEETINGS_PATH)[1], []);
-	const roomId = useStore((store) => getRoomIdFromMeeting(store, meetingId) || ``);
+	const roomId = useStore((store) => getRoomIdFromMeeting(store, meetingId) ?? ``);
 	const conversationTitle = useStore((store) => getRoomNameSelector(store, roomId));
 
 	const playMicLabel = t('meeting.interactions.playMic', 'Start mic test');
