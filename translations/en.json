@@ -132,6 +132,7 @@
         "collapseChat": "Collapse chat",
         "collapseParticipantsMeetingTooltip": "Collapse participants list",
         "continueActiveSession": "Continue the meeting in the new window",
+        "durationTooltip": "Meeting duration",
         "expandChat": "Expand chat",
         "expandParticipantsListTooltip": "Expand participants list",
         "extendChat": "Extend chat",

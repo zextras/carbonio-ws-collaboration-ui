@@ -40,6 +40,7 @@ export type MeetingCreatedEvent = BasicMeetingEvent & {
 export type MeetingStartedEvent = BasicMeetingEvent & {
 	type: WsEventType.MEETING_STARTED;
 	starterUser: string;
+	startedAt: string;
 };
 
 export type MeetingJoinedEvent = BasicMeetingEvent & {
