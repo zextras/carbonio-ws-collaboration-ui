@@ -130,7 +130,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 				{
 					root: messageListRef.current,
 					rootMargin: `-${messageListRef.current.clientHeight - 100}px 0px 15px 0px`,
-					threshold: [0.25, 0.75]
+					threshold: [0, 0.25, 0.5, 0.75, 1]
 				}
 			);
 		}

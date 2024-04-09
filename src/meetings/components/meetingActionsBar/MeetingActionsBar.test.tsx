@@ -7,7 +7,6 @@
 import React from 'react';
 
 import { screen, waitFor } from '@testing-library/react';
-import { UserEvent } from '@testing-library/user-event';
 
 import MeetingActionsBar from './MeetingActionsBar';
 import { useParams } from '../../../../__mocks__/react-router';
@@ -63,7 +62,7 @@ const meeting: MeetingBe = createMockMeeting({
 
 const streamRef = React.createRef<HTMLDivElement>();
 
-const storeBasicActiveMeetingSetup = (): void => {
+beforeEach(() => {
 	const store: RootStore = useStore.getState();
 	store.setLoginInfo(user1.id, user1.name);
 	store.setUserInfo(user1);
@@ -71,37 +70,27 @@ const storeBasicActiveMeetingSetup = (): void => {
 	store.setUserInfo(user3);
 	store.addRoom(room);
 	store.addMeeting(meeting);
+	store.startMeeting(meeting.id, '2024-08-25T17:24:28.961+02:00');
 	store.meetingConnection(meeting.id, false, undefined, false, undefined);
 	useParams.mockReturnValue({ meetingId: meeting.id });
-	setup(<MeetingActionsBar streamsWrapperRef={streamRef} />);
-};
-
-const storeSetupGroupMeetingSkeleton = (): { user: UserEvent; store: RootStore } => {
-	const store: RootStore = useStore.getState();
-	store.setLoginInfo(user1.id, user1.name);
-	store.setUserInfo(user1);
-	store.setUserInfo(user2);
-	store.setUserInfo(user3);
-	store.addRoom(room);
-	store.addMeeting(meeting);
-	store.meetingConnection(meeting.id, false, undefined, false, undefined);
-	useParams.mockReturnValue({ meetingId: meeting.id });
-	const { user } = setup(<MeetingSkeleton />);
-
-	return { store, user };
-};
-
+});
 describe('Meeting action bar', () => {
 	test('everything is rendered correctly', async () => {
-		storeBasicActiveMeetingSetup();
+		setup(<MeetingActionsBar streamsWrapperRef={streamRef} />);
 		const buttons = await screen.findAllByRole('button');
 		expect(buttons).toHaveLength(8);
+	});
+
+	test('Meeting duration is displayed', async () => {
+		setup(<MeetingActionsBar streamsWrapperRef={streamRef} />);
+		const meetingDuration = await screen.findByTestId('meeting_duration_component');
+		expect(meetingDuration).toBeInTheDocument();
 	});
 });
 
 describe('Meeting action bar interaction with skeleton', () => {
 	test('hover on different elements of the skeleton makes action bar appear and disappear', async () => {
-		const { user } = storeSetupGroupMeetingSkeleton();
+		const { user } = setup(<MeetingSkeleton />);
 		const meetingActionBar = await screen.findByTestId('meeting-action-bar');
 		await waitFor(() => user.hover(screen.getByTestId('meeting_sidebar')));
 		expect(meetingActionBar).toHaveStyle('transform: translateY( 5rem )');

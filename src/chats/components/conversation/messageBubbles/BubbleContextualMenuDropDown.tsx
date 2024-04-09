@@ -42,7 +42,7 @@ export const BubbleContextualMenuDropDownWrapper = styled.div<{
 	'data-testid': string;
 	isActive: boolean;
 	isMyMessage: boolean;
-	theme?: DefaultTheme | undefined;
+	theme?: DefaultTheme;
 }>`
 	position: absolute;
 	display: flex;
@@ -127,7 +127,7 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 
 	const [t] = useTranslation();
 	const copyActionLabel = t('action.copy', 'Copy');
-	const deleteActionLabel = t('action.delete', 'Delete');
+	const deleteActionLabel = t('action.deleteForAll', 'Delete for all');
 	const editActionLabel = t('action.edit', 'Edit');
 	const replyActionLabel = t('action.reply', 'Reply');
 	const forwardActionLabel = t('action.forward', 'Forward');

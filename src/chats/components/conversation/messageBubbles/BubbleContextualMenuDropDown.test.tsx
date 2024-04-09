@@ -123,15 +123,15 @@ describe('Bubble Contextual Menu - other user messages', () => {
 		const previewAction = screen.queryByText(/Preview/i);
 
 		const editAction = screen.queryByText(/Edit/i);
-		const deleteAction = screen.queryByText(/Delete/i);
+		const deleteForAllAction = screen.queryByText(/Delete for all/i);
 		if (msg.attachment) {
 			expect(editAction).not.toBeInTheDocument();
-			expect(deleteAction).not.toBeInTheDocument();
+			expect(deleteForAllAction).not.toBeInTheDocument();
 			expect(downloadAction).toBeInTheDocument();
 			expect(previewAction).toBeInTheDocument();
 		} else {
 			expect(editAction).not.toBeInTheDocument();
-			expect(deleteAction).not.toBeInTheDocument();
+			expect(deleteForAllAction).not.toBeInTheDocument();
 			expect(downloadAction).not.toBeInTheDocument();
 			expect(previewAction).not.toBeInTheDocument();
 		}
@@ -198,8 +198,8 @@ describe('Bubble Contextual Menu - my messages', () => {
 		expect(copyAction).toBeInTheDocument();
 		const forwardAction = screen.getByText(/Forward/i);
 		expect(forwardAction).toBeInTheDocument();
-		const deleteAction = screen.getByText(/Delete/i);
-		expect(deleteAction).toBeInTheDocument();
+		const deleteForAllAction = screen.getByText(/Delete for all/i);
+		expect(deleteForAllAction).toBeInTheDocument();
 
 		if (msg.forwarded) {
 			expect(screen.queryByText(/Edit/i)).not.toBeInTheDocument();
@@ -218,7 +218,7 @@ describe('Bubble Contextual Menu - my messages', () => {
 		}
 	});
 
-	test('if that message is being edited, the delete action should not be present', async () => {
+	test('if that message is being edited, the delete for all action should not be present', async () => {
 		const simpleTextMessage: TextMessage = createMockTextMessage({
 			roomId: mockedRoom.id,
 			from: mySessionId,
@@ -242,7 +242,7 @@ describe('Bubble Contextual Menu - my messages', () => {
 		const arrowButton = screen.getByTestId(iconArrowIosDownward);
 		await user.click(arrowButton);
 
-		expect(screen.queryByText(/Delete/i)).not.toBeInTheDocument();
+		expect(screen.queryByText(/Delete for all/i)).not.toBeInTheDocument();
 	});
 
 	test('if that message is being replied, the delete action should not be present', async () => {
@@ -269,7 +269,7 @@ describe('Bubble Contextual Menu - my messages', () => {
 		const arrowButton = screen.getByTestId(iconArrowIosDownward);
 		await user.click(arrowButton);
 
-		expect(screen.queryByText(/Delete/i)).not.toBeInTheDocument();
+		expect(screen.queryByText(/Delete for all/i)).not.toBeInTheDocument();
 	});
 
 	test('if forward mode is active, the forward action should not be present', async () => {

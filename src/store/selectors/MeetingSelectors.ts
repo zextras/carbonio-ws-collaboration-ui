@@ -186,3 +186,11 @@ export const getWaitingListSizeForMyVirtualMeeting = (store: RootStore): number 
 	});
 	return reduce(myMeetings, (acc, meeting) => acc + size(meeting.waitingList || []), 0);
 };
+
+export const getMeetingStartedAt = (
+	store: RootStore,
+	meetingId: string | undefined
+): string | undefined => {
+	const meeting = find(store.meetings, (meeting) => meeting.id === meetingId);
+	return meeting?.startedAt;
+};
