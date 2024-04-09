@@ -6,6 +6,7 @@
 
 import React, {
 	FunctionComponent,
+	MouseEventHandler,
 	ReactElement,
 	useCallback,
 	useEffect,
@@ -61,6 +62,11 @@ type ForwardMessageModalProps = {
 	messagesToForward: TextMessage[] | undefined;
 };
 
+export type ChatListItemProp = {
+	id: string;
+	onClickCb: (roomId: string) => MouseEventHandler<HTMLDivElement> | undefined;
+};
+
 const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 	open,
 	onClose,
@@ -88,32 +94,8 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 	const inputRef = useRef<HTMLInputElement>(null);
 	const [inputValue, setInputValue] = useState('');
 	const [selected, setSelected] = useState<{ [id: string]: boolean }>({});
-	const [chatList, setChatList] = useState<{ id: string }[]>([]);
+	const [chatList, setChatList] = useState<ChatListItemProp[]>([]);
 	const [chips, setChips] = useState<ChipItem<{ id: string }>[]>([]);
-
-	// Update conversation list on filter updating
-	useEffect(() => {
-		let roomList: { id: string }[];
-		const singleAndGroup = filter(rooms, (room) =>
-			includes([RoomType.ONE_TO_ONE, RoomType.GROUP], room.roomType)
-		);
-		if (inputValue === '') {
-			roomList = map(singleAndGroup, (room) => ({ id: room.roomId }));
-		} else {
-			roomList = [];
-			map(singleAndGroup, ({ roomId }) => {
-				const roomName = getRoomNameSelector(useStore.getState(), roomId);
-				if (roomName.toLocaleLowerCase().includes(inputValue.toLocaleLowerCase())) {
-					roomList.push({ id: roomId });
-				}
-			});
-		}
-		// Remove from roomList the message original conversation
-		remove(roomList, (room) => room.id === roomId);
-		setChatList(roomList);
-	}, [inputValue, roomId, rooms]);
-
-	const handleChangeText = useCallback((e) => setInputValue(e.target.value), []);
 
 	const select = useCallback(
 		(id) => setSelected((s) => (s[id] ? omit(s, id) : { ...s, [id]: true })),
@@ -142,6 +124,30 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 		[select]
 	);
 
+	// Update conversation list on filter updating
+	useEffect(() => {
+		let roomList: ChatListItemProp[];
+		const singleAndGroup = filter(rooms, (room) =>
+			includes([RoomType.ONE_TO_ONE, RoomType.GROUP], room.roomType)
+		);
+		if (inputValue === '') {
+			roomList = map(singleAndGroup, (room) => ({ id: room.roomId, onClickCb: onClickListItem }));
+		} else {
+			roomList = [];
+			map(singleAndGroup, ({ roomId }) => {
+				const roomName = getRoomNameSelector(useStore.getState(), roomId);
+				if (roomName.toLocaleLowerCase().includes(inputValue.toLocaleLowerCase())) {
+					roomList.push({ id: roomId, onClickCb: onClickListItem });
+				}
+			});
+		}
+		// Remove from roomList the message original conversation
+		remove(roomList, (room) => room.id === roomId);
+		setChatList(roomList);
+	}, [inputValue, onClickListItem, roomId, rooms]);
+
+	const handleChangeText = useCallback((e) => setInputValue(e.target.value), []);
+
 	const removeContactFromChip = useCallback(
 		(items: ChipItem<{ id: string }>[]) => {
 			setSelected(
@@ -164,19 +170,6 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 			.then(() => onClose())
 			.catch(() => onClose());
 	}, [messagesToForward, onClose, selected]);
-
-	const ListItem = useMemo(
-		() =>
-			// eslint-disable-next-line react/display-name
-			({ item, selected }: { item: { id: string }; selected: boolean }) => (
-				<ForwardMessageConversationListItem
-					roomId={item.id}
-					selected={selected}
-					onClick={onClickListItem}
-				/>
-			),
-		[onClickListItem]
-	);
 
 	const disabledForwardButton = useMemo(() => size(selected) === 0, [selected]);
 
@@ -236,9 +229,9 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 					</CustomContainer>
 				) : (
 					<List
-						data-testid="list_forward_modal"
 						items={chatList}
-						ItemComponent={ListItem}
+						data-testid="list_forward_modal"
+						ItemComponent={ForwardMessageConversationListItem}
 						selected={selected}
 					/>
 				)}
