@@ -10,7 +10,11 @@ import { screen } from '@testing-library/react';
 
 import BubbleContextualMenuDropDown from './BubbleContextualMenuDropDown';
 import useStore from '../../../../store/Store';
-import { createMockRoom, createMockTextMessage } from '../../../../tests/createMock';
+import {
+	createMockCapabilityList,
+	createMockRoom,
+	createMockTextMessage
+} from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe } from '../../../../types/network/models/roomBeTypes';
 import { messageActionType } from '../../../../types/store/ActiveConversationTypes';
@@ -27,20 +31,84 @@ const mockedRoom: RoomBe = createMockRoom({
 
 const mySessionId = 'mySessionId';
 
+const simpleMyTextMessage: TextMessage = createMockTextMessage({
+	roomId: mockedRoom.id,
+	date: Date.now() - 6000
+});
+
+const repliedMyTextMessage: TextMessage = createMockTextMessage({
+	roomId: mockedRoom.id,
+	replyTo: 'replyToId',
+	date: Date.now() - 6000,
+	repliedMessage: createMockTextMessage({ id: 'replyToId', roomId: mockedRoom.id })
+});
+
+const forwardedMyTextMessage: TextMessage = createMockTextMessage({
+	roomId: mockedRoom.id,
+	from: mySessionId,
+	date: Date.now() - 6000,
+	forwarded: { id: 'forwardedId', date: 1661441294393, text: 'Forwarded text!', from: 'userId2' }
+});
+
+const attachmentMyTextMessage: TextMessage = createMockTextMessage({
+	roomId: mockedRoom.id,
+	date: Date.now() - 6000,
+	attachment: { id: 'id', name: 'file', mimeType: 'image/png', size: 122312 }
+});
+
+const myMessagesTypes: Array<[string, TextMessage]> = [
+	['simple', simpleMyTextMessage],
+	['replied', repliedMyTextMessage],
+	['forwarded', forwardedMyTextMessage],
+	['attachment', attachmentMyTextMessage]
+];
+
+const simpleTextMessage: TextMessage = createMockTextMessage({
+	roomId: mockedRoom.id,
+	from: mySessionId,
+	date: Date.now() - 6000
+});
+
+const repliedTextMessage: TextMessage = createMockTextMessage({
+	roomId: mockedRoom.id,
+	from: mySessionId,
+	date: Date.now() - 6000,
+	replyTo: 'replyToId',
+	repliedMessage: createMockTextMessage({ id: 'replyToId', roomId: mockedRoom.id })
+});
+
+const forwardedTextMessage: TextMessage = createMockTextMessage({
+	roomId: mockedRoom.id,
+	from: mySessionId,
+	date: Date.now() - 6000,
+	forwarded: { id: 'forwardedId', date: 1661441294393, text: 'Forwarded text!' }
+});
+
+const attachmentTextMessage: TextMessage = createMockTextMessage({
+	roomId: mockedRoom.id,
+	from: mySessionId,
+	date: Date.now() - 60,
+	attachment: { id: 'id', name: 'file', mimeType: 'image/png', size: 122312 }
+});
+
+const messageTypes: Array<[string, TextMessage]> = [
+	['simple', simpleTextMessage],
+	['replied', repliedTextMessage],
+	['forwarded', forwardedTextMessage],
+	['attachment', attachmentTextMessage]
+];
+
 beforeEach(() => {
 	const store: RootStore = useStore.getState();
 	store.setSessionId(mySessionId);
 	store.addRoom(mockedRoom);
+	store.setCapabilities(createMockCapabilityList());
 });
+
 describe('Bubble Contextual Menu - other user messages', () => {
-	test('Simple text message', async () => {
-		const simpleTextMessage: TextMessage = createMockTextMessage({ roomId: mockedRoom.id });
-		const store: RootStore = useStore.getState();
-		store.addRoom(mockedRoom);
-		store.newMessage(simpleTextMessage);
-		const { user } = setup(
-			<BubbleContextualMenuDropDown message={simpleTextMessage} isMyMessage={false} />
-		);
+	test.each(messageTypes)('Test %s text message', async (msgType, msg) => {
+		useStore.getState().newMessage(msg);
+		const { user } = setup(<BubbleContextualMenuDropDown message={msg} isMyMessage={false} />);
 		const arrowButton = screen.getByTestId(iconArrowIosDownward);
 		await user.click(arrowButton);
 
@@ -51,102 +119,22 @@ describe('Bubble Contextual Menu - other user messages', () => {
 		expect(copyAction).toBeInTheDocument();
 		const forwardAction = screen.getByText(/Forward/i);
 		expect(forwardAction).toBeInTheDocument();
-		const editAction = screen.queryByText(/Edit/i);
-		expect(editAction).not.toBeInTheDocument();
-		const deleteAction = screen.queryByText(/Delete/i);
-		expect(deleteAction).not.toBeInTheDocument();
 		const downloadAction = screen.queryByText(/Download/i);
-		expect(downloadAction).not.toBeInTheDocument();
 		const previewAction = screen.queryByText(/Preview/i);
-		expect(previewAction).not.toBeInTheDocument();
-	});
 
-	test('Replied text message', async () => {
-		const simpleTextMessage: TextMessage = createMockTextMessage({
-			roomId: mockedRoom.id,
-			replyTo: 'replyToId',
-			repliedMessage: createMockTextMessage({ id: 'replyToId', roomId: mockedRoom.id })
-		});
-		useStore.getState().newMessage(simpleTextMessage);
-		const { user } = setup(
-			<BubbleContextualMenuDropDown message={simpleTextMessage} isMyMessage={false} />
-		);
-		const arrowButton = screen.getByTestId(iconArrowIosDownward);
-		await user.click(arrowButton);
-
-		// Actions
-		const replyAction = screen.getByText(/Reply/i);
-		expect(replyAction).toBeInTheDocument();
-		const copyAction = screen.getByText(/Copy/i);
-		expect(copyAction).toBeInTheDocument();
-		const forwardAction = screen.getByText(/Forward/i);
-		expect(forwardAction).toBeInTheDocument();
 		const editAction = screen.queryByText(/Edit/i);
-		expect(editAction).not.toBeInTheDocument();
 		const deleteAction = screen.queryByText(/Delete/i);
-		expect(deleteAction).not.toBeInTheDocument();
-		const downloadAction = screen.queryByText(/Download/i);
-		expect(downloadAction).not.toBeInTheDocument();
-		const previewAction = screen.queryByText(/Preview/i);
-		expect(previewAction).not.toBeInTheDocument();
-	});
-
-	test('Forwarded text message', async () => {
-		const simpleTextMessage: TextMessage = createMockTextMessage({
-			roomId: mockedRoom.id,
-			forwarded: { id: 'forwardedId', date: 1661441294393, text: 'Forwarded text!' }
-		});
-		useStore.getState().newMessage(simpleTextMessage);
-		const { user } = setup(
-			<BubbleContextualMenuDropDown message={simpleTextMessage} isMyMessage={false} />
-		);
-		const arrowButton = screen.getByTestId(iconArrowIosDownward);
-		await user.click(arrowButton);
-
-		// Actions
-		const replyAction = screen.getByText(/Reply/i);
-		expect(replyAction).toBeInTheDocument();
-		const copyAction = screen.getByText(/Copy/i);
-		expect(copyAction).toBeInTheDocument();
-		const forwardAction = screen.getByText(/Forward/i);
-		expect(forwardAction).toBeInTheDocument();
-		const editAction = screen.queryByText(/Edit/i);
-		expect(editAction).not.toBeInTheDocument();
-		const deleteAction = screen.queryByText(/Delete/i);
-		expect(deleteAction).not.toBeInTheDocument();
-		const downloadAction = screen.queryByText(/Download/i);
-		expect(downloadAction).not.toBeInTheDocument();
-		const previewAction = screen.queryByText(/Preview/i);
-		expect(previewAction).not.toBeInTheDocument();
-	});
-
-	test('Attachment text message', async () => {
-		const simpleTextMessage: TextMessage = createMockTextMessage({
-			roomId: mockedRoom.id,
-			attachment: { id: 'id', name: 'file', mimeType: 'image/png', size: 122312 }
-		});
-		useStore.getState().newMessage(simpleTextMessage);
-		const { user } = setup(
-			<BubbleContextualMenuDropDown message={simpleTextMessage} isMyMessage={false} />
-		);
-		const arrowButton = screen.getByTestId(iconArrowIosDownward);
-		await user.click(arrowButton);
-
-		// Actions
-		const replyAction = screen.getByText(/Reply/i);
-		expect(replyAction).toBeInTheDocument();
-		const copyAction = screen.getByText(/Copy/i);
-		expect(copyAction).toBeInTheDocument();
-		const forwardAction = screen.getByText(/Forward/i);
-		expect(forwardAction).toBeInTheDocument();
-		const editAction = screen.queryByText(/Edit/i);
-		expect(editAction).not.toBeInTheDocument();
-		const deleteAction = screen.queryByText(/Delete/i);
-		expect(deleteAction).not.toBeInTheDocument();
-		const downloadAction = screen.queryByText(/Download/i);
-		expect(downloadAction).toBeInTheDocument();
-		const previewAction = screen.queryByText(/Preview/i);
-		expect(previewAction).toBeInTheDocument();
+		if (msg.attachment) {
+			expect(editAction).not.toBeInTheDocument();
+			expect(deleteAction).not.toBeInTheDocument();
+			expect(downloadAction).toBeInTheDocument();
+			expect(previewAction).toBeInTheDocument();
+		} else {
+			expect(editAction).not.toBeInTheDocument();
+			expect(deleteAction).not.toBeInTheDocument();
+			expect(downloadAction).not.toBeInTheDocument();
+			expect(previewAction).not.toBeInTheDocument();
+		}
 	});
 
 	test('If forward mode is active, the forward action should not be present', async () => {
@@ -198,16 +186,8 @@ describe('Bubble Contextual Menu - other user messages', () => {
 });
 
 describe('Bubble Contextual Menu - my messages', () => {
-	test('Simple text message', async () => {
-		const simpleTextMessage: TextMessage = createMockTextMessage({
-			roomId: mockedRoom.id,
-			from: mySessionId,
-			date: Date.now() - 60
-		});
-		useStore.getState().newMessage(simpleTextMessage);
-		const { user } = setup(
-			<BubbleContextualMenuDropDown message={simpleTextMessage} isMyMessage />
-		);
+	test.each(myMessagesTypes)('Test %s text message', async (msgType, msg) => {
+		const { user } = setup(<BubbleContextualMenuDropDown message={msg} isMyMessage />);
 		const arrowButton = screen.getByTestId(iconArrowIosDownward);
 		await user.click(arrowButton);
 
@@ -218,108 +198,24 @@ describe('Bubble Contextual Menu - my messages', () => {
 		expect(copyAction).toBeInTheDocument();
 		const forwardAction = screen.getByText(/Forward/i);
 		expect(forwardAction).toBeInTheDocument();
-		const editAction = screen.queryByText(/Edit/i);
-		expect(editAction).toBeInTheDocument();
 		const deleteAction = screen.getByText(/Delete/i);
 		expect(deleteAction).toBeInTheDocument();
+
+		if (msg.forwarded) {
+			expect(screen.queryByText(/Edit/i)).not.toBeInTheDocument();
+		} else {
+			expect(screen.getByText(/Edit/i)).toBeInTheDocument();
+		}
+
 		const downloadAction = screen.queryByText(/Download/i);
-		expect(downloadAction).not.toBeInTheDocument();
 		const previewAction = screen.queryByText(/Preview/i);
-		expect(previewAction).not.toBeInTheDocument();
-	});
-
-	test('Replied text message', async () => {
-		const simpleTextMessage: TextMessage = createMockTextMessage({
-			roomId: mockedRoom.id,
-			from: mySessionId,
-			date: Date.now() - 60,
-			replyTo: 'replyToId',
-			repliedMessage: createMockTextMessage({ id: 'replyToId', roomId: mockedRoom.id })
-		});
-		useStore.getState().newMessage(simpleTextMessage);
-		const { user } = setup(
-			<BubbleContextualMenuDropDown message={simpleTextMessage} isMyMessage />
-		);
-		const arrowButton = screen.getByTestId(iconArrowIosDownward);
-		await user.click(arrowButton);
-
-		// Actions
-		const replyAction = screen.getByText(/Reply/i);
-		expect(replyAction).toBeInTheDocument();
-		const copyAction = screen.getByText(/Copy/i);
-		expect(copyAction).toBeInTheDocument();
-		const forwardAction = screen.getByText(/Forward/i);
-		expect(forwardAction).toBeInTheDocument();
-		const editAction = screen.queryByText(/Edit/i);
-		expect(editAction).toBeInTheDocument();
-		const deleteAction = screen.getByText(/Delete/i);
-		expect(deleteAction).toBeInTheDocument();
-		const downloadAction = screen.queryByText(/Download/i);
-		expect(downloadAction).not.toBeInTheDocument();
-		const previewAction = screen.queryByText(/Preview/i);
-		expect(previewAction).not.toBeInTheDocument();
-	});
-
-	test('Forwarded text message', async () => {
-		const simpleTextMessage: TextMessage = createMockTextMessage({
-			roomId: mockedRoom.id,
-			from: mySessionId,
-			date: Date.now() - 60,
-			forwarded: { id: 'forwardedId', date: 1661441294393, text: 'Forwarded text!' }
-		});
-		useStore.getState().newMessage(simpleTextMessage);
-		const { user } = setup(
-			<BubbleContextualMenuDropDown message={simpleTextMessage} isMyMessage />
-		);
-		const arrowButton = screen.getByTestId(iconArrowIosDownward);
-		await user.click(arrowButton);
-
-		// Actions
-		const replyAction = screen.getByText(/Reply/i);
-		expect(replyAction).toBeInTheDocument();
-		const copyAction = screen.getByText(/Copy/i);
-		expect(copyAction).toBeInTheDocument();
-		const forwardAction = screen.getByText(/Forward/i);
-		expect(forwardAction).toBeInTheDocument();
-		const editAction = screen.queryByText(/Edit/i);
-		expect(editAction).not.toBeInTheDocument();
-		const deleteAction = screen.queryByTestId(/Delete/i);
-		expect(deleteAction).not.toBeInTheDocument();
-		const downloadAction = screen.queryByText(/Download/i);
-		expect(downloadAction).not.toBeInTheDocument();
-		const previewAction = screen.queryByText(/Preview/i);
-		expect(previewAction).not.toBeInTheDocument();
-	});
-
-	test('Attachment text message', async () => {
-		const simpleTextMessage: TextMessage = createMockTextMessage({
-			roomId: mockedRoom.id,
-			from: mySessionId,
-			date: Date.now() - 60,
-			attachment: { id: 'id', name: 'file', mimeType: 'image/png', size: 122312 }
-		});
-		useStore.getState().newMessage(simpleTextMessage);
-		const { user } = setup(
-			<BubbleContextualMenuDropDown message={simpleTextMessage} isMyMessage />
-		);
-		const arrowButton = screen.getByTestId(iconArrowIosDownward);
-		await user.click(arrowButton);
-
-		// Actions
-		const replyAction = screen.getByText(/Reply/i);
-		expect(replyAction).toBeInTheDocument();
-		const copyAction = screen.getByText(/Copy/i);
-		expect(copyAction).toBeInTheDocument();
-		const forwardAction = screen.getByText(/Forward/i);
-		expect(forwardAction).toBeInTheDocument();
-		const editAction = screen.queryByText(/Edit/i);
-		expect(editAction).toBeInTheDocument();
-		const deleteAction = screen.queryByText(/Delete/i);
-		expect(deleteAction).toBeInTheDocument();
-		const downloadAction = screen.queryByText(/Download/i);
-		expect(downloadAction).toBeInTheDocument();
-		const previewAction = screen.queryByText(/Preview/i);
-		expect(previewAction).toBeInTheDocument();
+		if (msg.attachment) {
+			expect(downloadAction).toBeInTheDocument();
+			expect(previewAction).toBeInTheDocument();
+		} else {
+			expect(downloadAction).not.toBeInTheDocument();
+			expect(previewAction).not.toBeInTheDocument();
+		}
 	});
 
 	test('if that message is being edited, the delete action should not be present', async () => {
