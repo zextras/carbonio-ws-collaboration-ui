@@ -13,18 +13,14 @@ import { find } from 'lodash';
 import { MEETINGS_PATH } from '../../constants/appConstants';
 import useRouting, { PAGE_INFO_TYPE } from '../../hooks/useRouting';
 import { MeetingsApi } from '../../network';
-import { getRoomIdFromMeeting } from '../../store/selectors/MeetingSelectors';
 import useStore from '../../store/Store';
 import { MeetingType } from '../../types/network/models/meetingBeTypes';
-import AccessMeetingModal from '../components/meetingAccessPoints/accessModal/AccessMeetingModal';
-import WaitingRoom from '../components/meetingAccessPoints/waitingRoom/WaitingRoom';
+import AccessMeetingPage from '../components/meetingAccessPoint/AccessMeetingPage';
 
 const AccessMeetingPageView = (): ReactElement => {
 	const meetingId = useMemo(() => document.location.pathname.split(MEETINGS_PATH)[1], []);
 
 	const chatsBeNetworkStatus = useStore(({ connections }) => connections.status.chats_be);
-	const roomId = useStore((store) => getRoomIdFromMeeting(store, meetingId) || ``);
-
 	const [hasUserDirectAccess, setHasUserDirectAccess] = useState<boolean | undefined>(undefined);
 	const [meetingName, setMeetingName] = useState<string>('');
 
@@ -66,10 +62,9 @@ const AccessMeetingPageView = (): ReactElement => {
 	}, [chatsBeNetworkStatus, goToInfoPage, meetingId]);
 
 	return (
-		<Container background="gray0">
-			{hasUserDirectAccess === true && <AccessMeetingModal roomId={roomId} />}
-			{hasUserDirectAccess === false && (
-				<WaitingRoom meetingId={meetingId} meetingName={meetingName} />
+		<Container background={'gray0'}>
+			{chatsBeNetworkStatus && (
+				<AccessMeetingPage hasUserDirectAccess={hasUserDirectAccess} meetingName={meetingName} />
 			)}
 		</Container>
 	);

@@ -6,16 +6,14 @@
 import React, {
 	Dispatch,
 	FC,
-	RefObject,
 	SetStateAction,
 	useCallback,
 	useEffect,
 	useMemo,
-	useRef,
 	useState
 } from 'react';
 
-import { Container, MultiButton, Padding, Tooltip } from '@zextras/carbonio-design-system';
+import { Container, IconButton, Padding, Select, Tooltip } from '@zextras/carbonio-design-system';
 import { filter, find, map } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
@@ -33,7 +31,6 @@ type LocalMediaHandlerProps = {
 	>;
 	mediaDevicesEnabled: { audio: boolean; video: boolean };
 	setMediaDevicesEnabled: Dispatch<SetStateAction<{ audio: boolean; video: boolean }>>;
-	meetingAccessRef: RefObject<HTMLDivElement>;
 };
 
 const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
@@ -43,22 +40,18 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 	selectedDevicesId,
 	setSelectedDevicesId,
 	mediaDevicesEnabled,
-	setMediaDevicesEnabled,
-	meetingAccessRef
+	setMediaDevicesEnabled
 }) => {
 	const [t] = useTranslation();
 	const disableCamLabel = t('meeting.interactions.disableCamera', 'Disable camera');
 	const enableCamLabel = t('meeting.interactions.enableCamera', 'Enable camera');
 	const disableMicLabel = t('meeting.interactions.disableMicrophone', 'Disable microphone');
 	const enableMicLabel = t('meeting.interactions.enableMicrophone', 'Enable microphone');
+	const camDeviceLabel = t('meeting.interactions.camDevice', 'Camera device');
+	const micDeviceLabel = t('meeting.interactions.micDevice', 'Microphone device');
 
 	const [audioMediaList, setAudioMediaList] = useState<[] | MediaDeviceInfo[]>([]);
 	const [videoMediaList, setVideoMediaList] = useState<[] | MediaDeviceInfo[]>([]);
-	const [audioListOpen, setAudioListOpen] = useState<boolean>(false);
-	const [videoListOpen, setVideoListOpen] = useState<boolean>(false);
-
-	const audioDropdownRef = useRef<HTMLDivElement>(null);
-	const videoDropdownRef = useRef<HTMLDivElement>(null);
 
 	const toggleStreams = useCallback(
 		(audio: boolean, video: boolean, audioId: string | undefined, videoId: string | undefined) => {
@@ -79,18 +72,15 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 						tracks.forEach((track) => track.stop());
 					}
 				);
-				getAudioAndVideo(
-					audio
-						? audioId
-							? {
-									deviceId: { exact: audioId },
-									noiseSuppression: true,
-									echoCancellation: true
-							  }
-							: { noiseSuppression: true, echoCancellation: true }
-						: false,
-					video ? (videoId ? { deviceId: { exact: videoId } } : true) : false
-				)
+				const kindOfAudioDevice = audioId
+					? {
+							deviceId: { exact: audioId },
+							noiseSuppression: true,
+							echoCancellation: true
+					  }
+					: { noiseSuppression: true, echoCancellation: true };
+				const kindOfVideoDevice = videoId ? { deviceId: { exact: videoId } } : true;
+				getAudioAndVideo(audio ? kindOfAudioDevice : false, video ? kindOfVideoDevice : false)
 					.then((stream: MediaStream) => {
 						setStreamTrack(stream);
 						setMediaDevicesEnabled({ audio, video });
@@ -109,65 +99,53 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 		]
 	);
 
-	const mediaVideoList = useMemo(
+	const mediaVideoList: { id: string; label: string; value: string }[] = useMemo(
 		() =>
 			map(videoMediaList, (videoItem: MediaDeviceInfo, i) => ({
 				id: `device-${i}`,
 				label: videoItem.label ? videoItem.label : `device-${i}`,
-				onClick: (): void => {
-					if (mediaDevicesEnabled.video) {
-						setEnterButtonIsEnabled(false);
-						toggleStreams(
-							mediaDevicesEnabled.audio,
-							true,
-							selectedDevicesId.audio,
-							videoItem.deviceId
-						);
-					} else {
-						setSelectedDevicesId({ audio: selectedDevicesId.audio, video: videoItem.deviceId });
-					}
-				},
-				selected: videoItem.deviceId === selectedDevicesId.video,
 				value: videoItem.deviceId
 			})),
-		[
-			mediaDevicesEnabled.audio,
-			mediaDevicesEnabled.video,
-			selectedDevicesId.audio,
-			selectedDevicesId.video,
-			setEnterButtonIsEnabled,
-			setSelectedDevicesId,
-			toggleStreams,
-			videoMediaList
-		]
+		[videoMediaList]
 	);
 
-	const mediaAudioList = useMemo(
+	const mediaAudioList: { id: string; label: string; value: string }[] = useMemo(
 		() =>
 			map(audioMediaList, (audioItem: MediaDeviceInfo, i) => ({
 				id: `device-${i}`,
 				label: audioItem.label ? audioItem.label : `device-${i}`,
-				onClick: (): void => {
-					if (mediaDevicesEnabled.audio) {
-						setEnterButtonIsEnabled(false);
-						toggleStreams(
-							true,
-							mediaDevicesEnabled.video,
-							audioItem.deviceId,
-							selectedDevicesId.video
-						);
-					} else {
-						setSelectedDevicesId({ audio: audioItem.deviceId, video: selectedDevicesId.video });
-					}
-				},
-				selected: audioItem.deviceId === selectedDevicesId.audio,
 				value: audioItem.deviceId
 			})),
+		[audioMediaList]
+	);
+
+	const onChangeVideoSource = useCallback(
+		(videoItem) => {
+			if (mediaDevicesEnabled.video) {
+				setEnterButtonIsEnabled(false);
+				toggleStreams(mediaDevicesEnabled.audio, true, selectedDevicesId.audio, videoItem);
+			}
+			setSelectedDevicesId({ audio: selectedDevicesId.audio, video: videoItem });
+		},
 		[
-			audioMediaList,
-			mediaDevicesEnabled.audio,
-			mediaDevicesEnabled.video,
+			mediaDevicesEnabled,
 			selectedDevicesId.audio,
+			setEnterButtonIsEnabled,
+			setSelectedDevicesId,
+			toggleStreams
+		]
+	);
+
+	const onChangeAudioSource = useCallback(
+		(audioItem) => {
+			if (mediaDevicesEnabled.audio) {
+				setEnterButtonIsEnabled(false);
+				toggleStreams(true, mediaDevicesEnabled.video, audioItem, selectedDevicesId.video);
+			}
+			setSelectedDevicesId({ audio: audioItem, video: selectedDevicesId.video });
+		},
+		[
+			mediaDevicesEnabled,
 			selectedDevicesId.video,
 			setEnterButtonIsEnabled,
 			setSelectedDevicesId,
@@ -175,18 +153,28 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 		]
 	);
 
+	const videoSelected = useMemo(
+		() => find(mediaVideoList, ['value', selectedDevicesId.video]) ?? mediaVideoList[0],
+		[mediaVideoList, selectedDevicesId.video]
+	);
+
+	const audioSelected = useMemo(
+		() => find(mediaAudioList, ['value', selectedDevicesId.audio]) ?? mediaAudioList[0],
+		[mediaAudioList, selectedDevicesId.audio]
+	);
+
 	const updateListOfDevices = useCallback(() => {
 		navigator.mediaDevices
 			.enumerateDevices()
 			.then((devices) => {
-				const audioInputs: [] | MediaDeviceInfo[] | any = filter(
+				const audioInputs = filter(
 					devices,
-					(device) => device.kind === 'audioinput' && device
-				);
-				const videoInputs: [] | MediaDeviceInfo[] | any = filter(
+					(device: MediaDeviceInfo) => device.kind === 'audioinput' && device
+				) as MediaDeviceInfo[];
+				const videoInputs = filter(
 					devices,
 					(device: MediaDeviceInfo) => device.kind === 'videoinput' && device
-				);
+				) as MediaDeviceInfo[];
 				setAudioMediaList(audioInputs);
 				setVideoMediaList(videoInputs);
 			})
@@ -204,14 +192,7 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 				selectedDevicesId.video
 			);
 		},
-		[
-			setEnterButtonIsEnabled,
-			toggleStreams,
-			mediaDevicesEnabled.audio,
-			mediaDevicesEnabled.video,
-			selectedDevicesId.audio,
-			selectedDevicesId.video
-		]
+		[setEnterButtonIsEnabled, toggleStreams, mediaDevicesEnabled, selectedDevicesId]
 	);
 
 	const toggleAudio = useCallback(
@@ -225,23 +206,8 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 				selectedDevicesId.video
 			);
 		},
-		[
-			setEnterButtonIsEnabled,
-			toggleStreams,
-			mediaDevicesEnabled.audio,
-			mediaDevicesEnabled.video,
-			selectedDevicesId.audio,
-			selectedDevicesId.video
-		]
+		[setEnterButtonIsEnabled, toggleStreams, mediaDevicesEnabled, selectedDevicesId]
 	);
-
-	const toggleAudioDropdown = useCallback(() => {
-		setAudioListOpen((prevState) => !prevState);
-	}, [setAudioListOpen]);
-
-	const toggleVideoDropdown = useCallback(() => {
-		setVideoListOpen((prevState) => !prevState);
-	}, [setVideoListOpen]);
 
 	useEffect(() => {
 		if (BrowserUtils.isFirefox()) {
@@ -264,7 +230,7 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 		} else {
 			updateListOfDevices();
 		}
-	}, [mediaDevicesEnabled.audio, updateListOfDevices, mediaDevicesEnabled.video]);
+	}, [mediaDevicesEnabled, updateListOfDevices]);
 
 	useEffect(() => {
 		navigator.mediaDevices.addEventListener('devicechange', updateListOfDevices);
@@ -273,86 +239,61 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 		};
 	}, [updateListOfDevices]);
 
-	const handleClickOutsideAudioDropdown = useCallback((e) => {
-		if (audioDropdownRef.current && !audioDropdownRef.current.contains(e.target)) {
-			setAudioListOpen(false);
-		}
-	}, []);
-
-	const handleClickOutsideVideoDropdown = useCallback((e) => {
-		if (videoDropdownRef.current && !videoDropdownRef.current.contains(e.target)) {
-			setVideoListOpen(false);
-		}
-	}, []);
-
-	useEffect(() => {
-		let elRef: React.RefObject<HTMLDivElement> | null = meetingAccessRef;
-		if (elRef?.current) {
-			if (audioListOpen) {
-				elRef.current.addEventListener('mousedown', handleClickOutsideAudioDropdown);
-			}
-			if (videoListOpen) {
-				elRef.current.addEventListener('mousedown', handleClickOutsideVideoDropdown);
-			}
-		}
-
-		return (): void => {
-			if (elRef?.current) {
-				elRef.current.removeEventListener('mousedown', handleClickOutsideAudioDropdown);
-				elRef.current.addEventListener('mousedown', handleClickOutsideVideoDropdown);
-
-				elRef = null;
-			}
-		};
-	}, [
-		audioListOpen,
-		handleClickOutsideAudioDropdown,
-		handleClickOutsideVideoDropdown,
-		meetingAccessRef,
-		videoListOpen
-	]);
-
 	return (
-		<Container height="fit" width="fit" orientation={'horizontal'}>
-			<Tooltip placement="top" label={mediaDevicesEnabled.video ? disableCamLabel : enableCamLabel}>
-				<MultiButton
-					primaryIcon={mediaDevicesEnabled.video ? 'Video' : 'VideoOff'}
-					icon={videoListOpen ? 'ChevronUpOutline' : 'ChevronDownOutline'}
-					size="large"
-					shape="round"
-					background={'primary'}
-					onClick={toggleVideo}
-					dropdownProps={{
-						forceOpen: videoListOpen,
-						onClick: toggleVideoDropdown,
-						width: 'fit',
-						placement: 'bottom-end',
-						items: mediaVideoList,
-						dropdownListRef: videoDropdownRef
-					}}
+		<Container height="fit" width="100%">
+			<Container height="fit" orientation={'horizontal'}>
+				<Tooltip
+					placement="top"
+					label={mediaDevicesEnabled.video ? disableCamLabel : enableCamLabel}
+				>
+					<IconButton
+						icon={mediaDevicesEnabled.video ? 'Video' : 'VideoOff'}
+						size="extralarge"
+						backgroundColor={'primary'}
+						onClick={toggleVideo}
+					/>
+				</Tooltip>
+				<Padding left="1rem" />
+				<Select
+					label={camDeviceLabel}
+					data-testid={'camera-select'}
 					items={mediaVideoList}
+					onChange={onChangeVideoSource}
+					selection={videoSelected}
+					multiple={false}
+					placement="bottom-end"
+					showCheckbox={false}
+					background={'text'}
+					disablePortal
 				/>
-			</Tooltip>
-			<Padding left="1rem" />
-			<Tooltip placement="top" label={mediaDevicesEnabled.audio ? disableMicLabel : enableMicLabel}>
-				<MultiButton
-					primaryIcon={mediaDevicesEnabled.audio ? 'Mic' : 'MicOff'}
-					icon={audioListOpen ? 'ChevronUpOutline' : 'ChevronDownOutline'}
-					size="large"
-					shape="round"
-					background={'primary'}
-					dropdownProps={{
-						forceOpen: audioListOpen,
-						onClick: toggleAudioDropdown,
-						width: 'fit',
-						placement: 'bottom-start',
-						items: mediaAudioList,
-						dropdownListRef: audioDropdownRef
-					}}
-					onClick={toggleAudio}
+			</Container>
+			<Padding bottom="1rem" />
+			<Container height="fit" orientation={'horizontal'}>
+				<Tooltip
+					placement="top"
+					label={mediaDevicesEnabled.audio ? disableMicLabel : enableMicLabel}
+				>
+					<IconButton
+						icon={mediaDevicesEnabled.audio ? 'Mic' : 'MicOff'}
+						size="extralarge"
+						backgroundColor={'primary'}
+						onClick={toggleAudio}
+					/>
+				</Tooltip>
+				<Padding left="1rem" />
+				<Select
+					label={micDeviceLabel}
+					data-testid={'audio-select'}
 					items={mediaAudioList}
+					onChange={onChangeAudioSource}
+					selection={audioSelected}
+					multiple={false}
+					placement="bottom-end"
+					showCheckbox={false}
+					background={'text'}
+					disablePortal
 				/>
-			</Tooltip>
+			</Container>
 		</Container>
 	);
 };
