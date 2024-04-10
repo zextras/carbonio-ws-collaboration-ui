@@ -154,13 +154,14 @@
                 "rejected": "Maybe next time"
             },
             "title": {
-                "hangUp": "You hung up!",
+                "hangUp": "You left the waiting room",
                 "meetingNotFound": "The meeting you are looking for does not exist",
                 "notAuthenticatedUser": "You are not authenticated",
                 "rejected": "You access has been refused"
             }
         },
         "interactions": {
+            "camDevice": "Camera device",
             "cameraDisabled": "Camera disabled",
             "cameraEnabled": "Camera enabled",
             "cinemaView": "Cinema view",
@@ -175,10 +176,11 @@
             "gridView": "Grid view",
             "leaveConfirmation": "Leave meeting?",
             "leaveMeeting": "Leave Meeting",
+            "micDevice": "Microphone device",
             "microphoneDisabled": "Microphone disabled",
             "microphoneEnabled": "Microphone enabled",
-            "playMic": "Start microphone testing",
-            "stopMic": "Stop microphone testing"
+            "playMic": "Start mic test",
+            "stopMic": "Stop mic test"
         },
         "joinMeeting": "Join meeting",
         "joinMeetingDescription": "How do you want to join this meeting?",
@@ -249,7 +251,7 @@
         "startMeeting": "Start meeting",
         "startModal": {
             "audioAndVideoLoading": "Assets are loading",
-            "enterOneToOneMeetingTitle": "Start meeting with {{meetingTitle}}",
+            "enterOneToOneMeetingTitle": "Join meeting with {{meetingTitle}}",
             "enterRoomMeetingTitle": "Participate to {{meetingTitle}} meeting"
         },
         "tooltip": {
@@ -279,6 +281,7 @@
             "readyHint": "You will enter the meeting in a few moments",
             "setInputs": "Set your input devices by choosing them from dropdown menu",
             "title": "How do you want to join {{meetingName}} meeting?",
+            "userIsReady": "You're ready!",
             "welcomeCaption": "When you're ready, get comfortable.",
             "welcomeHint": "Click on “READY TO PARTICIPATE” to enter the meeting"
         }
