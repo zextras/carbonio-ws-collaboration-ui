@@ -31,6 +31,7 @@ const CustomContainer = styled(Container)`
 	left: 4rem;
 	bottom: 3rem;
 `;
+
 const AccessMeetingPage: FC<AccessMeetingPageProps> = ({ hasUserDirectAccess, meetingName }) => {
 	const [t] = useTranslation();
 	const meetingId = useMemo(() => document.location.pathname.split(MEETINGS_PATH)[1], []);
@@ -81,11 +82,6 @@ const AccessMeetingPage: FC<AccessMeetingPageProps> = ({ hasUserDirectAccess, me
 		enterInAFewMomentsLabel,
 		clickOnReadyLabel
 	]);
-
-	const handlePageOrientation = useMemo(
-		() => (pageWidth <= 1024 ? 'vertical' : 'horizontal'),
-		[pageWidth]
-	);
 
 	// resize handling
 	const handleResize = useCallback(() => {
@@ -149,7 +145,7 @@ const AccessMeetingPage: FC<AccessMeetingPageProps> = ({ hasUserDirectAccess, me
 					mainAlignment="flex-end"
 					crossAlignment="flex-start"
 				>
-					{handlePageOrientation !== 'vertical' ? (
+					{pageWidth >= 1024 ? (
 						<Button
 							backgroundColor="error"
 							label={leave}
@@ -159,13 +155,18 @@ const AccessMeetingPage: FC<AccessMeetingPageProps> = ({ hasUserDirectAccess, me
 						/>
 					) : (
 						<Tooltip label={leaveMeetingLabel}>
-							<IconButton backgroundColor="error" icon="LogOut" onClick={handleLeave} />
+							<IconButton
+								size="large"
+								backgroundColor="error"
+								icon="LogOut"
+								onClick={handleLeave}
+							/>
 						</Tooltip>
 					)}
 				</CustomContainer>
 			)
 		);
-	}, [handleLeave, handlePageOrientation, hasUserDirectAccess, leave, leaveMeetingLabel]);
+	}, [handleLeave, hasUserDirectAccess, leave, leaveMeetingLabel, pageWidth]);
 
 	return (
 		<Container>
@@ -177,7 +178,6 @@ const AccessMeetingPage: FC<AccessMeetingPageProps> = ({ hasUserDirectAccess, me
 					streamTrack={streamTrack}
 					setStreamTrack={setStreamTrack}
 					hasUserDirectAccess={hasUserDirectAccess}
-					handlePageOrientation={handlePageOrientation}
 					userIsReady={userIsReady}
 					setUserIsReady={setUserIsReady}
 					meetingName={meetingName}

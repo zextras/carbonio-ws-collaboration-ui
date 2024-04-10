@@ -24,6 +24,7 @@ import {
 	Tooltip
 } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 
 import AccessTile from './mediaHandlers/AccessTile';
 import LocalMediaHandler from './mediaHandlers/LocalMediaHandler';
@@ -40,18 +41,31 @@ type AccessMeetingPageMediaSectionProps = {
 	streamTrack: MediaStream | null;
 	setStreamTrack: Dispatch<SetStateAction<MediaStream | null>>;
 	hasUserDirectAccess: boolean | undefined;
-	handlePageOrientation: 'vertical' | 'horizontal';
 	userIsReady: boolean;
 	setUserIsReady: Dispatch<SetStateAction<boolean>>;
 	meetingName: string;
 	wrapperWidth: number;
 };
 
+const ResizeWrapper = styled(Container)`
+	display: flex;
+	flex-direction: row;
+	@media only screen and (max-width: 1024px) {
+		flex-direction: column;
+	}
+`;
+
+const AlignWrapper = styled(Container)`
+	align-items: flex-start;
+	@media only screen and (max-width: 1024px) {
+		align-items: center;
+	}
+`;
+
 const AccessMeetingPageMediaSection: FC<AccessMeetingPageMediaSectionProps> = ({
 	streamTrack,
 	setStreamTrack,
 	hasUserDirectAccess,
-	handlePageOrientation,
 	userIsReady,
 	setUserIsReady,
 	meetingName,
@@ -118,25 +132,19 @@ const AccessMeetingPageMediaSection: FC<AccessMeetingPageMediaSectionProps> = ({
 		return false;
 	}, [chatsBeNetworkStatus, websocketNetworkStatus]);
 
-	const handleResizeAlignment = useMemo(
-		() => (handlePageOrientation === 'vertical' ? 'center' : 'flex-start'),
-		[handlePageOrientation]
-	);
-
 	const waitingRoomLabels = useMemo(() => {
 		if (hasUserDirectAccess === undefined) return undefined;
 		return (
 			!hasUserDirectAccess && (
-				<Container height="fit" crossAlignment={handleResizeAlignment}>
+				<AlignWrapper height="fit">
 					<Text>{userIsReady ? areYouReadyLabel : whenYouAreReadyLabel}</Text>
 					<Text>{aModeratorWillLetYouEnterLabel}</Text>
-				</Container>
+				</AlignWrapper>
 			)
 		);
 	}, [
 		aModeratorWillLetYouEnterLabel,
 		areYouReadyLabel,
-		handleResizeAlignment,
 		hasUserDirectAccess,
 		userIsReady,
 		whenYouAreReadyLabel
@@ -249,12 +257,7 @@ const AccessMeetingPageMediaSection: FC<AccessMeetingPageMediaSectionProps> = ({
 
 	const buttonsWrapper = useMemo(
 		() => (
-			<Container
-				height="fit"
-				orientation="horizontal"
-				gap="1rem"
-				mainAlignment={handleResizeAlignment}
-			>
+			<Container height="fit" orientation="horizontal" gap="1rem" mainAlignment="flex-start">
 				<Row width={`50%`} minWidth="14rem">
 					<Button
 						width="fill"
@@ -274,7 +277,6 @@ const AccessMeetingPageMediaSection: FC<AccessMeetingPageMediaSectionProps> = ({
 		),
 		[
 			enterButton,
-			handleResizeAlignment,
 			mediaDevicesEnabled.audio,
 			onToggleAudioTest,
 			playMicLabel,
@@ -294,8 +296,7 @@ const AccessMeetingPageMediaSection: FC<AccessMeetingPageMediaSectionProps> = ({
 	useEventListener(EventName.MEETING_USER_ACCEPTED, waitingRoomHandler);
 
 	return (
-		<Container
-			orientation={handlePageOrientation}
+		<ResizeWrapper
 			height="fit"
 			width="fit"
 			mainAlignment="center"
@@ -311,11 +312,11 @@ const AccessMeetingPageMediaSection: FC<AccessMeetingPageMediaSectionProps> = ({
 			</Container>
 			<Container mainAlignment="flex-start" crossAlignment="flex-start" gap="1rem">
 				<Container mainAlignment="center" crossAlignment="center" gap="2rem">
-					<Container height="fit" crossAlignment={handleResizeAlignment}>
+					<AlignWrapper height="fit">
 						<Text size="large">{howToJoinMeeting}</Text>
 						<Padding bottom="0.25rem" />
 						<Text>{setInputDevicesLabel}</Text>
-					</Container>
+					</AlignWrapper>
 					<LocalMediaHandler
 						streamTrack={streamTrack}
 						setStreamTrack={setStreamTrack}
@@ -329,7 +330,7 @@ const AccessMeetingPageMediaSection: FC<AccessMeetingPageMediaSectionProps> = ({
 				</Container>
 				{waitingRoomLabels}
 			</Container>
-		</Container>
+		</ResizeWrapper>
 	);
 };
 
