@@ -167,14 +167,14 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 		navigator.mediaDevices
 			.enumerateDevices()
 			.then((devices) => {
-				const audioInputs: [] | MediaDeviceInfo[] | any = filter(
+				const audioInputs = filter(
 					devices,
-					(device) => device.kind === 'audioinput' && device
-				);
-				const videoInputs: [] | MediaDeviceInfo[] | any = filter(
+					(device: MediaDeviceInfo) => device.kind === 'audioinput' && device
+				) as MediaDeviceInfo[];
+				const videoInputs = filter(
 					devices,
 					(device: MediaDeviceInfo) => device.kind === 'videoinput' && device
-				);
+				) as MediaDeviceInfo[];
 				setAudioMediaList(audioInputs);
 				setVideoMediaList(videoInputs);
 			})
