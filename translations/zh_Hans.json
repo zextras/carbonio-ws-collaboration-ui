@@ -73,9 +73,11 @@
     },
     "settings": {
         "notifications": {
-            "checkboxLabel": "桌面通知",
             "title": "通知",
-            "description": "设置您的聊天消息通知偏好。"
+            "description": "设置您的聊天消息通知偏好。",
+            "subtitle": {
+                "general": "通用"
+            }
         },
         "profile": {
             "errorGenericResponse": "出现错误。请重试",
@@ -94,6 +96,14 @@
             "updatedPictureCorrectly": "新头像已成功上传",
             "deletedUserImageCorrectly": "头像已成功重置为原始选项",
             "pictureSizeTooLarge": "出现错误，群组头像图像的最大大小为{{size}}kb"
+        },
+        "meetings": {
+            "title": "会议",
+            "description": "设置音频和视频首选项以进入会议。在加入每个会议之前您都可以随时自定义首选项。"
+        },
+        "recording": {
+            "title": "录制",
+            "inputLabel": "目标文件夹"
         }
     },
     "status": {
@@ -175,7 +185,9 @@
         "addSingleAttachment": "添加{{counter}}个附件",
         "decline": "拒绝",
         "enter": "进入",
-        "joinMeeting": "加入会议"
+        "joinMeeting": "加入会议",
+        "ok": "OK",
+        "cancel": "取消"
     },
     "attachments": {
         "addFromLocal": "从本地添加",
@@ -184,7 +196,11 @@
         "dragAndDrop": "拖放模式",
         "dropHereDescription": "在此处拖入您的附件以将其快速添加至此聊天",
         "errorUploadingFile": "上传{{file}}时出错",
-        "uploadAborted": "上传已中断"
+        "uploadAborted": "上传已中断",
+        "integrations": {
+            "chooseFile": "选择文件",
+            "shareLink": "分享公开链接"
+        }
     },
     "conversation": {
         "chooseConversationDescription": "选择要进行聊天的会话",
@@ -194,7 +210,10 @@
         "emptyListTitle": "此列表为空",
         "mockCreateChatDescription": "通过共享信息和附件来与同事进行互动、沟通以及合作",
         "mockCreateChatTitle": "使用创建按钮新建聊天",
-        "newMessages": "新消息"
+        "newMessages": "新消息",
+        "selectionMode": {
+            "exit": "退出选择模式"
+        }
     },
     "titlePlaceholder": "您的群组标题",
     "affiliationMessages": {
@@ -233,6 +252,38 @@
         "newMeetingNotification": {
             "sendMessage": "发送消息",
             "writeAMessageToSendIt": "撰写消息以发送"
+        },
+        "virtual": {
+            "deleteTooltip": "删除虚拟房间"
+        },
+        "sidebar": {
+            "waitingCaption": "等待进入",
+            "tooltip": {
+                "waitingAccept": "允许用户进入",
+                "waitingReject": "拒绝用户"
+            },
+            "recording": {
+                "title": "录制",
+                "description": "录制将被保存在将其停止的主持人的文件空间中。"
+            }
+        },
+        "snackbar": {
+            "waitingInfo": "等待房间中似乎有用户"
+        },
+        "browserNotification": {
+            "waitingTitle": "等待房间中似乎有用户"
+        },
+        "waitingRoom": {
+            "hangUp": "挂断"
+        },
+        "recordingHint": "正在录制此会议",
+        "recordingStart": {
+            "failureSnackbar": "无法开始注册，请联系您的系统管理员。"
+        },
+        "recordingModal": {
+            "title": "停止录制",
+            "description": "您即将停止录制。您可随时开始新录制。",
+            "inputLabel": "录制名称"
         }
     },
     "meetings": {
@@ -246,5 +297,8 @@
         }
     },
     "tryLater": "稍后再试",
-    "thanksForParticipating": "感谢参与"
+    "thanksForParticipating": "感谢参与",
+    "snackbar": {
+        "mutedByModerator": "您已被主持人静音，请取消静音以说话"
+    }
 }

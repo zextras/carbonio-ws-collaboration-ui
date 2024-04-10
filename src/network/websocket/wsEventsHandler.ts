@@ -126,7 +126,7 @@ export function wsEventsHandler(event: WsEvent): void {
 			break;
 		}
 		case WsEventType.MEETING_STARTED: {
-			state.startMeeting(event.meetingId);
+			state.startMeeting(event.meetingId, event.startedAt);
 
 			// Send custom event to open an incoming meeting notification
 			const meeting = find(state.meetings, (meeting) => meeting.id === event.meetingId);

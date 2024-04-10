@@ -66,18 +66,27 @@
         "undo": "Rückgängig machen",
         "decline": "Ablehnen",
         "enter": "Eingabe",
-        "joinMeeting": "An Sitzung teilnehmen"
+        "joinMeeting": "An Sitzung teilnehmen",
+        "ok": "Ok",
+        "cancel": "Abbrechen"
     },
     "attachments": {
         "addFromLocal": "Von lokalem Speicherort hinzufügen",
         "attachLinkFiles": "Öffentlichen Link von Files anhängen",
-        "stopUpload": "Hochladen stoppen"
+        "stopUpload": "Hochladen stoppen",
+        "integrations": {
+            "chooseFile": "Datei auswählen",
+            "shareLink": "Öffentlichen Link teilen"
+        }
     },
     "conversation": {
         "chooseConversationDescription": "Wählen Sie ein Gespräch, um einen Chat zu beginnen",
         "keepInTouchTitle": "Lassen Sie uns in Kontakt bleiben!",
         "newMessage": "Neue Nachricht",
-        "newMessages": "Neue Nachrichten"
+        "newMessages": "Neue Nachrichten",
+        "selectionMode": {
+            "exit": "Auswahlmodus verlassen"
+        }
     },
     "date": {
         "yesterday": "Gestern"
@@ -101,15 +110,25 @@
     },
     "settings": {
         "notifications": {
-            "checkboxLabel": "Desktop Benachrichtigungen",
-            "title": "Benachrichtigungen"
+            "title": "Benachrichtigungen",
+            "subtitle": {
+                "general": "Allgemein"
+            }
         },
         "profile": {
             "errorGenericResponse": "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut",
             "title": "Profil"
         },
         "save": "Änderungen korrekt gespeichert",
-        "title": "Chat Einstellungen"
+        "title": "Chat Einstellungen",
+        "meetings": {
+            "description": "Legen Sie Ihre bevorzugten Audio- und Videoeinstellungen fest, um an Meetings teilzunehmen. Sie können Ihre Einstellungen vor jedem Meeting immer anpassen.",
+            "title": "Sitzungen"
+        },
+        "recording": {
+            "inputLabel": "Zielordner",
+            "title": "Aufnahme"
+        }
     },
     "status": {
         "lastSeen": "Zuletzt gesehen {{lastSeen}}",
@@ -133,6 +152,38 @@
         "joinMeeting": "An Sitzung teilnehmen",
         "newMeetingNotification": {
             "sendMessage": "Nachricht senden"
+        },
+        "virtual": {
+            "deleteTooltip": "Virtuellen Raum löschen"
+        },
+        "sidebar": {
+            "waitingCaption": "Warten auf den Eintritt",
+            "tooltip": {
+                "waitingAccept": "Benutzer hereinlassen",
+                "waitingReject": "Benutzer ablehnen"
+            },
+            "recording": {
+                "title": "Aufnahme",
+                "description": "Die Aufnahme wird im Files Space des Moderators gespeichert werden, der diese beendet hat."
+            }
+        },
+        "snackbar": {
+            "waitingInfo": "Es scheint jemand im Warteraum zu sein"
+        },
+        "browserNotification": {
+            "waitingTitle": "Es scheint jemand im Warteraum zu sein"
+        },
+        "waitingRoom": {
+            "hangUp": "Auflegen"
+        },
+        "recordingHint": "Diese Sitzung wird aufgezeichnet",
+        "recordingStart": {
+            "failureSnackbar": "Es ist nicht möglich, die Registrierung zu starten, wenden Sie sich bitte an Ihren Systemadministrator."
+        },
+        "recordingModal": {
+            "title": "Aufnahme anhalten",
+            "description": "Sie werden die Aufnahme anhalten. Sie können eine neue Aufnahme jederzeit starten.",
+            "inputLabel": "Name der Aufnahme"
         }
     },
     "meetings": {
@@ -146,5 +197,8 @@
         }
     },
     "thanksForParticipating": "Danke für die Teilnahme",
-    "tryLater": "Versuchen Sie es später"
+    "tryLater": "Versuchen Sie es später",
+    "snackbar": {
+        "mutedByModerator": "Sie wurden von einem Moderator stummgeschaltet, heben Sie die Stummschaltung auf, um zu sprechen"
+    }
 }

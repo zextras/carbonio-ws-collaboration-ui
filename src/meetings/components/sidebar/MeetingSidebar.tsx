@@ -63,8 +63,8 @@ const MeetingSidebar = (): ReactElement => {
 	const expandSidebarLabel = t('tooltip.expandSidebar', 'Expand sidebar');
 
 	const roomId = useStore((store) => getRoomIdByMeetingId(store, meetingId));
-	const roomType = useStore((store) => getRoomTypeSelector(store, roomId || ''));
-	const amIModerator = useStore((store) => getOwnershipOfTheRoom(store, roomId || ''));
+	const roomType = useStore((store) => getRoomTypeSelector(store, roomId ?? ''));
+	const amIModerator = useStore((store) => getOwnershipOfTheRoom(store, roomId ?? ''));
 	const meetingChatVisibility = useStore((store) => getMeetingChatVisibility(store, meetingId));
 	const sidebarIsVisible: boolean = useStore((store) => getMeetingSidebarStatus(store, meetingId));
 	const setMeetingSidebarStatus = useStore((store) => store.setMeetingSidebarStatus);

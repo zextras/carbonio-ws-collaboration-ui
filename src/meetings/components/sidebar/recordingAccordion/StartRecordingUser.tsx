@@ -31,7 +31,7 @@ const StartRecordingUser = ({ meetingId }: StartRecordingUserProps): ReactElemen
 		'has started recording'
 	);
 
-	const startRecordingUserId = useStore((state) => getStartRecordingUserId(state, meetingId)) || '';
+	const startRecordingUserId = useStore((state) => getStartRecordingUserId(state, meetingId)) ?? '';
 	const memberName: string | undefined = useStore((store) =>
 		getUserName(store, startRecordingUserId)
 	);

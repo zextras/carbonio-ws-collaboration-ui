@@ -14,6 +14,7 @@
         "decline": "Decline",
         "declineAll": "Decline all",
         "delete": "Delete",
+        "deleteForAll": "Delete for all",
         "download": "Download",
         "edit": "Edit",
         "editDetails": "Edit details",
@@ -66,7 +67,7 @@
         "roomTopicRemoved": "{{name}} removed {{roomName}}'s topic"
     },
     "conversation": {
-        "chooseConversationDescription": "Choose a conversation to start a chat",
+        "chooseConversationDescription": "Choose a chat to start a conversation",
         "emptyListDescription": "Chats and Groups will appear listed here",
         "emptyListTitle": "This list is empty",
         "keepInTouchTitle": "Let's keep in touch!",
@@ -75,7 +76,7 @@
         "newMessage": "New message",
         "newMessages": "New messages",
         "selectionMode": {
-            "exit": "Exit Selection Mode",
+            "exit": "Exit selection mode",
             "maxSelected": "The maximum number of messages that can be forwarded at the same time has been reached",
             "multipleForward": "forward {{numberOfMessages}} messages"
         }
@@ -127,7 +128,7 @@
     },
     "keepInTouchWithColleagues": "Keep in touch with your colleagues or join your groups' meeting rooms",
     "meeting": {
-        "activeMeetingTooltip": "There's an active meeting for this Conversation",
+        "activeMeetingTooltip": "There's an active meeting for this Chat",
         "browserNotification": {
             "waitingMessage": "New user is waiting to enter the meeting",
             "waitingTitle": "There seems to be someone in the Waiting Room"
@@ -135,6 +136,7 @@
         "collapseChat": "Collapse chat",
         "collapseParticipantsMeetingTooltip": "Collapse participants list",
         "continueActiveSession": "Continue the meeting in the new window",
+        "durationTooltip": "Meeting duration",
         "expandChat": "Expand chat",
         "expandParticipantsListTooltip": "Expand participants list",
         "extendChat": "Extend chat",
@@ -159,6 +161,7 @@
             }
         },
         "interactions": {
+            "camDevice": "Camera device",
             "cameraDisabled": "Camera disabled",
             "cameraEnabled": "Camera enabled",
             "cinemaView": "Cinema view",
@@ -173,10 +176,11 @@
             "gridView": "Grid view",
             "leaveConfirmation": "Leave Meeting?",
             "leaveMeeting": "Leave Meeting",
+            "micDevice": "Microphone device",
             "microphoneDisabled": "Microphone disabled",
             "microphoneEnabled": "Microphone enabled",
-            "playMic": "Start microphone testing",
-            "stopMic": "Stop microphone testing"
+            "playMic": "Start mic test",
+            "stopMic": "Stop mic test"
         },
         "joinMeeting": "Join meeting",
         "joinMeetingDescription": "How do you want to join this meeting?",
@@ -223,7 +227,6 @@
         },
         "rejoinMeeting": "Rejoin meeting",
         "restartMeeting": "Restart meeting",
-        "scheduledMeetingLabel": "Your Virtual Rooms",
         "setInputDescription": "Set your input devices by choosing them from dropdown menu",
         "sidebar": {
             "recording": {
@@ -243,21 +246,21 @@
             "waitingList": "Waiting list"
         },
         "snackbar": {
-            "waitingInfo": "There seems to be someone in the waiting room"
+            "waitingInfo": "There seems to be someone in the Waiting Room"
         },
         "startMeeting": "Start meeting",
         "startModal": {
             "audioAndVideoLoading": "Assets are loading",
-            "enterOneToOneMeetingTitle": "Start meeting with {{meetingTitle}}",
+            "enterOneToOneMeetingTitle": "Join meeting with {{meetingTitle}}",
             "enterRoomMeetingTitle": "Participate to {{meetingTitle}} meeting"
         },
         "tooltip": {
             "activeSessionTooltip": "You have an active session in this meeting"
         },
         "virtual": {
-            "buttonLabel": "Your Virtual Rooms",
-            "copyLinkSnackbar": "Virtual Room's link copied",
-            "copyLinkTooltip": "Copy Virtual Room's link",
+            "buttonLabel": "your virtual rooms",
+            "copyLinkSnackbar": "Virtual Room’s link copied",
+            "copyLinkTooltip": "Copy Virtual Room’s link",
             "copyTooltip": "Copy Virtual Room's link",
             "createTooltip": "Create new Virtual Room",
             "creationInput": "New Virtual Room’s name*",
@@ -265,7 +268,7 @@
             "deleteModalTitle": "Delete {{roomName}} Virtual Room",
             "deleteSnackbar": "Virtual Room deleted successfully",
             "deleteTooltip": "Delete Virtual Room",
-            "emptyState": "The Rooms you create will be shown here",
+            "emptyState": "Virtual Rooms you create will be shown here.",
             "invalidNameTooltip": "Invalid name",
             "nameRequiredTooltip": "Virtual Room’s name is required"
         },
@@ -278,7 +281,8 @@
             "readyHint": "You will enter the meeting in a few moments",
             "setInputs": "Set your input devices by choosing them from dropdown menu",
             "title": "How do you want to join {{meetingName}} meeting?",
-            "welcomeCaption": "When you are ready, get comfortable.",
+            "userIsReady": "You're ready!",
+            "welcomeCaption": "When you're ready, get comfortable.",
             "welcomeHint": "Click on “READY TO PARTICIPATE” to enter the meeting"
         }
     },
@@ -296,7 +300,7 @@
         "originallySentBy": "Originally sent by:"
     },
     "modal": {
-        "clearHistoryDescription": "You're cleaning your conversation history, please note that this action is irreversible. The history will be deleted for you and not for the other members.",
+        "clearHistoryDescription": "You're cleaning your chat history, please note that this action is irreversible. The history will be deleted for you and not for the other members.",
         "creation": {
             "addUserLimit": {
                 "limitReached": "You have selected the maximum number of members for a group",
@@ -328,9 +332,9 @@
         "leaveGroupLabel": "Are you sure to leave this Group?",
         "leaveRoom": "Leave Room",
         "leaveRoomLabel": "Are you sure to leave this Room?",
-        "muteForAllDescription": "By muting the user, all the participants won't hear the user anymore. Only muted user can be unmute himself. Proceed?",
+        "muteForAllDescription": "By muting the user, all participants will no longer hear the user. Only the muted user can unmute. Proceed?",
         "removeMember": "Remove member",
-        "showPreviousConversationHistory": "Show previous conversation history"
+        "showPreviousConversationHistory": "Show previous chat history"
     },
     "notification": {
         "meeting": {
@@ -400,11 +404,11 @@
         "goToPrivateChat": "Go to private chat to send a personal message",
         "isTyping": "is typing…",
         "lastSeen": "Last seen {{lastSeen}}",
-        "nameAndNumberOfPeopleAreTyping": "{{userName}} and {{numberOfUsers}} others are typing...",
-        "numberOfPeopleAreTyping": "{{numberOfUsers}} people are typing...",
+        "nameAndNumberOfPeopleAreTyping": "{{userName}} and {{numberOfUsers}} others are typing…",
+        "numberOfPeopleAreTyping": "{{numberOfUsers}} people are typing…",
         "offline": "Offline",
         "online": "Online",
-        "you": " You"
+        "you": "You"
     },
     "thanksForParticipating": "Thanks for participating",
     "titlePlaceholder": "Your Group's title",
@@ -421,7 +425,7 @@
         "forwardedMessage": "Message forwarded from another chat",
         "goToPrivateChat": "Go to private chat",
         "iAmModerator": "You're a moderator",
-        "leaveAndDelete": "Leave and delete the conversation",
+        "leaveAndDelete": "Leave and delete the chat",
         "leaveConversation": "Leave Group",
         "memberIsModerator": "This member is a moderator",
         "messageActions": "Message actions",
@@ -445,7 +449,7 @@
         "scrollUp": "Scroll up",
         "selectEmoji": "Select emoji",
         "sendMessage": "Send message",
-        "showConversationList": "Show conversations list",
+        "showConversationList": "Show chat list",
         "topOfList": "Top of list",
         "unpinVideo": "Unpin video",
         "uploadAttachment": "Upload an attachment",

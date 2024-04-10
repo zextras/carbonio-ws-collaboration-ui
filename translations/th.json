@@ -47,12 +47,18 @@
         "replyToYourself": "ตอบกลับไปยังตัวของคุณเอง",
         "decline": "ปฏิเสธ",
         "enter": "เข้าสู่การประชุม",
-        "joinMeeting": "เข้าร่วมการประชุม"
+        "joinMeeting": "เข้าร่วมการประชุม",
+        "ok": "ตกลง",
+        "cancel": "ยกเลิก"
     },
     "attachments": {
         "addFromLocal": "เพิ่มจาก local",
         "attachLinkFiles": "แนบลิงก์สาธารณะจาก Files",
-        "stopUpload": "หยุดอัปโหลด"
+        "stopUpload": "หยุดอัปโหลด",
+        "integrations": {
+            "chooseFile": "เลือกไฟล์",
+            "shareLink": "แชร์ลิงก์สาธารณะ"
+        }
     },
     "settings": {
         "profile": {
@@ -62,8 +68,18 @@
         "save": "บันทึกการแก้ไขอย่างถูกต้อง",
         "title": "การตั้งค่า Chats",
         "notifications": {
-            "checkboxLabel": "การแจ้งเตือนของเดสก์ท็อป",
-            "title": "การแจ้งเตือน"
+            "title": "การแจ้งเตือน",
+            "subtitle": {
+                "general": "ทั่วไป"
+            }
+        },
+        "meetings": {
+            "title": "การประชุม",
+            "description": "ตั้งค่าเสียงและวิดีโอของคุณเพื่อเข้าสู่การประชุม คุณสามารถปรับการตั้งค่าของคุณก่อนเข้าร่วมการประชุมได้ทุกครั้ง"
+        },
+        "recording": {
+            "inputLabel": "โฟลเดอร์ปลายทาง",
+            "title": "กำลังบันทึก"
         }
     },
     "status": {
@@ -76,7 +92,10 @@
         "chooseConversationDescription": "เลือกการสนทนาเพื่อเริ่มการแชท",
         "keepInTouchTitle": "เรามาติดต่อกันเถอะ!",
         "newMessage": "ข้อความใหม่",
-        "newMessages": "ข้อความใหม่"
+        "newMessages": "ข้อความใหม่",
+        "selectionMode": {
+            "exit": "ออกจากโหมดการเลือก"
+        }
     },
     "conversationInfo": {
         "actionAccordionTitle": "การดำเนินการ",
@@ -136,7 +155,39 @@
             "enableMicrophone": "เปิดไมโครโฟน",
             "microphoneEnabled": "เปิดใช้งานไมโครโฟน"
         },
-        "joinMeeting": "เข้าร่วมการประชุม"
+        "joinMeeting": "เข้าร่วมการประชุม",
+        "virtual": {
+            "deleteTooltip": "ลบห้องเสมือนจริง"
+        },
+        "sidebar": {
+            "waitingCaption": "กำลังรอเข้า",
+            "tooltip": {
+                "waitingAccept": "ให้ผู้ใช้เข้า",
+                "waitingReject": "ปฏิเสธผู้ใช้"
+            },
+            "recording": {
+                "title": "กำลังบันทึก",
+                "description": "การบันทึกจะถูกเก็บบันทึกไว้ในพื้นที่ไฟล์ของผู้ดูแลที่ทำการหยุดการบันทึก"
+            }
+        },
+        "snackbar": {
+            "waitingInfo": "ดูเหมือนว่าจะมีใครบางคนรออยู่ในห้องคัดกรอง"
+        },
+        "browserNotification": {
+            "waitingTitle": "ดูเหมือนว่าจะมีใครบางคนรออยู่ในห้องคัดกรอง"
+        },
+        "waitingRoom": {
+            "hangUp": "วางสาย"
+        },
+        "recordingHint": "กำลังบันทึกการประชุมนี้อยู่",
+        "recordingStart": {
+            "failureSnackbar": "ไม่สามารถเริ่มการลงทะเบียนได้ โปรดติดต่อผู้ดูแลระบบของคุณ"
+        },
+        "recordingModal": {
+            "title": "หยุดการบันทึก",
+            "description": "คุณจะหยุดการบันทึก คุณสามารถเริ่มต้นใหม่ได้ตลอดเวลา",
+            "inputLabel": "ชื่อการบันทึก"
+        }
     },
     "meetings": {
         "interactions": {
@@ -149,5 +200,8 @@
         }
     },
     "thanksForParticipating": "ขอขอบคุณที่เข้าร่วม",
-    "tryLater": "ลองในภายหลัง"
+    "tryLater": "ลองในภายหลัง",
+    "snackbar": {
+        "mutedByModerator": "คุณถูกปิดเสียงโดยผู้ดูแล เปิดเสียงตัวเองเพื่อพูด"
+    }
 }

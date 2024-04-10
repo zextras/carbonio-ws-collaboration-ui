@@ -38,7 +38,7 @@ const StopRecordingModal = ({
 	meetingId
 }: StopRecordingModalProps): ReactElement => {
 	const roomId = useStore((state) => getRoomIdByMeetingId(state, meetingId));
-	const roomName = useStore((state) => getRoomNameSelector(state, roomId || ''));
+	const roomName = useStore((state) => getRoomNameSelector(state, roomId ?? ''));
 
 	const defaultRecordingName = useMemo(
 		() => `Rec ${formatDate(new Date(), 'YYYY-MM-DD HHmm')} ${roomName}`.replaceAll(' ', '_'),
@@ -126,18 +126,15 @@ const StopRecordingModal = ({
 		return undefined;
 	}, [filenameIsTooLongLabel, filenameIsRequiredLabel, recordingName]);
 
+	const tooltipLabel = useMemo(() => {
+		if (recordingName === '') return filenameIsRequiredLabel;
+		if (recordingName.length >= 128) return filenameIsTooLongLabel;
+		return '';
+	}, [filenameIsRequiredLabel, filenameIsTooLongLabel, recordingName]);
+
 	const CustomFooter = useMemo(
 		() => (
-			<Tooltip
-				label={
-					recordingName === ''
-						? filenameIsRequiredLabel
-						: recordingName.length >= 128
-						? filenameIsTooLongLabel
-						: ''
-				}
-				placement="right"
-			>
+			<Tooltip label={tooltipLabel} placement="right">
 				<Container crossAlignment="flex-end">
 					<Button
 						color="error"
@@ -148,7 +145,7 @@ const StopRecordingModal = ({
 				</Container>
 			</Tooltip>
 		),
-		[filenameIsRequiredLabel, filenameIsTooLongLabel, recordingName, stopButtonLabel, stopRecording]
+		[recordingName, stopButtonLabel, stopRecording, tooltipLabel]
 	);
 
 	return (

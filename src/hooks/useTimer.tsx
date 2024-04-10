@@ -9,8 +9,8 @@ import { useEffect, useState } from 'react';
 
 import { dateToTimestamp } from '../utils/dateUtils';
 
-const useTimer = (date: string | number | Date): string => {
-	const difference = Date.now() - dateToTimestamp(date);
+const useTimer = (date: string | number | Date | undefined): string => {
+	const difference = Date.now() - dateToTimestamp(date ?? Date.now());
 	const [timespan, setTimespan] = useState(() => (difference > 0 ? difference : 0));
 
 	useEffect(() => {

@@ -18,6 +18,7 @@ export type Meeting = {
 	createdAt: string;
 	meetingType: MeetingType;
 	waitingList?: string[];
+	startedAt?: string;
 	recStartedAt?: string;
 	recUserId?: string;
 };
