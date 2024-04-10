@@ -99,17 +99,17 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 		]
 	);
 
-	const mediaVideoList: { id: string; label: string; value: MediaDeviceInfo }[] = useMemo(
+	const mediaVideoList: { id: string; label: string; value: string }[] = useMemo(
 		() =>
 			map(videoMediaList, (videoItem: MediaDeviceInfo, i) => ({
 				id: `device-${i}`,
 				label: videoItem.label ? videoItem.label : `device-${i}`,
-				value: videoItem
+				value: videoItem.deviceId
 			})),
 		[videoMediaList]
 	);
 
-	const mediaAudioList = useMemo(
+	const mediaAudioList: { id: string; label: string; value: string }[] = useMemo(
 		() =>
 			map(audioMediaList, (audioItem: MediaDeviceInfo, i) => ({
 				id: `device-${i}`,

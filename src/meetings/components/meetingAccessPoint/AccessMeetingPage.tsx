@@ -104,7 +104,6 @@ const AccessMeetingPage: FC<AccessMeetingPageProps> = ({ hasUserDirectAccess, me
 
 	const handleMeetingEnded = useCallback(() => {
 		if (!hasUserDirectAccess) {
-			console.log('AAA');
 			goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED);
 		}
 	}, [goToInfoPage, hasUserDirectAccess]);
