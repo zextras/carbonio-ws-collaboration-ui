@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { find } from 'lodash';
+
 import BaseAPI from './BaseAPI';
 import useStore from '../../store/Store';
 import { RequestType } from '../../types/network/apis/IBaseAPI';
@@ -14,21 +16,28 @@ import {
 	MeetingType
 } from '../../types/network/models/meetingBeTypes';
 import {
+	AcceptWaitingUserResponse,
 	CreateAudioOfferResponse,
 	CreateMediaAnswerResponse,
 	CreateMeetingResponse,
 	DeleteMeetingResponse,
 	GetMeetingResponse,
+	GetScheduledMeetingNameResponse,
+	GetWaitingListResponse,
 	JoinMeetingResponse,
 	LeaveMeetingResponse,
 	ListMeetingsResponse,
 	StartMeetingResponse,
+	StartRecordingResponse,
 	StopMeetingResponse,
+	StopRecordingResponse,
 	SubscribeMediaResponse,
 	UpdateAudioStreamStatusResponse,
 	UpdateMediaOfferResponse
 } from '../../types/network/responses/meetingsResponses';
 import { STREAM_TYPE, Subscription } from '../../types/store/ActiveMeetingTypes';
+import { RoomType } from '../../types/store/RoomTypes';
+import { RoomsApi } from '../index';
 
 class MeetingsApi extends BaseAPI implements IMeetingsApi {
 	// Singleton design pattern
@@ -52,12 +61,13 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 	public createMeeting(
 		roomId: string,
 		meetingType: MeetingType,
+		name: string,
 		expiration?: string
 	): Promise<CreateMeetingResponse> {
 		const createMeetingData: CreateMeetingData = {
 			roomId,
 			meetingType,
-			name: '',
+			name,
 			expiration
 		};
 		return this.fetchAPI(`meetings`, RequestType.POST, createMeetingData);
@@ -87,16 +97,28 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 		devicesId: { audioDevice?: string; videoDevice?: string }
 	): Promise<JoinMeetingResponse> {
 		return this.fetchAPI(`meetings/${meetingId}/join`, RequestType.POST, settings).then((resp) => {
-			useStore
-				.getState()
-				.meetingConnection(
-					meetingId,
-					settings.audioStreamEnabled,
-					devicesId.audioDevice,
-					settings.videoStreamEnabled,
-					devicesId.videoDevice
-				);
-			this.getMeetingByMeetingId(meetingId);
+			if (resp.status === 'ACCEPTED') {
+				useStore
+					.getState()
+					.meetingConnection(
+						meetingId,
+						settings.audioStreamEnabled,
+						devicesId.audioDevice,
+						settings.videoStreamEnabled,
+						devicesId.videoDevice
+					);
+				return this.getMeetingByMeetingId(meetingId).then((meeting) => {
+					if (meeting.meetingType === MeetingType.SCHEDULED) {
+						const room = find(useStore.getState().rooms, (room) => room.meetingId === meetingId);
+						const iAmOwner = find(
+							room?.members,
+							(member) => member.userId === useStore.getState().session.id && member.owner
+						);
+						if (iAmOwner) this.getWaitingList(meetingId);
+					}
+					return resp;
+				});
+			}
 			return resp;
 		});
 	}
@@ -115,7 +137,8 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 				this.joinMeeting(meeting.id, settings, devicesId).then(() => meeting.id)
 			);
 		}
-		return this.createMeeting(roomId, MeetingType.PERMANENT).then((response) =>
+		const roomName = useStore.getState().rooms[roomId]?.name || '';
+		return this.createMeeting(roomId, MeetingType.PERMANENT, roomName).then((response) =>
 			this.startMeeting(response.id).then(() =>
 				this.joinMeeting(response.id, settings, devicesId).then(() => response.id)
 			)
@@ -123,9 +146,19 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 	}
 
 	public leaveMeeting(meetingId: string): Promise<LeaveMeetingResponse> {
+		const room = find(useStore.getState().rooms, (room) => room.meetingId === meetingId);
+		const iAmNotOwner = find(
+			room?.members,
+			(member) => member.userId === useStore.getState().session.id && !member.owner
+		);
 		return this.fetchAPI(`meetings/${meetingId}/leave`, RequestType.POST).then(
 			(resp: LeaveMeetingResponse) => {
 				useStore.getState().meetingDisconnection(meetingId);
+
+				// Leave temporary room when a member leaves the scheduled meeting
+				if (room?.type === RoomType.TEMPORARY && iAmNotOwner) {
+					RoomsApi.deleteRoomMember(room.id, useStore.getState().session.id || '');
+				}
 				return resp;
 			}
 		);
@@ -191,6 +224,50 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 	): Promise<CreateMediaAnswerResponse> {
 		return this.fetchAPI(`meetings/${meetingId}/media/answer`, RequestType.PUT, {
 			sdp: sdpAnswer
+		});
+	}
+
+	public getScheduledMeetingName(meetingId: string): Promise<GetScheduledMeetingNameResponse> {
+		return this.fetchAPI(`public/meetings/${meetingId}`, RequestType.GET, undefined);
+	}
+
+	public leaveWaitingRoom(meetingId: string): Promise<AcceptWaitingUserResponse> {
+		const userId = useStore.getState().session.id;
+		return this.fetchAPI(`meetings/${meetingId}/queue/${userId}`, RequestType.POST, {
+			status: 'REJECTED'
+		});
+	}
+
+	public getWaitingList(meetingId: string): Promise<GetWaitingListResponse> {
+		return this.fetchAPI(`meetings/${meetingId}/queue`, RequestType.GET).then((resp) => {
+			useStore.getState().setWaitingList(meetingId, resp.users);
+			return resp;
+		});
+	}
+
+	public acceptWaitingUser(
+		meetingId: string,
+		userId: string,
+		accept: boolean
+	): Promise<AcceptWaitingUserResponse> {
+		const status = accept ? 'ACCEPTED' : 'REJECTED';
+		return this.fetchAPI(`meetings/${meetingId}/queue/${userId}`, RequestType.POST, {
+			status
+		});
+	}
+
+	startRecording(meetingId: string): Promise<StartRecordingResponse> {
+		return this.fetchAPI(`meetings/${meetingId}/startRecording`, RequestType.POST);
+	}
+
+	stopRecording(
+		meetingId: string,
+		recordingName: string,
+		folderId: string
+	): Promise<StopRecordingResponse> {
+		return this.fetchAPI(`meetings/${meetingId}/stopRecording`, RequestType.POST, {
+			name: recordingName,
+			folderId
 		});
 	}
 }

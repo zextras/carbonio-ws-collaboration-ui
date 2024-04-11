@@ -20,7 +20,7 @@ import { getActionsAccordionStatus } from '../../../../store/selectors/ActiveCon
 import { getMeetingActionsAccordionStatus } from '../../../../store/selectors/ActiveMeetingSelectors';
 import { roomIsEmpty } from '../../../../store/selectors/MessagesSelectors';
 import {
-	getMyOwnershipOfTheRoom,
+	getOwnershipOfTheRoom,
 	getNumberOfOwnersOfTheRoom,
 	getNumbersOfRoomMembers,
 	getRoomTypeSelector
@@ -47,9 +47,8 @@ export const ActionsAccordion: FC<ActionAccordionProps> = ({
 	const [t] = useTranslation();
 	const actionAccordionTitle: string = t('conversationInfo.actionAccordionTitle', 'Actions');
 	const roomType: string = useStore((state) => getRoomTypeSelector(state, roomId));
-	const sessionId: string | undefined = useStore((state) => state.session.id);
 	const numberOfMembers: number = useStore((state) => getNumbersOfRoomMembers(state, roomId));
-	const iAmOwner: boolean = useStore((state) => getMyOwnershipOfTheRoom(state, sessionId, roomId));
+	const iAmOwner: boolean = useStore((state) => getOwnershipOfTheRoom(state, roomId));
 	const numberOfOwners: number = useStore((state) => getNumberOfOwnersOfTheRoom(state, roomId));
 	const emptyRoom: boolean = useStore((state) => roomIsEmpty(state, roomId));
 	const accordionStatus: boolean = useStore((state) => getActionsAccordionStatus(state, roomId));
@@ -200,6 +199,7 @@ export const ActionsAccordion: FC<ActionAccordionProps> = ({
 	return (
 		<CustomAccordion
 			key="listAccordions"
+			data-testid="actionsAccordion"
 			items={infoDetails}
 			borderRadius="none"
 			background={isInsideMeeting ? 'gray0' : 'gray5'}

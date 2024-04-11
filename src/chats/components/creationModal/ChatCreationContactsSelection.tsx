@@ -88,6 +88,24 @@ const ChatCreationContactsSelection = ({
 		[isCreationModal, maxMembers]
 	);
 
+	const membersToAdd = useMemo(() => {
+		if (typeof maxGroupMembers === 'number' && maxGroupMembers - size(contactsSelected) !== 0) {
+			if (isCreationModal) return maxGroupMembers - size(contactsSelected);
+			if (maxGroupMembers - size(members) - size(contactsSelected) !== 0) {
+				return maxGroupMembers - size(members) - size(contactsSelected);
+			}
+		}
+		return -1;
+	}, [contactsSelected, isCreationModal, maxGroupMembers, members]);
+
+	const addUsersLimit = t(
+		'modal.creation.addUserLimit.users',
+		'You can invite other {{count}} members',
+		{
+			count: maxGroupMembers ? membersToAdd : 0
+		}
+	);
+
 	const [result, setResult] = useState<ContactMatch[]>([]);
 	const [chips, setChips] = useState<ChipItem<ContactInfo>[]>([]);
 	const [loading, setLoading] = useState<boolean>(false);
@@ -202,7 +220,7 @@ const ChatCreationContactsSelection = ({
 			isCreationModal
 				? typeof maxGroupMembers === 'number' && maxGroupMembers <= size(contactsSelected)
 				: typeof maxGroupMembers === 'number' &&
-				  maxGroupMembers - size(members) <= size(contactsSelected),
+					maxGroupMembers - size(members) <= size(contactsSelected),
 		[isCreationModal, contactsSelected, maxGroupMembers, members]
 	);
 
@@ -239,24 +257,9 @@ const ChatCreationContactsSelection = ({
 	);
 
 	const chipInputDescriptionLabel = useMemo(() => {
-		if (isCreationModal) {
-			if (typeof maxGroupMembers === 'number' && maxGroupMembers - size(contactsSelected) !== 0) {
-				return t('modal.creation.addUserLimit.users', 'You can invite other {{count}} members', {
-					count: maxGroupMembers ? maxGroupMembers - size(contactsSelected) : 0
-				});
-			}
-			return addUserLimitReachedLabel;
-		}
-		if (
-			typeof maxGroupMembers === 'number' &&
-			maxGroupMembers - size(members) - size(contactsSelected) !== 0
-		) {
-			return t('modal.creation.addUserLimit.users', 'You can invite other {{count}} members', {
-				count: maxGroupMembers ? maxGroupMembers - size(members) - size(contactsSelected) : 0
-			});
-		}
+		if (membersToAdd !== -1) return addUsersLimit;
 		return addUserLimitReachedLabel;
-	}, [isCreationModal, maxGroupMembers, contactsSelected, t, addUserLimitReachedLabel, members]);
+	}, [membersToAdd, addUsersLimit, addUserLimitReachedLabel]);
 
 	const contentToDisplay = useMemo(() => {
 		if (loading) {

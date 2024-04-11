@@ -6,12 +6,14 @@
 
 import React from 'react';
 
-import { screen, waitFor } from '@testing-library/react';
+import { screen } from '@testing-library/react';
+import { act } from '@testing-library/react-hooks';
 
 import MeetingNotification from './MeetingNotification';
 import useStore from '../../store/Store';
 import { createMockMeeting, createMockRoom, createMockUser } from '../../tests/createMock';
 import { mockedSendChatMessage } from '../../tests/mockedXmppClient';
+import { mockedCreateMeetingRequest } from '../../tests/mocks/network';
 import { setup } from '../../tests/test-utils';
 import { RoomType } from '../../types/store/RoomTypes';
 
@@ -29,6 +31,7 @@ beforeEach(() => {
 	store.addRoom(room);
 	store.addMeeting(meeting);
 });
+
 describe('MeetingNotification', () => {
 	test('Everything is rendered correctly', () => {
 		setup(
@@ -75,8 +78,10 @@ describe('MeetingNotification', () => {
 				stopMeetingSound={jest.fn()}
 			/>
 		);
-		userEvent.type(screen.getByPlaceholderText(sendAQuickMessage), 'Hello{enter}');
-		await waitFor(() => expect(mockedSendChatMessage).toHaveBeenCalled());
+		await act(async () => {
+			await userEvent.type(screen.getByPlaceholderText(sendAQuickMessage), 'Hello{enter}');
+		});
+		expect(mockedSendChatMessage).toHaveBeenCalled();
 	});
 
 	test('Declining a meeting removes the notification', async () => {
@@ -95,6 +100,7 @@ describe('MeetingNotification', () => {
 
 	test('Joining a meeting removes the notification', async () => {
 		jest.spyOn(window, 'open').mockImplementation(() => null);
+		mockedCreateMeetingRequest.mockResolvedValueOnce(meeting);
 		const { user: userEvent } = setup(
 			<MeetingNotification
 				id={'notificationId'}

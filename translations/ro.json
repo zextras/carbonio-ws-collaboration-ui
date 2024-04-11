@@ -14,7 +14,9 @@
         "edit": "Editeaza",
         "preview": "Examinare",
         "removeUser": "Eliminare",
-        "undo": "Anulare"
+        "undo": "Anulare",
+        "ok": "O.k",
+        "cancel": "Anulare"
     },
     "settings": {
         "notifications": {

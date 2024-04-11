@@ -7,104 +7,172 @@
 import React from 'react';
 
 import { screen } from '@testing-library/react';
-import { act, renderHook } from '@testing-library/react-hooks';
-import { UserEvent } from '@testing-library/user-event/setup/setup';
 
 import MeetingSidebar from './MeetingSidebar';
 import { useParams } from '../../../../__mocks__/react-router';
 import useStore from '../../../store/Store';
 import {
+	createMockCapabilityList,
 	createMockMeeting,
 	createMockMember,
 	createMockParticipants,
-	createMockRoom
+	createMockRoom,
+	createMockUser
 } from '../../../tests/createMock';
 import { setup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
-import { MeetingParticipant } from '../../../types/store/MeetingTypes';
-import { RootStore } from '../../../types/store/StoreTypes';
 
-const groupRoom: RoomBe = createMockRoom({
-	id: 'room-test',
-	type: RoomType.GROUP,
-	members: [
-		createMockMember({ userId: 'user1', owner: true }),
-		createMockMember({ userId: 'user2', owner: true })
-	],
-	userSettings: { muted: false }
-});
+const sessionUser = createMockUser({ id: 'sessionId', name: 'Session User' });
+const user1 = createMockUser({ id: 'user1', name: 'User 1' });
+const user2 = createMockUser({ id: 'user2', name: 'User 2' });
 
 const oneToOneRoom: RoomBe = createMockRoom({
-	id: 'room-test',
+	id: '1to1-room-test',
 	type: RoomType.ONE_TO_ONE,
 	members: [
-		createMockMember({ userId: 'user1', owner: true }),
-		createMockMember({ userId: 'user2', owner: true })
+		createMockMember({ userId: sessionUser.id, owner: true }),
+		createMockMember({ userId: user1.id, owner: true })
 	],
 	userSettings: { muted: false }
 });
 
-const user1Participant: MeetingParticipant = createMockParticipants({
-	userId: 'user1',
-	sessionId: 'sessionIdUser1'
+const groupRoom: RoomBe = createMockRoom({
+	id: 'group-room-test',
+	type: RoomType.GROUP,
+	members: [
+		createMockMember({ userId: sessionUser.id, owner: true }),
+		createMockMember({ userId: user1.id, owner: true }),
+		createMockMember({ userId: user2.id, owner: false })
+	],
+	userSettings: { muted: false }
 });
 
-const groupMeeting: MeetingBe = createMockMeeting({
-	roomId: groupRoom.id,
-	participants: [user1Participant]
+const temporaryRoomMod: RoomBe = createMockRoom({
+	id: 'temporary-mod-room-test',
+	type: RoomType.TEMPORARY,
+	members: [
+		createMockMember({ userId: sessionUser.id, owner: true }),
+		createMockMember({ userId: user1.id, owner: true }),
+		createMockMember({ userId: user2.id, owner: false })
+	]
+});
+
+const temporaryRoom: RoomBe = createMockRoom({
+	id: 'temporary-room-test',
+	type: RoomType.TEMPORARY,
+	members: [
+		createMockMember({ userId: sessionUser.id, owner: false }),
+		createMockMember({ userId: user1.id, owner: true }),
+		createMockMember({ userId: user2.id, owner: false })
+	]
 });
 
 const oneToOneMeeting: MeetingBe = createMockMeeting({
+	id: '1to1-meeting-test',
 	roomId: oneToOneRoom.id,
-	participants: [user1Participant]
+	participants: [createMockParticipants({ userId: sessionUser.id })]
 });
 
-const setupBasicGroup = (): { user: UserEvent; store: RootStore } => {
-	const { result } = renderHook(() => useStore());
-	act(() => {
-		result.current.addRoom(groupRoom);
-		result.current.addMeeting(groupMeeting);
-	});
-	useParams.mockReturnValue({ meetingId: groupMeeting.id });
-	const { user } = setup(<MeetingSidebar />);
-	return { user, store: result.current };
-};
+const groupMeeting: MeetingBe = createMockMeeting({
+	id: 'group-meeting-test',
+	roomId: groupRoom.id,
+	participants: [createMockParticipants({ userId: sessionUser.id })]
+});
 
-const setupBasicOneToOne = (): { user: UserEvent; store: RootStore } => {
-	const { result } = renderHook(() => useStore());
-	act(() => {
-		result.current.addRoom(oneToOneRoom);
-		result.current.addMeeting(oneToOneMeeting);
-		result.current.meetingConnection(oneToOneMeeting.id, false, 'audioId', false, 'videoId');
-	});
-	useParams.mockReturnValue({ meetingId: oneToOneMeeting.id });
-	const { user } = setup(<MeetingSidebar />);
-	return { user, store: result.current };
-};
+const scheduledMeetingMod: MeetingBe = createMockMeeting({
+	id: 'scheduled-meeting-mod-test',
+	roomId: temporaryRoomMod.id,
+	participants: [createMockParticipants({ userId: sessionUser.id })]
+});
 
+const scheduledMeeting: MeetingBe = createMockMeeting({
+	id: 'scheduled-meeting-test',
+	roomId: temporaryRoom.id,
+	participants: [createMockParticipants({ userId: sessionUser.id })]
+});
+
+beforeEach(() => {
+	const store = useStore.getState();
+	store.setLoginInfo(sessionUser.id, sessionUser.name);
+	store.setCapabilities(createMockCapabilityList({ canVideoCallRecord: true }));
+	store.setRooms([oneToOneRoom, groupRoom, temporaryRoom, temporaryRoomMod]);
+	store.setMeetings([oneToOneMeeting, groupMeeting, scheduledMeeting, scheduledMeetingMod]);
+	store.meetingConnection(oneToOneMeeting.id, false, 'audioId', false, 'videoId');
+	store.setWaitingList(scheduledMeetingMod.id, [user1.id]);
+});
 describe('Meeting sidebar', () => {
-	test('all elements rendered in a group meeting', () => {
-		setupBasicGroup();
+	test('OneToOne meeting has Action, Recording and Chat accordions ', async () => {
+		useParams.mockReturnValue({ meetingId: oneToOneMeeting.id });
+		setup(<MeetingSidebar />);
 		const actionsAccordions = screen.getByText(/Actions/);
+		const recordingAccordion = screen.queryByText(/Recording/);
+		const waitingListAccordion = screen.queryByText(/Waiting List/);
+		const participantsAccordion = screen.queryByTestId('MeetingParticipantsAccordion');
+		const chatAccordion = screen.getByText(/Chat/);
+		expect(actionsAccordions).toBeInTheDocument();
+		expect(recordingAccordion).toBeInTheDocument();
+		expect(waitingListAccordion).not.toBeInTheDocument();
+		expect(participantsAccordion).not.toBeInTheDocument();
+		expect(chatAccordion).toBeInTheDocument();
+	});
+
+	test('Group meeting has Action, Recording, Participant and Chat accordions ', async () => {
+		useParams.mockReturnValue({ meetingId: groupMeeting.id });
+		setup(<MeetingSidebar />);
+		const actionsAccordions = screen.getByText(/Actions/);
+		const recordingAccordion = screen.queryByText(/Recording/);
+		const waitingListAccordion = screen.queryByText(/Waiting List/);
 		const participantsAccordion = screen.getByTestId('MeetingParticipantsAccordion');
 		const chatAccordion = screen.getByText(/Chat/);
-		expect(actionsAccordions).toBeVisible();
-		expect(participantsAccordion).toBeVisible();
-		expect(chatAccordion).toBeVisible();
+		expect(actionsAccordions).toBeInTheDocument();
+		expect(recordingAccordion).toBeInTheDocument();
+		expect(waitingListAccordion).not.toBeInTheDocument();
+		expect(participantsAccordion).toBeInTheDocument();
+		expect(chatAccordion).toBeInTheDocument();
 	});
-	test('one to one meeting - participant accordion must not be present', () => {
-		setupBasicOneToOne();
-		const MeetingParticipantsAccordion = screen.queryByTestId('MeetingParticipantsAccordion');
-		const actionsAccordions = screen.getByText(/Actions/);
+
+	test('Scheduled meeting moderator has Recording, WaitingList, Participant and Chat accordions ', async () => {
+		useParams.mockReturnValue({ meetingId: scheduledMeetingMod.id });
+		setup(<MeetingSidebar />);
+		const actionsAccordions = screen.queryByText(/Actions/);
+		const recordingAccordion = screen.queryByText(/Recording/);
+		const waitingListAccordion = screen.queryByText(/Waiting list/);
+		const participantsAccordion = screen.getByTestId('MeetingParticipantsAccordion');
 		const chatAccordion = screen.getByText(/Chat/);
-		expect(actionsAccordions).toBeVisible();
-		expect(chatAccordion).toBeVisible();
-		expect(MeetingParticipantsAccordion).not.toBeInTheDocument();
+		expect(actionsAccordions).not.toBeInTheDocument();
+		expect(recordingAccordion).toBeInTheDocument();
+		expect(waitingListAccordion).toBeInTheDocument();
+		expect(participantsAccordion).toBeInTheDocument();
+		expect(chatAccordion).toBeInTheDocument();
+	});
+
+	test('Scheduled meeting member has Participant and Chat accordions ', () => {
+		useParams.mockReturnValue({ meetingId: scheduledMeeting.id });
+		setup(<MeetingSidebar />);
+		const actionsAccordions = screen.queryByText(/Actions/);
+		const recordingAccordion = screen.queryByText(/Recording/);
+		const waitingListAccordion = screen.queryByText(/Waiting List/);
+		const participantsAccordion = screen.getByTestId('MeetingParticipantsAccordion');
+		const chatAccordion = screen.getByText(/Chat/);
+		expect(actionsAccordions).not.toBeInTheDocument();
+		expect(recordingAccordion).not.toBeInTheDocument();
+		expect(waitingListAccordion).not.toBeInTheDocument();
+		expect(participantsAccordion).toBeInTheDocument();
+		expect(chatAccordion).toBeInTheDocument();
+	});
+
+	test('Recording accordion is not visible with recording capability set to false', async () => {
+		useParams.mockReturnValue({ meetingId: oneToOneMeeting.id });
+		useStore.getState().setCapabilities(createMockCapabilityList({ canVideoCallRecord: false }));
+		const { user } = setup(<MeetingSidebar />);
+		const recordingAccordion = screen.queryByText(/Recording/);
+		expect(recordingAccordion).not.toBeInTheDocument();
 	});
 
 	test('toggle Sidebar', async () => {
-		const { user } = setupBasicOneToOne();
+		useParams.mockReturnValue({ meetingId: oneToOneMeeting.id });
+		const { user } = setup(<MeetingSidebar />);
 		const button = screen.getByTestId('icon: ChevronLeftOutline');
 		expect(button).toBeInTheDocument();
 		await user.click(button);
@@ -113,7 +181,8 @@ describe('Meeting sidebar', () => {
 	});
 
 	test('when user click the sidebar button, the sidebar closes', async () => {
-		const { user } = setupBasicOneToOne();
+		useParams.mockReturnValue({ meetingId: oneToOneMeeting.id });
+		const { user } = setup(<MeetingSidebar />);
 
 		const sidebarButton = screen.getByTestId('sidebar_button');
 		await user.click(sidebarButton);

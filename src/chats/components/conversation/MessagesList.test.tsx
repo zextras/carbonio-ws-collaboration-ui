@@ -463,3 +463,35 @@ describe('Scroll position', () => {
 		expect(mockedScrollToEnd).toBeCalled();
 	});
 });
+
+describe('forward mode', () => {
+	test('Select of one or more messages to forward', async () => {
+		const { result } = renderHook(() => useStore());
+		act(() => {
+			result.current.addRoom(room);
+			result.current.updateHistory(room.id, messages);
+		});
+		const { user } = setup(<MessagesList roomId={room.id} />);
+		const messageList = screen.getByTestId(`intersectionObserverRoot${room.id}`);
+		expect(messageList).toBeVisible();
+		const arrowButton = await screen.findAllByTestId('icon: ArrowIosDownward');
+		await user.click(arrowButton[0]);
+
+		const forwardAction = await screen.findByText(/Forward/i);
+		expect(forwardAction).toBeInTheDocument();
+		await user.click(forwardAction);
+
+		const forwardContainer = await screen.findAllByTestId('forward_bubble_container');
+		expect(forwardContainer[0]).toHaveStyle('background: rgba(213, 227, 246, 0.50)');
+
+		await user.hover(forwardContainer[1]);
+		expect(forwardContainer[1]).toHaveStyle('background: rgba(230, 230, 230, 0.50)');
+
+		await act(async () => {
+			await user.click(forwardContainer[1]);
+		});
+
+		expect(forwardContainer[1]).toHaveStyle('background: rgba(213, 227, 246, 0.50)');
+		expect(result.current.activeConversations[room.id].forwardMessageList).toHaveLength(2);
+	});
+});

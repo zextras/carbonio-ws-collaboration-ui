@@ -50,7 +50,7 @@ const CustomAvatar = styled(Avatar)`
 const MemberComponentInfo: FC<ParticipantsInfoProps> = ({ member, roomId }) => {
 	const [t] = useTranslation();
 	const userOnlineLabel: string = t('status.online', 'Online');
-	const youLabel = t('status.you', ' You');
+	const youLabel = t('status.you', 'You');
 	const goToPrivateChatLabel = t(
 		'status.goToPrivateChat',
 		'Go to private chat to send a personal message'
@@ -91,10 +91,10 @@ const MemberComponentInfo: FC<ParticipantsInfoProps> = ({ member, roomId }) => {
 			sessionId === member.userId
 				? youLabel
 				: memberOnline
-				? userOnlineLabel
-				: memberLastActivity
-				? lastSeenLabel
-				: goToPrivateChatLabel,
+					? userOnlineLabel
+					: memberLastActivity
+						? lastSeenLabel
+						: goToPrivateChatLabel,
 		[
 			sessionId,
 			member.userId,

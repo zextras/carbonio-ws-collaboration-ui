@@ -24,8 +24,8 @@ import ChatCreationTitleInput from './ChatCreationTitleInput';
 import useRouting from '../../../hooks/useRouting';
 import { RoomsApi } from '../../../network';
 import useStore from '../../../store/Store';
+import { RoomType } from '../../../types/network/models/roomBeTypes';
 import { AddRoomResponse } from '../../../types/network/responses/roomsResponses';
-import { RoomType } from '../../../types/store/RoomTypes';
 
 const ChatCreationModal = ({
 	open,
@@ -50,6 +50,7 @@ const ChatCreationModal = ({
 		'settings.profile.errorGenericResponse',
 		'Something went Wrong. Please Retry'
 	);
+	const setPlaceholderRoom = useStore((state) => state.setPlaceholderRoom);
 
 	const inputRef = useRef<HTMLInputElement>(null);
 
@@ -102,31 +103,31 @@ const ChatCreationModal = ({
 		onClose();
 	}, [onClose, titlePlaceholder]);
 
-	const onCreate = useCallback(() => {
-		const ids = map(contactsSelected, (chip) => chip.id);
-		const oneToOneChatExist =
-			chatType === RoomType.ONE_TO_ONE &&
-			find(
+	const onCreateOneToOne = useCallback(
+		(userId: string) => {
+			const oneToOneChatExist = find(
 				useStore.getState().rooms,
 				(room) =>
 					room.type === RoomType.ONE_TO_ONE &&
-					!!find(room.members, (member) => member.userId === ids[0])
+					!!find(room.members, (member) => member.userId === userId)
 			);
-		if (oneToOneChatExist) {
-			goToRoomPage(oneToOneChatExist.id);
+			const roomId = oneToOneChatExist?.id ?? `placeholder-${userId}`;
+			if (!oneToOneChatExist) setPlaceholderRoom(userId);
 			onModalClose();
-		} else {
+			goToRoomPage(roomId);
+		},
+		[goToRoomPage, onModalClose, setPlaceholderRoom]
+	);
+
+	const onCreateGroup = useCallback(
+		(ids: string[]) => {
 			setIsPending(true);
-			const creationFields =
-				chatType === RoomType.ONE_TO_ONE
-					? { membersIds: ids, type: chatType }
-					: {
-							name: title,
-							description: topic,
-							type: chatType,
-							membersIds: ids
-					  };
-			RoomsApi.addRoom(creationFields)
+			RoomsApi.addRoom({
+				name: title,
+				description: topic,
+				type: RoomType.GROUP,
+				membersIds: ids
+			})
 				.then((response: AddRoomResponse) => {
 					setIsPending(false);
 					goToRoomPage(response.id);
@@ -140,17 +141,18 @@ const ChatCreationModal = ({
 						label: errorSnackbar
 					});
 				});
+		},
+		[createSnackbar, errorSnackbar, goToRoomPage, onModalClose, title, topic]
+	);
+
+	const onCreate = useCallback(() => {
+		const ids = map(contactsSelected, (chip) => chip.id);
+		if (chatType === RoomType.ONE_TO_ONE) {
+			onCreateOneToOne(ids[0]);
+		} else {
+			onCreateGroup(ids);
 		}
-	}, [
-		chatType,
-		contactsSelected,
-		goToRoomPage,
-		onModalClose,
-		title,
-		topic,
-		errorSnackbar,
-		createSnackbar
-	]);
+	}, [contactsSelected, chatType, onCreateOneToOne, onCreateGroup]);
 
 	const modalFooter = useMemo(
 		() => (

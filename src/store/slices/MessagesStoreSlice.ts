@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import produce from 'immer';
+import { produce } from 'immer';
 import {
 	concat,
 	find,
@@ -329,6 +329,11 @@ export const useMessagesStoreSlice: StateCreator<MessagesStoreSlice> = (
 		set(
 			produce((draft: RootStore) => {
 				remove(draft.messages[roomId], (message) => message.id === messageId);
+				if (
+					draft.messages[roomId][draft.messages[roomId].length - 1].type === MessageType.DATE_MSG
+				) {
+					draft.messages[roomId].pop();
+				}
 			}),
 			false,
 			'MESSAGES/REMOVE_PLACEHOLDER_MESSAGE'

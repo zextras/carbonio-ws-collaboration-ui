@@ -19,7 +19,7 @@ import { size } from 'lodash';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import { MEETINGS_PATH } from '../../constants/appConstants';
+import useRoomMeeting from '../../hooks/useRoomMeeting';
 import { UsersApi } from '../../network';
 import { getXmppClient } from '../../store/selectors/ConnectionSelector';
 import { getMeetingByMeetingId } from '../../store/selectors/MeetingSelectors';
@@ -105,10 +105,12 @@ const MeetingNotification = ({
 
 	const declineMeeting = useCallback(() => removeNotification(id), [id, removeNotification]);
 
+	const { openMeeting } = useRoomMeeting(meeting?.roomId || '');
+
 	const joinMeeting = useCallback(() => {
-		window.open(`${MEETINGS_PATH}${meeting?.roomId}`);
+		openMeeting();
 		removeNotification(id);
-	}, [id, removeNotification, meeting]);
+	}, [openMeeting, removeNotification, id]);
 
 	const picture = useMemo(() => UsersApi.getURLUserPicture(from), [from]);
 

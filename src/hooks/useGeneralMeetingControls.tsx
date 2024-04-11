@@ -11,12 +11,21 @@ import { filter, find, maxBy, size } from 'lodash';
 import useEventListener, { EventName } from './useEventListener';
 import useRouting, { PAGE_INFO_TYPE } from './useRouting';
 import { MeetingsApi } from '../network';
-import { getMeetingByMeetingId, getTiles } from '../store/selectors/MeetingSelectors';
+import {
+	getMeetingActiveByMeetingId,
+	getMeetingParticipantsByMeetingId,
+	getTiles
+} from '../store/selectors/MeetingSelectors';
 import useStore from '../store/Store';
 import { STREAM_TYPE } from '../types/store/ActiveMeetingTypes';
+import { MeetingParticipantMap } from '../types/store/MeetingTypes';
 
 const useGeneralMeetingControls = (meetingId: string): void => {
-	const meeting = useStore((store) => getMeetingByMeetingId(store, meetingId));
+	const isMeetingActive = useStore((store) => getMeetingActiveByMeetingId(store, meetingId));
+	const meetingParticipants: MeetingParticipantMap | undefined = useStore((store) =>
+		getMeetingParticipantsByMeetingId(store, meetingId)
+	);
+
 	const tiles = useStore((store) => getTiles(store, meetingId));
 	const setPinnedTile = useStore((store) => store.setPinnedTile);
 	const meetingDisconnection = useStore((store) => store.meetingDisconnection);
@@ -27,7 +36,8 @@ const useGeneralMeetingControls = (meetingId: string): void => {
 
 	// Redirect to info page if meeting ended or some error occurred
 	useEffect(() => {
-		if (!meeting) {
+		if (!isMeetingActive) {
+			meetingDisconnection(meetingId);
 			goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED);
 		}
 		return () => {
@@ -35,7 +45,7 @@ const useGeneralMeetingControls = (meetingId: string): void => {
 				window.parent.document.exitFullscreen();
 			}
 		};
-	}, [goToInfoPage, meeting]);
+	}, [goToInfoPage, isMeetingActive, meetingDisconnection, meetingId]);
 
 	// Leave meeting on window close
 	useEffect(() => {
@@ -48,28 +58,20 @@ const useGeneralMeetingControls = (meetingId: string): void => {
 	// Handle pinned tile disappearance
 	useEffect(() => {
 		const pinnedTile = useStore.getState().activeMeeting[meetingId]?.pinnedTile;
+		const isDisappeared = !find(
+			tiles,
+			(tile) => tile.userId === pinnedTile?.userId && tile.type === pinnedTile?.type
+		);
 		if (pinnedTile) {
 			const { setPinnedTile } = useStore.getState();
-			// Remove pin in face to face mode
-			if (size(tiles) < 3) {
+			// Remove pin in face to face mode || Remove pin video if participant left
+			if (size(tiles) < 3 || (isDisappeared && pinnedTile?.type === STREAM_TYPE.VIDEO)) {
 				setPinnedTile(meetingId, undefined);
-			} else {
-				const isDisappeared = !find(
-					tiles,
-					(tile) => tile.userId === pinnedTile?.userId && tile.type === pinnedTile?.type
-				);
-				if (isDisappeared) {
-					// Remove pin video if participant left
-					if (pinnedTile?.type === STREAM_TYPE.VIDEO) {
-						useStore.getState().setPinnedTile(meetingId, undefined);
-					}
-					// Remove pin screen if participant left or stopped sharing replacing with another screen
-					if (pinnedTile?.type === STREAM_TYPE.SCREEN) {
-						const allScreenShare = filter(tiles, (tile) => tile.type === STREAM_TYPE.SCREEN);
-						const screenToPin = maxBy(allScreenShare, (tile) => tile.creationDate);
-						useStore.getState().setPinnedTile(meetingId, screenToPin);
-					}
-				}
+			} else if (isDisappeared && pinnedTile?.type === STREAM_TYPE.SCREEN) {
+				// Remove pin screen if participant left or stopped sharing replacing with another screen
+				const allScreenShare = filter(tiles, (tile) => tile.type === STREAM_TYPE.SCREEN);
+				const screenToPin = maxBy(allScreenShare, (tile) => tile.creationDate);
+				setPinnedTile(meetingId, screenToPin);
 			}
 		}
 	}, [tiles, meetingId]);
@@ -77,7 +79,7 @@ const useGeneralMeetingControls = (meetingId: string): void => {
 	// Pin screen share tile if I join a meeting with it (to do only once after join)
 	useEffect(() => {
 		const screenShareParticipant = find(
-			meeting?.participants,
+			meetingParticipants,
 			(user) => user.screenStreamOn === true
 		);
 		if (screenShareParticipant) {

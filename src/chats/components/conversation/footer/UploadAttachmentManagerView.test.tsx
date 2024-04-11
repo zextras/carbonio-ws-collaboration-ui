@@ -6,8 +6,8 @@
 
 import React from 'react';
 
-import { act, fireEvent, screen } from '@testing-library/react';
-import { UserEvent } from '@testing-library/user-event/setup/setup';
+import { act, fireEvent, screen, waitFor } from '@testing-library/react';
+import { UserEvent } from '@testing-library/user-event';
 
 import MessageComposer from './MessageComposer';
 import UploadAttachmentManagerView from './UploadAttachmentManagerView';
@@ -20,6 +20,7 @@ import {
 	imageFile,
 	pdfFile
 } from '../../../../tests/createMock';
+import { mockedImageSizeRequest } from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe } from '../../../../types/network/models/roomBeTypes';
 import { FileToUpload } from '../../../../types/store/ActiveConversationTypes';
@@ -575,12 +576,13 @@ describe('Upload attachment view', () => {
 		expect(fileOld).toHaveStyle(borderColor);
 	});
 	test('Save description - input has text, file is selected and user press ENTER => description of the file will be saved, and message sent', async () => {
+		mockedImageSizeRequest.mockReturnValue({ width: 10, height: 10 });
 		const { user, store } = storeSetupAdvanced();
 		const fileOne = createMockFileToUpload({ hasFocus: true });
 		act(() => store.setFilesToAttach(mockedRoom.id, [fileOne]));
 		const inputText = 'description fileOne{enter}';
 		const composerTextArea = screen.getByRole('textbox');
-		await user.type(composerTextArea, inputText);
+		await waitFor(() => user.type(composerTextArea, inputText), { timeout: 3000 });
 		const composer = await screen.findByTestId('textAreaComposer');
 		expect((composer as HTMLTextAreaElement).value).toBe('');
 		const updatedStore = useStore.getState();
@@ -588,12 +590,13 @@ describe('Upload attachment view', () => {
 		expect(filesToAttachUpdated?.length).toBeUndefined();
 	});
 	test('Save description - input has text, file is selected and user click send button => description of the file will be saved, and message sent', async () => {
+		mockedImageSizeRequest.mockReturnValue({ width: 10, height: 10 });
 		const { user, store } = storeSetupAdvanced();
 		const fileOne = createMockFileToUpload({ hasFocus: true });
 		act(() => store.setFilesToAttach(mockedRoom.id, [fileOne]));
 		const sendButton = screen.getByTestId('icon: Navigation2');
 		expect(sendButton).not.toBeDisabled();
-		await user.click(sendButton);
+		await waitFor(() => user.click(sendButton));
 		const composer = await screen.findByTestId('textAreaComposer');
 		expect((composer as HTMLTextAreaElement).value).toBe('');
 		const updatedStore = useStore.getState();

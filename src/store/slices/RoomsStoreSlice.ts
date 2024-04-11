@@ -5,14 +5,16 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import produce from 'immer';
+import { produce } from 'immer';
 import { find, findIndex, forEach, remove } from 'lodash';
 import { StateCreator } from 'zustand';
 
 import { UsersApi } from '../../network';
 import { MemberBe, RoomBe } from '../../types/network/models/roomBeTypes';
+import { MessageType } from '../../types/store/MessageTypes';
+import { RoomType } from '../../types/store/RoomTypes';
 import { RoomsStoreSlice, RootStore } from '../../types/store/StoreTypes';
-import { isBefore } from '../../utils/dateUtils';
+import { dateToISODate, isBefore } from '../../utils/dateUtils';
 
 export const useRoomsStoreSlice: StateCreator<RoomsStoreSlice> = (set: (...any: any) => void) => ({
 	rooms: {},
@@ -256,6 +258,59 @@ export const useRoomsStoreSlice: StateCreator<RoomsStoreSlice> = (set: (...any: 
 			}),
 			false,
 			'ROOMS/ROOM_PICTURE_DELETED'
+		);
+	},
+	setPlaceholderRoom: (userId: string): void => {
+		set(
+			produce((draft: RootStore) => {
+				const roomId = `placeholder-${userId}`;
+				draft.rooms[roomId] = {
+					id: roomId,
+					type: RoomType.ONE_TO_ONE,
+					placeholder: true,
+					members: [
+						{
+							userId,
+							owner: true
+						}
+					],
+					createdAt: dateToISODate(Date.now()),
+					updatedAt: dateToISODate(Date.now())
+				};
+
+				draft.activeConversations[roomId] = {
+					isHistoryFullyLoaded: true
+				};
+
+				draft.messages[roomId] = [
+					{
+						type: MessageType.DATE_MSG,
+						date: Date.now(),
+						id: `date-${Date.now()}`,
+						roomId
+					}
+				];
+
+				// Retrieve members information if user is unknown
+				if (!find(draft.users, (user) => user.id === userId)) {
+					UsersApi.getDebouncedUser(userId);
+				}
+			}),
+			false,
+			'ROOMS/SET_PLACEHOLDER_ROOM'
+		);
+	},
+	replacePlaceholderRoom: (userId: string, newRoomId: string): void => {
+		set(
+			produce((draft: RootStore) => {
+				const placeholderRoomId = `placeholder-${userId}`;
+				draft.rooms[newRoomId] = draft.rooms[placeholderRoomId];
+				delete draft.rooms[placeholderRoomId];
+				delete draft.messages[placeholderRoomId];
+				delete draft.activeConversations[placeholderRoomId];
+			}),
+			false,
+			'ROOMS/CREATE_AND_REPLACE_PLACEHOLDER_ROOM'
 		);
 	}
 });

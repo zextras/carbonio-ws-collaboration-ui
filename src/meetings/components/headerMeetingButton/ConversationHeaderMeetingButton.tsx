@@ -11,7 +11,7 @@ import { useTranslation } from 'react-i18next';
 import styled, { DefaultTheme } from 'styled-components';
 
 import ActiveMeetingParticipantsDropdown from './ActiveMeetingParticipantsDropdown';
-import { MEETINGS_PATH } from '../../../constants/appConstants';
+import useRoomMeeting from '../../../hooks/useRoomMeeting';
 import {
 	getMeetingActive,
 	getMyMeetingParticipation,
@@ -52,8 +52,6 @@ const ActiveMeetingDot = styled.div`
 		}
 	}
 `;
-
-// type CreateSnackbarFn = typeof CreateSnackbarFn;
 
 type ConversationHeaderMeetingButtonProps = {
 	roomId: string;
@@ -98,9 +96,7 @@ const ConversationHeaderMeetingButton = ({
 
 	const ref = useRef<HTMLDivElement>(null);
 
-	// const createSnackbar: CreateSnackbarFn = useContext(SnackbarManagerContext);
-
-	const openMeeting = useCallback(() => window.open(`${MEETINGS_PATH}${roomId}`), [roomId]);
+	const { openMeeting } = useRoomMeeting(roomId);
 
 	const meetingButtonLabel = useMemo(
 		() =>

@@ -14,6 +14,9 @@ export type MeetingBe = {
 	participants: MeetingParticipantBe[];
 	createdAt: string;
 	meetingType: MeetingType;
+	startedAt?: string;
+	recStartedAt?: string;
+	recUserId?: string;
 };
 
 export type MeetingParticipantBe = {
@@ -35,9 +38,9 @@ export enum MeetingType {
 }
 
 export type CreateMeetingData = {
+	name: string;
 	roomId: string;
 	meetingType: MeetingType;
-	name: string;
 	expiration?: string;
 };
 

@@ -3,10 +3,13 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
+/* eslint-disable sonarjs/max-switch-cases */
 
 import { find } from 'lodash';
 
+import { MEETINGS_PATH } from '../../constants/appConstants';
 import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
+import displayWaitingListNotification from '../../meetings/components/sidebar/waitingListAccordion/displayWaitingListNotification';
 import useStore from '../../store/Store';
 import { MeetingType } from '../../types/network/models/meetingBeTypes';
 import { GetMeetingResponse } from '../../types/network/responses/meetingsResponses';
@@ -19,9 +22,13 @@ import { wsDebug } from '../../utils/debug';
 import { MeetingSoundFeedback, sendAudioFeedback } from '../../utils/MeetingsUtils';
 import { MeetingsApi, RoomsApi } from '../index';
 
-// eslint-disable-next-line sonarjs/cognitive-complexity
 export function wsEventsHandler(event: WsEvent): void {
 	const state = useStore.getState();
+	const inThisMeetingTab = (meetingId: string): boolean =>
+		window.location.pathname.includes(`${MEETINGS_PATH}${meetingId}`);
+	const sessionId = state.session.id;
+
+	const isMyId = (userId: string): boolean => userId === sessionId;
 
 	switch (event.type) {
 		case WsEventType.INITIALIZATION: {
@@ -58,7 +65,7 @@ export function wsEventsHandler(event: WsEvent): void {
 			break;
 		}
 		case WsEventType.ROOM_MEMBER_ADDED: {
-			if (event.userId === state.session.id) {
+			if (event.userId === sessionId) {
 				RoomsApi.getRoom(event.roomId).then((response: GetRoomResponse) => {
 					state.addRoom(response);
 					if (response.meetingId) {
@@ -76,7 +83,7 @@ export function wsEventsHandler(event: WsEvent): void {
 			break;
 		}
 		case WsEventType.ROOM_MEMBER_REMOVED: {
-			if (event.userId === state.session.id) {
+			if (event.userId === sessionId) {
 				if (state.meetings[event.roomId] !== undefined) {
 					state.deleteMeeting(state.meetings[event.roomId].id);
 				}
@@ -119,12 +126,12 @@ export function wsEventsHandler(event: WsEvent): void {
 			break;
 		}
 		case WsEventType.MEETING_STARTED: {
-			state.startMeeting(event.meetingId);
+			state.startMeeting(event.meetingId, event.startedAt);
 
 			// Send custom event to open an incoming meeting notification
 			const meeting = find(state.meetings, (meeting) => meeting.id === event.meetingId);
 			const room = find(state.rooms, (room) => room.id === meeting?.roomId);
-			const isMeetingStartedByMe = event.starterUser === state.session.id;
+			const isMeetingStartedByMe = event.starterUser === sessionId;
 			if (room?.type === RoomType.ONE_TO_ONE && !isMeetingStartedByMe) {
 				sendCustomEvent({ name: EventName.INCOMING_MEETING, data: event });
 			}
@@ -144,14 +151,13 @@ export function wsEventsHandler(event: WsEvent): void {
 			if (
 				meeting &&
 				state.rooms[meeting.roomId]?.type === RoomType.ONE_TO_ONE &&
-				event.userId === state.session.id
+				event.userId === sessionId
 			) {
 				sendCustomEvent({ name: EventName.REMOVED_MEETING_NOTIFICATION, data: event });
 			}
 
 			// Send audio feedback to other participants session user join
-			const activeMeeting = state.activeMeeting[event.meetingId];
-			if (activeMeeting && event.userId !== state.session.id) {
+			if (inThisMeetingTab(event.meetingId) && !isMyId(event.userId)) {
 				sendAudioFeedback(MeetingSoundFeedback.MEETING_JOIN_NOTIFICATION);
 			}
 			break;
@@ -162,19 +168,25 @@ export function wsEventsHandler(event: WsEvent): void {
 			// Update subscription manager
 			state.setDeleteSubscription(event.meetingId, event.userId);
 
-			// Send audio feedback to other participants session user leave
-			const activeMeeting = state.activeMeeting[event.meetingId];
-			if (activeMeeting && event.userId !== state.session.id) {
-				sendAudioFeedback(MeetingSoundFeedback.MEETING_LEAVE_NOTIFICATION);
-			}
+			if (inThisMeetingTab(event.meetingId)) {
+				// Send audio feedback to other participants session user leave
+				if (!isMyId(event.userId)) {
+					sendAudioFeedback(MeetingSoundFeedback.MEETING_LEAVE_NOTIFICATION);
+				}
 
-			// if user is talking, delete his id from the isTalking array
-			if (activeMeeting) {
+				// if user is talking, delete his id from the isTalking array
 				state.setTalkingUser(event.meetingId, event.userId, false);
 			}
 			break;
 		}
 		case WsEventType.MEETING_STOPPED: {
+			const meeting = find(state.meetings, (meeting) => meeting.id === event.meetingId);
+			if (meeting && state.rooms[meeting.roomId]?.type === RoomType.ONE_TO_ONE) {
+				sendCustomEvent({ name: EventName.REMOVED_MEETING_NOTIFICATION, data: event });
+			}
+			if (inThisMeetingTab(event.meetingId)) {
+				sendCustomEvent({ name: EventName.MEETING_STOPPED, data: event });
+			}
 			state.stopMeeting(event.meetingId);
 			break;
 		}
@@ -185,28 +197,26 @@ export function wsEventsHandler(event: WsEvent): void {
 		case WsEventType.MEETING_AUDIO_STREAM_CHANGED: {
 			state.changeStreamStatus(event.meetingId, event.userId, STREAM_TYPE.AUDIO, event.active);
 
-			// Send to session user audio feedback on audio status changes
-			const activeMeeting = state.activeMeeting[event.meetingId];
-			if (activeMeeting && event.userId === state.session.id) {
-				event.active
-					? sendAudioFeedback(MeetingSoundFeedback.MEETING_AUDIO_ON)
-					: sendAudioFeedback(MeetingSoundFeedback.MEETING_AUDIO_OFF);
-			}
-			// if user is talking, delete his id from the isTalking array
-			if (activeMeeting && !event.active) {
-				state.setTalkingUser(event.meetingId, event.userId, false);
-			}
+			if (inThisMeetingTab(event.meetingId)) {
+				// If user is talking, delete his id from the isTalking array
+				if (!event.active) {
+					state.setTalkingUser(event.meetingId, event.userId, false);
+				}
 
-			// mute the tile if someone performed this state on me
-			if (
-				activeMeeting &&
-				event.userId === state.session.id &&
-				!event.active &&
-				event.moderatorId !== undefined
-			) {
-				activeMeeting.bidirectionalAudioConn?.closeRtpSenderTrack();
-				// custom event to show snackbar
-				sendCustomEvent({ name: EventName.MEMBER_MUTED, data: event });
+				if (isMyId(event.userId)) {
+					// Send to session user audio feedback on audio status changes
+					event.active
+						? sendAudioFeedback(MeetingSoundFeedback.MEETING_AUDIO_ON)
+						: sendAudioFeedback(MeetingSoundFeedback.MEETING_AUDIO_OFF);
+
+					// Mute the tile if someone performed this state on me
+					if (!event.active && !!event.moderatorId) {
+						const activeMeeting = state.activeMeeting[event.meetingId];
+						activeMeeting.bidirectionalAudioConn?.closeRtpSenderTrack();
+						// Custom event to show snackbar
+						sendCustomEvent({ name: EventName.MEMBER_MUTED, data: event });
+					}
+				}
 			}
 			break;
 		}
@@ -214,7 +224,7 @@ export function wsEventsHandler(event: WsEvent): void {
 			const mediaType = event.mediaType.toLowerCase() as STREAM_TYPE;
 
 			// Update subscription manager
-			if (event.userId !== state.session.id) {
+			if (!isMyId(event.userId)) {
 				const sub = { userId: event.userId, type: mediaType };
 				if (!event.active) {
 					state.setRemoveSubscription(event.meetingId, sub);
@@ -229,13 +239,12 @@ export function wsEventsHandler(event: WsEvent): void {
 			}
 
 			// Send audio feedback of session user screen sharing
-			const activeMeeting = state.activeMeeting[event.meetingId];
-			if (activeMeeting && mediaType === STREAM_TYPE.SCREEN) {
+			if (inThisMeetingTab(event.meetingId) && mediaType === STREAM_TYPE.SCREEN) {
 				sendAudioFeedback(MeetingSoundFeedback.MEETING_SCREENSHARE_NOTIFICATION);
 			}
 
 			// Update subscription manager
-			if (event.userId !== state.session.id) {
+			if (!isMyId(event.userId)) {
 				const sub = { userId: event.userId, type: mediaType };
 				if (event.active) {
 					state.setAddSubscription(event.meetingId, sub);
@@ -245,9 +254,9 @@ export function wsEventsHandler(event: WsEvent): void {
 			break;
 		}
 		case WsEventType.MEETING_AUDIO_ANSWERED: {
-			const activeMeeting = state.activeMeeting[event.meetingId];
-			if (activeMeeting?.bidirectionalAudioConn) {
-				activeMeeting.bidirectionalAudioConn.handleRemoteAnswer({
+			if (inThisMeetingTab(event.meetingId)) {
+				const activeMeeting = state.activeMeeting[event.meetingId];
+				activeMeeting.bidirectionalAudioConn?.handleRemoteAnswer({
 					sdp: event.sdp,
 					type: 'answer'
 				});
@@ -255,11 +264,11 @@ export function wsEventsHandler(event: WsEvent): void {
 			break;
 		}
 		case WsEventType.MEETING_SDP_ANSWERED: {
-			const activeMeeting = state.activeMeeting[event.meetingId];
-			if (activeMeeting) {
+			if (inThisMeetingTab(event.meetingId)) {
 				const mediaType = event.mediaType.toLowerCase() as STREAM_TYPE;
-				if (mediaType === STREAM_TYPE.VIDEO && activeMeeting.videoOutConn) {
-					activeMeeting.videoOutConn.handleRemoteAnswer({
+				const activeMeeting = state.activeMeeting[event.meetingId];
+				if (mediaType === STREAM_TYPE.VIDEO) {
+					activeMeeting.videoOutConn?.handleRemoteAnswer({
 						sdp: event.sdp,
 						type: 'answer'
 					});
@@ -274,16 +283,16 @@ export function wsEventsHandler(event: WsEvent): void {
 			break;
 		}
 		case WsEventType.MEETING_SDP_OFFERED: {
-			const activeMeeting = state.activeMeeting[event.meetingId];
-			if (activeMeeting?.videoScreenIn) {
-				activeMeeting.videoScreenIn.handleRemoteOffer(event.sdp);
+			if (inThisMeetingTab(event.meetingId)) {
+				const activeMeeting = state.activeMeeting[event.meetingId];
+				activeMeeting.videoScreenIn?.handleRemoteOffer(event.sdp);
 			}
 			break;
 		}
 		case WsEventType.MEETING_PARTICIPANT_SUBSCRIBED: {
-			const activeMeeting = state.activeMeeting[event.meetingId];
-			if (activeMeeting?.videoScreenIn) {
-				activeMeeting.videoScreenIn.handleParticipantsSubscribed(event.streams);
+			if (inThisMeetingTab(event.meetingId)) {
+				const activeMeeting = state.activeMeeting[event.meetingId];
+				activeMeeting.videoScreenIn?.handleParticipantsSubscribed(event.streams);
 			}
 			break;
 		}
@@ -295,9 +304,57 @@ export function wsEventsHandler(event: WsEvent): void {
 			break;
 		}
 		case WsEventType.MEETING_PARTICIPANT_CLASHED: {
-			const activeMeeting = state.activeMeeting[event.meetingId];
-			if (activeMeeting) {
+			if (inThisMeetingTab(event.meetingId)) {
 				sendCustomEvent({ name: EventName.MEETING_PARTICIPANT_CLASHED, data: event });
+			}
+			break;
+		}
+		case WsEventType.MEETING_WAITING_PARTICIPANT_JOINED: {
+			const meeting = find(state.meetings, (meeting) => meeting.id === event.meetingId);
+			const userIsParticipant = find(
+				meeting?.participants,
+				(participant) => participant.userId === useStore.getState().session.id
+			);
+			if (userIsParticipant) {
+				state.addUserToWaitingList(event.meetingId, event.userId);
+				sendCustomEvent({ name: EventName.NEW_WAITING_USER, data: event });
+				if (inThisMeetingTab(event.meetingId)) {
+					displayWaitingListNotification(event.meetingId);
+				}
+			}
+			break;
+		}
+		case WsEventType.MEETING_USER_ACCEPTED: {
+			state.removeUserFromWaitingList(event.meetingId, event.userId);
+			if (inThisMeetingTab(event.meetingId)) {
+				sendCustomEvent({ name: EventName.MEETING_USER_ACCEPTED, data: event });
+			}
+			break;
+		}
+		case WsEventType.MEETING_USER_REJECTED: {
+			state.removeUserFromWaitingList(event.meetingId, event.userId);
+			if (inThisMeetingTab(event.meetingId)) {
+				sendCustomEvent({ name: EventName.MEETING_USER_REJECTED, data: event });
+			}
+			break;
+		}
+		case WsEventType.MEETING_WAITING_PARTICIPANT_CLASHED: {
+			if (inThisMeetingTab(event.meetingId)) {
+				sendCustomEvent({ name: EventName.MEETING_WAITING_PARTICIPANT_CLASHED, data: event });
+			}
+			break;
+		}
+		case WsEventType.MEETING_RECORDING_STARTED: {
+			state.startRecording(event.meetingId, event.sentDate, event.userId);
+			if (inThisMeetingTab(event.meetingId)) {
+				sendCustomEvent({ name: EventName.MEETING_RECORDING_STARTED, data: event });
+			}
+			break;
+		}
+		case WsEventType.MEETING_RECORDING_STOPPED: {
+			state.stopRecording(event.meetingId);
+			if (inThisMeetingTab(event.meetingId)) {
+				sendCustomEvent({ name: EventName.MEETING_RECORDING_STOPPED, data: event });
 			}
 			break;
 		}

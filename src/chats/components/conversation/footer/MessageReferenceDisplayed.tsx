@@ -80,8 +80,8 @@ const MessageReferenceDisplayed: React.FC<MessageReferenceDisplayedProps> = ({
 			referenceMessage.actionType === 'edit'
 				? editYourMessageLabel
 				: myId === referenceMessage.senderId
-				? replyToYourselfLabel
-				: replyTo,
+					? replyToYourselfLabel
+					: replyTo,
 		[
 			editYourMessageLabel,
 			myId,

@@ -5,8 +5,8 @@
  */
 /* eslint-disable no-param-reassign */
 
-import produce from 'immer';
-import { find, forEach } from 'lodash';
+import { produce } from 'immer';
+import { find, forEach, includes } from 'lodash';
 import { StateCreator } from 'zustand';
 
 import { UsersApi } from '../../network';
@@ -44,7 +44,10 @@ export const useMeetingsStoreSlice: StateCreator<MeetingsSlice> = (set: (...any:
 						active: meeting.active,
 						participants: participantsMap,
 						createdAt: meeting.createdAt,
-						meetingType: meeting.meetingType
+						meetingType: meeting.meetingType,
+						startedAt: meeting.startedAt,
+						recStartedAt: meeting.recStartedAt,
+						recUserId: meeting.recUserId
 					};
 
 					// Retrieve participants information if they are unknown
@@ -53,6 +56,12 @@ export const useMeetingsStoreSlice: StateCreator<MeetingsSlice> = (set: (...any:
 							UsersApi.getDebouncedUser(participant.userId);
 						}
 					});
+
+					// Set meetingId on room data
+					draft.rooms[meeting.roomId] = {
+						...draft.rooms[meeting.roomId],
+						meetingId: meeting.id
+					};
 				});
 			}),
 			false,
@@ -77,13 +86,17 @@ export const useMeetingsStoreSlice: StateCreator<MeetingsSlice> = (set: (...any:
 					{}
 				);
 				draft.meetings[meeting.roomId] = {
+					...draft.meetings[meeting.roomId],
 					id: meeting.id,
 					name: meeting.name,
 					roomId: meeting.roomId,
 					active: meeting.active,
 					participants: participantsMap,
 					createdAt: meeting.createdAt,
-					meetingType: meeting.meetingType
+					meetingType: meeting.meetingType,
+					startedAt: meeting.startedAt,
+					recStartedAt: meeting.recStartedAt,
+					recUserId: meeting.recUserId
 				};
 
 				// Retrieve participants information if they are unknown
@@ -92,6 +105,12 @@ export const useMeetingsStoreSlice: StateCreator<MeetingsSlice> = (set: (...any:
 						UsersApi.getDebouncedUser(participant.userId);
 					}
 				});
+
+				// Set meetingId on room data
+				draft.rooms[meeting.roomId] = {
+					...draft.rooms[meeting.roomId],
+					meetingId: meeting.id
+				};
 			}),
 			false,
 			'MEETINGS/ADD'
@@ -109,12 +128,13 @@ export const useMeetingsStoreSlice: StateCreator<MeetingsSlice> = (set: (...any:
 			'MEETINGS/DELETE'
 		);
 	},
-	startMeeting: (meetingId: string): void => {
+	startMeeting: (meetingId: string, startedAt: string): void => {
 		set(
 			produce((draft: RootStore) => {
 				const meeting = find(draft.meetings, (meeting) => meeting.id === meetingId);
 				if (meeting) {
 					draft.meetings[meeting.roomId].active = true;
+					draft.meetings[meeting.roomId].startedAt = startedAt;
 				}
 			}),
 			false,
@@ -127,6 +147,7 @@ export const useMeetingsStoreSlice: StateCreator<MeetingsSlice> = (set: (...any:
 				const meeting = find(draft.meetings, (meeting) => meeting.id === meetingId);
 				if (meeting) {
 					draft.meetings[meeting.roomId].active = false;
+					draft.meetings[meeting.roomId].startedAt = undefined;
 				}
 			}),
 			false,
@@ -199,6 +220,87 @@ export const useMeetingsStoreSlice: StateCreator<MeetingsSlice> = (set: (...any:
 			}),
 			false,
 			'MEETINGS/CHANGE_STREAM_STATUS'
+		);
+	},
+	setWaitingList: (meetingId: string, waitingList: string[]): void => {
+		set(
+			produce((draft: RootStore) => {
+				const meeting = find(draft.meetings, (meeting) => meeting.id === meetingId);
+				if (meeting) {
+					draft.meetings[meeting.roomId].waitingList = waitingList;
+					// Retrieve waiting users information if they are unknown
+					forEach(waitingList, (userId) => {
+						if (!find(draft.users, (user) => user.id === userId)) {
+							UsersApi.getDebouncedUser(userId);
+						}
+					});
+				}
+			}),
+			false,
+			'AM/SET_WAITING_LIST'
+		);
+	},
+	addUserToWaitingList: (meetingId: string, userId: string): void => {
+		set(
+			produce((draft: RootStore) => {
+				const meeting = find(draft.meetings, (meeting) => meeting.id === meetingId);
+				if (meeting && !includes(meeting.waitingList, userId)) {
+					if (!meeting.waitingList) draft.meetings[meeting.roomId].waitingList = [];
+					draft.meetings[meeting.roomId].waitingList?.push(userId);
+
+					// Retrieve waiting user information if ut is unknown
+					if (!find(draft.users, (user) => user.id === userId)) {
+						UsersApi.getDebouncedUser(userId);
+					}
+				}
+			}),
+			false,
+			'AM/ADD_USER_TO_WAITING_LIST'
+		);
+	},
+	removeUserFromWaitingList: (meetingId: string, userId: string): void => {
+		set(
+			produce((draft: RootStore) => {
+				const meeting = find(draft.meetings, (meeting) => meeting.id === meetingId);
+				if (meeting) {
+					const index = draft.meetings[meeting.roomId].waitingList?.indexOf(userId);
+					if (index !== undefined && index !== -1) {
+						draft.meetings[meeting.roomId].waitingList?.splice(index, 1);
+					}
+				}
+			}),
+			false,
+			'AM/REMOVE_USER_FROM_WAITING_LIST'
+		);
+	},
+	startRecording: (
+		meetingId: string,
+		startRecordingTimestamp: string,
+		startRecordingUserId: string
+	): void => {
+		set(
+			produce((draft: RootStore) => {
+				const meeting = find(draft.meetings, (meeting) => meeting.id === meetingId);
+				if (meeting) {
+					draft.meetings[meeting.roomId].recStartedAt = startRecordingTimestamp;
+					draft.meetings[meeting.roomId].recUserId = startRecordingUserId;
+				}
+			}),
+			false,
+			'AM/START_RECORDING'
+		);
+	},
+	stopRecording: (meetingId: string): void => {
+		set(
+			produce((draft: RootStore) => {
+				const meeting = find(draft.meetings, (meeting) => meeting.id === meetingId);
+				if (meeting) {
+					draft.meetings[meeting.roomId].recStartedAt = undefined;
+					draft.meetings[meeting.roomId].recUserId = undefined;
+				}
+			}),
+			false,
+			'AM/STOP_RECORDING'
 		);
 	}
 });

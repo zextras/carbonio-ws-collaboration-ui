@@ -12,7 +12,6 @@ import styled from 'styled-components';
 
 import AnimationGlobalStyle from './messageBubbles/BubbleAnimationsGlobalStyle';
 import MessageFactory from './messageBubbles/MessageFactory';
-import WritingBubble from './messageBubbles/WritingBubble';
 import MessageHistoryLoader from './MessageHistoryLoader';
 import ScrollButton from './ScrollButton';
 import useFirstUnreadMessage from './useFirstUnreadMessage';
@@ -21,8 +20,7 @@ import {
 	getHistoryIsFullyLoaded,
 	getHistoryIsLoadedDisabled,
 	getIdMessageWhereScrollIsStopped,
-	getInputHasFocus,
-	getRoomIsWritingList
+	getInputHasFocus
 } from '../../../store/selectors/ActiveConversationsSelectors';
 import { getXmppClient } from '../../../store/selectors/ConnectionSelector';
 import { getMyLastMarkerOfRoom } from '../../../store/selectors/MarkersSelectors';
@@ -39,7 +37,9 @@ const Messages = styled(Container)`
 `;
 
 const MessagesListWrapper = styled(Container)`
-	padding: 0.9375rem;
+	padding-top: 0.9375rem;
+	padding-bottom: 0.9375rem;
+	padding-left: 0.4375rem;
 	overflow-y: scroll;
 	align-self: auto;
 `;
@@ -52,7 +52,6 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 	const xmppClient = useStore(getXmppClient);
 	const inputHasFocus = useStore((store) => getInputHasFocus(store, roomId));
 	const roomMessages = useStore((store) => getMessagesSelector(store, roomId));
-	const usersWritingList = useStore((store) => getRoomIsWritingList(store, roomId));
 	const actualScrollPosition = useStore((store) => getIdMessageWhereScrollIsStopped(store, roomId));
 	const hasMoreMessageToLoad = useStore((store) => getHistoryIsFullyLoaded(store, roomId));
 	const historyLoadedDisabled = useStore((store) => getHistoryIsLoadedDisabled(store, roomId));
@@ -131,7 +130,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 				{
 					root: messageListRef.current,
 					rootMargin: `-${messageListRef.current.clientHeight - 100}px 0px 15px 0px`,
-					threshold: [0.25, 0.75]
+					threshold: [0, 0.25, 0.5, 0.75, 1]
 				}
 			);
 		}
@@ -162,7 +161,12 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 	useEffect(() => {
 		const store = useStore.getState();
 		const actualPosition = store.activeConversations[roomId]?.scrollPositionMessageId;
-		if (store.unreads[roomId] > 0 || !actualPosition) {
+		const lastMsg = last(store.messages[roomId])?.id;
+		if (
+			store.unreads[roomId] > 0 ||
+			!actualPosition ||
+			(lastMsg === actualPosition && store.unreads[roomId] === 0)
+		) {
 			scrollToEnd(MessagesListWrapperRef);
 		} else {
 			scrollToMessage(actualPosition);
@@ -281,13 +285,6 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 					<MessageHistoryLoader roomId={roomId} messageListRef={messageListRef} />
 				)}
 				{messagesWrapped}
-				{usersWritingList && (
-					<WritingBubble
-						writingListNames={usersWritingList}
-						roomId={roomId}
-						MessageListWrapperRef={MessagesListWrapperRef}
-					/>
-				)}
 			</MessagesListWrapper>
 			{showScrollButton && <ScrollButton roomId={roomId} onClickCb={handleClickScrollButton} />}
 		</Messages>

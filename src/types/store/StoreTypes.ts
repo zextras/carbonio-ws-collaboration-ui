@@ -67,6 +67,8 @@ export type RoomsStoreSlice = {
 	setClearedAt: (roomId: string, clearedAt: string) => void;
 	setRoomPictureUpdated: (id: string, date: string) => void;
 	setRoomPictureDeleted: (id: string) => void;
+	setPlaceholderRoom: (userId: string) => void;
+	replacePlaceholderRoom: (userId: string, newRoomId: string) => void;
 };
 
 export type MessagesStoreSlice = {
@@ -125,6 +127,8 @@ export type ActiveConversationsSlice = {
 	removeDescriptionToFileToAttach: (roomId: string, fileTempId: string) => void;
 	removeFileToAttach: (roomId: string, fileTempId: string) => void;
 	unsetFilesToAttach: (roomId: string) => void;
+	setForwardMessageList: (roomId: string, message: TextMessage) => void;
+	unsetForwardMessageList: (roomId: string, message?: TextMessage) => void;
 };
 
 export type ConnectionsStoreSlice = {
@@ -154,7 +158,7 @@ export type MeetingsSlice = {
 	setMeetings: (meetings: MeetingBe[]) => void;
 	addMeeting: (meeting: MeetingBe) => void;
 	deleteMeeting: (meetingId: string) => void;
-	startMeeting: (meetingId: string) => void;
+	startMeeting: (meetingId: string, startedAt: string) => void;
 	stopMeeting: (meetingId: string) => void;
 	addParticipant: (meetingId: string, participant: MeetingParticipant) => void;
 	removeParticipant: (meetingId: string, userId: string) => void;
@@ -164,11 +168,22 @@ export type MeetingsSlice = {
 		stream: STREAM_TYPE,
 		status: boolean
 	) => void;
+	setWaitingList: (meetingId: string, waitingList: string[]) => void;
+	addUserToWaitingList: (meetingId: string, userId: string) => void;
+	removeUserFromWaitingList: (meetingId: string, userId: string) => void;
+	startRecording: (
+		meetingId: string,
+		startRecordingTimestamp: string,
+		startRecordingUserId: string
+	) => void;
+	stopRecording: (meetingId: string) => void;
 };
 
 export type ActiveMeetingSlice = {
 	activeMeeting: ActiveMeetingMap;
 	setMeetingActionsAccordionStatus: (roomId: string, status: boolean) => void;
+	setWaitingListAccordionStatus: (roomId: string, status: boolean) => void;
+	setRecordingAccordionStatus: (roomId: string, status: boolean) => void;
 	setMeetingParticipantsAccordionStatus: (roomId: string, status: boolean) => void;
 	setMeetingChatVisibility: (meetingId: string, visibilityStatus: MeetingChatVisibility) => void;
 	setMeetingViewSelected: (meetingId: string, viewType: MeetingViewType) => void;

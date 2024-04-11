@@ -42,6 +42,7 @@ type virtualRoomsListProps = {
 const CustomContainer = styled(Container)`
 	position: fixed;
 	width: 21.875rem;
+	height: auto;
 	max-height: 31.25rem;
 	bottom: 3rem;
 	left: 3.6rem;
@@ -180,8 +181,8 @@ const VirtualRoomsList: FC<virtualRoomsListProps> = ({ setListVisibility, parent
 								nameError
 									? invalidNameString
 									: canCreateVirtualRoom
-									? createTooltip
-									: roomNameRequiredTooltip
+										? createTooltip
+										: roomNameRequiredTooltip
 							}
 						>
 							<CustomIconButton

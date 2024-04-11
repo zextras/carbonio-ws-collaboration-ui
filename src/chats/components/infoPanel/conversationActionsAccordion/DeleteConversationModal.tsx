@@ -41,8 +41,7 @@ const DeleteConversationModal: FC<DeleteModalProps> = ({
 			return t('modal.deleteGroup', 'Delete Group');
 		}
 		return t('modal.deleteRoom', 'Delete Room');
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [type]);
+	}, [numberOfMembers, t, type]);
 
 	const isMeetingActive = useStore((store) => getMeetingActive(store, roomId));
 
@@ -69,8 +68,7 @@ const DeleteConversationModal: FC<DeleteModalProps> = ({
 			return confirmDeleteGroupLabel;
 		}
 		return t('modal.deleteRoomLabel', 'Are you sure to delete this Room?');
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [type, isMeetingActive]);
+	}, [type, t, isMeetingActive]);
 
 	return (
 		<Modal

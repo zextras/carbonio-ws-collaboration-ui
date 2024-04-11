@@ -32,20 +32,13 @@ export const getRoomNameSelector = (state: RootStore, id: string): string => {
 	const room: Room = state.rooms[id];
 	if (!room) return '';
 	if (room.type === RoomType.ONE_TO_ONE) {
-		const otherUserId = room.members
-			? room.members.length > 1
-				? state.session.id === room.members[0].userId
-					? room.members[1].userId
-					: room.members[0].userId
-				: null
-			: null;
-		return otherUserId && state.users[otherUserId]
-			? state.users[otherUserId].name ||
-					state.users[otherUserId].email ||
-					state.users[otherUserId].id
-			: room.name || '';
+		const otherUser = find(room.members ?? [], (member) => member.userId !== state.session.id);
+		if (size(room.members) > 0 && otherUser) {
+			return state.users[otherUser.userId]?.name || state.users[otherUser.userId]?.email || '';
+		}
+		return '';
 	}
-	return state.rooms[id].name || state.rooms[id].id;
+	return state.rooms[id].name ?? '';
 };
 
 export const getRoomTypeSelector = (state: RootStore, id: string): RoomType =>
@@ -73,16 +66,13 @@ export const getRoomMainInfoSelector = (state: RootStore, id: string): RoomMainI
 	muted: state.rooms[id]?.userSettings?.muted
 });
 
-export const getMyOwnershipOfTheRoom = (
+export const getOwnershipOfTheRoom = (
 	state: RootStore,
-	sessionId: string | undefined,
-	roomId: string
+	roomId: string,
+	userId = state.session.id
 ): boolean => {
-	if (state.rooms[roomId]?.members != null && sessionId != null) {
-		const sessionMember = find(
-			state.rooms[roomId]?.members,
-			(member) => member.userId === sessionId
-		);
+	if (state.rooms[roomId]?.members != null && userId != null) {
+		const sessionMember = find(state.rooms[roomId]?.members, (member) => member.userId === userId);
 		if (sessionMember != null) {
 			return sessionMember.owner;
 		}
@@ -132,3 +122,9 @@ export const getRoomURLPicture = (state: RootStore, roomId: string): string | un
 	}
 	return room.pictureUpdatedAt && RoomsApi.getURLRoomPicture(room.id);
 };
+
+export const getMeetingIdFromRoom = (state: RootStore, roomId: string): string | undefined =>
+	state.rooms[roomId]?.meetingId;
+
+export const getIsPlaceholderRoom = (state: RootStore, roomId: string): boolean =>
+	state.rooms[roomId]?.placeholder ?? false;

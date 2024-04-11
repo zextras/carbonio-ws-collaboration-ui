@@ -32,7 +32,7 @@ const ClearHistoryModal: FC<ClearHistoryModalProps> = ({
 	const clearHistoryTitle = t('action.clearHistory', 'Clear history');
 	const clearHistoryDescriptionLabel = t(
 		'modal.clearHistoryDescription',
-		"You're cleaning your conversation history, please note that this action is irreversible. The history will be deleted for you and not for the other members."
+		"You're cleaning your chat history, please note that this action is irreversible. The history will be deleted for you and not for the other members."
 	);
 	const clearHistoryButtonLabel = t('action.clearHistory', 'Clear history');
 	const closeLabel = t('action.close', 'Close');

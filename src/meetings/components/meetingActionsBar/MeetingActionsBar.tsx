@@ -6,19 +6,22 @@
 
 import React, { ReactElement, RefObject, useCallback, useEffect, useRef, useState } from 'react';
 
-import { Container, Padding } from '@zextras/carbonio-design-system';
+import { Container } from '@zextras/carbonio-design-system';
+import { useParams } from 'react-router-dom';
 import styled, { FlattenSimpleInterpolation } from 'styled-components';
 
 import CameraButton from './CameraButton';
 import FullScreenButton from './FullScreenButton';
 import LeaveMeetingButton from './LeaveMeetingButton';
+import MeetingDuration from './MeetingDuration';
 import MicrophoneButton from './MicrophoneButton';
 import ScreenShareButton from './ScreenShareButton';
 import SwitchViewButton from './SwitchViewButton';
+import { MeetingRoutesParams } from '../../../hooks/useRouting';
 
 const BarContainer = styled(Container)<{ $isHoovering: boolean }>`
 	position: absolute;
-	bottom: 0;
+	bottom: -1rem;
 	width: 100%;
 	transform: translateY(
 		${({ $isHoovering }): string | FlattenSimpleInterpolation => ($isHoovering ? '-1rem' : '5rem')}
@@ -34,11 +37,18 @@ const ActionsWrapper = styled(Container)`
 	box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
 `;
 
+const SecondActionsWrapper = styled(ActionsWrapper)`
+	position: absolute;
+	right: 3.25rem;
+`;
+
 type MeetingActionsProps = {
 	streamsWrapperRef: RefObject<HTMLDivElement>;
 };
 
 const MeetingActionsBar = ({ streamsWrapperRef }: MeetingActionsProps): ReactElement => {
+	const { meetingId }: MeetingRoutesParams = useParams();
+
 	const [isHoovering, setIsHoovering] = useState<boolean>(false);
 	const [isHoverActions, setIsHoverActions] = useState<boolean>(false);
 	const [isAudioListOpen, setIsAudioListOpen] = useState<boolean>(false);
@@ -144,9 +154,15 @@ const MeetingActionsBar = ({ streamsWrapperRef }: MeetingActionsProps): ReactEle
 	);
 
 	return (
-		<BarContainer height="fit" $isHoovering={isHoovering} data-testid="meeting-action-bar">
+		<BarContainer
+			height="fit"
+			$isHoovering={isHoovering}
+			data-testid="meeting-action-bar"
+			padding={{ horizontal: '3.25rem' }}
+			orientation="horizontal"
+		>
 			<ActionsWrapper
-				background={'text'}
+				background="text"
 				width="fit"
 				height="fit"
 				orientation="horizontal"
@@ -166,9 +182,18 @@ const MeetingActionsBar = ({ streamsWrapperRef }: MeetingActionsProps): ReactEle
 				<ScreenShareButton />
 				<FullScreenButton />
 				<SwitchViewButton />
-				<Padding right="1rem" />
-				<LeaveMeetingButton />
 			</ActionsWrapper>
+			<SecondActionsWrapper
+				background="text"
+				width="fit"
+				height="fit"
+				orientation="horizontal"
+				onMouseEnter={handleMouseEnter}
+				onMouseLeave={handleMouseLeave}
+			>
+				<MeetingDuration meetingId={meetingId} />
+				<LeaveMeetingButton isHoovering={isHoovering} />
+			</SecondActionsWrapper>
 		</BarContainer>
 	);
 };

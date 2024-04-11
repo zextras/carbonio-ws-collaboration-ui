@@ -65,8 +65,23 @@ const InfoPage = (): ReactElement => {
 				'There cannot be more than one active session of the same meeting'
 			);
 			break;
+		case PAGE_INFO_TYPE.HANG_UP_PAGE:
+			titleLabel = t('meeting.infoPage.title.hangUp', 'You left the waiting room');
+			centralLabel = t('meeting.infoPage.slogan.hangUp', 'Maybe next time');
+			descriptionLowerLabel = t(
+				'meeting.infoPage.description.hangUp',
+				'We look forward to seeing you participate in future meetings'
+			);
+			break;
+		case PAGE_INFO_TYPE.NEXT_TIME_PAGE:
+			titleLabel = t('meeting.infoPage.title.rejected', 'Your access has been refused');
+			centralLabel = t('meeting.infoPage.slogan.rejected', 'Maybe next time');
+			descriptionLowerLabel = t(
+				'meeting.infoPage.description.rejected',
+				'The moderators have decided to deny your access to the meeting'
+			);
+			break;
 		case PAGE_INFO_TYPE.MEETING_ENDED:
-		default:
 			titleLabel = t('notification.meeting.ended', 'Meeting Ended');
 			centralLabel = t('thanksForParticipating', 'Thanks for participating');
 			descriptionLowerLabel = t(
@@ -74,6 +89,30 @@ const InfoPage = (): ReactElement => {
 				"Keep in touch with your colleagues or join your groups' meeting rooms"
 			);
 			break;
+		case PAGE_INFO_TYPE.UNAUTHENTICATED:
+			titleLabel = t('meeting.infoPage.title.notAuthenticatedUser', 'You are not authenticated');
+			centralLabel = t(
+				'meeting.infoPage.slogan.notAuthenticatedUser',
+				'login to access the meeting'
+			);
+			descriptionLowerLabel = t(
+				'meeting.infoPage.description.notAuthenticatedUser',
+				'You cannot join the meeting if you are not authenticated with your account'
+			);
+			break;
+		case PAGE_INFO_TYPE.MEETING_NOT_FOUND:
+		default: {
+			titleLabel = t(
+				'meeting.infoPage.title.meetingNotFound',
+				'The meeting you are looking for does not exist'
+			);
+			centralLabel = t('meeting.infoPage.slogan.meetingNotFound', 'Try later');
+			descriptionLowerLabel = t(
+				'meeting.infoPage.description.meetingNotFound',
+				'Please check the meeting link and try again'
+			);
+			break;
+		}
 	}
 
 	return (
@@ -96,5 +135,3 @@ const InfoPage = (): ReactElement => {
 };
 
 export default InfoPage;
-
-export type InfoType = 'room_empty' | 'meeting_ended';

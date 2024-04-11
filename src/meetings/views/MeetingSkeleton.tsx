@@ -24,6 +24,7 @@ import CinemaMode from '../components/cinemaMode/CinemaMode';
 import FaceToFaceMode from '../components/faceToFaceMode/FaceToFaceMode';
 import GridMode from '../components/gridMode/GridMode';
 import MeetingActionsBar from '../components/meetingActionsBar/MeetingActionsBar';
+import RecordingInfo from '../components/RecordingInfo';
 import MeetingSidebar from '../components/sidebar/MeetingSidebar';
 
 const SkeletonContainer = styled(Container)`
@@ -48,6 +49,9 @@ const LogoApp = styled(Container)<{ $customLogo: string | false | undefined }>`
 	background-repeat: no-repeat;
 	background-image: url(${({ $customLogo }): string => $customLogo || defaultLogo});
 `;
+export type MeetingViewProps = {
+	children?: ReactElement;
+};
 
 const MeetingSkeleton = (): ReactElement => {
 	const [t] = useTranslation();
@@ -82,9 +86,9 @@ const MeetingSkeleton = (): ReactElement => {
 
 	const ViewToDisplay = useMemo(() => {
 		if (numberOfTiles <= 2) {
-			return <FaceToFaceMode />;
+			return FaceToFaceMode;
 		}
-		return meetingViewSelected === MeetingViewType.CINEMA ? <CinemaMode /> : <GridMode />;
+		return meetingViewSelected === MeetingViewType.CINEMA ? CinemaMode : GridMode;
 	}, [meetingViewSelected, numberOfTiles]);
 
 	return (
@@ -97,9 +101,11 @@ const MeetingSkeleton = (): ReactElement => {
 				orientation="horizontal"
 				data-testid="meeting_view_container"
 			>
+				<RecordingInfo meetingId={meetingId} />
 				<LogoApp $customLogo={customLogo} />
-				{ViewToDisplay}
-				<MeetingActionsBar streamsWrapperRef={streamsWrapperRef} />
+				<ViewToDisplay>
+					<MeetingActionsBar streamsWrapperRef={streamsWrapperRef} />
+				</ViewToDisplay>
 			</ViewContainer>
 		</SkeletonContainer>
 	);

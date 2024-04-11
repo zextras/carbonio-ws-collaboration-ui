@@ -14,7 +14,7 @@ import {
 	getParticipantAudioStatus,
 	getRoomIdByMeetingId
 } from '../store/selectors/MeetingSelectors';
-import { getMyOwnershipOfTheRoom } from '../store/selectors/RoomsSelectors';
+import { getOwnershipOfTheRoom } from '../store/selectors/RoomsSelectors';
 import { getUserId } from '../store/selectors/SessionSelectors';
 import useStore from '../store/Store';
 
@@ -38,7 +38,7 @@ const useMuteForAll = (
 		getParticipantAudioStatus(store, meetingId || '', userIdToMute)
 	);
 	const roomId = useStore((store) => getRoomIdByMeetingId(store, meetingId || ''));
-	const amIModerator = useStore((store) => getMyOwnershipOfTheRoom(store, sessionId, roomId || ''));
+	const amIModerator = useStore((store) => getOwnershipOfTheRoom(store, roomId || ''));
 
 	const createSnackbar: CreateSnackbarFn = useSnackbar();
 

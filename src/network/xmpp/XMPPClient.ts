@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { find } from 'lodash';
 import { $iq, $msg, $pres, Strophe } from 'strophe.js';
 import { v4 as uuidGenerator } from 'uuid';
 
@@ -17,10 +18,12 @@ import { onGetLastActivityResponse } from './handlers/lastActivityHandler';
 import { onGetRosterResponse } from './handlers/rosterHandler';
 import { onSmartMarkers } from './handlers/smartMarkersHandler';
 import { carbonize, carbonizeMUC } from './utility/decodeJid';
+import { getLastUnreadMessage } from './utility/getLastUnreadMessage';
 import XMPPConnection, { XMPPRequestType } from './XMPPConnection';
 import useStore from '../../store/Store';
 import IXMPPClient from '../../types/network/xmpp/IXMPPClient';
 import { dateToISODate } from '../../utils/dateUtils';
+import { RoomsApi } from '../index';
 
 const jabberData = 'jabber:x:data';
 
@@ -123,6 +126,18 @@ class XMPPClient implements IXMPPClient {
 
 	// Send a text message
 	sendChatMessage(roomId: string, message: string): void {
+		const placeholderRoom = roomId.split('placeholder-');
+		if (placeholderRoom[1]) {
+			RoomsApi.replacePlaceholderRoom(placeholderRoom[1], message).then((response) => {
+				this.sendChatMessage(response.id, message);
+			});
+			return;
+		}
+
+		// Read messages before sending a new one
+		const lastMessageId = getLastUnreadMessage(roomId);
+		if (lastMessageId) this.readMessage(roomId, lastMessageId);
+
 		const uuid = uuidGenerator();
 		// Set a placeholder message into the store
 		useStore.getState().setPlaceholderMessage({ roomId, id: uuid, text: message });
@@ -145,6 +160,10 @@ class XMPPClient implements IXMPPClient {
 		replyTo: string,
 		replyMessageId: string
 	): void {
+		// Read messages before sending a new one
+		const lastMessageId = getLastUnreadMessage(roomId);
+		if (lastMessageId) this.readMessage(roomId, lastMessageId);
+
 		const to = `${carbonize(replyTo)}/${carbonizeMUC(roomId)}}`;
 		const uuid = uuidGenerator();
 
@@ -312,6 +331,9 @@ class XMPPClient implements IXMPPClient {
 
 	// Send "I'm typing" information to all the users on the room
 	sendIsWriting(roomId: string): void {
+		// Avoid sending isWriting events to placeholder rooms
+		if (useStore.getState().rooms[roomId]?.placeholder) return;
+
 		const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat' }).c('composing', {
 			xmlns: Strophe.NS.CHAT_STATE
 		});
@@ -320,6 +342,9 @@ class XMPPClient implements IXMPPClient {
 
 	// Sending a paused event to all users on the room
 	sendPaused(roomId: string): void {
+		// Avoid sending paused events to placeholder rooms
+		if (useStore.getState().rooms[roomId]?.placeholder) return;
+
 		const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat' }).c('paused', {
 			xmlns: Strophe.NS.CHAT_STATE
 		});
@@ -333,11 +358,17 @@ class XMPPClient implements IXMPPClient {
 
 	// Send confirmation that I read a certain message
 	readMessage(roomId: string, messageId: string): void {
-		const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat' }).c('displayed', {
-			xmlns: Strophe.NS.MARKERS,
-			id: messageId
-		});
-		this.xmppConnection.send({ type: XMPPRequestType.MESSAGE, elem: msg });
+		const message = find(
+			useStore.getState().messages[roomId],
+			(message) => message.id === messageId
+		);
+		if (message) {
+			const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat' }).c('displayed', {
+				xmlns: Strophe.NS.MARKERS,
+				id: messageId
+			});
+			this.xmppConnection.send({ type: XMPPRequestType.MESSAGE, elem: msg });
+		}
 	}
 
 	// Request last message read date of all the members of a room

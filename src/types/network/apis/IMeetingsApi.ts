@@ -7,16 +7,21 @@
 import { STREAM_TYPE, Subscription } from '../../store/ActiveMeetingTypes';
 import { JoinSettings, MeetingType } from '../models/meetingBeTypes';
 import {
+	AcceptWaitingUserResponse,
 	CreateAudioOfferResponse,
 	CreateMediaAnswerResponse,
 	CreateMeetingResponse,
 	DeleteMeetingResponse,
 	GetMeetingResponse,
+	GetScheduledMeetingNameResponse,
+	GetWaitingListResponse,
 	JoinMeetingResponse,
 	LeaveMeetingResponse,
 	ListMeetingsResponse,
 	StartMeetingResponse,
+	StartRecordingResponse,
 	StopMeetingResponse,
+	StopRecordingResponse,
 	SubscribeMediaResponse,
 	UpdateAudioStreamStatusResponse,
 	UpdateMediaOfferResponse
@@ -28,6 +33,7 @@ interface IMeetingsApi {
 	createMeeting(
 		roomId: string,
 		meetingType: MeetingType,
+		name: string,
 		expiration?: string
 	): Promise<CreateMeetingResponse>;
 	getMeeting(roomId: string): Promise<GetMeetingResponse>;
@@ -69,6 +75,21 @@ interface IMeetingsApi {
 		unsubscription: Subscription[]
 	): Promise<SubscribeMediaResponse>;
 	createMediaAnswer(meetingId: string, sdpOffer: string): Promise<CreateMediaAnswerResponse>;
+	// Scheduled meetings
+	getScheduledMeetingName(meetingId: string): Promise<GetScheduledMeetingNameResponse>;
+	leaveWaitingRoom(meetingId: string): Promise<AcceptWaitingUserResponse>;
+	getWaitingList(meetingId: string): Promise<GetWaitingListResponse>;
+	acceptWaitingUser(
+		meetingId: string,
+		userId: string,
+		accept: boolean
+	): Promise<AcceptWaitingUserResponse>;
+	startRecording(meetingId: string): Promise<StartRecordingResponse>;
+	stopRecording(
+		meetingId: string,
+		recordingName: string,
+		folderId: string
+	): Promise<StopRecordingResponse>;
 }
 
 export default IMeetingsApi;

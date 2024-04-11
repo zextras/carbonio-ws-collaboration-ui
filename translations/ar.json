@@ -4,7 +4,8 @@
         "delete": "حذف",
         "edit": "تحرير",
         "forward": "إعادة توجيه",
-        "reply": "الرد"
+        "reply": "الرد",
+        "cancel": "إلغاء"
     },
     "conversationInfo": {
         "email": "البريد الإلكتروني",
@@ -13,7 +14,10 @@
     },
     "settings": {
         "notifications": {
-            "title": "إعلامات"
+            "title": "إعلامات",
+            "subtitle": {
+                "general": "عام"
+            }
         }
     },
     "status": {

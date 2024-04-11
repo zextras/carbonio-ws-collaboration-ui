@@ -6,10 +6,11 @@
 
 import React, { FC, useCallback, useMemo } from 'react';
 
-import { Badge, Container, IconButton, Row, Text, Tooltip } from '@zextras/carbonio-design-system';
+import { Badge, Container, IconButton, Row, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
+import MeetingChatAccordionTitle from './MeetingChatAccordionTitle';
 import papyrusDark from '../../../../chats/assets/papyrus-dark.png';
 import papyrus from '../../../../chats/assets/papyrus.png';
 import Chat from '../../../../chats/components/conversation/Chat';
@@ -25,7 +26,9 @@ type MeetingConversationAccordionProps = {
 	meetingId: string;
 };
 const ChatContainer = styled(Container)`
-	transition: height 0.3s ease, min-height 0.3s ease;
+	transition:
+		height 0.3s ease,
+		min-height 0.3s ease;
 `;
 
 const WrapperMeetingChat = styled(Container)<{ $darkModeActive: boolean }>`
@@ -43,7 +46,6 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({
 	const minimizeChatLabel = t('meeting.minimizeChat', 'Minimize chat');
 	const expandChatLabel = t('meeting.expandChat', 'Expand chat');
 	const collapseChatLabel = t('meeting.collapseChat', 'Collapse chat');
-	const chatLabel = t('chat', 'Chat');
 
 	const unreadMessagesCount = useStore((store) => getRoomUnreadsSelector(store, roomId || ''));
 	const roomMuted = useStore((state) => getRoomMutedSelector(state, roomId));
@@ -113,9 +115,7 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({
 				borderRadius="none"
 				padding={{ vertical: 'extrasmall', left: 'large', right: 'medium' }}
 			>
-				<Container width="70%" crossAlignment="flex-start">
-					<Text>{chatLabel}</Text>
-				</Container>
+				<MeetingChatAccordionTitle roomId={roomId} />
 				<Container width="30%" orientation="horizontal" mainAlignment="flex-end">
 					{isChatOpenOrFullExpanded && (
 						<Tooltip label={!chatFullExpanded ? extendChatLabel : minimizeChatLabel}>

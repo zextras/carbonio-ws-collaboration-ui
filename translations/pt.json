@@ -30,7 +30,9 @@
         "addNewMembersTo": "Adicionar membros a {{roomName}}",
         "decline": "Recusar",
         "enter": "Entrar",
-        "joinMeeting": "Ingressar na reunião"
+        "joinMeeting": "Ingressar na reunião",
+        "ok": "Ok",
+        "cancel": "Cancelar"
     },
     "attachments": {
         "attachLinkFiles": "Anexar link público a partir de Files",
@@ -39,7 +41,11 @@
         "dragAndDrop": "Arrastar e soltar",
         "dropHereDescription": "Arraste para aqui os seus anexos para adicioná-los rapidamente a este Chat",
         "errorUploadingFile": "Ocorreu um erro durante o carregamento {{file}}",
-        "uploadAborted": "O carregamento foi interrompido"
+        "uploadAborted": "O carregamento foi interrompido",
+        "integrations": {
+            "chooseFile": "Escolher arquivo",
+            "shareLink": "Compartilhar link público"
+        }
     },
     "modal": {
         "deleteRoom": "Apagar Sala",
@@ -84,9 +90,11 @@
         },
         "save": "Edições salvas corretamente",
         "notifications": {
-            "checkboxLabel": "Notificações do desktop",
             "title": "Notificações",
-            "description": "Defina suas preferências para notificações de Chats."
+            "description": "Defina suas preferências para notificações de Chats.",
+            "subtitle": {
+                "general": "Geral"
+            }
         },
         "title": "Configurações dos chats",
         "room": {
@@ -94,6 +102,14 @@
             "deletedUserImageCorrectly": "O avatar foi redefinido com sucesso para o original",
             "pictureSizeTooLarge": "Ocorreu um erro. Lembre-se de que o tamanho máximo da imagem de avatar de um grupo é {{size}}kb",
             "updatedPictureCorrectly": "O novo avatar foi carregado com sucesso"
+        },
+        "meetings": {
+            "title": "Reuniões",
+            "description": "Defina as suas preferências de áudio e vídeo para entrar nas reuniões. Pode sempre personalizar as suas preferências antes de entrar em cada reunião."
+        },
+        "recording": {
+            "inputLabel": "Pasta de destino",
+            "title": "Gravando"
         }
     },
     "conversation": {
@@ -104,7 +120,10 @@
         "emptyListTitle": "A lista está vazia",
         "mockCreateChatTitle": "Crie um novo Chat usando o botão criar",
         "newMessages": "Novas mensagens",
-        "mockCreateChatDescription": "Interaja, comunique e colabore com seus colegas partilhando informações e ficheiros"
+        "mockCreateChatDescription": "Interaja, comunique e colabore com seus colegas partilhando informações e ficheiros",
+        "selectionMode": {
+            "exit": "Sair do modo de seleção"
+        }
     },
     "conversationInfo": {
         "actionAccordionTitle": "Ações",
@@ -228,6 +247,38 @@
         "newMeetingNotification": {
             "sendMessage": "Enviar mensagem",
             "writeAMessageToSendIt": "Escreva uma mensagem"
+        },
+        "virtual": {
+            "deleteTooltip": "Apagar Sala Virtual"
+        },
+        "sidebar": {
+            "waitingCaption": "Aguardando para entrar",
+            "tooltip": {
+                "waitingAccept": "Permitir a entrada do usuário",
+                "waitingReject": "Rejeitar usuário"
+            },
+            "recording": {
+                "title": "Gravando",
+                "description": "A gravação será salva no espaço Files do moderador que a parou."
+            }
+        },
+        "snackbar": {
+            "waitingInfo": "Parece que tem alguém na sala de espera"
+        },
+        "browserNotification": {
+            "waitingTitle": "Parece que tem alguém na sala de espera"
+        },
+        "waitingRoom": {
+            "hangUp": "Desligar"
+        },
+        "recordingHint": "Esta reunião está sendo gravada",
+        "recordingModal": {
+            "title": "Parar gravação",
+            "description": "Você vai parar a gravação. É possível iniciar uma nova a qualquer momento.",
+            "inputLabel": "Nome da Gravação"
+        },
+        "recordingStart": {
+            "failureSnackbar": "Não é possível iniciar a gravação, entre em contato com o administrador do seu sistema."
         }
     },
     "meetings": {
@@ -245,5 +296,8 @@
         "roomIsEmpty": "A Sala está vazia"
     },
     "thanksForParticipating": "Obrigado por participar",
-    "tryLater": "Tente mais tarde"
+    "tryLater": "Tente mais tarde",
+    "snackbar": {
+        "mutedByModerator": "Você foi silenciado por um moderador; reative-se você mesmo para falar"
+    }
 }

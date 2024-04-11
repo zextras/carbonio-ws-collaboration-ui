@@ -11,7 +11,8 @@ import {
 	GetImageResponse,
 	GetImageThumbnailResponse,
 	GetPdfResponse,
-	GetPdfThumbnailResponse
+	GetPdfThumbnailResponse,
+	ImageSize
 } from '../responses/attachmentsResponses';
 
 interface IAttachmentsApi {
@@ -59,6 +60,7 @@ interface IAttachmentsApi {
 		shape?: string,
 		format?: string
 	): string;
+	getImageSize(url: string): Promise<ImageSize>;
 }
 
 export enum ImageQuality {
@@ -74,7 +76,16 @@ export enum AttachmentType {
 	PNG = 'Png',
 	GIF = 'Gif',
 	WEBP = 'Webp',
-	PDF = 'pdf'
+	PDF = 'pdf',
+	DOCX = 'docx',
+	PPTX = 'pptx',
+	XLSX = 'xlsx',
+	MPKG = 'mpkg',
+	ODP = 'odp',
+	ODS = 'ods',
+	ODT = 'odt',
+	PPT = 'ppt',
+	XLS = 'xls'
 }
 
 export enum ImageShape {

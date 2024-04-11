@@ -4,14 +4,18 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { GetImageResponse } from '../../types/network/responses/attachmentsResponses';
 import {
+	AcceptWaitingUserResponse,
 	CreateMeetingResponse,
 	DeleteMeetingResponse,
 	GetMeetingResponse,
 	JoinMeetingResponse,
 	LeaveMeetingResponse,
 	StartMeetingResponse,
+	StartRecordingResponse,
 	StopMeetingResponse,
+	StopRecordingResponse,
 	SubscribeMediaResponse,
 	UpdateAudioStreamStatusResponse
 } from '../../types/network/responses/meetingsResponses';
@@ -71,6 +75,12 @@ export const mockedDeleteMeetingRequest: jest.Mock = jest.fn();
 export const mockedAddRoomAttachmentRequest: jest.Mock = jest.fn();
 export const mockedUpdateAudioStreamStatusRequest: jest.Mock = jest.fn();
 export const mockedSubscribeToMediaRequest: jest.Mock = jest.fn();
+export const mockedAcceptWaitingUserRequest: jest.Mock = jest.fn();
+export const mockedGetScheduledMeetingName: jest.Mock = jest.fn();
+export const mockedLeaveWaitingRoomRequest: jest.Mock = jest.fn();
+export const mockedImageSizeRequest: jest.Mock = jest.fn();
+export const mockedStartRecordingRequest: jest.Mock = jest.fn();
+export const mockedStopRecordingRequest: jest.Mock = jest.fn();
 
 jest.mock('../../network', () => {
 	const noResultProvided = 'no result provided';
@@ -87,6 +97,11 @@ jest.mock('../../network', () => {
 					result ? resolve(result) : reject(new Error(noResultProvided));
 				}),
 			deleteRoom: (): Promise<DeleteRoomResponse> =>
+				new Promise((resolve, reject) => {
+					const result = mockedDeleteRoomRequest();
+					result ? resolve(result) : reject(new Error(noResultProvided));
+				}),
+			deleteRoomAndMeeting: (): Promise<DeleteRoomResponse> =>
 				new Promise((resolve, reject) => {
 					const result = mockedDeleteRoomRequest();
 					result ? resolve(result) : reject(new Error(noResultProvided));
@@ -151,6 +166,11 @@ jest.mock('../../network', () => {
 				new Promise((resolve, reject) => {
 					const result = mockedAddRoomAttachmentRequest();
 					result ? resolve(result) : reject(new Error(noResultProvided));
+				}),
+			replacePlaceholderRoom: (): Promise<AddRoomResponse> =>
+				new Promise((resolve, reject) => {
+					const result = mockedAddRoomRequest();
+					result ? resolve(result) : reject(new Error(noResultProvided));
 				})
 		},
 		UsersApi: {
@@ -172,7 +192,12 @@ jest.mock('../../network', () => {
 			getImagePreviewURL: mockedGetImageURL,
 			getImageThumbnailURL: mockedGetImageThumbnailURL,
 			getPdfPreviewURL: mockedGetPdfURL,
-			getPdfThumbnailURL: mockedGetPdfThumbnailURL
+			getPdfThumbnailURL: mockedGetPdfThumbnailURL,
+			getImageSize: (): Promise<GetImageResponse> =>
+				new Promise((resolve, reject) => {
+					const result = mockedImageSizeRequest();
+					result ? resolve(result) : reject(new Error(noResultProvided));
+				})
 		},
 		MeetingsApi: {
 			getMeeting: (): Promise<GetMeetingResponse> =>
@@ -185,7 +210,7 @@ jest.mock('../../network', () => {
 					const result = mockedGetMeetingRequest();
 					result ? resolve(result) : reject(new Error(noResultProvided));
 				}),
-			createPermanentMeeting: (): Promise<CreateMeetingResponse> =>
+			createMeeting: (): Promise<CreateMeetingResponse> =>
 				new Promise((resolve, reject) => {
 					const result = mockedCreateMeetingRequest();
 					result ? resolve(result) : reject(new Error(noResultProvided));
@@ -228,6 +253,36 @@ jest.mock('../../network', () => {
 			subscribeToMedia: (): Promise<SubscribeMediaResponse> =>
 				new Promise((resolve, reject) => {
 					const result = mockedSubscribeToMediaRequest();
+					result ? resolve(result) : reject(new Error(noResultProvided));
+				}),
+			acceptWaitingUser(
+				meetingId: string,
+				userId: string,
+				accept: boolean
+			): Promise<AcceptWaitingUserResponse> {
+				return new Promise((resolve, reject) => {
+					const result = mockedAcceptWaitingUserRequest(meetingId, userId, accept);
+					result ? resolve(result) : reject(new Error(noResultProvided));
+				});
+			},
+			getScheduledMeetingName: (): Promise<SubscribeMediaResponse> =>
+				new Promise((resolve, reject) => {
+					const result = mockedGetScheduledMeetingName();
+					result ? resolve(result) : reject(new Error(noResultProvided));
+				}),
+			leaveWaitingRoom: (): Promise<SubscribeMediaResponse> =>
+				new Promise((resolve, reject) => {
+					const result = mockedLeaveWaitingRoomRequest();
+					result ? resolve(result) : reject(new Error(noResultProvided));
+				}),
+			startRecording: (): Promise<StartRecordingResponse> =>
+				new Promise((resolve, reject) => {
+					const result = mockedStartRecordingRequest();
+					result ? resolve(result) : reject(new Error(noResultProvided));
+				}),
+			stopRecording: (): Promise<StopRecordingResponse> =>
+				new Promise((resolve, reject) => {
+					const result = mockedStopRecordingRequest();
 					result ? resolve(result) : reject(new Error(noResultProvided));
 				})
 		}

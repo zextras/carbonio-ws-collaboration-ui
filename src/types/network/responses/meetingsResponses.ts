@@ -12,9 +12,9 @@ export type CreateMeetingResponse = MeetingBe;
 
 export type GetMeetingResponse = MeetingBe;
 
-export type StartMeetingResponse = Response;
+export type StartMeetingResponse = MeetingBe;
 
-export type JoinMeetingResponse = MeetingBe;
+export type JoinMeetingResponse = { status: 'ACCEPTED' | 'WAITING' };
 
 export type LeaveMeetingResponse = Response;
 
@@ -31,3 +31,13 @@ export type UpdateMediaOfferResponse = Response;
 export type SubscribeMediaResponse = Response;
 
 export type CreateMediaAnswerResponse = Response;
+
+export type GetScheduledMeetingNameResponse = { name: string };
+
+export type GetWaitingListResponse = { users: string[] };
+
+export type AcceptWaitingUserResponse = { accepted: boolean };
+
+export type StartRecordingResponse = Response;
+
+export type StopRecordingResponse = Response;

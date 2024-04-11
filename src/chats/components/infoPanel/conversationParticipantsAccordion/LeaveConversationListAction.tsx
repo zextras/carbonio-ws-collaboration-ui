@@ -32,23 +32,20 @@ const LeaveConversationListAction: FC<LeaveConversationProps> = ({
 	roomId
 }) => {
 	const [t] = useTranslation();
-	const leaveAndDeleteLabel: string = t(
-		'tooltip.leaveAndDelete',
-		'Leave and delete the conversation'
-	);
+	const leaveAndDeleteLabel: string = t('tooltip.leaveAndDelete', 'Leave and delete the chat');
 	const promoteSomeoneElseToModeratorLabel: string = t(
 		'tooltip.promoteSomeoneElseToModerator',
 		'Before leaving you have to promote someone else to moderator'
 	);
-	const leaveConversationLabel: string = t('tooltip.leaveConversation', 'Leave conversation');
+	const leaveConversationLabel: string = t('tooltip.leaveConversation', 'Leave Group');
 
 	const tooltipLabel =
 		// eslint-disable-next-line no-nested-ternary
 		iAmOwner && numberOfMembers === 1
 			? leaveAndDeleteLabel
 			: numberOfOwners === 1 && iAmOwner
-			? promoteSomeoneElseToModeratorLabel
-			: leaveConversationLabel;
+				? promoteSomeoneElseToModeratorLabel
+				: leaveConversationLabel;
 
 	const sessionUserId = useStore((store) => store.session.id);
 
@@ -64,7 +61,7 @@ const LeaveConversationListAction: FC<LeaveConversationProps> = ({
 	}, [goToMainPage, roomId, sessionUserId]);
 
 	const deleteConversation = useCallback(
-		() => RoomsApi.deleteRoom(roomId).then(() => goToMainPage()),
+		() => RoomsApi.deleteRoomAndMeeting(roomId).then(() => goToMainPage()),
 		[goToMainPage, roomId]
 	);
 

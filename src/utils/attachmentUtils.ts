@@ -37,8 +37,26 @@ export const getAttachmentExtension = (attachmentType: string): string | undefin
 			return AttachmentType.WEBP;
 		case 'pdf':
 			return AttachmentType.PDF;
+		case 'vnd.openxmlformats-officedocument.wordprocessingml.document':
+			return AttachmentType.DOCX;
+		case 'vnd.openxmlformats-officedocument.presentationml.presentation':
+			return AttachmentType.PPTX;
+		case 'vnd.openxmlformats-officedocument.spreadsheetml.sheet':
+			return AttachmentType.XLSX;
+		case 'vnd.oasis.opendocument.presentation':
+			return AttachmentType.ODP;
+		case 'vnd.oasis.opendocument.spreadsheet':
+			return AttachmentType.ODS;
+		case 'vnd.oasis.opendocument.text':
+			return AttachmentType.ODT;
+		case 'vnd.apple.installer+xml':
+			return AttachmentType.MPKG;
+		case 'vnd.ms-powerpoint':
+			return AttachmentType.PPT;
+		case 'vnd.ms-excel':
+			return AttachmentType.XLS;
 		default:
-			return undefined;
+			return type[1];
 	}
 };
 
@@ -49,7 +67,7 @@ export const getAttachmentInfo = (
 	let size;
 	let extension;
 	if (messageMimeType !== undefined) {
-		extension = messageMimeType.split('/')[1]?.toUpperCase();
+		extension = getAttachmentExtension(messageMimeType)?.toUpperCase();
 	} else {
 		extension = undefined;
 	}
@@ -80,7 +98,7 @@ export const getThumbnailURL = (attachmentId: string, mimeType: string): string 
 					ImageQuality.LOW,
 					getAttachmentExtension(mimeType),
 					ImageShape.RECTANGULAR
-			  );
+				);
 	}
 	return undefined;
 };
@@ -95,7 +113,7 @@ export const getAttachmentURL = (attachmentId: string, mimeType: string): string
 					'0x0',
 					ImageQuality.HIGH,
 					getAttachmentExtension(mimeType)
-			  );
+				);
 	}
 	return undefined;
 };

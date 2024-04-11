@@ -30,7 +30,9 @@
         "scrollToBottom": "Desplazar hacia abajo",
         "decline": "Rechazar",
         "enter": "Entrar",
-        "joinMeeting": "Unirse a la reunión"
+        "joinMeeting": "Unirse a la reunión",
+        "ok": "Ok",
+        "cancel": "Cancelar"
     },
     "attachments": {
         "addFromLocal": "Adjuntar desde Mi PC",
@@ -39,7 +41,11 @@
         "dragAndDrop": "Arrastrar y soltar",
         "dropHereDescription": "Selecciona y arrastra tus archivos para agregarlos rápidamente a este chat",
         "errorUploadingFile": "Algo ha salido mal al cargar {{file}}",
-        "uploadAborted": "La carga se ha interrumpido"
+        "uploadAborted": "La carga se ha interrumpido",
+        "integrations": {
+            "chooseFile": "Seleccionar archivo",
+            "shareLink": "Compartir enlace público"
+        }
     },
     "conversationInfo": {
         "status": "Estado",
@@ -118,7 +124,10 @@
         "mockCreateChatDescription": "Interactúa, comunícate y colabora con tus colegas compartiendo información y archivos",
         "mockCreateChatTitle": "Crea un nuevo chat desde el botón Crear",
         "emptyListTitle": "La lista está vacía",
-        "newMessages": "Nuevos mensajes"
+        "newMessages": "Nuevos mensajes",
+        "selectionMode": {
+            "exit": "Salir de selección múltiple"
+        }
     },
     "date": {
         "yesterday": "Ayer",
@@ -166,9 +175,11 @@
     },
     "settings": {
         "notifications": {
-            "checkboxLabel": "Notificaciones de escritorio",
             "title": "Notificaciones",
-            "description": "Establece tus preferencias para las notificaciones de los chats."
+            "description": "Establece tus preferencias para las notificaciones de los chats.",
+            "subtitle": {
+                "general": "General"
+            }
         },
         "profile": {
             "errorGenericResponse": "Algo salió mal. Por favor, reintentar",
@@ -187,6 +198,14 @@
             "deletedUserImageCorrectly": "El avatar ha sido restablecido al original",
             "pictureSizeTooLarge": "Algo ha salido mal. El tamaño máximo del avatar del grupo es de {{size}} kb",
             "updatedPictureCorrectly": "El avatar ha sido cargado correctamente"
+        },
+        "meetings": {
+            "title": "Reuniones",
+            "description": "Configura tus preferencias de audio y vídeo para entrar en las reuniones. Siempre podrás configurar tus preferencias antes de entrar en cualquier reunión."
+        },
+        "recording": {
+            "inputLabel": "Carpeta de destino",
+            "title": "Grabando"
         }
     },
     "status": {
@@ -233,6 +252,38 @@
         "newMeetingNotification": {
             "sendMessage": "Enviar mensaje",
             "writeAMessageToSendIt": "Escribe un mensaje"
+        },
+        "virtual": {
+            "deleteTooltip": "Eliminar Sala Virtual"
+        },
+        "sidebar": {
+            "tooltip": {
+                "waitingAccept": "Aceptar participante",
+                "waitingReject": "Rechazar usuario"
+            },
+            "waitingCaption": "Esperando para entrar",
+            "recording": {
+                "title": "Grabando",
+                "description": "La grabación se guardará en una carpeta en Files del moderador que la detuvo."
+            }
+        },
+        "snackbar": {
+            "waitingInfo": "Hay alguien en la sala de espera"
+        },
+        "browserNotification": {
+            "waitingTitle": "Hay alguien en la sala de espera"
+        },
+        "waitingRoom": {
+            "hangUp": "Colgar"
+        },
+        "recordingHint": "Esta reunión está siendo grabada",
+        "recordingModal": {
+            "description": "Estás a punto de detener la grabación. Puedes comenzar a grabar de nuevo en cualquier momento.",
+            "title": "Detener grabación",
+            "inputLabel": "Nombre del archivo"
+        },
+        "recordingStart": {
+            "failureSnackbar": "No es posible iniciar la grabación. Contacta con el administrador del sistema."
         }
     },
     "meetings": {
@@ -246,5 +297,8 @@
         }
     },
     "thanksForParticipating": "Gracias por participar",
-    "tryLater": "Inténtalo más tarde"
+    "tryLater": "Inténtalo más tarde",
+    "snackbar": {
+        "mutedByModerator": "Has sido silenciado por un moderador. Reactiva tu micrófono para hablar"
+    }
 }
