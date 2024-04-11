@@ -68,8 +68,8 @@ const PreviewErrorContainer = styled(Container)<{
 		$imgWidth === 0
 			? `width: ${$maxWidth * 0.063}rem;`
 			: $maxWidth === 0
-			? 'width: 100%'
-			: `width: min(${$imgWidth * 0.063}rem, ${$maxWidth * 0.063}rem);`};
+				? 'width: 100%'
+				: `width: min(${$imgWidth * 0.063}rem, ${$maxWidth * 0.063}rem);`};
 	${({ $imgWidth, $imgHeight }): string | false =>
 		$imgWidth !== 0
 			? `aspect-ratio: ${$imgWidth * 0.063}/${$imgHeight * 0.063};`

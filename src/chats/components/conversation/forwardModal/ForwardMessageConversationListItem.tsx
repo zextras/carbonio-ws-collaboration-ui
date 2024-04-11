@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { FunctionComponent, MouseEventHandler } from 'react';
+import React, { FunctionComponent } from 'react';
 
 import {
 	Avatar,
@@ -15,6 +15,7 @@ import {
 	TextWithTooltip
 } from '@zextras/carbonio-design-system';
 
+import { ChatListItemProp } from './ForwardMessageModal';
 import {
 	getRoomNameSelector,
 	getRoomTypeSelector,
@@ -24,21 +25,20 @@ import useStore from '../../../../store/Store';
 import { RoomType } from '../../../../types/store/RoomTypes';
 
 type ForwardModalConversationListItemProps = {
-	roomId: string;
+	item: ChatListItemProp;
 	selected: boolean;
-	onClick: (id: string) => MouseEventHandler<HTMLDivElement> | undefined;
 };
 
 const ForwardMessageConversationListItem: FunctionComponent<
 	ForwardModalConversationListItemProps
-> = ({ roomId, selected, onClick }) => {
-	const roomName = useStore((state) => getRoomNameSelector(state, roomId));
-	const picture: string | undefined = useStore((state) => getRoomURLPicture(state, roomId));
-	const roomType: string = useStore((state) => getRoomTypeSelector(state, roomId));
+> = ({ item, selected }) => {
+	const roomName = useStore((state) => getRoomNameSelector(state, item.id));
+	const picture: string | undefined = useStore((state) => getRoomURLPicture(state, item.id));
+	const roomType: string = useStore((state) => getRoomTypeSelector(state, item.id));
 
 	return (
 		<Container
-			onClick={onClick(roomId)}
+			onClick={item.onClickCb(item.id)}
 			orientation="horizontal"
 			mainAlignment="flex-start"
 			padding={{ vertical: 'small' }}

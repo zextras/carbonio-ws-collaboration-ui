@@ -18,6 +18,7 @@ beforeEach(() => {
 	store.addRoomMember(mockedRoom.id, mockedUser0);
 	store.addRoomMember(mockedRoom.id, mockedUser1);
 });
+
 describe('Active conversations slice', () => {
 	test('User starts to write', () => {
 		useStore.getState().setIsWriting(mockedRoom.id, mockedUser0.userId, true);

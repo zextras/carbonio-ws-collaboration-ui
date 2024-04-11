@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import produce from 'immer';
+import { produce } from 'immer';
 import { find } from 'lodash';
 import { StateCreator } from 'zustand';
 

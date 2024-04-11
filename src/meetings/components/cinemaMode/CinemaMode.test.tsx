@@ -7,7 +7,7 @@ import React from 'react';
 
 import { screen } from '@testing-library/react';
 import { act, renderHook } from '@testing-library/react-hooks';
-import { UserEvent } from '@testing-library/user-event/setup/setup';
+import { UserEvent } from '@testing-library/user-event';
 
 import CinemaMode from './CinemaMode';
 import { useParams } from '../../../../__mocks__/react-router';

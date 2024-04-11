@@ -77,7 +77,7 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 							deviceId: { exact: audioId },
 							noiseSuppression: true,
 							echoCancellation: true
-					  }
+						}
 					: { noiseSuppression: true, echoCancellation: true };
 				const kindOfVideoDevice = videoId ? { deviceId: { exact: videoId } } : true;
 				getAudioAndVideo(audio ? kindOfAudioDevice : false, video ? kindOfVideoDevice : false)

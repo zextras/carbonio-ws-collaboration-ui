@@ -138,7 +138,7 @@ export const createMockFile = (fields?: { name: string; options?: GenericFieldsT
 		? new File(['lotsOfBite'], fields.name, { ...fields.options })
 		: new File(['sunrise'], 'sunrise.png', {
 				type: 'image/png'
-		  });
+			});
 
 export const createMockFileToUpload = (fields?: GenericFieldsType): FileToUpload => ({
 	fileId: 'genericImageId',
