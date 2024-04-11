@@ -15,6 +15,8 @@ export type MeetingBe = {
 	createdAt: string;
 	meetingType: MeetingType;
 	startedAt?: string;
+	recStartedAt?: string;
+	recUserId?: string;
 };
 
 export type MeetingParticipantBe = {

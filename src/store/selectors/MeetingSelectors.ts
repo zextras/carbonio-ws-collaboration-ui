@@ -194,3 +194,24 @@ export const getMeetingStartedAt = (
 	const meeting = find(store.meetings, (meeting) => meeting.id === meetingId);
 	return meeting?.startedAt;
 };
+
+export const getMeetingRecordingTimestamp = (
+	store: RootStore,
+	meetingId: string
+): string | undefined => {
+	const meeting = find(store.meetings, (meeting) => meeting.id === meetingId);
+	return meeting?.recStartedAt;
+};
+
+export const getIsMeetingRecording = (store: RootStore, meetingId: string): boolean => {
+	const meeting = find(store.meetings, (meeting) => meeting.id === meetingId);
+	return !!meeting?.recStartedAt;
+};
+
+export const getStartRecordingUserId = (
+	store: RootStore,
+	meetingId: string
+): string | undefined => {
+	const meeting = find(store.meetings, (meeting) => meeting.id === meetingId);
+	return meeting?.recUserId;
+};

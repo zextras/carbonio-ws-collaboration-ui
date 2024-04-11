@@ -41,7 +41,8 @@ export const useActiveMeetingSlice: StateCreator<ActiveMeetingSlice> = (
 						sidebarIsOpened: true,
 						actionsAccordionIsOpened: true,
 						participantsAccordionIsOpened: false,
-						waitingListAccordionIsOpened: true
+						waitingListAccordionIsOpened: true,
+						recordingAccordionIsOpened: false
 					},
 					chatVisibility: MeetingChatVisibility.CLOSED,
 					meetingViewSelected: MeetingViewType.GRID,
@@ -115,6 +116,17 @@ export const useActiveMeetingSlice: StateCreator<ActiveMeetingSlice> = (
 			}),
 			false,
 			'AM/SET_WAITING_LIST_ACCORDION_STATUS'
+		);
+	},
+	setRecordingAccordionStatus: (meetingId: string, status: boolean): void => {
+		set(
+			produce((draft: RootStore) => {
+				if (draft.activeMeeting[meetingId]) {
+					draft.activeMeeting[meetingId].sidebarStatus.recordingAccordionIsOpened = status;
+				}
+			}),
+			false,
+			'AM/SET_RECORDING_ACCORDION_STATUS'
 		);
 	},
 	setMeetingParticipantsAccordionStatus: (meetingId: string, status: boolean): void => {

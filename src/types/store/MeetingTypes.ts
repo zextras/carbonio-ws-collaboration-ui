@@ -19,6 +19,8 @@ export type Meeting = {
 	meetingType: MeetingType;
 	waitingList?: string[];
 	startedAt?: string;
+	recStartedAt?: string;
+	recUserId?: string;
 };
 
 export type MeetingParticipantMap = {

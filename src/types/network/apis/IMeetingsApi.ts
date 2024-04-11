@@ -19,7 +19,9 @@ import {
 	LeaveMeetingResponse,
 	ListMeetingsResponse,
 	StartMeetingResponse,
+	StartRecordingResponse,
 	StopMeetingResponse,
+	StopRecordingResponse,
 	SubscribeMediaResponse,
 	UpdateAudioStreamStatusResponse,
 	UpdateMediaOfferResponse
@@ -82,6 +84,12 @@ interface IMeetingsApi {
 		userId: string,
 		accept: boolean
 	): Promise<AcceptWaitingUserResponse>;
+	startRecording(meetingId: string): Promise<StartRecordingResponse>;
+	stopRecording(
+		meetingId: string,
+		recordingName: string,
+		folderId: string
+	): Promise<StopRecordingResponse>;
 }
 
 export default IMeetingsApi;
