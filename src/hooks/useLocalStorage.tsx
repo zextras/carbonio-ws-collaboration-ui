@@ -6,17 +6,21 @@
 
 import { useEffect, useState } from 'react';
 
-type ReturnType<T> = [T, React.Dispatch<React.SetStateAction<T>>];
+import { getLocalStorageItem, LOCAL_STORAGE_NAMES } from '../utils/localStorageUtils';
 
-const useLocalStorage = <T,>(key: string, initialValue?: T): ReturnType<T> => {
-	const [localStorageItem, setLocalStorageItem] = useState<T>(() => {
-		try {
-			const item = window.localStorage.getItem(key);
-			return item ? JSON.parse(item) : initialValue;
-		} catch (error) {
-			return initialValue;
-		}
-	});
+type ReturnType<LocalStorageType> = [
+	LocalStorageType,
+	React.Dispatch<React.SetStateAction<LocalStorageType>>
+];
+
+const useLocalStorage = <LocalStorageType,>(
+	key: LOCAL_STORAGE_NAMES
+): ReturnType<LocalStorageType> => {
+	const [localStorageItem, setLocalStorageItem] = useState<LocalStorageType>(
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore
+		getLocalStorageItem(key)
+	);
 
 	useEffect(() => {
 		if (localStorageItem) {

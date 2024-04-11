@@ -149,15 +149,15 @@
             },
             "slogan": {
                 "hangUp": "Maybe next time",
-                "meetingNotFound": "try later",
-                "notAuthenticatedUser": "LOGIN TO ACCESS THE MEETING",
+                "meetingNotFound": "Try later",
+                "notAuthenticatedUser": "login to access the meeting",
                 "rejected": "Maybe next time"
             },
             "title": {
-                "hangUp": "You left the waiting room",
+                "hangUp": "You hung up!",
                 "meetingNotFound": "The meeting you are looking for does not exist",
                 "notAuthenticatedUser": "You are not authenticated",
-                "rejected": "You access has been refused"
+                "rejected": "Your access has been refused"
             }
         },
         "interactions": {
@@ -174,7 +174,7 @@
             "enableMicrophone": "Enable microphone",
             "enableScreen": "Enable screen share",
             "gridView": "Grid view",
-            "leaveConfirmation": "Leave meeting?",
+            "leaveConfirmation": "Leave Meeting?",
             "leaveMeeting": "Leave Meeting",
             "micDevice": "Microphone device",
             "microphoneDisabled": "Microphone disabled",
@@ -203,8 +203,8 @@
         "presentActiveSession": "There is another active session",
         "recordingHint": "This meeting is being recorded",
         "recordingModal": {
-            "caption": "The recording will be saved in {{folderName}} folder on Files. Go to Settings > Chats > Recording to change the destination folder.",
-            "confirmationAction": "STOP",
+            "caption": "The recording will be saved in \"{{folderName}}\".",
+            "confirmationAction": "Stop",
             "description": "You are going to stop the recording. You can start a new one at any time.",
             "exceededCharsError": "The recording file name must not exceed 128 characters",
             "inputLabel": "Recording Name",
@@ -231,8 +231,8 @@
         "sidebar": {
             "recording": {
                 "action": {
-                    "start": "START",
-                    "stop": "STOP"
+                    "start": "Start",
+                    "stop": "Stop"
                 },
                 "description": "The recording will be saved in the Files space of the moderator who stopped it.",
                 "moderatorInfo": "has started recording",
@@ -381,10 +381,10 @@
             "updatedPictureCorrectly": "New avatar has been successfully uploaded"
         },
         "recording": {
-            "browseAction": "BROWSE",
+            "browseAction": "Browse",
             "description": "Set a custom folder where to save the recordings of the meetings you stop.",
             "inputLabel": "Destination folder",
-            "resetAction": "RESET",
+            "resetAction": "Reset",
             "title": "Recording"
         },
         "room": {

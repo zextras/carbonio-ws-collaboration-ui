@@ -10,6 +10,8 @@ import {
 	MeetingAudioStreamChangedEvent,
 	MeetingJoinedEvent,
 	MeetingParticipantClashedEvent,
+	MeetingRecordingStartedEvent,
+	MeetingRecordingStoppedEvent,
 	MeetingStartedEvent,
 	MeetingStoppedEvent,
 	MeetingUserAcceptedEvent,
@@ -29,7 +31,9 @@ export enum EventName {
 	MEETING_USER_ACCEPTED = 'meetingUserAccepted',
 	MEETING_USER_REJECTED = 'meetingUserRejected',
 	MEETING_WAITING_PARTICIPANT_CLASHED = 'meetingWaitingParticipantClashed',
-	MEETING_STOPPED = 'meetingStopped'
+	MEETING_STOPPED = 'meetingStopped',
+	MEETING_RECORDING_STARTED = 'meetingRecordingStarted',
+	MEETING_RECORDING_STOPPED = 'meetingRecordingStopped'
 }
 
 export type NewMessageEvent = {
@@ -82,6 +86,16 @@ export type MeetingStoppedUseEvent = {
 	data: MeetingStoppedEvent;
 };
 
+export type RecordingStartedEvent = {
+	name: EventName.MEETING_RECORDING_STARTED;
+	data: MeetingRecordingStartedEvent;
+};
+
+export type RecordingStoppedEvent = {
+	name: EventName.MEETING_RECORDING_STOPPED;
+	data: MeetingRecordingStoppedEvent;
+};
+
 type CustomEvent =
 	| NewMessageEvent
 	| IncomingMeetingEvent
@@ -92,6 +106,8 @@ type CustomEvent =
 	| MeetingAcceptedEvent
 	| MeetingRejectedEvent
 	| MeetingWaitingParticipantClashedEvent
+	| RecordingStartedEvent
+	| RecordingStoppedEvent
 	| MeetingStoppedUseEvent;
 
 export const sendCustomEvent = (event: CustomEvent): void => {

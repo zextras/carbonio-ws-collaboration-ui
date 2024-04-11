@@ -171,12 +171,19 @@ export type MeetingsSlice = {
 	setWaitingList: (meetingId: string, waitingList: string[]) => void;
 	addUserToWaitingList: (meetingId: string, userId: string) => void;
 	removeUserFromWaitingList: (meetingId: string, userId: string) => void;
+	startRecording: (
+		meetingId: string,
+		startRecordingTimestamp: string,
+		startRecordingUserId: string
+	) => void;
+	stopRecording: (meetingId: string) => void;
 };
 
 export type ActiveMeetingSlice = {
 	activeMeeting: ActiveMeetingMap;
 	setMeetingActionsAccordionStatus: (roomId: string, status: boolean) => void;
 	setWaitingListAccordionStatus: (roomId: string, status: boolean) => void;
+	setRecordingAccordionStatus: (roomId: string, status: boolean) => void;
 	setMeetingParticipantsAccordionStatus: (roomId: string, status: boolean) => void;
 	setMeetingChatVisibility: (meetingId: string, visibilityStatus: MeetingChatVisibility) => void;
 	setMeetingViewSelected: (meetingId: string, viewType: MeetingViewType) => void;

@@ -222,4 +222,34 @@ describe('Test components slice', () => {
 			expect(waitingList).not.toContain('userId2');
 		});
 	});
+
+	describe('Recording', () => {
+		test('Start a new recording', () => {
+			const { result } = renderHook(() => useStore());
+			act(() => {
+				result.current.addMeeting(scheduleMeeting);
+				result.current.startRecording(
+					scheduleMeeting.id,
+					'2022-08-25T18:24:28.961+02:00',
+					'userId0'
+				);
+			});
+
+			const { recStartedAt, recUserId } = result.current.meetings[scheduleMeeting.roomId];
+			expect(recStartedAt).toBe('2022-08-25T18:24:28.961+02:00');
+			expect(recUserId).toBe('userId0');
+		});
+
+		test('Stop an ongoing recording', () => {
+			const { result } = renderHook(() => useStore());
+			act(() => {
+				result.current.addMeeting(scheduleMeeting);
+				result.current.stopRecording(scheduleMeeting.id);
+			});
+
+			const { recStartedAt, recUserId } = result.current.meetings[scheduleMeeting.roomId];
+			expect(recStartedAt).toBeUndefined();
+			expect(recUserId).toBeUndefined();
+		});
+	});
 });

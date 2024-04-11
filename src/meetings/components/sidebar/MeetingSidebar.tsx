@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { ReactElement, useCallback } from 'react';
+import React, { ReactElement, useCallback, useMemo } from 'react';
 
 import { Container, IconButton, Tooltip } from '@zextras/carbonio-design-system';
 import { includes } from 'lodash';
@@ -14,6 +14,7 @@ import styled from 'styled-components';
 
 import MeetingConversationAccordion from './MeetingConversationAccordion/MeetingConversationAccordion';
 import MeetingParticipantsAccordion from './ParticipantsAccordion/MeetingParticipantsAccordion';
+import RecordingAccordion from './recordingAccordion/RecordingAccordion';
 import WaitingListAccordion from './waitingListAccordion/WaitingListAccordion';
 import { ActionsAccordion } from '../../../chats/components/infoPanel/conversationActionsAccordion/ActionsAccordion';
 import { MeetingRoutesParams } from '../../../hooks/useRouting';
@@ -22,10 +23,15 @@ import {
 	getMeetingSidebarStatus
 } from '../../../store/selectors/ActiveMeetingSelectors';
 import { getRoomIdByMeetingId } from '../../../store/selectors/MeetingSelectors';
-import { getRoomTypeSelector } from '../../../store/selectors/RoomsSelectors';
+import {
+	getOwnershipOfTheRoom,
+	getRoomTypeSelector
+} from '../../../store/selectors/RoomsSelectors';
+import { getCapability } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { MeetingChatVisibility } from '../../../types/store/ActiveMeetingTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
+import { CapabilityType } from '../../../types/store/SessionTypes';
 import BubblesWrapper from '../bubblesWrapper/BubblesWrapper';
 
 const SidebarContainer = styled(Container)`
@@ -57,14 +63,37 @@ const MeetingSidebar = (): ReactElement => {
 	const expandSidebarLabel = t('tooltip.expandSidebar', 'Expand sidebar');
 
 	const roomId = useStore((store) => getRoomIdByMeetingId(store, meetingId));
-	const roomType = useStore((store) => getRoomTypeSelector(store, roomId || ''));
+	const roomType = useStore((store) => getRoomTypeSelector(store, roomId ?? ''));
+	const amIModerator = useStore((store) => getOwnershipOfTheRoom(store, roomId ?? ''));
 	const meetingChatVisibility = useStore((store) => getMeetingChatVisibility(store, meetingId));
 	const sidebarIsVisible: boolean = useStore((store) => getMeetingSidebarStatus(store, meetingId));
 	const setMeetingSidebarStatus = useStore((store) => store.setMeetingSidebarStatus);
-
+	const canVideoCallRecord = useStore((store) =>
+		getCapability(store, CapabilityType.CAN_VIDEO_CALL_RECORD)
+	);
 	const toggleSidebar = useCallback(
 		() => setMeetingSidebarStatus(meetingId, !sidebarIsVisible),
 		[setMeetingSidebarStatus, meetingId, sidebarIsVisible]
+	);
+
+	const showActionsAccordion = useMemo(
+		() => includes([RoomType.ONE_TO_ONE, RoomType.GROUP], roomType),
+		[roomType]
+	);
+
+	const showRecordingAccordion = useMemo(
+		() => canVideoCallRecord && amIModerator,
+		[amIModerator, canVideoCallRecord]
+	);
+
+	const showWaitingListAccordion = useMemo(
+		() => includes([RoomType.TEMPORARY], roomType) && amIModerator,
+		[amIModerator, roomType]
+	);
+
+	const showParticipantsAccordion = useMemo(
+		() => includes([RoomType.GROUP, RoomType.TEMPORARY], roomType),
+		[roomType]
 	);
 
 	return (
@@ -80,15 +109,12 @@ const MeetingSidebar = (): ReactElement => {
 		>
 			{meetingChatVisibility !== MeetingChatVisibility.EXPANDED && (
 				<AccordionContainer mainAlignment="flex-start" flexGrow="1" gap="gap: 0.063rem">
-					{includes([RoomType.ONE_TO_ONE, RoomType.GROUP], roomType) && (
+					{showActionsAccordion && (
 						<ActionsAccordion roomId={roomId || ''} isInsideMeeting meetingId={meetingId} />
 					)}
-					{includes([RoomType.TEMPORARY], roomType) && (
-						<WaitingListAccordion meetingId={meetingId} />
-					)}
-					{includes([RoomType.GROUP, RoomType.TEMPORARY], roomType) && (
-						<MeetingParticipantsAccordion meetingId={meetingId} />
-					)}
+					{showRecordingAccordion && <RecordingAccordion meetingId={meetingId} />}
+					{showWaitingListAccordion && <WaitingListAccordion meetingId={meetingId} />}
+					{showParticipantsAccordion && <MeetingParticipantsAccordion meetingId={meetingId} />}
 				</AccordionContainer>
 			)}
 			<MeetingConversationAccordion roomId={roomId || ''} meetingId={meetingId} />
