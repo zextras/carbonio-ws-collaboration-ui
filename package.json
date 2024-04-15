@@ -1,6 +1,6 @@
 {
 	"name": "carbonio-ws-collaboration-ui",
-	"version": "0.9.2",
+	"version": "0.9.3",
 	"description": "Chats Module for Zextras Carbonio",
 	"main": "src/app.jsx",
 	"scripts": {
