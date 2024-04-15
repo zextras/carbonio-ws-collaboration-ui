@@ -18,25 +18,12 @@ import VirtualRoomsButton from './VirtualRoomTemporaryWidget/VirtualRoomsButton'
 import { useFilterRoomsOnInput } from '../../../hooks/useFilterRoomsOnInput';
 import { getOneToOneAndGroupsInfoOrderedByLastMessage } from '../../../store/selectors/MessagesSelectors';
 import { getCapability } from '../../../store/selectors/SessionSelectors';
-import { getUsersSelector } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
 import { Member } from '../../../types/store/RoomTypes';
 import { CapabilityType } from '../../../types/store/SessionTypes';
 import DefaultUserSidebarView from '../../views/DefaultUserSidebarView';
 import ShimmeringCollapsedListView from '../../views/shimmerViews/ShimmeringCollapsedListView';
 import ShimmeringExpandedListView from '../../views/shimmerViews/ShimmeringExpandedListView';
-
-type SecondaryBarSingleGroupsView = {
-	expanded: boolean;
-};
-
-export type FilteredConversation = {
-	roomId: string;
-	name: string;
-	roomType: string;
-	lastMessageTimestamp: number;
-	members: Member[];
-};
 
 const CustomContainer = styled(Container)`
 	cursor: default;
@@ -46,13 +33,6 @@ const CustomText = styled(Text)`
 	text-align: center;
 `;
 
-const ConversationFilterContainer = styled(Container)`
-	height: fit-content;
-	position: sticky;
-	top: 0;
-	z-index: 1;
-`;
-
 const VirtualRoomContainer = styled(Container)`
 	height: fit-content;
 	position: sticky;
@@ -60,14 +40,28 @@ const VirtualRoomContainer = styled(Container)`
 	z-index: 3;
 `;
 
-const SecondaryBarSingleGroupsView: React.FC<SecondaryBarSingleGroupsView> = ({ expanded }) => {
+export type FilteredConversation = {
+	roomId: string;
+	name: string;
+	roomType: string;
+	lastMessageTimestamp: number;
+	members: Member[];
+};
+
+type SecondaryBarSingleGroupsViewProps = {
+	expanded: boolean;
+};
+
+const SecondaryBarSingleGroupsView: React.FC<SecondaryBarSingleGroupsViewProps> = ({
+	expanded
+}) => {
 	const [t] = useTranslation();
 	const showConversationList = t('tooltip.showConversationList', 'Show chat list');
 	const noMatchLabel = t('participantsList.noMatch', 'There are no items that match this search');
 
 	const canVideoCall = useStore((store) => getCapability(store, CapabilityType.CAN_VIDEO_CALL));
 	const roomsIds = useStore<FilteredConversation[]>(getOneToOneAndGroupsInfoOrderedByLastMessage);
-	const users = useStore(getUsersSelector);
+	const chatsBeNetworkStatus = useStore(({ connections }) => connections.status.chats_be);
 
 	const [filteredInput, setFilteredInput] = useState('');
 
@@ -79,69 +73,63 @@ const SecondaryBarSingleGroupsView: React.FC<SecondaryBarSingleGroupsView> = ({ 
 	);
 
 	const listOfRooms = useMemo(() => {
-		const list = [];
-		if (filteredConversationsIds.length !== 0) {
-			map(filteredConversationsIds, (room) => {
-				list.push(<ListItem roomId={room.roomId} key={`${room.roomId}_item`} />);
-			});
-		} else {
-			list.push(
-				<CustomContainer
-					mainAlignment="flex-start"
-					padding={{ vertical: '2rem', horizontal: '1rem' }}
-					key="no_match_item"
-				>
-					<CustomText color="gray1" size="small" weight="light" overflow="break-word">
-						{noMatchLabel}
-					</CustomText>
-				</CustomContainer>
-			);
+		if (size(filteredConversationsIds) > 0) {
+			return map(filteredConversationsIds, (room) => (
+				<ListItem roomId={room.roomId} key={`${room.roomId}_item`} />
+			));
 		}
-		return list;
+		return (
+			<CustomContainer
+				mainAlignment="flex-start"
+				padding={{ vertical: '2rem', horizontal: '1rem' }}
+				key="no_match_item"
+			>
+				<CustomText color="gray1" size="small" weight="light" overflow="break-word">
+					{noMatchLabel}
+				</CustomText>
+			</CustomContainer>
+		);
 	}, [filteredConversationsIds, noMatchLabel, ListItem]);
 
-	const listView = useMemo(
-		() =>
-			size(users) !== 1 ? (
-				roomsIds.length === 0 ? (
-					expanded ? (
-						<ShimmeringExpandedListView />
-					) : (
-						<ShimmeringCollapsedListView />
-					)
-				) : (
-					<Container mainAlignment="flex-start">
-						<ConversationFilterContainer>
-							<ConversationsFilter
-								expanded={expanded}
-								setFilteredInput={setFilteredInput}
-								key="conversations_filter_item"
-							/>
-						</ConversationFilterContainer>
-						<Container mainAlignment="space-between">
-							<Container height="fit" data-testid="conversations_list_filtered">
-								{listOfRooms}
-							</Container>
-							{canVideoCall && (
-								<VirtualRoomContainer>
-									<VirtualRoomsButton expanded={expanded} />
-								</VirtualRoomContainer>
-							)}
-						</Container>
-					</Container>
-				)
-			) : (
-				expanded && <DefaultUserSidebarView />
-			),
-
-		[canVideoCall, expanded, listOfRooms, roomsIds.length, setFilteredInput, users]
+	const ShimmeringListView = useMemo(
+		() => (expanded ? ShimmeringExpandedListView : ShimmeringCollapsedListView),
+		[expanded]
 	);
 
-	return expanded ? (
-		<Container mainAlignment="flex-start">{listView}</Container>
-	) : (
-		<Container mainAlignment="flex-start" title={showConversationList}>
-			{listView}
+	const ListView = useMemo(
+		() =>
+			size(roomsIds) > 0 ? (
+				<Container mainAlignment="flex-start">
+					<ConversationsFilter
+						expanded={expanded}
+						setFilteredInput={setFilteredInput}
+						key="conversations_filter_item"
+					/>
+					<Container mainAlignment="space-between">
+						<Container height="fit" data-testid="conversations_list_filtered">
+							{listOfRooms}
+						</Container>
+						{canVideoCall && (
+							<VirtualRoomContainer>
+								<VirtualRoomsButton expanded={expanded} />
+							</VirtualRoomContainer>
+						)}
+					</Container>
+				</Container>
+			) : (
+				<DefaultUserSidebarView />
+			),
+		[canVideoCall, expanded, listOfRooms, roomsIds]
+	);
+
+	const titleLabel = useMemo(
+		() => (expanded ? showConversationList : undefined),
+		[expanded, showConversationList]
+	);
+
+	return (
+		<Container mainAlignment="flex-start" title={titleLabel}>
+			{chatsBeNetworkStatus ? ListView : <ShimmeringListView />}
 		</Container>
 	);
 };

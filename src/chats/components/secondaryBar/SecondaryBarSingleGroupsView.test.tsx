@@ -7,44 +7,47 @@
 import React from 'react';
 
 import { screen } from '@testing-library/react';
-import { UserEvent } from '@testing-library/user-event';
 
 import SecondaryBarSingleGroupsView from './SecondaryBarSingleGroupsView';
 import useStore from '../../../store/Store';
-import { createMockMember, createMockRoom, createMockTextMessage } from '../../../tests/createMock';
+import {
+	createMockMember,
+	createMockRoom,
+	createMockTextMessage,
+	createMockUser
+} from '../../../tests/createMock';
 import { setup } from '../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
 import { RootStore } from '../../../types/store/StoreTypes';
-import { User } from '../../../types/store/UserTypes';
 
 const iconCloseOutline = 'icon: CloseOutline';
 const iconFunnelOutline = 'icon: FunnelOutline';
 const helloString = 'Hello guys!';
 
-const user1Be: User = {
+const user1Be = createMockUser({
 	id: 'user1Id',
 	email: 'user1@domain.com',
 	name: 'User1',
 	lastSeen: 1234567890,
 	statusMessage: "Hey there! I'm User 1",
 	pictureUpdatedAt: '235968427123'
-};
+});
 
-const user2Be: User = {
+const user2Be = createMockUser({
 	id: 'user2Id',
 	email: 'user2@domain.com',
 	name: 'User2',
 	lastSeen: 1234567890,
 	statusMessage: "Hey there! I'm User 2"
-};
+});
 
-const user3Be: User = {
+const user3Be = createMockUser({
 	id: 'user3Id',
 	email: 'user3@domain.com',
 	name: 'User3',
 	lastSeen: 1234567890,
 	statusMessage: "Hey there! I'm User 3"
-};
+});
 
 const mockedGroup1: RoomBe = createMockRoom({
 	id: 'mockedGroup1',
@@ -107,8 +110,9 @@ const mkdTextMsgUser3Group2 = createMockTextMessage({
 	date: 1704776670 // 2024-01-09 06:04:30
 });
 
-const secondaryBarSetup = (status: boolean): { user: UserEvent; store: RootStore } => {
+beforeEach(() => {
 	const store: RootStore = useStore.getState();
+	store.setChatsBeStatus(true);
 	store.setLoginInfo(user1Be.id, user1Be.name);
 	store.addRoom(mockedGroup1);
 	store.addRoom(mockedOneToOne1);
@@ -121,18 +125,15 @@ const secondaryBarSetup = (status: boolean): { user: UserEvent; store: RootStore
 	store.newMessage(mkdTextMsgUser1OneToOne);
 	store.newMessage(mkdTextMsgUser2OneToOne);
 	store.newMessage(mkdTextMsgUser3Group2);
-	const { user } = setup(<SecondaryBarSingleGroupsView expanded={status} />);
-	return { user, store };
-};
-
+});
 describe('Secondary Bar', () => {
 	test('everything is rendered correctly', async () => {
-		secondaryBarSetup(true);
+		setup(<SecondaryBarSingleGroupsView expanded={true} />);
 		const listNotFiltered = await screen.findByTestId('conversations_list_filtered');
 		expect(listNotFiltered.children).toHaveLength(4);
 	});
 	test('List is rendered in order of last message in chat', async () => {
-		secondaryBarSetup(true);
+		setup(<SecondaryBarSingleGroupsView expanded={true} />);
 		const listNotFiltered = await screen.findByTestId('conversations_list_filtered');
 		expect(listNotFiltered.children[0].textContent?.includes(user2Be.name)).toBeTruthy();
 		expect(listNotFiltered.children[1].textContent?.includes(user3Be.name)).toBeTruthy();
@@ -140,7 +141,7 @@ describe('Secondary Bar', () => {
 		expect(listNotFiltered.children[3].textContent?.includes(mockedGroup2.name!)).toBeTruthy();
 	});
 	test('User filter conversations and expect only groups to be visible', async () => {
-		const { user } = secondaryBarSetup(true);
+		const { user } = setup(<SecondaryBarSingleGroupsView expanded={true} />);
 		// user search a group conversation
 		const textArea = screen.getByRole('textbox');
 		await user.type(textArea, 'Group of');
@@ -155,7 +156,7 @@ describe('Secondary Bar', () => {
 		expect(funnelButton).toBeInTheDocument();
 	});
 	test('List filtered in order of last message in chat and expect only groups', async () => {
-		const { user } = secondaryBarSetup(true);
+		const { user } = setup(<SecondaryBarSingleGroupsView expanded={true} />);
 		const textArea = screen.getByRole('textbox');
 		await user.type(textArea, 'Group of');
 		const list = await screen.findByTestId('conversations_list_filtered');
@@ -163,7 +164,7 @@ describe('Secondary Bar', () => {
 		expect(list.children[1].textContent?.includes(mockedGroup2.name!)).toBeTruthy();
 	});
 	test('User filter conversations and expect both groups and oneToOne to be visible', async () => {
-		const { user } = secondaryBarSetup(true);
+		const { user } = setup(<SecondaryBarSingleGroupsView expanded={true} />);
 		// user search a one to one conversation
 		const textArea = screen.getByRole('textbox');
 		await user.type(textArea, 'User');
@@ -177,7 +178,7 @@ describe('Secondary Bar', () => {
 		expect(funnelButton).toBeInTheDocument();
 	});
 	test('User filter conversations by an name and expect to see oneToOne and all the groups where the string match', async () => {
-		const { user } = secondaryBarSetup(true);
+		const { user } = setup(<SecondaryBarSingleGroupsView expanded={true} />);
 		// user search a one to one conversation
 		const textArea = screen.getByRole('textbox');
 		await user.type(textArea, 'User3');
@@ -191,7 +192,7 @@ describe('Secondary Bar', () => {
 		expect(funnelButton).toBeInTheDocument();
 	});
 	test('List filtered in order of last message in chat and expect and groups where the string match', async () => {
-		const { user } = secondaryBarSetup(true);
+		const { user } = setup(<SecondaryBarSingleGroupsView expanded={true} />);
 		const textArea = screen.getByRole('textbox');
 		await user.type(textArea, 'User3');
 		const list = await screen.findByTestId('conversations_list_filtered');
@@ -199,7 +200,7 @@ describe('Secondary Bar', () => {
 		expect(list.children[1].textContent?.includes(mockedGroup1.name!)).toBeTruthy();
 	});
 	test("the filter doesn't find any match", async () => {
-		const { user } = secondaryBarSetup(true);
+		const { user } = setup(<SecondaryBarSingleGroupsView expanded={true} />);
 		const textArea = screen.getByRole('textbox');
 		await user.type(textArea, 'Hello');
 		const list = await screen.findByTestId('conversations_list_filtered');
@@ -208,7 +209,7 @@ describe('Secondary Bar', () => {
 		expect(noMatchText).toBeInTheDocument();
 	});
 	test('Collapsed sidebar view', () => {
-		secondaryBarSetup(false);
+		setup(<SecondaryBarSingleGroupsView expanded={false} />);
 		const funnelButton = screen.getByTestId(iconFunnelOutline);
 		expect(funnelButton).toBeInTheDocument();
 	});
