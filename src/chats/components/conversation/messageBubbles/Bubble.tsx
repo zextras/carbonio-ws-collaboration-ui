@@ -148,8 +148,6 @@ const Bubble: FC<BubbleProps> = ({
 		messageAttachment?.size
 	);
 
-	console.log(forwardMessageList);
-
 	const handleAddForwardMessage = useCallback(() => {
 		if (messageInForwardList) {
 			unsetForwardMessageList(message.roomId, message);
