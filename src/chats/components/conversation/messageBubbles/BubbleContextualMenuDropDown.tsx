@@ -257,7 +257,7 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 		unsetForwardList
 	]);
 
-	const forwardHastoAppear = useMemo(() => forwardList === undefined, [forwardList]);
+	const forwardHasToAppear = useMemo(() => forwardList === undefined, [forwardList]);
 
 	const canBeEdited = useMemo(
 		() =>
@@ -300,7 +300,7 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 		});
 
 		// Forward message in another chat
-		if (forwardHastoAppear) {
+		if (forwardHasToAppear) {
 			actions.push({
 				id: 'forward',
 				label: forwardActionLabel,
@@ -347,7 +347,7 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 		canBeEdited,
 		replyActionLabel,
 		replyMessageAction,
-		forwardHastoAppear,
+		forwardHasToAppear,
 		copyActionLabel,
 		copyMessageAction,
 		canBeDeleted,

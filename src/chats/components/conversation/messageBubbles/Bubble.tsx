@@ -7,7 +7,13 @@
 
 import React, { FC, useCallback, useEffect, useMemo, useRef } from 'react';
 
-import { Container, CreateSnackbarFn, Padding, useSnackbar } from '@zextras/carbonio-design-system';
+import {
+	Checkbox,
+	Container,
+	CreateSnackbarFn,
+	Padding,
+	useSnackbar
+} from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 import styled, { SimpleInterpolation } from 'styled-components';
 
@@ -142,6 +148,8 @@ const Bubble: FC<BubbleProps> = ({
 		messageAttachment?.size
 	);
 
+	console.log(forwardMessageList);
+
 	const handleAddForwardMessage = useCallback(() => {
 		if (messageInForwardList) {
 			unsetForwardMessageList(message.roomId, message);
@@ -191,8 +199,9 @@ const Bubble: FC<BubbleProps> = ({
 
 	return (
 		<ForwardContainer
+			orientation="horizontal"
 			width="fill"
-			crossAlignment="flex-start"
+			mainAlignment="space-between"
 			ref={forwardContainerRef}
 			$forwardIsActive={forwardIsActive}
 			$hoverIsActive={hoverIsActive}
@@ -254,6 +263,11 @@ const Bubble: FC<BubbleProps> = ({
 					canSeeMessageReads={canSeeMessageReads}
 				/>
 			</BubbleContainer>
+			{forwardMessageList !== undefined && forwardMessageList.length !== 0 && (
+				<Container padding={{ left: '0.5rem' }} width="fit">
+					<Checkbox defaultChecked={messageInForwardList} value={messageInForwardList} />
+				</Container>
+			)}
 		</ForwardContainer>
 	);
 };
