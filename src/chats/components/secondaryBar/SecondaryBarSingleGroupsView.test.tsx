@@ -7,6 +7,7 @@
 import React from 'react';
 
 import { screen } from '@testing-library/react';
+import { act } from 'react-dom/test-utils';
 
 import SecondaryBarSingleGroupsView from './SecondaryBarSingleGroupsView';
 import useStore from '../../../store/Store';
@@ -128,12 +129,12 @@ beforeEach(() => {
 });
 describe('Secondary Bar', () => {
 	test('everything is rendered correctly', async () => {
-		setup(<SecondaryBarSingleGroupsView expanded={true} />);
+		setup(<SecondaryBarSingleGroupsView expanded />);
 		const listNotFiltered = await screen.findByTestId('conversations_list_filtered');
 		expect(listNotFiltered.children).toHaveLength(4);
 	});
 	test('List is rendered in order of last message in chat', async () => {
-		setup(<SecondaryBarSingleGroupsView expanded={true} />);
+		setup(<SecondaryBarSingleGroupsView expanded />);
 		const listNotFiltered = await screen.findByTestId('conversations_list_filtered');
 		expect(listNotFiltered.children[0].textContent?.includes(user2Be.name)).toBeTruthy();
 		expect(listNotFiltered.children[1].textContent?.includes(user3Be.name)).toBeTruthy();
@@ -141,10 +142,12 @@ describe('Secondary Bar', () => {
 		expect(listNotFiltered.children[3].textContent?.includes(mockedGroup2.name!)).toBeTruthy();
 	});
 	test('User filter conversations and expect only groups to be visible', async () => {
-		const { user } = setup(<SecondaryBarSingleGroupsView expanded={true} />);
+		const { user } = setup(<SecondaryBarSingleGroupsView expanded />);
 		// user search a group conversation
 		const textArea = screen.getByRole('textbox');
-		await user.type(textArea, 'Group of');
+		act(() => {
+			user.type(textArea, 'Group of');
+		});
 		const list = await screen.findByTestId('conversations_list_filtered');
 		expect(list.children).toHaveLength(2);
 		const closeButton = screen.getByTestId(iconCloseOutline);
@@ -156,18 +159,22 @@ describe('Secondary Bar', () => {
 		expect(funnelButton).toBeInTheDocument();
 	});
 	test('List filtered in order of last message in chat and expect only groups', async () => {
-		const { user } = setup(<SecondaryBarSingleGroupsView expanded={true} />);
+		const { user } = setup(<SecondaryBarSingleGroupsView expanded />);
 		const textArea = screen.getByRole('textbox');
-		await user.type(textArea, 'Group of');
+		act(() => {
+			user.type(textArea, 'Group of');
+		});
 		const list = await screen.findByTestId('conversations_list_filtered');
 		expect(list.children[0].textContent?.includes(mockedGroup1.name!)).toBeTruthy();
 		expect(list.children[1].textContent?.includes(mockedGroup2.name!)).toBeTruthy();
 	});
 	test('User filter conversations and expect both groups and oneToOne to be visible', async () => {
-		const { user } = setup(<SecondaryBarSingleGroupsView expanded={true} />);
+		const { user } = setup(<SecondaryBarSingleGroupsView expanded />);
 		// user search a one to one conversation
 		const textArea = screen.getByRole('textbox');
-		await user.type(textArea, 'User');
+		act(() => {
+			user.type(textArea, 'User');
+		});
 		const list2 = await screen.findByTestId('conversations_list_filtered');
 		expect(list2.children).toHaveLength(4);
 		const closeButton = screen.getByTestId(iconCloseOutline);
@@ -178,10 +185,12 @@ describe('Secondary Bar', () => {
 		expect(funnelButton).toBeInTheDocument();
 	});
 	test('User filter conversations by an name and expect to see oneToOne and all the groups where the string match', async () => {
-		const { user } = setup(<SecondaryBarSingleGroupsView expanded={true} />);
+		const { user } = setup(<SecondaryBarSingleGroupsView expanded />);
 		// user search a one to one conversation
 		const textArea = screen.getByRole('textbox');
-		await user.type(textArea, 'User3');
+		act(() => {
+			user.type(textArea, 'User3');
+		});
 		const list2 = await screen.findByTestId('conversations_list_filtered');
 		expect(list2.children).toHaveLength(2);
 		const closeButton = screen.getByTestId(iconCloseOutline);
@@ -192,17 +201,21 @@ describe('Secondary Bar', () => {
 		expect(funnelButton).toBeInTheDocument();
 	});
 	test('List filtered in order of last message in chat and expect and groups where the string match', async () => {
-		const { user } = setup(<SecondaryBarSingleGroupsView expanded={true} />);
+		const { user } = setup(<SecondaryBarSingleGroupsView expanded />);
 		const textArea = screen.getByRole('textbox');
-		await user.type(textArea, 'User3');
+		act(() => {
+			user.type(textArea, 'User3');
+		});
 		const list = await screen.findByTestId('conversations_list_filtered');
 		expect(list.children[0].textContent?.includes(user3Be.name)).toBeTruthy();
 		expect(list.children[1].textContent?.includes(mockedGroup1.name!)).toBeTruthy();
 	});
 	test("the filter doesn't find any match", async () => {
-		const { user } = setup(<SecondaryBarSingleGroupsView expanded={true} />);
+		const { user } = setup(<SecondaryBarSingleGroupsView expanded />);
 		const textArea = screen.getByRole('textbox');
-		await user.type(textArea, 'Hello');
+		act(() => {
+			user.type(textArea, 'Hello');
+		});
 		const list = await screen.findByTestId('conversations_list_filtered');
 		expect(list.children).toHaveLength(1);
 		const noMatchText = screen.getByText(/There are no items that match this search/i);

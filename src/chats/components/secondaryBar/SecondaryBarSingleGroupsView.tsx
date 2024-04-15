@@ -14,6 +14,7 @@ import styled from 'styled-components';
 import CollapsedSidebarListItem from './CollapsedSidebarListItem';
 import ConversationsFilter from './ConversationsFilter';
 import ExpandedSidebarListItem from './ExpandedSidebarListItem';
+import FilteredGal from './FilteredGal';
 import VirtualRoomsButton from './VirtualRoomTemporaryWidget/VirtualRoomsButton';
 import { useFilterRoomsOnInput } from '../../../hooks/useFilterRoomsOnInput';
 import { getOneToOneAndGroupsInfoOrderedByLastMessage } from '../../../store/selectors/MessagesSelectors';
@@ -109,6 +110,7 @@ const SecondaryBarSingleGroupsView: React.FC<SecondaryBarSingleGroupsViewProps> 
 						<Container height="fit" data-testid="conversations_list_filtered">
 							{listOfRooms}
 						</Container>
+						{filteredInput !== '' && <FilteredGal expanded={expanded} input={filteredInput} />}
 						{canVideoCall && (
 							<VirtualRoomContainer>
 								<VirtualRoomsButton expanded={expanded} />
@@ -119,7 +121,7 @@ const SecondaryBarSingleGroupsView: React.FC<SecondaryBarSingleGroupsViewProps> 
 			) : (
 				<DefaultUserSidebarView />
 			),
-		[canVideoCall, expanded, listOfRooms, roomsIds]
+		[canVideoCall, expanded, filteredInput, listOfRooms, roomsIds]
 	);
 
 	const titleLabel = useMemo(
