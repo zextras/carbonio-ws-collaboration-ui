@@ -13,7 +13,7 @@ import styled from 'styled-components';
 
 import CollapsedSidebarListItem from './CollapsedSidebarListItem';
 import ExpandedSidebarListItem from './ExpandedSidebarListItem';
-import { useFilterRoomsOnInput } from '../../../hooks/useFilterRoomsOnInput';
+import { useFilterRoomsOnInput } from '../../../../hooks/useFilterRoomsOnInput';
 
 const CustomContainer = styled(Container)`
 	cursor: default;

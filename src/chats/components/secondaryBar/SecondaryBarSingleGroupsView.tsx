@@ -11,9 +11,9 @@ import { size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
+import FilteredConversationList from './conversationList/FilteredConversationList';
 import ConversationsFilter from './ConversationsFilter';
-import FilteredConversationList from './FilteredConversationList';
-import FilteredGal from './FilteredGal';
+import FilteredGal from './galSeachList/FilteredGal';
 import VirtualRoomsButton from './VirtualRoomTemporaryWidget/VirtualRoomsButton';
 import { getOneToOneAndGroupsInfoOrderedByLastMessage } from '../../../store/selectors/MessagesSelectors';
 import { getCapability } from '../../../store/selectors/SessionSelectors';

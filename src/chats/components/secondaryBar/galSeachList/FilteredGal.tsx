@@ -11,11 +11,12 @@ import { map, size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
+import GalListItem from './GalListItem';
 import {
 	autoCompleteGalRequest,
 	AutoCompleteGalResponse
-} from '../../../network/soap/AutoCompleteRequest';
-import { Member } from '../../../types/store/RoomTypes';
+} from '../../../../network/soap/AutoCompleteRequest';
+import { Member } from '../../../../types/store/RoomTypes';
 
 const CustomContainer = styled(Container)`
 	cursor: default;
@@ -55,11 +56,8 @@ const FilteredGal: React.FC<FilteredGalProps> = ({ expanded, input }) => {
 
 	const galUsers = useMemo(() => {
 		if (size(filteredGal) > 0) {
-			// TODO: match UI
 			return map(filteredGal, (contactMatch) => (
-				<Container key={contactMatch.zimbraId} height="fit" width="fit">
-					<Text size="small">{contactMatch.email}</Text>
-				</Container>
+				<GalListItem contact={contactMatch} key={contactMatch.zimbraId} />
 			));
 		}
 		return (
