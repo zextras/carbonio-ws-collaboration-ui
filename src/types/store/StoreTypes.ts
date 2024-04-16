@@ -181,7 +181,6 @@ export type MeetingsSlice = {
 
 export type ActiveMeetingSlice = {
 	activeMeeting: ActiveMeetingMap;
-	setMeetingActionsAccordionStatus: (roomId: string, status: boolean) => void;
 	setWaitingListAccordionStatus: (roomId: string, status: boolean) => void;
 	setRecordingAccordionStatus: (roomId: string, status: boolean) => void;
 	setMeetingParticipantsAccordionStatus: (roomId: string, status: boolean) => void;

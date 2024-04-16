@@ -16,16 +16,10 @@ import { RoomType } from '../../../../types/store/RoomTypes';
 type ClearHistoryProps = {
 	roomId: string;
 	roomType?: string;
-	isInsideMeeting?: boolean;
 	iAmTheOnlyOwner?: boolean;
 };
 
-const ClearHistoryAction: FC<ClearHistoryProps> = ({
-	roomId,
-	roomType,
-	isInsideMeeting,
-	iAmTheOnlyOwner
-}) => {
+const ClearHistoryAction: FC<ClearHistoryProps> = ({ roomId, roomType, iAmTheOnlyOwner }) => {
 	const [t] = useTranslation();
 	const clearHistoryLabel = t('action.clearHistory', 'Clear history');
 	const historyClearedLabel = t('feedback.historyCleared', 'History cleared successfully!');
@@ -35,11 +29,11 @@ const ClearHistoryAction: FC<ClearHistoryProps> = ({
 	const padding = useMemo(
 		() =>
 			roomType === RoomType.GROUP
-				? iAmTheOnlyOwner && isInsideMeeting
+				? iAmTheOnlyOwner
 					? { top: 'small', bottom: 'large' }
 					: { top: 'small' }
 				: { top: 'small', bottom: 'large' },
-		[iAmTheOnlyOwner, isInsideMeeting, roomType]
+		[iAmTheOnlyOwner, roomType]
 	);
 
 	const openModal = useCallback(() => setClearHistoryModalOpen(true), []);
@@ -69,7 +63,6 @@ const ClearHistoryAction: FC<ClearHistoryProps> = ({
 				label={clearHistoryLabel}
 				withArrow
 				action={openModal}
-				isInsideMeeting={isInsideMeeting}
 			/>
 			{clearHistoryModalOpen && (
 				<ClearHistoryModal

@@ -54,7 +54,7 @@ const MeetingChatAccordionTitle: FC<MeetingChatAccordionTitleProps> = ({ roomId 
 	}, [isWritingLabel]);
 
 	return (
-		<Container width="70%" crossAlignment="flex-start">
+		<Container width="70%" height="fit" crossAlignment="flex-start">
 			<ChatLabelText
 				overflow="ellipsis"
 				$isWritingIsVisible={isWritingIsDefined}

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { FC, useCallback, useMemo } from 'react';
+import React, { FC, useCallback, useEffect, useMemo } from 'react';
 
 import { Badge, Container, IconButton, Row, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
@@ -16,10 +16,16 @@ import papyrus from '../../../../chats/assets/papyrus.png';
 import Chat from '../../../../chats/components/conversation/Chat';
 import { useDarkReaderStatus } from '../../../../hooks/useDarkReaderStatus';
 import { getMeetingChatVisibility } from '../../../../store/selectors/ActiveMeetingSelectors';
-import { getRoomMutedSelector } from '../../../../store/selectors/RoomsSelectors';
+import {
+	getRoomMutedSelector,
+	getRoomTypeSelector
+} from '../../../../store/selectors/RoomsSelectors';
+import { getCapability } from '../../../../store/selectors/SessionSelectors';
 import { getRoomUnreadsSelector } from '../../../../store/selectors/UnreadsCounterSelectors';
 import useStore from '../../../../store/Store';
 import { MeetingChatVisibility } from '../../../../types/store/ActiveMeetingTypes';
+import { RoomType } from '../../../../types/store/RoomTypes';
+import { CapabilityType } from '../../../../types/store/SessionTypes';
 
 type MeetingConversationAccordionProps = {
 	roomId: string;
@@ -51,6 +57,10 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({
 	const roomMuted = useStore((state) => getRoomMutedSelector(state, roomId));
 	const meetingChatVisibility = useStore((store) => getMeetingChatVisibility(store, meetingId));
 	const setMeetingChatVisibility = useStore((store) => store.setMeetingChatVisibility);
+	const roomType = useStore((store) => getRoomTypeSelector(store, roomId ?? ''));
+	const canVideoRecordMeeting = useStore((store) =>
+		getCapability(store, CapabilityType.CAN_VIDEO_CALL_RECORD)
+	);
 
 	const isDarkModeEnabled = useDarkReaderStatus();
 
@@ -97,6 +107,26 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({
 		[unreadMessagesCount, roomMuted]
 	);
 
+	// i bottoni ci sono quando non è una 1to1, oppure quando è una 1to1 ma è attivo il recording
+	// if(canVideoRecordMeeting) return true;
+	// return roomType === RoomType.ONE_TO_ONE ? false : true;
+
+	const expandButtonShouldAppear = useMemo(() => {
+		if (canVideoRecordMeeting) return isChatOpenOrFullExpanded;
+		return roomType === RoomType.ONE_TO_ONE ? false : isChatOpenOrFullExpanded;
+	}, [canVideoRecordMeeting, isChatOpenOrFullExpanded, roomType]);
+
+	const chatChevronShouldAppear = useMemo(() => {
+		if (canVideoRecordMeeting) return true;
+		return roomType !== RoomType.ONE_TO_ONE;
+	}, [canVideoRecordMeeting, roomType]);
+
+	useEffect(() => {
+		if (roomType === RoomType.ONE_TO_ONE && !canVideoRecordMeeting) {
+			setMeetingChatVisibility(meetingId, MeetingChatVisibility.EXPANDED);
+		}
+	}, [canVideoRecordMeeting, meetingId, roomType, setMeetingChatVisibility]);
+
 	return (
 		<ChatContainer
 			key="MeetingConversationAccordion"
@@ -110,14 +140,14 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({
 			<Container
 				background="gray0"
 				orientation="horizontal"
-				height="fit"
+				maxHeight="2.75rem"
 				width="100%"
 				borderRadius="none"
 				padding={{ vertical: 'extrasmall', left: 'large', right: 'medium' }}
 			>
 				<MeetingChatAccordionTitle roomId={roomId} />
-				<Container width="30%" orientation="horizontal" mainAlignment="flex-end">
-					{isChatOpenOrFullExpanded && (
+				<Container height="fit" width="30%" orientation="horizontal" mainAlignment="flex-end">
+					{expandButtonShouldAppear && (
 						<Tooltip label={!chatFullExpanded ? extendChatLabel : minimizeChatLabel}>
 							<IconButton
 								data-testid="toggleChatExpanded"
@@ -128,14 +158,16 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({
 						</Tooltip>
 					)}
 					{!isChatOpenOrFullExpanded && UnreadCounter}
-					<Tooltip label={isChatOpenOrFullExpanded ? collapseChatLabel : expandChatLabel}>
-						<IconButton
-							data-testid="toggleChatStatus"
-							icon={isChatOpenOrFullExpanded ? 'ChevronDown' : 'ChevronUp'}
-							size="large"
-							onClick={toggleChatStatus}
-						/>
-					</Tooltip>
+					{chatChevronShouldAppear && (
+						<Tooltip label={isChatOpenOrFullExpanded ? collapseChatLabel : expandChatLabel}>
+							<IconButton
+								data-testid="toggleChatStatus"
+								icon={isChatOpenOrFullExpanded ? 'ChevronDown' : 'ChevronUp'}
+								size="large"
+								onClick={toggleChatStatus}
+							/>
+						</Tooltip>
+					)}
 				</Container>
 			</Container>
 			{isChatOpenOrFullExpanded && (
