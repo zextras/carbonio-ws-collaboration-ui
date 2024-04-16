@@ -37,7 +37,7 @@ type ActionAccordionProps = {
 	meetingId?: string;
 };
 
-export const ActionsAccordion: FC<ActionAccordionProps> = ({ roomId, meetingId }) => {
+export const ActionsAccordion: FC<ActionAccordionProps> = ({ roomId }) => {
 	const [t] = useTranslation();
 	const actionAccordionTitle: string = t('conversationInfo.actionAccordionTitle', 'Actions');
 	const roomType: string = useStore((state) => getRoomTypeSelector(state, roomId));
@@ -51,6 +51,8 @@ export const ActionsAccordion: FC<ActionAccordionProps> = ({ roomId, meetingId }
 	const toggleAccordionStatus = useCallback(() => {
 		setActionsAccordionStatus(roomId, !accordionStatus);
 	}, [accordionStatus, roomId, setActionsAccordionStatus]);
+
+	const editComponent = useMemo(() => <EditConversationAction roomId={roomId} />, [roomId]);
 
 	const infoDetails = useMemo(() => {
 		const arrayOfActions: AccordionItemType[] = [];
@@ -72,7 +74,7 @@ export const ActionsAccordion: FC<ActionAccordionProps> = ({ roomId, meetingId }
 				id: '2',
 				disableHover: true,
 				background: bkgColor,
-				CustomComponent: () => <EditConversationAction roomId={roomId} />
+				CustomComponent: () => editComponent
 			});
 
 			// Add member to conversation
@@ -157,6 +159,7 @@ export const ActionsAccordion: FC<ActionAccordionProps> = ({ roomId, meetingId }
 		accordionStatus,
 		toggleAccordionStatus,
 		roomId,
+		editComponent,
 		numberOfMembers
 	]);
 

@@ -26,15 +26,10 @@ const ClearHistoryAction: FC<ClearHistoryProps> = ({ roomId, roomType, iAmTheOnl
 
 	const [clearHistoryModalOpen, setClearHistoryModalOpen] = useState<boolean>(false);
 
-	const padding = useMemo(
-		() =>
-			roomType === RoomType.GROUP
-				? iAmTheOnlyOwner
-					? { top: 'small', bottom: 'large' }
-					: { top: 'small' }
-				: { top: 'small', bottom: 'large' },
-		[iAmTheOnlyOwner, roomType]
-	);
+	const padding = useMemo(() => {
+		if (roomType !== RoomType.GROUP) return { top: 'small', bottom: 'large' };
+		return iAmTheOnlyOwner ? { top: 'small', bottom: 'large' } : { top: 'small' };
+	}, [iAmTheOnlyOwner, roomType]);
 
 	const openModal = useCallback(() => setClearHistoryModalOpen(true), []);
 
