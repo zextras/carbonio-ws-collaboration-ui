@@ -28,7 +28,7 @@ const VirtualRoomsButton: FC<virtualRoomsButtonProps> = ({ expanded }) => {
 
 	return expanded ? (
 		<>
-			<Container padding="0.5rem" background="gray5">
+			<Container padding="0.5rem" background="gray5" height="fit">
 				<Button
 					label={virtualRoomsLabel}
 					color="primary"
@@ -43,7 +43,7 @@ const VirtualRoomsButton: FC<virtualRoomsButtonProps> = ({ expanded }) => {
 			)}
 		</>
 	) : (
-		<Container height="3rem" background="gray5">
+		<Container height="fit" background="gray5">
 			<Tooltip label={virtualRoomsLabel}>
 				<IconButton
 					icon="VideoOutline"
