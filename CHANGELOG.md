@@ -2,6 +2,44 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.9.3](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.9.2...v0.9.3) (2024-04-11)
+
+
+### Features
+
+* add call duration on meeting's layout ref: WSC-193 ([#272](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/272)) ([632c308](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/632c308abccdfe09a5ad347147a15ecd48fce870))
+* attach public link from Files refs: WSC-1245 ([#249](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/249)) ([40bfae3](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/40bfae35b187f5965ed6630a9bfb9bf09fe87bee)), closes [#252](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/252)
+* create one-to-one conversation only after sending the first message ref: WSC-1299 ([#258](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/258)) ([96a4876](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/96a487610244b9ce798848999f9faab5672ef0ce))
+* forward of multiple messages refs: WSC-725 ([#237](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/237)) ([ad83018](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/ad8301878a573c05748ad23cb2d9be8c0934c9f4))
+* handled long mimetypes on bubbles refs: WSC-1264 ([#233](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/233)) ([303a255](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/303a2554ef8893ee791f74b062a8d6c727808982))
+* improve leave button on meetings ref: WSC-1232 ([#235](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/235)) ([498b7b2](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/498b7b2228c208ad94fb91b86c752f2de77f2271))
+* meeting recording ref: WSC-1314 ([#250](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/250)) ([524a912](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/524a912b97e3a5e50df6a8aaa8c74f6f23de5287))
+* new is typing implementation refs: WSC-1329 ([#255](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/255)) ([cfd180c](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/cfd180cad690e91de7e22193fd3812eb3070a5e8))
+* new meeting access page refs: WSC-1338 ([#269](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/269)) ([b466bcc](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/b466bccb9d4254687b70d37c872b596fc36ec4f0))
+* notifications management refs: WSC-1308 ([#244](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/244)) ([20317c6](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/20317c6ff824228778178e6ff239149f535b2434))
+* rename delete action on bubble to delete for all refs:WSC-1297 ([#271](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/271)) ([fdd9664](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/fdd9664493697e06b3b343f196ef31d190c349aa))
+* unathenticated user who access a virtual room is now redirect to error auth page refs:WSC-1311 ([#245](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/245)) ([382e1bf](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/382e1bf24aadb1ae62fd34a671a823adf280b7f0))
+* waiting room user journey ref: WSC-1011 ([#228](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/228)) ([e3ba585](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/e3ba5856d3a4df5cf052db14d2acc7f4fd0ec62a)), closes [#225](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/225) [#229](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/229)
+
+
+### Bug Fixes
+
+* cancel the debounce when user stops writing refs: WSC-1302 ([#243](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/243)) ([807ca08](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/807ca085891c563059e5c1f787eef45d455671b9))
+* delete meeting before delete room WSC-1341 ([#253](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/253)) ([f7459c6](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/f7459c63f36492d3c70e53fdd72792cdd8ec0479))
+* error after single conversation creation during a search ref: WSC-1271 ([#240](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/240)) ([cdb6b52](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/cdb6b52e1378ecd782cc1c1eaed44b8ec6e74f41))
+* fix cognitive errors ([#263](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/263)) ([b0a8f51](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/b0a8f51e930d84c56bb8ff1c949bf538775cdc78))
+* fix uploading error handler refs: WSC-1339 ([158cd1e](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/158cd1ea970a8223a3a64a277fcfc836a8410ed8))
+* fixed leave button animation refs: WSC-1335 ([#257](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/257)) ([6c82b76](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/6c82b76f65fd5baf14ccef6a4a2001cb0af5a979))
+* fixed some cognitive complexity errors ([#262](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/262)) ([34986ee](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/34986ee808083cf794105c1a18b1596804199b69))
+* fixed waiting room sount that was laying even if disabled refs: WSC-1346 ([#254](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/254)) ([4e76a00](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/4e76a00bb8781a8907cf4e973e93956d2fc4af7c))
+* increse threshold for messages observer refs: WSC-1275 ([#270](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/270)) ([d43f795](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/d43f7955046dcbed64cacec974c9f346c4b33ec7))
+* reply to a message loses previous written text ref: WSC-1354 ([#268](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/268)) ([45eec45](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/45eec45007ad282891c98666bd513d04ec23529c))
+* toggle fullscren view work as intended now refs:WSC-1270 ([#239](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/239)) ([b423ade](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/b423ade51d02b8c8472042398bb9ac4cba4678e0))
+* unread message badge persists when receiving messages while sending one ref: WSC-1278 ([#238](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/238)) ([08d88d6](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/08d88d6fe86d6f5e806d1ad6f6d043176208f095))
+* when an error on sending attachment happens the data tag is remo… ([#251](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/251)) ([8199f76](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/8199f7658cb94760b4416c6ab003767af1e01044))
+* when someone call notification now is removed if the user leave the call refs:WSC-1265 ([#236](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/236)) ([3e62c50](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/3e62c50d00de857e1413a4b14ffa529570e23eed))
+* when user open conversation now the scroll reaches the bottom re… ([#265](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/265)) ([3ef5b80](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/3ef5b800f4e5e5187c4e65e2aeffeafed637842c))
+
 ### [0.9.2](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.9.1...v0.9.2) (2024-02-29)
 
 
