@@ -263,7 +263,12 @@ const Bubble: FC<BubbleProps> = ({
 			</BubbleContainer>
 			{forwardMessageList !== undefined && forwardMessageList.length !== 0 && (
 				<Container padding={{ left: '0.5rem' }} width="fit">
-					<Checkbox defaultChecked={messageInForwardList} value={messageInForwardList} />
+					<Checkbox
+						defaultChecked={messageInForwardList}
+						value={messageInForwardList}
+						iconColor={messageInForwardList ? 'primary' : 'gray0'}
+						disabled={!isForwardLimitNotReached && !messageInForwardList}
+					/>
 				</Container>
 			)}
 		</ForwardContainer>
