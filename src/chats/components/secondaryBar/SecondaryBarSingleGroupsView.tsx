@@ -25,7 +25,7 @@ import ShimmeringCollapsedListView from '../../views/shimmerViews/ShimmeringColl
 import ShimmeringExpandedListView from '../../views/shimmerViews/ShimmeringExpandedListView';
 
 const ScrollContainer = styled(Container)`
-	overflow-y: scroll;
+	overflow-y: auto;
 `;
 
 export type FilteredConversation = {

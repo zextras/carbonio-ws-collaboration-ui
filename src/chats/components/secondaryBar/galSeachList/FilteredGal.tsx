@@ -6,8 +6,8 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 
-import { Container, Divider, Padding, Text } from '@zextras/carbonio-design-system';
-import { map, size } from 'lodash';
+import { Container, Divider, IconButton, Padding, Text } from '@zextras/carbonio-design-system';
+import { differenceWith, map, size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -16,19 +16,16 @@ import {
 	autoCompleteGalRequest,
 	AutoCompleteGalResponse
 } from '../../../../network/soap/AutoCompleteRequest';
-import { Member } from '../../../../types/store/RoomTypes';
+import { getSingleConversationsUserId } from '../../../../store/selectors/RoomsSelectors';
+import useStore from '../../../../store/Store';
 
 const CustomContainer = styled(Container)`
 	cursor: default;
 `;
 
-export type FilteredConversation = {
-	roomId: string;
-	name: string;
-	roomType: string;
-	lastMessageTimestamp: number;
-	members: Member[];
-};
+const CustomText = styled(Text)`
+	text-align: center;
+`;
 
 type FilteredGalProps = {
 	input: string;
@@ -39,8 +36,11 @@ const FilteredGal: React.FC<FilteredGalProps> = ({ expanded, input }) => {
 	const [t] = useTranslation();
 	// TODO: add translation key
 	const createNewChatLabel = t('', 'Create new chat with:');
+	const noMatchLabel = t('', 'There are no items that match this search in your company.');
 
 	const [filteredGal, setFilteredGal] = useState<AutoCompleteGalResponse>([]);
+
+	const singleConversationsUserId = useStore(getSingleConversationsUserId);
 
 	// TODO: debounce input
 	useEffect(() => {
@@ -55,9 +55,14 @@ const FilteredGal: React.FC<FilteredGalProps> = ({ expanded, input }) => {
 	}, [input]);
 
 	const galUsers = useMemo(() => {
-		if (size(filteredGal) > 0) {
-			return map(filteredGal, (contactMatch) => (
-				<GalListItem contact={contactMatch} key={contactMatch.zimbraId} />
+		const filteredGalWithUserId = differenceWith(
+			filteredGal,
+			singleConversationsUserId,
+			(gal, userId) => gal.zimbraId === userId
+		);
+		if (size(filteredGalWithUserId) > 0) {
+			return map(filteredGalWithUserId, (contactMatch) => (
+				<GalListItem contact={contactMatch} expanded={expanded} key={contactMatch.zimbraId} />
 			));
 		}
 		return (
@@ -65,19 +70,32 @@ const FilteredGal: React.FC<FilteredGalProps> = ({ expanded, input }) => {
 				mainAlignment="flex-start"
 				padding={{ vertical: '2rem', horizontal: '1rem' }}
 			>
-				No match
+				<CustomText
+					color="gray1"
+					size="small"
+					weight="light"
+					overflow={expanded ? 'break-word' : 'ellipsis'}
+				>
+					{noMatchLabel}
+				</CustomText>
 			</CustomContainer>
 		);
-	}, [filteredGal]);
+	}, [expanded, filteredGal, noMatchLabel, singleConversationsUserId]);
 
 	return (
 		<Container mainAlignment="flex-start" crossAlignment="flex-start" data-testid="filtered_gal">
 			<Divider />
-			<Padding horizontal="large" vertical="small">
-				<Text size="small" color="primary">
-					{createNewChatLabel}
-				</Text>
-			</Padding>
+			{expanded ? (
+				<Padding horizontal="large" vertical="small">
+					<Text size="small" color="primary">
+						{createNewChatLabel}
+					</Text>
+				</Padding>
+			) : (
+				<Container width="fill" height="fit" padding={{ all: 'small' }}>
+					<IconButton icon="Plus" size="large" onClick={() => null} />
+				</Container>
+			)}
 			{galUsers}
 		</Container>
 	);

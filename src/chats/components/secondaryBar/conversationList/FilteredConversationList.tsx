@@ -30,7 +30,11 @@ type FilteredConversationListProps = {
 
 const FilteredConversationList: React.FC<FilteredConversationListProps> = ({ input, expanded }) => {
 	const [t] = useTranslation();
-	const noMatchLabel = t('participantsList.noMatch', 'There are no items that match this search');
+	// TODO update translation default value
+	const noMatchLabel = t(
+		'participantsList.noMatch',
+		'There are no users matching this search in your existing chats.'
+	);
 
 	const filteredConversationsIds = useFilterRoomsOnInput(input);
 
@@ -51,12 +55,17 @@ const FilteredConversationList: React.FC<FilteredConversationListProps> = ({ inp
 				padding={{ vertical: '2rem', horizontal: '1rem' }}
 				key="no_match_item"
 			>
-				<CustomText color="gray1" size="small" weight="light" overflow="break-word">
+				<CustomText
+					color="gray1"
+					size="small"
+					weight="light"
+					overflow={expanded ? 'break-word' : 'ellipsis'}
+				>
 					{noMatchLabel}
 				</CustomText>
 			</CustomContainer>
 		);
-	}, [filteredConversationsIds, noMatchLabel, ListItem]);
+	}, [filteredConversationsIds, expanded, noMatchLabel, ListItem]);
 
 	return (
 		<Container height="fit" data-testid="conversations_list_filtered">

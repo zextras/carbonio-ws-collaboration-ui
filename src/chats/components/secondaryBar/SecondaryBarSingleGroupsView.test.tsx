@@ -218,7 +218,9 @@ describe('Secondary Bar', () => {
 		});
 		const list = await screen.findByTestId('conversations_list_filtered');
 		expect(list.children).toHaveLength(1);
-		const noMatchText = screen.getByText(/There are no items that match this search/i);
+		const noMatchText = screen.getByText(
+			/There are no users matching this search in your existing chats./i
+		);
 		expect(noMatchText).toBeInTheDocument();
 	});
 	test('Collapsed sidebar view', () => {
