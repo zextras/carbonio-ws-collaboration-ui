@@ -51,6 +51,53 @@ export const ActionsAccordion: FC<ActionAccordionProps> = ({ roomId }) => {
 		setActionsAccordionStatus(roomId, !accordionStatus);
 	}, [accordionStatus, roomId, setActionsAccordionStatus]);
 
+	const editComponent = useMemo(() => <EditConversationAction roomId={roomId} />, [roomId]);
+
+	const muteComponent = useMemo(
+		() => <MuteConversationAction roomId={roomId} roomType={roomType} emptyRoom={emptyRoom} />,
+		[emptyRoom, roomId, roomType]
+	);
+
+	const addNewMemberComponent = useMemo(
+		() => (
+			<AddNewMemberAction
+				roomId={roomId}
+				iAmTheOnlyOwner={iAmOwner && numberOfOwners === 1}
+				emptyRoom={emptyRoom}
+			/>
+		),
+		[emptyRoom, iAmOwner, numberOfOwners, roomId]
+	);
+
+	const clearComponent = useMemo(
+		() => (
+			<ClearHistoryAction
+				roomId={roomId}
+				roomType={roomType}
+				iAmTheOnlyOwner={iAmOwner && numberOfOwners === 1}
+			/>
+		),
+		[iAmOwner, numberOfOwners, roomId, roomType]
+	);
+
+	const leaveConversationComponent = useMemo(
+		() => (
+			<LeaveConversationAction
+				roomId={roomId}
+				type={roomType}
+				iAmOneOfOwner={iAmOwner && numberOfOwners !== 1}
+			/>
+		),
+		[iAmOwner, numberOfOwners, roomId, roomType]
+	);
+
+	const deleteConversationComponent = useMemo(
+		() => (
+			<DeleteConversationAction roomId={roomId} type={roomType} numberOfMembers={numberOfMembers} />
+		),
+		[numberOfMembers, roomId, roomType]
+	);
+
 	const infoDetails = useMemo(() => {
 		const arrayOfActions: AccordionItemType[] = [];
 
@@ -59,9 +106,7 @@ export const ActionsAccordion: FC<ActionAccordionProps> = ({ roomId }) => {
 			id: '1',
 			disableHover: true,
 			background: 'gray6',
-			CustomComponent: () => (
-				<MuteConversationAction roomId={roomId} roomType={roomType} emptyRoom={emptyRoom} />
-			)
+			CustomComponent: () => muteComponent
 		});
 
 		// Edit conversation info
@@ -70,7 +115,7 @@ export const ActionsAccordion: FC<ActionAccordionProps> = ({ roomId }) => {
 				id: '2',
 				disableHover: true,
 				background: 'gray6',
-				CustomComponent: () => <EditConversationAction roomId={roomId} />
+				CustomComponent: () => editComponent
 			});
 
 			// Add member to conversation
@@ -78,13 +123,7 @@ export const ActionsAccordion: FC<ActionAccordionProps> = ({ roomId }) => {
 				id: '3',
 				disableHover: true,
 				background: 'gray6',
-				CustomComponent: () => (
-					<AddNewMemberAction
-						roomId={roomId}
-						iAmTheOnlyOwner={iAmOwner && numberOfOwners === 1}
-						emptyRoom={emptyRoom}
-					/>
-				)
+				CustomComponent: () => addNewMemberComponent
 			});
 		}
 
@@ -94,13 +133,7 @@ export const ActionsAccordion: FC<ActionAccordionProps> = ({ roomId }) => {
 				id: '4',
 				disableHover: true,
 				background: 'gray6',
-				CustomComponent: () => (
-					<ClearHistoryAction
-						roomId={roomId}
-						roomType={roomType}
-						iAmTheOnlyOwner={iAmOwner && numberOfOwners === 1}
-					/>
-				)
+				CustomComponent: () => clearComponent
 			});
 		}
 
@@ -110,13 +143,7 @@ export const ActionsAccordion: FC<ActionAccordionProps> = ({ roomId }) => {
 				id: '5',
 				disableHover: true,
 				background: 'gray6',
-				CustomComponent: () => (
-					<LeaveConversationAction
-						roomId={roomId}
-						type={roomType}
-						iAmOneOfOwner={iAmOwner && numberOfOwners !== 1}
-					/>
-				)
+				CustomComponent: () => leaveConversationComponent
 			});
 		}
 
@@ -126,13 +153,7 @@ export const ActionsAccordion: FC<ActionAccordionProps> = ({ roomId }) => {
 				id: '6',
 				disableHover: true,
 				background: 'gray6',
-				CustomComponent: () => (
-					<DeleteConversationAction
-						roomId={roomId}
-						type={roomType}
-						numberOfMembers={numberOfMembers}
-					/>
-				)
+				CustomComponent: () => deleteConversationComponent
 			});
 		}
 
@@ -154,8 +175,12 @@ export const ActionsAccordion: FC<ActionAccordionProps> = ({ roomId }) => {
 		actionAccordionTitle,
 		accordionStatus,
 		toggleAccordionStatus,
-		roomId,
-		numberOfMembers
+		muteComponent,
+		editComponent,
+		addNewMemberComponent,
+		clearComponent,
+		leaveConversationComponent,
+		deleteConversationComponent
 	]);
 
 	return (
