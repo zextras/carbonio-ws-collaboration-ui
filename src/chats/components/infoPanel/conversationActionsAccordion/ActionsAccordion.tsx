@@ -34,7 +34,6 @@ const CustomAccordion = styled(Accordion)`
 
 type ActionAccordionProps = {
 	roomId: string;
-	meetingId?: string;
 };
 
 export const ActionsAccordion: FC<ActionAccordionProps> = ({ roomId }) => {
@@ -52,17 +51,14 @@ export const ActionsAccordion: FC<ActionAccordionProps> = ({ roomId }) => {
 		setActionsAccordionStatus(roomId, !accordionStatus);
 	}, [accordionStatus, roomId, setActionsAccordionStatus]);
 
-	const editComponent = useMemo(() => <EditConversationAction roomId={roomId} />, [roomId]);
-
 	const infoDetails = useMemo(() => {
 		const arrayOfActions: AccordionItemType[] = [];
-		const bkgColor = 'gray6';
 
 		// Mute conversation
 		arrayOfActions.push({
 			id: '1',
 			disableHover: true,
-			background: bkgColor,
+			background: 'gray6',
 			CustomComponent: () => (
 				<MuteConversationAction roomId={roomId} roomType={roomType} emptyRoom={emptyRoom} />
 			)
@@ -73,15 +69,15 @@ export const ActionsAccordion: FC<ActionAccordionProps> = ({ roomId }) => {
 			arrayOfActions.push({
 				id: '2',
 				disableHover: true,
-				background: bkgColor,
-				CustomComponent: () => editComponent
+				background: 'gray6',
+				CustomComponent: () => <EditConversationAction roomId={roomId} />
 			});
 
 			// Add member to conversation
 			arrayOfActions.push({
 				id: '3',
 				disableHover: true,
-				background: bkgColor,
+				background: 'gray6',
 				CustomComponent: () => (
 					<AddNewMemberAction
 						roomId={roomId}
@@ -97,7 +93,7 @@ export const ActionsAccordion: FC<ActionAccordionProps> = ({ roomId }) => {
 			arrayOfActions.push({
 				id: '4',
 				disableHover: true,
-				background: bkgColor,
+				background: 'gray6',
 				CustomComponent: () => (
 					<ClearHistoryAction
 						roomId={roomId}
@@ -113,7 +109,7 @@ export const ActionsAccordion: FC<ActionAccordionProps> = ({ roomId }) => {
 			arrayOfActions.push({
 				id: '5',
 				disableHover: true,
-				background: bkgColor,
+				background: 'gray6',
 				CustomComponent: () => (
 					<LeaveConversationAction
 						roomId={roomId}
@@ -129,7 +125,7 @@ export const ActionsAccordion: FC<ActionAccordionProps> = ({ roomId }) => {
 			arrayOfActions.push({
 				id: '6',
 				disableHover: true,
-				background: bkgColor,
+				background: 'gray6',
 				CustomComponent: () => (
 					<DeleteConversationAction
 						roomId={roomId}
@@ -159,7 +155,6 @@ export const ActionsAccordion: FC<ActionAccordionProps> = ({ roomId }) => {
 		accordionStatus,
 		toggleAccordionStatus,
 		roomId,
-		editComponent,
 		numberOfMembers
 	]);
 
