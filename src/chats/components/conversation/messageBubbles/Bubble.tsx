@@ -195,6 +195,16 @@ const Bubble: FC<BubbleProps> = ({
 		[forwardMessageList, isForwardLimitNotReached, messageInForwardList]
 	);
 
+	const bubbleDropdownShouldBeVisible = useMemo(
+		() => message.read !== MarkerStatus.PENDING && forwardMessageList === undefined,
+		[forwardMessageList, message.read]
+	);
+
+	const checkboxShouldBeVisible = useMemo(
+		() => forwardMessageList !== undefined && forwardMessageList.length !== 0,
+		[forwardMessageList]
+	);
+
 	return (
 		<ForwardContainer
 			orientation="horizontal"
@@ -221,7 +231,7 @@ const Bubble: FC<BubbleProps> = ({
 				$lastMessageOfList={prevMessageIsFromSameSender && !nextMessageIsFromSameSender}
 				$messageAttachment={messageAttachment !== undefined}
 			>
-				{message.read !== MarkerStatus.PENDING && (
+				{bubbleDropdownShouldBeVisible && (
 					<DropDownWrapper padding={{ all: 'none' }}>
 						<BubbleContextualMenuDropDown message={message} isMyMessage={isMyMessage} />
 					</DropDownWrapper>
@@ -261,7 +271,7 @@ const Bubble: FC<BubbleProps> = ({
 					canSeeMessageReads={canSeeMessageReads}
 				/>
 			</BubbleContainer>
-			{forwardMessageList !== undefined && forwardMessageList.length !== 0 && (
+			{checkboxShouldBeVisible && (
 				<Container padding={{ left: '0.5rem' }} width="fit">
 					<Checkbox
 						defaultChecked={messageInForwardList}
