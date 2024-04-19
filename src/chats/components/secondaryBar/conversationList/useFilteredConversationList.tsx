@@ -6,7 +6,7 @@
 
 import React, { useMemo } from 'react';
 
-import { Container, TextWithTooltip } from '@zextras/carbonio-design-system';
+import { Container } from '@zextras/carbonio-design-system';
 import { map, size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -14,21 +14,19 @@ import styled from 'styled-components';
 import CollapsedSidebarListItem from './CollapsedSidebarListItem';
 import ExpandedSidebarListItem from './ExpandedSidebarListItem';
 import { useFilterRoomsOnInput } from '../../../../hooks/useFilterRoomsOnInput';
+import { SecondaryBarInfoText } from '../SecondaryBarSingleGroupsView';
 
 const CustomContainer = styled(Container)`
 	cursor: default;
 `;
 
-const CustomText = styled(TextWithTooltip)`
-	text-align: center;
-`;
-
-type FilteredConversationListProps = {
-	input: string;
-	expanded: boolean;
-};
-
-const FilteredConversationList: React.FC<FilteredConversationListProps> = ({ input, expanded }) => {
+const useFilteredConversationList = (
+	input: string,
+	expanded: boolean
+): {
+	conversationResultSize: number;
+	FilteredConversationList: JSX.Element;
+} => {
 	const [t] = useTranslation();
 	// TODO update translation default value
 	const noMatchLabel = t(
@@ -55,23 +53,30 @@ const FilteredConversationList: React.FC<FilteredConversationListProps> = ({ inp
 				padding={{ vertical: '2rem', horizontal: '1rem' }}
 				key="no_match_item"
 			>
-				<CustomText
+				<SecondaryBarInfoText
 					color="gray1"
 					size="small"
 					weight="light"
 					overflow={expanded ? 'break-word' : 'ellipsis'}
 				>
 					{noMatchLabel}
-				</CustomText>
+				</SecondaryBarInfoText>
 			</CustomContainer>
 		);
 	}, [filteredConversationsIds, expanded, noMatchLabel, ListItem]);
 
-	return (
-		<Container height="fit" data-testid="conversations_list_filtered">
-			{listOfRooms}
-		</Container>
+	const FilteredConversationList = useMemo(
+		() => (
+			<Container height="fit" data-testid="conversations_list_filtered">
+				{listOfRooms}
+			</Container>
+		),
+		[listOfRooms]
 	);
-};
 
-export default FilteredConversationList;
+	return {
+		conversationResultSize: size(filteredConversationsIds),
+		FilteredConversationList
+	};
+};
+export default useFilteredConversationList;

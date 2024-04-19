@@ -13,8 +13,7 @@ import {
 	Icon,
 	IconButton,
 	Padding,
-	Text,
-	TextWithTooltip
+	Text
 } from '@zextras/carbonio-design-system';
 import { differenceWith, map, size } from 'lodash';
 import { useTranslation } from 'react-i18next';
@@ -27,6 +26,7 @@ import {
 } from '../../../../network/soap/AutoCompleteRequest';
 import { getSingleConversationsUserId } from '../../../../store/selectors/RoomsSelectors';
 import useStore from '../../../../store/Store';
+import { SecondaryBarInfoText } from '../SecondaryBarSingleGroupsView';
 
 const CustomContainer = styled(Container)`
 	cursor: default;
@@ -35,20 +35,17 @@ const CustomContainer = styled(Container)`
 	}
 `;
 
-const CustomText = styled(TextWithTooltip)`
-	text-align: center;
-`;
-
 const CustomButton = styled(Button)`
 	padding: 0.25rem;
 `;
 
-type FilteredGalProps = {
-	input: string;
-	expanded: boolean;
-};
-
-const FilteredGal: React.FC<FilteredGalProps> = ({ expanded, input }) => {
+const useFilteredGal = (
+	input: string,
+	expanded: boolean
+): {
+	galResultSize: number;
+	FilteredGal: JSX.Element;
+} => {
 	const [t] = useTranslation();
 	// TODO: add translation key
 	const createNewChatLabel = t('', 'Create new chat with:');
@@ -62,13 +59,15 @@ const FilteredGal: React.FC<FilteredGalProps> = ({ expanded, input }) => {
 	const singleConversationsUserId = useStore(getSingleConversationsUserId);
 
 	const searchOnGal = useCallback((text: string) => {
-		setRequestStatus('loading');
-		autoCompleteGalRequest(text)
-			.then((response: AutoCompleteGalResponse) => {
-				setRequestStatus('success');
-				setFilteredGal(response);
-			})
-			.catch(() => setRequestStatus('error'));
+		if (text !== '') {
+			setRequestStatus('loading');
+			autoCompleteGalRequest(text)
+				.then((response: AutoCompleteGalResponse) => {
+					setRequestStatus('success');
+					setFilteredGal(response);
+				})
+				.catch(() => setRequestStatus('error'));
+		}
 	}, []);
 
 	// TODO: debounce input
@@ -105,14 +104,14 @@ const FilteredGal: React.FC<FilteredGalProps> = ({ expanded, input }) => {
 		}
 		return (
 			<CustomContainer padding={{ vertical: 'small', horizontal: 'large' }} height="fit">
-				<CustomText
+				<SecondaryBarInfoText
 					color="gray1"
 					size="small"
 					weight="light"
 					overflow={expanded ? 'break-word' : 'ellipsis'}
 				>
 					{noMatchLabel}
-				</CustomText>
+				</SecondaryBarInfoText>
 			</CustomContainer>
 		);
 	}, [expanded, filteredGal, noMatchLabel, singleConversationsUserId]);
@@ -129,14 +128,14 @@ const FilteredGal: React.FC<FilteredGalProps> = ({ expanded, input }) => {
 	const ErrorComponent = useMemo(
 		() => (
 			<CustomContainer padding={{ vertical: 'small', horizontal: 'large' }} height="fit" gap="1rem">
-				<CustomText
+				<SecondaryBarInfoText
 					color="gray1"
 					size="small"
 					weight="light"
 					overflow={expanded ? 'break-word' : 'ellipsis'}
 				>
 					{errorLabel}
-				</CustomText>
+				</SecondaryBarInfoText>
 				{expanded ? (
 					<CustomButton color="gray1" onClick={() => searchOnGal(input)} label={retryLabel} />
 				) : (
@@ -147,15 +146,22 @@ const FilteredGal: React.FC<FilteredGalProps> = ({ expanded, input }) => {
 		[errorLabel, expanded, input, retryLabel, searchOnGal]
 	);
 
-	return (
-		<Container mainAlignment="flex-start" crossAlignment="flex-start" data-testid="filtered_gal">
-			<Divider />
-			{GalSearchHeader}
-			{requestStatus === 'success' && GalUsersComponent}
-			{requestStatus === 'loading' && PendingComponent}
-			{requestStatus === 'error' && ErrorComponent}
-		</Container>
+	const FilteredGal = useMemo(
+		() => (
+			<Container mainAlignment="flex-start" crossAlignment="flex-start" data-testid="filtered_gal">
+				<Divider />
+				{GalSearchHeader}
+				{requestStatus === 'success' && GalUsersComponent}
+				{requestStatus === 'loading' && PendingComponent}
+				{requestStatus === 'error' && ErrorComponent}
+			</Container>
+		),
+		[requestStatus, GalSearchHeader, GalUsersComponent, PendingComponent, ErrorComponent]
 	);
-};
 
-export default FilteredGal;
+	return {
+		galResultSize: size(filteredGal),
+		FilteredGal
+	};
+};
+export default useFilteredGal;
