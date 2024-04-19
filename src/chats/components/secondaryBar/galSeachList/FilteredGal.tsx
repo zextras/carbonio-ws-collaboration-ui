@@ -4,9 +4,18 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { Container, Divider, IconButton, Padding, Text } from '@zextras/carbonio-design-system';
+import {
+	Button,
+	Container,
+	Divider,
+	Icon,
+	IconButton,
+	Padding,
+	Text,
+	TextWithTooltip
+} from '@zextras/carbonio-design-system';
 import { differenceWith, map, size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -21,10 +30,17 @@ import useStore from '../../../../store/Store';
 
 const CustomContainer = styled(Container)`
 	cursor: default;
+	> div > button > div {
+		text-transform: capitalize !important;
+	}
 `;
 
-const CustomText = styled(Text)`
+const CustomText = styled(TextWithTooltip)`
 	text-align: center;
+`;
+
+const CustomButton = styled(Button)`
+	padding: 0.25rem;
 `;
 
 type FilteredGalProps = {
@@ -37,24 +53,46 @@ const FilteredGal: React.FC<FilteredGalProps> = ({ expanded, input }) => {
 	// TODO: add translation key
 	const createNewChatLabel = t('', 'Create new chat with:');
 	const noMatchLabel = t('', 'There are no items that match this search in your company.');
+	const errorLabel = t('', 'There seems to be a problem with your search, please retry.');
+	const retryLabel = t('', 'Retry');
 
 	const [filteredGal, setFilteredGal] = useState<AutoCompleteGalResponse>([]);
+	const [requestStatus, setRequestStatus] = useState<'loading' | 'success' | 'error'>('loading');
 
 	const singleConversationsUserId = useStore(getSingleConversationsUserId);
 
-	// TODO: debounce input
-	useEffect(() => {
-		autoCompleteGalRequest(input)
+	const searchOnGal = useCallback((text: string) => {
+		setRequestStatus('loading');
+		autoCompleteGalRequest(text)
 			.then((response: AutoCompleteGalResponse) => {
-				console.log(response);
+				setRequestStatus('success');
 				setFilteredGal(response);
 			})
-			.catch((err: Error) => {
-				console.error(err);
-			});
-	}, [input]);
+			.catch(() => setRequestStatus('error'));
+	}, []);
 
-	const galUsers = useMemo(() => {
+	// TODO: debounce input
+	useEffect(() => {
+		searchOnGal(input);
+	}, [input, searchOnGal]);
+
+	const GalSearchHeader = useMemo(
+		() =>
+			expanded ? (
+				<Padding horizontal="large" vertical="small">
+					<Text size="small" color="primary">
+						{createNewChatLabel}
+					</Text>
+				</Padding>
+			) : (
+				<Container width="fill" height="fit" padding={{ all: 'small' }}>
+					<IconButton icon="Plus" size="large" onClick={() => null} />
+				</Container>
+			),
+		[expanded, createNewChatLabel]
+	);
+
+	const GalUsersComponent = useMemo(() => {
 		const filteredGalWithUserId = differenceWith(
 			filteredGal,
 			singleConversationsUserId,
@@ -66,10 +104,7 @@ const FilteredGal: React.FC<FilteredGalProps> = ({ expanded, input }) => {
 			));
 		}
 		return (
-			<CustomContainer
-				mainAlignment="flex-start"
-				padding={{ vertical: '2rem', horizontal: '1rem' }}
-			>
+			<CustomContainer padding={{ vertical: 'small', horizontal: 'large' }} height="fit">
 				<CustomText
 					color="gray1"
 					size="small"
@@ -82,21 +117,43 @@ const FilteredGal: React.FC<FilteredGalProps> = ({ expanded, input }) => {
 		);
 	}, [expanded, filteredGal, noMatchLabel, singleConversationsUserId]);
 
+	const PendingComponent = useMemo(
+		() => (
+			<CustomContainer padding={{ vertical: 'small', horizontal: 'large' }} height="fit">
+				<Icon icon="Refresh" />
+			</CustomContainer>
+		),
+		[]
+	);
+
+	const ErrorComponent = useMemo(
+		() => (
+			<CustomContainer padding={{ vertical: 'small', horizontal: 'large' }} height="fit" gap="1rem">
+				<CustomText
+					color="gray1"
+					size="small"
+					weight="light"
+					overflow={expanded ? 'break-word' : 'ellipsis'}
+				>
+					{errorLabel}
+				</CustomText>
+				{expanded ? (
+					<CustomButton color="gray1" onClick={() => searchOnGal(input)} label={retryLabel} />
+				) : (
+					<IconButton icon="Refresh" onClick={() => searchOnGal(input)} />
+				)}
+			</CustomContainer>
+		),
+		[errorLabel, expanded, input, retryLabel, searchOnGal]
+	);
+
 	return (
 		<Container mainAlignment="flex-start" crossAlignment="flex-start" data-testid="filtered_gal">
 			<Divider />
-			{expanded ? (
-				<Padding horizontal="large" vertical="small">
-					<Text size="small" color="primary">
-						{createNewChatLabel}
-					</Text>
-				</Padding>
-			) : (
-				<Container width="fill" height="fit" padding={{ all: 'small' }}>
-					<IconButton icon="Plus" size="large" onClick={() => null} />
-				</Container>
-			)}
-			{galUsers}
+			{GalSearchHeader}
+			{requestStatus === 'success' && GalUsersComponent}
+			{requestStatus === 'loading' && PendingComponent}
+			{requestStatus === 'error' && ErrorComponent}
 		</Container>
 	);
 };

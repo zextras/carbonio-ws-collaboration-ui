@@ -6,7 +6,7 @@
 
 import React, { useMemo } from 'react';
 
-import { Container, Text } from '@zextras/carbonio-design-system';
+import { Container, TextWithTooltip } from '@zextras/carbonio-design-system';
 import { map, size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -19,7 +19,7 @@ const CustomContainer = styled(Container)`
 	cursor: default;
 `;
 
-const CustomText = styled(Text)`
+const CustomText = styled(TextWithTooltip)`
 	text-align: center;
 `;
 
