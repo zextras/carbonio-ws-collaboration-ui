@@ -44,11 +44,10 @@ type SecondaryBarSingleGroupsViewProps = {
 	expanded: boolean;
 };
 
-const SecondaryBarSingleGroupsView: React.FC<SecondaryBarSingleGroupsViewProps> = ({
-	expanded
-}) => {
+const SecondaryBarView: React.FC<SecondaryBarSingleGroupsViewProps> = ({ expanded }) => {
 	const [t] = useTranslation();
 	const showConversationList = t('tooltip.showConversationList', 'Show chat list');
+	// TODO: add translation key
 	const noResultsLabel = t(
 		'',
 		'There are no users matching this search in your existing chats or in your company.'
@@ -133,4 +132,4 @@ const SecondaryBarSingleGroupsView: React.FC<SecondaryBarSingleGroupsViewProps> 
 	);
 };
 
-export default SecondaryBarSingleGroupsView;
+export default SecondaryBarView;

@@ -26,7 +26,7 @@ import {
 } from '../../../../network/soap/AutoCompleteRequest';
 import { getSingleConversationsUserId } from '../../../../store/selectors/RoomsSelectors';
 import useStore from '../../../../store/Store';
-import { SecondaryBarInfoText } from '../SecondaryBarSingleGroupsView';
+import { SecondaryBarInfoText } from '../SecondaryBarView';
 
 const CustomContainer = styled(Container)`
 	cursor: default;

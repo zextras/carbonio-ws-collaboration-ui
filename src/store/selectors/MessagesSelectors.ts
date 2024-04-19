@@ -6,7 +6,7 @@
 
 import { filter, find, forEach, includes, orderBy, size } from 'lodash';
 
-import { FilteredConversation } from '../../chats/components/secondaryBar/SecondaryBarSingleGroupsView';
+import { FilteredConversation } from '../../chats/components/secondaryBar/SecondaryBarView';
 import {
 	AttachmentMessageType,
 	ConfigurationMessage,

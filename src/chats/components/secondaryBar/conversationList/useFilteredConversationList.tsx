@@ -14,7 +14,7 @@ import styled from 'styled-components';
 import CollapsedSidebarListItem from './CollapsedSidebarListItem';
 import ExpandedSidebarListItem from './ExpandedSidebarListItem';
 import { useFilterRoomsOnInput } from '../../../../hooks/useFilterRoomsOnInput';
-import { SecondaryBarInfoText } from '../SecondaryBarSingleGroupsView';
+import { SecondaryBarInfoText } from '../SecondaryBarView';
 
 const CustomContainer = styled(Container)`
 	cursor: default;

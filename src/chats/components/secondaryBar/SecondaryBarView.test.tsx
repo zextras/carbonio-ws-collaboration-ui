@@ -9,7 +9,7 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
 
-import SecondaryBarSingleGroupsView from './SecondaryBarSingleGroupsView';
+import SecondaryBarView from './SecondaryBarView';
 import useStore from '../../../store/Store';
 import {
 	createMockMember,
@@ -129,12 +129,12 @@ beforeEach(() => {
 });
 describe('Secondary Bar', () => {
 	test('everything is rendered correctly', async () => {
-		setup(<SecondaryBarSingleGroupsView expanded />);
+		setup(<SecondaryBarView expanded />);
 		const listNotFiltered = await screen.findByTestId('conversations_list_filtered');
 		expect(listNotFiltered.children).toHaveLength(4);
 	});
 	test('List is rendered in order of last message in chat', async () => {
-		setup(<SecondaryBarSingleGroupsView expanded />);
+		setup(<SecondaryBarView expanded />);
 		const listNotFiltered = await screen.findByTestId('conversations_list_filtered');
 		expect(listNotFiltered.children[0].textContent?.includes(user2Be.name)).toBeTruthy();
 		expect(listNotFiltered.children[1].textContent?.includes(user3Be.name)).toBeTruthy();
@@ -142,7 +142,7 @@ describe('Secondary Bar', () => {
 		expect(listNotFiltered.children[3].textContent?.includes(mockedGroup2.name!)).toBeTruthy();
 	});
 	test('User filter conversations and expect only groups to be visible', async () => {
-		const { user } = setup(<SecondaryBarSingleGroupsView expanded />);
+		const { user } = setup(<SecondaryBarView expanded />);
 		// user search a group conversation
 		const textArea = screen.getByRole('textbox');
 		act(() => {
@@ -159,7 +159,7 @@ describe('Secondary Bar', () => {
 		expect(funnelButton).toBeInTheDocument();
 	});
 	test('List filtered in order of last message in chat and expect only groups', async () => {
-		const { user } = setup(<SecondaryBarSingleGroupsView expanded />);
+		const { user } = setup(<SecondaryBarView expanded />);
 		const textArea = screen.getByRole('textbox');
 		act(() => {
 			user.type(textArea, 'Group of');
@@ -169,7 +169,7 @@ describe('Secondary Bar', () => {
 		expect(list.children[1].textContent?.includes(mockedGroup2.name!)).toBeTruthy();
 	});
 	test('User filter conversations and expect both groups and oneToOne to be visible', async () => {
-		const { user } = setup(<SecondaryBarSingleGroupsView expanded />);
+		const { user } = setup(<SecondaryBarView expanded />);
 		// user search a one to one conversation
 		const textArea = screen.getByRole('textbox');
 		act(() => {
@@ -185,7 +185,7 @@ describe('Secondary Bar', () => {
 		expect(funnelButton).toBeInTheDocument();
 	});
 	test('User filter conversations by an name and expect to see oneToOne and all the groups where the string match', async () => {
-		const { user } = setup(<SecondaryBarSingleGroupsView expanded />);
+		const { user } = setup(<SecondaryBarView expanded />);
 		// user search a one to one conversation
 		const textArea = screen.getByRole('textbox');
 		act(() => {
@@ -201,7 +201,7 @@ describe('Secondary Bar', () => {
 		expect(funnelButton).toBeInTheDocument();
 	});
 	test('List filtered in order of last message in chat and expect and groups where the string match', async () => {
-		const { user } = setup(<SecondaryBarSingleGroupsView expanded />);
+		const { user } = setup(<SecondaryBarView expanded />);
 		const textArea = screen.getByRole('textbox');
 		act(() => {
 			user.type(textArea, 'User3');
@@ -211,7 +211,7 @@ describe('Secondary Bar', () => {
 		expect(list.children[1].textContent?.includes(mockedGroup1.name!)).toBeTruthy();
 	});
 	test("the filter doesn't find any match", async () => {
-		const { user } = setup(<SecondaryBarSingleGroupsView expanded />);
+		const { user } = setup(<SecondaryBarView expanded />);
 		const textArea = screen.getByRole('textbox');
 		act(() => {
 			user.type(textArea, 'Hello');
@@ -224,7 +224,7 @@ describe('Secondary Bar', () => {
 		expect(noMatchText).toBeInTheDocument();
 	});
 	test('Collapsed sidebar view', () => {
-		setup(<SecondaryBarSingleGroupsView expanded={false} />);
+		setup(<SecondaryBarView expanded={false} />);
 		const funnelButton = screen.getByTestId(iconFunnelOutline);
 		expect(funnelButton).toBeInTheDocument();
 	});

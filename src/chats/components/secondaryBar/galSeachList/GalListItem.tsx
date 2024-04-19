@@ -61,49 +61,38 @@ const GalListItem: React.FC<GalListItemProps> = ({ contact, expanded }) => {
 			height="fit"
 			padding={{ all: 'small' }}
 		>
-			{expanded ? (
-				<>
-					<Row>
-						<Avatar
-							data-testid={`${username}-avatar`}
-							label={username}
-							title={username}
-							shape="round"
-							background={userColor}
-						/>
-					</Row>
-					<Row
-						takeAvailableSpace
-						crossAlignment="flex-start"
-						width="fill"
-						padding={{ left: 'small' }}
-						orientation="horizontal"
-					>
-						<Row takeAvailableSpace crossAlignment="flex-start" orientation="vertical">
-							<Text size="small">{contact.fullName}</Text>
-							<Container
-								width="fill"
-								height="fit"
-								orientation="horizontal"
-								mainAlignment="flex-start"
-							>
-								<Text color="secondary" size="extrasmall" overflow="ellipsis" data-testid="message">
-									{descriptionLabel}
-								</Text>
-							</Container>
-						</Row>
-					</Row>
-				</>
-			) : (
+			<Row>
 				<Tooltip label={username}>
 					<Avatar
 						data-testid={`${username}-avatar`}
 						label={username}
-						title={username}
 						shape="round"
 						background={userColor}
 					/>
 				</Tooltip>
+			</Row>
+			{expanded && (
+				<Row
+					takeAvailableSpace
+					crossAlignment="flex-start"
+					width="fill"
+					padding={{ left: 'small' }}
+					orientation="horizontal"
+				>
+					<Row takeAvailableSpace crossAlignment="flex-start" orientation="vertical">
+						<Text size="small">{contact.fullName}</Text>
+						<Container
+							width="fill"
+							height="fit"
+							orientation="horizontal"
+							mainAlignment="flex-start"
+						>
+							<Text color="secondary" size="extrasmall" overflow="ellipsis" data-testid="message">
+								{descriptionLabel}
+							</Text>
+						</Container>
+					</Row>
+				</Row>
 			)}
 		</ListItem>
 	);

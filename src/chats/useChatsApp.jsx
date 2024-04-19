@@ -10,7 +10,7 @@ import { Container, ModalManager } from '@zextras/carbonio-design-system';
 import { addRoute, Spinner } from '@zextras/carbonio-shell-ui';
 
 import ConnectionSnackbarManager from './components/ConnectionSnackbarManager';
-import SecondaryBarSingleGroupsView from './components/secondaryBar/SecondaryBarSingleGroupsView';
+import SecondaryBarView from './components/secondaryBar/SecondaryBarView';
 import { LogoBeta } from './LogoBeta';
 import ShimmeringConversationView from './views/shimmerViews/ShimmeringConversationView';
 import ShimmeringInfoPanelView from './views/shimmerViews/ShimmeringInfoPanelView';
@@ -36,7 +36,7 @@ const ChatsMain = () => (
 const SecondaryBar = (props) => (
 	<Suspense fallback={<Spinner />}>
 		<ModalManager>
-			<SecondaryBarSingleGroupsView {...props} />
+			<SecondaryBarView {...props} />
 		</ModalManager>
 	</Suspense>
 );
