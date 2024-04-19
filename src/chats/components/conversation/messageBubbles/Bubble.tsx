@@ -154,7 +154,7 @@ const Bubble: FC<BubbleProps> = ({
 		} else if (!isForwardLimitNotReached) {
 			createSnackbar({
 				key: new Date().toLocaleString(),
-				type: 'warning',
+				type: 'info',
 				label: maxNumberReached,
 				hideButton: true,
 				autoHideTimeout: 3000
