@@ -203,7 +203,7 @@
         "presentActiveSession": "There is another active session",
         "recordingHint": "This meeting is being recorded",
         "recordingModal": {
-            "caption": "The recording will be saved in \"{{folderName}}\".",
+            "caption": "The recording will be saved in \"{{folderName}}\" folder on Files. Go to Settings > Chats > Recording to change the destination folder.",
             "confirmationAction": "Stop",
             "description": "You are going to stop the recording. You can start a new one at any time.",
             "exceededCharsError": "The recording file name must not exceed 128 characters",
@@ -235,6 +235,7 @@
                     "stop": "Stop"
                 },
                 "description": "The recording will be saved in the Files space of the moderator who stopped it.",
+                "ifSomethingGoesWrongTooltip": "If something goes wrong, the recording will be saved in the Files space of the moderator who started it.",
                 "moderatorInfo": "has started recording",
                 "title": "Recording"
             },

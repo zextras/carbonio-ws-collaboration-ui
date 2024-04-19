@@ -13,7 +13,9 @@ import {
 	Button,
 	Container,
 	CreateSnackbarFn,
+	Icon,
 	Text,
+	Tooltip,
 	useSnackbar
 } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
@@ -36,6 +38,13 @@ const CustomContainer = styled(Container)`
 	cursor: default;
 `;
 
+const CustomIcon = styled(Icon)`
+	width: 1.5rem;
+	min-width: 1.5rem;
+	height: 1.5rem;
+	min-height: 1.5rem;
+`;
+
 type RecordingAccordionProps = {
 	meetingId: string;
 };
@@ -56,6 +65,10 @@ const RecordingAccordion: FC<RecordingAccordionProps> = ({ meetingId }) => {
 	const errorSnackbarLabel = t(
 		'meeting.recordingStart.failureSnackbar',
 		'It is not possible to start the registration, please contact your system administrator.'
+	);
+	const recordingTooltipLabel = t(
+		'meeting.sidebar.recording.ifSomethingGoesWrongTooltip',
+		'If something goes wrong, the recording will be saved in the Files space of the moderator who started it.'
 	);
 
 	const recordingTimestamp = useStore((state) => getMeetingRecordingTimestamp(state, meetingId));
@@ -95,47 +108,78 @@ const RecordingAccordion: FC<RecordingAccordionProps> = ({ meetingId }) => {
 			});
 	}, [createSnackbar, errorSnackbarLabel, meetingId, successSnackbarLabel]);
 
-	const items = useMemo(() => {
-		const RecordingHeader = ({ item }: { item: AccordionItemType }): ReactElement => (
-			<AccordionItem item={item}>
-				{recordingTimestamp && <RecordingTimer timestamp={recordingTimestamp} />}
-			</AccordionItem>
-		);
-		const RecordingContainer = (): ReactElement => (
+	const RecordingContainer: ReactElement = useMemo(
+		() => (
 			<CustomContainer
 				crossAlignment="flex-start"
 				padding={{ vertical: 'large', right: 'small' }}
 				gap="0.5rem"
 			>
 				<StartRecordingUser meetingId={meetingId} />
-				<Container orientation="horizontal" gap="0.5rem">
-					<Button
-						data-testid="startRecordingButton"
-						width="fill"
-						color="success"
-						label={startButtonLabel}
-						onClick={startRecording}
-						disabled={!!recordingTimestamp}
-					/>
-					<Button
-						data-testid="stopRecordingButton"
-						width="fill"
-						color="error"
-						label={stopButtonLabel}
-						onClick={openModal}
-						disabled={!recordingTimestamp}
-					/>
+				<Container orientation="horizontal">
+					{!recordingTimestamp && (
+						<Button
+							data-testid="startRecordingButton"
+							width="fill"
+							color="success"
+							label={startButtonLabel}
+							onClick={startRecording}
+						/>
+					)}
+					{!!recordingTimestamp && (
+						<Button
+							data-testid="stopRecordingButton"
+							width="fill"
+							color="error"
+							label={stopButtonLabel}
+							onClick={openModal}
+						/>
+					)}
 				</Container>
-				<Text overflow="break-word">{accordionDescription}</Text>
+				<Container
+					orientation="horizontal"
+					height="fit"
+					width="fill"
+					gap="0.5rem"
+					crossAlignment="flex-start"
+				>
+					<Tooltip label={recordingTooltipLabel}>
+						<Container width="fit" height="fit">
+							<CustomIcon icon="InfoOutline" />
+						</Container>
+					</Tooltip>
+					<Text overflow="break-word">{accordionDescription}</Text>
+				</Container>
 			</CustomContainer>
-		);
+		),
+		[
+			accordionDescription,
+			meetingId,
+			openModal,
+			recordingTimestamp,
+			recordingTooltipLabel,
+			startButtonLabel,
+			startRecording,
+			stopButtonLabel
+		]
+	);
 
+	const RecordingHeader = useCallback(
+		({ item }: { item: AccordionItemType }): ReactElement => (
+			<AccordionItem item={item}>
+				{recordingTimestamp && <RecordingTimer timestamp={recordingTimestamp} />}
+			</AccordionItem>
+		),
+		[recordingTimestamp]
+	);
+
+	const items = useMemo(() => {
 		const recordingItem: AccordionItemType[] = [
 			{
 				id: 'recordingContainer',
 				disableHover: true,
 				background: 'text',
-				CustomComponent: RecordingContainer
+				CustomComponent: () => RecordingContainer
 			}
 		];
 		return [
@@ -149,22 +193,11 @@ const RecordingAccordion: FC<RecordingAccordionProps> = ({ meetingId }) => {
 				onClose: toggleAccordionStatus
 			} as AccordionItemType
 		];
-	}, [
-		accordionTitle,
-		accordionStatus,
-		toggleAccordionStatus,
-		recordingTimestamp,
-		meetingId,
-		startButtonLabel,
-		startRecording,
-		stopButtonLabel,
-		openModal,
-		accordionDescription
-	]);
+	}, [accordionTitle, accordionStatus, RecordingHeader, toggleAccordionStatus, RecordingContainer]);
 
 	return (
 		<>
-			<CustomAccordion items={items} borderRadius="none" background="gray0" />
+			<CustomAccordion items={items} borderRadius="none" background={'gray0'} />
 			<StopRecordingModal
 				isOpen={isStopRecordingModalOpen}
 				closeModal={closeModal}
