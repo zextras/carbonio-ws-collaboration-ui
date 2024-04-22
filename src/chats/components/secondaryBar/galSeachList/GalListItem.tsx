@@ -31,8 +31,10 @@ type GalListItemProps = {
 
 const GalListItem: React.FC<GalListItemProps> = ({ contact, expanded }) => {
 	const [t] = useTranslation();
-	// TODO: add translation key
-	const descriptionLabel = t('', 'Click to create a chat with this user.');
+	const descriptionLabel = t(
+		'participantsList.creationList.userDescription',
+		'Click to create a chat with this user.'
+	);
 
 	const setPlaceholderRoom = useStore((state) => state.setPlaceholderRoom);
 

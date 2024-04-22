@@ -346,7 +346,8 @@
         "closeSearch": "Close search",
         "creationList": {
             "searchFailure": "There seems to be a problem with your search, please retry.",
-            "title": "Create new chat with:"
+            "title": "Create new chat with:",
+            "userDescription": "Click to create a chat with this user."
         },
         "moreMembersAccordionTitle": "members",
         "noMatch": {
