@@ -56,8 +56,8 @@ const RecordingAccordion: FC<RecordingAccordionProps> = ({ meetingId }) => {
 		'meeting.sidebar.recording.description',
 		'The recording will be saved in the Files space of the moderator who stopped it.'
 	);
-	const startButtonLabel = t('meeting.sidebar.recording.action.start', 'Start');
-	const stopButtonLabel = t('meeting.sidebar.recording.action.stop', 'Stop');
+	const startButtonLabel = t('meeting.sidebar.recording.action.start', 'Start Recording');
+	const stopButtonLabel = t('meeting.sidebar.recording.action.stop', 'StopRecording');
 	const successSnackbarLabel = t(
 		'meeting.recordingStart.successSnackbar.starter',
 		'You have started the registration of this meeting'
@@ -67,7 +67,7 @@ const RecordingAccordion: FC<RecordingAccordionProps> = ({ meetingId }) => {
 		'It is not possible to start the registration, please contact your system administrator.'
 	);
 	const recordingTooltipLabel = t(
-		'meeting.sidebar.recording.ifSomethingGoesWrongTooltip',
+		'meeting.sidebar.recording.additionalDescription',
 		'If something goes wrong, the recording will be saved in the Files space of the moderator who started it.'
 	);
 

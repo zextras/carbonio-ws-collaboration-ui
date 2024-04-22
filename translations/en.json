@@ -231,11 +231,11 @@
         "sidebar": {
             "recording": {
                 "action": {
-                    "start": "Start",
-                    "stop": "Stop"
+                    "start": "Start Recording",
+                    "stop": "Stop Recording"
                 },
+                "additionalDescription": "If something goes wrong, the recording will be saved in the Files space of the moderator who started it.",
                 "description": "The recording will be saved in the Files space of the moderator who stopped it.",
-                "ifSomethingGoesWrongTooltip": "If something goes wrong, the recording will be saved in the Files space of the moderator who started it.",
                 "moderatorInfo": "has started recording",
                 "title": "Recording"
             },
