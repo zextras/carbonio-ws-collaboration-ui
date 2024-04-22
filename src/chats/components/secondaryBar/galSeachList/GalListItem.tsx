@@ -60,6 +60,7 @@ const GalListItem: React.FC<GalListItemProps> = ({ contact, expanded }) => {
 			mainAlignment="flex-start"
 			height="fit"
 			padding={{ all: 'small' }}
+			data-testid="gal_list_item"
 		>
 			<Row>
 				<Tooltip label={username}>
