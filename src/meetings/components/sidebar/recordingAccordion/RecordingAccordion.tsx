@@ -164,8 +164,12 @@ const RecordingAccordion: FC<RecordingAccordionProps> = ({ meetingId }) => {
 		]
 	);
 
+	type RecordingHeaderProps = {
+		item: AccordionItemType;
+	};
+
 	const RecordingHeader = useCallback(
-		({ item }: { item: AccordionItemType }): ReactElement => (
+		({ item }: RecordingHeaderProps): ReactElement => (
 			<AccordionItem item={item}>
 				{recordingTimestamp && <RecordingTimer timestamp={recordingTimestamp} />}
 			</AccordionItem>
