@@ -33,6 +33,7 @@
         "reply": "Reply",
         "replyToSomeone": "Reply to",
         "replyToYourself": "Reply to yourself",
+        "retry": "Retry",
         "scrollToBottom": "Scroll to bottom",
         "understood": "Understood",
         "undo": "Undo"
@@ -343,8 +344,16 @@
     },
     "participantsList": {
         "closeSearch": "Close search",
+        "creationList": {
+            "searchFailure": "There seems to be a problem with your search, please retry.",
+            "title": "Create new chat with:"
+        },
         "moreMembersAccordionTitle": "members",
-        "noMatch": "There are no items that match this search",
+        "noMatch": {
+            "all": "There are no users matching this search in your existing chats or in your company.",
+            "chatList": "There are no users matching this search in your existing chats.",
+            "gal": "There are no items that match this search in your company."
+        },
         "oneMemberAccordionTitle": "One member",
         "searchMembers": "Search members",
         "searchParticipants": "Search participants"
