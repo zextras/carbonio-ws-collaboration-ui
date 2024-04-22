@@ -107,10 +107,6 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({
 		[unreadMessagesCount, roomMuted]
 	);
 
-	// i bottoni ci sono quando non è una 1to1, oppure quando è una 1to1 ma è attivo il recording
-	// if(canVideoRecordMeeting) return true;
-	// return roomType === RoomType.ONE_TO_ONE ? false : true;
-
 	const expandButtonShouldAppear = useMemo(() => {
 		if (canVideoRecordMeeting) return isChatOpenOrFullExpanded;
 		return roomType === RoomType.ONE_TO_ONE ? false : isChatOpenOrFullExpanded;
