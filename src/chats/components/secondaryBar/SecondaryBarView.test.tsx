@@ -127,12 +127,32 @@ beforeEach(() => {
 	store.newMessage(mkdTextMsgUser2OneToOne);
 	store.newMessage(mkdTextMsgUser3Group2);
 });
-describe('Secondary Bar', () => {
-	test('everything is rendered correctly', async () => {
+describe('SecondaryBar tests', () => {
+	test('Default SecondaryBar contains conversationList', () => {
 		setup(<SecondaryBarView expanded />);
-		const listNotFiltered = await screen.findByTestId('conversations_list_filtered');
-		expect(listNotFiltered.children).toHaveLength(4);
+		const list = screen.getByTestId('conversations_list_filtered');
+		expect(list).toBeInTheDocument();
 	});
+
+	test('Default SecondaryBar does not contains galSearchList', () => {
+		setup(<SecondaryBarView expanded />);
+		const list = screen.queryByTestId('filtered_gal');
+		expect(list).not.toBeInTheDocument();
+	});
+
+	test('User see the ShimmeringListView when network status is not ready', () => {
+		const store: RootStore = useStore.getState();
+		store.setChatsBeStatus(false);
+		setup(<SecondaryBarView expanded />);
+		expect(screen.getByTestId('shimmering_list_view')).toBeInTheDocument();
+	});
+
+	test('Collapsed sidebar view', () => {
+		setup(<SecondaryBarView expanded={false} />);
+		const funnelButton = screen.getByTestId(iconFunnelOutline);
+		expect(funnelButton).toBeInTheDocument();
+	});
+
 	test('List is rendered in order of last message in chat', async () => {
 		setup(<SecondaryBarView expanded />);
 		const listNotFiltered = await screen.findByTestId('conversations_list_filtered');
@@ -141,6 +161,7 @@ describe('Secondary Bar', () => {
 		expect(listNotFiltered.children[2].textContent?.includes(mockedGroup1.name!)).toBeTruthy();
 		expect(listNotFiltered.children[3].textContent?.includes(mockedGroup2.name!)).toBeTruthy();
 	});
+
 	test('User filter conversations and expect only groups to be visible', async () => {
 		const { user } = setup(<SecondaryBarView expanded />);
 		// user search a group conversation
@@ -158,6 +179,7 @@ describe('Secondary Bar', () => {
 		const funnelButton = screen.getByTestId(iconFunnelOutline);
 		expect(funnelButton).toBeInTheDocument();
 	});
+
 	test('List filtered in order of last message in chat and expect only groups', async () => {
 		const { user } = setup(<SecondaryBarView expanded />);
 		const textArea = screen.getByRole('textbox');
@@ -168,6 +190,7 @@ describe('Secondary Bar', () => {
 		expect(list.children[0].textContent?.includes(mockedGroup1.name!)).toBeTruthy();
 		expect(list.children[1].textContent?.includes(mockedGroup2.name!)).toBeTruthy();
 	});
+
 	test('User filter conversations and expect both groups and oneToOne to be visible', async () => {
 		const { user } = setup(<SecondaryBarView expanded />);
 		// user search a one to one conversation
@@ -184,6 +207,7 @@ describe('Secondary Bar', () => {
 		const funnelButton = screen.getByTestId(iconFunnelOutline);
 		expect(funnelButton).toBeInTheDocument();
 	});
+
 	test('User filter conversations by an name and expect to see oneToOne and all the groups where the string match', async () => {
 		const { user } = setup(<SecondaryBarView expanded />);
 		// user search a one to one conversation
@@ -200,6 +224,7 @@ describe('Secondary Bar', () => {
 		const funnelButton = screen.getByTestId(iconFunnelOutline);
 		expect(funnelButton).toBeInTheDocument();
 	});
+
 	test('List filtered in order of last message in chat and expect and groups where the string match', async () => {
 		const { user } = setup(<SecondaryBarView expanded />);
 		const textArea = screen.getByRole('textbox');
@@ -210,7 +235,8 @@ describe('Secondary Bar', () => {
 		expect(list.children[0].textContent?.includes(user3Be.name)).toBeTruthy();
 		expect(list.children[1].textContent?.includes(mockedGroup1.name!)).toBeTruthy();
 	});
-	test("the filter doesn't find any match", async () => {
+
+	test("The filter doesn't find any match", async () => {
 		const { user } = setup(<SecondaryBarView expanded />);
 		const textArea = screen.getByRole('textbox');
 		act(() => {
@@ -222,10 +248,5 @@ describe('Secondary Bar', () => {
 			/There are no users matching this search in your existing chats./i
 		);
 		expect(noMatchText).toBeInTheDocument();
-	});
-	test('Collapsed sidebar view', () => {
-		setup(<SecondaryBarView expanded={false} />);
-		const funnelButton = screen.getByTestId(iconFunnelOutline);
-		expect(funnelButton).toBeInTheDocument();
 	});
 });

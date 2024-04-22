@@ -35,6 +35,10 @@ const CustomContainer = styled(Container)`
 	}
 `;
 
+const CustomText = styled(Text)`
+	cursor: default;
+`;
+
 const CustomButton = styled(Button)`
 	padding: 0.25rem;
 `;
@@ -47,11 +51,16 @@ const useFilteredGal = (
 	FilteredGal: JSX.Element;
 } => {
 	const [t] = useTranslation();
-	// TODO: add translation key
-	const createNewChatLabel = t('', 'Create new chat with:');
-	const noMatchLabel = t('', 'There are no items that match this search in your company.');
-	const errorLabel = t('', 'There seems to be a problem with your search, please retry.');
-	const retryLabel = t('', 'Retry');
+	const createNewChatLabel = t('participantsList.creationList.title', 'Create new chat with:');
+	const noMatchLabel = t(
+		'participantsList.noMatch.gal',
+		'There are no items that match this search in your company.'
+	);
+	const errorLabel = t(
+		'participantsList.creationList.searchFailure',
+		'There seems to be a problem with your search, please retry.'
+	);
+	const retryLabel = t('action.retry', 'Retry');
 
 	const [filteredGal, setFilteredGal] = useState<AutoCompleteGalResponse>([]);
 	const [requestStatus, setRequestStatus] = useState<'loading' | 'success' | 'error'>('loading');
@@ -70,7 +79,6 @@ const useFilteredGal = (
 		}
 	}, []);
 
-	// TODO: debounce input
 	useEffect(() => {
 		searchOnGal(input);
 	}, [input, searchOnGal]);
@@ -78,10 +86,10 @@ const useFilteredGal = (
 	const GalSearchHeader = useMemo(
 		() =>
 			expanded ? (
-				<Padding horizontal="large" vertical="small">
-					<Text size="small" color="primary">
+				<Padding horizontal="large" vertical="large" bottom="small">
+					<CustomText size="small" color="primary">
 						{createNewChatLabel}
-					</Text>
+					</CustomText>
 				</Padding>
 			) : (
 				<Container width="fill" height="fit" padding={{ all: 'small' }}>

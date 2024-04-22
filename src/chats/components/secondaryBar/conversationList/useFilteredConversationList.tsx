@@ -28,9 +28,8 @@ const useFilteredConversationList = (
 	FilteredConversationList: JSX.Element;
 } => {
 	const [t] = useTranslation();
-	// TODO update translation default value
 	const noMatchLabel = t(
-		'participantsList.noMatch',
+		'participantsList.noMatch.chatList',
 		'There are no users matching this search in your existing chats.'
 	);
 
@@ -50,7 +49,7 @@ const useFilteredConversationList = (
 		return (
 			<CustomContainer
 				mainAlignment="flex-start"
-				padding={{ vertical: '2rem', horizontal: '1rem' }}
+				padding={{ top: '2rem', bottom: '1.5rem', horizontal: '1rem' }}
 				key="no_match_item"
 			>
 				<SecondaryBarInfoText
@@ -67,7 +66,11 @@ const useFilteredConversationList = (
 
 	const FilteredConversationList = useMemo(
 		() => (
-			<Container height="fit" data-testid="conversations_list_filtered">
+			<Container
+				height="fit"
+				data-testid="conversations_list_filtered"
+				padding={{ vertical: 'small' }}
+			>
 				{listOfRooms}
 			</Container>
 		),

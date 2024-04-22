@@ -46,10 +46,8 @@ type SecondaryBarSingleGroupsViewProps = {
 
 const SecondaryBarView: React.FC<SecondaryBarSingleGroupsViewProps> = ({ expanded }) => {
 	const [t] = useTranslation();
-	const showConversationList = t('tooltip.showConversationList', 'Show chat list');
-	// TODO: add translation key
 	const noResultsLabel = t(
-		'',
+		'participantsList.noMatch.all',
 		'There are no users matching this search in your existing chats or in your company.'
 	);
 
@@ -120,13 +118,8 @@ const SecondaryBarView: React.FC<SecondaryBarSingleGroupsViewProps> = ({ expande
 		]
 	);
 
-	const titleLabel = useMemo(
-		() => (expanded ? showConversationList : undefined),
-		[expanded, showConversationList]
-	);
-
 	return (
-		<Container mainAlignment="flex-start" title={titleLabel}>
+		<Container mainAlignment="flex-start">
 			{chatsBeNetworkStatus ? ListView : <ShimmeringListView />}
 		</Container>
 	);
