@@ -105,24 +105,24 @@ describe('Meeting sidebar', () => {
 	test('OneToOne meeting has Recording and Chat accordions ', async () => {
 		useParams.mockReturnValue({ meetingId: oneToOneMeeting.id });
 		setup(<MeetingSidebar />);
-		const recordingAccordion = screen.queryByText(/Recording/);
+		const recordingAccordion = screen.queryAllByText(/Recording/);
 		const waitingListAccordion = screen.queryByText(/Waiting List/);
 		const participantsAccordion = screen.queryByTestId('MeetingParticipantsAccordion');
 		const chatAccordion = screen.getByText(/Chat/);
-		expect(recordingAccordion).toBeInTheDocument();
+		expect(recordingAccordion).toHaveLength(2);
 		expect(waitingListAccordion).not.toBeInTheDocument();
 		expect(participantsAccordion).not.toBeInTheDocument();
 		expect(chatAccordion).toBeInTheDocument();
 	});
 
-	test('Group meeting hasRecording, Participant and Chat accordions ', async () => {
+	test('Group meeting has Recording, Participant and Chat accordions ', async () => {
 		useParams.mockReturnValue({ meetingId: groupMeeting.id });
 		setup(<MeetingSidebar />);
-		const recordingAccordion = screen.queryByText(/Recording/);
+		const recordingAccordion = screen.queryAllByText(/Recording/);
 		const waitingListAccordion = screen.queryByText(/Waiting List/);
 		const participantsAccordion = screen.getByTestId('MeetingParticipantsAccordion');
 		const chatAccordion = screen.getByText(/Chat/);
-		expect(recordingAccordion).toBeInTheDocument();
+		expect(recordingAccordion).toHaveLength(2);
 		expect(waitingListAccordion).not.toBeInTheDocument();
 		expect(participantsAccordion).toBeInTheDocument();
 		expect(chatAccordion).toBeInTheDocument();
@@ -131,11 +131,11 @@ describe('Meeting sidebar', () => {
 	test('Scheduled meeting moderator has Recording, WaitingList, Participant and Chat accordions ', async () => {
 		useParams.mockReturnValue({ meetingId: scheduledMeetingMod.id });
 		setup(<MeetingSidebar />);
-		const recordingAccordion = screen.queryByText(/Recording/);
+		const recordingAccordion = screen.queryAllByText(/Recording/);
 		const waitingListAccordion = screen.queryByText(/Waiting list/);
 		const participantsAccordion = screen.getByTestId('MeetingParticipantsAccordion');
 		const chatAccordion = screen.getByText(/Chat/);
-		expect(recordingAccordion).toBeInTheDocument();
+		expect(recordingAccordion).toHaveLength(2);
 		expect(waitingListAccordion).toBeInTheDocument();
 		expect(participantsAccordion).toBeInTheDocument();
 		expect(chatAccordion).toBeInTheDocument();
