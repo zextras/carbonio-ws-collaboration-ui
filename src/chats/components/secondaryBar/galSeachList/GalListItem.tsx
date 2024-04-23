@@ -7,7 +7,6 @@
 import React, { useCallback, useMemo } from 'react';
 
 import { Avatar, Container, Row, Text, Tooltip, useTheme } from '@zextras/carbonio-design-system';
-import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import useRouting from '../../../../hooks/useRouting';
@@ -30,12 +29,6 @@ type GalListItemProps = {
 };
 
 const GalListItem: React.FC<GalListItemProps> = ({ contact, expanded }) => {
-	const [t] = useTranslation();
-	const descriptionLabel = t(
-		'participantsList.creationList.userDescription',
-		'Click to create a chat with this user.'
-	);
-
 	const setPlaceholderRoom = useStore((state) => state.setPlaceholderRoom);
 
 	const themeColor = useTheme();
@@ -91,7 +84,7 @@ const GalListItem: React.FC<GalListItemProps> = ({ contact, expanded }) => {
 							mainAlignment="flex-start"
 						>
 							<Text color="secondary" size="extrasmall" overflow="ellipsis" data-testid="message">
-								{descriptionLabel}
+								{contact.email}
 							</Text>
 						</Container>
 					</Row>

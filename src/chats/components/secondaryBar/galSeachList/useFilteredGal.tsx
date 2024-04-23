@@ -48,14 +48,10 @@ const useFilteredGal = (
 	expanded: boolean
 ): {
 	galResultSize: number;
-	FilteredGal: JSX.Element;
+	FilteredGal: JSX.Element | undefined;
 } => {
 	const [t] = useTranslation();
 	const createNewChatLabel = t('participantsList.creationList.title', 'Create new chat with:');
-	const noMatchLabel = t(
-		'participantsList.noMatch.gal',
-		'There are no items that match this search in your company.'
-	);
 	const errorLabel = t(
 		'participantsList.creationList.searchFailure',
 		'There seems to be a problem with your search, please retry.'
@@ -105,24 +101,10 @@ const useFilteredGal = (
 			singleConversationsUserId,
 			(gal, userId) => gal.zimbraId === userId
 		);
-		if (size(filteredGalWithUserId) > 0) {
-			return map(filteredGalWithUserId, (contactMatch) => (
-				<GalListItem contact={contactMatch} expanded={expanded} key={contactMatch.zimbraId} />
-			));
-		}
-		return (
-			<CustomContainer padding={{ vertical: 'small', horizontal: 'large' }} height="fit">
-				<SecondaryBarInfoText
-					color="gray1"
-					size="small"
-					weight="light"
-					overflow={expanded ? 'break-word' : 'ellipsis'}
-				>
-					{noMatchLabel}
-				</SecondaryBarInfoText>
-			</CustomContainer>
-		);
-	}, [expanded, filteredGal, noMatchLabel, singleConversationsUserId]);
+		return map(filteredGalWithUserId, (contactMatch) => (
+			<GalListItem contact={contactMatch} expanded={expanded} key={contactMatch.zimbraId} />
+		));
+	}, [expanded, filteredGal, singleConversationsUserId]);
 
 	const PendingComponent = useMemo(
 		() => (
@@ -168,8 +150,9 @@ const useFilteredGal = (
 	);
 
 	return {
-		galResultSize: size(filteredGal),
-		FilteredGal
+		galResultSize: size(GalUsersComponent),
+		FilteredGal:
+			size(GalUsersComponent) === 0 && requestStatus === 'success' ? undefined : FilteredGal
 	};
 };
 export default useFilteredGal;
