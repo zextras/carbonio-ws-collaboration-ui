@@ -77,7 +77,7 @@
         "newMessages": "New messages",
         "selectionMode": {
             "exit": "Exit selection mode",
-            "maxSelected": "The maximum number of messages that can be forwarded at the same time has been reached",
+            "maxSelected": "You have reached the maximum number of messages that can be forwarded at one time. Deselect a message to change your choice.",
             "multipleForward": "forward {{numberOfMessages}} messages"
         }
     },
