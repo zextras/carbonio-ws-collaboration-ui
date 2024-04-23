@@ -22,12 +22,7 @@ type MuteProps = {
 	emptyRoom?: boolean;
 };
 
-const MuteConversationAction: FC<MuteProps> = ({
-	roomId,
-	isInsideMeeting,
-	roomType,
-	emptyRoom
-}) => {
+const MuteConversationAction: FC<MuteProps> = ({ roomId, roomType, emptyRoom }) => {
 	const [t] = useTranslation();
 	const muteNotificationsLabel = t('action.muteNotifications', 'Mute notifications');
 	const activateNotificationsLabel = t('action.activateNotifications', 'activate notifications');
@@ -94,7 +89,6 @@ const MuteConversationAction: FC<MuteProps> = ({
 			padding={padding}
 			label={!isMuted ? muteNotificationsLabel : activateNotificationsLabel}
 			action={muteConversation}
-			isInsideMeeting={isInsideMeeting}
 		/>
 	);
 };

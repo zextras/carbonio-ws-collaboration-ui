@@ -14,6 +14,7 @@ import { mockDarkReaderIsEnabled } from '../../../../../__mocks__/darkreader';
 import { useParams } from '../../../../../__mocks__/react-router';
 import useStore from '../../../../store/Store';
 import {
+	createMockCapabilityList,
 	createMockMeeting,
 	createMockMember,
 	createMockParticipants,
@@ -66,6 +67,7 @@ const groupMeeting: MeetingBe = createMockMeeting({
 const setupBasicGroup = (): { user: UserEvent; store: RootStore } => {
 	const { result } = renderHook(() => useStore());
 	act(() => {
+		result.current.setCapabilities(createMockCapabilityList({ canVideoCallRecord: true }));
 		result.current.setLoginInfo(mockUser1.id, mockUser1.name);
 		result.current.setUserInfo(mockUser2);
 		result.current.addRoom(groupRoom);
@@ -81,20 +83,18 @@ describe('Meeting sidebar', () => {
 	test('open - close chat accordion', async () => {
 		const { user } = setupBasicGroup();
 		const toggleChatExpanded = screen.queryByTestId('toggleChatExpanded');
-		expect(toggleChatExpanded).not.toBeInTheDocument();
+		expect(toggleChatExpanded).toBeInTheDocument();
 		const toggleChatBtn = screen.getByTestId('toggleChatStatus');
 		await user.click(toggleChatBtn);
 		const chatAccordion = await screen.findByTestId('MeetingConversationAccordion');
+		expect(chatAccordion).toHaveStyle('height: 2.75rem');
+		await waitFor(() => user.click(toggleChatBtn));
 		expect(chatAccordion).toHaveStyle('height: 50%');
 		const composer = await screen.findByTestId('textAreaComposer');
 		expect(composer).toBeInTheDocument();
-		await waitFor(() => user.click(toggleChatBtn));
-		expect(chatAccordion).toHaveStyle('height: 2.75rem');
 	});
 	test('open - expand - collapse chat accordion', async () => {
 		const { user } = setupBasicGroup();
-		const toggleChatBtn = screen.getByTestId('toggleChatStatus');
-		await user.click(toggleChatBtn);
 		const toggleChatExpanded = screen.getByTestId('toggleChatExpanded');
 		await waitFor(() => user.click(toggleChatExpanded));
 		const chatAccordion = await screen.findByTestId('MeetingConversationAccordion');
@@ -105,7 +105,6 @@ describe('Meeting sidebar', () => {
 	test('open - expand - close chat accordion', async () => {
 		const { user } = setupBasicGroup();
 		const toggleChatBtn = screen.getByTestId('toggleChatStatus');
-		await user.click(toggleChatBtn);
 		const toggleChatExpanded = screen.getByTestId('toggleChatExpanded');
 		await waitFor(() => user.click(toggleChatExpanded));
 		const chatAccordion = await screen.findByTestId('MeetingConversationAccordion');
@@ -115,17 +114,13 @@ describe('Meeting sidebar', () => {
 	});
 	test('Display meeting chat with darkMode disabled', async () => {
 		mockDarkReaderIsEnabled.mockReturnValueOnce(false);
-		const { user } = setupBasicGroup();
-		const toggleChatBtn = screen.getByTestId('toggleChatStatus');
-		await waitFor(() => user.click(toggleChatBtn));
+		setupBasicGroup();
 		const wrapperMeetingChat = screen.getByTestId('WrapperMeetingChat');
 		expect(wrapperMeetingChat).toHaveStyle(`background-image: url('papyrus.png')`);
 	});
 	test('Display meeting chat with darkMode enabled', async () => {
 		mockDarkReaderIsEnabled.mockReturnValueOnce(true);
-		const { user } = setupBasicGroup();
-		const toggleChatBtn = screen.getByTestId('toggleChatStatus');
-		await waitFor(() => user.click(toggleChatBtn));
+		setupBasicGroup();
 		const wrapperMeetingChat = screen.getByTestId('WrapperMeetingChat');
 		expect(wrapperMeetingChat).toHaveStyle(`background-image: url('papyrus-dark.png')`);
 	});

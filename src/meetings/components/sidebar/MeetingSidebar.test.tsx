@@ -102,30 +102,26 @@ beforeEach(() => {
 	store.setWaitingList(scheduledMeetingMod.id, [user1.id]);
 });
 describe('Meeting sidebar', () => {
-	test('OneToOne meeting has Action, Recording and Chat accordions ', async () => {
+	test('OneToOne meeting has Recording and Chat accordions ', async () => {
 		useParams.mockReturnValue({ meetingId: oneToOneMeeting.id });
 		setup(<MeetingSidebar />);
-		const actionsAccordions = screen.getByText(/Actions/);
 		const recordingAccordion = screen.queryByText(/Recording/);
 		const waitingListAccordion = screen.queryByText(/Waiting List/);
 		const participantsAccordion = screen.queryByTestId('MeetingParticipantsAccordion');
 		const chatAccordion = screen.getByText(/Chat/);
-		expect(actionsAccordions).toBeInTheDocument();
 		expect(recordingAccordion).toBeInTheDocument();
 		expect(waitingListAccordion).not.toBeInTheDocument();
 		expect(participantsAccordion).not.toBeInTheDocument();
 		expect(chatAccordion).toBeInTheDocument();
 	});
 
-	test('Group meeting has Action, Recording, Participant and Chat accordions ', async () => {
+	test('Group meeting hasRecording, Participant and Chat accordions ', async () => {
 		useParams.mockReturnValue({ meetingId: groupMeeting.id });
 		setup(<MeetingSidebar />);
-		const actionsAccordions = screen.getByText(/Actions/);
 		const recordingAccordion = screen.queryByText(/Recording/);
 		const waitingListAccordion = screen.queryByText(/Waiting List/);
 		const participantsAccordion = screen.getByTestId('MeetingParticipantsAccordion');
 		const chatAccordion = screen.getByText(/Chat/);
-		expect(actionsAccordions).toBeInTheDocument();
 		expect(recordingAccordion).toBeInTheDocument();
 		expect(waitingListAccordion).not.toBeInTheDocument();
 		expect(participantsAccordion).toBeInTheDocument();
@@ -135,12 +131,10 @@ describe('Meeting sidebar', () => {
 	test('Scheduled meeting moderator has Recording, WaitingList, Participant and Chat accordions ', async () => {
 		useParams.mockReturnValue({ meetingId: scheduledMeetingMod.id });
 		setup(<MeetingSidebar />);
-		const actionsAccordions = screen.queryByText(/Actions/);
 		const recordingAccordion = screen.queryByText(/Recording/);
 		const waitingListAccordion = screen.queryByText(/Waiting list/);
 		const participantsAccordion = screen.getByTestId('MeetingParticipantsAccordion');
 		const chatAccordion = screen.getByText(/Chat/);
-		expect(actionsAccordions).not.toBeInTheDocument();
 		expect(recordingAccordion).toBeInTheDocument();
 		expect(waitingListAccordion).toBeInTheDocument();
 		expect(participantsAccordion).toBeInTheDocument();
@@ -150,12 +144,10 @@ describe('Meeting sidebar', () => {
 	test('Scheduled meeting member has Participant and Chat accordions ', () => {
 		useParams.mockReturnValue({ meetingId: scheduledMeeting.id });
 		setup(<MeetingSidebar />);
-		const actionsAccordions = screen.queryByText(/Actions/);
 		const recordingAccordion = screen.queryByText(/Recording/);
 		const waitingListAccordion = screen.queryByText(/Waiting List/);
 		const participantsAccordion = screen.getByTestId('MeetingParticipantsAccordion');
 		const chatAccordion = screen.getByText(/Chat/);
-		expect(actionsAccordions).not.toBeInTheDocument();
 		expect(recordingAccordion).not.toBeInTheDocument();
 		expect(waitingListAccordion).not.toBeInTheDocument();
 		expect(participantsAccordion).toBeInTheDocument();
@@ -165,7 +157,7 @@ describe('Meeting sidebar', () => {
 	test('Recording accordion is not visible with recording capability set to false', async () => {
 		useParams.mockReturnValue({ meetingId: oneToOneMeeting.id });
 		useStore.getState().setCapabilities(createMockCapabilityList({ canVideoCallRecord: false }));
-		const { user } = setup(<MeetingSidebar />);
+		setup(<MeetingSidebar />);
 		const recordingAccordion = screen.queryByText(/Recording/);
 		expect(recordingAccordion).not.toBeInTheDocument();
 	});
