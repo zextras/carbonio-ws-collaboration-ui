@@ -14,10 +14,9 @@ import EditConversationModal from './EditConversationModal';
 
 type EditProps = {
 	roomId: string;
-	isInsideMeeting?: boolean;
 };
 
-const EditConversationAction: FC<EditProps> = ({ roomId, isInsideMeeting }) => {
+const EditConversationAction: FC<EditProps> = ({ roomId }) => {
 	const [t] = useTranslation();
 	const editLabel = t('action.editDetails', 'Edit details');
 
@@ -40,7 +39,6 @@ const EditConversationAction: FC<EditProps> = ({ roomId, isInsideMeeting }) => {
 				label={editLabel}
 				withArrow
 				action={openModal}
-				isInsideMeeting={isInsideMeeting}
 			/>
 			{editModalOpen && (
 				<EditConversationModal

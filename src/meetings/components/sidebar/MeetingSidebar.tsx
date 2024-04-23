@@ -16,7 +16,6 @@ import MeetingConversationAccordion from './MeetingConversationAccordion/Meeting
 import MeetingParticipantsAccordion from './ParticipantsAccordion/MeetingParticipantsAccordion';
 import RecordingAccordion from './recordingAccordion/RecordingAccordion';
 import WaitingListAccordion from './waitingListAccordion/WaitingListAccordion';
-import { ActionsAccordion } from '../../../chats/components/infoPanel/conversationActionsAccordion/ActionsAccordion';
 import { MeetingRoutesParams } from '../../../hooks/useRouting';
 import {
 	getMeetingChatVisibility,
@@ -78,11 +77,6 @@ const MeetingSidebar = (): ReactElement => {
 		[setMeetingSidebarStatus, meetingId, sidebarIsVisible]
 	);
 
-	const showActionsAccordion = useMemo(
-		() => includes([RoomType.ONE_TO_ONE, RoomType.GROUP], roomType),
-		[roomType]
-	);
-
 	const showRecordingAccordion = useMemo(
 		() => canVideoCallRecord && amIModerator,
 		[amIModerator, canVideoCallRecord]
@@ -100,7 +94,7 @@ const MeetingSidebar = (): ReactElement => {
 
 	return (
 		<SidebarContainer
-			background="text"
+			background={'text'}
 			width={sidebarIsVisible ? '35%' : '0'}
 			minWidth={sidebarIsVisible ? '23.125rem' : '0'}
 			maxWidth="31.25rem"
@@ -111,9 +105,6 @@ const MeetingSidebar = (): ReactElement => {
 		>
 			{meetingChatVisibility !== MeetingChatVisibility.EXPANDED && (
 				<AccordionContainer mainAlignment="flex-start" flexGrow="1" gap="gap: 0.063rem">
-					{showActionsAccordion && (
-						<ActionsAccordion roomId={roomId || ''} isInsideMeeting meetingId={meetingId} />
-					)}
 					{showRecordingAccordion && <RecordingAccordion meetingId={meetingId} />}
 					{showWaitingListAccordion && <WaitingListAccordion meetingId={meetingId} />}
 					{showParticipantsAccordion && <MeetingParticipantsAccordion meetingId={meetingId} />}
