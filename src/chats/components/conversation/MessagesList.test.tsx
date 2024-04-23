@@ -483,6 +483,10 @@ describe('forward mode', () => {
 
 		const forwardContainer = await screen.findAllByTestId('forward_bubble_container');
 		expect(forwardContainer[0]).toHaveStyle('background: rgba(213, 227, 246, 0.50)');
+		const checkboxes = await screen.findAllByTestId('icon: Square');
+		expect(checkboxes).toHaveLength(3);
+		const markedCheckbox = await screen.findByTestId('icon: CheckmarkSquare');
+		expect(markedCheckbox).toBeInTheDocument();
 
 		await user.hover(forwardContainer[1]);
 		expect(forwardContainer[1]).toHaveStyle('background: rgba(230, 230, 230, 0.50)');
@@ -493,5 +497,7 @@ describe('forward mode', () => {
 
 		expect(forwardContainer[1]).toHaveStyle('background: rgba(213, 227, 246, 0.50)');
 		expect(result.current.activeConversations[room.id].forwardMessageList).toHaveLength(2);
+		const markedCheckboxes = await screen.findAllByTestId('icon: CheckmarkSquare');
+		expect(markedCheckboxes).toHaveLength(2);
 	});
 });

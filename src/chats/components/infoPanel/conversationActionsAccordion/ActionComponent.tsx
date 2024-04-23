@@ -75,7 +75,6 @@ type ActionProps = {
 	disabledTooltip?: string;
 	idComponent?: string;
 	actionTestId?: string;
-	isInsideMeeting?: boolean;
 };
 
 const ActionComponent: FC<ActionProps> = ({
@@ -88,8 +87,7 @@ const ActionComponent: FC<ActionProps> = ({
 	isDisabled,
 	disabledTooltip,
 	idComponent,
-	actionTestId,
-	isInsideMeeting
+	actionTestId
 }) => (
 	<Tooltip disabled={!isDisabled} label={disabledTooltip}>
 		<CustomActionContainer padding={padding} data-testid="action">
@@ -115,7 +113,7 @@ const ActionComponent: FC<ActionProps> = ({
 						<Padding right="large" />
 					</Row>
 					<Row takeAvailableSpace mainAlignment="flex-start">
-						<CustomText color={isInsideMeeting ? 'gray0' : actionColor} disabled={isDisabled}>
+						<CustomText color={actionColor} disabled={isDisabled}>
 							{label}
 						</CustomText>
 					</Row>
@@ -124,7 +122,7 @@ const ActionComponent: FC<ActionProps> = ({
 					<CustomIcon
 						disabled={isDisabled}
 						icon="ArrowIosForwardOutline"
-						color={isInsideMeeting ? 'gray0' : actionColor}
+						color={actionColor}
 						size="medium"
 					/>
 				)}
