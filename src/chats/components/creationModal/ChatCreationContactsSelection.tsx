@@ -72,7 +72,7 @@ const ChatCreationContactsSelection = ({
 	const [t] = useTranslation();
 	const noMatchLabel = t(
 		'participantsList.noMatch.gal',
-		'There are no items that match this search'
+		'There are no items that match this search in your company.'
 	);
 	const inputPlaceholder = t('modal.creation.inputPlaceholder', 'Start typing or pick an address');
 	const listTextLabel = t(

@@ -137,7 +137,9 @@ describe('Chat Creation Modal Contact Selector - search', () => {
 		await user.type(chipInput, zimbraUser1.fullName[0]);
 
 		await screen.findByText('spinner');
-		const placeholderLabel = await screen.findByText('There are no items that match this search');
+		const placeholderLabel = await screen.findByText(
+			'There are no items that match this search in your company.'
+		);
 		expect(placeholderLabel).toBeVisible();
 	});
 
