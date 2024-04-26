@@ -22,7 +22,8 @@ type DeletedBubbleProps = {
 const BubbleDeletedContainer = styled(Container)<{ $isMyMessage: boolean }>`
 	margin-top: 0.25rem;
 	margin-bottom: 0.25rem;
-	${({ $isMyMessage }): SimpleInterpolation => $isMyMessage && 'margin-left: auto;'};
+	${({ $isMyMessage }): SimpleInterpolation =>
+		$isMyMessage && 'margin-left: auto; margin-right: 0.4375rem;'};
 	box-shadow: 0 0 0.25rem rgba(166, 166, 166, 0.5);
 	border-radius: ${({ $isMyMessage }): string =>
 		$isMyMessage ? '0.25rem 0.25rem 0 0.25rem' : '0.25rem 0.25rem 0.25rem 0'};
