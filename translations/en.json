@@ -161,6 +161,7 @@
             }
         },
         "interactions": {
+            "browserPermission": "Grant browser permissions to enable resources",
             "camDevice": "Camera device",
             "cameraDisabled": "Camera disabled",
             "cameraEnabled": "Camera enabled",
