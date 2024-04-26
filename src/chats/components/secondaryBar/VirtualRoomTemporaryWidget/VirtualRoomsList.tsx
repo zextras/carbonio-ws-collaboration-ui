@@ -48,6 +48,7 @@ const CustomContainer = styled(Container)`
 	left: 3.6rem;
 	border-radius: 0.5rem;
 	box-shadow: 0 0 4px 0 rgba(166, 166, 166, 0.5);
+	z-index: 3;
 `;
 
 const ListContainer = styled(Container)`

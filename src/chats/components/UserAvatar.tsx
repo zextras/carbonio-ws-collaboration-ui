@@ -172,7 +172,7 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ roomId, unreadCount, draftMessa
 	return userName ? (
 		<AvatarContainer data-testid="avatar_box" width="fit">
 			{avatarUser}
-			{unreadCount && (
+			{!!unreadCount && (
 				<AvatarBadge
 					data-testid="unreads_counter"
 					value={unreadCount}

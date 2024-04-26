@@ -128,3 +128,16 @@ export const getMeetingIdFromRoom = (state: RootStore, roomId: string): string |
 
 export const getIsPlaceholderRoom = (state: RootStore, roomId: string): boolean =>
 	state.rooms[roomId]?.placeholder ?? false;
+
+export const getSingleConversationsUserId = (state: RootStore): string[] => {
+	const userIds: string[] = [];
+	forEach(state.rooms, (room) => {
+		if (room.type === RoomType.ONE_TO_ONE) {
+			const otherUser = find(room.members ?? [], (member) => member.userId !== state.session.id);
+			if (size(room.members) > 0 && otherUser) {
+				userIds.push(otherUser.userId);
+			}
+		}
+	});
+	return userIds;
+};
