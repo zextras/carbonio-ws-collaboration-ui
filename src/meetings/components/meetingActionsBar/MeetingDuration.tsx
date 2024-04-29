@@ -16,6 +16,7 @@ import useStore from '../../../store/Store';
 
 const CustomContainer = styled(Container)`
 	cursor: default;
+	min-height: fit-content;
 `;
 
 type MeetingDurationProps = {

@@ -14,6 +14,7 @@ import useRouting, { MeetingRoutesParams, PAGE_INFO_TYPE } from '../../../hooks/
 import { MeetingsApi } from '../../../network';
 
 const CustomContainer = styled(Container)`
+	min-height: fit-content;
 	> div > button > div {
 		text-transform: capitalize !important;
 		font-size: 0.9rem !important;
