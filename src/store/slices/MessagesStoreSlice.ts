@@ -68,7 +68,7 @@ export const useMessagesStoreSlice: StateCreator<MessagesStoreSlice> = (
 				if (!draft.messages[message.roomId]) draft.messages[message.roomId] = [];
 
 				// Add date message if the new message has a different date than the previous one
-				const lastMessageDate = last(draft.messages[message.roomId])?.date || 0;
+				const lastMessageDate = last(draft.messages[message.roomId])?.date ?? 0;
 				if (!datesAreFromTheSameDay(lastMessageDate, message.date)) {
 					draft.messages[message.roomId].push({
 						id: `dateMessage${message.date - 2}`,
@@ -165,7 +165,7 @@ export const useMessagesStoreSlice: StateCreator<MessagesStoreSlice> = (
 				if (size(historyWithDates) > 0) {
 					// Remove old first date message if the last message of the new history has the same date
 					const oldFirstMessage = draft.messages[roomId][0];
-					const lastRequestedMessageDate = last(historyWithDates)?.date || 0;
+					const lastRequestedMessageDate = last(historyWithDates)?.date ?? 0;
 					if (
 						oldFirstMessage?.type === MessageType.DATE_MSG &&
 						datesAreFromTheSameDay(oldFirstMessage.date, lastRequestedMessageDate)
@@ -293,7 +293,7 @@ export const useMessagesStoreSlice: StateCreator<MessagesStoreSlice> = (
 				if (!draft.messages[roomId]) draft.messages[roomId] = [];
 
 				// Add date message if the new message has a different date than the previous one
-				const lastMessageDate = last(draft.messages[roomId])?.date || 0;
+				const lastMessageDate = last(draft.messages[roomId])?.date ?? 0;
 				if (!datesAreFromTheSameDay(lastMessageDate, placeholderMessage.date)) {
 					draft.messages[roomId].push({
 						id: `dateMessage${placeholderMessage.date - 2}`,
