@@ -14,7 +14,6 @@ import useRouting, { MeetingRoutesParams, PAGE_INFO_TYPE } from '../../../hooks/
 import { MeetingsApi } from '../../../network';
 
 const CustomContainer = styled(Container)`
-	min-height: fit-content;
 	> div > button > div {
 		text-transform: capitalize !important;
 		font-size: 0.9rem !important;
@@ -84,7 +83,7 @@ const LeaveMeetingButton = ({ isHoovering }: LeaveMeetingButtonProps): ReactElem
 	}, [isHoovering]);
 
 	return (
-		<CustomContainer width="fit">
+		<CustomContainer width="fit" height="fit">
 			<Tooltip placement="top" label={leaveMeetingLabel}>
 				<CustomButton
 					label={buttonLabel}
