@@ -7,6 +7,8 @@
 // Define browser objects that aren't available in Jest
 // https://jestjs.io/docs/en/manual-mocks#mocking-methods-which-are-not-implemented-in-jsdom
 
+import mock = jest.mock;
+
 export const fetchResponse: jest.Mock = jest.fn(() => ({}));
 export const requestFullscreen = jest.fn();
 
@@ -65,19 +67,47 @@ export const mockedDevicesList = jest.fn(() => [
 	}
 ]);
 
-Object.defineProperty(global.navigator, 'mediaDevices', {
-	value: {
-		getUserMedia: jest.fn(() =>
-			Promise.resolve({
-				getTracks: jest.fn(() => ({ forEach: jest.fn() })),
-				getAudioTracks: jest.fn(() => ({ forEach: jest.fn() })),
-				getVideoTracks: jest.fn(() => ({ forEach: jest.fn() }))
-			})
-		),
-		enumerateDevices: jest.fn(() => Promise.resolve(mockedDevicesList())),
-		addEventListener: jest.fn(),
-		removeEventListener: jest.fn()
-	}
+export const mockMediaDevicesResolve = jest.fn(() => {
+	Object.defineProperty(global.navigator, 'mediaDevices', {
+		value: {
+			getUserMedia: jest.fn(() =>
+				Promise.resolve({
+					getTracks: jest.fn(() => ({ forEach: jest.fn() })),
+					getAudioTracks: jest.fn(() => ({ forEach: jest.fn() })),
+					getVideoTracks: jest.fn(() => ({ forEach: jest.fn() }))
+				})
+			),
+			enumerateDevices: jest.fn(() => Promise.resolve(mockedDevicesList())),
+			addEventListener: jest.fn(),
+			removeEventListener: jest.fn()
+		}
+	});
+});
+
+export const mockedGetUserMedia = jest.fn();
+export const mockedEnumerateDevices = jest.fn();
+
+export const mockMediaDevicesReject = jest.fn(() => {
+	Object.defineProperty(global.navigator, 'mediaDevices', {
+		value: {
+			getUserMedia: jest.fn(
+				() =>
+					new Promise((resolve, reject) => {
+						const result = mockedGetUserMedia();
+						result ? resolve(result) : reject(new Error('error'));
+					})
+			),
+			enumerateDevices: jest.fn(
+				() =>
+					new Promise((resolve, reject) => {
+						const result = mockedEnumerateDevices();
+						result ? resolve(result) : reject(new Error('error'));
+					})
+			),
+			addEventListener: jest.fn(),
+			removeEventListener: jest.fn()
+		}
+	});
 });
 
 Object.defineProperty(HTMLMediaElement.prototype, 'muted', {

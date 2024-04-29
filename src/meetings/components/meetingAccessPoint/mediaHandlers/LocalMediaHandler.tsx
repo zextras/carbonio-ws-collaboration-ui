@@ -93,16 +93,20 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 						setMediaDevicesEnabled({ audio, video });
 						setEnterButtonIsEnabled(true);
 					})
-					.catch(() => {
+					.catch((e) => {
 						mediaPermissionSnackbar();
+						console.error(e);
 					});
 			} else {
-				getAudioAndVideo({ noiseSuppression: true, echoCancellation: true }).then(
-					(stream: MediaStream) => {
+				getAudioAndVideo({ noiseSuppression: true, echoCancellation: true })
+					.then((stream: MediaStream) => {
 						const tracks = stream.getTracks();
 						tracks.forEach((track) => track.stop());
-					}
-				);
+					})
+					.catch((e) => {
+						mediaPermissionSnackbar();
+						console.error(e);
+					});
 				const kindOfAudioDevice = audioId
 					? {
 							deviceId: { exact: audioId },
@@ -246,26 +250,29 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 
 	useEffect(() => {
 		if (BrowserUtils.isFirefox()) {
-			navigator.mediaDevices.enumerateDevices().then((list) => {
-				const firstAudioInputForPermissions = find(
-					list,
-					(device: MediaDeviceInfo) => device.kind === 'audioinput'
-				);
-				if (firstAudioInputForPermissions) {
-					getAudioAndVideo(
-						{ deviceId: { exact: firstAudioInputForPermissions.deviceId } },
-						mediaDevicesEnabled.video
-					)
-						.then((stream: MediaStream) => {
-							const tracks: MediaStreamTrack[] = stream.getTracks();
-							tracks.forEach((track) => track.stop());
-							updateListOfDevices();
-						})
-						.catch(() => {
-							mediaPermissionSnackbar();
-						});
-				}
-			});
+			navigator.mediaDevices
+				.enumerateDevices()
+				.then((list) => {
+					const firstAudioInputForPermissions = find(
+						list,
+						(device: MediaDeviceInfo) => device.kind === 'audioinput'
+					);
+					if (firstAudioInputForPermissions) {
+						getAudioAndVideo(
+							{ deviceId: { exact: firstAudioInputForPermissions.deviceId } },
+							mediaDevicesEnabled.video
+						)
+							.then((stream: MediaStream) => {
+								const tracks: MediaStreamTrack[] = stream.getTracks();
+								tracks.forEach((track) => track.stop());
+								updateListOfDevices();
+							})
+							.catch(() => {
+								mediaPermissionSnackbar();
+							});
+					}
+				})
+				.catch();
 		} else {
 			updateListOfDevices();
 		}
