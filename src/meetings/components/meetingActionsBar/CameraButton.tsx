@@ -114,8 +114,9 @@ const CameraButton = ({
 			event.stopPropagation();
 			if (!videoStatus) {
 				if (!videoOutConn?.peerConn) {
-					videoOutConn?.startVideo(selectedVideoDeviceId).catch(() => {
+					videoOutConn?.startVideo(selectedVideoDeviceId).catch((e) => {
 						mediaPermissionSnackbar();
+						console.log(e);
 					});
 				} else {
 					getVideoStream(selectedVideoDeviceId).then((stream) => {
@@ -142,7 +143,9 @@ const CameraButton = ({
 				) as MediaDeviceInfo[];
 				setVideoMediaList(videoInputs);
 			})
-			.catch();
+			.catch((e) => {
+				console.log(e);
+			});
 	}, []);
 
 	/**

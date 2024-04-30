@@ -121,8 +121,9 @@ const MicrophoneButton = ({
 							MeetingsApi.updateAudioStreamStatus(meetingId, !audioStatus);
 						});
 					})
-					.catch(() => {
+					.catch((e) => {
 						mediaPermissionSnackbar();
+						console.log(e);
 					});
 			} else {
 				bidirectionalAudioConn?.closeRtpSenderTrack();
@@ -142,7 +143,9 @@ const MicrophoneButton = ({
 				) as MediaDeviceInfo[];
 				setAudioMediaList(audioInputs);
 			})
-			.catch();
+			.catch((e) => {
+				console.log(e);
+			});
 	}, []);
 
 	/**
