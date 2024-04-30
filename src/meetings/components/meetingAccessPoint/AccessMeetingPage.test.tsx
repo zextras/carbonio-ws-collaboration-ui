@@ -427,21 +427,3 @@ describe('AccessMeeting - enter to meeting by waiting Room', () => {
 		expect(mockGoToInfoPage).toHaveBeenCalledWith(PAGE_INFO_TYPE.MEETING_ENDED);
 	});
 });
-
-// describe('user not giving media permissions', () => {
-// 	test('user gives not the media permissions and tries to open microphone', async () => {
-// 		mockedEnumerateDevices.mockRejectedValue('error');
-// 		mockedGetUserMedia.mockRejectedValue('error');
-// 		mockMediaDevicesReject();
-// 		mockedJoinMeetingRequest.mockReturnValueOnce(groupMeeting);
-//
-// 		const { user } = setupBasicGroup();
-//
-// 		const videoOff = screen.getByTestId(iconVideoOff);
-// 		await act(() => user.click(videoOff));
-//
-// 		const snackbar = await screen.findByText('Grant browser permissions to enable resources');
-//
-// 		expect(snackbar).toBeInTheDocument();
-// 	});
-// });

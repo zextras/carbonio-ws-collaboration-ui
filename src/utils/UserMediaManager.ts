@@ -39,8 +39,8 @@ export const enumerateDevices = (): void => {
  * https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia
  */
 export const getAudioStream = (
-	noiseSuppression?: boolean | true,
-	echoCancellation?: boolean | true,
+	noiseSuppression?: boolean,
+	echoCancellation?: boolean,
 	deviceId?: string
 ): Promise<MediaStream> =>
 	new Promise((resolve, reject) => {
@@ -96,8 +96,8 @@ export const getAudioAndVideo = (
 	audio?:
 		| boolean
 		| {
-				noiseSuppression?: boolean | true;
-				echoCancellation?: boolean | true;
+				noiseSuppression?: boolean;
+				echoCancellation?: boolean;
 				deviceId?: { exact: string };
 		  },
 	video?: boolean | { deviceId?: { exact: string } }

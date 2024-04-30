@@ -104,7 +104,6 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 						tracks.forEach((track) => track.stop());
 					})
 					.catch((e) => {
-						mediaPermissionSnackbar();
 						console.error(e);
 					});
 				const kindOfAudioDevice = audioId
@@ -217,7 +216,9 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 				setAudioMediaList(audioInputs);
 				setVideoMediaList(videoInputs);
 			})
-			.catch();
+			.catch((e) => {
+				console.log(e);
+			});
 	}, []);
 
 	const toggleVideo = useCallback(
@@ -267,12 +268,14 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 								tracks.forEach((track) => track.stop());
 								updateListOfDevices();
 							})
-							.catch(() => {
-								mediaPermissionSnackbar();
+							.catch((e) => {
+								console.log(e);
 							});
 					}
 				})
-				.catch();
+				.catch((e) => {
+					console.log(e);
+				});
 		} else {
 			updateListOfDevices();
 		}
@@ -280,7 +283,6 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 		createSnackbar,
 		giveMediaPermissionSnackbar,
 		mediaDevicesEnabled,
-		mediaPermissionSnackbar,
 		understoodAction,
 		updateListOfDevices
 	]);

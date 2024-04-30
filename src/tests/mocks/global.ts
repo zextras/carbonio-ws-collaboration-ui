@@ -7,8 +7,6 @@
 // Define browser objects that aren't available in Jest
 // https://jestjs.io/docs/en/manual-mocks#mocking-methods-which-are-not-implemented-in-jsdom
 
-import mock = jest.mock;
-
 export const fetchResponse: jest.Mock = jest.fn(() => ({}));
 export const requestFullscreen = jest.fn();
 
@@ -94,20 +92,24 @@ export const mockMediaDevicesReject = jest.fn(() => {
 				() =>
 					new Promise((resolve, reject) => {
 						const result = mockedGetUserMedia();
-						result ? resolve(result) : reject(new Error('error'));
+						result ? resolve(result) : reject(new Error());
 					})
 			),
 			enumerateDevices: jest.fn(
 				() =>
 					new Promise((resolve, reject) => {
 						const result = mockedEnumerateDevices();
-						result ? resolve(result) : reject(new Error('error'));
+						result ? resolve(result) : reject(new Error());
 					})
 			),
 			addEventListener: jest.fn(),
 			removeEventListener: jest.fn()
 		}
 	});
+});
+
+Object.defineProperty(global.navigator, 'userAgent', {
+	value: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:124.0) Gecko/20100101 Firefox/124.0'
 });
 
 Object.defineProperty(HTMLMediaElement.prototype, 'muted', {
