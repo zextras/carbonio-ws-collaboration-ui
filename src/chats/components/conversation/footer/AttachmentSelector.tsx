@@ -16,10 +16,10 @@ import {
 	useSnackbar
 } from '@zextras/carbonio-design-system';
 import { useIntegratedFunction } from '@zextras/carbonio-shell-ui';
-import { forEach } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
+import useLoadFiles from '../../../../hooks/useLoadFiles';
 import { getFilesToUploadArray } from '../../../../store/selectors/ActiveConversationsSelectors';
 import { getXmppClient } from '../../../../store/selectors/ConnectionSelector';
 import {
@@ -27,9 +27,7 @@ import {
 	getRoomTypeSelector
 } from '../../../../store/selectors/RoomsSelectors';
 import useStore from '../../../../store/Store';
-import { FileToUpload } from '../../../../types/store/ActiveConversationTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
-import { uid } from '../../../../utils/attachmentUtils';
 
 type AttachmentSelectorProps = {
 	roomId: string;
@@ -68,7 +66,6 @@ const AttachmentSelector: React.FC<AttachmentSelectorProps> = ({ roomId }) => {
 	const roomName = useStore((store) => getRoomNameSelector(store, roomId));
 	const roomType = useStore((store) => getRoomTypeSelector(store, roomId));
 	const setInputHasFocus = useStore((store) => store.setInputHasFocus);
-	const setFilesToAttach = useStore((store) => store.setFilesToAttach);
 	const filesToUploadArray = useStore((store) => getFilesToUploadArray(store, roomId));
 
 	const [filesSelectFilesAction, filesSelectFilesActionAvailable] =
@@ -79,28 +76,17 @@ const AttachmentSelector: React.FC<AttachmentSelectorProps> = ({ roomId }) => {
 
 	const fileSelectorInputRef = useRef<HTMLInputElement>(null);
 
+	const loadFiles = useLoadFiles(roomId);
+
 	const selectFiles = useCallback(
 		(ev) => {
 			const { files } = ev.target as HTMLInputElement;
-			const listOfFiles: FileToUpload[] = [];
-			forEach(files, (file: File, index) => {
-				const fileLocalUrl = URL.createObjectURL(file);
-				const fileId = uid();
-				const isFocusedIfFirstOfListAndFirstToBeUploaded = index === 0 && !filesToUploadArray;
-				listOfFiles.push({
-					file,
-					fileId,
-					hasFocus: isFocusedIfFirstOfListAndFirstToBeUploaded,
-					description: '',
-					localUrl: fileLocalUrl
-				});
-			});
-			setFilesToAttach(roomId, listOfFiles);
+			loadFiles(files ?? new FileList());
 			if (!filesToUploadArray) {
 				setInputHasFocus(roomId, true);
 			}
 		},
-		[setFilesToAttach, roomId, setInputHasFocus, filesToUploadArray]
+		[loadFiles, filesToUploadArray, setInputHasFocus, roomId]
 	);
 
 	const handleClickAttachment = useCallback(

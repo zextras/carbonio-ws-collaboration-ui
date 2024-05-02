@@ -29,6 +29,7 @@ import AttachmentSelector from './AttachmentSelector';
 import DeleteMessageModal from './DeleteMessageModal';
 import EmojiSelector from './EmojiSelector';
 import MessageArea from './MessageArea';
+import useLoadFiles from '../../../../hooks/useLoadFiles';
 import useMessage from '../../../../hooks/useMessage';
 import { AttachmentsApi, RoomsApi } from '../../../../network';
 import {
@@ -44,7 +45,7 @@ import { AddRoomAttachmentResponse } from '../../../../types/network/responses/r
 import { FileToUpload, messageActionType } from '../../../../types/store/ActiveConversationTypes';
 import { Message, MessageType } from '../../../../types/store/MessageTypes';
 import { CapabilityType } from '../../../../types/store/SessionTypes';
-import { isAttachmentImage, uid } from '../../../../utils/attachmentUtils';
+import { isAttachmentImage } from '../../../../utils/attachmentUtils';
 import { BrowserUtils } from '../../../../utils/BrowserUtils';
 import { canPerformAction } from '../../../../utils/MessageActionsUtils';
 
@@ -90,7 +91,6 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 	const addDescriptionToFileToAttach = useStore((store) => store.addDescriptionToFileToAttach);
 	const unsetFilesToAttach = useStore((store) => store.unsetFilesToAttach);
 	const filesToUploadArray = useStore((store) => getFilesToUploadArray(store, roomId));
-	const setFilesToAttach = useStore((store) => store.setFilesToAttach);
 	const lastMessageId: string | undefined = useStore((state) =>
 		getLastMessageIdSelector(state, roomId)
 	);
@@ -111,6 +111,8 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 	const createSnackbar: CreateSnackbarFn = useSnackbar();
 
 	const messageInputRef = useRef<HTMLTextAreaElement>(null);
+
+	const loadFiles = useLoadFiles(roomId);
 
 	const sendDisabled = useMemo(() => {
 		// Send button is always enabled if user is editing
@@ -383,26 +385,6 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 		setInputHasFocus(roomId, false);
 	}, [textMessage, setInputHasFocus, roomId, setDraftMessage]);
 
-	const mapFiles = useCallback(
-		(listOfFiles, includeFiles) => {
-			forEach(includeFiles as [], (file: File, index) => {
-				const fileLocalUrl = URL.createObjectURL(file);
-				const fileId = uid();
-				const isFocusedIfFirstOfListAndFirstToBeUploaded = index === 0 && !filesToUploadArray;
-				listOfFiles.push({
-					file,
-					fileId,
-					hasFocus: isFocusedIfFirstOfListAndFirstToBeUploaded,
-					description: '',
-					localUrl: fileLocalUrl
-				});
-			});
-			setFilesToAttach(roomId, listOfFiles);
-			setInputHasFocus(roomId, true);
-		},
-		[filesToUploadArray, roomId, setFilesToAttach, setInputHasFocus]
-	);
-
 	const handlePaste = useCallback(
 		(ev) => {
 			try {
@@ -410,7 +392,6 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 				const editingMessage = referenceMessage?.actionType === messageActionType.EDIT;
 				if (!editingMessage) {
 					const includeFiles = ev.clipboardData.files;
-					const listOfFiles: FileToUpload[] = [];
 					if (includeFiles && includeFiles.length > 0) {
 						ev.preventDefault();
 						ev.stopPropagation();
@@ -425,7 +406,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 						// LINUX OS AND BROWSER ARE FIREFOX/CHROME
 						// WIN OS AND BROWSER ARE CHROME/FIREFOX
 						if (isLinux || (isWin && isFirefoxBrowser) || isChromeBrowser || chromeVersion) {
-							mapFiles(listOfFiles, includeFiles);
+							loadFiles(includeFiles);
 						} else if (
 							// MAC OS AND BROWSER ARE CHROME/FIREFOX/SAFARI
 							(isMac && isChromeBrowser) ||
@@ -433,7 +414,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 							isFirefoxBrowser ||
 							isSafariBrowser
 						) {
-							mapFiles(listOfFiles, includeFiles);
+							loadFiles(includeFiles);
 						} else {
 							console.error(`Browser not support copy/paste function ${navigator}`);
 						}
@@ -443,7 +424,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 				console.error(e);
 			}
 		},
-		[mapFiles, referenceMessage]
+		[loadFiles, referenceMessage?.actionType]
 	);
 
 	useEffect(() => {
