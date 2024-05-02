@@ -18,27 +18,30 @@ import {
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import { useIsWritingLabel } from '../../../hooks/useIsWritingLabel';
-import useMessage from '../../../hooks/useMessage';
-import useRouting from '../../../hooks/useRouting';
-import { getDraftMessage } from '../../../store/selectors/ActiveConversationsSelectors';
-import { getLastMessageIdSelector } from '../../../store/selectors/MessagesSelectors';
+import { useIsWritingLabel } from '../../../../hooks/useIsWritingLabel';
+import useMessage from '../../../../hooks/useMessage';
+import useRouting from '../../../../hooks/useRouting';
+import { getDraftMessage } from '../../../../store/selectors/ActiveConversationsSelectors';
+import { getLastMessageIdSelector } from '../../../../store/selectors/MessagesSelectors';
 import {
 	getRoomMutedSelector,
 	getRoomNameSelector,
 	getRoomTypeSelector
-} from '../../../store/selectors/RoomsSelectors';
-import { getCapability, getSelectedConversation } from '../../../store/selectors/SessionSelectors';
-import { getRoomUnreadsSelector } from '../../../store/selectors/UnreadsCounterSelectors';
-import { getUserName } from '../../../store/selectors/UsersSelectors';
-import useStore from '../../../store/Store';
-import { MarkerStatus } from '../../../types/store/MarkersTypes';
-import { Message, MessageType } from '../../../types/store/MessageTypes';
-import { RoomType } from '../../../types/store/RoomTypes';
-import { CapabilityType } from '../../../types/store/SessionTypes';
-import { ConfigurationMessageLabel } from '../../../utils/ConfigurationMessageLabel';
-import GroupAvatar from '../GroupAvatar';
-import UserAvatar from '../UserAvatar';
+} from '../../../../store/selectors/RoomsSelectors';
+import {
+	getCapability,
+	getSelectedConversation
+} from '../../../../store/selectors/SessionSelectors';
+import { getRoomUnreadsSelector } from '../../../../store/selectors/UnreadsCounterSelectors';
+import { getUserName } from '../../../../store/selectors/UsersSelectors';
+import useStore from '../../../../store/Store';
+import { MarkerStatus } from '../../../../types/store/MarkersTypes';
+import { Message, MessageType } from '../../../../types/store/MessageTypes';
+import { RoomType } from '../../../../types/store/RoomTypes';
+import { CapabilityType } from '../../../../types/store/SessionTypes';
+import { ConfigurationMessageLabel } from '../../../../utils/ConfigurationMessageLabel';
+import GroupAvatar from '../../GroupAvatar';
+import UserAvatar from '../../UserAvatar';
 
 type ExpandedSidebarListItemProps = {
 	roomId: string;

@@ -9,12 +9,12 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 
 import CollapsedSidebarListItem from './CollapsedSidebarListItem';
-import useStore from '../../../store/Store';
-import { createMockMember, createMockRoom } from '../../../tests/createMock';
-import { setup } from '../../../tests/test-utils';
-import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
-import { RootStore } from '../../../types/store/StoreTypes';
-import { User } from '../../../types/store/UserTypes';
+import useStore from '../../../../store/Store';
+import { createMockMember, createMockRoom } from '../../../../tests/createMock';
+import { setup } from '../../../../tests/test-utils';
+import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
+import { RootStore } from '../../../../types/store/StoreTypes';
+import { User } from '../../../../types/store/UserTypes';
 
 const backgroundColor = 'background-color: #cfd5dc';
 

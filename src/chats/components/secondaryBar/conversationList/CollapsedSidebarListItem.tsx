@@ -9,15 +9,18 @@ import React, { useCallback } from 'react';
 import { Container, Tooltip } from '@zextras/carbonio-design-system';
 import styled from 'styled-components';
 
-import useRouting from '../../../hooks/useRouting';
-import { getDraftMessage } from '../../../store/selectors/ActiveConversationsSelectors';
-import { getRoomNameSelector, getRoomTypeSelector } from '../../../store/selectors/RoomsSelectors';
-import { getSelectedConversation } from '../../../store/selectors/SessionSelectors';
-import { getRoomUnreadsSelector } from '../../../store/selectors/UnreadsCounterSelectors';
-import useStore from '../../../store/Store';
-import { RoomType } from '../../../types/store/RoomTypes';
-import GroupAvatar from '../GroupAvatar';
-import UserAvatar from '../UserAvatar';
+import useRouting from '../../../../hooks/useRouting';
+import { getDraftMessage } from '../../../../store/selectors/ActiveConversationsSelectors';
+import {
+	getRoomNameSelector,
+	getRoomTypeSelector
+} from '../../../../store/selectors/RoomsSelectors';
+import { getSelectedConversation } from '../../../../store/selectors/SessionSelectors';
+import { getRoomUnreadsSelector } from '../../../../store/selectors/UnreadsCounterSelectors';
+import useStore from '../../../../store/Store';
+import { RoomType } from '../../../../types/store/RoomTypes';
+import GroupAvatar from '../../GroupAvatar';
+import UserAvatar from '../../UserAvatar';
 
 type SidebarListItemProps = {
 	roomId: string;

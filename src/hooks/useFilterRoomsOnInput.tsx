@@ -8,7 +8,7 @@ import { useMemo } from 'react';
 
 import { find, map } from 'lodash';
 
-import { FilteredConversation } from '../chats/components/secondaryBar/SecondaryBarSingleGroupsView';
+import { FilteredConversation } from '../chats/components/secondaryBar/SecondaryBarView';
 import { getOneToOneAndGroupsInfoOrderedByLastMessage } from '../store/selectors/MessagesSelectors';
 import { getUserId } from '../store/selectors/SessionSelectors';
 import { getUsersSelector } from '../store/selectors/UsersSelectors';

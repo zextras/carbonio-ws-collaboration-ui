@@ -9,27 +9,27 @@ import React from 'react';
 import { act, screen } from '@testing-library/react';
 
 import ExpandedSidebarListItem from './ExpandedSidebarListItem';
-import { onComposingMessageStanza } from '../../../network/xmpp/handlers/composingMessageHandler';
-import useStore from '../../../store/Store';
+import { onComposingMessageStanza } from '../../../../network/xmpp/handlers/composingMessageHandler';
+import useStore from '../../../../store/Store';
 import {
 	createMockCapabilityList,
 	createMockConfigurationMessage,
 	createMockMember,
 	createMockRoom,
 	createMockTextMessage
-} from '../../../tests/createMock';
-import { xmppClient } from '../../../tests/mockedXmppClient';
-import { composingStanza, pausedStanza } from '../../../tests/mocks/XMPPStanza';
-import { setup } from '../../../tests/test-utils';
-import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
-import { MarkerStatus } from '../../../types/store/MarkersTypes';
+} from '../../../../tests/createMock';
+import { xmppClient } from '../../../../tests/mockedXmppClient';
+import { composingStanza, pausedStanza } from '../../../../tests/mocks/XMPPStanza';
+import { setup } from '../../../../tests/test-utils';
+import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
+import { MarkerStatus } from '../../../../types/store/MarkersTypes';
 import {
 	ConfigurationMessage,
 	MessageType,
 	OperationType
-} from '../../../types/store/MessageTypes';
-import { RootStore } from '../../../types/store/StoreTypes';
-import { User } from '../../../types/store/UserTypes';
+} from '../../../../types/store/MessageTypes';
+import { RootStore } from '../../../../types/store/StoreTypes';
+import { User } from '../../../../types/store/UserTypes';
 
 const iconDoneAll = 'icon: DoneAll';
 
