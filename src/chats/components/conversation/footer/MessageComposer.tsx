@@ -132,18 +132,22 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 		});
 	}, [listAbortController, uploadAbortedLabel, createSnackbar]);
 
-	const checkMaxLengthAndSetMessage = useCallback((textareaValue: string): void => {
-		if (textareaValue.length > 4096) {
-			setTextMessage(textareaValue.slice(0, 4096));
-			// todo fix selection place when user is modifying in the middle of the components
-			// const cursorPosition = messageInputRef.current.selectionStart;
-			// messageInputRef.current.setSelectionRange(cursorPosition, cursorPosition);
-			setNoMoreCharsOnInputComposer(true);
-		} else {
-			setNoMoreCharsOnInputComposer(false);
-			setTextMessage(textareaValue);
-		}
-	}, []);
+	const checkMaxLengthAndSetMessage = useCallback(
+		(textareaValue: string): void => {
+			// Description file limit is 682 chars because we apply a charToUnicode function to it
+			const charsLimit = size(filesToUploadArray) > 0 ? 682 : 4096;
+			if (size(textareaValue) >= charsLimit) {
+				setTextMessage(textareaValue.slice(0, charsLimit));
+				// TODO fix selection place when user is modifying in the middle of the components
+				// const cursorPosition = messageInputRef.current.selectionStart;
+				// messageInputRef.current.setSelectionRange(cursorPosition, cursorPosition);
+				setNoMoreCharsOnInputComposer(true);
+			} else {
+				setNoMoreCharsOnInputComposer(false);
+			}
+		},
+		[filesToUploadArray]
+	);
 
 	const errorHandler = (reason: DOMException, fileName: string): void => {
 		if (reason.name !== 'AbortError') {
@@ -317,12 +321,9 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 		}
 	}, [referenceMessage, deleteMessageModalStatus]);
 
-	const handleTypingMessage = useCallback(
-		(e: BaseSyntheticEvent): void => {
-			checkMaxLengthAndSetMessage(e.target.value);
-		},
-		[checkMaxLengthAndSetMessage]
-	);
+	const handleTypingMessage = useCallback((e: BaseSyntheticEvent): void => {
+		setTextMessage(e.target.value);
+	}, []);
 
 	const handleKeyUp = useCallback(
 		(e: KeyboardEvent) => {
@@ -498,7 +499,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 			gap="0.25rem"
 			padding={{ all: 'small' }}
 		>
-			<EmojiSelector messageInputRef={messageInputRef} setMessage={checkMaxLengthAndSetMessage} />
+			<EmojiSelector messageInputRef={messageInputRef} setMessage={setTextMessage} />
 			<MessageArea
 				roomId={roomId}
 				textareaRef={messageInputRef}
