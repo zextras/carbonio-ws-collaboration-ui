@@ -18,7 +18,10 @@ export const autoCompleteGalRequest = (text: string): Promise<AutoCompleteGalRes
 			sortBy: 'nameAsc'
 		})
 			.then((response: AutoCompleteGalSoapResponse) => {
-				const filterUsers = filter(response.cn, (user) => !!user._attrs.fullName);
+				const filterUsers = filter(
+					response.cn,
+					(user) => !!user._attrs.fullName && !user._attrs.type
+				);
 				const zimbraUsers = map(filterUsers, (user) => ({
 					email: user._attrs.email,
 					firstName: user._attrs.firstName,
@@ -50,4 +53,5 @@ export type ContactMatch = {
 	fullName: string;
 	lastName: string;
 	zimbraId: string;
+	type?: 'group';
 };

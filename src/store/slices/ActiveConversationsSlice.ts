@@ -275,8 +275,8 @@ export const useActiveConversationsSlice: StateCreator<ActiveConversationsSlice>
 		set(
 			produce((draft: RootStore) => {
 				if (draft.activeConversations[roomId].filesToAttach) {
-					// we set as active a different file only if the one we are removing is the selected one
-					// before to remove the file, we set as selected the once who comes after if present otherwise the previous one
+					// We set as active a different file only if the one we are removing is the selected one.
+					// Before remove the file, we set as selected the one who comes after if present, otherwise the previous one
 					const fileToRemoveIsSelected = find(
 						draft.activeConversations[roomId].filesToAttach,
 						(file) => file.fileId === fileTempId && file.hasFocus
@@ -287,26 +287,21 @@ export const useActiveConversationsSlice: StateCreator<ActiveConversationsSlice>
 							'fileId',
 							fileTempId
 						]);
+
 						forEach(draft.activeConversations[roomId].filesToAttach, (file) => {
 							file.hasFocus = false;
 						});
 
-						if (draft.activeConversations[roomId].filesToAttach![fileToRemoveIdx + 1]) {
-							draft.activeConversations[roomId].filesToAttach![fileToRemoveIdx + 1].hasFocus = true;
-							if (
-								draft.activeConversations[roomId].filesToAttach![fileToRemoveIdx + 1].description
-							) {
-								draft.activeConversations[roomId].draftMessage =
-									draft.activeConversations[roomId].filesToAttach![fileToRemoveIdx + 1].description;
-							}
-						} else if (draft.activeConversations[roomId].filesToAttach![fileToRemoveIdx - 1]) {
-							draft.activeConversations[roomId].filesToAttach![fileToRemoveIdx - 1].hasFocus = true;
-							if (
-								draft.activeConversations[roomId].filesToAttach![fileToRemoveIdx - 1].description
-							) {
-								draft.activeConversations[roomId].draftMessage =
-									draft.activeConversations[roomId].filesToAttach![fileToRemoveIdx - 1].description;
-							}
+						const { filesToAttach } = draft.activeConversations[roomId];
+
+						const fileIdxToUse =
+							(filesToAttach![fileToRemoveIdx + 1] && fileToRemoveIdx + 1) ||
+							(filesToAttach![fileToRemoveIdx - 1] && fileToRemoveIdx - 1);
+
+						draft.activeConversations[roomId].filesToAttach![fileIdxToUse].hasFocus = true;
+						if (draft.activeConversations[roomId].filesToAttach![fileIdxToUse].description) {
+							draft.activeConversations[roomId].draftMessage =
+								draft.activeConversations[roomId].filesToAttach![fileIdxToUse].description;
 						}
 					}
 
