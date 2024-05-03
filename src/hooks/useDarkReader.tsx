@@ -29,8 +29,9 @@ const useDarkReader = (): UseDarkReaderReturnType => {
 		if (inMeetingTab) {
 			return 'enabled';
 		}
-		return find(settings.props, (value) => value.name === 'zappDarkreaderMode')
+		const mode = find(settings.props, (value) => value.name === 'zappDarkreaderMode')
 			?._content as DarkReaderModeType;
+		return mode || 'disabled';
 	}, [inMeetingTab, settings.props]);
 
 	const enableDarkReader = useCallback(() => {
