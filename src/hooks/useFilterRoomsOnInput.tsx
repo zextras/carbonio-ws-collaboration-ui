@@ -21,35 +21,38 @@ export const useFilterRoomsOnInput = (filteredInput: string): FilteredConversati
 
 	return useMemo(() => {
 		if (filteredInput === '') return roomsInfo;
+		const nameIncludedInFilter = (userId: string, filter: string): boolean =>
+			users[userId]?.name?.toLocaleLowerCase().includes(filter);
+
+		const emailIncludedInFilter = (userId: string, filter: string): boolean =>
+			users[userId]?.email?.split('@')[0].toLocaleLowerCase().includes(filter);
 
 		const filter = filteredInput.toLocaleLowerCase();
 		const filteredGroups: FilteredConversation[] = [];
 		const filteredOneToOne: FilteredConversation[] = [];
 		map(roomsInfo, (room) => {
-			if (room.roomType === 'group') {
-				if (room.name.toLocaleLowerCase().includes(filter)) {
-					filteredGroups.push(room);
-				} else {
-					room.members.every((member) => {
-						if (
-							users[member.userId]?.name?.toLocaleLowerCase().includes(filter) ||
-							users[member.userId]?.email?.split('@')[0].toLocaleLowerCase().includes(filter)
-						) {
-							filteredGroups.push(room);
-							return false;
-						}
-						return true;
-					});
-				}
+			const userId = find(room.members, (member) => member.userId !== sessionId)?.userId;
+
+			if (
+				room.roomType !== 'group' &&
+				userId &&
+				(nameIncludedInFilter(userId, filter) || emailIncludedInFilter(userId, filter))
+			) {
+				filteredOneToOne.push(room);
+			} else if (room.roomType === 'group' && room.name.toLocaleLowerCase().includes(filter)) {
+				filteredGroups.push(room);
 			} else {
-				const userId = find(room.members, (member) => member.userId !== sessionId)?.userId;
-				if (userId) {
-					const userName = users[userId]?.name?.toLocaleLowerCase();
-					const userEmail = users[userId]?.email?.split('@')[0].toLocaleLowerCase();
-					if (userName?.includes(filter) || userEmail?.includes(filter)) {
-						filteredOneToOne.push(room);
+				room.members.every((member) => {
+					if (
+						room.roomType === 'group' &&
+						(nameIncludedInFilter(member.userId, filter) ||
+							emailIncludedInFilter(member.userId, filter))
+					) {
+						filteredGroups.push(room);
+						return false;
 					}
-				}
+					return true;
+				});
 			}
 		});
 		return [...filteredOneToOne, ...filteredGroups];

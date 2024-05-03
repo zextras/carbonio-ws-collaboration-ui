@@ -41,8 +41,12 @@ import { getLastMessageIdSelector } from '../../../../store/selectors/MessagesSe
 import { getCapability, getUserId } from '../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../store/Store';
 import { AddRoomAttachmentResponse } from '../../../../types/network/responses/roomsResponses';
-import { FileToUpload, messageActionType } from '../../../../types/store/ActiveConversationTypes';
-import { Message, MessageType } from '../../../../types/store/MessageTypes';
+import {
+	FileToUpload,
+	messageActionType,
+	ReferenceMessage
+} from '../../../../types/store/ActiveConversationTypes';
+import { Message, MessageType, TextMessage } from '../../../../types/store/MessageTypes';
 import { CapabilityType } from '../../../../types/store/SessionTypes';
 import { isAttachmentImage, uid } from '../../../../utils/attachmentUtils';
 import { BrowserUtils } from '../../../../utils/BrowserUtils';
@@ -227,6 +231,44 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 		xmppClient.sendPaused(roomId);
 	}, [sendThrottleIsWriting, sendDebouncedPause, xmppClient, roomId]);
 
+	const actionToPerformBasedOnType = useCallback(
+		(
+			referenceMessage: ReferenceMessage,
+			message: string,
+			completeReferenceMessage: TextMessage
+		): void => {
+			switch (referenceMessage.actionType) {
+				case messageActionType.REPLY: {
+					xmppClient.sendChatMessageReply(
+						roomId,
+						message,
+						referenceMessage.senderId,
+						referenceMessage.stanzaId
+					);
+					unsetReferenceMessage(roomId);
+					break;
+				}
+				case messageActionType.EDIT: {
+					// If a text message (not an attachment description) is completely removed, open the delete dialog
+					if (message === '' && !referenceMessage.attachment) {
+						setDeleteMessageModalStatus(true);
+					} else if (completeReferenceMessage.text !== message) {
+						// Avoid to send correction if text doesn't change
+						xmppClient.sendChatMessageEdit(roomId, message, referenceMessage.stanzaId);
+						unsetReferenceMessage(roomId);
+					} else {
+						unsetReferenceMessage(roomId);
+					}
+					break;
+				}
+				default: {
+					console.warn('case not handled', referenceMessage);
+				}
+			}
+		},
+		[roomId, unsetReferenceMessage, xmppClient]
+	);
+
 	const sendMessage = useCallback((): void => {
 		sendStopWriting();
 		const message = textMessage.trim();
@@ -262,39 +304,12 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 					setIsUploading(false);
 				})
 				.catch((error) => console.log(error));
+		} else if (referenceMessage && completeReferenceMessage?.type === MessageType.TEXT_MSG) {
+			actionToPerformBasedOnType(referenceMessage, message, completeReferenceMessage);
+			setDraftMessage(roomId, true);
+			setTextMessage('');
 		} else {
-			if (referenceMessage && completeReferenceMessage?.type === MessageType.TEXT_MSG) {
-				switch (referenceMessage.actionType) {
-					case messageActionType.REPLY: {
-						xmppClient.sendChatMessageReply(
-							roomId,
-							message,
-							referenceMessage.senderId,
-							referenceMessage.stanzaId
-						);
-						unsetReferenceMessage(roomId);
-						break;
-					}
-					case messageActionType.EDIT: {
-						// If a text message (not an attachment description) is completely removed, open the delete dialog
-						if (message === '' && !referenceMessage.attachment) {
-							setDeleteMessageModalStatus(true);
-						} else {
-							// Avoid to send correction if text doesn't change
-							if (completeReferenceMessage.text !== message) {
-								xmppClient.sendChatMessageEdit(roomId, message, referenceMessage.stanzaId);
-							}
-							unsetReferenceMessage(roomId);
-						}
-						break;
-					}
-					default: {
-						console.warn('case not handled', referenceMessage);
-					}
-				}
-			} else {
-				xmppClient.sendChatMessage(roomId, message);
-			}
+			xmppClient.sendChatMessage(roomId, message);
 			setDraftMessage(roomId, true);
 			setTextMessage('');
 		}
@@ -434,7 +449,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 						) {
 							mapFiles(listOfFiles, includeFiles);
 						} else {
-							console.error(`Browser not support copy/paste function ${navigator}`);
+							console.error(`Browser not support copy/paste function ${navigator.userAgent}`);
 						}
 					}
 				}
@@ -446,7 +461,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 	);
 
 	useEffect(() => {
-		setTextMessage(draftMessage || '');
+		setTextMessage(draftMessage ?? '');
 	}, [draftMessage, roomId]);
 
 	useEffect(() => {
@@ -461,7 +476,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 	}, [referenceMessage, filesToUploadArray, unsetFilesToAttach, roomId]);
 
 	useEffect(() => {
-		checkMaxLengthAndSetMessage(messageInputRef.current?.value || '');
+		checkMaxLengthAndSetMessage(messageInputRef.current?.value ?? '');
 	}, [textMessage, checkMaxLengthAndSetMessage]);
 
 	// Reset values when roomId changes
