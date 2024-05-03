@@ -62,10 +62,10 @@ export function onInboxMessageStanza(message: Element): true {
 	return true;
 }
 
-export function onGetInboxResponse(stanza: Element): true {
+export function onGetInboxResponse(): true {
 	return true;
 }
 
-export function onSetInboxResponse(stanza: Element): true {
+export function onSetInboxResponse(): true {
 	return true;
 }
