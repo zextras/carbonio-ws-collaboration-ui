@@ -128,13 +128,13 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({
 			key="MeetingConversationAccordion"
 			data-testid="MeetingConversationAccordion"
 			mainAlignment="flex-start"
-			height={chatFullExpanded ? '100%' : chatIsOpen ? '50%' : '2.75rem'}
+			height={chatIsOpen ? '100%' : '2.75rem'}
 			minHeight={chatFullExpanded ? '100%' : chatIsOpen ? '50%' : '2.75rem'}
 			width="100%"
 			borderRadius="none"
 		>
 			<Container
-				background="gray0"
+				background={'gray0'}
 				orientation="horizontal"
 				maxHeight="2.75rem"
 				width="100%"
@@ -148,7 +148,7 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({
 							<IconButton
 								data-testid="toggleChatExpanded"
 								icon={!chatFullExpanded ? 'ArrowUpward' : 'ArrowDownward'}
-								size="large"
+								customSize={{ iconSize: 'medium', paddingSize: 'extrasmall' }}
 								onClick={toggleChatExpanded}
 							/>
 						</Tooltip>
@@ -159,7 +159,7 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({
 							<IconButton
 								data-testid="toggleChatStatus"
 								icon={isChatOpenOrFullExpanded ? 'ChevronDown' : 'ChevronUp'}
-								size="large"
+								customSize={{ iconSize: 'large', paddingSize: 'extrasmall' }}
 								onClick={toggleChatStatus}
 							/>
 						</Tooltip>
