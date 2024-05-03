@@ -29,6 +29,10 @@ import AttachmentSelector from './AttachmentSelector';
 import DeleteMessageModal from './DeleteMessageModal';
 import EmojiSelector from './EmojiSelector';
 import MessageArea from './MessageArea';
+import {
+	FILE_DESCRIPTION_CHAR_LIMIT,
+	MESSAGE_CHAR_LIMIT
+} from '../../../../constants/messageConstants';
 import useLoadFiles from '../../../../hooks/useLoadFiles';
 import useMessage from '../../../../hooks/useMessage';
 import { AttachmentsApi, RoomsApi } from '../../../../network';
@@ -136,8 +140,8 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 
 	const checkMaxLengthAndSetMessage = useCallback(
 		(textareaValue: string): void => {
-			// Description file limit is 682 chars because we apply a charToUnicode function to it
-			const charsLimit = size(filesToUploadArray) > 0 ? 682 : 4096;
+			const charsLimit =
+				size(filesToUploadArray) > 0 ? FILE_DESCRIPTION_CHAR_LIMIT : MESSAGE_CHAR_LIMIT;
 			if (size(textareaValue) >= charsLimit) {
 				setTextMessage(textareaValue.slice(0, charsLimit));
 				// TODO fix selection place when user is modifying in the middle of the components
