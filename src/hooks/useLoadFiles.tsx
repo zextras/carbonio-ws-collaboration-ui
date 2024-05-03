@@ -18,6 +18,7 @@ import { uid } from '../utils/attachmentUtils';
 
 const useLoadFiles = (roomId: string): ((files: FileList) => void) => {
 	const [t] = useTranslation();
+	// TODO add translation keys
 	const titleLabel = t('', 'Message too long for caption');
 	const descriptionLabel = t(
 		'',

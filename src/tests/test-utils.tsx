@@ -16,7 +16,7 @@ interface ProvidersWrapperProps {
 	children?: React.ReactElement;
 }
 
-const ProvidersWrapper = ({ children }: ProvidersWrapperProps): JSX.Element => {
+export const ProvidersWrapper = ({ children }: ProvidersWrapperProps): JSX.Element => {
 	const i18n = useMemo(() => {
 		const i18nFactory = new I18nTestFactory();
 		return i18nFactory.getAppI18n();
