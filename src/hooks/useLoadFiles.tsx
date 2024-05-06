@@ -18,17 +18,16 @@ import { uid } from '../utils/attachmentUtils';
 
 const useLoadFiles = (roomId: string, clearInput?: () => void): ((files: FileList) => void) => {
 	const [t] = useTranslation();
-	// TODO add translation keys
-	const titleLabel = t('', 'Message too long for caption');
+	const titleLabel = t('conversation.longCaption.modal.title', 'Message too long for caption');
 	const descriptionLabel = t(
-		'',
+		'conversation.longCaption.modal.description',
 		'The message you are attaching this item to is very long and cannot be used as an attachment caption.'
 	);
 	const description2Label = t(
-		'',
+		'conversation.longCaption.modal.additionalDetails',
 		'If you proceed with the operation, the excess will be removed from the original text. Proceed?'
 	);
-	const confirmLabel = t('', 'Attach anyway');
+	const confirmLabel = t('conversation.longCaption.modal.action', 'Attach anyway');
 
 	const filesToUploadArray = useStore((store) => getFilesToUploadArray(store, roomId));
 	const setFilesToAttach = useStore((store) => store.setFilesToAttach);

@@ -72,6 +72,14 @@
         "emptyListDescription": "Chats and Groups will appear listed here",
         "emptyListTitle": "This list is empty",
         "keepInTouchTitle": "Let's keep in touch!",
+        "longCaption": {
+            "modal": {
+                "action": "Attach anyway",
+                "additionalDetails": "If you proceed with the operation, the excess will be removed from the original text. Proceed?",
+                "description": "The message you are attaching this item to is very long and cannot be used as an attachment caption.",
+                "title": "Message too long for caption"
+            }
+        },
         "mockCreateChatDescription": "Interact, communicate and collaborate with your colleagues by sharing information and attachments",
         "mockCreateChatTitle": "Create a new chat using the create button",
         "newMessage": "New message",
