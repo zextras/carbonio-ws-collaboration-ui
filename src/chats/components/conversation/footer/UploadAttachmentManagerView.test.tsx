@@ -131,7 +131,7 @@ describe('Upload attachment view', () => {
 		await user.upload(inputSelector, attachmentToUpload);
 		const titleCounter = screen.queryByText(add1Attachment);
 		expect(titleCounter).toBeInTheDocument();
-		expect(inputSelector.files).toHaveLength(1);
+		expect(useStore.getState().activeConversations[mockedRoom.id].filesToAttach).toHaveLength(1);
 		const fileWithPreview = await screen.findByTestId(/previewImage-/);
 		expect(fileWithPreview).toBeInTheDocument();
 		expect(fileWithPreview).toHaveStyle(borderColor);
@@ -163,7 +163,7 @@ describe('Upload attachment view', () => {
 			attachmentToUploadThree,
 			attachmentToUploadFour
 		]);
-		expect(inputSelector.files).toHaveLength(4);
+		expect(useStore.getState().activeConversations[mockedRoom.id].filesToAttach).toHaveLength(4);
 		const titleCounter = screen.queryByText('Add 4 attachments');
 		expect(titleCounter).toBeInTheDocument();
 		const fileWithPreview = await screen.findByTestId(/previewImage-Hello/);

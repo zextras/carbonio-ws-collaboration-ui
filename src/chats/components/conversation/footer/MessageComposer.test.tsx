@@ -417,8 +417,8 @@ describe('MessageComposer - send message', () => {
 
 		const input = screen.getByTestId('inputSelector') as HTMLInputElement;
 
-		user.upload(input, testImageFile);
-		await waitFor(() => expect(input.files).toHaveLength(1));
+		await user.upload(input, testImageFile);
+		expect(useStore.getState().activeConversations[mockedRoom.id].filesToAttach).toHaveLength(1);
 
 		const sendButton = screen.getByTestId(iconNavigator2);
 		await waitFor(() => user.click(sendButton));
@@ -436,8 +436,8 @@ describe('MessageComposer - send message', () => {
 
 		const input = screen.getByTestId('inputSelector') as HTMLInputElement;
 
-		user.upload(input, testPdfFile);
-		await waitFor(() => expect(input.files).toHaveLength(1));
+		await user.upload(input, testPdfFile);
+		expect(useStore.getState().activeConversations[mockedRoom.id].filesToAttach).toHaveLength(1);
 
 		const sendButton = screen.getByTestId(iconNavigator2);
 		await waitFor(() => user.click(sendButton));
@@ -454,8 +454,8 @@ describe('MessageComposer - send message', () => {
 
 		const input = screen.getByTestId('inputSelector') as HTMLInputElement;
 
-		user.upload(input, testFile);
-		await waitFor(() => expect(input.files).toHaveLength(1));
+		await user.upload(input, testFile);
+		expect(useStore.getState().activeConversations[mockedRoom.id].filesToAttach).toHaveLength(1);
 
 		const sendButton = screen.getByTestId(iconNavigator2);
 		await waitFor(() => user.click(sendButton));

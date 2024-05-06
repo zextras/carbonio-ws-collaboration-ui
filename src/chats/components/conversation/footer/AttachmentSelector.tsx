@@ -85,6 +85,9 @@ const AttachmentSelector: React.FC<AttachmentSelectorProps> = ({ roomId }) => {
 			if (!filesToUploadArray) {
 				setInputHasFocus(roomId, true);
 			}
+			if (fileSelectorInputRef.current) {
+				fileSelectorInputRef.current.value = '';
+			}
 		},
 		[loadFiles, filesToUploadArray, setInputHasFocus, roomId]
 	);
