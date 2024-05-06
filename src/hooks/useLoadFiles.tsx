@@ -16,7 +16,7 @@ import useStore from '../store/Store';
 import { FileToUpload } from '../types/store/ActiveConversationTypes';
 import { uid } from '../utils/attachmentUtils';
 
-const useLoadFiles = (roomId: string): ((files: FileList) => void) => {
+const useLoadFiles = (roomId: string, clearInput?: () => void): ((files: FileList) => void) => {
 	const [t] = useTranslation();
 	// TODO add translation keys
 	const titleLabel = t('', 'Message too long for caption');
@@ -63,7 +63,10 @@ const useLoadFiles = (roomId: string): ((files: FileList) => void) => {
 						closeModal();
 					},
 					showCloseIcon: true,
-					onClose: () => closeModal(),
+					onClose: () => {
+						clearInput?.();
+						closeModal();
+					},
 					children: (
 						<Container>
 							<Text overflow="break-word">{descriptionLabel}</Text>
@@ -77,6 +80,7 @@ const useLoadFiles = (roomId: string): ((files: FileList) => void) => {
 			}
 		},
 		[
+			clearInput,
 			confirmLabel,
 			creationModal,
 			description2Label,

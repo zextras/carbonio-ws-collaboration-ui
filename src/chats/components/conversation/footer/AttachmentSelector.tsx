@@ -76,7 +76,13 @@ const AttachmentSelector: React.FC<AttachmentSelectorProps> = ({ roomId }) => {
 
 	const fileSelectorInputRef = useRef<HTMLInputElement>(null);
 
-	const loadFiles = useLoadFiles(roomId);
+	const clearInput = useCallback(() => {
+		if (fileSelectorInputRef.current) {
+			fileSelectorInputRef.current.value = '';
+		}
+	}, [fileSelectorInputRef]);
+
+	const loadFiles = useLoadFiles(roomId, clearInput);
 
 	const selectFiles = useCallback(
 		(ev) => {
@@ -84,9 +90,6 @@ const AttachmentSelector: React.FC<AttachmentSelectorProps> = ({ roomId }) => {
 			loadFiles(files ?? new FileList());
 			if (!filesToUploadArray) {
 				setInputHasFocus(roomId, true);
-			}
-			if (fileSelectorInputRef.current) {
-				fileSelectorInputRef.current.value = '';
 			}
 		},
 		[loadFiles, filesToUploadArray, setInputHasFocus, roomId]
