@@ -148,9 +148,6 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 				size(filesToUploadArray) > 0 ? FILE_DESCRIPTION_CHAR_LIMIT : MESSAGE_CHAR_LIMIT;
 			if (size(textareaValue) >= charsLimit) {
 				setTextMessage(textareaValue.slice(0, charsLimit));
-				// TODO fix selection place when user is modifying in the middle of the components
-				// const cursorPosition = messageInputRef.current.selectionStart;
-				// messageInputRef.current.setSelectionRange(cursorPosition, cursorPosition);
 				setNoMoreCharsOnInputComposer(true);
 			} else {
 				setNoMoreCharsOnInputComposer(false);
@@ -468,7 +465,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 	// Reset values when roomId changes
 	useEffect(() => {
 		const messageRef = messageInputRef.current;
-		return () => {
+		return (): void => {
 			setTextMessage('');
 			if (messageRef) {
 				messageRef.value = '';
