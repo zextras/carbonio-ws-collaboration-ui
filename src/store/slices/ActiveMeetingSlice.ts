@@ -39,12 +39,11 @@ export const useActiveMeetingSlice: StateCreator<ActiveMeetingSlice> = (
 					// Default graphic values
 					sidebarStatus: {
 						sidebarIsOpened: true,
-						actionsAccordionIsOpened: true,
 						participantsAccordionIsOpened: false,
 						waitingListAccordionIsOpened: true,
 						recordingAccordionIsOpened: false
 					},
-					chatVisibility: MeetingChatVisibility.CLOSED,
+					chatVisibility: MeetingChatVisibility.OPEN,
 					meetingViewSelected: MeetingViewType.GRID,
 					isCarouselVisible: true,
 					// Peer connections
@@ -94,17 +93,6 @@ export const useActiveMeetingSlice: StateCreator<ActiveMeetingSlice> = (
 			}),
 			false,
 			'AM/SET_MEETING_SIDEBAR_STATUS'
-		);
-	},
-	setMeetingActionsAccordionStatus: (meetingId: string, status: boolean): void => {
-		set(
-			produce((draft: RootStore) => {
-				if (draft.activeMeeting[meetingId]) {
-					draft.activeMeeting[meetingId].sidebarStatus.actionsAccordionIsOpened = status;
-				}
-			}),
-			false,
-			'AM/SET_MEETING_ACTIONS_ACCORDION_STATUS'
 		);
 	},
 	setWaitingListAccordionStatus: (meetingId: string, status: boolean): void => {

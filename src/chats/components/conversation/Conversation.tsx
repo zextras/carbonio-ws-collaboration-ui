@@ -10,7 +10,7 @@ import { Container } from '@zextras/carbonio-design-system';
 import styled from 'styled-components';
 
 import Chat from './Chat';
-import { useDarkReaderStatus } from '../../../hooks/useDarkReaderStatus';
+import useDarkReader from '../../../hooks/useDarkReader';
 import useMediaQueryCheck from '../../../hooks/useMediaQueryCheck';
 import { ConversationProps } from '../../../types/store/RoomTypes';
 import papyrusDark from '../../assets/papyrus-dark.png';
@@ -24,7 +24,7 @@ const ConversationWrapper = styled(Container)<{ $darkModeActive: boolean }>`
 
 const Conversation = ({ roomId }: ConversationProps): ReactElement => {
 	const isDesktopView = useMediaQueryCheck();
-	const isDarkModeEnabled = useDarkReaderStatus();
+	const { darkReaderStatus } = useDarkReader();
 
 	const [infoPanelOpen, setInfoPanelOpen] = useState(false);
 
@@ -39,7 +39,7 @@ const Conversation = ({ roomId }: ConversationProps): ReactElement => {
 			data-testid="ConversationWrapper"
 			mainAlignment="flex-start"
 			orientation="horizontal"
-			$darkModeActive={isDarkModeEnabled}
+			$darkModeActive={darkReaderStatus}
 		>
 			{(isDesktopView || !infoPanelOpen) && (
 				<Chat roomId={roomId} setInfoPanelOpen={setInfoPanelOpen} />

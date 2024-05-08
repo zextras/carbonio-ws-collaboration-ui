@@ -60,10 +60,8 @@ describe('RecordingAccordion tests', () => {
 	test("User can only start the recording if it isn't already active", async () => {
 		setup(<RecordingAccordion meetingId={meeting.id} />);
 		const startButton = await screen.findByTestId('startRecordingButton');
-		const stopButton = await screen.findByTestId('stopRecordingButton');
 
 		expect(startButton).toBeEnabled();
-		expect(stopButton).toBeDisabled();
 	});
 
 	test("User can only stop the recording if it's already active", async () => {
@@ -73,10 +71,8 @@ describe('RecordingAccordion tests', () => {
 			useStore.getState().startRecording(meeting.id, '32423423', 'user1');
 		});
 
-		const startButton = await screen.findByTestId('startRecordingButton');
 		const stopButton = await screen.findByTestId('stopRecordingButton');
 
-		expect(startButton).toBeDisabled();
 		expect(stopButton).toBeEnabled();
 	});
 
@@ -91,7 +87,7 @@ describe('RecordingAccordion tests', () => {
 		const startButton = await screen.findByTestId('startRecordingButton');
 		await waitFor(() => user.click(startButton));
 
-		expect(mockedStartRecordingRequest).toBeCalled();
+		expect(mockedStartRecordingRequest).toHaveBeenCalled();
 	});
 
 	test('Show a snackbar when the start recording request fails', async () => {

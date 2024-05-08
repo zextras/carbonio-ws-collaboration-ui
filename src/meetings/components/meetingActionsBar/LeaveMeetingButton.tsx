@@ -83,7 +83,7 @@ const LeaveMeetingButton = ({ isHoovering }: LeaveMeetingButtonProps): ReactElem
 	}, [isHoovering]);
 
 	return (
-		<CustomContainer width="fit">
+		<CustomContainer width="fit" height="fit">
 			<Tooltip placement="top" label={leaveMeetingLabel}>
 				<CustomButton
 					label={buttonLabel}

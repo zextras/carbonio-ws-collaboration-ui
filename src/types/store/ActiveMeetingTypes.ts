@@ -33,7 +33,6 @@ export type ActiveMeetingMap = {
 export type SidebarStatus = {
 	sidebarIsOpened: boolean;
 	participantsAccordionIsOpened: boolean;
-	actionsAccordionIsOpened: boolean;
 	waitingListAccordionIsOpened: boolean;
 	recordingAccordionIsOpened: boolean;
 };

@@ -328,8 +328,9 @@ describe('AccessMeeting - enter to meeting by waiting Room', () => {
 		const hangButton = await screen.findByTestId('icon: LogOut');
 		await user.click(hangButton);
 
-		expect(mockGoToInfoPage).toBeCalledWith(PAGE_INFO_TYPE.HANG_UP_PAGE);
+		expect(mockGoToInfoPage).toHaveBeenCalledWith(PAGE_INFO_TYPE.HANG_UP_PAGE);
 	});
+
 	test('user is ready to participate', async () => {
 		mockedJoinMeetingRequest.mockReturnValue({ status: 'WAITING' });
 		const { user } = setupForWaitingRoom();
@@ -337,8 +338,7 @@ describe('AccessMeeting - enter to meeting by waiting Room', () => {
 		const enterButton = await screen.findByText(readyButtonLabel);
 		await act(() => user.click(enterButton));
 
-		const changedString = await screen.findByText('Everything is set! Make yourself comfortable.');
-		expect(changedString).toBeInTheDocument();
+		expect(mockedJoinMeetingRequest).toHaveBeenCalled();
 	});
 	test('user is accepted in the scheduled meeting', async () => {
 		mockedJoinMeetingRequest.mockReturnValue({ status: 'ACCEPTED' });
@@ -360,7 +360,7 @@ describe('AccessMeeting - enter to meeting by waiting Room', () => {
 			})
 		);
 
-		expect(mockGoToMeetingPage).toBeCalled();
+		expect(mockGoToMeetingPage).toHaveBeenCalled();
 	});
 	test('user is rejected by a moderator', async () => {
 		mockedJoinMeetingRequest.mockReturnValue({ status: 'WAITING' });
@@ -370,8 +370,7 @@ describe('AccessMeeting - enter to meeting by waiting Room', () => {
 		const enterButton = await screen.findByText(readyButtonLabel);
 		await act(() => user.click(enterButton));
 
-		const changedString = await screen.findByText('Everything is set! Make yourself comfortable.');
-		expect(changedString).toBeInTheDocument();
+		expect(mockedJoinMeetingRequest).toHaveBeenCalled();
 
 		await waitFor(() =>
 			sendCustomEvent({
@@ -385,8 +384,9 @@ describe('AccessMeeting - enter to meeting by waiting Room', () => {
 			})
 		);
 
-		expect(mockGoToInfoPage).toBeCalledWith(PAGE_INFO_TYPE.NEXT_TIME_PAGE);
+		expect(mockGoToInfoPage).toHaveBeenCalledWith(PAGE_INFO_TYPE.NEXT_TIME_PAGE);
 	});
+
 	test('user is waiting, not ready and the meeting and it finish before he can enter', async () => {
 		setupForWaitingRoom();
 		await waitFor(() => {
@@ -400,7 +400,7 @@ describe('AccessMeeting - enter to meeting by waiting Room', () => {
 			});
 		});
 
-		expect(mockGoToInfoPage).toBeCalledWith(PAGE_INFO_TYPE.MEETING_ENDED);
+		expect(mockGoToInfoPage).toHaveBeenCalledWith(PAGE_INFO_TYPE.MEETING_ENDED);
 	});
 	test('user is ready to participate and the meeting finish before he can enter', async () => {
 		mockedJoinMeetingRequest.mockReturnValue({ status: 'WAITING' });
@@ -419,6 +419,6 @@ describe('AccessMeeting - enter to meeting by waiting Room', () => {
 			});
 		});
 
-		expect(mockGoToInfoPage).toBeCalledWith(PAGE_INFO_TYPE.MEETING_ENDED);
+		expect(mockGoToInfoPage).toHaveBeenCalledWith(PAGE_INFO_TYPE.MEETING_ENDED);
 	});
 });

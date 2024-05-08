@@ -64,7 +64,7 @@ const StopRecordingModal = ({
 	);
 	const recordingCaption: string = t(
 		'meeting.recordingModal.caption',
-		`The recording will be saved in "${folder.name}".`,
+		`The recording will be saved in "${folder.name}" folder on Files. Go to Settings > Chats > Recording to change the destination folder.`,
 		{ folderName: folder.name }
 	);
 	const stopButtonLabel = t('meeting.recordingModal.confirmationAction', 'Stop');
@@ -170,7 +170,7 @@ const StopRecordingModal = ({
 					description={inputDescription}
 				/>
 				<Padding top="small" />
-				<Text color="gray1" size="small">
+				<Text color="gray1" size="small" overflow="break-word">
 					{recordingCaption}
 				</Text>
 			</Container>
