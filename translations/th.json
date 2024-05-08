@@ -1,0 +1,207 @@
+{
+    "tooltip": {
+        "room": {
+            "uploadPicture": "อัปโหลดรูปภาพ"
+        },
+        "selectEmoji": "เลือกอีโมจิ",
+        "sendMessage": "ส่งข้อความ",
+        "uploading": "กำลังอัปโหลด",
+        "clear": "เคลียร์",
+        "close": "ปิด",
+        "goToPrivateChat": "ไปที่แชทส่วนตัว",
+        "leaveConversation": "ออกจากการสนทนา",
+        "messageComposer": "ผู้เขียนข้อความ",
+        "messageRead": "อ่าน",
+        "messageSent": "ส่งแล้ว",
+        "demoteModerator": "ลดระดับผู้ดูแล",
+        "promoteModerator": "เลื่อนระดับเป็นผู้ดูแล",
+        "messageActions": "การดำเนินการกับข้อความ",
+        "collapseCarousel": "ย่อ",
+        "expandCarousel": "ขยาย",
+        "muteForAll": "ปิดเสียงทั้งหมด",
+        "pending": "ที่ค้างอยู่",
+        "pinVideo": "ปักหมุดวิดีโอ",
+        "unpinVideo": "ยกเลิกการปักหมุดวิดีโอ"
+    },
+    "action": {
+        "undo": "เลิกทำ",
+        "activateNotifications": "เปิดใช้งานการแจ้งเตือน",
+        "addAttachment": "เพิ่มไฟล์แนบ",
+        "addNewMembers": "เพิ่มสมาชิกใหม่",
+        "clearHistory": "ล้างประวัติ",
+        "close": "ปิด",
+        "copy": "คัดลอก",
+        "create": "สร้าง",
+        "delete": "ลบ",
+        "download": "ดาวน์โหลด",
+        "edit": "แก้ไข",
+        "editYourMessage": "แก้ไขข้อความของคุณ",
+        "forward": "ส่งต่อ",
+        "forwarded": "ส่งต่อแล้ว",
+        "leave": "ออก",
+        "muteNotifications": "ปิดเสียงการแจ้งเตือน",
+        "preview": "ดูตัวอย่าง",
+        "removeUser": "เอาออก",
+        "reply": "ตอบกลับ",
+        "replyToSomeone": "ตอบกลับไปยัง",
+        "replyToYourself": "ตอบกลับไปยังตัวของคุณเอง",
+        "decline": "ปฏิเสธ",
+        "enter": "เข้าสู่การประชุม",
+        "joinMeeting": "เข้าร่วมการประชุม",
+        "ok": "ตกลง",
+        "cancel": "ยกเลิก"
+    },
+    "attachments": {
+        "addFromLocal": "เพิ่มจาก local",
+        "attachLinkFiles": "แนบลิงก์สาธารณะจาก Files",
+        "stopUpload": "หยุดอัปโหลด",
+        "integrations": {
+            "chooseFile": "เลือกไฟล์",
+            "shareLink": "แชร์ลิงก์สาธารณะ"
+        }
+    },
+    "settings": {
+        "profile": {
+            "errorGenericResponse": "มีข้อผิดพลาด โปรดลองอีกครั้ง",
+            "title": "โปรไฟล์"
+        },
+        "save": "บันทึกการแก้ไขอย่างถูกต้อง",
+        "title": "การตั้งค่า Chats",
+        "notifications": {
+            "title": "การแจ้งเตือน",
+            "subtitle": {
+                "general": "ทั่วไป"
+            }
+        },
+        "meetings": {
+            "title": "การประชุม",
+            "description": "ตั้งค่าเสียงและวิดีโอของคุณเพื่อเข้าสู่การประชุม คุณสามารถปรับการตั้งค่าของคุณก่อนเข้าร่วมการประชุมได้ทุกครั้ง"
+        },
+        "recording": {
+            "inputLabel": "โฟลเดอร์ปลายทาง",
+            "title": "กำลังบันทึก"
+        }
+    },
+    "status": {
+        "lastSeen": "ดูครั้งล่าสุด {{lastSeen}}",
+        "offline": "ออฟไลน์",
+        "online": "ออนไลน์",
+        "isTyping": "กำลังพิมพ์…"
+    },
+    "conversation": {
+        "chooseConversationDescription": "เลือกการสนทนาเพื่อเริ่มการแชท",
+        "keepInTouchTitle": "เรามาติดต่อกันเถอะ!",
+        "newMessage": "ข้อความใหม่",
+        "newMessages": "ข้อความใหม่",
+        "selectionMode": {
+            "exit": "ออกจากโหมดการเลือก"
+        }
+    },
+    "conversationInfo": {
+        "actionAccordionTitle": "การดำเนินการ",
+        "email": "อีเมล",
+        "info": "ข้อมูล",
+        "messages": "ข้อความ",
+        "name": "ชื่อ",
+        "status": "สถานะ",
+        "title": "หัวข้อ",
+        "topic": "หัวข้อ"
+    },
+    "date": {
+        "yesterday": "เมื่อวาน"
+    },
+    "editModal": {
+        "groupDescriptionDetails": "อธิบายถึงหัวข้อของกลุ่ม"
+    },
+    "feedback": {
+        "historyCleared": "ล้างประวัติสำเร็จแล้ว!",
+        "notificationsActivatedForThisChat": "เปิดใช้งานการแจ้งเตือนสำหรับแชทนี้",
+        "notificationsMutedForThisChat": "ปิดเสียงการแจ้งเตือนสำหรับแชทนี้"
+    },
+    "message": {
+        "deletedMessage": "ข้อความที่ถูกลบ",
+        "draft": "แบบร่าง",
+        "edited": "แก้ไขแล้ว"
+    },
+    "modal": {
+        "creation": {
+            "newGroup": "กลุ่มใหม่"
+        },
+        "deleteRoom": "ลบห้อง",
+        "deleteUserDescription": "คุณแน่ใจหรือไม่ว่าต้องการลบสมาชิกคนนี้ออก?",
+        "leaveGroup": "ออกจากกลุ่ม",
+        "removeMember": "ลบสมาชิก",
+        "showPreviousConversationHistory": "แสดงประวัติการสนทนาก่อนหน้า",
+        "deleteMessageTitleDescription": "หากคุณลบเนื้อหาทั้งหมดของข้อความ เนื้อหานั้นจะไม่สามารถใช้งานได้อีกต่อไปและจะถูกลบออก",
+        "deleteMessageTitle": "ลบข้อความที่เลือกหรือไม่?"
+    },
+    "participantsList": {
+        "closeSearch": "ปิดการค้นหา",
+        "moreMembersAccordionTitle": "สมาชิก"
+    },
+    "chat": "แชท",
+    "external": {
+        "roomIsEmpty": "ห้องนี้ว่าง",
+        "nobodyInTheRoom": "ดูเหมือนว่าไม่มีใครอยู่ในห้องนี้"
+    },
+    "meeting": {
+        "newMeetingNotification": {
+            "sendMessage": "ส่งข้อความ"
+        },
+        "interactions": {
+            "cameraDisabled": "ปิดใช้งานกล้องถ่ายรูป",
+            "cameraEnabled": "เปิดใช้งานกล้องถ่ายรูป",
+            "enableCamera": "เปิดกล้อง",
+            "enableMicrophone": "เปิดไมโครโฟน",
+            "microphoneEnabled": "เปิดใช้งานไมโครโฟน"
+        },
+        "joinMeeting": "เข้าร่วมการประชุม",
+        "virtual": {
+            "deleteTooltip": "ลบห้องเสมือนจริง"
+        },
+        "sidebar": {
+            "waitingCaption": "กำลังรอเข้า",
+            "tooltip": {
+                "waitingAccept": "ให้ผู้ใช้เข้า",
+                "waitingReject": "ปฏิเสธผู้ใช้"
+            },
+            "recording": {
+                "title": "กำลังบันทึก",
+                "description": "การบันทึกจะถูกเก็บบันทึกไว้ในพื้นที่ไฟล์ของผู้ดูแลที่ทำการหยุดการบันทึก"
+            }
+        },
+        "snackbar": {
+            "waitingInfo": "ดูเหมือนว่าจะมีใครบางคนรออยู่ในห้องคัดกรอง"
+        },
+        "browserNotification": {
+            "waitingTitle": "ดูเหมือนว่าจะมีใครบางคนรออยู่ในห้องคัดกรอง"
+        },
+        "waitingRoom": {
+            "hangUp": "วางสาย"
+        },
+        "recordingHint": "กำลังบันทึกการประชุมนี้อยู่",
+        "recordingStart": {
+            "failureSnackbar": "ไม่สามารถเริ่มการลงทะเบียนได้ โปรดติดต่อผู้ดูแลระบบของคุณ"
+        },
+        "recordingModal": {
+            "title": "หยุดการบันทึก",
+            "description": "คุณจะหยุดการบันทึก คุณสามารถเริ่มต้นใหม่ได้ตลอดเวลา",
+            "inputLabel": "ชื่อการบันทึก"
+        }
+    },
+    "meetings": {
+        "interactions": {
+            "yourCamIsDisabled": "กล้องของคุณปิดอยู่"
+        }
+    },
+    "notification": {
+        "meeting": {
+            "ended": "สิ้นสุดการประชุมแล้ว"
+        }
+    },
+    "thanksForParticipating": "ขอขอบคุณที่เข้าร่วม",
+    "tryLater": "ลองในภายหลัง",
+    "snackbar": {
+        "mutedByModerator": "คุณถูกปิดเสียงโดยผู้ดูแล เปิดเสียงตัวเองเพื่อพูด"
+    }
+}

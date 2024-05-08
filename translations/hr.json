@@ -1,0 +1,119 @@
+{
+    "action": {
+        "activateNotifications": "Aktiviraj obavijesti",
+        "addNewMembers": "Dodaj nove članove",
+        "clearHistory": "Očisti povijest",
+        "close": "Zatvori",
+        "copy": "Kopiraj",
+        "create": "Stvori",
+        "delete": "Izbriši",
+        "download": "Preuzmi",
+        "edit": "Uredi",
+        "editYourMessage": "Uredi svoju poruku",
+        "enter": "Enter",
+        "forward": "Proslijedi",
+        "forwarded": "proslijeđeno",
+        "leave": "Napusti",
+        "muteNotifications": "Onemogući obavijesti",
+        "removeUser": "Ukloni",
+        "reply": "Odgovor",
+        "replyToSomeone": "Odgovori",
+        "replyToYourself": "Odgovori sebi",
+        "undo": "Vrati",
+        "ok": "U redu",
+        "cancel": "Odustani"
+    },
+    "meeting": {
+        "interactions": {
+            "enableCamera": "Omogući kameru",
+            "enableMicrophone": "Omogući mikrofon"
+        },
+        "newMeetingNotification": {
+            "sendMessage": "Pošalji poruku"
+        }
+    },
+    "tooltip": {
+        "messageRead": "Čitaj",
+        "muteForAll": "Utišaj za sve",
+        "close": "Zatvori",
+        "collapseCarousel": "Sažmi",
+        "expandCarousel": "Proširi",
+        "goToPrivateChat": "Idi na privatni razgovor",
+        "messageComposer": "Kompozitor poruke",
+        "pinVideo": "Prikvači video",
+        "room": {
+            "uploadPicture": "Prenesi sliku"
+        },
+        "selectEmoji": "Odaberi emoji",
+        "sendMessage": "Pošalji poruku",
+        "unpinVideo": "Otkvači videozapis"
+    },
+    "chat": "Razgovor",
+    "conversation": {
+        "newMessage": "Nova poruka"
+    },
+    "conversationInfo": {
+        "email": "E-pošta",
+        "info": "Info",
+        "name": "Ime",
+        "status": "Status",
+        "title": "Naslov",
+        "topic": "Tema"
+    },
+    "date": {
+        "yesterday": "Jučer"
+    },
+    "editModal": {
+        "groupDescriptionDetails": "Opisuje predmet grupe"
+    },
+    "feedback": {
+        "historyCleared": "Povijest je uspješno izbrisana!",
+        "notificationsActivatedForThisChat": "Obavijestu za ovaj razgovor su aktivirane",
+        "notificationsMutedForThisChat": "Obavijestu su onemogućene za ovaj razgovor"
+    },
+    "meetings": {
+        "interactions": {
+            "yourCamIsDisabled": "Tvoja kamera je isključena"
+        }
+    },
+    "message": {
+        "deletedMessage": "Izbrisana poruka"
+    },
+    "modal": {
+        "deleteRoom": "Izbriši sobu",
+        "removeMember": "Ukloni člana",
+        "showPreviousConversationHistory": "Prikaži prethodnu povijest razgovora"
+    },
+    "participantsList": {
+        "closeSearch": "Zatvori pretraživanje"
+    },
+    "settings": {
+        "notifications": {
+            "title": "Obavijesti",
+            "subtitle": {
+                "general": "Općenito"
+            }
+        },
+        "profile": {
+            "errorGenericResponse": "Nešto je pošlo po zlu. Pokušaj ponovo",
+            "title": "Profil"
+        },
+        "meetings": {
+            "title": "Sastanci",
+            "description": "Postavi svoje audio i video postavke za ulazak na sastanke. Uvijek možeš prilagoditi svoje postavke prije nego što se pridružiš sastanku."
+        }
+    },
+    "status": {
+        "lastSeen": "Zadnja aktivnost {{lastSeen}}",
+        "offline": "Izvan mreže",
+        "online": "Na mreži"
+    },
+    "snackbar": {
+        "mutedByModerator": "Utišani ste od strane moderatora, za razgovor ponovo uključi mikrofon"
+    },
+    "attachments": {
+        "integrations": {
+            "chooseFile": "Odaberi datoteku"
+        }
+    }
+}

@@ -1,0 +1,459 @@
+{
+    "action": {
+        "forward": "Кайра жөнөтүү",
+        "activateNotifications": "Билдирүүнү киштетүү",
+        "addNewMembers": "Жаңы катышуучуларды кошуу",
+        "close": "Жабуу",
+        "copy": "Көчүрүү",
+        "create": "Түзүү",
+        "delete": "Өчүрүү",
+        "edit": "Редакциялоо",
+        "editYourMessage": "Билдирүүнү редакциялоо",
+        "leave": "Чыгып кетүү",
+        "muteNotifications": "Кабарлоону өчүрүү",
+        "reply": "Жооп берүү",
+        "replyToSomeone": "Жооп берүү",
+        "replyToYourself": "Жооп берүү",
+        "undo": "Жокко чыгаруу",
+        "addAttachment": "Тиркемени тиркөө",
+        "addMoreAttachments": "{{counter}} тиркемелерин кошуу",
+        "addNewMembersTo": "{{roomName}} жаңы катышуучуларды кошуу",
+        "addSingleAttachment": "{{counter}} тиркемелерди кошуу",
+        "clearHistory": "Чаттын тарыхын тазалоо",
+        "decline": "Четке кагуу",
+        "declineAll": "Барын четке кагуу",
+        "download": "Жүктөө",
+        "editDetails": "Редакциялоо",
+        "editRoom": "{{roomName}} редакциялоо",
+        "enter": "Кирүү",
+        "forwarded": "кайра даректелди",
+        "joinMeeting": "Жолугушууга кошулуу",
+        "newChat": "Жаңы чат",
+        "ok": "Ок",
+        "preview": "Алдын ала көрүү",
+        "removeUser": "Өчүрүү",
+        "scrollToBottom": "Төмөн жылдырыңыз",
+        "understood": "Түшүнүктүү",
+        "cancel": "Жокко чыгаруу",
+        "deleteForAll": "Бары үчүн өчүрүү"
+    },
+    "attachments": {
+        "addFromLocal": "Локалдык ресурстан кошуу",
+        "attachLinkFiles": "Коомдук шилтемени Files тиркеңиз",
+        "dragAndDrop": "Drag&Drop режими",
+        "dropHereDescription": "Бул Чатка тез кошуу үчүн өзүңүздүн тиркемелерди бул жерге алып келгиле",
+        "errorUploadingFile": "{{file}} жүктөөдө ката кетти",
+        "stopUpload": "Жүктөөнү токтотуу",
+        "uploadAborted": "Жүктөө үзгүлтүккө учурады",
+        "integrations": {
+            "chooseFile": "Файл тандоо",
+            "shareLink": "Жалпы шилтемени бөлүшүү"
+        }
+    },
+    "feedback": {
+        "notificationsActivatedForThisChat": "Бул Чат үчүн билдирүү иштетилген",
+        "notificationsMutedForThisChat": "Бул Чат үчүн билдирүүнү өчүрүү",
+        "networkProblem": {
+            "xmpp": "XMPP боюнча туташтырууда ката кетти",
+            "websocket": "WEBSOCKET туташтырууда ката кетти",
+            "wsc": "WSC туташтырууда ката кетти"
+        },
+        "historyCleared": "Тарых тазаланды!",
+        "messageCopied": "Билдирүү көчүрүлдү",
+        "networkProblems": "Бул модулду колдонууда көйгөй пайда болушу мүмкүн, баракчаны жаңылап көрүңүз."
+    },
+    "external": {
+        "nobodyInTheRoom": "Бул Бөлмөдө эч ким жок",
+        "roomIsEmpty": "Бул Виртуалдык бөлмө бош"
+    },
+    "meeting": {
+        "interactions": {
+            "cameraDisabled": "Камера өчүрүдү",
+            "cameraEnabled": "Камера иштетилди",
+            "disableScreen": "Экранды көрсөтүүнү өчүрүү",
+            "stopMic": "Микрофонду текшерүүнү аяктоо",
+            "cinemaView": "Кинотеатр режими",
+            "disableCamera": "Камераны өчүрүү",
+            "disableFullScreen": "Толук экран режимин өчүрүү",
+            "disableMicrophone": "Микрофонду өчүрүү",
+            "enableCamera": "Камераны иштетүү",
+            "enableFullScreen": "Толук экран режимин иштетүү",
+            "enableMicrophone": "Микрофон иштетүү",
+            "enableScreen": "Экранда көрсөтүүнү иштетүү",
+            "gridView": "Торчонун түрү",
+            "leaveMeeting": "Жолугушуудан чыгып кетти",
+            "microphoneDisabled": "Микрофон өчүрүлгөн",
+            "microphoneEnabled": "Микрофон иштеп жатат",
+            "playMic": "Микрофонду текшерүүнү баштоо",
+            "leaveConfirmation": "Жолугушуудан чыгасызбы?"
+        },
+        "activeMeetingTooltip": "Бул Чат үчүн активдүү жолугушуу бар",
+        "collapseChat": "Чатты жашыруу",
+        "virtual": {
+            "copyLinkTooltip": "Виртуалдык бөлмөнүн шилтемесин көчүрүү",
+            "deleteModalDescription": "Бул виртуалдык бөлмөнү өчүрүп жатасыз. Эгерде анда активдүү жолугушуулар болсо, алар токтотулат жана башка эч ким кире албайт. Улантасызбы?",
+            "creationInput": "Жаңы виртуалдык бөлмөнүн аты*",
+            "buttonLabel": "Сиздин Виртуалдык бөлмөлөр",
+            "emptyState": "Бул жерден сиз түзгөн Виртуалдык бөлмөлөр көрүнөт.",
+            "deleteTooltip": "Бөлмөнү өчүрүү",
+            "nameRequiredTooltip": "Виртуалдык бөлмөнүн аталышын көрсөтүңүз",
+            "createTooltip": "Жаңы Виртуалдык бөлмө түзүү",
+            "invalidNameTooltip": "Аты туура эмес",
+            "copyLinkSnackbar": "Виртуалдык бөлмөгө шилтеме көчүрүлдү",
+            "deleteSnackbar": "Виртуалдык бөлмө ийгиликтүү өчүрүлдү",
+            "deleteModalTitle": "{{roomName}} виртуалдык бөлмөсүн өчүрүү"
+        },
+        "ongoingOneToOneMeetingTooltip": "{{name}} менен активдүү жолугушууңуз бар",
+        "startModal": {
+            "audioAndVideoLoading": "Ресурстар жүктөлүүдө",
+            "enterRoomMeetingTitle": "{{meeting Title}} жолугушууга катышыңыз"
+        },
+        "newMeetingNotification": {
+            "sendAQuickMessage": "Кыска билдирүү жөнөтүү",
+            "sendMessage": "Билдирүү жөнөтүү",
+            "userIsInvitingYou": "Сизди <strong>{{name}}</strong> чакырууда",
+            "writeAMessageToSendIt": "Жөнөтүү үчүн билдирүү жазыңыз"
+        },
+        "restartMeeting": "Жолугушууну кайра баштоо",
+        "sidebar": {
+            "recording": {
+                "description": "Жаздырууну токтоткон модератордун папкасында Files жаздыруу саталат",
+                "title": "Жаздыруу",
+                "moderatorInfo": "Жаздыруу башталды",
+                "action": {
+                    "start": "СТАРТ",
+                    "stop": "СТОП"
+                },
+                "additionalDescription": "Эгерде, көйгөй пайда болсо, жаздыруу аны жүргүзгөн Модератордун файлында сакталат."
+            },
+            "waitingList": "Күтүү баракчасы",
+            "waitingCaption": "Кирүүнү күтүп жатат",
+            "tooltip": {
+                "waitingAccept": "Кирүүгө уруксат берүү",
+                "waitingReject": "Пайдалануучунун кирүүсүн четке кагуу"
+            }
+        },
+        "noMoreActiveSession": "Бир эле жолугушуунун бирден ашык активдүү сессиясы болушу мүмкүн эмес",
+        "collapseParticipantsMeetingTooltip": "Катышуучулардын тизмесин жашыруу",
+        "continueActiveSession": "Жолугушууну жаңы терезеде улантуу",
+        "expandChat": "Чатты кеңейтүү",
+        "expandParticipantsListTooltip": "Катышуучулардын тизмесин кеңейтүү",
+        "extendChat": "Чатты кеңейтүү",
+        "joinMeeting": "Жолугушууга кошулуу",
+        "joinMeetingDescription": "Бул жолугушууга кантип кошулгуңуз келет?",
+        "minimizeChat": "Чатты төмөн түшүрүү",
+        "noTwoActiveSession": "Бир эле жыйындын эки активдүү сессиясы бирге болушу мүмкүн эмес",
+        "ongoingGroupMeetingTooltip": "Бул жолугушууга катышып жатасыз",
+        "openedInAnotherWindow": "Бул жолугушуу башка терезеде ачылган",
+        "participantsList": {
+            "title": "{{count}} катышуучу",
+            "title_plural": "{{count}} катышуучулар"
+        },
+        "presentActiveSession": "Дагы бир активдүү сессия бар",
+        "rejoinMeeting": "Жолугушууга кайрадан кошулуу",
+        "setInputDescription": "Аларды ачылган менюдан тандап, киргизүү түзүлүшүн орнотуңуз",
+        "startMeeting": "Жолугушууну баштоо",
+        "tooltip": {
+            "activeSessionTooltip": "Сиз бул жолугушууга катышып жатасыз"
+        },
+        "waitingParticipants": "Катышуучулар кошулууда…",
+        "snackbar": {
+            "waitingInfo": "Күтүү бөлмөсүндө бирөө бардай"
+        },
+        "recordingModal": {
+            "description": "Жаздырууну токтоткону жатасыз. Жаңы жаздырууну каалаган учурда баштасаңыз болот.",
+            "title": "Жаздырууну токтотуу",
+            "inputLabel": "Жаздыруунун аталышы",
+            "confirmationAction": "СТОП",
+            "requiredNameError": "Жаздыруу файлынын аталышын көрсөтүңүз",
+            "exceededCharsError": "Жаздыруу файлынын аталышы 128 символдон ашпоого тийиш"
+        },
+        "recordingStop": {
+            "successSnackbar": {
+                "stopper": "{{recordingName}} жеткиликтүү болгондон кийин {{folderName}} таба аласыз",
+                "participants": "{{userName}} жолугушуунун жаздыруусун токтотту"
+            },
+            "failureSnackbar": "Жаздырууну токтотуу мүмкүн эмес, системалык администраторго кайрылыңыз."
+        },
+        "browserNotification": {
+            "waitingTitle": "Күтүү бөлмөсүндө бирөө бардай",
+            "waitingMessage": "Жаңы пайдалануучу жолугушууга кирүүнү күтүп жатат"
+        },
+        "waitingRoom": {
+            "title": "{{meeting Name}} жыйналышына кандай кошулгуңуз келет?",
+            "setInputs": "Ачылган менюдан тандап, кирүү түзүлүшүн жөндөңүз",
+            "welcomeHint": "Жолугушууга кирүү үчүн \"КАТЫШУУ\" басыңыз",
+            "readyHint": "Сиз жолугушууга бир нече секундадан кийин киресиз",
+            "ready": "Катышам",
+            "welcomeCaption": "Даяр болуп, ыңгайлашыңыз.",
+            "nextStep": "Модератор сизди жакынкы убакта жолугушууга чакырат.",
+            "readyCaption": "Бары даяр! Ыңгайлашыңыз.",
+            "userIsReady": "Даярсызбы!"
+        },
+        "infoPage": {
+            "title": {
+                "meetingNotFound": "Сиз издегендей жолугушуу жок",
+                "notAuthenticatedUser": "Авторизациялоо өткөн жок"
+            },
+            "slogan": {
+                "hangUp": "Дагы кайталап көрүңүз",
+                "meetingNotFound": "кийинчерээк аракет кылыңыз",
+                "notAuthenticatedUser": "Жолугушууга кирүү үчүн системага кирүү"
+            },
+            "description": {
+                "hangUp": "Сизди алдыда боло турган жолугушуудан көрүүгө кубанычта болобуз",
+                "meetingNotFound": "Жолугушуу шилтемесин текшерип, кайра аракет кылыңыз",
+                "notAuthenticatedUser": "Эсептик жазуудан аутентификация өтпөсөңүз, жыйынга кошула албайсыз"
+            }
+        },
+        "recordingHint": "Жаздыруу жүрүп жатат",
+        "recordingStart": {
+            "successSnackbar": {
+                "participants": "{{userName}} жолугушууну жаздырып баштады",
+                "starter": "Сиз жолугушууну жаздырып баштадыңыз"
+            },
+            "failureSnackbar": "Жаздыруу мүмкүн болбой жатат, системалык администраторго кайрылыңыз."
+        },
+        "durationTooltip": "Жолугушуунун узактыгы"
+    },
+    "message": {
+        "deletedMessage": "Өчүрүлгөн билдирүү",
+        "edited": "редакцияланган",
+        "forwardedMultipleTimes": "Бир нече жолу жөнөтүлгөн",
+        "draft": "сомо",
+        "originallySentBy": "Башында жөнөтүлгөн:"
+    },
+    "notification": {
+        "meeting": {
+            "ended": "Жолугушуу аяктады"
+        }
+    },
+    "settings": {
+        "profile": {
+            "errorGenericResponse": "Бир нерсе туура эмес болуп калды. Кайталап көрүңүз",
+            "title": "Профиль",
+            "deletedUserImageCorrectly": "Аватар ийгиликтүү баштапкы калыбына келтирилди",
+            "description": "Башка пайдалануучулар көрө турган аватар тандаңыз, сүрөт автоматтык түрдө борбордо болот.",
+            "maximumDimension": "Максималдуу өлчөм: {{size}} кб",
+            "pictureSizeTooLarge": "Бир нерсе туура эмес болуп калды, аватар сүрөтүнүн өлчөмү максималдуу {{size}} кб экенин унутпаңыз",
+            "statusLabel": "Статусуңуз бул жерден көрүнөт",
+            "updatedPictureCorrectly": "Жаңы аватар ийгиликтүү жүктөлдү"
+        },
+        "notifications": {
+            "toggleSounds": {
+                "waitingRoom": "Эскертмелердин үнүн иштетүү",
+                "desktop": "Иш столунда эскертмелердин үнүн иштетүү"
+            },
+            "description": "Чаттын эскертмелери үчүн өзүңүздүн тандооңузду коюңуз",
+            "title": "Эскертүү",
+            "subtitle": {
+                "general": "Негизги",
+                "waitingRoom": "Күтүү залына кирүү тууралуу эскертме"
+            },
+            "checkbox": {
+                "waitingRoom": "Эскертмеге уруксат берүү",
+                "desktop": "Иш столундагы эскертмеге уруксат берүү"
+            }
+        },
+        "room": {
+            "pictureSizeTooLarge": "Бир нерсе туура эмес болуп калды, аватар сүрөтүнүн өлчөмү максималдуу {{size}} кб түзөт",
+            "deletedImageCorrectly": "Топтун аватары баштапкы абалына келтирилди",
+            "deletedUserImageCorrectly": "Аватар баштапкы абалына келтирилди",
+            "updatedPictureCorrectly": "Жаңы аватар ийгиликтүү жүктөлдү"
+        },
+        "meetings": {
+            "description": "Жыйналыштарга катышуу үчүн каалаган аудио жана видео коюңуз. Ар бир жолугушууга кирүүдөн мурун, каалагандай кылып ыңгайлаштыра аласыз.",
+            "title": "Жолугушуулар"
+        },
+        "save": "Оңдоолор сакталды",
+        "title": "Чаттарды жөнгө салуу",
+        "recording": {
+            "title": "Жаздыруу",
+            "description": "Сиз токтоткон жолугушуулардын жаздыруулары сактала турган папканы коюңуз.",
+            "inputLabel": "Багытталган папка",
+            "browseAction": "КАРОО",
+            "resetAction": "ӨЧҮРҮП САЛУУ"
+        }
+    },
+    "status": {
+        "lastSeen": "{{lastSeen}} акыркы жолу киргени",
+        "offline": "Тармактан тышкары",
+        "online": "Тармакта",
+        "areTyping": "жазып жатат…",
+        "goToPrivateChat": "Жеке билдирүү жөнөтүү үчүн Чатка кириңиз",
+        "isTyping": "жазып жатат…",
+        "numberOfPeopleAreTyping": "{{numberOfUsers}} жазып жатат…",
+        "nameAndNumberOfPeopleAreTyping": "{{userName}} жана дагы {{numberOfUsers}} жазып жатат…"
+    },
+    "thanksForParticipating": "Жолугушканга чейин",
+    "tooltip": {
+        "close": "Жабуу",
+        "goToPrivateChat": "Жеке чатка өтүү",
+        "messageComposer": "Билдирүү түзүү каражаты",
+        "selectEmoji": "emoji тандоо",
+        "sendMessage": "Билдирүү жөнөтүү",
+        "bottomOfList": "Тизменин төмөн жагында",
+        "clear": "Өчүрүү",
+        "collapseCarousel": "Төмөн түшүрүү",
+        "collapseSidebar": "Капталдагы панелди түшүрүү",
+        "demoteModerator": "Модератордун статусун төмөндөтүү",
+        "disableModalButton": "Жок дегенде бир даректи тандаңыз",
+        "expandCarousel": "Кеңейтүү",
+        "expandSidebar": "Капталдагы менюну төмөн түшүрүү",
+        "forwardedMessage": "Билдирүү башка чаттан кайра батталды",
+        "iAmModerator": "Сиз модераторсуз",
+        "memberIsModerator": "Бул катышуучу модератор болуп саналат",
+        "messageActions": "Билдирүүлөр менен аракет",
+        "messageRead": "Окуу",
+        "messageReceived": "Алынды",
+        "messageSent": "Жөнөтүлгөндөр",
+        "muteForAll": "Бардыгы үчүн үндү өчүрүү",
+        "participantMuted": "Бул катышуучунун үнү өчүрүлгөн",
+        "pending": "Чечимди күтүп жатат",
+        "pinVideo": "Видео тиркөө",
+        "promoteModerator": "Статусун модераторго чейин көтөрүү",
+        "promoteSomeoneElseToModerator": "Чыгып кетүүдөн мурда, модератор дайындоо керек",
+        "removeToAddNewOne": "Жаңы катышуучуларды кошуу үчүн, кимдир бирөөнү өчүрүңүз",
+        "room": {
+            "resetPicture": "Картинаны өчүрүп салуу",
+            "updatePicture": "Картинаны жаңылоо",
+            "uploadPicture": "Картинка жүктөө"
+        },
+        "scrollDown": "Төмөн жылдыруу",
+        "scrollUp": "Жогору жылдыруу",
+        "topOfList": "Тизменин жогору жагында",
+        "unpinVideo": "Видеону алып салуу",
+        "uploadAttachment": "Тиркемени жүктөө",
+        "userAvatar": {
+            "resetAvatar": "Аватарды өчүрүп салуу",
+            "updateAvatar": "Аватарды жаңыртуу",
+            "uploadAvatar": "Аватарды жүктөө"
+        },
+        "writeToSend": "Жөнөтүү үчүн билдирүү жазыңыз",
+        "youAreAlreadyMuted": "Сизде үн өчүрүлгөн"
+    },
+    "tryLater": "Кийинчерээк кайталаңыз",
+    "configurationMessages": {
+        "roomTopicChanged": "{{name}} {{roomName}} темасын \"<i>{{topicName}}</i>\" өзгөрттү",
+        "roomNameChanged": "{{name}} бул топтун аталышын \"<i>{{roomName}}</i>\" өзгөрттү",
+        "roomPictureDeleted": "{{name}} демейки {{roomName}} сүрөтүн калыбына келтирди",
+        "roomPictureUpdated": "{{name}} {{roomName}} сүрөтүн өзгөрттү",
+        "roomTopicRemoved": "{{name}} тарабынан {{roomName}} темасы өчүрүлдү"
+    },
+    "editModal": {
+        "topicTooLong": "Теманын максималдуу узундугу - 256 символ",
+        "confirmDisabled": "Сиз эч нерсени өзгөрткөн жоксуз",
+        "groupNameDetails": "Талап кылынат жана топту идентификациялайт",
+        "confirm": "Деталдарды редакциялоо",
+        "errorDisabled": "Киргизилген маалыматтарды текшериңиз",
+        "groupDescriptionDetails": "Топтун темасын сүрөттөө",
+        "nameTooLong": "Аталыштын максималдуу узундугу - 128 символ",
+        "nameTooShort": "Аталышы маанилүү маалымат болуп саналат"
+    },
+    "conversation": {
+        "mockCreateChatDescription": "Маалыматтар жана тиркемелер менен бөлүшүп, кесиптештериңиз менен баарлашкыла, өз ара аракеттенгиле жана кызматташкыла",
+        "emptyListDescription": "Бул жерда Чаттар жана Топтор көрсөтүлөт",
+        "emptyListTitle": "Бул тизме бош",
+        "keepInTouchTitle": "Байланышта болобуз!",
+        "mockCreateChatTitle": "\"Түзүү\" баскычынын жардамы менен жаңы Чат түзгүлө",
+        "newMessage": "Жаңы билдирүү",
+        "newMessages": "Жаңы билдирүүлөр",
+        "selectionMode": {
+            "multipleForward": "{{numberOfMessages}} билдирүүлөрдү кайра жөнөтүү",
+            "exit": "Тандоо режиминен чыгуу"
+        }
+    },
+    "keepInTouchWithColleagues": "Кесиптештер менен байланышта болуңуз же топторуңуздун иш мейкиндиктерине кошулуңуз",
+    "affiliationMessages": {
+        "SomeoneElseCreatedOneToOne": "{{userName}} сиз менен сүйлөшүүнү баштады",
+        "groupCreated": "{{roomName}} түзүлдү!",
+        "memberAdded": "{{userName}} {{roomName}} кошулду",
+        "memberRemoved": "{{userName}} {{roomName}} өчүрүлдү",
+        "oneToOneCreated": "Жаңы чат түзүлдү!",
+        "youCreatedOneToOne": "Сиз {{userName}} менен сүйлөшүүнү баштадыңыз"
+    },
+    "chat": "Чат",
+    "conversationFilter": {
+        "closeTooltip": "Чыпкаларды жабуу",
+        "filterTooltip": "Чыпкалардын тизмеси",
+        "label": "Тизмени чыпкалоо үчүн жазып баштаңыз"
+    },
+    "conversationInfo": {
+        "actionAccordionTitle": "Аракет",
+        "email": "Электрондук почта",
+        "info": "Маалымат",
+        "messages": "Билдирүү",
+        "name": "аты",
+        "status": "статусу",
+        "title": "Аталышы",
+        "topic": "Тема"
+    },
+    "date": {
+        "today": "Бүгүн",
+        "yesterday": "Кечээ"
+    },
+    "modal": {
+        "deleteGroupMeetingOngoingLabel": "Азыр активдүү жолугушуу жүрүп жатат. Топту жок кылуу эч кандай эскертүүсүз жолугушууну токтотууга алып келет.",
+        "leaveRoomLabel": "Ушул Бөлмөдөн чыгып кетүүнү каалайсызбы?",
+        "creation": {
+            "addUserLimit": {
+                "users": "1 катышуучу кошо аласыз\nСиз {{count}} пайдалануучуну кошо аласыз",
+                "users_plural": "Сиз {{count}} пайдалануучуларды кошо аласыз",
+                "limitReached": "Топко катышуучулардын максималдуу санын тандадыңыз"
+            },
+            "description": "Chats - бул кесиптештер менен байланышта болууга көмөк көрсөткөн, бирден-бир мессенджер. Сиз экиден ашык даректи кошуу менен топ түзө аласыз",
+            "contactList": "Топ түзүү үчүн дагы даректерди тандоо зарыл",
+            "inputPlaceholder": "Терип баштаңыз же даректи тандаңыз",
+            "newChat": "Жаңы Чат",
+            "newGroup": "Жаңы топ"
+        },
+        "deleteGroup": "Топту өчүрүү",
+        "deleteGroupLabel": "Бул аракет Топтун бардык мүчөлөрүнө таасирин тийгизет жана аны артка кайтарууга болбойт. Бул топту чын эле өчүргүңүз келеби?",
+        "deleteMessageTitle": "Тандалган билдирүүнү өчүрүү",
+        "deleteMessageTitleDescription": "Бидирүүнү өчүрүп жатасыз, ал кайра жеткиликтүү болбойт",
+        "deleteRoom": "Конференц-залды өчүрүү",
+        "deleteRoomLabel": "Бул бөлмөнү жок кылууну каалайсызбы?",
+        "deleteUserDescription": "Бул пайдалануучуну өчүрүүнү каалайсызбы?",
+        "forward": {
+            "chooseAtLeastOneChat": "Жок дегенде бир Чатты тандаңыз",
+            "description": "Билдирүүнү багыттоо үчүн Чат тандаңыз",
+            "inputPlaceholder": "Терип баштаңыз же Чат тандаңыз",
+            "title": "{{chatName}} билдирүүнү кайра жөнөтүү"
+        },
+        "leaveAndDelete": "Топтон чыгуу жана өчүрүү",
+        "leaveGroup": "Топтон чыгып кетүү",
+        "leaveGroupLabel": "Топтон чыгууну каалап жатасызбы?",
+        "leaveRoom": "Бөлмөдөн чыгуу",
+        "removeMember": "Катышуучуну өчүрүү",
+        "muteForAllDescription": "Пайдалануучунун үнүн өсүрсө, бардык катышуучулар аны уга албай калышат. Үндү өчүргөн гана пайдалануучу аны иштете алат. Улантуу керекпи?"
+    },
+    "meetings": {
+        "interactions": {
+            "yourCamIsDisabled": "Камера өчүрүлгөн",
+            "yourMicIsDisabled": "Микрофон өчүрүлгөн"
+        }
+    },
+    "participantsList": {
+        "closeSearch": "Издөөнү жабуу",
+        "moreMembersAccordionTitle": "катышуучулар",
+        "oneMemberAccordionTitle": "Бир катышуучу",
+        "searchMembers": "Катышуучуларды издөө",
+        "searchParticipants": "Катышуучуларды издөө",
+        "creationList": {
+            "title": "Жаңы Чат түзүү:",
+            "searchFailure": "Издөөдө көйгөй пайда болду, кайталап көрүңүз."
+        },
+        "noMatch": {
+            "all": "Учурдагы Чаттарда же компанияда бул суроо-талапка туура келген пайдалануучу жок.",
+            "chatList": "Учурдагы Чаттарды суроо-талапка туура келген пайдалануучулар жок."
+        }
+    },
+    "interactions": {
+        "micDevice": "Микрофонду тандоо",
+        "camDevice": "Камераны тандоо"
+    },
+    "snackbar": {
+        "mutedByModerator": "Модератор үндү өчүрүп салган, сүйлөшүү үчүн үндү иштетиңиз"
+    },
+    "titlePlaceholder": "Сиздин топтун аталышы"
+}

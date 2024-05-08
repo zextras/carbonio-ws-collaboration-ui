@@ -1,0 +1,204 @@
+{
+    "conversation": {
+        "keepInTouchTitle": "連絡を取り合いましょう！",
+        "newMessage": "新しいメッセージ",
+        "chooseConversationDescription": "会話を選択してチャットを開始します",
+        "newMessages": "新しいメッセージ",
+        "selectionMode": {
+            "exit": "選択モードを終了する"
+        }
+    },
+    "conversationInfo": {
+        "actionAccordionTitle": "操作",
+        "email": "メールアドレス",
+        "info": "情報",
+        "messages": "メッセージ",
+        "name": "名前",
+        "status": "状態",
+        "title": "タイトル",
+        "topic": "トピック"
+    },
+    "editModal": {
+        "groupDescriptionDetails": "グループの主題を示します"
+    },
+    "message": {
+        "draft": "下書き",
+        "deletedMessage": "削除されたメッセージ",
+        "edited": "編集しました"
+    },
+    "settings": {
+        "notifications": {
+            "title": "通知",
+            "subtitle": {
+                "general": "一般設定"
+            }
+        },
+        "profile": {
+            "errorGenericResponse": "エラーが発生しました。再度お試しください",
+            "title": "プロファイル"
+        },
+        "save": "編集内容が保存されました",
+        "title": "チャットの設定",
+        "meetings": {
+            "title": "会議",
+            "description": "オーディオとビデオを設定して、会議に参加しましょう。あらゆる会議に参加する前に、いつでも設定をカスタマイズできます。"
+        },
+        "recording": {
+            "title": "録音中",
+            "inputLabel": "宛先フォルダ"
+        }
+    },
+    "tooltip": {
+        "goToPrivateChat": "プライベートチャットに進む",
+        "clear": "クリアする",
+        "close": "閉じる",
+        "leaveConversation": "退室",
+        "messageComposer": "メッセージコンポーザー",
+        "messageRead": "既読",
+        "messageSent": "送信されました",
+        "room": {
+            "uploadPicture": "写真をアップロードする"
+        },
+        "selectEmoji": "絵文字を選択する",
+        "sendMessage": "メッセージを送る",
+        "uploading": "アップロードしています",
+        "demoteModerator": "モデレーターの降格",
+        "promoteModerator": "モデレーターに昇格",
+        "messageActions": "メッセージの操作",
+        "collapseCarousel": "崩壊する",
+        "expandCarousel": "拡張する",
+        "muteForAll": "全員ミュートにする",
+        "pending": "保留",
+        "pinVideo": "ビデオをピン留めする",
+        "unpinVideo": "動画のピン止めを解除する"
+    },
+    "action": {
+        "activateNotifications": "通知を有効にする",
+        "addAttachment": "添付ファイルを追加する",
+        "addNewMembers": "新しいメンバーを追加する",
+        "clearHistory": "履歴をクリアする",
+        "close": "閉じる",
+        "copy": "コピー",
+        "create": "作成する",
+        "delete": "削除する",
+        "download": "ダウンロード",
+        "edit": "編集",
+        "editYourMessage": "メッセージを編集する",
+        "forward": "転送する",
+        "forwarded": "転送済み",
+        "leave": "退会する",
+        "muteNotifications": "通知をミュートする",
+        "preview": "プレビューする",
+        "removeUser": "削除する",
+        "reply": "返信する",
+        "replyToSomeone": "返信先",
+        "replyToYourself": "自分に返信する",
+        "undo": "元に戻す",
+        "decline": "拒否する",
+        "enter": "参加する",
+        "joinMeeting": "会議に参加する",
+        "ok": "Ok",
+        "cancel": "キャンセル"
+    },
+    "attachments": {
+        "addFromLocal": "ローカルから追加する",
+        "attachLinkFiles": "ファイルからパブリックリンクを添付する",
+        "stopUpload": "アップロードを停止する",
+        "integrations": {
+            "chooseFile": "ファイルを選ぶ",
+            "shareLink": "パブリックリンクを共有する"
+        }
+    },
+    "date": {
+        "yesterday": "昨日"
+    },
+    "feedback": {
+        "historyCleared": "履歴が正常にクリアされました！",
+        "notificationsActivatedForThisChat": "このチャットに対して有効にされた通知",
+        "notificationsMutedForThisChat": "このチャットの通知はミュートされています"
+    },
+    "modal": {
+        "deleteRoom": "ルームを削除する",
+        "deleteUserDescription": "本当にこのメンバーを削除しますか？",
+        "leaveGroup": "グループから退会する",
+        "removeMember": "メンバーを削除する",
+        "showPreviousConversationHistory": "以前の会話履歴を表示",
+        "deleteMessageTitleDescription": "メッセージの内容全体を削除すると、そのメッセージは利用できなくなるため、削除されます。",
+        "deleteMessageTitle": "選択したメッセージを削除しますか?"
+    },
+    "participantsList": {
+        "closeSearch": "検索を閉じる",
+        "moreMembersAccordionTitle": "メンバー"
+    },
+    "status": {
+        "lastSeen": "最終閲覧 {{lastSeen}}",
+        "offline": "オフライン",
+        "online": "オンライン",
+        "isTyping": "が入力しています…"
+    },
+    "chat": "チャット",
+    "external": {
+        "nobodyInTheRoom": "このルームには誰もいないようです",
+        "roomIsEmpty": "このルームは空です"
+    },
+    "meeting": {
+        "interactions": {
+            "cameraDisabled": "カメラが無効です",
+            "cameraEnabled": "カメラが有効になりました",
+            "enableCamera": "カメラを有効にする",
+            "enableMicrophone": "マイクを有効にする",
+            "microphoneEnabled": "マイクが有効になりました"
+        },
+        "joinMeeting": "会議に参加する",
+        "newMeetingNotification": {
+            "sendMessage": "メッセージを送信する"
+        },
+        "virtual": {
+            "deleteTooltip": "バーチャルルームバーチャル"
+        },
+        "sidebar": {
+            "waitingCaption": "入室するのを待っています",
+            "tooltip": {
+                "waitingAccept": "ユーザーをさせる",
+                "waitingReject": "ユーザーを拒否する"
+            },
+            "recording": {
+                "title": "録音中",
+                "description": "録音は、停止したモデレーターのファイルスペースに保存されます。"
+            }
+        },
+        "snackbar": {
+            "waitingInfo": "待合室に誰かいるようです"
+        },
+        "browserNotification": {
+            "waitingTitle": "待合室に誰かいるようです"
+        },
+        "waitingRoom": {
+            "hangUp": "電話を切る"
+        },
+        "recordingHint": "この会議は記録されています",
+        "recordingStart": {
+            "failureSnackbar": "登録を開始することはできません。システム管理者に連絡してください。"
+        },
+        "recordingModal": {
+            "title": "録音を停止する",
+            "description": "録音を停止します。 いつでも新らたに録音開始できます。",
+            "inputLabel": "録音名"
+        }
+    },
+    "meetings": {
+        "interactions": {
+            "yourCamIsDisabled": "カメラがオフです"
+        }
+    },
+    "notification": {
+        "meeting": {
+            "ended": "会議が終了しました"
+        }
+    },
+    "thanksForParticipating": "参加していただきありがとうございます",
+    "tryLater": "後で試す",
+    "snackbar": {
+        "mutedByModerator": "モデレーターによってミュートされています。話すにはミュートを解除してください"
+    }
+}
