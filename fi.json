@@ -1,0 +1,12 @@
+{
+    "action": {
+        "forward": "Eteenpäin",
+        "preview": "Esikatselu",
+        "removeUser": "Poista",
+        "reply": "Vastaa",
+        "ok": "Ok"
+    },
+    "attachments": {
+        "addFromLocal": "Lisää paikallisesta"
+    }
+}
