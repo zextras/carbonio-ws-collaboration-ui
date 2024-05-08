@@ -1,0 +1,35 @@
+{
+    "conversationInfo": {
+        "status": "Stare",
+        "actionAccordionTitle": "Acţiuni",
+        "email": "Email",
+        "info": "Informatii",
+        "name": "Nume"
+    },
+    "action": {
+        "close": "Inchide",
+        "copy": "Copiaza",
+        "delete": "Ştergere",
+        "download": "Descarcare",
+        "edit": "Editeaza",
+        "preview": "Examinare",
+        "removeUser": "Eliminare",
+        "undo": "Anulare",
+        "ok": "O.k",
+        "cancel": "Anulare"
+    },
+    "settings": {
+        "notifications": {
+            "title": "Notificări"
+        }
+    },
+    "status": {
+        "offline": "Deconectat"
+    },
+    "tooltip": {
+        "clear": "Ştergere",
+        "close": "Inchide",
+        "messageRead": "Citeste",
+        "pending": "În aşteptare"
+    }
+}

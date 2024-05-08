@@ -1,0 +1,168 @@
+{
+    "action": {
+        "preview": "Előnézet",
+        "copy": "Másolat",
+        "delete": "Töröl",
+        "edit": "Szerkesztés",
+        "forward": "Továbbítás",
+        "reply": "Válasz",
+        "forwarded": "továbbított",
+        "activateNotifications": "Értesítések aktiválása",
+        "addNewMembers": "Új tagok hozzáadása",
+        "addAttachment": "Csatolt állomány hozzáadása",
+        "addMoreAttachments": "{{counter}} melléklet hozzáadása",
+        "close": "Bezárás",
+        "create": "Létrehoz",
+        "editYourMessage": "Az üzenet szerkesztése",
+        "leave": "Távozás",
+        "muteNotifications": "Értesítések némítása",
+        "replyToSomeone": "Válasz a következőnek",
+        "replyToYourself": "Válaszolj magadnak",
+        "undo": "Visszavonás",
+        "addNewMembersTo": "Új tagok hozzáadása a következőhöz: {{roomName}}",
+        "addSingleAttachment": "{{counter}} melléklet hozzáadása",
+        "clearHistory": "Előzmények törlése",
+        "decline": "Elutasítás",
+        "declineAll": "Összes elutasítása",
+        "download": "Letöltés",
+        "editDetails": "Részletek szerkesztése",
+        "editRoom": "{{roomName}} szerkesztése",
+        "enter": "Belép",
+        "joinMeeting": "Belépés az értekezletre",
+        "newChat": "Új csevegés",
+        "removeUser": "Eltávolítás",
+        "scrollToBottom": "Görgessen az aljára",
+        "ok": "Ok",
+        "cancel": "Törlés"
+    },
+    "conversationInfo": {
+        "email": "E-mail",
+        "name": "Név",
+        "status": "Státusz",
+        "messages": "Üzenetek",
+        "actionAccordionTitle": "Műveletek",
+        "info": "Információ",
+        "title": "Cím",
+        "topic": "Témakör"
+    },
+    "status": {
+        "offline": "Nem elérhető",
+        "online": "Online"
+    },
+    "settings": {
+        "notifications": {
+            "title": "Értesítések",
+            "subtitle": {
+                "general": "Általános"
+            }
+        },
+        "save": "A szerkesztések mentése sikeres",
+        "recording": {
+            "title": "Rögzítés"
+        }
+    },
+    "tooltip": {
+        "clear": "Törlés",
+        "messageSent": "Elküldött üzenetek",
+        "close": "Bezárás",
+        "collapseCarousel": "Összecsukás",
+        "expandCarousel": "Kibontás",
+        "messageRead": "Olvasott",
+        "muteForAll": "Némítás mindenki számára",
+        "pinVideo": "Videó rögzítése",
+        "unpinVideo": "Videó rögzítésének feloldása"
+    },
+    "message": {
+        "draft": "piszkozat",
+        "edited": "szerkesztve",
+        "deletedMessage": "Törölt üzenet"
+    },
+    "attachments": {
+        "addFromLocal": "Hozzáadás a helyi mappából",
+        "attachLinkFiles": "Nyilvános hivatkozás csatolása fájlokból",
+        "integrations": {
+            "chooseFile": "Fájl kiválasztása",
+            "shareLink": "Nyilvános hivatkozás megosztása"
+        }
+    },
+    "modal": {
+        "showPreviousConversationHistory": "Korábbi beszélgetési előzmények megjelenítése",
+        "creation": {
+            "newChat": "Új csevegés"
+        },
+        "removeMember": "Tag eltávolítása",
+        "deleteRoom": "Szoba törlése",
+        "deleteUserDescription": "Biztos benne, hogy törli ezt a tagot?",
+        "leaveGroup": "Kilépés a csoportból"
+    },
+    "notification": {
+        "meeting": {
+            "ended": "Az értekezlet véget ért"
+        }
+    },
+    "meeting": {
+        "interactions": {
+            "cameraEnabled": "Kamera engedélyezve",
+            "cameraDisabled": "Kamera letiltva"
+        },
+        "joinMeeting": "Belépés az értekezletre",
+        "virtual": {
+            "deleteTooltip": "Virtuális szoba törlése"
+        },
+        "snackbar": {
+            "waitingInfo": "Úgy tűnik, van valaki a váróban"
+        },
+        "browserNotification": {
+            "waitingTitle": "Úgy tűnik, van valaki a váróban"
+        },
+        "waitingRoom": {
+            "hangUp": "Vonal bontása"
+        },
+        "sidebar": {
+            "recording": {
+                "title": "Rögzítés",
+                "description": "A felvétel annak a moderátornak a Fájlok mezőjébe kerül mentésre, aki leállította."
+            }
+        },
+        "recordingHint": "Az értekezlet rögzítése folyamatban van",
+        "recordingStart": {
+            "failureSnackbar": "Nem lehet elindítani a regisztrációt, kérjük, lépjen kapcsolatba a rendszergazdával."
+        },
+        "recordingModal": {
+            "title": "Felvétel leállítása",
+            "description": "Leállítja a felvételt. Bármikor kezdhet egy újat.",
+            "inputLabel": "Név rögzítése"
+        }
+    },
+    "external": {
+        "nobodyInTheRoom": "Úgy tűnik, senki sincs ebben a szobában",
+        "roomIsEmpty": "Ez a szoba üres"
+    },
+    "feedback": {
+        "notificationsActivatedForThisChat": "Értesítések aktiválva ehhez a csevegéshez",
+        "notificationsMutedForThisChat": "Értesítések elnémítva ehhez a csevegéshez",
+        "historyCleared": "Előzmények sikeresen törölve!"
+    },
+    "meetings": {
+        "interactions": {
+            "yourCamIsDisabled": "A kamera ki van kapcsolva"
+        }
+    },
+    "conversation": {
+        "chooseConversationDescription": "Csevegés indításához válasszon ki egy beszélgetést",
+        "keepInTouchTitle": "Maradjunk kapcsolatban!",
+        "selectionMode": {
+            "exit": "Kilépés a kiválasztási módból"
+        }
+    },
+    "date": {
+        "yesterday": "Tegnap"
+    },
+    "editModal": {
+        "confirm": "Részletek szerkesztése",
+        "groupDescriptionDetails": "Leírja a Csoport témáját"
+    },
+    "snackbar": {
+        "mutedByModerator": "Egy moderátor elnémított, hallgattasd el magad, hogy megszólalhass"
+    }
+}
