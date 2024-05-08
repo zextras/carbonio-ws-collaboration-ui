@@ -1,0 +1,204 @@
+{
+    "conversationInfo": {
+        "info": "Info",
+        "actionAccordionTitle": "Aktionen",
+        "email": "Mail-Adresse",
+        "messages": "Nachrichten",
+        "name": "Name",
+        "status": "Status",
+        "title": "Titel",
+        "topic": "Thema"
+    },
+    "modal": {
+        "leaveGroup": "Gruppe verlassen",
+        "deleteRoom": "Raum löschen",
+        "deleteUserDescription": "Sind Sie sicher, dass Sie dieses Mitglied entfernen möchten?",
+        "removeMember": "Mitglied entfernen",
+        "showPreviousConversationHistory": "Vorherigen Konversationsverlauf anzeigen",
+        "deleteMessageTitle": "Ausgewählte Nachricht löschen?",
+        "deleteMessageTitleDescription": "Wenn Sie den gesamten Inhalt der Nachricht entfernen, steht diese nicht mehr zur Verfügung und wird folglich gelöscht."
+    },
+    "tooltip": {
+        "clear": "Löschen",
+        "close": "Schließen",
+        "messageComposer": "Nachricht entwerfen",
+        "goToPrivateChat": "Zum privaten Chat gehen",
+        "leaveConversation": "Unterhaltung verlassen",
+        "messageRead": "Gelesen",
+        "messageSent": "Gesendet",
+        "room": {
+            "uploadPicture": "Bild hochladen"
+        },
+        "selectEmoji": "Emoji auswählen",
+        "sendMessage": "Nachricht senden",
+        "uploading": "Hochladen",
+        "demoteModerator": "Moderator zurückstufen",
+        "promoteModerator": "Zum Moderator befördern",
+        "collapseCarousel": "Zusammenklappen",
+        "messageActions": "Nachrichtenaktionen",
+        "expandCarousel": "Aufklappen",
+        "muteForAll": "Für alle stummschalten",
+        "pending": "Ausstehend",
+        "pinVideo": "Video anheften",
+        "unpinVideo": "Video losheften"
+    },
+    "action": {
+        "activateNotifications": "Benachrichtigungen aktivieren",
+        "addAttachment": "Anhang einfügen",
+        "addNewMembers": "Neue Mitglieder hinzufügen",
+        "clearHistory": "Verlauf löschen",
+        "close": "Schließen",
+        "copy": "Kopieren",
+        "create": "Erstellen",
+        "delete": "Löschen",
+        "download": "Herunterladen",
+        "edit": "Bearbeiten",
+        "editYourMessage": "Bearbeiten Sie Ihre Nachricht",
+        "forward": "Weiterleiten",
+        "forwarded": "weitergeleitet",
+        "leave": "Verlassen",
+        "muteNotifications": "Benachrichtigungen stummschalten",
+        "preview": "Vorschau",
+        "removeUser": "Entfernen",
+        "reply": "Antworten",
+        "replyToSomeone": "Antwort an",
+        "replyToYourself": "Sich selbst antworten",
+        "undo": "Rückgängig machen",
+        "decline": "Ablehnen",
+        "enter": "Eingabe",
+        "joinMeeting": "An Sitzung teilnehmen",
+        "ok": "Ok",
+        "cancel": "Abbrechen"
+    },
+    "attachments": {
+        "addFromLocal": "Von lokalem Speicherort hinzufügen",
+        "attachLinkFiles": "Öffentlichen Link von Files anhängen",
+        "stopUpload": "Hochladen stoppen",
+        "integrations": {
+            "chooseFile": "Datei auswählen",
+            "shareLink": "Öffentlichen Link teilen"
+        }
+    },
+    "conversation": {
+        "chooseConversationDescription": "Wählen Sie ein Gespräch, um einen Chat zu beginnen",
+        "keepInTouchTitle": "Lassen Sie uns in Kontakt bleiben!",
+        "newMessage": "Neue Nachricht",
+        "newMessages": "Neue Nachrichten",
+        "selectionMode": {
+            "exit": "Auswahlmodus verlassen"
+        }
+    },
+    "date": {
+        "yesterday": "Gestern"
+    },
+    "editModal": {
+        "groupDescriptionDetails": "Beschreibt das Thema der Gruppe"
+    },
+    "feedback": {
+        "historyCleared": "Verlauf erfolgreich gelöscht!",
+        "notificationsActivatedForThisChat": "Für diesen Chat sind Benachrichtigungen aktiviert",
+        "notificationsMutedForThisChat": "Benachrichtigungen für diesen Chat stummgeschaltet"
+    },
+    "message": {
+        "deletedMessage": "Gelöschte Nachricht",
+        "draft": "Entwurf",
+        "edited": "bearbeitet"
+    },
+    "participantsList": {
+        "closeSearch": "Suche beenden",
+        "moreMembersAccordionTitle": "Mitglieder"
+    },
+    "settings": {
+        "notifications": {
+            "title": "Benachrichtigungen",
+            "subtitle": {
+                "general": "Allgemein"
+            }
+        },
+        "profile": {
+            "errorGenericResponse": "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut",
+            "title": "Profil"
+        },
+        "save": "Änderungen korrekt gespeichert",
+        "title": "Chat Einstellungen",
+        "meetings": {
+            "description": "Legen Sie Ihre bevorzugten Audio- und Videoeinstellungen fest, um an Meetings teilzunehmen. Sie können Ihre Einstellungen vor jedem Meeting immer anpassen.",
+            "title": "Sitzungen"
+        },
+        "recording": {
+            "inputLabel": "Zielordner",
+            "title": "Aufnahme"
+        }
+    },
+    "status": {
+        "lastSeen": "Zuletzt gesehen {{lastSeen}}",
+        "offline": "Offline",
+        "online": "Online",
+        "isTyping": "schreibt …"
+    },
+    "chat": "Chat",
+    "external": {
+        "nobodyInTheRoom": "Es scheint niemand in diesem Raum zu sein",
+        "roomIsEmpty": "Dieser Raum ist leer"
+    },
+    "meeting": {
+        "interactions": {
+            "cameraDisabled": "Kamera deaktiviert",
+            "cameraEnabled": "Kamera aktiviert",
+            "enableCamera": "Kamera einschalten",
+            "enableMicrophone": "Mikrofon einschalten",
+            "microphoneEnabled": "Mikrofon aktiviert"
+        },
+        "joinMeeting": "An Sitzung teilnehmen",
+        "newMeetingNotification": {
+            "sendMessage": "Nachricht senden"
+        },
+        "virtual": {
+            "deleteTooltip": "Virtuellen Raum löschen"
+        },
+        "sidebar": {
+            "waitingCaption": "Warten auf den Eintritt",
+            "tooltip": {
+                "waitingAccept": "Benutzer hereinlassen",
+                "waitingReject": "Benutzer ablehnen"
+            },
+            "recording": {
+                "title": "Aufnahme",
+                "description": "Die Aufnahme wird im Files Space des Moderators gespeichert werden, der diese beendet hat."
+            }
+        },
+        "snackbar": {
+            "waitingInfo": "Es scheint jemand im Warteraum zu sein"
+        },
+        "browserNotification": {
+            "waitingTitle": "Es scheint jemand im Warteraum zu sein"
+        },
+        "waitingRoom": {
+            "hangUp": "Auflegen"
+        },
+        "recordingHint": "Diese Sitzung wird aufgezeichnet",
+        "recordingStart": {
+            "failureSnackbar": "Es ist nicht möglich, die Registrierung zu starten, wenden Sie sich bitte an Ihren Systemadministrator."
+        },
+        "recordingModal": {
+            "title": "Aufnahme anhalten",
+            "description": "Sie werden die Aufnahme anhalten. Sie können eine neue Aufnahme jederzeit starten.",
+            "inputLabel": "Name der Aufnahme"
+        }
+    },
+    "meetings": {
+        "interactions": {
+            "yourCamIsDisabled": "Ihre Kamera ist ausgeschaltet"
+        }
+    },
+    "notification": {
+        "meeting": {
+            "ended": "Sitzung Beendet"
+        }
+    },
+    "thanksForParticipating": "Danke für die Teilnahme",
+    "tryLater": "Versuchen Sie es später",
+    "snackbar": {
+        "mutedByModerator": "Sie wurden von einem Moderator stummgeschaltet, heben Sie die Stummschaltung auf, um zu sprechen"
+    }
+}
