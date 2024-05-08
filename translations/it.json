@@ -34,8 +34,7 @@
         "declineAll": "Rifiuta tutto",
         "understood": "Ho capito",
         "ok": "Ok",
-        "cancel": "Elimina",
-        "deleteForAll": "Cancella per tutti"
+        "cancel": "Elimina"
     },
     "conversationInfo": {
         "title": "Titolo",
@@ -93,12 +92,12 @@
         "leaveRoom": "Abbandona Stanza",
         "leaveRoomLabel": "Vuoi abbandonare questa Stanza?",
         "deleteMessageTitleDescription": "Stai per cancellare il messaggio, questo non sarà più disponibile",
-        "deleteGroupMeetingOngoingLabel": "Al momento è in corso un meeting. Cancellare il Gruppo terminerà il meeting nessun senza preavviso.",
-        "muteForAllDescription": "Disattivando l'audio dell'utente, gli altri partecipanti non lo sentiranno più. Solo l'utente che è stato mutato potrà riattivare l'audio. Procedere?"
+        "deleteGroupMeetingOngoingLabel": "Al momento è in corso un meeting. Cancellare il Gruppo terminerà il meeting nessun senza preavviso."
     },
     "participantsList": {
         "closeSearch": "Chiudi ricerca",
         "moreMembersAccordionTitle": "partecipanti",
+        "noMatch": "Non ci sono elementi che corrispondono alla ricerca",
         "oneMemberAccordionTitle": "Un partecipante",
         "searchMembers": "Cerca membri",
         "searchParticipants": "Cerca partecipanti"
@@ -257,9 +256,7 @@
         "isTyping": "sta digitando…",
         "areTyping": "stanno digitando…",
         "goToPrivateChat": "Vai alla chat privata per inviare un messaggio personale",
-        "you": " Tu",
-        "numberOfPeopleAreTyping": "{{numberOfUsers}} persone stanno digitando…",
-        "nameAndNumberOfPeopleAreTyping": "{{userName}} e {{numberOfUsers}} altri stanno digitando…"
+        "you": " Tu"
     },
     "affiliationMessages": {
         "SomeoneElseCreatedOneToOne": "{{userName}} ha iniziato una conversazione con te",
@@ -381,8 +378,7 @@
             "readyCaption": "È tutto pronto! Mettiti comodo.",
             "nextStep": "Un moderatore ti farà entrare nel meeting il prima possibile.",
             "welcomeHint": "Clicca su “PRONTO A PARTECIPARE” per entrare nel meeting",
-            "welcomeCaption": "Quando sarai pronto, mettiti comodo.",
-            "userIsReady": "Sei pronto!"
+            "welcomeCaption": "Quando sarai pronto, mettiti comodo."
         },
         "infoPage": {
             "title": {
@@ -437,8 +433,7 @@
                 "stopper": "Troverai {{recordingName}} in {{folderName}} appena sarà disponibile"
             },
             "failureSnackbar": "Non è possibile terminare la registrazione, contatta il tuo amministratore di sistema."
-        },
-        "durationTooltip": "Durata della riunione"
+        }
     },
     "tryLater": "Riprova più tardi",
     "external": {
@@ -460,9 +455,5 @@
     "keepInTouchWithColleagues": "Rimani in contatto con i tuoi colleghi o unisciti alle sale riunioni dei tuoi gruppi",
     "snackbar": {
         "mutedByModerator": "Sei stato silenziato dal moderatore, riattiva il microfono per parlare"
-    },
-    "interactions": {
-        "camDevice": "Videocamera",
-        "micDevice": "Microfono"
     }
 }

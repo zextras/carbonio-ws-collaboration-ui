@@ -142,9 +142,7 @@
         "declineAll": "Tout refuser",
         "understood": "Compris",
         "ok": "Ok",
-        "cancel": "Annuler",
-        "deleteForAll": "Supprimer pour tout le monde",
-        "retry": "Réessayer"
+        "cancel": "Annuler"
     },
     "conversation": {
         "chooseConversationDescription": "Choisissez une conversation pour démarrer une discussion",
@@ -197,17 +195,10 @@
     "participantsList": {
         "closeSearch": "Fermer la recherche",
         "moreMembersAccordionTitle": "membres",
+        "noMatch": "Il n'y a pas d'élément qui corresponde à cette recherche",
         "oneMemberAccordionTitle": "Un membre",
         "searchMembers": "Rechercher des membres",
-        "searchParticipants": "Rechercher des participants",
-        "noMatch": {
-            "all": "Il n'y a pas d'utilisateur qui corresponde à votre recherche ni dans les discussion existante, ni dans votre établissement.",
-            "chatList": "Il n'y a pas d'utilisateur qui corresponde avec cette recherche dans les discussions existantes."
-        },
-        "creationList": {
-            "title": "Créer une nouvelle discussion avec :",
-            "searchFailure": "Votre recherche semble avoir un problème, merci de réessayer."
-        }
+        "searchParticipants": "Rechercher des participants"
     },
     "status": {
         "lastSeen": "Vu pour la dernière fois {{lastSeen}}",
@@ -381,8 +372,7 @@
                 "action": {
                     "start": "LANCER",
                     "stop": "ARRÊTER"
-                },
-                "additionalDescription": "Si quelque chose se passe mal, l'enregistrement sera sauvegardé dans Files dans l'espace du modérateur l'ayant lancée."
+                }
             }
         },
         "browserNotification": {
@@ -401,8 +391,7 @@
             "ready": "Prêt à participer",
             "welcomeCaption": "Lorsque vous êtes prêt, mettez-vous à l'aise.",
             "nextStep": "Un modérateur vous fera entrer dans la réunion dès que possible.",
-            "readyCaption": "Tout est prêt ! Installez-vous confortablement.",
-            "userIsReady": "Vous êtes prêt !"
+            "readyCaption": "Tout est prêt ! Installez-vous confortablement."
         },
         "infoPage": {
             "title": {
@@ -454,8 +443,7 @@
                 "stopper": "Vous trouverez {{recordingName}} dans le dossier {{folderName}} dès qu'il sera disponible",
                 "participants": "{{userName}} a interrompu l'enregistrement de cette réunion"
             }
-        },
-        "durationTooltip": "Durée de la réunion"
+        }
     },
     "meetings": {
         "interactions": {
@@ -467,9 +455,5 @@
     "keepInTouchWithColleagues": "Restez en contact avec vos collègues ou rejoignez les salles de réunion de votre groupe",
     "snackbar": {
         "mutedByModerator": "Vous avez été mis en sourdine par un modérateur, enlevez la sourdine pour parler"
-    },
-    "interactions": {
-        "camDevice": "Appareil photo",
-        "micDevice": "Microphone"
     }
 }

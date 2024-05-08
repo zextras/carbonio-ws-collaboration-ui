@@ -34,9 +34,7 @@
         "scrollToBottom": "Przewiń do samego dołu",
         "understood": "Rozumiem",
         "ok": "Ok",
-        "cancel": "Anuluj",
-        "deleteForAll": "Usuń dla wszystkich",
-        "retry": "Spróbuj ponownie"
+        "cancel": "Anuluj"
     },
     "modal": {
         "removeMember": "Usuń członka",
@@ -73,8 +71,7 @@
         "leaveAndDelete": "Opuść i usuń grupę",
         "leaveRoom": "Opuść pokój",
         "leaveRoomLabel": "Czy na pewno chcesz opuścić ten pokój?",
-        "deleteGroupMeetingOngoingLabel": "Trwa aktualnie spotkanie. Usunięcie grupy spowoduje zakończenie spotkania bez ostrzeżenia.",
-        "muteForAllDescription": "Wyciszając użytkownika sprawisz, że wszyscy uczestnicy nie będą słyszeć tego użytkownika. Tylko wyciszony użytkownik może się odciszyć. Kontynuować?"
+        "deleteGroupMeetingOngoingLabel": "Trwa aktualnie spotkanie. Usunięcie grupy spowoduje zakończenie spotkania bez ostrzeżenia."
     },
     "notification": {
         "meeting": {
@@ -87,14 +84,7 @@
         "searchParticipants": "Wyszukaj uczestników",
         "oneMemberAccordionTitle": "Jeden członek",
         "searchMembers": "Wyszukaj członków",
-        "creationList": {
-            "title": "Stwórz nowy czat z:",
-            "searchFailure": "Wygląda na to, że wystąpił problem z Twoim wyszukiwaniem, spróbuj ponownie."
-        },
-        "noMatch": {
-            "chatList": "Nie ma w Twoich czatach użytkowników pasujących do tego wyszukiwania.",
-            "all": "Nie ma w Twoich czatach ani w Twojej firmie użytkowników pasujących do tego wyszukiwania."
-        }
+        "noMatch": "Nie ma elementów pasujących do kryteriów wyszukiwania"
     },
     "settings": {
         "notifications": {
@@ -171,14 +161,6 @@
             "exit": "Wyjdź z trybu wybierania",
             "maxSelected": "Osiągnięto maksymalną ilość wiadomości jakie mogą jednocześnie zostać przekazane dalej",
             "multipleForward": "przekaż dalej {{numberOfMessages}} wiadomości"
-        },
-        "longCaption": {
-            "modal": {
-                "title": "Wiadomość zbyt długa na podpis",
-                "description": "Wiadomość jest bardzo długa i nie może zostać użyta jako podpis do załącznika.",
-                "action": "Załącz mimo to",
-                "additionalDetails": "Jeśli kontynuujesz operację, nadmiar zostanie usunięty z oryginalnego tekstu. Kontynuować?"
-            }
         }
     },
     "conversationInfo": {
@@ -310,8 +292,7 @@
                 "action": {
                     "start": "ROZPOCZNIJ",
                     "stop": "ZATRZYMAJ"
-                },
-                "additionalDescription": "Jeśli coś pójdzie nie tak, nagranie zostanie zapisane w przestrzeni Carbonio Pliki moderatora, który je rozpoczął."
+                }
             }
         },
         "snackbar": {
@@ -330,8 +311,7 @@
             "ready": "Gotowy do uczestniczenia",
             "nextStep": "Moderator wpuści Cię do spotkania tak szybko jak to możliwe.",
             "welcomeCaption": "Kiedy będziesz gotowy, odpręż się.",
-            "readyCaption": "Wszystko gotowe! Odpręż się.",
-            "userIsReady": "Jesteś gotowy!"
+            "readyCaption": "Wszystko gotowe! Odpręż się."
         },
         "infoPage": {
             "slogan": {
@@ -376,8 +356,7 @@
                 "participants": "Użytkownik {{userName}} zatrzymał nagrywanie tego spotkania"
             },
             "failureSnackbar": "Nie udało się zatrzymać nagrywania, skontaktuj się z Twoim administratorem systemu."
-        },
-        "durationTooltip": "Czas trwania spotkania"
+        }
     },
     "meetings": {
         "interactions": {
@@ -399,9 +378,7 @@
         "online": "Online",
         "you": " Ty",
         "goToPrivateChat": "Przejdź do prywatnego czatu, aby wysłać osobistą wiadomość",
-        "areTyping": "piszą…",
-        "numberOfPeopleAreTyping": "{{numberOfUsers}} osób pisze…",
-        "nameAndNumberOfPeopleAreTyping": "{{userName}} i {{numberOfUsers}} innych piszą…"
+        "areTyping": "piszą…"
     },
     "thanksForParticipating": "Dziękujemy za uczestniczenie",
     "tooltip": {
@@ -478,9 +455,5 @@
     "titlePlaceholder": "Tytuł Twojej grupy",
     "snackbar": {
         "mutedByModerator": "Zostałeś wyciszony przez moderatora. Odcisz się, aby inni Cię słyszeli"
-    },
-    "interactions": {
-        "micDevice": "Mikrofon",
-        "camDevice": "Kamera"
     }
 }
