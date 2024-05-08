@@ -67,7 +67,6 @@
     "participantsList": {
         "closeSearch": "关闭搜索",
         "moreMembersAccordionTitle": "成员",
-        "noMatch": "没有匹配此搜索的项目",
         "oneMemberAccordionTitle": "一名成员",
         "searchMembers": "搜索成员"
     },
