@@ -5,3 +5,9 @@
  */
 export const mockDarkReaderIsEnabled = jest.fn();
 export const isEnabled: jest.Mock = mockDarkReaderIsEnabled;
+
+export const mockDarkReaderEnable = jest.fn();
+export const enable: jest.Mock = mockDarkReaderEnable;
+
+export const mockDarkReaderDisable = jest.fn();
+export const disable: jest.Mock = mockDarkReaderDisable;

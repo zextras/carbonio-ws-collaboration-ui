@@ -7,8 +7,6 @@
 import React, { FC, useCallback, useMemo } from 'react';
 
 import { Container, Padding, Row, Text } from '@zextras/carbonio-design-system';
-import { useUserSettings } from '@zextras/carbonio-shell-ui';
-import { find } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import styled, { DefaultTheme } from 'styled-components';
 
@@ -16,6 +14,7 @@ import AttachmentSmallView from './AttachmentSmallView';
 import { ANIMATION_STYLES } from './BubbleAnimationsGlobalStyle';
 import BubbleFooter from './BubbleFooter';
 import BubbleHeader from './BubbleHeader';
+import useDarkReader from '../../../../hooks/useDarkReader';
 import useMessage from '../../../../hooks/useMessage';
 import { getUserName, getUserSelector } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
@@ -59,14 +58,9 @@ const RepliedTextMessageSectionView: FC<RepliedTextMessageSectionViewProps> = ({
 		repliedMessageRef;
 	const replyUserInfo = useStore((store) => getUserSelector(store, repliedMessage.from));
 	const senderIdentifier = useStore((store) => getUserName(store, repliedMessage.from));
-	const userColor = useMemo(() => calculateAvatarColor(senderIdentifier || ''), [senderIdentifier]);
+	const userColor = useMemo(() => calculateAvatarColor(senderIdentifier ?? ''), [senderIdentifier]);
 
-	const settings = useUserSettings();
-
-	const darkModeSettings = useMemo(
-		() => find(settings.props, (value) => value.name === 'zappDarkreaderMode')?._content,
-		[settings.props]
-	);
+	const { darkReaderMode } = useDarkReader();
 
 	const isInViewport = (element: HTMLElement): boolean => {
 		const rect = element.getBoundingClientRect();
@@ -98,7 +92,7 @@ const RepliedTextMessageSectionView: FC<RepliedTextMessageSectionViewProps> = ({
 		const messageScrollTo = window.parent.document.getElementById(`message-${repliedMessage.id}`);
 		if (messageScrollTo && replyUserInfo) {
 			if (!isInViewport(messageScrollTo)) messageScrollTo.scrollIntoView({ block: 'center' });
-			switch (darkModeSettings) {
+			switch (darkReaderMode) {
 				case 'enabled': {
 					setStyle(
 						ANIMATION_STYLES.HIGHLIGHT_MESSAGE_DARK,
@@ -125,7 +119,7 @@ const RepliedTextMessageSectionView: FC<RepliedTextMessageSectionViewProps> = ({
 				(messageScrollTo.firstChild as HTMLElement).style.animation = '';
 			}, 1400);
 		}
-	}, [repliedMessage.id, replyUserInfo, darkModeSettings, setStyle]);
+	}, [repliedMessage.id, replyUserInfo, darkReaderMode, setStyle]);
 
 	const textToShow = useMemo(() => {
 		if (repliedMessage.type === MessageType.TEXT_MSG) {
