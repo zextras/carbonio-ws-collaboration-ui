@@ -14,7 +14,7 @@ import MeetingChatAccordionTitle from './MeetingChatAccordionTitle';
 import papyrusDark from '../../../../chats/assets/papyrus-dark.png';
 import papyrus from '../../../../chats/assets/papyrus.png';
 import Chat from '../../../../chats/components/conversation/Chat';
-import { useDarkReaderStatus } from '../../../../hooks/useDarkReaderStatus';
+import useDarkReader from '../../../../hooks/useDarkReader';
 import { getMeetingChatVisibility } from '../../../../store/selectors/ActiveMeetingSelectors';
 import {
 	getRoomMutedSelector,
@@ -62,7 +62,7 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({
 		getCapability(store, CapabilityType.CAN_VIDEO_CALL_RECORD)
 	);
 
-	const isDarkModeEnabled = useDarkReaderStatus();
+	const { darkReaderStatus } = useDarkReader();
 
 	const toggleChatStatus = useCallback(() => {
 		setMeetingChatVisibility(
@@ -123,13 +123,18 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({
 		}
 	}, [canVideoRecordMeeting, meetingId, roomType, setMeetingChatVisibility]);
 
+	const minHeight = useMemo(() => {
+		if (chatFullExpanded) return '100%';
+		return chatIsOpen ? '50%' : '2.75rem';
+	}, [chatFullExpanded, chatIsOpen]);
+
 	return (
 		<ChatContainer
 			key="MeetingConversationAccordion"
 			data-testid="MeetingConversationAccordion"
 			mainAlignment="flex-start"
 			height={chatIsOpen ? '100%' : '2.75rem'}
-			minHeight={chatFullExpanded ? '100%' : chatIsOpen ? '50%' : '2.75rem'}
+			minHeight={minHeight}
 			width="100%"
 			borderRadius="none"
 		>
@@ -171,7 +176,7 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({
 					data-testid="WrapperMeetingChat"
 					mainAlignment="flex-start"
 					height="fill"
-					$darkModeActive={isDarkModeEnabled}
+					$darkModeActive={darkReaderStatus}
 				>
 					<Chat roomId={roomId} setInfoPanelOpen={(): null => null} />
 				</WrapperMeetingChat>

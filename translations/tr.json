@@ -59,7 +59,8 @@
         "mockCreateChatTitle": "Oluştur düğmesini kullanarak yeni bir sohbet oluşturun",
         "newMessages": "Yeni mesajlar",
         "selectionMode": {
-            "exit": "Seçme modundan çık"
+            "exit": "Seçme modundan çık",
+            "multipleForward": "{{numberOfMessages}} mesaj ilet"
         }
     },
     "conversationInfo": {
@@ -146,7 +147,6 @@
         "moreMembersAccordionTitle": "Üyeler",
         "oneMemberAccordionTitle": "Bir Üye",
         "searchMembers": "Üyeleri Ara",
-        "noMatch": "Bu aramayla eşleşen hiçbir öğe yok",
         "searchParticipants": "Katılımcıları ara"
     },
     "settings": {

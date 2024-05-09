@@ -1,0 +1,9 @@
+{
+    "action": {
+        "activateNotifications": "Aktivovat oznámení",
+        "addAttachment": "Přidat přílohu",
+        "addNewMembers": "Přidat nové členy",
+        "addNewMembersTo": "Přidat nové členy do {{roomName}}",
+        "addMoreAttachments": "Přidat {{counter}} příloh"
+    }
+}
