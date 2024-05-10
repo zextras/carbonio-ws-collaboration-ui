@@ -60,10 +60,11 @@ describe('CounterBadgeUpdater tests', () => {
 	});
 
 	test('Multiple conversations have unread messages', async () => {
-		useStore.getState().addUnreadCount(singleRoom.id, 2);
-		useStore.getState().addUnreadCount(groupRoom.id, 3);
-		useStore.getState().addUnreadCount(temporaryRoom.id, 4);
-		useStore.getState().addUnreadCount(roomMuted.id, 5);
+		const store = useStore.getState();
+		store.addUnreadCount(singleRoom.id, 2);
+		store.addUnreadCount(groupRoom.id, 3);
+		store.addUnreadCount(temporaryRoom.id, 4);
+		store.addUnreadCount(roomMuted.id, 5);
 		setup(<CounterBadgeUpdater />);
 		expect(updatePrimaryBadge).toBeCalledWith({ show: true, count: 5, showCount: true }, 'chats');
 	});
