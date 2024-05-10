@@ -28,7 +28,8 @@ import { MeetingParticipant } from '../../../../types/store/MeetingTypes';
 import { RootStore } from '../../../../types/store/StoreTypes';
 import MeetingSidebar from '../MeetingSidebar';
 
-const height = 'height: 2.75rem';
+const heightRem = 'height: 2.75rem';
+const heightPercentage = 'height: 100%';
 
 const mockUser1 = createMockUser({
 	id: 'user1',
@@ -89,7 +90,7 @@ describe('Meeting sidebar', () => {
 		const toggleChatBtn = screen.getByTestId('toggleChatStatus');
 		await user.click(toggleChatBtn);
 		const chatAccordion = await screen.findByTestId('MeetingConversationAccordion');
-		expect(chatAccordion).toHaveStyle(height);
+		expect(chatAccordion).toHaveStyle(heightRem);
 		await waitFor(() => user.click(toggleChatBtn));
 		expect(chatAccordion).toHaveStyle('height: 100%');
 		const composer = await screen.findByTestId('textAreaComposer');
@@ -100,9 +101,9 @@ describe('Meeting sidebar', () => {
 		const toggleChatExpanded = screen.getByTestId('toggleChatExpanded');
 		await waitFor(() => user.click(toggleChatExpanded));
 		const chatAccordion = await screen.findByTestId('MeetingConversationAccordion');
-		expect(chatAccordion).toHaveStyle(height);
+		expect(chatAccordion).toHaveStyle(heightPercentage);
 		await waitFor(() => user.click(toggleChatExpanded));
-		expect(chatAccordion).toHaveStyle('height: 100%');
+		expect(chatAccordion).toHaveStyle(heightPercentage);
 	});
 	test('open - expand - close chat accordion', async () => {
 		const { user } = setupBasicGroup();
@@ -110,7 +111,7 @@ describe('Meeting sidebar', () => {
 		const toggleChatExpanded = screen.getByTestId('toggleChatExpanded');
 		await waitFor(() => user.click(toggleChatExpanded));
 		const chatAccordion = await screen.findByTestId('MeetingConversationAccordion');
-		expect(chatAccordion).toHaveStyle(height);
+		expect(chatAccordion).toHaveStyle(heightPercentage);
 		await waitFor(() => user.click(toggleChatBtn));
 		expect(toggleChatBtn).toHaveStyle('height: fit');
 	});

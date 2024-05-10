@@ -33,8 +33,8 @@ type MeetingConversationAccordionProps = {
 };
 const ChatContainer = styled(Container)`
 	transition:
-		height 0.3s ease,
-		min-height 0.3s ease;
+		height 0.5s ease,
+		min-height 0.5s ease;
 `;
 
 const WrapperMeetingChat = styled(Container)<{ $darkModeActive: boolean }>`
@@ -128,12 +128,17 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({
 		return chatIsOpen ? '50%' : '2.75rem';
 	}, [chatFullExpanded, chatIsOpen]);
 
+	const height = useMemo(() => {
+		if (chatFullExpanded || chatIsOpen) return '100%';
+		return '2.75rem';
+	}, [chatFullExpanded, chatIsOpen]);
+
 	return (
 		<ChatContainer
 			key="MeetingConversationAccordion"
 			data-testid="MeetingConversationAccordion"
-			mainAlignment="flex-start"
-			height={chatIsOpen ? '100%' : '2.75rem'}
+			mainAlignment="flex-end"
+			height={height}
 			minHeight={minHeight}
 			width="100%"
 			borderRadius="none"
