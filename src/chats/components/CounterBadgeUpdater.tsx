@@ -12,7 +12,7 @@ import { CHATS_ROUTE } from '../../constants/appConstants';
 import { getTotalUnreadCountSelector } from '../../store/selectors/UnreadsCounterSelectors';
 import useStore from '../../store/Store';
 
-const CounterBadgeUpdater = () => {
+const CounterBadgeUpdater = (): null => {
 	const totalUnreadCount = useStore(getTotalUnreadCountSelector);
 
 	useEffect(() => {
