@@ -31,11 +31,7 @@ type MeetingConversationAccordionProps = {
 	roomId: string;
 	meetingId: string;
 };
-const ChatContainer = styled(Container)`
-	transition:
-		height 0.5s ease,
-		min-height 0.5s ease;
-`;
+const ChatContainer = styled(Container)``;
 
 const WrapperMeetingChat = styled(Container)<{ $darkModeActive: boolean }>`
 	overflow: hidden;
