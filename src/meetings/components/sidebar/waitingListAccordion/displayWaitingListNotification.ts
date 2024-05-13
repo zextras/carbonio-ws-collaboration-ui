@@ -34,12 +34,12 @@ const displayWaitingListNotification = (meetingId: string): void => {
 				t(
 					'meeting.browserNotification.waitingTitle',
 					'There seems to be someone in the Waiting Room'
-				) || undefined,
+				) ?? undefined,
 			message:
 				t(
 					'meeting.browserNotification.waitingMessage',
 					'New user is waiting to enter the meeting'
-				) || undefined
+				) ?? undefined
 		});
 	}
 	if (
