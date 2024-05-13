@@ -60,6 +60,7 @@ beforeEach(() => {
 	store.meetingConnection(meeting.id, false, undefined, false, undefined);
 	useParams.mockReturnValue({ meetingId: meeting.id });
 });
+
 describe('ActiveMeetingParticipantsDropdown tests', () => {
 	test('ParticipantList title is displayed correctly', async () => {
 		setup(<ConversationHeaderMeetingButton roomId={room.id} />);

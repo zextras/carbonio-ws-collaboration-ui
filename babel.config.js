@@ -6,16 +6,5 @@
 
 module.exports = {
 	presets: ['@babel/preset-env', '@babel/preset-react', '@babel/preset-typescript'],
-	plugins: [
-		'@babel/plugin-transform-runtime',
-		[
-			'i18next-extract',
-			{
-				outputPath: 'translations/{{ns}}.json',
-				discardOldKeys: false,
-				defaultNS: 'en',
-				jsonSpace: 4
-			}
-		]
-	]
+	plugins: ['@babel/plugin-transform-runtime']
 };
