@@ -12,7 +12,8 @@ export const getTotalUnreadCountSelector = (store: RootStore): number => {
 	const sum = (amount: number, n: number): number => amount + n;
 	return reduce(
 		map(store.unreads, (unread, key) => {
-			if (store.rooms[key] && !store.rooms[key].userSettings?.muted) {
+			const room = store.rooms[key];
+			if (!!room && !room.userSettings?.muted && room.type !== 'temporary') {
 				return unread;
 			}
 			return 0;

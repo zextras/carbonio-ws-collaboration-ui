@@ -31,11 +31,9 @@ const MeetingParticipantsAccordion: FC<MeetingParticipantsAccordionProps> = ({ m
 		getNumberOfMeetingParticipantsByMeetingId(store, meetingId)
 	);
 
-	const participantsTitle = t(
-		'meeting.participantsList.title',
-		"{{count}} meeting's participants",
-		{ count: numberOfParticipants !== undefined ? numberOfParticipants : 0 }
-	);
+	const participantsTitle = t('meeting.participantsList.title', {
+		count: numberOfParticipants ?? 0
+	});
 
 	const accordionStatus: boolean = useStore((state) =>
 		getMeetingParticipantsAccordionStatus(state, meetingId)

@@ -101,13 +101,9 @@ const ChatCreationContactsSelection = ({
 		return -1;
 	}, [contactsSelected, isCreationModal, maxGroupMembers, members]);
 
-	const addUsersLimit = t(
-		'modal.creation.addUserLimit.users',
-		'You can invite other {{count}} members',
-		{
-			count: maxGroupMembers ? membersToAdd : 0
-		}
-	);
+	const addUsersLimit = t('modal.creation.addUserLimit.users', {
+		count: maxGroupMembers ? membersToAdd : 0
+	});
 
 	const [result, setResult] = useState<ContactMatch[]>([]);
 	const [chips, setChips] = useState<ChipItem<ContactInfo>[]>([]);
