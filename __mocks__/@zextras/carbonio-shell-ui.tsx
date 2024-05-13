@@ -97,3 +97,5 @@ export const useIntegratedFunction = jest.fn(() => [
 	getLink,
 	functionCheck
 ]);
+
+export const updatePrimaryBadge = jest.fn();
