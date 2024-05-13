@@ -53,11 +53,13 @@ const ActiveMeetingParticipantsDropdown = ({
 	);
 	const meetingId = useStore((store) => getMeetingIdFromRoom(store, roomId));
 
-	const participantsTitle = t(
-		'meeting.participantsList.title',
-		"{{count}} meeting's participants",
-		{ count: numberOfParticipants !== undefined ? numberOfParticipants : 0 }
-	);
+	const participantsTitle = t('meeting.participantsList.title', {
+		defaultValue:
+			numberOfParticipants === 1
+				? "One meeting's participant"
+				: `${numberOfParticipants} meeting's participants`,
+		count: numberOfParticipants ?? 0
+	});
 
 	const listOfMembers = useMemo(
 		() =>
