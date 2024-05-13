@@ -30,14 +30,16 @@ const displayWaitingListNotification = (meetingId: string): void => {
 		getNotificationManager().notify({
 			showPopup: ChatsNotificationsSettings.WaitingRoomAccessNotifications,
 			playSound: false,
-			title: t(
-				'meeting.browserNotification.waitingTitle',
-				'There seems to be someone in the Waiting Room'
-			),
-			message: t(
-				'meeting.browserNotification.waitingMessage',
-				'New user is waiting to enter the meeting'
-			)
+			title:
+				t(
+					'meeting.browserNotification.waitingTitle',
+					'There seems to be someone in the Waiting Room'
+				) || undefined,
+			message:
+				t(
+					'meeting.browserNotification.waitingMessage',
+					'New user is waiting to enter the meeting'
+				) || undefined
 		});
 	}
 	if (
