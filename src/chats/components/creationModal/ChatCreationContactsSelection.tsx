@@ -102,6 +102,10 @@ const ChatCreationContactsSelection = ({
 	}, [contactsSelected, isCreationModal, maxGroupMembers, members]);
 
 	const addUsersLimit = t('modal.creation.addUserLimit.users', {
+		defaultValue:
+			maxGroupMembers && membersToAdd > 1
+				? `You can add other ${membersToAdd} members`
+				: 'You can add one last member',
 		count: maxGroupMembers ? membersToAdd : 0
 	});
 
