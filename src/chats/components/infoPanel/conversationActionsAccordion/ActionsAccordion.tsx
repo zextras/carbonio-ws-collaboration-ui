@@ -70,14 +70,8 @@ export const ActionsAccordion: FC<ActionAccordionProps> = ({ roomId }) => {
 	);
 
 	const clearComponent = useMemo(
-		() => (
-			<ClearHistoryAction
-				roomId={roomId}
-				roomType={roomType}
-				iAmTheOnlyOwner={iAmOwner && numberOfOwners === 1}
-			/>
-		),
-		[iAmOwner, numberOfOwners, roomId, roomType]
+		() => <ClearHistoryAction roomId={roomId} roomType={roomType} />,
+		[roomId, roomType]
 	);
 
 	const leaveConversationComponent = useMemo(

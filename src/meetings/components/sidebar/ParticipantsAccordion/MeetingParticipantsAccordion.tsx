@@ -32,6 +32,10 @@ const MeetingParticipantsAccordion: FC<MeetingParticipantsAccordionProps> = ({ m
 	);
 
 	const participantsTitle = t('meeting.participantsList.title', {
+		defaultValue:
+			numberOfParticipants === 1
+				? "One meeting's participant"
+				: `${numberOfParticipants} meeting's participants`,
 		count: numberOfParticipants ?? 0
 	});
 
