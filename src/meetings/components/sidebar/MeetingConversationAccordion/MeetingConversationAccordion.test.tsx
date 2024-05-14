@@ -92,7 +92,7 @@ describe('Meeting sidebar', () => {
 		const chatAccordion = await screen.findByTestId('MeetingConversationAccordion');
 		expect(chatAccordion).toHaveStyle(heightRem);
 		await waitFor(() => user.click(toggleChatBtn));
-		expect(chatAccordion).toHaveStyle('height: 100%');
+		expect(chatAccordion).toHaveStyle(heightPercentage);
 		const composer = await screen.findByTestId('textAreaComposer');
 		expect(composer).toBeInTheDocument();
 	});
