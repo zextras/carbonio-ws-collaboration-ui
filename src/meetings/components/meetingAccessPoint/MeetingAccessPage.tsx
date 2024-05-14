@@ -9,7 +9,7 @@ import { Container, Button, Tooltip, IconButton, Text } from '@zextras/carbonio-
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import AccessMeetingPageMediaSection from './AccessMeetingPageMediaSection';
+import MeetingAccessPageMediaSection from './MeetingAccessPageMediaSection';
 import { MEETINGS_PATH } from '../../../constants/appConstants';
 import useEventListener, { EventName } from '../../../hooks/useEventListener';
 import useRouting, { PAGE_INFO_TYPE } from '../../../hooks/useRouting';
@@ -32,7 +32,7 @@ const CustomContainer = styled(Container)`
 	bottom: 3rem;
 `;
 
-const AccessMeetingPage: FC<AccessMeetingPageProps> = ({ hasUserDirectAccess, meetingName }) => {
+const MeetingAccessPage: FC<AccessMeetingPageProps> = ({ hasUserDirectAccess, meetingName }) => {
 	const [t] = useTranslation();
 	const meetingId = useMemo(() => document.location.pathname.split(MEETINGS_PATH)[1], []);
 	const roomId = useStore((store) => getRoomIdFromMeeting(store, meetingId) ?? ``);
@@ -174,7 +174,7 @@ const AccessMeetingPage: FC<AccessMeetingPageProps> = ({ hasUserDirectAccess, me
 				<Text size="extralarge" weight="bold">
 					{accessTitle}
 				</Text>
-				<AccessMeetingPageMediaSection
+				<MeetingAccessPageMediaSection
 					streamTrack={streamTrack}
 					setStreamTrack={setStreamTrack}
 					hasUserDirectAccess={hasUserDirectAccess}
@@ -189,4 +189,4 @@ const AccessMeetingPage: FC<AccessMeetingPageProps> = ({ hasUserDirectAccess, me
 	);
 };
 
-export default AccessMeetingPage;
+export default MeetingAccessPage;

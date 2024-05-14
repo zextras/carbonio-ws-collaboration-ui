@@ -62,7 +62,7 @@ const AlignWrapper = styled(Container)`
 	}
 `;
 
-const AccessMeetingPageMediaSection: FC<AccessMeetingPageMediaSectionProps> = ({
+const MeetingAccessPageMediaSection: FC<AccessMeetingPageMediaSectionProps> = ({
 	streamTrack,
 	setStreamTrack,
 	hasUserDirectAccess,
@@ -334,4 +334,4 @@ const AccessMeetingPageMediaSection: FC<AccessMeetingPageMediaSectionProps> = ({
 	);
 };
 
-export default AccessMeetingPageMediaSection;
+export default MeetingAccessPageMediaSection;

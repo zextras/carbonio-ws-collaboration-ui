@@ -10,7 +10,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import { UserEvent } from '@testing-library/user-event';
 import { act } from 'react-dom/test-utils';
 
-import AccessMeetingPage from './AccessMeetingPage';
+import MeetingAccessPage from './MeetingAccessPage';
 import { useParams } from '../../../../__mocks__/react-router';
 import { EventName, sendCustomEvent } from '../../../hooks/useEventListener';
 import { PAGE_INFO_TYPE } from '../../../hooks/useRouting';
@@ -100,7 +100,7 @@ const setupGroupWithBeStatusUndefined = (): { user: UserEvent; store: RootStore 
 	});
 	useParams.mockReturnValue({ meetingId: groupMeeting.id });
 	const { user } = setup(
-		<AccessMeetingPage meetingName={groupMeeting.name} hasUserDirectAccess={canAccessMeeting} />
+		<MeetingAccessPage meetingName={groupMeeting.name} hasUserDirectAccess={canAccessMeeting} />
 	);
 	return { user, store: result.current };
 };
@@ -119,7 +119,7 @@ const setupBasicGroup = (): { user: UserEvent; store: RootStore } => {
 	});
 	useParams.mockReturnValue({ meetingId: groupMeeting.id });
 	const { user } = setup(
-		<AccessMeetingPage meetingName={groupMeeting.name} hasUserDirectAccess={canAccessMeeting} />
+		<MeetingAccessPage meetingName={groupMeeting.name} hasUserDirectAccess={canAccessMeeting} />
 	);
 	return { user, store: result.current };
 };
@@ -144,7 +144,7 @@ const setupForWaitingRoom = (): { user: UserEvent; store: RootStore } => {
 	});
 	useParams.mockReturnValue({ meetingId: groupForWaitingRoom.id });
 	const { user } = setup(
-		<AccessMeetingPage meetingName={meetingForWaitingRoom.name} hasUserDirectAccess={false} />
+		<MeetingAccessPage meetingName={meetingForWaitingRoom.name} hasUserDirectAccess={false} />
 	);
 	return { user, store: result.current };
 };

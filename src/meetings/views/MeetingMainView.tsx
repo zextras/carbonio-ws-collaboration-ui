@@ -9,13 +9,14 @@ import React, { lazy, ReactElement, Suspense, useEffect } from 'react';
 import { createMemoryHistory } from 'history';
 import { Route, Router, Switch } from 'react-router-dom';
 
+import MeetingExternalAccessPageView from './MeetingExternalAccessPageView';
 import ShimmerEntryMeetingView from './shimmers/ShimmerEntryMeetingView';
 import useDarkReader from '../../hooks/useDarkReader';
 import { MEETINGS_ROUTES, ROUTES } from '../../hooks/useRouting';
 import useStore from '../../store/Store';
 
-const LazyAccessMeetingPageView = lazy(
-	() => import(/* webpackChunkName: "AccessMeetingPageView" */ './AccessMeetingPageView')
+const LazyAccessPageView = lazy(
+	() => import(/* webpackChunkName: "MeetingAccessPageView" */ './AccessPage')
 );
 
 const LazyMeetingSkeleton = lazy(
@@ -24,9 +25,9 @@ const LazyMeetingSkeleton = lazy(
 
 const LazyInfoPage = lazy(() => import(/* webpackChunkName: "InfoPage" */ './InfoPage'));
 
-const AccessMeetingPageView = (): ReactElement => (
+const AccessPageView = (): ReactElement => (
 	<Suspense fallback={<ShimmerEntryMeetingView />}>
-		<LazyAccessMeetingPageView />
+		<LazyAccessPageView />
 	</Suspense>
 );
 
@@ -75,9 +76,10 @@ const MeetingMainView = (): ReactElement => {
 	return (
 		<Router history={history}>
 			<Switch>
-				<Route exact path={ROUTES.MAIN} component={AccessMeetingPageView} />
+				<Route exact path={ROUTES.MAIN} component={AccessPageView} />
 				<Route exact path={MEETINGS_ROUTES.MEETING} component={MeetingSkeleton} />
 				<Route exact path={MEETINGS_ROUTES.INFO} component={InfoPage} />
+				<Route exact path={MEETINGS_ROUTES.EXTERNAL} component={MeetingExternalAccessPageView} />
 			</Switch>
 		</Router>
 	);
