@@ -16,10 +16,9 @@ import { RoomType } from '../../../../types/store/RoomTypes';
 type ClearHistoryProps = {
 	roomId: string;
 	roomType?: string;
-	iAmTheOnlyOwner?: boolean;
 };
 
-const ClearHistoryAction: FC<ClearHistoryProps> = ({ roomId, roomType, iAmTheOnlyOwner }) => {
+const ClearHistoryAction: FC<ClearHistoryProps> = ({ roomId, roomType }) => {
 	const [t] = useTranslation();
 	const clearHistoryLabel = t('action.clearHistory', 'Clear history');
 	const historyClearedLabel = t('feedback.historyCleared', 'History cleared successfully!');
@@ -28,8 +27,8 @@ const ClearHistoryAction: FC<ClearHistoryProps> = ({ roomId, roomType, iAmTheOnl
 
 	const padding = useMemo(() => {
 		if (roomType !== RoomType.GROUP) return { top: 'small', bottom: 'large' };
-		return iAmTheOnlyOwner ? { top: 'small', bottom: 'large' } : { top: 'small' };
-	}, [iAmTheOnlyOwner, roomType]);
+		return { top: 'small' };
+	}, [roomType]);
 
 	const openModal = useCallback(() => setClearHistoryModalOpen(true), []);
 
@@ -45,8 +44,7 @@ const ClearHistoryAction: FC<ClearHistoryProps> = ({ roomId, roomType, iAmTheOnl
 				label: historyClearedLabel,
 				hideButton: true
 			}),
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[]
+		[createSnackbar, historyClearedLabel]
 	);
 
 	return (
