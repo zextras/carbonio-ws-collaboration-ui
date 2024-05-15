@@ -9,7 +9,6 @@ import React, { lazy, ReactElement, Suspense, useEffect } from 'react';
 import { createMemoryHistory } from 'history';
 import { Route, Router, Switch } from 'react-router-dom';
 
-import MeetingExternalAccessPageView from './MeetingExternalAccessPageView';
 import ShimmerEntryMeetingView from './shimmers/ShimmerEntryMeetingView';
 import useDarkReader from '../../hooks/useDarkReader';
 import { MEETINGS_ROUTES, ROUTES } from '../../hooks/useRouting';
@@ -66,7 +65,7 @@ const MeetingMainView = (): ReactElement => {
 		if (!darkReaderStatus) {
 			enableDarkReader();
 		}
-		return () => {
+		return (): void => {
 			if (!darkReaderStatus) {
 				disableDarkReader();
 			}
@@ -79,7 +78,6 @@ const MeetingMainView = (): ReactElement => {
 				<Route exact path={ROUTES.MAIN} component={AccessPageView} />
 				<Route exact path={MEETINGS_ROUTES.MEETING} component={MeetingSkeleton} />
 				<Route exact path={MEETINGS_ROUTES.INFO} component={InfoPage} />
-				<Route exact path={MEETINGS_ROUTES.EXTERNAL} component={MeetingExternalAccessPageView} />
 			</Switch>
 		</Router>
 	);

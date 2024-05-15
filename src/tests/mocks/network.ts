@@ -10,6 +10,7 @@ import {
 	CreateMeetingResponse,
 	DeleteMeetingResponse,
 	GetMeetingResponse,
+	GetScheduledMeetingNameResponse,
 	JoinMeetingResponse,
 	LeaveMeetingResponse,
 	StartMeetingResponse,
@@ -265,7 +266,7 @@ jest.mock('../../network', () => {
 					result ? resolve(result) : reject(new Error(noResultProvided));
 				});
 			},
-			getScheduledMeetingName: (): Promise<SubscribeMediaResponse> =>
+			getScheduledMeetingName: (): Promise<GetScheduledMeetingNameResponse> =>
 				new Promise((resolve, reject) => {
 					const result = mockedGetScheduledMeetingName();
 					result ? resolve(result) : reject(new Error(noResultProvided));

@@ -56,7 +56,7 @@ const MeetingAccessPageView = (): ReactElement => {
 	}, [chatsBeNetworkStatus, goToInfoPage, meetingId]);
 
 	return (
-		<Container background={'gray0'}>
+		<Container background={'gray0'} data-testid="meeting_access_page_view">
 			{chatsBeNetworkStatus && (
 				<MeetingAccessPage hasUserDirectAccess={hasUserDirectAccess} meetingName={meetingName} />
 			)}

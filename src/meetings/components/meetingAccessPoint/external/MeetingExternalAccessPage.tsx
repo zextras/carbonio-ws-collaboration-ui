@@ -36,7 +36,7 @@ const MeetingExternalAccessPage = (): ReactElement => {
 	}, [userName]);
 
 	return (
-		<Container crossAlignment="flex-start" padding="6.25rem">
+		<Container crossAlignment="flex-start" padding="6.25rem" data-testid="external_access_page">
 			<CustomContainer
 				mainAlignment="flex-start"
 				background={'gray6'}
