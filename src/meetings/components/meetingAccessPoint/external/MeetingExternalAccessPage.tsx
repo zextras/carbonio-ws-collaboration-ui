@@ -57,6 +57,7 @@ const MeetingExternalAccessPage = (): ReactElement => {
 					<Text size="large">How would you like to introduce yourself?</Text>
 					<Input label=" Type here your name" value={userName} onChange={handleInputChange} />
 					<CustomButton
+						data-testid="join_button"
 						width="fill"
 						label="join the meeting"
 						onClick={handleCreateExternalUser}

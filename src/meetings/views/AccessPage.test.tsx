@@ -77,7 +77,7 @@ const setupGroupForAccessPage = (): { user: UserEvent; store: RootStore } => {
 	act(() => {
 		result.current.setUserInfo(user1);
 		result.current.setUserInfo(user2);
-		result.current.setLoginInfo(user1.id, user1.name);
+		result.current.setLoginInfo(user3.id, user3.name);
 		result.current.addRoom(groupRoom);
 		result.current.addMeeting(groupMeeting);
 		result.current.setChatsBeStatus(true);
@@ -118,8 +118,8 @@ describe('Meeting access page', () => {
 		mockDarkReaderIsEnabled.mockReturnValueOnce(true);
 		setupAccessPage();
 
-		const t = await screen.findByTestId('meeting_access_page_view');
-		expect(t).toBeInTheDocument();
+		const meetingPage = await screen.findByTestId('meeting_access_page_view');
+		expect(meetingPage).toBeInTheDocument();
 	});
 
 	test('user that is not authenticated and enters in a meeting should see the access point', async () => {
@@ -131,8 +131,11 @@ describe('Meeting access page', () => {
 		expect(mockUseAuthenticated).toHaveBeenCalled();
 		expect(mockedGetScheduledMeetingName).toHaveBeenCalled();
 
-		const t = await screen.findByTestId('external_access_page');
-		expect(t).toBeInTheDocument();
+		const meetingPage = await screen.findByTestId('external_access_page');
+		expect(meetingPage).toBeInTheDocument();
+
+		const Button = await screen.findByTestId('join_button');
+		expect(Button).not.toHaveAttribute('disabled', true);
 	});
 
 	test('user that is authenticated and enters in a meeting in a group should see the access point', async () => {
@@ -141,7 +144,7 @@ describe('Meeting access page', () => {
 		mockedGetMeetingRequest.mockReturnValue('meeting');
 		setupGroupForAccessPage();
 
-		const t = await screen.findByTestId('meeting_access_page_view');
-		expect(t).toBeInTheDocument();
+		const meetingPage = await screen.findByTestId('meeting_access_page_view');
+		expect(meetingPage).toBeInTheDocument();
 	});
 });
