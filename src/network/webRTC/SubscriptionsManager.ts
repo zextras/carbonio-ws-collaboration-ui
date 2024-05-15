@@ -6,6 +6,7 @@
 
 import { concat, differenceWith, filter, find, isEqual, remove, size } from 'lodash';
 
+import PendingSubscriptionManager from './PendingSubscriptionRequest';
 import useStore from '../../store/Store';
 import { STREAM_TYPE, Subscription } from '../../types/store/ActiveMeetingTypes';
 import { MeetingsApi } from '../index';
@@ -17,13 +18,12 @@ class SubscriptionsManager {
 
 	subscriptions: Subscription[] = [];
 
-	isRequesting = false;
-
-	pendingRequests: (Subscription[] | undefined)[] = [];
+	pendingSubscription: PendingSubscriptionManager;
 
 	constructor(meetingId: string) {
 		this.meetingId = meetingId;
 		this.myUserId = useStore.getState().session.id;
+		this.pendingSubscription = new PendingSubscriptionManager(this.updateSubscription);
 	}
 
 	private filterSubscription(desiderata: Subscription[]): Subscription[] {
@@ -44,34 +44,18 @@ class SubscriptionsManager {
 		subscriptionToAdd: Subscription[],
 		subscriptionToRemove: Subscription[]
 	): void {
-		this.isRequesting = true;
+		this.pendingSubscription.subscriptionRequesting();
 		MeetingsApi.subscribeToMedia(this.meetingId, subscriptionToAdd, subscriptionToRemove)
 			.then(() => {
 				this.subscriptions = concat(this.subscriptions, subscriptionToAdd);
 				this.subscriptions = differenceWith(this.subscriptions, subscriptionToRemove, isEqual);
 
-				this.isRequesting = false;
-				// Perform next pending request
-				if (size(this.pendingRequests) > 0) {
-					const nextRequest = this.pendingRequests.shift();
-					if (nextRequest) {
-						this.updateSubscription(nextRequest);
-					}
-				}
+				this.pendingSubscription.subscriptionRequestDone();
 			})
-			.catch(() => {
-				this.isRequesting = false;
-				// Perform next pending request
-				if (size(this.pendingRequests) > 0) {
-					const nextRequest = this.pendingRequests.shift();
-					if (nextRequest) {
-						this.updateSubscription(nextRequest);
-					}
-				}
-			});
+			.catch(() => this.pendingSubscription.subscriptionRequestDone());
 	}
 
-	// We delete the subscription when user leave the meeting
+	// Delete the subscription when user leaves the meeting
 	public deleteSubscription(subIdToDelete: string): void {
 		remove(this.subscriptions, (sub) => sub.userId === subIdToDelete);
 	}
@@ -104,9 +88,8 @@ class SubscriptionsManager {
 
 	// Ask subscriptions that are not already asked and unset subscriptions that are not needed anymore
 	public updateSubscription(subsToRequest: Subscription[]): void {
-		// If a subscription is performing, the new request is pushed in a queue performed after the current one
-		if (this.isRequesting) {
-			this.pendingRequests.push(subsToRequest);
+		// Check if a request is already in progress
+		if (this.pendingSubscription.checkRequestStatus(subsToRequest)) {
 			return;
 		}
 
@@ -123,7 +106,7 @@ class SubscriptionsManager {
 		}
 	}
 
-	clean(): void {
+	public clean(): void {
 		this.subscriptions = [];
 	}
 }
