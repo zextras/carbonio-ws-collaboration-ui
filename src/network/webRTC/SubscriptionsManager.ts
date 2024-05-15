@@ -6,7 +6,7 @@
 
 import { concat, differenceWith, filter, find, isEqual, remove, size } from 'lodash';
 
-import PendingSubscriptionManager from './PendingSubscriptionRequest';
+import PendingSubscriptionManager from './PendingSubscriptionManager';
 import useStore from '../../store/Store';
 import { STREAM_TYPE, Subscription } from '../../types/store/ActiveMeetingTypes';
 import { MeetingsApi } from '../index';
