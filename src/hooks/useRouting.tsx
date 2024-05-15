@@ -61,6 +61,7 @@ const useRouting = (): UseRoutingHook => {
 		(infoType: PAGE_INFO_TYPE): void => route(MEETINGS_ROUTES.INFO.replace(':infoType', infoType)),
 		[route]
 	);
+
 	return {
 		goToMainPage,
 		goToRoomPage,

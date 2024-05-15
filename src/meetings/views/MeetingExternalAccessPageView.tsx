@@ -25,7 +25,7 @@ const MeetingExternalAccessPageView = (): ReactElement => {
 		if (darkReaderStatus) {
 			disableDarkReader();
 		}
-		return () => {
+		return (): void => {
 			if (!darkReaderStatus) {
 				enableDarkReader();
 			}
