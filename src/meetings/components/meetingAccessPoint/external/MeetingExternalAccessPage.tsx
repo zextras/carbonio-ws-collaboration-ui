@@ -5,7 +5,8 @@
  */
 import React, { ReactElement, useCallback, useMemo, useState } from 'react';
 
-import { Button, Container, Input, Text } from '@zextras/carbonio-design-system';
+import { Button, Container, Input, Padding, Text } from '@zextras/carbonio-design-system';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 const CustomContainer = styled(Container)`
@@ -22,6 +23,19 @@ const CustomButton = styled(Button)`
 `;
 
 const MeetingExternalAccessPage = (): ReactElement => {
+	const [t] = useTranslation();
+	const welcomePageTitle = t('welcomePage.blob', 'Hey stranger!');
+	const nameInput = t('welcomePage.nameInput', 'Type here your name');
+	const joinButton = t('welcomePage.joinButton', 'Join the meeting');
+	const welcomePageDescription = t(
+		'welcomePage.description',
+		'How would you like to introduce yourself?'
+	);
+	const enterMeetingDescription = t(
+		'welcomePage.journeyDescription',
+		'You will be redirected to the waiting room where a moderator will approve your access.'
+	);
+
 	const [userName, setUserName] = useState<string>('');
 
 	const handleInputChange = useCallback((ev: React.FormEvent<HTMLInputElement>): void => {
@@ -43,27 +57,26 @@ const MeetingExternalAccessPage = (): ReactElement => {
 				width="27.25rem"
 				height="fit"
 				maxHeight="38.75rem"
-				padding={{ vertical: '2rem', horizontal: '3rem' }}
+				padding="4rem"
 			>
-				<Container
-					mainAlignment="flex-start"
-					gap="1.5rem"
-					padding={{ vertical: '4rem' }}
-					height="fit"
-				>
+				<Container mainAlignment="flex-start" gap="1.5rem" height="fit">
 					<CustomText size="large" weight="bold">
-						Hey stranger!
+						{welcomePageTitle}
 					</CustomText>
-					<Text size="large">How would you like to introduce yourself?</Text>
-					<Input label=" Type here your name" value={userName} onChange={handleInputChange} />
+					<Text>{welcomePageDescription}</Text>
+					<Input label={nameInput} value={userName} onChange={handleInputChange} />
 					<CustomButton
 						data-testid="join_button"
 						width="fill"
-						label="join the meeting"
+						label={joinButton}
 						onClick={handleCreateExternalUser}
 						disabled={isButtonDisabled}
 					/>
 				</Container>
+				<Padding bottom="4rem" />
+				<Text overflow="break-word" size="small">
+					{enterMeetingDescription}
+				</Text>
 			</CustomContainer>
 		</Container>
 	);
