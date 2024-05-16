@@ -14,8 +14,8 @@ import useDarkReader from '../../hooks/useDarkReader';
 import { MEETINGS_ROUTES, ROUTES } from '../../hooks/useRouting';
 import useStore from '../../store/Store';
 
-const LazyAccessMeetingPageView = lazy(
-	() => import(/* webpackChunkName: "AccessMeetingPageView" */ './AccessMeetingPageView')
+const LazyAccessPageView = lazy(
+	() => import(/* webpackChunkName: "MeetingAccessPageView" */ './AccessPage')
 );
 
 const LazyMeetingSkeleton = lazy(
@@ -24,9 +24,9 @@ const LazyMeetingSkeleton = lazy(
 
 const LazyInfoPage = lazy(() => import(/* webpackChunkName: "InfoPage" */ './InfoPage'));
 
-const AccessMeetingPageView = (): ReactElement => (
+const AccessPageView = (): ReactElement => (
 	<Suspense fallback={<ShimmerEntryMeetingView />}>
-		<LazyAccessMeetingPageView />
+		<LazyAccessPageView />
 	</Suspense>
 );
 
@@ -65,7 +65,7 @@ const MeetingMainView = (): ReactElement => {
 		if (!darkReaderStatus) {
 			enableDarkReader();
 		}
-		return () => {
+		return (): void => {
 			if (!darkReaderStatus) {
 				disableDarkReader();
 			}
@@ -75,7 +75,7 @@ const MeetingMainView = (): ReactElement => {
 	return (
 		<Router history={history}>
 			<Switch>
-				<Route exact path={ROUTES.MAIN} component={AccessMeetingPageView} />
+				<Route exact path={ROUTES.MAIN} component={AccessPageView} />
 				<Route exact path={MEETINGS_ROUTES.MEETING} component={MeetingSkeleton} />
 				<Route exact path={MEETINGS_ROUTES.INFO} component={InfoPage} />
 			</Switch>

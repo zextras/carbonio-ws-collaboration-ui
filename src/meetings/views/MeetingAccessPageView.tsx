@@ -7,7 +7,6 @@
 import React, { ReactElement, useEffect, useMemo, useState } from 'react';
 
 import { Container } from '@zextras/carbonio-design-system';
-import { useAuthenticated } from '@zextras/carbonio-shell-ui';
 import { find } from 'lodash';
 
 import { MEETINGS_PATH } from '../../constants/appConstants';
@@ -15,9 +14,9 @@ import useRouting, { PAGE_INFO_TYPE } from '../../hooks/useRouting';
 import { MeetingsApi } from '../../network';
 import useStore from '../../store/Store';
 import { MeetingType } from '../../types/network/models/meetingBeTypes';
-import AccessMeetingPage from '../components/meetingAccessPoint/AccessMeetingPage';
+import MeetingAccessPage from '../components/meetingAccessPoint/MeetingAccessPage';
 
-const AccessMeetingPageView = (): ReactElement => {
+const MeetingAccessPageView = (): ReactElement => {
 	const meetingId = useMemo(() => document.location.pathname.split(MEETINGS_PATH)[1], []);
 
 	const chatsBeNetworkStatus = useStore(({ connections }) => connections.status.chats_be);
@@ -25,11 +24,6 @@ const AccessMeetingPageView = (): ReactElement => {
 	const [meetingName, setMeetingName] = useState<string>('');
 
 	const { goToInfoPage } = useRouting();
-	const authenticated = useAuthenticated();
-
-	useEffect(() => {
-		if (!authenticated) goToInfoPage(PAGE_INFO_TYPE.UNAUTHENTICATED);
-	}, [authenticated, goToInfoPage]);
 
 	useEffect(() => {
 		if (chatsBeNetworkStatus) {
@@ -62,12 +56,12 @@ const AccessMeetingPageView = (): ReactElement => {
 	}, [chatsBeNetworkStatus, goToInfoPage, meetingId]);
 
 	return (
-		<Container background={'gray0'}>
+		<Container background={'gray0'} data-testid="meeting_access_page_view">
 			{chatsBeNetworkStatus && (
-				<AccessMeetingPage hasUserDirectAccess={hasUserDirectAccess} meetingName={meetingName} />
+				<MeetingAccessPage hasUserDirectAccess={hasUserDirectAccess} meetingName={meetingName} />
 			)}
 		</Container>
 	);
 };
 
-export default AccessMeetingPageView;
+export default MeetingAccessPageView;
