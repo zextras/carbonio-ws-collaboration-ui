@@ -91,6 +91,10 @@ const meetingForWaitingRoom: MeetingBe = createMockMeeting({
 const setupGroupWithBeStatusUndefined = (): { user: UserEvent; store: RootStore } => {
 	const { result } = renderHook(() => useStore());
 	act(() => {
+		localStorage.setItem(
+			'ChatsMeetingSettings',
+			JSON.stringify({ EnableCamera: false, EnableMicrophone: false })
+		);
 		result.current.setUserInfo(user1);
 		result.current.setUserInfo(user2);
 		result.current.setLoginInfo(user1.id, user1.name);
@@ -108,6 +112,10 @@ const setupGroupWithBeStatusUndefined = (): { user: UserEvent; store: RootStore 
 const setupBasicGroup = (): { user: UserEvent; store: RootStore } => {
 	const { result } = renderHook(() => useStore());
 	act(() => {
+		localStorage.setItem(
+			'ChatsMeetingSettings',
+			JSON.stringify({ EnableCamera: false, EnableMicrophone: false })
+		);
 		result.current.setUserInfo(user1);
 		result.current.setUserInfo(user2);
 		result.current.setLoginInfo(user1.id, user1.name);
@@ -127,6 +135,10 @@ const setupBasicGroup = (): { user: UserEvent; store: RootStore } => {
 const setupForWaitingRoom = (): { user: UserEvent; store: RootStore } => {
 	const { result } = renderHook(() => useStore());
 	act(() => {
+		localStorage.setItem(
+			'ChatsMeetingSettings',
+			JSON.stringify({ EnableCamera: true, EnableMicrophone: true })
+		);
 		result.current.setUserInfo(user3);
 		result.current.setUserInfo(user2);
 		result.current.setLoginInfo(user2.id, user2.name);

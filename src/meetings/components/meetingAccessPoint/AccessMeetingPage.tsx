@@ -117,7 +117,7 @@ const AccessMeetingPage: FC<AccessMeetingPageProps> = ({ hasUserDirectAccess, me
 	// Leave waiting list on window close
 	useEffect(() => {
 		window.parent.addEventListener('beforeunload', handleLeave);
-		return () => {
+		return (): void => {
 			window.parent.removeEventListener('beforeunload', handleLeave);
 		};
 	}, [handleLeave]);
@@ -125,7 +125,7 @@ const AccessMeetingPage: FC<AccessMeetingPageProps> = ({ hasUserDirectAccess, me
 	useEffect(() => {
 		window.addEventListener('resize', handleResize);
 
-		return () => window.removeEventListener('resize', handleResize);
+		return (): void => window.removeEventListener('resize', handleResize);
 	}, [handleResize]);
 
 	useEffect(() => {
