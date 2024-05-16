@@ -96,7 +96,6 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 	const unsetReferenceMessage = useStore((store) => store.unsetReferenceMessage);
 	const setInputHasFocus = useStore((store) => store.setInputHasFocus);
 	const setDraftMessage = useStore((store) => store.setDraftMessage);
-	const addDescriptionToFileToAttach = useStore((store) => store.addDescriptionToFileToAttach);
 	const unsetFilesToAttach = useStore((store) => store.unsetFilesToAttach);
 	const filesToUploadArray = useStore((store) => getFilesToUploadArray(store, roomId));
 	const lastMessageId: string | undefined = useStore((state) =>
@@ -144,17 +143,22 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 
 	const checkMaxLengthAndSetMessage = useCallback(
 		(textareaValue: string): void => {
-			const charsLimit =
-				size(filesToUploadArray) > 0 ? FILE_DESCRIPTION_CHAR_LIMIT : MESSAGE_CHAR_LIMIT;
-			if (size(textareaValue) >= charsLimit) {
+			const filesToUpload = useStore.getState().activeConversations[roomId]?.filesToAttach;
+			const charsLimit = size(filesToUpload) > 0 ? FILE_DESCRIPTION_CHAR_LIMIT : MESSAGE_CHAR_LIMIT;
+			if (textareaValue.length >= charsLimit) {
 				setTextMessage(textareaValue.slice(0, charsLimit));
 				setNoMoreCharsOnInputComposer(true);
 			} else {
 				setNoMoreCharsOnInputComposer(false);
 			}
 		},
-		[filesToUploadArray]
+		[roomId]
 	);
+
+	// Check message max length when some files are attached
+	useEffect(() => {
+		checkMaxLengthAndSetMessage(messageInputRef.current?.value ?? '');
+	}, [filesToUploadArray?.length, checkMaxLengthAndSetMessage]);
 
 	const errorHandler = (reason: DOMException, fileName: string): void => {
 		if (reason.name !== 'AbortError') {
@@ -328,8 +332,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 		sendStopWriting,
 		referenceMessage,
 		completeReferenceMessage,
-		filesToUploadArray,
-		addDescriptionToFileToAttach
+		filesToUploadArray
 	]);
 
 	// Set focus on input after closing DeleteMessageModal
