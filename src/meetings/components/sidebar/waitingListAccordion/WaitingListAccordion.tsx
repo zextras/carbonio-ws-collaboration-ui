@@ -68,7 +68,7 @@ const WaitingListAccordion: FC<WaitingListAccordionProps> = ({ meetingId }) => {
 	}, [accordionStatus, accordionTitle, meetingId, toggleAccordionStatus, waitingList]);
 
 	if (size(waitingList) === 0) return null;
-	return <CustomAccordion items={items} borderRadius="none" background="gray0" />;
+	return <CustomAccordion items={items} borderRadius="none" background={'gray0'} />;
 };
 
 export default WaitingListAccordion;

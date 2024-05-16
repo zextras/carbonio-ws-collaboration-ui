@@ -64,7 +64,7 @@
 		"@emoji-mart/data": "^1.0.2",
 		"@testing-library/react-hooks": "^8.0.1",
 		"@zextras/carbonio-design-system": "^5.0.0",
-		"@zextras/carbonio-shell-ui": "6.0.0",
+		"@zextras/carbonio-shell-ui": "6.0.0-devel.1713196254679",
 		"@zextras/carbonio-ui-preview": "^1.2.2",
 		"emoji-mart": "^5.1.0",
 		"identity-obj-proxy": "^3.0.0",
