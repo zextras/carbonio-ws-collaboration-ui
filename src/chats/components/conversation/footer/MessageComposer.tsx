@@ -177,7 +177,10 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 		}
 	};
 
-	const uploadAttachmentPromise = (file: FileToUpload, controller: AbortController): any => {
+	const uploadAttachmentPromise = (
+		file: FileToUpload,
+		controller: AbortController
+	): Promise<void | AddRoomAttachmentResponse> => {
 		const fileName = file.file.name;
 		const { signal } = controller;
 
@@ -204,9 +207,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 						errorHandler(reason, fileName);
 					})
 				)
-				.catch((err) => {
-					Promise.reject(new Error(`Upload error for ${fileName}, reason: ${err}`));
-				});
+				.catch((err) => Promise.reject(new Error(`Upload error for ${fileName}, reason: ${err}`)));
 		}
 		return RoomsApi.addRoomAttachment(
 			roomId,

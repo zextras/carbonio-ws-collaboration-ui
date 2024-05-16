@@ -8,12 +8,7 @@ import { renderHook } from '@testing-library/react-hooks';
 
 import { useIsWritingLabel } from './useIsWritingLabel';
 import useStore from '../store/Store';
-import {
-	createMockMeeting,
-	createMockMember,
-	createMockParticipants,
-	createMockRoom
-} from '../tests/createMock';
+import { createMockMember, createMockRoom } from '../tests/createMock';
 import { RoomBe, RoomType } from '../types/network/models/roomBeTypes';
 import { UserBe } from '../types/network/models/userBeTypes';
 import { RootStore } from '../types/store/StoreTypes';
@@ -60,14 +55,6 @@ const testRoom: RoomBe = createMockRoom({
 		createMockMember({ userId: user3Info.id }),
 		createMockMember({ userId: user4Info.id }),
 		createMockMember({ userId: user5Info.id })
-	]
-});
-
-const mockMeeting = createMockMeeting({
-	roomId: testRoom.id,
-	participants: [
-		createMockParticipants({ userId: user2Info.id }),
-		createMockParticipants({ userId: user1Info.id })
 	]
 });
 
