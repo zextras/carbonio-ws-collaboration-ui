@@ -6,7 +6,7 @@
 
 import React, { FC, useCallback, useMemo } from 'react';
 
-import { Accordion, AccordionItemType, Container } from '@zextras/carbonio-design-system';
+import { Accordion, AccordionItemType } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -74,13 +74,12 @@ const MeetingParticipantsAccordion: FC<MeetingParticipantsAccordionProps> = ({ m
 	}, [accordionStatus, meetingId, participantsTitle, toggleAccordionStatus]);
 
 	return (
-		<Container
+		<CustomAccordion
+			items={infoDetails}
+			borderRadius="none"
+			background={'gray0'}
 			data-testid="MeetingParticipantsAccordion"
-			crossAlignment="flex-start"
-			mainAlignment="flex-start"
-		>
-			<CustomAccordion items={infoDetails} borderRadius="none" background="gray0" />
-		</Container>
+		/>
 	);
 };
 

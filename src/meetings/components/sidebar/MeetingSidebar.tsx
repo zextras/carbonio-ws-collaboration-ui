@@ -53,7 +53,11 @@ const SidebarIconButton = styled(IconButton)`
 `;
 
 const AccordionContainer = styled(Container)`
-	overflow-y: auto;
+	overflow-y: scroll;
+	scrollbar-width: none;
+	::-webkit-scrollbar {
+		width: 0;
+	}
 `;
 
 const MeetingSidebar = (): ReactElement => {
@@ -72,6 +76,7 @@ const MeetingSidebar = (): ReactElement => {
 	const canVideoCallRecord = useStore((store) =>
 		getCapability(store, CapabilityType.CAN_VIDEO_CALL_RECORD)
 	);
+
 	const toggleSidebar = useCallback(
 		() => setMeetingSidebarStatus(meetingId, !sidebarIsVisible),
 		[setMeetingSidebarStatus, meetingId, sidebarIsVisible]
@@ -103,14 +108,21 @@ const MeetingSidebar = (): ReactElement => {
 			mainAlignment="flex-end"
 			data-testid="meeting_sidebar"
 		>
-			{meetingChatVisibility !== MeetingChatVisibility.EXPANDED && (
-				<AccordionContainer mainAlignment="flex-start" flexGrow="1" gap="gap: 0.063rem">
-					{showRecordingAccordion && <RecordingAccordion meetingId={meetingId} />}
-					{showWaitingListAccordion && <WaitingListAccordion meetingId={meetingId} />}
-					{showParticipantsAccordion && <MeetingParticipantsAccordion meetingId={meetingId} />}
-				</AccordionContainer>
-			)}
-			<MeetingConversationAccordion roomId={roomId || ''} meetingId={meetingId} />
+			<Container height="100%" mainAlignment="space-between">
+				<Container
+					height="fit"
+					maxHeight={meetingChatVisibility === MeetingChatVisibility.OPEN ? '50%' : 'fill'}
+				>
+					{meetingChatVisibility !== MeetingChatVisibility.EXPANDED && (
+						<AccordionContainer height="fit" mainAlignment="flex-start" gap="gap: 0.063rem">
+							{showRecordingAccordion && <RecordingAccordion meetingId={meetingId} />}
+							{showWaitingListAccordion && <WaitingListAccordion meetingId={meetingId} />}
+							{showParticipantsAccordion && <MeetingParticipantsAccordion meetingId={meetingId} />}
+						</AccordionContainer>
+					)}
+				</Container>
+				<MeetingConversationAccordion roomId={roomId ?? ''} meetingId={meetingId} />
+			</Container>
 			<ChangeSidebarStatusButton>
 				<Tooltip
 					label={sidebarIsVisible ? collapseSidebarLabel : expandSidebarLabel}
