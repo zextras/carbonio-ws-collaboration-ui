@@ -33,5 +33,9 @@ export const BrowserUtils = {
 	getFirefoxVersion: (): number | false => {
 		const match = navigator.userAgent.match(/Firefox\/([0-9]+)\./);
 		return match ? parseInt(match[1], 10) : 0;
+	},
+	clearAuthCookies: (): void => {
+		document.cookie = `ZM_AUTH_TOKEN=; path=/;expires=Thu, 01 Jan 1970 00:00:01 GMT;`;
+		document.cookie = `ZX_AUTH_TOKEN=; path=/;expires=Thu, 01 Jan 1970 00:00:01 GMT;`;
 	}
 };

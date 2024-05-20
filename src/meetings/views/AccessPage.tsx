@@ -3,12 +3,11 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import React, { ReactElement, useEffect, useMemo, useState } from 'react';
+import React, { ReactElement, useEffect, useMemo } from 'react';
 
 import { useAuthenticated } from '@zextras/carbonio-shell-ui';
 
-import MeetingAccessPageView from './MeetingAccessPageView';
-import MeetingExternalAccessPageView from './MeetingExternalAccessPageView';
+import ShimmerEntryMeetingView from './shimmers/ShimmerEntryMeetingView';
 import { MEETINGS_PATH } from '../../constants/appConstants';
 import useRouting, { PAGE_INFO_TYPE } from '../../hooks/useRouting';
 import { MeetingsApi } from '../../network';
@@ -16,25 +15,25 @@ import { MeetingsApi } from '../../network';
 const AccessPage = (): ReactElement => {
 	const meetingId = useMemo(() => document.location.pathname.split(MEETINGS_PATH)[1], []);
 
-	const [isExternal, setIsExternal] = useState(false);
-
-	const { goToInfoPage } = useRouting();
+	const { goToInfoPage, goToExternalLoginPage, goToMeetingAccessPage } = useRouting();
 	const authenticated = useAuthenticated();
 
 	useEffect(() => {
 		if (!authenticated) {
 			MeetingsApi.getScheduledMeetingName(meetingId)
 				.then(() => {
-					setIsExternal(true);
+					goToExternalLoginPage();
 				})
 				.catch((err) => {
 					console.error(err);
 					goToInfoPage(PAGE_INFO_TYPE.MEETING_NOT_FOUND);
 				});
+		} else {
+			goToMeetingAccessPage();
 		}
-	}, [authenticated, goToInfoPage, meetingId]);
+	}, [authenticated, goToExternalLoginPage, goToInfoPage, goToMeetingAccessPage, meetingId]);
 
-	return isExternal ? <MeetingExternalAccessPageView /> : <MeetingAccessPageView />;
+	return <ShimmerEntryMeetingView />;
 };
 
 export default AccessPage;

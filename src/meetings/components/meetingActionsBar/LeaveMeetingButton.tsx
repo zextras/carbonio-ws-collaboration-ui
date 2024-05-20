@@ -12,6 +12,7 @@ import styled from 'styled-components';
 
 import useRouting, { MeetingRoutesParams, PAGE_INFO_TYPE } from '../../../hooks/useRouting';
 import { MeetingsApi } from '../../../network';
+import { BrowserUtils } from '../../../utils/BrowserUtils';
 
 const CustomContainer = styled(Container)`
 	> div > button > div {
@@ -54,6 +55,8 @@ const LeaveMeetingButton = ({ isHoovering }: LeaveMeetingButtonProps): ReactElem
 		(event) => {
 			event.stopPropagation();
 			MeetingsApi.leaveMeeting(meetingId).then(() => {
+				// TODO: Limit this cookie cleans only to guest accounts
+				BrowserUtils.clearAuthCookies();
 				goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED);
 			});
 		},
@@ -70,7 +73,7 @@ const LeaveMeetingButton = ({ isHoovering }: LeaveMeetingButtonProps): ReactElem
 			}, 800);
 		};
 		document.addEventListener('click', handleClick);
-		return () => {
+		return (): void => {
 			document.removeEventListener('click', handleClick);
 		};
 	}, [buttonLabel]);

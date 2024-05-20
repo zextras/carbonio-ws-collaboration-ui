@@ -10,6 +10,7 @@ import { Container } from '@zextras/carbonio-design-system';
 import { find } from 'lodash';
 
 import { MEETINGS_PATH } from '../../constants/appConstants';
+import useDarkReader from '../../hooks/useDarkReader';
 import useRouting, { PAGE_INFO_TYPE } from '../../hooks/useRouting';
 import { MeetingsApi } from '../../network';
 import useStore from '../../store/Store';
@@ -24,6 +25,7 @@ const MeetingAccessPageView = (): ReactElement => {
 	const [meetingName, setMeetingName] = useState<string>('');
 
 	const { goToInfoPage } = useRouting();
+	const { darkReaderStatus, enableDarkReader, disableDarkReader } = useDarkReader();
 
 	useEffect(() => {
 		if (chatsBeNetworkStatus) {
@@ -54,6 +56,10 @@ const MeetingAccessPageView = (): ReactElement => {
 				});
 		}
 	}, [chatsBeNetworkStatus, goToInfoPage, meetingId]);
+
+	useEffect(() => {
+		enableDarkReader();
+	}, [darkReaderStatus, disableDarkReader, enableDarkReader]);
 
 	return (
 		<Container background={'gray0'} data-testid="meeting_access_page_view">

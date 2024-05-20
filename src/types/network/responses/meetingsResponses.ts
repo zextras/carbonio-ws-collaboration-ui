@@ -41,3 +41,27 @@ export type AcceptWaitingUserResponse = { accepted: boolean };
 export type StartRecordingResponse = Response;
 
 export type StopRecordingResponse = Response;
+
+export type CreateGuestAccountResponse = Response & {
+	id: string;
+	tokenId: string;
+	zmToken: string;
+	zxToken: string;
+};
+
+export type LoginV3ConfigResponse = {
+	carbonioAdminUiDescription: string;
+	carbonioAdminUiTitle: string;
+	carbonioFeatureResetPasswordEnabled: boolean;
+	carbonioLogoURL: string;
+	carbonioPrefWebUiDarkMode: boolean;
+	carbonioWebUiDarkMode: boolean;
+	carbonioWebUiDescription: string;
+	carbonioWebUiTitle: string;
+	publicUrl: string;
+	zimbraDomainName: string;
+	zimbraPublicServiceHostname: string;
+	zimbraPublicServicePort: string;
+	zimbraPublicServiceProtocol: string;
+	carbonioWebUiAppLogo?: string;
+};
