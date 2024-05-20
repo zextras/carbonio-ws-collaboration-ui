@@ -13,7 +13,15 @@ import React, {
 	useState
 } from 'react';
 
-import { Container, IconButton, Padding, Select, Tooltip } from '@zextras/carbonio-design-system';
+import {
+	Container,
+	CreateSnackbarFn,
+	IconButton,
+	Padding,
+	Select,
+	Tooltip,
+	useSnackbar
+} from '@zextras/carbonio-design-system';
 import { filter, find, map } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
@@ -52,30 +60,56 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 	const enableMicLabel = t('meeting.interactions.enableMicrophone', 'Enable microphone');
 	const camDeviceLabel = t('meeting.interactions.camDevice', 'Camera device');
 	const micDeviceLabel = t('meeting.interactions.micDevice', 'Microphone device');
+	const understoodAction = t('action.understood', 'UNDERSTOOD');
+	const giveMediaPermissionSnackbar = t(
+		'meeting.interactions.browserPermission',
+		'Grant browser permissions to enable resources'
+	);
 
 	const [audioMediaList, setAudioMediaList] = useState<[] | MediaDeviceInfo[]>([]);
 	const [videoMediaList, setVideoMediaList] = useState<[] | MediaDeviceInfo[]>([]);
+
+	const createSnackbar: CreateSnackbarFn = useSnackbar();
+
+	const mediaPermissionSnackbar = useCallback(
+		() =>
+			createSnackbar({
+				key: new Date().toLocaleString(),
+				type: 'info',
+				label: giveMediaPermissionSnackbar,
+				actionLabel: understoodAction,
+				disableAutoHide: true
+			}),
+		[createSnackbar, giveMediaPermissionSnackbar, understoodAction]
+	);
 
 	const toggleStreams = useCallback(
 		(audio: boolean, video: boolean, audioId: string | undefined, videoId: string | undefined) => {
 			freeMediaResources(streamTrack);
 
 			if (!audio && !video) {
-				getAudioAndVideo(true, false).then((stream: MediaStream) => {
-					const tracks = stream.getTracks();
-					tracks.forEach((track) => track.stop());
-					setStreamTrack(stream);
-					setMediaDevicesEnabled({ audio, video });
-					setMeetingStorage({ EnableCamera: video, EnableMicrophone: audio });
-					setEnterButtonIsEnabled(true);
-				});
-			} else {
-				getAudioAndVideo({ noiseSuppression: true, echoCancellation: true }).then(
-					(stream: MediaStream) => {
+				getAudioAndVideo(true, false)
+					.then((stream: MediaStream) => {
 						const tracks = stream.getTracks();
 						tracks.forEach((track) => track.stop());
-					}
-				);
+						setStreamTrack(stream);
+						setMediaDevicesEnabled({ audio, video });
+						setMeetingStorage({ EnableCamera: video, EnableMicrophone: audio });
+						setEnterButtonIsEnabled(true);
+					})
+					.catch((e) => {
+						mediaPermissionSnackbar();
+						console.error(e);
+					});
+			} else {
+				getAudioAndVideo({ noiseSuppression: true, echoCancellation: true })
+					.then((stream: MediaStream) => {
+						const tracks = stream.getTracks();
+						tracks.forEach((track) => track.stop());
+					})
+					.catch((e) => {
+						console.error(e);
+					});
 				const kindOfAudioDevice = audioId
 					? {
 							deviceId: { exact: audioId },
@@ -92,10 +126,14 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 						setSelectedDevicesId({ audio: audioId, video: videoId });
 						setEnterButtonIsEnabled(true);
 					})
-					.catch((e) => console.error(e));
+					.catch((e) => {
+						mediaPermissionSnackbar();
+						console.error(e);
+					});
 			}
 		},
 		[
+			mediaPermissionSnackbar,
 			setEnterButtonIsEnabled,
 			setMediaDevicesEnabled,
 			setMeetingStorage,
@@ -184,7 +222,9 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 				setAudioMediaList(audioInputs);
 				setVideoMediaList(videoInputs);
 			})
-			.catch();
+			.catch((e) => {
+				console.log(e);
+			});
 	}, []);
 
 	const toggleVideo = useCallback(
@@ -217,26 +257,41 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 
 	useEffect(() => {
 		if (BrowserUtils.isFirefox()) {
-			navigator.mediaDevices.enumerateDevices().then((list) => {
-				const firstAudioInputForPermissions = find(
-					list,
-					(device: MediaDeviceInfo) => device.kind === 'audioinput'
-				);
-				if (firstAudioInputForPermissions) {
-					getAudioAndVideo(
-						{ deviceId: { exact: firstAudioInputForPermissions.deviceId } },
-						mediaDevicesEnabled.video
-					).then((stream: MediaStream) => {
-						const tracks: MediaStreamTrack[] = stream.getTracks();
-						tracks.forEach((track) => track.stop());
-						updateListOfDevices();
-					});
-				}
-			});
+			navigator.mediaDevices
+				.enumerateDevices()
+				.then((list) => {
+					const firstAudioInputForPermissions = find(
+						list,
+						(device: MediaDeviceInfo) => device.kind === 'audioinput'
+					);
+					if (firstAudioInputForPermissions) {
+						getAudioAndVideo(
+							{ deviceId: { exact: firstAudioInputForPermissions.deviceId } },
+							mediaDevicesEnabled.video
+						)
+							.then((stream: MediaStream) => {
+								const tracks: MediaStreamTrack[] = stream.getTracks();
+								tracks.forEach((track) => track.stop());
+								updateListOfDevices();
+							})
+							.catch((e) => {
+								console.log(e);
+							});
+					}
+				})
+				.catch((e) => {
+					console.log(e);
+				});
 		} else {
 			updateListOfDevices();
 		}
-	}, [mediaDevicesEnabled, updateListOfDevices]);
+	}, [
+		createSnackbar,
+		giveMediaPermissionSnackbar,
+		mediaDevicesEnabled,
+		understoodAction,
+		updateListOfDevices
+	]);
 
 	useEffect(() => {
 		if (mediaDevicesEnabled.audio || mediaDevicesEnabled.video) {
