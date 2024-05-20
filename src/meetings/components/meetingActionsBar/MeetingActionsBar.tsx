@@ -17,6 +17,7 @@ import MeetingDuration from './MeetingDuration';
 import MicrophoneButton from './MicrophoneButton';
 import ScreenShareButton from './ScreenShareButton';
 import SwitchViewButton from './SwitchViewButton';
+import useContainerDimensions from '../../../hooks/useContainerDimensions';
 import { MeetingRoutesParams } from '../../../hooks/useRouting';
 
 const BarContainer = styled(Container)<{ $isHoovering: boolean }>`
@@ -37,9 +38,10 @@ const ActionsWrapper = styled(Container)`
 	box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
 `;
 
-const SecondActionsWrapper = styled(ActionsWrapper)`
+const SecondActionsWrapper = styled(ActionsWrapper)<{ $compactMode: boolean }>`
 	position: absolute;
 	right: 3.25rem;
+	visibility: ${({ $compactMode }): string => ($compactMode ? 'hidden' : 'visible')};
 `;
 
 type MeetingActionsProps = {
@@ -53,9 +55,13 @@ const MeetingActionsBar = ({ streamsWrapperRef }: MeetingActionsProps): ReactEle
 	const [isHoverActions, setIsHoverActions] = useState<boolean>(false);
 	const [isAudioListOpen, setIsAudioListOpen] = useState<boolean>(false);
 	const [isVideoListOpen, setIsVideoListOpen] = useState<boolean>(false);
+	const [compactMode, setCompactMode] = useState<boolean>(false);
 
 	const audioDropdownRef = useRef<HTMLDivElement>(null);
 	const videoDropdownRef = useRef<HTMLDivElement>(null);
+	const barContainerRef = useRef<HTMLDivElement>(null);
+	const centerActionsWrapperRef = useRef<HTMLDivElement>(null);
+	const rightActionsWrapperRef = useRef<HTMLDivElement>(null);
 
 	const timeout = useRef<NodeJS.Timeout>();
 
@@ -153,13 +159,25 @@ const MeetingActionsBar = ({ streamsWrapperRef }: MeetingActionsProps): ReactEle
 		[]
 	);
 
+	const { width: barContainerWidth } = useContainerDimensions(barContainerRef);
+
+	useEffect(() => {
+		if (barContainerWidth && centerActionsWrapperRef.current && rightActionsWrapperRef.current) {
+			const centerActionsWidth = centerActionsWrapperRef.current.getBoundingClientRect().width;
+			const rightActionsWidth = rightActionsWrapperRef.current.getBoundingClientRect().width;
+			const sideSpace = (barContainerWidth - centerActionsWidth) / 2;
+			setCompactMode(rightActionsWidth > sideSpace);
+		}
+	}, [barContainerWidth]);
+
 	return (
 		<BarContainer
 			height="fit"
 			$isHoovering={isHoovering}
 			data-testid="meeting-action-bar"
-			padding={{ horizontal: '3.25rem' }}
+			padding={{ horizontal: compactMode ? '1rem' : '3.25rem' }}
 			orientation="horizontal"
+			ref={barContainerRef}
 		>
 			<ActionsWrapper
 				background="text"
@@ -168,6 +186,7 @@ const MeetingActionsBar = ({ streamsWrapperRef }: MeetingActionsProps): ReactEle
 				orientation="horizontal"
 				onMouseEnter={handleMouseEnter}
 				onMouseLeave={handleMouseLeave}
+				ref={centerActionsWrapperRef}
 			>
 				<CameraButton
 					isVideoListOpen={isVideoListOpen}
@@ -182,6 +201,12 @@ const MeetingActionsBar = ({ streamsWrapperRef }: MeetingActionsProps): ReactEle
 				<ScreenShareButton />
 				<FullScreenButton />
 				<SwitchViewButton />
+				{compactMode && (
+					<>
+						<MeetingDuration meetingId={meetingId} />
+						<LeaveMeetingButton isHoovering={isHoovering} oneClickLeave />
+					</>
+				)}
 			</ActionsWrapper>
 			<SecondActionsWrapper
 				background="text"
@@ -190,6 +215,8 @@ const MeetingActionsBar = ({ streamsWrapperRef }: MeetingActionsProps): ReactEle
 				orientation="horizontal"
 				onMouseEnter={handleMouseEnter}
 				onMouseLeave={handleMouseLeave}
+				ref={rightActionsWrapperRef}
+				$compactMode={compactMode}
 			>
 				<MeetingDuration meetingId={meetingId} />
 				<LeaveMeetingButton isHoovering={isHoovering} />
