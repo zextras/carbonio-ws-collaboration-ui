@@ -17,6 +17,7 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../../tests/createMock';
+import { mockMediaDevicesResolve } from '../../../tests/mocks/global';
 import { setup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 import { MemberBe, RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
@@ -61,6 +62,10 @@ const meeting: MeetingBe = createMockMeeting({
 });
 
 const streamRef = React.createRef<HTMLDivElement>();
+
+beforeAll(() => {
+	mockMediaDevicesResolve();
+});
 
 beforeEach(() => {
 	const store: RootStore = useStore.getState();

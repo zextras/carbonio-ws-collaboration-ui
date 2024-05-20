@@ -6,18 +6,24 @@
 import React from 'react';
 
 import { screen } from '@testing-library/react';
+import { renderHook } from '@testing-library/react-hooks';
 import { UserEvent } from '@testing-library/user-event';
 import { act } from 'react-dom/test-utils';
 
-import MicrophoneButton from './MicrophoneButton';
+import CameraButton from './CameraButton';
 import { useParams } from '../../../../__mocks__/react-router';
+import useStore from '../../../store/Store';
 import {
 	createMockMeeting,
 	createMockParticipants,
 	createMockRoom,
 	createMockUser
 } from '../../../tests/createMock';
-import { mockMediaDevicesResolve } from '../../../tests/mocks/global';
+import {
+	mockedEnumerateDevices,
+	mockedGetUserMedia,
+	mockMediaDevicesReject
+} from '../../../tests/mocks/global';
 import { setup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 import { MemberBe, RoomBe } from '../../../types/network/models/roomBeTypes';
@@ -52,36 +58,51 @@ const meeting: MeetingBe = createMockMeeting({
 	participants: [user1Participant]
 });
 
-const mockSetIsAudioListOpen = jest.fn();
+const mockSetIsVideoListOpen = jest.fn();
 
 const defaultSetup = (): { user: UserEvent } => {
+	const { result } = renderHook(() => useStore());
+	act(() => {
+		result.current.setUserInfo(user1);
+		result.current.setUserInfo(user2);
+		result.current.setLoginInfo(user1.id, user1.name);
+		result.current.addRoom(room);
+		result.current.addMeeting(meeting);
+		result.current.meetingConnection(meeting.id, false, undefined, false, undefined);
+	});
 	const refList = React.createRef<HTMLDivElement>();
 	useParams.mockReturnValue({ meetingId: meeting.id });
 	const { user } = setup(
-		<MicrophoneButton
-			audioDropdownRef={refList}
-			isAudioListOpen={false}
-			setIsAudioListOpen={mockSetIsAudioListOpen}
+		<CameraButton
+			videoDropdownRef={refList}
+			isVideoListOpen={false}
+			setIsVideoListOpen={mockSetIsVideoListOpen}
 		/>
 	);
 	return { user };
 };
 
 beforeAll(() => {
-	mockMediaDevicesResolve();
+	mockMediaDevicesReject();
 });
 
-describe('Microphone button', () => {
-	test('Should render the component', async () => {
-		defaultSetup();
-		expect(await screen.findByTestId('microphone-button')).toBeVisible();
-	});
+describe('Camera button - permission denied', () => {
+	test('User clicks on the button', async () => {
+		mockedEnumerateDevices.mockRejectedValue('error enumerateDevices');
+		mockedGetUserMedia.mockRejectedValue('error getUserMedia');
 
-	test('Toggle list of audio inputs', async () => {
-		mockSetIsAudioListOpen.mockReturnValue(true);
+		const err = jest.spyOn(console, 'error').mockImplementation();
+
 		const { user } = defaultSetup();
-		const multiButtonToggleList = screen.getByTestId('icon: ChevronUp');
-		await act(() => user.click(multiButtonToggleList));
-		expect(mockSetIsAudioListOpen).toHaveBeenCalled();
+
+		const button = screen.getByTestId('cameraButton');
+		expect(button).toBeVisible();
+
+		await act(() => user.click(button));
+
+		const snackbar = await screen.findByText('Grant browser permissions to enable resources');
+
+		expect(snackbar).toBeInTheDocument();
+		expect(err).toHaveBeenCalled();
 	});
 });

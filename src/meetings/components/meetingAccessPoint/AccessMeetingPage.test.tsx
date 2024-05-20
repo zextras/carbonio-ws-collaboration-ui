@@ -21,6 +21,7 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../../tests/createMock';
+import { mockMediaDevicesResolve } from '../../../tests/mocks/global';
 import { mockedEnterMeetingRequest, mockedJoinMeetingRequest } from '../../../tests/mocks/network';
 import { mockGoToInfoPage, mockGoToMeetingPage } from '../../../tests/mocks/useRouting';
 import { setup } from '../../../tests/test-utils';
@@ -148,6 +149,10 @@ const setupForWaitingRoom = (): { user: UserEvent; store: RootStore } => {
 	);
 	return { user, store: result.current };
 };
+
+beforeAll(() => {
+	mockMediaDevicesResolve();
+});
 
 describe('AccessMeeting - enter to meeting as a moderator or as a member of a group', () => {
 	test('Enter to meeting', async () => {

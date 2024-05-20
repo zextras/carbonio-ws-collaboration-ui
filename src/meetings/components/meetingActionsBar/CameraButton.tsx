@@ -13,7 +13,12 @@ import React, {
 	useState
 } from 'react';
 
-import { MultiButton, Tooltip } from '@zextras/carbonio-design-system';
+import {
+	CreateSnackbarFn,
+	MultiButton,
+	Tooltip,
+	useSnackbar
+} from '@zextras/carbonio-design-system';
 import { filter, map } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
@@ -42,6 +47,11 @@ const CameraButton = ({
 
 	const disableCamLabel = t('meeting.interactions.disableCamera', 'Disable camera');
 	const enableCamLabel = t('meeting.interactions.enableCamera', 'Enable camera');
+	const understoodAction = t('action.understood', 'UNDERSTOOD');
+	const giveMediaPermissionSnackbar = t(
+		'meeting.interactions.browserPermission',
+		'Grant browser permissions to enable resources'
+	);
 
 	const { meetingId }: MeetingRoutesParams = useParams();
 	const myUserId = useStore(getUserId);
@@ -54,6 +64,20 @@ const CameraButton = ({
 
 	const [buttonStatus, setButtonStatus] = useState<boolean>(true);
 	const [videoMediaList, setVideoMediaList] = useState<[] | MediaDeviceInfo[]>([]);
+
+	const createSnackbar: CreateSnackbarFn = useSnackbar();
+
+	const mediaPermissionSnackbar = useCallback(
+		() =>
+			createSnackbar({
+				key: new Date().toLocaleString(),
+				type: 'info',
+				label: giveMediaPermissionSnackbar,
+				actionLabel: understoodAction,
+				disableAutoHide: true
+			}),
+		[createSnackbar, giveMediaPermissionSnackbar, understoodAction]
+	);
 
 	useEffect(() => {
 		setButtonStatus(true);
@@ -90,7 +114,10 @@ const CameraButton = ({
 			event.stopPropagation();
 			if (!videoStatus) {
 				if (!videoOutConn?.peerConn) {
-					videoOutConn?.startVideo(selectedVideoDeviceId);
+					videoOutConn?.startVideo(selectedVideoDeviceId).catch((e) => {
+						mediaPermissionSnackbar();
+						console.log(e);
+					});
 				} else {
 					getVideoStream(selectedVideoDeviceId).then((stream) => {
 						videoOutConn
@@ -103,20 +130,22 @@ const CameraButton = ({
 			}
 			setButtonStatus(false);
 		},
-		[videoStatus, videoOutConn, selectedVideoDeviceId, meetingId]
+		[videoStatus, videoOutConn, selectedVideoDeviceId, mediaPermissionSnackbar, meetingId]
 	);
 
 	const updateListOfDevices = useCallback(() => {
 		navigator.mediaDevices
 			.enumerateDevices()
 			.then((devices) => {
-				const videoInputs: [] | MediaDeviceInfo[] | any = filter(
+				const videoInputs: [] | MediaDeviceInfo[] = filter(
 					devices,
 					(device) => device.kind === 'videoinput' && device
-				);
+				) as MediaDeviceInfo[];
 				setVideoMediaList(videoInputs);
 			})
-			.catch();
+			.catch((e) => {
+				console.log(e);
+			});
 	}, []);
 
 	/**
@@ -136,7 +165,7 @@ const CameraButton = ({
 	return (
 		<Tooltip placement="top" label={videoStatus ? disableCamLabel : enableCamLabel}>
 			<MultiButton
-				background="primary"
+				background={'primary'}
 				data-testid="cameraButton"
 				primaryIcon={videoStatus ? 'Video' : 'VideoOff'}
 				icon={isVideoListOpen ? 'ChevronDown' : 'ChevronUp'}

@@ -65,19 +65,51 @@ export const mockedDevicesList = jest.fn(() => [
 	}
 ]);
 
-Object.defineProperty(global.navigator, 'mediaDevices', {
-	value: {
-		getUserMedia: jest.fn(() =>
-			Promise.resolve({
-				getTracks: jest.fn(() => ({ forEach: jest.fn() })),
-				getAudioTracks: jest.fn(() => ({ forEach: jest.fn() })),
-				getVideoTracks: jest.fn(() => ({ forEach: jest.fn() }))
-			})
-		),
-		enumerateDevices: jest.fn(() => Promise.resolve(mockedDevicesList())),
-		addEventListener: jest.fn(),
-		removeEventListener: jest.fn()
-	}
+export const mockMediaDevicesResolve = jest.fn(() => {
+	Object.defineProperty(global.navigator, 'mediaDevices', {
+		value: {
+			getUserMedia: jest.fn(() =>
+				Promise.resolve({
+					getTracks: jest.fn(() => ({ forEach: jest.fn() })),
+					getAudioTracks: jest.fn(() => ({ forEach: jest.fn() })),
+					getVideoTracks: jest.fn(() => ({ forEach: jest.fn() }))
+				})
+			),
+			enumerateDevices: jest.fn(() => Promise.resolve(mockedDevicesList())),
+			addEventListener: jest.fn(),
+			removeEventListener: jest.fn()
+		}
+	});
+});
+
+export const mockedGetUserMedia = jest.fn();
+export const mockedEnumerateDevices = jest.fn();
+
+export const mockMediaDevicesReject = jest.fn(() => {
+	Object.defineProperty(global.navigator, 'mediaDevices', {
+		value: {
+			getUserMedia: jest.fn(
+				() =>
+					new Promise((resolve, reject) => {
+						const result = mockedGetUserMedia();
+						result ? resolve(result) : reject(new Error());
+					})
+			),
+			enumerateDevices: jest.fn(
+				() =>
+					new Promise((resolve, reject) => {
+						const result = mockedEnumerateDevices();
+						result ? resolve(result) : reject(new Error());
+					})
+			),
+			addEventListener: jest.fn(),
+			removeEventListener: jest.fn()
+		}
+	});
+});
+
+Object.defineProperty(global.navigator, 'userAgent', {
+	value: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:124.0) Gecko/20100101 Firefox/124.0'
 });
 
 Object.defineProperty(HTMLMediaElement.prototype, 'muted', {
