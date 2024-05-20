@@ -45,7 +45,7 @@ describe('LeaveMeetingButton', () => {
 		expect(mockedLeaveMeetingRequest).toHaveBeenCalled();
 	});
 
-	test('User leaves the meeting directly if ', async () => {
+	test('User leaves the meeting directly if component has the oneClickLeave prop', async () => {
 		mockedLeaveMeetingRequest.mockResolvedValueOnce({});
 		const { user } = setup(<LeaveMeetingButton isHoovering oneClickLeave />);
 		await user.click(screen.getByRole('button'));

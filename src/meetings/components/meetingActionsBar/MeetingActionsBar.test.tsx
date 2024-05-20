@@ -91,6 +91,18 @@ describe('Meeting action bar', () => {
 		const meetingDuration = await screen.findByTestId('meeting_duration_component');
 		expect(meetingDuration).toBeInTheDocument();
 	});
+
+	test('MetingActionBar is not compact by default', async () => {
+		setup(<MeetingActionsBar streamsWrapperRef={streamRef} />);
+		const meetingActionBar = await screen.findByTestId('meeting-action-bar');
+		expect(meetingActionBar).toHaveStyle('padding: 0px 3.25rem 0px 3.25rem');
+	});
+
+	test('Leave meeting button is shown in a separate wrapper by default', async () => {
+		setup(<MeetingActionsBar streamsWrapperRef={streamRef} />);
+		const secondActionsWrapper = await screen.findByTestId('second_actions_wrapper');
+		expect(secondActionsWrapper).toBeInTheDocument();
+	});
 });
 
 describe('Meeting action bar interaction with skeleton', () => {

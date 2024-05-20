@@ -21,7 +21,7 @@ const useContainerDimensions = (
 		if (elementRef?.current) {
 			observer.observe(elementRef.current);
 		}
-		return (): void => {
+		return () => {
 			observer?.disconnect();
 		};
 	}, [elementRef, handleResize]);

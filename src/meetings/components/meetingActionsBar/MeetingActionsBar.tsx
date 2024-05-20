@@ -209,6 +209,7 @@ const MeetingActionsBar = ({ streamsWrapperRef }: MeetingActionsProps): ReactEle
 				)}
 			</ActionsWrapper>
 			<SecondActionsWrapper
+				data-testid="second_actions_wrapper"
 				background="text"
 				width="fit"
 				height="fit"
