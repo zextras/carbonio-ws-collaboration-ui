@@ -49,7 +49,7 @@ export type CreateGuestAccountResponse = Response & {
 	zxToken: string;
 };
 
-export type LoginV3ConfigResponse = {
+export type LoginV3ConfigResponse = Response & {
 	carbonioAdminUiDescription: string;
 	carbonioAdminUiTitle: string;
 	carbonioFeatureResetPasswordEnabled: boolean;

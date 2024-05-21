@@ -393,4 +393,73 @@ describe('Meetings API', () => {
 			}
 		);
 	});
+
+	test('createMediaAnswer is called correctly', async () => {
+		fetchResponse.mockResolvedValueOnce({});
+		await meetingsApi.createMediaAnswer(meetingMock.id, 'sdpAnswer');
+
+		expect(global.fetch).toHaveBeenCalledWith(
+			`/services/chats/meetings/${meetingMock.id}/media/answer`,
+			{
+				method: 'PUT',
+				headers,
+				body: JSON.stringify({
+					sdp: 'sdpAnswer'
+				})
+			}
+		);
+	});
+
+	test('createAudioOffer is called correctly', async () => {
+		fetchResponse.mockResolvedValueOnce({});
+		await meetingsApi.createAudioOffer(meetingMock.id, 'sdpOffer');
+
+		expect(global.fetch).toHaveBeenCalledWith(
+			`/services/chats/meetings/${meetingMock.id}/audio/offer`,
+			{
+				method: 'PUT',
+				headers,
+				body: JSON.stringify({
+					sdp: 'sdpOffer'
+				})
+			}
+		);
+	});
+
+	test('getScheduledMeetingName is called correctly', async () => {
+		fetchResponse.mockResolvedValueOnce({});
+		await meetingsApi.getScheduledMeetingName(meetingMock.id);
+
+		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/public/meetings/${meetingMock.id}`, {
+			method: 'GET',
+			headers
+		});
+	});
+
+	test('authLogin is called correctly', async () => {
+		await meetingsApi.authLogin();
+
+		expect(global.fetch).toHaveBeenCalledWith(`/zx/login/v3/config`, {
+			method: 'GET'
+		});
+	});
+
+	test('authLogin failed', async () => {
+		await meetingsApi.authLogin();
+
+		expect(global.fetch).toHaveBeenCalledWith(`/zx/login/v3/config`, {
+			method: 'GET'
+		});
+	});
+
+	test('createGuestAccount is called correctly', async () => {
+		const headers = new Headers();
+		headers.append('Content-Type', 'application/json');
+		await meetingsApi.createGuestAccount('userName');
+
+		expect(global.fetch).toHaveBeenCalledWith(`/zx/auth/v3/guests?name=userName`, {
+			method: 'POST',
+			headers
+		});
+	});
 });

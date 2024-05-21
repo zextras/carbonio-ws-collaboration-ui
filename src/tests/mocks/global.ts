@@ -8,12 +8,14 @@
 // https://jestjs.io/docs/en/manual-mocks#mocking-methods-which-are-not-implemented-in-jsdom
 
 export const fetchResponse: jest.Mock = jest.fn(() => ({}));
+export const fetchTextResponse: jest.Mock = jest.fn(() => '{}');
 export const requestFullscreen = jest.fn();
 
 Object.defineProperty(global, 'fetch', {
 	value: jest.fn(() =>
 		Promise.resolve({
 			json: () => fetchResponse(),
+			text: () => fetchTextResponse(),
 			ok: true,
 			headers: { get: (): string => 'application/json' }
 		})

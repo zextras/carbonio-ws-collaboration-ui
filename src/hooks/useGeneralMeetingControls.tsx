@@ -19,6 +19,7 @@ import {
 import useStore from '../store/Store';
 import { STREAM_TYPE } from '../types/store/ActiveMeetingTypes';
 import { MeetingParticipantMap } from '../types/store/MeetingTypes';
+import { BrowserUtils } from '../utils/BrowserUtils';
 
 const useGeneralMeetingControls = (meetingId: string): void => {
 	const isMeetingActive = useStore((store) => getMeetingActiveByMeetingId(store, meetingId));
@@ -32,7 +33,9 @@ const useGeneralMeetingControls = (meetingId: string): void => {
 
 	const { goToInfoPage } = useRouting();
 
-	const leaveMeeting = useCallback(() => MeetingsApi.leaveMeeting(meetingId), [meetingId]);
+	const leaveMeeting = useCallback(() => {
+		MeetingsApi.leaveMeeting(meetingId).then(() => BrowserUtils.clearAuthCookies());
+	}, [meetingId]);
 
 	// Redirect to info page if meeting ended or some error occurred
 	useEffect(() => {

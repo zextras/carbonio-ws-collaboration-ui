@@ -273,25 +273,28 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 		});
 	}
 
-	public async authLogin(): Promise<LoginV3ConfigResponse> {
-		return (await fetch('/zx/login/v3/config', { method: RequestType.GET }))
-			.json()
-			.catch((err: Error) => Promise.reject(err));
-	}
-
-	public async createGuestAccount(name: string): Promise<CreateGuestAccountResponse> {
-		const headers = new Headers();
-		headers.append('Content-Type', 'application/json');
-		return (
-			await fetch(`/zx/auth/v3/guests?name=${name}`, {
-				method: RequestType.POST,
-				headers
-			}).then((resp) => {
+	public authLogin(): Promise<LoginV3ConfigResponse> {
+		return fetch('/zx/login/v3/config', { method: RequestType.GET })
+			.then((resp) => {
 				if (resp.ok) return resp;
 				return Promise.reject(resp);
 			})
-		)
-			.text()
+			.then((resp) => resp.json())
+			.catch((err: Error) => Promise.reject(err));
+	}
+
+	public createGuestAccount(name: string): Promise<CreateGuestAccountResponse> {
+		const headers = new Headers();
+		headers.append('Content-Type', 'application/json');
+		return fetch(`/zx/auth/v3/guests?name=${name}`, {
+			method: RequestType.POST,
+			headers
+		})
+			.then((resp) => {
+				if (resp.ok) return resp;
+				return Promise.reject(resp);
+			})
+			.then((res) => res.text())
 			.then((res) => JSON.parse(res))
 			.catch((err: Error) => Promise.reject(err));
 	}
