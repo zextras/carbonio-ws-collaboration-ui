@@ -121,8 +121,9 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 						setSelectedDevicesId({ audio: audioId, video: videoId });
 						setEnterButtonIsEnabled(true);
 					})
-					.catch((e) => {
+					.catch((e): void => {
 						mediaPermissionSnackbar();
+						setEnterButtonIsEnabled(true);
 						console.error(e);
 					});
 			}
