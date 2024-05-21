@@ -5,7 +5,15 @@
  */
 import React, { ReactElement, useCallback, useMemo, useState } from 'react';
 
-import { Button, Container, Input, Padding, Text } from '@zextras/carbonio-design-system';
+import {
+	Button,
+	Container,
+	CreateSnackbarFn,
+	Input,
+	Padding,
+	Text,
+	useSnackbar
+} from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -14,6 +22,7 @@ import { MeetingsApi, SessionApi } from '../../../network';
 import { WebSocketClient } from '../../../network/websocket/WebSocketClient';
 import XMPPClient from '../../../network/xmpp/XMPPClient';
 import useStore from '../../../store/Store';
+import { BrowserUtils } from '../../../utils/BrowserUtils';
 import ExternalAccessBackground from '../../assets/ExternalAccessBackground.png';
 
 const CustomContainer = styled(Container)`
@@ -48,12 +57,17 @@ const MeetingExternalAccessPage = (): ReactElement => {
 		'welcomePage.journeyDescription',
 		'You will be redirected to the waiting room where a moderator will approve your access.'
 	);
+	const generalErrorSnackbar = t(
+		'settings.profile.errorGenericResponse',
+		'Something went Wrong. Please Retry'
+	);
 
 	const setXmppClient = useStore((state) => state.setXmppClient);
 	const setWebSocketClient = useStore((state) => state.setWebSocketClient);
 	const setChatsBeStatus = useStore((state) => state.setChatsBeStatus);
 	const setLoginInfo = useStore((state) => state.setLoginInfo);
 
+	const createSnackbar: CreateSnackbarFn = useSnackbar();
 	const { goToMeetingAccessPage } = useRouting();
 
 	const [userName, setUserName] = useState<string>('');
@@ -64,28 +78,47 @@ const MeetingExternalAccessPage = (): ReactElement => {
 
 	const isButtonDisabled = useMemo(() => userName.length === 0, [userName.length]);
 
-	const handleCreateExternalUser = useCallback(() => {
-		MeetingsApi.createGuestAccount(userName).then((res) => {
-			document.cookie = `ZM_AUTH_TOKEN=${res.zmToken}; path=/`;
-			document.cookie = `ZX_AUTH_TOKEN=${res.zxToken}; path=/`;
-			setLoginInfo(res.id, userName, userName);
-
-			// NETWORKS: init XMPP and WebSocket clients
-			const xmppClient = new XMPPClient();
-			setXmppClient(xmppClient);
-			const webSocket = new WebSocketClient();
-			setWebSocketClient(webSocket);
-
-			Promise.all([SessionApi.getCapabilities()])
-				.then(() => {
-					setChatsBeStatus(true);
-					xmppClient.connect(res.zmToken);
-					webSocket.connect();
-					goToMeetingAccessPage();
-				})
-				.catch(() => setChatsBeStatus(false));
+	const errorSnackbar = useCallback(() => {
+		createSnackbar({
+			key: new Date().toLocaleString(),
+			type: 'error',
+			label: generalErrorSnackbar,
+			hideButton: true,
+			autoHideTimeout: 5000
 		});
+	}, [createSnackbar, generalErrorSnackbar]);
+
+	const handleCreateExternalUser = useCallback(() => {
+		MeetingsApi.createGuestAccount(userName)
+			.then((res) => {
+				document.cookie = `ZM_AUTH_TOKEN=${res.zmToken}; path=/`;
+				document.cookie = `ZX_AUTH_TOKEN=${res.zxToken}; path=/`;
+				setLoginInfo(res.id, userName, userName);
+
+				// NETWORKS: init XMPP and WebSocket clients
+				const xmppClient = new XMPPClient();
+				setXmppClient(xmppClient);
+				const webSocket = new WebSocketClient();
+				setWebSocketClient(webSocket);
+
+				SessionApi.getCapabilities()
+					.then(() => {
+						setChatsBeStatus(true);
+						xmppClient.connect(res.zmToken);
+						webSocket.connect();
+						goToMeetingAccessPage();
+					})
+					.catch(() => {
+						BrowserUtils.clearAuthCookies();
+						setChatsBeStatus(false);
+						errorSnackbar();
+					});
+			})
+			.catch(() => {
+				errorSnackbar();
+			});
 	}, [
+		errorSnackbar,
 		goToMeetingAccessPage,
 		setChatsBeStatus,
 		setLoginInfo,
