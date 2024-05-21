@@ -180,6 +180,7 @@ const MeetingActionsBar = ({ streamsWrapperRef }: MeetingActionsProps): ReactEle
 			ref={barContainerRef}
 		>
 			<ActionsWrapper
+				data-testid="main_actions_wrapper"
 				background="text"
 				width="fit"
 				height="fit"

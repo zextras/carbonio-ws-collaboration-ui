@@ -63,6 +63,12 @@ const meeting: MeetingBe = createMockMeeting({
 
 const streamRef = React.createRef<HTMLDivElement>();
 
+const mockUseContainerDimensions = jest.fn(() => ({ width: 100 }));
+jest.mock('../../../hooks/useContainerDimensions', () => ({
+	__esModule: true,
+	default: (): { width: number } => mockUseContainerDimensions()
+}));
+
 beforeAll(() => {
 	mockMediaDevicesResolve();
 });
@@ -102,6 +108,44 @@ describe('Meeting action bar', () => {
 		setup(<MeetingActionsBar streamsWrapperRef={streamRef} />);
 		const secondActionsWrapper = await screen.findByTestId('second_actions_wrapper');
 		expect(secondActionsWrapper).toBeInTheDocument();
+	});
+
+	test('Leave meeting button and ActionsWrapper are different component when window is large', async () => {
+		mockUseContainerDimensions.mockReturnValue({ width: 100 });
+		const { rerender } = setup(<MeetingActionsBar streamsWrapperRef={streamRef} />);
+		const mainActionsWrapper = screen.getByTestId('main_actions_wrapper');
+		const secondActionsWrapper = await screen.findByTestId('second_actions_wrapper');
+		expect(secondActionsWrapper).toBeInTheDocument();
+		jest
+			.spyOn(mainActionsWrapper, 'getBoundingClientRect')
+			.mockImplementation(() => ({ width: 30 }) as DOMRect);
+		jest
+			.spyOn(secondActionsWrapper, 'getBoundingClientRect')
+			.mockImplementation(() => ({ width: 20 }) as DOMRect);
+		mockUseContainerDimensions.mockReturnValueOnce({ width: 99 });
+		rerender(<MeetingActionsBar streamsWrapperRef={streamRef} />);
+
+		const secondActionsWrapper2 = screen.getByTestId('second_actions_wrapper');
+		expect(secondActionsWrapper2).toBeVisible();
+	});
+
+	test('Leave meeting button is merged into ActionsWrapper when window is tight', async () => {
+		mockUseContainerDimensions.mockReturnValue({ width: 50 });
+		const { rerender } = setup(<MeetingActionsBar streamsWrapperRef={streamRef} />);
+		const mainActionsWrapper = screen.getByTestId('main_actions_wrapper');
+		const secondActionsWrapper = await screen.findByTestId('second_actions_wrapper');
+		expect(secondActionsWrapper).toBeInTheDocument();
+		jest
+			.spyOn(mainActionsWrapper, 'getBoundingClientRect')
+			.mockImplementation(() => ({ width: 30 }) as DOMRect);
+		jest
+			.spyOn(secondActionsWrapper, 'getBoundingClientRect')
+			.mockImplementation(() => ({ width: 20 }) as DOMRect);
+		mockUseContainerDimensions.mockReturnValueOnce({ width: 49 });
+		rerender(<MeetingActionsBar streamsWrapperRef={streamRef} />);
+
+		const secondActionsWrapper2 = screen.getByTestId('second_actions_wrapper');
+		expect(secondActionsWrapper2).not.toBeVisible();
 	});
 });
 
