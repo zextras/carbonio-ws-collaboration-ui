@@ -29,6 +29,11 @@ import AttachmentSelector from './AttachmentSelector';
 import DeleteMessageModal from './DeleteMessageModal';
 import EmojiSelector from './EmojiSelector';
 import MessageArea from './MessageArea';
+import {
+	FILE_DESCRIPTION_CHAR_LIMIT,
+	MESSAGE_CHAR_LIMIT
+} from '../../../../constants/messageConstants';
+import useLoadFiles from '../../../../hooks/useLoadFiles';
 import useMessage from '../../../../hooks/useMessage';
 import { AttachmentsApi, RoomsApi } from '../../../../network';
 import {
@@ -48,7 +53,7 @@ import {
 } from '../../../../types/store/ActiveConversationTypes';
 import { Message, MessageType, TextMessage } from '../../../../types/store/MessageTypes';
 import { CapabilityType } from '../../../../types/store/SessionTypes';
-import { isAttachmentImage, uid } from '../../../../utils/attachmentUtils';
+import { isAttachmentImage } from '../../../../utils/attachmentUtils';
 import { BrowserUtils } from '../../../../utils/BrowserUtils';
 import { canPerformAction } from '../../../../utils/MessageActionsUtils';
 
@@ -91,10 +96,8 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 	const unsetReferenceMessage = useStore((store) => store.unsetReferenceMessage);
 	const setInputHasFocus = useStore((store) => store.setInputHasFocus);
 	const setDraftMessage = useStore((store) => store.setDraftMessage);
-	const addDescriptionToFileToAttach = useStore((store) => store.addDescriptionToFileToAttach);
 	const unsetFilesToAttach = useStore((store) => store.unsetFilesToAttach);
 	const filesToUploadArray = useStore((store) => getFilesToUploadArray(store, roomId));
-	const setFilesToAttach = useStore((store) => store.setFilesToAttach);
 	const lastMessageId: string | undefined = useStore((state) =>
 		getLastMessageIdSelector(state, roomId)
 	);
@@ -116,6 +119,8 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 
 	const messageInputRef = useRef<HTMLTextAreaElement>(null);
 
+	const loadFiles = useLoadFiles(roomId);
+
 	const sendDisabled = useMemo(() => {
 		// Send button is always enabled if user is editing
 		if (referenceMessage?.actionType === messageActionType.EDIT) {
@@ -136,18 +141,24 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 		});
 	}, [listAbortController, uploadAbortedLabel, createSnackbar]);
 
-	const checkMaxLengthAndSetMessage = useCallback((textareaValue: string): void => {
-		if (textareaValue.length > 4096) {
-			setTextMessage(textareaValue.slice(0, 4096));
-			// todo fix selection place when user is modifying in the middle of the components
-			// const cursorPosition = messageInputRef.current.selectionStart;
-			// messageInputRef.current.setSelectionRange(cursorPosition, cursorPosition);
-			setNoMoreCharsOnInputComposer(true);
-		} else {
-			setNoMoreCharsOnInputComposer(false);
-			setTextMessage(textareaValue);
-		}
-	}, []);
+	const checkMaxLengthAndSetMessage = useCallback(
+		(textareaValue: string): void => {
+			const filesToUpload = useStore.getState().activeConversations[roomId]?.filesToAttach;
+			const charsLimit = size(filesToUpload) > 0 ? FILE_DESCRIPTION_CHAR_LIMIT : MESSAGE_CHAR_LIMIT;
+			if (textareaValue.length >= charsLimit) {
+				setTextMessage(textareaValue.slice(0, charsLimit));
+				setNoMoreCharsOnInputComposer(true);
+			} else {
+				setNoMoreCharsOnInputComposer(false);
+			}
+		},
+		[roomId]
+	);
+
+	// Check message max length when some files are attached
+	useEffect(() => {
+		checkMaxLengthAndSetMessage(messageInputRef.current?.value ?? '');
+	}, [filesToUploadArray?.length, checkMaxLengthAndSetMessage]);
 
 	const errorHandler = (reason: DOMException, fileName: string): void => {
 		if (reason.name !== 'AbortError') {
@@ -166,7 +177,10 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 		}
 	};
 
-	const uploadAttachmentPromise = (file: FileToUpload, controller: AbortController): any => {
+	const uploadAttachmentPromise = (
+		file: FileToUpload,
+		controller: AbortController
+	): Promise<void | AddRoomAttachmentResponse> => {
 		const fileName = file.file.name;
 		const { signal } = controller;
 
@@ -193,9 +207,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 						errorHandler(reason, fileName);
 					})
 				)
-				.catch((err) => {
-					Promise.reject(new Error(`Upload error for ${fileName}, reason: ${err}`));
-				});
+				.catch((err) => Promise.reject(new Error(`Upload error for ${fileName}, reason: ${err}`)));
 		}
 		return RoomsApi.addRoomAttachment(
 			roomId,
@@ -321,8 +333,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 		sendStopWriting,
 		referenceMessage,
 		completeReferenceMessage,
-		filesToUploadArray,
-		addDescriptionToFileToAttach
+		filesToUploadArray
 	]);
 
 	// Set focus on input after closing DeleteMessageModal
@@ -332,12 +343,9 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 		}
 	}, [referenceMessage, deleteMessageModalStatus]);
 
-	const handleTypingMessage = useCallback(
-		(e: BaseSyntheticEvent): void => {
-			checkMaxLengthAndSetMessage(e.target.value);
-		},
-		[checkMaxLengthAndSetMessage]
-	);
+	const handleTypingMessage = useCallback((e: BaseSyntheticEvent): void => {
+		setTextMessage(e.target.value);
+	}, []);
 
 	const handleKeyUp = useCallback(
 		(e: KeyboardEvent) => {
@@ -397,26 +405,6 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 		setInputHasFocus(roomId, false);
 	}, [textMessage, setInputHasFocus, roomId, setDraftMessage]);
 
-	const mapFiles = useCallback(
-		(listOfFiles, includeFiles) => {
-			forEach(includeFiles as [], (file: File, index) => {
-				const fileLocalUrl = URL.createObjectURL(file);
-				const fileId = uid();
-				const isFocusedIfFirstOfListAndFirstToBeUploaded = index === 0 && !filesToUploadArray;
-				listOfFiles.push({
-					file,
-					fileId,
-					hasFocus: isFocusedIfFirstOfListAndFirstToBeUploaded,
-					description: '',
-					localUrl: fileLocalUrl
-				});
-			});
-			setFilesToAttach(roomId, listOfFiles);
-			setInputHasFocus(roomId, true);
-		},
-		[filesToUploadArray, roomId, setFilesToAttach, setInputHasFocus]
-	);
-
 	const handlePaste = useCallback(
 		(ev) => {
 			try {
@@ -424,7 +412,6 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 				const editingMessage = referenceMessage?.actionType === messageActionType.EDIT;
 				if (!editingMessage) {
 					const includeFiles = ev.clipboardData.files;
-					const listOfFiles: FileToUpload[] = [];
 					if (includeFiles && includeFiles.length > 0) {
 						ev.preventDefault();
 						ev.stopPropagation();
@@ -439,7 +426,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 						// LINUX OS AND BROWSER ARE FIREFOX/CHROME
 						// WIN OS AND BROWSER ARE CHROME/FIREFOX
 						if (isLinux || (isWin && isFirefoxBrowser) || isChromeBrowser || chromeVersion) {
-							mapFiles(listOfFiles, includeFiles);
+							loadFiles(includeFiles);
 						} else if (
 							// MAC OS AND BROWSER ARE CHROME/FIREFOX/SAFARI
 							(isMac && isChromeBrowser) ||
@@ -447,7 +434,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 							isFirefoxBrowser ||
 							isSafariBrowser
 						) {
-							mapFiles(listOfFiles, includeFiles);
+							loadFiles(includeFiles);
 						} else {
 							console.error(`Browser not support copy/paste function ${navigator.userAgent}`);
 						}
@@ -457,7 +444,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 				console.error(e);
 			}
 		},
-		[mapFiles, referenceMessage]
+		[loadFiles, referenceMessage?.actionType]
 	);
 
 	useEffect(() => {
@@ -482,7 +469,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 	// Reset values when roomId changes
 	useEffect(() => {
 		const messageRef = messageInputRef.current;
-		return () => {
+		return (): void => {
 			setTextMessage('');
 			if (messageRef) {
 				messageRef.value = '';
@@ -513,7 +500,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 			gap="0.25rem"
 			padding={{ all: 'small' }}
 		>
-			<EmojiSelector messageInputRef={messageInputRef} setMessage={checkMaxLengthAndSetMessage} />
+			<EmojiSelector messageInputRef={messageInputRef} setMessage={setTextMessage} />
 			<MessageArea
 				roomId={roomId}
 				textareaRef={messageInputRef}
