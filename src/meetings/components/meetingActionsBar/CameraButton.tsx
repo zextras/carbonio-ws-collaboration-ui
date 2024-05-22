@@ -112,23 +112,29 @@ const CameraButton = ({
 	const toggleVideoStream = useCallback(
 		(event) => {
 			event.stopPropagation();
+			setButtonStatus(false);
 			if (!videoStatus) {
 				if (!videoOutConn?.peerConn) {
 					videoOutConn?.startVideo(selectedVideoDeviceId).catch((e) => {
 						mediaPermissionSnackbar();
+						setButtonStatus(true);
 						console.log(e);
 					});
 				} else {
-					getVideoStream(selectedVideoDeviceId).then((stream) => {
-						videoOutConn
-							?.updateLocalStreamTrack(stream)
-							.then(() => MeetingsApi.updateMediaOffer(meetingId, STREAM_TYPE.VIDEO, true));
-					});
+					getVideoStream(selectedVideoDeviceId)
+						.then((stream) => {
+							videoOutConn
+								?.updateLocalStreamTrack(stream)
+								.then(() => MeetingsApi.updateMediaOffer(meetingId, STREAM_TYPE.VIDEO, true));
+						})
+						.catch((e) => {
+							setButtonStatus(true);
+							console.log(e);
+						});
 				}
 			} else {
 				videoOutConn?.stopVideo();
 			}
-			setButtonStatus(false);
 		},
 		[videoStatus, videoOutConn, selectedVideoDeviceId, mediaPermissionSnackbar, meetingId]
 	);
