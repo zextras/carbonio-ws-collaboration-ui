@@ -15,7 +15,9 @@ import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
 import { RoomType } from '../../types/store/RoomTypes';
 
 const meetingMock = createMockMeeting();
+const scheduledMeetingMock = createMockMeeting({ meetingType: MeetingType.SCHEDULED });
 const meetingMock1 = createMockMeeting({ id: 'meetingId1', roomId: 'roomId1' });
+const roomMock = createMockRoom({ meetingId: meetingMock.id });
 
 const userId = 'userId';
 
@@ -40,7 +42,9 @@ const sdpOffer = 'spdOfferMock';
 beforeEach(() => {
 	useStore.getState().setLoginInfo(userId, 'User');
 	useStore.getState().setSessionId('queueId');
+	useStore.getState().addRoom(roomMock);
 });
+
 describe('Meetings API', () => {
 	test('listMeetings is called correctly', async () => {
 		fetchResponse.mockResolvedValueOnce([meetingMock, meetingMock1]);
@@ -115,7 +119,7 @@ describe('Meetings API', () => {
 		});
 	});
 
-	test('joinMeeting is called correctly', async () => {
+	test('joinMeeting is called correctly for a permanent meeting', async () => {
 		fetchResponse.mockResolvedValueOnce({ status: 'ACCEPTED' });
 		fetchResponse.mockResolvedValueOnce(meetingMock);
 		await meetingsApi.joinMeeting(
@@ -136,9 +140,51 @@ describe('Meetings API', () => {
 			})
 		});
 
+		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/meetings/${meetingMock.id}`, {
+			method: 'GET',
+			headers
+		});
+
 		// Check if store is correctly updated
 		const store = useStore.getState();
 		expect(store.activeMeeting[meetingMock.id]).toBeDefined();
+	});
+
+	test('joinMeeting is called correctly for a scheduled meeting', async () => {
+		fetchResponse.mockResolvedValueOnce({ status: 'ACCEPTED' });
+		fetchResponse.mockResolvedValueOnce(scheduledMeetingMock);
+		await meetingsApi.joinMeeting(
+			meetingMock.id,
+			{
+				audioStreamEnabled: false,
+				videoStreamEnabled: false
+			},
+			{}
+		);
+		// Check if fetch is called with the correct parameters
+		expect(global.fetch).toHaveBeenCalledWith(
+			`/services/chats/meetings/${scheduledMeetingMock.id}/join`,
+			{
+				method: 'POST',
+				headers,
+				body: JSON.stringify({
+					audioStreamEnabled: false,
+					videoStreamEnabled: false
+				})
+			}
+		);
+
+		expect(global.fetch).toHaveBeenCalledWith(
+			`/services/chats/meetings/${scheduledMeetingMock.id}`,
+			{
+				method: 'GET',
+				headers
+			}
+		);
+
+		// Check if store is correctly updated
+		const store = useStore.getState();
+		expect(store.activeMeeting[scheduledMeetingMock.id]).toBeDefined();
 	});
 
 	test('leaveMeeting is called correctly', async () => {
