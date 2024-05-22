@@ -68,6 +68,10 @@ const canAccessMeeting = true;
 const setupBasicGroup = (): { user: UserEvent; store: RootStore } => {
 	const { result } = renderHook(() => useStore());
 	act(() => {
+		localStorage.setItem(
+			'ChatsMeetingSettings',
+			JSON.stringify({ EnableCamera: false, EnableMicrophone: false })
+		);
 		result.current.setUserInfo(user1);
 		result.current.setUserInfo(user2);
 		result.current.setLoginInfo(user1.id, user1.name);

@@ -26,6 +26,7 @@ import { filter, find, map } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 import { BrowserUtils } from '../../../../utils/BrowserUtils';
+import { MeetingStorageType } from '../../../../utils/localStorageUtils';
 import { freeMediaResources } from '../../../../utils/MeetingsUtils';
 import { getAudioAndVideo } from '../../../../utils/UserMediaManager';
 
@@ -39,6 +40,7 @@ type LocalMediaHandlerProps = {
 	>;
 	mediaDevicesEnabled: { audio: boolean; video: boolean };
 	setMediaDevicesEnabled: Dispatch<SetStateAction<{ audio: boolean; video: boolean }>>;
+	setMeetingStorage: Dispatch<SetStateAction<MeetingStorageType>>;
 };
 
 const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
@@ -48,7 +50,8 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 	selectedDevicesId,
 	setSelectedDevicesId,
 	mediaDevicesEnabled,
-	setMediaDevicesEnabled
+	setMediaDevicesEnabled,
+	setMeetingStorage
 }) => {
 	const [t] = useTranslation();
 	const disableCamLabel = t('meeting.interactions.disableCamera', 'Disable camera');
@@ -91,6 +94,7 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 						tracks.forEach((track) => track.stop());
 						setStreamTrack(stream);
 						setMediaDevicesEnabled({ audio, video });
+						setMeetingStorage({ EnableCamera: video, EnableMicrophone: audio });
 						setEnterButtonIsEnabled(true);
 					})
 					.catch((e) => {
@@ -118,6 +122,7 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 					.then((stream: MediaStream) => {
 						setStreamTrack(stream);
 						setMediaDevicesEnabled({ audio, video });
+						setMeetingStorage({ EnableCamera: video, EnableMicrophone: audio });
 						setSelectedDevicesId({ audio: audioId, video: videoId });
 						setEnterButtonIsEnabled(true);
 					})
@@ -131,6 +136,7 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 			mediaPermissionSnackbar,
 			setEnterButtonIsEnabled,
 			setMediaDevicesEnabled,
+			setMeetingStorage,
 			setSelectedDevicesId,
 			setStreamTrack,
 			streamTrack
@@ -286,6 +292,14 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 		understoodAction,
 		updateListOfDevices
 	]);
+
+	useEffect(() => {
+		if (mediaDevicesEnabled.audio || mediaDevicesEnabled.video) {
+			getAudioAndVideo(mediaDevicesEnabled.audio, mediaDevicesEnabled.video).then((stream) => {
+				setStreamTrack(stream);
+			});
+		}
+	}, [mediaDevicesEnabled, setStreamTrack]);
 
 	useEffect(() => {
 		navigator.mediaDevices.addEventListener('devicechange', updateListOfDevices);
