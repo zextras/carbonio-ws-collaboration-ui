@@ -30,16 +30,23 @@ export default class VideoOutConnection implements IVideoOutConnection {
 		}
 	}
 
-	public startVideo(selectedVideoDeviceId?: string): void {
-		this.peerConn = new RTCPeerConnection(new PeerConnConfig().getConfig());
-		this.peerConn.onnegotiationneeded = this.onNegotiationNeeded;
-		this.peerConn.oniceconnectionstatechange = this.onIceConnectionStateChange;
+	public startVideo(selectedVideoDeviceId?: string): Promise<void> {
+		return new Promise((resolve, reject) => {
+			this.peerConn = new RTCPeerConnection(new PeerConnConfig().getConfig());
+			this.peerConn.onnegotiationneeded = this.onNegotiationNeeded;
+			this.peerConn.oniceconnectionstatechange = this.onIceConnectionStateChange;
 
-		if (selectedVideoDeviceId) this.selectedVideoDeviceId = selectedVideoDeviceId;
+			if (selectedVideoDeviceId) this.selectedVideoDeviceId = selectedVideoDeviceId;
 
-		getVideoStream(selectedVideoDeviceId).then((stream) => {
-			this.updateLocalStreamTrack(stream);
-			useStore.getState().setLocalStreams(this.meetingId, STREAM_TYPE.VIDEO, stream);
+			getVideoStream(selectedVideoDeviceId)
+				.then((stream) => {
+					this.updateLocalStreamTrack(stream);
+					useStore.getState().setLocalStreams(this.meetingId, STREAM_TYPE.VIDEO, stream);
+					resolve();
+				})
+				.catch((err) => {
+					reject(new Error(`Error while requesting video track, reason: ${err}`));
+				});
 		});
 	}
 

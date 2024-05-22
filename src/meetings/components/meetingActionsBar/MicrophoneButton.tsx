@@ -14,7 +14,12 @@ import React, {
 	useState
 } from 'react';
 
-import { MultiButton, Tooltip } from '@zextras/carbonio-design-system';
+import {
+	CreateSnackbarFn,
+	MultiButton,
+	Tooltip,
+	useSnackbar
+} from '@zextras/carbonio-design-system';
 import { filter, map } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
@@ -43,6 +48,11 @@ const MicrophoneButton = ({
 
 	const disableMicLabel = t('meeting.interactions.disableMicrophone', 'Disable microphone');
 	const enableMicLabel = t('meeting.interactions.enableMicrophone', 'Enable microphone');
+	const understoodAction = t('action.understood', 'UNDERSTOOD');
+	const giveMediaPermissionSnackbar = t(
+		'meeting.interactions.browserPermission',
+		'Grant browser permissions to enable resources'
+	);
 
 	const { meetingId }: MeetingRoutesParams = useParams();
 	const myUserId = useStore(getUserId);
@@ -54,6 +64,20 @@ const MicrophoneButton = ({
 	);
 
 	const [audioMediaList, setAudioMediaList] = useState<[] | MediaDeviceInfo[]>([]);
+
+	const createSnackbar: CreateSnackbarFn = useSnackbar();
+
+	const mediaPermissionSnackbar = useCallback(
+		() =>
+			createSnackbar({
+				key: new Date().toLocaleString(),
+				type: 'info',
+				label: giveMediaPermissionSnackbar,
+				actionLabel: understoodAction,
+				disableAutoHide: true
+			}),
+		[createSnackbar, giveMediaPermissionSnackbar, understoodAction]
+	);
 
 	const mediaAudioList = useMemo(
 		() =>
@@ -91,30 +115,37 @@ const MicrophoneButton = ({
 		(event) => {
 			event.stopPropagation();
 			if (!audioStatus) {
-				getAudioStream(true, true, selectedAudioDeviceId).then((stream) => {
-					bidirectionalAudioConn?.updateLocalStreamTrack(stream).then(() => {
-						MeetingsApi.updateAudioStreamStatus(meetingId, !audioStatus);
+				getAudioStream(true, true, selectedAudioDeviceId)
+					.then((stream) => {
+						bidirectionalAudioConn?.updateLocalStreamTrack(stream).then(() => {
+							MeetingsApi.updateAudioStreamStatus(meetingId, !audioStatus);
+						});
+					})
+					.catch((e) => {
+						mediaPermissionSnackbar();
+						console.log(e);
 					});
-				});
 			} else {
 				bidirectionalAudioConn?.closeRtpSenderTrack();
 				MeetingsApi.updateAudioStreamStatus(meetingId, !audioStatus);
 			}
 		},
-		[audioStatus, bidirectionalAudioConn, meetingId, selectedAudioDeviceId]
+		[audioStatus, bidirectionalAudioConn, mediaPermissionSnackbar, meetingId, selectedAudioDeviceId]
 	);
 
 	const updateListOfDevices = useCallback(() => {
 		navigator.mediaDevices
 			.enumerateDevices()
 			.then((devices) => {
-				const audioInputs: [] | MediaDeviceInfo[] | any = filter(
+				const audioInputs: [] | MediaDeviceInfo[] = filter(
 					devices,
 					(device) => device.kind === 'audioinput' && device
-				);
+				) as MediaDeviceInfo[];
 				setAudioMediaList(audioInputs);
 			})
-			.catch();
+			.catch((e) => {
+				console.log(e);
+			});
 	}, []);
 
 	/**
@@ -135,7 +166,7 @@ const MicrophoneButton = ({
 		<Tooltip placement="top" label={audioStatus ? disableMicLabel : enableMicLabel}>
 			<MultiButton
 				data-testid="microphone-button"
-				background="primary"
+				background={'primary'}
 				primaryIcon={audioStatus ? 'Mic' : 'MicOff'}
 				icon={isAudioListOpen ? 'ChevronDown' : 'ChevronUp'}
 				onClick={toggleAudioStream}

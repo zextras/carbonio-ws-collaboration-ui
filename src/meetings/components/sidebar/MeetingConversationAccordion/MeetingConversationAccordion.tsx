@@ -31,11 +31,7 @@ type MeetingConversationAccordionProps = {
 	roomId: string;
 	meetingId: string;
 };
-const ChatContainer = styled(Container)`
-	transition:
-		height 0.3s ease,
-		min-height 0.3s ease;
-`;
+const ChatContainer = styled(Container)``;
 
 const WrapperMeetingChat = styled(Container)<{ $darkModeActive: boolean }>`
 	overflow: hidden;
@@ -123,23 +119,28 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({
 		}
 	}, [canVideoRecordMeeting, meetingId, roomType, setMeetingChatVisibility]);
 
-	const chatHeight = useMemo(() => {
+	const minHeight = useMemo(() => {
 		if (chatFullExpanded) return '100%';
 		return chatIsOpen ? '50%' : '2.75rem';
+	}, [chatFullExpanded, chatIsOpen]);
+
+	const height = useMemo(() => {
+		if (chatFullExpanded || chatIsOpen) return '100%';
+		return '2.75rem';
 	}, [chatFullExpanded, chatIsOpen]);
 
 	return (
 		<ChatContainer
 			key="MeetingConversationAccordion"
 			data-testid="MeetingConversationAccordion"
-			mainAlignment="flex-start"
-			height={chatHeight}
-			minHeight={chatHeight}
+			mainAlignment="flex-end"
+			height={height}
+			minHeight={minHeight}
 			width="100%"
 			borderRadius="none"
 		>
 			<Container
-				background="gray0"
+				background={'gray0'}
 				orientation="horizontal"
 				maxHeight="2.75rem"
 				width="100%"
@@ -153,7 +154,7 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({
 							<IconButton
 								data-testid="toggleChatExpanded"
 								icon={!chatFullExpanded ? 'ArrowUpward' : 'ArrowDownward'}
-								size="large"
+								customSize={{ iconSize: 'medium', paddingSize: 'extrasmall' }}
 								onClick={toggleChatExpanded}
 							/>
 						</Tooltip>
@@ -164,7 +165,7 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({
 							<IconButton
 								data-testid="toggleChatStatus"
 								icon={isChatOpenOrFullExpanded ? 'ChevronDown' : 'ChevronUp'}
-								size="large"
+								customSize={{ iconSize: 'large', paddingSize: 'extrasmall' }}
 								onClick={toggleChatStatus}
 							/>
 						</Tooltip>
