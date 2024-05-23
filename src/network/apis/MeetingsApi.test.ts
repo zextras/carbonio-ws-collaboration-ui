@@ -10,14 +10,17 @@ import meetingsApi from './MeetingsApi';
 import useStore from '../../store/Store';
 import { createMockMeeting, createMockMember, createMockRoom } from '../../tests/createMock';
 import { fetchResponse } from '../../tests/mocks/global';
+import { RequestType } from '../../types/network/apis/IBaseAPI';
 import { MeetingType } from '../../types/network/models/meetingBeTypes';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
 import { RoomType } from '../../types/store/RoomTypes';
 
 const meetingMock = createMockMeeting();
+const meetingNotActiveMock = createMockMeeting({ active: false });
 const scheduledMeetingMock = createMockMeeting({ meetingType: MeetingType.SCHEDULED });
 const meetingMock1 = createMockMeeting({ id: 'meetingId1', roomId: 'roomId1' });
 const roomMock = createMockRoom({ meetingId: meetingMock.id });
+const roomWithoutMeetingMock = createMockRoom();
 
 const userId = 'userId';
 
@@ -185,6 +188,103 @@ describe('Meetings API', () => {
 		// Check if store is correctly updated
 		const store = useStore.getState();
 		expect(store.activeMeeting[scheduledMeetingMock.id]).toBeDefined();
+	});
+
+	test('enterMeeting is called correctly when a meeting is already present and active', async () => {
+		useStore.getState().addMeeting(meetingMock);
+		await meetingsApi.enterMeeting(
+			meetingMock.roomId,
+			{
+				audioStreamEnabled: false,
+				videoStreamEnabled: false
+			},
+			{}
+		);
+
+		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/meetings/${meetingMock.id}/join`, {
+			method: RequestType.POST,
+			headers,
+			body: JSON.stringify({
+				audioStreamEnabled: false,
+				videoStreamEnabled: false
+			})
+		});
+	});
+
+	test('enterMeeting is called correctly when a meeting is already present but not active', async () => {
+		useStore.getState().addMeeting(meetingNotActiveMock);
+		await meetingsApi.enterMeeting(
+			meetingNotActiveMock.roomId,
+			{
+				audioStreamEnabled: false,
+				videoStreamEnabled: false
+			},
+			{}
+		);
+
+		expect(global.fetch).toHaveBeenCalledWith(
+			`/services/chats/meetings/${meetingNotActiveMock.id}/start`,
+			{
+				method: RequestType.POST,
+				headers
+			}
+		);
+
+		expect(global.fetch).toHaveBeenCalledWith(
+			`/services/chats/meetings/${meetingNotActiveMock.id}/join`,
+			{
+				method: RequestType.POST,
+				headers,
+				body: JSON.stringify({
+					audioStreamEnabled: false,
+					videoStreamEnabled: false
+				})
+			}
+		);
+	});
+
+	test('enterMeeting is called correctly when the meeting instance is not yet created', async () => {
+		useStore.getState().addRoom(roomWithoutMeetingMock);
+		fetchResponse.mockResolvedValueOnce(scheduledMeetingMock);
+
+		await meetingsApi.enterMeeting(
+			roomWithoutMeetingMock.id,
+			{
+				audioStreamEnabled: false,
+				videoStreamEnabled: false
+			},
+			{}
+		);
+
+		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/meetings`, {
+			method: RequestType.POST,
+			headers,
+			body: JSON.stringify({
+				roomId: roomWithoutMeetingMock.id,
+				meetingType: MeetingType.PERMANENT,
+				name: roomWithoutMeetingMock.name
+			})
+		});
+
+		expect(global.fetch).toHaveBeenCalledWith(
+			`/services/chats/meetings/${scheduledMeetingMock.id}/start`,
+			{
+				method: RequestType.POST,
+				headers
+			}
+		);
+
+		expect(global.fetch).toHaveBeenCalledWith(
+			`/services/chats/meetings/${scheduledMeetingMock.id}/join`,
+			{
+				method: RequestType.POST,
+				headers,
+				body: JSON.stringify({
+					audioStreamEnabled: false,
+					videoStreamEnabled: false
+				})
+			}
+		);
 	});
 
 	test('leaveMeeting is called correctly', async () => {
