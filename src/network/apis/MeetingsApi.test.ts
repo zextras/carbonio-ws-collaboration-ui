@@ -288,6 +288,8 @@ describe('Meetings API', () => {
 	});
 
 	test('leaveMeeting is called correctly', async () => {
+		document.cookie = `ZM_AUTH_TOKEN=123456789; path=/`;
+		document.cookie = `ZX_AUTH_TOKEN=123456789; path=/`;
 		fetchResponse.mockResolvedValueOnce(meetingMock);
 		await meetingsApi.leaveMeeting(meetingMock.id);
 
@@ -301,6 +303,26 @@ describe('Meetings API', () => {
 		// Check if store is correctly updated
 		const store = useStore.getState();
 		expect(store.activeMeeting[meetingMock.id]).not.toBeDefined();
+		expect(document.cookie).toBe('');
+	});
+
+	test('leaveMeeting is rejected', async () => {
+		document.cookie = `ZM_AUTH_TOKEN=123456789; path=/`;
+		document.cookie = `ZX_AUTH_TOKEN=123456789; path=/`;
+		fetchResponse.mockRejectedValueOnce(false);
+		await meetingsApi.leaveMeeting(meetingMock.id);
+
+		// Check if fetch is called with the correct parameters
+		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/meetings/${meetingMock.id}/leave`, {
+			method: 'POST',
+			headers,
+			body: undefined
+		});
+
+		// Check if store is correctly updated
+		const store = useStore.getState();
+		expect(store.activeMeeting[meetingMock.id]).not.toBeDefined();
+		expect(document.cookie).toBe('');
 	});
 
 	test('When a member leaves a scheduled meeting, he is also removed from temporary room', async () => {
@@ -462,6 +484,8 @@ describe('Meetings API', () => {
 	});
 
 	test('leaveWaitingRoom is called correctly', async () => {
+		document.cookie = `ZM_AUTH_TOKEN=123456789; path=/`;
+		document.cookie = `ZX_AUTH_TOKEN=123456789; path=/`;
 		fetchResponse.mockResolvedValueOnce({ status: 'ACCEPTED' });
 		await meetingsApi.leaveWaitingRoom(meetingMock.id);
 
@@ -476,6 +500,27 @@ describe('Meetings API', () => {
 				})
 			}
 		);
+		expect(document.cookie).toBe('');
+	});
+
+	test('leaveWaitingRoom is rejected', async () => {
+		document.cookie = `ZM_AUTH_TOKEN=123456789; path=/`;
+		document.cookie = `ZX_AUTH_TOKEN=123456789; path=/`;
+		fetchResponse.mockRejectedValueOnce(false);
+		await meetingsApi.leaveWaitingRoom(meetingMock.id);
+
+		// Check if fetch is called with the correct parameters
+		expect(global.fetch).toHaveBeenCalledWith(
+			`/services/chats/meetings/${meetingMock.id}/queue/${userId}`,
+			{
+				method: 'POST',
+				headers,
+				body: JSON.stringify({
+					status: 'REJECTED'
+				})
+			}
+		);
+		expect(document.cookie).toBe('');
 	});
 
 	test('getWaitingList is called correctly', async () => {
@@ -583,14 +628,6 @@ describe('Meetings API', () => {
 	});
 
 	test('authLogin is called correctly', async () => {
-		await meetingsApi.authLogin();
-
-		expect(global.fetch).toHaveBeenCalledWith(`/zx/login/v3/config`, {
-			method: 'GET'
-		});
-	});
-
-	test('authLogin failed', async () => {
 		await meetingsApi.authLogin();
 
 		expect(global.fetch).toHaveBeenCalledWith(`/zx/login/v3/config`, {

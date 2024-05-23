@@ -161,6 +161,7 @@ describe('AccessMeeting - enter to meeting as a moderator or as a member of a gr
 
 		expect(mockedEnterMeetingRequest).toBeCalled();
 	});
+
 	test('turn on video', async () => {
 		mockedJoinMeetingRequest.mockReturnValueOnce(groupMeeting);
 
@@ -171,6 +172,7 @@ describe('AccessMeeting - enter to meeting as a moderator or as a member of a gr
 		const videoOn = await screen.findByTestId(iconVideo);
 		expect(videoOn).toBeInTheDocument();
 	});
+
 	test('turn on audio', async () => {
 		mockedJoinMeetingRequest.mockReturnValueOnce(groupMeeting);
 
@@ -181,6 +183,7 @@ describe('AccessMeeting - enter to meeting as a moderator or as a member of a gr
 		const audioOn = await screen.findAllByTestId('icon: Mic');
 		expect(audioOn).toHaveLength(2);
 	});
+
 	test('try audio', async () => {
 		const { user } = setupBasicGroup();
 
@@ -194,6 +197,7 @@ describe('AccessMeeting - enter to meeting as a moderator or as a member of a gr
 		const stopAudio = await screen.findByText(/Stop mic test/i);
 		expect(stopAudio).toBeInTheDocument();
 	});
+
 	test('if networks connection are down, enter button should be disabled', async () => {
 		setupBasicGroup();
 
@@ -205,12 +209,14 @@ describe('AccessMeeting - enter to meeting as a moderator or as a member of a gr
 		const enterButton = await screen.findByRole('button', { name: 'Enter' });
 		expect(enterButton).toBeDisabled();
 	});
+
 	test('if network connections are undefined, enter button should be disabled', async () => {
 		setupGroupWithBeStatusUndefined();
 
 		const enterButton = await screen.findByRole('button', { name: 'Enter' });
 		expect(enterButton).toBeDisabled();
 	});
+
 	test('Enter to meeting fails', async () => {
 		const error = jest.spyOn(console, 'error').mockImplementation();
 		mockedEnterMeetingRequest.mockRejectedValue('rejected');
@@ -253,6 +259,7 @@ describe('AccessMeeting - enter to meeting as a moderator or as a member of a gr
 		// selected
 		expect(deviceSelected[1]).toHaveStyle(boldFontWeight);
 	});
+
 	test('Select audio device after turning on audio', async () => {
 		mockedJoinMeetingRequest.mockReturnValueOnce(groupMeeting);
 
@@ -303,6 +310,7 @@ describe('AccessMeeting - enter to meeting as a moderator or as a member of a gr
 		const enterButton = await screen.findByTestId('enterMeetingButton');
 		expect(enterButton).toBeEnabled();
 	});
+
 	test('Enter button is enabled after selection of audio source', async () => {
 		mockedJoinMeetingRequest.mockReturnValueOnce(groupMeeting);
 
@@ -340,6 +348,21 @@ describe('AccessMeeting - enter to meeting by waiting Room', () => {
 
 		expect(mockedJoinMeetingRequest).toHaveBeenCalled();
 	});
+
+	test('user is ready to participate and leaves', async () => {
+		mockedJoinMeetingRequest.mockReturnValue({ status: 'WAITING' });
+
+		const { user } = setupForWaitingRoom();
+
+		const enterButton = await screen.findByText(readyButtonLabel);
+		await act(() => user.click(enterButton));
+
+		const hangButton = await screen.findByTestId('icon: LogOut');
+		await user.click(hangButton);
+
+		expect(mockGoToInfoPage).toHaveBeenCalledWith(PAGE_INFO_TYPE.HANG_UP_PAGE);
+	});
+
 	test('user is accepted in the scheduled meeting', async () => {
 		mockedJoinMeetingRequest.mockReturnValue({ status: 'ACCEPTED' });
 		mockedEnterMeetingRequest.mockReturnValue(acceptedInMeeting);
@@ -362,6 +385,7 @@ describe('AccessMeeting - enter to meeting by waiting Room', () => {
 
 		expect(mockGoToMeetingPage).toHaveBeenCalled();
 	});
+
 	test('user is rejected by a moderator', async () => {
 		mockedJoinMeetingRequest.mockReturnValue({ status: 'WAITING' });
 		mockedEnterMeetingRequest.mockReturnValue(acceptedInMeeting);
@@ -402,6 +426,7 @@ describe('AccessMeeting - enter to meeting by waiting Room', () => {
 
 		expect(mockGoToInfoPage).toHaveBeenCalledWith(PAGE_INFO_TYPE.MEETING_ENDED);
 	});
+
 	test('user is ready to participate and the meeting finish before he can enter', async () => {
 		mockedJoinMeetingRequest.mockReturnValue({ status: 'WAITING' });
 		mockedEnterMeetingRequest.mockReturnValue(acceptedInMeeting);
@@ -420,5 +445,27 @@ describe('AccessMeeting - enter to meeting by waiting Room', () => {
 		});
 
 		expect(mockGoToInfoPage).toHaveBeenCalledWith(PAGE_INFO_TYPE.MEETING_ENDED);
+	});
+
+	test('user is in waiting room and enters from another tab', async () => {
+		mockedJoinMeetingRequest.mockReturnValue({ status: 'WAITING' });
+		mockedEnterMeetingRequest.mockReturnValue(acceptedInMeeting);
+		const { user } = setupForWaitingRoom();
+		const enterButton = await screen.findByText(readyButtonLabel);
+		await act(() => user.click(enterButton));
+
+		await waitFor(() => {
+			sendCustomEvent({
+				name: EventName.MEETING_WAITING_PARTICIPANT_CLASHED,
+				data: {
+					type: WsEventType.MEETING_WAITING_PARTICIPANT_CLASHED,
+					sentDate: '1234567',
+					meetingId: meetingForWaitingRoom.id,
+					userId: user2.id
+				}
+			});
+		});
+
+		expect(mockGoToInfoPage).toHaveBeenCalledWith(PAGE_INFO_TYPE.ALREADY_ACTIVE_MEETING_SESSION);
 	});
 });

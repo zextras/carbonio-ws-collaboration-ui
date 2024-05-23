@@ -87,6 +87,7 @@ export const mockedStopRecordingRequest: jest.Mock = jest.fn();
 export const mockedGetMeetingByMeetingId: jest.Mock = jest.fn();
 export const mockedCreateGuestAccount: jest.Mock = jest.fn();
 export const mockedGetCapabilities: jest.Mock = jest.fn();
+export const mockedAuthLoginRequest: jest.Mock = jest.fn();
 
 jest.mock('../../network', () => {
 	const noResultProvided = 'no result provided';
@@ -294,6 +295,11 @@ jest.mock('../../network', () => {
 			createGuestAccount: (): Promise<CreateGuestAccountResponse> =>
 				new Promise((resolve, reject) => {
 					const result = mockedCreateGuestAccount();
+					result ? resolve(result) : reject(new Error(noResultProvided));
+				}),
+			authLogin: (): Promise<CreateGuestAccountResponse> =>
+				new Promise((resolve, reject) => {
+					const result = mockedAuthLoginRequest();
 					result ? resolve(result) : reject(new Error(noResultProvided));
 				})
 		},
