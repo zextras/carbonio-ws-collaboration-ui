@@ -108,7 +108,6 @@ const MeetingAccessPage: FC<AccessMeetingPageProps> = ({ hasUserDirectAccess, me
 	const handleLeave = useCallback(() => {
 		freeMediaResources(streamTrack);
 		if (userIsReady) MeetingsApi.leaveWaitingRoom(meetingId);
-		// TODO: Limit this cookie cleans only to guest accounts
 		BrowserUtils.clearAuthCookies();
 		goToInfoPage(PAGE_INFO_TYPE.HANG_UP_PAGE);
 	}, [goToInfoPage, meetingId, streamTrack, userIsReady]);

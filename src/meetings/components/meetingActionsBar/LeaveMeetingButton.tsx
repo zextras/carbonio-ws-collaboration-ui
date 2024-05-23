@@ -55,7 +55,6 @@ const LeaveMeetingButton = ({ isHoovering }: LeaveMeetingButtonProps): ReactElem
 		(event) => {
 			event.stopPropagation();
 			MeetingsApi.leaveMeeting(meetingId).then(() => {
-				// TODO: Limit this cookie cleans only to guest accounts
 				BrowserUtils.clearAuthCookies();
 				goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED);
 			});
