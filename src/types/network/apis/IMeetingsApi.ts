@@ -53,7 +53,7 @@ interface IMeetingsApi {
 		settings: JoinSettings,
 		devicesId: { audioDevice?: string; videoDevice?: string }
 	): Promise<string>;
-	leaveMeeting(meetingId: string): Promise<LeaveMeetingResponse | void>;
+	leaveMeeting(meetingId: string): Promise<LeaveMeetingResponse>;
 	// Stop meeting when all the users have left the meeting
 	stopMeeting(meetingId: string): Promise<StopMeetingResponse>;
 	// Delete meeting with the deletion of the room
@@ -79,7 +79,7 @@ interface IMeetingsApi {
 	createMediaAnswer(meetingId: string, sdpOffer: string): Promise<CreateMediaAnswerResponse>;
 	// Scheduled meetings
 	getScheduledMeetingName(meetingId: string): Promise<GetScheduledMeetingNameResponse>;
-	leaveWaitingRoom(meetingId: string): Promise<AcceptWaitingUserResponse | void>;
+	leaveWaitingRoom(meetingId: string): Promise<AcceptWaitingUserResponse>;
 	getWaitingList(meetingId: string): Promise<GetWaitingListResponse>;
 	acceptWaitingUser(
 		meetingId: string,

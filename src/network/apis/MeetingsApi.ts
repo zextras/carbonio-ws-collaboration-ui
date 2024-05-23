@@ -148,7 +148,7 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 		);
 	}
 
-	public leaveMeeting(meetingId: string): Promise<LeaveMeetingResponse | void> {
+	public leaveMeeting(meetingId: string): Promise<LeaveMeetingResponse> {
 		const room = find(useStore.getState().rooms, (room) => room.meetingId === meetingId);
 		const iAmNotOwner = find(
 			room?.members,
@@ -165,8 +165,9 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 				BrowserUtils.clearAuthCookies();
 				return resp;
 			})
-			.catch(() => {
+			.catch((err) => {
 				BrowserUtils.clearAuthCookies();
+				return err;
 			});
 	}
 
@@ -237,16 +238,18 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 		return this.fetchAPI(`public/meetings/${meetingId}`, RequestType.GET, undefined);
 	}
 
-	public leaveWaitingRoom(meetingId: string): Promise<AcceptWaitingUserResponse | void> {
+	public leaveWaitingRoom(meetingId: string): Promise<AcceptWaitingUserResponse> {
 		const userId = useStore.getState().session.id;
 		return this.fetchAPI(`meetings/${meetingId}/queue/${userId}`, RequestType.POST, {
 			status: 'REJECTED'
 		})
-			.then(() => {
+			.then((resp) => {
 				BrowserUtils.clearAuthCookies();
+				return resp();
 			})
-			.catch(() => {
+			.catch((err) => {
 				BrowserUtils.clearAuthCookies();
+				return err;
 			});
 	}
 

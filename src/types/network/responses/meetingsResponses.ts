@@ -36,7 +36,7 @@ export type GetScheduledMeetingNameResponse = { name: string };
 
 export type GetWaitingListResponse = { users: string[] };
 
-export type AcceptWaitingUserResponse = { accepted: boolean };
+export type AcceptWaitingUserResponse = Response & { accepted: boolean };
 
 export type StartRecordingResponse = Response;
 
