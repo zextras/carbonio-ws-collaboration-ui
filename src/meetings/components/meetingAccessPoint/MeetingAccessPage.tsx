@@ -92,6 +92,7 @@ const MeetingAccessPage: FC<AccessMeetingPageProps> = ({ hasUserDirectAccess, me
 
 	const handleRejected = useCallback(() => {
 		freeMediaResources(streamTrack);
+		BrowserUtils.clearAuthCookies();
 		goToInfoPage(PAGE_INFO_TYPE.NEXT_TIME_PAGE);
 	}, [goToInfoPage, streamTrack]);
 
@@ -107,8 +108,11 @@ const MeetingAccessPage: FC<AccessMeetingPageProps> = ({ hasUserDirectAccess, me
 
 	const handleLeave = useCallback(() => {
 		freeMediaResources(streamTrack);
-		if (userIsReady) MeetingsApi.leaveWaitingRoom(meetingId);
-		BrowserUtils.clearAuthCookies();
+		if (userIsReady) {
+			MeetingsApi.leaveWaitingRoom(meetingId);
+		} else {
+			BrowserUtils.clearAuthCookies();
+		}
 		goToInfoPage(PAGE_INFO_TYPE.HANG_UP_PAGE);
 	}, [goToInfoPage, meetingId, streamTrack, userIsReady]);
 
@@ -119,7 +123,7 @@ const MeetingAccessPage: FC<AccessMeetingPageProps> = ({ hasUserDirectAccess, me
 	// Leave waiting list on window close
 	useEffect(() => {
 		window.parent.addEventListener('beforeunload', handleLeave);
-		return () => {
+		return (): void => {
 			window.parent.removeEventListener('beforeunload', handleLeave);
 		};
 	}, [handleLeave]);
@@ -127,7 +131,7 @@ const MeetingAccessPage: FC<AccessMeetingPageProps> = ({ hasUserDirectAccess, me
 	useEffect(() => {
 		window.addEventListener('resize', handleResize);
 
-		return () => window.removeEventListener('resize', handleResize);
+		return (): void => window.removeEventListener('resize', handleResize);
 	}, [handleResize]);
 
 	useEffect(() => {

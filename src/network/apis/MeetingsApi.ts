@@ -39,6 +39,7 @@ import {
 } from '../../types/network/responses/meetingsResponses';
 import { STREAM_TYPE, Subscription } from '../../types/store/ActiveMeetingTypes';
 import { RoomType } from '../../types/store/RoomTypes';
+import { BrowserUtils } from '../../utils/BrowserUtils';
 import { RoomsApi } from '../index';
 
 class MeetingsApi extends BaseAPI implements IMeetingsApi {
@@ -147,23 +148,26 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 		);
 	}
 
-	public leaveMeeting(meetingId: string): Promise<LeaveMeetingResponse> {
+	public leaveMeeting(meetingId: string): Promise<LeaveMeetingResponse | void> {
 		const room = find(useStore.getState().rooms, (room) => room.meetingId === meetingId);
 		const iAmNotOwner = find(
 			room?.members,
 			(member) => member.userId === useStore.getState().session.id && !member.owner
 		);
-		return this.fetchAPI(`meetings/${meetingId}/leave`, RequestType.POST).then(
-			(resp: LeaveMeetingResponse) => {
+		return this.fetchAPI(`meetings/${meetingId}/leave`, RequestType.POST)
+			.then((resp: LeaveMeetingResponse) => {
 				useStore.getState().meetingDisconnection(meetingId);
 
 				// Leave temporary room when a member leaves the scheduled meeting
 				if (room?.type === RoomType.TEMPORARY && iAmNotOwner) {
 					RoomsApi.deleteRoomMember(room.id, useStore.getState().session.id || '');
 				}
+				BrowserUtils.clearAuthCookies();
 				return resp;
-			}
-		);
+			})
+			.catch(() => {
+				BrowserUtils.clearAuthCookies();
+			});
 	}
 
 	public stopMeeting(meetingId: string): Promise<StopMeetingResponse> {
@@ -233,11 +237,17 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 		return this.fetchAPI(`public/meetings/${meetingId}`, RequestType.GET, undefined);
 	}
 
-	public leaveWaitingRoom(meetingId: string): Promise<AcceptWaitingUserResponse> {
+	public leaveWaitingRoom(meetingId: string): Promise<AcceptWaitingUserResponse | void> {
 		const userId = useStore.getState().session.id;
 		return this.fetchAPI(`meetings/${meetingId}/queue/${userId}`, RequestType.POST, {
 			status: 'REJECTED'
-		});
+		})
+			.then(() => {
+				BrowserUtils.clearAuthCookies();
+			})
+			.catch(() => {
+				BrowserUtils.clearAuthCookies();
+			});
 	}
 
 	public getWaitingList(meetingId: string): Promise<GetWaitingListResponse> {

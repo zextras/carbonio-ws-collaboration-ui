@@ -12,7 +12,6 @@ import styled from 'styled-components';
 
 import useRouting, { MeetingRoutesParams, PAGE_INFO_TYPE } from '../../../hooks/useRouting';
 import { MeetingsApi } from '../../../network';
-import { BrowserUtils } from '../../../utils/BrowserUtils';
 
 const CustomContainer = styled(Container)`
 	> div > button > div {
@@ -55,7 +54,6 @@ const LeaveMeetingButton = ({ isHoovering }: LeaveMeetingButtonProps): ReactElem
 		(event) => {
 			event.stopPropagation();
 			MeetingsApi.leaveMeeting(meetingId).then(() => {
-				BrowserUtils.clearAuthCookies();
 				goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED);
 			});
 		},
