@@ -19,6 +19,7 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../tests/createMock';
+import { mockMediaDevicesResolve } from '../../tests/mocks/global';
 import { mockedLeaveMeetingRequest } from '../../tests/mocks/network';
 import { mockGoToInfoPage } from '../../tests/mocks/useRouting';
 import { setup } from '../../tests/test-utils';
@@ -89,6 +90,10 @@ const storeSetupGroupMeetingSkeleton = (): { user: UserEvent } => {
 
 	return { user };
 };
+
+beforeAll(() => {
+	mockMediaDevicesResolve();
+});
 
 describe('Sidebar interactions', () => {
 	test('Enable full screen and sidebar must be closed', async () => {

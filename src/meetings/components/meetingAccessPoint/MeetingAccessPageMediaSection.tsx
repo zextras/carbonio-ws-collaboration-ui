@@ -30,11 +30,13 @@ import AccessTile from './mediaHandlers/AccessTile';
 import LocalMediaHandler from './mediaHandlers/LocalMediaHandler';
 import { MEETINGS_PATH } from '../../../constants/appConstants';
 import useEventListener, { EventName } from '../../../hooks/useEventListener';
+import useLocalStorage from '../../../hooks/useLocalStorage';
 import useRouting from '../../../hooks/useRouting';
 import { MeetingsApi } from '../../../network';
 import { getRoomIdFromMeeting } from '../../../store/selectors/MeetingSelectors';
 import { getRoomNameSelector } from '../../../store/selectors/RoomsSelectors';
 import useStore from '../../../store/Store';
+import { LOCAL_STORAGE_NAMES, MeetingStorageType } from '../../../utils/localStorageUtils';
 import { freeMediaResources } from '../../../utils/MeetingsUtils';
 
 type AccessMeetingPageMediaSectionProps = {
@@ -109,6 +111,10 @@ const MeetingAccessPageMediaSection: FC<AccessMeetingPageMediaSectionProps> = ({
 
 	const { goToMeetingPage } = useRouting();
 
+	const [meetingStorage, setMeetingStorage] = useLocalStorage<MeetingStorageType>(
+		LOCAL_STORAGE_NAMES.MEETINGS
+	);
+
 	const chatsBeNetworkStatus = useStore(({ connections }) => connections.status.chats_be);
 	const websocketNetworkStatus = useStore(({ connections }) => connections.status.websocket);
 
@@ -121,7 +127,7 @@ const MeetingAccessPageMediaSection: FC<AccessMeetingPageMediaSectionProps> = ({
 	const [mediaDevicesEnabled, setMediaDevicesEnabled] = useState<{
 		audio: boolean;
 		video: boolean;
-	}>({ audio: false, video: false });
+	}>({ audio: meetingStorage.EnableMicrophone, video: meetingStorage.EnableCamera });
 
 	const videoStreamRef = useRef<HTMLVideoElement>(null);
 
@@ -325,6 +331,7 @@ const MeetingAccessPageMediaSection: FC<AccessMeetingPageMediaSectionProps> = ({
 						setSelectedDevicesId={setSelectedDevicesId}
 						mediaDevicesEnabled={mediaDevicesEnabled}
 						setMediaDevicesEnabled={setMediaDevicesEnabled}
+						setMeetingStorage={setMeetingStorage}
 					/>
 					{buttonsWrapper}
 				</Container>

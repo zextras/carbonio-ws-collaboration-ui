@@ -15,7 +15,6 @@ import React, {
 } from 'react';
 
 import { Container } from '@zextras/carbonio-design-system';
-import { forEach } from 'lodash';
 import styled from 'styled-components';
 
 import ConversationHeader from './ConversationHeader';
@@ -23,14 +22,11 @@ import DropZoneView from './DropZoneView';
 import ConversationFooter from './footer/ConversationFooter';
 import MessagesList from './MessagesList';
 import { MEETINGS_PATH } from '../../../constants/appConstants';
+import useLoadFiles from '../../../hooks/useLoadFiles';
 import useMediaQueryCheck from '../../../hooks/useMediaQueryCheck';
-import {
-	getFilesToUploadArray,
-	getReferenceMessage
-} from '../../../store/selectors/ActiveConversationsSelectors';
+import { getReferenceMessage } from '../../../store/selectors/ActiveConversationsSelectors';
 import useStore from '../../../store/Store';
-import { FileToUpload, messageActionType } from '../../../types/store/ActiveConversationTypes';
-import { uid } from '../../../utils/attachmentUtils';
+import { messageActionType } from '../../../types/store/ActiveConversationTypes';
 
 const CustomContainer = styled(Container)`
 	position: relative;
@@ -42,14 +38,13 @@ type ChatsProps = {
 };
 
 const Chat = ({ roomId, setInfoPanelOpen }: ChatsProps): ReactElement => {
-	const filesToUploadArray = useStore((store) => getFilesToUploadArray(store, roomId));
-	const setFilesToAttach = useStore((store) => store.setFilesToAttach);
-	const setInputHasFocus = useStore((store) => store.setInputHasFocus);
 	const referenceMessage = useStore((store) => getReferenceMessage(store, roomId));
 
-	const isDesktopView = useMediaQueryCheck();
-	const isInsideMeeting = useMemo(() => window.location.pathname.includes(MEETINGS_PATH), []);
 	const [dropzoneEnabled, setDropzoneEnabled] = useState(false);
+
+	const isDesktopView = useMediaQueryCheck();
+
+	const isInsideMeeting = useMemo(() => window.location.pathname.includes(MEETINGS_PATH), []);
 
 	useEffect(() => {
 		if (isDesktopView) {
@@ -57,28 +52,16 @@ const Chat = ({ roomId, setInfoPanelOpen }: ChatsProps): ReactElement => {
 		}
 	}, [isDesktopView, setInfoPanelOpen]);
 
+	const loadFiles = useLoadFiles(roomId);
+
 	const handleOnDrop = useCallback(
 		(ev) => {
 			ev.preventDefault();
 			const { files } = ev.dataTransfer as HTMLInputElement;
-			const listOfFiles: FileToUpload[] = [];
-			forEach(files, (file: File, index) => {
-				const fileLocalUrl = URL.createObjectURL(file);
-				const fileId = uid();
-				const isFocusedIfFirstOfListAndFirstToBeUploaded = index === 0 && !filesToUploadArray;
-				listOfFiles.push({
-					file,
-					fileId,
-					hasFocus: isFocusedIfFirstOfListAndFirstToBeUploaded,
-					description: '',
-					localUrl: fileLocalUrl
-				});
-			});
-			setFilesToAttach(roomId, listOfFiles);
+			loadFiles(files ?? new FileList());
 			setDropzoneEnabled(false);
-			setInputHasFocus(roomId, true);
 		},
-		[roomId, setFilesToAttach, setInputHasFocus, filesToUploadArray]
+		[loadFiles]
 	);
 
 	const handleOnDragOver = useCallback(

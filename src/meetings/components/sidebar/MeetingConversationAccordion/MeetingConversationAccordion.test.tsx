@@ -28,6 +28,9 @@ import { MeetingParticipant } from '../../../../types/store/MeetingTypes';
 import { RootStore } from '../../../../types/store/StoreTypes';
 import MeetingSidebar from '../MeetingSidebar';
 
+const heightRem = 'height: 2.75rem';
+const heightPercentage = 'height: 100%';
+
 const mockUser1 = createMockUser({
 	id: 'user1',
 	name: 'User 1'
@@ -80,16 +83,16 @@ const setupBasicGroup = (): { user: UserEvent; store: RootStore } => {
 };
 
 describe('Meeting sidebar', () => {
-	test('open - close chat accordion', async () => {
+	test('close - open chat accordion', async () => {
 		const { user } = setupBasicGroup();
 		const toggleChatExpanded = screen.queryByTestId('toggleChatExpanded');
 		expect(toggleChatExpanded).toBeInTheDocument();
 		const toggleChatBtn = screen.getByTestId('toggleChatStatus');
 		await user.click(toggleChatBtn);
 		const chatAccordion = await screen.findByTestId('MeetingConversationAccordion');
-		expect(chatAccordion).toHaveStyle('height: 2.75rem');
+		expect(chatAccordion).toHaveStyle(heightRem);
 		await waitFor(() => user.click(toggleChatBtn));
-		expect(chatAccordion).toHaveStyle('height: 50%');
+		expect(chatAccordion).toHaveStyle(heightPercentage);
 		const composer = await screen.findByTestId('textAreaComposer');
 		expect(composer).toBeInTheDocument();
 	});
@@ -98,9 +101,9 @@ describe('Meeting sidebar', () => {
 		const toggleChatExpanded = screen.getByTestId('toggleChatExpanded');
 		await waitFor(() => user.click(toggleChatExpanded));
 		const chatAccordion = await screen.findByTestId('MeetingConversationAccordion');
-		expect(chatAccordion).toHaveStyle('height: 100%');
+		expect(chatAccordion).toHaveStyle(heightPercentage);
 		await waitFor(() => user.click(toggleChatExpanded));
-		expect(chatAccordion).toHaveStyle('height: 50%');
+		expect(chatAccordion).toHaveStyle(heightPercentage);
 	});
 	test('open - expand - close chat accordion', async () => {
 		const { user } = setupBasicGroup();
@@ -108,7 +111,7 @@ describe('Meeting sidebar', () => {
 		const toggleChatExpanded = screen.getByTestId('toggleChatExpanded');
 		await waitFor(() => user.click(toggleChatExpanded));
 		const chatAccordion = await screen.findByTestId('MeetingConversationAccordion');
-		expect(chatAccordion).toHaveStyle('height: 100%');
+		expect(chatAccordion).toHaveStyle(heightPercentage);
 		await waitFor(() => user.click(toggleChatBtn));
 		expect(toggleChatBtn).toHaveStyle('height: fit');
 	});

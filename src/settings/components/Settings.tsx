@@ -7,12 +7,7 @@
 import React, { FC, useCallback, useEffect, useState } from 'react';
 
 import { Container, CreateSnackbarFn, useSnackbar } from '@zextras/carbonio-design-system';
-import {
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore
-	SettingsHeader,
-	useIntegratedFunction
-} from '@zextras/carbonio-shell-ui';
+import { SettingsHeader, useIntegratedFunction } from '@zextras/carbonio-shell-ui';
 import { isEqual } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
@@ -186,8 +181,7 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 			setRecordingStorage(recordingDefaults);
 			setIsEnabled(false);
 		}
-
-		return Promise.resolve().then(successSnackbar);
+		return Promise.allSettled([Promise.resolve().then(successSnackbar)]);
 	}, [
 		picture,
 		deletePicture,

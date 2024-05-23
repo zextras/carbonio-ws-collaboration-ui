@@ -5,12 +5,7 @@
  */
 import React, { ReactElement } from 'react';
 
-import {
-	Account,
-	AccountSettings,
-	AppRoute,
-	INotificationManager
-} from '@zextras/carbonio-shell-ui';
+import { Account, AccountSettings, INotificationManager } from '@zextras/carbonio-shell-ui';
 import { createMemoryHistory } from 'history';
 
 import {
@@ -32,7 +27,7 @@ export const USER_SETTINGS: AccountSettings = {
 	}
 };
 
-export const ROUTE_SETTINGS: AppRoute = {
+export const ROUTE_SETTINGS = {
 	id: 'chats',
 	route: 'chats',
 	app: 'Chats'
@@ -78,7 +73,7 @@ export const useAuthenticated = (): boolean => mockUseAuthenticated();
 
 export const useUserSettings = (): AccountSettings => USER_SETTINGS;
 
-export const useCurrentRoute = (): AppRoute | undefined => ROUTE_SETTINGS;
+export const useCurrentRoute = (): typeof ROUTE_SETTINGS | undefined => ROUTE_SETTINGS;
 
 export const getUserAccount = (): Account => ACCOUNT;
 

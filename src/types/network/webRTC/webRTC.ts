@@ -35,7 +35,7 @@ export interface IBidirectionalConnectionAudioInOut extends IPeerConnection {
 export interface IVideoOutConnection extends IPeerConnection {
 	rtpSender: RTCRtpSender | null;
 	selectedVideoDeviceId: string | undefined;
-	startVideo(selectedVideoDeviceId?: string): void;
+	startVideo(selectedVideoDeviceId?: string): Promise<void>;
 	stopVideo(): void;
 	handleRemoteAnswer(remoteAnswer: RTCSessionDescriptionInit): void;
 	updateLocalStreamTrack(mediaStreamTrack: MediaStream): Promise<MediaStreamTrack | undefined>;

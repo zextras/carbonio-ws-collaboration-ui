@@ -12,18 +12,17 @@ import { forEach, map } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
+import useUploadFile from '../../../../hooks/useLoadFiles';
 import {
 	getDraftMessage,
 	getFilesToUploadArray
 } from '../../../../store/selectors/ActiveConversationsSelectors';
 import useStore from '../../../../store/Store';
-import { FileToUpload } from '../../../../types/store/ActiveConversationTypes';
 import {
 	canDisplayPreviewOnLoad,
 	getAttachmentIcon,
 	getAttachmentInfo,
-	getAttachmentType,
-	uid
+	getAttachmentType
 } from '../../../../utils/attachmentUtils';
 
 type UploadAttachmentManagerViewProps = {
@@ -112,7 +111,6 @@ const UploadAttachmentManagerView: React.FC<UploadAttachmentManagerViewProps> = 
 	const filesToUploadArray = useStore((store) => getFilesToUploadArray(store, roomId));
 	const draftMessage = useStore((store) => getDraftMessage(store, roomId));
 	const unsetFilesToAttach = useStore((store) => store.unsetFilesToAttach);
-	const setFilesToAttach = useStore((store) => store.setFilesToAttach);
 	const setDraftMessage = useStore((store) => store.setDraftMessage);
 	const setFileFocusedToModify = useStore((store) => store.setFileFocusedToModify);
 	const removeFileToAttach = useStore((store) => store.removeFileToAttach);
@@ -296,26 +294,14 @@ const UploadAttachmentManagerView: React.FC<UploadAttachmentManagerViewProps> = 
 		setDraftMessage(roomId, true);
 	}, [roomId, unsetFilesToAttach, setDraftMessage]);
 
+	const loadFiles = useUploadFile(roomId);
+
 	const selectFiles = useCallback(
 		(ev) => {
 			const { files } = ev.target as HTMLInputElement;
-			const listOfFiles: FileToUpload[] = [];
-			forEach(files, (file: File, index) => {
-				const fileLocalUrl = URL.createObjectURL(file);
-				const fileId = uid();
-				const isFocusedIfFirstOfListAndFirstToBeUploaded = index === 0 && !filesToUploadArray;
-				listOfFiles.push({
-					file,
-					fileId,
-					hasFocus: isFocusedIfFirstOfListAndFirstToBeUploaded,
-					description: '',
-					localUrl: fileLocalUrl
-				});
-			});
-			setFilesToAttach(roomId, listOfFiles);
-			setInputHasFocus(roomId, true);
+			loadFiles(files ?? new FileList());
 		},
-		[setFilesToAttach, roomId, setInputHasFocus, filesToUploadArray]
+		[loadFiles]
 	);
 
 	const titleLabel = useMemo(() => {

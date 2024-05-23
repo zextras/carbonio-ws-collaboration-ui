@@ -17,7 +17,11 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../../tests/createMock';
-import { mockMediaDevicesResolve } from '../../../tests/mocks/global';
+import {
+	mockedEnumerateDevices,
+	mockedGetUserMedia,
+	mockMediaDevicesReject
+} from '../../../tests/mocks/global';
 import { setup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 import { MemberBe, RoomBe } from '../../../types/network/models/roomBeTypes';
@@ -68,20 +72,26 @@ const defaultSetup = (): { user: UserEvent } => {
 };
 
 beforeAll(() => {
-	mockMediaDevicesResolve();
+	mockMediaDevicesReject();
 });
 
-describe('Microphone button', () => {
-	test('Should render the component', async () => {
-		defaultSetup();
-		expect(await screen.findByTestId('microphone-button')).toBeVisible();
-	});
+describe('Microphone button - permission denied', () => {
+	test('User clicks on the button', async () => {
+		mockedEnumerateDevices.mockRejectedValue('error enumerateDevices');
+		mockedGetUserMedia.mockRejectedValue('error getUserMedia');
 
-	test('Toggle list of audio inputs', async () => {
-		mockSetIsAudioListOpen.mockReturnValue(true);
+		const err = jest.spyOn(console, 'error').mockImplementation();
+
 		const { user } = defaultSetup();
-		const multiButtonToggleList = screen.getByTestId('icon: ChevronUp');
-		await act(() => user.click(multiButtonToggleList));
-		expect(mockSetIsAudioListOpen).toHaveBeenCalled();
+
+		const button = screen.getByTestId('microphone-button');
+		expect(button).toBeVisible();
+
+		await act(() => user.click(button));
+
+		const snackbar = await screen.findByText('Grant browser permissions to enable resources');
+
+		expect(snackbar).toBeInTheDocument();
+		expect(err).toHaveBeenCalled();
 	});
 });
