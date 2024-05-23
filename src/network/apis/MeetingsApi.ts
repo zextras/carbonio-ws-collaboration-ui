@@ -245,7 +245,7 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 		})
 			.then((resp) => {
 				BrowserUtils.clearAuthCookies();
-				return resp();
+				return resp;
 			})
 			.catch((err) => {
 				BrowserUtils.clearAuthCookies();
