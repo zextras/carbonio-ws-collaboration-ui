@@ -19,6 +19,7 @@ import {
 import useStore from '../store/Store';
 import { STREAM_TYPE } from '../types/store/ActiveMeetingTypes';
 import { MeetingParticipantMap } from '../types/store/MeetingTypes';
+import { BrowserUtils } from '../utils/BrowserUtils';
 
 const useGeneralMeetingControls = (meetingId: string): void => {
 	const isMeetingActive = useStore((store) => getMeetingActiveByMeetingId(store, meetingId));
@@ -32,15 +33,18 @@ const useGeneralMeetingControls = (meetingId: string): void => {
 
 	const { goToInfoPage } = useRouting();
 
-	const leaveMeeting = useCallback(() => MeetingsApi.leaveMeeting(meetingId), [meetingId]);
+	const leaveMeeting = useCallback(() => {
+		MeetingsApi.leaveMeeting(meetingId);
+	}, [meetingId]);
 
 	// Redirect to info page if meeting ended or some error occurred
 	useEffect(() => {
 		if (!isMeetingActive) {
 			meetingDisconnection(meetingId);
+			BrowserUtils.clearAuthCookies();
 			goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED);
 		}
-		return () => {
+		return (): void => {
 			if (window.parent.document.fullscreenElement) {
 				window.parent.document.exitFullscreen();
 			}
@@ -50,7 +54,7 @@ const useGeneralMeetingControls = (meetingId: string): void => {
 	// Leave meeting on window close
 	useEffect(() => {
 		window.parent.addEventListener('beforeunload', leaveMeeting);
-		return () => {
+		return (): void => {
 			window.parent.removeEventListener('beforeunload', leaveMeeting);
 		};
 	}, [leaveMeeting]);

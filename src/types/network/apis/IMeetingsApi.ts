@@ -9,6 +9,7 @@ import { JoinSettings, MeetingType } from '../models/meetingBeTypes';
 import {
 	AcceptWaitingUserResponse,
 	CreateAudioOfferResponse,
+	CreateGuestAccountResponse,
 	CreateMediaAnswerResponse,
 	CreateMeetingResponse,
 	DeleteMeetingResponse,
@@ -18,6 +19,7 @@ import {
 	JoinMeetingResponse,
 	LeaveMeetingResponse,
 	ListMeetingsResponse,
+	LoginV3ConfigResponse,
 	StartMeetingResponse,
 	StartRecordingResponse,
 	StopMeetingResponse,
@@ -90,6 +92,8 @@ interface IMeetingsApi {
 		recordingName: string,
 		folderId: string
 	): Promise<StopRecordingResponse>;
+	createGuestAccount(name: string): Promise<CreateGuestAccountResponse>;
+	authLogin(): Promise<LoginV3ConfigResponse>;
 }
 
 export default IMeetingsApi;

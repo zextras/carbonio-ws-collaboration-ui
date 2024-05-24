@@ -67,6 +67,10 @@ function replaceHistoryMock(location: string | Location): void {
 	}
 }
 
+export const mockUseAuthenticated = jest.fn();
+
+export const useAuthenticated = (): boolean => mockUseAuthenticated();
+
 export const useUserSettings = (): AccountSettings => USER_SETTINGS;
 
 export const useCurrentRoute = (): typeof ROUTE_SETTINGS | undefined => ROUTE_SETTINGS;

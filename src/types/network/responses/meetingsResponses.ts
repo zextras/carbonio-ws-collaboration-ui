@@ -36,8 +36,32 @@ export type GetScheduledMeetingNameResponse = { name: string };
 
 export type GetWaitingListResponse = { users: string[] };
 
-export type AcceptWaitingUserResponse = { accepted: boolean };
+export type AcceptWaitingUserResponse = Response & { accepted: boolean };
 
 export type StartRecordingResponse = Response;
 
 export type StopRecordingResponse = Response;
+
+export type CreateGuestAccountResponse = Response & {
+	id: string;
+	tokenId: string;
+	zmToken: string;
+	zxToken: string;
+};
+
+export type LoginV3ConfigResponse = Response & {
+	carbonioAdminUiDescription: string;
+	carbonioAdminUiTitle: string;
+	carbonioFeatureResetPasswordEnabled: boolean;
+	carbonioLogoURL: string;
+	carbonioPrefWebUiDarkMode: boolean;
+	carbonioWebUiDarkMode: boolean;
+	carbonioWebUiDescription: string;
+	carbonioWebUiTitle: string;
+	publicUrl: string;
+	zimbraDomainName: string;
+	zimbraPublicServiceHostname: string;
+	zimbraPublicServicePort: string;
+	zimbraPublicServiceProtocol: string;
+	carbonioWebUiAppLogo?: string;
+};

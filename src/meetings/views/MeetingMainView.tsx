@@ -10,12 +10,12 @@ import { createMemoryHistory } from 'history';
 import { Route, Router, Switch } from 'react-router-dom';
 
 import ShimmerEntryMeetingView from './shimmers/ShimmerEntryMeetingView';
-import useDarkReader from '../../hooks/useDarkReader';
 import { MEETINGS_ROUTES, ROUTES } from '../../hooks/useRouting';
+import { MeetingsApi } from '../../network';
 import useStore from '../../store/Store';
 
-const LazyAccessMeetingPageView = lazy(
-	() => import(/* webpackChunkName: "AccessMeetingPageView" */ './AccessMeetingPageView')
+const LazyAccessPageView = lazy(
+	() => import(/* webpackChunkName: "MeetingAccessPageView" */ './AccessPage')
 );
 
 const LazyMeetingSkeleton = lazy(
@@ -24,9 +24,20 @@ const LazyMeetingSkeleton = lazy(
 
 const LazyInfoPage = lazy(() => import(/* webpackChunkName: "InfoPage" */ './InfoPage'));
 
-const AccessMeetingPageView = (): ReactElement => (
+const LazyMeetingExternalAccessPage = lazy(
+	() =>
+		import(
+			/* webpackChunkName: "MeetingExternalAccessPage" */ '../components/meetingAccessPoint/MeetingExternalAccessPage'
+		)
+);
+
+const LazyMeetingAccessPageView = lazy(
+	() => import(/* webpackChunkName: "MeetingAccessPageView" */ './MeetingAccessPageView')
+);
+
+const AccessPageView = (): ReactElement => (
 	<Suspense fallback={<ShimmerEntryMeetingView />}>
-		<LazyAccessMeetingPageView />
+		<LazyAccessPageView />
 	</Suspense>
 );
 
@@ -42,17 +53,26 @@ const InfoPage = (): ReactElement => (
 	</Suspense>
 );
 
+const MeetingExternalAccessPage = (): ReactElement => (
+	<Suspense fallback={<ShimmerEntryMeetingView />}>
+		<LazyMeetingExternalAccessPage />
+	</Suspense>
+);
+
+const MeetingAccessPageView = (): ReactElement => (
+	<Suspense fallback={<ShimmerEntryMeetingView />}>
+		<LazyMeetingAccessPageView />
+	</Suspense>
+);
+
 const MeetingMainView = (): ReactElement => {
 	const history = createMemoryHistory();
 	const setCustomLogo = useStore((store) => store.setCustomLogo);
 
-	const { darkReaderStatus, enableDarkReader, disableDarkReader } = useDarkReader();
-
 	useEffect(() => {
-		fetch('/zx/login/v3/config')
-			.then((response) => response.json())
+		MeetingsApi.authLogin()
 			.then((data) => {
-				const clientLogo = data.carbonioWebUiAppLogo ? data.carbonioWebUiAppLogo : false;
+				const clientLogo = data.carbonioWebUiAppLogo ?? false;
 				setCustomLogo(clientLogo);
 			})
 			.catch((reason) => {
@@ -61,22 +81,13 @@ const MeetingMainView = (): ReactElement => {
 			});
 	}, [setCustomLogo]);
 
-	useEffect(() => {
-		if (!darkReaderStatus) {
-			enableDarkReader();
-		}
-		return () => {
-			if (!darkReaderStatus) {
-				disableDarkReader();
-			}
-		};
-	}, [darkReaderStatus, disableDarkReader, enableDarkReader]);
-
 	return (
 		<Router history={history}>
 			<Switch>
-				<Route exact path={ROUTES.MAIN} component={AccessMeetingPageView} />
+				<Route exact path={ROUTES.MAIN} component={AccessPageView} />
 				<Route exact path={MEETINGS_ROUTES.MEETING} component={MeetingSkeleton} />
+				<Route exact path={MEETINGS_ROUTES.MEETING_ACCESS_PAGE} component={MeetingAccessPageView} />
+				<Route exact path={MEETINGS_ROUTES.EXTERNAL_LOGIN} component={MeetingExternalAccessPage} />
 				<Route exact path={MEETINGS_ROUTES.INFO} component={InfoPage} />
 			</Switch>
 		</Router>

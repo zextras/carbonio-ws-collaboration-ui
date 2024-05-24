@@ -18,6 +18,7 @@ import {
 import {
 	AcceptWaitingUserResponse,
 	CreateAudioOfferResponse,
+	CreateGuestAccountResponse,
 	CreateMediaAnswerResponse,
 	CreateMeetingResponse,
 	DeleteMeetingResponse,
@@ -27,6 +28,7 @@ import {
 	JoinMeetingResponse,
 	LeaveMeetingResponse,
 	ListMeetingsResponse,
+	LoginV3ConfigResponse,
 	StartMeetingResponse,
 	StartRecordingResponse,
 	StopMeetingResponse,
@@ -37,6 +39,7 @@ import {
 } from '../../types/network/responses/meetingsResponses';
 import { STREAM_TYPE, Subscription } from '../../types/store/ActiveMeetingTypes';
 import { RoomType } from '../../types/store/RoomTypes';
+import { BrowserUtils } from '../../utils/BrowserUtils';
 import { RoomsApi } from '../index';
 
 class MeetingsApi extends BaseAPI implements IMeetingsApi {
@@ -151,17 +154,21 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 			room?.members,
 			(member) => member.userId === useStore.getState().session.id && !member.owner
 		);
-		return this.fetchAPI(`meetings/${meetingId}/leave`, RequestType.POST).then(
-			(resp: LeaveMeetingResponse) => {
+		return this.fetchAPI(`meetings/${meetingId}/leave`, RequestType.POST)
+			.then((resp: LeaveMeetingResponse) => {
 				useStore.getState().meetingDisconnection(meetingId);
 
 				// Leave temporary room when a member leaves the scheduled meeting
 				if (room?.type === RoomType.TEMPORARY && iAmNotOwner) {
 					RoomsApi.deleteRoomMember(room.id, useStore.getState().session.id || '');
 				}
+				BrowserUtils.clearAuthCookies();
 				return resp;
-			}
-		);
+			})
+			.catch((err) => {
+				BrowserUtils.clearAuthCookies();
+				return err;
+			});
 	}
 
 	public stopMeeting(meetingId: string): Promise<StopMeetingResponse> {
@@ -235,7 +242,15 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 		const userId = useStore.getState().session.id;
 		return this.fetchAPI(`meetings/${meetingId}/queue/${userId}`, RequestType.POST, {
 			status: 'REJECTED'
-		});
+		})
+			.then((resp) => {
+				BrowserUtils.clearAuthCookies();
+				return resp;
+			})
+			.catch((err) => {
+				BrowserUtils.clearAuthCookies();
+				return err;
+			});
 	}
 
 	public getWaitingList(meetingId: string): Promise<GetWaitingListResponse> {
@@ -260,7 +275,7 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 		return this.fetchAPI(`meetings/${meetingId}/startRecording`, RequestType.POST);
 	}
 
-	stopRecording(
+	public stopRecording(
 		meetingId: string,
 		recordingName: string,
 		folderId: string
@@ -269,6 +284,32 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 			name: recordingName,
 			folderId
 		});
+	}
+
+	public authLogin(): Promise<LoginV3ConfigResponse> {
+		return fetch('/zx/login/v3/config', { method: RequestType.GET })
+			.then((resp) => {
+				if (resp.ok) return resp;
+				return Promise.reject(resp);
+			})
+			.then((resp) => resp.json())
+			.catch((err: Error) => Promise.reject(err));
+	}
+
+	public createGuestAccount(name: string): Promise<CreateGuestAccountResponse> {
+		const headers = new Headers();
+		headers.append('Content-Type', 'application/json');
+		return fetch(`/zx/auth/v3/guests?name=${name}`, {
+			method: RequestType.POST,
+			headers
+		})
+			.then((resp) => {
+				if (resp.ok) return resp;
+				return Promise.reject(resp);
+			})
+			.then((res) => res.text())
+			.then((res) => JSON.parse(res))
+			.catch((err: Error) => Promise.reject(err));
 	}
 }
 
