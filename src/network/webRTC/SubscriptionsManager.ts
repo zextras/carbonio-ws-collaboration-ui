@@ -23,7 +23,7 @@ class SubscriptionsManager {
 	constructor(meetingId: string) {
 		this.meetingId = meetingId;
 		this.myUserId = useStore.getState().session.id;
-		this.pendingSubscription = new PendingSubscriptionManager(this.updateSubscription);
+		this.pendingSubscription = new PendingSubscriptionManager(this.updateSubscription.bind(this));
 	}
 
 	private filterSubscription(desiderata: Subscription[]): Subscription[] {
@@ -52,7 +52,9 @@ class SubscriptionsManager {
 
 				this.pendingSubscription.subscriptionRequestDone();
 			})
-			.catch(() => this.pendingSubscription.subscriptionRequestDone());
+			.catch(() => {
+				this.pendingSubscription.subscriptionRequestDone();
+			});
 	}
 
 	// Delete the subscription when user leaves the meeting
@@ -88,7 +90,6 @@ class SubscriptionsManager {
 
 	// Ask subscriptions that are not already asked and unset subscriptions that are not needed anymore
 	public updateSubscription(subsToRequest: Subscription[]): void {
-		// Check if a request is already in progress
 		if (this.pendingSubscription.checkRequestStatus(subsToRequest)) {
 			return;
 		}
