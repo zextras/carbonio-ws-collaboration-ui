@@ -9,7 +9,7 @@ import { Container, Button, Tooltip, IconButton, Text } from '@zextras/carbonio-
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import AccessMeetingPageMediaSection from './AccessMeetingPageMediaSection';
+import MeetingAccessPageMediaSection from './MeetingAccessPageMediaSection';
 import { MEETINGS_PATH } from '../../../constants/appConstants';
 import useEventListener, { EventName } from '../../../hooks/useEventListener';
 import useRouting, { PAGE_INFO_TYPE } from '../../../hooks/useRouting';
@@ -18,6 +18,7 @@ import { getRoomIdFromMeeting } from '../../../store/selectors/MeetingSelectors'
 import { getRoomNameSelector, getRoomTypeSelector } from '../../../store/selectors/RoomsSelectors';
 import useStore from '../../../store/Store';
 import { RoomType } from '../../../types/store/RoomTypes';
+import { BrowserUtils } from '../../../utils/BrowserUtils';
 import { freeMediaResources } from '../../../utils/MeetingsUtils';
 import { calcScaleDivisor } from '../../../utils/styleUtils';
 
@@ -32,7 +33,7 @@ const CustomContainer = styled(Container)`
 	bottom: 3rem;
 `;
 
-const AccessMeetingPage: FC<AccessMeetingPageProps> = ({ hasUserDirectAccess, meetingName }) => {
+const MeetingAccessPage: FC<AccessMeetingPageProps> = ({ hasUserDirectAccess, meetingName }) => {
 	const [t] = useTranslation();
 	const meetingId = useMemo(() => document.location.pathname.split(MEETINGS_PATH)[1], []);
 	const roomId = useStore((store) => getRoomIdFromMeeting(store, meetingId) ?? ``);
@@ -91,6 +92,7 @@ const AccessMeetingPage: FC<AccessMeetingPageProps> = ({ hasUserDirectAccess, me
 
 	const handleRejected = useCallback(() => {
 		freeMediaResources(streamTrack);
+		BrowserUtils.clearAuthCookies();
 		goToInfoPage(PAGE_INFO_TYPE.NEXT_TIME_PAGE);
 	}, [goToInfoPage, streamTrack]);
 
@@ -106,7 +108,11 @@ const AccessMeetingPage: FC<AccessMeetingPageProps> = ({ hasUserDirectAccess, me
 
 	const handleLeave = useCallback(() => {
 		freeMediaResources(streamTrack);
-		if (userIsReady) MeetingsApi.leaveWaitingRoom(meetingId);
+		if (userIsReady) {
+			MeetingsApi.leaveWaitingRoom(meetingId);
+		} else {
+			BrowserUtils.clearAuthCookies();
+		}
 		goToInfoPage(PAGE_INFO_TYPE.HANG_UP_PAGE);
 	}, [goToInfoPage, meetingId, streamTrack, userIsReady]);
 
@@ -174,7 +180,7 @@ const AccessMeetingPage: FC<AccessMeetingPageProps> = ({ hasUserDirectAccess, me
 				<Text size="extralarge" weight="bold">
 					{accessTitle}
 				</Text>
-				<AccessMeetingPageMediaSection
+				<MeetingAccessPageMediaSection
 					streamTrack={streamTrack}
 					setStreamTrack={setStreamTrack}
 					hasUserDirectAccess={hasUserDirectAccess}
@@ -189,4 +195,4 @@ const AccessMeetingPage: FC<AccessMeetingPageProps> = ({ hasUserDirectAccess, me
 	);
 };
 
-export default AccessMeetingPage;
+export default MeetingAccessPage;

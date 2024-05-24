@@ -3,10 +3,13 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
+
 export const mockGoToRoomPage: jest.Mock = jest.fn();
 export const mockGoToMainPage: jest.Mock = jest.fn();
 export const mockGoToMeetingPage: jest.Mock = jest.fn();
 export const mockGoToInfoPage: jest.Mock = jest.fn();
+export const mockGoToMeetingAccessPage: jest.Mock = jest.fn();
+export const mockGoToExternalLoginPage: jest.Mock = jest.fn();
 
 jest.mock('../../hooks/useRouting', () => ({
 	__esModule: true,
@@ -14,7 +17,9 @@ jest.mock('../../hooks/useRouting', () => ({
 		goToMainPage: mockGoToMainPage,
 		goToRoomPage: mockGoToRoomPage,
 		goToMeetingPage: mockGoToMeetingPage,
-		goToInfoPage: mockGoToInfoPage
+		goToInfoPage: mockGoToInfoPage,
+		goToMeetingAccessPage: mockGoToMeetingAccessPage,
+		goToExternalLoginPage: mockGoToExternalLoginPage
 	})),
 	PAGE_INFO_TYPE: {
 		HANG_UP_PAGE: 'hang_up_page',

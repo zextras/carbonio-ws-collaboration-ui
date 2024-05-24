@@ -10,12 +10,17 @@ import meetingsApi from './MeetingsApi';
 import useStore from '../../store/Store';
 import { createMockMeeting, createMockMember, createMockRoom } from '../../tests/createMock';
 import { fetchResponse } from '../../tests/mocks/global';
+import { RequestType } from '../../types/network/apis/IBaseAPI';
 import { MeetingType } from '../../types/network/models/meetingBeTypes';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
 import { RoomType } from '../../types/store/RoomTypes';
 
 const meetingMock = createMockMeeting();
+const meetingNotActiveMock = createMockMeeting({ active: false });
+const scheduledMeetingMock = createMockMeeting({ meetingType: MeetingType.SCHEDULED });
 const meetingMock1 = createMockMeeting({ id: 'meetingId1', roomId: 'roomId1' });
+const roomMock = createMockRoom({ meetingId: meetingMock.id });
+const roomWithoutMeetingMock = createMockRoom();
 
 const userId = 'userId';
 
@@ -40,7 +45,9 @@ const sdpOffer = 'spdOfferMock';
 beforeEach(() => {
 	useStore.getState().setLoginInfo(userId, 'User');
 	useStore.getState().setSessionId('queueId');
+	useStore.getState().addRoom(roomMock);
 });
+
 describe('Meetings API', () => {
 	test('listMeetings is called correctly', async () => {
 		fetchResponse.mockResolvedValueOnce([meetingMock, meetingMock1]);
@@ -115,7 +122,7 @@ describe('Meetings API', () => {
 		});
 	});
 
-	test('joinMeeting is called correctly', async () => {
+	test('joinMeeting is called correctly for a permanent meeting', async () => {
 		fetchResponse.mockResolvedValueOnce({ status: 'ACCEPTED' });
 		fetchResponse.mockResolvedValueOnce(meetingMock);
 		await meetingsApi.joinMeeting(
@@ -136,12 +143,153 @@ describe('Meetings API', () => {
 			})
 		});
 
+		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/meetings/${meetingMock.id}`, {
+			method: 'GET',
+			headers
+		});
+
 		// Check if store is correctly updated
 		const store = useStore.getState();
 		expect(store.activeMeeting[meetingMock.id]).toBeDefined();
 	});
 
+	test('joinMeeting is called correctly for a scheduled meeting', async () => {
+		fetchResponse.mockResolvedValueOnce({ status: 'ACCEPTED' });
+		fetchResponse.mockResolvedValueOnce(scheduledMeetingMock);
+		await meetingsApi.joinMeeting(
+			meetingMock.id,
+			{
+				audioStreamEnabled: false,
+				videoStreamEnabled: false
+			},
+			{}
+		);
+		// Check if fetch is called with the correct parameters
+		expect(global.fetch).toHaveBeenCalledWith(
+			`/services/chats/meetings/${scheduledMeetingMock.id}/join`,
+			{
+				method: 'POST',
+				headers,
+				body: JSON.stringify({
+					audioStreamEnabled: false,
+					videoStreamEnabled: false
+				})
+			}
+		);
+
+		expect(global.fetch).toHaveBeenCalledWith(
+			`/services/chats/meetings/${scheduledMeetingMock.id}`,
+			{
+				method: 'GET',
+				headers
+			}
+		);
+
+		// Check if store is correctly updated
+		const store = useStore.getState();
+		expect(store.activeMeeting[scheduledMeetingMock.id]).toBeDefined();
+	});
+
+	test('enterMeeting is called correctly when a meeting is already present and active', async () => {
+		useStore.getState().addMeeting(meetingMock);
+		await meetingsApi.enterMeeting(
+			meetingMock.roomId,
+			{
+				audioStreamEnabled: false,
+				videoStreamEnabled: false
+			},
+			{}
+		);
+
+		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/meetings/${meetingMock.id}/join`, {
+			method: RequestType.POST,
+			headers,
+			body: JSON.stringify({
+				audioStreamEnabled: false,
+				videoStreamEnabled: false
+			})
+		});
+	});
+
+	test('enterMeeting is called correctly when a meeting is already present but not active', async () => {
+		useStore.getState().addMeeting(meetingNotActiveMock);
+		await meetingsApi.enterMeeting(
+			meetingNotActiveMock.roomId,
+			{
+				audioStreamEnabled: false,
+				videoStreamEnabled: false
+			},
+			{}
+		);
+
+		expect(global.fetch).toHaveBeenCalledWith(
+			`/services/chats/meetings/${meetingNotActiveMock.id}/start`,
+			{
+				method: RequestType.POST,
+				headers
+			}
+		);
+
+		expect(global.fetch).toHaveBeenCalledWith(
+			`/services/chats/meetings/${meetingNotActiveMock.id}/join`,
+			{
+				method: RequestType.POST,
+				headers,
+				body: JSON.stringify({
+					audioStreamEnabled: false,
+					videoStreamEnabled: false
+				})
+			}
+		);
+	});
+
+	test('enterMeeting is called correctly when the meeting instance is not yet created', async () => {
+		useStore.getState().addRoom(roomWithoutMeetingMock);
+		fetchResponse.mockResolvedValueOnce(scheduledMeetingMock);
+
+		await meetingsApi.enterMeeting(
+			roomWithoutMeetingMock.id,
+			{
+				audioStreamEnabled: false,
+				videoStreamEnabled: false
+			},
+			{}
+		);
+
+		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/meetings`, {
+			method: RequestType.POST,
+			headers,
+			body: JSON.stringify({
+				roomId: roomWithoutMeetingMock.id,
+				meetingType: MeetingType.PERMANENT,
+				name: roomWithoutMeetingMock.name
+			})
+		});
+
+		expect(global.fetch).toHaveBeenCalledWith(
+			`/services/chats/meetings/${scheduledMeetingMock.id}/start`,
+			{
+				method: RequestType.POST,
+				headers
+			}
+		);
+
+		expect(global.fetch).toHaveBeenCalledWith(
+			`/services/chats/meetings/${scheduledMeetingMock.id}/join`,
+			{
+				method: RequestType.POST,
+				headers,
+				body: JSON.stringify({
+					audioStreamEnabled: false,
+					videoStreamEnabled: false
+				})
+			}
+		);
+	});
+
 	test('leaveMeeting is called correctly', async () => {
+		document.cookie = `ZM_AUTH_TOKEN=123456789; path=/`;
+		document.cookie = `ZX_AUTH_TOKEN=123456789; path=/`;
 		fetchResponse.mockResolvedValueOnce(meetingMock);
 		await meetingsApi.leaveMeeting(meetingMock.id);
 
@@ -155,6 +303,26 @@ describe('Meetings API', () => {
 		// Check if store is correctly updated
 		const store = useStore.getState();
 		expect(store.activeMeeting[meetingMock.id]).not.toBeDefined();
+		expect(document.cookie).toBe('');
+	});
+
+	test('leaveMeeting is rejected', async () => {
+		document.cookie = `ZM_AUTH_TOKEN=123456789; path=/`;
+		document.cookie = `ZX_AUTH_TOKEN=123456789; path=/`;
+		fetchResponse.mockRejectedValueOnce(false);
+		await meetingsApi.leaveMeeting(meetingMock.id);
+
+		// Check if fetch is called with the correct parameters
+		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/meetings/${meetingMock.id}/leave`, {
+			method: 'POST',
+			headers,
+			body: undefined
+		});
+
+		// Check if store is correctly updated
+		const store = useStore.getState();
+		expect(store.activeMeeting[meetingMock.id]).not.toBeDefined();
+		expect(document.cookie).toBe('');
 	});
 
 	test('When a member leaves a scheduled meeting, he is also removed from temporary room', async () => {
@@ -316,6 +484,8 @@ describe('Meetings API', () => {
 	});
 
 	test('leaveWaitingRoom is called correctly', async () => {
+		document.cookie = `ZM_AUTH_TOKEN=123456789; path=/`;
+		document.cookie = `ZX_AUTH_TOKEN=123456789; path=/`;
 		fetchResponse.mockResolvedValueOnce({ status: 'ACCEPTED' });
 		await meetingsApi.leaveWaitingRoom(meetingMock.id);
 
@@ -330,6 +500,27 @@ describe('Meetings API', () => {
 				})
 			}
 		);
+		expect(document.cookie).toBe('');
+	});
+
+	test('leaveWaitingRoom is rejected', async () => {
+		document.cookie = `ZM_AUTH_TOKEN=123456789; path=/`;
+		document.cookie = `ZX_AUTH_TOKEN=123456789; path=/`;
+		fetchResponse.mockRejectedValueOnce(false);
+		await meetingsApi.leaveWaitingRoom(meetingMock.id);
+
+		// Check if fetch is called with the correct parameters
+		expect(global.fetch).toHaveBeenCalledWith(
+			`/services/chats/meetings/${meetingMock.id}/queue/${userId}`,
+			{
+				method: 'POST',
+				headers,
+				body: JSON.stringify({
+					status: 'REJECTED'
+				})
+			}
+		);
+		expect(document.cookie).toBe('');
 	});
 
 	test('getWaitingList is called correctly', async () => {
@@ -392,5 +583,66 @@ describe('Meetings API', () => {
 				})
 			}
 		);
+	});
+
+	test('createMediaAnswer is called correctly', async () => {
+		fetchResponse.mockResolvedValueOnce({});
+		await meetingsApi.createMediaAnswer(meetingMock.id, 'sdpAnswer');
+
+		expect(global.fetch).toHaveBeenCalledWith(
+			`/services/chats/meetings/${meetingMock.id}/media/answer`,
+			{
+				method: 'PUT',
+				headers,
+				body: JSON.stringify({
+					sdp: 'sdpAnswer'
+				})
+			}
+		);
+	});
+
+	test('createAudioOffer is called correctly', async () => {
+		fetchResponse.mockResolvedValueOnce({});
+		await meetingsApi.createAudioOffer(meetingMock.id, 'sdpOffer');
+
+		expect(global.fetch).toHaveBeenCalledWith(
+			`/services/chats/meetings/${meetingMock.id}/audio/offer`,
+			{
+				method: 'PUT',
+				headers,
+				body: JSON.stringify({
+					sdp: 'sdpOffer'
+				})
+			}
+		);
+	});
+
+	test('getScheduledMeetingName is called correctly', async () => {
+		fetchResponse.mockResolvedValueOnce({});
+		await meetingsApi.getScheduledMeetingName(meetingMock.id);
+
+		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/public/meetings/${meetingMock.id}`, {
+			method: 'GET',
+			headers
+		});
+	});
+
+	test('authLogin is called correctly', async () => {
+		await meetingsApi.authLogin();
+
+		expect(global.fetch).toHaveBeenCalledWith(`/zx/login/v3/config`, {
+			method: 'GET'
+		});
+	});
+
+	test('createGuestAccount is called correctly', async () => {
+		const headers = new Headers();
+		headers.append('Content-Type', 'application/json');
+		await meetingsApi.createGuestAccount('userName');
+
+		expect(global.fetch).toHaveBeenCalledWith(`/zx/auth/v3/guests?name=userName`, {
+			method: 'POST',
+			headers
+		});
 	});
 });
