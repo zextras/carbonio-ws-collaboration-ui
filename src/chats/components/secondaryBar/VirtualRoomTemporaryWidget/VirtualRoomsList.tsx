@@ -154,6 +154,12 @@ const VirtualRoomsList: FC<virtualRoomsListProps> = ({ setListVisibility, parent
 		}
 	}, []);
 
+	const createVirtualRoomTooltip = useMemo(() => {
+		if (nameError) return invalidNameString;
+		if (canCreateVirtualRoom) return createTooltip;
+		return roomNameRequiredTooltip;
+	}, [canCreateVirtualRoom, createTooltip, invalidNameString, nameError, roomNameRequiredTooltip]);
+
 	const inputSection = useMemo(
 		() => (
 			<Container orientation="horizontal" ref={inputRef}>
@@ -177,15 +183,7 @@ const VirtualRoomsList: FC<virtualRoomsListProps> = ({ setListVisibility, parent
 								onClick={handleDeleteNameClick}
 							/>
 						</Tooltip>
-						<Tooltip
-							label={
-								nameError
-									? invalidNameString
-									: canCreateVirtualRoom
-										? createTooltip
-										: roomNameRequiredTooltip
-							}
-						>
+						<Tooltip label={createVirtualRoomTooltip}>
 							<CustomIconButton
 								size="large"
 								icon="CheckmarkOutline"
@@ -202,14 +200,12 @@ const VirtualRoomsList: FC<virtualRoomsListProps> = ({ setListVisibility, parent
 		[
 			canCreateVirtualRoom,
 			cancelTooltip,
-			createTooltip,
+			createVirtualRoomTooltip,
 			handleCreateButtonClick,
 			handleDeleteNameClick,
 			handleOnChangeInput,
 			inputHasFocus,
-			invalidNameString,
 			nameError,
-			roomNameRequiredTooltip,
 			virtualRoomNameInput
 		]
 	);
@@ -241,7 +237,7 @@ const VirtualRoomsList: FC<virtualRoomsListProps> = ({ setListVisibility, parent
 	useEffect(() => {
 		window.addEventListener('mouseup', handleMouseUp);
 
-		return () => {
+		return (): void => {
 			window.removeEventListener('mouseup', handleMouseUp);
 		};
 	}, [handleMouseUp]);

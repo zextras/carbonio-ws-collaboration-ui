@@ -21,6 +21,7 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../../tests/createMock';
+import { mockMediaDevicesResolve } from '../../../tests/mocks/global';
 import { mockedEnterMeetingRequest, mockedJoinMeetingRequest } from '../../../tests/mocks/network';
 import { mockGoToInfoPage, mockGoToMeetingPage } from '../../../tests/mocks/useRouting';
 import { setup } from '../../../tests/test-utils';
@@ -91,6 +92,10 @@ const meetingForWaitingRoom: MeetingBe = createMockMeeting({
 const setupGroupWithBeStatusUndefined = (): { user: UserEvent; store: RootStore } => {
 	const { result } = renderHook(() => useStore());
 	act(() => {
+		localStorage.setItem(
+			'ChatsMeetingSettings',
+			JSON.stringify({ EnableCamera: false, EnableMicrophone: false })
+		);
 		result.current.setUserInfo(user1);
 		result.current.setUserInfo(user2);
 		result.current.setLoginInfo(user1.id, user1.name);
@@ -108,6 +113,10 @@ const setupGroupWithBeStatusUndefined = (): { user: UserEvent; store: RootStore 
 const setupBasicGroup = (): { user: UserEvent; store: RootStore } => {
 	const { result } = renderHook(() => useStore());
 	act(() => {
+		localStorage.setItem(
+			'ChatsMeetingSettings',
+			JSON.stringify({ EnableCamera: false, EnableMicrophone: false })
+		);
 		result.current.setUserInfo(user1);
 		result.current.setUserInfo(user2);
 		result.current.setLoginInfo(user1.id, user1.name);
@@ -127,6 +136,10 @@ const setupBasicGroup = (): { user: UserEvent; store: RootStore } => {
 const setupForWaitingRoom = (): { user: UserEvent; store: RootStore } => {
 	const { result } = renderHook(() => useStore());
 	act(() => {
+		localStorage.setItem(
+			'ChatsMeetingSettings',
+			JSON.stringify({ EnableCamera: true, EnableMicrophone: true })
+		);
 		result.current.setUserInfo(user3);
 		result.current.setUserInfo(user2);
 		result.current.setLoginInfo(user2.id, user2.name);
@@ -148,6 +161,10 @@ const setupForWaitingRoom = (): { user: UserEvent; store: RootStore } => {
 	);
 	return { user, store: result.current };
 };
+
+beforeAll(() => {
+	mockMediaDevicesResolve();
+});
 
 describe('AccessMeeting - enter to meeting as a moderator or as a member of a group', () => {
 	test('Enter to meeting', async () => {
