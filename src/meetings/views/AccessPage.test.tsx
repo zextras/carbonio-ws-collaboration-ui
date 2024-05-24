@@ -6,14 +6,12 @@
 
 import React from 'react';
 
-import { screen } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 import { UserEvent } from '@testing-library/user-event';
 import { act } from 'react-dom/test-utils';
 
 import AccessPage from './AccessPage';
 import { mockUseAuthenticated } from '../../../__mocks__/@zextras/carbonio-shell-ui';
-import { mockDarkReaderIsEnabled } from '../../../__mocks__/darkreader';
 import { useParams } from '../../../__mocks__/react-router';
 import useStore from '../../store/Store';
 import {
@@ -23,6 +21,7 @@ import {
 	createMockUser
 } from '../../tests/createMock';
 import { mockedGetMeetingRequest, mockedGetScheduledMeetingName } from '../../tests/mocks/network';
+import { mockGoToExternalLoginPage, mockGoToMeetingAccessPage } from '../../tests/mocks/useRouting';
 import { setup } from '../../tests/test-utils';
 import { MeetingBe, MeetingType } from '../../types/network/models/meetingBeTypes';
 import { MemberBe, RoomBe } from '../../types/network/models/roomBeTypes';
@@ -113,38 +112,26 @@ const setupAccessPageNotAuthenticated = (): { user: UserEvent; store: RootStore 
 };
 
 describe('Meeting access page', () => {
-	test('user that is authenticated and enters in a meeting he can join through waiting room should see it', async () => {
+	test('Authenticated user -> access the meeting -> redirect to the waiting room', async () => {
 		mockUseAuthenticated.mockReturnValue(true);
-		mockDarkReaderIsEnabled.mockReturnValueOnce(true);
 		setupAccessPage();
-
-		const meetingPage = await screen.findByTestId('meeting_access_page_view');
-		expect(meetingPage).toBeInTheDocument();
+		expect(mockGoToMeetingAccessPage).toHaveBeenCalled();
 	});
 
-	test('user that is not authenticated and enters in a meeting should see the access point', async () => {
-		mockDarkReaderIsEnabled.mockReturnValueOnce(false);
+	test('Not authenticated user -> access the meeting -> reach the login external page', async () => {
 		mockUseAuthenticated.mockReturnValue(false);
-		mockedGetScheduledMeetingName.mockReturnValue('name');
+		mockedGetScheduledMeetingName.mockReturnValueOnce('name');
 		setupAccessPageNotAuthenticated();
 
 		expect(mockUseAuthenticated).toHaveBeenCalled();
 		expect(mockedGetScheduledMeetingName).toHaveBeenCalled();
-
-		const meetingPage = await screen.findByTestId('external_access_page');
-		expect(meetingPage).toBeInTheDocument();
-
-		const Button = await screen.findByTestId('join_button');
-		expect(Button).not.toHaveAttribute('disabled', true);
+		expect(await mockGoToExternalLoginPage).toHaveBeenCalled();
 	});
 
-	test('user that is authenticated and enters in a meeting in a group should see the access point', async () => {
-		mockUseAuthenticated.mockReturnValue(true);
-		mockDarkReaderIsEnabled.mockReturnValueOnce(true);
-		mockedGetMeetingRequest.mockReturnValue('meeting');
+	test('Authenticated user -> joins group meeting -> redirect to the waiting room', async () => {
+		mockUseAuthenticated.mockReturnValueOnce(true);
+		mockedGetMeetingRequest.mockReturnValueOnce('meeting');
 		setupGroupForAccessPage();
-
-		const meetingPage = await screen.findByTestId('meeting_access_page_view');
-		expect(meetingPage).toBeInTheDocument();
+		expect(mockGoToMeetingAccessPage).toHaveBeenCalled();
 	});
 });

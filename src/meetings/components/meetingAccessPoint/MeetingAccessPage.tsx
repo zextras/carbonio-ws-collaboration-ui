@@ -18,6 +18,7 @@ import { getRoomIdFromMeeting } from '../../../store/selectors/MeetingSelectors'
 import { getRoomNameSelector, getRoomTypeSelector } from '../../../store/selectors/RoomsSelectors';
 import useStore from '../../../store/Store';
 import { RoomType } from '../../../types/store/RoomTypes';
+import { BrowserUtils } from '../../../utils/BrowserUtils';
 import { freeMediaResources } from '../../../utils/MeetingsUtils';
 import { calcScaleDivisor } from '../../../utils/styleUtils';
 
@@ -91,6 +92,7 @@ const MeetingAccessPage: FC<AccessMeetingPageProps> = ({ hasUserDirectAccess, me
 
 	const handleRejected = useCallback(() => {
 		freeMediaResources(streamTrack);
+		BrowserUtils.clearAuthCookies();
 		goToInfoPage(PAGE_INFO_TYPE.NEXT_TIME_PAGE);
 	}, [goToInfoPage, streamTrack]);
 
@@ -106,7 +108,11 @@ const MeetingAccessPage: FC<AccessMeetingPageProps> = ({ hasUserDirectAccess, me
 
 	const handleLeave = useCallback(() => {
 		freeMediaResources(streamTrack);
-		if (userIsReady) MeetingsApi.leaveWaitingRoom(meetingId);
+		if (userIsReady) {
+			MeetingsApi.leaveWaitingRoom(meetingId);
+		} else {
+			BrowserUtils.clearAuthCookies();
+		}
 		goToInfoPage(PAGE_INFO_TYPE.HANG_UP_PAGE);
 	}, [goToInfoPage, meetingId, streamTrack, userIsReady]);
 

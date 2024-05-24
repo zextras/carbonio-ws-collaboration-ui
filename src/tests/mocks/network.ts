@@ -7,6 +7,7 @@
 import { GetImageResponse } from '../../types/network/responses/attachmentsResponses';
 import {
 	AcceptWaitingUserResponse,
+	CreateGuestAccountResponse,
 	CreateMeetingResponse,
 	DeleteMeetingResponse,
 	GetMeetingResponse,
@@ -37,6 +38,7 @@ import {
 	UpdateRoomResponse,
 	AddRoomAttachmentResponse
 } from '../../types/network/responses/roomsResponses';
+import { GetCapabilitiesResponse } from '../../types/network/responses/sessionResponses';
 import {
 	GetUserPictureResponse,
 	GetUserResponse
@@ -82,6 +84,10 @@ export const mockedLeaveWaitingRoomRequest: jest.Mock = jest.fn();
 export const mockedImageSizeRequest: jest.Mock = jest.fn();
 export const mockedStartRecordingRequest: jest.Mock = jest.fn();
 export const mockedStopRecordingRequest: jest.Mock = jest.fn();
+export const mockedGetMeetingByMeetingId: jest.Mock = jest.fn();
+export const mockedCreateGuestAccount: jest.Mock = jest.fn();
+export const mockedGetCapabilities: jest.Mock = jest.fn();
+export const mockedAuthLoginRequest: jest.Mock = jest.fn();
 
 jest.mock('../../network', () => {
 	const noResultProvided = 'no result provided';
@@ -208,7 +214,7 @@ jest.mock('../../network', () => {
 				}),
 			getMeetingByMeetingId: (): Promise<GetMeetingResponse> =>
 				new Promise((resolve, reject) => {
-					const result = mockedGetMeetingRequest();
+					const result = mockedGetMeetingByMeetingId();
 					result ? resolve(result) : reject(new Error(noResultProvided));
 				}),
 			createMeeting: (): Promise<CreateMeetingResponse> =>
@@ -284,6 +290,23 @@ jest.mock('../../network', () => {
 			stopRecording: (): Promise<StopRecordingResponse> =>
 				new Promise((resolve, reject) => {
 					const result = mockedStopRecordingRequest();
+					result ? resolve(result) : reject(new Error(noResultProvided));
+				}),
+			createGuestAccount: (): Promise<CreateGuestAccountResponse> =>
+				new Promise((resolve, reject) => {
+					const result = mockedCreateGuestAccount();
+					result ? resolve(result) : reject(new Error(noResultProvided));
+				}),
+			authLogin: (): Promise<CreateGuestAccountResponse> =>
+				new Promise((resolve, reject) => {
+					const result = mockedAuthLoginRequest();
+					result ? resolve(result) : reject(new Error(noResultProvided));
+				})
+		},
+		SessionApi: {
+			getCapabilities: (): Promise<GetCapabilitiesResponse> =>
+				new Promise((resolve, reject) => {
+					const result = mockedGetCapabilities();
 					result ? resolve(result) : reject(new Error(noResultProvided));
 				})
 		}

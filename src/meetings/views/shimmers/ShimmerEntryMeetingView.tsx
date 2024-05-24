@@ -8,11 +8,14 @@ import React, { ReactElement } from 'react';
 
 import { Container } from '@zextras/carbonio-design-system';
 
-import ShimmerMeetingStreamsWrapper from './ShimmerMeetingStreamsWrapper';
-
 const ShimmerEntryMeetingView = (): ReactElement => (
 	<Container orientation="horizontal" borderRadius="none">
-		<ShimmerMeetingStreamsWrapper />
+		<Container
+			width="fill"
+			borderRadius="none"
+			padding={{ all: 'large' }}
+			crossAlignment="flex-start"
+		/>
 	</Container>
 );
 
