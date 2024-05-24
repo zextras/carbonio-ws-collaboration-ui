@@ -9,6 +9,7 @@ import {
 	Button,
 	Container,
 	CreateSnackbarFn,
+	Divider,
 	Input,
 	Padding,
 	Text,
@@ -30,6 +31,10 @@ const CustomContainer = styled(Container)`
 	border-radius: 0.125rem;
 `;
 
+const CustomDescription = styled(Text)`
+	text-align: center;
+`;
+
 const CustomText = styled(Text)`
 	font-size: 2.625rem;
 `;
@@ -49,6 +54,12 @@ const MeetingExternalAccessPage = (): ReactElement => {
 	const welcomePageTitle = t('welcomePage.blob', 'Hey stranger!');
 	const nameInput = t('welcomePage.nameInput', 'Type here your name');
 	const joinButton = t('welcomePage.joinButton', 'Join the meeting');
+	const loginButton = t('welcomePage.loginButton', 'Go to your login page');
+	const accountTitle = t('welcomePage.loginTitle', 'Do you have an account?');
+	const accountDescription = t(
+		'welcomePage.loginDescription',
+		'Choose freely whether to go to the login page or simply access the meeting with your name.'
+	);
 	const welcomePageDescription = t(
 		'welcomePage.description',
 		'How would you like to introduce yourself?'
@@ -127,6 +138,16 @@ const MeetingExternalAccessPage = (): ReactElement => {
 		userName
 	]);
 
+	const handleRedirectLogin = useCallback(() => {
+		const meetingUrl = document.location.href;
+		const domainUrl = meetingUrl.match(/^(.*)\/carbonio/);
+		if (domainUrl) {
+			const urlUpdated = meetingUrl.replaceAll(/:/g, '%3A').replaceAll('/', '%2F');
+			const loginUrl = `${domainUrl[1]}/static/login/?destinationUrl=${urlUpdated}`;
+			window.parent.location.replace(loginUrl);
+		}
+	}, []);
+
 	return (
 		<BackgroundContainer>
 			<Container crossAlignment="flex-start" padding="6.25rem" data-testid="external_access_page">
@@ -151,6 +172,14 @@ const MeetingExternalAccessPage = (): ReactElement => {
 							onClick={handleCreateExternalUser}
 							disabled={isButtonDisabled}
 						/>
+						<Divider color="gray2" />
+						<Container gap="0.5rem" height="fit">
+							<Text>{accountTitle}</Text>
+							<CustomDescription overflow="break-word" size="small">
+								{accountDescription}
+							</CustomDescription>
+							<Button type="ghost" width="fill" label={loginButton} onClick={handleRedirectLogin} />
+						</Container>
 					</Container>
 					<Padding bottom="4rem" />
 					<Text overflow="break-word" size="small">
