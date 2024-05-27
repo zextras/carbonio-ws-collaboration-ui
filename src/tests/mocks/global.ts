@@ -220,3 +220,13 @@ export const mockPlayAudio = jest.fn();
 global.Audio = jest.fn().mockImplementation(() => ({
 	play: mockPlayAudio
 }));
+
+export const mockWebSocketSend = jest.fn();
+export const mockWebSocketClose = jest.fn();
+Object.defineProperty(global, 'WebSocket', {
+	value: jest.fn(() => ({
+		readyState: 1,
+		send: mockWebSocketSend,
+		close: mockWebSocketClose
+	}))
+});
