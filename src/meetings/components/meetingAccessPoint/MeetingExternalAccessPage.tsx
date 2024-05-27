@@ -139,12 +139,12 @@ const MeetingExternalAccessPage = (): ReactElement => {
 	]);
 
 	const handleRedirectLogin = useCallback(() => {
-		const meetingUrl = document.location.href;
-		const domainUrl = meetingUrl.match(/^(.*)\/carbonio/);
+		const meetingUrl = window.location.pathname;
+		const domainUrl = /^(.*)\/carbonio/.exec(meetingUrl);
 		if (domainUrl) {
 			const urlUpdated = meetingUrl.replaceAll(/:/g, '%3A').replaceAll('/', '%2F');
 			const loginUrl = `${domainUrl[1]}/static/login/?destinationUrl=${urlUpdated}`;
-			window.parent.location.replace(loginUrl);
+			window.location.replace(loginUrl);
 		}
 	}, []);
 
@@ -178,7 +178,13 @@ const MeetingExternalAccessPage = (): ReactElement => {
 							<CustomDescription overflow="break-word" size="small">
 								{accountDescription}
 							</CustomDescription>
-							<Button type="ghost" width="fill" label={loginButton} onClick={handleRedirectLogin} />
+							<Button
+								type="ghost"
+								width="fill"
+								label={loginButton}
+								onClick={handleRedirectLogin}
+								data-testid="login_button"
+							/>
 						</Container>
 					</Container>
 					<Padding bottom="4rem" />

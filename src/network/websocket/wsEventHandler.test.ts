@@ -146,7 +146,7 @@ describe('wsEventHandler', () => {
 	});
 	describe('Waiting room events', () => {
 		test("An user joins the waiting room while I'm in the meeting tab", () => {
-			window.history.pushState({}, '', `${MEETINGS_PATH}${scheduledMeeting.id}`);
+			window.location.pathname = `https://localhost/carbonio/${MEETINGS_PATH}${scheduledMeeting.id}`;
 			localStorage.setItem(
 				LOCAL_STORAGE_NAMES.NOTIFICATIONS,
 				JSON.stringify({
@@ -164,11 +164,11 @@ describe('wsEventHandler', () => {
 			});
 			const { waitingList } = useStore.getState().meetings[temporaryRoom.id];
 			expect(waitingList).toContain(user1.id);
-			expect(mockNotify).toBeCalled();
+			expect(mockNotify).toHaveBeenCalled();
 		});
 
 		test("An user joins the waiting room while I'm in the chats tab", () => {
-			window.history.pushState({}, '', CHATS_ROUTE);
+			window.location.pathname = `https://localhost/carbonio/${CHATS_ROUTE}`;
 			wsEventsHandler({
 				type: WsEventType.MEETING_WAITING_PARTICIPANT_JOINED,
 				meetingId: scheduledMeeting.id,
@@ -177,11 +177,11 @@ describe('wsEventHandler', () => {
 			});
 			const { waitingList } = useStore.getState().meetings[temporaryRoom.id];
 			expect(waitingList).toContain(user1.id);
-			expect(mockNotify).not.toBeCalled();
+			expect(mockNotify).not.toHaveBeenCalled();
 		});
 
 		test('An user is accepted in the waiting room', () => {
-			window.history.pushState({}, '', `${MEETINGS_PATH}${scheduledMeeting.id}`);
+			window.location.pathname = `https://localhost/carbonio/${MEETINGS_PATH}${scheduledMeeting.id}`;
 			useStore.getState().addUserToWaitingList(scheduledMeeting.id, user1.id);
 			wsEventsHandler({
 				type: WsEventType.MEETING_USER_ACCEPTED,
