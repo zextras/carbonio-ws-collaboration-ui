@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { MEETINGS_PATH } from '../../constants/appConstants';
+import useStore from '../../store/Store';
 import { WsEventType } from '../../types/network/websocket/wsEvents';
 
 export enum EventArea {
@@ -12,7 +14,7 @@ export enum EventArea {
 	CONVERSATION = 'conversation'
 }
 
-export const getEventArea = (eventType: WsEventType): EventArea | undefined => {
+export const eventHandlersUtilities = (eventType: WsEventType): EventArea | undefined => {
 	switch (eventType) {
 		case WsEventType.INITIALIZATION:
 		case WsEventType.PONG: {
@@ -61,3 +63,8 @@ export const getEventArea = (eventType: WsEventType): EventArea | undefined => {
 		}
 	}
 };
+
+export const isMyId = (userId: string): boolean => userId === useStore.getState().session.id;
+
+export const inThisMeetingTab = (meetingId: string): boolean =>
+	window.location.pathname.includes(`${MEETINGS_PATH}${meetingId}`);

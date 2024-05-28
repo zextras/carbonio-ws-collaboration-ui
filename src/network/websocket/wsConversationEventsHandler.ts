@@ -11,7 +11,7 @@ import { MeetingsApi, RoomsApi } from '../index';
 
 export const wsConversationEventsHandler = (event: WsEvent): void => {
 	const state = useStore.getState();
-	const sessionId = state.session.id;
+	const isMyId = (userId: string): boolean => userId === state.session.id;
 
 	switch (event.type) {
 		case WsEventType.ROOM_CREATED: {
@@ -44,7 +44,7 @@ export const wsConversationEventsHandler = (event: WsEvent): void => {
 			break;
 		}
 		case WsEventType.ROOM_MEMBER_ADDED: {
-			if (event.userId === sessionId) {
+			if (isMyId(event.userId)) {
 				RoomsApi.getRoom(event.roomId).then((response: GetRoomResponse) => {
 					state.addRoom(response);
 					if (response.meetingId) {
@@ -62,8 +62,8 @@ export const wsConversationEventsHandler = (event: WsEvent): void => {
 			break;
 		}
 		case WsEventType.ROOM_MEMBER_REMOVED: {
-			if (event.userId === sessionId) {
-				if (state.meetings[event.roomId] !== undefined) {
+			if (isMyId(event.userId)) {
+				if (state.meetings[event.roomId]) {
 					state.deleteMeeting(state.meetings[event.roomId].id);
 				}
 				state.deleteRoom(event.roomId);

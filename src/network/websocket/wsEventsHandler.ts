@@ -5,16 +5,16 @@
  */
 /* eslint-disable sonarjs/max-switch-cases */
 
-import { EventArea, getEventArea } from './getEventArea';
+import { EventArea, eventHandlersUtilities } from './eventHandlersUtilities';
 import { wsConversationEventsHandler } from './wsConversationEventsHandler';
-import { wsMeetingEventsHandler } from './wsMeetingEventsHandler';
+import { wsMeetingEventsHandler } from './wsMeetingEventHandlers/wsMeetingEventsHandler';
 import useStore from '../../store/Store';
 import { WsEvent, WsEventType } from '../../types/network/websocket/wsEvents';
 import { wsDebug } from '../../utils/debug';
 
 export function wsEventsHandler(event: WsEvent): void {
 	const state = useStore.getState();
-	switch (getEventArea(event.type)) {
+	switch (eventHandlersUtilities(event.type)) {
 		case EventArea.GENERAL: {
 			if (event.type === WsEventType.INITIALIZATION) {
 				state.setSessionId(event.queueId);
