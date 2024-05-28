@@ -139,7 +139,7 @@ const MeetingExternalAccessPage = (): ReactElement => {
 	]);
 
 	const handleRedirectLogin = useCallback(() => {
-		const meetingUrl = window.location.pathname;
+		const meetingUrl = window.location.href;
 		const domainUrl = /^(.*)\/carbonio/.exec(meetingUrl);
 		if (domainUrl) {
 			const urlUpdated = meetingUrl.replaceAll(/:/g, '%3A').replaceAll('/', '%2F');
