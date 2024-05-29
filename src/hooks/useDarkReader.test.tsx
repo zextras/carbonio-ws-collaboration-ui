@@ -33,7 +33,7 @@ describe('useDarkReader tests', () => {
 	});
 
 	test("darkReaderMode is 'enabled' when in meeting tab even if user settings are different", () => {
-		window.history.pushState({}, '', `${MEETINGS_PATH}meetingId`);
+		window.location.pathname = `https://localhost/carbonio/${MEETINGS_PATH}meetingId`;
 		const { result } = renderHook(() => useDarkReader());
 		expect(result.current.darkReaderMode).toBe('enabled');
 	});
