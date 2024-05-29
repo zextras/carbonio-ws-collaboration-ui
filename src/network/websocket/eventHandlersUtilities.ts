@@ -14,7 +14,7 @@ export enum EventArea {
 	CONVERSATION = 'conversation'
 }
 
-export const eventHandlersUtilities = (eventType: WsEventType): EventArea | undefined => {
+export const getEventArea = (eventType: WsEventType): EventArea | undefined => {
 	switch (eventType) {
 		case WsEventType.INITIALIZATION:
 		case WsEventType.PONG: {
@@ -65,6 +65,9 @@ export const eventHandlersUtilities = (eventType: WsEventType): EventArea | unde
 };
 
 export const isMyId = (userId: string): boolean => userId === useStore.getState().session.id;
+
+export const isMeetingActive = (meetingId: string): boolean =>
+	useStore.getState().activeMeeting[meetingId] !== undefined;
 
 export const inThisMeetingTab = (meetingId: string): boolean =>
 	window.location.pathname.includes(`${MEETINGS_PATH}${meetingId}`);
