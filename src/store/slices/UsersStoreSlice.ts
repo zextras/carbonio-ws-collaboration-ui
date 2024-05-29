@@ -22,7 +22,7 @@ export const useUsersStoreSlice: StateCreator<UsersStoreSlice> = (set: (...any: 
 					id: user.id,
 					email: user.email,
 					name: user.name,
-					userType: user.userType ?? UserType.EXTERNAL, // UserType.EXTERNAL, // user.userType,
+					type: user.type ?? UserType.INTERNAL,
 					lastSeen: user.lastSeen,
 					statusMessage: user.statusMessage,
 					pictureUpdatedAt: user.pictureUpdatedAt

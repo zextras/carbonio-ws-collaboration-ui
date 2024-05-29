@@ -123,7 +123,7 @@ export const createMockUser = (fields?: GenericFieldsType): UserBe => ({
 	id: 'id',
 	email: 'user@user.com',
 	name: 'Name',
-	userType: UserType.INTERNAL,
+	type: UserType.INTERNAL,
 	...fields
 });
 

@@ -20,12 +20,12 @@ import styled from 'styled-components';
 
 import { MeetingsApi, UsersApi } from '../../../../network';
 import {
-	getIsUserExternal,
+	getIsUserGuest,
 	getUserName,
 	getUserPictureUpdatedAt
 } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
-import ExternalUserLabel from '../../ExternalUserLabel';
+import GuestUserLabel from '../../GuestUserLabel';
 
 const CustomContainer = styled(Container)`
 	cursor: default;
@@ -48,7 +48,7 @@ const WaitingUser: FC<WaitingUserProps> = ({ meetingId, userId }) => {
 	const rejectButtonTooltip = t('meeting.sidebar.tooltip.waitingReject', 'Reject user');
 
 	const memberName: string | undefined = useStore((store) => getUserName(store, userId));
-	const isUserExternal = useStore((store) => getIsUserExternal(store, userId));
+	const isUserGuest = useStore((store) => getIsUserGuest(store, userId));
 	const userPictureUpdatedAt: string | undefined = useStore((state) =>
 		getUserPictureUpdatedAt(state, userId)
 	);
@@ -66,14 +66,14 @@ const WaitingUser: FC<WaitingUserProps> = ({ meetingId, userId }) => {
 					label={memberName}
 					shape="round"
 					picture={picture}
-					icon={isUserExternal ? 'SmileOutline' : ''}
+					icon={isUserGuest ? 'SmileOutline' : ''}
 				/>
 			) : (
 				<Container width="fit" height="fit">
 					<Shimmer.Avatar width="2rem" data-testid="avatarShimmer" />
 				</Container>
 			),
-		[isUserExternal, memberName, picture]
+		[isUserGuest, memberName, picture]
 	);
 
 	const acceptWaitingUser = useCallback(
@@ -95,7 +95,7 @@ const WaitingUser: FC<WaitingUserProps> = ({ meetingId, userId }) => {
 						<Text size="small" overflow="ellipsis">
 							{memberName}
 						</Text>
-						{isUserExternal && <ExternalUserLabel />}
+						{isUserGuest && <GuestUserLabel />}
 					</Container>
 					<Text size="extrasmall" overflow="ellipsis">
 						{waitingToEnterLabel}

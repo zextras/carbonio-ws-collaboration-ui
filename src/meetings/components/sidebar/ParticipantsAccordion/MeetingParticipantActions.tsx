@@ -18,7 +18,7 @@ import {
 } from '../../../../store/selectors/MeetingSelectors';
 import { getOwnershipOfTheRoom, getOwner } from '../../../../store/selectors/RoomsSelectors';
 import { getUserId } from '../../../../store/selectors/SessionSelectors';
-import { getIsUserExternal } from '../../../../store/selectors/UsersSelectors';
+import { getIsUserGuest } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
 
 type ParticipantActionsProps = {
@@ -47,7 +47,7 @@ const MeetingParticipantActions: FC<ParticipantActionsProps> = ({ memberId, meet
 		getParticipantAudioStatus(store, meetingId ?? '', memberId)
 	);
 	const isMemberOwner: boolean = useStore((store) => getOwner(store, roomId ?? '', memberId));
-	const isUserExternal = useStore((store) => getIsUserExternal(store, memberId));
+	const isUserGuest = useStore((store) => getIsUserGuest(store, memberId));
 	const iAmOwner: boolean = useStore((state) => getOwnershipOfTheRoom(state, roomId ?? '', userId));
 
 	const [muteForAllModalIsOpen, setMuteForAllModalIsOpen] = useState(false);
@@ -68,7 +68,7 @@ const MeetingParticipantActions: FC<ParticipantActionsProps> = ({ memberId, meet
 
 	return (
 		<Container width="fit" height="fit" orientation="horizontal">
-			{iAmOwner && !isSessionParticipant && !isUserExternal ? (
+			{iAmOwner && !isSessionParticipant && !isUserGuest ? (
 				<PromoteDemoteMemberAction
 					memberId={memberId}
 					roomId={roomId ?? ''}

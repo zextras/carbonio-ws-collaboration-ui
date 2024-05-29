@@ -13,7 +13,7 @@ const CustomText = styled(Text)`
 	flex-shrink: 0;
 `;
 
-const ExternalUserLabel = (): ReactElement => {
+const GuestUserLabel = (): ReactElement => {
 	const [t] = useTranslation();
 	const guestLabel = t('guest', 'Guest');
 	return (
@@ -28,4 +28,4 @@ const ExternalUserLabel = (): ReactElement => {
 	);
 };
 
-export default ExternalUserLabel;
+export default GuestUserLabel;

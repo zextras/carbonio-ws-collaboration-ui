@@ -17,13 +17,13 @@ import { UserType } from '../../../types/store/UserTypes';
 
 const loggedUser = createMockUser();
 const internalUser = createMockUser();
-const externalUser = createMockUser({ userType: UserType.EXTERNAL });
+const externalUser = createMockUser({ type: UserType.GUEST });
 const activeMeeting = createMockMeeting({});
 
 beforeEach(() => {
 	const store = useStore.getState();
 	store.addMeeting(activeMeeting);
-	store.setLoginInfo(loggedUser.id, loggedUser.name, loggedUser.userType);
+	store.setLoginInfo(loggedUser.id, loggedUser.name, loggedUser.type);
 });
 
 describe('ParticipantElement', () => {

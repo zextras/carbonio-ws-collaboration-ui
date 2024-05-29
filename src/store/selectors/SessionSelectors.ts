@@ -27,4 +27,4 @@ export const getCustomLogo = (store: RootStore): string | false | undefined =>
 	store.session?.customLogo;
 
 export const getIsLoggedUserExternal = (store: RootStore): boolean =>
-	store.session?.userType === UserType.EXTERNAL;
+	store.session?.userType === UserType.GUEST;

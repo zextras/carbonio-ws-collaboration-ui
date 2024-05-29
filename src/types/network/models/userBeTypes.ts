@@ -10,8 +10,8 @@ export type UserBe = {
 	id: string;
 	email: string;
 	name: string;
-	userType: UserType;
-	lastSeen?: number; // TODO REMOVE BACKEND DON'T SEND IT
+	type: UserType;
+	lastSeen?: number;
 	statusMessage?: string;
 	pictureUpdatedAt?: string;
 };

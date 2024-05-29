@@ -105,7 +105,7 @@ const MeetingExternalAccessPage = (): ReactElement => {
 			.then((res) => {
 				document.cookie = `ZM_AUTH_TOKEN=${res.zmToken}; path=/`;
 				document.cookie = `ZX_AUTH_TOKEN=${res.zxToken}; path=/`;
-				setLoginInfo(res.id, userName, userName, UserType.EXTERNAL);
+				setLoginInfo(res.id, userName, userName, UserType.GUEST);
 
 				// NETWORKS: init XMPP and WebSocket clients
 				const xmppClient = new XMPPClient();

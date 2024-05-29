@@ -17,7 +17,7 @@ import { UserType } from '../../../../types/store/UserTypes';
 
 const user1 = createMockUser({ id: 'user1', name: 'user1' });
 const user2 = createMockUser({ id: 'user2', name: 'user2' });
-const guestUser = createMockUser({ id: 'guestUserId', userType: UserType.EXTERNAL });
+const guestUser = createMockUser({ id: 'guestUserId', type: UserType.GUEST });
 
 beforeEach(() => {
 	const store = useStore.getState();

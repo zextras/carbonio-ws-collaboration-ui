@@ -13,12 +13,12 @@ import GoToPrivateChatAction from '../../../chats/components/infoPanel/conversat
 import { UsersApi } from '../../../network';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import {
-	getIsUserExternal,
+	getIsUserGuest,
 	getUserName,
 	getUserPictureUpdatedAt
 } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
-import ExternalUserLabel from '../ExternalUserLabel';
+import GuestUserLabel from '../GuestUserLabel';
 import MeetingParticipantActions from '../sidebar/ParticipantsAccordion/MeetingParticipantActions';
 
 const CustomContainer = styled(Container)`
@@ -43,7 +43,7 @@ const ParticipantElement: FC<ParticipantElementProps> = ({
 }) => {
 	const userId: string | undefined = useStore((store) => getUserId(store));
 	const memberName: string | undefined = useStore((store) => getUserName(store, memberId));
-	const isUserExternal = useStore((store) => getIsUserExternal(store, memberId));
+	const isUserGuest = useStore((store) => getIsUserGuest(store, memberId));
 	const userPictureUpdatedAt: string | undefined = useStore((state) =>
 		getUserPictureUpdatedAt(state, memberId)
 	);
@@ -66,10 +66,10 @@ const ParticipantElement: FC<ParticipantElementProps> = ({
 					label={memberName}
 					shape="round"
 					picture={picture}
-					icon={isUserExternal ? 'SmileOutline' : ''}
+					icon={isUserGuest ? 'SmileOutline' : ''}
 				/>
 			),
-		[memberName, picture, isUserExternal]
+		[memberName, picture, isUserGuest]
 	);
 
 	const infoElement = useMemo(
@@ -84,11 +84,11 @@ const ParticipantElement: FC<ParticipantElementProps> = ({
 					<Text color="text" size="small" overflow="ellipsis">
 						{memberName}
 					</Text>
-					{isUserExternal && <ExternalUserLabel />}
+					{isUserGuest && <GuestUserLabel />}
 				</Container>
 			</Row>
 		),
-		[isUserExternal, memberName]
+		[isUserGuest, memberName]
 	);
 
 	const isSessionParticipant: boolean = useMemo(() => memberId === userId, [memberId, userId]);

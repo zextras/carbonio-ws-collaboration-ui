@@ -11,9 +11,9 @@ import styled from 'styled-components';
 
 import usePinnedTile from '../../../hooks/usePinnedTile';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
-import { getIsUserExternal, getUserName } from '../../../store/selectors/UsersSelectors';
+import { getIsUserGuest, getUserName } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
-import ExternalUserLabel from '../ExternalUserLabel';
+import GuestUserLabel from '../GuestUserLabel';
 
 const InfoContainer = styled(Container)`
 	height: auto;
@@ -61,7 +61,7 @@ const TileUserInfo: FC<tileUserInfoProps> = ({
 
 	const userName = useStore((store) => getUserName(store, userId ?? ''));
 	const isSessionTile = useStore(getUserId) === userId;
-	const isUserExternal = useStore((store) => getIsUserExternal(store, userId ?? ''));
+	const isUserGuest = useStore((store) => getIsUserGuest(store, userId ?? ''));
 
 	const { canUsePinFeature, isPinned } = usePinnedTile(
 		meetingId ?? '',
@@ -149,7 +149,7 @@ const TileUserInfo: FC<tileUserInfoProps> = ({
 			>
 				<TextContainer orientation={'horizontal'} width={'fit'} height={'fit'} gap={'0.25rem'}>
 					<Text color={'gray6'}>{userName}</Text>
-					{isUserExternal && <ExternalUserLabel />}
+					{isUserGuest && <GuestUserLabel />}
 				</TextContainer>
 			</Row>
 		</InfoContainer>

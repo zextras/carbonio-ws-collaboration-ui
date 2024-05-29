@@ -10,7 +10,7 @@ import styled from 'styled-components';
 
 import { UsersApi } from '../../../network';
 import {
-	getIsUserExternal,
+	getIsUserGuest,
 	getUserName,
 	getUserPictureUpdatedAt
 } from '../../../store/selectors/UsersSelectors';
@@ -43,7 +43,7 @@ type tileAvatarComponentProps = {
 
 const TileAvatarComponent: FC<tileAvatarComponentProps> = ({ userId }) => {
 	const userName = useStore((store) => getUserName(store, userId ?? ''));
-	const isUserExternal = useStore((store) => getIsUserExternal(store, userId ?? ''));
+	const isUserGuest = useStore((store) => getIsUserGuest(store, userId ?? ''));
 	const userPictureUpdatedAt: string | undefined = useStore((state) =>
 		getUserPictureUpdatedAt(state, userId ?? '')
 	);
@@ -73,7 +73,7 @@ const TileAvatarComponent: FC<tileAvatarComponentProps> = ({ userId }) => {
 			size="extralarge"
 			background={userColor}
 			picture={picture || ''}
-			icon={isUserExternal ? 'SmileOutline' : ''}
+			icon={isUserGuest ? 'SmileOutline' : ''}
 		/>
 	) : (
 		<StyledShimmerAvatar />

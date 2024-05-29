@@ -30,5 +30,5 @@ export const getUserStatusMessage = (store: RootStore, id: string): string | und
 export const getUserPictureUpdatedAt = (store: RootStore, id: string): string | undefined =>
 	store.users[id]?.pictureUpdatedAt;
 
-export const getIsUserExternal = (store: RootStore, id: string): boolean | undefined =>
-	store.users[id]?.userType === UserType.EXTERNAL;
+export const getIsUserGuest = (store: RootStore, id: string): boolean | undefined =>
+	store.users[id]?.type === UserType.GUEST;

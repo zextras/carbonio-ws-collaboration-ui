@@ -8,7 +8,7 @@ export type User = {
 	id: string;
 	email: string;
 	name: string;
-	userType: UserType;
+	type: UserType;
 	lastSeen?: number;
 	statusMessage?: string;
 	online?: boolean;
@@ -22,5 +22,5 @@ export type UsersMap = {
 
 export enum UserType {
 	INTERNAL = 'internal',
-	EXTERNAL = 'external'
+	GUEST = 'guest'
 }
