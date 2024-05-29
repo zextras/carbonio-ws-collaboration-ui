@@ -15,7 +15,8 @@ import {
 	createMockMeeting,
 	createMockMember,
 	createMockParticipants,
-	createMockRoom
+	createMockRoom,
+	createMockUser
 } from '../../tests/createMock';
 import { setup } from '../../tests/test-utils';
 import { MeetingBe } from '../../types/network/models/meetingBeTypes';
@@ -28,24 +29,24 @@ const bgGrayDot = 'background-color: #cfd5dc';
 const bgGreenDot = 'background-color: #8bc34a';
 const iconBellOff = 'icon: BellOff';
 
-const user1Info: User = {
+const user1Info: User = createMockUser({
 	id: 'user1',
 	email: 'user1@domain.com',
 	name: 'User 1'
-};
+});
 
-const user2Info: User = {
+const user2Info: User = createMockUser({
 	id: 'user2',
 	email: 'user2@domain.com',
 	name: 'User 2'
-};
+});
 
-const user3Info: User = {
+const user3Info: User = createMockUser({
 	id: 'user3',
 	email: 'user3@domain.com',
 	name: 'User 3',
 	pictureUpdatedAt: '2022-08-25T17:24:28.961+02:00'
-};
+});
 
 const user1Participant: MeetingParticipant = createMockParticipants({
 	userId: 'user1',

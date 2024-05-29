@@ -9,7 +9,11 @@ import { Avatar, Shimmer, useTheme } from '@zextras/carbonio-design-system';
 import styled from 'styled-components';
 
 import { UsersApi } from '../../../network';
-import { getUserName, getUserPictureUpdatedAt } from '../../../store/selectors/UsersSelectors';
+import {
+	getIsUserExternal,
+	getUserName,
+	getUserPictureUpdatedAt
+} from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
 import { calculateAvatarColor } from '../../../utils/styleUtils';
 
@@ -38,9 +42,10 @@ type tileAvatarComponentProps = {
 };
 
 const TileAvatarComponent: FC<tileAvatarComponentProps> = ({ userId }) => {
-	const userName = useStore((store) => getUserName(store, userId || ''));
+	const userName = useStore((store) => getUserName(store, userId ?? ''));
+	const isUserExternal = useStore((store) => getIsUserExternal(store, userId ?? ''));
 	const userPictureUpdatedAt: string | undefined = useStore((state) =>
-		getUserPictureUpdatedAt(state, userId || '')
+		getUserPictureUpdatedAt(state, userId ?? '')
 	);
 
 	const [picture, setPicture] = useState<false | string>(false);
@@ -48,13 +53,13 @@ const TileAvatarComponent: FC<tileAvatarComponentProps> = ({ userId }) => {
 	const themeColor = useTheme();
 
 	const userColor = useMemo(() => {
-		const color = calculateAvatarColor(userName || '');
+		const color = calculateAvatarColor(userName ?? '');
 		return `${themeColor.avatarColors[color]}`;
 	}, [userName, themeColor.avatarColors]);
 
 	useEffect(() => {
 		if (userPictureUpdatedAt != null) {
-			setPicture(`${UsersApi.getURLUserPicture(userId || '')}?${userPictureUpdatedAt}`);
+			setPicture(`${UsersApi.getURLUserPicture(userId ?? '')}?${userPictureUpdatedAt}`);
 		} else {
 			setPicture(false);
 		}
@@ -68,6 +73,7 @@ const TileAvatarComponent: FC<tileAvatarComponentProps> = ({ userId }) => {
 			size="extralarge"
 			background={userColor}
 			picture={picture || ''}
+			icon={isUserExternal ? 'SmileOutline' : ''}
 		/>
 	) : (
 		<StyledShimmerAvatar />

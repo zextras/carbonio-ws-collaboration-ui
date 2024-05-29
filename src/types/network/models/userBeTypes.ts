@@ -4,11 +4,14 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { UserType } from '../../store/UserTypes';
+
 export type UserBe = {
 	id: string;
 	email: string;
 	name: string;
-	lastSeen?: number;
+	userType: UserType;
+	lastSeen?: number; // TODO REMOVE BACKEND DON'T SEND IT
 	statusMessage?: string;
 	pictureUpdatedAt?: string;
 };

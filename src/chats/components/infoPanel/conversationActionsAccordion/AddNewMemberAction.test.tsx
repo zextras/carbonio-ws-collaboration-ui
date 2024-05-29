@@ -12,7 +12,7 @@ import { act, renderHook } from '@testing-library/react-hooks';
 import AddNewMemberAction from './AddNewMemberAction';
 import { ContactMatch } from '../../../../network/soap/AutoCompleteRequest';
 import useStore from '../../../../store/Store';
-import { createMockRoom } from '../../../../tests/createMock';
+import { createMockRoom, createMockUser } from '../../../../tests/createMock';
 import { mockedAutoCompleteGalRequest } from '../../../../tests/mocks/AutoCompleteGal';
 import { mockedAddRoomMemberRequest } from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
@@ -35,17 +35,9 @@ const zimbraUser2: ContactMatch = {
 	zimbraId: 'user2-id'
 };
 
-const user1Info: User = {
-	id: 'user1-id',
-	email: 'user1@domain.com',
-	name: 'User 1'
-};
+const user1Info: User = createMockUser();
 
-const user2Info: User = {
-	id: 'user2-id',
-	email: 'user2@domain.com',
-	name: 'User 2'
-};
+const user2Info: User = createMockUser();
 
 const mockedRoom = createMockRoom({
 	id: 'roomId',

@@ -29,7 +29,7 @@ import {
 import { RoomsMap } from './RoomTypes';
 import { CapabilityList, Session } from './SessionTypes';
 import { UnreadsMap } from './UnreadsCounterTypes';
-import { UsersMap } from './UserTypes';
+import { UsersMap, UserType } from './UserTypes';
 import { MeetingBe } from '../network/models/meetingBeTypes';
 import { MemberBe, RoomBe } from '../network/models/roomBeTypes';
 import { UserBe } from '../network/models/userBeTypes';
@@ -90,7 +90,7 @@ export type MessagesStoreSlice = {
 export type SessionStoreSlice = {
 	session: Session;
 	setFilterHasFocus: (hasFocus: boolean) => void;
-	setLoginInfo: (id: string, name: string, displayName?: string) => void;
+	setLoginInfo: (id: string, name: string, displayName?: string, userType?: UserType) => void;
 	setSessionId: (sessionId: string) => void;
 	setCapabilities: (capabilities: CapabilityList) => void;
 	setSelectedRoomOneToOneGroup: (id: string) => void;

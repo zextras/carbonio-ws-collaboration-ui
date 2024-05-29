@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { FC, useCallback } from 'react';
+import React, { FC, useCallback, useMemo } from 'react';
 
 import { IconButton, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
@@ -40,10 +40,15 @@ const PromoteDemoteMemberAction: FC<PromoteDemoteMemberProps> = ({
 		[memberId, roomId]
 	);
 
+	const iconColor = useMemo(() => {
+		if (isInsideMeeting) return 'gray0';
+		return owner ? 'primary' : 'secondary';
+	}, [isInsideMeeting, owner]);
+
 	return (
 		<Tooltip label={tooltipLabel}>
 			<IconButton
-				iconColor={isInsideMeeting ? 'gray0' : owner ? 'primary' : 'secondary'}
+				iconColor={iconColor}
 				backgroundColor={isInsideMeeting ? 'text' : 'gray6'}
 				size={isInsideMeeting ? 'medium' : 'extralarge'}
 				icon={owner ? 'Crown' : 'CrownOutline'}

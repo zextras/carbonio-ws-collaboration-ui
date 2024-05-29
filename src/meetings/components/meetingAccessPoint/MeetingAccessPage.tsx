@@ -92,7 +92,6 @@ const MeetingAccessPage: FC<AccessMeetingPageProps> = ({ hasUserDirectAccess, me
 
 	const handleRejected = useCallback(() => {
 		freeMediaResources(streamTrack);
-		BrowserUtils.clearAuthCookies();
 		goToInfoPage(PAGE_INFO_TYPE.NEXT_TIME_PAGE);
 	}, [goToInfoPage, streamTrack]);
 

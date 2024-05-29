@@ -6,20 +6,24 @@
 import React from 'react';
 
 import { screen } from '@testing-library/react';
+import { act } from 'react-dom/test-utils';
 
 import WaitingUser from './WaitingUser';
 import useStore from '../../../../store/Store';
 import { createMockUser } from '../../../../tests/createMock';
 import { mockedAcceptWaitingUserRequest } from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
+import { UserType } from '../../../../types/store/UserTypes';
 
 const user1 = createMockUser({ id: 'user1', name: 'user1' });
 const user2 = createMockUser({ id: 'user2', name: 'user2' });
+const guestUser = createMockUser({ id: 'guestUserId', userType: UserType.EXTERNAL });
 
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setUserInfo(user1);
 });
+
 describe('WaitingUser tests', () => {
 	test('Should render the name of the user', () => {
 		setup(<WaitingUser meetingId="meetingId" userId={user1.id} />);
@@ -55,5 +59,22 @@ describe('WaitingUser tests', () => {
 		const acceptButton = screen.getByTestId('icon: CloseOutline');
 		await user.click(acceptButton);
 		expect(mockedAcceptWaitingUserRequest).toBeCalledWith('meetingId', user1.id, false);
+	});
+
+	test('User in waiting room is a logged user', async () => {
+		setup(<WaitingUser meetingId="meetingId" userId={user1.id} />);
+		const guestLabel = screen.queryByText('Guest');
+		expect(guestLabel).not.toBeInTheDocument();
+	});
+
+	test('User in waiting room is an external user', async () => {
+		setup(<WaitingUser meetingId="meetingId" userId={guestUser.id} />);
+		act(() => {
+			const store = useStore.getState();
+			store.setUserInfo(guestUser);
+		});
+
+		const guestLabel = await screen.findByText('Guest');
+		expect(guestLabel).toBeVisible();
 	});
 });

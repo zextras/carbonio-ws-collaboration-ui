@@ -23,6 +23,7 @@ import { MeetingsApi, SessionApi } from '../../../network';
 import { WebSocketClient } from '../../../network/websocket/WebSocketClient';
 import XMPPClient from '../../../network/xmpp/XMPPClient';
 import useStore from '../../../store/Store';
+import { UserType } from '../../../types/store/UserTypes';
 import { BrowserUtils } from '../../../utils/BrowserUtils';
 import ExternalAccessBackground from '../../assets/ExternalAccessBackground.png';
 
@@ -104,7 +105,7 @@ const MeetingExternalAccessPage = (): ReactElement => {
 			.then((res) => {
 				document.cookie = `ZM_AUTH_TOKEN=${res.zmToken}; path=/`;
 				document.cookie = `ZX_AUTH_TOKEN=${res.zxToken}; path=/`;
-				setLoginInfo(res.id, userName, userName);
+				setLoginInfo(res.id, userName, userName, UserType.EXTERNAL);
 
 				// NETWORKS: init XMPP and WebSocket clients
 				const xmppClient = new XMPPClient();

@@ -14,6 +14,7 @@ import MeetingParticipantsList from './MeetingParticipantsList';
 import useStore from '../../../../store/Store';
 import {
 	createMockMeeting,
+	createMockMember,
 	createMockParticipants,
 	createMockRoom,
 	createMockUser
@@ -31,19 +32,35 @@ import { MeetingParticipant } from '../../../../types/store/MeetingTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
 import { RootStore } from '../../../../types/store/StoreTypes';
 
+const user1: UserBe = createMockUser({ id: 'user1Id', name: 'user 1' });
+const user2: UserBe = createMockUser({ id: 'user2Id', name: 'user 2' });
+const user3: UserBe = createMockUser({
+	id: 'user3Id',
+	name: 'user 3',
+	pictureUpdatedAt: '2022-08-25T17:24:28.961+02:00'
+});
+
+const member1: MemberBe = createMockMember({ userId: user1.id, owner: true });
+const member2: MemberBe = createMockMember({ userId: user2.id });
+const member3: MemberBe = createMockMember({ userId: user3.id, owner: true });
+
+const user1Participant: MeetingParticipant = createMockParticipants({
+	userId: user1.id,
+	sessionId: 'sessionIdUser1'
+});
+const user3Participant: MeetingParticipant = createMockParticipants({
+	userId: user3.id,
+	sessionId: 'sessionIdUser3'
+});
+const user2Participant: MeetingParticipant = createMockParticipants({
+	userId: user2.id,
+	sessionId: 'sessionIdUser2',
+	audioStreamOn: true
+});
+
 // setup of the store when I'm a moderator
 const storeSetupGroupMeetingModerator = (): { user: UserEvent; store: RootStore } => {
 	const store: RootStore = useStore.getState();
-	const user1: UserBe = createMockUser({ id: 'user1Id', name: 'user 1' });
-	const user2: UserBe = createMockUser({ id: 'user2Id', name: 'user 2' });
-	const user3: UserBe = createMockUser({
-		id: 'user3Id',
-		name: 'user 3',
-		pictureUpdatedAt: '2022-08-25T17:24:28.961+02:00'
-	});
-	const member1: MemberBe = { userId: user1.id, owner: true };
-	const member2: MemberBe = { userId: user2.id, owner: false };
-	const member3: MemberBe = { userId: user3.id, owner: true };
 
 	const room: RoomBe = createMockRoom({
 		name: '',
@@ -56,19 +73,6 @@ const storeSetupGroupMeetingModerator = (): { user: UserEvent; store: RootStore 
 	store.setUserInfo(user3);
 	store.setLoginInfo(user1.id, user1.name);
 	store.addRoom(room);
-	const user1Participant: MeetingParticipant = createMockParticipants({
-		userId: user1.id,
-		sessionId: 'sessionIdUser1'
-	});
-	const user3Participant: MeetingParticipant = createMockParticipants({
-		userId: user3.id,
-		sessionId: 'sessionIdUser3'
-	});
-	const user2Participant: MeetingParticipant = createMockParticipants({
-		userId: user2.id,
-		sessionId: 'sessionIdUser2',
-		audioStreamOn: true
-	});
 	const meeting: MeetingBe = createMockMeeting({
 		roomId: room.id,
 		participants: [user1Participant, user2Participant, user3Participant]
@@ -79,19 +83,12 @@ const storeSetupGroupMeetingModerator = (): { user: UserEvent; store: RootStore 
 };
 
 // setup of the store of a Participant list and I'm a moderator
-
-const user2: UserBe = createMockUser({ id: 'user2Id', name: 'user 2' });
-
 const storeSetupParticipantModerator = (): {
 	meeting: MeetingBe;
 	user: UserEvent;
 	store: RootStore;
 } => {
 	const store: RootStore = useStore.getState();
-	const user1: UserBe = createMockUser({ id: 'user1Id', name: 'user 1' });
-
-	const member1: MemberBe = { userId: user1.id, owner: true };
-	const member2: MemberBe = { userId: user2.id, owner: false };
 
 	const room: RoomBe = createMockRoom({
 		name: '',
@@ -103,15 +100,7 @@ const storeSetupParticipantModerator = (): {
 	store.setUserInfo(user2);
 	store.setLoginInfo(user1.id, user1.name);
 	store.addRoom(room);
-	const user1Participant: MeetingParticipant = createMockParticipants({
-		userId: user1.id,
-		sessionId: 'sessionIdUser1'
-	});
-	const user2Participant: MeetingParticipant = createMockParticipants({
-		userId: user2.id,
-		sessionId: 'sessionIdUser2',
-		audioStreamOn: true
-	});
+
 	const meeting: MeetingBe = createMockMeeting({
 		roomId: room.id,
 		participants: [user1Participant, user2Participant]

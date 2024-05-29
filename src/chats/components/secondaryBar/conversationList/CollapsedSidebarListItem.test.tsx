@@ -10,7 +10,7 @@ import { screen } from '@testing-library/react';
 
 import CollapsedSidebarListItem from './CollapsedSidebarListItem';
 import useStore from '../../../../store/Store';
-import { createMockMember, createMockRoom } from '../../../../tests/createMock';
+import { createMockMember, createMockRoom, createMockUser } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
 import { RootStore } from '../../../../types/store/StoreTypes';
@@ -18,21 +18,15 @@ import { User } from '../../../../types/store/UserTypes';
 
 const backgroundColor = 'background-color: #cfd5dc';
 
-const user2Be: User = {
+const user2Be: User = createMockUser({
 	id: 'user2Id',
 	email: 'user2@domain.com',
 	name: 'User2',
 	lastSeen: 1234567890,
 	statusMessage: "Hey there! I'm User 2"
-};
+});
 
-const user1Be: User = {
-	id: 'user1Id',
-	email: 'user1@domain.com',
-	name: 'User1',
-	lastSeen: 1234567890,
-	statusMessage: "Hey there! I'm User 1"
-};
+const user1Be: User = createMockUser();
 
 const mockedGroup: RoomBe = createMockRoom({
 	type: RoomType.GROUP,

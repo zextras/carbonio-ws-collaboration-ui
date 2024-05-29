@@ -45,13 +45,13 @@ const myMockedRepliedTextMessage = createMockTextMessage({
 	text: 'Text message sent by me'
 });
 
-const user1: User = {
+const user1: User = createMockUser({
 	id: 'user1',
 	email: 'user1@domain.com',
 	name: 'User 1', // on DS them will be color #FFA726
 	lastSeen: 1234567890,
 	statusMessage: "Hey there! I'm User 1"
-};
+});
 
 const forwardedUser: UserBe = createMockUser({ id: 'forwardedUserId' });
 

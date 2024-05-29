@@ -13,7 +13,8 @@ import useStore from '../../../../store/Store';
 import {
 	createMockCapabilityList,
 	createMockRoom,
-	createMockTextMessage
+	createMockTextMessage,
+	createMockUser
 } from '../../../../tests/createMock';
 import { mockedGetImageThumbnailURL } from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
@@ -26,21 +27,21 @@ import { User } from '../../../../types/store/UserTypes';
 const previewUrl = 'preview-url';
 const iconDoneAll = 'icon: DoneAll';
 
-const user1Be: User = {
+const user1Be: User = createMockUser({
 	id: 'user1',
 	email: 'user1@domain.com',
 	name: 'User1',
 	lastSeen: 1234567890,
 	statusMessage: "Hey there! I'm User 1"
-};
+});
 
-const user2Be: User = {
+const user2Be: User = createMockUser({
 	id: 'user2',
 	email: 'user2@domain.com',
 	name: 'User2',
 	lastSeen: 1234567890,
 	statusMessage: "Hey there! I'm User 2"
-};
+});
 
 const mockedRoom: RoomBe = createMockRoom({
 	id: 'roomId',

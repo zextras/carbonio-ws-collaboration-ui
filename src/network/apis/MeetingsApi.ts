@@ -243,14 +243,9 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 		return this.fetchAPI(`meetings/${meetingId}/queue/${userId}`, RequestType.POST, {
 			status: 'REJECTED'
 		})
-			.then((resp) => {
-				BrowserUtils.clearAuthCookies();
-				return resp;
-			})
-			.catch((err) => {
-				BrowserUtils.clearAuthCookies();
-				return err;
-			});
+			.then((resp) => resp)
+			.catch((err) => err)
+			.finally(() => BrowserUtils.clearAuthCookies());
 	}
 
 	public getWaitingList(meetingId: string): Promise<GetWaitingListResponse> {

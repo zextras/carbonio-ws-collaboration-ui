@@ -13,13 +13,19 @@ import {
 	createMockConfigurationMessage,
 	createMockMember,
 	createMockParticipants,
-	createMockRoom
+	createMockRoom,
+	createMockUser
 } from '../tests/createMock';
 import { setup } from '../tests/test-utils';
 import { OperationType } from '../types/store/MessageTypes';
 
 const sessionUser = createMockMember({ userId: 'sessionId' });
-const member1 = createMockParticipants({ userId: 'id-1' });
+const mockUser = createMockUser({
+	id: 'id-1',
+	name: 'User 1',
+	email: 'user1@test.it'
+});
+const member1 = createMockParticipants({ userId: mockUser.id });
 const member2 = createMockParticipants({ userId: 'id-2' });
 
 const room = createMockRoom({ name: 'Group Name', members: [sessionUser, member1, member2] });
@@ -27,9 +33,10 @@ const room = createMockRoom({ name: 'Group Name', members: [sessionUser, member1
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo(sessionUser.userId, 'User');
-	store.setUserInfo({ id: member1.userId, name: 'User 1', email: 'user1@test.it' });
+	store.setUserInfo(mockUser);
 	store.addRoom(room);
 });
+
 describe('ConfigurationMessageLabel', () => {
 	test('User creates room', () => {
 		const configurationMessage = createMockConfigurationMessage({

@@ -10,7 +10,11 @@ import { act, screen } from '@testing-library/react';
 
 import MemberComponentInfo from './MemberComponentInfo';
 import useStore from '../../../../store/Store';
-import { createMockCapabilityList, createMockRoom } from '../../../../tests/createMock';
+import {
+	createMockCapabilityList,
+	createMockRoom,
+	createMockUser
+} from '../../../../tests/createMock';
 import { mockedGetURLUserPicture } from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 import { RoomType } from '../../../../types/network/models/roomBeTypes';
@@ -21,19 +25,19 @@ const iconCrown = 'icon: Crown';
 const iconLogOut = 'icon: LogOut';
 const iconMessageCircleOutline = 'icon: MessageCircleOutline';
 
-const user1Info: User = {
+const user1Info: User = createMockUser({
 	id: 'user1',
 	email: 'user1@domain.com',
 	name: 'User 1'
-};
+});
 
-const user2Info: User = {
+const user2Info: User = createMockUser({
 	id: 'user2',
 	email: 'user2@domain.com',
 	name: 'User 2',
 	last_activity: 1642818965849,
 	pictureUpdatedAt: '2022-08-25T17:24:28.961+02:00'
-};
+});
 
 const members = [
 	{
@@ -77,34 +81,37 @@ const membersWithOneOwner = [
 	}
 ];
 
-const user1Be: UserBe = {
+const user1Be: UserBe = createMockUser({
 	id: 'user1',
 	email: 'user1@domain.com',
 	name: 'User 1',
 	lastSeen: 1234567890,
 	statusMessage: "Hey there! I'm User 1"
-};
-const user2Be: UserBe = {
+});
+
+const user2Be: UserBe = createMockUser({
 	id: 'user2',
 	email: 'user2@domain.com',
 	name: 'User 2',
 	lastSeen: 1234567890,
 	statusMessage: "Hey there! I'm User 2"
-};
-const user3Be: UserBe = {
+});
+
+const user3Be: UserBe = createMockUser({
 	id: 'user3',
 	email: 'user3@domain.com',
 	name: 'User 3',
 	lastSeen: 1234567890,
 	statusMessage: "Hey there! I'm User 3"
-};
-const user4Be: UserBe = {
+});
+
+const user4Be: UserBe = createMockUser({
 	id: 'user4',
 	email: 'user4@domain.com',
 	name: 'User 4',
 	lastSeen: 1234567890,
 	statusMessage: "Hey there! I'm User 4"
-};
+});
 
 const mockedRoom = createMockRoom({
 	type: RoomType.GROUP,

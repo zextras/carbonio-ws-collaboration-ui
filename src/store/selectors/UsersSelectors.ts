@@ -5,7 +5,7 @@
  */
 
 import { RootStore } from '../../types/store/StoreTypes';
-import { User, UsersMap } from '../../types/store/UserTypes';
+import { User, UsersMap, UserType } from '../../types/store/UserTypes';
 
 export const getUsersSelector = (store: RootStore): UsersMap => store.users;
 
@@ -30,4 +30,5 @@ export const getUserStatusMessage = (store: RootStore, id: string): string | und
 export const getUserPictureUpdatedAt = (store: RootStore, id: string): string | undefined =>
 	store.users[id]?.pictureUpdatedAt;
 
-// inside the component call like this; users = useStore(getUsersSelector)
+export const getIsUserExternal = (store: RootStore, id: string): boolean | undefined =>
+	store.users[id]?.userType === UserType.EXTERNAL;

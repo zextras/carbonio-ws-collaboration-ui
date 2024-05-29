@@ -11,23 +11,16 @@ import { act, renderHook } from '@testing-library/react-hooks';
 
 import EditConversationAction from './EditConversationAction';
 import useStore from '../../../../store/Store';
-import { createMockMember, createMockRoom } from '../../../../tests/createMock';
+import { createMockMember, createMockRoom, createMockUser } from '../../../../tests/createMock';
 import { mockedUpdateRoomRequest } from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
 import { RootStore } from '../../../../types/store/StoreTypes';
 import { User } from '../../../../types/store/UserTypes';
 
-const user1Info: User = {
-	id: 'user1',
-	email: 'user1@domain.com',
-	name: 'User 1'
-};
-const user2Info: User = {
-	id: 'user2',
-	email: 'user2@domain.com',
-	name: 'User 2'
-};
+const user1Info: User = createMockUser();
+
+const user2Info: User = createMockUser();
 
 const testRoom: RoomBe = createMockRoom({
 	id: 'room-test',

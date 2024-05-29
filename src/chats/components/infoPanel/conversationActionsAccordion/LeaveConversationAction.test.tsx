@@ -11,23 +11,16 @@ import { act, renderHook } from '@testing-library/react-hooks';
 
 import LeaveConversationAction from './LeaveConversationAction';
 import useStore from '../../../../store/Store';
-import { createMockRoom } from '../../../../tests/createMock';
+import { createMockRoom, createMockUser } from '../../../../tests/createMock';
 import { mockedDeleteRoomMemberRequest } from '../../../../tests/mocks/network';
 import { mockGoToMainPage } from '../../../../tests/mocks/useRouting';
 import { setup } from '../../../../tests/test-utils';
 import { RoomType } from '../../../../types/network/models/roomBeTypes';
 import { User } from '../../../../types/store/UserTypes';
 
-const user1Info: User = {
-	id: 'user1',
-	email: 'user1@domain.com',
-	name: 'User 1'
-};
-const user2Info: User = {
-	id: 'user2',
-	email: 'user2@domain.com',
-	name: 'User 2'
-};
+const user1Info: User = createMockUser();
+
+const user2Info: User = createMockUser();
 
 const mockedRoom2 = createMockRoom({
 	id: 'roomId',
