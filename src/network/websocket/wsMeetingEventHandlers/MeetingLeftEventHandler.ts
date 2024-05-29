@@ -6,7 +6,7 @@
 import useStore from '../../../store/Store';
 import { MeetingLeftEvent } from '../../../types/network/websocket/wsMeetingEvents';
 import { MeetingSoundFeedback, sendAudioFeedback } from '../../../utils/MeetingsUtils';
-import { inThisMeetingTab, isMyId } from '../eventHandlersUtilities';
+import { isMeetingActive, isMyId } from '../eventHandlersUtilities';
 
 export const meetingLeftEventHandler = (event: MeetingLeftEvent): void => {
 	const state = useStore.getState();
@@ -15,7 +15,7 @@ export const meetingLeftEventHandler = (event: MeetingLeftEvent): void => {
 	// Update subscription manager
 	state.setDeleteSubscription(event.meetingId, event.userId);
 
-	if (inThisMeetingTab(event.meetingId)) {
+	if (isMeetingActive(event.meetingId)) {
 		// Send audio feedback to other participants session user leave
 		if (!isMyId(event.userId)) {
 			sendAudioFeedback(MeetingSoundFeedback.MEETING_LEAVE_NOTIFICATION);

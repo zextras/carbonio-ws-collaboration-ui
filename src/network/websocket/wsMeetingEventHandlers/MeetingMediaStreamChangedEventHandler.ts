@@ -7,7 +7,7 @@ import useStore from '../../../store/Store';
 import { MeetingMediaStreamChangedEvent } from '../../../types/network/websocket/wsMeetingEvents';
 import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
 import { MeetingSoundFeedback, sendAudioFeedback } from '../../../utils/MeetingsUtils';
-import { inThisMeetingTab, isMyId } from '../eventHandlersUtilities';
+import { isMeetingActive, isMyId } from '../eventHandlersUtilities';
 
 export const meetingMediaStreamChangedEventHandler = (
 	event: MeetingMediaStreamChangedEvent
@@ -31,7 +31,7 @@ export const meetingMediaStreamChangedEventHandler = (
 	}
 
 	// Send audio feedback of session user screen sharing
-	if (inThisMeetingTab(event.meetingId) && mediaType === STREAM_TYPE.SCREEN) {
+	if (isMeetingActive(event.meetingId) && mediaType === STREAM_TYPE.SCREEN) {
 		sendAudioFeedback(MeetingSoundFeedback.MEETING_SCREENSHARE_NOTIFICATION);
 	}
 

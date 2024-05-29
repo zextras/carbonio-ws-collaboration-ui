@@ -5,13 +5,13 @@
  */
 import useStore from '../../../store/Store';
 import { MeetingParticipantSubscribedEvent } from '../../../types/network/websocket/wsMeetingEvents';
-import { inThisMeetingTab } from '../eventHandlersUtilities';
+import { isMeetingActive } from '../eventHandlersUtilities';
 
 export const meetingParticipantSubscribedEventHandler = (
 	event: MeetingParticipantSubscribedEvent
 ): void => {
 	const state = useStore.getState();
-	if (inThisMeetingTab(event.meetingId)) {
+	if (isMeetingActive(event.meetingId)) {
 		const activeMeeting = state.activeMeeting[event.meetingId];
 		activeMeeting.videoScreenIn?.handleParticipantsSubscribed(event.streams);
 	}

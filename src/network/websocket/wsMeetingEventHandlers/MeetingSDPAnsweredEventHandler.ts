@@ -6,11 +6,11 @@
 import useStore from '../../../store/Store';
 import { MeetingSDPAnsweredEvent } from '../../../types/network/websocket/wsMeetingEvents';
 import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
-import { inThisMeetingTab } from '../eventHandlersUtilities';
+import { isMeetingActive } from '../eventHandlersUtilities';
 
 export const meetingSDPAnsweredEventHandler = (event: MeetingSDPAnsweredEvent): void => {
 	const state = useStore.getState();
-	if (inThisMeetingTab(event.meetingId)) {
+	if (isMeetingActive(event.meetingId)) {
 		const mediaType = event.mediaType.toLowerCase() as STREAM_TYPE;
 		const activeMeeting = state.activeMeeting[event.meetingId];
 		if (mediaType === STREAM_TYPE.VIDEO) {

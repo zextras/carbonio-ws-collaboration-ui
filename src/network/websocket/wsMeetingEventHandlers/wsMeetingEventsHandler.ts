@@ -26,6 +26,7 @@ import useStore from '../../../store/Store';
 import { MeetingType } from '../../../types/network/models/meetingBeTypes';
 import { WsEvent, WsEventType } from '../../../types/network/websocket/wsEvents';
 
+// TODO
 export const wsMeetingEventsHandler = (event: WsEvent): void => {
 	const state = useStore.getState();
 

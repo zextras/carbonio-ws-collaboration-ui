@@ -8,7 +8,7 @@ import useStore from '../../../store/Store';
 import { MeetingAudioStreamChangedEvent } from '../../../types/network/websocket/wsMeetingEvents';
 import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
 import { MeetingSoundFeedback, sendAudioFeedback } from '../../../utils/MeetingsUtils';
-import { inThisMeetingTab, isMyId } from '../eventHandlersUtilities';
+import { isMeetingActive, isMyId } from '../eventHandlersUtilities';
 
 export const meetingAudioStreamChangedEventHandler = (
 	event: MeetingAudioStreamChangedEvent
@@ -16,7 +16,7 @@ export const meetingAudioStreamChangedEventHandler = (
 	const state = useStore.getState();
 	state.changeStreamStatus(event.meetingId, event.userId, STREAM_TYPE.AUDIO, event.active);
 
-	if (inThisMeetingTab(event.meetingId)) {
+	if (isMeetingActive(event.meetingId)) {
 		// If user is talking, delete his id from the isTalking array
 		if (!event.active) {
 			state.setTalkingUser(event.meetingId, event.userId, false);

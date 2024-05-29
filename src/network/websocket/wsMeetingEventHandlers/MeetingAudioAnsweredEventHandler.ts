@@ -5,11 +5,11 @@
  */
 import useStore from '../../../store/Store';
 import { MeetingAudioAnsweredEvent } from '../../../types/network/websocket/wsMeetingEvents';
-import { inThisMeetingTab } from '../eventHandlersUtilities';
+import { isMeetingActive } from '../eventHandlersUtilities';
 
 export const meetingAudioAnsweredEventHandler = (event: MeetingAudioAnsweredEvent): void => {
 	const state = useStore.getState();
-	if (inThisMeetingTab(event.meetingId)) {
+	if (isMeetingActive(event.meetingId)) {
 		const activeMeeting = state.activeMeeting[event.meetingId];
 		activeMeeting.bidirectionalAudioConn?.handleRemoteAnswer({
 			sdp: event.sdp,

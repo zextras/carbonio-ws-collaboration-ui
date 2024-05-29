@@ -5,11 +5,11 @@
  */
 import useStore from '../../../store/Store';
 import { MeetingSDPOfferedEvent } from '../../../types/network/websocket/wsMeetingEvents';
-import { inThisMeetingTab } from '../eventHandlersUtilities';
+import { isMeetingActive } from '../eventHandlersUtilities';
 
 export const meetingSDPOfferedEventHandler = (event: MeetingSDPOfferedEvent): void => {
 	const state = useStore.getState();
-	if (inThisMeetingTab(event.meetingId)) {
+	if (isMeetingActive(event.meetingId)) {
 		const activeMeeting = state.activeMeeting[event.meetingId];
 		activeMeeting.videoScreenIn?.handleRemoteOffer(event.sdp);
 	}

@@ -11,7 +11,7 @@ import { MeetingJoinedEvent } from '../../../types/network/websocket/wsMeetingEv
 import { MeetingParticipant } from '../../../types/store/MeetingTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 import { MeetingSoundFeedback, sendAudioFeedback } from '../../../utils/MeetingsUtils';
-import { inThisMeetingTab, isMyId } from '../eventHandlersUtilities';
+import { isMeetingActive, isMyId } from '../eventHandlersUtilities';
 
 export const meetingJoinedEventHandler = (event: MeetingJoinedEvent): void => {
 	const state = useStore.getState();
@@ -34,7 +34,7 @@ export const meetingJoinedEventHandler = (event: MeetingJoinedEvent): void => {
 	}
 
 	// Send audio feedback to other participants session user join
-	if (inThisMeetingTab(event.meetingId) && !isMyId(event.userId)) {
+	if (isMeetingActive(event.meetingId) && !isMyId(event.userId)) {
 		sendAudioFeedback(MeetingSoundFeedback.MEETING_JOIN_NOTIFICATION);
 	}
 };

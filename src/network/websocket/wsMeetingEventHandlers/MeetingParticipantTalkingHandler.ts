@@ -5,13 +5,13 @@
  */
 import useStore from '../../../store/Store';
 import { MeetingParticipantTalkingEvent } from '../../../types/network/websocket/wsMeetingEvents';
+import { isMeetingActive } from '../eventHandlersUtilities';
 
 export const meetingParticipantTalkingEventHandler = (
 	event: MeetingParticipantTalkingEvent
 ): void => {
 	const state = useStore.getState();
-	const activeMeeting = state.activeMeeting[event.meetingId];
-	if (activeMeeting) {
+	if (isMeetingActive(event.meetingId)) {
 		state.setTalkingUser(event.meetingId, event.userId, event.isTalking);
 	}
 };
