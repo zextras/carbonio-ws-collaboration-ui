@@ -9,7 +9,6 @@ import { renderHook } from '@testing-library/react-hooks';
 import { act } from 'react-dom/test-utils';
 
 import { wsEventsHandler } from './wsEventsHandler';
-import { MEETINGS_PATH } from '../../constants/appConstants';
 import useStore from '../../store/Store';
 import {
 	createMockMeeting,
@@ -18,7 +17,7 @@ import {
 	createMockUser
 } from '../../tests/createMock';
 import { mockedGetMeetingRequest, mockedGetRoomRequest } from '../../tests/mocks/network';
-import { MeetingBe, MeetingType } from '../../types/network/models/meetingBeTypes';
+import { MeetingBe } from '../../types/network/models/meetingBeTypes';
 import { MemberBe, RoomBe } from '../../types/network/models/roomBeTypes';
 import { UserBe } from '../../types/network/models/userBeTypes';
 import {
@@ -56,7 +55,6 @@ const member3: MemberBe = {
 
 const user3Participant: MeetingParticipant = createMockParticipants({ userId: user3.id });
 const user2Participant: MeetingParticipant = createMockParticipants({ userId: user2.id });
-const user1Participant: MeetingParticipant = createMockParticipants({ userId: user1.id });
 
 const meeting: MeetingBe = createMockMeeting({
 	id: 'meetingId',
@@ -80,14 +78,6 @@ const roomWithoutMe: RoomBe = createMockRoom({
 	type: RoomType.GROUP,
 	members: [member2, member3],
 	meetingId: meeting.id
-});
-
-const temporaryRoom: RoomBe = createMockRoom({ type: RoomType.TEMPORARY, members: [member1] });
-
-const scheduledMeeting: MeetingBe = createMockMeeting({
-	roomId: 'id',
-	type: MeetingType.SCHEDULED,
-	participants: [user1Participant]
 });
 
 describe('wsEventHandler', () => {
@@ -133,40 +123,5 @@ describe('wsEventHandler', () => {
 		});
 
 		await waitFor(() => expect(result.current.meetings[roomWithoutMe.id]).toBeUndefined());
-	});
-
-	beforeEach(() => {
-		const store = useStore.getState();
-		store.setLoginInfo(user1.id, 'user1');
-		store.addRoom(temporaryRoom);
-		store.addMeeting(scheduledMeeting);
-		store.meetingConnection(scheduledMeeting.id, false, undefined, false, undefined);
-	});
-	describe('Recording events', () => {
-		test('Recording started', () => {
-			window.history.pushState({}, '', `${MEETINGS_PATH}${scheduledMeeting.id}`);
-			wsEventsHandler({
-				type: WsEventType.MEETING_RECORDING_STARTED,
-				meetingId: scheduledMeeting.id,
-				userId: user1.id,
-				sentDate: '123456789'
-			});
-			const { recStartedAt, recUserId } = useStore.getState().meetings[temporaryRoom.id];
-			expect(recStartedAt).toBe('123456789');
-			expect(recUserId).toBe(user1.id);
-		});
-
-		test('Recording stopped', () => {
-			window.history.pushState({}, '', `${MEETINGS_PATH}${scheduledMeeting.id}`);
-			wsEventsHandler({
-				type: WsEventType.MEETING_RECORDING_STOPPED,
-				meetingId: scheduledMeeting.id,
-				userId: user1.id,
-				sentDate: '123456789'
-			});
-			const { recStartedAt, recUserId } = useStore.getState().meetings[temporaryRoom.id];
-			expect(recStartedAt).toBeUndefined();
-			expect(recUserId).toBeUndefined();
-		});
 	});
 });

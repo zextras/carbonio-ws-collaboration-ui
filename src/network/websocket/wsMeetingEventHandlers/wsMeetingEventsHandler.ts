@@ -12,8 +12,8 @@ import { meetingMediaStreamChangedEventHandler } from './MeetingMediaStreamChang
 import { meetingParticipantClashedEventHandler } from './MeetingParticipantClashedEventHandler';
 import { meetingParticipantSubscribedEventHandler } from './MeetingParticipantSubscribedEventHandler';
 import { meetingParticipantTalkingEventHandler } from './MeetingParticipantTalkingHandler';
-import { meetingRecordingStoppedEventHandler } from './MeetingRecordingStartedEventHandler';
-import { meetingRecordingStartedEventHandler } from './MeetingRecordingStoppedEventHandler';
+import { meetingRecordingStartedEventHandler } from './MeetingRecordingStartedEventHandler';
+import { meetingRecordingStoppedEventHandler } from './MeetingRecordingStoppedEventHandler';
 import { meetingSDPAnsweredEventHandler } from './MeetingSDPAnsweredEventHandler';
 import { meetingSDPOfferedEventHandler } from './MeetingSDPOfferedEventHandler';
 import { meetingStartedEventHandler } from './MeetingStartedEventHandler';

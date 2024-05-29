@@ -5,14 +5,13 @@
  */
 import { EventName, sendCustomEvent } from '../../../hooks/useEventListener';
 import useStore from '../../../store/Store';
-import { MeetingRecordingStoppedEvent } from '../../../types/network/websocket/wsMeetingEvents';
+import { MeetingRecordingStartedEvent } from '../../../types/network/websocket/wsMeetingEvents';
 import { isMeetingActive } from '../eventHandlersUtilities';
 
-export const meetingRecordingStoppedEventHandler = (event: MeetingRecordingStoppedEvent): void => {
+export const meetingRecordingStartedEventHandler = (event: MeetingRecordingStartedEvent): void => {
 	const state = useStore.getState();
-	state.stopRecording(event.meetingId);
+	state.startRecording(event.meetingId, event.sentDate, event.userId);
 	if (isMeetingActive(event.meetingId)) {
-		sendCustomEvent({ name: EventName.MEETING_RECORDING_STOPPED, data: event });
+		sendCustomEvent({ name: EventName.MEETING_RECORDING_STARTED, data: event });
 	}
-	state.stopMeeting(event.meetingId);
 };
