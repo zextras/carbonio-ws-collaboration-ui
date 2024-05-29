@@ -6,12 +6,12 @@
 
 import { EventName, sendCustomEvent } from '../../../hooks/useEventListener';
 import { MeetingWaitingParticipantClashed } from '../../../types/network/websocket/wsMeetingEvents';
-import { inThisMeetingTab } from '../eventHandlersUtilities';
+import { inThisMeetingTab, isMyId } from '../eventHandlersUtilities';
 
 export const meetingWaitingParticipantClashedEventHandler = (
 	event: MeetingWaitingParticipantClashed
 ): void => {
-	if (inThisMeetingTab(event.meetingId)) {
+	if (isMyId(event.userId) && inThisMeetingTab(event.meetingId)) {
 		sendCustomEvent({ name: EventName.MEETING_WAITING_PARTICIPANT_CLASHED, data: event });
 	}
 };

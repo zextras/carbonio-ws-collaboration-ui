@@ -6,12 +6,14 @@
 import { EventName, sendCustomEvent } from '../../../hooks/useEventListener';
 import useStore from '../../../store/Store';
 import { MeetingUserRejectedEvent } from '../../../types/network/websocket/wsMeetingEvents';
-import { inThisMeetingTab } from '../eventHandlersUtilities';
+import { inThisMeetingTab, isMyId } from '../eventHandlersUtilities';
 
 export const meetingUserRejectedEventHandler = (event: MeetingUserRejectedEvent): void => {
 	const state = useStore.getState();
 	state.removeUserFromWaitingList(event.meetingId, event.userId);
-	if (inThisMeetingTab(event.meetingId)) {
+
+	// Send custom event to let session user know he is rejected
+	if (isMyId(event.userId) && inThisMeetingTab(event.meetingId)) {
 		sendCustomEvent({ name: EventName.MEETING_USER_REJECTED, data: event });
 	}
 };

@@ -13,10 +13,14 @@ import { isMeetingActive } from '../eventHandlersUtilities';
 
 export const meetingStoppedEventHandler = (event: MeetingStoppedEvent): void => {
 	const state = useStore.getState();
+
+	// Send custom event to remove incoming meeting notification
 	const meeting = find(state.meetings, (meeting) => meeting.id === event.meetingId);
 	if (meeting && state.rooms[meeting.roomId]?.type === RoomType.ONE_TO_ONE) {
 		sendCustomEvent({ name: EventName.REMOVED_MEETING_NOTIFICATION, data: event });
 	}
+
+	// Send custom event to stop meeting everyone is in
 	if (isMeetingActive(event.meetingId)) {
 		sendCustomEvent({ name: EventName.MEETING_STOPPED, data: event });
 	}
