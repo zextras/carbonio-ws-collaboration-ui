@@ -220,3 +220,14 @@ export const mockPlayAudio = jest.fn();
 global.Audio = jest.fn().mockImplementation(() => ({
 	play: mockPlayAudio
 }));
+
+export const mockReplace = jest.fn();
+Object.defineProperty(window, 'location', {
+	value: {
+		href: 'https://localhost/carbonio/',
+		pathname: 'https://localhost/carbonio/',
+		replace: mockReplace,
+		includes: jest.fn()
+	},
+	writable: true
+});
