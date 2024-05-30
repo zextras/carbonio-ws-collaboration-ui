@@ -83,7 +83,7 @@ const ConversationsFilter: FC<ConversationsFilterProps> = ({ expanded, setFilter
 
 	const customFilterIcon = useMemo(
 		() =>
-			function icon() {
+			function icon(): JSX.Element {
 				return (
 					<Tooltip label={searchInput.length > 0 ? closeTooltip : filterTooltip}>
 						<IconButton
@@ -116,7 +116,7 @@ const ConversationsFilter: FC<ConversationsFilterProps> = ({ expanded, setFilter
 					/>
 				</Container>
 			) : (
-				<CustomFunnelContainer height="3rem" background="gray5">
+				<CustomFunnelContainer height="3rem" background={'gray5'}>
 					<Tooltip label={filterTooltip}>
 						<IconButton
 							icon="FunnelOutline"
