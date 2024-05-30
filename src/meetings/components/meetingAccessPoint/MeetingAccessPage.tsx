@@ -177,9 +177,11 @@ const MeetingAccessPage: FC<AccessMeetingPageProps> = ({ hasUserDirectAccess, me
 	return (
 		<Container>
 			<Container mainAlignment="center" crossAlignment="center" gap="1.5rem">
-				<Text size="extralarge" weight="bold">
-					{accessTitle}
-				</Text>
+				<Container height="fit" width="fit">
+					<Text size="extralarge" weight="bold">
+						{accessTitle}
+					</Text>
+				</Container>
 				<MeetingAccessPageMediaSection
 					streamTrack={streamTrack}
 					setStreamTrack={setStreamTrack}
