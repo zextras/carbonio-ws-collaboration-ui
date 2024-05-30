@@ -16,11 +16,9 @@ export const meetingMediaStreamChangedEventHandler = (
 	const mediaType = event.mediaType.toLowerCase() as STREAM_TYPE;
 
 	// Update subscription manager
-	if (!isMyId(event.userId)) {
+	if (!isMyId(event.userId) && !event.active) {
 		const sub = { userId: event.userId, type: mediaType };
-		if (!event.active) {
-			state.setRemoveSubscription(event.meetingId, sub);
-		}
+		state.setRemoveSubscription(event.meetingId, sub);
 	}
 
 	state.changeStreamStatus(event.meetingId, event.userId, mediaType, event.active);
@@ -36,10 +34,8 @@ export const meetingMediaStreamChangedEventHandler = (
 	}
 
 	// Update subscription manager
-	if (!isMyId(event.userId)) {
+	if (!isMyId(event.userId) && event.active) {
 		const sub = { userId: event.userId, type: mediaType };
-		if (event.active) {
-			state.setAddSubscription(event.meetingId, sub);
-		}
+		state.setAddSubscription(event.meetingId, sub);
 	}
 };
