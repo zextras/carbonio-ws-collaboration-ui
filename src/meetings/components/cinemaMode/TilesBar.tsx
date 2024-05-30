@@ -15,7 +15,6 @@ import styled from 'styled-components';
 import useContainerDimensions from '../../../hooks/useContainerDimensions';
 import usePagination from '../../../hooks/usePagination';
 import { MeetingRoutesParams } from '../../../hooks/useRouting';
-import { getVideoScreenIn } from '../../../store/selectors/ActiveMeetingSelectors';
 import useStore from '../../../store/Store';
 import { STREAM_TYPE, TileData } from '../../../types/store/ActiveMeetingTypes';
 import Tile from '../tile/Tile';
@@ -56,7 +55,6 @@ const TilesBar = ({ carouselTiles, centralTile }: TilesBarProps): ReactElement =
 	const topLabel = t('tooltip.topOfList', 'Top of list');
 	const bottomLabel = t('tooltip.bottomOfList', 'Bottom of list');
 
-	const videoScreenIn = useStore((store) => getVideoScreenIn(store, meetingId));
 	const setUpdateSubscription = useStore((store) => store.setUpdateSubscription);
 
 	const tilesContainerRef = useRef<HTMLDivElement>(null);
@@ -105,7 +103,7 @@ const TilesBar = ({ carouselTiles, centralTile }: TilesBarProps): ReactElement =
 			subscriptions.push({ userId: centralTile.userId, type: centralTile.type });
 			setUpdateSubscription(meetingId, subscriptions);
 		}
-	}, [videoScreenIn, tilesDataToRender, centralTile, meetingId, setUpdateSubscription]);
+	}, [tilesDataToRender, centralTile, meetingId, setUpdateSubscription]);
 
 	return (
 		<TilesBarContainer mainAlignment="space-between">

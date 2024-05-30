@@ -15,11 +15,7 @@ import TilesBar from './TilesBar';
 import useContainerDimensions from '../../../hooks/useContainerDimensions';
 import { MeetingRoutesParams } from '../../../hooks/useRouting';
 import useTilesOrder from '../../../hooks/useTilesOrder';
-import {
-	getMeetingCarouselVisibility,
-	getVideoScreenIn
-} from '../../../store/selectors/ActiveMeetingSelectors';
-import { getUserId } from '../../../store/selectors/SessionSelectors';
+import { getMeetingCarouselVisibility } from '../../../store/selectors/ActiveMeetingSelectors';
 import useStore from '../../../store/Store';
 import { STREAM_TYPE, Subscription } from '../../../types/store/ActiveMeetingTypes';
 import { calcScaleDivisor } from '../../../utils/styleUtils';
@@ -61,8 +57,6 @@ const CinemaMode = ({ children }: MeetingViewProps): ReactElement => {
 
 	const carouselIsVisible = useStore((store) => getMeetingCarouselVisibility(store, meetingId));
 	const setIsCarouselVisible = useStore((store) => store.setIsCarouseVisible);
-	const videoScreenIn = useStore((store) => getVideoScreenIn(store, meetingId));
-	const myUserId = useStore(getUserId);
 	const setUpdateSubscription = useStore((store) => store.setUpdateSubscription);
 
 	const [t] = useTranslation();
@@ -99,7 +93,7 @@ const CinemaMode = ({ children }: MeetingViewProps): ReactElement => {
 			const subscription: Subscription = { userId: centralTile.userId, type: centralTile.type };
 			setUpdateSubscription(meetingId, [subscription]);
 		}
-	}, [carouselIsVisible, centralTile, meetingId, myUserId, setUpdateSubscription, videoScreenIn]);
+	}, [carouselIsVisible, centralTile, meetingId, setUpdateSubscription]);
 
 	return (
 		<Container orientation="horizontal">
