@@ -65,19 +65,33 @@ const TileAvatarComponent: FC<tileAvatarComponentProps> = ({ userId }) => {
 		}
 	}, [userId, userPictureUpdatedAt]);
 
-	return userName ? (
-		<StyledAvatar
-			label={userName}
-			title={userName}
-			shape="round"
-			size="extralarge"
-			background={userColor}
-			picture={picture || ''}
-			icon={isUserGuest ? 'SmileOutline' : ''}
-		/>
-	) : (
-		<StyledShimmerAvatar />
-	);
+	return useMemo(() => {
+		if (!userName) return <StyledShimmerAvatar />;
+		if (isUserGuest)
+			return (
+				<StyledAvatar
+					label={userName}
+					title={userName}
+					shape="round"
+					size="extralarge"
+					background={userColor}
+					icon={'SmileOutline'}
+				/>
+			);
+		if (userName) {
+			return (
+				<StyledAvatar
+					label={userName}
+					title={userName}
+					shape="round"
+					size="extralarge"
+					background={userColor}
+					picture={picture || ''}
+				/>
+			);
+		}
+		return <StyledShimmerAvatar />;
+	}, [isUserGuest, picture, userColor, userName]);
 };
 
 export default TileAvatarComponent;

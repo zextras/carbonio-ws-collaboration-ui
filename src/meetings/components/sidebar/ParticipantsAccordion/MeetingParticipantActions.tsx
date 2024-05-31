@@ -109,7 +109,7 @@ const MeetingParticipantActions: FC<ParticipantActionsProps> = ({ memberId, meet
 						backgroundColor="text"
 						icon={isPinned ? 'Unpin3Outline' : 'Pin3Outline'}
 						onClick={switchPinnedTile}
-						size="large"
+						size="medium"
 					/>
 				</Tooltip>
 			)}
