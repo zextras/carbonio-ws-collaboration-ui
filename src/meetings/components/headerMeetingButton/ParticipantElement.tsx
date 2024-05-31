@@ -55,22 +55,28 @@ const ParticipantElement: FC<ParticipantElementProps> = ({
 		return '';
 	}, [memberId, userPictureUpdatedAt]);
 
-	const avatarElement = useMemo(
-		() =>
-			memberName == null ? (
+	const avatarElement = useMemo(() => {
+		if (memberName == null) {
+			return (
 				<Container width="fit" height="fit">
 					<Shimmer.Avatar width="2rem" />
 				</Container>
-			) : (
-				<CustomAvatar
-					label={memberName}
-					shape="round"
-					picture={picture}
-					icon={isUserGuest ? 'SmileOutline' : ''}
-				/>
-			),
-		[memberName, picture, isUserGuest]
-	);
+			);
+		}
+		if (isUserGuest) {
+			return (
+				<CustomAvatar label={memberName} shape="round" picture={picture} icon={'SmileOutline'} />
+			);
+		}
+		if (memberName) {
+			return <CustomAvatar label={memberName} shape="round" picture={picture} />;
+		}
+		return (
+			<Container width="fit" height="fit">
+				<Shimmer.Avatar width="2rem" />
+			</Container>
+		);
+	}, [memberName, picture, isUserGuest]);
 
 	const infoElement = useMemo(
 		() => (

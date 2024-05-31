@@ -59,22 +59,28 @@ const WaitingUser: FC<WaitingUserProps> = ({ meetingId, userId }) => {
 		[userId, userPictureUpdatedAt]
 	);
 
-	const avatarElement = useMemo(
-		() =>
-			memberName ? (
-				<CustomAvatar
-					label={memberName}
-					shape="round"
-					picture={picture}
-					icon={isUserGuest ? 'SmileOutline' : ''}
-				/>
-			) : (
+	const avatarElement = useMemo(() => {
+		if (!memberName) {
+			return (
 				<Container width="fit" height="fit">
 					<Shimmer.Avatar width="2rem" data-testid="avatarShimmer" />
 				</Container>
-			),
-		[isUserGuest, memberName, picture]
-	);
+			);
+		}
+		if (isUserGuest) {
+			return (
+				<CustomAvatar label={memberName} shape="round" picture={picture} icon={'SmileOutline'} />
+			);
+		}
+		if (memberName) {
+			return <CustomAvatar label={memberName} shape="round" picture={picture} />;
+		}
+		return (
+			<Container width="fit" height="fit">
+				<Shimmer.Avatar width="2rem" data-testid="avatarShimmer" />
+			</Container>
+		);
+	}, [isUserGuest, memberName, picture]);
 
 	const acceptWaitingUser = useCallback(
 		() => MeetingsApi.acceptWaitingUser(meetingId, userId, true),
