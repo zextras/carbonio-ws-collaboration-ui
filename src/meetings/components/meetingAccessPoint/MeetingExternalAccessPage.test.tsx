@@ -11,6 +11,7 @@ import { renderHook } from '@testing-library/react-hooks';
 
 import MeetingExternalAccessPage from './MeetingExternalAccessPage';
 import useStore from '../../../store/Store';
+import { mockReplace } from '../../../tests/mocks/global';
 import { mockedCreateGuestAccount, mockedGetCapabilities } from '../../../tests/mocks/network';
 import { mockGoToMeetingAccessPage } from '../../../tests/mocks/useRouting';
 import { setup } from '../../../tests/test-utils';
@@ -109,5 +110,17 @@ describe('MeetingExternalAccessPage', () => {
 		expect(document.cookie).toBe(
 			`ZM_AUTH_TOKEN=${guestAccountResp.zmToken}; ZX_AUTH_TOKEN=${guestAccountResp.zxToken}`
 		);
+	});
+
+	test('user clicks on the login button', async () => {
+		mockedCreateGuestAccount.mockResolvedValueOnce(guestAccountResp);
+		mockedGetCapabilities.mockResolvedValueOnce({});
+		mockReplace.mockReturnValueOnce('url');
+		const { user } = setup(<MeetingExternalAccessPage />);
+
+		const loginButton = screen.getByRole('button', { name: 'Go to your login page' });
+		await user.click(loginButton);
+
+		expect(mockReplace).toHaveBeenCalled();
 	});
 });
