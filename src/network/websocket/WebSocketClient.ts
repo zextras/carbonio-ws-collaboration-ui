@@ -107,6 +107,13 @@ export class WebSocketClient implements IWebSocketClient {
 				this.connect();
 			}
 		}, this._reconnectionTime);
-		this._reconnectionTime = this._reconnectionTime * 2 + 1000;
+
+		// Exponential backoff with random delay between 0 and 10 seconds and max 5 minutes
+		const randomDelay = Math.floor(Math.random() * (10000 + 1));
+		if (this._reconnectionTime < 1000 * 60 * 2.5) {
+			this._reconnectionTime = this._reconnectionTime * 2 + randomDelay;
+		} else {
+			this._reconnectionTime = 1000 * 60 * 5 + randomDelay;
+		}
 	}
 }
