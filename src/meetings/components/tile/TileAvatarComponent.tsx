@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import React, { FC, useEffect, useMemo, useState } from 'react';
+import React, { FC, ReactElement, useEffect, useMemo, useState } from 'react';
 
 import { Avatar, Shimmer, useTheme } from '@zextras/carbonio-design-system';
 import styled from 'styled-components';
@@ -65,7 +65,7 @@ const TileAvatarComponent: FC<tileAvatarComponentProps> = ({ userId }) => {
 		}
 	}, [userId, userPictureUpdatedAt]);
 
-	return useMemo(() => {
+	const avatarToReturn = (): ReactElement => {
 		if (!userName) return <StyledShimmerAvatar />;
 		if (isUserGuest)
 			return (
@@ -91,7 +91,9 @@ const TileAvatarComponent: FC<tileAvatarComponentProps> = ({ userId }) => {
 			);
 		}
 		return <StyledShimmerAvatar />;
-	}, [isUserGuest, picture, userColor, userName]);
+	};
+
+	return avatarToReturn();
 };
 
 export default TileAvatarComponent;

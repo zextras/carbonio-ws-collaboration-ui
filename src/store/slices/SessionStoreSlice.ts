@@ -27,7 +27,7 @@ export const useSessionStoreSlice: StateCreator<SessionStoreSlice> = (
 					id,
 					name,
 					displayName,
-					userType,
+					userType: userType ?? UserType.INTERNAL,
 					connections: {
 						chats_be: undefined,
 						xmpp: undefined,

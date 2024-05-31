@@ -71,6 +71,8 @@ describe('Info page', () => {
 		}
 	);
 	test.each(pagesToCheckGuest)('Display %s info page, user is guest', async (type) => {
+		document.cookie = `ZM_AUTH_TOKEN=123456789; path=/`;
+		document.cookie = `ZX_AUTH_TOKEN=123456789; path=/`;
 		const guestUser = createMockUser({ type: UserType.GUEST });
 		const store = useStore.getState();
 		store.setLoginInfo(guestUser.id, guestUser.name, guestUser.name, guestUser.type);

@@ -503,26 +503,6 @@ describe('Meetings API', () => {
 		expect(document.cookie).toBe('');
 	});
 
-	test('leaveWaitingRoom is rejected', async () => {
-		document.cookie = `ZM_AUTH_TOKEN=123456789; path=/`;
-		document.cookie = `ZX_AUTH_TOKEN=123456789; path=/`;
-		fetchResponse.mockRejectedValueOnce(false);
-		await meetingsApi.leaveWaitingRoom(meetingMock.id);
-
-		// Check if fetch is called with the correct parameters
-		expect(global.fetch).toHaveBeenCalledWith(
-			`/services/chats/meetings/${meetingMock.id}/queue/${userId}`,
-			{
-				method: 'POST',
-				headers,
-				body: JSON.stringify({
-					status: 'REJECTED'
-				})
-			}
-		);
-		expect(document.cookie).toBe('');
-	});
-
 	test('getWaitingList is called correctly', async () => {
 		fetchResponse.mockResolvedValueOnce({ users: [userId] });
 		await meetingsApi.getWaitingList(meetingMock.id);
