@@ -74,9 +74,7 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 	const roomName = useStore((state) => getRoomNameSelector(state, roomId));
 	const isConversationSelected = useStore((state) => getSelectedConversation(state, roomId));
 	const userNameOfLastMessageOfRoom = useStore((store) =>
-		lastMessageOfRoom &&
-		(lastMessageOfRoom.type === MessageType.TEXT_MSG ||
-			lastMessageOfRoom.type === MessageType.CONFIGURATION_MSG)
+		lastMessageOfRoom && lastMessageOfRoom.type === MessageType.TEXT_MSG
 			? getUserName(store, lastMessageOfRoom.from)
 			: ''
 	);
