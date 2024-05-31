@@ -14,5 +14,4 @@ export const meetingRecordingStoppedEventHandler = (event: MeetingRecordingStopp
 	if (isMeetingActive(event.meetingId)) {
 		sendCustomEvent({ name: EventName.MEETING_RECORDING_STOPPED, data: event });
 	}
-	state.stopMeeting(event.meetingId);
 };

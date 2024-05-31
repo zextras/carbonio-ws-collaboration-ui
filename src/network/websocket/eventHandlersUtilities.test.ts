@@ -22,6 +22,46 @@ const meeting = createMockMeeting({ id: 'meetingId', roomId: room.id });
 const activeRoom = createMockRoom({ id: 'activeRoom' });
 const activeMeeting = createMockMeeting({ id: 'activeMeeting', roomId: activeRoom.id });
 
+export const conversationEvents = [
+	WsEventType.ROOM_CREATED,
+	WsEventType.ROOM_UPDATED,
+	WsEventType.ROOM_DELETED,
+	WsEventType.ROOM_OWNER_PROMOTED,
+	WsEventType.ROOM_OWNER_DEMOTED,
+	WsEventType.ROOM_PICTURE_CHANGED,
+	WsEventType.ROOM_PICTURE_DELETED,
+	WsEventType.ROOM_MEMBER_ADDED,
+	WsEventType.ROOM_MEMBER_REMOVED,
+	WsEventType.ROOM_MUTED,
+	WsEventType.ROOM_UNMUTED,
+	WsEventType.USER_PICTURE_CHANGED,
+	WsEventType.USER_PICTURE_DELETED,
+	WsEventType.ROOM_HISTORY_CLEARED
+];
+
+export const meetingEvents = [
+	WsEventType.MEETING_CREATED,
+	WsEventType.MEETING_STARTED,
+	WsEventType.MEETING_JOINED,
+	WsEventType.MEETING_LEFT,
+	WsEventType.MEETING_STOPPED,
+	WsEventType.MEETING_DELETED,
+	WsEventType.MEETING_AUDIO_STREAM_CHANGED,
+	WsEventType.MEETING_MEDIA_STREAM_CHANGED,
+	WsEventType.MEETING_AUDIO_ANSWERED,
+	WsEventType.MEETING_SDP_OFFERED,
+	WsEventType.MEETING_SDP_ANSWERED,
+	WsEventType.MEETING_PARTICIPANT_SUBSCRIBED,
+	WsEventType.MEETING_PARTICIPANT_TALKING,
+	WsEventType.MEETING_PARTICIPANT_CLASHED,
+	WsEventType.MEETING_WAITING_PARTICIPANT_JOINED,
+	WsEventType.MEETING_USER_ACCEPTED,
+	WsEventType.MEETING_USER_REJECTED,
+	WsEventType.MEETING_WAITING_PARTICIPANT_CLASHED,
+	WsEventType.MEETING_RECORDING_STARTED,
+	WsEventType.MEETING_RECORDING_STOPPED
+];
+
 describe('eventHandlersUtilities tests', () => {
 	describe('getEventArea tests', () => {
 		test('Event area is GENERAL for initialization and pong events', () => {
@@ -29,44 +69,12 @@ describe('eventHandlersUtilities tests', () => {
 			expect(getEventArea(WsEventType.PONG)).toBe(EventArea.GENERAL);
 		});
 
-		test('Event area is CONVERSATION for room-related events', () => {
-			expect(getEventArea(WsEventType.ROOM_CREATED)).toBe(EventArea.CONVERSATION);
-			expect(getEventArea(WsEventType.ROOM_UPDATED)).toBe(EventArea.CONVERSATION);
-			expect(getEventArea(WsEventType.ROOM_DELETED)).toBe(EventArea.CONVERSATION);
-			expect(getEventArea(WsEventType.ROOM_OWNER_PROMOTED)).toBe(EventArea.CONVERSATION);
-			expect(getEventArea(WsEventType.ROOM_OWNER_DEMOTED)).toBe(EventArea.CONVERSATION);
-			expect(getEventArea(WsEventType.ROOM_PICTURE_CHANGED)).toBe(EventArea.CONVERSATION);
-			expect(getEventArea(WsEventType.ROOM_PICTURE_DELETED)).toBe(EventArea.CONVERSATION);
-			expect(getEventArea(WsEventType.ROOM_MEMBER_ADDED)).toBe(EventArea.CONVERSATION);
-			expect(getEventArea(WsEventType.ROOM_MEMBER_REMOVED)).toBe(EventArea.CONVERSATION);
-			expect(getEventArea(WsEventType.ROOM_MUTED)).toBe(EventArea.CONVERSATION);
-			expect(getEventArea(WsEventType.ROOM_UNMUTED)).toBe(EventArea.CONVERSATION);
-			expect(getEventArea(WsEventType.USER_PICTURE_CHANGED)).toBe(EventArea.CONVERSATION);
-			expect(getEventArea(WsEventType.USER_PICTURE_DELETED)).toBe(EventArea.CONVERSATION);
-			expect(getEventArea(WsEventType.ROOM_HISTORY_CLEARED)).toBe(EventArea.CONVERSATION);
+		test.each(conversationEvents)('Event area is CONVERSATION for %s', (event) => {
+			expect(getEventArea(event)).toBe(EventArea.CONVERSATION);
 		});
 
-		test('Event area is MEETING for meeting-related events', () => {
-			expect(getEventArea(WsEventType.MEETING_CREATED)).toBe(EventArea.MEETING);
-			expect(getEventArea(WsEventType.MEETING_STARTED)).toBe(EventArea.MEETING);
-			expect(getEventArea(WsEventType.MEETING_JOINED)).toBe(EventArea.MEETING);
-			expect(getEventArea(WsEventType.MEETING_LEFT)).toBe(EventArea.MEETING);
-			expect(getEventArea(WsEventType.MEETING_STOPPED)).toBe(EventArea.MEETING);
-			expect(getEventArea(WsEventType.MEETING_DELETED)).toBe(EventArea.MEETING);
-			expect(getEventArea(WsEventType.MEETING_AUDIO_STREAM_CHANGED)).toBe(EventArea.MEETING);
-			expect(getEventArea(WsEventType.MEETING_MEDIA_STREAM_CHANGED)).toBe(EventArea.MEETING);
-			expect(getEventArea(WsEventType.MEETING_AUDIO_ANSWERED)).toBe(EventArea.MEETING);
-			expect(getEventArea(WsEventType.MEETING_SDP_ANSWERED)).toBe(EventArea.MEETING);
-			expect(getEventArea(WsEventType.MEETING_SDP_OFFERED)).toBe(EventArea.MEETING);
-			expect(getEventArea(WsEventType.MEETING_PARTICIPANT_SUBSCRIBED)).toBe(EventArea.MEETING);
-			expect(getEventArea(WsEventType.MEETING_PARTICIPANT_TALKING)).toBe(EventArea.MEETING);
-			expect(getEventArea(WsEventType.MEETING_PARTICIPANT_CLASHED)).toBe(EventArea.MEETING);
-			expect(getEventArea(WsEventType.MEETING_WAITING_PARTICIPANT_JOINED)).toBe(EventArea.MEETING);
-			expect(getEventArea(WsEventType.MEETING_USER_ACCEPTED)).toBe(EventArea.MEETING);
-			expect(getEventArea(WsEventType.MEETING_USER_REJECTED)).toBe(EventArea.MEETING);
-			expect(getEventArea(WsEventType.MEETING_WAITING_PARTICIPANT_CLASHED)).toBe(EventArea.MEETING);
-			expect(getEventArea(WsEventType.MEETING_RECORDING_STARTED)).toBe(EventArea.MEETING);
-			expect(getEventArea(WsEventType.MEETING_RECORDING_STOPPED)).toBe(EventArea.MEETING);
+		test.each(meetingEvents)('Event area is MEETING for %s', (event) => {
+			expect(getEventArea(event)).toBe(EventArea.MEETING);
 		});
 
 		test('Event area is undefined for unknown events', () => {

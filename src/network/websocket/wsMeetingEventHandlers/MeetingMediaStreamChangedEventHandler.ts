@@ -13,7 +13,7 @@ export const meetingMediaStreamChangedEventHandler = (
 	event: MeetingMediaStreamChangedEvent
 ): void => {
 	const state = useStore.getState();
-	const mediaType = event.mediaType.toLowerCase() as STREAM_TYPE;
+	const mediaType = event.mediaType?.toLowerCase() as STREAM_TYPE;
 
 	// Update subscription manager
 	if (!isMyId(event.userId) && !event.active) {
