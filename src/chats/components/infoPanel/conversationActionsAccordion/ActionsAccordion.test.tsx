@@ -15,7 +15,8 @@ import {
 	createMockCapabilityList,
 	createMockMember,
 	createMockRoom,
-	createMockTextMessage
+	createMockTextMessage,
+	createMockUser
 } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
@@ -24,27 +25,29 @@ import { UserBe } from '../../../../types/network/models/userBeTypes';
 const iconChevronUp = 'icon: ChevronUp';
 const iconChevronDown = 'icon: ChevronDown';
 
-const user1Be: UserBe = {
+const user1Be: UserBe = createMockUser({
 	id: 'user1',
 	email: 'user1@domain.com',
 	name: 'User 1',
 	lastSeen: 1234567890,
 	statusMessage: "Hey there! I'm User 1"
-};
-const user2Be: UserBe = {
+});
+
+const user2Be: UserBe = createMockUser({
 	id: 'user2',
 	email: 'user2@domain.com',
 	name: 'User 2',
 	lastSeen: 1234567890,
 	statusMessage: "Hey there! I'm User 2"
-};
-const user3Be: UserBe = {
+});
+
+const user3Be: UserBe = createMockUser({
 	id: 'user3',
 	email: 'user3@domain.com',
 	name: 'User 3',
 	lastSeen: 1234567890,
 	statusMessage: "Hey there! I'm User 3"
-};
+});
 
 describe('Actions Accordion', () => {
 	test('A owner of a group should see the correct actions - More than one owner', () => {

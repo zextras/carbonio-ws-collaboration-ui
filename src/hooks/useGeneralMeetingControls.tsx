@@ -19,7 +19,6 @@ import {
 import useStore from '../store/Store';
 import { STREAM_TYPE } from '../types/store/ActiveMeetingTypes';
 import { MeetingParticipantMap } from '../types/store/MeetingTypes';
-import { BrowserUtils } from '../utils/BrowserUtils';
 
 const useGeneralMeetingControls = (meetingId: string): void => {
 	const isMeetingActive = useStore((store) => getMeetingActiveByMeetingId(store, meetingId));
@@ -41,7 +40,6 @@ const useGeneralMeetingControls = (meetingId: string): void => {
 	useEffect(() => {
 		if (!isMeetingActive) {
 			meetingDisconnection(meetingId);
-			BrowserUtils.clearAuthCookies();
 			goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED);
 		}
 		return (): void => {

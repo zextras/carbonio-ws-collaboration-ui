@@ -16,7 +16,8 @@ import {
 	createMockConfigurationMessage,
 	createMockMessageFastening,
 	createMockRoom,
-	createMockTextMessage
+	createMockTextMessage,
+	createMockUser
 } from '../../../tests/createMock';
 import { mockedScrollToEnd, mockedScrollToMessage } from '../../../tests/mocks/scrollUtils';
 import { setup } from '../../../tests/test-utils';
@@ -34,37 +35,37 @@ import { User } from '../../../types/store/UserTypes';
 const fromId = 'c755b1d5-08dd-49d8-bec8-59074090ef1b';
 const helloString = 'Hello guys!';
 
-const user2Be: User = {
+const user2Be: User = createMockUser({
 	id: 'user2',
 	email: 'user2@domain.com',
 	name: 'User2',
 	lastSeen: 1234567890,
 	statusMessage: "Hey there! I'm User 2"
-};
+});
 
-const user3Be: User = {
+const user3Be: User = createMockUser({
 	id: 'user3',
 	email: 'user3@domain.com',
 	name: 'User3',
 	lastSeen: 1234567890,
 	statusMessage: "Hey there! I'm User 3"
-};
+});
 
-const user1Be: User = {
+const user1Be: User = createMockUser({
 	id: 'user1',
 	email: 'user1@domain.com',
 	name: 'User1',
 	lastSeen: 1234567890,
 	statusMessage: "Hey there! I'm User 1"
-};
+});
 
-const user4Be: User = {
+const user4Be: User = createMockUser({
 	id: 'user4',
 	email: 'user4@domain.com',
 	name: 'User4',
 	lastSeen: 1234567890,
 	statusMessage: "Hey there! I'm User 4"
-};
+});
 
 const room: RoomBe = {
 	id: 'Room-Id',

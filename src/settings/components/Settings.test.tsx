@@ -12,7 +12,7 @@ import { act } from 'react-dom/test-utils';
 import NotificationsSettings from './NotificationsSettings';
 import Settings from './Settings';
 import useStore from '../../store/Store';
-import { createMockCapabilityList } from '../../tests/createMock';
+import { createMockCapabilityList, createMockUser } from '../../tests/createMock';
 import { setup } from '../../tests/test-utils';
 import { UserBe } from '../../types/network/models/userBeTypes';
 import { RootStore } from '../../types/store/StoreTypes';
@@ -22,22 +22,22 @@ const pictureUpdatedAtTime = '2022-08-25T17:24:28.961+02:00';
 
 const squareIcon = 'icon: Square';
 
-const userWithoutImage: UserBe = {
+const userWithoutImage: UserBe = createMockUser({
 	id: 'user1',
 	email: 'user1@domain.com',
 	name: 'User 1',
 	lastSeen: 1234567890,
 	statusMessage: "Hey there! I'm User 1"
-};
+});
 
-const userWithImage: UserBe = {
+const userWithImage: UserBe = createMockUser({
 	id: 'user1',
 	email: 'user1@domain.com',
 	name: 'User 1',
 	lastSeen: 1234567890,
 	statusMessage: "Hey there! I'm User 1",
 	pictureUpdatedAt: pictureUpdatedAtTime
-};
+});
 
 const notificationsSettingsObject: NotificationsSettingsType = {
 	DesktopNotifications: true,

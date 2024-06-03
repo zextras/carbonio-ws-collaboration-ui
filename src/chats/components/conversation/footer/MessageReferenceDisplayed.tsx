@@ -6,12 +6,13 @@
 
 import React, { useEffect, useMemo } from 'react';
 
-import { Container, Text, Row, Padding, Avatar } from '@zextras/carbonio-design-system';
+import { Container, Text, Row, Avatar, Padding } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 import styled, { DefaultTheme } from 'styled-components';
 
 import useMessage from '../../../../hooks/useMessage';
-import { getUserSelector } from '../../../../store/selectors/UsersSelectors';
+import GuestUserLabel from '../../../../meetings/components/GuestUserLabel';
+import { getIsUserGuest, getUserSelector } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
 import { ReferenceMessage } from '../../../../types/store/ActiveConversationTypes';
 import { TextMessage } from '../../../../types/store/MessageTypes';
@@ -20,12 +21,6 @@ import { calculateAvatarColor } from '../../../../utils/styleUtils';
 
 const UserName = styled(Text)<{ $labelColor: keyof DefaultTheme['avatarColors'] }>`
 	color: ${({ $labelColor, theme }): string => theme.avatarColors[$labelColor]};
-`;
-
-const ContactWrapper = styled.div`
-	> div {
-		margin: 0 0 0 0.3125rem !important;
-	}
 `;
 
 const BorderContainer = styled(Container)<{
@@ -45,6 +40,10 @@ const CustomAvatar = styled(Avatar)`
 	}
 `;
 
+const CustomText = styled(Text)`
+	flex-shrink: 0;
+`;
+
 type MessageReferenceDisplayedProps = {
 	referenceMessage: ReferenceMessage;
 };
@@ -60,6 +59,8 @@ const MessageReferenceDisplayed: React.FC<MessageReferenceDisplayedProps> = ({
 	const myId = useStore((store) => store.session.id);
 	const senderInfo = useStore((store) => getUserSelector(store, referenceMessage.senderId));
 	const unsetReferenceMessage = useStore((store) => store.unsetReferenceMessage);
+	const isUserGuest = useStore((store) => getIsUserGuest(store, referenceMessage.senderId));
+
 	const message = useMessage(referenceMessage.roomId, referenceMessage.messageId) as TextMessage;
 
 	// Remove reference view when message is deleted
@@ -73,7 +74,9 @@ const MessageReferenceDisplayed: React.FC<MessageReferenceDisplayedProps> = ({
 		() => (senderInfo ? senderInfo.name || senderInfo.email || senderInfo.id : null),
 		[senderInfo]
 	);
-	const userColor = useMemo(() => calculateAvatarColor(senderIdentifier || ''), [senderIdentifier]);
+
+	const userColor = useMemo(() => calculateAvatarColor(senderIdentifier ?? ''), [senderIdentifier]);
+
 	const labelAction = useMemo(
 		() =>
 			// eslint-disable-next-line no-nested-ternary
@@ -120,37 +123,46 @@ const MessageReferenceDisplayed: React.FC<MessageReferenceDisplayedProps> = ({
 				padding={{ left: 'small' }}
 				width="fill"
 			>
-				{referenceMessage.attachment && (
-					<Padding right="small">
-						<CustomAvatar
-							size="large"
-							icon="FileTextOutline"
-							label={referenceMessage.attachment.name}
-							shape="square"
-							background={previewURL ? 'gray3' : 'gray0'}
-							picture={previewURL}
-						/>
-					</Padding>
-				)}
-				<Container mainAlignment="flex-start">
-					<Container mainAlignment="flex-start" orientation="horizontal">
-						<Text size="medium" color="secondary">
-							{labelAction}
-						</Text>
-						{myId !== referenceMessage.senderId && (
-							<ContactWrapper>
-								<UserName data-testid="reference-message-username" $labelColor={userColor}>
-									{senderIdentifier}
-								</UserName>
-							</ContactWrapper>
-						)}
+				<Row takeAvailableSpace wrap="nowrap" height="100%">
+					{referenceMessage.attachment && (
+						<Padding right="small">
+							<CustomAvatar
+								size="large"
+								icon="FileTextOutline"
+								label={referenceMessage.attachment.name}
+								shape="square"
+								background={previewURL ? 'gray3' : 'gray0'}
+								picture={previewURL}
+							/>
+						</Padding>
+					)}
+					<Container mainAlignment="flex-start">
+						<Container mainAlignment="flex-start" orientation="horizontal" gap={'0.25rem'}>
+							<CustomText size="medium" color="secondary">
+								{labelAction}
+							</CustomText>
+							{myId !== referenceMessage.senderId && (
+								<Row takeAvailableSpace wrap="nowrap" height="100%">
+									<Container orientation="horizontal" mainAlignment="flex-start" gap={'0.25rem'}>
+										<UserName
+											data-testid="reference-message-username"
+											overflow="ellipsis"
+											$labelColor={userColor}
+										>
+											{senderIdentifier}
+										</UserName>
+										{isUserGuest && <GuestUserLabel />}
+									</Container>
+								</Row>
+							)}
+						</Container>
+						<Container crossAlignment="flex-start" padding={{ top: 'small' }}>
+							<Text data-testid="reference-message" color="secondary" overflow="ellipsis">
+								{textMessage}
+							</Text>
+						</Container>
 					</Container>
-					<Container crossAlignment="flex-start" padding={{ top: 'small' }}>
-						<Text data-testid="reference-message" color="secondary" overflow="ellipsis">
-							{textMessage}
-						</Text>
-					</Container>
-				</Container>
+				</Row>
 			</BorderContainer>
 		</Row>
 	);

@@ -4,12 +4,15 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { UserType } from './UserTypes';
+
 export type Session = {
 	id?: string;
 	email?: string;
 	name?: string;
 	displayName?: string;
 	sessionId?: string;
+	userType?: UserType;
 	capabilities?: CapabilityList;
 	connections?: {
 		chats_be: boolean | undefined;

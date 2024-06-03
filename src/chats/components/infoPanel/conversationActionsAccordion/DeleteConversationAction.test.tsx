@@ -10,7 +10,7 @@ import { act, renderHook } from '@testing-library/react-hooks';
 
 import DeleteConversationAction from './DeleteConversationAction';
 import useStore from '../../../../store/Store';
-import { createMockRoom } from '../../../../tests/createMock';
+import { createMockRoom, createMockUser } from '../../../../tests/createMock';
 import { mockedDeleteRoomRequest } from '../../../../tests/mocks/network';
 import { mockGoToMainPage } from '../../../../tests/mocks/useRouting';
 import { setup } from '../../../../tests/test-utils';
@@ -19,17 +19,9 @@ import { RoomType } from '../../../../types/store/RoomTypes';
 import { RootStore } from '../../../../types/store/StoreTypes';
 import { User } from '../../../../types/store/UserTypes';
 
-const user1Info: User = {
-	id: 'user1-id',
-	email: 'user1@domain.com',
-	name: 'User 1'
-};
+const user1Info: User = createMockUser();
 
-const user2Info: User = {
-	id: 'user2-id',
-	email: 'user2@domain.com',
-	name: 'User 2'
-};
+const user2Info: User = createMockUser();
 
 const testRoom: RoomBe = createMockRoom({
 	id: 'room-test',

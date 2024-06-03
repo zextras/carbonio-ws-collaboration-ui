@@ -23,6 +23,7 @@ import {
 } from '../types/store/MessageTypes';
 import { RoomType } from '../types/store/RoomTypes';
 import { CapabilityList } from '../types/store/SessionTypes';
+import { UserType } from '../types/store/UserTypes';
 
 type GenericFieldsType = Record<string, string | boolean | number | object | object[]>;
 
@@ -122,6 +123,7 @@ export const createMockUser = (fields?: GenericFieldsType): UserBe => ({
 	id: 'id',
 	email: 'user@user.com',
 	name: 'Name',
+	type: UserType.INTERNAL,
 	...fields
 });
 

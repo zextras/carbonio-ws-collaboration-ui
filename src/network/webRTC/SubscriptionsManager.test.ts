@@ -12,7 +12,8 @@ import {
 	createMockMeeting,
 	createMockMember,
 	createMockParticipants,
-	createMockRoom
+	createMockRoom,
+	createMockUser
 } from '../../tests/createMock';
 import { mockedSubscribeToMediaRequest } from '../../tests/mocks/network';
 import { MeetingBe, MeetingParticipantBe } from '../../types/network/models/meetingBeTypes';
@@ -23,11 +24,11 @@ import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
 import { User } from '../../types/store/UserTypes';
 import { wsEventsHandler } from '../websocket/wsEventsHandler';
 
-const user1Info: User = {
+const user1Info: User = createMockUser({
 	id: 'user1',
 	email: 'user1@domain.com',
 	name: 'User 1'
-};
+});
 
 const groupRoom: RoomBe = createMockRoom({
 	id: 'room-test',

@@ -11,23 +11,19 @@ import { act, renderHook } from '@testing-library/react-hooks';
 
 import ClearHistoryAction from './ClearHistoryAction';
 import useStore from '../../../../store/Store';
-import { createMockRoom, createMockTextMessage } from '../../../../tests/createMock';
+import {
+	createMockRoom,
+	createMockTextMessage,
+	createMockUser
+} from '../../../../tests/createMock';
 import { mockedClearHistoryRequest } from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 import { RoomType } from '../../../../types/network/models/roomBeTypes';
 import { User } from '../../../../types/store/UserTypes';
 
-const user1Info: User = {
-	id: 'user1-id',
-	email: 'user1@domain.com',
-	name: 'User 1'
-};
+const user1Info: User = createMockUser();
 
-const user2Info: User = {
-	id: 'user2-id',
-	email: 'user2@domain.com',
-	name: 'User 2'
-};
+const user2Info: User = createMockUser();
 
 const mockedRoom = createMockRoom({
 	id: 'roomId',

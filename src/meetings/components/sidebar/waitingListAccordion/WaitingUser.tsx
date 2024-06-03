@@ -19,8 +19,13 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import { MeetingsApi, UsersApi } from '../../../../network';
-import { getUserName, getUserPictureUpdatedAt } from '../../../../store/selectors/UsersSelectors';
+import {
+	getIsUserGuest,
+	getUserName,
+	getUserPictureUpdatedAt
+} from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
+import GuestUserLabel from '../../GuestUserLabel';
 
 const CustomContainer = styled(Container)`
 	cursor: default;
@@ -43,7 +48,7 @@ const WaitingUser: FC<WaitingUserProps> = ({ meetingId, userId }) => {
 	const rejectButtonTooltip = t('meeting.sidebar.tooltip.waitingReject', 'Reject user');
 
 	const memberName: string | undefined = useStore((store) => getUserName(store, userId));
-
+	const isUserGuest = useStore((store) => getIsUserGuest(store, userId));
 	const userPictureUpdatedAt: string | undefined = useStore((state) =>
 		getUserPictureUpdatedAt(state, userId)
 	);
@@ -54,17 +59,28 @@ const WaitingUser: FC<WaitingUserProps> = ({ meetingId, userId }) => {
 		[userId, userPictureUpdatedAt]
 	);
 
-	const avatarElement = useMemo(
-		() =>
-			memberName ? (
-				<CustomAvatar label={memberName} shape="round" picture={picture} />
-			) : (
+	const avatarElement = useMemo(() => {
+		if (!memberName) {
+			return (
 				<Container width="fit" height="fit">
 					<Shimmer.Avatar width="2rem" data-testid="avatarShimmer" />
 				</Container>
-			),
-		[memberName, picture]
-	);
+			);
+		}
+		if (isUserGuest) {
+			return (
+				<CustomAvatar label={memberName} shape="round" picture={picture} icon={'SmileOutline'} />
+			);
+		}
+		if (memberName) {
+			return <CustomAvatar label={memberName} shape="round" picture={picture} />;
+		}
+		return (
+			<Container width="fit" height="fit">
+				<Shimmer.Avatar width="2rem" data-testid="avatarShimmer" />
+			</Container>
+		);
+	}, [isUserGuest, memberName, picture]);
 
 	const acceptWaitingUser = useCallback(
 		() => MeetingsApi.acceptWaitingUser(meetingId, userId, true),
@@ -80,10 +96,13 @@ const WaitingUser: FC<WaitingUserProps> = ({ meetingId, userId }) => {
 		<CustomContainer data-testid="waitingUser" orientation="horizontal" width="fill">
 			{avatarElement}
 			<Row takeAvailableSpace wrap="nowrap" height="100%">
-				<Container orientation="vertical" crossAlignment="flex-start" padding={{ left: 'small' }}>
-					<Text size="small" overflow="ellipsis">
-						{memberName}
-					</Text>
+				<Container crossAlignment="flex-start" padding={{ horizontal: 'small' }}>
+					<Container orientation={'horizontal'} mainAlignment="flex-start" gap={'0.25rem'}>
+						<Text size="small" overflow="ellipsis">
+							{memberName}
+						</Text>
+						{isUserGuest && <GuestUserLabel />}
+					</Container>
 					<Text size="extrasmall" overflow="ellipsis">
 						{waitingToEnterLabel}
 					</Text>

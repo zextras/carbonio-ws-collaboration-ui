@@ -242,15 +242,7 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 		const userId = useStore.getState().session.id;
 		return this.fetchAPI(`meetings/${meetingId}/queue/${userId}`, RequestType.POST, {
 			status: 'REJECTED'
-		})
-			.then((resp) => {
-				BrowserUtils.clearAuthCookies();
-				return resp;
-			})
-			.catch((err) => {
-				BrowserUtils.clearAuthCookies();
-				return err;
-			});
+		}).finally(() => BrowserUtils.clearAuthCookies());
 	}
 
 	public getWaitingList(meetingId: string): Promise<GetWaitingListResponse> {

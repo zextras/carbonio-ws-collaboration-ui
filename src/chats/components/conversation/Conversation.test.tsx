@@ -12,7 +12,7 @@ import { act } from 'react-dom/test-utils';
 import Conversation from './Conversation';
 import { mockDarkReaderIsEnabled } from '../../../../__mocks__/darkreader';
 import useStore from '../../../store/Store';
-import { createMockMember, createMockRoom } from '../../../tests/createMock';
+import { createMockMember, createMockRoom, createMockUser } from '../../../tests/createMock';
 import { mockedDeleteRoomMemberRequest } from '../../../tests/mocks/network';
 import { mockUseMediaQueryCheck } from '../../../tests/mocks/useMediaQueryCheck';
 import { mockGoToMainPage } from '../../../tests/mocks/useRouting';
@@ -44,17 +44,13 @@ const testRoom2: RoomBe = createMockRoom({
 	userSettings: { muted: false }
 });
 
-const user1Info: User = {
-	id: 'user1',
-	email: 'user1@domain.com',
-	name: 'User 1'
-};
+const user1Info: User = createMockUser();
 
-const user2Info: User = {
+const user2Info: User = createMockUser({
 	id: 'user2',
 	email: 'user2@domain.com',
 	name: 'User 2'
-};
+});
 
 describe('Conversation view', () => {
 	test('Display conversation view on small screen and toggle info panel', async () => {

@@ -8,15 +8,21 @@ import React, { FC } from 'react';
 
 import { Container, Icon, Padding, Text, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 
 import { getUserName } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
 import { ForwardedInfo } from '../../../../types/store/MessageTypes';
 import { formatDate } from '../../../../utils/dateUtils';
 
+const CustomText = styled(Text)`
+	flex-shrink: 0;
+`;
+
 type ForwardInfoProps = {
 	info: ForwardedInfo;
 };
+
 const ForwardInfo: FC<ForwardInfoProps> = ({ info }) => {
 	const forwardUsername = useStore((store) => getUserName(store, info.from));
 
@@ -31,7 +37,12 @@ const ForwardInfo: FC<ForwardInfoProps> = ({ info }) => {
 	const messageTime = formatDate(info.date, 'HH:mm');
 
 	return (
-		<Container padding={{ bottom: 'small' }} orientation="horizontal" mainAlignment="flex-start">
+		<Container
+			padding={{ bottom: 'small' }}
+			orientation="horizontal"
+			mainAlignment="flex-start"
+			gap={'0.25rem'}
+		>
 			{info.count > 1 && (
 				<Tooltip label={forwardedMultipleTimesLabel}>
 					<Padding right="extrasmall">
@@ -39,13 +50,15 @@ const ForwardInfo: FC<ForwardInfoProps> = ({ info }) => {
 					</Padding>
 				</Tooltip>
 			)}
-			<Text color="secondary" size="small" weight="bold">
+			<CustomText color="secondary" size="small" weight="bold">
 				{originallySentByLabel}
+			</CustomText>
+			<Text color="secondary" size="small" overflow="ellipsis">
+				{forwardUsername}
 			</Text>
-			<Padding right="extrasmall" />
-			<Text color="secondary" size="small">
-				{forwardUsername} ({messageDate} - {messageTime})
-			</Text>
+			<CustomText color="secondary" size="small">
+				({messageDate} - {messageTime})
+			</CustomText>
 		</Container>
 	);
 };

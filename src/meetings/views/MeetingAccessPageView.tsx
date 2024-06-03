@@ -52,7 +52,9 @@ const MeetingAccessPageView = (): ReactElement => {
 							setHasUserDirectAccess(false);
 							setMeetingName(resp.name);
 						})
-						.catch(() => goToInfoPage(PAGE_INFO_TYPE.MEETING_NOT_FOUND));
+						.catch(() => {
+							goToInfoPage(PAGE_INFO_TYPE.MEETING_NOT_FOUND);
+						});
 				});
 		}
 	}, [chatsBeNetworkStatus, goToInfoPage, meetingId]);

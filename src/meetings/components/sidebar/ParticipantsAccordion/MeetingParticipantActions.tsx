@@ -18,12 +18,14 @@ import {
 } from '../../../../store/selectors/MeetingSelectors';
 import { getOwnershipOfTheRoom, getOwner } from '../../../../store/selectors/RoomsSelectors';
 import { getUserId } from '../../../../store/selectors/SessionSelectors';
+import { getIsUserGuest } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
 
 type ParticipantActionsProps = {
 	memberId: string;
 	meetingId?: string;
 };
+
 const MeetingParticipantActions: FC<ParticipantActionsProps> = ({ memberId, meetingId }) => {
 	const [t] = useTranslation();
 	const memberIsModeratorLabel: string = t(
@@ -39,17 +41,18 @@ const MeetingParticipantActions: FC<ParticipantActionsProps> = ({ memberId, meet
 
 	const userId: string | undefined = useStore((store) => getUserId(store));
 	const roomId: string | undefined = useStore((store) =>
-		getRoomIdByMeetingId(store, meetingId || '')
+		getRoomIdByMeetingId(store, meetingId ?? '')
 	);
 	const participantAudioStatus = useStore((store) =>
-		getParticipantAudioStatus(store, meetingId || '', memberId)
+		getParticipantAudioStatus(store, meetingId ?? '', memberId)
 	);
-	const memberOwner: boolean = useStore((store) => getOwner(store, roomId || '', memberId));
-	const iAmOwner: boolean = useStore((state) => getOwnershipOfTheRoom(state, roomId || '', userId));
+	const isMemberOwner: boolean = useStore((store) => getOwner(store, roomId ?? '', memberId));
+	const isUserGuest = useStore((store) => getIsUserGuest(store, memberId));
+	const iAmOwner: boolean = useStore((state) => getOwnershipOfTheRoom(state, roomId ?? '', userId));
 
 	const [muteForAllModalIsOpen, setMuteForAllModalIsOpen] = useState(false);
 
-	const { isPinned, switchPinnedTile, canUsePinFeature } = usePinnedTile(meetingId || '', memberId);
+	const { isPinned, switchPinnedTile, canUsePinFeature } = usePinnedTile(meetingId ?? '', memberId);
 
 	const isSessionParticipant: boolean = useMemo(() => memberId === userId, [memberId, userId]);
 
@@ -65,15 +68,15 @@ const MeetingParticipantActions: FC<ParticipantActionsProps> = ({ memberId, meet
 
 	return (
 		<Container width="fit" height="fit" orientation="horizontal">
-			{iAmOwner && !isSessionParticipant ? (
+			{iAmOwner && !isSessionParticipant && !isUserGuest ? (
 				<PromoteDemoteMemberAction
 					memberId={memberId}
-					roomId={roomId || ''}
-					owner={memberOwner}
+					roomId={roomId ?? ''}
+					owner={isMemberOwner}
 					isInsideMeeting
 				/>
 			) : (
-				memberOwner && (
+				isMemberOwner && (
 					<Tooltip label={isSessionParticipant ? iAmModeratorLabel : memberIsModeratorLabel}>
 						<Padding all="0.5rem">
 							<Icon icon="Crown" size="medium" color="gray1" />
@@ -106,7 +109,7 @@ const MeetingParticipantActions: FC<ParticipantActionsProps> = ({ memberId, meet
 						backgroundColor="text"
 						icon={isPinned ? 'Unpin3Outline' : 'Pin3Outline'}
 						onClick={switchPinnedTile}
-						size="large"
+						size="medium"
 					/>
 				</Tooltip>
 			)}

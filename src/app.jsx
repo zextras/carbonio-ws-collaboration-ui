@@ -19,6 +19,7 @@ import XMPPClient from './network/xmpp/XMPPClient';
 import WaitingListSnackbar from './settings/components/WaitingListSnackbar';
 import useSettingsApp from './settings/useSettingsApp';
 import useStore from './store/Store';
+import { UserType } from './types/store/UserTypes';
 import { setDateDefault } from './utils/dateUtils';
 
 export default function App() {
@@ -33,7 +34,9 @@ export default function App() {
 
 	// STORE: init with user session main infos
 	useEffect(() => {
-		if (authenticated) setLoginInfo(userAccount.id, userAccount.name, userAccount.displayName);
+		if (authenticated) {
+			setLoginInfo(userAccount.id, userAccount.name, userAccount.displayName, UserType.INTERNAL);
+		}
 	}, [setLoginInfo, userAccount, authenticated]);
 
 	// SET TIMEZONE and LOCALE

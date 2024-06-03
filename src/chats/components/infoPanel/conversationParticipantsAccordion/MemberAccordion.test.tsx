@@ -10,25 +10,14 @@ import { screen } from '@testing-library/react';
 
 import { MemberAccordion } from './MemberAccordion';
 import useStore from '../../../../store/Store';
-import { createMockRoom } from '../../../../tests/createMock';
+import { createMockRoom, createMockUser } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
 import { UserBe } from '../../../../types/network/models/userBeTypes';
 
-const user1Be: UserBe = {
-	id: 'user1',
-	email: 'user1@domain.com',
-	name: 'User 1',
-	lastSeen: 1234567890,
-	statusMessage: "Hey there! I'm User 1"
-};
-const user2Be: UserBe = {
-	id: 'user2',
-	email: 'user2@domain.com',
-	name: 'User 2',
-	lastSeen: 1234567890,
-	statusMessage: "Hey there! I'm User 2"
-};
+const user1Be: UserBe = createMockUser();
+
+const user2Be: UserBe = createMockUser();
 
 const member = [
 	{
@@ -53,6 +42,7 @@ const members = [
 		external: false
 	}
 ];
+
 describe('Participants accordion', () => {
 	test('Title should be plural', () => {
 		const room: RoomBe = {

@@ -12,8 +12,13 @@ import styled from 'styled-components';
 import GoToPrivateChatAction from '../../../chats/components/infoPanel/conversationParticipantsAccordion/GoToPrivateChatAction';
 import { UsersApi } from '../../../network';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
-import { getUserName, getUserPictureUpdatedAt } from '../../../store/selectors/UsersSelectors';
+import {
+	getIsUserGuest,
+	getUserName,
+	getUserPictureUpdatedAt
+} from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
+import GuestUserLabel from '../GuestUserLabel';
 import MeetingParticipantActions from '../sidebar/ParticipantsAccordion/MeetingParticipantActions';
 
 const CustomContainer = styled(Container)`
@@ -27,7 +32,7 @@ const CustomAvatar = styled(Avatar)`
 
 type ParticipantElementProps = {
 	memberId: string;
-	meetingId?: string | undefined;
+	meetingId?: string;
 	isInsideMeeting?: boolean;
 };
 
@@ -38,7 +43,7 @@ const ParticipantElement: FC<ParticipantElementProps> = ({
 }) => {
 	const userId: string | undefined = useStore((store) => getUserId(store));
 	const memberName: string | undefined = useStore((store) => getUserName(store, memberId));
-
+	const isUserGuest = useStore((store) => getIsUserGuest(store, memberId));
 	const userPictureUpdatedAt: string | undefined = useStore((state) =>
 		getUserPictureUpdatedAt(state, memberId)
 	);
@@ -50,29 +55,46 @@ const ParticipantElement: FC<ParticipantElementProps> = ({
 		return '';
 	}, [memberId, userPictureUpdatedAt]);
 
-	const avatarElement = useMemo(
-		() =>
-			memberName == null ? (
+	const avatarElement = useMemo(() => {
+		if (memberName == null) {
+			return (
 				<Container width="fit" height="fit">
 					<Shimmer.Avatar width="2rem" />
 				</Container>
-			) : (
-				<CustomAvatar label={memberName} shape="round" picture={picture} />
-			),
-		[memberName, picture]
-	);
+			);
+		}
+		if (isUserGuest) {
+			return (
+				<CustomAvatar label={memberName} shape="round" picture={picture} icon={'SmileOutline'} />
+			);
+		}
+		if (memberName) {
+			return <CustomAvatar label={memberName} shape="round" picture={picture} />;
+		}
+		return (
+			<Container width="fit" height="fit">
+				<Shimmer.Avatar width="2rem" />
+			</Container>
+		);
+	}, [memberName, picture, isUserGuest]);
 
 	const infoElement = useMemo(
 		() => (
 			<Row takeAvailableSpace wrap="nowrap" height="100%">
-				<Container orientation="vertical" crossAlignment="flex-start" padding={{ left: 'small' }}>
+				<Container
+					orientation="horizontal"
+					mainAlignment="flex-start"
+					padding={{ horizontal: 'small' }}
+					gap={'0.25rem'}
+				>
 					<Text color="text" size="small" overflow="ellipsis">
 						{memberName}
 					</Text>
+					{isUserGuest && <GuestUserLabel />}
 				</Container>
 			</Row>
 		),
-		[memberName]
+		[isUserGuest, memberName]
 	);
 
 	const isSessionParticipant: boolean = useMemo(() => memberId === userId, [memberId, userId]);

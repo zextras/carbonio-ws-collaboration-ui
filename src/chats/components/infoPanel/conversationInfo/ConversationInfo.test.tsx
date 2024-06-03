@@ -11,19 +11,20 @@ import { act, screen } from '@testing-library/react';
 import ConversationInfo from './ConversationInfo';
 import ConversationInfoDetails from './ConversationInfoDetails';
 import useStore from '../../../../store/Store';
+import { createMockUser } from '../../../../tests/createMock';
 import { mockedGetUserPictureRequest } from '../../../../tests/mocks/network';
 import { mockUseMediaQueryCheck } from '../../../../tests/mocks/useMediaQueryCheck';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
 import { UserBe } from '../../../../types/network/models/userBeTypes';
 
-const user1Be: UserBe = {
+const user1Be: UserBe = createMockUser({
 	id: 'user1',
 	email: 'user1@domain.com',
 	name: 'User 1',
 	lastSeen: 1234567890,
 	statusMessage: "Hey there! I'm User 1"
-};
+});
 
 const room = {
 	id: 'Room-Id',
