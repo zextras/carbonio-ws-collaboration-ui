@@ -5,6 +5,7 @@
  */
 
 import { MEETINGS_PATH } from '../../constants/appConstants';
+import { getUserId } from '../../store/selectors/SessionSelectors';
 import useStore from '../../store/Store';
 import { WsEventType } from '../../types/network/websocket/wsEvents';
 
@@ -64,7 +65,7 @@ export const getEventArea = (eventType: WsEventType): EventArea | undefined => {
 	}
 };
 
-export const isMyId = (userId: string): boolean => userId === useStore.getState().session.id;
+export const isMyId = (userId: string): boolean => userId === getUserId(useStore.getState());
 
 export const isMeetingActive = (meetingId: string): boolean =>
 	useStore.getState().activeMeeting[meetingId] !== undefined;
