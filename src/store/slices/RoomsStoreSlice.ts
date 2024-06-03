@@ -46,8 +46,7 @@ export const useRoomsStoreSlice: StateCreator<RoomsStoreSlice> = (set: (...any: 
 					if (roomBe.userSettings?.clearedAt != null) {
 						forEach(draft.messages[roomBe.id], (message) => {
 							if (
-								roomBe.userSettings &&
-								roomBe.userSettings.clearedAt &&
+								roomBe.userSettings?.clearedAt &&
 								isBefore(message.date, roomBe.userSettings.clearedAt)
 							) {
 								remove(draft.messages[roomBe.id], (mes) => mes.id === message.id);
@@ -65,8 +64,8 @@ export const useRoomsStoreSlice: StateCreator<RoomsStoreSlice> = (set: (...any: 
 			produce((draft: RootStore) => {
 				draft.rooms[roomBe.id] = {
 					id: roomBe.id,
-					name: roomBe.name || '',
-					description: roomBe.description || '',
+					name: roomBe.name ?? '',
+					description: roomBe.description ?? '',
 					type: roomBe.type,
 					createdAt: roomBe.createdAt,
 					updatedAt: roomBe.createdAt,
@@ -132,8 +131,8 @@ export const useRoomsStoreSlice: StateCreator<RoomsStoreSlice> = (set: (...any: 
 			produce((draft: RootStore) => {
 				draft.rooms[id] = {
 					...draft.rooms[id],
-					name: newName || '',
-					description: newDescription || ''
+					name: newName ?? '',
+					description: newDescription ?? ''
 				};
 			}),
 			false,
@@ -143,10 +142,12 @@ export const useRoomsStoreSlice: StateCreator<RoomsStoreSlice> = (set: (...any: 
 	setRoomMuted: (id: string): void => {
 		set(
 			produce((draft: RootStore) => {
-				draft.rooms[id].userSettings = {
-					...draft.rooms[id].userSettings,
-					muted: true
-				};
+				if (draft.rooms[id]) {
+					draft.rooms[id].userSettings = {
+						...draft.rooms[id].userSettings,
+						muted: true
+					};
+				}
 			}),
 			false,
 			'ROOMS/MUTE_ROOM'
@@ -155,10 +156,12 @@ export const useRoomsStoreSlice: StateCreator<RoomsStoreSlice> = (set: (...any: 
 	setRoomUnmuted: (id: string): void => {
 		set(
 			produce((draft: RootStore) => {
-				draft.rooms[id].userSettings = {
-					...draft.rooms[id].userSettings,
-					muted: false
-				};
+				if (draft.rooms[id]) {
+					draft.rooms[id].userSettings = {
+						...draft.rooms[id].userSettings,
+						muted: false
+					};
+				}
 			}),
 			false,
 			'ROOMS/UNMUTE_ROOM'
@@ -197,7 +200,7 @@ export const useRoomsStoreSlice: StateCreator<RoomsStoreSlice> = (set: (...any: 
 	promoteMemberToModerator: (id: string, userId: string): void => {
 		set(
 			produce((draft: RootStore) => {
-				const memberToPromote = find(draft.rooms[id].members, { userId });
+				const memberToPromote = find(draft.rooms[id]?.members, { userId });
 				if (memberToPromote) {
 					memberToPromote.owner = true;
 					const index = findIndex(draft.rooms[id].members, { userId });
@@ -211,7 +214,7 @@ export const useRoomsStoreSlice: StateCreator<RoomsStoreSlice> = (set: (...any: 
 	demoteMemberFromModerator: (id: string, userId: string): void => {
 		set(
 			produce((draft: RootStore) => {
-				const memberToDemote = find(draft.rooms[id].members, { userId });
+				const memberToDemote = find(draft.rooms[id]?.members, { userId });
 				if (memberToDemote) {
 					memberToDemote.owner = false;
 					const index = findIndex(draft.rooms[id].members, { userId });
@@ -225,12 +228,13 @@ export const useRoomsStoreSlice: StateCreator<RoomsStoreSlice> = (set: (...any: 
 	setClearedAt: (roomId: string, clearedAt: string): void => {
 		set(
 			produce((draft: RootStore) => {
-				draft.rooms[roomId].userSettings = {
-					...draft.rooms[roomId].userSettings,
-					clearedAt
-				};
-
-				draft.messages[roomId] = [];
+				if (draft.rooms[roomId]) {
+					draft.rooms[roomId].userSettings = {
+						...draft.rooms[roomId].userSettings,
+						clearedAt
+					};
+					draft.messages[roomId] = [];
+				}
 			}),
 			false,
 			'ROOMS/SET_CLEARED_AT'
