@@ -120,7 +120,17 @@ Object.defineProperty(HTMLMediaElement.prototype, 'muted', {
 
 Object.defineProperty(window, 'RTCPeerConnection', {
 	value: jest.fn(() => ({
-		addTrack: jest.fn()
+		addTrack: jest.fn(),
+		createAnswer: jest.fn(() => Promise.resolve({ sdp: '', type: 'answer' })),
+		setRemoteDescription: jest.fn(() => Promise.resolve()),
+		setLocalDescription: jest.fn(() => Promise.resolve())
+	}))
+});
+
+Object.defineProperty(window, 'RTCSessionDescription', {
+	value: jest.fn(() => ({
+		sdp: 'sdp',
+		type: 'offer'
 	}))
 });
 

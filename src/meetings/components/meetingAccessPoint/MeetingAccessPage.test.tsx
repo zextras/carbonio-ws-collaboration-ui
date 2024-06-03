@@ -477,8 +477,7 @@ describe('AccessMeeting - enter to meeting by waiting Room', () => {
 				data: {
 					type: WsEventType.MEETING_WAITING_PARTICIPANT_CLASHED,
 					sentDate: '1234567',
-					meetingId: meetingForWaitingRoom.id,
-					userId: user2.id
+					meetingId: meetingForWaitingRoom.id
 				}
 			});
 		});

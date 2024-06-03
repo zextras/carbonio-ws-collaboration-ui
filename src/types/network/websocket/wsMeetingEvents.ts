@@ -130,7 +130,6 @@ export type MeetingUserRejectedEvent = BasicMeetingEvent & {
 
 export type MeetingWaitingParticipantClashed = BasicMeetingEvent & {
 	type: WsEventType.MEETING_WAITING_PARTICIPANT_CLASHED;
-	userId: string;
 };
 
 export type MeetingRecordingStartedEvent = BasicMeetingEvent & {
