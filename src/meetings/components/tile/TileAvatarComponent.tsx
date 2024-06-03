@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import React, { FC, ReactElement, useEffect, useMemo, useState } from 'react';
+import React, { FC, useEffect, useMemo, useState } from 'react';
 
 import { Avatar, Shimmer, useTheme } from '@zextras/carbonio-design-system';
 import styled from 'styled-components';
@@ -65,35 +65,31 @@ const TileAvatarComponent: FC<tileAvatarComponentProps> = ({ userId }) => {
 		}
 	}, [userId, userPictureUpdatedAt]);
 
-	const avatarToReturn = (): ReactElement => {
-		if (!userName) return <StyledShimmerAvatar />;
-		if (isUserGuest)
-			return (
-				<StyledAvatar
-					label={userName}
-					title={userName}
-					shape="round"
-					size="extralarge"
-					background={userColor}
-					icon={'SmileOutline'}
-				/>
-			);
-		if (userName) {
-			return (
-				<StyledAvatar
-					label={userName}
-					title={userName}
-					shape="round"
-					size="extralarge"
-					background={userColor}
-					picture={picture || ''}
-				/>
-			);
-		}
-		return <StyledShimmerAvatar />;
-	};
-
-	return avatarToReturn();
+	if (!userName) return <StyledShimmerAvatar />;
+	if (isUserGuest)
+		return (
+			<StyledAvatar
+				label={userName}
+				title={userName}
+				shape="round"
+				size="extralarge"
+				background={userColor}
+				icon={'SmileOutline'}
+			/>
+		);
+	if (userName) {
+		return (
+			<StyledAvatar
+				label={userName}
+				title={userName}
+				shape="round"
+				size="extralarge"
+				background={userColor}
+				picture={picture || ''}
+			/>
+		);
+	}
+	return <StyledShimmerAvatar />;
 };
 
 export default TileAvatarComponent;
