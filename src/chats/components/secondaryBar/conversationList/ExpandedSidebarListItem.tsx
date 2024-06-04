@@ -76,9 +76,7 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 	const userNameOfLastMessageOfRoom = useStore((store) =>
 		lastMessageOfRoom && lastMessageOfRoom.type === MessageType.TEXT_MSG
 			? getUserName(store, lastMessageOfRoom.from)
-			: lastMessageOfRoom && lastMessageOfRoom.type === MessageType.CONFIGURATION_MSG
-				? getUserName(store, lastMessageOfRoom.from)
-				: ''
+			: ''
 	);
 	const roomMuted = useStore((state) => getRoomMutedSelector(state, roomId));
 	const draftMessage = useStore((store) => getDraftMessage(store, roomId));
@@ -205,7 +203,7 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 			orientation="horizontal"
 			mainAlignment="flex-start"
 			height="fit"
-			padding={{ all: 'small' }}
+			padding={{ all: '0.422rem' }}
 			$selected={isConversationSelected}
 		>
 			<Row>
@@ -228,7 +226,7 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 							<Text size="small">{roomName}</Text>
 							<Container
 								width="fill"
-								height="fit"
+								height="1rem"
 								orientation="horizontal"
 								mainAlignment="flex-start"
 							>

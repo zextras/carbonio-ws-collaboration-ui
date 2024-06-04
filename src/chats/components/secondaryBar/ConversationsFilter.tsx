@@ -116,7 +116,7 @@ const ConversationsFilter: FC<ConversationsFilterProps> = ({ expanded, setFilter
 					/>
 				</Container>
 			) : (
-				<CustomFunnelContainer height="3rem" background="gray5">
+				<CustomFunnelContainer height="3rem" background={'gray5'}>
 					<Tooltip label={filterTooltip}>
 						<IconButton
 							icon="FunnelOutline"
