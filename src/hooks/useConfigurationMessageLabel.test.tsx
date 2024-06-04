@@ -7,7 +7,7 @@ import React from 'react';
 
 import { screen } from '@testing-library/react';
 
-import { ConfigurationMessageLabel } from './ConfigurationMessageLabel';
+import { ConfigurationMessageLabel } from './useConfigurationMessageLabel';
 import useStore from '../store/Store';
 import {
 	createMockConfigurationMessage,
@@ -37,7 +37,7 @@ beforeEach(() => {
 	store.addRoom(room);
 });
 
-describe('ConfigurationMessageLabel', () => {
+describe('useConfigurationMessageLabel', () => {
 	test('User creates room', () => {
 		const configurationMessage = createMockConfigurationMessage({
 			roomId: room.id,
