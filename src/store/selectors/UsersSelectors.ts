@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { t } from '@zextras/carbonio-shell-ui';
+
 import { RootStore } from '../../types/store/StoreTypes';
 import { User, UsersMap, UserType } from '../../types/store/UserTypes';
 
@@ -12,8 +14,8 @@ export const getUsersSelector = (store: RootStore): UsersMap => store.users;
 export const getUserSelector = (store: RootStore, id: string | undefined): User | undefined =>
 	id ? store.users[id] : undefined;
 
-export const getUserName = (store: RootStore, id: string): string | undefined =>
-	store.users[id]?.name || store.users[id]?.email || store.users[id]?.id;
+export const getUserName = (store: RootStore, id: string): string =>
+	store.users[id]?.name || store.users[id]?.email || t('status.anonymous', 'Anonymous user');
 
 export const getUserLastActivity = (store: RootStore, id: string): number | undefined =>
 	store.users[id]?.last_activity;

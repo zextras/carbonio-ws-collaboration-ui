@@ -6,34 +6,38 @@
 import React from 'react';
 
 import { screen } from '@testing-library/react';
+import { renderHook } from '@testing-library/react-hooks';
 
-import { ConfigurationMessageLabel } from './useConfigurationMessageLabel';
+import {
+	ConfigurationMessageLabel,
+	useConfigurationMessageLabel
+} from './useConfigurationMessageLabel';
 import useStore from '../store/Store';
 import {
 	createMockConfigurationMessage,
 	createMockMember,
-	createMockParticipants,
 	createMockRoom,
 	createMockUser
 } from '../tests/createMock';
-import { setup } from '../tests/test-utils';
+import { ProvidersWrapper, setup } from '../tests/test-utils';
 import { OperationType } from '../types/store/MessageTypes';
 
-const sessionUser = createMockMember({ userId: 'sessionId' });
-const mockUser = createMockUser({
+const sessionUser = createMockUser({ userId: 'sessionId', name: 'User' });
+const user1 = createMockUser({
 	id: 'id-1',
 	name: 'User 1',
 	email: 'user1@test.it'
 });
-const member1 = createMockParticipants({ userId: mockUser.id });
-const member2 = createMockParticipants({ userId: 'id-2' });
+const member1 = createMockMember({ userId: user1.id });
+const member2 = createMockMember({ userId: 'id-2' });
 
 const room = createMockRoom({ name: 'Group Name', members: [sessionUser, member1, member2] });
 
 beforeEach(() => {
 	const store = useStore.getState();
-	store.setLoginInfo(sessionUser.userId, 'User');
-	store.setUserInfo(mockUser);
+	store.setLoginInfo(sessionUser.id, sessionUser.name);
+	store.setUserInfo(sessionUser);
+	store.setUserInfo(user1);
 	store.addRoom(room);
 });
 
@@ -42,7 +46,7 @@ describe('useConfigurationMessageLabel', () => {
 		const configurationMessage = createMockConfigurationMessage({
 			roomId: room.id,
 			operation: OperationType.ROOM_CREATION,
-			from: sessionUser.userId
+			from: sessionUser.id
 		});
 		setup(<ConfigurationMessageLabel message={configurationMessage} />);
 
@@ -53,40 +57,25 @@ describe('useConfigurationMessageLabel', () => {
 		const configurationMessage = createMockConfigurationMessage({
 			roomId: room.id,
 			operation: OperationType.ROOM_NAME_CHANGED,
-			from: sessionUser.userId,
+			from: sessionUser.id,
 			value: 'New Group Name'
 		});
 		setup(<ConfigurationMessageLabel message={configurationMessage} />);
 
-		expect(
-			screen.getByText(`{{nameToDisplay}} changed the title of this Group in`)
-		).toBeInTheDocument();
-	});
-
-	test('User changes topic', () => {
-		const configurationMessage = createMockConfigurationMessage({
-			roomId: room.id,
-			operation: OperationType.ROOM_DESCRIPTION_CHANGED,
-			from: sessionUser.userId,
-			value: 'New Group topic'
-		});
-		setup(<ConfigurationMessageLabel message={configurationMessage} />);
-
-		expect(
-			screen.getByText(`{{nameToDisplay}} changed the topic of ${room.name} in`)
-		).toBeInTheDocument();
+		expect(screen.getByText(`You changed the title of this Group in`)).toBeInTheDocument();
 	});
 
 	test('Session user removes topic', () => {
 		const configurationMessage = createMockConfigurationMessage({
 			roomId: room.id,
 			operation: OperationType.ROOM_DESCRIPTION_CHANGED,
-			from: sessionUser.userId,
+			from: sessionUser.id,
 			value: ''
 		});
-		setup(<ConfigurationMessageLabel message={configurationMessage} />);
-
-		expect(screen.getByText(`You removed ${room.name}'s topic`)).toBeInTheDocument();
+		const { result } = renderHook(() => useConfigurationMessageLabel(configurationMessage), {
+			wrapper: ProvidersWrapper
+		});
+		expect(result.current).toBe(`You removed ${room.name}'s topic.`);
 	});
 
 	test('User removes topic', () => {
@@ -96,8 +85,9 @@ describe('useConfigurationMessageLabel', () => {
 			from: member1.userId,
 			value: ''
 		});
-		setup(<ConfigurationMessageLabel message={configurationMessage} />);
-		const member1Name = useStore.getState().users[member1.userId].name;
-		expect(screen.getByText(`${member1Name} removed ${room.name}'s topic`)).toBeInTheDocument();
+		const { result } = renderHook(() => useConfigurationMessageLabel(configurationMessage), {
+			wrapper: ProvidersWrapper
+		});
+		expect(result.current).toBe(`User 1 removed ${room.name}'s topic.`);
 	});
 });

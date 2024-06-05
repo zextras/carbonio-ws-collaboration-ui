@@ -38,8 +38,10 @@ const ConversationInfoDetails: FC<ConversationInfoDetailsProps> = ({ roomId, roo
 	const emailLabel = t('conversationInfo.email', 'Email');
 	const topicLabel = t('conversationInfo.topic', 'Topic');
 	const statusLabel = t('conversationInfo.status', 'Status');
+
 	const sessionId: string | undefined = useStore((store) => store.session.id);
 	const roomMembers: Member[] | undefined = useStore((state) => getRoomMembers(state, roomId));
+
 	const memberId: string = useMemo(() => {
 		if (roomType === RoomType.ONE_TO_ONE && roomMembers !== undefined) {
 			if (roomMembers[0].userId === sessionId) return roomMembers[1]?.userId;
@@ -47,6 +49,7 @@ const ConversationInfoDetails: FC<ConversationInfoDetailsProps> = ({ roomId, roo
 		}
 		return '';
 	}, [roomMembers, roomType, sessionId]);
+
 	const memberName: string | undefined = useStore((state) =>
 		roomType === RoomType.ONE_TO_ONE ? getUserName(state, memberId) : undefined
 	);

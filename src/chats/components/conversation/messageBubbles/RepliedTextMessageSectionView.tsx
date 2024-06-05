@@ -58,7 +58,7 @@ const RepliedTextMessageSectionView: FC<RepliedTextMessageSectionViewProps> = ({
 		repliedMessageRef;
 	const replyUserInfo = useStore((store) => getUserSelector(store, repliedMessage.from));
 	const senderIdentifier = useStore((store) => getUserName(store, repliedMessage.from));
-	const userColor = useMemo(() => calculateAvatarColor(senderIdentifier ?? ''), [senderIdentifier]);
+	const userColor = useMemo(() => calculateAvatarColor(senderIdentifier), [senderIdentifier]);
 
 	const { darkReaderMode } = useDarkReader();
 
@@ -148,7 +148,7 @@ const RepliedTextMessageSectionView: FC<RepliedTextMessageSectionViewProps> = ({
 				)}
 				<Row takeAvailableSpace wrap="nowrap">
 					<Container crossAlignment="flex-start">
-						{senderIdentifier && <BubbleHeader senderId={repliedMessage.from} />}
+						<BubbleHeader senderId={repliedMessage.from} />
 						{repliedMessage.deleted ? (
 							<DeletedMessageWrap color="secondary" overflow="ellipsis">
 								{deletedMessageLabel}

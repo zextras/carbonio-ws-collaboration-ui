@@ -6,7 +6,7 @@
 
 import React, { useMemo } from 'react';
 
-import { Avatar, Container, Shimmer, Badge, useTheme } from '@zextras/carbonio-design-system';
+import { Avatar, Container, Badge, useTheme } from '@zextras/carbonio-design-system';
 import { find } from 'lodash';
 import styled, { DefaultTheme } from 'styled-components';
 
@@ -88,7 +88,7 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ roomId, unreadCount, draftMessa
 	const roomMembers: Member[] | undefined = useStore((store) => getRoomMembers(store, roomId));
 	const otherMember = find(roomMembers, (member) => member.userId !== sessionId);
 	const idAvailable = otherMember?.userId ?? '';
-	const userName: string | undefined = useStore((store) => getUserName(store, idAvailable));
+	const userName: string = useStore((store) => getUserName(store, idAvailable));
 	const roomMuted = useStore((state) => getRoomMutedSelector(state, roomId));
 	const memberOnline: boolean | undefined = useStore((store) => getUserOnline(store, idAvailable));
 	const userPictureUpdatedAt: string | undefined = useStore((state) =>
@@ -109,7 +109,7 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ roomId, unreadCount, draftMessa
 	}, [otherMember, userPictureUpdatedAt]);
 
 	const userColor = useMemo(() => {
-		const color = calculateAvatarColor(userName ?? '');
+		const color = calculateAvatarColor(userName);
 		return isMeetingActive
 			? calcAvatarMeetingColor(themeColor.avatarColors[color])
 			: `${themeColor.avatarColors[color]}`;
@@ -122,7 +122,7 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ roomId, unreadCount, draftMessa
 					<Container>
 						<Avatar
 							icon="Video"
-							label={userName ?? ''}
+							label={userName}
 							title={userName}
 							shape="round"
 							background={userColor}
@@ -134,7 +134,7 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ roomId, unreadCount, draftMessa
 				return (
 					<Avatar
 						icon="Edit2"
-						label={userName ?? ''}
+						label={userName}
 						title={userName}
 						shape="round"
 						background={userColor}
@@ -144,7 +144,7 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ roomId, unreadCount, draftMessa
 				return (
 					<Avatar
 						icon="BellOff"
-						label={userName ?? ''}
+						label={userName}
 						title={userName}
 						shape="round"
 						background={userColor}
@@ -154,7 +154,7 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ roomId, unreadCount, draftMessa
 				return (
 					<Avatar
 						data-testid={`${userName}-avatar`}
-						label={userName ?? ''}
+						label={userName}
 						title={userName}
 						shape="round"
 						background={userColor}
@@ -169,7 +169,7 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ roomId, unreadCount, draftMessa
 		[canSeeUsersPresence, unreadCount]
 	);
 
-	return userName ? (
+	return (
 		<AvatarContainer data-testid="avatar_box" width="fit">
 			{avatarUser}
 			{!!unreadCount && (
@@ -181,8 +181,6 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ roomId, unreadCount, draftMessa
 			)}
 			{canShowPresence && <Presence data-testid="user_presence_dot" memberOnline={memberOnline} />}
 		</AvatarContainer>
-	) : (
-		<Shimmer.Avatar data-testid="shimmer_avatar" size="medium" />
 	);
 };
 

@@ -26,7 +26,7 @@ const BubbleHeader: FC<BubbleHeaderProps> = ({ senderId }) => {
 	const senderName = useStore((store) => getUserName(store, senderId));
 	const isUserGuest = useStore((store) => getIsUserGuest(store, senderId));
 
-	const userColor = useMemo(() => calculateAvatarColor(senderName ?? ''), [senderName]);
+	const userColor = useMemo(() => calculateAvatarColor(senderName), [senderName]);
 
 	return (
 		<Container orientation="horizontal" mainAlignment="flex-start" gap={'0.25rem'}>

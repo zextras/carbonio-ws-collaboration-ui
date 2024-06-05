@@ -6,15 +6,7 @@
 
 import React, { FC, useCallback, useMemo } from 'react';
 
-import {
-	Avatar,
-	Container,
-	IconButton,
-	Row,
-	Shimmer,
-	Text,
-	Tooltip
-} from '@zextras/carbonio-design-system';
+import { Avatar, Container, IconButton, Row, Text, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -47,7 +39,7 @@ const WaitingUser: FC<WaitingUserProps> = ({ meetingId, userId }) => {
 	const acceptButtonTooltip = t('meeting.sidebar.tooltip.waitingAccept', 'Let user in');
 	const rejectButtonTooltip = t('meeting.sidebar.tooltip.waitingReject', 'Reject user');
 
-	const memberName: string | undefined = useStore((store) => getUserName(store, userId));
+	const memberName: string = useStore((store) => getUserName(store, userId));
 	const isUserGuest = useStore((store) => getIsUserGuest(store, userId));
 	const userPictureUpdatedAt: string | undefined = useStore((state) =>
 		getUserPictureUpdatedAt(state, userId)
@@ -60,26 +52,12 @@ const WaitingUser: FC<WaitingUserProps> = ({ meetingId, userId }) => {
 	);
 
 	const avatarElement = useMemo(() => {
-		if (!memberName) {
-			return (
-				<Container width="fit" height="fit">
-					<Shimmer.Avatar width="2rem" data-testid="avatarShimmer" />
-				</Container>
-			);
-		}
 		if (isUserGuest) {
 			return (
 				<CustomAvatar label={memberName} shape="round" picture={picture} icon={'SmileOutline'} />
 			);
 		}
-		if (memberName) {
-			return <CustomAvatar label={memberName} shape="round" picture={picture} />;
-		}
-		return (
-			<Container width="fit" height="fit">
-				<Shimmer.Avatar width="2rem" data-testid="avatarShimmer" />
-			</Container>
-		);
+		return <CustomAvatar label={memberName} shape="round" picture={picture} />;
 	}, [isUserGuest, memberName, picture]);
 
 	const acceptWaitingUser = useCallback(

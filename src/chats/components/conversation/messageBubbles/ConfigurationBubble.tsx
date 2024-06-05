@@ -18,7 +18,7 @@ type ConfigurationMsgProps = {
 };
 
 const ConfigurationBubble: FC<ConfigurationMsgProps> = ({ message, refEl }) => {
-	const configurationMessageLabel = useConfigurationMessageLabel({ message });
+	const configurationMessageLabel = useConfigurationMessageLabel(message);
 	return (
 		<CustomMessage
 			id={`message-${message.id}`}

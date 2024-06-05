@@ -21,7 +21,6 @@ import {
 	Padding,
 	Button,
 	FileLoader,
-	Shimmer,
 	Tooltip,
 	IconButton,
 	CreateSnackbarFn,
@@ -32,11 +31,7 @@ import styled, { css, DefaultTheme, FlattenInterpolation, ThemeProps } from 'sty
 
 import { UsersApi } from '../../network';
 import { getCapability } from '../../store/selectors/SessionSelectors';
-import {
-	getUserEmail,
-	getUserName,
-	getUserPictureUpdatedAt
-} from '../../store/selectors/UsersSelectors';
+import { getUserName, getUserPictureUpdatedAt } from '../../store/selectors/UsersSelectors';
 import useStore from '../../store/Store';
 import { CapabilityType } from '../../types/store/SessionTypes';
 import { calculateAvatarColor } from '../../utils/styleUtils';
@@ -141,8 +136,7 @@ const ProfileSettings: FC<ProfileSettingsProps> = ({
 	setToDelete,
 	toDelete
 }) => {
-	const memberName: string | undefined = useStore((state) => getUserName(state, sessionId ?? ''));
-	const memberEmail: string | undefined = useStore((state) => getUserEmail(state, sessionId ?? ''));
+	const memberName: string = useStore((state) => getUserName(state, sessionId ?? ''));
 	const userPictureUpdatedAt: string | undefined = useStore((state) =>
 		getUserPictureUpdatedAt(state, sessionId ?? '')
 	);
@@ -221,7 +215,7 @@ const ProfileSettings: FC<ProfileSettingsProps> = ({
 					mainAlignment="flex-end"
 				>
 					<NameWrapText color="gray6" size="medium" $hasPicture={!!tempPicture}>
-						{memberName ?? memberEmail ?? ''}
+						{memberName}
 					</NameWrapText>
 					<Padding top="extrasmall" />
 					<Container orientation="horizontal" mainAlignment="flex-start" height="fit">
@@ -232,7 +226,7 @@ const ProfileSettings: FC<ProfileSettingsProps> = ({
 				</Container>
 			</Container>
 		),
-		[memberEmail, memberName, statusLabel, tempPicture]
+		[memberName, statusLabel, tempPicture]
 	);
 
 	const hoverContainer = useMemo(
@@ -313,7 +307,7 @@ const ProfileSettings: FC<ProfileSettingsProps> = ({
 				</PictureContainer>
 			) : (
 				<BackgroundContainer
-					$color={calculateAvatarColor(memberName ?? '')}
+					$color={calculateAvatarColor(memberName)}
 					$hasHoverGradient
 					minHeight="10rem"
 					maxHeight="10rem"
@@ -339,13 +333,7 @@ const ProfileSettings: FC<ProfileSettingsProps> = ({
 				<Divider color="gray2" />
 				<Padding vertical="large">
 					<Container orientation="horizontal" mainAlignment="flex-start">
-						{memberName == null && memberEmail == null ? (
-							<Container width="fit" height="fit" data-testid="shimmer_container">
-								<Shimmer.Logo height="10rem" width="22.938rem" radius="0" />
-							</Container>
-						) : (
-							userPicture
-						)}
+						{userPicture}
 						<Padding right="large" />
 						<Container width="fill" mainAlignment="flex-start" crossAlignment="flex-start">
 							<Container crossAlignment="flex-start" mainAlignment="flex-start" height="fit">

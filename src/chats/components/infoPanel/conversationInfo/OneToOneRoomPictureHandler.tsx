@@ -14,7 +14,6 @@ import RoomPictureHandler from './RoomPictureHandler';
 import { UsersApi } from '../../../../network';
 import { getCapability } from '../../../../store/selectors/SessionSelectors';
 import {
-	getUserEmail,
 	getUserLastActivity,
 	getUserName,
 	getUserOnline,
@@ -53,8 +52,7 @@ const OneToOneRoomPictureHandler: FC<RoomPictureProps> = ({ memberId }) => {
 	const userOnlineLabel: string = t('status.online', 'Online');
 	const userOfflineLabel: string = t('status.offline', 'Offline');
 
-	const memberName: string | undefined = useStore((state) => getUserName(state, memberId)) || '';
-	const memberEmail: string | undefined = useStore((state) => getUserEmail(state, memberId));
+	const memberName: string = useStore((state) => getUserName(state, memberId));
 	const memberOnline: boolean | undefined = useStore((state) => getUserOnline(state, memberId));
 	const memberLastActivity: number | undefined = useStore((state) =>
 		getUserLastActivity(state, memberId)
@@ -97,13 +95,7 @@ const OneToOneRoomPictureHandler: FC<RoomPictureProps> = ({ memberId }) => {
 		return null;
 	}, [picture, canSeeUsersPresence, memberOnline, presenceLabel]);
 
-	return (
-		<RoomPictureHandler
-			title={memberName || memberEmail || ''}
-			description={description}
-			picture={picture}
-		/>
-	);
+	return <RoomPictureHandler title={memberName} description={description} picture={picture} />;
 };
 
 export default OneToOneRoomPictureHandler;

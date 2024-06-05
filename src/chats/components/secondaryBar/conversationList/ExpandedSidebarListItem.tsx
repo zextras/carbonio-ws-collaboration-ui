@@ -153,11 +153,7 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 						lastMessageOfRoom.attachment && lastMessageOfRoom.text === ''
 							? lastMessageOfRoom.attachment.name
 							: lastMessageOfRoom.text;
-					if (
-						roomType === RoomType.GROUP &&
-						lastMessageOfRoom.from !== sessionId &&
-						userNameOfLastMessageOfRoom
-					) {
+					if (roomType === RoomType.GROUP && lastMessageOfRoom.from !== sessionId) {
 						return `${userNameOfLastMessageOfRoom.split(/(\s+)/)[0]}: ${text}`;
 					}
 					return text;

@@ -6,7 +6,7 @@
 
 import React, { ReactElement, useMemo } from 'react';
 
-import { Avatar, Container, Shimmer, Text } from '@zextras/carbonio-design-system';
+import { Avatar, Container, Text } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -32,9 +32,7 @@ const StartRecordingUser = ({ meetingId }: StartRecordingUserProps): ReactElemen
 	);
 
 	const startRecordingUserId = useStore((state) => getStartRecordingUserId(state, meetingId)) ?? '';
-	const memberName: string | undefined = useStore((store) =>
-		getUserName(store, startRecordingUserId)
-	);
+	const memberName: string = useStore((store) => getUserName(store, startRecordingUserId));
 	const userPictureUpdatedAt: string | undefined = useStore((state) =>
 		getUserPictureUpdatedAt(state, startRecordingUserId)
 	);
@@ -46,22 +44,10 @@ const StartRecordingUser = ({ meetingId }: StartRecordingUserProps): ReactElemen
 		return '';
 	}, [startRecordingUserId, userPictureUpdatedAt]);
 
-	const avatarElement = useMemo(
-		() =>
-			memberName == null ? (
-				<Container width="fit" height="fit">
-					<Shimmer.Avatar width="2rem" />
-				</Container>
-			) : (
-				<CustomAvatar label={memberName} shape="round" picture={picture} />
-			),
-		[memberName, picture]
-	);
-
 	if (!startRecordingUserId) return null;
 	return (
 		<Container orientation="horizontal" gap="0.5rem">
-			{avatarElement}
+			<CustomAvatar label={memberName} shape="round" picture={picture} />
 			<Container crossAlignment="flex-start">
 				<Text>{memberName}</Text>
 				<Text color="gray1" size="small">

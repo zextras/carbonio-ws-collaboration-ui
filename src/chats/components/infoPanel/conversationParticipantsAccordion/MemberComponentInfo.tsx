@@ -11,7 +11,6 @@ import {
 	Container,
 	Padding,
 	Text,
-	Shimmer,
 	Row,
 	TextWithTooltip
 } from '@zextras/carbonio-design-system';
@@ -22,7 +21,6 @@ import MemberComponentActions from './MemberComponentActions';
 import { UsersApi } from '../../../../network';
 import { getCapability } from '../../../../store/selectors/SessionSelectors';
 import {
-	getUserEmail,
 	getUserLastActivity,
 	getUserName,
 	getUserOnline,
@@ -57,8 +55,7 @@ const MemberComponentInfo: FC<ParticipantsInfoProps> = ({ member, roomId }) => {
 	);
 
 	const sessionId: string | undefined = useStore.getState().session.id;
-	const memberName: string | undefined = useStore((store) => getUserName(store, member.userId));
-	const memberEmail: string | undefined = useStore((store) => getUserEmail(store, member.userId));
+	const memberName: string = useStore((store) => getUserName(store, member.userId));
 	const memberLastActivity: number | undefined = useStore((store) =>
 		getUserLastActivity(store, member.userId)
 	);
@@ -107,18 +104,6 @@ const MemberComponentInfo: FC<ParticipantsInfoProps> = ({ member, roomId }) => {
 		]
 	);
 
-	const avatarElement = useMemo(
-		() =>
-			memberName == null && memberEmail == null ? (
-				<Container width="fit" height="fit">
-					<Shimmer.Avatar width="2rem" />
-				</Container>
-			) : (
-				<CustomAvatar label={memberName || memberEmail || ''} shape="round" picture={picture} />
-			),
-		[memberEmail, memberName, picture]
-	);
-
 	const infoElement = useMemo(
 		() => (
 			<Row takeAvailableSpace wrap="nowrap" height="100%">
@@ -144,7 +129,7 @@ const MemberComponentInfo: FC<ParticipantsInfoProps> = ({ member, roomId }) => {
 			width="fill"
 			padding={{ top: 'extrasmall', bottom: 'extrasmall' }}
 		>
-			{avatarElement}
+			<CustomAvatar label={memberName} shape="round" picture={picture} />
 			{infoElement}
 			<Row>
 				<MemberComponentActions roomId={roomId} memberId={member.userId} />

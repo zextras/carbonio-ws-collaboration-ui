@@ -6,7 +6,7 @@
 
 import React, { FC, useMemo } from 'react';
 
-import { Avatar, Container, Text, Shimmer, Row } from '@zextras/carbonio-design-system';
+import { Avatar, Container, Text, Row } from '@zextras/carbonio-design-system';
 import styled from 'styled-components';
 
 import GoToPrivateChatAction from '../../../chats/components/infoPanel/conversationParticipantsAccordion/GoToPrivateChatAction';
@@ -42,7 +42,7 @@ const ParticipantElement: FC<ParticipantElementProps> = ({
 	meetingId
 }) => {
 	const userId: string | undefined = useStore((store) => getUserId(store));
-	const memberName: string | undefined = useStore((store) => getUserName(store, memberId));
+	const memberName: string = useStore((store) => getUserName(store, memberId));
 	const isUserGuest = useStore((store) => getIsUserGuest(store, memberId));
 	const userPictureUpdatedAt: string | undefined = useStore((state) =>
 		getUserPictureUpdatedAt(state, memberId)
@@ -56,26 +56,12 @@ const ParticipantElement: FC<ParticipantElementProps> = ({
 	}, [memberId, userPictureUpdatedAt]);
 
 	const avatarElement = useMemo(() => {
-		if (memberName == null) {
-			return (
-				<Container width="fit" height="fit">
-					<Shimmer.Avatar width="2rem" />
-				</Container>
-			);
-		}
 		if (isUserGuest) {
 			return (
 				<CustomAvatar label={memberName} shape="round" picture={picture} icon={'SmileOutline'} />
 			);
 		}
-		if (memberName) {
-			return <CustomAvatar label={memberName} shape="round" picture={picture} />;
-		}
-		return (
-			<Container width="fit" height="fit">
-				<Shimmer.Avatar width="2rem" />
-			</Container>
-		);
+		return <CustomAvatar label={memberName} shape="round" picture={picture} />;
 	}, [memberName, picture, isUserGuest]);
 
 	const infoElement = useMemo(
