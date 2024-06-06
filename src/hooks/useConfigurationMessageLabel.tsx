@@ -118,6 +118,7 @@ export const useConfigurationMessageLabel = (
 	const memberAddedLabel = useMemo(() => {
 		if (roomType === RoomType.ONE_TO_ONE)
 			return t('affiliationMessages.oneToOneCreated', 'New Chat created!');
+		if (!areAffiliatedUserInfoPresent) return undefined;
 		if (loggedUserId === message.value) {
 			return t('affiliationMessages.user.Added', 'You have been added to {{roomName}}.', {
 				roomName
@@ -127,9 +128,18 @@ export const useConfigurationMessageLabel = (
 			userName: affiliatedUsername,
 			roomName
 		});
-	}, [affiliatedUsername, loggedUserId, message.value, roomName, roomType, t]);
+	}, [
+		affiliatedUsername,
+		areAffiliatedUserInfoPresent,
+		loggedUserId,
+		message.value,
+		roomName,
+		roomType,
+		t
+	]);
 
 	const memberRemovedLabel = useMemo(() => {
+		if (!areAffiliatedUserInfoPresent) return undefined;
 		if (loggedUserId === message.value) {
 			return t('affiliationMessages.user.Removed', 'You are no longer a member of {{roomName}}.', {
 				roomName
@@ -140,7 +150,7 @@ export const useConfigurationMessageLabel = (
 			`{{userName}} is no longer a member of {{roomName}}.`,
 			{ userName: affiliatedUsername, roomName }
 		);
-	}, [affiliatedUsername, loggedUserId, message.value, roomName, t]);
+	}, [affiliatedUsername, areAffiliatedUserInfoPresent, loggedUserId, message.value, roomName, t]);
 
 	switch (message.operation) {
 		case OperationType.ROOM_NAME_CHANGED:
@@ -152,10 +162,8 @@ export const useConfigurationMessageLabel = (
 		case OperationType.ROOM_PICTURE_DELETED:
 			return roomPictureDeletedLabel;
 		case OperationType.MEMBER_ADDED:
-			if (!areAffiliatedUserInfoPresent) return undefined;
 			return memberAddedLabel;
 		case OperationType.MEMBER_REMOVED:
-			if (!areAffiliatedUserInfoPresent) return undefined;
 			return memberRemovedLabel;
 		case OperationType.ROOM_CREATION:
 			return t('affiliationMessages.groupCreated', `${roomName} created!`, { roomName });
