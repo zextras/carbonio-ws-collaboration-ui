@@ -20,77 +20,140 @@ export const useConfigurationMessageLabel = (
 	message: ConfigurationMessage
 ): JSX.Element | string | undefined => {
 	const [t] = useTranslation();
-	const youLabel = t('status.you', 'You');
 
-	const leggedUserId = useStore(getUserId);
+	const loggedUserId = useStore(getUserId);
 	const roomName = useStore((store) => getRoomNameSelector(store, message.roomId));
 	const roomType = useStore((store) => getRoomTypeSelector(store, message.roomId));
 	const actionMakerUsername = useStore((store) => getUserName(store, message.from));
 	const affiliatedUsername = useStore((store) => getUserName(store, message.value));
 
-	const displayedActionMakerName = useMemo(
-		() => (message.from === leggedUserId ? youLabel : actionMakerUsername),
-		[actionMakerUsername, leggedUserId, message.from, youLabel]
-	);
+	const roomNameChangedLabel = useMemo(() => {
+		if (loggedUserId === message.from) {
+			return (
+				<Trans
+					i18nKey="configurationMessages.user.roomNameChanged"
+					defaults='You changed the title of this Group in <i>"{{roomName}}"</i>.'
+					values={{ roomName: message.value }}
+				/>
+			);
+		}
+		return (
+			<Trans
+				i18nKey="configurationMessages.member.roomNameChanged"
+				defaults='{{name}} changed the title of this Group in <i>"{{roomName}}"</i>.'
+				values={{ name: actionMakerUsername, roomName: message.value }}
+			/>
+		);
+	}, [loggedUserId, message, actionMakerUsername]);
 
-	const displayedAffiliatedName = useMemo(
-		() => (message.value === leggedUserId ? youLabel : affiliatedUsername),
-		[affiliatedUsername, leggedUserId, message.value, youLabel]
-	);
+	const roomDescriptionChangedLabel = useMemo(() => {
+		if (message.value === '') {
+			if (loggedUserId === message.from) {
+				return t(
+					'configurationMessages.user.roomTopicRemoved',
+					"You removed {{roomName}}'s topic.",
+					{ roomName }
+				);
+			}
+			return t(
+				'configurationMessages.member.roomTopicRemoved',
+				`{{name}} removed {{roomName}}'s topic.`,
+				{
+					name: actionMakerUsername,
+					roomName
+				}
+			);
+		}
+		if (loggedUserId === message.from) {
+			return (
+				<Trans
+					i18nKey="configurationMessages.user.roomTopicChanged"
+					defaults='You changed the topic of {{roomName}} in "<i>{{topicName}}</i>".'
+					values={{ roomName, topicName: message.value }}
+				/>
+			);
+		}
+		return (
+			<Trans
+				i18nKey="configurationMessages.member.roomTopicChanged"
+				defaults='{{name}} changed the topic of {{roomName}} in "<i>{{topicName}}</i>".'
+				values={{ name: actionMakerUsername, roomName, topicName: message.value }}
+			/>
+		);
+	}, [message, loggedUserId, actionMakerUsername, roomName, t]);
+
+	const roomPictureUpdatedLabel = useMemo(() => {
+		if (loggedUserId === message.from) {
+			return t(
+				'configurationMessages.user.roomPictureUpdated',
+				"You changed {{roomName}}'s image.",
+				{ roomName }
+			);
+		}
+		return t(
+			'configurationMessages.member.roomPictureUpdated',
+			`{{name}} changed {{roomName}}'s image.`,
+			{ name: actionMakerUsername, roomName }
+		);
+	}, [actionMakerUsername, loggedUserId, message.from, roomName, t]);
+
+	const roomPictureDeletedLabel = useMemo(() => {
+		if (loggedUserId === message.from) {
+			return t(
+				'configurationMessages.user.roomPictureDeleted',
+				"You have restored the default {{roomName}}'s image.",
+				{ roomName }
+			);
+		}
+		return t(
+			'configurationMessages.member.roomPictureDeleted',
+			`{{name}} restored the default {{roomName}}'s image.`,
+			{ name: actionMakerUsername, roomName }
+		);
+	}, [actionMakerUsername, loggedUserId, message.from, roomName, t]);
+
+	const memberAddedLabel = useMemo(() => {
+		if (roomType === RoomType.ONE_TO_ONE)
+			return t('affiliationMessages.oneToOneCreated', 'New Chat created!');
+		if (loggedUserId === message.value) {
+			return t('affiliationMessages.user.Added', 'You have been added to {{roomName}}.', {
+				roomName
+			});
+		}
+		return t('affiliationMessages.member.Added', `{{userName}} has been added to {{roomName}}.`, {
+			userName: affiliatedUsername,
+			roomName
+		});
+	}, [affiliatedUsername, loggedUserId, message.value, roomName, roomType, t]);
+
+	const memberRemovedLabel = useMemo(() => {
+		if (loggedUserId === message.value) {
+			return t('affiliationMessages.user.Removed', 'You are no longer a member of {{roomName}}.', {
+				roomName
+			});
+		}
+		return t(
+			'affiliationMessages.member.Removed',
+			`{{userName}} is no longer a member of {{roomName}}.`,
+			{ userName: affiliatedUsername, roomName }
+		);
+	}, [affiliatedUsername, loggedUserId, message.value, roomName, t]);
 
 	switch (message.operation) {
 		case OperationType.ROOM_NAME_CHANGED:
-			return (
-				<Trans
-					i18nKey="configurationMessages.roomNameChanged"
-					defaults='{{name}} changed the title of this Group in <i>"{{roomName}}"</i>'
-					values={{ name: displayedActionMakerName, roomName: message.value }}
-				/>
-			);
+			return roomNameChangedLabel;
 		case OperationType.ROOM_DESCRIPTION_CHANGED:
-			return message.value === '' ? (
-				t(
-					'configurationMessages.roomTopicRemoved',
-					`${displayedActionMakerName} removed ${roomName}'s topic.`,
-					{ name: displayedActionMakerName, roomName }
-				)
-			) : (
-				<Trans
-					i18nKey={'configurationMessages.roomTopicChanged'}
-					defaults='{{name}} changed the topic of {{roomName}} in <i>"{{topicName}}"</i>.'
-					values={{ name: displayedActionMakerName, roomName, topicName: message.value }}
-				/>
-			);
+			return roomDescriptionChangedLabel;
 		case OperationType.ROOM_PICTURE_UPDATED:
-			return t(
-				'configurationMessages.roomPictureUpdated',
-				`${displayedActionMakerName} changed ${roomName}'s image.`,
-				{ name: displayedActionMakerName, roomName }
-			);
+			return roomPictureUpdatedLabel;
 		case OperationType.ROOM_PICTURE_DELETED:
-			return t(
-				'configurationMessages.roomPictureDeleted',
-				`${displayedActionMakerName} restored the default ${roomName}'s image.`,
-				{ name: displayedActionMakerName, roomName }
-			);
+			return roomPictureDeletedLabel;
 		case OperationType.MEMBER_ADDED:
-			if (roomType === RoomType.ONE_TO_ONE)
-				return t('affiliationMessages.oneToOneCreated', 'New Chat created!');
-			return t(
-				'affiliationMessages.memberAdded',
-				`${displayedAffiliatedName} has been added to ${roomName}`,
-				{ userName: displayedAffiliatedName, roomName }
-			);
+			return memberAddedLabel;
 		case OperationType.MEMBER_REMOVED:
-			return t(
-				'affiliationMessages.memberRemoved',
-				`${displayedAffiliatedName} is no longer a member of the group`,
-				{ userName: displayedAffiliatedName }
-			);
+			return memberRemovedLabel;
 		case OperationType.ROOM_CREATION:
-			return t('affiliationMessages.groupCreated', `${roomName} created!`, {
-				roomName
-			});
+			return t('affiliationMessages.groupCreated', `${roomName} created!`, { roomName });
 		default: {
 			console.warn('Configuration message to replace: ', message.operation);
 			return undefined;

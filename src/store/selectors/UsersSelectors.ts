@@ -15,7 +15,7 @@ export const getUserSelector = (store: RootStore, id: string | undefined): User 
 	id ? store.users[id] : undefined;
 
 export const getUserName = (store: RootStore, id: string): string =>
-	store.users[id]?.name || store.users[id]?.email || t('status.anonymous', 'Anonymous user');
+	store.users[id]?.name || store.users[id]?.email || t('status.Anonymous', 'Anonymous user');
 
 export const getUserLastActivity = (store: RootStore, id: string): number | undefined =>
 	store.users[id]?.last_activity;

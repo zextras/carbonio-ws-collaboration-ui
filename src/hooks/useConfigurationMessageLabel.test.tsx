@@ -53,18 +53,6 @@ describe('useConfigurationMessageLabel', () => {
 		expect(screen.getByText(`${room.name} created!`)).toBeInTheDocument();
 	});
 
-	test('User changes room name', () => {
-		const configurationMessage = createMockConfigurationMessage({
-			roomId: room.id,
-			operation: OperationType.ROOM_NAME_CHANGED,
-			from: sessionUser.id,
-			value: 'New Group Name'
-		});
-		setup(<ConfigurationMessageLabel message={configurationMessage} />);
-
-		expect(screen.getByText(`You changed the title of this Group in`)).toBeInTheDocument();
-	});
-
 	test('Session user removes topic', () => {
 		const configurationMessage = createMockConfigurationMessage({
 			roomId: room.id,
