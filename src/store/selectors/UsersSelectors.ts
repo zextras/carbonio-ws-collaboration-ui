@@ -34,3 +34,8 @@ export const getUserPictureUpdatedAt = (store: RootStore, id: string): string | 
 
 export const getIsUserGuest = (store: RootStore, id: string): boolean | undefined =>
 	store.users[id]?.type === UserType.GUEST;
+
+export const getAreUserInfoPresent = (store: RootStore, id: string): boolean => {
+	const user = getUserSelector(store, id);
+	return !!user?.name || !!user?.email;
+};

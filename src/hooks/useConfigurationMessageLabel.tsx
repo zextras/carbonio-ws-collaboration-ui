@@ -11,7 +11,7 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { getRoomNameSelector, getRoomTypeSelector } from '../store/selectors/RoomsSelectors';
 import { getUserId } from '../store/selectors/SessionSelectors';
-import { getUserName } from '../store/selectors/UsersSelectors';
+import { getAreUserInfoPresent, getUserName } from '../store/selectors/UsersSelectors';
 import useStore from '../store/Store';
 import { ConfigurationMessage, OperationType } from '../types/store/MessageTypes';
 import { RoomType } from '../types/store/RoomTypes';
@@ -26,6 +26,9 @@ export const useConfigurationMessageLabel = (
 	const roomType = useStore((store) => getRoomTypeSelector(store, message.roomId));
 	const actionMakerUsername = useStore((store) => getUserName(store, message.from));
 	const affiliatedUsername = useStore((store) => getUserName(store, message.value));
+	const areAffiliatedUserInfoPresent = useStore((store) =>
+		getAreUserInfoPresent(store, message.value)
+	);
 
 	const roomNameChangedLabel = useMemo(() => {
 		if (loggedUserId === message.from) {
@@ -149,8 +152,10 @@ export const useConfigurationMessageLabel = (
 		case OperationType.ROOM_PICTURE_DELETED:
 			return roomPictureDeletedLabel;
 		case OperationType.MEMBER_ADDED:
+			if (!areAffiliatedUserInfoPresent) return undefined;
 			return memberAddedLabel;
 		case OperationType.MEMBER_REMOVED:
+			if (!areAffiliatedUserInfoPresent) return undefined;
 			return memberRemovedLabel;
 		case OperationType.ROOM_CREATION:
 			return t('affiliationMessages.groupCreated', `${roomName} created!`, { roomName });
