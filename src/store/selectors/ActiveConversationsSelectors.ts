@@ -77,7 +77,7 @@ export const isMessageInForwardList = (
 };
 
 export const maxForwardLimitNotReached = (store: RootStore, roomId: string): boolean => {
-	if (store.activeConversations[roomId] && store.activeConversations[roomId].forwardMessageList) {
+	if (store.activeConversations[roomId]?.forwardMessageList) {
 		return store.activeConversations[roomId].forwardMessageList!.length < 20;
 	}
 	return true;
