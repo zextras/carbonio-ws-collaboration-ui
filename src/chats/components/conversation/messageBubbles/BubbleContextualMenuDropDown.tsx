@@ -165,10 +165,10 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 	const onDropdownOpen = useCallback(() => setDropdownActive(true), [setDropdownActive]);
 	const onDropdownClose = useCallback(() => setDropdownActive(false), [setDropdownActive]);
 
-	const closeDropdownOnScroll = useCallback(() => {
-		console.log(dropdownActive);
-		return dropdownActive && dropDownRef.current?.click();
-	}, [dropdownActive]);
+	const closeDropdownOnScroll = useCallback(
+		() => dropdownActive && dropDownRef.current?.click(),
+		[dropdownActive]
+	);
 
 	useEffect(() => {
 		const messageListRef = window.document.getElementById(`messageListRef${message.roomId}`);
