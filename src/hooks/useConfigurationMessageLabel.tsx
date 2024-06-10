@@ -11,7 +11,7 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { getRoomNameSelector, getRoomTypeSelector } from '../store/selectors/RoomsSelectors';
 import { getUserId } from '../store/selectors/SessionSelectors';
-import { getAreUserInfoPresent, getUserName } from '../store/selectors/UsersSelectors';
+import { getAreUserInfoAvailable, getUserName } from '../store/selectors/UsersSelectors';
 import useStore from '../store/Store';
 import { ConfigurationMessage, OperationType } from '../types/store/MessageTypes';
 import { RoomType } from '../types/store/RoomTypes';
@@ -26,8 +26,8 @@ export const useConfigurationMessageLabel = (
 	const roomType = useStore((store) => getRoomTypeSelector(store, message.roomId));
 	const actionMakerUsername = useStore((store) => getUserName(store, message.from));
 	const affiliatedUsername = useStore((store) => getUserName(store, message.value));
-	const areAffiliatedUserInfoPresent = useStore((store) =>
-		getAreUserInfoPresent(store, message.value)
+	const areAffiliatedUserInfoAvailable = useStore((store) =>
+		getAreUserInfoAvailable(store, message.value)
 	);
 
 	const roomNameChangedLabel = useMemo(() => {
@@ -118,7 +118,7 @@ export const useConfigurationMessageLabel = (
 	const memberAddedLabel = useMemo(() => {
 		if (roomType === RoomType.ONE_TO_ONE)
 			return t('affiliationMessages.oneToOneCreated', 'New Chat created!');
-		if (!areAffiliatedUserInfoPresent) return undefined;
+		if (!areAffiliatedUserInfoAvailable) return undefined;
 		if (loggedUserId === message.value) {
 			return t('affiliationMessages.user.Added', 'You have been added to {{roomName}}.', {
 				roomName
@@ -130,7 +130,7 @@ export const useConfigurationMessageLabel = (
 		});
 	}, [
 		affiliatedUsername,
-		areAffiliatedUserInfoPresent,
+		areAffiliatedUserInfoAvailable,
 		loggedUserId,
 		message.value,
 		roomName,
@@ -139,7 +139,7 @@ export const useConfigurationMessageLabel = (
 	]);
 
 	const memberRemovedLabel = useMemo(() => {
-		if (!areAffiliatedUserInfoPresent) return undefined;
+		if (!areAffiliatedUserInfoAvailable) return undefined;
 		if (loggedUserId === message.value) {
 			return t('affiliationMessages.user.Removed', 'You are no longer a member of {{roomName}}.', {
 				roomName
@@ -150,7 +150,14 @@ export const useConfigurationMessageLabel = (
 			`{{userName}} is no longer a member of {{roomName}}.`,
 			{ userName: affiliatedUsername, roomName }
 		);
-	}, [affiliatedUsername, areAffiliatedUserInfoPresent, loggedUserId, message.value, roomName, t]);
+	}, [
+		affiliatedUsername,
+		areAffiliatedUserInfoAvailable,
+		loggedUserId,
+		message.value,
+		roomName,
+		t
+	]);
 
 	switch (message.operation) {
 		case OperationType.ROOM_NAME_CHANGED:

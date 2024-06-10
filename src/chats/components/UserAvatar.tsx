@@ -15,6 +15,7 @@ import { getMeetingActive } from '../../store/selectors/MeetingSelectors';
 import { getRoomMembers, getRoomMutedSelector } from '../../store/selectors/RoomsSelectors';
 import { getCapability } from '../../store/selectors/SessionSelectors';
 import {
+	getAreUserInfoAvailable,
 	getUserName,
 	getUserOnline,
 	getUserPictureUpdatedAt
@@ -88,6 +89,7 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ roomId, unreadCount, draftMessa
 	const roomMembers: Member[] | undefined = useStore((store) => getRoomMembers(store, roomId));
 	const otherMember = find(roomMembers, (member) => member.userId !== sessionId);
 	const idAvailable = otherMember?.userId ?? '';
+	const areUserInfoAvailable = useStore((store) => getAreUserInfoAvailable(store, idAvailable));
 	const userName: string = useStore((store) => getUserName(store, idAvailable));
 	const roomMuted = useStore((state) => getRoomMutedSelector(state, roomId));
 	const memberOnline: boolean | undefined = useStore((store) => getUserOnline(store, idAvailable));
@@ -159,10 +161,19 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ roomId, unreadCount, draftMessa
 						shape="round"
 						background={userColor}
 						picture={picture}
+						icon={!areUserInfoAvailable ? 'QuestionMarkCircleOutline' : undefined}
 					/>
 				);
 		}
-	}, [isMeetingActive, draftMessage, roomMuted, userName, picture, userColor]);
+	}, [
+		isMeetingActive,
+		userName,
+		userColor,
+		draftMessage,
+		roomMuted,
+		picture,
+		areUserInfoAvailable
+	]);
 
 	const canShowPresence = useMemo(
 		() => !unreadCount && canSeeUsersPresence,

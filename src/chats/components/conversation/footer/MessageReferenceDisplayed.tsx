@@ -12,9 +12,12 @@ import styled, { DefaultTheme } from 'styled-components';
 
 import useMessage from '../../../../hooks/useMessage';
 import GuestUserLabel from '../../../../meetings/components/GuestUserLabel';
-import { getIsUserGuest, getUserSelector } from '../../../../store/selectors/UsersSelectors';
+import { getIsUserGuest, getUserName } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
-import { ReferenceMessage } from '../../../../types/store/ActiveConversationTypes';
+import {
+	messageActionType,
+	ReferenceMessage
+} from '../../../../types/store/ActiveConversationTypes';
 import { TextMessage } from '../../../../types/store/MessageTypes';
 import { getThumbnailURL } from '../../../../utils/attachmentUtils';
 import { calculateAvatarColor } from '../../../../utils/styleUtils';
@@ -57,7 +60,7 @@ const MessageReferenceDisplayed: React.FC<MessageReferenceDisplayedProps> = ({
 	const replyTo = t('action.replyToSomeone', 'Reply to');
 
 	const myId = useStore((store) => store.session.id);
-	const senderInfo = useStore((store) => getUserSelector(store, referenceMessage.senderId));
+	const senderUserName = useStore((store) => getUserName(store, referenceMessage.senderId));
 	const unsetReferenceMessage = useStore((store) => store.unsetReferenceMessage);
 	const isUserGuest = useStore((store) => getIsUserGuest(store, referenceMessage.senderId));
 
@@ -70,30 +73,20 @@ const MessageReferenceDisplayed: React.FC<MessageReferenceDisplayedProps> = ({
 		}
 	}, [message, unsetReferenceMessage]);
 
-	const senderIdentifier = useMemo(
-		() => (senderInfo ? senderInfo.name || senderInfo.email || senderInfo.id : null),
-		[senderInfo]
-	);
+	const userColor = useMemo(() => calculateAvatarColor(senderUserName), [senderUserName]);
 
-	const userColor = useMemo(() => calculateAvatarColor(senderIdentifier ?? ''), [senderIdentifier]);
-
-	const labelAction = useMemo(
-		() =>
-			// eslint-disable-next-line no-nested-ternary
-			referenceMessage.actionType === 'edit'
-				? editYourMessageLabel
-				: myId === referenceMessage.senderId
-					? replyToYourselfLabel
-					: replyTo,
-		[
-			editYourMessageLabel,
-			myId,
-			referenceMessage.actionType,
-			referenceMessage.senderId,
-			replyToYourselfLabel,
-			replyTo
-		]
-	);
+	const labelAction = useMemo(() => {
+		if (referenceMessage.actionType === messageActionType.EDIT) return editYourMessageLabel;
+		if (myId === referenceMessage.senderId) return replyToYourselfLabel;
+		return replyTo;
+	}, [
+		editYourMessageLabel,
+		myId,
+		referenceMessage.actionType,
+		referenceMessage.senderId,
+		replyTo,
+		replyToYourselfLabel
+	]);
 
 	const textMessage = useMemo(() => {
 		if (message.attachment) {
@@ -149,7 +142,7 @@ const MessageReferenceDisplayed: React.FC<MessageReferenceDisplayedProps> = ({
 											overflow="ellipsis"
 											$labelColor={userColor}
 										>
-											{senderIdentifier}
+											{senderUserName}
 										</UserName>
 										{isUserGuest && <GuestUserLabel />}
 									</Container>

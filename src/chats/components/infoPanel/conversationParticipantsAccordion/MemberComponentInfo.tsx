@@ -21,6 +21,7 @@ import MemberComponentActions from './MemberComponentActions';
 import { UsersApi } from '../../../../network';
 import { getCapability } from '../../../../store/selectors/SessionSelectors';
 import {
+	getAreUserInfoAvailable,
 	getUserLastActivity,
 	getUserName,
 	getUserOnline,
@@ -55,6 +56,7 @@ const MemberComponentInfo: FC<ParticipantsInfoProps> = ({ member, roomId }) => {
 	);
 
 	const sessionId: string | undefined = useStore.getState().session.id;
+	const areUserInfoAvailable = useStore((store) => getAreUserInfoAvailable(store, member.userId));
 	const memberName: string = useStore((store) => getUserName(store, member.userId));
 	const memberLastActivity: number | undefined = useStore((store) =>
 		getUserLastActivity(store, member.userId)
@@ -83,26 +85,21 @@ const MemberComponentInfo: FC<ParticipantsInfoProps> = ({ member, roomId }) => {
 
 	const lastSeenLabel: string = t('status.lastSeen', `Last Seen ${lastSeen}`, { lastSeen });
 
-	const presenceLabel = useMemo(
-		() =>
-			sessionId === member.userId
-				? youLabel
-				: memberOnline
-					? userOnlineLabel
-					: memberLastActivity
-						? lastSeenLabel
-						: goToPrivateChatLabel,
-		[
-			sessionId,
-			member.userId,
-			youLabel,
-			memberOnline,
-			userOnlineLabel,
-			memberLastActivity,
-			lastSeenLabel,
-			goToPrivateChatLabel
-		]
-	);
+	const presenceLabel = useMemo(() => {
+		if (sessionId === member.userId) return youLabel;
+		if (memberOnline) return userOnlineLabel;
+		if (memberLastActivity) return lastSeenLabel;
+		return goToPrivateChatLabel;
+	}, [
+		sessionId,
+		member.userId,
+		youLabel,
+		memberOnline,
+		userOnlineLabel,
+		memberLastActivity,
+		lastSeenLabel,
+		goToPrivateChatLabel
+	]);
 
 	const infoElement = useMemo(
 		() => (
@@ -129,7 +126,12 @@ const MemberComponentInfo: FC<ParticipantsInfoProps> = ({ member, roomId }) => {
 			width="fill"
 			padding={{ top: 'extrasmall', bottom: 'extrasmall' }}
 		>
-			<CustomAvatar label={memberName} shape="round" picture={picture} />
+			<CustomAvatar
+				label={memberName}
+				shape="round"
+				picture={picture}
+				icon={!areUserInfoAvailable ? 'QuestionMarkCircleOutline' : undefined}
+			/>
 			{infoElement}
 			<Row>
 				<MemberComponentActions roomId={roomId} memberId={member.userId} />

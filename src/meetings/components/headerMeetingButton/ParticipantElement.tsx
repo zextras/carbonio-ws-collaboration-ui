@@ -13,6 +13,7 @@ import GoToPrivateChatAction from '../../../chats/components/infoPanel/conversat
 import { UsersApi } from '../../../network';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import {
+	getAreUserInfoAvailable,
 	getIsUserGuest,
 	getUserName,
 	getUserPictureUpdatedAt
@@ -43,6 +44,7 @@ const ParticipantElement: FC<ParticipantElementProps> = ({
 }) => {
 	const userId: string | undefined = useStore((store) => getUserId(store));
 	const memberName: string = useStore((store) => getUserName(store, memberId));
+	const areMemberInfoAvailable = useStore((store) => getAreUserInfoAvailable(store, memberId));
 	const isUserGuest = useStore((store) => getIsUserGuest(store, memberId));
 	const userPictureUpdatedAt: string | undefined = useStore((state) =>
 		getUserPictureUpdatedAt(state, memberId)
@@ -54,15 +56,6 @@ const ParticipantElement: FC<ParticipantElementProps> = ({
 		}
 		return '';
 	}, [memberId, userPictureUpdatedAt]);
-
-	const avatarElement = useMemo(() => {
-		if (isUserGuest) {
-			return (
-				<CustomAvatar label={memberName} shape="round" picture={picture} icon={'SmileOutline'} />
-			);
-		}
-		return <CustomAvatar label={memberName} shape="round" picture={picture} />;
-	}, [memberName, picture, isUserGuest]);
 
 	const infoElement = useMemo(
 		() => (
@@ -85,6 +78,16 @@ const ParticipantElement: FC<ParticipantElementProps> = ({
 
 	const isSessionParticipant: boolean = useMemo(() => memberId === userId, [memberId, userId]);
 
+	const icon = useMemo(() => {
+		if (isUserGuest) {
+			return 'SmileOutline';
+		}
+		if (!areMemberInfoAvailable) {
+			return 'QuestionMarkCircleOutline';
+		}
+		return undefined;
+	}, [areMemberInfoAvailable, isUserGuest]);
+
 	return (
 		<CustomContainer
 			data-testid="participant_element"
@@ -92,7 +95,7 @@ const ParticipantElement: FC<ParticipantElementProps> = ({
 			width="fill"
 			padding={{ top: 'extrasmall', bottom: 'extrasmall' }}
 		>
-			{avatarElement}
+			<CustomAvatar label={memberName} shape="round" picture={picture} icon={icon} />
 			{infoElement}
 			{!isInsideMeeting ? (
 				!isSessionParticipant && (
