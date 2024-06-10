@@ -26,15 +26,15 @@ export type Session = {
 
 export type CapabilityList = {
 	canSeeMessageReads: boolean;
-	canSeeUsersPresence: boolean;
-	canVideoCall: boolean;
-	canVideoCallRecord: boolean;
-	canUseVirtualBackground: boolean;
+	canSeeUsersPresence?: boolean;
+	canVideoCall?: boolean;
+	canVideoCallRecord?: boolean;
+	canUseVirtualBackground?: boolean;
 	editMessageTimeLimitInMinutes: number;
 	deleteMessageTimeLimitInMinutes: number;
-	maxGroupMembers: number;
-	maxRoomImageSizeInKb: number;
-	maxUserImageSizeInKb: number;
+	maxGroupMembers?: number;
+	maxRoomImageSizeInKb?: number;
+	maxUserImageSizeInKb?: number;
 };
 
 export enum CapabilityType {

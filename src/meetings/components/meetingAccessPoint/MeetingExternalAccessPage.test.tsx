@@ -7,12 +7,10 @@
 import React from 'react';
 
 import { screen } from '@testing-library/react';
-import { renderHook } from '@testing-library/react-hooks';
 
 import MeetingExternalAccessPage from './MeetingExternalAccessPage';
-import useStore from '../../../store/Store';
 import { mockReplace } from '../../../tests/mocks/global';
-import { mockedCreateGuestAccount, mockedGetCapabilities } from '../../../tests/mocks/network';
+import { mockedCreateGuestAccount } from '../../../tests/mocks/network';
 import { mockGoToMeetingAccessPage } from '../../../tests/mocks/useRouting';
 import { setup } from '../../../tests/test-utils';
 
@@ -65,37 +63,12 @@ describe('MeetingExternalAccessPage', () => {
 		const errorSnackbar = await screen.findByText(/Something went Wrong. Please Retry/i);
 
 		expect(mockedCreateGuestAccount).toHaveBeenCalledTimes(1);
-		expect(mockedGetCapabilities).not.toHaveBeenCalled();
-		expect(document.cookie).toBe('');
-		expect(errorSnackbar).toBeVisible();
-	});
-
-	test('After external user is created, the capabilitiesApi fails', async () => {
-		// console.error()) is expected
-		jest.spyOn(console, 'error').mockImplementation();
-
-		mockedCreateGuestAccount.mockResolvedValueOnce(guestAccountResp);
-		mockedGetCapabilities.mockRejectedValueOnce(false);
-		const { user } = setup(<MeetingExternalAccessPage />);
-
-		const nameInput = screen.getByRole('textbox', { name: typeHereLabel });
-		await user.type(nameInput, userNameLabel);
-
-		const joinButton = screen.getByRole('button', { name: joinLabel });
-		await user.click(joinButton);
-		const { result } = renderHook(() => useStore());
-		const errorSnackbar = await screen.findByText(/Something went Wrong. Please Retry/i);
-
-		expect(mockedCreateGuestAccount).toHaveBeenCalledTimes(1);
-		expect(mockedGetCapabilities).toHaveBeenCalledTimes(1);
-		expect(result.current.connections.status.chats_be).toBe(false);
 		expect(document.cookie).toBe('');
 		expect(errorSnackbar).toBeVisible();
 	});
 
 	test('External user creates a new guest account', async () => {
 		mockedCreateGuestAccount.mockResolvedValueOnce(guestAccountResp);
-		mockedGetCapabilities.mockResolvedValueOnce({});
 
 		const { user } = setup(<MeetingExternalAccessPage />);
 
@@ -105,7 +78,6 @@ describe('MeetingExternalAccessPage', () => {
 		const joinButton = screen.getByRole('button', { name: 'Join the meeting' });
 		await user.click(joinButton);
 		expect(mockedCreateGuestAccount).toHaveBeenCalledTimes(1);
-		expect(mockedGetCapabilities).toHaveBeenCalledTimes(1);
 		expect(mockGoToMeetingAccessPage).toHaveBeenCalled();
 		expect(document.cookie).toBe(
 			`ZM_AUTH_TOKEN=${guestAccountResp.zmToken}; ZX_AUTH_TOKEN=${guestAccountResp.zxToken}`
@@ -114,7 +86,6 @@ describe('MeetingExternalAccessPage', () => {
 
 	test('user clicks on the login button', async () => {
 		mockedCreateGuestAccount.mockResolvedValueOnce(guestAccountResp);
-		mockedGetCapabilities.mockResolvedValueOnce({});
 		mockReplace.mockReturnValueOnce('url');
 		const { user } = setup(<MeetingExternalAccessPage />);
 

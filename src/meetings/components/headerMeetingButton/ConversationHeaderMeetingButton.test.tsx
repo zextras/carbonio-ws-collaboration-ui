@@ -18,7 +18,7 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../../tests/createMock';
-import { mockedAddRoomRequest } from '../../../tests/mocks/network';
+import { mockedAddRoomRequest, mockedCreateMeetingRequest } from '../../../tests/mocks/network';
 import { mockGoToRoomPage } from '../../../tests/mocks/useRouting';
 import { setup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
@@ -177,6 +177,20 @@ describe('Conversation header meeting button - group', () => {
 		expect(joinMeetingButton).toBeVisible();
 		expect(joinMeetingButton).not.toBeDisabled();
 	});
+
+	test('open meeting for the first time', async () => {
+		mockedCreateMeetingRequest.mockReturnValue('created');
+		const room = createMockRoom();
+		const store = useStore.getState();
+		store.addRoom(room);
+		const { user } = setup(<ConversationHeaderMeetingButton roomId={room.id} />);
+
+		const joinMeetingButton = screen.getByTestId('join_meeting_button');
+		await user.click(joinMeetingButton);
+
+		expect(mockedCreateMeetingRequest).toHaveBeenCalled();
+	});
+
 	test('everything is rendered correctly - meeting started', () => {
 		storeSetupGroupMeeting();
 		const disabledButton = screen.getByTestId('join_meeting_button');

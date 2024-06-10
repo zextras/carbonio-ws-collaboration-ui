@@ -4,7 +4,10 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { GetImageResponse } from '../../types/network/responses/attachmentsResponses';
+import {
+	DeleteAttachmentResponse,
+	GetImageResponse
+} from '../../types/network/responses/attachmentsResponses';
 import {
 	AcceptWaitingUserResponse,
 	CreateGuestAccountResponse,
@@ -88,6 +91,7 @@ export const mockedGetMeetingByMeetingId: jest.Mock = jest.fn();
 export const mockedCreateGuestAccount: jest.Mock = jest.fn();
 export const mockedGetCapabilities: jest.Mock = jest.fn();
 export const mockedAuthLoginRequest: jest.Mock = jest.fn();
+export const mockedDeleteAttachment: jest.Mock = jest.fn();
 
 jest.mock('../../network', () => {
 	const noResultProvided = 'no result provided';
@@ -203,6 +207,11 @@ jest.mock('../../network', () => {
 			getImageSize: (): Promise<GetImageResponse> =>
 				new Promise((resolve, reject) => {
 					const result = mockedImageSizeRequest();
+					result ? resolve(result) : reject(new Error(noResultProvided));
+				}),
+			deleteAttachment: (): Promise<DeleteAttachmentResponse> =>
+				new Promise((resolve, reject) => {
+					const result = mockedDeleteAttachment();
 					result ? resolve(result) : reject(new Error(noResultProvided));
 				})
 		},

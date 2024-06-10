@@ -19,7 +19,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import useRouting from '../../../hooks/useRouting';
-import { MeetingsApi, SessionApi } from '../../../network';
+import { MeetingsApi } from '../../../network';
 import { WebSocketClient } from '../../../network/websocket/WebSocketClient';
 import XMPPClient from '../../../network/xmpp/XMPPClient';
 import useStore from '../../../store/Store';
@@ -78,6 +78,7 @@ const MeetingExternalAccessPage = (): ReactElement => {
 	const setWebSocketClient = useStore((state) => state.setWebSocketClient);
 	const setChatsBeStatus = useStore((state) => state.setChatsBeStatus);
 	const setLoginInfo = useStore((state) => state.setLoginInfo);
+	const setCapabilities = useStore((store) => store.setCapabilities);
 
 	const createSnackbar: CreateSnackbarFn = useSnackbar();
 	const { goToMeetingAccessPage } = useRouting();
@@ -113,25 +114,27 @@ const MeetingExternalAccessPage = (): ReactElement => {
 				const webSocket = new WebSocketClient();
 				setWebSocketClient(webSocket);
 
-				SessionApi.getCapabilities()
-					.then(() => {
-						setChatsBeStatus(true);
-						xmppClient.connect(res.zmToken);
-						webSocket.connect();
-						goToMeetingAccessPage();
-					})
-					.catch(() => {
-						BrowserUtils.clearAuthCookies();
-						setChatsBeStatus(false);
-						errorSnackbar();
-					});
+				setChatsBeStatus(true);
+				xmppClient.connect(res.zmToken);
+				webSocket.connect();
+
+				setCapabilities({
+					canSeeMessageReads: true,
+					deleteMessageTimeLimitInMinutes: 10,
+					editMessageTimeLimitInMinutes: 10
+				});
+
+				goToMeetingAccessPage();
 			})
 			.catch(() => {
+				BrowserUtils.clearAuthCookies();
+				setChatsBeStatus(false);
 				errorSnackbar();
 			});
 	}, [
 		errorSnackbar,
 		goToMeetingAccessPage,
+		setCapabilities,
 		setChatsBeStatus,
 		setLoginInfo,
 		setWebSocketClient,

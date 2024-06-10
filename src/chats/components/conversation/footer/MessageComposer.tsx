@@ -44,6 +44,7 @@ import {
 import { getXmppClient } from '../../../../store/selectors/ConnectionSelector';
 import { getLastMessageIdSelector } from '../../../../store/selectors/MessagesSelectors';
 import { getCapability, getUserId } from '../../../../store/selectors/SessionSelectors';
+import { getIsUserGuest } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
 import { AddRoomAttachmentResponse } from '../../../../types/network/responses/roomsResponses';
 import {
@@ -91,6 +92,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 	const stopUploadLabel = t('attachments.stopUpload', 'Stop upload');
 
 	const myUserId = useStore(getUserId);
+	const isUserGuest = useStore((store) => getIsUserGuest(store, myUserId ?? ''));
 	const referenceMessage = useStore((store) => getReferenceMessage(store, roomId));
 	const draftMessage = useStore((store) => getDraftMessage(store, roomId));
 	const unsetReferenceMessage = useStore((store) => store.unsetReferenceMessage);
@@ -486,10 +488,11 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 
 	const showAttachFileButton = useMemo(
 		() =>
+			!isUserGuest &&
 			!isUploading &&
 			!filesToUploadArray &&
 			(!referenceMessage || referenceMessage.actionType === messageActionType.REPLY),
-		[filesToUploadArray, isUploading, referenceMessage]
+		[filesToUploadArray, isUploading, isUserGuest, referenceMessage]
 	);
 
 	return (
