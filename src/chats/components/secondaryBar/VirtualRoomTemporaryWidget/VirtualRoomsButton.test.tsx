@@ -57,19 +57,4 @@ describe('VirtualRoomsButton', () => {
 			'https://localhost/carbonio/focus-mode/meetings/scheduled-meeting-mod-test'
 		);
 	});
-	// test('create virtual room', async () => {
-	// 	const store = useStore.getState();
-	// 	store.setLoginInfo(sessionUser.id, sessionUser.name);
-	// 	store.setCapabilities(createMockCapabilityList());
-	// 	store.setRooms([temporaryRoomMod]);
-	// 	store.setMeetings([scheduledMeetingMod]);
-	//
-	// 	const { user } = setup(<VirtualRoomsButton expanded />);
-	//
-	// 	const button = screen.getByRole('button');
-	// 	await user.click(button);
-	//
-	// 	const input = await screen.findByRole('textbox');
-	// 	await user.type(input, 'Virtual Room name');
-	// });
 });
