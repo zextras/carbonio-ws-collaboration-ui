@@ -18,14 +18,12 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import MemberComponentActions from './MemberComponentActions';
-import { UsersApi } from '../../../../network';
+import useAvatarUtilities from '../../../../hooks/useAvatarUtilities';
 import { getCapability } from '../../../../store/selectors/SessionSelectors';
 import {
-	getAreUserInfoAvailable,
 	getUserLastActivity,
 	getUserName,
-	getUserOnline,
-	getUserPictureUpdatedAt
+	getUserOnline
 } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
 import { Member } from '../../../../types/store/RoomTypes';
@@ -56,13 +54,9 @@ const MemberComponentInfo: FC<ParticipantsInfoProps> = ({ member, roomId }) => {
 	);
 
 	const sessionId: string | undefined = useStore.getState().session.id;
-	const areUserInfoAvailable = useStore((store) => getAreUserInfoAvailable(store, member.userId));
 	const memberName: string = useStore((store) => getUserName(store, member.userId));
 	const memberLastActivity: number | undefined = useStore((store) =>
 		getUserLastActivity(store, member.userId)
-	);
-	const userPictureUpdatedAt: string | undefined = useStore((state) =>
-		getUserPictureUpdatedAt(state, member.userId)
 	);
 	const memberOnline: boolean | undefined = useStore((store) =>
 		getUserOnline(store, member.userId)
@@ -71,12 +65,7 @@ const MemberComponentInfo: FC<ParticipantsInfoProps> = ({ member, roomId }) => {
 		getCapability(store, CapabilityType.CAN_SEE_USERS_PRESENCE)
 	);
 
-	const picture = useMemo(() => {
-		if (userPictureUpdatedAt != null) {
-			return `${UsersApi.getURLUserPicture(member.userId)}?${userPictureUpdatedAt}`;
-		}
-		return '';
-	}, [member, userPictureUpdatedAt]);
+	const { avatarPicture, avatarIcon, avatarColor } = useAvatarUtilities(member.userId);
 
 	const lastSeen: string = useMemo(
 		() => (memberLastActivity ? getCalendarTime(memberLastActivity) : ''),
@@ -129,8 +118,9 @@ const MemberComponentInfo: FC<ParticipantsInfoProps> = ({ member, roomId }) => {
 			<CustomAvatar
 				label={memberName}
 				shape="round"
-				picture={picture}
-				icon={!areUserInfoAvailable ? 'QuestionMarkCircleOutline' : undefined}
+				picture={avatarPicture}
+				icon={avatarIcon}
+				background={avatarColor}
 			/>
 			{infoElement}
 			<Row>

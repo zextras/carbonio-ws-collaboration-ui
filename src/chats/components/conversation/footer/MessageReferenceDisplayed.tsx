@@ -8,8 +8,9 @@ import React, { useEffect, useMemo } from 'react';
 
 import { Container, Text, Row, Avatar, Padding } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import styled, { DefaultTheme } from 'styled-components';
+import styled from 'styled-components';
 
+import useAvatarUtilities from '../../../../hooks/useAvatarUtilities';
 import useMessage from '../../../../hooks/useMessage';
 import GuestUserLabel from '../../../../meetings/components/GuestUserLabel';
 import { getIsUserGuest, getUserName } from '../../../../store/selectors/UsersSelectors';
@@ -20,17 +21,11 @@ import {
 } from '../../../../types/store/ActiveConversationTypes';
 import { TextMessage } from '../../../../types/store/MessageTypes';
 import { getThumbnailURL } from '../../../../utils/attachmentUtils';
-import { calculateAvatarColor } from '../../../../utils/styleUtils';
-
-const UserName = styled(Text)<{ $labelColor: keyof DefaultTheme['avatarColors'] }>`
-	color: ${({ $labelColor, theme }): string => theme.avatarColors[$labelColor]};
-`;
 
 const BorderContainer = styled(Container)<{
-	$customBorderColor: keyof DefaultTheme['avatarColors'];
+	$customBorderColor: string;
 }>`
-	border-left: ${({ $customBorderColor, theme }): string =>
-		`0.25rem solid ${theme.avatarColors[$customBorderColor]}`};
+	border-left: ${({ $customBorderColor }): string => `0.25rem solid ${$customBorderColor}`};
 	border-radius: 0;
 `;
 
@@ -66,14 +61,14 @@ const MessageReferenceDisplayed: React.FC<MessageReferenceDisplayedProps> = ({
 
 	const message = useMessage(referenceMessage.roomId, referenceMessage.messageId) as TextMessage;
 
+	const { avatarColor } = useAvatarUtilities(referenceMessage.senderId);
+
 	// Remove reference view when message is deleted
 	useEffect(() => {
 		if (message?.deleted) {
 			unsetReferenceMessage(message.roomId);
 		}
 	}, [message, unsetReferenceMessage]);
-
-	const userColor = useMemo(() => calculateAvatarColor(senderUserName), [senderUserName]);
 
 	const labelAction = useMemo(() => {
 		if (referenceMessage.actionType === messageActionType.EDIT) return editYourMessageLabel;
@@ -111,7 +106,7 @@ const MessageReferenceDisplayed: React.FC<MessageReferenceDisplayedProps> = ({
 			<BorderContainer
 				data-testid="reference-border-message"
 				orientation="horizontal"
-				$customBorderColor={userColor}
+				$customBorderColor={avatarColor}
 				mainAlignment="flex-start"
 				padding={{ left: 'small' }}
 				width="fill"
@@ -137,13 +132,13 @@ const MessageReferenceDisplayed: React.FC<MessageReferenceDisplayedProps> = ({
 							{myId !== referenceMessage.senderId && (
 								<Row takeAvailableSpace wrap="nowrap" height="100%">
 									<Container orientation="horizontal" mainAlignment="flex-start" gap={'0.25rem'}>
-										<UserName
+										<Text
 											data-testid="reference-message-username"
 											overflow="ellipsis"
-											$labelColor={userColor}
+											color={avatarColor}
 										>
 											{senderUserName}
-										</UserName>
+										</Text>
 										{isUserGuest && <GuestUserLabel />}
 									</Container>
 								</Row>

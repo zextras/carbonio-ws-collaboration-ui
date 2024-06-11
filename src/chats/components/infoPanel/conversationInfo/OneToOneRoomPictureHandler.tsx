@@ -11,13 +11,12 @@ import { useTranslation } from 'react-i18next';
 import styled, { DefaultTheme } from 'styled-components';
 
 import RoomPictureHandler from './RoomPictureHandler';
-import { UsersApi } from '../../../../network';
+import useAvatarUtilities from '../../../../hooks/useAvatarUtilities';
 import { getCapability } from '../../../../store/selectors/SessionSelectors';
 import {
 	getUserLastActivity,
 	getUserName,
-	getUserOnline,
-	getUserPictureUpdatedAt
+	getUserOnline
 } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
 import { CapabilityType } from '../../../../types/store/SessionTypes';
@@ -57,10 +56,6 @@ const OneToOneRoomPictureHandler: FC<RoomPictureProps> = ({ memberId }) => {
 	const memberLastActivity: number | undefined = useStore((state) =>
 		getUserLastActivity(state, memberId)
 	);
-	const userPictureUpdatedAt: string | undefined = useStore((state) =>
-		getUserPictureUpdatedAt(state, memberId)
-	);
-
 	const lastSeen: string = useMemo(
 		() => (memberLastActivity ? getCalendarTime(memberLastActivity) : ''),
 		[memberLastActivity]
@@ -68,17 +63,13 @@ const OneToOneRoomPictureHandler: FC<RoomPictureProps> = ({ memberId }) => {
 
 	const lastSeenLabel: string = t('status.lastSeen', `Last seen ${lastSeen}`, { lastSeen });
 
-	const presenceLabel = useMemo(
-		() => (memberOnline ? userOnlineLabel : memberLastActivity ? lastSeenLabel : userOfflineLabel),
-		[memberOnline, memberLastActivity, userOnlineLabel, lastSeenLabel, userOfflineLabel]
-	);
+	const { avatarPicture, avatarColor } = useAvatarUtilities(memberId);
 
-	const picture = useMemo(() => {
-		if (userPictureUpdatedAt) {
-			return `${UsersApi.getURLUserPicture(memberId)}?${userPictureUpdatedAt}`;
-		}
-		return false;
-	}, [memberId, userPictureUpdatedAt]);
+	const presenceLabel = useMemo(() => {
+		if (memberOnline) return userOnlineLabel;
+		if (memberLastActivity) return lastSeenLabel;
+		return userOfflineLabel;
+	}, [memberOnline, memberLastActivity, userOnlineLabel, lastSeenLabel, userOfflineLabel]);
 
 	const description = useMemo(() => {
 		if (canSeeUsersPresence) {
@@ -86,16 +77,23 @@ const OneToOneRoomPictureHandler: FC<RoomPictureProps> = ({ memberId }) => {
 				<Container orientation="horizontal" mainAlignment="flex-start" height="fit">
 					{memberOnline && <Presence data-testid="user_presence_dot" />}
 					{memberOnline && <Padding right={'0.25rem'} />}
-					<CustomText size="small" color="gray6" $hasPicture={!!picture}>
+					<CustomText size="small" color="gray6" $hasPicture={!!avatarPicture}>
 						{presenceLabel}
 					</CustomText>
 				</Container>
 			);
 		}
 		return null;
-	}, [picture, canSeeUsersPresence, memberOnline, presenceLabel]);
+	}, [avatarPicture, canSeeUsersPresence, memberOnline, presenceLabel]);
 
-	return <RoomPictureHandler title={memberName} description={description} picture={picture} />;
+	return (
+		<RoomPictureHandler
+			title={memberName}
+			description={description}
+			picture={avatarPicture}
+			backgroundColor={avatarColor}
+		/>
+	);
 };
 
 export default OneToOneRoomPictureHandler;
