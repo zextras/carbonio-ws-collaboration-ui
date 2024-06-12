@@ -25,7 +25,6 @@ type BubbleFooterProps = {
 	date: number;
 	isMyMessage?: boolean;
 	messageRead?: MarkerStatus;
-	messageType?: string;
 	messageExtension?: string;
 	messageSize?: string;
 	isEdited?: boolean;

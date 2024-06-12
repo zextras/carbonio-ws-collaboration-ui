@@ -430,7 +430,7 @@ describe('render list of messages with history loader visible for first time ope
 		const message = screen.getByTestId(`configuration_msg-${mockedRemoveMemberMessage.id}`);
 		expect(message).toBeVisible();
 		const label = screen.getByText(
-			new RegExp(`${user3Be.name} is no longer a member of the group`, 'i')
+			new RegExp(`${user3Be.name} is no longer a member of ${room.name}.`, 'i')
 		);
 		expect(label).toBeVisible();
 	});

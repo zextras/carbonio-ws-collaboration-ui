@@ -95,14 +95,6 @@ const meeting: MeetingBe = createMockMeeting({
 });
 
 describe('User avatar', () => {
-	test('user avatar has not data loaded and show shimmer element', () => {
-		const store = useStore.getState();
-		store.addRoom(room);
-		setup(<UserAvatar roomId={room.id} draftMessage={false} />);
-		const shimmerAvatar = screen.getByTestId('shimmer_avatar');
-		expect(shimmerAvatar).toBeVisible();
-	});
-
 	describe('Presence dot', () => {
 		test('User presence dot should be visible when canSeeUsersPresence capability is set to true', () => {
 			const store = useStore.getState();

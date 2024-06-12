@@ -13,7 +13,6 @@ type ConversationInfoDetailsElementProps = {
 	label: string | undefined;
 	icon: string;
 	type: string;
-	padding: { left: string; top?: string; bottom: string; right?: string };
 };
 
 const CustomText = styled(Text)`
@@ -23,10 +22,9 @@ const CustomText = styled(Text)`
 const ConversationInfoDetailsElement: FC<ConversationInfoDetailsElementProps> = ({
 	label,
 	icon,
-	type,
-	padding
+	type
 }) => (
-	<Container orientation="horizontal" crossAlignment="flex-start" padding={padding}>
+	<Container orientation="horizontal" crossAlignment="flex-start">
 		<Container width="fit-content" height="fit-content">
 			<Icon icon={icon} size="medium" />
 		</Container>

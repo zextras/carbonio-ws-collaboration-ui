@@ -18,6 +18,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
+import { ConfigurationMessageLabel } from '../../../../hooks/useConfigurationMessageLabel';
 import { useIsWritingLabel } from '../../../../hooks/useIsWritingLabel';
 import useMessage from '../../../../hooks/useMessage';
 import useRouting from '../../../../hooks/useRouting';
@@ -39,7 +40,6 @@ import { MarkerStatus } from '../../../../types/store/MarkersTypes';
 import { Message, MessageType } from '../../../../types/store/MessageTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
 import { CapabilityType } from '../../../../types/store/SessionTypes';
-import { ConfigurationMessageLabel } from '../../../../utils/ConfigurationMessageLabel';
 import GroupAvatar from '../../GroupAvatar';
 import UserAvatar from '../../UserAvatar';
 
@@ -153,11 +153,7 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 						lastMessageOfRoom.attachment && lastMessageOfRoom.text === ''
 							? lastMessageOfRoom.attachment.name
 							: lastMessageOfRoom.text;
-					if (
-						roomType === RoomType.GROUP &&
-						lastMessageOfRoom.from !== sessionId &&
-						userNameOfLastMessageOfRoom
-					) {
+					if (roomType === RoomType.GROUP && lastMessageOfRoom.from !== sessionId) {
 						return `${userNameOfLastMessageOfRoom.split(/(\s+)/)[0]}: ${text}`;
 					}
 					return text;

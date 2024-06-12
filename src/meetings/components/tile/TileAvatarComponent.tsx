@@ -5,7 +5,7 @@
  */
 import React, { FC, useEffect, useMemo, useState } from 'react';
 
-import { Avatar, Shimmer, useTheme } from '@zextras/carbonio-design-system';
+import { Avatar, useTheme } from '@zextras/carbonio-design-system';
 import styled from 'styled-components';
 
 import { UsersApi } from '../../../network';
@@ -18,16 +18,6 @@ import useStore from '../../../store/Store';
 import { calculateAvatarColor } from '../../../utils/styleUtils';
 
 const StyledAvatar = styled(Avatar)`
-	min-height: 3.125rem;
-	min-width: 3.125rem;
-	height: 49%;
-	width: 27.5%;
-	aspect-ratio: 1;
-	max-height: 8.75rem;
-	max-width: 8.75rem;
-`;
-
-const StyledShimmerAvatar = styled(Shimmer.Avatar)`
 	min-height: 3.125rem;
 	min-width: 3.125rem;
 	height: 49%;
@@ -53,7 +43,7 @@ const TileAvatarComponent: FC<tileAvatarComponentProps> = ({ userId }) => {
 	const themeColor = useTheme();
 
 	const userColor = useMemo(() => {
-		const color = calculateAvatarColor(userName ?? '');
+		const color = calculateAvatarColor(userName);
 		return `${themeColor.avatarColors[color]}`;
 	}, [userName, themeColor.avatarColors]);
 
@@ -65,7 +55,6 @@ const TileAvatarComponent: FC<tileAvatarComponentProps> = ({ userId }) => {
 		}
 	}, [userId, userPictureUpdatedAt]);
 
-	if (!userName) return <StyledShimmerAvatar />;
 	if (isUserGuest)
 		return (
 			<StyledAvatar
@@ -77,19 +66,16 @@ const TileAvatarComponent: FC<tileAvatarComponentProps> = ({ userId }) => {
 				icon={'SmileOutline'}
 			/>
 		);
-	if (userName) {
-		return (
-			<StyledAvatar
-				label={userName}
-				title={userName}
-				shape="round"
-				size="extralarge"
-				background={userColor}
-				picture={picture || ''}
-			/>
-		);
-	}
-	return <StyledShimmerAvatar />;
+	return (
+		<StyledAvatar
+			label={userName}
+			title={userName}
+			shape="round"
+			size="extralarge"
+			background={userColor}
+			picture={picture || ''}
+		/>
+	);
 };
 
 export default TileAvatarComponent;

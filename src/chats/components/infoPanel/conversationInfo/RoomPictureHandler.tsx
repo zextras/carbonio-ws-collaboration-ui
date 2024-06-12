@@ -6,10 +6,10 @@
 
 import React, { FC, useCallback, useContext, useMemo } from 'react';
 
-import { Container, Padding, Text } from '@zextras/carbonio-design-system';
+import { Container, Padding, Text, useTheme } from '@zextras/carbonio-design-system';
 import { PreviewsManagerContext } from '@zextras/carbonio-ui-preview';
 import { useTranslation } from 'react-i18next';
-import styled, { css, DefaultTheme, FlattenSimpleInterpolation } from 'styled-components';
+import styled, { css, FlattenSimpleInterpolation } from 'styled-components';
 
 import { calculateAvatarColor } from '../../../../utils/styleUtils';
 
@@ -17,6 +17,7 @@ type RoomPictureProps = {
 	title: string;
 	description: React.ReactNode | null;
 	picture: string | false;
+	backgroundColor?: string;
 	moreHoverActions?: React.ReactNode;
 };
 
@@ -26,21 +27,18 @@ const HoverContainer = styled(Container)`
 
 const BackgroundContainer = styled(Container)<{
 	$hasHoverGradient: boolean;
-	$color: keyof DefaultTheme['avatarColors'];
+	$color: string;
 }>`
 	position: relative;
 	border-radius: 0;
-	background-color: ${({ $color, theme }): string | false => `${theme.avatarColors[$color]}`};
+	background-color: ${({ $color }): string | false => `${$color}`};
 	&:hover {
 		background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
-			${({ $color, $hasHoverGradient, theme }): string | false =>
-				$hasHoverGradient && `${theme.avatarColors[$color]}`};
+			${({ $color, $hasHoverGradient }): string | false => $hasHoverGradient && `${$color}`};
 		background: -webkit-linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
-			${({ $color, $hasHoverGradient, theme }): string | false =>
-				$hasHoverGradient && `${theme.avatarColors[$color]}`};
+			${({ $color, $hasHoverGradient }): string | false => $hasHoverGradient && `${$color}`};
 		background: -moz-linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
-			${({ $color, $hasHoverGradient, theme }): string | false =>
-				$hasHoverGradient && `${theme.avatarColors[$color]}`};
+			${({ $color, $hasHoverGradient }): string | false => $hasHoverGradient && `${$color}`};
 		${HoverContainer} {
 			opacity: 1;
 		}
@@ -104,10 +102,13 @@ const RoomPictureHandler: FC<RoomPictureProps> = ({
 	title,
 	description,
 	picture,
+	backgroundColor,
 	moreHoverActions
 }) => {
 	const [t] = useTranslation();
 	const closeLabel = t('action.close', 'Close');
+
+	const themeColor = useTheme();
 
 	const { createPreview } = useContext(PreviewsManagerContext);
 	const onPreviewClick = useCallback(() => {
@@ -159,7 +160,7 @@ const RoomPictureHandler: FC<RoomPictureProps> = ({
 
 	return !picture ? (
 		<BackgroundContainer
-			$color={calculateAvatarColor(title)}
+			$color={backgroundColor ?? themeColor.avatarColors[calculateAvatarColor(title)]}
 			$hasHoverGradient={!!picture || !!moreHoverActions}
 			mainAlignment="flex-end"
 			minHeight="10rem"
