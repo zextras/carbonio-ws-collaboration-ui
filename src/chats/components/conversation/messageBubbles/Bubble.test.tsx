@@ -17,7 +17,12 @@ import {
 	createMockTextMessage,
 	createMockUser
 } from '../../../../tests/createMock';
-import { mockedGetImageThumbnailURL } from '../../../../tests/mocks/network';
+import { mockedSendChatMessageDeletion } from '../../../../tests/mockedXmppClient';
+import { mockAttachmentTagElement } from '../../../../tests/mocks/global';
+import {
+	mockedDeleteAttachment,
+	mockedGetImageThumbnailURL
+} from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe } from '../../../../types/network/models/roomBeTypes';
 import { MarkerStatus } from '../../../../types/store/MarkersTypes';
@@ -28,6 +33,7 @@ import { User, UserType } from '../../../../types/store/UserTypes';
 
 const previewUrl = 'preview-url';
 const iconDoneAll = 'icon: DoneAll';
+const iconArrowIosDownward = 'icon: ArrowIosDownward';
 
 const user1Be: User = createMockUser({
 	id: 'user1',
@@ -328,5 +334,83 @@ describe('Message header', () => {
 		);
 		const guestLabel = screen.queryByText('Guest');
 		expect(guestLabel).not.toBeInTheDocument();
+	});
+});
+
+describe('Actions', () => {
+	test('download an attachment', async () => {
+		const store: RootStore = useStore.getState();
+		store.setLoginInfo(user1Be.id, user1Be.name);
+		store.addRoom(mockedTempRoom);
+		store.setUserInfo(user1Be);
+		const { user } = setup(
+			<Bubble
+				message={mockedAttachmentMessageGb}
+				prevMessageIsFromSameSender={false}
+				nextMessageIsFromSameSender={false}
+				messageRef={React.createRef<HTMLDivElement>()}
+			/>
+		);
+		jest.spyOn(document.body, 'appendChild').mockReturnValue(mockAttachmentTagElement);
+
+		const arrowButton = screen.getByTestId(iconArrowIosDownward);
+		await user.click(arrowButton);
+
+		const downloadAction = await screen.findByText(/Download/i);
+		await user.click(downloadAction);
+
+		expect(document.body.appendChild).toHaveBeenCalledWith(
+			expect.objectContaining({ download: 'image.jpeg' })
+		);
+	});
+	test('Delete a message with attachment', async () => {
+		mockedDeleteAttachment.mockReturnValue('deleted');
+
+		const store: RootStore = useStore.getState();
+		store.setLoginInfo(user1Be.id, user1Be.name);
+		store.addRoom(mockedTempRoom);
+		store.setUserInfo(user1Be);
+		store.newMessage(mockedAttachmentMessageGb);
+		const { user } = setup(
+			<Bubble
+				message={mockedAttachmentMessageGb}
+				prevMessageIsFromSameSender={false}
+				nextMessageIsFromSameSender={false}
+				messageRef={React.createRef<HTMLDivElement>()}
+			/>
+		);
+
+		const arrowButton = await screen.findByTestId(iconArrowIosDownward);
+		await user.click(arrowButton);
+
+		const deleteAction = await screen.findByText(/Delete for all/i);
+		await user.click(deleteAction);
+
+		expect(mockedDeleteAttachment).toHaveBeenCalled();
+	});
+	test('Delete a message', async () => {
+		mockedSendChatMessageDeletion.mockReturnValue('deleted');
+
+		const store: RootStore = useStore.getState();
+		store.setLoginInfo(user1Be.id, user1Be.name);
+		store.addRoom(mockedTempRoom);
+		store.setUserInfo(user1Be);
+		store.newMessage(mockedTextMessageSentByMe);
+		const { user } = setup(
+			<Bubble
+				message={mockedTextMessageSentByMe}
+				prevMessageIsFromSameSender={false}
+				nextMessageIsFromSameSender={false}
+				messageRef={React.createRef<HTMLDivElement>()}
+			/>
+		);
+
+		const arrowButton = await screen.findByTestId(iconArrowIosDownward);
+		await user.click(arrowButton);
+
+		const deleteAction = await screen.findByText(/Delete for all/i);
+		await user.click(deleteAction);
+
+		expect(mockedSendChatMessageDeletion).toHaveBeenCalled();
 	});
 });

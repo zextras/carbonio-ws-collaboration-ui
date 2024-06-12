@@ -238,6 +238,12 @@ describe('Meeting settings', () => {
 		expect(camCheckbox).toBeInTheDocument();
 	});
 	test('Change meeting media settings', async () => {
+		act(() => {
+			localStorage.setItem(
+				'ChatsMeetingSettings',
+				JSON.stringify({ EnableCamera: true, EnableMicrophone: true })
+			);
+		});
 		const store: RootStore = useStore.getState();
 		store.setUserInfo(userWithoutImage);
 		store.setLoginInfo(userWithoutImage.id, userWithoutImage.name, userWithoutImage.name);

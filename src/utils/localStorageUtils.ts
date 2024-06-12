@@ -50,8 +50,8 @@ export const getLocalStorageItem = (localStorageName: LOCAL_STORAGE_NAMES): Loca
 			window.parent.localStorage.setItem(
 				localStorageName,
 				JSON.stringify({
-					EnableMicrophone: true,
-					EnableCamera: true
+					EnableMicrophone: false,
+					EnableCamera: false
 				})
 			);
 			break;

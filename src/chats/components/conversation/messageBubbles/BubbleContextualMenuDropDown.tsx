@@ -29,7 +29,8 @@ import {
 	getReferenceMessage
 } from '../../../../store/selectors/ActiveConversationsSelectors';
 import { getXmppClient } from '../../../../store/selectors/ConnectionSelector';
-import { getCapability } from '../../../../store/selectors/SessionSelectors';
+import { getCapability, getUserId } from '../../../../store/selectors/SessionSelectors';
+import { getIsUserGuest } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
 import { messageActionType } from '../../../../types/store/ActiveConversationTypes';
 import { TextMessage } from '../../../../types/store/MessageTypes';
@@ -136,6 +137,8 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 	const successfulCopySnackbar = t('feedback.messageCopied', 'Message copied');
 	const messageActionsTooltip = t('tooltip.messageActions', 'Message actions');
 
+	const sessionId: string | undefined = useStore((store) => getUserId(store));
+	const isUserGuest = useStore((store) => getIsUserGuest(store, sessionId ?? ''));
 	const deleteMessageTimeLimitInMinutes = useStore((store) =>
 		getCapability(store, CapabilityType.DELETE_MESSAGE_TIME_LIMIT)
 	) as number;
@@ -148,7 +151,6 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 	const setDraftMessage = useStore((store) => store.setDraftMessage);
 	const forwardList = useStore((store) => getForwardList(store, message.roomId));
 	const setForwardList = useStore((store) => store.setForwardMessageList);
-	const unsetForwardList = useStore((store) => store.unsetForwardMessageList);
 
 	const filesToUploadArray = useStore((store) => getFilesToUploadArray(store, message.roomId));
 	const [dropdownActive, setDropdownActive] = useState(false);
@@ -171,7 +173,7 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 	useEffect(() => {
 		const messageListRef = window.document.getElementById(`messageListRef${message.roomId}`);
 		messageListRef?.addEventListener('scroll', closeDropdownOnScroll);
-		return () => messageListRef?.removeEventListener('scroll', closeDropdownOnScroll);
+		return (): void => messageListRef?.removeEventListener('scroll', closeDropdownOnScroll);
 	}, [closeDropdownOnScroll, message.roomId]);
 
 	const setForwardModeOn = useCallback(() => {
@@ -181,16 +183,8 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 	}, [message, setDraftMessage, setForwardList, unsetReferenceMessage]);
 
 	const copyMessageAction = useCallback(() => {
-		if (window.parent.navigator.clipboard) {
-			window.parent.navigator.clipboard.writeText(message.text).then();
-		} else {
-			const input = window.document.createElement('input');
-			input.setAttribute('value', message.text);
-			window.parent.document.body.appendChild(input);
-			input.select();
-			window.parent.document.execCommand('copy');
-			window.parent.document.body.removeChild(input);
-		}
+		window.parent.navigator.clipboard.writeText(message.text).then();
+
 		createSnackbar({
 			key: new Date().toLocaleString(),
 			type: 'info',
@@ -200,7 +194,6 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 	}, [createSnackbar, message.text, successfulCopySnackbar]);
 
 	const editMessageAction = useCallback(() => {
-		unsetForwardList(message.roomId);
 		setDraftMessage(message.roomId, false, message.text);
 		setReferenceMessage(
 			message.roomId,
@@ -210,10 +203,9 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 			messageActionType.EDIT,
 			message.attachment
 		);
-	}, [message, setDraftMessage, setReferenceMessage, unsetForwardList]);
+	}, [message, setDraftMessage, setReferenceMessage]);
 
 	const deleteMessageAction = useCallback(() => {
-		unsetForwardList(message.roomId);
 		if (message.attachment) {
 			AttachmentsApi.deleteAttachment(message.attachment.id).then(() =>
 				xmppClient.sendChatMessageDeletion(message.roomId, message.stanzaId)
@@ -221,7 +213,7 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 		} else {
 			xmppClient.sendChatMessageDeletion(message.roomId, message.stanzaId);
 		}
-	}, [message.attachment, message.stanzaId, message.roomId, xmppClient, unsetForwardList]);
+	}, [message.attachment, message.stanzaId, message.roomId, xmppClient]);
 
 	const downloadAction = useCallback(() => {
 		if (message.attachment) {
@@ -237,7 +229,6 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 	}, [message.attachment]);
 
 	const replyMessageAction = useCallback(() => {
-		unsetForwardList(message.roomId);
 		if (referenceMessage?.actionType === messageActionType.EDIT) {
 			setDraftMessage(message.roomId, false, '');
 		}
@@ -249,15 +240,12 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 			messageActionType.REPLY,
 			message.attachment
 		);
-	}, [
-		message,
-		referenceMessage?.actionType,
-		setDraftMessage,
-		setReferenceMessage,
-		unsetForwardList
-	]);
+	}, [message, referenceMessage?.actionType, setDraftMessage, setReferenceMessage]);
 
-	const forwardHasToAppear = useMemo(() => forwardList === undefined, [forwardList]);
+	const forwardHasToAppear = useMemo(
+		() => !isUserGuest && forwardList === undefined,
+		[forwardList, isUserGuest]
+	);
 
 	const canBeEdited = useMemo(
 		() =>

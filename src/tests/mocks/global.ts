@@ -251,3 +251,5 @@ Object.defineProperty(global, 'WebSocket', {
 		close: mockWebSocketClose
 	}))
 });
+
+export const mockAttachmentTagElement = document.createElement('a');

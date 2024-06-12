@@ -13,6 +13,7 @@ export const mockedSendChatMessageEdit = jest.fn();
 export const mockedSendChatMessageReply = jest.fn();
 export const mockedSendIsWriting = jest.fn();
 export const mockedSendPaused = jest.fn();
+export const mockedSendChatMessageDeletion = jest.fn();
 
 export const mockedReadMessage = jest.fn();
 export const xmppClient = {
@@ -24,7 +25,7 @@ export const xmppClient = {
 	setInbox: (): null => null,
 	sendChatMessage: mockedSendChatMessage,
 	sendChatMessageReply: mockedSendChatMessageReply,
-	sendChatMessageDeletion: (): null => null,
+	sendChatMessageDeletion: mockedSendChatMessageDeletion,
 	sendChatMessageEdit: mockedSendChatMessageEdit,
 	requestMessageToForward: (): Promise<Element> =>
 		Promise.resolve(Strophe.createHtml(textMessageRealTime)),
