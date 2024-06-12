@@ -28,9 +28,7 @@ export const xmppClient = {
 	sendChatMessageDeletion: mockedSendChatMessageDeletion,
 	sendChatMessageEdit: mockedSendChatMessageEdit,
 	requestMessageToForward: (): Promise<Element> =>
-		new Promise((resolve) => {
-			resolve(Strophe.createHtml(textMessageRealTime));
-		}),
+		Promise.resolve(Strophe.createHtml(textMessageRealTime)),
 	requestHistory: (): null => null,
 	requestHistoryBetweenTwoMessage: (): null => null,
 	requestMessageSubjectOfReply: (): null => null,

@@ -16,7 +16,6 @@ import { setup } from '../../../../tests/test-utils';
 import { UserType } from '../../../../types/store/UserTypes';
 
 const user1 = createMockUser({ id: 'user1', name: 'user1' });
-const user2 = createMockUser({ id: 'user2', name: 'user2' });
 const guestUser = createMockUser({ id: 'guestUserId', type: UserType.GUEST });
 
 beforeEach(() => {
@@ -29,12 +28,6 @@ describe('WaitingUser tests', () => {
 		setup(<WaitingUser meetingId="meetingId" userId={user1.id} />);
 		const name = screen.getByText(user1.name);
 		expect(name).toBeInTheDocument();
-	});
-
-	test('If user is not found, should render a shimmer', () => {
-		setup(<WaitingUser meetingId="meetingId" userId={user2.id} />);
-		const shimmer = screen.getByTestId('avatarShimmer');
-		expect(shimmer).toBeInTheDocument();
 	});
 
 	test('Should render the accept and reject buttons', () => {

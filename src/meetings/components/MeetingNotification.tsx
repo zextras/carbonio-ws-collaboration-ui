@@ -27,7 +27,7 @@ import { getUserName, getUserPictureUpdatedAt } from '../../store/selectors/User
 import useStore from '../../store/Store';
 
 const NotificationContainer = styled(Container)`
-	box-shadow: 0px 0px 0.25rem rgba(166, 166, 166, 0.5);
+	box-shadow: 0 0 0.25rem rgba(166, 166, 166, 0.5);
 	border-radius: 4px;
 	min-width: 20rem;
 	max-width: 25rem;
@@ -56,7 +56,7 @@ const MeetingNotification = ({
 	stopMeetingSound
 }: MeetingNotificationProps): ReactElement => {
 	const xmppClient = useStore(getXmppClient);
-	const userName: string = useStore((store) => getUserName(store, from)) || '';
+	const userName: string = useStore((store) => getUserName(store, from));
 	const userPictureUpdatedAt: string | undefined = useStore((state) =>
 		getUserPictureUpdatedAt(state, from)
 	);
@@ -66,7 +66,7 @@ const MeetingNotification = ({
 	const userIsInvitingYouLabel = (
 		<Trans
 			i18nKey="meeting.newMeetingNotification.userIsInvitingYou"
-			defaults="<strong>{{userName}}</strong> is inviting you"
+			defaults="<strong>{{name}}</strong> is inviting you"
 			values={{ name: userName }}
 		/>
 	);
@@ -119,7 +119,7 @@ const MeetingNotification = ({
 			data-testid="incoming_call_notification"
 			width="fill"
 			height="fill"
-			background="gray6"
+			background={'gray6'}
 			padding="1rem"
 			gap="1rem"
 		>

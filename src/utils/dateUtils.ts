@@ -20,8 +20,8 @@ export const setDateDefault = (
 	timezoneId: string | undefined,
 	locale: string | undefined
 ): void => {
-	moment.tz.setDefault(timezoneId || moment.tz.guess());
-	moment.locale(locale || 'en');
+	moment.tz.setDefault(timezoneId ?? moment.tz.guess());
+	moment.locale(locale ?? 'en');
 };
 
 export const formatDate = (date: DateType, format: string): string => moment(date).format(format);

@@ -11,7 +11,6 @@ import {
 	Container,
 	Padding,
 	Text,
-	Shimmer,
 	Row,
 	TextWithTooltip
 } from '@zextras/carbonio-design-system';
@@ -19,14 +18,12 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import MemberComponentActions from './MemberComponentActions';
-import { UsersApi } from '../../../../network';
+import useAvatarUtilities from '../../../../hooks/useAvatarUtilities';
 import { getCapability } from '../../../../store/selectors/SessionSelectors';
 import {
-	getUserEmail,
 	getUserLastActivity,
 	getUserName,
-	getUserOnline,
-	getUserPictureUpdatedAt
+	getUserOnline
 } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
 import { Member } from '../../../../types/store/RoomTypes';
@@ -57,13 +54,9 @@ const MemberComponentInfo: FC<ParticipantsInfoProps> = ({ member, roomId }) => {
 	);
 
 	const sessionId: string | undefined = useStore.getState().session.id;
-	const memberName: string | undefined = useStore((store) => getUserName(store, member.userId));
-	const memberEmail: string | undefined = useStore((store) => getUserEmail(store, member.userId));
+	const memberName: string = useStore((store) => getUserName(store, member.userId));
 	const memberLastActivity: number | undefined = useStore((store) =>
 		getUserLastActivity(store, member.userId)
-	);
-	const userPictureUpdatedAt: string | undefined = useStore((state) =>
-		getUserPictureUpdatedAt(state, member.userId)
 	);
 	const memberOnline: boolean | undefined = useStore((store) =>
 		getUserOnline(store, member.userId)
@@ -72,12 +65,7 @@ const MemberComponentInfo: FC<ParticipantsInfoProps> = ({ member, roomId }) => {
 		getCapability(store, CapabilityType.CAN_SEE_USERS_PRESENCE)
 	);
 
-	const picture = useMemo(() => {
-		if (userPictureUpdatedAt != null) {
-			return `${UsersApi.getURLUserPicture(member.userId)}?${userPictureUpdatedAt}`;
-		}
-		return '';
-	}, [member, userPictureUpdatedAt]);
+	const { avatarPicture, avatarIcon, avatarColor } = useAvatarUtilities(member.userId);
 
 	const lastSeen: string = useMemo(
 		() => (memberLastActivity ? getCalendarTime(memberLastActivity) : ''),
@@ -86,38 +74,21 @@ const MemberComponentInfo: FC<ParticipantsInfoProps> = ({ member, roomId }) => {
 
 	const lastSeenLabel: string = t('status.lastSeen', `Last Seen ${lastSeen}`, { lastSeen });
 
-	const presenceLabel = useMemo(
-		() =>
-			sessionId === member.userId
-				? youLabel
-				: memberOnline
-					? userOnlineLabel
-					: memberLastActivity
-						? lastSeenLabel
-						: goToPrivateChatLabel,
-		[
-			sessionId,
-			member.userId,
-			youLabel,
-			memberOnline,
-			userOnlineLabel,
-			memberLastActivity,
-			lastSeenLabel,
-			goToPrivateChatLabel
-		]
-	);
-
-	const avatarElement = useMemo(
-		() =>
-			memberName == null && memberEmail == null ? (
-				<Container width="fit" height="fit">
-					<Shimmer.Avatar width="2rem" />
-				</Container>
-			) : (
-				<CustomAvatar label={memberName || memberEmail || ''} shape="round" picture={picture} />
-			),
-		[memberEmail, memberName, picture]
-	);
+	const presenceLabel = useMemo(() => {
+		if (sessionId === member.userId) return youLabel;
+		if (memberOnline) return userOnlineLabel;
+		if (memberLastActivity) return lastSeenLabel;
+		return goToPrivateChatLabel;
+	}, [
+		sessionId,
+		member.userId,
+		youLabel,
+		memberOnline,
+		userOnlineLabel,
+		memberLastActivity,
+		lastSeenLabel,
+		goToPrivateChatLabel
+	]);
 
 	const infoElement = useMemo(
 		() => (
@@ -144,7 +115,13 @@ const MemberComponentInfo: FC<ParticipantsInfoProps> = ({ member, roomId }) => {
 			width="fill"
 			padding={{ top: 'extrasmall', bottom: 'extrasmall' }}
 		>
-			{avatarElement}
+			<CustomAvatar
+				label={memberName}
+				shape="round"
+				picture={avatarPicture}
+				icon={avatarIcon}
+				background={avatarColor}
+			/>
 			{infoElement}
 			<Row>
 				<MemberComponentActions roomId={roomId} memberId={member.userId} />

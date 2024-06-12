@@ -173,7 +173,7 @@ const AttachmentView: FC<AttachmentViewProps> = ({
 
 	useEffect(() => {
 		window.addEventListener('resize', resizeHandler);
-		return () => {
+		return (): void => {
 			window.removeEventListener('resize', resizeHandler);
 		};
 	}, [resizeHandler]);
@@ -184,7 +184,7 @@ const AttachmentView: FC<AttachmentViewProps> = ({
 		setPreviewError(true);
 	}, []);
 
-	const userColor = useMemo(() => calculateAvatarColor(senderIdentifier ?? ''), [senderIdentifier]);
+	const userColor = useMemo(() => calculateAvatarColor(senderIdentifier), [senderIdentifier]);
 
 	const previewURL = useMemo(
 		() => getThumbnailURL(attachment.id, attachment.mimeType),
