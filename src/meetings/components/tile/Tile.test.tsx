@@ -13,10 +13,12 @@ import Tile from './Tile';
 import useStore from '../../../store/Store';
 import {
 	createMockMeeting,
+	createMockMember,
 	createMockParticipants,
 	createMockRoom,
 	createMockUser
 } from '../../../tests/createMock';
+import { mockMediaDevicesResolve } from '../../../tests/mocks/global';
 import { mockedUpdateAudioStreamStatusRequest } from '../../../tests/mocks/network';
 import { setup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
@@ -36,9 +38,10 @@ const user3: UserBe = createMockUser({
 	name: 'user 3',
 	pictureUpdatedAt: '2022-08-25T17:24:28.961+02:00'
 });
-const member1: MemberBe = { userId: user1.id, owner: true };
-const member2: MemberBe = { userId: user2.id, owner: false };
-const member3: MemberBe = { userId: user3.id, owner: true };
+
+const member1: MemberBe = createMockMember({ userId: user1.id, owner: true });
+const member2: MemberBe = createMockMember({ userId: user2.id });
+const member3: MemberBe = createMockMember({ userId: user3.id, owner: true });
 
 const room: RoomBe = createMockRoom({
 	name: '',
@@ -181,6 +184,10 @@ const storeSetupTileAudioOnAndVideoOff = (): { user: UserEvent; store: RootStore
 	);
 	return { user, store };
 };
+
+beforeAll(() => {
+	mockMediaDevicesResolve();
+});
 
 describe('Tile test - enter meeting modal', () => {
 	test('my tile - everything is rendered correctly', () => {

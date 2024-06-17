@@ -16,8 +16,11 @@ export enum ROUTES {
 
 export enum MEETINGS_ROUTES {
 	MEETING = '/meeting/:meetingId',
+	EXTERNAL_LOGIN = '/externalLogin',
+	MEETING_ACCESS_PAGE = '/meetingAccessPage',
 	INFO = '/infoPage/:infoType'
 }
+
 export type MeetingRoutesParams = {
 	meetingId: string;
 	infoType: PAGE_INFO_TYPE;
@@ -38,6 +41,8 @@ export type UseRoutingHook = {
 	goToRoomPage: (roomId: string) => void;
 	goToMeetingPage: (meetingId: string) => void;
 	goToInfoPage: (infoType: PAGE_INFO_TYPE) => void;
+	goToExternalLoginPage: () => void;
+	goToMeetingAccessPage: () => void;
 };
 
 const useRouting = (): UseRoutingHook => {
@@ -57,8 +62,19 @@ const useRouting = (): UseRoutingHook => {
 		(meetingId: string): void => route(MEETINGS_ROUTES.MEETING.replace(':meetingId', meetingId)),
 		[route]
 	);
+
 	const goToInfoPage = useCallback(
 		(infoType: PAGE_INFO_TYPE): void => route(MEETINGS_ROUTES.INFO.replace(':infoType', infoType)),
+		[route]
+	);
+
+	const goToExternalLoginPage = useCallback(
+		(): void => route(MEETINGS_ROUTES.EXTERNAL_LOGIN),
+		[route]
+	);
+
+	const goToMeetingAccessPage = useCallback(
+		(): void => route(MEETINGS_ROUTES.MEETING_ACCESS_PAGE),
 		[route]
 	);
 
@@ -66,7 +82,9 @@ const useRouting = (): UseRoutingHook => {
 		goToMainPage,
 		goToRoomPage,
 		goToMeetingPage,
-		goToInfoPage
+		goToInfoPage,
+		goToExternalLoginPage,
+		goToMeetingAccessPage
 	};
 };
 

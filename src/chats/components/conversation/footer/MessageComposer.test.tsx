@@ -19,7 +19,8 @@ import {
 	createMockFile,
 	createMockMember,
 	createMockRoom,
-	createMockTextMessage
+	createMockTextMessage,
+	createMockUser
 } from '../../../../tests/createMock';
 import {
 	mockedSendChatMessageEdit,
@@ -37,10 +38,12 @@ import { FileToUpload, messageActionType } from '../../../../types/store/ActiveC
 import { Message } from '../../../../types/store/MessageTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
 import { RootStore } from '../../../../types/store/StoreTypes';
+import { User, UserType } from '../../../../types/store/UserTypes';
 
 const iconNavigator2 = 'icon: Navigation2';
 const borderColor = 'border-color: #8bc34a';
 const initText = 'we are gonna se';
+const iconAttach = 'icon: Attach';
 
 const mockedRoom: RoomBe = createMockRoom({
 	id: 'roomTest',
@@ -48,6 +51,17 @@ const mockedRoom: RoomBe = createMockRoom({
 	members: [
 		createMockMember({ userId: 'idPaolo', owner: true }),
 		createMockMember({ userId: 'idRoberto' })
+	]
+});
+
+const guestUser: User = createMockUser({ type: UserType.GUEST });
+
+const mockedRoomTemporary: RoomBe = createMockRoom({
+	id: 'roomTest',
+	type: RoomType.TEMPORARY,
+	members: [
+		createMockMember({ userId: 'idPaolo', owner: true }),
+		createMockMember({ userId: guestUser.id })
 	]
 });
 
@@ -140,7 +154,7 @@ describe('MessageComposer', () => {
 
 	test('Select file button', async () => {
 		const { user } = setup(<MessageComposer roomId={'roomId'} />);
-		const selectFileButton = screen.getByTestId('icon: Attach');
+		const selectFileButton = screen.getByTestId(iconAttach);
 		expect(selectFileButton).toBeVisible();
 
 		// Button status while user writes
@@ -417,8 +431,8 @@ describe('MessageComposer - send message', () => {
 
 		const input = screen.getByTestId('inputSelector') as HTMLInputElement;
 
-		user.upload(input, testImageFile);
-		await waitFor(() => expect(input.files).toHaveLength(1));
+		await user.upload(input, testImageFile);
+		expect(useStore.getState().activeConversations[mockedRoom.id].filesToAttach).toHaveLength(1);
 
 		const sendButton = screen.getByTestId(iconNavigator2);
 		await waitFor(() => user.click(sendButton));
@@ -436,8 +450,8 @@ describe('MessageComposer - send message', () => {
 
 		const input = screen.getByTestId('inputSelector') as HTMLInputElement;
 
-		user.upload(input, testPdfFile);
-		await waitFor(() => expect(input.files).toHaveLength(1));
+		await user.upload(input, testPdfFile);
+		expect(useStore.getState().activeConversations[mockedRoom.id].filesToAttach).toHaveLength(1);
 
 		const sendButton = screen.getByTestId(iconNavigator2);
 		await waitFor(() => user.click(sendButton));
@@ -454,8 +468,8 @@ describe('MessageComposer - send message', () => {
 
 		const input = screen.getByTestId('inputSelector') as HTMLInputElement;
 
-		user.upload(input, testFile);
-		await waitFor(() => expect(input.files).toHaveLength(1));
+		await user.upload(input, testFile);
+		expect(useStore.getState().activeConversations[mockedRoom.id].filesToAttach).toHaveLength(1);
 
 		const sendButton = screen.getByTestId(iconNavigator2);
 		await waitFor(() => user.click(sendButton));
@@ -463,6 +477,17 @@ describe('MessageComposer - send message', () => {
 		const updatedStore = useStore.getState();
 		expect(mockedAddRoomAttachmentRequest).toHaveBeenCalledTimes(1);
 		expect(updatedStore.activeConversations[mockedRoom.id].filesToAttach).toBeUndefined();
+	});
+
+	test("attachment selector shouldn't be present if the user is a guest", () => {
+		mockedAddRoomAttachmentRequest.mockReturnValue('attachmentId');
+		const store = useStore.getState();
+		store.addRoom(mockedRoomTemporary);
+		store.setLoginInfo(guestUser.id, guestUser.name, guestUser.type);
+		store.setUserInfo(guestUser);
+		setup(<MessageComposer roomId={mockedRoom.id} />);
+
+		expect(screen.queryByTestId(iconAttach)).not.toBeInTheDocument();
 	});
 });
 

@@ -6,6 +6,7 @@
 
 import { CapabilityType } from '../../types/store/SessionTypes';
 import { RootStore } from '../../types/store/StoreTypes';
+import { UserType } from '../../types/store/UserTypes';
 
 export const getSelectedRoomId = (store: RootStore): string | undefined =>
 	store.session.selectedRoomOneToOneGroup;
@@ -17,10 +18,12 @@ export const getSidebarFilterHasFocus = (store: RootStore): boolean => store.ses
 export const getCapability = (
 	store: RootStore,
 	capabilityName: CapabilityType
-): boolean | number | undefined =>
-	store.session.capabilities && store.session.capabilities[capabilityName];
+): boolean | number | undefined => store.session.capabilities?.[capabilityName];
 
 export const getUserId = (store: RootStore): string | undefined => store.session?.id;
 
 export const getCustomLogo = (store: RootStore): string | false | undefined =>
 	store.session?.customLogo;
+
+export const getIsLoggedUserExternal = (store: RootStore): boolean =>
+	store.session?.userType === UserType.GUEST;

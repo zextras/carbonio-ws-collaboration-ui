@@ -8,46 +8,41 @@ import { renderHook } from '@testing-library/react-hooks';
 
 import { useIsWritingLabel } from './useIsWritingLabel';
 import useStore from '../store/Store';
-import {
-	createMockMeeting,
-	createMockMember,
-	createMockParticipants,
-	createMockRoom
-} from '../tests/createMock';
+import { createMockMember, createMockRoom, createMockUser } from '../tests/createMock';
 import { RoomBe, RoomType } from '../types/network/models/roomBeTypes';
 import { UserBe } from '../types/network/models/userBeTypes';
 import { RootStore } from '../types/store/StoreTypes';
 import { User } from '../types/store/UserTypes';
 
-const user1Info: UserBe = {
+const user1Info: UserBe = createMockUser({
 	id: 'user1',
 	email: 'user1@domain.com',
 	name: 'One'
-};
+});
 
-const user2Info: UserBe = {
+const user2Info: UserBe = createMockUser({
 	id: 'user2',
 	email: 'user2@domain.com',
 	name: 'Two'
-};
+});
 
-const user3Info: UserBe = {
+const user3Info: UserBe = createMockUser({
 	id: 'user3',
 	email: 'user3@domain.com',
 	name: 'Three'
-};
+});
 
-const user4Info: UserBe = {
+const user4Info: UserBe = createMockUser({
 	id: 'user4',
 	email: 'user4@domain.com',
 	name: 'Four'
-};
+});
 
-const user5Info: User = {
+const user5Info: User = createMockUser({
 	id: 'user5',
 	email: 'user5@domain.com',
 	name: 'User 5'
-};
+});
 
 const testRoom: RoomBe = createMockRoom({
 	id: 'room-test',
@@ -60,14 +55,6 @@ const testRoom: RoomBe = createMockRoom({
 		createMockMember({ userId: user3Info.id }),
 		createMockMember({ userId: user4Info.id }),
 		createMockMember({ userId: user5Info.id })
-	]
-});
-
-const mockMeeting = createMockMeeting({
-	roomId: testRoom.id,
-	participants: [
-		createMockParticipants({ userId: user2Info.id }),
-		createMockParticipants({ userId: user1Info.id })
 	]
 });
 

@@ -66,7 +66,7 @@ const myMessagesTypes: Array<[string, TextMessage]> = [
 const simpleTextMessage: TextMessage = createMockTextMessage({
 	roomId: mockedRoom.id,
 	from: mySessionId,
-	date: Date.now() - 6000
+	date: Date.now() - 60
 });
 
 const repliedTextMessage: TextMessage = createMockTextMessage({
@@ -138,8 +138,6 @@ describe('Bubble Contextual Menu - other user messages', () => {
 	});
 
 	test('If forward mode is active, the forward action should not be present', async () => {
-		const simpleTextMessage: TextMessage = createMockTextMessage({ roomId: mockedRoom.id });
-
 		const store: RootStore = useStore.getState();
 		store.newMessage(simpleTextMessage);
 		store.setForwardMessageList(mockedRoom.id, simpleTextMessage);
@@ -154,11 +152,6 @@ describe('Bubble Contextual Menu - other user messages', () => {
 	});
 
 	test('Reply a message after starting an edit should reset the input', async () => {
-		const simpleTextMessage: TextMessage = createMockTextMessage({
-			roomId: mockedRoom.id,
-			from: mySessionId,
-			date: Date.now() - 60
-		});
 		const store: RootStore = useStore.getState();
 		store.newMessage(simpleTextMessage);
 		store.setDraftMessage(simpleTextMessage.roomId, false, simpleTextMessage.text);
@@ -219,11 +212,6 @@ describe('Bubble Contextual Menu - my messages', () => {
 	});
 
 	test('if that message is being edited, the delete for all action should not be present', async () => {
-		const simpleTextMessage: TextMessage = createMockTextMessage({
-			roomId: mockedRoom.id,
-			from: mySessionId,
-			date: Date.now() - 60
-		});
 		const store: RootStore = useStore.getState();
 		store.newMessage(simpleTextMessage);
 		store.setDraftMessage(simpleTextMessage.roomId, false, simpleTextMessage.text);
@@ -246,11 +234,6 @@ describe('Bubble Contextual Menu - my messages', () => {
 	});
 
 	test('if that message is being replied, the delete action should not be present', async () => {
-		const simpleTextMessage: TextMessage = createMockTextMessage({
-			roomId: mockedRoom.id,
-			from: mySessionId,
-			date: Date.now() - 60
-		});
 		const store: RootStore = useStore.getState();
 		store.newMessage(simpleTextMessage);
 		store.setDraftMessage(simpleTextMessage.roomId, false, simpleTextMessage.text);
@@ -273,11 +256,6 @@ describe('Bubble Contextual Menu - my messages', () => {
 	});
 
 	test('if forward mode is active, the forward action should not be present', async () => {
-		const simpleTextMessage: TextMessage = createMockTextMessage({
-			roomId: mockedRoom.id,
-			from: mySessionId,
-			date: Date.now() - 60
-		});
 		const store: RootStore = useStore.getState();
 		store.newMessage(simpleTextMessage);
 		store.setForwardMessageList(mockedRoom.id, simpleTextMessage);
@@ -289,5 +267,58 @@ describe('Bubble Contextual Menu - my messages', () => {
 		await user.click(arrowButton);
 
 		expect(screen.queryByText(/Forward/i)).not.toBeInTheDocument();
+	});
+
+	test('Forward mode is turned on', async () => {
+		const store: RootStore = useStore.getState();
+		store.newMessage(simpleTextMessage);
+
+		const { user } = setup(
+			<BubbleContextualMenuDropDown message={simpleTextMessage} isMyMessage />
+		);
+		const arrowButton = screen.getByTestId(iconArrowIosDownward);
+		await user.click(arrowButton);
+
+		const forwardAction = await screen.findByText(/Forward/i);
+		await user.click(forwardAction);
+
+		const storeUpdated = useStore.getState();
+
+		expect(storeUpdated.activeConversations[mockedRoom.id].forwardMessageList).toStrictEqual([
+			simpleTextMessage
+		]);
+	});
+	test('Edit a message', async () => {
+		const store: RootStore = useStore.getState();
+		store.newMessage(simpleTextMessage);
+
+		const { user } = setup(
+			<BubbleContextualMenuDropDown message={simpleTextMessage} isMyMessage />
+		);
+		const arrowButton = screen.getByTestId(iconArrowIosDownward);
+		await user.click(arrowButton);
+
+		const editAction = await screen.findByText(/Edit/i);
+		await user.click(editAction);
+
+		const storeUpdated = useStore.getState();
+
+		expect(storeUpdated.activeConversations[mockedRoom.id].referenceMessage).toBeDefined();
+	});
+	test('Copy a message', async () => {
+		const store: RootStore = useStore.getState();
+		store.newMessage(simpleTextMessage);
+
+		const { user } = setup(
+			<BubbleContextualMenuDropDown message={simpleTextMessage} isMyMessage />
+		);
+		const arrowButton = screen.getByTestId(iconArrowIosDownward);
+		await user.click(arrowButton);
+
+		const copyAction = await screen.findByText(/Copy/i);
+		await user.click(copyAction);
+
+		const copiedText = await window.navigator.clipboard.readText();
+		expect(copiedText).toEqual(simpleTextMessage.text);
 	});
 });

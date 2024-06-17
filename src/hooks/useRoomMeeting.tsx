@@ -43,16 +43,7 @@ const useRoomMeeting = (roomId: string): RoomMeetingHookType => {
 	const copyMeetingLink = useCallback(() => {
 		const separator = window.location.href.includes(CHATS_ROUTE) ? CHATS_ROUTE : MEETINGS_PATH;
 		const link = `${window.location.href.split(separator)[0]}${meetingLink}`;
-		if (window.parent.navigator.clipboard) {
-			window.parent.navigator.clipboard.writeText(link);
-		} else {
-			const input = window.document.createElement('input');
-			input.setAttribute('value', link);
-			window.parent.document.body.appendChild(input);
-			input.select();
-			window.parent.document.execCommand('copy');
-			window.parent.document.body.removeChild(input);
-		}
+		window.parent.navigator.clipboard.writeText(link).then();
 	}, [meetingLink]);
 
 	return { openMeeting, copyMeetingLink };

@@ -29,7 +29,7 @@ const mockedRoom: RoomBe = createMockRoom({
 	type: RoomType.GROUP
 });
 
-const myId = 'myId'; // on DS them will be color #EF9A9A
+const loggedUser = createMockUser({ id: 'loggedUserId', name: 'Logged User' }); // on DS them will be color #26A69A
 
 const mockedRepliedTextMessage = createMockTextMessage({
 	id: 'messageId',
@@ -41,17 +41,17 @@ const mockedRepliedTextMessage = createMockTextMessage({
 const myMockedRepliedTextMessage = createMockTextMessage({
 	id: 'messageId',
 	roomId: mockedRoom.id,
-	from: myId,
+	from: loggedUser.id,
 	text: 'Text message sent by me'
 });
 
-const user1: User = {
+const user1: User = createMockUser({
 	id: 'user1',
 	email: 'user1@domain.com',
 	name: 'User 1', // on DS them will be color #FFA726
 	lastSeen: 1234567890,
 	statusMessage: "Hey there! I'm User 1"
-};
+});
 
 const forwardedUser: UserBe = createMockUser({ id: 'forwardedUserId' });
 
@@ -80,13 +80,17 @@ const attachmentTextMessage = createMockTextMessage({
 	}
 });
 
+beforeEach(() => {
+	const store = useStore.getState();
+	store.setLoginInfo(loggedUser.id, loggedUser.name);
+	store.setUserInfo(loggedUser);
+	store.setUserInfo(user1);
+	store.setUserInfo(forwardedUser);
+	store.addRoom(mockedRoom);
+});
 describe('Message reference displayed', () => {
 	test('Display the reference message of another user in a reply action of user', async () => {
-		const store = useStore.getState();
-		store.setSessionId(myId);
-		store.addRoom(mockedRoom);
-		store.setUserInfo(user1);
-		store.newMessage(mockedRepliedTextMessage);
+		useStore.getState().newMessage(mockedRepliedTextMessage);
 
 		const referenceMessage = {
 			roomId: mockedRoom.id,
@@ -108,10 +112,7 @@ describe('Message reference displayed', () => {
 		expect(message).toBeInTheDocument();
 	});
 	test('Display the reference message of my message in a reply action of user', async () => {
-		const store = useStore.getState();
-		store.setLoginInfo(myId, 'me@userme.it');
-		store.addRoom(mockedRoom);
-		store.newMessage(myMockedRepliedTextMessage);
+		useStore.getState().newMessage(myMockedRepliedTextMessage);
 
 		const myReferenceMessage = {
 			roomId: mockedRoom.id,
@@ -126,15 +127,12 @@ describe('Message reference displayed', () => {
 		expect(replyToMySelfLabel).toHaveStyle('color: #828282');
 		const borderComponent = await screen.findByTestId(refBorderMsg);
 		expect(borderComponent).toBeInTheDocument();
-		expect(borderComponent).toHaveStyle('border-left: 0.25rem solid #EF9A9A');
+		expect(borderComponent).toHaveStyle('border-left: 0.25rem solid #26A69A');
 		const message = screen.getByText(/Text message sent by me/i);
 		expect(message).toBeInTheDocument();
 	});
 	test('Display the reference message I want to edit', async () => {
-		const store = useStore.getState();
-		store.setLoginInfo(myId, 'me@userme.it');
-		store.addRoom(mockedRoom);
-		store.newMessage(myMockedRepliedTextMessage);
+		useStore.getState().newMessage(myMockedRepliedTextMessage);
 		const myReferenceEditMessage = {
 			roomId: mockedRoom.id,
 			messageId: myMockedRepliedTextMessage.id,
@@ -148,18 +146,13 @@ describe('Message reference displayed', () => {
 		expect(editYourMessageLabel).toHaveStyle('color: #828282');
 		const borderComponent = await screen.findByTestId(refBorderMsg);
 		expect(borderComponent).toBeInTheDocument();
-		expect(borderComponent).toHaveStyle('border-left: 0.25rem solid #EF9A9A');
+		expect(borderComponent).toHaveStyle('border-left: 0.25rem solid #26A69A');
 		const message = screen.getByText(/Text message sent by me/i);
 		expect(message).toBeInTheDocument();
 	});
 
 	test('Reference message is a forwarded message', async () => {
-		const store = useStore.getState();
-		store.setSessionId(myId);
-		store.setUserInfo(user1);
-		store.setUserInfo(forwardedUser);
-		store.addRoom(mockedRoom);
-		store.newMessage(forwardedTextMessage);
+		useStore.getState().newMessage(forwardedTextMessage);
 
 		const referenceMessage = {
 			roomId: mockedRoom.id,
@@ -183,11 +176,7 @@ describe('Message reference displayed', () => {
 	});
 
 	test('Reference message is a message with an attachment', async () => {
-		const store = useStore.getState();
-		store.setSessionId(myId);
-		store.setUserInfo(user1);
-		store.addRoom(mockedRoom);
-		store.newMessage(attachmentTextMessage);
+		useStore.getState().newMessage(attachmentTextMessage);
 
 		const referenceMessage = {
 			roomId: mockedRoom.id,

@@ -51,6 +51,7 @@ const LogoBeta = ({ active }: { active: boolean }): JSX.Element => {
 				icon="TeamOutline"
 				size={'large'}
 				iconColor={active ? 'primary' : 'gray0'}
+				backgroundColor={active ? 'gray4' : 'gray6'}
 				onClick={goToChats}
 			/>
 			<CustomLabel background="info" height="2.25rem" width="fit">

@@ -8,12 +8,14 @@
 // https://jestjs.io/docs/en/manual-mocks#mocking-methods-which-are-not-implemented-in-jsdom
 
 export const fetchResponse: jest.Mock = jest.fn(() => ({}));
+export const fetchTextResponse: jest.Mock = jest.fn(() => '{}');
 export const requestFullscreen = jest.fn();
 
 Object.defineProperty(global, 'fetch', {
 	value: jest.fn(() =>
 		Promise.resolve({
 			json: () => fetchResponse(),
+			text: () => fetchTextResponse(),
 			ok: true,
 			headers: { get: (): string => 'application/json' }
 		})
@@ -65,19 +67,51 @@ export const mockedDevicesList = jest.fn(() => [
 	}
 ]);
 
-Object.defineProperty(global.navigator, 'mediaDevices', {
-	value: {
-		getUserMedia: jest.fn(() =>
-			Promise.resolve({
-				getTracks: jest.fn(() => ({ forEach: jest.fn() })),
-				getAudioTracks: jest.fn(() => ({ forEach: jest.fn() })),
-				getVideoTracks: jest.fn(() => ({ forEach: jest.fn() }))
-			})
-		),
-		enumerateDevices: jest.fn(() => Promise.resolve(mockedDevicesList())),
-		addEventListener: jest.fn(),
-		removeEventListener: jest.fn()
-	}
+export const mockMediaDevicesResolve = jest.fn(() => {
+	Object.defineProperty(global.navigator, 'mediaDevices', {
+		value: {
+			getUserMedia: jest.fn(() =>
+				Promise.resolve({
+					getTracks: jest.fn(() => ({ forEach: jest.fn() })),
+					getAudioTracks: jest.fn(() => ({ forEach: jest.fn() })),
+					getVideoTracks: jest.fn(() => ({ forEach: jest.fn() }))
+				})
+			),
+			enumerateDevices: jest.fn(() => Promise.resolve(mockedDevicesList())),
+			addEventListener: jest.fn(),
+			removeEventListener: jest.fn()
+		}
+	});
+});
+
+export const mockedGetUserMedia = jest.fn();
+export const mockedEnumerateDevices = jest.fn();
+
+export const mockMediaDevicesReject = jest.fn(() => {
+	Object.defineProperty(global.navigator, 'mediaDevices', {
+		value: {
+			getUserMedia: jest.fn(
+				() =>
+					new Promise((resolve, reject) => {
+						const result = mockedGetUserMedia();
+						result ? resolve(result) : reject(new Error());
+					})
+			),
+			enumerateDevices: jest.fn(
+				() =>
+					new Promise((resolve, reject) => {
+						const result = mockedEnumerateDevices();
+						result ? resolve(result) : reject(new Error());
+					})
+			),
+			addEventListener: jest.fn(),
+			removeEventListener: jest.fn()
+		}
+	});
+});
+
+Object.defineProperty(global.navigator, 'userAgent', {
+	value: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:124.0) Gecko/20100101 Firefox/124.0'
 });
 
 Object.defineProperty(HTMLMediaElement.prototype, 'muted', {
@@ -86,7 +120,17 @@ Object.defineProperty(HTMLMediaElement.prototype, 'muted', {
 
 Object.defineProperty(window, 'RTCPeerConnection', {
 	value: jest.fn(() => ({
-		addTrack: jest.fn()
+		addTrack: jest.fn(),
+		createAnswer: jest.fn(() => Promise.resolve({ sdp: '', type: 'answer' })),
+		setRemoteDescription: jest.fn(() => Promise.resolve()),
+		setLocalDescription: jest.fn(() => Promise.resolve())
+	}))
+});
+
+Object.defineProperty(window, 'RTCSessionDescription', {
+	value: jest.fn(() => ({
+		sdp: 'sdp',
+		type: 'offer'
 	}))
 });
 
@@ -186,3 +230,26 @@ export const mockPlayAudio = jest.fn();
 global.Audio = jest.fn().mockImplementation(() => ({
 	play: mockPlayAudio
 }));
+
+export const mockReplace = jest.fn();
+Object.defineProperty(window, 'location', {
+	value: {
+		href: 'https://localhost/carbonio/',
+		pathname: 'https://localhost/carbonio/',
+		replace: mockReplace,
+		includes: jest.fn()
+	},
+	writable: true
+});
+
+export const mockWebSocketSend = jest.fn();
+export const mockWebSocketClose = jest.fn();
+Object.defineProperty(global, 'WebSocket', {
+	value: jest.fn(() => ({
+		readyState: 1,
+		send: mockWebSocketSend,
+		close: mockWebSocketClose
+	}))
+});
+
+export const mockAttachmentTagElement = document.createElement('a');

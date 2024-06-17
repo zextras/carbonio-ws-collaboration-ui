@@ -28,12 +28,7 @@ type AddNewMemberProps = {
 	emptyRoom?: boolean;
 };
 
-const AddNewMemberAction: FC<AddNewMemberProps> = ({
-	roomId,
-	isInsideMeeting,
-	iAmTheOnlyOwner,
-	emptyRoom
-}) => {
+const AddNewMemberAction: FC<AddNewMemberProps> = ({ roomId, iAmTheOnlyOwner, emptyRoom }) => {
 	const [t] = useTranslation();
 	const addNewMemberTitle: string = t('action.addNewMembers', `Add new members`);
 	const removeToAddNewOneLabel = t(
@@ -50,11 +45,8 @@ const AddNewMemberAction: FC<AddNewMemberProps> = ({
 	const [showHistory, setShowHistory] = useState<boolean>(false);
 
 	const padding = useMemo(
-		() =>
-			isInsideMeeting && iAmTheOnlyOwner && emptyRoom
-				? { top: 'small', bottom: 'large' }
-				: { top: 'small' },
-		[isInsideMeeting, iAmTheOnlyOwner, emptyRoom]
+		() => (iAmTheOnlyOwner && emptyRoom ? { top: 'small', bottom: 'large' } : { top: 'small' }),
+		[iAmTheOnlyOwner, emptyRoom]
 	);
 
 	const closeModal = useCallback(() => {
@@ -91,7 +83,6 @@ const AddNewMemberAction: FC<AddNewMemberProps> = ({
 				action={(): void => setAddNewMemberModalOpen(true)}
 				isDisabled={addMemberDisabled}
 				disabledTooltip={removeToAddNewOneLabel}
-				isInsideMeeting={isInsideMeeting}
 			/>
 			{addNewMemberModalOpen && (
 				<AddNewMemberModal

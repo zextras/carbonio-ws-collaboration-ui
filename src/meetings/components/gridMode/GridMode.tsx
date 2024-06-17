@@ -15,7 +15,6 @@ import styled from 'styled-components';
 import useContainerDimensions from '../../../hooks/useContainerDimensions';
 import usePagination from '../../../hooks/usePagination';
 import { MeetingRoutesParams } from '../../../hooks/useRouting';
-import { getVideoScreenIn } from '../../../store/selectors/ActiveMeetingSelectors';
 import { getNumberOfTiles, getTiles } from '../../../store/selectors/MeetingSelectors';
 import useStore from '../../../store/Store';
 import { STREAM_TYPE, TileData } from '../../../types/store/ActiveMeetingTypes';
@@ -71,7 +70,6 @@ const GridMode = ({ children }: MeetingViewProps): ReactElement => {
 
 	const tilesData: TileData[] = useStore((store) => getTiles(store, meetingId));
 	const numberOfTiles = useStore((store) => getNumberOfTiles(store, meetingId));
-	const videoScreenIn = useStore((store) => getVideoScreenIn(store, meetingId));
 	const setUpdateSubscription = useStore((store) => store.setUpdateSubscription);
 
 	const { tileWidth, rows, columns, numberOfPages } = useMemo(() => {
@@ -144,7 +142,7 @@ const GridMode = ({ children }: MeetingViewProps): ReactElement => {
 			}));
 			setUpdateSubscription(meetingId, subscriptions);
 		}
-	}, [meetingId, setUpdateSubscription, tilesToRender, videoScreenIn]);
+	}, [meetingId, setUpdateSubscription, tilesToRender]);
 
 	return (
 		<GridContainer data-testid="gridModeView" mainAlignment="space-between" ref={gridContainerRef}>

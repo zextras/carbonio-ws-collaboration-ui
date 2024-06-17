@@ -6,14 +6,15 @@
 
 import React, { FC, useMemo } from 'react';
 
-import { Avatar, Container, Text, Shimmer, Row } from '@zextras/carbonio-design-system';
+import { Avatar, Container, Text, Row } from '@zextras/carbonio-design-system';
 import styled from 'styled-components';
 
 import GoToPrivateChatAction from '../../../chats/components/infoPanel/conversationParticipantsAccordion/GoToPrivateChatAction';
-import { UsersApi } from '../../../network';
+import useAvatarUtilities from '../../../hooks/useAvatarUtilities';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
-import { getUserName, getUserPictureUpdatedAt } from '../../../store/selectors/UsersSelectors';
+import { getIsUserGuest, getUserName } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
+import GuestUserLabel from '../GuestUserLabel';
 import MeetingParticipantActions from '../sidebar/ParticipantsAccordion/MeetingParticipantActions';
 
 const CustomContainer = styled(Container)`
@@ -27,7 +28,7 @@ const CustomAvatar = styled(Avatar)`
 
 type ParticipantElementProps = {
 	memberId: string;
-	meetingId?: string | undefined;
+	meetingId?: string;
 	isInsideMeeting?: boolean;
 };
 
@@ -37,45 +38,31 @@ const ParticipantElement: FC<ParticipantElementProps> = ({
 	meetingId
 }) => {
 	const userId: string | undefined = useStore((store) => getUserId(store));
-	const memberName: string | undefined = useStore((store) => getUserName(store, memberId));
-
-	const userPictureUpdatedAt: string | undefined = useStore((state) =>
-		getUserPictureUpdatedAt(state, memberId)
-	);
-
-	const picture = useMemo(() => {
-		if (userPictureUpdatedAt != null) {
-			return `${UsersApi.getURLUserPicture(memberId)}?${userPictureUpdatedAt}`;
-		}
-		return '';
-	}, [memberId, userPictureUpdatedAt]);
-
-	const avatarElement = useMemo(
-		() =>
-			memberName == null ? (
-				<Container width="fit" height="fit">
-					<Shimmer.Avatar width="2rem" />
-				</Container>
-			) : (
-				<CustomAvatar label={memberName} shape="round" picture={picture} />
-			),
-		[memberName, picture]
-	);
+	const memberName: string = useStore((store) => getUserName(store, memberId));
+	const isUserGuest = useStore((store) => getIsUserGuest(store, memberId));
 
 	const infoElement = useMemo(
 		() => (
 			<Row takeAvailableSpace wrap="nowrap" height="100%">
-				<Container orientation="vertical" crossAlignment="flex-start" padding={{ left: 'small' }}>
+				<Container
+					orientation="horizontal"
+					mainAlignment="flex-start"
+					padding={{ horizontal: 'small' }}
+					gap={'0.25rem'}
+				>
 					<Text color="text" size="small" overflow="ellipsis">
 						{memberName}
 					</Text>
+					{isUserGuest && <GuestUserLabel />}
 				</Container>
 			</Row>
 		),
-		[memberName]
+		[isUserGuest, memberName]
 	);
 
 	const isSessionParticipant: boolean = useMemo(() => memberId === userId, [memberId, userId]);
+
+	const { avatarPicture, avatarIcon, avatarColor } = useAvatarUtilities(memberId);
 
 	return (
 		<CustomContainer
@@ -84,7 +71,13 @@ const ParticipantElement: FC<ParticipantElementProps> = ({
 			width="fill"
 			padding={{ top: 'extrasmall', bottom: 'extrasmall' }}
 		>
-			{avatarElement}
+			<CustomAvatar
+				label={memberName}
+				shape="round"
+				picture={avatarPicture}
+				icon={avatarIcon}
+				background={avatarColor}
+			/>
 			{infoElement}
 			{!isInsideMeeting ? (
 				!isSessionParticipant && (

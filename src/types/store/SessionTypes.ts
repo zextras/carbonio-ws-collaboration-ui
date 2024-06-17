@@ -4,12 +4,15 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { UserType } from './UserTypes';
+
 export type Session = {
 	id?: string;
 	email?: string;
 	name?: string;
 	displayName?: string;
 	sessionId?: string;
+	userType?: UserType;
 	capabilities?: CapabilityList;
 	connections?: {
 		chats_be: boolean | undefined;
@@ -23,15 +26,15 @@ export type Session = {
 
 export type CapabilityList = {
 	canSeeMessageReads: boolean;
-	canSeeUsersPresence: boolean;
-	canVideoCall: boolean;
-	canVideoCallRecord: boolean;
-	canUseVirtualBackground: boolean;
+	canSeeUsersPresence?: boolean;
+	canVideoCall?: boolean;
+	canVideoCallRecord?: boolean;
+	canUseVirtualBackground?: boolean;
 	editMessageTimeLimitInMinutes: number;
 	deleteMessageTimeLimitInMinutes: number;
-	maxGroupMembers: number;
-	maxRoomImageSizeInKb: number;
-	maxUserImageSizeInKb: number;
+	maxGroupMembers?: number;
+	maxRoomImageSizeInKb?: number;
+	maxUserImageSizeInKb?: number;
 };
 
 export enum CapabilityType {

@@ -17,7 +17,11 @@ const CustomContainer = styled(Container)`
 `;
 
 const ShimmeringExpandedListView = (): ReactElement => (
-	<Container mainAlignment="flex-start" crossAlignment="flex-start">
+	<Container
+		mainAlignment="flex-start"
+		crossAlignment="flex-start"
+		data-testid="shimmering_list_view"
+	>
 		<CustomContainer orientation="horizontal" mainAlignment="flex-start">
 			<Container crossAlignment="flex-start" padding={{ left: 'large' }}>
 				<Shimmer.Text width="70%" />

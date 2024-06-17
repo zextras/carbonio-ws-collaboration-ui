@@ -16,7 +16,6 @@ import MeetingConversationAccordion from './MeetingConversationAccordion/Meeting
 import MeetingParticipantsAccordion from './ParticipantsAccordion/MeetingParticipantsAccordion';
 import RecordingAccordion from './recordingAccordion/RecordingAccordion';
 import WaitingListAccordion from './waitingListAccordion/WaitingListAccordion';
-import { ActionsAccordion } from '../../../chats/components/infoPanel/conversationActionsAccordion/ActionsAccordion';
 import { MeetingRoutesParams } from '../../../hooks/useRouting';
 import {
 	getMeetingChatVisibility,
@@ -54,7 +53,11 @@ const SidebarIconButton = styled(IconButton)`
 `;
 
 const AccordionContainer = styled(Container)`
-	overflow-y: auto;
+	overflow-y: scroll;
+	scrollbar-width: none;
+	::-webkit-scrollbar {
+		width: 0;
+	}
 `;
 
 const MeetingSidebar = (): ReactElement => {
@@ -73,14 +76,10 @@ const MeetingSidebar = (): ReactElement => {
 	const canVideoCallRecord = useStore((store) =>
 		getCapability(store, CapabilityType.CAN_VIDEO_CALL_RECORD)
 	);
+
 	const toggleSidebar = useCallback(
 		() => setMeetingSidebarStatus(meetingId, !sidebarIsVisible),
 		[setMeetingSidebarStatus, meetingId, sidebarIsVisible]
-	);
-
-	const showActionsAccordion = useMemo(
-		() => includes([RoomType.ONE_TO_ONE, RoomType.GROUP], roomType),
-		[roomType]
 	);
 
 	const showRecordingAccordion = useMemo(
@@ -100,7 +99,7 @@ const MeetingSidebar = (): ReactElement => {
 
 	return (
 		<SidebarContainer
-			background="text"
+			background={'text'}
 			width={sidebarIsVisible ? '35%' : '0'}
 			minWidth={sidebarIsVisible ? '23.125rem' : '0'}
 			maxWidth="31.25rem"
@@ -109,17 +108,21 @@ const MeetingSidebar = (): ReactElement => {
 			mainAlignment="flex-end"
 			data-testid="meeting_sidebar"
 		>
-			{meetingChatVisibility !== MeetingChatVisibility.EXPANDED && (
-				<AccordionContainer mainAlignment="flex-start" flexGrow="1" gap="gap: 0.063rem">
-					{showActionsAccordion && (
-						<ActionsAccordion roomId={roomId || ''} isInsideMeeting meetingId={meetingId} />
+			<Container height="100%" mainAlignment="space-between">
+				<Container
+					height="fit"
+					maxHeight={meetingChatVisibility === MeetingChatVisibility.OPEN ? '50%' : 'fill'}
+				>
+					{meetingChatVisibility !== MeetingChatVisibility.EXPANDED && (
+						<AccordionContainer height="fit" mainAlignment="flex-start" gap="gap: 0.063rem">
+							{showRecordingAccordion && <RecordingAccordion meetingId={meetingId} />}
+							{showWaitingListAccordion && <WaitingListAccordion meetingId={meetingId} />}
+							{showParticipantsAccordion && <MeetingParticipantsAccordion meetingId={meetingId} />}
+						</AccordionContainer>
 					)}
-					{showRecordingAccordion && <RecordingAccordion meetingId={meetingId} />}
-					{showWaitingListAccordion && <WaitingListAccordion meetingId={meetingId} />}
-					{showParticipantsAccordion && <MeetingParticipantsAccordion meetingId={meetingId} />}
-				</AccordionContainer>
-			)}
-			<MeetingConversationAccordion roomId={roomId || ''} meetingId={meetingId} />
+				</Container>
+				<MeetingConversationAccordion roomId={roomId ?? ''} meetingId={meetingId} />
+			</Container>
 			<ChangeSidebarStatusButton>
 				<Tooltip
 					label={sidebarIsVisible ? collapseSidebarLabel : expandSidebarLabel}

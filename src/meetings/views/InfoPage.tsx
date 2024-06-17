@@ -11,6 +11,9 @@ import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { MeetingRoutesParams, PAGE_INFO_TYPE } from '../../hooks/useRouting';
+import { getIsLoggedUserExternal } from '../../store/selectors/SessionSelectors';
+import useStore from '../../store/Store';
+import { BrowserUtils } from '../../utils/BrowserUtils';
 
 const CustomContainer = styled(Container)`
 	z-index: 10;
@@ -47,6 +50,20 @@ const InfoPage = (): ReactElement => {
 	let titleLabel;
 	let centralLabel;
 	let descriptionLowerLabel;
+
+	const isLoggedUserExternal = useStore(getIsLoggedUserExternal);
+
+	switch (infoType) {
+		case PAGE_INFO_TYPE.MEETING_ENDED:
+		case PAGE_INFO_TYPE.NEXT_TIME_PAGE:
+		case PAGE_INFO_TYPE.MEETING_NOT_FOUND:
+			if (isLoggedUserExternal) {
+				BrowserUtils.clearAuthCookies();
+			}
+			break;
+		default:
+			break;
+	}
 
 	switch (infoType) {
 		case PAGE_INFO_TYPE.ROOM_EMPTY:

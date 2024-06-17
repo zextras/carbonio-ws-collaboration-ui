@@ -35,6 +35,7 @@ const MeetingDuration = ({ meetingId }: MeetingDurationProps): ReactElement | nu
 			<CustomContainer
 				orientation="horizontal"
 				width="fit"
+				height="fit"
 				crossAlignment="flex-end"
 				gap="0.25rem"
 				data-testid="meeting_duration_component"

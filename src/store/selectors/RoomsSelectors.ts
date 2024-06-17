@@ -6,11 +6,10 @@
 
 import { countBy, filter, find, forEach, map, orderBy, size } from 'lodash';
 
+import { getUserName } from './UsersSelectors';
 import { RoomsApi, UsersApi } from '../../network';
-import { Member, Room, RoomsMap, RoomType } from '../../types/store/RoomTypes';
+import { Member, Room, RoomType } from '../../types/store/RoomTypes';
 import { RootStore } from '../../types/store/StoreTypes';
-
-export const getRoomsSelector = (state: RootStore): RoomsMap => ({ ...state.rooms });
 
 export const getRoomIdsList = (state: RootStore): string[] => {
 	const idsList: string[] = [];
@@ -34,11 +33,11 @@ export const getRoomNameSelector = (state: RootStore, id: string): string => {
 	if (room.type === RoomType.ONE_TO_ONE) {
 		const otherUser = find(room.members ?? [], (member) => member.userId !== state.session.id);
 		if (size(room.members) > 0 && otherUser) {
-			return state.users[otherUser.userId]?.name || state.users[otherUser.userId]?.email || '';
+			return getUserName(state, otherUser.userId);
 		}
 		return '';
 	}
-	return state.rooms[id].name ?? '';
+	return room.name ?? '';
 };
 
 export const getRoomTypeSelector = (state: RootStore, id: string): RoomType =>
@@ -57,14 +56,6 @@ export type RoomMainInfosType = {
 	type?: RoomType;
 	muted?: boolean;
 };
-
-export const getRoomMainInfoSelector = (state: RootStore, id: string): RoomMainInfosType => ({
-	id: state.rooms[id]?.id,
-	name: state.rooms[id]?.name,
-	description: state.rooms[id]?.description,
-	type: state.rooms[id]?.type,
-	muted: state.rooms[id]?.userSettings?.muted
-});
 
 export const getOwnershipOfTheRoom = (
 	state: RootStore,
@@ -128,3 +119,16 @@ export const getMeetingIdFromRoom = (state: RootStore, roomId: string): string |
 
 export const getIsPlaceholderRoom = (state: RootStore, roomId: string): boolean =>
 	state.rooms[roomId]?.placeholder ?? false;
+
+export const getSingleConversationsUserId = (state: RootStore): string[] => {
+	const userIds: string[] = [];
+	forEach(state.rooms, (room) => {
+		if (room.type === RoomType.ONE_TO_ONE) {
+			const otherUser = find(room.members ?? [], (member) => member.userId !== state.session.id);
+			if (size(room.members) > 0 && otherUser) {
+				userIds.push(otherUser.userId);
+			}
+		}
+	});
+	return userIds;
+};

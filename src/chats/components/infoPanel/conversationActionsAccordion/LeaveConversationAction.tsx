@@ -11,7 +11,7 @@ import { useTranslation } from 'react-i18next';
 
 import ActionComponent from './ActionComponent';
 import LeaveConversationModal from './LeaveConversationModal';
-import useRouting, { PAGE_INFO_TYPE } from '../../../../hooks/useRouting';
+import useRouting from '../../../../hooks/useRouting';
 import { RoomsApi } from '../../../../network';
 import useStore from '../../../../store/Store';
 import { RoomType } from '../../../../types/store/RoomTypes';
@@ -20,15 +20,9 @@ type LeaveProps = {
 	roomId: string;
 	type: string;
 	iAmOneOfOwner: boolean;
-	isInsideMeeting?: boolean;
 };
 
-const LeaveConversationAction: FC<LeaveProps> = ({
-	roomId,
-	type,
-	iAmOneOfOwner,
-	isInsideMeeting
-}) => {
+const LeaveConversationAction: FC<LeaveProps> = ({ roomId, type, iAmOneOfOwner }) => {
 	const [t] = useTranslation();
 	const leaveLabel: string = useMemo(() => {
 		if (type === RoomType.GROUP) {
@@ -41,29 +35,20 @@ const LeaveConversationAction: FC<LeaveProps> = ({
 
 	const [leaveConversationModalOpen, setLeaveConversationModalOpen] = useState<boolean>(false);
 
-	const { goToMainPage, goToInfoPage } = useRouting();
+	const { goToMainPage } = useRouting();
 
 	const padding = useMemo(
-		() =>
-			!iAmOneOfOwner
-				? { top: 'small', bottom: 'large' }
-				: isInsideMeeting
-					? { top: 'small', bottom: 'large' }
-					: { top: 'small' },
-		[iAmOneOfOwner, isInsideMeeting]
+		() => (!iAmOneOfOwner ? { top: 'small', bottom: 'large' } : { top: 'small' }),
+		[iAmOneOfOwner]
 	);
 
 	const leaveConversation = useCallback(() => {
 		if (sessionId) {
 			RoomsApi.deleteRoomMember(roomId, sessionId).then(() => {
-				if (isInsideMeeting) {
-					goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED);
-				} else {
-					goToMainPage();
-				}
+				goToMainPage();
 			});
 		}
-	}, [goToInfoPage, goToMainPage, isInsideMeeting, roomId, sessionId]);
+	}, [goToMainPage, roomId, sessionId]);
 
 	const closeModal = useCallback(() => setLeaveConversationModalOpen(false), []);
 
@@ -76,7 +61,6 @@ const LeaveConversationAction: FC<LeaveProps> = ({
 				label={leaveLabel}
 				withArrow
 				action={(): void => setLeaveConversationModalOpen(true)}
-				isInsideMeeting={isInsideMeeting}
 				actionTestId="leaveAction"
 			/>
 			{leaveConversationModalOpen && (

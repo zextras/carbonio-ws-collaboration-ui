@@ -10,7 +10,7 @@ import { screen, waitFor } from '@testing-library/react';
 
 import GroupRoomPictureHandler from './GroupRoomPictureHandler';
 import useStore from '../../../../store/Store';
-import { createMockMember, createMockRoom } from '../../../../tests/createMock';
+import { createMockMember, createMockRoom, createMockUser } from '../../../../tests/createMock';
 import {
 	mockedDeleteRoomPictureRequest,
 	mockedUpdateRoomPictureRequest
@@ -22,20 +22,9 @@ import { User } from '../../../../types/store/UserTypes';
 
 const pictureUpdatedAtTime = '2022-08-25T17:24:28.961+02:00';
 
-const user1Info: User = {
-	id: 'myId',
-	email: 'user1@domain.com',
-	name: 'User 1',
-	pictureUpdatedAt: pictureUpdatedAtTime
-};
+const user1Info: User = createMockUser();
 
-const user2Info: User = {
-	id: 'otherId',
-	email: 'user2@domain.com',
-	name: 'User 2',
-	pictureUpdatedAt: pictureUpdatedAtTime,
-	last_activity: 1642818965849
-};
+const user2Info: User = createMockUser();
 
 const testRoom: RoomBe = createMockRoom({
 	id: 'room-test',

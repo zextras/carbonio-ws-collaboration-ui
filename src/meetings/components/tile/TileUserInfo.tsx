@@ -11,8 +11,9 @@ import styled from 'styled-components';
 
 import usePinnedTile from '../../../hooks/usePinnedTile';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
-import { getUserName } from '../../../store/selectors/UsersSelectors';
+import { getIsUserGuest, getUserName } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
+import GuestUserLabel from '../GuestUserLabel';
 
 const InfoContainer = styled(Container)`
 	height: auto;
@@ -58,12 +59,13 @@ const TileUserInfo: FC<tileUserInfoProps> = ({
 	const micOffLabel = t('meetings.interactions.yourMicIsDisabled', 'Your microphone is off');
 	const camOffLabel = t('meetings.interactions.yourCamIsDisabled', 'Your camera is off');
 
-	const userName = useStore((store) => getUserName(store, userId || ''));
+	const userName = useStore((store) => getUserName(store, userId ?? ''));
 	const isSessionTile = useStore(getUserId) === userId;
+	const isUserGuest = useStore((store) => getIsUserGuest(store, userId ?? ''));
 
 	const { canUsePinFeature, isPinned } = usePinnedTile(
-		meetingId || '',
-		userId || '',
+		meetingId ?? '',
+		userId ?? '',
 		isScreenShare
 	);
 
@@ -145,8 +147,9 @@ const TileUserInfo: FC<tileUserInfoProps> = ({
 				takeAvailableSpace
 				padding="0.5rem"
 			>
-				<TextContainer width={'fit'} height={'fit'}>
+				<TextContainer orientation={'horizontal'} width={'fit'} height={'fit'} gap={'0.25rem'}>
 					<Text color={'gray6'}>{userName}</Text>
+					{isUserGuest && <GuestUserLabel />}
 				</TextContainer>
 			</Row>
 		</InfoContainer>

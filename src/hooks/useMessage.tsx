@@ -29,7 +29,7 @@ const useMessage = (roomId: string, messageId: string): Message | undefined => {
 						return {
 							...message,
 							edited: true,
-							text: fastening.value || ''
+							text: fastening.value ?? ''
 						} as TextMessage;
 					}
 					case 'delete': {

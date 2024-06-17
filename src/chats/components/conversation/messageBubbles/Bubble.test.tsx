@@ -12,53 +12,58 @@ import Bubble from './Bubble';
 import useStore from '../../../../store/Store';
 import {
 	createMockCapabilityList,
+	createMockMember,
 	createMockRoom,
-	createMockTextMessage
+	createMockTextMessage,
+	createMockUser
 } from '../../../../tests/createMock';
-import { mockedGetImageThumbnailURL } from '../../../../tests/mocks/network';
+import { mockedSendChatMessageDeletion } from '../../../../tests/mockedXmppClient';
+import { mockAttachmentTagElement } from '../../../../tests/mocks/global';
+import {
+	mockedDeleteAttachment,
+	mockedGetImageThumbnailURL
+} from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe } from '../../../../types/network/models/roomBeTypes';
 import { MarkerStatus } from '../../../../types/store/MarkersTypes';
+import { TextMessage } from '../../../../types/store/MessageTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
 import { RootStore } from '../../../../types/store/StoreTypes';
-import { User } from '../../../../types/store/UserTypes';
+import { User, UserType } from '../../../../types/store/UserTypes';
 
 const previewUrl = 'preview-url';
 const iconDoneAll = 'icon: DoneAll';
+const iconArrowIosDownward = 'icon: ArrowIosDownward';
 
-const user1Be: User = {
+const user1Be: User = createMockUser({
 	id: 'user1',
 	email: 'user1@domain.com',
 	name: 'User1',
 	lastSeen: 1234567890,
 	statusMessage: "Hey there! I'm User 1"
-};
+});
 
-const user2Be: User = {
+const user2Be: User = createMockUser({
 	id: 'user2',
 	email: 'user2@domain.com',
 	name: 'User2',
 	lastSeen: 1234567890,
 	statusMessage: "Hey there! I'm User 2"
-};
+});
+
+const mockMember1 = createMockMember({ userId: user1Be.id, owner: true });
+const mockMember2 = createMockMember({ userId: user2Be.id });
+
+const guestUser: User = createMockUser({ type: UserType.GUEST });
+
+const mockedTempRoom: RoomBe = createMockRoom({ type: RoomType.TEMPORARY, members: [mockMember1] });
+
+const mockedMsgFromGuest = createMockTextMessage({ roomId: mockedTempRoom.id, from: guestUser.id });
 
 const mockedRoom: RoomBe = createMockRoom({
 	id: 'roomId',
 	type: RoomType.GROUP,
-	members: [
-		{
-			userId: user1Be.id,
-			owner: true,
-			temporary: false,
-			external: false
-		},
-		{
-			userId: user2Be.id,
-			owner: false,
-			temporary: false,
-			external: false
-		}
-	]
+	members: [mockMember1, mockMember2]
 });
 
 const mockedRepliedTextMessage = createMockTextMessage({
@@ -177,8 +182,6 @@ describe('Message bubble component visualization', () => {
 			/>
 		);
 		const insideText = screen.getByText(
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore
 			new RegExp(`${mockedRepliedTextMessage.repliedMessage?.text}`, 'i')
 		);
 		expect(insideText).toBeVisible();
@@ -215,11 +218,27 @@ describe('Message bubble component visualization', () => {
 	});
 });
 
+const sizeFormatMessages: Array<[string, TextMessage, string]> = [
+	['B', mockedAttachmentMessageB, 'PNG • 21B'],
+	['Kb', mockedAttachmentMessageKb, 'PNG • 20.91KB'],
+	['Mb', mockedAttachmentMessageMb, 'PNG • 3.19MB'],
+	['Gb', mockedAttachmentMessageGb, 'PNG • 5.31GB']
+];
+
+const readsMessages: Array<[string, TextMessage, boolean, string]> = [
+	['Reads - user can see reads', mockedTextMessageSentByMe, true, iconDoneAll],
+	['someone reads - user can see reads', mockedTextMessageReadBySomeone, true, iconDoneAll],
+	['unread - user can see reads', mockedTextMessageUnread, true, 'icon: Checkmark'],
+	['someone reads - user can see reads', mockedTextMessageReadBySomeone, true, iconDoneAll],
+	['pending status - user can see reads', mockedTextMessagePending, true, 'icon: ClockOutline'],
+	['pending status - user cannot see reads', mockedTextMessagePending, false, 'icon: ClockOutline']
+];
+
 describe('Attachment footer', () => {
-	test('Display size in B', () => {
+	test.each(sizeFormatMessages)('Display size in %s', async (format, msg, evaluate) => {
 		const store: RootStore = useStore.getState();
 		store.addRoom(mockedRoom);
-		store.newMessage(mockedAttachmentMessageB);
+		store.newMessage(msg);
 		mockedGetImageThumbnailURL.mockReturnValue(previewUrl);
 		setup(
 			<Bubble
@@ -229,106 +248,24 @@ describe('Attachment footer', () => {
 				messageRef={React.createRef<HTMLDivElement>()}
 			/>
 		);
-		const extensionFile = screen.getByText(/PNG • 21B/i);
+		const extensionFile = screen.getByText(new RegExp(evaluate, 'i'));
 		expect(extensionFile).toBeInTheDocument();
 	});
-	test('Display size in Kb', () => {
+	test.each(readsMessages)('Display message sent from me, %s', (format, msg, cap, iconToCheck) => {
 		const store: RootStore = useStore.getState();
 		store.addRoom(mockedRoom);
-		store.newMessage(mockedAttachmentMessageKb);
-		mockedGetImageThumbnailURL.mockReturnValue(previewUrl);
-		setup(
-			<Bubble
-				message={mockedAttachmentMessageKb}
-				prevMessageIsFromSameSender={false}
-				nextMessageIsFromSameSender={false}
-				messageRef={React.createRef<HTMLDivElement>()}
-			/>
-		);
-		const extensionFile = screen.getByText(/PNG • 20.91KB/i);
-		expect(extensionFile).toBeInTheDocument();
-	});
-	test('Display size in Mb', () => {
-		const store: RootStore = useStore.getState();
-		store.addRoom(mockedRoom);
-		store.newMessage(mockedAttachmentMessageMb);
-		mockedGetImageThumbnailURL.mockReturnValue(previewUrl);
-		setup(
-			<Bubble
-				message={mockedAttachmentMessageMb}
-				prevMessageIsFromSameSender={false}
-				nextMessageIsFromSameSender={false}
-				messageRef={React.createRef<HTMLDivElement>()}
-			/>
-		);
-		const extensionFile = screen.getByText(/PNG • 3.19MB/i);
-		expect(extensionFile).toBeInTheDocument();
-	});
-	test('Display size in Gb', () => {
-		const store: RootStore = useStore.getState();
-		store.addRoom(mockedRoom);
-		store.newMessage(mockedAttachmentMessageGb);
-		mockedGetImageThumbnailURL.mockReturnValue(previewUrl);
-		setup(
-			<Bubble
-				message={mockedAttachmentMessageGb}
-				prevMessageIsFromSameSender={false}
-				nextMessageIsFromSameSender={false}
-				messageRef={React.createRef<HTMLDivElement>()}
-			/>
-		);
-		const extensionFile = screen.getByText(/PNG • 5.31GB/i);
-		expect(extensionFile).toBeInTheDocument();
-	});
-	test('Display reads for a message sent from me, me - user can see reads', () => {
-		const store: RootStore = useStore.getState();
-		store.addRoom(mockedRoom);
-		store.newMessage(mockedTextMessageSentByMe);
+		store.newMessage(msg);
 		store.setLoginInfo(user1Be.id, user1Be.name);
-		store.setCapabilities(createMockCapabilityList({ canSeeMessageReads: true }));
+		store.setCapabilities(createMockCapabilityList({ canSeeMessageReads: cap }));
 		setup(
 			<Bubble
-				message={mockedTextMessageSentByMe}
+				message={msg}
 				prevMessageIsFromSameSender={false}
 				nextMessageIsFromSameSender={false}
 				messageRef={React.createRef<HTMLDivElement>()}
 			/>
 		);
-		const ackIcon = screen.getByTestId(iconDoneAll);
-		expect(ackIcon).toBeInTheDocument();
-	});
-	test('Display someone reads for a message sent from me - user can see reads', () => {
-		const store: RootStore = useStore.getState();
-		store.addRoom(mockedRoom);
-		store.newMessage(mockedTextMessageReadBySomeone);
-		store.setLoginInfo(user1Be.id, user1Be.name);
-		store.setCapabilities(createMockCapabilityList({ canSeeMessageReads: true }));
-		setup(
-			<Bubble
-				message={mockedTextMessageReadBySomeone}
-				prevMessageIsFromSameSender={false}
-				nextMessageIsFromSameSender={false}
-				messageRef={React.createRef<HTMLDivElement>()}
-			/>
-		);
-		const ackIcon = screen.getByTestId(iconDoneAll);
-		expect(ackIcon).toBeInTheDocument();
-	});
-	test('Display unread message sent from me - user can see reads', () => {
-		const store: RootStore = useStore.getState();
-		store.addRoom(mockedRoom);
-		store.newMessage(mockedTextMessageUnread);
-		store.setLoginInfo(user1Be.id, user1Be.name);
-		store.setCapabilities(createMockCapabilityList({ canSeeMessageReads: true }));
-		setup(
-			<Bubble
-				message={mockedTextMessageUnread}
-				prevMessageIsFromSameSender={false}
-				nextMessageIsFromSameSender={false}
-				messageRef={React.createRef<HTMLDivElement>()}
-			/>
-		);
-		const ackIcon = screen.getByTestId('icon: Checkmark');
+		const ackIcon = screen.getByTestId(iconToCheck);
 		expect(ackIcon).toBeInTheDocument();
 	});
 	test('Display reads for a message sent from me, me - user cannot see reads', () => {
@@ -347,23 +284,6 @@ describe('Attachment footer', () => {
 		);
 		expect(screen.queryByTestId(iconDoneAll)).not.toBeInTheDocument();
 	});
-	test('Display someone reads for a message sent from me - user can see reads', () => {
-		const store: RootStore = useStore.getState();
-		store.addRoom(mockedRoom);
-		store.newMessage(mockedTextMessageReadBySomeone);
-		store.setLoginInfo(user1Be.id, user1Be.name);
-		store.setCapabilities(createMockCapabilityList({ canSeeMessageReads: true }));
-		setup(
-			<Bubble
-				message={mockedTextMessageReadBySomeone}
-				prevMessageIsFromSameSender={false}
-				nextMessageIsFromSameSender={false}
-				messageRef={React.createRef<HTMLDivElement>()}
-			/>
-		);
-		const ackIcon = screen.getByTestId(iconDoneAll);
-		expect(ackIcon).toBeInTheDocument();
-	});
 	test('Display unread message sent from me - user cannot see reads', () => {
 		const store: RootStore = useStore.getState();
 		store.addRoom(mockedRoom);
@@ -380,38 +300,117 @@ describe('Attachment footer', () => {
 		);
 		expect(screen.queryByTestId('icon: Checkmark')).not.toBeInTheDocument();
 	});
-	test('Display pending status for message sent from me - user can see reads', () => {
+});
+
+describe('Message header', () => {
+	test('Sender is guest user', async () => {
 		const store: RootStore = useStore.getState();
-		store.addRoom(mockedRoom);
-		store.newMessage(mockedTextMessagePending);
 		store.setLoginInfo(user1Be.id, user1Be.name);
-		store.setCapabilities(createMockCapabilityList({ canSeeMessageReads: true }));
+		store.addRoom(mockedTempRoom);
+		store.setUserInfo(guestUser);
 		setup(
 			<Bubble
-				message={mockedTextMessagePending}
+				message={mockedMsgFromGuest}
 				prevMessageIsFromSameSender={false}
 				nextMessageIsFromSameSender={false}
 				messageRef={React.createRef<HTMLDivElement>()}
 			/>
 		);
-		const ackIcon = screen.getByTestId('icon: ClockOutline');
-		expect(ackIcon).toBeInTheDocument();
+		const guestLabel = screen.queryByText('Guest');
+		expect(guestLabel).toBeInTheDocument();
 	});
-	test('Display pending status for message sent from me - user cannot see reads', () => {
+	test('Sender is internal user', async () => {
 		const store: RootStore = useStore.getState();
-		store.addRoom(mockedRoom);
-		store.newMessage(mockedTextMessagePending);
 		store.setLoginInfo(user1Be.id, user1Be.name);
-		store.setCapabilities(createMockCapabilityList({ canSeeMessageReads: false }));
+		store.addRoom(mockedTempRoom);
+		store.setUserInfo(user1Be);
 		setup(
 			<Bubble
-				message={mockedTextMessagePending}
+				message={mockedTextMessageSentByMe}
 				prevMessageIsFromSameSender={false}
 				nextMessageIsFromSameSender={false}
 				messageRef={React.createRef<HTMLDivElement>()}
 			/>
 		);
-		const ackIcon = screen.getByTestId('icon: ClockOutline');
-		expect(ackIcon).toBeInTheDocument();
+		const guestLabel = screen.queryByText('Guest');
+		expect(guestLabel).not.toBeInTheDocument();
+	});
+});
+
+describe('Actions', () => {
+	test('download an attachment', async () => {
+		const store: RootStore = useStore.getState();
+		store.setLoginInfo(user1Be.id, user1Be.name);
+		store.addRoom(mockedTempRoom);
+		store.setUserInfo(user1Be);
+		const { user } = setup(
+			<Bubble
+				message={mockedAttachmentMessageGb}
+				prevMessageIsFromSameSender={false}
+				nextMessageIsFromSameSender={false}
+				messageRef={React.createRef<HTMLDivElement>()}
+			/>
+		);
+		jest.spyOn(document.body, 'appendChild').mockReturnValue(mockAttachmentTagElement);
+
+		const arrowButton = screen.getByTestId(iconArrowIosDownward);
+		await user.click(arrowButton);
+
+		const downloadAction = await screen.findByText(/Download/i);
+		await user.click(downloadAction);
+
+		expect(document.body.appendChild).toHaveBeenCalledWith(
+			expect.objectContaining({ download: 'image.jpeg' })
+		);
+	});
+	test('Delete a message with attachment', async () => {
+		mockedDeleteAttachment.mockReturnValue('deleted');
+
+		const store: RootStore = useStore.getState();
+		store.setLoginInfo(user1Be.id, user1Be.name);
+		store.addRoom(mockedTempRoom);
+		store.setUserInfo(user1Be);
+		store.newMessage(mockedAttachmentMessageGb);
+		const { user } = setup(
+			<Bubble
+				message={mockedAttachmentMessageGb}
+				prevMessageIsFromSameSender={false}
+				nextMessageIsFromSameSender={false}
+				messageRef={React.createRef<HTMLDivElement>()}
+			/>
+		);
+
+		const arrowButton = await screen.findByTestId(iconArrowIosDownward);
+		await user.click(arrowButton);
+
+		const deleteAction = await screen.findByText(/Delete for all/i);
+		await user.click(deleteAction);
+
+		expect(mockedDeleteAttachment).toHaveBeenCalled();
+	});
+	test('Delete a message', async () => {
+		mockedSendChatMessageDeletion.mockReturnValue('deleted');
+
+		const store: RootStore = useStore.getState();
+		store.setLoginInfo(user1Be.id, user1Be.name);
+		store.addRoom(mockedTempRoom);
+		store.setUserInfo(user1Be);
+		store.newMessage(mockedTextMessageSentByMe);
+		const { user } = setup(
+			<Bubble
+				message={mockedTextMessageSentByMe}
+				prevMessageIsFromSameSender={false}
+				nextMessageIsFromSameSender={false}
+				messageRef={React.createRef<HTMLDivElement>()}
+			/>
+		);
+
+		const arrowButton = await screen.findByTestId(iconArrowIosDownward);
+		await user.click(arrowButton);
+
+		const deleteAction = await screen.findByText(/Delete for all/i);
+		await user.click(deleteAction);
+
+		expect(mockedSendChatMessageDeletion).toHaveBeenCalled();
 	});
 });

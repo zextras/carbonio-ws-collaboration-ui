@@ -10,6 +10,7 @@ import { StateCreator } from 'zustand';
 
 import { UserBe } from '../../types/network/models/userBeTypes';
 import { RootStore, UsersStoreSlice } from '../../types/store/StoreTypes';
+import { UserType } from '../../types/store/UserTypes';
 
 export const useUsersStoreSlice: StateCreator<UsersStoreSlice> = (set: (...any: any) => void) => ({
 	users: {},
@@ -21,6 +22,7 @@ export const useUsersStoreSlice: StateCreator<UsersStoreSlice> = (set: (...any: 
 					id: user.id,
 					email: user.email,
 					name: user.name,
+					type: user.type ?? UserType.INTERNAL,
 					lastSeen: user.lastSeen,
 					statusMessage: user.statusMessage,
 					pictureUpdatedAt: user.pictureUpdatedAt

@@ -14,7 +14,7 @@ import LeaveConversationListAction from './LeaveConversationListAction';
 import MemberComponentInfo from './MemberComponentInfo';
 import RemoveMemberListAction from './RemoveMemberListAction';
 import useStore from '../../../../store/Store';
-import { createMockRoom } from '../../../../tests/createMock';
+import { createMockRoom, createMockUser } from '../../../../tests/createMock';
 import {
 	mockedAddRoomRequest,
 	mockedDeleteRoomMemberRequest,
@@ -30,22 +30,23 @@ import { User } from '../../../../types/store/UserTypes';
 const iconClose = 'icon: Close';
 const iconTrash2Outline = 'icon: Trash2Outline';
 
-const user1Info: User = {
+const user1Info: User = createMockUser({
 	id: 'user1',
 	email: 'user1@domain.com',
 	name: 'User 1'
-};
-const user2Info: User = {
+});
+
+const user2Info: User = createMockUser({
 	id: 'user2',
 	email: 'user2@domain.com',
 	name: 'User 2'
-};
+});
 
-const user3Info: User = {
+const user3Info: User = createMockUser({
 	id: 'user3',
 	email: 'user3@domain.com',
 	name: 'User 3'
-};
+});
 
 const userInfoMember = {
 	userId: user2Info.id,

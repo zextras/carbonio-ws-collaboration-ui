@@ -22,6 +22,13 @@ import styled from 'styled-components';
 import { getSidebarFilterHasFocus } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 
+const FilterContainer = styled(Container)`
+	height: fit-content;
+	position: sticky;
+	top: 0;
+	z-index: 1;
+`;
+
 const CustomFunnelContainer = styled(Container)`
 	border-bottom: 0.0625rem solid ${({ theme }): string => theme.palette.gray3.regular};
 `;
@@ -76,7 +83,7 @@ const ConversationsFilter: FC<ConversationsFilterProps> = ({ expanded, setFilter
 
 	const customFilterIcon = useMemo(
 		() =>
-			function icon() {
+			function icon(): JSX.Element {
 				return (
 					<Tooltip label={searchInput.length > 0 ? closeTooltip : filterTooltip}>
 						<IconButton
@@ -91,33 +98,37 @@ const ConversationsFilter: FC<ConversationsFilterProps> = ({ expanded, setFilter
 		[closeTooltip, filterTooltip, resetFilter, searchInput]
 	);
 
-	return expanded ? (
-		<Container height="fit" crossAlignment="flex-end">
-			<Input
-				data-testid="filter_input"
-				inputRef={filterInputRef}
-				height="2.938rem"
-				backgroundColor="gray5"
-				borderColor="gray3"
-				label={filterLabel}
-				value={searchInput}
-				onChange={handleFilterChange}
-				onFocus={handleInputFocus}
-				CustomIcon={customFilterIcon}
-			/>
-		</Container>
-	) : (
-		<CustomFunnelContainer height="3rem" background="gray5">
-			<Tooltip label={filterTooltip}>
-				<IconButton
-					icon="FunnelOutline"
-					size="large"
-					customSize={{ paddingSize: '0.25rem', iconSize: '' }}
-					onClick={handleInputFocus}
-					backgroundColor="gray5"
-				/>
-			</Tooltip>
-		</CustomFunnelContainer>
+	return (
+		<FilterContainer>
+			{expanded ? (
+				<Container height="fit" crossAlignment="flex-end">
+					<Input
+						data-testid="filter_input"
+						inputRef={filterInputRef}
+						height="2.938rem"
+						backgroundColor="gray5"
+						borderColor="gray3"
+						label={filterLabel}
+						value={searchInput}
+						onChange={handleFilterChange}
+						onFocus={handleInputFocus}
+						CustomIcon={customFilterIcon}
+					/>
+				</Container>
+			) : (
+				<CustomFunnelContainer height="3rem" background={'gray5'}>
+					<Tooltip label={filterTooltip}>
+						<IconButton
+							icon="FunnelOutline"
+							size="large"
+							customSize={{ paddingSize: '0.25rem', iconSize: '' }}
+							onClick={handleInputFocus}
+							backgroundColor="gray5"
+						/>
+					</Tooltip>
+				</CustomFunnelContainer>
+			)}
+		</FilterContainer>
 	);
 };
 

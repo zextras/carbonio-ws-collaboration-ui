@@ -82,6 +82,7 @@ const MeetingSkeleton = (): ReactElement => {
 			disableAutoHide: true
 		});
 	}, [createSnackbar, mutedByModerator, okLabel]);
+
 	useEventListener(EventName.MEMBER_MUTED, handleMutedEvent);
 
 	const ViewToDisplay = useMemo(() => {

@@ -38,8 +38,10 @@ const ConversationInfoDetails: FC<ConversationInfoDetailsProps> = ({ roomId, roo
 	const emailLabel = t('conversationInfo.email', 'Email');
 	const topicLabel = t('conversationInfo.topic', 'Topic');
 	const statusLabel = t('conversationInfo.status', 'Status');
+
 	const sessionId: string | undefined = useStore((store) => store.session.id);
 	const roomMembers: Member[] | undefined = useStore((state) => getRoomMembers(state, roomId));
+
 	const memberId: string = useMemo(() => {
 		if (roomType === RoomType.ONE_TO_ONE && roomMembers !== undefined) {
 			if (roomMembers[0].userId === sessionId) return roomMembers[1]?.userId;
@@ -47,6 +49,7 @@ const ConversationInfoDetails: FC<ConversationInfoDetailsProps> = ({ roomId, roo
 		}
 		return '';
 	}, [roomMembers, roomType, sessionId]);
+
 	const memberName: string | undefined = useStore((state) =>
 		roomType === RoomType.ONE_TO_ONE ? getUserName(state, memberId) : undefined
 	);
@@ -59,46 +62,48 @@ const ConversationInfoDetails: FC<ConversationInfoDetailsProps> = ({ roomId, roo
 	);
 	const userEmail = useStore((state) => getUserEmail(state, memberId));
 
-	return (
-		<>
-			{roomType === RoomType.ONE_TO_ONE && (
-				<CustomContainer crossAlignment="flex-start" mainAlignment="flex-start">
-					<ConversationInfoDetailsElement
-						label={userEmail}
-						icon="EmailOutline"
-						type={emailLabel}
-						padding={{ left: 'large', top: 'large', bottom: 'small' }}
-					/>
-					<ConversationInfoDetailsElement
-						label={memberName}
-						icon="AtOutline"
-						type={nameLabel}
-						padding={
-							userStatusMessage
-								? { left: 'large', bottom: 'small' }
-								: { left: 'large', bottom: 'large' }
-						}
-					/>
-					{userStatusMessage && (
-						<ConversationInfoDetailsElement
-							label={userStatusMessage}
-							icon="InfoOutline"
-							type={statusLabel}
-							padding={{ left: 'large', bottom: 'large' }}
-						/>
-					)}
-				</CustomContainer>
-			)}
-			{roomType === RoomType.GROUP && roomTopic && (
-				<ConversationInfoDetailsElement
-					label={roomTopic}
-					icon="InfoOutline"
-					type={topicLabel}
-					padding={{ left: 'large', top: 'large', bottom: 'large', right: 'large' }}
-				/>
-			)}
-		</>
-	);
+	if (roomType === RoomType.ONE_TO_ONE)
+		return (
+			<CustomContainer
+				crossAlignment="flex-start"
+				mainAlignment="flex-start"
+				padding={{ all: 'large' }}
+				gap="0.5rem"
+			>
+				{roomType === RoomType.ONE_TO_ONE && (
+					<>
+						{userEmail && (
+							<ConversationInfoDetailsElement
+								label={userEmail}
+								icon="EmailOutline"
+								type={emailLabel}
+							/>
+						)}
+						<ConversationInfoDetailsElement label={memberName} icon="AtOutline" type={nameLabel} />
+						{userStatusMessage && (
+							<ConversationInfoDetailsElement
+								label={userStatusMessage}
+								icon="InfoOutline"
+								type={statusLabel}
+							/>
+						)}
+					</>
+				)}
+			</CustomContainer>
+		);
+
+	if (roomType === RoomType.GROUP && roomTopic)
+		return (
+			<CustomContainer
+				crossAlignment="flex-start"
+				mainAlignment="flex-start"
+				padding={{ all: 'large' }}
+				gap="small"
+			>
+				<ConversationInfoDetailsElement label={roomTopic} icon="InfoOutline" type={topicLabel} />
+			</CustomContainer>
+		);
+	return null;
 };
 
 export default ConversationInfoDetails;

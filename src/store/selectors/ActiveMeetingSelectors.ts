@@ -17,9 +17,6 @@ import { RootStore } from '../../types/store/StoreTypes';
 export const getMeetingSidebarStatus = (store: RootStore, meetingId: string): boolean =>
 	store.activeMeeting[meetingId]?.sidebarStatus.sidebarIsOpened;
 
-export const getMeetingActionsAccordionStatus = (store: RootStore, meetingId: string): boolean =>
-	store.activeMeeting[meetingId]?.sidebarStatus.actionsAccordionIsOpened;
-
 export const getMeetingParticipantsAccordionStatus = (
 	store: RootStore,
 	meetingId: string

@@ -147,13 +147,13 @@ const AttachmentView: FC<AttachmentViewProps> = ({
 		return split(attachment.area, 'x');
 	}, [attachment.area, attachment.mimeType]);
 
-	const [isPreviewLoaded, setPreviewLoaded] = useState(false);
+	const [isPreviewLoaded, setIsPreviewLoaded] = useState(false);
 	const [previewError, setPreviewError] = useState(false);
 	const [attachmentBubbleMaxWidth, setAttachmentBubbleMaxWidth] = useState(0);
 
 	// Reset preview state when attachment changes to request again preview
 	useEffect(() => {
-		setPreviewLoaded(false);
+		setIsPreviewLoaded(false);
 		setPreviewError(false);
 	}, [attachment.id]);
 
@@ -173,18 +173,18 @@ const AttachmentView: FC<AttachmentViewProps> = ({
 
 	useEffect(() => {
 		window.addEventListener('resize', resizeHandler);
-		return () => {
+		return (): void => {
 			window.removeEventListener('resize', resizeHandler);
 		};
 	}, [resizeHandler]);
 
-	const setLoaded = useCallback(() => setPreviewLoaded(true), []);
+	const setLoaded = useCallback(() => setIsPreviewLoaded(true), []);
 	const setError = useCallback(() => {
-		setPreviewLoaded(true);
+		setIsPreviewLoaded(true);
 		setPreviewError(true);
 	}, []);
 
-	const userColor = useMemo(() => calculateAvatarColor(senderIdentifier || ''), [senderIdentifier]);
+	const userColor = useMemo(() => calculateAvatarColor(senderIdentifier), [senderIdentifier]);
 
 	const previewURL = useMemo(
 		() => getThumbnailURL(attachment.id, attachment.mimeType),
@@ -263,7 +263,7 @@ const AttachmentView: FC<AttachmentViewProps> = ({
 			>
 				{previewError ? (
 					<PreviewErrorContainer
-						background="gray5"
+						background={'gray5'}
 						$imgWidth={Number(dimensions[0])}
 						$imgHeight={Number(dimensions[1])}
 						$maxWidth={attachmentBubbleMaxWidth}

@@ -6,23 +6,18 @@
 
 import React, { useMemo } from 'react';
 
-import { Avatar, Container, Shimmer, Badge, useTheme } from '@zextras/carbonio-design-system';
+import { Avatar, Container, Badge } from '@zextras/carbonio-design-system';
 import { find } from 'lodash';
 import styled, { DefaultTheme } from 'styled-components';
 
-import { UsersApi } from '../../network';
+import useAvatarUtilities from '../../hooks/useAvatarUtilities';
 import { getMeetingActive } from '../../store/selectors/MeetingSelectors';
 import { getRoomMembers, getRoomMutedSelector } from '../../store/selectors/RoomsSelectors';
 import { getCapability } from '../../store/selectors/SessionSelectors';
-import {
-	getUserName,
-	getUserOnline,
-	getUserPictureUpdatedAt
-} from '../../store/selectors/UsersSelectors';
+import { getUserName, getUserOnline } from '../../store/selectors/UsersSelectors';
 import useStore from '../../store/Store';
 import { Member } from '../../types/store/RoomTypes';
 import { CapabilityType } from '../../types/store/SessionTypes';
-import { calcAvatarMeetingColor, calculateAvatarColor } from '../../utils/styleUtils';
 
 type UserAvatarProps = {
 	roomId: string;
@@ -88,32 +83,18 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ roomId, unreadCount, draftMessa
 	const roomMembers: Member[] | undefined = useStore((store) => getRoomMembers(store, roomId));
 	const otherMember = find(roomMembers, (member) => member.userId !== sessionId);
 	const idAvailable = otherMember?.userId ?? '';
-	const userName: string | undefined = useStore((store) => getUserName(store, idAvailable));
+	const userName: string = useStore((store) => getUserName(store, idAvailable));
 	const roomMuted = useStore((state) => getRoomMutedSelector(state, roomId));
 	const memberOnline: boolean | undefined = useStore((store) => getUserOnline(store, idAvailable));
-	const userPictureUpdatedAt: string | undefined = useStore((state) =>
-		getUserPictureUpdatedAt(state, idAvailable)
-	);
 	const canSeeUsersPresence = useStore((store) =>
 		getCapability(store, CapabilityType.CAN_SEE_USERS_PRESENCE)
 	);
 	const isMeetingActive = useStore((store) => getMeetingActive(store, roomId));
 
-	const themeColor = useTheme();
-
-	const picture = useMemo(() => {
-		if (userPictureUpdatedAt != null && otherMember?.userId !== undefined) {
-			return `${UsersApi.getURLUserPicture(otherMember.userId)}?${userPictureUpdatedAt}`;
-		}
-		return '';
-	}, [otherMember, userPictureUpdatedAt]);
-
-	const userColor = useMemo(() => {
-		const color = calculateAvatarColor(userName ?? '');
-		return isMeetingActive
-			? calcAvatarMeetingColor(themeColor.avatarColors[color])
-			: `${themeColor.avatarColors[color]}`;
-	}, [userName, isMeetingActive, themeColor.avatarColors]);
+	const { avatarColor, avatarPicture, avatarIcon } = useAvatarUtilities(
+		idAvailable,
+		isMeetingActive
+	);
 
 	const avatarUser = useMemo(() => {
 		switch (true) {
@@ -122,10 +103,10 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ roomId, unreadCount, draftMessa
 					<Container>
 						<Avatar
 							icon="Video"
-							label={userName ?? ''}
+							label={userName}
 							title={userName}
 							shape="round"
-							background={userColor}
+							background={avatarColor}
 						/>
 						<ActiveMeetingDot />
 					</Container>
@@ -134,45 +115,46 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ roomId, unreadCount, draftMessa
 				return (
 					<Avatar
 						icon="Edit2"
-						label={userName ?? ''}
+						label={userName}
 						title={userName}
 						shape="round"
-						background={userColor}
+						background={avatarColor}
 					/>
 				);
 			case roomMuted:
 				return (
 					<Avatar
 						icon="BellOff"
-						label={userName ?? ''}
+						label={userName}
 						title={userName}
 						shape="round"
-						background={userColor}
+						background={avatarColor}
 					/>
 				);
 			default:
 				return (
 					<Avatar
 						data-testid={`${userName}-avatar`}
-						label={userName ?? ''}
+						label={userName}
 						title={userName}
 						shape="round"
-						background={userColor}
-						picture={picture}
+						background={avatarColor}
+						picture={avatarPicture}
+						icon={avatarIcon}
 					/>
 				);
 		}
-	}, [isMeetingActive, draftMessage, roomMuted, userName, picture, userColor]);
+	}, [isMeetingActive, userName, avatarColor, draftMessage, roomMuted, avatarPicture, avatarIcon]);
 
 	const canShowPresence = useMemo(
 		() => !unreadCount && canSeeUsersPresence,
 		[canSeeUsersPresence, unreadCount]
 	);
 
-	return userName ? (
+	return (
 		<AvatarContainer data-testid="avatar_box" width="fit">
 			{avatarUser}
-			{unreadCount && (
+			{!!unreadCount && (
 				<AvatarBadge
 					data-testid="unreads_counter"
 					value={unreadCount}
@@ -181,8 +163,6 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ roomId, unreadCount, draftMessa
 			)}
 			{canShowPresence && <Presence data-testid="user_presence_dot" memberOnline={memberOnline} />}
 		</AvatarContainer>
-	) : (
-		<Shimmer.Avatar data-testid="shimmer_avatar" size="medium" />
 	);
 };
 

@@ -12,6 +12,7 @@ import { StateCreator } from 'zustand';
 import { UsersApi } from '../../network';
 import { CapabilityList } from '../../types/store/SessionTypes';
 import { RootStore, SessionStoreSlice } from '../../types/store/StoreTypes';
+import { UserType } from '../../types/store/UserTypes';
 
 export const useSessionStoreSlice: StateCreator<SessionStoreSlice> = (
 	set: (...any: any) => void
@@ -19,13 +20,14 @@ export const useSessionStoreSlice: StateCreator<SessionStoreSlice> = (
 	session: {
 		filterHasFocus: false
 	},
-	setLoginInfo: (id: string, name: string, displayName?: string): void => {
+	setLoginInfo: (id: string, name: string, displayName?: string, userType?: UserType): void => {
 		set(
 			produce((draft: RootStore) => {
 				draft.session = {
 					id,
 					name,
 					displayName,
+					userType: userType ?? UserType.INTERNAL,
 					connections: {
 						chats_be: undefined,
 						xmpp: undefined,

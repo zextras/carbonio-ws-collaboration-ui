@@ -28,9 +28,13 @@ const CustomButton = styled(Button)<{ $active: boolean }>`
 
 type LeaveMeetingButtonProps = {
 	isHoovering: boolean;
+	oneClickLeave?: boolean;
 };
 
-const LeaveMeetingButton = ({ isHoovering }: LeaveMeetingButtonProps): ReactElement => {
+const LeaveMeetingButton = ({
+	isHoovering,
+	oneClickLeave
+}: LeaveMeetingButtonProps): ReactElement => {
 	const [t] = useTranslation();
 	const leaveMeetingLabel = t('meeting.interactions.leaveMeeting', 'Leave Meeting');
 	const leaveMeetingButtonLabel = t('meeting.interactions.leaveConfirmation', 'Leave Meeting?');
@@ -70,7 +74,7 @@ const LeaveMeetingButton = ({ isHoovering }: LeaveMeetingButtonProps): ReactElem
 			}, 800);
 		};
 		document.addEventListener('click', handleClick);
-		return () => {
+		return (): void => {
 			document.removeEventListener('click', handleClick);
 		};
 	}, [buttonLabel]);
@@ -83,14 +87,14 @@ const LeaveMeetingButton = ({ isHoovering }: LeaveMeetingButtonProps): ReactElem
 	}, [isHoovering]);
 
 	return (
-		<CustomContainer width="fit">
+		<CustomContainer width="fit" height="fit">
 			<Tooltip placement="top" label={leaveMeetingLabel}>
 				<CustomButton
 					label={buttonLabel}
 					size="large"
 					color="error"
 					icon="LogOutOutline"
-					onClick={active ? leaveMeeting : activeButton}
+					onClick={active || oneClickLeave ? leaveMeeting : activeButton}
 					$active={active}
 				/>
 			</Tooltip>

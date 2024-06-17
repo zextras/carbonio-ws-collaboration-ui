@@ -6,7 +6,7 @@
 
 import React, { FC, useCallback, useMemo } from 'react';
 
-import { Accordion, AccordionItemType, Container } from '@zextras/carbonio-design-system';
+import { Accordion, AccordionItemType } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -31,11 +31,13 @@ const MeetingParticipantsAccordion: FC<MeetingParticipantsAccordionProps> = ({ m
 		getNumberOfMeetingParticipantsByMeetingId(store, meetingId)
 	);
 
-	const participantsTitle = t(
-		'meeting.participantsList.title',
-		"{{count}} meeting's participants",
-		{ count: numberOfParticipants !== undefined ? numberOfParticipants : 0 }
-	);
+	const participantsTitle = t('meeting.participantsList.title', {
+		defaultValue:
+			numberOfParticipants === 1
+				? "One meeting's participant"
+				: `${numberOfParticipants} meeting's participants`,
+		count: numberOfParticipants ?? 0
+	});
 
 	const accordionStatus: boolean = useStore((state) =>
 		getMeetingParticipantsAccordionStatus(state, meetingId)
@@ -72,13 +74,12 @@ const MeetingParticipantsAccordion: FC<MeetingParticipantsAccordionProps> = ({ m
 	}, [accordionStatus, meetingId, participantsTitle, toggleAccordionStatus]);
 
 	return (
-		<Container
+		<CustomAccordion
+			items={infoDetails}
+			borderRadius="none"
+			background={'gray0'}
 			data-testid="MeetingParticipantsAccordion"
-			crossAlignment="flex-start"
-			mainAlignment="flex-start"
-		>
-			<CustomAccordion items={infoDetails} borderRadius="none" background="gray0" />
-		</Container>
+		/>
 	);
 };
 

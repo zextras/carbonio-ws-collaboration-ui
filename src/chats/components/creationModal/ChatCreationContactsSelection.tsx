@@ -70,7 +70,10 @@ const ChatCreationContactsSelection = ({
 	inputRef
 }: ChatCreationContactsSelectionProps): ReactElement => {
 	const [t] = useTranslation();
-	const noMatchLabel = t('participantsList.noMatch', 'There are no items that match this search');
+	const noMatchLabel = t(
+		'participantsList.noMatch.gal',
+		'There are no items that match this search in your company.'
+	);
 	const inputPlaceholder = t('modal.creation.inputPlaceholder', 'Start typing or pick an address');
 	const listTextLabel = t(
 		'modal.creation.contactList',
@@ -98,13 +101,13 @@ const ChatCreationContactsSelection = ({
 		return -1;
 	}, [contactsSelected, isCreationModal, maxGroupMembers, members]);
 
-	const addUsersLimit = t(
-		'modal.creation.addUserLimit.users',
-		'You can invite other {{count}} members',
-		{
-			count: maxGroupMembers ? membersToAdd : 0
-		}
-	);
+	const addUsersLimit = t('modal.creation.addUserLimit.users', {
+		defaultValue:
+			maxGroupMembers && membersToAdd > 1
+				? `You can add other ${membersToAdd} members`
+				: 'You can add one last member',
+		count: maxGroupMembers ? membersToAdd : 0
+	});
 
 	const [result, setResult] = useState<ContactMatch[]>([]);
 	const [chips, setChips] = useState<ChipItem<ContactInfo>[]>([]);

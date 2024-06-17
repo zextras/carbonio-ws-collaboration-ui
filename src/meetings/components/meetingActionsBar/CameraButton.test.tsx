@@ -17,6 +17,7 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../../tests/createMock';
+import { mockMediaDevicesResolve } from '../../../tests/mocks/global';
 import { setup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 import { MemberBe, RoomBe } from '../../../types/network/models/roomBeTypes';
@@ -65,6 +66,10 @@ const defaultSetup = (): { user: UserEvent } => {
 	);
 	return { user };
 };
+
+beforeAll(() => {
+	mockMediaDevicesResolve();
+});
 
 describe('Camera button', () => {
 	test('Should render the component', async () => {

@@ -12,7 +12,6 @@ import styled from 'styled-components';
 
 import useContainerDimensions from '../../../hooks/useContainerDimensions';
 import { MeetingRoutesParams } from '../../../hooks/useRouting';
-import { getVideoScreenIn } from '../../../store/selectors/ActiveMeetingSelectors';
 import { getCentralTileData } from '../../../store/selectors/MeetingSelectors';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
@@ -55,7 +54,6 @@ const FaceToFaceMode = ({ children }: MeetingViewProps): ReactElement => {
 	const centralTile = useStore((store) => getCentralTileData(store, meetingId));
 
 	const localId = useStore(getUserId);
-	const videoScreenIn = useStore((store) => getVideoScreenIn(store, meetingId));
 	const setUpdateSubscription = useStore((store) => store.setUpdateSubscription);
 
 	const faceToFaceRef = useRef<null | HTMLDivElement>(null);
@@ -67,7 +65,7 @@ const FaceToFaceMode = ({ children }: MeetingViewProps): ReactElement => {
 			const subscription: Subscription = { userId: centralTile.userId, type: centralTile.type };
 			setUpdateSubscription(meetingId, [subscription]);
 		}
-	}, [centralTile, meetingId, setUpdateSubscription, videoScreenIn]);
+	}, [centralTile, meetingId, setUpdateSubscription]);
 
 	const centralTileWidth = useMemo(() => {
 		const tileHeight = (faceToFaceDimensions.width / 16) * 9;
