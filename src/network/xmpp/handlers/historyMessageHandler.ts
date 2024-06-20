@@ -25,7 +25,8 @@ import HistoryAccumulator from '../utility/HistoryAccumulator';
 export enum MamRequestType {
 	HISTORY = 'history',
 	REPLIED = 'replied',
-	FORWARDED = 'forwarded'
+	FORWARDED = 'forwarded',
+	LOAD_FULL_HISTORY = 'load_full_history'
 }
 
 export function onHistoryMessageStanza(message: Element): true {
@@ -64,6 +65,13 @@ export function onHistoryMessageStanza(message: Element): true {
 						historyMessage.stanzaId,
 						insideMessage
 					);
+				}
+				break;
+			}
+			case MamRequestType.LOAD_FULL_HISTORY: {
+				const chatExporter = useStore.getState().session.chatExporting?.exporter;
+				if (chatExporter) {
+					chatExporter.addMessageToFullHistory(historyMessage);
 				}
 				break;
 			}
@@ -144,4 +152,15 @@ export function onRequestSingleMessage(stanza: Element, messageWithResponseId: s
 	const referenceMessage = HistoryAccumulator.returnReferenceForRepliedMessage(referenceMessageId);
 	const store: RootStore = useStore.getState();
 	store.setRepliedMessage(referenceMessage.roomId, messageWithResponseId, referenceMessage);
+}
+
+export function onLoadFullHistory(stanza: Element): void {
+	xmppDebug('Request full history', stanza);
+	const roomId = getId(getRequiredAttribute(stanza, 'from'));
+	const { chatExporting } = useStore.getState().session;
+
+	if (chatExporting && chatExporting.roomId === roomId) {
+		const isHistoryComplete = getRequiredTagElement(stanza, 'fin').getAttribute('complete');
+		chatExporting.exporter.handleFullHistoryResponse(!!isHistoryComplete);
+	}
 }

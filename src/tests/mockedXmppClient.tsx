@@ -32,6 +32,7 @@ export const xmppClient = {
 	requestHistory: (): null => null,
 	requestHistoryBetweenTwoMessage: (): null => null,
 	requestMessageSubjectOfReply: (): null => null,
+	requestFullHistory: (): void => {},
 	sendIsWriting: mockedSendIsWriting,
 	sendPaused: mockedSendPaused,
 	readMessage: mockedReadMessage,

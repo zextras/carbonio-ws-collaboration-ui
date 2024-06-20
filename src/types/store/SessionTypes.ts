@@ -5,6 +5,7 @@
  */
 
 import { UserType } from './UserTypes';
+import ChatExporter from '../../network/xmpp/utility/ChatExporter';
 
 export type Session = {
 	id?: string;
@@ -22,6 +23,10 @@ export type Session = {
 	selectedRoomOneToOneGroup?: string;
 	filterHasFocus: boolean;
 	customLogo?: string | false;
+	chatExporting?: {
+		roomId: string;
+		exporter: ChatExporter;
+	};
 };
 
 export type CapabilityList = {

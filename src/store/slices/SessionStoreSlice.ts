@@ -10,6 +10,7 @@ import { find } from 'lodash';
 import { StateCreator } from 'zustand';
 
 import { UsersApi } from '../../network';
+import ChatExporter from '../../network/xmpp/utility/ChatExporter';
 import { CapabilityList } from '../../types/store/SessionTypes';
 import { RootStore, SessionStoreSlice } from '../../types/store/StoreTypes';
 import { UserType } from '../../types/store/UserTypes';
@@ -88,6 +89,22 @@ export const useSessionStoreSlice: StateCreator<SessionStoreSlice> = (
 			}),
 			false,
 			'SESSION/SET_CUSTOM_LOGO'
+		);
+	},
+	setChatExporting: (roomId?: string): void => {
+		set(
+			produce((draft: RootStore) => {
+				if (roomId) {
+					draft.session.chatExporting = {
+						roomId,
+						exporter: new ChatExporter(roomId)
+					};
+				} else {
+					delete draft.session.chatExporting;
+				}
+			}),
+			false,
+			'SESSION/SET_CHAT_EXPORTING'
 		);
 	}
 });

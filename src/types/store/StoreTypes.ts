@@ -95,6 +95,7 @@ export type SessionStoreSlice = {
 	setCapabilities: (capabilities: CapabilityList) => void;
 	setSelectedRoomOneToOneGroup: (id: string) => void;
 	setCustomLogo: (logo: string | false) => void;
+	setChatExporting: (roomId?: string) => void;
 };
 
 export type MarkersStoreSlice = {

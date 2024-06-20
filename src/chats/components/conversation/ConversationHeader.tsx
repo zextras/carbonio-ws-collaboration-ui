@@ -142,6 +142,12 @@ const ConversationHeader = ({
 					</CustomIsWritingText>
 				</Container>
 			</Row>
+			<IconButton
+				data-testid="backButton"
+				icon="Download"
+				iconColor="secondary"
+				onClick={(): void => useStore.getState().setChatExporting(roomId)}
+			/>
 			<Container orientation="horizontal" width="fit" style={{ minWidth: 'fit-content' }}>
 				{canVideoCall && !isPlaceholderRoom && <ConversationHeaderMeetingButton roomId={roomId} />}
 				{!isDesktopView && (
