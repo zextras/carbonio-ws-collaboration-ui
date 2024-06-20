@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.9.6](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.9.5...v0.9.6) (2024-06-18)
+
+
+### Bug Fixes
+
+* update sdk version ref: WSC-1542 ([fd47f2e](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/fd47f2ec10a43b159d442b970615af3acd082412))
+
 ### [0.9.5](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.9.4...v0.9.5) (2024-06-17)
 
 
