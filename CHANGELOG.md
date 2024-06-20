@@ -2,6 +2,50 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.9.6](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.9.5...v0.9.6) (2024-06-18)
+
+
+### Bug Fixes
+
+* update sdk version ref: WSC-1542 ([fd47f2e](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/fd47f2ec10a43b159d442b970615af3acd082412))
+
+### [0.9.5](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.9.4...v0.9.5) (2024-06-17)
+
+
+### Features
+
+* add a random wait to retry the socket connections WSC-1478 ([#319](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/319)) ([f9f88c7](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/f9f88c7dbc591dedfdb3dfeefdde29b4473788c0))
+* add guest label for external users refs:WSC-1484 ([#322](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/322)) ([eec9f7c](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/eec9f7c6fa65f58c155b39e330cf24bbed4eb1ba))
+* handle a different number of max chars for attachment description on clients ref WSC-770 ([#297](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/297)) ([e7b1d5c](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/e7b1d5cb56f5170ad0ff2cd6f4593e4f169303c4))
+* implemented redirect to login on external page refs: WSC-1469 ([#318](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/318)) ([6eaf744](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/6eaf744d141bfefedfbe9394c52d54eca45661f0))
+* improve visual selection of multiple bubbles refs: WSC-1408 ([#277](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/277)) ([7566e86](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/7566e86dbe3b21556f5ff8a57087fcecf7df5846))
+* improved Chat widget toggle behaviour refs: WSC-1410 ([#296](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/296)) ([d534d9e](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/d534d9e045139b288ea81cd13c77d7fdf19fa878))
+* improved recording feature usability refs: WSC-1406 ([#284](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/284)) ([9c42137](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/9c421374124c47a91b2c0ed2a011df92bb6e7262))
+* rearrangement of meeting sidebar refs: WSC-1138 ([#279](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/279)) ([d58e38a](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/d58e38af562a0d581b04a286c12351275005fc22))
+* when i search someone i want to find fake conversation that i don t have with users ref: WSC-194 ([#285](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/285)) ([1dc2bc2](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/1dc2bc295acd510669c68b948829398555fb1948))
+
+
+### Bug Fixes
+
+* access meeting page takes value from localStorage correctly refs: WSC-1455 ([#311](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/311)) ([2cda68b](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/2cda68b55ef7c20d2bdd0d1ba3a1b85d7d7264bd))
+* add defaults for plural strings ([#307](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/307)) ([73af51f](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/73af51f659068ccc17fa4633214abc169b99b123))
+* change translation key on creation modal ref: WSC-1453 ([#287](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/287)) ([d9d19dc](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/d9d19dc209891608a9a8910b495d8ce20653a878))
+* check if account from autocomplete request is not of type group … ([#289](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/289)) ([8e42c5d](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/8e42c5d331cef6c69a04ae0b7366a1d979735573))
+* deletedMessage margin size ([#308](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/308)) ([fdb35b7](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/fdb35b77cf36f9e92f2d507da07c7d702c55ba80))
+* fixed disabled buttons refs: WSC-1452 ([#315](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/315)) ([823ed6f](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/823ed6f13c8ac7b2f38202dc21cc4fac46201ba9))
+* fixed sensibility refs: WSC-1481 ([#320](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/320)) ([d70bbae](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/d70bbae5d90b37eacc7163172ce0fa69a0c3758a))
+* fixed wrong height on list item refs: WSC-1372 ([#323](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/323)) ([2e676c3](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/2e676c33735bc992d408ba5ce20adb2549f471a6))
+* handled the case of media permission denied refs: WSC-1402 ([#290](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/290)) ([c01eeb4](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/c01eeb4da22718f8e1c15c81f598b9e6c5cff66e))
+* highlight color on meeting ref: WSC-1368 ([#291](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/291)) ([f4d9666](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/f4d9666502ea2ab7ece363dcc445030b8c090824))
+* icon in primary bar doesn't keep the background active status ref: WSC-1334 ([5b1f62f](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/5b1f62fbd248cb6c7532e87f149a4db4a47ee0bb))
+* leave button broken on Safari browser ref: WSC-1444 ([#288](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/288)) ([776fcc0](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/776fcc05ba293c20cb77ed3a523b94e15cdd3ce6))
+* meeting event sounds plays when youre in the meeting access point ref: WSC-1416 ([#321](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/321)) ([008959b](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/008959b46094fa8b633b30f941cd8ed35d8a88fa))
+* on small screens the duration of a meeting covers the action bar ref: WSC-1405 ([#314](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/314)) ([6067203](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/60672032be9c54887f2344db699836f8356c46cd))
+* remove unnecessary bottom padding at clear history action refs: WSC-1458 ([#306](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/306)) ([bc22e3d](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/bc22e3d06b3690933817c6bfa39066229c414f3d))
+* remove virtual rooms unread messages from the icon badge ref: WSC-1467 ([#304](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/304)) ([1bb944d](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/1bb944dde24575f8897ae94ed66af548321e3de9))
+* set anonymous user as label for configuration messages when the users info aren returned ref: WSC-1489 ([#326](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/326)) ([1305b49](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/1305b497181f43c2223b579c949bede05ac3f2d7))
+* share subscription isn't triggered when someone share the screen WSC-1454 ([#312](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/312)) ([e131635](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/e13163588471f567e89f617d5d6e77457aa72e85))
+
 ### [0.9.4](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.9.3...v0.9.4) (2024-05-08)
 
 ### [0.9.3](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.9.2...v0.9.3) (2024-04-11)
