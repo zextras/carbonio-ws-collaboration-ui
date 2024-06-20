@@ -6,16 +6,10 @@
 
 import React, { Dispatch, FC, SetStateAction, useCallback } from 'react';
 
-import {
-	Checkbox,
-	Container,
-	Divider,
-	Padding,
-	Text,
-	Switch
-} from '@zextras/carbonio-design-system';
+import { Checkbox, Container, Text, Switch } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
+import SettingsCard from './SettingsCard';
 import { NotificationsSettingsType } from '../../utils/localStorageUtils';
 
 type NotificationsSettingsProps = {
@@ -84,57 +78,47 @@ const NotificationsSettings: FC<NotificationsSettingsProps> = ({
 	}, [setUpdatedNotificationsSettings]);
 
 	return (
-		<Container
-			background={'gray6'}
-			padding={{ horizontal: 'medium', bottom: 'medium' }}
-			data-testid="notification_container"
-		>
-			<Container crossAlignment="flex-start">
-				<Padding top="large" bottom="medium">
-					<Text weight="bold">{sectionTitle}</Text>
-				</Padding>
-				<Divider color="gray2" />
-				<Padding vertical="large">
-					<Container mainAlignment="flex-start" crossAlignment="flex-start" gap="1rem">
-						<Text overflow="break-word" size={'small'}>
-							{sectionDescription}
-						</Text>
-						<Text overflow="break-word">{generalTitle}</Text>
-						<Checkbox
-							defaultChecked={updatedNotificationsSettings.DesktopNotifications}
-							value={updatedNotificationsSettings.DesktopNotifications}
-							onClick={onChangeNotificationCheckbox}
-							label={notificationsCheckboxLabel}
-							data-testid="desktop_notifications_checkbox"
-						/>
-						<Switch
-							disabled={!updatedNotificationsSettings.DesktopNotifications}
-							defaultChecked={updatedNotificationsSettings.DesktopNotificationsSounds}
-							value={updatedNotificationsSettings.DesktopNotificationsSounds}
-							onClick={onChangeNotificationSoundsSwitch}
-							label={notificationsSwitchLabel}
-							data-testid="desktop_notifications_sounds_switch"
-						/>
-						<Text overflow="break-word">{waitingRoomTitle}</Text>
-						<Checkbox
-							defaultChecked={updatedNotificationsSettings.WaitingRoomAccessNotifications}
-							value={updatedNotificationsSettings.WaitingRoomAccessNotifications}
-							onClick={onChangeWaitingRoomAccessNotificationCheckbox}
-							label={waitingRoomCheckboxLabel}
-							data-testid="waiting_room_access_notifications_checkbox"
-						/>
-						<Switch
-							disabled={!updatedNotificationsSettings.WaitingRoomAccessNotifications}
-							defaultChecked={updatedNotificationsSettings.WaitingRoomAccessNotificationsSounds}
-							value={updatedNotificationsSettings.WaitingRoomAccessNotificationsSounds}
-							onClick={onChangeWaitingRoomAccessNotificationSoundsSwitch}
-							label={waitingRoomSwitchLabel}
-							data-testid="waiting_room_access_sounds_switch"
-						/>
-					</Container>
-				</Padding>
+		<SettingsCard title={sectionTitle} description={sectionDescription}>
+			<Container
+				mainAlignment="flex-start"
+				crossAlignment="flex-start"
+				gap="1rem"
+				data-testid="notification_container"
+			>
+				<Text overflow="break-word">{generalTitle}</Text>
+				<Checkbox
+					defaultChecked={updatedNotificationsSettings.DesktopNotifications}
+					value={updatedNotificationsSettings.DesktopNotifications}
+					onClick={onChangeNotificationCheckbox}
+					label={notificationsCheckboxLabel}
+					data-testid="desktop_notifications_checkbox"
+				/>
+				<Switch
+					disabled={!updatedNotificationsSettings.DesktopNotifications}
+					defaultChecked={updatedNotificationsSettings.DesktopNotificationsSounds}
+					value={updatedNotificationsSettings.DesktopNotificationsSounds}
+					onClick={onChangeNotificationSoundsSwitch}
+					label={notificationsSwitchLabel}
+					data-testid="desktop_notifications_sounds_switch"
+				/>
+				<Text overflow="break-word">{waitingRoomTitle}</Text>
+				<Checkbox
+					defaultChecked={updatedNotificationsSettings.WaitingRoomAccessNotifications}
+					value={updatedNotificationsSettings.WaitingRoomAccessNotifications}
+					onClick={onChangeWaitingRoomAccessNotificationCheckbox}
+					label={waitingRoomCheckboxLabel}
+					data-testid="waiting_room_access_notifications_checkbox"
+				/>
+				<Switch
+					disabled={!updatedNotificationsSettings.WaitingRoomAccessNotifications}
+					defaultChecked={updatedNotificationsSettings.WaitingRoomAccessNotificationsSounds}
+					value={updatedNotificationsSettings.WaitingRoomAccessNotificationsSounds}
+					onClick={onChangeWaitingRoomAccessNotificationSoundsSwitch}
+					label={waitingRoomSwitchLabel}
+					data-testid="waiting_room_access_sounds_switch"
+				/>
 			</Container>
-		</Container>
+		</SettingsCard>
 	);
 };
 
