@@ -10,7 +10,12 @@ import IXMPPClient from '../../../types/network/xmpp/IXMPPClient';
 import { Message, MessageType, TextMessage } from '../../../types/store/MessageTypes';
 import { dateToISODate } from '../../../utils/dateUtils';
 
-class ChatExporter {
+export interface IChatExporter {
+	addMessageToFullHistory(message: Message): void;
+	handleFullHistoryResponse(isHistoryComplete: boolean): void;
+}
+
+class ChatExporter implements IChatExporter {
 	private roomId: string;
 
 	private fullHistory: Message[] = [];

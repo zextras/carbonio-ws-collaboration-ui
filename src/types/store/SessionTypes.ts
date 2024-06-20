@@ -5,7 +5,7 @@
  */
 
 import { UserType } from './UserTypes';
-import ChatExporter from '../../network/xmpp/utility/ChatExporter';
+import { IChatExporter } from '../../settings/components/chatExporter/ChatExporter';
 
 export type Session = {
 	id?: string;
@@ -25,7 +25,7 @@ export type Session = {
 	customLogo?: string | false;
 	chatExporting?: {
 		roomId: string;
-		exporter: ChatExporter;
+		exporter: IChatExporter;
 	};
 };
 

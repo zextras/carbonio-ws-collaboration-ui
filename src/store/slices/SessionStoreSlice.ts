@@ -10,7 +10,7 @@ import { find } from 'lodash';
 import { StateCreator } from 'zustand';
 
 import { UsersApi } from '../../network';
-import ChatExporter from '../../network/xmpp/utility/ChatExporter';
+import ChatExporter from '../../settings/components/chatExporter/ChatExporter';
 import { CapabilityList } from '../../types/store/SessionTypes';
 import { RootStore, SessionStoreSlice } from '../../types/store/StoreTypes';
 import { UserType } from '../../types/store/UserTypes';
@@ -65,7 +65,7 @@ export const useSessionStoreSlice: StateCreator<SessionStoreSlice> = (
 	setSelectedRoomOneToOneGroup: (roomId: string): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (draft.session && draft.session?.selectedRoomOneToOneGroup !== roomId) {
+				if (draft.session.selectedRoomOneToOneGroup !== roomId) {
 					draft.session.selectedRoomOneToOneGroup = roomId;
 				}
 			}),
