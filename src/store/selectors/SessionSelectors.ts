@@ -27,3 +27,6 @@ export const getCustomLogo = (store: RootStore): string | false | undefined =>
 
 export const getIsLoggedUserExternal = (store: RootStore): boolean =>
 	store.session?.userType === UserType.GUEST;
+
+export const getExportedChat = (store: RootStore): string | undefined =>
+	store.session.chatExporting?.roomId;
