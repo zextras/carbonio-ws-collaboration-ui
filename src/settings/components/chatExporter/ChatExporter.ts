@@ -8,6 +8,7 @@ import { forEach, last } from 'lodash';
 import useStore from '../../../store/Store';
 import IXMPPClient from '../../../types/network/xmpp/IXMPPClient';
 import { Message, MessageType, TextMessage } from '../../../types/store/MessageTypes';
+import { ExportStatus } from '../../../types/store/SessionTypes';
 import { dateToISODate } from '../../../utils/dateUtils';
 
 export interface IChatExporter {
@@ -47,6 +48,7 @@ class ChatExporter implements IChatExporter {
 				content += this.textMessageFormatter(message as TextMessage);
 			}
 		});
+		useStore.getState().setChatExportStatus(ExportStatus.DOWNLOADING);
 
 		// Create and download the file
 		const blob = new Blob([content], { type: 'text/plain' });

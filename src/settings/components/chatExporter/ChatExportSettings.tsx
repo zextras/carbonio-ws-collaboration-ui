@@ -3,18 +3,20 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import React, { FC, useCallback, useMemo, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 
 import {
 	Button,
 	Container,
+	CreateSnackbarFn,
 	Icon,
 	Input,
 	ListItem,
 	ListV2,
 	Spinner,
 	Text,
-	Tooltip
+	Tooltip,
+	useSnackbar
 } from '@zextras/carbonio-design-system';
 import { map } from 'lodash';
 import { useTranslation } from 'react-i18next';
@@ -22,8 +24,9 @@ import styled from 'styled-components';
 
 import ChatItem from './ChatItem';
 import { useFilterRoomsOnInput } from '../../../hooks/useFilterRoomsOnInput';
-import { getExportedChat } from '../../../store/selectors/SessionSelectors';
+import { getExportedChat, getExportStatus } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
+import { ExportStatus } from '../../../types/store/SessionTypes';
 import SettingsCard from '../SettingsCard';
 
 const CustomListItem = styled(ListItem)`
@@ -56,8 +59,13 @@ const ChatExportSettings: FC = () => {
 		'settings.export.caption',
 		'Exporting chats with a lot of content can take a while.'
 	);
+	const snackbarLabel = t(
+		'settings.export.snackbar.success',
+		'Chat successfully exported, download will begin immediately!'
+	);
 
 	const exportedChat = useStore(getExportedChat);
+	const exportStatus = useStore(getExportStatus);
 	const setChatExporting = useStore((store) => store.setChatExporting);
 
 	const [selectedRoomId, setSelectedRoomId] = useState<string | undefined>();
@@ -70,6 +78,19 @@ const ChatExportSettings: FC = () => {
 		(e: React.ChangeEvent<HTMLInputElement>) => setInputText(e.target.value),
 		[setInputText]
 	);
+
+	const createSnackbar: CreateSnackbarFn = useSnackbar();
+
+	useEffect(() => {
+		if (exportStatus === ExportStatus.DOWNLOADING) {
+			createSnackbar({
+				key: new Date().toLocaleString(),
+				color: 'info',
+				label: snackbarLabel,
+				hideButton: true
+			});
+		}
+	}, [createSnackbar, exportStatus, snackbarLabel]);
 
 	const items = useMemo(
 		() =>

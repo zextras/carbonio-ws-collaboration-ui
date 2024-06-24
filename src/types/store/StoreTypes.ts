@@ -27,7 +27,7 @@ import {
 	TextMessage
 } from './MessageTypes';
 import { RoomsMap } from './RoomTypes';
-import { CapabilityList, Session } from './SessionTypes';
+import { CapabilityList, ExportStatus, Session } from './SessionTypes';
 import { UnreadsMap } from './UnreadsCounterTypes';
 import { UsersMap, UserType } from './UserTypes';
 import { MeetingBe } from '../network/models/meetingBeTypes';
@@ -96,6 +96,7 @@ export type SessionStoreSlice = {
 	setSelectedRoomOneToOneGroup: (id: string) => void;
 	setCustomLogo: (logo: string | false) => void;
 	setChatExporting: (roomId?: string) => void;
+	setChatExportStatus: (status: ExportStatus) => void;
 };
 
 export type MarkersStoreSlice = {

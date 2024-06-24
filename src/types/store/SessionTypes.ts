@@ -26,6 +26,7 @@ export type Session = {
 	chatExporting?: {
 		roomId: string;
 		exporter: IChatExporter;
+		status: ExportStatus;
 	};
 };
 
@@ -53,4 +54,9 @@ export enum CapabilityType {
 	MAX_GROUP_MEMBERS = 'maxGroupMembers',
 	MAX_ROOM_IMAGE_SIZE = 'maxRoomImageSizeInKb',
 	MAX_USER_IMAGE_SIZE = 'maxUserImageSizeInKb'
+}
+
+export enum ExportStatus {
+	EXPORTING = 'exporting',
+	DOWNLOADING = 'downloading'
 }

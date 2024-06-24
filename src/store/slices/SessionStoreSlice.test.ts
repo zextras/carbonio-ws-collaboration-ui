@@ -7,6 +7,7 @@
 import { act, renderHook } from '@testing-library/react-hooks';
 
 import ChatExporter from '../../settings/components/chatExporter/ChatExporter';
+import { ExportStatus } from '../../types/store/SessionTypes';
 import { UserType } from '../../types/store/UserTypes';
 import useStore from '../Store';
 
@@ -56,7 +57,8 @@ describe('SessionStoreSlice tests', () => {
 		});
 		expect(result.current.session.chatExporting).toStrictEqual({
 			roomId: 'roomId',
-			exporter: new ChatExporter(roomId)
+			exporter: new ChatExporter(roomId),
+			status: ExportStatus.EXPORTING
 		});
 	});
 

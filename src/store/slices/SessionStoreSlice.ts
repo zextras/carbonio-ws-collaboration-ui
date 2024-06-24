@@ -11,7 +11,7 @@ import { StateCreator } from 'zustand';
 
 import { UsersApi } from '../../network';
 import ChatExporter from '../../settings/components/chatExporter/ChatExporter';
-import { CapabilityList } from '../../types/store/SessionTypes';
+import { CapabilityList, ExportStatus } from '../../types/store/SessionTypes';
 import { RootStore, SessionStoreSlice } from '../../types/store/StoreTypes';
 import { UserType } from '../../types/store/UserTypes';
 
@@ -97,7 +97,8 @@ export const useSessionStoreSlice: StateCreator<SessionStoreSlice> = (
 				if (roomId) {
 					draft.session.chatExporting = {
 						roomId,
-						exporter: new ChatExporter(roomId)
+						exporter: new ChatExporter(roomId),
+						status: ExportStatus.EXPORTING
 					};
 				} else {
 					delete draft.session.chatExporting;
@@ -105,6 +106,17 @@ export const useSessionStoreSlice: StateCreator<SessionStoreSlice> = (
 			}),
 			false,
 			'SESSION/SET_CHAT_EXPORTING'
+		);
+	},
+	setChatExportStatus: (status: ExportStatus): void => {
+		set(
+			produce((draft: RootStore) => {
+				if (draft.session.chatExporting) {
+					draft.session.chatExporting.status = status;
+				}
+			}),
+			false,
+			'SESSION/SET_CHAT_EXPORTING_STATUS'
 		);
 	}
 });
