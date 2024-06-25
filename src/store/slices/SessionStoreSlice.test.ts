@@ -50,24 +50,39 @@ describe('SessionStoreSlice tests', () => {
 		expect(result.current.session.selectedRoomOneToOneGroup).toBe('roomId');
 	});
 
-	test('Start chat export', () => {
-		const { result } = renderHook(() => useStore());
-		act(() => {
-			result.current.setChatExporting(roomId);
+	describe('Export chat', () => {
+		test('Start chat export', () => {
+			const { result } = renderHook(() => useStore());
+			act(() => {
+				result.current.setChatExporting(roomId);
+			});
+			expect(result.current.session.chatExporting).toStrictEqual({
+				roomId,
+				exporter: new ChatExporter(roomId),
+				status: ExportStatus.EXPORTING
+			});
 		});
-		expect(result.current.session.chatExporting).toStrictEqual({
-			roomId: 'roomId',
-			exporter: new ChatExporter(roomId),
-			status: ExportStatus.EXPORTING
-		});
-	});
 
-	test('End chat export', () => {
-		const { result } = renderHook(() => useStore());
-		act(() => {
-			result.current.setChatExporting(roomId);
-			result.current.setChatExporting();
+		test('End chat export', () => {
+			const { result } = renderHook(() => useStore());
+			act(() => {
+				result.current.setChatExporting(roomId);
+				result.current.setChatExporting();
+			});
+			expect(result.current.session.chatExporting).toBeUndefined();
 		});
-		expect(result.current.session.chatExporting).toBeUndefined();
+
+		test('Set chat export status', () => {
+			const { result } = renderHook(() => useStore());
+			act(() => {
+				result.current.setChatExporting(roomId);
+				result.current.setChatExportStatus(ExportStatus.DOWNLOADING);
+			});
+			expect(result.current.session.chatExporting).toStrictEqual({
+				roomId,
+				exporter: new ChatExporter(roomId),
+				status: ExportStatus.DOWNLOADING
+			});
+		});
 	});
 });
