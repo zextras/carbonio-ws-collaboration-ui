@@ -70,9 +70,7 @@ export function onHistoryMessageStanza(message: Element): true {
 			}
 			case MamRequestType.LOAD_FULL_HISTORY: {
 				const chatExporter = useStore.getState().session.chatExporting?.exporter;
-				if (chatExporter) {
-					chatExporter.addMessageToFullHistory(historyMessage);
-				}
+				chatExporter?.addMessageToFullHistory(historyMessage);
 				break;
 			}
 			default:

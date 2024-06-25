@@ -38,7 +38,7 @@ class ChatExporter implements IChatExporter {
 		if (isHistoryComplete) {
 			this.exportHistory();
 		} else {
-			const from = last(this.fullHistory)?.date || 0;
+			const from = last(this.fullHistory)?.date ?? 0;
 			this.xmppClient.requestFullHistory(this.roomId, from);
 		}
 	}

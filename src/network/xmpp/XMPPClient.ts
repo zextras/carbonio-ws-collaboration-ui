@@ -320,7 +320,7 @@ class XMPPClient implements IXMPPClient {
 	requestFullHistory(roomId: string, from?: number): void {
 		const room = useStore.getState().rooms[roomId];
 		const clearedAt = room.userSettings?.clearedAt;
-		const startHistory = from || clearedAt || room.createdAt;
+		const startHistory = from ?? clearedAt ?? room.createdAt;
 
 		const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
 			.c('query', { xmlns: Strophe.NS.MAM, queryid: MamRequestType.LOAD_FULL_HISTORY })
