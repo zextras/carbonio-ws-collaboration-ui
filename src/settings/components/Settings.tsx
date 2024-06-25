@@ -233,6 +233,7 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 					updatedNotificationsSettings={updatedNotificationsSettings}
 					setUpdatedNotificationsSettings={setUpdatedNotificationsSettings}
 				/>
+				<ChatExportSettings />
 				<MeetingSettings
 					meetingMediaDefaults={meetingMediaDefaults}
 					setMeetingMediaDefaults={setMeetingMediaDefaults}
@@ -243,7 +244,6 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 						setRecordingDefaults={setRecordingDefaults}
 					/>
 				)}
-				<ChatExportSettings />
 			</Container>
 		</Container>
 	);

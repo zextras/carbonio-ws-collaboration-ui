@@ -38,7 +38,7 @@ const CustomListItem = styled(ListItem)`
 
 const ChatExportSettings: FC = () => {
 	const [t] = useTranslation();
-	const titleLabel = t('settings.export.Title', 'Chat export');
+	const titleLabel = t('settings.export.title', 'Chat export');
 	const descriptionLabel = t(
 		'settings.export.subHead',
 		'Choose one of your chats to export messages to a text file. Remember that you are responsible for how you use the exported data.'
@@ -63,7 +63,7 @@ const ChatExportSettings: FC = () => {
 	);
 	const snackbarLabel = t(
 		'settings.export.snackbar.success',
-		'Chat successfully exported, download will begin immediately!'
+		'Chat exported successfully, check your downloads!'
 	);
 	const noMatchTitleLabel = t('settings.export.emptySpace.noMatch.title', 'Try another query');
 	const noMatchDescriptionLabel = t(
@@ -90,10 +90,10 @@ const ChatExportSettings: FC = () => {
 
 	const filteredConversationsIds = useFilterRoomsOnInput(inputText);
 
-	const onInputChange = useCallback(
-		(e: React.ChangeEvent<HTMLInputElement>) => setInputText(e.target.value),
-		[setInputText]
-	);
+	const onInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+		setInputText(e.target.value);
+		setSelectedRoomId(undefined);
+	}, []);
 
 	const createSnackbar: CreateSnackbarFn = useSnackbar();
 
@@ -180,10 +180,11 @@ const ChatExportSettings: FC = () => {
 	]);
 
 	return (
-		<SettingsCard title={titleLabel} description={descriptionLabel}>
-			<Text overflow="break-word" size="small" color="gray1" italic>
-				{subDescriptionLabel}
-			</Text>
+		<SettingsCard
+			title={titleLabel}
+			description={descriptionLabel}
+			subDescription={subDescriptionLabel}
+		>
 			<Input
 				label={inputNameLabel}
 				value={inputText}
