@@ -16,6 +16,7 @@ import useRouting, { PAGE_INFO_TYPE } from '../../../hooks/useRouting';
 import { MeetingsApi } from '../../../network';
 import { getRoomIdFromMeeting } from '../../../store/selectors/MeetingSelectors';
 import { getRoomNameSelector, getRoomTypeSelector } from '../../../store/selectors/RoomsSelectors';
+import { getIsLoggedUserExternal } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { RoomType } from '../../../types/store/RoomTypes';
 import { BrowserUtils } from '../../../utils/BrowserUtils';
@@ -61,6 +62,7 @@ const MeetingAccessPage: FC<AccessMeetingPageProps> = ({ hasUserDirectAccess, me
 	);
 
 	const roomType = useStore((store) => getRoomTypeSelector(store, roomId));
+	const isLoggedUserExternal = useStore(getIsLoggedUserExternal);
 
 	const [streamTrack, setStreamTrack] = useState<MediaStream | null>(null);
 	const [pageWidth, setPageWidth] = useState(window.innerWidth);
@@ -109,11 +111,11 @@ const MeetingAccessPage: FC<AccessMeetingPageProps> = ({ hasUserDirectAccess, me
 		freeMediaResources(streamTrack);
 		if (userIsReady) {
 			MeetingsApi.leaveWaitingRoom(meetingId);
-		} else {
+		} else if (isLoggedUserExternal) {
 			BrowserUtils.clearAuthCookies();
 		}
 		goToInfoPage(PAGE_INFO_TYPE.HANG_UP_PAGE);
-	}, [goToInfoPage, meetingId, streamTrack, userIsReady]);
+	}, [goToInfoPage, isLoggedUserExternal, meetingId, streamTrack, userIsReady]);
 
 	useEventListener(EventName.MEETING_USER_REJECTED, handleRejected);
 	useEventListener(EventName.MEETING_WAITING_PARTICIPANT_CLASHED, handleRejoin);
