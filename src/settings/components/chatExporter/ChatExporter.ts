@@ -3,13 +3,15 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
+import { t } from '@zextras/carbonio-shell-ui';
 import { forEach, last } from 'lodash';
 
+import { getRoomNameSelector } from '../../../store/selectors/RoomsSelectors';
 import useStore from '../../../store/Store';
 import IXMPPClient from '../../../types/network/xmpp/IXMPPClient';
 import { Message, MessageType, TextMessage } from '../../../types/store/MessageTypes';
 import { ExportStatus } from '../../../types/store/SessionTypes';
-import { dateToISODate } from '../../../utils/dateUtils';
+import { formatDate } from '../../../utils/dateUtils';
 
 export interface IChatExporter {
 	addMessageToFullHistory(message: Message): void;
@@ -45,7 +47,7 @@ class ChatExporter implements IChatExporter {
 		let content = '';
 		forEach(this.fullHistory, (message) => {
 			if (message.type === MessageType.TEXT_MSG) {
-				content += this.textMessageFormatter(message as TextMessage);
+				content += this.messageFormatter(message);
 			}
 		});
 		useStore.getState().setChatExportStatus(ExportStatus.DOWNLOADING);
@@ -54,7 +56,8 @@ class ChatExporter implements IChatExporter {
 		const blob = new Blob([content], { type: 'text/plain' });
 		const link = document.createElement('a');
 		link.href = URL.createObjectURL(blob);
-		link.download = 'chat-history.txt';
+		const chatName = getRoomNameSelector(useStore.getState(), this.roomId);
+		link.download = `${chatName}.txt`;
 		document.body.appendChild(link);
 		link.click();
 		document.body.removeChild(link);
@@ -63,9 +66,18 @@ class ChatExporter implements IChatExporter {
 		useStore.getState().setChatExporting();
 	}
 
-	private textMessageFormatter(message: TextMessage): string {
+	private messageFormatter(message: TextMessage): string {
 		const senderName = useStore.getState().users[message.from]?.name || message.from;
-		return `[${dateToISODate(message.date)}] - ${senderName}: "${message.text}"\n`;
+		const header = `[${formatDate(message.date, 'YYYY-MM-DD HH:mm:ss')}] ${senderName}: `;
+		if (message.deleted) {
+			const deletedMessage = t('message.deletedMessage', 'Deleted message');
+			return `${header}[${deletedMessage}]\n`;
+		}
+		if (message.attachment) {
+			const attachmentName = message.attachment.name || '';
+			return `${header}[${attachmentName}] ${message.text}\n`;
+		}
+		return `${header}${message.text}\n`;
 	}
 }
 

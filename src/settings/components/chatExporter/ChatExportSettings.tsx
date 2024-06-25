@@ -18,20 +18,22 @@ import {
 	Tooltip,
 	useSnackbar
 } from '@zextras/carbonio-design-system';
-import { map } from 'lodash';
+import { map, size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import ChatItem from './ChatItem';
 import { useFilterRoomsOnInput } from '../../../hooks/useFilterRoomsOnInput';
+import { getIsThereAnyRoom } from '../../../store/selectors/RoomsSelectors';
 import { getExportedChat, getExportStatus } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { ExportStatus } from '../../../types/store/SessionTypes';
 import SettingsCard from '../SettingsCard';
 
 const CustomListItem = styled(ListItem)`
-	padding: 0.2rem;
+	margin: 0.2rem;
 	border-radius: 4px;
+	box-shadow: 0 0 4px 0 rgba(166, 166, 166, 0.5);
 `;
 
 const ChatExportSettings: FC = () => {
@@ -63,13 +65,27 @@ const ChatExportSettings: FC = () => {
 		'settings.export.snackbar.success',
 		'Chat successfully exported, download will begin immediately!'
 	);
+	const noMatchTitleLabel = t('settings.export.emptySpace.noMatch.title', 'Try another query');
+	const noMatchDescriptionLabel = t(
+		'settings.export.emptySpace.noMatch.description',
+		'There are no matches for this search in your existing chats.'
+	);
+	const noChatsLabel = t('settings.export.emptySpace.firstAccess.title', 'There’s nothing there.');
+	const noChatsCallToActionLabel = t(
+		'settings.export.emptySpace.firstAccess.callToAction',
+		'Go to Chats and start collaborating!'
+	);
+	const noChatsDescriptionLabel = t(
+		'settings.export.emptySpace.firstAccess.description',
+		'Your single chats and groups will appear listed here.'
+	);
 
 	const exportedChat = useStore(getExportedChat);
 	const exportStatus = useStore(getExportStatus);
 	const setChatExporting = useStore((store) => store.setChatExporting);
+	const isThereAnyRoom = useStore(getIsThereAnyRoom);
 
 	const [selectedRoomId, setSelectedRoomId] = useState<string | undefined>();
-
 	const [inputText, setInputText] = useState('');
 
 	const filteredConversationsIds = useFilterRoomsOnInput(inputText);
@@ -103,9 +119,7 @@ const ChatExportSettings: FC = () => {
 	);
 
 	const onExport = useCallback(() => {
-		if (selectedRoomId) {
-			setChatExporting(selectedRoomId);
-		}
+		if (selectedRoomId) setChatExporting(selectedRoomId);
 	}, [selectedRoomId, setChatExporting]);
 
 	const filterIcon = useMemo(
@@ -131,6 +145,40 @@ const ChatExportSettings: FC = () => {
 		return undefined;
 	}, [exportedChat, noOneSelectedTooltip, ongoingExportTooltip, selectedRoomId]);
 
+	const MainArea = useMemo(() => {
+		if (!isThereAnyRoom) {
+			return (
+				<Container gap="0.5rem" padding="1rem">
+					<Text size="large" color="gray1" weight="bold">
+						{noChatsLabel}
+					</Text>
+					<Text color="gray1">{noChatsCallToActionLabel}</Text>
+					<Text color="gray1">{noChatsDescriptionLabel}</Text>
+				</Container>
+			);
+		}
+		if (size(filteredConversationsIds) === 0) {
+			return (
+				<Container gap="0.5rem" padding="1rem">
+					<Text size="large" color="gray1" weight="bold">
+						{noMatchTitleLabel}
+					</Text>
+					<Text color="gray1">{noMatchDescriptionLabel}</Text>
+				</Container>
+			);
+		}
+		return <ListV2 maxHeight="15rem">{items}</ListV2>;
+	}, [
+		filteredConversationsIds,
+		isThereAnyRoom,
+		items,
+		noChatsCallToActionLabel,
+		noChatsDescriptionLabel,
+		noChatsLabel,
+		noMatchDescriptionLabel,
+		noMatchTitleLabel
+	]);
+
 	return (
 		<SettingsCard title={titleLabel} description={descriptionLabel}>
 			<Text overflow="break-word" size="small" color="gray1" italic>
@@ -142,7 +190,7 @@ const ChatExportSettings: FC = () => {
 				onChange={onInputChange}
 				CustomIcon={filterIcon}
 			/>
-			<ListV2 maxHeight="200px">{items}</ListV2>
+			{MainArea}
 			<Container orientation="horizontal" mainAlignment="flex-start" gap="1rem">
 				<Tooltip label={buttonTooltip} disabled={!disabledButton}>
 					<Button

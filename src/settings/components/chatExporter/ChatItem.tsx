@@ -7,7 +7,6 @@ import React, { useMemo } from 'react';
 
 import { Avatar, Container, Spinner, Text } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 import { ConfigurationMessageLabel } from '../../../hooks/useConfigurationMessageLabel';
 import useMessage from '../../../hooks/useMessage';
@@ -22,11 +21,6 @@ import { getUserName } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
 import { Message, MessageType } from '../../../types/store/MessageTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
-
-const CustomContainer = styled(Container)`
-	border-radius: 4px;
-	box-shadow: 0 0 4px 0 rgba(166, 166, 166, 0.5);
-`;
 
 type ChatItemProps = {
 	roomId: string;
@@ -70,12 +64,7 @@ const ChatItem: React.FC<ChatItemProps> = ({ roomId, onClick }: ChatItemProps) =
 	}, [deletedMessageLabel, lastMessageOfRoom, loggedUserId, userNameOfLastMessageOfRoom]);
 
 	return (
-		<CustomContainer
-			orientation="horizontal"
-			onClick={onClick}
-			padding={{ all: 'small' }}
-			gap="0.5rem"
-		>
+		<Container orientation="horizontal" onClick={onClick} padding={{ all: 'small' }} gap="0.5rem">
 			<Avatar
 				label={roomName}
 				picture={picture}
@@ -88,7 +77,7 @@ const ChatItem: React.FC<ChatItemProps> = ({ roomId, onClick }: ChatItemProps) =
 				</Text>
 			</Container>
 			{exportedChat === roomId && <Spinner color="gray1" />}
-		</CustomContainer>
+		</Container>
 	);
 };
 
