@@ -3,10 +3,6 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-/**
- * @jest-environment jsdom
- */
-
 import ChatExporter from './ChatExporter';
 import { createMockTextMessage } from '../../../tests/createMock';
 import { mockedRequestFullHistory } from '../../../tests/mockedXmppClient';
