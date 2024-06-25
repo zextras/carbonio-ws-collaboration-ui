@@ -11,6 +11,7 @@ import { textMessageRealTime } from '../network/xmpp/xmppMessageExamples';
 export const mockedSendChatMessage = jest.fn();
 export const mockedSendChatMessageEdit = jest.fn();
 export const mockedSendChatMessageReply = jest.fn();
+export const mockedRequestFullHistory = jest.fn();
 export const mockedSendIsWriting = jest.fn();
 export const mockedSendPaused = jest.fn();
 export const mockedReadMessage = jest.fn();
@@ -32,7 +33,7 @@ export const xmppClient = {
 	requestHistory: jest.fn(),
 	requestHistoryBetweenTwoMessage: jest.fn(),
 	requestMessageSubjectOfReply: jest.fn(),
-	requestFullHistory: jest.fn(),
+	requestFullHistory: mockedRequestFullHistory,
 	sendIsWriting: mockedSendIsWriting,
 	sendPaused: mockedSendPaused,
 	readMessage: mockedReadMessage,
