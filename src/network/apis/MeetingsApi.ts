@@ -39,6 +39,7 @@ import {
 } from '../../types/network/responses/meetingsResponses';
 import { STREAM_TYPE, Subscription } from '../../types/store/ActiveMeetingTypes';
 import { RoomType } from '../../types/store/RoomTypes';
+import { UserType } from '../../types/store/UserTypes';
 import { BrowserUtils } from '../../utils/BrowserUtils';
 import { RoomsApi } from '../index';
 
@@ -154,6 +155,7 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 			room?.members,
 			(member) => member.userId === useStore.getState().session.id && !member.owner
 		);
+		const isExternal = useStore.getState().session?.userType === UserType.GUEST;
 		return this.fetchAPI(`meetings/${meetingId}/leave`, RequestType.POST)
 			.then((resp: LeaveMeetingResponse) => {
 				useStore.getState().meetingDisconnection(meetingId);
@@ -162,11 +164,15 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 				if (room?.type === RoomType.TEMPORARY && iAmNotOwner) {
 					RoomsApi.deleteRoomMember(room.id, useStore.getState().session.id || '');
 				}
-				BrowserUtils.clearAuthCookies();
+				if (isExternal) {
+					BrowserUtils.clearAuthCookies();
+				}
 				return resp;
 			})
 			.catch((err) => {
-				BrowserUtils.clearAuthCookies();
+				if (isExternal) {
+					BrowserUtils.clearAuthCookies();
+				}
 				return err;
 			});
 	}
