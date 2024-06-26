@@ -298,20 +298,23 @@ describe('Meetings API', () => {
 		document.cookie = `ZM_AUTH_TOKEN=123456789; path=/`;
 		document.cookie = `ZX_AUTH_TOKEN=123456789; path=/`;
 		fetchResponse.mockResolvedValueOnce(meetingMock);
-		useStore.getState().setLoginInfo(guestUser.id, guestUser.name, guestUser.type);
+		useStore.getState().setLoginInfo(guestUser.id, guestUser.name, guestUser.name, guestUser.type);
 		await meetingsApi.leaveMeeting(meetingMock.id);
 
 		// Check if fetch is called with the correct parameters
-		// expect(global.fetch).toHaveBeenCalledWith(`/services/chats/meetings/${meetingMock.id}/leave`, {
-		// 	method: 'POST',
-		// 	headers,
-		// 	body: undefined
-		// });
+		expect(global.fetch).toHaveBeenCalledWith(
+			`/services/chats/meetings/${meetingMock.id}/leave`,
+			expect.objectContaining({
+				method: 'POST',
+				headers,
+				body: undefined
+			})
+		);
 
 		// Check if store is correctly updated
 		const store = useStore.getState();
 		expect(store.activeMeeting[meetingMock.id]).not.toBeDefined();
-		// expect(document.cookie).toBe('');
+		expect(document.cookie).toBe('');
 	});
 
 	test('leaveMeeting for internal user is called correctly', async () => {
@@ -355,22 +358,25 @@ describe('Meetings API', () => {
 	test('leaveMeeting for external user is rejected', async () => {
 		document.cookie = `ZM_AUTH_TOKEN=123456789; path=/`;
 		document.cookie = `ZX_AUTH_TOKEN=123456789; path=/`;
-		useStore.getState().setLoginInfo(guestUser.id, guestUser.name, guestUser.type);
+		useStore.getState().setLoginInfo(guestUser.id, guestUser.name, guestUser.name, guestUser.type);
 
 		fetchResponse.mockRejectedValueOnce(false);
 		await meetingsApi.leaveMeeting(meetingMock.id);
 
 		// Check if fetch is called with the correct parameters
-		// expect(global.fetch).toHaveBeenCalledWith(`/services/chats/meetings/${meetingMock.id}/leave`, {
-		// 	method: 'POST',
-		// 	headers,
-		// 	body: undefined
-		// });
+		expect(global.fetch).toHaveBeenCalledWith(
+			`/services/chats/meetings/${meetingMock.id}/leave`,
+			expect.objectContaining({
+				method: 'POST',
+				headers,
+				body: undefined
+			})
+		);
 
 		// Check if store is correctly updated
 		const store = useStore.getState();
 		expect(store.activeMeeting[meetingMock.id]).not.toBeDefined();
-		// expect(document.cookie).toBe('');
+		expect(document.cookie).toBe('');
 	});
 
 	test('When a member leaves a scheduled meeting, he is also removed from temporary room', async () => {
