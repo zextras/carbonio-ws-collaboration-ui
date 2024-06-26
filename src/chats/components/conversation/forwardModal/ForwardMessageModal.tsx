@@ -20,7 +20,8 @@ import {
 	ChipInput,
 	ChipItem,
 	Container,
-	List,
+	ListItem,
+	ListV2,
 	Modal,
 	Padding,
 	Text,
@@ -103,7 +104,7 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 	);
 
 	const onClickListItem = useCallback(
-		(roomId: string) => () => {
+		(roomId: string) => (): void => {
 			select(roomId);
 			const newChip = {
 				value: {
@@ -192,6 +193,16 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 		[chooseOneChatLabel, disabledForwardButton, forwardActionLabel, forwardMessage]
 	);
 
+	const items = useMemo(
+		() =>
+			map(chatList, (item) => (
+				<ListItem key={item.id} active={selected[item.id]}>
+					{() => <ForwardMessageConversationListItem item={item} selected={selected[item.id]} />}
+				</ListItem>
+			)),
+		[chatList, selected]
+	);
+
 	return (
 		<Modal
 			open={open}
@@ -228,12 +239,7 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 						</Text>
 					</CustomContainer>
 				) : (
-					<List
-						items={chatList}
-						data-testid="list_forward_modal"
-						ItemComponent={ForwardMessageConversationListItem}
-						selected={selected}
-					/>
+					<ListV2 data-testid="list_forward_modal">{items}</ListV2>
 				)}
 			</Container>
 		</Modal>
