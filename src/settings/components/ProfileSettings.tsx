@@ -190,7 +190,7 @@ const ProfileSettings: FC<ProfileSettingsProps> = ({
 			} else {
 				createSnackbar({
 					key: new Date().toLocaleString(),
-					type: 'error',
+					severity: 'error',
 					label: imageSizeTooLargeSnackbar,
 					hideButton: true,
 					autoHideTimeout: 5000

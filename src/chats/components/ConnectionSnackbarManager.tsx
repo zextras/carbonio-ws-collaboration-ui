@@ -43,7 +43,7 @@ const ConnectionSnackbarManager = (): ReactElement | null => {
 				onClose={(): void => setSnackbarManuallyClosed(true)}
 				actionLabel={actionLabel}
 				disableAutoHide
-				type="warning"
+				severity="warning"
 				label={networkProblemLabel}
 			/>
 		);

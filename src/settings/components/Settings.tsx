@@ -125,7 +125,7 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 	const successSnackbar = useCallback(() => {
 		createSnackbar({
 			key: new Date().toLocaleString(),
-			type: 'info',
+			severity: 'info',
 			label: saveSettingsSnackbar,
 			hideButton: true,
 			autoHideTimeout: 5000
@@ -135,7 +135,7 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 	const errorSnackbar = useCallback(() => {
 		createSnackbar({
 			key: new Date().toLocaleString(),
-			type: 'error',
+			severity: 'error',
 			label: errorDeleteImageSnackbar,
 			hideButton: true,
 			autoHideTimeout: 5000
