@@ -39,7 +39,7 @@ describe('Edit group Details Modal', () => {
 		setup(<EditConversationModal editModalOpen closeModal={jest.fn} roomId={testRoom.id} />);
 		const nameInput = screen.getByTestId('name_input');
 		const descriptionInput = screen.getByTestId('description_input');
-		const editButton = screen.getByTestId('edit_button');
+		const editButton = screen.getByRole('button', { name: /Edit details/i });
 		expect(nameInput).toBeInTheDocument();
 		expect(descriptionInput).toBeInTheDocument();
 		expect(editButton).toBeInTheDocument();
@@ -52,7 +52,7 @@ describe('Edit group Details Modal', () => {
 		const { user } = setup(
 			<EditConversationModal editModalOpen closeModal={jest.fn} roomId={testRoom.id} />
 		);
-		const editButton = screen.getByTestId('edit_button');
+		const editButton = screen.getByRole('button', { name: /Edit details/i });
 		const nameInput = screen.getByTestId('name_input');
 		expect(editButton).not.toBeEnabled();
 		expect(screen.getByDisplayValue(new RegExp(`${testRoom2.name}`, 'i'))).toBeInTheDocument();
@@ -70,7 +70,7 @@ describe('Edit group Details Modal', () => {
 			<EditConversationModal editModalOpen closeModal={jest.fn} roomId={testRoom.id} />
 		);
 		// inside testRoom, the title field is empty, that's why the title input shound be in error state
-		const editButton = screen.getByTestId('edit_button');
+		const editButton = screen.getByRole('button', { name: /Edit details/i });
 		const nameInput = screen.getByTestId('name_input');
 		const titleLabel = screen.getByText(/It describes the subject of the Group/i);
 		const descriptionLabel = screen.getByText(/It describes the subject of the Group/i);
@@ -103,7 +103,7 @@ describe('Edit group Details Modal', () => {
 		const { user } = setup(
 			<EditConversationModal editModalOpen closeModal={jest.fn} roomId={testRoom.id} />
 		);
-		const editButton = screen.getByTestId('edit_button');
+		const editButton = screen.getByRole('button', { name: /Edit details/i });
 		const descriptionInput = screen.getByTestId('description_input');
 
 		// the state should change if I write a description longer than 256 characters, the description input shound be in error state
@@ -125,7 +125,7 @@ describe('Edit group Details Modal', () => {
 			<EditConversationModal editModalOpen closeModal={jest.fn} roomId={testRoom.id} />
 		);
 		// inside testRoom, the title field is empty, that's why the title input shound be in error state
-		const editButton = screen.getByTestId('edit_button');
+		const editButton = screen.getByRole('button', { name: /Edit details/i });
 		const nameInput = screen.getByTestId('name_input');
 		const titleLabel = screen.getByText(/It describes the subject of the Group/i);
 		const descriptionLabel = screen.getByText(/It describes the subject of the Group/i);
@@ -158,7 +158,7 @@ describe('Edit group Details Modal', () => {
 		const { user } = setup(
 			<EditConversationModal editModalOpen closeModal={jest.fn} roomId={testRoom.id} />
 		);
-		const editButton = screen.getByTestId('edit_button');
+		const editButton = screen.getByRole('button', { name: /Edit details/i });
 		const descriptionInput = screen.getByTestId('description_input');
 
 		// the state should change if I write a description longer than 256 characters, the description input shound be in error state
@@ -186,7 +186,7 @@ describe('Edit group Details Modal', () => {
 		);
 		const descriptionInput = screen.getByTestId('description_input');
 		await user.type(descriptionInput, 'This is a new description');
-		const editButton = screen.getByTestId('edit_button');
+		const editButton = screen.getByRole('button', { name: /Edit details/i });
 		expect(editButton).toBeEnabled();
 	});
 });

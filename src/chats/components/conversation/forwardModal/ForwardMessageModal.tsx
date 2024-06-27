@@ -16,7 +16,6 @@ import React, {
 } from 'react';
 
 import {
-	Button,
 	ChipInput,
 	ChipItem,
 	Container,
@@ -24,8 +23,7 @@ import {
 	ListV2,
 	Modal,
 	Padding,
-	Text,
-	Tooltip
+	Text
 } from '@zextras/carbonio-design-system';
 import {
 	difference,
@@ -174,25 +172,6 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 
 	const disabledForwardButton = useMemo(() => size(selected) === 0, [selected]);
 
-	const modalFooter = useMemo(
-		() => (
-			<Tooltip
-				label={disabledForwardButton ? chooseOneChatLabel : forwardActionLabel}
-				placement="right"
-			>
-				<Container crossAlignment="flex-end">
-					<Button
-						label={forwardActionLabel}
-						onClick={forwardMessage}
-						disabled={disabledForwardButton}
-						data-testid="forward_button"
-					/>
-				</Container>
-			</Tooltip>
-		),
-		[chooseOneChatLabel, disabledForwardButton, forwardActionLabel, forwardMessage]
-	);
-
 	const items = useMemo(
 		() =>
 			map(chatList, (item) => (
@@ -206,12 +185,15 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 	return (
 		<Modal
 			open={open}
+			size="small"
 			title={modalTitle}
 			showCloseIcon
 			onClose={onClose}
-			size="small"
-			customFooter={modalFooter}
 			closeIconTooltip={closeLabel}
+			onConfirm={forwardMessage}
+			confirmLabel={forwardActionLabel}
+			confirmDisabled={disabledForwardButton}
+			confirmTooltip={disabledForwardButton ? chooseOneChatLabel : forwardActionLabel}
 		>
 			<Text overflow="break-word" size="small">
 				{modalDescription}

@@ -7,13 +7,10 @@
 import React, { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import {
-	Button,
-	Container,
 	CreateSnackbarFn,
 	Modal,
 	Padding,
 	Text,
-	Tooltip,
 	useSnackbar
 } from '@zextras/carbonio-design-system';
 import { find, map, size } from 'lodash';
@@ -154,39 +151,22 @@ const ChatCreationModal = ({
 		}
 	}, [contactsSelected, chatType, onCreateOneToOne, onCreateGroup]);
 
-	const modalFooter = useMemo(
-		() => (
-			<Tooltip
-				label={
-					disabledCreateButton
-						? titleError || topicError
-							? errorLabelDisabled
-							: disabledButtonTooltip
-						: createButtonLabel
-				}
-				placement="right"
-			>
-				<Container crossAlignment="flex-end">
-					<Button
-						label={createButtonLabel}
-						onClick={onCreate}
-						disabled={disabledCreateButton || isPending}
-						data-testid="create_button"
-					/>
-				</Container>
-			</Tooltip>
-		),
-		[
-			disabledCreateButton,
-			titleError,
-			topicError,
-			errorLabelDisabled,
-			disabledButtonTooltip,
-			createButtonLabel,
-			onCreate,
-			isPending
-		]
-	);
+	const createButtonTooltip = useMemo(() => {
+		if (disabledCreateButton) {
+			if (titleError || topicError) {
+				return errorLabelDisabled;
+			}
+			return disabledButtonTooltip;
+		}
+		return createButtonLabel;
+	}, [
+		disabledCreateButton,
+		createButtonLabel,
+		titleError,
+		topicError,
+		disabledButtonTooltip,
+		errorLabelDisabled
+	]);
 
 	useEffect(() => {
 		if (inputRef.current) {
@@ -197,12 +177,15 @@ const ChatCreationModal = ({
 	return (
 		<Modal
 			open={open}
+			size="medium"
 			title={modalTitle}
+			onConfirm={onCreate}
+			confirmLabel={createButtonLabel}
+			confirmDisabled={disabledCreateButton || isPending}
+			confirmTooltip={createButtonTooltip}
 			showCloseIcon
 			closeIconTooltip={closeLabel}
 			onClose={onModalClose}
-			size="medium"
-			customFooter={modalFooter}
 		>
 			<Text overflow="break-word" size="small">
 				{descriptionLabel}
