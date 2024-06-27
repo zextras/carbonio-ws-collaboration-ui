@@ -61,7 +61,7 @@ export default abstract class BaseAPI implements IBaseAPI {
 				// Headers have to be encoded in unicode to be sent
 				const headers = new Headers();
 				headers.append('fileName', charToUnicode(file.name));
-				headers.append('mimeType', file.type);
+				headers.append('mimeType', file.type || 'application/octet-stream');
 				if (optionalFields) {
 					optionalFields.description &&
 						headers.append('description', charToUnicode(optionalFields.description));
