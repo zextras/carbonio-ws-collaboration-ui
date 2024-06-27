@@ -11,29 +11,31 @@ import { textMessageRealTime } from '../network/xmpp/xmppMessageExamples';
 export const mockedSendChatMessage = jest.fn();
 export const mockedSendChatMessageEdit = jest.fn();
 export const mockedSendChatMessageReply = jest.fn();
+export const mockedRequestFullHistory = jest.fn();
 export const mockedSendIsWriting = jest.fn();
 export const mockedSendPaused = jest.fn();
+export const mockedReadMessage = jest.fn();
 export const mockedSendChatMessageDeletion = jest.fn();
 
-export const mockedReadMessage = jest.fn();
 export const xmppClient = {
-	connect: (): null => null,
-	getContactList: (): null => null,
-	setOnline: (): null => null,
-	getLastActivity: (): null => null,
-	getInbox: (): null => null,
-	setInbox: (): null => null,
+	connect: jest.fn(),
+	getContactList: jest.fn(),
+	setOnline: jest.fn(),
+	getLastActivity: jest.fn(),
+	getInbox: jest.fn(),
+	setInbox: jest.fn(),
 	sendChatMessage: mockedSendChatMessage,
 	sendChatMessageReply: mockedSendChatMessageReply,
 	sendChatMessageDeletion: mockedSendChatMessageDeletion,
 	sendChatMessageEdit: mockedSendChatMessageEdit,
 	requestMessageToForward: (): Promise<Element> =>
 		Promise.resolve(Strophe.createHtml(textMessageRealTime)),
-	requestHistory: (): null => null,
-	requestHistoryBetweenTwoMessage: (): null => null,
-	requestMessageSubjectOfReply: (): null => null,
+	requestHistory: jest.fn(),
+	requestHistoryBetweenTwoMessage: jest.fn(),
+	requestMessageSubjectOfReply: jest.fn(),
+	requestFullHistory: mockedRequestFullHistory,
 	sendIsWriting: mockedSendIsWriting,
 	sendPaused: mockedSendPaused,
 	readMessage: mockedReadMessage,
-	lastMarkers: (): null => null
+	lastMarkers: jest.fn()
 };
