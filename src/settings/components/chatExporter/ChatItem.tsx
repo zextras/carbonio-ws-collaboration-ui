@@ -5,7 +5,7 @@
  */
 import React, { useMemo } from 'react';
 
-import { Avatar, Container, Spinner, Text } from '@zextras/carbonio-design-system';
+import { Avatar, Container, Row, Spinner, Text } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
 import { ConfigurationMessageLabel } from '../../../hooks/useConfigurationMessageLabel';
@@ -70,12 +70,14 @@ const ChatItem: React.FC<ChatItemProps> = ({ roomId, onClick }: ChatItemProps) =
 				picture={picture}
 				shape={roomType === RoomType.ONE_TO_ONE ? 'round' : 'square'}
 			/>
-			<Container width="fill" crossAlignment="flex-start">
-				<Text size="small">{roomName}</Text>
-				<Text color="secondary" size="extrasmall" overflow="ellipsis">
-					{messageToDisplay}
-				</Text>
-			</Container>
+			<Row takeAvailableSpace>
+				<Container width="fill" crossAlignment="flex-start">
+					<Text size="small">{roomName}</Text>
+					<Text color="secondary" size="extrasmall" overflow="ellipsis">
+						{messageToDisplay}
+					</Text>
+				</Container>
+			</Row>
 			{exportedChat === roomId && <Spinner color="gray1" />}
 		</Container>
 	);
