@@ -5,9 +5,10 @@
  */
 import React, { Dispatch, FC, SetStateAction, useCallback } from 'react';
 
-import { Checkbox, Container, Divider, Padding, Text } from '@zextras/carbonio-design-system';
+import { Checkbox, Container } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
+import SettingsCard from './SettingsCard';
 import { MeetingStorageType } from '../../utils/localStorageUtils';
 
 type MeetingSettingsProps = {
@@ -43,37 +44,24 @@ const MeetingSettings: FC<MeetingSettingsProps> = ({
 	}, [setMeetingMediaDefaults]);
 
 	return (
-		<Container
-			background={'gray6'}
-			padding={{ horizontal: 'medium', bottom: 'medium' }}
-			data-testid="meeting_settings_container"
-		>
-			<Container crossAlignment="flex-start" gap="1rem">
-				<Padding top="large">
-					<Text weight="bold">{meetingSectionLabel}</Text>
-				</Padding>
-				<Divider color="gray2" />
-				<Container mainAlignment="flex-start" crossAlignment="flex-start" gap="1rem">
-					<Text overflow="break-word" size={'small'}>
-						{meetingSectionDescription}
-					</Text>
-					<Checkbox
-						defaultChecked={meetingMediaDefaults.EnableMicrophone}
-						value={meetingMediaDefaults.EnableMicrophone}
-						onClick={setMicrophoneEnabled}
-						label={enableMicLabel}
-						data-testid="microphone_checkbox"
-					/>
-					<Checkbox
-						defaultChecked={meetingMediaDefaults.EnableCamera}
-						value={meetingMediaDefaults.EnableCamera}
-						onClick={setCameraEnabled}
-						label={enableCamLabel}
-						data-testid="camera_checkbox"
-					/>
-				</Container>
+		<SettingsCard title={meetingSectionLabel} description={meetingSectionDescription}>
+			<Container crossAlignment="flex-start" gap="1rem" data-testid="meeting_settings_container">
+				<Checkbox
+					defaultChecked={meetingMediaDefaults.EnableMicrophone}
+					value={meetingMediaDefaults.EnableMicrophone}
+					onClick={setMicrophoneEnabled}
+					label={enableMicLabel}
+					data-testid="microphone_checkbox"
+				/>
+				<Checkbox
+					defaultChecked={meetingMediaDefaults.EnableCamera}
+					value={meetingMediaDefaults.EnableCamera}
+					onClick={setCameraEnabled}
+					label={enableCamLabel}
+					data-testid="camera_checkbox"
+				/>
 			</Container>
-		</Container>
+		</SettingsCard>
 	);
 };
 

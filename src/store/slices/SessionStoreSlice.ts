@@ -10,7 +10,8 @@ import { find } from 'lodash';
 import { StateCreator } from 'zustand';
 
 import { UsersApi } from '../../network';
-import { CapabilityList } from '../../types/store/SessionTypes';
+import ChatExporter from '../../settings/components/chatExporter/ChatExporter';
+import { CapabilityList, ExportStatus } from '../../types/store/SessionTypes';
 import { RootStore, SessionStoreSlice } from '../../types/store/StoreTypes';
 import { UserType } from '../../types/store/UserTypes';
 
@@ -64,7 +65,7 @@ export const useSessionStoreSlice: StateCreator<SessionStoreSlice> = (
 	setSelectedRoomOneToOneGroup: (roomId: string): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (draft.session && draft.session?.selectedRoomOneToOneGroup !== roomId) {
+				if (draft.session.selectedRoomOneToOneGroup !== roomId) {
 					draft.session.selectedRoomOneToOneGroup = roomId;
 				}
 			}),
@@ -88,6 +89,34 @@ export const useSessionStoreSlice: StateCreator<SessionStoreSlice> = (
 			}),
 			false,
 			'SESSION/SET_CUSTOM_LOGO'
+		);
+	},
+	setChatExporting: (roomId?: string): void => {
+		set(
+			produce((draft: RootStore) => {
+				if (roomId) {
+					draft.session.chatExporting = {
+						roomId,
+						exporter: new ChatExporter(roomId),
+						status: ExportStatus.EXPORTING
+					};
+				} else {
+					delete draft.session.chatExporting;
+				}
+			}),
+			false,
+			'SESSION/SET_CHAT_EXPORTING'
+		);
+	},
+	setChatExportStatus: (status: ExportStatus): void => {
+		set(
+			produce((draft: RootStore) => {
+				if (draft.session.chatExporting) {
+					draft.session.chatExporting.status = status;
+				}
+			}),
+			false,
+			'SESSION/SET_CHAT_EXPORTING_STATUS'
 		);
 	}
 });

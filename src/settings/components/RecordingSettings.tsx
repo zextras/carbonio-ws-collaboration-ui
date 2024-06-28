@@ -5,11 +5,12 @@
  */
 import React, { Dispatch, FC, ReactElement, SetStateAction, useCallback, useMemo } from 'react';
 
-import { Button, Container, Divider, Input, Padding, Text } from '@zextras/carbonio-design-system';
+import { Button, Container, Input, Padding } from '@zextras/carbonio-design-system';
 import { useIntegratedFunction } from '@zextras/carbonio-shell-ui';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
+import SettingsCard from './SettingsCard';
 import { MeetingRecordingType } from '../../utils/localStorageUtils';
 
 const CustomButton = styled(Button)`
@@ -73,48 +74,41 @@ const RecordingSettings: FC<RecordingSettingsProps> = ({
 
 	if (filesSelectFilesActionAvailable) {
 		return (
-			<Container
-				background={'gray6'}
-				padding={{ horizontal: 'medium', bottom: 'medium' }}
-				data-testid="recording_settings_container"
-			>
-				<Container crossAlignment="flex-start" gap="1rem" data-testid="recording_container">
-					<Padding top="large">
-						<Text weight="bold">{recordingSectionLabel}</Text>
-					</Padding>
-					<Divider color="gray2" />
-					<Text size="small" overflow="break-word">
-						{recordingDescription}
-					</Text>
-					<Container orientation="horizontal" width="100%" height="fit" mainAlignment="flex-start">
-						<Container width="15.625rem">
-							<CustomInput
-								backgroundColor={'gray5'}
-								value={recordingDefaults.name}
-								label={destinationFolderLabel}
-								onChange={handleBrowse}
-							/>
-						</Container>
-						<Padding left="medium" />
-						<CustomButton
-							width="fit"
-							label={browseLabel}
-							color="primary"
-							type="outlined"
-							onClick={handleBrowse}
-						/>
-						<Padding left="medium" />
-						<CustomButton
-							width="fit"
-							label={resetLabel}
-							color="secondary"
-							type="outlined"
-							disabled={isRootDefault}
-							onClick={handleReset}
+			<SettingsCard title={recordingSectionLabel} description={recordingDescription}>
+				<Container
+					orientation="horizontal"
+					width="100%"
+					height="fit"
+					mainAlignment="flex-start"
+					data-testid="recording_settings_container"
+				>
+					<Container width="15.625rem">
+						<CustomInput
+							backgroundColor={'gray5'}
+							value={recordingDefaults.name}
+							label={destinationFolderLabel}
+							onChange={handleBrowse}
 						/>
 					</Container>
+					<Padding left="medium" />
+					<CustomButton
+						width="fit"
+						label={browseLabel}
+						color="primary"
+						type="outlined"
+						onClick={handleBrowse}
+					/>
+					<Padding left="medium" />
+					<CustomButton
+						width="fit"
+						label={resetLabel}
+						color="secondary"
+						type="outlined"
+						disabled={isRootDefault}
+						onClick={handleReset}
+					/>
 				</Container>
-			</Container>
+			</SettingsCard>
 		);
 	}
 	return null;

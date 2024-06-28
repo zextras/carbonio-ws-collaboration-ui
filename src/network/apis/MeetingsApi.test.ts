@@ -8,12 +8,18 @@ import { size } from 'lodash';
 
 import meetingsApi from './MeetingsApi';
 import useStore from '../../store/Store';
-import { createMockMeeting, createMockMember, createMockRoom } from '../../tests/createMock';
+import {
+	createMockMeeting,
+	createMockMember,
+	createMockRoom,
+	createMockUser
+} from '../../tests/createMock';
 import { fetchResponse } from '../../tests/mocks/global';
 import { RequestType } from '../../types/network/apis/IBaseAPI';
 import { MeetingType } from '../../types/network/models/meetingBeTypes';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
 import { RoomType } from '../../types/store/RoomTypes';
+import { User, UserType } from '../../types/store/UserTypes';
 
 const meetingMock = createMockMeeting();
 const meetingNotActiveMock = createMockMeeting({ active: false });
@@ -21,6 +27,7 @@ const scheduledMeetingMock = createMockMeeting({ meetingType: MeetingType.SCHEDU
 const meetingMock1 = createMockMeeting({ id: 'meetingId1', roomId: 'roomId1' });
 const roomMock = createMockRoom({ meetingId: meetingMock.id });
 const roomWithoutMeetingMock = createMockRoom();
+const guestUser: User = createMockUser({ type: UserType.GUEST });
 
 const userId = 'userId';
 
@@ -287,7 +294,30 @@ describe('Meetings API', () => {
 		);
 	});
 
-	test('leaveMeeting is called correctly', async () => {
+	test('leaveMeeting for external user is called correctly', async () => {
+		document.cookie = `ZM_AUTH_TOKEN=123456789; path=/`;
+		document.cookie = `ZX_AUTH_TOKEN=123456789; path=/`;
+		fetchResponse.mockResolvedValueOnce(meetingMock);
+		useStore.getState().setLoginInfo(guestUser.id, guestUser.name, guestUser.name, guestUser.type);
+		await meetingsApi.leaveMeeting(meetingMock.id);
+
+		// Check if fetch is called with the correct parameters
+		expect(global.fetch).toHaveBeenCalledWith(
+			`/services/chats/meetings/${meetingMock.id}/leave`,
+			expect.objectContaining({
+				method: 'POST',
+				headers,
+				body: undefined
+			})
+		);
+
+		// Check if store is correctly updated
+		const store = useStore.getState();
+		expect(store.activeMeeting[meetingMock.id]).not.toBeDefined();
+		expect(document.cookie).toBe('');
+	});
+
+	test('leaveMeeting for internal user is called correctly', async () => {
 		document.cookie = `ZM_AUTH_TOKEN=123456789; path=/`;
 		document.cookie = `ZX_AUTH_TOKEN=123456789; path=/`;
 		fetchResponse.mockResolvedValueOnce(meetingMock);
@@ -303,10 +333,10 @@ describe('Meetings API', () => {
 		// Check if store is correctly updated
 		const store = useStore.getState();
 		expect(store.activeMeeting[meetingMock.id]).not.toBeDefined();
-		expect(document.cookie).toBe('');
+		expect(document.cookie).toBe('ZM_AUTH_TOKEN=123456789; ZX_AUTH_TOKEN=123456789');
 	});
 
-	test('leaveMeeting is rejected', async () => {
+	test('leaveMeeting for internal user is rejected', async () => {
 		document.cookie = `ZM_AUTH_TOKEN=123456789; path=/`;
 		document.cookie = `ZX_AUTH_TOKEN=123456789; path=/`;
 		fetchResponse.mockRejectedValueOnce(false);
@@ -318,6 +348,30 @@ describe('Meetings API', () => {
 			headers,
 			body: undefined
 		});
+
+		// Check if store is correctly updated
+		const store = useStore.getState();
+		expect(store.activeMeeting[meetingMock.id]).not.toBeDefined();
+		expect(document.cookie).toBe('ZM_AUTH_TOKEN=123456789; ZX_AUTH_TOKEN=123456789');
+	});
+
+	test('leaveMeeting for external user is rejected', async () => {
+		document.cookie = `ZM_AUTH_TOKEN=123456789; path=/`;
+		document.cookie = `ZX_AUTH_TOKEN=123456789; path=/`;
+		useStore.getState().setLoginInfo(guestUser.id, guestUser.name, guestUser.name, guestUser.type);
+
+		fetchResponse.mockRejectedValueOnce(false);
+		await meetingsApi.leaveMeeting(meetingMock.id);
+
+		// Check if fetch is called with the correct parameters
+		expect(global.fetch).toHaveBeenCalledWith(
+			`/services/chats/meetings/${meetingMock.id}/leave`,
+			expect.objectContaining({
+				method: 'POST',
+				headers,
+				body: undefined
+			})
+		);
 
 		// Check if store is correctly updated
 		const store = useStore.getState();

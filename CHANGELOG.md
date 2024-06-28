@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.9.7](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.9.6...v0.9.7) (2024-06-25)
+
+
+### Bug Fixes
+
+* when internal user leaves meeting session persist and is no more deleted refs: WSC-1560 ([99d0cdf](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/99d0cdf27c4d3b52433676de8d791f8a962cc169))
+
 ### [0.9.6](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.9.5...v0.9.6) (2024-06-18)
 
 
