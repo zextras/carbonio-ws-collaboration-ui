@@ -3,6 +3,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
+
 import { find } from 'lodash';
 
 import { IVideoScreenInConnection } from '../../types/network/webRTC/webRTC';
@@ -49,14 +50,22 @@ export const getStream = (
 	streamType: STREAM_TYPE
 ): MediaStream | undefined => {
 	if (userId === store.session.id) {
-		if (streamType === STREAM_TYPE.VIDEO)
+		if (store.activeMeeting[meetingId]?.virtualBackground.blur) {
+			return store.activeMeeting[meetingId].virtualBackground.updatedStream;
+		}
+		if (streamType === STREAM_TYPE.VIDEO) {
 			return store.activeMeeting[meetingId]?.localStreams?.video;
-		if (streamType === STREAM_TYPE.SCREEN)
+		}
+		if (streamType === STREAM_TYPE.SCREEN) {
 			return store.activeMeeting[meetingId]?.localStreams?.screen;
+		}
 	}
 	const subscriptionId = `${userId}-${streamType}`;
 	return store.activeMeeting[meetingId]?.subscription[subscriptionId]?.stream;
 };
+
+export const getLocalStreamVideo = (store: RootStore, meetingId: string): MediaStream | undefined =>
+	store.activeMeeting[meetingId]?.localStreams?.video;
 
 export const getMeetingCarouselVisibility = (store: RootStore, meetingId: string): boolean =>
 	store.activeMeeting[meetingId]?.isCarouselVisible;
@@ -74,3 +83,9 @@ export const getVideoScreenIn = (
 	store: RootStore,
 	meetingId: string
 ): IVideoScreenInConnection | undefined => store.activeMeeting[meetingId]?.videoScreenIn;
+
+export const getIsBackgroundBlurred = (store: RootStore, meetingId: string): boolean =>
+	store.activeMeeting[meetingId]?.virtualBackground.blur;
+
+export const getUpdatedStream = (store: RootStore, meetingId: string): MediaStream | undefined =>
+	store.activeMeeting[meetingId]?.virtualBackground?.updatedStream;

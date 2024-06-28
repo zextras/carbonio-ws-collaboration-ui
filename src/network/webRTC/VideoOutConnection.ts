@@ -84,7 +84,10 @@ export default class VideoOutConnection implements IVideoOutConnection {
 	};
 
 	// Stop the old track and add the new one without a new renegotiation
-	public updateLocalStreamTrack(mediaStreamTrack: MediaStream): Promise<MediaStreamTrack> {
+	public updateLocalStreamTrack(
+		mediaStreamTrack: MediaStream,
+		isVirtualBackground?: boolean
+	): Promise<MediaStreamTrack> {
 		return new Promise((resolve) => {
 			const videoTrack: MediaStreamTrack = mediaStreamTrack.getVideoTracks()[0];
 			if (this.peerConn) {
@@ -94,8 +97,12 @@ export default class VideoOutConnection implements IVideoOutConnection {
 						mediaStreamTrack ?? new MediaStream()
 					);
 				} else if (this.rtpSender?.track) {
-					this.rtpSender.track.stop();
-					this.rtpSender.replaceTrack(videoTrack).catch((reason) => console.warn(reason));
+					if (isVirtualBackground) {
+						this.rtpSender.replaceTrack(videoTrack).catch((reason) => console.warn(reason));
+					} else {
+						this.rtpSender.track.stop();
+						this.rtpSender.replaceTrack(videoTrack).catch((reason) => console.warn(reason));
+					}
 				}
 			}
 			resolve(videoTrack);
@@ -110,6 +117,7 @@ export default class VideoOutConnection implements IVideoOutConnection {
 
 	public closePeerConnection(): void {
 		useStore.getState().removeLocalStreams(this.meetingId, STREAM_TYPE.VIDEO);
+		useStore.getState().removeBackgroundStream(this.meetingId);
 		this.rtpSender?.track?.stop();
 		this.peerConn?.close();
 		this.rtpSender = null;

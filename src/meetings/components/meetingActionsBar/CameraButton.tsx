@@ -61,6 +61,7 @@ const CameraButton = ({
 	const videoOutConn = useStore((store) => store.activeMeeting[meetingId]?.videoOutConn);
 	const setSelectedDeviceId = useStore((store) => store.setSelectedDeviceId);
 	const setLocalStreams = useStore((store) => store.setLocalStreams);
+	const setBlur = useStore((store) => store.setBlur);
 
 	const [buttonStatus, setButtonStatus] = useState<boolean>(true);
 	const [videoMediaList, setVideoMediaList] = useState<[] | MediaDeviceInfo[]>([]);
@@ -90,6 +91,7 @@ const CameraButton = ({
 				label: videoItem.label ? videoItem.label : `device-${i}`,
 				onClick: (): void => {
 					if (videoStatus) {
+						setBlur(meetingId, false);
 						getVideoStream(videoItem.deviceId).then((stream) => {
 							videoOutConn?.updateLocalStreamTrack(stream).then(() => {
 								setLocalStreams(meetingId, STREAM_TYPE.VIDEO, stream);
@@ -102,7 +104,15 @@ const CameraButton = ({
 				},
 				value: videoItem.deviceId
 			})),
-		[videoMediaList, videoStatus, videoOutConn, setLocalStreams, meetingId, setSelectedDeviceId]
+		[
+			videoMediaList,
+			videoStatus,
+			setBlur,
+			meetingId,
+			videoOutConn,
+			setLocalStreams,
+			setSelectedDeviceId
+		]
 	);
 
 	const toggleVideoDropdown = useCallback(() => {
@@ -134,9 +144,10 @@ const CameraButton = ({
 				}
 			} else {
 				videoOutConn?.stopVideo();
+				setBlur(meetingId, false);
 			}
 		},
-		[videoStatus, videoOutConn, selectedVideoDeviceId, mediaPermissionSnackbar, meetingId]
+		[videoStatus, videoOutConn, selectedVideoDeviceId, mediaPermissionSnackbar, meetingId, setBlur]
 	);
 
 	const updateListOfDevices = useCallback(() => {

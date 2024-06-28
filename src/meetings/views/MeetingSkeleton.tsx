@@ -16,9 +16,10 @@ import useGeneralMeetingControls from '../../hooks/useGeneralMeetingControls';
 import { MeetingRoutesParams } from '../../hooks/useRouting';
 import { getMeetingViewSelected } from '../../store/selectors/ActiveMeetingSelectors';
 import { getNumberOfTiles } from '../../store/selectors/MeetingSelectors';
-import { getCustomLogo } from '../../store/selectors/SessionSelectors';
+import { getCapability, getCustomLogo } from '../../store/selectors/SessionSelectors';
 import useStore from '../../store/Store';
 import { MeetingViewType } from '../../types/store/ActiveMeetingTypes';
+import { CapabilityType } from '../../types/store/SessionTypes';
 import defaultLogo from '../assets/Logo.png';
 import CinemaMode from '../components/cinemaMode/CinemaMode';
 import FaceToFaceMode from '../components/faceToFaceMode/FaceToFaceMode';
@@ -26,6 +27,7 @@ import GridMode from '../components/gridMode/GridMode';
 import MeetingActionsBar from '../components/meetingActionsBar/MeetingActionsBar';
 import RecordingInfo from '../components/RecordingInfo';
 import MeetingSidebar from '../components/sidebar/MeetingSidebar';
+import VirtualBackground from '../components/tile/VirtualBackground';
 
 const SkeletonContainer = styled(Container)`
 	overflow: hidden;
@@ -66,6 +68,9 @@ const MeetingSkeleton = (): ReactElement => {
 	const meetingViewSelected = useStore((store) => getMeetingViewSelected(store, meetingId));
 	const numberOfTiles = useStore((store) => getNumberOfTiles(store, meetingId));
 	const customLogo = useStore(getCustomLogo);
+	const canUseVirtualBackground = useStore((store) =>
+		getCapability(store, CapabilityType.CAN_USE_VIRTUAL_BACKGROUND)
+	);
 
 	const streamsWrapperRef = useRef<HTMLDivElement>(null);
 
@@ -97,7 +102,7 @@ const MeetingSkeleton = (): ReactElement => {
 			<MeetingSidebar />
 			<ViewContainer
 				ref={streamsWrapperRef}
-				background="gray0"
+				background={'gray0'}
 				crossAlignment="center"
 				orientation="horizontal"
 				data-testid="meeting_view_container"
@@ -108,6 +113,7 @@ const MeetingSkeleton = (): ReactElement => {
 					<MeetingActionsBar streamsWrapperRef={streamsWrapperRef} />
 				</ViewToDisplay>
 			</ViewContainer>
+			{canUseVirtualBackground && <VirtualBackground meetingId={meetingId} />}
 		</SkeletonContainer>
 	);
 };
