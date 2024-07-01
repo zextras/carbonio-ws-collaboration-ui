@@ -6,7 +6,7 @@
 
 import React, { ReactElement, RefObject, useCallback, useEffect, useRef, useState } from 'react';
 
-import { Container } from '@zextras/carbonio-design-system';
+import { Container, IconButton } from '@zextras/carbonio-design-system';
 import { useParams } from 'react-router-dom';
 import styled, { FlattenSimpleInterpolation } from 'styled-components';
 
@@ -19,6 +19,10 @@ import ScreenShareButton from './ScreenShareButton';
 import SwitchViewButton from './SwitchViewButton';
 import useContainerDimensions from '../../../hooks/useContainerDimensions';
 import { MeetingRoutesParams } from '../../../hooks/useRouting';
+import { getIsBackgroundBlurred } from '../../../store/selectors/ActiveMeetingSelectors';
+import { getCapability } from '../../../store/selectors/SessionSelectors';
+import useStore from '../../../store/Store';
+import { CapabilityType } from '../../../types/store/SessionTypes';
 
 const BarContainer = styled(Container)<{ $isHoovering: boolean }>`
 	position: absolute;
@@ -56,6 +60,12 @@ const MeetingActionsBar = ({ streamsWrapperRef }: MeetingActionsProps): ReactEle
 	const [isAudioListOpen, setIsAudioListOpen] = useState<boolean>(false);
 	const [isVideoListOpen, setIsVideoListOpen] = useState<boolean>(false);
 	const [compactMode, setCompactMode] = useState<boolean>(false);
+
+	const blur = useStore((store) => getIsBackgroundBlurred(store, meetingId));
+	const setBlur = useStore((store) => store.setBlur);
+	const canUseVirtualBackground = useStore((store) =>
+		getCapability(store, CapabilityType.CAN_USE_VIRTUAL_BACKGROUND)
+	);
 
 	const audioDropdownRef = useRef<HTMLDivElement>(null);
 	const videoDropdownRef = useRef<HTMLDivElement>(null);
@@ -170,6 +180,10 @@ const MeetingActionsBar = ({ streamsWrapperRef }: MeetingActionsProps): ReactEle
 		}
 	}, [barContainerWidth]);
 
+	const onCLickBlur = useCallback(() => {
+		setBlur(meetingId, !blur);
+	}, [blur, meetingId, setBlur]);
+
 	return (
 		<BarContainer
 			height="fit"
@@ -181,7 +195,7 @@ const MeetingActionsBar = ({ streamsWrapperRef }: MeetingActionsProps): ReactEle
 		>
 			<ActionsWrapper
 				data-testid="main_actions_wrapper"
-				background="text"
+				background={'text'}
 				width="fit"
 				height="fit"
 				orientation="horizontal"
@@ -202,6 +216,15 @@ const MeetingActionsBar = ({ streamsWrapperRef }: MeetingActionsProps): ReactEle
 				<ScreenShareButton />
 				<FullScreenButton />
 				<SwitchViewButton />
+				{canUseVirtualBackground && (
+					<IconButton
+						iconColor="gray6"
+						backgroundColor="primary"
+						icon={blur ? 'Avatar' : 'AvatarOutline'}
+						onClick={onCLickBlur}
+						size="large"
+					/>
+				)}
 				{compactMode && (
 					<>
 						<MeetingDuration meetingId={meetingId} />
@@ -211,7 +234,7 @@ const MeetingActionsBar = ({ streamsWrapperRef }: MeetingActionsProps): ReactEle
 			</ActionsWrapper>
 			<SecondActionsWrapper
 				data-testid="second_actions_wrapper"
-				background="text"
+				background={'text'}
 				width="fit"
 				height="fit"
 				orientation="horizontal"

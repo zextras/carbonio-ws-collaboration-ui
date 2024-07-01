@@ -38,7 +38,10 @@ export interface IVideoOutConnection extends IPeerConnection {
 	startVideo(selectedVideoDeviceId?: string): Promise<void>;
 	stopVideo(): void;
 	handleRemoteAnswer(remoteAnswer: RTCSessionDescriptionInit): void;
-	updateLocalStreamTrack(mediaStreamTrack: MediaStream): Promise<MediaStreamTrack | undefined>;
+	updateLocalStreamTrack(
+		mediaStreamTrack: MediaStream,
+		isVirtualBackground?: boolean
+	): Promise<MediaStreamTrack | undefined>;
 }
 
 export interface IScreenOutConnection extends IPeerConnection {

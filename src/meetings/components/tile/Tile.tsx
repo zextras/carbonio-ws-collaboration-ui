@@ -73,12 +73,12 @@ const VideoEl = styled.video<{
 const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProps }) => {
 	const audioStatus = useStore((store) => getParticipantAudioStatus(store, meetingId, userId));
 	const videoStatus = useStore((store) => getParticipantVideoStatus(store, meetingId, userId));
-	const userIsTalking = useStore((store) => getUserIsTalking(store, meetingId || '', userId || ''));
+	const userIsTalking = useStore((store) => getUserIsTalking(store, meetingId ?? '', userId ?? ''));
 	const videoStream = useStore((store) =>
 		getStream(
 			store,
-			meetingId || '',
-			userId || '',
+			meetingId ?? '',
+			userId ?? '',
 			!isScreenShare ? STREAM_TYPE.VIDEO : STREAM_TYPE.SCREEN
 		)
 	);
@@ -89,7 +89,7 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 	const hoverRef = useRef<HTMLDivElement>(null);
 	const timeout = useRef<NodeJS.Timeout>();
 
-	const { canUsePinFeature } = usePinnedTile(meetingId || '', userId || '', isScreenShare);
+	const { canUsePinFeature } = usePinnedTile(meetingId ?? '', userId ?? '', isScreenShare);
 
 	const { muteForAllHasToAppear } = useMuteForAll(meetingId, userId);
 
@@ -122,7 +122,7 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 	}, []);
 
 	useEffect(() => {
-		if (streamRef && streamRef.current) {
+		if (streamRef?.current) {
 			if (videoStream && (videoStatus || isScreenShare)) {
 				streamRef.current.srcObject = videoStream;
 			} else {

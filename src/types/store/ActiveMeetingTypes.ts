@@ -23,6 +23,7 @@ export type ActiveMeeting = {
 	meetingViewSelected: MeetingViewType;
 	isCarouselVisible: boolean;
 	pinnedTile?: PinnedTile;
+	virtualBackground: VirtualBackground;
 	talkingUsers: string[];
 };
 
@@ -88,3 +89,8 @@ export type TileData = {
 };
 
 export type PinnedTile = TileData & { previousViewType?: MeetingViewType };
+
+export type VirtualBackground = {
+	blur: boolean;
+	updatedStream?: MediaStream;
+};

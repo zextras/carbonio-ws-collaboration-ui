@@ -61,6 +61,7 @@
 		"ts-node": "^10.9.2"
 	},
 	"dependencies": {
+		"@mediapipe/selfie_segmentation": "^0.1.1632777926",
 		"@emoji-mart/data": "^1.0.2",
 		"@testing-library/react-hooks": "^8.0.1",
 		"@zextras/carbonio-design-system": "6.0.0",
@@ -70,6 +71,7 @@
 		"identity-obj-proxy": "^3.0.0",
 		"immer": "^10.0.3",
 		"lodash": "4.17.21",
+		"file-loader": "3.0.1",
 		"moment": "^2.29.1",
 		"moment-timezone": "^0.5.34",
 		"polished": "^4.2.2",

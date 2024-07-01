@@ -208,6 +208,9 @@ export type ActiveMeetingSlice = {
 	setAddSubscription: (meetingId: string, subToAdd: Subscription) => void;
 	setUpdateSubscription: (meetingId: string, subsToRequest: Subscription[]) => void;
 	setDeleteSubscription: (meetingId: string, subIdToDelete: string) => void;
+	setBackgroundStream: (meetingId: string, stream: MediaStream) => void;
+	removeBackgroundStream: (meetingId: string) => void;
+	setBlur: (meetingId: string, status: boolean) => void;
 };
 
 export type RootStore = UsersStoreSlice &
