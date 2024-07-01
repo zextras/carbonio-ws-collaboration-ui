@@ -50,7 +50,10 @@ export const getStream = (
 	streamType: STREAM_TYPE
 ): MediaStream | undefined => {
 	if (userId === store.session.id) {
-		if (store.activeMeeting[meetingId]?.virtualBackground.blur) {
+		if (
+			store.activeMeeting[meetingId]?.virtualBackground.blur &&
+			streamType !== STREAM_TYPE.SCREEN
+		) {
 			return store.activeMeeting[meetingId].virtualBackground.updatedStream;
 		}
 		if (streamType === STREAM_TYPE.VIDEO) {

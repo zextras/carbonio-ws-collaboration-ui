@@ -130,11 +130,7 @@ const VirtualBackground = ({ meetingId }: VirtualBackgroundProps): ReactElement 
 	);
 
 	const sendSelfieSegmentation = useCallback(() => {
-		if (
-			myStreamRef &&
-			myStreamRef.current &&
-			myStreamRef.current.readyState >= HTMLMediaElement.HAVE_METADATA
-		) {
+		if (myStreamRef?.current && myStreamRef.current.readyState >= HTMLMediaElement.HAVE_METADATA) {
 			selfieSegmentationManager.send(myStreamRef.current);
 		}
 	}, [selfieSegmentationManager]);
@@ -148,7 +144,7 @@ const VirtualBackground = ({ meetingId }: VirtualBackgroundProps): ReactElement 
 		if (blur) {
 			selfieSegmentationManager.initialize().then(() => {
 				worker.postMessage({ type: 'start' });
-				if (canvasBgRefs && canvasBgRefs.current) {
+				if (canvasBgRefs?.current) {
 					const canvasStream = canvasBgRefs.current.captureStream();
 					videoOutConn?.updateLocalStreamTrack(canvasStream, true).then(() => {
 						setBackgroundStream(meetingId ?? '', canvasStream);
@@ -197,7 +193,7 @@ const VirtualBackground = ({ meetingId }: VirtualBackgroundProps): ReactElement 
 	}, [blur, meetingId, removeBackgroundStream, updatedStream, videoOutConn, myVideoStream, worker]);
 
 	useEffect(() => {
-		if (myStreamRef && myStreamRef.current) {
+		if (myStreamRef?.current) {
 			if (myVideoStream) {
 				myStreamRef.current.srcObject = myVideoStream;
 			} else {

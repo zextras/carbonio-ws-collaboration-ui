@@ -17,7 +17,7 @@ self.onmessage = (e) => {
 			}
 			globalTimer = setInterval(() => {
 				self.postMessage('update');
-			}, 1000 / 15);
+			}, 1000 / 30);
 			break;
 		case 'stop':
 			clearInterval(globalTimer);
