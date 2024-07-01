@@ -15,13 +15,13 @@ import React, {
 import { GpuBuffer } from '@mediapipe/selfie_segmentation';
 import styled from 'styled-components';
 
+import SelfieSegmentationManager, { ISelfieSegmentation } from './SelfieSegmentation';
 import {
 	getIsBackgroundBlurred,
 	getLocalStreamVideo,
 	getUpdatedStream
 } from '../../../store/selectors/ActiveMeetingSelectors';
 import useStore from '../../../store/Store';
-import SelfieSegmentationManager, { ISelfieSegmentation } from '../../SelfieSegmentation';
 
 const VirtualBackgroundCanvas = styled.canvas<{
 	ref: MutableRefObject<HTMLCanvasElement | undefined>;
@@ -68,23 +68,12 @@ const VirtualBackground = ({ meetingId }: VirtualBackgroundProps): ReactElement 
 			if (canvas) {
 				const context = canvas.getContext('2d');
 				if (context) {
+					// setup canvas width and height to be the same as the results one
+					context.canvas.width = 640;
+					context.canvas.height = 360;
+
 					// Clear the canvas
 					context.clearRect(0, 0, canvas.width, canvas.height);
-
-					// Calculate aspect ratio
-					const canvasRatio = canvas.width / canvas.height;
-					const imageRatio = results.image.width / results.image.height;
-
-					// Calculate dimensions for drawing
-					let drawWidth;
-					let drawHeight;
-					if (canvasRatio > imageRatio) {
-						drawWidth = canvas.height * imageRatio;
-						drawHeight = canvas.height;
-					} else {
-						drawWidth = canvas.width;
-						drawHeight = canvas.width / imageRatio;
-					}
 
 					// Draw the segmentation mask
 					context.save();
@@ -92,31 +81,11 @@ const VirtualBackground = ({ meetingId }: VirtualBackgroundProps): ReactElement 
 
 					// Apply blur effect
 					context.globalCompositeOperation = 'source-out';
-					context.filter = 'blur(8px)';
-					context.drawImage(
-						results.image,
-						0,
-						0,
-						results.image.width,
-						results.image.height,
-						(canvas.width - drawWidth) / 2,
-						(canvas.height - drawHeight) / 2,
-						drawWidth,
-						drawHeight
-					);
+					context.filter = 'blur(10px)';
+					context.drawImage(results.image, 0, 0, results.image.width, results.image.height);
 					context.filter = 'none';
 					context.globalCompositeOperation = 'destination-atop';
-					context.drawImage(
-						results.image,
-						0,
-						0,
-						results.image.width,
-						results.image.height,
-						(canvas.width - drawWidth) / 2,
-						(canvas.height - drawHeight) / 2,
-						drawWidth,
-						drawHeight
-					);
+					context.drawImage(results.image, 0, 0, results.image.width, results.image.height);
 					context.restore();
 				}
 			}
@@ -129,16 +98,35 @@ const VirtualBackground = ({ meetingId }: VirtualBackgroundProps): ReactElement 
 		[paintStreamWithBlur]
 	);
 
+	const worker: Worker = useMemo(
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore
+		() => new Worker(new URL('./selfieSegmentationWorker.js', import.meta.url)),
+		[]
+	);
+
 	const sendSelfieSegmentation = useCallback(() => {
 		if (myStreamRef?.current && myStreamRef.current.readyState >= HTMLMediaElement.HAVE_METADATA) {
 			selfieSegmentationManager.send(myStreamRef.current);
 		}
 	}, [selfieSegmentationManager]);
 
-	const worker = useMemo(
-		() => new Worker(new URL('../../selfieSegmentationWorker.js', import.meta.url)),
-		[]
-	);
+	const handleMessageWorker = useCallback(() => {
+		worker.onmessage = (event): void => {
+			switch (event.data) {
+				case 'update': {
+					sendSelfieSegmentation();
+					break;
+				}
+				case 'workerStarted': {
+					worker.postMessage({ type: 'frameUpdateTimer' });
+					break;
+				}
+				default:
+					break;
+			}
+		};
+	}, [sendSelfieSegmentation, worker]);
 
 	useEffect(() => {
 		if (blur) {
@@ -151,21 +139,7 @@ const VirtualBackground = ({ meetingId }: VirtualBackgroundProps): ReactElement 
 					});
 				}
 			});
-
-			worker.onmessage = (event): void => {
-				switch (event.data) {
-					case 'update': {
-						sendSelfieSegmentation();
-						break;
-					}
-					case 'workerStarted': {
-						worker.postMessage({ type: 'frameUpdateTimer' });
-						break;
-					}
-					default:
-						break;
-				}
-			};
+			handleMessageWorker();
 		}
 
 		return (): void => {
@@ -179,7 +153,8 @@ const VirtualBackground = ({ meetingId }: VirtualBackgroundProps): ReactElement 
 		setBackgroundStream,
 		videoOutConn,
 		myVideoStream,
-		worker
+		worker,
+		handleMessageWorker
 	]);
 
 	useEffect(() => {

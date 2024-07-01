@@ -27,7 +27,7 @@ import GridMode from '../components/gridMode/GridMode';
 import MeetingActionsBar from '../components/meetingActionsBar/MeetingActionsBar';
 import RecordingInfo from '../components/RecordingInfo';
 import MeetingSidebar from '../components/sidebar/MeetingSidebar';
-import VirtualBackground from '../components/tile/VirtualBackground';
+import VirtualBackground from '../components/virtualBackground/VirtualBackground';
 
 const SkeletonContainer = styled(Container)`
 	overflow: hidden;

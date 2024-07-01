@@ -6,9 +6,11 @@
 
 let globalTimer;
 
+// eslint-disable-next-line no-restricted-globals
 self.onmessage = (e) => {
 	switch (e.data.type) {
 		case 'start':
+			// eslint-disable-next-line no-restricted-globals
 			self.postMessage('workerStarted');
 			break;
 		case 'frameUpdateTimer':
@@ -16,6 +18,7 @@ self.onmessage = (e) => {
 				clearInterval(globalTimer);
 			}
 			globalTimer = setInterval(() => {
+				// eslint-disable-next-line no-restricted-globals
 				self.postMessage('update');
 			}, 1000 / 30);
 			break;
