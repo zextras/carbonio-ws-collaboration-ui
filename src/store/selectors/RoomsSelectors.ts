@@ -132,3 +132,5 @@ export const getSingleConversationsUserId = (state: RootStore): string[] => {
 	});
 	return userIds;
 };
+
+export const getIsThereAnyRoom = (state: RootStore): boolean => size(state.rooms) > 0;

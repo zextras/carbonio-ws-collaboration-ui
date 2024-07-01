@@ -10,6 +10,7 @@ import { v4 as uuidGenerator } from 'uuid';
 
 import {
 	MamRequestType,
+	onLoadFullHistory,
 	onRequestHistory,
 	onRequestSingleMessage
 } from './handlers/historyMessageHandler';
@@ -212,14 +213,6 @@ class XMPPClient implements IXMPPClient {
 		this.xmppConnection.send({ type: XMPPRequestType.MESSAGE, elem: msg });
 	}
 
-	// Request the full history of a room
-	requestFullHistory(roomId: string): void {
-		const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) }).c('query', {
-			xmlns: Strophe.NS.MAM
-		});
-		this.xmppConnection.send({ type: XMPPRequestType.IQ, elem: iq, callback: onRequestHistory });
-	}
-
 	// Request n messages before end date but not before start date
 	requestHistory(roomId: string, endHistory: number, quantity: number, unread?: number): void {
 		const clearedAt = useStore.getState().rooms[roomId].userSettings?.clearedAt;
@@ -321,6 +314,29 @@ class XMPPClient implements IXMPPClient {
 				callback: resolve,
 				errorCallback: reject
 			});
+		});
+	}
+
+	requestFullHistory(roomId: string, from?: number): void {
+		const room = useStore.getState().rooms[roomId];
+		const clearedAt = room.userSettings?.clearedAt;
+		const startHistory = from ?? clearedAt ?? room.createdAt;
+
+		const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
+			.c('query', { xmlns: Strophe.NS.MAM, queryid: MamRequestType.LOAD_FULL_HISTORY })
+			.c('x', { type: 'submit', xmlns: jabberData })
+			.c('field', { var: 'FORM_TYPE', type: 'hidden' })
+			.c('value')
+			.t(Strophe.NS.MAM)
+			.up()
+			.up()
+			.c('field', { var: 'start' })
+			.c('value')
+			.t(dateToISODate(startHistory));
+		this.xmppConnection.send({
+			type: XMPPRequestType.IQ,
+			elem: iq,
+			callback: onLoadFullHistory
 		});
 	}
 

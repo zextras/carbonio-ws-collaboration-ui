@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { CapabilityType } from '../../types/store/SessionTypes';
+import { CapabilityType, ExportStatus } from '../../types/store/SessionTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 import { UserType } from '../../types/store/UserTypes';
 
@@ -27,3 +27,9 @@ export const getCustomLogo = (store: RootStore): string | false | undefined =>
 
 export const getIsLoggedUserExternal = (store: RootStore): boolean =>
 	store.session?.userType === UserType.GUEST;
+
+export const getExportedChat = (store: RootStore): string | undefined =>
+	store.session.chatExporting?.roomId;
+
+export const getExportStatus = (store: RootStore): ExportStatus | undefined =>
+	store.session.chatExporting?.status;

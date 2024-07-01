@@ -5,6 +5,7 @@
  */
 
 import { UserType } from './UserTypes';
+import { IChatExporter } from '../../settings/components/chatExporter/ChatExporter';
 
 export type Session = {
 	id?: string;
@@ -22,6 +23,11 @@ export type Session = {
 	selectedRoomOneToOneGroup?: string;
 	filterHasFocus: boolean;
 	customLogo?: string | false;
+	chatExporting?: {
+		roomId: string;
+		exporter: IChatExporter;
+		status: ExportStatus;
+	};
 };
 
 export type CapabilityList = {
@@ -48,4 +54,9 @@ export enum CapabilityType {
 	MAX_GROUP_MEMBERS = 'maxGroupMembers',
 	MAX_ROOM_IMAGE_SIZE = 'maxRoomImageSizeInKb',
 	MAX_USER_IMAGE_SIZE = 'maxUserImageSizeInKb'
+}
+
+export enum ExportStatus {
+	EXPORTING = 'exporting',
+	DOWNLOADING = 'downloading'
 }
