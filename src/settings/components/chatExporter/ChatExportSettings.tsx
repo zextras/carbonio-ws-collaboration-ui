@@ -50,11 +50,11 @@ const ChatExportSettings: FC = () => {
 	const inputNameLabel = t('settings.export.filterInput', 'Filter list');
 	const buttonLabel = t('settings.export.action', 'Export selected chat');
 	const noOneSelectedTooltip = t(
-		'settings.export.action.tooltip.noOneSelected',
+		'settings.export.tooltip.noOneSelected',
 		'Select one of your chats to export it'
 	);
 	const ongoingExportTooltip = t(
-		'settings.export.action.tooltip.ongoingExport',
+		'settings.export.tooltip.ongoingExport',
 		'You are already exporting a chat, wait for the export to finish.'
 	);
 	const canTakeAWhileLabel = t(
