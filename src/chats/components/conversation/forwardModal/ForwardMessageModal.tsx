@@ -176,7 +176,7 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 		() =>
 			map(chatList, (item) => (
 				<ListItem key={item.id} active={selected[item.id]}>
-					{() => <ForwardMessageConversationListItem item={item} selected={selected[item.id]} />}
+					{() => <ForwardMessageConversationListItem item={item} isSelected={selected[item.id]} />}
 				</ListItem>
 			)),
 		[chatList, selected]
