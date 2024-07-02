@@ -137,6 +137,7 @@ const StopRecordingModal = ({
 			open={isOpen}
 			title={title}
 			onConfirm={stopRecording}
+			confirmColor="error"
 			confirmLabel={stopButtonLabel}
 			confirmDisabled={recordingName === '' || size(recordingName) >= 128}
 			confirmTooltip={tooltipLabel}
