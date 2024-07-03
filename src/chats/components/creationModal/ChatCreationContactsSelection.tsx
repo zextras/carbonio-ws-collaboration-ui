@@ -18,7 +18,8 @@ import {
 	ChipInput,
 	ChipItem,
 	Container,
-	List,
+	ListItem,
+	ListV2,
 	Padding,
 	Text
 } from '@zextras/carbonio-design-system';
@@ -201,7 +202,7 @@ const ChatCreationContactsSelection = ({
 	);
 
 	const onClickListItem = useCallback(
-		(item: ContactInfo) => () => {
+		(item: ContactInfo) => (): void => {
 			const newChip: ChipItem<ContactInfo> = {
 				value: item,
 				label: item.name || item.email
@@ -227,24 +228,21 @@ const ChatCreationContactsSelection = ({
 		[isCreationModal, contactsSelected, maxGroupMembers, members]
 	);
 
-	const ListItem = useMemo(
+	const items = useMemo(
 		() =>
-			// eslint-disable-next-line react/display-name
-			({ item, selected }: { item: ContactInfo; selected: boolean }) => {
-				const clickCb =
-					(chipInputHasError && selected) || !chipInputHasError
-						? onClickListItem
-						: () => () => null;
-				return (
-					<ListParticipant
-						item={item}
-						selected={selected}
-						onClickCb={clickCb}
-						isDisabled={chipInputHasError}
-					/>
-				);
-			},
-		[chipInputHasError, onClickListItem]
+			map(resultList, (item) => (
+				<ListItem key={item.id} active={!!contactsSelected[item.id]}>
+					{() => (
+						<ListParticipant
+							item={item}
+							selected={!!contactsSelected[item.id]}
+							onClickCb={onClickListItem}
+							isDisabled={chipInputHasError}
+						/>
+					)}
+				</ListItem>
+			)),
+		[chipInputHasError, contactsSelected, onClickListItem, resultList]
 	);
 
 	const removeContactFromChip = useCallback(
@@ -269,14 +267,7 @@ const ChatCreationContactsSelection = ({
 			return <Spinner />;
 		}
 		if (!error) {
-			return (
-				<List
-					data-testid="list_creation_modal"
-					items={resultList}
-					ItemComponent={ListItem}
-					selected={contactsSelected}
-				/>
-			);
+			return <ListV2 data-testid="list_creation_modal">{items}</ListV2>;
 		}
 		return (
 			<CustomContainer padding="large">
@@ -285,7 +276,7 @@ const ChatCreationContactsSelection = ({
 				</Text>
 			</CustomContainer>
 		);
-	}, [ListItem, contactsSelected, error, loading, noMatchLabel, resultList]);
+	}, [error, items, loading, noMatchLabel]);
 
 	return (
 		<>
