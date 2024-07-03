@@ -154,3 +154,8 @@ export const freeMediaResources = (streamTrack: MediaStream | null): void => {
 		tracks.forEach((track) => track.stop());
 	}
 };
+
+export const getWorkerUrl = (): URL =>
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore
+	new URL('../meetings/components/virtualBackground/selfieSegmentationWorker.js', import.meta.url);

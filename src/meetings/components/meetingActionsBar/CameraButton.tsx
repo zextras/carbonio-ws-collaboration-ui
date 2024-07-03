@@ -15,7 +15,9 @@ import React, {
 
 import {
 	CreateSnackbarFn,
+	DropdownItem,
 	MultiButton,
+	Text,
 	Tooltip,
 	useSnackbar
 } from '@zextras/carbonio-design-system';
@@ -25,11 +27,15 @@ import { useParams } from 'react-router-dom';
 
 import { MeetingRoutesParams } from '../../../hooks/useRouting';
 import MeetingsApi from '../../../network/apis/MeetingsApi';
-import { getSelectedVideoDeviceId } from '../../../store/selectors/ActiveMeetingSelectors';
+import {
+	getIsBackgroundBlurred,
+	getSelectedVideoDeviceId
+} from '../../../store/selectors/ActiveMeetingSelectors';
 import { getParticipantVideoStatus } from '../../../store/selectors/MeetingSelectors';
-import { getUserId } from '../../../store/selectors/SessionSelectors';
+import { getCapability, getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
+import { CapabilityType } from '../../../types/store/SessionTypes';
 import { getVideoStream } from '../../../utils/UserMediaManager';
 
 type CamButtonProps = {
@@ -52,6 +58,18 @@ const CameraButton = ({
 		'meeting.interactions.browserPermission',
 		'Grant browser permissions to enable resources'
 	);
+	const devicesTitle = t('meeting.interactions.title.devices', 'Devices');
+	const videoEffectTitle = t('meeting.interactions.title.videoEffect', 'Video effect');
+	const removeBlurLabel = t('meeting.interactions.option.removeBlur', 'Remove blur effect');
+	const applyBlurLabel = t('meeting.interactions.option.applyBlur', 'Apply blur effect');
+	const turnOnCameraTooltip = t(
+		'meeting.interactions.userHint',
+		'Turn on the camera to select a video effect'
+	);
+	const selectedDeviceTooltip = t(
+		'meeting.interactions.selectedDeviceTooltip',
+		'This device is selected'
+	);
 
 	const { meetingId }: MeetingRoutesParams = useParams();
 	const myUserId = useStore(getUserId);
@@ -62,6 +80,10 @@ const CameraButton = ({
 	const setSelectedDeviceId = useStore((store) => store.setSelectedDeviceId);
 	const setLocalStreams = useStore((store) => store.setLocalStreams);
 	const setBlur = useStore((store) => store.setBlur);
+	const blur = useStore((store) => getIsBackgroundBlurred(store, meetingId));
+	const canUseVirtualBackground = useStore((store) =>
+		getCapability(store, CapabilityType.CAN_USE_VIRTUAL_BACKGROUND)
+	);
 
 	const [buttonStatus, setButtonStatus] = useState<boolean>(true);
 	const [videoMediaList, setVideoMediaList] = useState<[] | MediaDeviceInfo[]>([]);
@@ -84,7 +106,7 @@ const CameraButton = ({
 		setButtonStatus(true);
 	}, [videoStatus]);
 
-	const mediaVideoList = useMemo(
+	const mediaVideoList: DropdownItem[] = useMemo(
 		() =>
 			map(videoMediaList, (videoItem: MediaDeviceInfo, i) => ({
 				id: `device-${i}`,
@@ -102,10 +124,16 @@ const CameraButton = ({
 						setSelectedDeviceId(meetingId, STREAM_TYPE.VIDEO, videoItem.deviceId);
 					}
 				},
+				icon: selectedVideoDeviceId === videoItem.deviceId ? 'AcceptanceMeeting' : undefined,
+				disabled: selectedVideoDeviceId === videoItem.deviceId,
+				tooltipLabel:
+					selectedVideoDeviceId === videoItem.deviceId ? selectedDeviceTooltip : undefined,
 				value: videoItem.deviceId
 			})),
 		[
 			videoMediaList,
+			selectedVideoDeviceId,
+			selectedDeviceTooltip,
 			videoStatus,
 			setBlur,
 			meetingId,
@@ -114,6 +142,49 @@ const CameraButton = ({
 			setSelectedDeviceId
 		]
 	);
+
+	const onCLickBlur = useCallback(() => {
+		setBlur(meetingId, !blur);
+	}, [blur, meetingId, setBlur]);
+
+	const dropdownList = useMemo(() => {
+		const list: DropdownItem[] = [];
+		if (canUseVirtualBackground) {
+			list.push({
+				id: 'video-effect',
+				label: videoEffectTitle,
+				disabled: true,
+				customComponent: <Text weight="bold">Video effect</Text>
+			});
+			list.push({
+				id: 'blur',
+				icon: blur ? 'Avatar' : 'AvatarOutline',
+				label: blur ? removeBlurLabel : applyBlurLabel,
+				disabled: !videoStatus,
+				tooltipLabel: !videoStatus ? turnOnCameraTooltip : undefined,
+				onClick: onCLickBlur
+			});
+			list.push({ type: 'divider', id: 'divider', label: 'divider' });
+		}
+		list.push({
+			id: 'devices',
+			label: devicesTitle,
+			disabled: true,
+			customComponent: <Text weight="bold">Devices</Text>
+		});
+		return list.concat(mediaVideoList);
+	}, [
+		applyBlurLabel,
+		blur,
+		canUseVirtualBackground,
+		devicesTitle,
+		mediaVideoList,
+		onCLickBlur,
+		removeBlurLabel,
+		turnOnCameraTooltip,
+		videoEffectTitle,
+		videoStatus
+	]);
 
 	const toggleVideoDropdown = useCallback(() => {
 		setIsVideoListOpen((prevState) => !prevState);
@@ -187,14 +258,15 @@ const CameraButton = ({
 				primaryIcon={videoStatus ? 'Video' : 'VideoOff'}
 				icon={isVideoListOpen ? 'ChevronDown' : 'ChevronUp'}
 				onClick={toggleVideoStream}
-				items={mediaVideoList}
+				items={dropdownList}
 				size="large"
 				shape="regular"
 				dropdownProps={{
 					forceOpen: isVideoListOpen,
 					onClick: toggleVideoDropdown,
 					dropdownListRef: videoDropdownRef,
-					items: mediaVideoList
+					items: dropdownList,
+					width: 'fit-content'
 				}}
 				disabledPrimary={!buttonStatus}
 				disabledSecondary={!buttonStatus}

@@ -128,7 +128,7 @@ describe('Grid mode meeting view', () => {
 		await waitFor(() => user.click(endMeetingButton));
 
 		expect(mockedLeaveMeetingRequest).toHaveBeenCalled();
-		expect(mockGoToInfoPage).toBeCalledWith(PAGE_INFO_TYPE.MEETING_ENDED);
+		expect(mockGoToInfoPage).toHaveBeenCalledWith(PAGE_INFO_TYPE.MEETING_ENDED);
 	});
 
 	test('User click once leave button and then move away', async () => {

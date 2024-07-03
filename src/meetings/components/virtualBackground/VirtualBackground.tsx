@@ -15,13 +15,14 @@ import React, {
 import { GpuBuffer } from '@mediapipe/selfie_segmentation';
 import styled from 'styled-components';
 
-import SelfieSegmentationManager, { ISelfieSegmentation } from './SelfieSegmentation';
+import SelfieSegmentationManager, { ISelfieSegmentation } from './SelfieSegmentationManager';
 import {
 	getIsBackgroundBlurred,
 	getLocalStreamVideo,
 	getUpdatedStream
 } from '../../../store/selectors/ActiveMeetingSelectors';
 import useStore from '../../../store/Store';
+import { getWorkerUrl } from '../../../utils/MeetingsUtils';
 
 const VirtualBackgroundCanvas = styled.canvas<{
 	ref: MutableRefObject<HTMLCanvasElement | undefined>;
@@ -98,12 +99,7 @@ const VirtualBackground = ({ meetingId }: VirtualBackgroundProps): ReactElement 
 		[paintStreamWithBlur]
 	);
 
-	const worker: Worker = useMemo(
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore
-		() => new Worker(new URL('./selfieSegmentationWorker.js', import.meta.url)),
-		[]
-	);
+	const worker: Worker = useMemo(() => new Worker(getWorkerUrl()), []);
 
 	const sendSelfieSegmentation = useCallback(() => {
 		if (myStreamRef?.current && myStreamRef.current.readyState >= HTMLMediaElement.HAVE_METADATA) {

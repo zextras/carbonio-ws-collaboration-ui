@@ -107,4 +107,26 @@ describe('Active Meeting Slice', () => {
 			MeetingChatVisibility.EXPANDED
 		);
 	});
+	test('Change blur status', () => {
+		const { result } = renderHook(() => useStore());
+		act(() => result.current.meetingConnection(meetingId, false, undefined, false, undefined));
+
+		act(() => result.current.setBlur(meetingId, true));
+		expect(result.current.activeMeeting[meetingId].virtualBackground.blur).toBe(true);
+
+		act(() => result.current.setBlur(meetingId, false));
+		expect(result.current.activeMeeting[meetingId].virtualBackground.blur).toBe(false);
+	});
+
+	test('Change updated stream', () => {
+		const streamMedia = new MediaStream();
+
+		const { result } = renderHook(() => useStore());
+		act(() => result.current.meetingConnection(meetingId, false, undefined, false, undefined));
+
+		act(() => result.current.setBackgroundStream(meetingId, streamMedia));
+		expect(result.current.activeMeeting[meetingId].virtualBackground.updatedStream).toBe(
+			streamMedia
+		);
+	});
 });

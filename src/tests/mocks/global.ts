@@ -7,6 +7,8 @@
 // Define browser objects that aren't available in Jest
 // https://jestjs.io/docs/en/manual-mocks#mocking-methods-which-are-not-implemented-in-jsdom
 
+import { noop } from 'lodash';
+
 export const fetchResponse: jest.Mock = jest.fn(() => ({}));
 export const fetchTextResponse: jest.Mock = jest.fn(() => '{}');
 export const requestFullscreen = jest.fn();
@@ -253,3 +255,24 @@ Object.defineProperty(global, 'WebSocket', {
 });
 
 export const mockAttachmentTagElement = document.createElement('a');
+
+// web worker mock
+class Worker {
+	url: string;
+
+	onmessage: (msg: string) => void;
+
+	constructor(stringUrl: string) {
+		this.url = stringUrl;
+		this.onmessage = noop;
+	}
+
+	postMessage(msg: string): void {
+		this.onmessage(msg);
+	}
+}
+
+Object.defineProperty(window, 'Worker', {
+	writable: true,
+	value: Worker
+});
