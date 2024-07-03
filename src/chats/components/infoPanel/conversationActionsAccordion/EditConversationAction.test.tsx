@@ -97,7 +97,7 @@ describe('Edit conversation action', () => {
 		const nameInput = await screen.findByTestId('name_input');
 		user.type(nameInput, 'A new name');
 
-		const editButton = await screen.findByTestId('edit_button');
+		const editButton = await screen.findByRole('button', { name: /Edit details/i });
 		user.click(editButton);
 
 		const snackbar = await screen.findByText(/Something went Wrong. Please Retry/i);

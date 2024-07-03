@@ -26,12 +26,12 @@ import { RoomType } from '../../../../types/store/RoomTypes';
 
 type ForwardModalConversationListItemProps = {
 	item: ChatListItemProp;
-	selected: boolean;
+	isSelected: boolean | undefined;
 };
 
 const ForwardMessageConversationListItem: FunctionComponent<
 	ForwardModalConversationListItemProps
-> = ({ item, selected }) => {
+> = ({ item, isSelected }) => {
 	const roomName = useStore((state) => getRoomNameSelector(state, item.id));
 	const picture: string | undefined = useStore((state) => getRoomURLPicture(state, item.id));
 	const roomType: string = useStore((state) => getRoomTypeSelector(state, item.id));
@@ -46,7 +46,7 @@ const ForwardMessageConversationListItem: FunctionComponent<
 		>
 			<Row>
 				<Row>
-					<Checkbox value={selected} />
+					<Checkbox value={!!isSelected} />
 					<Padding horizontal="small">
 						<Avatar
 							label={roomName}

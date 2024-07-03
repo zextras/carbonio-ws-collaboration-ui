@@ -65,7 +65,7 @@ describe('Forward Message Modal', () => {
 		expect(description).toBeInTheDocument();
 		const list = screen.getByTestId('list_forward_modal');
 		expect(list).toBeInTheDocument();
-		const footerButton = screen.getByTestId('forward_button');
+		const footerButton = screen.getByRole('button', { name: /Forward/i });
 		expect(footerButton).toBeInTheDocument();
 		expect(footerButton).toHaveAttribute('disabled');
 	});
@@ -120,7 +120,7 @@ describe('Forward Message Modal', () => {
 		const conversationComponent = await screen.findByText(user1.name!);
 		await user.click(conversationComponent);
 
-		const footerButton = await screen.findByTestId('forward_button');
+		const footerButton = await screen.findByRole('button', { name: /Forward/i });
 		expect(footerButton).not.toHaveAttribute('disabled', true);
 
 		await user.click(footerButton);
@@ -145,7 +145,7 @@ describe('Forward Message Modal', () => {
 		const conversationComponent = await screen.findByText(chat2.name!);
 		await user.click(conversationComponent);
 
-		const footerButton = await screen.findByTestId('forward_button');
+		const footerButton = await screen.findByRole('button', { name: /Forward/i });
 		expect(footerButton).not.toHaveAttribute('disabled', true);
 
 		await user.click(footerButton);
@@ -170,7 +170,7 @@ describe('Forward Message Modal', () => {
 		const conversationComponent = await screen.findByText(chat2.name!);
 		await user.click(conversationComponent);
 
-		const footerButton = await screen.findByTestId('forward_button');
+		const footerButton = await screen.findByRole('button', { name: /Forward/i });
 		expect(footerButton).not.toHaveAttribute('disabled', true);
 
 		await user.click(footerButton);
@@ -198,7 +198,7 @@ describe('Forward Message Modal', () => {
 		const conversation2Component = await screen.findByText(chat2.name!);
 		await user.click(conversation2Component);
 
-		const footerButton = await screen.findByTestId('forward_button');
+		const footerButton = await screen.findByRole('button', { name: /Forward/i });
 		await user.click(footerButton);
 
 		expect(mockedForwardMessagesRequest).toHaveBeenCalledTimes(1);
@@ -225,7 +225,7 @@ describe('Forward Message Modal', () => {
 		const conversation2Component = await screen.findByText(chat2.name!);
 		await user.click(conversation2Component);
 
-		const footerButton = await screen.findByTestId('forward_button');
+		const footerButton = await screen.findByRole('button', { name: /Forward/i });
 		await user.click(footerButton);
 
 		expect(mockedForwardMessagesRequest).toHaveBeenCalledTimes(1);
@@ -245,7 +245,7 @@ describe('Forward Message Modal', () => {
 		// Forward to Test Room
 		await user.type(await screen.findByTestId('chip_input_forward_modal'), chat2.name![0]);
 		await user.click(await screen.findByText(chat2.name!));
-		await user.click(await screen.findByTestId('forward_button'));
+		await user.click(await screen.findByRole('button', { name: /Forward/i }));
 
 		expect(onClose).toHaveBeenCalledTimes(1);
 	});
@@ -266,7 +266,7 @@ describe('Forward Message Modal', () => {
 		// Forward to Test Room
 		await user.type(await screen.findByTestId('chip_input_forward_modal'), chat2.name![0]);
 		await user.click(await screen.findByText(chat2.name!));
-		await user.click(await screen.findByTestId('forward_button'));
+		await user.click(await screen.findByRole('button', { name: /Forward/i }));
 
 		expect(onClose).toHaveBeenCalledTimes(1);
 	});
