@@ -12,6 +12,7 @@ import MeetingActionsBar from './MeetingActionsBar';
 import { useParams } from '../../../../__mocks__/react-router';
 import useStore from '../../../store/Store';
 import {
+	createMockCapabilityList,
 	createMockMeeting,
 	createMockParticipants,
 	createMockRoom,
@@ -84,6 +85,7 @@ beforeEach(() => {
 	store.startMeeting(meeting.id, '2024-08-25T17:24:28.961+02:00');
 	store.meetingConnection(meeting.id, false, undefined, false, undefined);
 	useParams.mockReturnValue({ meetingId: meeting.id });
+	store.setCapabilities(createMockCapabilityList());
 });
 describe('Meeting action bar', () => {
 	test('everything is rendered correctly', async () => {
