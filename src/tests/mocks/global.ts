@@ -7,8 +7,6 @@
 // Define browser objects that aren't available in Jest
 // https://jestjs.io/docs/en/manual-mocks#mocking-methods-which-are-not-implemented-in-jsdom
 
-import { noop } from 'lodash';
-
 export const fetchResponse: jest.Mock = jest.fn(() => ({}));
 export const fetchTextResponse: jest.Mock = jest.fn(() => '{}');
 export const requestFullscreen = jest.fn();
@@ -156,9 +154,11 @@ Object.defineProperty(window, 'MediaStream', {
 	value: jest.fn(() => ({
 		stream: (): any => ({
 			getAudioTracks: jest.fn(),
+			getVideoTracks: jest.fn(),
 			addTrack: jest.fn()
 		}),
 		getAudioTracks: (): any[] => [MediaStream],
+		getVideoTracks: (): any[] => [MediaStream],
 		addTrack: jest.fn()
 	}))
 });
@@ -260,15 +260,26 @@ export const mockAttachmentTagElement = document.createElement('a');
 class Worker {
 	url: string;
 
-	onmessage: (msg: string) => void;
+	onmessage: (msg: { data: string }) => void;
 
 	constructor(stringUrl: string) {
 		this.url = stringUrl;
-		this.onmessage = noop;
+		this.onmessage = (): void => {};
 	}
 
-	postMessage(msg: string): void {
-		this.onmessage(msg);
+	postMessage(msg: { type: string }): void {
+		switch (msg.type) {
+			case 'start':
+				this.onmessage({ data: 'workerStarted' });
+				break;
+			case 'frameUpdateTimer':
+				this.onmessage({ data: 'update' });
+				break;
+			case 'stop':
+				break;
+			default:
+				break;
+		}
 	}
 }
 

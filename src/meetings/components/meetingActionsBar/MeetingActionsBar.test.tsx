@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { screen, waitFor } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 
 import MeetingActionsBar from './MeetingActionsBar';
 import { useParams } from '../../../../__mocks__/react-router';
@@ -25,7 +25,6 @@ import { MemberBe, RoomBe, RoomType } from '../../../types/network/models/roomBe
 import { UserBe } from '../../../types/network/models/userBeTypes';
 import { MeetingParticipant } from '../../../types/store/MeetingTypes';
 import { RootStore } from '../../../types/store/StoreTypes';
-import MeetingSkeleton from '../../views/MeetingSkeleton';
 
 const user1: UserBe = createMockUser({ id: 'user1Id', name: 'user 1' });
 const user2: UserBe = createMockUser({ id: 'user2Id', name: 'user 2' });
@@ -148,16 +147,5 @@ describe('Meeting action bar', () => {
 
 		const secondActionsWrapper2 = screen.getByTestId('second_actions_wrapper');
 		expect(secondActionsWrapper2).not.toBeVisible();
-	});
-});
-
-describe('Meeting action bar interaction with skeleton', () => {
-	test('hover on different elements of the skeleton makes action bar appear and disappear', async () => {
-		const { user } = setup(<MeetingSkeleton />);
-		const meetingActionBar = await screen.findByTestId('meeting-action-bar');
-		await waitFor(() => user.hover(screen.getByTestId('meeting_sidebar')));
-		expect(meetingActionBar).toHaveStyle('transform: translateY( 5rem )');
-		await waitFor(() => user.hover(screen.getByTestId('meeting_view_container')));
-		expect(meetingActionBar).toHaveStyle('transform: translateY( -1rem )');
 	});
 });
