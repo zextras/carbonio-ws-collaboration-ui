@@ -92,7 +92,7 @@ describe('Chat Creation Modal Contact Selector - search', () => {
 		await screen.findByText('spinner');
 		const list = await screen.findByTestId('list_creation_modal');
 		expect(list).toBeVisible();
-		expect(list.children).toHaveLength(0);
+		expect(list.children[0].children).toHaveLength(0);
 
 		// Set [userObj] as returned valued for AutoCompleteRequest
 		mockedAutoCompleteGalRequest.mockReturnValueOnce([zimbraUser1]);
@@ -130,7 +130,7 @@ describe('Chat Creation Modal Contact Selector - search', () => {
 		await screen.findByText('spinner');
 		const list = await screen.findByTestId('list_creation_modal');
 		expect(list).toBeVisible();
-		expect(list.children).toHaveLength(2);
+		expect(list.children[0].children).toHaveLength(2);
 
 		// Type on ChipInput to trigger a new autoCompleteGalRequest
 		const chipInput = await screen.findByTestId('chip_input_creation_modal');
@@ -161,7 +161,7 @@ describe('Chat Creation Modal Contact Selector - search', () => {
 		await screen.findByText('spinner');
 		const list = await screen.findByTestId('list_creation_modal');
 		expect(list).toBeVisible();
-		expect(list.children).toHaveLength(0);
+		expect(list.children[0].children).toHaveLength(0);
 
 		// Type on ChipInput to trigger a new autoCompleteGalRequest
 		const chipInput = await screen.findByTestId('chip_input_creation_modal');
@@ -171,7 +171,7 @@ describe('Chat Creation Modal Contact Selector - search', () => {
 		await screen.findByText('spinner');
 		const list2 = await screen.findByTestId('list_creation_modal');
 		expect(list2).toBeVisible();
-		expect(list2.children).toHaveLength(0);
+		expect(list2.children[0].children).toHaveLength(0);
 	});
 
 	test('Search an user by name and surname', async () => {

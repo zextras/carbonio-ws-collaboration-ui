@@ -49,7 +49,7 @@ const WaitingListSnackbar = (): ReactElement | null => {
 		<Snackbar
 			open={showWaitingUserSnackbar}
 			key="newWaitingUser"
-			type="info"
+			severity="info"
 			label={snackbarLabel}
 			disableAutoHide
 			onClose={(): void => setWaitingUserShowSnackbar(false)}

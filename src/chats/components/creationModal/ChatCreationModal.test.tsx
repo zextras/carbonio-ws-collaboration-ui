@@ -68,7 +68,7 @@ describe('Chat Creation Modal', () => {
 		expect(description).toBeInTheDocument();
 		const list = await screen.findByTestId('list_creation_modal');
 		expect(list).toBeInTheDocument();
-		const footerButton = await screen.findByTestId('create_button');
+		const footerButton = await screen.findByRole('button', { name: /create/i });
 		expect(footerButton).toBeInTheDocument();
 		expect(footerButton).toHaveAttribute('disabled');
 	});
@@ -86,7 +86,7 @@ describe('Chat Creation Modal', () => {
 		const userComponent = await screen.findByText(zimbraUser1.fullName);
 		user.click(userComponent);
 
-		const footerButton = await screen.findByTestId('create_button');
+		const footerButton = await screen.findByRole('button', { name: /create/i });
 		expect(footerButton).not.toHaveAttribute('disabled', true);
 
 		user.click(footerButton);
@@ -126,7 +126,7 @@ describe('Chat Creation Modal', () => {
 		const title = await screen.findByDisplayValue(/Title/i);
 		expect(title).toBeInTheDocument();
 
-		const footerButton = await screen.findByTestId('create_button');
+		const footerButton = await screen.findByRole('button', { name: /new group/i });
 		expect(footerButton).toBeEnabled();
 
 		mockedAddRoomRequest.mockReturnValue({
@@ -160,7 +160,7 @@ describe('Chat Creation Modal', () => {
 		const user2Component = await screen.findByText(zimbraUser2.fullName);
 		user.click(user2Component);
 
-		const footerButton = await screen.findByTestId('create_button');
+		const footerButton = await screen.findByRole('button', { name: /create/i });
 		expect(footerButton).toBeEnabled();
 
 		mockedAddRoomRequest.mockRejectedValueOnce({});
@@ -184,7 +184,7 @@ describe('Chat Creation Modal', () => {
 		await user.type(chipInput, zimbraUser2.fullName[0]);
 		const user2Component = await screen.findByText(zimbraUser2.fullName);
 		await user.click(user2Component);
-		const footerButton = await screen.findByTestId('create_button');
+		const footerButton = await screen.findByRole('button', { name: /new group/i });
 
 		const titleInput = screen.getByTestId('name_input');
 		await user.type(titleInput, 'Group Title');
@@ -208,7 +208,7 @@ describe('Chat Creation Modal', () => {
 		await user.type(chipInput, zimbraUser2.fullName[0]);
 		const user2Component = await screen.findByText(zimbraUser2.fullName);
 		await user.click(user2Component);
-		const footerButton = await screen.findByTestId('create_button');
+		const footerButton = await screen.findByRole('button', { name: /new group/i });
 
 		const titleInput = screen.getByTestId('name_input');
 		await user.type(
@@ -233,7 +233,7 @@ describe('Chat Creation Modal', () => {
 		await user.type(chipInput, zimbraUser2.fullName[0]);
 		const user2Component = await screen.findByText(zimbraUser2.fullName);
 		await user.click(user2Component);
-		const footerButton = await screen.findByTestId('create_button');
+		const footerButton = await screen.findByRole('button', { name: /new group/i });
 
 		const topicInput = screen.getByTestId('description_input');
 		await user.type(
@@ -257,7 +257,7 @@ describe('Chat Creation Modal', () => {
 		const userComponent = await screen.findByText(zimbraUser1.fullName);
 		await user.click(userComponent);
 
-		const footerButton = await screen.findByTestId('create_button');
+		const footerButton = await screen.findByRole('button', { name: /create/i });
 		await user.click(footerButton);
 	});
 
