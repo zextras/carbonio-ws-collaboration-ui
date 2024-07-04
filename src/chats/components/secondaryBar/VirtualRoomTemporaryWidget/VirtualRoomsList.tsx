@@ -93,15 +93,12 @@ const VirtualRoomsList: FC<virtualRoomsListProps> = ({ setListVisibility, parent
 
 	const handleMouseUp = useCallback(
 		(event) => {
-			if (inputRef.current && inputRef.current.contains(event.target)) {
+			if (inputRef.current?.contains(event.target)) {
 				setInputHasFocus(true);
 			} else {
 				setInputHasFocus(false);
 			}
-			if (
-				(modalRef.current && modalRef.current.contains(event.target)) ||
-				(parentRef.current && parentRef.current.contains(event.target))
-			) {
+			if (modalRef.current?.contains(event.target) || parentRef.current?.contains(event.target)) {
 				setListVisibility(true);
 			} else if (popupRef.current && !popupRef.current.contains(event.target)) {
 				setListVisibility(false);
@@ -221,7 +218,7 @@ const VirtualRoomsList: FC<virtualRoomsListProps> = ({ setListVisibility, parent
 	const noVirtualRoomSection = useMemo(
 		() => (
 			<Container padding="1rem">
-				<Text color="gray1" size="small" weight="light">
+				<Text color="gray1" size="small" weight="light" overflow="break-word">
 					{noVirtualRoomsLabel}
 				</Text>
 			</Container>

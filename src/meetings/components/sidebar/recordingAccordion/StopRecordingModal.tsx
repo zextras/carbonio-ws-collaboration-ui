@@ -7,16 +7,15 @@
 import React, { ReactElement, useCallback, useMemo, useState } from 'react';
 
 import {
-	Button,
 	Container,
 	CreateSnackbarFn,
 	Input,
 	Modal,
 	Padding,
 	Text,
-	Tooltip,
 	useSnackbar
 } from '@zextras/carbonio-design-system';
+import { size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 import { MeetingsApi } from '../../../../network';
@@ -132,31 +131,19 @@ const StopRecordingModal = ({
 		return '';
 	}, [filenameIsRequiredLabel, filenameIsTooLongLabel, recordingName]);
 
-	const CustomFooter = useMemo(
-		() => (
-			<Tooltip label={tooltipLabel} placement="right">
-				<Container crossAlignment="flex-end">
-					<Button
-						color="error"
-						label={stopButtonLabel}
-						onClick={stopRecording}
-						disabled={recordingName === '' || recordingName.length >= 128}
-					/>
-				</Container>
-			</Tooltip>
-		),
-		[recordingName, stopButtonLabel, stopRecording, tooltipLabel]
-	);
-
 	return (
 		<Modal
 			size="small"
 			open={isOpen}
 			title={title}
+			onConfirm={stopRecording}
+			confirmColor="error"
+			confirmLabel={stopButtonLabel}
+			confirmDisabled={recordingName === '' || size(recordingName) >= 128}
+			confirmTooltip={tooltipLabel}
 			showCloseIcon
 			onClose={onCloseModal}
 			closeIconTooltip={closeLabel}
-			customFooter={CustomFooter}
 		>
 			<Container crossAlignment="flex-start">
 				<Text overflow="break-word">{descriptionLabel}</Text>

@@ -57,39 +57,38 @@ const ListParticipant = ({
 	);
 
 	return (
-		<Padding vertical="small">
-			<Tooltip disabled={!isDisabled} label={removeToAddNewOneLabel}>
-				<Container
-					data-testid={`chip-${item.email}`}
-					onClick={onClickCb(item)}
-					orientation="horizontal"
-					mainAlignment="flex-start"
-					width="fill"
-				>
-					<Row>
-						<Checkbox
-							data-testid={`checkbox-chip-${item.email}`}
-							value={selected}
-							disabled={!selected && isDisabled}
-						/>
-						<Padding horizontal="small">
-							<Avatar label={item.name} picture={picture} />
-						</Padding>
-						<Container crossAlignment="flex-start" width="fit">
-							<Text size="small">{item.name}</Text>
-							<Padding top="extrasmall" />
-							<SelectableText
-								data-testid={`${item.id}-emailSelectable`}
-								size="extrasmall"
-								color="gray1"
-							>
-								{item.email}
-							</SelectableText>
-						</Container>
-					</Row>
-				</Container>
-			</Tooltip>
-		</Padding>
+		<Tooltip disabled={!isDisabled} label={removeToAddNewOneLabel}>
+			<Container
+				data-testid={`chip-${item.email}`}
+				onClick={onClickCb(item)}
+				orientation="horizontal"
+				mainAlignment="flex-start"
+				width="fill"
+				padding={{ vertical: 'small' }}
+			>
+				<Row>
+					<Checkbox
+						data-testid={`checkbox-chip-${item.email}`}
+						value={selected}
+						disabled={!selected && isDisabled}
+					/>
+					<Padding horizontal="small">
+						<Avatar label={item.name} picture={picture} />
+					</Padding>
+					<Container crossAlignment="flex-start" width="fit">
+						<Text size="small">{item.name}</Text>
+						<Padding top="extrasmall" />
+						<SelectableText
+							data-testid={`${item.id}-emailSelectable`}
+							size="extrasmall"
+							color="gray1"
+						>
+							{item.email}
+						</SelectableText>
+					</Container>
+				</Row>
+			</Container>
+		</Tooltip>
 	);
 };
 
