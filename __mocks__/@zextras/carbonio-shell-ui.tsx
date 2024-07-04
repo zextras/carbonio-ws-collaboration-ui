@@ -22,9 +22,7 @@ const history = createMemoryHistory();
 export const USER_SETTINGS: AccountSettings = {
 	attrs: {},
 	props: [],
-	prefs: {
-		zimbraPrefTimeZoneId: 'UTC'
-	}
+	prefs: {}
 };
 
 export const ROUTE_SETTINGS = {

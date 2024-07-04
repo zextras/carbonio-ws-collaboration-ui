@@ -15,7 +15,7 @@ import {
 } from './dateUtils';
 
 beforeEach(() => {
-	setDateDefault('Europe/Rome', 'it');
+	setDateDefault('it');
 });
 describe('date utils', () => {
 	describe('formatDate', () => {
