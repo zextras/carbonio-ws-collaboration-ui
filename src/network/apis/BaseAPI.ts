@@ -16,7 +16,7 @@ export default abstract class BaseAPI implements IBaseAPI {
 	private readonly url: string = '/services/chats/';
 
 	private mimeTypeToAppend(mimeTypeToCheck: string | undefined): string {
-		return mimeTypeToCheck || 'application/octet-stream';
+		return mimeTypeToCheck ?? 'application/octet-stream';
 	}
 
 	public fetchAPI(
