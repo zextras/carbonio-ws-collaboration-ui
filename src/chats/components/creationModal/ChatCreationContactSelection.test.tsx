@@ -48,6 +48,12 @@ const user1: Member = {
 	external: false
 };
 
+const memberLimits: Array<[string, number, string]> = [
+	['0', 3, 'You have selected the maximum number of members for a group'],
+	['1', 4, 'You can add one last member'],
+	['2', 5, 'You can add other 2 members']
+];
+
 describe('Chat Creation Modal Contact Selector - search', () => {
 	test('All elements are rendered', async () => {
 		const { result } = renderHook(() => useStore());
@@ -349,4 +355,25 @@ describe('Add participant Modal Contact Selector', () => {
 		const user2Component = screen.getByText(zimbraUser2.fullName);
 		expect(user2Component).toBeVisible();
 	});
+	test.each(memberLimits)(
+		'Check limit of member to add, limit is %s',
+		async (k, limit, stringToCheck) => {
+			const { result } = renderHook(() => useStore());
+			act(() =>
+				result.current.setCapabilities(createMockCapabilityList({ maxGroupMembers: limit }))
+			);
+
+			setup(
+				<ChatCreationContactsSelection
+					contactsSelected={{}}
+					setContactSelected={jest.fn()}
+					members={[user0, user1]}
+					inputRef={React.createRef()}
+				/>
+			);
+
+			const usersToAddLimitReached = await screen.findByText(stringToCheck);
+			expect(usersToAddLimitReached).toBeInTheDocument();
+		}
+	);
 });

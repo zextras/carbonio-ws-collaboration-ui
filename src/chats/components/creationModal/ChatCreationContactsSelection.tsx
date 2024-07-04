@@ -88,8 +88,8 @@ const ChatCreationContactsSelection = ({
 	const maxMembers = useStore((store) => getCapability(store, CapabilityType.MAX_GROUP_MEMBERS));
 
 	const maxGroupMembers = useMemo(
-		() => (isCreationModal && typeof maxMembers === 'number' ? maxMembers - 1 : undefined),
-		[isCreationModal, maxMembers]
+		() => (typeof maxMembers === 'number' ? maxMembers - 1 : undefined),
+		[maxMembers]
 	);
 
 	const membersToAdd = useMemo(() => {
@@ -230,18 +230,24 @@ const ChatCreationContactsSelection = ({
 
 	const items = useMemo(
 		() =>
-			map(resultList, (item) => (
-				<ListItem key={item.id} active={!!contactsSelected[item.id]}>
-					{() => (
-						<ListParticipant
-							item={item}
-							selected={!!contactsSelected[item.id]}
-							onClickCb={onClickListItem}
-							isDisabled={chipInputHasError}
-						/>
-					)}
-				</ListItem>
-			)),
+			map(resultList, (item) => {
+				const clickCb =
+					(chipInputHasError && !!contactsSelected[item.id]) || !chipInputHasError
+						? onClickListItem
+						: () => (): null => null;
+				return (
+					<ListItem key={item.id} active={!!contactsSelected[item.id]}>
+						{() => (
+							<ListParticipant
+								item={item}
+								selected={!!contactsSelected[item.id]}
+								onClickCb={clickCb}
+								isDisabled={chipInputHasError}
+							/>
+						)}
+					</ListItem>
+				);
+			}),
 		[chipInputHasError, contactsSelected, onClickListItem, resultList]
 	);
 
