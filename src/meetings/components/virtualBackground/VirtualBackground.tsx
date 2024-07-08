@@ -22,6 +22,7 @@ import {
 	getUpdatedStream
 } from '../../../store/selectors/ActiveMeetingSelectors';
 import useStore from '../../../store/Store';
+import { BrowserUtils } from '../../../utils/BrowserUtils';
 import { getWorkerUrl } from '../../../utils/MeetingsUtils';
 
 const VirtualBackgroundCanvas = styled.canvas<{
@@ -71,7 +72,11 @@ const VirtualBackground = ({ meetingId }: VirtualBackgroundProps): ReactElement 
 				if (context) {
 					// setup canvas width and height to be the same as the results one
 					context.canvas.width = 640;
-					context.canvas.height = 360;
+					if (BrowserUtils.isFirefox()) {
+						context.canvas.height = 480;
+					} else {
+						context.canvas.height = 360;
+					}
 
 					// Clear the canvas
 					context.clearRect(0, 0, canvas.width, canvas.height);
