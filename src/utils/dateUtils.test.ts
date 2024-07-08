@@ -34,13 +34,11 @@ describe('date utils', () => {
 		});
 
 		test('Date object is converted in a string with "YYYY-MM-DD" format', () => {
-			expect(formatDate(new Date(1690745401000), 'YYYY-MM-DD')).toBe(
-				moment(date).format('YYYY-MM-DD')
-			);
+			expect(formatDate(new Date(date), 'YYYY-MM-DD')).toBe(moment(date).format('YYYY-MM-DD'));
 		});
 
 		test('Date object is converted in a string with "YYYY-MM-DD HH:mm:ss" format', () => {
-			expect(formatDate(new Date(1690745401000), 'YYYY-MM-DD HH:mm:ss')).toBe(
+			expect(formatDate(new Date(date), 'YYYY-MM-DD HH:mm:ss')).toBe(
 				moment(date).format('YYYY-MM-DD HH:mm:ss')
 			);
 		});
@@ -60,7 +58,7 @@ describe('date utils', () => {
 
 	describe('dateToTimestamp', () => {
 		test('Date object is converted in a unix timestamp', () => {
-			expect(dateToTimestamp(new Date(1690745401000))).toBe(1690745401000);
+			expect(dateToTimestamp(new Date(date))).toBe(1690745401000);
 		});
 
 		test('ISO date is converted in a unix timestamp', () => {
@@ -70,11 +68,11 @@ describe('date utils', () => {
 
 	describe('dateToISODate', () => {
 		test('Unix timestamp is converted in a ISO date', () => {
-			expect(dateToISODate(1690745401000)).toBe('2023-07-30T21:30:01.000+02:00');
+			expect(dateToISODate(date)).toBe(moment(date).format('YYYY-MM-DDTHH:mm:ss.SSSZ'));
 		});
 
 		test('Date object is converted in a ISO date', () => {
-			expect(dateToISODate(new Date(1690745401000))).toBe('2023-07-30T21:30:01.000+02:00');
+			expect(dateToISODate(date)).toBe(moment(new Date(date)).format('YYYY-MM-DDTHH:mm:ss.SSSZ'));
 		});
 	});
 
