@@ -5,16 +5,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import moment from 'moment-timezone';
-
-import {
-	dateString,
-	dateToISODate,
-	dateToTimestamp,
-	formatDate,
-	now,
-	setDateDefault
-} from './dateUtils';
+import { dateString, dateToTimestamp, now, setDateDefault } from './dateUtils';
 
 const date = 1690745401000;
 
@@ -22,40 +13,6 @@ beforeEach(() => {
 	setDateDefault('it');
 });
 describe('date utils', () => {
-	describe('formatDate', () => {
-		test('Timestamp is converted in a string with "YYYY-MM-DD" format', () => {
-			expect(formatDate(date, 'YYYY-MM-DD')).toBe(moment(date).format('YYYY-MM-DD'));
-		});
-
-		test('Timestamp is converted in a string with "YYYY-MM-DD HH:mm:ss" format', () => {
-			expect(formatDate(date, 'YYYY-MM-DD HH:mm:ss')).toBe(
-				moment(date).format('YYYY-MM-DD HH:mm:ss')
-			);
-		});
-
-		test('Date object is converted in a string with "YYYY-MM-DD" format', () => {
-			expect(formatDate(new Date(date), 'YYYY-MM-DD')).toBe(moment(date).format('YYYY-MM-DD'));
-		});
-
-		test('Date object is converted in a string with "YYYY-MM-DD HH:mm:ss" format', () => {
-			expect(formatDate(new Date(date), 'YYYY-MM-DD HH:mm:ss')).toBe(
-				moment(date).format('YYYY-MM-DD HH:mm:ss')
-			);
-		});
-
-		test('ISO date is converted in a string with "YYYY-MM-DD" format', () => {
-			expect(formatDate('2023-07-30T21:30:01.000Z', 'YYYY-MM-DD')).toBe(
-				moment('2023-07-30T21:30:01.000Z').format('YYYY-MM-DD')
-			);
-		});
-
-		test('ISO date is converted in a string with "YYYY-MM-DD HH:mm:ss" format', () => {
-			expect(formatDate('2023-07-30T21:30:01.000Z', 'YYYY-MM-DD HH:mm:ss')).toBe(
-				moment('2023-07-30T21:30:01.000Z').format('YYYY-MM-DD HH:mm:ss')
-			);
-		});
-	});
-
 	describe('dateToTimestamp', () => {
 		test('Date object is converted in a unix timestamp', () => {
 			expect(dateToTimestamp(new Date(date))).toBe(1690745401000);
@@ -63,16 +20,6 @@ describe('date utils', () => {
 
 		test('ISO date is converted in a unix timestamp', () => {
 			expect(dateToTimestamp('2023-07-30T21:30:01.000+02:00')).toBe(1690745401000);
-		});
-	});
-
-	describe('dateToISODate', () => {
-		test('Unix timestamp is converted in a ISO date', () => {
-			expect(dateToISODate(date)).toBe(moment(date).format('YYYY-MM-DDTHH:mm:ss.SSSZ'));
-		});
-
-		test('Date object is converted in a ISO date', () => {
-			expect(dateToISODate(date)).toBe(moment(new Date(date)).format('YYYY-MM-DDTHH:mm:ss.SSSZ'));
 		});
 	});
 
