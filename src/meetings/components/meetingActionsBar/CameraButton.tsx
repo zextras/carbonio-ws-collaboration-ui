@@ -80,7 +80,7 @@ const CameraButton = ({
 	const setSelectedDeviceId = useStore((store) => store.setSelectedDeviceId);
 	const setLocalStreams = useStore((store) => store.setLocalStreams);
 	const setBlur = useStore((store) => store.setBlur);
-	const blur = useStore((store) => getIsBackgroundBlurred(store, meetingId));
+	const isBlur = useStore((store) => getIsBackgroundBlurred(store, meetingId));
 	const canUseVirtualBackground = useStore((store) =>
 		getCapability(store, CapabilityType.CAN_USE_VIRTUAL_BACKGROUND)
 	);
@@ -144,8 +144,8 @@ const CameraButton = ({
 	);
 
 	const onCLickBlur = useCallback(() => {
-		setBlur(meetingId, !blur);
-	}, [blur, meetingId, setBlur]);
+		setBlur(meetingId, !isBlur);
+	}, [isBlur, meetingId, setBlur]);
 
 	const dropdownList = useMemo(() => {
 		const list: DropdownItem[] = [];
@@ -154,12 +154,12 @@ const CameraButton = ({
 				id: 'video-effect',
 				label: videoEffectTitle,
 				disabled: true,
-				customComponent: <Text weight="bold">Video effect</Text>
+				customComponent: <Text weight="bold">{videoEffectTitle}</Text>
 			});
 			list.push({
 				id: 'blur',
-				icon: blur ? 'Avatar' : 'AvatarOutline',
-				label: blur ? removeBlurLabel : applyBlurLabel,
+				icon: isBlur ? 'Avatar' : 'AvatarOutline',
+				label: isBlur ? removeBlurLabel : applyBlurLabel,
 				disabled: !videoStatus,
 				tooltipLabel: !videoStatus ? turnOnCameraTooltip : undefined,
 				onClick: onCLickBlur
@@ -170,12 +170,12 @@ const CameraButton = ({
 			id: 'devices',
 			label: devicesTitle,
 			disabled: true,
-			customComponent: <Text weight="bold">Devices</Text>
+			customComponent: <Text weight="bold">{devicesTitle}</Text>
 		});
 		return list.concat(mediaVideoList);
 	}, [
 		applyBlurLabel,
-		blur,
+		isBlur,
 		canUseVirtualBackground,
 		devicesTitle,
 		mediaVideoList,
