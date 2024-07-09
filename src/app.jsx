@@ -41,7 +41,7 @@ export default function App() {
 
 	// SET TIMEZONE and LOCALE
 	useEffect(() => {
-		if (authenticated) setDateDefault(prefs?.zimbraPrefTimeZoneId, prefs?.zimbraPrefLocale);
+		if (authenticated) setDateDefault(prefs?.zimbraPrefLocale);
 	}, [prefs, authenticated]);
 
 	// NETWORKS: init XMPP and WebSocket clients
