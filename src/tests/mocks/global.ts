@@ -154,9 +154,11 @@ Object.defineProperty(window, 'MediaStream', {
 	value: jest.fn(() => ({
 		stream: (): any => ({
 			getAudioTracks: jest.fn(),
+			getVideoTracks: jest.fn(),
 			addTrack: jest.fn()
 		}),
 		getAudioTracks: (): any[] => [MediaStream],
+		getVideoTracks: (): any[] => [MediaStream],
 		addTrack: jest.fn()
 	}))
 });
@@ -253,3 +255,35 @@ Object.defineProperty(global, 'WebSocket', {
 });
 
 export const mockAttachmentTagElement = document.createElement('a');
+
+// web worker mock
+class Worker {
+	url: string;
+
+	onmessage: (msg: { data: string }) => void;
+
+	constructor(stringUrl: string) {
+		this.url = stringUrl;
+		this.onmessage = (): void => {};
+	}
+
+	postMessage(msg: { type: string }): void {
+		switch (msg.type) {
+			case 'start':
+				this.onmessage({ data: 'workerStarted' });
+				break;
+			case 'frameUpdateTimer':
+				this.onmessage({ data: 'update' });
+				break;
+			case 'stop':
+				break;
+			default:
+				break;
+		}
+	}
+}
+
+Object.defineProperty(window, 'Worker', {
+	writable: true,
+	value: Worker
+});

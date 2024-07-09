@@ -62,6 +62,9 @@ export const useActiveMeetingSlice: StateCreator<ActiveMeetingSlice> = (
 						videoStreamEnabled,
 						selectedVideoDeviceId
 					),
+					virtualBackground: {
+						blur: false
+					},
 					screenOutConn: new ScreenOutConnection(meetingId),
 					subscription: {},
 					talkingUsers: []
@@ -319,6 +322,35 @@ export const useActiveMeetingSlice: StateCreator<ActiveMeetingSlice> = (
 			}),
 			false,
 			'AM/DELETE_SUB'
+		);
+	},
+	setBackgroundStream: (meetingId: string, stream: MediaStream): void => {
+		set(
+			produce((draft: RootStore) => {
+				if (draft.activeMeeting[meetingId]) {
+					draft.activeMeeting[meetingId].virtualBackground.updatedStream = stream;
+				}
+			}),
+			false,
+			'AM/SET_BACKGROUND_STREAM'
+		);
+	},
+	removeBackgroundStream: (meetingId: string): void => {
+		set(
+			produce((draft: RootStore) => {
+				delete draft.activeMeeting[meetingId].virtualBackground.updatedStream;
+			}),
+			false,
+			'AM/REMOVE_BACKGROUND_STREAM'
+		);
+	},
+	setBlur: (meetingId: string, status: boolean): void => {
+		set(
+			produce((draft: RootStore) => {
+				draft.activeMeeting[meetingId].virtualBackground.blur = status;
+			}),
+			false,
+			'AM/SET_BLUR'
 		);
 	}
 });

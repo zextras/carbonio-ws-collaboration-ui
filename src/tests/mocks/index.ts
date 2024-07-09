@@ -11,9 +11,12 @@ import './global';
 import './network';
 import './XMPPConnection';
 import './AutoCompleteGal';
+import './SelfieSegmentationManager';
 
 // Hooks mocks
 import './useRouting';
 import './useMediaQueryCheck';
 
+// utils mock
 import './scrollUtils';
+import './MeetingsUtils';
