@@ -7,17 +7,20 @@
 import { Strophe } from 'strophe.js';
 
 import useStore from '../../../store/Store';
+import { getTagElement } from '../utility/decodeStanza';
 
 export function onPresenceStanza(stanza: Element): true {
-	const store = useStore.getState();
-	const from = Strophe.getNodeFromJid(stanza.getAttribute('from'));
-	const type = stanza.getAttribute('type');
-	store.setUserPresence(from, !type);
-
-	// If user goes offline, request his last activity
-	if (type != null) {
-		const jid = Strophe.getBareJidFromJid(stanza.getAttribute('from'));
-		store.connections.xmppClient.getLastActivity(jid);
+	const delay = getTagElement(stanza, 'delay');
+	if (!delay) {
+		const store = useStore.getState();
+		const from = Strophe.getNodeFromJid(stanza.getAttribute('from'));
+		const type = stanza.getAttribute('type');
+		store.setUserPresence(from, !type);
+		// If user goes offline, request his last activity
+		if (type != null) {
+			const jid = Strophe.getBareJidFromJid(stanza.getAttribute('from'));
+			store.connections.xmppClient.getLastActivity(jid);
+		}
 	}
 	// TODO SEND PAUSE ISWRITING WHEN USER GOES OFFLINE
 	return true;
