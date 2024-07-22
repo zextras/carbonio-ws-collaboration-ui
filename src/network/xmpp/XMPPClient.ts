@@ -33,9 +33,9 @@ class XMPPClient implements IXMPPClient {
 
 	constructor() {
 		this.xmppConnection = new XMPPConnection(() => {
+			this.setInbox();
 			this.getContactList();
 			this.setOnline();
-			this.setInbox();
 		});
 
 		// Useful namespaces
