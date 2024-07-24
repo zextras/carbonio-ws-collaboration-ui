@@ -29,6 +29,7 @@ export type XMPPRequest = {
 	callback?: (stanza: Element) => void;
 	errorCallback?: (stanza: Element) => void;
 };
+
 class XMPPConnection {
 	private token: string | undefined;
 
@@ -46,17 +47,13 @@ class XMPPConnection {
 		this.initFunction = initFunction;
 
 		// Init XMPP connection
-		const service = `wss://${window.document.domain}/services/messaging/ws-xmpp`;
+		const service = `wss://${window.location.host}/services/messaging/ws-xmpp`;
 		this.connection = new Strophe.Connection(service);
 
-		// Debug
-		// const parser = new DOMParser();
-		// this.connection.rawInput = (data: string): void => {
-		// 	xmppDebug('<-- IN:', parser.parseFromString(data, 'text/xml'));
-		// };
-		// this.connection.rawOutput = (data: string): void => {
-		// 	xmppDebug('---> OUT:', parser.parseFromString(data, 'text/xml'));
-		// };
+		// Disconnect session to broadcast unavailable presence
+		window.addEventListener('beforeunload', () => {
+			this.connection.disconnect('Session closed');
+		});
 	}
 
 	private onConnectionStatus(statusCode: StropheConnectionStatus): void {

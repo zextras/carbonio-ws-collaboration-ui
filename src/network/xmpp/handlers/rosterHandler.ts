@@ -16,6 +16,7 @@ import { getRequiredAttribute } from '../utility/decodeStanza';
 
 export function onGetRosterResponse(stanza: Element): boolean {
 	const contacts = stanza.getElementsByTagName('item');
+	console.log(stanza);
 	forEach(contacts, (contact) => {
 		const jid = getRequiredAttribute(contact, 'jid');
 		useStore.getState().connections.xmppClient.getLastActivity(jid);
