@@ -12,7 +12,7 @@ import { onErrorStanza } from './handlers/errorHandler';
 import { onHistoryMessageStanza } from './handlers/historyMessageHandler';
 import { onInboxMessageStanza } from './handlers/inboxMessageHandler';
 import { onNewMessageStanza } from './handlers/newMessageHandler';
-import { onPresenceStanza } from './handlers/presenceHandler';
+import { onPingStanza, onPresenceStanza } from './handlers/presenceHandler';
 import { onDisplayedMessageStanza } from './handlers/smartMarkersHandler';
 import useStore from '../../store/Store';
 import { xmppDebug } from '../../utils/debug';
@@ -131,6 +131,7 @@ class XMPPConnection {
 		this.connection.addHandler(onInboxMessageStanza, Strophe.NS.INBOX, 'message');
 		this.connection.addHandler(onComposingMessageStanza, Strophe.NS.CHAT_STATE, 'message');
 		this.connection.addHandler(onDisplayedMessageStanza, Strophe.NS.MARKERS, 'message');
+		this.connection.addHandler(onPingStanza, Strophe.NS.PING, 'iq');
 
 		this.initFunction();
 

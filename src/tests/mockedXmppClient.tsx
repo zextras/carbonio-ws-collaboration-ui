@@ -21,6 +21,7 @@ export const xmppClient = {
 	connect: jest.fn(),
 	getContactList: jest.fn(),
 	setOnline: jest.fn(),
+	sendPong: jest.fn(),
 	getLastActivity: jest.fn(),
 	getInbox: jest.fn(),
 	setInbox: jest.fn(),
