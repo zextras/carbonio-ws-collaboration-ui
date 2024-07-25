@@ -15,13 +15,13 @@ export function onPresenceStanza(stanza: Element): true {
 	const type = stanza.getAttribute('type');
 
 	if (isMyId(from) && type === 'unavailable') {
+		// Another client of the logged user went offline
 		store.connections.xmppClient.setOnline();
-		return true;
-	}
-
-	if (type == null) {
+	} else if (type == null) {
+		// Online presence stanza
 		store.setUserPresence(from, true);
 	} else if (type === 'unavailable') {
+		// Offline presence stanza
 		store.setUserPresence(from, false);
 		const jid = Strophe.getBareJidFromJid(stanza.getAttribute('from'));
 		store.connections.xmppClient.getLastActivity(jid);
