@@ -47,7 +47,7 @@ class XMPPConnection {
 		this.initFunction = initFunction;
 
 		// Init XMPP connection
-		const service = `wss://${window.location.host}/services/messaging/ws-xmpp`;
+		const service = `wss://${window.location.hostname}/services/messaging/ws-xmpp`;
 		this.connection = new Strophe.Connection(service);
 
 		// Disconnect session to broadcast unavailable presence
