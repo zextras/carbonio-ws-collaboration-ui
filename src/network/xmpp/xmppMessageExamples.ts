@@ -10,17 +10,24 @@
  * Presence stanzas
  */
 // Presence stanza received after a roster iq or when a user logs in
-export const loginPresenceStanza = `<presence xmlns="jabber:client" from="userId@carbonio/23404c07056f067a1679-319950-697888" to="userId@carbonio/23404c07056f067a1679-319950-697888"/>`;
+export const onlinePresence = `<presence xmlns="jabber:client" from="userId@carbonio/resourceId" to="userId@carbonio/resourceId"/>`;
 
 // Presence stanza received when a user logs out
-export const logoutPresenceStanza = `<presence xmlns="jabber:client" from="userIde@carbonio/36d4feb9816b11381679-322829-747836" to="userId@carbonio/92f080e7f2dfa5fe1679-320957-345490" type="unavailable"/>`;
+export const offlinePresence = `<presence xmlns="jabber:client" from="userId@carbonio/resourceId" to="userId@carbonio/resourceId" type="unavailable"/>`;
+
+/**
+ * Ping stanzas
+ */
+export const pingIq = `<iq from='carbonio' to='userId@carbonio/resourceId' type='get' id='stanzaId' xmlns='jabber:client'><ping xmlns='urn:xmpp:ping'/></iq>`;
+
+export const pongIq = `<iq id="stanzaId" to="carbonio" type="result" xmlns="jabber:client"/>`;
 
 /**
  * Inbox stanzas: messages received after an inbox iq
  */
 
 export const textMessageFromInbox = `
-<message xmlns="jabber:client" from="userId@carbonio" to="userId@carbonio/c7e75930c3382f901679-320886-854829" id="messageId">
+<message xmlns="jabber:client" from="userId@carbonio" to="userId@carbonio/resourceId" id="messageId">
     <result xmlns="erlang-solutions.com:xmpp:inbox:0" unread="0" queryid="queryId">
         <forwarded xmlns="urn:xmpp:forward:0">
             <delay xmlns="urn:xmpp:delay" stamp="2023-03-20T13:58:29.624130Z"/>
@@ -37,7 +44,7 @@ export const textMessageFromInbox = `
 </message>`;
 
 export const replyMessageFromInbox = `
-<message xmlns="jabber:client" from="userId@carbonio" to="userId@carbonio/ccca1b879044b0971679-323677-633848" id="1679-323677-729980">
+<message xmlns="jabber:client" from="userId@carbonio" to="userId@carbonio/resourceId" id="messageId">
     <result xmlns="erlang-solutions.com:xmpp:inbox:0" unread="0" queryid="queryId">
         <forwarded xmlns="urn:xmpp:forward:0">
             <delay xmlns="urn:xmpp:delay" stamp="2023-03-20T14:41:28.291032Z"/>
@@ -55,7 +62,7 @@ export const replyMessageFromInbox = `
 </message>`;
 
 export const forwardedTextMessageFromInbox = `
-<message xmlns="jabber:client" from="userId@carbonio" to="userId@carbonio/0637b3772630df231679-560156-424312" id="messageId">
+<message xmlns="jabber:client" from="userId@carbonio" to="userId@carbonio/resourceId" id="messageId">
     <result xmlns="erlang-solutions.com:xmpp:inbox:0" unread="0" queryid="queryId">
         <forwarded xmlns="urn:xmpp:forward:0">
             <delay xmlns="urn:xmpp:delay" stamp="2023-03-23T08:22:36.564202Z"/>
@@ -81,10 +88,10 @@ export const forwardedTextMessageFromInbox = `
  */
 
 export const affiliationMessageFromHistory = `
-<message xmlns="jabber:client" from="roomId@muclight.carbonio" to="userId@carbonio/d01b4714166cf0531679-320498-378373" id="messageId">
+<message xmlns="jabber:client" from="roomId@muclight.carbonio" to="userId@carbonio/resourceId" id="messageId">
     <result xmlns="urn:xmpp:mam:2" queryid="history" id="stanzaId">
         <forwarded xmlns="urn:xmpp:forward:0">
-            <delay xmlns="urn:xmpp:delay" stamp="2023-03-20T13:49:24.830723Z" from="roomId@muclight.carbonio"/>
+            <delay xmlns="urn:xmpp:delay" stamp="timestamp" from="roomId@muclight.carbonio"/>
             <message xmlns="jabber:client" from="roomId@muclight.carbonio" id="messageId" type="groupchat">
                 <x xmlns="urn:xmpp:muclight:0#affiliations">
                     <version>1679-320164-832179</version>
@@ -97,7 +104,7 @@ export const affiliationMessageFromHistory = `
 </message>`;
 
 export const textMessageFromHistory = `
-<message xmlns="jabber:client" from="roomId@muclight.carbonio" to="userId@carbonio/92f080e7f2dfa5fe1679-320957-345490" id="messageId">
+<message xmlns="jabber:client" from="roomId@muclight.carbonio" to="userId@carbonio/resourceId" id="messageId">
     <result xmlns="urn:xmpp:mam:2" queryid="history" id="stanzaId">
         <forwarded xmlns="urn:xmpp:forward:0">
             <delay xmlns="urn:xmpp:delay" stamp="2023-03-20T13:58:29.599694Z" from="roomId@muclight.carbonio/userId@carbonio"/>
@@ -105,7 +112,7 @@ export const textMessageFromHistory = `
                 <body>hello!</body>
                 <markable xmlns="urn:xmpp:chat-markers:0"/>
                 <x xmlns="http://jabber.org/protocol/muc#user">
-                    <item affiliation="member" jid="userId@carbonio/d01b4714166cf0531679-320498-378373" role="participant"/>
+                    <item affiliation="member" jid="userId@carbonio/resourceId" role="participant"/>
                 </x>
             </message>
         </forwarded>
@@ -113,7 +120,7 @@ export const textMessageFromHistory = `
 </message>`;
 
 export const replyMessageFromHistory = `
-<message xmlns="jabber:client" from="userId@carbonio" to="userId@carbonio/ccca1b879044b0971679-323677-633848" id="messageId">
+<message xmlns="jabber:client" from="userId@carbonio" to="userId@carbonio/resourceId" id="messageId">
     <result xmlns="erlang-solutions.com:xmpp:inbox:0" unread="0" queryid="queryId">
         <forwarded xmlns="urn:xmpp:forward:0">
             <delay xmlns="urn:xmpp:delay" stamp="2023-03-20T14:41:28.291032Z"/>
@@ -131,7 +138,7 @@ export const replyMessageFromHistory = `
 </message>`;
 
 export const forwardedTextMessageFromHistory = `
-<message xmlns="jabber:client" from="roomId@muclight.carbonio" to="userId@carbonio/f0932068bb1fbd061679-560392-720919" id="messageId">
+<message xmlns="jabber:client" from="roomId@muclight.carbonio" to="userId@carbonio/resourceId" id="messageId">
     <result xmlns="urn:xmpp:mam:2" queryid="history" id="stanzaId">
         <forwarded xmlns="urn:xmpp:forward:0">
             <delay xmlns="urn:xmpp:delay" stamp="2023-03-23T08:22:36.533016Z" from="roomId@muclight.carbonio/userId@carbonio"/>
