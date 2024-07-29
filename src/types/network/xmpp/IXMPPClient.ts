@@ -9,6 +9,7 @@ interface IXMMPClient {
 	// Presence
 	getContactList(): void;
 	setOnline(): void;
+	sendPong(ping: Element): void;
 	// Last activity
 	getLastActivity(jid: string): void;
 	// Inbox

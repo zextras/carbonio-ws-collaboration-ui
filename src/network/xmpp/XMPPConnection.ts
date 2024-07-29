@@ -12,7 +12,7 @@ import { onErrorStanza } from './handlers/errorHandler';
 import { onHistoryMessageStanza } from './handlers/historyMessageHandler';
 import { onInboxMessageStanza } from './handlers/inboxMessageHandler';
 import { onNewMessageStanza } from './handlers/newMessageHandler';
-import { onPresenceStanza } from './handlers/presenceHandler';
+import { onPingStanza, onPresenceStanza } from './handlers/presenceHandler';
 import { onDisplayedMessageStanza } from './handlers/smartMarkersHandler';
 import useStore from '../../store/Store';
 import { xmppDebug } from '../../utils/debug';
@@ -29,6 +29,7 @@ export type XMPPRequest = {
 	callback?: (stanza: Element) => void;
 	errorCallback?: (stanza: Element) => void;
 };
+
 class XMPPConnection {
 	private token: string | undefined;
 
@@ -46,17 +47,13 @@ class XMPPConnection {
 		this.initFunction = initFunction;
 
 		// Init XMPP connection
-		const service = `wss://${window.document.domain}/services/messaging/ws-xmpp`;
+		const service = `wss://${window.location.hostname}/services/messaging/ws-xmpp`;
 		this.connection = new Strophe.Connection(service);
 
-		// Debug
-		// const parser = new DOMParser();
-		// this.connection.rawInput = (data: string): void => {
-		// 	xmppDebug('<-- IN:', parser.parseFromString(data, 'text/xml'));
-		// };
-		// this.connection.rawOutput = (data: string): void => {
-		// 	xmppDebug('---> OUT:', parser.parseFromString(data, 'text/xml'));
-		// };
+		// Disconnect session to broadcast unavailable presence
+		window.addEventListener('beforeunload', () => {
+			this.connection.disconnect('Session closed');
+		});
 	}
 
 	private onConnectionStatus(statusCode: StropheConnectionStatus): void {
@@ -134,6 +131,7 @@ class XMPPConnection {
 		this.connection.addHandler(onInboxMessageStanza, Strophe.NS.INBOX, 'message');
 		this.connection.addHandler(onComposingMessageStanza, Strophe.NS.CHAT_STATE, 'message');
 		this.connection.addHandler(onDisplayedMessageStanza, Strophe.NS.MARKERS, 'message');
+		this.connection.addHandler(onPingStanza, Strophe.NS.PING, 'iq');
 
 		this.initFunction();
 
