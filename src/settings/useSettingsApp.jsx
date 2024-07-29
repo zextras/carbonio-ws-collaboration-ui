@@ -6,10 +6,10 @@
 import React, { lazy, Suspense, useEffect } from 'react';
 
 import { ModalManager } from '@zextras/carbonio-design-system';
-import { addSettingsView, Spinner } from '@zextras/carbonio-shell-ui';
+import { addSettingsView, Spinner, upsertApp } from '@zextras/carbonio-shell-ui';
 
 import { LogoSettingsBeta } from '../chats/LogoBeta';
-import { CHATS_ROUTE, PRODUCT_NAME } from '../constants/appConstants';
+import { CHATS_APP_ID, CHATS_ROUTE, PRODUCT_NAME } from '../constants/appConstants';
 
 const LazySettingsView = lazy(
 	() => import(/* webpackChunkName: "settingsView" */ './views/SettingsView')
@@ -30,6 +30,11 @@ export default function useSettingsApp() {
 			route: CHATS_ROUTE,
 			label: PRODUCT_NAME,
 			component: SettingsView
+		});
+		upsertApp({
+			name: CHATS_APP_ID,
+			display: CHATS_APP_ID,
+			description: 'Chats Module for Zextras Carbonio'
 		});
 	}, []);
 }
