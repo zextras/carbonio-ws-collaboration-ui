@@ -16,7 +16,8 @@ import useGeneralMeetingControls from '../../hooks/useGeneralMeetingControls';
 import { MeetingRoutesParams } from '../../hooks/useRouting';
 import { getMeetingViewSelected } from '../../store/selectors/ActiveMeetingSelectors';
 import { getNumberOfTiles } from '../../store/selectors/MeetingSelectors';
-import { getCapability, getCustomLogo } from '../../store/selectors/SessionSelectors';
+import { getCapability, getCustomLogo, getUserId } from '../../store/selectors/SessionSelectors';
+import { getIsUserGuest } from '../../store/selectors/UsersSelectors';
 import useStore from '../../store/Store';
 import { MeetingViewType } from '../../types/store/ActiveMeetingTypes';
 import { CapabilityType } from '../../types/store/SessionTypes';
@@ -64,6 +65,7 @@ const MeetingSkeleton = (): ReactElement => {
 	const okLabel = t('action.ok', 'Ok');
 
 	const { meetingId }: MeetingRoutesParams = useParams();
+	const myUserId = useStore(getUserId);
 
 	const meetingViewSelected = useStore((store) => getMeetingViewSelected(store, meetingId));
 	const numberOfTiles = useStore((store) => getNumberOfTiles(store, meetingId));
@@ -71,6 +73,7 @@ const MeetingSkeleton = (): ReactElement => {
 	const canUseVirtualBackground = useStore((store) =>
 		getCapability(store, CapabilityType.CAN_USE_VIRTUAL_BACKGROUND)
 	);
+	const isUserGuest = useStore((store) => getIsUserGuest(store, myUserId ?? ''));
 
 	const streamsWrapperRef = useRef<HTMLDivElement>(null);
 
@@ -97,6 +100,11 @@ const MeetingSkeleton = (): ReactElement => {
 		return meetingViewSelected === MeetingViewType.CINEMA ? CinemaMode : GridMode;
 	}, [meetingViewSelected, numberOfTiles]);
 
+	const isVirtualBackgroundVisible = useMemo(
+		() => canUseVirtualBackground || isUserGuest,
+		[canUseVirtualBackground, isUserGuest]
+	);
+
 	return (
 		<SkeletonContainer orientation="horizontal" borderRadius="none">
 			<MeetingSidebar />
@@ -113,7 +121,7 @@ const MeetingSkeleton = (): ReactElement => {
 					<MeetingActionsBar streamsWrapperRef={streamsWrapperRef} />
 				</ViewToDisplay>
 			</ViewContainer>
-			{canUseVirtualBackground && <VirtualBackground meetingId={meetingId} />}
+			{isVirtualBackgroundVisible && <VirtualBackground meetingId={meetingId} />}
 		</SkeletonContainer>
 	);
 };
