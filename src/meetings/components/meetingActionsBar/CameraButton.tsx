@@ -151,7 +151,7 @@ const CameraButton = ({
 
 	const dropdownList = useMemo(() => {
 		const list: DropdownItem[] = [];
-		if (canUseVirtualBackground || isUserGuest) {
+		if (canUseVirtualBackground ?? isUserGuest) {
 			list.push({
 				id: 'video-effect',
 				label: videoEffectTitle,
