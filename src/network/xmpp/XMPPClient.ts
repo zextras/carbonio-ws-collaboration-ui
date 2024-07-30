@@ -18,7 +18,7 @@ import { onGetInboxResponse, onSetInboxResponse } from './handlers/inboxMessageH
 import { onGetLastActivityResponse } from './handlers/lastActivityHandler';
 import { onGetRosterResponse } from './handlers/rosterHandler';
 import { onSmartMarkers } from './handlers/smartMarkersHandler';
-import { carbonize, carbonizeMUC } from './utility/decodeJid';
+import { carbonize, carbonizeMUC, domain } from './utility/decodeJid';
 import { getLastUnreadMessage } from './utility/getLastUnreadMessage';
 import XMPPConnection, { XMPPRequestType } from './XMPPConnection';
 import useStore from '../../store/Store';
@@ -33,9 +33,9 @@ class XMPPClient implements IXMPPClient {
 
 	constructor() {
 		this.xmppConnection = new XMPPConnection(() => {
+			this.setInbox();
 			this.getContactList();
 			this.setOnline();
-			this.setInbox();
 		});
 
 		// Useful namespaces
@@ -49,6 +49,7 @@ class XMPPClient implements IXMPPClient {
 		Strophe.addNamespace('LAST_ACTIVITY', 'jabber:iq:last');
 		Strophe.addNamespace('MAM', 'urn:xmpp:mam:2');
 		Strophe.addNamespace('MARKERS', 'urn:xmpp:chat-markers:0');
+		Strophe.addNamespace('PING', 'urn:xmpp:ping');
 		Strophe.addNamespace('REPLY', 'urn:xmpp:reply:0');
 		Strophe.addNamespace('ROSTER', 'jabber:iq:roster');
 		Strophe.addNamespace('SMART_MARKERS', 'esl:xmpp:smart-markers:0');
@@ -83,6 +84,13 @@ class XMPPClient implements IXMPPClient {
 	// Send my 'presence' event to all my contacts
 	public setOnline(): void {
 		this.xmppConnection.send({ type: XMPPRequestType.PRESENCE, elem: $pres() });
+	}
+
+	public sendPong(ping: Element): void {
+		this.xmppConnection.send({
+			type: XMPPRequestType.IQ,
+			elem: $iq({ type: 'result', to: domain, id: ping.getAttribute('id') })
+		});
 	}
 
 	// Request last activity date of a particular user
@@ -216,7 +224,7 @@ class XMPPClient implements IXMPPClient {
 	// Request n messages before end date but not before start date
 	requestHistory(roomId: string, endHistory: number, quantity: number, unread?: number): void {
 		const clearedAt = useStore.getState().rooms[roomId].userSettings?.clearedAt;
-		const startHistory = clearedAt || useStore.getState().rooms[roomId].createdAt;
+		const startHistory = clearedAt ?? useStore.getState().rooms[roomId].createdAt;
 		// Ask for ${QUANTITY} messages before end date but not before start date
 		const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
 			.c('query', { xmlns: Strophe.NS.MAM, queryid: MamRequestType.HISTORY })

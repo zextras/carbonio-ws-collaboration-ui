@@ -11,6 +11,7 @@ import { XMPPRequestType } from './XMPPConnection';
 import { createMockRoom } from '../../tests/createMock';
 import { mockedAddRoomRequest } from '../../tests/mocks/network';
 import { mockedXmppConnect, mockedXmppSend } from '../../tests/mocks/XMPPConnection';
+import { pingStanza } from '../../tests/mocks/XMPPStanza';
 
 describe('XMPPClient', () => {
 	test('connect is called with the correct params', () => {
@@ -36,6 +37,16 @@ describe('XMPPClient', () => {
 
 		expect(mockedXmppSend).toHaveBeenCalledWith({
 			type: XMPPRequestType.PRESENCE,
+			elem: expect.any(Object)
+		});
+	});
+
+	test('sendPong should respond to a ping request', () => {
+		const xmppClient = new XMPPClient();
+		xmppClient.sendPong(pingStanza('stanzaId'));
+
+		expect(mockedXmppSend).toHaveBeenCalledWith({
+			type: XMPPRequestType.IQ,
 			elem: expect.any(Object)
 		});
 	});

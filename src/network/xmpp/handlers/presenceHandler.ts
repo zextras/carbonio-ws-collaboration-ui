@@ -7,18 +7,29 @@
 import { Strophe } from 'strophe.js';
 
 import useStore from '../../../store/Store';
+import { isMyId } from '../../websocket/eventHandlersUtilities';
 
 export function onPresenceStanza(stanza: Element): true {
 	const store = useStore.getState();
 	const from = Strophe.getNodeFromJid(stanza.getAttribute('from'));
 	const type = stanza.getAttribute('type');
-	store.setUserPresence(from, !type);
 
-	// If user goes offline, request his last activity
-	if (type != null) {
+	if (isMyId(from) && type === 'unavailable') {
+		// Another client of the logged user went offline
+		store.connections.xmppClient.setOnline();
+	} else if (type == null) {
+		// Online presence stanza
+		store.setUserPresence(from, true);
+	} else if (type === 'unavailable') {
+		// Offline presence stanza
+		store.setUserPresence(from, false);
 		const jid = Strophe.getBareJidFromJid(stanza.getAttribute('from'));
 		store.connections.xmppClient.getLastActivity(jid);
 	}
-	// TODO SEND PAUSE ISWRITING WHEN USER GOES OFFLINE
+	return true;
+}
+
+export function onPingStanza(stanza: Element): true {
+	useStore.getState().connections.xmppClient.sendPong(stanza);
 	return true;
 }
