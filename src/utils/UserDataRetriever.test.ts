@@ -7,10 +7,6 @@ import * as uuid from 'uuid';
 
 import UserDataRetriever from './UserDataRetriever';
 
-beforeEach(() => {
-	UserDataRetriever.clearUserCache();
-});
-
 describe('UserDataRetriever tests', () => {
 	test('getDebouncedUser is correctly used with few users', async () => {
 		UserDataRetriever.getDebouncedUser(uuid.v6());
