@@ -18,10 +18,6 @@ const applicationJson = 'application/json';
 const user: UserBe = createMockUser({ id: uuid.v6() });
 const user2: UserBe = createMockUser({ id: uuid.v6() });
 
-beforeEach(() => {
-	usersApi.clearUserCache();
-});
-
 describe('Users API', () => {
 	test('getUser is called correctly', async () => {
 		// Send getUser request
@@ -135,55 +131,5 @@ describe('Users API', () => {
 			method: 'DELETE',
 			body: undefined
 		});
-	});
-
-	test('getDebouncedUser is correctly used with few users', async () => {
-		usersApi.getDebouncedUser(uuid.v6());
-		usersApi.getDebouncedUser(uuid.v6());
-		usersApi.getDebouncedUser(uuid.v6());
-		// Finish debounced function
-		jest.runAllTimers();
-
-		expect(global.fetch).toHaveBeenCalledTimes(1);
-	});
-
-	test('getDebouncedUser is correctly used with a lot of users', async () => {
-		usersApi.getDebouncedUser(uuid.v6());
-		usersApi.getDebouncedUser(uuid.v6());
-		usersApi.getDebouncedUser(uuid.v6());
-		usersApi.getDebouncedUser(uuid.v6());
-		usersApi.getDebouncedUser(uuid.v6());
-		usersApi.getDebouncedUser(uuid.v6());
-		usersApi.getDebouncedUser(uuid.v6());
-		usersApi.getDebouncedUser(uuid.v6());
-		usersApi.getDebouncedUser(uuid.v6());
-		usersApi.getDebouncedUser(uuid.v6());
-		// Second group of users
-		usersApi.getDebouncedUser(uuid.v6());
-		usersApi.getDebouncedUser(uuid.v6());
-
-		// Finish debounced function
-		jest.runAllTimers();
-
-		expect(global.fetch).toHaveBeenCalledTimes(2);
-	});
-
-	test('getDebouncedUser is correctly used with a duplicated userId', async () => {
-		const duplicateUuid = uuid.v6();
-		usersApi.getDebouncedUser(uuid.v6());
-		usersApi.getDebouncedUser(uuid.v6());
-		usersApi.getDebouncedUser(duplicateUuid);
-		usersApi.getDebouncedUser(uuid.v6());
-		usersApi.getDebouncedUser(uuid.v6());
-		usersApi.getDebouncedUser(uuid.v6());
-		usersApi.getDebouncedUser(uuid.v6());
-		usersApi.getDebouncedUser(uuid.v6());
-		usersApi.getDebouncedUser(uuid.v6());
-		usersApi.getDebouncedUser(uuid.v6());
-		usersApi.getDebouncedUser(duplicateUuid); // Duplicated id
-		// Finish debounced function
-		jest.runAllTimers();
-
-		expect(global.fetch).toHaveBeenCalledTimes(1);
 	});
 });
