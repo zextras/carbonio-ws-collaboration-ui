@@ -19,7 +19,7 @@ interface IUsersApi {
 	getUserPicture(userId: string): Promise<GetUserPictureResponse>;
 	changeUserPicture(userId: string, file: File): Promise<ChangeUserPictureResponse>;
 	deleteUserPicture(userId: string): Promise<DeleteUserPictureResponse>;
-	getDebouncedUser(userId: string): void;
+	getDebouncedUser(userId: string | undefined): void;
 	clearUserCache(): void;
 }
 

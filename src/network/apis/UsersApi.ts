@@ -4,7 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { concat, debounce, difference, find, forEach, join, map } from 'lodash';
+import { concat, debounce, difference, find, forEach, join, map, size, slice } from 'lodash';
+import { validate } from 'uuid';
 
 import BaseAPI from './BaseAPI';
 import useStore from '../../store/Store';
@@ -63,7 +64,7 @@ class UsersApi extends BaseAPI implements IUsersApi {
 			} else {
 				this.uploadFileFetchAPI(`users/${userId}/picture`, RequestType.PUT, file)
 					.then((resp: ChangeUserPictureResponse) => resolve(resp))
-					.catch((error) => reject(error));
+					.catch((error) => reject(new Error(error)));
 			}
 		});
 	}
@@ -81,16 +82,22 @@ class UsersApi extends BaseAPI implements IUsersApi {
 		this.requestingUsers = [];
 	}
 
-	// getUsers wants max 10 userId at a time
-	private deboucedUserGetter = debounce(() => {
-		this.getUsers(this.usersToRequest).then(() => {
-			this.requestingUsers = difference(this.requestingUsers, this.usersToRequest);
+	private getRequestedUsers(): void {
+		const requestingUsers = slice(this.usersToRequest, 0, 10);
+		this.usersToRequest = difference(this.usersToRequest, requestingUsers);
+		this.requestingUsers = concat(this.requestingUsers, requestingUsers);
+
+		this.getUsers(requestingUsers).finally(() => {
+			this.requestingUsers = difference(this.requestingUsers, requestingUsers);
 		});
-		this.usersToRequest = [];
-	}, 1000);
+	}
+
+	private debouncedUserGetter = debounce(this.getRequestedUsers, 600);
 
 	// Create groups of 10 users after 1 second of delay from the last call
-	public getDebouncedUser(userId: string): void {
+	public getDebouncedUser(userId: string | undefined): void {
+		if (!userId || useStore.getState().users[userId]?.email || !validate(userId)) return;
+
 		// If the user is already being requested, don't request it again
 		if (
 			!find(this.usersToRequest, (id) => id === userId) &&
@@ -99,17 +106,11 @@ class UsersApi extends BaseAPI implements IUsersApi {
 			this.usersToRequest.push(userId);
 
 			// If there are less than 10 users to request, wait 1 second before requesting them (wait if there are other calls)
-			if (this.usersToRequest.length < 10) {
-				this.deboucedUserGetter();
+			if (size(this.usersToRequest) < 10) {
+				this.debouncedUserGetter();
 			} else {
 				// If there are more than 10 users to request, request them immediately
-				this.deboucedUserGetter && this.deboucedUserGetter.cancel();
-				// Save momentarily the users that are being requested to not request them again
-				this.requestingUsers = concat(this.requestingUsers, this.usersToRequest);
-				this.getUsers(this.usersToRequest).then(() => {
-					this.requestingUsers = difference(this.requestingUsers, this.usersToRequest);
-				});
-				this.usersToRequest = [];
+				this.debouncedUserGetter.flush();
 			}
 		}
 	}

@@ -6,10 +6,8 @@
  */
 
 import { produce } from 'immer';
-import { find } from 'lodash';
 import { StateCreator } from 'zustand';
 
-import { UsersApi } from '../../network';
 import ChatExporter from '../../settings/components/chatExporter/ChatExporter';
 import { CapabilityList, ExportStatus } from '../../types/store/SessionTypes';
 import { RootStore, SessionStoreSlice } from '../../types/store/StoreTypes';
@@ -36,9 +34,6 @@ export const useSessionStoreSlice: StateCreator<SessionStoreSlice> = (
 					},
 					filterHasFocus: draft.session.filterHasFocus
 				};
-				if (!find(draft.users, (user) => user.id === id)) {
-					UsersApi.getDebouncedUser(id);
-				}
 			}),
 			false,
 			'SESSION/LOGIN_INFO'
