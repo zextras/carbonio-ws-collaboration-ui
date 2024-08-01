@@ -8,6 +8,7 @@ import { concat, debounce, difference, find, forEach, map, size, slice } from 'l
 import { validate } from 'uuid';
 
 import { UsersApi } from '../network';
+import { getUserName } from '../store/selectors/UsersSelectors';
 import useStore from '../store/Store';
 
 class UserDataRetriever {
@@ -58,7 +59,7 @@ class UserDataRetriever {
 			validate(userId) &&
 			!find(this.usersToRequest, (id) => id === userId) &&
 			!find(this.requestingUsers, (id) => id === userId) &&
-			!(this.unknownUsers[userId] > 1)
+			(!this.unknownUsers[userId] || this.unknownUsers[userId] < 2)
 		) {
 			this.usersToRequest.push(userId);
 
@@ -69,6 +70,14 @@ class UserDataRetriever {
 				this.debouncedUserGetter.flush();
 			}
 		}
+	}
+
+	public async getAsyncUsername(userId: string): Promise<string> {
+		if (useStore.getState().users[userId]) {
+			return getUserName(useStore.getState(), userId);
+		}
+		await UsersApi.getUsers([userId]);
+		return getUserName(useStore.getState(), userId);
 	}
 }
 

@@ -10,12 +10,16 @@ import { find, map } from 'lodash';
 import { FileToUpload, ReferenceMessage } from '../../types/store/ActiveConversationTypes';
 import { TextMessage } from '../../types/store/MessageTypes';
 import { RootStore } from '../../types/store/StoreTypes';
+import UserDataRetriever from "../../utils/UserDataRetriever";
 
 export const getRoomIsWritingList = (store: RootStore, id: string): string[] | undefined =>
 	store.activeConversations[id]?.isWritingList
 		? map(
 				store.activeConversations[id]?.isWritingList,
-				(userId) => store.users[userId]?.name || store.users[userId]?.email || ''
+				(userId) => {
+					UserDataRetriever.getAsyncUsername(userId);
+					return store.users[userId]?.name || store.users[userId]?.email || '';
+				}
 		  )
 		: store.activeConversations[id]?.isWritingList;
 
