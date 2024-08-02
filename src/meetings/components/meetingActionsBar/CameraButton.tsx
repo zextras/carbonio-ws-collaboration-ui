@@ -149,9 +149,14 @@ const CameraButton = ({
 		setBlur(meetingId, !isBlur);
 	}, [isBlur, meetingId, setBlur]);
 
+	const isVirtualBackgroundVisible = useMemo(
+		() => canUseVirtualBackground ?? isUserGuest,
+		[canUseVirtualBackground, isUserGuest]
+	);
+
 	const dropdownList = useMemo(() => {
 		const list: DropdownItem[] = [];
-		if (canUseVirtualBackground ?? isUserGuest) {
+		if (isVirtualBackgroundVisible) {
 			list.push({
 				id: 'video-effect',
 				label: videoEffectTitle,
@@ -176,8 +181,7 @@ const CameraButton = ({
 		});
 		return list.concat(mediaVideoList);
 	}, [
-		canUseVirtualBackground,
-		isUserGuest,
+		isVirtualBackgroundVisible,
 		devicesTitle,
 		mediaVideoList,
 		videoEffectTitle,
