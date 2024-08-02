@@ -19,7 +19,10 @@ export const getUserSelector = (store: RootStore, id: string | undefined): User 
 
 export const getUserName = (store: RootStore, id: string): string => {
 	UserDataRetriever.getDebouncedUser(id);
-	return store.users[id]?.name || store.users[id]?.email || t('status.Anonymous', 'Anonymous user');
+	if (store.users[id]?.type === UserType.ANONYMOUS) {
+		return t('status.Anonymous', 'Anonymous user');
+	}
+	return store.users[id]?.name || store.users[id]?.email || '';
 };
 
 export const getUserLastActivity = (store: RootStore, id: string): number | undefined =>
@@ -48,7 +51,5 @@ export const getIsUserGuest = (store: RootStore, id: string): boolean | undefine
 	return store.users[id]?.type === UserType.GUEST;
 };
 
-export const getAreUserInfoAvailable = (store: RootStore, id: string): boolean => {
-	const user = getUserSelector(store, id);
-	return !!user?.name || !!user?.email;
-};
+export const getIsAnonymousUser = (store: RootStore, id: string): boolean =>
+	store.users[id]?.type === UserType.ANONYMOUS;

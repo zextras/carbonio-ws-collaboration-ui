@@ -12,6 +12,7 @@ import ChatExporter from '../../settings/components/chatExporter/ChatExporter';
 import { CapabilityList, ExportStatus } from '../../types/store/SessionTypes';
 import { RootStore, SessionStoreSlice } from '../../types/store/StoreTypes';
 import { UserType } from '../../types/store/UserTypes';
+import UserDataRetriever from '../../utils/UserDataRetriever';
 
 export const useSessionStoreSlice: StateCreator<SessionStoreSlice> = (
 	set: (...any: any) => void
@@ -34,6 +35,7 @@ export const useSessionStoreSlice: StateCreator<SessionStoreSlice> = (
 					},
 					filterHasFocus: draft.session.filterHasFocus
 				};
+				UserDataRetriever.getDebouncedUser(id, true);
 			}),
 			false,
 			'SESSION/LOGIN_INFO'

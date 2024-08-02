@@ -39,6 +39,7 @@ class UserDataRetriever {
 				forEach(unknownUsers, (userId) => {
 					if (!this.unknownUsers[userId]) {
 						this.unknownUsers[userId] = 1;
+						useStore.getState().setAnonymousUser(userId);
 					} else {
 						this.unknownUsers[userId] += 1;
 					}
@@ -52,7 +53,7 @@ class UserDataRetriever {
 	private debouncedUserGetter = debounce(this.getRequestedUsers, 600);
 
 	// Create groups of 10 users to request
-	public getDebouncedUser(userId: string | undefined): void {
+	public getDebouncedUser(userId: string | undefined, immediately: boolean = false): void {
 		if (
 			userId &&
 			!useStore.getState().users[userId]?.email &&
@@ -63,11 +64,11 @@ class UserDataRetriever {
 		) {
 			this.usersToRequest.push(userId);
 
-			// If there are less than 10 users to request, wait 0.6 second before requesting them
-			if (size(this.usersToRequest) < 10) {
-				this.debouncedUserGetter();
+			if (size(this.usersToRequest) > 9 || immediately) {
+				this.debouncedUserGetter?.cancel();
+				this.getRequestedUsers();
 			} else {
-				this.debouncedUserGetter.flush();
+				this.debouncedUserGetter();
 			}
 		}
 	}
