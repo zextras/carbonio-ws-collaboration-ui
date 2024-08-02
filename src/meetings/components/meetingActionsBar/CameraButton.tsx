@@ -33,6 +33,7 @@ import {
 } from '../../../store/selectors/ActiveMeetingSelectors';
 import { getParticipantVideoStatus } from '../../../store/selectors/MeetingSelectors';
 import { getCapability, getUserId } from '../../../store/selectors/SessionSelectors';
+import { getIsUserGuest } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
 import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
 import { CapabilityType } from '../../../types/store/SessionTypes';
@@ -84,6 +85,7 @@ const CameraButton = ({
 	const canUseVirtualBackground = useStore((store) =>
 		getCapability(store, CapabilityType.CAN_USE_VIRTUAL_BACKGROUND)
 	);
+	const isUserGuest = useStore((store) => getIsUserGuest(store, myUserId ?? ''));
 
 	const [buttonStatus, setButtonStatus] = useState<boolean>(true);
 	const [videoMediaList, setVideoMediaList] = useState<[] | MediaDeviceInfo[]>([]);
@@ -149,7 +151,7 @@ const CameraButton = ({
 
 	const dropdownList = useMemo(() => {
 		const list: DropdownItem[] = [];
-		if (canUseVirtualBackground) {
+		if (canUseVirtualBackground ?? isUserGuest) {
 			list.push({
 				id: 'video-effect',
 				label: videoEffectTitle,
@@ -174,16 +176,17 @@ const CameraButton = ({
 		});
 		return list.concat(mediaVideoList);
 	}, [
-		applyBlurLabel,
-		isBlur,
 		canUseVirtualBackground,
+		isUserGuest,
 		devicesTitle,
 		mediaVideoList,
-		onCLickBlur,
-		removeBlurLabel,
-		turnOnCameraTooltip,
 		videoEffectTitle,
-		videoStatus
+		isBlur,
+		removeBlurLabel,
+		applyBlurLabel,
+		videoStatus,
+		turnOnCameraTooltip,
+		onCLickBlur
 	]);
 
 	const toggleVideoDropdown = useCallback(() => {
