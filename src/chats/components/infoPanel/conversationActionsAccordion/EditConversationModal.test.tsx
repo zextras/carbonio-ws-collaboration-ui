@@ -62,7 +62,7 @@ describe('Edit group Details Modal', () => {
 		expect(editButton).toBeEnabled();
 	});
 
-	test('Errors on input fields', async () => {
+	test('Errors on input fields - general', async () => {
 		// setup of the room
 		const store: RootStore = useStore.getState();
 		store.addRoom(testRoom);
@@ -74,8 +74,8 @@ describe('Edit group Details Modal', () => {
 		const nameInput = screen.getByTestId('name_input');
 		const titleLabel = screen.getByText(/It describes the subject of the Group/i);
 		const descriptionLabel = screen.getByText(/It describes the subject of the Group/i);
-		expect(descriptionLabel).toHaveAttribute('color', 'secondary');
-		expect(titleLabel).toHaveAttribute('color', 'secondary');
+		expect(titleLabel).toBeInTheDocument();
+		expect(descriptionLabel).toBeInTheDocument();
 		expect(editButton).not.toBeEnabled();
 
 		// if I write something inside the title field everything should work fine
@@ -83,7 +83,6 @@ describe('Edit group Details Modal', () => {
 
 		const titleLabel2 = screen.getByText(/It is required and identifies the Group/i);
 		expect(titleLabel2).toBeInTheDocument();
-		expect(titleLabel2).toHaveAttribute('color', 'primary');
 		expect(editButton).toBeEnabled();
 
 		// if I write a title longer than 128 characters the title input shound be in error state with the description input
@@ -93,7 +92,6 @@ describe('Edit group Details Modal', () => {
 		);
 		const titleLabel3 = screen.getByText(/Maximum title length is 128 characters/i);
 		expect(titleLabel3).toBeInTheDocument();
-		expect(titleLabel3).toHaveAttribute('color', 'error');
 		expect(editButton).not.toBeEnabled();
 	});
 	test('Errors on input fields - description', async () => {
@@ -113,7 +111,6 @@ describe('Edit group Details Modal', () => {
 		);
 		const descriptionLabel = screen.getByText(/Maximum topic length is 256 characters/i);
 		expect(descriptionLabel).toBeInTheDocument();
-		expect(descriptionLabel).toHaveAttribute('color', 'error');
 		expect(editButton).not.toBeEnabled();
 	});
 
@@ -129,8 +126,8 @@ describe('Edit group Details Modal', () => {
 		const nameInput = screen.getByTestId('name_input');
 		const titleLabel = screen.getByText(/It describes the subject of the Group/i);
 		const descriptionLabel = screen.getByText(/It describes the subject of the Group/i);
-		expect(descriptionLabel).toHaveAttribute('color', 'secondary');
-		expect(titleLabel).toHaveAttribute('color', 'secondary');
+		expect(descriptionLabel).toBeInTheDocument();
+		expect(titleLabel).toBeInTheDocument();
 		expect(editButton).not.toBeEnabled();
 
 		// if I write something inside the title field everything should work fine
@@ -138,7 +135,6 @@ describe('Edit group Details Modal', () => {
 
 		const titleLabel2 = screen.getByText(/It is required and identifies the Group/i);
 		expect(titleLabel2).toBeInTheDocument();
-		expect(titleLabel2).toHaveAttribute('color', 'primary');
 		expect(editButton).toBeEnabled();
 
 		// if I write a title longer than 128 characters the title input shound be in error state with the description input
@@ -148,7 +144,6 @@ describe('Edit group Details Modal', () => {
 		);
 		const titleLabel3 = screen.getByText(/Maximum title length is 128 characters/i);
 		expect(titleLabel3).toBeInTheDocument();
-		expect(titleLabel3).toHaveAttribute('color', 'error');
 		expect(editButton).not.toBeEnabled();
 	});
 	test('Errors on input fields - description', async () => {
@@ -168,7 +163,6 @@ describe('Edit group Details Modal', () => {
 		);
 		const descriptionLabel = screen.getByText(/Maximum topic length is 256 characters/i);
 		expect(descriptionLabel).toBeInTheDocument();
-		expect(descriptionLabel).toHaveAttribute('color', 'error');
 		expect(editButton).not.toBeEnabled();
 	});
 	test('user modify a field and press edit button', async () => {

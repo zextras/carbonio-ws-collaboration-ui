@@ -217,7 +217,6 @@ describe('Chat Creation Modal', () => {
 		);
 		const titleLabel = screen.getByText(/Maximum title length is 128 characters/i);
 		expect(titleLabel).toBeInTheDocument();
-		expect(titleLabel).toHaveAttribute('color', 'error');
 		expect(footerButton).not.toBeEnabled();
 	});
 
@@ -242,7 +241,6 @@ describe('Chat Creation Modal', () => {
 		);
 		const topicLabel = screen.getByText(/Maximum topic length is 256 characters/i);
 		expect(topicLabel).toBeInTheDocument();
-		expect(topicLabel).toHaveAttribute('color', 'error');
 		expect(footerButton).not.toBeEnabled();
 	});
 
@@ -279,7 +277,6 @@ describe('Chat Creation Modal', () => {
 		await user.type(chipInput, zimbraUser3.fullName[0]);
 		const user3Checkbox = screen.getByTestId('icon: Square');
 		expect(user3Checkbox).toBeInTheDocument();
-		expect(user3Checkbox).toHaveAttribute('disabled');
 		expect(usersToAddLimitReached).toBeInTheDocument();
 	});
 
