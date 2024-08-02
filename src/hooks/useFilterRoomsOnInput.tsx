@@ -4,20 +4,32 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 
-import { find, map } from 'lodash';
+import { find, forEach, map } from 'lodash';
 
 import { FilteredConversation } from '../chats/components/secondaryBar/SecondaryBarView';
 import { getOneToOneAndGroupsInfoOrderedByLastMessage } from '../store/selectors/MessagesSelectors';
 import { getUserId } from '../store/selectors/SessionSelectors';
 import { getUsersSelector } from '../store/selectors/UsersSelectors';
 import useStore from '../store/Store';
+import UserDataRetriever from '../utils/UserDataRetriever';
 
 export const useFilterRoomsOnInput = (filteredInput: string): FilteredConversation[] => {
 	const roomsInfo = useStore<FilteredConversation[]>(getOneToOneAndGroupsInfoOrderedByLastMessage);
 	const sessionId = useStore(getUserId);
 	const users = useStore(getUsersSelector);
+
+	// Fetch user data for each member of the rooms to let user filters by group members
+	useEffect(() => {
+		if (filteredInput !== '') {
+			forEach(roomsInfo, (room) => {
+				forEach(room.members, (member) => {
+					UserDataRetriever.getDebouncedUser(member.userId);
+				});
+			});
+		}
+	}, [filteredInput, roomsInfo]);
 
 	return useMemo(() => {
 		if (filteredInput === '') return roomsInfo;
