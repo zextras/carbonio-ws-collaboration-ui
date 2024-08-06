@@ -44,6 +44,7 @@ export type UsersStoreSlice = {
 	setUserStatusMessage: (id: string, statusMsg: string) => void;
 	setUserPictureUpdated: (id: string, date: string) => void;
 	setUserPictureDeleted: (id: string) => void;
+	setAnonymousUser: (id: string) => void;
 };
 
 export type RoomsStoreSlice = {

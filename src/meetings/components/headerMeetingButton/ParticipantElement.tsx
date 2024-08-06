@@ -6,7 +6,7 @@
 
 import React, { FC, useMemo } from 'react';
 
-import { Avatar, Container, Text, Row } from '@zextras/carbonio-design-system';
+import { Avatar, Container, Text, Row, Shimmer } from '@zextras/carbonio-design-system';
 import styled from 'styled-components';
 
 import GoToPrivateChatAction from '../../../chats/components/infoPanel/conversationParticipantsAccordion/GoToPrivateChatAction';
@@ -62,7 +62,7 @@ const ParticipantElement: FC<ParticipantElementProps> = ({
 
 	const isSessionParticipant: boolean = useMemo(() => memberId === userId, [memberId, userId]);
 
-	const { avatarPicture, avatarIcon, avatarColor } = useAvatarUtilities(memberId);
+	const { avatarPicture, avatarIcon, avatarColor, isLoading } = useAvatarUtilities(memberId);
 
 	return (
 		<CustomContainer
@@ -71,13 +71,17 @@ const ParticipantElement: FC<ParticipantElementProps> = ({
 			width="fill"
 			padding={{ top: 'extrasmall', bottom: 'extrasmall' }}
 		>
-			<CustomAvatar
-				label={memberName}
-				shape="round"
-				picture={avatarPicture}
-				icon={avatarIcon}
-				background={avatarColor}
-			/>
+			{isLoading ? (
+				<Shimmer.Avatar />
+			) : (
+				<CustomAvatar
+					label={memberName}
+					shape="round"
+					picture={avatarPicture}
+					icon={avatarIcon}
+					background={avatarColor}
+				/>
+			)}
 			{infoElement}
 			{!isInsideMeeting ? (
 				!isSessionParticipant && (

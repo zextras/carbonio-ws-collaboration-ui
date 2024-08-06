@@ -10,62 +10,65 @@ import useStore from '../../../store/Store';
 import {
 	createMockMeeting,
 	createMockRoom,
-	createMockTextMessage
+	createMockTextMessage,
+	createMockUser
 } from '../../../tests/createMock';
 
 const room = createMockRoom();
+const loggedUser = createMockUser({ id: 'loggeduserId', name: 'Logged User' });
+const user = createMockUser({ id: 'userId', name: 'User' });
 
 beforeEach(() => {
 	const store = useStore.getState();
-	store.setLoginInfo('userId', 'User');
+	store.setLoginInfo(loggedUser.id, loggedUser.name);
+	store.setUserInfo(user);
 	store.addRoom(room);
 });
 describe('Test display message browser notification', () => {
-	test('Send desktop notification on new message', () => {
-		const newMessage = createMockTextMessage({ roomId: room.id, from: 'userId1' });
-		displayMessageBrowserNotification(newMessage);
-
-		expect(mockNotify).toBeCalled();
+	test('Send desktop notification on new message', async () => {
+		const newMessage = createMockTextMessage({ roomId: room.id, from: user.id });
+		await displayMessageBrowserNotification(newMessage);
+		expect(mockNotify).toHaveBeenCalled();
 	});
 
-	test('Avoid sending desktop notification on my message', () => {
-		const newMessage = createMockTextMessage({ roomId: room.id, from: 'userId' });
-		displayMessageBrowserNotification(newMessage);
+	test('Avoid sending desktop notification on my message', async () => {
+		const newMessage = createMockTextMessage({ roomId: room.id, from: loggedUser.id });
+		await displayMessageBrowserNotification(newMessage);
 
-		expect(mockNotify).not.toBeCalled();
+		expect(mockNotify).not.toHaveBeenCalled();
 	});
 
-	test('Avoid sending desktop notification on conversation with focused input', () => {
+	test('Avoid sending desktop notification on conversation with focused input', async () => {
 		const store = useStore.getState();
 		store.setSelectedRoomOneToOneGroup(room.id);
 		store.setInputHasFocus(room.id, true);
 
-		const newMessage = createMockTextMessage({ roomId: room.id });
-		displayMessageBrowserNotification(newMessage);
+		const newMessage = createMockTextMessage({ roomId: room.id, from: user.id });
+		await displayMessageBrowserNotification(newMessage);
 
-		expect(mockNotify).not.toBeCalled();
+		expect(mockNotify).not.toHaveBeenCalled();
 	});
 
-	test('Avoid sending desktop notification on muted conversation', () => {
+	test('Avoid sending desktop notification on muted conversation', async () => {
 		const store = useStore.getState();
 		store.setRoomMuted(room.id);
 
 		const newMessage = createMockTextMessage({ roomId: room.id });
-		displayMessageBrowserNotification(newMessage);
+		await displayMessageBrowserNotification(newMessage);
 
-		expect(mockNotify).not.toBeCalled();
+		expect(mockNotify).not.toHaveBeenCalled();
 	});
 
-	test('Avoid sending desktop notification on meeting tab', () => {
+	test('Avoid sending desktop notification on meeting tab', async () => {
 		const room = createMockRoom();
 		const store = useStore.getState();
 		const meeting = createMockMeeting({ roomId: room.id });
 		store.addMeeting(meeting);
 		store.meetingConnection(meeting.id, false, undefined, false, undefined);
 
-		const newMessage = createMockTextMessage({ roomId: room.id });
-		displayMessageBrowserNotification(newMessage);
+		const newMessage = createMockTextMessage({ roomId: room.id, from: user.id });
+		await displayMessageBrowserNotification(newMessage);
 
-		expect(mockNotify).not.toBeCalled();
+		expect(mockNotify).not.toHaveBeenCalled();
 	});
 });

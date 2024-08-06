@@ -22,5 +22,6 @@ export type UsersMap = {
 
 export enum UserType {
 	INTERNAL = 'internal',
-	GUEST = 'guest'
+	GUEST = 'guest',
+	ANONYMOUS = 'anonymous'
 }
