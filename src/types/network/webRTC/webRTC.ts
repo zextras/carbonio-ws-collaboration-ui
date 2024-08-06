@@ -5,6 +5,7 @@
  */
 
 import SubscriptionsManager from '../../../network/webRTC/SubscriptionsManager';
+import { STREAM_TYPE } from '../../store/ActiveMeetingTypes';
 import { StreamInfo } from '../models/meetingBeTypes';
 
 export interface IPeerConnConfig {
@@ -55,5 +56,5 @@ export interface IVideoScreenInConnection extends IPeerConnection {
 	subscriptionManager: SubscriptionsManager;
 	handleRemoteOffer(sdp: string): void;
 	handleParticipantsSubscribed(streamsMap: StreamInfo[]): void;
-	removeStream(streamKey: string): void;
+	removeStream(streamKey: string, streamType: STREAM_TYPE[]): void;
 }

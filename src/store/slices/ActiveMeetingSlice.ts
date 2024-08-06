@@ -312,13 +312,18 @@ export const useActiveMeetingSlice: StateCreator<ActiveMeetingSlice> = (
 			'AM/UPDATE_SUB'
 		);
 	},
-	setDeleteSubscription: (meetingId: string, subIdToDelete: string): void => {
+	setDeleteSubscription: (
+		meetingId: string,
+		subIdToDelete: string,
+		streamType: STREAM_TYPE[]
+	): void => {
 		set(
 			produce((draft: RootStore) => {
 				draft.activeMeeting[meetingId]?.videoScreenIn?.subscriptionManager.deleteSubscription(
-					subIdToDelete
+					subIdToDelete,
+					streamType
 				);
-				draft.activeMeeting[meetingId]?.videoScreenIn?.removeStream(subIdToDelete);
+				draft.activeMeeting[meetingId]?.videoScreenIn?.removeStream(subIdToDelete, streamType);
 			}),
 			false,
 			'AM/DELETE_SUB'

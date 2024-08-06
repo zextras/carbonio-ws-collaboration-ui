@@ -207,7 +207,11 @@ export type ActiveMeetingSlice = {
 	setRemoveSubscription: (meetingId: string, subToRemove: Subscription) => void;
 	setAddSubscription: (meetingId: string, subToAdd: Subscription) => void;
 	setUpdateSubscription: (meetingId: string, subsToRequest: Subscription[]) => void;
-	setDeleteSubscription: (meetingId: string, subIdToDelete: string) => void;
+	setDeleteSubscription: (
+		meetingId: string,
+		subIdToDelete: string,
+		streamType: STREAM_TYPE[]
+	) => void;
 	setBackgroundStream: (meetingId: string, stream: MediaStream) => void;
 	removeBackgroundStream: (meetingId: string) => void;
 	setBlur: (meetingId: string, status: boolean) => void;

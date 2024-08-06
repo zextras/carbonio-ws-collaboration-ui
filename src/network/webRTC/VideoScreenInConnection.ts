@@ -66,10 +66,9 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 		this.updateStreams();
 	}
 
-	public removeStream = (streamKey: string): void => {
-		forEach(this.streamsMap, () => {
-			delete this.streamsMap[`${streamKey}-${STREAM_TYPE.VIDEO}`];
-			delete this.streamsMap[`${streamKey}-${STREAM_TYPE.SCREEN}`];
+	public removeStream = (streamKey: string, streamType: STREAM_TYPE[]): void => {
+		forEach(streamType, (type) => {
+			delete this.streamsMap[`${streamKey}-${type}`];
 		});
 	};
 
