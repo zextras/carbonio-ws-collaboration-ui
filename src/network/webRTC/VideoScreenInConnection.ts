@@ -19,7 +19,7 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 
 	meetingId: string;
 
-	subscriptionManager: SubscriptionsManager;
+	subscriptionManager?: SubscriptionsManager;
 
 	streamsMap: StreamMap;
 
@@ -97,7 +97,7 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 	}
 
 	public closePeerConnection(): void {
+		delete this.subscriptionManager;
 		this.peerConn?.close?.();
-		this.subscriptionManager.clean();
 	}
 }

@@ -282,7 +282,7 @@ export const useActiveMeetingSlice: StateCreator<ActiveMeetingSlice> = (
 	setRemoveSubscription: (meetingId: string, subToRemove: Subscription): void => {
 		set(
 			produce((draft: RootStore) => {
-				draft.activeMeeting[meetingId]?.videoScreenIn?.subscriptionManager.removeSubscription(
+				draft.activeMeeting[meetingId]?.videoScreenIn?.subscriptionManager?.removeSubscription(
 					subToRemove
 				);
 			}),
@@ -293,7 +293,7 @@ export const useActiveMeetingSlice: StateCreator<ActiveMeetingSlice> = (
 	setAddSubscription: (meetingId: string, subToAdd: Subscription): void => {
 		set(
 			produce((draft: RootStore) => {
-				draft.activeMeeting[meetingId]?.videoScreenIn?.subscriptionManager.addSubscription(
+				draft.activeMeeting[meetingId]?.videoScreenIn?.subscriptionManager?.addSubscription(
 					subToAdd
 				);
 			}),
@@ -304,7 +304,7 @@ export const useActiveMeetingSlice: StateCreator<ActiveMeetingSlice> = (
 	setUpdateSubscription: (meetingId: string, subsToRequest: Subscription[]): void => {
 		set(
 			produce((draft: RootStore) => {
-				draft.activeMeeting[meetingId]?.videoScreenIn?.subscriptionManager.updateSubscription(
+				draft.activeMeeting[meetingId]?.videoScreenIn?.subscriptionManager?.updateSubscription(
 					subsToRequest
 				);
 			}),
@@ -319,7 +319,7 @@ export const useActiveMeetingSlice: StateCreator<ActiveMeetingSlice> = (
 	): void => {
 		set(
 			produce((draft: RootStore) => {
-				draft.activeMeeting[meetingId]?.videoScreenIn?.subscriptionManager.deleteSubscription(
+				draft.activeMeeting[meetingId]?.videoScreenIn?.subscriptionManager?.deleteSubscription(
 					subIdToDelete,
 					streamType
 				);

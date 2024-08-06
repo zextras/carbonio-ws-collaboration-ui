@@ -53,7 +53,7 @@ export interface IScreenOutConnection extends IPeerConnection {
 }
 
 export interface IVideoScreenInConnection extends IPeerConnection {
-	subscriptionManager: SubscriptionsManager;
+	subscriptionManager?: SubscriptionsManager;
 	handleRemoteOffer(sdp: string): void;
 	handleParticipantsSubscribed(streamsMap: StreamInfo[]): void;
 	removeStream(streamKey: string, streamType: STREAM_TYPE[]): void;
