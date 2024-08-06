@@ -282,7 +282,7 @@ export const useActiveMeetingSlice: StateCreator<ActiveMeetingSlice> = (
 	setRemoveSubscription: (meetingId: string, subToRemove: Subscription): void => {
 		set(
 			produce((draft: RootStore) => {
-				draft.activeMeeting[meetingId]?.videoScreenIn?.subscriptionManager.removeSubscription(
+				draft.activeMeeting[meetingId]?.videoScreenIn?.subscriptionManager?.removeSubscription(
 					subToRemove
 				);
 			}),
@@ -293,7 +293,7 @@ export const useActiveMeetingSlice: StateCreator<ActiveMeetingSlice> = (
 	setAddSubscription: (meetingId: string, subToAdd: Subscription): void => {
 		set(
 			produce((draft: RootStore) => {
-				draft.activeMeeting[meetingId]?.videoScreenIn?.subscriptionManager.addSubscription(
+				draft.activeMeeting[meetingId]?.videoScreenIn?.subscriptionManager?.addSubscription(
 					subToAdd
 				);
 			}),
@@ -304,7 +304,7 @@ export const useActiveMeetingSlice: StateCreator<ActiveMeetingSlice> = (
 	setUpdateSubscription: (meetingId: string, subsToRequest: Subscription[]): void => {
 		set(
 			produce((draft: RootStore) => {
-				draft.activeMeeting[meetingId]?.videoScreenIn?.subscriptionManager.updateSubscription(
+				draft.activeMeeting[meetingId]?.videoScreenIn?.subscriptionManager?.updateSubscription(
 					subsToRequest
 				);
 			}),
@@ -312,13 +312,18 @@ export const useActiveMeetingSlice: StateCreator<ActiveMeetingSlice> = (
 			'AM/UPDATE_SUB'
 		);
 	},
-	setDeleteSubscription: (meetingId: string, subIdToDelete: string): void => {
+	setDeleteSubscription: (
+		meetingId: string,
+		subIdToDelete: string,
+		streamType: STREAM_TYPE[]
+	): void => {
 		set(
 			produce((draft: RootStore) => {
-				draft.activeMeeting[meetingId]?.videoScreenIn?.subscriptionManager.deleteSubscription(
-					subIdToDelete
+				draft.activeMeeting[meetingId]?.videoScreenIn?.subscriptionManager?.deleteSubscription(
+					subIdToDelete,
+					streamType
 				);
-				draft.activeMeeting[meetingId]?.videoScreenIn?.removeStream(subIdToDelete);
+				draft.activeMeeting[meetingId]?.videoScreenIn?.removeStream(subIdToDelete, streamType);
 			}),
 			false,
 			'AM/DELETE_SUB'
