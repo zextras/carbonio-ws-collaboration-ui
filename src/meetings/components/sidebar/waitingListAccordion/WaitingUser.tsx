@@ -4,18 +4,23 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { FC, useCallback, useMemo } from 'react';
+import React, { FC, useCallback } from 'react';
 
-import { Avatar, Container, IconButton, Row, Text, Tooltip } from '@zextras/carbonio-design-system';
+import {
+	Avatar,
+	Container,
+	IconButton,
+	Row,
+	Shimmer,
+	Text,
+	Tooltip
+} from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import { MeetingsApi, UsersApi } from '../../../../network';
-import {
-	getIsUserGuest,
-	getUserName,
-	getUserPictureUpdatedAt
-} from '../../../../store/selectors/UsersSelectors';
+import useAvatarUtilities from '../../../../hooks/useAvatarUtilities';
+import { MeetingsApi } from '../../../../network';
+import { getIsUserGuest, getUserName } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
 import GuestUserLabel from '../../GuestUserLabel';
 
@@ -41,24 +46,8 @@ const WaitingUser: FC<WaitingUserProps> = ({ meetingId, userId }) => {
 
 	const memberName: string = useStore((store) => getUserName(store, userId));
 	const isUserGuest = useStore((store) => getIsUserGuest(store, userId));
-	const userPictureUpdatedAt: string | undefined = useStore((state) =>
-		getUserPictureUpdatedAt(state, userId)
-	);
 
-	const picture = useMemo(
-		() =>
-			userPictureUpdatedAt ? `${UsersApi.getURLUserPicture(userId)}?${userPictureUpdatedAt}` : '',
-		[userId, userPictureUpdatedAt]
-	);
-
-	const avatarElement = useMemo(() => {
-		if (isUserGuest) {
-			return (
-				<CustomAvatar label={memberName} shape="round" picture={picture} icon={'SmileOutline'} />
-			);
-		}
-		return <CustomAvatar label={memberName} shape="round" picture={picture} />;
-	}, [isUserGuest, memberName, picture]);
+	const { avatarPicture, avatarIcon, avatarColor, isLoading } = useAvatarUtilities(userId);
 
 	const acceptWaitingUser = useCallback(
 		() => MeetingsApi.acceptWaitingUser(meetingId, userId, true),
@@ -72,7 +61,17 @@ const WaitingUser: FC<WaitingUserProps> = ({ meetingId, userId }) => {
 
 	return (
 		<CustomContainer data-testid="waitingUser" orientation="horizontal" width="fill">
-			{avatarElement}
+			{isLoading ? (
+				<Shimmer.Avatar />
+			) : (
+				<CustomAvatar
+					label={memberName}
+					shape="round"
+					picture={avatarPicture}
+					icon={avatarIcon}
+					background={avatarColor}
+				/>
+			)}
 			<Row takeAvailableSpace wrap="nowrap" height="100%">
 				<Container crossAlignment="flex-start" padding={{ horizontal: 'small' }}>
 					<Container orientation={'horizontal'} mainAlignment="flex-start" gap={'0.25rem'}>

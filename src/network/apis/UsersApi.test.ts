@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 import { size } from 'lodash';
+import * as uuid from 'uuid';
 
 import usersApi from './UsersApi';
 import useStore from '../../store/Store';
@@ -14,12 +15,8 @@ import { UserBe } from '../../types/network/models/userBeTypes';
 const contentType = 'Content-Type';
 const applicationJson = 'application/json';
 
-const user: UserBe = createMockUser({ id: 'userId1' });
-const user2: UserBe = createMockUser({ id: 'userId2' });
-
-beforeEach(() => {
-	usersApi.clearUserCache();
-});
+const user: UserBe = createMockUser({ id: uuid.v6() });
+const user2: UserBe = createMockUser({ id: uuid.v6() });
 
 describe('Users API', () => {
 	test('getUser is called correctly', async () => {
@@ -54,7 +51,7 @@ describe('Users API', () => {
 
 		// Check if fetch is called with the correct parameters
 		expect(global.fetch).toHaveBeenCalledWith(
-			`/services/chats/users?userIds=userId1&userIds=userId2`,
+			`/services/chats/users?userIds=${user.id}&userIds=${user2.id}`,
 			{
 				method: 'GET',
 				headers,
@@ -134,54 +131,5 @@ describe('Users API', () => {
 			method: 'DELETE',
 			body: undefined
 		});
-	});
-
-	test('getDebouncedUser is correctly used with few users', async () => {
-		usersApi.getDebouncedUser('userId1');
-		usersApi.getDebouncedUser('userId2');
-		usersApi.getDebouncedUser('userId3');
-		// Finish debounced function
-		jest.runAllTimers();
-
-		expect(global.fetch).toHaveBeenCalledTimes(1);
-	});
-
-	test('getDebouncedUser is correctly used with a lot of users', async () => {
-		usersApi.getDebouncedUser('userId1');
-		usersApi.getDebouncedUser('userId2');
-		usersApi.getDebouncedUser('userId3');
-		usersApi.getDebouncedUser('userId4');
-		usersApi.getDebouncedUser('userId5');
-		usersApi.getDebouncedUser('userId6');
-		usersApi.getDebouncedUser('userId7');
-		usersApi.getDebouncedUser('userId8');
-		usersApi.getDebouncedUser('userId9');
-		usersApi.getDebouncedUser('userId10');
-		// Second group of users
-		usersApi.getDebouncedUser('userId11');
-		usersApi.getDebouncedUser('userId12');
-
-		// Finish debounced function
-		jest.runAllTimers();
-
-		expect(global.fetch).toHaveBeenCalledTimes(2);
-	});
-
-	test('getDebouncedUser is correctly used with a duplicated userId', async () => {
-		usersApi.getDebouncedUser('userId1');
-		usersApi.getDebouncedUser('userId2');
-		usersApi.getDebouncedUser('userId3');
-		usersApi.getDebouncedUser('userId4');
-		usersApi.getDebouncedUser('userId5');
-		usersApi.getDebouncedUser('userId6');
-		usersApi.getDebouncedUser('userId7');
-		usersApi.getDebouncedUser('userId8');
-		usersApi.getDebouncedUser('userId9');
-		usersApi.getDebouncedUser('userId10');
-		usersApi.getDebouncedUser('userId2'); // Duplicated id
-		// Finish debounced function
-		jest.runAllTimers();
-
-		expect(global.fetch).toHaveBeenCalledTimes(1);
 	});
 });

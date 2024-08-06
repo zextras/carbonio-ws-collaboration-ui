@@ -10,10 +10,10 @@ import { useTheme } from '@zextras/carbonio-design-system';
 
 import { UsersApi } from '../network';
 import {
-	getAreUserInfoAvailable,
 	getIsUserGuest,
 	getUserName,
-	getUserPictureUpdatedAt
+	getUserPictureUpdatedAt,
+	getIsAnonymousUser
 } from '../store/selectors/UsersSelectors';
 import useStore from '../store/Store';
 import { calcAvatarMeetingColor, calculateAvatarColor } from '../utils/styleUtils';
@@ -21,8 +21,13 @@ import { calcAvatarMeetingColor, calculateAvatarColor } from '../utils/styleUtil
 const useAvatarUtilities = (
 	userId: string,
 	onMeeting?: boolean
-): { avatarColor: string; avatarPicture: string; avatarIcon: string | undefined } => {
-	const areUserInfoAvailable = useStore((store) => getAreUserInfoAvailable(store, userId));
+): {
+	avatarColor: string;
+	avatarPicture: string;
+	avatarIcon: string | undefined;
+	isLoading: boolean;
+} => {
+	const isAnonymousUser = useStore((store) => getIsAnonymousUser(store, userId));
 	const userName: string = useStore((store) => getUserName(store, userId));
 	const userPictureUpdatedAt: string | undefined = useStore((state) =>
 		getUserPictureUpdatedAt(state, userId)
@@ -33,10 +38,10 @@ const useAvatarUtilities = (
 
 	const color = useMemo(() => {
 		const color = calculateAvatarColor(userName);
-		if (!areUserInfoAvailable) return `#828282`;
+		if (isAnonymousUser) return `#828282`;
 		if (onMeeting) return calcAvatarMeetingColor(themeColor.avatarColors[color]);
 		return `${themeColor.avatarColors[color]}`;
-	}, [userName, areUserInfoAvailable, themeColor.avatarColors, onMeeting]);
+	}, [userName, isAnonymousUser, themeColor.avatarColors, onMeeting]);
 
 	const picture = useMemo(() => {
 		if (userPictureUpdatedAt)
@@ -45,15 +50,18 @@ const useAvatarUtilities = (
 	}, [userId, userPictureUpdatedAt]);
 
 	const icon = useMemo(() => {
-		if (!areUserInfoAvailable) return 'QuestionMarkCircleOutline';
+		if (isAnonymousUser) return 'QuestionMarkCircleOutline';
 		if (isUserGuest) return 'SmileOutline';
 		return undefined;
-	}, [areUserInfoAvailable, isUserGuest]);
+	}, [isAnonymousUser, isUserGuest]);
+
+	const isLoading = useMemo(() => userName === '', [userName]);
 
 	return {
 		avatarColor: color,
 		avatarPicture: picture,
-		avatarIcon: icon
+		avatarIcon: icon,
+		isLoading
 	};
 };
 export default useAvatarUtilities;
