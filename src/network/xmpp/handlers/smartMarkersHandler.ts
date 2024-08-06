@@ -30,23 +30,24 @@ export function onSmartMarkers(stanza: Element): true {
 
 export function onDisplayedMessageStanza(message: Element): true {
 	const displayed = getTagElement(message, 'displayed');
-	const from = getAttribute(message, 'from');
-	const messageId = getAttribute(message, 'id');
-	if (displayed && from && messageId) {
-		const roomId = getId(from);
-		const displayedMessage: Marker = {
-			from: getId(getResource(from)),
-			messageId,
-			markerDate: now(),
-			type: MarkerType.DISPLAYED
-		};
-		const store = useStore.getState();
-		store.updateMarkers(roomId, [displayedMessage]);
-		store.updateUnreadMessages(roomId);
-
-		// Update unread counter
-		if (getId(getResource(from)) === store.session.id) {
-			store.updateUnreadCount(roomId);
+	if (displayed) {
+		const messageId = getAttribute(displayed, 'id');
+		if (messageId) {
+			const from = getRequiredAttribute(message, 'from');
+			const roomId = getId(from);
+			const displayedMessage: Marker = {
+				from: getId(getResource(from)),
+				messageId,
+				markerDate: now(),
+				type: MarkerType.DISPLAYED
+			};
+			const store = useStore.getState();
+			store.updateMarkers(roomId, [displayedMessage]);
+			store.updateUnreadMessages(roomId);
+			// Update unread counter
+			if (getId(getResource(from)) === store.session.id) {
+				store.updateUnreadCount(roomId);
+			}
 		}
 	}
 	return true;
