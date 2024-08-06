@@ -294,8 +294,13 @@ const MeetingAccessPageMediaSection: FC<AccessMeetingPageMediaSectionProps> = ({
 	// handle change of video stream
 	useEffect(() => {
 		if (videoStreamRef.current) {
-			videoStreamRef.current.srcObject = streamTrack;
-			setEnterButtonIsEnabled(true);
+			if (mediaDevicesEnabled.video) {
+				videoStreamRef.current.srcObject = streamTrack;
+				setEnterButtonIsEnabled(true);
+			} else {
+				videoStreamRef.current.srcObject = null;
+				setEnterButtonIsEnabled(true);
+			}
 		}
 	}, [streamTrack, mediaDevicesEnabled, setEnterButtonIsEnabled]);
 
