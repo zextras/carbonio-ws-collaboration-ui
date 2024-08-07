@@ -288,12 +288,7 @@ class XMPPClient implements IXMPPClient {
 		const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
 			.c('query', { xmlns: Strophe.NS.MAM, queryid: MamRequestType.REPLIED })
 			.c('x', { xmlns: jabberData })
-			.c('field', { var: 'from_id' })
-			.c('value')
-			.t(messageSubjectOfReplyId)
-			.up()
-			.up()
-			.c('field', { var: 'to_id' })
+			.c('field', { var: 'ids' })
 			.c('value')
 			.t(messageSubjectOfReplyId);
 		this.xmppConnection.send({
@@ -308,12 +303,7 @@ class XMPPClient implements IXMPPClient {
 			const iq = $iq({ type: 'set', to: carbonizeMUC(roomId) })
 				.c('query', { xmlns: Strophe.NS.MAM, queryid: MamRequestType.FORWARDED })
 				.c('x', { xmlns: jabberData })
-				.c('field', { var: 'from_id' })
-				.c('value')
-				.t(messageToForwardStanzaId)
-				.up()
-				.up()
-				.c('field', { var: 'to_id' })
+				.c('field', { var: 'ids' })
 				.c('value')
 				.t(messageToForwardStanzaId);
 			this.xmppConnection.send({
