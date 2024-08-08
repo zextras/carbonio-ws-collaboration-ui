@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { concat, debounce, difference, find, forEach, join, map } from 'lodash';
+import { forEach, join, map } from 'lodash';
 
 import BaseAPI from './BaseAPI';
 import useStore from '../../store/Store';
@@ -63,55 +63,13 @@ class UsersApi extends BaseAPI implements IUsersApi {
 			} else {
 				this.uploadFileFetchAPI(`users/${userId}/picture`, RequestType.PUT, file)
 					.then((resp: ChangeUserPictureResponse) => resolve(resp))
-					.catch((error) => reject(error));
+					.catch((error) => reject(new Error(error)));
 			}
 		});
 	}
 
 	public deleteUserPicture(userId: string): Promise<DeleteUserPictureResponse> {
 		return this.fetchAPI(`users/${userId}/picture`, RequestType.DELETE);
-	}
-
-	private usersToRequest: string[] = [];
-
-	private requestingUsers: string[] = [];
-
-	public clearUserCache(): void {
-		this.usersToRequest = [];
-		this.requestingUsers = [];
-	}
-
-	// getUsers wants max 10 userId at a time
-	private deboucedUserGetter = debounce(() => {
-		this.getUsers(this.usersToRequest).then(() => {
-			this.requestingUsers = difference(this.requestingUsers, this.usersToRequest);
-		});
-		this.usersToRequest = [];
-	}, 1000);
-
-	// Create groups of 10 users after 1 second of delay from the last call
-	public getDebouncedUser(userId: string): void {
-		// If the user is already being requested, don't request it again
-		if (
-			!find(this.usersToRequest, (id) => id === userId) &&
-			!find(this.requestingUsers, (id) => id === userId)
-		) {
-			this.usersToRequest.push(userId);
-
-			// If there are less than 10 users to request, wait 1 second before requesting them (wait if there are other calls)
-			if (this.usersToRequest.length < 10) {
-				this.deboucedUserGetter();
-			} else {
-				// If there are more than 10 users to request, request them immediately
-				this.deboucedUserGetter && this.deboucedUserGetter.cancel();
-				// Save momentarily the users that are being requested to not request them again
-				this.requestingUsers = concat(this.requestingUsers, this.usersToRequest);
-				this.getUsers(this.usersToRequest).then(() => {
-					this.requestingUsers = difference(this.requestingUsers, this.usersToRequest);
-				});
-				this.usersToRequest = [];
-			}
-		}
 	}
 }
 

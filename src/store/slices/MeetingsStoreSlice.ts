@@ -9,7 +9,6 @@ import { produce } from 'immer';
 import { find, forEach, includes } from 'lodash';
 import { StateCreator } from 'zustand';
 
-import { UsersApi } from '../../network';
 import { MeetingBe, MeetingParticipantBe } from '../../types/network/models/meetingBeTypes';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
 import { MeetingParticipant, MeetingParticipantMap } from '../../types/store/MeetingTypes';
@@ -49,13 +48,6 @@ export const useMeetingsStoreSlice: StateCreator<MeetingsSlice> = (set: (...any:
 						recStartedAt: meeting.recStartedAt,
 						recUserId: meeting.recUserId
 					};
-
-					// Retrieve participants information if they are unknown
-					forEach(meeting.participants, (participant) => {
-						if (!find(draft.users, (user) => user.id === participant.userId)) {
-							UsersApi.getDebouncedUser(participant.userId);
-						}
-					});
 
 					// Set meetingId on room data
 					draft.rooms[meeting.roomId] = {
@@ -98,13 +90,6 @@ export const useMeetingsStoreSlice: StateCreator<MeetingsSlice> = (set: (...any:
 					recStartedAt: meeting.recStartedAt,
 					recUserId: meeting.recUserId
 				};
-
-				// Retrieve participants information if they are unknown
-				forEach(meeting.participants, (participant) => {
-					if (!find(draft.users, (user) => user.id === participant.userId)) {
-						UsersApi.getDebouncedUser(participant.userId);
-					}
-				});
 
 				// Set meetingId on room data
 				draft.rooms[meeting.roomId] = {
@@ -167,10 +152,6 @@ export const useMeetingsStoreSlice: StateCreator<MeetingsSlice> = (set: (...any:
 						screenStreamOn: participant.screenStreamOn || false,
 						joinedAt: participant.joinedAt
 					};
-					// Retrieve member information if he is unknown
-					if (!find(draft.users, (user) => user.id === participant.userId)) {
-						UsersApi.getDebouncedUser(participant.userId);
-					}
 				}
 			}),
 			false,
@@ -228,12 +209,6 @@ export const useMeetingsStoreSlice: StateCreator<MeetingsSlice> = (set: (...any:
 				const meeting = find(draft.meetings, (meeting) => meeting.id === meetingId);
 				if (meeting) {
 					draft.meetings[meeting.roomId].waitingList = waitingList;
-					// Retrieve waiting users information if they are unknown
-					forEach(waitingList, (userId) => {
-						if (!find(draft.users, (user) => user.id === userId)) {
-							UsersApi.getDebouncedUser(userId);
-						}
-					});
 				}
 			}),
 			false,
@@ -247,11 +222,6 @@ export const useMeetingsStoreSlice: StateCreator<MeetingsSlice> = (set: (...any:
 				if (meeting && !includes(meeting.waitingList, userId)) {
 					if (!meeting.waitingList) draft.meetings[meeting.roomId].waitingList = [];
 					draft.meetings[meeting.roomId].waitingList?.push(userId);
-
-					// Retrieve waiting user information if ut is unknown
-					if (!find(draft.users, (user) => user.id === userId)) {
-						UsersApi.getDebouncedUser(userId);
-					}
 				}
 			}),
 			false,

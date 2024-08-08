@@ -22,7 +22,6 @@ import {
 import { StateCreator } from 'zustand';
 
 import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
-import { UsersApi } from '../../network';
 import { MarkerStatus } from '../../types/store/MarkersTypes';
 import {
 	ConfigurationMessage,
@@ -35,27 +34,8 @@ import {
 } from '../../types/store/MessageTypes';
 import { RoomType } from '../../types/store/RoomTypes';
 import { MessagesStoreSlice, RootStore } from '../../types/store/StoreTypes';
-import { UsersMap } from '../../types/store/UserTypes';
 import { calcReads } from '../../utils/calcReads';
 import { datesAreFromTheSameDay, isBefore, isStrictlyBefore } from '../../utils/dateUtils';
-
-// Retrieve user information about userId in the various type of message (only if it is unknown)
-const retrieveMessageUserInfo = (message: Message, users: UsersMap): void => {
-	if (message.type === MessageType.TEXT_MSG) {
-		if (!users[message.from]) UsersApi.getDebouncedUser(message.from);
-		if (message.forwarded && !users[message.forwarded.from])
-			UsersApi.getDebouncedUser(message.forwarded.from);
-	} else if (message.type === MessageType.CONFIGURATION_MSG) {
-		if (!users[message.from]) UsersApi.getDebouncedUser(message.from);
-		if (
-			(message.operation === OperationType.MEMBER_ADDED ||
-				message.operation === OperationType.MEMBER_REMOVED) &&
-			!users[message.value]
-		) {
-			UsersApi.getDebouncedUser(message.value);
-		}
-	}
-};
 
 export const useMessagesStoreSlice: StateCreator<MessagesStoreSlice> = (
 	set: (...any: any) => void
@@ -91,9 +71,6 @@ export const useMessagesStoreSlice: StateCreator<MessagesStoreSlice> = (
 				} else {
 					draft.messages[message.roomId].push(message);
 				}
-
-				// Retrieve user information
-				retrieveMessageUserInfo(message, draft.users);
 			}),
 			false,
 			'MESSAGES/NEW_MESSAGE'
@@ -120,9 +97,6 @@ export const useMessagesStoreSlice: StateCreator<MessagesStoreSlice> = (
 						});
 						draft.messages[message.roomId].push(message);
 					}
-
-					// Retrieve user information
-					retrieveMessageUserInfo(message, draft.users);
 				}
 			}),
 			false,
@@ -156,9 +130,6 @@ export const useMessagesStoreSlice: StateCreator<MessagesStoreSlice> = (
 							});
 						}
 						historyWithDates.push(historyMessage);
-
-						// Retrieve user information
-						retrieveMessageUserInfo(historyMessage, draft.users);
 					}
 				});
 
@@ -258,8 +229,6 @@ export const useMessagesStoreSlice: StateCreator<MessagesStoreSlice> = (
 				if (messageWithAResponse) {
 					messageWithAResponse.repliedMessage = messageSubjectOfReply;
 				}
-
-				retrieveMessageUserInfo(messageSubjectOfReply, draft.users);
 			}),
 			false,
 			'MESSAGES/SET_REPLIED_MESSAGE'

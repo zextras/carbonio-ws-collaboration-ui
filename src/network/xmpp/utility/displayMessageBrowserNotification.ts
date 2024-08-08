@@ -15,8 +15,9 @@ import {
 	LOCAL_STORAGE_NAMES,
 	NotificationsSettingsType
 } from '../../../utils/localStorageUtils';
+import UserDataRetriever from '../../../utils/UserDataRetriever';
 
-const displayMessageBrowserNotification = (message: TextMessage): void => {
+const displayMessageBrowserNotification = async (message: TextMessage): Promise<void> => {
 	const store = useStore.getState();
 	const notMyMessage = message.from !== store.session.id;
 	const inputIsFocused =
@@ -39,14 +40,12 @@ const displayMessageBrowserNotification = (message: TextMessage): void => {
 		((!isMeetingTab && isOneToOneGroupMessage) || (isMeetingTab && !isOneToOneGroupMessage)) &&
 		ChatsNotificationsSettings.DesktopNotifications
 	) {
-		const sender = store.users[message.from];
-		const title = room.type === RoomType.ONE_TO_ONE ? sender.name || sender.email || '' : room.name;
+		const senderName = await UserDataRetriever.getAsyncUsername(message.from);
+		const title = room.type === RoomType.ONE_TO_ONE ? senderName || '' : room.name;
 		const text = message.attachment && message.text === '' ? message.attachment.name : message.text;
 
 		const textMessage =
-			room.type === RoomType.ONE_TO_ONE
-				? text
-				: `${(sender?.name || sender?.email)?.split(' ')[0]}: ${text}`;
+			room.type === RoomType.ONE_TO_ONE ? text : `${senderName?.split(' ')[0]}: ${text}`;
 
 		getNotificationManager().notify({
 			showPopup: true,

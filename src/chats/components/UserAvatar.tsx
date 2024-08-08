@@ -6,7 +6,7 @@
 
 import React, { useMemo } from 'react';
 
-import { Avatar, Container, Badge } from '@zextras/carbonio-design-system';
+import { Avatar, Container, Badge, Shimmer } from '@zextras/carbonio-design-system';
 import { find } from 'lodash';
 import styled, { DefaultTheme } from 'styled-components';
 
@@ -91,7 +91,7 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ roomId, unreadCount, draftMessa
 	);
 	const isMeetingActive = useStore((store) => getMeetingActive(store, roomId));
 
-	const { avatarColor, avatarPicture, avatarIcon } = useAvatarUtilities(
+	const { avatarColor, avatarPicture, avatarIcon, isLoading } = useAvatarUtilities(
 		idAvailable,
 		isMeetingActive
 	);
@@ -131,6 +131,8 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ roomId, unreadCount, draftMessa
 						background={avatarColor}
 					/>
 				);
+			case isLoading:
+				return <Shimmer.Avatar />;
 			default:
 				return (
 					<Avatar
@@ -144,7 +146,16 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ roomId, unreadCount, draftMessa
 					/>
 				);
 		}
-	}, [isMeetingActive, userName, avatarColor, draftMessage, roomMuted, avatarPicture, avatarIcon]);
+	}, [
+		isMeetingActive,
+		userName,
+		avatarColor,
+		draftMessage,
+		roomMuted,
+		isLoading,
+		avatarPicture,
+		avatarIcon
+	]);
 
 	const canShowPresence = useMemo(
 		() => !unreadCount && canSeeUsersPresence,

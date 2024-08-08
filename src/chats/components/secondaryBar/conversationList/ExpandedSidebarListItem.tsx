@@ -6,15 +6,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 
-import {
-	Badge,
-	Container,
-	Icon,
-	Row,
-	Shimmer,
-	Text,
-	Tooltip
-} from '@zextras/carbonio-design-system';
+import { Badge, Container, Icon, Row, Text, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -216,47 +208,36 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 				padding={{ left: 'small' }}
 				orientation="horizontal"
 			>
-				{roomName !== '' ? (
-					<>
-						<Row takeAvailableSpace crossAlignment="flex-start" orientation="vertical">
-							<Text size="small">{roomName}</Text>
-							<Container
-								width="fill"
-								height="1rem"
-								orientation="horizontal"
-								mainAlignment="flex-start"
-							>
-								{draftMessage && (
-									<Tooltip label={draftTooltip} maxWidth="12.5rem">
-										<Container width="fit" padding={{ right: 'extrasmall' }}>
-											<Icon size="small" icon="Edit2" color="gray" />
-										</Container>
-									</Tooltip>
-								)}
-								{!draftMessage && ackIcon && showMessageReads && (
-									<Tooltip label={dropdownTooltip}>
-										<Container width="fit" padding={{ right: 'extrasmall' }}>
-											{ackIcon}
-										</Container>
-									</Tooltip>
-								)}
-								{lastMessageOfRoom?.type === MessageType.TEXT_MSG &&
-									lastMessageOfRoom.attachment &&
-									!isWritingLabel && (
-										<Container width="fit" padding={{ right: 'extrasmall' }}>
-											<Icon size="small" icon="FileTextOutline" color="gray" />
-										</Container>
-									)}
-								<Text color="secondary" size="extrasmall" overflow="ellipsis" data-testid="message">
-									{messageToDisplay}
-								</Text>
-							</Container>
-						</Row>
-						{UnreadCounter}
-					</>
-				) : (
-					<Shimmer.Text width="100%" />
-				)}
+				<Row takeAvailableSpace crossAlignment="flex-start" orientation="vertical">
+					<Text size="small">{roomName}</Text>
+					<Container width="fill" height="1rem" orientation="horizontal" mainAlignment="flex-start">
+						{draftMessage && (
+							<Tooltip label={draftTooltip} maxWidth="12.5rem">
+								<Container width="fit" padding={{ right: 'extrasmall' }}>
+									<Icon size="small" icon="Edit2" color="gray" />
+								</Container>
+							</Tooltip>
+						)}
+						{!draftMessage && ackIcon && showMessageReads && (
+							<Tooltip label={dropdownTooltip}>
+								<Container width="fit" padding={{ right: 'extrasmall' }}>
+									{ackIcon}
+								</Container>
+							</Tooltip>
+						)}
+						{lastMessageOfRoom?.type === MessageType.TEXT_MSG &&
+							lastMessageOfRoom.attachment &&
+							!isWritingLabel && (
+								<Container width="fit" padding={{ right: 'extrasmall' }}>
+									<Icon size="small" icon="FileTextOutline" color="gray" />
+								</Container>
+							)}
+						<Text color="secondary" size="extrasmall" overflow="ellipsis" data-testid="message">
+							{messageToDisplay}
+						</Text>
+					</Container>
+				</Row>
+				{UnreadCounter}
 			</Row>
 		</ListItem>
 	);

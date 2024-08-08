@@ -75,7 +75,7 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 		() =>
 			createSnackbar({
 				key: new Date().toLocaleString(),
-				type: 'info',
+				severity: 'info',
 				label: giveMediaPermissionSnackbar,
 				actionLabel: understoodAction,
 				disableAutoHide: true
@@ -86,30 +86,7 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 	const toggleStreams = useCallback(
 		(audio: boolean, video: boolean, audioId: string | undefined, videoId: string | undefined) => {
 			freeMediaResources(streamTrack);
-
-			if (!audio && !video) {
-				getAudioAndVideo(true, false)
-					.then((stream: MediaStream) => {
-						const tracks = stream.getTracks();
-						tracks.forEach((track) => track.stop());
-						setStreamTrack(stream);
-						setMediaDevicesEnabled({ audio, video });
-						setMeetingStorage({ EnableCamera: video, EnableMicrophone: audio });
-						setEnterButtonIsEnabled(true);
-					})
-					.catch((e) => {
-						mediaPermissionSnackbar();
-						console.error(e);
-					});
-			} else {
-				getAudioAndVideo({ noiseSuppression: true, echoCancellation: true })
-					.then((stream: MediaStream) => {
-						const tracks = stream.getTracks();
-						tracks.forEach((track) => track.stop());
-					})
-					.catch((e) => {
-						console.error(e);
-					});
+			if (audio || video) {
 				const kindOfAudioDevice = audioId
 					? {
 							deviceId: { exact: audioId },
@@ -131,6 +108,11 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 						setEnterButtonIsEnabled(true);
 						console.error(e);
 					});
+			} else {
+				setStreamTrack(null);
+				setMeetingStorage({ EnableCamera: video, EnableMicrophone: audio });
+				setMediaDevicesEnabled({ audio, video });
+				setEnterButtonIsEnabled(true);
 			}
 		},
 		[
@@ -300,7 +282,9 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 				setStreamTrack(stream);
 			});
 		}
-	}, [mediaDevicesEnabled, setStreamTrack]);
+		// this useEffect should run just once and only at the beginning
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
 
 	useEffect(() => {
 		navigator.mediaDevices.addEventListener('devicechange', updateListOfDevices);

@@ -63,44 +63,74 @@ const members = [
 	createMockMember({ userId: user2Info.id })
 ];
 
-const room: RoomBe = createMockRoom({ members, type: RoomType.ONE_TO_ONE });
+const room: RoomBe = createMockRoom({ id: 'roomId', members, type: RoomType.ONE_TO_ONE });
 const roomMuted: RoomBe = createMockRoom({
+	id: 'mutedRoomId',
 	type: RoomType.ONE_TO_ONE,
 	members,
 	userSettings: { muted: true }
 });
 const roomWithPicture: RoomBe = createMockRoom({
+	id: 'roomWithPicture',
 	members: [
 		createMockMember({ userId: user1Info.id, owner: true }),
 		createMockMember({ userId: user3Info.id })
 	]
 });
+const singleConversationWithUnloadUser: RoomBe = createMockRoom({
+	roomId: 'unloadRoomId',
+	type: RoomType.ONE_TO_ONE,
+	members: [
+		createMockMember({ userId: user1Info.id, owner: true }),
+		createMockMember({ userId: 'unloadUserId' })
+	]
+});
 
 const roomWithMeeting: RoomBe = createMockRoom({
+	roomId: 'meetingRoomId',
 	type: RoomType.ONE_TO_ONE,
 	members,
 	meeting: 'meetingId'
 });
 
 const roomMutedWithMeeting: RoomBe = createMockRoom({
+	roomId: 'mutedWithMeetingRoomId',
 	type: RoomType.ONE_TO_ONE,
 	members,
 	userSettings: { muted: true },
-	meeting: 'meetingId'
+	meeting: 'meetingId2'
 });
 
 const meeting: MeetingBe = createMockMeeting({
-	roomId: 'id',
+	id: 'meetingId',
+	roomId: roomWithMeeting.id,
 	participants: [user1Participant, user2Participant]
 });
 
+const meeting2: MeetingBe = createMockMeeting({
+	id: 'meetingId2',
+	roomId: roomMutedWithMeeting.id,
+	participants: [user1Participant, user2Participant]
+});
+
+beforeEach(() => {
+	const store = useStore.getState();
+	store.setLoginInfo(user1Info.id, user1Info.name);
+	store.setUserInfo(user1Info);
+	store.setUserInfo(user2Info);
+	store.setUserInfo(user3Info);
+	store.addRoom(room);
+	store.addRoom(roomWithPicture);
+	store.addRoom(singleConversationWithUnloadUser);
+	store.addRoom(roomMuted);
+	store.addRoom(roomMutedWithMeeting);
+	store.addMeeting(meeting);
+	store.addMeeting(meeting2);
+});
 describe('User avatar', () => {
 	describe('Presence dot', () => {
 		test('User presence dot should be visible when canSeeUsersPresence capability is set to true', () => {
 			const store = useStore.getState();
-			store.addRoom(room);
-			store.setLoginInfo(user1Info.id, user1Info.email, user1Info.name);
-			store.setUserInfo(user2Info);
 			store.setCapabilities(createMockCapabilityList({ canSeeUsersPresence: true }));
 			setup(<UserAvatar roomId={room.id} draftMessage={false} />);
 
@@ -116,9 +146,6 @@ describe('User avatar', () => {
 		});
 		test('User presence dot should not be visible when canSeeUsersPresence capability is set to false', () => {
 			const store = useStore.getState();
-			store.addRoom(room);
-			store.setLoginInfo(user1Info.id, user1Info.email, user1Info.name);
-			store.setUserInfo(user2Info);
 			store.setCapabilities(createMockCapabilityList({ canSeeUsersPresence: false }));
 			setup(<UserAvatar roomId={room.id} draftMessage={false} />);
 
@@ -134,9 +161,6 @@ describe('User avatar', () => {
 		});
 		test('User presence dot should be gray and shows he is offline', async () => {
 			const store = useStore.getState();
-			store.addRoom(room);
-			store.setLoginInfo(user1Info.id, user1Info.email, user1Info.name);
-			store.setUserInfo(user2Info);
 			store.setUserPictureUpdated(user2Info.id, '2022-08-25T17:24:28.961+02:00');
 			store.setCapabilities(createMockCapabilityList({ canSeeUsersPresence: true }));
 			setup(<UserAvatar roomId={room.id} draftMessage={false} />);
@@ -148,9 +172,6 @@ describe('User avatar', () => {
 		});
 		test('User presence dot should be green and shows he is online', async () => {
 			const store = useStore.getState();
-			store.addRoom(room);
-			store.setLoginInfo(user1Info.id, user1Info.email, user1Info.name);
-			store.setUserInfo(user2Info);
 			store.setCapabilities(createMockCapabilityList({ canSeeUsersPresence: true }));
 			store.setUserPresence('user2', true);
 			setup(<UserAvatar roomId={room.id} draftMessage={false} />);
@@ -165,9 +186,6 @@ describe('User avatar', () => {
 	describe('Notifications enabled/disabled', () => {
 		test('Check if the conversation has notifications disabled and user is online', () => {
 			const store = useStore.getState();
-			store.addRoom(room);
-			store.setLoginInfo(user1Info.id, user1Info.email, user1Info.name);
-			store.setUserInfo(user2Info);
 			store.setUserPresence('user2', true);
 			store.setRoomMuted(room.id);
 			store.setCapabilities(createMockCapabilityList({ canSeeUsersPresence: true }));
@@ -180,9 +198,6 @@ describe('User avatar', () => {
 		});
 		test('Check if the conversation has notifications disabled and user is offline', () => {
 			const store = useStore.getState();
-			store.addRoom(room);
-			store.setLoginInfo(user1Info.id, user1Info.email, user1Info.name);
-			store.setUserInfo(user2Info);
 			store.setRoomMuted(room.id);
 			store.setCapabilities(createMockCapabilityList({ canSeeUsersPresence: true }));
 			setup(<UserAvatar roomId={room.id} draftMessage={false} />);
@@ -194,9 +209,6 @@ describe('User avatar', () => {
 		});
 		test('Check if the conversation has notifications enabled and user is online', () => {
 			const store = useStore.getState();
-			store.addRoom(room);
-			store.setLoginInfo(user1Info.id, user1Info.email, user1Info.name);
-			store.setUserInfo(user2Info);
 			store.setUserPresence('user2', true);
 			store.setCapabilities(createMockCapabilityList({ canSeeUsersPresence: true }));
 			setup(<UserAvatar roomId={room.id} draftMessage={false} />);
@@ -208,9 +220,6 @@ describe('User avatar', () => {
 		});
 		test('Check if the conversation has notifications enabled and user is offline', () => {
 			const store = useStore.getState();
-			store.addRoom(room);
-			store.setLoginInfo(user1Info.id, user1Info.email, user1Info.name);
-			store.setUserInfo(user2Info);
 			store.setCapabilities(createMockCapabilityList({ canSeeUsersPresence: true }));
 			setup(<UserAvatar roomId={room.id} draftMessage={false} />);
 			const userAvatar = screen.getByTestId('User 2-avatar');
@@ -220,21 +229,12 @@ describe('User avatar', () => {
 			expect(presenceDot).toHaveStyle(bgGrayDot);
 		});
 		test('Check if user has notifications disabled', () => {
-			const store = useStore.getState();
-			store.addRoom(roomMuted);
-			store.setLoginInfo(user1Info.id, user1Info.email, user1Info.name);
-			store.setUserInfo(user2Info);
 			setup(<UserAvatar roomId={roomMuted.id} draftMessage={false} />);
 			const userAvatarWithNotificationMuted = screen.getByTestId(iconBellOff);
 			expect(userAvatarWithNotificationMuted).toBeVisible();
 		});
 		test('Check if user has notifications disabled in a chat with an ongoing meeting', () => {
-			const store = useStore.getState();
-			store.addRoom(roomMutedWithMeeting);
-			store.addMeeting(meeting);
-			store.setLoginInfo(user1Info.id, user1Info.email, user1Info.name);
-			store.setUserInfo(user2Info);
-			setup(<UserAvatar roomId={roomMuted.id} draftMessage={false} />);
+			setup(<UserAvatar roomId={roomMutedWithMeeting.id} draftMessage={false} />);
 			const userAvatarWithNotificationMuted = screen.getByTestId('icon: Video');
 			expect(userAvatarWithNotificationMuted).toBeVisible();
 		});
@@ -243,9 +243,6 @@ describe('User avatar', () => {
 	describe('Draft message', () => {
 		test('Check if there is the draft message and notifications enabled', () => {
 			const store = useStore.getState();
-			store.addRoom(room);
-			store.setLoginInfo(user1Info.id, user1Info.email, user1Info.name);
-			store.setUserInfo(user2Info);
 			store.setDraftMessage(room.id, false, hiString);
 			setup(<UserAvatar roomId={room.id} draftMessage />);
 			const userAvatarWithDraft = screen.getByTestId('icon: Edit2');
@@ -253,9 +250,6 @@ describe('User avatar', () => {
 		});
 		test('Check if there is the draft message and notifications disabled', () => {
 			const store = useStore.getState();
-			store.addRoom(roomMuted);
-			store.setLoginInfo(user1Info.id, user1Info.email, user1Info.name);
-			store.setUserInfo(user2Info);
 			store.setDraftMessage(room.id, false, hiString);
 			setup(<UserAvatar roomId={room.id} draftMessage />);
 			const userAvatarWithDraft = screen.getByTestId('icon: Edit2');
@@ -263,23 +257,15 @@ describe('User avatar', () => {
 		});
 		test('Check if there is the draft message and there is an ongoing meeting', () => {
 			const store = useStore.getState();
-			store.addRoom(roomWithMeeting);
-			store.addMeeting(meeting);
-			store.setLoginInfo(user1Info.id, user1Info.email, user1Info.name);
-			store.setUserInfo(user2Info);
 			store.setDraftMessage(room.id, false, hiString);
-			setup(<UserAvatar roomId={room.id} draftMessage />);
+			setup(<UserAvatar roomId={roomWithMeeting.id} draftMessage />);
 			const userAvatarWithDraft = screen.getByTestId('icon: Video');
 			expect(userAvatarWithDraft).toBeVisible();
 		});
 	});
 
 	test('Show user picture if user has one', () => {
-		const store = useStore.getState();
-		store.addRoom(roomWithPicture);
-		store.setLoginInfo(user1Info.id, user1Info.email, user1Info.name);
-		store.setUserInfo(user3Info);
-		setup(<UserAvatar roomId={room.id} draftMessage={false} />);
+		setup(<UserAvatar roomId={roomWithPicture.id} draftMessage={false} />);
 		const avatar = screen.getByTestId(`${user3Info.name}-avatar`);
 		expect(avatar.children.length).toBe(0);
 	});
