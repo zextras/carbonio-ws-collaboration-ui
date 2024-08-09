@@ -57,6 +57,7 @@ class XMPPClient implements IXMPPClient {
 		Strophe.addNamespace('XMPP_RETRACT', 'urn:esl:message-retract-by-stanza-id:0');
 		Strophe.addNamespace('XMPP_FASTEN', 'urn:xmpp:fasten:0');
 		Strophe.addNamespace('ZEXTRAS_EDIT', 'zextras:xmpp:edit:0');
+		Strophe.addNamespace('ZEXTRAS_REACTION', 'zextras:xmpp:reaction:0');
 	}
 
 	public connect(token: string): void {
@@ -218,6 +219,20 @@ class XMPPClient implements IXMPPClient {
 			.up()
 			.c('body')
 			.t(message);
+		this.xmppConnection.send({ type: XMPPRequestType.MESSAGE, elem: msg });
+	}
+
+	sendChatMessageReaction(roomId: string, messageStanzaId: string, reaction: string): void {
+		const uuid = uuidGenerator();
+		const msg = $msg({ to: carbonizeMUC(roomId), type: 'groupchat', id: uuid })
+			.c('apply-to', { id: messageStanzaId, xmlns: Strophe.NS.XMPP_FASTEN })
+			.c('reaction', { xmlns: Strophe.NS.ZEXTRAS_REACTION })
+			.up()
+			.c('external', { name: 'body' })
+			.up()
+			.up()
+			.c('body')
+			.t(reaction);
 		this.xmppConnection.send({ type: XMPPRequestType.MESSAGE, elem: msg });
 	}
 

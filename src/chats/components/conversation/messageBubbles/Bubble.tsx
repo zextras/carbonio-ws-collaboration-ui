@@ -8,6 +8,7 @@
 import React, { FC, useCallback, useEffect, useMemo, useRef } from 'react';
 
 import {
+	Button,
 	Checkbox,
 	Container,
 	CreateSnackbarFn,
@@ -261,6 +262,19 @@ const Bubble: FC<BubbleProps> = ({
 					</>
 				)}
 				<TextContentBubble textContent={messageFormatted} />
+				{/* TODO Example of a button that sends a reaction to a message */}
+				<Button
+					label="react"
+					onClick={() => {
+						useStore
+							.getState()
+							.connections.xmppClient.sendChatMessageReaction(
+								message.roomId,
+								message.stanzaId,
+								'\uD83D\uDE00'
+							);
+					}}
+				/>
 				<BubbleFooter
 					isMyMessage={isMyMessage}
 					date={message.date}

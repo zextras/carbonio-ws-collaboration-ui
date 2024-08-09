@@ -29,6 +29,7 @@ export const xmppClient = {
 	sendChatMessageReply: mockedSendChatMessageReply,
 	sendChatMessageDeletion: mockedSendChatMessageDeletion,
 	sendChatMessageEdit: mockedSendChatMessageEdit,
+	sendChatMessageReaction: jest.fn(),
 	requestMessageToForward: (): Promise<Element> =>
 		Promise.resolve(Strophe.createHtml(textMessageRealTime)),
 	requestHistory: jest.fn(),
