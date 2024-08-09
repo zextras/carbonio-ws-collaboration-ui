@@ -130,7 +130,8 @@ const GroupAvatar: React.FC<UserAvatarProps> = ({ roomId, unreadCount, draftMess
 				<AvatarBadge
 					data-testid="unreads_counter"
 					value={unreadCount}
-					type={!roomMuted ? 'unread' : 'read'}
+					backgroundColor={!roomMuted ? 'primary' : 'gray2'}
+					color={!roomMuted ? 'gray6' : 'gray0'}
 				/>
 			)}
 		</AvatarContainer>

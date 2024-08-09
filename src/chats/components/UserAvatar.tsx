@@ -46,7 +46,7 @@ export const AvatarBadge = styled(Badge)`
 	position: absolute;
 	right: -0.25rem;
 	bottom: -0.25rem;
-	padding: 0.2rem 0.0625rem;
+	padding: 0 0.425rem;
 	font-size: 0.6rem;
 `;
 
@@ -169,7 +169,8 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ roomId, unreadCount, draftMessa
 				<AvatarBadge
 					data-testid="unreads_counter"
 					value={unreadCount}
-					type={!roomMuted ? 'unread' : 'read'}
+					backgroundColor={!roomMuted ? 'primary' : 'gray2'}
+					color={!roomMuted ? 'gray6' : 'gray0'}
 				/>
 			)}
 			{canShowPresence && <Presence data-testid="user_presence_dot" memberOnline={memberOnline} />}
