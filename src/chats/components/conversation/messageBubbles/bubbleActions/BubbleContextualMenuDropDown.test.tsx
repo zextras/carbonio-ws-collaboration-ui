@@ -9,18 +9,18 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 
 import BubbleContextualMenuDropDown from './BubbleContextualMenuDropDown';
-import useStore from '../../../../store/Store';
+import useStore from '../../../../../store/Store';
 import {
 	createMockCapabilityList,
 	createMockRoom,
 	createMockTextMessage
-} from '../../../../tests/createMock';
-import { setup } from '../../../../tests/test-utils';
-import { RoomBe } from '../../../../types/network/models/roomBeTypes';
-import { messageActionType } from '../../../../types/store/ActiveConversationTypes';
-import { TextMessage } from '../../../../types/store/MessageTypes';
-import { RoomType } from '../../../../types/store/RoomTypes';
-import { RootStore } from '../../../../types/store/StoreTypes';
+} from '../../../../../tests/createMock';
+import { setup } from '../../../../../tests/test-utils';
+import { RoomBe } from '../../../../../types/network/models/roomBeTypes';
+import { messageActionType } from '../../../../../types/store/ActiveConversationTypes';
+import { TextMessage } from '../../../../../types/store/MessageTypes';
+import { RoomType } from '../../../../../types/store/RoomTypes';
+import { RootStore } from '../../../../../types/store/StoreTypes';
 
 const iconArrowIosDownward = 'icon: ArrowIosDownward';
 
