@@ -26,7 +26,7 @@ const MessageReactionsList: FC<BubbleReactionsProps> = ({ message }) => {
 	const reactionGroup = useMemo(() => {
 		const reactionGroup: { [reaction: string]: string[] } = {};
 		forEach(reactions, (reaction) => {
-			if (reaction.value !== undefined) {
+			if (reaction.value !== undefined && reaction.value !== '') {
 				if (!reactionGroup[reaction.value]) {
 					reactionGroup[reaction.value] = [];
 				}

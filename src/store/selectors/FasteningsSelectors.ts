@@ -45,3 +45,19 @@ export const getReactionFastenings = (
 	}
 	return [];
 };
+
+export const getMyLastReaction = (
+	state: RootStore,
+	roomId: string,
+	stanzaId: string
+): string | undefined => {
+	const fastenings = state.fastenings?.[roomId]?.[stanzaId];
+	if (fastenings) {
+		const myReactions = filter(
+			fastenings,
+			(fastening) => fastening.action === 'reaction' && fastening.from === state.session?.id
+		);
+		return last(myReactions)?.value;
+	}
+	return undefined;
+};

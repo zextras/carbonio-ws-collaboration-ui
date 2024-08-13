@@ -10,6 +10,7 @@ import { Button, Container, Dropdown } from '@zextras/carbonio-design-system';
 import styled from 'styled-components';
 
 import { getXmppClient } from '../../../../../store/selectors/ConnectionSelector';
+import { getMyLastReaction } from '../../../../../store/selectors/FasteningsSelectors';
 import useStore from '../../../../../store/Store';
 import { TextMessage } from '../../../../../types/store/MessageTypes';
 
@@ -19,6 +20,7 @@ type BubbleReactionsProps = {
 
 const EmojiBox = styled(Container)<{
 	$emoji: string;
+	$selected: boolean;
 }>`
 	width: 2rem;
 	height: 2rem;
@@ -29,10 +31,17 @@ const EmojiBox = styled(Container)<{
 		background-color: ${({ theme }): string => theme.palette.gray6.hover};
 		cursor: pointer;
 	}
+
+	${({ theme, $selected }): string | false =>
+		$selected && `background-color: ${theme.palette.highlight.active};`};
 `;
 
 const BubbleReactions: FC<BubbleReactionsProps> = ({ message }) => {
 	const xmppClient = useStore(getXmppClient);
+
+	const myReaction = useStore((store) =>
+		getMyLastReaction(store, message.roomId, message.stanzaId)
+	);
 
 	const [dropdownActive, setDropdownActive] = useState(false);
 
@@ -53,8 +62,14 @@ const BubbleReactions: FC<BubbleReactionsProps> = ({ message }) => {
 	}, [closeDropdownOnScroll, message.roomId]);
 
 	const sendReaction = useCallback(
-		(emoji: string) => xmppClient.sendChatMessageReaction(message.roomId, message.stanzaId, emoji),
-		[message.roomId, message.stanzaId, xmppClient]
+		(emoji: string) => {
+			if (myReaction !== emoji) {
+				xmppClient.sendChatMessageReaction(message.roomId, message.stanzaId, emoji);
+			} else {
+				xmppClient.sendChatMessageReaction(message.roomId, message.stanzaId, '');
+			}
+		},
+		[message.roomId, message.stanzaId, myReaction, xmppClient]
 	);
 
 	const emojiItems = useMemo(
@@ -64,17 +79,37 @@ const BubbleReactions: FC<BubbleReactionsProps> = ({ message }) => {
 				disabled: true,
 				customComponent: (
 					<Container orientation="horizontal">
-						<EmojiBox $emoji={'\uD83D\uDC4D'} onClick={() => sendReaction('\uD83D\uDC4D')} />
-						<EmojiBox $emoji={'\u2764\uFE0F'} onClick={() => sendReaction('\u2764\uFE0F')} />
-						<EmojiBox $emoji={'\uD83D\uDE02'} onClick={() => sendReaction('\uD83D\uDE02')} />
-						<EmojiBox $emoji={'\uD83D\uDE22'} onClick={() => sendReaction('\uD83D\uDE22')} />
-						<EmojiBox $emoji={'\uD83D\uDC4E'} onClick={() => sendReaction('\uD83D\uDC4E')} />
+						<EmojiBox
+							$emoji={'\uD83D\uDC4D'}
+							$selected={myReaction === '\uD83D\uDC4D'}
+							onClick={() => sendReaction('\uD83D\uDC4D')}
+						/>
+						<EmojiBox
+							$emoji={'\u2764\uFE0F'}
+							$selected={myReaction === '\u2764\uFE0F'}
+							onClick={() => sendReaction('\u2764\uFE0F')}
+						/>
+						<EmojiBox
+							$emoji={'\uD83D\uDE02'}
+							$selected={myReaction === '\uD83D\uDE02'}
+							onClick={() => sendReaction('\uD83D\uDE02')}
+						/>
+						<EmojiBox
+							$emoji={'\uD83D\uDE22'}
+							$selected={myReaction === '\uD83D\uDE22'}
+							onClick={() => sendReaction('\uD83D\uDE22')}
+						/>
+						<EmojiBox
+							$emoji={'\uD83D\uDC4E'}
+							$selected={myReaction === '\uD83D\uDC4E'}
+							onClick={() => sendReaction('\uD83D\uDC4E')}
+						/>
 					</Container>
 				),
 				padding: '0'
 			}
 		],
-		[sendReaction]
+		[myReaction, sendReaction]
 	);
 
 	return (
