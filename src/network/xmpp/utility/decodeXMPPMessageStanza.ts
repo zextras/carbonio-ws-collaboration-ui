@@ -54,7 +54,8 @@ export function decodeXMPPMessageStanza(
 				action: 'delete',
 				roomId,
 				date: messageDate,
-				originalStanzaId
+				originalStanzaId,
+				from: getId(resource)
 			};
 			return message;
 		}
@@ -70,6 +71,7 @@ export function decodeXMPPMessageStanza(
 				roomId,
 				date: messageDate,
 				originalStanzaId,
+				from: getId(resource),
 				value: body?.textContent || ''
 			};
 			return message;
@@ -79,10 +81,20 @@ export function decodeXMPPMessageStanza(
 		const reaction = getTagElement(fasteningElement, 'reaction');
 		if (reaction) {
 			const body = getTagElement(messageStanza, 'body');
-			// TODO
-			console.log('reaction', body?.textContent, 'for the message with id: ', originalStanzaId);
-			return undefined;
+			const message: MessageFastening = {
+				id: messageId,
+				type: MessageType.FASTENING,
+				action: 'reaction',
+				roomId,
+				date: messageDate,
+				originalStanzaId,
+				from: getId(resource),
+				value: body?.textContent || ''
+			};
+			return message;
 		}
+
+		return undefined;
 	}
 
 	// Affiliation message are not considered, they are replaced by configuration messages

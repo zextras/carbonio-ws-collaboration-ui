@@ -22,6 +22,7 @@ import BubbleActions, { BubbleActionsWrapper } from './bubbleActions/BubbleActio
 import BubbleFooter from './BubbleFooter';
 import BubbleHeader from './BubbleHeader';
 import ForwardInfo from './ForwardInfo';
+import MessageReactionsList from './MessageReactionsList';
 import RepliedTextMessageSectionView from './RepliedTextMessageSectionView';
 import TextContentBubble from './TextContentBubble';
 import {
@@ -238,17 +239,17 @@ const Bubble: FC<BubbleProps> = ({
 					/>
 				)}
 				{messageAttachment && (
-					<>
+					<Padding bottom="0.5rem">
 						<AttachmentView
 							attachment={messageAttachment}
 							isMyMessage={isMyMessage}
 							from={message.from}
 							messageListRef={messageListRef}
 						/>
-						<Padding bottom="0.5rem" />
-					</>
+					</Padding>
 				)}
 				<TextContentBubble textContent={messageFormatted} />
+				<MessageReactionsList message={message} />
 				<BubbleFooter
 					isMyMessage={isMyMessage}
 					date={message.date}

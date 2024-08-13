@@ -58,8 +58,9 @@ export type DateMessage = BasicMessage & {
 
 export type MessageFastening = BasicMessage & {
 	type: MessageType.FASTENING;
-	action: 'delete' | 'edit';
+	action: 'delete' | 'edit' | 'reaction';
 	originalStanzaId: string;
+	from: string;
 	value?: string;
 };
 export enum MessageType {

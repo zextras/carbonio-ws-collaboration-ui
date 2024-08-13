@@ -88,6 +88,7 @@ export const createMockMessageFastening = (fields?: GenericFieldsType): MessageF
 	type: MessageType.FASTENING,
 	action: 'delete',
 	originalStanzaId: 'originalStanzaId',
+	from: 'from',
 	...fields
 });
 
