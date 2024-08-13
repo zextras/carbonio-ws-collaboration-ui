@@ -6,7 +6,7 @@
 
 import React, { useEffect, useMemo } from 'react';
 
-import { Container, Text, Row, Avatar, Padding } from '@zextras/carbonio-design-system';
+import { Container, Text, Row, Avatar } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -113,7 +113,7 @@ const MessageReferenceDisplayed: React.FC<MessageReferenceDisplayedProps> = ({
 			>
 				<Row takeAvailableSpace wrap="nowrap" height="100%">
 					{referenceMessage.attachment && (
-						<Padding right="small">
+						<Row padding={{ right: 'small' }}>
 							<CustomAvatar
 								size="large"
 								icon="FileTextOutline"
@@ -122,9 +122,9 @@ const MessageReferenceDisplayed: React.FC<MessageReferenceDisplayedProps> = ({
 								background={previewURL ? 'gray3' : 'gray0'}
 								picture={previewURL}
 							/>
-						</Padding>
+						</Row>
 					)}
-					<Container mainAlignment="flex-start">
+					<Row takeAvailableSpace mainAlignment="flex-start">
 						<Container mainAlignment="flex-start" orientation="horizontal" gap={'0.25rem'}>
 							<CustomText size="medium" color="secondary">
 								{labelAction}
@@ -149,7 +149,7 @@ const MessageReferenceDisplayed: React.FC<MessageReferenceDisplayedProps> = ({
 								{textMessage}
 							</Text>
 						</Container>
-					</Container>
+					</Row>
 				</Row>
 			</BorderContainer>
 		</Row>
