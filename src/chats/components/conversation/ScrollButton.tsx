@@ -35,7 +35,7 @@ export const ScrollBadge = styled(Badge)`
 	position: absolute;
 	right: -0.25rem;
 	bottom: -0.25rem;
-	padding: 0.2rem 0.0625rem;
+	padding: 0 0.425rem;
 	font-size: 0.6rem;
 `;
 
@@ -85,7 +85,8 @@ const ScrollButton = ({ roomId, onClickCb }: ScrollButtonProps): ReactElement =>
 				<Badge
 					data-testid="scrollButton-unreadCount"
 					value={labelNewMessages}
-					type={!roomMuted ? 'unread' : 'read'}
+					backgroundColor={!roomMuted ? 'primary' : 'gray2'}
+					color={!roomMuted ? 'gray6' : 'gray0'}
 				/>
 			)}
 			<Padding horizontal="extrasmall" />
@@ -99,7 +100,13 @@ const ScrollButton = ({ roomId, onClickCb }: ScrollButtonProps): ReactElement =>
 				backgroundColor="gray6"
 				onClick={onClickCb}
 			/>
-			{unreadCount > 0 && <ScrollBadge value={unreadCount} type={!roomMuted ? 'unread' : 'read'} />}
+			{unreadCount > 0 && (
+				<ScrollBadge
+					value={unreadCount}
+					backgroundColor={!roomMuted ? 'primary' : 'gray2'}
+					color={!roomMuted ? 'gray6' : 'gray0'}
+				/>
+			)}
 		</CustomContainer>
 	);
 };

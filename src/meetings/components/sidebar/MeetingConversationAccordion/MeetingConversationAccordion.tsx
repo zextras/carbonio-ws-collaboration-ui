@@ -97,7 +97,11 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({
 		() =>
 			unreadMessagesCount > 0 ? (
 				<Row padding={{ left: 'small' }} mainAlignment="center" crossAlignment="center">
-					<Badge value={unreadMessagesCount} type={!roomMuted ? 'unread' : 'read'} />
+					<Badge
+						value={unreadMessagesCount}
+						backgroundColor={!roomMuted ? 'primary' : 'gray2'}
+						color={!roomMuted ? 'gray6' : 'gray0'}
+					/>
 				</Row>
 			) : null,
 		[unreadMessagesCount, roomMuted]

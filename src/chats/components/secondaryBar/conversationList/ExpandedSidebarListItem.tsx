@@ -176,7 +176,11 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 		() =>
 			unreadMessagesCount > 0 ? (
 				<Row padding={{ left: 'small' }} mainAlignment="center" crossAlignment="center">
-					<Badge value={unreadMessagesCount} type={!roomMuted ? 'unread' : 'read'} />
+					<Badge
+						value={unreadMessagesCount}
+						backgroundColor={!roomMuted ? 'primary' : 'gray2'}
+						color={!roomMuted ? 'gray6' : 'gray0'}
+					/>
 				</Row>
 			) : null,
 		[unreadMessagesCount, roomMuted]
@@ -203,7 +207,7 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 			</Row>
 			<Row
 				takeAvailableSpace
-				crossAlignment="flex-start"
+				crossAlignment="center"
 				width="fill"
 				padding={{ left: 'small' }}
 				orientation="horizontal"
