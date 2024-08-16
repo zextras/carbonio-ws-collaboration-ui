@@ -108,7 +108,7 @@ const ActionComponent: FC<ActionProps> = ({
 							data-testid={actionTestId ?? 'action-button'}
 							icon={icon}
 							backgroundColor={actionColor}
-							onClick={action}
+							onClick={!isDisabled ? action : (): null => null}
 							disabled={isDisabled}
 						/>
 						<Padding right="large" />

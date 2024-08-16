@@ -75,6 +75,7 @@ const AddNewMemberAction: FC<AddNewMemberProps> = ({ roomId }) => {
 				action={(): void => setAddNewMemberModalOpen(true)}
 				isDisabled={addMemberDisabled}
 				disabledTooltip={removeToAddNewOneLabel}
+				actionTestId="leaveActionButton"
 			/>
 			{addNewMemberModalOpen && (
 				<AddNewMemberModal
