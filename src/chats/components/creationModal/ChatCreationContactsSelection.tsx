@@ -183,24 +183,6 @@ const ChatCreationContactsSelection = ({
 		debouncedAutoComplete();
 	}, [debouncedAutoComplete]);
 
-	const onClickListItem = useCallback(
-		(item: ContactInfo) => (): void => {
-			const newChip: ChipItem<ContactInfo> = {
-				value: item,
-				label: item.displayName || item.email
-			};
-			setContactSelected((contacts: ContactSelected) =>
-				contacts[item.id] ? omit(contacts, item.id) : { ...contacts, [item.id]: item }
-			);
-			setChips((chips) =>
-				find(chips, (chip) => chip.value?.id === item.id)
-					? differenceBy(chips, [newChip], (chip) => chip.value?.id)
-					: union(chips, [newChip])
-			);
-		},
-		[setContactSelected]
-	);
-
 	const chipInputHasError = useMemo(
 		() =>
 			isCreationModal
@@ -210,26 +192,40 @@ const ChatCreationContactsSelection = ({
 		[isCreationModal, contactsSelected, maxGroupMembers, members]
 	);
 
+	const onClickListItem = useCallback(
+		(item: ContactInfo) => (): void => {
+			if ((chipInputHasError && !!contactsSelected[item.id]) || !chipInputHasError) {
+				const newChip: ChipItem<ContactInfo> = {
+					value: item,
+					label: item.displayName || item.email
+				};
+				setContactSelected((contacts: ContactSelected) =>
+					contacts[item.id] ? omit(contacts, item.id) : { ...contacts, [item.id]: item }
+				);
+				setChips((chips) =>
+					find(chips, (chip) => chip.value?.id === item.id)
+						? differenceBy(chips, [newChip], (chip) => chip.value?.id)
+						: union(chips, [newChip])
+				);
+			}
+		},
+		[chipInputHasError, contactsSelected, setContactSelected]
+	);
+
 	const items = useMemo(
 		() =>
-			map(result, (item) => {
-				const clickCb =
-					(chipInputHasError && !!contactsSelected[item.id]) || !chipInputHasError
-						? onClickListItem
-						: () => (): null => null;
-				return (
-					<ListItem key={item.id} active={!!contactsSelected[item.id]}>
-						{() => (
-							<ListParticipant
-								item={item}
-								selected={!!contactsSelected[item.id]}
-								onClickCb={clickCb}
-								isDisabled={chipInputHasError}
-							/>
-						)}
-					</ListItem>
-				);
-			}),
+			map(result, (item) => (
+				<ListItem key={item.id} active={!!contactsSelected[item.id]}>
+					{() => (
+						<ListParticipant
+							item={item}
+							selected={!!contactsSelected[item.id]}
+							onClickCb={onClickListItem}
+							isDisabled={chipInputHasError}
+						/>
+					)}
+				</ListItem>
+			)),
 		[chipInputHasError, contactsSelected, onClickListItem, result]
 	);
 
