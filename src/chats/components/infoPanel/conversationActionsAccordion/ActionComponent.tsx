@@ -20,6 +20,8 @@ import styled, { DefaultTheme } from 'styled-components';
 
 const CustomText = styled(Text)``;
 
+const CustomHoverButton = styled(Button)``;
+
 const CustomIcon = styled(Icon)`
 	padding-right: 0.5rem;
 `;
@@ -36,6 +38,14 @@ const ActionContainer = styled(Container)<{
 			disabled
 				? theme.palette[$actionColor].disabled
 				: theme.palette[$actionColor].regular} !important;
+		${CustomHoverButton} {
+			background-color: ${({ theme, $actionColor, disabled }): string =>
+				disabled
+					? theme.palette[$actionColor].disabled
+					: theme.palette[$actionColor].regular} !important;
+			color: ${({ theme, disabled }): string =>
+				disabled ? theme.palette.gray6.disabled : theme.palette.gray6.regular} !important;
+		}
 		${CustomIcon} {
 			color: ${({ theme, disabled }): string =>
 				disabled ? theme.palette.gray6.disabled : theme.palette.gray6.regular} !important;
@@ -94,7 +104,7 @@ const ActionComponent: FC<ActionProps> = ({
 			>
 				<CustomContainer orientation="horizontal" mainAlignment="flex-start">
 					<Row>
-						<Button
+						<CustomHoverButton
 							data-testid={actionTestId ?? 'action-button'}
 							icon={icon}
 							backgroundColor={actionColor}
