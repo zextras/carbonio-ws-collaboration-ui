@@ -20,12 +20,10 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import GalListItem from './GalListItem';
-import {
-	autoCompleteGalRequest,
-	AutoCompleteGalResponse
-} from '../../../../network/soap/AutoCompleteRequest';
+import { searchUsersByFeatureRequest } from '../../../../network/soap/SearchUsersByFeatureRequest';
 import { getSingleConversationsUserId } from '../../../../store/selectors/RoomsSelectors';
 import useStore from '../../../../store/Store';
+import { SearchUsersByFeatureSoapResponse } from '../../../../types/network/soap/searchUsersByFeatureRequest';
 import { SecondaryBarInfoText } from '../SecondaryBarView';
 
 const CustomContainer = styled(Container)`
@@ -58,7 +56,7 @@ const useFilteredGal = (
 	);
 	const retryLabel = t('action.retry', 'Retry');
 
-	const [filteredGal, setFilteredGal] = useState<AutoCompleteGalResponse>([]);
+	const [filteredGal, setFilteredGal] = useState<SearchUsersByFeatureSoapResponse>([]);
 	const [requestStatus, setRequestStatus] = useState<'loading' | 'success' | 'error'>('loading');
 
 	const singleConversationsUserId = useStore(getSingleConversationsUserId);
@@ -66,8 +64,8 @@ const useFilteredGal = (
 	const searchOnGal = useCallback((text: string) => {
 		if (text !== '') {
 			setRequestStatus('loading');
-			autoCompleteGalRequest(text)
-				.then((response: AutoCompleteGalResponse) => {
+			searchUsersByFeatureRequest(text)
+				.then((response: SearchUsersByFeatureSoapResponse) => {
 					setRequestStatus('success');
 					setFilteredGal(response);
 				})
@@ -99,10 +97,10 @@ const useFilteredGal = (
 		const filteredGalWithUserId = differenceWith(
 			filteredGal,
 			singleConversationsUserId,
-			(gal, userId) => gal.zimbraId === userId
+			(gal, userId) => gal.id === userId
 		);
-		return map(filteredGalWithUserId, (contactMatch) => (
-			<GalListItem contact={contactMatch} expanded={expanded} key={contactMatch.zimbraId} />
+		return map(filteredGalWithUserId, (contactInfo) => (
+			<GalListItem contact={contactInfo} expanded={expanded} key={contactInfo.id} />
 		));
 	}, [expanded, filteredGal, singleConversationsUserId]);
 

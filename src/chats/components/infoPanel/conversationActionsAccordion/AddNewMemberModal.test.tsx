@@ -11,7 +11,7 @@ import { screen } from '@testing-library/react';
 import AddNewMemberModal from './AddNewMemberModal';
 import useStore from '../../../../store/Store';
 import { createMockMember, createMockRoom } from '../../../../tests/createMock';
-import { mockedAutoCompleteGalRequest } from '../../../../tests/mocks/AutoCompleteGal';
+import { mockSearchUsersByFeatureRequest } from '../../../../tests/mocks/SearchUsersByFeature';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
 import { RootStore } from '../../../../types/store/StoreTypes';
@@ -26,7 +26,7 @@ const testRoom: RoomBe = createMockRoom({
 
 describe('Add new Member Modal', () => {
 	test('Everything should be rendered - checkbox selected', async () => {
-		mockedAutoCompleteGalRequest.mockReturnValue([]);
+		mockSearchUsersByFeatureRequest.mockReturnValue([]);
 		const store: RootStore = useStore.getState();
 		store.addRoom(testRoom);
 		setup(
@@ -63,7 +63,7 @@ describe('Add new Member Modal', () => {
 		expect(checkboxIcon2).toBeInTheDocument();
 	});
 	test('Everything should be rendered - checkbox not selected', async () => {
-		mockedAutoCompleteGalRequest.mockReturnValue([]);
+		mockSearchUsersByFeatureRequest.mockReturnValue([]);
 		const store: RootStore = useStore.getState();
 		store.addRoom(testRoom);
 		setup(
