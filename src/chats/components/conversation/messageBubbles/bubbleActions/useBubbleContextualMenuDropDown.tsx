@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { FC, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { ReactElement, useCallback, useContext, useMemo, useRef, useState } from 'react';
 
 import {
 	Button,
@@ -32,15 +32,14 @@ import { CapabilityType } from '../../../../../types/store/SessionTypes';
 import { isPreviewSupported } from '../../../../../utils/attachmentUtils';
 import { canPerformAction } from '../../../../../utils/MessageActionsUtils';
 
-type BubbleContextualMenuDropDownProps = {
-	message: TextMessage;
-	isMyMessage: boolean;
-};
-
-const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
-	message,
-	isMyMessage
-}) => {
+const useBubbleContextualMenuDropDown = (
+	message: TextMessage,
+	isMyMessage: boolean
+): {
+	MenuDropdown: ReactElement;
+	menuDropdownActive: boolean;
+	menuDropdownRef: React.RefObject<HTMLDivElement>;
+} => {
 	const xmppClient = useStore(getXmppClient);
 
 	const [t] = useTranslation();
@@ -81,17 +80,6 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 
 	const onDropdownOpen = useCallback(() => setDropdownActive(true), [setDropdownActive]);
 	const onDropdownClose = useCallback(() => setDropdownActive(false), [setDropdownActive]);
-
-	const closeDropdownOnScroll = useCallback(
-		() => dropdownActive && dropDownRef.current?.click(),
-		[dropdownActive]
-	);
-
-	useEffect(() => {
-		const messageListRef = window.document.getElementById(`messageListRef${message.roomId}`);
-		messageListRef?.addEventListener('scroll', closeDropdownOnScroll);
-		return (): void => messageListRef?.removeEventListener('scroll', closeDropdownOnScroll);
-	}, [closeDropdownOnScroll, message.roomId]);
 
 	const setForwardModeOn = useCallback(() => {
 		setDraftMessage(message.roomId, false, '');
@@ -271,27 +259,39 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 		downloadAction
 	]);
 
-	return (
-		<Dropdown
-			data-testid={`cxtMenuDropdown-${message.id}`}
-			items={contextualMenuActions}
-			onOpen={onDropdownOpen}
-			onClose={onDropdownClose}
-			disableRestoreFocus
-			disablePortal
-			placement="right-start"
-			ref={dropDownRef}
-		>
-			<Button
-				size="small"
-				icon="ArrowIosDownward"
-				type="ghost"
-				color="text"
-				title={messageActionsTooltip}
-				onClick={(): null => null}
-			/>
-		</Dropdown>
+	const MenuDropdown = useMemo(
+		() => (
+			<Dropdown
+				data-testid={`cxtMenuDropdown-${message.id}`}
+				items={contextualMenuActions}
+				onOpen={onDropdownOpen}
+				onClose={onDropdownClose}
+				disableRestoreFocus
+				disablePortal
+				placement="right-start"
+				ref={dropDownRef}
+			>
+				<Button
+					size="small"
+					icon="ArrowIosDownward"
+					type="ghost"
+					color="text"
+					title={messageActionsTooltip}
+					onClick={(): null => null}
+				/>
+			</Dropdown>
+		),
+		[
+			contextualMenuActions,
+			dropDownRef,
+			message.id,
+			messageActionsTooltip,
+			onDropdownClose,
+			onDropdownOpen
+		]
 	);
+
+	return { MenuDropdown, menuDropdownActive: dropdownActive, menuDropdownRef: dropDownRef };
 };
 
-export default BubbleContextualMenuDropDown;
+export default useBubbleContextualMenuDropDown;

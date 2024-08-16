@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { ReactElement, useCallback, useMemo, useRef, useState } from 'react';
 
 import { Button, Container, Dropdown } from '@zextras/carbonio-design-system';
 import styled from 'styled-components';
@@ -13,10 +13,6 @@ import { getXmppClient } from '../../../../../store/selectors/ConnectionSelector
 import { getMyLastReaction } from '../../../../../store/selectors/FasteningsSelectors';
 import useStore from '../../../../../store/Store';
 import { TextMessage } from '../../../../../types/store/MessageTypes';
-
-type BubbleReactionsProps = {
-	message: TextMessage;
-};
 
 const EmojiBox = styled(Container)<{
 	$emoji: string;
@@ -36,7 +32,13 @@ const EmojiBox = styled(Container)<{
 		$selected && `background-color: ${theme.palette.highlight.active};`};
 `;
 
-const BubbleReactions: FC<BubbleReactionsProps> = ({ message }) => {
+const useBubbleReactions = (
+	message: TextMessage
+): {
+	ReactionsDropdown: ReactElement;
+	reactionsDropdownActive: boolean;
+	reactionsDropdownRef: React.RefObject<HTMLDivElement>;
+} => {
 	const xmppClient = useStore(getXmppClient);
 
 	const myReaction = useStore((store) =>
@@ -49,17 +51,6 @@ const BubbleReactions: FC<BubbleReactionsProps> = ({ message }) => {
 
 	const onDropdownOpen = useCallback(() => setDropdownActive(true), [setDropdownActive]);
 	const onDropdownClose = useCallback(() => setDropdownActive(false), [setDropdownActive]);
-
-	const closeDropdownOnScroll = useCallback(
-		() => dropdownActive && dropDownRef.current?.click(),
-		[dropdownActive]
-	);
-
-	useEffect(() => {
-		const messageListRef = window.document.getElementById(`messageListRef${message.roomId}`);
-		messageListRef?.addEventListener('scroll', closeDropdownOnScroll);
-		return (): void => messageListRef?.removeEventListener('scroll', closeDropdownOnScroll);
-	}, [closeDropdownOnScroll, message.roomId]);
 
 	const sendReaction = useCallback(
 		(emoji: string) => {
@@ -112,27 +103,35 @@ const BubbleReactions: FC<BubbleReactionsProps> = ({ message }) => {
 		[myReaction, sendReaction]
 	);
 
-	return (
-		<Dropdown
-			data-testid={`reactionsDropdown-${message.id}`}
-			items={emojiItems}
-			onOpen={onDropdownOpen}
-			onClose={onDropdownClose}
-			disableAutoFocus
-			disableRestoreFocus
-			disablePortal
-			placement="top"
-			ref={dropDownRef}
-		>
-			<Button
-				icon="SmileOutline"
-				type="ghost"
-				size="small"
-				color="text"
-				onClick={(): null => null}
-			/>
-		</Dropdown>
+	const ReactionsDropdown = useMemo(
+		() => (
+			<Dropdown
+				data-testid={`reactionsDropdown-${message.id}`}
+				items={emojiItems}
+				onOpen={onDropdownOpen}
+				onClose={onDropdownClose}
+				disableAutoFocus
+				disableRestoreFocus
+				disablePortal
+				placement="top"
+				ref={dropDownRef}
+			>
+				<Button
+					icon="SmileOutline"
+					type="ghost"
+					size="small"
+					color="text"
+					onClick={(): null => null}
+				/>
+			</Dropdown>
+		),
+		[emojiItems, dropDownRef, message.id, onDropdownClose, onDropdownOpen]
 	);
+	return {
+		ReactionsDropdown,
+		reactionsDropdownActive: dropdownActive,
+		reactionsDropdownRef: dropDownRef
+	};
 };
 
-export default BubbleReactions;
+export default useBubbleReactions;

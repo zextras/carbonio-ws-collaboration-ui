@@ -4,13 +4,13 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { FC, ReactElement } from 'react';
+import React, { FC, ReactElement, useCallback, useEffect } from 'react';
 
 import { Container, Theme } from '@zextras/carbonio-design-system';
 import styled, { css, DefaultTheme, FlattenSimpleInterpolation } from 'styled-components';
 
-import BubbleContextualMenuDropDown from './BubbleContextualMenuDropDown';
-import BubbleReactions from './BubbleReactions';
+import useBubbleContextualMenuDropDown from './useBubbleContextualMenuDropDown';
+import useBubbleReactions from './useBubbleReactions';
 import { Z_INDEX_RANK } from '../../../../../types/generics';
 import { TextMessage } from '../../../../../types/store/MessageTypes';
 
@@ -24,6 +24,7 @@ export const BubbleActionsWrapper = styled.div<{
 	'data-testid': string;
 	isMyMessage: boolean;
 	theme?: DefaultTheme;
+	$isActive: boolean;
 }>`
 	position: absolute;
 	display: flex;
@@ -80,6 +81,12 @@ export const BubbleActionsWrapper = styled.div<{
 		);
 		color: ${theme.palette.text.regular};
 	`};
+
+	${({ $isActive }): FlattenSimpleInterpolation | false =>
+		$isActive &&
+		css`
+			opacity: 1;
+		`};
 `;
 
 type BubbleActionsProps = {
@@ -87,13 +94,38 @@ type BubbleActionsProps = {
 	isMyMessage: boolean;
 };
 
-const BubbleActions: FC<BubbleActionsProps> = ({ message, isMyMessage }) => (
-	<DropDownWrapper padding={{ all: 'none' }}>
-		<BubbleActionsWrapper data-testid={`cxtMenu-${message.id}-iconOpen`} isMyMessage={isMyMessage}>
-			<BubbleReactions message={message} />
-			<BubbleContextualMenuDropDown message={message} isMyMessage={isMyMessage} />
-		</BubbleActionsWrapper>
-	</DropDownWrapper>
-);
+const BubbleActions: FC<BubbleActionsProps> = ({ message, isMyMessage }) => {
+	const { MenuDropdown, menuDropdownActive, menuDropdownRef } = useBubbleContextualMenuDropDown(
+		message,
+		isMyMessage
+	);
+
+	const { ReactionsDropdown, reactionsDropdownActive, reactionsDropdownRef } =
+		useBubbleReactions(message);
+
+	const closeDropdownOnScroll = useCallback(() => {
+		menuDropdownActive && menuDropdownRef.current?.click();
+		reactionsDropdownActive && reactionsDropdownRef.current?.click();
+	}, [menuDropdownActive, menuDropdownRef, reactionsDropdownActive, reactionsDropdownRef]);
+
+	useEffect(() => {
+		const messageListRef = window.document.getElementById(`messageListRef${message.roomId}`);
+		messageListRef?.addEventListener('scroll', closeDropdownOnScroll);
+		return (): void => messageListRef?.removeEventListener('scroll', closeDropdownOnScroll);
+	}, [closeDropdownOnScroll, message.roomId]);
+
+	return (
+		<DropDownWrapper padding={{ all: 'none' }}>
+			<BubbleActionsWrapper
+				data-testid={`cxtMenu-${message.id}-iconOpen`}
+				isMyMessage={isMyMessage}
+				$isActive={menuDropdownActive || reactionsDropdownActive}
+			>
+				{ReactionsDropdown}
+				{MenuDropdown}
+			</BubbleActionsWrapper>
+		</DropDownWrapper>
+	);
+};
 
 export default BubbleActions;
