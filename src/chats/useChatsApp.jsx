@@ -11,7 +11,6 @@ import { addRoute, Spinner } from '@zextras/carbonio-shell-ui';
 
 import ConnectionSnackbarManager from './components/ConnectionSnackbarManager';
 import SecondaryBarView from './components/secondaryBar/SecondaryBarView';
-import { LogoBeta } from './LogoBeta';
 import ShimmeringConversationView from './views/shimmerViews/ShimmeringConversationView';
 import ShimmeringInfoPanelView from './views/shimmerViews/ShimmeringInfoPanelView';
 import { CHATS_ROUTE, PRODUCT_NAME } from '../constants/appConstants';
@@ -47,7 +46,7 @@ export default function useChatsApp() {
 			route: CHATS_ROUTE,
 			visible: true,
 			label: PRODUCT_NAME,
-			primaryBar: LogoBeta,
+			primaryBar: 'WscOutline',
 			appView: ChatsMain,
 			secondaryBar: SecondaryBar
 		});
