@@ -192,6 +192,14 @@ const ChatCreationContactsSelection = ({
 		[isCreationModal, contactsSelected, maxGroupMembers, members]
 	);
 
+	const addOrRemoveChip = useCallback((newChip) => {
+		setChips((chips) =>
+			find(chips, (chip) => chip.value?.id === newChip.value?.id)
+				? differenceBy(chips, [newChip], (chip) => chip.value?.id)
+				: union(chips, [newChip])
+		);
+	}, []);
+
 	const onClickListItem = useCallback(
 		(item: ContactInfo) => (): void => {
 			if ((chipInputHasError && !!contactsSelected[item.id]) || !chipInputHasError) {
@@ -202,14 +210,10 @@ const ChatCreationContactsSelection = ({
 				setContactSelected((contacts: ContactSelected) =>
 					contacts[item.id] ? omit(contacts, item.id) : { ...contacts, [item.id]: item }
 				);
-				setChips((chips) =>
-					find(chips, (chip) => chip.value?.id === item.id)
-						? differenceBy(chips, [newChip], (chip) => chip.value?.id)
-						: union(chips, [newChip])
-				);
+				addOrRemoveChip(newChip);
 			}
 		},
-		[chipInputHasError, contactsSelected, setContactSelected]
+		[addOrRemoveChip, chipInputHasError, contactsSelected, setContactSelected]
 	);
 
 	const items = useMemo(
