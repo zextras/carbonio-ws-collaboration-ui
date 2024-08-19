@@ -18,6 +18,21 @@ const CustomContainer = styled(Container)`
 	border-radius: 1.25rem;
 	font-size: 0.9rem;
 	cursor: default;
+	animation: bounceIn 0.4s ease-in-out;
+
+	@keyframes bounceIn {
+		0% {
+			transform: scale(0.5);
+			opacity: 0;
+		}
+		60% {
+			transform: scale(1.1);
+			opacity: 1;
+		}
+		100% {
+			transform: scale(1);
+		}
+	}
 `;
 
 const CustomAvatar = styled(Avatar)<{ $numberBadge: boolean }>`
