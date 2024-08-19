@@ -21,7 +21,7 @@ const useLoadFiles = (roomId: string, clearInput?: () => void): ((files: FileLis
 	const titleLabel = t('conversation.longCaption.modal.title', 'Message too long for caption');
 	const descriptionLabel = t(
 		'conversation.longCaption.modal.description',
-		'The message you are attaching this item to is very long and cannot be used as an attachment caption.'
+		"This text is too long and it can't be used as the attachment caption."
 	);
 	const description2Label = t(
 		'conversation.longCaption.modal.additionalDetails',
