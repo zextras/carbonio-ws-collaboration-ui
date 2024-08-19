@@ -7,6 +7,7 @@
 import React, { ReactElement, useCallback, useMemo, useRef, useState } from 'react';
 
 import { Button, Container, Dropdown } from '@zextras/carbonio-design-system';
+import { map } from 'lodash';
 import styled from 'styled-components';
 
 import { getXmppClient } from '../../../../../store/selectors/ConnectionSelector';
@@ -70,31 +71,17 @@ const useBubbleReactions = (
 				disabled: true,
 				customComponent: (
 					<Container orientation="horizontal">
-						<EmojiBox
-							$emoji={'\uD83D\uDC4D'}
-							$selected={myReaction === '\uD83D\uDC4D'}
-							onClick={() => sendReaction('\uD83D\uDC4D')}
-						/>
-						<EmojiBox
-							$emoji={'\u2764\uFE0F'}
-							$selected={myReaction === '\u2764\uFE0F'}
-							onClick={() => sendReaction('\u2764\uFE0F')}
-						/>
-						<EmojiBox
-							$emoji={'\uD83D\uDE02'}
-							$selected={myReaction === '\uD83D\uDE02'}
-							onClick={() => sendReaction('\uD83D\uDE02')}
-						/>
-						<EmojiBox
-							$emoji={'\uD83D\uDE22'}
-							$selected={myReaction === '\uD83D\uDE22'}
-							onClick={() => sendReaction('\uD83D\uDE22')}
-						/>
-						<EmojiBox
-							$emoji={'\uD83D\uDC4E'}
-							$selected={myReaction === '\uD83D\uDC4E'}
-							onClick={() => sendReaction('\uD83D\uDC4E')}
-						/>
+						{map(
+							['\uD83D\uDC4D', '\u2764\uFE0F', '\uD83D\uDE02', '\uD83D\uDE22', '\uD83D\uDC4E'],
+							(emoji) => (
+								<EmojiBox
+									key={emoji}
+									$emoji={emoji}
+									$selected={myReaction === emoji}
+									onClick={() => sendReaction(emoji)}
+								/>
+							)
+						)}
 					</Container>
 				),
 				padding: '0'

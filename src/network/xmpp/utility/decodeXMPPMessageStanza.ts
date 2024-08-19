@@ -48,7 +48,7 @@ export function decodeXMPPMessageStanza(
 		// Message fastening for a delete message
 		const retracted = getTagElement(fasteningElement, 'retract');
 		if (retracted) {
-			const message: MessageFastening = {
+			return {
 				id: messageId,
 				type: MessageType.FASTENING,
 				action: 'delete',
@@ -56,15 +56,14 @@ export function decodeXMPPMessageStanza(
 				date: messageDate,
 				originalStanzaId,
 				from: getId(resource)
-			};
-			return message;
+			} as MessageFastening;
 		}
 
 		// Message fastening for an edited message
 		const edited = getTagElement(fasteningElement, 'edit');
 		if (edited) {
 			const body = getTagElement(messageStanza, 'body');
-			const message: MessageFastening = {
+			return {
 				id: messageId,
 				type: MessageType.FASTENING,
 				action: 'edit',
@@ -72,16 +71,15 @@ export function decodeXMPPMessageStanza(
 				date: messageDate,
 				originalStanzaId,
 				from: getId(resource),
-				value: body?.textContent || ''
-			};
-			return message;
+				value: body?.textContent ?? ''
+			} as MessageFastening;
 		}
 
 		// Message fastening for a message reaction
 		const reaction = getTagElement(fasteningElement, 'reaction');
 		if (reaction) {
 			const body = getTagElement(messageStanza, 'body');
-			const message: MessageFastening = {
+			return {
 				id: messageId,
 				type: MessageType.FASTENING,
 				action: 'reaction',
@@ -89,11 +87,9 @@ export function decodeXMPPMessageStanza(
 				date: messageDate,
 				originalStanzaId,
 				from: getId(resource),
-				value: body?.textContent || ''
-			};
-			return message;
+				value: body?.textContent ?? ''
+			} as MessageFastening;
 		}
-
 		return undefined;
 	}
 
