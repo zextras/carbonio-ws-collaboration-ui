@@ -22,7 +22,6 @@ import BubbleActions, { BubbleActionsWrapper } from './bubbleActions/BubbleActio
 import BubbleFooter from './BubbleFooter';
 import BubbleHeader from './BubbleHeader';
 import ForwardInfo from './ForwardInfo';
-import MessageReactionsList from './MessageReactionsList';
 import RepliedTextMessageSectionView from './RepliedTextMessageSectionView';
 import TextContentBubble from './TextContentBubble';
 import {
@@ -249,7 +248,6 @@ const Bubble: FC<BubbleProps> = ({
 					</Padding>
 				)}
 				<TextContentBubble textContent={messageFormatted} />
-				<MessageReactionsList message={message} />
 				<BubbleFooter
 					isMyMessage={isMyMessage}
 					date={message.date}
@@ -258,6 +256,9 @@ const Bubble: FC<BubbleProps> = ({
 					messageExtension={extension}
 					messageSize={size}
 					canSeeMessageReads={canSeeMessageReads}
+					showReactions
+					roomId={message.roomId}
+					stanzaId={message.stanzaId}
 				/>
 			</BubbleContainer>
 			{checkboxShouldBeVisible && (

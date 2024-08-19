@@ -20,9 +20,11 @@ const CustomContainer = styled(Container)`
 	cursor: default;
 `;
 
-const CustomAvatar = styled(Avatar)`
+const CustomAvatar = styled(Avatar)<{ $numberBadge: boolean }>`
 	> p {
 		font-size: 0.5rem;
+		${({ $numberBadge, theme }): string | false =>
+			$numberBadge && `font-size: 0.75rem; color: ${theme.palette.text.regular};`}
 	}
 `;
 
@@ -49,6 +51,11 @@ const ReactionChip = ({ reaction, from }: ReactionChipProps): ReactElement => {
 		[from]
 	);
 
+	const colorToShow = useMemo(
+		() => (size(from) === 1 ? avatarColor : 'gray4'),
+		[from, avatarColor]
+	);
+
 	return (
 		<Tooltip label={tooltipLabel}>
 			<CustomContainer
@@ -67,7 +74,8 @@ const ReactionChip = ({ reaction, from }: ReactionChipProps): ReactElement => {
 					shape="round"
 					picture={pictureToShow}
 					icon={avatarIcon}
-					background={avatarColor}
+					background={colorToShow}
+					$numberBadge={size(from) > 1}
 				/>
 			</CustomContainer>
 		</Tooltip>

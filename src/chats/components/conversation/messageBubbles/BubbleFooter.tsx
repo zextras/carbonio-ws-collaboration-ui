@@ -18,6 +18,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
+import MessageReactionsList from './MessageReactionsList';
 import { MarkerStatus } from '../../../../types/store/MarkersTypes';
 import { formatDate } from '../../../../utils/dateUtils';
 
@@ -29,7 +30,14 @@ type BubbleFooterProps = {
 	messageSize?: string;
 	isEdited?: boolean;
 	canSeeMessageReads?: boolean | number;
+	showReactions?: boolean;
+	roomId?: string;
+	stanzaId?: string;
 };
+
+const CustomRow = styled(Row)`
+	overflow: hidden;
+`;
 
 const ItalicText = styled(Text)`
 	font-style: italic;
@@ -43,7 +51,10 @@ const BubbleFooter: FC<BubbleFooterProps> = ({
 	messageExtension,
 	messageSize,
 	isEdited,
-	canSeeMessageReads
+	canSeeMessageReads,
+	roomId,
+	stanzaId,
+	showReactions = false
 }) => {
 	const [t] = useTranslation();
 	const editedLabel = t('message.edited', 'edited');
@@ -87,13 +98,16 @@ const BubbleFooter: FC<BubbleFooterProps> = ({
 			crossAlignment="flex-end"
 			padding={{ top: 'small' }}
 		>
-			<Row takeAvailableSpace mainAlignment="flex-start" padding={{ right: 'medium' }}>
-				{messageExtension && messageSize && (
-					<TextWithTooltip color="secondary" size="small">
-						{messageExtension} • {messageSize}
-					</TextWithTooltip>
-				)}
-			</Row>
+			<CustomRow takeAvailableSpace mainAlignment="flex-start" padding={{ right: 'medium' }}>
+				<Container orientation="horizontal" width="fit" gap="0.5rem">
+					{messageExtension && messageSize && (
+						<TextWithTooltip color="secondary" size="small">
+							{messageExtension} • {messageSize}
+						</TextWithTooltip>
+					)}
+					{showReactions && <MessageReactionsList roomId={roomId!} stanzaId={stanzaId!} />}
+				</Container>
+			</CustomRow>
 			<Row orientation="horizontal" width="fit">
 				{isEdited && (
 					<Container width="fit">

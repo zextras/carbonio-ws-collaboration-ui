@@ -44,10 +44,9 @@ export function onHistoryMessageStanza(message: Element): true {
 		const queryId = getAttribute(result, 'queryid');
 		switch (queryId) {
 			case MamRequestType.HISTORY: {
+				HistoryAccumulator.addMessageToHistory(historyMessage.roomId, historyMessage);
 				if (historyMessage.type === MessageType.FASTENING) {
 					useStore.getState().addFastening(historyMessage);
-				} else {
-					HistoryAccumulator.addMessageToHistory(historyMessage.roomId, historyMessage);
 				}
 				break;
 			}
@@ -105,26 +104,46 @@ export function onRequestHistory(stanza: Element, unread?: number): void {
 
 	const historyMessages = HistoryAccumulator.returnHistory(roomId);
 
+	// Filter messages by type
+	const storeMessages = filter(
+		historyMessages,
+		(message) =>
+			message.type === MessageType.TEXT_MSG || message.type === MessageType.CONFIGURATION_MSG
+	);
+	const fasteningMessages = filter(
+		historyMessages,
+		(message) => message.type === MessageType.FASTENING
+	);
+
+	// If there are only fastening messages in the history, request more messages
+	if (size(storeMessages) === 0 && size(fasteningMessages) > 0) {
+		console.log('Requesting more messages - only fastening messages in the history');
+		xmppClient.requestHistory(roomId, fasteningMessages[0].date, 10);
+	}
+
 	// History is fully loaded if the response is marked as complete
 	// or if there are no messages in the response because the history has been cleared
-	if (isHistoryFullyLoaded || size(historyMessages) === 0) store.setHistoryIsFullyLoaded(roomId);
+	if (isHistoryFullyLoaded || size(storeMessages) === 0) {
+		console.log('History is fully loaded');
+		store.setHistoryIsFullyLoaded(roomId);
+	}
 
 	// If unread are more than loaded text messages, request history again
 	// Do this check here to load history only when user opens conversation
-	if (size(historyMessages) > 0 && unread && unread > 0) {
-		const textMessages = filter(
-			unionBy(historyMessages, store.messages[roomId], 'id'),
-			(message) => message.type === MessageType.TEXT_MSG
-		);
+	if (size(storeMessages) > 0 && unread && unread > 0) {
+		const textMessages = filter(unionBy(storeMessages, store.messages[roomId], 'id'));
 		const unreadNotLoaded = unread - size(textMessages);
 		if (unreadNotLoaded > 0) {
+			console.log('Requesting more messages - unread messages not loaded');
 			// Request 5 more messages to avoid a new history request when user scrolls to the first new message
 			xmppClient.requestHistory(roomId, historyMessages[0].date, unreadNotLoaded + 5, unread);
 		}
 	}
 
 	// Store history messages on store updating the history of the room
-	if (historyMessages.length > 0) store.updateHistory(roomId, historyMessages);
+	if (size(storeMessages) > 0) {
+		store.updateHistory(roomId, storeMessages);
+	}
 
 	// Add message of creation room at the start of the history
 	const historyIsBeenCleared = !!store.rooms[roomId].userSettings?.clearedAt;
@@ -134,7 +153,7 @@ export function onRequestHistory(stanza: Element, unread?: number): void {
 	store.setHistoryLoadDisabled(roomId, false);
 
 	// Request message subject of reply
-	forEach(historyMessages, (message) => {
+	forEach(storeMessages, (message) => {
 		const messageSubjectOfReplyId = (message as TextMessage).replyTo;
 		if (messageSubjectOfReplyId) {
 			xmppClient.requestMessageSubjectOfReply(message.roomId, messageSubjectOfReplyId, message.id);
