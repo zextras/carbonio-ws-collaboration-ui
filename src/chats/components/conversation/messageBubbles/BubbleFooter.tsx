@@ -35,10 +35,6 @@ type BubbleFooterProps = {
 	stanzaId?: string;
 };
 
-const CustomRow = styled(Row)`
-	overflow: hidden;
-`;
-
 const ItalicText = styled(Text)`
 	font-style: italic;
 	padding-right: ${({ theme }): string => theme.sizes.padding.small};
@@ -98,7 +94,7 @@ const BubbleFooter: FC<BubbleFooterProps> = ({
 			crossAlignment="flex-end"
 			padding={{ top: 'small' }}
 		>
-			<CustomRow takeAvailableSpace mainAlignment="flex-start" padding={{ right: 'medium' }}>
+			<Row takeAvailableSpace mainAlignment="flex-start" padding={{ right: 'medium' }}>
 				<Container orientation="horizontal" width="fit" gap="0.5rem">
 					{messageExtension && messageSize && (
 						<TextWithTooltip color="secondary" size="small">
@@ -107,7 +103,7 @@ const BubbleFooter: FC<BubbleFooterProps> = ({
 					)}
 					{showReactions && <MessageReactionsList roomId={roomId!} stanzaId={stanzaId!} />}
 				</Container>
-			</CustomRow>
+			</Row>
 			<Row orientation="horizontal" width="fit">
 				{isEdited && (
 					<Container width="fit">

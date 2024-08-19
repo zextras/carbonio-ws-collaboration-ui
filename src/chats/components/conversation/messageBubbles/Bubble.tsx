@@ -22,6 +22,7 @@ import BubbleActions, { BubbleActionsWrapper } from './bubbleActions/BubbleActio
 import BubbleFooter from './BubbleFooter';
 import BubbleHeader from './BubbleHeader';
 import ForwardInfo from './ForwardInfo';
+import MessageReactionsList from './MessageReactionsList';
 import RepliedTextMessageSectionView from './RepliedTextMessageSectionView';
 import TextContentBubble from './TextContentBubble';
 import {
@@ -212,6 +213,7 @@ const Bubble: FC<BubbleProps> = ({
 				key={message.id}
 				height="fit"
 				width="fit"
+				crossAlignment="flex-start"
 				maxWidth={messageAttachment && !message.forwarded ? '60%' : '75%'}
 				padding={{ all: 'medium' }}
 				background={isMyMessage ? 'highlight' : 'gray6'}
@@ -248,6 +250,9 @@ const Bubble: FC<BubbleProps> = ({
 					</Padding>
 				)}
 				<TextContentBubble textContent={messageFormatted} />
+				{messageAttachment && (
+					<MessageReactionsList roomId={message.roomId} stanzaId={message.stanzaId} />
+				)}
 				<BubbleFooter
 					isMyMessage={isMyMessage}
 					date={message.date}
@@ -256,7 +261,7 @@ const Bubble: FC<BubbleProps> = ({
 					messageExtension={extension}
 					messageSize={size}
 					canSeeMessageReads={canSeeMessageReads}
-					showReactions
+					showReactions={!messageAttachment}
 					roomId={message.roomId}
 					stanzaId={message.stanzaId}
 				/>

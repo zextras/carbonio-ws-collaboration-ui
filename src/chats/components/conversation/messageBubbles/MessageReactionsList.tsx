@@ -8,6 +8,7 @@ import React, { FC, useMemo } from 'react';
 
 import { Container } from '@zextras/carbonio-design-system';
 import { forEach, map, reverse } from 'lodash';
+import styled from 'styled-components';
 
 import ReactionChip from './ReactionChip';
 import { getReactionFastenings } from '../../../../store/selectors/FasteningsSelectors';
@@ -17,6 +18,10 @@ type BubbleReactionsProps = {
 	roomId: string;
 	stanzaId: string;
 };
+
+const ReactionChipContainer = styled(Container)`
+	flex-wrap: wrap;
+`;
 
 const MessageReactionsList: FC<BubbleReactionsProps> = ({ roomId, stanzaId }) => {
 	const reactions = useStore((store) => getReactionFastenings(store, roomId, stanzaId));
@@ -45,7 +50,7 @@ const MessageReactionsList: FC<BubbleReactionsProps> = ({ roomId, stanzaId }) =>
 	);
 
 	return (
-		<Container
+		<ReactionChipContainer
 			orientation="horizontal"
 			mainAlignment="flex-start"
 			padding={{ right: 'small' }}
@@ -53,7 +58,7 @@ const MessageReactionsList: FC<BubbleReactionsProps> = ({ roomId, stanzaId }) =>
 			width="fit"
 		>
 			{reactionsList}
-		</Container>
+		</ReactionChipContainer>
 	);
 };
 
