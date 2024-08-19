@@ -67,7 +67,10 @@ const MessageHistoryLoader = ({
 	const handleHistoryLoader = useCallback(
 		debounce(() => {
 			const roomMessages = useStore.getState().messages[roomId];
-			const date = first(roomMessages)?.date ?? now();
+			const date =
+				useStore.getState().activeConversations[roomId]?.lastMamMessage?.date ??
+				first(roomMessages)?.date ??
+				now();
 			if (!historyLoadedDisabled) {
 				xmppClient.requestHistory(roomId, date, 50, useStore.getState().unreads[roomId]);
 				setHistoryLoadDisabled(roomId, true);
@@ -93,7 +96,7 @@ const MessageHistoryLoader = ({
 			);
 			intersectionObserverRef.current.observe(messageHistoryLoaderRef.current);
 		}
-		return () => intersectionObserverRef.current?.disconnect();
+		return (): void => intersectionObserverRef.current?.disconnect();
 	}, [handleHistoryLoader, messageHistoryLoaderRef, messageListRef]);
 
 	return (

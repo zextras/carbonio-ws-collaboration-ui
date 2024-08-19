@@ -103,6 +103,7 @@ export function onRequestHistory(stanza: Element, unread?: number): void {
 	const { xmppClient } = store.connections;
 
 	const historyMessages = HistoryAccumulator.returnHistory(roomId);
+	store.setLastMamMessage(historyMessages[0]);
 
 	// Filter messages by type
 	const storeMessages = filter(
@@ -117,14 +118,12 @@ export function onRequestHistory(stanza: Element, unread?: number): void {
 
 	// If there are only fastening messages in the history, request more messages
 	if (size(storeMessages) === 0 && size(fasteningMessages) > 0) {
-		console.log('Requesting more messages - only fastening messages in the history');
-		xmppClient.requestHistory(roomId, fasteningMessages[0].date, 10);
+		xmppClient.requestHistory(roomId, fasteningMessages[0].date, 50);
 	}
 
 	// History is fully loaded if the response is marked as complete
 	// or if there are no messages in the response because the history has been cleared
-	if (isHistoryFullyLoaded || size(storeMessages) === 0) {
-		console.log('History is fully loaded');
+	if (isHistoryFullyLoaded || size(historyMessages) === 0) {
 		store.setHistoryIsFullyLoaded(roomId);
 	}
 
@@ -134,7 +133,6 @@ export function onRequestHistory(stanza: Element, unread?: number): void {
 		const textMessages = filter(unionBy(storeMessages, store.messages[roomId], 'id'));
 		const unreadNotLoaded = unread - size(textMessages);
 		if (unreadNotLoaded > 0) {
-			console.log('Requesting more messages - unread messages not loaded');
 			// Request 5 more messages to avoid a new history request when user scrolls to the first new message
 			xmppClient.requestHistory(roomId, historyMessages[0].date, unreadNotLoaded + 5, unread);
 		}
