@@ -70,7 +70,7 @@ describe('Chat Creation Modal', () => {
 		expect(list).toBeInTheDocument();
 		const footerButton = await screen.findByRole('button', { name: /create/i });
 		expect(footerButton).toBeInTheDocument();
-		expect(footerButton).toHaveAttribute('disabled');
+		expect(footerButton).toBeDisabled();
 	});
 
 	test('Creating a 1to1 Chat add a placeholder room', async () => {
@@ -87,10 +87,10 @@ describe('Chat Creation Modal', () => {
 		user.click(userComponent);
 
 		const footerButton = await screen.findByRole('button', { name: /create/i });
-		expect(footerButton).not.toHaveAttribute('disabled', true);
+		expect(footerButton).toBeEnabled();
 
 		user.click(footerButton);
-		await waitFor(() => expect(footerButton).not.toHaveAttribute('disabled', true));
+		await waitFor(() => expect(footerButton).toBeEnabled());
 		const placeholderRoom = useStore.getState().rooms[`placeholder-${zimbraUser1.zimbraId}`];
 		expect(placeholderRoom).toEqual(
 			expect.objectContaining({
@@ -139,7 +139,7 @@ describe('Chat Creation Modal', () => {
 			pictureUpdatedAt: 'pictureUpdatedAt'
 		});
 		user.click(footerButton);
-		await waitFor(() => expect(footerButton).not.toHaveAttribute('disabled', true));
+		await waitFor(() => expect(footerButton).toBeEnabled());
 		expect(mockedAddRoomRequest).toHaveBeenCalled();
 	});
 
@@ -165,7 +165,7 @@ describe('Chat Creation Modal', () => {
 
 		mockedAddRoomRequest.mockRejectedValueOnce({});
 		user.click(footerButton);
-		await waitFor(() => expect(footerButton).not.toHaveAttribute('disabled', true));
+		await waitFor(() => expect(footerButton).toBeEnabled());
 		const snackbar = await screen.findByText(/Something went Wrong. Please Retry/i);
 		expect(snackbar).toBeInTheDocument();
 	});
@@ -295,7 +295,7 @@ describe('Chat Creation Modal', () => {
 		await user.type(chipInput, zimbraUser3.fullName[0]);
 		const user3Checkbox = screen.getByTestId('icon: Square');
 		expect(user3Checkbox).toBeInTheDocument();
-		expect(user3Checkbox).not.toHaveAttribute('disabled');
+		expect(user3Checkbox).toBeEnabled();
 	});
 });
 
