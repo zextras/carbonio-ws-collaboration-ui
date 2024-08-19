@@ -327,10 +327,10 @@ describe('MessageComposer', () => {
 		setup(<MessageComposer roomId={mockedRoom.id} />);
 
 		const attachFileButton = screen.getByTestId('icon: Attach');
-		expect(attachFileButton).not.toHaveAttribute('disabled', true);
+		expect(attachFileButton).toBeEnabled();
 
 		const sendButton = screen.getByTestId(iconNavigator2);
-		expect(sendButton).not.toHaveAttribute('disabled', true);
+		expect(sendButton).toBeEnabled();
 	});
 
 	test('User can reply to a message with a message and send it', async () => {

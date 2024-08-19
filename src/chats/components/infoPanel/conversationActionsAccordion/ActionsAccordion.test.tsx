@@ -220,6 +220,6 @@ describe('Actions Accordion', () => {
 
 		setup(<ActionsAccordion roomId={room.id} />);
 		const addNewMemberAction = screen.getByTestId('addNewMemberAction');
-		expect(addNewMemberAction).not.toHaveAttribute('disabled');
+		expect(addNewMemberAction).toBeEnabled();
 	});
 });
