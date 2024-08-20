@@ -14,7 +14,7 @@ module.exports = function (wpConf) {
 			'node_modules/@mediapipe/selfie_segmentation/selfie_segmentation.js'
 		),
 		test: /\.(tflite|binarypb|wasm|js)$/,
-		use: 'file-loader'
+		type: 'asset/resource'
 	});
 	return wpConf;
 };

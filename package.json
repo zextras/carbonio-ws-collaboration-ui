@@ -69,7 +69,6 @@
 		"@zextras/carbonio-shell-ui": "7.0.1",
 		"@zextras/carbonio-ui-preview": "1.2.2",
 		"emoji-mart": "^5.1.0",
-		"file-loader": "3.0.1",
 		"identity-obj-proxy": "^3.0.0",
 		"immer": "^10.0.3",
 		"lodash": "4.17.21",
