@@ -5,7 +5,7 @@
  */
 import { HistoryAccumulator } from './HistoryAccumulator';
 import { createMockRoom, createMockTextMessage } from '../../../tests/createMock';
-import { reactionMessageStanza } from '../../../tests/mocks/XMPPStanza';
+import { reactionMessageFromHistoryStanza } from '../../../tests/mocks/XMPPStanza';
 
 const room1 = createMockRoom({ id: '1' });
 const room2 = createMockRoom({ id: '2' });
@@ -58,10 +58,10 @@ describe('HistoryAccumulator', () => {
 		const historyAccumulator = new HistoryAccumulator();
 		historyAccumulator.addReferenceForForwardedMessage(
 			textMessage3.stanzaId,
-			reactionMessageStanza(room2.id, textMessage3.stanzaId, 'user')
+			reactionMessageFromHistoryStanza(room2.id, textMessage3.stanzaId, 'user', 'queryId')
 		);
 		expect(historyAccumulator.returnReferenceForForwardedMessage(textMessage3.stanzaId)).toEqual(
-			reactionMessageStanza(room2.id, textMessage3.stanzaId, 'user')
+			reactionMessageFromHistoryStanza(room2.id, textMessage3.stanzaId, 'user', 'queryId')
 		);
 	});
 });

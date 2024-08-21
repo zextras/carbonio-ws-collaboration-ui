@@ -10,7 +10,10 @@ import {
 	pingIq,
 	pongIq,
 	reactionMessage,
-	startWritingMessage
+	reactionMessageStanzaFromHistory,
+	replyMessageFromHistory,
+	startWritingMessage,
+	textMessageFromHistory
 } from '../../network/xmpp/xmppMessageExamples';
 
 export const strStanzaToXml = (str: string): Element => {
@@ -48,6 +51,36 @@ export const pausedStanza = (roomId: string, from: string): Element => {
 	return strStanzaToXml(messageStanza);
 };
 
+export const historyTextMessageStanza = (
+	roomId: string,
+	from: string,
+	body: string,
+	queryId: string
+): Element => {
+	const messageToParse = textMessageFromHistory
+		.replace('roomId', roomId)
+		.replace('from', from)
+		.replace('body', body)
+		.replace('queryId', queryId);
+	return strStanzaToXml(messageToParse);
+};
+
+export const replyTextMessageStanza = (
+	roomId: string,
+	from: string,
+	body: string,
+	queryId: string,
+	replyTo: string
+): Element => {
+	const messageToParse = replyMessageFromHistory
+		.replace('roomId', roomId)
+		.replace('from', from)
+		.replace('body', body)
+		.replace('queryId', queryId)
+		.replace('replyTo', replyTo);
+	return strStanzaToXml(messageToParse);
+};
+
 export const reactionMessageStanza = (
 	roomId: string,
 	originalStanzaId: string,
@@ -57,5 +90,19 @@ export const reactionMessageStanza = (
 		.replace('roomId', roomId)
 		.replace('originalStanzaId', originalStanzaId)
 		.replace('userId', userId);
+	return strStanzaToXml(messageToParse);
+};
+
+export const reactionMessageFromHistoryStanza = (
+	roomId: string,
+	originalStanzaId: string,
+	userId: string,
+	queryId: string
+): Element => {
+	const messageToParse = reactionMessageStanzaFromHistory
+		.replace('roomId', roomId)
+		.replace('originalStanzaId', originalStanzaId)
+		.replace('userId', userId)
+		.replace('queryId', queryId);
 	return strStanzaToXml(messageToParse);
 };
