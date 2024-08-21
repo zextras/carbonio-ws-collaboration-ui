@@ -5,7 +5,8 @@
  */
 
 import { decodeXMPPMessageStanza } from './decodeXMPPMessageStanza';
-import { MessageType, TextMessage } from '../../../types/store/MessageTypes';
+import { reactionMessageStanza } from '../../../tests/mocks/XMPPStanza';
+import { MessageFastening, MessageType, TextMessage } from '../../../types/store/MessageTypes';
 import { retractedMessage } from '../xmppMessageExamples';
 
 const applicationXml = 'application/xml';
@@ -64,5 +65,15 @@ describe('Test decode message function', () => {
 		expect(messageParsed.id).toBe('testMessageId');
 		expect(messageParsed.from).toBe('testUserId');
 		expect(messageParsed.deleted).toBeTruthy();
+	});
+
+	test('Parse fastening message', async () => {
+		const messageParsed = decodeXMPPMessageStanza(
+			reactionMessageStanza('testRoomId', 'testOriginalStanzaId', 'testUserId')
+		) as MessageFastening;
+		expect(messageParsed.type).toBe(MessageType.FASTENING);
+		expect(messageParsed.roomId).toBe('testRoomId');
+		expect(messageParsed.originalStanzaId).toBe('testOriginalStanzaId');
+		expect(messageParsed.from).toBe('testUserId');
 	});
 });

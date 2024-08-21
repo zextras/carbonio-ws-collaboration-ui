@@ -38,7 +38,7 @@ export function decodeXMPPMessageStanza(
 	const fromAttribute = getRequiredAttribute(messageStanza, 'from');
 	const roomId = getId(fromAttribute);
 	const resource = getResource(fromAttribute);
-	const messageDate = optional?.date || now();
+	const messageDate = optional?.date ?? now();
 
 	// Message fastening
 	const fasteningElement = getTagElement(messageStanza, 'apply-to');

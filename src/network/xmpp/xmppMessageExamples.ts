@@ -234,3 +234,11 @@ export const retractedMessage = `
             <stanza-id xmlns="urn:xmpp:sid:0" id="stanzaId" by="roomId@muclight.carbonio"/>
         </retracted>
     </message>`;
+
+export const reactionMessage = `
+    <message id="messageId" from="roomId@muclight.carbonio/userId@carbonio" to="userId@carbonio" type="groupchat" xmlns="jabber:client">
+        <apply-to id="originalStanzaId" xmlns="urn:xmpp:fasten:0"><reaction xmlns="zextras:xmpp:reaction:0"/>
+            <external name="body"/>
+        </apply-to>
+        <body>👍</body>
+    </message>`;

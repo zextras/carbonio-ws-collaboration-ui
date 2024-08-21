@@ -9,6 +9,7 @@ import {
 	pauseWritingMessage,
 	pingIq,
 	pongIq,
+	reactionMessage,
 	startWritingMessage
 } from '../../network/xmpp/xmppMessageExamples';
 
@@ -45,4 +46,16 @@ export const composingStanza = (roomId: string, from: string): Element => {
 export const pausedStanza = (roomId: string, from: string): Element => {
 	const messageStanza = pauseWritingMessage.replace('roomId', roomId).replace('userId', from);
 	return strStanzaToXml(messageStanza);
+};
+
+export const reactionMessageStanza = (
+	roomId: string,
+	originalStanzaId: string,
+	userId: string
+): Element => {
+	const messageToParse = reactionMessage
+		.replace('roomId', roomId)
+		.replace('originalStanzaId', originalStanzaId)
+		.replace('userId', userId);
+	return strStanzaToXml(messageToParse);
 };
