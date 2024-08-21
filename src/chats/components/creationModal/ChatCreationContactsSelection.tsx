@@ -95,8 +95,8 @@ const ChatCreationContactsSelection = ({
 	const membersToAdd = useMemo(() => {
 		if (typeof maxGroupMembers === 'number' && maxGroupMembers - size(contactsSelected) !== 0) {
 			if (isCreationModal) return maxGroupMembers - size(contactsSelected);
-			if (maxGroupMembers - size(members) - size(contactsSelected) !== 0) {
-				return maxGroupMembers - size(members) - size(contactsSelected);
+			if (maxGroupMembers - (size(members) - 1) - size(contactsSelected) !== 0) {
+				return maxGroupMembers - (size(members) - 1) - size(contactsSelected);
 			}
 		}
 		return -1;
@@ -224,7 +224,7 @@ const ChatCreationContactsSelection = ({
 			isCreationModal
 				? typeof maxGroupMembers === 'number' && maxGroupMembers <= size(contactsSelected)
 				: typeof maxGroupMembers === 'number' &&
-					maxGroupMembers - size(members) <= size(contactsSelected),
+					maxGroupMembers - (size(members) - 1) <= size(contactsSelected),
 		[isCreationModal, contactsSelected, maxGroupMembers, members]
 	);
 

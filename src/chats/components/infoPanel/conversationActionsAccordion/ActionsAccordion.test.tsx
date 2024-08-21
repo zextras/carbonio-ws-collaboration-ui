@@ -199,6 +199,9 @@ describe('Actions Accordion', () => {
 		setup(<ActionsAccordion roomId={room.id} />);
 		const addNewMemberAction = screen.getByTestId('addNewMemberAction');
 		expect(addNewMemberAction).toHaveAttribute('disabled');
+
+		const leaveActionButton = screen.getByTestId('leaveActionButton');
+		expect(leaveActionButton).toBeDisabled();
 	});
 
 	test('A owner of a group should see add member enabled', async () => {
