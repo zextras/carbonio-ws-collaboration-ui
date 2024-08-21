@@ -76,6 +76,7 @@ const useBubbleReactions = (
 							(emoji) => (
 								<EmojiBox
 									key={emoji}
+									data-testid={`reaction-${emoji}`}
 									$emoji={emoji}
 									$selected={myReaction === emoji}
 									onClick={() => sendReaction(emoji)}
