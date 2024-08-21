@@ -8,7 +8,7 @@ import { orderBy } from 'lodash';
 
 import { Message, MessageList, MessageMap, TextMessage } from '../../../types/store/MessageTypes';
 
-class HistoryAccumulator {
+export class HistoryAccumulator {
 	// Singleton design pattern
 	private static instance: HistoryAccumulator;
 
