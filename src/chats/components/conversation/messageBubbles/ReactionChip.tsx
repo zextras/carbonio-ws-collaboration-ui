@@ -81,6 +81,7 @@ const ReactionChip = ({ reaction, from }: ReactionChipProps): ReactElement => {
 				padding="0.25rem 0.25rem 0.25rem 0.3rem"
 				orientation="horizontal"
 				gap="0.25rem"
+				data-testid="reaction-chip"
 			>
 				<Padding bottom="0.1rem">{reaction}</Padding>
 				<CustomAvatar
