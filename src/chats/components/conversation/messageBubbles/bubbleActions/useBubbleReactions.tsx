@@ -25,12 +25,13 @@ const EmojiBox = styled(Container)<{
 		${({ $emoji }): string => `content: "${$emoji}";`};
 	}
 	&:hover {
-		background-color: ${({ theme }): string => theme.palette.gray6.hover};
+		background-color: ${({ theme, $selected }): string =>
+			$selected ? theme.palette.highlight.active : theme.palette.gray6.hover};
 		cursor: pointer;
 	}
 
 	${({ theme, $selected }): string | false =>
-		$selected && `background-color: ${theme.palette.highlight.active};`};
+		$selected && `background-color: ${theme.palette.highlight.focus};`};
 `;
 
 const useBubbleReactions = (
@@ -68,13 +69,13 @@ const useBubbleReactions = (
 		() => [
 			{
 				id: 'emojis',
-				disabled: true,
 				customComponent: (
 					<Container orientation="horizontal">
 						{map(
 							['\uD83D\uDC4D', '\u2764\uFE0F', '\uD83D\uDE02', '\uD83D\uDE22', '\uD83D\uDC4E'],
 							(emoji) => (
 								<EmojiBox
+									background="gray6"
 									key={emoji}
 									data-testid={`reaction-${emoji}`}
 									$emoji={emoji}

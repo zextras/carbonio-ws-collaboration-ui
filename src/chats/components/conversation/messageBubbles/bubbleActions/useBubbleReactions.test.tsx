@@ -105,7 +105,7 @@ describe('Bubble Contextual Menu - other user messages', () => {
 		await user.click(smileButton);
 
 		const reaction = screen.getByTestId('reaction-\uD83D\uDC4D');
-		expect(reaction).toHaveStyle('background-color: #96b8e9;');
+		expect(reaction).toHaveStyle('background-color: #abc6ed;');
 		// Remove reaction
 		await user.click(reaction);
 		expect(mockedSendChatMessageReaction).toHaveBeenCalledTimes(1);
