@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 import {
+	endRequestHistoryIq,
 	offlinePresence,
 	onlinePresence,
 	pauseWritingMessage,
@@ -104,5 +105,12 @@ export const reactionMessageFromHistoryStanza = (
 		.replace('originalStanzaId', originalStanzaId)
 		.replace('userId', userId)
 		.replace('queryId', queryId);
+	return strStanzaToXml(messageToParse);
+};
+
+export const endRequestHistoryStanza = (roomId: string, complete: boolean): Element => {
+	const messageToParse = endRequestHistoryIq
+		.replace('roomId', roomId)
+		.replace("complete='true'", complete ? "complete='true'" : '');
 	return strStanzaToXml(messageToParse);
 };

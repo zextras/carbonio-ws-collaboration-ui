@@ -173,6 +173,17 @@ export const reactionMessageStanzaFromHistory = `
     </result>
 </message>`;
 
+export const endRequestHistoryIq = `
+    <iq from='roomId@muclight.carbonio' to='userId@carbonio/resourceId' id='iqId' type='result' xmlns='jabber:client'>
+        <fin xmlns='urn:xmpp:mam:2' complete='true'>
+            <set xmlns='http://jabber.org/protocol/rsm'>
+                <first index='258'>C808PJQD9V81</first>
+                <last>C809FC6JH8O1</last>
+                <count>308</count>
+            </set>
+        </fin>
+    </iq>`;
+
 /**
  * Realtime messages
  */

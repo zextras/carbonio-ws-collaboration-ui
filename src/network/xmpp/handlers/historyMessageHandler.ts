@@ -103,7 +103,9 @@ export function onRequestHistory(stanza: Element, unread?: number): void {
 	const { xmppClient } = store.connections;
 
 	const historyMessages = HistoryAccumulator.returnHistory(roomId);
-	store.setLastMamMessage(historyMessages[0]);
+	if (size(historyMessages) > 0) {
+		store.setLastMamMessage(historyMessages[0]);
+	}
 
 	// Filter messages by type
 	const storeMessages = filter(
