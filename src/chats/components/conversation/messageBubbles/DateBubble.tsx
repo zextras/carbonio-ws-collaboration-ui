@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import { CustomMessage } from './MessageFactory';
+import { Z_INDEX_RANK } from '../../../../types/generics';
 import { DateMessage } from '../../../../types/store/MessageTypes';
 import { dateString } from '../../../../utils/dateUtils';
 
@@ -23,6 +24,7 @@ const CustomMessageWrapper = styled(Container)`
 	position: sticky;
 	top: 0;
 	margin: auto;
+	z-index: ${Z_INDEX_RANK.DATE_STICKY_LABEL};
 `;
 
 const DateBubble: FC<DateMsgProps> = ({ message, refEl }) => {

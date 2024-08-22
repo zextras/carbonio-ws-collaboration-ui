@@ -15,7 +15,6 @@ import ConfigurationBubble from './ConfigurationBubble';
 import DateBubble from './DateBubble';
 import DeletedBubble from './DeletedBubble';
 import useMessage from '../../../../hooks/useMessage';
-import { Z_INDEX_RANK } from '../../../../types/generics';
 import { MessageType } from '../../../../types/store/MessageTypes';
 
 type MessageProps = {
@@ -45,7 +44,6 @@ export const CustomMessage = styled(Container)<{ $dateMessage?: boolean }>`
 	text-align: center;
 	background-color: ${({ theme, $dateMessage }): string =>
 		$dateMessage ? theme.palette.gray6.regular : theme.palette.gray5.regular};
-	z-index: ${Z_INDEX_RANK.DATE_STICKY_LABEL};
 `;
 
 const MessageFactory = ({
