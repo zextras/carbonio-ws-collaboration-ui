@@ -16,6 +16,7 @@ import {
 } from './decodeStanza';
 import {
 	ConfigurationMessage,
+	FasteningAction,
 	Message,
 	MessageFastening,
 	MessageType,
@@ -38,42 +39,59 @@ export function decodeXMPPMessageStanza(
 	const fromAttribute = getRequiredAttribute(messageStanza, 'from');
 	const roomId = getId(fromAttribute);
 	const resource = getResource(fromAttribute);
-	const messageDate = optional?.date || now();
+	const messageDate = optional?.date ?? now();
 
 	// Message fastening
 	const fasteningElement = getTagElement(messageStanza, 'apply-to');
 	if (fasteningElement) {
 		const originalStanzaId = getRequiredAttribute(fasteningElement, 'id');
 
-		// Message Fastening for a delete message
+		// Message fastening for a delete message
 		const retracted = getTagElement(fasteningElement, 'retract');
 		if (retracted) {
-			const message: MessageFastening = {
+			return {
 				id: messageId,
 				type: MessageType.FASTENING,
-				action: 'delete',
-				roomId,
-				date: messageDate,
-				originalStanzaId
-			};
-			return message;
-		}
-
-		// Message Fastening for an edited message
-		const edited = getTagElement(fasteningElement, 'edit');
-		if (edited) {
-			const body = getTagElement(messageStanza, 'body');
-			const message: MessageFastening = {
-				id: messageId,
-				type: MessageType.FASTENING,
-				action: 'edit',
+				action: FasteningAction.DELETE,
 				roomId,
 				date: messageDate,
 				originalStanzaId,
-				value: body?.textContent || ''
-			};
-			return message;
+				from: getId(resource)
+			} as MessageFastening;
 		}
+
+		// Message fastening for an edited message
+		const edited = getTagElement(fasteningElement, 'edit');
+		if (edited) {
+			const body = getTagElement(messageStanza, 'body');
+			return {
+				id: messageId,
+				type: MessageType.FASTENING,
+				action: FasteningAction.EDIT,
+				roomId,
+				date: messageDate,
+				originalStanzaId,
+				from: getId(resource),
+				value: body?.textContent ?? ''
+			} as MessageFastening;
+		}
+
+		// Message fastening for a message reaction
+		const reaction = getTagElement(fasteningElement, 'reaction');
+		if (reaction) {
+			const body = getTagElement(messageStanza, 'body');
+			return {
+				id: messageId,
+				type: MessageType.FASTENING,
+				action: FasteningAction.REACTION,
+				roomId,
+				date: messageDate,
+				originalStanzaId,
+				from: getId(resource),
+				value: body?.textContent ?? ''
+			} as MessageFastening;
+		}
+		return undefined;
 	}
 
 	// Affiliation message are not considered, they are replaced by configuration messages

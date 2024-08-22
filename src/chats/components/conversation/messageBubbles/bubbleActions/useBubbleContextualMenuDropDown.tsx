@@ -1,129 +1,45 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /*
- * SPDX-FileCopyrightText: 2022 Zextras <https://www.zextras.com>
+ * SPDX-FileCopyrightText: 2024 Zextras <https://www.zextras.com>
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, {
-	FC,
-	ReactElement,
-	useCallback,
-	useContext,
-	useEffect,
-	useMemo,
-	useRef,
-	useState
-} from 'react';
+import React, { ReactElement, useCallback, useContext, useMemo, useRef, useState } from 'react';
 
-import { Dropdown, IconButton, SnackbarManagerContext } from '@zextras/carbonio-design-system';
+import {
+	Button,
+	Dropdown,
+	DropdownItem,
+	SnackbarManagerContext
+} from '@zextras/carbonio-design-system';
 import { size } from 'lodash';
 import { useTranslation } from 'react-i18next';
-import styled, { css, DefaultTheme, FlattenSimpleInterpolation } from 'styled-components';
 
-import usePreview from '../../../../hooks/usePreview';
-import { AttachmentsApi } from '../../../../network';
+import usePreview from '../../../../../hooks/usePreview';
+import { AttachmentsApi } from '../../../../../network';
 import {
 	getFilesToUploadArray,
 	getForwardList,
 	getReferenceMessage
-} from '../../../../store/selectors/ActiveConversationsSelectors';
-import { getXmppClient } from '../../../../store/selectors/ConnectionSelector';
-import { getCapability, getUserId } from '../../../../store/selectors/SessionSelectors';
-import { getIsUserGuest } from '../../../../store/selectors/UsersSelectors';
-import useStore from '../../../../store/Store';
-import { messageActionType } from '../../../../types/store/ActiveConversationTypes';
-import { TextMessage } from '../../../../types/store/MessageTypes';
-import { CapabilityType } from '../../../../types/store/SessionTypes';
-import { isPreviewSupported } from '../../../../utils/attachmentUtils';
-import { canPerformAction } from '../../../../utils/MessageActionsUtils';
+} from '../../../../../store/selectors/ActiveConversationsSelectors';
+import { getXmppClient } from '../../../../../store/selectors/ConnectionSelector';
+import { getCapability, getUserId } from '../../../../../store/selectors/SessionSelectors';
+import { getIsUserGuest } from '../../../../../store/selectors/UsersSelectors';
+import useStore from '../../../../../store/Store';
+import { messageActionType } from '../../../../../types/store/ActiveConversationTypes';
+import { TextMessage } from '../../../../../types/store/MessageTypes';
+import { CapabilityType } from '../../../../../types/store/SessionTypes';
+import { isPreviewSupported } from '../../../../../utils/attachmentUtils';
+import { canPerformAction } from '../../../../../utils/MessageActionsUtils';
 
-export const BubbleContextualMenuDropDownWrapper = styled.div<{
-	children: ReactElement;
-	'data-testid': string;
-	isActive: boolean;
-	isMyMessage: boolean;
-	theme?: DefaultTheme;
-}>`
-	position: absolute;
-	display: flex;
-	padding-top: 0.5rem;
-	justify-content: flex-end;
-	transition: 0.2s ease-out;
-	opacity: 0;
-	pointer-events: none;
-
-	> div {
-		pointer-events: auto;
-	}
-
-	${({
-		theme,
-		isMyMessage
-	}: {
-		theme: any;
-		isMyMessage: boolean;
-	}): FlattenSimpleInterpolation => css`
-		top: -0.6875rem;
-		right: -0.1875rem;
-		width: 3rem;
-		height: 1.6875rem;
-		background-image: -webkit-radial-gradient(
-			75% 50%,
-			circle cover,
-			${theme.palette[isMyMessage ? 'highlight' : 'gray6'].regular},
-			transparent 100%
-		);
-		background-image: -moz-radial-gradient(
-			75% 50%,
-			circle cover,
-			${theme.palette[isMyMessage ? 'highlight' : 'gray6'].regular},
-			transparent 100
-		);
-		background-image: -o-radial-gradient(
-			75% 50%,
-			circle cover,
-			${theme.palette[isMyMessage ? 'highlight' : 'gray6'].regular},
-			transparent 100
-		);
-		background-image: -ms-radial-gradient(
-			75% 50%,
-			circle cover,
-			${theme.palette[isMyMessage ? 'highlight' : 'gray6'].regular},
-			transparent 100
-		);
-		background-image: radial-gradient(
-			75% 50%,
-			circle cover,
-			${theme.palette[isMyMessage ? 'highlight' : 'gray6'].regular},
-			transparent 100%
-		);
-		color: ${theme.palette.text.regular};
-	`};
-
-	${({ isActive }: any): FlattenSimpleInterpolation =>
-		isActive &&
-		css`
-			opacity: 1;
-		`};
-`;
-
-type BubbleContextualMenuDropDownProps = {
-	message: TextMessage;
-	isMyMessage: boolean;
-};
-
-type DropDownActionType = {
-	id: string;
-	label: string;
-	onClick: () => void;
-	disabled?: boolean;
-};
-
-const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
-	message,
-	isMyMessage
-}) => {
+const useBubbleContextualMenuDropDown = (
+	message: TextMessage,
+	isMyMessage: boolean
+): {
+	MenuDropdown: ReactElement;
+	menuDropdownActive: boolean;
+	menuDropdownRef: React.RefObject<HTMLDivElement>;
+} => {
 	const xmppClient = useStore(getXmppClient);
 
 	const [t] = useTranslation();
@@ -164,17 +80,6 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 
 	const onDropdownOpen = useCallback(() => setDropdownActive(true), [setDropdownActive]);
 	const onDropdownClose = useCallback(() => setDropdownActive(false), [setDropdownActive]);
-
-	const closeDropdownOnScroll = useCallback(
-		() => dropdownActive && dropDownRef.current?.click(),
-		[dropdownActive]
-	);
-
-	useEffect(() => {
-		const messageListRef = window.document.getElementById(`messageListRef${message.roomId}`);
-		messageListRef?.addEventListener('scroll', closeDropdownOnScroll);
-		return (): void => messageListRef?.removeEventListener('scroll', closeDropdownOnScroll);
-	}, [closeDropdownOnScroll, message.roomId]);
 
 	const setForwardModeOn = useCallback(() => {
 		setDraftMessage(message.roomId, false, '');
@@ -268,7 +173,7 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 	const canBeDownloaded = useMemo(() => message.attachment, [message.attachment]);
 
 	const contextualMenuActions = useMemo(() => {
-		const actions: DropDownActionType[] = [];
+		const actions: DropdownItem[] = [];
 
 		// Edit functionality
 		if (canBeEdited) {
@@ -354,12 +259,8 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 		downloadAction
 	]);
 
-	return (
-		<BubbleContextualMenuDropDownWrapper
-			data-testid={`cxtMenu-${message.id}-iconOpen`}
-			isMyMessage={isMyMessage}
-			isActive={dropdownActive}
-		>
+	const MenuDropdown = useMemo(
+		() => (
 			<Dropdown
 				data-testid={`cxtMenuDropdown-${message.id}`}
 				items={contextualMenuActions}
@@ -370,16 +271,27 @@ const BubbleContextualMenuDropDown: FC<BubbleContextualMenuDropDownProps> = ({
 				placement="right-start"
 				ref={dropDownRef}
 			>
-				<IconButton
-					iconColor="currentColor"
+				<Button
 					size="small"
 					icon="ArrowIosDownward"
+					type="ghost"
+					color="text"
 					title={messageActionsTooltip}
 					onClick={(): null => null}
 				/>
 			</Dropdown>
-		</BubbleContextualMenuDropDownWrapper>
+		),
+		[
+			contextualMenuActions,
+			dropDownRef,
+			message.id,
+			messageActionsTooltip,
+			onDropdownClose,
+			onDropdownOpen
+		]
 	);
+
+	return { MenuDropdown, menuDropdownActive: dropdownActive, menuDropdownRef: dropDownRef };
 };
 
-export default BubbleContextualMenuDropDown;
+export default useBubbleContextualMenuDropDown;

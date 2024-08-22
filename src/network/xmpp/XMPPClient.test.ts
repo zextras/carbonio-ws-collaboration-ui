@@ -79,4 +79,13 @@ describe('XMPPClient', () => {
 
 		expect(mockedAddRoomRequest).toBeCalled();
 	});
+
+	test('sendChatMessageReaction', () => {
+		const xmppClient = new XMPPClient();
+		xmppClient.sendChatMessageReaction('room-test', 'stanzaId-test', '\uD83D\uDC4D');
+		expect(mockedXmppSend).toHaveBeenCalledWith({
+			type: XMPPRequestType.MESSAGE,
+			elem: expect.any(Object)
+		});
+	});
 });

@@ -6,10 +6,16 @@
 
 import { useMemo } from 'react';
 
-import { getFasteningSelector } from '../store/selectors/FasteningsSelectors';
+import { getEditAndDeleteFasteningSelector } from '../store/selectors/FasteningsSelectors';
 import { getMessageSelector } from '../store/selectors/MessagesSelectors';
 import useStore from '../store/Store';
-import { Message, MessageFastening, MessageType, TextMessage } from '../types/store/MessageTypes';
+import {
+	FasteningAction,
+	Message,
+	MessageFastening,
+	MessageType,
+	TextMessage
+} from '../types/store/MessageTypes';
 
 const useMessage = (roomId: string, messageId: string): Message | undefined => {
 	const message = useStore<Message | undefined>((store) =>
@@ -18,21 +24,21 @@ const useMessage = (roomId: string, messageId: string): Message | undefined => {
 
 	const fastening = useStore<MessageFastening | undefined>((store) => {
 		const stanzaId = message?.type === MessageType.TEXT_MSG ? message.stanzaId : '';
-		return getFasteningSelector(store, roomId, stanzaId);
+		return getEditAndDeleteFasteningSelector(store, roomId, stanzaId);
 	});
 
 	return useMemo((): Message | undefined => {
 		if (message) {
 			if (fastening) {
 				switch (fastening.action) {
-					case 'edit': {
+					case FasteningAction.EDIT: {
 						return {
 							...message,
 							edited: true,
 							text: fastening.value ?? ''
 						} as TextMessage;
 					}
-					case 'delete': {
+					case FasteningAction.DELETE: {
 						return {
 							...message,
 							deleted: true,

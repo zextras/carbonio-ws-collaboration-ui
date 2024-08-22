@@ -58,10 +58,18 @@ export type DateMessage = BasicMessage & {
 
 export type MessageFastening = BasicMessage & {
 	type: MessageType.FASTENING;
-	action: 'delete' | 'edit';
+	action: FasteningAction;
 	originalStanzaId: string;
+	from: string;
 	value?: string;
 };
+
+export enum FasteningAction {
+	DELETE = 'delete',
+	EDIT = 'edit',
+	REACTION = 'reaction'
+}
+
 export enum MessageType {
 	TEXT_MSG = 'text',
 	AFFILIATION_MSG = 'affiliation',

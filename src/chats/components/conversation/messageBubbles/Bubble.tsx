@@ -18,12 +18,11 @@ import { useTranslation } from 'react-i18next';
 import styled, { SimpleInterpolation } from 'styled-components';
 
 import AttachmentView from './AttachmentView';
-import BubbleContextualMenuDropDown, {
-	BubbleContextualMenuDropDownWrapper
-} from './BubbleContextualMenuDropDown';
+import BubbleActions, { BubbleActionsWrapper } from './bubbleActions/BubbleActions';
 import BubbleFooter from './BubbleFooter';
 import BubbleHeader from './BubbleHeader';
 import ForwardInfo from './ForwardInfo';
+import MessageReactionsList from './MessageReactionsList';
 import RepliedTextMessageSectionView from './RepliedTextMessageSectionView';
 import TextContentBubble from './TextContentBubble';
 import {
@@ -35,7 +34,6 @@ import { getMessageAttachment } from '../../../../store/selectors/MessagesSelect
 import { getRoomTypeSelector } from '../../../../store/selectors/RoomsSelectors';
 import { getCapability } from '../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../store/Store';
-import { Z_INDEX_RANK } from '../../../../types/generics';
 import { MarkerStatus } from '../../../../types/store/MarkersTypes';
 import { TextMessage } from '../../../../types/store/MessageTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
@@ -50,11 +48,6 @@ type BubbleProps = {
 	messageRef: React.RefObject<HTMLDivElement>;
 	messageListRef?: React.RefObject<HTMLDivElement | undefined>;
 };
-
-const DropDownWrapper = styled(Container)`
-	position: relative;
-	z-index: ${Z_INDEX_RANK.DROPDOWN_CXT};
-`;
 
 const ForwardContainer = styled(Container)<{
 	$forwardIsActive: boolean;
@@ -85,7 +78,7 @@ const BubbleContainer = styled(Container)<{
 	box-shadow: 0 0 0.25rem rgba(166, 166, 166, 0.5);
 
 	&:hover {
-		${BubbleContextualMenuDropDownWrapper} {
+		${BubbleActionsWrapper} {
 			opacity: 1;
 		}
 	}
@@ -94,18 +87,16 @@ const BubbleContainer = styled(Container)<{
 		$firstMessageOfList,
 		$centerMessageOfList,
 		$lastMessageOfList
-	}): string =>
-		$isMyMessage
-			? $firstMessageOfList
-				? '0.25rem 0.25rem 0 0.25rem'
-				: $centerMessageOfList || $lastMessageOfList
-					? '0.25rem 0 0 0.25rem'
-					: '0.25rem 0 0.25rem 0.25rem'
-			: $firstMessageOfList
-				? '0 0.25rem 0.25rem 0'
-				: $centerMessageOfList
-					? '0 0.25rem 0.25rem 0'
-					: '0 0.25rem 0.25rem 0.25rem'};
+	}): string => {
+		if ($isMyMessage) {
+			if ($firstMessageOfList) return '0.25rem 0.25rem 0 0.25rem';
+			return $centerMessageOfList || $lastMessageOfList
+				? '0.25rem 0 0 0.25rem'
+				: '0.25rem 0 0.25rem 0.25rem';
+		}
+		if ($firstMessageOfList) return '0 0.25rem 0.25rem 0';
+		return $centerMessageOfList ? '0 0.25rem 0.25rem 0' : '0 0.25rem 0.25rem 0.25rem';
+	}};
 `;
 
 const Bubble: FC<BubbleProps> = ({
@@ -178,7 +169,7 @@ const Bubble: FC<BubbleProps> = ({
 			forwardContainerRef.current.addEventListener('click', handleAddForwardMessage);
 			refValue = forwardContainerRef.current;
 		}
-		return () => {
+		return (): void => {
 			if (refValue) {
 				refValue.removeEventListener('click', handleAddForwardMessage);
 			}
@@ -222,6 +213,7 @@ const Bubble: FC<BubbleProps> = ({
 				key={message.id}
 				height="fit"
 				width="fit"
+				crossAlignment="flex-start"
 				maxWidth={messageAttachment && !message.forwarded ? '60%' : '75%'}
 				padding={{ all: 'medium' }}
 				background={isMyMessage ? 'highlight' : 'gray6'}
@@ -232,9 +224,7 @@ const Bubble: FC<BubbleProps> = ({
 				$messageAttachment={messageAttachment !== undefined}
 			>
 				{bubbleDropdownShouldBeVisible && (
-					<DropDownWrapper padding={{ all: 'none' }}>
-						<BubbleContextualMenuDropDown message={message} isMyMessage={isMyMessage} />
-					</DropDownWrapper>
+					<BubbleActions message={message} isMyMessage={isMyMessage} />
 				)}
 				{!isMyMessage && roomType !== RoomType.ONE_TO_ONE && !prevMessageIsFromSameSender && (
 					<>
@@ -250,17 +240,19 @@ const Bubble: FC<BubbleProps> = ({
 					/>
 				)}
 				{messageAttachment && (
-					<>
+					<Padding bottom="0.5rem">
 						<AttachmentView
 							attachment={messageAttachment}
 							isMyMessage={isMyMessage}
 							from={message.from}
 							messageListRef={messageListRef}
 						/>
-						<Padding bottom="0.5rem" />
-					</>
+					</Padding>
 				)}
 				<TextContentBubble textContent={messageFormatted} />
+				{messageAttachment && (
+					<MessageReactionsList roomId={message.roomId} stanzaId={message.stanzaId} />
+				)}
 				<BubbleFooter
 					isMyMessage={isMyMessage}
 					date={message.date}
@@ -269,6 +261,9 @@ const Bubble: FC<BubbleProps> = ({
 					messageExtension={extension}
 					messageSize={size}
 					canSeeMessageReads={canSeeMessageReads}
+					showReactions={!messageAttachment}
+					roomId={message.roomId}
+					stanzaId={message.stanzaId}
 				/>
 			</BubbleContainer>
 			{checkboxShouldBeVisible && (

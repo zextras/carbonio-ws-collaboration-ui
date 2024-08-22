@@ -10,8 +10,9 @@ import { find, findIndex, forEach, orderBy, remove } from 'lodash';
 import { StateCreator } from 'zustand';
 
 import { FileToUpload, messageActionType } from '../../types/store/ActiveConversationTypes';
-import { AttachmentMessageType, TextMessage } from '../../types/store/MessageTypes';
+import { AttachmentMessageType, Message, TextMessage } from '../../types/store/MessageTypes';
 import { ActiveConversationsSlice, RootStore } from '../../types/store/StoreTypes';
+import { isBefore } from '../../utils/dateUtils';
 
 export const useActiveConversationsSlice: StateCreator<ActiveConversationsSlice> = (
 	set: (...any: any) => void
@@ -144,6 +145,21 @@ export const useActiveConversationsSlice: StateCreator<ActiveConversationsSlice>
 			}),
 			false,
 			'AC/SET_DRAFT_MESSAGE'
+		);
+	},
+	setLastMamMessage: (message: Message): void => {
+		set(
+			produce((draft: RootStore) => {
+				const lastMamDate = draft.activeConversations[message.roomId]?.lastMamMessage?.date;
+				if (!lastMamDate || isBefore(message.date, lastMamDate)) {
+					draft.activeConversations[message.roomId] = {
+						...draft.activeConversations[message.roomId],
+						lastMamMessage: message
+					};
+				}
+			}),
+			false,
+			'AC/SET_LAST_MAM_MESSAGE_ID'
 		);
 	},
 	setHistoryIsFullyLoaded: (roomId: string): void => {

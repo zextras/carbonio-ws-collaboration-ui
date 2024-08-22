@@ -4,23 +4,22 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React from 'react';
-
 import { screen } from '@testing-library/react';
+import { renderHook } from '@testing-library/react-hooks';
 
-import BubbleContextualMenuDropDown from './BubbleContextualMenuDropDown';
-import useStore from '../../../../store/Store';
+import useBubbleContextualMenuDropDown from './useBubbleContextualMenuDropDown';
+import useStore from '../../../../../store/Store';
 import {
 	createMockCapabilityList,
 	createMockRoom,
 	createMockTextMessage
-} from '../../../../tests/createMock';
-import { setup } from '../../../../tests/test-utils';
-import { RoomBe } from '../../../../types/network/models/roomBeTypes';
-import { messageActionType } from '../../../../types/store/ActiveConversationTypes';
-import { TextMessage } from '../../../../types/store/MessageTypes';
-import { RoomType } from '../../../../types/store/RoomTypes';
-import { RootStore } from '../../../../types/store/StoreTypes';
+} from '../../../../../tests/createMock';
+import { ProvidersWrapper, setup } from '../../../../../tests/test-utils';
+import { RoomBe } from '../../../../../types/network/models/roomBeTypes';
+import { messageActionType } from '../../../../../types/store/ActiveConversationTypes';
+import { TextMessage } from '../../../../../types/store/MessageTypes';
+import { RoomType } from '../../../../../types/store/RoomTypes';
+import { RootStore } from '../../../../../types/store/StoreTypes';
 
 const iconArrowIosDownward = 'icon: ArrowIosDownward';
 
@@ -108,7 +107,10 @@ beforeEach(() => {
 describe('Bubble Contextual Menu - other user messages', () => {
 	test.each(messageTypes)('Test %s text message', async (msgType, msg) => {
 		useStore.getState().newMessage(msg);
-		const { user } = setup(<BubbleContextualMenuDropDown message={msg} isMyMessage={false} />);
+		const { result } = renderHook(() => useBubbleContextualMenuDropDown(msg, false), {
+			wrapper: ProvidersWrapper
+		});
+		const { user } = setup(result.current.MenuDropdown);
 		const arrowButton = screen.getByTestId(iconArrowIosDownward);
 		await user.click(arrowButton);
 
@@ -142,9 +144,10 @@ describe('Bubble Contextual Menu - other user messages', () => {
 		store.newMessage(simpleTextMessage);
 		store.setForwardMessageList(mockedRoom.id, simpleTextMessage);
 
-		const { user } = setup(
-			<BubbleContextualMenuDropDown message={simpleTextMessage} isMyMessage={false} />
-		);
+		const { result } = renderHook(() => useBubbleContextualMenuDropDown(simpleTextMessage, false), {
+			wrapper: ProvidersWrapper
+		});
+		const { user } = setup(result.current.MenuDropdown);
 		const arrowButton = screen.getByTestId(iconArrowIosDownward);
 		await user.click(arrowButton);
 
@@ -164,9 +167,11 @@ describe('Bubble Contextual Menu - other user messages', () => {
 			simpleTextMessage.attachment
 		);
 
-		const { user } = setup(
-			<BubbleContextualMenuDropDown message={simpleTextMessage} isMyMessage={false} />
-		);
+		const { result } = renderHook(() => useBubbleContextualMenuDropDown(simpleTextMessage, false), {
+			wrapper: ProvidersWrapper
+		});
+
+		const { user } = setup(result.current.MenuDropdown);
 		const arrowButton = screen.getByTestId(iconArrowIosDownward);
 		await user.click(arrowButton);
 
@@ -180,7 +185,11 @@ describe('Bubble Contextual Menu - other user messages', () => {
 
 describe('Bubble Contextual Menu - my messages', () => {
 	test.each(myMessagesTypes)('Test %s text message', async (msgType, msg) => {
-		const { user } = setup(<BubbleContextualMenuDropDown message={msg} isMyMessage />);
+		const { result } = renderHook(() => useBubbleContextualMenuDropDown(msg, true), {
+			wrapper: ProvidersWrapper
+		});
+
+		const { user } = setup(result.current.MenuDropdown);
 		const arrowButton = screen.getByTestId(iconArrowIosDownward);
 		await user.click(arrowButton);
 
@@ -224,9 +233,10 @@ describe('Bubble Contextual Menu - my messages', () => {
 			simpleTextMessage.attachment
 		);
 
-		const { user } = setup(
-			<BubbleContextualMenuDropDown message={simpleTextMessage} isMyMessage />
-		);
+		const { result } = renderHook(() => useBubbleContextualMenuDropDown(simpleTextMessage, true), {
+			wrapper: ProvidersWrapper
+		});
+		const { user } = setup(result.current.MenuDropdown);
 		const arrowButton = screen.getByTestId(iconArrowIosDownward);
 		await user.click(arrowButton);
 
@@ -246,9 +256,10 @@ describe('Bubble Contextual Menu - my messages', () => {
 			simpleTextMessage.attachment
 		);
 
-		const { user } = setup(
-			<BubbleContextualMenuDropDown message={simpleTextMessage} isMyMessage />
-		);
+		const { result } = renderHook(() => useBubbleContextualMenuDropDown(simpleTextMessage, true), {
+			wrapper: ProvidersWrapper
+		});
+		const { user } = setup(result.current.MenuDropdown);
 		const arrowButton = screen.getByTestId(iconArrowIosDownward);
 		await user.click(arrowButton);
 
@@ -260,9 +271,10 @@ describe('Bubble Contextual Menu - my messages', () => {
 		store.newMessage(simpleTextMessage);
 		store.setForwardMessageList(mockedRoom.id, simpleTextMessage);
 
-		const { user } = setup(
-			<BubbleContextualMenuDropDown message={simpleTextMessage} isMyMessage />
-		);
+		const { result } = renderHook(() => useBubbleContextualMenuDropDown(simpleTextMessage, true), {
+			wrapper: ProvidersWrapper
+		});
+		const { user } = setup(result.current.MenuDropdown);
 		const arrowButton = screen.getByTestId(iconArrowIosDownward);
 		await user.click(arrowButton);
 
@@ -273,9 +285,10 @@ describe('Bubble Contextual Menu - my messages', () => {
 		const store: RootStore = useStore.getState();
 		store.newMessage(simpleTextMessage);
 
-		const { user } = setup(
-			<BubbleContextualMenuDropDown message={simpleTextMessage} isMyMessage />
-		);
+		const { result } = renderHook(() => useBubbleContextualMenuDropDown(simpleTextMessage, true), {
+			wrapper: ProvidersWrapper
+		});
+		const { user } = setup(result.current.MenuDropdown);
 		const arrowButton = screen.getByTestId(iconArrowIosDownward);
 		await user.click(arrowButton);
 
@@ -292,9 +305,10 @@ describe('Bubble Contextual Menu - my messages', () => {
 		const store: RootStore = useStore.getState();
 		store.newMessage(simpleTextMessage);
 
-		const { user } = setup(
-			<BubbleContextualMenuDropDown message={simpleTextMessage} isMyMessage />
-		);
+		const { result } = renderHook(() => useBubbleContextualMenuDropDown(simpleTextMessage, true), {
+			wrapper: ProvidersWrapper
+		});
+		const { user } = setup(result.current.MenuDropdown);
 		const arrowButton = screen.getByTestId(iconArrowIosDownward);
 		await user.click(arrowButton);
 
@@ -308,10 +322,10 @@ describe('Bubble Contextual Menu - my messages', () => {
 	test('Copy a message', async () => {
 		const store: RootStore = useStore.getState();
 		store.newMessage(simpleTextMessage);
-
-		const { user } = setup(
-			<BubbleContextualMenuDropDown message={simpleTextMessage} isMyMessage />
-		);
+		const { result } = renderHook(() => useBubbleContextualMenuDropDown(simpleTextMessage, true), {
+			wrapper: ProvidersWrapper
+		});
+		const { user } = setup(result.current.MenuDropdown);
 		const arrowButton = screen.getByTestId(iconArrowIosDownward);
 		await user.click(arrowButton);
 

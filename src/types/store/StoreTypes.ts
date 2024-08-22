@@ -120,6 +120,7 @@ export type ActiveConversationsSlice = {
 		attachment?: AttachmentMessageType
 	) => void;
 	unsetReferenceMessage: (roomId: string) => void;
+	setLastMamMessage: (message: Message) => void;
 	setHistoryIsFullyLoaded: (roomId: string) => void;
 	setHistoryLoadDisabled: (roomId: string, status: boolean) => void;
 	setActionsAccordionStatus: (roomId: string, status: boolean) => void;
