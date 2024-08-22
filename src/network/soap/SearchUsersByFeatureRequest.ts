@@ -7,6 +7,7 @@
 import { soapFetch } from '@zextras/carbonio-shell-ui';
 import { find, map, remove } from 'lodash';
 
+import { autoCompleteGalRequest } from './AutoCompleteRequest';
 import {
 	SearchUsersByFeatureRequest,
 	SearchUsersByFeatureResponse,
@@ -17,20 +18,28 @@ import { isMyId } from '../websocket/eventHandlersUtilities';
 export const searchUsersByFeatureRequest = (
 	text: string
 ): Promise<SearchUsersByFeatureSoapResponse> =>
-	soapFetch<SearchUsersByFeatureRequest, SearchUsersByFeatureResponse>('SearchUsersByFeature', {
-		_jsns: 'urn:zimbraAccount',
-		name: text,
-		feature: 'CHATS'
-	}).then((response: SearchUsersByFeatureResponse) => {
-		const results = map(response.account, (user) => {
-			const displayName = find(user.a, (attr) => attr.n === 'displayName')?._content;
-			const email = find(user.a, (attr) => attr.n === 'email')?._content;
-			return {
-				id: user.id,
-				displayName: displayName ?? user.name,
-				email: email ?? user.name
-			};
+	new Promise((resolve, reject) => {
+		soapFetch<SearchUsersByFeatureRequest, SearchUsersByFeatureResponse>('SearchUsersByFeature', {
+			_jsns: 'urn:zimbraAccount',
+			name: text,
+			feature: 'CHATS'
+		}).then((response: SearchUsersByFeatureResponse) => {
+			if (response.account) {
+				const results = map(response.account, (user) => {
+					const displayName = find(user.a, (attr) => attr.n === 'displayName')?._content;
+					const email = find(user.a, (attr) => attr.n === 'email')?._content;
+					return {
+						id: user.id,
+						displayName: displayName ?? user.name,
+						email: email ?? user.name
+					};
+				});
+				remove(results, (user) => isMyId(user.id));
+				resolve(results);
+			} else {
+				autoCompleteGalRequest(text)
+					.then((response) => resolve(response))
+					.catch(() => reject());
+			}
 		});
-		remove(results, (user) => isMyId(user.id));
-		return results;
 	});

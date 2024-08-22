@@ -10,6 +10,7 @@ import './global';
 // Network mocks
 import './network';
 import './XMPPConnection';
+import './AutoCompleteGal';
 import './SearchUsersByFeature';
 import './SelfieSegmentationManager';
 
