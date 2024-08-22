@@ -18,10 +18,10 @@ import {
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import { ContactInfo } from './ChatCreationContactsSelection';
 import { UsersApi } from '../../../network';
 import { getUserPictureUpdatedAt } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
+import { ContactInfo } from '../../../types/network/soap/searchUsersByFeatureRequest';
 
 type ListParticipantProps = {
 	item: ContactInfo;
@@ -73,10 +73,10 @@ const ListParticipant = ({
 						disabled={!selected && isDisabled}
 					/>
 					<Padding horizontal="small">
-						<Avatar label={item.name} picture={picture} />
+						<Avatar label={item.displayName} picture={picture} />
 					</Padding>
 					<Container crossAlignment="flex-start" width="fit">
-						<Text size="small">{item.name}</Text>
+						<Text size="small">{item.displayName}</Text>
 						<Padding top="extrasmall" />
 						<SelectableText
 							data-testid={`${item.id}-emailSelectable`}

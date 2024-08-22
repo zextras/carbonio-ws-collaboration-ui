@@ -11,6 +11,7 @@ import './global';
 import './network';
 import './XMPPConnection';
 import './AutoCompleteGal';
+import './SearchUsersByFeature';
 import './SelfieSegmentationManager';
 
 // Hooks mocks

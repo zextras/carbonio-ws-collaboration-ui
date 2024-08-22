@@ -13,8 +13,13 @@ import useStore from '../../../store/Store';
 import { createMockUser } from '../../../tests/createMock';
 import { mockedGetURLUserPicture } from '../../../tests/mocks/network';
 import { setup } from '../../../tests/test-utils';
+import { ContactInfo } from '../../../types/network/soap/searchUsersByFeatureRequest';
 
-const contactInfo = createMockUser();
+const contactInfo: ContactInfo = {
+	email: 'test@user.com',
+	displayName: 'Test User',
+	id: '1234567890'
+};
 
 describe('List Participant', () => {
 	test('The email of participant list item is selectable', async () => {
@@ -44,7 +49,7 @@ describe('List Participant', () => {
 
 	test('Show user picture if user has one', () => {
 		const store = useStore.getState();
-		store.setUserInfo(createMockUser({ pictureUpdatedAt: '2022-01-01' }));
+		store.setUserInfo(createMockUser({ id: contactInfo.id, pictureUpdatedAt: '2022-01-01' }));
 		setup(
 			<ListParticipant
 				item={contactInfo}

@@ -10,29 +10,25 @@ import { screen, waitFor } from '@testing-library/react';
 import { act, renderHook } from '@testing-library/react-hooks';
 
 import AddNewMemberAction from './AddNewMemberAction';
-import { ContactMatch } from '../../../../network/soap/AutoCompleteRequest';
 import useStore from '../../../../store/Store';
 import { createMockRoom, createMockUser } from '../../../../tests/createMock';
-import { mockedAutoCompleteGalRequest } from '../../../../tests/mocks/AutoCompleteGal';
 import { mockedAddRoomMemberRequest } from '../../../../tests/mocks/network';
+import { mockSearchUsersByFeatureRequest } from '../../../../tests/mocks/SearchUsersByFeature';
 import { setup } from '../../../../tests/test-utils';
 import { RoomType } from '../../../../types/network/models/roomBeTypes';
+import { ContactInfo } from '../../../../types/network/soap/searchUsersByFeatureRequest';
 import { User } from '../../../../types/store/UserTypes';
 
-const zimbraUser1: ContactMatch = {
+const zimbraUser1: ContactInfo = {
 	email: 'user1@domain.com',
-	firstName: 'User 1',
-	fullName: 'User One',
-	lastName: 'One',
-	zimbraId: 'user1-id'
+	displayName: 'User One',
+	id: 'user1-id'
 };
 
-const zimbraUser2: ContactMatch = {
+const zimbraUser2: ContactInfo = {
 	email: 'user2@domain.com',
-	firstName: 'User 2',
-	fullName: 'User Two',
-	lastName: 'Two',
-	zimbraId: 'user2-id'
+	displayName: 'User Two',
+	id: 'user2-id'
 };
 
 const user1Info: User = createMockUser();
@@ -81,7 +77,7 @@ describe('Add new member action', () => {
 			result.current.setLoginInfo(user1Info.id, user1Info.name);
 			result.current.setUserInfo(user2Info);
 		});
-		mockedAutoCompleteGalRequest
+		mockSearchUsersByFeatureRequest
 			.mockReturnValueOnce([])
 			.mockReturnValueOnce([zimbraUser1, zimbraUser2]);
 
@@ -98,7 +94,7 @@ describe('Add new member action', () => {
 		expect(addMemberModal).toBeInTheDocument();
 
 		const chipInput = await screen.findByTestId('chip_input_creation_modal');
-		user.type(chipInput, zimbraUser2.fullName[0]);
+		user.type(chipInput, zimbraUser2.displayName[0]);
 
 		await screen.findByText('spinner');
 		const list = await screen.findByTestId('list_creation_modal');

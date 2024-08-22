@@ -5,10 +5,13 @@
  */
 
 import { soapFetch } from '@zextras/carbonio-shell-ui';
-import { map, filter } from 'lodash';
+import { map, filter, remove } from 'lodash';
 
-export const autoCompleteGalRequest = (text: string): Promise<AutoCompleteGalResponse> =>
-	new Promise<AutoCompleteGalResponse>((resolve, reject) => {
+import { ContactInfo } from '../../types/network/soap/searchUsersByFeatureRequest';
+import { isMyId } from '../websocket/eventHandlersUtilities';
+
+export const autoCompleteGalRequest = (text: string): Promise<ContactInfo[]> =>
+	new Promise<ContactInfo[]>((resolve, reject) => {
 		soapFetch<AutoCompleteGalSoapRequest, AutoCompleteGalSoapResponse>('AutoCompleteGal', {
 			_jsns: 'urn:zimbraAccount',
 			type: 'account',
@@ -22,14 +25,13 @@ export const autoCompleteGalRequest = (text: string): Promise<AutoCompleteGalRes
 					response.cn,
 					(user) => !!user._attrs.fullName && !user._attrs.type
 				);
-				const zimbraUsers = map(filterUsers, (user) => ({
-					email: user._attrs.email,
-					firstName: user._attrs.firstName,
-					fullName: user._attrs.fullName,
-					lastName: user._attrs.lastName,
-					zimbraId: user._attrs.zimbraId
+				const results = map(filterUsers, (user) => ({
+					id: user._attrs.zimbraId,
+					displayName: user._attrs.fullName,
+					email: user._attrs.email
 				}));
-				resolve(zimbraUsers);
+				remove(results, (user) => isMyId(user.id));
+				resolve(results);
 			})
 			.catch(reject);
 	});
@@ -44,8 +46,6 @@ export type AutoCompleteGalSoapRequest = {
 export type AutoCompleteGalSoapResponse = {
 	cn: { _attrs: ContactMatch }[];
 };
-
-export type AutoCompleteGalResponse = ContactMatch[];
 
 export type ContactMatch = {
 	email: string;

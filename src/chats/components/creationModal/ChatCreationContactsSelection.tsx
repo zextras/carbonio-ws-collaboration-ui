@@ -33,7 +33,6 @@ import {
 	includes,
 	map,
 	omit,
-	remove,
 	size,
 	union
 } from 'lodash';
@@ -41,13 +40,13 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import ListParticipant from './ListParticipant';
-import {
-	autoCompleteGalRequest,
-	AutoCompleteGalResponse,
-	ContactMatch
-} from '../../../network/soap/AutoCompleteRequest';
+import { searchUsersByFeatureRequest } from '../../../network/soap/SearchUsersByFeatureRequest';
 import { getCapability } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
+import {
+	ContactInfo,
+	SearchUsersByFeatureSoapResponse
+} from '../../../types/network/soap/searchUsersByFeatureRequest';
 import { Member } from '../../../types/store/RoomTypes';
 import { CapabilityType } from '../../../types/store/SessionTypes';
 
@@ -110,18 +109,18 @@ const ChatCreationContactsSelection = ({
 		count: maxGroupMembers ? membersToAdd : 0
 	});
 
-	const [result, setResult] = useState<ContactMatch[]>([]);
+	const [result, setResult] = useState<ContactInfo[]>([]);
 	const [chips, setChips] = useState<ChipItem<ContactInfo>[]>([]);
 	const [loading, setLoading] = useState<boolean>(false);
 	const [error, setError] = useState<boolean>(false);
 
 	// Callback that creates the users' list when you are already inside a group
 	const userListNotInsideRoom = useCallback(
-		(response) => {
-			const userList: ContactMatch[] = [];
+		(response: SearchUsersByFeatureSoapResponse) => {
+			const userList: ContactInfo[] = [];
 			const membersIds = map(members, 'userId');
 			forEach(response, (user) => {
-				if (!includes(membersIds, user.zimbraId)) {
+				if (!includes(membersIds, user.id)) {
 					userList.push(user);
 				}
 			});
@@ -140,45 +139,38 @@ const ChatCreationContactsSelection = ({
 	useEffect(() => {
 		setLoading(true);
 		setError(false);
-		autoCompleteGalRequest('')
-			.then((response: AutoCompleteGalResponse) => {
+		searchUsersByFeatureRequest('')
+			.then((response: SearchUsersByFeatureSoapResponse) => {
 				setLoading(false);
-				// Remove myself from the list
-				remove(response, (user) => user.zimbraId === useStore.getState().session.id);
 				if (isCreationModal) {
 					setResult(response);
 				} else {
-					const usersNotInsideRoom: ContactMatch[] = userListNotInsideRoom(response);
+					const usersNotInsideRoom = userListNotInsideRoom(response);
 					setResult(usersNotInsideRoom);
 				}
 			})
-			.catch((err: Error) => {
+			.catch(() => {
 				setLoading(false);
-				console.error(err);
 			});
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
+	}, [isCreationModal, userListNotInsideRoom]);
 
 	const debouncedAutoComplete = useMemo(
 		() =>
 			debounce(() => {
-				autoCompleteGalRequest(inputRef.current?.value ?? '')
-					.then((response: AutoCompleteGalResponse) => {
+				searchUsersByFeatureRequest(inputRef.current?.value ?? '')
+					.then((response: SearchUsersByFeatureSoapResponse) => {
 						setLoading(false);
-						// Remove myself from the list
-						remove(response, (user) => user.zimbraId === useStore.getState().session.id);
 						if (isCreationModal) {
 							setResult(response);
 							if (size(response) === 0) setError(true);
 						} else {
-							const usersNotInsideRoom: ContactMatch[] = userListNotInsideRoom(response);
+							const usersNotInsideRoom = userListNotInsideRoom(response);
 							setResult(usersNotInsideRoom);
 							if (size(usersNotInsideRoom) === 0) setError(true);
 						}
 					})
-					.catch((err: Error) => {
+					.catch(() => {
 						setLoading(false);
-						console.error(err);
 					});
 			}, 200),
 		[inputRef, isCreationModal, userListNotInsideRoom]
@@ -191,34 +183,6 @@ const ChatCreationContactsSelection = ({
 		debouncedAutoComplete();
 	}, [debouncedAutoComplete]);
 
-	const resultList = useMemo(
-		() =>
-			map(result, (user: ContactMatch) => ({
-				id: user.zimbraId,
-				name: user.fullName,
-				email: user.email
-			})),
-		[result]
-	);
-
-	const onClickListItem = useCallback(
-		(item: ContactInfo) => (): void => {
-			const newChip: ChipItem<ContactInfo> = {
-				value: item,
-				label: item.name || item.email
-			};
-			setContactSelected((contacts: ContactSelected) =>
-				contacts[item.id] ? omit(contacts, item.id) : { ...contacts, [item.id]: item }
-			);
-			setChips((chips) =>
-				find(chips, (chip) => chip.value?.id === item.id)
-					? differenceBy(chips, [newChip], (chip) => chip.value?.id)
-					: union(chips, [newChip])
-			);
-		},
-		[setContactSelected]
-	);
-
 	const chipInputHasError = useMemo(
 		() =>
 			isCreationModal
@@ -228,27 +192,45 @@ const ChatCreationContactsSelection = ({
 		[isCreationModal, contactsSelected, maxGroupMembers, members]
 	);
 
+	const addOrRemoveChip = useCallback((newChip) => {
+		setChips((chips) =>
+			find(chips, (chip) => chip.value?.id === newChip.value?.id)
+				? differenceBy(chips, [newChip], (chip) => chip.value?.id)
+				: union(chips, [newChip])
+		);
+	}, []);
+
+	const onClickListItem = useCallback(
+		(item: ContactInfo) => (): void => {
+			if ((chipInputHasError && !!contactsSelected[item.id]) || !chipInputHasError) {
+				const newChip: ChipItem<ContactInfo> = {
+					value: item,
+					label: item.displayName || item.email
+				};
+				setContactSelected((contacts: ContactSelected) =>
+					contacts[item.id] ? omit(contacts, item.id) : { ...contacts, [item.id]: item }
+				);
+				addOrRemoveChip(newChip);
+			}
+		},
+		[addOrRemoveChip, chipInputHasError, contactsSelected, setContactSelected]
+	);
+
 	const items = useMemo(
 		() =>
-			map(resultList, (item) => {
-				const clickCb =
-					(chipInputHasError && !!contactsSelected[item.id]) || !chipInputHasError
-						? onClickListItem
-						: () => (): null => null;
-				return (
-					<ListItem key={item.id} active={!!contactsSelected[item.id]}>
-						{() => (
-							<ListParticipant
-								item={item}
-								selected={!!contactsSelected[item.id]}
-								onClickCb={clickCb}
-								isDisabled={chipInputHasError}
-							/>
-						)}
-					</ListItem>
-				);
-			}),
-		[chipInputHasError, contactsSelected, onClickListItem, resultList]
+			map(result, (item) => (
+				<ListItem key={item.id} active={!!contactsSelected[item.id]}>
+					{() => (
+						<ListParticipant
+							item={item}
+							selected={!!contactsSelected[item.id]}
+							onClickCb={onClickListItem}
+							isDisabled={chipInputHasError}
+						/>
+					)}
+				</ListItem>
+			)),
+		[chipInputHasError, contactsSelected, onClickListItem, result]
 	);
 
 	const removeContactFromChip = useCallback(
@@ -311,12 +293,6 @@ const ChatCreationContactsSelection = ({
 };
 
 export default ChatCreationContactsSelection;
-
-export type ContactInfo = {
-	id: string;
-	name: string;
-	email: string;
-};
 
 export type ContactSelected = {
 	[id: string]: ContactInfo;

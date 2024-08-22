@@ -10,7 +10,6 @@ import { screen, waitFor } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
 
 import SecondaryBarView from './SecondaryBarView';
-import { ContactMatch } from '../../../network/soap/AutoCompleteRequest';
 import useStore from '../../../store/Store';
 import {
 	createMockMember,
@@ -18,9 +17,10 @@ import {
 	createMockTextMessage,
 	createMockUser
 } from '../../../tests/createMock';
-import { mockedAutoCompleteGalRequest } from '../../../tests/mocks/AutoCompleteGal';
+import { mockSearchUsersByFeatureRequest } from '../../../tests/mocks/SearchUsersByFeature';
 import { setup } from '../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
+import { ContactInfo } from '../../../types/network/soap/searchUsersByFeatureRequest';
 import { RootStore } from '../../../types/store/StoreTypes';
 
 const iconCloseOutline = 'icon: CloseOutline';
@@ -113,12 +113,10 @@ const mkdTextMsgUser3Group2 = createMockTextMessage({
 	date: 1704776670 // 2024-01-09 06:04:30
 });
 
-const contactUser1: ContactMatch = {
+const contactUser1: ContactInfo = {
 	email: 'user1@test.com',
-	firstName: 'User 1',
-	lastName: 'Test',
-	fullName: 'User 1 Test',
-	zimbraId: '1234567890'
+	displayName: 'User 1 Test',
+	id: '1234567890'
 };
 
 beforeEach(() => {
@@ -264,7 +262,7 @@ describe('SecondaryBar tests', () => {
 
 	describe('FilteredGal inside SecondaryBarView tests', () => {
 		test('User filter gal and expect only one user to be visible', async () => {
-			mockedAutoCompleteGalRequest.mockResolvedValueOnce([contactUser1]);
+			mockSearchUsersByFeatureRequest.mockResolvedValueOnce([contactUser1]);
 			const { user } = setup(<SecondaryBarView expanded />);
 			// user search a user
 			const textArea = screen.getByRole('textbox');
@@ -276,7 +274,7 @@ describe('SecondaryBar tests', () => {
 		});
 
 		test('User filter gal but AutoCompleteGalRequest fails', async () => {
-			mockedAutoCompleteGalRequest.mockRejectedValueOnce(new Error('Error'));
+			mockSearchUsersByFeatureRequest.mockRejectedValueOnce(new Error('Error'));
 			const { user } = setup(<SecondaryBarView expanded />);
 			// user search a user
 			const textArea = screen.getByRole('textbox');
@@ -290,7 +288,7 @@ describe('SecondaryBar tests', () => {
 		});
 
 		test('User try to search again using Retry button after a failed search', async () => {
-			mockedAutoCompleteGalRequest.mockRejectedValueOnce(new Error('Error'));
+			mockSearchUsersByFeatureRequest.mockRejectedValueOnce(new Error('Error'));
 			const { user } = setup(<SecondaryBarView expanded />);
 			// user search a user
 			const textArea = screen.getByRole('textbox');
@@ -305,12 +303,12 @@ describe('SecondaryBar tests', () => {
 			const retryButton = screen.getByText('Retry');
 			expect(retryButton).toBeInTheDocument();
 
-			mockedAutoCompleteGalRequest.mockRejectedValueOnce(new Error('Error'));
+			mockSearchUsersByFeatureRequest.mockRejectedValueOnce(new Error('Error'));
 			await waitFor(() => {
 				user.click(retryButton);
 			});
 
-			expect(mockedAutoCompleteGalRequest).toHaveBeenCalledTimes(2);
+			expect(mockSearchUsersByFeatureRequest).toHaveBeenCalledTimes(2);
 		});
 	});
 });
