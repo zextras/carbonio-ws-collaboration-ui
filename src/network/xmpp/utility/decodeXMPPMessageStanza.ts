@@ -16,6 +16,7 @@ import {
 } from './decodeStanza';
 import {
 	ConfigurationMessage,
+	FasteningAction,
 	Message,
 	MessageFastening,
 	MessageType,
@@ -51,7 +52,7 @@ export function decodeXMPPMessageStanza(
 			return {
 				id: messageId,
 				type: MessageType.FASTENING,
-				action: 'delete',
+				action: FasteningAction.DELETE,
 				roomId,
 				date: messageDate,
 				originalStanzaId,
@@ -66,7 +67,7 @@ export function decodeXMPPMessageStanza(
 			return {
 				id: messageId,
 				type: MessageType.FASTENING,
-				action: 'edit',
+				action: FasteningAction.EDIT,
 				roomId,
 				date: messageDate,
 				originalStanzaId,
@@ -82,7 +83,7 @@ export function decodeXMPPMessageStanza(
 			return {
 				id: messageId,
 				type: MessageType.FASTENING,
-				action: 'reaction',
+				action: FasteningAction.REACTION,
 				roomId,
 				date: messageDate,
 				originalStanzaId,

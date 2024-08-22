@@ -12,6 +12,7 @@ import { createMockMessageFastening, createMockTextMessage } from '../../../test
 import { mockedReadMessage, xmppClient } from '../../../tests/mockedXmppClient';
 import {
 	DateMessage,
+	FasteningAction,
 	MessageFastening,
 	MessageType,
 	TextMessage
@@ -53,11 +54,11 @@ const createXMPPFasteningMessage = (fastening: MessageFastening): Element => {
 				type="groupchat"
 			>
 				${
-					fastening.action === 'delete' &&
+					fastening.action === FasteningAction.DELETE &&
 					`<apply-to id="${fastening.originalStanzaId}" xmlns="urn:xmpp:fasten:0"><retract xmlns='urn:xmpp:message-retract:0'/></apply-to>`
 				}
 				${
-					fastening.action === 'edit' &&
+					fastening.action === FasteningAction.EDIT &&
 					`<apply-to id="${fastening.originalStanzaId}" xmlns="urn:xmpp:fasten:0"><edit xmlns='zextras:xmpp:edit:0'/><external name="body"/></apply-to><body>${fastening.value}</body>`
 				}
 			</message>
@@ -110,7 +111,7 @@ describe('XMPP newMessageHandler', () => {
 	test('New delete fastening arrives', () => {
 		// A new deletion fastening arrives
 		const deletionFastening = createMockMessageFastening({
-			action: 'delete',
+			action: FasteningAction.DELETE,
 			originalStanzaId: 'stanzaId'
 		});
 		const deletionFasteningXMPP = createXMPPFasteningMessage(deletionFastening);
@@ -128,7 +129,7 @@ describe('XMPP newMessageHandler', () => {
 	test('New edit fastening arrives', () => {
 		// A new edit fastening arrives
 		const editFastening = createMockMessageFastening({
-			action: 'edit',
+			action: FasteningAction.EDIT,
 			originalStanzaId: 'stanzaId',
 			value: 'new text'
 		});

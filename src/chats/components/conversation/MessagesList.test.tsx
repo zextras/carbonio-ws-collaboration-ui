@@ -25,6 +25,7 @@ import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
 import { MarkerStatus } from '../../../types/store/MarkersTypes';
 import {
 	ConfigurationMessage,
+	FasteningAction,
 	MessageType,
 	OperationType,
 	TextMessage
@@ -241,7 +242,7 @@ describe('render list of messages with history loader visible for first time ope
 		});
 		const mockedDeletedMessage = createMockMessageFastening({
 			roomId: mockedRoom.id,
-			action: 'delete',
+			action: FasteningAction.DELETE,
 			originalStanzaId: mockedTextMessage.stanzaId
 		});
 
@@ -265,7 +266,7 @@ describe('render list of messages with history loader visible for first time ope
 		});
 		const mockedEditedMessage = createMockMessageFastening({
 			roomId: mockedRoom.id,
-			action: 'edit',
+			action: FasteningAction.EDIT,
 			originalStanzaId: mockedTextMessage.stanzaId,
 			value: 'Hello guys! I am edited message'
 		});
@@ -323,7 +324,7 @@ describe('render list of messages with history loader visible for first time ope
 		});
 		const mockedDeletedMessage = createMockMessageFastening({
 			roomId: mockedRoom.id,
-			action: 'delete',
+			action: FasteningAction.DELETE,
 			originalStanzaId: mockedTextMessage.stanzaId
 		});
 
@@ -349,7 +350,7 @@ describe('render list of messages with history loader visible for first time ope
 		});
 		const mockedEditedMessage = createMockMessageFastening({
 			roomId: mockedRoom.id,
-			action: 'edit',
+			action: FasteningAction.EDIT,
 			originalStanzaId: mockedTextMessage.stanzaId,
 			value: 'Hello guys! I am edited message'
 		});

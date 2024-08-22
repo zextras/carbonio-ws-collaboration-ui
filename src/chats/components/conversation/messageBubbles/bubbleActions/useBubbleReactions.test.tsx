@@ -8,7 +8,7 @@ import { screen } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 import { forEach } from 'lodash';
 
-import useBubbleReactions from './useBubbleReactions';
+import useBubbleReactions, { ReactionType } from './useBubbleReactions';
 import useStore from '../../../../../store/Store';
 import {
 	createMockMessageFastening,
@@ -19,7 +19,7 @@ import {
 import { mockedSendChatMessageReaction } from '../../../../../tests/mockedXmppClient';
 import { ProvidersWrapper, setup } from '../../../../../tests/test-utils';
 import { RoomBe } from '../../../../../types/network/models/roomBeTypes';
-import { TextMessage } from '../../../../../types/store/MessageTypes';
+import { FasteningAction, TextMessage } from '../../../../../types/store/MessageTypes';
 import { RootStore } from '../../../../../types/store/StoreTypes';
 
 const sessionUser = createMockUser({ id: 'sesssionId', name: 'sessionName' });
@@ -31,10 +31,10 @@ const simpleTextMessage: TextMessage = createMockTextMessage({
 });
 const reactionToSimpleTextMessage = createMockMessageFastening({
 	roomId: room.id,
-	action: 'reaction',
+	action: FasteningAction.REACTION,
 	originalStanzaId: simpleTextMessage.stanzaId,
 	from: sessionUser.id,
-	value: '\uD83D\uDC4D'
+	value: ReactionType.THUMBS_UP
 });
 
 const iconTestId = 'icon: SmileOutline';
@@ -66,14 +66,7 @@ describe('Bubble Contextual Menu - other user messages', () => {
 		const smileButton = screen.getByTestId(iconTestId);
 		expect(result.current.reactionsDropdownActive).toBe(false);
 		await user.click(smileButton);
-		const reactions = [
-			'\uD83D\uDC4D',
-			'\u2764\uFE0F',
-			'\uD83D\uDE02',
-			'\uD83D\uDE22',
-			'\uD83D\uDC4E'
-		];
-		forEach(reactions, (reaction) => {
+		forEach(ReactionType, (reaction) => {
 			const reactionBox = screen.getByTestId(`reaction-${reaction}`);
 			expect(reactionBox).toBeInTheDocument();
 		});
@@ -88,7 +81,7 @@ describe('Bubble Contextual Menu - other user messages', () => {
 		expect(result.current.reactionsDropdownActive).toBe(false);
 		await user.click(smileButton);
 
-		const reaction = screen.getByTestId('reaction-\uD83D\uDC4D');
+		const reaction = screen.getByTestId(`reaction-${ReactionType.THUMBS_UP}`);
 		await user.click(reaction);
 
 		expect(mockedSendChatMessageReaction).toHaveBeenCalledTimes(1);
@@ -104,7 +97,7 @@ describe('Bubble Contextual Menu - other user messages', () => {
 		expect(result.current.reactionsDropdownActive).toBe(false);
 		await user.click(smileButton);
 
-		const reaction = screen.getByTestId('reaction-\uD83D\uDC4D');
+		const reaction = screen.getByTestId(`reaction-${ReactionType.THUMBS_UP}`);
 		expect(reaction).toHaveStyle('background-color: #abc6ed;');
 		// Remove reaction
 		await user.click(reaction);

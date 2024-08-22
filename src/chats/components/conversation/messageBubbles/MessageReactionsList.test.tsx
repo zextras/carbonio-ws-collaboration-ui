@@ -8,6 +8,7 @@ import React from 'react';
 
 import { screen } from '@testing-library/react';
 
+import { ReactionType } from './bubbleActions/useBubbleReactions';
 import MessageReactionsList from './MessageReactionsList';
 import useStore from '../../../../store/Store';
 import {
@@ -18,7 +19,7 @@ import {
 } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe } from '../../../../types/network/models/roomBeTypes';
-import { TextMessage } from '../../../../types/store/MessageTypes';
+import { FasteningAction, TextMessage } from '../../../../types/store/MessageTypes';
 
 const loggedUser = createMockUser({ id: 'loggedUser', name: 'Logged User' });
 const user1 = createMockUser({ id: 'user1', name: 'User 1' });
@@ -34,35 +35,35 @@ const simpleTextMessage: TextMessage = createMockTextMessage({
 const reaction1ToSimpleTextMessage = createMockMessageFastening({
 	id: 'reaction1',
 	roomId: room.id,
-	action: 'reaction',
+	action: FasteningAction.REACTION,
 	originalStanzaId: simpleTextMessage.stanzaId,
 	from: user1.id,
-	value: '\uD83D\uDC4D'
+	value: ReactionType.THUMBS_UP
 });
 
 const reaction2ToSimpleTextMessage = createMockMessageFastening({
 	id: 'reaction2',
 	roomId: room.id,
-	action: 'reaction',
+	action: FasteningAction.REACTION,
 	originalStanzaId: simpleTextMessage.stanzaId,
 	from: user2.id,
-	value: '\u2764\uFE0F'
+	value: ReactionType.HEART
 });
 const reaction3ToSimpleTextMessage = createMockMessageFastening({
 	id: 'reaction3',
 	roomId: room.id,
-	action: 'reaction',
+	action: FasteningAction.REACTION,
 	originalStanzaId: simpleTextMessage.stanzaId,
 	from: user3.id,
-	value: '\uD83D\uDE02'
+	value: ReactionType.JOY
 });
 const reaction4ToSimpleTextMessage = createMockMessageFastening({
 	id: 'reaction4',
 	roomId: room.id,
-	action: 'reaction',
+	action: FasteningAction.REACTION,
 	originalStanzaId: simpleTextMessage.stanzaId,
 	from: loggedUser.id,
-	value: '\uD83D\uDC4D'
+	value: ReactionType.THUMBS_UP
 });
 
 const reactionChipTestId = 'reaction-chip';

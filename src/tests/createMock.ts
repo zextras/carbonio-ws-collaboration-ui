@@ -16,6 +16,7 @@ import { Marker, MarkerStatus, MarkerType } from '../types/store/MarkersTypes';
 import {
 	ConfigurationMessage,
 	DateMessage,
+	FasteningAction,
 	MessageFastening,
 	MessageType,
 	OperationType,
@@ -86,7 +87,7 @@ export const createMockMessageFastening = (fields?: GenericFieldsType): MessageF
 	roomId: 'roomId',
 	date: 1661441294393,
 	type: MessageType.FASTENING,
-	action: 'delete',
+	action: FasteningAction.DELETE,
 	originalStanzaId: 'originalStanzaId',
 	from: 'from',
 	...fields

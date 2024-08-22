@@ -6,7 +6,7 @@
 
 import { filter, includes, last, reduce } from 'lodash';
 
-import { MessageFastening } from '../../types/store/MessageTypes';
+import { FasteningAction, MessageFastening } from '../../types/store/MessageTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 
 export const getEditAndDeleteFasteningSelector = (
@@ -16,7 +16,8 @@ export const getEditAndDeleteFasteningSelector = (
 ): MessageFastening | undefined => {
 	if (state.fastenings?.[roomId]?.[stanzaId]) {
 		const editAndDeleteFastenings = state.fastenings[roomId][stanzaId].filter(
-			(fastening) => fastening.action === 'edit' || fastening.action === 'delete'
+			(fastening) =>
+				fastening.action === FasteningAction.EDIT || fastening.action === FasteningAction.DELETE
 		);
 		return last(editAndDeleteFastenings);
 	}
@@ -30,7 +31,10 @@ export const getReactionFastenings = (
 ): MessageFastening[] => {
 	const fastenings = state.fastenings?.[roomId]?.[stanzaId];
 	if (fastenings) {
-		const reactions = filter(fastenings, (fastening) => fastening.action === 'reaction');
+		const reactions = filter(
+			fastenings,
+			(fastening) => fastening.action === FasteningAction.REACTION
+		);
 		const latestReactions = reduce(
 			reactions,
 			(acc: { [from: string]: number }, fastening: MessageFastening, index: number) => {
@@ -55,7 +59,8 @@ export const getMyLastReaction = (
 	if (fastenings) {
 		const myReactions = filter(
 			fastenings,
-			(fastening) => fastening.action === 'reaction' && fastening.from === state.session?.id
+			(fastening) =>
+				fastening.action === FasteningAction.REACTION && fastening.from === state.session?.id
 		);
 		return last(myReactions)?.value;
 	}

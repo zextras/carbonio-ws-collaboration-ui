@@ -15,6 +15,14 @@ import { getMyLastReaction } from '../../../../../store/selectors/FasteningsSele
 import useStore from '../../../../../store/Store';
 import { TextMessage } from '../../../../../types/store/MessageTypes';
 
+export enum ReactionType {
+	'THUMBS_UP' = '\uD83D\uDC4D',
+	'HEART' = '\u2764\uFE0F',
+	'JOY' = '\uD83D\uDE02',
+	'CRY' = '\uD83D\uDE22',
+	'THUMBS_DOWN' = '\uD83D\uDC4E'
+}
+
 const EmojiBox = styled(Container)<{
 	$emoji: string;
 	$selected: boolean;
@@ -71,19 +79,16 @@ const useBubbleReactions = (
 				id: 'emojis',
 				customComponent: (
 					<Container orientation="horizontal">
-						{map(
-							['\uD83D\uDC4D', '\u2764\uFE0F', '\uD83D\uDE02', '\uD83D\uDE22', '\uD83D\uDC4E'],
-							(emoji) => (
-								<EmojiBox
-									background="gray6"
-									key={emoji}
-									data-testid={`reaction-${emoji}`}
-									$emoji={emoji}
-									$selected={myReaction === emoji}
-									onClick={() => sendReaction(emoji)}
-								/>
-							)
-						)}
+						{map(ReactionType, (emoji) => (
+							<EmojiBox
+								background="gray6"
+								key={emoji}
+								data-testid={`reaction-${emoji}`}
+								$emoji={emoji}
+								$selected={myReaction === emoji}
+								onClick={() => sendReaction(emoji)}
+							/>
+						))}
 					</Container>
 				),
 				padding: '0'
