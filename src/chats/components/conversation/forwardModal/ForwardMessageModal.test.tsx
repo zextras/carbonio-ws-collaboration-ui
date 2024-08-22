@@ -67,7 +67,7 @@ describe('Forward Message Modal', () => {
 		expect(list).toBeInTheDocument();
 		const footerButton = screen.getByRole('button', { name: /Forward/i });
 		expect(footerButton).toBeInTheDocument();
-		expect(footerButton).toHaveAttribute('disabled');
+		expect(footerButton).toBeDisabled();
 	});
 
 	test("Current conversation isn't displayed in the list", () => {
@@ -121,7 +121,7 @@ describe('Forward Message Modal', () => {
 		await user.click(conversationComponent);
 
 		const footerButton = await screen.findByRole('button', { name: /Forward/i });
-		expect(footerButton).not.toHaveAttribute('disabled', true);
+		expect(footerButton).toBeEnabled();
 
 		await user.click(footerButton);
 		expect(mockedForwardMessagesRequest).toHaveBeenCalledTimes(1);
@@ -146,7 +146,7 @@ describe('Forward Message Modal', () => {
 		await user.click(conversationComponent);
 
 		const footerButton = await screen.findByRole('button', { name: /Forward/i });
-		expect(footerButton).not.toHaveAttribute('disabled', true);
+		expect(footerButton).toBeEnabled();
 
 		await user.click(footerButton);
 		expect(mockedForwardMessagesRequest).toHaveBeenCalledTimes(1);
@@ -171,7 +171,7 @@ describe('Forward Message Modal', () => {
 		await user.click(conversationComponent);
 
 		const footerButton = await screen.findByRole('button', { name: /Forward/i });
-		expect(footerButton).not.toHaveAttribute('disabled', true);
+		expect(footerButton).toBeEnabled();
 
 		await user.click(footerButton);
 		expect(mockedForwardMessagesRequest).toHaveBeenCalledTimes(1);

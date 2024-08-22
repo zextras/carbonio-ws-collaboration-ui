@@ -23,12 +23,9 @@ import { ContactSelected } from '../../creationModal/ChatCreationContactsSelecti
 
 type AddNewMemberProps = {
 	roomId: string;
-	isInsideMeeting?: boolean;
-	iAmTheOnlyOwner?: boolean;
-	emptyRoom?: boolean;
 };
 
-const AddNewMemberAction: FC<AddNewMemberProps> = ({ roomId, iAmTheOnlyOwner, emptyRoom }) => {
+const AddNewMemberAction: FC<AddNewMemberProps> = ({ roomId }) => {
 	const [t] = useTranslation();
 	const addNewMemberTitle: string = t('action.addNewMembers', `Add new members`);
 	const removeToAddNewOneLabel = t(
@@ -43,11 +40,6 @@ const AddNewMemberAction: FC<AddNewMemberProps> = ({ roomId, iAmTheOnlyOwner, em
 	const [contactsSelected, setContactSelected] = useState<ContactSelected>({});
 	const [addNewMemberModalOpen, setAddNewMemberModalOpen] = useState<boolean>(false);
 	const [showHistory, setShowHistory] = useState<boolean>(false);
-
-	const padding = useMemo(
-		() => (iAmTheOnlyOwner && emptyRoom ? { top: 'small', bottom: 'large' } : { top: 'small' }),
-		[iAmTheOnlyOwner, emptyRoom]
-	);
 
 	const closeModal = useCallback(() => {
 		setAddNewMemberModalOpen(false);
@@ -77,12 +69,13 @@ const AddNewMemberAction: FC<AddNewMemberProps> = ({ roomId, iAmTheOnlyOwner, em
 				idComponent="addNewMemberAction"
 				icon="PersonAddOutline"
 				actionColor="primary"
-				padding={padding}
+				padding={{ top: 'small' }}
 				label={addNewMemberTitle}
 				withArrow
 				action={(): void => setAddNewMemberModalOpen(true)}
 				isDisabled={addMemberDisabled}
 				disabledTooltip={removeToAddNewOneLabel}
+				actionTestId="leaveActionButton"
 			/>
 			{addNewMemberModalOpen && (
 				<AddNewMemberModal

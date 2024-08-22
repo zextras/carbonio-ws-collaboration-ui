@@ -23,19 +23,19 @@ import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
 import { ContactInfo } from '../../../types/network/soap/searchUsersByFeatureRequest';
 
 // Mock objects
-const zimbraUser1: ContactInfo = {
+const user1: ContactInfo = {
 	email: 'user1@test.com',
 	displayName: 'User One',
 	id: 'user1-id'
 };
 
-const zimbraUser2: ContactInfo = {
+const user2: ContactInfo = {
 	email: 'user2@test.com',
 	displayName: 'User Two',
 	id: 'user2-id'
 };
 
-const zimbraUser3: ContactInfo = {
+const user3: ContactInfo = {
 	email: 'user3@test.com',
 	displayName: 'User Three',
 	id: 'user3-id'
@@ -44,7 +44,7 @@ const zimbraUser3: ContactInfo = {
 const testRoom: RoomBe = createMockRoom({
 	id: 'roomTest',
 	type: RoomType.ONE_TO_ONE,
-	members: [createMockMember({ userId: 'myId' }), createMockMember({ userId: zimbraUser1.id })]
+	members: [createMockMember({ userId: 'myId' }), createMockMember({ userId: user1.id })]
 });
 
 describe('Chat Creation Modal', () => {
@@ -61,31 +61,31 @@ describe('Chat Creation Modal', () => {
 		expect(list).toBeInTheDocument();
 		const footerButton = await screen.findByRole('button', { name: /create/i });
 		expect(footerButton).toBeInTheDocument();
-		expect(footerButton).toHaveAttribute('disabled');
+		expect(footerButton).toBeDisabled();
 	});
 
 	test('Creating a 1to1 Chat add a placeholder room', async () => {
 		const { user } = setup(<ChatCreationModal open onClose={jest.fn()} />);
 
-		mockSearchUsersByFeatureRequest.mockReturnValueOnce([zimbraUser1]);
+		mockSearchUsersByFeatureRequest.mockReturnValueOnce([user1]);
 
 		// Type on ChipInput to trigger a new autoCompleteGalRequest
 		const chipInput = await screen.findByTestId('chip_input_creation_modal');
-		user.type(chipInput, zimbraUser1.displayName[0]);
+		user.type(chipInput, user1.displayName[0]);
 
 		// Add Chip on ChipInput
-		const userComponent = await screen.findByText(zimbraUser1.displayName);
+		const userComponent = await screen.findByText(user1.displayName);
 		user.click(userComponent);
 
 		const footerButton = await screen.findByRole('button', { name: /create/i });
-		expect(footerButton).not.toHaveAttribute('disabled', true);
+		expect(footerButton).toBeEnabled();
 
 		user.click(footerButton);
-		await waitFor(() => expect(footerButton).not.toHaveAttribute('disabled', true));
-		const placeholderRoom = useStore.getState().rooms[`placeholder-${zimbraUser1.id}`];
+		await waitFor(() => expect(footerButton).toBeEnabled());
+		const placeholderRoom = useStore.getState().rooms[`placeholder-${user1.id}`];
 		expect(placeholderRoom).toEqual(
 			expect.objectContaining({
-				id: `placeholder-${zimbraUser1.id}`,
+				id: `placeholder-${user1.id}`,
 				type: RoomType.ONE_TO_ONE,
 				placeholder: true
 			})
@@ -97,18 +97,18 @@ describe('Chat Creation Modal', () => {
 		act(() => result.current.setCapabilities(createMockCapabilityList({ maxGroupMembers: 5 })));
 		const { user } = setup(<ChatCreationModal open onClose={jest.fn()} />);
 
-		mockSearchUsersByFeatureRequest.mockReturnValueOnce([zimbraUser1, zimbraUser2]);
+		mockSearchUsersByFeatureRequest.mockReturnValueOnce([user1, user2]);
 
-		// Add zimbraUser1 and zimbraUser2 chips
+		// Add user1 and user2 chips
 		const chipInput = await screen.findByTestId('chip_input_creation_modal');
-		user.type(chipInput, zimbraUser1.displayName[0]);
-		const user1Component = await screen.findByText(zimbraUser1.displayName);
+		user.type(chipInput, user1.displayName[0]);
+		const user1Component = await screen.findByText(user1.displayName);
 		user.click(user1Component);
 
 		// the state here changes, in fact now there's a chip inside the input, so there's need to focus again on it
 		const chipInput1 = await screen.findByTestId('chip_input_creation_modal');
-		user.type(chipInput1, zimbraUser2.displayName[0]);
-		const user2Component = await screen.findByText(zimbraUser2.displayName);
+		user.type(chipInput1, user2.displayName[0]);
+		const user2Component = await screen.findByText(user2.displayName);
 		user.click(user2Component);
 
 		// Add group title
@@ -130,7 +130,7 @@ describe('Chat Creation Modal', () => {
 			pictureUpdatedAt: 'pictureUpdatedAt'
 		});
 		user.click(footerButton);
-		await waitFor(() => expect(footerButton).not.toHaveAttribute('disabled', true));
+		await waitFor(() => expect(footerButton).toBeEnabled());
 		expect(mockedAddRoomRequest).toHaveBeenCalled();
 	});
 
@@ -139,16 +139,16 @@ describe('Chat Creation Modal', () => {
 		act(() => result.current.setCapabilities(createMockCapabilityList({ maxGroupMembers: 5 })));
 		const { user } = setup(<ChatCreationModal open onClose={jest.fn()} />);
 
-		mockSearchUsersByFeatureRequest.mockReturnValueOnce([zimbraUser1, zimbraUser2]);
+		mockSearchUsersByFeatureRequest.mockReturnValueOnce([user1, user2]);
 
-		// Add zimbraUser1 and zimbraUser2 chips
+		// Add user1 and user2 chips
 		const chipInput = await screen.findByTestId('chip_input_creation_modal');
-		user.type(chipInput, zimbraUser1.displayName[0]);
-		const user1Component = await screen.findByText(zimbraUser1.displayName);
+		user.type(chipInput, user1.displayName[0]);
+		const user1Component = await screen.findByText(user1.displayName);
 		user.click(user1Component);
 		const chipInput1 = await screen.findByTestId('chip_input_creation_modal');
-		user.type(chipInput1, zimbraUser2.displayName[0]);
-		const user2Component = await screen.findByText(zimbraUser2.displayName);
+		user.type(chipInput1, user2.displayName[0]);
+		const user2Component = await screen.findByText(user2.displayName);
 		user.click(user2Component);
 
 		const footerButton = await screen.findByRole('button', { name: /create/i });
@@ -156,7 +156,7 @@ describe('Chat Creation Modal', () => {
 
 		mockedAddRoomRequest.mockRejectedValueOnce({});
 		user.click(footerButton);
-		await waitFor(() => expect(footerButton).not.toHaveAttribute('disabled', true));
+		await waitFor(() => expect(footerButton).toBeEnabled());
 		const snackbar = await screen.findByText(/Something went Wrong. Please Retry/i);
 		expect(snackbar).toBeInTheDocument();
 	});
@@ -164,16 +164,16 @@ describe('Chat Creation Modal', () => {
 	test('title and topic fields are filled properly', async () => {
 		const { result } = renderHook(() => useStore());
 		act(() => result.current.setCapabilities(createMockCapabilityList({ maxGroupMembers: 5 })));
-		mockSearchUsersByFeatureRequest.mockReturnValueOnce([zimbraUser1, zimbraUser2]);
+		mockSearchUsersByFeatureRequest.mockReturnValueOnce([user1, user2]);
 		const { user } = setup(<ChatCreationModal open onClose={jest.fn()} />);
 
-		// Add zimbraUser1 and zimbraUser2 chips
+		// Add user1 and user2 chips
 		const chipInput = await screen.findByTestId('chip_input_creation_modal');
-		await user.type(chipInput, zimbraUser1.displayName[0]);
-		const user1Component = await screen.findByText(zimbraUser1.displayName);
+		await user.type(chipInput, user1.displayName[0]);
+		const user1Component = await screen.findByText(user1.displayName);
 		await user.click(user1Component);
-		await user.type(chipInput, zimbraUser2.displayName[0]);
-		const user2Component = await screen.findByText(zimbraUser2.displayName);
+		await user.type(chipInput, user2.displayName[0]);
+		const user2Component = await screen.findByText(user2.displayName);
 		await user.click(user2Component);
 		const footerButton = await screen.findByRole('button', { name: /new group/i });
 
@@ -189,15 +189,15 @@ describe('Chat Creation Modal', () => {
 	});
 
 	test('Error on title input', async () => {
-		mockSearchUsersByFeatureRequest.mockReturnValueOnce([zimbraUser1, zimbraUser2]);
+		mockSearchUsersByFeatureRequest.mockReturnValueOnce([user1, user2]);
 		const { user } = setup(<ChatCreationModal open onClose={jest.fn()} />);
-		// Add zimbraUser1 and zimbraUser2 chips
+		// Add user1 and user2 chips
 		const chipInput = await screen.findByTestId('chip_input_creation_modal');
-		await user.type(chipInput, zimbraUser1.displayName[0]);
-		const user1Component = await screen.findByText(zimbraUser1.displayName);
+		await user.type(chipInput, user1.displayName[0]);
+		const user1Component = await screen.findByText(user1.displayName);
 		await user.click(user1Component);
-		await user.type(chipInput, zimbraUser2.displayName[0]);
-		const user2Component = await screen.findByText(zimbraUser2.displayName);
+		await user.type(chipInput, user2.displayName[0]);
+		const user2Component = await screen.findByText(user2.displayName);
 		await user.click(user2Component);
 		const footerButton = await screen.findByRole('button', { name: /new group/i });
 
@@ -212,16 +212,16 @@ describe('Chat Creation Modal', () => {
 	});
 
 	test('Error on topic input', async () => {
-		mockSearchUsersByFeatureRequest.mockReturnValueOnce([zimbraUser1, zimbraUser2]);
+		mockSearchUsersByFeatureRequest.mockReturnValueOnce([user1, user2]);
 		const { user } = setup(<ChatCreationModal open onClose={jest.fn()} />);
 
-		// Add zimbraUser1 and zimbraUser2 chips
+		// Add user1 and user2 chips
 		const chipInput = await screen.findByTestId('chip_input_creation_modal');
-		await user.type(chipInput, zimbraUser1.displayName[0]);
-		const user1Component = await screen.findByText(zimbraUser1.displayName);
+		await user.type(chipInput, user1.displayName[0]);
+		const user1Component = await screen.findByText(user1.displayName);
 		await user.click(user1Component);
-		await user.type(chipInput, zimbraUser2.displayName[0]);
-		const user2Component = await screen.findByText(zimbraUser2.displayName);
+		await user.type(chipInput, user2.displayName[0]);
+		const user2Component = await screen.findByText(user2.displayName);
 		await user.click(user2Component);
 		const footerButton = await screen.findByRole('button', { name: /new group/i });
 
@@ -239,11 +239,11 @@ describe('Chat Creation Modal', () => {
 		const { result } = renderHook(() => useStore());
 		act(() => result.current.addRoom(testRoom));
 
-		mockSearchUsersByFeatureRequest.mockReturnValueOnce([zimbraUser1]);
+		mockSearchUsersByFeatureRequest.mockReturnValueOnce([user1]);
 		const { user } = setup(<ChatCreationModal open onClose={jest.fn()} />);
 
-		// Add zimbraUser1 to ChipInput
-		const userComponent = await screen.findByText(zimbraUser1.displayName);
+		// Add user1 to ChipInput
+		const userComponent = await screen.findByText(user1.displayName);
 		await user.click(userComponent);
 
 		const footerButton = await screen.findByRole('button', { name: /create/i });
@@ -253,19 +253,19 @@ describe('Chat Creation Modal', () => {
 	test('Check creation disabled if user reach the limit available, and check list checkbox are disabled', async () => {
 		const { result } = renderHook(() => useStore());
 		act(() => result.current.setCapabilities(createMockCapabilityList({ maxGroupMembers: 3 })));
-		mockSearchUsersByFeatureRequest.mockReturnValueOnce([zimbraUser1, zimbraUser2, zimbraUser3]);
+		mockSearchUsersByFeatureRequest.mockReturnValueOnce([user1, user2, user3]);
 		const { user } = setup(<ChatCreationModal open onClose={jest.fn()} />);
 		const chipInput = await screen.findByTestId('chip_input_creation_modal');
-		await user.type(chipInput, zimbraUser1.displayName[0]);
-		const user1Component = await screen.findByText(zimbraUser1.displayName);
+		await user.type(chipInput, user1.displayName[0]);
+		const user1Component = await screen.findByText(user1.displayName);
 		await user.click(user1Component);
-		await user.type(chipInput, zimbraUser2.displayName[0]);
-		const user2Component = await screen.findByText(zimbraUser2.displayName);
+		await user.type(chipInput, user2.displayName[0]);
+		const user2Component = await screen.findByText(user2.displayName);
 		await user.click(user2Component);
 		const usersToAddLimitReached = await screen.findByText(
 			'You have selected the maximum number of members for a group'
 		);
-		await user.type(chipInput, zimbraUser3.displayName[0]);
+		await user.type(chipInput, user3.displayName[0]);
 		const user3Checkbox = screen.getByTestId('icon: Square');
 		expect(user3Checkbox).toBeInTheDocument();
 		expect(usersToAddLimitReached).toBeInTheDocument();
@@ -274,19 +274,19 @@ describe('Chat Creation Modal', () => {
 	test('Check list checkbox are enabled when user can add other members', async () => {
 		const { result } = renderHook(() => useStore());
 		act(() => result.current.setCapabilities(createMockCapabilityList({ maxGroupMembers: 4 })));
-		mockSearchUsersByFeatureRequest.mockReturnValueOnce([zimbraUser1, zimbraUser2, zimbraUser3]);
+		mockSearchUsersByFeatureRequest.mockReturnValueOnce([user1, user2, user3]);
 		const { user } = setup(<ChatCreationModal open onClose={jest.fn()} />);
 		const chipInput = await screen.findByTestId('chip_input_creation_modal');
-		await user.type(chipInput, zimbraUser1.displayName[0]);
-		const user1Component = await screen.findByText(zimbraUser1.displayName);
+		await user.type(chipInput, user1.displayName[0]);
+		const user1Component = await screen.findByText(user1.displayName);
 		await user.click(user1Component);
-		await user.type(chipInput, zimbraUser2.displayName[0]);
-		const user2Component = await screen.findByText(zimbraUser2.displayName);
+		await user.type(chipInput, user2.displayName[0]);
+		const user2Component = await screen.findByText(user2.displayName);
 		await user.click(user2Component);
-		await user.type(chipInput, zimbraUser3.displayName[0]);
+		await user.type(chipInput, user3.displayName[0]);
 		const user3Checkbox = screen.getByTestId('icon: Square');
 		expect(user3Checkbox).toBeInTheDocument();
-		expect(user3Checkbox).not.toHaveAttribute('disabled');
+		expect(user3Checkbox).toBeEnabled();
 	});
 });
 

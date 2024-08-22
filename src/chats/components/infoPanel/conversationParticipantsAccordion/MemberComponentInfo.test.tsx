@@ -134,11 +134,11 @@ describe('Participant component info', () => {
 
 			const iAmOwnerAction = screen.getByTestId(iconCrown);
 			expect(iAmOwnerAction).toBeInTheDocument();
-			expect(iAmOwnerAction).not.toHaveAttribute('disabled', true);
+			expect(iAmOwnerAction).toBeEnabled();
 
 			const logoutAction = screen.getByTestId(iconLogOut);
 			expect(logoutAction).toBeInTheDocument();
-			expect(logoutAction).not.toHaveAttribute('disabled', true);
+			expect(logoutAction).toBeEnabled();
 		});
 		test('The user is an owner and sees his element inside list', () => {
 			const store = useStore.getState();
@@ -152,7 +152,7 @@ describe('Participant component info', () => {
 
 			const iAmOwnerAction = screen.getByTestId(iconCrown);
 			expect(iAmOwnerAction).toBeInTheDocument();
-			expect(iAmOwnerAction).not.toHaveAttribute('disabled', true);
+			expect(iAmOwnerAction).toBeEnabled();
 
 			const logoutAction = screen.getByTestId(iconLogOut);
 			expect(logoutAction).toBeInTheDocument();

@@ -67,10 +67,7 @@ const CameraButton = ({
 		'meeting.interactions.userHint',
 		'Turn on the camera to select a video effect'
 	);
-	const selectedDeviceTooltip = t(
-		'meeting.interactions.selectedDeviceTooltip',
-		'This device is selected'
-	);
+	const selectedDeviceTooltip = t('meeting.interactions.selectedDeviceTooltip', 'Selected device');
 
 	const { meetingId }: MeetingRoutesParams = useParams();
 	const myUserId = useStore(getUserId);
