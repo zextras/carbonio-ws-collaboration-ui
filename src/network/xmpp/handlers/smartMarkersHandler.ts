@@ -11,7 +11,7 @@ import { Marker, MarkerType } from '../../../types/store/MarkersTypes';
 import { now } from '../../../utils/dateUtils';
 import { getId, getResource } from '../utility/decodeJid';
 import { decodeMarker } from '../utility/decodeMarker';
-import { getRequiredAttribute, getTagElement } from '../utility/decodeStanza';
+import { getAttribute, getRequiredAttribute, getTagElement } from '../utility/decodeStanza';
 
 export function onSmartMarkers(stanza: Element): true {
 	const smartMarkersQuery = getTagElement(stanza, 'query');
@@ -31,21 +31,23 @@ export function onSmartMarkers(stanza: Element): true {
 export function onDisplayedMessageStanza(message: Element): true {
 	const displayed = getTagElement(message, 'displayed');
 	if (displayed) {
-		const from = getRequiredAttribute(message, 'from');
-		const roomId = getId(from);
-		const displayedMessage: Marker = {
-			from: getId(getResource(from)),
-			messageId: getRequiredAttribute(displayed, 'id'),
-			markerDate: now(),
-			type: MarkerType.DISPLAYED
-		};
-		const store = useStore.getState();
-		store.updateMarkers(roomId, [displayedMessage]);
-		store.updateUnreadMessages(roomId);
-
-		// Update unread counter
-		if (getId(getResource(from)) === store.session.id) {
-			store.updateUnreadCount(roomId);
+		const messageId = getAttribute(displayed, 'id');
+		if (messageId) {
+			const from = getRequiredAttribute(message, 'from');
+			const roomId = getId(from);
+			const displayedMessage: Marker = {
+				from: getId(getResource(from)),
+				messageId,
+				markerDate: now(),
+				type: MarkerType.DISPLAYED
+			};
+			const store = useStore.getState();
+			store.updateMarkers(roomId, [displayedMessage]);
+			store.updateUnreadMessages(roomId);
+			// Update unread counter
+			if (getId(getResource(from)) === store.session.id) {
+				store.updateUnreadCount(roomId);
+			}
 		}
 	}
 	return true;

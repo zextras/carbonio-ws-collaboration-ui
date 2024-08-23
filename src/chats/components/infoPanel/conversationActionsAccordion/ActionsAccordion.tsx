@@ -58,16 +58,7 @@ export const ActionsAccordion: FC<ActionAccordionProps> = ({ roomId }) => {
 		[emptyRoom, roomId, roomType]
 	);
 
-	const addNewMemberComponent = useMemo(
-		() => (
-			<AddNewMemberAction
-				roomId={roomId}
-				iAmTheOnlyOwner={iAmOwner && numberOfOwners === 1}
-				emptyRoom={emptyRoom}
-			/>
-		),
-		[emptyRoom, iAmOwner, numberOfOwners, roomId]
-	);
+	const addNewMemberComponent = useMemo(() => <AddNewMemberAction roomId={roomId} />, [roomId]);
 
 	const clearComponent = useMemo(
 		() => <ClearHistoryAction roomId={roomId} roomType={roomType} />,

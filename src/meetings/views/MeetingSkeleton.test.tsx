@@ -6,7 +6,7 @@
 import React from 'react';
 
 import { screen, waitFor } from '@testing-library/react';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act } from '@testing-library/react-hooks';
 import { UserEvent } from '@testing-library/user-event';
 
 import MeetingSkeleton from './MeetingSkeleton';
@@ -14,6 +14,7 @@ import { useParams } from '../../../__mocks__/react-router';
 import { PAGE_INFO_TYPE } from '../../hooks/useRouting';
 import useStore from '../../store/Store';
 import {
+	createMockCapabilityList,
 	createMockMeeting,
 	createMockParticipants,
 	createMockRoom,
@@ -21,6 +22,7 @@ import {
 } from '../../tests/createMock';
 import { mockMediaDevicesResolve } from '../../tests/mocks/global';
 import { mockedLeaveMeetingRequest } from '../../tests/mocks/network';
+import { mockInitialize } from '../../tests/mocks/SelfieSegmentationManager';
 import { mockGoToInfoPage } from '../../tests/mocks/useRouting';
 import { setup } from '../../tests/test-utils';
 import { MeetingBe } from '../../types/network/models/meetingBeTypes';
@@ -29,6 +31,7 @@ import { UserBe } from '../../types/network/models/userBeTypes';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
 import { MeetingParticipant } from '../../types/store/MeetingTypes';
 import { RoomType } from '../../types/store/RoomTypes';
+import { RootStore } from '../../types/store/StoreTypes';
 
 const meetingActionBarLabel = 'meeting-action-bar';
 
@@ -74,22 +77,25 @@ const meeting: MeetingBe = createMockMeeting({
 	participants: [user1Participant, user2Participant, user3Participant]
 });
 
-const storeSetupGroupMeetingSkeleton = (): { user: UserEvent } => {
-	const { result } = renderHook(() => useStore());
-	act(() => {
-		result.current.setUserInfo(user1);
-		result.current.setUserInfo(user2);
-		result.current.setUserInfo(user3);
-		result.current.setLoginInfo(user1.id, user1.name);
-		result.current.addRoom(room);
-		result.current.addMeeting(meeting);
-		result.current.meetingConnection(meeting.id, false, undefined, false, undefined);
-	});
+const storeSetupGroupMeetingSkeleton = (): { user: UserEvent; store: RootStore } => {
+	const store = useStore.getState();
+	store.setUserInfo(user1);
+	store.setUserInfo(user2);
+	store.setUserInfo(user3);
+	store.setLoginInfo(user1.id, user1.name);
+	store.addRoom(room);
+	store.addMeeting(meeting);
+	store.meetingConnection(meeting.id, false, undefined, true, 'videoId');
+	store.setLocalStreams(meeting.id, STREAM_TYPE.VIDEO, new MediaStream());
+	store.setCapabilities(createMockCapabilityList());
 	useParams.mockReturnValue({ meetingId: meeting.id });
 	const { user } = setup(<MeetingSkeleton />);
 
-	return { user };
+	return { user, store };
 };
+
+const mockCaptureStream = jest.fn().mockReturnValue(new MediaStream());
+HTMLCanvasElement.prototype.captureStream = mockCaptureStream;
 
 beforeAll(() => {
 	mockMediaDevicesResolve();
@@ -128,7 +134,7 @@ describe('Grid mode meeting view', () => {
 		await waitFor(() => user.click(endMeetingButton));
 
 		expect(mockedLeaveMeetingRequest).toHaveBeenCalled();
-		expect(mockGoToInfoPage).toBeCalledWith(PAGE_INFO_TYPE.MEETING_ENDED);
+		expect(mockGoToInfoPage).toHaveBeenCalledWith(PAGE_INFO_TYPE.MEETING_ENDED);
 	});
 
 	test('User click once leave button and then move away', async () => {
@@ -195,5 +201,41 @@ describe('Grid mode meeting view', () => {
 
 		const gridModeView = await screen.findByTestId('gridModeView');
 		expect(gridModeView).toBeInTheDocument();
+	});
+});
+
+describe('Meeting action bar interaction with skeleton', () => {
+	test('hover on different elements of the skeleton makes action bar appear and disappear', async () => {
+		const { user } = setup(<MeetingSkeleton />);
+		const meetingActionBar = await screen.findByTestId('meeting-action-bar');
+		await waitFor(() => user.hover(screen.getByTestId('meeting_sidebar')));
+		expect(meetingActionBar).toHaveStyle('transform: translateY( 5rem )');
+		await waitFor(() => user.hover(screen.getByTestId('meeting_view_container')));
+		expect(meetingActionBar).toHaveStyle('transform: translateY( -1rem )');
+	});
+});
+
+describe('Virtual Background setup', () => {
+	test('turn on and off blur', async () => {
+		mockInitialize.mockReturnValue('initialized');
+		const { store } = storeSetupGroupMeetingSkeleton();
+		expect(store.activeMeeting[meeting.id]).not.toBeDefined();
+
+		// turn on blur
+		await waitFor(() => {
+			store.setBlur(meeting.id, true);
+		});
+		const updatedStore = useStore.getState();
+		expect(updatedStore.activeMeeting[meeting.id].virtualBackground.updatedStream).toBeDefined();
+		expect(mockInitialize).toHaveBeenCalled();
+
+		// turn off blur
+		await waitFor(() => {
+			store.setBlur(meeting.id, false);
+		});
+		const updatedStore2 = useStore.getState();
+		expect(
+			updatedStore2.activeMeeting[meeting.id].virtualBackground.updatedStream
+		).not.toBeDefined();
 	});
 });

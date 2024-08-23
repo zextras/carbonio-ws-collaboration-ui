@@ -11,6 +11,7 @@ import { XMPPRequestType } from './XMPPConnection';
 import { createMockRoom } from '../../tests/createMock';
 import { mockedAddRoomRequest } from '../../tests/mocks/network';
 import { mockedXmppConnect, mockedXmppSend } from '../../tests/mocks/XMPPConnection';
+import { pingStanza } from '../../tests/mocks/XMPPStanza';
 
 describe('XMPPClient', () => {
 	test('connect is called with the correct params', () => {
@@ -36,6 +37,16 @@ describe('XMPPClient', () => {
 
 		expect(mockedXmppSend).toHaveBeenCalledWith({
 			type: XMPPRequestType.PRESENCE,
+			elem: expect.any(Object)
+		});
+	});
+
+	test('sendPong should respond to a ping request', () => {
+		const xmppClient = new XMPPClient();
+		xmppClient.sendPong(pingStanza('stanzaId'));
+
+		expect(mockedXmppSend).toHaveBeenCalledWith({
+			type: XMPPRequestType.IQ,
 			elem: expect.any(Object)
 		});
 	});
@@ -67,5 +78,14 @@ describe('XMPPClient', () => {
 		xmppClient.sendChatMessage('placeholder-roomId123', 'Hello, world!');
 
 		expect(mockedAddRoomRequest).toBeCalled();
+	});
+
+	test('sendChatMessageReaction', () => {
+		const xmppClient = new XMPPClient();
+		xmppClient.sendChatMessageReaction('room-test', 'stanzaId-test', '\uD83D\uDC4D');
+		expect(mockedXmppSend).toHaveBeenCalledWith({
+			type: XMPPRequestType.MESSAGE,
+			elem: expect.any(Object)
+		});
 	});
 });

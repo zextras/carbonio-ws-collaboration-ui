@@ -5,6 +5,7 @@
  */
 
 import SubscriptionsManager from '../../../network/webRTC/SubscriptionsManager';
+import { STREAM_TYPE } from '../../store/ActiveMeetingTypes';
 import { StreamInfo } from '../models/meetingBeTypes';
 
 export interface IPeerConnConfig {
@@ -38,7 +39,10 @@ export interface IVideoOutConnection extends IPeerConnection {
 	startVideo(selectedVideoDeviceId?: string): Promise<void>;
 	stopVideo(): void;
 	handleRemoteAnswer(remoteAnswer: RTCSessionDescriptionInit): void;
-	updateLocalStreamTrack(mediaStreamTrack: MediaStream): Promise<MediaStreamTrack | undefined>;
+	updateLocalStreamTrack(
+		mediaStreamTrack: MediaStream,
+		isVirtualBackground?: boolean
+	): Promise<MediaStreamTrack | undefined>;
 }
 
 export interface IScreenOutConnection extends IPeerConnection {
@@ -49,8 +53,8 @@ export interface IScreenOutConnection extends IPeerConnection {
 }
 
 export interface IVideoScreenInConnection extends IPeerConnection {
-	subscriptionManager: SubscriptionsManager;
+	subscriptionManager?: SubscriptionsManager;
 	handleRemoteOffer(sdp: string): void;
 	handleParticipantsSubscribed(streamsMap: StreamInfo[]): void;
-	removeStream(streamKey: string): void;
+	removeStream(streamKey: string, streamType: STREAM_TYPE[]): void;
 }

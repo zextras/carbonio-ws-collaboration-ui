@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { concat, differenceWith, filter, find, isEqual, remove, size } from 'lodash';
+import { concat, differenceWith, filter, find, forEach, isEqual, remove, size } from 'lodash';
 
 import PendingSubscriptionManager from './PendingSubscriptionManager';
 import useStore from '../../store/Store';
@@ -58,8 +58,13 @@ class SubscriptionsManager {
 	}
 
 	// Delete the subscription when user leaves the meeting
-	public deleteSubscription(subIdToDelete: string): void {
-		remove(this.subscriptions, (sub) => sub.userId === subIdToDelete);
+	public deleteSubscription(
+		subIdToDelete: string,
+		streamType: STREAM_TYPE[] = [STREAM_TYPE.VIDEO, STREAM_TYPE.SCREEN]
+	): void {
+		forEach(streamType, (type) => {
+			remove(this.subscriptions, (sub) => sub.userId === subIdToDelete && sub.type === type);
+		});
 	}
 
 	public removeSubscription(subToRemove: Subscription): void {

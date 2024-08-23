@@ -91,5 +91,18 @@ export const useUsersStoreSlice: StateCreator<UsersStoreSlice> = (set: (...any: 
 			false,
 			'USERS/USER_PICTURE_DELETED'
 		);
+	},
+	setAnonymousUser: (id: string): void => {
+		set(
+			produce((draft: RootStore) => {
+				draft.users[id] = {
+					...draft.users[id],
+					id,
+					type: UserType.ANONYMOUS
+				};
+			}),
+			false,
+			'USERS/SET_ANONYMOUS_USER'
+		);
 	}
 });

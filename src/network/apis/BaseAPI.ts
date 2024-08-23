@@ -15,6 +15,10 @@ import { charToUnicode } from '../../utils/textUtils';
 export default abstract class BaseAPI implements IBaseAPI {
 	private readonly url: string = '/services/chats/';
 
+	private mimeTypeToAppend(mimeTypeToCheck: string | undefined): string {
+		return mimeTypeToCheck ?? 'application/octet-stream';
+	}
+
 	public fetchAPI(
 		endpoint: string,
 		method: RequestType,
@@ -61,7 +65,7 @@ export default abstract class BaseAPI implements IBaseAPI {
 				// Headers have to be encoded in unicode to be sent
 				const headers = new Headers();
 				headers.append('fileName', charToUnicode(file.name));
-				headers.append('mimeType', file.type);
+				headers.append('mimeType', this.mimeTypeToAppend(file.type));
 				if (optionalFields) {
 					optionalFields.description &&
 						headers.append('description', charToUnicode(optionalFields.description));

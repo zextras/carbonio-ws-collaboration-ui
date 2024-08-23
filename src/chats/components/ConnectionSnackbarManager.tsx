@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { ReactElement, useEffect, useState } from 'react';
+import React, { ReactElement, useEffect, useMemo, useState } from 'react';
 
 import { Snackbar } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
@@ -24,26 +24,44 @@ const ConnectionSnackbarManager = (): ReactElement | null => {
 	const websocketNetworkStatus = useStore(({ connections }) => connections.status.websocket);
 
 	const [snackbarManuallyClosed, setSnackbarManuallyClosed] = useState(false);
+	const [timer, setTimer] = useState<boolean>(false);
 
 	useEffect(() => {
 		if (chatsBeNetworkStatus || xmppNetworkStatus || websocketNetworkStatus) {
 			setSnackbarManuallyClosed(false);
+			setTimer(false);
 		}
 	}, [chatsBeNetworkStatus, websocketNetworkStatus, xmppNetworkStatus]);
 
-	if (
-		!snackbarManuallyClosed &&
-		(chatsBeNetworkStatus === false ||
-			xmppNetworkStatus === false ||
-			websocketNetworkStatus === false)
-	) {
+	const showSnackbar = useMemo(
+		() =>
+			!snackbarManuallyClosed &&
+			(chatsBeNetworkStatus === false ||
+				xmppNetworkStatus === false ||
+				websocketNetworkStatus === false),
+		[chatsBeNetworkStatus, websocketNetworkStatus, xmppNetworkStatus, snackbarManuallyClosed]
+	);
+
+	useEffect(() => {
+		let timeout: NodeJS.Timeout;
+		if (showSnackbar) {
+			timeout = setTimeout(() => {
+				setTimer(true);
+			}, 1000);
+		}
+		return (): void => {
+			timeout && clearTimeout(timeout);
+		};
+	}, [showSnackbar]);
+
+	if (showSnackbar && timer) {
 		return (
 			<Snackbar
 				open={!chatsBeNetworkStatus || !xmppNetworkStatus || !websocketNetworkStatus}
 				onClose={(): void => setSnackbarManuallyClosed(true)}
 				actionLabel={actionLabel}
 				disableAutoHide
-				type="warning"
+				severity="warning"
 				label={networkProblemLabel}
 			/>
 		);

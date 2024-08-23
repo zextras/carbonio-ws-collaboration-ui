@@ -70,8 +70,11 @@ export const useConnectionsStoreSlice: StateCreator<ConnectionsStoreSlice> = (
 		set(
 			produce((draft: RootStore) => {
 				forEach(draft.users, (user) => {
-					draft.users[user.id].online = undefined;
-					draft.users[user.id].last_activity = undefined;
+					draft.users[user.id] = {
+						...draft.users[user.id],
+						online: undefined,
+						last_activity: undefined
+					};
 				});
 				draft.messages = {};
 				draft.markers = {};

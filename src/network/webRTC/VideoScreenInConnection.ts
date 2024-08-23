@@ -19,7 +19,7 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 
 	meetingId: string;
 
-	subscriptionManager: SubscriptionsManager;
+	subscriptionManager?: SubscriptionsManager;
 
 	streamsMap: StreamMap;
 
@@ -66,10 +66,9 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 		this.updateStreams();
 	}
 
-	public removeStream = (streamKey: string): void => {
-		forEach(this.streamsMap, () => {
-			delete this.streamsMap[`${streamKey}-${STREAM_TYPE.VIDEO}`];
-			delete this.streamsMap[`${streamKey}-${STREAM_TYPE.SCREEN}`];
+	public removeStream = (streamKey: string, streamType: STREAM_TYPE[]): void => {
+		forEach(streamType, (type) => {
+			delete this.streamsMap[`${streamKey}-${type}`];
 		});
 	};
 
@@ -98,7 +97,7 @@ export default class VideoScreenInConnection implements IVideoScreenInConnection
 	}
 
 	public closePeerConnection(): void {
+		delete this.subscriptionManager;
 		this.peerConn?.close?.();
-		this.subscriptionManager.clean();
 	}
 }

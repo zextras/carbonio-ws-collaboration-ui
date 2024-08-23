@@ -9,34 +9,32 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 
 import GalListItem from './GalListItem';
-import { ContactMatch } from '../../../../network/soap/AutoCompleteRequest';
 import useStore from '../../../../store/Store';
 import { setup } from '../../../../tests/test-utils';
+import { ContactInfo } from '../../../../types/network/soap/searchUsersByFeatureRequest';
 
-const contact: ContactMatch = {
+const contact: ContactInfo = {
 	email: 'contact@test.com',
-	firstName: 'Contact',
-	lastName: 'Test',
-	fullName: 'Contact Test',
-	zimbraId: '1234567890'
+	displayName: 'Contact Test',
+	id: '1234567890'
 };
 
 describe('GalListItem tests', () => {
 	test('Expanded GalListItem shows avatar and username', () => {
 		setup(<GalListItem contact={contact} expanded />);
-		const avatar = screen.getByTestId(`${contact.fullName}-avatar`);
+		const avatar = screen.getByTestId(`${contact.displayName}-avatar`);
 		expect(avatar).toBeInTheDocument();
 
-		const username = screen.getByText(contact.fullName);
+		const username = screen.getByText(contact.displayName);
 		expect(username).toBeInTheDocument();
 	});
 
 	test('Collapsed GalListItem shows avatar but not the username', () => {
 		setup(<GalListItem contact={contact} expanded={false} />);
-		const avatar = screen.getByTestId(`${contact.fullName}-avatar`);
+		const avatar = screen.getByTestId(`${contact.displayName}-avatar`);
 		expect(avatar).toBeInTheDocument();
 
-		const username = screen.queryByText(contact.fullName);
+		const username = screen.queryByText(contact.displayName);
 		expect(username).not.toBeInTheDocument();
 	});
 
@@ -44,6 +42,6 @@ describe('GalListItem tests', () => {
 		setup(<GalListItem contact={contact} expanded />);
 		const listItem = screen.getByTestId('gal_list_item');
 		listItem.click();
-		expect(useStore.getState().rooms[`placeholder-${contact.zimbraId}`]).toBeDefined();
+		expect(useStore.getState().rooms[`placeholder-${contact.id}`]).toBeDefined();
 	});
 });

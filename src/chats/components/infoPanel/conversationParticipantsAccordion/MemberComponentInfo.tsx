@@ -12,7 +12,8 @@ import {
 	Padding,
 	Text,
 	Row,
-	TextWithTooltip
+	TextWithTooltip,
+	Shimmer
 } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -65,7 +66,7 @@ const MemberComponentInfo: FC<ParticipantsInfoProps> = ({ member, roomId }) => {
 		getCapability(store, CapabilityType.CAN_SEE_USERS_PRESENCE)
 	);
 
-	const { avatarPicture, avatarIcon, avatarColor } = useAvatarUtilities(member.userId);
+	const { avatarPicture, avatarIcon, avatarColor, isLoading } = useAvatarUtilities(member.userId);
 
 	const lastSeen: string = useMemo(
 		() => (memberLastActivity ? getCalendarTime(memberLastActivity) : ''),
@@ -115,13 +116,17 @@ const MemberComponentInfo: FC<ParticipantsInfoProps> = ({ member, roomId }) => {
 			width="fill"
 			padding={{ top: 'extrasmall', bottom: 'extrasmall' }}
 		>
-			<CustomAvatar
-				label={memberName}
-				shape="round"
-				picture={avatarPicture}
-				icon={avatarIcon}
-				background={avatarColor}
-			/>
+			{isLoading ? (
+				<Shimmer.Avatar />
+			) : (
+				<CustomAvatar
+					label={memberName}
+					shape="round"
+					picture={avatarPicture}
+					icon={avatarIcon}
+					background={avatarColor}
+				/>
+			)}
 			{infoElement}
 			<Row>
 				<MemberComponentActions roomId={roomId} memberId={member.userId} />

@@ -8,28 +8,19 @@ import React, { FC } from 'react';
 
 import {
 	Container,
-	IconButton,
 	Padding,
 	Text,
 	Icon,
 	Row,
 	Tooltip,
-	PaddingObj
+	PaddingObj,
+	Button
 } from '@zextras/carbonio-design-system';
 import styled, { DefaultTheme } from 'styled-components';
 
 const CustomText = styled(Text)``;
 
-const CustomIconButton = styled(IconButton)<{ $backgroundColor: keyof DefaultTheme['palette'] }>`
-	background-color: ${({ theme, $backgroundColor }): string =>
-		theme.palette[$backgroundColor].regular} !important;
-	color: ${({ theme }): string => theme.palette.gray6.regular} !important;
-	&:hover {
-		background-color: ${({ theme, $backgroundColor }): string =>
-			theme.palette[$backgroundColor].regular} !important;
-		color: ${({ theme }): string => theme.palette.gray6.regular} !important;
-	}
-`;
+const CustomHoverButton = styled(Button)``;
 
 const CustomIcon = styled(Icon)`
 	padding-right: 0.5rem;
@@ -43,9 +34,21 @@ const ActionContainer = styled(Container)<{
 	height: fit-content;
 	cursor: pointer;
 	&:hover {
-		background-color: ${({ theme, $actionColor }): string => theme.palette[$actionColor].regular};
+		background-color: ${({ theme, $actionColor, disabled }): string =>
+			disabled
+				? theme.palette[$actionColor].disabled
+				: theme.palette[$actionColor].regular} !important;
+		${CustomHoverButton} {
+			background-color: ${({ theme, $actionColor, disabled }): string =>
+				disabled
+					? theme.palette[$actionColor].disabled
+					: theme.palette[$actionColor].regular} !important;
+			color: ${({ theme, disabled }): string =>
+				disabled ? theme.palette.gray6.disabled : theme.palette.gray6.regular} !important;
+		}
 		${CustomIcon} {
-			color: ${({ theme }): string => theme.palette.gray6.regular} !important;
+			color: ${({ theme, disabled }): string =>
+				disabled ? theme.palette.gray6.disabled : theme.palette.gray6.regular} !important;
 		}
 		${CustomText} {
 			color: ${({ theme }): string => theme.palette.gray6.regular};
@@ -92,7 +95,7 @@ const ActionComponent: FC<ActionProps> = ({
 	<Tooltip disabled={!isDisabled} label={disabledTooltip}>
 		<CustomActionContainer padding={padding} data-testid="action">
 			<ActionContainer
-				data-testid={idComponent || 'action'}
+				data-testid={idComponent ?? 'action'}
 				orientation="horizontal"
 				width="fill"
 				$actionColor={actionColor}
@@ -101,13 +104,11 @@ const ActionComponent: FC<ActionProps> = ({
 			>
 				<CustomContainer orientation="horizontal" mainAlignment="flex-start">
 					<Row>
-						<CustomIconButton
-							data-testid={actionTestId || 'action-button'}
+						<CustomHoverButton
+							data-testid={actionTestId ?? 'action-button'}
 							icon={icon}
-							iconColor="gray6"
-							size="medium"
-							$backgroundColor={actionColor}
-							onClick={action}
+							backgroundColor={actionColor}
+							onClick={!isDisabled ? action : (): null => null}
 							disabled={isDisabled}
 						/>
 						<Padding right="large" />

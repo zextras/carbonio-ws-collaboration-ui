@@ -16,9 +16,11 @@ import useGeneralMeetingControls from '../../hooks/useGeneralMeetingControls';
 import { MeetingRoutesParams } from '../../hooks/useRouting';
 import { getMeetingViewSelected } from '../../store/selectors/ActiveMeetingSelectors';
 import { getNumberOfTiles } from '../../store/selectors/MeetingSelectors';
-import { getCustomLogo } from '../../store/selectors/SessionSelectors';
+import { getCapability, getCustomLogo, getUserId } from '../../store/selectors/SessionSelectors';
+import { getIsUserGuest } from '../../store/selectors/UsersSelectors';
 import useStore from '../../store/Store';
 import { MeetingViewType } from '../../types/store/ActiveMeetingTypes';
+import { CapabilityType } from '../../types/store/SessionTypes';
 import defaultLogo from '../assets/Logo.png';
 import CinemaMode from '../components/cinemaMode/CinemaMode';
 import FaceToFaceMode from '../components/faceToFaceMode/FaceToFaceMode';
@@ -26,6 +28,7 @@ import GridMode from '../components/gridMode/GridMode';
 import MeetingActionsBar from '../components/meetingActionsBar/MeetingActionsBar';
 import RecordingInfo from '../components/RecordingInfo';
 import MeetingSidebar from '../components/sidebar/MeetingSidebar';
+import VirtualBackground from '../components/virtualBackground/VirtualBackground';
 
 const SkeletonContainer = styled(Container)`
 	overflow: hidden;
@@ -62,10 +65,15 @@ const MeetingSkeleton = (): ReactElement => {
 	const okLabel = t('action.ok', 'Ok');
 
 	const { meetingId }: MeetingRoutesParams = useParams();
+	const myUserId = useStore(getUserId);
 
 	const meetingViewSelected = useStore((store) => getMeetingViewSelected(store, meetingId));
 	const numberOfTiles = useStore((store) => getNumberOfTiles(store, meetingId));
 	const customLogo = useStore(getCustomLogo);
+	const canUseVirtualBackground = useStore((store) =>
+		getCapability(store, CapabilityType.CAN_USE_VIRTUAL_BACKGROUND)
+	);
+	const isUserGuest = useStore((store) => getIsUserGuest(store, myUserId ?? ''));
 
 	const streamsWrapperRef = useRef<HTMLDivElement>(null);
 
@@ -92,12 +100,17 @@ const MeetingSkeleton = (): ReactElement => {
 		return meetingViewSelected === MeetingViewType.CINEMA ? CinemaMode : GridMode;
 	}, [meetingViewSelected, numberOfTiles]);
 
+	const isVirtualBackgroundVisible = useMemo(
+		() => canUseVirtualBackground ?? isUserGuest,
+		[canUseVirtualBackground, isUserGuest]
+	);
+
 	return (
 		<SkeletonContainer orientation="horizontal" borderRadius="none">
 			<MeetingSidebar />
 			<ViewContainer
 				ref={streamsWrapperRef}
-				background="gray0"
+				background={'gray0'}
 				crossAlignment="center"
 				orientation="horizontal"
 				data-testid="meeting_view_container"
@@ -108,6 +121,7 @@ const MeetingSkeleton = (): ReactElement => {
 					<MeetingActionsBar streamsWrapperRef={streamsWrapperRef} />
 				</ViewToDisplay>
 			</ViewContainer>
+			{isVirtualBackgroundVisible && <VirtualBackground meetingId={meetingId} />}
 		</SkeletonContainer>
 	);
 };

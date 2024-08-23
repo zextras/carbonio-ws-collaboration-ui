@@ -6,7 +6,7 @@
 
 import React, { useMemo } from 'react';
 
-import { Avatar, Container, Badge } from '@zextras/carbonio-design-system';
+import { Avatar, Container, Badge, Shimmer } from '@zextras/carbonio-design-system';
 import { find } from 'lodash';
 import styled, { DefaultTheme } from 'styled-components';
 
@@ -46,7 +46,7 @@ export const AvatarBadge = styled(Badge)`
 	position: absolute;
 	right: -0.25rem;
 	bottom: -0.25rem;
-	padding: 0.2rem 0.0625rem;
+	padding: 0 0.425rem;
 	font-size: 0.6rem;
 `;
 
@@ -91,7 +91,7 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ roomId, unreadCount, draftMessa
 	);
 	const isMeetingActive = useStore((store) => getMeetingActive(store, roomId));
 
-	const { avatarColor, avatarPicture, avatarIcon } = useAvatarUtilities(
+	const { avatarColor, avatarPicture, avatarIcon, isLoading } = useAvatarUtilities(
 		idAvailable,
 		isMeetingActive
 	);
@@ -131,6 +131,8 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ roomId, unreadCount, draftMessa
 						background={avatarColor}
 					/>
 				);
+			case isLoading:
+				return <Shimmer.Avatar />;
 			default:
 				return (
 					<Avatar
@@ -144,7 +146,16 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ roomId, unreadCount, draftMessa
 					/>
 				);
 		}
-	}, [isMeetingActive, userName, avatarColor, draftMessage, roomMuted, avatarPicture, avatarIcon]);
+	}, [
+		isMeetingActive,
+		userName,
+		avatarColor,
+		draftMessage,
+		roomMuted,
+		isLoading,
+		avatarPicture,
+		avatarIcon
+	]);
 
 	const canShowPresence = useMemo(
 		() => !unreadCount && canSeeUsersPresence,
@@ -158,7 +169,8 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ roomId, unreadCount, draftMessa
 				<AvatarBadge
 					data-testid="unreads_counter"
 					value={unreadCount}
-					type={!roomMuted ? 'unread' : 'read'}
+					backgroundColor={!roomMuted ? 'primary' : 'gray2'}
+					color={!roomMuted ? 'gray6' : 'gray0'}
 				/>
 			)}
 			{canShowPresence && <Presence data-testid="user_presence_dot" memberOnline={memberOnline} />}

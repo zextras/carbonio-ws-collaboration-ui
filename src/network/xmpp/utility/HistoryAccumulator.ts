@@ -4,9 +4,11 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { orderBy } from 'lodash';
+
 import { Message, MessageList, MessageMap, TextMessage } from '../../../types/store/MessageTypes';
 
-class HistoryAccumulator {
+export class HistoryAccumulator {
 	// Singleton design pattern
 	private static instance: HistoryAccumulator;
 
@@ -37,7 +39,7 @@ class HistoryAccumulator {
 	public returnHistory(roomId: string): MessageList {
 		const history = this.histories[roomId] || [];
 		delete this.histories[roomId];
-		return history;
+		return orderBy(history, ['date'], ['asc']);
 	}
 
 	public addReferenceForRepliedMessage(message: TextMessage): void {

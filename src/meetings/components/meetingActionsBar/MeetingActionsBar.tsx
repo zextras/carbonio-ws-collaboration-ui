@@ -181,7 +181,7 @@ const MeetingActionsBar = ({ streamsWrapperRef }: MeetingActionsProps): ReactEle
 		>
 			<ActionsWrapper
 				data-testid="main_actions_wrapper"
-				background="text"
+				background={'text'}
 				width="fit"
 				height="fit"
 				orientation="horizontal"
@@ -211,7 +211,7 @@ const MeetingActionsBar = ({ streamsWrapperRef }: MeetingActionsProps): ReactEle
 			</ActionsWrapper>
 			<SecondActionsWrapper
 				data-testid="second_actions_wrapper"
-				background="text"
+				background={'text'}
 				width="fit"
 				height="fit"
 				orientation="horizontal"

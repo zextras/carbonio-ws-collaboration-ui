@@ -10,28 +10,24 @@ import { act, screen, waitFor } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 
 import ChatCreationContactsSelection from './ChatCreationContactsSelection';
-import { ContactMatch } from '../../../network/soap/AutoCompleteRequest';
 import useStore from '../../../store/Store';
 import { createMockCapabilityList } from '../../../tests/createMock';
-import { mockedAutoCompleteGalRequest } from '../../../tests/mocks/AutoCompleteGal';
+import { mockSearchUsersByFeatureRequest } from '../../../tests/mocks/SearchUsersByFeature';
 import { setup } from '../../../tests/test-utils';
+import { ContactInfo } from '../../../types/network/soap/searchUsersByFeatureRequest';
 import { Member } from '../../../types/store/RoomTypes';
 
 // Mock objects
-const zimbraUser1: ContactMatch = {
+const contactUser1: ContactInfo = {
 	email: 'user1@test.com',
-	firstName: 'User',
-	fullName: 'User One',
-	lastName: 'One',
-	zimbraId: 'user1-id'
+	displayName: 'User One',
+	id: 'user1-id'
 };
 
-const zimbraUser2: ContactMatch = {
+const contactUser2: ContactInfo = {
 	email: 'user2@test.com',
-	firstName: 'User',
-	fullName: 'User Two',
-	lastName: 'Two',
-	zimbraId: 'user2-id'
+	displayName: 'User Two',
+	id: 'user2-id'
 };
 
 const user0: Member = {
@@ -48,11 +44,17 @@ const user1: Member = {
 	external: false
 };
 
+const memberLimits: Array<[string, number, string]> = [
+	['0', 2, 'You have selected the maximum number of members for a group'],
+	['1', 3, 'You can add one last member'],
+	['2', 4, 'You can add other 2 members']
+];
+
 describe('Chat Creation Modal Contact Selector - search', () => {
 	test('All elements are rendered', async () => {
 		const { result } = renderHook(() => useStore());
 		act(() => result.current.setCapabilities(createMockCapabilityList({ maxGroupMembers: 3 })));
-		mockedAutoCompleteGalRequest.mockReturnValue([]);
+		mockSearchUsersByFeatureRequest.mockReturnValue([]);
 
 		setup(
 			<ChatCreationContactsSelection
@@ -78,7 +80,7 @@ describe('Chat Creation Modal Contact Selector - search', () => {
 
 	test('Search user on Creation Modal', async () => {
 		// Set first AutoCompleteRequest response to []
-		mockedAutoCompleteGalRequest.mockReturnValueOnce([]);
+		mockSearchUsersByFeatureRequest.mockReturnValueOnce([]);
 
 		const { user } = setup(
 			<ChatCreationContactsSelection
@@ -92,14 +94,14 @@ describe('Chat Creation Modal Contact Selector - search', () => {
 		await screen.findByText('spinner');
 		const list = await screen.findByTestId('list_creation_modal');
 		expect(list).toBeVisible();
-		expect(list.children).toHaveLength(0);
+		expect(list.children[0].children).toHaveLength(0);
 
 		// Set [userObj] as returned valued for AutoCompleteRequest
-		mockedAutoCompleteGalRequest.mockReturnValueOnce([zimbraUser1]);
+		mockSearchUsersByFeatureRequest.mockReturnValueOnce([contactUser1]);
 
 		// Type on ChipInput to trigger a new autoCompleteGalRequest
 		const chipInput = await screen.findByTestId('chip_input_creation_modal');
-		await user.type(chipInput, zimbraUser1.fullName[0]);
+		await user.type(chipInput, contactUser1.displayName[0]);
 
 		// AutoCompleteRequest trigger an initial "Spinner" state and then render contact list
 		await screen.findByText('spinner');
@@ -108,14 +110,14 @@ describe('Chat Creation Modal Contact Selector - search', () => {
 		expect(list2.children).toHaveLength(1);
 
 		// Check presence of userObj on the contact list
-		const userNameComponent = screen.getByText(zimbraUser1.fullName);
+		const userNameComponent = screen.getByText(contactUser1.displayName);
 		expect(userNameComponent).toBeVisible();
-		const userEmailComponent = screen.getByText(zimbraUser1.email);
+		const userEmailComponent = screen.getByText(contactUser1.email);
 		expect(userEmailComponent).toBeVisible();
 	});
 
 	test('Search user fails', async () => {
-		mockedAutoCompleteGalRequest.mockReturnValueOnce([zimbraUser1, zimbraUser2]);
+		mockSearchUsersByFeatureRequest.mockReturnValueOnce([contactUser1, contactUser2]);
 
 		const { user } = setup(
 			<ChatCreationContactsSelection
@@ -130,11 +132,11 @@ describe('Chat Creation Modal Contact Selector - search', () => {
 		await screen.findByText('spinner');
 		const list = await screen.findByTestId('list_creation_modal');
 		expect(list).toBeVisible();
-		expect(list.children).toHaveLength(2);
+		expect(list.children[0].children).toHaveLength(2);
 
 		// Type on ChipInput to trigger a new autoCompleteGalRequest
 		const chipInput = await screen.findByTestId('chip_input_creation_modal');
-		await user.type(chipInput, zimbraUser1.fullName[0]);
+		await user.type(chipInput, contactUser1.displayName[0]);
 
 		await screen.findByText('spinner');
 		const placeholderLabel = await screen.findByText(
@@ -146,7 +148,7 @@ describe('Chat Creation Modal Contact Selector - search', () => {
 	test('Search user fails on first request', async () => {
 		// console.error()) is expected
 		jest.spyOn(console, 'error').mockImplementation();
-		mockedAutoCompleteGalRequest.mockRejectedValue({ error: 'error' });
+		mockSearchUsersByFeatureRequest.mockRejectedValue({ error: 'error' });
 
 		const { user } = setup(
 			<ChatCreationContactsSelection
@@ -161,21 +163,21 @@ describe('Chat Creation Modal Contact Selector - search', () => {
 		await screen.findByText('spinner');
 		const list = await screen.findByTestId('list_creation_modal');
 		expect(list).toBeVisible();
-		expect(list.children).toHaveLength(0);
+		expect(list.children[0].children).toHaveLength(0);
 
 		// Type on ChipInput to trigger a new autoCompleteGalRequest
 		const chipInput = await screen.findByTestId('chip_input_creation_modal');
-		await user.type(chipInput, zimbraUser1.fullName[0]);
+		await user.type(chipInput, contactUser1.displayName[0]);
 
 		// AutoCompleteRequest trigger an initial "Spinner" state and then render the empty contact list
 		await screen.findByText('spinner');
 		const list2 = await screen.findByTestId('list_creation_modal');
 		expect(list2).toBeVisible();
-		expect(list2.children).toHaveLength(0);
+		expect(list2.children[0].children).toHaveLength(0);
 	});
 
 	test('Search an user by name and surname', async () => {
-		mockedAutoCompleteGalRequest.mockReturnValueOnce([zimbraUser1]);
+		mockSearchUsersByFeatureRequest.mockReturnValueOnce([contactUser1]);
 
 		const { user } = setup(
 			<ChatCreationContactsSelection
@@ -188,14 +190,14 @@ describe('Chat Creation Modal Contact Selector - search', () => {
 
 		// Type on ChipInput to trigger a new autoCompleteGalRequest
 		const chipInput = await screen.findByTestId('chip_input_creation_modal');
-		await user.type(chipInput, `${zimbraUser1.firstName} ${zimbraUser1.lastName}`);
+		await user.type(chipInput, `${contactUser1.displayName}`);
 		expect(screen.getByText(/User One/i)).toBeInTheDocument();
-		expect(screen.getByText(zimbraUser1.email)).toBeInTheDocument();
+		expect(screen.getByText(contactUser1.email)).toBeInTheDocument();
 	});
 
 	test('Search an user with logged user inside the response', async () => {
-		useStore.getState().setLoginInfo(zimbraUser1.zimbraId, zimbraUser1.fullName);
-		mockedAutoCompleteGalRequest.mockReturnValueOnce([zimbraUser1, zimbraUser2]);
+		useStore.getState().setLoginInfo(contactUser1.id, contactUser1.displayName);
+		mockSearchUsersByFeatureRequest.mockReturnValueOnce([contactUser1, contactUser2]);
 
 		const { user } = setup(
 			<ChatCreationContactsSelection
@@ -210,14 +212,14 @@ describe('Chat Creation Modal Contact Selector - search', () => {
 		const chipInput = await screen.findByTestId('chip_input_creation_modal');
 		await user.type(chipInput, `User`);
 		expect(screen.queryByText(/User One/i)).not.toBeInTheDocument();
-		expect(screen.queryByText(zimbraUser1.email)).not.toBeInTheDocument();
+		expect(screen.queryByText(contactUser1.email)).not.toBeInTheDocument();
 		// User Two is present because is not the logged user
 		expect(screen.getByText(/User Two/i)).toBeInTheDocument();
 		expect(screen.getByText('user2@test.com')).toBeInTheDocument();
 	});
 
 	test('Add and remove chip by clicking different components', async () => {
-		mockedAutoCompleteGalRequest.mockReturnValueOnce([zimbraUser1]);
+		mockSearchUsersByFeatureRequest.mockReturnValueOnce([contactUser1]);
 
 		const { user } = setup(
 			<ChatCreationContactsSelection
@@ -230,12 +232,12 @@ describe('Chat Creation Modal Contact Selector - search', () => {
 		const list = await screen.findByTestId('list_creation_modal');
 		expect(list).toBeInTheDocument();
 
-		const userComponent = screen.getByText(zimbraUser1.fullName);
+		const userComponent = screen.getByText(contactUser1.displayName);
 		user.click(userComponent);
 
 		await screen.findByTestId('chip_input_creation_modal');
 
-		const name = await screen.findAllByText(`${zimbraUser1.firstName} ${zimbraUser1.lastName}`);
+		const name = await screen.findAllByText(`${contactUser1.displayName}`);
 		// here I check that the chip exist and is the one related to user1
 		await waitFor(() => expect(name).toHaveLength(2));
 
@@ -244,16 +246,14 @@ describe('Chat Creation Modal Contact Selector - search', () => {
 
 		await screen.findByTestId('chip_input_creation_modal');
 
-		const nameUpdated = await screen.findAllByText(
-			`${zimbraUser1.firstName} ${zimbraUser1.lastName}`
-		);
+		const nameUpdated = await screen.findAllByText(`${contactUser1.displayName}`);
 
 		// the chip should not be in the document
 		expect(nameUpdated).toHaveLength(1);
 	});
 
 	test('Add and remove chip by clicking the same component', async () => {
-		mockedAutoCompleteGalRequest.mockReturnValueOnce([zimbraUser1]);
+		mockSearchUsersByFeatureRequest.mockReturnValueOnce([contactUser1]);
 
 		const { user } = setup(
 			<ChatCreationContactsSelection
@@ -266,9 +266,9 @@ describe('Chat Creation Modal Contact Selector - search', () => {
 		const list = await screen.findByTestId('list_creation_modal');
 		expect(list).toBeInTheDocument();
 
-		const userComponent = await screen.findByText(zimbraUser1.fullName);
+		const userComponent = await screen.findByText(contactUser1.displayName);
 		user.click(userComponent);
-		const name = await screen.findAllByText(`${zimbraUser1.firstName} ${zimbraUser1.lastName}`);
+		const name = await screen.findAllByText(`${contactUser1.displayName}`);
 
 		await waitFor(() => expect(name).toHaveLength(1));
 
@@ -276,9 +276,7 @@ describe('Chat Creation Modal Contact Selector - search', () => {
 
 		await screen.findByTestId('chip_input_creation_modal');
 
-		const nameUpdated = await screen.findAllByText(
-			`${zimbraUser1.firstName} ${zimbraUser1.lastName}`
-		);
+		const nameUpdated = await screen.findAllByText(`${contactUser1.displayName}`);
 
 		// the chip should not be in the document
 		expect(nameUpdated).toHaveLength(1);
@@ -287,7 +285,7 @@ describe('Chat Creation Modal Contact Selector - search', () => {
 
 describe('Add participant Modal Contact Selector', () => {
 	test('All elements are rendered', async () => {
-		mockedAutoCompleteGalRequest.mockReturnValue([]);
+		mockSearchUsersByFeatureRequest.mockReturnValue([]);
 
 		setup(
 			<ChatCreationContactsSelection
@@ -314,7 +312,7 @@ describe('Add participant Modal Contact Selector', () => {
 
 	test('Search user on Add Participant Modal', async () => {
 		// Set first AutoCompleteRequest response to []
-		mockedAutoCompleteGalRequest.mockReturnValueOnce([]);
+		mockSearchUsersByFeatureRequest.mockReturnValueOnce([]);
 
 		const { user } = setup(
 			<ChatCreationContactsSelection
@@ -331,22 +329,44 @@ describe('Add participant Modal Contact Selector', () => {
 		expect(screen.getByTestId('list_creation_modal')).toBeVisible();
 
 		// Set [userObj] as returned valued for AutoCompleteRequest
-		mockedAutoCompleteGalRequest.mockReturnValueOnce([zimbraUser1, zimbraUser2]);
+		mockSearchUsersByFeatureRequest.mockReturnValueOnce([contactUser1, contactUser2]);
 
-		// Type on ChipInput to search zimbraUser2
+		// Type on ChipInput to search contactUser2
 		const chipInput = await screen.findByTestId('chip_input_creation_modal');
-		await user.type(chipInput, zimbraUser2.fullName[0]);
+		await user.type(chipInput, contactUser2.displayName[0]);
 
 		// AutoCompleteRequest trigger an initial "Spinner" state and then render contact list
 		await screen.findByText('spinner');
 		const list = await screen.findByTestId('list_creation_modal');
 		expect(list).toBeVisible();
 
-		// AutoCompleteRequest return zimbraUser1 and zimbraUser2, but we can see only zimbraUser2
+		// AutoCompleteRequest return contactUser1 and contactUser2, but we can see only contactUser2
 		expect(list.children).toHaveLength(1);
-		const user1Component = screen.queryByText(zimbraUser1.fullName);
+		const user1Component = screen.queryByText(contactUser1.displayName);
 		expect(user1Component).not.toBeInTheDocument();
-		const user2Component = screen.getByText(zimbraUser2.fullName);
+		const user2Component = screen.getByText(contactUser2.displayName);
 		expect(user2Component).toBeVisible();
 	});
+
+	test.each(memberLimits)(
+		'Check limit of member to add, limit is %s',
+		async (k, limit, stringToCheck) => {
+			const { result } = renderHook(() => useStore());
+			act(() =>
+				result.current.setCapabilities(createMockCapabilityList({ maxGroupMembers: limit }))
+			);
+
+			setup(
+				<ChatCreationContactsSelection
+					contactsSelected={{}}
+					setContactSelected={jest.fn()}
+					members={[user0, user1]}
+					inputRef={React.createRef()}
+				/>
+			);
+
+			const usersToAddLimitReached = await screen.findByText(stringToCheck);
+			expect(usersToAddLimitReached).toBeInTheDocument();
+		}
+	);
 });

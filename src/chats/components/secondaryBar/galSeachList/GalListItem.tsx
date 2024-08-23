@@ -10,8 +10,8 @@ import { Avatar, Container, Row, Text, Tooltip, useTheme } from '@zextras/carbon
 import styled from 'styled-components';
 
 import useRouting from '../../../../hooks/useRouting';
-import { ContactMatch } from '../../../../network/soap/AutoCompleteRequest';
 import useStore from '../../../../store/Store';
+import { ContactInfo } from '../../../../types/network/soap/searchUsersByFeatureRequest';
 import { calculateAvatarColor } from '../../../../utils/styleUtils';
 
 const ListItem = styled(Container)`
@@ -24,7 +24,7 @@ const ListItem = styled(Container)`
 `;
 
 type GalListItemProps = {
-	contact: ContactMatch;
+	contact: ContactInfo;
 	expanded: boolean;
 };
 
@@ -35,7 +35,7 @@ const GalListItem: React.FC<GalListItemProps> = ({ contact, expanded }) => {
 
 	const { goToRoomPage } = useRouting();
 
-	const username = useMemo(() => contact.fullName ?? contact.email ?? '', [contact]);
+	const username = useMemo(() => contact.displayName ?? contact.email ?? '', [contact]);
 
 	const userColor = useMemo(() => {
 		const color = calculateAvatarColor(username);
@@ -43,10 +43,10 @@ const GalListItem: React.FC<GalListItemProps> = ({ contact, expanded }) => {
 	}, [username, themeColor.avatarColors]);
 
 	const createPlaceholderRoom = useCallback(() => {
-		const roomId = `placeholder-${contact.zimbraId}`;
-		setPlaceholderRoom(contact.zimbraId);
+		const roomId = `placeholder-${contact.id}`;
+		setPlaceholderRoom(contact.id);
 		goToRoomPage(roomId);
-	}, [contact.zimbraId, goToRoomPage, setPlaceholderRoom]);
+	}, [contact.id, goToRoomPage, setPlaceholderRoom]);
 
 	return (
 		<ListItem
@@ -76,7 +76,7 @@ const GalListItem: React.FC<GalListItemProps> = ({ contact, expanded }) => {
 					orientation="horizontal"
 				>
 					<Row takeAvailableSpace crossAlignment="flex-start" orientation="vertical">
-						<Text size="small">{contact.fullName}</Text>
+						<Text size="small">{contact.displayName}</Text>
 						<Container
 							width="fill"
 							height="fit"

@@ -11,6 +11,7 @@ import { SettingsHeader, useIntegratedFunction } from '@zextras/carbonio-shell-u
 import { isEqual } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
+import ChatExportSettings from './chatExporter/ChatExportSettings';
 import MeetingSettings from './MeetingSettings';
 import NotificationsSettings from './NotificationsSettings';
 import ProfileSettings from './ProfileSettings';
@@ -125,7 +126,7 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 	const successSnackbar = useCallback(() => {
 		createSnackbar({
 			key: new Date().toLocaleString(),
-			type: 'info',
+			severity: 'info',
 			label: saveSettingsSnackbar,
 			hideButton: true,
 			autoHideTimeout: 5000
@@ -135,7 +136,7 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 	const errorSnackbar = useCallback(() => {
 		createSnackbar({
 			key: new Date().toLocaleString(),
-			type: 'error',
+			severity: 'error',
 			label: errorDeleteImageSnackbar,
 			hideButton: true,
 			autoHideTimeout: 5000
@@ -232,6 +233,7 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 					updatedNotificationsSettings={updatedNotificationsSettings}
 					setUpdatedNotificationsSettings={setUpdatedNotificationsSettings}
 				/>
+				<ChatExportSettings />
 				<MeetingSettings
 					meetingMediaDefaults={meetingMediaDefaults}
 					setMeetingMediaDefaults={setMeetingMediaDefaults}

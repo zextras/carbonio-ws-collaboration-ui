@@ -44,7 +44,7 @@ const ChangeSidebarStatusButton = styled.div`
 	position: absolute;
 	right: calc(-1rem - 2.25rem);
 	top: calc(50% - (15.09375rem / 2));
-	z-index: 39;
+	z-index: 1;
 `;
 
 const SidebarIconButton = styled(IconButton)`

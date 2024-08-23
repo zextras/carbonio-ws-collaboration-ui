@@ -32,9 +32,11 @@ import { WsEventType } from '../../../types/network/websocket/wsEvents';
 import { MeetingParticipant } from '../../../types/store/MeetingTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 import { RootStore } from '../../../types/store/StoreTypes';
+import { User, UserType } from '../../../types/store/UserTypes';
 
 const audioDevice2 = 'Audio Device 2';
 const videoDevice2 = 'Video Device 2';
+const iconLogOut = 'icon: LogOut';
 
 const normalFontWeight = 'font-weight: 400';
 const boldFontWeight = 'font-weight: 700';
@@ -49,6 +51,7 @@ const acceptedInMeeting = 'accepted insideMeeting';
 const user1: UserBe = createMockUser({ id: 'user1Id', name: 'user 1' });
 const user2: UserBe = createMockUser({ id: 'user2Id', name: 'user 2' });
 const user3: UserBe = createMockUser({ id: 'user3Id', name: 'user 3' });
+const guestUser: User = createMockUser({ type: UserType.GUEST });
 
 const member1: MemberBe = { userId: user1.id, owner: true };
 const member2: MemberBe = { userId: user2.id, owner: false };
@@ -143,6 +146,35 @@ const setupForWaitingRoom = (): { user: UserEvent; store: RootStore } => {
 		result.current.setUserInfo(user3);
 		result.current.setUserInfo(user2);
 		result.current.setLoginInfo(user2.id, user2.name);
+		result.current.addRoom(groupForWaitingRoom);
+		result.current.addMeeting(meetingForWaitingRoom);
+		result.current.setChatsBeStatus(true);
+		result.current.setWebsocketStatus(true);
+		result.current.meetingConnection(
+			groupMeeting.id,
+			true,
+			'Audio Device 1',
+			true,
+			'Video Device 1'
+		);
+	});
+	useParams.mockReturnValue({ meetingId: groupForWaitingRoom.id });
+	const { user } = setup(
+		<MeetingAccessPage meetingName={meetingForWaitingRoom.name} hasUserDirectAccess={false} />
+	);
+	return { user, store: result.current };
+};
+
+const setupExternalUserForWaitingRoom = (): { user: UserEvent; store: RootStore } => {
+	const { result } = renderHook(() => useStore());
+	act(() => {
+		localStorage.setItem(
+			'ChatsMeetingSettings',
+			JSON.stringify({ EnableCamera: true, EnableMicrophone: true })
+		);
+		result.current.setUserInfo(user3);
+		result.current.setUserInfo(user2);
+		result.current.setLoginInfo(guestUser.id, guestUser.name, guestUser.name, guestUser.type);
 		result.current.addRoom(groupForWaitingRoom);
 		result.current.addMeeting(meetingForWaitingRoom);
 		result.current.setChatsBeStatus(true);
@@ -350,7 +382,7 @@ describe('AccessMeeting - enter to meeting by waiting Room', () => {
 	test('user leaves', async () => {
 		const { user } = setupForWaitingRoom();
 
-		const hangButton = await screen.findByTestId('icon: LogOut');
+		const hangButton = await screen.findByTestId(iconLogOut);
 		await user.click(hangButton);
 
 		expect(mockGoToInfoPage).toHaveBeenCalledWith(PAGE_INFO_TYPE.HANG_UP_PAGE);
@@ -374,7 +406,7 @@ describe('AccessMeeting - enter to meeting by waiting Room', () => {
 		const enterButton = await screen.findByText(readyButtonLabel);
 		await act(() => user.click(enterButton));
 
-		const hangButton = await screen.findByTestId('icon: LogOut');
+		const hangButton = await screen.findByTestId(iconLogOut);
 		await user.click(hangButton);
 
 		expect(mockGoToInfoPage).toHaveBeenCalledWith(PAGE_INFO_TYPE.HANG_UP_PAGE);
@@ -401,6 +433,35 @@ describe('AccessMeeting - enter to meeting by waiting Room', () => {
 		);
 
 		expect(mockGoToMeetingPage).toHaveBeenCalled();
+	});
+
+	test('user is not ready to participate and leaves', async () => {
+		document.cookie = `ZM_AUTH_TOKEN=123456789; path=/`;
+		document.cookie = `ZX_AUTH_TOKEN=123456789; path=/`;
+		mockedJoinMeetingRequest.mockReturnValue({ status: 'WAITING' });
+
+		const { user } = setupForWaitingRoom();
+
+		const enterButton = await screen.findByText(readyButtonLabel);
+		await act(() => user.click(enterButton));
+
+		const hangButton = await screen.findByTestId(iconLogOut);
+		await user.click(hangButton);
+
+		expect(mockGoToInfoPage).toHaveBeenCalledWith(PAGE_INFO_TYPE.HANG_UP_PAGE);
+		expect(document.cookie).toBe('ZM_AUTH_TOKEN=123456789; ZX_AUTH_TOKEN=123456789');
+	});
+
+	test('External user is not ready to participate and leaves', async () => {
+		document.cookie = `ZM_AUTH_TOKEN=123456789; path=/`;
+		document.cookie = `ZX_AUTH_TOKEN=123456789; path=/`;
+		const { user } = setupExternalUserForWaitingRoom();
+
+		const hangButton = await screen.findByTestId(iconLogOut);
+		await user.click(hangButton);
+
+		expect(mockGoToInfoPage).toHaveBeenCalledWith(PAGE_INFO_TYPE.HANG_UP_PAGE);
+		expect(document.cookie).toBe('');
 	});
 
 	test('user is rejected by a moderator', async () => {

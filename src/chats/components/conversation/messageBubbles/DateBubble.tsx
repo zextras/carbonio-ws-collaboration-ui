@@ -23,6 +23,7 @@ type DateMsgProps = {
 const CustomMessageWrapper = styled(Container)`
 	position: sticky;
 	top: 0;
+	margin: auto;
 	z-index: ${Z_INDEX_RANK.DATE_STICKY_LABEL};
 `;
 

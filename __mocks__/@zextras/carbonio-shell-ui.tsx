@@ -22,9 +22,7 @@ const history = createMemoryHistory();
 export const USER_SETTINGS: AccountSettings = {
 	attrs: {},
 	props: [],
-	prefs: {
-		zimbraPrefTimeZoneId: 'UTC'
-	}
+	prefs: {}
 };
 
 export const ROUTE_SETTINGS = {
@@ -98,3 +96,10 @@ export const useIntegratedFunction = jest.fn(() => [
 ]);
 
 export const updatePrimaryBadge = jest.fn();
+
+export const mockSoapFetch = jest.fn();
+export const soapFetch = (): Promise<unknown> =>
+	new Promise((resolve, reject) => {
+		const result = mockSoapFetch();
+		result ? resolve(result) : reject(new Error('error'));
+	});

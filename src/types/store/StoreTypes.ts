@@ -27,7 +27,7 @@ import {
 	TextMessage
 } from './MessageTypes';
 import { RoomsMap } from './RoomTypes';
-import { CapabilityList, Session } from './SessionTypes';
+import { CapabilityList, ExportStatus, Session } from './SessionTypes';
 import { UnreadsMap } from './UnreadsCounterTypes';
 import { UsersMap, UserType } from './UserTypes';
 import { MeetingBe } from '../network/models/meetingBeTypes';
@@ -44,6 +44,7 @@ export type UsersStoreSlice = {
 	setUserStatusMessage: (id: string, statusMsg: string) => void;
 	setUserPictureUpdated: (id: string, date: string) => void;
 	setUserPictureDeleted: (id: string) => void;
+	setAnonymousUser: (id: string) => void;
 };
 
 export type RoomsStoreSlice = {
@@ -95,6 +96,8 @@ export type SessionStoreSlice = {
 	setCapabilities: (capabilities: CapabilityList) => void;
 	setSelectedRoomOneToOneGroup: (id: string) => void;
 	setCustomLogo: (logo: string | false) => void;
+	setChatExporting: (roomId?: string) => void;
+	setChatExportStatus: (status: ExportStatus) => void;
 };
 
 export type MarkersStoreSlice = {
@@ -117,6 +120,7 @@ export type ActiveConversationsSlice = {
 		attachment?: AttachmentMessageType
 	) => void;
 	unsetReferenceMessage: (roomId: string) => void;
+	setLastMamMessage: (message: Message) => void;
 	setHistoryIsFullyLoaded: (roomId: string) => void;
 	setHistoryLoadDisabled: (roomId: string, status: boolean) => void;
 	setActionsAccordionStatus: (roomId: string, status: boolean) => void;
@@ -205,7 +209,14 @@ export type ActiveMeetingSlice = {
 	setRemoveSubscription: (meetingId: string, subToRemove: Subscription) => void;
 	setAddSubscription: (meetingId: string, subToAdd: Subscription) => void;
 	setUpdateSubscription: (meetingId: string, subsToRequest: Subscription[]) => void;
-	setDeleteSubscription: (meetingId: string, subIdToDelete: string) => void;
+	setDeleteSubscription: (
+		meetingId: string,
+		subIdToDelete: string,
+		streamType: STREAM_TYPE[]
+	) => void;
+	setBackgroundStream: (meetingId: string, stream: MediaStream) => void;
+	removeBackgroundStream: (meetingId: string) => void;
+	setBlur: (meetingId: string, status: boolean) => void;
 };
 
 export type RootStore = UsersStoreSlice &

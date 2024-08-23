@@ -4,18 +4,19 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { AttachmentMessageType, TextMessage } from './MessageTypes';
+import { AttachmentMessageType, Message, TextMessage } from './MessageTypes';
 
 export type ActiveConversation = {
-	draftMessage?: string | undefined;
+	draftMessage?: string;
 	scrollPositionMessageId?: string;
+	lastMamMessage?: Message;
 	isHistoryFullyLoaded?: boolean;
 	isHistoryLoadDisabled?: boolean;
 	inputHasFocus?: boolean;
 	isWritingList?: string[];
-	referenceMessage?: ReferenceMessage | undefined;
+	referenceMessage?: ReferenceMessage;
 	infoPanelStatus?: InfoPanelStatus;
-	filesToAttach?: FileToUpload[] | undefined;
+	filesToAttach?: FileToUpload[];
 	forwardMessageList?: TextMessage[];
 };
 

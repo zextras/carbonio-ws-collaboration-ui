@@ -17,7 +17,6 @@ import React, {
 import {
 	Container,
 	Text,
-	Divider,
 	Padding,
 	Button,
 	FileLoader,
@@ -29,6 +28,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import styled, { css, DefaultTheme, FlattenInterpolation, ThemeProps } from 'styled-components';
 
+import SettingsCard from './SettingsCard';
 import { UsersApi } from '../../network';
 import { getCapability } from '../../store/selectors/SessionSelectors';
 import { getUserName, getUserPictureUpdatedAt } from '../../store/selectors/UsersSelectors';
@@ -190,7 +190,7 @@ const ProfileSettings: FC<ProfileSettingsProps> = ({
 			} else {
 				createSnackbar({
 					key: new Date().toLocaleString(),
-					type: 'error',
+					severity: 'error',
 					label: imageSizeTooLargeSnackbar,
 					hideButton: true,
 					autoHideTimeout: 5000
@@ -325,64 +325,56 @@ const ProfileSettings: FC<ProfileSettingsProps> = ({
 	);
 
 	return (
-		<Container background={'gray6'} padding={{ horizontal: 'medium', bottom: 'medium' }}>
-			<Container crossAlignment="flex-start">
-				<Padding top="large" bottom="medium">
-					<Text weight="bold">{sectionTitle}</Text>
-				</Padding>
-				<Divider color="gray2" />
-				<Padding vertical="large">
-					<Container orientation="horizontal" mainAlignment="flex-start">
-						{userPicture}
-						<Padding right="large" />
-						<Container width="fill" mainAlignment="flex-start" crossAlignment="flex-start">
-							<Container crossAlignment="flex-start" mainAlignment="flex-start" height="fit">
-								<Text overflow="break-word" size={'small'}>
-									{sectionDescription}
-								</Text>
-								<Text overflow="break-word" size={'small'}>
-									{sectionDescription2}
-								</Text>
-							</Container>
-							<Padding top="large" />
-							<Container
-								orientation="horizontal"
-								mainAlignment="flex-start"
-								crossAlignment="flex-start"
-							>
-								<Tooltip
-									placement="bottom"
-									label={tempPicture ? updatePictureLabel : uploadPictureLabel}
-								>
-									<CustomFileLoader
-										onClick={(): null => null}
-										onChange={onChangeUserImage}
-										label="Upload Avatar"
-										type="outlined"
-										icon="UploadOutline"
-										iconColor="primary"
-										data-testid="upload_button"
-									/>
-								</Tooltip>
-								<Padding right="medium" />
-								<Tooltip placement="bottom" label={resetPictureLabel}>
-									<CustomButton
-										label="Reset Avatar"
-										type="outlined"
-										onClick={onResetUserImage}
-										disabled={!tempPicture}
-										data-testid="reset_button"
-										color="secondary"
-										icon="RefreshOutline"
-										iconPlacement="right"
-									/>
-								</Tooltip>
-							</Container>
-						</Container>
+		<SettingsCard title={sectionTitle}>
+			<Container orientation="horizontal" mainAlignment="flex-start">
+				{userPicture}
+				<Padding right="large" />
+				<Container width="fill" mainAlignment="flex-start" crossAlignment="flex-start">
+					<Container crossAlignment="flex-start" mainAlignment="flex-start" height="fit">
+						<Text overflow="break-word" size={'small'}>
+							{sectionDescription}
+						</Text>
+						<Text overflow="break-word" size={'small'}>
+							{sectionDescription2}
+						</Text>
 					</Container>
-				</Padding>
+					<Padding top="large" />
+					<Container
+						orientation="horizontal"
+						mainAlignment="flex-start"
+						crossAlignment="flex-start"
+					>
+						<Tooltip
+							placement="bottom"
+							label={tempPicture ? updatePictureLabel : uploadPictureLabel}
+						>
+							<CustomFileLoader
+								onClick={(): null => null}
+								onChange={onChangeUserImage}
+								label="Upload Avatar"
+								type="outlined"
+								icon="UploadOutline"
+								iconColor="primary"
+								data-testid="upload_button"
+							/>
+						</Tooltip>
+						<Padding right="medium" />
+						<Tooltip placement="bottom" label={resetPictureLabel}>
+							<CustomButton
+								label="Reset Avatar"
+								type="outlined"
+								onClick={onResetUserImage}
+								disabled={!tempPicture}
+								data-testid="reset_button"
+								color="secondary"
+								icon="RefreshOutline"
+								iconPlacement="right"
+							/>
+						</Tooltip>
+					</Container>
+				</Container>
 			</Container>
-		</Container>
+		</SettingsCard>
 	);
 };
 

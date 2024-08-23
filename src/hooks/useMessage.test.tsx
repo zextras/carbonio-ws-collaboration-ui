@@ -13,7 +13,7 @@ import {
 	createMockRoom,
 	createMockTextMessage
 } from '../tests/createMock';
-import { TextMessage } from '../types/store/MessageTypes';
+import { FasteningAction, TextMessage } from '../types/store/MessageTypes';
 
 describe('Test useMessage custom hook', () => {
 	test('Message without modification', () => {
@@ -41,7 +41,7 @@ describe('Test useMessage custom hook', () => {
 		const fastening = createMockMessageFastening({
 			roomId: message.roomId,
 			originalStanzaId: message.stanzaId,
-			action: 'delete'
+			action: FasteningAction.DELETE
 		});
 		act(() => store.addFastening(fastening));
 		const messageResult = result.current as TextMessage;
@@ -62,7 +62,7 @@ describe('Test useMessage custom hook', () => {
 		const fastening = createMockMessageFastening({
 			roomId: message.roomId,
 			originalStanzaId: message.stanzaId,
-			action: 'edit',
+			action: FasteningAction.EDIT,
 			value: 'Edited message'
 		});
 		act(() => store.addFastening(fastening));

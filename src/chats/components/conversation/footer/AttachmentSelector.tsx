@@ -123,7 +123,7 @@ const AttachmentSelector: React.FC<AttachmentSelectorProps> = ({ roomId }) => {
 					.catch(() => {
 						createSnackbar({
 							key: new Date().toLocaleString(),
-							type: 'error',
+							severity: 'error',
 							label: errorSnackbar
 						});
 					});

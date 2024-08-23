@@ -66,10 +66,12 @@ const MessageHistoryLoader = ({
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	const handleHistoryLoader = useCallback(
 		debounce(() => {
-			const roomMessages = useStore.getState().messages[roomId];
-			const date = first(roomMessages)?.date ?? now();
+			const store = useStore.getState();
+			const roomMessages = store.messages[roomId];
+			const lastMamMessage = store.activeConversations[roomId]?.lastMamMessage;
+			const date = lastMamMessage?.date ?? first(roomMessages)?.date ?? now();
 			if (!historyLoadedDisabled) {
-				xmppClient.requestHistory(roomId, date, 50, useStore.getState().unreads[roomId]);
+				xmppClient.requestHistory(roomId, date, 50, store.unreads[roomId]);
 				setHistoryLoadDisabled(roomId, true);
 			}
 		}, 500),
@@ -93,7 +95,7 @@ const MessageHistoryLoader = ({
 			);
 			intersectionObserverRef.current.observe(messageHistoryLoaderRef.current);
 		}
-		return () => intersectionObserverRef.current?.disconnect();
+		return (): void => intersectionObserverRef.current?.disconnect();
 	}, [handleHistoryLoader, messageHistoryLoaderRef, messageListRef]);
 
 	return (

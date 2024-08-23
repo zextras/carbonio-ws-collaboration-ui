@@ -9,6 +9,7 @@ interface IXMMPClient {
 	// Presence
 	getContactList(): void;
 	setOnline(): void;
+	sendPong(ping: Element): void;
 	// Last activity
 	getLastActivity(jid: string): void;
 	// Inbox
@@ -24,6 +25,7 @@ interface IXMMPClient {
 	): void;
 	sendChatMessageDeletion(roomId: string, messageStanzaId: string): void;
 	sendChatMessageEdit(roomId: string, message: string, messageStanzaId: string): void;
+	sendChatMessageReaction(roomId: string, messageStanzaId: string, reaction: string): void;
 	requestHistory(roomId: string, endHistory: number, quantity: number, unread?: number): void;
 	requestHistoryBetweenTwoMessage(
 		roomId: string,
@@ -36,6 +38,7 @@ interface IXMMPClient {
 		replyMessageId: string
 	): void;
 	requestMessageToForward(roomId: string, messageId: string): Promise<Element>;
+	requestFullHistory(roomId: string, from?: number): void;
 	// Chat state
 	sendIsWriting(roomId: string): void;
 	sendPaused(roomId: string): void;

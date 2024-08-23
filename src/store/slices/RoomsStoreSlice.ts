@@ -9,7 +9,6 @@ import { produce } from 'immer';
 import { find, findIndex, forEach, remove } from 'lodash';
 import { StateCreator } from 'zustand';
 
-import { UsersApi } from '../../network';
 import { MemberBe, RoomBe } from '../../types/network/models/roomBeTypes';
 import { MessageType } from '../../types/store/MessageTypes';
 import { RoomType } from '../../types/store/RoomTypes';
@@ -34,13 +33,6 @@ export const useRoomsStoreSlice: StateCreator<RoomsStoreSlice> = (set: (...any: 
 						userSettings: roomBe.userSettings,
 						meetingId: roomBe.meetingId
 					};
-
-					// Retrieve members information if they are unknown
-					forEach(roomBe.members, (member) => {
-						if (!find(draft.users, (user) => user.id === member.userId)) {
-							UsersApi.getDebouncedUser(member.userId);
-						}
-					});
 
 					// Delete stored messages that have a date previous clearedAt date
 					if (roomBe.userSettings?.clearedAt != null) {
@@ -74,13 +66,6 @@ export const useRoomsStoreSlice: StateCreator<RoomsStoreSlice> = (set: (...any: 
 					userSettings: roomBe.userSettings,
 					meetingId: roomBe.meetingId
 				};
-
-				// Retrieve members information if they are unknown
-				forEach(roomBe.members, (member) => {
-					if (!find(draft.users, (user) => user.id === member.userId)) {
-						UsersApi.getDebouncedUser(member.userId);
-					}
-				});
 			}),
 			false,
 			'ROOMS/ADD_ROOM'
@@ -172,11 +157,6 @@ export const useRoomsStoreSlice: StateCreator<RoomsStoreSlice> = (set: (...any: 
 			produce((draft: RootStore) => {
 				if (draft.rooms[id].members == null) draft.rooms[id].members = [];
 				draft.rooms[id].members!.push(member);
-
-				// Retrieve member information if he is unknown
-				if (!find(draft.users, (user) => user.id === member.userId)) {
-					UsersApi.getDebouncedUser(member.userId);
-				}
 			}),
 			false,
 			'ROOMS/ADD_ROOM_MEMBER'
@@ -294,11 +274,6 @@ export const useRoomsStoreSlice: StateCreator<RoomsStoreSlice> = (set: (...any: 
 						roomId
 					}
 				];
-
-				// Retrieve members information if user is unknown
-				if (!find(draft.users, (user) => user.id === userId)) {
-					UsersApi.getDebouncedUser(userId);
-				}
 			}),
 			false,
 			'ROOMS/SET_PLACEHOLDER_ROOM'

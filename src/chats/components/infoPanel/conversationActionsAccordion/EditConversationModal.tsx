@@ -7,13 +7,11 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 
 import {
-	Button,
 	Container,
 	Input,
 	Modal,
 	Padding,
 	CreateSnackbarFn,
-	Tooltip,
 	useSnackbar
 } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
@@ -111,44 +109,32 @@ const EditConversationModal: FC<EditConversationProps> = ({
 		if (e.target.value.length <= 257) setNewDescription(e.target.value);
 	}, []);
 
-	const modalFooter = useMemo(
-		() => (
-			<Container mainAlignment="flex-end" orientation="horizontal">
-				<Tooltip
-					placement="bottom"
-					label={
-						buttonDisabled
-							? nameError || descriptionError
-								? errorLabelDisabled
-								: confirmLabelDisabled
-							: confirmEditLabel
-					}
-					role="tooltip"
-				>
-					<Container height="fit" width="fit">
-						<Button
-							data-testid="edit_button"
-							label={confirmEditLabel}
-							onClick={editAction}
-							disabled={buttonDisabled}
-						/>
-					</Container>
-				</Tooltip>
-			</Container>
-		),
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[buttonDisabled, descriptionError, nameError, editAction]
-	);
+	const editButtonTooltip = useMemo(() => {
+		if (buttonDisabled) {
+			if (nameError || descriptionError) return errorLabelDisabled;
+			return confirmLabelDisabled;
+		}
+		return confirmEditLabel;
+	}, [
+		buttonDisabled,
+		confirmEditLabel,
+		confirmLabelDisabled,
+		descriptionError,
+		errorLabelDisabled,
+		nameError
+	]);
 
 	return (
 		<Modal
 			size="medium"
 			open={editModalOpen}
 			title={editLabel}
-			confirmColor="primary"
+			onConfirm={editAction}
+			confirmLabel={confirmEditLabel}
+			confirmDisabled={buttonDisabled}
+			confirmTooltip={editButtonTooltip}
 			showCloseIcon
 			closeIconTooltip={closeLabel}
-			customFooter={modalFooter}
 			onClose={closeModal}
 			data-testid="edit_conversation_modal"
 		>

@@ -6,7 +6,7 @@
 
 import React, { useCallback } from 'react';
 
-import { Container, Padding, useModal, Text } from '@zextras/carbonio-design-system';
+import { Container, Padding, Text, useModal } from '@zextras/carbonio-design-system';
 import { map, size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
@@ -21,7 +21,7 @@ const useLoadFiles = (roomId: string, clearInput?: () => void): ((files: FileLis
 	const titleLabel = t('conversation.longCaption.modal.title', 'Message too long for caption');
 	const descriptionLabel = t(
 		'conversation.longCaption.modal.description',
-		'The message you are attaching this item to is very long and cannot be used as an attachment caption.'
+		"This text is too long and it can't be used as the attachment caption."
 	);
 	const description2Label = t(
 		'conversation.longCaption.modal.additionalDetails',
@@ -33,7 +33,7 @@ const useLoadFiles = (roomId: string, clearInput?: () => void): ((files: FileLis
 	const setFilesToAttach = useStore((store) => store.setFilesToAttach);
 	const setInputHasFocus = useStore((store) => store.setInputHasFocus);
 
-	const creationModal = useModal();
+	const { createModal, closeModal } = useModal();
 
 	const setFilesIntoStore = useCallback(
 		(files: FileList) => {
@@ -54,17 +54,19 @@ const useLoadFiles = (roomId: string, clearInput?: () => void): ((files: FileLis
 		(files: FileList) => {
 			const textAreaComposer = document.querySelector('[data-testid="textAreaComposer"]');
 			if (size(textAreaComposer?.textContent) > FILE_DESCRIPTION_CHAR_LIMIT) {
-				const closeModal = creationModal({
+				const modalId = 'attachment-description-limit-modal';
+				createModal({
+					id: modalId,
 					title: titleLabel,
 					confirmLabel,
 					onConfirm: () => {
 						setFilesIntoStore(files);
-						closeModal();
+						closeModal(modalId);
 					},
 					showCloseIcon: true,
 					onClose: () => {
 						clearInput?.();
-						closeModal();
+						closeModal(modalId);
 					},
 					children: (
 						<Container>
@@ -80,8 +82,9 @@ const useLoadFiles = (roomId: string, clearInput?: () => void): ((files: FileLis
 		},
 		[
 			clearInput,
+			closeModal,
 			confirmLabel,
-			creationModal,
+			createModal,
 			description2Label,
 			descriptionLabel,
 			setFilesIntoStore,
