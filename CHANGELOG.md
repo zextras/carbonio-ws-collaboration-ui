@@ -2,6 +2,33 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.9.8](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.9.7...v0.9.8) (2024-08-23)
+
+
+### Features
+
+*  apply reactions and show them on bubble with counter ref: WSC-1564 ([#377](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/377)) ([c68e19f](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/c68e19f9a296539e614a9f9c95732a29375c2456))
+* removed zimbraPrefTimeZoneId refs: WSC-1533 ([#349](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/349)) ([2decff2](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/2decff2cef7da88d8e98bfbc01a6395158c7d554))
+* user must be able to choose only accounts that has been enabled to the chat ref: WSC-1585 ([#373](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/373)) ([c543022](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/c543022038967a7503268f30a2ec641085ebcf7d))
+* virtual background: blur refs: WSC-1259  ([#347](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/347)) ([e9e995c](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/e9e995cff79a37da4d77a720ba4fbe6da059bab4))
+
+
+### Bug Fixes
+
+* avoid showing connection snackbar on page reload ref: WSC-1661 ([#364](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/364)) ([8ec9942](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/8ec9942e1d8ad2bc9478b576a5fb75f77ab1b9b2))
+* blur visible for guests refs: WSC-1621 ([#360](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/360)) ([c61c132](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/c61c1329796178fc1b37d9ea478a5061c85da139))
+* cannot download files with uncommon extensions ref: WSC:1151 ([#338](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/338)) ([c961a0c](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/c961a0c2f0725102f207bce69025784028f07d53))
+* displayed stanza with undefined id attribute ref: WSC-1641 ([#365](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/365)) ([a9a9894](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/a9a9894e51b8cf1f5b425cfc6732d1b7a08437aa))
+* fixed consistency between media refs: WSC-1651 ([#362](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/362)) ([1866fbd](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/1866fbd59c78782e53d5f6f829b915c0386b109a))
+* fixed overflow refs: WSC-1674 ([#371](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/371)) ([676cb50](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/676cb50024c01427731a092fac4913eb5dcbda19))
+* improve video stream subscription management ref: WSC-1611 ([#363](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/363)) ([08dcfb0](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/08dcfb05c43d4400285f2af755485b8129a58c1c))
+* presence status improvement ref: WSC-1237 ([#352](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/352)) ([7df425b](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/7df425b3bd8dcdd09cb9472c1cc0dab33facba68))
+* replied and forwarded MAM request after mongooseIM update ([#367](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/367)) ([080e780](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/080e7804c0ee937e6b2a7cb20e899615165ea542))
+* string fix and user selection on add and create is blocked on reached limit refs:WSC-1381 ([#348](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/348)) ([65b7e0e](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/65b7e0e418adb98e70614b4975a0bade9467ff6c))
+* take id attribute from displayed stanza ([#366](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/366)) ([5d749da](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/5d749dacf17b04da0fa7d4f017f11816f595b4b2))
+* translations keys ([#339](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/339)) ([d33b0f7](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/d33b0f70dce77ef0218a1b8bda5e302a8afbb3b9))
+* update usage of use modal refs: WSC-1475 ([#368](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/368)) ([a81a121](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/a81a121524bbe338744362a3787a7f234e8dec56))
+
 ### [0.9.7](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.9.6...v0.9.7) (2024-06-25)
 
 
