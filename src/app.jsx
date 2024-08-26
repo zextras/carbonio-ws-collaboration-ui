@@ -6,7 +6,7 @@
 
 import React, { useEffect } from 'react';
 
-import { useAuthenticated, useUserAccount, useUserSettings } from '@zextras/carbonio-shell-ui';
+import { getUserAccount, useAuthenticated, useUserSettings } from '@zextras/carbonio-shell-ui';
 
 import CounterBadgeUpdater from './chats/components/CounterBadgeUpdater';
 import RegisterCreationButton from './chats/components/RegisterCreationButton';
@@ -29,15 +29,15 @@ export default function App() {
 	const setChatsBeStatus = useStore((state) => state.setChatsBeStatus);
 
 	const authenticated = useAuthenticated();
-	const userAccount = useUserAccount();
 	const { prefs } = useUserSettings();
 
 	// STORE: init with user session main infos
 	useEffect(() => {
-		if (authenticated) {
+		const userAccount = getUserAccount();
+		if (authenticated && userAccount) {
 			setLoginInfo(userAccount.id, userAccount.name, userAccount.displayName, UserType.INTERNAL);
 		}
-	}, [setLoginInfo, userAccount, authenticated]);
+	}, [setLoginInfo, authenticated]);
 
 	// SET TIMEZONE and LOCALE
 	useEffect(() => {
