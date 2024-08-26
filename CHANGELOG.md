@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.9.9](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.9.8...v0.9.9) (2024-08-26)
+
+
+### Bug Fixes
+
+* avoid useUserAccount hook ([#383](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/383)) ([e6ba860](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/e6ba8603d297781465979c72d32bc205ce42bbd6))
+* fallback autocompleteGAL request on unknown document error ref: WSC-1589 ([#382](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/382)) ([1e55f99](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/1e55f99d8eb119913228e21d8feffe61beca9ec0))
+
 ### [0.9.8](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.9.7...v0.9.8) (2024-08-23)
 
 
