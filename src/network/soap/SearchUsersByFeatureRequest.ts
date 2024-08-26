@@ -23,18 +23,18 @@ export const searchUsersByFeatureRequest = (
 		name: text,
 		feature: 'CHATS'
 	}).then((response: SearchUsersByFeatureResponse) => {
-		if (response.account) {
-			const results = map(response.account, (user) => {
-				const displayName = find(user.a, (attr) => attr.n === 'displayName')?._content;
-				const email = find(user.a, (attr) => attr.n === 'email')?._content;
-				return {
-					id: user.id,
-					displayName: displayName ?? user.name,
-					email: email ?? user.name
-				};
-			});
-			remove(results, (user) => isMyId(user.id));
-			return results;
+		if (response.Fault?.Detail?.Error?.Code === 'service.UNKNOWN_DOCUMENT') {
+			return autoCompleteGalRequest(text);
 		}
-		return autoCompleteGalRequest(text);
+		const results = map(response.account, (user) => {
+			const displayName = find(user.a, (attr) => attr.n === 'displayName')?._content;
+			const email = find(user.a, (attr) => attr.n === 'email')?._content;
+			return {
+				id: user.id,
+				displayName: displayName ?? user.name,
+				email: email ?? user.name
+			};
+		});
+		remove(results, (user) => isMyId(user.id));
+		return results;
 	});

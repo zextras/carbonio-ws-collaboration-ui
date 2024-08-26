@@ -12,7 +12,7 @@ export type SearchUsersByFeatureRequest = {
 
 export type SearchUsersByFeatureResponse = {
 	account: ContactMatch[];
-};
+} & { Fault: { Detail: { Error: { Code: string } } } };
 
 export type ContactMatch = {
 	a: { n: string; _content: string }[];
