@@ -4,14 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, {
-	BaseSyntheticEvent,
-	useCallback,
-	useEffect,
-	useMemo,
-	useRef,
-	useState
-} from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import {
 	Container,
@@ -96,7 +89,8 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 	const referenceMessage = useStore((store) => getReferenceMessage(store, roomId));
 	const draftMessage = useStore((store) => getDraftMessage(store, roomId));
 	const unsetReferenceMessage = useStore((store) => store.unsetReferenceMessage);
-	const setInputHasFocus = useStore((store) => store.setInputHasFocus);
+	// Useless, moved handleOnBlur in MessageArea
+	// const setInputHasFocus = useStore((store) => store.setInputHasFocus);
 	const setDraftMessage = useStore((store) => store.setDraftMessage);
 	const unsetFilesToAttach = useStore((store) => store.unsetFilesToAttach);
 	const filesToUploadArray = useStore((store) => getFilesToUploadArray(store, roomId));
@@ -345,8 +339,11 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 		}
 	}, [referenceMessage, deleteMessageModalStatus]);
 
-	const handleTypingMessage = useCallback((e: BaseSyntheticEvent): void => {
-		setTextMessage(e.target.value);
+	// Now the function is called onInput, not onChange
+	const onInput = useCallback((): void => {
+		if (messageInputRef.current) {
+			setTextMessage(messageInputRef.current.innerHTML);
+		}
 	}, []);
 
 	const handleKeyUp = useCallback(
@@ -398,14 +395,15 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 		[sendDisabled, sendMessage, sendThrottleIsWriting, sendDebouncedPause]
 	);
 
-	const handleOnBlur = useCallback(() => {
-		if (size(textMessage) > 0) {
-			setDraftMessage(roomId, false, textMessage);
-		} else {
-			setDraftMessage(roomId, true);
-		}
-		setInputHasFocus(roomId, false);
-	}, [textMessage, setInputHasFocus, roomId, setDraftMessage]);
+	// Moved inside MessageArea to be more clear
+	// const handleOnBlur = useCallback(() => {
+	// 	if (size(textMessage) > 0) {
+	// 		setDraftMessage(roomId, false, textMessage);
+	// 	} else {
+	// 		setDraftMessage(roomId, true);
+	// 	}
+	// 	setInputHasFocus(roomId, false);
+	// }, [textMessage, setInputHasFocus, roomId, setDraftMessage]);
 
 	const handlePaste = useCallback(
 		(ev) => {
@@ -440,6 +438,11 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 						} else {
 							console.error(`Browser not support copy/paste function ${navigator.userAgent}`);
 						}
+					} else {
+						// Evita di incollare testo formattato
+						ev.preventDefault();
+						const text = ev.clipboardData.getData('text/plain');
+						document.execCommand('insertText', false, text);
 					}
 				}
 			} catch (e) {
@@ -508,11 +511,11 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 				roomId={roomId}
 				textareaRef={messageInputRef}
 				message={textMessage}
-				onInput={handleTypingMessage}
+				onInput={onInput}
 				composerIsFull={noMoreCharsOnInputComposer}
 				handleKeyDownTextarea={handleKeyDown}
 				handleKeyUpTextarea={handleKeyUp}
-				handleOnBlur={handleOnBlur}
+				// handleOnBlur={handleOnBlur} moved into MessageArea
 				handleOnPaste={handlePaste}
 				isDisabled={isDisabledWhileAttachingFile}
 			/>

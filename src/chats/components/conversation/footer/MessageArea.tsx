@@ -7,6 +7,8 @@
 
 import React, { MutableRefObject, useCallback, useEffect } from 'react';
 
+import { Button } from '@zextras/carbonio-design-system';
+import { size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import styled, { css, FlattenSimpleInterpolation } from 'styled-components';
 
@@ -15,12 +17,14 @@ import useStore from '../../../../store/Store';
 import { SIZES } from '../../../../types/generics';
 import useFirstUnreadMessage from '../useFirstUnreadMessage';
 
-const MessageTextarea = styled.textarea<{
+const MessageTextarea = styled.div<{
+	contentEditable: boolean;
+	onInput: (e: never) => void;
 	ref: MutableRefObject<HTMLTextAreaElement | null>;
-	value: string;
+	// value: string;
 	onKeyDown: (e: never) => void;
 	onKeyUp: (e: never) => void;
-	onChange: (e: never) => void;
+	// onChange: (e: never) => void;
 	onFocus: (e: never) => void;
 	onBlur: (e: never) => void;
 	onPaste: (e: never) => void;
@@ -95,7 +99,6 @@ type MessageAreaPros = {
 	composerIsFull: boolean;
 	handleKeyDownTextarea: (e: never) => void;
 	handleKeyUpTextarea: (e: never) => void;
-	handleOnBlur: (e: never) => void;
 	handleOnPaste: (e: never) => void;
 	isDisabled: boolean;
 };
@@ -108,7 +111,6 @@ const MessageArea: React.FC<MessageAreaPros> = ({
 	composerIsFull,
 	handleKeyDownTextarea,
 	handleKeyUpTextarea,
-	handleOnBlur,
 	handleOnPaste,
 	isDisabled
 }) => {
@@ -117,6 +119,7 @@ const MessageArea: React.FC<MessageAreaPros> = ({
 
 	const inputHasFocus = useStore((store) => getInputHasFocus(store, roomId));
 	const setInputHasFocus = useStore((store) => store.setInputHasFocus);
+	const setDraftMessage = useStore((store) => store.setDraftMessage);
 
 	const firstNewMessage = useFirstUnreadMessage(roomId);
 
@@ -132,6 +135,7 @@ const MessageArea: React.FC<MessageAreaPros> = ({
 	}, [firstNewMessage, roomId, textareaRef]);
 
 	useEffect(() => {
+		// TODO: IT NOT WORKS!
 		if (inputHasFocus) {
 			textareaRef.current?.focus();
 			// Focus the end of the input if there is a draft message;
@@ -145,6 +149,7 @@ const MessageArea: React.FC<MessageAreaPros> = ({
 
 	// Increase height when there are more lines
 	useEffect(() => {
+		// IT WORKS!
 		if (textareaRef.current) {
 			textareaRef.current.style.height = '';
 			if (textareaRef.current.scrollHeight > textareaRef.current.clientHeight) {
@@ -160,21 +165,67 @@ const MessageArea: React.FC<MessageAreaPros> = ({
 		[roomId, setInputHasFocus]
 	);
 
+	// Moved from MessageComposer
+	const handleOnBlur = useCallback(() => {
+		if (size(message) > 0) {
+			setDraftMessage(roomId, false, message);
+		} else {
+			setDraftMessage(roomId, true);
+		}
+		setInputHasFocus(roomId, false);
+	}, [message, setInputHasFocus, roomId, setDraftMessage]);
+
+	// Update the innerHTML of the textarea
+	useEffect(() => {
+		if (textareaRef.current && textareaRef.current.innerHTML !== message) {
+			textareaRef.current.innerHTML = message;
+		}
+	}, [message, textareaRef]);
+
+	const addChip = useCallback(() => {
+		if (textareaRef.current) {
+			const squareDiv = document.createElement('div');
+			squareDiv.style.width = '20px';
+			squareDiv.style.height = '20px';
+			squareDiv.style.backgroundColor = 'blue';
+			squareDiv.style.display = 'inline-block'; // Per tenerlo in linea con il testo
+			squareDiv.contentEditable = 'false';
+
+			textareaRef.current.appendChild(squareDiv);
+
+			// Assicurati che il cursore si sposti dopo il div aggiunto
+			const range = document.createRange();
+			range.setStartAfter(squareDiv);
+			range.collapse(true);
+
+			const selection = window.getSelection();
+			selection?.removeAllRanges();
+			selection?.addRange(range);
+
+			textareaRef.current.focus();
+		}
+	}, [textareaRef]);
+
 	return (
-		<MessageTextarea
-			data-testid="textAreaComposer"
-			ref={textareaRef}
-			value={message}
-			onKeyDown={handleKeyDownTextarea}
-			onKeyUp={handleKeyUpTextarea}
-			onChange={onInput}
-			onFocus={handleOnFocus}
-			onBlur={handleOnBlur}
-			onPaste={handleOnPaste}
-			aria-label={messageComposerLabel}
-			composerIsFull={composerIsFull}
-			disabled={isDisabled}
-		/>
+		<>
+			<MessageTextarea
+				data-testid="textAreaComposer"
+				ref={textareaRef}
+				contentEditable
+				onInput={onInput}
+				// value={message} REPLACED with innerHTML useEffect
+				onKeyDown={handleKeyDownTextarea}
+				onKeyUp={handleKeyUpTextarea}
+				// onChange={onInput} REPLACED with onInput
+				onFocus={handleOnFocus}
+				onBlur={handleOnBlur}
+				onPaste={handleOnPaste}
+				aria-label={messageComposerLabel}
+				composerIsFull={composerIsFull}
+				disabled={isDisabled}
+			/>
+			<Button icon="Star" onClick={addChip} />
+		</>
 	);
 };
 
