@@ -33,7 +33,8 @@ export enum PAGE_INFO_TYPE {
 	MEETING_ENDED = 'meeting_ended',
 	ALREADY_ACTIVE_MEETING_SESSION = 'already_active_meeting_session',
 	MEETING_NOT_FOUND = 'meeting_not_found',
-	UNAUTHENTICATED = 'unauthenticated'
+	UNAUTHENTICATED = 'unauthenticated',
+	INVALID_WAITING_ROOM = 'invalid_waiting_room'
 }
 
 export type UseRoutingHook = {

@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import React, { ReactElement } from 'react';
+import React, { ReactElement, useEffect } from 'react';
 
 import { Container, Padding, Text } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
@@ -53,17 +53,11 @@ const InfoPage = (): ReactElement => {
 
 	const isLoggedUserExternal = useStore(getIsLoggedUserExternal);
 
-	switch (infoType) {
-		case PAGE_INFO_TYPE.MEETING_ENDED:
-		case PAGE_INFO_TYPE.NEXT_TIME_PAGE:
-		case PAGE_INFO_TYPE.MEETING_NOT_FOUND:
-			if (isLoggedUserExternal) {
-				BrowserUtils.clearAuthCookies();
-			}
-			break;
-		default:
-			break;
-	}
+	useEffect(() => {
+		if (isLoggedUserExternal) {
+			BrowserUtils.clearAuthCookies();
+		}
+	}, [isLoggedUserExternal]);
 
 	switch (infoType) {
 		case PAGE_INFO_TYPE.ROOM_EMPTY:
@@ -115,6 +109,17 @@ const InfoPage = (): ReactElement => {
 			descriptionLowerLabel = t(
 				'meeting.infoPage.description.notAuthenticatedUser',
 				'You cannot join the meeting if you are not authenticated with your account'
+			);
+			break;
+		case PAGE_INFO_TYPE.INVALID_WAITING_ROOM:
+			titleLabel = t(
+				'meeting.infoPage.title.invalidWaiting',
+				'There are no moderators in the meeting'
+			);
+			centralLabel = t('meeting.infoPage.slogan.invalidWaiting', 'Try again later');
+			descriptionLowerLabel = t(
+				'meeting.infoPage.description.invalidWaiting',
+				'You must be approved by a moderator to join this meeting.'
 			);
 			break;
 		case PAGE_INFO_TYPE.MEETING_NOT_FOUND:

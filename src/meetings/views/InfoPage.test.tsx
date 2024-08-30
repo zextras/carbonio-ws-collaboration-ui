@@ -55,6 +55,12 @@ const pagesToCheckGuest = [
 		'Meeting Ended',
 		'Thanks for participating',
 		"Keep in touch with your colleagues or join your groups' meeting rooms"
+	],
+	[
+		PAGE_INFO_TYPE.INVALID_WAITING_ROOM,
+		'Invalid waiting room',
+		'Try later',
+		'The waiting room is not valid'
 	]
 ];
 
