@@ -3,9 +3,10 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import React, { ReactElement, useEffect } from 'react';
+import React, { ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
 
-import { Container, Text } from '@zextras/carbonio-design-system';
+import { Container, Divider, Icon, Padding, Text } from '@zextras/carbonio-design-system';
+import { map, range } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -15,37 +16,24 @@ import { MeetingRoutesParams, PAGE_INFO_TYPE } from '../../hooks/useRouting';
 import { getIsLoggedUserExternal } from '../../store/selectors/SessionSelectors';
 import useStore from '../../store/Store';
 import { BrowserUtils } from '../../utils/BrowserUtils';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-expect-error
-import sloganGif from '../assets/infoPageSlogan.gif';
-
-const CustomContainer = styled(Container)`
-	background: linear-gradient(287deg, #0f0f34 0%, #2c4579 74.63%);
-`;
-
-const BoxText = styled(Container)`
-	border-radius: 1.25rem;
-	box-shadow: 4px 4px 4px 0px rgba(0, 0, 0, 0.25);
-`;
 
 const Title = styled(Text)`
-	font-size: 1.75rem;
-	color: #93b2f4;
+	font-size: 1.6rem;
 `;
 
-const Description = styled(Text)`
-	font-size: 1.125rem;
+const Feedback = styled(Text)`
+	font-size: 1.3rem;
+	line-height: 1.75rem;
 `;
 
 const Slogan = styled(Text)`
 	font-size: 1.375rem;
 `;
 
-const InfoPageGif = styled.img<{ src: string }>`
-	width: 3rem;
-	border-radius: 50%;
-	transform: scaleX(-1);
-	box-shadow: 4px 4px 4px 0px rgba(0, 0, 0, 0.25);
+const StarIcon = styled(Icon)`
+	height: 1.75rem;
+	width: 1.75rem;
+	cursor: pointer;
 `;
 
 const InfoPage = (): ReactElement => {
@@ -55,6 +43,17 @@ const InfoPage = (): ReactElement => {
 	let titleLabel;
 	let sloganLabel;
 	let descriptionLabel;
+
+	const meetingExperienceLabel = t(
+		'',
+		'Let us know what you think about your experience with this meeting.'
+	);
+	const thankYouLabel = t('', 'THANKS FOR YOUR FEEDBACK!');
+	const opinionLabel = t('', 'Your opinion is important to us!');
+	const improveLabel = t('', 'It can allow us to improve :)');
+
+	const [hoveredStarIndex, setHoveredStarIndex] = useState<number | null>(null);
+	const [clicked, setClicked] = useState(false);
 
 	const isLoggedUserExternal = useStore(getIsLoggedUserExternal);
 
@@ -148,39 +147,85 @@ const InfoPage = (): ReactElement => {
 		disableDarkReader();
 	}, [darkReaderStatus, disableDarkReader]);
 
+	const handleHoverStar = useCallback((index: number) => {
+		setHoveredStarIndex(index);
+	}, []);
+
+	const handleLeaveStar = useCallback(() => {
+		setHoveredStarIndex(null);
+	}, []);
+
+	const onClick = useCallback(() => {
+		setClicked(true);
+	}, []);
+
+	const renderStars = useMemo(
+		() =>
+			map(range(1, 6), (i) => (
+				<Container
+					key={i}
+					width="fit"
+					height="fit"
+					orientation="horizontal"
+					onMouseEnter={() => handleHoverStar(i)}
+					onMouseLeave={handleLeaveStar}
+				>
+					<StarIcon
+						icon={hoveredStarIndex !== null && i <= hoveredStarIndex ? 'Star' : 'StarOutline'}
+						color="warning"
+						onClick={onClick}
+					/>
+					{i < 5 && <Padding right="1.5rem" />}
+				</Container>
+			)),
+		[handleHoverStar, handleLeaveStar, hoveredStarIndex, onClick]
+	);
+
 	return (
-		<CustomContainer
-			mainAlignment="flex-start"
-			crossAlignment="flex-start"
-			padding={{ top: '25vh', left: '15vw' }}
-			gap="1rem"
-		>
-			<BoxText
-				height="fit"
-				width="fit"
-				padding={{ vertical: '3.125rem', horizontal: '2.5rem' }}
-				gap="1rem"
-				crossAlignment="flex-start"
-				background="text"
-			>
-				<Title>{titleLabel.toUpperCase()}</Title>
-				<Description size="extralarge" color="gray6">
-					{descriptionLabel}
-				</Description>
-			</BoxText>
-			<Container
-				height="fit"
-				width="fit"
-				orientation="horizontal"
-				padding={{ top: '1rem' }}
-				gap="1rem"
-			>
-				<InfoPageGif src={sloganGif} />
-				<Slogan weight="bold" color="gray6">
-					{sloganLabel.toUpperCase()}
-				</Slogan>
+		<Container background={'gray0'}>
+			<Container width="fit" gap="2rem">
+				<Container height="fit" width="fit" gap="0.7rem">
+					<Title color="gray6" weight="bold">
+						{titleLabel}
+					</Title>
+					<Text size="extralarge" color="gray6" weight="light">
+						{descriptionLabel}
+					</Text>
+				</Container>
+				<Container
+					height="fit"
+					width="fill"
+					orientation="horizontal"
+					padding={{ top: '1rem' }}
+					gap="1rem"
+				>
+					<Divider />
+					<Container width="fit" height="fit">
+						<Slogan weight="bold" color="gray6">
+							{sloganLabel.toUpperCase()}
+						</Slogan>
+					</Container>
+
+					<Divider />
+				</Container>
+				<Container gap="0.7rem" width="fit" height="fit">
+					<Text color="gray6">{meetingExperienceLabel}</Text>
+					{clicked ? (
+						<Feedback color="warning" weight="light">
+							{thankYouLabel}
+						</Feedback>
+					) : (
+						<Container orientation="horizontal" width="fit" height="fit">
+							{renderStars}
+						</Container>
+					)}
+					<Container width="fit" height=" fit">
+						<Text color="gray6">{opinionLabel}</Text>
+						<Text color="gray6">{improveLabel}</Text>
+					</Container>
+				</Container>
 			</Container>
-		</CustomContainer>
+		</Container>
 	);
 };
 
