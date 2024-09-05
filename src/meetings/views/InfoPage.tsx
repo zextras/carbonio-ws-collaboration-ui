@@ -45,12 +45,15 @@ const InfoPage = (): ReactElement => {
 	let descriptionLabel;
 
 	const meetingExperienceLabel = t(
-		'',
+		'meeting.infoPage.feedback.title',
 		'Let us know what you think about your experience with this meeting.'
 	);
-	const thankYouLabel = t('', 'THANKS FOR YOUR FEEDBACK!');
-	const opinionLabel = t('', 'Your opinion is important to us!');
-	const improveLabel = t('', 'It can allow us to improve :)');
+	const thankYouLabel = t('meeting.infoPage.feedback.thankYou', 'THANKS FOR YOUR FEEDBACK!');
+	const opinionLabel = t(
+		'meeting.infoPage.feedback.description',
+		'Your opinion is important to us!'
+	);
+	const improveLabel = t('meeting.infoPage.feedback.caption', 'It can allow us to improve :)');
 
 	const [hoveredStarIndex, setHoveredStarIndex] = useState<number | null>(null);
 	const [clicked, setClicked] = useState(false);
