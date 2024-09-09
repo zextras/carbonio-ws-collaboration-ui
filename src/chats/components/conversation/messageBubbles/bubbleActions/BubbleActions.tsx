@@ -47,7 +47,7 @@ export const BubbleActionsWrapper = styled.div<{
 	}): FlattenSimpleInterpolation => css`
 		top: -0.6875rem;
 		right: -0.1875rem;
-		width: 3rem;
+		width: 3.1rem;
 		height: 1.6875rem;
 		background: ${theme.palette[isMyMessage ? 'highlight' : 'gray6'].regular};
 		border-bottom-left-radius: 20%;
@@ -93,7 +93,7 @@ const BubbleActions: FC<BubbleActionsProps> = ({ message, isMyMessage }) => {
 				isMyMessage={isMyMessage}
 				$isActive={menuDropdownActive || reactionsDropdownActive}
 			>
-				<Padding left="0.35rem" />
+				<Padding left="0.25rem" />
 				{ReactionsDropdown}
 				<Padding right="0.25rem" />
 				{MenuDropdown}
