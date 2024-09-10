@@ -5,7 +5,7 @@
  */
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 
-import { Container, Button, Tooltip, IconButton, Text } from '@zextras/carbonio-design-system';
+import { Container, Button, Tooltip, Text } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -103,7 +103,7 @@ const MeetingAccessPage: FC<AccessMeetingPageProps> = ({ hasUserDirectAccess, me
 
 	const handleMeetingEnded = useCallback(() => {
 		if (!hasUserDirectAccess) {
-			goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED);
+			goToInfoPage(PAGE_INFO_TYPE.INVALID_WAITING_ROOM);
 		}
 	}, [goToInfoPage, hasUserDirectAccess]);
 
@@ -162,12 +162,7 @@ const MeetingAccessPage: FC<AccessMeetingPageProps> = ({ hasUserDirectAccess, me
 						/>
 					) : (
 						<Tooltip label={leaveMeetingLabel}>
-							<IconButton
-								size="large"
-								backgroundColor="error"
-								icon="LogOut"
-								onClick={handleLeave}
-							/>
+							<Button size="large" backgroundColor="error" icon="LogOut" onClick={handleLeave} />
 						</Tooltip>
 					)}
 				</CustomContainer>

@@ -55,6 +55,12 @@ const pagesToCheckGuest = [
 		'Meeting Ended',
 		'Thanks for participating',
 		"Keep in touch with your colleagues or join your groups' meeting rooms"
+	],
+	[
+		PAGE_INFO_TYPE.INVALID_WAITING_ROOM,
+		'There are no moderators in the meeting',
+		'Try again later',
+		'You must be approved by a moderator to join this meeting.'
 	]
 ];
 
@@ -65,9 +71,9 @@ describe('Info page', () => {
 			useParams.mockReturnValueOnce({ infoType: type });
 			setup(<InfoPage />);
 
-			expect(await screen.findByText(title)).toBeVisible();
-			expect(await screen.findByText(central)).toBeVisible();
-			expect(await screen.findByText(desc)).toBeVisible();
+			expect(screen.getAllByText(new RegExp(title, 'i'))[0]).toBeVisible();
+			expect(screen.getByText(new RegExp(central, 'i'))).toBeVisible();
+			expect(screen.getByText(new RegExp(desc, 'i'))).toBeVisible();
 		}
 	);
 	test.each(pagesToCheckGuest)('Display %s info page, user is guest', async (type) => {
