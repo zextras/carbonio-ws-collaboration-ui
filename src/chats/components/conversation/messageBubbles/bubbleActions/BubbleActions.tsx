@@ -6,7 +6,7 @@
 
 import React, { FC, ReactElement, useCallback, useEffect } from 'react';
 
-import { Container, Theme } from '@zextras/carbonio-design-system';
+import { Container, Padding, Theme } from '@zextras/carbonio-design-system';
 import styled, { css, DefaultTheme, FlattenSimpleInterpolation } from 'styled-components';
 
 import useBubbleContextualMenuDropDown from './useBubbleContextualMenuDropDown';
@@ -47,38 +47,10 @@ export const BubbleActionsWrapper = styled.div<{
 	}): FlattenSimpleInterpolation => css`
 		top: -0.6875rem;
 		right: -0.1875rem;
-		width: 3rem;
+		width: 3.1rem;
 		height: 1.6875rem;
-		background-image: -webkit-radial-gradient(
-			75% 50%,
-			circle cover,
-			${theme.palette[isMyMessage ? 'highlight' : 'gray6'].regular},
-			transparent 100%
-		);
-		background-image: -moz-radial-gradient(
-			75% 50%,
-			circle cover,
-			${theme.palette[isMyMessage ? 'highlight' : 'gray6'].regular},
-			transparent 100
-		);
-		background-image: -o-radial-gradient(
-			75% 50%,
-			circle cover,
-			${theme.palette[isMyMessage ? 'highlight' : 'gray6'].regular},
-			transparent 100
-		);
-		background-image: -ms-radial-gradient(
-			75% 50%,
-			circle cover,
-			${theme.palette[isMyMessage ? 'highlight' : 'gray6'].regular},
-			transparent 100
-		);
-		background-image: radial-gradient(
-			75% 50%,
-			circle cover,
-			${theme.palette[isMyMessage ? 'highlight' : 'gray6'].regular},
-			transparent 100%
-		);
+		background: ${theme.palette[isMyMessage ? 'highlight' : 'gray6'].regular};
+		border-bottom-left-radius: 20%;
 		color: ${theme.palette.text.regular};
 	`};
 
@@ -121,7 +93,9 @@ const BubbleActions: FC<BubbleActionsProps> = ({ message, isMyMessage }) => {
 				isMyMessage={isMyMessage}
 				$isActive={menuDropdownActive || reactionsDropdownActive}
 			>
+				<Padding left="0.25rem" />
 				{ReactionsDropdown}
+				<Padding right="0.25rem" />
 				{MenuDropdown}
 			</BubbleActionsWrapper>
 		</DropDownWrapper>
