@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.9.10](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.9.9...v0.9.10) (2024-09-10)
+
+
+### Bug Fixes
+
+* fixed visibility on message actions refs: WSC-1683 ([edc623b](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/edc623b826bfacaaacc2522ca74efa012cadfbfe))
+* fixed visibility on message actions refs: WSC-1683 ([37e9afd](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/37e9afdc9ac65331274f2143a676d05af70c4c47))
+* padding fixes refs: WSC-1683 ([872f6f3](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/872f6f308ff3fa2e60287737998b640b7fdc8c47))
+
 ### [0.9.9](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.9.8...v0.9.9) (2024-08-26)
 
 
