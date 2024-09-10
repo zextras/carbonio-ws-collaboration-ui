@@ -502,7 +502,7 @@ describe('AccessMeeting - enter to meeting by waiting Room', () => {
 			});
 		});
 
-		expect(mockGoToInfoPage).toHaveBeenCalledWith(PAGE_INFO_TYPE.MEETING_ENDED);
+		expect(mockGoToInfoPage).toHaveBeenCalledWith(PAGE_INFO_TYPE.INVALID_WAITING_ROOM);
 	});
 
 	test('user is ready to participate and the meeting finish before he can enter', async () => {
@@ -522,7 +522,7 @@ describe('AccessMeeting - enter to meeting by waiting Room', () => {
 			});
 		});
 
-		expect(mockGoToInfoPage).toHaveBeenCalledWith(PAGE_INFO_TYPE.MEETING_ENDED);
+		expect(mockGoToInfoPage).toHaveBeenCalledWith(PAGE_INFO_TYPE.INVALID_WAITING_ROOM);
 	});
 
 	test('user is in waiting room and enters from another tab', async () => {

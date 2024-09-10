@@ -9,7 +9,6 @@ import { EventName, sendCustomEvent } from '../../../hooks/useEventListener';
 import useStore from '../../../store/Store';
 import { MeetingStoppedEvent } from '../../../types/network/websocket/wsMeetingEvents';
 import { RoomType } from '../../../types/store/RoomTypes';
-import { isMeetingActive } from '../eventHandlersUtilities';
 
 export const meetingStoppedEventHandler = (event: MeetingStoppedEvent): void => {
 	const state = useStore.getState();
@@ -20,9 +19,6 @@ export const meetingStoppedEventHandler = (event: MeetingStoppedEvent): void => 
 		sendCustomEvent({ name: EventName.REMOVED_MEETING_NOTIFICATION, data: event });
 	}
 
-	// Send custom event to stop meeting everyone is in
-	if (isMeetingActive(event.meetingId)) {
-		sendCustomEvent({ name: EventName.MEETING_STOPPED, data: event });
-	}
+	sendCustomEvent({ name: EventName.MEETING_STOPPED, data: event });
 	state.stopMeeting(event.meetingId);
 };
