@@ -8,7 +8,7 @@ import React, { ReactElement, useMemo } from 'react';
 
 import { Container, Text } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import styled, { SimpleInterpolation } from 'styled-components';
+import styled from 'styled-components';
 
 import Bubble from './Bubble';
 import ConfigurationBubble from './ConfigurationBubble';
@@ -27,23 +27,19 @@ type MessageProps = {
 	messageListRef?: React.RefObject<HTMLDivElement | undefined>;
 };
 
-export const CustomMessage = styled(Container)<{ $dateMessage?: boolean }>`
+export const CustomMessage = styled(Container)`
 	width: fit-content;
 	white-space: pre-wrap;
 	word-break: break-word;
 	max-width: 80%;
 	height: auto;
-	margin: 0.625rem;
 	padding: 0.25em 1em;
-	${({ $dateMessage }): SimpleInterpolation =>
-		$dateMessage && 'border-radius: 1rem; box-shadow: 0 0 0.25rem rgba(166, 166, 166, 0.5);'}
 	margin: 0.625rem auto;
 	cursor: default;
-	-webkit-user-select: none;
 	user-select: none;
+	-webkit-user-select: none;
 	text-align: center;
-	background-color: ${({ theme, $dateMessage }): string =>
-		$dateMessage ? theme.palette.gray6.regular : theme.palette.gray5.regular};
+	background-color: ${({ theme }): string => theme.palette.gray5.regular};
 `;
 
 const MessageFactory = ({
@@ -103,7 +99,7 @@ const MessageFactory = ({
 				);
 			}
 			case MessageType.DATE_MSG: {
-				return <DateBubble message={message} refEl={messageRef} />;
+				return <DateBubble message={message} refEl={messageRef} messageListRef={messageListRef} />;
 			}
 			default: {
 				return <div>Message not handled</div>;
