@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { act, fireEvent, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, screen } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event';
 
 import MessageComposer from './MessageComposer';
@@ -582,7 +582,7 @@ describe('Upload attachment view', () => {
 		act(() => store.setFilesToAttach(mockedRoom.id, [fileOne]));
 		const inputText = 'description fileOne{enter}';
 		const composerTextArea = screen.getByRole('textbox');
-		await waitFor(() => user.type(composerTextArea, inputText), { timeout: 3000 });
+		await user.type(composerTextArea, inputText);
 		const composer = await screen.findByTestId('textAreaComposer');
 		expect((composer as HTMLTextAreaElement).value).toBe('');
 		const updatedStore = useStore.getState();
@@ -596,7 +596,7 @@ describe('Upload attachment view', () => {
 		act(() => store.setFilesToAttach(mockedRoom.id, [fileOne]));
 		const sendButton = screen.getByTestId('icon: Navigation2');
 		expect(sendButton).not.toBeDisabled();
-		await waitFor(() => user.click(sendButton));
+		await user.click(sendButton);
 		const composer = await screen.findByTestId('textAreaComposer');
 		expect((composer as HTMLTextAreaElement).value).toBe('');
 		const updatedStore = useStore.getState();

@@ -6,8 +6,7 @@
 
 import React from 'react';
 
-import { screen, waitFor } from '@testing-library/react';
-import { act } from 'react-dom/test-utils';
+import { screen, waitFor, act } from '@testing-library/react';
 
 import NotificationsSettings from './NotificationsSettings';
 import Settings from './Settings';

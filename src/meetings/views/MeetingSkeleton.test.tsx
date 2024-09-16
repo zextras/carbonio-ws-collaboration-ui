@@ -5,8 +5,7 @@
  */
 import React from 'react';
 
-import { screen, waitFor } from '@testing-library/react';
-import { act } from '@testing-library/react-hooks';
+import { screen, waitFor, act } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event';
 
 import MeetingSkeleton from './MeetingSkeleton';
@@ -106,11 +105,8 @@ describe('Sidebar interactions', () => {
 		const { user } = storeSetupGroupMeetingSkeleton();
 		await waitFor(() => user.hover(screen.getByTestId(meetingActionBarLabel)));
 		const fullScreenButton = await screen.findByTestId('fullscreen-button');
-		await waitFor(() => {
-			act(() => {
-				user.click(fullScreenButton);
-			});
-		});
+		await user.click(fullScreenButton);
+
 		const meetingSidebar = screen.queryByTestId('meeting_sidebar');
 		expect(meetingSidebar).toHaveStyle('width: 0');
 	});
@@ -127,11 +123,11 @@ describe('Grid mode meeting view', () => {
 		mockedLeaveMeetingRequest.mockResolvedValueOnce('Meeting left');
 		const { user } = storeSetupGroupMeetingSkeleton();
 		const meetingActionBar = await screen.findByTestId(meetingActionBarLabel);
-		await waitFor(() => user.hover(meetingActionBar));
+		await user.hover(meetingActionBar);
 
 		const endMeetingButton = await screen.findByTestId('icon: LogOutOutline');
-		await waitFor(() => user.click(endMeetingButton));
-		await waitFor(() => user.click(endMeetingButton));
+		await user.click(endMeetingButton);
+		await user.click(endMeetingButton);
 
 		expect(mockedLeaveMeetingRequest).toHaveBeenCalled();
 		expect(mockGoToInfoPage).toHaveBeenCalledWith(PAGE_INFO_TYPE.MEETING_ENDED);
@@ -140,16 +136,18 @@ describe('Grid mode meeting view', () => {
 	test('User click once leave button and then move away', async () => {
 		const { user } = storeSetupGroupMeetingSkeleton();
 		const meetingActionBar = await screen.findByTestId(meetingActionBarLabel);
-		await waitFor(() => user.hover(meetingActionBar));
+		await user.hover(meetingActionBar);
 
 		const endMeetingButton = await screen.findByTestId('icon: LogOutOutline');
-		await waitFor(() => user.click(endMeetingButton));
+		await user.click(endMeetingButton);
 
 		const sidebarButton = await screen.findByTestId('sidebar_button');
-		await waitFor(() => user.hover(sidebarButton));
+		await user.hover(sidebarButton);
 
-		const text = screen.queryByText('Leave Meeting?');
-		expect(text).not.toBeInTheDocument();
+		await waitFor(() => {
+			const text = screen.queryByText('Leave Meeting?');
+			expect(text).not.toBeInTheDocument();
+		});
 	});
 
 	test('Toggle pin video and switch to cinema mode', async () => {
@@ -222,15 +220,18 @@ describe('Virtual Background setup', () => {
 		expect(store.activeMeeting[meeting.id]).not.toBeDefined();
 
 		// turn on blur
-		await waitFor(() => {
+		act(() => {
 			store.setBlur(meeting.id, true);
 		});
-		const updatedStore = useStore.getState();
-		expect(updatedStore.activeMeeting[meeting.id].virtualBackground.updatedStream).toBeDefined();
+
+		await waitFor(() => {
+			const updatedStore = useStore.getState();
+			expect(updatedStore.activeMeeting[meeting.id].virtualBackground.updatedStream).toBeDefined();
+		});
 		expect(mockInitialize).toHaveBeenCalled();
 
 		// turn off blur
-		await waitFor(() => {
+		act(() => {
 			store.setBlur(meeting.id, false);
 		});
 		const updatedStore2 = useStore.getState();

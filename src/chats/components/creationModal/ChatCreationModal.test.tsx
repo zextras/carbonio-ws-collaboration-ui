@@ -6,8 +6,7 @@
 
 import React from 'react';
 
-import { act, screen, waitFor } from '@testing-library/react';
-import { renderHook } from '@testing-library/react-hooks';
+import { act, screen, waitFor, renderHook } from '@testing-library/react';
 
 import ChatCreationModal from './ChatCreationModal';
 import useStore from '../../../store/Store';
@@ -71,17 +70,16 @@ describe('Chat Creation Modal', () => {
 
 		// Type on ChipInput to trigger a new autoCompleteGalRequest
 		const chipInput = await screen.findByTestId('chip_input_creation_modal');
-		user.type(chipInput, user1.displayName[0]);
+		await user.type(chipInput, user1.displayName[0]);
 
 		// Add Chip on ChipInput
 		const userComponent = await screen.findByText(user1.displayName);
-		user.click(userComponent);
+		await user.click(userComponent);
 
 		const footerButton = await screen.findByRole('button', { name: /create/i });
 		expect(footerButton).toBeEnabled();
 
-		user.click(footerButton);
-		await waitFor(() => expect(footerButton).toBeEnabled());
+		await user.click(footerButton);
 		const placeholderRoom = useStore.getState().rooms[`placeholder-${user1.id}`];
 		expect(placeholderRoom).toEqual(
 			expect.objectContaining({
@@ -101,19 +99,19 @@ describe('Chat Creation Modal', () => {
 
 		// Add user1 and user2 chips
 		const chipInput = await screen.findByTestId('chip_input_creation_modal');
-		user.type(chipInput, user1.displayName[0]);
+		await user.type(chipInput, user1.displayName[0]);
 		const user1Component = await screen.findByText(user1.displayName);
-		user.click(user1Component);
+		await user.click(user1Component);
 
 		// the state here changes, in fact now there's a chip inside the input, so there's need to focus again on it
 		const chipInput1 = await screen.findByTestId('chip_input_creation_modal');
-		user.type(chipInput1, user2.displayName[0]);
+		await user.type(chipInput1, user2.displayName[0]);
 		const user2Component = await screen.findByText(user2.displayName);
-		user.click(user2Component);
+		await user.click(user2Component);
 
 		// Add group title
 		const titleInput = await screen.findByRole('textbox', { name: /title/i });
-		user.type(titleInput, 'Title');
+		await user.type(titleInput, 'Title');
 		const title = await screen.findByDisplayValue(/Title/i);
 		expect(title).toBeInTheDocument();
 
@@ -129,8 +127,7 @@ describe('Chat Creation Modal', () => {
 			updatedAt: 'updated',
 			pictureUpdatedAt: 'pictureUpdatedAt'
 		});
-		user.click(footerButton);
-		await waitFor(() => expect(footerButton).toBeEnabled());
+		await user.click(footerButton);
 		expect(mockedAddRoomRequest).toHaveBeenCalled();
 	});
 
@@ -143,19 +140,19 @@ describe('Chat Creation Modal', () => {
 
 		// Add user1 and user2 chips
 		const chipInput = await screen.findByTestId('chip_input_creation_modal');
-		user.type(chipInput, user1.displayName[0]);
+		await user.type(chipInput, user1.displayName[0]);
 		const user1Component = await screen.findByText(user1.displayName);
-		user.click(user1Component);
+		await user.click(user1Component);
 		const chipInput1 = await screen.findByTestId('chip_input_creation_modal');
-		user.type(chipInput1, user2.displayName[0]);
+		await user.type(chipInput1, user2.displayName[0]);
 		const user2Component = await screen.findByText(user2.displayName);
-		user.click(user2Component);
+		await user.click(user2Component);
 
-		const footerButton = await screen.findByRole('button', { name: /create/i });
+		const footerButton = await screen.findByRole('button', { name: /new group/i });
 		expect(footerButton).toBeEnabled();
 
 		mockedAddRoomRequest.mockRejectedValueOnce({});
-		user.click(footerButton);
+		await user.click(footerButton);
 		await waitFor(() => expect(footerButton).toBeEnabled());
 		const snackbar = await screen.findByText(/Something went Wrong. Please Retry/i);
 		expect(snackbar).toBeInTheDocument();

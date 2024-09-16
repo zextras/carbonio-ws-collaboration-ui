@@ -134,7 +134,7 @@ const ChatCreationModal = ({
 					setIsPending(false);
 					createSnackbar({
 						key: new Date().toLocaleString(),
-						type: 'error',
+						severity: 'error',
 						label: errorSnackbar
 					});
 				});

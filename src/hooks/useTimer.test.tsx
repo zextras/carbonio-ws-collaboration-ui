@@ -4,8 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { renderHook } from '@testing-library/react-hooks';
-import { act } from 'react-dom/test-utils';
+import { act, renderHook } from '@testing-library/react';
 
 import useTimer from './useTimer';
 
@@ -17,28 +16,28 @@ describe('useTimer tests', () => {
 	});
 
 	test('Time from 1 second ago', () => {
-		const subtractedDate = Date.now() - 1 * 1000;
+		const subtractedDate = Date.now() - 1000;
 		const { result } = renderHook(() => useTimer(subtractedDate));
 		expect(result.current).toBe('00:01');
 		jest.clearAllTimers();
 	});
 
 	test('Time from 1 minute ago', () => {
-		const subtractedDate = Date.now() - 1 * 60 * 1000;
+		const subtractedDate = Date.now() - 60 * 1000;
 		const { result } = renderHook(() => useTimer(subtractedDate));
 		expect(result.current).toBe('01:00');
 		jest.clearAllTimers();
 	});
 
 	test('Time from 1 hour ago', () => {
-		const subtractedDate = Date.now() - 1 * 60 * 60 * 1000;
+		const subtractedDate = Date.now() - 60 * 60 * 1000;
 		const { result } = renderHook(() => useTimer(subtractedDate));
 		expect(result.current).toBe('01:00:00');
 		jest.clearAllTimers();
 	});
 
 	test('Time from 1 day ago', () => {
-		const subtractedDate = Date.now() - 1 * 24 * 60 * 60 * 1000;
+		const subtractedDate = Date.now() - 24 * 60 * 60 * 1000;
 		const { result } = renderHook(() => useTimer(subtractedDate));
 		expect(result.current).toBe('24:00:00');
 		jest.clearAllTimers();

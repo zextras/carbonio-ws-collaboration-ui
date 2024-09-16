@@ -6,8 +6,7 @@
 
 import React from 'react';
 
-import { act, screen, waitFor } from '@testing-library/react';
-import { renderHook } from '@testing-library/react-hooks';
+import { act, screen, waitFor, renderHook } from '@testing-library/react';
 
 import ChatCreationContactsSelection from './ChatCreationContactsSelection';
 import useStore from '../../../store/Store';
@@ -54,7 +53,7 @@ describe('Chat Creation Modal Contact Selector - search', () => {
 	test('All elements are rendered', async () => {
 		const { result } = renderHook(() => useStore());
 		act(() => result.current.setCapabilities(createMockCapabilityList({ maxGroupMembers: 3 })));
-		mockSearchUsersByFeatureRequest.mockReturnValue([]);
+		mockSearchUsersByFeatureRequest.mockReturnValueOnce([]);
 
 		setup(
 			<ChatCreationContactsSelection
@@ -65,17 +64,15 @@ describe('Chat Creation Modal Contact Selector - search', () => {
 			/>
 		);
 
+		// Render ListItem (after autoCompleteGalRequest)
+		const list = await screen.findByTestId('list_creation_modal');
+		expect(list).toBeVisible();
+
+		expect(screen.getByText('Select more than an address to create a Group')).toBeVisible();
+
 		// Render ChipInput
 		const chipInput = await screen.findByTestId('chip_input_creation_modal');
 		expect(chipInput).toBeVisible();
-
-		// Render ListItem (after autoCompleteGalRequest)
-		await waitFor(() => {
-			const list = screen.getByTestId('list_creation_modal');
-			expect(list).toBeVisible();
-		});
-
-		expect(screen.getByText('Select more than an address to create a Group')).toBeVisible();
 	});
 
 	test('Search user on Creation Modal', async () => {
@@ -90,8 +87,8 @@ describe('Chat Creation Modal Contact Selector - search', () => {
 				inputRef={React.createRef()}
 			/>
 		);
+
 		// Initial AutoCompleteRequest trigger an initial "Spinner" state and then render contact list
-		await screen.findByText('spinner');
 		const list = await screen.findByTestId('list_creation_modal');
 		expect(list).toBeVisible();
 		expect(list.children[0].children).toHaveLength(0);
@@ -117,6 +114,8 @@ describe('Chat Creation Modal Contact Selector - search', () => {
 	});
 
 	test('Search user fails', async () => {
+		const { result } = renderHook(() => useStore());
+		act(() => result.current.setCapabilities(createMockCapabilityList({ maxGroupMembers: 3 })));
 		mockSearchUsersByFeatureRequest.mockReturnValueOnce([contactUser1, contactUser2]);
 
 		const { user } = setup(
@@ -129,7 +128,6 @@ describe('Chat Creation Modal Contact Selector - search', () => {
 		);
 
 		// Initial AutoCompleteRequest trigger an initial "Spinner" state and then render contact list
-		await screen.findByText('spinner');
 		const list = await screen.findByTestId('list_creation_modal');
 		expect(list).toBeVisible();
 		expect(list.children[0].children).toHaveLength(2);
@@ -233,7 +231,7 @@ describe('Chat Creation Modal Contact Selector - search', () => {
 		expect(list).toBeInTheDocument();
 
 		const userComponent = screen.getByText(contactUser1.displayName);
-		user.click(userComponent);
+		await user.click(userComponent);
 
 		await screen.findByTestId('chip_input_creation_modal');
 
@@ -242,7 +240,7 @@ describe('Chat Creation Modal Contact Selector - search', () => {
 		await waitFor(() => expect(name).toHaveLength(2));
 
 		const removeButton = await screen.findByTestId('icon: Close');
-		user.click(removeButton);
+		await user.click(removeButton);
 
 		await screen.findByTestId('chip_input_creation_modal');
 
@@ -253,6 +251,8 @@ describe('Chat Creation Modal Contact Selector - search', () => {
 	});
 
 	test('Add and remove chip by clicking the same component', async () => {
+		const { result } = renderHook(() => useStore());
+		act(() => result.current.setCapabilities(createMockCapabilityList({ maxGroupMembers: 3 })));
 		mockSearchUsersByFeatureRequest.mockReturnValueOnce([contactUser1]);
 
 		const { user } = setup(
@@ -267,12 +267,12 @@ describe('Chat Creation Modal Contact Selector - search', () => {
 		expect(list).toBeInTheDocument();
 
 		const userComponent = await screen.findByText(contactUser1.displayName);
-		user.click(userComponent);
+		await user.click(userComponent);
 		const name = await screen.findAllByText(`${contactUser1.displayName}`);
 
-		await waitFor(() => expect(name).toHaveLength(1));
+		await waitFor(() => expect(name).toHaveLength(2));
 
-		user.click(userComponent);
+		await user.click(userComponent);
 
 		await screen.findByTestId('chip_input_creation_modal');
 
@@ -313,7 +313,8 @@ describe('Add participant Modal Contact Selector', () => {
 	test('Search user on Add Participant Modal', async () => {
 		// Set first AutoCompleteRequest response to []
 		mockSearchUsersByFeatureRequest.mockReturnValueOnce([]);
-
+		const { result } = renderHook(() => useStore());
+		act(() => result.current.setCapabilities(createMockCapabilityList({ maxGroupMembers: 5 })));
 		const { user } = setup(
 			<ChatCreationContactsSelection
 				contactsSelected={{}}
@@ -323,8 +324,6 @@ describe('Add participant Modal Contact Selector', () => {
 			/>
 		);
 
-		// Initial AutoCompleteRequest trigger an initial "Spinner" state and then render contact list
-		await screen.findByText('spinner');
 		await screen.findByTestId('list_creation_modal');
 		expect(screen.getByTestId('list_creation_modal')).toBeVisible();
 

@@ -5,10 +5,8 @@
  */
 import React from 'react';
 
-import { screen, waitFor } from '@testing-library/react';
-import { renderHook } from '@testing-library/react-hooks';
+import { screen, waitFor, act, renderHook } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event';
-import { act } from 'react-dom/test-utils';
 
 import MeetingAccessPage from './MeetingAccessPage';
 import { useParams } from '../../../../__mocks__/react-router';
@@ -104,7 +102,6 @@ const setupGroupWithBeStatusUndefined = (): { user: UserEvent; store: RootStore 
 		result.current.setLoginInfo(user1.id, user1.name);
 		result.current.addRoom(groupRoom);
 		result.current.addMeeting(groupMeeting);
-		result.current.meetingConnection(groupMeeting.id, false, undefined, false, undefined);
 	});
 	useParams.mockReturnValue({ meetingId: groupMeeting.id });
 	const { user } = setup(
@@ -127,7 +124,6 @@ const setupBasicGroup = (): { user: UserEvent; store: RootStore } => {
 		result.current.addMeeting(groupMeeting);
 		result.current.setChatsBeStatus(true);
 		result.current.setWebsocketStatus(true);
-		result.current.meetingConnection(groupMeeting.id, false, undefined, false, undefined);
 	});
 	useParams.mockReturnValue({ meetingId: groupMeeting.id });
 	const { user } = setup(
@@ -150,13 +146,6 @@ const setupForWaitingRoom = (): { user: UserEvent; store: RootStore } => {
 		result.current.addMeeting(meetingForWaitingRoom);
 		result.current.setChatsBeStatus(true);
 		result.current.setWebsocketStatus(true);
-		result.current.meetingConnection(
-			groupMeeting.id,
-			true,
-			'Audio Device 1',
-			true,
-			'Video Device 1'
-		);
 	});
 	useParams.mockReturnValue({ meetingId: groupForWaitingRoom.id });
 	const { user } = setup(
@@ -179,13 +168,6 @@ const setupExternalUserForWaitingRoom = (): { user: UserEvent; store: RootStore 
 		result.current.addMeeting(meetingForWaitingRoom);
 		result.current.setChatsBeStatus(true);
 		result.current.setWebsocketStatus(true);
-		result.current.meetingConnection(
-			groupMeeting.id,
-			true,
-			'Audio Device 1',
-			true,
-			'Video Device 1'
-		);
 	});
 	useParams.mockReturnValue({ meetingId: groupForWaitingRoom.id });
 	const { user } = setup(
@@ -208,7 +190,7 @@ describe('AccessMeeting - enter to meeting as a moderator or as a member of a gr
 		const enterButton = await screen.findByText('Enter');
 		await user.click(enterButton);
 
-		expect(mockedEnterMeetingRequest).toBeCalled();
+		expect(mockedEnterMeetingRequest).toHaveBeenCalled();
 	});
 
 	test('turn on video', async () => {
@@ -217,7 +199,7 @@ describe('AccessMeeting - enter to meeting as a moderator or as a member of a gr
 		const { user } = setupBasicGroup();
 
 		const videoOff = screen.getByTestId(iconVideoOff);
-		await act(() => user.click(videoOff));
+		await user.click(videoOff);
 		const videoOn = await screen.findByTestId(iconVideo);
 		expect(videoOn).toBeInTheDocument();
 	});
@@ -228,7 +210,7 @@ describe('AccessMeeting - enter to meeting as a moderator or as a member of a gr
 		const { user } = setupBasicGroup();
 
 		const audioOff = screen.getByTestId(iconMicOff);
-		await act(() => user.click(audioOff));
+		await user.click(audioOff);
 		const audioOn = await screen.findAllByTestId('icon: Mic');
 		expect(audioOn).toHaveLength(2);
 	});
@@ -237,12 +219,12 @@ describe('AccessMeeting - enter to meeting as a moderator or as a member of a gr
 		const { user } = setupBasicGroup();
 
 		const audioOff = screen.getByTestId(iconMicOff);
-		await act(() => user.click(audioOff));
+		await user.click(audioOff);
 		const audioOn = await screen.findAllByTestId('icon: Mic');
 		expect(audioOn[1]).toBeInTheDocument();
 		const tryAudio = await screen.findByText(/Start mic test/i);
 		expect(tryAudio).toBeEnabled();
-		await act(() => user.click(tryAudio));
+		await user.click(tryAudio);
 		const stopAudio = await screen.findByText(/Stop mic test/i);
 		expect(stopAudio).toBeInTheDocument();
 	});
@@ -286,19 +268,19 @@ describe('AccessMeeting - enter to meeting as a moderator or as a member of a gr
 		const { user } = setupBasicGroup();
 
 		const videoOff = screen.getByTestId(iconVideoOff);
-		await act(() => user.click(videoOff));
+		await user.click(videoOff);
 		const videoOn = await screen.findByTestId(iconVideo);
 		expect(videoOn).toBeInTheDocument();
 
 		const videoButtonSelect = await screen.findByText(/Video Default/i);
-		await act(() => user.click(videoButtonSelect));
+		await user.click(videoButtonSelect);
 
 		const device = await screen.findByText(videoDevice2);
 		expect(device).toBeInTheDocument();
 		// not selected
 		expect(device).toHaveStyle(normalFontWeight);
 
-		await act(() => user.click(device));
+		await user.click(device);
 
 		const videoButtonSelectUpdated = await screen.findByText(videoDevice2);
 
@@ -315,23 +297,23 @@ describe('AccessMeeting - enter to meeting as a moderator or as a member of a gr
 		const { user } = setupBasicGroup();
 
 		const audioOff = screen.getByTestId(iconMicOff);
-		await act(() => user.click(audioOff));
+		await user.click(audioOff);
 		const audioOn = await screen.findAllByTestId('icon: Mic');
 		expect(audioOn[0]).toBeInTheDocument();
 
 		const audioButtonSelect = await screen.findByText(/Audio Default/i);
-		await act(() => user.click(audioButtonSelect));
+		await user.click(audioButtonSelect);
 
 		const device = await screen.findByText(audioDevice2);
 		expect(device).toBeInTheDocument();
 		// not selected
 		expect(device).toHaveStyle(normalFontWeight);
 
-		await act(() => user.click(device));
+		await user.click(device);
 
 		const audioButtonSelectUpdated = await screen.findByText(audioDevice2);
 
-		await act(() => user.click(audioButtonSelectUpdated));
+		await user.click(audioButtonSelectUpdated);
 		const deviceSelected = await screen.findAllByText(audioDevice2);
 		expect(deviceSelected[1]).toBeInTheDocument();
 		// selected
@@ -344,17 +326,17 @@ describe('AccessMeeting - enter to meeting as a moderator or as a member of a gr
 		const { user } = setupBasicGroup();
 
 		const videoOff = screen.getByTestId(iconVideoOff);
-		await act(() => user.click(videoOff));
+		await user.click(videoOff);
 		const videoOn = await screen.findByTestId(iconVideo);
 		expect(videoOn).toBeInTheDocument();
 
 		const videoButtonSelect = await screen.findByText('Video Default');
-		await act(() => user.click(videoButtonSelect));
+		await user.click(videoButtonSelect);
 
 		const device = await screen.findByText(videoDevice2);
 		expect(device).toBeInTheDocument();
 
-		await act(() => user.click(device));
+		await user.click(device);
 
 		const enterButton = await screen.findByTestId('enterMeetingButton');
 		expect(enterButton).toBeEnabled();
@@ -366,12 +348,12 @@ describe('AccessMeeting - enter to meeting as a moderator or as a member of a gr
 		const { user } = setupBasicGroup();
 
 		const audioButtonSelect = await screen.findByText(/Audio Default/i);
-		await act(() => user.click(audioButtonSelect));
+		await user.click(audioButtonSelect);
 
 		const device = await screen.findByText(audioDevice2);
 		expect(device).toBeInTheDocument();
 
-		await act(() => user.click(device));
+		await user.click(device);
 
 		const enterButton = screen.getByTestId('enterMeetingButton');
 		expect(enterButton).toBeEnabled();
@@ -393,7 +375,7 @@ describe('AccessMeeting - enter to meeting by waiting Room', () => {
 		const { user } = setupForWaitingRoom();
 
 		const enterButton = await screen.findByText(readyButtonLabel);
-		await act(() => user.click(enterButton));
+		await user.click(enterButton);
 
 		expect(mockedJoinMeetingRequest).toHaveBeenCalled();
 	});
@@ -404,7 +386,7 @@ describe('AccessMeeting - enter to meeting by waiting Room', () => {
 		const { user } = setupForWaitingRoom();
 
 		const enterButton = await screen.findByText(readyButtonLabel);
-		await act(() => user.click(enterButton));
+		await user.click(enterButton);
 
 		const hangButton = await screen.findByTestId(iconLogOut);
 		await user.click(hangButton);
@@ -418,7 +400,7 @@ describe('AccessMeeting - enter to meeting by waiting Room', () => {
 		const { user } = setupForWaitingRoom();
 
 		const enterButton = await screen.findByText(readyButtonLabel);
-		await act(() => user.click(enterButton));
+		await user.click(enterButton);
 
 		await waitFor(() =>
 			sendCustomEvent({
@@ -443,7 +425,7 @@ describe('AccessMeeting - enter to meeting by waiting Room', () => {
 		const { user } = setupForWaitingRoom();
 
 		const enterButton = await screen.findByText(readyButtonLabel);
-		await act(() => user.click(enterButton));
+		await user.click(enterButton);
 
 		const hangButton = await screen.findByTestId(iconLogOut);
 		await user.click(hangButton);
@@ -470,7 +452,7 @@ describe('AccessMeeting - enter to meeting by waiting Room', () => {
 		const { user } = setupForWaitingRoom();
 
 		const enterButton = await screen.findByText(readyButtonLabel);
-		await act(() => user.click(enterButton));
+		await user.click(enterButton);
 
 		expect(mockedJoinMeetingRequest).toHaveBeenCalled();
 
@@ -510,7 +492,7 @@ describe('AccessMeeting - enter to meeting by waiting Room', () => {
 		mockedEnterMeetingRequest.mockReturnValue(acceptedInMeeting);
 		const { user } = setupForWaitingRoom();
 		const enterButton = await screen.findByText(readyButtonLabel);
-		await act(() => user.click(enterButton));
+		await user.click(enterButton);
 		await waitFor(() => {
 			sendCustomEvent({
 				name: EventName.MEETING_STOPPED,
@@ -530,7 +512,7 @@ describe('AccessMeeting - enter to meeting by waiting Room', () => {
 		mockedEnterMeetingRequest.mockReturnValue(acceptedInMeeting);
 		const { user } = setupForWaitingRoom();
 		const enterButton = await screen.findByText(readyButtonLabel);
-		await act(() => user.click(enterButton));
+		await user.click(enterButton);
 
 		await waitFor(() => {
 			sendCustomEvent({

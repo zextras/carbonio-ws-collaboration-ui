@@ -84,7 +84,7 @@ const MeetingSkeleton = (): ReactElement => {
 	const handleMutedEvent = useCallback(() => {
 		createSnackbar({
 			key: new Date().toLocaleString(),
-			type: 'info',
+			severity: 'info',
 			label: mutedByModerator,
 			actionLabel: okLabel,
 			disableAutoHide: true

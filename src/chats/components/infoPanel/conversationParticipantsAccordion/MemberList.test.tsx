@@ -176,15 +176,14 @@ describe('Participants list', () => {
 		const searchIcon = screen.getByTestId('icon: Search');
 		expect(searchIcon).toBeInTheDocument();
 		const list = await screen.findByTestId('members_list');
-		user.type(searchInput, 'user 4');
+		await user.type(searchInput, 'user 4');
 
 		const placeholderText = await screen.findByText(/There are no items that match this search/i);
 		expect(placeholderText).toBeInTheDocument();
 		expect(list).not.toBeInTheDocument();
 
 		const closeButton = await screen.findByTestId('close_button');
-		user.click(closeButton);
-		const placeholderText1 = await screen.findByText(/There are no items that match this search/i);
-		expect(placeholderText1).not.toBeInTheDocument();
+		await user.click(closeButton);
+		expect(placeholderText).not.toBeInTheDocument();
 	});
 });

@@ -5,10 +5,8 @@
  */
 import React from 'react';
 
-import { screen } from '@testing-library/react';
-import { renderHook } from '@testing-library/react-hooks';
+import { screen, act, renderHook } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event';
-import { act } from 'react-dom/test-utils';
 
 import CameraButton from './CameraButton';
 import { useParams } from '../../../../__mocks__/react-router';

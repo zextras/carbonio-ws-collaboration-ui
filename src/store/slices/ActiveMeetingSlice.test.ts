@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 import { size } from 'lodash';
 
 import { MeetingChatVisibility, MeetingViewType } from '../../types/store/ActiveMeetingTypes';

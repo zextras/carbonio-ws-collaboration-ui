@@ -6,8 +6,7 @@
 
 import React from 'react';
 
-import { screen, waitFor } from '@testing-library/react';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { screen, waitFor, act, renderHook } from '@testing-library/react';
 
 import AddNewMemberAction from './AddNewMemberAction';
 import useStore from '../../../../store/Store';
@@ -55,18 +54,18 @@ describe('Add new member action', () => {
 
 		const { user } = setup(<AddNewMemberAction roomId={mockedRoom.id} />);
 
-		user.click(screen.getByText(/Add new Members/i));
+		await user.click(screen.getByText(/Add new Members/i));
 		const addMemberModal = await screen.findByTestId('add_member_modal');
 		expect(addMemberModal).toBeInTheDocument();
 
 		const checkboxIcon = await screen.findByTestId('icon: Square');
 		expect(checkboxIcon).toBeInTheDocument();
 
-		user.click(checkboxIcon);
+		await user.click(checkboxIcon);
 		const checkmark = await screen.findByTestId('icon: CheckmarkSquare');
 		expect(checkmark).toBeInTheDocument();
 
-		user.click(screen.getByTestId('icon: Close'));
+		await user.click(screen.getByTestId('icon: Close'));
 		await waitFor(() => expect(addMemberModal).not.toBeInTheDocument());
 	});
 
@@ -89,23 +88,23 @@ describe('Add new member action', () => {
 
 		expect(result.current.rooms[mockedRoom.id].members?.length).toBe(1);
 
-		user.click(screen.getByText(/Add new Members/i));
+		await user.click(screen.getByText(/Add new Members/i));
 		const addMemberModal = await screen.findByTestId('add_member_modal');
 		expect(addMemberModal).toBeInTheDocument();
 
 		const chipInput = await screen.findByTestId('chip_input_creation_modal');
-		user.type(chipInput, zimbraUser2.displayName[0]);
+		await user.type(chipInput, zimbraUser2.displayName[0]);
 
 		await screen.findByText('spinner');
 		const list = await screen.findByTestId('list_creation_modal');
 		expect(list).toBeVisible();
 
 		const checkboxIcon = screen.queryAllByTestId('icon: Square')[0];
-		user.click(checkboxIcon);
+		await user.click(checkboxIcon);
 
 		const addButton = await screen.findByTestId('add_new_member_button');
-		user.click(addButton);
+		await user.click(addButton);
 
-		await waitFor(() => expect(mockedAddRoomMemberRequest).toBeCalled());
+		await waitFor(() => expect(mockedAddRoomMemberRequest).toHaveBeenCalled());
 	});
 });

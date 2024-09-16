@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 
 import { createMockRoom, createMockUser } from '../../tests/createMock';
 import { MessageType } from '../../types/store/MessageTypes';

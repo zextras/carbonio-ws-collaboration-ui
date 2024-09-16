@@ -6,8 +6,7 @@
 
 import React from 'react';
 
-import { screen, waitFor } from '@testing-library/react';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { screen, waitFor, act, renderHook } from '@testing-library/react';
 
 import GoToPrivateChatAction from './GoToPrivateChatAction';
 import LeaveConversationListAction from './LeaveConversationListAction';
@@ -119,7 +118,7 @@ describe('participants actions - go to private chat', () => {
 		mockGoToRoomPage.mockReturnValue(`room of ${user1Info.name}`);
 		const { user } = setup(<GoToPrivateChatAction memberId={user1Info.id} />);
 		await user.click(screen.getByTestId('go_to_private_chat'));
-		expect(mockGoToRoomPage).toBeCalled();
+		expect(mockGoToRoomPage).toHaveBeenCalled();
 	});
 	test('non-existent chat', async () => {
 		const { result } = renderHook(() => useStore());
@@ -135,9 +134,9 @@ describe('participants actions - go to private chat', () => {
 		});
 		mockGoToRoomPage.mockReturnValue(`room of ${user1Info.name}`);
 		const { user } = setup(<GoToPrivateChatAction memberId={user1Info.id} />);
-		user.click(screen.getByTestId('go_to_private_chat'));
+		await user.click(screen.getByTestId('go_to_private_chat'));
 		await waitFor(() => {
-			expect(mockGoToRoomPage).toBeCalled();
+			expect(mockGoToRoomPage).toHaveBeenCalled();
 		});
 	});
 });
@@ -180,12 +179,12 @@ describe('participants actions - leave/delete conversation', () => {
 			/>
 		);
 		const logout = await screen.findByTestId('icon: LogOut');
-		user.click(logout);
+		await user.click(logout);
 		const button = await screen.findByRole('button', { name: 'Leave' });
 
-		user.click(button);
-		await waitFor(() => expect(mockedDeleteRoomMemberRequest).toBeCalled());
-		await waitFor(() => expect(mockGoToMainPage).toBeCalled());
+		await user.click(button);
+		await waitFor(() => expect(mockedDeleteRoomMemberRequest).toHaveBeenCalled());
+		await waitFor(() => expect(mockGoToMainPage).toHaveBeenCalled());
 	});
 	test('delete conversation - open and close modal', async () => {
 		const store = useStore.getState();
@@ -224,11 +223,11 @@ describe('participants actions - leave/delete conversation', () => {
 			/>
 		);
 
-		user.click(screen.getByTestId(iconTrash2Outline));
+		await user.click(screen.getByTestId(iconTrash2Outline));
 		const button = await screen.findByRole('button', { name: 'Delete' });
-		user.click(button);
-		await waitFor(() => expect(mockedDeleteRoomRequest).toBeCalled());
-		await waitFor(() => expect(mockGoToMainPage).toBeCalled());
+		await user.click(button);
+		await waitFor(() => expect(mockedDeleteRoomRequest).toHaveBeenCalled());
+		await waitFor(() => expect(mockGoToMainPage).toHaveBeenCalled());
 	});
 });
 
@@ -249,9 +248,9 @@ describe('participants actions - promote/demote member', () => {
 		expect(promoteButton).toBeEnabled();
 
 		// Promote member
-		user.click(promoteButton);
+		await user.click(promoteButton);
 
-		await waitFor(() => expect(mockedPromoteRoomMemberRequest).toBeCalled());
+		await waitFor(() => expect(mockedPromoteRoomMemberRequest).toHaveBeenCalled());
 	});
 
 	test('Demote member', async () => {
@@ -279,9 +278,9 @@ describe('participants actions - promote/demote member', () => {
 		expect(demoteButton).toBeInTheDocument();
 		expect(demoteButton).toBeEnabled();
 
-		user.click(demoteButton);
+		await user.click(demoteButton);
 
-		await waitFor(() => expect(mockedDemotesRoomMemberRequest).toBeCalled());
+		await waitFor(() => expect(mockedDemotesRoomMemberRequest).toHaveBeenCalled());
 	});
 });
 
@@ -316,10 +315,10 @@ describe('participants actions - delete user', () => {
 			<RemoveMemberListAction roomId={mockedRoom.id} memberId={user2Info.id} />
 		);
 
-		user.click(screen.getByTestId(iconTrash2Outline));
+		await user.click(screen.getByTestId(iconTrash2Outline));
 		const button = await screen.findByRole('button', { name: 'Remove' });
 
-		user.click(button);
-		await waitFor(() => expect(mockedDeleteRoomMemberRequest).toBeCalled());
+		await user.click(button);
+		await waitFor(() => expect(mockedDeleteRoomMemberRequest).toHaveBeenCalled());
 	});
 });
