@@ -200,8 +200,8 @@ describe('AccessMeeting - enter to meeting as a moderator or as a member of a gr
 
 		const videoOff = screen.getByTestId(iconVideoOff);
 		await user.click(videoOff);
-		const videoOn = await screen.findByTestId(iconVideo);
-		expect(videoOn).toBeInTheDocument();
+		const videoOn = await screen.findAllByTestId(iconVideo);
+		expect(videoOn).toHaveLength(2);
 	});
 
 	test('turn on audio', async () => {
@@ -232,20 +232,27 @@ describe('AccessMeeting - enter to meeting as a moderator or as a member of a gr
 	test('if networks connection are down, enter button should be disabled', async () => {
 		setupBasicGroup();
 
+		const enterButton = await screen.findByTestId('enterMeetingButton');
+		expect(enterButton).toBeInTheDocument();
+
 		// shutting down one of the network dependencies
 		act(() => {
 			useStore.getState().setChatsBeStatus(false);
 		});
 
-		const enterButton = await screen.findByRole('button', { name: 'Enter' });
-		expect(enterButton).toBeDisabled();
+		const enterButtonUpdated = await screen.findByRole('button', { name: 'Enter' });
+		expect(enterButtonUpdated).toBeDisabled();
 	});
 
 	test('if network connections are undefined, enter button should be disabled', async () => {
 		setupGroupWithBeStatusUndefined();
 
-		const enterButton = await screen.findByRole('button', { name: 'Enter' });
-		expect(enterButton).toBeDisabled();
+		const enterButton = await screen.findByTestId('enterMeetingButton');
+		expect(enterButton).toBeInTheDocument();
+
+		await waitFor(() => {
+			expect(enterButton).toBeDisabled();
+		});
 	});
 
 	test('Enter to meeting fails', async () => {
@@ -325,21 +332,22 @@ describe('AccessMeeting - enter to meeting as a moderator or as a member of a gr
 
 		const { user } = setupBasicGroup();
 
-		const videoOff = screen.getByTestId(iconVideoOff);
-		await user.click(videoOff);
-		const videoOn = await screen.findByTestId(iconVideo);
-		expect(videoOn).toBeInTheDocument();
-
 		const videoButtonSelect = await screen.findByText('Video Default');
 		await user.click(videoButtonSelect);
 
 		const device = await screen.findByText(videoDevice2);
 		expect(device).toBeInTheDocument();
-
 		await user.click(device);
 
-		const enterButton = await screen.findByTestId('enterMeetingButton');
-		expect(enterButton).toBeEnabled();
+		const videoOff = screen.getByTestId(iconVideoOff);
+		await user.click(videoOff);
+		const videoOn = await screen.findByTestId(iconVideo);
+		expect(videoOn).toBeInTheDocument();
+
+		await waitFor(() => {
+			const enterButton = screen.getByTestId('enterMeetingButton');
+			expect(enterButton).toBeEnabled();
+		});
 	});
 
 	test('Enter button is enabled after selection of audio source', async () => {
@@ -401,6 +409,7 @@ describe('AccessMeeting - enter to meeting by waiting Room', () => {
 
 		const enterButton = await screen.findByText(readyButtonLabel);
 		await user.click(enterButton);
+		jest.advanceTimersByTime(1000);
 
 		await waitFor(() =>
 			sendCustomEvent({
@@ -473,6 +482,8 @@ describe('AccessMeeting - enter to meeting by waiting Room', () => {
 
 	test('user is waiting, not ready and the meeting and it finish before he can enter', async () => {
 		setupForWaitingRoom();
+		const enterButton = await screen.findByText(readyButtonLabel);
+		expect(enterButton).toBeInTheDocument();
 		await waitFor(() => {
 			sendCustomEvent({
 				name: EventName.MEETING_STOPPED,

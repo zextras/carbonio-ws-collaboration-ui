@@ -332,6 +332,7 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 						size="extralarge"
 						backgroundColor={'primary'}
 						onClick={toggleAudio}
+						data-testid={'turn_on_audio'}
 					/>
 				</Tooltip>
 				<Padding left="1rem" />

@@ -248,7 +248,7 @@ describe('SecondaryBar tests', () => {
 
 	describe('FilteredGal inside SecondaryBarView tests', () => {
 		test('User filter gal and expect only one user to be visible', async () => {
-			mockSearchUsersByFeatureRequest.mockResolvedValue([contactUser1]);
+			mockSearchUsersByFeatureRequest.mockReturnValueOnce([contactUser1]);
 			const { user } = setup(<SecondaryBarView expanded />);
 			// user search a user
 			const textArea = screen.getByRole('textbox', {
@@ -257,10 +257,9 @@ describe('SecondaryBar tests', () => {
 			await user.type(textArea, '1');
 
 			await waitFor(() => {
-				const galListLoading = screen.queryByTestId('icon: Refresh');
-				expect(galListLoading).not.toBeInTheDocument();
+				const galListItems = screen.getAllByTestId('gal_list_item');
+				expect(galListItems).toHaveLength(1);
 			});
-			screen.debug();
 		});
 
 		test('User filter gal but AutoCompleteGalRequest fails', async () => {
