@@ -8,16 +8,11 @@ import React, { FC } from 'react';
 
 import { Container, Icon, Padding, Text, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 
 import { getUserName } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
 import { ForwardedInfo } from '../../../../types/store/MessageTypes';
 import { formatDate } from '../../../../utils/dateUtils';
-
-const CustomText = styled(Text)`
-	flex-shrink: 0;
-`;
 
 type ForwardInfoProps = {
 	info: ForwardedInfo;
@@ -50,15 +45,13 @@ const ForwardInfo: FC<ForwardInfoProps> = ({ info }) => {
 					</Padding>
 				</Tooltip>
 			)}
-			<CustomText color="secondary" size="small" weight="bold">
-				{originallySentByLabel}
-			</CustomText>
-			<Text color="secondary" size="small" overflow="ellipsis">
-				{forwardUsername}
-			</Text>
-			<CustomText color="secondary" size="small">
-				({messageDate} - {messageTime})
-			</CustomText>
+			<Tooltip
+				label={`${originallySentByLabel} ${forwardUsername} (${messageDate} - ${messageTime})`}
+			>
+				<Text color="secondary" size="small">
+					{originallySentByLabel} {forwardUsername} ({messageDate} - {messageTime})
+				</Text>
+			</Tooltip>
 		</Container>
 	);
 };
