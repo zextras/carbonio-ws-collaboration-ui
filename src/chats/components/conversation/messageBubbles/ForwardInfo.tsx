@@ -7,7 +7,7 @@
 import React, { FC } from 'react';
 
 import { Container, Icon, Padding, Text, Tooltip } from '@zextras/carbonio-design-system';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { getUserName } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
@@ -22,7 +22,6 @@ const ForwardInfo: FC<ForwardInfoProps> = ({ info }) => {
 	const forwardUsername = useStore((store) => getUserName(store, info.from));
 
 	const [t] = useTranslation();
-	const originallySentByLabel = t('message.originallySentBy', 'Originally sent by:');
 	const forwardedMultipleTimesLabel = t(
 		'message.forwardedMultipleTimes',
 		'Forwarded multiple times'
@@ -30,6 +29,17 @@ const ForwardInfo: FC<ForwardInfoProps> = ({ info }) => {
 
 	const messageDate = formatDate(info.date, 'DD MMM YY');
 	const messageTime = formatDate(info.date, 'HH:mm');
+	const originallySentByLabel = (
+		<Trans
+			i18nKey="gsdf"
+			defaults="<strong>Originally sent by:</strong> {{forwardUsername}} ({{messageDate}} - {{messageTime}})"
+			values={{
+				forwardUsername,
+				messageDate,
+				messageTime
+			}}
+		/>
+	);
 
 	return (
 		<Container
@@ -45,11 +55,9 @@ const ForwardInfo: FC<ForwardInfoProps> = ({ info }) => {
 					</Padding>
 				</Tooltip>
 			)}
-			<Tooltip
-				label={`${originallySentByLabel} ${forwardUsername} (${messageDate} - ${messageTime})`}
-			>
+			<Tooltip label={originallySentByLabel}>
 				<Text color="secondary" size="small">
-					{originallySentByLabel} {forwardUsername} ({messageDate} - {messageTime})
+					{originallySentByLabel}
 				</Text>
 			</Tooltip>
 		</Container>
