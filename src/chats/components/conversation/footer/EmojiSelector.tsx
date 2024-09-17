@@ -5,7 +5,7 @@
  */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { Container, IconButton, Tooltip } from '@zextras/carbonio-design-system';
+import { Button, Container, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -13,7 +13,7 @@ import EmojiPicker from './EmojiPicker';
 import { MEETINGS_PATH } from '../../../../constants/appConstants';
 import { Emoji } from '../../../../types/generics';
 
-const EmojiIconButton = styled(IconButton)<{ alt?: string }>``;
+const EmojiButton = styled(Button)<{ alt?: string }>``;
 
 type EmojiSelectorProps = {
 	messageInputRef: React.RefObject<HTMLTextAreaElement>;
@@ -88,9 +88,10 @@ const EmojiSelector: React.FC<EmojiSelectorProps> = ({ messageInputRef, setMessa
 			)}
 			<Tooltip label={selectEmojiLabel}>
 				<Container width="fit" height="fit">
-					<EmojiIconButton
+					<EmojiButton
 						ref={emojiButtonRef}
-						iconColor="secondary"
+						color="secondary"
+						type="ghost"
 						size="large"
 						icon="SmileOutline"
 						alt={selectEmojiLabel}

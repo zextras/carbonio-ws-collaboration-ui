@@ -21,7 +21,6 @@ import {
 	Button,
 	FileLoader,
 	Tooltip,
-	IconButton,
 	CreateSnackbarFn,
 	useSnackbar
 } from '@zextras/carbonio-design-system';
@@ -252,9 +251,9 @@ const ProfileSettings: FC<ProfileSettingsProps> = ({
 					</Tooltip>
 					{!!picture && (
 						<Tooltip placement="bottom" label={resetPictureLabel}>
-							<IconButton
+							<Button
 								icon="RefreshOutline"
-								iconColor="gray6"
+								color="gray6"
 								size="large"
 								onClick={onResetUserImage}
 								data-testid="delete_button_hover"

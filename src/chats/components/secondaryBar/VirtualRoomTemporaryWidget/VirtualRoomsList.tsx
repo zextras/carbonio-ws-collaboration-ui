@@ -19,10 +19,10 @@ import {
 	Input,
 	Row,
 	Text,
-	IconButton,
 	Tooltip,
 	CreateSnackbarFn,
-	useSnackbar
+	useSnackbar,
+	Button
 } from '@zextras/carbonio-design-system';
 import { map, size } from 'lodash';
 import { useTranslation } from 'react-i18next';
@@ -55,7 +55,7 @@ const ListContainer = styled(Container)`
 	overflow-y: scroll;
 `;
 
-const CustomIconButton = styled(IconButton)`
+const CustomButton = styled(Button)`
 	border-radius: 0.125rem;
 `;
 
@@ -172,19 +172,19 @@ const VirtualRoomsList: FC<virtualRoomsListProps> = ({ setListVisibility, parent
 				{inputHasFocus && (
 					<Row width="fit" orientation="horizontal" gap="0.5rem" padding={{ horizontal: '0.5rem' }}>
 						<Tooltip label={cancelTooltip}>
-							<CustomIconButton
+							<CustomButton
 								size="large"
 								icon="CloseOutline"
-								iconColor="gray6"
+								labelColor="gray6"
 								backgroundColor="secondary"
 								onClick={handleDeleteNameClick}
 							/>
 						</Tooltip>
 						<Tooltip label={createVirtualRoomTooltip}>
-							<CustomIconButton
+							<CustomButton
 								size="large"
 								icon="CheckmarkOutline"
-								iconColor="gray6"
+								labelColor="gray6"
 								backgroundColor="primary"
 								onClick={handleCreateButtonClick}
 								disabled={!canCreateVirtualRoom}

@@ -6,15 +6,7 @@
 
 import React, { ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
 
-import {
-	Avatar,
-	Button,
-	Container,
-	IconButton,
-	Input,
-	Text,
-	Tooltip
-} from '@zextras/carbonio-design-system';
+import { Avatar, Button, Container, Input, Text, Tooltip } from '@zextras/carbonio-design-system';
 import { size } from 'lodash';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -140,10 +132,10 @@ const MeetingNotification = ({
 					onChange={onTextChange}
 				/>
 				<CustomTooltip label={disableSendMessage ? disableSendTooltip : activeSendTooltip}>
-					<IconButton
+					<Button
 						icon="Navigation2"
 						size="extralarge"
-						iconColor="primary"
+						color="primary"
 						type="outlined"
 						disabled={disableSendMessage}
 						onClick={sendMessage}
