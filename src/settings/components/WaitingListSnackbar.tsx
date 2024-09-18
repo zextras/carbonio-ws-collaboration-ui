@@ -59,6 +59,7 @@ const WaitingListSnackbar = (): ReactElement | null => {
 
 	return (
 		<Snackbar
+			data-testid="notification_snackbar"
 			open={showWaitingUserSnackbar}
 			key="newWaitingUser"
 			severity="info"
