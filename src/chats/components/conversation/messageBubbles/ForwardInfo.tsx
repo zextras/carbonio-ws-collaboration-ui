@@ -31,7 +31,7 @@ const ForwardInfo: FC<ForwardInfoProps> = ({ info }) => {
 	const messageTime = formatDate(info.date, 'HH:mm');
 	const originallySentByLabel = (
 		<Trans
-			i18nKey="gsdf"
+			i18nKey="message.originallySentBy"
 			defaults="<strong>Originally sent by:</strong> {{forwardUsername}} ({{messageDate}} - {{messageTime}})"
 			values={{
 				forwardUsername,
