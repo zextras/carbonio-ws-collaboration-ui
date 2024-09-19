@@ -6,7 +6,7 @@
 
 import React, { FC, useCallback, useState } from 'react';
 
-import { IconButton, Tooltip } from '@zextras/carbonio-design-system';
+import { Button, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
 import DeleteUserModal from './DeleteUserModal';
@@ -34,8 +34,9 @@ const RemoveMemberListAction: FC<RemoveMemberProps> = ({ roomId, memberId }) => 
 	return (
 		<>
 			<Tooltip label={removeMemberLabel}>
-				<IconButton
-					iconColor="error"
+				<Button
+					type="ghost"
+					color="error"
 					size="extralarge"
 					icon="Trash2Outline"
 					onClick={(): void => setDeleteUserModalOpen(true)}

@@ -5,7 +5,7 @@
  */
 import React, { ReactElement, useCallback } from 'react';
 
-import { IconButton, Tooltip } from '@zextras/carbonio-design-system';
+import { Button, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 
@@ -36,8 +36,8 @@ const ScreenShareButton = (): ReactElement => {
 
 	return (
 		<Tooltip placement="top" label={screenStatus ? disableScreenLabel : enableScreenLabel}>
-			<IconButton
-				iconColor="gray6"
+			<Button
+				labelColor="gray6"
 				backgroundColor="primary"
 				icon={screenStatus ? 'ScreenSharingOn' : 'ScreenSharingOff'}
 				onClick={toggleScreenStream}

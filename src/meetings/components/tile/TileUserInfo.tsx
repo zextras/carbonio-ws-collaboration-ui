@@ -5,7 +5,7 @@
  */
 import React, { FC, useMemo } from 'react';
 
-import { Container, IconButton, Row, Text, Tooltip } from '@zextras/carbonio-design-system';
+import { Button, Container, Row, Text, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -31,7 +31,7 @@ const TextContainer = styled(Container)`
 	user-select: none;
 `;
 
-const CustomIconButton = styled(IconButton)`
+const CustomButton = styled(Button)`
 	cursor: default;
 	z-index: 1;
 	&:hover {
@@ -76,9 +76,9 @@ const TileUserInfo: FC<tileUserInfoProps> = ({
 			<>
 				{!videoStreamEnabled && (
 					<Tooltip label={camOffLabel} disabled={!isSessionTile}>
-						<CustomIconButton
+						<CustomButton
 							icon="VideoOffOutline"
-							iconColor="gray6"
+							labelColor="gray6"
 							backgroundColor="gray0"
 							size="large"
 							onClick={placeHolderFn}
@@ -87,9 +87,9 @@ const TileUserInfo: FC<tileUserInfoProps> = ({
 				)}
 				{!audioStreamEnabled && (
 					<Tooltip label={micOffLabel} disabled={!isSessionTile}>
-						<CustomIconButton
+						<CustomButton
 							icon="MicOffOutline"
-							iconColor="gray6"
+							labelColor="gray6"
 							backgroundColor="gray0"
 							size="large"
 							onClick={placeHolderFn}
@@ -97,18 +97,18 @@ const TileUserInfo: FC<tileUserInfoProps> = ({
 					</Tooltip>
 				)}
 				{canUsePinFeature && isPinned && (
-					<CustomIconButton
+					<CustomButton
 						icon="Pin3Outline"
-						iconColor="gray6"
+						labelColor="gray6"
 						backgroundColor="gray0"
 						size="large"
 						onClick={placeHolderFn}
 					/>
 				)}
 				{isScreenShare && (
-					<CustomIconButton
+					<CustomButton
 						icon="ScreenSharingOnOutline"
-						iconColor="gray6"
+						color="gray6"
 						backgroundColor="gray0"
 						size="large"
 						onClick={placeHolderFn}

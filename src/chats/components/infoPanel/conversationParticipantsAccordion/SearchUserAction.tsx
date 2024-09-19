@@ -6,7 +6,7 @@
 
 import React, { FC, useCallback, useState } from 'react';
 
-import { Input, IconButton, Container, Tooltip } from '@zextras/carbonio-design-system';
+import { Input, Container, Tooltip, Button } from '@zextras/carbonio-design-system';
 import { size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
@@ -50,10 +50,11 @@ const SearchUserAction: FC<SearchUserProps> = ({ setFilteredInput, isInsideMeeti
 							: searchMemberLabel
 				}
 			>
-				<IconButton
+				<Button
+					type="ghost"
 					data-testid="close_button"
 					icon={size(searchInput) > 0 ? 'Close' : 'Search'}
-					iconColor="text"
+					color="text"
 					onClick={resetFilter}
 				/>
 			</Tooltip>

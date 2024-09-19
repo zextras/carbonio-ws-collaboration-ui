@@ -6,7 +6,7 @@
 
 import React, { FC, useCallback, useEffect, useMemo } from 'react';
 
-import { Badge, Container, IconButton, Row, Tooltip } from '@zextras/carbonio-design-system';
+import { Badge, Button, Container, Row, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -37,6 +37,26 @@ const WrapperMeetingChat = styled(Container)<{ $darkModeActive: boolean }>`
 	overflow: hidden;
 	background-image: url('${({ $darkModeActive }): string =>
 		$darkModeActive ? papyrusDark : papyrus}');
+`;
+
+const CustomMediumButton = styled(Button)`
+	padding: ${({ theme }): string => theme.sizes.padding.extrasmall};
+	& > svg {
+		width: ${({ theme }): string => theme.sizes.icon.medium};
+		min-width: ${({ theme }): string => theme.sizes.icon.medium};
+		height: ${({ theme }): string => theme.sizes.icon.medium};
+		min-height: ${({ theme }): string => theme.sizes.icon.medium};
+	}
+`;
+
+const CustomLargeButton = styled(Button)`
+	padding: ${({ theme }): string => theme.sizes.padding.extrasmall};
+	& > svg {
+		width: ${({ theme }): string => theme.sizes.icon.large};
+		min-width: ${({ theme }): string => theme.sizes.icon.large};
+		height: ${({ theme }): string => theme.sizes.icon.large};
+		min-height: ${({ theme }): string => theme.sizes.icon.large};
+	}
 `;
 
 const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({
@@ -155,10 +175,11 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({
 				<Container height="fit" width="30%" orientation="horizontal" mainAlignment="flex-end">
 					{expandButtonShouldAppear && (
 						<Tooltip label={!chatFullExpanded ? extendChatLabel : minimizeChatLabel}>
-							<IconButton
+							<CustomMediumButton
+								type="ghost"
+								color="text"
 								data-testid="toggleChatExpanded"
 								icon={!chatFullExpanded ? 'ArrowUpward' : 'ArrowDownward'}
-								customSize={{ iconSize: 'medium', paddingSize: 'extrasmall' }}
 								onClick={toggleChatExpanded}
 							/>
 						</Tooltip>
@@ -166,10 +187,11 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({
 					{!isChatOpenOrFullExpanded && UnreadCounter}
 					{chatChevronShouldAppear && (
 						<Tooltip label={isChatOpenOrFullExpanded ? collapseChatLabel : expandChatLabel}>
-							<IconButton
+							<CustomLargeButton
+								type="ghost"
+								color="text"
 								data-testid="toggleChatStatus"
 								icon={isChatOpenOrFullExpanded ? 'ChevronDown' : 'ChevronUp'}
-								customSize={{ iconSize: 'large', paddingSize: 'extrasmall' }}
 								onClick={toggleChatStatus}
 							/>
 						</Tooltip>

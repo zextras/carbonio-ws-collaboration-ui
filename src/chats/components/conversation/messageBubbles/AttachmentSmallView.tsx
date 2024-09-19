@@ -6,7 +6,7 @@
 
 import React, { FC, useCallback, useMemo } from 'react';
 
-import { Avatar, Container, IconButton, Padding, Tooltip } from '@zextras/carbonio-design-system';
+import { Avatar, Button, Container, Padding, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -33,8 +33,15 @@ const CustomPadding = styled(Padding)`
 	}
 `;
 
-const CustomIconButton = styled(IconButton)`
+const CustomButton = styled(Button)`
 	background-color: rgba(255, 255, 255, 0);
+	padding: 0.25rem;
+	& > svg {
+		width: 1.5rem;
+		min-width: 1.5rem;
+		height: 1.5rem;
+		min-height: 1.5rem;
+	}
 `;
 
 const CustomAvatar = styled(Avatar)`
@@ -85,19 +92,9 @@ const AttachmentSmallView: FC<AttachmentSmallViewProps> = ({ attachment }) => {
 			>
 				<Tooltip label={previewSupported ? previewActionLabel : downloadActionLabel}>
 					{previewSupported ? (
-						<CustomIconButton
-							icon="EyeOutline"
-							iconColor="gray6"
-							customSize={{ iconSize: 'large', paddingSize: 'extrasmall' }}
-							onClick={onPreviewClick}
-						/>
+						<CustomButton type="ghost" icon="EyeOutline" color="gray6" onClick={onPreviewClick} />
 					) : (
-						<CustomIconButton
-							iconColor="gray6"
-							icon="DownloadOutline"
-							customSize={{ iconSize: 'large', paddingSize: 'extrasmall' }}
-							onClick={download}
-						/>
+						<CustomButton type="ghost" color="gray6" icon="DownloadOutline" onClick={download} />
 					)}
 				</Tooltip>
 			</HoverContainer>
