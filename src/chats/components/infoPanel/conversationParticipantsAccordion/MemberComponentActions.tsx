@@ -6,7 +6,7 @@
 
 import React, { FC, useMemo } from 'react';
 
-import { Container, IconButton, Tooltip } from '@zextras/carbonio-design-system';
+import { Button, Container, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
 import GoToPrivateChatAction from './GoToPrivateChatAction';
@@ -54,8 +54,9 @@ const MemberComponentActions: FC<ActionsProps> = ({ roomId, memberId }) => {
 			) : (
 				memberOwner && (
 					<Tooltip label={isSessionParticipant ? iAmModeratorLabel : memberIsModeratorLabel}>
-						<IconButton
-							iconColor="primary"
+						<Button
+							type="ghost"
+							color="primary"
 							size="extralarge"
 							icon="Crown"
 							disabled

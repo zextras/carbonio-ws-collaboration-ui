@@ -6,7 +6,7 @@
 
 import React, { useCallback, useContext, useMemo, useRef } from 'react';
 
-import { Container, Icon, IconButton, Text, Tooltip } from '@zextras/carbonio-design-system';
+import { Button, Container, Icon, Text, Tooltip } from '@zextras/carbonio-design-system';
 import { PreviewsManagerContext } from '@zextras/carbonio-ui-preview';
 import { forEach, map } from 'lodash';
 import { useTranslation } from 'react-i18next';
@@ -71,7 +71,7 @@ const PreviewLocalFile = styled(Container)<{ $hasFocus: boolean; $bkgUrl: string
 		`center / contain no-repeat url('${$bkgUrl}'), ${theme.palette.gray0.regular}`};
 `;
 
-const FileCloseIconButton = styled(IconButton)`
+const FileCloseButton = styled(Button)`
 	position: absolute;
 	top: 0.25rem;
 	right: 0.25rem;
@@ -225,10 +225,10 @@ const UploadAttachmentManagerView: React.FC<UploadAttachmentManagerViewProps> = 
 					>
 						<HoverActions>
 							<Tooltip label={removeActionLabel} placement="top">
-								<FileCloseIconButton
+								<FileCloseButton
 									data-testid={`removeSingleFile-${file.fileId}`}
 									backgroundColor="gray6"
-									borderRadius="round"
+									shape="round"
 									icon="Close"
 									size="small"
 									onClick={(ev): void => removeFile(ev, file.fileId)}
@@ -236,10 +236,10 @@ const UploadAttachmentManagerView: React.FC<UploadAttachmentManagerViewProps> = 
 							</Tooltip>
 							{displayPreview && (
 								<Tooltip label={previewActionLabel} placement="top">
-									<IconButton
+									<Button
 										data-testid={`previewSingleFile-${file.fileId}`}
 										backgroundColor="gray6"
-										borderRadius="round"
+										shape="round"
 										icon="EyeOutline"
 										size="large"
 										onClick={(): void => previewClick(file)}
@@ -325,10 +325,11 @@ const UploadAttachmentManagerView: React.FC<UploadAttachmentManagerViewProps> = 
 				<Container orientation="horizontal" mainAlignment="space-between">
 					<Text color="secondary">{titleLabel}</Text>
 					<Tooltip label={closeTooltip} placement="top">
-						<IconButton
+						<Button
 							data-testid="closeFilesManager"
+							type="ghost"
 							icon="Close"
-							iconColor="secondary"
+							color="secondary"
 							size="medium"
 							onClick={closeUploadAttachmentManagerView}
 						/>
@@ -346,11 +347,11 @@ const UploadAttachmentManagerView: React.FC<UploadAttachmentManagerViewProps> = 
 						{filesWithPreview}
 					</FileListContainer>
 					<Tooltip label={addAttachmentLabel} placement="top">
-						<IconButton
+						<Button
 							data-testid="addMoreFilesFromManager"
 							size="large"
 							icon="Plus"
-							iconColor="gray1"
+							color="gray1"
 							type="outlined"
 							backgroundColor="transparent"
 							onClick={addMoreFiles}

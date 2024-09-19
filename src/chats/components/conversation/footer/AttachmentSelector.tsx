@@ -7,11 +7,11 @@
 import React, { RefObject, useCallback, useEffect, useMemo, useRef } from 'react';
 
 import {
+	Button,
 	Container,
 	CreateSnackbarFn,
 	Dropdown,
 	DropdownItem,
-	IconButton,
 	Tooltip,
 	useSnackbar
 } from '@zextras/carbonio-design-system';
@@ -181,7 +181,13 @@ const AttachmentSelector: React.FC<AttachmentSelectorProps> = ({ roomId }) => {
 		<Container width="fit" height="fit">
 			<Tooltip label={uploadAttachmentTooltip} placement="top">
 				<Dropdown items={items} placement="top-end">
-					<IconButton icon="Attach" iconColor="gray1" size="large" onClick={(): null => null} />
+					<Button
+						icon="Attach"
+						type="ghost"
+						color="gray1"
+						size="large"
+						onClick={(): null => null}
+					/>
 				</Dropdown>
 			</Tooltip>
 			<InputSelector

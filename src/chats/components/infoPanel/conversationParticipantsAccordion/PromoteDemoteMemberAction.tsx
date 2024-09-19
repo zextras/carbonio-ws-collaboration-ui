@@ -6,7 +6,7 @@
 
 import React, { FC, useCallback, useMemo } from 'react';
 
-import { IconButton, Tooltip } from '@zextras/carbonio-design-system';
+import { Button, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
 import { RoomsApi } from '../../../../network';
@@ -47,9 +47,9 @@ const PromoteDemoteMemberAction: FC<PromoteDemoteMemberProps> = ({
 
 	return (
 		<Tooltip label={tooltipLabel}>
-			<IconButton
-				iconColor={iconColor}
-				backgroundColor={isInsideMeeting ? 'text' : 'gray6'}
+			<Button
+				type="ghost"
+				color={iconColor}
 				size={isInsideMeeting ? 'medium' : 'extralarge'}
 				icon={owner ? 'Crown' : 'CrownOutline'}
 				onClick={owner ? demoteMember : promoteMember}

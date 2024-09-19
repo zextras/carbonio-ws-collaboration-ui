@@ -5,7 +5,7 @@
  */
 import React, { FC, useCallback, useRef, useState } from 'react';
 
-import { Button, Container, IconButton, Tooltip } from '@zextras/carbonio-design-system';
+import { Button, Container, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
 import VirtualRoomsList from './VirtualRoomsList';
@@ -45,12 +45,12 @@ const VirtualRoomsButton: FC<virtualRoomsButtonProps> = ({ expanded }) => {
 	) : (
 		<Container padding="0.5rem" height="fit" background="gray5">
 			<Tooltip label={virtualRoomsLabel}>
-				<IconButton
+				<Button
 					icon="VideoOutline"
 					size="large"
 					onClick={handleOnClick}
 					type="outlined"
-					iconColor="primary"
+					labelColor="primary"
 					backgroundColor="gray6"
 				/>
 			</Tooltip>

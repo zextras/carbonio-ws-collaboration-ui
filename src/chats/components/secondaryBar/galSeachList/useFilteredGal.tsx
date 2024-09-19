@@ -6,15 +6,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import {
-	Button,
-	Container,
-	Divider,
-	Icon,
-	IconButton,
-	Padding,
-	Text
-} from '@zextras/carbonio-design-system';
+import { Button, Container, Divider, Icon, Padding, Text } from '@zextras/carbonio-design-system';
 import { differenceWith, map, size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -87,7 +79,7 @@ const useFilteredGal = (
 				</Padding>
 			) : (
 				<Container width="fill" height="fit" padding={{ all: 'small' }}>
-					<IconButton icon="Plus" size="large" onClick={() => null} />
+					<Button type="ghost" icon="Plus" size="large" onClick={() => null} />
 				</Container>
 			),
 		[expanded, createNewChatLabel]
@@ -127,7 +119,7 @@ const useFilteredGal = (
 				{expanded ? (
 					<CustomButton color="gray1" onClick={() => searchOnGal(input)} label={retryLabel} />
 				) : (
-					<IconButton icon="Refresh" onClick={() => searchOnGal(input)} />
+					<Button type="ghost" icon="Refresh" onClick={() => searchOnGal(input)} />
 				)}
 			</CustomContainer>
 		),

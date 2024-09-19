@@ -6,7 +6,7 @@
 
 import React, { useCallback } from 'react';
 
-import { Container, IconButton, Tooltip } from '@zextras/carbonio-design-system';
+import { Button, Container, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
 import MessageReferenceDisplayed from './MessageReferenceDisplayed';
@@ -44,9 +44,10 @@ const ReferenceMessageView: React.FC<ReferenceMessageViewProps> = ({ roomId }) =
 				<MessageReferenceDisplayed referenceMessage={referenceMessage} />
 				<Tooltip label={closeTooltip} placement="right">
 					<Container mainAlignment="flex-start" padding={{ right: 'small' }} width="2.5rem">
-						<IconButton
+						<Button
 							icon="Close"
-							iconColor="secondary"
+							type="ghost"
+							color="secondary"
 							size="medium"
 							onClick={closeReferenceView}
 						/>

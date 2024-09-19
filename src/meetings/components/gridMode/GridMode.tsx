@@ -6,7 +6,7 @@
 
 import React, { ReactElement, useEffect, useMemo, useRef } from 'react';
 
-import { Container, IconButton, Tooltip } from '@zextras/carbonio-design-system';
+import { Button, Container, Tooltip } from '@zextras/carbonio-design-system';
 import { map, size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
@@ -50,7 +50,7 @@ const ButtonDownContainer = styled(Container)`
 	z-index: 100;
 `;
 
-const ChevronIconButton = styled(IconButton)`
+const ChevronButton = styled(Button)`
 	width: 2.25rem;
 	height: 15rem;
 	max-height: 15rem;
@@ -149,8 +149,8 @@ const GridMode = ({ children }: MeetingViewProps): ReactElement => {
 			{showPaginationButtons && (
 				<ButtonUpContainer width="fit" height="fit" mainAlignment="flex-end">
 					<Tooltip label={prevButton.disabled ? topLabel : scrollUpLabel} placement="left">
-						<ChevronIconButton
-							iconColor="gray6"
+						<ChevronButton
+							labelColor="gray6"
 							backgroundColor="text"
 							icon="ChevronUpOutline"
 							size="large"
@@ -164,8 +164,8 @@ const GridMode = ({ children }: MeetingViewProps): ReactElement => {
 			{showPaginationButtons && (
 				<ButtonDownContainer width="fit" height="fitt" mainAlignment="flex-start">
 					<Tooltip label={nextButton.disabled ? bottomLabel : scrollDownLabel} placement="left">
-						<ChevronIconButton
-							iconColor="gray6"
+						<ChevronButton
+							labelColor="gray6"
 							backgroundColor="text"
 							icon="ChevronDownOutline"
 							size="large"

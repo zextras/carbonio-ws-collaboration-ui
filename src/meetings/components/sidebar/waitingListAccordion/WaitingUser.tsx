@@ -9,7 +9,7 @@ import React, { FC, useCallback } from 'react';
 import {
 	Avatar,
 	Container,
-	IconButton,
+	Button,
 	Row,
 	Shimmer,
 	Text,
@@ -87,20 +87,20 @@ const WaitingUser: FC<WaitingUserProps> = ({ meetingId, userId }) => {
 			</Row>
 			<Container orientation="horizontal" width="fit" gap="0.5rem">
 				<Tooltip label={acceptButtonTooltip} placement="top">
-					<IconButton
+					<Button
 						icon="CheckmarkOutline"
 						size="large"
 						backgroundColor="success"
-						iconColor="gray6"
+						labelColor="gray6"
 						onClick={acceptWaitingUser}
 					/>
 				</Tooltip>
 				<Tooltip label={rejectButtonTooltip} placement="top">
-					<IconButton
+					<Button
 						icon="CloseOutline"
 						size="large"
 						backgroundColor="error"
-						iconColor="gray6"
+						labelColor="gray6"
 						onClick={rejectWaitingUser}
 					/>
 				</Tooltip>

@@ -9,12 +9,12 @@ import React, { FC, useCallback, useMemo, useState } from 'react';
 import {
 	Container,
 	CreateSnackbarFn,
-	IconButton,
 	Row,
 	useSnackbar,
 	Text,
 	Modal,
-	Tooltip
+	Tooltip,
+	Button
 } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -33,8 +33,15 @@ type virtualRoomElementProps = {
 	modalRef: React.RefObject<HTMLDivElement>;
 };
 
-const CustomIconButton = styled(IconButton)`
+const CustomButton = styled(Button)`
 	border-radius: 0.125rem;
+	padding: 0.125rem;
+	& > svg {
+		width: 1.25rem;
+		min-width: 1.25rem;
+		height: 1.25rem;
+		min-height: 1.25rem;
+	}
 `;
 
 const VirtualRoomListElement: FC<virtualRoomElementProps> = ({ roomId, modalRef }) => {
@@ -122,22 +129,20 @@ const VirtualRoomListElement: FC<virtualRoomElementProps> = ({ roomId, modalRef 
 			</Row>
 			<Row gap="0.25rem">
 				<Tooltip label={deleteVirtualRoomTooltip}>
-					<CustomIconButton
-						customSize={{ iconSize: '1.25rem', paddingSize: '0.125rem' }}
+					<CustomButton
+						type="ghost"
+						color="text"
 						icon="Trash2Outline"
 						onClick={handleModalOpening}
 					/>
 				</Tooltip>
 				<Tooltip label={copyVirtualRoomTooltip}>
-					<CustomIconButton
-						customSize={{ iconSize: '1.25rem', paddingSize: '0.125rem' }}
-						icon="Link2Outline"
-						onClick={handleCopyLink}
-					/>
+					<CustomButton type="ghost" color="text" icon="Link2Outline" onClick={handleCopyLink} />
 				</Tooltip>
 				<Tooltip label={enterRoomTooltip}>
-					<CustomIconButton
-						customSize={{ iconSize: '1.25rem', paddingSize: '0.125rem' }}
+					<CustomButton
+						type="ghost"
+						color="text"
 						icon="ArrowForwardOutline"
 						onClick={openMeeting}
 					/>
