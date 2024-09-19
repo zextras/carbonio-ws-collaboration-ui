@@ -23,7 +23,7 @@ enum WsReadyState {
 export class WebSocketClient implements IWebSocketClient {
 	_webSocket: WebSocket | undefined;
 
-	_reconnectionTime = 0;
+	_reconnectionTime = Math.floor(Math.random() * 15000) + 1000;
 
 	_pingTime = 20000;
 
@@ -67,7 +67,7 @@ export class WebSocketClient implements IWebSocketClient {
 
 	_onOpen = (): void => {
 		wsDebug('...connected!');
-		this._reconnectionTime = 0;
+		this._reconnectionTime = Math.floor(Math.random() * 15000) + 1000;
 		// Start sending ping every n seconds
 		this._pingInterval = window.setInterval(() => {
 			this.send({ type: 'ping' });
