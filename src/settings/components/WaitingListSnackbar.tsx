@@ -10,7 +10,10 @@ import { Snackbar } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
 import useEventListener, { EventName } from '../../hooks/useEventListener';
-import { getWaitingListSizeForMyVirtualMeeting } from '../../store/selectors/MeetingSelectors';
+import {
+	getMeetingByMeetingId,
+	getWaitingListSizeForMyVirtualMeeting
+} from '../../store/selectors/MeetingSelectors';
 import useStore from '../../store/Store';
 import {
 	getLocalStorageItem,
@@ -20,10 +23,6 @@ import {
 
 const WaitingListSnackbar = (): ReactElement | null => {
 	const [t] = useTranslation();
-	const snackbarLabel = t(
-		'meeting.snackbar.waitingInfo',
-		'There seems to be someone in the waiting room'
-	);
 
 	const waitingListSize = useStore(getWaitingListSizeForMyVirtualMeeting);
 
@@ -31,28 +30,42 @@ const WaitingListSnackbar = (): ReactElement | null => {
 		LOCAL_STORAGE_NAMES.NOTIFICATIONS
 	);
 
-	const [showWaitingUserSnackbar, setWaitingUserShowSnackbar] = useState(false);
+	const [showWaitingUserSnackbar, setShowWaitingUserSnackbar] = useState(false);
+	const [meetingId, setMeetingId] = useState<string>('');
 
-	const waitingSnackbarHandler = useCallback(() => {
-		if (ChatsNotificationsSettings.WaitingRoomAccessNotifications) {
-			setWaitingUserShowSnackbar(true);
+	const meeting = useStore((store) => getMeetingByMeetingId(store, meetingId));
+
+	const snackbarLabel = t(
+		'meeting.snackbar.waitingInfo',
+		`There seems to be someone in ${meeting?.name}'s waiting room`,
+		{ roomName: meeting?.name }
+	);
+
+	const waitingSnackbarHandler = useCallback((event) => {
+		setMeetingId(event.detail.meetingId);
+	}, []);
+
+	useEffect(() => {
+		if (ChatsNotificationsSettings.WaitingRoomAccessNotifications && meeting !== undefined) {
+			setShowWaitingUserSnackbar(true);
 		}
-	}, [ChatsNotificationsSettings.WaitingRoomAccessNotifications]);
+	}, [ChatsNotificationsSettings.WaitingRoomAccessNotifications, meeting]);
 
 	useEventListener(EventName.NEW_WAITING_USER, waitingSnackbarHandler);
 
 	useEffect(() => {
-		if (waitingListSize === 0) setWaitingUserShowSnackbar(false);
+		if (waitingListSize === 0) setShowWaitingUserSnackbar(false);
 	}, [waitingListSize]);
 
 	return (
 		<Snackbar
+			data-testid="notification_snackbar"
 			open={showWaitingUserSnackbar}
 			key="newWaitingUser"
 			severity="info"
 			label={snackbarLabel}
 			disableAutoHide
-			onClose={(): void => setWaitingUserShowSnackbar(false)}
+			onClose={(): void => setShowWaitingUserSnackbar(false)}
 		/>
 	);
 };

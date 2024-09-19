@@ -32,8 +32,9 @@ const displayWaitingListNotification = (meetingId: string): void => {
 			playSound: false,
 			title:
 				t(
-					'meeting.browserNotification.waitingTitle',
-					'There seems to be someone in the Waiting Room'
+					'meeting.snackbar.waitingInfo',
+					`There seems to be someone in the ${room?.name}'s Waiting Room`,
+					{ roomName: room?.name }
 				) ?? undefined,
 			message:
 				t(
