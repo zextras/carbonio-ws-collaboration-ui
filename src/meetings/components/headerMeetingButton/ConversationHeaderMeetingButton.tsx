@@ -6,7 +6,7 @@
 
 import React, { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { Button, Container, Icon, IconButton, Tooltip } from '@zextras/carbonio-design-system';
+import { Button, Container, Icon, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 import styled, { DefaultTheme } from 'styled-components';
 
@@ -50,6 +50,16 @@ const ActiveMeetingDot = styled.div`
 		100% {
 			opacity: 1;
 		}
+	}
+`;
+
+const CustomButtonIcon = styled(Button)`
+	padding: 0.125rem;
+	& > svg {
+		width: 1.25rem;
+		min-width: 1.25rem;
+		height: 1.25rem;
+		min-height: 1.25rem;
 	}
 `;
 
@@ -168,10 +178,10 @@ const ConversationHeaderMeetingButton = ({
 							}
 							placement="top"
 						>
-							<IconButton
+							<CustomButtonIcon
 								icon={isDropdownOpen ? 'ChevronUp' : 'ChevronDown'}
-								iconColor="secondary"
-								customSize={{ iconSize: '1.25rem', paddingSize: '0.125rem' }}
+								type="ghost"
+								color="secondary"
 								onClick={toggleDropdown}
 								data-testid="participant_list_button"
 							/>

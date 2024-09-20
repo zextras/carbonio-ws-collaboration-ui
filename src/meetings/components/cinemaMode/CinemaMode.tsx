@@ -6,7 +6,7 @@
 
 import React, { ReactElement, useRef, useMemo, useCallback, useEffect } from 'react';
 
-import { Container, IconButton, Tooltip } from '@zextras/carbonio-design-system';
+import { Button, Container, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -47,7 +47,7 @@ const ChangeSidebarStatusButton = styled.div`
 	z-index: 39;
 `;
 
-const SidebarIconButton = styled(IconButton)`
+const SidebarButton = styled(Button)`
 	width: 2.25rem;
 	height: 15rem;
 `;
@@ -119,8 +119,8 @@ const CinemaMode = ({ children }: MeetingViewProps): ReactElement => {
 						label={carouselIsVisible ? collapseCarouselLabel : expandCarouselLabel}
 						placement="left"
 					>
-						<SidebarIconButton
-							iconColor="gray6"
+						<SidebarButton
+							labelColor="gray6"
 							backgroundColor="text"
 							icon={carouselIsVisible ? 'ChevronRightOutline' : 'ChevronLeftOutline'}
 							onClick={toggleCarousel}

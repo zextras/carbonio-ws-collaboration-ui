@@ -10,7 +10,7 @@ import {
 	Container,
 	CreateSnackbarFn,
 	FileLoader,
-	IconButton,
+	Button,
 	Text,
 	Tooltip,
 	useSnackbar
@@ -46,7 +46,7 @@ const HoverActions = styled(Container)`
 	right: 0;
 `;
 
-const CustomIconButton = styled(IconButton)`
+const CustomButton = styled(Button)`
 	&:hover {
 		background-color: rgba(0, 0, 0, 0.5);
 	}
@@ -193,9 +193,10 @@ const GroupRoomPictureHandler: FC<RoomPictureProps> = ({ roomId }) => {
 					</Tooltip>
 					{!!picture && (
 						<Tooltip placement="bottom" label={resetPictureLabel}>
-							<CustomIconButton
+							<CustomButton
+								type="ghost"
 								icon="RefreshOutline"
-								iconColor="gray6"
+								color="gray6"
 								size="large"
 								onClick={onDeleteGroupImage}
 								data-testid="delete_button"

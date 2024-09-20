@@ -15,11 +15,11 @@ import React, {
 
 import {
 	Container,
-	IconButton,
 	Row,
 	TextWithTooltip,
 	Text,
-	Tooltip
+	Tooltip,
+	Button
 } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 import styled, { css, FlattenSimpleInterpolation } from 'styled-components';
@@ -146,10 +146,11 @@ const ConversationHeader = ({
 				{canVideoCall && !isPlaceholderRoom && <ConversationHeaderMeetingButton roomId={roomId} />}
 				{!isDesktopView && (
 					<Tooltip label={infoTooltip}>
-						<IconButton
+						<Button
 							data-testid="infoPanelToggle"
+							type="ghost"
 							onClick={toggleInfoPanel}
-							iconColor="secondary"
+							color="secondary"
 							size="large"
 							icon="InfoOutline"
 						/>

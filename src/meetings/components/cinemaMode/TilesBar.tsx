@@ -6,7 +6,7 @@
 
 import React, { ReactElement, useEffect, useMemo, useRef } from 'react';
 
-import { Container, IconButton, Tooltip } from '@zextras/carbonio-design-system';
+import { Button, Container, Tooltip } from '@zextras/carbonio-design-system';
 import { map, size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
@@ -110,8 +110,8 @@ const TilesBar = ({ carouselTiles, centralTile }: TilesBarProps): ReactElement =
 			{showPaginationButtons && (
 				<ButtonUpContainer width="fill" height="fit">
 					<Tooltip label={prevButton.disabled ? topLabel : scrollUpLabel} placement="left">
-						<IconButton
-							iconColor="gray6"
+						<Button
+							labelColor="gray6"
 							backgroundColor="text"
 							icon="ChevronUpOutline"
 							size="large"
@@ -126,8 +126,8 @@ const TilesBar = ({ carouselTiles, centralTile }: TilesBarProps): ReactElement =
 			{showPaginationButtons && (
 				<ButtonDownContainer width="fill" height="fit">
 					<Tooltip label={nextButton.disabled ? bottomLabel : scrollDownLabel} placement="left">
-						<IconButton
-							iconColor="gray6"
+						<Button
+							labelColor="gray6"
 							backgroundColor="text"
 							icon="ChevronDownOutline"
 							size="large"

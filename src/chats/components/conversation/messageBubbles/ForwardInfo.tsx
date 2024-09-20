@@ -7,17 +7,12 @@
 import React, { FC } from 'react';
 
 import { Container, Icon, Padding, Text, Tooltip } from '@zextras/carbonio-design-system';
-import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { getUserName } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
 import { ForwardedInfo } from '../../../../types/store/MessageTypes';
 import { formatDate } from '../../../../utils/dateUtils';
-
-const CustomText = styled(Text)`
-	flex-shrink: 0;
-`;
 
 type ForwardInfoProps = {
 	info: ForwardedInfo;
@@ -27,7 +22,6 @@ const ForwardInfo: FC<ForwardInfoProps> = ({ info }) => {
 	const forwardUsername = useStore((store) => getUserName(store, info.from));
 
 	const [t] = useTranslation();
-	const originallySentByLabel = t('message.originallySentBy', 'Originally sent by:');
 	const forwardedMultipleTimesLabel = t(
 		'message.forwardedMultipleTimes',
 		'Forwarded multiple times'
@@ -35,6 +29,17 @@ const ForwardInfo: FC<ForwardInfoProps> = ({ info }) => {
 
 	const messageDate = formatDate(info.date, 'DD MMM YY');
 	const messageTime = formatDate(info.date, 'HH:mm');
+	const originallySentByLabel = (
+		<Trans
+			i18nKey="message.originallySentBy"
+			defaults="<strong>Originally sent by:</strong> {{forwardUsername}} ({{messageDate}} - {{messageTime}})"
+			values={{
+				forwardUsername,
+				messageDate,
+				messageTime
+			}}
+		/>
+	);
 
 	return (
 		<Container
@@ -50,15 +55,11 @@ const ForwardInfo: FC<ForwardInfoProps> = ({ info }) => {
 					</Padding>
 				</Tooltip>
 			)}
-			<CustomText color="secondary" size="small" weight="bold">
-				{originallySentByLabel}
-			</CustomText>
-			<Text color="secondary" size="small" overflow="ellipsis">
-				{forwardUsername}
-			</Text>
-			<CustomText color="secondary" size="small">
-				({messageDate} - {messageTime})
-			</CustomText>
+			<Tooltip label={originallySentByLabel}>
+				<Text color="secondary" size="small">
+					{originallySentByLabel}
+				</Text>
+			</Tooltip>
 		</Container>
 	);
 };

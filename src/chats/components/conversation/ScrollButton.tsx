@@ -6,7 +6,7 @@
 
 import React, { ReactElement, useCallback, useState, useMemo } from 'react';
 
-import { Badge, Container, IconButton, Padding } from '@zextras/carbonio-design-system';
+import { Badge, Button, Container, Padding } from '@zextras/carbonio-design-system';
 import { debounce } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -90,14 +90,13 @@ const ScrollButton = ({ roomId, onClickCb }: ScrollButtonProps): ReactElement =>
 				/>
 			)}
 			<Padding horizontal="extrasmall" />
-			<IconButton
+			<Button
 				data-testid={'scrollButton'}
 				type="outlined"
 				title={buttonLabel}
-				borderRadius="round"
+				shape="round"
 				icon="ArrowheadDownOutline"
-				iconColor="primary"
-				backgroundColor="gray6"
+				color="primary"
 				onClick={onClickCb}
 			/>
 			{unreadCount > 0 && (

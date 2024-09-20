@@ -41,6 +41,7 @@ const MessagesListWrapper = styled(Container)`
 	padding-bottom: 0.9375rem;
 	padding-left: 0.4375rem;
 	overflow-y: scroll;
+	overflow-x: hidden;
 	align-self: auto;
 `;
 
@@ -144,7 +145,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 
 	useEffect(() => {
 		observerInit();
-		return () => messageScrollPositionObserver.current?.disconnect();
+		return (): void => messageScrollPositionObserver.current?.disconnect();
 	}, [observerInit]);
 
 	// Read last message when user enters for the first time in a conversation
