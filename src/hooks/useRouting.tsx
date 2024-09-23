@@ -9,6 +9,8 @@ import { useCallback } from 'react';
 import { pushHistory, replaceHistory } from '@zextras/carbonio-shell-ui';
 import { useHistory } from 'react-router-dom';
 
+import { CHATS_ROUTE } from '../constants/appConstants';
+
 export enum ROUTES {
 	MAIN = '/',
 	ROOM = '/:roomId'
@@ -40,6 +42,7 @@ export enum PAGE_INFO_TYPE {
 export type UseRoutingHook = {
 	goToMainPage: () => void;
 	goToRoomPage: (roomId: string) => void;
+	goToChatsPage: (param: string) => void;
 	goToMeetingPage: (meetingId: string) => void;
 	goToInfoPage: (infoType: PAGE_INFO_TYPE) => void;
 	goToExternalLoginPage: () => void;
@@ -55,6 +58,11 @@ const useRouting = (): UseRoutingHook => {
 
 	const goToRoomPage = useCallback(
 		(roomId: string) => pushHistory(ROUTES.ROOM.replace(':roomId', roomId)),
+		[]
+	);
+
+	const goToChatsPage = useCallback(
+		(param: string) => replaceHistory({ path: `/${param}`, route: CHATS_ROUTE }),
 		[]
 	);
 
@@ -82,6 +90,7 @@ const useRouting = (): UseRoutingHook => {
 	return {
 		goToMainPage,
 		goToRoomPage,
+		goToChatsPage,
 		goToMeetingPage,
 		goToInfoPage,
 		goToExternalLoginPage,

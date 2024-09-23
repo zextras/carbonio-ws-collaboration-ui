@@ -6,6 +6,7 @@
 
 export const mockGoToRoomPage: jest.Mock = jest.fn();
 export const mockGoToMainPage: jest.Mock = jest.fn();
+export const mockGoToChatsPage: jest.Mock = jest.fn();
 export const mockGoToMeetingPage: jest.Mock = jest.fn();
 export const mockGoToInfoPage: jest.Mock = jest.fn();
 export const mockGoToMeetingAccessPage: jest.Mock = jest.fn();
@@ -16,6 +17,7 @@ jest.mock('../../hooks/useRouting', () => ({
 	default: jest.fn(() => ({
 		goToMainPage: mockGoToMainPage,
 		goToRoomPage: mockGoToRoomPage,
+		goToChatsPage: mockGoToChatsPage,
 		goToMeetingPage: mockGoToMeetingPage,
 		goToInfoPage: mockGoToInfoPage,
 		goToMeetingAccessPage: mockGoToMeetingAccessPage,
