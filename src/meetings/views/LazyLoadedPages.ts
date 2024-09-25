@@ -30,4 +30,9 @@ export const LazyMeetingSkeleton = lazy(
 	() => import(/* webpackChunkName: "MeetingSkeleton" */ './MeetingSkeleton')
 );
 
-export const LazyInfoPage = lazy(() => import(/* webpackChunkName: "InfoPage" */ './InfoPage'));
+export const LazyInfoPage = lazy(() => {
+	if (BrowserUtils.isMobile()) {
+		return import(/* webpackChunkName: "InfoMobilePage" */ './mobile/InfoMobilePage');
+	}
+	return import(/* webpackChunkName: "InfoPage" */ './InfoPage');
+});
