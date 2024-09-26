@@ -25,14 +25,14 @@ const LazyMeetingSkeleton = lazy(
 
 const LazyInfoPage = lazy(() => import(/* webpackChunkName: "InfoPage" */ './InfoPage'));
 
-const LazyExternalAccessPage = lazy(() => {
+const LazyMeetingExternalAccessPage = lazy(() => {
 	if (BrowserUtils.isMobile()) {
 		return import(
-			/* webpackChunkName: "ExternalAccessMobilePage" */ './mobile/MeetingExternalAccessMobilePage'
+			/* webpackChunkName: "MeetingExternalAccessMobilePage" */ './mobile/MeetingExternalAccessMobilePage'
 		);
 	}
 	return import(
-		/* webpackChunkName: "ExternalAccessPage" */ '../components/meetingAccessPoint/MeetingExternalAccessPage'
+		/* webpackChunkName: "MeetingExternalAccessPage" */ '../components/meetingAccessPoint/MeetingExternalAccessPage'
 	);
 });
 
@@ -60,7 +60,7 @@ const InfoPage = (): ReactElement => (
 
 const MeetingExternalAccessPage = (): ReactElement => (
 	<Suspense fallback={<ShimmerEntryMeetingView />}>
-		<LazyExternalAccessPage />
+		<LazyMeetingExternalAccessPage />
 	</Suspense>
 );
 
