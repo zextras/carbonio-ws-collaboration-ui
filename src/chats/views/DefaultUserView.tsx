@@ -32,17 +32,22 @@ type newUserViewProps = {
 const DefaultUserView: FC<newUserViewProps> = ({ roomsIds }): ReactElement => {
 	const [t] = useTranslation();
 	const createChatTitle = t(
-		'conversation.mockCreateChatTitle',
+		'conversation.emptyList.displayer.title',
 		'Create a new chat using the create button'
 	);
 	const createChatDescription = t(
-		'conversation.mockCreateChatDescription',
-		'Interact, communicate and collaborate with your colleagues by sharing information and attachments'
+		'conversation.displayer.description',
+		'Interact, communicate and collaborate with your colleagues by sharing information and attachments.'
 	);
 
 	const chooseAChatTitle = t(
-		'conversation.chooseAChatTitle',
+		'conversation.displayer.title',
 		'Choose a chat to start sending messages.'
+	);
+
+	const createChatOrGroupDescription = t(
+		'conversation.emptyList.displayer.description',
+		'When creating a chat you will have the possibility to choose more than one person and create a group.'
 	);
 
 	return (
@@ -63,7 +68,7 @@ const DefaultUserView: FC<newUserViewProps> = ({ roomsIds }): ReactElement => {
 			<Padding bottom="small" />
 			<Container height="fit">
 				<CustomText overflow="break-word" size="small" color="gray1">
-					{createChatDescription}
+					{roomsIds.length !== 0 ? createChatDescription : createChatOrGroupDescription}
 				</CustomText>
 			</Container>
 			<Padding bottom="large" />

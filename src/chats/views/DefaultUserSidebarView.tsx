@@ -16,10 +16,10 @@ const CustomText = styled(Text)`
 
 const DefaultUserSidebarView = (): ReactElement => {
 	const [t] = useTranslation();
-	const emptyListTitle = t('conversation.nothingThereTitle', 'There’s nothing there');
+	const emptyListTitle = t('conversation.emptyList.list.title', 'There’s nothing there');
 	const emptyListDescription = t(
-		'conversation.emptyListDescription',
-		'Chats and Groups will appear listed here'
+		'conversation.emptyList.list.description',
+		'Chats and Groups will appear listed here.'
 	);
 	return (
 		<Container mainAlignment="center" crossAlignment="center">
