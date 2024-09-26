@@ -10,10 +10,10 @@ import { Container, ModalManager } from '@zextras/carbonio-design-system';
 import { addRoute, Spinner } from '@zextras/carbonio-shell-ui';
 
 import ConnectionSnackbarManager from './components/ConnectionSnackbarManager';
+import { CHATS_ROUTE, PRODUCT_NAME } from '../constants/appConstants';
 import SecondaryBarView from './components/secondaryBar/SecondaryBarView';
 import ShimmeringConversationView from './views/shimmerViews/ShimmeringConversationView';
 import ShimmeringInfoPanelView from './views/shimmerViews/ShimmeringInfoPanelView';
-import { CHATS_ROUTE, PRODUCT_NAME } from '../constants/appConstants';
 
 const LazyMainView = lazy(() => import(/* webpackChunkName: "mainView" */ './views/MainView'));
 

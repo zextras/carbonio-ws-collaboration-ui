@@ -5,7 +5,7 @@
  */
 import React, { FC, useCallback, useMemo, useState } from 'react';
 
-import { Container, Tooltip, Icon, Padding, IconButton } from '@zextras/carbonio-design-system';
+import { Container, Tooltip, Icon, Padding, Button } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
 import MuteForAllModal from './MuteForAllModal';
@@ -93,8 +93,8 @@ const MeetingParticipantActions: FC<ParticipantActionsProps> = ({ memberId, meet
 			)}
 			{muteForAllHasToAppear && (
 				<Tooltip label={muteForAllLabel}>
-					<IconButton
-						iconColor="gray0"
+					<Button
+						labelColor="gray0"
 						backgroundColor="text"
 						icon="MicOffOutline"
 						onClick={openMuteForAllModal}
@@ -104,8 +104,8 @@ const MeetingParticipantActions: FC<ParticipantActionsProps> = ({ memberId, meet
 			)}
 			{canUsePinFeature && (
 				<Tooltip label={isPinned ? unpinVideoLabel : pinVideoLabel}>
-					<IconButton
-						iconColor="gray0"
+					<Button
+						labelColor="gray0"
 						backgroundColor="text"
 						icon={isPinned ? 'Unpin3Outline' : 'Pin3Outline'}
 						onClick={switchPinnedTile}

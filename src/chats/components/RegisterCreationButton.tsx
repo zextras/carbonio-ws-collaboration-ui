@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { ReactElement, useEffect, useMemo, useState } from 'react';
+import React, { ReactElement, useEffect, useState } from 'react';
 
 import { ACTION_TYPES, registerActions, removeActions } from '@zextras/carbonio-shell-ui';
 import { useTranslation } from 'react-i18next';
@@ -22,27 +22,18 @@ const RegisterCreationButton = (): ReactElement => {
 			id: createChatLabel,
 			type: ACTION_TYPES.NEW,
 			action: () => ({
-				id: 'create-chat',
-				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-				// @ts-ignore
-				type: ACTION_TYPES.NEW,
+				id: createChatLabel,
 				label: t('action.newChat', 'New Chat'),
-				icon: 'MessageSquareOutline',
-				onClick: () => setNewChatModal(true),
+				icon: 'WscOutline',
+				onClick: (): void => setNewChatModal(true),
 				group: CHATS_APP_ID,
-				primary: true,
-				disabled: false
+				primary: true
 			})
 		});
-		return () => removeActions(createChatLabel);
+		return (): void => removeActions(createChatLabel);
 	}, [t]);
 
-	const CreationModal: ReactElement = useMemo(
-		() => <ChatCreationModal open={newChatModal} onClose={(): void => setNewChatModal(false)} />,
-		[newChatModal]
-	);
-
-	return CreationModal;
+	return <ChatCreationModal open={newChatModal} onClose={(): void => setNewChatModal(false)} />;
 };
 
 export default RegisterCreationButton;

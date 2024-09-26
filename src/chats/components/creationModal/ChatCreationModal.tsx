@@ -54,14 +54,14 @@ const ChatCreationModal = ({
 	const [chatType, setChatType] = useState<RoomType.ONE_TO_ONE | RoomType.GROUP>(
 		RoomType.ONE_TO_ONE
 	);
-	const [contactsSelected, setContactSelected] = useState<ContactSelected>({});
+	const [contactsSelected, setContactsSelected] = useState<ContactSelected>({});
 	const [title, setTitle] = useState<string>(titlePlaceholder);
 	const [topic, setTopic] = useState<string>('');
 	const [isPending, setIsPending] = useState<boolean>(false);
 
 	const createSnackbar: CreateSnackbarFn = useSnackbar();
 
-	const { goToRoomPage } = useRouting();
+	const { goToChatsPage } = useRouting();
 
 	useEffect(() => {
 		if (size(contactsSelected) > 1) {
@@ -94,7 +94,7 @@ const ChatCreationModal = ({
 
 	const onModalClose = useCallback(() => {
 		setChatType(RoomType.ONE_TO_ONE);
-		setContactSelected({});
+		setContactsSelected({});
 		setTitle(titlePlaceholder);
 		setTopic('');
 		onClose();
@@ -111,9 +111,9 @@ const ChatCreationModal = ({
 			const roomId = oneToOneChatExist?.id ?? `placeholder-${userId}`;
 			if (!oneToOneChatExist) setPlaceholderRoom(userId);
 			onModalClose();
-			goToRoomPage(roomId);
+			goToChatsPage(roomId);
 		},
-		[goToRoomPage, onModalClose, setPlaceholderRoom]
+		[goToChatsPage, onModalClose, setPlaceholderRoom]
 	);
 
 	const onCreateGroup = useCallback(
@@ -127,7 +127,7 @@ const ChatCreationModal = ({
 			})
 				.then((response: AddRoomResponse) => {
 					setIsPending(false);
-					goToRoomPage(response.id);
+					goToChatsPage(response.id);
 					onModalClose();
 				})
 				.catch(() => {
@@ -139,7 +139,7 @@ const ChatCreationModal = ({
 					});
 				});
 		},
-		[createSnackbar, errorSnackbar, goToRoomPage, onModalClose, title, topic]
+		[createSnackbar, errorSnackbar, goToChatsPage, onModalClose, title, topic]
 	);
 
 	const onCreate = useCallback(() => {
@@ -193,7 +193,7 @@ const ChatCreationModal = ({
 			<Padding bottom="medium" />
 			<ChatCreationContactsSelection
 				contactsSelected={contactsSelected}
-				setContactSelected={setContactSelected}
+				setContactSelected={setContactsSelected}
 				isCreationModal
 				inputRef={inputRef}
 			/>

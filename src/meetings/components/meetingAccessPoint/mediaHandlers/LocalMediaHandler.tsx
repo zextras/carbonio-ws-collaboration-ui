@@ -14,9 +14,9 @@ import React, {
 } from 'react';
 
 import {
+	Button,
 	Container,
 	CreateSnackbarFn,
-	IconButton,
 	Padding,
 	Select,
 	Tooltip,
@@ -300,7 +300,7 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 					placement="top"
 					label={mediaDevicesEnabled.video ? disableCamLabel : enableCamLabel}
 				>
-					<IconButton
+					<Button
 						icon={mediaDevicesEnabled.video ? 'Video' : 'VideoOff'}
 						size="extralarge"
 						backgroundColor={'primary'}
@@ -327,7 +327,7 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 					placement="top"
 					label={mediaDevicesEnabled.audio ? disableMicLabel : enableMicLabel}
 				>
-					<IconButton
+					<Button
 						icon={mediaDevicesEnabled.audio ? 'Mic' : 'MicOff'}
 						size="extralarge"
 						backgroundColor={'primary'}
