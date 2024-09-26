@@ -4,22 +4,41 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { ReactElement, Suspense, useEffect } from 'react';
+import React, { lazy, ReactElement, Suspense, useEffect } from 'react';
 
 import { createMemoryHistory } from 'history';
 import { Route, Router, Switch } from 'react-router-dom';
 
-import {
-	LazyAccessPageView,
-	LazyExternalAccessPage,
-	LazyInfoPage,
-	LazyMeetingAccessPageView,
-	LazyMeetingSkeleton
-} from './LazyLoadedPages';
 import ShimmerEntryMeetingView from './shimmers/ShimmerEntryMeetingView';
 import { MEETINGS_ROUTES, ROUTES } from '../../hooks/useRouting';
 import { MeetingsApi } from '../../network';
 import useStore from '../../store/Store';
+import { BrowserUtils } from '../../utils/BrowserUtils';
+
+const LazyAccessPageView = lazy(
+	() => import(/* webpackChunkName: "MeetingAccessPageView" */ './AccessPage')
+);
+
+const LazyMeetingSkeleton = lazy(
+	() => import(/* webpackChunkName: "MeetingSkeleton" */ './MeetingSkeleton')
+);
+
+const LazyInfoPage = lazy(() => import(/* webpackChunkName: "InfoPage" */ './InfoPage'));
+
+const LazyExternalAccessPage = lazy(() => {
+	if (BrowserUtils.isMobile()) {
+		return import(
+			/* webpackChunkName: "ExternalAccessMobilePage" */ './mobile/MeetingExternalAccessMobilePage'
+		);
+	}
+	return import(
+		/* webpackChunkName: "ExternalAccessPage" */ '../components/meetingAccessPoint/MeetingExternalAccessPage'
+	);
+});
+
+const LazyMeetingAccessPageView = lazy(
+	() => import(/* webpackChunkName: "MeetingAccessPageView" */ './MeetingAccessPageView')
+);
 
 const AccessPageView = (): ReactElement => (
 	<Suspense fallback={<ShimmerEntryMeetingView />}>
@@ -66,6 +85,14 @@ const MeetingMainView = (): ReactElement => {
 				console.log(reason);
 			});
 	}, [setCustomLogo]);
+
+	// Workaround while Shell doesn't remove the minWidth
+	useEffect(() => {
+		const background = document.querySelector('.shell-view__Background-sc-1116s2y-0.llNRgR');
+		if (background) {
+			background.setAttribute('style', 'min-width: 100%');
+		}
+	}, []);
 
 	return (
 		<Router history={history}>

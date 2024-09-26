@@ -9,7 +9,6 @@ import { Container, Padding, Text } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import MobileContainer from './MobileContainer';
 import ExternalAccessBackground from '../../assets/ExternalAccessBackground.png';
 import ExternalGuestForm from '../../components/meetingAccessPoint/ExternalGuestForm';
 
@@ -32,20 +31,18 @@ const MeetingExternalAccessMobilePage = (): ReactElement => {
 	);
 
 	return (
-		<MobileContainer>
-			<BackgroundContainer padding="2rem">
-				<Container
-					height="fit"
-					background={'gray6'}
-					padding={{ vertical: '4rem', horizontal: '2rem' }}
-					crossAlignment="center"
-				>
-					<ExternalGuestForm />
-					<Padding bottom="2rem" />
-					<CustomDescription overflow="break-word">{enterMeetingDescription}</CustomDescription>
-				</Container>
-			</BackgroundContainer>
-		</MobileContainer>
+		<BackgroundContainer padding="2rem">
+			<Container
+				height="fit"
+				background={'gray6'}
+				padding={{ vertical: '4rem', horizontal: '2rem' }}
+				crossAlignment="center"
+			>
+				<ExternalGuestForm />
+				<Padding bottom="2rem" />
+				<CustomDescription overflow="break-word">{enterMeetingDescription}</CustomDescription>
+			</Container>
+		</BackgroundContainer>
 	);
 };
 
