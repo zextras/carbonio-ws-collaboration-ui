@@ -16,7 +16,7 @@ const CustomText = styled(Text)`
 
 const DefaultUserSidebarView = (): ReactElement => {
 	const [t] = useTranslation();
-	const emptyListTitle = t('conversation.emptyListTitle', 'This list is empty');
+	const emptyListTitle = t('conversation.nothingThereTitle', 'There’s nothing there');
 	const emptyListDescription = t(
 		'conversation.emptyListDescription',
 		'Chats and Groups will appear listed here'

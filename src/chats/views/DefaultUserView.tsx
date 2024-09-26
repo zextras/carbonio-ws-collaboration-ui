@@ -40,10 +40,9 @@ const DefaultUserView: FC<newUserViewProps> = ({ roomsIds }): ReactElement => {
 		'Interact, communicate and collaborate with your colleagues by sharing information and attachments'
 	);
 
-	const keepInTouchTitle = t('conversation.keepInTouchTitle', "Let's keep in touch!");
-	const chooseConversationDescription = t(
-		'conversation.chooseConversationDescription',
-		'Choose a chat to start a conversation'
+	const chooseAChatTitle = t(
+		'conversation.chooseAChatTitle',
+		'Choose a chat to start sending messages.'
 	);
 
 	return (
@@ -58,13 +57,13 @@ const DefaultUserView: FC<newUserViewProps> = ({ roomsIds }): ReactElement => {
 			<Padding bottom="small" />
 			<Container height="fit">
 				<CustomText weight="bold" overflow="break-word" size="large" color="gray1">
-					{roomsIds.length !== 0 ? keepInTouchTitle : createChatTitle}
+					{roomsIds.length !== 0 ? chooseAChatTitle : createChatTitle}
 				</CustomText>
 			</Container>
 			<Padding bottom="small" />
 			<Container height="fit">
 				<CustomText overflow="break-word" size="small" color="gray1">
-					{roomsIds.length !== 0 ? chooseConversationDescription : createChatDescription}
+					{createChatDescription}
 				</CustomText>
 			</Container>
 			<Padding bottom="large" />
