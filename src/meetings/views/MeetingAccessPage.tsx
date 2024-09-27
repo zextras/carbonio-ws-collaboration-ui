@@ -21,7 +21,7 @@ const CustomContainer = styled(Container)`
 	bottom: 3rem;
 `;
 
-const MeetingAccessPageView = (): ReactElement => {
+const MeetingAccessPage = (): ReactElement => {
 	const [t] = useTranslation();
 	const leave = t('action.leave', 'Leave');
 	const leaveMeetingLabel = t('meeting.interactions.leaveMeeting', 'Leave Meeting');
@@ -38,6 +38,7 @@ const MeetingAccessPageView = (): ReactElement => {
 		userIsReady,
 		setUserIsReady
 	} = useAccessMeetingInformation();
+
 	const { handleLeave, handleEnterMeeting, handleWaitingRoom } = useAccessMeetingAction(
 		hasUserDirectAccess,
 		streamTrack,
@@ -119,4 +120,4 @@ const MeetingAccessPageView = (): ReactElement => {
 	);
 };
 
-export default MeetingAccessPageView;
+export default MeetingAccessPage;

@@ -8,19 +8,19 @@ import React from 'react';
 
 import { screen } from '@testing-library/react';
 
-import MeetingAccessPageView from './MeetingAccessPageView';
+import MeetingAccessPage from './MeetingAccessPage';
 import { mockDarkReaderEnable } from '../../../__mocks__/darkreader';
 import { setup } from '../../tests/test-utils';
 
 describe('MeetingAccessPageView', () => {
 	test('Render the component', async () => {
-		setup(<MeetingAccessPageView />);
+		setup(<MeetingAccessPage />);
 		const wrapper = screen.getByTestId('meeting_access_page_view');
 		expect(wrapper).toBeVisible();
 	});
 
 	test('Enable the DarkReader for the page', async () => {
-		setup(<MeetingAccessPageView />);
+		setup(<MeetingAccessPage />);
 		expect(mockDarkReaderEnable).toHaveBeenCalled();
 	});
 });

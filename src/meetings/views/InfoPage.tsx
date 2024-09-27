@@ -17,11 +17,7 @@ import { getIsLoggedUserExternal } from '../../store/selectors/SessionSelectors'
 import useStore from '../../store/Store';
 import { BrowserUtils } from '../../utils/BrowserUtils';
 
-const CenterText = styled(Text)`
-	text-align: center;
-`;
-
-const Title = styled(CenterText)`
+const Title = styled(Text)`
 	font-size: 1.6rem;
 `;
 
@@ -192,12 +188,18 @@ const InfoPage = (): ReactElement => {
 		<Container background={'gray0'}>
 			<Container width="fit" maxWidth="100%" padding="1.5rem" gap="2rem">
 				<Container height="fit" maxWidth="100%" gap="0.7rem">
-					<Title color="gray6" weight="bold" overflow="break-word">
+					<Title color="gray6" weight="bold" overflow="break-word" textAlign="center">
 						{titleLabel}
 					</Title>
-					<CenterText size="extralarge" color="gray6" weight="light" overflow="break-word">
+					<Text
+						size="extralarge"
+						color="gray6"
+						weight="light"
+						overflow="break-word"
+						textAlign="center"
+					>
 						{descriptionLabel}
-					</CenterText>
+					</Text>
 				</Container>
 				<Container
 					height="fit"
@@ -215,9 +217,9 @@ const InfoPage = (): ReactElement => {
 					<Divider />
 				</Container>
 				<Container gap="0.7rem" width="fit" height="fit">
-					<CenterText color="gray6" overflow="break-word">
+					<Text color="gray6" overflow="break-word" textAlign="center">
 						{meetingExperienceLabel}
-					</CenterText>
+					</Text>
 					{clicked ? (
 						<Feedback color="warning" weight="light">
 							{thankYouLabel}

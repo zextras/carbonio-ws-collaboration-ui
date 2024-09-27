@@ -16,7 +16,7 @@ import useStore from '../../store/Store';
 import { BrowserUtils } from '../../utils/BrowserUtils';
 
 const LazyAccessPageView = lazy(
-	() => import(/* webpackChunkName: "MeetingAccessPageView" */ './AccessPage')
+	() => import(/* webpackChunkName: "MeetingAccessPage" */ './AccessPage')
 );
 
 const LazyMeetingSkeleton = lazy(
@@ -42,7 +42,7 @@ const LazyMeetingAccessPage = lazy(() => {
 			/* webpackChunkName: "MeetingAccessMobilePageView" */ './mobile/MeetingAccessMobilePage'
 		);
 	}
-	return import(/* webpackChunkName: "MeetingAccessPageView" */ './MeetingAccessPageView');
+	return import(/* webpackChunkName: "MeetingAccessPage" */ './MeetingAccessPage');
 });
 
 const AccessPageView = (): ReactElement => (

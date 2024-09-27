@@ -9,6 +9,7 @@ import { Button, Container, Icon, Text } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
 import useEventListener, { EventName } from '../../../hooks/useEventListener';
+import useStore from '../../../store/Store';
 import useAccessMeetingAction from '../../components/meetingAccessPoint/useAccessMeetingAction';
 import useAccessMeetingInformation from '../../components/meetingAccessPoint/useAccessMeetingInformation';
 
@@ -31,12 +32,15 @@ const MeetingAccessMobilePage = (): ReactElement => {
 	const enter = t('action.enter', 'Enter');
 	const readyLabel = t('meeting.waitingRoom.userIsReady', "You're ready!");
 
+	const chatsBeNetworkStatus = useStore(({ connections }) => connections.status.chats_be);
+	const websocketNetworkStatus = useStore(({ connections }) => connections.status.websocket);
+
 	const { hasUserDirectAccess, ShowMeetingAccessPage, accessTitle, userIsReady, setUserIsReady } =
 		useAccessMeetingInformation();
 
 	const { handleEnterMeeting, handleWaitingRoom } = useAccessMeetingAction(
 		hasUserDirectAccess,
-		null, // TODO
+		null,
 		userIsReady,
 		setUserIsReady
 	);
@@ -46,8 +50,12 @@ const MeetingAccessMobilePage = (): ReactElement => {
 		return (
 			!hasUserDirectAccess && (
 				<Container height="fit">
-					<Text>{userIsReady ? areYouReadyLabel : whenYouAreReadyLabel}</Text>
-					<Text>{aModeratorWillLetYouEnterLabel}</Text>
+					<Text overflow="break-word" textAlign="center">
+						{userIsReady ? areYouReadyLabel : whenYouAreReadyLabel}
+					</Text>
+					<Text overflow="break-word" textAlign="center">
+						{aModeratorWillLetYouEnterLabel}
+					</Text>
 				</Container>
 			)
 		);
@@ -59,6 +67,13 @@ const MeetingAccessMobilePage = (): ReactElement => {
 		whenYouAreReadyLabel
 	]);
 
+	const areNetworksUp = useMemo(() => {
+		if (chatsBeNetworkStatus !== undefined && websocketNetworkStatus !== undefined) {
+			return chatsBeNetworkStatus && websocketNetworkStatus;
+		}
+		return false;
+	}, [chatsBeNetworkStatus, websocketNetworkStatus]);
+
 	const enterButton = useMemo(() => {
 		if (hasUserDirectAccess === undefined) return undefined;
 		if (hasUserDirectAccess)
@@ -68,7 +83,7 @@ const MeetingAccessMobilePage = (): ReactElement => {
 					width="fill"
 					label={enter}
 					onClick={() => handleEnterMeeting()}
-					// disabled={!enterButtonIsEnabled} // TODO
+					disabled={!areNetworksUp}
 				/>
 			);
 		if (!userIsReady)
@@ -80,11 +95,11 @@ const MeetingAccessMobilePage = (): ReactElement => {
 					iconPlacement="right"
 					onClick={() => handleWaitingRoom()}
 					width="fill"
-					// disabled={!enterButtonIsEnabled} // TODO
+					disabled={!areNetworksUp}
 				/>
 			);
 		return (
-			<Container orientation="horizontal" gap="0.5rem" mainAlignment="flex-start">
+			<Container orientation="horizontal" gap="0.5rem" mainAlignment="center">
 				<Icon icon="CheckmarkCircle2" color="success" size="large" />
 				<Text weight="bold" size="extralarge">
 					{readyLabel}
@@ -92,6 +107,7 @@ const MeetingAccessMobilePage = (): ReactElement => {
 			</Container>
 		);
 	}, [
+		areNetworksUp,
 		enter,
 		handleEnterMeeting,
 		handleWaitingRoom,
@@ -105,14 +121,23 @@ const MeetingAccessMobilePage = (): ReactElement => {
 
 	return (
 		<ShowMeetingAccessPage>
-			<>
-				<Text>{accessTitle}</Text>
+			<Container gap="1rem">
+				<Text weight="bold" overflow="break-word" textAlign="center">
+					{accessTitle}
+				</Text>
 				{waitingRoomLabels}
-				<Container>
-					<Button onClick={(): void => {}} icon="Mic" />
-					{enterButton}
-				</Container>
-			</>
+			</Container>
+			<Container height="fit" orientation="horizontal" gap="2rem">
+				<Button
+					onClick={(): void => {}}
+					icon="MicOff"
+					disabled
+					size="large"
+					color="text"
+					minWidth="2.5rem"
+				/>
+				{enterButton}
+			</Container>
 		</ShowMeetingAccessPage>
 	);
 };

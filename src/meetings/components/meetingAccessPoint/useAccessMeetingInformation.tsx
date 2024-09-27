@@ -27,14 +27,20 @@ import useStore from '../../../store/Store';
 import { MeetingType } from '../../../types/network/models/meetingBeTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 
-const useAccessMeetingInformation = (): {
+type UseAccessMeetingInformationReturnType = {
 	meetingName: string;
 	accessTitle: string;
 	hasUserDirectAccess: boolean;
-	ShowMeetingAccessPage: ({ children }: { children: ReactElement }) => ReactElement;
+	ShowMeetingAccessPage: ({
+		children
+	}: {
+		children: ReactElement | ReactElement[];
+	}) => ReactElement;
 	userIsReady: boolean;
 	setUserIsReady: Dispatch<SetStateAction<boolean>>;
-} => {
+};
+
+const useAccessMeetingInformation = (): UseAccessMeetingInformationReturnType => {
 	const [userIsReady, setUserIsReady] = useState<boolean>(false);
 
 	const meetingId = useMemo(() => document.location.pathname.split(MEETINGS_PATH)[1], []);
