@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 
 import useEventListener, { EventName } from '../../../hooks/useEventListener';
 import useStore from '../../../store/Store';
+import Logo from '../../components/Logo';
 import useAccessMeetingAction from '../../components/meetingAccessPoint/useAccessMeetingAction';
 import useAccessMeetingInformation from '../../components/meetingAccessPoint/useAccessMeetingInformation';
 
@@ -121,6 +122,7 @@ const MeetingAccessMobilePage = (): ReactElement => {
 
 	return (
 		<ShowMeetingAccessPage>
+			<Logo top="2rem" left="2rem" />
 			<Container gap="1rem">
 				<Text weight="bold" overflow="break-word" textAlign="center">
 					{accessTitle}

@@ -16,15 +16,15 @@ import useGeneralMeetingControls from '../../hooks/useGeneralMeetingControls';
 import { MeetingRoutesParams } from '../../hooks/useRouting';
 import { getMeetingViewSelected } from '../../store/selectors/ActiveMeetingSelectors';
 import { getNumberOfTiles } from '../../store/selectors/MeetingSelectors';
-import { getCapability, getCustomLogo, getUserId } from '../../store/selectors/SessionSelectors';
+import { getCapability, getUserId } from '../../store/selectors/SessionSelectors';
 import { getIsUserGuest } from '../../store/selectors/UsersSelectors';
 import useStore from '../../store/Store';
 import { MeetingViewType } from '../../types/store/ActiveMeetingTypes';
 import { CapabilityType } from '../../types/store/SessionTypes';
-import defaultLogo from '../assets/Logo.png';
 import CinemaMode from '../components/cinemaMode/CinemaMode';
 import FaceToFaceMode from '../components/faceToFaceMode/FaceToFaceMode';
 import GridMode from '../components/gridMode/GridMode';
+import Logo from '../components/Logo';
 import MeetingActionsBar from '../components/meetingActionsBar/MeetingActionsBar';
 import RecordingInfo from '../components/RecordingInfo';
 import MeetingSidebar from '../components/sidebar/MeetingSidebar';
@@ -42,16 +42,6 @@ const ViewContainer = styled(Container)`
 	flex-grow: 1;
 `;
 
-const LogoApp = styled(Container)<{ $customLogo: string | false | undefined }>`
-	position: absolute;
-	top: 1rem;
-	left: 1rem;
-	background-size: contain;
-	height: 1.3125rem;
-	width: 9.625rem;
-	background-repeat: no-repeat;
-	background-image: url(${({ $customLogo }): string => $customLogo || defaultLogo});
-`;
 export type MeetingViewProps = {
 	children?: ReactElement;
 };
@@ -69,7 +59,6 @@ const MeetingSkeleton = (): ReactElement => {
 
 	const meetingViewSelected = useStore((store) => getMeetingViewSelected(store, meetingId));
 	const numberOfTiles = useStore((store) => getNumberOfTiles(store, meetingId));
-	const customLogo = useStore(getCustomLogo);
 	const canUseVirtualBackground = useStore((store) =>
 		getCapability(store, CapabilityType.CAN_USE_VIRTUAL_BACKGROUND)
 	);
@@ -116,7 +105,7 @@ const MeetingSkeleton = (): ReactElement => {
 				data-testid="meeting_view_container"
 			>
 				<RecordingInfo meetingId={meetingId} />
-				<LogoApp $customLogo={customLogo} />
+				<Logo />
 				<ViewToDisplay>
 					<MeetingActionsBar streamsWrapperRef={streamsWrapperRef} />
 				</ViewToDisplay>
