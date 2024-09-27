@@ -10,7 +10,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import { UserEvent } from '@testing-library/user-event';
 import { act } from 'react-dom/test-utils';
 
-import MeetingAccessPage from './MeetingAccessPage';
+import MeetingAccessPageTODELETE from './MeetingAccessPageTODELETE';
 import { useParams } from '../../../../__mocks__/react-router';
 import useStore from '../../../store/Store';
 import {
@@ -83,7 +83,10 @@ const setupBasicGroup = (): { user: UserEvent; store: RootStore } => {
 	});
 	useParams.mockReturnValue({ meetingId: groupMeeting.id });
 	const { user } = setup(
-		<MeetingAccessPage meetingName={groupMeeting.name} hasUserDirectAccess={canAccessMeeting} />
+		<MeetingAccessPageTODELETE
+			meetingName={groupMeeting.name}
+			hasUserDirectAccess={canAccessMeeting}
+		/>
 	);
 	return { user, store: result.current };
 };

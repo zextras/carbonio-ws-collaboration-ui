@@ -34,7 +34,10 @@ const CustomContainer = styled(Container)`
 	bottom: 3rem;
 `;
 
-const MeetingAccessPage: FC<AccessMeetingPageProps> = ({ hasUserDirectAccess, meetingName }) => {
+const MeetingAccessPageTODELETE: FC<AccessMeetingPageProps> = ({
+	hasUserDirectAccess,
+	meetingName
+}) => {
 	const [t] = useTranslation();
 	const meetingId = useMemo(() => document.location.pathname.split(MEETINGS_PATH)[1], []);
 	const roomId = useStore((store) => getRoomIdFromMeeting(store, meetingId) ?? ``);
@@ -186,6 +189,8 @@ const MeetingAccessPage: FC<AccessMeetingPageProps> = ({ hasUserDirectAccess, me
 					setUserIsReady={setUserIsReady}
 					meetingName={meetingName}
 					wrapperWidth={wrapperWidth}
+					handleEnterMeeting={() => {}}
+					handleWaitingRoom={() => {}}
 				/>
 			</Container>
 			{leaveButton}
@@ -193,4 +198,4 @@ const MeetingAccessPage: FC<AccessMeetingPageProps> = ({ hasUserDirectAccess, me
 	);
 };
 
-export default MeetingAccessPage;
+export default MeetingAccessPageTODELETE;

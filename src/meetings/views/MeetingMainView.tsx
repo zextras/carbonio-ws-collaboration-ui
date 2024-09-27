@@ -36,9 +36,14 @@ const LazyMeetingExternalAccessPage = lazy(() => {
 	);
 });
 
-const LazyMeetingAccessPageView = lazy(
-	() => import(/* webpackChunkName: "MeetingAccessPageView" */ './MeetingAccessPageView')
-);
+const LazyMeetingAccessPage = lazy(() => {
+	if (BrowserUtils.isMobile()) {
+		return import(
+			/* webpackChunkName: "MeetingAccessMobilePageView" */ './mobile/MeetingAccessMobilePage'
+		);
+	}
+	return import(/* webpackChunkName: "MeetingAccessPageView" */ './MeetingAccessPageView');
+});
 
 const AccessPageView = (): ReactElement => (
 	<Suspense fallback={<ShimmerEntryMeetingView />}>
@@ -66,7 +71,7 @@ const MeetingExternalAccessPage = (): ReactElement => (
 
 const MeetingAccessPageView = (): ReactElement => (
 	<Suspense fallback={<ShimmerEntryMeetingView />}>
-		<LazyMeetingAccessPageView />
+		<LazyMeetingAccessPage />
 	</Suspense>
 );
 
@@ -85,14 +90,6 @@ const MeetingMainView = (): ReactElement => {
 				console.log(reason);
 			});
 	}, [setCustomLogo]);
-
-	// Workaround while Shell doesn't remove the minWidth
-	useEffect(() => {
-		const background = document.querySelector('.shell-view__Background-sc-1116s2y-0.llNRgR');
-		if (background) {
-			background.setAttribute('style', 'min-width: 100%');
-		}
-	}, []);
 
 	return (
 		<Router history={history}>
