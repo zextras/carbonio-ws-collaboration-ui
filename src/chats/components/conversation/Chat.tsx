@@ -55,9 +55,9 @@ const Chat = ({ roomId, setInfoPanelOpen }: ChatsProps): ReactElement => {
 	const loadFiles = useLoadFiles(roomId);
 
 	const handleOnDrop = useCallback(
-		(ev) => {
+		(ev: React.DragEvent<HTMLElement>) => {
 			ev.preventDefault();
-			const { files } = ev.dataTransfer as HTMLInputElement;
+			const { files } = ev.dataTransfer;
 			loadFiles(files ?? new FileList());
 			setDropzoneEnabled(false);
 		},
@@ -65,7 +65,7 @@ const Chat = ({ roomId, setInfoPanelOpen }: ChatsProps): ReactElement => {
 	);
 
 	const handleOnDragOver = useCallback(
-		(ev) => {
+		(ev: React.DragEvent<HTMLElement>) => {
 			// Avoid to drop files if user is editing a message
 			const editingMessage = referenceMessage?.actionType === messageActionType.EDIT;
 			if (!editingMessage) {
@@ -76,12 +76,12 @@ const Chat = ({ roomId, setInfoPanelOpen }: ChatsProps): ReactElement => {
 		[referenceMessage]
 	);
 
-	const handleOnDragLeave = useCallback((ev) => {
+	const handleOnDragLeave = useCallback((ev: React.DragEvent<HTMLElement> | DragEvent) => {
 		ev.preventDefault();
 		setDropzoneEnabled(false);
 	}, []);
 
-	const handleOnDragStart = useCallback((ev) => {
+	const handleOnDragStart = useCallback((ev: React.DragEvent<HTMLElement>) => {
 		ev.preventDefault();
 	}, []);
 

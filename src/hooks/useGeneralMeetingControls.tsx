@@ -8,7 +8,10 @@ import { useCallback, useEffect } from 'react';
 
 import { filter, find, maxBy, size } from 'lodash';
 
-import useEventListener, { EventName } from './useEventListener';
+import useEventListener, {
+	EventName,
+	MeetingWaitingParticipantClashedEvent
+} from './useEventListener';
 import useRouting, { PAGE_INFO_TYPE } from './useRouting';
 import { MeetingsApi } from '../network';
 import {
@@ -94,8 +97,8 @@ const useGeneralMeetingControls = (meetingId: string): void => {
 	}, [meetingId, setPinnedTile]);
 
 	const meetingParticipantClashedHandler = useCallback(
-		(event) => {
-			meetingDisconnection(event.detail.meetingId);
+		(event: CustomEvent<MeetingWaitingParticipantClashedEvent> | undefined) => {
+			meetingDisconnection(event?.detail.data.meetingId ?? '');
 			goToInfoPage(PAGE_INFO_TYPE.ALREADY_ACTIVE_MEETING_SESSION);
 		},
 		[goToInfoPage, meetingDisconnection]

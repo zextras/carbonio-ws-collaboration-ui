@@ -80,7 +80,7 @@ const StopRecordingModal = ({
 
 	const createSnackbar: CreateSnackbarFn = useSnackbar();
 
-	const onNameChange = useCallback((e) => {
+	const onNameChange = useCallback((e: { target: { value: string } }) => {
 		if (e.target.value.length < 129) setRecordingName(e.target.value);
 	}, []);
 
@@ -94,7 +94,7 @@ const StopRecordingModal = ({
 			.then(() => {
 				createSnackbar({
 					key: new Date().toLocaleString(),
-					type: 'info',
+					severity: 'info',
 					label: recordingStopped,
 					hideButton: true
 				});
@@ -103,7 +103,7 @@ const StopRecordingModal = ({
 			.catch(() => {
 				createSnackbar({
 					key: new Date().toLocaleString(),
-					type: 'warning',
+					severity: 'warning',
 					label: errorSnackbarLabel,
 					hideButton: true
 				});

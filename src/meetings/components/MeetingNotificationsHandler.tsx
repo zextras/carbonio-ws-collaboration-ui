@@ -14,7 +14,7 @@ import styled from 'styled-components';
 
 import MeetingNotification from './MeetingNotification';
 import { MEETINGS_ROUTE } from '../../constants/appConstants';
-import useEventListener, { EventName } from '../../hooks/useEventListener';
+import useEventListener, { EventName, IncomingMeetingEvent } from '../../hooks/useEventListener';
 import { MeetingStartedEvent } from '../../types/network/websocket/wsMeetingEvents';
 import meetingNotificationRingMp3 from '../assets/meeting-notification-sound.mp3';
 import meetingNotificationRingOgg from '../assets/meeting-notification-sound.ogg';
@@ -48,9 +48,11 @@ const MeetingNotificationsHandler = (): ReactElement => {
 
 	const timeout = useRef<NodeJS.Timeout>();
 
-	const addNotification = useCallback(({ detail: meetingStartedEvent }) => {
+	const addNotification = useCallback((event: CustomEvent<MeetingStartedEvent> | undefined) => {
 		clearTimeout(timeout.current);
-		setNotificationArray((prev) => [meetingStartedEvent, ...prev]);
+		if (event) {
+			setNotificationArray((prev) => [event?.detail, ...prev]);
+		}
 		setMeetingSound(true);
 		timeout.current = setTimeout(() => setMeetingSound(false), 12000);
 	}, []);
@@ -65,10 +67,10 @@ const MeetingNotificationsHandler = (): ReactElement => {
 	}, []);
 
 	const removeNotificationFromMeetingEvent = useCallback(
-		({ detail: meetingEvent }) => {
+		(event: CustomEvent<IncomingMeetingEvent> | undefined) => {
 			const notificationToRemove = find(
 				notificationArray,
-				(notification) => notification.meetingId === meetingEvent.meetingId
+				(notification) => notification.meetingId === event?.detail.data.meetingId
 			);
 			if (notificationToRemove) {
 				removeNotification(notificationToRemove.meetingId);

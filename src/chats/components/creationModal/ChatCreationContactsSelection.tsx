@@ -19,7 +19,7 @@ import {
 	ChipItem,
 	Container,
 	ListItem,
-	ListV2,
+	List,
 	Padding,
 	Text
 } from '@zextras/carbonio-design-system';
@@ -192,7 +192,7 @@ const ChatCreationContactsSelection = ({
 		[isCreationModal, contactsSelected, maxGroupMembers, members]
 	);
 
-	const addOrRemoveChip = useCallback((newChip) => {
+	const addOrRemoveChip = useCallback((newChip: ChipItem<ContactInfo>) => {
 		setChips((chips) =>
 			find(chips, (chip) => chip.value?.id === newChip.value?.id)
 				? differenceBy(chips, [newChip], (chip) => chip.value?.id)
@@ -255,7 +255,7 @@ const ChatCreationContactsSelection = ({
 			return <Spinner />;
 		}
 		if (!error) {
-			return <ListV2 data-testid="list_creation_modal">{items}</ListV2>;
+			return <List data-testid="list_creation_modal">{items}</List>;
 		}
 		return (
 			<CustomContainer padding="large">

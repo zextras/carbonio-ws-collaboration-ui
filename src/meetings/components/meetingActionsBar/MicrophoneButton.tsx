@@ -71,7 +71,7 @@ const MicrophoneButton = ({
 		() =>
 			createSnackbar({
 				key: new Date().toLocaleString(),
-				type: 'info',
+				severity: 'info',
 				label: giveMediaPermissionSnackbar,
 				actionLabel: understoodAction,
 				disableAutoHide: true
@@ -112,7 +112,7 @@ const MicrophoneButton = ({
 	}, [setIsAudioListOpen]);
 
 	const toggleAudioStream = useCallback(
-		(event) => {
+		(event: { stopPropagation: () => void }) => {
 			event.stopPropagation();
 			if (!audioStatus) {
 				getAudioStream(true, true, selectedAudioDeviceId)

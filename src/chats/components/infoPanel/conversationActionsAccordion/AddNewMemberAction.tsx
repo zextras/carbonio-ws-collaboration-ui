@@ -37,13 +37,13 @@ const AddNewMemberAction: FC<AddNewMemberProps> = ({ roomId }) => {
 	const roomName: string = useStore((state) => getRoomNameSelector(state, roomId));
 	const maxMembers = useStore((store) => getCapability(store, CapabilityType.MAX_GROUP_MEMBERS));
 
-	const [contactsSelected, setContactSelected] = useState<ContactSelected>({});
+	const [contactsSelected, setContactsSelected] = useState<ContactSelected>({});
 	const [addNewMemberModalOpen, setAddNewMemberModalOpen] = useState<boolean>(false);
 	const [showHistory, setShowHistory] = useState<boolean>(false);
 
 	const closeModal = useCallback(() => {
 		setAddNewMemberModalOpen(false);
-		setContactSelected({});
+		setContactsSelected({});
 	}, []);
 
 	const addNewMember = useCallback(() => {
@@ -84,7 +84,7 @@ const AddNewMemberAction: FC<AddNewMemberProps> = ({ roomId }) => {
 					closeModal={closeModal}
 					members={members}
 					contactsSelected={contactsSelected}
-					setContactSelected={setContactSelected}
+					setContactSelected={setContactsSelected}
 					showHistory={showHistory}
 					setShowHistory={setShowHistory}
 					label={roomName}

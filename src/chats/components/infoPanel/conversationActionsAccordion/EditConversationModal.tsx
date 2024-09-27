@@ -84,7 +84,7 @@ const EditConversationModal: FC<EditConversationProps> = ({
 				setButtonDisabled(false);
 				createSnackbar({
 					key: new Date().toLocaleString(),
-					type: 'error',
+					severity: 'error',
 					label: errorSnackbar
 				});
 			});
@@ -101,11 +101,11 @@ const EditConversationModal: FC<EditConversationProps> = ({
 		if (roomDescription) setNewDescription(roomDescription);
 	}, [roomDescription, roomName]);
 
-	const onNameChange = useCallback((e) => {
+	const onNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
 		if (e.target.value.length <= 129) setNewName(e.target.value);
 	}, []);
 
-	const onDescriptionChange = useCallback((e) => {
+	const onDescriptionChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
 		if (e.target.value.length <= 257) setNewDescription(e.target.value);
 	}, []);
 

@@ -35,10 +35,10 @@ const useMuteForAll = (
 
 	const sessionId: string | undefined = useStore((store) => getUserId(store));
 	const participantAudioStatus = useStore((store) =>
-		getParticipantAudioStatus(store, meetingId || '', userIdToMute)
+		getParticipantAudioStatus(store, meetingId ?? '', userIdToMute)
 	);
-	const roomId = useStore((store) => getRoomIdByMeetingId(store, meetingId || ''));
-	const amIModerator = useStore((store) => getOwnershipOfTheRoom(store, roomId || ''));
+	const roomId = useStore((store) => getRoomIdByMeetingId(store, meetingId ?? ''));
+	const amIModerator = useStore((store) => getOwnershipOfTheRoom(store, roomId ?? ''));
 
 	const createSnackbar: CreateSnackbarFn = useSnackbar();
 
@@ -52,7 +52,7 @@ const useMuteForAll = (
 			MeetingsApi.updateAudioStreamStatus(meetingId, false, userIdToMute).catch(() => {
 				createSnackbar({
 					key: new Date().toLocaleString(),
-					type: 'error',
+					severity: 'error',
 					label: errorSnackbar
 				});
 			});

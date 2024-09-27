@@ -92,15 +92,18 @@ const VirtualRoomsList: FC<virtualRoomsListProps> = ({ setListVisibility, parent
 	const createSnackbar: CreateSnackbarFn = useSnackbar();
 
 	const handleMouseUp = useCallback(
-		(event) => {
-			if (inputRef.current?.contains(event.target)) {
+		(event: MouseEvent) => {
+			if (inputRef.current?.contains(event.target as Node)) {
 				setInputHasFocus(true);
 			} else {
 				setInputHasFocus(false);
 			}
-			if (modalRef.current?.contains(event.target) || parentRef.current?.contains(event.target)) {
+			if (
+				modalRef.current?.contains(event.target as Node) ||
+				parentRef.current?.contains(event.target as Node)
+			) {
 				setListVisibility(true);
-			} else if (popupRef.current && !popupRef.current.contains(event.target)) {
+			} else if (popupRef.current && !popupRef.current.contains(event.target as Node)) {
 				setListVisibility(false);
 			}
 		},
@@ -120,7 +123,7 @@ const VirtualRoomsList: FC<virtualRoomsListProps> = ({ setListVisibility, parent
 			.catch(() => {
 				createSnackbar({
 					key: new Date().toLocaleString(),
-					type: 'error',
+					severity: 'error',
 					label: errorSnackbar,
 					hideButton: true
 				});
@@ -240,7 +243,7 @@ const VirtualRoomsList: FC<virtualRoomsListProps> = ({ setListVisibility, parent
 	}, [handleMouseUp]);
 
 	return (
-		<CustomContainer background="gray6" height="fit" padding="0.5rem" ref={popupRef}>
+		<CustomContainer background={'gray6'} height="fit" padding="0.5rem" ref={popupRef}>
 			{inputSection}
 			<ListContainer>{listSection}</ListContainer>
 		</CustomContainer>

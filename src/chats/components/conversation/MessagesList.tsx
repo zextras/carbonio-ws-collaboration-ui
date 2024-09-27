@@ -15,7 +15,7 @@ import MessageFactory from './messageBubbles/MessageFactory';
 import MessageHistoryLoader from './MessageHistoryLoader';
 import ScrollButton from './ScrollButton';
 import useFirstUnreadMessage from './useFirstUnreadMessage';
-import useEventListener, { EventName } from '../../../hooks/useEventListener';
+import useEventListener, { EventName, NewMessageEvent } from '../../../hooks/useEventListener';
 import {
 	getHistoryIsFullyLoaded,
 	getHistoryIsLoadedDisabled,
@@ -106,7 +106,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 	);
 
 	const intersectionObserverCallback = useCallback(
-		(entries) => {
+		(entries: IntersectionObserverEntry[]) => {
 			if (size(roomMessages) > 1) {
 				const lastMsg = document.getElementById(`message-${last(roomMessages)?.id}`);
 				const lastMsgRect = lastMsg?.getBoundingClientRect();
@@ -248,13 +248,13 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 		// checking to be actually at the bottom and also if last message it's mine
 		// since we want to go always at the bottom when we send a message, no matter
 		// if we scrolled up in the history
-		(messageFromEvent) => {
+		(event: CustomEvent<NewMessageEvent> | undefined) => {
 			if (
 				size(roomMessages) > 0 &&
-				messageFromEvent.detail.roomId === roomId &&
+				event?.detail.data.roomId === roomId &&
 				(actualScrollPosition === last(roomMessages)?.id ||
-					(messageFromEvent.detail.type === MessageType.TEXT_MSG &&
-						messageFromEvent.detail.from === myUserId))
+					(event?.detail.data.roomId === MessageType.TEXT_MSG &&
+						event?.detail.data.roomId === myUserId))
 			) {
 				setTimeout(() => {
 					scrollToEnd(MessagesListWrapperRef);

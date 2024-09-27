@@ -125,7 +125,7 @@ const GroupRoomPictureHandler: FC<RoomPictureProps> = ({ roomId }) => {
 				.then(() => {
 					createSnackbar({
 						key: new Date().toLocaleString(),
-						type: 'info',
+						severity: 'info',
 						label: updatedImageSnackbar,
 						hideButton: true,
 						autoHideTimeout: 5000
@@ -134,7 +134,7 @@ const GroupRoomPictureHandler: FC<RoomPictureProps> = ({ roomId }) => {
 				.catch(() => {
 					createSnackbar({
 						key: new Date().toLocaleString(),
-						type: 'error',
+						severity: 'error',
 						label: imageSizeTooLargeSnackbar,
 						hideButton: true,
 						autoHideTimeout: 5000
@@ -149,7 +149,7 @@ const GroupRoomPictureHandler: FC<RoomPictureProps> = ({ roomId }) => {
 			.then(() => {
 				createSnackbar({
 					key: new Date().toLocaleString(),
-					type: 'info',
+					severity: 'info',
 					label: deletedImageSnackbar,
 					hideButton: true,
 					autoHideTimeout: 5000
@@ -158,7 +158,7 @@ const GroupRoomPictureHandler: FC<RoomPictureProps> = ({ roomId }) => {
 			.catch(() => {
 				createSnackbar({
 					key: new Date().toLocaleString(),
-					type: 'error',
+					severity: 'error',
 					label: errorDeleteImageSnackbar,
 					hideButton: true,
 					autoHideTimeout: 5000

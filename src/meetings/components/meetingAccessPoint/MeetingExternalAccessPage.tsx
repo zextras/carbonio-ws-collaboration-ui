@@ -94,7 +94,7 @@ const MeetingExternalAccessPage = (): ReactElement => {
 	const errorSnackbar = useCallback(() => {
 		createSnackbar({
 			key: new Date().toLocaleString(),
-			type: 'error',
+			severity: 'error',
 			label: generalErrorSnackbar,
 			hideButton: true,
 			autoHideTimeout: 5000

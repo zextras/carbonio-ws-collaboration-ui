@@ -147,7 +147,7 @@ const ConversationHeaderMeetingButton = ({
 
 	useEffect(() => {
 		document.addEventListener('click', closeDropdown, true);
-		return () => {
+		return (): void => {
 			document.removeEventListener('click', closeDropdown, true);
 		};
 	}, [closeDropdown, ref]);

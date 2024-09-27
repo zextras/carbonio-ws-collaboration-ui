@@ -97,7 +97,7 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 	const [chips, setChips] = useState<ChipItem<{ id: string }>[]>([]);
 
 	const select = useCallback(
-		(id) => setSelected((s) => (s[id] ? omit(s, id) : { ...s, [id]: true })),
+		(id: string) => setSelected((s) => (s[id] ? omit(s, id) : { ...s, [id]: true })),
 		[]
 	);
 

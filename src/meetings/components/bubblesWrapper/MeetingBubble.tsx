@@ -79,13 +79,13 @@ const MeetingBubble: FC<MeetingBubbleProps> = ({ messageId, handleBubbleRemove }
 	const { meetingId }: MeetingRoutesParams = useParams();
 
 	const roomId = useStore((store) => getRoomIdByMeetingId(store, meetingId));
-	const message = useStore((store) => getMessageSelector(store, roomId || '', messageId));
-	const roomType = useStore<RoomType>((store) => getRoomTypeSelector(store, roomId || ''));
+	const message = useStore((store) => getMessageSelector(store, roomId ?? '', messageId));
+	const roomType = useStore<RoomType>((store) => getRoomTypeSelector(store, roomId ?? ''));
 	const messageAttachment = useStore((store) => getMessageAttachment(store, message));
 	const setMeetingSidebarStatus = useStore((store) => store.setMeetingSidebarStatus);
 	const setMeetingChatVisibility = useStore((store) => store.setMeetingChatVisibility);
 	const setInputHasFocus = useStore((store) => store.setInputHasFocus);
-	const inputHasFocus = useStore((store) => getInputHasFocus(store, roomId || ''));
+	const inputHasFocus = useStore((store) => getInputHasFocus(store, roomId ?? ''));
 
 	const [isVisible, setIsVisible] = useState(true);
 	const [isHovering, setIsHovering] = useState(false);
@@ -107,7 +107,7 @@ const MeetingBubble: FC<MeetingBubbleProps> = ({ messageId, handleBubbleRemove }
 		setMeetingSidebarStatus(meetingId, true);
 		setMeetingChatVisibility(meetingId, MeetingChatVisibility.OPEN);
 		if (!inputHasFocus) {
-			setInputHasFocus(roomId || '', true);
+			setInputHasFocus(roomId ?? '', true);
 		}
 	}, [
 		inputHasFocus,
@@ -153,7 +153,7 @@ const MeetingBubble: FC<MeetingBubbleProps> = ({ messageId, handleBubbleRemove }
 				}, 500);
 			}, 3500);
 		}
-		return () => {
+		return (): void => {
 			clearTimeout(timer.current);
 		};
 	}, [messageId, handleBubbleRemove, isHovering]);

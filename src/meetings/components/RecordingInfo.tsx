@@ -10,14 +10,18 @@ import { Container, CreateSnackbarFn, Text, useSnackbar } from '@zextras/carboni
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import useEventListener, { EventName } from '../../hooks/useEventListener';
+import useEventListener, {
+	EventName,
+	RecordingStartedEvent,
+	RecordingStoppedEvent
+} from '../../hooks/useEventListener';
 import { getIsMeetingRecording } from '../../store/selectors/MeetingSelectors';
 import useStore from '../../store/Store';
 
 const RecordingContainer = styled(Container)`
 	position: absolute;
 	top: 0;
-	border-radius: 0px 0px 20px 20px;
+	border-radius: 0 0 20px 20px;
 `;
 
 type RecordingInfoProps = {
@@ -33,9 +37,9 @@ const RecordingInfo = ({ meetingId }: RecordingInfoProps): ReactElement | null =
 	const createSnackbar: CreateSnackbarFn = useSnackbar();
 
 	const handleRecordingStarted = useCallback(
-		(event) => {
-			if (event.detail.userId !== useStore.getState().session.id) {
-				const moderator = useStore.getState().users[event.detail.userId];
+		(event: CustomEvent<RecordingStartedEvent> | undefined) => {
+			if (event?.detail.data.userId !== useStore.getState().session.id) {
+				const moderator = useStore.getState().users[event?.detail.data.userId ?? ''];
 				const moderatorName = moderator?.name || moderator?.email || '';
 				const recordingStarted = t(
 					'meeting.recordingStart.successSnackbar.participants',
@@ -46,7 +50,7 @@ const RecordingInfo = ({ meetingId }: RecordingInfoProps): ReactElement | null =
 				);
 				createSnackbar({
 					key: new Date().toLocaleString(),
-					type: 'info',
+					severity: 'info',
 					label: recordingStarted,
 					hideButton: true
 				});
@@ -58,9 +62,9 @@ const RecordingInfo = ({ meetingId }: RecordingInfoProps): ReactElement | null =
 	useEventListener(EventName.MEETING_RECORDING_STARTED, handleRecordingStarted);
 
 	const handleRecordingStopped = useCallback(
-		(event) => {
-			if (event.detail.userId !== useStore.getState().session.id) {
-				const moderator = useStore.getState().users[event.detail.userId];
+		(event: CustomEvent<RecordingStoppedEvent> | undefined) => {
+			if (event?.detail.data.userId !== useStore.getState().session.id) {
+				const moderator = useStore.getState().users[event?.detail.data.userId ?? ''];
 				const moderatorName = moderator?.name || moderator?.email || '';
 				const recordingStopped = t(
 					'meeting.recordingStop.successSnackbar.participants',
@@ -71,7 +75,7 @@ const RecordingInfo = ({ meetingId }: RecordingInfoProps): ReactElement | null =
 				);
 				createSnackbar({
 					key: new Date().toLocaleString(),
-					type: 'info',
+					severity: 'info',
 					label: recordingStopped,
 					hideButton: true
 				});
@@ -87,7 +91,7 @@ const RecordingInfo = ({ meetingId }: RecordingInfoProps): ReactElement | null =
 		<RecordingContainer
 			height="fit"
 			width="fit"
-			background="error"
+			background={'error'}
 			padding={{ horizontal: 'extralarge', vertical: 'extrasmall' }}
 		>
 			<Text>{meetingIsBeenRecordedLabel}</Text>
