@@ -41,7 +41,6 @@ type AccessMeetingPageMediaSectionProps = {
 	setStreamTrack: Dispatch<SetStateAction<MediaStream | null>>;
 	hasUserDirectAccess: boolean | undefined;
 	userIsReady: boolean;
-	setUserIsReady: Dispatch<SetStateAction<boolean>>;
 	meetingName: string;
 	wrapperWidth: number;
 	handleEnterMeeting: (
@@ -74,7 +73,6 @@ const MeetingAccessPageMediaSection: FC<AccessMeetingPageMediaSectionProps> = ({
 	setStreamTrack,
 	hasUserDirectAccess,
 	userIsReady,
-	setUserIsReady,
 	meetingName,
 	wrapperWidth,
 	handleEnterMeeting,

@@ -107,7 +107,6 @@ const MeetingAccessPage = (): ReactElement => {
 						setStreamTrack={setStreamTrack}
 						hasUserDirectAccess={hasUserDirectAccess}
 						userIsReady={userIsReady}
-						setUserIsReady={setUserIsReady}
 						meetingName={meetingName}
 						wrapperWidth={wrapperWidth}
 						handleEnterMeeting={handleEnterMeeting}

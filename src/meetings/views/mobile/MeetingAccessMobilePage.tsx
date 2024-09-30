@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import React, { ReactElement, useMemo } from 'react';
+import React, { ReactElement, useCallback, useMemo, useState } from 'react';
 
 import { Button, Container, Icon, Text } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
@@ -35,6 +35,10 @@ const MeetingAccessMobilePage = (): ReactElement => {
 
 	const chatsBeNetworkStatus = useStore(({ connections }) => connections.status.chats_be);
 	const websocketNetworkStatus = useStore(({ connections }) => connections.status.websocket);
+
+	const [audioOn, setAudioOn] = useState(false);
+
+	const toggleAudio = useCallback(() => setAudioOn((prev) => !prev), []);
 
 	const { hasUserDirectAccess, ShowMeetingAccessPage, accessTitle, userIsReady, setUserIsReady } =
 		useAccessMeetingInformation();
@@ -83,7 +87,7 @@ const MeetingAccessMobilePage = (): ReactElement => {
 					data-testid="enterMeetingButton"
 					width="fill"
 					label={enter}
-					onClick={() => handleEnterMeeting()}
+					onClick={() => handleEnterMeeting({ audio: audioOn, video: false })}
 					disabled={!areNetworksUp}
 				/>
 			);
@@ -94,7 +98,7 @@ const MeetingAccessMobilePage = (): ReactElement => {
 					label={readyToParticipateLabel}
 					icon="CheckmarkOutline"
 					iconPlacement="right"
-					onClick={() => handleWaitingRoom()}
+					onClick={() => handleWaitingRoom({ audio: audioOn, video: false })}
 					width="fill"
 					disabled={!areNetworksUp}
 				/>
@@ -109,6 +113,7 @@ const MeetingAccessMobilePage = (): ReactElement => {
 		);
 	}, [
 		areNetworksUp,
+		audioOn,
 		enter,
 		handleEnterMeeting,
 		handleWaitingRoom,
@@ -131,9 +136,8 @@ const MeetingAccessMobilePage = (): ReactElement => {
 			</Container>
 			<Container height="fit" orientation="horizontal" gap="2rem">
 				<Button
-					onClick={(): void => {}}
-					icon="MicOff"
-					disabled
+					onClick={toggleAudio}
+					icon={audioOn ? 'Mic' : 'MicOff'}
 					size="large"
 					color="text"
 					minWidth="2.5rem"
