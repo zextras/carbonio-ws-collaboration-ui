@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { FC, useCallback, useState } from 'react';
+import React, { FC, useCallback, useMemo, useState } from 'react';
 
 import { Input, Container, Tooltip, Button } from '@zextras/carbonio-design-system';
 import { size } from 'lodash';
@@ -26,30 +26,32 @@ const SearchUserAction: FC<SearchUserProps> = ({ setFilteredInput, isInsideMeeti
 	const closeSearchTooltip: string = t('participantsList.closeSearch', 'Close search');
 	const [searchInput, setSearchInput] = useState('');
 
-	const handleFilterChange = useCallback((ev: React.FormEvent<HTMLInputElement>): void => {
-		setSearchInput(ev.currentTarget.value);
-		setFilteredInput(ev.currentTarget.value);
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
+	const handleFilterChange = useCallback(
+		(ev: React.FormEvent<HTMLInputElement>): void => {
+			setSearchInput(ev.currentTarget.value);
+			setFilteredInput(ev.currentTarget.value);
+		},
+		[setFilteredInput]
+	);
 
 	const resetFilter = useCallback((): void => {
 		setSearchInput('');
 		setFilteredInput('');
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
+	}, [setFilteredInput]);
+
+	const tooltipLabel = useMemo(() => {
+		if (size(searchInput) > 0) {
+			return closeSearchTooltip;
+		}
+		if (isInsideMeeting) {
+			return searchParticipantLabel;
+		}
+		return searchMemberLabel;
+	}, [closeSearchTooltip, isInsideMeeting, searchInput, searchMemberLabel, searchParticipantLabel]);
 
 	const CustomElement = useCallback(
 		(): React.ReactElement => (
-			<Tooltip
-				placement="top"
-				label={
-					size(searchInput) > 0
-						? closeSearchTooltip
-						: isInsideMeeting
-							? searchParticipantLabel
-							: searchMemberLabel
-				}
-			>
+			<Tooltip placement="top" label={tooltipLabel}>
 				<Button
 					type="ghost"
 					data-testid="close_button"
@@ -59,8 +61,7 @@ const SearchUserAction: FC<SearchUserProps> = ({ setFilteredInput, isInsideMeeti
 				/>
 			</Tooltip>
 		),
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[searchInput]
+		[resetFilter, searchInput, tooltipLabel]
 	);
 
 	return (

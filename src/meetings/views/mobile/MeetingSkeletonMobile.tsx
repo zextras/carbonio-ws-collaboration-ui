@@ -15,6 +15,7 @@ import { MeetingRoutesParams } from '../../../hooks/useRouting';
 import Logo from '../../components/Logo';
 import MobileActionBar from '../../components/mobile/MobileActionBar';
 import MobileConversation from '../../components/mobile/MobileConversation';
+import MobileParticipants from '../../components/mobile/MobileParticipants';
 
 export enum MobileMeetingView {
 	TILES = 'tiles',
@@ -43,7 +44,7 @@ const MeetingSkeletonMobile = (): ReactElement => {
 			<CustomContainer>
 				{view === MobileMeetingView.TILES && <Container>Meeting Tiles</Container>}
 				{view === MobileMeetingView.CHAT && <MobileConversation meetingId={meetingId} />}
-				{view === MobileMeetingView.PARTICIPANTS && <Container>Participants</Container>}
+				{view === MobileMeetingView.PARTICIPANTS && <MobileParticipants meetingId={meetingId} />}
 			</CustomContainer>
 			<MobileActionBar meetingId={meetingId} view={view} setView={setView} />
 		</Container>
