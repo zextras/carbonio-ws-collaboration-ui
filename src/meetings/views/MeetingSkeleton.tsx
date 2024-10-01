@@ -4,14 +4,12 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { ReactElement, useCallback, useMemo, useRef } from 'react';
+import React, { ReactElement, useMemo, useRef } from 'react';
 
-import { Container, CreateSnackbarFn, useSnackbar } from '@zextras/carbonio-design-system';
-import { useTranslation } from 'react-i18next';
+import { Container } from '@zextras/carbonio-design-system';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
-import useEventListener, { EventName } from '../../hooks/useEventListener';
 import useGeneralMeetingControls from '../../hooks/useGeneralMeetingControls';
 import { MeetingRoutesParams } from '../../hooks/useRouting';
 import { getMeetingViewSelected } from '../../store/selectors/ActiveMeetingSelectors';
@@ -47,13 +45,6 @@ export type MeetingViewProps = {
 };
 
 const MeetingSkeleton = (): ReactElement => {
-	const [t] = useTranslation();
-	const mutedByModerator = t(
-		'snackbar.mutedByModerator',
-		"You've been muted by a moderator, unmute yourself to speak"
-	);
-	const okLabel = t('action.ok', 'Ok');
-
 	const { meetingId }: MeetingRoutesParams = useParams();
 	const myUserId = useStore(getUserId);
 
@@ -66,21 +57,7 @@ const MeetingSkeleton = (): ReactElement => {
 
 	const streamsWrapperRef = useRef<HTMLDivElement>(null);
 
-	const createSnackbar: CreateSnackbarFn = useSnackbar();
-
 	useGeneralMeetingControls(meetingId);
-
-	const handleMutedEvent = useCallback(() => {
-		createSnackbar({
-			key: new Date().toLocaleString(),
-			type: 'info',
-			label: mutedByModerator,
-			actionLabel: okLabel,
-			disableAutoHide: true
-		});
-	}, [createSnackbar, mutedByModerator, okLabel]);
-
-	useEventListener(EventName.MEMBER_MUTED, handleMutedEvent);
 
 	const ViewToDisplay = useMemo(() => {
 		if (numberOfTiles <= 2) {

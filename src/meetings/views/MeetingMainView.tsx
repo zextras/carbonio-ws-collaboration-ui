@@ -19,9 +19,12 @@ const LazyAccessPageView = lazy(
 	() => import(/* webpackChunkName: "MeetingAccessPage" */ './AccessPage')
 );
 
-const LazyMeetingSkeleton = lazy(
-	() => import(/* webpackChunkName: "MeetingSkeleton" */ './MeetingSkeleton')
-);
+const LazyMeetingSkeleton = lazy(() => {
+	if (BrowserUtils.isMobile()) {
+		return import(/* webpackChunkName: "MeetingSkeletonMobile" */ './mobile/MeetingSkeletonMobile');
+	}
+	return import(/* webpackChunkName: "MeetingSkeleton" */ './MeetingSkeleton');
+});
 
 const LazyInfoPage = lazy(() => import(/* webpackChunkName: "InfoPage" */ './InfoPage'));
 
