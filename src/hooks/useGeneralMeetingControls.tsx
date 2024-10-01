@@ -97,8 +97,8 @@ const useGeneralMeetingControls = (meetingId: string): void => {
 	}, [meetingId, setPinnedTile]);
 
 	const meetingParticipantClashedHandler = useCallback(
-		(event: CustomEvent<MeetingWaitingParticipantClashedEvent> | undefined) => {
-			meetingDisconnection(event?.detail.data.meetingId ?? '');
+		(event: CustomEvent<MeetingWaitingParticipantClashedEvent['data']> | undefined) => {
+			meetingDisconnection(event?.detail.meetingId ?? '');
 			goToInfoPage(PAGE_INFO_TYPE.ALREADY_ACTIVE_MEETING_SESSION);
 		},
 		[goToInfoPage, meetingDisconnection]

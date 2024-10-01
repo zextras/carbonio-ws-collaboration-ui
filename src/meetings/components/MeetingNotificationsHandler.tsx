@@ -48,14 +48,17 @@ const MeetingNotificationsHandler = (): ReactElement => {
 
 	const timeout = useRef<NodeJS.Timeout>();
 
-	const addNotification = useCallback((event: CustomEvent<MeetingStartedEvent> | undefined) => {
-		clearTimeout(timeout.current);
-		if (event) {
-			setNotificationArray((prev) => [event?.detail, ...prev]);
-		}
-		setMeetingSound(true);
-		timeout.current = setTimeout(() => setMeetingSound(false), 12000);
-	}, []);
+	const addNotification = useCallback(
+		(event: CustomEvent<IncomingMeetingEvent['data']> | undefined) => {
+			clearTimeout(timeout.current);
+			if (event) {
+				setNotificationArray((prev) => [event?.detail, ...prev]);
+			}
+			setMeetingSound(true);
+			timeout.current = setTimeout(() => setMeetingSound(false), 12000);
+		},
+		[]
+	);
 
 	const removeNotification = useCallback((notificationId: string): void => {
 		setNotificationArray((prev: MeetingStartedEvent[]) => {
@@ -67,10 +70,10 @@ const MeetingNotificationsHandler = (): ReactElement => {
 	}, []);
 
 	const removeNotificationFromMeetingEvent = useCallback(
-		(event: CustomEvent<IncomingMeetingEvent> | undefined) => {
+		(event: CustomEvent<IncomingMeetingEvent['data']> | undefined) => {
 			const notificationToRemove = find(
 				notificationArray,
-				(notification) => notification.meetingId === event?.detail.data.meetingId
+				(notification) => notification.meetingId === event?.detail.meetingId
 			);
 			if (notificationToRemove) {
 				removeNotification(notificationToRemove.meetingId);

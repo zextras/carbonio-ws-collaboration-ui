@@ -46,7 +46,7 @@ const LeaveMeetingButton = ({
 	const [buttonLabel, setButtonLabel] = useState('');
 
 	const activeButton = useCallback(
-		(event) => {
+		(event: React.MouseEvent<HTMLButtonElement, MouseEvent> | KeyboardEvent) => {
 			event.stopPropagation();
 			setActive(true);
 			setButtonLabel(leaveMeetingButtonLabel);
@@ -55,7 +55,7 @@ const LeaveMeetingButton = ({
 	);
 
 	const leaveMeeting = useCallback(
-		(event) => {
+		(event: React.MouseEvent<HTMLButtonElement, MouseEvent> | KeyboardEvent) => {
 			event.stopPropagation();
 			MeetingsApi.leaveMeeting(meetingId).then(() => {
 				goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED);

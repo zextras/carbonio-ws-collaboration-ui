@@ -37,9 +37,9 @@ const RecordingInfo = ({ meetingId }: RecordingInfoProps): ReactElement | null =
 	const createSnackbar: CreateSnackbarFn = useSnackbar();
 
 	const handleRecordingStarted = useCallback(
-		(event: CustomEvent<RecordingStartedEvent> | undefined) => {
-			if (event?.detail.data.userId !== useStore.getState().session.id) {
-				const moderator = useStore.getState().users[event?.detail.data.userId ?? ''];
+		(event: CustomEvent<RecordingStartedEvent['data']> | undefined) => {
+			if (event?.detail.userId !== useStore.getState().session.id) {
+				const moderator = useStore.getState().users[event?.detail.userId ?? ''];
 				const moderatorName = moderator?.name || moderator?.email || '';
 				const recordingStarted = t(
 					'meeting.recordingStart.successSnackbar.participants',
@@ -62,9 +62,9 @@ const RecordingInfo = ({ meetingId }: RecordingInfoProps): ReactElement | null =
 	useEventListener(EventName.MEETING_RECORDING_STARTED, handleRecordingStarted);
 
 	const handleRecordingStopped = useCallback(
-		(event: CustomEvent<RecordingStoppedEvent> | undefined) => {
-			if (event?.detail.data.userId !== useStore.getState().session.id) {
-				const moderator = useStore.getState().users[event?.detail.data.userId ?? ''];
+		(event: CustomEvent<RecordingStoppedEvent['data']> | undefined) => {
+			if (event?.detail.userId !== useStore.getState().session.id) {
+				const moderator = useStore.getState().users[event?.detail.userId ?? ''];
 				const moderatorName = moderator?.name || moderator?.email || '';
 				const recordingStopped = t(
 					'meeting.recordingStop.successSnackbar.participants',

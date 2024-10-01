@@ -76,13 +76,22 @@ describe('Mute/Unmute Conversation', () => {
 		expect(mockedUnmuteRoomNotificationRequest).toHaveBeenCalled();
 	});
 	test('undo mute', async () => {
-		const { result } = renderHook(() => useStore());
-		act(() => result.current.addRoom(testRoom));
 		mockedMuteRoomNotificationRequest.mockReturnValue(true);
 		mockedUnmuteRoomNotificationRequest.mockReturnValueOnce(true);
+
+		const { result } = renderHook(() => useStore());
+		act(() => result.current.addRoom(testRoom));
 		const { user } = setup(<MuteConversationAction roomId={testRoom.id} />);
 
-		await user.click(screen.getByText(/Mute notifications/i));
+		const mute = screen.getByText(/Mute notifications/i);
+		expect(mute).toBeEnabled();
+
+		await user.click(mute);
+
+		await act(async () => {
+			await jest.advanceTimersToNextTimerAsync();
+		});
+
 		const snackbar = await screen.findByText(/Notifications muted for this chat/i);
 		await waitFor(() => expect(snackbar).toBeVisible());
 		await user.click(screen.getByText(/UNDO/i));

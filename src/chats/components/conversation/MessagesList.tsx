@@ -248,13 +248,12 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 		// checking to be actually at the bottom and also if last message it's mine
 		// since we want to go always at the bottom when we send a message, no matter
 		// if we scrolled up in the history
-		(event: CustomEvent<NewMessageEvent> | undefined) => {
+		(event: CustomEvent<NewMessageEvent['data']> | undefined) => {
 			if (
 				size(roomMessages) > 0 &&
-				event?.detail.data.roomId === roomId &&
+				event?.detail.roomId === roomId &&
 				(actualScrollPosition === last(roomMessages)?.id ||
-					(event?.detail.data.roomId === MessageType.TEXT_MSG &&
-						event?.detail.data.roomId === myUserId))
+					(event?.detail.roomId === MessageType.TEXT_MSG && event?.detail.roomId === myUserId))
 			) {
 				setTimeout(() => {
 					scrollToEnd(MessagesListWrapperRef);

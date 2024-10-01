@@ -24,11 +24,14 @@ const WrapperContainer = styled(Container)<{ $messageIdsList: string[] }>`
 const BubblesWrapper = (): JSX.Element => {
 	const [messageIdsList, setMessageIdsList] = useState<string[]>([]);
 
-	const newMessageHandler = useCallback((event: CustomEvent<NewMessageEvent> | undefined) => {
-		if (event?.detail.data.type === MessageType.TEXT_MSG) {
-			setMessageIdsList((oldState) => [event?.detail.data.id, ...oldState]);
-		}
-	}, []);
+	const newMessageHandler = useCallback(
+		(event: CustomEvent<NewMessageEvent['data']> | undefined) => {
+			if (event?.detail.type === MessageType.TEXT_MSG) {
+				setMessageIdsList((oldState) => [event?.detail.id, ...oldState]);
+			}
+		},
+		[]
+	);
 
 	const handleBubbleRemove = useCallback((messageIdToRemove: string) => {
 		setMessageIdsList((oldState) => {

@@ -42,8 +42,8 @@ const WaitingListSnackbar = (): ReactElement | null => {
 	);
 
 	const waitingSnackbarHandler = useCallback(
-		(event: CustomEvent<NewWaitingUserEvent> | undefined) => {
-			setMeetingId(event?.detail.data.meetingId ?? '');
+		(event: CustomEvent<NewWaitingUserEvent['data']> | undefined) => {
+			setMeetingId(event?.detail.meetingId ?? '');
 		},
 		[]
 	);

@@ -189,7 +189,6 @@ const UploadAttachmentManagerView: React.FC<UploadAttachmentManagerViewProps> = 
 
 	const previewClick = useCallback(
 		(file: FileToUpload) => {
-			console.log(file);
 			const { extension, size } = getAttachmentInfo(file.file.type, file.file.size);
 			return createPreview({
 				previewType: getAttachmentType(file.file.type),

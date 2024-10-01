@@ -59,11 +59,11 @@ const ScrollButton = ({ roomId, onClickCb }: ScrollButtonProps): ReactElement =>
 	);
 
 	const newMessageEventHandler = useCallback(
-		(event: CustomEvent<NewMessageEvent> | undefined) => {
+		(event: CustomEvent<NewMessageEvent['data']> | undefined) => {
 			if (
-				event?.detail.data.roomId === roomId &&
-				event?.detail.data.type === MessageType.TEXT_MSG &&
-				event?.detail.data.from !== myUserId
+				event?.detail.roomId === roomId &&
+				event?.detail.type === MessageType.TEXT_MSG &&
+				event?.detail.from !== myUserId
 			) {
 				setShowNewMessageBadge(true);
 				debouncedNewMessagesBadgeSetter();
