@@ -108,7 +108,11 @@ const useAccessMeetingInformation = (): UseAccessMeetingInformationReturnType =>
 
 	const ShowMeetingAccessPage = useCallback(
 		({ children }) => (
-			<Container background="gray0" padding="2rem" data-testid="meeting_access_page_view">
+			<Container
+				background="gray0"
+				padding={{ top: '4rem', bottom: '2rem', horizontal: '2rem' }}
+				data-testid="meeting_access_page_view"
+			>
 				{chatsBeNetworkStatus && children}
 			</Container>
 		),
