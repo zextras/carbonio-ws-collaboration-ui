@@ -88,10 +88,6 @@ describe('Mute/Unmute Conversation', () => {
 
 		await user.click(mute);
 
-		await act(async () => {
-			await jest.advanceTimersToNextTimerAsync();
-		});
-
 		const snackbar = await screen.findByText(/Notifications muted for this chat/i);
 		await waitFor(() => expect(snackbar).toBeVisible());
 		await user.click(screen.getByText(/UNDO/i));

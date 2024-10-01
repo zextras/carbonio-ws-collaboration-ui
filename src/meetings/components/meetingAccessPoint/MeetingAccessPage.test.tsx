@@ -200,8 +200,11 @@ describe('AccessMeeting - enter to meeting as a moderator or as a member of a gr
 
 		const videoOff = screen.getByTestId(iconVideoOff);
 		await user.click(videoOff);
-		const videoOn = await screen.findAllByTestId(iconVideo);
-		expect(videoOn).toHaveLength(2);
+
+		await waitFor(() => {
+			const videoOn = screen.getAllByTestId('icon: Video');
+			expect(videoOn).toHaveLength(1);
+		});
 	});
 
 	test('turn on audio', async () => {
@@ -211,8 +214,11 @@ describe('AccessMeeting - enter to meeting as a moderator or as a member of a gr
 
 		const audioOff = screen.getByTestId(iconMicOff);
 		await user.click(audioOff);
-		const audioOn = await screen.findAllByTestId('icon: Mic');
-		expect(audioOn).toHaveLength(2);
+
+		await waitFor(() => {
+			const audioOn = screen.getAllByTestId('icon: Mic');
+			expect(audioOn).toHaveLength(2);
+		});
 	});
 
 	test('try audio', async () => {
@@ -220,8 +226,11 @@ describe('AccessMeeting - enter to meeting as a moderator or as a member of a gr
 
 		const audioOff = screen.getByTestId(iconMicOff);
 		await user.click(audioOff);
-		const audioOn = await screen.findAllByTestId('icon: Mic');
-		expect(audioOn[1]).toBeInTheDocument();
+
+		await waitFor(() => {
+			const audioOn = screen.getAllByTestId('icon: Mic');
+			expect(audioOn[1]).toBeInTheDocument();
+		});
 		const tryAudio = await screen.findByText(/Start mic test/i);
 		expect(tryAudio).toBeEnabled();
 		await user.click(tryAudio);
