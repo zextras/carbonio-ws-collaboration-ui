@@ -127,14 +127,14 @@ const MeetingAccessMobilePage = (): ReactElement => {
 
 	return (
 		<ShowMeetingAccessPage>
-			<Logo top="2rem" left="2rem" />
+			<Logo top="1.5rem" left="1.5rem" />
 			<Container gap="1rem">
 				<Text weight="bold" overflow="break-word" textAlign="center">
 					{accessTitle}
 				</Text>
 				{waitingRoomLabels}
 			</Container>
-			<Container height="fit" orientation="horizontal" gap="2rem">
+			<Container height="fit" orientation="horizontal" gap="2rem" padding="1rem">
 				<Button
 					onClick={toggleAudio}
 					icon={audioOn ? 'Mic' : 'MicOff'}

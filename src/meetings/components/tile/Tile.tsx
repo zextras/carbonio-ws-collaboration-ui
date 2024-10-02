@@ -21,6 +21,7 @@ import {
 } from '../../../store/selectors/MeetingSelectors';
 import useStore from '../../../store/Store';
 import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
+import { BrowserUtils } from '../../../utils/BrowserUtils';
 
 type modalTileProps = {
 	streamRef: React.MutableRefObject<HTMLVideoElement | null>;
@@ -49,11 +50,15 @@ const CustomTile = styled(Container)<{ $isTalking: boolean; $isHovering: boolean
 			opacity: ${({ $isHovering }): number => ($isHovering ? 1 : 0)};
 		}
 	}
+
+	${BrowserUtils.isMobile() && 'height: 100%;'}
 `;
 
 const CustomContainer = styled(Container)`
 	aspect-ratio: 16/9;
 	position: absolute;
+
+	${BrowserUtils.isMobile() && 'height: 100%;'}
 `;
 
 const VideoEl = styled.video<{
@@ -68,6 +73,8 @@ const VideoEl = styled.video<{
 	aspect-ratio: 16/9;
 	width: inherit;
 	border-radius: 0.5rem;
+
+	${BrowserUtils.isMobile() && 'border-radius: 0;'}
 `;
 
 const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProps }) => {

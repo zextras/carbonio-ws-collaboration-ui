@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2023 Zextras <https://www.zextras.com>
+ * SPDX-FileCopyrightText: 2024 Zextras <https://www.zextras.com>
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
@@ -7,7 +7,6 @@
 import React, { Dispatch, ReactElement, SetStateAction, useCallback } from 'react';
 
 import { Button, Container } from '@zextras/carbonio-design-system';
-import styled from 'styled-components';
 
 import useRouting, { PAGE_INFO_TYPE } from '../../../hooks/useRouting';
 import { MeetingsApi } from '../../../network';
@@ -16,11 +15,6 @@ import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { getAudioStream } from '../../../utils/UserMediaManager';
 import { MobileMeetingView } from '../../views/mobile/MeetingSkeletonMobile';
-
-const ActiveButton = styled(Button)<{ $active: boolean }>`
-	background-color: ${({ theme, $active }): string =>
-		$active ? theme.palette.success.regular : theme.palette.primary.regular};
-`;
 
 type MobileActionBarProps = {
 	meetingId: string;
@@ -71,7 +65,7 @@ const MobileActionBar = ({ meetingId, view, setView }: MobileActionBarProps): Re
 	}, [view, setView]);
 
 	return (
-		<Container height="fit" orientation="horizontal" gap="1rem">
+		<Container height="fit" orientation="horizontal" padding="1rem" gap="1rem">
 			<Button
 				size="large"
 				icon="PeopleOutline"
