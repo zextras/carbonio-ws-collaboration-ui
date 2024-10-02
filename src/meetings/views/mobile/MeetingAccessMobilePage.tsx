@@ -124,11 +124,13 @@ const MeetingAccessMobilePage = (): ReactElement => {
 		userIsReady
 	]);
 
-	useEventListener(EventName.MEETING_USER_ACCEPTED, () => handleWaitingRoom());
+	useEventListener(EventName.MEETING_USER_ACCEPTED, () =>
+		handleWaitingRoom({ audio: audioOn, video: false })
+	);
 
 	return (
 		<ShowMeetingAccessPage>
-			<Logo top="1.5rem" left="1.5rem" />
+			<Logo top="2rem" left="2rem" />
 			<Container>
 				<Container padding={{ horizontal: '2rem' }}>
 					<AccessTile

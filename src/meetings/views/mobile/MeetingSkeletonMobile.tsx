@@ -17,6 +17,7 @@ import MobileActionBar from '../../components/mobile/MobileActionBar';
 import MobileConversation from '../../components/mobile/MobileConversation';
 import MobileParticipants from '../../components/mobile/MobileParticipants';
 import MobileTilesView from '../../components/mobile/MobileTilesView';
+import RecordingInfo from '../../components/RecordingInfo';
 
 export enum MobileMeetingView {
 	TILES = 'tiles',
@@ -36,8 +37,9 @@ const MeetingSkeletonMobile = (): ReactElement => {
 	useGeneralMeetingControls(meetingId);
 
 	return (
-		<Container background="gray0" padding={{ top: '4rem', bottom: '1rem', horizontal: '1rem' }}>
-			<Logo top="1.5rem" left="1.5rem" />
+		<Container background="gray0" padding={{ top: '4.4rem', bottom: '1rem', horizontal: '1rem' }}>
+			<RecordingInfo meetingId={meetingId} />
+			<Logo top="2rem" left="2rem" />
 			<CustomContainer>
 				{view === MobileMeetingView.TILES && <MobileTilesView meetingId={meetingId} />}
 				{view === MobileMeetingView.CHAT && <MobileConversation meetingId={meetingId} />}
