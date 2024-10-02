@@ -44,7 +44,6 @@ const DefaultUserView: FC<newUserViewProps> = ({ roomsIds }): ReactElement => {
 		'conversation.displayer.title',
 		'Choose a chat to start sending messages.'
 	);
-
 	const createChatOrGroupDescription = t(
 		'conversation.emptyList.displayer.description',
 		'When creating a chat you will have the possibility to choose more than one person and create a group.'
