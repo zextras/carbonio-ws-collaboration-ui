@@ -57,8 +57,6 @@ const CustomTile = styled(Container)<{ $isTalking: boolean; $isHovering: boolean
 const CustomContainer = styled(Container)`
 	aspect-ratio: 16/9;
 	position: absolute;
-
-	${BrowserUtils.isMobile() && 'height: 100%;'}
 `;
 
 const VideoEl = styled.video<{
@@ -192,7 +190,7 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 				isScreenShare={!!isScreenShare}
 			/>
 			{!videoStreamEnabled && (
-				<CustomContainer data-testid="avatar_box">
+				<CustomContainer data-testid="avatar_box" height="fit">
 					<TileAvatarComponent userId={userId} />
 				</CustomContainer>
 			)}

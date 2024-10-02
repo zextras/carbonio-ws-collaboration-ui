@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next';
 import useEventListener, { EventName } from '../../../hooks/useEventListener';
 import useStore from '../../../store/Store';
 import Logo from '../../components/Logo';
+import AccessTile from '../../components/meetingAccessPoint/mediaHandlers/AccessTile';
 import useAccessMeetingAction from '../../components/meetingAccessPoint/useAccessMeetingAction';
 import useAccessMeetingInformation from '../../components/meetingAccessPoint/useAccessMeetingInformation';
 
@@ -128,11 +129,20 @@ const MeetingAccessMobilePage = (): ReactElement => {
 	return (
 		<ShowMeetingAccessPage>
 			<Logo top="1.5rem" left="1.5rem" />
-			<Container gap="1rem">
-				<Text weight="bold" overflow="break-word" textAlign="center">
-					{accessTitle}
-				</Text>
-				{waitingRoomLabels}
+			<Container>
+				<Container padding={{ horizontal: '2rem' }}>
+					<AccessTile
+						videoStreamRef={React.createRef()}
+						videoPlayerTestMuted
+						mediaDevicesEnabled={{ audio: audioOn, video: false }}
+					/>
+				</Container>
+				<Container height="fit" gap="1rem" padding={{ horizontal: '1rem', vertical: '2rem' }}>
+					<Text weight="bold" overflow="break-word" textAlign="center">
+						{accessTitle}
+					</Text>
+					{waitingRoomLabels}
+				</Container>
 			</Container>
 			<Container height="fit" orientation="horizontal" gap="2rem" padding="1rem">
 				<Button

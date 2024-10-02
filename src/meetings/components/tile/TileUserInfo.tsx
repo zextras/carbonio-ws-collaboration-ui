@@ -16,7 +16,7 @@ import useStore from '../../../store/Store';
 import GuestUserLabel from '../GuestUserLabel';
 
 const InfoContainer = styled(Container)`
-	height: auto;
+	height: 100%;
 	aspect-ratio: 16/9;
 	position: absolute;
 `;
