@@ -110,7 +110,7 @@ const useAccessMeetingInformation = (): UseAccessMeetingInformationReturnType =>
 		({ children }) => (
 			<Container
 				background="gray0"
-				padding={{ top: '4.5rem', bottom: '1rem', horizontal: '1rem' }}
+				padding={{ vertical: '4.5rem', horizontal: '1rem' }}
 				data-testid="meeting_access_page_view"
 			>
 				{chatsBeNetworkStatus && children}

@@ -37,7 +37,7 @@ const MeetingSkeletonMobile = (): ReactElement => {
 	useGeneralMeetingControls(meetingId);
 
 	return (
-		<Container background="gray0" padding={{ top: '4.4rem', bottom: '1rem', horizontal: '1rem' }}>
+		<Container background="gray0" padding={{ vertical: '4.4rem', horizontal: '1rem' }}>
 			<RecordingInfo meetingId={meetingId} />
 			<Logo top="2rem" left="2rem" />
 			<CustomContainer>
