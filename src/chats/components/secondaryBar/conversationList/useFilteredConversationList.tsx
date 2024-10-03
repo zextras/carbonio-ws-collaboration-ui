@@ -4,17 +4,17 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { Container } from '@zextras/carbonio-design-system';
-import { map, size } from 'lodash';
+import { Container, ListV2 } from '@zextras/carbonio-design-system';
+import { isEqual, map, size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import CollapsedSidebarListItem from './CollapsedSidebarListItem';
 import ExpandedSidebarListItem from './ExpandedSidebarListItem';
 import { useFilterRoomsOnInput } from '../../../../hooks/useFilterRoomsOnInput';
-import { SecondaryBarInfoText } from '../SecondaryBarView';
+import { FilteredConversation, SecondaryBarInfoText } from '../SecondaryBarView';
 
 const CustomContainer = styled(Container)`
 	cursor: default;
@@ -33,18 +33,46 @@ const useFilteredConversationList = (
 		'There are no users matching this search in your existing chats.'
 	);
 
+	const offsetRef = useRef(0);
+	const [items, setItems] = useState<FilteredConversation[]>([]);
+
 	const filteredConversationsIds = useFilterRoomsOnInput(input);
 
-	const ListItem = useMemo(
+	const ConversationListItem = useMemo(
 		() => (expanded ? ExpandedSidebarListItem : CollapsedSidebarListItem),
 		[expanded]
 	);
 
+	// upload the other list elements while scrolling down
+	const loadItems = useCallback(() => {
+		if (offsetRef.current <= filteredConversationsIds.length) {
+			const offset = offsetRef.current;
+			const newItems = filteredConversationsIds.slice(offset, offset + 2);
+			setItems((prevState) => [...prevState, ...newItems]);
+			offsetRef.current += 2;
+		}
+	}, [filteredConversationsIds]);
+
+	// change the offset and reload the function as filteredConversationsIds changes
+	useEffect(() => {
+		if (input !== '' || !isEqual(filteredConversationsIds[0], items[0])) {
+			setItems([]);
+			offsetRef.current = 0;
+			loadItems();
+		}
+	}, [filteredConversationsIds, input, items, loadItems]);
+
+	const ConversationElements = useMemo(
+		() =>
+			map(items, (room) => (
+				<ConversationListItem roomId={room.roomId} key={`${room.roomId}_item`} />
+			)),
+		[ConversationListItem, items]
+	);
+
 	const listOfRooms = useMemo(() => {
 		if (size(filteredConversationsIds) > 0) {
-			return map(filteredConversationsIds, (room) => (
-				<ListItem roomId={room.roomId} key={`${room.roomId}_item`} />
-			));
+			return <ListV2 onListBottom={loadItems}>{ConversationElements}</ListV2>;
 		}
 		return (
 			<CustomContainer
@@ -62,12 +90,12 @@ const useFilteredConversationList = (
 				</SecondaryBarInfoText>
 			</CustomContainer>
 		);
-	}, [filteredConversationsIds, expanded, noMatchLabel, ListItem]);
+	}, [filteredConversationsIds, expanded, noMatchLabel, loadItems, ConversationElements]);
 
 	const FilteredConversationList = useMemo(
 		() => (
 			<Container
-				height="fit"
+				maxHeight={`${window.innerHeight}px`}
 				data-testid="conversations_list_filtered"
 				padding={{ vertical: 'small' }}
 			>
