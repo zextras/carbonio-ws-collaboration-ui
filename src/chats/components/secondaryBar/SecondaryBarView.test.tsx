@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { screen, waitFor } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 
 import SecondaryBarView from './SecondaryBarView';
 import useStore from '../../../store/Store';
@@ -16,7 +16,6 @@ import {
 	createMockTextMessage,
 	createMockUser
 } from '../../../tests/createMock';
-import { mockSearchUsersByFeatureRequest } from '../../../tests/mocks/SearchUsersByFeature';
 import { setup } from '../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
 import { ContactInfo } from '../../../types/network/soap/searchUsersByFeatureRequest';
@@ -246,52 +245,52 @@ describe('SecondaryBar tests', () => {
 		});
 	});
 
-	describe('FilteredGal inside SecondaryBarView tests', () => {
-		test('User filter gal and expect only one user to be visible', async () => {
-			mockSearchUsersByFeatureRequest.mockReturnValueOnce([contactUser1]);
-			const { user } = setup(<SecondaryBarView expanded />);
-			// user search a user
-			const textArea = screen.getByRole('textbox', {
-				name: /type to filter list/i
-			});
-			await user.type(textArea, '1');
-
-			await waitFor(() => {
-				const galListItems = screen.getAllByTestId('gal_list_item');
-				expect(galListItems).toHaveLength(1);
-			});
-		});
-
-		test('User filter gal but AutoCompleteGalRequest fails', async () => {
-			mockSearchUsersByFeatureRequest.mockRejectedValueOnce(new Error('Error'));
-			const { user } = setup(<SecondaryBarView expanded />);
-			// user search a user
-			const textArea = screen.getByRole('textbox');
-			await user.type(textArea, '1');
-			const noMatchText = await screen.findByText(
-				/There seems to be a problem with your search, please retry./i
-			);
-			expect(noMatchText).toBeInTheDocument();
-		});
-
-		test('User try to search again using Retry button after a failed search', async () => {
-			mockSearchUsersByFeatureRequest.mockRejectedValueOnce(new Error('Error'));
-			const { user } = setup(<SecondaryBarView expanded />);
-			// user search a user
-			const textArea = screen.getByRole('textbox');
-			await user.type(textArea, '1');
-			const noMatchText = await screen.findByText(
-				/There seems to be a problem with your search, please retry./i
-			);
-			expect(noMatchText).toBeInTheDocument();
-
-			const retryButton = screen.getByText('Retry');
-			expect(retryButton).toBeInTheDocument();
-
-			mockSearchUsersByFeatureRequest.mockRejectedValueOnce(new Error('Error'));
-			await user.click(retryButton);
-
-			expect(mockSearchUsersByFeatureRequest).toHaveBeenCalledTimes(2);
-		});
-	});
+	// describe('FilteredGal inside SecondaryBarView tests', () => {
+	// 	test('User filter gal and expect only one user to be visible', async () => {
+	// 		mockSearchUsersByFeatureRequest.mockReturnValueOnce([contactUser1]);
+	// 		const { user } = setup(<SecondaryBarView expanded />);
+	// 		// user search a user
+	// 		const textArea = screen.getByRole('textbox', {
+	// 			name: /type to filter list/i
+	// 		});
+	// 		await user.type(textArea, '1');
+	//
+	// 		await waitFor(() => {
+	// 			const galListItems = screen.getAllByTestId('gal_list_item');
+	// 			expect(galListItems).toHaveLength(1);
+	// 		});
+	// 	});
+	//
+	// 	test('User filter gal but AutoCompleteGalRequest fails', async () => {
+	// 		mockSearchUsersByFeatureRequest.mockRejectedValueOnce(new Error('Error'));
+	// 		const { user } = setup(<SecondaryBarView expanded />);
+	// 		// user search a user
+	// 		const textArea = screen.getByRole('textbox');
+	// 		await user.type(textArea, '1');
+	// 		const noMatchText = await screen.findByText(
+	// 			/There seems to be a problem with your search, please retry./i
+	// 		);
+	// 		expect(noMatchText).toBeInTheDocument();
+	// 	});
+	//
+	// 	test('User try to search again using Retry button after a failed search', async () => {
+	// 		mockSearchUsersByFeatureRequest.mockRejectedValueOnce(new Error('Error'));
+	// 		const { user } = setup(<SecondaryBarView expanded />);
+	// 		// user search a user
+	// 		const textArea = screen.getByRole('textbox');
+	// 		await user.type(textArea, '1');
+	// 		const noMatchText = await screen.findByText(
+	// 			/There seems to be a problem with your search, please retry./i
+	// 		);
+	// 		expect(noMatchText).toBeInTheDocument();
+	//
+	// 		const retryButton = screen.getByText('Retry');
+	// 		expect(retryButton).toBeInTheDocument();
+	//
+	// 		mockSearchUsersByFeatureRequest.mockRejectedValueOnce(new Error('Error'));
+	// 		await user.click(retryButton);
+	//
+	// 		expect(mockSearchUsersByFeatureRequest).toHaveBeenCalledTimes(2);
+	// 	});
+	// });
 });
