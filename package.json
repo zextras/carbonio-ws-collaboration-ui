@@ -42,7 +42,7 @@
 		"@typescript-eslint/eslint-plugin": "^7.0.1",
 		"@typescript-eslint/parser": "^7.0.1",
 		"@zextras/carbonio-ui-configs": "^1.0.0",
-		"@zextras/carbonio-ui-sdk": "1.7.6",
+		"@zextras/carbonio-ui-sdk": "1.7.8",
 		"babel-eslint": "10.1.0",
 		"babel-jest": "29.7.0",
 		"babel-plugin-i18next-extract": "0.10.0",
