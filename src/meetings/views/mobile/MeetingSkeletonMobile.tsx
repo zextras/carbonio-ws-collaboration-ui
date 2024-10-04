@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { ReactElement } from 'react';
+import React, { ReactElement, useCallback, useEffect } from 'react';
 
 import { Container } from '@zextras/carbonio-design-system';
 import { useParams } from 'react-router-dom';
@@ -12,6 +12,10 @@ import styled from 'styled-components';
 
 import useGeneralMeetingControls from '../../../hooks/useGeneralMeetingControls';
 import { MeetingRoutesParams } from '../../../hooks/useRouting';
+import { MeetingsApi } from '../../../network';
+import useStore from '../../../store/Store';
+import { UserType } from '../../../types/store/UserTypes';
+import { BrowserUtils } from '../../../utils/BrowserUtils';
 import Logo from '../../components/Logo';
 import MobileActionBar from '../../components/mobile/MobileActionBar';
 import MobileConversation from '../../components/mobile/MobileConversation';
@@ -35,6 +39,21 @@ const MeetingSkeletonMobile = (): ReactElement => {
 	const [view, setView] = React.useState<MobileMeetingView>(MobileMeetingView.TILES);
 
 	useGeneralMeetingControls(meetingId);
+
+	const leaveMeeting = useCallback(() => {
+		const isLoggedUserExternal = useStore.getState().session.userType === UserType.GUEST;
+		MeetingsApi.leaveMeeting(meetingId);
+		if (isLoggedUserExternal) {
+			BrowserUtils.clearAuthCookies();
+		}
+	}, [meetingId]);
+
+	useEffect(() => {
+		window.addEventListener('pagehide', leaveMeeting);
+		return (): void => {
+			window.removeEventListener('pagehide', leaveMeeting);
+		};
+	}, [leaveMeeting]);
 
 	return (
 		<Container background="gray0" padding={{ vertical: '4.4rem', horizontal: '1rem' }}>

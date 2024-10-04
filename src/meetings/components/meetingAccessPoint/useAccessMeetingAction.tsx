@@ -70,8 +70,7 @@ const useAccessMeetingAction = (
 		freeMediaResources(streamTrack);
 		if (userIsReady) {
 			MeetingsApi.leaveWaitingRoom(meetingId);
-		}
-		if (isLoggedUserExternal) {
+		} else if (isLoggedUserExternal) {
 			BrowserUtils.clearAuthCookies();
 		}
 		goToInfoPage(PAGE_INFO_TYPE.HANG_UP_PAGE);

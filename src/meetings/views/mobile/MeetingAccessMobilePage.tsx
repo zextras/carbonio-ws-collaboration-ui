@@ -3,13 +3,17 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import React, { ReactElement, useCallback, useMemo, useState } from 'react';
+import React, { ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { Button, Container, Icon, Text } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
+import { MEETINGS_PATH } from '../../../constants/appConstants';
 import useEventListener, { EventName } from '../../../hooks/useEventListener';
+import { MeetingsApi } from '../../../network';
 import useStore from '../../../store/Store';
+import { UserType } from '../../../types/store/UserTypes';
+import { BrowserUtils } from '../../../utils/BrowserUtils';
 import Logo from '../../components/Logo';
 import AccessTile from '../../components/meetingAccessPoint/mediaHandlers/AccessTile';
 import useAccessMeetingAction from '../../components/meetingAccessPoint/useAccessMeetingAction';
@@ -33,6 +37,8 @@ const MeetingAccessMobilePage = (): ReactElement => {
 	);
 	const enter = t('action.enter', 'Enter');
 	const readyLabel = t('meeting.waitingRoom.userIsReady', "You're ready!");
+
+	const meetingId = useMemo(() => document.location.pathname.split(MEETINGS_PATH)[1], []);
 
 	const chatsBeNetworkStatus = useStore(({ connections }) => connections.status.chats_be);
 	const websocketNetworkStatus = useStore(({ connections }) => connections.status.websocket);
@@ -127,6 +133,23 @@ const MeetingAccessMobilePage = (): ReactElement => {
 	useEventListener(EventName.MEETING_USER_ACCEPTED, () =>
 		handleWaitingRoom({ audio: audioOn, video: false })
 	);
+
+	const leaveWaiting = useCallback(() => {
+		const isLoggedUserExternal = useStore.getState().session.userType === UserType.GUEST;
+		if (userIsReady) {
+			MeetingsApi.leaveWaitingRoom(meetingId);
+		}
+		if (isLoggedUserExternal) {
+			BrowserUtils.clearAuthCookies();
+		}
+	}, [meetingId, userIsReady]);
+
+	useEffect(() => {
+		window.addEventListener('pagehide', leaveWaiting);
+		return (): void => {
+			window.removeEventListener('pagehide', leaveWaiting);
+		};
+	}, [leaveWaiting]);
 
 	return (
 		<ShowMeetingAccessPage>
