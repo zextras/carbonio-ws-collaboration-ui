@@ -51,6 +51,7 @@ const WaitingListSnackbar = (): ReactElement | null => {
 	useEffect(() => {
 		if (ChatsNotificationsSettings.WaitingRoomAccessNotifications && meeting !== undefined) {
 			setShowWaitingUserSnackbar(true);
+			setMeetingId('');
 		}
 	}, [ChatsNotificationsSettings.WaitingRoomAccessNotifications, meeting]);
 
