@@ -22,7 +22,7 @@ const MobileConversation = ({ meetingId }: { meetingId: string }): ReactElement 
 
 	if (!roomId) return null;
 	return (
-		<Container crossAlignment="flex-start">
+		<Container crossAlignment="flex-start" data-testid="mobile_conversation_view">
 			<Padding all="1rem">
 				<Text>{chatLabel}</Text>
 			</Padding>
