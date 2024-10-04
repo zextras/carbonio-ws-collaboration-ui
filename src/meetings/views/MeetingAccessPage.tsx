@@ -64,9 +64,7 @@ const MeetingAccessPage = (): ReactElement => {
 	}, []);
 
 	const leaveButton = useMemo(() => {
-		if (hasUserDirectAccess === undefined) {
-			return undefined;
-		}
+		if (hasUserDirectAccess === undefined) return undefined;
 		return (
 			!hasUserDirectAccess && (
 				<CustomContainer

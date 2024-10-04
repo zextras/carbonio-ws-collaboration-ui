@@ -91,7 +91,6 @@ const MeetingAccessMobilePage = (): ReactElement => {
 		if (hasUserDirectAccess)
 			return (
 				<Button
-					data-testid="enterMeetingButton"
 					width="fill"
 					label={enter}
 					onClick={() => handleEnterMeeting({ audio: audioOn, video: false })}

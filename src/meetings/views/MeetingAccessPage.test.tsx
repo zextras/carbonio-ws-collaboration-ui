@@ -9,18 +9,27 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 
 import MeetingAccessPage from './MeetingAccessPage';
-import { mockDarkReaderEnable } from '../../../__mocks__/darkreader';
+import useStore from '../../store/Store';
+import { createMockMeeting } from '../../tests/createMock';
+import { mockMediaDevicesResolve } from '../../tests/mocks/global';
+import { mockedGetMeetingByMeetingId } from '../../tests/mocks/network';
 import { setup } from '../../tests/test-utils';
+import { MeetingType } from '../../types/network/models/meetingBeTypes';
 
-describe('MeetingAccessPageView', () => {
-	test('Render the component', async () => {
-		setup(<MeetingAccessPage />);
-		const wrapper = screen.getByTestId('meeting_access_page_view');
-		expect(wrapper).toBeVisible();
-	});
+beforeAll(() => {
+	mockMediaDevicesResolve();
+});
 
-	test('Enable the DarkReader for the page', async () => {
+describe('MeetingAccessPage', () => {
+	test('Leave button for guest user', async () => {
+		const store = useStore.getState();
+		store.setChatsBeStatus(true);
+		mockedGetMeetingByMeetingId.mockReturnValueOnce(
+			createMockMeeting({ meetingType: MeetingType.SCHEDULED })
+		);
+
 		setup(<MeetingAccessPage />);
-		expect(mockDarkReaderEnable).toHaveBeenCalled();
+		const icon = await screen.findByTestId('icon: LogOut');
+		expect(icon).toBeVisible();
 	});
 });
