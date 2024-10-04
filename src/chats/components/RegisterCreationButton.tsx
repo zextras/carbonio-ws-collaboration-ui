@@ -4,9 +4,14 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { ReactElement, useEffect, useState } from 'react';
+import React, { ReactElement, useEffect, useMemo, useState } from 'react';
 
-import { ACTION_TYPES, registerActions, removeActions } from '@zextras/carbonio-shell-ui';
+import {
+	ACTION_TYPES,
+	NewAction,
+	registerActions,
+	removeActions
+} from '@zextras/carbonio-shell-ui';
 import { useTranslation } from 'react-i18next';
 
 import ChatCreationModal from './creationModal/ChatCreationModal';
@@ -17,21 +22,26 @@ const RegisterCreationButton = (): ReactElement => {
 	const [newChatModal, setNewChatModal] = useState(false);
 	const createChatLabel = 'create-chat';
 
+	const newAction = useMemo(
+		(): NewAction => ({
+			id: createChatLabel,
+			label: t('action.newChat', 'New Chat'),
+			icon: 'WscOutline',
+			execute: (): void => setNewChatModal(true),
+			group: CHATS_APP_ID,
+			primary: true
+		}),
+		[t]
+	);
+
 	useEffect(() => {
-		registerActions({
+		registerActions<NewAction>({
 			id: createChatLabel,
 			type: ACTION_TYPES.NEW,
-			action: () => ({
-				id: createChatLabel,
-				label: t('action.newChat', 'New Chat'),
-				icon: 'WscOutline',
-				onClick: (): void => setNewChatModal(true),
-				group: CHATS_APP_ID,
-				primary: true
-			})
+			action: () => newAction
 		});
 		return (): void => removeActions(createChatLabel);
-	}, [t]);
+	}, [newAction, t]);
 
 	return <ChatCreationModal open={newChatModal} onClose={(): void => setNewChatModal(false)} />;
 };
