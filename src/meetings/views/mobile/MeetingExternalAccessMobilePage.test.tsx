@@ -46,4 +46,12 @@ describe('MeetingExternalAccessMobilePage test', () => {
 		await user.click(joinButton);
 		expect(mockedCreateGuestAccount).toHaveBeenCalled();
 	});
+
+	test('Create external user with enter key', async () => {
+		mockedCreateGuestAccount.mockResolvedValueOnce({});
+		const { user } = setup(<MeetingExternalAccessMobilePage />);
+		const inputName = await screen.findByText(/Type here your name/i);
+		await user.type(inputName, 'John Doe {enter}');
+		expect(mockedCreateGuestAccount).toHaveBeenCalled();
+	});
 });
