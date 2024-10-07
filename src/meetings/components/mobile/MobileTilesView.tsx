@@ -33,7 +33,7 @@ const MobileTilesView = ({ meetingId }: { meetingId: string }): ReactElement | n
 	}, [centralTile, meetingId, setUpdateSubscription]);
 
 	return (
-		<Container data-testid="mobile_skeleton_view">
+		<Container data-testid="mobile_skeleton_view" padding={{ all: '0.125rem' }}>
 			{centralTile ? (
 				<Tile
 					userId={centralTile.userId}
