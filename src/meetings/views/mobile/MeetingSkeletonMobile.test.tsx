@@ -45,7 +45,7 @@ describe('MeetingSkeletonMobile test', () => {
 		store.addRoom(room);
 		store.addMeeting(meeting);
 		const { user } = setup(<MeetingSkeletonMobile />);
-		const participantsButton = screen.getByTestId('icon: PeopleOutline');
+		const participantsButton = screen.getByTestId('icon: People');
 		expect(participantsButton).toBeInTheDocument();
 
 		await user.click(participantsButton);

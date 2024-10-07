@@ -37,7 +37,7 @@ describe('MobileActionBar test', () => {
 				setView={setView}
 			/>
 		);
-		const participantsButton = screen.getByTestId('icon: PeopleOutline');
+		const participantsButton = screen.getByTestId('icon: People');
 		expect(participantsButton).toBeInTheDocument();
 
 		await user.click(participantsButton);

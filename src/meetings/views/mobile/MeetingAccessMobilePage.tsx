@@ -154,7 +154,7 @@ const MeetingAccessMobilePage = (): ReactElement => {
 		<ShowMeetingAccessPage>
 			<Logo top="2rem" left="2rem" />
 			<Container>
-				<Container padding={{ horizontal: '2rem' }}>
+				<Container padding={{ horizontal: '1rem' }}>
 					<AccessTile
 						videoStreamRef={React.createRef()}
 						videoPlayerTestMuted
@@ -168,7 +168,7 @@ const MeetingAccessMobilePage = (): ReactElement => {
 					{waitingRoomLabels}
 				</Container>
 			</Container>
-			<Container height="fit" orientation="horizontal" gap="2rem" padding="1rem">
+			<Container height="fit" orientation="horizontal" gap="2rem" padding={{ horizontal: '1rem' }}>
 				<Button
 					onClick={toggleAudio}
 					icon={audioOn ? 'Mic' : 'MicOff'}

@@ -68,15 +68,13 @@ const MobileActionBar = ({ meetingId, view, setView }: MobileActionBarProps): Re
 		<Container height="fit" orientation="horizontal" padding="1rem" gap="1rem">
 			<Button
 				size="large"
-				icon="PeopleOutline"
+				icon={view === MobileMeetingView.PARTICIPANTS ? 'Video' : 'People'}
 				onClick={toggleParticipantView}
-				backgroundColor={view === MobileMeetingView.PARTICIPANTS ? 'success' : 'primary'}
 			/>
 			<Button
 				size="large"
-				icon="MessageCircle"
+				icon={view === MobileMeetingView.CHAT ? 'Video' : 'MessageCircle'}
 				onClick={toggleChatView}
-				backgroundColor={view === MobileMeetingView.CHAT ? 'success' : 'primary'}
 			/>
 			<Button size="large" icon={audioStatus ? 'Mic' : 'MicOff'} onClick={toggleAudioStream} />
 			<Button size="large" icon="LogOutOutline" color="error" onClick={leaveMeeting} />
