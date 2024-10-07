@@ -119,13 +119,27 @@ const ExternalGuestForm = (): ReactElement => {
 		userName
 	]);
 
+	const handleKeyPress = useCallback(
+		(event: React.KeyboardEvent<HTMLInputElement>) => {
+			if (event.key === 'Enter' && !isButtonDisabled) {
+				handleCreateExternalUser();
+			}
+		},
+		[handleCreateExternalUser, isButtonDisabled]
+	);
+
 	return (
 		<Container mainAlignment="flex-start" gap="1.5rem" height="fit">
 			<CustomText size="large" weight="bold" overflow="break-word">
 				{welcomePageTitle}
 			</CustomText>
 			<CustomSubtitle overflow="break-word">{welcomePageDescription}</CustomSubtitle>
-			<Input label={nameInput} value={userName} onChange={handleInputChange} />
+			<Input
+				label={nameInput}
+				value={userName}
+				onChange={handleInputChange}
+				onKeyPress={handleKeyPress}
+			/>
 			<CustomButton
 				data-testid="join_button"
 				width="fill"
