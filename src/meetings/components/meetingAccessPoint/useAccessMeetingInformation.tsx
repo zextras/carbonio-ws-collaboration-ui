@@ -113,10 +113,10 @@ const useAccessMeetingInformation = (): UseAccessMeetingInformationReturnType =>
 				padding={{ vertical: '4.5rem', horizontal: '1rem' }}
 				data-testid="meeting_access_page_view"
 			>
-				{chatsBeNetworkStatus && children}
+				{chatsBeNetworkStatus && hasUserDirectAccess !== undefined && children}
 			</Container>
 		),
-		[chatsBeNetworkStatus]
+		[chatsBeNetworkStatus, hasUserDirectAccess]
 	);
 
 	const accessTitle = useMemo(() => {
