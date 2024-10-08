@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { ReactElement, useCallback, useEffect } from 'react';
+import React, { ReactElement, useCallback, useEffect, useState } from 'react';
 
 import { Container } from '@zextras/carbonio-design-system';
 import { useParams } from 'react-router-dom';
@@ -36,7 +36,7 @@ const CustomContainer = styled(Container)`
 const MeetingSkeletonMobile = (): ReactElement => {
 	const { meetingId }: MeetingRoutesParams = useParams();
 
-	const [view, setView] = React.useState<MobileMeetingView>(MobileMeetingView.TILES);
+	const [view, setView] = useState<MobileMeetingView>(MobileMeetingView.TILES);
 
 	useGeneralMeetingControls(meetingId);
 
