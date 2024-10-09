@@ -6,7 +6,9 @@
 
 import { useCallback, useEffect } from 'react';
 
+import { CreateSnackbarFn, useSnackbar } from '@zextras/carbonio-design-system';
 import { filter, find, maxBy, size } from 'lodash';
+import { useTranslation } from 'react-i18next';
 
 import useEventListener, {
 	EventName,
@@ -105,6 +107,27 @@ const useGeneralMeetingControls = (meetingId: string): void => {
 	);
 
 	useEventListener(EventName.MEETING_PARTICIPANT_CLASHED, meetingParticipantClashedHandler);
+
+	const [t] = useTranslation();
+	const mutedByModerator = t(
+		'snackbar.mutedByModerator',
+		"You've been muted by a moderator, unmute yourself to speak"
+	);
+	const okLabel = t('action.ok', 'Ok');
+
+	const createSnackbar: CreateSnackbarFn = useSnackbar();
+
+	const handleMutedEvent = useCallback(() => {
+		createSnackbar({
+			key: new Date().toLocaleString(),
+			severity: 'info',
+			label: mutedByModerator,
+			actionLabel: okLabel,
+			disableAutoHide: true
+		});
+	}, [createSnackbar, mutedByModerator, okLabel]);
+
+	useEventListener(EventName.MEMBER_MUTED, handleMutedEvent);
 };
 
 export default useGeneralMeetingControls;

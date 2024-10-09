@@ -37,5 +37,9 @@ export const BrowserUtils = {
 	clearAuthCookies: (): void => {
 		document.cookie = `ZM_AUTH_TOKEN=; path=/;expires=Thu, 01 Jan 1970 00:00:01 GMT;`;
 		document.cookie = `ZX_AUTH_TOKEN=; path=/;expires=Thu, 01 Jan 1970 00:00:01 GMT;`;
+	},
+	isMobile: (): boolean => {
+		const regex = /Mobi|Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i;
+		return regex.test(navigator.userAgent);
 	}
 };

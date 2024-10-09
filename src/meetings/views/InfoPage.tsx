@@ -186,18 +186,24 @@ const InfoPage = (): ReactElement => {
 
 	return (
 		<Container background={'gray0'}>
-			<Container width="fit" gap="2rem">
-				<Container height="fit" width="fit" gap="0.7rem">
-					<Title color="gray6" weight="bold">
+			<Container width="fit" maxWidth="100%" padding="1.5rem" gap="2rem">
+				<Container height="fit" maxWidth="100%" gap="0.7rem">
+					<Title color="gray6" weight="bold" overflow="break-word" textAlign="center">
 						{titleLabel}
 					</Title>
-					<Text size="extralarge" color="gray6" weight="light">
+					<Text
+						size="extralarge"
+						color="gray6"
+						weight="light"
+						overflow="break-word"
+						textAlign="center"
+					>
 						{descriptionLabel}
 					</Text>
 				</Container>
 				<Container
 					height="fit"
-					width="fill"
+					maxWidth="100%"
 					orientation="horizontal"
 					padding={{ top: '1rem' }}
 					gap="1rem"
@@ -208,11 +214,12 @@ const InfoPage = (): ReactElement => {
 							{sloganLabel.toUpperCase()}
 						</Slogan>
 					</Container>
-
 					<Divider />
 				</Container>
 				<Container gap="0.7rem" width="fit" height="fit">
-					<Text color="gray6">{meetingExperienceLabel}</Text>
+					<Text color="gray6" overflow="break-word" textAlign="center">
+						{meetingExperienceLabel}
+					</Text>
 					{clicked ? (
 						<Feedback color="warning" weight="light">
 							{thankYouLabel}

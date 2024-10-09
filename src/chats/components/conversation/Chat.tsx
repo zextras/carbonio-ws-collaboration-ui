@@ -34,7 +34,7 @@ const CustomContainer = styled(Container)`
 
 type ChatsProps = {
 	roomId: string;
-	setInfoPanelOpen: Dispatch<SetStateAction<boolean>>;
+	setInfoPanelOpen?: Dispatch<SetStateAction<boolean>>;
 };
 
 const Chat = ({ roomId, setInfoPanelOpen }: ChatsProps): ReactElement => {
@@ -47,7 +47,7 @@ const Chat = ({ roomId, setInfoPanelOpen }: ChatsProps): ReactElement => {
 	const isInsideMeeting = useMemo(() => window.location.pathname.includes(MEETINGS_PATH), []);
 
 	useEffect(() => {
-		if (isDesktopView) {
+		if (isDesktopView && setInfoPanelOpen) {
 			setInfoPanelOpen(false);
 		}
 	}, [isDesktopView, setInfoPanelOpen]);
@@ -101,7 +101,7 @@ const Chat = ({ roomId, setInfoPanelOpen }: ChatsProps): ReactElement => {
 					onDragLeaveEvent={handleOnDragLeave}
 				/>
 			)}
-			{!isInsideMeeting && (
+			{!isInsideMeeting && setInfoPanelOpen && (
 				<ConversationHeader roomId={roomId} setInfoPanelOpen={setInfoPanelOpen} />
 			)}
 			<MessagesList roomId={roomId} />
