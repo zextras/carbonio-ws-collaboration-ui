@@ -7,6 +7,7 @@
 import React, {
 	Dispatch,
 	FC,
+	FormEvent,
 	SetStateAction,
 	useCallback,
 	useEffect,
@@ -179,13 +180,16 @@ const ProfileSettings: FC<ProfileSettingsProps> = ({
 	}, [picture, sessionId, toDelete, userPictureUpdatedAt]);
 
 	const onChangeUserImage = useCallback(
-		(e) => {
+		(e: FormEvent) => {
+			const inputElement = e.target as HTMLInputElement;
+			const files = inputElement?.files;
 			if (
 				typeof maxUserImageSize === 'number' &&
-				e.target.files[0].size / 1000 < maxUserImageSize
+				files &&
+				files[0].size / 1000 < maxUserImageSize
 			) {
-				setTempPicture(URL.createObjectURL(e.target.files[0]));
-				setPicture(e.target.files[0]);
+				setTempPicture(URL.createObjectURL(files[0]));
+				setPicture(files[0]);
 			} else {
 				createSnackbar({
 					key: new Date().toLocaleString(),

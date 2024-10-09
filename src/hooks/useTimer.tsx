@@ -20,7 +20,7 @@ const useTimer = (date: string | number | Date | undefined): string => {
 				setTimespan(Date.now() - dateToTimestamp(date));
 			}, 1000);
 		}
-		return () => clearInterval(interval);
+		return (): void => clearInterval(interval);
 	}, [date]);
 
 	const hours = Math.floor(timespan / (1000 * 60 * 60))

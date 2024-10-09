@@ -20,7 +20,7 @@ const RoomView = (): ReactElement => {
 	// Retrieve room id from url
 	const params: { roomId?: string } = useParams();
 	const selectedRoomId: string = useMemo(
-		() => (params && params.roomId ? decodeURIComponent(params.roomId) : ''),
+		() => (params?.roomId ? decodeURIComponent(params.roomId) : ''),
 		[params]
 	);
 

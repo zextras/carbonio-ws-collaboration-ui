@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { act, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 
 import StopRecordingModal from './StopRecordingModal';
 import useStore from '../../../../store/Store';
@@ -48,9 +48,7 @@ describe('StopRecordingModal tests', () => {
 		const { user } = setup(
 			<StopRecordingModal isOpen closeModal={jest.fn} meetingId={meeting.id} />
 		);
-		act(() => {
-			user.click(screen.getByText('Stop'));
-		});
+		await user.click(screen.getByText('Stop'));
 
 		const defaultRecordingName = `Rec ${formatDate(new Date(), 'YYYY-MM-DD HHmm')} ${
 			room.name
@@ -59,7 +57,7 @@ describe('StopRecordingModal tests', () => {
 			`You will find ${defaultRecordingName} in Home as soon as it is available`
 		);
 		expect(snackbar).toBeVisible();
-		expect(mockedStopRecordingRequest).toBeCalled();
+		expect(mockedStopRecordingRequest).toHaveBeenCalled();
 	});
 
 	test('Stop recording with a modified recording name', async () => {
@@ -70,15 +68,13 @@ describe('StopRecordingModal tests', () => {
 		const newName = 'NewRecordingName';
 		await user.clear(screen.getByRole('textbox'));
 		await user.type(screen.getByRole('textbox'), newName);
-		act(() => {
-			user.click(screen.getByText('Stop'));
-		});
+		await user.click(screen.getByText('Stop'));
 
 		const snackbar = await screen.findByText(
 			`You will find ${newName} in Home as soon as it is available`
 		);
 		expect(snackbar).toBeVisible();
-		expect(mockedStopRecordingRequest).toBeCalled();
+		expect(mockedStopRecordingRequest).toHaveBeenCalled();
 	});
 
 	test('SHow a snackbar when the stop recording request fails', async () => {
@@ -86,9 +82,7 @@ describe('StopRecordingModal tests', () => {
 		const { user } = setup(
 			<StopRecordingModal isOpen closeModal={jest.fn} meetingId={meeting.id} />
 		);
-		act(() => {
-			user.click(screen.getByText('Stop'));
-		});
+		await user.click(screen.getByText('Stop'));
 
 		const snackbar = await screen.findByText(
 			'It is not possible to stop the registration, please contact your system administrator.'

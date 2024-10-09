@@ -78,7 +78,7 @@ const ActiveMeetingParticipantsDropdown = ({
 	return (
 		<CustomContainer
 			id="meeting-list-dropdown"
-			background="gray5"
+			background={'gray5'}
 			width="20rem"
 			$isDropdownOpen={isDropdownOpen}
 			mainAlignment="flex-start"

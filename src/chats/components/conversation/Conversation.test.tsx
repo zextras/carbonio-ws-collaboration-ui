@@ -6,8 +6,7 @@
 
 import React from 'react';
 
-import { screen, waitFor } from '@testing-library/react';
-import { act } from 'react-dom/test-utils';
+import { screen } from '@testing-library/react';
 
 import Conversation from './Conversation';
 import { mockDarkReaderIsEnabled } from '../../../../__mocks__/darkreader';
@@ -107,11 +106,7 @@ describe('Conversation view', () => {
 		const leaveModal = screen.getByTestId('leave_modal');
 		expect(leaveModal).toBeInTheDocument();
 		const button = await screen.findByRole('button', { name: 'Leave' });
-		await waitFor(() => {
-			act(() => {
-				user.click(button);
-			});
-		});
+		await user.click(button);
 		expect(mockedDeleteRoomMemberRequest).toHaveBeenCalledTimes(1);
 		expect(mockGoToMainPage).toHaveBeenCalledTimes(1);
 	});

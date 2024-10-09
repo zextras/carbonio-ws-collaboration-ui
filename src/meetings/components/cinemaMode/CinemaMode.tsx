@@ -109,7 +109,7 @@ const CinemaMode = ({ children }: MeetingViewProps): ReactElement => {
 				{children}
 			</CustomContainer>
 			<CarouselContainer
-				background="gray0"
+				background={'gray0'}
 				width={carouselIsVisible ? '35%' : '0'}
 				minWidth={carouselIsVisible ? '10.375rem' : '0'}
 				maxWidth="18.75rem"

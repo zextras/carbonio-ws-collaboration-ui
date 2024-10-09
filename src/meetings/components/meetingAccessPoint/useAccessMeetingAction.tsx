@@ -85,7 +85,10 @@ const useAccessMeetingAction = (
 	}, [handleLeave]);
 
 	const handleEnterMeeting = useCallback(
-		(mediaDevicesEnabled, selectedDevicesId) => {
+		(
+			mediaDevicesEnabled?: { audio: boolean; video: boolean },
+			selectedDevicesId?: { audio?: string; video?: string }
+		) => {
 			MeetingsApi.enterMeeting(
 				getRoomIdFromMeeting(useStore.getState(), meetingId) ?? '',
 				{
@@ -107,7 +110,10 @@ const useAccessMeetingAction = (
 	);
 
 	const handleWaitingRoom = useCallback(
-		(mediaDevicesEnabled, selectedDevicesId) => {
+		(
+			mediaDevicesEnabled?: { audio: boolean; video: boolean },
+			selectedDevicesId?: { audio?: string; video?: string }
+		) => {
 			MeetingsApi.joinMeeting(
 				meetingId,
 				{

@@ -93,7 +93,7 @@ const CameraButton = ({
 		() =>
 			createSnackbar({
 				key: new Date().toLocaleString(),
-				type: 'info',
+				severity: 'info',
 				label: giveMediaPermissionSnackbar,
 				actionLabel: understoodAction,
 				disableAutoHide: true
@@ -191,7 +191,7 @@ const CameraButton = ({
 	}, [setIsVideoListOpen]);
 
 	const toggleVideoStream = useCallback(
-		(event) => {
+		(event: React.MouseEvent<HTMLButtonElement, MouseEvent> | KeyboardEvent) => {
 			event.stopPropagation();
 			setButtonStatus(false);
 			if (!videoStatus) {

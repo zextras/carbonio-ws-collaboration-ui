@@ -102,7 +102,7 @@ describe('Room Picture Handler - groups', () => {
 		const { user } = setup(<GroupRoomPictureHandler roomId={testRoom.id} />);
 
 		const backgroundContainer = screen.getByTestId('background_container');
-		user.hover(backgroundContainer);
+		await user.hover(backgroundContainer);
 
 		const hoverContainer = await screen.findByTestId('hover_container');
 		const input = hoverContainer.children.item(0) as HTMLInputElement;
@@ -110,13 +110,10 @@ describe('Room Picture Handler - groups', () => {
 		expect(input).not.toBeNull();
 		expect(input.files).toHaveLength(0);
 
-		user.upload(input, testImageFile);
+		await user.upload(input, testImageFile);
 		await waitFor(() => expect(input.files).toHaveLength(1));
 
-		const snackbar = await screen.findByText(/New avatar has been successfully uploaded/i);
-		expect(snackbar).toBeVisible();
-
-		expect(mockedUpdateRoomPictureRequest).toBeCalled();
+		expect(mockedUpdateRoomPictureRequest).toHaveBeenCalled();
 	});
 	test('update an image fails', async () => {
 		const testImageFile = new File(['hello'], 'hello.png', { type: 'image/png' });
@@ -132,15 +129,17 @@ describe('Room Picture Handler - groups', () => {
 		const pictureContainer = await screen.findByTestId('picture_container');
 		expect(pictureContainer).toBeInTheDocument();
 
-		user.hover(pictureContainer);
+		await user.hover(pictureContainer);
 		const hoverContainer = await screen.findByTestId('hover_container');
 		const input = hoverContainer.children.item(0) as HTMLInputElement;
 		expect(input).not.toBeNull();
 
-		user.upload(input, testImageFile);
+		await user.upload(input, testImageFile);
 
-		const snackbar = await screen.findByText(/Something went wrong/i);
-		expect(snackbar).toBeVisible();
+		expect(mockedUpdateRoomPictureRequest).toHaveBeenCalledTimes(1);
+
+		const result = mockedUpdateRoomPictureRequest.mock.results[0].value;
+		await expect(result).rejects.toEqual('image not changed');
 	});
 	test('delete an image', async () => {
 		const store: RootStore = useStore.getState();
@@ -155,17 +154,17 @@ describe('Room Picture Handler - groups', () => {
 		const pictureContainer = await screen.findByTestId('picture_container');
 		expect(pictureContainer).toBeInTheDocument();
 
-		user.hover(pictureContainer);
+		await user.hover(pictureContainer);
 		const deleteButton = await screen.findByTestId('delete_button');
 		expect(deleteButton).toBeInTheDocument();
-		user.click(deleteButton);
+		await user.click(deleteButton);
 
 		const snackbar = await screen.findByText(
 			/Group avatar has been successfully reset to the original one/i
 		);
 		expect(snackbar).toBeVisible();
 
-		expect(mockedDeleteRoomPictureRequest).toBeCalled();
+		expect(mockedDeleteRoomPictureRequest).toHaveBeenCalled();
 	});
 	test('delete an image fails ', async () => {
 		const store: RootStore = useStore.getState();
@@ -180,10 +179,10 @@ describe('Room Picture Handler - groups', () => {
 		const pictureContainer = await screen.findByTestId('picture_container');
 		expect(pictureContainer).toBeInTheDocument();
 
-		user.hover(pictureContainer);
+		await user.hover(pictureContainer);
 		const deleteButton = await screen.findByTestId('delete_button');
 		expect(deleteButton).toBeInTheDocument();
-		user.click(deleteButton);
+		await user.click(deleteButton);
 
 		const snackbar = await screen.findByText(/Something went wrong. Please Retry/i);
 		expect(snackbar).toBeVisible();

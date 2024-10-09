@@ -83,7 +83,11 @@ const MeetingNotification = ({
 		}
 	}, [id, meeting, removeNotification]);
 
-	const onTextChange = useCallback((e) => setMessage(e.currentTarget.value), []);
+	const onTextChange = useCallback(
+		(e: { currentTarget: { value: React.SetStateAction<string> } }) =>
+			setMessage(e.currentTarget.value),
+		[]
+	);
 
 	const disableSendMessage = useMemo(() => size(message.trim()) === 0, [message]);
 
@@ -97,7 +101,7 @@ const MeetingNotification = ({
 
 	const declineMeeting = useCallback(() => removeNotification(id), [id, removeNotification]);
 
-	const { openMeeting } = useRoomMeeting(meeting?.roomId || '');
+	const { openMeeting } = useRoomMeeting(meeting?.roomId ?? '');
 
 	const joinMeeting = useCallback(() => {
 		openMeeting();

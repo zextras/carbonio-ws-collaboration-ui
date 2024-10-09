@@ -10,7 +10,10 @@ import { CreateSnackbarFn, useSnackbar } from '@zextras/carbonio-design-system';
 import { filter, find, maxBy, size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
-import useEventListener, { EventName } from './useEventListener';
+import useEventListener, {
+	EventName,
+	MeetingWaitingParticipantClashedEvent
+} from './useEventListener';
 import useRouting, { PAGE_INFO_TYPE } from './useRouting';
 import { MeetingsApi } from '../network';
 import {
@@ -96,8 +99,8 @@ const useGeneralMeetingControls = (meetingId: string): void => {
 	}, [meetingId, setPinnedTile]);
 
 	const meetingParticipantClashedHandler = useCallback(
-		(event) => {
-			meetingDisconnection(event.detail.meetingId);
+		(event: CustomEvent<MeetingWaitingParticipantClashedEvent['data']> | undefined) => {
+			meetingDisconnection(event?.detail.meetingId ?? '');
 			goToInfoPage(PAGE_INFO_TYPE.ALREADY_ACTIVE_MEETING_SESSION);
 		},
 		[goToInfoPage, meetingDisconnection]
@@ -117,7 +120,7 @@ const useGeneralMeetingControls = (meetingId: string): void => {
 	const handleMutedEvent = useCallback(() => {
 		createSnackbar({
 			key: new Date().toLocaleString(),
-			type: 'info',
+			severity: 'info',
 			label: mutedByModerator,
 			actionLabel: okLabel,
 			disableAutoHide: true

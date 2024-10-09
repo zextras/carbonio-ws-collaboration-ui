@@ -11,7 +11,7 @@ import { debounce } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import useEventListener, { EventName } from '../../../hooks/useEventListener';
+import useEventListener, { EventName, NewMessageEvent } from '../../../hooks/useEventListener';
 import { getRoomMutedSelector } from '../../../store/selectors/RoomsSelectors';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import { getRoomUnreadsSelector } from '../../../store/selectors/UnreadsCounterSelectors';
@@ -59,11 +59,11 @@ const ScrollButton = ({ roomId, onClickCb }: ScrollButtonProps): ReactElement =>
 	);
 
 	const newMessageEventHandler = useCallback(
-		(messageFromEvent) => {
+		(event: CustomEvent<NewMessageEvent['data']> | undefined) => {
 			if (
-				messageFromEvent.detail.roomId === roomId &&
-				messageFromEvent.detail.type === MessageType.TEXT_MSG &&
-				messageFromEvent.detail.from !== myUserId
+				event?.detail.roomId === roomId &&
+				event?.detail.type === MessageType.TEXT_MSG &&
+				event?.detail.from !== myUserId
 			) {
 				setShowNewMessageBadge(true);
 				debouncedNewMessagesBadgeSetter();

@@ -6,8 +6,7 @@
 
 import React from 'react';
 
-import { screen, waitFor } from '@testing-library/react';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { screen, waitFor, act, renderHook } from '@testing-library/react';
 
 import ClearHistoryAction from './ClearHistoryAction';
 import useStore from '../../../../store/Store';
@@ -63,16 +62,16 @@ describe('clear history action', () => {
 		const { user } = setup(<ClearHistoryAction roomId={mockedRoom.id} />);
 		const clearHistoryLabel = screen.getByText(/Clear History/i);
 
-		user.click(clearHistoryLabel);
+		await user.click(clearHistoryLabel);
 
 		// the third one is the button one
 		await waitFor(() => expect(screen.getAllByText(/Clear History/i)).toHaveLength(3));
 
-		user.click(screen.getAllByText(/Clear History/i)[2]);
+		await user.click(screen.getAllByText(/Clear History/i)[2]);
 
 		// the modal has disappeared
 		await waitFor(() => expect(screen.getAllByText(/Clear History/i)).toHaveLength(1));
 
-		await waitFor(() => expect(mockedClearHistoryRequest).toBeCalled());
+		await waitFor(() => expect(mockedClearHistoryRequest).toHaveBeenCalled());
 	});
 });

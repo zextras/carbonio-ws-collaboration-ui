@@ -46,7 +46,7 @@ const FullScreenButton = (): ReactElement => {
 
 	useEffect(() => {
 		window.addEventListener('keydown', checkKeyPress, true);
-		return () => {
+		return (): void => {
 			window.removeEventListener('keydown', checkKeyPress);
 		};
 	}, [checkKeyPress]);

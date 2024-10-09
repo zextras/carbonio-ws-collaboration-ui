@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 
 import useAccessMeetingAction from './useAccessMeetingAction';
 import { mockDarkReaderEnable } from '../../../../__mocks__/darkreader';

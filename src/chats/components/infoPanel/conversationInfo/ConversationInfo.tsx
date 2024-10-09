@@ -61,7 +61,7 @@ const ConversationInfo: FC<ConversationInfoProps> = ({ roomId, roomType, setInfo
 	return (
 		<Container orientation="vertical">
 			<InfoHeader
-				background="gray5"
+				background={'gray5'}
 				borderRadius="none"
 				orientation="horizontal"
 				mainAlignment="space-between"

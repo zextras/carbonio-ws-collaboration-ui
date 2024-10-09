@@ -6,9 +6,8 @@
 
 import React from 'react';
 
-import { renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event';
-import { act } from 'react-dom/test-utils';
 
 import AccessPage from './AccessPage';
 import { mockUseAuthenticated } from '../../../__mocks__/@zextras/carbonio-shell-ui';

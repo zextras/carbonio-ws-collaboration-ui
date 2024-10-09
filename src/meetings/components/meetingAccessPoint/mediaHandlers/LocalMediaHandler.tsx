@@ -147,12 +147,12 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 	);
 
 	const onChangeVideoSource = useCallback(
-		(videoItem) => {
+		(videoItem: string | null) => {
 			if (mediaDevicesEnabled.video) {
 				setEnterButtonIsEnabled(false);
-				toggleStreams(mediaDevicesEnabled.audio, true, selectedDevicesId.audio, videoItem);
+				toggleStreams(mediaDevicesEnabled.audio, true, selectedDevicesId.audio, videoItem ?? '');
 			}
-			setSelectedDevicesId({ audio: selectedDevicesId.audio, video: videoItem });
+			setSelectedDevicesId({ audio: selectedDevicesId.audio, video: videoItem ?? '' });
 		},
 		[
 			mediaDevicesEnabled,
@@ -164,12 +164,12 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 	);
 
 	const onChangeAudioSource = useCallback(
-		(audioItem) => {
+		(audioItem: string | null) => {
 			if (mediaDevicesEnabled.audio) {
 				setEnterButtonIsEnabled(false);
-				toggleStreams(true, mediaDevicesEnabled.video, audioItem, selectedDevicesId.video);
+				toggleStreams(true, mediaDevicesEnabled.video, audioItem ?? '', selectedDevicesId.video);
 			}
-			setSelectedDevicesId({ audio: audioItem, video: selectedDevicesId.video });
+			setSelectedDevicesId({ audio: audioItem ?? '', video: selectedDevicesId.video });
 		},
 		[
 			mediaDevicesEnabled,
@@ -211,7 +211,7 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 	}, []);
 
 	const toggleVideo = useCallback(
-		(event) => {
+		(event: React.MouseEvent<HTMLButtonElement, MouseEvent> | KeyboardEvent) => {
 			event.stopPropagation();
 			setEnterButtonIsEnabled(false);
 			toggleStreams(
@@ -225,7 +225,7 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 	);
 
 	const toggleAudio = useCallback(
-		(event) => {
+		(event: React.MouseEvent<HTMLButtonElement, MouseEvent> | KeyboardEvent) => {
 			event.stopPropagation();
 			setEnterButtonIsEnabled(false);
 			toggleStreams(
@@ -332,6 +332,7 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 						size="extralarge"
 						backgroundColor={'primary'}
 						onClick={toggleAudio}
+						data-testid={'turn_on_audio'}
 					/>
 				</Tooltip>
 				<Padding left="1rem" />

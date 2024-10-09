@@ -10,7 +10,7 @@ import { map, pull } from 'lodash';
 import styled from 'styled-components';
 
 import MeetingBubble from './MeetingBubble';
-import useEventListener, { EventName } from '../../../hooks/useEventListener';
+import useEventListener, { EventName, NewMessageEvent } from '../../../hooks/useEventListener';
 import { MessageType } from '../../../types/store/MessageTypes';
 
 const WrapperContainer = styled(Container)<{ $messageIdsList: string[] }>`
@@ -24,11 +24,14 @@ const WrapperContainer = styled(Container)<{ $messageIdsList: string[] }>`
 const BubblesWrapper = (): JSX.Element => {
 	const [messageIdsList, setMessageIdsList] = useState<string[]>([]);
 
-	const newMessageHandler = useCallback(({ detail: messageFromEvent }) => {
-		if (messageFromEvent.type === MessageType.TEXT_MSG) {
-			setMessageIdsList((oldState) => [messageFromEvent.id, ...oldState]);
-		}
-	}, []);
+	const newMessageHandler = useCallback(
+		(event: CustomEvent<NewMessageEvent['data']> | undefined) => {
+			if (event?.detail.type === MessageType.TEXT_MSG) {
+				setMessageIdsList((oldState) => [event?.detail.id, ...oldState]);
+			}
+		},
+		[]
+	);
 
 	const handleBubbleRemove = useCallback((messageIdToRemove: string) => {
 		setMessageIdsList((oldState) => {

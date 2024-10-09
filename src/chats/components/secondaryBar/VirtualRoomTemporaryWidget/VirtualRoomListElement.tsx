@@ -87,7 +87,7 @@ const VirtualRoomListElement: FC<virtualRoomElementProps> = ({ roomId, modalRef 
 			.then(() => {
 				createSnackbar({
 					key: new Date().toLocaleString(),
-					type: 'success',
+					severity: 'success',
 					label: deleteVirtualRoomSnackbar,
 					hideButton: true
 				});
@@ -105,15 +105,20 @@ const VirtualRoomListElement: FC<virtualRoomElementProps> = ({ roomId, modalRef 
 		copyMeetingLink();
 		createSnackbar({
 			key: new Date().toLocaleString(),
-			type: 'info',
+			severity: 'info',
 			label: copyVirtualRoomLinkSnackbar,
 			hideButton: true
 		});
 	}, [copyMeetingLink, createSnackbar, copyVirtualRoomLinkSnackbar]);
 
+	const enterMeeting = useMemo(
+		() => (amIParticipating ? rejoinMeeting : joinMeeting),
+		[amIParticipating, joinMeeting, rejoinMeeting]
+	);
+
 	const enterRoomTooltip = useMemo(
-		() => (meetingIsActive ? (amIParticipating ? rejoinMeeting : joinMeeting) : startMeeting),
-		[amIParticipating, joinMeeting, meetingIsActive, rejoinMeeting, startMeeting]
+		() => (meetingIsActive ? enterMeeting : startMeeting),
+		[enterMeeting, meetingIsActive, startMeeting]
 	);
 
 	const handleModalOpening = useCallback(() => setShowModal((prevState) => !prevState), []);

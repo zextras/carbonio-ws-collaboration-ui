@@ -26,7 +26,7 @@ const SpeakingElement = ({ userId }: SpeakingElementProps): ReactElement => {
 			width="fit"
 			height="fit"
 			padding={{ vertical: '0.5rem', horizontal: '1rem' }}
-			background="gray0"
+			background={'gray0'}
 		>
 			{userName}
 		</CustomContainer>

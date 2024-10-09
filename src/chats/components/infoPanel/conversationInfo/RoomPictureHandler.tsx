@@ -126,7 +126,10 @@ const RoomPictureHandler: FC<RoomPictureProps> = ({
 		}
 	}, [picture, createPreview, title, closeLabel]);
 
-	const stopPropagation = useCallback((e) => e.stopPropagation(), []);
+	const stopPropagation = useCallback(
+		(e: { stopPropagation: () => void }) => e.stopPropagation(),
+		[]
+	);
 
 	const hoverContainer = useMemo(
 		() => (
@@ -173,7 +176,7 @@ const RoomPictureHandler: FC<RoomPictureProps> = ({
 			</GradientContainer>
 		</BackgroundContainer>
 	) : (
-		<Container background="gray6" height="fit">
+		<Container background={'gray6'} height="fit">
 			<PictureContainer
 				$picture={picture}
 				mainAlignment="flex-end"

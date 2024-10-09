@@ -63,7 +63,7 @@ const useTilesOrder = (meetingId: string): { centralTile: TileData; carouselTile
 	}, [tilesData, tiles]);
 
 	const checkIfIsStillTalking = useCallback(
-		(prevFirstIsTalking) => {
+		(prevFirstIsTalking: string) => {
 			const isTalkingUsers = useStore.getState().activeMeeting[meetingId].talkingUsers;
 			if (
 				first(isTalkingUsers) === prevFirstIsTalking &&
@@ -83,7 +83,7 @@ const useTilesOrder = (meetingId: string): { centralTile: TileData; carouselTile
 		if (size(isTalkingList) > 0) {
 			debounceIsTalking(isTalkingList[0]);
 		}
-		return () => debounceIsTalking.cancel();
+		return (): void => debounceIsTalking.cancel();
 	}, [checkIfIsStillTalking, isTalkingList]);
 
 	const centralTile = useMemo(() => tiles[0], [tiles]);

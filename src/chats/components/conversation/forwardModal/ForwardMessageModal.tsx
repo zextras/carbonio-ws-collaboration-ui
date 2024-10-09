@@ -97,7 +97,7 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 	const [chips, setChips] = useState<ChipItem<{ id: string }>[]>([]);
 
 	const select = useCallback(
-		(id) => setSelected((s) => (s[id] ? omit(s, id) : { ...s, [id]: true })),
+		(id: string) => setSelected((s) => (s[id] ? omit(s, id) : { ...s, [id]: true })),
 		[]
 	);
 
@@ -145,7 +145,14 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 		setChatList(roomList);
 	}, [inputValue, onClickListItem, roomId, rooms]);
 
-	const handleChangeText = useCallback((e) => setInputValue(e.target.value), []);
+	const handleChangeText = useCallback(
+		(event: React.KeyboardEvent<HTMLInputElement> & { textContent: string | null }) => {
+			if (event.textContent !== null) {
+				setInputValue(event.textContent);
+			}
+		},
+		[]
+	);
 
 	const removeContactFromChip = useCallback(
 		(items: ChipItem<{ id: string }>[]) => {

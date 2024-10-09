@@ -6,8 +6,7 @@
 
 import React from 'react';
 
-import { screen, waitFor } from '@testing-library/react';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { screen, waitFor, act, renderHook } from '@testing-library/react';
 
 import LeaveConversationAction from './LeaveConversationAction';
 import useStore from '../../../../store/Store';
@@ -96,10 +95,10 @@ describe('Leave conversation Action', () => {
 
 		expect(result.current.rooms[mockedRoom.id].members?.length).toBe(2);
 
-		user.click(screen.getByText(/Leave Group/i));
+		await user.click(screen.getByText(/Leave Group/i));
 		const button = await screen.findByRole('button', { name: 'Leave' });
-		user.click(button);
-		await waitFor(() => expect(mockedDeleteRoomMemberRequest).toBeCalled());
-		await waitFor(() => expect(mockGoToMainPage).toBeCalled());
+		await user.click(button);
+		await waitFor(() => expect(mockedDeleteRoomMemberRequest).toHaveBeenCalled());
+		await waitFor(() => expect(mockGoToMainPage).toHaveBeenCalled());
 	});
 });

@@ -40,7 +40,7 @@ const ClearHistoryAction: FC<ClearHistoryProps> = ({ roomId, roomType }) => {
 		() =>
 			createSnackbar({
 				key: new Date().toLocaleString(),
-				type: 'success',
+				severity: 'success',
 				label: historyClearedLabel,
 				hideButton: true
 			}),

@@ -7,7 +7,6 @@ import React from 'react';
 
 import { screen } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event';
-import { act } from 'react-dom/test-utils';
 
 import CameraButton from './CameraButton';
 import { useParams } from '../../../../__mocks__/react-router';
@@ -81,7 +80,7 @@ describe('Camera button', () => {
 		mockSetIsVideoListOpen.mockReturnValue(true);
 		const { user } = defaultSetup();
 		const multiButtonToggleList = screen.getByTestId('icon: ChevronUp');
-		await act(() => user.click(multiButtonToggleList));
+		await user.click(multiButtonToggleList);
 		expect(mockSetIsVideoListOpen).toHaveBeenCalled();
 	});
 });

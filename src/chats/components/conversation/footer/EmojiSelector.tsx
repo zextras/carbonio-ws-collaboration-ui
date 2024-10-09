@@ -52,7 +52,7 @@ const EmojiSelector: React.FC<EmojiSelectorProps> = ({ messageInputRef, setMessa
 			emojiButtonRef.current.addEventListener('mouseleave', mouseLeaveEvent);
 			refValue = emojiButtonRef.current;
 		}
-		return () => {
+		return (): void => {
 			if (refValue) {
 				refValue.removeEventListener('mouseenter', mouseEnterEvent);
 				refValue.removeEventListener('mouseleave', mouseLeaveEvent);

@@ -133,8 +133,8 @@ const ConversationHeaderMeetingButton = ({
 	}, [setIsDropdownOpen]);
 
 	const closeDropdown = useCallback(
-		(event) => {
-			if (ref.current && !ref.current.contains(event.target)) {
+		(event: MouseEvent) => {
+			if (ref.current && !ref.current.contains(event.target as HTMLElement)) {
 				setIsDropdownOpen(false);
 			}
 		},
@@ -147,7 +147,7 @@ const ConversationHeaderMeetingButton = ({
 
 	useEffect(() => {
 		document.addEventListener('click', closeDropdown, true);
-		return () => {
+		return (): void => {
 			document.removeEventListener('click', closeDropdown, true);
 		};
 	}, [closeDropdown, ref]);
