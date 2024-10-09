@@ -245,6 +245,7 @@ describe('SecondaryBar tests', () => {
 		});
 	});
 
+	// TODO fix test
 	// describe('FilteredGal inside SecondaryBarView tests', () => {
 	// 	test('User filter gal and expect only one user to be visible', async () => {
 	// 		mockSearchUsersByFeatureRequest.mockReturnValueOnce([contactUser1]);

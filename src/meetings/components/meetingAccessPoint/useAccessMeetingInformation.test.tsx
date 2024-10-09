@@ -46,6 +46,7 @@ describe('useAccessMeetingAction tests', () => {
 		});
 	});
 
+	// TODO fix test
 	// test('Internal user has not userHasDirectAccess to scheduled meeting', async () => {
 	// 	useStore.getState().setChatsBeStatus(true);
 	// 	mockedGetMeetingByMeetingId.mockResolvedValueOnce(

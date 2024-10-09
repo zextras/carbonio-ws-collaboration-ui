@@ -75,6 +75,7 @@ describe('Mute/Unmute Conversation', () => {
 		await user.click(unmuteAction);
 		expect(mockedUnmuteRoomNotificationRequest).toHaveBeenCalled();
 	});
+	// TODO fix test
 	// test('undo mute', async () => {
 	// 	mockedMuteRoomNotificationRequest.mockReturnValue(true);
 	// 	mockedUnmuteRoomNotificationRequest.mockReturnValueOnce(true);
