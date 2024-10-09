@@ -94,4 +94,16 @@ describe('MeetingExternalAccessPage', () => {
 
 		expect(mockReplace).toHaveBeenCalled();
 	});
+
+	test('User confirm the name with enter key', async () => {
+		mockedCreateGuestAccount.mockResolvedValueOnce(guestAccountResp);
+
+		const { user } = setup(<MeetingExternalAccessPage />);
+
+		const nameInput = screen.getByRole('textbox', { name: typeHereLabel });
+		await user.type(nameInput, userNameLabel);
+		await user.type(nameInput, '{enter}');
+
+		expect(mockedCreateGuestAccount).toHaveBeenCalledTimes(1);
+	});
 });

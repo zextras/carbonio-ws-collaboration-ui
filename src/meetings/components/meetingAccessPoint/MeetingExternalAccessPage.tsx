@@ -3,28 +3,13 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import React, { ReactElement, useCallback, useMemo, useState } from 'react';
+import React, { ReactElement, useCallback } from 'react';
 
-import {
-	Button,
-	Container,
-	CreateSnackbarFn,
-	Divider,
-	Input,
-	Padding,
-	Text,
-	useSnackbar
-} from '@zextras/carbonio-design-system';
+import { Button, Container, Divider, Padding, Text } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import useRouting from '../../../hooks/useRouting';
-import { MeetingsApi } from '../../../network';
-import { WebSocketClient } from '../../../network/websocket/WebSocketClient';
-import XMPPClient from '../../../network/xmpp/XMPPClient';
-import useStore from '../../../store/Store';
-import { UserType } from '../../../types/store/UserTypes';
-import { BrowserUtils } from '../../../utils/BrowserUtils';
+import ExternalGuestForm from './ExternalGuestForm';
 import ExternalAccessBackground from '../../assets/ExternalAccessBackground.png';
 
 const CustomContainer = styled(Container)`
@@ -36,14 +21,6 @@ const CustomDescription = styled(Text)`
 	text-align: center;
 `;
 
-const CustomText = styled(Text)`
-	font-size: 2.625rem;
-`;
-
-const CustomButton = styled(Button)`
-	border-radius: 0.125rem;
-`;
-
 const BackgroundContainer = styled(Container)`
 	background-image: url(${(): string => ExternalAccessBackground});
 	background-size: cover;
@@ -52,95 +29,16 @@ const BackgroundContainer = styled(Container)`
 
 const MeetingExternalAccessPage = (): ReactElement => {
 	const [t] = useTranslation();
-	const welcomePageTitle = t('welcomePage.blob', 'Hey stranger!');
-	const nameInput = t('welcomePage.nameInput', 'Type here your name');
-	const joinButton = t('welcomePage.joinButton', 'Join the meeting');
 	const loginButton = t('welcomePage.loginButton', 'Go to your login page');
 	const accountTitle = t('welcomePage.loginTitle', 'Do you have an account?');
 	const accountDescription = t(
 		'welcomePage.loginDescription',
 		'Choose freely whether to go to the login page or simply access the meeting with your name.'
 	);
-	const welcomePageDescription = t(
-		'welcomePage.description',
-		'How would you like to introduce yourself?'
-	);
 	const enterMeetingDescription = t(
 		'welcomePage.journeyDescription',
 		'You will be redirected to the waiting room where a moderator will approve your access.'
 	);
-	const generalErrorSnackbar = t(
-		'settings.profile.errorGenericResponse',
-		'Something went Wrong. Please Retry'
-	);
-
-	const setXmppClient = useStore((state) => state.setXmppClient);
-	const setWebSocketClient = useStore((state) => state.setWebSocketClient);
-	const setChatsBeStatus = useStore((state) => state.setChatsBeStatus);
-	const setLoginInfo = useStore((state) => state.setLoginInfo);
-	const setCapabilities = useStore((store) => store.setCapabilities);
-
-	const createSnackbar: CreateSnackbarFn = useSnackbar();
-	const { goToMeetingAccessPage } = useRouting();
-
-	const [userName, setUserName] = useState<string>('');
-
-	const handleInputChange = useCallback((ev: React.FormEvent<HTMLInputElement>): void => {
-		setUserName(ev.currentTarget.value);
-	}, []);
-
-	const isButtonDisabled = useMemo(() => userName.length === 0, [userName.length]);
-
-	const errorSnackbar = useCallback(() => {
-		createSnackbar({
-			key: new Date().toLocaleString(),
-			type: 'error',
-			label: generalErrorSnackbar,
-			hideButton: true,
-			autoHideTimeout: 5000
-		});
-	}, [createSnackbar, generalErrorSnackbar]);
-
-	const handleCreateExternalUser = useCallback(() => {
-		MeetingsApi.createGuestAccount(userName)
-			.then((res) => {
-				document.cookie = `ZM_AUTH_TOKEN=${res.zmToken}; path=/`;
-				document.cookie = `ZX_AUTH_TOKEN=${res.zxToken}; path=/`;
-				setLoginInfo(res.id, userName, userName, UserType.GUEST);
-
-				// NETWORKS: init XMPP and WebSocket clients
-				const xmppClient = new XMPPClient();
-				setXmppClient(xmppClient);
-				const webSocket = new WebSocketClient();
-				setWebSocketClient(webSocket);
-
-				setChatsBeStatus(true);
-				xmppClient.connect(res.zmToken);
-				webSocket.connect();
-
-				setCapabilities({
-					canSeeMessageReads: true,
-					deleteMessageTimeLimitInMinutes: 10,
-					editMessageTimeLimitInMinutes: 10
-				});
-
-				goToMeetingAccessPage();
-			})
-			.catch(() => {
-				BrowserUtils.clearAuthCookies();
-				setChatsBeStatus(false);
-				errorSnackbar();
-			});
-	}, [
-		errorSnackbar,
-		goToMeetingAccessPage,
-		setCapabilities,
-		setChatsBeStatus,
-		setLoginInfo,
-		setWebSocketClient,
-		setXmppClient,
-		userName
-	]);
 
 	const handleRedirectLogin = useCallback(() => {
 		const meetingUrl = window.location.href;
@@ -164,18 +62,7 @@ const MeetingExternalAccessPage = (): ReactElement => {
 					padding="4rem"
 				>
 					<Container mainAlignment="flex-start" gap="1.5rem" height="fit">
-						<CustomText size="large" weight="bold">
-							{welcomePageTitle}
-						</CustomText>
-						<Text>{welcomePageDescription}</Text>
-						<Input label={nameInput} value={userName} onChange={handleInputChange} />
-						<CustomButton
-							data-testid="join_button"
-							width="fill"
-							label={joinButton}
-							onClick={handleCreateExternalUser}
-							disabled={isButtonDisabled}
-						/>
+						<ExternalGuestForm />
 						<Divider color="gray2" />
 						<Container gap="0.5rem" height="fit">
 							<Text>{accountTitle}</Text>

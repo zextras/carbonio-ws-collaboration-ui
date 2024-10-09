@@ -33,7 +33,7 @@ type MeetingConversationAccordionProps = {
 };
 const ChatContainer = styled(Container)``;
 
-const WrapperMeetingChat = styled(Container)<{ $darkModeActive: boolean }>`
+export const WrapperMeetingChat = styled(Container)<{ $darkModeActive: boolean }>`
 	overflow: hidden;
 	background-image: url('${({ $darkModeActive }): string =>
 		$darkModeActive ? papyrusDark : papyrus}');
@@ -205,7 +205,7 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({
 					height="fill"
 					$darkModeActive={darkReaderStatus}
 				>
-					<Chat roomId={roomId} setInfoPanelOpen={(): null => null} />
+					<Chat roomId={roomId} />
 				</WrapperMeetingChat>
 			)}
 		</ChatContainer>

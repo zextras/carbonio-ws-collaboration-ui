@@ -13,27 +13,40 @@ import ShimmerEntryMeetingView from './shimmers/ShimmerEntryMeetingView';
 import { MEETINGS_ROUTES, ROUTES } from '../../hooks/useRouting';
 import { MeetingsApi } from '../../network';
 import useStore from '../../store/Store';
+import { BrowserUtils } from '../../utils/BrowserUtils';
 
 const LazyAccessPageView = lazy(
-	() => import(/* webpackChunkName: "MeetingAccessPageView" */ './AccessPage')
+	() => import(/* webpackChunkName: "MeetingAccessPage" */ './AccessPage')
 );
 
-const LazyMeetingSkeleton = lazy(
-	() => import(/* webpackChunkName: "MeetingSkeleton" */ './MeetingSkeleton')
-);
+const LazyMeetingSkeleton = lazy(() => {
+	if (BrowserUtils.isMobile()) {
+		return import(/* webpackChunkName: "MeetingSkeletonMobile" */ './mobile/MeetingSkeletonMobile');
+	}
+	return import(/* webpackChunkName: "MeetingSkeleton" */ './MeetingSkeleton');
+});
 
 const LazyInfoPage = lazy(() => import(/* webpackChunkName: "InfoPage" */ './InfoPage'));
 
-const LazyMeetingExternalAccessPage = lazy(
-	() =>
-		import(
-			/* webpackChunkName: "MeetingExternalAccessPage" */ '../components/meetingAccessPoint/MeetingExternalAccessPage'
-		)
-);
+const LazyMeetingExternalAccessPage = lazy(() => {
+	if (BrowserUtils.isMobile()) {
+		return import(
+			/* webpackChunkName: "MeetingExternalAccessMobilePage" */ './mobile/MeetingExternalAccessMobilePage'
+		);
+	}
+	return import(
+		/* webpackChunkName: "MeetingExternalAccessPage" */ '../components/meetingAccessPoint/MeetingExternalAccessPage'
+	);
+});
 
-const LazyMeetingAccessPageView = lazy(
-	() => import(/* webpackChunkName: "MeetingAccessPageView" */ './MeetingAccessPageView')
-);
+const LazyMeetingAccessPage = lazy(() => {
+	if (BrowserUtils.isMobile()) {
+		return import(
+			/* webpackChunkName: "MeetingAccessMobilePageView" */ './mobile/MeetingAccessMobilePage'
+		);
+	}
+	return import(/* webpackChunkName: "MeetingAccessPage" */ './MeetingAccessPage');
+});
 
 const AccessPageView = (): ReactElement => (
 	<Suspense fallback={<ShimmerEntryMeetingView />}>
@@ -61,7 +74,7 @@ const MeetingExternalAccessPage = (): ReactElement => (
 
 const MeetingAccessPageView = (): ReactElement => (
 	<Suspense fallback={<ShimmerEntryMeetingView />}>
-		<LazyMeetingAccessPageView />
+		<LazyMeetingAccessPage />
 	</Suspense>
 );
 

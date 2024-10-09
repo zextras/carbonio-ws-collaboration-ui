@@ -6,11 +6,9 @@
 import React from 'react';
 
 import { screen } from '@testing-library/react';
-import { renderHook } from '@testing-library/react-hooks';
-import { UserEvent } from '@testing-library/user-event';
 import { act } from 'react-dom/test-utils';
 
-import MeetingAccessPage from './MeetingAccessPage';
+import MeetingAccessPageMediaSection from './MeetingAccessPageMediaSection';
 import { useParams } from '../../../../__mocks__/react-router';
 import useStore from '../../../store/Store';
 import {
@@ -30,7 +28,6 @@ import { MemberBe, RoomBe } from '../../../types/network/models/roomBeTypes';
 import { UserBe } from '../../../types/network/models/userBeTypes';
 import { MeetingParticipant } from '../../../types/store/MeetingTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
-import { RootStore } from '../../../types/store/StoreTypes';
 
 const iconVideoOff = 'icon: VideoOff';
 const iconMicOff = 'icon: MicOff';
@@ -63,33 +60,25 @@ const groupMeeting: MeetingBe = createMockMeeting({
 	participants: [user1Participant, user2Participant]
 });
 
-const canAccessMeeting = true;
-
-const setupBasicGroup = (): { user: UserEvent; store: RootStore } => {
-	const { result } = renderHook(() => useStore());
-	act(() => {
-		localStorage.setItem(
-			'ChatsMeetingSettings',
-			JSON.stringify({ EnableCamera: false, EnableMicrophone: false })
-		);
-		result.current.setUserInfo(user1);
-		result.current.setUserInfo(user2);
-		result.current.setLoginInfo(user1.id, user1.name);
-		result.current.addRoom(groupRoom);
-		result.current.addMeeting(groupMeeting);
-		result.current.setChatsBeStatus(true);
-		result.current.setWebsocketStatus(true);
-		result.current.meetingConnection(groupMeeting.id, false, undefined, false, undefined);
-	});
-	useParams.mockReturnValue({ meetingId: groupMeeting.id });
-	const { user } = setup(
-		<MeetingAccessPage meetingName={groupMeeting.name} hasUserDirectAccess={canAccessMeeting} />
-	);
-	return { user, store: result.current };
-};
-
 beforeAll(() => {
 	mockMediaDevicesReject();
+});
+
+beforeEach(() => {
+	const store = useStore.getState();
+	store.setUserInfo(user1);
+	store.setUserInfo(user2);
+	store.setLoginInfo(user1.id, user1.name);
+	store.addRoom(groupRoom);
+	store.addMeeting(groupMeeting);
+	store.setChatsBeStatus(true);
+	store.setWebsocketStatus(true);
+	store.meetingConnection(groupMeeting.id, false, undefined, false, undefined);
+	localStorage.setItem(
+		'ChatsMeetingSettings',
+		JSON.stringify({ EnableCamera: false, EnableMicrophone: false })
+	);
+	useParams.mockReturnValue({ meetingId: groupMeeting.id });
 });
 
 describe('user not giving media permissions', () => {
@@ -99,7 +88,18 @@ describe('user not giving media permissions', () => {
 
 		const err = jest.spyOn(console, 'error').mockImplementation();
 
-		const { user } = setupBasicGroup();
+		const { user } = setup(
+			<MeetingAccessPageMediaSection
+				streamTrack={null}
+				setStreamTrack={jest.fn()}
+				hasUserDirectAccess
+				userIsReady
+				meetingName={groupMeeting.name}
+				wrapperWidth={100}
+				handleEnterMeeting={jest.fn()}
+				handleWaitingRoom={jest.fn()}
+			/>
+		);
 
 		const videoOff = screen.getByTestId(iconVideoOff);
 		await act(() => user.click(videoOff));
@@ -116,7 +116,18 @@ describe('user not giving media permissions', () => {
 
 		const err = jest.spyOn(console, 'error').mockImplementation();
 
-		const { user } = setupBasicGroup();
+		const { user } = setup(
+			<MeetingAccessPageMediaSection
+				streamTrack={null}
+				setStreamTrack={jest.fn()}
+				hasUserDirectAccess
+				userIsReady
+				meetingName={groupMeeting.name}
+				wrapperWidth={100}
+				handleEnterMeeting={jest.fn()}
+				handleWaitingRoom={jest.fn()}
+			/>
+		);
 
 		const micOff = screen.getByTestId(iconMicOff);
 		await act(() => user.click(micOff));
@@ -125,5 +136,45 @@ describe('user not giving media permissions', () => {
 
 		expect(snackbar).toBeInTheDocument();
 		expect(err).toHaveBeenCalled();
+	});
+
+	test('Internal user joins meeting', async () => {
+		const joinMeeting = jest.fn();
+		const { user } = setup(
+			<MeetingAccessPageMediaSection
+				streamTrack={null}
+				setStreamTrack={jest.fn()}
+				hasUserDirectAccess
+				userIsReady
+				meetingName={groupMeeting.name}
+				wrapperWidth={100}
+				handleEnterMeeting={joinMeeting}
+				handleWaitingRoom={jest.fn()}
+			/>
+		);
+		const enterButton = screen.getByRole('button', { name: 'Enter' });
+		expect(enterButton).toBeInTheDocument();
+		await user.click(enterButton);
+		expect(joinMeeting).toHaveBeenCalled();
+	});
+
+	test('User joins waiting room', async () => {
+		const joinWaiting = jest.fn();
+		const { user } = setup(
+			<MeetingAccessPageMediaSection
+				streamTrack={null}
+				setStreamTrack={jest.fn()}
+				hasUserDirectAccess={false}
+				userIsReady={false}
+				meetingName={groupMeeting.name}
+				wrapperWidth={100}
+				handleEnterMeeting={jest.fn()}
+				handleWaitingRoom={joinWaiting}
+			/>
+		);
+		const readyButton = screen.getByRole('button', { name: 'Ready to participate' });
+		expect(readyButton).toBeInTheDocument();
+		await user.click(readyButton);
+		expect(joinWaiting).toHaveBeenCalled();
 	});
 });
