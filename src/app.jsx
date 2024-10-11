@@ -70,7 +70,9 @@ export default function App() {
 	}, [authenticated, setChatsBeStatus, setWebSocketClient, setXmppClient]);
 
 	useChatsApp();
+
 	useMeetingsApp();
+
 	useSettingsApp();
 
 	return (
