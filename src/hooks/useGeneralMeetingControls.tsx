@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
 import { CreateSnackbarFn, useSnackbar } from '@zextras/carbonio-design-system';
 import { filter, find, maxBy, size } from 'lodash';
@@ -26,20 +26,30 @@ import { STREAM_TYPE } from '../types/store/ActiveMeetingTypes';
 import { MeetingParticipantMap } from '../types/store/MeetingTypes';
 
 const useGeneralMeetingControls = (meetingId: string): void => {
+	const [t] = useTranslation();
+	const mutedByModerator = t(
+		'snackbar.mutedByModerator',
+		"You've been muted by a moderator, unmute yourself to speak"
+	);
+	const okLabel = t('action.ok', 'Ok');
+	const connectionReestablishedLabel = t(
+		'feedback.connectionReestabilished',
+		'Connection re-established, meeting can continue without interruption.'
+	);
+
 	const isMeetingActive = useStore((store) => getMeetingActiveByMeetingId(store, meetingId));
 	const meetingParticipants: MeetingParticipantMap | undefined = useStore((store) =>
 		getMeetingParticipantsByMeetingId(store, meetingId)
 	);
-
 	const tiles = useStore((store) => getTiles(store, meetingId));
 	const setPinnedTile = useStore((store) => store.setPinnedTile);
+	const meetingConnection = useStore((store) => store.meetingConnection);
 	const meetingDisconnection = useStore((store) => store.meetingDisconnection);
+	const websocketNetworkStatus = useStore(({ connections }) => connections.status.websocket);
 
-	const { goToInfoPage } = useRouting();
+	const { goToInfoPage, goToMeetingPage } = useRouting();
 
-	const leaveMeeting = useCallback(() => {
-		MeetingsApi.leaveMeeting(meetingId);
-	}, [meetingId]);
+	const createSnackbar: CreateSnackbarFn = useSnackbar();
 
 	// Redirect to info page if meeting ended or some error occurred
 	useEffect(() => {
@@ -55,6 +65,8 @@ const useGeneralMeetingControls = (meetingId: string): void => {
 	}, [goToInfoPage, isMeetingActive, meetingDisconnection, meetingId]);
 
 	// Leave meeting on window close
+	const leaveMeeting = useCallback(() => MeetingsApi.leaveMeeting(meetingId), [meetingId]);
+
 	useEffect(() => {
 		window.parent.addEventListener('beforeunload', leaveMeeting);
 		return (): void => {
@@ -98,6 +110,7 @@ const useGeneralMeetingControls = (meetingId: string): void => {
 		// eslint-disable-next-line
 	}, [meetingId, setPinnedTile]);
 
+	// Disconnect user if he joins the meeting with other session
 	const meetingParticipantClashedHandler = useCallback(
 		(event: CustomEvent<MeetingWaitingParticipantClashedEvent['data']> | undefined) => {
 			meetingDisconnection(event?.detail.meetingId ?? '');
@@ -105,18 +118,9 @@ const useGeneralMeetingControls = (meetingId: string): void => {
 		},
 		[goToInfoPage, meetingDisconnection]
 	);
-
 	useEventListener(EventName.MEETING_PARTICIPANT_CLASHED, meetingParticipantClashedHandler);
 
-	const [t] = useTranslation();
-	const mutedByModerator = t(
-		'snackbar.mutedByModerator',
-		"You've been muted by a moderator, unmute yourself to speak"
-	);
-	const okLabel = t('action.ok', 'Ok');
-
-	const createSnackbar: CreateSnackbarFn = useSnackbar();
-
+	// Display snackbar when user is muted by moderator
 	const handleMutedEvent = useCallback(() => {
 		createSnackbar({
 			key: new Date().toLocaleString(),
@@ -126,8 +130,40 @@ const useGeneralMeetingControls = (meetingId: string): void => {
 			disableAutoHide: true
 		});
 	}, [createSnackbar, mutedByModerator, okLabel]);
-
 	useEventListener(EventName.MEMBER_MUTED, handleMutedEvent);
+
+	// Display snackbar when ws reconnect and leave meeting if user is no more in it
+	const websocketNetworkStatusPrev = useRef(websocketNetworkStatus);
+	useEffect(() => {
+		if (websocketNetworkStatusPrev.current === false && websocketNetworkStatus === true) {
+			MeetingsApi.getMeetingByMeetingId(meetingId).then((meeting) => {
+				const userInMeeting = find(
+					meeting?.participants,
+					(member) => member.userId === useStore.getState().session.id
+				);
+				if (!userInMeeting) {
+					meetingDisconnection(meetingId);
+					goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED);
+				}
+				createSnackbar({
+					key: new Date().toLocaleString(),
+					severity: 'info',
+					label: connectionReestablishedLabel,
+					hideButton: true
+				});
+			});
+		}
+		websocketNetworkStatusPrev.current = websocketNetworkStatus;
+	}, [
+		connectionReestablishedLabel,
+		createSnackbar,
+		goToInfoPage,
+		goToMeetingPage,
+		meetingConnection,
+		meetingDisconnection,
+		meetingId,
+		websocketNetworkStatus
+	]);
 };
 
 export default useGeneralMeetingControls;
