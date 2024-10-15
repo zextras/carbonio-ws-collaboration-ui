@@ -287,3 +287,5 @@ Object.defineProperty(window, 'Worker', {
 	writable: true,
 	value: Worker
 });
+
+HTMLCanvasElement.prototype.getContext = jest.fn();

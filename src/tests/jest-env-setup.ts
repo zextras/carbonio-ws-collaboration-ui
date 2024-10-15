@@ -34,9 +34,6 @@ beforeEach(() => {
 
 beforeAll(() => {
 	jest.setTimeout(30000);
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore
-	jest.retryTimes(2, { logErrorsBeforeRetry: true });
 });
 
 afterEach(() => {
