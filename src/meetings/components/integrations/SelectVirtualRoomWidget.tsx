@@ -96,13 +96,14 @@ const SelectVirtualRoomWidget: FC<SelectVirtualRoomWidgetProps> = ({ onChange, d
 			selection={selection}
 			items={items}
 			onChange={onChangeVirtualRoom}
+			data-testid="select_virtual_room"
 		/>
 	) : (
 		<Container height="2.938rem" background={'gray5'}>
 			<Text color="gray1" size="small" weight="light">
 				{goToChatsLabel}
 			</Text>
-			<Text color="gray1" size="small" weight="light">
+			<Text color="gray1" size="small" weight="light" data-testid="no_virtual_room">
 				{findVirtualRoomLabel}
 			</Text>
 		</Container>
