@@ -7,7 +7,7 @@
 import React, { lazy, Suspense, useEffect } from 'react';
 
 import { Container, ModalManager } from '@zextras/carbonio-design-system';
-import { addRoute, Spinner } from '@zextras/carbonio-shell-ui';
+import { addRoute, SecondaryBarComponentProps, Spinner } from '@zextras/carbonio-shell-ui';
 
 import ConnectionSnackbarManager from './components/ConnectionSnackbarManager';
 import { CHATS_ROUTE, PRODUCT_NAME } from '../constants/appConstants';
@@ -17,7 +17,7 @@ import ShimmeringInfoPanelView from './views/shimmerViews/ShimmeringInfoPanelVie
 
 const LazyMainView = lazy(() => import(/* webpackChunkName: "mainView" */ './views/MainView'));
 
-const ChatsMain = () => (
+const ChatsMain = (): React.JSX.Element => (
 	<Suspense
 		fallback={
 			<Container mainAlignment="flex-start" orientation="horizontal">
@@ -32,7 +32,8 @@ const ChatsMain = () => (
 		</ModalManager>
 	</Suspense>
 );
-const SecondaryBar = (props) => (
+
+const SecondaryBar = (props: SecondaryBarComponentProps): React.JSX.Element => (
 	<Suspense fallback={<Spinner />}>
 		<ModalManager>
 			<SecondaryBarView {...props} />
@@ -40,7 +41,7 @@ const SecondaryBar = (props) => (
 	</Suspense>
 );
 
-export default function useChatsApp() {
+export default function useChatsApp(): void {
 	useEffect(() => {
 		addRoute({
 			route: CHATS_ROUTE,
