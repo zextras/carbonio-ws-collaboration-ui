@@ -68,6 +68,10 @@ const CameraButton = ({
 		'Turn on the camera to select a video effect'
 	);
 	const selectedDeviceTooltip = t('meeting.interactions.selectedDeviceTooltip', 'Selected device');
+	const disableButtonLabel = t(
+		'meeting.interactions.disabled',
+		'There are connection problems, please try again later.'
+	);
 
 	const { meetingId }: MeetingRoutesParams = useParams();
 	const myUserId = useStore(getUserId);
@@ -83,6 +87,7 @@ const CameraButton = ({
 		getCapability(store, CapabilityType.CAN_USE_VIRTUAL_BACKGROUND)
 	);
 	const isUserGuest = useStore((store) => getIsUserGuest(store, myUserId ?? ''));
+	const websocketNetworkStatus = useStore(({ connections }) => connections.status.websocket);
 
 	const [buttonStatus, setButtonStatus] = useState<boolean>(true);
 	const [videoMediaList, setVideoMediaList] = useState<[] | MediaDeviceInfo[]>([]);
@@ -250,8 +255,13 @@ const CameraButton = ({
 		};
 	}, [updateListOfDevices]);
 
+	const tooltipLabel = useMemo(() => {
+		if (!websocketNetworkStatus) return disableButtonLabel;
+		return videoStatus ? disableCamLabel : enableCamLabel;
+	}, [websocketNetworkStatus, disableButtonLabel, videoStatus, disableCamLabel, enableCamLabel]);
+
 	return (
-		<Tooltip placement="top" label={videoStatus ? disableCamLabel : enableCamLabel}>
+		<Tooltip placement="top" label={tooltipLabel}>
 			<MultiButton
 				background={'primary'}
 				data-testid="cameraButton"
@@ -268,8 +278,8 @@ const CameraButton = ({
 					items: dropdownList,
 					width: 'fit-content'
 				}}
-				disabledPrimary={!buttonStatus}
-				disabledSecondary={!buttonStatus}
+				disabledPrimary={!buttonStatus || !websocketNetworkStatus}
+				disabledSecondary={!buttonStatus || !websocketNetworkStatus}
 			/>
 		</Tooltip>
 	);

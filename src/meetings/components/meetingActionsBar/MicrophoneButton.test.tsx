@@ -10,6 +10,7 @@ import { UserEvent } from '@testing-library/user-event';
 
 import MicrophoneButton from './MicrophoneButton';
 import { useParams } from '../../../../__mocks__/react-router';
+import useStore from '../../../store/Store';
 import {
 	createMockMeeting,
 	createMockParticipants,
@@ -77,10 +78,17 @@ describe('Microphone button', () => {
 	});
 
 	test('Toggle list of audio inputs', async () => {
+		useStore.getState().setWebsocketStatus(true);
 		mockSetIsAudioListOpen.mockReturnValue(true);
 		const { user } = defaultSetup();
 		const multiButtonToggleList = screen.getByTestId('icon: ChevronUp');
 		await user.click(multiButtonToggleList);
 		expect(mockSetIsAudioListOpen).toHaveBeenCalled();
+	});
+
+	test('Microphone button is disabled when websocket is down', async () => {
+		useStore.getState().setWebsocketStatus(false);
+		defaultSetup();
+		expect(await screen.findByTestId('microphone-button')).toBeDisabled();
 	});
 });

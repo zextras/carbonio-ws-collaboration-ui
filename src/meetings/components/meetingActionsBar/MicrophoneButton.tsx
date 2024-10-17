@@ -53,6 +53,10 @@ const MicrophoneButton = ({
 		'meeting.interactions.browserPermission',
 		'Grant browser permissions to enable resources'
 	);
+	const disableButtonLabel = t(
+		'meeting.interactions.disabled',
+		'There are connection problems, please try again later.'
+	);
 
 	const { meetingId }: MeetingRoutesParams = useParams();
 	const myUserId = useStore(getUserId);
@@ -62,6 +66,7 @@ const MicrophoneButton = ({
 	const bidirectionalAudioConn = useStore(
 		(store) => store.activeMeeting[meetingId]?.bidirectionalAudioConn
 	);
+	const websocketNetworkStatus = useStore(({ connections }) => connections.status.websocket);
 
 	const [audioMediaList, setAudioMediaList] = useState<[] | MediaDeviceInfo[]>([]);
 
@@ -162,8 +167,13 @@ const MicrophoneButton = ({
 		};
 	}, [updateListOfDevices]);
 
+	const tooltipLabel = useMemo(() => {
+		if (!websocketNetworkStatus) return disableButtonLabel;
+		return audioStatus ? disableMicLabel : enableMicLabel;
+	}, [websocketNetworkStatus, disableButtonLabel, audioStatus, disableMicLabel, enableMicLabel]);
+
 	return (
-		<Tooltip placement="top" label={audioStatus ? disableMicLabel : enableMicLabel}>
+		<Tooltip placement="top" label={tooltipLabel}>
 			<MultiButton
 				data-testid="microphone-button"
 				background={'primary'}
@@ -179,6 +189,8 @@ const MicrophoneButton = ({
 					dropdownListRef: audioDropdownRef,
 					items: mediaAudioList
 				}}
+				disabledPrimary={!websocketNetworkStatus}
+				disabledSecondary={!websocketNetworkStatus}
 			/>
 		</Tooltip>
 	);
