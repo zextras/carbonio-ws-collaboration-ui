@@ -8,7 +8,6 @@
 export const PRODUCT_NAME = 'Chats';
 export const CHATS_APP_ID = 'carbonio-ws-collaboration-ui';
 export const CHATS_ROUTE = 'chats';
-export const CALENDARS_ROUTE = 'calendars';
 
 // Meetings zapp constants
 export const MEETINGS_NAME = 'Meetings';

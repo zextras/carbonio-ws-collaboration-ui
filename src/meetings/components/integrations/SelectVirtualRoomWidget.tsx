@@ -14,11 +14,12 @@ import {
 } from '@zextras/carbonio-design-system';
 import { find, map, tail } from 'lodash';
 import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 
 import { getVirtualRoomsList } from '../../../store/selectors/RoomsSelectors';
 import useStore from '../../../store/Store';
 import { Room } from '../../../types/store/RoomTypes';
-import { getMeetingLinkFromCalendar } from '../../../utils/MeetingsUtils';
+import { createMeetingLinkFromOutside } from '../../../utils/MeetingsUtils';
 
 type defaultType = {
 	label: string;
@@ -37,13 +38,22 @@ export type SelectVirtualRoomWidgetProps = {
 	defaultValue: defaultType;
 };
 
+const CustomContainer = styled(Container)`
+	user-select: none;
+	-webkit-user-select: none;
+`;
+
+const CustomText = styled(Text)`
+	font-style: italic;
+`;
+
 const SelectVirtualRoomWidget: FC<SelectVirtualRoomWidgetProps> = ({ onChange, defaultValue }) => {
 	const [t] = useTranslation();
 
 	const noVirtualRoomLabel = t('appointment.input.defaultValue', 'No Virtual Room selected');
 	const findVirtualRoomLabel = t(
 		'appointment.placeholder.description',
-		'You will find your Virtual Rooms here when you’re back!'
+		'You will find your Virtual Rooms here when you’re back.'
 	);
 	const goToChatsLabel = t(
 		'appointment.placeholder.title',
@@ -67,7 +77,7 @@ const SelectVirtualRoomWidget: FC<SelectVirtualRoomWidgetProps> = ({ onChange, d
 					id: room.id,
 					label: room.name ?? '',
 					title: room.name ?? '',
-					link: getMeetingLinkFromCalendar(room.meetingId)
+					link: createMeetingLinkFromOutside(room.meetingId)
 				}
 			}))
 		],
@@ -99,14 +109,14 @@ const SelectVirtualRoomWidget: FC<SelectVirtualRoomWidgetProps> = ({ onChange, d
 			data-testid="select_virtual_room"
 		/>
 	) : (
-		<Container height="2.938rem" background={'gray5'}>
-			<Text color="gray1" size="small" weight="light">
+		<CustomContainer height="2.938rem" background={'gray5'}>
+			<CustomText color="gray1" size="small" weight="light">
 				{goToChatsLabel}
-			</Text>
-			<Text color="gray1" size="small" weight="light" data-testid="no_virtual_room">
+			</CustomText>
+			<CustomText color="gray1" size="small" weight="light" data-testid="no_virtual_room">
 				{findVirtualRoomLabel}
-			</Text>
-		</Container>
+			</CustomText>
+		</CustomContainer>
 	);
 };
 

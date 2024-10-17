@@ -6,7 +6,7 @@
 
 import { concat, find, forEach, indexOf, last, map, min, range, without } from 'lodash';
 
-import { CALENDARS_ROUTE, MEETINGS_PATH } from '../constants/appConstants';
+import { MEETINGS_PATH } from '../constants/appConstants';
 import audioOff from '../meetings/assets/AudioOFF.mp3';
 import audioOn from '../meetings/assets/AudioON.mp3';
 import meetingIn from '../meetings/assets/MeetingIN.mp3';
@@ -161,10 +161,13 @@ export const getWorkerUrl = (): URL =>
 	// @ts-ignore
 	new URL('../meetings/components/virtualBackground/selfieSegmentationWorker.js', import.meta.url);
 
-export const getMeetingLinkFromCalendar = (meetingId: string | undefined): string => {
+export const createMeetingLinkFromOutside = (meetingId: string | undefined): string => {
 	const meetingLink = `${MEETINGS_PATH}${meetingId}`;
-	const separator = window.location.href.includes(CALENDARS_ROUTE)
-		? CALENDARS_ROUTE
-		: MEETINGS_PATH;
-	return `${window.location.href.split(separator)[0]}${meetingLink}`;
+
+	console.log(window.location.href);
+
+	const regex = /^(.*?)(?=\/(mails|calendars|contacts|groups|chats|files|tasks|search|settings))/;
+	const match = regex.exec(window.location.href);
+	const baseURL = match ? match[1] : null;
+	return `${baseURL}/${meetingLink}`;
 };
