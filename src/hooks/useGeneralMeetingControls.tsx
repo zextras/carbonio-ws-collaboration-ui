@@ -141,16 +141,17 @@ const useGeneralMeetingControls = (meetingId: string): void => {
 					meeting?.participants,
 					(member) => member.userId === useStore.getState().session.id
 				);
-				if (!userInMeeting) {
+				if (userInMeeting) {
+					createSnackbar({
+						key: new Date().toLocaleString(),
+						severity: 'info',
+						label: connectionReestablishedLabel,
+						hideButton: true
+					});
+				} else {
 					meetingDisconnection(meetingId);
-					goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED);
+					goToInfoPage(PAGE_INFO_TYPE.GENERAL_ERROR);
 				}
-				createSnackbar({
-					key: new Date().toLocaleString(),
-					severity: 'info',
-					label: connectionReestablishedLabel,
-					hideButton: true
-				});
 			});
 		}
 		websocketNetworkStatusPrev.current = websocketNetworkStatus;
