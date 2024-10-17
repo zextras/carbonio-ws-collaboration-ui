@@ -16,7 +16,7 @@ import {
 import CounterBadgeUpdater from './chats/components/CounterBadgeUpdater';
 import RegisterCreationButton from './chats/components/RegisterCreationButton';
 import useChatsApp from './chats/useChatsApp';
-import SelectVirtualRoomWidget from './meetings/components/integrations/SelectVirtualRoomWidget';
+import SelectVirtualRoomWidgetComponent from './meetings/components/integrations/SelectVirtualRoomWidget';
 import MeetingNotificationHandler from './meetings/components/MeetingNotificationsHandler';
 import useMeetingsApp from './meetings/useMeetingsApp';
 import { MeetingsApi, RoomsApi, SessionApi } from './network';
@@ -36,10 +36,6 @@ export default function App(): React.JSX.Element {
 
 	const authenticated = useAuthenticated();
 	const { prefs } = useUserSettings();
-
-	const SelectVirtualRoomWidgetComponent = ({ onChange, defaultValue }) => (
-		<SelectVirtualRoomWidget onChange={onChange} defaultValue={defaultValue} />
-	);
 
 	// STORE: init with user session main infos
 	useEffect(() => {

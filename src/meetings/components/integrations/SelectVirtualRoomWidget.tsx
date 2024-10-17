@@ -120,4 +120,9 @@ const SelectVirtualRoomWidget: FC<SelectVirtualRoomWidgetProps> = ({ onChange, d
 	);
 };
 
-export default SelectVirtualRoomWidget;
+const SelectVirtualRoomWidgetComponent: FC<SelectVirtualRoomWidgetProps> = ({
+	onChange,
+	defaultValue
+}) => <SelectVirtualRoomWidget onChange={onChange} defaultValue={defaultValue} />;
+
+export default SelectVirtualRoomWidgetComponent;
