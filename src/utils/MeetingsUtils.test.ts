@@ -5,6 +5,7 @@
  */
 
 import {
+	createMeetingLinkFromOutside,
 	findAllPossiblePairs,
 	maximiseRowsAndColumns,
 	maximiseTileSize,
@@ -291,5 +292,10 @@ describe('MeetingsUtils', () => {
 			expect(newOrderTiles[1]).toEqual({ userId: 'user2', type: STREAM_TYPE.AUDIO });
 			expect(newOrderTiles[2]).toEqual({ userId: 'user5', type: STREAM_TYPE.VIDEO });
 		});
+	});
+
+	test('create link', () => {
+		const link = createMeetingLinkFromOutside('meeting-id');
+		expect(link).toBe('https://localhost/carbonio/focus-mode/meetings/meeting-id');
 	});
 });

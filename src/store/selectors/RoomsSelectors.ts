@@ -25,6 +25,11 @@ export const getTemporaryRoomIdsOrderedByCreation = (store: RootStore): string[]
 	return map(orderedRooms, (room) => room.id);
 };
 
+export const getVirtualRoomsList = (store: RootStore): Room[] => {
+	const filteredRooms = filter(store.rooms, (room) => room.type === RoomType.TEMPORARY);
+	return orderBy(filteredRooms, ['createdAt'], ['desc']);
+};
+
 export const getRoomSelector = (state: RootStore, id: string): Room => state.rooms[id];
 
 export const getRoomNameSelector = (state: RootStore, id: string): string => {
@@ -44,7 +49,7 @@ export const getRoomTypeSelector = (state: RootStore, id: string): RoomType =>
 	state.rooms[id]?.type;
 
 export const getRoomDescriptionSelector = (state: RootStore, id: string): string =>
-	state.rooms[id]?.description || '';
+	state.rooms[id]?.description ?? '';
 
 export const getRoomMutedSelector = (state: RootStore, id: string): boolean | undefined =>
 	state.rooms[id]?.userSettings?.muted;
