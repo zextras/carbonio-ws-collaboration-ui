@@ -53,6 +53,7 @@ const ScreenShareButton = (): ReactElement => {
 	return (
 		<Tooltip placement="top" label={tooltipLabel}>
 			<Button
+				data-testid="screenshare-button"
 				labelColor="gray6"
 				backgroundColor="primary"
 				icon={screenStatus ? 'ScreenSharingOn' : 'ScreenSharingOff'}
