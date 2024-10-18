@@ -29,4 +29,36 @@ describe('ScreenShare button', () => {
 		setup(<ScreenShareButton />);
 		expect(await screen.findByTestId('screenshare-button')).toBeDisabled();
 	});
+
+	test('ScreenSharingOff icon when screenshare is disabled', async () => {
+		useParams.mockReturnValue({ meetingId: meeting.id });
+		const store = useStore.getState();
+		store.setWebsocketStatus(true);
+		store.setLoginInfo('userId', 'User', 'User');
+		store.addMeeting(
+			createMockMeeting({
+				id: meeting.id,
+				participants: [{ userId: 'userId', screenStreamEnabled: false }]
+			})
+		);
+		setup(<ScreenShareButton />);
+		const disabledScreenShareIcon = await screen.findByTestId('icon: ScreenSharingOff');
+		expect(disabledScreenShareIcon).toBeVisible();
+	});
+
+	test('ScreenSharingOn icon when screenshare is enabled', async () => {
+		useParams.mockReturnValue({ meetingId: meeting.id });
+		const store = useStore.getState();
+		store.setWebsocketStatus(true);
+		store.setLoginInfo('userId', 'User', 'User');
+		store.addMeeting(
+			createMockMeeting({
+				id: meeting.id,
+				participants: [{ userId: 'userId', screenStreamEnabled: true }]
+			})
+		);
+		setup(<ScreenShareButton />);
+		const enabledScreenShareIcon = await screen.findByTestId('icon: ScreenSharingOn');
+		expect(enabledScreenShareIcon).toBeVisible();
+	});
 });
