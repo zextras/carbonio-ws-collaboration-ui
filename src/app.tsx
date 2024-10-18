@@ -22,7 +22,7 @@ import useStore from './store/Store';
 import { UserType } from './types/store/UserTypes';
 import { setDateDefault } from './utils/dateUtils';
 
-export default function App() {
+export default function App(): React.JSX.Element {
 	const setLoginInfo = useStore((state) => state.setLoginInfo);
 	const setXmppClient = useStore((state) => state.setXmppClient);
 	const setWebSocketClient = useStore((state) => state.setWebSocketClient);
