@@ -132,7 +132,7 @@ const useGeneralMeetingControls = (meetingId: string): void => {
 	}, [createSnackbar, mutedByModerator, okLabel]);
 	useEventListener(EventName.MEMBER_MUTED, handleMutedEvent);
 
-	// Display snackbar when ws reconnect and leave meeting if user is no more in it
+	// Show a snackbar when WebSocket reconnects and automatically leave the meeting if the user is no longer present
 	const websocketNetworkStatusPrev = useRef(websocketNetworkStatus);
 	useEffect(() => {
 		if (websocketNetworkStatusPrev.current === false && websocketNetworkStatus === true) {

@@ -25,7 +25,7 @@ beforeEach(() => {
 	store.meetingConnection(meeting.id, false, undefined, false, undefined);
 });
 describe('useGeneralMeetingControl hook', () => {
-	test('Display snackbar when web socket connection is back and users is already in it', async () => {
+	test('Show a snackbar when the WebSocket connection is restored and the user is still in the meeting', async () => {
 		mockedGetMeetingByMeetingId.mockReturnValueOnce(meeting);
 		renderHook(() => useGeneralMeetingControls(meeting.id), {
 			wrapper: ProvidersWrapper
@@ -43,7 +43,7 @@ describe('useGeneralMeetingControl hook', () => {
 		});
 	});
 
-	test('Close meeting if web socket connection is back but user is not in meeting anymore', async () => {
+	test('Automatically close the meeting if the WebSocket connection is restored but the user is no longer in the meeting', async () => {
 		mockedGetMeetingByMeetingId.mockReturnValueOnce({
 			...meeting,
 			participants: []
