@@ -8,9 +8,9 @@ import React from 'react';
 
 import { act, renderHook } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event';
+import * as Shell from '@zextras/carbonio-shell-ui';
 
 import AccessPage from './AccessPage';
-import { mockUseAuthenticated } from '../../../__mocks__/@zextras/carbonio-shell-ui';
 import { useParams } from '../../../__mocks__/react-router';
 import useStore from '../../store/Store';
 import {
@@ -112,13 +112,13 @@ const setupAccessPageNotAuthenticated = (): { user: UserEvent; store: RootStore 
 
 describe('Meeting access page', () => {
 	test('Authenticated user -> access the meeting -> redirect to the waiting room', async () => {
-		mockUseAuthenticated.mockReturnValue(true);
+		jest.spyOn(Shell, 'useAuthenticated').mockReturnValue(true);
 		setupAccessPage();
 		expect(mockGoToMeetingAccessPage).toHaveBeenCalled();
 	});
 
 	test('Not authenticated user -> access the meeting -> reach the login external page', async () => {
-		mockUseAuthenticated.mockReturnValue(false);
+		const mockUseAuthenticated = jest.spyOn(Shell, 'useAuthenticated').mockReturnValue(false);
 		mockedGetScheduledMeetingName.mockReturnValueOnce('name');
 		setupAccessPageNotAuthenticated();
 
@@ -128,7 +128,7 @@ describe('Meeting access page', () => {
 	});
 
 	test('Authenticated user -> joins group meeting -> redirect to the waiting room', async () => {
-		mockUseAuthenticated.mockReturnValueOnce(true);
+		jest.spyOn(Shell, 'useAuthenticated').mockReturnValue(true);
 		mockedGetMeetingRequest.mockReturnValueOnce('meeting');
 		setupGroupForAccessPage();
 		expect(mockGoToMeetingAccessPage).toHaveBeenCalled();

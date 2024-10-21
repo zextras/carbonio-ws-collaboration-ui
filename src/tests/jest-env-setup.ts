@@ -39,7 +39,6 @@ beforeAll(() => {
 afterEach(() => {
 	jest.runOnlyPendingTimers();
 	jest.useRealTimers();
-	jest.restoreAllMocks();
 	act(() => {
 		window.resizeTo(1024, 768);
 	});

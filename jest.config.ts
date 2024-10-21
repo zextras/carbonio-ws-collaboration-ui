@@ -68,7 +68,7 @@ export default {
 	// globals: {},
 
 	// The maximum amount of workers used to run your tests. Can be specified as % or a number. E.g. maxWorkers: 10% will use 10% of your CPU amount + 1 as the maximum worker number. maxWorkers: 2 will use a maximum of 2 workers.
-	maxWorkers: 2,
+	// maxWorkers: 2,
 
 	// An array of directory names to be searched recursively up from the requiring module's location
 	moduleDirectories: ['node_modules', 'utils'],
@@ -110,7 +110,7 @@ export default {
 	reporters: ['default', 'jest-junit'],
 
 	// Automatically reset mock state before every test
-	// resetMocks: false,
+	resetMocks: false,
 
 	// Reset the module registry before running each individual test
 	// resetModules: false,
@@ -119,7 +119,7 @@ export default {
 	// resolver: undefined,
 
 	// Automatically restore mock state and implementation before every test
-	// restoreMocks: false,
+	restoreMocks: true,
 
 	// The root directory that Jest should scan for tests and modules within
 	// rootDir: undefined,
