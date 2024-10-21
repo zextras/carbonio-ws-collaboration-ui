@@ -6,6 +6,7 @@
 	"scripts": {
 		"build": "sdk build",
 		"deploy": "sdk deploy",
+		"sdk-install": "sdk install",
 		"start": "sdk watch",
 		"test": "jest",
 		"postinstall": "is-ci || husky",

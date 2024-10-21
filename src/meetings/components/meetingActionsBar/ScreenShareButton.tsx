@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import React, { ReactElement, useCallback } from 'react';
+import React, { ReactElement, useCallback, useMemo } from 'react';
 
 import { Button, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
@@ -19,12 +19,17 @@ const ScreenShareButton = (): ReactElement => {
 
 	const disableScreenLabel = t('meeting.interactions.disableScreen', 'Disable screen share');
 	const enableScreenLabel = t('meeting.interactions.enableScreen', 'Enable screen share');
+	const disableButtonLabel = t(
+		'meeting.interactions.disabled',
+		'There are connection problems, please try again later.'
+	);
 
 	const { meetingId }: MeetingRoutesParams = useParams();
 
 	const myUserId = useStore(getUserId);
 	const screenStatus = useStore((store) => getParticipantScreenStatus(store, meetingId, myUserId));
 	const screenOutConn = useStore((store) => store.activeMeeting[meetingId]?.screenOutConn);
+	const websocketNetworkStatus = useStore(({ connections }) => connections.status.websocket);
 
 	const toggleScreenStream = useCallback(() => {
 		if (!screenStatus) {
@@ -34,14 +39,27 @@ const ScreenShareButton = (): ReactElement => {
 		}
 	}, [screenOutConn, screenStatus]);
 
+	const tooltipLabel = useMemo(() => {
+		if (!websocketNetworkStatus) return disableButtonLabel;
+		return screenStatus ? disableScreenLabel : enableScreenLabel;
+	}, [
+		websocketNetworkStatus,
+		disableButtonLabel,
+		screenStatus,
+		disableScreenLabel,
+		enableScreenLabel
+	]);
+
 	return (
-		<Tooltip placement="top" label={screenStatus ? disableScreenLabel : enableScreenLabel}>
+		<Tooltip placement="top" label={tooltipLabel}>
 			<Button
+				data-testid="screenshare-button"
 				labelColor="gray6"
 				backgroundColor="primary"
 				icon={screenStatus ? 'ScreenSharingOn' : 'ScreenSharingOff'}
 				onClick={toggleScreenStream}
 				size="large"
+				disabled={!websocketNetworkStatus}
 			/>
 		</Tooltip>
 	);
