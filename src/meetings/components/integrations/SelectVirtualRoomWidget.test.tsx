@@ -43,7 +43,12 @@ describe('SelectVirtualRoomWidget', () => {
 		store.setCapabilities(createMockCapabilityList());
 		store.setRooms([temporaryRoomMod]);
 		store.setMeetings([scheduledMeetingMod]);
-		setup(<SelectVirtualRoomWidgetComponent onChange={jest.fn()} defaultValue={undefined} />);
+		setup(
+			<SelectVirtualRoomWidgetComponent
+				onChange={jest.fn()}
+				defaultValue={{ label: 'Virtual Room Selected', link: 'a-beautiful-link' }}
+			/>
+		);
 
 		const selectVirtualRoom = screen.getByTestId('select_virtual_room');
 
