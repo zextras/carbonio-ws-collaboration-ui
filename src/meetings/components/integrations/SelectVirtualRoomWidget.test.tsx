@@ -46,16 +46,21 @@ describe('SelectVirtualRoomWidget', () => {
 		setup(
 			<SelectVirtualRoomWidgetComponent
 				onChange={jest.fn()}
-				defaultValue={{ label: 'Virtual Room Selected', link: 'a-beautiful-link' }}
+				defaultValue={{
+					label: temporaryRoomMod.name ?? '',
+					link: 'https://localhost/carbonio/focus-mode/meetings/scheduled-meeting-mod-test'
+				}}
 			/>
 		);
 
 		const selectVirtualRoom = screen.getByTestId('select_virtual_room');
-
 		expect(selectVirtualRoom).toBeInTheDocument();
+
+		const selectedVirtualRoom = await screen.findByText(temporaryRoomMod.name ?? '');
+		expect(selectedVirtualRoom).toBeInTheDocument();
 	});
 
-	test('Should render properly - user has not virtual rooms', async () => {
+	test('Should render properly - user has not virtual rooms and defaultValue is undefined', async () => {
 		mockedGetScheduledMeetingName.mockRejectedValue(new Error('Error'));
 		const store = useStore.getState();
 		store.setLoginInfo(sessionUser.id, sessionUser.name);
@@ -65,7 +70,24 @@ describe('SelectVirtualRoomWidget', () => {
 		});
 
 		const noVirtualRoom = screen.getByTestId('no_virtual_room');
-
 		expect(noVirtualRoom).toBeInTheDocument();
+	});
+
+	test('Should render properly - user has not virtual rooms and defaultValue is not undefined', async () => {
+		mockedGetScheduledMeetingName.mockRejectedValue(new Error('Error'));
+		const store = useStore.getState();
+		store.setLoginInfo(sessionUser.id, sessionUser.name);
+		store.setCapabilities(createMockCapabilityList());
+		await act(async () => {
+			setup(
+				<SelectVirtualRoomWidgetComponent
+					onChange={() => null}
+					defaultValue={{ label: 'Virtual Room Selected', link: 'a-beautiful-link' }}
+				/>
+			);
+		});
+
+		const selectedVirtualRoom = screen.getByText('Virtual Room Selected');
+		expect(selectedVirtualRoom).toBeInTheDocument();
 	});
 });
