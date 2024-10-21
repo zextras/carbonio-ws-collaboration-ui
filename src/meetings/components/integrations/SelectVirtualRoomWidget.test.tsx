@@ -5,9 +5,9 @@
  */
 import React from 'react';
 
-import { screen } from '@testing-library/react';
+import { act, screen } from '@testing-library/react';
 
-import SelectVirtualRoomWidget from './SelectVirtualRoomWidget';
+import SelectVirtualRoomWidgetComponent from './SelectVirtualRoomWidget';
 import useStore from '../../../store/Store';
 import {
 	createMockCapabilityList,
@@ -16,6 +16,7 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../../tests/createMock';
+import { mockedGetScheduledMeetingName } from '../../../tests/mocks/network';
 import { setup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
@@ -36,14 +37,13 @@ const scheduledMeetingMod: MeetingBe = createMockMeeting({
 
 describe('SelectVirtualRoomWidget', () => {
 	test('Should render properly - user has virtual rooms', async () => {
+		mockedGetScheduledMeetingName.mockReturnValue('name');
 		const store = useStore.getState();
 		store.setLoginInfo(sessionUser.id, sessionUser.name);
 		store.setCapabilities(createMockCapabilityList());
 		store.setRooms([temporaryRoomMod]);
 		store.setMeetings([scheduledMeetingMod]);
-		setup(
-			<SelectVirtualRoomWidget onChange={jest.fn()} defaultValue={{ label: 'aa', link: 'link' }} />
-		);
+		setup(<SelectVirtualRoomWidgetComponent onChange={jest.fn()} defaultValue={undefined} />);
 
 		const selectVirtualRoom = screen.getByTestId('select_virtual_room');
 
@@ -51,12 +51,13 @@ describe('SelectVirtualRoomWidget', () => {
 	});
 
 	test('Should render properly - user has not virtual rooms', async () => {
+		mockedGetScheduledMeetingName.mockRejectedValue(new Error('Error'));
 		const store = useStore.getState();
 		store.setLoginInfo(sessionUser.id, sessionUser.name);
 		store.setCapabilities(createMockCapabilityList());
-		setup(
-			<SelectVirtualRoomWidget onChange={jest.fn()} defaultValue={{ label: 'aa', link: 'link' }} />
-		);
+		await act(async () => {
+			setup(<SelectVirtualRoomWidgetComponent onChange={() => null} defaultValue={undefined} />);
+		});
 
 		const noVirtualRoom = screen.getByTestId('no_virtual_room');
 

@@ -163,11 +163,15 @@ export const getWorkerUrl = (): URL =>
 
 export const createMeetingLinkFromOutside = (meetingId: string | undefined): string => {
 	const meetingLink = `${MEETINGS_PATH}${meetingId}`;
-
-	console.log(window.location.href);
-
 	const regex = /^(.*?)(?=\/(mails|calendars|contacts|groups|chats|files|tasks|search|settings))/;
 	const match = regex.exec(window.location.href);
 	const baseURL = match ? match[1] : null;
 	return `${baseURL}/${meetingLink}`;
+};
+
+export const getMeetingIdFromLink = (meetingLink: string): string => {
+	const regex = /focus-mode\/meetings\/(.+)/;
+	const match = regex.exec(meetingLink);
+	if (!match) return meetingLink;
+	return match[1];
 };
