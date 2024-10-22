@@ -31,7 +31,6 @@ type defaultType = {
 type valueItem = {
 	id: string;
 	label: string;
-	title?: string;
 	link?: string;
 };
 
@@ -94,7 +93,6 @@ const SelectVirtualRoomWidget: FC<SelectVirtualRoomWidgetProps> = ({ onChange, d
 				value: {
 					id: 'default_id',
 					label: defaultRoom?.label ?? '',
-					title: defaultRoom?.label,
 					link: defaultRoom?.link
 				},
 				customComponent: (
@@ -118,7 +116,6 @@ const SelectVirtualRoomWidget: FC<SelectVirtualRoomWidgetProps> = ({ onChange, d
 				value: {
 					id: room.id,
 					label: room.name ?? '',
-					title: room.name ?? '',
 					link: createMeetingLinkFromOutside(room.meetingId)
 				},
 				customComponent: (
