@@ -66,10 +66,13 @@ const SelectVirtualRoomWidget: FC<SelectVirtualRoomWidgetProps> = ({ onChange, d
 		'Be aware that you are not the owner of this Virtual Room, or it no longer exists.'
 	);
 
+	const limitedAccessLabel = t('appointment.input.limitedOption', 'Limited access');
+
 	const virtualRoomIdsList = useStore(getVirtualRoomsList);
 
 	const [defaultRoom, setDefaultRoom] = useState<defaultType | undefined>(undefined);
 	const [defaultIsMyRoom, setDefaultIsMyRoom] = useState<boolean>(true);
+	const [selectedItem, setSelectedItem] = useState<SelectItem<valueItem> | undefined>(undefined);
 
 	const items: SelectItem<valueItem>[] = useMemo(() => {
 		const roomList: SelectItem<valueItem>[] = [];
@@ -78,7 +81,12 @@ const SelectVirtualRoomWidget: FC<SelectVirtualRoomWidgetProps> = ({ onChange, d
 			value: {
 				id: 'no_room_selected',
 				label: noVirtualRoomLabel
-			}
+			},
+			customComponent: (
+				<CustomContainer width="fit" mainAlignment="flex-start" orientation="horizontal">
+					<Text>{noVirtualRoomLabel}</Text>
+				</CustomContainer>
+			)
 		});
 		if (!defaultIsMyRoom) {
 			roomList.push({
@@ -88,7 +96,20 @@ const SelectVirtualRoomWidget: FC<SelectVirtualRoomWidgetProps> = ({ onChange, d
 					label: defaultRoom?.label ?? '',
 					title: defaultRoom?.label,
 					link: defaultRoom?.link
-				}
+				},
+				customComponent: (
+					<CustomContainer
+						width="fit"
+						mainAlignment="flex-start"
+						orientation="horizontal"
+						gap="0.25rem"
+					>
+						<Icon icon="AlertTriangleOutline" />
+						<CustomText>
+							{defaultRoom?.label ?? ''} - {limitedAccessLabel}
+						</CustomText>
+					</CustomContainer>
+				)
 			});
 		}
 		roomList.push(
@@ -99,19 +120,28 @@ const SelectVirtualRoomWidget: FC<SelectVirtualRoomWidgetProps> = ({ onChange, d
 					label: room.name ?? '',
 					title: room.name ?? '',
 					link: createMeetingLinkFromOutside(room.meetingId)
-				}
+				},
+				customComponent: (
+					<CustomContainer width="fit" mainAlignment="flex-start" orientation="horizontal">
+						<Text>{room.name ?? ''}</Text>
+					</CustomContainer>
+				)
 			}))
 		);
 		return roomList;
-	}, [defaultIsMyRoom, defaultRoom, noVirtualRoomLabel, virtualRoomIdsList]);
+	}, [defaultIsMyRoom, defaultRoom, limitedAccessLabel, noVirtualRoomLabel, virtualRoomIdsList]);
 
 	const selection: SelectItem<valueItem> = useMemo(() => {
 		if (defaultValue !== undefined) {
 			setDefaultRoom(defaultValue);
 			const rooms: SelectItem<valueItem>[] = tail(items);
 			const selectedItem = find(rooms, (item) => item.value.link === defaultValue?.link);
-			if (selectedItem !== undefined) return selectedItem;
+			if (selectedItem !== undefined) {
+				setSelectedItem(selectedItem);
+				return selectedItem;
+			}
 		}
+		setSelectedItem(items[0]);
 		return items[0];
 	}, [items, defaultValue]);
 
@@ -143,6 +173,11 @@ const SelectVirtualRoomWidget: FC<SelectVirtualRoomWidgetProps> = ({ onChange, d
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
+	const alertHasToAppear = useMemo(
+		() => !defaultIsMyRoom && selectedItem?.label === defaultRoom?.label,
+		[defaultIsMyRoom, defaultRoom?.label, selectedItem?.label]
+	);
+
 	return showRoomsList ? (
 		<Container gap="0.5rem">
 			<Select
@@ -152,13 +187,13 @@ const SelectVirtualRoomWidget: FC<SelectVirtualRoomWidgetProps> = ({ onChange, d
 				onChange={onChangeVirtualRoom}
 				data-testid="select_virtual_room"
 			/>
-			{!defaultIsMyRoom && (
-				<Container orientation="horizontal" mainAlignment="flex-start" gap="0.25rem">
-					<Icon icon="InfoOutline" color="secondary" />
+			{alertHasToAppear && (
+				<CustomContainer orientation="horizontal" mainAlignment="flex-start" gap="0.25rem">
+					<Icon icon="AlertTriangleOutline" color="secondary" />
 					<Text size="small" color="secondary">
 						{notMyRoomLabel}
 					</Text>
-				</Container>
+				</CustomContainer>
 			)}
 		</Container>
 	) : (
