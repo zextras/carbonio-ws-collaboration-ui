@@ -8,7 +8,6 @@ import { useMemo } from 'react';
 
 import { useTheme } from '@zextras/carbonio-design-system';
 
-import { UsersApi } from '../network';
 import {
 	getIsUserGuest,
 	getUserName,
@@ -43,11 +42,7 @@ const useAvatarUtilities = (
 		return `${themeColor.avatarColors[color]}`;
 	}, [userName, isAnonymousUser, themeColor.avatarColors, onMeeting]);
 
-	const picture = useMemo(() => {
-		if (userPictureUpdatedAt)
-			return `${UsersApi.getURLUserPicture(userId)}?${userPictureUpdatedAt}`;
-		return '';
-	}, [userId, userPictureUpdatedAt]);
+	const picture = useMemo(() => '', []);
 
 	const icon = useMemo(() => {
 		if (isAnonymousUser) return 'QuestionMarkCircleOutline';

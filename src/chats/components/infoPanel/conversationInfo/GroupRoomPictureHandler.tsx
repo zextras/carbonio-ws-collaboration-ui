@@ -101,12 +101,7 @@ const GroupRoomPictureHandler: FC<RoomPictureProps> = ({ roomId }) => {
 		return `${numberOfMembers} ${moreMembersAccordionTitle}`;
 	}, [numberOfMembers, oneMemberAccordionTitle, moreMembersAccordionTitle]);
 
-	const picture = useMemo(() => {
-		if (roomPictureUpdatedAt) {
-			return `${RoomsApi.getURLRoomPicture(roomId)}?${roomPictureUpdatedAt}`;
-		}
-		return false;
-	}, [roomId, roomPictureUpdatedAt]);
+	const picture = useMemo(() => '', []);
 
 	const description = useMemo(
 		() => (

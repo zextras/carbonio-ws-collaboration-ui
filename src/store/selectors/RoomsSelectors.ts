@@ -7,7 +7,6 @@
 import { countBy, filter, find, forEach, map, orderBy, size } from 'lodash';
 
 import { getUserName } from './UsersSelectors';
-import { RoomsApi, UsersApi } from '../../network';
 import { Member, Room, RoomType } from '../../types/store/RoomTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 
@@ -108,10 +107,10 @@ export const getRoomURLPicture = (state: RootStore, roomId: string): string | un
 		);
 		if (otherMember) {
 			const otherUser = state.users[otherMember.userId];
-			return otherUser?.pictureUpdatedAt && UsersApi.getURLUserPicture(otherMember.userId);
+			return otherUser?.pictureUpdatedAt && '';
 		}
 	}
-	return room.pictureUpdatedAt && RoomsApi.getURLRoomPicture(room.id);
+	return room.pictureUpdatedAt && '';
 };
 
 export const getMeetingIdFromRoom = (state: RootStore, roomId: string): string | undefined =>

@@ -10,7 +10,6 @@ import { Avatar, Container, Shimmer, useTheme } from '@zextras/carbonio-design-s
 import styled, { DefaultTheme } from 'styled-components';
 
 import { AvatarBadge, AvatarContainer } from './UserAvatar';
-import { RoomsApi } from '../../network';
 import { getMeetingActive } from '../../store/selectors/MeetingSelectors';
 import {
 	getPictureUpdatedAt,
@@ -60,12 +59,7 @@ const GroupAvatar: React.FC<UserAvatarProps> = ({ roomId, unreadCount, draftMess
 
 	const themeColor = useTheme();
 
-	const picture = useMemo(() => {
-		if (pictureUpdatedAt != null) {
-			return `${RoomsApi.getURLRoomPicture(roomId)}?${pictureUpdatedAt}`;
-		}
-		return '';
-	}, [roomId, pictureUpdatedAt]);
+	const picture = useMemo(() => '', []);
 
 	const userColor = useMemo(() => {
 		const color = calculateAvatarColor(roomName);
