@@ -11,7 +11,6 @@ import { screen, act } from '@testing-library/react';
 import MeetingNotification from './MeetingNotification';
 import useStore from '../../store/Store';
 import { createMockMeeting, createMockRoom, createMockUser } from '../../tests/createMock';
-import { mockedSendChatMessage } from '../../tests/mockedXmppClient';
 import { mockedCreateMeetingRequest } from '../../tests/mocks/network';
 import { setup } from '../../tests/test-utils';
 import { RoomType } from '../../types/store/RoomTypes';
@@ -53,6 +52,10 @@ describe('MeetingNotification', () => {
 	});
 
 	test('User can send a message clicking to the button Send message', async () => {
+		const spyOnSendChatMessage = jest.spyOn(
+			useStore.getState().connections.xmppClient,
+			'sendChatMessage'
+		);
 		const { user: userEvent } = setup(
 			<MeetingNotification
 				id={'notificationId'}
@@ -64,10 +67,14 @@ describe('MeetingNotification', () => {
 		);
 		await userEvent.type(screen.getByPlaceholderText(sendAQuickMessage), 'Hello');
 		await userEvent.click(screen.getByTestId('icon: Navigation2'));
-		expect(mockedSendChatMessage).toHaveBeenCalled();
+		expect(spyOnSendChatMessage).toHaveBeenCalled();
 	});
 
 	test('User can send a message clicking Enter', async () => {
+		const spyOnSendChatMessage = jest.spyOn(
+			useStore.getState().connections.xmppClient,
+			'sendChatMessage'
+		);
 		const { user: userEvent } = setup(
 			<MeetingNotification
 				id={'notificationId'}
@@ -80,7 +87,7 @@ describe('MeetingNotification', () => {
 		await act(async () => {
 			await userEvent.type(screen.getByPlaceholderText(sendAQuickMessage), 'Hello{enter}');
 		});
-		expect(mockedSendChatMessage).toHaveBeenCalled();
+		expect(spyOnSendChatMessage).toHaveBeenCalled();
 	});
 
 	test('Declining a meeting removes the notification', async () => {

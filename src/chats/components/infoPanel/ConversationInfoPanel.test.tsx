@@ -36,6 +36,7 @@ beforeEach(() => {
 	store.addRoom(oneToOneRoom);
 	store.setPlaceholderRoom(user1.id);
 });
+
 describe('Conversation info panel', () => {
 	test('Display info panel opened', async () => {
 		setup(

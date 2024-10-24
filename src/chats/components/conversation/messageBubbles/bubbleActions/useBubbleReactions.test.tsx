@@ -15,7 +15,6 @@ import {
 	createMockTextMessage,
 	createMockUser
 } from '../../../../../tests/createMock';
-import { mockedSendChatMessageReaction } from '../../../../../tests/mockedXmppClient';
 import { ProvidersWrapper, setup } from '../../../../../tests/test-utils';
 import { RoomBe } from '../../../../../types/network/models/roomBeTypes';
 import { FasteningAction, TextMessage } from '../../../../../types/store/MessageTypes';
@@ -72,6 +71,10 @@ describe('Bubble Contextual Menu - other user messages', () => {
 	});
 
 	test('Send a reaction', async () => {
+		const spyOnSendChatMessageReaction = jest.spyOn(
+			useStore.getState().connections.xmppClient,
+			'sendChatMessageReaction'
+		);
 		const { result } = renderHook(() => useBubbleReactions(simpleTextMessage), {
 			wrapper: ProvidersWrapper
 		});
@@ -83,11 +86,17 @@ describe('Bubble Contextual Menu - other user messages', () => {
 		const reaction = screen.getByTestId(`reaction-${ReactionType.THUMBS_UP}`);
 		await user.click(reaction);
 
-		expect(mockedSendChatMessageReaction).toHaveBeenCalledTimes(1);
+		expect(spyOnSendChatMessageReaction).toHaveBeenCalledTimes(1);
 	});
 
 	test('Sent reaction is highlight', async () => {
-		useStore.getState().addFastening(reactionToSimpleTextMessage);
+		const store = useStore.getState();
+		const spyOnSendChatMessageReaction = jest.spyOn(
+			useStore.getState().connections.xmppClient,
+			'sendChatMessageReaction'
+		);
+
+		store.addFastening(reactionToSimpleTextMessage);
 		const { result } = renderHook(() => useBubbleReactions(simpleTextMessage), {
 			wrapper: ProvidersWrapper
 		});
@@ -100,6 +109,6 @@ describe('Bubble Contextual Menu - other user messages', () => {
 		expect(reaction).toHaveStyle('background-color: #abc6ed;');
 		// Remove reaction
 		await user.click(reaction);
-		expect(mockedSendChatMessageReaction).toHaveBeenCalledTimes(1);
+		expect(spyOnSendChatMessageReaction).toHaveBeenCalledTimes(1);
 	});
 });

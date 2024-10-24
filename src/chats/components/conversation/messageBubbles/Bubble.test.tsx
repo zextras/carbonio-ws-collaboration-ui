@@ -17,7 +17,6 @@ import {
 	createMockTextMessage,
 	createMockUser
 } from '../../../../tests/createMock';
-import { mockedSendChatMessageDeletion } from '../../../../tests/mockedXmppClient';
 import { mockAttachmentTagElement } from '../../../../tests/mocks/global';
 import {
 	mockedDeleteAttachment,
@@ -389,7 +388,9 @@ describe('Actions', () => {
 		expect(mockedDeleteAttachment).toHaveBeenCalled();
 	});
 	test('Delete a message', async () => {
-		mockedSendChatMessageDeletion.mockReturnValue('deleted');
+		const spySendChatMessageDeletion = jest
+			.spyOn(useStore.getState().connections.xmppClient, 'sendChatMessageDeletion')
+			.mockImplementation(() => 'deleted');
 
 		const store: RootStore = useStore.getState();
 		store.setLoginInfo(user1Be.id, user1Be.name);
@@ -411,6 +412,6 @@ describe('Actions', () => {
 		const deleteAction = await screen.findByText(/Delete for all/i);
 		await user.click(deleteAction);
 
-		expect(mockedSendChatMessageDeletion).toHaveBeenCalled();
+		expect(spySendChatMessageDeletion).toHaveBeenCalled();
 	});
 });

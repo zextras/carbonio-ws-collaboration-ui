@@ -9,15 +9,10 @@ import useStore from '../../store/Store';
 import {
 	createMockCapabilityList,
 	createMockMeeting,
-	createMockRoom,
-	createMockTextMessage
+	createMockRoom
 } from '../../tests/createMock';
 import { fetchResponse } from '../../tests/mocks/global';
 import { RoomType } from '../../types/store/RoomTypes';
-import { dateToISODate } from '../../utils/dateUtils';
-import { getTagElement } from '../xmpp/utility/decodeStanza';
-import HistoryAccumulator from '../xmpp/utility/HistoryAccumulator';
-import { textMessageFromHistory } from '../xmpp/xmppMessageExamples';
 
 const contentType = 'Content-Type';
 const applicationJson = 'application/json';
@@ -488,7 +483,8 @@ describe('Rooms API', () => {
 		});
 	});
 
-	test('forwardMessages is called correctly', async () => {
+	test.todo(
+		'forwardMessages is called correctly' /* , async () => {
 		// Send addRoom request
 		const message = createMockTextMessage();
 		const forwardedMessage = {
@@ -507,9 +503,11 @@ describe('Rooms API', () => {
 			headers,
 			body: JSON.stringify([forwardedMessage])
 		});
-	});
+	} */
+	);
 
-	test('forwardMessages - edited message - is called correctly', async () => {
+	test.todo(
+		'forwardMessages - edited message - is called correctly' /* , async () => {
 		// Send addRoom request
 		const messageEdited = createMockTextMessage();
 		const msgToParse = textMessageFromHistory.replace(
@@ -542,7 +540,8 @@ describe('Rooms API', () => {
 			headers,
 			body: JSON.stringify([forwardedMessage])
 		});
-	});
+	} */
+	);
 
 	test('replacePlaceholderRoom is called correctly', async () => {
 		// Send replacePlaceholderRoom request

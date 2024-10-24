@@ -70,7 +70,6 @@ describe('WebSocketClient', () => {
 	});
 
 	test('retryReconnection is called with exponential backoff', () => {
-		jest.useFakeTimers();
 		const wsClient = new WebSocketClient();
 		wsClient.connect();
 		expect(wsClient._reconnectionTime).toBe(0);
@@ -89,12 +88,9 @@ describe('WebSocketClient', () => {
 		const thirdReconnectionTime = wsClient._reconnectionTime;
 		expect(thirdReconnectionTime).toBeGreaterThanOrEqual(secondReconnectionTime);
 		expect(thirdReconnectionTime).toBeLessThanOrEqual(secondReconnectionTime * 2 + 10000);
-
-		jest.useRealTimers();
 	});
 
 	test('Reconnection timer limit is 5 minutes', () => {
-		jest.useFakeTimers();
 		const wsClient = new WebSocketClient();
 		wsClient.connect();
 		wsClient._reconnectionTime = 1000 * 60 * 2;
@@ -103,6 +99,5 @@ describe('WebSocketClient', () => {
 		wsClient._tryReconnection();
 
 		expect(wsClient._reconnectionTime).toBeLessThanOrEqual(1000 * 60 * 5 + 10000);
-		jest.useRealTimers();
 	});
 });

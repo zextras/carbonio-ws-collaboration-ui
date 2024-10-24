@@ -4,11 +4,11 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import '@testing-library/jest-dom/extend-expect';
+import '@testing-library/jest-dom';
 import { act, configure } from '@testing-library/react';
 import failOnConsole from 'jest-fail-on-console';
 
-import { xmppClient } from './mockedXmppClient';
+import XMPPClient from '../network/xmpp/XMPPClient';
 import useStore from '../store/Store';
 
 configure({
@@ -26,19 +26,10 @@ failOnConsole({
 });
 
 beforeEach(() => {
-	jest.useFakeTimers();
-	// Do not useFakeTimers with `whatwg-fetch` if using mocked server
-	// https://github.com/mswjs/msw/issues/448
-	useStore.getState().setXmppClient(xmppClient);
-});
-
-beforeAll(() => {
-	jest.setTimeout(30000);
+	useStore.getState().setXmppClient(new XMPPClient());
 });
 
 afterEach(() => {
-	jest.runOnlyPendingTimers();
-	jest.useRealTimers();
 	act(() => {
 		window.resizeTo(1024, 768);
 	});
