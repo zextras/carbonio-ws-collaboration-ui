@@ -6,6 +6,7 @@
 
 import { concat, find, forEach, indexOf, last, map, min, range, without } from 'lodash';
 
+import { MEETINGS_PATH } from '../constants/appConstants';
 import audioOff from '../meetings/assets/AudioOFF.mp3';
 import audioOn from '../meetings/assets/AudioON.mp3';
 import meetingIn from '../meetings/assets/MeetingIN.mp3';
@@ -80,8 +81,8 @@ export const calcGrid = (
 	const tilesRatio = (16 * columns) / (9 * rows);
 	const containerRatio = dimensions.width / dimensions.height;
 
-	let tileWidth = 0;
-	let tileHeight = 0;
+	let tileWidth: number;
+	let tileHeight: number;
 	if (tilesRatio > containerRatio) {
 		// Tiles are more wide than tall respect to the container
 		tileWidth = (dimensions.width - (16 * columns - 16)) / columns; // 16px of gap between tiles
@@ -159,3 +160,18 @@ export const getWorkerUrl = (): URL =>
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore
 	new URL('../meetings/components/virtualBackground/selfieSegmentationWorker.js', import.meta.url);
+
+export const createMeetingLinkFromOutside = (meetingId: string | undefined): string => {
+	const meetingLink = `${MEETINGS_PATH}${meetingId}`;
+	const regex = /^(.*?)(?=\/(mails|calendars|contacts|groups|chats|files|tasks|search|settings))/;
+	const match = regex.exec(window.location.href);
+	const baseURL = match ? match[1] : null;
+	return `${baseURL}/${meetingLink}`;
+};
+
+export const getMeetingIdFromLink = (meetingLink: string): string => {
+	const regex = /focus-mode\/meetings\/(.+)/;
+	const match = regex.exec(meetingLink);
+	if (!match) return meetingLink;
+	return match[1];
+};

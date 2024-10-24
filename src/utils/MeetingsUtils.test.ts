@@ -5,7 +5,9 @@
  */
 
 import {
+	createMeetingLinkFromOutside,
 	findAllPossiblePairs,
+	getMeetingIdFromLink,
 	maximiseRowsAndColumns,
 	maximiseTileSize,
 	MeetingSoundFeedback,
@@ -291,5 +293,20 @@ describe('MeetingsUtils', () => {
 			expect(newOrderTiles[1]).toEqual({ userId: 'user2', type: STREAM_TYPE.AUDIO });
 			expect(newOrderTiles[2]).toEqual({ userId: 'user5', type: STREAM_TYPE.VIDEO });
 		});
+	});
+
+	test('createMeetingLinkFromOutside', () => {
+		const link = createMeetingLinkFromOutside('meeting-id');
+		expect(link).toBe('https://localhost/carbonio/focus-mode/meetings/meeting-id');
+	});
+
+	test('getMeetingIdFromLink - valid link', () => {
+		const id = getMeetingIdFromLink('https://localhost/carbonio/focus-mode/meetings/meeting-id');
+		expect(id).toBe('meeting-id');
+	});
+
+	test('getMeetingIdFromLink - not valid link', () => {
+		const id = getMeetingIdFromLink('https://localhost/carbonio/chats/meeting-id');
+		expect(id).toBe('https://localhost/carbonio/chats/meeting-id');
 	});
 });
