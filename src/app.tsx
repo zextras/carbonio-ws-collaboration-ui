@@ -6,24 +6,19 @@
 
 import React, { useEffect } from 'react';
 
-import {
-	getUserAccount,
-	registerComponents,
-	useAuthenticated,
-	useUserSettings
-} from '@zextras/carbonio-shell-ui';
+import { getUserAccount, useAuthenticated, useUserSettings } from '@zextras/carbonio-shell-ui';
 
 import CounterBadgeUpdater from './chats/components/CounterBadgeUpdater';
 import RegisterCreationButton from './chats/components/RegisterCreationButton';
-import useChatsApp from './chats/useChatsApp';
-import SelectVirtualRoomWidgetComponent from './meetings/components/integrations/SelectVirtualRoomWidget';
+import initChats from './chats/initChats';
+import initIntegrations from './integrations/initIntegrations';
 import MeetingNotificationHandler from './meetings/components/MeetingNotificationsHandler';
-import useMeetingsApp from './meetings/useMeetingsApp';
+import initMeetings from './meetings/initMeetings';
 import { MeetingsApi, RoomsApi, SessionApi } from './network';
 import { WebSocketClient } from './network/websocket/WebSocketClient';
 import XMPPClient from './network/xmpp/XMPPClient';
 import WaitingListSnackbar from './settings/components/WaitingListSnackbar';
-import useSettingsApp from './settings/useSettingsApp';
+import initSettings from './settings/initSettings';
 import useStore from './store/Store';
 import { UserType } from './types/store/UserTypes';
 import { setDateDefault } from './utils/dateUtils';
@@ -70,18 +65,15 @@ export default function App(): React.JSX.Element {
 					// Init xmppClient and webSocket after roomList request to avoid missing data (specially for the inbox request)
 					xmppClient.connect(resp[0].zmToken);
 					webSocket.connect();
-					registerComponents({
-						id: 'wsc-room-selector',
-						component: SelectVirtualRoomWidgetComponent
-					});
 				})
 				.catch(() => setChatsBeStatus(false));
 		}
 	}, [authenticated, setChatsBeStatus, setWebSocketClient, setXmppClient]);
 
-	useChatsApp();
-	useMeetingsApp();
-	useSettingsApp();
+	initChats();
+	initMeetings();
+	initSettings();
+	initIntegrations();
 
 	return (
 		<>

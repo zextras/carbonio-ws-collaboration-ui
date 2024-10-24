@@ -8,18 +8,18 @@ import React from 'react';
 import { act, screen } from '@testing-library/react';
 
 import SelectVirtualRoomWidgetComponent from './SelectVirtualRoomWidget';
-import useStore from '../../../store/Store';
+import useStore from '../../store/Store';
 import {
 	createMockCapabilityList,
 	createMockMeeting,
 	createMockMember,
 	createMockRoom,
 	createMockUser
-} from '../../../tests/createMock';
-import { mockedGetScheduledMeetingName } from '../../../tests/mocks/network';
-import { setup } from '../../../tests/test-utils';
-import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
-import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
+} from '../../tests/createMock';
+import { mockedGetScheduledMeetingName } from '../../tests/mocks/network';
+import { setup } from '../../tests/test-utils';
+import { MeetingBe } from '../../types/network/models/meetingBeTypes';
+import { RoomBe, RoomType } from '../../types/network/models/roomBeTypes';
 
 const sessionUser = createMockUser({ id: 'sessionId', name: 'Session User' });
 

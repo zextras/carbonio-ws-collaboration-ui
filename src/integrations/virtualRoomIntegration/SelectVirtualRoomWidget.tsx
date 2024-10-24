@@ -17,11 +17,11 @@ import { find, map, tail } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import { MeetingsApi } from '../../../network';
-import { getVirtualRoomsList } from '../../../store/selectors/RoomsSelectors';
-import useStore from '../../../store/Store';
-import { Room } from '../../../types/store/RoomTypes';
-import { createMeetingLinkFromOutside, getMeetingIdFromLink } from '../../../utils/MeetingsUtils';
+import { MeetingsApi } from '../../network';
+import { getVirtualRoomsList } from '../../store/selectors/RoomsSelectors';
+import useStore from '../../store/Store';
+import { Room } from '../../types/store/RoomTypes';
+import { createMeetingLinkFromOutside, getMeetingIdFromLink } from '../../utils/MeetingsUtils';
 
 type defaultType = {
 	label: string;
