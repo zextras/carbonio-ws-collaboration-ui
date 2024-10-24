@@ -50,7 +50,7 @@ const AddNewMemberAction: FC<AddNewMemberProps> = ({ roomId }) => {
 		map(contactsSelected, (contact) => {
 			const userToAdd: AddMemberFields = {
 				userId: contact.id,
-				owner: false,
+				owner: contact.owner,
 				historyCleared: !showHistory
 			};
 			RoomsApi.addRoomMember(roomId, userToAdd).then(() => closeModal());

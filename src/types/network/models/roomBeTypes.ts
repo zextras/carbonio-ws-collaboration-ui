@@ -26,13 +26,13 @@ export enum RoomType {
 export type RoomCreationFields =
 	| {
 			type: RoomType.ONE_TO_ONE;
-			membersIds: string[]; // only 1 item (other's user id, not mine)
+			members: MemberBe[]; // only 1 item (other's user id, not mine)
 	  }
 	| {
 			type: RoomType.GROUP;
 			name: string; // min: 1, max: 128
 			description: string; // min: 0, max: 256
-			membersIds: string[]; // minItems: 1 (not include creator id)
+			members: MemberBe[]; // minItems: 1 (not include creator)
 	  }
 	| {
 			type: RoomType.TEMPORARY;
