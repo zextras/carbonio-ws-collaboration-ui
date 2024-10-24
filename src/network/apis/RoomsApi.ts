@@ -284,7 +284,10 @@ class RoomsApi extends BaseAPI implements IRoomsApi {
 				: undefined
 		});
 
-		return this.addRoom({ type: RoomType.ONE_TO_ONE, membersIds: [userId] }).then((response) => {
+		return this.addRoom({
+			type: RoomType.ONE_TO_ONE,
+			members: [{ userId, owner: true }]
+		}).then((response) => {
 			replacePlaceholderRoom(userId, response.id);
 			pushHistory(ROUTES.ROOM.replace(':roomId', response.id));
 			return response;

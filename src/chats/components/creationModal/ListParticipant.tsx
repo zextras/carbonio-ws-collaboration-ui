@@ -8,6 +8,7 @@ import React, { MouseEventHandler, ReactElement, useMemo } from 'react';
 
 import {
 	Avatar,
+	Button,
 	Checkbox,
 	Container,
 	Padding,
@@ -27,6 +28,8 @@ type ListParticipantProps = {
 	item: ContactInfo;
 	selected: boolean;
 	onClickCb: (item: ContactInfo) => MouseEventHandler<HTMLDivElement> | undefined;
+	isOwner: (id: string) => boolean;
+	updateOwner: (id: string) => void;
 	isDisabled?: boolean;
 };
 
@@ -38,6 +41,8 @@ const ListParticipant = ({
 	item,
 	selected,
 	onClickCb,
+	isOwner,
+	updateOwner,
 	isDisabled
 }: ListParticipantProps): ReactElement => {
 	const [t] = useTranslation();
@@ -58,35 +63,49 @@ const ListParticipant = ({
 
 	return (
 		<Tooltip disabled={!isDisabled} label={removeToAddNewOneLabel}>
-			<Container
-				data-testid={`chip-${item.email}`}
-				onClick={onClickCb(item)}
-				orientation="horizontal"
-				mainAlignment="flex-start"
-				width="fill"
-				padding={{ vertical: 'small' }}
-			>
-				<Row>
-					<Checkbox
-						data-testid={`checkbox-chip-${item.email}`}
-						value={selected}
-						disabled={!selected && isDisabled}
-					/>
-					<Padding horizontal="small">
-						<Avatar label={item.displayName} picture={picture} />
-					</Padding>
-					<Container crossAlignment="flex-start" width="fit">
-						<Text size="small">{item.displayName}</Text>
-						<Padding top="extrasmall" />
-						<SelectableText
-							data-testid={`${item.id}-emailSelectable`}
-							size="extrasmall"
-							color="gray1"
-						>
-							{item.email}
-						</SelectableText>
-					</Container>
-				</Row>
+			<Container orientation="horizontal">
+				<Container
+					data-testid={`chip-${item.email}`}
+					onClick={onClickCb(item)}
+					orientation="horizontal"
+					mainAlignment="flex-start"
+					width="fill"
+					padding={{ vertical: 'small' }}
+				>
+					<Row>
+						<Checkbox
+							data-testid={`checkbox-chip-${item.email}`}
+							value={selected}
+							disabled={!selected && isDisabled}
+						/>
+						<Padding horizontal="small">
+							<Avatar label={item.displayName} picture={picture} />
+						</Padding>
+						<Container crossAlignment="flex-start" width="fit">
+							<Text size="small">{item.displayName}</Text>
+							<Padding top="extrasmall" />
+							<SelectableText
+								data-testid={`${item.id}-emailSelectable`}
+								size="extrasmall"
+								color="gray1"
+							>
+								{item.email}
+							</SelectableText>
+						</Container>
+					</Row>
+				</Container>
+				<Container width="fit">
+					<Tooltip label={isOwner(item.id) ? 'Demote' : 'Promote to moderator'}>
+						<Button
+							icon={isOwner(item.id) ? 'Crown' : 'CrownOutline'}
+							type="ghost"
+							color="gray0"
+							size="large"
+							disabled={!selected}
+							onClick={() => updateOwner(item.id)}
+						></Button>
+					</Tooltip>
+				</Container>
 			</Container>
 		</Tooltip>
 	);
