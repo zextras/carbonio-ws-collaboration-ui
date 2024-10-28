@@ -4,6 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+// Carbonio constants
+export const CARBONIO_PATH = '/carbonio/';
+
 // Chats zapp constants
 export const PRODUCT_NAME = 'Chats';
 export const CHATS_APP_ID = 'carbonio-ws-collaboration-ui';
