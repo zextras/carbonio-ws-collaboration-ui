@@ -16,7 +16,6 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../tests/createMock';
-import { mockedGetScheduledMeetingName } from '../../tests/mocks/network';
 import { setup } from '../../tests/test-utils';
 import { MeetingBe } from '../../types/network/models/meetingBeTypes';
 import { RoomBe, RoomType } from '../../types/network/models/roomBeTypes';
@@ -37,7 +36,6 @@ const scheduledMeetingMod: MeetingBe = createMockMeeting({
 
 describe('SelectVirtualRoomWidget', () => {
 	test('Should render properly - user has virtual rooms', async () => {
-		mockedGetScheduledMeetingName.mockReturnValue('name');
 		const store = useStore.getState();
 		store.setLoginInfo(sessionUser.id, sessionUser.name);
 		store.setCapabilities(createMockCapabilityList());
@@ -61,7 +59,6 @@ describe('SelectVirtualRoomWidget', () => {
 	});
 
 	test('Should render properly - user has not virtual rooms and defaultValue is undefined', async () => {
-		mockedGetScheduledMeetingName.mockRejectedValue(new Error('Error'));
 		const store = useStore.getState();
 		store.setLoginInfo(sessionUser.id, sessionUser.name);
 		store.setCapabilities(createMockCapabilityList());
@@ -74,7 +71,6 @@ describe('SelectVirtualRoomWidget', () => {
 	});
 
 	test('Should render properly - user has not virtual rooms and defaultValue is not undefined', async () => {
-		mockedGetScheduledMeetingName.mockRejectedValue(new Error('Error'));
 		const store = useStore.getState();
 		store.setLoginInfo(sessionUser.id, sessionUser.name);
 		store.setCapabilities(createMockCapabilityList());
