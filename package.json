@@ -8,7 +8,6 @@
 		"deploy": "sdk deploy",
 		"sdk-install": "sdk install",
 		"start": "sdk watch",
-		"sdk-install": "sdk install",
 		"test": "jest",
 		"postinstall": "is-ci || husky",
 		"prepublishOnly": "pinst --disable",
