@@ -13,7 +13,7 @@ import {
 	SingleSelectionOnChange,
 	Icon
 } from '@zextras/carbonio-design-system';
-import { find, map, tail } from 'lodash';
+import { find, map } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -131,8 +131,7 @@ const SelectVirtualRoomWidget: FC<SelectVirtualRoomWidgetProps> = ({ onChange, d
 	const selection: SelectItem<valueItem> = useMemo(() => {
 		if (defaultValue !== undefined) {
 			setDefaultRoom(defaultValue);
-			const rooms: SelectItem<valueItem>[] = tail(items);
-			const selectedItem = find(rooms, (item) => item.value.link === defaultValue?.link);
+			const selectedItem = find(items, (item) => item.value.link === defaultValue?.link);
 			if (selectedItem !== undefined) {
 				setSelectedItem(selectedItem);
 				return selectedItem;
@@ -158,7 +157,7 @@ const SelectVirtualRoomWidget: FC<SelectVirtualRoomWidgetProps> = ({ onChange, d
 
 	useEffect(() => {
 		if (defaultValue !== undefined) {
-			MeetingsApi.getScheduledMeetingName(getMeetingIdFromLink(defaultValue.link))
+			MeetingsApi.getMeetingByMeetingId(getMeetingIdFromLink(defaultValue.link))
 				.then(() => {
 					setDefaultIsMyRoom(true);
 				})
