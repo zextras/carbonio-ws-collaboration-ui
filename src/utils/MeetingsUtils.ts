@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { concat, find, forEach, indexOf, last, map, min, range, without } from 'lodash';
+import { concat, find, forEach, indexOf, last, map, min, range, split, without } from 'lodash';
 
-import { MEETINGS_PATH } from '../constants/appConstants';
+import { CARBONIO_PATH, MEETINGS_PATH } from '../constants/appConstants';
 import audioOff from '../meetings/assets/AudioOFF.mp3';
 import audioOn from '../meetings/assets/AudioON.mp3';
 import meetingIn from '../meetings/assets/MeetingIN.mp3';
@@ -162,16 +162,14 @@ export const getWorkerUrl = (): URL =>
 	new URL('../meetings/components/virtualBackground/selfieSegmentationWorker.js', import.meta.url);
 
 export const createMeetingLinkFromOutside = (meetingId: string | undefined): string => {
-	const meetingLink = `${MEETINGS_PATH}${meetingId}`;
-	const regex = /^(.*?)(?=\/(mails|calendars|contacts|groups|chats|files|tasks|search|settings))/;
-	const match = regex.exec(window.location.href);
-	const baseURL = match ? match[1] : null;
-	return `${baseURL}/${meetingLink}`;
+	const baseURL = split(window.location.href, CARBONIO_PATH);
+	return `${baseURL[0]}${CARBONIO_PATH}${MEETINGS_PATH}${meetingId}`;
 };
 
 export const getMeetingIdFromLink = (meetingLink: string): string => {
-	const regex = /focus-mode\/meetings\/(.+)/;
-	const match = regex.exec(meetingLink);
-	if (!match) return meetingLink;
-	return match[1];
+	if (meetingLink.includes(MEETINGS_PATH)) {
+		const splitString = split(meetingLink, MEETINGS_PATH);
+		return splitString[1];
+	}
+	return meetingLink;
 };
