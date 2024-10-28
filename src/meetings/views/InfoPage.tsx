@@ -129,6 +129,11 @@ const InfoPage = (): ReactElement => {
 				'You must be approved by a moderator to join this meeting.'
 			);
 			break;
+		case PAGE_INFO_TYPE.GENERAL_ERROR:
+			titleLabel = t('meeting.infoPage.title.generalError', 'Ouch! You left the meeting.');
+			sloganLabel = t('meeting.infoPage.slogan.generalError', 'PLEASE, TRY TO JOIN AGAIN');
+			descriptionLabel = t('meeting.infoPage.description.generalError', 'Something went wrong.');
+			break;
 		case PAGE_INFO_TYPE.MEETING_NOT_FOUND:
 		default: {
 			titleLabel = t(

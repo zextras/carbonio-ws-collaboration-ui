@@ -61,6 +61,12 @@ const pagesToCheckGuest = [
 		'There are no moderators in the meeting',
 		'Try again later',
 		'You must be approved by a moderator to join this meeting.'
+	],
+	[
+		PAGE_INFO_TYPE.GENERAL_ERROR,
+		'Ouch! You left the meeting.',
+		'PLEASE, TRY TO JOIN AGAIN',
+		'Something went wrong.'
 	]
 ];
 
