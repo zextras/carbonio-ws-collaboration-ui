@@ -10,6 +10,7 @@ import { UserEvent } from '@testing-library/user-event';
 
 import CameraButton from './CameraButton';
 import { useParams } from '../../../../__mocks__/react-router';
+import useStore from '../../../store/Store';
 import {
 	createMockMeeting,
 	createMockParticipants,
@@ -77,10 +78,17 @@ describe('Camera button', () => {
 	});
 
 	test('Toggle list of video inputs', async () => {
+		useStore.getState().setWebsocketStatus(true);
 		mockSetIsVideoListOpen.mockReturnValue(true);
 		const { user } = defaultSetup();
 		const multiButtonToggleList = screen.getByTestId('icon: ChevronUp');
 		await user.click(multiButtonToggleList);
 		expect(mockSetIsVideoListOpen).toHaveBeenCalled();
+	});
+
+	test('Camera button is disabled when websocket is down', async () => {
+		useStore.getState().setWebsocketStatus(false);
+		defaultSetup();
+		expect(await screen.findByTestId('cameraButton')).toBeDisabled();
 	});
 });
