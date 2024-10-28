@@ -25,7 +25,7 @@ import {
 	UpdateAudioStreamStatusResponse
 } from '../../types/network/responses/meetingsResponses';
 import {
-	AddRoomMemberResponse,
+	AddRoomMembersResponse,
 	AddRoomResponse,
 	ClearRoomHistoryResponse,
 	DeleteRoomMemberResponse,
@@ -163,7 +163,7 @@ jest.mock('../../network', () => {
 					const result = mockedDemotesRoomMemberRequest();
 					result ? resolve(result) : reject(new Error(noResultProvided));
 				}),
-			addRoomMember: (): Promise<AddRoomMemberResponse> =>
+			addRoomMembers: (): Promise<AddRoomMembersResponse> =>
 				new Promise((resolve, reject) => {
 					const result = mockedAddRoomMemberRequest();
 					result ? resolve(result) : reject(new Error(noResultProvided));

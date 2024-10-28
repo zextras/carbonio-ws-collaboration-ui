@@ -70,6 +70,8 @@ const ChatCreationContactsSelection = ({
 	inputRef
 }: ChatCreationContactsSelectionProps): ReactElement => {
 	const [t] = useTranslation();
+	const demoteModeratorLabel: string = t('tooltip.demoteModerator', 'Demote moderator');
+	const promoteModeratorLabel: string = t('tooltip.promoteModerator', 'Promote to moderator');
 	const noMatchLabel = t(
 		'participantsList.noMatch.gal',
 		'There are no items that match this search in your company.'
@@ -232,7 +234,9 @@ const ChatCreationContactsSelection = ({
 						actions: [
 							{
 								...chip.actions[0],
-								label: contactsSelected[chip.value.id].owner ? 'Demote' : 'Promote to moderator',
+								label: contactsSelected[chip.value.id].owner
+									? demoteModeratorLabel
+									: promoteModeratorLabel,
 								icon: contactsSelected[chip.value.id].owner ? 'Crown' : 'CrownOutline'
 							}
 						]
@@ -241,7 +245,7 @@ const ChatCreationContactsSelection = ({
 				return chip;
 			})
 		);
-	}, [contactsSelected]);
+	}, [contactsSelected, demoteModeratorLabel, promoteModeratorLabel]);
 
 	const createChip = useCallback(
 		(item: ContactInfo): ChipItem<ContactInfo> => ({
@@ -251,13 +255,13 @@ const ChatCreationContactsSelection = ({
 				{
 					id: 'set-moderator',
 					type: 'button',
-					label: isOwner(item.id) ? 'Demote' : 'Promote to moderator',
+					label: isOwner(item.id) ? demoteModeratorLabel : promoteModeratorLabel,
 					icon: isOwner(item.id) ? 'Crown' : 'CrownOutline',
 					onClick: (): void => updateOwner(item.id)
 				}
 			]
 		}),
-		[isOwner, updateOwner]
+		[demoteModeratorLabel, isOwner, promoteModeratorLabel, updateOwner]
 	);
 
 	const onClickListItem = useCallback(

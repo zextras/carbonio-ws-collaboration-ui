@@ -8,7 +8,7 @@ import { TextMessage } from '../../store/MessageTypes';
 import { AddMemberFields, RoomCreationFields, RoomEditableFields } from '../models/roomBeTypes';
 import {
 	AddRoomAttachmentResponse,
-	AddRoomMemberResponse,
+	AddRoomMembersResponse,
 	AddRoomResponse,
 	ClearRoomHistoryResponse,
 	DeleteRoomMemberResponse,
@@ -48,7 +48,7 @@ interface IRoomsApi {
 	clearRoomHistory(roomId: string): Promise<ClearRoomHistoryResponse>;
 	// Room members
 	getRoomMembers(roomId: string): Promise<GetRoomMembersResponse>;
-	addRoomMember(roomId: string, member: AddMemberFields[]): Promise<AddRoomMemberResponse>;
+	addRoomMembers(roomId: string, member: AddMemberFields[]): Promise<AddRoomMembersResponse>;
 	deleteRoomMember(roomId: string, userId: string): Promise<DeleteRoomMemberResponse>;
 	promoteRoomMember(roomId: string, userId: string): Promise<PromoteRoomMemberResponse>;
 	demotesRoomMember(roomId: string, userId: string): Promise<DemotesRoomMemberResponse>;

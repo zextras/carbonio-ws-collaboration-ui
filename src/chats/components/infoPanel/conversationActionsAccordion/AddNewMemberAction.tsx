@@ -55,7 +55,7 @@ const AddNewMemberAction: FC<AddNewMemberProps> = ({ roomId }) => {
 				historyCleared: !showHistory
 			});
 		});
-		RoomsApi.addRoomMember(roomId, members).then(() => closeModal());
+		RoomsApi.addRoomMembers(roomId, members).then(() => closeModal());
 	}, [closeModal, contactsSelected, roomId, showHistory]);
 
 	const addMemberDisabled = useMemo(

@@ -50,6 +50,8 @@ const ListParticipant = ({
 		'tooltip.removeToAddNewOne',
 		'Remove someone to add new members'
 	);
+	const demoteModeratorLabel: string = t('tooltip.demoteModerator', 'Demote moderator');
+	const promoteModeratorLabel: string = t('tooltip.promoteModerator', 'Promote to moderator');
 
 	const userPictureUpdatedAt: string | undefined = useStore((state) =>
 		getUserPictureUpdatedAt(state, item.id)
@@ -95,7 +97,7 @@ const ListParticipant = ({
 					</Row>
 				</Container>
 				<Container width="fit">
-					<Tooltip label={isOwner(item.id) ? 'Demote' : 'Promote to moderator'}>
+					<Tooltip label={isOwner(item.id) ? demoteModeratorLabel : promoteModeratorLabel}>
 						<Button
 							icon={isOwner(item.id) ? 'Crown' : 'CrownOutline'}
 							type="ghost"

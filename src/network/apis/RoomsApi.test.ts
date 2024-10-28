@@ -314,7 +314,7 @@ describe('Rooms API', () => {
 				historyCleared: true
 			}
 		];
-		await roomsApi.addRoomMember('roomId', member);
+		await roomsApi.addRoomMembers('roomId', member);
 
 		// Set appropriate headers
 		const headers = new Headers();

@@ -21,7 +21,7 @@ import {
 } from '../../types/network/models/roomBeTypes';
 import {
 	AddRoomAttachmentResponse,
-	AddRoomMemberResponse,
+	AddRoomMembersResponse,
 	AddRoomResponse,
 	ClearRoomHistoryResponse,
 	DeleteRoomMemberResponse,
@@ -148,7 +148,10 @@ class RoomsApi extends BaseAPI implements IRoomsApi {
 		return this.fetchAPI(`rooms/${roomId}/members`, RequestType.GET);
 	}
 
-	public addRoomMember(roomId: string, member: AddMemberFields[]): Promise<AddRoomMemberResponse> {
+	public addRoomMembers(
+		roomId: string,
+		member: AddMemberFields[]
+	): Promise<AddRoomMembersResponse> {
 		return this.fetchAPI(`rooms/${roomId}/members`, RequestType.POST, member);
 	}
 
