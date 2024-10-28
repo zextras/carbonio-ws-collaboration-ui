@@ -48,7 +48,7 @@ interface IRoomsApi {
 	clearRoomHistory(roomId: string): Promise<ClearRoomHistoryResponse>;
 	// Room members
 	getRoomMembers(roomId: string): Promise<GetRoomMembersResponse>;
-	addRoomMember(roomId: string, member: AddMemberFields): Promise<AddRoomMemberResponse>;
+	addRoomMember(roomId: string, member: AddMemberFields[]): Promise<AddRoomMemberResponse>;
 	deleteRoomMember(roomId: string, userId: string): Promise<DeleteRoomMemberResponse>;
 	promoteRoomMember(roomId: string, userId: string): Promise<PromoteRoomMemberResponse>;
 	demotesRoomMember(roomId: string, userId: string): Promise<DemotesRoomMemberResponse>;

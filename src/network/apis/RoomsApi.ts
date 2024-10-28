@@ -78,7 +78,7 @@ class RoomsApi extends BaseAPI implements IRoomsApi {
 			// Create meeting for the created room
 			const meetingType =
 				room.type === RoomType.TEMPORARY ? MeetingType.SCHEDULED : MeetingType.PERMANENT;
-			MeetingsApi.createMeeting(response.id, meetingType, response.name || '');
+			MeetingsApi.createMeeting(response.id, meetingType, response.name ?? '');
 			return response;
 		});
 	}
@@ -123,7 +123,7 @@ class RoomsApi extends BaseAPI implements IRoomsApi {
 			} else {
 				this.uploadFileFetchAPI(`rooms/${roomId}/picture`, RequestType.PUT, file)
 					.then((resp: UpdateRoomPictureResponse) => resolve(resp))
-					.catch((error) => reject(error));
+					.catch((error) => reject(new Error(error)));
 			}
 		});
 	}
@@ -148,7 +148,7 @@ class RoomsApi extends BaseAPI implements IRoomsApi {
 		return this.fetchAPI(`rooms/${roomId}/members`, RequestType.GET);
 	}
 
-	public addRoomMember(roomId: string, member: AddMemberFields): Promise<AddRoomMemberResponse> {
+	public addRoomMember(roomId: string, member: AddMemberFields[]): Promise<AddRoomMemberResponse> {
 		return this.fetchAPI(`rooms/${roomId}/members`, RequestType.POST, member);
 	}
 
@@ -211,7 +211,7 @@ class RoomsApi extends BaseAPI implements IRoomsApi {
 		setPlaceholderMessage({
 			roomId,
 			id: uuid,
-			text: optionalFields.description || '',
+			text: optionalFields.description ?? '',
 			replyTo: optionalFields.replyId,
 			attachment: {
 				id: 'placeholderFileId',
@@ -231,7 +231,7 @@ class RoomsApi extends BaseAPI implements IRoomsApi {
 			.then((resp: AddRoomAttachmentResponse) => resp)
 			.catch((error) => {
 				useStore.getState().removePlaceholderMessage(roomId, uuid);
-				return Promise.reject(error);
+				return Promise.reject(new Error(error));
 			});
 	}
 

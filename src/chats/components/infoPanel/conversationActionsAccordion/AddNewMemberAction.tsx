@@ -47,14 +47,15 @@ const AddNewMemberAction: FC<AddNewMemberProps> = ({ roomId }) => {
 	}, []);
 
 	const addNewMember = useCallback(() => {
+		const members: AddMemberFields[] = [];
 		map(contactsSelected, (contact) => {
-			const userToAdd: AddMemberFields = {
+			members.push({
 				userId: contact.id,
 				owner: contact.owner,
 				historyCleared: !showHistory
-			};
-			RoomsApi.addRoomMember(roomId, userToAdd).then(() => closeModal());
+			});
 		});
+		RoomsApi.addRoomMember(roomId, members).then(() => closeModal());
 	}, [closeModal, contactsSelected, roomId, showHistory]);
 
 	const addMemberDisabled = useMemo(
