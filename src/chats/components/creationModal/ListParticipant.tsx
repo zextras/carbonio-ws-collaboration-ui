@@ -99,7 +99,7 @@ const ListParticipant = ({
 						<Button
 							icon={isOwner(item.id) ? 'Crown' : 'CrownOutline'}
 							type="ghost"
-							color="gray0"
+							color={isOwner(item.id) ? 'primary' : 'gray1'}
 							size="large"
 							disabled={!selected}
 							onClick={() => updateOwner(item.id)}
