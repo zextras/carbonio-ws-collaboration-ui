@@ -8,7 +8,6 @@
 import './global';
 
 // Network mocks
-import './network';
 import './AutoCompleteGal';
 import './SearchUsersByFeature';
 import './SelfieSegmentationManager';

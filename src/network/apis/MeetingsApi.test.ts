@@ -78,7 +78,6 @@ describe('Meetings API', () => {
 	});
 
 	test('createMeeting is called correctly', async () => {
-		fetchResponse.mockResolvedValueOnce(meetingMock);
 		await meetingsApi.createMeeting('roomId', MeetingType.PERMANENT, '');
 		// Check if fetch is called with the correct parameters
 		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/meetings`, {
@@ -93,7 +92,6 @@ describe('Meetings API', () => {
 	});
 
 	test('getMeeting is called correctly', async () => {
-		fetchResponse.mockResolvedValueOnce(meetingMock);
 		await meetingsApi.getMeeting(meetingMock.roomId);
 
 		// Check if fetch is called with the correct parameters
@@ -120,7 +118,6 @@ describe('Meetings API', () => {
 	});
 
 	test('start is called correctly', async () => {
-		fetchResponse.mockResolvedValueOnce(meetingMock);
 		await meetingsApi.startMeeting('meetingId');
 		// Check if fetch is called with the correct parameters
 		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/meetings/${meetingMock.id}/start`, {
@@ -297,7 +294,6 @@ describe('Meetings API', () => {
 	test('leaveMeeting for external user is called correctly', async () => {
 		document.cookie = `ZM_AUTH_TOKEN=123456789; path=/`;
 		document.cookie = `ZX_AUTH_TOKEN=123456789; path=/`;
-		fetchResponse.mockResolvedValueOnce(meetingMock);
 		useStore.getState().setLoginInfo(guestUser.id, guestUser.name, guestUser.name, guestUser.type);
 		await meetingsApi.leaveMeeting(meetingMock.id);
 
@@ -320,7 +316,6 @@ describe('Meetings API', () => {
 	test('leaveMeeting for internal user is called correctly', async () => {
 		document.cookie = `ZM_AUTH_TOKEN=123456789; path=/`;
 		document.cookie = `ZX_AUTH_TOKEN=123456789; path=/`;
-		fetchResponse.mockResolvedValueOnce(meetingMock);
 		await meetingsApi.leaveMeeting(meetingMock.id);
 
 		// Check if fetch is called with the correct parameters
@@ -339,7 +334,6 @@ describe('Meetings API', () => {
 	test('leaveMeeting for internal user is rejected', async () => {
 		document.cookie = `ZM_AUTH_TOKEN=123456789; path=/`;
 		document.cookie = `ZX_AUTH_TOKEN=123456789; path=/`;
-		fetchResponse.mockRejectedValueOnce(false);
 		await meetingsApi.leaveMeeting(meetingMock.id);
 
 		// Check if fetch is called with the correct parameters
@@ -360,7 +354,6 @@ describe('Meetings API', () => {
 		document.cookie = `ZX_AUTH_TOKEN=123456789; path=/`;
 		useStore.getState().setLoginInfo(guestUser.id, guestUser.name, guestUser.name, guestUser.type);
 
-		fetchResponse.mockRejectedValueOnce(false);
 		await meetingsApi.leaveMeeting(meetingMock.id);
 
 		// Check if fetch is called with the correct parameters
@@ -388,7 +381,6 @@ describe('Meetings API', () => {
 		const store = useStore.getState();
 		store.addRoom(temporaryRoom);
 
-		fetchResponse.mockResolvedValueOnce(meetingMock);
 		await meetingsApi.leaveMeeting(meetingMock.id);
 
 		// Check if fetch is called with the correct parameters
@@ -408,7 +400,6 @@ describe('Meetings API', () => {
 		const store = useStore.getState();
 		store.addRoom(temporaryRoom);
 
-		fetchResponse.mockResolvedValueOnce(meetingMock);
 		await meetingsApi.leaveMeeting(meetingMock.id);
 
 		// Check if fetch is called with the correct parameters
@@ -420,7 +411,6 @@ describe('Meetings API', () => {
 	});
 
 	test('stopMeeting is called correctly', async () => {
-		fetchResponse.mockResolvedValueOnce(meetingMock);
 		await meetingsApi.stopMeeting('meetingId');
 		// Check if fetch is called with the correct parameters
 		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/meetings/${meetingMock.id}/stop`, {
@@ -430,7 +420,6 @@ describe('Meetings API', () => {
 	});
 
 	test('deleteMeeting is called correctly', async () => {
-		fetchResponse.mockResolvedValueOnce(meetingMock);
 		await meetingsApi.deleteMeeting(meetingMock.id);
 
 		// Check if fetch is called with the correct parameters
@@ -443,7 +432,6 @@ describe('Meetings API', () => {
 
 	test('updateAudioStreamStatus is called to set audio enabled', async () => {
 		ongoingMeetingSetup();
-		fetchResponse.mockResolvedValueOnce(meetingMock);
 		await meetingsApi.updateAudioStreamStatus(meetingMock.id, true);
 
 		// Check if fetch is called with the correct parameters
@@ -458,7 +446,6 @@ describe('Meetings API', () => {
 
 	test('updateAudioStreamStatus is called to set audio disabled', async () => {
 		ongoingMeetingSetup();
-		fetchResponse.mockResolvedValueOnce(meetingMock);
 		await meetingsApi.updateAudioStreamStatus(meetingMock.id, false);
 
 		// Check if fetch is called with the correct parameters
@@ -473,7 +460,6 @@ describe('Meetings API', () => {
 
 	test('updateVideoStreamStatus is called to set video enabled', async () => {
 		ongoingMeetingSetup();
-		fetchResponse.mockResolvedValueOnce(meetingMock);
 		await meetingsApi.updateMediaOffer(meetingMock.id, STREAM_TYPE.VIDEO, true, sdpOffer);
 
 		// Check if fetch is called with the correct parameters
@@ -490,7 +476,6 @@ describe('Meetings API', () => {
 
 	test('updateVideoStreamStatus is called to set video disabled', async () => {
 		ongoingMeetingSetup();
-		fetchResponse.mockResolvedValueOnce(meetingMock);
 		await meetingsApi.updateMediaOffer(meetingMock.id, STREAM_TYPE.VIDEO, false);
 
 		// Check if fetch is called with the correct parameters
@@ -506,7 +491,6 @@ describe('Meetings API', () => {
 
 	test('updateScreenStreamStatus is called to set screen share enabled', async () => {
 		ongoingMeetingSetup();
-		fetchResponse.mockResolvedValueOnce(meetingMock);
 		await meetingsApi.updateMediaOffer(meetingMock.id, STREAM_TYPE.SCREEN, true, sdpOffer);
 
 		// Check if fetch is called with the correct parameters
@@ -523,7 +507,6 @@ describe('Meetings API', () => {
 
 	test('updateScreenStreamStatus is called to set screen share disabled', async () => {
 		ongoingMeetingSetup();
-		fetchResponse.mockResolvedValueOnce(meetingMock);
 		await meetingsApi.updateMediaOffer(meetingMock.id, STREAM_TYPE.SCREEN, false);
 
 		// Check if fetch is called with the correct parameters
@@ -540,7 +523,6 @@ describe('Meetings API', () => {
 	test('leaveWaitingRoom is called correctly for internal user', async () => {
 		const cookie = `ZM_AUTH_TOKEN=123456789`;
 		document.cookie = cookie;
-		fetchResponse.mockResolvedValueOnce({});
 		await meetingsApi.leaveWaitingRoom(meetingMock.id);
 
 		// Check if fetch is called with the correct parameters
@@ -561,7 +543,6 @@ describe('Meetings API', () => {
 		document.cookie = `ZM_AUTH_TOKEN=123456789`;
 		useStore.getState().setLoginInfo(userId, guestUser.email, guestUser.name, guestUser.type);
 		useStore.getState().setSessionId('queueId');
-		fetchResponse.mockResolvedValueOnce({});
 		await meetingsApi.leaveWaitingRoom(meetingMock.id);
 
 		// Check if fetch is called with the correct parameters
@@ -579,7 +560,6 @@ describe('Meetings API', () => {
 	});
 
 	test('getWaitingList is called correctly', async () => {
-		fetchResponse.mockResolvedValueOnce({ users: [userId] });
 		await meetingsApi.getWaitingList(meetingMock.id);
 
 		// Check if fetch is called with the correct parameters
@@ -591,7 +571,6 @@ describe('Meetings API', () => {
 	});
 
 	test('acceptWaitingUser is called correctly', async () => {
-		fetchResponse.mockResolvedValueOnce({ status: 'ACCEPTED' });
 		await meetingsApi.acceptWaitingUser(meetingMock.id, userId, true);
 
 		// Check if fetch is called with the correct parameters
@@ -608,7 +587,6 @@ describe('Meetings API', () => {
 	});
 
 	test('startRecording is called correctly', async () => {
-		fetchResponse.mockResolvedValueOnce({});
 		await meetingsApi.startRecording(meetingMock.id);
 
 		// Check if fetch is called with the correct parameters
@@ -623,7 +601,6 @@ describe('Meetings API', () => {
 	});
 
 	test('stopRecording is called correctly', async () => {
-		fetchResponse.mockResolvedValueOnce({});
 		await meetingsApi.stopRecording(meetingMock.id, 'recordingName', 'folderId');
 
 		// Check if fetch is called with the correct parameters
@@ -641,7 +618,6 @@ describe('Meetings API', () => {
 	});
 
 	test('createMediaAnswer is called correctly', async () => {
-		fetchResponse.mockResolvedValueOnce({});
 		await meetingsApi.createMediaAnswer(meetingMock.id, 'sdpAnswer');
 
 		expect(global.fetch).toHaveBeenCalledWith(
@@ -657,7 +633,6 @@ describe('Meetings API', () => {
 	});
 
 	test('createAudioOffer is called correctly', async () => {
-		fetchResponse.mockResolvedValueOnce({});
 		await meetingsApi.createAudioOffer(meetingMock.id, 'sdpOffer');
 
 		expect(global.fetch).toHaveBeenCalledWith(
@@ -673,7 +648,6 @@ describe('Meetings API', () => {
 	});
 
 	test('getScheduledMeetingName is called correctly', async () => {
-		fetchResponse.mockResolvedValueOnce({});
 		await meetingsApi.getScheduledMeetingName(meetingMock.id);
 
 		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/public/meetings/${meetingMock.id}`, {

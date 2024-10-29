@@ -6,12 +6,12 @@
 
 import React from 'react';
 
-import { screen, waitFor, act, renderHook } from '@testing-library/react';
+import { act, renderHook, screen } from '@testing-library/react';
 
 import EditConversationAction from './EditConversationAction';
 import useStore from '../../../../store/Store';
 import { createMockMember, createMockRoom, createMockUser } from '../../../../tests/createMock';
-import { mockedUpdateRoomRequest } from '../../../../tests/mocks/network';
+import { RoomsApiToSpy, spyOnRoomsApi } from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
 import { RootStore } from '../../../../types/store/StoreTypes';
@@ -63,6 +63,8 @@ describe('Edit conversation action', () => {
 		expect(screen.queryByTestId('edit_conversation_modal')).not.toBeInTheDocument();
 	});
 	test('edit conversation', async () => {
+		const spyOnUpdateRoom = spyOnRoomsApi(RoomsApiToSpy.UPDATE_ROOM);
+		spyOnUpdateRoom.mockRejectedValueOnce('Not edited');
 		const { result } = renderHook(() => useStore());
 		act(() => {
 			result.current.setLoginInfo(user1Info.id, user1Info.name);
@@ -70,26 +72,7 @@ describe('Edit conversation action', () => {
 			result.current.setUserInfo(user2Info);
 			result.current.addRoom(testRoom2);
 		});
-		mockedUpdateRoomRequest.mockRejectedValueOnce('Not edited').mockReturnValueOnce({
-			id: 'room-test',
-			name: 'A new name',
-			description: 'This is a beautiful description',
-			type: RoomType.GROUP,
-			members: [
-				{
-					userId: user1Info.id,
-					owner: true,
-					temporary: false,
-					external: false
-				},
-				{
-					userId: user2Info.id,
-					owner: false,
-					temporary: false,
-					external: false
-				}
-			]
-		});
+
 		const { user } = setup(<EditConversationAction roomId={testRoom.id} />);
 		await user.click(screen.getByText(/Edit Details/i));
 
@@ -101,9 +84,9 @@ describe('Edit conversation action', () => {
 
 		const snackbar = await screen.findByText(/Something went Wrong. Please Retry/i);
 		expect(snackbar).toBeVisible();
-		await waitFor(() => expect(result.current.rooms[testRoom2.id].name).toBe('A Group'));
+		expect(result.current.rooms[testRoom2.id].name).toBe('A Group');
 
 		await user.click(editButton);
-		await waitFor(() => expect(mockedUpdateRoomRequest).toHaveBeenCalledTimes(2));
+		expect(spyOnUpdateRoom).toHaveBeenCalledTimes(2);
 	});
 });

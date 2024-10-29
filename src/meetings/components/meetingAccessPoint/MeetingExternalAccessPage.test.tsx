@@ -10,9 +10,10 @@ import { screen } from '@testing-library/react';
 
 import MeetingExternalAccessPage from './MeetingExternalAccessPage';
 import { mockReplace } from '../../../tests/mocks/global';
-import { mockedCreateGuestAccount } from '../../../tests/mocks/network';
+import { MeetingsApiToSpy, spyOnMeetingsApi } from '../../../tests/mocks/network';
 import { mockGoToMeetingAccessPage } from '../../../tests/mocks/useRouting';
 import { setup } from '../../../tests/test-utils';
+import { CreateGuestAccountResponse } from '../../../types/network/responses/meetingsResponses';
 
 const guestAccountResp = {
 	id: 'userGuestId',
@@ -50,9 +51,10 @@ describe('MeetingExternalAccessPage', () => {
 
 	test('Create external guest Api fails', async () => {
 		// console.error()) is expected
+		const spyOnCreateGuestAccount = spyOnMeetingsApi(MeetingsApiToSpy.CREATE_GUEST_ACCOUNT);
 		jest.spyOn(console, 'error').mockImplementation();
 
-		mockedCreateGuestAccount.mockRejectedValueOnce(false);
+		spyOnCreateGuestAccount.mockRejectedValueOnce(false);
 		const { user } = setup(<MeetingExternalAccessPage />);
 
 		const nameInput = screen.getByRole('textbox', { name: typeHereLabel });
@@ -61,13 +63,15 @@ describe('MeetingExternalAccessPage', () => {
 		const joinButton = screen.getByRole('button', { name: joinLabel });
 		await user.click(joinButton);
 
-		expect(mockedCreateGuestAccount).toHaveBeenCalledTimes(1);
+		expect(spyOnCreateGuestAccount).toHaveBeenCalledTimes(1);
 		expect(document.cookie).toBe('');
 	});
 
 	test('External user creates a new guest account', async () => {
-		mockedCreateGuestAccount.mockResolvedValueOnce(guestAccountResp);
-
+		const spyOnCreateGuestAccount = spyOnMeetingsApi(MeetingsApiToSpy.CREATE_GUEST_ACCOUNT);
+		spyOnCreateGuestAccount.mockImplementation(() =>
+			Promise.resolve(guestAccountResp as CreateGuestAccountResponse)
+		);
 		const { user } = setup(<MeetingExternalAccessPage />);
 
 		const nameInput = screen.getByRole('textbox', { name: 'Type here your name' });
@@ -75,7 +79,8 @@ describe('MeetingExternalAccessPage', () => {
 
 		const joinButton = screen.getByRole('button', { name: 'Join the meeting' });
 		await user.click(joinButton);
-		expect(mockedCreateGuestAccount).toHaveBeenCalledTimes(1);
+
+		expect(spyOnCreateGuestAccount).toHaveBeenCalledTimes(1);
 		expect(mockGoToMeetingAccessPage).toHaveBeenCalled();
 		expect(document.cookie).toBe(
 			`ZM_AUTH_TOKEN=${guestAccountResp.zmToken}; ZX_AUTH_TOKEN=${guestAccountResp.zxToken}`
@@ -83,7 +88,6 @@ describe('MeetingExternalAccessPage', () => {
 	});
 
 	test('user clicks on the login button', async () => {
-		mockedCreateGuestAccount.mockResolvedValueOnce(guestAccountResp);
 		mockReplace.mockReturnValueOnce('url');
 		const { user } = setup(<MeetingExternalAccessPage />);
 
@@ -94,14 +98,13 @@ describe('MeetingExternalAccessPage', () => {
 	});
 
 	test('User confirm the name with enter key', async () => {
-		mockedCreateGuestAccount.mockResolvedValueOnce(guestAccountResp);
-
+		const spyOnCreateGuestAccount = spyOnMeetingsApi(MeetingsApiToSpy.CREATE_GUEST_ACCOUNT);
 		const { user } = setup(<MeetingExternalAccessPage />);
 
 		const nameInput = screen.getByRole('textbox', { name: typeHereLabel });
 		await user.type(nameInput, userNameLabel);
 		await user.type(nameInput, '{enter}');
 
-		expect(mockedCreateGuestAccount).toHaveBeenCalledTimes(1);
+		expect(spyOnCreateGuestAccount).toHaveBeenCalledTimes(1);
 	});
 });

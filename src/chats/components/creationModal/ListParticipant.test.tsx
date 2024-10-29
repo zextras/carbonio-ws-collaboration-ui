@@ -11,7 +11,7 @@ import { screen } from '@testing-library/react';
 import ListParticipant from './ListParticipant';
 import useStore from '../../../store/Store';
 import { createMockUser } from '../../../tests/createMock';
-import { mockedGetURLUserPicture } from '../../../tests/mocks/network';
+import { spyOnUsersApi, UsersApiToSpy } from '../../../tests/mocks/network';
 import { setup } from '../../../tests/test-utils';
 import { ContactInfo } from '../../../types/network/soap/searchUsersByFeatureRequest';
 
@@ -48,6 +48,7 @@ describe('List Participant', () => {
 	});
 
 	test('Show user picture if user has one', () => {
+		const spyOnGetURLUserPicture = spyOnUsersApi(UsersApiToSpy.GET_URL_USER_PICTURE);
 		const store = useStore.getState();
 		store.setUserInfo(createMockUser({ id: contactInfo.id, pictureUpdatedAt: '2022-01-01' }));
 		setup(
@@ -58,6 +59,6 @@ describe('List Participant', () => {
 				isDisabled={false}
 			/>
 		);
-		expect(mockedGetURLUserPicture).toBeCalled();
+		expect(spyOnGetURLUserPicture).toHaveBeenCalled();
 	});
 });

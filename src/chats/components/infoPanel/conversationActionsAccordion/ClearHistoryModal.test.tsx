@@ -11,7 +11,6 @@ import { screen } from '@testing-library/react';
 import ClearHistoryModal from './ClearHistoryModal';
 import useStore from '../../../../store/Store';
 import { createMockRoom } from '../../../../tests/createMock';
-import { mockedClearHistoryRequest } from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe } from '../../../../types/network/models/roomBeTypes';
 
@@ -38,9 +37,7 @@ describe('Clear history', () => {
 	test('Clear history modal closing after cleared', async () => {
 		useStore.getState().addRoom(mockRoom);
 		const closeModal = jest.fn();
-		mockedClearHistoryRequest.mockReturnValueOnce({
-			clearedAt: '2022-10-31T10:39:48.622581+01:00'
-		});
+
 		const { user } = setup(
 			<ClearHistoryModal
 				roomId={mockRoom.id}

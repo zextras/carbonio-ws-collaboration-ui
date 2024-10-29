@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { act, screen, waitFor, renderHook } from '@testing-library/react';
+import { act, renderHook, screen, waitFor } from '@testing-library/react';
 
 import ChatCreationModal from './ChatCreationModal';
 import useStore from '../../../store/Store';
@@ -15,7 +15,7 @@ import {
 	createMockMember,
 	createMockRoom
 } from '../../../tests/createMock';
-import { mockedAddRoomRequest } from '../../../tests/mocks/network';
+import { RoomsApiToSpy, spyOnRoomsApi } from '../../../tests/mocks/network';
 import { mockSearchUsersByFeatureRequest } from '../../../tests/mocks/SearchUsersByFeature';
 import { setup } from '../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
@@ -91,6 +91,8 @@ describe('Chat Creation Modal', () => {
 	});
 
 	test('Create a group', async () => {
+		const spyOnAddRoom = spyOnRoomsApi(RoomsApiToSpy.ADD_ROOM);
+		// const spyOnFetch = jest.spyOn(global, 'fetch');
 		const { result } = renderHook(() => useStore());
 		act(() => result.current.setCapabilities(createMockCapabilityList({ maxGroupMembers: 5 })));
 		const { user } = setup(<ChatCreationModal open onClose={jest.fn()} />);
@@ -118,20 +120,12 @@ describe('Chat Creation Modal', () => {
 		const footerButton = await screen.findByRole('button', { name: /new group/i });
 		expect(footerButton).toBeEnabled();
 
-		mockedAddRoomRequest.mockReturnValue({
-			id: 'room-id',
-			name: 'name',
-			description: 'description',
-			type: RoomType.GROUP,
-			createdAt: 'created',
-			updatedAt: 'updated',
-			pictureUpdatedAt: 'pictureUpdatedAt'
-		});
 		await user.click(footerButton);
-		expect(mockedAddRoomRequest).toHaveBeenCalled();
+		expect(spyOnAddRoom).toHaveBeenCalledTimes(1);
 	});
 
 	test('Error on creating a group displaying a snackbar', async () => {
+		const spyOnAddRoom = spyOnRoomsApi(RoomsApiToSpy.ADD_ROOM);
 		const { result } = renderHook(() => useStore());
 		act(() => result.current.setCapabilities(createMockCapabilityList({ maxGroupMembers: 5 })));
 		const { user } = setup(<ChatCreationModal open onClose={jest.fn()} />);
@@ -151,7 +145,7 @@ describe('Chat Creation Modal', () => {
 		const footerButton = await screen.findByRole('button', { name: /new group/i });
 		expect(footerButton).toBeEnabled();
 
-		mockedAddRoomRequest.mockRejectedValueOnce({});
+		spyOnAddRoom.mockRejectedValue(false);
 		await user.click(footerButton);
 		await waitFor(() => expect(footerButton).toBeEnabled());
 		const snackbar = await screen.findByText(/Something went Wrong. Please Retry/i);

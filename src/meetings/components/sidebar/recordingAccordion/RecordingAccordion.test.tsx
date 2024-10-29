@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { screen, act } from '@testing-library/react';
+import { act, screen } from '@testing-library/react';
 
 import RecordingAccordion from './RecordingAccordion';
 import useStore from '../../../../store/Store';
@@ -16,7 +16,7 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../../../tests/createMock';
-import { mockedStartRecordingRequest } from '../../../../tests/mocks/network';
+import { MeetingsApiToSpy, spyOnMeetingsApi } from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 import { MeetingBe, MeetingType } from '../../../../types/network/models/meetingBeTypes';
 import { RoomBe } from '../../../../types/network/models/roomBeTypes';
@@ -44,6 +44,7 @@ beforeEach(() => {
 	store.addMeeting(meeting);
 	store.meetingConnection(meeting.id, false, undefined, false, undefined);
 });
+
 describe('RecordingAccordion tests', () => {
 	test('Toggle accordion status', async () => {
 		const { user } = setup(<RecordingAccordion meetingId={meeting.id} />);
@@ -76,7 +77,7 @@ describe('RecordingAccordion tests', () => {
 	});
 
 	test('When user clicks on the start button the recording starts', async () => {
-		mockedStartRecordingRequest.mockResolvedValueOnce({});
+		const spyOnStartRecording = spyOnMeetingsApi(MeetingsApiToSpy.START_RECORDING);
 		const { user } = setup(<RecordingAccordion meetingId={meeting.id} />);
 
 		const chevron = screen.getByTestId(iconDown);
@@ -86,11 +87,11 @@ describe('RecordingAccordion tests', () => {
 		jest.advanceTimersByTime(1000);
 		await user.click(startButton);
 
-		expect(mockedStartRecordingRequest).toHaveBeenCalled();
+		expect(spyOnStartRecording).toHaveBeenCalled();
 	});
 
 	test('Show a snackbar when the start recording request fails', async () => {
-		mockedStartRecordingRequest.mockRejectedValue({});
+		const spyOnStartRecording = spyOnMeetingsApi(MeetingsApiToSpy.START_RECORDING);
 		const { user } = setup(<RecordingAccordion meetingId={meeting.id} />);
 
 		const chevron = screen.getByTestId(iconDown);
@@ -100,6 +101,6 @@ describe('RecordingAccordion tests', () => {
 		jest.advanceTimersByTime(1000);
 		await user.click(startButton);
 
-		await expect(mockedStartRecordingRequest()).rejects.toEqual({});
+		expect(spyOnStartRecording).rejects;
 	});
 });

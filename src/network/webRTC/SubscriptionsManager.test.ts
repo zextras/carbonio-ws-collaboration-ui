@@ -15,7 +15,6 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../tests/createMock';
-import { mockedSubscribeToMediaRequest } from '../../tests/mocks/network';
 import { MeetingBe, MeetingParticipantBe } from '../../types/network/models/meetingBeTypes';
 import { RoomBe, RoomType } from '../../types/network/models/roomBeTypes';
 import { WsEventType } from '../../types/network/websocket/wsEvents';
@@ -95,7 +94,6 @@ beforeEach(() => {
 
 describe('Test SubscriptionsManager', () => {
 	test('Request all streams subscriptions', async () => {
-		mockedSubscribeToMediaRequest.mockResolvedValue(true);
 		const subscriptionsManager = new SubscriptionsManager(groupMeeting.id);
 		subscriptionsManager.updateSubscription([
 			{ userId: 'user1', type: STREAM_TYPE.VIDEO },

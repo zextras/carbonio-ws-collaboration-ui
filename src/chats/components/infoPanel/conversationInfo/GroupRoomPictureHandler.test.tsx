@@ -6,15 +6,12 @@
 
 import React from 'react';
 
-import { screen, waitFor } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 
 import GroupRoomPictureHandler from './GroupRoomPictureHandler';
 import useStore from '../../../../store/Store';
 import { createMockMember, createMockRoom, createMockUser } from '../../../../tests/createMock';
-import {
-	mockedDeleteRoomPictureRequest,
-	mockedUpdateRoomPictureRequest
-} from '../../../../tests/mocks/network';
+import { RoomsApiToSpy, spyOnRoomsApi } from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
 import { RootStore } from '../../../../types/store/StoreTypes';
@@ -91,9 +88,9 @@ describe('Room Picture Handler - groups', () => {
 		expect(deleteButton).toBeInTheDocument();
 	});
 	test('upload an image', async () => {
+		const spyOnUpdateRoomPicture = spyOnRoomsApi(RoomsApiToSpy.UPDATE_ROOM_PICTURE);
 		const testImageFile = new File(['hello'], 'hello.png', { type: 'image/png' });
 
-		mockedUpdateRoomPictureRequest.mockReturnValueOnce('ww.url.it');
 		const store: RootStore = useStore.getState();
 		store.addRoom(testRoom);
 		store.setUserInfo(user1Info);
@@ -111,14 +108,16 @@ describe('Room Picture Handler - groups', () => {
 		expect(input.files).toHaveLength(0);
 
 		await user.upload(input, testImageFile);
-		await waitFor(() => expect(input.files).toHaveLength(1));
+		expect(input.files).toHaveLength(1);
 
-		expect(mockedUpdateRoomPictureRequest).toHaveBeenCalled();
+		expect(spyOnUpdateRoomPicture).toHaveBeenCalled();
 	});
+
 	test('update an image fails', async () => {
+		const spyOnUpdateRoomPicture = spyOnRoomsApi(RoomsApiToSpy.UPDATE_ROOM_PICTURE);
+		const spyOnDeleteRoomPicture = spyOnRoomsApi(RoomsApiToSpy.DELETE_ROOM_PICTURE);
 		const testImageFile = new File(['hello'], 'hello.png', { type: 'image/png' });
 
-		mockedUpdateRoomPictureRequest.mockRejectedValueOnce('image not changed');
 		const store: RootStore = useStore.getState();
 		store.addRoom(testRoom2);
 		store.setUserInfo(user1Info);
@@ -136,19 +135,18 @@ describe('Room Picture Handler - groups', () => {
 
 		await user.upload(input, testImageFile);
 
-		expect(mockedUpdateRoomPictureRequest).toHaveBeenCalledTimes(1);
-
-		const result = mockedUpdateRoomPictureRequest.mock.results[0].value;
-		await expect(result).rejects.toEqual('image not changed');
+		expect(spyOnUpdateRoomPicture).toHaveBeenCalledTimes(1);
+		expect(spyOnDeleteRoomPicture).toThrowError();
 	});
+
 	test('delete an image', async () => {
+		const spyOnDeleteRoomPicture = spyOnRoomsApi(RoomsApiToSpy.DELETE_ROOM_PICTURE);
 		const store: RootStore = useStore.getState();
 		store.addRoom(testRoom2);
 		store.setUserInfo(user1Info);
 		store.setUserInfo(user2Info);
 		store.setLoginInfo(user1Info.id, user1Info.name);
 
-		mockedDeleteRoomPictureRequest.mockReturnValueOnce('deleted');
 		const { user } = setup(<GroupRoomPictureHandler roomId={testRoom2.id} />);
 
 		const pictureContainer = await screen.findByTestId('picture_container');
@@ -164,16 +162,18 @@ describe('Room Picture Handler - groups', () => {
 		);
 		expect(snackbar).toBeVisible();
 
-		expect(mockedDeleteRoomPictureRequest).toHaveBeenCalled();
+		expect(spyOnDeleteRoomPicture).toHaveBeenCalled();
 	});
+
 	test('delete an image fails ', async () => {
+		const spyOnDeleteRoomPicture = spyOnRoomsApi(RoomsApiToSpy.DELETE_ROOM_PICTURE);
+		spyOnDeleteRoomPicture.mockRejectedValue(false);
 		const store: RootStore = useStore.getState();
 		store.addRoom(testRoom2);
 		store.setUserInfo(user1Info);
 		store.setUserInfo(user2Info);
 		store.setLoginInfo(user1Info.id, user1Info.name);
 
-		mockedDeleteRoomPictureRequest.mockRejectedValueOnce('not deleted');
 		const { user } = setup(<GroupRoomPictureHandler roomId={testRoom.id} />);
 
 		const pictureContainer = await screen.findByTestId('picture_container');

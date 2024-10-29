@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { screen, act } from '@testing-library/react';
+import { act, screen } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event';
 
 import ConversationHeaderMeetingButton from './ConversationHeaderMeetingButton';
@@ -17,7 +17,7 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../../tests/createMock';
-import { mockedAddRoomRequest, mockedCreateMeetingRequest } from '../../../tests/mocks/network';
+import { MeetingsApiToSpy, spyOnMeetingsApi } from '../../../tests/mocks/network';
 import { mockGoToRoomPage } from '../../../tests/mocks/useRouting';
 import { setup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
@@ -95,12 +95,6 @@ const storeSetupGroupMeeting = (): { user: UserEvent; store: RootStore } => {
 	store.setUserInfo(user2);
 	store.setLoginInfo(user1.id, user1.name);
 	store.addRoom(room);
-	mockedAddRoomRequest.mockReturnValue({
-		id: 'room-id',
-		name: ' ',
-		description: '',
-		membersIds: [user2.id]
-	});
 	mockGoToRoomPage.mockReturnValue(`room of ${user2.name}`);
 	const user1Participant: MeetingParticipant = createMockParticipants({
 		userId: user1.id,
@@ -162,6 +156,7 @@ describe('Conversation header meeting button - one to one', () => {
 		expect(joinMeetingButton).toBeVisible();
 		expect(joinMeetingButton).not.toBeDisabled();
 	});
+
 	test('everything is rendered correctly - meeting started', () => {
 		storeSetupOneToOneMeeting();
 		const disabledButton = screen.getByTestId('join_meeting_button');
@@ -178,7 +173,7 @@ describe('Conversation header meeting button - group', () => {
 	});
 
 	test('open meeting for the first time', async () => {
-		mockedCreateMeetingRequest.mockReturnValue('created');
+		const spyOnCreateMeeting = spyOnMeetingsApi(MeetingsApiToSpy.CREATE_MEETING);
 		const room = createMockRoom();
 		const store = useStore.getState();
 		store.addRoom(room);
@@ -187,7 +182,7 @@ describe('Conversation header meeting button - group', () => {
 		const joinMeetingButton = screen.getByTestId('join_meeting_button');
 		await user.click(joinMeetingButton);
 
-		expect(mockedCreateMeetingRequest).toHaveBeenCalled();
+		expect(spyOnCreateMeeting).toHaveBeenCalled();
 	});
 
 	test('everything is rendered correctly - meeting started', () => {
@@ -199,6 +194,7 @@ describe('Conversation header meeting button - group', () => {
 		const participantListButton = screen.getByTestId('participant_list_button');
 		expect(participantListButton).toBeVisible();
 	});
+
 	test("toggle dropdown - I'm inside the meeting", async () => {
 		const { user } = storeSetupGroupMeeting();
 
@@ -212,6 +208,7 @@ describe('Conversation header meeting button - group', () => {
 		expect(list).toBeInTheDocument();
 		expect(list.children).toHaveLength(2);
 	});
+
 	test("toggle dropdown - I'm not inside the meeting", async () => {
 		const { user } = storeSetupGroupMeetingWithoutMe();
 
@@ -229,6 +226,7 @@ describe('Conversation header meeting button - group', () => {
 		const goToPrivateChatButton = await screen.findAllByTestId('go_to_private_chat');
 		expect(goToPrivateChatButton).toHaveLength(2);
 	});
+
 	test('go to private chat from dropdown', async () => {
 		const { user } = storeSetupGroupMeeting();
 
@@ -241,6 +239,7 @@ describe('Conversation header meeting button - group', () => {
 		await user.click(goToPrivateChatButton[0]);
 		expect(mockGoToRoomPage).toBeCalled();
 	});
+
 	test('open meeting', async () => {
 		const meetingOpen = jest.spyOn(window, 'open');
 		const { user } = storeSetupGroupMeetingWithoutMe();
@@ -251,6 +250,7 @@ describe('Conversation header meeting button - group', () => {
 		await user.click(joinMeetingButton);
 		expect(meetingOpen).toHaveBeenCalledTimes(1);
 	});
+
 	test("hide dropdown when there's no one else inside the meeting", async () => {
 		const { user } = storeSetupGroupMeetingWithoutMe();
 		const participantListButton = screen.getByTestId('participant_list_button');

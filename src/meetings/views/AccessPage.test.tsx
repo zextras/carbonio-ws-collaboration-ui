@@ -19,7 +19,7 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../tests/createMock';
-import { mockedGetMeetingRequest, mockedGetScheduledMeetingName } from '../../tests/mocks/network';
+import { MeetingsApiToSpy, spyOnMeetingsApi } from '../../tests/mocks/network';
 import { mockGoToExternalLoginPage, mockGoToMeetingAccessPage } from '../../tests/mocks/useRouting';
 import { setup } from '../../tests/test-utils';
 import { MeetingBe, MeetingType } from '../../types/network/models/meetingBeTypes';
@@ -118,18 +118,20 @@ describe('Meeting access page', () => {
 	});
 
 	test('Not authenticated user -> access the meeting -> reach the login external page', async () => {
+		const spyOnGetScheduledMeetingName = spyOnMeetingsApi(
+			MeetingsApiToSpy.GET_SCHEDULED_MEETING_NAME
+		);
 		const mockUseAuthenticated = jest.spyOn(Shell, 'useAuthenticated').mockReturnValue(false);
-		mockedGetScheduledMeetingName.mockReturnValueOnce('name');
+		spyOnGetScheduledMeetingName.mockImplementation(() => Promise.resolve('name'));
 		setupAccessPageNotAuthenticated();
 
 		expect(mockUseAuthenticated).toHaveBeenCalled();
-		expect(mockedGetScheduledMeetingName).toHaveBeenCalled();
+		expect(spyOnGetScheduledMeetingName).toHaveBeenCalled();
 		expect(await mockGoToExternalLoginPage).toHaveBeenCalled();
 	});
 
 	test('Authenticated user -> joins group meeting -> redirect to the waiting room', async () => {
 		jest.spyOn(Shell, 'useAuthenticated').mockReturnValue(true);
-		mockedGetMeetingRequest.mockReturnValueOnce('meeting');
 		setupGroupForAccessPage();
 		expect(mockGoToMeetingAccessPage).toHaveBeenCalled();
 	});

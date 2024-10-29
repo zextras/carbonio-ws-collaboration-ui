@@ -9,10 +9,15 @@ import useStore from '../../store/Store';
 import {
 	createMockCapabilityList,
 	createMockMeeting,
-	createMockRoom
+	createMockRoom,
+	createMockTextMessage
 } from '../../tests/createMock';
 import { fetchResponse } from '../../tests/mocks/global';
 import { RoomType } from '../../types/store/RoomTypes';
+import { dateToISODate } from '../../utils/dateUtils';
+import { getTagElement } from '../xmpp/utility/decodeStanza';
+import HistoryAccumulator from '../xmpp/utility/HistoryAccumulator';
+import { textMessageFromHistory } from '../xmpp/xmppMessageExamples';
 
 const contentType = 'Content-Type';
 const applicationJson = 'application/json';
@@ -483,14 +488,19 @@ describe('Rooms API', () => {
 		});
 	});
 
-	test.todo(
-		'forwardMessages is called correctly' /* , async () => {
+	test('forwardMessages is called correctly', async () => {
+		const spyOnRequestMessageToForward = jest.spyOn(
+			useStore.getState().connections.xmppClient,
+			'requestMessageToForward'
+		);
 		// Send addRoom request
 		const message = createMockTextMessage();
 		const forwardedMessage = {
 			originalMessage: undefined,
 			originalMessageSentAt: dateToISODate(message.date)
 		};
+		spyOnRequestMessageToForward.mockImplementation(() => Promise.resolve(forwardedMessage as any));
+
 		await roomsApi.forwardMessages(['roomId'], [message]);
 
 		// Set appropriate headers
@@ -503,11 +513,13 @@ describe('Rooms API', () => {
 			headers,
 			body: JSON.stringify([forwardedMessage])
 		});
-	} */
-	);
+	});
 
-	test.todo(
-		'forwardMessages - edited message - is called correctly' /* , async () => {
+	test('forwardMessages - edited message - is called correctly', async () => {
+		const spyOnRequestMessageToForward = jest.spyOn(
+			useStore.getState().connections.xmppClient,
+			'requestMessageToForward'
+		);
 		// Send addRoom request
 		const messageEdited = createMockTextMessage();
 		const msgToParse = textMessageFromHistory.replace(
@@ -528,6 +540,8 @@ describe('Rooms API', () => {
 			originalMessageSentAt: dateToISODate(messageEdited.date)
 		};
 
+		spyOnRequestMessageToForward.mockImplementation(() => Promise.resolve(messageParsed!));
+
 		await roomsApi.forwardMessages(['roomId'], [messageEdited]);
 
 		// Set appropriate headers
@@ -540,8 +554,7 @@ describe('Rooms API', () => {
 			headers,
 			body: JSON.stringify([forwardedMessage])
 		});
-	} */
-	);
+	});
 
 	test('replacePlaceholderRoom is called correctly', async () => {
 		// Send replacePlaceholderRoom request

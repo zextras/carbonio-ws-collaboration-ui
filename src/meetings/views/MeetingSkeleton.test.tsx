@@ -5,7 +5,7 @@
  */
 import React from 'react';
 
-import { screen, waitFor, act } from '@testing-library/react';
+import { act, screen, waitFor } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event';
 
 import MeetingSkeleton from './MeetingSkeleton';
@@ -20,7 +20,7 @@ import {
 	createMockUser
 } from '../../tests/createMock';
 import { mockMediaDevicesResolve } from '../../tests/mocks/global';
-import { mockedLeaveMeetingRequest } from '../../tests/mocks/network';
+import { MeetingsApiToSpy, spyOnMeetingsApi } from '../../tests/mocks/network';
 import { mockInitialize } from '../../tests/mocks/SelfieSegmentationManager';
 import { mockGoToInfoPage } from '../../tests/mocks/useRouting';
 import { setup } from '../../tests/test-utils';
@@ -120,7 +120,7 @@ describe('Grid mode meeting view', () => {
 	});
 
 	test('Close the meeting', async () => {
-		mockedLeaveMeetingRequest.mockResolvedValueOnce('Meeting left');
+		const spyOnLeaveMeeting = spyOnMeetingsApi(MeetingsApiToSpy.LEAVE_MEETING);
 		const { user } = storeSetupGroupMeetingSkeleton();
 		const meetingActionBar = await screen.findByTestId(meetingActionBarLabel);
 		await user.hover(meetingActionBar);
@@ -129,7 +129,7 @@ describe('Grid mode meeting view', () => {
 		await user.click(endMeetingButton);
 		await user.click(endMeetingButton);
 
-		expect(mockedLeaveMeetingRequest).toHaveBeenCalled();
+		expect(spyOnLeaveMeeting).toHaveBeenCalled();
 		expect(mockGoToInfoPage).toHaveBeenCalledWith(PAGE_INFO_TYPE.MEETING_ENDED);
 	});
 

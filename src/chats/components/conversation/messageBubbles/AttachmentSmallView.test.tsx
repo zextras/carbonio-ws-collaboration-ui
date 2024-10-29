@@ -9,15 +9,13 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 
 import AttachmentSmallView from './AttachmentSmallView';
-import {
-	mockedGetImageThumbnailURL,
-	mockedGetURLAttachment
-} from '../../../../tests/mocks/network';
+import { AttachmentsApiToSpy, spyOnAttachmentsApi } from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 import { AttachmentMessageType } from '../../../../types/store/MessageTypes';
 
 describe('Attachment Small view', () => {
 	test('Download generic file', async () => {
+		const spyOnGetURLAttachment = spyOnAttachmentsApi(AttachmentsApiToSpy.GET_URL_ATTACHMENT);
 		const genericAttachment: AttachmentMessageType = {
 			id: 'genericAttachmentId',
 			name: 'generic.zip',
@@ -35,10 +33,13 @@ describe('Attachment Small view', () => {
 
 		// Download action is triggered
 		await user.click(downloadIcon);
-		expect(mockedGetURLAttachment).toHaveBeenCalledTimes(1);
+		expect(spyOnGetURLAttachment).toHaveBeenCalledTimes(1);
 	});
 
 	test('Preview image file', async () => {
+		const spyOnGetImageThumbnailURL = spyOnAttachmentsApi(
+			AttachmentsApiToSpy.GET_IMAGE_THUMBNAIL_URL
+		);
 		const imageAttachment: AttachmentMessageType = {
 			id: 'pngAttachmentId',
 			name: 'image.png',
@@ -54,6 +55,6 @@ describe('Attachment Small view', () => {
 
 		// preview action is triggered
 		await user.click(previewIcon);
-		expect(mockedGetImageThumbnailURL).toHaveBeenCalled();
+		expect(spyOnGetImageThumbnailURL).toHaveBeenCalled();
 	});
 });

@@ -8,6 +8,8 @@ import { onGetLastActivityResponse } from './handlers/lastActivityHandler';
 import { onGetRosterResponse } from './handlers/rosterHandler';
 import XMPPClient from './XMPPClient';
 import { XMPPRequestType } from './XMPPConnection';
+import { createMockRoom } from '../../tests/createMock';
+import { RoomsApiToSpy, spyOnRoomsApi } from '../../tests/mocks/network';
 import { pingStanza } from '../../tests/mocks/XMPPStanza';
 
 describe('XMPPClient', () => {
@@ -75,15 +77,13 @@ describe('XMPPClient', () => {
 		});
 	});
 
-	test.todo(
-		'sendChatMessage to a placeholder should create a room' /* , () => {
-		mockedAddRoomRequest.mockReturnValueOnce(createMockRoom({ id: 'roomId123' }));
+	test('sendChatMessage to a placeholder should create a room', () => {
+		const spyOnAddRoom = spyOnRoomsApi(RoomsApiToSpy.ADD_ROOM);
+		spyOnAddRoom.mockImplementation(() => Promise.resolve(createMockRoom({ id: 'roomId123' })));
 		const xmppClient = new XMPPClient();
 		xmppClient.sendChatMessage('placeholder-roomId123', 'Hello, world!');
-
-		expect(mockedAddRoomRequest).toBeCalled();
-	} */
-	);
+		expect(spyOnAddRoom).toHaveBeenCalledTimes(1);
+	});
 
 	test('sendChatMessageReaction', () => {
 		const xmppClient = new XMPPClient();

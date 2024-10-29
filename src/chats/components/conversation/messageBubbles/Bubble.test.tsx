@@ -18,10 +18,7 @@ import {
 	createMockUser
 } from '../../../../tests/createMock';
 import { mockAttachmentTagElement } from '../../../../tests/mocks/global';
-import {
-	mockedDeleteAttachment,
-	mockedGetImageThumbnailURL
-} from '../../../../tests/mocks/network';
+import { AttachmentsApiToSpy, spyOnAttachmentsApi } from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe } from '../../../../types/network/models/roomBeTypes';
 import { MarkerStatus } from '../../../../types/store/MarkersTypes';
@@ -30,7 +27,6 @@ import { RoomType } from '../../../../types/store/RoomTypes';
 import { RootStore } from '../../../../types/store/StoreTypes';
 import { User, UserType } from '../../../../types/store/UserTypes';
 
-const previewUrl = 'preview-url';
 const iconDoneAll = 'icon: DoneAll';
 const iconArrowIosDownward = 'icon: ArrowIosDownward';
 
@@ -189,7 +185,6 @@ describe('Message bubble component visualization', () => {
 		const store: RootStore = useStore.getState();
 		store.addRoom(mockedRoom);
 		store.newMessage(mockedAttachmentMessageKb);
-		mockedGetImageThumbnailURL.mockReturnValue(previewUrl);
 		setup(
 			<Bubble
 				message={mockedAttachmentMessageKb}
@@ -203,7 +198,6 @@ describe('Message bubble component visualization', () => {
 	test('Hover on image reply', async () => {
 		const store: RootStore = useStore.getState();
 		store.addRoom(mockedRoom);
-		mockedGetImageThumbnailURL.mockReturnValue(previewUrl);
 		const { user } = setup(
 			<Bubble
 				message={mockedRepliedTextMessageWithAttachment}
@@ -238,7 +232,6 @@ describe('Attachment footer', () => {
 		const store: RootStore = useStore.getState();
 		store.addRoom(mockedRoom);
 		store.newMessage(msg);
-		mockedGetImageThumbnailURL.mockReturnValue(previewUrl);
 		setup(
 			<Bubble
 				message={mockedAttachmentMessageB}
@@ -363,8 +356,7 @@ describe('Actions', () => {
 		);
 	});
 	test('Delete a message with attachment', async () => {
-		mockedDeleteAttachment.mockReturnValue('deleted');
-
+		const spyOnDeleteAttachment = spyOnAttachmentsApi(AttachmentsApiToSpy.DELETE_ATTACHMENT);
 		const store: RootStore = useStore.getState();
 		store.setLoginInfo(user1Be.id, user1Be.name);
 		store.addRoom(mockedTempRoom);
@@ -385,7 +377,7 @@ describe('Actions', () => {
 		const deleteAction = await screen.findByText(/Delete for all/i);
 		await user.click(deleteAction);
 
-		expect(mockedDeleteAttachment).toHaveBeenCalled();
+		expect(spyOnDeleteAttachment).toHaveBeenCalled();
 	});
 	test('Delete a message', async () => {
 		const spySendChatMessageDeletion = jest
