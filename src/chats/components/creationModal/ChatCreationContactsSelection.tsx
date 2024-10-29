@@ -21,7 +21,8 @@ import {
 	ListItem,
 	List,
 	Padding,
-	Text
+	Text,
+	ChipAction
 } from '@zextras/carbonio-design-system';
 import { Spinner } from '@zextras/carbonio-shell-ui';
 import {
@@ -213,55 +214,75 @@ const ChatCreationContactsSelection = ({
 	);
 
 	const updateOwner = useCallback(
-		(id: string) => {
-			setContactSelected((contacts: ContactSelected) => ({
-				...contacts,
-				[id]: {
-					...contacts[id],
-					owner: !contacts[id].owner
-				}
-			}));
+		(id: string | undefined) => {
+			if (id) {
+				setContactSelected((contacts: ContactSelected) => ({
+					...contacts,
+					[id]: {
+						...contacts[id],
+						owner: !contacts[id].owner
+					}
+				}));
+			}
 		},
 		[setContactSelected]
 	);
 
+	const moderatorLabel = useCallback(
+		(id: string) => {
+			if (isOwner(id)) return demoteModeratorLabel;
+			return promoteModeratorLabel;
+		},
+		[demoteModeratorLabel, isOwner, promoteModeratorLabel]
+	);
+
+	const moderatorIcon = useCallback(
+		(id: string) => {
+			if (isOwner(id)) return 'Crown';
+			return 'CrownOutline';
+		},
+		[isOwner]
+	);
+
+	const getChipActions = useCallback(
+		(chipId: string): ChipAction[] => {
+			if (size(contactsSelected) < 2) return [];
+
+			return [
+				{
+					id: 'set-moderator',
+					type: 'button',
+					label: moderatorLabel(chipId),
+					icon: moderatorIcon(chipId),
+					onClick: (): void => updateOwner(chipId)
+				}
+			];
+		},
+		[contactsSelected, moderatorIcon, moderatorLabel, updateOwner]
+	);
+
+	// update of chip aspect when contactsSelected changes
 	useEffect(() => {
 		setChips((prevChips) =>
 			prevChips.map((chip) => {
-				if (chip.value?.id && chip.actions && contactsSelected[chip.value.id]) {
+				if (chip.value !== undefined && contactsSelected[chip.value.id]) {
 					return {
 						...chip,
-						actions: [
-							{
-								...chip.actions[0],
-								label: contactsSelected[chip.value.id].owner
-									? demoteModeratorLabel
-									: promoteModeratorLabel,
-								icon: contactsSelected[chip.value.id].owner ? 'Crown' : 'CrownOutline'
-							}
-						]
+						actions: getChipActions(chip.value.id)
 					};
 				}
 				return chip;
 			})
 		);
-	}, [contactsSelected, demoteModeratorLabel, promoteModeratorLabel]);
+	}, [contactsSelected, getChipActions, isOwner, updateOwner]);
 
 	const createChip = useCallback(
 		(item: ContactInfo): ChipItem<ContactInfo> => ({
 			value: item,
 			label: item.displayName || item.email,
-			actions: [
-				{
-					id: 'set-moderator',
-					type: 'button',
-					label: isOwner(item.id) ? demoteModeratorLabel : promoteModeratorLabel,
-					icon: isOwner(item.id) ? 'Crown' : 'CrownOutline',
-					onClick: (): void => updateOwner(item.id)
-				}
-			]
+			actions: getChipActions(item.id)
 		}),
-		[demoteModeratorLabel, isOwner, promoteModeratorLabel, updateOwner]
+		[getChipActions]
 	);
 
 	const onClickListItem = useCallback(
@@ -291,11 +312,12 @@ const ChatCreationContactsSelection = ({
 							isDisabled={chipInputHasError}
 							updateOwner={updateOwner}
 							isOwner={isOwner}
+							canBeModerator={members !== undefined || size(contactsSelected) >= 2}
 						/>
 					)}
 				</ListItem>
 			)),
-		[chipInputHasError, contactsSelected, isOwner, onClickListItem, result, updateOwner]
+		[chipInputHasError, contactsSelected, isOwner, members, onClickListItem, result, updateOwner]
 	);
 
 	const removeContactFromChip = useCallback(

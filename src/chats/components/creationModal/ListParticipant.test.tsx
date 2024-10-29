@@ -39,6 +39,7 @@ describe('List Participant', () => {
 				isDisabled={false}
 				isOwner={mockIsOwner}
 				updateOwner={mockUpdateOwner}
+				canBeModerator
 			/>
 		);
 		const contactEmail = screen.getByTestId(`${contactInfo.id}-emailSelectable`);
@@ -53,6 +54,7 @@ describe('List Participant', () => {
 				isDisabled={false}
 				isOwner={mockIsOwner}
 				updateOwner={mockUpdateOwner}
+				canBeModerator
 			/>
 		);
 		const contactEmail = screen.getByTestId(`${contactInfo.id}-emailSelectable`);
@@ -70,6 +72,7 @@ describe('List Participant', () => {
 				isDisabled={false}
 				isOwner={mockIsOwner}
 				updateOwner={mockUpdateOwner}
+				canBeModerator
 			/>
 		);
 		expect(mockedGetURLUserPicture).toHaveBeenCalled();

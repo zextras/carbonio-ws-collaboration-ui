@@ -30,6 +30,7 @@ type ListParticipantProps = {
 	onClickCb: (item: ContactInfo) => MouseEventHandler<HTMLDivElement> | undefined;
 	isOwner: (id: string) => boolean;
 	updateOwner: (id: string) => void;
+	canBeModerator: boolean;
 	isDisabled?: boolean;
 };
 
@@ -43,6 +44,7 @@ const ListParticipant = ({
 	onClickCb,
 	isOwner,
 	updateOwner,
+	canBeModerator,
 	isDisabled
 }: ListParticipantProps): ReactElement => {
 	const [t] = useTranslation();
@@ -96,18 +98,20 @@ const ListParticipant = ({
 						</Container>
 					</Row>
 				</Container>
-				<Container width="fit">
-					<Tooltip label={isOwner(item.id) ? demoteModeratorLabel : promoteModeratorLabel}>
-						<Button
-							icon={isOwner(item.id) ? 'Crown' : 'CrownOutline'}
-							type="ghost"
-							color={isOwner(item.id) ? 'primary' : 'gray1'}
-							size="large"
-							disabled={!selected}
-							onClick={() => updateOwner(item.id)}
-						></Button>
-					</Tooltip>
-				</Container>
+				{canBeModerator && (
+					<Container width="fit">
+						<Tooltip label={isOwner(item.id) ? demoteModeratorLabel : promoteModeratorLabel}>
+							<Button
+								icon={isOwner(item.id) ? 'Crown' : 'CrownOutline'}
+								type="ghost"
+								color={isOwner(item.id) ? 'primary' : 'gray1'}
+								size="large"
+								disabled={!selected}
+								onClick={() => updateOwner(item.id)}
+							></Button>
+						</Tooltip>
+					</Container>
+				)}
 			</Container>
 		</Tooltip>
 	);
