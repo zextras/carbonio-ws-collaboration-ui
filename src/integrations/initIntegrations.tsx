@@ -7,6 +7,7 @@ import { useEffect } from 'react';
 
 import { registerComponents } from '@zextras/carbonio-shell-ui';
 
+import CopyRoomWidget from './copyRoomIntegration/CopyRoomWidget';
 import SelectVirtualRoomWidgetComponent from './virtualRoomIntegration/SelectVirtualRoomWidget';
 
 export default function useIntegrationsApp(): void {
@@ -14,6 +15,10 @@ export default function useIntegrationsApp(): void {
 		registerComponents({
 			id: 'wsc-room-selector',
 			component: SelectVirtualRoomWidgetComponent
+		});
+		registerComponents({
+			id: 'wsc-copy-room',
+			component: CopyRoomWidget
 		});
 	}, []);
 }
