@@ -7,7 +7,7 @@
 import React, { FC, ReactElement, useCallback, useEffect } from 'react';
 
 import { Container, Padding, Theme } from '@zextras/carbonio-design-system';
-import styled, { css, DefaultTheme, FlattenSimpleInterpolation } from 'styled-components';
+import styled, { css, DefaultTheme } from 'styled-components';
 
 import useBubbleContextualMenuDropDown from './useBubbleContextualMenuDropDown';
 import useBubbleReactions from './useBubbleReactions';
@@ -38,13 +38,7 @@ export const BubbleActionsWrapper = styled.div<{
 		pointer-events: auto;
 	}
 
-	${({
-		theme,
-		isMyMessage
-	}: {
-		theme: Theme;
-		isMyMessage: boolean;
-	}): FlattenSimpleInterpolation => css`
+	${({ theme, isMyMessage }: { theme: Theme; isMyMessage: boolean }): ReturnType<typeof css> => css`
 		top: -0.6875rem;
 		right: -0.1875rem;
 		width: 3.1rem;
@@ -54,7 +48,7 @@ export const BubbleActionsWrapper = styled.div<{
 		color: ${theme.palette.text.regular};
 	`};
 
-	${({ $isActive }): FlattenSimpleInterpolation | false =>
+	${({ $isActive }): ReturnType<typeof css> | false =>
 		$isActive &&
 		css`
 			opacity: 1;

@@ -22,7 +22,7 @@ import {
 	Button
 } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import styled, { css, FlattenSimpleInterpolation } from 'styled-components';
+import styled, { css } from 'styled-components';
 
 import { useIsWritingLabel } from '../../../hooks/useIsWritingLabel';
 import useMediaQueryCheck from '../../../hooks/useMediaQueryCheck';
@@ -66,11 +66,7 @@ const CustomTextWithTooltip = styled(TextWithTooltip)<{
 		}
 	}
 
-	${({
-		$isWritingIsVisible
-	}: {
-		$isWritingIsVisible: boolean;
-	}): false | FlattenSimpleInterpolation =>
+	${({ $isWritingIsVisible }: { $isWritingIsVisible: boolean }): ReturnType<typeof css> =>
 		$isWritingIsVisible
 			? css`
 					animation: slideUp 0.4s ease forwards;
@@ -80,11 +76,10 @@ const CustomTextWithTooltip = styled(TextWithTooltip)<{
 				`};
 `;
 
-const CustomIsWritingText = styled(Text)`
+const CustomIsWritingText = styled(Text)<{ $isWritingIsVisible: boolean }>`
 	opacity: 0;
 	transition: opacity 0.2s ease;
-	${({ $isWritingIsVisible }: { $isWritingIsVisible: boolean }): string | false =>
-		$isWritingIsVisible && 'opacity: 1;'}
+	${({ $isWritingIsVisible }): string | false => $isWritingIsVisible && 'opacity: 1;'}
 `;
 
 const ConversationHeader = ({

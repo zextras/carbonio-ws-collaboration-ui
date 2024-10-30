@@ -272,10 +272,8 @@ const CameraButton = ({
 				size="large"
 				shape="regular"
 				dropdownProps={{
-					forceOpen: isVideoListOpen,
 					onClick: toggleVideoDropdown,
 					dropdownListRef: videoDropdownRef,
-					items: dropdownList,
 					width: 'fit-content'
 				}}
 				disabledPrimary={!buttonStatus || !websocketNetworkStatus}

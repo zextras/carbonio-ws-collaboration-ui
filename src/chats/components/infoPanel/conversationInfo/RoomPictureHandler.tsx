@@ -9,7 +9,7 @@ import React, { FC, useCallback, useContext, useMemo } from 'react';
 import { Container, Padding, Text, useTheme } from '@zextras/carbonio-design-system';
 import { PreviewsManagerContext } from '@zextras/carbonio-ui-preview';
 import { useTranslation } from 'react-i18next';
-import styled, { css, FlattenSimpleInterpolation } from 'styled-components';
+import styled, { css } from 'styled-components';
 
 import { calculateAvatarColor } from '../../../../utils/styleUtils';
 
@@ -61,7 +61,7 @@ const PictureContainer = styled(Container)<{ $picture: string }>`
 	}
 
 	&:hover {
-		${({ $picture }): false | FlattenSimpleInterpolation => css`
+		${({ $picture }): ReturnType<typeof css> => css`
 			background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url(${$picture});
 			background-image: -webkit-linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
 				url(${$picture});

@@ -108,7 +108,7 @@ const TileUserInfo: FC<tileUserInfoProps> = ({
 				{isScreenShare && (
 					<CustomButton
 						icon="ScreenSharingOnOutline"
-						color="gray6"
+						labelColor="gray6"
 						backgroundColor="gray0"
 						size="large"
 						onClick={placeHolderFn}

@@ -184,10 +184,8 @@ const MicrophoneButton = ({
 				size="large"
 				shape="regular"
 				dropdownProps={{
-					forceOpen: isAudioListOpen,
 					onClick: toggleAudioDropdown,
-					dropdownListRef: audioDropdownRef,
-					items: mediaAudioList
+					dropdownListRef: audioDropdownRef
 				}}
 				disabledPrimary={!websocketNetworkStatus}
 				disabledSecondary={!websocketNetworkStatus}

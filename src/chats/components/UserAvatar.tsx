@@ -25,17 +25,12 @@ type UserAvatarProps = {
 	draftMessage: boolean;
 };
 
-const Presence = styled.div`
+const Presence = styled.div<{ $memberOnline?: boolean }>`
 	position: absolute;
 	width: 0.5rem;
 	height: 0.5rem;
-	background-color: ${({
-		memberOnline,
-		theme
-	}: {
-		memberOnline?: boolean;
-		theme: DefaultTheme;
-	}): string => (memberOnline ? theme.palette.success.regular : theme.palette.gray2.regular)};
+	background-color: ${({ $memberOnline, theme }): string =>
+		$memberOnline ? theme.palette.success.regular : theme.palette.gray2.regular};
 	border: 0.0625rem solid ${(props): string => props.theme.palette.gray5.regular};
 	border-radius: 50%;
 	right: 0;
@@ -173,7 +168,7 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ roomId, unreadCount, draftMessa
 					color={!roomMuted ? 'gray6' : 'gray0'}
 				/>
 			)}
-			{canShowPresence && <Presence data-testid="user_presence_dot" memberOnline={memberOnline} />}
+			{canShowPresence && <Presence data-testid="user_presence_dot" $memberOnline={memberOnline} />}
 		</AvatarContainer>
 	);
 };

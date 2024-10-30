@@ -8,7 +8,7 @@
 import React, { MutableRefObject, useCallback, useEffect } from 'react';
 
 import { useTranslation } from 'react-i18next';
-import styled, { css, FlattenSimpleInterpolation } from 'styled-components';
+import styled, { css } from 'styled-components';
 
 import { getInputHasFocus } from '../../../../store/selectors/ActiveConversationsSelectors';
 import useStore from '../../../../store/Store';
@@ -54,7 +54,7 @@ const MessageTextarea = styled.textarea<{
 		}
 	}
 
-	${({ composerIsFull }: { composerIsFull: boolean }): false | FlattenSimpleInterpolation =>
+	${({ composerIsFull }: { composerIsFull: boolean }): false | ReturnType<typeof css> =>
 		composerIsFull &&
 		css`
 			opacity: 0.5 !important;

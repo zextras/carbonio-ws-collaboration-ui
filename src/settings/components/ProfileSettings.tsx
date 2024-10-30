@@ -26,7 +26,7 @@ import {
 	useSnackbar
 } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import styled, { css, DefaultTheme, FlattenInterpolation, ThemeProps } from 'styled-components';
+import styled, { css, DefaultTheme } from 'styled-components';
 
 import SettingsCard from './SettingsCard';
 import { UsersApi } from '../../network';
@@ -84,7 +84,7 @@ const PictureContainer = styled(Container)<{ $picture: string; $hasHover: boolea
 	}
 
 	//  TODO: remove hasHover when the preview of the image is implemented
-	${({ $hasHover, $picture }): false | FlattenInterpolation<ThemeProps<DefaultTheme>> =>
+	${({ $hasHover, $picture }): false | ReturnType<typeof css> =>
 		$hasHover &&
 		css`
 			&:hover {
@@ -245,10 +245,9 @@ const ProfileSettings: FC<ProfileSettingsProps> = ({
 				>
 					<Tooltip placement="bottom" label={tempPicture ? updatePictureLabel : uploadPictureLabel}>
 						<FileLoader
-							onClick={(): null => null}
 							onChange={onChangeUserImage}
 							icon="Upload"
-							iconColor="gray6"
+							labelColor="gray6"
 							size="large"
 							data-testid="upload_button_hover"
 						/>
@@ -352,12 +351,11 @@ const ProfileSettings: FC<ProfileSettingsProps> = ({
 							label={tempPicture ? updatePictureLabel : uploadPictureLabel}
 						>
 							<CustomFileLoader
-								onClick={(): null => null}
 								onChange={onChangeUserImage}
 								label="Upload Avatar"
 								type="outlined"
 								icon="UploadOutline"
-								iconColor="primary"
+								labelColor="primary"
 								data-testid="upload_button"
 							/>
 						</Tooltip>

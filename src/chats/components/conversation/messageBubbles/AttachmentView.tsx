@@ -17,7 +17,7 @@ import {
 } from '@zextras/carbonio-design-system';
 import { split } from 'lodash';
 import { useTranslation } from 'react-i18next';
-import styled, { DefaultTheme, SimpleInterpolation } from 'styled-components';
+import styled, { DefaultTheme } from 'styled-components';
 
 import AttachmentSmallView from './AttachmentSmallView';
 import usePreview from '../../../../hooks/usePreview';
@@ -52,8 +52,8 @@ const CustomButton = styled(Button)`
 `;
 
 const PreviewContainer = styled(Container)<{ $isLoaded: boolean; $previewError: boolean }>`
-	${({ $isLoaded }): SimpleInterpolation => $isLoaded && `background: black;`};
-	${({ $previewError, theme }): SimpleInterpolation =>
+	${({ $isLoaded }): false | string => $isLoaded && `background: black;`};
+	${({ $previewError, theme }): false | string =>
 		$previewError &&
 		`border-radius: 0.25rem;
 		background: ${theme.palette.gray5.regular};`};
