@@ -56,7 +56,7 @@ describe('Rooms API', () => {
 			name: room.name!,
 			description: room.description!,
 			type: room.type,
-			membersIds: []
+			members: []
 		};
 		fetchResponse.mockResolvedValueOnce(room);
 		await roomsApi.addRoom(roomToAdd);
@@ -307,12 +307,14 @@ describe('Rooms API', () => {
 
 	test('addRoomMember is called correctly', async () => {
 		// Send addRoomMember request
-		const member = {
-			userId: 'userId',
-			owner: false,
-			historyCleared: true
-		};
-		await roomsApi.addRoomMember('roomId', member);
+		const member = [
+			{
+				userId: 'userId',
+				owner: false,
+				historyCleared: true
+			}
+		];
+		await roomsApi.addRoomMembers('roomId', member);
 
 		// Set appropriate headers
 		const headers = new Headers();
@@ -483,7 +485,7 @@ describe('Rooms API', () => {
 			headers,
 			body: JSON.stringify({
 				type: RoomType.ONE_TO_ONE,
-				membersIds: ['userId']
+				members: [{ userId: 'userId', owner: true }]
 			})
 		});
 	});
@@ -561,7 +563,7 @@ describe('Rooms API', () => {
 			headers,
 			body: JSON.stringify({
 				type: RoomType.ONE_TO_ONE,
-				membersIds: ['userId']
+				members: [{ userId: 'userId', owner: true }]
 			})
 		});
 	});

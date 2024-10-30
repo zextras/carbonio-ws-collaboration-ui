@@ -21,8 +21,13 @@ import ChatCreationTitleInput from './ChatCreationTitleInput';
 import useRouting from '../../../hooks/useRouting';
 import { RoomsApi } from '../../../network';
 import useStore from '../../../store/Store';
-import { RoomType } from '../../../types/network/models/roomBeTypes';
+import { MemberBe, RoomType } from '../../../types/network/models/roomBeTypes';
 import { AddRoomResponse } from '../../../types/network/responses/roomsResponses';
+
+export type contactChip = {
+	id: string;
+	owner: boolean;
+};
 
 const ChatCreationModal = ({
 	open,
@@ -117,13 +122,13 @@ const ChatCreationModal = ({
 	);
 
 	const onCreateGroup = useCallback(
-		(ids: string[]) => {
+		(ids: MemberBe[]) => {
 			setIsPending(true);
 			RoomsApi.addRoom({
 				name: title,
 				description: topic,
 				type: RoomType.GROUP,
-				membersIds: ids
+				members: ids
 			})
 				.then((response: AddRoomResponse) => {
 					setIsPending(false);
@@ -143,9 +148,12 @@ const ChatCreationModal = ({
 	);
 
 	const onCreate = useCallback(() => {
-		const ids = map(contactsSelected, (chip) => chip.id);
+		const ids: MemberBe[] = map(contactsSelected, (chip) => ({
+			userId: chip.id,
+			owner: chip.owner
+		}));
 		if (chatType === RoomType.ONE_TO_ONE) {
-			onCreateOneToOne(ids[0]);
+			onCreateOneToOne(ids[0].userId);
 		} else {
 			onCreateGroup(ids);
 		}
