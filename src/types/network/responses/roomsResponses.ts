@@ -33,7 +33,7 @@ export type ClearRoomHistoryResponse = {
 
 export type GetRoomMembersResponse = ''; // TODO
 
-export type AddRoomMemberResponse = MemberBe;
+export type AddRoomMembersResponse = MemberBe;
 
 export type DeleteRoomMemberResponse = Response;
 
