@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { RefObject, useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import {
 	Button,
@@ -33,13 +33,7 @@ type AttachmentSelectorProps = {
 	roomId: string;
 };
 
-const InputSelector = styled.input<{
-	onChange: (ev: React.ChangeEvent<HTMLInputElement>) => void;
-	type: string;
-	multiple: boolean;
-	hidden: boolean;
-	ref: RefObject<HTMLInputElement>;
-}>`
+const InputSelector = styled.input`
 	cursor: pointer;
 	opacity: 0;
 	z-index: 2;

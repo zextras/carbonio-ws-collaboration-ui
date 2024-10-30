@@ -3,14 +3,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import React, {
-	MutableRefObject,
-	ReactElement,
-	useCallback,
-	useEffect,
-	useMemo,
-	useRef
-} from 'react';
+import React, { ReactElement, useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { GpuBuffer } from '@mediapipe/selfie_segmentation';
 import styled from 'styled-components';
@@ -25,9 +18,7 @@ import useStore from '../../../store/Store';
 import { BrowserUtils } from '../../../utils/BrowserUtils';
 import { getWorkerUrl } from '../../../utils/MeetingsUtils';
 
-const VirtualBackgroundCanvas = styled.canvas<{
-	ref: MutableRefObject<HTMLCanvasElement | null>;
-}>`
+const VirtualBackgroundCanvas = styled.canvas`
 	display: none;
 	margin: auto;
 	padding: 0;
@@ -38,13 +29,7 @@ type VirtualBackgroundProps = {
 	meetingId: string | undefined;
 };
 
-const VideoEl = styled.video<{
-	playsInline: boolean;
-	autoPlay: boolean;
-	muted: boolean;
-	controls: boolean;
-	ref: MutableRefObject<HTMLVideoElement | null>;
-}>`
+const VideoEl = styled.video`
 	width: 0;
 	position: absolute;
 	top: 0;

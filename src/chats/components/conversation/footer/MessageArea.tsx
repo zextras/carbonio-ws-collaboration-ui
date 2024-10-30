@@ -15,18 +15,7 @@ import useStore from '../../../../store/Store';
 import { SIZES } from '../../../../types/generics';
 import useFirstUnreadMessage from '../useFirstUnreadMessage';
 
-const MessageTextarea = styled.textarea<{
-	ref: MutableRefObject<HTMLTextAreaElement | null>;
-	value: string;
-	onKeyDown: (e: never) => void;
-	onKeyUp: (e: never) => void;
-	onChange: (e: never) => void;
-	onFocus: (e: never) => void;
-	onBlur: (e: never) => void;
-	onPaste: (e: never) => void;
-	composerIsFull: boolean;
-	disabled: boolean;
-}>`
+const MessageTextarea = styled.textarea<{ $composerIsFull: boolean }>`
 	flex: 1;
 	padding: 0.5rem 0;
 	height: 1.25rem;
@@ -54,8 +43,8 @@ const MessageTextarea = styled.textarea<{
 		}
 	}
 
-	${({ composerIsFull }: { composerIsFull: boolean }): false | ReturnType<typeof css> =>
-		composerIsFull &&
+	${({ $composerIsFull }): false | ReturnType<typeof css> =>
+		$composerIsFull &&
 		css`
 			opacity: 0.5 !important;
 			animation: inputFull 0.1s ease-in 0s 1;
@@ -172,7 +161,7 @@ const MessageArea: React.FC<MessageAreaPros> = ({
 			onBlur={handleOnBlur}
 			onPaste={handleOnPaste}
 			aria-label={messageComposerLabel}
-			composerIsFull={composerIsFull}
+			$composerIsFull={composerIsFull}
 			disabled={isDisabled}
 		/>
 	);

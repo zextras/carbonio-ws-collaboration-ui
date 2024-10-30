@@ -85,18 +85,15 @@ const PreviewErrorContainer = styled(Container)<{
 `;
 
 const AttachmentImg = styled.img<{
-	src: string;
-	onLoad: () => void;
-	onError: () => void;
-	isPreviewLoaded: boolean;
 	width: number;
 	height: number;
+	$isPreviewLoaded: boolean;
 }>`
-	${({ width, isPreviewLoaded }): string | false =>
-		width === 0 && !isPreviewLoaded && `width: fit-content;`};
-	${({ isPreviewLoaded }): string | false => isPreviewLoaded && `width: fit-content;`};
-	${({ height, isPreviewLoaded }): string | false =>
-		height * 0.063 >= 37.5 && isPreviewLoaded && `object-fit: contain;`};
+	${({ width, $isPreviewLoaded }): string | false =>
+		width === 0 && !$isPreviewLoaded && `width: fit-content;`};
+	${({ $isPreviewLoaded }): string | false => $isPreviewLoaded && `width: fit-content;`};
+	${({ height, $isPreviewLoaded }): string | false =>
+		height * 0.063 >= 37.5 && $isPreviewLoaded && `object-fit: contain;`};
 	max-width: ${({ width }): string => (width === 0 ? '100%' : `min(${width * 0.063}rem, 100%)`)};
 	max-height: 37.5rem;
 	height: fit-content;
@@ -285,7 +282,7 @@ const AttachmentView: FC<AttachmentViewProps> = ({
 							onLoad={setLoaded}
 							onError={setError}
 							data-testid="attachmentImg"
-							isPreviewLoaded={isPreviewLoaded}
+							$isPreviewLoaded={isPreviewLoaded}
 							width={Number(dimensions[0])}
 							height={Number(dimensions[1])}
 						/>

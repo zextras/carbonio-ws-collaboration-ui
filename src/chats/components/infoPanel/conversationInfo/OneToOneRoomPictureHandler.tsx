@@ -8,7 +8,7 @@ import React, { FC, useMemo } from 'react';
 
 import { Container, Padding, Text } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import styled, { DefaultTheme } from 'styled-components';
+import styled from 'styled-components';
 
 import RoomPictureHandler from './RoomPictureHandler';
 import useAvatarUtilities from '../../../../hooks/useAvatarUtilities';
@@ -29,8 +29,7 @@ type RoomPictureProps = {
 const Presence = styled.div`
 	width: 0.6rem;
 	height: 0.6rem;
-	background-color: ${({ theme }: { theme: DefaultTheme }): string =>
-		theme.palette.success.regular};
+	background-color: ${({ theme }): string => theme.palette.success.regular};
 	border: 0.0625rem solid ${(props): string => props.theme.palette.gray5.regular};
 	border-radius: 50%;
 	margin-right: 0.1875rem;
