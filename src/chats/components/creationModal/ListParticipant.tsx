@@ -99,7 +99,7 @@ const ListParticipant = ({
 					</Row>
 				</Container>
 				{canBeModerator && (
-					<Container width="fit">
+					<Container width="fit" padding={{ right: 'small' }}>
 						<Tooltip label={isOwner(item.id) ? demoteModeratorLabel : promoteModeratorLabel}>
 							<Button
 								icon={isOwner(item.id) ? 'Crown' : 'CrownOutline'}

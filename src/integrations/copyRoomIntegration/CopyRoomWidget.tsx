@@ -5,10 +5,19 @@
  */
 import React, { FC, useCallback, useState } from 'react';
 
-import { Button, Container, Icon, Modal, Text } from '@zextras/carbonio-design-system';
+import {
+	Button,
+	Container,
+	CreateSnackbarFn,
+	Icon,
+	Modal,
+	Text,
+	useSnackbar
+} from '@zextras/carbonio-design-system';
 import { replaceHistory } from '@zextras/carbonio-shell-ui';
 import { filter } from 'lodash';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 
 import { CHATS_ROUTE } from '../../constants/appConstants';
 import { RoomsApi } from '../../network';
@@ -21,37 +30,51 @@ type CopyRoomWidgetProps = {
 	members: MemberBe[];
 };
 
+const ItalicText = styled(Text)`
+	font-style: italic;
+`;
+
 const CopyRoomWidget: FC<CopyRoomWidgetProps> = ({ name, members }) => {
 	const [t] = useTranslation();
-	const duplicateTitle = t('', 'Duplicate to new Chats module');
+	const duplicateTitle = t('readOnly.toBeMigrate.title', 'Duplicate to new Chats module');
 	const duplicateDescription = t(
-		'',
-		'This action creates a copy of the group, including its title, topic, members, and moderators.'
+		'readOnly.toBeMigrate.description',
+		'This action creates a copy of the group, including its title, members, and moderator role.'
 	);
-	const duplicateButton = t('', 'COPY GROUP');
-	const alreadyDuplicateTitle = t('', 'Group already duplicated');
+	const duplicateButton = t('readOnly.toBeMigrate.callToAction', 'COPY GROUP');
+	const alreadyDuplicateTitle = t(
+		'readOnly.alreadyMigrate.title',
+		'This group is already duplicated'
+	);
 	const alreadyDuplicateDescription = t(
-		'',
-		'Click the button to be redirected to the new form and use the duplicate of this group.'
+		'readOnly.alreadyMigrate.description',
+		'Click the button to be redirected to the new module and use the duplicate of this group.'
 	);
-	const alreadyDuplicateButton = t('', 'VIEW IN NEW CHATS MODULE');
-	const modalTitle = t('', 'Create a copy of the group {{groupName}}', { groupName: name });
+	const alreadyDuplicateButton = t(
+		'readOnly.alreadyMigrate.callToAction',
+		'VIEW IN NEW CHATS MODULE'
+	);
+	const modalTitle = t('readOnly.modal.title', 'Create a copy of the group {{groupName}}', {
+		groupName: name
+	});
 	const modalDescription1 = t(
-		'',
+		'readOnly.modal.subtitle',
 		'You are about to create a copy of the group in the new Chats module.'
 	);
-	const modalDescription2 = t(
-		'',
-		'Important: You are copying the group and with it the title, topic, members and moderators. This action does not create a copy of the conversation history.'
-	);
 	const modalDescription3 = t(
-		'',
+		'readOnly.modal.caption',
 		'Once the copy is complete, you will be automatically redirected to the new module.'
 	);
-	const modalButton = t('', 'CONTINUE');
+	const modalButton = t('readOnly.modal.callToAction', 'CONTINUE');
 	const closeModalLabel = t('action.close', 'Close');
+	const snackbarErrorLabel = t(
+		'readOnly.feedback.error',
+		'Something went wrong, please try again or reload the page'
+	);
 
 	const duplicatedGroup = useStore((store) => getDuplicatedRoom(store, name, members));
+
+	const createSnackbar: CreateSnackbarFn = useSnackbar();
 
 	const [open, setOpen] = useState(false);
 
@@ -76,14 +99,22 @@ const CopyRoomWidget: FC<CopyRoomWidgetProps> = ({ name, members }) => {
 			name,
 			description: '',
 			members: membersWithoutMe
-		}).then((response) => {
-			setOpen(false);
-			replaceHistory({
-				path: `/${response.id}`,
-				route: CHATS_ROUTE
+		})
+			.then((response) => {
+				setOpen(false);
+				replaceHistory({
+					path: `/${response.id}`,
+					route: CHATS_ROUTE
+				});
+			})
+			.catch(() => {
+				createSnackbar({
+					key: new Date().toLocaleString(),
+					severity: 'warning',
+					label: snackbarErrorLabel
+				});
 			});
-		});
-	}, [members, name]);
+	}, [createSnackbar, members, name, snackbarErrorLabel]);
 
 	return (
 		<Container crossAlignment="flex-start" gap="0.5rem">
@@ -115,9 +146,14 @@ const CopyRoomWidget: FC<CopyRoomWidgetProps> = ({ name, members }) => {
 						<Container width="fit" padding={{ right: 'medium' }}>
 							<Icon icon="AlertCircleOutline" size="large" />
 						</Container>
-						<Text overflow="break-word">{modalDescription2}</Text>
+						<Text overflow="break-word">
+							<Trans
+								i18nKey="readOnly.modal.warning"
+								defaults="Important: You are copying the group and with it the title, members and moderators. This action <strong>does not create</strong> a copy of the <strong>conversation history</strong>."
+							/>
+						</Text>
 					</Container>
-					<Text overflow="break-word">{modalDescription3}</Text>
+					<ItalicText overflow="break-word">{modalDescription3}</ItalicText>
 				</Modal>
 			)}
 		</Container>
