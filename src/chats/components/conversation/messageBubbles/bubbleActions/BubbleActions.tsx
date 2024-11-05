@@ -78,7 +78,7 @@ const BubbleActions: FC<BubbleActionsProps> = ({ message, isMyMessage }) => {
 	}, [closeDropdownOnScroll, message.roomId]);
 
 	return (
-		<DropDownWrapper padding={{ all: 'none' }}>
+		<DropDownWrapper padding={{ all: 0 }}>
 			<BubbleActionsWrapper
 				data-testid={`cxtMenu-${message.id}-iconOpen`}
 				$isMyMessage={isMyMessage}

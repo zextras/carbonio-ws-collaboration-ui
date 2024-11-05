@@ -33,12 +33,13 @@ const BackgroundContainer = styled(Container)<{
 	border-radius: 0;
 	background-color: ${({ $color }): string | false => `${$color}`};
 	&:hover {
-		background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
-			${({ $color, $hasHoverGradient }): string | false => $hasHoverGradient && `${$color}`};
-		background: -webkit-linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
-			${({ $color, $hasHoverGradient }): string | false => $hasHoverGradient && `${$color}`};
-		background: -moz-linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
-			${({ $color, $hasHoverGradient }): string | false => $hasHoverGradient && `${$color}`};
+		${({ $hasHoverGradient, $color }): false | ReturnType<typeof css> =>
+			$hasHoverGradient &&
+			css`
+				background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), ${$color};
+				background: -webkit-linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), ${$color};
+				background: -moz-linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), ${$color};
+			`}
 		${HoverContainer} {
 			opacity: 1;
 		}

@@ -64,9 +64,12 @@ const MessageTextarea = styled.textarea<{ $composerIsFull: boolean }>`
 		background: ${({ theme }): string => theme.palette.gray3.regular};
 		border-radius: 0.25rem;
 	}
+	/*
+	TODO: this rule is causing the warning "Keyframe rule ignored due to bad selector"
 	&::-webkit-scrollbar-thumb:hover {
 		background: #ccc;
 	}
+	*/
 	&::-webkit-scrollbar-track {
 		background: transparent;
 	}

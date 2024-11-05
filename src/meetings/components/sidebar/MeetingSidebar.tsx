@@ -114,7 +114,7 @@ const MeetingSidebar = (): ReactElement => {
 					maxHeight={meetingChatVisibility === MeetingChatVisibility.OPEN ? '50%' : 'fill'}
 				>
 					{meetingChatVisibility !== MeetingChatVisibility.EXPANDED && (
-						<AccordionContainer height="fit" mainAlignment="flex-start" gap="gap: 0.063rem">
+						<AccordionContainer height="fit" mainAlignment="flex-start">
 							{showRecordingAccordion && <RecordingAccordion meetingId={meetingId} />}
 							{showWaitingListAccordion && <WaitingListAccordion meetingId={meetingId} />}
 							{showParticipantsAccordion && <MeetingParticipantsAccordion meetingId={meetingId} />}

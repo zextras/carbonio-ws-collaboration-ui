@@ -16,7 +16,6 @@ import React, {
 import {
 	CreateSnackbarFn,
 	DropdownItem,
-	MultiButton,
 	Text,
 	Tooltip,
 	useSnackbar
@@ -25,6 +24,7 @@ import { filter, map } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 
+import { MultiActionButton } from './MultiActionButton';
 import { MeetingRoutesParams } from '../../../hooks/useRouting';
 import MeetingsApi from '../../../network/apis/MeetingsApi';
 import {
@@ -191,10 +191,6 @@ const CameraButton = ({
 		onCLickBlur
 	]);
 
-	const toggleVideoDropdown = useCallback(() => {
-		setIsVideoListOpen((prevState) => !prevState);
-	}, [setIsVideoListOpen]);
-
 	const toggleVideoStream = useCallback(
 		(event: React.MouseEvent<HTMLButtonElement, MouseEvent> | KeyboardEvent) => {
 			event.stopPropagation();
@@ -262,22 +258,15 @@ const CameraButton = ({
 
 	return (
 		<Tooltip placement="top" label={tooltipLabel}>
-			<MultiButton
-				background={'primary'}
-				data-testid="cameraButton"
-				primaryIcon={videoStatus ? 'Video' : 'VideoOff'}
-				icon={isVideoListOpen ? 'ChevronDown' : 'ChevronUp'}
+			<MultiActionButton
+				showItems={isVideoListOpen}
+				setShowItems={setIsVideoListOpen}
 				onClick={toggleVideoStream}
 				items={dropdownList}
-				size="large"
-				shape="regular"
-				dropdownProps={{
-					onClick: toggleVideoDropdown,
-					dropdownListRef: videoDropdownRef,
-					width: 'fit-content'
-				}}
-				disabledPrimary={!buttonStatus || !websocketNetworkStatus}
-				disabledSecondary={!buttonStatus || !websocketNetworkStatus}
+				disabled={!buttonStatus || !websocketNetworkStatus}
+				data-testid="cameraButton"
+				icon={videoStatus ? 'Video' : 'VideoOff'}
+				listRef={videoDropdownRef}
 			/>
 		</Tooltip>
 	);

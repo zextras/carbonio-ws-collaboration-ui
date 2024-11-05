@@ -29,10 +29,31 @@ const Loader = styled.div`
 	width: 1.75rem;
 	height: 1.75rem;
 
-	@-moz-keyframes spin { 0% {transform: scaleX(-1) rotate(0deg);} 100% {transform: scaleX(-1) rotate(360deg);} }
-	@-webkit-keyframes spin { 0% {transform: scaleX(-1) rotate(0deg);} 100% {transform: scaleX(-1) rotate(360deg);} }
-	@keyframes spin { 0% {transform: scaleX(-1) rotate(0deg);} 100% {transform: scaleX(-1) rotate(360deg);} }
+	@-moz-keyframes spin {
+		0% {
+			transform: scaleX(-1) rotate(0deg);
+		}
+		100% {
+			transform: scaleX(-1) rotate(360deg);
+		}
 	}
+	@-webkit-keyframes spin {
+		0% {
+			transform: scaleX(-1) rotate(0deg);
+		}
+		100% {
+			transform: scaleX(-1) rotate(360deg);
+		}
+	}
+	@keyframes spin {
+		0% {
+			transform: scaleX(-1) rotate(0deg);
+		}
+		100% {
+			transform: scaleX(-1) rotate(360deg);
+		}
+	}
+
 	& svg {
 		position: relative;
 		top: 0.375rem;

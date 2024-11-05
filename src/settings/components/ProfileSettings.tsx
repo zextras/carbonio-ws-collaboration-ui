@@ -55,15 +55,16 @@ const BackgroundContainer = styled(Container)<{
 	border-radius: 0;
 	background-color: ${({ $color, theme }): string | false => `${theme.avatarColors[$color]}`};
 	&:hover {
-		background: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)),
-			${({ $color, $hasHoverGradient, theme }): string | false =>
-				$hasHoverGradient && `${theme.avatarColors[$color]}`};
-		background: -webkit-linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)),
-			${({ $color, $hasHoverGradient, theme }): string | false =>
-				$hasHoverGradient && `${theme.avatarColors[$color]}`};
-		background: -moz-linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)),
-			${({ $color, $hasHoverGradient, theme }): string | false =>
-				$hasHoverGradient && `${theme.avatarColors[$color]}`};
+		${({ $color, $hasHoverGradient, theme }): false | ReturnType<typeof css> =>
+			$hasHoverGradient &&
+			css`
+				background: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)),
+					${theme.avatarColors[$color]};
+				background: -webkit-linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)),
+					${theme.avatarColors[$color]};
+				background: -moz-linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)),
+					${theme.avatarColors[$color]};
+			`}
 		${HoverContainer} {
 			opacity: 1;
 		}

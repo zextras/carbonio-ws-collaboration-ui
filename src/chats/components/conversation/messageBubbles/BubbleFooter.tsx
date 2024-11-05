@@ -116,7 +116,7 @@ const BubbleFooter: FC<BubbleFooterProps> = ({
 					messageRead &&
 					(canSeeMessageReads || messageRead === MarkerStatus.PENDING) && (
 						<Tooltip label={dropdownTooltip}>
-							<Padding width="fit" right="small">
+							<Padding width="fit-content" right="small">
 								<Icon size="small" icon={ackIcon} color={ackIconColor} />
 							</Padding>
 						</Tooltip>
