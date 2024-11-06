@@ -16,7 +16,7 @@ import {
 	getParticipantAudioStatus,
 	getRoomIdByMeetingId
 } from '../../../../store/selectors/MeetingSelectors';
-import { getOwnershipOfTheRoom, getOwner } from '../../../../store/selectors/RoomsSelectors';
+import { getOwnershipOfTheRoom } from '../../../../store/selectors/RoomsSelectors';
 import { getUserId } from '../../../../store/selectors/SessionSelectors';
 import { getIsUserGuest } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
@@ -46,7 +46,9 @@ const MeetingParticipantActions: FC<ParticipantActionsProps> = ({ memberId, meet
 	const participantAudioStatus = useStore((store) =>
 		getParticipantAudioStatus(store, meetingId ?? '', memberId)
 	);
-	const isMemberOwner: boolean = useStore((store) => getOwner(store, roomId ?? '', memberId));
+	const isMemberOwner: boolean = useStore((store) =>
+		getOwnershipOfTheRoom(store, roomId ?? '', memberId)
+	);
 	const isUserGuest = useStore((store) => getIsUserGuest(store, memberId));
 	const iAmOwner: boolean = useStore((state) => getOwnershipOfTheRoom(state, roomId ?? '', userId));
 

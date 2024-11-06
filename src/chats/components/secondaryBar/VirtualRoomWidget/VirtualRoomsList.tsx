@@ -52,7 +52,7 @@ const CustomContainer = styled(Container)`
 `;
 
 const ListContainer = styled(Container)`
-	overflow-y: scroll;
+	overflow-y: auto;
 `;
 
 const CustomButton = styled(Button)`
@@ -243,9 +243,11 @@ const VirtualRoomsList: FC<virtualRoomsListProps> = ({ setListVisibility, parent
 	}, [handleMouseUp]);
 
 	return (
-		<CustomContainer background={'gray6'} height="fit" padding="0.5rem" ref={popupRef}>
+		<CustomContainer background={'gray6'} height="fit" padding="0.5rem" gap="0.5rem" ref={popupRef}>
 			{inputSection}
-			<ListContainer>{listSection}</ListContainer>
+			<ListContainer gap="0.5rem" mainAlignment="flex-start">
+				{listSection}
+			</ListContainer>
 		</CustomContainer>
 	);
 };
