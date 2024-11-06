@@ -1,3 +1,4 @@
+/* eslint-disable import/no-mutable-exports */
 /*
  * SPDX-FileCopyrightText: 2022 Zextras <https://www.zextras.com>
  *
@@ -10,6 +11,9 @@ import failOnConsole from 'jest-fail-on-console';
 
 import XMPPClient from '../network/xmpp/XMPPClient';
 import useStore from '../store/Store';
+import * as FetchUtils from '../utils/FetchUtils';
+
+export let spyOnFetch: jest.SpyInstance;
 
 configure({
 	asyncUtilTimeout: 2000
@@ -27,6 +31,8 @@ failOnConsole({
 
 beforeEach(() => {
 	useStore.getState().setXmppClient(new XMPPClient());
+	spyOnFetch = jest.spyOn(FetchUtils, 'fetchAPI');
+	spyOnFetch.mockImplementation(() => Promise.resolve(true));
 });
 
 afterEach(() => {

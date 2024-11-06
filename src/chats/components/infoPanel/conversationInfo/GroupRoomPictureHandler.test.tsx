@@ -10,7 +10,12 @@ import { screen } from '@testing-library/react';
 
 import GroupRoomPictureHandler from './GroupRoomPictureHandler';
 import useStore from '../../../../store/Store';
-import { createMockMember, createMockRoom, createMockUser } from '../../../../tests/createMock';
+import {
+	createMockCapabilityList,
+	createMockMember,
+	createMockRoom,
+	createMockUser
+} from '../../../../tests/createMock';
 import { RoomsApiToSpy, spyOnRoomsApi } from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
@@ -115,14 +120,14 @@ describe('Room Picture Handler - groups', () => {
 
 	test('update an image fails', async () => {
 		const spyOnUpdateRoomPicture = spyOnRoomsApi(RoomsApiToSpy.UPDATE_ROOM_PICTURE);
-		const spyOnDeleteRoomPicture = spyOnRoomsApi(RoomsApiToSpy.DELETE_ROOM_PICTURE);
-		const testImageFile = new File(['hello'], 'hello.png', { type: 'image/png' });
+		const testImageFile = new File([new ArrayBuffer(3000)], 'hello.png', { type: 'image/png' });
 
 		const store: RootStore = useStore.getState();
 		store.addRoom(testRoom2);
 		store.setUserInfo(user1Info);
 		store.setUserInfo(user2Info);
 		store.setLoginInfo(user1Info.id, user1Info.name);
+		store.setCapabilities(createMockCapabilityList({ maxRoomImageSizeInKb: 1 }));
 		const { user } = setup(<GroupRoomPictureHandler roomId={testRoom2.id} />);
 
 		const pictureContainer = await screen.findByTestId('picture_container');
@@ -132,11 +137,9 @@ describe('Room Picture Handler - groups', () => {
 		const hoverContainer = await screen.findByTestId('hover_container');
 		const input = hoverContainer.children.item(0) as HTMLInputElement;
 		expect(input).not.toBeNull();
-
 		await user.upload(input, testImageFile);
 
-		expect(spyOnUpdateRoomPicture).toHaveBeenCalledTimes(1);
-		expect(spyOnDeleteRoomPicture).toThrowError();
+		expect(spyOnUpdateRoomPicture).rejects.toThrowError();
 	});
 
 	test('delete an image', async () => {

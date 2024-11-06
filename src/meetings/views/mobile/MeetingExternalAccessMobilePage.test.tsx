@@ -37,7 +37,9 @@ describe('MeetingExternalAccessMobilePage test', () => {
 	});
 
 	test('Create external user', async () => {
-		const spyOnCreateGuestAccount = spyOnMeetingsApi(MeetingsApiToSpy.CREATE_GUEST_ACCOUNT);
+		const spyOnCreateGuestAccount = spyOnMeetingsApi(
+			MeetingsApiToSpy.CREATE_GUEST_ACCOUNT
+		).mockImplementation(() => Promise.resolve());
 		const { user } = setup(<MeetingExternalAccessMobilePage />);
 		const inputName = await screen.findByText(/Type here your name/i);
 		await user.type(inputName, 'John Doe');
@@ -48,7 +50,9 @@ describe('MeetingExternalAccessMobilePage test', () => {
 	});
 
 	test('Create external user with enter key', async () => {
-		const spyOnCreateGuestAccount = spyOnMeetingsApi(MeetingsApiToSpy.CREATE_GUEST_ACCOUNT);
+		const spyOnCreateGuestAccount = spyOnMeetingsApi(
+			MeetingsApiToSpy.CREATE_GUEST_ACCOUNT
+		).mockImplementation(() => Promise.resolve());
 		const { user } = setup(<MeetingExternalAccessMobilePage />);
 		const inputName = await screen.findByText(/Type here your name/i);
 		await user.type(inputName, 'John Doe {enter}');

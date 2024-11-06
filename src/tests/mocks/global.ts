@@ -7,20 +7,7 @@
 // Define browser objects that aren't available in Jest
 // https://jestjs.io/docs/en/manual-mocks#mocking-methods-which-are-not-implemented-in-jsdom
 
-export const fetchResponse: jest.Mock = jest.fn(() => ({}));
-export const fetchTextResponse: jest.Mock = jest.fn(() => '{}');
 export const requestFullscreen = jest.fn();
-
-Object.defineProperty(global, 'fetch', {
-	value: jest.fn(() =>
-		Promise.resolve({
-			json: () => fetchResponse(),
-			text: () => fetchTextResponse(),
-			ok: true,
-			headers: { get: (): string => 'application/json' }
-		})
-	)
-});
 
 Object.defineProperty(global, 'URL', {
 	value: {
@@ -168,6 +155,7 @@ Object.defineProperty(window, 'open', {
 });
 
 // This mock makes uuid/v4 to always generate the same uuid "00000000-0000-4000-8000-000000000000"
+export const mockedUuid = '00000000-0000-4000-8000-000000000000';
 Object.defineProperty(window, 'crypto', {
 	value: {
 		getRandomValues: (arr: string[]) => {

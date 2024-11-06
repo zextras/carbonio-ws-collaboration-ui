@@ -98,7 +98,9 @@ describe('MeetingExternalAccessPage', () => {
 	});
 
 	test('User confirm the name with enter key', async () => {
-		const spyOnCreateGuestAccount = spyOnMeetingsApi(MeetingsApiToSpy.CREATE_GUEST_ACCOUNT);
+		const spyOnCreateGuestAccount = spyOnMeetingsApi(
+			MeetingsApiToSpy.CREATE_GUEST_ACCOUNT
+		).mockImplementation(() => Promise.resolve());
 		const { user } = setup(<MeetingExternalAccessPage />);
 
 		const nameInput = screen.getByRole('textbox', { name: typeHereLabel });

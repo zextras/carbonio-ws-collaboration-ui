@@ -6,7 +6,6 @@
 
 import { find } from 'lodash';
 
-import BaseAPI from './BaseAPI';
 import useStore from '../../store/Store';
 import { RequestType } from '../../types/network/apis/IBaseAPI';
 import IMeetingsApi from '../../types/network/apis/IMeetingsApi';
@@ -41,9 +40,10 @@ import { STREAM_TYPE, Subscription } from '../../types/store/ActiveMeetingTypes'
 import { RoomType } from '../../types/store/RoomTypes';
 import { UserType } from '../../types/store/UserTypes';
 import { BrowserUtils } from '../../utils/BrowserUtils';
+import { fetchAPI } from '../../utils/FetchUtils';
 import { RoomsApi } from '../index';
 
-class MeetingsApi extends BaseAPI implements IMeetingsApi {
+class MeetingsApi implements IMeetingsApi {
 	// Singleton design pattern
 	private static instance: IMeetingsApi;
 
@@ -55,7 +55,7 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 	}
 
 	public listMeetings(): Promise<ListMeetingsResponse> {
-		return this.fetchAPI(`meetings`, RequestType.GET).then((resp: ListMeetingsResponse) => {
+		return fetchAPI(`meetings`, RequestType.GET).then((resp: ListMeetingsResponse) => {
 			const { setMeetings } = useStore.getState();
 			setMeetings(resp);
 			return resp;
@@ -74,25 +74,23 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 			name,
 			expiration
 		};
-		return this.fetchAPI(`meetings`, RequestType.POST, createMeetingData);
+		return fetchAPI(`meetings`, RequestType.POST, createMeetingData);
 	}
 
 	public getMeeting(roomId: string): Promise<GetMeetingResponse> {
-		return this.fetchAPI(`rooms/${roomId}/meeting`, RequestType.GET);
+		return fetchAPI(`rooms/${roomId}/meeting`, RequestType.GET);
 	}
 
 	public getMeetingByMeetingId(meetingId: string): Promise<GetMeetingResponse> {
-		return this.fetchAPI(`meetings/${meetingId}`, RequestType.GET).then(
-			(resp: GetMeetingResponse) => {
-				const { addMeeting } = useStore.getState();
-				addMeeting(resp);
-				return resp;
-			}
-		);
+		return fetchAPI(`meetings/${meetingId}`, RequestType.GET).then((resp: GetMeetingResponse) => {
+			const { addMeeting } = useStore.getState();
+			addMeeting(resp);
+			return resp;
+		});
 	}
 
 	public startMeeting(meetingId: string): Promise<StartMeetingResponse> {
-		return this.fetchAPI(`meetings/${meetingId}/start`, RequestType.POST);
+		return fetchAPI(`meetings/${meetingId}/start`, RequestType.POST);
 	}
 
 	public joinMeeting(
@@ -100,7 +98,7 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 		settings: JoinSettings,
 		devicesId: { audioDevice?: string; videoDevice?: string }
 	): Promise<JoinMeetingResponse> {
-		return this.fetchAPI(`meetings/${meetingId}/join`, RequestType.POST, settings).then((resp) => {
+		return fetchAPI(`meetings/${meetingId}/join`, RequestType.POST, settings).then((resp) => {
 			if (resp.status === 'ACCEPTED') {
 				useStore
 					.getState()
@@ -156,7 +154,7 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 			(member) => member.userId === useStore.getState().session.id && !member.owner
 		);
 		const isExternal = useStore.getState().session?.userType === UserType.GUEST;
-		return this.fetchAPI(`meetings/${meetingId}/leave`, RequestType.POST)
+		return fetchAPI(`meetings/${meetingId}/leave`, RequestType.POST)
 			.then((resp: LeaveMeetingResponse) => {
 				useStore.getState().meetingDisconnection(meetingId);
 
@@ -178,11 +176,11 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 	}
 
 	public stopMeeting(meetingId: string): Promise<StopMeetingResponse> {
-		return this.fetchAPI(`meetings/${meetingId}/stop`, RequestType.POST);
+		return fetchAPI(`meetings/${meetingId}/stop`, RequestType.POST);
 	}
 
 	public deleteMeeting(meetingId: string): Promise<DeleteMeetingResponse> {
-		return this.fetchAPI(`meetings/${meetingId}`, RequestType.DELETE).then(
+		return fetchAPI(`meetings/${meetingId}`, RequestType.DELETE).then(
 			(resp: DeleteMeetingResponse) => {
 				useStore.getState().meetingDisconnection(meetingId);
 				return resp;
@@ -191,7 +189,7 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 	}
 
 	public createAudioOffer(meetingId: string, sdpOffer: string): Promise<CreateAudioOfferResponse> {
-		return this.fetchAPI(`meetings/${meetingId}/audio/offer`, RequestType.PUT, {
+		return fetchAPI(`meetings/${meetingId}/audio/offer`, RequestType.PUT, {
 			sdp: sdpOffer
 		});
 	}
@@ -201,7 +199,7 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 		enabled: boolean,
 		userToModerate?: string
 	): Promise<UpdateAudioStreamStatusResponse> {
-		return this.fetchAPI(`meetings/${meetingId}/audio`, RequestType.PUT, {
+		return fetchAPI(`meetings/${meetingId}/audio`, RequestType.PUT, {
 			enabled,
 			userToModerate
 		});
@@ -213,7 +211,7 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 		enabled: boolean,
 		sdp?: string
 	): Promise<UpdateMediaOfferResponse> {
-		return this.fetchAPI(`meetings/${meetingId}/media`, RequestType.PUT, {
+		return fetchAPI(`meetings/${meetingId}/media`, RequestType.PUT, {
 			type,
 			enabled,
 			sdp
@@ -225,7 +223,7 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 		subscription: Subscription[],
 		unsubscription: Subscription[]
 	): Promise<SubscribeMediaResponse> {
-		return this.fetchAPI(`meetings/${meetingId}/media/subscribe`, RequestType.PUT, {
+		return fetchAPI(`meetings/${meetingId}/media/subscribe`, RequestType.PUT, {
 			subscribe: subscription,
 			unsubscribe: unsubscription
 		});
@@ -235,18 +233,18 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 		meetingId: string,
 		sdpAnswer: string
 	): Promise<CreateMediaAnswerResponse> {
-		return this.fetchAPI(`meetings/${meetingId}/media/answer`, RequestType.PUT, {
+		return fetchAPI(`meetings/${meetingId}/media/answer`, RequestType.PUT, {
 			sdp: sdpAnswer
 		});
 	}
 
 	public getScheduledMeetingName(meetingId: string): Promise<GetScheduledMeetingNameResponse> {
-		return this.fetchAPI(`public/meetings/${meetingId}`, RequestType.GET, undefined);
+		return fetchAPI(`public/meetings/${meetingId}`, RequestType.GET, undefined);
 	}
 
 	public leaveWaitingRoom(meetingId: string): Promise<AcceptWaitingUserResponse> {
 		const userId = useStore.getState().session.id;
-		return this.fetchAPI(`meetings/${meetingId}/queue/${userId}`, RequestType.POST, {
+		return fetchAPI(`meetings/${meetingId}/queue/${userId}`, RequestType.POST, {
 			status: 'REJECTED'
 		}).finally(() => {
 			const isExternal = useStore.getState().session?.userType === UserType.GUEST;
@@ -255,7 +253,7 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 	}
 
 	public getWaitingList(meetingId: string): Promise<GetWaitingListResponse> {
-		return this.fetchAPI(`meetings/${meetingId}/queue`, RequestType.GET).then((resp) => {
+		return fetchAPI(`meetings/${meetingId}/queue`, RequestType.GET).then((resp) => {
 			useStore.getState().setWaitingList(meetingId, resp.users);
 			return resp;
 		});
@@ -267,13 +265,13 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 		accept: boolean
 	): Promise<AcceptWaitingUserResponse> {
 		const status = accept ? 'ACCEPTED' : 'REJECTED';
-		return this.fetchAPI(`meetings/${meetingId}/queue/${userId}`, RequestType.POST, {
+		return fetchAPI(`meetings/${meetingId}/queue/${userId}`, RequestType.POST, {
 			status
 		});
 	}
 
 	startRecording(meetingId: string): Promise<StartRecordingResponse> {
-		return this.fetchAPI(`meetings/${meetingId}/startRecording`, RequestType.POST);
+		return fetchAPI(`meetings/${meetingId}/startRecording`, RequestType.POST);
 	}
 
 	public stopRecording(
@@ -281,7 +279,7 @@ class MeetingsApi extends BaseAPI implements IMeetingsApi {
 		recordingName: string,
 		folderId: string
 	): Promise<StopRecordingResponse> {
-		return this.fetchAPI(`meetings/${meetingId}/stopRecording`, RequestType.POST, {
+		return fetchAPI(`meetings/${meetingId}/stopRecording`, RequestType.POST, {
 			name: recordingName,
 			folderId
 		});

@@ -5,7 +5,9 @@
  */
 
 import AttachmentsApi from './AttachmentsApi';
+import { spyOnFetch } from '../../tests/jest-env-setup';
 import { AttachmentType, ImageQuality, ImageShape } from '../../types/network/apis/IAttachmentsApi';
+import { RequestType } from '../../types/network/apis/IBaseAPI';
 
 const contentType = 'Content-Type';
 const applicationJson = 'application/json';
@@ -37,49 +39,27 @@ describe('Attachments API', () => {
 		const headers = new Headers();
 		headers.append(contentType, applicationJson);
 
-		// Check if fetch is called with the correct parameters
-		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/attachments/fileId`, {
-			headers,
-			method: 'DELETE',
-			body: undefined
-		});
+		expect(spyOnFetch).toHaveBeenCalledWith('attachments/fileId', RequestType.DELETE);
 	});
 
 	test('getAttachmentInfo is called correctly', async () => {
 		// Send getAttachmentInfo request
 		await AttachmentsApi.getAttachmentInfo('fileId');
 
-		// Set appropriate headers
-		const headers = new Headers();
-		headers.append(contentType, applicationJson);
-
-		// Check if fetch is called with the correct parameters
-		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/attachments/fileId`, {
-			method: 'GET',
-			headers,
-			body: undefined
-		});
+		expect(spyOnFetch).toHaveBeenCalledWith('attachments/fileId', RequestType.GET);
 	});
 
 	test('getURLAttachment is called correctly', () => {
 		const url = AttachmentsApi.getURLAttachment('fileId');
-		expect(url).toEqual(`http://localhost/services/chats/attachments/fileId/download`);
+
+		expect(url).toEqual('http://localhost/services/chats/attachments/fileId/download');
 	});
 
 	test('getAttachment is called correctly', async () => {
 		// Send getAttachment request
 		await AttachmentsApi.getAttachment('fileId');
 
-		// Set appropriate headers
-		const headers = new Headers();
-		headers.append(contentType, applicationJson);
-
-		// Check if fetch is called with the correct parameters
-		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/attachments/fileId/download`, {
-			headers,
-			method: 'GET',
-			body: undefined
-		});
+		expect(spyOnFetch).toHaveBeenCalledWith('attachments/fileId/download', RequestType.GET);
 	});
 
 	test.each(imagePreviewCases)(
@@ -92,14 +72,9 @@ describe('Attachments API', () => {
 			const headers = new Headers();
 			headers.append(contentType, applicationJson);
 
-			// Check if fetch is called with the correct parameters
-			expect(global.fetch).toHaveBeenCalledWith(
-				`/services/chats/preview/image/fileId/0x0/${queryRes}`,
-				{
-					headers,
-					method: 'GET',
-					body: undefined
-				}
+			expect(spyOnFetch).toHaveBeenCalledWith(
+				`preview/image/fileId/0x0/${queryRes}`,
+				RequestType.GET
 			);
 		}
 	);
@@ -114,18 +89,9 @@ describe('Attachments API', () => {
 			ImageShape.ROUNDED
 		);
 
-		// Set appropriate headers
-		const headers = new Headers();
-		headers.append(contentType, applicationJson);
-
-		// Check if fetch is called with the correct parameters
-		expect(global.fetch).toHaveBeenCalledWith(
-			`/services/chats/preview/image/fileId/0x0/thumbnail/?quality=High&output_format=Jpeg&shape=Rounded`,
-			{
-				headers,
-				method: 'GET',
-				body: undefined
-			}
+		expect(spyOnFetch).toHaveBeenCalledWith(
+			'preview/image/fileId/0x0/thumbnail/?quality=High&output_format=Jpeg&shape=Rounded',
+			RequestType.GET
 		);
 	});
 
@@ -137,14 +103,9 @@ describe('Attachments API', () => {
 		const headers = new Headers();
 		headers.append(contentType, applicationJson);
 
-		// Check if fetch is called with the correct parameters
-		expect(global.fetch).toHaveBeenCalledWith(
-			`/services/chats/preview/pdf/fileId/?first_page=1&last_page=4`,
-			{
-				headers,
-				method: 'GET',
-				body: undefined
-			}
+		expect(spyOnFetch).toHaveBeenCalledWith(
+			'preview/pdf/fileId/?first_page=1&last_page=4',
+			RequestType.GET
 		);
 	});
 
@@ -158,18 +119,9 @@ describe('Attachments API', () => {
 			AttachmentType.PNG
 		);
 
-		// Set appropriate headers
-		const headers = new Headers();
-		headers.append(contentType, applicationJson);
-
-		// Check if fetch is called with the correct parameters
-		expect(global.fetch).toHaveBeenCalledWith(
-			`/services/chats/preview/pdf/fileId/0x0/thumbnail/?shape=Rectangular&quality=Lowest&output_format=Png`,
-			{
-				headers,
-				method: 'GET',
-				body: undefined
-			}
+		expect(spyOnFetch).toHaveBeenCalledWith(
+			'preview/pdf/fileId/0x0/thumbnail/?shape=Rectangular&quality=Lowest&output_format=Png',
+			RequestType.GET
 		);
 	});
 
@@ -179,29 +131,22 @@ describe('Attachments API', () => {
 			// Send getAttachmentPreview request
 			await AttachmentsApi.getPdfThumbnail('fileId', '0x0', ...queryParams);
 
-			// Set appropriate headers
-			const headers = new Headers();
-			headers.append(contentType, applicationJson);
-
-			// Check if fetch is called with the correct parameters
-			expect(global.fetch).toHaveBeenCalledWith(
-				`/services/chats/preview/pdf/fileId/0x0/thumbnail/${queryRes}`,
-				{
-					headers,
-					method: 'GET',
-					body: undefined
-				}
+			expect(spyOnFetch).toHaveBeenCalledWith(
+				`preview/pdf/fileId/0x0/thumbnail/${queryRes}`,
+				RequestType.GET
 			);
 		}
 	);
 
 	test.each(imagePreviewCases)('getImagePreviewURL with %s', (type, queryParams, urlRes) => {
 		const url = AttachmentsApi.getImagePreviewURL('fileId', '0x0', ...queryParams);
+
 		expect(url).toEqual(`http://localhost/services/chats/preview/image/fileId/0x0/${urlRes}`);
 	});
 
 	test.each(imagePreviewCases)('getImageThumbnailURL with %s', (type, queryParams, urlRes) => {
 		const url = AttachmentsApi.getImageThumbnailURL('fileId', '0x0', ...queryParams);
+
 		expect(url).toEqual(
 			`http://localhost/services/chats/preview/image/fileId/0x0/thumbnail/${urlRes}`
 		);
@@ -209,6 +154,7 @@ describe('Attachments API', () => {
 
 	test.each(pdfThumbnailCases)('getPdfThumbnailURL with %s', (type, queryParams, urlRes) => {
 		const url = AttachmentsApi.getPdfThumbnailURL('fileId', '0x0', ...queryParams);
+
 		expect(url).toEqual(
 			`http://localhost/services/chats/preview/pdf/fileId/0x0/thumbnail/${urlRes}`
 		);
@@ -216,6 +162,7 @@ describe('Attachments API', () => {
 
 	test.each(pdfPreviewURLCases)('getPdfPreviewURL with %s', (type, queryParams, urlRes) => {
 		const url = AttachmentsApi.getPdfPreviewURL('fileId', ...queryParams);
+
 		expect(url).toEqual(`http://localhost/services/chats/preview/pdf/fileId/${urlRes}`);
 	});
 });

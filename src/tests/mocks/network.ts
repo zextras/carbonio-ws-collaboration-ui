@@ -9,6 +9,7 @@
 import attachmentsApi from '../../network/apis/AttachmentsApi';
 import meetingsApi from '../../network/apis/MeetingsApi';
 import roomsApi from '../../network/apis/RoomsApi';
+import sessionApi from '../../network/apis/SessionApi';
 import usersApi from '../../network/apis/UsersApi';
 
 export enum RoomsApiToSpy {
@@ -26,7 +27,8 @@ export enum RoomsApiToSpy {
 	UNMUTE_ROOM_NOTIFICATION = 'unmuteRoomNotification',
 	CLEAR_ROOM_HISTORY = 'clearRoomHistory',
 	FORWARD_MESSAGE = 'forwardMessages',
-	ADD_ROOM_ATTACHMENT = 'addRoomAttachment'
+	ADD_ROOM_ATTACHMENT = 'addRoomAttachment',
+	REPLACE_PLACEHOLDER_ROOM = 'replacePlaceholderRoom'
 }
 
 export enum AttachmentsApiToSpy {
@@ -53,11 +55,26 @@ export enum MeetingsApiToSpy {
 	START_RECORDING = 'startRecording',
 	STOP_RECORDING = 'stopRecording',
 	ACCEPT_WAITING_USER = 'acceptWaitingUser',
+	AUTH_LOGIN = 'authLogin',
 	CREATE_GUEST_ACCOUNT = 'createGuestAccount'
 }
 
-export const spyOnRoomsApi = (apiToSpy: RoomsApiToSpy) => jest.spyOn(roomsApi, apiToSpy);
-export const spyOnAttachmentsApi = (apiToSpy: AttachmentsApiToSpy) =>
-	jest.spyOn(attachmentsApi, apiToSpy);
-export const spyOnUsersApi = (apiToSpy: UsersApiToSpy) => jest.spyOn(usersApi, apiToSpy);
-export const spyOnMeetingsApi = (apiToSpy: MeetingsApiToSpy) => jest.spyOn(meetingsApi, apiToSpy);
+export enum SessionApiToSpy {
+	GET_TOKEN = 'getToken',
+	GET_CAPABILITIES = 'getCapabilities'
+}
+
+export const spyOnAttachmentsApi: (apiToSpy: AttachmentsApiToSpy) => jest.SpyInstance = (
+	apiToSpy: AttachmentsApiToSpy
+) => jest.spyOn(attachmentsApi, apiToSpy);
+export const spyOnRoomsApi: (apiToSpy: RoomsApiToSpy) => jest.SpyInstance = (
+	apiToSpy: RoomsApiToSpy
+) => jest.spyOn(roomsApi, apiToSpy);
+export const spyOnUsersApi: (apiToSpy: UsersApiToSpy) => jest.SpyInstance = (
+	apiToSpy: UsersApiToSpy
+) => jest.spyOn(usersApi, apiToSpy);
+export const spyOnMeetingsApi: (apiToSpy: MeetingsApiToSpy) => jest.SpyInstance = (
+	apiToSpy: MeetingsApiToSpy
+) => jest.spyOn(meetingsApi, apiToSpy);
+export const spyOnSessionApi: (apiToSpy: SessionApiToSpy) => jest.SpyInstance = (apiToSpy) =>
+	jest.spyOn(sessionApi, apiToSpy);

@@ -93,9 +93,6 @@ const storeSetupGroupMeetingSkeleton = (): { user: UserEvent; store: RootStore }
 	return { user, store };
 };
 
-const mockCaptureStream = jest.fn().mockReturnValue(new MediaStream());
-HTMLCanvasElement.prototype.captureStream = mockCaptureStream;
-
 beforeAll(() => {
 	mockMediaDevicesResolve();
 });
@@ -215,6 +212,8 @@ describe('Meeting action bar interaction with skeleton', () => {
 
 describe('Virtual Background setup', () => {
 	test('turn on and off blur', async () => {
+		HTMLCanvasElement.prototype.captureStream = jest.fn().mockReturnValue(new MediaStream());
+
 		mockInitialize.mockReturnValue('initialized');
 		const { store } = storeSetupGroupMeetingSkeleton();
 		expect(store.activeMeeting[meeting.id]).not.toBeDefined();
