@@ -17,12 +17,12 @@ import React, {
 import {
 	Container,
 	Input,
-	Row,
 	Text,
-	Tooltip,
 	CreateSnackbarFn,
 	useSnackbar,
-	Button
+	Button,
+	Modal,
+	Padding
 } from '@zextras/carbonio-design-system';
 import { map, size } from 'lodash';
 import { useTranslation } from 'react-i18next';
@@ -55,10 +55,6 @@ const ListContainer = styled(Container)`
 	overflow-y: auto;
 `;
 
-const CustomButton = styled(Button)`
-	border-radius: 0.125rem;
-`;
-
 const VirtualRoomsList: FC<virtualRoomsListProps> = ({ setListVisibility, parentRef }) => {
 	const [t] = useTranslation();
 
@@ -67,7 +63,7 @@ const VirtualRoomsList: FC<virtualRoomsListProps> = ({ setListVisibility, parent
 		'meeting.virtual.emptyState',
 		'The Rooms you create will be shown here'
 	);
-	const cancelTooltip = t('action.cancel', 'Cancel');
+	const closeLabel = t('action.close', 'Close');
 	const createTooltip = t('meeting.virtual.createTooltip', 'Create new Virtual Room');
 	const roomNameRequiredTooltip = t(
 		'meeting.virtual.nameRequiredTooltip',
@@ -78,29 +74,29 @@ const VirtualRoomsList: FC<virtualRoomsListProps> = ({ setListVisibility, parent
 		'settings.profile.errorGenericResponse',
 		'Something went wrong. Please retry'
 	);
+	const newRoomModalDescription = t(
+		'',
+		'Give to this Room a recognizable name in order to let your attendees know what they are expecting to meet about.'
+	);
 
 	const virtualRoomList = useStore(getTemporaryRoomIdsOrderedByCreation);
-	const [inputHasFocus, setInputHasFocus] = useState(false);
 	const [canCreateVirtualRoom, setCanCreateVirtualRoom] = useState(false);
 	const [nameError, setNameError] = useState(false);
+	const [showCreationModal, setShowCreationModal] = useState(false);
 
-	const inputRef = useRef<HTMLDivElement>(null);
 	const textRef = useRef<HTMLInputElement>(null);
 	const popupRef = useRef<HTMLDivElement>(null);
 	const modalRef = useRef<HTMLDivElement>(null);
+	const createModalRef = useRef<HTMLDivElement>(null);
 
 	const createSnackbar: CreateSnackbarFn = useSnackbar();
 
 	const handleMouseUp = useCallback(
 		(event: MouseEvent) => {
-			if (inputRef.current?.contains(event.target as Node)) {
-				setInputHasFocus(true);
-			} else {
-				setInputHasFocus(false);
-			}
 			if (
 				modalRef.current?.contains(event.target as Node) ||
-				parentRef.current?.contains(event.target as Node)
+				parentRef.current?.contains(event.target as Node) ||
+				createModalRef.current?.contains(event.target as Node)
 			) {
 				setListVisibility(true);
 			} else if (popupRef.current && !popupRef.current.contains(event.target as Node)) {
@@ -116,9 +112,8 @@ const VirtualRoomsList: FC<virtualRoomsListProps> = ({ setListVisibility, parent
 			type: RoomType.TEMPORARY
 		})
 			.then(() => {
-				textRef.current!.value = '';
-				setInputHasFocus(false);
 				setCanCreateVirtualRoom(false);
+				setShowCreationModal(false);
 			})
 			.catch(() => {
 				createSnackbar({
@@ -129,15 +124,6 @@ const VirtualRoomsList: FC<virtualRoomsListProps> = ({ setListVisibility, parent
 				});
 			});
 	}, [createSnackbar, errorSnackbar]);
-
-	const handleDeleteNameClick = useCallback(() => {
-		if (textRef.current) {
-			textRef.current.value = '';
-			textRef.current.focus();
-			setCanCreateVirtualRoom(false);
-			setNameError(false);
-		}
-	}, []);
 
 	const handleOnChangeInput = useCallback(() => {
 		const textSize = size(textRef.current?.value);
@@ -160,52 +146,50 @@ const VirtualRoomsList: FC<virtualRoomsListProps> = ({ setListVisibility, parent
 		return roomNameRequiredTooltip;
 	}, [canCreateVirtualRoom, createTooltip, invalidNameString, nameError, roomNameRequiredTooltip]);
 
-	const inputSection = useMemo(
+	const toggleModal = useCallback(() => {
+		setShowCreationModal((prevState) => !prevState);
+	}, []);
+
+	const newRoomModal = useMemo(
 		() => (
-			<Container orientation="horizontal" ref={inputRef}>
-				<Row takeAvailableSpace>
-					<Input
-						backgroundColor="gray6"
-						label={virtualRoomNameInput}
-						inputRef={textRef}
-						onChange={handleOnChangeInput}
-						hasError={nameError}
-					/>
-				</Row>
-				{inputHasFocus && (
-					<Row width="fit" orientation="horizontal" gap="0.5rem" padding={{ horizontal: '0.5rem' }}>
-						<Tooltip label={cancelTooltip}>
-							<CustomButton
-								size="large"
-								icon="CloseOutline"
-								labelColor="gray6"
-								backgroundColor="secondary"
-								onClick={handleDeleteNameClick}
-							/>
-						</Tooltip>
-						<Tooltip label={createVirtualRoomTooltip}>
-							<CustomButton
-								size="large"
-								icon="CheckmarkOutline"
-								labelColor="gray6"
-								backgroundColor="primary"
-								onClick={handleCreateButtonClick}
-								disabled={!canCreateVirtualRoom}
-							/>
-						</Tooltip>
-					</Row>
-				)}
-			</Container>
+			<Modal
+				open={showCreationModal}
+				title="Create new Virtual Room"
+				confirmColor="primary"
+				onConfirm={handleCreateButtonClick}
+				confirmLabel="create"
+				confirmDisabled={!canCreateVirtualRoom}
+				confirmTooltip={createVirtualRoomTooltip}
+				showCloseIcon
+				onClose={toggleModal}
+				closeIconTooltip={closeLabel}
+				ref={createModalRef}
+			>
+				<Text overflow="break-word" size="small">
+					{newRoomModalDescription}
+				</Text>
+				<Padding bottom="1rem" />
+				<Input
+					backgroundColor="gray6"
+					label={virtualRoomNameInput}
+					inputRef={textRef}
+					onChange={handleOnChangeInput}
+					hasError={nameError}
+					description={nameError ? invalidNameString : ''}
+				/>
+			</Modal>
 		),
 		[
 			canCreateVirtualRoom,
-			cancelTooltip,
+			closeLabel,
 			createVirtualRoomTooltip,
 			handleCreateButtonClick,
-			handleDeleteNameClick,
 			handleOnChangeInput,
-			inputHasFocus,
+			invalidNameString,
 			nameError,
+			newRoomModalDescription,
+			showCreationModal,
+			toggleModal,
 			virtualRoomNameInput
 		]
 	);
@@ -244,10 +228,11 @@ const VirtualRoomsList: FC<virtualRoomsListProps> = ({ setListVisibility, parent
 
 	return (
 		<CustomContainer background={'gray6'} height="fit" padding="0.5rem" gap="0.5rem" ref={popupRef}>
-			{inputSection}
+			<Button label="Create new Room" color="primary" width="fill" onClick={toggleModal} />
 			<ListContainer gap="0.5rem" mainAlignment="flex-start">
 				{listSection}
 			</ListContainer>
+			{newRoomModal}
 		</CustomContainer>
 	);
 };
