@@ -28,8 +28,7 @@ export const getUserName = (store: RootStore, id: string): string => {
 export const getUserLastActivity = (store: RootStore, id: string): number | undefined =>
 	store.users[id]?.last_activity;
 
-export const getUserOnline = (store: RootStore, id: string): boolean | undefined =>
-	store.users[id]?.online;
+export const getUserOnline = (store: RootStore, id: string): boolean => !!store.users[id]?.online;
 
 export const getUserEmail = (store: RootStore, id: string): string | undefined => {
 	UserDataRetriever.getDebouncedUser(id);
