@@ -81,6 +81,7 @@ const ListParticipant = ({
 							data-testid={`checkbox-chip-${item.email}`}
 							value={selected}
 							disabled={!selected && isDisabled}
+							iconColor={selected ? 'primary' : 'gray0'}
 						/>
 						<Padding horizontal="small">
 							<Avatar label={item.displayName} picture={picture} />
