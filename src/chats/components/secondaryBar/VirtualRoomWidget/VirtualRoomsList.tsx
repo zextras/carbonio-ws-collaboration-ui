@@ -20,7 +20,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import CreateVirtualRoomButton from './CreateVirtualRoomButton';
-import VirtualRoomListElement from './VirtualRoomListElement';
+import VirtualRoomCard from './virtualRoomCard/VirtualRoomCard';
 import { getTemporaryRoomIdsOrderedByCreation } from '../../../../store/selectors/RoomsSelectors';
 import useStore from '../../../../store/Store';
 
@@ -82,7 +82,7 @@ const VirtualRoomsList: FC<virtualRoomsListProps> = ({ setListVisibility, parent
 	const virtualRoomListSection = useMemo(
 		() =>
 			map(virtualRoomList, (room) => (
-				<VirtualRoomListElement roomId={room} modalRef={modalRef} key={`listItem-${room}`} />
+				<VirtualRoomCard roomId={room} modalRef={modalRef} key={`listItem-${room}`} />
 			)),
 		[virtualRoomList]
 	);

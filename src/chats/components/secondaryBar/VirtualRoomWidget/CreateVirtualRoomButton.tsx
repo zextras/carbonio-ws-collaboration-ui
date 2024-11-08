@@ -120,12 +120,11 @@ const CreateVirtualRoomButton: FC<CreateVirtualRoomButtonProps> = ({
 				</Text>
 				<Padding bottom="1rem" />
 				<Input
-					backgroundColor="gray6"
 					label={virtualRoomNameInput}
 					inputRef={textRef}
 					onChange={handleOnChangeInput}
 					hasError={nameError}
-					description={nameError ? invalidNameString : ''}
+					description={nameError ? 'Please enter a shorter name' : ''}
 				/>
 			</Modal>
 		</>
