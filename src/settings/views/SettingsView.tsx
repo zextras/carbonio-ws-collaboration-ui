@@ -14,7 +14,7 @@ import Settings from '../components/Settings';
 const SettingsView = (): ReactElement => {
 	const id: string | undefined = useStore((store) => store.session.id);
 	if (!id) {
-		return <Spinner />;
+		return <Spinner data-testid="spinner" />;
 	}
 	return <Settings />;
 };
