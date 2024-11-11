@@ -7,6 +7,7 @@ import React, { FC, useMemo } from 'react';
 
 import { Avatar, Container, Row, Text, Tooltip } from '@zextras/carbonio-design-system';
 import { map, size } from 'lodash';
+import { useTranslation } from 'react-i18next';
 import styled, { DefaultTheme } from 'styled-components';
 
 import useAvatarUtilities from '../../../../../hooks/useAvatarUtilities';
@@ -61,7 +62,11 @@ const ParticipantsSection: FC<ParticipantsSectionProp> = ({
 	amIParticipating,
 	isMyRoom
 }) => {
-	const t = 0;
+	const [t] = useTranslation();
+
+	const userOnlyParticipantLabel = t('', 'You are the only active participant.');
+	const oneActiveParticipantLabel = t('', 'One active Participant.');
+	const startMeetingLabel = t('', 'Start a meeting in this virtual room.');
 
 	const meetingParticipants = useStore((store) => getMeetingParticipants(store, roomId));
 
@@ -74,23 +79,44 @@ const ParticipantsSection: FC<ParticipantsSectionProp> = ({
 
 	const participantName = useStore((store) => getUserName(store, firstParticipantId));
 
+	const userAndOtherParticipantsLabel = t(
+		'',
+		'You and other {{numberOfParticipants}} active participants.',
+		{
+			numberOfParticipants: size(meetingParticipants) - 1
+		}
+	);
+
+	const otherParticipantsLabel = t('', '{{numberOfParticipants}} active participants.', {
+		numberOfParticipants: size(meetingParticipants)
+	});
+
 	const { avatarColor: participantColor } = useAvatarUtilities(firstParticipantId);
 
 	const participantsLabel = useMemo(() => {
 		if (meetingIsActive) {
 			if (amIParticipating) {
 				if (size(meetingParticipants) === 1) {
-					return ' You are the only active participant.';
+					return userOnlyParticipantLabel;
 				}
-				return `You and other ${size(meetingParticipants) - 1} active participants.`;
+				return userAndOtherParticipantsLabel;
 			}
 			if (size(meetingParticipants) === 1) {
-				return `${size(meetingParticipants)} active participant.`;
+				return oneActiveParticipantLabel;
 			}
-			return `${size(meetingParticipants)} active participants.`;
+			return otherParticipantsLabel;
 		}
-		return 'Start a meeting in this virtual room.';
-	}, [amIParticipating, meetingIsActive, meetingParticipants]);
+		return startMeetingLabel;
+	}, [
+		amIParticipating,
+		meetingIsActive,
+		meetingParticipants,
+		oneActiveParticipantLabel,
+		otherParticipantsLabel,
+		startMeetingLabel,
+		userAndOtherParticipantsLabel,
+		userOnlyParticipantLabel
+	]);
 
 	const participantIds = useMemo(
 		() => map(meetingParticipants, (participant) => participant.userId),

@@ -53,6 +53,10 @@ const InfoSection: FC<InfoSectionProps> = ({
 	const moderatorsList = useStore((store) => getOwners(store, roomId));
 	const moderatorName = useStore((store) => getUserName(store, moderatorsList[0].userId));
 
+	const otherModeratorsLabel = t('', 'and other {{numberOfModerators}} moderators', {
+		numberOfModerators: moderatorsList.length - 1
+	});
+
 	const { avatarColor, isLoading } = useAvatarUtilities(
 		userIsModerator ? (sessionId ?? '') : moderatorsList[0].userId
 	);
@@ -72,9 +76,10 @@ const InfoSection: FC<InfoSectionProps> = ({
 		if (moderatorsList.length === 2) {
 			return otherOneModeratorLabel;
 		}
-		return `and other ${moderatorsList.length - 1} moderators`;
+		return otherModeratorsLabel;
 	}, [
 		moderatorsList.length,
+		otherModeratorsLabel,
 		userIsModerator,
 		isTheOnlyModeratorLabel,
 		sessionOnlyModeratorLabel,
