@@ -79,7 +79,7 @@ const BubbleFooter: FC<BubbleFooterProps> = ({
 		}
 	}, [messageRead, t]);
 
-	const label = useMemo(
+	const messageExtensionSizeLabel = useMemo(
 		() => `${messageExtension} • ${messageSize}`,
 		[messageExtension, messageSize]
 	);
@@ -94,9 +94,9 @@ const BubbleFooter: FC<BubbleFooterProps> = ({
 			<Row takeAvailableSpace mainAlignment="flex-start" padding={{ right: 'medium' }}>
 				<Container orientation="horizontal" width="fit" gap="0.5rem">
 					{messageExtension && messageSize && (
-						<Tooltip label={label} overflowTooltip>
+						<Tooltip label={messageExtensionSizeLabel} overflowTooltip>
 							<Text color="secondary" size="small">
-								{label}
+								{messageExtensionSizeLabel}
 							</Text>
 						</Tooltip>
 					)}
