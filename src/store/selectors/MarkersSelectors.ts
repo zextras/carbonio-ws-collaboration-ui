@@ -39,7 +39,7 @@ export const getUsersReadingMessage = (
 			store.messages[roomId],
 			(message) => message.id === marker.messageId
 		);
-		const dateToCompare = markedMessage?.date || marker.markerDate;
+		const dateToCompare = markedMessage?.date ?? marker.markerDate;
 		if (marker.from !== store.session.id && isBefore(messageDate, dateToCompare)) {
 			readBy.push(userId);
 		}
