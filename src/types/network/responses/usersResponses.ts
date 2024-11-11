@@ -11,7 +11,3 @@ export type GetUserResponse = UserBe;
 export type GetUsersResponse = UserBe[];
 
 export type GetUserPictureResponse = Blob;
-
-export type ChangeUserPictureResponse = Response;
-
-export type DeleteUserPictureResponse = Response;

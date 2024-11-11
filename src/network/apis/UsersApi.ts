@@ -11,8 +11,6 @@ import useStore from '../../store/Store';
 import { RequestType } from '../../types/network/apis/IBaseAPI';
 import IUsersApi from '../../types/network/apis/IUsersApi';
 import {
-	ChangeUserPictureResponse,
-	DeleteUserPictureResponse,
 	GetUserPictureResponse,
 	GetUserResponse,
 	GetUsersResponse
@@ -53,23 +51,6 @@ class UsersApi extends BaseAPI implements IUsersApi {
 
 	public getUserPicture(userId: string): Promise<GetUserPictureResponse> {
 		return this.fetchAPI(`users/${userId}/picture`, RequestType.GET);
-	}
-
-	public changeUserPicture(userId: string, file: File): Promise<ChangeUserPictureResponse> {
-		return new Promise<ChangeUserPictureResponse>((resolve, reject) => {
-			const sizeLimit = useStore.getState().session.capabilities?.maxUserImageSizeInKb;
-			if (sizeLimit && file.size > sizeLimit * 1024) {
-				reject(new Error('File too large'));
-			} else {
-				this.uploadFileFetchAPI(`users/${userId}/picture`, RequestType.PUT, file)
-					.then((resp: ChangeUserPictureResponse) => resolve(resp))
-					.catch((error) => reject(new Error(error)));
-			}
-		});
-	}
-
-	public deleteUserPicture(userId: string): Promise<DeleteUserPictureResponse> {
-		return this.fetchAPI(`users/${userId}/picture`, RequestType.DELETE);
 	}
 }
 

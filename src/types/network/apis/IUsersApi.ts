@@ -5,8 +5,6 @@
  */
 
 import {
-	ChangeUserPictureResponse,
-	DeleteUserPictureResponse,
 	GetUserPictureResponse,
 	GetUserResponse,
 	GetUsersResponse
@@ -17,8 +15,6 @@ interface IUsersApi {
 	getUsers(userId: string[]): Promise<GetUsersResponse>;
 	getURLUserPicture(userId: string): string;
 	getUserPicture(userId: string): Promise<GetUserPictureResponse>;
-	changeUserPicture(userId: string, file: File): Promise<ChangeUserPictureResponse>;
-	deleteUserPicture(userId: string): Promise<DeleteUserPictureResponse>;
 }
 
 export default IUsersApi;
