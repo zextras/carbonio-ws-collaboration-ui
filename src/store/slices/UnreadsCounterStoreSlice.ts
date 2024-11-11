@@ -8,6 +8,7 @@ import { produce } from 'immer';
 import { filter, find, size } from 'lodash';
 import { StateCreator } from 'zustand';
 
+import { isMyId } from '../../network/websocket/eventHandlersUtilities';
 import { Message, MessageType } from '../../types/store/MessageTypes';
 import { RootStore, UnreadsCounterSlice } from '../../types/store/StoreTypes';
 import { isBefore } from '../../utils/dateUtils';
@@ -39,21 +40,29 @@ export const useUnreadsCountStoreSlice: StateCreator<UnreadsCounterSlice> = (
 	updateUnreadCount: (roomId: string): void => {
 		set(
 			produce((draft: RootStore) => {
+				const messages = draft.messages[roomId];
 				const lastMarker =
 					draft.markers[roomId] &&
 					draft.session.id !== undefined &&
 					draft.markers[roomId][draft.session.id];
 				const lastMarkedMessage = find(
-					draft.messages[roomId],
+					messages,
 					(message: Message) => lastMarker && message.id === lastMarker.messageId
 				);
+				const isConfigurationMessage = (type: MessageType): boolean =>
+					type === MessageType.CONFIGURATION_MSG;
+				const isTextMessageFromOther = (message: Message): boolean =>
+					message.type === MessageType.TEXT_MSG && !isMyId(message.from);
+				const isAfterLastMarker = (date: number): boolean => {
+					if (!lastMarker) return true;
+					const dateToCompare = lastMarkedMessage ? lastMarkedMessage.date : lastMarker.markerDate;
+					return !isBefore(date, dateToCompare);
+				};
 				const unreadByMe = filter(
-					draft.messages[roomId],
+					messages,
 					(message) =>
-						(message.type === MessageType.CONFIGURATION_MSG ||
-							(message.type === MessageType.TEXT_MSG && message.from !== draft.session.id)) &&
-						(!lastMarkedMessage ||
-							(lastMarkedMessage && !isBefore(message.date, lastMarkedMessage.date)))
+						(isConfigurationMessage(message.type) || isTextMessageFromOther(message)) &&
+						isAfterLastMarker(message.date)
 				);
 				draft.unreads[roomId] = size(unreadByMe);
 			}),

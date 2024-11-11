@@ -28,7 +28,8 @@ export function calcReads(messageDate: number, roomId: string): MarkerStatus {
 				roomMessages,
 				(message: Message) => message.id === marker.messageId
 			) as TextMessage;
-			if (marker.from !== sessionId && markedMessage && isBefore(messageDate, markedMessage.date)) {
+			const dateToCompare = markedMessage?.date || marker.markerDate;
+			if (marker.from !== sessionId && isBefore(messageDate, dateToCompare)) {
 				readBy.push(userId);
 			}
 		});
