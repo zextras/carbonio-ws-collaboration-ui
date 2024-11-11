@@ -10,11 +10,7 @@ import BaseAPI from './BaseAPI';
 import useStore from '../../store/Store';
 import { RequestType } from '../../types/network/apis/IBaseAPI';
 import IUsersApi from '../../types/network/apis/IUsersApi';
-import {
-	GetUserPictureResponse,
-	GetUserResponse,
-	GetUsersResponse
-} from '../../types/network/responses/usersResponses';
+import { GetUserResponse, GetUsersResponse } from '../../types/network/responses/usersResponses';
 
 class UsersApi extends BaseAPI implements IUsersApi {
 	// Singleton design pattern
@@ -44,13 +40,6 @@ class UsersApi extends BaseAPI implements IUsersApi {
 				return resp;
 			}
 		);
-	}
-
-	public getURLUserPicture = (userId: string): string =>
-		`${window.document.location.origin}/services/chats/users/${userId}/picture`;
-
-	public getUserPicture(userId: string): Promise<GetUserPictureResponse> {
-		return this.fetchAPI(`users/${userId}/picture`, RequestType.GET);
 	}
 }
 

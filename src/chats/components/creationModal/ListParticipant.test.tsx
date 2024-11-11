@@ -9,9 +9,6 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 
 import ListParticipant from './ListParticipant';
-import useStore from '../../../store/Store';
-import { createMockUser } from '../../../tests/createMock';
-import { mockedGetURLUserPicture } from '../../../tests/mocks/network';
 import { setup } from '../../../tests/test-utils';
 import { ContactInfo } from '../../../types/network/soap/searchUsersByFeatureRequest';
 
@@ -59,22 +56,5 @@ describe('List Participant', () => {
 		);
 		const contactEmail = screen.getByTestId(`${contactInfo.id}-emailSelectable`);
 		expect(contactEmail).not.toHaveStyle('user-select: none');
-	});
-
-	test('Show user picture if user has one', () => {
-		const store = useStore.getState();
-		store.setUserInfo(createMockUser({ id: contactInfo.id, pictureUpdatedAt: '2022-01-01' }));
-		setup(
-			<ListParticipant
-				item={contactInfo}
-				selected={false}
-				onClickCb={(): undefined => undefined}
-				isDisabled={false}
-				isOwner={mockIsOwner}
-				updateOwner={mockUpdateOwner}
-				canBeModerator
-			/>
-		);
-		expect(mockedGetURLUserPicture).toHaveBeenCalled();
 	});
 });

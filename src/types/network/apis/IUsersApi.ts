@@ -4,17 +4,11 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import {
-	GetUserPictureResponse,
-	GetUserResponse,
-	GetUsersResponse
-} from '../responses/usersResponses';
+import { GetUserResponse, GetUsersResponse } from '../responses/usersResponses';
 
 interface IUsersApi {
 	getUser(userId: string): Promise<GetUserResponse>;
 	getUsers(userId: string[]): Promise<GetUsersResponse>;
-	getURLUserPicture(userId: string): string;
-	getUserPicture(userId: string): Promise<GetUserPictureResponse>;
 }
 
 export default IUsersApi;

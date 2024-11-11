@@ -64,26 +64,4 @@ describe('Users API', () => {
 		expect(size(store.users)).toBe(2);
 		expect(store.users[user.id]).toEqual(user);
 	});
-
-	test('getURLUserPicture is called correctly', () => {
-		const user = createMockUser({ id: 'userId' });
-		const url = usersApi.getURLUserPicture(user.id);
-		expect(url).toEqual(`http://localhost/services/chats/users/userId/picture`);
-	});
-
-	test('getUserPicture is called correctly', async () => {
-		// Send getUserPicture request
-		await usersApi.getUserPicture(user.id);
-
-		// Set appropriate headers
-		const headers = new Headers();
-		headers.append(contentType, applicationJson);
-
-		// Check if fetch is called with the correct parameters
-		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/users/${user.id}/picture`, {
-			headers,
-			method: 'GET',
-			body: undefined
-		});
-	});
 });

@@ -9,5 +9,3 @@ import { UserBe } from '../models/userBeTypes';
 export type GetUserResponse = UserBe;
 
 export type GetUsersResponse = UserBe[];
-
-export type GetUserPictureResponse = Blob;
