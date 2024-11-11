@@ -7,7 +7,6 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 
 import {
-	Button,
 	Container,
 	Icon,
 	Padding,
@@ -22,7 +21,10 @@ import styled from 'styled-components';
 
 import MessageReactionsList from './MessageReactionsList';
 import ReadByDropdown from './readByDropdown/ReadByDropdown';
+import { getRoomTypeSelector } from '../../../../store/selectors/RoomsSelectors';
+import useStore from '../../../../store/Store';
 import { MarkerStatus } from '../../../../types/store/MarkersTypes';
+import { RoomType } from '../../../../types/store/RoomTypes';
 import { formatDate } from '../../../../utils/dateUtils';
 
 type BubbleFooterProps = {
@@ -43,6 +45,10 @@ const ItalicText = styled(Text)`
 	padding-right: ${({ theme }): string => theme.sizes.padding.small};
 `;
 
+const CustomIcon = styled(Icon)<{ $clickable: boolean }>`
+	cursor: ${({ $clickable }): string => ($clickable ? 'pointer' : 'default')};
+`;
+
 const BubbleFooter: FC<BubbleFooterProps> = ({
 	date,
 	isMyMessage = false,
@@ -57,6 +63,8 @@ const BubbleFooter: FC<BubbleFooterProps> = ({
 }) => {
 	const [t] = useTranslation();
 	const editedLabel = t('message.edited', 'edited');
+
+	const roomType = useStore((store) => getRoomTypeSelector(store, roomId ?? ''));
 
 	const [readByDropdownOpen, setReadByDropdownOpen] = useState(false);
 
@@ -92,11 +100,17 @@ const BubbleFooter: FC<BubbleFooterProps> = ({
 		}
 	}, [messageRead, t]);
 
-	const closeDropdown = useCallback(() => setReadByDropdownOpen(false), []);
+	const closeDropdown = useCallback((event: Event) => {
+		const containerReadByIcon = window.document.getElementById('container-read-by-icon');
+		if (containerReadByIcon && !containerReadByIcon.contains(event.target as Node)) {
+			setReadByDropdownOpen(false);
+		}
+	}, []);
+
 	const handleScroll = useCallback(
-		(e: Event) => {
+		(event: Event) => {
 			const dropdownReadBy = window.document.getElementById(`read-by-dropdown-${stanzaId}`);
-			if (dropdownReadBy && !dropdownReadBy.contains(e.target as Node)) {
+			if (dropdownReadBy && !dropdownReadBy.contains(event.target as Node)) {
 				setReadByDropdownOpen(false);
 			}
 		},
@@ -112,6 +126,19 @@ const BubbleFooter: FC<BubbleFooterProps> = ({
 			messageListRef?.removeEventListener('scroll', handleScroll, true);
 		};
 	}, [closeDropdown, handleScroll, roomId]);
+
+	const readByClickable = useMemo(
+		() =>
+			includes([MarkerStatus.READ_BY_SOMEONE, MarkerStatus.READ], messageRead) &&
+			roomType !== RoomType.ONE_TO_ONE,
+		[messageRead, roomType]
+	);
+
+	const clickReadBy = useCallback(() => {
+		if (readByClickable) {
+			setReadByDropdownOpen((prev) => !prev);
+		}
+	}, [readByClickable]);
 
 	return (
 		<Container
@@ -141,21 +168,21 @@ const BubbleFooter: FC<BubbleFooterProps> = ({
 				{isMyMessage &&
 					messageRead &&
 					(canSeeMessageReads || messageRead === MarkerStatus.PENDING) && (
-						<Container width="fit" style={{ position: 'relative' }}>
+						<Container
+							id="container-read-by-icon"
+							width="fit"
+							style={{ position: 'relative' }}
+							onClick={clickReadBy}
+						>
 							<Tooltip label={dropdownTooltip}>
-								{includes([MarkerStatus.PENDING, MarkerStatus.UNREAD], messageRead) ? (
-									<Padding width="fit" all="extrasmall">
-										<Icon size="small" icon={ackIcon} color={ackIconColor} />
-									</Padding>
-								) : (
-									<Button
+								<Padding width="fit" all="extrasmall">
+									<CustomIcon
+										$clickable={readByClickable}
+										size="small"
 										icon={ackIcon}
 										color={ackIconColor}
-										onClick={(): void => setReadByDropdownOpen((prev) => !prev)}
-										size="small"
-										type="ghost"
 									/>
-								)}
+								</Padding>
 							</Tooltip>
 							{readByDropdownOpen && roomId && stanzaId && (
 								<ReadByDropdown roomId={roomId} stanzaId={stanzaId} />

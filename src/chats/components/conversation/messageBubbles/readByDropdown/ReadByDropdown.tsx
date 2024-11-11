@@ -21,6 +21,7 @@ const CustomDropdown = styled(Container)`
 	z-index: 3;
 	border-radius: 1rem;
 	box-shadow: 0 0 0.25rem rgba(166, 166, 166, 0.5);
+	user-select: none;
 `;
 
 type ReadByProps = {
@@ -29,7 +30,7 @@ type ReadByProps = {
 };
 const ReadByDropdown = ({ roomId, stanzaId }: ReadByProps): ReactElement => {
 	const [t] = useTranslation();
-	const seenByLabel = t('', 'Seen by:'); // TODO add translation key
+	const seenByLabel = t('readBy.title', 'Seen by:');
 
 	const readingUsers = useStore((store) => getUsersReadingMessage(store, roomId, stanzaId));
 
@@ -44,7 +45,7 @@ const ReadByDropdown = ({ roomId, stanzaId }: ReadByProps): ReactElement => {
 			background="gray6"
 			width="fit"
 			height="fit"
-			padding="small"
+			padding="medium"
 			mainAlignment="flex-start"
 			gap="0.5rem"
 		>
