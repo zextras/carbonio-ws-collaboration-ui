@@ -121,7 +121,7 @@ const ConversationHeader = ({
 			padding={{ vertical: 'medium', horizontal: 'large' }}
 		>
 			<Row takeAvailableSpace mainAlignment="flex-start">
-				<Container orientation="vertical" width="fit" height=" fit" crossAlignment="flex-start">
+				<Container orientation="vertical" height=" fit" crossAlignment="flex-start">
 					<Tooltip label={roomName} overflow="ellipsis" overflowTooltip>
 						<CustomText $isWritingIsVisible={isWritingIsDefined}>{roomName}</CustomText>
 					</Tooltip>
