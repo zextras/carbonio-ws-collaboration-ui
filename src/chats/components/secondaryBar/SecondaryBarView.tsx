@@ -6,7 +6,7 @@
 
 import React, { useMemo, useState } from 'react';
 
-import { Container, TextWithTooltip } from '@zextras/carbonio-design-system';
+import { Container, Tooltip, Text } from '@zextras/carbonio-design-system';
 import { size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -36,7 +36,7 @@ export type FilteredConversation = {
 	members: Member[];
 };
 
-export const SecondaryBarInfoText = styled(TextWithTooltip)`
+export const SecondaryBarInfoText = styled(Text)`
 	text-align: center;
 `;
 
@@ -85,14 +85,16 @@ const SecondaryBarView: React.FC<SecondaryBarSingleGroupsViewProps> = ({ expande
 					<ScrollContainer mainAlignment="flex-start">
 						{noResults ? (
 							<Container padding={{ vertical: '2rem', horizontal: '1rem' }} height="fit">
-								<SecondaryBarInfoText
-									color="gray1"
-									size="small"
-									weight="light"
-									overflow={expanded ? 'break-word' : 'ellipsis'}
-								>
-									{noResultsLabel}
-								</SecondaryBarInfoText>
+								<Tooltip label={noResultsLabel} overflowTooltip>
+									<SecondaryBarInfoText
+										color="gray1"
+										size="small"
+										weight="light"
+										overflow={expanded ? 'break-word' : 'ellipsis'}
+									>
+										{noResultsLabel}
+									</SecondaryBarInfoText>
+								</Tooltip>
 							</Container>
 						) : (
 							<>

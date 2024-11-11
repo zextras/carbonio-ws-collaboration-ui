@@ -6,15 +6,7 @@
 
 import React, { FC, useMemo } from 'react';
 
-import {
-	Container,
-	Icon,
-	Padding,
-	Row,
-	Text,
-	TextWithTooltip,
-	Tooltip
-} from '@zextras/carbonio-design-system';
+import { Container, Icon, Padding, Row, Text, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -87,6 +79,11 @@ const BubbleFooter: FC<BubbleFooterProps> = ({
 		}
 	}, [messageRead, t]);
 
+	const label = useMemo(
+		() => `${messageExtension} • ${messageSize}`,
+		[messageExtension, messageSize]
+	);
+
 	return (
 		<Container
 			orientation="horizontal"
@@ -97,9 +94,11 @@ const BubbleFooter: FC<BubbleFooterProps> = ({
 			<Row takeAvailableSpace mainAlignment="flex-start" padding={{ right: 'medium' }}>
 				<Container orientation="horizontal" width="fit" gap="0.5rem">
 					{messageExtension && messageSize && (
-						<TextWithTooltip color="secondary" size="small">
-							{messageExtension} • {messageSize}
-						</TextWithTooltip>
+						<Tooltip label={label} overflowTooltip>
+							<Text color="secondary" size="small">
+								{label}
+							</Text>
+						</Tooltip>
 					)}
 					{showReactions && <MessageReactionsList roomId={roomId!} stanzaId={stanzaId!} />}
 				</Container>
