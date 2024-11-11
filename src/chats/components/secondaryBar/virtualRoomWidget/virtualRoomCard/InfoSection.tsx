@@ -68,14 +68,13 @@ const InfoSection: FC<InfoSectionProps> = ({
 
 	const moderatorLabel = useMemo(() => {
 		if (moderatorsList.length === 1) {
-			if (userIsModerator) {
-				return sessionOnlyModeratorLabel;
-			}
-			return isTheOnlyModeratorLabel;
+			return userIsModerator ? sessionOnlyModeratorLabel : isTheOnlyModeratorLabel;
 		}
+
 		if (moderatorsList.length === 2) {
 			return otherOneModeratorLabel;
 		}
+
 		return otherModeratorsLabel;
 	}, [
 		moderatorsList.length,

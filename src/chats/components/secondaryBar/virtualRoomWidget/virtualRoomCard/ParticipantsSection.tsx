@@ -94,19 +94,22 @@ const ParticipantsSection: FC<ParticipantsSectionProp> = ({
 	const { avatarColor: participantColor } = useAvatarUtilities(firstParticipantId);
 
 	const participantsLabel = useMemo(() => {
-		if (meetingIsActive) {
-			if (amIParticipating) {
-				if (size(meetingParticipants) === 1) {
-					return userOnlyParticipantLabel;
-				}
-				return userAndOtherParticipantsLabel;
-			}
-			if (size(meetingParticipants) === 1) {
-				return oneActiveParticipantLabel;
-			}
-			return otherParticipantsLabel;
+		if (!meetingIsActive) {
+			return startMeetingLabel;
 		}
-		return startMeetingLabel;
+
+		if (amIParticipating) {
+			if (size(meetingParticipants) === 1) {
+				return userOnlyParticipantLabel;
+			}
+			return userAndOtherParticipantsLabel;
+		}
+
+		if (size(meetingParticipants) === 1) {
+			return oneActiveParticipantLabel;
+		}
+
+		return otherParticipantsLabel;
 	}, [
 		amIParticipating,
 		meetingIsActive,
@@ -154,7 +157,7 @@ const ParticipantsSection: FC<ParticipantsSectionProp> = ({
 					{participantsLabel}
 				</Text>
 			</CustomRow>
-			<Tooltip label={userNames.join(', ')} disabled={size(meetingParticipants) === 0}>
+			<Tooltip label={userNames.join(', ')} disabled={size(meetingParticipants) === 0 || !isMyRoom}>
 				<CustomRow isMyRoom={isMyRoom || amIParticipating}>{avatarList}</CustomRow>
 			</Tooltip>
 		</Container>
