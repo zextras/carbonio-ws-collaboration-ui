@@ -39,6 +39,7 @@ const Presence = styled.div`
 type ReadByDropdownUserProps = {
 	userId: string;
 };
+
 const ReadByDropdownUser = ({ userId }: ReadByDropdownUserProps): ReactElement => {
 	const username = useStore((store) => getUserName(store, userId));
 
