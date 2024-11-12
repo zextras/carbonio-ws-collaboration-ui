@@ -74,7 +74,7 @@ const ParticipantsSection: FC<ParticipantsSectionProp> = ({
 	);
 	const startMeetingLabel = t(
 		'meeting.virtual.startPrompt',
-		'Start a meeting in this virtual room.'
+		'Start a meeting in this Virtual Room.'
 	);
 
 	const meetingParticipants = useStore((store) => getMeetingParticipants(store, roomId));
