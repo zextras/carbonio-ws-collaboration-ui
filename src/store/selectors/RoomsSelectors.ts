@@ -4,10 +4,21 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { countBy, filter, find, forEach, map, orderBy, size } from 'lodash';
+import {
+	countBy,
+	differenceWith,
+	filter,
+	find,
+	forEach,
+	isEqual,
+	map,
+	orderBy,
+	size
+} from 'lodash';
 
 import { getUserName } from './UsersSelectors';
 import { RoomsApi } from '../../network';
+import { MemberBe } from '../../types/network/models/roomBeTypes';
 import { Member, Room, RoomType } from '../../types/store/RoomTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 
@@ -132,3 +143,25 @@ export const getSingleConversationsUserId = (state: RootStore): string[] => {
 };
 
 export const getIsThereAnyRoom = (state: RootStore): boolean => size(state.rooms) > 0;
+
+export const getDuplicatedRoom = (
+	state: RootStore,
+	name: string,
+	members: MemberBe[]
+): Room | undefined =>
+	find(state.rooms, (room) => {
+		if (room.type === RoomType.GROUP) {
+			if (room.name === name && size(members) === size(room.members)) {
+				const roomMembers = map(room.members, (member) => ({
+					userId: member.userId,
+					owner: member.owner
+				}));
+				return (
+					size(differenceWith(members, roomMembers, isEqual)) === 0 &&
+					size(differenceWith(roomMembers, members, isEqual)) === 0
+				);
+			}
+			return false;
+		}
+		return false;
+	});
