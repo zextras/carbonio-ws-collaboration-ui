@@ -48,7 +48,7 @@ const CreateVirtualRoomButton: FC<CreateVirtualRoomButtonProps> = ({
 		'Virtual Room’s name is required'
 	);
 	const newRoomModalDescription = t(
-		'',
+		'meeting.virtual.modal.description',
 		'Give to this Room a recognizable name in order to let your attendees know what they are expecting to meet about.'
 	);
 

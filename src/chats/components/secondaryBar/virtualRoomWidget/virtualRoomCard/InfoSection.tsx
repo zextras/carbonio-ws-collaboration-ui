@@ -45,17 +45,30 @@ const InfoSection: FC<InfoSectionProps> = ({
 }) => {
 	const [t] = useTranslation();
 
-	const sessionOnlyModeratorLabel = t('', "You're the only moderator");
-	const isTheOnlyModeratorLabel = t('', 'is the only moderator');
-	const otherOneModeratorLabel = t('', 'and other one moderator');
+	const sessionOnlyModeratorLabel = t(
+		'meeting.virtual.moderators.onlyUser',
+		"You're the only moderator"
+	);
+	const isTheOnlyModeratorLabel = t(
+		'meeting.virtual.moderators.onlyModerator',
+		'is the only moderator'
+	);
+	const otherOneModeratorLabel = t(
+		'meeting.virtual.moderators.singleAdditional',
+		'and other one moderator'
+	);
 
 	const sessionName = useStore((store) => getUserName(store, sessionId ?? ''));
 	const moderatorsList = useStore((store) => getOwners(store, roomId));
 	const moderatorName = useStore((store) => getUserName(store, moderatorsList[0].userId));
 
-	const otherModeratorsLabel = t('', 'and other {{numberOfModerators}} moderators', {
-		numberOfModerators: moderatorsList.length - 1
-	});
+	const otherModeratorsLabel = t(
+		'meeting.virtual.moderators.multipleAdditional',
+		'and other {{numberOfModerators}} moderators',
+		{
+			numberOfModerators: moderatorsList.length - 1
+		}
+	);
 
 	const { avatarColor, isLoading } = useAvatarUtilities(
 		userIsModerator ? (sessionId ?? '') : moderatorsList[0].userId

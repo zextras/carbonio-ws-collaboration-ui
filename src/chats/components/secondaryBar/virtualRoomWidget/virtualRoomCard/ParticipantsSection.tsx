@@ -64,9 +64,18 @@ const ParticipantsSection: FC<ParticipantsSectionProp> = ({
 }) => {
 	const [t] = useTranslation();
 
-	const userOnlyParticipantLabel = t('', 'You are the only active participant.');
-	const oneActiveParticipantLabel = t('', 'One active Participant.');
-	const startMeetingLabel = t('', 'Start a meeting in this virtual room.');
+	const userOnlyParticipantLabel = t(
+		'meeting.virtual.participants.onlyUser',
+		'You are the only active participant.'
+	);
+	const oneActiveParticipantLabel = t(
+		'meeting.virtual.participants.singleActive',
+		'One active Participant.'
+	);
+	const startMeetingLabel = t(
+		'meeting.virtual.startPrompt',
+		'Start a meeting in this virtual room.'
+	);
 
 	const meetingParticipants = useStore((store) => getMeetingParticipants(store, roomId));
 
@@ -80,16 +89,20 @@ const ParticipantsSection: FC<ParticipantsSectionProp> = ({
 	const participantName = useStore((store) => getUserName(store, firstParticipantId));
 
 	const userAndOtherParticipantsLabel = t(
-		'',
+		'meeting.virtual.participants.userWithOthers',
 		'You and other {{numberOfParticipants}} active participants.',
 		{
 			numberOfParticipants: size(meetingParticipants) - 1
 		}
 	);
 
-	const otherParticipantsLabel = t('', '{{numberOfParticipants}} active participants.', {
-		numberOfParticipants: size(meetingParticipants)
-	});
+	const otherParticipantsLabel = t(
+		'meeting.virtual.participants.multipleActive',
+		'{{numberOfParticipants}} active participants.',
+		{
+			numberOfParticipants: size(meetingParticipants)
+		}
+	);
 
 	const { avatarColor: participantColor } = useAvatarUtilities(firstParticipantId);
 
