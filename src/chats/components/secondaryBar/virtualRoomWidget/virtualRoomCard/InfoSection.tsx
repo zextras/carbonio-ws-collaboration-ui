@@ -5,7 +5,7 @@
  */
 import React, { FC, useMemo } from 'react';
 
-import { Avatar, Container, Row, Shimmer, Text } from '@zextras/carbonio-design-system';
+import { Avatar, Row, Shimmer, Text } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 import styled, { DefaultTheme } from 'styled-components';
 
@@ -23,6 +23,11 @@ type InfoSectionProps = {
 };
 
 const CustomAvatar = styled(Avatar)`
+	min-width: 2rem;
+	min-height: 2rem;
+`;
+
+const CustomShimmerAvatar = styled(Shimmer.Avatar)`
 	min-width: 2rem;
 	min-height: 2rem;
 `;
@@ -106,23 +111,25 @@ const InfoSection: FC<InfoSectionProps> = ({
 			mainAlignment="flex-start"
 			isMyRoom={amIParticipating || isMyRoom}
 		>
-			{isLoading ? (
-				<Shimmer.Avatar />
-			) : (
-				<CustomAvatar
-					label={userIsModerator ? sessionName : moderatorName}
-					shape="round"
-					background={avatarColor}
-				/>
-			)}
-			<Container height="fit" width="fit" crossAlignment="flex-start">
+			<Row>
+				{isLoading ? (
+					<CustomShimmerAvatar />
+				) : (
+					<CustomAvatar
+						label={userIsModerator ? sessionName : moderatorName}
+						shape="round"
+						background={avatarColor}
+					/>
+				)}
+			</Row>
+			<Row orientation="vertical" takeAvailableSpace height="fit" crossAlignment="flex-start">
 				<Text size="small" overflow="ellipsis">
 					{ownerName}
 				</Text>
 				<Text size="extrasmall" weight="light" color="gray1">
 					{moderatorLabel}
 				</Text>
-			</Container>
+			</Row>
 		</CustomRow>
 	);
 };

@@ -70,7 +70,7 @@ const ParticipantsSection: FC<ParticipantsSectionProp> = ({
 	);
 	const oneActiveParticipantLabel = t(
 		'meeting.virtual.participants.singleActive',
-		'One active Participant.'
+		'One active participant.'
 	);
 	const startMeetingLabel = t(
 		'meeting.virtual.startPrompt',
