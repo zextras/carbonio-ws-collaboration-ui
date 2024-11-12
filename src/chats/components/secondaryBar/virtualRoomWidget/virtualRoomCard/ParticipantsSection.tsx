@@ -104,7 +104,7 @@ const ParticipantsSection: FC<ParticipantsSectionProp> = ({
 		}
 	);
 
-	const { avatarColor: participantColor } = useAvatarUtilities(firstParticipantId);
+	const { avatarColor, avatarPicture } = useAvatarUtilities(firstParticipantId);
 
 	const participantsLabel = useMemo(() => {
 		if (!meetingIsActive) {
@@ -149,14 +149,15 @@ const ParticipantsSection: FC<ParticipantsSectionProp> = ({
 					<CustomParticipantAvatar
 						label={participantName}
 						shape="round"
-						background={participantColor}
+						background={avatarColor}
+						picture={avatarPicture}
 					/>
 					{size(meetingParticipants) > 1 && (
 						<AvatarCounter>+{size(meetingParticipants) - 1}</AvatarCounter>
 					)}
 				</AvatarContainer>
 			),
-		[meetingParticipants, participantColor, participantName]
+		[avatarColor, avatarPicture, meetingParticipants, participantName]
 	);
 
 	return (

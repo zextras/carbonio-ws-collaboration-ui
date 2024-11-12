@@ -39,6 +39,10 @@ const CreateVirtualRoomButton: FC<CreateVirtualRoomButtonProps> = ({
 	const createTooltip = t('meeting.virtual.createTooltip', 'Create new Virtual Room');
 	const virtualRoomNameInput = t('meeting.virtual.creationInput', 'New Virtual Room’s name*');
 	const invalidNameString = t('meeting.virtual.invalidNameTooltip', 'Invalid name');
+	const invalidNameCaption = t(
+		'meeting.virtual.modal.invalidNameCaption',
+		'Please enter a shorter name'
+	);
 	const errorSnackbar = t(
 		'settings.profile.errorGenericResponse',
 		'Something went wrong. Please retry'
@@ -124,7 +128,7 @@ const CreateVirtualRoomButton: FC<CreateVirtualRoomButtonProps> = ({
 					inputRef={textRef}
 					onChange={handleOnChangeInput}
 					hasError={nameError}
-					description={nameError ? 'Please enter a shorter name' : ''}
+					description={nameError ? invalidNameCaption : ''}
 				/>
 			</Modal>
 		</>

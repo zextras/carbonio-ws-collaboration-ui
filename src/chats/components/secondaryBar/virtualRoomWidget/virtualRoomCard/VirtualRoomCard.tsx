@@ -4,10 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { FC, useMemo } from 'react';
+import React, { FC } from 'react';
 
-import { Container, Text, Row, Padding } from '@zextras/carbonio-design-system';
-import { find } from 'lodash';
+import { Container, Text, Row } from '@zextras/carbonio-design-system';
 import styled, { DefaultTheme } from 'styled-components';
 
 import InfoSection from './InfoSection';
@@ -21,7 +20,6 @@ import {
 	getOwnershipOfTheRoom,
 	getRoomSelector
 } from '../../../../../store/selectors/RoomsSelectors';
-import { getUserId } from '../../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../../store/Store';
 
 type virtualRoomElementProps = {
@@ -39,13 +37,13 @@ const CustomContainer = styled(Container)`
 			: 'border: 1px solid #e6e9ed;'};
 `;
 
-const CustomRow = styled(Row)<{ isMyRoom: boolean | undefined }>`
+const CustomRow = styled(Row)<{ $isMyRoom: boolean | undefined }>`
 	${({
-		isMyRoom
+		$isMyRoom
 	}: {
-		isMyRoom: boolean | undefined;
+		$isMyRoom: boolean | undefined;
 		theme: DefaultTheme;
-	}): string | undefined | false => !isMyRoom && 'opacity: 0.5; cursor: default;'};
+	}): string | undefined | false => !$isMyRoom && 'opacity: 0.5; cursor: default;'};
 `;
 
 const MeetingActive = styled.div`
@@ -66,44 +64,33 @@ const VirtualRoomCard: FC<virtualRoomElementProps> = ({ roomId, modalRef }) => {
 	const meetingIsActive: boolean = useStore((store) => getMeetingActive(store, roomId));
 	const amIParticipating = useStore((state) => getMyMeetingParticipation(state, roomId));
 	const userIsModerator = useStore((store) => getOwnershipOfTheRoom(store, roomId ?? ''));
-	const sessionId = useStore(getUserId);
-
-	const userIsMember = useMemo(
-		() => find(room.members, (member) => member.userId === sessionId),
-		[room.members, sessionId]
-	);
-
-	const isMyRoom = useMemo(() => userIsMember && userIsModerator, [userIsMember, userIsModerator]);
 
 	return (
-		<CustomContainer padding="1rem" meetingIsActive={meetingIsActive}>
+		<CustomContainer padding="1rem" gap="0.5rem" meetingIsActive={meetingIsActive}>
 			<Container orientation="horizontal">
 				<InfoSection
 					roomId={roomId}
 					userIsModerator={userIsModerator}
-					sessionId={sessionId}
 					amIParticipating={amIParticipating}
-					isMyRoom={isMyRoom}
+					isMyRoom={userIsModerator}
 				/>
 				<ManageMeetingButtons
 					roomId={roomId}
-					sessionId={sessionId}
 					amIParticipating={amIParticipating}
-					isMyRoom={isMyRoom}
+					isMyRoom={userIsModerator}
 					modalRef={modalRef}
 					meetingIsActive={meetingIsActive}
 				/>
 			</Container>
-			<Padding bottom="0.5rem" />
 			<Container gap="0.5rem">
 				<Container orientation="horizontal" gap="0.5rem">
-					<CustomRow width="fit" height="fit" isMyRoom={isMyRoom || amIParticipating}>
+					<CustomRow width="fit" height="fit" $isMyRoom={userIsModerator || amIParticipating}>
 						<MeetingActive meetingIsActive={meetingIsActive} />
 					</CustomRow>
 					<CustomRow
 						takeAvailableSpace
 						mainAlignment="flex-start"
-						isMyRoom={isMyRoom || amIParticipating}
+						$isMyRoom={userIsModerator || amIParticipating}
 					>
 						<Text size="large">{room.name}</Text>
 					</CustomRow>
@@ -112,7 +99,7 @@ const VirtualRoomCard: FC<virtualRoomElementProps> = ({ roomId, modalRef }) => {
 					roomId={roomId}
 					meetingIsActive={meetingIsActive}
 					amIParticipating={amIParticipating}
-					isMyRoom={isMyRoom}
+					isMyRoom={userIsModerator}
 				/>
 			</Container>
 		</CustomContainer>

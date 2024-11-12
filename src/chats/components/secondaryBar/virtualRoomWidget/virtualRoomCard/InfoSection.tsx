@@ -11,13 +11,13 @@ import styled, { DefaultTheme } from 'styled-components';
 
 import useAvatarUtilities from '../../../../../hooks/useAvatarUtilities';
 import { getOwners } from '../../../../../store/selectors/RoomsSelectors';
+import { getUserId } from '../../../../../store/selectors/SessionSelectors';
 import { getUserName } from '../../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../../store/Store';
 
 type InfoSectionProps = {
 	roomId: string;
 	userIsModerator: boolean;
-	sessionId: string | undefined;
 	amIParticipating: boolean;
 	isMyRoom: boolean | undefined;
 };
@@ -32,19 +32,18 @@ const CustomShimmerAvatar = styled(Shimmer.Avatar)`
 	min-height: 2rem;
 `;
 
-const CustomRow = styled(Row)<{ isMyRoom: boolean | undefined }>`
+const CustomRow = styled(Row)<{ $isMyRoom: boolean | undefined }>`
 	${({
-		isMyRoom
+		$isMyRoom
 	}: {
-		isMyRoom: boolean | undefined;
+		$isMyRoom: boolean | undefined;
 		theme: DefaultTheme;
-	}): string | undefined | false => !isMyRoom && 'opacity: 0.5; cursor: default;'};
+	}): string | undefined | false => !$isMyRoom && 'opacity: 0.5; cursor: default;'};
 `;
 
 const InfoSection: FC<InfoSectionProps> = ({
 	roomId,
 	userIsModerator,
-	sessionId,
 	amIParticipating,
 	isMyRoom
 }) => {
@@ -63,6 +62,7 @@ const InfoSection: FC<InfoSectionProps> = ({
 		'and other one moderator'
 	);
 
+	const sessionId = useStore(getUserId);
 	const sessionName = useStore((store) => getUserName(store, sessionId ?? ''));
 	const moderatorsList = useStore((store) => getOwners(store, roomId));
 	const moderatorName = useStore((store) => getUserName(store, moderatorsList[0].userId));
@@ -75,7 +75,7 @@ const InfoSection: FC<InfoSectionProps> = ({
 		}
 	);
 
-	const { avatarColor, isLoading } = useAvatarUtilities(
+	const { avatarPicture, avatarColor, isLoading } = useAvatarUtilities(
 		userIsModerator ? (sessionId ?? '') : moderatorsList[0].userId
 	);
 
@@ -109,7 +109,7 @@ const InfoSection: FC<InfoSectionProps> = ({
 			orientation="horizontal"
 			gap="0.5rem"
 			mainAlignment="flex-start"
-			isMyRoom={amIParticipating || isMyRoom}
+			$isMyRoom={amIParticipating || isMyRoom}
 		>
 			<Row>
 				{isLoading ? (
@@ -118,6 +118,7 @@ const InfoSection: FC<InfoSectionProps> = ({
 					<CustomAvatar
 						label={userIsModerator ? sessionName : moderatorName}
 						shape="round"
+						picture={avatarPicture}
 						background={avatarColor}
 					/>
 				)}

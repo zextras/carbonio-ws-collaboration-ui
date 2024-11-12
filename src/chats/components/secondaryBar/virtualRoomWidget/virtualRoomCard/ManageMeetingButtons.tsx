@@ -20,24 +20,24 @@ import styled, { DefaultTheme } from 'styled-components';
 import useRoomMeeting from '../../../../../hooks/useRoomMeeting';
 import { RoomsApi } from '../../../../../network';
 import { getRoomSelector } from '../../../../../store/selectors/RoomsSelectors';
+import { getUserId } from '../../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../../store/Store';
 
 type ManageMeetingButtonsProps = {
 	roomId: string;
-	sessionId: string | undefined;
 	amIParticipating: boolean;
 	isMyRoom: boolean | undefined;
 	modalRef: React.RefObject<HTMLDivElement>;
 	meetingIsActive: boolean;
 };
 
-const CustomDeleteButton = styled(Button)<{ isMyRoom: boolean | undefined }>`
+const CustomDeleteButton = styled(Button)<{ $isMyRoom: boolean | undefined }>`
 	${({
-		isMyRoom
+		$isMyRoom
 	}: {
-		isMyRoom: boolean | undefined;
+		$isMyRoom: boolean | undefined;
 		theme: DefaultTheme;
-	}): string | undefined | false => !isMyRoom && 'opacity: 0.5; cursor: default;'};
+	}): string | undefined | false => !$isMyRoom && 'opacity: 0.5; cursor: default;'};
 	&:hover {
 		background-color: ${({ theme }): string => theme.palette.error.regular};
 		color: ${({ theme }): string => theme.palette.gray6.regular};
@@ -54,7 +54,6 @@ const CustomMainButton = styled(Button)<{ isMyRoom: boolean | undefined }>`
 `;
 
 const ManageMeetingButtons: FC<ManageMeetingButtonsProps> = ({
-	sessionId,
 	roomId,
 	isMyRoom,
 	modalRef,
@@ -87,6 +86,7 @@ const ManageMeetingButtons: FC<ManageMeetingButtonsProps> = ({
 		'Something went wrong. Please retry'
 	);
 
+	const sessionId = useStore(getUserId);
 	const room = useStore((state) => getRoomSelector(state, roomId));
 	const modalTitle = t('meeting.virtual.deleteModalTitle', `Delete ${room.name} Virtual Room`, {
 		roomName: room.name
@@ -153,7 +153,7 @@ const ManageMeetingButtons: FC<ManageMeetingButtonsProps> = ({
 							color="text"
 							icon="Trash2Outline"
 							onClick={handleModalOpening}
-							isMyRoom={amIParticipating || isMyRoom}
+							$isMyRoom={amIParticipating || isMyRoom}
 						/>
 					</Tooltip>
 				)}
