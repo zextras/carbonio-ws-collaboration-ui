@@ -104,7 +104,7 @@ const CreateVirtualRoomButton: FC<CreateVirtualRoomButtonProps> = ({
 			<Button label="Create new Room" color="primary" width="fill" onClick={toggleModal} />
 			<Modal
 				open={showCreationModal}
-				title="Create new Virtual Room"
+				title={createTooltip}
 				confirmColor="primary"
 				onConfirm={handleCreateButtonClick}
 				confirmLabel="create"

@@ -18,6 +18,7 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../../../tests/createMock';
+import { mockedAddRoomRequest } from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 import { MeetingBe } from '../../../../types/network/models/meetingBeTypes';
 import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
@@ -94,6 +95,8 @@ describe('VirtualRoomsButton', () => {
 	test("user copy virtual room's link", async () => {
 		const store = useStore.getState();
 		store.setLoginInfo(sessionUser.id, sessionUser.name);
+		store.setUserInfo(user1);
+		store.setUserInfo(user2);
 		store.setCapabilities(createMockCapabilityList());
 		store.setRooms([
 			roomSessionOnlyModerator,
@@ -122,5 +125,37 @@ describe('VirtualRoomsButton', () => {
 		expect(copiedLink).toEqual(
 			'https://localhost/carbonio/focus-mode/meetings/scheduled-meeting-mod-test'
 		);
+	});
+
+	test('create virtual room', async () => {
+		mockedAddRoomRequest.mockReturnValue('created');
+		const store = useStore.getState();
+		store.setLoginInfo(sessionUser.id, sessionUser.name);
+		store.setUserInfo(user1);
+		store.setUserInfo(user2);
+		store.setCapabilities(createMockCapabilityList());
+
+		const { user } = setup(<VirtualRoomsButton expanded />);
+
+		const button = screen.getByRole('button');
+		await user.click(button);
+
+		const createButton = await screen.findByRole('button', { name: 'Create new Room' });
+		expect(createButton).toBeVisible();
+
+		await user.click(createButton);
+
+		const modalTitle = await screen.findByText('Create new Virtual Room');
+		expect(modalTitle).toBeInTheDocument();
+
+		const textArea = await screen.findByRole('textbox');
+
+		await user.type(textArea, 'New Virtual Room');
+
+		const createRoomButton = screen.getByRole('button', { name: 'create' });
+		expect(createRoomButton).toBeEnabled();
+
+		await user.click(createRoomButton);
+		expect(mockedAddRoomRequest).toHaveBeenCalled();
 	});
 });
