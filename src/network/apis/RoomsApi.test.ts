@@ -50,7 +50,7 @@ describe('Rooms API', () => {
 			name: room.name!,
 			description: room.description!,
 			type: room.type,
-			membersIds: []
+			members: []
 		};
 
 		await roomsApi.addRoom(roomToAdd);
@@ -190,12 +190,14 @@ describe('Rooms API', () => {
 
 	test('addRoomMember is called correctly', async () => {
 		// Send addRoomMember request
-		const member = {
-			userId: 'userId',
-			owner: false,
-			historyCleared: true
-		};
-		await roomsApi.addRoomMember('roomId', member);
+		const member = [
+			{
+				userId: 'userId',
+				owner: false,
+				historyCleared: true
+			}
+		];
+		await roomsApi.addRoomMembers('roomId', member);
 
 		expect(spyOnFetch).toHaveBeenCalledWith(`rooms/roomId/members`, RequestType.POST, member);
 	});
@@ -303,7 +305,7 @@ describe('Rooms API', () => {
 
 		expect(spyOnFetch).toHaveBeenNthCalledWith(1, 'rooms', RequestType.POST, {
 			type: RoomType.ONE_TO_ONE,
-			membersIds: ['userId']
+			members: [{ userId: 'userId', owner: true }]
 		});
 	});
 
@@ -370,7 +372,7 @@ describe('Rooms API', () => {
 
 		expect(spyOnFetch).toHaveBeenNthCalledWith(1, 'rooms', RequestType.POST, {
 			type: RoomType.ONE_TO_ONE,
-			membersIds: ['userId']
+			members: [{ userId: 'userId', owner: true }]
 		});
 	});
 });

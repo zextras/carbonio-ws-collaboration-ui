@@ -70,7 +70,7 @@ describe('Add new member action', () => {
 	});
 
 	test('Add new member', async () => {
-		const spyOnAddRoomMember = spyOnRoomsApi(RoomsApiToSpy.ADD_ROOM_MEMBER);
+		const spyOnAddRoomMember = spyOnRoomsApi(RoomsApiToSpy.ADD_ROOM_MEMBERS);
 		const { result } = renderHook(() => useStore());
 		act(() => {
 			result.current.addRoom(mockedRoom);

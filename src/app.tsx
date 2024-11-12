@@ -10,14 +10,15 @@ import { getUserAccount, useAuthenticated, useUserSettings } from '@zextras/carb
 
 import CounterBadgeUpdater from './chats/components/CounterBadgeUpdater';
 import RegisterCreationButton from './chats/components/RegisterCreationButton';
-import useChatsApp from './chats/useChatsApp';
+import initChats from './chats/initChats';
+import initIntegrations from './integrations/initIntegrations';
 import MeetingNotificationHandler from './meetings/components/MeetingNotificationsHandler';
-import useMeetingsApp from './meetings/useMeetingsApp';
+import initMeetings from './meetings/initMeetings';
 import { MeetingsApi, RoomsApi, SessionApi } from './network';
 import { WebSocketClient } from './network/websocket/WebSocketClient';
 import XMPPClient from './network/xmpp/XMPPClient';
 import WaitingListSnackbar from './settings/components/WaitingListSnackbar';
-import useSettingsApp from './settings/useSettingsApp';
+import initSettings from './settings/initSettings';
 import useStore from './store/Store';
 import { UserType } from './types/store/UserTypes';
 import { setDateDefault } from './utils/dateUtils';
@@ -69,9 +70,10 @@ export default function App(): React.JSX.Element {
 		}
 	}, [authenticated, setChatsBeStatus, setWebSocketClient, setXmppClient]);
 
-	useChatsApp();
-	useMeetingsApp();
-	useSettingsApp();
+	initChats();
+	initMeetings();
+	initSettings();
+	initIntegrations();
 
 	return (
 		<>

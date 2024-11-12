@@ -20,7 +20,7 @@ import {
 } from '../../types/network/models/roomBeTypes';
 import {
 	AddRoomAttachmentResponse,
-	AddRoomMemberResponse,
+	AddRoomMembersResponse,
 	AddRoomResponse,
 	ClearRoomHistoryResponse,
 	DeleteRoomMemberResponse,
@@ -78,7 +78,7 @@ class RoomsApi implements IRoomsApi {
 			// Create meeting for the created room
 			const meetingType =
 				room.type === RoomType.TEMPORARY ? MeetingType.SCHEDULED : MeetingType.PERMANENT;
-			MeetingsApi.createMeeting(response.id, meetingType, response.name || '');
+			MeetingsApi.createMeeting(response.id, meetingType, response.name ?? '');
 			return response;
 		});
 	}
@@ -123,7 +123,7 @@ class RoomsApi implements IRoomsApi {
 			} else {
 				uploadFileFetchAPI(`rooms/${roomId}/picture`, RequestType.PUT, file)
 					.then((resp: UpdateRoomPictureResponse) => resolve(resp))
-					.catch((error) => reject(error));
+					.catch((error) => reject(new Error(error)));
 			}
 		});
 	}
@@ -148,7 +148,10 @@ class RoomsApi implements IRoomsApi {
 		return fetchAPI(`rooms/${roomId}/members`, RequestType.GET);
 	}
 
-	public addRoomMember(roomId: string, member: AddMemberFields): Promise<AddRoomMemberResponse> {
+	public addRoomMembers(
+		roomId: string,
+		member: AddMemberFields[]
+	): Promise<AddRoomMembersResponse> {
 		return fetchAPI(`rooms/${roomId}/members`, RequestType.POST, member);
 	}
 
@@ -211,7 +214,7 @@ class RoomsApi implements IRoomsApi {
 		setPlaceholderMessage({
 			roomId,
 			id: uuid,
-			text: optionalFields.description || '',
+			text: optionalFields.description ?? '',
 			replyTo: optionalFields.replyId,
 			attachment: {
 				id: 'placeholderFileId',
@@ -231,7 +234,7 @@ class RoomsApi implements IRoomsApi {
 			.then((resp: AddRoomAttachmentResponse) => resp)
 			.catch((error) => {
 				useStore.getState().removePlaceholderMessage(roomId, uuid);
-				return Promise.reject(error);
+				return Promise.reject(new Error(error));
 			});
 	}
 
@@ -284,7 +287,10 @@ class RoomsApi implements IRoomsApi {
 				: undefined
 		});
 
-		return this.addRoom({ type: RoomType.ONE_TO_ONE, membersIds: [userId] }).then((response) => {
+		return this.addRoom({
+			type: RoomType.ONE_TO_ONE,
+			members: [{ userId, owner: true }]
+		}).then((response) => {
 			replacePlaceholderRoom(userId, response.id);
 			pushHistory(ROUTES.ROOM.replace(':roomId', response.id));
 			return response;

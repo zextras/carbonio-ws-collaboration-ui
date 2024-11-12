@@ -16,7 +16,7 @@ export enum RoomsApiToSpy {
 	ADD_ROOM = 'addRoom',
 	DELETE_ROOM = 'deleteRoom',
 	UPDATE_ROOM = 'updateRoom',
-	ADD_ROOM_MEMBER = 'addRoomMember',
+	ADD_ROOM_MEMBERS = 'addRoomMembers',
 	DELETE_ROOM_MEMBER = 'deleteRoomMember',
 	PROMOTE_ROOM_MEMBER = 'promoteRoomMember',
 	DEMOTE_ROOM_MEMBER = 'demotesRoomMember',

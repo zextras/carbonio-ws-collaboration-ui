@@ -279,6 +279,36 @@ describe('Chat Creation Modal', () => {
 		expect(user3Checkbox).toBeInTheDocument();
 		expect(user3Checkbox).toBeEnabled();
 	});
+
+	test('User wants to add another user as a moderator', async () => {
+		const { result } = renderHook(() => useStore());
+		act(() => result.current.setCapabilities(createMockCapabilityList({ maxGroupMembers: 5 })));
+		const { user } = setup(<ChatCreationModal open onClose={jest.fn()} />);
+
+		mockSearchUsersByFeatureRequest.mockReturnValueOnce([user1, user2]);
+
+		// Add users
+		const chipInput = await screen.findByTestId('chip_input_creation_modal');
+		await user.type(chipInput, user1.displayName[0]);
+		const user1Component = await screen.findByText(user1.displayName);
+		await user.click(user1Component);
+		await user.type(chipInput, user2.displayName[0]);
+		const user2Component = await screen.findByText(user2.displayName);
+		await user.click(user2Component);
+
+		const crownOutlineButtons = await screen.findAllByTestId('icon: CrownOutline');
+		// click the list element
+		await user.click(crownOutlineButtons[1]);
+
+		const crownButton = await screen.findAllByTestId('icon: Crown');
+		expect(crownButton).toHaveLength(2);
+		// click the chip button
+		await user.click(crownButton[0]);
+
+		// 4 crownOutline because there are two inside the chips and two on the list items
+		const crownOutlineButtonsUpdated = await screen.findAllByTestId('icon: CrownOutline');
+		expect(crownOutlineButtonsUpdated).toHaveLength(4);
+	});
 });
 
 // Useful debug functions for test

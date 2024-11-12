@@ -10,6 +10,7 @@ import { UserEvent } from '@testing-library/user-event';
 import * as ReactRouter from 'react-router';
 
 import MicrophoneButton from './MicrophoneButton';
+import useStore from '../../../store/Store';
 import {
 	createMockMeeting,
 	createMockParticipants,
@@ -68,6 +69,7 @@ const defaultSetup = (): { user: UserEvent } => {
 
 describe('Microphone button - permission denied', () => {
 	test('User clicks on the button', async () => {
+		useStore.getState().setWebsocketStatus(true);
 		jest.spyOn(navigator.mediaDevices, 'getUserMedia').mockRejectedValue('error getUserMedia');
 
 		const err = jest.spyOn(console, 'error').mockImplementation();
