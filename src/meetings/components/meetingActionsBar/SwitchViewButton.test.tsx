@@ -6,9 +6,9 @@
 import React from 'react';
 
 import { screen, act } from '@testing-library/react';
+import * as ReactRouter from 'react-router';
 
 import SwitchViewButton from './SwitchViewButton';
-import { useParams } from '../../../../__mocks__/react-router';
 import useStore from '../../../store/Store';
 import {
 	createMockMeeting,
@@ -48,7 +48,8 @@ beforeEach(() => {
 	store.addRoom(room);
 	store.addMeeting(meeting);
 	store.meetingConnection(meeting.id, false, undefined, false, undefined);
-	useParams.mockReturnValue({ meetingId: meeting.id });
+	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
+	spyUseParams.mockReturnValue({ meetingId: meeting.id });
 });
 
 describe('SwitchViewButton tests', () => {

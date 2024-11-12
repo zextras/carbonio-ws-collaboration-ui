@@ -6,9 +6,9 @@
 import React from 'react';
 
 import { screen } from '@testing-library/react';
+import * as ReactRouter from 'react-router';
 
 import InfoPage from './InfoPage';
-import { useParams } from '../../../__mocks__/react-router';
 import { PAGE_INFO_TYPE } from '../../hooks/useRouting';
 import useStore from '../../store/Store';
 import { createMockUser } from '../../tests/createMock';
@@ -68,7 +68,8 @@ describe('Info page', () => {
 	test.each([...pages, ...pagesToCheckGuest])(
 		'Display %s info page',
 		async (type, title, central, desc) => {
-			useParams.mockReturnValueOnce({ infoType: type });
+			const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
+			spyUseParams.mockReturnValueOnce({ infoType: type });
 			setup(<InfoPage />);
 
 			expect(screen.getAllByText(new RegExp(title, 'i'))[0]).toBeVisible();
@@ -82,7 +83,8 @@ describe('Info page', () => {
 		const guestUser = createMockUser({ type: UserType.GUEST });
 		const store = useStore.getState();
 		store.setLoginInfo(guestUser.id, guestUser.name, guestUser.name, guestUser.type);
-		useParams.mockReturnValueOnce({ infoType: type });
+		const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
+		spyUseParams.mockReturnValueOnce({ infoType: type });
 		setup(<InfoPage />);
 
 		expect(document.cookie).toBe('');

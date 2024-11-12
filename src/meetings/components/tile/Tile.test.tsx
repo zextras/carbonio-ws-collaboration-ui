@@ -17,7 +17,6 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../../tests/createMock';
-import { mockMediaDevicesResolve } from '../../../tests/mocks/global';
 import { setup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 import { MemberBe, RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
@@ -182,10 +181,6 @@ const storeSetupTileAudioOnAndVideoOff = (): { user: UserEvent; store: RootStore
 	);
 	return { user, store };
 };
-
-beforeAll(() => {
-	mockMediaDevicesResolve();
-});
 
 describe('Tile test - enter meeting modal', () => {
 	test('my tile - everything is rendered correctly', () => {

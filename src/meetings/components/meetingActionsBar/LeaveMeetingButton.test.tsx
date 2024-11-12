@@ -6,9 +6,9 @@
 import React from 'react';
 
 import { screen } from '@testing-library/react';
+import * as ReactRouter from 'react-router';
 
 import LeaveMeetingButton from './LeaveMeetingButton';
-import { useParams } from '../../../../__mocks__/react-router';
 import { createMockMeeting } from '../../../tests/createMock';
 import { MeetingsApiToSpy, spyOnMeetingsApi } from '../../../tests/mocks/network';
 import { setup } from '../../../tests/test-utils';
@@ -18,8 +18,9 @@ const mockMeeting: MeetingBe = createMockMeeting();
 
 const leaveMeetingButtonText = 'Leave Meeting?';
 
-beforeAll(() => {
-	useParams.mockReturnValue({ meetingId: mockMeeting.id });
+beforeEach(() => {
+	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
+	spyUseParams.mockReturnValue({ meetingId: mockMeeting.id });
 });
 
 describe('LeaveMeetingButton', () => {

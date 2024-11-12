@@ -9,9 +9,9 @@ import React from 'react';
 import { act, renderHook } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event';
 import * as Shell from '@zextras/carbonio-shell-ui';
+import * as ReactRouter from 'react-router';
 
 import AccessPage from './AccessPage';
-import { useParams } from '../../../__mocks__/react-router';
 import useStore from '../../store/Store';
 import {
 	createMockMeeting,
@@ -82,7 +82,8 @@ const setupGroupForAccessPage = (): { user: UserEvent; store: RootStore } => {
 		result.current.setWebsocketStatus(true);
 		result.current.meetingConnection(groupMeeting.id, false, undefined, false, undefined);
 	});
-	useParams.mockReturnValue({ meetingId: groupMeeting.id });
+	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
+	spyUseParams.mockReturnValue({ meetingId: groupMeeting.id });
 	const { user } = setup(<AccessPage />);
 	return { user, store: result.current };
 };
@@ -99,7 +100,8 @@ const setupAccessPage = (): { user: UserEvent; store: RootStore } => {
 		result.current.setWebsocketStatus(true);
 		result.current.meetingConnection(groupMeeting.id, false, undefined, false, undefined);
 	});
-	useParams.mockReturnValue({ meetingId: groupForWaitingRoom.id });
+	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
+	spyUseParams.mockReturnValue({ meetingId: groupForWaitingRoom.id });
 	const { user } = setup(<AccessPage />);
 	return { user, store: result.current };
 };

@@ -7,9 +7,9 @@ import React from 'react';
 
 import { screen, act, renderHook } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event';
+import * as ReactRouter from 'react-router';
 
 import CameraButton from './CameraButton';
-import { useParams } from '../../../../__mocks__/react-router';
 import useStore from '../../../store/Store';
 import {
 	createMockMeeting,
@@ -17,11 +17,6 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../../tests/createMock';
-import {
-	mockedEnumerateDevices,
-	mockedGetUserMedia,
-	mockMediaDevicesReject
-} from '../../../tests/mocks/global';
 import { setup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 import { MemberBe, RoomBe } from '../../../types/network/models/roomBeTypes';
@@ -69,7 +64,8 @@ const defaultSetup = (): { user: UserEvent } => {
 		result.current.meetingConnection(meeting.id, false, undefined, false, undefined);
 	});
 	const refList = React.createRef<HTMLDivElement>();
-	useParams.mockReturnValue({ meetingId: meeting.id });
+	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
+	spyUseParams.mockReturnValue({ meetingId: meeting.id });
 	const { user } = setup(
 		<CameraButton
 			videoDropdownRef={refList}
@@ -80,14 +76,9 @@ const defaultSetup = (): { user: UserEvent } => {
 	return { user };
 };
 
-beforeAll(() => {
-	mockMediaDevicesReject();
-});
-
 describe('Camera button - permission denied', () => {
 	test('User clicks on the button', async () => {
-		mockedEnumerateDevices.mockRejectedValue('error enumerateDevices');
-		mockedGetUserMedia.mockRejectedValue('error getUserMedia');
+		jest.spyOn(navigator.mediaDevices, 'getUserMedia').mockRejectedValue('error getUserMedia');
 
 		const err = jest.spyOn(console, 'error').mockImplementation();
 

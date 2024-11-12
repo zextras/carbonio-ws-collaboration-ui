@@ -7,16 +7,15 @@ import React from 'react';
 
 import { screen } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event';
+import * as ReactRouter from 'react-router';
 
 import CameraButton from './CameraButton';
-import { useParams } from '../../../../__mocks__/react-router';
 import {
 	createMockMeeting,
 	createMockParticipants,
 	createMockRoom,
 	createMockUser
 } from '../../../tests/createMock';
-import { mockMediaDevicesResolve } from '../../../tests/mocks/global';
 import { setup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 import { MemberBe, RoomBe } from '../../../types/network/models/roomBeTypes';
@@ -54,8 +53,9 @@ const meeting: MeetingBe = createMockMeeting({
 const mockSetIsVideoListOpen = jest.fn();
 
 const defaultSetup = (): { user: UserEvent } => {
+	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
 	const refList = React.createRef<HTMLDivElement>();
-	useParams.mockReturnValue({ meetingId: meeting.id });
+	spyUseParams.mockReturnValue({ meetingId: meeting.id });
 	const { user } = setup(
 		<CameraButton
 			videoDropdownRef={refList}
@@ -65,10 +65,6 @@ const defaultSetup = (): { user: UserEvent } => {
 	);
 	return { user };
 };
-
-beforeAll(() => {
-	mockMediaDevicesResolve();
-});
 
 describe('Camera button', () => {
 	test('Should render the component', async () => {

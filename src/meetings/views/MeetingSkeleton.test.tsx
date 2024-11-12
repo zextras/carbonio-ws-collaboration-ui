@@ -7,9 +7,9 @@ import React from 'react';
 
 import { act, screen, waitFor } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event';
+import * as ReactRouter from 'react-router';
 
 import MeetingSkeleton from './MeetingSkeleton';
-import { useParams } from '../../../__mocks__/react-router';
 import { PAGE_INFO_TYPE } from '../../hooks/useRouting';
 import useStore from '../../store/Store';
 import {
@@ -19,7 +19,6 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../tests/createMock';
-import { mockMediaDevicesResolve } from '../../tests/mocks/global';
 import { MeetingsApiToSpy, spyOnMeetingsApi } from '../../tests/mocks/network';
 import { mockInitialize } from '../../tests/mocks/SelfieSegmentationManager';
 import { mockGoToInfoPage } from '../../tests/mocks/useRouting';
@@ -87,15 +86,12 @@ const storeSetupGroupMeetingSkeleton = (): { user: UserEvent; store: RootStore }
 	store.meetingConnection(meeting.id, false, undefined, true, 'videoId');
 	store.setLocalStreams(meeting.id, STREAM_TYPE.VIDEO, new MediaStream());
 	store.setCapabilities(createMockCapabilityList());
-	useParams.mockReturnValue({ meetingId: meeting.id });
+	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
+	spyUseParams.mockReturnValue({ meetingId: meeting.id });
 	const { user } = setup(<MeetingSkeleton />);
 
 	return { user, store };
 };
-
-beforeAll(() => {
-	mockMediaDevicesResolve();
-});
 
 describe('Sidebar interactions', () => {
 	test('Enable full screen and sidebar must be closed', async () => {

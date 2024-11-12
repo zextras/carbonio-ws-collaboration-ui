@@ -6,14 +6,13 @@
 
 import { WebSocketClient } from './WebSocketClient';
 import useStore from '../../store/Store';
-import { mockWebSocketSend } from '../../tests/mocks/global';
 import { WsEventType } from '../../types/network/websocket/wsEvents';
 
 describe('WebSocketClient', () => {
 	test('Connect WebSocketClient generate a WebSocket', () => {
 		const wsClient = new WebSocketClient();
 		wsClient.connect();
-		expect(global.WebSocket).toHaveBeenCalledWith(
+		expect(wsClient._webSocket?.url).toEqual(
 			`wss://${window.location.hostname}/services/chats/events`
 		);
 		expect(wsClient._webSocket).toBeDefined();
@@ -30,6 +29,14 @@ describe('WebSocketClient', () => {
 	});
 
 	test('Send message if WebSocket is open', () => {
+		const mockWebSocketSend = jest.fn();
+		Object.defineProperty(global, 'WebSocket', {
+			value: jest.fn(() => ({
+				readyState: 1,
+				send: mockWebSocketSend
+			}))
+		});
+
 		const wsClient = new WebSocketClient();
 		wsClient.connect();
 		wsClient.send({ type: 'ping' });

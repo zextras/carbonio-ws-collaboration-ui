@@ -6,12 +6,11 @@
 import React from 'react';
 
 import { act, screen } from '@testing-library/react';
+import * as ReactRouter from 'react-router';
 
 import MobileActionBar from './MobileActionBar';
-import { useParams } from '../../../../__mocks__/react-router';
 import useStore from '../../../store/Store';
 import { createMockMeeting } from '../../../tests/createMock';
-import { mockMediaDevicesResolve } from '../../../tests/mocks/global';
 import { MeetingsApiToSpy, spyOnMeetingsApi } from '../../../tests/mocks/network';
 import { setup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
@@ -21,8 +20,8 @@ import { MobileMeetingView } from '../../views/mobile/MeetingSkeletonMobile';
 const mockMeeting: MeetingBe = createMockMeeting();
 
 beforeAll(() => {
-	useParams.mockReturnValue({ meetingId: mockMeeting.id });
-	mockMediaDevicesResolve();
+	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
+	spyUseParams.mockReturnValue({ meetingId: mockMeeting.id });
 });
 
 describe('MobileActionBar test', () => {

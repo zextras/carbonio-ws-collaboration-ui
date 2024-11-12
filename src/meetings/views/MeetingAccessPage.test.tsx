@@ -10,12 +10,7 @@ import { screen } from '@testing-library/react';
 
 import MeetingAccessPage from './MeetingAccessPage';
 import useStore from '../../store/Store';
-import { mockMediaDevicesResolve } from '../../tests/mocks/global';
 import { setup } from '../../tests/test-utils';
-
-beforeAll(() => {
-	mockMediaDevicesResolve();
-});
 
 describe('MeetingAccessPage', () => {
 	test('Leave button for guest user', async () => {

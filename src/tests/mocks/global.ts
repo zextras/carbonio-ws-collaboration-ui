@@ -54,49 +54,6 @@ export const mockedDevicesList = jest.fn(() => [
 	}
 ]);
 
-export const mockMediaDevicesResolve = jest.fn(() => {
-	Object.defineProperty(global.navigator, 'mediaDevices', {
-		value: {
-			getUserMedia: jest.fn(() =>
-				Promise.resolve({
-					getTracks: jest.fn(() => ({ forEach: jest.fn() })),
-					getAudioTracks: jest.fn(() => ({ forEach: jest.fn() })),
-					getVideoTracks: jest.fn(() => ({ forEach: jest.fn() }))
-				})
-			),
-			enumerateDevices: jest.fn(() => Promise.resolve(mockedDevicesList())),
-			addEventListener: jest.fn(),
-			removeEventListener: jest.fn()
-		}
-	});
-});
-
-export const mockedGetUserMedia = jest.fn();
-export const mockedEnumerateDevices = jest.fn();
-
-export const mockMediaDevicesReject = jest.fn(() => {
-	Object.defineProperty(global.navigator, 'mediaDevices', {
-		value: {
-			getUserMedia: jest.fn(
-				() =>
-					new Promise((resolve, reject) => {
-						const result = mockedGetUserMedia();
-						result ? resolve(result) : reject(new Error());
-					})
-			),
-			enumerateDevices: jest.fn(
-				() =>
-					new Promise((resolve, reject) => {
-						const result = mockedEnumerateDevices();
-						result ? resolve(result) : reject(new Error());
-					})
-			),
-			addEventListener: jest.fn(),
-			removeEventListener: jest.fn()
-		}
-	});
-});
-
 Object.defineProperty(global.navigator, 'userAgent', {
 	value: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:124.0) Gecko/20100101 Firefox/124.0'
 });
@@ -121,35 +78,6 @@ Object.defineProperty(window, 'RTCSessionDescription', {
 	}))
 });
 
-Object.defineProperty(window, 'AudioContext', {
-	writable: true,
-	value: jest.fn(() => ({
-		createOscillator: (): any => ({
-			connect: () => ({
-				stream: {
-					getAudioTracks: () => [MediaStream]
-				}
-			}),
-			start: jest.fn()
-		}),
-		createMediaStreamDestination: jest.fn()
-	}))
-});
-
-Object.defineProperty(window, 'MediaStream', {
-	writable: true,
-	value: jest.fn(() => ({
-		stream: (): any => ({
-			getAudioTracks: jest.fn(),
-			getVideoTracks: jest.fn(),
-			addTrack: jest.fn()
-		}),
-		getAudioTracks: (): any[] => [MediaStream],
-		getVideoTracks: (): any[] => [MediaStream],
-		addTrack: jest.fn()
-	}))
-});
-
 Object.defineProperty(window, 'open', {
 	value: jest.fn()
 });
@@ -166,42 +94,8 @@ Object.defineProperty(window, 'crypto', {
 	}
 });
 
-Object.defineProperty(window, 'matchMedia', {
-	writable: true,
-	value: jest.fn().mockImplementation((query) => ({
-		matches: false,
-		media: query,
-		onchange: null,
-		addListener: jest.fn(), // Deprecated
-		removeListener: jest.fn(), // Deprecated
-		addEventListener: jest.fn(),
-		removeEventListener: jest.fn(),
-		dispatchEvent: jest.fn()
-	}))
-});
-
 export const intersectionObserverMockObserve = jest.fn();
 export const intersectionObserverMockDisconnect = jest.fn();
-Object.defineProperty(window, 'IntersectionObserver', {
-	writable: true,
-	value: jest.fn().mockImplementation((callback, options) => ({
-		thresholds: options.threshold,
-		root: options.root,
-		rootMargin: options.rootMargin,
-		observe: intersectionObserverMockObserve,
-		unobserve: jest.fn(),
-		disconnect: intersectionObserverMockDisconnect
-	}))
-});
-
-Object.defineProperty(window, 'ResizeObserver', {
-	writable: true,
-	value: jest.fn().mockImplementation(() => ({
-		observe: jest.fn(),
-		unobserve: jest.fn(),
-		disconnect: jest.fn()
-	}))
-});
 
 window.resizeTo = function resizeTo(width: number, height: number): void {
 	Object.assign(this, {
@@ -217,9 +111,6 @@ Object.defineProperty(document.documentElement, 'requestFullscreen', {
 });
 
 export const mockPlayAudio = jest.fn();
-global.Audio = jest.fn().mockImplementation(() => ({
-	play: mockPlayAudio
-}));
 
 export const mockReplace = jest.fn();
 Object.defineProperty(window, 'location', {
@@ -230,16 +121,6 @@ Object.defineProperty(window, 'location', {
 		includes: jest.fn()
 	},
 	writable: true
-});
-
-export const mockWebSocketSend = jest.fn();
-export const mockWebSocketClose = jest.fn();
-Object.defineProperty(global, 'WebSocket', {
-	value: jest.fn(() => ({
-		readyState: 1,
-		send: mockWebSocketSend,
-		close: mockWebSocketClose
-	}))
 });
 
 export const mockAttachmentTagElement = document.createElement('a');
