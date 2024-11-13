@@ -22,9 +22,9 @@ import {
 	List,
 	Padding,
 	Text,
-	ChipAction
+	ChipAction,
+	Spinner
 } from '@zextras/carbonio-design-system';
-import { Spinner } from '@zextras/carbonio-shell-ui';
 import {
 	debounce,
 	difference,
@@ -339,7 +339,7 @@ const ChatCreationContactsSelection = ({
 
 	const contentToDisplay = useMemo(() => {
 		if (loading) {
-			return <Spinner />;
+			return <Spinner color={'primary'} />;
 		}
 		if (!error) {
 			return <List data-testid="list_creation_modal">{items}</List>;

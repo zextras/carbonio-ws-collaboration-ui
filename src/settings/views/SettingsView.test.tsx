@@ -21,6 +21,6 @@ describe('SettingsView tests', () => {
 
 	test('SettingsView renders Spinner if session user is not loaded', () => {
 		setup(<SettingsView />);
-		expect(screen.getByText('spinner')).toBeInTheDocument();
+		expect(screen.getByTestId('spinner')).toBeInTheDocument();
 	});
 });

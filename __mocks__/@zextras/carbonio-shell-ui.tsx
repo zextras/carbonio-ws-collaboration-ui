@@ -79,8 +79,6 @@ export const getNotificationManager = (): INotificationManager => NOTIFICATION_M
 
 export const SettingsHeader = (): ReactElement => <div>settings header</div>;
 
-export const Spinner = (): ReactElement => <div>spinner</div>;
-
 export const pushHistory = jest.fn(pushHistoryMock);
 
 export const replaceHistory = jest.fn(replaceHistoryMock);
