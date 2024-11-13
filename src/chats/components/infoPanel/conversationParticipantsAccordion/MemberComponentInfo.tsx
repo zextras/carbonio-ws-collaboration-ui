@@ -95,9 +95,11 @@ const MemberComponentInfo: FC<ParticipantsInfoProps> = ({ member, roomId }) => {
 		() => (
 			<Row takeAvailableSpace wrap="nowrap" height="100%">
 				<Container orientation="vertical" crossAlignment="flex-start" padding={{ left: 'small' }}>
-					<Text color="text" size="small" overflow="ellipsis">
-						{memberName}
-					</Text>
+					<Tooltip label={memberName} overflowTooltip>
+						<Text color="text" size="small" overflow="ellipsis">
+							{memberName}
+						</Text>
+					</Tooltip>
 					<Padding top="extrasmall" />
 					{canSeeUsersPresence && (
 						<Tooltip label={presenceLabel} overflowTooltip>
