@@ -25,11 +25,13 @@ export const getUserName = (store: RootStore, id: string): string => {
 	return store.users[id]?.name || store.users[id]?.email || '';
 };
 
+export const getUserNames = (store: RootStore, ids: string[]): string[] =>
+	ids.map((id) => getUserName(store, id));
+
 export const getUserLastActivity = (store: RootStore, id: string): number | undefined =>
 	store.users[id]?.last_activity;
 
-export const getUserOnline = (store: RootStore, id: string): boolean | undefined =>
-	store.users[id]?.online;
+export const getUserOnline = (store: RootStore, id: string): boolean => !!store.users[id]?.online;
 
 export const getUserEmail = (store: RootStore, id: string): string | undefined => {
 	UserDataRetriever.getDebouncedUser(id);

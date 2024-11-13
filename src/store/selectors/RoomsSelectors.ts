@@ -79,24 +79,25 @@ export const getOwnershipOfTheRoom = (
 	userId = state.session.id
 ): boolean => {
 	if (state.rooms[roomId]?.members != null && userId != null) {
-		const sessionMember = find(state.rooms[roomId]?.members, (member) => member.userId === userId);
-		if (sessionMember != null) {
-			return sessionMember.owner;
+		const member = find(state.rooms[roomId]?.members, (member) => member.userId === userId);
+		if (member != null) {
+			return member.owner;
 		}
 		return false;
 	}
 	return false;
 };
 
-export const getOwner = (state: RootStore, roomId: string, userId: string): boolean => {
+export const getOwners = (state: RootStore, roomId: string): Member[] => {
+	const ownersList: Member[] = [];
 	if (state.rooms[roomId]?.members != null) {
-		const user = find(state.rooms[roomId]?.members, (member) => member.userId === userId);
-		if (user != null) {
-			return user.owner;
-		}
-		return false;
+		map(state.rooms[roomId]?.members, (member) => {
+			if (member.owner) {
+				ownersList.push(member);
+			}
+		});
 	}
-	return false;
+	return ownersList;
 };
 
 export const getNumberOfOwnersOfTheRoom = (state: RootStore, roomId: string): number => {

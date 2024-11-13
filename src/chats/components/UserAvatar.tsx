@@ -85,7 +85,7 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ roomId, unreadCount, draftMessa
 	const idAvailable = otherMember?.userId ?? '';
 	const userName: string = useStore((store) => getUserName(store, idAvailable));
 	const roomMuted = useStore((state) => getRoomMutedSelector(state, roomId));
-	const memberOnline: boolean | undefined = useStore((store) => getUserOnline(store, idAvailable));
+	const memberOnline: boolean = useStore((store) => getUserOnline(store, idAvailable));
 	const canSeeUsersPresence = useStore((store) =>
 		getCapability(store, CapabilityType.CAN_SEE_USERS_PRESENCE)
 	);
