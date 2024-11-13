@@ -59,9 +59,7 @@ const MemberComponentInfo: FC<ParticipantsInfoProps> = ({ member, roomId }) => {
 	const memberLastActivity: number | undefined = useStore((store) =>
 		getUserLastActivity(store, member.userId)
 	);
-	const memberOnline: boolean | undefined = useStore((store) =>
-		getUserOnline(store, member.userId)
-	);
+	const memberOnline: boolean = useStore((store) => getUserOnline(store, member.userId));
 	const canSeeUsersPresence = useStore((store) =>
 		getCapability(store, CapabilityType.CAN_SEE_USERS_PRESENCE)
 	);
