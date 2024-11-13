@@ -21,39 +21,16 @@ import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
 import { RootStore } from '../../../../types/store/StoreTypes';
 import { User } from '../../../../types/store/UserTypes';
 
-const pictureUpdatedAtTime = '2022-08-25T17:24:28.961+02:00';
-
 const user1Info: User = createMockUser();
 
 const user2Info: User = createMockUser();
 
 const testRoom: RoomBe = createMockRoom({
-	pictureUpdatedAt: pictureUpdatedAtTime,
 	type: RoomType.ONE_TO_ONE,
 	members: [createMockMember({ userId: user1Info.id }), createMockMember({ userId: user2Info.id })]
 });
 
 describe('Room Picture Handler - one_to_one', () => {
-	test('everything should be rendered - with image', async () => {
-		const store: RootStore = useStore.getState();
-		store.addRoom(testRoom);
-		store.setUserInfo(user1Info);
-		store.setUserInfo(user2Info);
-		store.setLoginInfo(user1Info.id, user1Info.name);
-		const { user } = setup(<OneToOneRoomPictureHandler memberId={user2Info.id} />);
-
-		// Simulate USER_PICTURE_CHANGED WebSocket event
-		act(() => {
-			store.setUserPictureUpdated(user2Info.id, pictureUpdatedAtTime);
-		});
-
-		const pictureContainer = screen.getByTestId('picture_container');
-		await user.hover(pictureContainer);
-
-		const userName = screen.getByText(new RegExp(`${user2Info.name}`, 'i'));
-
-		expect(userName).toBeInTheDocument();
-	});
 	test('label should show "Last seen" phrase if last_activity is present', () => {
 		const store: RootStore = useStore.getState();
 		store.addRoom(testRoom);

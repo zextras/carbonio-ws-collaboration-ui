@@ -42,10 +42,7 @@ import {
 	AddRoomAttachmentResponse
 } from '../../types/network/responses/roomsResponses';
 import { GetCapabilitiesResponse } from '../../types/network/responses/sessionResponses';
-import {
-	GetUserPictureResponse,
-	GetUserResponse
-} from '../../types/network/responses/usersResponses';
+import { GetUserResponse } from '../../types/network/responses/usersResponses';
 
 export const mockedAddRoomRequest: jest.Mock = jest.fn();
 export const mockedGetRoomRequest: jest.Mock = jest.fn();
@@ -190,12 +187,6 @@ jest.mock('../../network', () => {
 					const result = mockedGetUserRequest();
 					result ? resolve(result) : reject(new Error(noResultProvided));
 				}),
-			getUserPicture: (): Promise<GetUserPictureResponse> =>
-				new Promise((resolve, reject) => {
-					const result = mockedGetUserPictureRequest();
-					result ? resolve(result) : reject(new Error(noResultProvided));
-				}),
-			getURLUserPicture: mockedGetURLUserPicture,
 			getDebouncedUser: jest.fn()
 		},
 		AttachmentsApi: {

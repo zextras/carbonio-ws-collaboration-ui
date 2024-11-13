@@ -16,7 +16,7 @@ import { calculateAvatarColor } from '../../../../utils/styleUtils';
 type RoomPictureProps = {
 	title: string;
 	description: React.ReactNode | null;
-	picture: string | false;
+	picture: string | undefined;
 	backgroundColor?: string;
 	moreHoverActions?: React.ReactNode;
 };

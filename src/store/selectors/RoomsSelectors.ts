@@ -17,7 +17,7 @@ import {
 } from 'lodash';
 
 import { getUserName } from './UsersSelectors';
-import { RoomsApi, UsersApi } from '../../network';
+import { RoomsApi } from '../../network';
 import { MemberBe } from '../../types/network/models/roomBeTypes';
 import { Member, Room, RoomType } from '../../types/store/RoomTypes';
 import { RootStore } from '../../types/store/StoreTypes';
@@ -119,14 +119,7 @@ export const getPictureUpdatedAt = (state: RootStore, roomId: string): string | 
 export const getRoomURLPicture = (state: RootStore, roomId: string): string | undefined => {
 	const room = state.rooms[roomId];
 	if (room.type === RoomType.ONE_TO_ONE) {
-		const otherMember = find(
-			state.rooms[roomId].members,
-			(member) => member.userId !== state.session.id
-		);
-		if (otherMember) {
-			const otherUser = state.users[otherMember.userId];
-			return otherUser?.pictureUpdatedAt && UsersApi.getURLUserPicture(otherMember.userId);
-		}
+		return undefined;
 	}
 	return room.pictureUpdatedAt && RoomsApi.getURLRoomPicture(room.id);
 };

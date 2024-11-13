@@ -43,11 +43,6 @@ export const getUserStatusMessage = (store: RootStore, id: string): string | und
 	return store.users[id]?.statusMessage;
 };
 
-export const getUserPictureUpdatedAt = (store: RootStore, id: string): string | undefined => {
-	UserDataRetriever.getDebouncedUser(id);
-	return store.users[id]?.pictureUpdatedAt;
-};
-
 export const getIsUserGuest = (store: RootStore, id: string): boolean | undefined => {
 	UserDataRetriever.getDebouncedUser(id);
 	return store.users[id]?.type === UserType.GUEST;
