@@ -481,11 +481,7 @@ describe('Meetings API', () => {
 	test('getScheduledMeetingName is called correctly', async () => {
 		await meetingsApi.getScheduledMeetingName(meetingMock.id);
 
-		expect(spyOnFetch).toHaveBeenCalledWith(
-			`public/meetings/${meetingMock.id}`,
-			RequestType.GET,
-			undefined
-		);
+		expect(spyOnFetch).toHaveBeenCalledWith(`public/meetings/${meetingMock.id}`, RequestType.GET);
 	});
 
 	test('authLogin is called correctly', async () => {

@@ -40,7 +40,7 @@ export const fetchAPI = (
 	})
 		.then((resp: Response) => {
 			if (resp.ok) return resp;
-			return Promise.reject(resp);
+			return Promise.reject(new Error());
 		})
 		.then((resp: Response) => {
 			const contentType = resp.headers.get('content-type');
@@ -86,7 +86,7 @@ export const uploadFileFetchAPI = (
 			})
 				.then((resp: Response) => {
 					if (resp.ok) return resp;
-					return Promise.reject(resp);
+					return Promise.reject(new Error());
 				})
 				.then((resp: Response) => {
 					const contentType = resp.headers.get('content-type');
@@ -95,7 +95,7 @@ export const uploadFileFetchAPI = (
 				})
 				.catch((err: Error) => {
 					console.error(err);
-					reject(err);
+					reject(new Error());
 				});
 		});
 		reader.addEventListener('error', (error) => {

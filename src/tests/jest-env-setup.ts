@@ -52,15 +52,26 @@ beforeEach(() => {
 		}))
 	});
 
+	const connectMockFn = (): {
+		stream: {
+			getAudioTracks: () => {
+				prototype: MediaStream;
+				new (): MediaStream;
+				new (stream: MediaStream): MediaStream;
+				new (tracks: MediaStreamTrack[]): MediaStream;
+			}[];
+		};
+	} => ({
+		stream: {
+			getAudioTracks: () => [MediaStream]
+		}
+	});
+
 	Object.defineProperty(window, 'AudioContext', {
 		writable: true,
 		value: jest.fn(() => ({
 			createOscillator: (): any => ({
-				connect: () => ({
-					stream: {
-						getAudioTracks: () => [MediaStream]
-					}
-				}),
+				connect: connectMockFn,
 				start: jest.fn()
 			}),
 			createMediaStreamDestination: jest.fn()

@@ -239,7 +239,7 @@ class MeetingsApi implements IMeetingsApi {
 	}
 
 	public getScheduledMeetingName(meetingId: string): Promise<GetScheduledMeetingNameResponse> {
-		return fetchAPI(`public/meetings/${meetingId}`, RequestType.GET, undefined);
+		return fetchAPI(`public/meetings/${meetingId}`, RequestType.GET);
 	}
 
 	public leaveWaitingRoom(meetingId: string): Promise<AcceptWaitingUserResponse> {
