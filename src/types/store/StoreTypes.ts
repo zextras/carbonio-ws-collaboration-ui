@@ -42,8 +42,6 @@ export type UsersStoreSlice = {
 	setUserPresence: (id: string, presence: boolean) => void;
 	setUserLastActivity: (id: string, date: number) => void;
 	setUserStatusMessage: (id: string, statusMsg: string) => void;
-	setUserPictureUpdated: (id: string, date: string) => void;
-	setUserPictureDeleted: (id: string) => void;
 	setAnonymousUser: (id: string) => void;
 };
 

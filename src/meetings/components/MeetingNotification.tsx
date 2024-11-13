@@ -11,11 +11,11 @@ import { size } from 'lodash';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
+import useAvatarUtilities from '../../hooks/useAvatarUtilities';
 import useRoomMeeting from '../../hooks/useRoomMeeting';
-import { UsersApi } from '../../network';
 import { getXmppClient } from '../../store/selectors/ConnectionSelector';
 import { getMeetingByMeetingId } from '../../store/selectors/MeetingSelectors';
-import { getUserName, getUserPictureUpdatedAt } from '../../store/selectors/UsersSelectors';
+import { getUserName } from '../../store/selectors/UsersSelectors';
 import useStore from '../../store/Store';
 
 const NotificationContainer = styled(Container)`
@@ -49,9 +49,6 @@ const MeetingNotification = ({
 }: MeetingNotificationProps): ReactElement => {
 	const xmppClient = useStore(getXmppClient);
 	const userName: string = useStore((store) => getUserName(store, from));
-	const userPictureUpdatedAt: string | undefined = useStore((state) =>
-		getUserPictureUpdatedAt(state, from)
-	);
 	const meeting = useStore((store) => getMeetingByMeetingId(store, meetingId));
 
 	const [t] = useTranslation();
@@ -108,7 +105,7 @@ const MeetingNotification = ({
 		removeNotification(id);
 	}, [openMeeting, removeNotification, id]);
 
-	const picture = useMemo(() => UsersApi.getURLUserPicture(from), [from]);
+	const { avatarPicture } = useAvatarUtilities(from);
 
 	return (
 		<NotificationContainer
@@ -120,12 +117,7 @@ const MeetingNotification = ({
 			gap="1rem"
 		>
 			<Container gap="0.5rem">
-				<Avatar
-					size="large"
-					label={userName}
-					title={userName}
-					picture={userPictureUpdatedAt ? picture : ''}
-				/>
+				<Avatar size="large" label={userName} title={userName} picture={avatarPicture} />
 				<CustomText overflow="break-word">{userIsInvitingYouLabel}</CustomText>
 			</Container>
 			<Container orientation="horizontal" gap="0.5rem">

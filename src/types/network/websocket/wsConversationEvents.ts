@@ -18,8 +18,6 @@ export type WsConversationEvent =
 	| RoomMemberRemovedEvent
 	| RoomMutedEvent
 	| RoomUnmutedEvent
-	| UserPictureChangedEvent
-	| UserPictureDeletedEvent
 	| RoomHistoryClearedEvent;
 
 type BasicConversationEvent = {
@@ -88,16 +86,6 @@ export type RoomMutedEvent = BasicConversationEvent & {
 export type RoomUnmutedEvent = BasicConversationEvent & {
 	type: WsEventType.ROOM_UNMUTED;
 	roomId: string;
-};
-
-export type UserPictureChangedEvent = BasicConversationEvent & {
-	type: WsEventType.USER_PICTURE_CHANGED;
-	userId: string;
-};
-
-export type UserPictureDeletedEvent = BasicConversationEvent & {
-	type: WsEventType.USER_PICTURE_DELETED;
-	userId: string;
 };
 
 export type RoomHistoryClearedEvent = BasicConversationEvent & {

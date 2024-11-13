@@ -29,8 +29,7 @@ const user1: UserBe = createMockUser({ id: 'user1Id', name: 'user 1' });
 const user2: UserBe = createMockUser({ id: 'user2Id', name: 'user 2' });
 const user3: UserBe = createMockUser({
 	id: 'user3Id',
-	name: 'user 3',
-	pictureUpdatedAt: '2022-08-25T17:24:28.961+02:00'
+	name: 'user 3'
 });
 const member1: MemberBe = { userId: user1.id, owner: true };
 const member2: MemberBe = { userId: user2.id, owner: false };
