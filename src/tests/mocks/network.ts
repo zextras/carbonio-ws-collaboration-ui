@@ -9,7 +9,6 @@
 import attachmentsApi from '../../network/apis/AttachmentsApi';
 import meetingsApi from '../../network/apis/MeetingsApi';
 import roomsApi from '../../network/apis/RoomsApi';
-import usersApi from '../../network/apis/UsersApi';
 
 export enum RoomsApiToSpy {
 	GET_ROOM = 'getRoom',
@@ -36,10 +35,6 @@ export enum AttachmentsApiToSpy {
 	GET_IMAGE_THUMBNAIL_URL = 'getImageThumbnailURL'
 }
 
-export enum UsersApiToSpy {
-	GET_URL_USER_PICTURE = 'getURLUserPicture'
-}
-
 export enum MeetingsApiToSpy {
 	CREATE_MEETING = 'createMeeting',
 	GET_MEETING = 'getMeeting',
@@ -60,12 +55,11 @@ export enum MeetingsApiToSpy {
 export const spyOnAttachmentsApi: (apiToSpy: AttachmentsApiToSpy) => jest.SpyInstance = (
 	apiToSpy: AttachmentsApiToSpy
 ) => jest.spyOn(attachmentsApi, apiToSpy);
+
 export const spyOnRoomsApi: (apiToSpy: RoomsApiToSpy) => jest.SpyInstance = (
 	apiToSpy: RoomsApiToSpy
 ) => jest.spyOn(roomsApi, apiToSpy);
-export const spyOnUsersApi: (apiToSpy: UsersApiToSpy) => jest.SpyInstance = (
-	apiToSpy: UsersApiToSpy
-) => jest.spyOn(usersApi, apiToSpy);
+
 export const spyOnMeetingsApi: (apiToSpy: MeetingsApiToSpy) => jest.SpyInstance = (
 	apiToSpy: MeetingsApiToSpy
 ) => jest.spyOn(meetingsApi, apiToSpy);

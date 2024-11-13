@@ -62,7 +62,6 @@ const OneToOneRoom: RoomBe = {
 	type: RoomType.ONE_TO_ONE,
 	createdAt: '1234567',
 	updatedAt: '12345678',
-	pictureUpdatedAt: '123456789',
 	members: [
 		{
 			userId: 'user1',

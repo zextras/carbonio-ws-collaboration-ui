@@ -39,7 +39,6 @@ import {
 	UpdateRoomPictureResponse,
 	UpdateRoomResponse
 } from '../../types/network/responses/roomsResponses';
-import { ChangeUserPictureResponse } from '../../types/network/responses/usersResponses';
 import { TextMessage } from '../../types/store/MessageTypes';
 import { dateToISODate } from '../../utils/dateUtils';
 import { fetchAPI, uploadFileFetchAPI } from '../../utils/FetchUtils';
@@ -116,7 +115,7 @@ class RoomsApi implements IRoomsApi {
 	}
 
 	public updateRoomPicture(roomId: string, file: File): Promise<UpdateRoomPictureResponse> {
-		return new Promise<ChangeUserPictureResponse>((resolve, reject) => {
+		return new Promise<UpdateRoomPictureResponse>((resolve, reject) => {
 			const sizeLimit = useStore.getState().session.capabilities?.maxRoomImageSizeInKb;
 			if (sizeLimit && file.size > sizeLimit * 1000) {
 				reject(new Error('File too large'));
