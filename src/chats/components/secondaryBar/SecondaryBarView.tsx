@@ -14,7 +14,7 @@ import styled from 'styled-components';
 import useFilteredConversationList from './conversationList/useFilteredConversationList';
 import ConversationsFilter from './ConversationsFilter';
 import useFilteredGal from './galSeachList/useFilteredGal';
-import VirtualRoomsButton from './VirtualRoomTemporaryWidget/VirtualRoomsButton';
+import VirtualRoomsButton from './virtualRoomWidget/VirtualRoomsButton';
 import { getOneToOneAndGroupsInfoOrderedByLastMessage } from '../../../store/selectors/MessagesSelectors';
 import { getCapability } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
