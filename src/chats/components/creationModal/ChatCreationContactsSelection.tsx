@@ -339,7 +339,11 @@ const ChatCreationContactsSelection = ({
 
 	const contentToDisplay = useMemo(() => {
 		if (loading) {
-			return <Spinner color={'primary'} />;
+			return (
+				<Container>
+					<Spinner color={'primary'} />
+				</Container>
+			);
 		}
 		if (!error) {
 			return <List data-testid="list_creation_modal">{items}</List>;

@@ -34,7 +34,13 @@ const ChatsMain = (): React.JSX.Element => (
 );
 
 const SecondaryBar = (props: SecondaryBarComponentProps): React.JSX.Element => (
-	<Suspense fallback={<Spinner color={'primary'} />}>
+	<Suspense
+		fallback={
+			<Container>
+				<Spinner color={'primary'} />
+			</Container>
+		}
+	>
 		<ModalManager>
 			<SecondaryBarView {...props} />
 		</ModalManager>
