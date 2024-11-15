@@ -100,9 +100,8 @@ export const uploadFileFetchAPI = (
 					reject(err);
 				});
 		});
-		reader.addEventListener('error', (error) => {
-			console.error(error);
-			reject(error);
+		reader.addEventListener('error', () => {
+			reject(new Error());
 		});
 		reader.readAsArrayBuffer(file);
 	});
