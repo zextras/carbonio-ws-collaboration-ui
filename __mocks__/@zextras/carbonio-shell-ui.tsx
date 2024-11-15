@@ -50,7 +50,6 @@ export const NOTIFICATION_MANAGER = {
 };
 
 function pushHistoryMock(location: Shell.HistoryParams): void {
-	console.log('push history', location);
 	if (typeof location === 'string') {
 		history.push(location);
 	} else {
@@ -66,8 +65,6 @@ function replaceHistoryMock(location: Shell.HistoryParams): void {
 		history.replace(location.path);
 	}
 }
-
-export const mockUseAuthenticated = jest.fn();
 
 export const useAuthenticated: typeof Shell.useAuthenticated = (): boolean => false;
 
@@ -87,6 +84,7 @@ export const Spinner: typeof Shell.Spinner = () => <div>spinner</div>;
 export const pushHistory: typeof Shell.pushHistory = pushHistoryMock;
 
 export const replaceHistory: typeof Shell.replaceHistory = replaceHistoryMock;
+
 export const t = (key: string, value: string): string => value;
 
 export const useIntegratedFunction: typeof Shell.useIntegratedFunction = (id) => {

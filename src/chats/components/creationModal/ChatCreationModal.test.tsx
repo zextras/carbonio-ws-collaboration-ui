@@ -92,7 +92,6 @@ describe('Chat Creation Modal', () => {
 
 	test('Create a group', async () => {
 		const spyOnAddRoom = spyOnRoomsApi(RoomsApiToSpy.ADD_ROOM);
-		// const spyOnFetch = jest.spyOn(global, 'fetch');
 		const { result } = renderHook(() => useStore());
 		act(() => result.current.setCapabilities(createMockCapabilityList({ maxGroupMembers: 5 })));
 		const { user } = setup(<ChatCreationModal open onClose={jest.fn()} />);
