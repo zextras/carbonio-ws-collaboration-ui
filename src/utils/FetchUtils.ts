@@ -40,7 +40,7 @@ export const fetchAPI = (
 	})
 		.then((resp: Response) => {
 			if (resp.ok) return resp;
-			return Promise.reject(new Error());
+			return Promise.reject(new Error('status ko'));
 		})
 		.then((resp: Response) => {
 			const contentType = resp.headers.get('content-type');
@@ -90,12 +90,14 @@ export const uploadFileFetchAPI = (
 				})
 				.then((resp: Response) => {
 					const contentType = resp.headers.get('content-type');
-					if (includes(contentType, 'image/')) resolve(resp.blob());
-					else resolve(resp);
+					if (includes(contentType, 'image/')) {
+						resolve(resp.blob());
+					} else {
+						resolve(resp);
+					}
 				})
 				.catch((err: Error) => {
-					console.error(err);
-					reject(new Error());
+					reject(err);
 				});
 		});
 		reader.addEventListener('error', (error) => {
