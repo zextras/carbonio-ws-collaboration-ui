@@ -44,7 +44,7 @@ const RecordingSettings: FC<RecordingSettingsProps> = ({
 		useIntegratedFunction('select-nodes');
 
 	const confirmAction = useCallback(
-		(nodes) => {
+		(nodes: { id: string; name: string }[]) => {
 			setRecordingDefaults({
 				name: nodes[0].id === 'LOCAL_ROOT' ? 'Home' : nodes[0].name,
 				id: nodes[0].id

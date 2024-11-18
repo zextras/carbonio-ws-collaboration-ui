@@ -6,12 +6,12 @@
 
 import React, { ReactElement, useCallback, useState, useMemo } from 'react';
 
-import { Badge, Container, IconButton, Padding } from '@zextras/carbonio-design-system';
+import { Badge, Button, Container, Padding } from '@zextras/carbonio-design-system';
 import { debounce } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import useEventListener, { EventName } from '../../../hooks/useEventListener';
+import useEventListener, { EventName, NewMessageEvent } from '../../../hooks/useEventListener';
 import { getRoomMutedSelector } from '../../../store/selectors/RoomsSelectors';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import { getRoomUnreadsSelector } from '../../../store/selectors/UnreadsCounterSelectors';
@@ -59,11 +59,11 @@ const ScrollButton = ({ roomId, onClickCb }: ScrollButtonProps): ReactElement =>
 	);
 
 	const newMessageEventHandler = useCallback(
-		(messageFromEvent) => {
+		(event: CustomEvent<NewMessageEvent['data']> | undefined) => {
 			if (
-				messageFromEvent.detail.roomId === roomId &&
-				messageFromEvent.detail.type === MessageType.TEXT_MSG &&
-				messageFromEvent.detail.from !== myUserId
+				event?.detail.roomId === roomId &&
+				event?.detail.type === MessageType.TEXT_MSG &&
+				event?.detail.from !== myUserId
 			) {
 				setShowNewMessageBadge(true);
 				debouncedNewMessagesBadgeSetter();
@@ -90,14 +90,13 @@ const ScrollButton = ({ roomId, onClickCb }: ScrollButtonProps): ReactElement =>
 				/>
 			)}
 			<Padding horizontal="extrasmall" />
-			<IconButton
+			<Button
 				data-testid={'scrollButton'}
 				type="outlined"
 				title={buttonLabel}
-				borderRadius="round"
+				shape="round"
 				icon="ArrowheadDownOutline"
-				iconColor="primary"
-				backgroundColor="gray6"
+				color="primary"
 				onClick={onClickCb}
 			/>
 			{unreadCount > 0 && (

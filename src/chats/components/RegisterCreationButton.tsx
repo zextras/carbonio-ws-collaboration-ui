@@ -6,7 +6,12 @@
 
 import React, { ReactElement, useEffect, useMemo, useState } from 'react';
 
-import { ACTION_TYPES, registerActions, removeActions } from '@zextras/carbonio-shell-ui';
+import {
+	ACTION_TYPES,
+	NewAction,
+	registerActions,
+	removeActions
+} from '@zextras/carbonio-shell-ui';
 import { useTranslation } from 'react-i18next';
 
 import ChatCreationModal from './creationModal/ChatCreationModal';
@@ -17,32 +22,28 @@ const RegisterCreationButton = (): ReactElement => {
 	const [newChatModal, setNewChatModal] = useState(false);
 	const createChatLabel = 'create-chat';
 
-	useEffect(() => {
-		registerActions({
+	const newAction = useMemo(
+		(): NewAction => ({
 			id: createChatLabel,
-			type: ACTION_TYPES.NEW,
-			action: () => ({
-				id: 'create-chat',
-				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-				// @ts-ignore
-				type: ACTION_TYPES.NEW,
-				label: t('action.newChat', 'New Chat'),
-				icon: 'MessageSquareOutline',
-				onClick: () => setNewChatModal(true),
-				group: CHATS_APP_ID,
-				primary: true,
-				disabled: false
-			})
-		});
-		return () => removeActions(createChatLabel);
-	}, [t]);
-
-	const CreationModal: ReactElement = useMemo(
-		() => <ChatCreationModal open={newChatModal} onClose={(): void => setNewChatModal(false)} />,
-		[newChatModal]
+			label: t('action.newChat', 'New Chat'),
+			icon: 'WscOutline',
+			execute: (): void => setNewChatModal(true),
+			group: CHATS_APP_ID,
+			primary: true
+		}),
+		[t]
 	);
 
-	return CreationModal;
+	useEffect(() => {
+		registerActions<NewAction>({
+			id: createChatLabel,
+			type: ACTION_TYPES.NEW,
+			action: () => newAction
+		});
+		return (): void => removeActions(createChatLabel);
+	}, [newAction, t]);
+
+	return <ChatCreationModal open={newChatModal} onClose={(): void => setNewChatModal(false)} />;
 };
 
 export default RegisterCreationButton;

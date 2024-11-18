@@ -14,7 +14,7 @@ import styled from 'styled-components';
 
 import MeetingNotification from './MeetingNotification';
 import { MEETINGS_ROUTE } from '../../constants/appConstants';
-import useEventListener, { EventName } from '../../hooks/useEventListener';
+import useEventListener, { EventName, IncomingMeetingEvent } from '../../hooks/useEventListener';
 import { MeetingStartedEvent } from '../../types/network/websocket/wsMeetingEvents';
 import meetingNotificationRingMp3 from '../assets/meeting-notification-sound.mp3';
 import meetingNotificationRingOgg from '../assets/meeting-notification-sound.ogg';
@@ -48,12 +48,17 @@ const MeetingNotificationsHandler = (): ReactElement => {
 
 	const timeout = useRef<NodeJS.Timeout>();
 
-	const addNotification = useCallback(({ detail: meetingStartedEvent }) => {
-		clearTimeout(timeout.current);
-		setNotificationArray((prev) => [meetingStartedEvent, ...prev]);
-		setMeetingSound(true);
-		timeout.current = setTimeout(() => setMeetingSound(false), 12000);
-	}, []);
+	const addNotification = useCallback(
+		(event: CustomEvent<IncomingMeetingEvent['data']> | undefined) => {
+			clearTimeout(timeout.current);
+			if (event) {
+				setNotificationArray((prev) => [event?.detail, ...prev]);
+			}
+			setMeetingSound(true);
+			timeout.current = setTimeout(() => setMeetingSound(false), 12000);
+		},
+		[]
+	);
 
 	const removeNotification = useCallback((notificationId: string): void => {
 		setNotificationArray((prev: MeetingStartedEvent[]) => {
@@ -65,10 +70,10 @@ const MeetingNotificationsHandler = (): ReactElement => {
 	}, []);
 
 	const removeNotificationFromMeetingEvent = useCallback(
-		({ detail: meetingEvent }) => {
+		(event: CustomEvent<IncomingMeetingEvent['data']> | undefined) => {
 			const notificationToRemove = find(
 				notificationArray,
-				(notification) => notification.meetingId === meetingEvent.meetingId
+				(notification) => notification.meetingId === event?.detail.meetingId
 			);
 			if (notificationToRemove) {
 				removeNotification(notificationToRemove.meetingId);

@@ -15,7 +15,7 @@ import React, {
 	useState
 } from 'react';
 
-import { Container, Input, IconButton, Tooltip } from '@zextras/carbonio-design-system';
+import { Container, Input, Tooltip, Button } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -31,6 +31,10 @@ const FilterContainer = styled(Container)`
 
 const CustomFunnelContainer = styled(Container)`
 	border-bottom: 0.0625rem solid ${({ theme }): string => theme.palette.gray3.regular};
+`;
+
+const CustomButton = styled(Button)`
+	padding: 0.25rem;
 `;
 
 type ConversationsFilterProps = {
@@ -86,10 +90,11 @@ const ConversationsFilter: FC<ConversationsFilterProps> = ({ expanded, setFilter
 			function icon(): JSX.Element {
 				return (
 					<Tooltip label={searchInput.length > 0 ? closeTooltip : filterTooltip}>
-						<IconButton
+						<CustomButton
+							type="ghost"
+							color="text"
 							icon={searchInput.length > 0 ? 'CloseOutline' : 'FunnelOutline'}
 							size="large"
-							customSize={{ paddingSize: '0.25rem', iconSize: '' }}
 							onClick={resetFilter}
 						/>
 					</Tooltip>
@@ -118,12 +123,12 @@ const ConversationsFilter: FC<ConversationsFilterProps> = ({ expanded, setFilter
 			) : (
 				<CustomFunnelContainer height="3rem" background={'gray5'}>
 					<Tooltip label={filterTooltip}>
-						<IconButton
+						<CustomButton
+							type="ghost"
 							icon="FunnelOutline"
 							size="large"
-							customSize={{ paddingSize: '0.25rem', iconSize: '' }}
 							onClick={handleInputFocus}
-							backgroundColor="gray5"
+							color="gray5"
 						/>
 					</Tooltip>
 				</CustomFunnelContainer>

@@ -65,27 +65,27 @@ const MeetingActionsBar = ({ streamsWrapperRef }: MeetingActionsProps): ReactEle
 
 	const timeout = useRef<NodeJS.Timeout>();
 
-	const handleClickOutsideAudioDropdown = useCallback((e) => {
-		if (audioDropdownRef.current && !audioDropdownRef.current.contains(e.target)) {
+	const handleClickOutsideAudioDropdown = useCallback((e: MouseEvent) => {
+		if (audioDropdownRef.current && !audioDropdownRef.current.contains(e.target as HTMLElement)) {
 			setIsAudioListOpen(false);
 		}
 	}, []);
 
-	const handleClickOutsideVideoDropdown = useCallback((e) => {
-		if (videoDropdownRef.current && !videoDropdownRef.current.contains(e.target)) {
+	const handleClickOutsideVideoDropdown = useCallback((e: MouseEvent) => {
+		if (videoDropdownRef.current && !videoDropdownRef.current.contains(e.target as HTMLElement)) {
 			setIsVideoListOpen(false);
 		}
 	}, []);
 
 	const handleHoverMouseMove = useCallback(
-		(e) => {
+		(e: MouseEvent) => {
 			if (!isHoovering) {
 				timeout.current && clearTimeout(timeout.current);
 				setIsHoovering(true);
 				if (!isHoverActions) {
 					timeout.current = setTimeout(() => {
 						const NewEvent = new CustomEvent('mouseStop', { bubbles: true, cancelable: true });
-						e.target.dispatchEvent(NewEvent);
+						(e.target as HTMLElement).dispatchEvent(NewEvent);
 					}, 2000);
 				}
 			}

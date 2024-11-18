@@ -4,8 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { screen } from '@testing-library/react';
-import { renderHook } from '@testing-library/react-hooks';
+import { screen, renderHook } from '@testing-library/react';
 
 import useBubbleContextualMenuDropDown from './useBubbleContextualMenuDropDown';
 import useStore from '../../../../../store/Store';

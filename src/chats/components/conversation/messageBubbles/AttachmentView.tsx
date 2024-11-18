@@ -6,15 +6,7 @@
 
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 
-import {
-	Container,
-	Icon,
-	IconButton,
-	Row,
-	Text,
-	TextWithTooltip,
-	Tooltip
-} from '@zextras/carbonio-design-system';
+import { Button, Container, Icon, Row, Text, Tooltip } from '@zextras/carbonio-design-system';
 import { split } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import styled, { DefaultTheme, SimpleInterpolation } from 'styled-components';
@@ -40,8 +32,15 @@ const CustomContainer = styled(Container)`
 	background-color: rgba(255, 255, 255, 0.2);
 `;
 
-const CustomIconButton = styled(IconButton)`
+const CustomButton = styled(Button)`
 	background-color: rgba(255, 255, 255, 0);
+	padding: 0.25rem;
+	& > svg {
+		width: 1.5rem;
+		min-width: 1.5rem;
+		height: 1.5rem;
+		min-height: 1.5rem;
+	}
 `;
 
 const PreviewContainer = styled(Container)<{ $isLoaded: boolean; $previewError: boolean }>`
@@ -212,9 +211,11 @@ const AttachmentView: FC<AttachmentViewProps> = ({
 				mainAlignment="flex-end"
 				crossAlignment="flex-start"
 			>
-				<TextWithTooltip color={isPreviewLoaded && !previewError ? 'gray6' : 'gray1'}>
-					{attachment.name}
-				</TextWithTooltip>
+				<Tooltip overflowTooltip label={attachment.name}>
+					<Text color={isPreviewLoaded && !previewError ? 'gray6' : 'gray1'}>
+						{attachment.name}
+					</Text>
+				</Tooltip>
 			</TextContainer>
 		),
 		[attachment.name, isPreviewLoaded, previewError]
@@ -226,20 +227,20 @@ const AttachmentView: FC<AttachmentViewProps> = ({
 				<CustomContainer width="fit" height="fit" padding={{ all: 'small' }}>
 					<Container orientation="horizontal" style={{ gap: '0.625rem' }}>
 						<Tooltip label={previewActionLabel}>
-							<CustomIconButton
-								borderRadius="round"
+							<CustomButton
+								type="ghost"
+								shape="round"
 								icon="EyeOutline"
-								iconColor="gray6"
-								customSize={{ iconSize: 'large', paddingSize: 'extrasmall' }}
+								color="gray6"
 								onClick={onPreviewClick}
 							/>
 						</Tooltip>
 						<Tooltip label={downloadActionLabel}>
-							<CustomIconButton
-								borderRadius="round"
-								iconColor="gray6"
+							<CustomButton
+								type="ghost"
+								shape="round"
+								color="gray6"
 								icon="DownloadOutline"
-								customSize={{ iconSize: 'large', paddingSize: 'extrasmall' }}
 								onClick={download}
 							/>
 						</Tooltip>

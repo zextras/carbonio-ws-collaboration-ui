@@ -7,9 +7,8 @@
 
 import React from 'react';
 
-import { createEvent, fireEvent, screen, waitFor } from '@testing-library/react';
+import { createEvent, fireEvent, screen, waitFor, act } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event';
-import { act } from 'react-dom/test-utils';
 
 import ConversationFooter from './ConversationFooter';
 import MessageComposer from './MessageComposer';
@@ -119,17 +118,17 @@ describe('MessageComposer', () => {
 
 		// hover on emoji button
 		const emojiButton = screen.getAllByRole('button')[0];
-		user.hover(emojiButton);
+		await user.hover(emojiButton);
 		const emojiPicker = await screen.findByTestId('emojiPicker');
 		expect(emojiPicker).toBeInTheDocument();
 
 		// hover on emojiPicker
-		user.hover(emojiPicker);
+		await user.hover(emojiPicker);
 		expect(emojiPicker).toBeInTheDocument();
 
 		// hover on textarea for closing the emojiPicker
 		const textArea = await screen.findByRole('textbox');
-		user.hover(textArea);
+		await user.hover(textArea);
 		await waitFor(() => expect(emojiPicker).not.toBeInTheDocument());
 	});
 
@@ -435,7 +434,7 @@ describe('MessageComposer - send message', () => {
 		expect(useStore.getState().activeConversations[mockedRoom.id].filesToAttach).toHaveLength(1);
 
 		const sendButton = screen.getByTestId(iconNavigator2);
-		await waitFor(() => user.click(sendButton));
+		await user.click(sendButton);
 
 		const updatedStore = useStore.getState();
 		expect(mockedImageSizeRequest).toHaveBeenCalledTimes(1);
@@ -454,7 +453,7 @@ describe('MessageComposer - send message', () => {
 		expect(useStore.getState().activeConversations[mockedRoom.id].filesToAttach).toHaveLength(1);
 
 		const sendButton = screen.getByTestId(iconNavigator2);
-		await waitFor(() => user.click(sendButton));
+		await user.click(sendButton);
 
 		const updatedStore = useStore.getState();
 		expect(mockedAddRoomAttachmentRequest).toHaveBeenCalledTimes(1);
@@ -472,7 +471,7 @@ describe('MessageComposer - send message', () => {
 		expect(useStore.getState().activeConversations[mockedRoom.id].filesToAttach).toHaveLength(1);
 
 		const sendButton = screen.getByTestId(iconNavigator2);
-		await waitFor(() => user.click(sendButton));
+		await user.click(sendButton);
 
 		const updatedStore = useStore.getState();
 		expect(mockedAddRoomAttachmentRequest).toHaveBeenCalledTimes(1);
@@ -733,9 +732,9 @@ describe('MessageComposer - isWriting events', () => {
 		await user.type(composerTextArea, 'How are you?');
 		jest.advanceTimersByTime(2000);
 		await user.type(composerTextArea, 'I am fine');
-		expect(mockedSendIsWriting).toBeCalledTimes(2);
+		expect(mockedSendIsWriting).toHaveBeenCalledTimes(2);
 		jest.advanceTimersByTime(1000);
-		expect(mockedSendIsWriting).toBeCalledTimes(3);
+		expect(mockedSendIsWriting).toHaveBeenCalledTimes(3);
 	});
 
 	test('sendStopWriting is called after 3.5 seconds after user stops writing', async () => {
@@ -744,7 +743,7 @@ describe('MessageComposer - isWriting events', () => {
 
 		await user.type(composerTextArea, 'Hi');
 		jest.advanceTimersByTime(4000);
-		expect(mockedSendPaused).toBeCalledTimes(1);
+		expect(mockedSendPaused).toHaveBeenCalledTimes(1);
 	});
 
 	test('sendStopWriting is called immediately when user sends the message', async () => {
@@ -754,7 +753,7 @@ describe('MessageComposer - isWriting events', () => {
 		await user.type(composerTextArea, 'Hi');
 		const sendButton = screen.getByTestId(iconNavigator2);
 		await user.click(sendButton);
-		expect(mockedSendPaused).toBeCalledTimes(1);
+		expect(mockedSendPaused).toHaveBeenCalledTimes(1);
 	});
 });
 
@@ -784,7 +783,7 @@ describe('MessageComposer - draft message', () => {
 	test('ArrowUp triggers edit when last message is sent by me', async () => {
 		const { user } = storeSetupGroup();
 
-		user.keyboard('{ArrowUp}');
+		await user.keyboard('{ArrowUp}');
 
 		const composerTextArea = screen.getByRole('textbox');
 		await waitFor(() =>
@@ -805,7 +804,7 @@ describe('MessageComposer - draft message', () => {
 		});
 		act(() => store.newMessage(messageByRoberto));
 
-		user.keyboard('{ArrowUp}');
+		await user.keyboard('{ArrowUp}');
 
 		const composerTextArea = screen.getByRole('textbox');
 		await waitFor(() => expect((composerTextArea as HTMLTextAreaElement).value).toBe(''));

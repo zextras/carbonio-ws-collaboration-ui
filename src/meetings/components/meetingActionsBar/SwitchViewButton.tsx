@@ -5,7 +5,7 @@
  */
 import React, { ReactElement, useCallback } from 'react';
 
-import { IconButton, Tooltip } from '@zextras/carbonio-design-system';
+import { Button, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 
@@ -39,10 +39,10 @@ const SwitchViewButton = (): ReactElement | null => {
 			placement="top"
 			label={meetingViewSelected === MeetingViewType.GRID ? cinemaViewLabel : gridViewLabel}
 		>
-			<IconButton
+			<Button
 				size="large"
 				backgroundColor="primary"
-				iconColor="gray6"
+				labelColor="gray6"
 				icon={meetingViewSelected === MeetingViewType.GRID ? 'CinemaView' : 'Grid'}
 				onClick={switchMode}
 			/>

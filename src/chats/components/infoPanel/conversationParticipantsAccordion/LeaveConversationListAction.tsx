@@ -6,7 +6,7 @@
 
 import React, { FC, useCallback, useState } from 'react';
 
-import { IconButton, Tooltip } from '@zextras/carbonio-design-system';
+import { Button, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
 import useRouting from '../../../../hooks/useRouting';
@@ -75,8 +75,9 @@ const LeaveConversationListAction: FC<LeaveConversationProps> = ({
 	return (
 		<>
 			<Tooltip label={tooltipLabel} maxWidth="fit-content">
-				<IconButton
-					iconColor="error"
+				<Button
+					type="ghost"
+					color="error"
 					size="extralarge"
 					icon={iAmOwner && numberOfMembers === 1 ? 'Trash2Outline' : 'LogOut'}
 					onClick={

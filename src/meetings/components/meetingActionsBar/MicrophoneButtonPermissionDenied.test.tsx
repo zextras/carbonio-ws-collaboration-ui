@@ -5,12 +5,12 @@
  */
 import React from 'react';
 
-import { screen } from '@testing-library/react';
+import { screen, act } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event';
-import { act } from 'react-dom/test-utils';
 
 import MicrophoneButton from './MicrophoneButton';
 import { useParams } from '../../../../__mocks__/react-router';
+import useStore from '../../../store/Store';
 import {
 	createMockMeeting,
 	createMockParticipants,
@@ -77,6 +77,7 @@ beforeAll(() => {
 
 describe('Microphone button - permission denied', () => {
 	test('User clicks on the button', async () => {
+		useStore.getState().setWebsocketStatus(true);
 		mockedEnumerateDevices.mockRejectedValue('error enumerateDevices');
 		mockedGetUserMedia.mockRejectedValue('error getUserMedia');
 

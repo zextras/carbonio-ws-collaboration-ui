@@ -5,8 +5,7 @@
  */
 import React from 'react';
 
-import { screen } from '@testing-library/react';
-import { renderHook } from '@testing-library/react-hooks';
+import { screen, renderHook } from '@testing-library/react';
 
 import {
 	ConfigurationMessageLabel,

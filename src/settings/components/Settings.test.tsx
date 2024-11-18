@@ -6,8 +6,7 @@
 
 import React from 'react';
 
-import { screen, waitFor } from '@testing-library/react';
-import { act } from 'react-dom/test-utils';
+import { screen, waitFor, act } from '@testing-library/react';
 
 import NotificationsSettings from './NotificationsSettings';
 import Settings from './Settings';
@@ -56,55 +55,6 @@ const notificationsSettingsObjectFalse: NotificationsSettingsType = {
 const dataTestid = 'data-testid';
 
 describe('Settings view', () => {
-	describe('Profile Settings', () => {
-		test('Everything should be rendered - no image', async () => {
-			const store: RootStore = useStore.getState();
-			store.setUserInfo(userWithoutImage);
-			store.setLoginInfo(userWithoutImage.id, userWithoutImage.name, userWithoutImage.name);
-			setup(<Settings id={userWithoutImage.id} />);
-			const background = screen.getByTestId('background_container');
-			expect(background).toBeInTheDocument();
-			const uploadButton = screen.getByTestId('upload_button');
-			const resetButton = screen.getByTestId('reset_button');
-			expect(uploadButton).toBeInTheDocument();
-			expect(resetButton).toBeInTheDocument();
-			expect(resetButton).not.toBeEnabled();
-		});
-
-		test('Everything should be rendered - with image', async () => {
-			const store: RootStore = useStore.getState();
-			store.setUserInfo(userWithImage);
-			store.setUserPictureUpdated(userWithImage.id, pictureUpdatedAtTime);
-			store.setLoginInfo(userWithImage.id, userWithImage.name, userWithImage.name);
-			setup(<Settings id={userWithImage.id} />);
-
-			const background = screen.getByTestId('picture_container');
-			expect(background).toBeInTheDocument();
-
-			const uploadButton = screen.getByTestId('upload_button');
-			const resetButton = screen.getByTestId('reset_button');
-			expect(uploadButton).toBeInTheDocument();
-			expect(resetButton).toBeInTheDocument();
-			expect(resetButton).toBeEnabled();
-		});
-
-		test('Delete a profile image', async () => {
-			const store: RootStore = useStore.getState();
-			store.setUserInfo(userWithImage);
-			store.setUserPictureUpdated(userWithImage.id, pictureUpdatedAtTime);
-			store.setLoginInfo(userWithImage.id, userWithImage.name, userWithImage.name);
-			const { user } = setup(<Settings id={userWithImage.id} />);
-			const pictureContainer = screen.getByTestId('picture_container');
-			expect(pictureContainer).toBeInTheDocument();
-			const resetButton = screen.getByTestId('reset_button');
-			await user.click(resetButton);
-			expect(pictureContainer).not.toBeInTheDocument();
-			const backgroundContainer = screen.getByTestId('background_container');
-			expect(backgroundContainer).toBeInTheDocument();
-			expect(resetButton).not.toBeEnabled();
-		});
-	});
-
 	describe('Notifications Settings', () => {
 		test('desktop notification checkbox active', async () => {
 			const store: RootStore = useStore.getState();
@@ -230,7 +180,7 @@ describe('Settings view', () => {
 			const store: RootStore = useStore.getState();
 			store.setUserInfo(userWithoutImage);
 			store.setLoginInfo(userWithoutImage.id, userWithoutImage.name, userWithoutImage.name);
-			setup(<Settings id={userWithoutImage.id} />);
+			setup(<Settings />);
 
 			const meetingContainer = screen.getByTestId('meeting_settings_container');
 			expect(meetingContainer).toBeInTheDocument();
@@ -251,7 +201,7 @@ describe('Settings view', () => {
 			store.setUserInfo(userWithoutImage);
 			store.setLoginInfo(userWithoutImage.id, userWithoutImage.name, userWithoutImage.name);
 			store.setCapabilities(createMockCapabilityList({ canVideoCallRecord: false }));
-			const { user } = setup(<Settings id={userWithoutImage.id} />);
+			const { user } = setup(<Settings />);
 
 			const micCheckbox = screen.getByTestId('microphone_checkbox');
 			const camCheckbox = screen.getByTestId('camera_checkbox');
@@ -272,7 +222,7 @@ describe('Settings view', () => {
 			store.setUserInfo(userWithoutImage);
 			store.setLoginInfo(userWithoutImage.id, userWithoutImage.name, userWithoutImage.name);
 			store.setCapabilities(createMockCapabilityList());
-			setup(<Settings id={userWithoutImage.id} />);
+			setup(<Settings />);
 
 			const recordingContainer = screen.getByTestId('recording_settings_container');
 			expect(recordingContainer).toBeInTheDocument();
@@ -282,7 +232,7 @@ describe('Settings view', () => {
 			store.setUserInfo(userWithoutImage);
 			store.setLoginInfo(userWithoutImage.id, userWithoutImage.name, userWithoutImage.name);
 			store.setCapabilities(createMockCapabilityList({ canVideoCallRecord: false }));
-			setup(<Settings id={userWithoutImage.id} />);
+			setup(<Settings />);
 
 			const recordingContainer = screen.queryByTestId('recording_settings_container');
 			expect(recordingContainer).not.toBeInTheDocument();
@@ -297,7 +247,7 @@ describe('Settings view', () => {
 				'ChatsRecordingSettings',
 				JSON.stringify({ name: 'prova', id: 'provaId' })
 			);
-			const { user } = setup(<Settings id={userWithImage.id} />);
+			const { user } = setup(<Settings />);
 
 			const resetButton = screen.getByRole('button', { name: 'Reset' });
 

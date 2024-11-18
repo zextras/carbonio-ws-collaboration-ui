@@ -14,7 +14,7 @@ const LazySettingsView = lazy(
 	() => import(/* webpackChunkName: "settingsView" */ './views/SettingsView')
 );
 
-const SettingsView = () => (
+const SettingsView = (): React.JSX.Element => (
 	<Suspense fallback={<Spinner />}>
 		<ModalManager>
 			<LazySettingsView />
@@ -22,7 +22,7 @@ const SettingsView = () => (
 	</Suspense>
 );
 
-export default function useSettingsApp() {
+export default function useSettingsApp(): void {
 	useEffect(() => {
 		addSettingsView({
 			icon: 'WscOutline',

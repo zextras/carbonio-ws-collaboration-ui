@@ -14,9 +14,9 @@ import React, {
 } from 'react';
 
 import {
+	Button,
 	Container,
 	CreateSnackbarFn,
-	IconButton,
 	Spinner,
 	Tooltip,
 	useSnackbar
@@ -62,7 +62,7 @@ type ConversationMessageComposerProps = {
 	roomId: string;
 };
 
-const BlockUploadButton = styled(IconButton)`
+const BlockUploadButton = styled(Button)`
 	display: none;
 `;
 
@@ -79,7 +79,7 @@ const UploadSpinnerWrapper = styled(Container)`
 	}
 `;
 
-const SendIconButton = styled(IconButton)<{ alt?: string }>``;
+const SendButton = styled(Button)<{ alt?: string }>``;
 
 const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId }) => {
 	const xmppClient = useStore(getXmppClient);
@@ -136,7 +136,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 		forEach(listAbortController, (controller: AbortController) => controller.abort());
 		createSnackbar({
 			key: new Date().toLocaleString(),
-			type: 'info',
+			severity: 'info',
 			label: uploadAbortedLabel,
 			hideButton: true,
 			autoHideTimeout: 3000
@@ -171,7 +171,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 			);
 			createSnackbar({
 				key: new Date().toLocaleString(),
-				type: 'error',
+				severity: 'error',
 				label: errorString,
 				actionLabel: 'UNDERSTOOD',
 				disableAutoHide: true
@@ -408,12 +408,12 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 	}, [textMessage, setInputHasFocus, roomId, setDraftMessage]);
 
 	const handlePaste = useCallback(
-		(ev) => {
+		(ev: ClipboardEvent) => {
 			try {
 				// Avoid to paste files if user is editing a message
 				const editingMessage = referenceMessage?.actionType === messageActionType.EDIT;
 				if (!editingMessage) {
-					const includeFiles = ev.clipboardData.files;
+					const includeFiles = ev.clipboardData?.files;
 					if (includeFiles && includeFiles.length > 0) {
 						ev.preventDefault();
 						ev.stopPropagation();
@@ -523,7 +523,8 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 						<LoadingSpinner color="primary" title={uploadingLabel} />
 						<BlockUploadButton
 							onClick={abortUploadRequest}
-							iconColor="gray0"
+							type="ghost"
+							color="gray0"
 							size="large"
 							icon="CloseOutline"
 						/>
@@ -531,9 +532,10 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 				</Tooltip>
 			)}
 			<Tooltip label={sendDisabled ? writeToSendTooltip : sendMessageLabel} placement="top">
-				<SendIconButton
+				<SendButton
 					onClick={sendMessage}
-					iconColor="primary"
+					type="ghost"
+					color="primary"
 					size="large"
 					icon="Navigation2"
 					alt={sendDisabled ? writeToSendTooltip : sendMessageLabel}

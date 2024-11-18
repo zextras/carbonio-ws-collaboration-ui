@@ -19,9 +19,10 @@ import {
 	ChipItem,
 	Container,
 	ListItem,
-	ListV2,
+	List,
 	Padding,
-	Text
+	Text,
+	ChipAction
 } from '@zextras/carbonio-design-system';
 import { Spinner } from '@zextras/carbonio-shell-ui';
 import {
@@ -70,6 +71,8 @@ const ChatCreationContactsSelection = ({
 	inputRef
 }: ChatCreationContactsSelectionProps): ReactElement => {
 	const [t] = useTranslation();
+	const demoteModeratorLabel: string = t('tooltip.demoteModerator', 'Demote moderator');
+	const promoteModeratorLabel: string = t('tooltip.promoteModerator', 'Promote to moderator');
 	const noMatchLabel = t(
 		'participantsList.noMatch.gal',
 		'There are no items that match this search in your company.'
@@ -192,7 +195,7 @@ const ChatCreationContactsSelection = ({
 		[isCreationModal, contactsSelected, maxGroupMembers, members]
 	);
 
-	const addOrRemoveChip = useCallback((newChip) => {
+	const addOrRemoveChip = useCallback((newChip: ChipItem<ContactInfo>) => {
 		setChips((chips) =>
 			find(chips, (chip) => chip.value?.id === newChip.value?.id)
 				? differenceBy(chips, [newChip], (chip) => chip.value?.id)
@@ -200,20 +203,101 @@ const ChatCreationContactsSelection = ({
 		);
 	}, []);
 
+	const isOwner = useCallback(
+		(id: string): boolean => {
+			if (contactsSelected[id]) {
+				return contactsSelected[id].owner;
+			}
+			return false;
+		},
+		[contactsSelected]
+	);
+
+	const updateOwner = useCallback(
+		(id: string | undefined) => {
+			if (id) {
+				setContactSelected((contacts: ContactSelected) => ({
+					...contacts,
+					[id]: {
+						...contacts[id],
+						owner: !contacts[id].owner
+					}
+				}));
+			}
+		},
+		[setContactSelected]
+	);
+
+	const moderatorLabel = useCallback(
+		(id: string) => {
+			if (isOwner(id)) return demoteModeratorLabel;
+			return promoteModeratorLabel;
+		},
+		[demoteModeratorLabel, isOwner, promoteModeratorLabel]
+	);
+
+	const moderatorIcon = useCallback(
+		(id: string) => {
+			if (isOwner(id)) return 'Crown';
+			return 'CrownOutline';
+		},
+		[isOwner]
+	);
+
+	const getChipActions = useCallback(
+		(chipId: string): ChipAction[] => {
+			if (size(contactsSelected) < 2) return [];
+
+			return [
+				{
+					id: 'set-moderator',
+					type: 'button',
+					label: moderatorLabel(chipId),
+					icon: moderatorIcon(chipId),
+					onClick: (): void => updateOwner(chipId)
+				}
+			];
+		},
+		[contactsSelected, moderatorIcon, moderatorLabel, updateOwner]
+	);
+
+	// update of chip aspect when contactsSelected changes
+	useEffect(() => {
+		setChips((prevChips) =>
+			prevChips.map((chip) => {
+				if (chip.value !== undefined && contactsSelected[chip.value.id]) {
+					return {
+						...chip,
+						actions: getChipActions(chip.value.id)
+					};
+				}
+				return chip;
+			})
+		);
+	}, [contactsSelected, getChipActions, isOwner, updateOwner]);
+
+	const createChip = useCallback(
+		(item: ContactInfo): ChipItem<ContactInfo> => ({
+			value: item,
+			label: item.displayName || item.email,
+			actions: getChipActions(item.id)
+		}),
+		[getChipActions]
+	);
+
 	const onClickListItem = useCallback(
 		(item: ContactInfo) => (): void => {
 			if ((chipInputHasError && !!contactsSelected[item.id]) || !chipInputHasError) {
-				const newChip: ChipItem<ContactInfo> = {
-					value: item,
-					label: item.displayName || item.email
-				};
+				const newChip: ChipItem<ContactInfo> = createChip(item);
 				setContactSelected((contacts: ContactSelected) =>
-					contacts[item.id] ? omit(contacts, item.id) : { ...contacts, [item.id]: item }
+					contacts[item.id]
+						? omit(contacts, item.id)
+						: { ...contacts, [item.id]: { ...item, owner: false } }
 				);
 				addOrRemoveChip(newChip);
 			}
 		},
-		[addOrRemoveChip, chipInputHasError, contactsSelected, setContactSelected]
+		[addOrRemoveChip, chipInputHasError, contactsSelected, createChip, setContactSelected]
 	);
 
 	const items = useMemo(
@@ -226,11 +310,14 @@ const ChatCreationContactsSelection = ({
 							selected={!!contactsSelected[item.id]}
 							onClickCb={onClickListItem}
 							isDisabled={chipInputHasError}
+							updateOwner={updateOwner}
+							isOwner={isOwner}
+							canBeModerator={members !== undefined || size(contactsSelected) >= 2}
 						/>
 					)}
 				</ListItem>
 			)),
-		[chipInputHasError, contactsSelected, onClickListItem, result]
+		[chipInputHasError, contactsSelected, isOwner, members, onClickListItem, result, updateOwner]
 	);
 
 	const removeContactFromChip = useCallback(
@@ -255,7 +342,7 @@ const ChatCreationContactsSelection = ({
 			return <Spinner />;
 		}
 		if (!error) {
-			return <ListV2 data-testid="list_creation_modal">{items}</ListV2>;
+			return <List data-testid="list_creation_modal">{items}</List>;
 		}
 		return (
 			<CustomContainer padding="large">
@@ -295,5 +382,5 @@ const ChatCreationContactsSelection = ({
 export default ChatCreationContactsSelection;
 
 export type ContactSelected = {
-	[id: string]: ContactInfo;
+	[id: string]: ContactInfo & { owner: boolean };
 };

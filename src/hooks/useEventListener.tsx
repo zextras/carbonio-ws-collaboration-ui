@@ -96,7 +96,7 @@ export type RecordingStoppedEvent = {
 	data: MeetingRecordingStoppedEvent;
 };
 
-type CustomEvent =
+type AppCustomEvent =
 	| NewMessageEvent
 	| IncomingMeetingEvent
 	| RemovedMeetingNotificationEvent
@@ -110,13 +110,13 @@ type CustomEvent =
 	| RecordingStoppedEvent
 	| MeetingStoppedUseEvent;
 
-export const sendCustomEvent = (event: CustomEvent): void => {
+export const sendCustomEvent = (event: AppCustomEvent): void => {
 	window.dispatchEvent(new CustomEvent(event.name, { detail: event.data }));
 };
 
-const useEventListener = (
+const useEventListener = <T = unknown,>(
 	eventName: EventName,
-	handler: (event?: Event) => void,
+	handler: (event?: CustomEvent<T>) => void,
 	element = window
 ): void => {
 	const savedHandler = useRef(handler);
@@ -126,9 +126,13 @@ const useEventListener = (
 	}, [handler]);
 
 	useEffect(() => {
-		const eventListener = (event: Event): void => savedHandler.current(event);
+		const eventListener = (event: Event): void => {
+			if (event instanceof CustomEvent) {
+				savedHandler.current(event as CustomEvent<T>);
+			}
+		};
 		element.addEventListener(eventName, eventListener);
-		return () => {
+		return (): void => {
 			element.removeEventListener(eventName, eventListener);
 		};
 	}, [eventName, element]);

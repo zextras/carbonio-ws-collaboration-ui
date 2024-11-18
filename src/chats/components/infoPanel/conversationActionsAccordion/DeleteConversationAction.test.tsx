@@ -5,8 +5,7 @@
  */
 import React from 'react';
 
-import { screen, waitFor } from '@testing-library/react';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { screen, waitFor, act, renderHook } from '@testing-library/react';
 
 import DeleteConversationAction from './DeleteConversationAction';
 import useStore from '../../../../store/Store';
@@ -97,11 +96,11 @@ describe('delete conversation action', () => {
 		expect(result.current.rooms[testRoom.id]).toBeDefined();
 
 		const deleteRoomLabel = screen.getByText(/Delete Group/i);
-		user.click(deleteRoomLabel);
+		await user.click(deleteRoomLabel);
 
 		const deleteButton = await screen.findByRole('button', { name: 'Delete' });
 
-		user.click(deleteButton);
-		await waitFor(() => expect(mockGoToMainPage).toBeCalled());
+		await user.click(deleteButton);
+		await waitFor(() => expect(mockGoToMainPage).toHaveBeenCalled());
 	});
 });

@@ -13,7 +13,6 @@ export type User = {
 	statusMessage?: string;
 	online?: boolean;
 	last_activity?: number;
-	pictureUpdatedAt?: string;
 };
 
 export type UsersMap = {

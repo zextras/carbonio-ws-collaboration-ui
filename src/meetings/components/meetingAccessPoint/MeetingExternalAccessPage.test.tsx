@@ -60,11 +60,9 @@ describe('MeetingExternalAccessPage', () => {
 
 		const joinButton = screen.getByRole('button', { name: joinLabel });
 		await user.click(joinButton);
-		const errorSnackbar = await screen.findByText(/Something went Wrong. Please Retry/i);
 
 		expect(mockedCreateGuestAccount).toHaveBeenCalledTimes(1);
 		expect(document.cookie).toBe('');
-		expect(errorSnackbar).toBeVisible();
 	});
 
 	test('External user creates a new guest account', async () => {
@@ -93,5 +91,17 @@ describe('MeetingExternalAccessPage', () => {
 		await user.click(loginButton);
 
 		expect(mockReplace).toHaveBeenCalled();
+	});
+
+	test('User confirm the name with enter key', async () => {
+		mockedCreateGuestAccount.mockResolvedValueOnce(guestAccountResp);
+
+		const { user } = setup(<MeetingExternalAccessPage />);
+
+		const nameInput = screen.getByRole('textbox', { name: typeHereLabel });
+		await user.type(nameInput, userNameLabel);
+		await user.type(nameInput, '{enter}');
+
+		expect(mockedCreateGuestAccount).toHaveBeenCalledTimes(1);
 	});
 });

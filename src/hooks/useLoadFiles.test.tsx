@@ -4,8 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { fireEvent, screen } from '@testing-library/react';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { fireEvent, screen, act, renderHook } from '@testing-library/react';
 
 import useLoadFiles from './useLoadFiles';
 import { FILE_DESCRIPTION_CHAR_LIMIT } from '../constants/messageConstants';

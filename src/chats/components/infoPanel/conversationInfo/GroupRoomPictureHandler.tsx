@@ -4,13 +4,13 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { FC, useCallback, useMemo } from 'react';
+import React, { FC, FormEvent, useCallback, useMemo } from 'react';
 
 import {
 	Container,
 	CreateSnackbarFn,
 	FileLoader,
-	IconButton,
+	Button,
 	Text,
 	Tooltip,
 	useSnackbar
@@ -46,7 +46,7 @@ const HoverActions = styled(Container)`
 	right: 0;
 `;
 
-const CustomIconButton = styled(IconButton)`
+const CustomButton = styled(Button)`
 	&:hover {
 		background-color: rgba(0, 0, 0, 0.5);
 	}
@@ -105,7 +105,7 @@ const GroupRoomPictureHandler: FC<RoomPictureProps> = ({ roomId }) => {
 		if (roomPictureUpdatedAt) {
 			return `${RoomsApi.getURLRoomPicture(roomId)}?${roomPictureUpdatedAt}`;
 		}
-		return false;
+		return undefined;
 	}, [roomId, roomPictureUpdatedAt]);
 
 	const description = useMemo(
@@ -120,26 +120,30 @@ const GroupRoomPictureHandler: FC<RoomPictureProps> = ({ roomId }) => {
 	const createSnackbar: CreateSnackbarFn = useSnackbar();
 
 	const handleGroupPictureChange = useCallback(
-		(e) => {
-			RoomsApi.updateRoomPicture(roomId, e.target.files[0])
-				.then(() => {
-					createSnackbar({
-						key: new Date().toLocaleString(),
-						type: 'info',
-						label: updatedImageSnackbar,
-						hideButton: true,
-						autoHideTimeout: 5000
+		(e: FormEvent) => {
+			const inputElement = e.target as HTMLInputElement;
+			const files = inputElement?.files;
+			if (files) {
+				RoomsApi.updateRoomPicture(roomId, files[0])
+					.then(() => {
+						createSnackbar({
+							key: new Date().toLocaleString(),
+							severity: 'info',
+							label: updatedImageSnackbar,
+							hideButton: true,
+							autoHideTimeout: 5000
+						});
+					})
+					.catch(() => {
+						createSnackbar({
+							key: new Date().toLocaleString(),
+							severity: 'error',
+							label: imageSizeTooLargeSnackbar,
+							hideButton: true,
+							autoHideTimeout: 5000
+						});
 					});
-				})
-				.catch(() => {
-					createSnackbar({
-						key: new Date().toLocaleString(),
-						type: 'error',
-						label: imageSizeTooLargeSnackbar,
-						hideButton: true,
-						autoHideTimeout: 5000
-					});
-				});
+			}
 		},
 		[createSnackbar, imageSizeTooLargeSnackbar, roomId, updatedImageSnackbar]
 	);
@@ -149,7 +153,7 @@ const GroupRoomPictureHandler: FC<RoomPictureProps> = ({ roomId }) => {
 			.then(() => {
 				createSnackbar({
 					key: new Date().toLocaleString(),
-					type: 'info',
+					severity: 'info',
 					label: deletedImageSnackbar,
 					hideButton: true,
 					autoHideTimeout: 5000
@@ -158,7 +162,7 @@ const GroupRoomPictureHandler: FC<RoomPictureProps> = ({ roomId }) => {
 			.catch(() => {
 				createSnackbar({
 					key: new Date().toLocaleString(),
-					type: 'error',
+					severity: 'error',
 					label: errorDeleteImageSnackbar,
 					hideButton: true,
 					autoHideTimeout: 5000
@@ -193,9 +197,10 @@ const GroupRoomPictureHandler: FC<RoomPictureProps> = ({ roomId }) => {
 					</Tooltip>
 					{!!picture && (
 						<Tooltip placement="bottom" label={resetPictureLabel}>
-							<CustomIconButton
+							<CustomButton
+								type="ghost"
 								icon="RefreshOutline"
-								iconColor="gray6"
+								color="gray6"
 								size="large"
 								onClick={onDeleteGroupImage}
 								data-testid="delete_button"

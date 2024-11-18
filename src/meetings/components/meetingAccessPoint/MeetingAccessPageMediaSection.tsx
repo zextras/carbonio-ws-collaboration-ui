@@ -31,22 +31,26 @@ import LocalMediaHandler from './mediaHandlers/LocalMediaHandler';
 import { MEETINGS_PATH } from '../../../constants/appConstants';
 import useEventListener, { EventName } from '../../../hooks/useEventListener';
 import useLocalStorage from '../../../hooks/useLocalStorage';
-import useRouting from '../../../hooks/useRouting';
-import { MeetingsApi } from '../../../network';
 import { getRoomIdFromMeeting } from '../../../store/selectors/MeetingSelectors';
 import { getRoomNameSelector } from '../../../store/selectors/RoomsSelectors';
 import useStore from '../../../store/Store';
 import { LOCAL_STORAGE_NAMES, MeetingStorageType } from '../../../utils/localStorageUtils';
-import { freeMediaResources } from '../../../utils/MeetingsUtils';
 
 type AccessMeetingPageMediaSectionProps = {
 	streamTrack: MediaStream | null;
 	setStreamTrack: Dispatch<SetStateAction<MediaStream | null>>;
 	hasUserDirectAccess: boolean | undefined;
 	userIsReady: boolean;
-	setUserIsReady: Dispatch<SetStateAction<boolean>>;
 	meetingName: string;
 	wrapperWidth: number;
+	handleEnterMeeting: (
+		mediaDevicesEnabled?: { audio: boolean; video: boolean },
+		selectedDevicesId?: { audio?: string; video?: string }
+	) => void;
+	handleWaitingRoom: (
+		mediaDevicesEnabled?: { audio: boolean; video: boolean },
+		selectedDevicesId?: { audio?: string; video?: string }
+	) => void;
 };
 
 const ResizeWrapper = styled(Container)`
@@ -69,9 +73,10 @@ const MeetingAccessPageMediaSection: FC<AccessMeetingPageMediaSectionProps> = ({
 	setStreamTrack,
 	hasUserDirectAccess,
 	userIsReady,
-	setUserIsReady,
 	meetingName,
-	wrapperWidth
+	wrapperWidth,
+	handleEnterMeeting,
+	handleWaitingRoom
 }) => {
 	const [t] = useTranslation();
 	const meetingId = useMemo(() => document.location.pathname.split(MEETINGS_PATH)[1], []);
@@ -108,8 +113,6 @@ const MeetingAccessPageMediaSection: FC<AccessMeetingPageMediaSectionProps> = ({
 		'meeting.waitingRoom.nextStep',
 		'A moderator will let you into the meeting as soon as possible.'
 	);
-
-	const { goToMeetingPage } = useRouting();
 
 	const [meetingStorage, setMeetingStorage] = useLocalStorage<MeetingStorageType>(
 		LOCAL_STORAGE_NAMES.MEETINGS
@@ -161,55 +164,15 @@ const MeetingAccessPageMediaSection: FC<AccessMeetingPageMediaSectionProps> = ({
 	}, [setVideoPlayerTestMuted]);
 
 	// handle waiting room flow and events
-	const waitingRoomHandler = useCallback(() => {
-		MeetingsApi.joinMeeting(
-			meetingId,
-			{
-				videoStreamEnabled: mediaDevicesEnabled.video,
-				audioStreamEnabled: mediaDevicesEnabled.audio
-			},
-			{ audioDevice: selectedDevicesId.audio, videoDevice: selectedDevicesId.video }
-		)
-			.then((resp) => {
-				if (resp.status === 'WAITING') setUserIsReady(true);
-				if (resp.status === 'ACCEPTED') {
-					freeMediaResources(streamTrack);
-					goToMeetingPage(meetingId);
-				}
-			})
-			.catch((err) => console.error(err, 'Error on waitingRoomHandler'));
-	}, [
-		goToMeetingPage,
-		mediaDevicesEnabled,
-		meetingId,
-		selectedDevicesId,
-		setUserIsReady,
-		streamTrack
-	]);
+	const waitingRoomHandler = useCallback(
+		() => handleWaitingRoom(mediaDevicesEnabled, selectedDevicesId),
+		[handleWaitingRoom, mediaDevicesEnabled, selectedDevicesId]
+	);
 
-	const enterMeeting = useCallback(() => {
-		MeetingsApi.enterMeeting(
-			roomId,
-			{
-				videoStreamEnabled: mediaDevicesEnabled.video,
-				audioStreamEnabled: mediaDevicesEnabled.audio
-			},
-			{ audioDevice: selectedDevicesId.audio, videoDevice: selectedDevicesId.video }
-		)
-			.then((meetingId) => {
-				freeMediaResources(streamTrack);
-				goToMeetingPage(meetingId);
-			})
-			.catch((err) => console.error(err, 'Error on joinMeeting'));
-	}, [
-		streamTrack,
-		roomId,
-		mediaDevicesEnabled.video,
-		mediaDevicesEnabled.audio,
-		selectedDevicesId.audio,
-		selectedDevicesId.video,
-		goToMeetingPage
-	]);
+	const enterMeeting = useCallback(
+		() => handleEnterMeeting(mediaDevicesEnabled, selectedDevicesId),
+		[handleEnterMeeting, mediaDevicesEnabled, selectedDevicesId]
+	);
 
 	const enterButton = useMemo(() => {
 		if (hasUserDirectAccess === undefined) return undefined;

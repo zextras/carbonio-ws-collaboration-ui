@@ -537,10 +537,31 @@ describe('Meetings API', () => {
 		});
 	});
 
-	test('leaveWaitingRoom is called correctly', async () => {
-		document.cookie = `ZM_AUTH_TOKEN=123456789; path=/`;
-		document.cookie = `ZX_AUTH_TOKEN=123456789; path=/`;
-		fetchResponse.mockResolvedValueOnce({ status: 'ACCEPTED' });
+	test('leaveWaitingRoom is called correctly for internal user', async () => {
+		const cookie = `ZM_AUTH_TOKEN=123456789`;
+		document.cookie = cookie;
+		fetchResponse.mockResolvedValueOnce({});
+		await meetingsApi.leaveWaitingRoom(meetingMock.id);
+
+		// Check if fetch is called with the correct parameters
+		expect(global.fetch).toHaveBeenCalledWith(
+			`/services/chats/meetings/${meetingMock.id}/queue/${userId}`,
+			{
+				method: 'POST',
+				headers,
+				body: JSON.stringify({
+					status: 'REJECTED'
+				})
+			}
+		);
+		expect(document.cookie).toBe(cookie);
+	});
+
+	test('leaveWaitingRoom is called correctly for guest user', async () => {
+		document.cookie = `ZM_AUTH_TOKEN=123456789`;
+		useStore.getState().setLoginInfo(userId, guestUser.email, guestUser.name, guestUser.type);
+		useStore.getState().setSessionId('queueId');
+		fetchResponse.mockResolvedValueOnce({});
 		await meetingsApi.leaveWaitingRoom(meetingMock.id);
 
 		// Check if fetch is called with the correct parameters

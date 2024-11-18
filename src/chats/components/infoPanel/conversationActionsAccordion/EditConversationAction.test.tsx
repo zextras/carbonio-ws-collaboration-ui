@@ -6,8 +6,7 @@
 
 import React from 'react';
 
-import { screen, waitFor } from '@testing-library/react';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { screen, waitFor, act, renderHook } from '@testing-library/react';
 
 import EditConversationAction from './EditConversationAction';
 import useStore from '../../../../store/Store';
@@ -92,19 +91,19 @@ describe('Edit conversation action', () => {
 			]
 		});
 		const { user } = setup(<EditConversationAction roomId={testRoom.id} />);
-		user.click(screen.getByText(/Edit Details/i));
+		await user.click(screen.getByText(/Edit Details/i));
 
 		const nameInput = await screen.findByTestId('name_input');
-		user.type(nameInput, 'A new name');
+		await user.type(nameInput, 'A new name');
 
 		const editButton = await screen.findByRole('button', { name: /Edit details/i });
-		user.click(editButton);
+		await user.click(editButton);
 
 		const snackbar = await screen.findByText(/Something went Wrong. Please Retry/i);
 		expect(snackbar).toBeVisible();
 		await waitFor(() => expect(result.current.rooms[testRoom2.id].name).toBe('A Group'));
 
-		user.click(editButton);
-		await waitFor(() => expect(mockedUpdateRoomRequest).toBeCalledTimes(2));
+		await user.click(editButton);
+		await waitFor(() => expect(mockedUpdateRoomRequest).toHaveBeenCalledTimes(2));
 	});
 });

@@ -14,10 +14,8 @@ import { useTranslation } from 'react-i18next';
 import ChatExportSettings from './chatExporter/ChatExportSettings';
 import MeetingSettings from './MeetingSettings';
 import NotificationsSettings from './NotificationsSettings';
-import ProfileSettings from './ProfileSettings';
 import RecordingSettings from './RecordingSettings';
 import useLocalStorage from '../../hooks/useLocalStorage';
-import { UsersApi } from '../../network';
 import { getCapability } from '../../store/selectors/SessionSelectors';
 import useStore from '../../store/Store';
 import { CapabilityType } from '../../types/store/SessionTypes';
@@ -28,18 +26,10 @@ import {
 	NotificationsSettingsType
 } from '../../utils/localStorageUtils';
 
-type SettingsProps = {
-	id?: string | undefined;
-};
-
-const Settings: FC<SettingsProps> = ({ id }) => {
+const Settings: FC = () => {
 	const [t] = useTranslation();
 	const settingsTitle = t('settings.title', 'Chats settings');
 	const saveSettingsSnackbar = t('settings.save', 'Edits saved correctly');
-	const errorDeleteImageSnackbar = t(
-		'settings.profile.errorGenericResponse',
-		'Something went Wrong. Please Retry'
-	);
 
 	const canRecordVideo = useStore((store) =>
 		getCapability(store, CapabilityType.CAN_VIDEO_CALL_RECORD)
@@ -56,8 +46,6 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 		LOCAL_STORAGE_NAMES.RECORDING
 	);
 
-	const [picture, setPicture] = useState<false | File>(false);
-	const [deletePicture, setDeletePicture] = useState<boolean>(false);
 	const [isEnabled, setIsEnabled] = useState<boolean>(false);
 	const [updatedNotificationsSettings, setUpdatedNotificationsSettings] =
 		useState<NotificationsSettingsType>({
@@ -93,8 +81,6 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 	// set the isEnabled value when changed
 	useEffect(() => {
 		if (
-			!!picture ||
-			deletePicture ||
 			!isEqual(notificationsStorage, updatedNotificationsSettings) ||
 			!isEqual(meetingStorage, meetingMediaDefaults) ||
 			!isEqual(recordingStorage, recordingDefaults)
@@ -104,11 +90,9 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 			setIsEnabled(false);
 		}
 	}, [
-		deletePicture,
 		meetingMediaDefaults,
 		meetingStorage,
 		notificationsStorage,
-		picture,
 		recordingDefaults,
 		recordingStorage,
 		updatedNotificationsSettings
@@ -116,8 +100,6 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 
 	// sets all the values that has been changed to false and set the default values to the localStorage ones
 	const onClose = useCallback(() => {
-		setPicture(false);
-		setDeletePicture(false);
 		setUpdatedNotificationsSettings(notificationsStorage);
 		setMeetingMediaDefaults(meetingStorage);
 		setRecordingStorage({ name: 'Home', id: 'LOCAL_ROOT' });
@@ -133,38 +115,8 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 		});
 	}, [createSnackbar, saveSettingsSnackbar]);
 
-	const errorSnackbar = useCallback(() => {
-		createSnackbar({
-			key: new Date().toLocaleString(),
-			severity: 'error',
-			label: errorDeleteImageSnackbar,
-			hideButton: true,
-			autoHideTimeout: 5000
-		});
-	}, [createSnackbar, errorDeleteImageSnackbar]);
-
 	// saves the elements that have been modified
 	const saveSettings = useCallback(() => {
-		// if a user change the picture
-		if (picture) {
-			UsersApi.changeUserPicture(id || '', picture)
-				.then(() => {
-					setPicture(false);
-					setIsEnabled(false);
-				})
-				.catch(() => Promise.reject().then(errorSnackbar));
-		}
-
-		// if a user delete the pictures
-		if (deletePicture) {
-			UsersApi.deleteUserPicture(id || '')
-				.then(() => {
-					setDeletePicture(false);
-					setIsEnabled(false);
-				})
-				.catch(() => Promise.reject().then(errorSnackbar));
-		}
-
 		// if a user changes the notifications' settings
 		if (!isEqual(notificationsStorage, updatedNotificationsSettings)) {
 			setNotificationsStorage(updatedNotificationsSettings);
@@ -184,8 +136,6 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 		}
 		return Promise.allSettled([Promise.resolve().then(successSnackbar)]);
 	}, [
-		picture,
-		deletePicture,
 		notificationsStorage,
 		updatedNotificationsSettings,
 		meetingStorage,
@@ -193,8 +143,6 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 		recordingStorage,
 		recordingDefaults,
 		successSnackbar,
-		id,
-		errorSnackbar,
 		setNotificationsStorage,
 		setMeetingStorage,
 		setRecordingStorage
@@ -222,13 +170,6 @@ const Settings: FC<SettingsProps> = ({ id }) => {
 				padding={{ vertical: 'large', horizontal: 'medium' }}
 				gap="1rem"
 			>
-				<ProfileSettings
-					picture={picture}
-					setPicture={setPicture}
-					sessionId={id}
-					setToDelete={setDeletePicture}
-					toDelete={deletePicture}
-				/>
 				<NotificationsSettings
 					updatedNotificationsSettings={updatedNotificationsSettings}
 					setUpdatedNotificationsSettings={setUpdatedNotificationsSettings}

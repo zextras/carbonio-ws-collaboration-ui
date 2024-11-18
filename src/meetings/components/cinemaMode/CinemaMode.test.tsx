@@ -5,8 +5,7 @@
  */
 import React from 'react';
 
-import { screen } from '@testing-library/react';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { screen, act, renderHook } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event';
 
 import CinemaMode from './CinemaMode';

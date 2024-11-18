@@ -4,10 +4,21 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { countBy, filter, find, forEach, map, orderBy, size } from 'lodash';
+import {
+	countBy,
+	differenceWith,
+	filter,
+	find,
+	forEach,
+	isEqual,
+	map,
+	orderBy,
+	size
+} from 'lodash';
 
 import { getUserName } from './UsersSelectors';
-import { RoomsApi, UsersApi } from '../../network';
+import { RoomsApi } from '../../network';
+import { MemberBe } from '../../types/network/models/roomBeTypes';
 import { Member, Room, RoomType } from '../../types/store/RoomTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 
@@ -23,6 +34,11 @@ export const getTemporaryRoomIdsOrderedByCreation = (store: RootStore): string[]
 	const filteredRooms = filter(store.rooms, (room) => room.type === RoomType.TEMPORARY);
 	const orderedRooms = orderBy(filteredRooms, ['createdAt'], ['desc']);
 	return map(orderedRooms, (room) => room.id);
+};
+
+export const getVirtualRoomsList = (store: RootStore): Room[] => {
+	const filteredRooms = filter(store.rooms, (room) => room.type === RoomType.TEMPORARY);
+	return orderBy(filteredRooms, ['createdAt'], ['desc']);
 };
 
 export const getRoomSelector = (state: RootStore, id: string): Room => state.rooms[id];
@@ -44,7 +60,7 @@ export const getRoomTypeSelector = (state: RootStore, id: string): RoomType =>
 	state.rooms[id]?.type;
 
 export const getRoomDescriptionSelector = (state: RootStore, id: string): string =>
-	state.rooms[id]?.description || '';
+	state.rooms[id]?.description ?? '';
 
 export const getRoomMutedSelector = (state: RootStore, id: string): boolean | undefined =>
 	state.rooms[id]?.userSettings?.muted;
@@ -63,24 +79,25 @@ export const getOwnershipOfTheRoom = (
 	userId = state.session.id
 ): boolean => {
 	if (state.rooms[roomId]?.members != null && userId != null) {
-		const sessionMember = find(state.rooms[roomId]?.members, (member) => member.userId === userId);
-		if (sessionMember != null) {
-			return sessionMember.owner;
+		const member = find(state.rooms[roomId]?.members, (member) => member.userId === userId);
+		if (member != null) {
+			return member.owner;
 		}
 		return false;
 	}
 	return false;
 };
 
-export const getOwner = (state: RootStore, roomId: string, userId: string): boolean => {
+export const getOwners = (state: RootStore, roomId: string): Member[] => {
+	const ownersList: Member[] = [];
 	if (state.rooms[roomId]?.members != null) {
-		const user = find(state.rooms[roomId]?.members, (member) => member.userId === userId);
-		if (user != null) {
-			return user.owner;
-		}
-		return false;
+		map(state.rooms[roomId]?.members, (member) => {
+			if (member.owner) {
+				ownersList.push(member);
+			}
+		});
 	}
-	return false;
+	return ownersList;
 };
 
 export const getNumberOfOwnersOfTheRoom = (state: RootStore, roomId: string): number => {
@@ -102,14 +119,7 @@ export const getPictureUpdatedAt = (state: RootStore, roomId: string): string | 
 export const getRoomURLPicture = (state: RootStore, roomId: string): string | undefined => {
 	const room = state.rooms[roomId];
 	if (room.type === RoomType.ONE_TO_ONE) {
-		const otherMember = find(
-			state.rooms[roomId].members,
-			(member) => member.userId !== state.session.id
-		);
-		if (otherMember) {
-			const otherUser = state.users[otherMember.userId];
-			return otherUser?.pictureUpdatedAt && UsersApi.getURLUserPicture(otherMember.userId);
-		}
+		return undefined;
 	}
 	return room.pictureUpdatedAt && RoomsApi.getURLRoomPicture(room.id);
 };
@@ -134,3 +144,25 @@ export const getSingleConversationsUserId = (state: RootStore): string[] => {
 };
 
 export const getIsThereAnyRoom = (state: RootStore): boolean => size(state.rooms) > 0;
+
+export const getDuplicatedRoom = (
+	state: RootStore,
+	name: string,
+	members: MemberBe[]
+): Room | undefined =>
+	find(state.rooms, (room) => {
+		if (room.type === RoomType.GROUP) {
+			if (room.name === name && size(members) === size(room.members)) {
+				const roomMembers = map(room.members, (member) => ({
+					userId: member.userId,
+					owner: member.owner
+				}));
+				return (
+					size(differenceWith(members, roomMembers, isEqual)) === 0 &&
+					size(differenceWith(roomMembers, members, isEqual)) === 0
+				);
+			}
+			return false;
+		}
+		return false;
+	});

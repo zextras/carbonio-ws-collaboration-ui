@@ -12,8 +12,8 @@ import {
 	Padding,
 	Text,
 	Row,
-	TextWithTooltip,
-	Shimmer
+	Shimmer,
+	Tooltip
 } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -59,9 +59,7 @@ const MemberComponentInfo: FC<ParticipantsInfoProps> = ({ member, roomId }) => {
 	const memberLastActivity: number | undefined = useStore((store) =>
 		getUserLastActivity(store, member.userId)
 	);
-	const memberOnline: boolean | undefined = useStore((store) =>
-		getUserOnline(store, member.userId)
-	);
+	const memberOnline: boolean = useStore((store) => getUserOnline(store, member.userId));
 	const canSeeUsersPresence = useStore((store) =>
 		getCapability(store, CapabilityType.CAN_SEE_USERS_PRESENCE)
 	);
@@ -95,14 +93,18 @@ const MemberComponentInfo: FC<ParticipantsInfoProps> = ({ member, roomId }) => {
 		() => (
 			<Row takeAvailableSpace wrap="nowrap" height="100%">
 				<Container orientation="vertical" crossAlignment="flex-start" padding={{ left: 'small' }}>
-					<Text color="text" size="small" overflow="ellipsis">
-						{memberName}
-					</Text>
+					<Tooltip label={memberName} overflowTooltip>
+						<Text color="text" size="small" overflow="ellipsis">
+							{memberName}
+						</Text>
+					</Tooltip>
 					<Padding top="extrasmall" />
 					{canSeeUsersPresence && (
-						<TextWithTooltip size="extrasmall" color="secondary">
-							{presenceLabel}
-						</TextWithTooltip>
+						<Tooltip label={presenceLabel} overflowTooltip>
+							<Text size="extrasmall" color="secondary">
+								{presenceLabel}
+							</Text>
+						</Tooltip>
 					)}
 				</Container>
 			</Row>

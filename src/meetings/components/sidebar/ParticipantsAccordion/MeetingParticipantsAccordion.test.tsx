@@ -5,9 +5,8 @@
  */
 import React from 'react';
 
-import { screen } from '@testing-library/react';
+import { screen, act } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event';
-import { act } from 'react-dom/test-utils';
 
 import MeetingParticipantsAccordion from './MeetingParticipantsAccordion';
 import MeetingParticipantsList from './MeetingParticipantsList';
@@ -154,11 +153,10 @@ describe("Meeting Participants Accordion - moderator's side", () => {
 		expect(promoteButton).toBeEnabled();
 
 		// promote member
-		user.click(promoteButton);
+		await user.click(promoteButton);
 		const button = await screen.findByTestId('icon: Crown');
 		expect(button).toBeInTheDocument();
 	});
-
 	test('Search one member inside list', async () => {
 		const { user } = storeSetupParticipantModerator();
 		const searchInput = screen.getByRole('textbox', { name: /Search participants/i });
@@ -177,16 +175,15 @@ describe("Meeting Participants Accordion - moderator's side", () => {
 		const { user } = storeSetupParticipantModerator();
 		const searchInput = screen.getByRole('textbox', { name: /Search participants/i });
 		const list = await screen.findByTestId('meeting_participants_list');
-		user.type(searchInput, 'user 4');
+		await user.type(searchInput, 'user 4');
 
 		const placeholderText = await screen.findByText(/There are no items that match this search/i);
 		expect(placeholderText).toBeInTheDocument();
 		expect(list).not.toBeInTheDocument();
 
 		const closeButton = await screen.findByTestId('close_button');
-		user.click(closeButton);
-		const placeholderText1 = await screen.findByText(/There are no items that match this search/i);
-		expect(placeholderText1).not.toBeInTheDocument();
+		await user.click(closeButton);
+		expect(placeholderText).not.toBeInTheDocument();
 	});
 
 	test('mute a member if you are a moderator', async () => {
@@ -202,7 +199,7 @@ describe("Meeting Participants Accordion - moderator's side", () => {
 		expect(muteButton).toBeInTheDocument();
 		expect(muteButton).toBeEnabled();
 
-		user.click(muteButton);
+		await user.click(muteButton);
 
 		const micOff = await screen.findByTestId('icon: MicOff');
 

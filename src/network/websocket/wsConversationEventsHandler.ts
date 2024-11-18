@@ -80,14 +80,6 @@ export const wsConversationEventsHandler = (event: WsEvent): void => {
 			state.setRoomUnmuted(event.roomId);
 			break;
 		}
-		case WsEventType.USER_PICTURE_CHANGED: {
-			state.setUserPictureUpdated(event.userId, event.sentDate);
-			break;
-		}
-		case WsEventType.USER_PICTURE_DELETED: {
-			state.setUserPictureDeleted(event.userId);
-			break;
-		}
 		case WsEventType.ROOM_HISTORY_CLEARED: {
 			state.setClearedAt(event.roomId, event.clearedAt);
 			break;

@@ -6,7 +6,7 @@
 
 import React, { Dispatch, FC, SetStateAction, useCallback, useMemo } from 'react';
 
-import { Container, IconButton, Text, Tooltip } from '@zextras/carbonio-design-system';
+import { Container, Button, Text, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -61,7 +61,7 @@ const ConversationInfo: FC<ConversationInfoProps> = ({ roomId, roomType, setInfo
 	return (
 		<Container orientation="vertical">
 			<InfoHeader
-				background="gray5"
+				background={'gray5'}
 				borderRadius="none"
 				orientation="horizontal"
 				mainAlignment="space-between"
@@ -72,10 +72,11 @@ const ConversationInfo: FC<ConversationInfoProps> = ({ roomId, roomType, setInfo
 				</Text>
 				{!isDesktopView && (
 					<Tooltip label={messagesTooltip}>
-						<IconButton
+						<Button
+							type="ghost"
 							data-testid="closeInfoPanel"
 							onClick={toggleMessageList}
-							iconColor="secondary"
+							color="secondary"
 							size="large"
 							icon="MessageCircleOutline"
 						/>

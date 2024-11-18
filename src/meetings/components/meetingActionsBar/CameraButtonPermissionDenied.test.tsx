@@ -5,10 +5,8 @@
  */
 import React from 'react';
 
-import { screen } from '@testing-library/react';
-import { renderHook } from '@testing-library/react-hooks';
+import { screen, act } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event';
-import { act } from 'react-dom/test-utils';
 
 import CameraButton from './CameraButton';
 import { useParams } from '../../../../__mocks__/react-router';
@@ -61,15 +59,6 @@ const meeting: MeetingBe = createMockMeeting({
 const mockSetIsVideoListOpen = jest.fn();
 
 const defaultSetup = (): { user: UserEvent } => {
-	const { result } = renderHook(() => useStore());
-	act(() => {
-		result.current.setUserInfo(user1);
-		result.current.setUserInfo(user2);
-		result.current.setLoginInfo(user1.id, user1.name);
-		result.current.addRoom(room);
-		result.current.addMeeting(meeting);
-		result.current.meetingConnection(meeting.id, false, undefined, false, undefined);
-	});
 	const refList = React.createRef<HTMLDivElement>();
 	useParams.mockReturnValue({ meetingId: meeting.id });
 	const { user } = setup(
@@ -86,6 +75,16 @@ beforeAll(() => {
 	mockMediaDevicesReject();
 });
 
+beforeEach(() => {
+	const store = useStore.getState();
+	store.setWebsocketStatus(true);
+	store.setUserInfo(user1);
+	store.setUserInfo(user2);
+	store.setLoginInfo(user1.id, user1.name);
+	store.addRoom(room);
+	store.addMeeting(meeting);
+	store.meetingConnection(meeting.id, false, undefined, false, undefined);
+});
 describe('Camera button - permission denied', () => {
 	test('User clicks on the button', async () => {
 		mockedEnumerateDevices.mockRejectedValue('error enumerateDevices');

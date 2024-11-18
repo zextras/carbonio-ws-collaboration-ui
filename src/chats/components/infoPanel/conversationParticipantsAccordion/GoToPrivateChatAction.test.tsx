@@ -24,13 +24,13 @@ const room = createMockRoom({
 });
 
 describe('GoToPrivateChatAction tests', () => {
-	test('IconButton is smaller if it is mount on the chat page', async () => {
+	test('Button is smaller if it is mount on the chat page', async () => {
 		setup(<GoToPrivateChatAction memberId="memberId" />);
 		const button1 = screen.getByRole('button');
 		expect(button1).toHaveStyle('padding: 0.75rem');
 	});
 
-	test('IconButton is bigger if it is mount on the meeting page', async () => {
+	test('Button is bigger if it is mount on the meeting page', async () => {
 		setup(<GoToPrivateChatAction memberId="memberId" isParticipantMeeting />);
 		const button2 = screen.getByRole('button');
 		expect(button2).toHaveStyle('padding: 0.438rem');

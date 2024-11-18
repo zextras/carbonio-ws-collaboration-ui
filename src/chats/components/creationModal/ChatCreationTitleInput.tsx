@@ -45,13 +45,13 @@ const ChatCreationTitleInput: FC<ChatCreationProps> = ({
 	}, [topic, t]);
 
 	const handleTitleChange = useCallback(
-		(event) => {
+		(event: React.ChangeEvent<HTMLInputElement>) => {
 			if (event.target.value.length <= 129) setTitle(event.target.value);
 		},
 		[setTitle]
 	);
 	const handleTopicChange = useCallback(
-		(event) => {
+		(event: React.ChangeEvent<HTMLInputElement>) => {
 			if (event.target.value.length <= 257) setTopic(event.target.value);
 		},
 		[setTopic]

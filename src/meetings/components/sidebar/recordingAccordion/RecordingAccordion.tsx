@@ -93,7 +93,7 @@ const RecordingAccordion: FC<RecordingAccordionProps> = ({ meetingId }) => {
 			.then(() => {
 				createSnackbar({
 					key: new Date().toLocaleString(),
-					type: 'info',
+					severity: 'info',
 					label: successSnackbarLabel,
 					hideButton: true
 				});
@@ -101,7 +101,7 @@ const RecordingAccordion: FC<RecordingAccordionProps> = ({ meetingId }) => {
 			.catch(() => {
 				createSnackbar({
 					key: new Date().toLocaleString(),
-					type: 'warning',
+					severity: 'warning',
 					label: errorSnackbarLabel,
 					hideButton: true
 				});

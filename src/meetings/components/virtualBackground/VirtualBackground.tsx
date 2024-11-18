@@ -26,7 +26,7 @@ import { BrowserUtils } from '../../../utils/BrowserUtils';
 import { getWorkerUrl } from '../../../utils/MeetingsUtils';
 
 const VirtualBackgroundCanvas = styled.canvas<{
-	ref: MutableRefObject<HTMLCanvasElement | undefined>;
+	ref: MutableRefObject<HTMLCanvasElement | null>;
 }>`
 	display: none;
 	margin: auto;
@@ -54,7 +54,7 @@ const VideoEl = styled.video<{
 `;
 
 const VirtualBackground = ({ meetingId }: VirtualBackgroundProps): ReactElement => {
-	const canvasBgRefs = useRef<HTMLCanvasElement>();
+	const canvasBgRefs = useRef<HTMLCanvasElement | null>(null);
 	const setBackgroundStream = useStore((store) => store.setBackgroundStream);
 	const videoOutConn = useStore((store) => store.activeMeeting[meetingId ?? '']?.videoOutConn);
 	const updatedStream = useStore((store) => getUpdatedStream(store, meetingId ?? ''));

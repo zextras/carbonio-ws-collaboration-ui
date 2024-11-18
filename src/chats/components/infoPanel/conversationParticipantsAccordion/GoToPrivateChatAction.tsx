@@ -6,9 +6,10 @@
 
 import React, { FC, useCallback } from 'react';
 
-import { IconButton, Tooltip } from '@zextras/carbonio-design-system';
+import { Button, Tooltip } from '@zextras/carbonio-design-system';
 import { find } from 'lodash';
 import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 
 import useRouting from '../../../../hooks/useRouting';
 import useStore from '../../../../store/Store';
@@ -18,6 +19,18 @@ type GoToPrivateChatProps = {
 	memberId: string;
 	isParticipantMeeting?: boolean;
 };
+
+const CustomButton = styled(Button)<{ $isParticipantMeeting: boolean }>`
+	background-color: rgba(255, 255, 255, 0);
+	padding: ${({ $isParticipantMeeting }): string | false =>
+		$isParticipantMeeting ? '0.438rem' : '0.75rem'};
+	& > svg {
+		width: 1.25rem;
+		min-width: 1.25rem;
+		height: 1.25rem;
+		min-height: 1.25rem;
+	}
+`;
 
 const GoToPrivateChatAction: FC<GoToPrivateChatProps> = ({ memberId, isParticipantMeeting }) => {
 	const [t] = useTranslation();
@@ -41,15 +54,13 @@ const GoToPrivateChatAction: FC<GoToPrivateChatProps> = ({ memberId, isParticipa
 
 	return (
 		<Tooltip label={goToPrivateChatLabel}>
-			<IconButton
-				iconColor="secondary"
-				customSize={{
-					iconSize: '1.25rem',
-					paddingSize: isParticipantMeeting ? '0.438rem' : '0.75rem'
-				}}
+			<CustomButton
+				type="ghost"
+				color="secondary"
 				icon={'MessageCircleOutline'}
 				onClick={goToUserRoom}
 				data-testid="go_to_private_chat"
+				$isParticipantMeeting={!!isParticipantMeeting}
 			/>
 		</Tooltip>
 	);

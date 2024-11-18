@@ -80,7 +80,7 @@ const FaceToFaceMode = ({ children }: MeetingViewProps): ReactElement => {
 	const centralContentToDisplay = useMemo(
 		() =>
 			centralTile ? (
-				<CentralTile width={centralTileWidth} height="fit" background="text">
+				<CentralTile width={centralTileWidth} height="fit" background={'text'}>
 					<Tile
 						userId={centralTile.userId}
 						meetingId={meetingId}
@@ -102,7 +102,7 @@ const FaceToFaceMode = ({ children }: MeetingViewProps): ReactElement => {
 				width="30%"
 				maxWidth="25rem"
 				height="fit"
-				background="secondary"
+				background={'secondary'}
 			>
 				<Tile userId={localId} meetingId={meetingId} />
 			</MyStreamContainer>

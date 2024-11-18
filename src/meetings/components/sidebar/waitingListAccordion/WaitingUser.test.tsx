@@ -5,8 +5,7 @@
  */
 import React from 'react';
 
-import { screen } from '@testing-library/react';
-import { act } from 'react-dom/test-utils';
+import { screen, act } from '@testing-library/react';
 
 import WaitingUser from './WaitingUser';
 import useStore from '../../../../store/Store';

@@ -16,14 +16,14 @@ const LazyMeetingMainView = lazy(
 	() => import(/* webpackChunkName: "mainView" */ './views/MeetingMainView')
 );
 
-const MeetingMain = () => (
+const MeetingMain = (): React.JSX.Element => (
 	<Suspense fallback={<ShimmerEntryMeetingView />}>
 		<ConnectionSnackbarManager />
 		<LazyMeetingMainView />
 	</Suspense>
 );
 
-export default function useMeetingsApp() {
+export default function useMeetingsApp(): void {
 	useEffect(() => {
 		addRoute({
 			route: MEETINGS_ROUTE,

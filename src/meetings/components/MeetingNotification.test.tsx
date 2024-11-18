@@ -6,8 +6,7 @@
 
 import React from 'react';
 
-import { screen } from '@testing-library/react';
-import { act } from '@testing-library/react-hooks';
+import { screen, act } from '@testing-library/react';
 
 import MeetingNotification from './MeetingNotification';
 import useStore from '../../store/Store';

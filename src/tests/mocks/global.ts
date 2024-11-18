@@ -236,8 +236,8 @@ global.Audio = jest.fn().mockImplementation(() => ({
 export const mockReplace = jest.fn();
 Object.defineProperty(window, 'location', {
 	value: {
-		href: 'https://localhost/carbonio/',
-		pathname: 'https://localhost/carbonio/',
+		href: 'https://localhost/carbonio/chats',
+		pathname: 'https://localhost/carbonio/chats',
 		replace: mockReplace,
 		includes: jest.fn()
 	},
@@ -287,3 +287,5 @@ Object.defineProperty(window, 'Worker', {
 	writable: true,
 	value: Worker
 });
+
+HTMLCanvasElement.prototype.getContext = jest.fn();

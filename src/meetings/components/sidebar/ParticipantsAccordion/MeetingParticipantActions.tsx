@@ -5,7 +5,7 @@
  */
 import React, { FC, useCallback, useMemo, useState } from 'react';
 
-import { Container, Tooltip, Icon, Padding, IconButton } from '@zextras/carbonio-design-system';
+import { Container, Tooltip, Icon, Padding, Button } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
 import MuteForAllModal from './MuteForAllModal';
@@ -16,7 +16,7 @@ import {
 	getParticipantAudioStatus,
 	getRoomIdByMeetingId
 } from '../../../../store/selectors/MeetingSelectors';
-import { getOwnershipOfTheRoom, getOwner } from '../../../../store/selectors/RoomsSelectors';
+import { getOwnershipOfTheRoom } from '../../../../store/selectors/RoomsSelectors';
 import { getUserId } from '../../../../store/selectors/SessionSelectors';
 import { getIsUserGuest } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
@@ -46,7 +46,9 @@ const MeetingParticipantActions: FC<ParticipantActionsProps> = ({ memberId, meet
 	const participantAudioStatus = useStore((store) =>
 		getParticipantAudioStatus(store, meetingId ?? '', memberId)
 	);
-	const isMemberOwner: boolean = useStore((store) => getOwner(store, roomId ?? '', memberId));
+	const isMemberOwner: boolean = useStore((store) =>
+		getOwnershipOfTheRoom(store, roomId ?? '', memberId)
+	);
 	const isUserGuest = useStore((store) => getIsUserGuest(store, memberId));
 	const iAmOwner: boolean = useStore((state) => getOwnershipOfTheRoom(state, roomId ?? '', userId));
 
@@ -93,8 +95,8 @@ const MeetingParticipantActions: FC<ParticipantActionsProps> = ({ memberId, meet
 			)}
 			{muteForAllHasToAppear && (
 				<Tooltip label={muteForAllLabel}>
-					<IconButton
-						iconColor="gray0"
+					<Button
+						labelColor="gray0"
 						backgroundColor="text"
 						icon="MicOffOutline"
 						onClick={openMuteForAllModal}
@@ -104,8 +106,8 @@ const MeetingParticipantActions: FC<ParticipantActionsProps> = ({ memberId, meet
 			)}
 			{canUsePinFeature && (
 				<Tooltip label={isPinned ? unpinVideoLabel : pinVideoLabel}>
-					<IconButton
-						iconColor="gray0"
+					<Button
+						labelColor="gray0"
 						backgroundColor="text"
 						icon={isPinned ? 'Unpin3Outline' : 'Pin3Outline'}
 						onClick={switchPinnedTile}

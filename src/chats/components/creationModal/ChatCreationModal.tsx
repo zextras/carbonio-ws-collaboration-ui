@@ -21,8 +21,13 @@ import ChatCreationTitleInput from './ChatCreationTitleInput';
 import useRouting from '../../../hooks/useRouting';
 import { RoomsApi } from '../../../network';
 import useStore from '../../../store/Store';
-import { RoomType } from '../../../types/network/models/roomBeTypes';
+import { MemberBe, RoomType } from '../../../types/network/models/roomBeTypes';
 import { AddRoomResponse } from '../../../types/network/responses/roomsResponses';
+
+export type contactChip = {
+	id: string;
+	owner: boolean;
+};
 
 const ChatCreationModal = ({
 	open,
@@ -54,14 +59,14 @@ const ChatCreationModal = ({
 	const [chatType, setChatType] = useState<RoomType.ONE_TO_ONE | RoomType.GROUP>(
 		RoomType.ONE_TO_ONE
 	);
-	const [contactsSelected, setContactSelected] = useState<ContactSelected>({});
+	const [contactsSelected, setContactsSelected] = useState<ContactSelected>({});
 	const [title, setTitle] = useState<string>(titlePlaceholder);
 	const [topic, setTopic] = useState<string>('');
 	const [isPending, setIsPending] = useState<boolean>(false);
 
 	const createSnackbar: CreateSnackbarFn = useSnackbar();
 
-	const { goToRoomPage } = useRouting();
+	const { goToChatsPage } = useRouting();
 
 	useEffect(() => {
 		if (size(contactsSelected) > 1) {
@@ -94,7 +99,7 @@ const ChatCreationModal = ({
 
 	const onModalClose = useCallback(() => {
 		setChatType(RoomType.ONE_TO_ONE);
-		setContactSelected({});
+		setContactsSelected({});
 		setTitle(titlePlaceholder);
 		setTopic('');
 		onClose();
@@ -111,41 +116,44 @@ const ChatCreationModal = ({
 			const roomId = oneToOneChatExist?.id ?? `placeholder-${userId}`;
 			if (!oneToOneChatExist) setPlaceholderRoom(userId);
 			onModalClose();
-			goToRoomPage(roomId);
+			goToChatsPage(roomId);
 		},
-		[goToRoomPage, onModalClose, setPlaceholderRoom]
+		[goToChatsPage, onModalClose, setPlaceholderRoom]
 	);
 
 	const onCreateGroup = useCallback(
-		(ids: string[]) => {
+		(ids: MemberBe[]) => {
 			setIsPending(true);
 			RoomsApi.addRoom({
 				name: title,
 				description: topic,
 				type: RoomType.GROUP,
-				membersIds: ids
+				members: ids
 			})
 				.then((response: AddRoomResponse) => {
 					setIsPending(false);
-					goToRoomPage(response.id);
+					goToChatsPage(response.id);
 					onModalClose();
 				})
 				.catch(() => {
 					setIsPending(false);
 					createSnackbar({
 						key: new Date().toLocaleString(),
-						type: 'error',
+						severity: 'error',
 						label: errorSnackbar
 					});
 				});
 		},
-		[createSnackbar, errorSnackbar, goToRoomPage, onModalClose, title, topic]
+		[createSnackbar, errorSnackbar, goToChatsPage, onModalClose, title, topic]
 	);
 
 	const onCreate = useCallback(() => {
-		const ids = map(contactsSelected, (chip) => chip.id);
+		const ids: MemberBe[] = map(contactsSelected, (chip) => ({
+			userId: chip.id,
+			owner: chip.owner
+		}));
 		if (chatType === RoomType.ONE_TO_ONE) {
-			onCreateOneToOne(ids[0]);
+			onCreateOneToOne(ids[0].userId);
 		} else {
 			onCreateGroup(ids);
 		}
@@ -193,7 +201,7 @@ const ChatCreationModal = ({
 			<Padding bottom="medium" />
 			<ChatCreationContactsSelection
 				contactsSelected={contactsSelected}
-				setContactSelected={setContactSelected}
+				setContactSelected={setContactsSelected}
 				isCreationModal
 				inputRef={inputRef}
 			/>

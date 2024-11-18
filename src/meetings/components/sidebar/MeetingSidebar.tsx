@@ -6,7 +6,7 @@
 
 import React, { ReactElement, useCallback, useMemo } from 'react';
 
-import { Container, IconButton, Tooltip } from '@zextras/carbonio-design-system';
+import { Button, Container, Tooltip } from '@zextras/carbonio-design-system';
 import { includes } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
@@ -47,7 +47,7 @@ const ChangeSidebarStatusButton = styled.div`
 	z-index: 1;
 `;
 
-const SidebarIconButton = styled(IconButton)`
+const SidebarButton = styled(Button)`
 	width: 2.25rem;
 	height: 15rem;
 `;
@@ -128,8 +128,8 @@ const MeetingSidebar = (): ReactElement => {
 					label={sidebarIsVisible ? collapseSidebarLabel : expandSidebarLabel}
 					placement="right"
 				>
-					<SidebarIconButton
-						iconColor="gray6"
+					<SidebarButton
+						labelColor="gray6"
 						backgroundColor="text"
 						icon={sidebarIsVisible ? 'ChevronLeftOutline' : 'ChevronRightOutline'}
 						onClick={toggleSidebar}

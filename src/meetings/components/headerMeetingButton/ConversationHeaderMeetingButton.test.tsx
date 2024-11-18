@@ -6,9 +6,8 @@
 
 import React from 'react';
 
-import { screen } from '@testing-library/react';
+import { screen, act } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event';
-import { act } from 'react-dom/test-utils';
 
 import ConversationHeaderMeetingButton from './ConversationHeaderMeetingButton';
 import useStore from '../../../store/Store';

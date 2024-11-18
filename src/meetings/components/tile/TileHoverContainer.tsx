@@ -5,7 +5,7 @@
  */
 import React, { FC, useCallback, useMemo, useState } from 'react';
 
-import { Container, IconButton, Padding, Tooltip } from '@zextras/carbonio-design-system';
+import { Button, Container, Padding, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -25,6 +25,16 @@ export const HoverContainer = styled(Container)`
 	-moz-transition: opacity 200ms linear 300ms;
 	-o-transition: opacity 200ms linear 300ms;
 	transition: opacity 100ms linear 200ms;
+`;
+
+const CustomButton = styled(Button)`
+	padding: 0.75rem;
+	& > svg {
+		width: 1.5rem;
+		min-width: 1.5rem;
+		height: 1.5rem;
+		min-height: 1.5rem;
+	}
 `;
 
 type tileHoverContainerProps = {
@@ -72,13 +82,12 @@ const TileHoverContainer: FC<tileHoverContainerProps> = ({
 		<HoverContainer width="100%" data-testid="hover_container" orientation="horizontal">
 			{canUseMuteForAll && (
 				<Tooltip label={muteForAllLabel} disabled={!isHoovering}>
-					<IconButton
+					<CustomButton
 						icon="MicOffOutline"
-						iconColor="text"
-						backgroundColor="gray6"
+						backgroundColor="text"
+						labelColor="gray6"
 						size="large"
-						borderRadius="round"
-						customSize={{ iconSize: '1.5rem', paddingSize: '0.75rem' }}
+						shape="round"
 						onClick={openMuteForAllModal}
 					/>
 				</Tooltip>
@@ -86,13 +95,11 @@ const TileHoverContainer: FC<tileHoverContainerProps> = ({
 			{canUseMuteForAll && canUsePinFeature && <Padding right="1rem" />}
 			{canUsePinFeature && (
 				<Tooltip label={isPinned ? unpinVideoLabel : pinVideoLabel} disabled={!isHoovering}>
-					<IconButton
+					<CustomButton
 						icon={!isPinned ? 'Pin3Outline' : 'Unpin3Outline'}
-						iconColor="text"
-						backgroundColor="gray6"
+						color="text"
 						size="large"
-						borderRadius="round"
-						customSize={{ iconSize: '1.5rem', paddingSize: '0.75rem' }}
+						shape="round"
 						onClick={switchPinnedTile}
 					/>
 				</Tooltip>

@@ -5,7 +5,7 @@
  */
 import React, { ReactElement, useCallback, useEffect } from 'react';
 
-import { IconButton, Tooltip } from '@zextras/carbonio-design-system';
+import { Button, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 
@@ -46,16 +46,16 @@ const FullScreenButton = (): ReactElement => {
 
 	useEffect(() => {
 		window.addEventListener('keydown', checkKeyPress, true);
-		return () => {
+		return (): void => {
 			window.removeEventListener('keydown', checkKeyPress);
 		};
 	}, [checkKeyPress]);
 
 	return (
 		<Tooltip placement="top" label={isFullScreen ? disableFullScreenLabel : enableFullScreenLabel}>
-			<IconButton
+			<Button
 				data-testid={isFullScreen ? 'exit-fullscreen-button' : 'fullscreen-button'}
-				iconColor="gray6"
+				labelColor="gray6"
 				backgroundColor="primary"
 				icon={isFullScreen ? 'Collapse' : 'Expand'}
 				onClick={toggleFullScreenFn}

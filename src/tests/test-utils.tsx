@@ -13,7 +13,7 @@ import { I18nextProvider } from 'react-i18next';
 import I18nTestFactory from './i18n-test-factory';
 
 interface ProvidersWrapperProps {
-	children?: React.ReactElement;
+	children?: React.ReactNode;
 }
 
 export const ProvidersWrapper = ({ children }: ProvidersWrapperProps): JSX.Element => {

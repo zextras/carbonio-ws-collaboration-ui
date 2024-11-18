@@ -17,7 +17,6 @@ import { RoomType } from '../../../../types/store/RoomTypes';
 
 type MuteProps = {
 	roomId: string;
-	isInsideMeeting?: boolean;
 	roomType?: string;
 	emptyRoom?: boolean;
 };
@@ -53,7 +52,7 @@ const MuteConversationAction: FC<MuteProps> = ({ roomId, roomType, emptyRoom }) 
 				.then(() => {
 					createSnackbar({
 						key: new Date().toLocaleString(),
-						type: 'info',
+						severity: 'info',
 						label: notificationsActivatedForThisChatLabel,
 						actionLabel: undoLabel,
 						onActionClick: () => RoomsApi.muteRoomNotification(roomId)
@@ -65,7 +64,7 @@ const MuteConversationAction: FC<MuteProps> = ({ roomId, roomType, emptyRoom }) 
 				.then(() => {
 					createSnackbar({
 						key: new Date().toLocaleString(),
-						type: 'info',
+						severity: 'info',
 						label: notificationsMutedForThisChatLabel,
 						actionLabel: undoLabel,
 						onActionClick: () => RoomsApi.unmuteRoomNotification(roomId)

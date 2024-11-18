@@ -6,7 +6,7 @@
 
 import React, { FC, useMemo } from 'react';
 
-import { Container, IconButton, Tooltip } from '@zextras/carbonio-design-system';
+import { Button, Container, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
 import GoToPrivateChatAction from './GoToPrivateChatAction';
@@ -14,7 +14,6 @@ import LeaveConversationListAction from './LeaveConversationListAction';
 import PromoteDemoteMemberAction from './PromoteDemoteMemberAction';
 import RemoveMemberListAction from './RemoveMemberListAction';
 import {
-	getOwner,
 	getOwnershipOfTheRoom,
 	getNumberOfOwnersOfTheRoom,
 	getNumbersOfRoomMembers
@@ -37,7 +36,7 @@ const MemberComponentActions: FC<ActionsProps> = ({ roomId, memberId }) => {
 	const sessionId: string | undefined = useStore((state) => state.session.id);
 	const numberOfOwners = useStore((state) => getNumberOfOwnersOfTheRoom(state, roomId));
 	const numberOfMembers: number = useStore((state) => getNumbersOfRoomMembers(state, roomId));
-	const memberOwner: boolean = useStore((store) => getOwner(store, roomId, memberId));
+	const memberOwner: boolean = useStore((store) => getOwnershipOfTheRoom(store, roomId, memberId));
 	const iAmOwner: boolean = useStore((state) => getOwnershipOfTheRoom(state, roomId));
 
 	const isSessionParticipant: boolean = useMemo(
@@ -54,8 +53,9 @@ const MemberComponentActions: FC<ActionsProps> = ({ roomId, memberId }) => {
 			) : (
 				memberOwner && (
 					<Tooltip label={isSessionParticipant ? iAmModeratorLabel : memberIsModeratorLabel}>
-						<IconButton
-							iconColor="primary"
+						<Button
+							type="ghost"
+							color="primary"
 							size="extralarge"
 							icon="Crown"
 							disabled

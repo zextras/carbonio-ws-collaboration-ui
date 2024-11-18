@@ -34,8 +34,6 @@ export const conversationEvents = [
 	WsEventType.ROOM_MEMBER_REMOVED,
 	WsEventType.ROOM_MUTED,
 	WsEventType.ROOM_UNMUTED,
-	WsEventType.USER_PICTURE_CHANGED,
-	WsEventType.USER_PICTURE_DELETED,
 	WsEventType.ROOM_HISTORY_CLEARED
 ];
 

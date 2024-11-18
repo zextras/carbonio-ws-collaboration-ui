@@ -9,9 +9,6 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 
 import ListParticipant from './ListParticipant';
-import useStore from '../../../store/Store';
-import { createMockUser } from '../../../tests/createMock';
-import { mockedGetURLUserPicture } from '../../../tests/mocks/network';
 import { setup } from '../../../tests/test-utils';
 import { ContactInfo } from '../../../types/network/soap/searchUsersByFeatureRequest';
 
@@ -19,6 +16,14 @@ const contactInfo: ContactInfo = {
 	email: 'test@user.com',
 	displayName: 'Test User',
 	id: '1234567890'
+};
+
+const mockIsOwner = (id: string): boolean => {
+	console.log(id);
+	return true;
+};
+const mockUpdateOwner = (id: string): void => {
+	console.log(id);
 };
 
 describe('List Participant', () => {
@@ -29,6 +34,9 @@ describe('List Participant', () => {
 				selected={false}
 				onClickCb={(): undefined => undefined}
 				isDisabled={false}
+				isOwner={mockIsOwner}
+				updateOwner={mockUpdateOwner}
+				canBeModerator
 			/>
 		);
 		const contactEmail = screen.getByTestId(`${contactInfo.id}-emailSelectable`);
@@ -41,23 +49,12 @@ describe('List Participant', () => {
 				selected={false}
 				onClickCb={(): undefined => undefined}
 				isDisabled={false}
+				isOwner={mockIsOwner}
+				updateOwner={mockUpdateOwner}
+				canBeModerator
 			/>
 		);
 		const contactEmail = screen.getByTestId(`${contactInfo.id}-emailSelectable`);
 		expect(contactEmail).not.toHaveStyle('user-select: none');
-	});
-
-	test('Show user picture if user has one', () => {
-		const store = useStore.getState();
-		store.setUserInfo(createMockUser({ id: contactInfo.id, pictureUpdatedAt: '2022-01-01' }));
-		setup(
-			<ListParticipant
-				item={contactInfo}
-				selected={false}
-				onClickCb={(): undefined => undefined}
-				isDisabled={false}
-			/>
-		);
-		expect(mockedGetURLUserPicture).toBeCalled();
 	});
 });

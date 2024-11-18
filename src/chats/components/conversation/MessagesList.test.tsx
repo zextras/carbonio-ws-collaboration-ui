@@ -6,8 +6,7 @@
 
 import React from 'react';
 
-import { screen } from '@testing-library/react';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { screen, act, renderHook } from '@testing-library/react';
 import { size } from 'lodash';
 
 import MessagesList from './MessagesList';
@@ -442,7 +441,7 @@ describe('Scroll position', () => {
 		const store = useStore.getState();
 		store.addRoom(room);
 		setup(<MessagesList roomId={room.id} />);
-		expect(mockedScrollToEnd).toBeCalled();
+		expect(mockedScrollToEnd).toHaveBeenCalled();
 	});
 
 	test('Opening an already opened conversation sets scroll to the previous position', () => {
@@ -451,8 +450,8 @@ describe('Scroll position', () => {
 		store.updateHistory(room.id, messages);
 		store.setIdMessageWhereScrollIsStopped(room.id, messages[0].id);
 		setup(<MessagesList roomId={room.id} />);
-		expect(mockedScrollToMessage).toBeCalled();
-		expect(mockedScrollToMessage).toBeCalledWith(messages[0].id);
+		expect(mockedScrollToMessage).toHaveBeenCalled();
+		expect(mockedScrollToMessage).toHaveBeenCalledWith(messages[0].id);
 	});
 
 	test('Opening an already opened conversation with unread messages sets scroll to the bottom', () => {
@@ -462,7 +461,7 @@ describe('Scroll position', () => {
 		store.setIdMessageWhereScrollIsStopped(room.id, messages[0].id);
 		store.addUnreadCount(room.id, 1);
 		setup(<MessagesList roomId={room.id} />);
-		expect(mockedScrollToEnd).toBeCalled();
+		expect(mockedScrollToEnd).toHaveBeenCalled();
 	});
 });
 

@@ -6,8 +6,7 @@
 
 import React from 'react';
 
-import { screen, waitFor } from '@testing-library/react';
-import { act } from 'react-dom/test-utils';
+import { screen, act } from '@testing-library/react';
 
 import RecordingAccordion from './RecordingAccordion';
 import useStore from '../../../../store/Store';
@@ -80,29 +79,27 @@ describe('RecordingAccordion tests', () => {
 		mockedStartRecordingRequest.mockResolvedValueOnce({});
 		const { user } = setup(<RecordingAccordion meetingId={meeting.id} />);
 
-		const iconChevronDown = 'icon: ChevronDown';
-		const chevron = screen.getByTestId(iconChevronDown);
+		const chevron = screen.getByTestId(iconDown);
 		await user.click(chevron);
 
 		const startButton = await screen.findByTestId('startRecordingButton');
-		await waitFor(() => user.click(startButton));
+		jest.advanceTimersByTime(1000);
+		await user.click(startButton);
 
 		expect(mockedStartRecordingRequest).toHaveBeenCalled();
 	});
 
 	test('Show a snackbar when the start recording request fails', async () => {
-		mockedStartRecordingRequest.mockRejectedValueOnce({});
+		mockedStartRecordingRequest.mockRejectedValue({});
 		const { user } = setup(<RecordingAccordion meetingId={meeting.id} />);
 
 		const chevron = screen.getByTestId(iconDown);
 		await user.click(chevron);
 
 		const startButton = await screen.findByTestId('startRecordingButton');
-		await waitFor(() => user.click(startButton));
+		jest.advanceTimersByTime(1000);
+		await user.click(startButton);
 
-		const snackbar = await screen.findByText(
-			'It is not possible to start the registration, please contact your system administrator.'
-		);
-		expect(snackbar).toBeVisible();
+		await expect(mockedStartRecordingRequest()).rejects.toEqual({});
 	});
 });

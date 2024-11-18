@@ -7,11 +7,11 @@
 import React, { RefObject, useCallback, useEffect, useMemo, useRef } from 'react';
 
 import {
+	Button,
 	Container,
 	CreateSnackbarFn,
 	Dropdown,
 	DropdownItem,
-	IconButton,
 	Tooltip,
 	useSnackbar
 } from '@zextras/carbonio-design-system';
@@ -85,8 +85,8 @@ const AttachmentSelector: React.FC<AttachmentSelectorProps> = ({ roomId }) => {
 	const loadFiles = useLoadFiles(roomId, clearInput);
 
 	const selectFiles = useCallback(
-		(ev) => {
-			const { files } = ev.target as HTMLInputElement;
+		(ev: { target: HTMLInputElement }) => {
+			const { files } = ev.target;
 			loadFiles(files ?? new FileList());
 			if (!filesToUploadArray) {
 				setInputHasFocus(roomId, true);
@@ -107,7 +107,7 @@ const AttachmentSelector: React.FC<AttachmentSelectorProps> = ({ roomId }) => {
 	}, [filesToUploadArray]);
 
 	const confirmAction = useCallback(
-		(nodes) => {
+		(nodes: object[]) => {
 			const date = new Date().toLocaleString();
 			let myDescription;
 			if (roomType === RoomType.ONE_TO_ONE) {
@@ -181,7 +181,13 @@ const AttachmentSelector: React.FC<AttachmentSelectorProps> = ({ roomId }) => {
 		<Container width="fit" height="fit">
 			<Tooltip label={uploadAttachmentTooltip} placement="top">
 				<Dropdown items={items} placement="top-end">
-					<IconButton icon="Attach" iconColor="gray1" size="large" onClick={(): null => null} />
+					<Button
+						icon="Attach"
+						type="ghost"
+						color="gray1"
+						size="large"
+						onClick={(): null => null}
+					/>
 				</Dropdown>
 			</Tooltip>
 			<InputSelector

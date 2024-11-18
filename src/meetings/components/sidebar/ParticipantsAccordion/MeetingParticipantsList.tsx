@@ -27,7 +27,7 @@ const CustomContainer = styled(Container)`
 `;
 
 const ListContainer = styled(Container)`
-	overflow-y: scroll;
+	overflow-y: auto;
 `;
 
 const MeetingParticipantsList: FC<ParticipantsListProps> = ({ meetingId }) => {
@@ -99,7 +99,7 @@ const MeetingParticipantsList: FC<ParticipantsListProps> = ({ meetingId }) => {
 	);
 
 	return (
-		<Container padding={{ right: 'small' }}>
+		<Container padding={{ right: 'small' }} height="fit">
 			<SearchUserAction setFilteredInput={setFilteredInput} isInsideMeeting />
 			<Container height="fit" padding={{ bottom: '0.75rem' }}>
 				{memberList}
