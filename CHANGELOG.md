@@ -2,6 +2,33 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.9.11](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.9.10...v0.9.11) (2024-11-18)
+
+
+### Features
+
+* add integration to copy groups from chats ref: TEAMS-4165 ([#419](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/419)) ([954cfb5](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/954cfb5905ab7cef9b6bbbec0340caa8cd644fa8))
+* added room name on waiting room snackbar refs: WSC-1307 ([#399](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/399)) ([a29fc62](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/a29fc62c7280ed4fc70699595e123fda5b3afbc7))
+* avoid meeting disconnection in case of temporary connection issues ref: WSC-1131 ([#416](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/416)) ([be3d43a](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/be3d43a24d50330f251ca074d25bc95bacb1c2e0))
+* changed keys and strings for default views refs: WSC-1250 ([#402](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/402)) ([1b08676](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/1b08676297fa9f775a9e66218a51d1fa45742374))
+* let the user know who read a message in a group chat ref: WSC-1702 ([#427](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/427)) ([bb77dcd](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/bb77dcdbd3b7c9d51c656d3a7676fc595f379bc1))
+* restyle video meeting page to be more usable from mobile device ref: WSC-1694 ([#407](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/407)) ([3944f9f](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/3944f9f3bdcb2f2de0da4649107cec483ce02cce))
+* set member as a moderator on creation refs: WSC-1740 ([#417](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/417)) ([f2a6302](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/f2a63024ed595523b33b039039f1c5c6b5d0a577))
+* update to React18 refs: WSC-1592 ([#397](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/397)) ([2695784](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/26957842b389613652014910d2283017200e09f8))
+* update virtual room visualization and management refs: WSC-1748 ([#426](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/426)) ([6e5cbb3](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/6e5cbb39ab0f7fb293e2d2430b6b1ce0c6208532))
+* virtual room integration refs: WSC-1714 ([#413](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/413)) ([210a889](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/210a889346ee9cf287be2abea9e540075c6b7816))
+
+
+### Bug Fixes
+
+* add room set meeting without replace object refs: WSC-1721 ([#418](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/418)) ([aa63883](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/aa63883fae42644784ff601061fd6519fe6131c6))
+* chat creation redirect is broken starting from other zapps ref: WSC-1700 ([#401](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/401)) ([9832a30](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/9832a3015886db6f8474439eac11f3fa73f94e82))
+* date label does not allow nearby buttons to be clicked ref: WSC-1652 ([#398](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/398)) ([ad3cd8e](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/ad3cd8e478ffa6766b462a43bf717c896286e9f6))
+* fixed missing check on mimetype control refs: WSC-1690 ([#393](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/393)) ([73c2048](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/73c2048188c8a2311750c21d17e855fef6c831de))
+* fixed wrong behavior of waiting room snackbar refs: WSC-1723 ([#408](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/408)) ([47cc4a6](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/47cc4a6f4d39b01522a0438c2aeb64140d06b6ba))
+* if the attendee joins the waiting room before the moderator the guest list is empty ref: WSC-1655 ([#387](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/387)) ([59c1172](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/59c1172110ebcc0294b28ce7ed22993c32444add))
+* update unread counter with fastening markers ref: WSC-1747 ([#424](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/424)) ([d90f52d](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/d90f52de999d72f56756b447c31a243cf67f148f))
+
 ### [0.9.10](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.9.9...v0.9.10) (2024-09-10)
 
 
