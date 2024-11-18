@@ -105,7 +105,7 @@ const GroupRoomPictureHandler: FC<RoomPictureProps> = ({ roomId }) => {
 		if (roomPictureUpdatedAt) {
 			return `${RoomsApi.getURLRoomPicture(roomId)}?${roomPictureUpdatedAt}`;
 		}
-		return false;
+		return undefined;
 	}, [roomId, roomPictureUpdatedAt]);
 
 	const description = useMemo(

@@ -44,8 +44,7 @@ const user2Info: User = createMockUser({
 const user3Info: User = createMockUser({
 	id: 'user3',
 	email: 'user3@domain.com',
-	name: 'User 3',
-	pictureUpdatedAt: '2022-08-25T17:24:28.961+02:00'
+	name: 'User 3'
 });
 
 const user1Participant: MeetingParticipant = createMockParticipants({
@@ -161,7 +160,6 @@ describe('User avatar', () => {
 		});
 		test('User presence dot should be gray and shows he is offline', async () => {
 			const store = useStore.getState();
-			store.setUserPictureUpdated(user2Info.id, '2022-08-25T17:24:28.961+02:00');
 			store.setCapabilities(createMockCapabilityList({ canSeeUsersPresence: true }));
 			setup(<UserAvatar roomId={room.id} draftMessage={false} />);
 			const avatar = screen.getByTestId('avatar_box');
@@ -262,11 +260,5 @@ describe('User avatar', () => {
 			const userAvatarWithDraft = screen.getByTestId('icon: Video');
 			expect(userAvatarWithDraft).toBeVisible();
 		});
-	});
-
-	test('Show user picture if user has one', () => {
-		setup(<UserAvatar roomId={roomWithPicture.id} draftMessage={false} />);
-		const avatar = screen.getByTestId(`${user3Info.name}-avatar`);
-		expect(avatar.children.length).toBe(0);
 	});
 });

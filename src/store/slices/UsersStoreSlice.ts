@@ -24,8 +24,7 @@ export const useUsersStoreSlice: StateCreator<UsersStoreSlice> = (set: (...any: 
 					name: user.name,
 					type: user.type ?? UserType.INTERNAL,
 					lastSeen: user.lastSeen,
-					statusMessage: user.statusMessage,
-					pictureUpdatedAt: user.pictureUpdatedAt
+					statusMessage: user.statusMessage
 				};
 			}),
 			false,
@@ -66,30 +65,6 @@ export const useUsersStoreSlice: StateCreator<UsersStoreSlice> = (set: (...any: 
 			}),
 			false,
 			'USERS/SET_STATUS_MESSAGE'
-		);
-	},
-	setUserPictureUpdated: (id: string, date: string): void => {
-		set(
-			produce((draft: RootStore) => {
-				draft.users[id] = {
-					...draft.users[id],
-					pictureUpdatedAt: date
-				};
-			}),
-			false,
-			'USERS/USER_PICTURE_CHANGED'
-		);
-	},
-	setUserPictureDeleted: (id: string): void => {
-		set(
-			produce((draft: RootStore) => {
-				draft.users[id] = {
-					...draft.users[id],
-					pictureUpdatedAt: undefined
-				};
-			}),
-			false,
-			'USERS/USER_PICTURE_DELETED'
 		);
 	},
 	setAnonymousUser: (id: string): void => {

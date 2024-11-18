@@ -13,10 +13,10 @@ import Settings from '../components/Settings';
 
 const SettingsView = (): ReactElement => {
 	const id: string | undefined = useStore((store) => store.session.id);
-	if (id === undefined) {
-		return <Spinner />;
+	if (!id) {
+		return <Spinner data-testid="spinner" />;
 	}
-	return <Settings id={id} />;
+	return <Settings />;
 };
 
 export default SettingsView;

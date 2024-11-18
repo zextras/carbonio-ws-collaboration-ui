@@ -13,5 +13,4 @@ export type UserBe = {
 	type: UserType;
 	lastSeen?: number;
 	statusMessage?: string;
-	pictureUpdatedAt?: string;
 };
