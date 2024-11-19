@@ -7,9 +7,9 @@ import React from 'react';
 
 import { screen } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event';
+import * as ReactRouter from 'react-router';
 
 import MicrophoneButton from './MicrophoneButton';
-import { useParams } from '../../../../__mocks__/react-router';
 import useStore from '../../../store/Store';
 import {
 	createMockMeeting,
@@ -17,7 +17,6 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../../tests/createMock';
-import { mockMediaDevicesResolve } from '../../../tests/mocks/global';
 import { setup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 import { MemberBe, RoomBe } from '../../../types/network/models/roomBeTypes';
@@ -56,7 +55,9 @@ const mockSetIsAudioListOpen = jest.fn();
 
 const defaultSetup = (): { user: UserEvent } => {
 	const refList = React.createRef<HTMLDivElement>();
-	useParams.mockReturnValue({ meetingId: meeting.id });
+	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
+	spyUseParams.mockReturnValue({ meetingId: meeting.id });
+
 	const { user } = setup(
 		<MicrophoneButton
 			audioDropdownRef={refList}
@@ -66,10 +67,6 @@ const defaultSetup = (): { user: UserEvent } => {
 	);
 	return { user };
 };
-
-beforeAll(() => {
-	mockMediaDevicesResolve();
-});
 
 describe('Microphone button', () => {
 	test('Should render the component', async () => {

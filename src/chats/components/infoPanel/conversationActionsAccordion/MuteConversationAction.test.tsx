@@ -6,15 +6,12 @@
 
 import React from 'react';
 
-import { screen, act, renderHook } from '@testing-library/react';
+import { act, renderHook, screen } from '@testing-library/react';
 
 import MuteConversationAction from './MuteConversationAction';
 import useStore from '../../../../store/Store';
 import { createMockMember, createMockRoom } from '../../../../tests/createMock';
-import {
-	mockedMuteRoomNotificationRequest,
-	mockedUnmuteRoomNotificationRequest
-} from '../../../../tests/mocks/network';
+import { RoomsApiToSpy, spyOnRoomsApi } from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
 
@@ -43,16 +40,18 @@ describe('Mute/Unmute Conversation', () => {
 		const titleIsPresent = screen.getByText(/Mute notifications/i);
 		expect(titleIsPresent).toBeInTheDocument();
 	});
+
 	test('Label should be "Activate notifications" in groups', async () => {
 		useStore.getState().addRoom(testRoom2);
 		setup(<MuteConversationAction roomId={testRoom2.id} />);
 		const titleIsPresent = screen.getByText(/Activate notifications/i);
 		expect(titleIsPresent).toBeInTheDocument();
 	});
+
 	test('mute notifications', async () => {
+		const spyOnMuteRoomNotification = spyOnRoomsApi(RoomsApiToSpy.MUTE_ROOM_NOTIFICATION);
 		const { result } = renderHook(() => useStore());
 		act(() => result.current.addRoom(testRoom));
-		mockedMuteRoomNotificationRequest.mockRejectedValueOnce(false).mockReturnValueOnce(true);
 		const { user } = setup(<MuteConversationAction roomId={testRoom.id} />);
 
 		const muteAction = await screen.findByText(/Mute notifications/i);
@@ -60,12 +59,13 @@ describe('Mute/Unmute Conversation', () => {
 		expect(muteAction).toBeInTheDocument();
 
 		await user.click(muteAction);
-		expect(mockedMuteRoomNotificationRequest).toHaveBeenCalled();
+		expect(spyOnMuteRoomNotification).toHaveBeenCalled();
 	});
+
 	test('unmute notifications', async () => {
+		const spyOnUnmuteRoomNotification = spyOnRoomsApi(RoomsApiToSpy.UNMUTE_ROOM_NOTIFICATION);
 		const { result } = renderHook(() => useStore());
 		act(() => result.current.addRoom(testRoom2));
-		mockedUnmuteRoomNotificationRequest.mockRejectedValueOnce(false).mockReturnValueOnce(true);
 		const { user } = setup(<MuteConversationAction roomId={testRoom2.id} />);
 
 		const unmuteAction = screen.getByText(/Activate notifications/i);
@@ -73,40 +73,35 @@ describe('Mute/Unmute Conversation', () => {
 		expect(unmuteAction).toBeInTheDocument();
 
 		await user.click(unmuteAction);
-		expect(mockedUnmuteRoomNotificationRequest).toHaveBeenCalled();
+		expect(spyOnUnmuteRoomNotification).toHaveBeenCalled();
 	});
-	// TODO fix test
-	// test('undo mute', async () => {
-	// 	mockedMuteRoomNotificationRequest.mockReturnValue(true);
-	// 	mockedUnmuteRoomNotificationRequest.mockReturnValueOnce(true);
-	//
-	// 	const { result } = renderHook(() => useStore());
-	// 	act(() => result.current.addRoom(testRoom));
-	// 	const { user } = setup(<MuteConversationAction roomId={testRoom.id} />);
-	//
-	// 	const mute = screen.getByText(/Mute notifications/i);
-	// 	expect(mute).toBeEnabled();
-	//
-	// 	await user.click(mute);
-	//
-	// 	const snackbar = await screen.findByText(/Notifications muted for this chat/i);
-	// 	await waitFor(() => expect(snackbar).toBeVisible());
-	// 	await user.click(screen.getByText(/UNDO/i));
-	// 	await waitFor(() => expect(result.current.rooms[testRoom.id].userSettings?.muted).toBe(false));
-	// });
-	//
-	// test('undo unmute', async () => {
-	// 	const { result } = renderHook(() => useStore());
-	// 	act(() => result.current.addRoom(testRoom2));
-	// 	mockedUnmuteRoomNotificationRequest.mockReturnValue(true);
-	// 	mockedMuteRoomNotificationRequest.mockReturnValueOnce(true);
-	// 	const { user } = setup(<MuteConversationAction roomId={testRoom2.id} />);
-	//
-	// 	const unmuteAction = screen.getByText(/Activate notifications/i);
-	// 	await user.click(unmuteAction);
-	// 	const snackbar = await screen.findByText(/Notifications activated for this chat/i);
-	// 	expect(snackbar).toBeVisible();
-	// 	await user.click(screen.getByText(/UNDO/i));
-	// 	await waitFor(() => expect(result.current.rooms[testRoom.id].userSettings?.muted).toBe(true));
-	// });
+
+	test('undo mute', async () => {
+		const { result } = renderHook(() => useStore());
+		act(() => result.current.addRoom(testRoom));
+		const { user } = setup(<MuteConversationAction roomId={testRoom.id} />);
+
+		const mute = screen.getByText(/Mute notifications/i);
+		expect(mute).toBeEnabled();
+
+		await user.click(mute);
+
+		const snackbar = await screen.findByText(/Notifications muted for this chat/i);
+		expect(snackbar).toBeVisible();
+		await user.click(screen.getByText(/UNDO/i));
+		expect(result.current.rooms[testRoom.id].userSettings?.muted).toBe(false);
+	});
+
+	test('undo unmute', async () => {
+		const { result } = renderHook(() => useStore());
+		act(() => result.current.addRoom(testRoom2));
+		const { user } = setup(<MuteConversationAction roomId={testRoom2.id} />);
+
+		const unmuteAction = screen.getByText(/Activate notifications/i);
+		await user.click(unmuteAction);
+		const snackbar = await screen.findByText(/Notifications activated for this chat/i);
+		expect(snackbar).toBeVisible();
+		await user.click(screen.getByText(/UNDO/i));
+		expect(result.current.rooms[testRoom.id].userSettings?.muted).toBe(true);
+	});
 });

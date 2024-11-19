@@ -11,7 +11,6 @@ import { screen } from '@testing-library/react';
 import EditConversationModal from './EditConversationModal';
 import useStore from '../../../../store/Store';
 import { createMockMember, createMockRoom } from '../../../../tests/createMock';
-import { mockedUpdateRoomRequest } from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
 import { RootStore } from '../../../../types/store/StoreTypes';
@@ -94,6 +93,7 @@ describe('Edit group Details Modal', () => {
 		expect(titleLabel3).toBeInTheDocument();
 		expect(editButton).not.toBeEnabled();
 	});
+
 	test('Errors on input fields - description', async () => {
 		// setup of the room
 		const store: RootStore = useStore.getState();
@@ -146,6 +146,7 @@ describe('Edit group Details Modal', () => {
 		expect(titleLabel3).toBeInTheDocument();
 		expect(editButton).not.toBeEnabled();
 	});
+
 	test('Errors on input fields - description', async () => {
 		// setup of the room
 		const store: RootStore = useStore.getState();
@@ -165,14 +166,8 @@ describe('Edit group Details Modal', () => {
 		expect(descriptionLabel).toBeInTheDocument();
 		expect(editButton).not.toBeEnabled();
 	});
+
 	test('user modify a field and press edit button', async () => {
-		mockedUpdateRoomRequest.mockReturnValue({
-			id: testRoom.id,
-			name: testRoom.name,
-			description: 'This is a new description',
-			type: RoomType.GROUP,
-			members: [createMockMember({ userId: 'myId' })]
-		});
 		const store: RootStore = useStore.getState();
 		store.addRoom(testRoom);
 		const { user } = setup(
