@@ -83,7 +83,7 @@ const EmojiSelector: React.FC<EmojiSelectorProps> = ({ messageInputRef, setMessa
 					onEmojiSelect={insertEmojiInMessage}
 					setShowEmojiPicker={setShowEmojiPicker}
 					emojiTimeoutRef={emojiTimeoutRef}
-					isInsideMeeting={isInsideMeeting}
+					smallSize={isInsideMeeting}
 				/>
 			)}
 			<Tooltip label={selectEmojiLabel}>

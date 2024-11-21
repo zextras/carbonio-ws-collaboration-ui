@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
 import React, {
 	Dispatch,
 	MutableRefObject,
@@ -19,18 +17,17 @@ import React, {
 import data from '@emoji-mart/data';
 import { Container } from '@zextras/carbonio-design-system';
 import { Picker } from 'emoji-mart';
+import moment from 'moment-timezone';
 import styled from 'styled-components';
 
 import { Emoji, Z_INDEX_RANK } from '../../../../types/generics';
 import { calcScaleDivisor } from '../../../../utils/styleUtils';
 
-const PickerWrapper = styled(Container)<{ $scaleHeight?: number }>`
+const PickerWrapper = styled(Container)`
 	z-index: ${Z_INDEX_RANK.EMOJI_PICKER};
 	position: absolute;
-	bottom: 3.4375rem;
+	bottom: 3.75rem;
 	left: 0.5rem;
-	height: ${({ $scaleHeight }): string => `${$scaleHeight}rem`};
-	width: 22rem;
 	transform-origin: bottom left;
 	animation: showEmoji 0.2s ease-in 0s 1;
 	flex-wrap: wrap;
@@ -42,11 +39,9 @@ const PickerWrapper = styled(Container)<{ $scaleHeight?: number }>`
 
 	@keyframes showEmoji {
 		0% {
-			//transform: scale(0);
 			opacity: 0;
 		}
 		100% {
-			//transform: scale(1, 1);
 			opacity: 1;
 		}
 	}
@@ -54,17 +49,16 @@ const PickerWrapper = styled(Container)<{ $scaleHeight?: number }>`
 
 type EmojiPickerProps = {
 	onEmojiSelect: (emoji: Emoji) => void;
-	setShowEmojiPicker?: Dispatch<SetStateAction<boolean>>;
-	emojiTimeoutRef?: MutableRefObject<NodeJS.Timeout | undefined>;
-	isInsideMeeting?: boolean;
+	setShowEmojiPicker: Dispatch<SetStateAction<boolean>>;
+	emojiTimeoutRef: MutableRefObject<NodeJS.Timeout | undefined>;
+	smallSize?: boolean;
 };
 
 const EmojiPicker: React.FC<EmojiPickerProps> = ({
 	onEmojiSelect,
 	setShowEmojiPicker,
 	emojiTimeoutRef,
-	isInsideMeeting,
-	...props
+	smallSize = false
 }) => {
 	const ref = useRef<HTMLDivElement>(null);
 
@@ -92,7 +86,7 @@ const EmojiPicker: React.FC<EmojiPickerProps> = ({
 			ref.current.addEventListener('mouseleave', mouseLeaveEvent);
 			refValue = ref.current;
 		}
-		return () => {
+		return (): void => {
 			if (refValue) {
 				refValue.removeEventListener('mouseenter', mouseEnterEvent);
 				refValue.removeEventListener('mouseleave', mouseLeaveEvent);
@@ -101,13 +95,13 @@ const EmojiPicker: React.FC<EmojiPickerProps> = ({
 	}, [setShowEmojiPicker, emojiTimeoutRef, mouseEnterEvent, mouseLeaveEvent]);
 
 	const scaleHeight = useMemo(
-		() => (isInsideMeeting ? 290 / calcScaleDivisor() : 435 / calcScaleDivisor()),
-		[isInsideMeeting]
+		() => (smallSize ? 290 / calcScaleDivisor() : 435 / calcScaleDivisor()),
+		[smallSize]
 	);
 
 	useEffect(() => {
 		// eslint-disable-next-line no-new
-		new Picker({ previewPosition: 'none', ...props, onEmojiSelect, data, ref });
+		new Picker({ previewPosition: 'none', onEmojiSelect, data, ref, locale: moment.locale() });
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
@@ -115,8 +109,8 @@ const EmojiPicker: React.FC<EmojiPickerProps> = ({
 		<PickerWrapper
 			ref={ref}
 			data-testid="emojiPicker"
-			$scaleHeight={scaleHeight}
-			mainAlignment={'flex-end'}
+			height={`${scaleHeight}rem`}
+			width="22rem"
 			crossAlignment={'flex-start'}
 		/>
 	);
