@@ -7,7 +7,7 @@
 import React, { FC } from 'react';
 
 import { Container, Text, Row } from '@zextras/carbonio-design-system';
-import styled, { DefaultTheme } from 'styled-components';
+import styled from 'styled-components';
 
 import InfoSection from './InfoSection';
 import ManageMeetingButtons from './ManageMeetingButtons';
@@ -38,12 +38,7 @@ const CustomContainer = styled(Container)<{ $meetingIsActive?: boolean }>`
 `;
 
 const CustomRow = styled(Row)<{ $isMyRoom: boolean | undefined }>`
-	${({
-		$isMyRoom
-	}: {
-		$isMyRoom: boolean | undefined;
-		theme: DefaultTheme;
-	}): string | undefined | false => !$isMyRoom && 'opacity: 0.5; cursor: default;'};
+	${({ $isMyRoom }): string | undefined | false => !$isMyRoom && 'opacity: 0.5; cursor: default;'};
 `;
 
 const MeetingActive = styled.div<{ $meetingIsActive?: boolean }>`

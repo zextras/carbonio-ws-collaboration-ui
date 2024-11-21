@@ -59,7 +59,7 @@ const CustomText = styled(Text)<{
 		}
 	}
 
-	${({ $isWritingIsVisible }: { $isWritingIsVisible: boolean }): ReturnType<typeof css> =>
+	${({ $isWritingIsVisible }): ReturnType<typeof css> =>
 		$isWritingIsVisible
 			? css`
 					animation: slideUp 0.4s ease forwards;
