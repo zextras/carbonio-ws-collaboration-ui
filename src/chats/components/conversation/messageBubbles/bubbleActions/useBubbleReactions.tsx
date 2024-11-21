@@ -6,10 +6,11 @@
 
 import React, { ReactElement, useCallback, useMemo, useRef, useState } from 'react';
 
-import { Button, Container, Dropdown } from '@zextras/carbonio-design-system';
+import { Button, Container, Dropdown, Icon } from '@zextras/carbonio-design-system';
 import { map } from 'lodash';
 import styled from 'styled-components';
 
+import CustomReactionPicker from './CustomReactionPicker';
 import { getXmppClient } from '../../../../../store/selectors/ConnectionSelector';
 import { getMyLastReaction } from '../../../../../store/selectors/FasteningsSelectors';
 import useStore from '../../../../../store/Store';
@@ -24,13 +25,13 @@ export enum ReactionType {
 }
 
 const EmojiBox = styled(Container)<{
-	$emoji: string;
-	$selected: boolean;
+	$emoji?: string;
+	$selected?: boolean;
 }>`
 	width: 2rem;
 	height: 2rem;
 	&::before {
-		${({ $emoji }): string => `content: "${$emoji}";`};
+		${({ $emoji }): string | false => !!$emoji && `content: "${$emoji}";`};
 	}
 	&:hover {
 		background-color: ${({ theme, $selected }): string =>
@@ -39,7 +40,7 @@ const EmojiBox = styled(Container)<{
 	}
 
 	${({ theme, $selected }): string | false =>
-		$selected && `background-color: ${theme.palette.highlight.focus};`};
+		!!$selected && `background-color: ${theme.palette.highlight.focus};`};
 `;
 
 const useBubbleReactions = (
@@ -56,6 +57,7 @@ const useBubbleReactions = (
 	);
 
 	const [dropdownActive, setDropdownActive] = useState(false);
+	const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
 	const dropDownRef = useRef<HTMLDivElement>(null);
 
@@ -71,6 +73,14 @@ const useBubbleReactions = (
 			}
 		},
 		[message.roomId, message.stanzaId, myReaction, xmppClient]
+	);
+
+	const openEmojiPicker = useCallback(
+		(ev: React.MouseEvent) => {
+			ev.stopPropagation();
+			setShowEmojiPicker(true);
+		},
+		[setShowEmojiPicker]
 	);
 
 	const emojiItems = useMemo(
@@ -89,37 +99,48 @@ const useBubbleReactions = (
 								onClick={() => sendReaction(emoji)}
 							/>
 						))}
+						<EmojiBox
+							background="gray6"
+							key="custom-reactions"
+							data-testid="custom-reactions"
+							onClick={openEmojiPicker}
+						>
+							<Icon icon="Plus" />
+						</EmojiBox>
 					</Container>
 				),
 				padding: '0'
 			}
 		],
-		[myReaction, sendReaction]
+		[myReaction, openEmojiPicker, sendReaction]
 	);
 
 	const ReactionsDropdown = useMemo(
 		() => (
-			<Dropdown
-				data-testid={`reactionsDropdown-${message.id}`}
-				items={emojiItems}
-				onOpen={onDropdownOpen}
-				onClose={onDropdownClose}
-				disableAutoFocus
-				disableRestoreFocus
-				disablePortal
-				placement="top"
-				ref={dropDownRef}
-			>
-				<Button
-					icon="SmileOutline"
-					type="ghost"
-					size="small"
-					color="text"
-					onClick={(): null => null}
-				/>
-			</Dropdown>
+			<>
+				<Dropdown
+					data-testid={`reactionsDropdown-${message.id}`}
+					items={emojiItems}
+					onOpen={onDropdownOpen}
+					onClose={onDropdownClose}
+					disableAutoFocus
+					disableRestoreFocus
+					disablePortal
+					placement="top"
+					ref={dropDownRef}
+				>
+					<Button
+						icon="SmileOutline"
+						type="ghost"
+						size="small"
+						color="text"
+						onClick={(): null => null}
+					/>
+				</Dropdown>
+				{showEmojiPicker && <CustomReactionPicker onEmojiSelect={sendReaction} />}
+			</>
 		),
-		[emojiItems, dropDownRef, message.id, onDropdownClose, onDropdownOpen]
+		[message.id, emojiItems, onDropdownOpen, onDropdownClose, showEmojiPicker, sendReaction]
 	);
 	return {
 		ReactionsDropdown,

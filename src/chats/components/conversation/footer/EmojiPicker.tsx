@@ -50,7 +50,7 @@ const PickerWrapper = styled(Container)`
 type EmojiPickerProps = {
 	onEmojiSelect: (emoji: Emoji) => void;
 	setShowEmojiPicker: Dispatch<SetStateAction<boolean>>;
-	emojiTimeoutRef: MutableRefObject<NodeJS.Timeout | undefined>;
+	emojiTimeoutRef?: MutableRefObject<NodeJS.Timeout | undefined>;
 	smallSize?: boolean;
 };
 

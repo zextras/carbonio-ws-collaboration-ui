@@ -7,10 +7,9 @@
 import React, { FC, useMemo } from 'react';
 
 import { Container } from '@zextras/carbonio-design-system';
-import { forEach, includes, map, reverse } from 'lodash';
+import { forEach, map, reverse } from 'lodash';
 import styled from 'styled-components';
 
-import { ReactionType } from './bubbleActions/useBubbleReactions';
 import ReactionChip from './ReactionChip';
 import { getReactionFastenings } from '../../../../store/selectors/FasteningsSelectors';
 import useStore from '../../../../store/Store';
@@ -30,7 +29,7 @@ const MessageReactionsList: FC<BubbleReactionsProps> = ({ roomId, stanzaId }) =>
 	const reactionGroup = useMemo(() => {
 		const reactionGroup: { [reaction: string]: string[] } = {};
 		forEach(reactions, (reaction) => {
-			if (!!reaction.value && includes(ReactionType, reaction.value)) {
+			if (reaction.value) {
 				if (!reactionGroup[reaction.value]) {
 					reactionGroup[reaction.value] = [];
 				}
