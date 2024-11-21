@@ -6,7 +6,7 @@
 
 import React, { useMemo, useState } from 'react';
 
-import { Container, TextWithTooltip } from '@zextras/carbonio-design-system';
+import { Container, Tooltip, Text } from '@zextras/carbonio-design-system';
 import { size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -14,7 +14,7 @@ import styled from 'styled-components';
 import useFilteredConversationList from './conversationList/useFilteredConversationList';
 import ConversationsFilter from './ConversationsFilter';
 import useFilteredGal from './galSeachList/useFilteredGal';
-import VirtualRoomsButton from './VirtualRoomTemporaryWidget/VirtualRoomsButton';
+import VirtualRoomsButton from './virtualRoomWidget/VirtualRoomsButton';
 import { getOneToOneAndGroupsInfoOrderedByLastMessage } from '../../../store/selectors/MessagesSelectors';
 import { getCapability } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
@@ -36,7 +36,7 @@ export type FilteredConversation = {
 	members: Member[];
 };
 
-export const SecondaryBarInfoText = styled(TextWithTooltip)`
+export const SecondaryBarInfoText = styled(Text)`
 	text-align: center;
 `;
 
@@ -85,14 +85,16 @@ const SecondaryBarView: React.FC<SecondaryBarSingleGroupsViewProps> = ({ expande
 					<ScrollContainer mainAlignment="flex-start">
 						{noResults ? (
 							<Container padding={{ vertical: '2rem', horizontal: '1rem' }} height="fit">
-								<SecondaryBarInfoText
-									color="gray1"
-									size="small"
-									weight="light"
-									overflow={expanded ? 'break-word' : 'ellipsis'}
-								>
-									{noResultsLabel}
-								</SecondaryBarInfoText>
+								<Tooltip label={noResultsLabel} overflowTooltip>
+									<SecondaryBarInfoText
+										color="gray1"
+										size="small"
+										weight="light"
+										overflow={expanded ? 'break-word' : 'ellipsis'}
+									>
+										{noResultsLabel}
+									</SecondaryBarInfoText>
+								</Tooltip>
 							</Container>
 						) : (
 							<>

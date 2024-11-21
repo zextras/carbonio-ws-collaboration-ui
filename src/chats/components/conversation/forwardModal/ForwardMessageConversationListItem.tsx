@@ -12,7 +12,8 @@ import {
 	Container,
 	Padding,
 	Row,
-	TextWithTooltip
+	Tooltip,
+	Text
 } from '@zextras/carbonio-design-system';
 
 import { ChatListItemProp } from './ForwardMessageModal';
@@ -57,7 +58,9 @@ const ForwardMessageConversationListItem: FunctionComponent<
 				</Row>
 				<Row mainAlignment="flex-start" takeAvailableSpace wrap="nowrap">
 					<Container width="fill" crossAlignment="flex-start">
-						<TextWithTooltip>{roomName}</TextWithTooltip>
+						<Tooltip label={roomName} overflowTooltip>
+							<Text>{roomName}</Text>
+						</Tooltip>
 					</Container>
 				</Row>
 			</Row>

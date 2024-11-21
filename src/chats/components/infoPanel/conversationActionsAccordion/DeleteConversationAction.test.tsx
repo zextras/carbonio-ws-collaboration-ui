@@ -5,12 +5,11 @@
  */
 import React from 'react';
 
-import { screen, waitFor, act, renderHook } from '@testing-library/react';
+import { screen, act, renderHook } from '@testing-library/react';
 
 import DeleteConversationAction from './DeleteConversationAction';
 import useStore from '../../../../store/Store';
 import { createMockRoom, createMockUser } from '../../../../tests/createMock';
-import { mockedDeleteRoomRequest } from '../../../../tests/mocks/network';
 import { mockGoToMainPage } from '../../../../tests/mocks/useRouting';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe } from '../../../../types/network/models/roomBeTypes';
@@ -81,13 +80,13 @@ describe('delete conversation action', () => {
 		await user.click(screen.getByTestId('icon: Close'));
 		expect(screen.queryByTestId('leave_modal')).not.toBeInTheDocument();
 	});
+
 	test('delete conversation', async () => {
 		const { result } = renderHook(() => useStore());
 		act(() => {
 			result.current.setLoginInfo(user1Info.id, user1Info.name);
 			result.current.addRoom(testRoom);
 		});
-		mockedDeleteRoomRequest.mockReturnValueOnce('the conversation has been deleted');
 		mockGoToMainPage.mockReturnValueOnce('main page');
 		const { user } = setup(
 			<DeleteConversationAction roomId={testRoom.id} type={testRoom.type} numberOfMembers={2} />
@@ -101,6 +100,6 @@ describe('delete conversation action', () => {
 		const deleteButton = await screen.findByRole('button', { name: 'Delete' });
 
 		await user.click(deleteButton);
-		await waitFor(() => expect(mockGoToMainPage).toHaveBeenCalled());
+		expect(mockGoToMainPage).toHaveBeenCalled();
 	});
 });

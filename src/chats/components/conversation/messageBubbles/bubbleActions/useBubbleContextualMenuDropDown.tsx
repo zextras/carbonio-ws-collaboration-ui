@@ -10,7 +10,8 @@ import {
 	Button,
 	Dropdown,
 	DropdownItem,
-	SnackbarManagerContext
+	SnackbarManagerContext,
+	Tooltip
 } from '@zextras/carbonio-design-system';
 import { size } from 'lodash';
 import { useTranslation } from 'react-i18next';
@@ -261,25 +262,26 @@ const useBubbleContextualMenuDropDown = (
 
 	const MenuDropdown = useMemo(
 		() => (
-			<Dropdown
-				data-testid={`cxtMenuDropdown-${message.id}`}
-				items={contextualMenuActions}
-				onOpen={onDropdownOpen}
-				onClose={onDropdownClose}
-				disableRestoreFocus
-				disablePortal
-				placement="right-start"
-				ref={dropDownRef}
-			>
-				<Button
-					size="small"
-					icon="ArrowIosDownward"
-					type="ghost"
-					color="text"
-					title={messageActionsTooltip}
-					onClick={(): null => null}
-				/>
-			</Dropdown>
+			<Tooltip label={messageActionsTooltip} placement="top">
+				<Dropdown
+					data-testid={`cxtMenuDropdown-${message.id}`}
+					items={contextualMenuActions}
+					onOpen={onDropdownOpen}
+					onClose={onDropdownClose}
+					disableRestoreFocus
+					disablePortal
+					placement="right-start"
+					ref={dropDownRef}
+				>
+					<Button
+						size="small"
+						icon="ArrowIosDownward"
+						type="ghost"
+						color="text"
+						onClick={(): null => null}
+					/>
+				</Dropdown>
+			</Tooltip>
 		),
 		[
 			contextualMenuActions,

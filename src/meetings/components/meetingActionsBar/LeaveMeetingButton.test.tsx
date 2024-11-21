@@ -6,11 +6,11 @@
 import React from 'react';
 
 import { screen } from '@testing-library/react';
+import * as ReactRouter from 'react-router';
 
 import LeaveMeetingButton from './LeaveMeetingButton';
-import { useParams } from '../../../../__mocks__/react-router';
 import { createMockMeeting } from '../../../tests/createMock';
-import { mockedLeaveMeetingRequest } from '../../../tests/mocks/network';
+import { MeetingsApiToSpy, spyOnMeetingsApi } from '../../../tests/mocks/network';
 import { setup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 
@@ -18,9 +18,11 @@ const mockMeeting: MeetingBe = createMockMeeting();
 
 const leaveMeetingButtonText = 'Leave Meeting?';
 
-beforeAll(() => {
-	useParams.mockReturnValue({ meetingId: mockMeeting.id });
+beforeEach(() => {
+	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
+	spyUseParams.mockReturnValue({ meetingId: mockMeeting.id });
 });
+
 describe('LeaveMeetingButton', () => {
 	test('Default button status: closed', () => {
 		setup(<LeaveMeetingButton isHoovering />);
@@ -37,18 +39,18 @@ describe('LeaveMeetingButton', () => {
 	});
 
 	test('User clicks twice the button: leaveMeeting should be called', async () => {
-		mockedLeaveMeetingRequest.mockResolvedValueOnce('Meeting left');
+		const spyOnLeaveMeeting = spyOnMeetingsApi(MeetingsApiToSpy.LEAVE_MEETING);
 		const { user } = setup(<LeaveMeetingButton isHoovering />);
 		const button = screen.getByRole('button');
 		await user.click(button);
 		await user.click(button);
-		expect(mockedLeaveMeetingRequest).toHaveBeenCalled();
+		expect(spyOnLeaveMeeting).toHaveBeenCalled();
 	});
 
 	test('User leaves the meeting directly if component has the oneClickLeave prop', async () => {
-		mockedLeaveMeetingRequest.mockResolvedValueOnce({});
+		const spyOnLeaveMeeting = spyOnMeetingsApi(MeetingsApiToSpy.LEAVE_MEETING);
 		const { user } = setup(<LeaveMeetingButton isHoovering oneClickLeave />);
 		await user.click(screen.getByRole('button'));
-		expect(mockedLeaveMeetingRequest).toHaveBeenCalled();
+		expect(spyOnLeaveMeeting).toHaveBeenCalled();
 	});
 });

@@ -16,7 +16,7 @@ import {
 	createMockTextMessage,
 	createMockUser
 } from '../../../../tests/createMock';
-import { mockedForwardMessagesRequest } from '../../../../tests/mocks/network';
+import { RoomsApiToSpy, spyOnRoomsApi } from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe } from '../../../../types/network/models/roomBeTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
@@ -48,6 +48,7 @@ beforeEach(() => {
 	store.addRoom(chat2);
 	store.addRoom(chat3);
 });
+
 describe('Forward Message Modal', () => {
 	test('All elements are rendered', () => {
 		setup(
@@ -103,6 +104,7 @@ describe('Forward Message Modal', () => {
 	});
 
 	test('Forward a message to a 1-to-1 room', async () => {
+		const spyOnForwardMessage = spyOnRoomsApi(RoomsApiToSpy.FORWARD_MESSAGE);
 		const { user } = setup(
 			<ForwardMessageModal
 				open
@@ -124,10 +126,11 @@ describe('Forward Message Modal', () => {
 		expect(footerButton).toBeEnabled();
 
 		await user.click(footerButton);
-		expect(mockedForwardMessagesRequest).toHaveBeenCalledTimes(1);
+		expect(spyOnForwardMessage).toHaveBeenCalledTimes(1);
 	});
 
 	test('Forward a message to a group', async () => {
+		const spyOnForwardMessage = spyOnRoomsApi(RoomsApiToSpy.FORWARD_MESSAGE);
 		const { user } = setup(
 			<ForwardMessageModal
 				open
@@ -149,10 +152,11 @@ describe('Forward Message Modal', () => {
 		expect(footerButton).toBeEnabled();
 
 		await user.click(footerButton);
-		expect(mockedForwardMessagesRequest).toHaveBeenCalledTimes(1);
+		expect(spyOnForwardMessage).toHaveBeenCalledTimes(1);
 	});
 
 	test('Forward more than one message to a group', async () => {
+		const spyOnForwardMessage = spyOnRoomsApi(RoomsApiToSpy.FORWARD_MESSAGE);
 		const { user } = setup(
 			<ForwardMessageModal
 				open
@@ -174,10 +178,11 @@ describe('Forward Message Modal', () => {
 		expect(footerButton).toBeEnabled();
 
 		await user.click(footerButton);
-		expect(mockedForwardMessagesRequest).toHaveBeenCalledTimes(1);
+		expect(spyOnForwardMessage).toHaveBeenCalledTimes(1);
 	});
 
 	test('Forward a message to multiple conversations', async () => {
+		const spyOnForwardMessage = spyOnRoomsApi(RoomsApiToSpy.FORWARD_MESSAGE);
 		const { user } = setup(
 			<ForwardMessageModal
 				open
@@ -201,10 +206,11 @@ describe('Forward Message Modal', () => {
 		const footerButton = await screen.findByRole('button', { name: /Forward/i });
 		await user.click(footerButton);
 
-		expect(mockedForwardMessagesRequest).toHaveBeenCalledTimes(1);
+		expect(spyOnForwardMessage).toHaveBeenCalledTimes(1);
 	});
 
 	test('Forward more than one message to multiple conversations', async () => {
+		const spyOnForwardMessage = spyOnRoomsApi(RoomsApiToSpy.FORWARD_MESSAGE);
 		const { user } = setup(
 			<ForwardMessageModal
 				open
@@ -228,10 +234,13 @@ describe('Forward Message Modal', () => {
 		const footerButton = await screen.findByRole('button', { name: /Forward/i });
 		await user.click(footerButton);
 
-		expect(mockedForwardMessagesRequest).toHaveBeenCalledTimes(1);
+		expect(spyOnForwardMessage).toHaveBeenCalledTimes(1);
 	});
 
 	test('Close modal after forward someone else message', async () => {
+		const spyOnForwardMessage = spyOnRoomsApi(RoomsApiToSpy.FORWARD_MESSAGE);
+		spyOnForwardMessage.mockImplementation(() => Promise.resolve(testRoom));
+
 		const onClose = jest.fn();
 		const { user } = setup(
 			<ForwardMessageModal
@@ -251,6 +260,9 @@ describe('Forward Message Modal', () => {
 	});
 
 	test('Close modal after forward my message', async () => {
+		const spyOnForwardMessage = spyOnRoomsApi(RoomsApiToSpy.FORWARD_MESSAGE);
+		spyOnForwardMessage.mockImplementation(() => Promise.resolve(testRoom));
+
 		const messageToForward = createMockTextMessage({ roomId: testRoom.id, from: sessionUser.id });
 
 		const onClose = jest.fn();

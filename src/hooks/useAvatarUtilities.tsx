@@ -8,13 +8,7 @@ import { useMemo } from 'react';
 
 import { useTheme } from '@zextras/carbonio-design-system';
 
-import { UsersApi } from '../network';
-import {
-	getIsUserGuest,
-	getUserName,
-	getUserPictureUpdatedAt,
-	getIsAnonymousUser
-} from '../store/selectors/UsersSelectors';
+import { getIsUserGuest, getUserName, getIsAnonymousUser } from '../store/selectors/UsersSelectors';
 import useStore from '../store/Store';
 import { calcAvatarMeetingColor, calculateAvatarColor } from '../utils/styleUtils';
 
@@ -23,15 +17,12 @@ const useAvatarUtilities = (
 	onMeeting?: boolean
 ): {
 	avatarColor: string;
-	avatarPicture: string;
+	avatarPicture: string | undefined;
 	avatarIcon: string | undefined;
 	isLoading: boolean;
 } => {
 	const isAnonymousUser = useStore((store) => getIsAnonymousUser(store, userId));
 	const userName: string = useStore((store) => getUserName(store, userId));
-	const userPictureUpdatedAt: string | undefined = useStore((state) =>
-		getUserPictureUpdatedAt(state, userId)
-	);
 	const isUserGuest = useStore((store) => getIsUserGuest(store, userId));
 
 	const themeColor = useTheme();
@@ -43,12 +34,6 @@ const useAvatarUtilities = (
 		return `${themeColor.avatarColors[color]}`;
 	}, [userName, isAnonymousUser, themeColor.avatarColors, onMeeting]);
 
-	const picture = useMemo(() => {
-		if (userPictureUpdatedAt)
-			return `${UsersApi.getURLUserPicture(userId)}?${userPictureUpdatedAt}`;
-		return '';
-	}, [userId, userPictureUpdatedAt]);
-
 	const icon = useMemo(() => {
 		if (isAnonymousUser) return 'QuestionMarkCircleOutline';
 		if (isUserGuest) return 'SmileOutline';
@@ -59,7 +44,7 @@ const useAvatarUtilities = (
 
 	return {
 		avatarColor: color,
-		avatarPicture: picture,
+		avatarPicture: undefined,
 		avatarIcon: icon,
 		isLoading
 	};

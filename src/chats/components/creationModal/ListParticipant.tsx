@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { MouseEventHandler, ReactElement, useMemo } from 'react';
+import React, { MouseEventHandler, ReactElement } from 'react';
 
 import {
 	Avatar,
@@ -19,9 +19,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import { UsersApi } from '../../../network';
-import { getUserPictureUpdatedAt } from '../../../store/selectors/UsersSelectors';
-import useStore from '../../../store/Store';
+import useAvatarUtilities from '../../../hooks/useAvatarUtilities';
 import { ContactInfo } from '../../../types/network/soap/searchUsersByFeatureRequest';
 
 type ListParticipantProps = {
@@ -55,15 +53,7 @@ const ListParticipant = ({
 	const demoteModeratorLabel: string = t('tooltip.demoteModerator', 'Demote moderator');
 	const promoteModeratorLabel: string = t('tooltip.promoteModerator', 'Promote to moderator');
 
-	const userPictureUpdatedAt: string | undefined = useStore((state) =>
-		getUserPictureUpdatedAt(state, item.id)
-	);
-
-	const picture = useMemo(
-		() =>
-			userPictureUpdatedAt ? `${UsersApi.getURLUserPicture(item.id)}?${userPictureUpdatedAt}` : '',
-		[item.id, userPictureUpdatedAt]
-	);
+	const { avatarPicture } = useAvatarUtilities(item.id);
 
 	return (
 		<Tooltip disabled={!isDisabled} label={removeToAddNewOneLabel}>
@@ -81,9 +71,10 @@ const ListParticipant = ({
 							data-testid={`checkbox-chip-${item.email}`}
 							value={selected}
 							disabled={!selected && isDisabled}
+							iconColor={selected ? 'primary' : 'gray0'}
 						/>
 						<Padding horizontal="small">
-							<Avatar label={item.displayName} picture={picture} />
+							<Avatar label={item.displayName} picture={avatarPicture} />
 						</Padding>
 						<Container crossAlignment="flex-start" width="fit">
 							<Text size="small">{item.displayName}</Text>
@@ -99,7 +90,7 @@ const ListParticipant = ({
 					</Row>
 				</Container>
 				{canBeModerator && (
-					<Container width="fit">
+					<Container width="fit" padding={{ right: 'small' }}>
 						<Tooltip label={isOwner(item.id) ? demoteModeratorLabel : promoteModeratorLabel}>
 							<Button
 								icon={isOwner(item.id) ? 'Crown' : 'CrownOutline'}

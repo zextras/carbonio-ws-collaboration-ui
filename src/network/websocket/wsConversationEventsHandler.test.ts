@@ -10,7 +10,12 @@ import { wsConversationEventsHandler } from './wsConversationEventsHandler';
 import { wsEventsHandler } from './wsEventsHandler';
 import useStore from '../../store/Store';
 import { createMockMeeting, createMockRoom, createMockUser } from '../../tests/createMock';
-import { mockedGetMeetingRequest, mockedGetRoomRequest } from '../../tests/mocks/network';
+import {
+	MeetingsApiToSpy,
+	RoomsApiToSpy,
+	spyOnMeetingsApi,
+	spyOnRoomsApi
+} from '../../tests/mocks/network';
 import { MeetingBe } from '../../types/network/models/meetingBeTypes';
 import { RoomBe } from '../../types/network/models/roomBeTypes';
 import {
@@ -38,10 +43,13 @@ beforeEach(() => {
 	store.setUserInfo(sessionUser);
 	store.addRoom(room);
 });
+
 describe('wsConversationEventHandler tests', () => {
 	test('ROOM_MEMBER_ADDED: session user is added in a room with an ongoing meeting', async () => {
-		mockedGetRoomRequest.mockReturnValue(room);
-		mockedGetMeetingRequest.mockReturnValue(meeting);
+		const spyOnGetRoom = spyOnRoomsApi(RoomsApiToSpy.GET_ROOM);
+		const spyOnGetMeeting = spyOnMeetingsApi(MeetingsApiToSpy.GET_MEETING);
+		spyOnGetRoom.mockImplementation(() => Promise.resolve(room));
+		spyOnGetMeeting.mockImplementation(() => Promise.resolve(meeting));
 
 		wsConversationEventsHandler({
 			type: WsEventType.ROOM_MEMBER_ADDED,

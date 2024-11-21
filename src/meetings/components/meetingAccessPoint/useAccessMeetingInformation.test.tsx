@@ -12,12 +12,10 @@ import useAccessMeetingInformation from './useAccessMeetingInformation';
 import { PAGE_INFO_TYPE } from '../../../hooks/useRouting';
 import useStore from '../../../store/Store';
 import { createMockMeeting } from '../../../tests/createMock';
-import {
-	mockedGetMeetingByMeetingId,
-	mockedGetScheduledMeetingName
-} from '../../../tests/mocks/network';
+import { MeetingsApiToSpy, spyOnMeetingsApi } from '../../../tests/mocks/network';
 import { mockGoToInfoPage } from '../../../tests/mocks/useRouting';
 import { ProvidersWrapper, setup } from '../../../tests/test-utils';
+import { MeetingType } from '../../../types/network/models/meetingBeTypes';
 
 describe('useAccessMeetingAction tests', () => {
 	test('Render ShowMeetingAccessPage', async () => {
@@ -36,8 +34,9 @@ describe('useAccessMeetingAction tests', () => {
 	});
 
 	test('Internal user has userHasDirectAccess to permanent meeting', async () => {
+		const spyOnGetMeetingByMeetingId = spyOnMeetingsApi(MeetingsApiToSpy.GET_MEETING_BY_MEETING_ID);
+		spyOnGetMeetingByMeetingId.mockImplementation(() => Promise.resolve(createMockMeeting()));
 		useStore.getState().setChatsBeStatus(true);
-		mockedGetMeetingByMeetingId.mockResolvedValueOnce(createMockMeeting());
 		const { result } = renderHook(() => useAccessMeetingInformation(), {
 			wrapper: ProvidersWrapper
 		});
@@ -46,26 +45,27 @@ describe('useAccessMeetingAction tests', () => {
 		});
 	});
 
-	// TODO fix test
-	// test('Internal user has not userHasDirectAccess to scheduled meeting', async () => {
-	// 	useStore.getState().setChatsBeStatus(true);
-	// 	mockedGetMeetingByMeetingId.mockResolvedValueOnce(
-	// 		createMockMeeting({ meetingType: MeetingType.SCHEDULED })
-	// 	);
-	// 	const { result } = renderHook(() => useAccessMeetingInformation(), {
-	// 		wrapper: ProvidersWrapper
-	// 	});
-	// 	await act(async () => {
-	// 		await waitFor(() => {
-	// 			expect(result.current.hasUserDirectAccess).toBeFalsy();
-	// 		});
-	// 	});
-	// });
+	test('Internal user has not userHasDirectAccess to scheduled meeting', async () => {
+		const spyOnGetMeetingByMeetingId = spyOnMeetingsApi(MeetingsApiToSpy.GET_MEETING_BY_MEETING_ID);
+		spyOnGetMeetingByMeetingId.mockImplementation(() =>
+			Promise.resolve(createMockMeeting({ meetingType: MeetingType.SCHEDULED }))
+		);
+		useStore.getState().setChatsBeStatus(true);
+
+		const { result } = renderHook(() => useAccessMeetingInformation(), {
+			wrapper: ProvidersWrapper
+		});
+		await waitFor(() => {
+			expect(result.current.hasUserDirectAccess).toBeFalsy();
+		});
+	});
 
 	test('Get meeting name for guest users', async () => {
+		const spyOnGetScheduledMeetingName = spyOnMeetingsApi(
+			MeetingsApiToSpy.GET_SCHEDULED_MEETING_NAME
+		);
 		useStore.getState().setChatsBeStatus(true);
-		mockedGetMeetingByMeetingId.mockRejectedValueOnce(new Error('Error'));
-		mockedGetScheduledMeetingName.mockResolvedValueOnce({ name: 'Meeting name' });
+		spyOnGetScheduledMeetingName.mockResolvedValueOnce({ name: 'Meeting name' });
 		const { result } = renderHook(() => useAccessMeetingInformation(), {
 			wrapper: ProvidersWrapper
 		});
@@ -75,14 +75,16 @@ describe('useAccessMeetingAction tests', () => {
 	});
 
 	test('Meeting not found for guest users', async () => {
+		const spyOnGetScheduledMeetingName = spyOnMeetingsApi(
+			MeetingsApiToSpy.GET_SCHEDULED_MEETING_NAME
+		);
 		useStore.getState().setChatsBeStatus(true);
-		mockedGetMeetingByMeetingId.mockRejectedValueOnce(new Error('Error'));
-		mockedGetScheduledMeetingName.mockRejectedValueOnce(new Error('Error'));
+		spyOnGetScheduledMeetingName.mockRejectedValue(false);
 		renderHook(() => useAccessMeetingInformation(), {
 			wrapper: ProvidersWrapper
 		});
 		await waitFor(() => {
-			expect(mockGoToInfoPage).toBeCalledWith(PAGE_INFO_TYPE.MEETING_NOT_FOUND);
+			expect(mockGoToInfoPage).toHaveBeenCalledWith(PAGE_INFO_TYPE.MEETING_NOT_FOUND);
 		});
 	});
 });

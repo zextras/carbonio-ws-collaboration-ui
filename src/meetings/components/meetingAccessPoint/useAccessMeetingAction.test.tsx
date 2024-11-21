@@ -8,11 +8,7 @@ import { renderHook } from '@testing-library/react';
 
 import useAccessMeetingAction from './useAccessMeetingAction';
 import { mockDarkReaderEnable } from '../../../../__mocks__/darkreader';
-import {
-	mockedEnterMeetingRequest,
-	mockedJoinMeetingRequest,
-	mockedLeaveWaitingRoomRequest
-} from '../../../tests/mocks/network';
+import { MeetingsApiToSpy, spyOnMeetingsApi } from '../../../tests/mocks/network';
 
 describe('useAccessMeetingAction tests', () => {
 	test('Enable the DarkReader', async () => {
@@ -21,25 +17,23 @@ describe('useAccessMeetingAction tests', () => {
 	});
 
 	test('handleLeave for waiting user', async () => {
-		mockedLeaveWaitingRoomRequest.mockResolvedValueOnce({});
+		const spyOnLeaveWaitingRoom = spyOnMeetingsApi(MeetingsApiToSpy.LEAVE_WAITING_ROOM);
 		const { result } = renderHook(() => useAccessMeetingAction(true, null, true, jest.fn()));
 		result.current.handleLeave();
-		expect(mockedLeaveWaitingRoomRequest).toHaveBeenCalled();
+		expect(spyOnLeaveWaitingRoom).toHaveBeenCalled();
 	});
 
 	test('handleEnterMeeting', async () => {
-		mockedEnterMeetingRequest.mockResolvedValueOnce({});
+		const spyOnEnterMeeting = spyOnMeetingsApi(MeetingsApiToSpy.ENTER_MEETING);
 		const { result } = renderHook(() => useAccessMeetingAction(true, null, true, jest.fn()));
 		result.current.handleEnterMeeting();
-
-		expect(mockedEnterMeetingRequest).toHaveBeenCalled();
+		expect(spyOnEnterMeeting).toHaveBeenCalled();
 	});
 
 	test('handleWaitingRoom for waiting user', async () => {
-		mockedJoinMeetingRequest.mockResolvedValueOnce({});
+		const spyOnJoinMeeting = spyOnMeetingsApi(MeetingsApiToSpy.JOIN_MEETING);
 		const { result } = renderHook(() => useAccessMeetingAction(true, null, true, jest.fn()));
 		result.current.handleWaitingRoom();
-
-		expect(mockedJoinMeetingRequest).toHaveBeenCalled();
+		expect(spyOnJoinMeeting).toHaveBeenCalled();
 	});
 });

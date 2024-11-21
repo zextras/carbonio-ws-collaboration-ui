@@ -7,9 +7,9 @@ import React from 'react';
 
 import { screen, act, renderHook } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event';
+import * as ReactRouter from 'react-router';
 
 import FullScreenButton from './FullScreenButton';
-import { useParams } from '../../../../__mocks__/react-router';
 import useStore from '../../../store/Store';
 import {
 	createMockMeeting,
@@ -29,8 +29,7 @@ const user1: UserBe = createMockUser({ id: 'user1Id', name: 'user 1' });
 const user2: UserBe = createMockUser({ id: 'user2Id', name: 'user 2' });
 const user3: UserBe = createMockUser({
 	id: 'user3Id',
-	name: 'user 3',
-	pictureUpdatedAt: '2022-08-25T17:24:28.961+02:00'
+	name: 'user 3'
 });
 const member1: MemberBe = { userId: user1.id, owner: true };
 const member2: MemberBe = { userId: user2.id, owner: false };
@@ -74,7 +73,8 @@ const storeSetupGroupMeeting = (): { user: UserEvent } => {
 		result.current.addMeeting(meeting);
 		result.current.meetingConnection(meeting.id, false, undefined, false, undefined);
 	});
-	useParams.mockReturnValue({ meetingId: meeting.id });
+	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
+	spyUseParams.mockReturnValue({ meetingId: meeting.id });
 	const { user } = setup(<FullScreenButton />);
 
 	return { user };

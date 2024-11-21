@@ -32,8 +32,6 @@ export const getEventArea = (eventType: WsEventType): EventArea | undefined => {
 		case WsEventType.ROOM_MEMBER_REMOVED:
 		case WsEventType.ROOM_MUTED:
 		case WsEventType.ROOM_UNMUTED:
-		case WsEventType.USER_PICTURE_CHANGED:
-		case WsEventType.USER_PICTURE_DELETED:
 		case WsEventType.ROOM_HISTORY_CLEARED: {
 			return EventArea.CONVERSATION;
 		}

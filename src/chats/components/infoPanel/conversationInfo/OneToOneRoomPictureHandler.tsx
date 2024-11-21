@@ -51,7 +51,7 @@ const OneToOneRoomPictureHandler: FC<RoomPictureProps> = ({ memberId }) => {
 	const userOfflineLabel: string = t('status.offline', 'Offline');
 
 	const memberName: string = useStore((state) => getUserName(state, memberId));
-	const memberOnline: boolean | undefined = useStore((state) => getUserOnline(state, memberId));
+	const memberOnline: boolean = useStore((state) => getUserOnline(state, memberId));
 	const memberLastActivity: number | undefined = useStore((state) =>
 		getUserLastActivity(state, memberId)
 	);

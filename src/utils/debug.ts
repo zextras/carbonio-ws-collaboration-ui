@@ -8,18 +8,23 @@
 // Debug WebSocket events
 import { WsEvent } from '../types/network/websocket/wsEvents';
 
-export const wsDebug = (text: string, object?: WsEvent): void =>
-	console.log(
-		`%c CHATS WS [${new Date().toISOString().slice(11, -5)}]: ${text}`,
-		'color: Green',
-		object || ''
-	);
+export const wsDebug = (text: string, object?: WsEvent): void => {
+	if (process.env.NODE_ENV !== 'test') {
+		console.log(
+			`%c CHATS WS [${new Date().toISOString().slice(11, -5)}]: ${text}`,
+			'color: Green',
+			object || ''
+		);
+	}
+};
 
 // Debug XMPP events
 export const xmppDebug = (text: string, object?: Element): void => {
-	console.log(
-		`%c CHATS XMPP [${new Date().toISOString().slice(11, -5)}]: ${text}`,
-		'color: Violet',
-		object || ''
-	);
+	if (process.env.NODE_ENV !== 'test') {
+		console.log(
+			`%c CHATS XMPP [${new Date().toISOString().slice(11, -5)}]: ${text}`,
+			'color: Violet',
+			object || ''
+		);
+	}
 };

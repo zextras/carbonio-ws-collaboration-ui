@@ -16,7 +16,7 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../../../tests/createMock';
-import { mockedStopRecordingRequest } from '../../../../tests/mocks/network';
+import { MeetingsApiToSpy, spyOnMeetingsApi } from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 import { MeetingBe, MeetingType } from '../../../../types/network/models/meetingBeTypes';
 import { RoomBe } from '../../../../types/network/models/roomBeTypes';
@@ -44,7 +44,7 @@ beforeEach(() => {
 });
 describe('StopRecordingModal tests', () => {
 	test('Stop recording without modifying the recording name', async () => {
-		mockedStopRecordingRequest.mockResolvedValueOnce({});
+		const spyOnStopRecording = spyOnMeetingsApi(MeetingsApiToSpy.STOP_RECORDING);
 		const { user } = setup(
 			<StopRecordingModal isOpen closeModal={jest.fn} meetingId={meeting.id} />
 		);
@@ -57,11 +57,11 @@ describe('StopRecordingModal tests', () => {
 			`You will find ${defaultRecordingName} in Home as soon as it is available`
 		);
 		expect(snackbar).toBeVisible();
-		expect(mockedStopRecordingRequest).toHaveBeenCalled();
+		expect(spyOnStopRecording).toHaveBeenCalled();
 	});
 
 	test('Stop recording with a modified recording name', async () => {
-		mockedStopRecordingRequest.mockResolvedValueOnce({});
+		const spyOnStopRecording = spyOnMeetingsApi(MeetingsApiToSpy.STOP_RECORDING);
 		const { user } = setup(
 			<StopRecordingModal isOpen closeModal={jest.fn} meetingId={meeting.id} />
 		);
@@ -74,11 +74,12 @@ describe('StopRecordingModal tests', () => {
 			`You will find ${newName} in Home as soon as it is available`
 		);
 		expect(snackbar).toBeVisible();
-		expect(mockedStopRecordingRequest).toHaveBeenCalled();
+		expect(spyOnStopRecording).toHaveBeenCalled();
 	});
 
 	test('SHow a snackbar when the stop recording request fails', async () => {
-		mockedStopRecordingRequest.mockRejectedValueOnce({});
+		const spyOnStopRecording = spyOnMeetingsApi(MeetingsApiToSpy.STOP_RECORDING);
+		spyOnStopRecording.mockRejectedValue(false);
 		const { user } = setup(
 			<StopRecordingModal isOpen closeModal={jest.fn} meetingId={meeting.id} />
 		);

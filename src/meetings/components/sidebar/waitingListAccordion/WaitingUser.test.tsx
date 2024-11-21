@@ -5,12 +5,12 @@
  */
 import React from 'react';
 
-import { screen, act } from '@testing-library/react';
+import { act, screen } from '@testing-library/react';
 
 import WaitingUser from './WaitingUser';
 import useStore from '../../../../store/Store';
 import { createMockUser } from '../../../../tests/createMock';
-import { mockedAcceptWaitingUserRequest } from '../../../../tests/mocks/network';
+import { MeetingsApiToSpy, spyOnMeetingsApi } from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 import { UserType } from '../../../../types/store/UserTypes';
 
@@ -38,19 +38,19 @@ describe('WaitingUser tests', () => {
 	});
 
 	test('Moderator clicks on accept button', async () => {
-		mockedAcceptWaitingUserRequest.mockResolvedValue({});
+		const spyOnAcceptWaitingUser = spyOnMeetingsApi(MeetingsApiToSpy.ACCEPT_WAITING_USER);
 		const { user } = setup(<WaitingUser meetingId="meetingId" userId={user1.id} />);
 		const acceptButton = screen.getByTestId('icon: CheckmarkOutline');
 		await user.click(acceptButton);
-		expect(mockedAcceptWaitingUserRequest).toBeCalledWith('meetingId', user1.id, true);
+		expect(spyOnAcceptWaitingUser).toBeCalledWith('meetingId', user1.id, true);
 	});
 
 	test('Moderator clicks on reject button', async () => {
-		mockedAcceptWaitingUserRequest.mockResolvedValue({});
+		const spyOnAcceptWaitingUser = spyOnMeetingsApi(MeetingsApiToSpy.ACCEPT_WAITING_USER);
 		const { user } = setup(<WaitingUser meetingId="meetingId" userId={user1.id} />);
 		const acceptButton = screen.getByTestId('icon: CloseOutline');
 		await user.click(acceptButton);
-		expect(mockedAcceptWaitingUserRequest).toBeCalledWith('meetingId', user1.id, false);
+		expect(spyOnAcceptWaitingUser).toBeCalledWith('meetingId', user1.id, false);
 	});
 
 	test('User in waiting room is a logged user', async () => {

@@ -13,14 +13,7 @@ import React, {
 	useState
 } from 'react';
 
-import {
-	Container,
-	Row,
-	TextWithTooltip,
-	Text,
-	Tooltip,
-	Button
-} from '@zextras/carbonio-design-system';
+import { Container, Row, Text, Tooltip, Button } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 import styled, { css } from 'styled-components';
 
@@ -43,7 +36,7 @@ const RoomInfoHeader = styled(Container)`
 	user-select: none;
 `;
 
-const CustomTextWithTooltip = styled(TextWithTooltip)<{
+const CustomText = styled(Text)<{
 	$isWritingIsVisible: boolean;
 }>`
 	@keyframes slideUp {
@@ -123,10 +116,10 @@ const ConversationHeader = ({
 			padding={{ vertical: 'medium', horizontal: 'large' }}
 		>
 			<Row takeAvailableSpace mainAlignment="flex-start">
-				<Container orientation="vertical" width="fit" height="fit" crossAlignment="flex-start">
-					<CustomTextWithTooltip overflow="ellipsis" $isWritingIsVisible={isWritingIsDefined}>
-						{roomName}
-					</CustomTextWithTooltip>
+				<Container orientation="vertical" height="fit" crossAlignment="flex-start">
+					<Tooltip label={roomName} overflow="ellipsis" overflowTooltip>
+						<CustomText $isWritingIsVisible={isWritingIsDefined}>{roomName}</CustomText>
+					</Tooltip>
 					<CustomIsWritingText
 						size="small"
 						color="secondary"

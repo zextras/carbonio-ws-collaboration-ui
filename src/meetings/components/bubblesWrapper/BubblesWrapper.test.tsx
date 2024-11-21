@@ -7,9 +7,9 @@ import React from 'react';
 
 import { screen, waitFor, act } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event';
+import * as ReactRouter from 'react-router';
 
 import BubblesWrapper from './BubblesWrapper';
-import { useParams } from '../../../../__mocks__/react-router';
 import { EventName, sendCustomEvent } from '../../../hooks/useEventListener';
 import useStore from '../../../store/Store';
 import {
@@ -85,7 +85,8 @@ const storeBasicActiveMeetingSetup = (): { user: UserEvent; store: RootStore } =
 	store.addMeeting(meeting);
 	store.meetingConnection(meeting.id, false, undefined, false, undefined);
 	store.setMeetingSidebarStatus(meeting.id, false);
-	useParams.mockReturnValue({ meetingId: meeting.id });
+	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
+	spyUseParams.mockReturnValue({ meetingId: meeting.id });
 	const { user } = setup(<BubblesWrapper />);
 
 	return { store, user };

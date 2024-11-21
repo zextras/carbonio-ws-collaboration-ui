@@ -6,19 +6,13 @@
 
 import { forEach, join, map } from 'lodash';
 
-import BaseAPI from './BaseAPI';
 import useStore from '../../store/Store';
 import { RequestType } from '../../types/network/apis/IBaseAPI';
 import IUsersApi from '../../types/network/apis/IUsersApi';
-import {
-	ChangeUserPictureResponse,
-	DeleteUserPictureResponse,
-	GetUserPictureResponse,
-	GetUserResponse,
-	GetUsersResponse
-} from '../../types/network/responses/usersResponses';
+import { GetUserResponse, GetUsersResponse } from '../../types/network/responses/usersResponses';
+import { fetchAPI } from '../../utils/FetchUtils';
 
-class UsersApi extends BaseAPI implements IUsersApi {
+class UsersApi implements IUsersApi {
 	// Singleton design pattern
 	private static instance: IUsersApi;
 
@@ -31,7 +25,7 @@ class UsersApi extends BaseAPI implements IUsersApi {
 
 	public getUser(userId: string): Promise<GetUserResponse> {
 		const { setUserInfo } = useStore.getState();
-		return this.fetchAPI(`users/${userId}`, RequestType.GET).then((resp: GetUserResponse) => {
+		return fetchAPI(`users/${userId}`, RequestType.GET).then((resp: GetUserResponse) => {
 			setUserInfo(resp);
 			return resp;
 		});
@@ -40,36 +34,10 @@ class UsersApi extends BaseAPI implements IUsersApi {
 	public getUsers(userIds: string[]): Promise<GetUsersResponse> {
 		const { setUserInfo } = useStore.getState();
 		const ids = map(userIds, (id) => `userIds=${id}`);
-		return this.fetchAPI(`users?${join(ids, '&')}`, RequestType.GET).then(
-			(resp: GetUsersResponse) => {
-				forEach(resp, (user) => setUserInfo(user));
-				return resp;
-			}
-		);
-	}
-
-	public getURLUserPicture = (userId: string): string =>
-		`${window.document.location.origin}/services/chats/users/${userId}/picture`;
-
-	public getUserPicture(userId: string): Promise<GetUserPictureResponse> {
-		return this.fetchAPI(`users/${userId}/picture`, RequestType.GET);
-	}
-
-	public changeUserPicture(userId: string, file: File): Promise<ChangeUserPictureResponse> {
-		return new Promise<ChangeUserPictureResponse>((resolve, reject) => {
-			const sizeLimit = useStore.getState().session.capabilities?.maxUserImageSizeInKb;
-			if (sizeLimit && file.size > sizeLimit * 1024) {
-				reject(new Error('File too large'));
-			} else {
-				this.uploadFileFetchAPI(`users/${userId}/picture`, RequestType.PUT, file)
-					.then((resp: ChangeUserPictureResponse) => resolve(resp))
-					.catch((error) => reject(new Error(error)));
-			}
+		return fetchAPI(`users?${join(ids, '&')}`, RequestType.GET).then((resp: GetUsersResponse) => {
+			forEach(resp, (user) => setUserInfo(user));
+			return resp;
 		});
-	}
-
-	public deleteUserPicture(userId: string): Promise<DeleteUserPictureResponse> {
-		return this.fetchAPI(`users/${userId}/picture`, RequestType.DELETE);
 	}
 }
 

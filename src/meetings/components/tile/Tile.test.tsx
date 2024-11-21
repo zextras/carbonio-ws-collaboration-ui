@@ -5,7 +5,7 @@
  */
 import React from 'react';
 
-import { screen, waitFor, act } from '@testing-library/react';
+import { screen, act } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event';
 
 import Tile from './Tile';
@@ -17,8 +17,6 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../../tests/createMock';
-import { mockMediaDevicesResolve } from '../../../tests/mocks/global';
-import { mockedUpdateAudioStreamStatusRequest } from '../../../tests/mocks/network';
 import { setup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 import { MemberBe, RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
@@ -184,10 +182,6 @@ const storeSetupTileAudioOnAndVideoOff = (): { user: UserEvent; store: RootStore
 	return { user, store };
 };
 
-beforeAll(() => {
-	mockMediaDevicesResolve();
-});
-
 describe('Tile test - enter meeting modal', () => {
 	test('my tile - everything is rendered correctly', () => {
 		storeSetupMyTileAudioOnVideoOff();
@@ -203,7 +197,7 @@ describe('Tile test - enter meeting modal', () => {
 		const { user } = storeSetupMyTileAudioOnVideoOff();
 		const tile = screen.getByTestId('tile');
 		user.hover(tile);
-		await waitFor(() => expect(screen.queryByTestId('hover_container')).not.toBeInTheDocument());
+		expect(screen.queryByTestId('hover_container')).not.toBeInTheDocument();
 	});
 	test('user tile - audio on and video off', async () => {
 		storeSetupTileAudioOnAndVideoOff();
@@ -279,7 +273,6 @@ describe('Tile test - on meeting', () => {
 
 describe('Tile actions', () => {
 	test('mute for all appears and works if I am a moderator', async () => {
-		mockedUpdateAudioStreamStatusRequest.mockReturnValueOnce('muted');
 		storeBasicActiveMeetingSetup();
 		const store: RootStore = useStore.getState();
 		act(() => {
@@ -320,7 +313,7 @@ describe('Tile actions', () => {
 		const hoverContainer = screen.getByTestId('hover_container');
 		user.hover(hoverContainer);
 
-		await waitFor(() => expect(screen.queryByTestId(iconMicOffOutline)).not.toBeInTheDocument());
+		expect(screen.queryByTestId(iconMicOffOutline)).not.toBeInTheDocument();
 	});
 
 	test('mute for all does not appear if I am not a moderator', async () => {
@@ -333,6 +326,6 @@ describe('Tile actions', () => {
 		const hoverContainer = screen.getByTestId('hover_container');
 		user.hover(hoverContainer);
 
-		await waitFor(() => expect(screen.queryByTestId(iconMicOffOutline)).not.toBeInTheDocument());
+		expect(screen.queryByTestId(iconMicOffOutline)).not.toBeInTheDocument();
 	});
 });
