@@ -19,10 +19,13 @@ import {
 	createMockUser
 } from '../../../../tests/createMock';
 import { RoomsApiToSpy, spyOnRoomsApi } from '../../../../tests/mocks/network';
+import { mockSearchUsersByFeatureRequest } from '../../../../tests/mocks/SearchUsersByFeature';
 import { setup } from '../../../../tests/test-utils';
 import { MeetingBe } from '../../../../types/network/models/meetingBeTypes';
 import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
+import { ContactInfo } from '../../../../types/network/soap/searchUsersByFeatureRequest';
 
+const virtualRoomName = 'New Virtual Room';
 const sessionUser = createMockUser({ id: 'sessionId', name: 'Session User' });
 
 const user1 = createMockUser({ id: 'user1', name: 'User 1' });
@@ -91,13 +94,30 @@ const meetingTwoModActive: MeetingBe = createMockMeeting({
 	participants: [createMockParticipants({ userId: user2.id })]
 });
 
+// Mock objects
+const contactUser1: ContactInfo = {
+	email: 'user1@test.com',
+	displayName: 'User One',
+	id: 'user1-id'
+};
+
+const contactUser2: ContactInfo = {
+	email: 'user2@test.com',
+	displayName: 'User Two',
+	id: 'user2-id'
+};
+
+beforeEach(() => {
+	const store = useStore.getState();
+	store.setLoginInfo(sessionUser.id, sessionUser.name);
+	store.setUserInfo(user1);
+	store.setUserInfo(user2);
+	store.setCapabilities(createMockCapabilityList());
+});
+
 describe('VirtualRoomsButton', () => {
 	test("user copy virtual room's link", async () => {
 		const store = useStore.getState();
-		store.setLoginInfo(sessionUser.id, sessionUser.name);
-		store.setUserInfo(user1);
-		store.setUserInfo(user2);
-		store.setCapabilities(createMockCapabilityList());
 		store.setRooms([
 			roomSessionOnlyModerator,
 			roomSessionTwoMod,
@@ -128,12 +148,8 @@ describe('VirtualRoomsButton', () => {
 	});
 
 	test('create virtual room', async () => {
+		mockSearchUsersByFeatureRequest.mockReturnValueOnce([]);
 		const spyOnAddRoom = spyOnRoomsApi(RoomsApiToSpy.ADD_ROOM);
-		const store = useStore.getState();
-		store.setLoginInfo(sessionUser.id, sessionUser.name);
-		store.setUserInfo(user1);
-		store.setUserInfo(user2);
-		store.setCapabilities(createMockCapabilityList());
 
 		const { user } = setup(<VirtualRoomsButton expanded />);
 
@@ -148,14 +164,55 @@ describe('VirtualRoomsButton', () => {
 		const modalTitle = await screen.findByText('Create new Virtual Room');
 		expect(modalTitle).toBeInTheDocument();
 
-		const textArea = await screen.findByRole('textbox');
+		const textArea = await screen.findByText('New Virtual Room’s name*');
 
-		await user.type(textArea, 'New Virtual Room');
+		await user.type(textArea, virtualRoomName);
 
 		const createRoomButton = screen.getByRole('button', { name: 'create' });
 		expect(createRoomButton).toBeEnabled();
 
 		await user.click(createRoomButton);
 		expect(spyOnAddRoom).toHaveBeenCalled();
+	});
+
+	test('create virtual room with 2 moderators', async () => {
+		mockSearchUsersByFeatureRequest.mockReturnValue([contactUser1, contactUser2]);
+
+		const spyOnAddRoom = spyOnRoomsApi(RoomsApiToSpy.ADD_ROOM);
+		const { user } = setup(<VirtualRoomsButton expanded />);
+
+		const button = screen.getByRole('button');
+		await user.click(button);
+
+		const createButton = await screen.findByRole('button', { name: 'Create new Room' });
+		expect(createButton).toBeVisible();
+
+		await user.click(createButton);
+
+		const modalTitle = await screen.findByText('Create new Virtual Room');
+		expect(modalTitle).toBeInTheDocument();
+
+		const textArea = await screen.findByText('New Virtual Room’s name*');
+
+		await user.type(textArea, virtualRoomName);
+
+		const chipContactOne = await screen.findByText('User One');
+		const chipContactTwo = await screen.findByText('User Two');
+
+		await user.click(chipContactOne);
+		await user.click(chipContactTwo);
+
+		const createRoomButton = screen.getByRole('button', { name: 'create' });
+		expect(createRoomButton).toBeEnabled();
+
+		await user.click(createRoomButton);
+		expect(spyOnAddRoom).toHaveBeenCalledWith({
+			name: virtualRoomName,
+			type: RoomType.TEMPORARY,
+			members: [
+				{ userId: contactUser1.id, owner: true },
+				{ userId: contactUser2.id, owner: true }
+			]
+		});
 	});
 });

@@ -14,11 +14,14 @@ import {
 	Text,
 	useSnackbar
 } from '@zextras/carbonio-design-system';
-import { size } from 'lodash';
+import { map, size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
+import ModeratorsContactsSelection from './ModeratorsContactsSelection';
 import { RoomsApi } from '../../../../network';
+import { MemberBe } from '../../../../types/network/models/roomBeTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
+import { ContactSelected } from '../../creationModal/ChatCreationContactsSelection';
 
 type CreateVirtualRoomButtonProps = {
 	toggleModal: () => void;
@@ -55,20 +58,33 @@ const CreateVirtualRoomButton: FC<CreateVirtualRoomButtonProps> = ({
 		'meeting.virtual.modal.description',
 		'Give to this Room a recognizable name in order to let your attendees know what they are expecting to meet about.'
 	);
+	const addModeratorsDescription = t(
+		'todo',
+		'You will moderate this Room. The additional moderator will be added as collaborators with the same priviledges.'
+	);
 
 	const [nameError, setNameError] = useState(false);
 	const [canCreateVirtualRoom, setCanCreateVirtualRoom] = useState(false);
+	const [contactsSelected, setContactsSelected] = useState<ContactSelected>({});
 
 	const textRef = useRef<HTMLInputElement>(null);
+	const contactInputRef = useRef<HTMLInputElement>(null);
 
 	const createSnackbar: CreateSnackbarFn = useSnackbar();
 
 	const handleCreateButtonClick = useCallback(() => {
+		const newOwnersToAdd: MemberBe[] = map(contactsSelected, (contactChip) => ({
+			userId: contactChip.id,
+			owner: true
+		}));
+
 		RoomsApi.addRoom({
 			name: textRef.current?.value ?? '',
-			type: RoomType.TEMPORARY
+			type: RoomType.TEMPORARY,
+			members: newOwnersToAdd
 		})
 			.then(() => {
+				setContactsSelected({});
 				setCanCreateVirtualRoom(false);
 				setShowCreationModal(false);
 			})
@@ -80,7 +96,7 @@ const CreateVirtualRoomButton: FC<CreateVirtualRoomButtonProps> = ({
 					hideButton: true
 				});
 			});
-	}, [createSnackbar, errorSnackbar, setShowCreationModal]);
+	}, [contactsSelected, createSnackbar, errorSnackbar, setShowCreationModal]);
 
 	const createVirtualRoomTooltip = useMemo(() => {
 		if (nameError) return invalidNameString;
@@ -129,6 +145,15 @@ const CreateVirtualRoomButton: FC<CreateVirtualRoomButtonProps> = ({
 					onChange={handleOnChangeInput}
 					hasError={nameError}
 					description={nameError ? invalidNameCaption : ''}
+				/>
+				<Text overflow="break-word" size="small">
+					{addModeratorsDescription}
+				</Text>
+				<Padding bottom="1rem" />
+				<ModeratorsContactsSelection
+					contactsSelected={contactsSelected}
+					setContactSelected={setContactsSelected}
+					inputRef={contactInputRef}
 				/>
 			</Modal>
 		</>
