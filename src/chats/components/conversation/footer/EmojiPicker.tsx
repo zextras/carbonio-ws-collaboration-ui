@@ -20,6 +20,7 @@ import { Picker } from 'emoji-mart';
 import moment from 'moment-timezone';
 import styled from 'styled-components';
 
+import { MEETINGS_PATH } from '../../../../constants/appConstants';
 import { Emoji, Z_INDEX_RANK } from '../../../../types/generics';
 import { calcScaleDivisor } from '../../../../utils/styleUtils';
 
@@ -51,20 +52,21 @@ type EmojiPickerProps = {
 	onEmojiSelect: (emoji: Emoji) => void;
 	setShowEmojiPicker: Dispatch<SetStateAction<boolean>>;
 	emojiTimeoutRef?: MutableRefObject<NodeJS.Timeout | undefined>;
-	smallSize?: boolean;
 };
 
 const EmojiPicker: React.FC<EmojiPickerProps> = ({
 	onEmojiSelect,
 	setShowEmojiPicker,
-	emojiTimeoutRef,
-	smallSize = false
+	emojiTimeoutRef
 }) => {
-	const ref = useRef<HTMLDivElement>(null);
+	const pickerContainerRef = useRef<HTMLDivElement>(null);
+	const pickerRef = useRef<typeof Picker.prototype | null>(null);
+
+	const isInsideMeeting = useMemo(() => window.location.pathname.includes(MEETINGS_PATH), []);
 
 	const mouseEnterEvent = useCallback(() => {
 		if (setShowEmojiPicker) {
-			if (emojiTimeoutRef && emojiTimeoutRef.current) {
+			if (emojiTimeoutRef?.current) {
 				clearTimeout(emojiTimeoutRef.current);
 			}
 			setShowEmojiPicker(true);
@@ -81,10 +83,10 @@ const EmojiPicker: React.FC<EmojiPickerProps> = ({
 
 	useEffect(() => {
 		let refValue: HTMLDivElement | null = null;
-		if (ref.current) {
-			ref.current.addEventListener('mouseenter', mouseEnterEvent);
-			ref.current.addEventListener('mouseleave', mouseLeaveEvent);
-			refValue = ref.current;
+		if (pickerContainerRef.current) {
+			pickerContainerRef.current.addEventListener('mouseenter', mouseEnterEvent);
+			pickerContainerRef.current.addEventListener('mouseleave', mouseLeaveEvent);
+			refValue = pickerContainerRef.current;
 		}
 		return (): void => {
 			if (refValue) {
@@ -95,19 +97,26 @@ const EmojiPicker: React.FC<EmojiPickerProps> = ({
 	}, [setShowEmojiPicker, emojiTimeoutRef, mouseEnterEvent, mouseLeaveEvent]);
 
 	const scaleHeight = useMemo(
-		() => (smallSize ? 290 / calcScaleDivisor() : 435 / calcScaleDivisor()),
-		[smallSize]
+		() => (isInsideMeeting ? 290 / calcScaleDivisor() : 435 / calcScaleDivisor()),
+		[isInsideMeeting]
 	);
 
 	useEffect(() => {
-		// eslint-disable-next-line no-new
-		new Picker({ previewPosition: 'none', onEmojiSelect, data, ref, locale: moment.locale() });
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
+		pickerRef.current = new Picker({
+			previewPosition: 'none',
+			onEmojiSelect,
+			data,
+			ref: pickerContainerRef,
+			locale: moment.locale()
+		});
+		return (): void => {
+			pickerRef.current = null;
+		};
+	}, [onEmojiSelect]);
 
 	return (
 		<PickerWrapper
-			ref={ref}
+			ref={pickerContainerRef}
 			data-testid="emojiPicker"
 			height={`${scaleHeight}rem`}
 			width="22rem"

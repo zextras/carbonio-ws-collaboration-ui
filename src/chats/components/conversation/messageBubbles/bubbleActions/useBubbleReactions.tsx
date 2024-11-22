@@ -62,7 +62,10 @@ const useBubbleReactions = (
 	const dropDownRef = useRef<HTMLDivElement>(null);
 
 	const onDropdownOpen = useCallback(() => setDropdownActive(true), [setDropdownActive]);
-	const onDropdownClose = useCallback(() => setDropdownActive(false), [setDropdownActive]);
+	const onDropdownClose = useCallback(() => {
+		setShowEmojiPicker(false);
+		setDropdownActive(false);
+	}, [setDropdownActive]);
 
 	const sendReaction = useCallback(
 		(emoji: string) => {
@@ -83,64 +86,75 @@ const useBubbleReactions = (
 		[setShowEmojiPicker]
 	);
 
+	const selectCustomReaction = useCallback(
+		(emoji: string) => {
+			sendReaction(emoji);
+			setShowEmojiPicker(false);
+		},
+		[sendReaction]
+	);
+
 	const emojiItems = useMemo(
 		() => [
 			{
 				id: 'emojis',
 				customComponent: (
 					<Container orientation="horizontal">
-						{map(ReactionType, (emoji) => (
-							<EmojiBox
-								background="gray6"
-								key={emoji}
-								data-testid={`reaction-${emoji}`}
-								$emoji={emoji}
-								$selected={myReaction === emoji}
-								onClick={() => sendReaction(emoji)}
-							/>
-						))}
-						<EmojiBox
-							background="gray6"
-							key="custom-reactions"
-							data-testid="custom-reactions"
-							onClick={openEmojiPicker}
-						>
-							<Icon icon="Plus" />
-						</EmojiBox>
+						{showEmojiPicker ? (
+							<CustomReactionPicker onEmojiSelect={selectCustomReaction} />
+						) : (
+							<>
+								{map(ReactionType, (emoji) => (
+									<EmojiBox
+										background="gray6"
+										key={emoji}
+										data-testid={`reaction-${emoji}`}
+										$emoji={emoji}
+										$selected={myReaction === emoji}
+										onClick={() => sendReaction(emoji)}
+									/>
+								))}
+								<EmojiBox
+									background="gray6"
+									key="custom-reactions"
+									data-testid="custom-reactions"
+									onClick={openEmojiPicker}
+								>
+									<Icon icon="Plus" />
+								</EmojiBox>
+							</>
+						)}
 					</Container>
 				),
 				padding: '0'
 			}
 		],
-		[myReaction, openEmojiPicker, sendReaction]
+		[myReaction, openEmojiPicker, selectCustomReaction, sendReaction, showEmojiPicker]
 	);
 
 	const ReactionsDropdown = useMemo(
 		() => (
-			<>
-				<Dropdown
-					data-testid={`reactionsDropdown-${message.id}`}
-					items={emojiItems}
-					onOpen={onDropdownOpen}
-					onClose={onDropdownClose}
-					disableAutoFocus
-					disableRestoreFocus
-					disablePortal
-					placement="top"
-					ref={dropDownRef}
-				>
-					<Button
-						icon="SmileOutline"
-						type="ghost"
-						size="small"
-						color="text"
-						onClick={(): null => null}
-					/>
-				</Dropdown>
-				{showEmojiPicker && <CustomReactionPicker onEmojiSelect={sendReaction} />}
-			</>
+			<Dropdown
+				data-testid={`reactionsDropdown-${message.id}`}
+				items={emojiItems}
+				onOpen={onDropdownOpen}
+				onClose={onDropdownClose}
+				disableAutoFocus
+				disableRestoreFocus
+				disablePortal
+				placement="top"
+				ref={dropDownRef}
+			>
+				<Button
+					icon="SmileOutline"
+					type="ghost"
+					size="small"
+					color="text"
+					onClick={(): null => null}
+				/>
+			</Dropdown>
 		),
-		[message.id, emojiItems, onDropdownOpen, onDropdownClose, showEmojiPicker, sendReaction]
+		[message.id, emojiItems, onDropdownOpen, onDropdownClose]
 	);
 	return {
 		ReactionsDropdown,
