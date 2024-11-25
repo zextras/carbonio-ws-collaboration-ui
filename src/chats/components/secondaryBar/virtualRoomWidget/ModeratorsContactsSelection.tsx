@@ -39,6 +39,10 @@ const CustomContainer = styled(Container)`
 	cursor: default;
 `;
 
+const CustomList = styled(List)`
+	padding-top: 0.5rem;
+`;
+
 type ModeratorContactsSelectionProps = {
 	contactsSelected: ContactSelected;
 	setContactSelected: Dispatch<SetStateAction<ContactSelected>>;
@@ -56,7 +60,7 @@ const ModeratorsContactsSelection = ({
 		'participantsList.noMatch.gal',
 		'There are no items that match this search in your company.'
 	);
-	const inputPlaceholder = t('modal.creation.inputPlaceholder', 'Start typing or pick an address');
+	const inputPlaceholder = t('meeting.virtual.modal.moderator.input', `Room's moderators`);
 
 	const [result, setResult] = useState<ContactInfo[]>([]);
 	const [chips, setChips] = useState<ChipItem<ContactInfo>[]>([]);
@@ -200,7 +204,7 @@ const ModeratorsContactsSelection = ({
 			return <Spinner />;
 		}
 		if (!error) {
-			return <List data-testid="list_moderators_selection">{items}</List>;
+			return <CustomList data-testid="list_moderators_selection">{items}</CustomList>;
 		}
 		return (
 			<CustomContainer padding="large">

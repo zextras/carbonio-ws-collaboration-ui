@@ -25,7 +25,11 @@ import { MeetingBe } from '../../../../types/network/models/meetingBeTypes';
 import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
 import { ContactInfo } from '../../../../types/network/soap/searchUsersByFeatureRequest';
 
+const createNewRoom = 'Create new Room';
 const virtualRoomName = 'New Virtual Room';
+const createNewVirtualRoom = 'Create new Virtual Room';
+const newVirtualRoomsName = 'New Virtual Room’s name*';
+
 const sessionUser = createMockUser({ id: 'sessionId', name: 'Session User' });
 
 const user1 = createMockUser({ id: 'user1', name: 'User 1' });
@@ -156,15 +160,15 @@ describe('VirtualRoomsButton', () => {
 		const button = screen.getByRole('button');
 		await user.click(button);
 
-		const createButton = await screen.findByRole('button', { name: 'Create new Room' });
+		const createButton = await screen.findByRole('button', { name: createNewRoom });
 		expect(createButton).toBeVisible();
 
 		await user.click(createButton);
 
-		const modalTitle = await screen.findByText('Create new Virtual Room');
+		const modalTitle = await screen.findByText(createNewVirtualRoom);
 		expect(modalTitle).toBeInTheDocument();
 
-		const textArea = await screen.findByText('New Virtual Room’s name*');
+		const textArea = await screen.findByText(newVirtualRoomsName);
 
 		await user.type(textArea, virtualRoomName);
 
@@ -184,15 +188,15 @@ describe('VirtualRoomsButton', () => {
 		const button = screen.getByRole('button');
 		await user.click(button);
 
-		const createButton = await screen.findByRole('button', { name: 'Create new Room' });
+		const createButton = await screen.findByRole('button', { name: createNewRoom });
 		expect(createButton).toBeVisible();
 
 		await user.click(createButton);
 
-		const modalTitle = await screen.findByText('Create new Virtual Room');
+		const modalTitle = await screen.findByText(createNewVirtualRoom);
 		expect(modalTitle).toBeInTheDocument();
 
-		const textArea = await screen.findByText('New Virtual Room’s name*');
+		const textArea = await screen.findByText(newVirtualRoomsName);
 
 		await user.type(textArea, virtualRoomName);
 
@@ -213,6 +217,83 @@ describe('VirtualRoomsButton', () => {
 				{ userId: contactUser1.id, owner: true },
 				{ userId: contactUser2.id, owner: true }
 			]
+		});
+	});
+
+	test('create virtual room by selecting and removing one moderator', async () => {
+		mockSearchUsersByFeatureRequest.mockReturnValue([contactUser1, contactUser2]);
+
+		const spyOnAddRoom = spyOnRoomsApi(RoomsApiToSpy.ADD_ROOM);
+		const { user } = setup(<VirtualRoomsButton expanded />);
+
+		const button = screen.getByRole('button');
+		await user.click(button);
+
+		const createButton = await screen.findByRole('button', { name: createNewRoom });
+		expect(createButton).toBeVisible();
+
+		await user.click(createButton);
+
+		const modalTitle = await screen.findByText(createNewVirtualRoom);
+		expect(modalTitle).toBeInTheDocument();
+
+		const textArea = await screen.findByText(newVirtualRoomsName);
+
+		await user.type(textArea, virtualRoomName);
+
+		const chipContactOne = await screen.findByText('User One');
+		const chipContactTwo = await screen.findByText('User Two');
+
+		await user.click(chipContactOne);
+		await user.click(chipContactTwo);
+
+		// removing chip
+		await user.click(chipContactOne);
+
+		const createRoomButton = screen.getByRole('button', { name: 'create' });
+		expect(createRoomButton).toBeEnabled();
+
+		await user.click(createRoomButton);
+		expect(spyOnAddRoom).toHaveBeenCalledWith({
+			name: virtualRoomName,
+			type: RoomType.TEMPORARY,
+			members: [{ userId: contactUser2.id, owner: true }]
+		});
+	});
+
+	test('create virtual room by typing one moderator name', async () => {
+		const spyOnAddRoom = spyOnRoomsApi(RoomsApiToSpy.ADD_ROOM);
+		const { user } = setup(<VirtualRoomsButton expanded />);
+
+		const button = screen.getByRole('button');
+		await user.click(button);
+
+		const createButton = await screen.findByRole('button', { name: createNewRoom });
+		expect(createButton).toBeVisible();
+
+		await user.click(createButton);
+
+		const modalTitle = await screen.findByText(createNewVirtualRoom);
+		expect(modalTitle).toBeInTheDocument();
+
+		const textArea = await screen.findByText(newVirtualRoomsName);
+		await user.type(textArea, virtualRoomName);
+
+		mockSearchUsersByFeatureRequest.mockReturnValueOnce([contactUser1]);
+		const moderatorInput = await screen.findByText("Room's moderators");
+		await user.type(moderatorInput, 'User One');
+
+		const chipContactOne = await screen.findByText('User One');
+		await user.click(chipContactOne);
+
+		const createRoomButton = screen.getByRole('button', { name: 'create' });
+		expect(createRoomButton).toBeEnabled();
+
+		await user.click(createRoomButton);
+		expect(spyOnAddRoom).toHaveBeenCalledWith({
+			name: virtualRoomName,
+			type: RoomType.TEMPORARY,
+			members: [{ userId: contactUser1.id, owner: true }]
 		});
 	});
 });
