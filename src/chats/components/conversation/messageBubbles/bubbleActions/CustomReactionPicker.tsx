@@ -41,7 +41,12 @@ const CustomReactionPicker: React.FC<EmojiPickerProps> = ({ onEmojiSelect }) => 
 	}, [sendCustomReaction]);
 
 	return (
-		<Container ref={pickerContainerRef} data-testid="emojiPicker" height="15rem" width="17.5rem" />
+		<Container
+			ref={pickerContainerRef}
+			data-testid="custom-reaction-picker"
+			height="15rem"
+			width="17.5rem"
+		/>
 	);
 };
 

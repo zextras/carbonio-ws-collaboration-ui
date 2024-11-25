@@ -60,8 +60,8 @@ const useBubbleReactions = (
 	const [popoverActive, setPopoverActive] = useState(false);
 	const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
-	const onDropdownOpen = useCallback(() => setPopoverActive(true), [setPopoverActive]);
-	const onDropdownClose = useCallback(() => {
+	const onPopoverOpen = useCallback(() => setPopoverActive(true), [setPopoverActive]);
+	const onPopoverClose = useCallback(() => {
 		setShowEmojiPicker(false);
 		setPopoverActive(false);
 	}, [setPopoverActive]);
@@ -129,20 +129,20 @@ const useBubbleReactions = (
 					type="ghost"
 					size="small"
 					color="text"
-					onClick={onDropdownOpen}
+					onClick={onPopoverOpen}
 				/>
 				<CustomPopover
 					open={popoverActive}
 					anchorEl={buttonRef}
 					placement="top"
-					onClose={onDropdownClose}
+					onClose={onPopoverClose}
 					styleAsModal
 				>
 					<Container orientation="horizontal">{popoverContent}</Container>
 				</CustomPopover>
 			</Container>
 		),
-		[onDropdownOpen, popoverActive, onDropdownClose, popoverContent]
+		[onPopoverOpen, popoverActive, onPopoverClose, popoverContent]
 	);
 
 	return {

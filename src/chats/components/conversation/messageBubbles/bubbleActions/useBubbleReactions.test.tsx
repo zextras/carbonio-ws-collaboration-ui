@@ -114,4 +114,19 @@ describe('Bubble Contextual Menu - other user messages', () => {
 		await user.click(reaction);
 		expect(spyOnSendChatMessageReaction).toHaveBeenCalledTimes(1);
 	});
+
+	test('Open custom reaction picker', async () => {
+		const { result } = renderHook(() => useBubbleReactions(simpleTextMessage), {
+			wrapper: ProvidersWrapper
+		});
+		const { user, rerender } = setup(result.current.ReactionsPopover);
+		const smileButton = screen.getByTestId(iconTestId);
+		await user.click(smileButton);
+		rerender(result.current.ReactionsPopover);
+		const customReactionButton = screen.getByTestId('custom-reactions');
+		await user.click(customReactionButton);
+		rerender(result.current.ReactionsPopover);
+		const customReactionPicker = screen.getByTestId('custom-reaction-picker');
+		expect(customReactionPicker).toBeInTheDocument();
+	});
 });
