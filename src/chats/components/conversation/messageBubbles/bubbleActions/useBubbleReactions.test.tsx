@@ -44,7 +44,7 @@ beforeEach(() => {
 	store.newMessage(simpleTextMessage);
 });
 
-describe.skip('Bubble Contextual Menu - other user messages', () => {
+describe('Bubble Contextual Menu - other user messages', () => {
 	test('Dropdown change visibility by clicking on smile icon', async () => {
 		const { result } = renderHook(() => useBubbleReactions(simpleTextMessage), {
 			wrapper: ProvidersWrapper
@@ -60,10 +60,11 @@ describe.skip('Bubble Contextual Menu - other user messages', () => {
 		const { result } = renderHook(() => useBubbleReactions(simpleTextMessage), {
 			wrapper: ProvidersWrapper
 		});
-		const { user } = setup(result.current.ReactionsPopover);
+		const { user, rerender } = setup(result.current.ReactionsPopover);
 		const smileButton = screen.getByTestId(iconTestId);
 		expect(result.current.reactionsPopoverActive).toBe(false);
 		await user.click(smileButton);
+		rerender(result.current.ReactionsPopover);
 		forEach(ReactionType, (reaction) => {
 			const reactionBox = screen.getByTestId(`reaction-${reaction}`);
 			expect(reactionBox).toBeInTheDocument();
@@ -78,11 +79,12 @@ describe.skip('Bubble Contextual Menu - other user messages', () => {
 		const { result } = renderHook(() => useBubbleReactions(simpleTextMessage), {
 			wrapper: ProvidersWrapper
 		});
-		const { user } = setup(result.current.ReactionsPopover);
+		const { user, rerender } = setup(result.current.ReactionsPopover);
 		const smileButton = screen.getByTestId(iconTestId);
 		expect(result.current.reactionsPopoverActive).toBe(false);
 		await user.click(smileButton);
 
+		rerender(result.current.ReactionsPopover);
 		const reaction = screen.getByTestId(`reaction-${ReactionType.THUMBS_UP}`);
 		await user.click(reaction);
 
@@ -100,11 +102,12 @@ describe.skip('Bubble Contextual Menu - other user messages', () => {
 		const { result } = renderHook(() => useBubbleReactions(simpleTextMessage), {
 			wrapper: ProvidersWrapper
 		});
-		const { user } = setup(result.current.ReactionsPopover);
+		const { user, rerender } = setup(result.current.ReactionsPopover);
 		const smileButton = screen.getByTestId(iconTestId);
 		expect(result.current.reactionsPopoverActive).toBe(false);
 		await user.click(smileButton);
 
+		rerender(result.current.ReactionsPopover);
 		const reaction = screen.getByTestId(`reaction-${ReactionType.THUMBS_UP}`);
 		expect(reaction).toHaveStyle('background-color: #abc6ed;');
 		// Remove reaction
