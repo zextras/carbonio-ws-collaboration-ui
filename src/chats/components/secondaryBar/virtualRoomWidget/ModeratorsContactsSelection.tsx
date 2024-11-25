@@ -79,6 +79,7 @@ const ModeratorsContactsSelection = ({
 			.then((response: SearchUsersByFeatureSoapResponse) => {
 				setLoading(false);
 				setResult(response);
+				if (size(response) === 0) setError(true);
 			})
 			.catch(() => {
 				setLoading(false);

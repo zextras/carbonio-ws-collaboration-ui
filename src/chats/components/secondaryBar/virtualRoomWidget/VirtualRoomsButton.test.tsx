@@ -268,7 +268,7 @@ describe('VirtualRoomsButton', () => {
 	});
 
 	test('create virtual room by selecting and removing one moderator', async () => {
-		mockSearchUsersByFeatureRequest.mockReturnValue([contactUser1, contactUser2]);
+		mockSearchUsersByFeatureRequest.mockReturnValueOnce([contactUser1, contactUser2]);
 
 		const spyOnAddRoom = spyOnRoomsApi(RoomsApiToSpy.ADD_ROOM);
 		const { user } = setup(<VirtualRoomsButton expanded />);
@@ -359,6 +359,30 @@ describe('VirtualRoomsButton', () => {
 
 		const contactList = await screen.findByTestId('list_moderators_selection');
 		expect(contactList).toBeInTheDocument();
+
+		const createRoomButton = screen.getByRole('button', { name: 'create' });
+		expect(createRoomButton).toBeDisabled();
+	});
+
+	test('Search user returns no matches', async () => {
+		mockSearchUsersByFeatureRequest.mockReturnValue([]);
+		const { user } = setup(<VirtualRoomsButton expanded />);
+
+		const button = screen.getByRole('button');
+		await user.click(button);
+
+		const createButton = await screen.findByRole('button', { name: createNewRoom });
+		expect(createButton).toBeVisible();
+
+		await user.click(createButton);
+
+		const moderatorInput = await screen.findByText("Room's moderators");
+		await user.type(moderatorInput, 'User');
+
+		const noMatch = await screen.findByText(
+			'There are no items that match this search in your company.'
+		);
+		expect(noMatch).toBeInTheDocument();
 
 		const createRoomButton = screen.getByRole('button', { name: 'create' });
 		expect(createRoomButton).toBeDisabled();
