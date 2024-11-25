@@ -179,6 +179,53 @@ describe('VirtualRoomsButton', () => {
 		expect(spyOnAddRoom).toHaveBeenCalled();
 	});
 
+	test('Try to create a room without a name', async () => {
+		const { user } = setup(<VirtualRoomsButton expanded />);
+
+		const button = screen.getByRole('button');
+		await user.click(button);
+
+		const createButton = await screen.findByRole('button', { name: createNewRoom });
+		expect(createButton).toBeVisible();
+
+		await user.click(createButton);
+
+		const modalTitle = await screen.findByText(createNewVirtualRoom);
+		expect(modalTitle).toBeInTheDocument();
+
+		const textArea = await screen.findByText(newVirtualRoomsName);
+
+		await user.type(textArea, 'a{backspace}');
+
+		const createRoomButton = screen.getByRole('button', { name: 'create' });
+		expect(createRoomButton).toBeDisabled();
+	});
+
+	test('Try to create a room without a name too long', async () => {
+		const { user } = setup(<VirtualRoomsButton expanded />);
+
+		const button = screen.getByRole('button');
+		await user.click(button);
+
+		const createButton = await screen.findByRole('button', { name: createNewRoom });
+		expect(createButton).toBeVisible();
+
+		await user.click(createButton);
+
+		const modalTitle = await screen.findByText(createNewVirtualRoom);
+		expect(modalTitle).toBeInTheDocument();
+
+		const textArea = await screen.findByText(newVirtualRoomsName);
+
+		await user.type(
+			textArea,
+			'Lorem dolo ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'
+		);
+
+		const createRoomButton = screen.getByRole('button', { name: 'create' });
+		expect(createRoomButton).toBeDisabled();
+	});
+
 	test('create virtual room with 2 moderators', async () => {
 		mockSearchUsersByFeatureRequest.mockReturnValue([contactUser1, contactUser2]);
 

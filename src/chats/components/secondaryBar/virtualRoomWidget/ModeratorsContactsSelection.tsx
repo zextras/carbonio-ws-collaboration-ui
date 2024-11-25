@@ -31,7 +31,6 @@ import {
 	ContactInfo,
 	SearchUsersByFeatureSoapResponse
 } from '../../../../types/network/soap/searchUsersByFeatureRequest';
-import { Member } from '../../../../types/store/RoomTypes';
 import { ContactSelected } from '../../creationModal/ChatCreationContactsSelection';
 import ListParticipant from '../../creationModal/ListParticipant';
 
@@ -46,7 +45,6 @@ const CustomList = styled(List)`
 type ModeratorContactsSelectionProps = {
 	contactsSelected: ContactSelected;
 	setContactSelected: Dispatch<SetStateAction<ContactSelected>>;
-	members?: Member[];
 	inputRef: React.RefObject<HTMLInputElement>;
 };
 
@@ -118,20 +116,7 @@ const ModeratorsContactsSelection = ({
 		);
 	}, []);
 
-	const updateOwner = useCallback(
-		(id: string | undefined) => {
-			if (id) {
-				setContactSelected((contacts: ContactSelected) => ({
-					...contacts,
-					[id]: {
-						...contacts[id],
-						owner: !contacts[id].owner
-					}
-				}));
-			}
-		},
-		[setContactSelected]
-	);
+	const nooP = useCallback(() => false, []);
 
 	// update of chip aspect when contactsSelected changes
 	useEffect(() => {
@@ -145,7 +130,7 @@ const ModeratorsContactsSelection = ({
 				return chip;
 			})
 		);
-	}, [contactsSelected, updateOwner]);
+	}, [contactsSelected]);
 
 	const createChip = useCallback(
 		(item: ContactInfo): ChipItem<ContactInfo> => ({
@@ -177,14 +162,14 @@ const ModeratorsContactsSelection = ({
 							item={item}
 							selected={!!contactsSelected[item.id]}
 							onClickCb={onClickListItem}
-							updateOwner={updateOwner}
-							isOwner={() => false}
+							updateOwner={nooP}
+							isOwner={nooP}
 							canBeModerator={false}
 						/>
 					)}
 				</ListItem>
 			)),
-		[contactsSelected, onClickListItem, result, updateOwner]
+		[contactsSelected, nooP, onClickListItem, result]
 	);
 
 	const removeContactFromChip = useCallback(
