@@ -343,4 +343,24 @@ describe('VirtualRoomsButton', () => {
 			members: [{ userId: contactUser1.id, owner: true }]
 		});
 	});
+
+	test('Search user fails ', async () => {
+		jest.spyOn(console, 'error').mockImplementation();
+		mockSearchUsersByFeatureRequest.mockRejectedValue({ error: 'error' });
+		const { user } = setup(<VirtualRoomsButton expanded />);
+
+		const button = screen.getByRole('button');
+		await user.click(button);
+
+		const createButton = await screen.findByRole('button', { name: createNewRoom });
+		expect(createButton).toBeVisible();
+
+		await user.click(createButton);
+
+		const contactList = await screen.findByTestId('list_moderators_selection');
+		expect(contactList).toBeInTheDocument();
+
+		const createRoomButton = screen.getByRole('button', { name: 'create' });
+		expect(createRoomButton).toBeDisabled();
+	});
 });
