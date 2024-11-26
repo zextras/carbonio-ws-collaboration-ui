@@ -100,7 +100,7 @@ describe('Chat Creation Modal Contact Selector - search', () => {
 		await user.type(chipInput, contactUser1.displayName[0]);
 
 		// AutoCompleteRequest trigger an initial "Spinner" state and then render contact list
-		await screen.findByText('spinner');
+		await screen.findByTestId('spinner');
 		const list2 = await screen.findByTestId('list_creation_modal');
 		expect(list2).toBeVisible();
 		expect(list2.children).toHaveLength(1);
@@ -136,7 +136,7 @@ describe('Chat Creation Modal Contact Selector - search', () => {
 		const chipInput = await screen.findByTestId('chip_input_creation_modal');
 		await user.type(chipInput, contactUser1.displayName[0]);
 
-		await screen.findByText('spinner');
+		await screen.findByTestId('spinner');
 		const placeholderLabel = await screen.findByText(
 			'There are no items that match this search in your company.'
 		);
@@ -158,7 +158,7 @@ describe('Chat Creation Modal Contact Selector - search', () => {
 		);
 
 		// Initial AutoCompleteRequest trigger an initial "Spinner" state and then render contact list
-		await screen.findByText('spinner');
+		await screen.findByTestId('spinner');
 		const list = await screen.findByTestId('list_creation_modal');
 		expect(list).toBeVisible();
 		expect(list.children[0].children).toHaveLength(0);
@@ -168,7 +168,7 @@ describe('Chat Creation Modal Contact Selector - search', () => {
 		await user.type(chipInput, contactUser1.displayName[0]);
 
 		// AutoCompleteRequest trigger an initial "Spinner" state and then render the empty contact list
-		await screen.findByText('spinner');
+		await screen.findByTestId('spinner');
 		const list2 = await screen.findByTestId('list_creation_modal');
 		expect(list2).toBeVisible();
 		expect(list2.children[0].children).toHaveLength(0);
@@ -333,7 +333,7 @@ describe('Add participant Modal Contact Selector', () => {
 		await user.type(chipInput, contactUser2.displayName[0]);
 
 		// AutoCompleteRequest trigger an initial "Spinner" state and then render contact list
-		await screen.findByText('spinner');
+		await screen.findByTestId('spinner');
 		const list = await screen.findByTestId('list_creation_modal');
 		expect(list).toBeVisible();
 
