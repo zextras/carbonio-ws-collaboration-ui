@@ -107,7 +107,8 @@ const EmojiPicker: React.FC<EmojiPickerProps> = ({
 			onEmojiSelect,
 			data,
 			ref: pickerContainerRef,
-			locale: moment.locale()
+			locale: moment.locale(),
+			skinTonePosition: 'none'
 		});
 		return (): void => {
 			pickerRef.current = null;

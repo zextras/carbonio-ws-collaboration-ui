@@ -6,8 +6,9 @@
 
 import React, { ReactElement, useCallback, useMemo, useRef, useState } from 'react';
 
-import { Button, Container, Popover } from '@zextras/carbonio-design-system';
+import { Button, Container, Popover, Tooltip } from '@zextras/carbonio-design-system';
 import { map } from 'lodash';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import CustomReactionPicker from './CustomReactionPicker';
@@ -51,6 +52,9 @@ const useBubbleReactions = (
 	reactionsPopoverRef: React.RefObject<HTMLDivElement>;
 } => {
 	const xmppClient = useStore(getXmppClient);
+	const [t] = useTranslation();
+	const reactionsLabel = t('tooltip.reactions', 'Reactions');
+	const moreReactionsLabel = t('tooltip.moreReactions', 'More reactions');
 
 	const myReaction = useStore((store) =>
 		getMyLastReaction(store, message.roomId, message.stanzaId)
@@ -108,41 +112,52 @@ const useBubbleReactions = (
 						$selected={myReaction === emoji}
 					/>
 				))}
-				<EmojiButton
-					key="custom-reactions"
-					data-testid="custom-reactions"
-					icon="Plus"
-					color="gray6"
-					labelColor="text"
-					onClick={openEmojiPicker}
-				/>
+				<Tooltip label={moreReactionsLabel} placement="top">
+					<EmojiButton
+						key="custom-reactions"
+						data-testid="custom-reactions"
+						icon="Plus"
+						color="gray6"
+						labelColor="text"
+						onClick={openEmojiPicker}
+					/>
+				</Tooltip>
 			</>
 		);
-	}, [myReaction, openEmojiPicker, selectCustomReaction, sendReaction, showEmojiPicker]);
+	}, [
+		moreReactionsLabel,
+		myReaction,
+		openEmojiPicker,
+		selectCustomReaction,
+		sendReaction,
+		showEmojiPicker
+	]);
 
 	const ReactionsPopover = useMemo(
 		() => (
-			<Container width="fit" height="fit">
-				<Button
-					ref={buttonRef}
-					icon="SmileOutline"
-					type="ghost"
-					size="small"
-					color="text"
-					onClick={onPopoverOpen}
-				/>
-				<CustomPopover
-					open={popoverActive}
-					anchorEl={buttonRef}
-					placement="top"
-					onClose={onPopoverClose}
-					styleAsModal
-				>
-					<Container orientation="horizontal">{popoverContent}</Container>
-				</CustomPopover>
-			</Container>
+			<Tooltip label={reactionsLabel} placement="left">
+				<Container width="fit" height="fit">
+					<Button
+						ref={buttonRef}
+						icon="SmileOutline"
+						type="ghost"
+						size="small"
+						color="text"
+						onClick={onPopoverOpen}
+					/>
+					<CustomPopover
+						open={popoverActive}
+						anchorEl={buttonRef}
+						placement="top"
+						onClose={onPopoverClose}
+						styleAsModal
+					>
+						<Container orientation="horizontal">{popoverContent}</Container>
+					</CustomPopover>
+				</Container>
+			</Tooltip>
 		),
-		[onPopoverOpen, popoverActive, onPopoverClose, popoverContent]
+		[reactionsLabel, onPopoverOpen, popoverActive, onPopoverClose, popoverContent]
 	);
 
 	return {

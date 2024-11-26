@@ -33,7 +33,11 @@ const CustomReactionPicker: React.FC<EmojiPickerProps> = ({ onEmojiSelect }) => 
 			data,
 			ref: pickerContainerRef,
 			locale: moment.locale(),
-			perLine: 7
+			maxFrequentRows: 1,
+			perLine: 7,
+			navPosition: 'none',
+			noCountryFlags: true,
+			skinTonePosition: 'none'
 		});
 		return (): void => {
 			pickerRef.current = null;
