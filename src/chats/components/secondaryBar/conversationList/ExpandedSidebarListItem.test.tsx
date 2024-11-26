@@ -19,7 +19,6 @@ import {
 	createMockTextMessage,
 	createMockUser
 } from '../../../../tests/createMock';
-import { xmppClient } from '../../../../tests/mockedXmppClient';
 import { composingStanza, pausedStanza } from '../../../../tests/mocks/XMPPStanza';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
@@ -168,6 +167,7 @@ beforeEach(() => {
 	store.addRoom(mockedOneToOne);
 	store.setCapabilities(createMockCapabilityList({ canSeeMessageReads: true }));
 });
+
 describe('Expanded sidebar list item', () => {
 	describe('Group List Item', () => {
 		test('User cannot see message reads - I sent a message but it is in pending state', async () => {
@@ -306,13 +306,16 @@ describe('Expanded sidebar list item', () => {
 			setup(<ExpandedSidebarListItem roomId={mockedGroup.id} />);
 			act(() => {
 				const composingMessage = composingStanza(mockedGroup.id, user4Be.id);
-				onComposingMessageStanza.call(xmppClient, composingMessage);
+				onComposingMessageStanza.call(useStore.getState().connections.xmppClient, composingMessage);
 			});
 			expect(screen.getByText(`${user4Be.name} is typing...`));
 			jest.advanceTimersByTime(3000);
 			act(() => {
 				const stopWritingMessage = pausedStanza(mockedGroup.id, user4Be.id);
-				onComposingMessageStanza.call(xmppClient, stopWritingMessage);
+				onComposingMessageStanza.call(
+					useStore.getState().connections.xmppClient,
+					stopWritingMessage
+				);
 			});
 			jest.advanceTimersByTime(7000);
 			const ackIcon = screen.getByTestId(iconDoneAll);
@@ -379,13 +382,16 @@ describe('Expanded sidebar list item', () => {
 			setup(<ExpandedSidebarListItem roomId={mockedOneToOne.id} />);
 			act(() => {
 				const composingMessage = composingStanza(mockedOneToOne.id, user2Be.id);
-				onComposingMessageStanza.call(xmppClient, composingMessage);
+				onComposingMessageStanza.call(useStore.getState().connections.xmppClient, composingMessage);
 			});
 			expect(screen.getByText(`${user2Be.name} is typing...`));
 			jest.advanceTimersByTime(3000);
 			act(() => {
 				const stopWritingMessage = pausedStanza(mockedOneToOne.id, user2Be.id);
-				onComposingMessageStanza.call(xmppClient, stopWritingMessage);
+				onComposingMessageStanza.call(
+					useStore.getState().connections.xmppClient,
+					stopWritingMessage
+				);
 			});
 			jest.advanceTimersByTime(7000);
 			const ackIcon = screen.getByTestId(iconDoneAll);

@@ -6,9 +6,9 @@
 import React from 'react';
 
 import { screen } from '@testing-library/react';
+import * as ReactRouter from 'react-router';
 
 import WhoIsSpeaking from './WhoIsSpeaking';
-import { useParams } from '../../../../__mocks__/react-router';
 import useStore from '../../../store/Store';
 import {
 	createMockMeeting,
@@ -46,14 +46,17 @@ const user1Participant: MeetingParticipant = createMockParticipants({
 	userId: user1.id,
 	sessionId: 'sessionIdUser1'
 });
+
 const user3Participant: MeetingParticipant = createMockParticipants({
 	userId: user3.id,
 	sessionId: 'sessionIdUser3'
 });
+
 const user2Participant: MeetingParticipant = createMockParticipants({
 	userId: user2.id,
 	sessionId: 'sessionIdUser2'
 });
+
 const meeting: MeetingBe = createMockMeeting({
 	roomId: room.id,
 	participants: [user1Participant, user2Participant, user3Participant]
@@ -87,7 +90,8 @@ const setupActiveMeeting = (): void => {
 
 describe('Who is speaking', () => {
 	it('has to be rendered correctly - central tile is a video', () => {
-		useParams.mockReturnValue({ meetingId: meeting.id });
+		const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
+		spyUseParams.mockReturnValue({ meetingId: meeting.id });
 		setupActiveMeeting();
 		setup(<WhoIsSpeaking centralTile={centralTileVideo} />);
 
@@ -96,7 +100,8 @@ describe('Who is speaking', () => {
 	});
 
 	it('has to be rendered correctly - central tile is a screen', () => {
-		useParams.mockReturnValue({ meetingId: meeting.id });
+		const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
+		spyUseParams.mockReturnValue({ meetingId: meeting.id });
 		setupActiveMeeting();
 		setup(<WhoIsSpeaking centralTile={centralTileScreen} />);
 

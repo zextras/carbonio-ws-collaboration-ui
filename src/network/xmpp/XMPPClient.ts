@@ -29,7 +29,7 @@ import { RoomsApi } from '../index';
 const jabberData = 'jabber:x:data';
 
 class XMPPClient implements IXMPPClient {
-	private xmppConnection: XMPPConnection;
+	public xmppConnection: XMPPConnection;
 
 	constructor() {
 		this.xmppConnection = new XMPPConnection(() => {

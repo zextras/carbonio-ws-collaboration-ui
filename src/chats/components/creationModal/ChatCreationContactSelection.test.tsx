@@ -53,7 +53,6 @@ describe('Chat Creation Modal Contact Selector - search', () => {
 	test('All elements are rendered', async () => {
 		const { result } = renderHook(() => useStore());
 		act(() => result.current.setCapabilities(createMockCapabilityList({ maxGroupMembers: 3 })));
-		mockSearchUsersByFeatureRequest.mockReturnValueOnce([]);
 
 		setup(
 			<ChatCreationContactsSelection
@@ -116,6 +115,7 @@ describe('Chat Creation Modal Contact Selector - search', () => {
 	test('Search user fails', async () => {
 		const { result } = renderHook(() => useStore());
 		act(() => result.current.setCapabilities(createMockCapabilityList({ maxGroupMembers: 3 })));
+		mockSearchUsersByFeatureRequest.mockReturnValue([]);
 		mockSearchUsersByFeatureRequest.mockReturnValueOnce([contactUser1, contactUser2]);
 
 		const { user } = setup(
@@ -285,8 +285,6 @@ describe('Chat Creation Modal Contact Selector - search', () => {
 
 describe('Add participant Modal Contact Selector', () => {
 	test('All elements are rendered', async () => {
-		mockSearchUsersByFeatureRequest.mockReturnValue([]);
-
 		setup(
 			<ChatCreationContactsSelection
 				contactsSelected={{}}
@@ -350,6 +348,7 @@ describe('Add participant Modal Contact Selector', () => {
 	test.each(memberLimits)(
 		'Check limit of member to add, limit is %s',
 		async (k, limit, stringToCheck) => {
+			mockSearchUsersByFeatureRequest.mockReturnValue([]);
 			const { result } = renderHook(() => useStore());
 			act(() =>
 				result.current.setCapabilities(createMockCapabilityList({ maxGroupMembers: limit }))

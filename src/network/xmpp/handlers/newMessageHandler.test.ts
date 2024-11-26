@@ -9,7 +9,6 @@ import { size } from 'lodash';
 import { onNewMessageStanza } from './newMessageHandler';
 import useStore from '../../../store/Store';
 import { createMockMessageFastening, createMockTextMessage } from '../../../tests/createMock';
-import { mockedReadMessage, xmppClient } from '../../../tests/mockedXmppClient';
 import {
 	DateMessage,
 	FasteningAction,
@@ -72,7 +71,7 @@ describe('XMPP newMessageHandler', () => {
 		// A new text message arrives
 		const message = createMockTextMessage({ text: 'Hi!' });
 		const messageXMPP = createXMPPTextMessage(message);
-		onNewMessageStanza.call(xmppClient, messageXMPP);
+		onNewMessageStanza.call(useStore.getState().connections.xmppClient, messageXMPP);
 
 		// Check if information are stored correctly
 		const store = useStore.getState();
@@ -92,7 +91,7 @@ describe('XMPP newMessageHandler', () => {
 	test('New replied message arrives', () => {
 		const info = createMockTextMessage({ text: 'Hi!', replyTo: 'anotherStanzaId' });
 		const message = createXMPPTextMessage(info);
-		onNewMessageStanza.call(xmppClient, message);
+		onNewMessageStanza.call(useStore.getState().connections.xmppClient, message);
 
 		// Check if information are stored correctly
 		const store = useStore.getState();
@@ -115,7 +114,7 @@ describe('XMPP newMessageHandler', () => {
 			originalStanzaId: 'stanzaId'
 		});
 		const deletionFasteningXMPP = createXMPPFasteningMessage(deletionFastening);
-		onNewMessageStanza.call(xmppClient, deletionFasteningXMPP);
+		onNewMessageStanza.call(useStore.getState().connections.xmppClient, deletionFasteningXMPP);
 
 		// Check if information are stored correctly
 		const store = useStore.getState();
@@ -134,7 +133,7 @@ describe('XMPP newMessageHandler', () => {
 			value: 'new text'
 		});
 		const editFasteningXMPP = createXMPPFasteningMessage(editFastening);
-		onNewMessageStanza.call(xmppClient, editFasteningXMPP);
+		onNewMessageStanza.call(useStore.getState().connections.xmppClient, editFasteningXMPP);
 
 		// Check if information are stored correctly
 		const store = useStore.getState();
@@ -146,9 +145,11 @@ describe('XMPP newMessageHandler', () => {
 	});
 
 	test('readMessage is not called for my own text messages', () => {
+		const { xmppClient } = useStore.getState().connections;
+		const spyOnReadMessage = jest.spyOn(xmppClient, 'readMessage');
 		const message = createMockTextMessage({ text: 'Hi!' });
 		const messageXMPP = createXMPPTextMessage(message);
 		onNewMessageStanza.call(xmppClient, messageXMPP);
-		expect(mockedReadMessage).not.toHaveBeenCalled();
+		expect(spyOnReadMessage).not.toHaveBeenCalled();
 	});
 });

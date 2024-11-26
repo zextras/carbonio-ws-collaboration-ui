@@ -12,9 +12,13 @@ import {
 	createMockRoom,
 	createMockTextMessage
 } from '../../tests/createMock';
-import { fetchResponse } from '../../tests/mocks/global';
+import { spyOnFetch } from '../../tests/jest-env-setup';
+import { mockedUuid } from '../../tests/mocks/global';
+import { RequestType } from '../../types/network/apis/IBaseAPI';
+import { MeetingType } from '../../types/network/models/meetingBeTypes';
 import { RoomType } from '../../types/store/RoomTypes';
 import { dateToISODate } from '../../utils/dateUtils';
+import * as FetchUtils from '../../utils/FetchUtils';
 import { getTagElement } from '../xmpp/utility/decodeStanza';
 import HistoryAccumulator from '../xmpp/utility/HistoryAccumulator';
 import { textMessageFromHistory } from '../xmpp/xmppMessageExamples';
@@ -27,23 +31,13 @@ describe('Rooms API', () => {
 	test('listRooms is called correctly', async () => {
 		// Send listRooms request
 		const room = createMockRoom({ id: 'room0' });
-		fetchResponse.mockResolvedValueOnce([room]);
+		spyOnFetch.mockResolvedValueOnce([room]);
 		await roomsApi.listRooms(true, true);
 
-		// Set appropriate headers
-		const headers = new Headers();
-		headers.append(contentType, applicationJson);
-
-		// Check if fetch is called with the correct parameters
-		expect(global.fetch).toHaveBeenCalledWith(
-			`/services/chats/rooms?extraFields=members&extraFields=settings`,
-			{
-				method: 'GET',
-				headers,
-				body: undefined
-			}
+		expect(spyOnFetch).toHaveBeenCalledWith(
+			'rooms?extraFields=members&extraFields=settings',
+			RequestType.GET
 		);
-
 		// Check if store is correctly updated
 		const store = useStore.getState();
 		expect(store.rooms[room.id]).toEqual(room);
@@ -58,60 +52,32 @@ describe('Rooms API', () => {
 			type: room.type,
 			members: []
 		};
-		fetchResponse.mockResolvedValueOnce(room);
+
 		await roomsApi.addRoom(roomToAdd);
 
-		// Set appropriate headers
-		const headers = new Headers();
-		headers.append(contentType, applicationJson);
-
-		// Check if fetch is called with the correct parameters
-		expect(global.fetch).toHaveBeenNthCalledWith(1, `/services/chats/rooms`, {
-			method: 'POST',
-			headers,
-			body: JSON.stringify(roomToAdd)
+		expect(spyOnFetch).toHaveBeenCalledWith('rooms', RequestType.POST, roomToAdd);
+		expect(spyOnFetch).toHaveBeenLastCalledWith('meetings', RequestType.POST, {
+			meetingType: MeetingType.PERMANENT,
+			name: ''
 		});
-		expect(global.fetch).toHaveBeenNthCalledWith(
-			2,
-			`/services/chats/meetings`,
-			expect.objectContaining({ method: 'POST' })
-		);
 	});
 
 	test('getRoom is called correctly', async () => {
 		// Send getRoom request
 		const room = createMockRoom({ id: 'room0' });
-		fetchResponse.mockResolvedValueOnce(room);
+		spyOnFetch.mockResolvedValueOnce(room);
 		await roomsApi.getRoom(room.id);
 
-		// Set appropriate headers
-		const headers = new Headers();
-		headers.append(contentType, applicationJson);
-
-		// Check if fetch is called with the correct parameters
-		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/rooms/room0`, {
-			method: 'GET',
-			headers,
-			body: undefined
-		});
+		expect(spyOnFetch).toHaveBeenCalledWith('rooms/room0', RequestType.GET);
 	});
 
 	test('updateRoom is called correctly', async () => {
 		// Send updateRoom request
 		const room = createMockRoom({ id: 'room0', name: 'new name' });
-		fetchResponse.mockResolvedValueOnce(room);
+		spyOnFetch.mockResolvedValueOnce(room);
 		await roomsApi.updateRoom(room.id, { name: 'new name' });
 
-		// Set appropriate headers
-		const headers = new Headers();
-		headers.append(contentType, applicationJson);
-
-		// Check if fetch is called with the correct parameters
-		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/rooms/room0`, {
-			method: 'PUT',
-			headers,
-			body: JSON.stringify({ name: 'new name' })
-		});
+		expect(spyOnFetch).toHaveBeenCalledWith('rooms/room0', RequestType.PUT, { name: 'new name' });
 	});
 
 	test('deleteRoom is called correctly', async () => {
@@ -119,16 +85,7 @@ describe('Rooms API', () => {
 		// Send deleteRoom request
 		await roomsApi.deleteRoom(room.id);
 
-		// Set appropriate headers
-		const headers = new Headers();
-		headers.append(contentType, applicationJson);
-
-		// Check if fetch is called with the correct parameters
-		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/rooms/${room.id}`, {
-			method: 'DELETE',
-			headers,
-			body: undefined
-		});
+		expect(spyOnFetch).toHaveBeenCalledWith(`rooms/${room.id}`, RequestType.DELETE);
 	});
 
 	test('deleteRoomAndMeeting without an associated meeting is called correctly', async () => {
@@ -136,16 +93,7 @@ describe('Rooms API', () => {
 		// Send deleteRoom request
 		await roomsApi.deleteRoomAndMeeting(room.id);
 
-		// Set appropriate headers
-		const headers = new Headers();
-		headers.append(contentType, applicationJson);
-
-		// Check if fetch is called with the correct parameters
-		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/rooms/${room.id}`, {
-			method: 'DELETE',
-			headers,
-			body: undefined
-		});
+		expect(spyOnFetch).toHaveBeenCalledWith(`rooms/${room.id}`, RequestType.DELETE);
 	});
 
 	test('deleteRoomAndMeeting with an associated meeting is called correctly', async () => {
@@ -155,27 +103,14 @@ describe('Rooms API', () => {
 		// Send deleteRoom request
 		await roomsApi.deleteRoomAndMeeting(room.id);
 
-		// Set appropriate headers
-		const headers = new Headers();
-		headers.append(contentType, applicationJson);
-
-		// Check if fetch is called with the correct parameters
-		expect(global.fetch).toHaveBeenNthCalledWith(
-			1,
-			`/services/chats/meetings/${meeting.id}`,
-			expect.objectContaining({ method: 'DELETE' })
-		);
-
-		expect(global.fetch).toHaveBeenNthCalledWith(2, `/services/chats/rooms/${room.id}`, {
-			method: 'DELETE',
-			headers,
-			body: undefined
-		});
+		expect(spyOnFetch).toHaveBeenNthCalledWith(1, `meetings/${meeting.id}`, RequestType.DELETE);
+		expect(spyOnFetch).toHaveBeenNthCalledWith(2, `rooms/${room.id}`, RequestType.DELETE);
 	});
 
 	test('getURLRoomPicture is called correctly', () => {
 		const room = createMockRoom({ id: 'roomId', name: 'new name' });
 		const url = roomsApi.getURLRoomPicture(room.id);
+
 		expect(url).toEqual(`http://localhost/services/chats/rooms/roomId/picture`);
 	});
 
@@ -183,19 +118,13 @@ describe('Rooms API', () => {
 		// Send getUserPicture request
 		await roomsApi.getRoomPicture('roomId');
 
-		// Set appropriate headers
-		const headers = new Headers();
-		headers.append(contentType, applicationJson);
-
-		// Check if fetch is called with the correct parameters
-		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/rooms/roomId/picture`, {
-			headers,
-			method: 'GET',
-			body: undefined
-		});
+		expect(spyOnFetch).toHaveBeenCalledWith(`rooms/roomId/picture`, RequestType.GET);
 	});
 
 	test('updateRoomPicture is called correctly', async () => {
+		const spyOnUploadFileFetchAPI = jest
+			.spyOn(FetchUtils, 'uploadFileFetchAPI')
+			.mockResolvedValue(true);
 		// Send updateRoomPicture request
 		const testFile = new File([], 'image.png', { type: 'image/png' });
 		await roomsApi.updateRoomPicture('roomId', testFile);
@@ -205,12 +134,11 @@ describe('Rooms API', () => {
 		headers.append('fileName', '\\u0069\\u006d\\u0061\\u0067\\u0065\\u002e\\u0070\\u006e\\u0067'); // Unicode of 'image.png'
 		headers.append('mimeType', testFile.type);
 
-		// Check if fetch is called with the correct parameters
-		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/rooms/roomId/picture`, {
-			method: 'PUT',
-			headers,
-			body: new ArrayBuffer(0)
-		});
+		expect(spyOnUploadFileFetchAPI).toHaveBeenCalledWith(
+			'rooms/roomId/picture',
+			RequestType.PUT,
+			testFile
+		);
 	});
 
 	test('updateRoomPicture is called with a file too large', async () => {
@@ -222,87 +150,42 @@ describe('Rooms API', () => {
 		Object.defineProperty(testFile, 'size', { value: 1024 * 1024 + 1 });
 
 		expect(roomsApi.updateRoomPicture('roomId', testFile)).rejects.toThrowError('File too large');
-		expect(global.fetch).not.toHaveBeenCalled();
+		expect(spyOnFetch).not.toHaveBeenCalled();
 	});
 
 	test('deleteRoomPicture is called correctly', async () => {
 		// Send deleteRoomPicture request
 		await roomsApi.deleteRoomPicture('roomId');
 
-		// Set appropriate headers
-		const headers = new Headers();
-		headers.append(contentType, applicationJson);
-
-		// Check if fetch is called with the correct parameters
-		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/rooms/roomId/picture`, {
-			headers,
-			method: 'DELETE',
-			body: undefined
-		});
+		expect(spyOnFetch).toHaveBeenCalledWith(`rooms/roomId/picture`, RequestType.DELETE);
 	});
 
 	test('muteRoomNotification is called correctly', async () => {
 		// Send muteRoomNotification request
 		await roomsApi.muteRoomNotification('roomId');
 
-		// Set appropriate headers
-		const headers = new Headers();
-		headers.append(contentType, applicationJson);
-
-		// Check if fetch is called with the correct parameters
-		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/rooms/roomId/mute`, {
-			method: 'PUT',
-			headers,
-			body: undefined
-		});
+		expect(spyOnFetch).toHaveBeenCalledWith(`rooms/roomId/mute`, RequestType.PUT);
 	});
 
 	test('unmuteRoomNotification is called correctly', async () => {
 		// Send unmuteRoomNotification request
 		await roomsApi.unmuteRoomNotification('roomId');
 
-		// Set appropriate headers
-		const headers = new Headers();
-		headers.append(contentType, applicationJson);
-
-		// Check if fetch is called with the correct parameters
-		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/rooms/roomId/mute`, {
-			method: 'DELETE',
-			headers,
-			body: undefined
-		});
+		expect(spyOnFetch).toHaveBeenCalledWith(`rooms/roomId/mute`, RequestType.DELETE);
 	});
 
 	test('clearRoomHistory is called correctly', async () => {
 		// Send clearRoomHistory request
 		await roomsApi.clearRoomHistory('roomId');
 
-		// Set appropriate headers
-		const headers = new Headers();
-		headers.append(contentType, applicationJson);
-
-		// Check if fetch is called with the correct parameters
-		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/rooms/roomId/clear`, {
-			method: 'PUT',
-			headers,
-			body: undefined
-		});
+		expect(spyOnFetch).toHaveBeenCalledWith(`rooms/roomId/clear`, RequestType.PUT);
 	});
 
 	test('getRoomMembers is called correctly', async () => {
 		// Send getRoomMembers request
 		await roomsApi.getRoomMembers('roomId');
 
-		// Set appropriate headers
-		const headers = new Headers();
-		headers.append(contentType, applicationJson);
-
-		// Check if fetch is called with the correct parameters
-		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/rooms/roomId/members`, {
-			method: 'GET',
-			headers,
-			body: undefined
-		});
+		expect(spyOnFetch).toHaveBeenCalledWith(`rooms/roomId/members`, RequestType.GET);
 	});
 
 	test('addRoomMember is called correctly', async () => {
@@ -316,16 +199,7 @@ describe('Rooms API', () => {
 		];
 		await roomsApi.addRoomMembers('roomId', member);
 
-		// Set appropriate headers
-		const headers = new Headers();
-		headers.append(contentType, applicationJson);
-
-		// Check if fetch is called with the correct parameters
-		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/rooms/roomId/members`, {
-			method: 'POST',
-			headers,
-			body: JSON.stringify(member)
-		});
+		expect(spyOnFetch).toHaveBeenCalledWith(`rooms/roomId/members`, RequestType.POST, member);
 	});
 
 	test('deleteRoomMember is called correctly', async () => {
@@ -336,28 +210,14 @@ describe('Rooms API', () => {
 		const headers = new Headers();
 		headers.append(contentType, applicationJson);
 
-		// Check if fetch is called with the correct parameters
-		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/rooms/roomId/members/userId`, {
-			method: 'DELETE',
-			headers,
-			body: undefined
-		});
+		expect(spyOnFetch).toHaveBeenCalledWith(`rooms/roomId/members/userId`, RequestType.DELETE);
 	});
 
 	test('promoteRoomMember is called correctly', async () => {
 		// Send promoteRoomMember request
 		await roomsApi.promoteRoomMember('roomId', 'userId');
 
-		// Set appropriate headers
-		const headers = new Headers();
-		headers.append(contentType, applicationJson);
-
-		// Check if fetch is called with the correct parameters
-		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/rooms/roomId/members/userId/owner`, {
-			method: 'PUT',
-			headers,
-			body: undefined
-		});
+		expect(spyOnFetch).toHaveBeenCalledWith(`rooms/roomId/members/userId/owner`, RequestType.PUT);
 	});
 
 	test('demotesRoomMember is called correctly', async () => {
@@ -368,73 +228,52 @@ describe('Rooms API', () => {
 		const headers = new Headers();
 		headers.append(contentType, applicationJson);
 
-		// Check if fetch is called with the correct parameters
-		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/rooms/roomId/members/userId/owner`, {
-			method: 'DELETE',
-			headers,
-			body: undefined
-		});
+		expect(spyOnFetch).toHaveBeenCalledWith(
+			`rooms/roomId/members/userId/owner`,
+			RequestType.DELETE
+		);
 	});
 
 	test('getRoomAttachments is called correctly', async () => {
 		// Send getRoomAttachments request
 		await roomsApi.getRoomAttachments('roomId');
 
-		// Set appropriate headers
-		const headers = new Headers();
-		headers.append(contentType, applicationJson);
-
-		// Check if fetch is called with the correct parameters
-		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/rooms/roomId/attachments`, {
-			headers,
-			method: 'GET',
-			body: undefined
-		});
+		expect(spyOnFetch).toHaveBeenCalledWith(`rooms/roomId/attachments`, RequestType.GET);
 	});
 
 	test('getRoomAttachments is called correctly with params', async () => {
 		// Send getRoomAttachments request
 		await roomsApi.getRoomAttachments('roomId', 3, 'filter');
 
-		// Set appropriate headers
-		const headers = new Headers();
-		headers.append(contentType, applicationJson);
-
-		// Check if fetch is called with the correct parameters
-		expect(global.fetch).toHaveBeenCalledWith(
-			`/services/chats/rooms/roomId/attachments?itemsNumber=3&extraFields=filter`,
-			{
-				headers,
-				method: 'GET',
-				body: undefined
-			}
+		expect(spyOnFetch).toHaveBeenCalledWith(
+			`rooms/roomId/attachments?itemsNumber=3&extraFields=filter`,
+			RequestType.GET
 		);
 	});
 
 	test('addRoomAttachment is called correctly', async () => {
+		const spyOnUploadFileFetchAPI = jest
+			.spyOn(FetchUtils, 'uploadFileFetchAPI')
+			.mockImplementation(() => Promise.resolve());
 		// Send addRoomAttachments request
 		const testFile = new File([], 'file.pdf', { type: applicationPdf });
 		const { signal } = new AbortController();
 		const area = '0x0';
 		await roomsApi.addRoomAttachment('roomId', testFile, { area }, signal);
 
-		// Set appropriate headers
-		const headers = new Headers();
-		headers.append('fileName', '\\u0066\\u0069\\u006c\\u0065\\u002e\\u0070\\u0064\\u0066'); // Unicode of 'file.pdf'
-		headers.append('mimeType', testFile.type);
-		headers.append('messageId', '00000000-0000-4000-8000-000000000000');
-		headers.append('area', area);
-
-		// Check if fetch is called with the correct parameters
-		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/rooms/roomId/attachments`, {
-			method: 'POST',
-			headers,
-			body: new ArrayBuffer(0),
-			signal
-		});
+		expect(spyOnUploadFileFetchAPI).toHaveBeenCalledWith(
+			'rooms/roomId/attachments',
+			RequestType.POST,
+			testFile,
+			signal,
+			{ area, messageId: mockedUuid }
+		);
 	});
 
 	test('addRoomAttachment is called correctly with optionalParams', async () => {
+		const spyOnUploadFileFetchAPI = jest
+			.spyOn(FetchUtils, 'uploadFileFetchAPI')
+			.mockImplementation(() => Promise.resolve());
 		// Send addRoomAttachments request
 		const testFile = new File([], 'file.pdf', { type: applicationPdf });
 		const { signal } = new AbortController();
@@ -446,72 +285,55 @@ describe('Rooms API', () => {
 			signal
 		);
 
-		// Set appropriate headers
-		const headers = new Headers();
-		headers.append('fileName', '\\u0066\\u0069\\u006c\\u0065\\u002e\\u0070\\u0064\\u0066'); // Unicode of 'file.pdf'
-		headers.append('mimeType', testFile.type);
-		headers.append(
-			'description',
-			'\\u0064\\u0065\\u0073\\u0063\\u0072\\u0069\\u0070\\u0074\\u0069\\u006f\\u006e'
-		); // Unicode of 'description'
-		headers.append('replyId', 'stanzaId');
-		headers.append('messageId', '00000000-0000-4000-8000-000000000000');
-		headers.append('area', area);
-
-		// Check if fetch is called with the correct parameters
-		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/rooms/roomId/attachments`, {
-			method: 'POST',
-			headers,
-			body: new ArrayBuffer(0),
-			signal
-		});
+		expect(spyOnUploadFileFetchAPI).toHaveBeenCalledWith(
+			'rooms/roomId/attachments',
+			RequestType.POST,
+			testFile,
+			signal,
+			{ description: 'description', replyId: 'stanzaId', area, messageId: mockedUuid }
+		);
 	});
 
 	test('addRoomAttachment is called correctly with placeholderRoom', async () => {
-		fetchResponse.mockResolvedValueOnce(createMockRoom({ id: 'room0' }));
-		fetchResponse.mockResolvedValueOnce(createMockMeeting({ id: 'meeting0' }));
+		spyOnFetch.mockResolvedValueOnce(createMockRoom({ id: 'room0' }));
+		spyOnFetch.mockResolvedValueOnce(createMockMeeting({ id: 'meeting0' }));
 		// Send addRoomAttachments request
 		const testFile = new File([], 'file.pdf', { type: applicationPdf });
 		const { signal } = new AbortController();
 		const area = '0x0';
 		await roomsApi.addRoomAttachment('placeholder-userId', testFile, { area }, signal);
 
-		// Set appropriate headers
-		const headers = new Headers();
-		headers.append(contentType, applicationJson);
-
-		expect(global.fetch).toHaveBeenNthCalledWith(1, `/services/chats/rooms`, {
-			method: 'POST',
-			headers,
-			body: JSON.stringify({
-				type: RoomType.ONE_TO_ONE,
-				members: [{ userId: 'userId', owner: true }]
-			})
+		expect(spyOnFetch).toHaveBeenNthCalledWith(1, 'rooms', RequestType.POST, {
+			type: RoomType.ONE_TO_ONE,
+			members: [{ userId: 'userId', owner: true }]
 		});
 	});
 
 	test('forwardMessages is called correctly', async () => {
+		const spyOnRequestMessageToForward = jest.spyOn(
+			useStore.getState().connections.xmppClient,
+			'requestMessageToForward'
+		);
 		// Send addRoom request
 		const message = createMockTextMessage();
 		const forwardedMessage = {
 			originalMessage: undefined,
 			originalMessageSentAt: dateToISODate(message.date)
 		};
+		spyOnRequestMessageToForward.mockImplementation(() => Promise.resolve(forwardedMessage as any));
+
 		await roomsApi.forwardMessages(['roomId'], [message]);
 
-		// Set appropriate headers
-		const headers = new Headers();
-		headers.append(contentType, applicationJson);
-
-		// Check if fetch is called with the correct parameters
-		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/rooms/roomId/forward`, {
-			method: 'POST',
-			headers,
-			body: JSON.stringify([forwardedMessage])
-		});
+		expect(spyOnFetch).toHaveBeenCalledWith('rooms/roomId/forward', RequestType.POST, [
+			forwardedMessage
+		]);
 	});
 
 	test('forwardMessages - edited message - is called correctly', async () => {
+		const spyOnRequestMessageToForward = jest.spyOn(
+			useStore.getState().connections.xmppClient,
+			'requestMessageToForward'
+		);
 		// Send addRoom request
 		const messageEdited = createMockTextMessage();
 		const msgToParse = textMessageFromHistory.replace(
@@ -532,39 +354,25 @@ describe('Rooms API', () => {
 			originalMessageSentAt: dateToISODate(messageEdited.date)
 		};
 
+		spyOnRequestMessageToForward.mockImplementation(() => Promise.resolve(messageParsed!));
+
 		await roomsApi.forwardMessages(['roomId'], [messageEdited]);
 
-		// Set appropriate headers
-		const headers = new Headers();
-		headers.append(contentType, applicationJson);
-
-		// Check if fetch is called with the correct parameters
-		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/rooms/roomId/forward`, {
-			method: 'POST',
-			headers,
-			body: JSON.stringify([forwardedMessage])
-		});
+		expect(spyOnFetch).toHaveBeenCalledWith('rooms/roomId/forward', RequestType.POST, [
+			forwardedMessage
+		]);
 	});
 
 	test('replacePlaceholderRoom is called correctly', async () => {
 		// Send replacePlaceholderRoom request
 		const room = createMockRoom({ id: 'room0' });
 		const testFile = new File([], 'file.pdf', { type: applicationPdf });
-		fetchResponse.mockResolvedValueOnce(room);
+		spyOnFetch.mockResolvedValueOnce(room);
 		await roomsApi.replacePlaceholderRoom('userId', 'text', testFile);
 
-		// Set appropriate headers
-		const headers = new Headers();
-		headers.append(contentType, applicationJson);
-
-		// Check if fetch is called with the correct parameters
-		expect(global.fetch).toHaveBeenNthCalledWith(1, `/services/chats/rooms`, {
-			method: 'POST',
-			headers,
-			body: JSON.stringify({
-				type: RoomType.ONE_TO_ONE,
-				members: [{ userId: 'userId', owner: true }]
-			})
+		expect(spyOnFetch).toHaveBeenNthCalledWith(1, 'rooms', RequestType.POST, {
+			type: RoomType.ONE_TO_ONE,
+			members: [{ userId: 'userId', owner: true }]
 		});
 	});
 });

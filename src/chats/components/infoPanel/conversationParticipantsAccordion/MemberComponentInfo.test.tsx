@@ -15,7 +15,6 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../../../tests/createMock';
-import { mockedGetURLUserPicture } from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 import { RoomType } from '../../../../types/network/models/roomBeTypes';
 import { UserBe } from '../../../../types/network/models/userBeTypes';
@@ -261,13 +260,13 @@ describe('Participant component info', () => {
 			store.setUserInfo(user2Info);
 			store.setCapabilities(createMockCapabilityList({ canSeeUsersPresence: true }));
 			act(() => store.setUserPresence('user1', false));
-			mockedGetURLUserPicture.mockReturnValue('Imageurl.jpeg');
 			setup(<MemberComponentInfo member={members[1]} roomId={mockedRoom.id} />);
 
 			expect(
 				screen.getByText(/Go to private chat to send a personal message/i)
 			).toBeInTheDocument();
 		});
+
 		test('Label should show "Last seen" phrase if last_activity is present', () => {
 			const store = useStore.getState();
 			store.setLoginInfo('user1', 'User 1');
@@ -281,6 +280,7 @@ describe('Participant component info', () => {
 			expect(screen.getByText(/Last seen 01\/22\/2022/i)).toBeInTheDocument();
 		});
 	});
+
 	describe('Subtitle sentence with canSeeUsersPresence capability set to false', () => {
 		test('Label should not show Online', () => {
 			const store = useStore.getState();
@@ -294,6 +294,7 @@ describe('Participant component info', () => {
 
 			expect(screen.queryByText(/Online/i)).not.toBeInTheDocument();
 		});
+
 		test('Label should not show Offline', () => {
 			const store = useStore.getState();
 			store.setLoginInfo('user1', 'User 1');
@@ -302,11 +303,10 @@ describe('Participant component info', () => {
 			store.setUserInfo(user2Info);
 			store.setCapabilities(createMockCapabilityList({ canSeeUsersPresence: false }));
 			act(() => store.setUserPresence('user1', false));
-			mockedGetURLUserPicture.mockReturnValue('Imageurl.jpeg');
 			setup(<MemberComponentInfo member={members[0]} roomId={mockedRoom.id} />);
-
 			expect(screen.queryByText(/Offline/i)).not.toBeInTheDocument();
 		});
+
 		test('Label should not show "Last seen" phrase if last_activity is present', () => {
 			const store = useStore.getState();
 			store.setLoginInfo('user1', 'User 1');

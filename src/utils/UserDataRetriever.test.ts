@@ -6,6 +6,7 @@
 import * as uuid from 'uuid';
 
 import UserDataRetriever from './UserDataRetriever';
+import { spyOnFetch } from '../tests/jest-env-setup';
 
 describe('UserDataRetriever tests', () => {
 	test('getDebouncedUser is correctly used with few users', async () => {
@@ -15,7 +16,7 @@ describe('UserDataRetriever tests', () => {
 		// Finish debounced function
 		jest.runAllTimers();
 
-		expect(global.fetch).toHaveBeenCalledTimes(1);
+		expect(spyOnFetch).toHaveBeenCalledTimes(1);
 	});
 
 	test('getDebouncedUser is correctly used with a lot of users', async () => {
@@ -36,7 +37,7 @@ describe('UserDataRetriever tests', () => {
 		// Finish debounced function
 		jest.runAllTimers();
 
-		expect(global.fetch).toHaveBeenCalledTimes(2);
+		expect(spyOnFetch).toHaveBeenCalledTimes(2);
 	});
 
 	test('getDebouncedUser is correctly used with a duplicated userId', async () => {
@@ -55,6 +56,6 @@ describe('UserDataRetriever tests', () => {
 		// Finish debounced function
 		jest.runAllTimers();
 
-		expect(global.fetch).toHaveBeenCalledTimes(1);
+		expect(spyOnFetch).toHaveBeenCalledTimes(1);
 	});
 });

@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { screen, waitFor, act, renderHook } from '@testing-library/react';
+import { act, renderHook, screen, waitFor } from '@testing-library/react';
 
 import GoToPrivateChatAction from './GoToPrivateChatAction';
 import LeaveConversationListAction from './LeaveConversationListAction';
@@ -14,13 +14,7 @@ import MemberComponentInfo from './MemberComponentInfo';
 import RemoveMemberListAction from './RemoveMemberListAction';
 import useStore from '../../../../store/Store';
 import { createMockRoom, createMockUser } from '../../../../tests/createMock';
-import {
-	mockedAddRoomRequest,
-	mockedDeleteRoomMemberRequest,
-	mockedDeleteRoomRequest,
-	mockedDemotesRoomMemberRequest,
-	mockedPromoteRoomMemberRequest
-} from '../../../../tests/mocks/network';
+import { RoomsApiToSpy, spyOnRoomsApi } from '../../../../tests/mocks/network';
 import { mockGoToMainPage, mockGoToRoomPage } from '../../../../tests/mocks/useRouting';
 import { setup } from '../../../../tests/test-utils';
 import { RoomType } from '../../../../types/network/models/roomBeTypes';
@@ -126,12 +120,6 @@ describe('participants actions - go to private chat', () => {
 			result.current.setLoginInfo(user2Info.id, user2Info.name);
 			result.current.setUserInfo(user1Info);
 		});
-		mockedAddRoomRequest.mockReturnValue({
-			id: 'room-id',
-			name: ' ',
-			description: '',
-			membersIds: [user1Info.id]
-		});
 		mockGoToRoomPage.mockReturnValue(`room of ${user1Info.name}`);
 		const { user } = setup(<GoToPrivateChatAction memberId={user1Info.id} />);
 		await user.click(screen.getByTestId('go_to_private_chat'));
@@ -162,12 +150,12 @@ describe('participants actions - leave/delete conversation', () => {
 		expect(screen.queryByTestId('leave_modal')).not.toBeInTheDocument();
 	});
 	test('leave conversation', async () => {
+		const spyOnDeleteRoomMember = spyOnRoomsApi(RoomsApiToSpy.DELETE_ROOM_MEMBER);
 		const { result } = renderHook(() => useStore());
 		act(() => {
 			result.current.setLoginInfo(user2Info.id, user2Info.name);
 			result.current.addRoom(mockedRoom);
 		});
-		mockedDeleteRoomMemberRequest.mockReturnValueOnce('you left the conversation');
 		mockGoToMainPage.mockReturnValue('main page');
 		const { user } = setup(
 			<LeaveConversationListAction
@@ -183,8 +171,8 @@ describe('participants actions - leave/delete conversation', () => {
 		const button = await screen.findByRole('button', { name: 'Leave' });
 
 		await user.click(button);
-		await waitFor(() => expect(mockedDeleteRoomMemberRequest).toHaveBeenCalled());
-		await waitFor(() => expect(mockGoToMainPage).toHaveBeenCalled());
+		expect(spyOnDeleteRoomMember).toHaveBeenCalled();
+		expect(mockGoToMainPage).toHaveBeenCalled();
 	});
 	test('delete conversation - open and close modal', async () => {
 		const store = useStore.getState();
@@ -206,12 +194,12 @@ describe('participants actions - leave/delete conversation', () => {
 		expect(screen.queryByTestId('delete_modal')).not.toBeInTheDocument();
 	});
 	test('delete conversation', async () => {
+		const spyOnDeleteRoom = spyOnRoomsApi(RoomsApiToSpy.DELETE_ROOM);
 		const { result } = renderHook(() => useStore());
 		act(() => {
 			result.current.setLoginInfo(user1Info.id, user1Info.name);
 			result.current.addRoom(mockedRoom2);
 		});
-		mockedDeleteRoomRequest.mockReturnValueOnce('the conversation has been deleted');
 		mockGoToMainPage.mockReturnValue('main page');
 		const { user } = setup(
 			<LeaveConversationListAction
@@ -226,20 +214,20 @@ describe('participants actions - leave/delete conversation', () => {
 		await user.click(screen.getByTestId(iconTrash2Outline));
 		const button = await screen.findByRole('button', { name: 'Delete' });
 		await user.click(button);
-		await waitFor(() => expect(mockedDeleteRoomRequest).toHaveBeenCalled());
-		await waitFor(() => expect(mockGoToMainPage).toHaveBeenCalled());
+		expect(spyOnDeleteRoom).toHaveBeenCalled();
+		expect(mockGoToMainPage).toHaveBeenCalled();
 	});
 });
 
 describe('participants actions - promote/demote member', () => {
 	test('Promote member', async () => {
+		const spyOnPromoteRoomMember = spyOnRoomsApi(RoomsApiToSpy.PROMOTE_ROOM_MEMBER);
 		const { result } = renderHook(() => useStore());
 		act(() => {
 			result.current.setLoginInfo(user1Info.id, user1Info.name);
 			result.current.setUserInfo(user2Info);
 			result.current.addRoom(mockedRoom);
 		});
-		mockedPromoteRoomMemberRequest.mockReturnValueOnce('promoted');
 
 		const { user } = setup(<MemberComponentInfo roomId={mockedRoom.id} member={userInfoMember} />);
 
@@ -250,10 +238,11 @@ describe('participants actions - promote/demote member', () => {
 		// Promote member
 		await user.click(promoteButton);
 
-		await waitFor(() => expect(mockedPromoteRoomMemberRequest).toHaveBeenCalled());
+		expect(spyOnPromoteRoomMember).toHaveBeenCalled();
 	});
 
 	test('Demote member', async () => {
+		const spyOnDemoteRoomMember = spyOnRoomsApi(RoomsApiToSpy.DEMOTE_ROOM_MEMBER);
 		const { result } = renderHook(() => useStore());
 		act(() => {
 			result.current.setLoginInfo(user1Info.id, user1Info.name);
@@ -261,7 +250,6 @@ describe('participants actions - promote/demote member', () => {
 			result.current.addRoom(mockedRoom);
 		});
 
-		mockedDemotesRoomMemberRequest.mockReturnValueOnce('demoted');
 		const { user } = setup(
 			<MemberComponentInfo
 				roomId={mockedRoom.id}
@@ -280,7 +268,7 @@ describe('participants actions - promote/demote member', () => {
 
 		await user.click(demoteButton);
 
-		await waitFor(() => expect(mockedDemotesRoomMemberRequest).toHaveBeenCalled());
+		expect(spyOnDemoteRoomMember).toHaveBeenCalled();
 	});
 });
 
@@ -302,15 +290,14 @@ describe('participants actions - delete user', () => {
 	});
 
 	test('delete user', async () => {
+		const spyOnDeleteRoomMember = spyOnRoomsApi(RoomsApiToSpy.DELETE_ROOM_MEMBER);
 		const { result } = renderHook(() => useStore());
 		act(() => {
 			result.current.setLoginInfo(user1Info.id, user1Info.name);
 			result.current.setUserInfo(user2Info);
 			result.current.addRoom(mockedRoom);
 		});
-		mockedDeleteRoomMemberRequest.mockReturnValueOnce(
-			'user has been kicked out from the conversation'
-		);
+
 		const { user } = setup(
 			<RemoveMemberListAction roomId={mockedRoom.id} memberId={user2Info.id} />
 		);
@@ -319,6 +306,6 @@ describe('participants actions - delete user', () => {
 		const button = await screen.findByRole('button', { name: 'Remove' });
 
 		await user.click(button);
-		await waitFor(() => expect(mockedDeleteRoomMemberRequest).toHaveBeenCalled());
+		expect(spyOnDeleteRoomMember).toHaveBeenCalled();
 	});
 });

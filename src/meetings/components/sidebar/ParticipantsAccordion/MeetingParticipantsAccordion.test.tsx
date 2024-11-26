@@ -18,10 +18,7 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../../../tests/createMock';
-import {
-	mockedPromoteRoomMemberRequest,
-	mockedUpdateAudioStreamStatusRequest
-} from '../../../../tests/mocks/network';
+import {} from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 import { MeetingBe } from '../../../../types/network/models/meetingBeTypes';
 import { MemberBe, RoomBe } from '../../../../types/network/models/roomBeTypes';
@@ -144,8 +141,6 @@ describe("Meeting Participants Accordion - moderator's side", () => {
 	// 	expect(mutedIcon).toBeInTheDocument();
 	// });
 	test('promote moderator', async () => {
-		mockedPromoteRoomMemberRequest.mockReturnValueOnce('promoted');
-
 		const { user } = storeSetupParticipantModerator();
 
 		const promoteButton = screen.getByTestId('icon: CrownOutline');
@@ -157,6 +152,7 @@ describe("Meeting Participants Accordion - moderator's side", () => {
 		const button = await screen.findByTestId('icon: Crown');
 		expect(button).toBeInTheDocument();
 	});
+
 	test('Search one member inside list', async () => {
 		const { user } = storeSetupParticipantModerator();
 		const searchInput = screen.getByRole('textbox', { name: /Search participants/i });
@@ -164,6 +160,7 @@ describe("Meeting Participants Accordion - moderator's side", () => {
 		await user.type(searchInput, 'user 1');
 		expect(list.children).toHaveLength(1);
 	});
+
 	test('Search more members inside list', async () => {
 		const { user } = storeSetupParticipantModerator();
 		const searchInput = screen.getByRole('textbox', { name: /Search participants/i });
@@ -171,6 +168,7 @@ describe("Meeting Participants Accordion - moderator's side", () => {
 		await user.type(searchInput, 'user');
 		expect(list.children).toHaveLength(2);
 	});
+
 	test('Search a user that is not in the list', async () => {
 		const { user } = storeSetupParticipantModerator();
 		const searchInput = screen.getByRole('textbox', { name: /Search participants/i });
@@ -187,7 +185,6 @@ describe("Meeting Participants Accordion - moderator's side", () => {
 	});
 
 	test('mute a member if you are a moderator', async () => {
-		mockedUpdateAudioStreamStatusRequest.mockReturnValueOnce('muted');
 		const { meeting, user, store } = storeSetupParticipantModerator();
 
 		act(() => {

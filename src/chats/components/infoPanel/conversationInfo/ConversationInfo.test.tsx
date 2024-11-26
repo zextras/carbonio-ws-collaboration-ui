@@ -12,7 +12,6 @@ import ConversationInfo from './ConversationInfo';
 import ConversationInfoDetails from './ConversationInfoDetails';
 import useStore from '../../../../store/Store';
 import { createMockUser } from '../../../../tests/createMock';
-import { mockedGetUserPictureRequest } from '../../../../tests/mocks/network';
 import { mockUseMediaQueryCheck } from '../../../../tests/mocks/useMediaQueryCheck';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
@@ -82,17 +81,16 @@ describe('Conversation info Details', () => {
 	test('group info should appear as expected', async () => {
 		const store = useStore.getState();
 		store.addRoom(room);
-		mockedGetUserPictureRequest.mockReturnValueOnce(ImageBlob);
 		setup(<ConversationInfoDetails roomId={room.id} roomType="group" />);
 		expect(screen.getByText(room.description)).toBeInTheDocument();
 		act(() => store.setRoomDescription(room.id, 'new description'));
 		expect(screen.getByText(/new description/i)).toBeInTheDocument();
 	});
+
 	test('user info should appear as expected', async () => {
 		const store = useStore.getState();
 		store.addRoom(OneToOneRoom);
 		store.setUserInfo(user1Be);
-		mockedGetUserPictureRequest.mockReturnValueOnce(ImageBlob);
 		setup(<ConversationInfoDetails roomId={OneToOneRoom.id} roomType={RoomType.ONE_TO_ONE} />);
 		expect(screen.getAllByText(user1Be.name)).toHaveLength(1);
 		expect(screen.getByText(user1Be.email)).toBeInTheDocument();
@@ -109,7 +107,6 @@ describe('Conversation Info', () => {
 		const store = useStore.getState();
 		store.addRoom(OneToOneRoom);
 		store.setUserInfo(user1Be);
-		mockedGetUserPictureRequest.mockReturnValueOnce(ImageBlob);
 		setup(
 			<ConversationInfo
 				roomId={OneToOneRoom.id}
@@ -119,6 +116,7 @@ describe('Conversation Info', () => {
 		);
 		expect(screen.getAllByText(user1Be.name)).toHaveLength(1);
 	});
+
 	test('group info should appear as expected', async () => {
 		const store = useStore.getState();
 		store.addRoom(room);
@@ -127,6 +125,7 @@ describe('Conversation Info', () => {
 		);
 		expect(screen.getByText(room.name)).toBeInTheDocument();
 	});
+
 	test('infoPanel take all space', async () => {
 		const store = useStore.getState();
 		store.addRoom(room);
@@ -134,6 +133,7 @@ describe('Conversation Info', () => {
 		const messagesIcon = screen.getByTestId('icon: MessageCircleOutline');
 		expect(messagesIcon).toBeInTheDocument();
 	});
+
 	test('infoPanel does not take all space', async () => {
 		mockUseMediaQueryCheck.mockReturnValueOnce(true);
 		const store = useStore.getState();

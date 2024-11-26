@@ -3,6 +3,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
+import type * as useRoutingModule from '../../hooks/useRouting';
 
 export const mockGoToRoomPage: jest.Mock = jest.fn();
 export const mockGoToMainPage: jest.Mock = jest.fn();
@@ -12,9 +13,10 @@ export const mockGoToInfoPage: jest.Mock = jest.fn();
 export const mockGoToMeetingAccessPage: jest.Mock = jest.fn();
 export const mockGoToExternalLoginPage: jest.Mock = jest.fn();
 
-jest.mock('../../hooks/useRouting', () => ({
+jest.mock<typeof useRoutingModule>('../../hooks/useRouting', () => ({
 	__esModule: true,
-	default: jest.fn(() => ({
+	...jest.requireActual('../../hooks/useRouting'),
+	default: (): ReturnType<(typeof useRoutingModule)['default']> => ({
 		goToMainPage: mockGoToMainPage,
 		goToRoomPage: mockGoToRoomPage,
 		goToChatsPage: mockGoToChatsPage,
@@ -22,15 +24,5 @@ jest.mock('../../hooks/useRouting', () => ({
 		goToInfoPage: mockGoToInfoPage,
 		goToMeetingAccessPage: mockGoToMeetingAccessPage,
 		goToExternalLoginPage: mockGoToExternalLoginPage
-	})),
-	PAGE_INFO_TYPE: {
-		HANG_UP_PAGE: 'hang_up_page',
-		NEXT_TIME_PAGE: 'next_time_page',
-		ROOM_EMPTY: 'room_empty',
-		MEETING_ENDED: 'meeting_ended',
-		ALREADY_ACTIVE_MEETING_SESSION: 'already_active_meeting_session',
-		MEETING_NOT_FOUND: 'meeting_not_found',
-		UNAUTHENTICATED: 'unauthenticated',
-		GENERAL_ERROR: 'general_error'
-	}
+	})
 }));
