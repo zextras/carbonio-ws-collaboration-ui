@@ -20,7 +20,7 @@ const member2 = createMockMember({ id: 'member2', owner: false });
 
 describe('CopyRoomIntegration tests', () => {
 	test('Chats group has no duplicate group in WSC', () => {
-		setup(<CopyRoomWidget name={'test'} members={[]} />);
+		setup(<CopyRoomWidget name={'test'} members={[]} type="group" />);
 		expect(screen.getByText('COPY GROUP')).toBeInTheDocument();
 	});
 
@@ -37,6 +37,7 @@ describe('CopyRoomIntegration tests', () => {
 						owner: sessionMember.owner
 					}
 				]}
+				type="group"
 			/>
 		);
 		expect(screen.getByText('VIEW IN NEW CHATS MODULE')).toBeInTheDocument();
@@ -62,6 +63,7 @@ describe('CopyRoomIntegration tests', () => {
 						owner: member2.owner
 					}
 				]}
+				type="group"
 			/>
 		);
 		const copyGroupButton = screen.getByText('COPY GROUP');
