@@ -6,10 +6,11 @@
 
 import { EventName, sendCustomEvent } from '../../../hooks/useEventListener';
 import useStore from '../../../store/Store';
-import { MessageType } from '../../../types/store/MessageTypes';
+import { FasteningAction, MessageType } from '../../../types/store/MessageTypes';
 import { getTagElement } from '../utility/decodeStanza';
 import { decodeXMPPMessageStanza } from '../utility/decodeXMPPMessageStanza';
 import displayMessageBrowserNotification from '../utility/displayMessageBrowserNotification';
+import displayReactionBrowserNotification from '../utility/displayReactionBrowserNotification';
 
 export function onNewMessageStanza(message: Element): true {
 	const resultElement = getTagElement(message, 'result');
@@ -53,6 +54,10 @@ export function onNewMessageStanza(message: Element): true {
 				}
 				case MessageType.FASTENING: {
 					store.addFastening(newMessage);
+
+					if (newMessage.action === FasteningAction.REACTION && newMessage.from !== sessionId) {
+						displayReactionBrowserNotification(newMessage);
+					}
 					break;
 				}
 				default: {
