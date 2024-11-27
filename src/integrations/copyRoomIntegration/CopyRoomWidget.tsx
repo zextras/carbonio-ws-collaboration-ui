@@ -96,10 +96,10 @@ const CopyRoomWidget: FC<CopyRoomWidgetProps> = ({ name, members, topic, type })
 
 	const modalTitle = useMemo(() => {
 		if (type === 'group')
-			return t('readOnly.modal.title', 'Create a copy of the group {{roomName}}', {
+			return t('readOnly.modal.title', 'Create a copy of the group "{{roomName}}"', {
 				roomName: name
 			});
-		return t('readOnly.room.modal.title', 'Convert {{roomName}} to a Group', {
+		return t('readOnly.room.modal.title', 'Convert "{{roomName}}" to a Group', {
 			roomName: name
 		});
 	}, [name, t, type]);
