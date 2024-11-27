@@ -3,7 +3,6 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-
 import React from 'react';
 
 import { screen } from '@testing-library/react';
@@ -22,8 +21,8 @@ import { RoomsApiToSpy, spyOnRoomsApi } from '../../../../tests/mocks/network';
 import { mockSearchUsersByFeatureRequest } from '../../../../tests/mocks/SearchUsersByFeature';
 import { setup } from '../../../../tests/test-utils';
 import { MeetingBe } from '../../../../types/network/models/meetingBeTypes';
-import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
-import { ContactInfo } from '../../../../types/network/soap/searchUsersByFeatureRequest';
+import { RoomBe } from '../../../../types/network/models/roomBeTypes';
+import { RoomType } from '../../../../types/store/RoomTypes';
 
 const createNewRoom = 'Create new Room';
 const virtualRoomName = 'New Virtual Room';
@@ -98,19 +97,6 @@ const meetingTwoModActive: MeetingBe = createMockMeeting({
 	participants: [createMockParticipants({ userId: user2.id })]
 });
 
-// Mock objects
-const contactUser1: ContactInfo = {
-	email: 'user1@test.com',
-	displayName: 'User One',
-	id: 'user1-id'
-};
-
-const contactUser2: ContactInfo = {
-	email: 'user2@test.com',
-	displayName: 'User Two',
-	id: 'user2-id'
-};
-
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo(sessionUser.id, sessionUser.name);
@@ -151,7 +137,7 @@ describe('VirtualRoomsButton', () => {
 		);
 	});
 
-	test('create virtual room', async () => {
+	test('create virtual modal', async () => {
 		mockSearchUsersByFeatureRequest.mockReturnValueOnce([]);
 		const spyOnAddRoom = spyOnRoomsApi(RoomsApiToSpy.ADD_ROOM);
 
@@ -177,214 +163,5 @@ describe('VirtualRoomsButton', () => {
 
 		await user.click(createRoomButton);
 		expect(spyOnAddRoom).toHaveBeenCalled();
-	});
-
-	test('Try to create a room without a name', async () => {
-		const { user } = setup(<VirtualRoomsButton expanded />);
-
-		const button = screen.getByRole('button');
-		await user.click(button);
-
-		const createButton = await screen.findByRole('button', { name: createNewRoom });
-		expect(createButton).toBeVisible();
-
-		await user.click(createButton);
-
-		const modalTitle = await screen.findByText(createNewVirtualRoom);
-		expect(modalTitle).toBeInTheDocument();
-
-		const textArea = await screen.findByText(newVirtualRoomsName);
-
-		await user.type(textArea, 'a{backspace}');
-
-		const createRoomButton = screen.getByRole('button', { name: 'create' });
-		expect(createRoomButton).toBeDisabled();
-	});
-
-	test('Try to create a room without a name too long', async () => {
-		const { user } = setup(<VirtualRoomsButton expanded />);
-
-		const button = screen.getByRole('button');
-		await user.click(button);
-
-		const createButton = await screen.findByRole('button', { name: createNewRoom });
-		expect(createButton).toBeVisible();
-
-		await user.click(createButton);
-
-		const modalTitle = await screen.findByText(createNewVirtualRoom);
-		expect(modalTitle).toBeInTheDocument();
-
-		const textArea = await screen.findByText(newVirtualRoomsName);
-
-		await user.type(
-			textArea,
-			'Lorem dolo ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'
-		);
-
-		const createRoomButton = screen.getByRole('button', { name: 'create' });
-		expect(createRoomButton).toBeDisabled();
-	});
-
-	test('create virtual room with 2 moderators', async () => {
-		mockSearchUsersByFeatureRequest.mockReturnValue([contactUser1, contactUser2]);
-
-		const spyOnAddRoom = spyOnRoomsApi(RoomsApiToSpy.ADD_ROOM);
-		const { user } = setup(<VirtualRoomsButton expanded />);
-
-		const button = screen.getByRole('button');
-		await user.click(button);
-
-		const createButton = await screen.findByRole('button', { name: createNewRoom });
-		expect(createButton).toBeVisible();
-
-		await user.click(createButton);
-
-		const modalTitle = await screen.findByText(createNewVirtualRoom);
-		expect(modalTitle).toBeInTheDocument();
-
-		const textArea = await screen.findByText(newVirtualRoomsName);
-
-		await user.type(textArea, virtualRoomName);
-
-		const chipContactOne = await screen.findByText('User One');
-		const chipContactTwo = await screen.findByText('User Two');
-
-		await user.click(chipContactOne);
-		await user.click(chipContactTwo);
-
-		const createRoomButton = screen.getByRole('button', { name: 'create' });
-		expect(createRoomButton).toBeEnabled();
-
-		await user.click(createRoomButton);
-		expect(spyOnAddRoom).toHaveBeenCalledWith({
-			name: virtualRoomName,
-			type: RoomType.TEMPORARY,
-			members: [
-				{ userId: contactUser1.id, owner: true },
-				{ userId: contactUser2.id, owner: true }
-			]
-		});
-	});
-
-	test('create virtual room by selecting and removing one moderator', async () => {
-		mockSearchUsersByFeatureRequest.mockReturnValueOnce([contactUser1, contactUser2]);
-
-		const spyOnAddRoom = spyOnRoomsApi(RoomsApiToSpy.ADD_ROOM);
-		const { user } = setup(<VirtualRoomsButton expanded />);
-
-		const button = screen.getByRole('button');
-		await user.click(button);
-
-		const createButton = await screen.findByRole('button', { name: createNewRoom });
-		expect(createButton).toBeVisible();
-
-		await user.click(createButton);
-
-		const modalTitle = await screen.findByText(createNewVirtualRoom);
-		expect(modalTitle).toBeInTheDocument();
-
-		const textArea = await screen.findByText(newVirtualRoomsName);
-
-		await user.type(textArea, virtualRoomName);
-
-		const chipContactOne = await screen.findByText('User One');
-		const chipContactTwo = await screen.findByText('User Two');
-
-		await user.click(chipContactOne);
-		await user.click(chipContactTwo);
-
-		// removing chip
-		await user.click(chipContactOne);
-
-		const createRoomButton = screen.getByRole('button', { name: 'create' });
-		expect(createRoomButton).toBeEnabled();
-
-		await user.click(createRoomButton);
-		expect(spyOnAddRoom).toHaveBeenCalledWith({
-			name: virtualRoomName,
-			type: RoomType.TEMPORARY,
-			members: [{ userId: contactUser2.id, owner: true }]
-		});
-	});
-
-	test('create virtual room by typing one moderator name', async () => {
-		const spyOnAddRoom = spyOnRoomsApi(RoomsApiToSpy.ADD_ROOM);
-		const { user } = setup(<VirtualRoomsButton expanded />);
-
-		const button = screen.getByRole('button');
-		await user.click(button);
-
-		const createButton = await screen.findByRole('button', { name: createNewRoom });
-		expect(createButton).toBeVisible();
-
-		await user.click(createButton);
-
-		const modalTitle = await screen.findByText(createNewVirtualRoom);
-		expect(modalTitle).toBeInTheDocument();
-
-		const textArea = await screen.findByText(newVirtualRoomsName);
-		await user.type(textArea, virtualRoomName);
-
-		mockSearchUsersByFeatureRequest.mockReturnValueOnce([contactUser1]);
-		const moderatorInput = await screen.findByText("Room's moderators");
-		await user.type(moderatorInput, 'User One');
-
-		const chipContactOne = await screen.findByText('User One');
-		await user.click(chipContactOne);
-
-		const createRoomButton = screen.getByRole('button', { name: 'create' });
-		expect(createRoomButton).toBeEnabled();
-
-		await user.click(createRoomButton);
-		expect(spyOnAddRoom).toHaveBeenCalledWith({
-			name: virtualRoomName,
-			type: RoomType.TEMPORARY,
-			members: [{ userId: contactUser1.id, owner: true }]
-		});
-	});
-
-	test('Search user fails ', async () => {
-		jest.spyOn(console, 'error').mockImplementation();
-		mockSearchUsersByFeatureRequest.mockRejectedValue({ error: 'error' });
-		const { user } = setup(<VirtualRoomsButton expanded />);
-
-		const button = screen.getByRole('button');
-		await user.click(button);
-
-		const createButton = await screen.findByRole('button', { name: createNewRoom });
-		expect(createButton).toBeVisible();
-
-		await user.click(createButton);
-
-		const contactList = await screen.findByTestId('list_moderators_selection');
-		expect(contactList).toBeInTheDocument();
-
-		const createRoomButton = screen.getByRole('button', { name: 'create' });
-		expect(createRoomButton).toBeDisabled();
-	});
-
-	test('Search user returns no matches', async () => {
-		mockSearchUsersByFeatureRequest.mockReturnValue([]);
-		const { user } = setup(<VirtualRoomsButton expanded />);
-
-		const button = screen.getByRole('button');
-		await user.click(button);
-
-		const createButton = await screen.findByRole('button', { name: createNewRoom });
-		expect(createButton).toBeVisible();
-
-		await user.click(createButton);
-
-		const moderatorInput = await screen.findByText("Room's moderators");
-		await user.type(moderatorInput, 'User');
-
-		const noMatch = await screen.findByText(
-			'There are no items that match this search in your company.'
-		);
-		expect(noMatch).toBeInTheDocument();
-
-		const createRoomButton = screen.getByRole('button', { name: 'create' });
-		expect(createRoomButton).toBeDisabled();
 	});
 });

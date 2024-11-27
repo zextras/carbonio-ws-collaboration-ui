@@ -19,9 +19,9 @@ import {
 	Container,
 	ListItem,
 	List,
-	Text
+	Text,
+	Spinner
 } from '@zextras/carbonio-design-system';
-import { Spinner } from '@zextras/carbonio-shell-ui';
 import { debounce, difference, differenceBy, find, map, omit, size, union } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -187,7 +187,7 @@ const ModeratorsContactsSelection = ({
 
 	const contentToDisplay = useMemo(() => {
 		if (loading) {
-			return <Spinner />;
+			return <Spinner color="gray1" />;
 		}
 		if (!error) {
 			return <CustomList data-testid="list_moderators_selection">{items}</CustomList>;
