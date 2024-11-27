@@ -79,8 +79,6 @@ export const getNotificationManager: typeof Shell.getNotificationManager = () =>
 
 export const SettingsHeader: typeof Shell.SettingsHeader = () => <div>settings header</div>;
 
-export const Spinner: typeof Shell.Spinner = () => <div>spinner</div>;
-
 export const pushHistory: typeof Shell.pushHistory = pushHistoryMock;
 
 export const replaceHistory: typeof Shell.replaceHistory = replaceHistoryMock;

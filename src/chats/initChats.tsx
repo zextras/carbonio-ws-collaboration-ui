@@ -6,8 +6,8 @@
 
 import React, { lazy, Suspense, useEffect } from 'react';
 
-import { Container, ModalManager } from '@zextras/carbonio-design-system';
-import { addRoute, SecondaryBarComponentProps, Spinner } from '@zextras/carbonio-shell-ui';
+import { Container, ModalManager, Spinner } from '@zextras/carbonio-design-system';
+import { addRoute, SecondaryBarComponentProps } from '@zextras/carbonio-shell-ui';
 
 import ConnectionSnackbarManager from './components/ConnectionSnackbarManager';
 import { CHATS_ROUTE, PRODUCT_NAME } from '../constants/appConstants';
@@ -34,7 +34,13 @@ const ChatsMain = (): React.JSX.Element => (
 );
 
 const SecondaryBar = (props: SecondaryBarComponentProps): React.JSX.Element => (
-	<Suspense fallback={<Spinner />}>
+	<Suspense
+		fallback={
+			<Container>
+				<Spinner color={'primary'} />
+			</Container>
+		}
+	>
 		<ModalManager>
 			<SecondaryBarView {...props} />
 		</ModalManager>
