@@ -10,7 +10,6 @@ import {
 	createMockRoom,
 	createMockTextMessage
 } from '../../../tests/createMock';
-import { mockedRequestHistory } from '../../../tests/mockedXmppClient';
 import {
 	endRequestHistoryStanza,
 	historyTextMessageStanza,
@@ -77,8 +76,12 @@ describe('onRequestHistory', () => {
 	});
 
 	test('Request history again if there are only fastenings', () => {
+		const spyOnRequestHistory = jest.spyOn(
+			useStore.getState().connections.xmppClient,
+			'requestHistory'
+		);
 		HistoryAccumulator.addMessageToHistory(room.id, fastening);
 		onRequestHistory(endRequestHistoryStanza(room.id, false));
-		expect(mockedRequestHistory).toHaveBeenCalled();
+		expect(spyOnRequestHistory).toHaveBeenCalled();
 	});
 });

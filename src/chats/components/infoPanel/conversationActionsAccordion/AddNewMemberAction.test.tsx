@@ -6,12 +6,12 @@
 
 import React from 'react';
 
-import { screen, waitFor, act, renderHook } from '@testing-library/react';
+import { act, renderHook, screen, waitFor } from '@testing-library/react';
 
 import AddNewMemberAction from './AddNewMemberAction';
 import useStore from '../../../../store/Store';
 import { createMockRoom, createMockUser } from '../../../../tests/createMock';
-import { mockedAddRoomMemberRequest } from '../../../../tests/mocks/network';
+import { RoomsApiToSpy, spyOnRoomsApi } from '../../../../tests/mocks/network';
 import { mockSearchUsersByFeatureRequest } from '../../../../tests/mocks/SearchUsersByFeature';
 import { setup } from '../../../../tests/test-utils';
 import { RoomType } from '../../../../types/network/models/roomBeTypes';
@@ -70,6 +70,7 @@ describe('Add new member action', () => {
 	});
 
 	test('Add new member', async () => {
+		const spyOnAddRoomMember = spyOnRoomsApi(RoomsApiToSpy.ADD_ROOM_MEMBERS);
 		const { result } = renderHook(() => useStore());
 		act(() => {
 			result.current.addRoom(mockedRoom);
@@ -80,10 +81,6 @@ describe('Add new member action', () => {
 			.mockReturnValueOnce([])
 			.mockReturnValueOnce([zimbraUser1, zimbraUser2]);
 
-		mockedAddRoomMemberRequest.mockReturnValue({
-			userId: 'user2-id',
-			owner: false
-		});
 		const { user } = setup(<AddNewMemberAction roomId={mockedRoom.id} />);
 
 		expect(result.current.rooms[mockedRoom.id].members?.length).toBe(1);
@@ -95,7 +92,7 @@ describe('Add new member action', () => {
 		const chipInput = await screen.findByTestId('chip_input_creation_modal');
 		await user.type(chipInput, zimbraUser2.displayName[0]);
 
-		await screen.findByText('spinner');
+		await screen.findByTestId('spinner');
 		const list = await screen.findByTestId('list_creation_modal');
 		expect(list).toBeVisible();
 
@@ -105,6 +102,6 @@ describe('Add new member action', () => {
 		const addButton = await screen.findByTestId('add_new_member_button');
 		await user.click(addButton);
 
-		await waitFor(() => expect(mockedAddRoomMemberRequest).toHaveBeenCalled());
+		await waitFor(() => expect(spyOnAddRoomMember).toHaveBeenCalled());
 	});
 });

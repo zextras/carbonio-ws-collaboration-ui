@@ -7,7 +7,7 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### Features
 
-* let user to convert Chats spaces and channels to WSC group ref: WSC-1775 ([955183e](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/955183ef77ec05213c63b601975217d74613ced4))
+* let user converting Chats spaces and channels to WSC group ref: WSC-1775 ([955183e](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/955183ef77ec05213c63b601975217d74613ced4))
 
 
 ### Bug Fixes

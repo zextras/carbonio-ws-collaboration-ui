@@ -7,9 +7,9 @@
 import React from 'react';
 
 import { screen, act } from '@testing-library/react';
+import * as ReactRouter from 'react-router';
 
 import ConversationHeaderMeetingButton from './ConversationHeaderMeetingButton';
-import { useParams } from '../../../../__mocks__/react-router';
 import useStore from '../../../store/Store';
 import {
 	createMockMeeting,
@@ -57,7 +57,8 @@ beforeEach(() => {
 	store.addMeeting(meeting);
 	store.startMeeting(meeting.id, '2024-08-25T17:24:28.961+02:00');
 	store.meetingConnection(meeting.id, false, undefined, false, undefined);
-	useParams.mockReturnValue({ meetingId: meeting.id });
+	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
+	spyUseParams.mockReturnValue({ meetingId: meeting.id });
 });
 
 describe('ActiveMeetingParticipantsDropdown tests', () => {

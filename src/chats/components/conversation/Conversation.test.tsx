@@ -12,7 +12,7 @@ import Conversation from './Conversation';
 import { mockDarkReaderIsEnabled } from '../../../../__mocks__/darkreader';
 import useStore from '../../../store/Store';
 import { createMockMember, createMockRoom, createMockUser } from '../../../tests/createMock';
-import { mockedDeleteRoomMemberRequest } from '../../../tests/mocks/network';
+import { RoomsApiToSpy, spyOnRoomsApi } from '../../../tests/mocks/network';
 import { mockUseMediaQueryCheck } from '../../../tests/mocks/useMediaQueryCheck';
 import { mockGoToMainPage } from '../../../tests/mocks/useRouting';
 import { setup } from '../../../tests/test-utils';
@@ -70,6 +70,7 @@ describe('Conversation view', () => {
 		const infoPanelToggleVisibleAgain = screen.getByTestId('infoPanelToggle');
 		expect(infoPanelToggleVisibleAgain).toBeInTheDocument();
 	});
+
 	test('Display info panel and check data are visible', async () => {
 		mockUseMediaQueryCheck.mockReturnValueOnce(true);
 		const store = useStore.getState();
@@ -91,14 +92,15 @@ describe('Conversation view', () => {
 		const roomDescription = screen.getByText(/A description/i);
 		expect(roomDescription).toBeInTheDocument();
 	});
+
 	test('Leave a group and check everything is shown correctly', async () => {
+		const spyOnDeleteRoomMember = spyOnRoomsApi(RoomsApiToSpy.DELETE_ROOM_MEMBER);
 		mockUseMediaQueryCheck.mockReturnValue(true);
 		const store = useStore.getState();
 		store.addRoom(testRoom);
 		store.addRoom(testRoom2);
 		store.setLoginInfo(user1Info.id, user1Info.email, user1Info.name);
 		store.setUserInfo(user2Info);
-		mockedDeleteRoomMemberRequest.mockReturnValueOnce('you left the conversation');
 		mockGoToMainPage.mockReturnValueOnce('main page');
 		const { user } = setup(<Conversation roomId={testRoom.id} />);
 		expect(screen.getByText(/Leave Group/i)).toBeInTheDocument();
@@ -107,9 +109,10 @@ describe('Conversation view', () => {
 		expect(leaveModal).toBeInTheDocument();
 		const button = await screen.findByRole('button', { name: 'Leave' });
 		await user.click(button);
-		expect(mockedDeleteRoomMemberRequest).toHaveBeenCalledTimes(1);
+		expect(spyOnDeleteRoomMember).toHaveBeenCalledTimes(1);
 		expect(mockGoToMainPage).toHaveBeenCalledTimes(1);
 	});
+
 	test('Display conversation view with darkMode disabled', async () => {
 		mockDarkReaderIsEnabled.mockReturnValueOnce(false);
 		const store = useStore.getState();
@@ -118,6 +121,7 @@ describe('Conversation view', () => {
 		const ConversationWrapper = screen.getByTestId('ConversationWrapper');
 		expect(ConversationWrapper).toHaveStyle(`background-image: url('papyrus.png')`);
 	});
+
 	test('Display conversation view with darkMode enabled', async () => {
 		mockDarkReaderIsEnabled.mockReturnValueOnce(true);
 		const store = useStore.getState();

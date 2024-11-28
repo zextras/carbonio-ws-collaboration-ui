@@ -18,7 +18,7 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../../../tests/createMock';
-import { mockedAddRoomRequest } from '../../../../tests/mocks/network';
+import { RoomsApiToSpy, spyOnRoomsApi } from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 import { MeetingBe } from '../../../../types/network/models/meetingBeTypes';
 import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
@@ -128,7 +128,7 @@ describe('VirtualRoomsButton', () => {
 	});
 
 	test('create virtual room', async () => {
-		mockedAddRoomRequest.mockReturnValue('created');
+		const spyOnAddRoom = spyOnRoomsApi(RoomsApiToSpy.ADD_ROOM);
 		const store = useStore.getState();
 		store.setLoginInfo(sessionUser.id, sessionUser.name);
 		store.setUserInfo(user1);
@@ -156,6 +156,6 @@ describe('VirtualRoomsButton', () => {
 		expect(createRoomButton).toBeEnabled();
 
 		await user.click(createRoomButton);
-		expect(mockedAddRoomRequest).toHaveBeenCalled();
+		expect(spyOnAddRoom).toHaveBeenCalled();
 	});
 });

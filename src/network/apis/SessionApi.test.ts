@@ -7,42 +7,27 @@
 import sessionApi from './SessionApi';
 import useStore from '../../store/Store';
 import { createMockCapabilityList } from '../../tests/createMock';
-import { fetchResponse } from '../../tests/mocks/global';
+import { spyOnFetch } from '../../tests/jest-env-setup';
 
 describe('Session API', () => {
 	test('getToken is called correctly', async () => {
 		// Send getToken request
-		fetchResponse.mockResolvedValueOnce({ token: 'test-token' });
 		await sessionApi.getToken();
 
-		// Set appropriate headers
-		const headers = new Headers();
-		headers.append('Content-Type', 'application/json');
-
 		// Check if fetch is called with the correct parameters
-		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/auth/token`, {
-			method: 'GET',
-			headers,
-			body: undefined
-		});
+		expect(spyOnFetch).toHaveBeenCalledTimes(1);
+		expect(spyOnFetch).toHaveBeenCalledWith(`auth/token`, 'GET');
 	});
 
 	test('getCapabilities is called correctly', async () => {
 		// Send getCapabilities request
 		const capabilityList = createMockCapabilityList();
-		fetchResponse.mockResolvedValueOnce(capabilityList);
+		spyOnFetch.mockResolvedValue(capabilityList);
 		await sessionApi.getCapabilities();
 
-		// Set appropriate headers
-		const headers = new Headers();
-		headers.append('Content-Type', 'application/json');
-
 		// Check if fetch is called with the correct parameters
-		expect(global.fetch).toHaveBeenCalledWith(`/services/chats/users/capabilities`, {
-			method: 'GET',
-			headers,
-			body: undefined
-		});
+		expect(spyOnFetch).toHaveBeenCalledTimes(1);
+		expect(spyOnFetch).toHaveBeenCalledWith(`users/capabilities`, 'GET');
 
 		// Check if store is correctly updated
 		const store = useStore.getState();
