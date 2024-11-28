@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.9.12](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.9.11...v0.9.12) (2024-11-28)
+
+
+### Features
+
+* let user converting Chats spaces and channels to WSC group ref: WSC-1775 ([955183e](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/955183ef77ec05213c63b601975217d74613ced4))
+
+
+### Bug Fixes
+
+* translation default ([1e168fc](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/1e168fc329ac35ce40aa5baa481dc572fd91ede3))
+
 ### [0.9.11](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.9.10...v0.9.11) (2024-11-18)
 
 
