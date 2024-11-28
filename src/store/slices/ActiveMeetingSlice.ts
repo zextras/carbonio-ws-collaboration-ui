@@ -362,24 +362,6 @@ export const useActiveMeetingSlice: StateCreator<ActiveMeetingSlice> = (
 			'AM/REMOVE_BACKGROUND_STREAM'
 		);
 	},
-	// setBlur: (meetingId: string, status: boolean): void => {
-	// 	set(
-	// 		produce((draft: RootStore) => {
-	// 			draft.activeMeeting[meetingId].virtualBackground.blur = status;
-	// 		}),
-	// 		false,
-	// 		'AM/SET_BLUR'
-	// 	);
-	// },
-	// setBackground: (meetingId: string, status: boolean): void => {
-	// 	set(
-	// 		produce((draft: RootStore) => {
-	// 			draft.activeMeeting[meetingId].virtualBackground.background = status;
-	// 		}),
-	// 		false,
-	// 		'AM/SET_BACKGROUND'
-	// 	);
-	// },
 	setBackgroundImage: (meetingId: string, image: VirtualBackgroundType): void => {
 		set(
 			produce((draft: RootStore) => {

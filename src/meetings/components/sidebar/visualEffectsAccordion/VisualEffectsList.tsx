@@ -79,6 +79,7 @@ const VisualEffectsList: FC<VisualEffectCardsProps> = ({ meetingId }) => {
 							minWidth="6.5rem"
 							maxWidth="9.25rem"
 							onClick={changeBackground}
+							data-testid={`${element}`}
 							$picture={isBlurOrNone ? false : virtualBackgroundImages[element]}
 							$isSelected={isSelected}
 						>
