@@ -174,7 +174,6 @@ describe('Message bubble component visualization', () => {
 				prevMessageIsFromSameSender={false}
 				nextMessageIsFromSameSender={false}
 				messageRef={React.createRef<HTMLDivElement>()}
-				isPrevMessageDeleted={false}
 			/>
 		);
 		const insideText = screen.getByText(
@@ -192,7 +191,6 @@ describe('Message bubble component visualization', () => {
 				prevMessageIsFromSameSender={false}
 				nextMessageIsFromSameSender={false}
 				messageRef={React.createRef<HTMLDivElement>()}
-				isPrevMessageDeleted={false}
 			/>
 		);
 		expect(screen.getByTestId('attachmentImg')).toBeInTheDocument();
@@ -206,7 +204,6 @@ describe('Message bubble component visualization', () => {
 				prevMessageIsFromSameSender={false}
 				nextMessageIsFromSameSender={false}
 				messageRef={React.createRef<HTMLDivElement>()}
-				isPrevMessageDeleted={false}
 			/>
 		);
 		await user.hover(screen.getByTestId('hover-container'));
@@ -241,7 +238,6 @@ describe('Attachment footer', () => {
 				prevMessageIsFromSameSender={false}
 				nextMessageIsFromSameSender={false}
 				messageRef={React.createRef<HTMLDivElement>()}
-				isPrevMessageDeleted={false}
 			/>
 		);
 		const extensionFile = screen.getByText(new RegExp(evaluate, 'i'));
@@ -259,7 +255,6 @@ describe('Attachment footer', () => {
 				prevMessageIsFromSameSender={false}
 				nextMessageIsFromSameSender={false}
 				messageRef={React.createRef<HTMLDivElement>()}
-				isPrevMessageDeleted={false}
 			/>
 		);
 		const ackIcon = screen.getByTestId(iconToCheck);
@@ -277,7 +272,6 @@ describe('Attachment footer', () => {
 				prevMessageIsFromSameSender={false}
 				nextMessageIsFromSameSender={false}
 				messageRef={React.createRef<HTMLDivElement>()}
-				isPrevMessageDeleted={false}
 			/>
 		);
 		expect(screen.queryByTestId(iconDoneAll)).not.toBeInTheDocument();
@@ -294,7 +288,6 @@ describe('Attachment footer', () => {
 				prevMessageIsFromSameSender={false}
 				nextMessageIsFromSameSender={false}
 				messageRef={React.createRef<HTMLDivElement>()}
-				isPrevMessageDeleted={false}
 			/>
 		);
 		expect(screen.queryByTestId('icon: Checkmark')).not.toBeInTheDocument();
@@ -313,7 +306,6 @@ describe('Message header', () => {
 				prevMessageIsFromSameSender={false}
 				nextMessageIsFromSameSender={false}
 				messageRef={React.createRef<HTMLDivElement>()}
-				isPrevMessageDeleted={false}
 			/>
 		);
 		const guestLabel = screen.queryByText('Guest');
@@ -330,7 +322,6 @@ describe('Message header', () => {
 				prevMessageIsFromSameSender={false}
 				nextMessageIsFromSameSender={false}
 				messageRef={React.createRef<HTMLDivElement>()}
-				isPrevMessageDeleted={false}
 			/>
 		);
 		const guestLabel = screen.queryByText('Guest');
@@ -350,7 +341,6 @@ describe('Actions', () => {
 				prevMessageIsFromSameSender={false}
 				nextMessageIsFromSameSender={false}
 				messageRef={React.createRef<HTMLDivElement>()}
-				isPrevMessageDeleted={false}
 			/>
 		);
 		jest.spyOn(document.body, 'appendChild').mockReturnValue(mockAttachmentTagElement);
@@ -378,7 +368,6 @@ describe('Actions', () => {
 				prevMessageIsFromSameSender={false}
 				nextMessageIsFromSameSender={false}
 				messageRef={React.createRef<HTMLDivElement>()}
-				isPrevMessageDeleted={false}
 			/>
 		);
 
@@ -406,7 +395,6 @@ describe('Actions', () => {
 				prevMessageIsFromSameSender={false}
 				nextMessageIsFromSameSender={false}
 				messageRef={React.createRef<HTMLDivElement>()}
-				isPrevMessageDeleted={false}
 			/>
 		);
 

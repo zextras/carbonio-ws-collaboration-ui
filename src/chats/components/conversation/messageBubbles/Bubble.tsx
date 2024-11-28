@@ -47,7 +47,7 @@ type BubbleProps = {
 	nextMessageIsFromSameSender: boolean;
 	messageRef: React.RefObject<HTMLDivElement>;
 	messageListRef?: React.RefObject<HTMLDivElement | undefined>;
-	isPrevMessageDeleted: boolean;
+	isPrevMessageDeleted?: boolean;
 };
 
 const ForwardContainer = styled(Container)<{
@@ -106,7 +106,7 @@ const Bubble: FC<BubbleProps> = ({
 	nextMessageIsFromSameSender,
 	messageRef,
 	messageListRef,
-	isPrevMessageDeleted
+	isPrevMessageDeleted = false
 }) => {
 	const [t] = useTranslation();
 	const maxNumberReached = t(
@@ -201,7 +201,7 @@ const Bubble: FC<BubbleProps> = ({
 	const showSenderName =
 		!isMyMessage &&
 		roomType !== RoomType.ONE_TO_ONE &&
-		(!prevMessageIsFromSameSender || (prevMessageIsFromSameSender && isPrevMessageDeleted));
+		(!prevMessageIsFromSameSender || isPrevMessageDeleted);
 
 	return (
 		<ForwardContainer
