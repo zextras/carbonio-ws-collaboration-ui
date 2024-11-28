@@ -27,26 +27,83 @@ beforeEach(() => {
 	store.setUserInfo(user3);
 });
 
+const chipTestId = 'reaction-chip';
+
 describe('ReactionChip', () => {
 	test('Display a reaction sent by one user', () => {
-		setup(<ReactionChip reaction={'\uD83D\uDC4D'} from={[user1.id]} />);
+		setup(
+			<ReactionChip
+				reaction={'\uD83D\uDC4D'}
+				from={[user1.id]}
+				roomId={'roomId'}
+				stanzaId={'stanzaId'}
+			/>
+		);
 		expect(screen.getByText('👍')).toBeInTheDocument();
 		expect(screen.getByText('U1')).toBeInTheDocument();
 	});
 
 	test('Display a reaction sent by multiple users', () => {
-		setup(<ReactionChip reaction={'\uD83D\uDC4D'} from={[user1.id, user2.id, user3.id]} />);
+		setup(
+			<ReactionChip
+				reaction={'\uD83D\uDC4D'}
+				from={[user1.id, user2.id, user3.id]}
+				roomId={'roomId'}
+				stanzaId={'stanzaId'}
+			/>
+		);
 		expect(screen.getByText('👍')).toBeInTheDocument();
 		expect(screen.getByText('3')).toBeInTheDocument();
 	});
 
 	test('Hovering over the chip shows a tooltip with the names of the users who sent the reaction', async () => {
 		const { user } = setup(
-			<ReactionChip reaction={'\uD83D\uDC4D'} from={[user1.id, user2.id, user3.id]} />
+			<ReactionChip
+				reaction={'\uD83D\uDC4D'}
+				from={[user1.id, user2.id, user3.id]}
+				roomId={'roomId'}
+				stanzaId={'stanzaId'}
+			/>
 		);
-		const container = screen.getByTestId('reaction-chip');
+		const container = screen.getByTestId(chipTestId);
 		await user.hover(container);
 		await screen.findByText('User 1, User 2, User 3');
 		expect(screen.getByText('User 1, User 2, User 3')).toBeInTheDocument();
+	});
+
+	test('Clicking on the chip sends a reaction if session user does not previous send id', async () => {
+		const spyOnSendChatMessageReaction = jest.spyOn(
+			useStore.getState().connections.xmppClient,
+			'sendChatMessageReaction'
+		);
+		const { user } = setup(
+			<ReactionChip
+				reaction={'\uD83D\uDC4D'}
+				from={[user1.id, user2.id, user3.id]}
+				roomId={'roomId'}
+				stanzaId={'stanzaId'}
+			/>
+		);
+		const container = screen.getByTestId(chipTestId);
+		await user.click(container);
+		expect(spyOnSendChatMessageReaction).toHaveBeenCalledWith('roomId', 'stanzaId', '\uD83D\uDC4D');
+	});
+
+	test('Clicking on the chip that the user sent remove it', async () => {
+		const spyOnSendChatMessageReaction = jest.spyOn(
+			useStore.getState().connections.xmppClient,
+			'sendChatMessageReaction'
+		);
+		const { user } = setup(
+			<ReactionChip
+				reaction={'\uD83D\uDC4D'}
+				from={[loggedUser.id, user2.id, user3.id]}
+				roomId={'roomId'}
+				stanzaId={'stanzaId'}
+			/>
+		);
+		const container = screen.getByTestId(chipTestId);
+		await user.click(container);
+		expect(spyOnSendChatMessageReaction).toHaveBeenCalledWith('roomId', 'stanzaId', '');
 	});
 });

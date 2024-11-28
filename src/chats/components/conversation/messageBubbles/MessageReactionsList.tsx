@@ -37,11 +37,17 @@ const MessageReactionsList: FC<BubbleReactionsProps> = ({ roomId, stanzaId }) =>
 	const reactionsList = useMemo(
 		() =>
 			reverse(
-				map(reactionGroup, (from, reaction) => (
-					<ReactionChip key={reaction} reaction={reaction} from={from} />
+				map(reactionGroup, (from: string[], reaction: string) => (
+					<ReactionChip
+						key={reaction}
+						reaction={reaction}
+						from={from}
+						roomId={roomId}
+						stanzaId={stanzaId}
+					/>
 				))
 			),
-		[reactionGroup]
+		[reactionGroup, roomId, stanzaId]
 	);
 
 	return (
