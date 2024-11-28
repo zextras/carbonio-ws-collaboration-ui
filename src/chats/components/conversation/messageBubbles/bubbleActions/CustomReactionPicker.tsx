@@ -19,7 +19,7 @@ type EmojiPickerProps = {
 
 const CustomReactionPicker: React.FC<EmojiPickerProps> = ({ onEmojiSelect }) => {
 	const pickerContainerRef = useRef<HTMLDivElement>(null);
-	const pickerRef = useRef<typeof Picker.prototype | null>(null);
+	const pickerRef = useRef<Picker | null>(null);
 
 	const sendCustomReaction = useCallback(
 		(emoji: Emoji) => onEmojiSelect(emoji.native),

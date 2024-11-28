@@ -60,7 +60,7 @@ const EmojiPicker: React.FC<EmojiPickerProps> = ({
 	emojiTimeoutRef
 }) => {
 	const pickerContainerRef = useRef<HTMLDivElement>(null);
-	const pickerRef = useRef<typeof Picker.prototype | null>(null);
+	const pickerRef = useRef<Picker | null>(null);
 
 	const isInsideMeeting = useMemo(() => window.location.pathname.includes(MEETINGS_PATH), []);
 
