@@ -10,6 +10,7 @@ import { getUserAccount, useAuthenticated, useUserSettings } from '@zextras/carb
 
 import CounterBadgeUpdater from './chats/components/CounterBadgeUpdater';
 import RegisterCreationButton from './chats/components/RegisterCreationButton';
+import RegisterVirtualRoomCreationButton from './chats/components/RegisterVirtualRoomCreationButton';
 import initChats from './chats/initChats';
 import initIntegrations from './integrations/initIntegrations';
 import MeetingNotificationHandler from './meetings/components/MeetingNotificationsHandler';
@@ -78,6 +79,7 @@ export default function App(): React.JSX.Element {
 	return (
 		<>
 			<RegisterCreationButton />
+			<RegisterVirtualRoomCreationButton />
 			<CounterBadgeUpdater />
 			<MeetingNotificationHandler />
 			<WaitingListSnackbar />

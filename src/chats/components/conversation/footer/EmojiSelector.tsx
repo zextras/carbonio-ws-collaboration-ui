@@ -3,14 +3,13 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { Button, Container, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import EmojiPicker from './EmojiPicker';
-import { MEETINGS_PATH } from '../../../../constants/appConstants';
 import { Emoji } from '../../../../types/generics';
 
 const EmojiButton = styled(Button)<{ alt?: string }>``;
@@ -27,8 +26,6 @@ const EmojiSelector: React.FC<EmojiSelectorProps> = ({ messageInputRef, setMessa
 
 	const emojiButtonRef = useRef<HTMLDivElement>(null);
 	const emojiTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
-
-	const isInsideMeeting = useMemo(() => window.location.pathname.includes(MEETINGS_PATH), []);
 
 	const mouseEnterEvent = useCallback(() => {
 		if (emojiButtonRef.current) {
@@ -83,7 +80,6 @@ const EmojiSelector: React.FC<EmojiSelectorProps> = ({ messageInputRef, setMessa
 					onEmojiSelect={insertEmojiInMessage}
 					setShowEmojiPicker={setShowEmojiPicker}
 					emojiTimeoutRef={emojiTimeoutRef}
-					isInsideMeeting={isInsideMeeting}
 				/>
 			)}
 			<Tooltip label={selectEmojiLabel}>
