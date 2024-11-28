@@ -33,6 +33,8 @@ const VisualEffectsAccordion: FC<VisualEffectsAccordionProps> = ({ meetingId }) 
 		[accordionStatus, meetingId, setVisualEffectsAccordionStatus]
 	);
 
+	const list = useMemo(() => <VisualEffectsList meetingId={meetingId} />, [meetingId]);
+
 	const items = useMemo<AccordionItemType[]>(() => {
 		const arrayOfActions: AccordionItemType[] = [
 			{
@@ -40,7 +42,7 @@ const VisualEffectsAccordion: FC<VisualEffectsAccordionProps> = ({ meetingId }) 
 				disableHover: true,
 				background: 'text',
 				label: 'title',
-				CustomComponent: () => <VisualEffectsList meetingId={meetingId} />
+				CustomComponent: () => list
 			}
 		];
 		return [
@@ -53,7 +55,7 @@ const VisualEffectsAccordion: FC<VisualEffectsAccordionProps> = ({ meetingId }) 
 				onClose: toggleAccordionStatus
 			}
 		];
-	}, [accordionStatus, meetingId, toggleAccordionStatus]);
+	}, [accordionStatus, list, toggleAccordionStatus]);
 
 	return <CustomAccordion items={items} borderRadius="none" background={'gray0'} />;
 };

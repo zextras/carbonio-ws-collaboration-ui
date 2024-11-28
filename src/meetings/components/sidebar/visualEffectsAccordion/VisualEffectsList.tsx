@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import React, { FC, useCallback, useMemo } from 'react';
+import React, { FC, useMemo } from 'react';
 
 import { Container, Icon, Text } from '@zextras/carbonio-design-system';
 import styled from 'styled-components';
@@ -41,13 +41,6 @@ const VisualEffectsList: FC<VisualEffectCardsProps> = ({ meetingId }) => {
 
 	const { virtualBackgroundImages } = useVirtualBackground();
 
-	const changeBackground = useCallback(
-		(type: VirtualBackgroundType) => {
-			setBackgroundImage(meetingId, type);
-		},
-		[meetingId, setBackgroundImage]
-	);
-
 	const rowsToRender = useMemo(() => {
 		const gridArray: React.ReactNode[] = [];
 		const chunks = getBackgroundChunks();
@@ -68,8 +61,11 @@ const VisualEffectsList: FC<VisualEffectCardsProps> = ({ meetingId }) => {
 
 				const isBlurOrNone =
 					element === VirtualBackgroundType.BLUR || element === VirtualBackgroundType.NONE;
-
 				const isSelected = element === backgroundSelected;
+
+				const changeBackground = (): void => {
+					setBackgroundImage(meetingId, element);
+				};
 
 				return (
 					<Container
@@ -82,7 +78,7 @@ const VisualEffectsList: FC<VisualEffectCardsProps> = ({ meetingId }) => {
 							maxHeight="7.267rem"
 							minWidth="6.5rem"
 							maxWidth="9.25rem"
-							onClick={() => changeBackground(element)}
+							onClick={changeBackground}
 							$picture={isBlurOrNone ? false : virtualBackgroundImages[element]}
 							$isSelected={isSelected}
 						>
@@ -111,7 +107,7 @@ const VisualEffectsList: FC<VisualEffectCardsProps> = ({ meetingId }) => {
 		});
 
 		return gridArray;
-	}, [backgroundSelected, changeBackground, virtualBackgroundImages]);
+	}, [backgroundSelected, meetingId, setBackgroundImage, virtualBackgroundImages]);
 
 	return (
 		<ListContainer minHeight="21.313rem" mainAlignment="flex-start" crossAlignment="flex-start">
