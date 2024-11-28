@@ -9,7 +9,7 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 
 import MeetingExternalAccessMobilePage from './MeetingExternalAccessMobilePage';
-import { mockedCreateGuestAccount } from '../../../tests/mocks/network';
+import { MeetingsApiToSpy, spyOnMeetingsApi } from '../../../tests/mocks/network';
 import { setup } from '../../../tests/test-utils';
 
 const typeHereLabel = 'Type here your name';
@@ -37,21 +37,25 @@ describe('MeetingExternalAccessMobilePage test', () => {
 	});
 
 	test('Create external user', async () => {
-		mockedCreateGuestAccount.mockResolvedValueOnce({});
+		const spyOnCreateGuestAccount = spyOnMeetingsApi(
+			MeetingsApiToSpy.CREATE_GUEST_ACCOUNT
+		).mockImplementation(() => Promise.resolve());
 		const { user } = setup(<MeetingExternalAccessMobilePage />);
 		const inputName = await screen.findByText(/Type here your name/i);
 		await user.type(inputName, 'John Doe');
 		const joinButton = await screen.findByRole('button', { name: /Join the meeting/i });
 		expect(joinButton).toBeVisible();
 		await user.click(joinButton);
-		expect(mockedCreateGuestAccount).toHaveBeenCalled();
+		expect(spyOnCreateGuestAccount).toHaveBeenCalled();
 	});
 
 	test('Create external user with enter key', async () => {
-		mockedCreateGuestAccount.mockResolvedValueOnce({});
+		const spyOnCreateGuestAccount = spyOnMeetingsApi(
+			MeetingsApiToSpy.CREATE_GUEST_ACCOUNT
+		).mockImplementation(() => Promise.resolve());
 		const { user } = setup(<MeetingExternalAccessMobilePage />);
 		const inputName = await screen.findByText(/Type here your name/i);
 		await user.type(inputName, 'John Doe {enter}');
-		expect(mockedCreateGuestAccount).toHaveBeenCalled();
+		expect(spyOnCreateGuestAccount).toHaveBeenCalled();
 	});
 });
