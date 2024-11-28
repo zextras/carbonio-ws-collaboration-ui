@@ -27,16 +27,11 @@ import { useParams } from 'react-router-dom';
 
 import { MeetingRoutesParams } from '../../../hooks/useRouting';
 import MeetingsApi from '../../../network/apis/MeetingsApi';
-import {
-	getIsBackgroundBlurred,
-	getSelectedVideoDeviceId
-} from '../../../store/selectors/ActiveMeetingSelectors';
+import { getSelectedVideoDeviceId } from '../../../store/selectors/ActiveMeetingSelectors';
 import { getParticipantVideoStatus } from '../../../store/selectors/MeetingSelectors';
-import { getCapability, getUserId } from '../../../store/selectors/SessionSelectors';
-import { getIsUserGuest } from '../../../store/selectors/UsersSelectors';
+import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
-import { CapabilityType } from '../../../types/store/SessionTypes';
 import { getVideoStream } from '../../../utils/UserMediaManager';
 
 type CamButtonProps = {
@@ -81,12 +76,6 @@ const CameraButton = ({
 	const videoOutConn = useStore((store) => store.activeMeeting[meetingId]?.videoOutConn);
 	const setSelectedDeviceId = useStore((store) => store.setSelectedDeviceId);
 	const setLocalStreams = useStore((store) => store.setLocalStreams);
-	const setBlur = useStore((store) => store.setBlur);
-	const isBlur = useStore((store) => getIsBackgroundBlurred(store, meetingId));
-	const canUseVirtualBackground = useStore((store) =>
-		getCapability(store, CapabilityType.CAN_USE_VIRTUAL_BACKGROUND)
-	);
-	const isUserGuest = useStore((store) => getIsUserGuest(store, myUserId ?? ''));
 	const websocketNetworkStatus = useStore(({ connections }) => connections.status.websocket);
 
 	const [buttonStatus, setButtonStatus] = useState<boolean>(true);
@@ -117,7 +106,6 @@ const CameraButton = ({
 				label: videoItem.label ? videoItem.label : `device-${i}`,
 				onClick: (): void => {
 					if (videoStatus) {
-						setBlur(meetingId, false);
 						getVideoStream(videoItem.deviceId).then((stream) => {
 							videoOutConn?.updateLocalStreamTrack(stream).then(() => {
 								setLocalStreams(meetingId, STREAM_TYPE.VIDEO, stream);
@@ -139,7 +127,6 @@ const CameraButton = ({
 			selectedVideoDeviceId,
 			selectedDeviceTooltip,
 			videoStatus,
-			setBlur,
 			meetingId,
 			videoOutConn,
 			setLocalStreams,
@@ -147,29 +134,8 @@ const CameraButton = ({
 		]
 	);
 
-	const onCLickBlur = useCallback(() => {
-		setBlur(meetingId, !isBlur);
-	}, [isBlur, meetingId, setBlur]);
-
 	const dropdownList = useMemo(() => {
 		const list: DropdownItem[] = [];
-		if (canUseVirtualBackground ?? isUserGuest) {
-			list.push({
-				id: 'video-effect',
-				label: videoEffectTitle,
-				disabled: true,
-				customComponent: <Text weight="bold">{videoEffectTitle}</Text>
-			});
-			list.push({
-				id: 'blur',
-				icon: isBlur ? 'Avatar' : 'AvatarOutline',
-				label: isBlur ? removeBlurLabel : applyBlurLabel,
-				disabled: !videoStatus,
-				tooltipLabel: !videoStatus ? turnOnCameraTooltip : undefined,
-				onClick: onCLickBlur
-			});
-			list.push({ type: 'divider', id: 'divider', label: 'divider' });
-		}
 		list.push({
 			id: 'devices',
 			label: devicesTitle,
@@ -177,19 +143,7 @@ const CameraButton = ({
 			customComponent: <Text weight="bold">{devicesTitle}</Text>
 		});
 		return list.concat(mediaVideoList);
-	}, [
-		canUseVirtualBackground,
-		isUserGuest,
-		devicesTitle,
-		mediaVideoList,
-		videoEffectTitle,
-		isBlur,
-		removeBlurLabel,
-		applyBlurLabel,
-		videoStatus,
-		turnOnCameraTooltip,
-		onCLickBlur
-	]);
+	}, [devicesTitle, mediaVideoList]);
 
 	const toggleVideoDropdown = useCallback(() => {
 		setIsVideoListOpen((prevState) => !prevState);
@@ -220,10 +174,9 @@ const CameraButton = ({
 				}
 			} else {
 				videoOutConn?.stopVideo();
-				setBlur(meetingId, false);
 			}
 		},
-		[videoStatus, videoOutConn, selectedVideoDeviceId, mediaPermissionSnackbar, meetingId, setBlur]
+		[videoStatus, videoOutConn, selectedVideoDeviceId, mediaPermissionSnackbar, meetingId]
 	);
 
 	const updateListOfDevices = useCallback(() => {

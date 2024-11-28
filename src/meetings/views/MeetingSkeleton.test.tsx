@@ -5,7 +5,7 @@
  */
 import React from 'react';
 
-import { screen, waitFor, act } from '@testing-library/react';
+import { act, screen, waitFor } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event';
 
 import MeetingSkeleton from './MeetingSkeleton';
@@ -27,7 +27,7 @@ import { setup } from '../../tests/test-utils';
 import { MeetingBe } from '../../types/network/models/meetingBeTypes';
 import { MemberBe, RoomBe } from '../../types/network/models/roomBeTypes';
 import { UserBe } from '../../types/network/models/userBeTypes';
-import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
+import { STREAM_TYPE, VirtualBackgroundType } from '../../types/store/ActiveMeetingTypes';
 import { MeetingParticipant } from '../../types/store/MeetingTypes';
 import { RoomType } from '../../types/store/RoomTypes';
 import { RootStore } from '../../types/store/StoreTypes';
@@ -221,7 +221,7 @@ describe('Virtual Background setup', () => {
 
 		// turn on blur
 		act(() => {
-			store.setBlur(meeting.id, true);
+			store.setBackgroundImage(meeting.id, VirtualBackgroundType.BLUR);
 		});
 
 		await waitFor(() => {
@@ -232,7 +232,7 @@ describe('Virtual Background setup', () => {
 
 		// turn off blur
 		act(() => {
-			store.setBlur(meeting.id, false);
+			store.setBackgroundImage(meeting.id, VirtualBackgroundType.NONE);
 		});
 		const updatedStore2 = useStore.getState();
 		expect(

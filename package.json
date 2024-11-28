@@ -64,7 +64,7 @@
 	},
 	"dependencies": {
 		"@emoji-mart/data": "^1.0.2",
-		"@mediapipe/selfie_segmentation": "^0.1.1632777926",
+		"@mediapipe/selfie_segmentation": "^0.1.1675465747",
 		"@zextras/carbonio-design-system": "8.0.0",
 		"@zextras/carbonio-shell-ui": "devel",
 		"@zextras/carbonio-ui-preview": "3.0.0",

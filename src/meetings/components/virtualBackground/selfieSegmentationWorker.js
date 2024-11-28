@@ -20,7 +20,7 @@ self.onmessage = (e) => {
 			globalTimer = setInterval(() => {
 				// eslint-disable-next-line no-restricted-globals
 				self.postMessage('update');
-			}, 1000 / 30);
+			}, 1000 / 90);
 			break;
 		case 'stop':
 			clearInterval(globalTimer);

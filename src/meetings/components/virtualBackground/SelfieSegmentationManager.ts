@@ -13,19 +13,23 @@ import selfie_segmentation_landscape from '@mediapipe/selfie_segmentation/selfie
 import selfie_segmentation_solution_simd_wasm_bin from '@mediapipe/selfie_segmentation/selfie_segmentation_solution_simd_wasm_bin';
 import selfie_segmentation_solution_simd_wasm_bin_wasm from '@mediapipe/selfie_segmentation/selfie_segmentation_solution_simd_wasm_bin.wasm';
 
+import { VirtualBackgroundType } from '../../../types/store/ActiveMeetingTypes';
+
 export interface ISelfieSegmentation {
+	setResultsCallback(callback: (results: Results) => void, type: VirtualBackgroundType): void;
 	initialize(): Promise<void>;
 	send(input: HTMLVideoElement | null): Promise<void>;
+	close(): void;
 }
 
 export default class SelfieSegmentationManager implements ISelfieSegmentation {
-	private readonly onResultsCallback: (results: Results) => void;
+	private onResultsCallback: (results: Results) => void;
+
+	private type: VirtualBackgroundType;
 
 	private selfieSegmentation: SelfieSegmentation;
 
-	constructor(onResultsCallback: (results: Results) => void) {
-		this.onResultsCallback = onResultsCallback;
-
+	constructor() {
 		this.selfieSegmentation = new SelfieSegmentation({
 			locateFile: (file: string): string => {
 				switch (file) {
@@ -60,17 +64,38 @@ export default class SelfieSegmentationManager implements ISelfieSegmentation {
 		}
 	}
 
+	public setResultsCallback(
+		callback: (results: Results) => void,
+		type: VirtualBackgroundType
+	): void {
+		if (!(this.type === 'none' || this.type === 'blur') && !(type === 'none' || type === 'blur')) {
+			this.onResultsCallback = callback;
+		}
+		this.type = type;
+	}
+
 	public async initialize(): Promise<void> {
 		try {
 			await this.selfieSegmentation.initialize();
 		} catch (error) {
-			console.error('Error douring selfieSegmentation initialization: ', error);
+			console.error('Error during selfieSegmentation initialization: ', error);
 		}
 	}
 
 	public async send(input: HTMLVideoElement | null): Promise<void> {
 		if (input) {
 			await this.selfieSegmentation.send({ image: input });
+		}
+	}
+
+	public async close(): void {
+		try {
+			if (this.selfieSegmentation) {
+				await this.selfieSegmentation.close();
+				this.selfieSegmentation = null;
+			}
+		} catch (error) {
+			console.error('Errore durante la chiusura di selfieSegmentation:', error);
 		}
 	}
 }
