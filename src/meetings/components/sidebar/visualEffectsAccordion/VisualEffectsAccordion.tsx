@@ -7,6 +7,7 @@
 import React, { FC, useCallback, useMemo } from 'react';
 
 import { Accordion, AccordionItemType } from '@zextras/carbonio-design-system';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import VisualEffectsList from './VisualEffectsList';
@@ -23,6 +24,9 @@ type VisualEffectsAccordionProps = {
 };
 
 const VisualEffectsAccordion: FC<VisualEffectsAccordionProps> = ({ meetingId }) => {
+	const [t] = useTranslation();
+	const accordionLabel = t('meeting.visualEffects.title', 'Visual Effects');
+
 	const accordionStatus = useStore((state) => getVisualEffectsAccordionStatus(state, meetingId));
 	const setVisualEffectsAccordionStatus = useStore(
 		(state) => state.setVisualEffectsAccordionStatus
@@ -48,14 +52,14 @@ const VisualEffectsAccordion: FC<VisualEffectsAccordionProps> = ({ meetingId }) 
 		return [
 			{
 				id: 'ParticipantAccordion',
-				label: 'Visual effects',
+				label: accordionLabel,
 				open: accordionStatus,
 				items: arrayOfActions,
 				onOpen: toggleAccordionStatus,
 				onClose: toggleAccordionStatus
 			}
 		];
-	}, [accordionStatus, list, toggleAccordionStatus]);
+	}, [accordionLabel, accordionStatus, list, toggleAccordionStatus]);
 
 	return <CustomAccordion items={items} borderRadius="none" background={'gray0'} />;
 };

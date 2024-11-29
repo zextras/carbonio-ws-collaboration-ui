@@ -17,7 +17,6 @@ import {
 	CreateSnackbarFn,
 	DropdownItem,
 	MultiButton,
-	Text,
 	Tooltip,
 	useSnackbar
 } from '@zextras/carbonio-design-system';
@@ -53,14 +52,6 @@ const CameraButton = ({
 	const giveMediaPermissionSnackbar = t(
 		'meeting.interactions.browserPermission',
 		'Grant browser permissions to enable resources'
-	);
-	const devicesTitle = t('meeting.interactions.title.devices', 'Devices');
-	const videoEffectTitle = t('meeting.interactions.title.videoEffect', 'Video effect');
-	const removeBlurLabel = t('meeting.interactions.option.removeBlur', 'Remove blur effect');
-	const applyBlurLabel = t('meeting.interactions.option.applyBlur', 'Apply blur effect');
-	const turnOnCameraTooltip = t(
-		'meeting.interactions.userHint',
-		'Turn on the camera to select a video effect'
 	);
 	const selectedDeviceTooltip = t('meeting.interactions.selectedDeviceTooltip', 'Selected device');
 	const disableButtonLabel = t(
@@ -133,17 +124,6 @@ const CameraButton = ({
 			setSelectedDeviceId
 		]
 	);
-
-	const dropdownList = useMemo(() => {
-		const list: DropdownItem[] = [];
-		list.push({
-			id: 'devices',
-			label: devicesTitle,
-			disabled: true,
-			customComponent: <Text weight="bold">{devicesTitle}</Text>
-		});
-		return list.concat(mediaVideoList);
-	}, [devicesTitle, mediaVideoList]);
 
 	const toggleVideoDropdown = useCallback(() => {
 		setIsVideoListOpen((prevState) => !prevState);
@@ -221,14 +201,14 @@ const CameraButton = ({
 				primaryIcon={videoStatus ? 'Video' : 'VideoOff'}
 				icon={isVideoListOpen ? 'ChevronDown' : 'ChevronUp'}
 				onClick={toggleVideoStream}
-				items={dropdownList}
+				items={mediaVideoList}
 				size="large"
 				shape="regular"
 				dropdownProps={{
 					forceOpen: isVideoListOpen,
 					onClick: toggleVideoDropdown,
 					dropdownListRef: videoDropdownRef,
-					items: dropdownList,
+					items: mediaVideoList,
 					width: 'fit-content'
 				}}
 				disabledPrimary={!buttonStatus || !websocketNetworkStatus}

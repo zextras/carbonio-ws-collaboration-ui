@@ -6,6 +6,7 @@
 import React, { FC, useMemo } from 'react';
 
 import { Container, Icon, Text } from '@zextras/carbonio-design-system';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import useVirtualBackground from '../../../../hooks/useVirtualBackground';
@@ -36,6 +37,7 @@ const ListContainer = styled(Container)`
 `;
 
 const VisualEffectsList: FC<VisualEffectCardsProps> = ({ meetingId }) => {
+	const [t] = useTranslation();
 	const setBackgroundImage = useStore((store) => store.setBackgroundImage);
 	const backgroundSelected = useStore((store) => getBackgroundImage(store, meetingId));
 
@@ -67,6 +69,11 @@ const VisualEffectsList: FC<VisualEffectCardsProps> = ({ meetingId }) => {
 					setBackgroundImage(meetingId, element);
 				};
 
+				const elementLabel =
+					element === VirtualBackgroundType.BLUR
+						? t('meeting.visualEffects.blur', 'Blur')
+						: t('meeting.visualEffects.none', 'None');
+
 				return (
 					<Container
 						key={`background-${i}-${element}`}
@@ -82,11 +89,15 @@ const VisualEffectsList: FC<VisualEffectCardsProps> = ({ meetingId }) => {
 							data-testid={`${element}`}
 							$picture={isBlurOrNone ? false : virtualBackgroundImages[element]}
 							$isSelected={isSelected}
+							gap="0.5rem"
 						>
 							{isBlurOrNone && (
-								<Icon icon={element === VirtualBackgroundType.BLUR ? 'Blur' : 'Slash'} />
+								<Icon
+									size="large"
+									icon={element === VirtualBackgroundType.BLUR ? 'Blur' : 'Slash'}
+								/>
 							)}
-							{isBlurOrNone && <Text>{element}</Text>}
+							{isBlurOrNone && <Text>{elementLabel}</Text>}
 						</PictureContainer>
 					</Container>
 				);
@@ -108,10 +119,15 @@ const VisualEffectsList: FC<VisualEffectCardsProps> = ({ meetingId }) => {
 		});
 
 		return gridArray;
-	}, [backgroundSelected, meetingId, setBackgroundImage, virtualBackgroundImages]);
+	}, [backgroundSelected, meetingId, setBackgroundImage, t, virtualBackgroundImages]);
 
 	return (
-		<ListContainer minHeight="21.313rem" mainAlignment="flex-start" crossAlignment="flex-start">
+		<ListContainer
+			padding={{ vertical: '0.5rem' }}
+			minHeight="18.527rem"
+			mainAlignment="flex-start"
+			crossAlignment="flex-start"
+		>
 			{rowsToRender}
 		</ListContainer>
 	);
