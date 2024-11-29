@@ -35,6 +35,10 @@ import { User } from '../../../types/store/UserTypes';
 const fromId = 'c755b1d5-08dd-49d8-bec8-59074090ef1b';
 const helloString = 'Hello guys!';
 
+const userA = createMockUser({ id: 'userA', name: 'userA' });
+const userB = createMockUser({ id: 'userB', name: 'userB' });
+const userC = createMockUser({ id: 'userC', name: 'userC' });
+
 const user2Be: User = createMockUser({
 	id: 'user2',
 	email: 'user2@domain.com',
@@ -124,48 +128,25 @@ const mockedConfigurationMessage: ConfigurationMessage = {
 	read: MarkerStatus.READ
 };
 
-const messages: TextMessage[] = [
-	{
-		id: '1111-409408-555555',
+const generateListMessage = (entries: Partial<TextMessage>[]): TextMessage[] =>
+	entries.map((msg, idx) => ({
+		id: `${idx.toString().repeat(4)}-${idx.toString().repeat(4)}-${idx.toString().repeat(4)}`,
 		roomId: 'Room-Id',
 		date: 1665409408796,
+		stanzaId: `stanzaId-${idx.toString().repeat(4)}`,
 		type: MessageType.TEXT_MSG,
-		stanzaId: 'stanzaId-1111-409408-555555',
-		from: fromId,
-		text: '11111',
-		read: MarkerStatus.READ
-	},
-	{
-		id: '2222-409408-222222',
-		roomId: 'Room-Id',
-		date: 1665409408796,
-		type: MessageType.TEXT_MSG,
-		stanzaId: 'stanzaId-2222-409408-222222',
-		from: fromId,
-		text: '22222',
-		read: MarkerStatus.READ
-	},
-	{
-		id: '3333-409408-333333',
-		roomId: 'Room-Id',
-		date: 1665409408796,
-		type: MessageType.TEXT_MSG,
-		stanzaId: 'stanzaId-3333-409408-333333',
-		from: fromId,
-		text: '33333',
-		read: MarkerStatus.READ
-	},
-	{
-		id: '4444-409408-444444',
-		roomId: 'Room-Id',
-		date: 1665409408796,
-		type: MessageType.TEXT_MSG,
-		stanzaId: 'stanzaId-4444-409408-444444',
-		from: fromId,
-		text: '44444',
-		read: MarkerStatus.READ
-	}
-];
+		from: 'fromId',
+		text: `${idx.toString().repeat(4)}`,
+		read: MarkerStatus.READ,
+		...msg
+	}));
+
+const messages = generateListMessage([
+	{ from: fromId },
+	{ from: fromId },
+	{ from: fromId },
+	{ from: fromId }
+]);
 
 describe('render list of messages with history loader visible for first time opening the conversation', () => {
 	test('Render the list of messages', () => {
@@ -462,6 +443,75 @@ describe('Scroll position', () => {
 		store.addUnreadCount(room.id, 1);
 		setup(<MessagesList roomId={room.id} />);
 		expect(mockedScrollToEnd).toHaveBeenCalled();
+	});
+});
+
+describe('Display group of messages', () => {
+	test('Display a group of messages sent as: first user A, 3 messages user B , last user C', async () => {
+		const mockedRoom: RoomBe = createMockRoom({ id: 'roomTest' });
+		const messages = generateListMessage([
+			{ roomId: mockedRoom.id, from: userA.id },
+			{ roomId: mockedRoom.id, from: userB.id },
+			{ roomId: mockedRoom.id, from: userB.id },
+			{ roomId: mockedRoom.id, from: userB.id },
+			{ roomId: mockedRoom.id, from: userC.id }
+		]);
+		const { result } = renderHook(() => useStore());
+		act(() => {
+			result.current.setLoginInfo('userId', 'User');
+			result.current.setUserInfo(userA);
+			result.current.setUserInfo(userB);
+			result.current.setUserInfo(userC);
+			result.current.addRoom(mockedRoom);
+		});
+
+		setup(<MessagesList roomId={mockedRoom.id} />);
+
+		act(() => {
+			result.current.setHistoryIsFullyLoaded(mockedRoom.id);
+			result.current.updateHistory(mockedRoom.id, messages);
+			result.current.addCreateRoomMessage(mockedRoom.id);
+		});
+
+		const bubbleHeaders = await screen.findAllByTestId(/^bubbleHeader-.*/);
+		expect(bubbleHeaders.length).toEqual(3);
+		expect(bubbleHeaders[0]).toHaveTextContent(userA.id);
+		expect(bubbleHeaders[1]).toHaveTextContent(userB.id);
+		expect(bubbleHeaders[2]).toHaveTextContent(userC.id);
+	});
+
+	test('Display a group of messages sent as: first user A, 3 messages user B (second is deleted) , last user C', async () => {
+		const mockedRoom: RoomBe = createMockRoom({ id: 'roomTest' });
+		const messages = generateListMessage([
+			{ roomId: mockedRoom.id, from: userA.id },
+			{ roomId: mockedRoom.id, from: userB.id },
+			{ roomId: mockedRoom.id, from: userB.id, deleted: true },
+			{ roomId: mockedRoom.id, from: userB.id },
+			{ roomId: mockedRoom.id, from: userC.id }
+		]);
+		const { result } = renderHook(() => useStore());
+		act(() => {
+			result.current.setLoginInfo('userId', 'User');
+			result.current.setUserInfo(userA);
+			result.current.setUserInfo(userB);
+			result.current.setUserInfo(userC);
+			result.current.addRoom(mockedRoom);
+		});
+
+		setup(<MessagesList roomId={mockedRoom.id} />);
+
+		act(() => {
+			result.current.setHistoryIsFullyLoaded(mockedRoom.id);
+			result.current.updateHistory(mockedRoom.id, messages);
+			result.current.addCreateRoomMessage(mockedRoom.id);
+		});
+
+		const bubbleHeaders = await screen.findAllByTestId(/^bubbleHeader-.*/);
+		expect(bubbleHeaders.length).toEqual(4);
+		expect(bubbleHeaders[0]).toHaveTextContent(userA.id);
+		expect(bubbleHeaders[1]).toHaveTextContent(userB.id);
+		expect(bubbleHeaders[2]).toHaveTextContent(userB.id);
+		expect(bubbleHeaders[3]).toHaveTextContent(userC.id);
 	});
 });
 

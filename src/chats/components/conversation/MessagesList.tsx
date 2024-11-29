@@ -204,6 +204,9 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 					message.type === MessageType.TEXT_MSG &&
 					prevMessage?.type === MessageType.TEXT_MSG &&
 					prevMessage.from === message.from;
+				const isPrevMessageDeleted = !!(
+					prevMessage?.type === MessageType.TEXT_MSG && prevMessage?.deleted
+				);
 
 				const nextMessage = wrapper[index + 1];
 				const nextMessageIsFromSameSender =
@@ -221,6 +224,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 						messageRef={messageRef}
 						messageListRef={messageListRef}
 						isFirstNewMessage={firstNewMessage === message.id}
+						isPrevMessageDeleted={isPrevMessageDeleted}
 					/>
 				);
 			});
