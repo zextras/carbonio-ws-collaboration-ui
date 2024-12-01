@@ -68,7 +68,7 @@
 		"@mediapipe/selfie_segmentation": "^0.1.1632777926",
 		"@zextras/carbonio-design-system": "8.0.0",
 		"@zextras/carbonio-shell-ui": "devel",
-		"@zextras/carbonio-ui-preview": "3.0.0",
+		"@zextras/carbonio-ui-preview": "3.1.0",
 		"emoji-mart": "5.6.0",
 		"identity-obj-proxy": "^3.0.0",
 		"immer": "^10.0.3",
