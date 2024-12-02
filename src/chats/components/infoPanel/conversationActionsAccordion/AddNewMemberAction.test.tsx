@@ -92,7 +92,7 @@ describe('Add new member action', () => {
 		const chipInput = await screen.findByTestId('chip_input_creation_modal');
 		await user.type(chipInput, zimbraUser2.displayName[0]);
 
-		await screen.findByText('spinner');
+		await screen.findByTestId('spinner');
 		const list = await screen.findByTestId('list_creation_modal');
 		expect(list).toBeVisible();
 

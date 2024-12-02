@@ -6,7 +6,6 @@
 import React, { Dispatch, FC, SetStateAction, useCallback, useMemo, useRef, useState } from 'react';
 
 import {
-	Button,
 	CreateSnackbarFn,
 	Input,
 	Modal,
@@ -14,20 +13,23 @@ import {
 	Text,
 	useSnackbar
 } from '@zextras/carbonio-design-system';
-import { size } from 'lodash';
+import { map, size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
+import ModeratorsContactsSelection from './ModeratorsContactsSelection';
 import { RoomsApi } from '../../../../network';
+import { MemberBe } from '../../../../types/network/models/roomBeTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
+import { ContactSelected } from '../../creationModal/ChatCreationContactsSelection';
 
-type CreateVirtualRoomButtonProps = {
+type CreateVirtualRoomModalProps = {
 	toggleModal: () => void;
 	showCreationModal: boolean;
 	setShowCreationModal: Dispatch<SetStateAction<boolean>>;
 	createModalRef: React.RefObject<HTMLDivElement>;
 };
 
-const CreateVirtualRoomButton: FC<CreateVirtualRoomButtonProps> = ({
+const CreateVirtualRoomModal: FC<CreateVirtualRoomModalProps> = ({
 	toggleModal,
 	showCreationModal,
 	setShowCreationModal,
@@ -55,20 +57,33 @@ const CreateVirtualRoomButton: FC<CreateVirtualRoomButtonProps> = ({
 		'meeting.virtual.modal.description',
 		'Give to this Room a recognizable name in order to let your attendees know what they are expecting to meet about.'
 	);
+	const addModeratorsDescription = t(
+		'meeting.virtual.modal.moderator.description',
+		'You will moderate this Room. The additional moderator will be added as collaborators with the same privileges.'
+	);
 
 	const [nameError, setNameError] = useState(false);
 	const [canCreateVirtualRoom, setCanCreateVirtualRoom] = useState(false);
+	const [contactsSelected, setContactsSelected] = useState<ContactSelected>({});
 
 	const textRef = useRef<HTMLInputElement>(null);
+	const contactInputRef = useRef<HTMLInputElement>(null);
 
 	const createSnackbar: CreateSnackbarFn = useSnackbar();
 
 	const handleCreateButtonClick = useCallback(() => {
+		const newOwnersToAdd: MemberBe[] = map(contactsSelected, (contactChip) => ({
+			userId: contactChip.id,
+			owner: true
+		}));
+
 		RoomsApi.addRoom({
 			name: textRef.current?.value ?? '',
-			type: RoomType.TEMPORARY
+			type: RoomType.TEMPORARY,
+			members: newOwnersToAdd
 		})
 			.then(() => {
+				setContactsSelected({});
 				setCanCreateVirtualRoom(false);
 				setShowCreationModal(false);
 			})
@@ -80,7 +95,7 @@ const CreateVirtualRoomButton: FC<CreateVirtualRoomButtonProps> = ({
 					hideButton: true
 				});
 			});
-	}, [createSnackbar, errorSnackbar, setShowCreationModal]);
+	}, [contactsSelected, createSnackbar, errorSnackbar, setShowCreationModal]);
 
 	const createVirtualRoomTooltip = useMemo(() => {
 		if (nameError) return invalidNameString;
@@ -103,36 +118,47 @@ const CreateVirtualRoomButton: FC<CreateVirtualRoomButtonProps> = ({
 		}
 	}, []);
 
+	const handleCloseModal = useCallback(() => {
+		toggleModal();
+		setContactsSelected({});
+	}, [toggleModal]);
+
 	return (
-		<>
-			<Button label="Create new Room" color="primary" width="fill" onClick={toggleModal} />
-			<Modal
-				open={showCreationModal}
-				title={createTooltip}
-				confirmColor="primary"
-				onConfirm={handleCreateButtonClick}
-				confirmLabel="create"
-				confirmDisabled={!canCreateVirtualRoom}
-				confirmTooltip={createVirtualRoomTooltip}
-				showCloseIcon
-				onClose={toggleModal}
-				closeIconTooltip={closeLabel}
-				ref={createModalRef}
-			>
-				<Text overflow="break-word" size="small">
-					{newRoomModalDescription}
-				</Text>
-				<Padding bottom="1rem" />
-				<Input
-					label={virtualRoomNameInput}
-					inputRef={textRef}
-					onChange={handleOnChangeInput}
-					hasError={nameError}
-					description={nameError ? invalidNameCaption : ''}
-				/>
-			</Modal>
-		</>
+		<Modal
+			open={showCreationModal}
+			title={createTooltip}
+			confirmColor="primary"
+			onConfirm={handleCreateButtonClick}
+			confirmLabel="create"
+			confirmDisabled={!canCreateVirtualRoom}
+			confirmTooltip={createVirtualRoomTooltip}
+			showCloseIcon
+			onClose={handleCloseModal}
+			closeIconTooltip={closeLabel}
+			ref={createModalRef}
+		>
+			<Text overflow="break-word" size="small">
+				{newRoomModalDescription}
+			</Text>
+			<Padding bottom="1rem" />
+			<Input
+				label={virtualRoomNameInput}
+				inputRef={textRef}
+				onChange={handleOnChangeInput}
+				hasError={nameError}
+				description={nameError ? invalidNameCaption : ''}
+			/>
+			<Text overflow="break-word" size="small">
+				{addModeratorsDescription}
+			</Text>
+			<Padding bottom="1rem" />
+			<ModeratorsContactsSelection
+				contactsSelected={contactsSelected}
+				setContactSelected={setContactsSelected}
+				inputRef={contactInputRef}
+			/>
+		</Modal>
 	);
 };
 
-export default CreateVirtualRoomButton;
+export default CreateVirtualRoomModal;

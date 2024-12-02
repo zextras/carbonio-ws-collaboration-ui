@@ -1,6 +1,6 @@
 {
 	"name": "carbonio-ws-collaboration-ui",
-	"version": "0.9.11",
+	"version": "0.9.12",
 	"description": "Chats Module for Zextras Carbonio",
 	"main": "src/app.jsx",
 	"scripts": {
@@ -64,12 +64,12 @@
 		"ts-node": "^10.9.2"
 	},
 	"dependencies": {
-		"@emoji-mart/data": "^1.0.2",
+		"@emoji-mart/data": "1.2.1",
 		"@mediapipe/selfie_segmentation": "^0.1.1632777926",
 		"@zextras/carbonio-design-system": "9.0.0-devel.5",
 		"@zextras/carbonio-shell-ui": "devel",
 		"@zextras/carbonio-ui-preview": "3.1.0-devel.1",
-		"emoji-mart": "^5.1.0",
+		"emoji-mart": "5.6.0",
 		"identity-obj-proxy": "^3.0.0",
 		"immer": "^10.0.3",
 		"lodash": "4.17.21",

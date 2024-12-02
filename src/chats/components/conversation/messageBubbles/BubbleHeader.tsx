@@ -24,7 +24,12 @@ const BubbleHeader: FC<BubbleHeaderProps> = ({ senderId }) => {
 	const { avatarColor } = useAvatarUtilities(senderId);
 
 	return (
-		<Container orientation="horizontal" mainAlignment="flex-start" gap={'0.25rem'}>
+		<Container
+			data-testid={`bubbleHeader-${senderId}`}
+			orientation="horizontal"
+			mainAlignment="flex-start"
+			gap={'0.25rem'}
+		>
 			<Text color={avatarColor} weight="bold">
 				{senderName}
 			</Text>
