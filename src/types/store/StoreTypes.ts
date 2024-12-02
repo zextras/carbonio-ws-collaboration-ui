@@ -131,6 +131,7 @@ export type ActiveConversationsSlice = {
 	unsetFilesToAttach: (roomId: string) => void;
 	setForwardMessageList: (roomId: string, message: TextMessage) => void;
 	unsetForwardMessageList: (roomId: string, message?: TextMessage) => void;
+	setNewReaction: (roomId: string, stanzaId: string, reaction: string) => void;
 };
 
 export type ConnectionsStoreSlice = {

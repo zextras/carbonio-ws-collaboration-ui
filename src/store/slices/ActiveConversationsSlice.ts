@@ -9,8 +9,14 @@ import { produce } from 'immer';
 import { find, findIndex, forEach, orderBy, remove } from 'lodash';
 import { StateCreator } from 'zustand';
 
+import { isMyId } from '../../network/websocket/eventHandlersUtilities';
 import { FileToUpload, messageActionType } from '../../types/store/ActiveConversationTypes';
-import { AttachmentMessageType, Message, TextMessage } from '../../types/store/MessageTypes';
+import {
+	AttachmentMessageType,
+	Message,
+	MessageType,
+	TextMessage
+} from '../../types/store/MessageTypes';
 import { ActiveConversationsSlice, RootStore } from '../../types/store/StoreTypes';
 import { isBefore } from '../../utils/dateUtils';
 
@@ -27,6 +33,11 @@ export const useActiveConversationsSlice: StateCreator<ActiveConversationsSlice>
 					draft.activeConversations[roomId] = {
 						inputHasFocus: hasFocus
 					};
+				}
+
+				// Remove newReactions
+				if (hasFocus && draft.activeConversations[roomId].newReactions) {
+					delete draft.activeConversations[roomId].newReactions;
 				}
 			}),
 			false,
@@ -379,6 +390,33 @@ export const useActiveConversationsSlice: StateCreator<ActiveConversationsSlice>
 			}),
 			false,
 			'AC/UNSET_FORWARD_MESSAGE_LIST'
+		);
+	},
+	setNewReaction(roomId: string, stanzaId: string, reaction: string): void {
+		set(
+			produce((draft: RootStore) => {
+				const originalMessage = find(
+					draft.messages[roomId],
+					(message) => message.type === MessageType.TEXT_MSG && message.stanzaId === stanzaId
+				) as TextMessage;
+				if (!isMyId(originalMessage.from)) return;
+
+				if (!draft.activeConversations[roomId]) draft.activeConversations[roomId] = {};
+				if (!draft.activeConversations[roomId].newReactions)
+					draft.activeConversations[roomId].newReactions = {};
+
+				const reactions = draft.activeConversations[roomId].newReactions?.[stanzaId] || [];
+				if (reactions.includes(reaction)) return;
+				if (reaction === '') remove(reactions, (r) => r === reaction);
+				else reactions.push(reaction);
+
+				draft.activeConversations[roomId].newReactions = {
+					...draft.activeConversations[roomId].newReactions,
+					[stanzaId]: reactions
+				};
+			}),
+			false,
+			'AC/SET_NEW_REACTION'
 		);
 	}
 });

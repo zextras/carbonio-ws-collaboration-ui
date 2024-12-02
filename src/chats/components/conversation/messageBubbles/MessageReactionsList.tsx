@@ -12,6 +12,7 @@ import styled from 'styled-components';
 
 import { ReactionType } from './bubbleActions/useBubbleReactions';
 import ReactionChip from './ReactionChip';
+import { getNewReactions } from '../../../../store/selectors/ActiveConversationsSelectors';
 import { getReactionFastenings } from '../../../../store/selectors/FasteningsSelectors';
 import useStore from '../../../../store/Store';
 
@@ -26,9 +27,7 @@ const ReactionChipContainer = styled(Container)`
 
 const MessageReactionsList: FC<BubbleReactionsProps> = ({ roomId, stanzaId }) => {
 	const reactions = useStore((store) => getReactionFastenings(store, roomId, stanzaId));
-
-	// TODO: get info from store
-	const newReactionsToMyMessage = useMemo(() => [ReactionType.THUMBS_UP], []);
+	const newReactionsToMyMessage = useStore((store) => getNewReactions(store, roomId, stanzaId));
 
 	const reactionGroup = useMemo(() => {
 		const reactionGroup: { [reaction: string]: string[] } = {};

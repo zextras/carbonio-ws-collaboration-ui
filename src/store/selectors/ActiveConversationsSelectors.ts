@@ -86,3 +86,11 @@ export const maxForwardLimitNotReached = (store: RootStore, roomId: string): boo
 	}
 	return true;
 };
+
+export const getNewReactions = (store: RootStore, roomId: string, stanzaId: string): string[] => {
+	const activeConversations = store.activeConversations[roomId];
+	if (activeConversations?.newReactions) {
+		return activeConversations.newReactions[stanzaId] || [];
+	}
+	return [];
+};
