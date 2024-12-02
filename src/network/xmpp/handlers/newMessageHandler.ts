@@ -57,6 +57,7 @@ export function onNewMessageStanza(message: Element): true {
 
 					if (newMessage.action === FasteningAction.REACTION && newMessage.from !== sessionId) {
 						displayReactionBrowserNotification(newMessage);
+						// TODO add to the store new reaction information
 					}
 					break;
 				}

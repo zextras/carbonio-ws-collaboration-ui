@@ -27,6 +27,9 @@ const ReactionChipContainer = styled(Container)`
 const MessageReactionsList: FC<BubbleReactionsProps> = ({ roomId, stanzaId }) => {
 	const reactions = useStore((store) => getReactionFastenings(store, roomId, stanzaId));
 
+	// TODO: get info from store
+	const newReactionsToMyMessage = useMemo(() => [ReactionType.THUMBS_UP], []);
+
 	const reactionGroup = useMemo(() => {
 		const reactionGroup: { [reaction: string]: string[] } = {};
 		forEach(reactions, (reaction) => {
@@ -44,10 +47,15 @@ const MessageReactionsList: FC<BubbleReactionsProps> = ({ roomId, stanzaId }) =>
 		() =>
 			reverse(
 				map(reactionGroup, (from, reaction) => (
-					<ReactionChip key={reaction} reaction={reaction} from={from} />
+					<ReactionChip
+						key={reaction}
+						reaction={reaction}
+						from={from}
+						newReactionToMyMessage={includes(newReactionsToMyMessage, reaction)}
+					/>
 				))
 			),
-		[reactionGroup]
+		[newReactionsToMyMessage, reactionGroup]
 	);
 
 	return (

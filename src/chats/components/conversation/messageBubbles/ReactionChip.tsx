@@ -19,6 +19,7 @@ const CustomContainer = styled(Container)`
 	font-size: 0.9rem;
 	cursor: default;
 	animation: bounceIn 0.4s ease-in-out;
+	transition: background-color 1s ease;
 
 	@keyframes bounceIn {
 		0% {
@@ -46,9 +47,14 @@ const CustomAvatar = styled(Avatar)<{ $numberBadge: boolean }>`
 type ReactionChipProps = {
 	reaction: string | undefined;
 	from: string[];
+	newReactionToMyMessage?: boolean;
 };
 
-const ReactionChip = ({ reaction, from }: ReactionChipProps): ReactElement => {
+const ReactionChip = ({
+	reaction,
+	from,
+	newReactionToMyMessage = false
+}: ReactionChipProps): ReactElement => {
 	const { avatarColor, avatarPicture, avatarIcon } = useAvatarUtilities(from[0]);
 
 	const tooltipLabel = useMemo(
@@ -74,7 +80,7 @@ const ReactionChip = ({ reaction, from }: ReactionChipProps): ReactElement => {
 	return (
 		<Tooltip label={tooltipLabel}>
 			<CustomContainer
-				background="gray4"
+				background={newReactionToMyMessage ? 'primary' : 'gray4'}
 				width="fit-content"
 				minHeight="1.5rem"
 				maxHeight="1.5rem"
