@@ -7,10 +7,8 @@
 import React, { FC, useMemo } from 'react';
 
 import { Container } from '@zextras/carbonio-design-system';
-import { forEach, includes, map, reverse } from 'lodash';
-import styled from 'styled-components';
+import { forEach, map, reverse, includes } from 'lodash';
 
-import { ReactionType } from './bubbleActions/useBubbleReactions';
 import ReactionChip from './ReactionChip';
 import { getNewReactions } from '../../../../store/selectors/ActiveConversationsSelectors';
 import { getReactionFastenings } from '../../../../store/selectors/FasteningsSelectors';
@@ -21,10 +19,6 @@ type BubbleReactionsProps = {
 	stanzaId: string;
 };
 
-const ReactionChipContainer = styled(Container)`
-	flex-wrap: wrap;
-`;
-
 const MessageReactionsList: FC<BubbleReactionsProps> = ({ roomId, stanzaId }) => {
 	const reactions = useStore((store) => getReactionFastenings(store, roomId, stanzaId));
 	const newReactionsToMyMessage = useStore((store) => getNewReactions(store, roomId, stanzaId));
@@ -32,7 +26,7 @@ const MessageReactionsList: FC<BubbleReactionsProps> = ({ roomId, stanzaId }) =>
 	const reactionGroup = useMemo(() => {
 		const reactionGroup: { [reaction: string]: string[] } = {};
 		forEach(reactions, (reaction) => {
-			if (!!reaction.value && includes(ReactionType, reaction.value)) {
+			if (reaction.value) {
 				if (!reactionGroup[reaction.value]) {
 					reactionGroup[reaction.value] = [];
 				}
@@ -45,28 +39,31 @@ const MessageReactionsList: FC<BubbleReactionsProps> = ({ roomId, stanzaId }) =>
 	const reactionsList = useMemo(
 		() =>
 			reverse(
-				map(reactionGroup, (from, reaction) => (
+				map(reactionGroup, (from: string[], reaction: string) => (
 					<ReactionChip
 						key={reaction}
 						reaction={reaction}
 						from={from}
+						roomId={roomId}
+						stanzaId={stanzaId}
 						newReactionToMyMessage={includes(newReactionsToMyMessage, reaction)}
 					/>
 				))
 			),
-		[newReactionsToMyMessage, reactionGroup]
+		[reactionGroup, roomId, stanzaId, newReactionsToMyMessage]
 	);
 
 	return (
-		<ReactionChipContainer
+		<Container
 			orientation="horizontal"
 			mainAlignment="flex-start"
 			padding={{ right: 'small' }}
 			gap="0.5em"
 			width="fit"
+			wrap="wrap"
 		>
 			{reactionsList}
-		</ReactionChipContainer>
+		</Container>
 	);
 };
 

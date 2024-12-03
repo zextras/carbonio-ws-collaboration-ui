@@ -25,6 +25,7 @@ type MessageProps = {
 	messageRef: React.RefObject<HTMLDivElement>;
 	isFirstNewMessage: boolean;
 	messageListRef?: React.RefObject<HTMLDivElement | undefined>;
+	isPrevMessageDeleted: boolean;
 };
 
 export const CustomMessage = styled(Container)`
@@ -49,7 +50,8 @@ const MessageFactory = ({
 	nextMessageIsFromSameSender,
 	messageRef,
 	isFirstNewMessage,
-	messageListRef
+	messageListRef,
+	isPrevMessageDeleted
 }: MessageProps): ReactElement => {
 	const [t] = useTranslation();
 	const newMessagesLabel = t('conversation.newMessages', 'New messages');
@@ -85,6 +87,7 @@ const MessageFactory = ({
 								nextMessageIsFromSameSender={nextMessageIsFromSameSender}
 								messageRef={messageRef}
 								messageListRef={messageListRef}
+								isPrevMessageDeleted={isPrevMessageDeleted}
 							/>
 						)}
 					</>

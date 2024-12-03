@@ -4,20 +4,22 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { ReactElement, useEffect, useMemo, useState } from 'react';
+import React, { ReactElement, useState, useEffect, useCallback, useMemo } from 'react';
 
 import { Avatar, Container, Padding, Tooltip } from '@zextras/carbonio-design-system';
-import { map, size } from 'lodash';
+import { includes, map, size } from 'lodash';
 import styled from 'styled-components';
 
 import useAvatarUtilities from '../../../../hooks/useAvatarUtilities';
+import { getXmppClient } from '../../../../store/selectors/ConnectionSelector';
+import { getUserId } from '../../../../store/selectors/SessionSelectors';
 import { getUserName } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
 
-const CustomContainer = styled(Container)`
+const CustomContainer = styled(Container)<{ $animation: boolean }>`
 	border-radius: 1.25rem;
 	font-size: 0.9rem;
-	cursor: default;
+	cursor: pointer;
 	animation: bounceIn 0.4s ease-in-out;
 	transition: background-color 1s ease;
 
@@ -34,6 +36,9 @@ const CustomContainer = styled(Container)`
 			transform: scale(1);
 		}
 	}
+
+	${({ $animation }): string =>
+		$animation ? `animation: bounceIn 0.4s ease-in-out;` : `animation: none;`}
 `;
 
 const CustomAvatar = styled(Avatar)<{ $numberBadge: boolean }>`
@@ -45,16 +50,24 @@ const CustomAvatar = styled(Avatar)<{ $numberBadge: boolean }>`
 `;
 
 type ReactionChipProps = {
-	reaction: string | undefined;
+	reaction: string;
 	from: string[];
+	roomId: string;
+	stanzaId: string;
 	newReactionToMyMessage?: boolean;
 };
 
 const ReactionChip = ({
 	reaction,
 	from,
+	roomId,
+	stanzaId,
 	newReactionToMyMessage = false
 }: ReactionChipProps): ReactElement => {
+	const xmppClient = useStore(getXmppClient);
+	const sessionId = useStore(getUserId);
+
+	const [isAnimating, setIsAnimating] = useState(false);
 	const [backgroundEffect, setBackgroundEffect] = useState(newReactionToMyMessage);
 
 	useEffect(() => {
@@ -89,6 +102,16 @@ const ReactionChip = ({
 		[from, avatarColor]
 	);
 
+	const changeReaction = useCallback(() => {
+		setIsAnimating(true);
+		if (includes(from, sessionId)) {
+			xmppClient.sendChatMessageReaction(roomId, stanzaId, '');
+		} else {
+			xmppClient.sendChatMessageReaction(roomId, stanzaId, reaction);
+		}
+		setTimeout(() => setIsAnimating(false), 500);
+	}, [from, reaction, roomId, sessionId, stanzaId, xmppClient]);
+
 	return (
 		<Tooltip label={tooltipLabel}>
 			<CustomContainer
@@ -99,7 +122,9 @@ const ReactionChip = ({
 				padding="0.25rem 0.25rem 0.25rem 0.3rem"
 				orientation="horizontal"
 				gap="0.25rem"
+				onClick={changeReaction}
 				data-testid="reaction-chip"
+				$animation={isAnimating}
 			>
 				<Padding bottom="0.1rem">{reaction}</Padding>
 				<CustomAvatar
