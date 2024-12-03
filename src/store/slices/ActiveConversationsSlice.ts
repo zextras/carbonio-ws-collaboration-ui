@@ -9,7 +9,6 @@ import { produce } from 'immer';
 import { find, findIndex, forEach, orderBy, remove, reverse } from 'lodash';
 import { StateCreator } from 'zustand';
 
-import { isMyId } from '../../network/websocket/eventHandlersUtilities';
 import { FileToUpload, messageActionType } from '../../types/store/ActiveConversationTypes';
 import {
 	AttachmentMessageType,
@@ -395,18 +394,24 @@ export const useActiveConversationsSlice: StateCreator<ActiveConversationsSlice>
 	setNewReaction(roomId: string, stanzaId: string, reaction: string, from: string): void {
 		set(
 			produce((draft: RootStore) => {
-				const originalMessage = find(
-					draft.messages[roomId],
-					(message) => message.type === MessageType.TEXT_MSG && message.stanzaId === stanzaId
-				) as TextMessage;
-				if (!isMyId(originalMessage.from)) return;
+				// Ignore reactions to messages that are not mine
+				if (
+					!find(
+						draft.messages[roomId],
+						(message) =>
+							message.type === MessageType.TEXT_MSG &&
+							message.stanzaId === stanzaId &&
+							message.from === draft.session.id
+					)
+				)
+					return;
 
 				if (!draft.activeConversations[roomId]) draft.activeConversations[roomId] = {};
 				const reactions = draft.activeConversations[roomId].newReactions || [];
 
 				if (reaction === '') {
 					const reactionToRemove = find(
-						reverse(draft.fastenings[roomId][stanzaId]),
+						reverse(draft.fastenings[roomId]?.[stanzaId]),
 						(fastening) =>
 							fastening.action === 'reaction' && fastening.from === from && fastening.value !== ''
 					);
