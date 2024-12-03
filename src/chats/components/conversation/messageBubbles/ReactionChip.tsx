@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { ReactElement, useMemo } from 'react';
+import React, { ReactElement, useEffect, useMemo, useState } from 'react';
 
 import { Avatar, Container, Padding, Tooltip } from '@zextras/carbonio-design-system';
 import { map, size } from 'lodash';
@@ -55,6 +55,18 @@ const ReactionChip = ({
 	from,
 	newReactionToMyMessage = false
 }: ReactionChipProps): ReactElement => {
+	const [backgroundEffect, setBackgroundEffect] = useState(newReactionToMyMessage);
+
+	useEffect(() => {
+		if (newReactionToMyMessage) {
+			setBackgroundEffect(true);
+		} else {
+			setTimeout(() => {
+				setBackgroundEffect(false);
+			}, 5000);
+		}
+	}, [newReactionToMyMessage]);
+
 	const { avatarColor, avatarPicture, avatarIcon } = useAvatarUtilities(from[0]);
 
 	const tooltipLabel = useMemo(
@@ -80,7 +92,7 @@ const ReactionChip = ({
 	return (
 		<Tooltip label={tooltipLabel}>
 			<CustomContainer
-				background={newReactionToMyMessage ? 'primary' : 'gray4'}
+				background={backgroundEffect ? 'primary' : 'gray4'}
 				width="fit-content"
 				minHeight="1.5rem"
 				maxHeight="1.5rem"
