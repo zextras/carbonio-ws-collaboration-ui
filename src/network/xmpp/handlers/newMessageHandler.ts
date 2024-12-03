@@ -60,7 +60,8 @@ export function onNewMessageStanza(message: Element): true {
 						store.setNewReaction(
 							newMessage.roomId,
 							newMessage.originalStanzaId,
-							newMessage.value ?? ''
+							newMessage.value ?? '',
+							newMessage.from
 						);
 					}
 					break;

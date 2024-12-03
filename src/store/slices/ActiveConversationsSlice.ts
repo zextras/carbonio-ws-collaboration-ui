@@ -6,7 +6,7 @@
  */
 
 import { produce } from 'immer';
-import { find, findIndex, forEach, orderBy, remove } from 'lodash';
+import { find, findIndex, forEach, orderBy, remove, reverse } from 'lodash';
 import { StateCreator } from 'zustand';
 
 import { isMyId } from '../../network/websocket/eventHandlersUtilities';
@@ -392,7 +392,7 @@ export const useActiveConversationsSlice: StateCreator<ActiveConversationsSlice>
 			'AC/UNSET_FORWARD_MESSAGE_LIST'
 		);
 	},
-	setNewReaction(roomId: string, stanzaId: string, reaction: string): void {
+	setNewReaction(roomId: string, stanzaId: string, reaction: string, from: string): void {
 		set(
 			produce((draft: RootStore) => {
 				const originalMessage = find(
@@ -402,18 +402,28 @@ export const useActiveConversationsSlice: StateCreator<ActiveConversationsSlice>
 				if (!isMyId(originalMessage.from)) return;
 
 				if (!draft.activeConversations[roomId]) draft.activeConversations[roomId] = {};
-				if (!draft.activeConversations[roomId].newReactions)
-					draft.activeConversations[roomId].newReactions = {};
+				const reactions = draft.activeConversations[roomId].newReactions || [];
 
-				const reactions = draft.activeConversations[roomId].newReactions?.[stanzaId] || [];
-				if (reactions.includes(reaction)) return;
-				if (reaction === '') remove(reactions, (r) => r === reaction);
-				else reactions.push(reaction);
-
-				draft.activeConversations[roomId].newReactions = {
-					...draft.activeConversations[roomId].newReactions,
-					[stanzaId]: reactions
-				};
+				if (reaction === '') {
+					const reactionToRemove = find(
+						reverse(draft.fastenings[roomId][stanzaId]),
+						(fastening) =>
+							fastening.action === 'reaction' && fastening.from === from && fastening.value !== ''
+					);
+					const index = findIndex(
+						reactions,
+						(r) => r.reaction === reactionToRemove?.value && r.stanzaId === stanzaId
+					);
+					if (index !== -1) {
+						reactions.splice(index, 1);
+					}
+				} else {
+					reactions.push({
+						stanzaId,
+						reaction
+					});
+				}
+				draft.activeConversations[roomId].newReactions = reactions;
 			}),
 			false,
 			'AC/SET_NEW_REACTION'
