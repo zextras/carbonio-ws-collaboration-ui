@@ -27,7 +27,7 @@ const displayReactionBrowserNotification = async (message: MessageFastening): Pr
 
 	const refToMyMessage = !!find(
 		store.messages[message.roomId],
-		(msg: TextMessage) => msg.stanzaId === message.originalStanzaId
+		(msg: TextMessage) => msg.stanzaId === message.originalStanzaId && msg.from === store.session.id
 	);
 
 	const ChatsNotificationsSettings: NotificationsSettingsType = getLocalStorageItem(
@@ -46,11 +46,12 @@ const displayReactionBrowserNotification = async (message: MessageFastening): Pr
 		const senderFirstName = senderName?.split(' ')[0];
 		const title = room.type === RoomType.ONE_TO_ONE ? senderName || '' : room.name;
 
-		// TODO translation keys
-		const reactWith = t('', 'Reacted to your message with:');
-		const userReactWith = t('', `${senderFirstName} reacted to your message with:`, {
-			senderName: senderFirstName
-		});
+		const reactWith = t('browserNotification.reaction.chat', 'Reacted to your message with:');
+		const userReactWith = t(
+			'browserNotification.reaction.group',
+			`${senderFirstName} reacted to your message with:`,
+			{ userName: senderFirstName }
+		);
 
 		const textMessage =
 			room.type === RoomType.ONE_TO_ONE

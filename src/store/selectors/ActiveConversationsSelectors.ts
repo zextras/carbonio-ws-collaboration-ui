@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { filter, find, last, map } from 'lodash';
+import { filter, find, includes, last, map } from 'lodash';
 
 import { FileToUpload, ReferenceMessage } from '../../types/store/ActiveConversationTypes';
 import { TextMessage } from '../../types/store/MessageTypes';
@@ -87,12 +87,13 @@ export const maxForwardLimitNotReached = (store: RootStore, roomId: string): boo
 	return true;
 };
 
-export const getNewReactions = (store: RootStore, roomId: string, stanzaId: string): string[] => {
+export const getIsNewReaction = (store: RootStore, roomId: string, stanzaId: string, reaction: string): boolean => {
 	const activeConversations = store.activeConversations[roomId];
 	if (activeConversations?.newReactions) {
-		return map(filter(activeConversations.newReactions, (reaction) => reaction.stanzaId === stanzaId), 'reaction');
+		const newReactions = filter(activeConversations.newReactions, (reaction) => reaction.stanzaId === stanzaId);
+		return includes(map(newReactions, 'reaction'), reaction);
 	}
-	return [];
+	return false;
 };
 
 export const getLastNewReaction = (store: RootStore, roomId: string): string | undefined => {

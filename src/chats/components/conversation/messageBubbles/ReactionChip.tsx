@@ -11,6 +11,7 @@ import { includes, map, size } from 'lodash';
 import styled from 'styled-components';
 
 import useAvatarUtilities from '../../../../hooks/useAvatarUtilities';
+import { getIsNewReaction } from '../../../../store/selectors/ActiveConversationsSelectors';
 import { getXmppClient } from '../../../../store/selectors/ConnectionSelector';
 import { getUserId } from '../../../../store/selectors/SessionSelectors';
 import { getUserName } from '../../../../store/selectors/UsersSelectors';
@@ -54,31 +55,25 @@ type ReactionChipProps = {
 	from: string[];
 	roomId: string;
 	stanzaId: string;
-	newReactionToMyMessage?: boolean;
 };
 
-const ReactionChip = ({
-	reaction,
-	from,
-	roomId,
-	stanzaId,
-	newReactionToMyMessage = false
-}: ReactionChipProps): ReactElement => {
+const ReactionChip = ({ reaction, from, roomId, stanzaId }: ReactionChipProps): ReactElement => {
 	const xmppClient = useStore(getXmppClient);
 	const sessionId = useStore(getUserId);
+	const isNewReaction = useStore((store) => getIsNewReaction(store, roomId, stanzaId, reaction));
 
 	const [isAnimating, setIsAnimating] = useState(false);
-	const [backgroundEffect, setBackgroundEffect] = useState(newReactionToMyMessage);
+	const [backgroundEffect, setBackgroundEffect] = useState(isNewReaction);
 
 	useEffect(() => {
-		if (newReactionToMyMessage) {
+		if (isNewReaction) {
 			setBackgroundEffect(true);
 		} else {
 			setTimeout(() => {
 				setBackgroundEffect(false);
 			}, 5000);
 		}
-	}, [newReactionToMyMessage]);
+	}, [isNewReaction]);
 
 	const { avatarColor, avatarPicture, avatarIcon } = useAvatarUtilities(from[0]);
 
