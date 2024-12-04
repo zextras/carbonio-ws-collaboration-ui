@@ -13,9 +13,7 @@ import meetingIn from '../meetings/assets/MeetingIN.mp3';
 import meetingOut from '../meetings/assets/MeetingOUT.mp3';
 import screenshareOn from '../meetings/assets/ScreenShareON.mp3';
 import waitingUserSound from '../meetings/assets/waitingUserOnQueue.mp3';
-import { STREAM_TYPE, TileData, VirtualBackgroundType } from '../types/store/ActiveMeetingTypes';
-
-type BackgroundValues = Array<VirtualBackgroundType | 'placeholder'>;
+import { STREAM_TYPE, TileData } from '../types/store/ActiveMeetingTypes';
 
 export enum MeetingSoundFeedback {
 	MEETING_JOIN_NOTIFICATION = 'meetingJoinNotification',
@@ -174,20 +172,4 @@ export const getMeetingIdFromLink = (meetingLink: string): string => {
 		return splitString[1];
 	}
 	return meetingLink;
-};
-
-export const getBackgroundChunks = (): Array<BackgroundValues> => {
-	const chunks = [];
-	const enumValues: BackgroundValues = Object.values(VirtualBackgroundType);
-
-	if (Object.values(VirtualBackgroundType).length % 3 !== 0) {
-		for (let i = 0; i < 3 - (Object.values(VirtualBackgroundType).length % 3); i += 1) {
-			enumValues.push('placeholder');
-		}
-	}
-	for (let i = 0; i < enumValues.length; i += 3) {
-		chunks.push(enumValues.slice(i, i + 3));
-	}
-
-	return chunks;
 };

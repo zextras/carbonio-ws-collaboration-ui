@@ -6,6 +6,7 @@
 import React, { FC, useMemo } from 'react';
 
 import { Container, Icon, Text } from '@zextras/carbonio-design-system';
+import { map } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -13,7 +14,6 @@ import useVirtualBackground from '../../../../hooks/useVirtualBackground';
 import { getBackgroundImage } from '../../../../store/selectors/ActiveMeetingSelectors';
 import useStore from '../../../../store/Store';
 import { VirtualBackgroundType } from '../../../../types/store/ActiveMeetingTypes';
-import { getBackgroundChunks } from '../../../../utils/MeetingsUtils';
 
 type VisualEffectCardsProps = {
 	meetingId: string;
@@ -34,6 +34,8 @@ const PictureContainer = styled(Container)<{ $picture?: string | false; $isSelec
 
 const ListContainer = styled(Container)`
 	overflow-y: scroll;
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
 `;
 
 const VisualEffectsList: FC<VisualEffectCardsProps> = ({ meetingId }) => {
@@ -43,24 +45,9 @@ const VisualEffectsList: FC<VisualEffectCardsProps> = ({ meetingId }) => {
 
 	const { virtualBackgroundImages } = useVirtualBackground();
 
-	const rowsToRender = useMemo(() => {
-		const gridArray: React.ReactNode[] = [];
-		const chunks = getBackgroundChunks();
-
-		chunks.forEach((chunk, i) => {
-			const rowBackgrounds: React.ReactNode[] = chunk.map((element) => {
-				if (element === 'placeholder') {
-					return (
-						<Container
-							key={`placeholder-${i}-${element}`}
-							minHeight="5.176rem"
-							maxHeight="7.267rem"
-							minWidth="6.5rem"
-							maxWidth="9.25rem"
-						/>
-					);
-				}
-
+	const backgroundTiles = useMemo(
+		() =>
+			map(VirtualBackgroundType, (element) => {
 				const isBlurOrNone =
 					element === VirtualBackgroundType.BLUR || element === VirtualBackgroundType.NONE;
 				const isSelected = element === backgroundSelected;
@@ -76,7 +63,7 @@ const VisualEffectsList: FC<VisualEffectCardsProps> = ({ meetingId }) => {
 
 				return (
 					<Container
-						key={`background-${i}-${element}`}
+						key={`background-${element}`}
 						mainAlignment="flex-start"
 						crossAlignment="flex-start"
 					>
@@ -101,25 +88,9 @@ const VisualEffectsList: FC<VisualEffectCardsProps> = ({ meetingId }) => {
 						</PictureContainer>
 					</Container>
 				);
-			});
-
-			gridArray.push(
-				<Container
-					key={`row-${i}`}
-					orientation="horizontal"
-					mainAlignment="flex-start"
-					crossAlignment="flex-start"
-					height="fit"
-					gap="0.5rem"
-					padding={{ top: '0.5rem', right: '0.5rem' }}
-				>
-					{rowBackgrounds}
-				</Container>
-			);
-		});
-
-		return gridArray;
-	}, [backgroundSelected, meetingId, setBackgroundImage, t, virtualBackgroundImages]);
+			}),
+		[backgroundSelected, meetingId, setBackgroundImage, t, virtualBackgroundImages]
+	);
 
 	return (
 		<ListContainer
@@ -127,8 +98,9 @@ const VisualEffectsList: FC<VisualEffectCardsProps> = ({ meetingId }) => {
 			minHeight="18.527rem"
 			mainAlignment="flex-start"
 			crossAlignment="flex-start"
+			gap="0.5rem"
 		>
-			{rowsToRender}
+			{backgroundTiles}
 		</ListContainer>
 	);
 };

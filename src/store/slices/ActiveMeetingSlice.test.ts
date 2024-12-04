@@ -23,15 +23,16 @@ describe('Active Meeting Slice', () => {
 
 		// Check store data
 		expect(size(result.current.activeMeeting)).toBe(1);
-		// expect(result.current.activeMeeting[meetingId].sidebarStatus).toStrictEqual({
-		// 	sidebarIsOpened: true,
-		// 	participantsAccordionIsOpened: false,
-		// 	waitingListAccordionIsOpened: true,
-		// 	recordingAccordionIsOpened: false
-		// });
-		// expect(result.current.activeMeeting[meetingId].chatVisibility).toBe(MeetingChatVisibility.OPEN);
-		// act(() => result.current.meetingDisconnection(meetingId));
-		// expect(result.current.activeMeeting[meetingId]).toBeUndefined();
+		expect(result.current.activeMeeting[meetingId].sidebarStatus).toStrictEqual({
+			sidebarIsOpened: true,
+			participantsAccordionIsOpened: false,
+			waitingListAccordionIsOpened: true,
+			visualEffectsAccordionIsOpened: false,
+			recordingAccordionIsOpened: false
+		});
+		expect(result.current.activeMeeting[meetingId].chatVisibility).toBe(MeetingChatVisibility.OPEN);
+		act(() => result.current.meetingDisconnection(meetingId));
+		expect(result.current.activeMeeting[meetingId]).toBeUndefined();
 	});
 	test('Meeting default view is GRID', () => {
 		const { result } = renderHook(() => useStore());

@@ -216,8 +216,6 @@ export type ActiveMeetingSlice = {
 	) => void;
 	setBackgroundStream: (meetingId: string, stream: MediaStream) => void;
 	removeBackgroundStream: (meetingId: string) => void;
-	// setBlur: (meetingId: string, status: boolean) => void;
-	// setBackground: (meetingId: string, status: boolean) => void;
 	setBackgroundImage: (meetingId: string, image: VirtualBackgroundType) => void;
 };
 

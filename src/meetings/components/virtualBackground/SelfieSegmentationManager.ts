@@ -13,10 +13,8 @@ import selfie_segmentation_landscape from '@mediapipe/selfie_segmentation/selfie
 import selfie_segmentation_solution_simd_wasm_bin from '@mediapipe/selfie_segmentation/selfie_segmentation_solution_simd_wasm_bin';
 import selfie_segmentation_solution_simd_wasm_bin_wasm from '@mediapipe/selfie_segmentation/selfie_segmentation_solution_simd_wasm_bin.wasm';
 
-import { VirtualBackgroundType } from '../../../types/store/ActiveMeetingTypes';
-
 export interface ISelfieSegmentation {
-	setResultsCallback(callback: (results: Results) => void, type: VirtualBackgroundType): void;
+	setResultsCallback(callback: (results: Results) => void): void;
 	initialize(): Promise<void>;
 	send(input: HTMLVideoElement | null): Promise<void>;
 	close(): void;
@@ -24,8 +22,6 @@ export interface ISelfieSegmentation {
 
 export default class SelfieSegmentationManager implements ISelfieSegmentation {
 	private onResultsCallback: (results: Results) => void;
-
-	private type: VirtualBackgroundType;
 
 	private selfieSegmentation: SelfieSegmentation;
 
@@ -64,14 +60,8 @@ export default class SelfieSegmentationManager implements ISelfieSegmentation {
 		}
 	}
 
-	public setResultsCallback(
-		callback: (results: Results) => void,
-		type: VirtualBackgroundType
-	): void {
-		if (!(this.type === 'none' || this.type === 'blur') && !(type === 'none' || type === 'blur')) {
-			this.onResultsCallback = callback;
-		}
-		this.type = type;
+	public setResultsCallback(callback: (results: Results) => void): void {
+		this.onResultsCallback = callback;
 	}
 
 	public async initialize(): Promise<void> {
@@ -95,7 +85,7 @@ export default class SelfieSegmentationManager implements ISelfieSegmentation {
 				this.selfieSegmentation = null;
 			}
 		} catch (error) {
-			console.error('Errore durante la chiusura di selfieSegmentation:', error);
+			console.error('Error during selfieSegmentation closing: ', error);
 		}
 	}
 }

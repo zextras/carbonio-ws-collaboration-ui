@@ -78,8 +78,7 @@ const VirtualBackground = ({ meetingId }: VirtualBackgroundProps): ReactElement 
 			selfieSegmentationManager.setResultsCallback(
 				backgroundImageSelected === VirtualBackgroundType.BLUR
 					? paintStreamWithBlur
-					: paintStreamWithBackground,
-				backgroundImageSelected
+					: paintStreamWithBackground
 			);
 		}
 	}, [
