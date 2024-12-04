@@ -4,47 +4,28 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 import { t, getNotificationManager, replaceHistory } from '@zextras/carbonio-shell-ui';
-import { find, includes, isEmpty } from 'lodash';
+import { find } from 'lodash';
 
+import { displayChatNotification } from './displayMessageBrowserNotification';
 import { CHATS_ROUTE } from '../../../constants/appConstants';
 import useStore from '../../../store/Store';
 import { MessageFastening, TextMessage } from '../../../types/store/MessageTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
-import {
-	getLocalStorageItem,
-	LOCAL_STORAGE_NAMES,
-	NotificationsSettingsType
-} from '../../../utils/localStorageUtils';
+import { getLocalStorageItem, LOCAL_STORAGE_NAMES } from '../../../utils/localStorageUtils';
 import UserDataRetriever from '../../../utils/UserDataRetriever';
 
 const displayReactionBrowserNotification = async (message: MessageFastening): Promise<void> => {
 	const store = useStore.getState();
-
 	const room = store.rooms[message.roomId];
-	const roomIsMuted = room?.userSettings?.muted;
-	const isMeetingTab = !isEmpty(store.activeMeeting);
-	const isOneToOneGroupMessage = includes([RoomType.ONE_TO_ONE, RoomType.GROUP], room?.type);
 
 	const refToMyMessage = !!find(
 		store.messages[message.roomId],
 		(msg: TextMessage) => msg.stanzaId === message.originalStanzaId && msg.from === store.session.id
 	);
 
-	const ChatsNotificationsSettings: NotificationsSettingsType = getLocalStorageItem(
-		LOCAL_STORAGE_NAMES.NOTIFICATIONS
-	);
-
-	if (
-		room &&
-		!roomIsMuted &&
-		((!isMeetingTab && isOneToOneGroupMessage) || (isMeetingTab && !isOneToOneGroupMessage)) &&
-		ChatsNotificationsSettings.DesktopNotifications &&
-		refToMyMessage &&
-		message.value !== ''
-	) {
+	if (displayChatNotification(message.roomId) && refToMyMessage && message.value !== '') {
 		const senderName = await UserDataRetriever.getAsyncUsername(message.from);
 		const senderFirstName = senderName?.split(' ')[0];
-		const title = room.type === RoomType.ONE_TO_ONE ? senderName || '' : room.name;
 
 		const reactWith = t('browserNotification.reaction.chat', 'Reacted to your message with:');
 		const userReactWith = t(
@@ -53,6 +34,7 @@ const displayReactionBrowserNotification = async (message: MessageFastening): Pr
 			{ userName: senderFirstName }
 		);
 
+		const title = room.type === RoomType.ONE_TO_ONE ? senderName || '' : room.name;
 		const textMessage =
 			room.type === RoomType.ONE_TO_ONE
 				? `${reactWith} ${message.value}`
@@ -60,7 +42,7 @@ const displayReactionBrowserNotification = async (message: MessageFastening): Pr
 
 		getNotificationManager().notify({
 			showPopup: true,
-			playSound: ChatsNotificationsSettings.DesktopNotificationsSounds,
+			playSound: getLocalStorageItem(LOCAL_STORAGE_NAMES.NOTIFICATIONS).DesktopNotificationsSounds,
 			title,
 			message: textMessage,
 			onClick: (): void => {
