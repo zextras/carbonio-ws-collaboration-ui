@@ -5,6 +5,7 @@
  */
 
 import { createMockMember, createMockRoom, createMockTextMessage } from '../../tests/createMock';
+import { dateToTimestamp } from '../../utils/dateUtils';
 import useStore from '../Store';
 
 const mockedRoom = createMockRoom();
@@ -71,7 +72,7 @@ describe('Active conversations slice', () => {
 		const message = createMockTextMessage({
 			id: 'message0',
 			roomId: mockedRoom.id,
-			date: new Date('2022-01-01T00:00:00Z')
+			date: dateToTimestamp('2022-01-01T00:00:00Z')
 		});
 		useStore.getState().setLastMamMessage(message);
 		expect(useStore.getState().activeConversations[mockedRoom.id].lastMamMessage).toBe(message);
@@ -81,12 +82,12 @@ describe('Active conversations slice', () => {
 		const message0 = createMockTextMessage({
 			id: 'message0',
 			roomId: mockedRoom.id,
-			date: new Date('2022-01-01T10:00:00Z')
+			date: dateToTimestamp('2022-01-01T10:00:00Z')
 		});
 		const message1 = createMockTextMessage({
 			id: 'message1',
 			roomId: mockedRoom.id,
-			date: new Date('2022-01-01T11:00:01Z')
+			date: dateToTimestamp('2022-01-01T11:00:01Z')
 		});
 		useStore.getState().setLastMamMessage(message1);
 		useStore.getState().setLastMamMessage(message0);
@@ -99,12 +100,12 @@ describe('Active conversations slice', () => {
 		const message0 = createMockTextMessage({
 			id: 'message0',
 			roomId: mockedRoom.id,
-			date: new Date('2022-01-01T10:00:00Z')
+			date: dateToTimestamp('2022-01-01T10:00:00Z')
 		});
 		const message1 = createMockTextMessage({
 			id: 'message1',
 			roomId: mockedRoom.id,
-			date: new Date('2022-01-02T10:00:01Z')
+			date: dateToTimestamp('2022-01-02T10:00:01Z')
 		});
 		useStore.getState().setLastMamMessage(message0);
 		useStore.getState().setLastMamMessage(message1);

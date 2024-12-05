@@ -77,7 +77,7 @@ const roomWithPicture: RoomBe = createMockRoom({
 	]
 });
 const singleConversationWithUnloadUser: RoomBe = createMockRoom({
-	roomId: 'unloadRoomId',
+	id: 'unloadRoomId',
 	type: RoomType.ONE_TO_ONE,
 	members: [
 		createMockMember({ userId: user1Info.id, owner: true }),
@@ -86,18 +86,18 @@ const singleConversationWithUnloadUser: RoomBe = createMockRoom({
 });
 
 const roomWithMeeting: RoomBe = createMockRoom({
-	roomId: 'meetingRoomId',
+	id: 'meetingRoomId',
 	type: RoomType.ONE_TO_ONE,
 	members,
-	meeting: 'meetingId'
+	meetingId: 'meetingId'
 });
 
 const roomMutedWithMeeting: RoomBe = createMockRoom({
-	roomId: 'mutedWithMeetingRoomId',
+	id: 'mutedWithMeetingRoomId',
 	type: RoomType.ONE_TO_ONE,
 	members,
 	userSettings: { muted: true },
-	meeting: 'meetingId2'
+	meetingId: 'meetingId2'
 });
 
 const meeting: MeetingBe = createMockMeeting({

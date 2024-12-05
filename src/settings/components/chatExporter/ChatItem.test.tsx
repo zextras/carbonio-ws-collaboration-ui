@@ -87,7 +87,7 @@ describe('ChatItem test', () => {
 		const message = createMockTextMessage({
 			roomId: singleRoom.id,
 			text: '',
-			attachment: { name: 'Attachment.txt' },
+			attachment: { id: 'file', name: 'Attachment.txt', mimeType: 'txt', size: 2300 },
 			from: otherUser.id
 		});
 		useStore.getState().newMessage(message);

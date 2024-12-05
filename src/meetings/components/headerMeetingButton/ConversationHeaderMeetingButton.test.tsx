@@ -13,6 +13,7 @@ import ConversationHeaderMeetingButton from './ConversationHeaderMeetingButton';
 import useStore from '../../../store/Store';
 import {
 	createMockMeeting,
+	createMockMember,
 	createMockParticipants,
 	createMockRoom,
 	createMockUser
@@ -35,7 +36,7 @@ const storeSetupOneToOne = (): void => {
 		name: '',
 		description: '',
 		type: RoomType.ONE_TO_ONE,
-		members: [user1, user2]
+		members: [createMockMember({ id: user1.id }), createMockMember({ id: user2.id })]
 	});
 	store.addRoom(room);
 	setup(<ConversationHeaderMeetingButton roomId={room.id} />);
@@ -48,7 +49,7 @@ const storeSetupOneToOneMeeting = (): { store: RootStore } => {
 		name: '',
 		description: '',
 		type: RoomType.ONE_TO_ONE,
-		members: [user1, user2]
+		members: [createMockMember({ id: user1.id }), createMockMember({ id: user2.id })]
 	});
 	store.setUserInfo(user1);
 	store.setUserInfo(user2);
@@ -76,7 +77,7 @@ const storeSetupGroup = (): void => {
 	const user2: UserBe = createMockUser({ id: 'user2Id', name: 'user 2' });
 	const room: RoomBe = createMockRoom({
 		type: RoomType.GROUP,
-		members: [user1, user2]
+		members: [createMockMember({ id: user1.id }), createMockMember({ id: user2.id })]
 	});
 	store.addRoom(room);
 	setup(<ConversationHeaderMeetingButton roomId={room.id} />);
@@ -89,7 +90,7 @@ const storeSetupGroupMeeting = (): { user: UserEvent; store: RootStore } => {
 		name: '',
 		description: '',
 		type: RoomType.GROUP,
-		members: [user1, user2]
+		members: [createMockMember({ id: user1.id }), createMockMember({ id: user2.id })]
 	});
 	store.setUserInfo(user1);
 	store.setUserInfo(user2);
@@ -125,7 +126,11 @@ const storeSetupGroupMeetingWithoutMe = (): { user: UserEvent; store: RootStore 
 		name: '',
 		description: '',
 		type: RoomType.GROUP,
-		members: [user1, user2, user3]
+		members: [
+			createMockMember({ id: user1.id }),
+			createMockMember({ id: user2.id }),
+			createMockMember({ id: user3.id })
+		]
 	});
 	store.setUserInfo(user1);
 	store.setUserInfo(user2);

@@ -30,7 +30,7 @@ type GenericFieldsType = Record<string, string | boolean | number | object | obj
 
 const timeStampString = '2022-08-25T17:24:28.961+02:00';
 
-export const createMockRoom = (fields?: GenericFieldsType): RoomBe => ({
+export const createMockRoom = (fields?: Partial<RoomBe>): RoomBe => ({
 	id: 'id',
 	name: 'name',
 	description: 'description',
@@ -44,7 +44,7 @@ export const createMockRoom = (fields?: GenericFieldsType): RoomBe => ({
 	...fields
 });
 
-export const createMockTextMessage = (fields?: GenericFieldsType): TextMessage => ({
+export const createMockTextMessage = (fields?: Partial<TextMessage>): TextMessage => ({
 	id: 'id',
 	roomId: 'roomId',
 	date: 1661441294393,

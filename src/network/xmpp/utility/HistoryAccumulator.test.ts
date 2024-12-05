@@ -6,6 +6,7 @@
 import { HistoryAccumulator } from './HistoryAccumulator';
 import { createMockRoom, createMockTextMessage } from '../../../tests/createMock';
 import { reactionMessageFromHistoryStanza } from '../../../tests/mocks/XMPPStanza';
+import { dateToTimestamp } from '../../../utils/dateUtils';
 
 const room1 = createMockRoom({ id: '1' });
 const room2 = createMockRoom({ id: '2' });
@@ -13,25 +14,25 @@ const room2 = createMockRoom({ id: '2' });
 const textMessage1 = createMockTextMessage({
 	id: '1',
 	roomId: room1.id,
-	date: new Date('2021-01-01T00:00:00Z')
+	date: dateToTimestamp('2021-01-01T00:00:00Z')
 });
 const textMessage2 = createMockTextMessage({
 	id: '1',
 	roomId: room2.id,
-	date: new Date('2021-01-01T02:00:00Z'),
-	replyTo: textMessage1
+	date: dateToTimestamp('2021-01-01T02:00:00Z'),
+	replyTo: textMessage1.id
 });
 
 const textMessage3 = createMockTextMessage({
 	id: '3',
 	roomId: room2.id,
-	date: new Date('2021-01-01T03:00:00Z'),
-	replyTo: textMessage2
+	date: dateToTimestamp('2021-01-01T03:00:00Z'),
+	replyTo: textMessage2.id
 });
 const textMessage4 = createMockTextMessage({
 	id: '4',
 	roomId: room1.id,
-	date: new Date('2021-01-01T04:00:00Z')
+	date: dateToTimestamp('2021-01-01T04:00:00Z')
 });
 
 describe('HistoryAccumulator', () => {

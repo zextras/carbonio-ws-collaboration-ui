@@ -44,9 +44,7 @@ const testRoom: RoomBe = createMockRoom({
 
 const testRoom2: RoomBe = createMockRoom({
 	id: 'room-test',
-	name: 'A Group',
-	description: 'This is a beautiful description',
-	type: 'AAA',
+	type: RoomType.GROUP,
 	members: [
 		{
 			userId: user1Info.id,
@@ -73,7 +71,7 @@ describe('delete conversation action', () => {
 		const { user } = setup(
 			<DeleteConversationAction roomId={testRoom2.id} type={testRoom2.type} numberOfMembers={2} />
 		);
-		const deleteRoomLabel = screen.getByText(/Delete Room/i);
+		const deleteRoomLabel = screen.getByText(/Delete Group/i);
 		await user.click(deleteRoomLabel);
 		expect(screen.getByTestId('delete_modal')).toBeInTheDocument();
 
