@@ -36,7 +36,7 @@ const storeSetupOneToOne = (): void => {
 		name: '',
 		description: '',
 		type: RoomType.ONE_TO_ONE,
-		members: [createMockMember({ id: user1.id }), createMockMember({ id: user2.id })]
+		members: [createMockMember({ userId: user1.id }), createMockMember({ userId: user2.id })]
 	});
 	store.addRoom(room);
 	setup(<ConversationHeaderMeetingButton roomId={room.id} />);
@@ -49,20 +49,14 @@ const storeSetupOneToOneMeeting = (): { store: RootStore } => {
 		name: '',
 		description: '',
 		type: RoomType.ONE_TO_ONE,
-		members: [createMockMember({ id: user1.id }), createMockMember({ id: user2.id })]
+		members: [createMockMember({ userId: user1.id }), createMockMember({ userId: user2.id })]
 	});
 	store.setUserInfo(user1);
 	store.setUserInfo(user2);
 	store.setLoginInfo(user1.id, user1.name);
 	store.addRoom(room);
-	const user1Participant: MeetingParticipant = createMockParticipants({
-		userId: user1.id,
-		sessionId: 'sessionIdUser1'
-	});
-	const user2Participant: MeetingParticipant = createMockParticipants({
-		userId: user2.id,
-		sessionId: 'sessionIdUser2'
-	});
+	const user1Participant: MeetingParticipant = createMockParticipants({ userId: user1.id });
+	const user2Participant: MeetingParticipant = createMockParticipants({ userId: user2.id });
 	const meeting: MeetingBe = createMockMeeting({
 		roomId: room.id,
 		participants: [user1Participant, user2Participant]
@@ -77,7 +71,7 @@ const storeSetupGroup = (): void => {
 	const user2: UserBe = createMockUser({ id: 'user2Id', name: 'user 2' });
 	const room: RoomBe = createMockRoom({
 		type: RoomType.GROUP,
-		members: [createMockMember({ id: user1.id }), createMockMember({ id: user2.id })]
+		members: [createMockMember({ userId: user1.id }), createMockMember({ userId: user2.id })]
 	});
 	store.addRoom(room);
 	setup(<ConversationHeaderMeetingButton roomId={room.id} />);
@@ -90,21 +84,15 @@ const storeSetupGroupMeeting = (): { user: UserEvent; store: RootStore } => {
 		name: '',
 		description: '',
 		type: RoomType.GROUP,
-		members: [createMockMember({ id: user1.id }), createMockMember({ id: user2.id })]
+		members: [createMockMember({ userId: user1.id }), createMockMember({ userId: user2.id })]
 	});
 	store.setUserInfo(user1);
 	store.setUserInfo(user2);
 	store.setLoginInfo(user1.id, user1.name);
 	store.addRoom(room);
 	mockGoToRoomPage.mockReturnValue(`room of ${user2.name}`);
-	const user1Participant: MeetingParticipant = createMockParticipants({
-		userId: user1.id,
-		sessionId: 'sessionIdUser1'
-	});
-	const user2Participant: MeetingParticipant = createMockParticipants({
-		userId: user2.id,
-		sessionId: 'sessionIdUser2'
-	});
+	const user1Participant: MeetingParticipant = createMockParticipants({ userId: user1.id });
+	const user2Participant: MeetingParticipant = createMockParticipants({ userId: user2.id });
 	const meeting: MeetingBe = createMockMeeting({
 		roomId: room.id,
 		participants: [user1Participant, user2Participant]
@@ -119,17 +107,16 @@ const storeSetupGroupMeetingWithoutMe = (): { user: UserEvent; store: RootStore 
 	const user2: UserBe = createMockUser({ id: 'user2Id', name: 'user 2' });
 	const user3: UserBe = createMockUser({
 		id: 'user3Id',
-		name: 'user 3',
-		pictureUpdatedAt: '2022-08-25T17:24:28.961+02:00'
+		name: 'user 3'
 	});
 	const room: RoomBe = createMockRoom({
 		name: '',
 		description: '',
 		type: RoomType.GROUP,
 		members: [
-			createMockMember({ id: user1.id }),
-			createMockMember({ id: user2.id }),
-			createMockMember({ id: user3.id })
+			createMockMember({ userId: user1.id }),
+			createMockMember({ userId: user2.id }),
+			createMockMember({ userId: user3.id })
 		]
 	});
 	store.setUserInfo(user1);
@@ -137,14 +124,8 @@ const storeSetupGroupMeetingWithoutMe = (): { user: UserEvent; store: RootStore 
 	store.setUserInfo(user3);
 	store.setLoginInfo(user1.id, user1.name);
 	store.addRoom(room);
-	const user3Participant: MeetingParticipant = createMockParticipants({
-		userId: user3.id,
-		sessionId: 'sessionIdUser3'
-	});
-	const user2Participant: MeetingParticipant = createMockParticipants({
-		userId: user2.id,
-		sessionId: 'sessionIdUser2'
-	});
+	const user3Participant: MeetingParticipant = createMockParticipants({ userId: user3.id });
+	const user2Participant: MeetingParticipant = createMockParticipants({ userId: user2.id });
 	const meeting: MeetingBe = createMockMeeting({
 		roomId: room.id,
 		participants: [user3Participant, user2Participant]

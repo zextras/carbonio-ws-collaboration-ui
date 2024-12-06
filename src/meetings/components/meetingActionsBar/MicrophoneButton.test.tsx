@@ -41,10 +41,7 @@ const room: RoomBe = createMockRoom({
 	members: [member1, member2, member3, member4]
 });
 
-const user1Participant: MeetingParticipant = createMockParticipants({
-	userId: user1.id,
-	sessionId: 'sessionIdUser1'
-});
+const user1Participant: MeetingParticipant = createMockParticipants({ userId: user1.id });
 
 const meeting: MeetingBe = createMockMeeting({
 	roomId: room.id,

@@ -204,7 +204,6 @@ const CameraButton = ({
 					videoOutConn?.startVideo(selectedVideoDeviceId).catch((e) => {
 						mediaPermissionSnackbar();
 						setButtonStatus(true);
-						console.log(e);
 					});
 				} else {
 					getVideoStream(selectedVideoDeviceId)

@@ -24,7 +24,7 @@ import {
 } from '../types/store/MessageTypes';
 import { RoomType } from '../types/store/RoomTypes';
 import { CapabilityList } from '../types/store/SessionTypes';
-import { UserType } from '../types/store/UserTypes';
+import { User, UserType } from '../types/store/UserTypes';
 
 type GenericFieldsType = Record<string, string | boolean | number | object | object[]>;
 
@@ -62,7 +62,7 @@ export const createMockTextMessage = (fields?: Partial<TextMessage>): TextMessag
 });
 
 export const createMockConfigurationMessage = (
-	fields?: GenericFieldsType
+	fields?: Partial<ConfigurationMessage>
 ): ConfigurationMessage => ({
 	id: 'id',
 	roomId: 'roomId',
@@ -74,7 +74,8 @@ export const createMockConfigurationMessage = (
 	read: MarkerStatus.UNREAD,
 	...fields
 });
-export const createMockDateMessage = (fields?: GenericFieldsType): DateMessage => ({
+
+export const createMockDateMessage = (fields?: Partial<DateMessage>): DateMessage => ({
 	id: 'id',
 	roomId: 'roomId',
 	date: 1661441294393,
@@ -82,7 +83,9 @@ export const createMockDateMessage = (fields?: GenericFieldsType): DateMessage =
 	...fields
 });
 
-export const createMockMessageFastening = (fields?: GenericFieldsType): MessageFastening => ({
+export const createMockMessageFastening = (
+	fields?: Partial<MessageFastening>
+): MessageFastening => ({
 	id: 'id',
 	roomId: 'roomId',
 	date: 1661441294393,
@@ -93,13 +96,13 @@ export const createMockMessageFastening = (fields?: GenericFieldsType): MessageF
 	...fields
 });
 
-export const createMockMember = (fields?: GenericFieldsType): MemberBe => ({
+export const createMockMember = (fields?: Partial<MemberBe>): MemberBe => ({
 	userId: 'userId',
 	owner: false,
 	...fields
 });
 
-export const createMockMarker = (fields?: GenericFieldsType): Marker => ({
+export const createMockMarker = (fields?: Partial<Marker>): Marker => ({
 	from: 'from',
 	messageId: 'messageId',
 	markerDate: 1662541394393,
@@ -107,7 +110,7 @@ export const createMockMarker = (fields?: GenericFieldsType): Marker => ({
 	...fields
 });
 
-export const createMockCapabilityList = (fields?: GenericFieldsType): CapabilityList => ({
+export const createMockCapabilityList = (fields?: Partial<CapabilityList>): CapabilityList => ({
 	canSeeMessageReads: true,
 	canSeeUsersPresence: true,
 	canVideoCall: true,
@@ -121,7 +124,7 @@ export const createMockCapabilityList = (fields?: GenericFieldsType): Capability
 	...fields
 });
 
-export const createMockUser = (fields?: GenericFieldsType): UserBe => ({
+export const createMockUser = (fields?: Partial<User>): UserBe => ({
 	id: 'id',
 	email: 'user@user.com',
 	name: 'Name',
@@ -144,7 +147,7 @@ export const createMockFile = (fields?: { name: string; options?: GenericFieldsT
 				type: 'image/png'
 			});
 
-export const createMockFileToUpload = (fields?: GenericFieldsType): FileToUpload => ({
+export const createMockFileToUpload = (fields?: Partial<FileToUpload>): FileToUpload => ({
 	fileId: 'genericImageId',
 	file: imageFile,
 	localUrl: 'localhost/generic/url',
@@ -153,7 +156,7 @@ export const createMockFileToUpload = (fields?: GenericFieldsType): FileToUpload
 	...fields
 });
 
-export const createMockMeeting = (fields?: GenericFieldsType): MeetingBe => ({
+export const createMockMeeting = (fields?: Partial<MeetingBe>): MeetingBe => ({
 	id: 'meetingId',
 	name: '',
 	roomId: 'roomId',
@@ -164,7 +167,9 @@ export const createMockMeeting = (fields?: GenericFieldsType): MeetingBe => ({
 	...fields
 });
 
-export const createMockParticipants = (fields?: GenericFieldsType): MeetingParticipantBe => ({
+export const createMockParticipants = (
+	fields?: Partial<MeetingParticipantBe>
+): MeetingParticipantBe => ({
 	userId: 'userId',
 	audioStreamEnabled: false,
 	videoStreamEnabled: false,
