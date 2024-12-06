@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import { HistoryAccumulator } from './HistoryAccumulator';
+import HistoryAccumulator from './HistoryAccumulator';
 import { createMockRoom, createMockTextMessage } from '../../../tests/createMock';
 import { reactionMessageFromHistoryStanza } from '../../../tests/mocks/XMPPStanza';
 import { dateToTimestamp } from '../../../utils/dateUtils';
@@ -37,31 +37,28 @@ const textMessage4 = createMockTextMessage({
 
 describe('HistoryAccumulator', () => {
 	test('Add and return history messages', () => {
-		const historyAccumulator = new HistoryAccumulator();
-		historyAccumulator.addMessageToHistory(room1.id, textMessage1);
-		historyAccumulator.addMessageToHistory(room1.id, textMessage2);
-		historyAccumulator.addMessageToHistory(room2.id, textMessage3);
-		historyAccumulator.addMessageToHistory(room2.id, textMessage4);
-		expect(historyAccumulator.returnHistory(room1.id)).toEqual([textMessage1, textMessage2]);
-		expect(historyAccumulator.returnHistory(room1.id)).toEqual([]);
-		expect(historyAccumulator.returnHistory(room2.id)).toEqual([textMessage3, textMessage4]);
+		HistoryAccumulator.addMessageToHistory(room1.id, textMessage1);
+		HistoryAccumulator.addMessageToHistory(room1.id, textMessage2);
+		HistoryAccumulator.addMessageToHistory(room2.id, textMessage3);
+		HistoryAccumulator.addMessageToHistory(room2.id, textMessage4);
+		expect(HistoryAccumulator.returnHistory(room1.id)).toEqual([textMessage1, textMessage2]);
+		expect(HistoryAccumulator.returnHistory(room1.id)).toEqual([]);
+		expect(HistoryAccumulator.returnHistory(room2.id)).toEqual([textMessage3, textMessage4]);
 	});
 
 	test('Add and return replied messages', () => {
-		const historyAccumulator = new HistoryAccumulator();
-		historyAccumulator.addReferenceForRepliedMessage(textMessage1);
-		expect(historyAccumulator.returnReferenceForRepliedMessage(textMessage1.stanzaId)).toEqual(
+		HistoryAccumulator.addReferenceForRepliedMessage(textMessage1);
+		expect(HistoryAccumulator.returnReferenceForRepliedMessage(textMessage1.stanzaId)).toEqual(
 			textMessage1
 		);
 	});
 
 	test('Add and return forwarded messages', () => {
-		const historyAccumulator = new HistoryAccumulator();
-		historyAccumulator.addReferenceForForwardedMessage(
+		HistoryAccumulator.addReferenceForForwardedMessage(
 			textMessage3.stanzaId,
 			reactionMessageFromHistoryStanza(room2.id, textMessage3.stanzaId, 'user', 'queryId')
 		);
-		expect(historyAccumulator.returnReferenceForForwardedMessage(textMessage3.stanzaId)).toEqual(
+		expect(HistoryAccumulator.returnReferenceForForwardedMessage(textMessage3.stanzaId)).toEqual(
 			reactionMessageFromHistoryStanza(room2.id, textMessage3.stanzaId, 'user', 'queryId')
 		);
 	});

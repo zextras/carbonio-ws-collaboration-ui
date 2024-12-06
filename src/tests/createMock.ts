@@ -26,8 +26,6 @@ import { RoomType } from '../types/store/RoomTypes';
 import { CapabilityList } from '../types/store/SessionTypes';
 import { User, UserType } from '../types/store/UserTypes';
 
-type GenericFieldsType = Record<string, string | boolean | number | object | object[]>;
-
 const timeStampString = '2022-08-25T17:24:28.961+02:00';
 
 export const createMockRoom = (fields?: Partial<RoomBe>): RoomBe => ({
@@ -140,12 +138,11 @@ export const pdfFile = new File(['doc'], 'doc.pdf', {
 	type: 'application/pdf'
 });
 
-export const createMockFile = (fields?: { name: string; options?: GenericFieldsType }): File =>
-	fields
-		? new File(['lotsOfBite'], fields.name, { ...fields.options })
-		: new File(['sunrise'], 'sunrise.png', {
-				type: 'image/png'
-			});
+export const createMockFile = (fields?: {
+	name?: string;
+	options?: Partial<FilePropertyBag>;
+}): File =>
+	new File(['lotsOfBite'], fields?.name ?? 'file.png', { type: 'image/png', ...fields?.options });
 
 export const createMockFileToUpload = (fields?: Partial<FileToUpload>): FileToUpload => ({
 	fileId: 'genericImageId',
