@@ -25,7 +25,8 @@ const PictureContainer = styled(Container)<{ $picture?: string | false; $isSelec
 	aspect-ratio: 1.2959;
 	border-radius: 0.5rem;
 	${({ $isSelected, theme }): string | false =>
-		$isSelected && `border: 1px solid ${theme.palette.success.regular};`}
+		$isSelected && `outline: 2px solid ${theme.palette.success.active};`}
+	${({ $isSelected }): string | false => !$isSelected && `opacity: 0.6;`}
 	${({ $picture, theme }): string =>
 		$picture
 			? `background-image: url(${$picture});`
@@ -62,31 +63,23 @@ const VisualEffectsList: FC<VisualEffectCardsProps> = ({ meetingId }) => {
 						: t('meeting.visualEffects.none', 'None');
 
 				return (
-					<Container
+					<PictureContainer
 						key={`background-${element}`}
-						mainAlignment="flex-start"
-						crossAlignment="flex-start"
+						minHeight="5.176rem"
+						maxHeight="7.267rem"
+						minWidth="6.5rem"
+						maxWidth="9.25rem"
+						onClick={changeBackground}
+						data-testid={`${element}`}
+						$picture={isBlurOrNone ? false : virtualBackgroundImages[element]}
+						$isSelected={isSelected}
+						gap="0.5rem"
 					>
-						<PictureContainer
-							minHeight="5.176rem"
-							maxHeight="7.267rem"
-							minWidth="6.5rem"
-							maxWidth="9.25rem"
-							onClick={changeBackground}
-							data-testid={`${element}`}
-							$picture={isBlurOrNone ? false : virtualBackgroundImages[element]}
-							$isSelected={isSelected}
-							gap="0.5rem"
-						>
-							{isBlurOrNone && (
-								<Icon
-									size="large"
-									icon={element === VirtualBackgroundType.BLUR ? 'Blur' : 'Slash'}
-								/>
-							)}
-							{isBlurOrNone && <Text>{elementLabel}</Text>}
-						</PictureContainer>
-					</Container>
+						{isBlurOrNone && (
+							<Icon size="large" icon={element === VirtualBackgroundType.BLUR ? 'Blur' : 'Slash'} />
+						)}
+						{isBlurOrNone && <Text>{elementLabel}</Text>}
+					</PictureContainer>
 				);
 			}),
 		[backgroundSelected, meetingId, setBackgroundImage, t, virtualBackgroundImages]
@@ -94,7 +87,8 @@ const VisualEffectsList: FC<VisualEffectCardsProps> = ({ meetingId }) => {
 
 	return (
 		<ListContainer
-			padding={{ vertical: '0.5rem' }}
+			padding={{ vertical: '0.5rem', horizontal: '0.126rem' }}
+			data-testid="visualEffects-list"
 			minHeight="18.527rem"
 			mainAlignment="flex-start"
 			crossAlignment="flex-start"

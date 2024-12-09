@@ -141,8 +141,6 @@ const VirtualBackground = ({ meetingId }: VirtualBackgroundProps): ReactElement 
 		selfieSegmentationManager
 	]);
 
-	useEffect(() => {}, []);
-
 	useEffect(() => {
 		if (backgroundImageSelected === VirtualBackgroundType.NONE && updatedStream !== undefined) {
 			removeBackgroundStream(meetingId ?? '');

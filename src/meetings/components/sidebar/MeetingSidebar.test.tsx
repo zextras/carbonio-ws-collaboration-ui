@@ -206,16 +206,16 @@ describe('Meeting sidebar', () => {
 			useStore.getState().setBackgroundImage(oneToOneMeeting.id, VirtualBackgroundType.LIVING_ROOM);
 		});
 
-		expect(screen.getByTestId(VirtualBackgroundType.LIVING_ROOM)).toHaveStyle(
-			'border: 1px solid #8bc34a;'
-		);
+		const styles = getComputedStyle(screen.getByTestId(VirtualBackgroundType.LIVING_ROOM));
+
+		expect(styles.outline).toBe('2px solid #639030');
 
 		act(() => {
 			useStore.getState().setBackgroundImage(oneToOneMeeting.id, VirtualBackgroundType.BLUR);
 		});
 
 		expect(screen.getByTestId(VirtualBackgroundType.LIVING_ROOM)).not.toHaveStyle(
-			'border: 1px solid #8bc34a;'
+			'border: 2px solid #669431;'
 		);
 	});
 });
