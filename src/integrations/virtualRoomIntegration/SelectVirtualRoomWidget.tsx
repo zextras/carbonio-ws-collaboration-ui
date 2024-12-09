@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import {
 	Container,
@@ -11,24 +11,26 @@ import {
 	Text,
 	SelectItem,
 	SingleSelectionOnChange,
-	Icon
+	Icon,
+	Button
 } from '@zextras/carbonio-design-system';
 import { find, map } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
+import CreateVirtualRoomModal from '../../chats/components/secondaryBar/virtualRoomWidget/CreateVirtualRoomModal';
 import { MeetingsApi } from '../../network';
 import { getVirtualRoomsList } from '../../store/selectors/RoomsSelectors';
 import useStore from '../../store/Store';
 import { Room } from '../../types/store/RoomTypes';
 import { createMeetingLinkFromOutside, getMeetingIdFromLink } from '../../utils/MeetingsUtils';
 
-type defaultType = {
+export type defaultType = {
 	label: string;
 	link: string;
 };
 
-type valueItem = {
+export type valueItem = {
 	id: string;
 	label: string;
 	link?: string;
@@ -52,14 +54,6 @@ const SelectVirtualRoomWidget: FC<SelectVirtualRoomWidgetProps> = ({ onChange, d
 	const [t] = useTranslation();
 
 	const noVirtualRoomLabel = t('appointment.input.defaultValue', 'No Virtual Room selected');
-	const findVirtualRoomLabel = t(
-		'appointment.placeholder.description',
-		'You will find your Virtual Rooms here when you’re back.'
-	);
-	const goToChatsLabel = t(
-		'appointment.placeholder.title',
-		'You can go to Chats and create a Virtual Room to host your appointment.'
-	);
 	const notMyRoomLabel = t(
 		'appointment.input.caption',
 		'Be aware that you are not the owner of this Virtual Room, or it no longer exists.'
@@ -72,6 +66,13 @@ const SelectVirtualRoomWidget: FC<SelectVirtualRoomWidgetProps> = ({ onChange, d
 	const [defaultRoom, setDefaultRoom] = useState<defaultType | undefined>(undefined);
 	const [defaultIsMyRoom, setDefaultIsMyRoom] = useState<boolean>(true);
 	const [selectedItem, setSelectedItem] = useState<SelectItem<valueItem> | undefined>(undefined);
+	const [showCreationModal, setShowCreationModal] = useState(false);
+
+	const createModalRef = useRef<HTMLDivElement>(null);
+
+	const toggleModal = useCallback(() => {
+		setShowCreationModal((prevState) => !prevState);
+	}, []);
 
 	const items: SelectItem<valueItem>[] = useMemo(() => {
 		const roomList: SelectItem<valueItem>[] = [];
@@ -125,8 +126,34 @@ const SelectVirtualRoomWidget: FC<SelectVirtualRoomWidgetProps> = ({ onChange, d
 				)
 			}))
 		);
+		roomList.push({
+			label: 'create new room',
+			value: {
+				id: 'create_new_room',
+				label: 'create new room'
+			},
+			customComponent: (
+				<CustomContainer width="fill">
+					<Button
+						width="fill"
+						color="primary"
+						type="outlined"
+						label="create new room"
+						onClick={toggleModal}
+					/>
+				</CustomContainer>
+			)
+		});
 		return roomList;
-	}, [defaultIsMyRoom, defaultRoom, limitedAccessLabel, noVirtualRoomLabel, virtualRoomIdsList]);
+	}, [
+		defaultIsMyRoom,
+		defaultRoom?.label,
+		defaultRoom?.link,
+		limitedAccessLabel,
+		noVirtualRoomLabel,
+		toggleModal,
+		virtualRoomIdsList
+	]);
 
 	const selection: SelectItem<valueItem> = useMemo(() => {
 		if (defaultValue !== undefined) {
@@ -150,11 +177,6 @@ const SelectVirtualRoomWidget: FC<SelectVirtualRoomWidgetProps> = ({ onChange, d
 		[onChange]
 	);
 
-	const showRoomsList = useMemo(
-		() => !defaultIsMyRoom || virtualRoomIdsList.length !== 0,
-		[defaultIsMyRoom, virtualRoomIdsList.length]
-	);
-
 	useEffect(() => {
 		if (defaultValue !== undefined) {
 			MeetingsApi.getMeetingByMeetingId(getMeetingIdFromLink(defaultValue.link))
@@ -174,7 +196,7 @@ const SelectVirtualRoomWidget: FC<SelectVirtualRoomWidgetProps> = ({ onChange, d
 		[defaultIsMyRoom, defaultRoom?.label, selectedItem?.label]
 	);
 
-	return showRoomsList ? (
+	return (
 		<Container gap="0.5rem">
 			<Select
 				label="Virtual Room"
@@ -191,16 +213,16 @@ const SelectVirtualRoomWidget: FC<SelectVirtualRoomWidgetProps> = ({ onChange, d
 					</Text>
 				</CustomContainer>
 			)}
+			{showCreationModal && (
+				<CreateVirtualRoomModal
+					toggleModal={toggleModal}
+					showCreationModal={showCreationModal}
+					setShowCreationModal={setShowCreationModal}
+					createModalRef={createModalRef}
+					onChangeVirtualRoom={onChangeVirtualRoom}
+				/>
+			)}
 		</Container>
-	) : (
-		<CustomContainer height="2.938rem" background={'gray5'}>
-			<CustomText color="gray1" size="small" weight="light">
-				{goToChatsLabel}
-			</CustomText>
-			<CustomText color="gray1" size="small" weight="light" data-testid="no_virtual_room">
-				{findVirtualRoomLabel}
-			</CustomText>
-		</CustomContainer>
 	);
 };
 
