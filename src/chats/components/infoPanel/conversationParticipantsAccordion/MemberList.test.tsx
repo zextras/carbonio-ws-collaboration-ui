@@ -84,11 +84,6 @@ const room: RoomBe = {
 	]
 };
 
-const ImageBlob = {
-	size: 1234,
-	type: 'image/jpeg'
-};
-
 describe('Participants list', () => {
 	test('The participants list should be rendered as expected', async () => {
 		const store = useStore.getState();

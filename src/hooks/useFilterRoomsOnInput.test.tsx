@@ -8,7 +8,7 @@ import { renderHook } from '@testing-library/react';
 
 import { useFilterRoomsOnInput } from './useFilterRoomsOnInput';
 import useStore from '../store/Store';
-import { createMockRoom, createMockUser } from '../tests/createMock';
+import { createMockMember, createMockRoom, createMockUser } from '../tests/createMock';
 import { RoomType } from '../types/store/RoomTypes';
 
 const user1 = createMockUser({ id: 'userId1', name: 'User 1' });
@@ -21,12 +21,12 @@ const group3 = createMockRoom({ id: 'roomId3', name: 'Room 3' });
 
 const single1 = createMockRoom({
 	id: 'roomId4',
-	members: [{ userId: user1.id }],
+	members: [createMockMember({ userId: user1.id })],
 	type: RoomType.ONE_TO_ONE
 });
 const single2 = createMockRoom({
 	id: 'roomId5',
-	members: [{ userId: user2.id }],
+	members: [createMockMember({ userId: user2.id })],
 	type: RoomType.ONE_TO_ONE
 });
 

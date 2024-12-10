@@ -24,7 +24,9 @@ describe('messageActionsUtils function', () => {
 		expect(result).not.toBeTruthy();
 	});
 	test('edit action can not be performed due to forwarded message', () => {
-		const simpleMessage = createMockTextMessage({ forwarded: true });
+		const simpleMessage = createMockTextMessage({
+			forwarded: { id: 'forwardedId', date: 1661441294393, from: 'userId2', count: 1 }
+		});
 		const result = canPerformAction(simpleMessage, true, 123456789, messageActionType.EDIT);
 		expect(result).not.toBeTruthy();
 	});

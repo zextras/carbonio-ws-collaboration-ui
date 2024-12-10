@@ -10,7 +10,11 @@ import { screen } from '@testing-library/react';
 import ScreenShareButton from './ScreenShareButton';
 import { useParams } from '../../../../__mocks__/react-router';
 import useStore from '../../../store/Store';
-import { createMockMeeting, createMockRoom } from '../../../tests/createMock';
+import {
+	createMockMeeting,
+	createMockParticipants,
+	createMockRoom
+} from '../../../tests/createMock';
 import { setup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 
@@ -38,7 +42,7 @@ describe('ScreenShare button', () => {
 		store.addMeeting(
 			createMockMeeting({
 				id: meeting.id,
-				participants: [{ userId: 'userId', screenStreamEnabled: false }]
+				participants: [createMockParticipants({ userId: 'userId', screenStreamEnabled: false })]
 			})
 		);
 		setup(<ScreenShareButton />);
@@ -54,7 +58,7 @@ describe('ScreenShare button', () => {
 		store.addMeeting(
 			createMockMeeting({
 				id: meeting.id,
-				participants: [{ userId: 'userId', screenStreamEnabled: true }]
+				participants: [createMockParticipants({ userId: 'userId', screenStreamEnabled: true })]
 			})
 		);
 		setup(<ScreenShareButton />);
