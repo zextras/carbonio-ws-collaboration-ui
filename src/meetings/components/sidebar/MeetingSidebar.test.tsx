@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { screen } from '@testing-library/react';
+import { act, screen } from '@testing-library/react';
 import * as ReactRouter from 'react-router';
 
 import MeetingSidebar from './MeetingSidebar';
@@ -22,6 +22,7 @@ import {
 import { setup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
+import { VirtualBackgroundType } from '../../../types/store/ActiveMeetingTypes';
 
 const sessionUser = createMockUser({ id: 'sessionId', name: 'Session User' });
 const user1 = createMockUser({ id: 'user1', name: 'User 1' });
@@ -189,5 +190,32 @@ describe('Meeting sidebar', () => {
 
 		const closedSidebarButton = await screen.findByTestId('icon: ChevronRightOutline');
 		expect(closedSidebarButton).toBeVisible();
+	});
+
+	test('when user select a virtual background, the one selected has green border', async () => {
+		const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
+		spyUseParams.mockReturnValue({ meetingId: oneToOneMeeting.id });
+		useStore.getState().setCapabilities(createMockCapabilityList());
+		const { user } = setup(<MeetingSidebar />);
+		const t = screen.getAllByTestId('icon: ChevronDown');
+		await user.click(t[1]);
+
+		expect(screen.getByTestId(VirtualBackgroundType.NONE)).toBeVisible();
+
+		act(() => {
+			useStore.getState().setBackgroundImage(oneToOneMeeting.id, VirtualBackgroundType.LIVING_ROOM);
+		});
+
+		const styles = getComputedStyle(screen.getByTestId(VirtualBackgroundType.LIVING_ROOM));
+
+		expect(styles.outline).toBe('2px solid #639030');
+
+		act(() => {
+			useStore.getState().setBackgroundImage(oneToOneMeeting.id, VirtualBackgroundType.BLUR);
+		});
+
+		expect(screen.getByTestId(VirtualBackgroundType.LIVING_ROOM)).not.toHaveStyle(
+			'border: 2px solid #669431;'
+		);
 	});
 });

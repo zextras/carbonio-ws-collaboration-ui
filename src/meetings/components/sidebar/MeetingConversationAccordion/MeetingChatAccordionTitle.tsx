@@ -10,6 +10,8 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import { useIsWritingLabel } from '../../../../hooks/useIsWritingLabel';
+import { getRoomNameSelector } from '../../../../store/selectors/RoomsSelectors';
+import useStore from '../../../../store/Store';
 
 const IsWritingLabelText = styled(Text)<{
 	$isWritingIsVisible: boolean;
@@ -38,6 +40,8 @@ const MeetingChatAccordionTitle: FC<MeetingChatAccordionTitleProps> = ({ roomId 
 	const [t] = useTranslation();
 	const chatLabel = t('chat', 'Chat');
 
+	const roomName = useStore((store) => getRoomNameSelector(store, roomId));
+
 	const isWritingLabel = useIsWritingLabel(roomId, true);
 
 	const [isWritingIsDefined, setIsWritingIsDefined] = useState(false);
@@ -60,7 +64,7 @@ const MeetingChatAccordionTitle: FC<MeetingChatAccordionTitleProps> = ({ roomId 
 				$isWritingIsVisible={isWritingIsDefined}
 				data-testid="chat_title"
 			>
-				{chatLabel}
+				{`${chatLabel} - ${roomName}`}
 			</ChatLabelText>
 			<IsWritingLabelText
 				overflow="ellipsis"
