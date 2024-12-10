@@ -12,14 +12,18 @@ import {
 	SelectItem,
 	SingleSelectionOnChange,
 	Icon,
-	Button
+	Button,
+	Row,
+	Tooltip
 } from '@zextras/carbonio-design-system';
 import { find, map } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import CreateVirtualRoomModal from '../../chats/components/secondaryBar/virtualRoomWidget/CreateVirtualRoomModal';
+import DeleteVirtualRoomModal from '../../chats/components/secondaryBar/virtualRoomWidget/DeleteVirtualRoomModal';
 import { MeetingsApi } from '../../network';
+import { getRoomIdByMeetingId } from '../../store/selectors/MeetingSelectors';
 import { getVirtualRoomsList } from '../../store/selectors/RoomsSelectors';
 import useStore from '../../store/Store';
 import { Room } from '../../types/store/RoomTypes';
@@ -53,6 +57,8 @@ const CustomText = styled(Text)`
 const SelectVirtualRoomWidget: FC<SelectVirtualRoomWidgetProps> = ({ onChange, defaultValue }) => {
 	const [t] = useTranslation();
 
+	const deleteVirtualRoomTooltip = t('meeting.virtual.deleteTooltip', 'Delete Virtual Room');
+	const createVirtualRoom = t('meeting.virtual.newRoom', 'Create new Room');
 	const noVirtualRoomLabel = t('appointment.input.defaultValue', 'No Virtual Room selected');
 	const notMyRoomLabel = t(
 		'appointment.input.caption',
@@ -67,11 +73,21 @@ const SelectVirtualRoomWidget: FC<SelectVirtualRoomWidgetProps> = ({ onChange, d
 	const [defaultIsMyRoom, setDefaultIsMyRoom] = useState<boolean>(true);
 	const [selectedItem, setSelectedItem] = useState<SelectItem<valueItem> | undefined>(undefined);
 	const [showCreationModal, setShowCreationModal] = useState(false);
+	const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+	const selectedRoomId = useStore((store) =>
+		getRoomIdByMeetingId(store, getMeetingIdFromLink(defaultValue?.link ?? ''))
+	);
 
 	const createModalRef = useRef<HTMLDivElement>(null);
+	const deleteModalRef = useRef<HTMLDivElement>(null);
 
 	const toggleModal = useCallback(() => {
 		setShowCreationModal((prevState) => !prevState);
+	}, []);
+
+	const handleDeleteModalOpening = useCallback(() => {
+		setShowDeleteModal((prevState) => !prevState);
 	}, []);
 
 	const items: SelectItem<valueItem>[] = useMemo(() => {
@@ -127,10 +143,10 @@ const SelectVirtualRoomWidget: FC<SelectVirtualRoomWidgetProps> = ({ onChange, d
 			}))
 		);
 		roomList.push({
-			label: 'create new room',
+			label: createVirtualRoom,
 			value: {
 				id: 'create_new_room',
-				label: 'create new room'
+				label: createVirtualRoom
 			},
 			customComponent: (
 				<CustomContainer width="fill">
@@ -138,7 +154,7 @@ const SelectVirtualRoomWidget: FC<SelectVirtualRoomWidgetProps> = ({ onChange, d
 						width="fill"
 						color="primary"
 						type="outlined"
-						label="create new room"
+						label={createVirtualRoom}
 						onClick={toggleModal}
 					/>
 				</CustomContainer>
@@ -146,6 +162,7 @@ const SelectVirtualRoomWidget: FC<SelectVirtualRoomWidgetProps> = ({ onChange, d
 		});
 		return roomList;
 	}, [
+		createVirtualRoom,
 		defaultIsMyRoom,
 		defaultRoom?.label,
 		defaultRoom?.link,
@@ -157,7 +174,6 @@ const SelectVirtualRoomWidget: FC<SelectVirtualRoomWidgetProps> = ({ onChange, d
 
 	const selection: SelectItem<valueItem> = useMemo(() => {
 		if (defaultValue !== undefined) {
-			setDefaultRoom(defaultValue);
 			const selectedItem = find(items, (item) => item.value.link === defaultValue?.link);
 			if (selectedItem !== undefined) {
 				setSelectedItem(selectedItem);
@@ -178,6 +194,7 @@ const SelectVirtualRoomWidget: FC<SelectVirtualRoomWidgetProps> = ({ onChange, d
 	);
 
 	useEffect(() => {
+		setDefaultRoom(defaultValue);
 		if (defaultValue !== undefined) {
 			MeetingsApi.getMeetingByMeetingId(getMeetingIdFromLink(defaultValue.link))
 				.then(() => {
@@ -191,20 +208,42 @@ const SelectVirtualRoomWidget: FC<SelectVirtualRoomWidgetProps> = ({ onChange, d
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
+	const selectionIsMyRoom = useMemo(() => {
+		const element = find(virtualRoomIdsList, (element) => element.id === selection.value.id);
+		return element !== undefined;
+	}, [selection.value.id, virtualRoomIdsList]);
+
 	const alertHasToAppear = useMemo(
-		() => !defaultIsMyRoom && selectedItem?.label === defaultRoom?.label,
-		[defaultIsMyRoom, defaultRoom?.label, selectedItem?.label]
+		() => !selectionIsMyRoom && selectedItem?.label === defaultRoom?.label,
+		[defaultRoom?.label, selectedItem?.label, selectionIsMyRoom]
 	);
 
 	return (
 		<Container gap="0.5rem">
-			<Select
-				label="Virtual Room"
-				selection={selection}
-				items={items}
-				onChange={onChangeVirtualRoom}
-				data-testid="select_virtual_room"
-			/>
+			<Container orientation="horizontal" mainAlignment="flex-start" gap="0.5rem">
+				<Row takeAvailableSpace>
+					<Select
+						label="Virtual Room"
+						selection={selection}
+						items={items}
+						onChange={onChangeVirtualRoom}
+						data-testid="select_virtual_room"
+					/>
+				</Row>
+				{selectionIsMyRoom && (
+					<Row width="fit">
+						<Tooltip label={deleteVirtualRoomTooltip}>
+							<Button
+								type="outlined"
+								color="error"
+								icon="Trash2Outline"
+								size="large"
+								onClick={handleDeleteModalOpening}
+							/>
+						</Tooltip>
+					</Row>
+				)}
+			</Container>
 			{alertHasToAppear && (
 				<CustomContainer orientation="horizontal" mainAlignment="flex-start" gap="0.25rem">
 					<Icon icon="AlertTriangleOutline" color="secondary" />
@@ -219,6 +258,16 @@ const SelectVirtualRoomWidget: FC<SelectVirtualRoomWidgetProps> = ({ onChange, d
 					showCreationModal={showCreationModal}
 					setShowCreationModal={setShowCreationModal}
 					createModalRef={createModalRef}
+					onChangeVirtualRoom={onChangeVirtualRoom}
+				/>
+			)}
+			{showDeleteModal && (
+				<DeleteVirtualRoomModal
+					showModal={showDeleteModal}
+					setShowModal={setShowDeleteModal}
+					handleModalOpening={handleDeleteModalOpening}
+					modalRef={deleteModalRef}
+					roomId={selectedRoomId ?? ''}
 					onChangeVirtualRoom={onChangeVirtualRoom}
 				/>
 			)}
