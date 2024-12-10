@@ -32,7 +32,7 @@ const room: RoomBe = createMockRoom({
 
 const meeting: MeetingBe = createMockMeeting({
 	roomId: 'id',
-	type: MeetingType.SCHEDULED
+	meetingType: MeetingType.SCHEDULED
 });
 
 beforeEach(() => {

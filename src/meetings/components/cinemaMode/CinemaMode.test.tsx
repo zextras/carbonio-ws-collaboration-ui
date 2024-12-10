@@ -39,25 +39,13 @@ const groupRoom: RoomBe = createMockRoom({
 	userSettings: { muted: false }
 });
 
-const user1Participant: MeetingParticipant = createMockParticipants({
-	userId: user1.id,
-	sessionId: 'sessionIdUser1'
-});
+const user1Participant: MeetingParticipant = createMockParticipants({ userId: user1.id });
 
-const user2Participant: MeetingParticipant = createMockParticipants({
-	userId: user2.id,
-	sessionId: 'sessionIdUser2'
-});
+const user2Participant: MeetingParticipant = createMockParticipants({ userId: user2.id });
 
-const user3Participant: MeetingParticipant = createMockParticipants({
-	userId: user3.id,
-	sessionId: 'sessionIdUser3'
-});
+const user3Participant: MeetingParticipant = createMockParticipants({ userId: user3.id });
 
-const user4Participant: MeetingParticipant = createMockParticipants({
-	userId: user4.id,
-	sessionId: 'sessionIdUser4'
-});
+const user4Participant: MeetingParticipant = createMockParticipants({ userId: user4.id });
 
 const groupMeeting: MeetingBe = createMockMeeting({
 	roomId: groupRoom.id,

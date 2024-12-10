@@ -52,7 +52,9 @@ describe('ChatExporter tests', () => {
 		const chatExporter = new ChatExporter(roomId);
 		const message = createMockTextMessage();
 		chatExporter.addMessageToFullHistory(message);
-		const message2 = createMockTextMessage({ attachment: { name: 'File.txt' } });
+		const message2 = createMockTextMessage({
+			attachment: { id: 'file', name: 'File.txt', mimeType: 'txt', size: 2300 }
+		});
 		chatExporter.addMessageToFullHistory(message2);
 		const message3 = createMockTextMessage({ deleted: true });
 		chatExporter.addMessageToFullHistory(message3);

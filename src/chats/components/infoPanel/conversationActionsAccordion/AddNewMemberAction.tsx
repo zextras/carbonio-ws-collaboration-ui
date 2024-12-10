@@ -76,8 +76,6 @@ const AddNewMemberAction: FC<AddNewMemberProps> = ({ roomId }) => {
 				action={(): void => setAddNewMemberModalOpen(true)}
 				isDisabled={addMemberDisabled}
 				disabledTooltip={removeToAddNewOneLabel}
-				// TODO: is this leaveActionButton action id correct for the addNewMember action?
-				actionTestId="leaveActionButton"
 			/>
 			{addNewMemberModalOpen && (
 				<AddNewMemberModal

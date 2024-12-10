@@ -5,20 +5,20 @@
  */
 import React, { ReactElement, useCallback, useEffect, useMemo, useRef } from 'react';
 
-import { GpuBuffer } from '@mediapipe/selfie_segmentation';
 import styled from 'styled-components';
 
-import SelfieSegmentationManager, { ISelfieSegmentation } from './SelfieSegmentationManager';
+import SelfieSegmentationManager from './SelfieSegmentationManager';
+import useVirtualBackground from '../../../hooks/useVirtualBackground';
 import {
-	getIsBackgroundBlurred,
+	getBackgroundImage,
 	getLocalStreamVideo,
 	getUpdatedStream
 } from '../../../store/selectors/ActiveMeetingSelectors';
 import useStore from '../../../store/Store';
-import { BrowserUtils } from '../../../utils/BrowserUtils';
+import { VirtualBackgroundType } from '../../../types/store/ActiveMeetingTypes';
 import { getWorkerUrl } from '../../../utils/MeetingsUtils';
 
-const VirtualBackgroundCanvas = styled.canvas`
+const BackgroundCanvas = styled.canvas`
 	display: none;
 	margin: auto;
 	padding: 0;
@@ -39,57 +39,40 @@ const VideoEl = styled.video`
 `;
 
 const VirtualBackground = ({ meetingId }: VirtualBackgroundProps): ReactElement => {
-	const canvasBgRefs = useRef<HTMLCanvasElement | null>(null);
+	const canvasRefs = useRef<HTMLCanvasElement | null>(null);
 	const setBackgroundStream = useStore((store) => store.setBackgroundStream);
 	const videoOutConn = useStore((store) => store.activeMeeting[meetingId ?? '']?.videoOutConn);
 	const updatedStream = useStore((store) => getUpdatedStream(store, meetingId ?? ''));
 	const removeBackgroundStream = useStore((store) => store.removeBackgroundStream);
-	const blur = useStore((store) => getIsBackgroundBlurred(store, meetingId ?? ''));
 	const myVideoStream = useStore((store) => getLocalStreamVideo(store, meetingId ?? ''));
+	const backgroundImageSelected = useStore((store) => getBackgroundImage(store, meetingId ?? ''));
+
+	const worker: Worker = useMemo(() => new Worker(getWorkerUrl()), []);
 
 	const myStreamRef = useRef<HTMLVideoElement | null>(null);
 
-	const paintStreamWithBlur = useCallback(
-		(results: { image: GpuBuffer; segmentationMask: GpuBuffer }) => {
-			const canvas = canvasBgRefs?.current;
-			if (canvas) {
-				const context = canvas.getContext('2d');
-				if (context) {
-					// setup canvas width and height to be the same as the results one
-					context.canvas.width = 640;
-					if (BrowserUtils.isFirefox()) {
-						context.canvas.height = 480;
-					} else {
-						context.canvas.height = 360;
-					}
-
-					// Clear the canvas
-					context.clearRect(0, 0, canvas.width, canvas.height);
-
-					// Draw the segmentation mask
-					context.save();
-					context.drawImage(results.segmentationMask, 0, 0, canvas.width, canvas.height);
-
-					// Apply blur effect
-					context.globalCompositeOperation = 'source-out';
-					context.filter = 'blur(10px)';
-					context.drawImage(results.image, 0, 0, results.image.width, results.image.height);
-					context.filter = 'none';
-					context.globalCompositeOperation = 'destination-atop';
-					context.drawImage(results.image, 0, 0, results.image.width, results.image.height);
-					context.restore();
-				}
-			}
-		},
-		[canvasBgRefs]
+	const { paintStreamWithBlur, paintStreamWithBackground } = useVirtualBackground(
+		backgroundImageSelected,
+		canvasRefs
 	);
 
-	const selfieSegmentationManager: ISelfieSegmentation = useMemo(
-		() => new SelfieSegmentationManager(paintStreamWithBlur),
-		[paintStreamWithBlur]
-	);
+	const selfieSegmentationManager = useMemo(() => new SelfieSegmentationManager(), []);
 
-	const worker: Worker = useMemo(() => new Worker(getWorkerUrl()), []);
+	useEffect(() => {
+		if (backgroundImageSelected !== VirtualBackgroundType.NONE) {
+			selfieSegmentationManager.setResultsCallback(
+				backgroundImageSelected === VirtualBackgroundType.BLUR
+					? paintStreamWithBlur
+					: paintStreamWithBackground
+			);
+		}
+	}, [
+		selfieSegmentationManager,
+		paintStreamWithBackground,
+		paintStreamWithBlur,
+		backgroundImageSelected,
+		worker
+	]);
 
 	const sendSelfieSegmentation = useCallback(() => {
 		if (myStreamRef?.current && myStreamRef.current.readyState >= HTMLMediaElement.HAVE_METADATA) {
@@ -115,11 +98,11 @@ const VirtualBackground = ({ meetingId }: VirtualBackgroundProps): ReactElement 
 	}, [sendSelfieSegmentation, worker]);
 
 	useEffect(() => {
-		if (blur) {
+		if (backgroundImageSelected !== VirtualBackgroundType.NONE) {
 			selfieSegmentationManager.initialize().then(() => {
 				worker.postMessage({ type: 'start' });
-				if (canvasBgRefs?.current) {
-					const canvasStream = canvasBgRefs.current.captureStream();
+				if (canvasRefs?.current) {
+					const canvasStream = canvasRefs.current.captureStream();
 					videoOutConn?.updateLocalStreamTrack(canvasStream, true).then(() => {
 						setBackgroundStream(meetingId ?? '', canvasStream);
 					});
@@ -132,26 +115,34 @@ const VirtualBackground = ({ meetingId }: VirtualBackgroundProps): ReactElement 
 			worker.postMessage({ type: 'stop' });
 		};
 	}, [
-		blur,
 		meetingId,
-		selfieSegmentationManager,
 		sendSelfieSegmentation,
 		setBackgroundStream,
 		videoOutConn,
 		myVideoStream,
 		worker,
-		handleMessageWorker
+		handleMessageWorker,
+		backgroundImageSelected,
+		selfieSegmentationManager
 	]);
 
 	useEffect(() => {
-		if (!blur && updatedStream !== undefined) {
+		if (backgroundImageSelected === VirtualBackgroundType.NONE && updatedStream !== undefined) {
 			removeBackgroundStream(meetingId ?? '');
 			if (myVideoStream) {
 				videoOutConn?.updateLocalStreamTrack(myVideoStream);
 			}
 			worker.postMessage({ type: 'stop' });
 		}
-	}, [blur, meetingId, removeBackgroundStream, updatedStream, videoOutConn, myVideoStream, worker]);
+	}, [
+		meetingId,
+		removeBackgroundStream,
+		updatedStream,
+		videoOutConn,
+		myVideoStream,
+		worker,
+		backgroundImageSelected
+	]);
 
 	useEffect(() => {
 		if (myStreamRef?.current) {
@@ -165,7 +156,7 @@ const VirtualBackground = ({ meetingId }: VirtualBackgroundProps): ReactElement 
 
 	return (
 		<>
-			<VirtualBackgroundCanvas ref={canvasBgRefs} />
+			<BackgroundCanvas ref={canvasRefs} />
 			<VideoEl playsInline autoPlay muted controls={false} ref={myStreamRef} />
 		</>
 	);

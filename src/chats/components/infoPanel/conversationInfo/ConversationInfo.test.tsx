@@ -72,11 +72,6 @@ const OneToOneRoom: RoomBe = {
 	]
 };
 
-const ImageBlob = {
-	size: undefined,
-	type: 'basic'
-};
-
 describe('Conversation info Details', () => {
 	test('group info should appear as expected', async () => {
 		const store = useStore.getState();

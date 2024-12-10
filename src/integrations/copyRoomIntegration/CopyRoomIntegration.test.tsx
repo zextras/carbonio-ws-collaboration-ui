@@ -12,11 +12,12 @@ import { RoomsApi } from '../../network';
 import useStore from '../../store/Store';
 import { createMockMember, createMockRoom, createMockUser } from '../../tests/createMock';
 import { setup } from '../../tests/test-utils';
+import { RoomType } from '../../types/network/models/roomBeTypes';
 
 const sessionUser = createMockUser({ id: 'sessionId', name: 'Session User' });
-const sessionMember = createMockMember({ id: sessionUser.id, owner: true });
-const member1 = createMockMember({ id: 'member1', owner: false });
-const member2 = createMockMember({ id: 'member2', owner: false });
+const sessionMember = createMockMember({ userId: sessionUser.id, owner: true });
+const member1 = createMockMember({ userId: 'member1', owner: false });
+const member2 = createMockMember({ userId: 'member2', owner: false });
 
 describe('CopyRoomIntegration tests', () => {
 	test('Chats group has no duplicate group in WSC', () => {
@@ -27,7 +28,7 @@ describe('CopyRoomIntegration tests', () => {
 	test('Chats group has duplicate group in WSC', () => {
 		useStore
 			.getState()
-			.addRoom(createMockRoom({ name: 'test', type: 'group', members: [sessionMember] }));
+			.addRoom(createMockRoom({ name: 'test', type: RoomType.GROUP, members: [sessionMember] }));
 		setup(
 			<CopyRoomWidget
 				name={'test'}
@@ -78,7 +79,7 @@ describe('CopyRoomIntegration tests', () => {
 		const room = createMockRoom({
 			name: 'test',
 			description: 'description test',
-			type: 'group',
+			type: RoomType.GROUP,
 			members: [sessionMember]
 		});
 		useStore.getState().addRoom(room);

@@ -18,7 +18,6 @@ import {
 } from '../../../tests/createMock';
 import { setup } from '../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
-import { ContactInfo } from '../../../types/network/soap/searchUsersByFeatureRequest';
 import { RootStore } from '../../../types/store/StoreTypes';
 
 const iconCloseOutline = 'icon: CloseOutline';
@@ -30,8 +29,7 @@ const user1Be = createMockUser({
 	email: 'user1@domain.com',
 	name: 'User1',
 	lastSeen: 1234567890,
-	statusMessage: "Hey there! I'm User 1",
-	pictureUpdatedAt: '235968427123'
+	statusMessage: "Hey there! I'm User 1"
 });
 
 const user2Be = createMockUser({
@@ -110,12 +108,6 @@ const mkdTextMsgUser3Group2 = createMockTextMessage({
 	from: user2Be.id,
 	date: 1704776670 // 2024-01-09 06:04:30
 });
-
-const contactUser1: ContactInfo = {
-	email: 'user1@test.com',
-	displayName: 'User 1 Test',
-	id: '1234567890'
-};
 
 beforeEach(() => {
 	const store: RootStore = useStore.getState();

@@ -23,7 +23,7 @@ const user2Info: User = createMockUser();
 
 const mockedRoom2 = createMockRoom({
 	id: 'roomId',
-	type: 'roomType',
+	type: RoomType.GROUP,
 	members: [
 		{
 			userId: user1Info.id,
@@ -71,7 +71,7 @@ describe('Leave conversation Action', () => {
 				iAmOneOfOwner={false}
 			/>
 		);
-		await user.click(screen.getByText(/Leave Room/i));
+		await user.click(screen.getByText(/Leave Group/i));
 		expect(screen.getByTestId('leave_modal')).toBeInTheDocument();
 
 		await user.click(screen.getByTestId('icon: Close'));

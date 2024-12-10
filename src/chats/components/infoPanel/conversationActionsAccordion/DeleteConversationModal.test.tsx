@@ -10,7 +10,12 @@ import { screen } from '@testing-library/react';
 
 import DeleteConversationModal from './DeleteConversationModal';
 import useStore from '../../../../store/Store';
-import { createMockMeeting, createMockMember, createMockRoom } from '../../../../tests/createMock';
+import {
+	createMockMeeting,
+	createMockMember,
+	createMockParticipants,
+	createMockRoom
+} from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
 import { MeetingBe } from '../../../../types/network/models/meetingBeTypes';
 import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
@@ -31,7 +36,10 @@ const testRoom: RoomBe = createMockRoom({
 
 const testMeeting: MeetingBe = createMockMeeting({
 	roomId: testRoom.id,
-	participants: [memberOne, memberOne]
+	participants: [
+		createMockParticipants({ userId: memberOne.userId }),
+		createMockParticipants({ userId: memberTwo.userId })
+	]
 });
 
 describe('Delete Conversation Modal', () => {
