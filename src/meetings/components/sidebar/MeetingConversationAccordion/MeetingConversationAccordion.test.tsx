@@ -8,9 +8,9 @@ import React from 'react';
 
 import { screen, waitFor, act, renderHook } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event';
+import * as ReactRouter from 'react-router';
 
 import { mockDarkReaderIsEnabled } from '../../../../../__mocks__/darkreader';
-import { useParams } from '../../../../../__mocks__/react-router';
 import useStore from '../../../../store/Store';
 import {
 	createMockCapabilityList,
@@ -76,7 +76,8 @@ const setupBasicGroup = (): { user: UserEvent; store: RootStore } => {
 		result.current.addMeeting(groupMeeting);
 		result.current.meetingConnection(groupMeeting.id, false, undefined, false, undefined);
 	});
-	useParams.mockReturnValue({ meetingId: groupMeeting.id });
+	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
+	spyUseParams.mockReturnValue({ meetingId: groupMeeting.id });
 	const { user } = setup(<MeetingSidebar />);
 	return { user, store: result.current };
 };

@@ -3,7 +3,6 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-
 import React from 'react';
 
 import { screen } from '@testing-library/react';
@@ -18,10 +17,17 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../../../tests/createMock';
-import { mockedAddRoomRequest } from '../../../../tests/mocks/network';
+import { RoomsApiToSpy, spyOnRoomsApi } from '../../../../tests/mocks/network';
+import { mockSearchUsersByFeatureRequest } from '../../../../tests/mocks/SearchUsersByFeature';
 import { setup } from '../../../../tests/test-utils';
 import { MeetingBe } from '../../../../types/network/models/meetingBeTypes';
-import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
+import { RoomBe } from '../../../../types/network/models/roomBeTypes';
+import { RoomType } from '../../../../types/store/RoomTypes';
+
+const createNewRoom = 'Create new Room';
+const virtualRoomName = 'New Virtual Room';
+const createNewVirtualRoom = 'Create new Virtual Room';
+const newVirtualRoomsName = 'New Virtual Room’s name*';
 
 const sessionUser = createMockUser({ id: 'sessionId', name: 'Session User' });
 
@@ -91,13 +97,17 @@ const meetingTwoModActive: MeetingBe = createMockMeeting({
 	participants: [createMockParticipants({ userId: user2.id })]
 });
 
+beforeEach(() => {
+	const store = useStore.getState();
+	store.setLoginInfo(sessionUser.id, sessionUser.name);
+	store.setUserInfo(user1);
+	store.setUserInfo(user2);
+	store.setCapabilities(createMockCapabilityList());
+});
+
 describe('VirtualRoomsButton', () => {
 	test("user copy virtual room's link", async () => {
 		const store = useStore.getState();
-		store.setLoginInfo(sessionUser.id, sessionUser.name);
-		store.setUserInfo(user1);
-		store.setUserInfo(user2);
-		store.setCapabilities(createMockCapabilityList());
 		store.setRooms([
 			roomSessionOnlyModerator,
 			roomSessionTwoMod,
@@ -127,35 +137,31 @@ describe('VirtualRoomsButton', () => {
 		);
 	});
 
-	test('create virtual room', async () => {
-		mockedAddRoomRequest.mockReturnValue('created');
-		const store = useStore.getState();
-		store.setLoginInfo(sessionUser.id, sessionUser.name);
-		store.setUserInfo(user1);
-		store.setUserInfo(user2);
-		store.setCapabilities(createMockCapabilityList());
+	test('create virtual modal', async () => {
+		mockSearchUsersByFeatureRequest.mockReturnValueOnce([]);
+		const spyOnAddRoom = spyOnRoomsApi(RoomsApiToSpy.ADD_ROOM);
 
 		const { user } = setup(<VirtualRoomsButton expanded />);
 
 		const button = screen.getByRole('button');
 		await user.click(button);
 
-		const createButton = await screen.findByRole('button', { name: 'Create new Room' });
+		const createButton = await screen.findByRole('button', { name: createNewRoom });
 		expect(createButton).toBeVisible();
 
 		await user.click(createButton);
 
-		const modalTitle = await screen.findByText('Create new Virtual Room');
+		const modalTitle = await screen.findByText(createNewVirtualRoom);
 		expect(modalTitle).toBeInTheDocument();
 
-		const textArea = await screen.findByRole('textbox');
+		const textArea = await screen.findByText(newVirtualRoomsName);
 
-		await user.type(textArea, 'New Virtual Room');
+		await user.type(textArea, virtualRoomName);
 
 		const createRoomButton = screen.getByRole('button', { name: 'create' });
 		expect(createRoomButton).toBeEnabled();
 
 		await user.click(createRoomButton);
-		expect(mockedAddRoomRequest).toHaveBeenCalled();
+		expect(spyOnAddRoom).toHaveBeenCalled();
 	});
 });

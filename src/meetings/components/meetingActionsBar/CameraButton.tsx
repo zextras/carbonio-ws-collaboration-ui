@@ -17,7 +17,6 @@ import {
 	CreateSnackbarFn,
 	DropdownItem,
 	MultiButton,
-	Text,
 	Tooltip,
 	useSnackbar
 } from '@zextras/carbonio-design-system';
@@ -27,16 +26,11 @@ import { useParams } from 'react-router-dom';
 
 import { MeetingRoutesParams } from '../../../hooks/useRouting';
 import MeetingsApi from '../../../network/apis/MeetingsApi';
-import {
-	getIsBackgroundBlurred,
-	getSelectedVideoDeviceId
-} from '../../../store/selectors/ActiveMeetingSelectors';
+import { getSelectedVideoDeviceId } from '../../../store/selectors/ActiveMeetingSelectors';
 import { getParticipantVideoStatus } from '../../../store/selectors/MeetingSelectors';
-import { getCapability, getUserId } from '../../../store/selectors/SessionSelectors';
-import { getIsUserGuest } from '../../../store/selectors/UsersSelectors';
+import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
-import { CapabilityType } from '../../../types/store/SessionTypes';
 import { getVideoStream } from '../../../utils/UserMediaManager';
 
 type CamButtonProps = {
@@ -59,14 +53,6 @@ const CameraButton = ({
 		'meeting.interactions.browserPermission',
 		'Grant browser permissions to enable resources'
 	);
-	const devicesTitle = t('meeting.interactions.title.devices', 'Devices');
-	const videoEffectTitle = t('meeting.interactions.title.videoEffect', 'Video effect');
-	const removeBlurLabel = t('meeting.interactions.option.removeBlur', 'Remove blur effect');
-	const applyBlurLabel = t('meeting.interactions.option.applyBlur', 'Apply blur effect');
-	const turnOnCameraTooltip = t(
-		'meeting.interactions.userHint',
-		'Turn on the camera to select a video effect'
-	);
 	const selectedDeviceTooltip = t('meeting.interactions.selectedDeviceTooltip', 'Selected device');
 	const disableButtonLabel = t(
 		'meeting.interactions.disabled',
@@ -81,12 +67,6 @@ const CameraButton = ({
 	const videoOutConn = useStore((store) => store.activeMeeting[meetingId]?.videoOutConn);
 	const setSelectedDeviceId = useStore((store) => store.setSelectedDeviceId);
 	const setLocalStreams = useStore((store) => store.setLocalStreams);
-	const setBlur = useStore((store) => store.setBlur);
-	const isBlur = useStore((store) => getIsBackgroundBlurred(store, meetingId));
-	const canUseVirtualBackground = useStore((store) =>
-		getCapability(store, CapabilityType.CAN_USE_VIRTUAL_BACKGROUND)
-	);
-	const isUserGuest = useStore((store) => getIsUserGuest(store, myUserId ?? ''));
 	const websocketNetworkStatus = useStore(({ connections }) => connections.status.websocket);
 
 	const [buttonStatus, setButtonStatus] = useState<boolean>(true);
@@ -117,7 +97,6 @@ const CameraButton = ({
 				label: videoItem.label ? videoItem.label : `device-${i}`,
 				onClick: (): void => {
 					if (videoStatus) {
-						setBlur(meetingId, false);
 						getVideoStream(videoItem.deviceId).then((stream) => {
 							videoOutConn?.updateLocalStreamTrack(stream).then(() => {
 								setLocalStreams(meetingId, STREAM_TYPE.VIDEO, stream);
@@ -139,57 +118,12 @@ const CameraButton = ({
 			selectedVideoDeviceId,
 			selectedDeviceTooltip,
 			videoStatus,
-			setBlur,
 			meetingId,
 			videoOutConn,
 			setLocalStreams,
 			setSelectedDeviceId
 		]
 	);
-
-	const onCLickBlur = useCallback(() => {
-		setBlur(meetingId, !isBlur);
-	}, [isBlur, meetingId, setBlur]);
-
-	const dropdownList = useMemo(() => {
-		const list: DropdownItem[] = [];
-		if (canUseVirtualBackground ?? isUserGuest) {
-			list.push({
-				id: 'video-effect',
-				label: videoEffectTitle,
-				disabled: true,
-				customComponent: <Text weight="bold">{videoEffectTitle}</Text>
-			});
-			list.push({
-				id: 'blur',
-				icon: isBlur ? 'Avatar' : 'AvatarOutline',
-				label: isBlur ? removeBlurLabel : applyBlurLabel,
-				disabled: !videoStatus,
-				tooltipLabel: !videoStatus ? turnOnCameraTooltip : undefined,
-				onClick: onCLickBlur
-			});
-			list.push({ type: 'divider', id: 'divider', label: 'divider' });
-		}
-		list.push({
-			id: 'devices',
-			label: devicesTitle,
-			disabled: true,
-			customComponent: <Text weight="bold">{devicesTitle}</Text>
-		});
-		return list.concat(mediaVideoList);
-	}, [
-		canUseVirtualBackground,
-		isUserGuest,
-		devicesTitle,
-		mediaVideoList,
-		videoEffectTitle,
-		isBlur,
-		removeBlurLabel,
-		applyBlurLabel,
-		videoStatus,
-		turnOnCameraTooltip,
-		onCLickBlur
-	]);
 
 	const toggleVideoDropdown = useCallback(() => {
 		setIsVideoListOpen((prevState) => !prevState);
@@ -220,10 +154,9 @@ const CameraButton = ({
 				}
 			} else {
 				videoOutConn?.stopVideo();
-				setBlur(meetingId, false);
 			}
 		},
-		[videoStatus, videoOutConn, selectedVideoDeviceId, mediaPermissionSnackbar, meetingId, setBlur]
+		[videoStatus, videoOutConn, selectedVideoDeviceId, mediaPermissionSnackbar, meetingId]
 	);
 
 	const updateListOfDevices = useCallback(() => {
@@ -268,14 +201,14 @@ const CameraButton = ({
 				primaryIcon={videoStatus ? 'Video' : 'VideoOff'}
 				icon={isVideoListOpen ? 'ChevronDown' : 'ChevronUp'}
 				onClick={toggleVideoStream}
-				items={dropdownList}
+				items={mediaVideoList}
 				size="large"
 				shape="regular"
 				dropdownProps={{
 					forceOpen: isVideoListOpen,
 					onClick: toggleVideoDropdown,
 					dropdownListRef: videoDropdownRef,
-					items: dropdownList,
+					items: mediaVideoList,
 					width: 'fit-content'
 				}}
 				disabledPrimary={!buttonStatus || !websocketNetworkStatus}

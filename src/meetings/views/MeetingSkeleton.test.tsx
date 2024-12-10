@@ -5,11 +5,11 @@
  */
 import React from 'react';
 
-import { screen, waitFor, act } from '@testing-library/react';
+import { act, screen, waitFor } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event';
+import * as ReactRouter from 'react-router';
 
 import MeetingSkeleton from './MeetingSkeleton';
-import { useParams } from '../../../__mocks__/react-router';
 import { PAGE_INFO_TYPE } from '../../hooks/useRouting';
 import useStore from '../../store/Store';
 import {
@@ -19,15 +19,14 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../tests/createMock';
-import { mockMediaDevicesResolve } from '../../tests/mocks/global';
-import { mockedLeaveMeetingRequest } from '../../tests/mocks/network';
+import { MeetingsApiToSpy, spyOnMeetingsApi } from '../../tests/mocks/network';
 import { mockInitialize } from '../../tests/mocks/SelfieSegmentationManager';
 import { mockGoToInfoPage } from '../../tests/mocks/useRouting';
 import { setup } from '../../tests/test-utils';
 import { MeetingBe } from '../../types/network/models/meetingBeTypes';
 import { MemberBe, RoomBe } from '../../types/network/models/roomBeTypes';
 import { UserBe } from '../../types/network/models/userBeTypes';
-import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
+import { STREAM_TYPE, VirtualBackgroundType } from '../../types/store/ActiveMeetingTypes';
 import { MeetingParticipant } from '../../types/store/MeetingTypes';
 import { RoomType } from '../../types/store/RoomTypes';
 import { RootStore } from '../../types/store/StoreTypes';
@@ -87,18 +86,12 @@ const storeSetupGroupMeetingSkeleton = (): { user: UserEvent; store: RootStore }
 	store.meetingConnection(meeting.id, false, undefined, true, 'videoId');
 	store.setLocalStreams(meeting.id, STREAM_TYPE.VIDEO, new MediaStream());
 	store.setCapabilities(createMockCapabilityList());
-	useParams.mockReturnValue({ meetingId: meeting.id });
+	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
+	spyUseParams.mockReturnValue({ meetingId: meeting.id });
 	const { user } = setup(<MeetingSkeleton />);
 
 	return { user, store };
 };
-
-const mockCaptureStream = jest.fn().mockReturnValue(new MediaStream());
-HTMLCanvasElement.prototype.captureStream = mockCaptureStream;
-
-beforeAll(() => {
-	mockMediaDevicesResolve();
-});
 
 describe('Sidebar interactions', () => {
 	test('Enable full screen and sidebar must be closed', async () => {
@@ -120,7 +113,7 @@ describe('Grid mode meeting view', () => {
 	});
 
 	test('Close the meeting', async () => {
-		mockedLeaveMeetingRequest.mockResolvedValueOnce('Meeting left');
+		const spyOnLeaveMeeting = spyOnMeetingsApi(MeetingsApiToSpy.LEAVE_MEETING);
 		const { user } = storeSetupGroupMeetingSkeleton();
 		const meetingActionBar = await screen.findByTestId(meetingActionBarLabel);
 		await user.hover(meetingActionBar);
@@ -129,7 +122,7 @@ describe('Grid mode meeting view', () => {
 		await user.click(endMeetingButton);
 		await user.click(endMeetingButton);
 
-		expect(mockedLeaveMeetingRequest).toHaveBeenCalled();
+		expect(spyOnLeaveMeeting).toHaveBeenCalled();
 		expect(mockGoToInfoPage).toHaveBeenCalledWith(PAGE_INFO_TYPE.MEETING_ENDED);
 	});
 
@@ -215,13 +208,15 @@ describe('Meeting action bar interaction with skeleton', () => {
 
 describe('Virtual Background setup', () => {
 	test('turn on and off blur', async () => {
+		HTMLCanvasElement.prototype.captureStream = jest.fn().mockReturnValue(new MediaStream());
+
 		mockInitialize.mockReturnValue('initialized');
 		const { store } = storeSetupGroupMeetingSkeleton();
 		expect(store.activeMeeting[meeting.id]).not.toBeDefined();
 
 		// turn on blur
 		act(() => {
-			store.setBlur(meeting.id, true);
+			store.setBackgroundImage(meeting.id, VirtualBackgroundType.BLUR);
 		});
 
 		await waitFor(() => {
@@ -232,7 +227,7 @@ describe('Virtual Background setup', () => {
 
 		// turn off blur
 		act(() => {
-			store.setBlur(meeting.id, false);
+			store.setBackgroundImage(meeting.id, VirtualBackgroundType.NONE);
 		});
 		const updatedStore2 = useStore.getState();
 		expect(

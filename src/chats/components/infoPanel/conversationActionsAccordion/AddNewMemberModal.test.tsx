@@ -50,7 +50,7 @@ describe('Add new Member Modal', () => {
 			/>
 		);
 
-		await screen.findByText('spinner');
+		await screen.findByTestId('spinner');
 		await screen.findByTestId('list_creation_modal');
 
 		const title = screen.getByText(new RegExp(`Add new members to ${testRoom.name}`, 'i'));
@@ -87,7 +87,7 @@ describe('Add new Member Modal', () => {
 			/>
 		);
 
-		await screen.findByText('spinner');
+		await screen.findByTestId('spinner');
 		await screen.findByTestId('list_creation_modal');
 
 		const title = screen.getByText(new RegExp(`Add new members to ${testRoom.name}`, 'i'));

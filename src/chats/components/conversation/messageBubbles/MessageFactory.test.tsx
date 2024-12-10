@@ -29,6 +29,7 @@ describe('Message Factory', () => {
 				nextMessageIsFromSameSender={false}
 				messageRef={React.createRef()}
 				isFirstNewMessage={false}
+				isPrevMessageDeleted
 			/>
 		);
 		const messageTypeNotHandled = screen.getByText('Message not handled');
@@ -49,6 +50,7 @@ describe('Message Factory', () => {
 				nextMessageIsFromSameSender={false}
 				messageRef={React.createRef()}
 				isFirstNewMessage={false}
+				isPrevMessageDeleted
 			/>
 		);
 		const bubble = screen.getByTestId(`Bubble-${message.id}`);
@@ -69,6 +71,7 @@ describe('Message Factory', () => {
 				nextMessageIsFromSameSender={false}
 				messageRef={React.createRef()}
 				isFirstNewMessage
+				isPrevMessageDeleted
 			/>
 		);
 		const bubble = screen.getByTestId(`Bubble-${message.id}`);
@@ -91,6 +94,7 @@ describe('Message Factory', () => {
 				nextMessageIsFromSameSender={false}
 				messageRef={React.createRef()}
 				isFirstNewMessage={false}
+				isPrevMessageDeleted
 			/>
 		);
 		const bubble = screen.getByTestId(`BubbleDeleted-${message.id}`);
@@ -111,6 +115,7 @@ describe('Message Factory', () => {
 				nextMessageIsFromSameSender={false}
 				messageRef={React.createRef()}
 				isFirstNewMessage
+				isPrevMessageDeleted
 			/>
 		);
 		const bubble = screen.getByTestId(`BubbleDeleted-${message.id}`);
@@ -133,6 +138,7 @@ describe('Message Factory', () => {
 				nextMessageIsFromSameSender={false}
 				messageRef={React.createRef()}
 				isFirstNewMessage
+				isPrevMessageDeleted
 			/>
 		);
 		const bubble = screen.getByTestId(`configuration_msg-${message.id}`);
@@ -155,6 +161,7 @@ describe('Message Factory', () => {
 				nextMessageIsFromSameSender={false}
 				messageRef={React.createRef()}
 				isFirstNewMessage
+				isPrevMessageDeleted
 			/>
 		);
 		const bubble = screen.getByTestId(`date_msg-${message.id}`);

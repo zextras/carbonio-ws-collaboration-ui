@@ -72,13 +72,13 @@ const BubbleActions: FC<BubbleActionsProps> = ({ message, isMyMessage }) => {
 		isMyMessage
 	);
 
-	const { ReactionsDropdown, reactionsDropdownActive, reactionsDropdownRef } =
+	const { ReactionsPopover, reactionsPopoverActive, reactionsPopoverRef } =
 		useBubbleReactions(message);
 
 	const closeDropdownOnScroll = useCallback(() => {
 		menuDropdownActive && menuDropdownRef.current?.click();
-		reactionsDropdownActive && reactionsDropdownRef.current?.click();
-	}, [menuDropdownActive, menuDropdownRef, reactionsDropdownActive, reactionsDropdownRef]);
+		reactionsPopoverActive && reactionsPopoverRef.current?.click();
+	}, [menuDropdownActive, menuDropdownRef, reactionsPopoverActive, reactionsPopoverRef]);
 
 	useEffect(() => {
 		const messageListRef = window.document.getElementById(`messageListRef${message.roomId}`);
@@ -91,10 +91,10 @@ const BubbleActions: FC<BubbleActionsProps> = ({ message, isMyMessage }) => {
 			<BubbleActionsWrapper
 				data-testid={`cxtMenu-${message.id}-iconOpen`}
 				isMyMessage={isMyMessage}
-				$isActive={menuDropdownActive || reactionsDropdownActive}
+				$isActive={menuDropdownActive || reactionsPopoverActive}
 			>
 				<Padding left="0.25rem" />
-				{ReactionsDropdown}
+				{ReactionsPopover}
 				<Padding right="0.25rem" />
 				{MenuDropdown}
 			</BubbleActionsWrapper>

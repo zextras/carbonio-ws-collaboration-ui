@@ -15,7 +15,6 @@ import {
 	createMockTextMessage,
 	createMockUser
 } from '../../../../../tests/createMock';
-import { mockedSendChatMessageReaction } from '../../../../../tests/mockedXmppClient';
 import { ProvidersWrapper, setup } from '../../../../../tests/test-utils';
 import { RoomBe } from '../../../../../types/network/models/roomBeTypes';
 import { FasteningAction, TextMessage } from '../../../../../types/store/MessageTypes';
@@ -50,21 +49,22 @@ describe('Bubble Contextual Menu - other user messages', () => {
 		const { result } = renderHook(() => useBubbleReactions(simpleTextMessage), {
 			wrapper: ProvidersWrapper
 		});
-		const { user } = setup(result.current.ReactionsDropdown);
+		const { user } = setup(result.current.ReactionsPopover);
 		const smileButton = screen.getByTestId(iconTestId);
-		expect(result.current.reactionsDropdownActive).toBe(false);
+		expect(result.current.reactionsPopoverActive).toBe(false);
 		await user.click(smileButton);
-		expect(result.current.reactionsDropdownActive).toBe(true);
+		expect(result.current.reactionsPopoverActive).toBe(true);
 	});
 
 	test('All reactions are displayed', async () => {
 		const { result } = renderHook(() => useBubbleReactions(simpleTextMessage), {
 			wrapper: ProvidersWrapper
 		});
-		const { user } = setup(result.current.ReactionsDropdown);
+		const { user, rerender } = setup(result.current.ReactionsPopover);
 		const smileButton = screen.getByTestId(iconTestId);
-		expect(result.current.reactionsDropdownActive).toBe(false);
+		expect(result.current.reactionsPopoverActive).toBe(false);
 		await user.click(smileButton);
+		rerender(result.current.ReactionsPopover);
 		forEach(ReactionType, (reaction) => {
 			const reactionBox = screen.getByTestId(`reaction-${reaction}`);
 			expect(reactionBox).toBeInTheDocument();
@@ -72,34 +72,61 @@ describe('Bubble Contextual Menu - other user messages', () => {
 	});
 
 	test('Send a reaction', async () => {
+		const spyOnSendChatMessageReaction = jest.spyOn(
+			useStore.getState().connections.xmppClient,
+			'sendChatMessageReaction'
+		);
 		const { result } = renderHook(() => useBubbleReactions(simpleTextMessage), {
 			wrapper: ProvidersWrapper
 		});
-		const { user } = setup(result.current.ReactionsDropdown);
+		const { user, rerender } = setup(result.current.ReactionsPopover);
 		const smileButton = screen.getByTestId(iconTestId);
-		expect(result.current.reactionsDropdownActive).toBe(false);
+		expect(result.current.reactionsPopoverActive).toBe(false);
 		await user.click(smileButton);
 
+		rerender(result.current.ReactionsPopover);
 		const reaction = screen.getByTestId(`reaction-${ReactionType.THUMBS_UP}`);
 		await user.click(reaction);
 
-		expect(mockedSendChatMessageReaction).toHaveBeenCalledTimes(1);
+		expect(spyOnSendChatMessageReaction).toHaveBeenCalledTimes(1);
 	});
 
 	test('Sent reaction is highlight', async () => {
-		useStore.getState().addFastening(reactionToSimpleTextMessage);
+		const store = useStore.getState();
+		const spyOnSendChatMessageReaction = jest.spyOn(
+			store.connections.xmppClient,
+			'sendChatMessageReaction'
+		);
+
+		store.addFastening(reactionToSimpleTextMessage);
 		const { result } = renderHook(() => useBubbleReactions(simpleTextMessage), {
 			wrapper: ProvidersWrapper
 		});
-		const { user } = setup(result.current.ReactionsDropdown);
+		const { user, rerender } = setup(result.current.ReactionsPopover);
 		const smileButton = screen.getByTestId(iconTestId);
-		expect(result.current.reactionsDropdownActive).toBe(false);
+		expect(result.current.reactionsPopoverActive).toBe(false);
 		await user.click(smileButton);
 
+		rerender(result.current.ReactionsPopover);
 		const reaction = screen.getByTestId(`reaction-${ReactionType.THUMBS_UP}`);
 		expect(reaction).toHaveStyle('background-color: #abc6ed;');
 		// Remove reaction
 		await user.click(reaction);
-		expect(mockedSendChatMessageReaction).toHaveBeenCalledTimes(1);
+		expect(spyOnSendChatMessageReaction).toHaveBeenCalledTimes(1);
+	});
+
+	test('Open custom reaction picker', async () => {
+		const { result } = renderHook(() => useBubbleReactions(simpleTextMessage), {
+			wrapper: ProvidersWrapper
+		});
+		const { user, rerender } = setup(result.current.ReactionsPopover);
+		const smileButton = screen.getByTestId(iconTestId);
+		await user.click(smileButton);
+		rerender(result.current.ReactionsPopover);
+		const customReactionButton = screen.getByTestId('custom-reactions');
+		await user.click(customReactionButton);
+		rerender(result.current.ReactionsPopover);
+		const customReactionPicker = screen.getByTestId('custom-reaction-picker');
+		expect(customReactionPicker).toBeInTheDocument();
 	});
 });

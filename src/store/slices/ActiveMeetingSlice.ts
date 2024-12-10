@@ -18,7 +18,8 @@ import {
 	STREAM_TYPE,
 	StreamsSubscriptionMap,
 	Subscription,
-	TileData
+	TileData,
+	VirtualBackgroundType
 } from '../../types/store/ActiveMeetingTypes';
 import { ActiveMeetingSlice, RootStore } from '../../types/store/StoreTypes';
 
@@ -41,7 +42,8 @@ export const useActiveMeetingSlice: StateCreator<ActiveMeetingSlice> = (
 						sidebarIsOpened: true,
 						participantsAccordionIsOpened: false,
 						waitingListAccordionIsOpened: true,
-						recordingAccordionIsOpened: false
+						recordingAccordionIsOpened: false,
+						visualEffectsAccordionIsOpened: false
 					},
 					chatVisibility: MeetingChatVisibility.OPEN,
 					meetingViewSelected: MeetingViewType.GRID,
@@ -63,7 +65,7 @@ export const useActiveMeetingSlice: StateCreator<ActiveMeetingSlice> = (
 						selectedVideoDeviceId
 					),
 					virtualBackground: {
-						blur: false
+						backgroundImage: VirtualBackgroundType.NONE
 					},
 					screenOutConn: new ScreenOutConnection(meetingId),
 					subscription: {},
@@ -129,6 +131,17 @@ export const useActiveMeetingSlice: StateCreator<ActiveMeetingSlice> = (
 			}),
 			false,
 			'AM/SET_MEETING_PARTICIPANTS_ACCORDION_STATUS'
+		);
+	},
+	setVisualEffectsAccordionStatus: (meetingId: string, status: boolean): void => {
+		set(
+			produce((draft: RootStore) => {
+				if (draft.activeMeeting[meetingId]) {
+					draft.activeMeeting[meetingId].sidebarStatus.visualEffectsAccordionIsOpened = status;
+				}
+			}),
+			false,
+			'AM/SET_VISUAL_EFFECTS_ACCORDION_STATUS'
 		);
 	},
 	setMeetingChatVisibility: (meetingId: string, visibilityStatus: MeetingChatVisibility): void => {
@@ -349,13 +362,15 @@ export const useActiveMeetingSlice: StateCreator<ActiveMeetingSlice> = (
 			'AM/REMOVE_BACKGROUND_STREAM'
 		);
 	},
-	setBlur: (meetingId: string, status: boolean): void => {
+	setBackgroundImage: (meetingId: string, image: VirtualBackgroundType): void => {
 		set(
 			produce((draft: RootStore) => {
-				draft.activeMeeting[meetingId].virtualBackground.blur = status;
+				if (draft.activeMeeting[meetingId]) {
+					draft.activeMeeting[meetingId].virtualBackground.backgroundImage = image;
+				}
 			}),
 			false,
-			'AM/SET_BLUR'
+			'AM/SET_BACKGROUND_IMAGE'
 		);
 	}
 });

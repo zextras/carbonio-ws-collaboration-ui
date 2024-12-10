@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import BaseAPI from './BaseAPI';
 import IAttachmentsApi from '../../types/network/apis/IAttachmentsApi';
 import { RequestType } from '../../types/network/apis/IBaseAPI';
 import {
@@ -17,8 +16,9 @@ import {
 	GetPdfThumbnailResponse,
 	ImageSize
 } from '../../types/network/responses/attachmentsResponses';
+import { fetchAPI } from '../../utils/FetchUtils';
 
-class AttachmentsApi extends BaseAPI implements IAttachmentsApi {
+class AttachmentsApi implements IAttachmentsApi {
 	// Singleton design pattern
 	private static instance: IAttachmentsApi;
 
@@ -30,18 +30,18 @@ class AttachmentsApi extends BaseAPI implements IAttachmentsApi {
 	}
 
 	public deleteAttachment(fileId: string): Promise<DeleteAttachmentResponse> {
-		return this.fetchAPI(`attachments/${fileId}`, RequestType.DELETE);
+		return fetchAPI(`attachments/${fileId}`, RequestType.DELETE);
 	}
 
 	public getAttachmentInfo(fileId: string): Promise<GetAttachmentInfoResponse> {
-		return this.fetchAPI(`attachments/${fileId}`, RequestType.GET);
+		return fetchAPI(`attachments/${fileId}`, RequestType.GET);
 	}
 
 	public getURLAttachment = (fileId: string): string =>
 		`${window.document.location.origin}/services/chats/attachments/${fileId}/download`;
 
 	public getAttachment(fileId: string): Promise<GetAttachmentResponse> {
-		return this.fetchAPI(`attachments/${fileId}/download`, RequestType.GET);
+		return fetchAPI(`attachments/${fileId}/download`, RequestType.GET);
 	}
 
 	public getImagePreview(
@@ -57,7 +57,7 @@ class AttachmentsApi extends BaseAPI implements IAttachmentsApi {
 			if (format) array.push(`output_format=${format}`);
 			params = `?${array.join('&')}`;
 		}
-		return this.fetchAPI(`preview/image/${fileId}/${area}/${params}`, RequestType.GET);
+		return fetchAPI(`preview/image/${fileId}/${area}/${params}`, RequestType.GET);
 	}
 
 	public getImagePreviewURL = (
@@ -91,7 +91,7 @@ class AttachmentsApi extends BaseAPI implements IAttachmentsApi {
 			if (shape) array.push(`shape=${shape}`);
 			params = `?${array.join('&')}`;
 		}
-		return this.fetchAPI(`preview/image/${fileId}/${area}/thumbnail/${params}`, RequestType.GET);
+		return fetchAPI(`preview/image/${fileId}/${area}/thumbnail/${params}`, RequestType.GET);
 	}
 
 	public getImageThumbnailURL = (
@@ -124,7 +124,7 @@ class AttachmentsApi extends BaseAPI implements IAttachmentsApi {
 			if (lastPage) array.push(`last_page=${lastPage}`);
 			params = `?${array.join('&')}`;
 		}
-		return this.fetchAPI(`preview/pdf/${fileId}/${params}`, RequestType.GET);
+		return fetchAPI(`preview/pdf/${fileId}/${params}`, RequestType.GET);
 	}
 
 	public getPdfPreviewURL = (fileId: string, firstPage?: number, lastPage?: number): string => {
@@ -153,7 +153,7 @@ class AttachmentsApi extends BaseAPI implements IAttachmentsApi {
 			if (format) array.push(`output_format=${format}`);
 			params = `?${array.join('&')}`;
 		}
-		return this.fetchAPI(`preview/pdf/${fileId}/${area}/thumbnail/${params}`, RequestType.GET);
+		return fetchAPI(`preview/pdf/${fileId}/${area}/thumbnail/${params}`, RequestType.GET);
 	}
 
 	public getPdfThumbnailURL = (

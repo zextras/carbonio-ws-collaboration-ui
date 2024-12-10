@@ -12,7 +12,8 @@ import {
 	STREAM_TYPE,
 	StreamsSubscriptionMap,
 	Subscription,
-	TileData
+	TileData,
+	VirtualBackgroundType
 } from './ActiveMeetingTypes';
 import { Connections } from './ConnectionsTypes';
 import { FasteningsMap } from './FasteningMessagesTypes';
@@ -186,6 +187,7 @@ export type ActiveMeetingSlice = {
 	setWaitingListAccordionStatus: (roomId: string, status: boolean) => void;
 	setRecordingAccordionStatus: (roomId: string, status: boolean) => void;
 	setMeetingParticipantsAccordionStatus: (roomId: string, status: boolean) => void;
+	setVisualEffectsAccordionStatus: (meetingId: string, status: boolean) => void;
 	setMeetingChatVisibility: (meetingId: string, visibilityStatus: MeetingChatVisibility) => void;
 	setMeetingViewSelected: (meetingId: string, viewType: MeetingViewType) => void;
 	meetingConnection: (
@@ -214,7 +216,7 @@ export type ActiveMeetingSlice = {
 	) => void;
 	setBackgroundStream: (meetingId: string, stream: MediaStream) => void;
 	removeBackgroundStream: (meetingId: string) => void;
-	setBlur: (meetingId: string, status: boolean) => void;
+	setBackgroundImage: (meetingId: string, image: VirtualBackgroundType) => void;
 };
 
 export type RootStore = UsersStoreSlice &

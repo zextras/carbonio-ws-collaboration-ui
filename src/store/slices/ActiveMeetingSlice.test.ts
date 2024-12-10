@@ -7,7 +7,11 @@
 import { act, renderHook } from '@testing-library/react';
 import { size } from 'lodash';
 
-import { MeetingChatVisibility, MeetingViewType } from '../../types/store/ActiveMeetingTypes';
+import {
+	MeetingChatVisibility,
+	MeetingViewType,
+	VirtualBackgroundType
+} from '../../types/store/ActiveMeetingTypes';
 import useStore from '../Store';
 
 const meetingId = 'meetingId';
@@ -23,6 +27,7 @@ describe('Active Meeting Slice', () => {
 			sidebarIsOpened: true,
 			participantsAccordionIsOpened: false,
 			waitingListAccordionIsOpened: true,
+			visualEffectsAccordionIsOpened: false,
 			recordingAccordionIsOpened: false
 		});
 		expect(result.current.activeMeeting[meetingId].chatVisibility).toBe(MeetingChatVisibility.OPEN);
@@ -107,15 +112,19 @@ describe('Active Meeting Slice', () => {
 			MeetingChatVisibility.EXPANDED
 		);
 	});
-	test('Change blur status', () => {
+	test('Change background status', () => {
 		const { result } = renderHook(() => useStore());
 		act(() => result.current.meetingConnection(meetingId, false, undefined, false, undefined));
 
-		act(() => result.current.setBlur(meetingId, true));
-		expect(result.current.activeMeeting[meetingId].virtualBackground.blur).toBe(true);
+		act(() => result.current.setBackgroundImage(meetingId, VirtualBackgroundType.COWORKING));
+		expect(result.current.activeMeeting[meetingId].virtualBackground.backgroundImage).toBe(
+			VirtualBackgroundType.COWORKING
+		);
 
-		act(() => result.current.setBlur(meetingId, false));
-		expect(result.current.activeMeeting[meetingId].virtualBackground.blur).toBe(false);
+		act(() => result.current.setBackgroundImage(meetingId, VirtualBackgroundType.NONE));
+		expect(result.current.activeMeeting[meetingId].virtualBackground.backgroundImage).toBe(
+			VirtualBackgroundType.NONE
+		);
 	});
 
 	test('Change updated stream', () => {
