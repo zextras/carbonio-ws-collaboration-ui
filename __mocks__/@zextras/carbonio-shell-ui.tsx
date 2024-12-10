@@ -5,7 +5,12 @@
  */
 import React, { ReactElement } from 'react';
 
-import { Account, AccountSettings, INotificationManager } from '@zextras/carbonio-shell-ui';
+import {
+	Account,
+	AccountSettings,
+	INotificationManager,
+	useTracker as ShellUseTracker
+} from '@zextras/carbonio-shell-ui';
 import { createMemoryHistory } from 'history';
 
 import {
@@ -103,3 +108,9 @@ export const soapFetch = (): Promise<unknown> =>
 		const result = mockSoapFetch();
 		result ? resolve(result) : reject(new Error('error'));
 	});
+
+export const useTracker: typeof ShellUseTracker = () => ({
+	capture: jest.fn(),
+	enableTracker: jest.fn(),
+	reset: jest.fn()
+});
