@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.9.13](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.9.12...v0.9.13) (2024-12-10)
+
+
+### Features
+
+* collect meetings feedbacks ref: WSC-1780 ([736cd52](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/736cd5260bfbf2e4aed1c9a0bfc7c037ae3f9eef))
+
 ### [0.9.12](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.9.11...v0.9.12) (2024-11-28)
 
 
