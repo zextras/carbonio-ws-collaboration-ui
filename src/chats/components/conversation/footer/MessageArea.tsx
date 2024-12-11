@@ -17,7 +17,7 @@ import useFirstUnreadMessage from '../useFirstUnreadMessage';
 
 const MessageTextarea = styled.textarea<{ $composerIsFull: boolean }>`
 	flex: 1;
-	padding: 0.5rem 0;
+	padding: 0.5rem 0 0.5rem 0.5rem;
 	height: 1.25rem;
 	min-height: 1.25rem;
 	max-height: calc(50vh - ${SIZES.SPACE_FOR_ELEMENTS_VISIBLE_ON_MESSAGE_LIST});
@@ -29,6 +29,7 @@ const MessageTextarea = styled.textarea<{ $composerIsFull: boolean }>`
 	cursor: auto;
 	border: none;
 	overflow-y: scroll;
+	background: ${({ theme }): string => theme.palette.gray3.regular}
 	scrollbar-color: ${({ theme }): string => theme.palette.gray3.regular} transparent;
 
 	@keyframes inputFull {

@@ -189,7 +189,7 @@ const GroupRoomPictureHandler: FC<RoomPictureProps> = ({ roomId }) => {
 						<CustomFileLoader
 							onChange={handleGroupPictureChange}
 							icon="Upload"
-							labelColor="gray6"
+							color="gray6"
 							size="large"
 							data-testid="upload_button"
 						/>
