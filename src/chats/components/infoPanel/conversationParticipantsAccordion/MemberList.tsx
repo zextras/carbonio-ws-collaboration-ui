@@ -29,7 +29,10 @@ const CustomContainer = styled(Container)`
 
 const MemberList: FC<ParticipantsListProps> = ({ roomId }) => {
 	const [t] = useTranslation();
-	const noMatchLabel = t('participantsList.noMatch', 'There are no items that match this search');
+	const noMatchLabel = t(
+		'participantsList.noMatch.general',
+		'Your search returned no results, try another keyword.'
+	);
 	const members: Member[] | undefined = useStore((state) => getRoomMembers(state, roomId));
 	const users: UsersMap = useStore(getUsersSelector);
 	const [filteredContactList, setFilteredContactList] = useState<Member[] | undefined>([]);
