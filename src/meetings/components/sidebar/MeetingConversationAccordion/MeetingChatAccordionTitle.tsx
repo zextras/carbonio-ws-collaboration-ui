@@ -18,8 +18,7 @@ const IsWritingLabelText = styled(Text)<{
 }>`
 	opacity: 0;
 	transition: opacity 0.3s ease;
-	${({ $isWritingIsVisible }: { $isWritingIsVisible: boolean }): string | false =>
-		$isWritingIsVisible && 'opacity: 1;'}
+	${({ $isWritingIsVisible }): string | false => $isWritingIsVisible && 'opacity: 1;'}
 `;
 
 const ChatLabelText = styled(Text)<{
@@ -28,8 +27,7 @@ const ChatLabelText = styled(Text)<{
 	position: absolute;
 	opacity: 1;
 	transition: opacity 0.3s ease;
-	${({ $isWritingIsVisible }: { $isWritingIsVisible: boolean }): string | false =>
-		$isWritingIsVisible && 'opacity: 0;'}
+	${({ $isWritingIsVisible }): string | false => $isWritingIsVisible && 'opacity: 0;'}
 `;
 
 type MeetingChatAccordionTitleProps = {

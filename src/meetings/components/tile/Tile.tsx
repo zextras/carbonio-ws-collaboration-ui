@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { MutableRefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { Container } from '@zextras/carbonio-design-system';
 import styled from 'styled-components';
@@ -60,14 +60,9 @@ const CustomContainer = styled(Container)`
 `;
 
 const VideoEl = styled.video<{
-	playsInline: boolean;
-	autoPlay: boolean;
-	muted: boolean;
-	controls: boolean;
-	ref: MutableRefObject<HTMLVideoElement | null>;
-	isScreenShare: boolean;
+	$isScreenShare: boolean;
 }>`
-	${({ isScreenShare }): string | false => !isScreenShare && 'object-fit: cover;'}
+	${({ $isScreenShare }): string | false => !$isScreenShare && 'object-fit: cover;'}
 	aspect-ratio: 16/9;
 	width: inherit;
 	border-radius: 0.5rem;
@@ -187,7 +182,7 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 				muted={modalProps ? modalProps.streamMuted : true}
 				controls={false}
 				ref={modalProps ? modalProps.streamRef : streamRef}
-				isScreenShare={!!isScreenShare}
+				$isScreenShare={!!isScreenShare}
 			/>
 			{!videoStreamEnabled && (
 				<CustomContainer data-testid="avatar_box" height="fit">
