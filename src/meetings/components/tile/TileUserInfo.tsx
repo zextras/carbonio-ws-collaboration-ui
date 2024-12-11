@@ -13,12 +13,14 @@ import usePinnedTile from '../../../hooks/usePinnedTile';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import { getIsUserGuest, getUserName } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
+import { Z_INDEX_RANK } from '../../../types/generics';
 import GuestUserLabel from '../GuestUserLabel';
 
 const InfoContainer = styled(Container)`
 	height: 100%;
 	aspect-ratio: 16/9;
 	position: absolute;
+	z-index: ${Z_INDEX_RANK.TILE_INFO};
 `;
 
 const TextContainer = styled(Container)`
@@ -27,13 +29,11 @@ const TextContainer = styled(Container)`
 	background-color: ${({ theme }): string => theme.palette.text.regular};
 	border-radius: 0.25rem;
 	padding: 0.25rem 0.5rem;
-	z-index: 2;
 	user-select: none;
 `;
 
 const CustomButton = styled(Button)`
 	cursor: default;
-	z-index: 1;
 	&:hover {
 		background-color: ${({ theme }): string => theme.palette.gray0.regular} !important;
 		color: ${({ theme }): string => theme.palette.gray6.regular} !important;
