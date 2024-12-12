@@ -101,6 +101,7 @@ describe('VirtualRoomsModal', () => {
 				showCreationModal
 				setShowCreationModal={noop}
 				createModalRef={React.createRef<HTMLDivElement>()}
+				onChangeVirtualRoom={() => {}}
 			/>
 		);
 
