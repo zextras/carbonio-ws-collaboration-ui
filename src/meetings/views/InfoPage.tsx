@@ -6,11 +6,13 @@
 import React, { ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { Container, Divider, Icon, Padding, Text } from '@zextras/carbonio-design-system';
+import { useTracker } from '@zextras/carbonio-shell-ui';
 import { map, range } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
+import { CHATS_APP_ID, TRACKER_EVENT } from '../../constants/appConstants';
 import useDarkReader from '../../hooks/useDarkReader';
 import { MeetingRoutesParams, PAGE_INFO_TYPE } from '../../hooks/useRouting';
 import { getIsLoggedUserExternal } from '../../store/selectors/SessionSelectors';
@@ -38,6 +40,8 @@ const StarIcon = styled(Icon)`
 
 const InfoPage = (): ReactElement => {
 	const { infoType }: MeetingRoutesParams = useParams();
+
+	const { capture } = useTracker();
 
 	const [t] = useTranslation();
 	let titleLabel;
@@ -163,9 +167,13 @@ const InfoPage = (): ReactElement => {
 		setHoveredStarIndex(null);
 	}, []);
 
-	const onClick = useCallback(() => {
-		setClicked(true);
-	}, []);
+	const onClick = useCallback(
+		(rating: number) => {
+			setClicked(true);
+			capture(TRACKER_EVENT.meetingEvaluation, { app: CHATS_APP_ID, rating });
+		},
+		[capture]
+	);
 
 	const renderStars = useMemo(
 		() =>
@@ -181,7 +189,7 @@ const InfoPage = (): ReactElement => {
 					<StarIcon
 						icon={hoveredStarIndex !== null && i <= hoveredStarIndex ? 'Star' : 'StarOutline'}
 						color="warning"
-						onClick={onClick}
+						onClick={() => onClick(i)}
 					/>
 					{i < 5 && <Padding right="1.5rem" />}
 				</Container>

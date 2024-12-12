@@ -105,3 +105,9 @@ export const soapFetch: typeof Shell.soapFetch = () =>
 		const result = mockSoapFetch();
 		result ? resolve(result) : reject(new Error('error'));
 	});
+
+export const useTracker: typeof Shell.useTracker = () => ({
+	capture: jest.fn(),
+	enableTracker: jest.fn(),
+	reset: jest.fn()
+});
