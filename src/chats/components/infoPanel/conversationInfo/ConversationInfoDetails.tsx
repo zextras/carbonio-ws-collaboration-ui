@@ -98,7 +98,6 @@ const ConversationInfoDetails: FC<ConversationInfoDetailsProps> = ({ roomId, roo
 				crossAlignment="flex-start"
 				mainAlignment="flex-start"
 				padding={{ all: 'large' }}
-				gap="small"
 			>
 				<ConversationInfoDetailsElement label={roomTopic} icon="InfoOutline" type={topicLabel} />
 			</CustomContainer>

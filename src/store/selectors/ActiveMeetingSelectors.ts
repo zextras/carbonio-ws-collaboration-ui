@@ -11,7 +11,8 @@ import {
 	MeetingChatVisibility,
 	MeetingViewType,
 	STREAM_TYPE,
-	TileData
+	TileData,
+	VirtualBackgroundType
 } from '../../types/store/ActiveMeetingTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 
@@ -28,6 +29,9 @@ export const getWaitingListAccordionStatus = (store: RootStore, meetingId: strin
 
 export const getRecordingAccordionStatus = (store: RootStore, meetingId: string): boolean =>
 	store.activeMeeting[meetingId]?.sidebarStatus.recordingAccordionIsOpened;
+
+export const getVisualEffectsAccordionStatus = (store: RootStore, meetingId: string): boolean =>
+	store.activeMeeting[meetingId]?.sidebarStatus.visualEffectsAccordionIsOpened;
 
 export const getMeetingChatVisibility = (
 	store: RootStore,
@@ -51,7 +55,9 @@ export const getStream = (
 ): MediaStream | undefined => {
 	if (userId === store.session.id) {
 		if (
-			store.activeMeeting[meetingId]?.virtualBackground.blur &&
+			store.activeMeeting[meetingId] &&
+			store.activeMeeting[meetingId]?.virtualBackground.backgroundImage !==
+				VirtualBackgroundType.NONE &&
 			streamType !== STREAM_TYPE.SCREEN
 		) {
 			return store.activeMeeting[meetingId].virtualBackground.updatedStream;
@@ -87,8 +93,8 @@ export const getVideoScreenIn = (
 	meetingId: string
 ): IVideoScreenInConnection | undefined => store.activeMeeting[meetingId]?.videoScreenIn;
 
-export const getIsBackgroundBlurred = (store: RootStore, meetingId: string): boolean =>
-	store.activeMeeting[meetingId]?.virtualBackground.blur;
+export const getBackgroundImage = (store: RootStore, meetingId: string): VirtualBackgroundType =>
+	store.activeMeeting[meetingId]?.virtualBackground.backgroundImage;
 
 export const getUpdatedStream = (store: RootStore, meetingId: string): MediaStream | undefined =>
 	store.activeMeeting[meetingId]?.virtualBackground?.updatedStream;

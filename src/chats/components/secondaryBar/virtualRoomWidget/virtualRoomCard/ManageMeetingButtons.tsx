@@ -15,7 +15,7 @@ import {
 	useSnackbar
 } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import styled, { DefaultTheme } from 'styled-components';
+import styled from 'styled-components';
 
 import useRoomMeeting from '../../../../../hooks/useRoomMeeting';
 import { RoomsApi } from '../../../../../network';
@@ -32,25 +32,15 @@ type ManageMeetingButtonsProps = {
 };
 
 const CustomDeleteButton = styled(Button)<{ $isMyRoom: boolean | undefined }>`
-	${({
-		$isMyRoom
-	}: {
-		$isMyRoom: boolean | undefined;
-		theme: DefaultTheme;
-	}): string | undefined | false => !$isMyRoom && 'opacity: 0.5; cursor: default;'};
+	${({ $isMyRoom }): string | undefined | false => !$isMyRoom && 'opacity: 0.5; cursor: default;'};
 	&:hover {
 		background-color: ${({ theme }): string => theme.palette.error.regular};
 		color: ${({ theme }): string => theme.palette.gray6.regular};
 	}
 `;
 
-const CustomMainButton = styled(Button)<{ isMyRoom: boolean | undefined }>`
-	${({
-		isMyRoom
-	}: {
-		isMyRoom: boolean | undefined;
-		theme: DefaultTheme;
-	}): string | undefined | false => !isMyRoom && 'opacity: 1;'};
+const CustomMainButton = styled(Button)<{ $isMyRoom: boolean | undefined }>`
+	${({ $isMyRoom }): string | undefined | false => !$isMyRoom && 'opacity: 1;'};
 `;
 
 const ManageMeetingButtons: FC<ManageMeetingButtonsProps> = ({
@@ -171,7 +161,7 @@ const ManageMeetingButtons: FC<ManageMeetingButtonsProps> = ({
 						color={amIParticipating || isMyRoom ? 'primary' : 'error'}
 						icon={amIParticipating || isMyRoom ? 'Video' : 'LogOut'}
 						onClick={amIParticipating || isMyRoom ? openMeeting : leaveConversation}
-						isMyRoom={amIParticipating || isMyRoom}
+						$isMyRoom={amIParticipating || isMyRoom}
 					/>
 				</Tooltip>
 			</Row>

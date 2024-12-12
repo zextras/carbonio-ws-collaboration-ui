@@ -8,7 +8,7 @@ import React, { FC, useMemo } from 'react';
 import { Avatar, Container, Row, Text, Tooltip } from '@zextras/carbonio-design-system';
 import { map, size } from 'lodash';
 import { useTranslation } from 'react-i18next';
-import styled, { DefaultTheme } from 'styled-components';
+import styled from 'styled-components';
 
 import useAvatarUtilities from '../../../../../hooks/useAvatarUtilities';
 import { getMeetingParticipants } from '../../../../../store/selectors/MeetingSelectors';
@@ -22,13 +22,8 @@ type ParticipantsSectionProp = {
 	isMyRoom: boolean | undefined;
 };
 
-const CustomRow = styled(Row)<{ isMyRoom: boolean | undefined }>`
-	${({
-		isMyRoom
-	}: {
-		isMyRoom: boolean | undefined;
-		theme: DefaultTheme;
-	}): string | undefined | false => !isMyRoom && 'opacity: 0.5; cursor: default;'};
+const CustomRow = styled(Row)<{ $isMyRoom: boolean | undefined }>`
+	${({ $isMyRoom }): string | undefined | false => !$isMyRoom && 'opacity: 0.5; cursor: default;'};
 `;
 
 const AvatarCounter = styled.div`
@@ -36,7 +31,7 @@ const AvatarCounter = styled.div`
 	width: 2.063rem;
 	height: 2.063rem;
 	border: 0.063rem solid #ffffff;
-	background-color: ${({ theme }: { theme: DefaultTheme }): string => theme.palette.gray2.regular};
+	background-color: ${({ theme }): string => theme.palette.gray2.regular};
 	border-radius: 50%;
 	text-align: center;
 	align-content: center;
@@ -165,14 +160,14 @@ const ParticipantsSection: FC<ParticipantsSectionProp> = ({
 			<CustomRow
 				takeAvailableSpace
 				mainAlignment="flex-start"
-				isMyRoom={isMyRoom || amIParticipating}
+				$isMyRoom={isMyRoom || amIParticipating}
 			>
 				<Text size="small" weight="light" color="gray1">
 					{participantsLabel}
 				</Text>
 			</CustomRow>
 			<Tooltip label={userNames.join(', ')} disabled={size(meetingParticipants) === 0 || !isMyRoom}>
-				<CustomRow isMyRoom={isMyRoom || amIParticipating}>{avatarList}</CustomRow>
+				<CustomRow $isMyRoom={isMyRoom || amIParticipating}>{avatarList}</CustomRow>
 			</Tooltip>
 		</Container>
 	);

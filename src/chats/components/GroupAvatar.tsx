@@ -7,7 +7,7 @@
 import React, { useMemo } from 'react';
 
 import { Avatar, Container, Shimmer, useTheme } from '@zextras/carbonio-design-system';
-import styled, { DefaultTheme } from 'styled-components';
+import styled from 'styled-components';
 
 import { AvatarBadge, AvatarContainer } from './UserAvatar';
 import { RoomsApi } from '../../network';
@@ -30,7 +30,7 @@ const ActiveMeetingDot = styled.div`
 	position: absolute;
 	width: 0.313rem;
 	height: 0.313rem;
-	background-color: ${({ theme }: { theme: DefaultTheme }): string => theme.palette.error.regular};
+	background-color: ${({ theme }): string => theme.palette.error.regular};
 	border: 0.0625rem solid ${(props): string => props.theme.palette.error.regular};
 	border-radius: 50%;
 	left: 0.188rem;

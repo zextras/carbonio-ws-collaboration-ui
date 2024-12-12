@@ -15,7 +15,7 @@ import { MeetingUserAcceptedEvent } from '../../../types/network/websocket/wsMee
 import { RoomType } from '../../../types/store/RoomTypes';
 
 const room = createMockRoom({ type: RoomType.TEMPORARY });
-const meeting = createMockMeeting({ roomId: room.id, type: MeetingType.SCHEDULED });
+const meeting = createMockMeeting({ roomId: room.id, meetingType: MeetingType.SCHEDULED });
 
 const event: MeetingUserAcceptedEvent = {
 	type: WsEventType.MEETING_USER_ACCEPTED,

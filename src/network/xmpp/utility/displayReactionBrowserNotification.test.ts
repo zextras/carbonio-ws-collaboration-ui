@@ -40,6 +40,7 @@ beforeEach(() => {
 	store.newMessage(messageFromMe);
 	store.newMessage(messageFromUser);
 });
+
 describe('Test display reaction browser notification', () => {
 	test('Send desktop notification on new reaction to my message', async () => {
 		const newReaction = createMockMessageFastening({

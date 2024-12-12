@@ -58,7 +58,6 @@ function pushHistoryMock(location: Shell.HistoryParams): void {
 }
 
 function replaceHistoryMock(location: Shell.HistoryParams): void {
-	console.log('replace history', location);
 	if (typeof location === 'string') {
 		history.replace(location);
 	} else {
@@ -106,3 +105,9 @@ export const soapFetch: typeof Shell.soapFetch = () =>
 		const result = mockSoapFetch();
 		result ? resolve(result) : reject(new Error('error'));
 	});
+
+export const useTracker: typeof Shell.useTracker = () => ({
+	capture: jest.fn(),
+	enableTracker: jest.fn(),
+	reset: jest.fn()
+});

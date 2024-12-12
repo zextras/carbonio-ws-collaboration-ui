@@ -18,14 +18,6 @@ const contactInfo: ContactInfo = {
 	id: '1234567890'
 };
 
-const mockIsOwner = (id: string): boolean => {
-	console.log(id);
-	return true;
-};
-const mockUpdateOwner = (id: string): void => {
-	console.log(id);
-};
-
 describe('List Participant', () => {
 	test('The email of participant list item is selectable', async () => {
 		setup(
@@ -34,8 +26,8 @@ describe('List Participant', () => {
 				selected={false}
 				onClickCb={(): undefined => undefined}
 				isDisabled={false}
-				isOwner={mockIsOwner}
-				updateOwner={mockUpdateOwner}
+				isOwner={jest.fn()}
+				updateOwner={jest.fn()}
 				canBeModerator
 			/>
 		);
@@ -49,8 +41,8 @@ describe('List Participant', () => {
 				selected={false}
 				onClickCb={(): undefined => undefined}
 				isDisabled={false}
-				isOwner={mockIsOwner}
-				updateOwner={mockUpdateOwner}
+				isOwner={jest.fn()}
+				updateOwner={jest.fn()}
 				canBeModerator
 			/>
 		);

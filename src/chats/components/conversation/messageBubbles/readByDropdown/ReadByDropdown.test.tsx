@@ -33,19 +33,16 @@ const textMessage = createMockTextMessage({
 });
 
 const user1Marker = createMockMarker({
-	roomId: room.id,
 	messageId: textMessage.id,
 	from: user1.id,
 	markerDate: now - 4000
 });
 const user2Marker = createMockMarker({
-	roomId: room.id,
 	messageId: textMessage.id,
 	from: user2.id,
 	markerDate: now - 3000
 });
 const sessionUserMarker = createMockMarker({
-	roomId: room.id,
 	messageId: textMessage.id,
 	from: sessionUser.id,
 	markerDate: now - 2000

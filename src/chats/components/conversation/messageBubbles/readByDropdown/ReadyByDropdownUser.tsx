@@ -6,7 +6,7 @@
 import React, { ReactElement } from 'react';
 
 import { Avatar, Container, Shimmer, Text } from '@zextras/carbonio-design-system';
-import styled, { DefaultTheme } from 'styled-components';
+import styled from 'styled-components';
 
 import useAvatarUtilities from '../../../../../hooks/useAvatarUtilities';
 import { getCapability } from '../../../../../store/selectors/SessionSelectors';
@@ -24,11 +24,11 @@ const CustomAvatar = styled(Avatar)`
 	}
 `;
 
-const Presence = styled.div`
+const Presence = styled.div<{ $online: boolean }>`
 	position: absolute;
 	width: 0.4rem;
 	height: 0.4rem;
-	background-color: ${({ $online, theme }: { $online: boolean; theme: DefaultTheme }): string =>
+	background-color: ${({ $online, theme }): string =>
 		$online ? theme.palette.success.regular : theme.palette.gray2.regular};
 	border: 0.0625rem solid ${(props): string => props.theme.palette.gray5.regular};
 	border-radius: 50%;

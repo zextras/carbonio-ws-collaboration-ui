@@ -7,7 +7,7 @@
 import React, { FC } from 'react';
 
 import { Container, Text, Row } from '@zextras/carbonio-design-system';
-import styled, { DefaultTheme } from 'styled-components';
+import styled from 'styled-components';
 
 import InfoSection from './InfoSection';
 import ManageMeetingButtons from './ManageMeetingButtons';
@@ -27,35 +27,25 @@ type virtualRoomElementProps = {
 	modalRef: React.RefObject<HTMLDivElement>;
 };
 
-const CustomContainer = styled(Container)`
+const CustomContainer = styled(Container)<{ $meetingIsActive?: boolean }>`
 	border-radius: 1rem;
 	user-select: none;
 	-webkit-user-select: none;
-	${({ meetingIsActive, theme }: { meetingIsActive?: boolean; theme: DefaultTheme }): string =>
-		meetingIsActive
+	${({ $meetingIsActive, theme }): string =>
+		$meetingIsActive
 			? `box-sizing: border-box; border: 1.5px solid ${theme.palette.success.regular};`
 			: 'border: 1px solid #e6e9ed;'};
 `;
 
 const CustomRow = styled(Row)<{ $isMyRoom: boolean | undefined }>`
-	${({
-		$isMyRoom
-	}: {
-		$isMyRoom: boolean | undefined;
-		theme: DefaultTheme;
-	}): string | undefined | false => !$isMyRoom && 'opacity: 0.5; cursor: default;'};
+	${({ $isMyRoom }): string | undefined | false => !$isMyRoom && 'opacity: 0.5; cursor: default;'};
 `;
 
-const MeetingActive = styled.div`
+const MeetingActive = styled.div<{ $meetingIsActive?: boolean }>`
 	width: 0.75rem;
 	height: 0.75rem;
-	background-color: ${({
-		meetingIsActive,
-		theme
-	}: {
-		meetingIsActive?: boolean;
-		theme: DefaultTheme;
-	}): string => (meetingIsActive ? theme.palette.success.regular : theme.palette.gray2.regular)};
+	background-color: ${({ $meetingIsActive, theme }): string =>
+		$meetingIsActive ? theme.palette.success.regular : theme.palette.gray2.regular};
 	border-radius: 50%;
 `;
 
@@ -66,7 +56,7 @@ const VirtualRoomCard: FC<virtualRoomElementProps> = ({ roomId, modalRef }) => {
 	const userIsModerator = useStore((store) => getOwnershipOfTheRoom(store, roomId ?? ''));
 
 	return (
-		<CustomContainer padding="1rem" gap="0.5rem" meetingIsActive={meetingIsActive}>
+		<CustomContainer padding="1rem" gap="0.5rem" $meetingIsActive={meetingIsActive}>
 			<Container orientation="horizontal">
 				<InfoSection
 					roomId={roomId}
@@ -85,7 +75,7 @@ const VirtualRoomCard: FC<virtualRoomElementProps> = ({ roomId, modalRef }) => {
 			<Container gap="0.5rem">
 				<Container orientation="horizontal" gap="0.5rem">
 					<CustomRow width="fit" height="fit" $isMyRoom={userIsModerator || amIParticipating}>
-						<MeetingActive meetingIsActive={meetingIsActive} />
+						<MeetingActive $meetingIsActive={meetingIsActive} />
 					</CustomRow>
 					<CustomRow
 						takeAvailableSpace

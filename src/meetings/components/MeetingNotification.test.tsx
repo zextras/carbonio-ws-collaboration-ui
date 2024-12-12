@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { screen, act } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 
 import MeetingNotification from './MeetingNotification';
 import useStore from '../../store/Store';
@@ -83,9 +83,7 @@ describe('MeetingNotification', () => {
 				stopMeetingSound={jest.fn()}
 			/>
 		);
-		await act(async () => {
-			await userEvent.type(screen.getByPlaceholderText(sendAQuickMessage), 'Hello{enter}');
-		});
+		await userEvent.type(screen.getByPlaceholderText(sendAQuickMessage), 'Hello{enter}');
 		expect(spyOnSendChatMessage).toHaveBeenCalled();
 	});
 
