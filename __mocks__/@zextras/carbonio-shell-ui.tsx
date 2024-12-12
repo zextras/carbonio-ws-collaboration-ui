@@ -58,7 +58,6 @@ function pushHistoryMock(location: Shell.HistoryParams): void {
 }
 
 function replaceHistoryMock(location: Shell.HistoryParams): void {
-	console.log('replace history', location);
 	if (typeof location === 'string') {
 		history.replace(location);
 	} else {

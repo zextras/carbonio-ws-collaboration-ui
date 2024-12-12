@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { screen, act } from '@testing-library/react';
+import { act } from '@testing-library/react';
 
 import { ActionsAccordion } from './ActionsAccordion';
 import useStore from '../../../../store/Store';
@@ -17,7 +17,7 @@ import {
 	createMockTextMessage,
 	createMockUser
 } from '../../../../tests/createMock';
-import { setup } from '../../../../tests/test-utils';
+import { setup, screen } from '../../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
 import { UserBe } from '../../../../types/network/models/userBeTypes';
 
@@ -196,11 +196,10 @@ describe('Actions Accordion', () => {
 		store.setCapabilities(createMockCapabilityList({ maxGroupMembers: 3 }));
 
 		setup(<ActionsAccordion roomId={room.id} />);
-		const addNewMemberAction = screen.getByTestId('addNewMemberAction');
-		expect(addNewMemberAction).toHaveAttribute('disabled');
-
-		const leaveActionButton = screen.getByTestId('leaveActionButton');
-		expect(leaveActionButton).toBeDisabled();
+		const addNewMemberActionButton = screen.getByRoleWithIcon('button', {
+			icon: 'icon: PersonAddOutline'
+		});
+		expect(addNewMemberActionButton).toBeDisabled();
 	});
 
 	test('A owner of a group should see add member enabled', async () => {

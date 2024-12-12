@@ -22,7 +22,7 @@ import { ProvidersWrapper, setup } from '../tests/test-utils';
 import { OperationType } from '../types/store/MessageTypes';
 import { RoomType } from '../types/store/RoomTypes';
 
-const loggedUser = createMockUser({ userId: 'loggedUserId', name: 'Logged User' });
+const loggedUser = createMockUser({ id: 'loggedUserId', name: 'Logged User' });
 const user1 = createMockUser({ id: 'id-1', name: 'User 1' });
 const user2 = createMockUser({ id: 'id-2' });
 
@@ -313,7 +313,7 @@ describe('useConfigurationMessageLabel', () => {
 		const warn = jest.spyOn(console, 'warn').mockImplementation();
 		const configurationMessage = createMockConfigurationMessage({
 			roomId: groupRoom.id,
-			operation: 'unknownOperation'
+			operation: 'unknownOperation' as OperationType
 		});
 		const { result } = renderHook(() => useConfigurationMessageLabel(configurationMessage), {
 			wrapper: ProvidersWrapper

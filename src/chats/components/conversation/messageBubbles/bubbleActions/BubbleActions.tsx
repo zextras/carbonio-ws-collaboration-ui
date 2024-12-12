@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { FC, ReactElement, useCallback, useEffect } from 'react';
+import React, { FC, useCallback, useEffect } from 'react';
 
-import { Container, Padding, Theme } from '@zextras/carbonio-design-system';
-import styled, { css, DefaultTheme, FlattenSimpleInterpolation } from 'styled-components';
+import { Container, Padding } from '@zextras/carbonio-design-system';
+import styled, { css } from 'styled-components';
 
 import useBubbleContextualMenuDropDown from './useBubbleContextualMenuDropDown';
 import useBubbleReactions from './useBubbleReactions';
@@ -20,10 +20,7 @@ const DropDownWrapper = styled(Container)`
 `;
 
 export const BubbleActionsWrapper = styled.div<{
-	children: ReactElement[];
-	'data-testid': string;
-	isMyMessage: boolean;
-	theme?: DefaultTheme;
+	$isMyMessage: boolean;
 	$isActive: boolean;
 }>`
 	position: absolute;
@@ -38,23 +35,17 @@ export const BubbleActionsWrapper = styled.div<{
 		pointer-events: auto;
 	}
 
-	${({
-		theme,
-		isMyMessage
-	}: {
-		theme: Theme;
-		isMyMessage: boolean;
-	}): FlattenSimpleInterpolation => css`
+	${({ theme, $isMyMessage }): ReturnType<typeof css> => css`
 		top: -0.6875rem;
 		right: -0.1875rem;
 		width: 3.1rem;
 		height: 1.6875rem;
-		background: ${theme.palette[isMyMessage ? 'highlight' : 'gray6'].regular};
+		background: ${theme.palette[$isMyMessage ? 'highlight' : 'gray6'].regular};
 		border-bottom-left-radius: 20%;
 		color: ${theme.palette.text.regular};
 	`};
 
-	${({ $isActive }): FlattenSimpleInterpolation | false =>
+	${({ $isActive }): ReturnType<typeof css> | false =>
 		$isActive &&
 		css`
 			opacity: 1;
@@ -87,10 +78,10 @@ const BubbleActions: FC<BubbleActionsProps> = ({ message, isMyMessage }) => {
 	}, [closeDropdownOnScroll, message.roomId]);
 
 	return (
-		<DropDownWrapper padding={{ all: 'none' }}>
+		<DropDownWrapper padding={{ all: 0 }}>
 			<BubbleActionsWrapper
 				data-testid={`cxtMenu-${message.id}-iconOpen`}
-				isMyMessage={isMyMessage}
+				$isMyMessage={isMyMessage}
 				$isActive={menuDropdownActive || reactionsPopoverActive}
 			>
 				<Padding left="0.25rem" />

@@ -17,7 +17,7 @@ const room = createMockRoom({
 	type: RoomType.TEMPORARY,
 	members: [{ userId: 'myUserId', owner: true }]
 });
-const meeting = createMockMeeting({ roomId: room.id, type: MeetingType.SCHEDULED });
+const meeting = createMockMeeting({ roomId: room.id, meetingType: MeetingType.SCHEDULED });
 
 const event: MeetingParticipantClashedEvent = {
 	type: WsEventType.MEETING_PARTICIPANT_CLASHED,

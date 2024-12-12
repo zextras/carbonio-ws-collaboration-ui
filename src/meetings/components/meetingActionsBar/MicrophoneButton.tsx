@@ -14,16 +14,12 @@ import React, {
 	useState
 } from 'react';
 
-import {
-	CreateSnackbarFn,
-	MultiButton,
-	Tooltip,
-	useSnackbar
-} from '@zextras/carbonio-design-system';
+import { CreateSnackbarFn, Tooltip, useSnackbar } from '@zextras/carbonio-design-system';
 import { filter, map } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 
+import { MultiActionButton } from './MultiActionButton';
 import { MeetingRoutesParams } from '../../../hooks/useRouting';
 import { MeetingsApi } from '../../../network';
 import { getSelectedAudioDeviceId } from '../../../store/selectors/ActiveMeetingSelectors';
@@ -112,10 +108,6 @@ const MicrophoneButton = ({
 		]
 	);
 
-	const toggleAudioDropdown = useCallback(() => {
-		setIsAudioListOpen((prevState) => !prevState);
-	}, [setIsAudioListOpen]);
-
 	const toggleAudioStream = useCallback(
 		(event: { stopPropagation: () => void }) => {
 			event.stopPropagation();
@@ -174,23 +166,15 @@ const MicrophoneButton = ({
 
 	return (
 		<Tooltip placement="top" label={tooltipLabel}>
-			<MultiButton
-				data-testid="microphone-button"
-				background={'primary'}
-				primaryIcon={audioStatus ? 'Mic' : 'MicOff'}
-				icon={isAudioListOpen ? 'ChevronDown' : 'ChevronUp'}
+			<MultiActionButton
+				showItems={isAudioListOpen}
+				setShowItems={setIsAudioListOpen}
 				onClick={toggleAudioStream}
 				items={mediaAudioList}
-				size="large"
-				shape="regular"
-				dropdownProps={{
-					forceOpen: isAudioListOpen,
-					onClick: toggleAudioDropdown,
-					dropdownListRef: audioDropdownRef,
-					items: mediaAudioList
-				}}
-				disabledPrimary={!websocketNetworkStatus}
-				disabledSecondary={!websocketNetworkStatus}
+				disabled={!websocketNetworkStatus}
+				data-testid="microphone-button"
+				icon={audioStatus ? 'Mic' : 'MicOff'}
+				listRef={audioDropdownRef}
 			/>
 		</Tooltip>
 	);

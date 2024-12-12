@@ -6,14 +6,18 @@
 
 import { act, renderHook } from '@testing-library/react';
 
-import { createMockRoom, createMockUser } from '../../tests/createMock';
+import { createMockMember, createMockRoom, createMockUser } from '../../tests/createMock';
 import { MessageType } from '../../types/store/MessageTypes';
 import { RoomType } from '../../types/store/RoomTypes';
 import useStore from '../Store';
 
 const user1 = createMockUser({ id: 'user1' });
 
-const room1 = createMockRoom({ id: 'room1-id', type: RoomType.ONE_TO_ONE, members: [user1] });
+const room1 = createMockRoom({
+	id: 'room1-id',
+	type: RoomType.ONE_TO_ONE,
+	members: [createMockMember({ userId: user1.id })]
+});
 
 describe('RoomsStoreSlice tests', () => {
 	describe('Placeholder room', () => {

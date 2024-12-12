@@ -12,14 +12,14 @@ import useStore from '../Store';
 
 const mockParticipant0 = createMockParticipants({
 	userId: 'userId0',
-	audioStreamOn: true,
-	videoStreamOn: true
+	audioStreamEnabled: true,
+	videoStreamEnabled: true
 });
 
 const mockParticipant1 = createMockParticipants({
 	userId: 'userId1',
-	audioStreamOn: false,
-	videoStreamOn: true
+	audioStreamEnabled: false,
+	videoStreamEnabled: true
 });
 
 const mockMeeting0 = createMockMeeting({

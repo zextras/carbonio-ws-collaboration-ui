@@ -7,7 +7,7 @@ import React, { FC, useMemo } from 'react';
 
 import { Avatar, Row, Shimmer, Text } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import styled, { DefaultTheme } from 'styled-components';
+import styled from 'styled-components';
 
 import useAvatarUtilities from '../../../../../hooks/useAvatarUtilities';
 import { getOwners } from '../../../../../store/selectors/RoomsSelectors';
@@ -33,12 +33,7 @@ const CustomShimmerAvatar = styled(Shimmer.Avatar)`
 `;
 
 const CustomRow = styled(Row)<{ $isMyRoom: boolean | undefined }>`
-	${({
-		$isMyRoom
-	}: {
-		$isMyRoom: boolean | undefined;
-		theme: DefaultTheme;
-	}): string | undefined | false => !$isMyRoom && 'opacity: 0.5; cursor: default;'};
+	${({ $isMyRoom }): string | undefined | false => !$isMyRoom && 'opacity: 0.5; cursor: default;'};
 `;
 
 const InfoSection: FC<InfoSectionProps> = ({

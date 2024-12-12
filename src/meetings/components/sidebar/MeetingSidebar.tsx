@@ -26,12 +26,14 @@ import {
 	getOwnershipOfTheRoom,
 	getRoomTypeSelector
 } from '../../../store/selectors/RoomsSelectors';
-import { getCapability } from '../../../store/selectors/SessionSelectors';
+import { getCapability, getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { MeetingChatVisibility } from '../../../types/store/ActiveMeetingTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 import { CapabilityType } from '../../../types/store/SessionTypes';
 import BubblesWrapper from '../bubblesWrapper/BubblesWrapper';
+import VisualEffectsAccordion from './visualEffectsAccordion/VisualEffectsAccordion';
+import { getIsUserGuest } from '../../../store/selectors/UsersSelectors';
 
 const SidebarContainer = styled(Container)`
 	position: relative;
@@ -67,14 +69,20 @@ const MeetingSidebar = (): ReactElement => {
 	const collapseSidebarLabel = t('tooltip.collapseSidebar', 'Collapse sidebar');
 	const expandSidebarLabel = t('tooltip.expandSidebar', 'Expand sidebar');
 
+	const myUserId = useStore(getUserId);
+
 	const roomId = useStore((store) => getRoomIdByMeetingId(store, meetingId));
 	const roomType = useStore((store) => getRoomTypeSelector(store, roomId ?? ''));
 	const amIModerator = useStore((store) => getOwnershipOfTheRoom(store, roomId ?? ''));
 	const meetingChatVisibility = useStore((store) => getMeetingChatVisibility(store, meetingId));
 	const sidebarIsVisible: boolean = useStore((store) => getMeetingSidebarStatus(store, meetingId));
 	const setMeetingSidebarStatus = useStore((store) => store.setMeetingSidebarStatus);
+	const isUserGuest = useStore((store) => getIsUserGuest(store, myUserId ?? ''));
 	const canVideoCallRecord = useStore((store) =>
 		getCapability(store, CapabilityType.CAN_VIDEO_CALL_RECORD)
+	);
+	const canUseVirtualBackground = useStore((store) =>
+		getCapability(store, CapabilityType.CAN_USE_VIRTUAL_BACKGROUND)
 	);
 
 	const toggleSidebar = useCallback(
@@ -114,10 +122,13 @@ const MeetingSidebar = (): ReactElement => {
 					maxHeight={meetingChatVisibility === MeetingChatVisibility.OPEN ? '50%' : 'fill'}
 				>
 					{meetingChatVisibility !== MeetingChatVisibility.EXPANDED && (
-						<AccordionContainer height="fit" mainAlignment="flex-start" gap="gap: 0.063rem">
+						<AccordionContainer height="fit" mainAlignment="flex-start">
 							{showRecordingAccordion && <RecordingAccordion meetingId={meetingId} />}
 							{showWaitingListAccordion && <WaitingListAccordion meetingId={meetingId} />}
 							{showParticipantsAccordion && <MeetingParticipantsAccordion meetingId={meetingId} />}
+							{(canUseVirtualBackground || isUserGuest) && (
+								<VisualEffectsAccordion meetingId={meetingId} />
+							)}
 						</AccordionContainer>
 					)}
 				</Container>

@@ -34,8 +34,7 @@ const user2Info: User = createMockUser({
 	id: 'user2',
 	email: 'user2@domain.com',
 	name: 'User 2',
-	last_activity: 1642818965849,
-	pictureUpdatedAt: '2022-08-25T17:24:28.961+02:00'
+	last_activity: 1642818965849
 });
 
 const members = [

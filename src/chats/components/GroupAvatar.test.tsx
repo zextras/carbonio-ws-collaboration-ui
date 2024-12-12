@@ -33,14 +33,8 @@ const members = [
 		external: false
 	}
 ];
-const user1Participant: MeetingParticipant = createMockParticipants({
-	userId: 'user1',
-	sessionId: 'sessionIdUser1'
-});
-const user2Participant: MeetingParticipant = createMockParticipants({
-	userId: 'user2',
-	sessionId: 'sessionIdUser2'
-});
+const user1Participant: MeetingParticipant = createMockParticipants({ userId: 'user1' });
+const user2Participant: MeetingParticipant = createMockParticipants({ userId: 'user2' });
 
 const roomId = 'Group-Room-Id';
 const meeting: MeetingBe = createMockMeeting({

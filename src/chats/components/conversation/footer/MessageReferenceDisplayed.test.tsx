@@ -61,6 +61,7 @@ const forwardedTextMessage = createMockTextMessage({
 	from: user1.id,
 	text: 'Forwarded text!',
 	forwarded: {
+		id: 'forwardedId',
 		from: forwardedUser.id,
 		date: 1661441294393,
 		count: 1

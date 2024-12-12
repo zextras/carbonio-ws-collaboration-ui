@@ -4,14 +4,15 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { ReactElement, useCallback, useContext, useMemo, useRef, useState } from 'react';
+import React, { ReactElement, useCallback, useMemo, useRef, useState } from 'react';
 
 import {
 	Button,
+	CreateSnackbarFn,
 	Dropdown,
 	DropdownItem,
-	SnackbarManagerContext,
-	Tooltip
+	Tooltip,
+	useSnackbar
 } from '@zextras/carbonio-design-system';
 import { size } from 'lodash';
 import { useTranslation } from 'react-i18next';
@@ -71,7 +72,7 @@ const useBubbleContextualMenuDropDown = (
 
 	const filesToUploadArray = useStore((store) => getFilesToUploadArray(store, message.roomId));
 	const [dropdownActive, setDropdownActive] = useState(false);
-	const createSnackbar: any = useContext(SnackbarManagerContext);
+	const createSnackbar: CreateSnackbarFn = useSnackbar();
 
 	const dropDownRef = useRef<HTMLDivElement>(null);
 
@@ -93,7 +94,7 @@ const useBubbleContextualMenuDropDown = (
 
 		createSnackbar({
 			key: new Date().toLocaleString(),
-			type: 'info',
+			severity: 'info',
 			label: successfulCopySnackbar,
 			hideButton: true
 		});
