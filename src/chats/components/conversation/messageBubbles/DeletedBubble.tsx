@@ -8,7 +8,7 @@ import React, { FC } from 'react';
 
 import { Container, Text, Padding } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import styled, { SimpleInterpolation } from 'styled-components';
+import styled from 'styled-components';
 
 import useStore from '../../../../store/Store';
 import { TextMessage } from '../../../../types/store/MessageTypes';
@@ -21,7 +21,7 @@ type DeletedBubbleProps = {
 
 const BubbleDeletedContainer = styled(Container)<{ $isMyMessage: boolean }>`
 	margin: 0.25rem 0 0.25rem 0.4375rem;
-	${({ $isMyMessage }): SimpleInterpolation =>
+	${({ $isMyMessage }): false | string =>
 		$isMyMessage && 'margin-left: auto; margin-right: 0.4375rem;'};
 	box-shadow: 0 0 0.25rem rgba(166, 166, 166, 0.5);
 	border-radius: ${({ $isMyMessage }): string =>

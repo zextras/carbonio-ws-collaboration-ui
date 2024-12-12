@@ -6,11 +6,14 @@
 
 import { onComposingMessageStanza } from './composingMessageHandler';
 import useStore from '../../../store/Store';
-import { createMockRoom, createMockUser } from '../../../tests/createMock';
+import { createMockMember, createMockRoom, createMockUser } from '../../../tests/createMock';
 import { composingStanza, pausedStanza } from '../../../tests/mocks/XMPPStanza';
 
 const user0 = createMockUser({ id: 'user0' });
-const mockedRoom = createMockRoom({ id: 'groupId', participants: [user0] });
+const mockedRoom = createMockRoom({
+	id: 'groupId',
+	members: [createMockMember({ userId: user0.id })]
+});
 
 beforeEach(() => {
 	const store = useStore.getState();

@@ -28,27 +28,27 @@ const CustomIcon = styled(Icon)`
 
 const ActionContainer = styled(Container)<{
 	$actionColor: keyof DefaultTheme['palette'];
-	disabled?: boolean;
+	$disabled?: boolean;
 }>`
 	border-radius: 0.5rem;
 	height: fit-content;
 	cursor: pointer;
 	&:hover {
-		background-color: ${({ theme, $actionColor, disabled }): string =>
-			disabled
+		background-color: ${({ theme, $actionColor, $disabled }): string =>
+			$disabled
 				? theme.palette[$actionColor].disabled
 				: theme.palette[$actionColor].regular} !important;
 		${CustomHoverButton} {
-			background-color: ${({ theme, $actionColor, disabled }): string =>
-				disabled
+			background-color: ${({ theme, $actionColor, $disabled }): string =>
+				$disabled
 					? theme.palette[$actionColor].disabled
 					: theme.palette[$actionColor].regular} !important;
-			color: ${({ theme, disabled }): string =>
-				disabled ? theme.palette.gray6.disabled : theme.palette.gray6.regular} !important;
+			color: ${({ theme, $disabled }): string =>
+				$disabled ? theme.palette.gray6.disabled : theme.palette.gray6.regular} !important;
 		}
 		${CustomIcon} {
-			color: ${({ theme, disabled }): string =>
-				disabled ? theme.palette.gray6.disabled : theme.palette.gray6.regular} !important;
+			color: ${({ theme, $disabled }): string =>
+				$disabled ? theme.palette.gray6.disabled : theme.palette.gray6.regular} !important;
 		}
 		${CustomText} {
 			color: ${({ theme }): string => theme.palette.gray6.regular};
@@ -100,7 +100,7 @@ const ActionComponent: FC<ActionProps> = ({
 				width="fill"
 				$actionColor={actionColor}
 				onClick={!isDisabled ? action : (): null => null}
-				disabled={isDisabled}
+				$disabled={isDisabled}
 			>
 				<CustomContainer orientation="horizontal" mainAlignment="flex-start">
 					<Row>

@@ -84,11 +84,6 @@ const room: RoomBe = {
 	]
 };
 
-const ImageBlob = {
-	size: 1234,
-	type: 'image/jpeg'
-};
-
 describe('Participants list', () => {
 	test('The participants list should be rendered as expected', async () => {
 		const store = useStore.getState();
@@ -176,7 +171,9 @@ describe('Participants list', () => {
 		const list = await screen.findByTestId('members_list');
 		await user.type(searchInput, 'user 4');
 
-		const placeholderText = await screen.findByText(/There are no items that match this search/i);
+		const placeholderText = await screen.findByText(
+			/Your search returned no results, try another keyword./i
+		);
 		expect(placeholderText).toBeInTheDocument();
 		expect(list).not.toBeInTheDocument();
 

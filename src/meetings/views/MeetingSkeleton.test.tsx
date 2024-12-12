@@ -50,25 +50,13 @@ const room: RoomBe = createMockRoom({
 	members: [member1, member2, member3, member4]
 });
 
-const user1Participant: MeetingParticipant = createMockParticipants({
-	userId: user1.id,
-	sessionId: 'sessionIdUser1'
-});
+const user1Participant: MeetingParticipant = createMockParticipants({ userId: user1.id });
 
-const user2Participant: MeetingParticipant = createMockParticipants({
-	userId: user2.id,
-	sessionId: 'sessionIdUser2'
-});
+const user2Participant: MeetingParticipant = createMockParticipants({ userId: user2.id });
 
-const user3Participant: MeetingParticipant = createMockParticipants({
-	userId: user3.id,
-	sessionId: 'sessionIdUser3'
-});
+const user3Participant: MeetingParticipant = createMockParticipants({ userId: user3.id });
 
-const user4Participant: MeetingParticipant = createMockParticipants({
-	userId: user4.id,
-	sessionId: 'sessionIdUser4'
-});
+const user4Participant: MeetingParticipant = createMockParticipants({ userId: user4.id });
 
 const meeting: MeetingBe = createMockMeeting({
 	roomId: room.id,
@@ -200,9 +188,9 @@ describe('Meeting action bar interaction with skeleton', () => {
 		const { user } = setup(<MeetingSkeleton />);
 		const meetingActionBar = await screen.findByTestId('meeting-action-bar');
 		await waitFor(() => user.hover(screen.getByTestId('meeting_sidebar')));
-		expect(meetingActionBar).toHaveStyle('transform: translateY( 5rem )');
+		expect(meetingActionBar).toHaveStyle('transform: translateY(5rem)');
 		await waitFor(() => user.hover(screen.getByTestId('meeting_view_container')));
-		expect(meetingActionBar).toHaveStyle('transform: translateY( -1rem )');
+		expect(meetingActionBar).toHaveStyle('transform: translateY(-1rem)');
 	});
 });
 

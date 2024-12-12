@@ -9,8 +9,12 @@ import { last, size } from 'lodash';
 
 import useFirstUnreadMessage from './useFirstUnreadMessage';
 import useStore from '../../../store/Store';
-import { createMockMarker, createMockRoom, createMockTextMessage } from '../../../tests/createMock';
-import { MessageType } from '../../../types/store/MessageTypes';
+import {
+	createMockConfigurationMessage,
+	createMockMarker,
+	createMockRoom,
+	createMockTextMessage
+} from '../../../tests/createMock';
 import { dateToTimestamp } from '../../../utils/dateUtils';
 
 const myUserId = 'myUserId';
@@ -72,11 +76,10 @@ const complexHistory = [
 		roomId: room.id,
 		date: dateToTimestamp(new Date('01 May 2023 14:03'))
 	}),
-	createMockTextMessage({
+	createMockConfigurationMessage({
 		id: 'messageId4',
 		roomId: room.id,
-		date: dateToTimestamp(new Date('01 May 2023 14:04')),
-		type: MessageType.CONFIGURATION_MSG
+		date: dateToTimestamp(new Date('01 May 2023 14:04'))
 	}),
 	createMockTextMessage({
 		id: 'messageId5',

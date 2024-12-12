@@ -23,7 +23,7 @@ import {
 	TextMessage
 } from '../../types/store/MessageTypes';
 import { RoomType } from '../../types/store/RoomTypes';
-import { dateToTimestamp } from '../../utils/dateUtils';
+import { dateToISODate, dateToTimestamp } from '../../utils/dateUtils';
 import useStore from '../Store';
 
 const dateOne = '2023-05-01 14:00';
@@ -148,7 +148,8 @@ describe('Test messages slice - newInboxMessage', () => {
 	test('Arrive an inbox message of a room in which history is been cleared before message date', () => {
 		const room = createMockRoom({
 			userSettings: {
-				clearedAt: dateToTimestamp('2023-05-01 12:00')
+				muted: false,
+				clearedAt: dateToISODate('2023-05-01 12:00')
 			}
 		});
 		const inboxMessage = createMockTextMessage({
@@ -168,7 +169,8 @@ describe('Test messages slice - newInboxMessage', () => {
 	test('Arrive an inbox message of a room in which history is been cleared after message date', () => {
 		const room = createMockRoom({
 			userSettings: {
-				clearedAt: dateToTimestamp(dateOne)
+				muted: false,
+				clearedAt: dateToISODate(dateOne)
 			}
 		});
 		const inboxMessage = createMockTextMessage({
@@ -375,7 +377,7 @@ describe('Test message slice - addCreateRoomMessage', () => {
 	test('Add a create room message to a group with cleared history', () => {
 		const room = createMockRoom({
 			type: RoomType.GROUP,
-			userSettings: { clearedAt: dateToTimestamp(dateOne) }
+			userSettings: { muted: false, clearedAt: dateToISODate(dateOne) }
 		});
 		const message0 = createMockTextMessage({ id: 'message0' });
 		const message1 = createMockTextMessage({ id: 'message1' });
@@ -396,7 +398,7 @@ describe('Test message slice - addCreateRoomMessage', () => {
 
 describe('Test message slice - updateUnreadMessages', () => {
 	const room = createMockRoom({
-		userSettings: { clearedAt: '2022-08-26T19:14:54.393Z' }, // 26 ago 2022, 19:14:54
+		userSettings: { muted: false, clearedAt: '2022-08-26T19:14:54.393Z' }, // 26 ago 2022, 19:14:54
 		members: [
 			createMockMember({ userId: 'user0' }),
 			createMockMember({ userId: 'user1' }),

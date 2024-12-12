@@ -174,7 +174,7 @@ const BubbleFooter: FC<BubbleFooterProps> = ({
 							onClick={clickReadBy}
 						>
 							<Tooltip label={dropdownTooltip}>
-								<Padding width="fit" all="extrasmall">
+								<Padding width="fit-content" all="extrasmall">
 									<CustomIcon
 										$clickable={readByClickable}
 										size="small"

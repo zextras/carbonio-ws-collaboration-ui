@@ -15,7 +15,7 @@ import {
 	useSnackbar
 } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import styled, { SimpleInterpolation } from 'styled-components';
+import styled from 'styled-components';
 
 import AttachmentView from './AttachmentView';
 import BubbleActions, { BubbleActionsWrapper } from './bubbleActions/BubbleActions';
@@ -75,7 +75,7 @@ const BubbleContainer = styled(Container)<{
 	margin-top: 0.25rem;
 	margin-bottom: 0.25rem;
 	${({ $messageAttachment }): string | false => !$messageAttachment && 'width: fit-content;'};
-	${({ $isMyMessage }): SimpleInterpolation => $isMyMessage && 'margin-left: auto;'};
+	${({ $isMyMessage }): false | string => $isMyMessage && 'margin-left: auto;'};
 	box-shadow: 0 0 0.25rem rgba(166, 166, 166, 0.5);
 
 	&:hover {
