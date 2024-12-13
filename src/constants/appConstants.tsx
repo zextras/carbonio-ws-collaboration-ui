@@ -16,3 +16,7 @@ export const CHATS_ROUTE = 'chats';
 export const MEETINGS_NAME = 'Meetings';
 export const MEETINGS_ROUTE = 'meetings';
 export const MEETINGS_PATH = `focus-mode/${MEETINGS_ROUTE}/`;
+
+export const TRACKER_EVENT = {
+	meetingEvaluation: 'Meeting evaluation'
+};

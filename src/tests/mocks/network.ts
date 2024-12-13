@@ -25,7 +25,8 @@ export enum RoomsApiToSpy {
 	UNMUTE_ROOM_NOTIFICATION = 'unmuteRoomNotification',
 	CLEAR_ROOM_HISTORY = 'clearRoomHistory',
 	FORWARD_MESSAGE = 'forwardMessages',
-	ADD_ROOM_ATTACHMENT = 'addRoomAttachment'
+	ADD_ROOM_ATTACHMENT = 'addRoomAttachment',
+	DELETE_ROOM_AND_MEETING = 'deleteRoomAndMeeting'
 }
 
 export enum AttachmentsApiToSpy {

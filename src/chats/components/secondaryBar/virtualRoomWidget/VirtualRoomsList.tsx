@@ -53,6 +53,8 @@ const VirtualRoomsList: FC<virtualRoomsListProps> = ({ setListVisibility, parent
 		'The Rooms you create will be shown here'
 	);
 
+	const createVirtualRoom = t('meeting.virtual.newRoom', 'Create new Room');
+
 	const virtualRoomList = useStore(getTemporaryRoomIdsOrderedByCreation);
 	const [showCreationModal, setShowCreationModal] = useState(false);
 
@@ -113,7 +115,7 @@ const VirtualRoomsList: FC<virtualRoomsListProps> = ({ setListVisibility, parent
 
 	return (
 		<CustomContainer background={'gray6'} height="fit" padding="0.5rem" gap="0.5rem" ref={popupRef}>
-			<Button label="Create new Room" color="primary" width="fill" onClick={toggleModal} />
+			<Button label={createVirtualRoom} color="primary" width="fill" onClick={toggleModal} />
 			<CreateVirtualRoomModal
 				toggleModal={toggleModal}
 				showCreationModal={showCreationModal}
