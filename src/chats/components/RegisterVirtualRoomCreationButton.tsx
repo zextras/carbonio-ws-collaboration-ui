@@ -29,7 +29,7 @@ const RegisterVirtualRoomCreationButton = (): ReactElement => {
 		(): NewAction => ({
 			id: createVirtualLabel,
 			label: t('action.newVirtual', 'New Virtual Room'),
-			icon: 'WscOutline',
+			icon: 'VideoOutline',
 			execute: (): void => setShowCreationModal(true),
 			group: CHATS_APP_ID,
 			primary: true

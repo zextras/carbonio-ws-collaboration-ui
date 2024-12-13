@@ -72,12 +72,12 @@ class RoomsApi implements IRoomsApi {
 		});
 	}
 
-	public addRoom(room: RoomCreationFields): Promise<AddRoomResponse> {
-		return fetchAPI('rooms', RequestType.POST, room).then((response: AddRoomResponse) => {
+	public async addRoom(room: RoomCreationFields): Promise<AddRoomResponse> {
+		return fetchAPI('rooms', RequestType.POST, room).then(async (response: AddRoomResponse) => {
 			// Create meeting for the created room
 			const meetingType =
 				room.type === RoomType.TEMPORARY ? MeetingType.SCHEDULED : MeetingType.PERMANENT;
-			MeetingsApi.createMeeting(response.id, meetingType, response.name ?? '');
+			await MeetingsApi.createMeeting(response.id, meetingType, response.name ?? '');
 			return response;
 		});
 	}

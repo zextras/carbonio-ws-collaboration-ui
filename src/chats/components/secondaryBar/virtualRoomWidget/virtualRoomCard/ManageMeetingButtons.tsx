@@ -8,9 +8,7 @@ import React, { FC, useCallback, useMemo, useState } from 'react';
 import {
 	Button,
 	CreateSnackbarFn,
-	Modal,
 	Row,
-	Text,
 	Tooltip,
 	useSnackbar
 } from '@zextras/carbonio-design-system';
@@ -19,9 +17,9 @@ import styled from 'styled-components';
 
 import useRoomMeeting from '../../../../../hooks/useRoomMeeting';
 import { RoomsApi } from '../../../../../network';
-import { getRoomSelector } from '../../../../../store/selectors/RoomsSelectors';
 import { getUserId } from '../../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../../store/Store';
+import DeleteVirtualRoomModal from '../DeleteVirtualRoomModal';
 
 type ManageMeetingButtonsProps = {
 	roomId: string;
@@ -56,31 +54,13 @@ const ManageMeetingButtons: FC<ManageMeetingButtonsProps> = ({
 	const startMeeting = t('meeting.startMeeting', 'Start meeting');
 	const joinMeeting = t('meeting.joinMeeting', 'Join meeting');
 	const rejoinMeeting = t('meeting.rejoinMeeting', 'Rejoin meeting');
-	const closeLabel = t('action.close', 'Close');
-	const deleteVirtualRoomLabel = t('action.delete', 'Delete');
 	const leaveRoomTooltip = t('modal.leaveRoom', 'Leave Room');
 	const copyVirtualRoomLinkSnackbar = t(
 		'meeting.virtual.copyLinkSnackbar',
 		"Virtual Room's link copied"
 	);
-	const deleteVirtualRoomSnackbar = t(
-		'meeting.virtual.deleteSnackbar',
-		'Virtual Room deleted successfully'
-	);
-	const deleteVirtualRoomDescription = t(
-		'meeting.virtual.deleteModalDescription',
-		'You are deleting this Virtual Room, if it has active meetings, they will be stopped and no one will be able to access the Room anymore. Proceed?'
-	);
-	const errorSnackbar = t(
-		'settings.profile.errorGenericResponse',
-		'Something went wrong. Please retry'
-	);
 
 	const sessionId = useStore(getUserId);
-	const room = useStore((state) => getRoomSelector(state, roomId));
-	const modalTitle = t('meeting.virtual.deleteModalTitle', `Delete ${room.name} Virtual Room`, {
-		roomName: room.name
-	});
 
 	const [showModal, setShowModal] = useState(false);
 	const createSnackbar: CreateSnackbarFn = useSnackbar();
@@ -111,25 +91,6 @@ const ManageMeetingButtons: FC<ManageMeetingButtonsProps> = ({
 		() => (meetingIsActive ? enterMeeting : startMeeting),
 		[enterMeeting, meetingIsActive, startMeeting]
 	);
-
-	const handleDeleteRoom = useCallback(() => {
-		RoomsApi.deleteRoomAndMeeting(roomId)
-			.then(() => {
-				createSnackbar({
-					key: new Date().toLocaleString(),
-					severity: 'success',
-					label: deleteVirtualRoomSnackbar,
-					hideButton: true
-				});
-			})
-			.catch(() => {
-				createSnackbar({
-					key: new Date().toLocaleString(),
-					label: errorSnackbar,
-					hideButton: true
-				});
-			});
-	}, [createSnackbar, deleteVirtualRoomSnackbar, errorSnackbar, roomId]);
 
 	const handleModalOpening = useCallback(() => setShowModal((prevState) => !prevState), []);
 
@@ -165,19 +126,13 @@ const ManageMeetingButtons: FC<ManageMeetingButtonsProps> = ({
 					/>
 				</Tooltip>
 			</Row>
-			<Modal
-				title={modalTitle}
-				open={showModal}
-				onConfirm={handleDeleteRoom}
-				confirmLabel={deleteVirtualRoomLabel}
-				onClose={handleModalOpening}
-				showCloseIcon
-				ref={modalRef}
-				confirmColor="error"
-				closeIconTooltip={closeLabel}
-			>
-				<Text overflow="break-word">{deleteVirtualRoomDescription}</Text>
-			</Modal>
+			<DeleteVirtualRoomModal
+				showModal={showModal}
+				setShowModal={setShowModal}
+				handleModalOpening={handleModalOpening}
+				modalRef={modalRef}
+				roomId={roomId}
+			/>
 		</>
 	);
 };
