@@ -5,11 +5,21 @@
  */
 import React, { useMemo } from 'react';
 
-import { render, RenderOptions, RenderResult, waitFor } from '@testing-library/react';
+import {
+	queries,
+	render,
+	RenderOptions,
+	RenderResult,
+	Screen,
+	screen,
+	waitFor,
+	within
+} from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { ModalManager, SnackbarManager, ThemeProvider } from '@zextras/carbonio-design-system';
 import { I18nextProvider } from 'react-i18next';
 
+import { customQueries } from './custom-queries';
 import I18nTestFactory from './i18n-test-factory';
 
 interface ProvidersWrapperProps {
@@ -33,24 +43,36 @@ export const ProvidersWrapper = ({ children }: ProvidersWrapperProps): JSX.Eleme
 	);
 };
 
+const extendedQueries = { ...queries, ...customQueries };
 function customRender(
 	ui: React.ReactElement,
-	options?: Omit<RenderOptions, 'wrapper'>
-): RenderResult {
+	options?: Omit<RenderOptions, 'wrapper' | 'queries'>
+): RenderResult<typeof extendedQueries> {
 	return render(ui, {
 		wrapper: ProvidersWrapper,
+		queries: extendedQueries,
 		...options
 	});
 }
 
 export function setup(
 	...args: Parameters<typeof customRender>
-): { user: ReturnType<(typeof userEvent)['setup']> } & ReturnType<typeof render> {
+): { user: ReturnType<(typeof userEvent)['setup']> } & ReturnType<typeof customRender> {
 	return {
 		user: userEvent.setup({ advanceTimers: jest.advanceTimersByTime }),
 		...customRender(...args)
 	};
 }
+
+function customWithin(
+	element: Parameters<typeof within<typeof extendedQueries>>[0]
+): ReturnType<typeof within<typeof extendedQueries>> {
+	return within(element, extendedQueries);
+}
+
+const customScreen: Screen<typeof extendedQueries> = { ...screen, ...customWithin(document.body) };
+
+export { customWithin as within, customScreen as screen };
 
 export async function triggerObserver(observedElement: HTMLElement): Promise<void> {
 	const { calls } = (window.IntersectionObserver as jest.Mock<IntersectionObserver>).mock;

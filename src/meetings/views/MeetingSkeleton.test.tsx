@@ -188,9 +188,9 @@ describe('Meeting action bar interaction with skeleton', () => {
 		const { user } = setup(<MeetingSkeleton />);
 		const meetingActionBar = await screen.findByTestId('meeting-action-bar');
 		await waitFor(() => user.hover(screen.getByTestId('meeting_sidebar')));
-		expect(meetingActionBar).toHaveStyle('transform: translateY( 5rem )');
+		expect(meetingActionBar).toHaveStyle('transform: translateY(5rem)');
 		await waitFor(() => user.hover(screen.getByTestId('meeting_view_container')));
-		expect(meetingActionBar).toHaveStyle('transform: translateY( -1rem )');
+		expect(meetingActionBar).toHaveStyle('transform: translateY(-1rem)');
 	});
 });
 

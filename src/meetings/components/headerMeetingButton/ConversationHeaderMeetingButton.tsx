@@ -8,7 +8,7 @@ import React, { ReactElement, useCallback, useEffect, useMemo, useRef, useState 
 
 import { Button, Container, Icon, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import styled, { DefaultTheme } from 'styled-components';
+import styled from 'styled-components';
 
 import ActiveMeetingParticipantsDropdown from './ActiveMeetingParticipantsDropdown';
 import useRoomMeeting from '../../../hooks/useRoomMeeting';
@@ -33,7 +33,7 @@ const ActiveMeetingDot = styled.div`
 	position: absolute;
 	width: 0.313rem;
 	height: 0.313rem;
-	background-color: ${({ theme }: { theme: DefaultTheme }): string => theme.palette.error.regular};
+	background-color: ${({ theme }): string => theme.palette.error.regular};
 	border: 0.0625rem solid ${(props): string => props.theme.palette.error.regular};
 	border-radius: 50%;
 	left: 0;

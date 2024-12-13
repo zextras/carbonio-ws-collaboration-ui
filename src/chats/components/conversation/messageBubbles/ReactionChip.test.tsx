@@ -10,7 +10,7 @@ import { screen } from '@testing-library/react';
 
 import ReactionChip from './ReactionChip';
 import useStore from '../../../../store/Store';
-import { createMockUser } from '../../../../tests/createMock';
+import { createMockTextMessage, createMockUser } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
 
 const loggedUser = createMockUser({ id: 'loggedUser', name: 'Logged User' });
@@ -105,5 +105,23 @@ describe('ReactionChip', () => {
 		const container = screen.getByTestId(chipTestId);
 		await user.click(container);
 		expect(spyOnSendChatMessageReaction).toHaveBeenCalledWith('roomId', 'stanzaId', '');
+	});
+
+	test('Chip changes color when a new reaction is received', async () => {
+		const store = useStore.getState();
+		store.newMessage(
+			createMockTextMessage({ stanzaId: 'stanzaId', roomId: 'roomId', from: loggedUser.id })
+		);
+		store.setNewReaction('roomId', 'stanzaId', '\uD83D\uDC4D', user1.id);
+		setup(
+			<ReactionChip
+				reaction={'\uD83D\uDC4D'}
+				from={[user1.id]}
+				roomId={'roomId'}
+				stanzaId={'stanzaId'}
+			/>
+		);
+		const container = screen.getByTestId(chipTestId);
+		expect(container).toHaveStyle('background: rgb(43, 115, 210)');
 	});
 });

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { ReactElement, RefObject, useCallback, useEffect, useRef } from 'react';
+import React, { ReactElement, useCallback, useEffect, useRef } from 'react';
 
 import { Icon } from '@zextras/carbonio-design-system';
 import { debounce, first } from 'lodash';
@@ -29,10 +29,31 @@ const Loader = styled.div`
 	width: 1.75rem;
 	height: 1.75rem;
 
-	@-moz-keyframes spin { 0% {transform: scaleX(-1) rotate(0deg);} 100% {transform: scaleX(-1) rotate(360deg);} }
-	@-webkit-keyframes spin { 0% {transform: scaleX(-1) rotate(0deg);} 100% {transform: scaleX(-1) rotate(360deg);} }
-	@keyframes spin { 0% {transform: scaleX(-1) rotate(0deg);} 100% {transform: scaleX(-1) rotate(360deg);} }
+	@-moz-keyframes spin {
+		0% {
+			transform: scaleX(-1) rotate(0deg);
+		}
+		100% {
+			transform: scaleX(-1) rotate(360deg);
+		}
 	}
+	@-webkit-keyframes spin {
+		0% {
+			transform: scaleX(-1) rotate(0deg);
+		}
+		100% {
+			transform: scaleX(-1) rotate(360deg);
+		}
+	}
+	@keyframes spin {
+		0% {
+			transform: scaleX(-1) rotate(0deg);
+		}
+		100% {
+			transform: scaleX(-1) rotate(360deg);
+		}
+	}
+
 	& svg {
 		position: relative;
 		top: 0.375rem;
@@ -43,11 +64,7 @@ const Loader = styled.div`
 	}
 `;
 
-const VisibilityContainer = styled.div<{
-	children: ReactElement;
-	'data-testid': string;
-	ref: RefObject<HTMLDivElement>;
-}>`
+const VisibilityContainer = styled.div`
 	width: 100%;
 	text-align: center;
 `;

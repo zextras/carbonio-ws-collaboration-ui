@@ -38,7 +38,7 @@ const ReferenceMessageView: React.FC<ReferenceMessageViewProps> = ({ roomId }) =
 				orientation="horizontal"
 				mainAlignment="flex-start"
 				background={'gray5'}
-				padding={{ vertical: 'medium', left: 'medium' }}
+				padding={{ bottom: 'medium', top: 'medium', left: 'medium' }}
 				data-testid="reference_message"
 			>
 				<MessageReferenceDisplayed referenceMessage={referenceMessage} />

@@ -10,6 +10,7 @@ import {
 	Input,
 	Modal,
 	Padding,
+	SingleSelectionOnChange,
 	Text,
 	useSnackbar
 } from '@zextras/carbonio-design-system';
@@ -17,9 +18,13 @@ import { map, size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 import ModeratorsContactsSelection from './ModeratorsContactsSelection';
+import { valueItem } from '../../../../integrations/virtualRoomIntegration/SelectVirtualRoomWidget';
 import { RoomsApi } from '../../../../network';
+import { getMeetingIdFromRoom } from '../../../../store/selectors/RoomsSelectors';
+import useStore from '../../../../store/Store';
 import { MemberBe } from '../../../../types/network/models/roomBeTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
+import { createMeetingLinkFromOutside } from '../../../../utils/MeetingsUtils';
 import { ContactSelected } from '../../creationModal/ChatCreationContactsSelection';
 
 type CreateVirtualRoomModalProps = {
@@ -27,13 +32,15 @@ type CreateVirtualRoomModalProps = {
 	showCreationModal: boolean;
 	setShowCreationModal: Dispatch<SetStateAction<boolean>>;
 	createModalRef: React.RefObject<HTMLDivElement>;
+	onChangeVirtualRoom?: SingleSelectionOnChange<valueItem>;
 };
 
 const CreateVirtualRoomModal: FC<CreateVirtualRoomModalProps> = ({
 	toggleModal,
 	showCreationModal,
 	setShowCreationModal,
-	createModalRef
+	createModalRef,
+	onChangeVirtualRoom
 }) => {
 	const [t] = useTranslation();
 
@@ -82,7 +89,14 @@ const CreateVirtualRoomModal: FC<CreateVirtualRoomModalProps> = ({
 			type: RoomType.TEMPORARY,
 			members: newOwnersToAdd
 		})
-			.then(() => {
+			.then((resp): void => {
+				if (onChangeVirtualRoom !== undefined) {
+					onChangeVirtualRoom({
+						id: resp.id,
+						label: resp.name ?? '',
+						link: createMeetingLinkFromOutside(getMeetingIdFromRoom(useStore.getState(), resp.id))
+					});
+				}
 				setContactsSelected({});
 				setCanCreateVirtualRoom(false);
 				setShowCreationModal(false);
@@ -95,7 +109,7 @@ const CreateVirtualRoomModal: FC<CreateVirtualRoomModalProps> = ({
 					hideButton: true
 				});
 			});
-	}, [contactsSelected, createSnackbar, errorSnackbar, setShowCreationModal]);
+	}, [contactsSelected, createSnackbar, errorSnackbar, onChangeVirtualRoom, setShowCreationModal]);
 
 	const createVirtualRoomTooltip = useMemo(() => {
 		if (nameError) return invalidNameString;

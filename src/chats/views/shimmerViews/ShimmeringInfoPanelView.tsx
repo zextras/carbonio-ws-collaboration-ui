@@ -7,12 +7,12 @@
 import React, { ReactElement } from 'react';
 
 import { Container, Padding, Shimmer } from '@zextras/carbonio-design-system';
-import styled, { css, DefaultTheme, FlattenInterpolation, ThemeProps } from 'styled-components';
+import styled, { css } from 'styled-components';
 
 const CustomContainer = styled(Container)<{ $isTopContainer?: boolean }>`
 	background-color: ${({ theme }): string => theme.palette.gray5.regular};
 	border-bottom: 0.0625rem solid ${({ theme }): string => theme.palette.gray6.active};
-	${({ $isTopContainer }): FlattenInterpolation<ThemeProps<DefaultTheme>> | false | undefined =>
+	${({ $isTopContainer }): ReturnType<typeof css> | false | undefined =>
 		$isTopContainer &&
 		css`
 			background-color: ${({ theme }): string => theme.palette.gray4.regular};

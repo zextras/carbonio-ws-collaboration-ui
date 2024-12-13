@@ -62,16 +62,6 @@ describe('SelectVirtualRoomWidget', () => {
 		expect(selectedVirtualRoom).toBeInTheDocument();
 	});
 
-	test('Should render properly - user has not virtual rooms and defaultValue is undefined', async () => {
-		const store = useStore.getState();
-		store.setLoginInfo(sessionUser.id, sessionUser.name);
-		store.setCapabilities(createMockCapabilityList());
-		setup(<SelectVirtualRoomWidgetComponent onChange={() => null} defaultValue={undefined} />);
-
-		const noVirtualRoom = screen.getByTestId('no_virtual_room');
-		expect(noVirtualRoom).toBeInTheDocument();
-	});
-
 	test('Should render properly - user has not virtual rooms and defaultValue is not undefined', async () => {
 		const store = useStore.getState();
 		store.setLoginInfo(sessionUser.id, sessionUser.name);

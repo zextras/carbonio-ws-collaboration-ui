@@ -164,7 +164,9 @@ describe("Meeting Participants Accordion - moderator's side", () => {
 		const list = await screen.findByTestId('meeting_participants_list');
 		await user.type(searchInput, 'user 4');
 
-		const placeholderText = await screen.findByText(/There are no items that match this search/i);
+		const placeholderText = await screen.findByText(
+			/Your search returned no results, try another keyword./i
+		);
 		expect(placeholderText).toBeInTheDocument();
 		expect(list).not.toBeInTheDocument();
 

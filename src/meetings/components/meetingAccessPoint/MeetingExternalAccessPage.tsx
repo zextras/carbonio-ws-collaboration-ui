@@ -22,7 +22,7 @@ const CustomDescription = styled(Text)`
 `;
 
 const BackgroundContainer = styled(Container)`
-	background-image: url(${(): string => ExternalAccessBackground});
+	background-image: url(${ExternalAccessBackground});
 	background-size: cover;
 	aspect-ratio: 1/1;
 `;

@@ -117,7 +117,7 @@ const useBubbleReactions = (
 						key="custom-reactions"
 						data-testid="custom-reactions"
 						icon="Plus"
-						color="gray6"
+						backgroundColor="gray6"
 						labelColor="text"
 						onClick={openEmojiPicker}
 					/>

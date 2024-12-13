@@ -6,11 +6,16 @@
  */
 
 import { produce } from 'immer';
-import { find, findIndex, forEach, orderBy, remove } from 'lodash';
+import { find, findIndex, forEach, orderBy, remove, reverse } from 'lodash';
 import { StateCreator } from 'zustand';
 
 import { FileToUpload, messageActionType } from '../../types/store/ActiveConversationTypes';
-import { AttachmentMessageType, Message, TextMessage } from '../../types/store/MessageTypes';
+import {
+	AttachmentMessageType,
+	Message,
+	MessageType,
+	TextMessage
+} from '../../types/store/MessageTypes';
 import { ActiveConversationsSlice, RootStore } from '../../types/store/StoreTypes';
 import { isBefore } from '../../utils/dateUtils';
 
@@ -27,6 +32,11 @@ export const useActiveConversationsSlice: StateCreator<ActiveConversationsSlice>
 					draft.activeConversations[roomId] = {
 						inputHasFocus: hasFocus
 					};
+				}
+
+				// Remove newReactions
+				if (hasFocus && draft.activeConversations[roomId].newReactions) {
+					delete draft.activeConversations[roomId].newReactions;
 				}
 			}),
 			false,
@@ -379,6 +389,49 @@ export const useActiveConversationsSlice: StateCreator<ActiveConversationsSlice>
 			}),
 			false,
 			'AC/UNSET_FORWARD_MESSAGE_LIST'
+		);
+	},
+	setNewReaction(roomId: string, stanzaId: string, reaction: string, from: string): void {
+		set(
+			produce((draft: RootStore) => {
+				// Ignore reactions to messages that are not mine
+				if (
+					!find(
+						draft.messages[roomId],
+						(message) =>
+							message.type === MessageType.TEXT_MSG &&
+							message.stanzaId === stanzaId &&
+							message.from === draft.session.id
+					)
+				)
+					return;
+
+				if (!draft.activeConversations[roomId]) draft.activeConversations[roomId] = {};
+				const reactions = draft.activeConversations[roomId].newReactions || [];
+
+				if (reaction === '') {
+					const reactionToRemove = find(
+						reverse(draft.fastenings[roomId]?.[stanzaId]),
+						(fastening) =>
+							fastening.action === 'reaction' && fastening.from === from && fastening.value !== ''
+					);
+					const index = findIndex(
+						reactions,
+						(r) => r.reaction === reactionToRemove?.value && r.stanzaId === stanzaId
+					);
+					if (index !== -1) {
+						reactions.splice(index, 1);
+					}
+				} else {
+					reactions.push({
+						stanzaId,
+						reaction
+					});
+				}
+				draft.activeConversations[roomId].newReactions = reactions;
+			}),
+			false,
+			'AC/SET_NEW_REACTION'
 		);
 	}
 });

@@ -9,7 +9,7 @@ import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { Button, Container, Icon, Row, Text, Tooltip } from '@zextras/carbonio-design-system';
 import { split } from 'lodash';
 import { useTranslation } from 'react-i18next';
-import styled, { DefaultTheme, SimpleInterpolation } from 'styled-components';
+import styled, { DefaultTheme } from 'styled-components';
 
 import AttachmentSmallView from './AttachmentSmallView';
 import usePreview from '../../../../hooks/usePreview';
@@ -44,8 +44,8 @@ const CustomButton = styled(Button)`
 `;
 
 const PreviewContainer = styled(Container)<{ $isLoaded: boolean; $previewError: boolean }>`
-	${({ $isLoaded }): SimpleInterpolation => $isLoaded && `background: black;`};
-	${({ $previewError, theme }): SimpleInterpolation =>
+	${({ $isLoaded }): false | string => $isLoaded && `background: black;`};
+	${({ $previewError, theme }): false | string =>
 		$previewError &&
 		`border-radius: 0.25rem;
 		background: ${theme.palette.gray5.regular};`};
@@ -77,18 +77,15 @@ const PreviewErrorContainer = styled(Container)<{
 `;
 
 const AttachmentImg = styled.img<{
-	src: string;
-	onLoad: () => void;
-	onError: () => void;
-	isPreviewLoaded: boolean;
 	width: number;
 	height: number;
+	$isPreviewLoaded: boolean;
 }>`
-	${({ width, isPreviewLoaded }): string | false =>
-		width === 0 && !isPreviewLoaded && `width: fit-content;`};
-	${({ isPreviewLoaded }): string | false => isPreviewLoaded && `width: fit-content;`};
-	${({ height, isPreviewLoaded }): string | false =>
-		height * 0.063 >= 37.5 && isPreviewLoaded && `object-fit: contain;`};
+	${({ width, $isPreviewLoaded }): string | false =>
+		width === 0 && !$isPreviewLoaded && `width: fit-content;`};
+	${({ $isPreviewLoaded }): string | false => $isPreviewLoaded && `width: fit-content;`};
+	${({ height, $isPreviewLoaded }): string | false =>
+		height * 0.063 >= 37.5 && $isPreviewLoaded && `object-fit: contain;`};
 	max-width: ${({ width }): string => (width === 0 ? '100%' : `min(${width * 0.063}rem, 100%)`)};
 	max-height: 37.5rem;
 	height: fit-content;
@@ -114,10 +111,10 @@ const TextContainer = styled(Container)`
 `;
 
 const FileContainer = styled(Container)<{
-	$userBorderColor: keyof DefaultTheme['avatarColors'] | string;
+	$userBorderColor?: keyof DefaultTheme['avatarColors'];
 }>`
-	border-left: ${({ $userBorderColor, theme }): string =>
-		`0.25rem solid ${theme.avatarColors[$userBorderColor as keyof DefaultTheme['avatarColors']]}`};
+	border-left: ${({ $userBorderColor, theme }): string | undefined =>
+		$userBorderColor && `0.25rem solid ${theme.avatarColors[$userBorderColor]}`};
 	border-radius: 0 0.25rem 0.25rem 0;
 `;
 
@@ -279,7 +276,7 @@ const AttachmentView: FC<AttachmentViewProps> = ({
 							onLoad={setLoaded}
 							onError={setError}
 							data-testid="attachmentImg"
-							isPreviewLoaded={isPreviewLoaded}
+							$isPreviewLoaded={isPreviewLoaded}
 							width={Number(dimensions[0])}
 							height={Number(dimensions[1])}
 						/>
@@ -296,7 +293,7 @@ const AttachmentView: FC<AttachmentViewProps> = ({
 			padding={{ horizontal: 'small', vertical: 'small' }}
 			orientation="horizontal"
 			crossAlignment="flex-start"
-			$userBorderColor={isMyMessage ? '#C4D5EF' : userColor}
+			$userBorderColor={isMyMessage ? undefined : userColor}
 		>
 			<Row>
 				<AttachmentSmallView attachment={attachment} />
