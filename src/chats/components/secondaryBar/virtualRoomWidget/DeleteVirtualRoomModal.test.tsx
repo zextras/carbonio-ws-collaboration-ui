@@ -37,7 +37,7 @@ const scheduledMeetingMod: MeetingBe = createMockMeeting({
 
 describe('SelectVirtualRoomWidget', () => {
 	test('Should render properly - user has virtual rooms', async () => {
-		const spyOnStartRecording = spyOnRoomsApi(RoomsApiToSpy.DELETE_ROOM_AND_MEETING);
+		const spyOnDeleteRoomAndMeeting = spyOnRoomsApi(RoomsApiToSpy.DELETE_ROOM_AND_MEETING);
 		act(() => {
 			const store = useStore.getState();
 			store.setLoginInfo(sessionUser.id, sessionUser.name);
@@ -59,6 +59,6 @@ describe('SelectVirtualRoomWidget', () => {
 
 		await user.click(deleteButton);
 
-		expect(spyOnStartRecording).toHaveBeenCalled();
+		expect(spyOnDeleteRoomAndMeeting).toHaveBeenCalled();
 	});
 });
