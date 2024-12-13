@@ -85,7 +85,10 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 	);
 
 	const closeLabel = t('action.close', 'Close');
-	const noMatchLabel = t('participantsList.noMatch', 'There are no items that match this search');
+	const noMatchLabel = t(
+		'participantsList.noMatch.general',
+		'Your search returned no results, try another keyword.'
+	);
 	const inputPlaceholder = t('modal.forward.inputPlaceholder', 'Start typing or pick a chat');
 	const forwardActionLabel = t('action.forward', 'Forward');
 	const chooseOneChatLabel = t('modal.forward.chooseAtLeastOneChat', 'Choose at least one chat');

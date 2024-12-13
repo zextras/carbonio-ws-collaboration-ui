@@ -4,7 +4,14 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { createMockMember, createMockRoom, createMockTextMessage } from '../../tests/createMock';
+import {
+	createMockMember,
+	createMockMessageFastening,
+	createMockRoom,
+	createMockTextMessage,
+	createMockUser
+} from '../../tests/createMock';
+import { FasteningAction } from '../../types/store/MessageTypes';
 import { dateToTimestamp } from '../../utils/dateUtils';
 import useStore from '../Store';
 
@@ -13,8 +20,11 @@ const mockedRoom = createMockRoom();
 const mockedUser0 = createMockMember({ userId: 'user0' });
 const mockedUser1 = createMockMember({ userId: 'user1' });
 
+const sessionUser = createMockUser({ id: 'sessionUserId', name: 'sessionUserName' });
+
 beforeEach(() => {
 	const store = useStore.getState();
+	store.setLoginInfo(sessionUser.id, sessionUser.name);
 	store.addRoom(mockedRoom);
 	store.addRoomMember(mockedRoom.id, mockedUser0);
 	store.addRoomMember(mockedRoom.id, mockedUser1);
@@ -112,5 +122,68 @@ describe('Active conversations slice', () => {
 		expect(useStore.getState().activeConversations[mockedRoom.id].lastMamMessage).toStrictEqual(
 			message0
 		);
+	});
+
+	describe('New reactions', () => {
+		test('Set new reaction from another user to session user message', () => {
+			const message = createMockTextMessage({
+				id: 'originalMessage-id',
+				stanzaId: 'originalMessage-stanzaId',
+				roomId: mockedRoom.id,
+				from: sessionUser.id
+			});
+			const store = useStore.getState();
+			store.newMessage(message);
+			store.setNewReaction(mockedRoom.id, message.stanzaId, '👍', mockedUser0.userId);
+
+			const { newReactions } = useStore.getState().activeConversations[mockedRoom.id];
+			expect(newReactions).toHaveLength(1);
+			expect(newReactions?.[0].reaction).toBe('👍');
+		});
+
+		test('Set and remove reaction from another user to session user message', () => {
+			const message = createMockTextMessage({
+				id: 'id',
+				stanzaId: 'stanzaId',
+				roomId: mockedRoom.id,
+				from: sessionUser.id
+			});
+			const fastening = createMockMessageFastening({
+				roomId: mockedRoom.id,
+				action: FasteningAction.REACTION,
+				originalStanzaId: message.stanzaId,
+				from: mockedUser0.userId,
+				value: '👍'
+			});
+			const store = useStore.getState();
+			store.newMessage(message);
+			store.addFastening(fastening);
+			store.setNewReaction(
+				fastening.roomId,
+				fastening.originalStanzaId,
+				fastening.value || '',
+				fastening.from
+			);
+			store.setNewReaction(fastening.roomId, fastening.originalStanzaId, '', fastening.from);
+
+			const { newReactions } = useStore.getState().activeConversations[mockedRoom.id];
+			expect(newReactions).toHaveLength(0);
+		});
+
+		test('Set new reaction from another user to other user message', () => {
+			const message = createMockTextMessage({
+				id: 'originalMessage-id',
+				stanzaId: 'originalMessage-stanzaId',
+				roomId: mockedRoom.id,
+				from: mockedUser1.userId
+			});
+			const store = useStore.getState();
+			store.newMessage(message);
+			store.setNewReaction(mockedRoom.id, message.stanzaId, '👍', mockedUser0.userId);
+
+			expect(
+				useStore.getState().activeConversations?.[mockedRoom.id]?.newReactions
+			).toBeUndefined();
+		});
 	});
 });

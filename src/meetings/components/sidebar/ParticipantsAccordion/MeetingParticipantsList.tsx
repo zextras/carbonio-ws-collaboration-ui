@@ -32,7 +32,10 @@ const ListContainer = styled(Container)`
 
 const MeetingParticipantsList: FC<ParticipantsListProps> = ({ meetingId }) => {
 	const [t] = useTranslation();
-	const noMatchLabel = t('participantsList.noMatch', 'There are no items that match this search');
+	const noMatchLabel = t(
+		'participantsList.noMatch.general',
+		'Your search returned no results, try another keyword.'
+	);
 	const meetingParticipants: MeetingParticipantMap | undefined = useStore((store) =>
 		getMeetingParticipantsByMeetingId(store, meetingId)
 	);

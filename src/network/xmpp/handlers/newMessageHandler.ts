@@ -6,59 +6,67 @@
 
 import { EventName, sendCustomEvent } from '../../../hooks/useEventListener';
 import useStore from '../../../store/Store';
-import { MessageType } from '../../../types/store/MessageTypes';
+import { FasteningAction, MessageType } from '../../../types/store/MessageTypes';
 import { getTagElement } from '../utility/decodeStanza';
 import { decodeXMPPMessageStanza } from '../utility/decodeXMPPMessageStanza';
 import displayMessageBrowserNotification from '../utility/displayMessageBrowserNotification';
+import displayReactionBrowserNotification from '../utility/displayReactionBrowserNotification';
 
 export function onNewMessageStanza(message: Element): true {
-	const resultElement = getTagElement(message, 'result');
+	if (getTagElement(message, 'result') != null) return true;
 
-	if (resultElement == null) {
-		const newMessage = decodeXMPPMessageStanza(message);
+	const newMessage = decodeXMPPMessageStanza(message);
+	if (!newMessage) return true;
 
-		if (newMessage) {
-			const store = useStore.getState();
-			const { xmppClient } = store.connections;
-			const sessionId: string | undefined = useStore.getState().session.id;
+	const store = useStore.getState();
+	const { xmppClient } = store.connections;
+	const sessionId: string | undefined = useStore.getState().session.id;
 
-			switch (newMessage.type) {
-				case MessageType.TEXT_MSG: {
-					store.newMessage(newMessage);
+	switch (newMessage.type) {
+		case MessageType.TEXT_MSG: {
+			store.newMessage(newMessage);
 
-					if (newMessage.from !== sessionId) {
-						sendCustomEvent({ name: EventName.NEW_MESSAGE, data: newMessage });
-						store.incrementUnreadCount(newMessage.roomId);
-						displayMessageBrowserNotification(newMessage);
-					}
-
-					// Request message subject of reply
-					const messageSubjectOfReplyId = newMessage.replyTo;
-					if (messageSubjectOfReplyId) {
-						xmppClient.requestMessageSubjectOfReply(
-							newMessage.roomId,
-							messageSubjectOfReplyId,
-							newMessage.id
-						);
-					}
-					break;
-				}
-				case MessageType.CONFIGURATION_MSG: {
-					store.newMessage(newMessage);
-					if (newMessage.from !== sessionId) {
-						sendCustomEvent({ name: EventName.NEW_MESSAGE, data: newMessage });
-						store.incrementUnreadCount(newMessage.roomId);
-					}
-					break;
-				}
-				case MessageType.FASTENING: {
-					store.addFastening(newMessage);
-					break;
-				}
-				default: {
-					break;
-				}
+			if (newMessage.from !== sessionId) {
+				sendCustomEvent({ name: EventName.NEW_MESSAGE, data: newMessage });
+				store.incrementUnreadCount(newMessage.roomId);
+				displayMessageBrowserNotification(newMessage);
 			}
+
+			// Request message subject of reply
+			const messageSubjectOfReplyId = newMessage.replyTo;
+			if (messageSubjectOfReplyId) {
+				xmppClient.requestMessageSubjectOfReply(
+					newMessage.roomId,
+					messageSubjectOfReplyId,
+					newMessage.id
+				);
+			}
+			break;
+		}
+		case MessageType.CONFIGURATION_MSG: {
+			store.newMessage(newMessage);
+			if (newMessage.from !== sessionId) {
+				sendCustomEvent({ name: EventName.NEW_MESSAGE, data: newMessage });
+				store.incrementUnreadCount(newMessage.roomId);
+			}
+			break;
+		}
+		case MessageType.FASTENING: {
+			store.addFastening(newMessage);
+
+			if (newMessage.action === FasteningAction.REACTION && newMessage.from !== sessionId) {
+				displayReactionBrowserNotification(newMessage);
+				store.setNewReaction(
+					newMessage.roomId,
+					newMessage.originalStanzaId,
+					newMessage.value ?? '',
+					newMessage.from
+				);
+			}
+			break;
+		}
+		default: {
+			break;
 		}
 	}
 	return true;

@@ -4,13 +4,14 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { ReactElement, useCallback, useMemo, useState } from 'react';
+import React, { ReactElement, useState, useEffect, useCallback, useMemo } from 'react';
 
 import { Avatar, Container, Padding, Tooltip } from '@zextras/carbonio-design-system';
 import { includes, map, size } from 'lodash';
 import styled from 'styled-components';
 
 import useAvatarUtilities from '../../../../hooks/useAvatarUtilities';
+import { getIsNewReaction } from '../../../../store/selectors/ActiveConversationsSelectors';
 import { getXmppClient } from '../../../../store/selectors/ConnectionSelector';
 import { getUserId } from '../../../../store/selectors/SessionSelectors';
 import { getUserName } from '../../../../store/selectors/UsersSelectors';
@@ -21,6 +22,7 @@ const CustomContainer = styled(Container)<{ $animation: boolean }>`
 	font-size: 0.9rem;
 	cursor: pointer;
 	animation: bounceIn 0.4s ease-in-out;
+	transition: background-color 1s ease;
 
 	@keyframes bounceIn {
 		0% {
@@ -58,8 +60,20 @@ type ReactionChipProps = {
 const ReactionChip = ({ reaction, from, roomId, stanzaId }: ReactionChipProps): ReactElement => {
 	const xmppClient = useStore(getXmppClient);
 	const sessionId = useStore(getUserId);
+	const isNewReaction = useStore((store) => getIsNewReaction(store, roomId, stanzaId, reaction));
 
 	const [isAnimating, setIsAnimating] = useState(false);
+	const [backgroundEffect, setBackgroundEffect] = useState(isNewReaction);
+
+	useEffect(() => {
+		if (isNewReaction) {
+			setBackgroundEffect(true);
+		} else {
+			setTimeout(() => {
+				setBackgroundEffect(false);
+			}, 5000);
+		}
+	}, [isNewReaction]);
 
 	const { avatarColor, avatarPicture, avatarIcon } = useAvatarUtilities(from[0]);
 
@@ -96,7 +110,7 @@ const ReactionChip = ({ reaction, from, roomId, stanzaId }: ReactionChipProps): 
 	return (
 		<Tooltip label={tooltipLabel}>
 			<CustomContainer
-				background="gray4"
+				background={backgroundEffect ? 'primary' : 'gray4'}
 				width="fit-content"
 				minHeight="1.5rem"
 				maxHeight="1.5rem"

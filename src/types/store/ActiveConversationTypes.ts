@@ -18,6 +18,7 @@ export type ActiveConversation = {
 	infoPanelStatus?: InfoPanelStatus;
 	filesToAttach?: FileToUpload[];
 	forwardMessageList?: TextMessage[];
+	newReactions?: NewReaction[];
 };
 
 export type ActiveConversationsMap = {
@@ -49,4 +50,9 @@ export type FileToUpload = {
 	localUrl: string;
 	description: string;
 	hasFocus: boolean;
+};
+
+type NewReaction = {
+	stanzaId: string;
+	reaction: string;
 };
