@@ -20,7 +20,7 @@ import {
 	ChipItem,
 	Container,
 	ListItem,
-	ListV2,
+	List,
 	Modal,
 	Padding,
 	Text
@@ -231,7 +231,7 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 						</Text>
 					</CustomContainer>
 				) : (
-					<ListV2 data-testid="list_forward_modal">{items}</ListV2>
+					<List data-testid="list_forward_modal">{items}</List>
 				)}
 			</Container>
 		</Modal>

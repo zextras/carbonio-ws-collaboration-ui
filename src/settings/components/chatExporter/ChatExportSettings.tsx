@@ -12,7 +12,7 @@ import {
 	Icon,
 	Input,
 	ListItem,
-	ListV2,
+	List,
 	Spinner,
 	Text,
 	Tooltip,
@@ -110,11 +110,14 @@ const ChatExportSettings: FC = () => {
 
 	const items = useMemo(
 		() =>
-			map(filteredConversationsIds, (room) => (
-				<CustomListItem key={room.roomId} active={room.roomId === selectedRoomId}>
-					{() => <ChatItem roomId={room.roomId} onClick={() => setSelectedRoomId(room.roomId)} />}
-				</CustomListItem>
-			)),
+			map(filteredConversationsIds, (room) => {
+				const onClick = (): void => setSelectedRoomId(room.roomId);
+				return (
+					<CustomListItem key={room.roomId} active={room.roomId === selectedRoomId}>
+						{() => <ChatItem roomId={room.roomId} onClick={onClick} />}
+					</CustomListItem>
+				);
+			}),
 		[filteredConversationsIds, selectedRoomId]
 	);
 
@@ -167,7 +170,7 @@ const ChatExportSettings: FC = () => {
 				</Container>
 			);
 		}
-		return <ListV2 maxHeight="15rem">{items}</ListV2>;
+		return <List maxHeight="15rem">{items}</List>;
 	}, [
 		filteredConversationsIds,
 		isThereAnyRoom,
