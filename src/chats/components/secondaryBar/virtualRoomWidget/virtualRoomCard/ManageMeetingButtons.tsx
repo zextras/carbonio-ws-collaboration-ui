@@ -22,6 +22,7 @@ import { RoomsApi } from '../../../../../network';
 import { getUserId } from '../../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../../store/Store';
 import DeleteVirtualRoomModal from '../DeleteVirtualRoomModal';
+import EditVirtualRoomModal from './EditVirtualRoomModal';
 
 type ManageMeetingButtonsProps = {
 	roomId: string;
@@ -43,8 +44,9 @@ const ManageMeetingButtons: FC<ManageMeetingButtonsProps> = ({
 	meetingIsActive
 }) => {
 	const [t] = useTranslation();
-	const roomActionsTooltip = t('', 'Room actions'); // TODO: key translations
+	const roomActionsTooltip = t('', 'Room actions'); // TODO: translation key
 	const copyVirtualRoomLabel = t('meeting.virtual.copyTooltip', "Copy Virtual Room's link");
+	const editVirtualRoomLabel = t('', 'Edit Virtual Room'); // TODO: translation key
 	const deleteVirtualRoomLabel = t('meeting.virtual.deleteTooltip', 'Delete Virtual Room');
 	const startMeetingLabel = t('meeting.startMeeting', 'Start meeting');
 	const joinMeetingLabel = t('meeting.joinMeeting', 'Join meeting');
@@ -57,8 +59,11 @@ const ManageMeetingButtons: FC<ManageMeetingButtonsProps> = ({
 
 	const sessionId = useStore(getUserId);
 
-	const [showModal, setShowModal] = useState(false);
+	const [showEditModal, setShowEditModal] = useState(false);
+	const [showDeleteModal, setShowDeleteModal] = useState(false);
+
 	const createSnackbar: CreateSnackbarFn = useSnackbar();
+
 	const { openMeeting, copyMeetingLink } = useRoomMeeting(roomId);
 
 	const leaveConversation = useCallback(() => {
@@ -81,7 +86,12 @@ const ManageMeetingButtons: FC<ManageMeetingButtonsProps> = ({
 		return joinMeetingLabel;
 	}, [amIParticipating, joinMeetingLabel, meetingIsActive, rejoinMeetingLabel, startMeetingLabel]);
 
-	const handleModalOpening = useCallback(() => setShowModal((prevState) => !prevState), []);
+	const handleEditModalOpening = useCallback(() => setShowEditModal((prevState) => !prevState), []);
+
+	const handleDeleteModalOpening = useCallback(
+		() => setShowDeleteModal((prevState) => !prevState),
+		[]
+	);
 
 	const items = useMemo((): Array<DropdownItem> => {
 		const actions = [];
@@ -93,9 +103,14 @@ const ManageMeetingButtons: FC<ManageMeetingButtonsProps> = ({
 		});
 		if (isMyRoom) {
 			actions.push({
+				id: 'editRoomAction',
+				label: editVirtualRoomLabel,
+				onClick: handleEditModalOpening
+			});
+			actions.push({
 				id: 'deleteRoomAction',
 				label: deleteVirtualRoomLabel,
-				onClick: handleModalOpening
+				onClick: handleDeleteModalOpening
 			});
 		}
 		return actions;
@@ -103,8 +118,10 @@ const ManageMeetingButtons: FC<ManageMeetingButtonsProps> = ({
 		amIParticipating,
 		copyVirtualRoomLabel,
 		deleteVirtualRoomLabel,
+		editVirtualRoomLabel,
 		handleCopyLink,
-		handleModalOpening,
+		handleDeleteModalOpening,
+		handleEditModalOpening,
 		isMyRoom
 	]);
 
@@ -123,12 +140,18 @@ const ManageMeetingButtons: FC<ManageMeetingButtonsProps> = ({
 					$isMyRoom={amIParticipating || isMyRoom}
 				/>
 			</Tooltip>
-			<DeleteVirtualRoomModal
-				showModal={showModal}
-				setShowModal={setShowModal}
-				handleModalOpening={handleModalOpening}
-				modalRef={modalRef}
+			<EditVirtualRoomModal
+				showModal={showEditModal}
+				setShowModal={setShowEditModal}
 				roomId={roomId}
+				modalRef={modalRef}
+			/>
+			<DeleteVirtualRoomModal
+				showModal={showDeleteModal}
+				setShowModal={setShowDeleteModal}
+				handleModalOpening={handleDeleteModalOpening}
+				roomId={roomId}
+				modalRef={modalRef}
 			/>
 		</Row>
 	);
