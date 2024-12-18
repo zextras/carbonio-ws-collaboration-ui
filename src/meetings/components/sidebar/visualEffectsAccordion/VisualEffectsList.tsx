@@ -76,12 +76,12 @@ const VisualEffectsList: FC<VisualEffectCardsProps> = ({ meetingId }) => {
 						minWidth="6.5rem"
 						maxWidth="9.25rem"
 						onClick={changeBackground}
-						data-testid={`${element}`}
+						data-testid={element}
 						$isSelected={isSelected}
 						gap="0.5rem"
 					>
 						{!isBlurOrNone ? (
-							<StyledImg src={virtualBackgroundImages[element]} alt={`${element}`} />
+							<StyledImg src={virtualBackgroundImages[element]} alt={element} />
 						) : (
 							<>
 								<Icon
