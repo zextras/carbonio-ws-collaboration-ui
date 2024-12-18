@@ -20,17 +20,23 @@ type VisualEffectCardsProps = {
 };
 
 const PictureContainer = styled(Container)<{ $picture?: string | false; $isSelected: boolean }>`
-	background-size: cover;
-	background-position: center;
 	aspect-ratio: 1.2959;
 	border-radius: 0.5rem;
+	background-color: ${({ theme }): string => `${theme.palette.gray0.regular}`};
 	${({ $isSelected, theme }): string | false =>
 		$isSelected && `outline: 2px solid ${theme.palette.success.active};`}
 	${({ $isSelected }): string | false => !$isSelected && `opacity: 0.6;`}
-	${({ $picture, theme }): string =>
-		$picture
-			? `background-image: url(${$picture});`
-			: `background-color: ${theme.palette.gray0.regular}`};
+`;
+
+const StyledImg = styled.img`
+	border-radius: 0.5rem;
+	aspect-ratio: 1.2959;
+	min-height: 5.176rem;
+	max-height: 7.267rem;
+	min-width: 6.5rem;
+	max-width: 9.25rem;
+	object-fit: cover;
+	object-position: center;
 `;
 
 const ListContainer = styled(Container)`
@@ -71,14 +77,20 @@ const VisualEffectsList: FC<VisualEffectCardsProps> = ({ meetingId }) => {
 						maxWidth="9.25rem"
 						onClick={changeBackground}
 						data-testid={`${element}`}
-						$picture={isBlurOrNone ? false : virtualBackgroundImages[element]}
 						$isSelected={isSelected}
 						gap="0.5rem"
 					>
-						{isBlurOrNone && (
-							<Icon size="large" icon={element === VirtualBackgroundType.BLUR ? 'Blur' : 'Slash'} />
+						{!isBlurOrNone ? (
+							<StyledImg src={virtualBackgroundImages[element]} alt={`${element}`} />
+						) : (
+							<>
+								<Icon
+									size="large"
+									icon={element === VirtualBackgroundType.BLUR ? 'Blur' : 'Slash'}
+								/>
+								<Text>{elementLabel}</Text>
+							</>
 						)}
-						{isBlurOrNone && <Text>{elementLabel}</Text>}
 					</PictureContainer>
 				);
 			}),
