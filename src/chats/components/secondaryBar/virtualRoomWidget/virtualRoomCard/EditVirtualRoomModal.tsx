@@ -3,14 +3,25 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import React, { FC, useCallback } from 'react';
+import React, { FC, useCallback, useMemo, useRef, useState } from 'react';
 
-import { CreateSnackbarFn, Modal, Text, useSnackbar } from '@zextras/carbonio-design-system';
+import {
+	Container,
+	CreateSnackbarFn,
+	Input,
+	Modal,
+	Text,
+	useSnackbar
+} from '@zextras/carbonio-design-system';
+import { map } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 import { RoomsApi } from '../../../../../network';
 import { getRoomNameSelector } from '../../../../../store/selectors/RoomsSelectors';
 import useStore from '../../../../../store/Store';
+import { AddMemberFields } from '../../../../../types/network/models/roomBeTypes';
+import { ContactSelected } from '../../../creationModal/ChatCreationContactsSelection';
+import ModeratorsContactsSelection from '../ModeratorsContactsSelection';
 
 type deleteVirtualRoomModalProps = {
 	showModal: boolean;
@@ -32,12 +43,13 @@ const EditVirtualRoomModal: FC<deleteVirtualRoomModalProps> = ({
 	const modalTitle = t('', `Edit ${roomName} Virtual Room`, {
 		roomName
 	});
+	const namePlaceholder = t('', "Room's name*");
 	const editNameDescription = t(
-		'',
+		'meeting.virtual.modal.description',
 		'Give to this Room a recognizable name in order to let your attendees know what they are expecting to meet about.'
 	);
 	const editModeratorsDescription = t(
-		'',
+		'meeting.virtual.modal.moderator.description',
 		'You will moderate this Room. The additional moderator will be added as collaborators with the same privileges.'
 	);
 	const editVirtualRoomLabel = t('action.edit', 'Edit');
@@ -48,11 +60,29 @@ const EditVirtualRoomModal: FC<deleteVirtualRoomModalProps> = ({
 		'Something went wrong. Please retry'
 	);
 
+	const [newName, setNewName] = useState<string>(roomName);
+	const [contactsSelected, setContactsSelected] = useState<ContactSelected>({});
+
+	const contactInputRef = useRef<HTMLInputElement>(null);
+
+	const onNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+		if (e.target.value.length <= 129) setNewName(e.target.value);
+	}, []);
+
+	const nameError = useMemo(() => newName.length === 0 || newName.length > 128, [newName]);
+
 	const createSnackbar: CreateSnackbarFn = useSnackbar();
 
-	const handleDeleteRoom = useCallback(() => {
-		// TODO: change name and moderators
-		RoomsApi.updateRoom(roomId, { name: roomName })
+	const handleEditRoom = useCallback(() => {
+		const newOwnersToAdd: AddMemberFields[] = map(contactsSelected, (contactChip) => ({
+			userId: contactChip.id,
+			owner: true,
+			historyCleared: false
+		}));
+		Promise.all([
+			RoomsApi.updateRoom(roomId, { name: newName }),
+			RoomsApi.addRoomMembers(roomId, newOwnersToAdd)
+		])
 			.then(() => {
 				setShowModal(false);
 				createSnackbar({
@@ -69,21 +99,46 @@ const EditVirtualRoomModal: FC<deleteVirtualRoomModalProps> = ({
 					hideButton: true
 				});
 			});
-	}, [createSnackbar, editRoomSnackbar, errorSnackbar, roomId, roomName, setShowModal]);
+	}, [
+		contactsSelected,
+		createSnackbar,
+		editRoomSnackbar,
+		errorSnackbar,
+		newName,
+		roomId,
+		setShowModal
+	]);
+
+	const disableEditButton = useMemo(() => nameError, [nameError]);
 
 	return (
 		<Modal
+			ref={modalRef}
+			size="medium"
 			title={modalTitle}
 			open={showModal}
-			onConfirm={handleDeleteRoom}
+			onConfirm={handleEditRoom}
 			confirmLabel={editVirtualRoomLabel}
+			confirmDisabled={disableEditButton}
 			onClose={() => setShowModal(false)}
 			showCloseIcon
 			closeIconTooltip={closeLabel}
-			ref={modalRef}
 		>
-			<Text overflow="break-word">{editNameDescription}</Text>
-			<Text overflow="break-word">{editModeratorsDescription}</Text>
+			<Container gap="1rem">
+				<Text overflow="break-word">{editNameDescription}</Text>
+				<Input
+					label={namePlaceholder}
+					value={newName}
+					onChange={onNameChange}
+					hasError={nameError}
+				/>
+				<Text overflow="break-word">{editModeratorsDescription}</Text>
+				<ModeratorsContactsSelection
+					contactsSelected={contactsSelected}
+					setContactSelected={setContactsSelected}
+					inputRef={contactInputRef}
+				/>
+			</Container>
 		</Modal>
 	);
 };
