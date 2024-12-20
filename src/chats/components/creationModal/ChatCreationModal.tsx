@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { ReactElement, useCallback, useMemo, useState } from 'react';
 
 import {
 	CreateSnackbarFn,
@@ -16,18 +16,15 @@ import {
 import { find, map, size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
-import ChatCreationContactsSelection, { ContactSelected } from './ChatCreationContactsSelection';
 import ChatCreationTitleInput from './ChatCreationTitleInput';
 import useRouting from '../../../hooks/useRouting';
 import { RoomsApi } from '../../../network';
+import { getCapability } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { MemberBe, RoomType } from '../../../types/network/models/roomBeTypes';
 import { AddRoomResponse } from '../../../types/network/responses/roomsResponses';
-
-export type contactChip = {
-	id: string;
-	owner: boolean;
-};
+import { CapabilityType } from '../../../types/store/SessionTypes';
+import ContactsSelector, { ContactsSelected } from '../ContactsSelector';
 
 const ChatCreationModal = ({
 	open,
@@ -52,14 +49,21 @@ const ChatCreationModal = ({
 		'settings.profile.errorGenericResponse',
 		'Something went Wrong. Please Retry'
 	);
-	const setPlaceholderRoom = useStore((state) => state.setPlaceholderRoom);
-
-	const inputRef = useRef<HTMLInputElement>(null);
-
-	const [chatType, setChatType] = useState<RoomType.ONE_TO_ONE | RoomType.GROUP>(
-		RoomType.ONE_TO_ONE
+	const listTextLabel = t(
+		'modal.creation.contactList',
+		'Select more than an address to create a Group'
 	);
-	const [contactsSelected, setContactsSelected] = useState<ContactSelected>({});
+	const inputPlaceholder = t('modal.creation.inputPlaceholder', 'Start typing or pick an address');
+	const addUserLimitReachedLabel = t(
+		'modal.creation.addUserLimit.limitReached',
+		'You have selected the maximum number of members for a group'
+	);
+
+	const setPlaceholderRoom = useStore((state) => state.setPlaceholderRoom);
+	const maxMembers =
+		(useStore((store) => getCapability(store, CapabilityType.MAX_GROUP_MEMBERS)) as number) ?? 0;
+
+	const [contactsSelected, setContactsSelected] = useState<ContactsSelected>([]);
 	const [title, setTitle] = useState<string>(titlePlaceholder);
 	const [topic, setTopic] = useState<string>('');
 	const [isPending, setIsPending] = useState<boolean>(false);
@@ -68,26 +72,23 @@ const ChatCreationModal = ({
 
 	const { goToChatsPage } = useRouting();
 
-	useEffect(() => {
-		if (size(contactsSelected) > 1) {
-			setChatType(RoomType.GROUP);
-		} else {
-			setChatType(RoomType.ONE_TO_ONE);
-		}
-		if (open && inputRef.current) {
-			inputRef.current.focus();
-		}
-	}, [contactsSelected, open]);
+	const chatType = useMemo(
+		() => (size(contactsSelected) > 1 ? RoomType.GROUP : RoomType.ONE_TO_ONE),
+		[contactsSelected]
+	);
 
 	const modalTitle = useMemo(
 		() => (chatType === RoomType.ONE_TO_ONE ? newChatLabel : newGroupLabel),
 		[chatType, newChatLabel, newGroupLabel]
 	);
+
 	const createButtonLabel = useMemo(
 		() => (chatType === RoomType.ONE_TO_ONE ? createLabel : newGroupLabel),
 		[chatType, createLabel, newGroupLabel]
 	);
+
 	const titleError = useMemo(() => title.length === 0 || title.length > 128, [title]);
+
 	const topicError = useMemo(() => topic.length > 256, [topic]);
 
 	const disabledCreateButton = useMemo(() => {
@@ -98,8 +99,7 @@ const ChatCreationModal = ({
 	}, [chatType, titleError, topicError, contactsSelected]);
 
 	const onModalClose = useCallback(() => {
-		setChatType(RoomType.ONE_TO_ONE);
-		setContactsSelected({});
+		setContactsSelected([]);
 		setTitle(titlePlaceholder);
 		setTopic('');
 		onClose();
@@ -148,9 +148,9 @@ const ChatCreationModal = ({
 	);
 
 	const onCreate = useCallback(() => {
-		const ids: MemberBe[] = map(contactsSelected, (chip) => ({
-			userId: chip.id,
-			owner: chip.owner
+		const ids: MemberBe[] = map(contactsSelected, (contact) => ({
+			userId: contact.id,
+			owner: !!contact.owner
 		}));
 		if (chatType === RoomType.ONE_TO_ONE) {
 			onCreateOneToOne(ids[0].userId);
@@ -176,11 +176,20 @@ const ChatCreationModal = ({
 		errorLabelDisabled
 	]);
 
-	useEffect(() => {
-		if (inputRef.current) {
-			inputRef.current.value = '';
+	const inputDescription = useMemo(() => {
+		if (size(contactsSelected) > 1) {
+			if (maxMembers - size(contactsSelected) - 1 > 0)
+				return t('modal.creation.addUserLimit.users', {
+					defaultValue:
+						maxMembers - size(contactsSelected) - 1 >= 2
+							? `You can add other ${maxMembers - size(contactsSelected) - 1} members`
+							: 'You can add one last member',
+					count: maxMembers - size(contactsSelected) - 1
+				});
+			return addUserLimitReachedLabel;
 		}
-	}, [contactsSelected]);
+		return undefined;
+	}, [contactsSelected, t, maxMembers, addUserLimitReachedLabel]);
 
 	return (
 		<Modal
@@ -199,12 +208,16 @@ const ChatCreationModal = ({
 				{descriptionLabel}
 			</Text>
 			<Padding bottom="medium" />
-			<ChatCreationContactsSelection
+			<ContactsSelector
 				contactsSelected={contactsSelected}
 				setContactSelected={setContactsSelected}
-				isCreationModal
-				inputRef={inputRef}
+				inputPlaceholder={inputPlaceholder}
+				inputDescription={inputDescription}
+				maxSelectionNumber={maxMembers - 1}
+				canSelectOwnership={size(contactsSelected) > 1}
 			/>
+			<Padding bottom="large" />
+			<Text color="gray1">{listTextLabel}</Text>
 			{chatType === RoomType.GROUP && (
 				<ChatCreationTitleInput
 					title={title}
