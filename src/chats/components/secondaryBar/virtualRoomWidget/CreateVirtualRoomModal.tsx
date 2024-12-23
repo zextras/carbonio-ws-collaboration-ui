@@ -45,7 +45,7 @@ const CreateVirtualRoomModal: FC<CreateVirtualRoomModalProps> = ({
 
 	const closeLabel = t('action.close', 'Close');
 	const createTooltip = t('meeting.virtual.createTooltip', 'Create new Virtual Room');
-	const virtualRoomNameInput = t('meeting.virtual.creationInput', 'New Virtual Room’s name*');
+	const virtualRoomNameInput = t('meeting.virtual.creationInput', 'Virtual Room’s name');
 	const invalidNameString = t('meeting.virtual.invalidNameTooltip', 'Invalid name');
 	const invalidNameCaption = t(
 		'meeting.virtual.modal.invalidNameCaption',
@@ -61,13 +61,16 @@ const CreateVirtualRoomModal: FC<CreateVirtualRoomModalProps> = ({
 	);
 	const newRoomModalDescription = t(
 		'meeting.virtual.modal.description',
-		'Give to this Room a recognizable name in order to let your attendees know what they are expecting to meet about.'
+		'Give this Virtual Room a recognizable name so that your attendees know what they are expecting to meet about.'
 	);
 	const addModeratorsDescription = t(
 		'meeting.virtual.modal.moderator.description',
-		'You will moderate this Room. The additional moderator will be added as collaborators with the same privileges.'
+		'You will moderate this Virtual Room. The additional moderator will be added as collaborators with the same privileges.'
 	);
-	const chipInputPlaceholder = t('meeting.virtual.modal.moderator.input', `Room's moderators`);
+	const chipInputPlaceholder = t(
+		'meeting.virtual.modal.moderator.input',
+		`Virtual Room’s moderators`
+	);
 
 	const [nameError, setNameError] = useState(false);
 	const [canCreateVirtualRoom, setCanCreateVirtualRoom] = useState(false);
@@ -155,7 +158,7 @@ const CreateVirtualRoomModal: FC<CreateVirtualRoomModalProps> = ({
 			</Text>
 			<Padding bottom="1rem" />
 			<Input
-				label={virtualRoomNameInput}
+				label={`${virtualRoomNameInput}*`}
 				inputRef={textRef}
 				onChange={handleOnChangeInput}
 				hasError={nameError}

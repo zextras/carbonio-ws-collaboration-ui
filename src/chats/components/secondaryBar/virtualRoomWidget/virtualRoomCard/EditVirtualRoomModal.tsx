@@ -46,13 +46,16 @@ const EditVirtualRoomModal: FC<deleteVirtualRoomModalProps> = ({
 	const namePlaceholder = t('', "Room's name*");
 	const editNameDescription = t(
 		'meeting.virtual.modal.description',
-		'Give to this Room a recognizable name in order to let your attendees know what they are expecting to meet about.'
+		'Give this Virtual Room a recognizable name so that your attendees know what they are expecting to meet about.'
 	);
 	const editModeratorsDescription = t(
 		'meeting.virtual.modal.moderator.description',
-		'You will moderate this Room. The additional moderator will be added as collaborators with the same privileges.'
+		'You will moderate this Virtual Room. The additional moderator will be added as collaborators with the same privileges.'
 	);
-	const chipInputPlaceholder = t('meeting.virtual.modal.moderator.input', `Room's moderators`);
+	const chipInputPlaceholder = t(
+		'meeting.virtual.modal.moderator.input',
+		`Virtual Room’s moderators`
+	);
 	const editVirtualRoomLabel = t('action.edit', 'Edit');
 	const closeLabel = t('action.close', 'Close');
 	const editRoomSnackbar = t('', 'Virtual Room edited successfully');

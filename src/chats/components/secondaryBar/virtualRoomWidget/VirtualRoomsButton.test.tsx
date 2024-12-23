@@ -14,11 +14,6 @@ import { RoomsApiToSpy, spyOnRoomsApi } from '../../../../tests/mocks/network';
 import { mockSearchUsersByFeatureRequest } from '../../../../tests/mocks/SearchUsersByFeature';
 import { setup } from '../../../../tests/test-utils';
 
-const createNewRoom = 'Create new Room';
-const virtualRoomName = 'New Virtual Room';
-const createNewVirtualRoom = 'Create new Virtual Room';
-const newVirtualRoomsName = 'New Virtual Room’s name*';
-
 const sessionUser = createMockUser({ id: 'sessionId', name: 'Session User' });
 
 const user1 = createMockUser({ id: 'user1', name: 'User 1' });
@@ -40,17 +35,17 @@ describe('VirtualRoomsButton', () => {
 		const button = screen.getByRole('button');
 		await user.click(button);
 
-		const createButton = await screen.findByRole('button', { name: createNewRoom });
+		const createButton = await screen.findByText('Create new virtual room');
 		expect(createButton).toBeVisible();
 
 		await user.click(createButton);
 
-		const modalTitle = await screen.findByText(createNewVirtualRoom);
+		const modalTitle = await screen.findByText('Create new Virtual Room');
 		expect(modalTitle).toBeInTheDocument();
 
-		const textArea = await screen.findByText(newVirtualRoomsName);
+		const textArea = await screen.findByText('Virtual Room’s name*');
 
-		await user.type(textArea, virtualRoomName);
+		await user.type(textArea, 'test');
 
 		const createRoomButton = screen.getByRole('button', { name: 'create' });
 		expect(createRoomButton).toBeEnabled();

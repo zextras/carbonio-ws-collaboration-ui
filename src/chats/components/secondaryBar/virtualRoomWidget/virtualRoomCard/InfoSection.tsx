@@ -5,7 +5,7 @@
  */
 import React, { FC, useMemo } from 'react';
 
-import { Avatar, Row, Shimmer, Text } from '@zextras/carbonio-design-system';
+import { Avatar, Row, Shimmer, Text, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -98,6 +98,15 @@ const InfoSection: FC<InfoSectionProps> = ({
 		otherOneModeratorLabel
 	]);
 
+	const moderatorsNameList = useMemo(() => {
+		if (moderatorsList.length > 1) {
+			return moderatorsList
+				.map((moderator) => getUserName(useStore.getState(), moderator.userId))
+				.join(', ');
+		}
+		return '';
+	}, [moderatorsList]);
+
 	return (
 		<CustomRow
 			takeAvailableSpace
@@ -122,9 +131,11 @@ const InfoSection: FC<InfoSectionProps> = ({
 				<Text size="small" overflow="ellipsis">
 					{ownerName}
 				</Text>
-				<Text size="extrasmall" weight="light" color="gray1">
-					{moderatorLabel}
-				</Text>
+				<Tooltip label={moderatorsNameList} disabled={moderatorsList.length <= 1}>
+					<Text size="extrasmall" weight="light" color="gray1">
+						{moderatorLabel}
+					</Text>
+				</Tooltip>
 			</Row>
 		</CustomRow>
 	);
