@@ -99,7 +99,7 @@ const ListParticipant = ({
 								size="large"
 								disabled={!selected}
 								onClick={() => updateOwner(item.id)}
-							></Button>
+							/>
 						</Tooltip>
 					</Container>
 				)}

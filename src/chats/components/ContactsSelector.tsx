@@ -148,8 +148,8 @@ const ContactsSelector = ({
 		setLoading(true);
 		searchUsersByFeatureRequest(inputRef.current?.value ?? '')
 			.then((response: SearchUsersByFeatureSoapResponse) => {
-				setLoading(false);
 				setSearchResult(filterResponse(response));
+				setLoading(false);
 			})
 			.catch(() => {
 				setLoading(false);
