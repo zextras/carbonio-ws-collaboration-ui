@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import React, { FC, useCallback, useMemo, useRef, useState } from 'react';
+import React, { FC, useCallback, useMemo, useState } from 'react';
 
 import {
 	Container,
@@ -17,11 +17,10 @@ import { map } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 import { RoomsApi } from '../../../../../network';
-import { getRoomNameSelector } from '../../../../../store/selectors/RoomsSelectors';
+import { getOwners, getRoomNameSelector } from '../../../../../store/selectors/RoomsSelectors';
 import useStore from '../../../../../store/Store';
 import { AddMemberFields } from '../../../../../types/network/models/roomBeTypes';
-import { ContactSelected } from '../../../creationModal/ChatCreationContactsSelection';
-import ModeratorsContactsSelection from '../ModeratorsContactsSelection';
+import ContactsSelector, { ContactsSelected } from '../../../ContactsSelector';
 
 type deleteVirtualRoomModalProps = {
 	showModal: boolean;
@@ -37,6 +36,7 @@ const EditVirtualRoomModal: FC<deleteVirtualRoomModalProps> = ({
 	roomId
 }) => {
 	const roomName = useStore((state) => getRoomNameSelector(state, roomId));
+	const owners = useStore((state) => getOwners(state, roomId));
 
 	const [t] = useTranslation();
 	// TODO: translation keys
@@ -52,6 +52,7 @@ const EditVirtualRoomModal: FC<deleteVirtualRoomModalProps> = ({
 		'meeting.virtual.modal.moderator.description',
 		'You will moderate this Room. The additional moderator will be added as collaborators with the same privileges.'
 	);
+	const chipInputPlaceholder = t('meeting.virtual.modal.moderator.input', `Room's moderators`);
 	const editVirtualRoomLabel = t('action.edit', 'Edit');
 	const closeLabel = t('action.close', 'Close');
 	const editRoomSnackbar = t('', 'Virtual Room edited successfully');
@@ -61,9 +62,7 @@ const EditVirtualRoomModal: FC<deleteVirtualRoomModalProps> = ({
 	);
 
 	const [newName, setNewName] = useState<string>(roomName);
-	const [contactsSelected, setContactsSelected] = useState<ContactSelected>({});
-
-	const contactInputRef = useRef<HTMLInputElement>(null);
+	const [contactsSelected, setContactsSelected] = useState<ContactsSelected>([]);
 
 	const onNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
 		if (e.target.value.length <= 129) setNewName(e.target.value);
@@ -133,10 +132,11 @@ const EditVirtualRoomModal: FC<deleteVirtualRoomModalProps> = ({
 					hasError={nameError}
 				/>
 				<Text overflow="break-word">{editModeratorsDescription}</Text>
-				<ModeratorsContactsSelection
+				<ContactsSelector
 					contactsSelected={contactsSelected}
 					setContactSelected={setContactsSelected}
-					inputRef={contactInputRef}
+					currentMembers={owners}
+					chipInputPlaceholder={chipInputPlaceholder}
 				/>
 			</Container>
 		</Modal>

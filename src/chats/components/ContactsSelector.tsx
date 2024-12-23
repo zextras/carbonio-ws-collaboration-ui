@@ -43,6 +43,7 @@ type ContactsSelectorProps = {
 	canSelectOwnership?: boolean;
 	maxSelectionNumber?: number;
 	currentMembers?: Member[];
+	chipInputPlaceholder?: string;
 };
 
 const ContactsSelector = ({
@@ -50,7 +51,8 @@ const ContactsSelector = ({
 	setContactSelected,
 	canSelectOwnership = false,
 	maxSelectionNumber,
-	currentMembers = []
+	currentMembers = [],
+	chipInputPlaceholder
 }: ContactsSelectorProps): ReactElement => {
 	const [t] = useTranslation();
 	const inputPlaceholder = t('modal.creation.inputPlaceholder', 'Start typing or pick an address');
@@ -146,9 +148,10 @@ const ContactsSelector = ({
 		setLoading(true);
 		searchUsersByFeatureRequest(inputRef.current?.value ?? '')
 			.then((response: SearchUsersByFeatureSoapResponse) => {
+				setLoading(false);
 				setSearchResult(filterResponse(response));
 			})
-			.finally(() => {
+			.catch(() => {
 				setLoading(false);
 			});
 	}, [filterResponse]);
@@ -232,7 +235,7 @@ const ContactsSelector = ({
 				ref={inputRef}
 				data-testid="chip_input_contact_selector"
 				placeholder={inputPlaceholder}
-				description={inputDescription ?? ''}
+				description={chipInputPlaceholder ?? inputDescription ?? ''}
 				inputRef={inputRef}
 				onInputType={searchContacts}
 				value={chips}

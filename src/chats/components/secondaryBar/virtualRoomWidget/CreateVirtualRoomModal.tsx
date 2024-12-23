@@ -17,7 +17,6 @@ import {
 import { map, size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
-import ModeratorsContactsSelection from './ModeratorsContactsSelection';
 import { valueItem } from '../../../../integrations/virtualRoomIntegration/SelectVirtualRoomWidget';
 import { RoomsApi } from '../../../../network';
 import { getMeetingIdFromRoom } from '../../../../store/selectors/RoomsSelectors';
@@ -25,7 +24,7 @@ import useStore from '../../../../store/Store';
 import { MemberBe } from '../../../../types/network/models/roomBeTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
 import { createMeetingLinkFromOutside } from '../../../../utils/MeetingsUtils';
-import { ContactSelected } from '../../creationModal/ChatCreationContactsSelection';
+import ContactsSelector, { ContactsSelected } from '../../ContactsSelector';
 
 type CreateVirtualRoomModalProps = {
 	toggleModal: () => void;
@@ -68,13 +67,13 @@ const CreateVirtualRoomModal: FC<CreateVirtualRoomModalProps> = ({
 		'meeting.virtual.modal.moderator.description',
 		'You will moderate this Room. The additional moderator will be added as collaborators with the same privileges.'
 	);
+	const chipInputPlaceholder = t('meeting.virtual.modal.moderator.input', `Room's moderators`);
 
 	const [nameError, setNameError] = useState(false);
 	const [canCreateVirtualRoom, setCanCreateVirtualRoom] = useState(false);
-	const [contactsSelected, setContactsSelected] = useState<ContactSelected>({});
+	const [contactsSelected, setContactsSelected] = useState<ContactsSelected>([]);
 
 	const textRef = useRef<HTMLInputElement>(null);
-	const contactInputRef = useRef<HTMLInputElement>(null);
 
 	const createSnackbar: CreateSnackbarFn = useSnackbar();
 
@@ -97,7 +96,7 @@ const CreateVirtualRoomModal: FC<CreateVirtualRoomModalProps> = ({
 						link: createMeetingLinkFromOutside(getMeetingIdFromRoom(useStore.getState(), resp.id))
 					});
 				}
-				setContactsSelected({});
+				setContactsSelected([]);
 				setCanCreateVirtualRoom(false);
 				setShowCreationModal(false);
 			})
@@ -134,7 +133,7 @@ const CreateVirtualRoomModal: FC<CreateVirtualRoomModalProps> = ({
 
 	const handleCloseModal = useCallback(() => {
 		toggleModal();
-		setContactsSelected({});
+		setContactsSelected([]);
 	}, [toggleModal]);
 
 	return (
@@ -166,10 +165,10 @@ const CreateVirtualRoomModal: FC<CreateVirtualRoomModalProps> = ({
 				{addModeratorsDescription}
 			</Text>
 			<Padding bottom="1rem" />
-			<ModeratorsContactsSelection
+			<ContactsSelector
 				contactsSelected={contactsSelected}
 				setContactSelected={setContactsSelected}
-				inputRef={contactInputRef}
+				chipInputPlaceholder={chipInputPlaceholder}
 			/>
 		</Modal>
 	);

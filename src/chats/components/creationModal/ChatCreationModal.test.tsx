@@ -46,7 +46,7 @@ const testRoom: RoomBe = createMockRoom({
 	members: [createMockMember({ userId: 'myId' }), createMockMember({ userId: user1.id })]
 });
 
-describe.skip('Chat Creation Modal', () => {
+describe('Chat Creation Modal', () => {
 	test('All elements are rendered', async () => {
 		mockSearchUsersByFeatureRequest.mockReturnValueOnce([user1]);
 		setup(<ChatCreationModal open onClose={jest.fn()} />);
@@ -99,13 +99,13 @@ describe.skip('Chat Creation Modal', () => {
 		mockSearchUsersByFeatureRequest.mockReturnValueOnce([user1, user2]);
 
 		// Add user1 and user2 chips
-		const chipInput = await screen.findByTestId('chip_input_creation_modal');
+		const chipInput = await screen.findByTestId('chip_input_contact_selector');
 		await user.type(chipInput, user1.displayName[0]);
 		const user1Component = await screen.findByText(user1.displayName);
 		await user.click(user1Component);
 
 		// the state here changes, in fact now there's a chip inside the input, so there's need to focus again on it
-		const chipInput1 = await screen.findByTestId('chip_input_creation_modal');
+		const chipInput1 = await screen.findByTestId('chip_input_contact_selector');
 		await user.type(chipInput1, user2.displayName[0]);
 		const user2Component = await screen.findByText(user2.displayName);
 		await user.click(user2Component);
@@ -132,11 +132,11 @@ describe.skip('Chat Creation Modal', () => {
 		mockSearchUsersByFeatureRequest.mockReturnValueOnce([user1, user2]);
 
 		// Add user1 and user2 chips
-		const chipInput = await screen.findByTestId('chip_input_creation_modal');
+		const chipInput = await screen.findByTestId('chip_input_contact_selector');
 		await user.type(chipInput, user1.displayName[0]);
 		const user1Component = await screen.findByText(user1.displayName);
 		await user.click(user1Component);
-		const chipInput1 = await screen.findByTestId('chip_input_creation_modal');
+		const chipInput1 = await screen.findByTestId('chip_input_contact_selector');
 		await user.type(chipInput1, user2.displayName[0]);
 		const user2Component = await screen.findByText(user2.displayName);
 		await user.click(user2Component);
@@ -158,7 +158,7 @@ describe.skip('Chat Creation Modal', () => {
 		const { user } = setup(<ChatCreationModal open onClose={jest.fn()} />);
 
 		// Add user1 and user2 chips
-		const chipInput = await screen.findByTestId('chip_input_creation_modal');
+		const chipInput = await screen.findByTestId('chip_input_contact_selector');
 		await user.type(chipInput, user1.displayName[0]);
 		const user1Component = await screen.findByText(user1.displayName);
 		await user.click(user1Component);
@@ -182,7 +182,7 @@ describe.skip('Chat Creation Modal', () => {
 		mockSearchUsersByFeatureRequest.mockReturnValueOnce([user1, user2]);
 		const { user } = setup(<ChatCreationModal open onClose={jest.fn()} />);
 		// Add user1 and user2 chips
-		const chipInput = await screen.findByTestId('chip_input_creation_modal');
+		const chipInput = await screen.findByTestId('chip_input_contact_selector');
 		await user.type(chipInput, user1.displayName[0]);
 		const user1Component = await screen.findByText(user1.displayName);
 		await user.click(user1Component);
@@ -206,7 +206,7 @@ describe.skip('Chat Creation Modal', () => {
 		const { user } = setup(<ChatCreationModal open onClose={jest.fn()} />);
 
 		// Add user1 and user2 chips
-		const chipInput = await screen.findByTestId('chip_input_creation_modal');
+		const chipInput = await screen.findByTestId('chip_input_contact_selector');
 		await user.type(chipInput, user1.displayName[0]);
 		const user1Component = await screen.findByText(user1.displayName);
 		await user.click(user1Component);
@@ -245,7 +245,7 @@ describe.skip('Chat Creation Modal', () => {
 		act(() => result.current.setCapabilities(createMockCapabilityList({ maxGroupMembers: 3 })));
 		mockSearchUsersByFeatureRequest.mockReturnValueOnce([user1, user2, user3]);
 		const { user } = setup(<ChatCreationModal open onClose={jest.fn()} />);
-		const chipInput = await screen.findByTestId('chip_input_creation_modal');
+		const chipInput = await screen.findByTestId('chip_input_contact_selector');
 		await user.type(chipInput, user1.displayName[0]);
 		const user1Component = await screen.findByText(user1.displayName);
 		await user.click(user1Component);
@@ -266,7 +266,7 @@ describe.skip('Chat Creation Modal', () => {
 		act(() => result.current.setCapabilities(createMockCapabilityList({ maxGroupMembers: 4 })));
 		mockSearchUsersByFeatureRequest.mockReturnValueOnce([user1, user2, user3]);
 		const { user } = setup(<ChatCreationModal open onClose={jest.fn()} />);
-		const chipInput = await screen.findByTestId('chip_input_creation_modal');
+		const chipInput = await screen.findByTestId('chip_input_contact_selector');
 		await user.type(chipInput, user1.displayName[0]);
 		const user1Component = await screen.findByText(user1.displayName);
 		await user.click(user1Component);
@@ -287,7 +287,7 @@ describe.skip('Chat Creation Modal', () => {
 		mockSearchUsersByFeatureRequest.mockReturnValueOnce([user1, user2]);
 
 		// Add users
-		const chipInput = await screen.findByTestId('chip_input_creation_modal');
+		const chipInput = await screen.findByTestId('chip_input_contact_selector');
 		await user.type(chipInput, user1.displayName[0]);
 		const user1Component = await screen.findByText(user1.displayName);
 		await user.click(user1Component);
