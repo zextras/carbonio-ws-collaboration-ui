@@ -4,24 +4,25 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { Dispatch, FC, SetStateAction, useCallback, useEffect, useRef } from 'react';
+import React, { Dispatch, FC, SetStateAction, useCallback, useMemo } from 'react';
 
 import { Button, Checkbox, Container, Modal, Tooltip } from '@zextras/carbonio-design-system';
 import { size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
+import { getCapability } from '../../../../store/selectors/SessionSelectors';
+import useStore from '../../../../store/Store';
 import { Member } from '../../../../types/store/RoomTypes';
-import ChatCreationContactsSelection, {
-	ContactSelected
-} from '../../creationModal/ChatCreationContactsSelection';
+import { CapabilityType } from '../../../../types/store/SessionTypes';
+import ContactsSelector, { ContactsSelected } from '../../ContactsSelector';
 
 type AddNewMemberProps = {
 	addNewMemberModalOpen: boolean;
 	addNewMember: () => void;
 	closeModal: () => void;
 	members: Member[] | undefined;
-	contactsSelected: ContactSelected;
-	setContactSelected: Dispatch<SetStateAction<ContactSelected>>;
+	contactsSelected: ContactsSelected;
+	setContactsSelected: Dispatch<SetStateAction<ContactsSelected>>;
 	showHistory: boolean;
 	setShowHistory: Dispatch<SetStateAction<boolean>>;
 	label: string;
@@ -33,7 +34,7 @@ const AddNewMemberModal: FC<AddNewMemberProps> = ({
 	closeModal,
 	members,
 	contactsSelected,
-	setContactSelected,
+	setContactsSelected,
 	showHistory,
 	setShowHistory,
 	label
@@ -50,40 +51,42 @@ const AddNewMemberModal: FC<AddNewMemberProps> = ({
 	const addNewMemberButtonLabel = t('action.addNewMembers', 'Add new members');
 	const closeLabel = t('action.close', 'Close');
 
-	const inputRef = useRef<HTMLInputElement>(null);
+	const maxMembers =
+		(useStore((store) => getCapability(store, CapabilityType.MAX_GROUP_MEMBERS)) as number) ?? 0;
 
-	const onClickCheckbox = useCallback(
-		() => setShowHistory((check) => !check),
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[]
-	);
+	const onClickCheckbox = useCallback(() => setShowHistory((check) => !check), [setShowHistory]);
 
-	useEffect(() => {
-		if (inputRef.current) {
-			inputRef.current.value = '';
-		}
-	}, [contactsSelected]);
-
-	const modalFooter = (
-		<Container orientation="horizontal" mainAlignment="space-between">
-			<Container crossAlignment="flex-start" width="fit">
-				<Checkbox
-					label={showConversationHistoryLabel}
-					value={showHistory}
-					onClick={onClickCheckbox}
-				/>
-			</Container>
-			<Tooltip label={disabledButtonTooltip} disabled={size(contactsSelected) !== 0}>
-				<Container crossAlignment="flex-end" width="fit">
-					<Button
-						label={addNewMemberButtonLabel}
-						onClick={addNewMember}
-						disabled={size(contactsSelected) === 0}
-						data-testid="add_new_member_button"
+	const modalFooter = useMemo(
+		() => (
+			<Container orientation="horizontal" mainAlignment="space-between">
+				<Container crossAlignment="flex-start" width="fit">
+					<Checkbox
+						label={showConversationHistoryLabel}
+						value={showHistory}
+						onClick={onClickCheckbox}
 					/>
 				</Container>
-			</Tooltip>
-		</Container>
+				<Tooltip label={disabledButtonTooltip} disabled={size(contactsSelected) !== 0}>
+					<Container crossAlignment="flex-end" width="fit">
+						<Button
+							label={addNewMemberButtonLabel}
+							onClick={addNewMember}
+							disabled={size(contactsSelected) === 0}
+							data-testid="add_new_member_button"
+						/>
+					</Container>
+				</Tooltip>
+			</Container>
+		),
+		[
+			addNewMember,
+			addNewMemberButtonLabel,
+			contactsSelected,
+			disabledButtonTooltip,
+			onClickCheckbox,
+			showHistory,
+			showConversationHistoryLabel
+		]
 	);
 
 	return (
@@ -98,14 +101,13 @@ const AddNewMemberModal: FC<AddNewMemberProps> = ({
 			closeIconTooltip={closeLabel}
 			data-testid="add_member_modal"
 		>
-			<Container>
-				<ChatCreationContactsSelection
-					contactsSelected={contactsSelected}
-					setContactSelected={setContactSelected}
-					members={members}
-					inputRef={inputRef}
-				/>
-			</Container>
+			<ContactsSelector
+				contactsSelected={contactsSelected}
+				setContactSelected={setContactsSelected}
+				maxSelectionNumber={maxMembers - size(members)}
+				canSelectOwnership
+				currentMembers={members}
+			/>
 		</Modal>
 	);
 };

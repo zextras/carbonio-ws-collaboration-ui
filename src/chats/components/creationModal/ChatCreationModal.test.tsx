@@ -57,7 +57,7 @@ describe.skip('Chat Creation Modal', () => {
 			'Chats are one-to-one conversations that help you to stay in touch with your contacts. You can create a Group by including more than two addresses'
 		);
 		expect(description).toBeInTheDocument();
-		const list = await screen.findByTestId('list_creation_modal');
+		const list = await screen.findByTestId('list_contacts');
 		expect(list).toBeInTheDocument();
 		const footerButton = await screen.findByRole('button', { name: /create/i });
 		expect(footerButton).toBeInTheDocument();

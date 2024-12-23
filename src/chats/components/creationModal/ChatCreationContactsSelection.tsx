@@ -346,7 +346,7 @@ const ChatCreationContactsSelection = ({
 			);
 		}
 		if (!error) {
-			return <List data-testid="list_creation_modal">{items}</List>;
+			return <List data-testid="list_contacts">{items}</List>;
 		}
 		return (
 			<CustomContainer padding="large">

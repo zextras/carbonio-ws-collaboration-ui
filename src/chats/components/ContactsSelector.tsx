@@ -26,7 +26,7 @@ import {
 	Spinner,
 	Text
 } from '@zextras/carbonio-design-system';
-import { difference, differenceBy, find, map, size, union } from 'lodash';
+import { difference, differenceBy, filter, find, map, size, union } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 import ListParticipant from './creationModal/ListParticipant';
@@ -35,25 +35,29 @@ import {
 	ContactInfo,
 	SearchUsersByFeatureSoapResponse
 } from '../../types/network/soap/searchUsersByFeatureRequest';
+import { Member } from '../../types/store/RoomTypes';
 
 type ContactsSelectorProps = {
 	contactsSelected: ContactsSelected;
 	setContactSelected: Dispatch<SetStateAction<ContactsSelected>>;
 	canSelectOwnership?: boolean;
-	inputPlaceholder?: string;
-	inputDescription?: string;
 	maxSelectionNumber?: number;
+	currentMembers?: Member[];
 };
 
 const ContactsSelector = ({
 	contactsSelected,
 	setContactSelected,
 	canSelectOwnership = false,
-	inputPlaceholder,
-	inputDescription,
-	maxSelectionNumber
+	maxSelectionNumber,
+	currentMembers = []
 }: ContactsSelectorProps): ReactElement => {
 	const [t] = useTranslation();
+	const inputPlaceholder = t('modal.creation.inputPlaceholder', 'Start typing or pick an address');
+	const addUserLimitReachedLabel = t(
+		'modal.creation.addUserLimit.limitReached',
+		'You have selected the maximum number of members for a group'
+	);
 	const noMatchLabel = t(
 		'participantsList.noMatch.gal',
 		'There are no items that match this search in your company.'
@@ -88,6 +92,20 @@ const ContactsSelector = ({
 		[setContactSelected]
 	);
 
+	const inputDescription = useMemo(() => {
+		if (!maxSelectionNumber) return undefined;
+		const placesLeft = maxSelectionNumber - size(contactsSelected);
+		if (placesLeft > 0)
+			return t('modal.creation.addUserLimit.users', {
+				defaultValue:
+					placesLeft >= 2
+						? `You can add other ${placesLeft} members`
+						: 'You can add one last member',
+				count: placesLeft
+			});
+		return addUserLimitReachedLabel;
+	}, [contactsSelected, maxSelectionNumber, t, addUserLimitReachedLabel]);
+
 	useEffect(() => {
 		const newChips = map(contactsSelected, (contact) => {
 			const actions: ChipAction[] = [];
@@ -115,18 +133,31 @@ const ContactsSelector = ({
 		updateOwnership
 	]);
 
+	const filterResponse = useCallback(
+		(response: SearchUsersByFeatureSoapResponse) =>
+			filter(
+				response,
+				(contact) => !find(currentMembers, (member) => member.userId === contact.id)
+			),
+		[currentMembers]
+	);
+
 	const searchContacts = useCallback(() => {
 		setLoading(true);
 		searchUsersByFeatureRequest(inputRef.current?.value ?? '')
 			.then((response: SearchUsersByFeatureSoapResponse) => {
-				setSearchResult(response);
+				setSearchResult(filterResponse(response));
 			})
 			.finally(() => {
 				setLoading(false);
 			});
-	}, []);
+	}, [filterResponse]);
 
-	useEffect(() => searchContacts(), [searchContacts]);
+	useEffect(
+		() => searchContacts(),
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[]
+	);
 
 	const onClickListedContact = useCallback(
 		(contact: ContactInfo) => (): void => {
@@ -187,7 +218,7 @@ const ContactsSelector = ({
 
 	const ListContacts = useMemo(() => {
 		if (loading) return <Spinner color="primary" />;
-		if (!resultsError) return <List data-testid="list_creation_modal">{items}</List>;
+		if (!resultsError) return <List data-testid="list_contacts">{items}</List>;
 		return (
 			<Text color="gray1" size="small" weight="light">
 				{noMatchLabel}
@@ -198,6 +229,7 @@ const ContactsSelector = ({
 	return (
 		<Container>
 			<ChipInput
+				ref={inputRef}
 				data-testid="chip_input_contact_selector"
 				placeholder={inputPlaceholder}
 				description={inputDescription ?? ''}

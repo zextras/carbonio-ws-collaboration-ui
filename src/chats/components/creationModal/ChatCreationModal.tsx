@@ -53,11 +53,6 @@ const ChatCreationModal = ({
 		'modal.creation.contactList',
 		'Select more than an address to create a Group'
 	);
-	const inputPlaceholder = t('modal.creation.inputPlaceholder', 'Start typing or pick an address');
-	const addUserLimitReachedLabel = t(
-		'modal.creation.addUserLimit.limitReached',
-		'You have selected the maximum number of members for a group'
-	);
 
 	const setPlaceholderRoom = useStore((state) => state.setPlaceholderRoom);
 	const maxMembers =
@@ -161,9 +156,7 @@ const ChatCreationModal = ({
 
 	const createButtonTooltip = useMemo(() => {
 		if (disabledCreateButton) {
-			if (titleError || topicError) {
-				return errorLabelDisabled;
-			}
+			if (titleError || topicError) return errorLabelDisabled;
 			return disabledButtonTooltip;
 		}
 		return createButtonLabel;
@@ -175,21 +168,6 @@ const ChatCreationModal = ({
 		disabledButtonTooltip,
 		errorLabelDisabled
 	]);
-
-	const inputDescription = useMemo(() => {
-		if (size(contactsSelected) > 1) {
-			if (maxMembers - size(contactsSelected) - 1 > 0)
-				return t('modal.creation.addUserLimit.users', {
-					defaultValue:
-						maxMembers - size(contactsSelected) - 1 >= 2
-							? `You can add other ${maxMembers - size(contactsSelected) - 1} members`
-							: 'You can add one last member',
-					count: maxMembers - size(contactsSelected) - 1
-				});
-			return addUserLimitReachedLabel;
-		}
-		return undefined;
-	}, [contactsSelected, t, maxMembers, addUserLimitReachedLabel]);
 
 	return (
 		<Modal
@@ -211,9 +189,7 @@ const ChatCreationModal = ({
 			<ContactsSelector
 				contactsSelected={contactsSelected}
 				setContactSelected={setContactsSelected}
-				inputPlaceholder={inputPlaceholder}
-				inputDescription={inputDescription}
-				maxSelectionNumber={maxMembers - 1}
+				maxSelectionNumber={size(contactsSelected) > 1 ? maxMembers - 1 : undefined}
 				canSelectOwnership={size(contactsSelected) > 1}
 			/>
 			<Padding bottom="large" />

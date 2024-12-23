@@ -64,7 +64,7 @@ describe('Chat Creation Modal Contact Selector - search', () => {
 		);
 
 		// Render ListItem (after autoCompleteGalRequest)
-		const list = await screen.findByTestId('list_creation_modal');
+		const list = await screen.findByTestId('list_contacts');
 		expect(list).toBeVisible();
 
 		expect(screen.getByText('Select more than an address to create a Group')).toBeVisible();
@@ -88,7 +88,7 @@ describe('Chat Creation Modal Contact Selector - search', () => {
 		);
 
 		// Initial AutoCompleteRequest trigger an initial "Spinner" state and then render contact list
-		const list = await screen.findByTestId('list_creation_modal');
+		const list = await screen.findByTestId('list_contacts');
 		expect(list).toBeVisible();
 		expect(list.children[0].children).toHaveLength(0);
 
@@ -101,7 +101,7 @@ describe('Chat Creation Modal Contact Selector - search', () => {
 
 		// AutoCompleteRequest trigger an initial "Spinner" state and then render contact list
 		await screen.findByTestId('spinner');
-		const list2 = await screen.findByTestId('list_creation_modal');
+		const list2 = await screen.findByTestId('list_contacts');
 		expect(list2).toBeVisible();
 		expect(list2.children).toHaveLength(1);
 
@@ -128,7 +128,7 @@ describe('Chat Creation Modal Contact Selector - search', () => {
 		);
 
 		// Initial AutoCompleteRequest trigger an initial "Spinner" state and then render contact list
-		const list = await screen.findByTestId('list_creation_modal');
+		const list = await screen.findByTestId('list_contacts');
 		expect(list).toBeVisible();
 		expect(list.children[0].children).toHaveLength(2);
 
@@ -159,7 +159,7 @@ describe('Chat Creation Modal Contact Selector - search', () => {
 
 		// Initial AutoCompleteRequest trigger an initial "Spinner" state and then render contact list
 		await screen.findByTestId('spinner');
-		const list = await screen.findByTestId('list_creation_modal');
+		const list = await screen.findByTestId('list_contacts');
 		expect(list).toBeVisible();
 		expect(list.children[0].children).toHaveLength(0);
 
@@ -169,7 +169,7 @@ describe('Chat Creation Modal Contact Selector - search', () => {
 
 		// AutoCompleteRequest trigger an initial "Spinner" state and then render the empty contact list
 		await screen.findByTestId('spinner');
-		const list2 = await screen.findByTestId('list_creation_modal');
+		const list2 = await screen.findByTestId('list_contacts');
 		expect(list2).toBeVisible();
 		expect(list2.children[0].children).toHaveLength(0);
 	});
@@ -227,7 +227,7 @@ describe('Chat Creation Modal Contact Selector - search', () => {
 				inputRef={React.createRef()}
 			/>
 		);
-		const list = await screen.findByTestId('list_creation_modal');
+		const list = await screen.findByTestId('list_contacts');
 		expect(list).toBeInTheDocument();
 
 		const userComponent = screen.getByText(contactUser1.displayName);
@@ -263,7 +263,7 @@ describe('Chat Creation Modal Contact Selector - search', () => {
 				inputRef={React.createRef()}
 			/>
 		);
-		const list = await screen.findByTestId('list_creation_modal');
+		const list = await screen.findByTestId('list_contacts');
 		expect(list).toBeInTheDocument();
 
 		const userComponent = await screen.findByText(contactUser1.displayName);
@@ -299,7 +299,7 @@ describe('Add participant Modal Contact Selector', () => {
 
 		// Render ListItem (after autoCompleteGalRequest)
 		await waitFor(() => {
-			const list = screen.getByTestId('list_creation_modal');
+			const list = screen.getByTestId('list_contacts');
 			expect(list).toBeVisible();
 		});
 
@@ -322,8 +322,8 @@ describe('Add participant Modal Contact Selector', () => {
 			/>
 		);
 
-		await screen.findByTestId('list_creation_modal');
-		expect(screen.getByTestId('list_creation_modal')).toBeVisible();
+		await screen.findByTestId('list_contacts');
+		expect(screen.getByTestId('list_contacts')).toBeVisible();
 
 		// Set [userObj] as returned valued for AutoCompleteRequest
 		mockSearchUsersByFeatureRequest.mockReturnValueOnce([contactUser1, contactUser2]);
@@ -334,7 +334,7 @@ describe('Add participant Modal Contact Selector', () => {
 
 		// AutoCompleteRequest trigger an initial "Spinner" state and then render contact list
 		await screen.findByTestId('spinner');
-		const list = await screen.findByTestId('list_creation_modal');
+		const list = await screen.findByTestId('list_contacts');
 		expect(list).toBeVisible();
 
 		// AutoCompleteRequest return contactUser1 and contactUser2, but we can see only contactUser2
