@@ -58,7 +58,7 @@ const AddNewMemberModal: FC<AddNewMemberProps> = ({
 
 	const modalFooter = useMemo(
 		() => (
-			<Container orientation="horizontal" mainAlignment="space-between">
+			<Container orientation="horizontal" mainAlignment="space-between" data-testid="modal_footer">
 				<Container crossAlignment="flex-start" width="fit">
 					<Checkbox
 						label={showConversationHistoryLabel}
@@ -84,8 +84,8 @@ const AddNewMemberModal: FC<AddNewMemberProps> = ({
 			contactsSelected,
 			disabledButtonTooltip,
 			onClickCheckbox,
-			showHistory,
-			showConversationHistoryLabel
+			showConversationHistoryLabel,
+			showHistory
 		]
 	);
 

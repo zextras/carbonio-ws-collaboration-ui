@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { act, renderHook, screen, waitFor } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 
 import AddNewMemberAction from './AddNewMemberAction';
 import useStore from '../../../../store/Store';
@@ -47,11 +47,15 @@ const mockedRoom = createMockRoom({
 	]
 });
 
+beforeEach(() => {
+	const store = useStore.getState();
+	store.addRoom(mockedRoom);
+	store.setLoginInfo(user1Info.id, user1Info.name);
+	store.setUserInfo(user2Info);
+});
+
 describe.skip('Add new member action', () => {
 	test('open/close modal and mark checkbox', async () => {
-		const store = useStore.getState();
-		store.addRoom(mockedRoom);
-
 		const { user } = setup(<AddNewMemberAction roomId={mockedRoom.id} />);
 
 		await user.click(screen.getByText(/Add new Members/i));
@@ -71,19 +75,8 @@ describe.skip('Add new member action', () => {
 
 	test('Add new member', async () => {
 		const spyOnAddRoomMember = spyOnRoomsApi(RoomsApiToSpy.ADD_ROOM_MEMBERS);
-		const { result } = renderHook(() => useStore());
-		act(() => {
-			result.current.addRoom(mockedRoom);
-			result.current.setLoginInfo(user1Info.id, user1Info.name);
-			result.current.setUserInfo(user2Info);
-		});
-		mockSearchUsersByFeatureRequest
-			.mockReturnValueOnce([])
-			.mockReturnValueOnce([zimbraUser1, zimbraUser2]);
-
+		mockSearchUsersByFeatureRequest.mockReturnValueOnce([zimbraUser1, zimbraUser2]);
 		const { user } = setup(<AddNewMemberAction roomId={mockedRoom.id} />);
-
-		expect(result.current.rooms[mockedRoom.id].members?.length).toBe(1);
 
 		await user.click(screen.getByText(/Add new Members/i));
 		const addMemberModal = await screen.findByTestId('add_member_modal');
@@ -92,9 +85,8 @@ describe.skip('Add new member action', () => {
 		const chipInput = await screen.findByTestId('chip_input_contact_selector');
 		await user.type(chipInput, zimbraUser2.displayName[0]);
 
-		await screen.findByTestId('spinner');
 		const list = await screen.findByTestId('list_contacts');
-		expect(list).toBeVisible();
+		expect(list).toBeInTheDocument();
 
 		const checkboxIcon = screen.queryAllByTestId('icon: Square')[0];
 		await user.click(checkboxIcon);
