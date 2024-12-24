@@ -234,8 +234,8 @@ const ContactsSelector = ({
 			<ChipInput
 				ref={inputRef}
 				data-testid="chip_input_contact_selector"
-				placeholder={inputPlaceholder}
-				description={chipInputPlaceholder ?? inputDescription ?? ''}
+				placeholder={chipInputPlaceholder ?? inputPlaceholder}
+				description={inputDescription}
 				inputRef={inputRef}
 				onInputType={searchContacts}
 				value={chips}

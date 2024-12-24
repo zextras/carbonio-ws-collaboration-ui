@@ -44,9 +44,9 @@ const ManageMeetingButtons: FC<ManageMeetingButtonsProps> = ({
 	meetingIsActive
 }) => {
 	const [t] = useTranslation();
-	const roomActionsTooltip = t('', 'Room actions'); // TODO: translation key
+	const roomActionsTooltip = t('tooltip.virtualActions', 'Room actions');
 	const copyVirtualRoomLabel = t('meeting.virtual.copyTooltip', "Copy Virtual Room's link");
-	const editVirtualRoomLabel = t('', 'Edit Virtual Room'); // TODO: translation key
+	const editVirtualRoomLabel = t('action.virtual.editRoom', 'Edit Virtual Room');
 	const deleteVirtualRoomLabel = t('meeting.virtual.deleteTooltip', 'Delete Virtual Room');
 	const startMeetingLabel = t('meeting.startMeeting', 'Start meeting');
 	const joinMeetingLabel = t('meeting.joinMeeting', 'Join meeting');
@@ -140,19 +140,23 @@ const ManageMeetingButtons: FC<ManageMeetingButtonsProps> = ({
 					$isMyRoom={amIParticipating || isMyRoom}
 				/>
 			</Tooltip>
-			<EditVirtualRoomModal
-				showModal={showEditModal}
-				setShowModal={setShowEditModal}
-				roomId={roomId}
-				modalRef={modalRef}
-			/>
-			<DeleteVirtualRoomModal
-				showModal={showDeleteModal}
-				setShowModal={setShowDeleteModal}
-				handleModalOpening={handleDeleteModalOpening}
-				roomId={roomId}
-				modalRef={modalRef}
-			/>
+			{showEditModal && (
+				<EditVirtualRoomModal
+					modalRef={modalRef}
+					showModal={showEditModal}
+					setShowModal={setShowEditModal}
+					roomId={roomId}
+				/>
+			)}
+			{showDeleteModal && (
+				<DeleteVirtualRoomModal
+					modalRef={modalRef}
+					showModal={showDeleteModal}
+					setShowModal={setShowDeleteModal}
+					handleModalOpening={handleDeleteModalOpening}
+					roomId={roomId}
+				/>
+			)}
 		</Row>
 	);
 };

@@ -13,7 +13,7 @@ import {
 	Text,
 	useSnackbar
 } from '@zextras/carbonio-design-system';
-import { map } from 'lodash';
+import { map, size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 import { RoomsApi } from '../../../../../network';
@@ -39,11 +39,10 @@ const EditVirtualRoomModal: FC<deleteVirtualRoomModalProps> = ({
 	const owners = useStore((state) => getOwners(state, roomId));
 
 	const [t] = useTranslation();
-	// TODO: translation keys
-	const modalTitle = t('', `Edit ${roomName} Virtual Room`, {
+	const modalTitle = t('meeting.virtual.modal.edit.title ', `Edit "${roomName}" Virtual Room`, {
 		roomName
 	});
-	const namePlaceholder = t('', "Room's name*");
+	const namePlaceholder = t('meeting.virtual.creationInput', 'Virtual Room’s name');
 	const editNameDescription = t(
 		'meeting.virtual.modal.description',
 		'Give this Virtual Room a recognizable name so that your attendees know what they are expecting to meet about.'
@@ -56,6 +55,7 @@ const EditVirtualRoomModal: FC<deleteVirtualRoomModalProps> = ({
 		'meeting.virtual.modal.moderator.input',
 		`Virtual Room’s moderators`
 	);
+	const confirmLabelDisabled = t('editModal.confirmDisabled', "You haven't changed anything");
 	const editVirtualRoomLabel = t('action.edit', 'Edit');
 	const closeLabel = t('action.close', 'Close');
 	const editRoomSnackbar = t('', 'Virtual Room edited successfully');
@@ -111,17 +111,25 @@ const EditVirtualRoomModal: FC<deleteVirtualRoomModalProps> = ({
 		setShowModal
 	]);
 
-	const disableEditButton = useMemo(() => nameError, [nameError]);
+	const changeSomething = useMemo(
+		() => newName !== roomName || size(contactsSelected) > 0,
+		[contactsSelected, newName, roomName]
+	);
+
+	const disableEditButton = useMemo(
+		() => nameError || !changeSomething,
+		[changeSomething, nameError]
+	);
 
 	return (
 		<Modal
 			ref={modalRef}
-			size="medium"
 			title={modalTitle}
 			open={showModal}
 			onConfirm={handleEditRoom}
 			confirmLabel={editVirtualRoomLabel}
 			confirmDisabled={disableEditButton}
+			confirmTooltip={changeSomething ? undefined : confirmLabelDisabled}
 			onClose={() => setShowModal(false)}
 			showCloseIcon
 			closeIconTooltip={closeLabel}
@@ -129,7 +137,7 @@ const EditVirtualRoomModal: FC<deleteVirtualRoomModalProps> = ({
 			<Container gap="1rem">
 				<Text overflow="break-word">{editNameDescription}</Text>
 				<Input
-					label={namePlaceholder}
+					label={`${namePlaceholder}*`}
 					value={newName}
 					onChange={onNameChange}
 					hasError={nameError}
