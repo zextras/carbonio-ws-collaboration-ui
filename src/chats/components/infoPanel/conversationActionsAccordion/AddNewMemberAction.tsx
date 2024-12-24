@@ -19,7 +19,7 @@ import useStore from '../../../../store/Store';
 import { AddMemberFields } from '../../../../types/network/models/roomBeTypes';
 import { Member } from '../../../../types/store/RoomTypes';
 import { CapabilityType } from '../../../../types/store/SessionTypes';
-import { ContactsSelected } from '../../ContactsSelector';
+import { ContactsSelected } from '../../contactSelector/ContactsSelector';
 
 type AddNewMemberProps = {
 	roomId: string;

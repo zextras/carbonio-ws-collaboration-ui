@@ -22,7 +22,7 @@ import { getOwners, getRoomNameSelector } from '../../../../../store/selectors/R
 import { getUserId } from '../../../../../store/selectors/SessionSelectors';
 import { getUserEmail, getUserName } from '../../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../../store/Store';
-import ContactsSelector, { ContactsSelected } from '../../../ContactsSelector';
+import ContactsSelector, { ContactsSelected } from '../../../contactSelector/ContactsSelector';
 
 type deleteVirtualRoomModalProps = {
 	showModal: boolean;

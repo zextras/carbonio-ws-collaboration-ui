@@ -22,7 +22,7 @@ import { getCapability } from '../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../store/Store';
 import { Member } from '../../../../types/store/RoomTypes';
 import { CapabilityType } from '../../../../types/store/SessionTypes';
-import ContactsSelector, { ContactsSelected } from '../../ContactsSelector';
+import ContactsSelector, { ContactsSelected } from '../../contactSelector/ContactsSelector';
 
 type AddNewMemberProps = {
 	addNewMemberModalOpen: boolean;

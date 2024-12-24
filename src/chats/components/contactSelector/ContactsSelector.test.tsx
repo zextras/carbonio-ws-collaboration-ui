@@ -9,9 +9,9 @@ import React, { useState } from 'react';
 import { screen, within } from '@testing-library/react';
 
 import ContactsSelector from './ContactsSelector';
-import { mockSearchUsersByFeatureRequest } from '../../tests/mocks/SearchUsersByFeature';
-import { setup } from '../../tests/test-utils';
-import { ContactInfo } from '../../types/network/soap/searchUsersByFeatureRequest';
+import { mockSearchUsersByFeatureRequest } from '../../../tests/mocks/SearchUsersByFeature';
+import { setup } from '../../../tests/test-utils';
+import { ContactInfo } from '../../../types/network/soap/searchUsersByFeatureRequest';
 
 const user1: ContactInfo = {
 	email: 'user1@test.com',

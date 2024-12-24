@@ -24,7 +24,7 @@ import useStore from '../../../store/Store';
 import { MemberBe, RoomType } from '../../../types/network/models/roomBeTypes';
 import { AddRoomResponse } from '../../../types/network/responses/roomsResponses';
 import { CapabilityType } from '../../../types/store/SessionTypes';
-import ContactsSelector, { ContactsSelected } from '../ContactsSelector';
+import ContactsSelector, { ContactsSelected } from '../contactSelector/ContactsSelector';
 
 const ChatCreationModal = ({
 	open,

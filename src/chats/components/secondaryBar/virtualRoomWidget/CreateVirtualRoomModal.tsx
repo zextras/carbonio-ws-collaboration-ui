@@ -24,7 +24,7 @@ import useStore from '../../../../store/Store';
 import { MemberBe } from '../../../../types/network/models/roomBeTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
 import { createMeetingLinkFromOutside } from '../../../../utils/MeetingsUtils';
-import ContactsSelector, { ContactsSelected } from '../../ContactsSelector';
+import ContactsSelector, { ContactsSelected } from '../../contactSelector/ContactsSelector';
 
 type CreateVirtualRoomModalProps = {
 	toggleModal: () => void;

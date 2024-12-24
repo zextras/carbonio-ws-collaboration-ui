@@ -29,13 +29,13 @@ import {
 import { difference, differenceBy, filter, find, map, size, union } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
-import ListParticipant from './creationModal/ListParticipant';
-import { searchUsersByFeatureRequest } from '../../network/soap/SearchUsersByFeatureRequest';
+import ListParticipant from './ListParticipant';
+import { searchUsersByFeatureRequest } from '../../../network/soap/SearchUsersByFeatureRequest';
 import {
 	ContactInfo,
 	SearchUsersByFeatureSoapResponse
-} from '../../types/network/soap/searchUsersByFeatureRequest';
-import { Member } from '../../types/store/RoomTypes';
+} from '../../../types/network/soap/searchUsersByFeatureRequest';
+import { Member } from '../../../types/store/RoomTypes';
 
 type ContactsSelectorProps = {
 	contactsSelected: ContactsSelected;
@@ -205,8 +205,8 @@ const ContactsSelector = ({
 								selected={!!contactSelected}
 								onClickCb={onClickListedContact}
 								isDisabled={chipInputError}
-								updateOwner={updateOwnership} // change prop name
-								isOwner={() => contactSelected?.owner || false} // do not pass function
+								updateOwnership={updateOwnership}
+								isOwner={contactSelected?.owner || false}
 								canBeModerator={canSelectOwnership}
 							/>
 						)}
