@@ -55,7 +55,6 @@ export const useRoomsStoreSlice: StateCreator<RoomsStoreSlice> = (set: (...any: 
 		set(
 			produce((draft: RootStore) => {
 				draft.rooms[roomBe.id] = {
-					...draft.rooms[roomBe.id],
 					id: roomBe.id,
 					name: roomBe.name ?? '',
 					description: roomBe.description ?? '',
@@ -65,7 +64,7 @@ export const useRoomsStoreSlice: StateCreator<RoomsStoreSlice> = (set: (...any: 
 					pictureUpdatedAt: roomBe.pictureUpdatedAt,
 					members: roomBe.members,
 					userSettings: roomBe.userSettings,
-					meetingId: roomBe.meetingId
+					meetingId: draft.rooms[roomBe.id]?.meetingId ?? roomBe.meetingId
 				};
 			}),
 			false,
