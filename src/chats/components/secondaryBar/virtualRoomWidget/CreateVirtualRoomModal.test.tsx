@@ -19,8 +19,7 @@ import { RoomType } from '../../../../types/network/models/roomBeTypes';
 import { ContactInfo } from '../../../../types/network/soap/searchUsersByFeatureRequest';
 
 const virtualRoomName = 'New Virtual Room';
-const createNewVirtualRoom = 'Create new Virtual Room';
-const newVirtualRoomsName = 'New Virtual Room’s name*';
+const virtualRoomNamePlaceholder = 'Virtual Room’s name*';
 
 const sessionUser = createMockUser({ id: 'sessionId', name: 'Session User' });
 
@@ -48,7 +47,7 @@ beforeEach(() => {
 	store.setCapabilities(createMockCapabilityList());
 });
 
-describe.skip('VirtualRoomsModal', () => {
+describe('VirtualRoomsModal', () => {
 	test('Try to create a room without a name', async () => {
 		const { user } = setup(
 			<CreateVirtualRoomModal
@@ -59,10 +58,10 @@ describe.skip('VirtualRoomsModal', () => {
 			/>
 		);
 
-		const modalTitle = await screen.findByText(createNewVirtualRoom);
+		const modalTitle = await screen.findByText('Create new Virtual Room');
 		expect(modalTitle).toBeInTheDocument();
 
-		const textArea = await screen.findByText(newVirtualRoomsName);
+		const textArea = await screen.findByRole('textbox', { name: virtualRoomNamePlaceholder });
 
 		await user.type(textArea, 'a{backspace}');
 
@@ -80,7 +79,7 @@ describe.skip('VirtualRoomsModal', () => {
 			/>
 		);
 
-		const textArea = await screen.findByText(newVirtualRoomsName);
+		const textArea = await screen.findByRole('textbox', { name: virtualRoomNamePlaceholder });
 
 		await user.type(
 			textArea,
@@ -105,7 +104,7 @@ describe.skip('VirtualRoomsModal', () => {
 			/>
 		);
 
-		const textArea = await screen.findByText(newVirtualRoomsName);
+		const textArea = await screen.findByRole('textbox', { name: virtualRoomNamePlaceholder });
 
 		await user.type(textArea, virtualRoomName);
 
@@ -142,7 +141,7 @@ describe.skip('VirtualRoomsModal', () => {
 			/>
 		);
 
-		const textArea = await screen.findByText(newVirtualRoomsName);
+		const textArea = await screen.findByRole('textbox', { name: virtualRoomNamePlaceholder });
 
 		await user.type(textArea, virtualRoomName);
 
@@ -177,11 +176,11 @@ describe.skip('VirtualRoomsModal', () => {
 			/>
 		);
 
-		const textArea = await screen.findByText(newVirtualRoomsName);
+		const textArea = await screen.findByRole('textbox', { name: virtualRoomNamePlaceholder });
 		await user.type(textArea, virtualRoomName);
 
 		mockSearchUsersByFeatureRequest.mockReturnValueOnce([contactUser1]);
-		const moderatorInput = await screen.findByText("Room's moderators");
+		const moderatorInput = await screen.findByTestId('chip_input_contact_selector');
 		await user.type(moderatorInput, 'User One');
 
 		const chipContactOne = await screen.findByText('User One');
@@ -200,7 +199,7 @@ describe.skip('VirtualRoomsModal', () => {
 
 	test('Search user fails ', async () => {
 		jest.spyOn(console, 'error').mockImplementation();
-		mockSearchUsersByFeatureRequest.mockRejectedValue({ error: 'error' });
+		mockSearchUsersByFeatureRequest.mockRejectedValueOnce({ error: 'error' });
 		setup(
 			<CreateVirtualRoomModal
 				toggleModal={noop}
@@ -230,7 +229,7 @@ describe.skip('VirtualRoomsModal', () => {
 			/>
 		);
 
-		const moderatorInput = await screen.findByText("Room's moderators");
+		const moderatorInput = await screen.findByTestId('chip_input_contact_selector');
 		await user.type(moderatorInput, 'User');
 
 		const noMatch = await screen.findByText(
