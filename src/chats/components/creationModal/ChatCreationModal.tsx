@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { ReactElement, useCallback, useMemo, useState } from 'react';
+import React, { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import {
 	CreateSnackbarFn,
@@ -66,6 +66,14 @@ const ChatCreationModal = ({
 	const createSnackbar: CreateSnackbarFn = useSnackbar();
 
 	const { goToChatsPage } = useRouting();
+
+	const inputRef = useRef<HTMLInputElement>(null);
+
+	useEffect(() => {
+		if (open && inputRef.current) {
+			inputRef.current.focus();
+		}
+	}, [open]);
 
 	const chatType = useMemo(
 		() => (size(contactsSelected) > 1 ? RoomType.GROUP : RoomType.ONE_TO_ONE),
@@ -191,6 +199,7 @@ const ChatCreationModal = ({
 				setContactSelected={setContactsSelected}
 				maxSelectionNumber={size(contactsSelected) > 1 ? maxMembers - 1 : undefined}
 				canSelectOwnership={size(contactsSelected) > 1}
+				customInputRef={inputRef}
 			/>
 			<Padding bottom="large" />
 			<Text color="gray1">{listTextLabel}</Text>

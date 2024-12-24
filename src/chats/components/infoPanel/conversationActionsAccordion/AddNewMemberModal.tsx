@@ -4,7 +4,15 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { Dispatch, FC, SetStateAction, useCallback, useMemo } from 'react';
+import React, {
+	Dispatch,
+	FC,
+	SetStateAction,
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef
+} from 'react';
 
 import { Button, Checkbox, Container, Modal, Tooltip } from '@zextras/carbonio-design-system';
 import { size } from 'lodash';
@@ -53,6 +61,14 @@ const AddNewMemberModal: FC<AddNewMemberProps> = ({
 
 	const maxMembers =
 		(useStore((store) => getCapability(store, CapabilityType.MAX_GROUP_MEMBERS)) as number) ?? 0;
+
+	const inputRef = useRef<HTMLInputElement>(null);
+
+	useEffect(() => {
+		if (addNewMemberModalOpen && inputRef.current) {
+			inputRef.current?.focus();
+		}
+	}, [addNewMemberModalOpen]);
 
 	const onClickCheckbox = useCallback(() => setShowHistory((check) => !check), [setShowHistory]);
 
@@ -107,6 +123,7 @@ const AddNewMemberModal: FC<AddNewMemberProps> = ({
 				maxSelectionNumber={maxMembers - size(members)}
 				canSelectOwnership
 				currentMembers={members}
+				customInputRef={inputRef}
 			/>
 		</Modal>
 	);

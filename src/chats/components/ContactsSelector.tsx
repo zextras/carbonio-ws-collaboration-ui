@@ -44,6 +44,7 @@ type ContactsSelectorProps = {
 	maxSelectionNumber?: number;
 	currentMembers?: Member[];
 	chipInputPlaceholder?: string;
+	customInputRef?: React.RefObject<HTMLInputElement>;
 };
 
 const ContactsSelector = ({
@@ -52,7 +53,8 @@ const ContactsSelector = ({
 	canSelectOwnership = false,
 	maxSelectionNumber,
 	currentMembers = [],
-	chipInputPlaceholder
+	chipInputPlaceholder,
+	customInputRef
 }: ContactsSelectorProps): ReactElement => {
 	const [t] = useTranslation();
 	const inputPlaceholder = t('modal.creation.inputPlaceholder', 'Start typing or pick an address');
@@ -71,7 +73,9 @@ const ContactsSelector = ({
 	const [chips, setChips] = useState<ChipItem<ContactInfo>[]>([]);
 	const [loading, setLoading] = useState<boolean>(false);
 
-	const inputRef = useRef<HTMLInputElement>(null);
+	const chipInputRef = useRef<HTMLInputElement>(null);
+
+	const inputRef = customInputRef ?? chipInputRef;
 
 	const chipInputError = useMemo(
 		() => !!(maxSelectionNumber && maxSelectionNumber <= size(contactsSelected)),
@@ -154,7 +158,7 @@ const ContactsSelector = ({
 			.catch(() => {
 				setLoading(false);
 			});
-	}, [filterResponse]);
+	}, [filterResponse, inputRef]);
 
 	useEffect(
 		() => searchContacts(),
@@ -176,7 +180,7 @@ const ContactsSelector = ({
 				}
 			}
 		},
-		[chipInputError, contactsSelected, setContactSelected]
+		[chipInputError, contactsSelected, inputRef, setContactSelected]
 	);
 
 	const onChipRemove = useCallback(
