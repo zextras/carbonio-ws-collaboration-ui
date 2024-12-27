@@ -44,6 +44,7 @@ const InfoSection: FC<InfoSectionProps> = ({
 }) => {
 	const [t] = useTranslation();
 
+	const youLabel = t('status.you', 'You');
 	const sessionOnlyModeratorLabel = t(
 		'meeting.virtual.moderators.onlyUser',
 		"You're the only moderator"
@@ -75,8 +76,8 @@ const InfoSection: FC<InfoSectionProps> = ({
 	);
 
 	const ownerName = useMemo(
-		() => (userIsModerator ? 'You' : moderatorName),
-		[userIsModerator, moderatorName]
+		() => (userIsModerator ? youLabel : moderatorName),
+		[userIsModerator, youLabel, moderatorName]
 	);
 
 	const moderatorLabel = useMemo(() => {
