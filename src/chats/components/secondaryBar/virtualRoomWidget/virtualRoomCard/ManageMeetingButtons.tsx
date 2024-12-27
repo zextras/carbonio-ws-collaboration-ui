@@ -127,9 +127,15 @@ const ManageMeetingButtons: FC<ManageMeetingButtonsProps> = ({
 
 	return (
 		<Row orientation="horizontal" gap="0.25rem">
-			<Tooltip label={roomActionsTooltip} disablePortal>
+			<Tooltip label={roomActionsTooltip} disabled={!isMyRoom && !amIParticipating} disablePortal>
 				<Dropdown items={items} placement="top-start" disablePortal>
-					<Button icon="MoreVertical" type="ghost" color="gray0" onClick={(): void => undefined} />
+					<Button
+						icon="MoreVertical"
+						type="ghost"
+						color="gray0"
+						onClick={(): void => undefined}
+						disabled={!isMyRoom && !amIParticipating}
+					/>
 				</Dropdown>
 			</Tooltip>
 			<Tooltip label={amIParticipating || isMyRoom ? enterRoomTooltip : leaveRoomTooltip}>

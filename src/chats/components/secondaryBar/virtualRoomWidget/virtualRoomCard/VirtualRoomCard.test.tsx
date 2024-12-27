@@ -13,6 +13,7 @@ import useStore from '../../../../../store/Store';
 import {
 	createMockMeeting,
 	createMockMember,
+	createMockParticipants,
 	createMockRoom,
 	createMockUser
 } from '../../../../../tests/createMock';
@@ -49,7 +50,11 @@ const memberRoom = createMockRoom({
 		createMockMember({ userId: sessionUser.id, owner: false })
 	]
 });
-const memberMeeting = createMockMeeting({ id: 'memberMeetingId', roomId: 'memberRoomId' });
+const memberMeeting = createMockMeeting({
+	id: 'memberMeetingId',
+	roomId: 'memberRoomId',
+	participants: [createMockParticipants({ userId: sessionUser.id })]
+});
 
 beforeEach(() => {
 	const store = useStore.getState();
@@ -92,7 +97,7 @@ describe('VirtualRoomCard', () => {
 		expect(screen.getByText(deleteVirtualRoomLabel)).toBeInTheDocument();
 	});
 
-	test('Virtual room member can see only copy action', async () => {
+	test('Virtual room meeting participant can see only copy action', async () => {
 		const { user } = setup(<VirtualRoomCard roomId={memberRoom.id} modalRef={createRef()} />);
 		const actionsButtons = screen.getByTestId(moreVerticalIcon);
 		await user.click(actionsButtons);
