@@ -146,7 +146,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 		return (): void => messageScrollPositionObserver.current?.disconnect();
 	}, [observerInit]);
 
-	// Read last message when user open the conversation for the first time
+	// Read last message when user opens the conversation for the first time
 	useEffect(() => {
 		if (!actualScrollPosition && size(roomMessages) > 0 && inputHasFocus) {
 			const lastMessage = last(roomMessages);
