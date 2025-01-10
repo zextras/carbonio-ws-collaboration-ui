@@ -19,8 +19,7 @@ import { RoomType } from '../../../../types/network/models/roomBeTypes';
 import { ContactInfo } from '../../../../types/network/soap/searchUsersByFeatureRequest';
 
 const virtualRoomName = 'New Virtual Room';
-const createNewVirtualRoom = 'Create new Virtual Room';
-const newVirtualRoomsName = 'New Virtual Room’s name*';
+const virtualRoomNamePlaceholder = 'Virtual Room’s name*';
 
 const sessionUser = createMockUser({ id: 'sessionId', name: 'Session User' });
 
@@ -59,10 +58,10 @@ describe('VirtualRoomsModal', () => {
 			/>
 		);
 
-		const modalTitle = await screen.findByText(createNewVirtualRoom);
+		const modalTitle = await screen.findByText('Create new Virtual Room');
 		expect(modalTitle).toBeInTheDocument();
 
-		const textArea = await screen.findByText(newVirtualRoomsName);
+		const textArea = await screen.findByRole('textbox', { name: virtualRoomNamePlaceholder });
 
 		await user.type(textArea, 'a{backspace}');
 
@@ -80,7 +79,7 @@ describe('VirtualRoomsModal', () => {
 			/>
 		);
 
-		const textArea = await screen.findByText(newVirtualRoomsName);
+		const textArea = await screen.findByRole('textbox', { name: virtualRoomNamePlaceholder });
 
 		await user.type(
 			textArea,
@@ -92,7 +91,7 @@ describe('VirtualRoomsModal', () => {
 	});
 
 	test('create virtual room with 2 moderators', async () => {
-		mockSearchUsersByFeatureRequest.mockReturnValue([contactUser1, contactUser2]);
+		mockSearchUsersByFeatureRequest.mockReturnValueOnce([contactUser1, contactUser2]);
 
 		const spyOnAddRoom = spyOnRoomsApi(RoomsApiToSpy.ADD_ROOM);
 		const { user } = setup(
@@ -105,7 +104,7 @@ describe('VirtualRoomsModal', () => {
 			/>
 		);
 
-		const textArea = await screen.findByText(newVirtualRoomsName);
+		const textArea = await screen.findByRole('textbox', { name: virtualRoomNamePlaceholder });
 
 		await user.type(textArea, virtualRoomName);
 
@@ -142,7 +141,7 @@ describe('VirtualRoomsModal', () => {
 			/>
 		);
 
-		const textArea = await screen.findByText(newVirtualRoomsName);
+		const textArea = await screen.findByRole('textbox', { name: virtualRoomNamePlaceholder });
 
 		await user.type(textArea, virtualRoomName);
 
@@ -177,11 +176,11 @@ describe('VirtualRoomsModal', () => {
 			/>
 		);
 
-		const textArea = await screen.findByText(newVirtualRoomsName);
+		const textArea = await screen.findByRole('textbox', { name: virtualRoomNamePlaceholder });
 		await user.type(textArea, virtualRoomName);
 
 		mockSearchUsersByFeatureRequest.mockReturnValueOnce([contactUser1]);
-		const moderatorInput = await screen.findByText("Room's moderators");
+		const moderatorInput = await screen.findByTestId('chip_input_contact_selector');
 		await user.type(moderatorInput, 'User One');
 
 		const chipContactOne = await screen.findByText('User One');
@@ -200,7 +199,7 @@ describe('VirtualRoomsModal', () => {
 
 	test('Search user fails ', async () => {
 		jest.spyOn(console, 'error').mockImplementation();
-		mockSearchUsersByFeatureRequest.mockRejectedValue({ error: 'error' });
+		mockSearchUsersByFeatureRequest.mockRejectedValueOnce({ error: 'error' });
 		setup(
 			<CreateVirtualRoomModal
 				toggleModal={noop}
@@ -210,15 +209,17 @@ describe('VirtualRoomsModal', () => {
 			/>
 		);
 
-		const contactList = await screen.findByTestId('list_moderators_selection');
-		expect(contactList).toBeInTheDocument();
+		const noResults = await screen.findByText(
+			'There are no items that match this search in your company.'
+		);
+		expect(noResults).toBeInTheDocument();
 
 		const createRoomButton = screen.getByRole('button', { name: 'create' });
 		expect(createRoomButton).toBeDisabled();
 	});
 
 	test('Search user returns no matches', async () => {
-		mockSearchUsersByFeatureRequest.mockReturnValue([]);
+		mockSearchUsersByFeatureRequest.mockReturnValueOnce([]);
 		const { user } = setup(
 			<CreateVirtualRoomModal
 				toggleModal={noop}
@@ -228,7 +229,7 @@ describe('VirtualRoomsModal', () => {
 			/>
 		);
 
-		const moderatorInput = await screen.findByText("Room's moderators");
+		const moderatorInput = await screen.findByTestId('chip_input_contact_selector');
 		await user.type(moderatorInput, 'User');
 
 		const noMatch = await screen.findByText(

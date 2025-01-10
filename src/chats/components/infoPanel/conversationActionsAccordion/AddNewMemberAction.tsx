@@ -7,7 +7,7 @@
 import React, { FC, useCallback, useMemo, useState } from 'react';
 
 import { Container } from '@zextras/carbonio-design-system';
-import { map } from 'lodash';
+import { map, size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 import ActionComponent from './ActionComponent';
@@ -19,7 +19,7 @@ import useStore from '../../../../store/Store';
 import { AddMemberFields } from '../../../../types/network/models/roomBeTypes';
 import { Member } from '../../../../types/store/RoomTypes';
 import { CapabilityType } from '../../../../types/store/SessionTypes';
-import { ContactSelected } from '../../creationModal/ChatCreationContactsSelection';
+import { ContactsSelected } from '../../contactSelector/ContactsSelector';
 
 type AddNewMemberProps = {
 	roomId: string;
@@ -33,17 +33,17 @@ const AddNewMemberAction: FC<AddNewMemberProps> = ({ roomId }) => {
 		'Remove someone to add new members'
 	);
 
-	const members: Member[] | undefined = useStore((state) => getRoomMembers(state, roomId));
+	const members: Member[] = useStore((state) => getRoomMembers(state, roomId));
 	const roomName: string = useStore((state) => getRoomNameSelector(state, roomId));
 	const maxMembers = useStore((store) => getCapability(store, CapabilityType.MAX_GROUP_MEMBERS));
 
-	const [contactsSelected, setContactsSelected] = useState<ContactSelected>({});
+	const [contactsSelected, setContactsSelected] = useState<ContactsSelected>([]);
 	const [addNewMemberModalOpen, setAddNewMemberModalOpen] = useState<boolean>(false);
 	const [showHistory, setShowHistory] = useState<boolean>(false);
 
 	const closeModal = useCallback(() => {
 		setAddNewMemberModalOpen(false);
-		setContactsSelected({});
+		setContactsSelected([]);
 	}, []);
 
 	const addNewMember = useCallback(() => {
@@ -51,17 +51,14 @@ const AddNewMemberAction: FC<AddNewMemberProps> = ({ roomId }) => {
 		map(contactsSelected, (contact) => {
 			members.push({
 				userId: contact.id,
-				owner: contact.owner,
+				owner: !!contact.owner,
 				historyCleared: !showHistory
 			});
 		});
 		RoomsApi.addRoomMembers(roomId, members).then(() => closeModal());
 	}, [closeModal, contactsSelected, roomId, showHistory]);
 
-	const addMemberDisabled = useMemo(
-		() => maxMembers === members?.length,
-		[maxMembers, members?.length]
-	);
+	const addMemberDisabled = useMemo(() => maxMembers === size(members), [maxMembers, members]);
 
 	return (
 		<Container>
@@ -84,7 +81,7 @@ const AddNewMemberAction: FC<AddNewMemberProps> = ({ roomId }) => {
 					closeModal={closeModal}
 					members={members}
 					contactsSelected={contactsSelected}
-					setContactSelected={setContactsSelected}
+					setContactsSelected={setContactsSelected}
 					showHistory={showHistory}
 					setShowHistory={setShowHistory}
 					label={roomName}

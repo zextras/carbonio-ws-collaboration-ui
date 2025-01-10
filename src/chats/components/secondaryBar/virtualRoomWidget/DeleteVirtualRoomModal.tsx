@@ -57,7 +57,7 @@ const DeleteVirtualRoomModal: FC<deleteVirtualRoomModalProps> = ({
 	const createSnackbar: CreateSnackbarFn = useSnackbar();
 
 	const roomName = useStore((state) => getRoomNameSelector(state, roomId));
-	const modalTitle = t('meeting.virtual.deleteModalTitle', `Delete ${roomName} Virtual Room`, {
+	const modalTitle = t('meeting.virtual.deleteModalTitle', `Delete "${roomName}" Virtual Room`, {
 		roomName
 	});
 

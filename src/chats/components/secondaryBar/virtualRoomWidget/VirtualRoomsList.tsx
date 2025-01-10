@@ -53,7 +53,7 @@ const VirtualRoomsList: FC<virtualRoomsListProps> = ({ setListVisibility, parent
 		'The Rooms you create will be shown here'
 	);
 
-	const createVirtualRoom = t('meeting.virtual.newRoom', 'Create new Room');
+	const createVirtualRoom = t('meeting.virtual.newRoom', 'Create new virtual room');
 
 	const virtualRoomList = useStore(getTemporaryRoomIdsOrderedByCreation);
 	const [showCreationModal, setShowCreationModal] = useState(false);
