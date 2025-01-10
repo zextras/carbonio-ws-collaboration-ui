@@ -47,7 +47,6 @@
 		"@zextras/carbonio-ui-sdk": "1.7.11",
 		"babel-eslint": "10.1.0",
 		"babel-jest": "29.7.0",
-		"babel-plugin-i18next-extract": "1.0.0",
 		"babel-plugin-transform-import-meta": "^2.2.1",
 		"eslint": "^8.46.0",
 		"eslint-plugin-import": "^2.29.1",
