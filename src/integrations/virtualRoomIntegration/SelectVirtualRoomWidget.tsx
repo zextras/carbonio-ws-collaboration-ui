@@ -58,7 +58,7 @@ const SelectVirtualRoomWidget: FC<SelectVirtualRoomWidgetProps> = ({ onChange, d
 	const [t] = useTranslation();
 
 	const deleteVirtualRoomTooltip = t('meeting.virtual.deleteTooltip', 'Delete Virtual Room');
-	const createVirtualRoom = t('meeting.virtual.newRoom', 'Create new Room');
+	const createVirtualRoom = t('meeting.virtual.newRoom', 'Create new virtual room');
 	const noVirtualRoomLabel = t('appointment.input.defaultValue', 'No Virtual Room selected');
 	const notMyRoomLabel = t(
 		'appointment.input.caption',

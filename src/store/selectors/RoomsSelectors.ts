@@ -107,8 +107,8 @@ export const getNumberOfOwnersOfTheRoom = (state: RootStore, roomId: string): nu
 	return 0;
 };
 
-export const getRoomMembers = (state: RootStore, roomId: string): Member[] | undefined =>
-	state.rooms[roomId]?.members;
+export const getRoomMembers = (state: RootStore, roomId: string): Member[] =>
+	state.rooms[roomId]?.members ?? [];
 
 export const getNumbersOfRoomMembers = (state: RootStore, roomId: string): number =>
 	size(state.rooms[roomId]?.members);
