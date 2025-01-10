@@ -3,7 +3,6 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-/* eslint-disable no-nested-ternary */
 
 import React, { FC, useCallback, useEffect, useMemo, useRef } from 'react';
 
@@ -207,6 +206,7 @@ const Bubble: FC<BubbleProps> = ({
 		<ForwardContainer
 			orientation="horizontal"
 			width="fill"
+			height="fit"
 			mainAlignment="space-between"
 			ref={forwardContainerRef}
 			$forwardIsActive={forwardIsActive}
