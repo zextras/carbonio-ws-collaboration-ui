@@ -8,11 +8,11 @@ import React, { ReactElement } from 'react';
 import { Avatar, Container, Shimmer, Text } from '@zextras/carbonio-design-system';
 import styled from 'styled-components';
 
-import useAvatarUtilities from '../../../../../hooks/useAvatarUtilities';
-import { getCapability } from '../../../../../store/selectors/SessionSelectors';
-import { getUserName, getUserOnline } from '../../../../../store/selectors/UsersSelectors';
-import useStore from '../../../../../store/Store';
-import { CapabilityType } from '../../../../../types/store/SessionTypes';
+import useAvatarUtilities from '../../hooks/useAvatarUtilities';
+import { getCapability } from '../../store/selectors/SessionSelectors';
+import { getUserName, getUserOnline } from '../../store/selectors/UsersSelectors';
+import useStore from '../../store/Store';
+import { CapabilityType } from '../../types/store/SessionTypes';
 
 const CustomAvatar = styled(Avatar)`
 	min-width: 1.5rem;
@@ -22,6 +22,13 @@ const CustomAvatar = styled(Avatar)`
 	> p {
 		font-size: 0.65rem;
 	}
+`;
+
+const CustomShimmerAvatar = styled(Shimmer.Avatar)`
+	min-width: 1.5rem;
+	max-width: 1.5rem;
+	min-height: 1.5rem;
+	max-height: 1.5rem;
 `;
 
 const Presence = styled.div<{ $online: boolean }>`
@@ -36,11 +43,12 @@ const Presence = styled.div<{ $online: boolean }>`
 	bottom: 0;
 `;
 
-type ReadByDropdownUserProps = {
+type UserInfoRowProps = {
 	userId: string;
+	displayPresence?: boolean;
 };
 
-const ReadByDropdownUser = ({ userId }: ReadByDropdownUserProps): ReactElement => {
+const UserInfoRow = ({ userId, displayPresence }: UserInfoRowProps): ReactElement => {
 	const username = useStore((store) => getUserName(store, userId));
 
 	const { avatarColor, avatarPicture, avatarIcon, isLoading } = useAvatarUtilities(userId);
@@ -57,7 +65,7 @@ const ReadByDropdownUser = ({ userId }: ReadByDropdownUserProps): ReactElement =
 			style={{ position: 'relative' }}
 		>
 			{isLoading ? (
-				<Shimmer.Avatar />
+				<CustomShimmerAvatar />
 			) : (
 				<CustomAvatar
 					label={username}
@@ -67,10 +75,10 @@ const ReadByDropdownUser = ({ userId }: ReadByDropdownUserProps): ReactElement =
 					icon={avatarIcon}
 				/>
 			)}
-			{canSeeUsersPresence && <Presence $online={memberOnline} />}
+			{canSeeUsersPresence && displayPresence && <Presence $online={memberOnline} />}
 			<Text size="small">{username}</Text>
 		</Container>
 	);
 };
 
-export default ReadByDropdownUser;
+export default UserInfoRow;

@@ -10,9 +10,9 @@ import { map } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import ReadByDropdownUser from './ReadyByDropdownUser';
 import { getUsersReadingMessage } from '../../../../../store/selectors/MarkersSelectors';
 import useStore from '../../../../../store/Store';
+import ReadByDropdownUser from '../../../UserInfoRow';
 
 const CustomDropdown = styled(Container)`
 	position: absolute;
@@ -35,7 +35,10 @@ const ReadByDropdown = ({ roomId, stanzaId }: ReadByProps): ReactElement => {
 	const readingUsers = useStore((store) => getUsersReadingMessage(store, roomId, stanzaId));
 
 	const ReadingUserList = useMemo(
-		() => map(readingUsers, (userId) => <ReadByDropdownUser userId={userId} key={userId} />),
+		() =>
+			map(readingUsers, (userId) => (
+				<ReadByDropdownUser userId={userId} key={userId} displayPresence />
+			)),
 		[readingUsers]
 	);
 
