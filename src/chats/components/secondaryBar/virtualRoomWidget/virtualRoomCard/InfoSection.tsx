@@ -59,7 +59,10 @@ const InfoSection: FC<InfoSectionProps> = ({
 		'meeting.virtual.moderators.singleAdditional',
 		'and other one moderator'
 	);
-	const virtualRoomModeratorsLabel = t('', "Virtual Room's moderators:"); // TODO: translation key
+	const virtualRoomModeratorsLabel = t(
+		'meeting.virtual.moderators.widget',
+		"Virtual Room's moderators:"
+	);
 
 	const sessionId = useStore(getUserId);
 	const sessionName = useStore((store) => getUserName(store, sessionId ?? ''));
@@ -68,12 +71,11 @@ const InfoSection: FC<InfoSectionProps> = ({
 
 	const moderatorsTextRef = useRef(null);
 
-	// TODO: update translation key
 	const otherModeratorsLabel = useMemo(
 		() => (
 			<Trans
-				i18nKey="meeting.virtual.moderators.multipleAdditionalIUWEHFIWUEFG"
-				defaults="and other <strong>{{numberOfModerators}} moderators</strong>"
+				i18nKey="meeting.virtual.moderators.multipleAdditional"
+				defaults="and other <strong>{{numberOfModerators}} moderators</strong>."
 				values={{ numberOfModerators: moderatorsList.length - 1 }}
 			/>
 		),

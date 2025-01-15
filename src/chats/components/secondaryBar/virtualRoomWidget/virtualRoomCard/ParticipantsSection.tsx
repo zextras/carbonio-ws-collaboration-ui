@@ -74,7 +74,7 @@ const ParticipantsSection: FC<ParticipantsSectionProp> = ({
 		'meeting.virtual.startPrompt',
 		'Start a meeting in this Virtual Room.'
 	);
-	const activeParticipantsLabel = t('', 'Active participants:'); // TODO: translation key
+	const activeParticipantsLabel = t('meeting.virtual.participants.widget', 'Active participants:');
 
 	const meetingParticipants = useStore((store) => getMeetingParticipants(store, roomId));
 
