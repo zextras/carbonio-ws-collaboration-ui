@@ -7,7 +7,7 @@ import React, { FC, useMemo, useRef } from 'react';
 
 import { Avatar, Container, Row, Shimmer, Text } from '@zextras/carbonio-design-system';
 import { size } from 'lodash';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import PopoverUserList from './PopoverUserList';
@@ -68,12 +68,16 @@ const InfoSection: FC<InfoSectionProps> = ({
 
 	const moderatorsTextRef = useRef(null);
 
-	const otherModeratorsLabel = t(
-		'meeting.virtual.moderators.multipleAdditional',
-		'and other {{numberOfModerators}} moderators',
-		{
-			numberOfModerators: moderatorsList.length - 1
-		}
+	// TODO: update translation key
+	const otherModeratorsLabel = useMemo(
+		() => (
+			<Trans
+				i18nKey="meeting.virtual.moderators.multipleAdditionalIUWEHFIWUEFG"
+				defaults="and other <strong>{{numberOfModerators}} moderators</strong>"
+				values={{ numberOfModerators: moderatorsList.length - 1 }}
+			/>
+		),
+		[moderatorsList.length]
 	);
 
 	const { avatarPicture, avatarColor, isLoading } = useAvatarUtilities(

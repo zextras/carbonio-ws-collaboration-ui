@@ -6,7 +6,7 @@
 
 import React, { FC } from 'react';
 
-import { Container, Text, Row } from '@zextras/carbonio-design-system';
+import { Container, Text, Row, Tooltip } from '@zextras/carbonio-design-system';
 import styled from 'styled-components';
 
 import InfoSection from './InfoSection';
@@ -82,7 +82,9 @@ const VirtualRoomCard: FC<virtualRoomElementProps> = ({ roomId, modalRef }) => {
 						mainAlignment="flex-start"
 						$isMyRoom={userIsModerator || amIParticipating}
 					>
-						<Text size="large">{room.name}</Text>
+						<Tooltip label={room.name} overflowTooltip>
+							<Text size="large">{room.name}</Text>
+						</Tooltip>
 					</CustomRow>
 				</Container>
 				<ParticipantsSection
