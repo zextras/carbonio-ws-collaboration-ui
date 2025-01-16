@@ -9,17 +9,18 @@ import { Avatar, Container, Shimmer, Text } from '@zextras/carbonio-design-syste
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import useAvatarUtilities from '../../hooks/useAvatarUtilities';
-import { getCapability, getIsLoggedUser } from '../../store/selectors/SessionSelectors';
-import { getUserName, getUserOnline } from '../../store/selectors/UsersSelectors';
-import useStore from '../../store/Store';
-import { CapabilityType } from '../../types/store/SessionTypes';
+import useAvatarUtilities from '../../../hooks/useAvatarUtilities';
+import { getCapability, getIsLoggedUser } from '../../../store/selectors/SessionSelectors';
+import { getUserName, getUserOnline } from '../../../store/selectors/UsersSelectors';
+import useStore from '../../../store/Store';
+import { CapabilityType } from '../../../types/store/SessionTypes';
 
 const CustomAvatar = styled(Avatar)`
 	min-width: 1.5rem;
 	max-width: 1.5rem;
 	min-height: 1.5rem;
 	max-height: 1.5rem;
+
 	> p {
 		font-size: 0.65rem;
 	}
@@ -49,7 +50,7 @@ type UserInfoRowProps = {
 	displayPresence?: boolean;
 };
 
-const UserInfoRow = ({ userId, displayPresence }: UserInfoRowProps): ReactElement => {
+const UserPopoverRow = ({ userId, displayPresence }: UserInfoRowProps): ReactElement => {
 	const [t] = useTranslation();
 	const youLabel = t('status.you', 'You');
 
@@ -86,4 +87,4 @@ const UserInfoRow = ({ userId, displayPresence }: UserInfoRowProps): ReactElemen
 	);
 };
 
-export default UserInfoRow;
+export default UserPopoverRow;

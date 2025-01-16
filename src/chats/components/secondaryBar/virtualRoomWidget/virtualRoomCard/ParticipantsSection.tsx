@@ -10,11 +10,11 @@ import { map, size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import PopoverUserList from './PopoverUserList';
 import useAvatarUtilities from '../../../../../hooks/useAvatarUtilities';
 import { getMeetingParticipants } from '../../../../../store/selectors/MeetingSelectors';
 import { getUserName } from '../../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../../store/Store';
+import UserPopoverList from '../../../userPopoverList/UserPopoverList';
 
 type ParticipantsSectionProp = {
 	roomId: string;
@@ -173,11 +173,12 @@ const ParticipantsSection: FC<ParticipantsSectionProp> = ({
 				{avatarList}
 			</CustomRow>
 			{size(meetingParticipants) > 0 && isMyRoom && (
-				<PopoverUserList
+				<UserPopoverList
 					anchorEl={participantsRef}
+					userList={participantIds}
 					title={activeParticipantsLabel}
 					icon="VideoOutline"
-					userList={participantIds}
+					placement="right"
 				/>
 			)}
 		</Container>

@@ -10,12 +10,12 @@ import { size } from 'lodash';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import PopoverUserList from './PopoverUserList';
 import useAvatarUtilities from '../../../../../hooks/useAvatarUtilities';
 import { getOwners } from '../../../../../store/selectors/RoomsSelectors';
 import { getUserId } from '../../../../../store/selectors/SessionSelectors';
 import { getUserName } from '../../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../../store/Store';
+import UserPopoverList from '../../../userPopoverList/UserPopoverList';
 
 type InfoSectionProps = {
 	roomId: string;
@@ -145,11 +145,12 @@ const InfoSection: FC<InfoSectionProps> = ({
 						{moderatorLabel}
 					</ClickableText>
 					{size(moderatorsList) > 1 && (
-						<PopoverUserList
+						<UserPopoverList
 							anchorEl={moderatorsTextRef}
+							userList={moderatorsList}
 							title={virtualRoomModeratorsLabel}
 							icon="Crown"
-							userList={moderatorsList}
+							placement="right"
 						/>
 					)}
 				</Container>
