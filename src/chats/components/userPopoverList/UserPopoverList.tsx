@@ -12,7 +12,7 @@ import { map } from 'lodash';
 
 import UserPopoverRow from './UserPopoverRow';
 
-type PopoverUserListProps = {
+export type UserPopoverListProps = {
 	anchorEl: RefObject<HTMLElement>;
 	userList: string[];
 	title?: string;
@@ -22,7 +22,7 @@ type PopoverUserListProps = {
 	placement?: PopoverProps['placement'];
 };
 
-const UserPopoverList: FC<PopoverUserListProps> = ({
+const UserPopoverList: FC<UserPopoverListProps> = ({
 	anchorEl,
 	userList,
 	title,

@@ -45,12 +45,12 @@ const Presence = styled.div<{ $online: boolean }>`
 	bottom: 0;
 `;
 
-type UserInfoRowProps = {
+type UserPopoverRowProps = {
 	userId: string;
 	displayPresence?: boolean;
 };
 
-const UserPopoverRow = ({ userId, displayPresence }: UserInfoRowProps): ReactElement => {
+const UserPopoverRow = ({ userId, displayPresence }: UserPopoverRowProps): ReactElement => {
 	const [t] = useTranslation();
 	const youLabel = t('status.you', 'You');
 
