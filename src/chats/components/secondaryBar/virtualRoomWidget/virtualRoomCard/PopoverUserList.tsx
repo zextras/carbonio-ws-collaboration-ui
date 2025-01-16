@@ -20,12 +20,11 @@ type PopoverUserListProps = {
 };
 
 const PopoverUserList: FC<PopoverUserListProps> = ({ anchorEl, title, icon, userList }) => {
-	const [isHovered, setIsHovered] = useState(false);
+	const [open, setOpen] = useState(false);
 
 	useEffect(() => {
 		if (anchorEl.current) {
-			anchorEl.current.onmouseenter = (): void => setIsHovered(true);
-			anchorEl.current.onmouseleave = (): void => setIsHovered(false);
+			anchorEl.current.onclick = (): void => setOpen(true);
 		}
 	}, [anchorEl]);
 
@@ -36,11 +35,11 @@ const PopoverUserList: FC<PopoverUserListProps> = ({ anchorEl, title, icon, user
 	return (
 		<Popover
 			anchorEl={anchorEl}
-			open={isHovered}
+			open={open}
 			placement="right"
 			disablePortal
 			styleAsModal
-			onClose={() => {}}
+			onClose={() => setOpen(false)}
 		>
 			<Container gap="0.5rem" padding="small">
 				<Container gap="0.5rem" orientation="horizontal" mainAlignment="flex-start">
@@ -49,7 +48,12 @@ const PopoverUserList: FC<PopoverUserListProps> = ({ anchorEl, title, icon, user
 						{title}
 					</Text>
 				</Container>
-				<Container mainAlignment="flex-start" gap="0.5rem">
+				<Container
+					mainAlignment="flex-start"
+					maxHeight="20vh"
+					gap="0.5rem"
+					style={{ overflowY: 'scroll' }}
+				>
 					{users}
 				</Container>
 			</Container>

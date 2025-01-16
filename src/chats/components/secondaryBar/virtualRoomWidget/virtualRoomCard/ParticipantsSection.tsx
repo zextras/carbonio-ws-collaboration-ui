@@ -43,6 +43,7 @@ const AvatarCounter = styled.div`
 
 const AvatarContainer = styled(Container)`
 	position: relative;
+	cursor: pointer;
 `;
 
 const CustomParticipantAvatar = styled(Avatar)`

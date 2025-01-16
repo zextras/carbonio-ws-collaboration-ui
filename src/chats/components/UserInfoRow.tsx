@@ -6,10 +6,11 @@
 import React, { ReactElement } from 'react';
 
 import { Avatar, Container, Shimmer, Text } from '@zextras/carbonio-design-system';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import useAvatarUtilities from '../../hooks/useAvatarUtilities';
-import { getCapability } from '../../store/selectors/SessionSelectors';
+import { getCapability, getIsLoggedUser } from '../../store/selectors/SessionSelectors';
 import { getUserName, getUserOnline } from '../../store/selectors/UsersSelectors';
 import useStore from '../../store/Store';
 import { CapabilityType } from '../../types/store/SessionTypes';
@@ -49,13 +50,17 @@ type UserInfoRowProps = {
 };
 
 const UserInfoRow = ({ userId, displayPresence }: UserInfoRowProps): ReactElement => {
-	const username = useStore((store) => getUserName(store, userId));
+	const [t] = useTranslation();
+	const youLabel = t('status.you', 'You');
 
-	const { avatarColor, avatarPicture, avatarIcon, isLoading } = useAvatarUtilities(userId);
+	const username = useStore((store) => getUserName(store, userId));
+	const isLoggedUser = useStore((store) => getIsLoggedUser(store, userId));
 	const memberOnline: boolean = useStore((store) => getUserOnline(store, userId));
 	const canSeeUsersPresence = useStore((store) =>
 		getCapability(store, CapabilityType.CAN_SEE_USERS_PRESENCE)
 	);
+
+	const { avatarColor, avatarPicture, avatarIcon, isLoading } = useAvatarUtilities(userId);
 
 	return (
 		<Container
@@ -76,7 +81,7 @@ const UserInfoRow = ({ userId, displayPresence }: UserInfoRowProps): ReactElemen
 				/>
 			)}
 			{canSeeUsersPresence && displayPresence && <Presence $online={memberOnline} />}
-			<Text size="small">{username}</Text>
+			<Text size="small">{isLoggedUser ? youLabel : username}</Text>
 		</Container>
 	);
 };

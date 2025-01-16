@@ -38,6 +38,11 @@ const CustomRow = styled(Row)<{ $isMyRoom: boolean | undefined }>`
 	${({ $isMyRoom }): string | undefined | false => !$isMyRoom && 'opacity: 0.5; cursor: default;'};
 `;
 
+const ClickableText = styled(Text)<{ $displayList: boolean }>`
+	cursor: ${({ $displayList }): string | undefined | false =>
+		$displayList ? 'pointer' : 'default;'};
+`;
+
 const InfoSection: FC<InfoSectionProps> = ({
 	roomId,
 	userIsModerator,
@@ -130,9 +135,15 @@ const InfoSection: FC<InfoSectionProps> = ({
 					{ownerName}
 				</Text>
 				<Container ref={moderatorsTextRef} crossAlignment="flex-start" width="fit">
-					<Text size="extrasmall" weight="light" color="gray1" ref={moderatorsTextRef}>
+					<ClickableText
+						size="extrasmall"
+						weight="light"
+						color="gray1"
+						ref={moderatorsTextRef}
+						$displayList={size(moderatorsList) > 1}
+					>
 						{moderatorLabel}
-					</Text>
+					</ClickableText>
 					{size(moderatorsList) > 1 && (
 						<PopoverUserList
 							anchorEl={moderatorsTextRef}
