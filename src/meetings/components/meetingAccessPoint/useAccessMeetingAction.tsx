@@ -89,6 +89,7 @@ const useAccessMeetingAction = (
 			mediaDevicesEnabled?: { audio: boolean; video: boolean },
 			selectedDevicesId?: { audio?: string; video?: string }
 		) => {
+			console.log(selectedDevicesId?.audio);
 			MeetingsApi.enterMeeting(
 				getRoomIdFromMeeting(useStore.getState(), meetingId) ?? '',
 				{

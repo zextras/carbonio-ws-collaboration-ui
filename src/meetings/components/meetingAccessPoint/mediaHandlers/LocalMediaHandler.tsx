@@ -287,6 +287,12 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 	}, []);
 
 	useEffect(() => {
+		if (selectedDevicesId.audio === undefined && mediaAudioList[0]) {
+			setSelectedDevicesId({ audio: mediaAudioList[0].value, video: selectedDevicesId.video });
+		}
+	}, [mediaAudioList, selectedDevicesId, setSelectedDevicesId]);
+
+	useEffect(() => {
 		navigator.mediaDevices.addEventListener('devicechange', updateListOfDevices);
 		return (): void => {
 			navigator.mediaDevices.removeEventListener('devicechange', updateListOfDevices);
