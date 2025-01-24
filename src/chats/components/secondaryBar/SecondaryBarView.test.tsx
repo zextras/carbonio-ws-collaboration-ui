@@ -113,10 +113,7 @@ beforeEach(() => {
 	const store: RootStore = useStore.getState();
 	store.setChatsBeStatus(true);
 	store.setLoginInfo(user1Be.id, user1Be.name);
-	store.addRoom(mockedGroup1);
-	store.addRoom(mockedOneToOne1);
-	store.addRoom(mockedGroup2);
-	store.addRoom(mockedOneToOne2);
+	store.setRooms([mockedGroup1, mockedOneToOne1, mockedGroup2, mockedOneToOne2]);
 	store.setUserInfo(user1Be);
 	store.setUserInfo(user2Be);
 	store.setUserInfo(user3Be);
@@ -234,6 +231,28 @@ describe('SecondaryBar tests', () => {
 				/There are no users matching this search in your existing chats./i
 			);
 			expect(noMatchText).toBeInTheDocument();
+		});
+
+		test('First render displays only 10 list element', async () => {
+			useStore
+				.getState()
+				.setRooms([
+					createMockRoom({ id: '1' }),
+					createMockRoom({ id: '2' }),
+					createMockRoom({ id: '3' }),
+					createMockRoom({ id: '4' }),
+					createMockRoom({ id: '5' }),
+					createMockRoom({ id: '6' }),
+					createMockRoom({ id: '7' }),
+					createMockRoom({ id: '8' }),
+					createMockRoom({ id: '9' }),
+					createMockRoom({ id: '10' }),
+					createMockRoom({ id: '11' }),
+					createMockRoom({ id: '12' })
+				]);
+			setup(<SecondaryBarView expanded />);
+			const listElements = await screen.findAllByTestId('list-item');
+			expect(listElements).toHaveLength(10);
 		});
 	});
 

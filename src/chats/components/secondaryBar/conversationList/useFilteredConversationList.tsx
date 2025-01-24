@@ -42,7 +42,7 @@ const useFilteredConversationList = (
 		[expanded]
 	);
 
-	const [itemsDisplayedNumber, setItemsDisplayedNumber] = useState<number>(15);
+	const [itemsDisplayedNumber, setItemsDisplayedNumber] = useState<number>(10);
 
 	const loadItems = useCallback(() => {
 		if (size(filteredConversationsIds) > itemsDisplayedNumber && !filtering) {
