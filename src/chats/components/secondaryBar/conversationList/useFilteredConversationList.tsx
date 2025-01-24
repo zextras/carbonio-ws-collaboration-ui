@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
-import { Container } from '@zextras/carbonio-design-system';
+import { Container, List } from '@zextras/carbonio-design-system';
 import { map, size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -35,46 +35,57 @@ const useFilteredConversationList = (
 
 	const filteredConversationsIds = useFilterRoomsOnInput(input);
 
+	const filtering = useMemo(() => input !== '', [input]);
+
 	const ListItem = useMemo(
 		() => (expanded ? ExpandedSidebarListItem : CollapsedSidebarListItem),
 		[expanded]
 	);
 
-	const listOfRooms = useMemo(() => {
-		if (size(filteredConversationsIds) > 0) {
-			return map(filteredConversationsIds, (room) => (
-				<ListItem roomId={room.roomId} key={`${room.roomId}_item`} />
-			));
+	const [itemsDisplayedNumber, setItemsDisplayedNumber] = useState<number>(15);
+
+	const loadItems = useCallback(() => {
+		if (size(filteredConversationsIds) > itemsDisplayedNumber && !filtering) {
+			setItemsDisplayedNumber((prevState) => prevState + 3);
 		}
-		return (
-			<CustomContainer
-				mainAlignment="flex-start"
-				padding={{ top: '2rem', bottom: '1.5rem', horizontal: '1rem' }}
-				key="no_match_item"
-			>
-				<SecondaryBarInfoText
-					color="gray1"
-					size="small"
-					weight="light"
-					overflow={expanded ? 'break-word' : 'ellipsis'}
-				>
-					{noMatchLabel}
-				</SecondaryBarInfoText>
-			</CustomContainer>
-		);
-	}, [filteredConversationsIds, expanded, noMatchLabel, ListItem]);
+	}, [filteredConversationsIds, filtering, itemsDisplayedNumber]);
+
+	const listOfRooms = useMemo(() => {
+		const items = filtering
+			? filteredConversationsIds
+			: filteredConversationsIds.slice(0, itemsDisplayedNumber);
+		return map(items, (room) => <ListItem roomId={room.roomId} key={`${room.roomId}_item`} />);
+	}, [ListItem, filteredConversationsIds, filtering, itemsDisplayedNumber]);
 
 	const FilteredConversationList = useMemo(
 		() => (
 			<Container
-				height="fit"
 				data-testid="conversations_list_filtered"
+				height={!filtering ? '100%' : 'fit'}
+				maxHeight={!filtering ? 'fit' : 'auto'}
 				padding={{ vertical: 'small' }}
 			>
-				{listOfRooms}
+				{size(filteredConversationsIds) > 0 ? (
+					<List onListBottom={loadItems}>{listOfRooms}</List>
+				) : (
+					<CustomContainer
+						mainAlignment="flex-start"
+						padding={{ top: '2rem', bottom: '1.5rem', horizontal: '1rem' }}
+						key="no_match_item"
+					>
+						<SecondaryBarInfoText
+							color="gray1"
+							size="small"
+							weight="light"
+							overflow={expanded ? 'break-word' : 'ellipsis'}
+						>
+							{noMatchLabel}
+						</SecondaryBarInfoText>
+					</CustomContainer>
+				)}
 			</Container>
 		),
-		[listOfRooms]
+		[expanded, filteredConversationsIds, filtering, listOfRooms, loadItems, noMatchLabel]
 	);
 
 	return {

@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { screen } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 
 import SecondaryBarView from './SecondaryBarView';
 import useStore from '../../../store/Store';
@@ -154,11 +154,11 @@ describe('SecondaryBar tests', () => {
 	describe('ConversationList inside SecondaryBarView tests', () => {
 		test('List is rendered in order of last message in chat', async () => {
 			setup(<SecondaryBarView expanded />);
-			const listNotFiltered = await screen.findByTestId('conversations_list_filtered');
-			expect(listNotFiltered.children[0].textContent?.includes(user2Be.name)).toBeTruthy();
-			expect(listNotFiltered.children[1].textContent?.includes(user3Be.name)).toBeTruthy();
-			expect(listNotFiltered.children[2].textContent?.includes(mockedGroup1.name!)).toBeTruthy();
-			expect(listNotFiltered.children[3].textContent?.includes(mockedGroup2.name!)).toBeTruthy();
+			const listElements = await screen.findAllByTestId('list-item');
+			expect(within(listElements[0]).getByText(user2Be.name)).toBeInTheDocument();
+			expect(within(listElements[1]).getByText(user3Be.name)).toBeInTheDocument();
+			expect(within(listElements[2]).getByText(mockedGroup1.name!)).toBeInTheDocument();
+			expect(within(listElements[3]).getByText(mockedGroup2.name!)).toBeInTheDocument();
 		});
 
 		test('User filter conversations and expect only groups to be visible', async () => {
@@ -167,8 +167,8 @@ describe('SecondaryBar tests', () => {
 			const textArea = screen.getByRole('textbox');
 			await user.type(textArea, 'Group of');
 
-			const list = await screen.findByTestId('conversations_list_filtered');
-			expect(list.children).toHaveLength(2);
+			const listElements = await screen.findAllByTestId('list-item');
+			expect(listElements).toHaveLength(2);
 			const closeButton = screen.getByTestId(iconCloseOutline);
 			expect(closeButton).toBeInTheDocument();
 			// user click the close button
@@ -182,9 +182,9 @@ describe('SecondaryBar tests', () => {
 			const { user } = setup(<SecondaryBarView expanded />);
 			const textArea = screen.getByRole('textbox');
 			await user.type(textArea, 'Group of');
-			const list = await screen.findByTestId('conversations_list_filtered');
-			expect(list.children[0].textContent?.includes(mockedGroup1.name!)).toBeTruthy();
-			expect(list.children[1].textContent?.includes(mockedGroup2.name!)).toBeTruthy();
+			const listElements = await screen.findAllByTestId('list-item');
+			expect(within(listElements[0]).getByText(mockedGroup1.name!)).toBeInTheDocument();
+			expect(within(listElements[1]).getByText(mockedGroup2.name!)).toBeInTheDocument();
 		});
 
 		test('User filter conversations and expect both groups and oneToOne to be visible', async () => {
@@ -192,8 +192,8 @@ describe('SecondaryBar tests', () => {
 			// user search a one to one conversation
 			const textArea = screen.getByRole('textbox');
 			await user.type(textArea, 'User');
-			const list2 = await screen.findByTestId('conversations_list_filtered');
-			expect(list2.children).toHaveLength(4);
+			const listElements = await screen.findAllByTestId('list-item');
+			expect(listElements).toHaveLength(4);
 			const closeButton = screen.getByTestId(iconCloseOutline);
 			expect(closeButton).toBeInTheDocument();
 			await user.click(closeButton);
@@ -207,8 +207,8 @@ describe('SecondaryBar tests', () => {
 			// user search a one to one conversation
 			const textArea = screen.getByRole('textbox');
 			await user.type(textArea, 'User3');
-			const list2 = await screen.findByTestId('conversations_list_filtered');
-			expect(list2.children).toHaveLength(2);
+			const listElements = await screen.findAllByTestId('list-item');
+			expect(listElements).toHaveLength(2);
 			const closeButton = screen.getByTestId(iconCloseOutline);
 			expect(closeButton).toBeInTheDocument();
 			await user.click(closeButton);
@@ -221,9 +221,9 @@ describe('SecondaryBar tests', () => {
 			const { user } = setup(<SecondaryBarView expanded />);
 			const textArea = screen.getByRole('textbox');
 			await user.type(textArea, 'User3');
-			const list = await screen.findByTestId('conversations_list_filtered');
-			expect(list.children[0].textContent?.includes(user3Be.name)).toBeTruthy();
-			expect(list.children[1].textContent?.includes(mockedGroup1.name!)).toBeTruthy();
+			const listElements = await screen.findAllByTestId('list-item');
+			expect(within(listElements[0]).getByText(user3Be.name)).toBeInTheDocument();
+			expect(within(listElements[1]).getByText(mockedGroup1.name!)).toBeInTheDocument();
 		});
 
 		test("The filter doesn't find any match", async () => {
