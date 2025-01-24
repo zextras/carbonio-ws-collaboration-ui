@@ -4,11 +4,11 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React from 'react';
+import React, { ReactElement, useRef } from 'react';
 
 import { act, screen } from '@testing-library/react';
 
-import ReadByDropdown from './ReadByDropdown';
+import ReadByPopoverList from './ReadByPopoverList';
 import useStore from '../../../../../store/Store';
 import {
 	createMockMarker,
@@ -48,6 +48,16 @@ const sessionUserMarker = createMockMarker({
 	markerDate: now - 2000
 });
 
+const ComplexComponent = (): ReactElement => {
+	const ref = useRef(null);
+	return (
+		<>
+			<div data-testid="clickableDiv" ref={ref} />
+			<ReadByPopoverList roomId={room.id} stanzaId={textMessage.stanzaId} anchorRef={ref} />
+		</>
+	);
+};
+
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo(sessionUser.id, sessionUser.email);
@@ -56,9 +66,10 @@ beforeEach(() => {
 	store.newMessage(textMessage);
 	store.updateMarkers(room.id, [user1Marker]);
 });
-describe('ReadByDropdown test', () => {
-	test('Display updating reading user list', () => {
-		setup(<ReadByDropdown roomId={room.id} stanzaId={textMessage.stanzaId} />);
+describe('ReadByPopoverList test', () => {
+	test('Display updating reading user list', async () => {
+		const { user } = setup(<ComplexComponent />);
+		await user.click(screen.getByTestId('clickableDiv'));
 		expect(screen.getByText('User 1')).toBeInTheDocument();
 		act(() => {
 			useStore.getState().updateMarkers(room.id, [user2Marker]);
@@ -66,9 +77,10 @@ describe('ReadByDropdown test', () => {
 		expect(screen.getByText('User 2')).toBeInTheDocument();
 	});
 
-	test('Display all reading except sessionUser', () => {
+	test('Display all reading except sessionUser', async () => {
 		useStore.getState().updateMarkers(room.id, [sessionUserMarker]);
-		setup(<ReadByDropdown roomId={room.id} stanzaId={textMessage.stanzaId} />);
+		const { user } = setup(<ComplexComponent />);
+		await user.click(screen.getByTestId('clickableDiv'));
 		expect(screen.getByText('User 1')).toBeInTheDocument();
 		expect(screen.queryByText(sessionUser.email)).not.toBeInTheDocument();
 	});

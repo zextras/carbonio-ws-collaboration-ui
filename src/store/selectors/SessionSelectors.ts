@@ -10,6 +10,7 @@ import { UserType } from '../../types/store/UserTypes';
 
 export const getSelectedRoomId = (store: RootStore): string | undefined =>
 	store.session.selectedRoomOneToOneGroup;
+
 export const getSelectedConversation = (store: RootStore, roomId: string): boolean =>
 	store.session.selectedRoomOneToOneGroup === roomId;
 
@@ -21,6 +22,9 @@ export const getCapability = (
 ): boolean | number | undefined => store.session.capabilities?.[capabilityName];
 
 export const getUserId = (store: RootStore): string | undefined => store.session?.id;
+
+export const getIsLoggedUser = (store: RootStore, userId: string): boolean =>
+	userId === store.session?.id;
 
 export const getCustomLogo = (store: RootStore): string | false | undefined =>
 	store.session?.customLogo;

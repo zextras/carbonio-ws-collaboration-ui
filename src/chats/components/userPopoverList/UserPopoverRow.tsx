@@ -6,22 +6,31 @@
 import React, { ReactElement } from 'react';
 
 import { Avatar, Container, Shimmer, Text } from '@zextras/carbonio-design-system';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import useAvatarUtilities from '../../../../../hooks/useAvatarUtilities';
-import { getCapability } from '../../../../../store/selectors/SessionSelectors';
-import { getUserName, getUserOnline } from '../../../../../store/selectors/UsersSelectors';
-import useStore from '../../../../../store/Store';
-import { CapabilityType } from '../../../../../types/store/SessionTypes';
+import useAvatarUtilities from '../../../hooks/useAvatarUtilities';
+import { getCapability, getIsLoggedUser } from '../../../store/selectors/SessionSelectors';
+import { getUserName, getUserOnline } from '../../../store/selectors/UsersSelectors';
+import useStore from '../../../store/Store';
+import { CapabilityType } from '../../../types/store/SessionTypes';
 
 const CustomAvatar = styled(Avatar)`
 	min-width: 1.5rem;
 	max-width: 1.5rem;
 	min-height: 1.5rem;
 	max-height: 1.5rem;
+
 	> p {
 		font-size: 0.65rem;
 	}
+`;
+
+const CustomShimmerAvatar = styled(Shimmer.Avatar)`
+	min-width: 1.5rem;
+	max-width: 1.5rem;
+	min-height: 1.5rem;
+	max-height: 1.5rem;
 `;
 
 const Presence = styled.div<{ $online: boolean }>`
@@ -36,18 +45,23 @@ const Presence = styled.div<{ $online: boolean }>`
 	bottom: 0;
 `;
 
-type ReadByDropdownUserProps = {
+type UserPopoverRowProps = {
 	userId: string;
+	displayPresence?: boolean;
 };
 
-const ReadByDropdownUser = ({ userId }: ReadByDropdownUserProps): ReactElement => {
-	const username = useStore((store) => getUserName(store, userId));
+const UserPopoverRow = ({ userId, displayPresence }: UserPopoverRowProps): ReactElement => {
+	const [t] = useTranslation();
+	const youLabel = t('status.you', 'You');
 
-	const { avatarColor, avatarPicture, avatarIcon, isLoading } = useAvatarUtilities(userId);
+	const username = useStore((store) => getUserName(store, userId));
+	const isLoggedUser = useStore((store) => getIsLoggedUser(store, userId));
 	const memberOnline: boolean = useStore((store) => getUserOnline(store, userId));
 	const canSeeUsersPresence = useStore((store) =>
 		getCapability(store, CapabilityType.CAN_SEE_USERS_PRESENCE)
 	);
+
+	const { avatarColor, avatarPicture, avatarIcon, isLoading } = useAvatarUtilities(userId);
 
 	return (
 		<Container
@@ -57,7 +71,7 @@ const ReadByDropdownUser = ({ userId }: ReadByDropdownUserProps): ReactElement =
 			style={{ position: 'relative' }}
 		>
 			{isLoading ? (
-				<Shimmer.Avatar />
+				<CustomShimmerAvatar />
 			) : (
 				<CustomAvatar
 					label={username}
@@ -67,10 +81,10 @@ const ReadByDropdownUser = ({ userId }: ReadByDropdownUserProps): ReactElement =
 					icon={avatarIcon}
 				/>
 			)}
-			{canSeeUsersPresence && <Presence $online={memberOnline} />}
-			<Text size="small">{username}</Text>
+			{canSeeUsersPresence && displayPresence && <Presence $online={memberOnline} />}
+			<Text size="small">{isLoggedUser ? youLabel : username}</Text>
 		</Container>
 	);
 };
 
-export default ReadByDropdownUser;
+export default UserPopoverRow;

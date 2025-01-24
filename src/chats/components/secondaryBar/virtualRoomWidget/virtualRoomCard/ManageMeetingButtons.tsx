@@ -125,6 +125,13 @@ const ManageMeetingButtons: FC<ManageMeetingButtonsProps> = ({
 		isMyRoom
 	]);
 
+	const meetingIcon = useMemo(() => {
+		if (!amIParticipating && !isMyRoom) return 'LogOut';
+		if (!meetingIsActive) return 'StartMeeting';
+		if (amIParticipating) return 'RejoinMeeting';
+		return 'JoinMeeting';
+	}, [amIParticipating, isMyRoom, meetingIsActive]);
+
 	return (
 		<Row orientation="horizontal" gap="0.25rem">
 			<Tooltip label={roomActionsTooltip} disabled={!isMyRoom && !amIParticipating} disablePortal>
@@ -141,7 +148,7 @@ const ManageMeetingButtons: FC<ManageMeetingButtonsProps> = ({
 			<Tooltip label={amIParticipating || isMyRoom ? enterRoomTooltip : leaveRoomTooltip}>
 				<JoinRoomButton
 					color={amIParticipating || isMyRoom ? 'primary' : 'error'}
-					icon={amIParticipating || isMyRoom ? 'Video' : 'LogOut'}
+					icon={meetingIcon}
 					onClick={amIParticipating || isMyRoom ? openMeeting : leaveConversation}
 					$isMyRoom={amIParticipating || isMyRoom}
 				/>

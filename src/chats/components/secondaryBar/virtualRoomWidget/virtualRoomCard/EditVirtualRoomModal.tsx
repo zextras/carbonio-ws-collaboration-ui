@@ -74,12 +74,12 @@ const EditVirtualRoomModal: FC<deleteVirtualRoomModalProps> = ({
 	}, []);
 
 	useEffect(() => {
-		const otherOwners = filter(owners, (owner) => owner.userId !== getUserId(useStore.getState()));
+		const otherOwners = filter(owners, (owner) => owner !== getUserId(useStore.getState()));
 		setContactsSelected(
 			map(otherOwners, (owner) => ({
-				id: owner.userId,
-				displayName: getUserName(useStore.getState(), owner.userId),
-				email: getUserEmail(useStore.getState(), owner.userId) ?? ''
+				id: owner,
+				displayName: getUserName(useStore.getState(), owner),
+				email: getUserEmail(useStore.getState(), owner) ?? ''
 			}))
 		);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -88,12 +88,11 @@ const EditVirtualRoomModal: FC<deleteVirtualRoomModalProps> = ({
 	const { ownersToAdd, ownersToRemove, ownersToUpgrade, ownerToDemote } = useMemo(() => {
 		const newOwners = contactsSelected
 			.map((user) => user.id)
-			.filter((userId) => !owners.some((owner) => owner.userId === userId));
+			.filter((userId) => !owners.some((owner) => owner === userId));
 		const ownersToAdd = newOwners.filter((userId) => !meetingParticipants?.[userId]);
 		const ownersToUpgrade = newOwners.filter((userId) => meetingParticipants?.[userId]);
 
 		const oldOwners = owners
-			.map((user) => user.userId)
 			.filter((userId) => !contactsSelected.some((contactChip) => contactChip.id === userId))
 			.filter((userId) => userId !== getUserId(useStore.getState()));
 		const ownersToRemove = oldOwners.filter((userId) => !meetingParticipants?.[userId]);
