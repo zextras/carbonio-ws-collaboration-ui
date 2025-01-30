@@ -25,9 +25,6 @@ export const getUserName = (store: RootStore, id: string): string => {
 	return store.users[id]?.name || store.users[id]?.email || '';
 };
 
-export const getUserNames = (store: RootStore, ids: string[]): string[] =>
-	ids.map((id) => getUserName(store, id));
-
 export const getUserLastActivity = (store: RootStore, id: string): number | undefined =>
 	store.users[id]?.last_activity;
 

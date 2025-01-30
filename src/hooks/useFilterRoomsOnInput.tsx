@@ -6,19 +6,29 @@
 
 import { useEffect, useMemo } from 'react';
 
-import { find, forEach, map } from 'lodash';
+import { find, forEach, map, orderBy } from 'lodash';
 
 import { FilteredConversation } from '../chats/components/secondaryBar/SecondaryBarView';
-import { getOneToOneAndGroupsInfoOrderedByLastMessage } from '../store/selectors/MessagesSelectors';
+import { getOneToOneAndGroupsInfoLastMessage } from '../store/selectors/MessagesSelectors';
 import { getUserId } from '../store/selectors/SessionSelectors';
 import { getUsersSelector } from '../store/selectors/UsersSelectors';
 import useStore from '../store/Store';
 import UserDataRetriever from '../utils/UserDataRetriever';
 
 export const useFilterRoomsOnInput = (filteredInput: string): FilteredConversation[] => {
-	const roomsInfo = useStore<FilteredConversation[]>(getOneToOneAndGroupsInfoOrderedByLastMessage);
+	const filteredConvNotOrdered = useStore<FilteredConversation[]>(
+		getOneToOneAndGroupsInfoLastMessage
+	);
 	const sessionId = useStore(getUserId);
 	const users = useStore(getUsersSelector);
+
+	const roomsInfo: FilteredConversation[] = useMemo(
+		() =>
+			filteredConvNotOrdered?.length > 0
+				? orderBy(filteredConvNotOrdered, ['lastMessageTimestamp'], ['desc'])
+				: ([] as FilteredConversation[]),
+		[filteredConvNotOrdered]
+	);
 
 	// Fetch user data for each member of the rooms to let user filters by group members
 	useEffect(() => {

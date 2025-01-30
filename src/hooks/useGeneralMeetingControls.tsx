@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { CreateSnackbarFn, useSnackbar } from '@zextras/carbonio-design-system';
-import { filter, find, maxBy, size } from 'lodash';
+import { filter, find, forEach, maxBy, size, sortBy } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 import useEventListener, {
@@ -18,12 +18,12 @@ import useRouting, { PAGE_INFO_TYPE } from './useRouting';
 import { MeetingsApi } from '../network';
 import {
 	getMeetingActiveByMeetingId,
-	getMeetingParticipantsByMeetingId,
-	getTiles
+	getMeetingParticipantsByMeetingId
 } from '../store/selectors/MeetingSelectors';
 import useStore from '../store/Store';
-import { STREAM_TYPE } from '../types/store/ActiveMeetingTypes';
+import { STREAM_TYPE, TileData } from '../types/store/ActiveMeetingTypes';
 import { MeetingParticipantMap } from '../types/store/MeetingTypes';
+import { dateToTimestamp } from '../utils/dateUtils';
 
 const useGeneralMeetingControls = (meetingId: string): void => {
 	const [t] = useTranslation();
@@ -41,7 +41,32 @@ const useGeneralMeetingControls = (meetingId: string): void => {
 	const meetingParticipants: MeetingParticipantMap | undefined = useStore((store) =>
 		getMeetingParticipantsByMeetingId(store, meetingId)
 	);
-	const tiles = useStore((store) => getTiles(store, meetingId));
+	const tiles = useMemo(() => {
+		const tiles: TileData[] = [];
+		if (meetingParticipants) {
+			const sortedParticipants = sortBy(
+				meetingParticipants,
+				(participant) => dateToTimestamp(participant.joinedAt),
+				['asc']
+			);
+			forEach(sortedParticipants, (participant) => {
+				tiles.push({
+					userId: participant.userId,
+					type: STREAM_TYPE.VIDEO,
+					creationDate: participant.joinedAt
+				});
+				if (participant.screenStreamOn) {
+					tiles.push({
+						userId: participant.userId,
+						type: STREAM_TYPE.SCREEN,
+						creationDate: participant.dateScreenOn
+					});
+				}
+			});
+			return tiles;
+		}
+		return [];
+	}, [meetingParticipants]);
 	const setPinnedTile = useStore((store) => store.setPinnedTile);
 	const meetingConnection = useStore((store) => store.meetingConnection);
 	const meetingDisconnection = useStore((store) => store.meetingDisconnection);

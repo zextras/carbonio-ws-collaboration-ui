@@ -22,23 +22,33 @@ import { MemberBe } from '../../types/network/models/roomBeTypes';
 import { Member, Room, RoomType } from '../../types/store/RoomTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 
+const idsList: string[] = [];
+
 export const getRoomIdsList = (state: RootStore): string[] => {
-	const idsList: string[] = [];
+	idsList.length = 0;
 	forEach(state.rooms, (room) => {
 		idsList.push(room.id);
 	});
 	return idsList;
 };
 
+const temporaryRoomIdsOrderedByCreation: string[] = [];
+
 export const getTemporaryRoomIdsOrderedByCreation = (store: RootStore): string[] => {
+	temporaryRoomIdsOrderedByCreation.length = 0;
 	const filteredRooms = filter(store.rooms, (room) => room.type === RoomType.TEMPORARY);
 	const orderedRooms = orderBy(filteredRooms, ['createdAt'], ['desc']);
-	return map(orderedRooms, (room) => room.id);
+	temporaryRoomIdsOrderedByCreation.push(...map(orderedRooms, (room) => room.id));
+	return temporaryRoomIdsOrderedByCreation;
 };
 
+const roomsList: Room[] = [];
+
 export const getVirtualRoomsList = (store: RootStore): Room[] => {
+	roomsList.length = 0;
 	const filteredRooms = filter(store.rooms, (room) => room.type === RoomType.TEMPORARY);
-	return orderBy(filteredRooms, ['createdAt'], ['desc']);
+	roomsList.push(...orderBy(filteredRooms, ['createdAt'], ['desc']));
+	return roomsList;
 };
 
 export const getRoomSelector = (state: RootStore, id: string): Room => state.rooms[id];
@@ -88,8 +98,10 @@ export const getOwnershipOfTheRoom = (
 	return false;
 };
 
+const ownersList: string[] = [];
+
 export const getOwners = (state: RootStore, roomId: string): string[] => {
-	const ownersList: string[] = [];
+	ownersList.length = 0;
 	if (state.rooms[roomId]?.members != null) {
 		map(state.rooms[roomId]?.members, (member) => {
 			if (member.owner) {
@@ -107,8 +119,10 @@ export const getNumberOfOwnersOfTheRoom = (state: RootStore, roomId: string): nu
 	return 0;
 };
 
+const FALLBACK_ARRAY: Member[] = [];
+
 export const getRoomMembers = (state: RootStore, roomId: string): Member[] =>
-	state.rooms[roomId]?.members ?? [];
+	state.rooms[roomId]?.members ?? FALLBACK_ARRAY;
 
 export const getNumbersOfRoomMembers = (state: RootStore, roomId: string): number =>
 	size(state.rooms[roomId]?.members);
@@ -130,8 +144,10 @@ export const getMeetingIdFromRoom = (state: RootStore, roomId: string): string |
 export const getIsPlaceholderRoom = (state: RootStore, roomId: string): boolean =>
 	state.rooms[roomId]?.placeholder ?? false;
 
+const userIds: string[] = [];
+
 export const getSingleConversationsUserId = (state: RootStore): string[] => {
-	const userIds: string[] = [];
+	userIds.length = 0;
 	forEach(state.rooms, (room) => {
 		if (room.type === RoomType.ONE_TO_ONE) {
 			const otherUser = find(room.members ?? [], (member) => member.userId !== state.session.id);

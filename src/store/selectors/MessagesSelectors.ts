@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { filter, find, forEach, includes, orderBy, size } from 'lodash';
+import { filter, find, forEach, includes, size } from 'lodash';
 
 import { FilteredConversation } from '../../chats/components/secondaryBar/SecondaryBarView';
 import {
@@ -17,22 +17,25 @@ import {
 import { RoomType } from '../../types/store/RoomTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 
-export const getMessagesSelector = (store: RootStore, roomId: string): Message[] =>
-	store.messages[roomId] ? store.messages[roomId] : [];
+const FALLBACK_MESSAGE_SELECTOR: Message[] = [];
 
-export const getTextMessagesSelector = (store: RootStore, roomId: string): TextMessage[] =>
-	filter(
-		store.messages[roomId],
-		(message) => message.type === MessageType.TEXT_MSG
-	) as TextMessage[];
+export const getMessagesSelector = (store: RootStore, roomId: string): Message[] =>
+	store.messages[roomId] ? store.messages[roomId] : FALLBACK_MESSAGE_SELECTOR;
+
+const readableMessages: (TextMessage | ConfigurationMessage)[] = [];
 
 export const getReadableMessagesSelector = (
 	store: RootStore,
 	roomId: string
-): (TextMessage | ConfigurationMessage)[] =>
-	filter(store.messages[roomId], (message) =>
-		includes([MessageType.TEXT_MSG, MessageType.CONFIGURATION_MSG], message.type)
-	) as TextMessage[];
+): (TextMessage | ConfigurationMessage)[] => {
+	readableMessages.length = 0;
+	readableMessages.push(
+		...(filter(store.messages[roomId], (message) =>
+			includes([MessageType.TEXT_MSG, MessageType.CONFIGURATION_MSG], message.type)
+		) as TextMessage[])
+	);
+	return readableMessages;
+};
 
 export const getLastTextMessageIdSelector = (
 	store: RootStore,
@@ -61,14 +64,16 @@ export const getMessageSelector = (
 	messageId: string | undefined
 ): Message | undefined => find(store.messages[roomId], (message) => message.id === messageId);
 
-export const getRoomIdsOrderedLastMessage = (
+const listOfConvByLastMessage: {
+	roomId: string;
+	roomType: string;
+	lastMessageTimestamp: number;
+}[] = [];
+
+export const getRoomIdsWithLastMessage = (
 	store: RootStore
 ): { roomId: string; roomType: string; lastMessageTimestamp: number }[] => {
-	const listOfConvByLastMessage: {
-		roomId: string;
-		roomType: string;
-		lastMessageTimestamp: number;
-	}[] = [];
+	listOfConvByLastMessage.length = 0;
 	// check to remove and tell BE to improve because if a user is removed from a room
 	// the messages of this always came back and trigger error
 	forEach(store.rooms, (room) => {
@@ -80,13 +85,13 @@ export const getRoomIdsOrderedLastMessage = (
 			lastMessageTimestamp: lastMessage ? lastMessage.date : 0
 		});
 	});
-	return orderBy(listOfConvByLastMessage, ['lastMessageTimestamp'], ['desc']);
+	return listOfConvByLastMessage;
 };
 
-export const getOneToOneAndGroupsInfoOrderedByLastMessage = (
-	store: RootStore
-): FilteredConversation[] => {
-	const listOfConvByLastMessage: FilteredConversation[] = [];
+const listOfConvLastMessage: FilteredConversation[] = [];
+
+export const getOneToOneAndGroupsInfoLastMessage = (store: RootStore): FilteredConversation[] => {
+	listOfConvLastMessage.length = 0;
 	// check to remove and tell BE to improve because if a user is removed from a room
 	// the messages of this always came back and trigger error
 	const filteredRooms = filter(
@@ -96,7 +101,7 @@ export const getOneToOneAndGroupsInfoOrderedByLastMessage = (
 	forEach(filteredRooms, (room) => {
 		const lastMessage =
 			store.messages[room.id] && store.messages[room.id][store.messages[room.id].length - 1];
-		listOfConvByLastMessage.push({
+		listOfConvLastMessage.push({
 			roomId: room.id,
 			name: room.name || '',
 			roomType: room.type,
@@ -104,7 +109,7 @@ export const getOneToOneAndGroupsInfoOrderedByLastMessage = (
 			members: room.members || []
 		});
 	});
-	return orderBy(listOfConvByLastMessage, ['lastMessageTimestamp'], ['desc']);
+	return listOfConvLastMessage;
 };
 
 export const roomIsEmpty = (store: RootStore, roomId: string): boolean =>
