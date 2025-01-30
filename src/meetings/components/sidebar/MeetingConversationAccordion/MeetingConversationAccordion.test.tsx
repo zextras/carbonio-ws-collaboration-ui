@@ -127,25 +127,22 @@ describe('Meeting sidebar', () => {
 
 	test('title of the accordion changes when a user is writing', async () => {
 		const { store } = setupBasicGroup();
-
-		const chatTitle = screen.getByTestId('chat_title');
-		expect(chatTitle).toBeVisible();
+		expect(screen.getByText(`Chat - ${groupRoom.name}`)).toBeInTheDocument();
 
 		act(() => {
 			store.setIsWriting(groupRoom.id, mockUser2.id, true);
 		});
 
-		const isWritingText = await screen.findByTestId('is_writing_title');
-		expect(isWritingText).toBeVisible();
-		expect(chatTitle).not.toBeVisible();
+		expect(await screen.findByText(/User is typing.../i)).toBeInTheDocument();
+		expect(screen.queryByText(`Chat - ${groupRoom.name}`)).not.toBeInTheDocument();
 
 		act(() => {
 			store.setIsWriting(groupRoom.id, mockUser2.id, false);
 			jest.advanceTimersByTime(4000);
 		});
 
-		expect(isWritingText).not.toBeVisible();
-		expect(chatTitle).toBeVisible();
+		expect(screen.queryByText(/User is typing.../i)).not.toBeInTheDocument();
+		expect(await screen.findByText(`Chat - ${groupRoom.name}`)).toBeInTheDocument();
 	});
 	test('title of the accordion when two or more users are typing', async () => {
 		const { store } = setupBasicGroup();
@@ -155,8 +152,7 @@ describe('Meeting sidebar', () => {
 			store.setIsWriting(groupRoom.id, mockUser3.id, true);
 		});
 
-		const isWritingText = await screen.findByText(/2 people are typing.../i);
-		expect(isWritingText).toBeVisible();
+		expect(await screen.findByText(/2 people are typing.../i)).toBeInTheDocument();
 
 		act(() => {
 			store.setIsWriting(groupRoom.id, mockUser2.id, false);
@@ -164,6 +160,6 @@ describe('Meeting sidebar', () => {
 			jest.advanceTimersByTime(4000);
 		});
 
-		expect(isWritingText).not.toBeVisible();
+		expect(screen.queryByText(/2 people are typing.../i)).not.toBeInTheDocument();
 	});
 });
