@@ -11,16 +11,19 @@ import { addRoute } from '@zextras/carbonio-shell-ui';
 import ShimmerEntryMeetingView from './views/shimmers/ShimmerEntryMeetingView';
 import ConnectionSnackbarManager from '../chats/components/ConnectionSnackbarManager';
 import { MEETINGS_NAME, MEETINGS_ROUTE } from '../constants/appConstants';
+import { PiPProvider } from './components/pictureInPicture/PictureInPictureProvider';
 
 const LazyMeetingMainView = lazy(
 	() => import(/* webpackChunkName: "mainView" */ './views/MeetingMainView')
 );
 
 const MeetingMain = (): React.JSX.Element => (
-	<Suspense fallback={<ShimmerEntryMeetingView />}>
-		<ConnectionSnackbarManager />
-		<LazyMeetingMainView />
-	</Suspense>
+	<PiPProvider>
+		<Suspense fallback={<ShimmerEntryMeetingView />}>
+			<ConnectionSnackbarManager />
+			<LazyMeetingMainView />
+		</Suspense>
+	</PiPProvider>
 );
 
 export default function useMeetingsApp(): void {

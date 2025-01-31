@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { ReactElement, useMemo, useRef } from 'react';
+import React, { ReactElement, useEffect, useMemo, useRef } from 'react';
 
 import { Container } from '@zextras/carbonio-design-system';
 import { useParams } from 'react-router-dom';
@@ -24,6 +24,8 @@ import FaceToFaceMode from '../components/faceToFaceMode/FaceToFaceMode';
 import GridMode from '../components/gridMode/GridMode';
 import Logo from '../components/Logo';
 import MeetingActionsBar from '../components/meetingActionsBar/MeetingActionsBar';
+import { PiPWindow, usePiPWindow } from '../components/pictureInPicture/PictureInPictureProvider';
+import Prova from '../components/pictureInPicture/Prova';
 import RecordingInfo from '../components/RecordingInfo';
 import MeetingSidebar from '../components/sidebar/MeetingSidebar';
 import VirtualBackground from '../components/virtualBackground/VirtualBackground';
@@ -71,24 +73,51 @@ const MeetingSkeleton = (): ReactElement => {
 		[canUseVirtualBackground, isUserGuest]
 	);
 
+	const { isSupported, requestPipWindow, pipWindow, closePipWindow } = usePiPWindow();
+
+	useEffect(() => {
+		const handleVisibilityChange = () => {
+			if (document.visibilityState === 'hidden') {
+				requestPipWindow(320, 500);
+			} else if (document.visibilityState === 'visible') {
+				closePipWindow();
+			}
+		};
+
+		document.addEventListener('visibilitychange', handleVisibilityChange);
+
+		return () => {
+			document.removeEventListener('visibilitychange', handleVisibilityChange);
+		};
+	}, [closePipWindow, requestPipWindow]);
+
 	return (
-		<SkeletonContainer orientation="horizontal" borderRadius="none">
-			<MeetingSidebar />
-			<ViewContainer
-				ref={streamsWrapperRef}
-				background={'gray0'}
-				crossAlignment="center"
-				orientation="horizontal"
-				data-testid="meeting_view_container"
-			>
-				<RecordingInfo meetingId={meetingId} />
-				<Logo />
-				<ViewToDisplay>
-					<MeetingActionsBar streamsWrapperRef={streamsWrapperRef} />
-				</ViewToDisplay>
-			</ViewContainer>
-			{isVirtualBackgroundVisible && <VirtualBackground meetingId={meetingId} />}
-		</SkeletonContainer>
+		<>
+			{pipWindow && (
+				<PiPWindow pipWindow={pipWindow}>
+					<Prova />
+				</PiPWindow>
+			)}
+			{
+				<SkeletonContainer orientation="horizontal" borderRadius="none">
+					<MeetingSidebar />
+					<ViewContainer
+						ref={streamsWrapperRef}
+						background={'gray0'}
+						crossAlignment="center"
+						orientation="horizontal"
+						data-testid="meeting_view_container"
+					>
+						<RecordingInfo meetingId={meetingId} />
+						<Logo />
+						<ViewToDisplay>
+							<MeetingActionsBar streamsWrapperRef={streamsWrapperRef} />
+						</ViewToDisplay>
+					</ViewContainer>
+					{isVirtualBackgroundVisible && <VirtualBackground meetingId={meetingId} />}
+				</SkeletonContainer>
+			}
+		</>
 	);
 };
 
