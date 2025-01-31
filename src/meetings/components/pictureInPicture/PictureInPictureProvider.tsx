@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 import { createPortal } from 'react-dom';
 
@@ -28,7 +28,7 @@ export const PiPProvider = ({ children }: PiPProviderProps) => {
 	// Expose pipWindow that is currently active
 	const [pipWindow, setPipWindow] = useState<Window | null>(null);
 
-	// Close pipWidnow programmatically
+	// Close pipWindow programmatically
 	const closePipWindow = useCallback(() => {
 		if (pipWindow != null) {
 			pipWindow.close();
@@ -36,13 +36,11 @@ export const PiPProvider = ({ children }: PiPProviderProps) => {
 		}
 	}, [pipWindow]);
 
-	const styleSheet = useCallback((pip) => {
+	const styleSheet = useCallback((pip: Window) => {
 		[...document.styleSheets].forEach((styleSheet) => {
 			try {
 				const cssRules = [...styleSheet.cssRules].map((rule) => rule.cssText).join('');
-				console.log(cssRules);
 				const style = document.createElement('style');
-
 				style.textContent = cssRules;
 				pip.document.head.appendChild(style);
 			} catch (e) {
@@ -55,13 +53,16 @@ export const PiPProvider = ({ children }: PiPProviderProps) => {
 		});
 	}, []);
 
+	// Copy styles only when pipWindow is available and already mounted
+	useEffect(() => {
+		if (pipWindow) styleSheet(pipWindow);
+	}, [pipWindow, styleSheet]);
+
 	// Open new pipWindow
 	const requestPipWindow = useCallback(
 		async (width: number, height: number) => {
 			// We don't want to allow multiple requests.
-			if (pipWindow != null) {
-				return;
-			}
+			if (pipWindow != null) return;
 
 			const pip = await window.documentPictureInPicture.requestWindow({
 				width,
@@ -73,24 +74,9 @@ export const PiPProvider = ({ children }: PiPProviderProps) => {
 				setPipWindow(null);
 			});
 
-			// It is important to copy all parent widnow styles. Otherwise, there would be no CSS available at all
-			// https://developer.chrome.com/docs/web-platform/document-picture-in-picture/#copy-style-sheets-to-the-picture-in-picture-window
-
-			if (document.readyState === 'complete') {
-				styleSheet(pip);
-				setPipWindow(pip);
-			}
-
-			const forceRepaint = () => {
-				pip.document.body.style.display = 'none';
-				requestAnimationFrame(() => {
-					pip.document.body.style.display = 'block';
-				});
-			};
-
-			setTimeout(forceRepaint, 1000); // Forza il repaint dopo 1s
+			setPipWindow(pip);
 		},
-		[pipWindow, styleSheet]
+		[pipWindow]
 	);
 
 	const value = useMemo(
