@@ -29,10 +29,10 @@ export const useOrderedOneToOneAndGroupsInfoByLastMessage = (): FilteredConversa
 		const lastMessage = messages[room.id] && messages[room.id][messages[room.id].length - 1];
 		listOfConvLastMessage.push({
 			roomId: room.id,
-			name: room.name || '',
+			name: room.name ?? '',
 			roomType: room.type,
 			lastMessageTimestamp: lastMessage ? lastMessage.date : 0,
-			members: room.members || []
+			members: room.members ?? []
 		});
 	});
 	return orderBy(listOfConvLastMessage, ['lastMessageTimestamp'], ['desc']);
