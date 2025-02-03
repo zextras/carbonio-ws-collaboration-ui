@@ -12,18 +12,16 @@ import {
 	differenceWith,
 	findIndex,
 	first,
-	forEach,
 	intersectionWith,
 	isEqual,
-	size,
-	sortBy
+	size
 } from 'lodash';
 
+import useTiles from './useTiles';
 import { getPinnedTile, getTalkingList } from '../store/selectors/ActiveMeetingSelectors';
 import { getMeetingParticipantsByMeetingId } from '../store/selectors/MeetingSelectors';
 import useStore from '../store/Store';
 import { STREAM_TYPE, TileData } from '../types/store/ActiveMeetingTypes';
-import { dateToTimestamp } from '../utils/dateUtils';
 import { orderSpeakingTiles } from '../utils/MeetingsUtils';
 
 const useTilesOrder = (meetingId: string): { centralTile: TileData; carouselTiles: TileData[] } => {
@@ -33,32 +31,7 @@ const useTilesOrder = (meetingId: string): { centralTile: TileData; carouselTile
 	const pinnedTile: TileData | undefined = useStore((store) => getPinnedTile(store, meetingId));
 	const isTalkingList = useStore((store) => getTalkingList(store, meetingId));
 
-	const tilesData = useMemo(() => {
-		const tiles: TileData[] = [];
-		if (meetingParticipants) {
-			const sortedParticipants = sortBy(
-				meetingParticipants,
-				(participant) => dateToTimestamp(participant.joinedAt),
-				['asc']
-			);
-			forEach(sortedParticipants, (participant) => {
-				tiles.push({
-					userId: participant.userId,
-					type: STREAM_TYPE.VIDEO,
-					creationDate: participant.joinedAt
-				});
-				if (participant.screenStreamOn) {
-					tiles.push({
-						userId: participant.userId,
-						type: STREAM_TYPE.SCREEN,
-						creationDate: participant.dateScreenOn
-					});
-				}
-			});
-			return tiles;
-		}
-		return [];
-	}, [meetingParticipants]);
+	const tilesData = useTiles(meetingId);
 
 	const [tiles, setTiles] = useState<TileData[]>(tilesData);
 

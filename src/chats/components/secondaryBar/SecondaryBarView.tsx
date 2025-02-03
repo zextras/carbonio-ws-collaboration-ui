@@ -7,7 +7,7 @@
 import React, { useMemo, useState } from 'react';
 
 import { Container, Tooltip, Text } from '@zextras/carbonio-design-system';
-import { orderBy, size } from 'lodash';
+import { size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -15,7 +15,7 @@ import useFilteredConversationList from './conversationList/useFilteredConversat
 import ConversationsFilter from './ConversationsFilter';
 import useFilteredGal from './galSeachList/useFilteredGal';
 import VirtualRoomsButton from './virtualRoomWidget/VirtualRoomsButton';
-import { getOneToOneAndGroupsInfoLastMessage } from '../../../store/selectors/MessagesSelectors';
+import { useOrderedOneToOneAndGroupsInfoByLastMessage } from '../../../store/selectors/MessagesSelectors';
 import { getCapability } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { Member } from '../../../types/store/RoomTypes';
@@ -52,8 +52,7 @@ const SecondaryBarView: React.FC<SecondaryBarSingleGroupsViewProps> = ({ expande
 	);
 
 	const canVideoCall = useStore((store) => getCapability(store, CapabilityType.CAN_VIDEO_CALL));
-	const unorderedRoomsIds = useStore<FilteredConversation[]>(getOneToOneAndGroupsInfoLastMessage);
-	const roomsIds = orderBy(unorderedRoomsIds, ['lastMessageTimestamp'], ['desc']);
+	const roomsIds = useOrderedOneToOneAndGroupsInfoByLastMessage();
 	const chatsBeNetworkStatus = useStore(({ connections }) => connections.status.chats_be);
 
 	const [filteredInput, setFilteredInput] = useState('');

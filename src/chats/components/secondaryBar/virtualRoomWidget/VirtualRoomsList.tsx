@@ -21,8 +21,7 @@ import styled from 'styled-components';
 
 import CreateVirtualRoomModal from './CreateVirtualRoomModal';
 import VirtualRoomCard from './virtualRoomCard/VirtualRoomCard';
-import { getTemporaryRoomIdsOrderedByCreation } from '../../../../store/selectors/RoomsSelectors';
-import useStore from '../../../../store/Store';
+import { useTemporaryRoomIdsOrderedByCreation } from '../../../../store/selectors/RoomsSelectors';
 
 type virtualRoomsListProps = {
 	setListVisibility: Dispatch<SetStateAction<boolean>>;
@@ -55,7 +54,8 @@ const VirtualRoomsList: FC<virtualRoomsListProps> = ({ setListVisibility, parent
 
 	const createVirtualRoom = t('meeting.virtual.newRoom', 'Create new virtual room');
 
-	const virtualRoomList = useStore(getTemporaryRoomIdsOrderedByCreation);
+	const virtualRoomList = useTemporaryRoomIdsOrderedByCreation();
+
 	const [showCreationModal, setShowCreationModal] = useState(false);
 
 	const popupRef = useRef<HTMLDivElement>(null);

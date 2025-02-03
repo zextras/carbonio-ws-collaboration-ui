@@ -7,7 +7,7 @@
 import React, { ReactElement, useEffect, useMemo, useRef } from 'react';
 
 import { Button, Container, Tooltip } from '@zextras/carbonio-design-system';
-import { forEach, map, size, sortBy } from 'lodash';
+import { map, size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -15,13 +15,10 @@ import styled from 'styled-components';
 import useContainerDimensions from '../../../hooks/useContainerDimensions';
 import usePagination from '../../../hooks/usePagination';
 import { MeetingRoutesParams } from '../../../hooks/useRouting';
-import {
-	getMeetingParticipantsByMeetingId,
-	getNumberOfTiles
-} from '../../../store/selectors/MeetingSelectors';
+import useTiles from '../../../hooks/useTiles';
+import { getNumberOfTiles } from '../../../store/selectors/MeetingSelectors';
 import useStore from '../../../store/Store';
-import { STREAM_TYPE, TileData } from '../../../types/store/ActiveMeetingTypes';
-import { dateToTimestamp } from '../../../utils/dateUtils';
+import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
 import { calcGrid, maximiseRowsAndColumns, maximiseTileSize } from '../../../utils/MeetingsUtils';
 import { calcScaleDivisor } from '../../../utils/styleUtils';
 import { MeetingViewProps } from '../../views/MeetingSkeleton';
@@ -71,39 +68,10 @@ const GridMode = ({ children }: MeetingViewProps): ReactElement => {
 
 	const gridContainerRef = useRef<HTMLDivElement>(null);
 	const dimensions = useContainerDimensions(gridContainerRef);
+	const tilesData = useTiles(meetingId);
 
-	const meetingParticipants = useStore((store) =>
-		getMeetingParticipantsByMeetingId(store, meetingId)
-	);
 	const numberOfTiles = useStore((store) => getNumberOfTiles(store, meetingId));
 	const setUpdateSubscription = useStore((store) => store.setUpdateSubscription);
-
-	const tilesData = useMemo(() => {
-		const tiles: TileData[] = [];
-		if (meetingParticipants) {
-			const sortedParticipants = sortBy(
-				meetingParticipants,
-				(participant) => dateToTimestamp(participant.joinedAt),
-				['asc']
-			);
-			forEach(sortedParticipants, (participant) => {
-				tiles.push({
-					userId: participant.userId,
-					type: STREAM_TYPE.VIDEO,
-					creationDate: participant.joinedAt
-				});
-				if (participant.screenStreamOn) {
-					tiles.push({
-						userId: participant.userId,
-						type: STREAM_TYPE.SCREEN,
-						creationDate: participant.dateScreenOn
-					});
-				}
-			});
-			return tiles;
-		}
-		return [];
-	}, [meetingParticipants]);
 
 	const { tileWidth, rows, columns, numberOfPages } = useMemo(() => {
 		// Calculate a full density grid

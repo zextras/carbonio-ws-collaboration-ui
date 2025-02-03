@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { filter, find, forEach, includes, size } from 'lodash';
+import { filter, find, forEach, includes, orderBy, size } from 'lodash';
 
 import { FilteredConversation } from '../../chats/components/secondaryBar/SecondaryBarView';
 import {
@@ -16,6 +16,27 @@ import {
 } from '../../types/store/MessageTypes';
 import { RoomType } from '../../types/store/RoomTypes';
 import { RootStore } from '../../types/store/StoreTypes';
+import useStore from '../Store';
+
+export const useOrderedOneToOneAndGroupsInfoByLastMessage = (): FilteredConversation[] => {
+	const { rooms, messages } = useStore((store) => store);
+	const filteredRooms = filter(
+		rooms,
+		(room) => room.type === RoomType.GROUP || room.type === RoomType.ONE_TO_ONE
+	);
+	const listOfConvLastMessage: FilteredConversation[] = [];
+	forEach(filteredRooms, (room) => {
+		const lastMessage = messages[room.id] && messages[room.id][messages[room.id].length - 1];
+		listOfConvLastMessage.push({
+			roomId: room.id,
+			name: room.name || '',
+			roomType: room.type,
+			lastMessageTimestamp: lastMessage ? lastMessage.date : 0,
+			members: room.members || []
+		});
+	});
+	return orderBy(listOfConvLastMessage, ['lastMessageTimestamp'], ['desc']);
+};
 
 const FALLBACK_MESSAGE_SELECTOR: Message[] = [];
 
@@ -86,30 +107,6 @@ export const getRoomIdsWithLastMessage = (
 		});
 	});
 	return listOfConvByLastMessage;
-};
-
-const listOfConvLastMessage: FilteredConversation[] = [];
-
-export const getOneToOneAndGroupsInfoLastMessage = (store: RootStore): FilteredConversation[] => {
-	listOfConvLastMessage.length = 0;
-	// check to remove and tell BE to improve because if a user is removed from a room
-	// the messages of this always came back and trigger error
-	const filteredRooms = filter(
-		store.rooms,
-		(room) => room.type === RoomType.GROUP || room.type === RoomType.ONE_TO_ONE
-	);
-	forEach(filteredRooms, (room) => {
-		const lastMessage =
-			store.messages[room.id] && store.messages[room.id][store.messages[room.id].length - 1];
-		listOfConvLastMessage.push({
-			roomId: room.id,
-			name: room.name || '',
-			roomType: room.type,
-			lastMessageTimestamp: lastMessage ? lastMessage.date : 0,
-			members: room.members || []
-		});
-	});
-	return listOfConvLastMessage;
 };
 
 export const roomIsEmpty = (store: RootStore, roomId: string): boolean =>

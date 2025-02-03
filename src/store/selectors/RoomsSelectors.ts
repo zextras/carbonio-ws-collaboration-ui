@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { useMemo } from 'react';
+
 import {
 	countBy,
 	differenceWith,
@@ -21,34 +23,48 @@ import { RoomsApi } from '../../network';
 import { MemberBe } from '../../types/network/models/roomBeTypes';
 import { Member, Room, RoomType } from '../../types/store/RoomTypes';
 import { RootStore } from '../../types/store/StoreTypes';
+import useStore from '../Store';
 
-const idsList: string[] = [];
-
-export const getRoomIdsList = (state: RootStore): string[] => {
-	idsList.length = 0;
-	forEach(state.rooms, (room) => {
-		idsList.push(room.id);
-	});
-	return idsList;
+export const useRoomIdsList = (): string[] => {
+	const rooms = useStore((store) => store.rooms);
+	return useMemo(() => {
+		const idsList: string[] = [];
+		forEach(rooms, (room) => {
+			idsList.push(room.id);
+		});
+		return idsList;
+	}, [rooms]);
 };
 
-const temporaryRoomIdsOrderedByCreation: string[] = [];
-
-export const getTemporaryRoomIdsOrderedByCreation = (store: RootStore): string[] => {
-	temporaryRoomIdsOrderedByCreation.length = 0;
-	const filteredRooms = filter(store.rooms, (room) => room.type === RoomType.TEMPORARY);
-	const orderedRooms = orderBy(filteredRooms, ['createdAt'], ['desc']);
-	temporaryRoomIdsOrderedByCreation.push(...map(orderedRooms, (room) => room.id));
-	return temporaryRoomIdsOrderedByCreation;
+export const useTemporaryRoomIdsOrderedByCreation = (): string[] => {
+	const rooms = useStore((store) => store.rooms);
+	return useMemo(() => {
+		const filteredRooms = filter(rooms, (room) => room.type === RoomType.TEMPORARY);
+		return [...map(orderBy(filteredRooms, ['createdAt'], ['desc']), (room) => room.id)];
+	}, [rooms]);
 };
 
-const roomsList: Room[] = [];
+export const useVirtualRoomsList = (): Room[] => {
+	const rooms = useStore((store) => store.rooms);
+	return useMemo(() => {
+		const filteredRooms = filter(rooms, (room) => room.type === RoomType.TEMPORARY);
+		return [...orderBy(filteredRooms, ['createdAt'], ['desc'])];
+	}, [rooms]);
+};
 
-export const getVirtualRoomsList = (store: RootStore): Room[] => {
-	roomsList.length = 0;
-	const filteredRooms = filter(store.rooms, (room) => room.type === RoomType.TEMPORARY);
-	roomsList.push(...orderBy(filteredRooms, ['createdAt'], ['desc']));
-	return roomsList;
+export const useOwners = (roomId: string): string[] => {
+	const members = useStore((store) => store.rooms[roomId]?.members);
+	return useMemo(() => {
+		const ownersList: string[] = [];
+		if (members != null) {
+			map(members, (member) => {
+				if (member.owner) {
+					ownersList.push(member.userId);
+				}
+			});
+		}
+		return ownersList;
+	}, [members]);
 };
 
 export const getRoomSelector = (state: RootStore, id: string): Room => state.rooms[id];
@@ -75,14 +91,6 @@ export const getRoomDescriptionSelector = (state: RootStore, id: string): string
 export const getRoomMutedSelector = (state: RootStore, id: string): boolean | undefined =>
 	state.rooms[id]?.userSettings?.muted;
 
-export type RoomMainInfosType = {
-	id?: string;
-	name?: string;
-	description?: string;
-	type?: RoomType;
-	muted?: boolean;
-};
-
 export const getOwnershipOfTheRoom = (
 	state: RootStore,
 	roomId: string,
@@ -96,20 +104,6 @@ export const getOwnershipOfTheRoom = (
 		return false;
 	}
 	return false;
-};
-
-const ownersList: string[] = [];
-
-export const getOwners = (state: RootStore, roomId: string): string[] => {
-	ownersList.length = 0;
-	if (state.rooms[roomId]?.members != null) {
-		map(state.rooms[roomId]?.members, (member) => {
-			if (member.owner) {
-				ownersList.push(member.userId);
-			}
-		});
-	}
-	return ownersList;
 };
 
 export const getNumberOfOwnersOfTheRoom = (state: RootStore, roomId: string): number => {
