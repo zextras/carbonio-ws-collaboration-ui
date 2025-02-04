@@ -53,6 +53,7 @@ const MicrophoneButton = ({
 		'meeting.interactions.disabled',
 		'There are connection problems, please try again later.'
 	);
+	const unknownDeviceLabel = t('meeting.interactions.unknownDevice', 'Unknown device');
 
 	const { meetingId }: MeetingRoutesParams = useParams();
 	const myUserId = useStore(getUserId);
@@ -84,7 +85,7 @@ const MicrophoneButton = ({
 		() =>
 			map(audioMediaList, (audioItem: MediaDeviceInfo, i) => ({
 				id: `device-${i}`,
-				label: audioItem.label ? audioItem.label : `device-${i}`,
+				label: audioItem.label ? audioItem.label : unknownDeviceLabel,
 				onClick: (): void => {
 					if (audioStatus) {
 						getAudioStream(true, true, audioItem.deviceId).then((stream) => {
@@ -100,6 +101,7 @@ const MicrophoneButton = ({
 			})),
 		[
 			audioMediaList,
+			unknownDeviceLabel,
 			selectedAudioDeviceId,
 			audioStatus,
 			bidirectionalAudioConn,

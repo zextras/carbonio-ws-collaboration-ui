@@ -65,6 +65,7 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 		'meeting.interactions.browserPermission',
 		'Grant browser permissions to enable resources'
 	);
+	const unknownDeviceLabel = t('meeting.interactions.unknownDevice', 'Unknown device');
 
 	const [audioMediaList, setAudioMediaList] = useState<[] | MediaDeviceInfo[]>([]);
 	const [videoMediaList, setVideoMediaList] = useState<[] | MediaDeviceInfo[]>([]);
@@ -130,20 +131,20 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 		() =>
 			map(videoMediaList, (videoItem: MediaDeviceInfo, i) => ({
 				id: `device-${i}`,
-				label: videoItem.label ? videoItem.label : `device-${i}`,
+				label: videoItem.label ? videoItem.label : unknownDeviceLabel,
 				value: videoItem.deviceId
 			})),
-		[videoMediaList]
+		[unknownDeviceLabel, videoMediaList]
 	);
 
 	const mediaAudioList: { id: string; label: string; value: string }[] = useMemo(
 		() =>
 			map(audioMediaList, (audioItem: MediaDeviceInfo, i) => ({
 				id: `device-${i}`,
-				label: audioItem.label ? audioItem.label : `device-${i}`,
+				label: audioItem.label ? audioItem.label : unknownDeviceLabel,
 				value: audioItem.deviceId
 			})),
-		[audioMediaList]
+		[audioMediaList, unknownDeviceLabel]
 	);
 
 	const onChangeVideoSource = useCallback(

@@ -58,6 +58,7 @@ const CameraButton = ({
 		'meeting.interactions.disabled',
 		'There are connection problems, please try again later.'
 	);
+	const unknownDeviceLabel = t('meeting.interactions.unknownDevice', 'Unknown device');
 
 	const { meetingId }: MeetingRoutesParams = useParams();
 	const myUserId = useStore(getUserId);
@@ -94,7 +95,7 @@ const CameraButton = ({
 		() =>
 			map(videoMediaList, (videoItem: MediaDeviceInfo, i) => ({
 				id: `device-${i}`,
-				label: videoItem.label ? videoItem.label : `device-${i}`,
+				label: videoItem.label ? videoItem.label : unknownDeviceLabel,
 				onClick: (): void => {
 					if (videoStatus) {
 						getVideoStream(videoItem.deviceId).then((stream) => {
@@ -115,12 +116,13 @@ const CameraButton = ({
 			})),
 		[
 			videoMediaList,
+			unknownDeviceLabel,
 			selectedVideoDeviceId,
 			selectedDeviceTooltip,
 			videoStatus,
-			meetingId,
 			videoOutConn,
 			setLocalStreams,
+			meetingId,
 			setSelectedDeviceId
 		]
 	);
