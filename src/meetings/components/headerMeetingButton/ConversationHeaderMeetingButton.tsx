@@ -108,25 +108,20 @@ const ConversationHeaderMeetingButton = ({
 
 	const { openMeeting } = useRoomMeeting(roomId);
 
-	const meetingButtonLabel = useMemo(
-		() =>
-			meetingIsActive
-				? amIParticipating
-					? meetingParticipantsNumber === 1
-						? restartMeeting
-						: rejoinMeeting
-					: joinMeeting
-				: startMeeting,
-		[
-			amIParticipating,
-			joinMeeting,
-			meetingIsActive,
-			meetingParticipantsNumber,
-			rejoinMeeting,
-			restartMeeting,
-			startMeeting
-		]
-	);
+	const meetingButtonLabel = useMemo(() => {
+		if (!meetingIsActive) return startMeeting;
+		if (!amIParticipating) return joinMeeting;
+		if (meetingParticipantsNumber === 1) return restartMeeting;
+		return rejoinMeeting;
+	}, [
+		amIParticipating,
+		joinMeeting,
+		meetingIsActive,
+		meetingParticipantsNumber,
+		rejoinMeeting,
+		restartMeeting,
+		startMeeting
+	]);
 
 	const toggleDropdown = useCallback(() => {
 		setIsDropdownOpen((prevState) => !prevState);
