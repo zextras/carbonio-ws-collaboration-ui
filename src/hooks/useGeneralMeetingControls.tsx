@@ -15,6 +15,7 @@ import useEventListener, {
 	MeetingWaitingParticipantClashedEvent
 } from './useEventListener';
 import useRouting, { PAGE_INFO_TYPE } from './useRouting';
+import { usePiPWindow } from '../meetings/components/pictureInPicture/PictureInPictureProvider';
 import { MeetingsApi } from '../network';
 import {
 	getMeetingActiveByMeetingId,
@@ -47,6 +48,7 @@ const useGeneralMeetingControls = (meetingId: string): void => {
 	const meetingDisconnection = useStore((store) => store.meetingDisconnection);
 	const websocketNetworkStatus = useStore(({ connections }) => connections.status.websocket);
 
+	const { closePipWindow } = usePiPWindow();
 	const { goToInfoPage, goToMeetingPage } = useRouting();
 
 	const createSnackbar: CreateSnackbarFn = useSnackbar();
@@ -114,9 +116,10 @@ const useGeneralMeetingControls = (meetingId: string): void => {
 	const meetingParticipantClashedHandler = useCallback(
 		(event: CustomEvent<MeetingWaitingParticipantClashedEvent['data']> | undefined) => {
 			meetingDisconnection(event?.detail.meetingId ?? '');
+			closePipWindow();
 			goToInfoPage(PAGE_INFO_TYPE.ALREADY_ACTIVE_MEETING_SESSION);
 		},
-		[goToInfoPage, meetingDisconnection]
+		[closePipWindow, goToInfoPage, meetingDisconnection]
 	);
 	useEventListener(EventName.MEETING_PARTICIPANT_CLASHED, meetingParticipantClashedHandler);
 

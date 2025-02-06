@@ -3,29 +3,169 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import React from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
-import { Container } from '@zextras/carbonio-design-system';
+import { Button, Container, Icon, Padding, Text } from '@zextras/carbonio-design-system';
 import { useParams } from 'react-router-dom';
+import styled from 'styled-components';
 
 import { MeetingRoutesParams } from '../../../hooks/useRouting';
 import useTilesOrder from '../../../hooks/useTilesOrder';
+import MeetingsApi from '../../../network/apis/MeetingsApi';
+import {
+	getNameOfFirstTalkingUser,
+	getSelectedAudioDeviceId,
+	getSelectedVideoDeviceId
+} from '../../../store/selectors/ActiveMeetingSelectors';
+import {
+	getMeetingByMeetingId,
+	getParticipantAudioStatus,
+	getParticipantVideoStatus
+} from '../../../store/selectors/MeetingSelectors';
+import { getUserId } from '../../../store/selectors/SessionSelectors';
+import useStore from '../../../store/Store';
 import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
+import { getAudioStream, getVideoStream } from '../../../utils/UserMediaManager';
+import LeaveMeetingButton from '../meetingActionsBar/LeaveMeetingButton';
+import MeetingDuration from '../meetingActionsBar/MeetingDuration';
 import Tile from '../tile/Tile';
+
+const PipContainer = styled(Container)`
+	background-color: ${({ theme }): string => theme.palette.gray0.regular};
+	position: absolute;
+`;
+
+const CustomActionBar = styled(Container)`
+	border-radius: 0.5rem;
+`;
 
 const PictureInPictureView = () => {
 	const { meetingId }: MeetingRoutesParams = useParams();
 
+	const myUserId = useStore(getUserId);
+	const meeting = useStore((store) => getMeetingByMeetingId(store, meetingId));
+	const whoIsSpeaking = useStore((store) => getNameOfFirstTalkingUser(store, meetingId));
+	const videoOutConn = useStore((store) => store.activeMeeting[meetingId]?.videoOutConn);
+	const videoStatus = useStore((store) => getParticipantVideoStatus(store, meetingId, myUserId));
+	const selectedVideoDeviceId = useStore((store) => getSelectedVideoDeviceId(store, meetingId));
+	const audioStatus = useStore((store) => getParticipantAudioStatus(store, meetingId, myUserId));
+	const selectedAudioDeviceId = useStore((store) => getSelectedAudioDeviceId(store, meetingId));
+	const websocketNetworkStatus = useStore(({ connections }) => connections.status.websocket);
+	const bidirectionalAudioConn = useStore(
+		(store) => store.activeMeeting[meetingId]?.bidirectionalAudioConn
+	);
+
+	const [isSpeaking, setIsSpeaking] = useState<string | boolean | undefined>(true);
+
+	useEffect(() => {
+		setIsSpeaking(whoIsSpeaking);
+	}, [whoIsSpeaking]);
+
+	const toggleAudioStream = useCallback(
+		(event: { stopPropagation: () => void }) => {
+			event.stopPropagation();
+			if (!audioStatus) {
+				getAudioStream(true, true, selectedAudioDeviceId)
+					.then((stream) => {
+						bidirectionalAudioConn?.updateLocalStreamTrack(stream).then(() => {
+							MeetingsApi.updateAudioStreamStatus(meetingId, !audioStatus);
+						});
+					})
+					.catch((e) => {
+						console.log(e);
+					});
+			} else {
+				bidirectionalAudioConn?.closeRtpSenderTrack();
+				MeetingsApi.updateAudioStreamStatus(meetingId, !audioStatus);
+			}
+		},
+		[audioStatus, bidirectionalAudioConn, meetingId, selectedAudioDeviceId]
+	);
+
+	const toggleVideoStream = useCallback(
+		(event: React.MouseEvent<HTMLButtonElement, MouseEvent> | KeyboardEvent) => {
+			event.stopPropagation();
+			if (!videoStatus) {
+				if (!videoOutConn?.peerConn) {
+					videoOutConn?.startVideo(selectedVideoDeviceId).catch((e) => {});
+				} else {
+					getVideoStream(selectedVideoDeviceId)
+						.then((stream) => {
+							videoOutConn
+								?.updateLocalStreamTrack(stream)
+								.then(() => MeetingsApi.updateMediaOffer(meetingId, STREAM_TYPE.VIDEO, true));
+						})
+						.catch((e) => {
+							console.log(e);
+						});
+				}
+			} else {
+				videoOutConn?.stopVideo();
+			}
+		},
+		[videoStatus, videoOutConn, selectedVideoDeviceId, meetingId]
+	);
+
 	const { centralTile } = useTilesOrder(meetingId);
 
 	return (
-		<Container padding="2rem">
+		<PipContainer
+			padding="1rem"
+			gap="0.5rem"
+			mainAlignment="space-between"
+			crossAlignment="flex-start"
+		>
+			<Container width="fit" height="fit" gap="0.5rem" crossAlignment="flex-start">
+				<Text size="large" color="gray6">
+					{meeting?.name}
+				</Text>
+				<Container width="fit" height="fit" orientation="horizontal" crossAlignment="flex-start">
+					{isSpeaking && (
+						<>
+							<Icon icon="VolumeUp" size="small" color="success" />
+							<Padding right="0.5rem" />
+						</>
+					)}
+					<Text size="small" color="gray6" weight="light" overflow="ellipsis">
+						{whoIsSpeaking ? `${whoIsSpeaking} is speaking.` : "Nobody's talking right now."}
+					</Text>
+				</Container>
+			</Container>
+
 			<Tile
 				userId={centralTile.userId}
 				meetingId={meetingId}
 				isScreenShare={centralTile.type === STREAM_TYPE.SCREEN}
+				isPip
 			/>
-		</Container>
+			<Container width="fill" height="fit" orientation="horizontal" mainAlignment="space-between">
+				<CustomActionBar
+					background={'text'}
+					gap="0.5rem"
+					padding="0.5rem"
+					width="fit"
+					orientation="horizontal"
+				>
+					<Button
+						onClick={toggleVideoStream}
+						icon={videoStatus ? 'Video' : 'VideoOff'}
+						disabled={!websocketNetworkStatus}
+						size={'large'}
+					/>
+					<Button onClick={toggleAudioStream} icon={audioStatus ? 'Mic' : 'MicOff'} size="large" />
+				</CustomActionBar>
+				<CustomActionBar
+					background={'text'}
+					padding="0.5rem"
+					gap="0.5rem"
+					width="fit"
+					orientation="horizontal"
+				>
+					<MeetingDuration meetingId={meetingId} isPip />
+					<LeaveMeetingButton isHoovering oneClickLeave isPip />
+				</CustomActionBar>
+			</Container>
+		</PipContainer>
 	);
 };
 

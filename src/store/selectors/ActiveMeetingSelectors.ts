@@ -85,6 +85,19 @@ export const getPinnedTile = (store: RootStore, meetingId: string): TileData | u
 export const getTalkingList = (store: RootStore, meetingId: string): string[] =>
 	store.activeMeeting[meetingId]?.talkingUsers;
 
+export const getNameOfFirstTalkingUser = (
+	store: RootStore,
+	meetingId: string
+): string | undefined => {
+	const id = store.activeMeeting[meetingId].talkingUsers
+		? store.activeMeeting[meetingId]?.talkingUsers[0]
+		: undefined;
+	if (id) {
+		return store.users[id]?.name || store.users[id]?.email || '';
+	}
+	return undefined;
+};
+
 export const getUserIsTalking = (store: RootStore, meetingId: string, userId: string): boolean =>
 	find(store.activeMeeting[meetingId]?.talkingUsers, (user) => user === userId) !== undefined;
 

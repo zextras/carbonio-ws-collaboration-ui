@@ -25,7 +25,7 @@ import GridMode from '../components/gridMode/GridMode';
 import Logo from '../components/Logo';
 import MeetingActionsBar from '../components/meetingActionsBar/MeetingActionsBar';
 import { PiPWindow, usePiPWindow } from '../components/pictureInPicture/PictureInPictureProvider';
-import Prova from '../components/pictureInPicture/Prova';
+import PictureInPictureView from '../components/pictureInPicture/PictureInPictureView';
 import RecordingInfo from '../components/RecordingInfo';
 import MeetingSidebar from '../components/sidebar/MeetingSidebar';
 import VirtualBackground from '../components/virtualBackground/VirtualBackground';
@@ -77,25 +77,39 @@ const MeetingSkeleton = (): ReactElement => {
 
 	useEffect(() => {
 		const handleVisibilityChange = () => {
-			if (document.visibilityState === 'hidden') {
-				requestPipWindow(320, 500);
+			if (document.visibilityState === 'hidden' && isSupported) {
+				requestPipWindow(320, 331);
 			} else if (document.visibilityState === 'visible') {
 				closePipWindow();
 			}
 		};
 
+		const handleWindowFocus = () => {
+			closePipWindow();
+		};
+
+		const handleWindowBlur = () => {
+			if (isSupported) {
+				requestPipWindow(320, 331);
+			}
+		};
+
 		document.addEventListener('visibilitychange', handleVisibilityChange);
+		window.addEventListener('focus', handleWindowFocus);
+		window.addEventListener('blur', handleWindowBlur);
 
 		return () => {
 			document.removeEventListener('visibilitychange', handleVisibilityChange);
+			window.removeEventListener('focus', handleWindowFocus);
+			window.removeEventListener('blur', handleWindowBlur);
 		};
-	}, [closePipWindow, requestPipWindow]);
+	}, [closePipWindow, isSupported, requestPipWindow]);
 
 	return (
 		<>
 			{pipWindow && (
 				<PiPWindow pipWindow={pipWindow}>
-					<Prova />
+					<PictureInPictureView />
 				</PiPWindow>
 			)}
 			{
