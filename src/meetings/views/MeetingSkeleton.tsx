@@ -4,13 +4,14 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { ReactElement, useEffect, useMemo, useRef } from 'react';
+import React, { ReactElement, useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { Container } from '@zextras/carbonio-design-system';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import useGeneralMeetingControls from '../../hooks/useGeneralMeetingControls';
+import usePiPWindow from '../../hooks/usePipWindow';
 import { MeetingRoutesParams } from '../../hooks/useRouting';
 import { getMeetingViewSelected } from '../../store/selectors/ActiveMeetingSelectors';
 import { getNumberOfTiles } from '../../store/selectors/MeetingSelectors';
@@ -24,7 +25,7 @@ import FaceToFaceMode from '../components/faceToFaceMode/FaceToFaceMode';
 import GridMode from '../components/gridMode/GridMode';
 import Logo from '../components/Logo';
 import MeetingActionsBar from '../components/meetingActionsBar/MeetingActionsBar';
-import { PiPWindow, usePiPWindow } from '../components/pictureInPicture/PictureInPictureProvider';
+import { PiPWindow } from '../components/pictureInPicture/PictureInPictureProvider';
 import PictureInPictureView from '../components/pictureInPicture/PictureInPictureView';
 import RecordingInfo from '../components/RecordingInfo';
 import MeetingSidebar from '../components/sidebar/MeetingSidebar';
@@ -75,35 +76,21 @@ const MeetingSkeleton = (): ReactElement => {
 
 	const { isSupported, requestPipWindow, pipWindow, closePipWindow } = usePiPWindow();
 
-	useEffect(() => {
-		const handleVisibilityChange = () => {
-			if (document.visibilityState === 'hidden' && isSupported) {
-				requestPipWindow(320, 331);
-			} else if (document.visibilityState === 'visible') {
-				closePipWindow();
-			}
-		};
-
-		const handleWindowFocus = () => {
+	const handleVisibilityChange = useCallback(() => {
+		if (document.visibilityState === 'hidden' && isSupported) {
+			requestPipWindow(320, 331);
+		} else if (document.visibilityState === 'visible') {
 			closePipWindow();
-		};
-
-		const handleWindowBlur = () => {
-			if (isSupported) {
-				requestPipWindow(320, 331);
-			}
-		};
-
-		document.addEventListener('visibilitychange', handleVisibilityChange);
-		window.addEventListener('focus', handleWindowFocus);
-		window.addEventListener('blur', handleWindowBlur);
-
-		return () => {
-			document.removeEventListener('visibilitychange', handleVisibilityChange);
-			window.removeEventListener('focus', handleWindowFocus);
-			window.removeEventListener('blur', handleWindowBlur);
-		};
+		}
 	}, [closePipWindow, isSupported, requestPipWindow]);
+
+	useEffect(() => {
+		document.addEventListener('visibilitychange', handleVisibilityChange);
+
+		return (): void => {
+			document.removeEventListener('visibilitychange', handleVisibilityChange);
+		};
+	}, [handleVisibilityChange]);
 
 	return (
 		<>

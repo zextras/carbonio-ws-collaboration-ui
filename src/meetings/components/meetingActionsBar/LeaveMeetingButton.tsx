@@ -10,9 +10,9 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
+import usePiPWindow from '../../../hooks/usePipWindow';
 import useRouting, { MeetingRoutesParams, PAGE_INFO_TYPE } from '../../../hooks/useRouting';
 import { MeetingsApi } from '../../../network';
-import { usePiPWindow } from '../pictureInPicture/PictureInPictureProvider';
 
 const CustomContainer = styled(Container)`
 	> div > button > div {

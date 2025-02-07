@@ -14,8 +14,8 @@ import useEventListener, {
 	EventName,
 	MeetingWaitingParticipantClashedEvent
 } from './useEventListener';
+import usePiPWindow from './usePipWindow';
 import useRouting, { PAGE_INFO_TYPE } from './useRouting';
-import { usePiPWindow } from '../meetings/components/pictureInPicture/PictureInPictureProvider';
 import { MeetingsApi } from '../network';
 import {
 	getMeetingActiveByMeetingId,

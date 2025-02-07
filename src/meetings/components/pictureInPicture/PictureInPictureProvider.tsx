@@ -4,31 +4,26 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, {
+	createContext,
+	JSX,
+	ReactPortal,
+	useCallback,
+	useEffect,
+	useMemo,
+	useState
+} from 'react';
 
 import { createPortal } from 'react-dom';
 
-type PiPContextType = {
-	isSupported: boolean;
-	pipWindow: Window | null;
-	requestPipWindow: (width: number, height: number) => Promise<void>;
-	closePipWindow: () => void;
-};
+import { PiPContextType, PiPProviderProps, PiPWindowProps } from '../../../types/pipTypes';
 
-const PiPContext = createContext<PiPContextType | undefined>(undefined);
+export const PiPContext = createContext<PiPContextType | undefined>(undefined);
 
-type PiPProviderProps = {
-	children: React.ReactNode;
-};
-
-export const PiPProvider = ({ children }: PiPProviderProps) => {
-	// Detect if the feature is available.
+export const PiPProvider = ({ children }: PiPProviderProps): JSX.Element => {
 	const isSupported = 'documentPictureInPicture' in window;
-
-	// Expose pipWindow that is currently active
 	const [pipWindow, setPipWindow] = useState<Window | null>(null);
 
-	// Close pipWindow programmatically
 	const closePipWindow = useCallback(() => {
 		if (pipWindow != null) {
 			pipWindow.close();
@@ -53,31 +48,22 @@ export const PiPProvider = ({ children }: PiPProviderProps) => {
 		});
 	}, []);
 
-	// Copy styles only when pipWindow is available and already mounted
 	useEffect(() => {
 		if (pipWindow) styleSheet(pipWindow);
 	}, [pipWindow, styleSheet]);
 
-	// Open new pipWindow
 	const requestPipWindow = useCallback(
 		async (width: number, height: number) => {
-			// We don't want to allow multiple requests.
 			if (pipWindow != null) return;
-
-			const pip = await window.documentPictureInPicture.requestWindow({
-				width,
-				height
-			});
-
-			// Detect when window is closed by user
-			pip.addEventListener('pagehide', () => {
-				setPipWindow(null);
-			});
+			// @ts-expect-error this api is an advanced one that is not supported in every browser
+			const pip = await window.documentPictureInPicture.requestWindow({ width, height });
 
 			setPipWindow(pip);
 		},
 		[pipWindow]
 	);
+
+	// ExternalLink
 
 	const value = useMemo(
 		() => ({
@@ -86,26 +72,11 @@ export const PiPProvider = ({ children }: PiPProviderProps) => {
 			requestPipWindow,
 			closePipWindow
 		}),
-		[closePipWindow, isSupported, pipWindow, requestPipWindow]
+		[isSupported, pipWindow, requestPipWindow, closePipWindow]
 	);
 
 	return <PiPContext.Provider value={value}>{children}</PiPContext.Provider>;
 };
 
-export function usePiPWindow(): PiPContextType {
-	const context = useContext(PiPContext);
-
-	if (context === undefined) {
-		throw new Error('usePiPWindow must be used within a PiPContext');
-	}
-
-	return context;
-}
-
-type PiPWindowProps = {
-	pipWindow: Window;
-	children: React.ReactNode;
-};
-
-export const PiPWindow = ({ pipWindow, children }: PiPWindowProps) =>
+export const PiPWindow = ({ pipWindow, children }: PiPWindowProps): ReactPortal =>
 	createPortal(children, pipWindow.document.body);
