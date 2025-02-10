@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { MutableRefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { Container } from '@zextras/carbonio-design-system';
+import { Container, Shimmer } from '@zextras/carbonio-design-system';
 import styled from 'styled-components';
 
 import TileAvatarComponent from './TileAvatarComponent';
@@ -20,6 +20,7 @@ import {
 	getParticipantVideoStatus
 } from '../../../store/selectors/MeetingSelectors';
 import useStore from '../../../store/Store';
+import { Z_INDEX_RANK } from '../../../types/generics';
 import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
 import { BrowserUtils } from '../../../utils/BrowserUtils';
 
@@ -54,23 +55,24 @@ const CustomTile = styled(Container)<{ $isTalking: boolean; $isHovering: boolean
 	${BrowserUtils.isMobile() && 'height: 100%;'}
 `;
 
+const CustomShimmer = styled(Shimmer.Logo)`
+	position: absolute;
+	z-index: ${Z_INDEX_RANK.TILE_SHIMMER};
+`;
+
 const CustomContainer = styled(Container)`
 	aspect-ratio: 16/9;
 	position: absolute;
 `;
 
 const VideoEl = styled.video<{
-	playsInline: boolean;
-	autoPlay: boolean;
-	muted: boolean;
-	controls: boolean;
-	ref: MutableRefObject<HTMLVideoElement | null>;
-	isScreenShare: boolean;
+	$isScreenShare: boolean;
 }>`
-	${({ isScreenShare }): string | false => !isScreenShare && 'object-fit: cover;'}
+	${({ $isScreenShare }): string | false => !$isScreenShare && 'object-fit: cover;'}
 	aspect-ratio: 16/9;
 	width: inherit;
 	border-radius: 0.5rem;
+	z-index: ${Z_INDEX_RANK.TILE_VIDEO};
 
 	${BrowserUtils.isMobile() && 'border-radius: 0;'}
 `;
@@ -187,13 +189,14 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 				muted={modalProps ? modalProps.streamMuted : true}
 				controls={false}
 				ref={modalProps ? modalProps.streamRef : streamRef}
-				isScreenShare={!!isScreenShare}
+				$isScreenShare={!!isScreenShare}
 			/>
 			{!videoStreamEnabled && (
 				<CustomContainer data-testid="avatar_box" height="fit">
 					<TileAvatarComponent userId={userId} />
 				</CustomContainer>
 			)}
+			{videoStreamEnabled && <CustomShimmer width="100%" height="100%" />}
 		</CustomTile>
 	);
 };

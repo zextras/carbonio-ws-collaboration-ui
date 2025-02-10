@@ -14,7 +14,10 @@ import { ConfigurationMessageLabel } from '../../../../hooks/useConfigurationMes
 import { useIsWritingLabel } from '../../../../hooks/useIsWritingLabel';
 import useMessage from '../../../../hooks/useMessage';
 import useRouting from '../../../../hooks/useRouting';
-import { getDraftMessage } from '../../../../store/selectors/ActiveConversationsSelectors';
+import {
+	getDraftMessage,
+	getLastNewReaction
+} from '../../../../store/selectors/ActiveConversationsSelectors';
 import { getLastMessageIdSelector } from '../../../../store/selectors/MessagesSelectors';
 import {
 	getRoomMutedSelector,
@@ -62,6 +65,7 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 	);
 	const lastMessageOfRoom: Message | undefined = useMessage(roomId, lastMessageId ?? '');
 	const unreadMessagesCount = useStore((store) => getRoomUnreadsSelector(store, roomId));
+	const lastNewReaction = useStore((store) => getLastNewReaction(store, roomId));
 	const roomType = useStore((state) => getRoomTypeSelector(state, roomId));
 	const roomName = useStore((state) => getRoomNameSelector(state, roomId));
 	const isConversationSelected = useStore((state) => getSelectedConversation(state, roomId));
@@ -174,16 +178,16 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 
 	const UnreadCounter = useMemo(
 		() =>
-			unreadMessagesCount > 0 ? (
+			unreadMessagesCount > 0 || lastNewReaction ? (
 				<Row padding={{ left: 'small' }} mainAlignment="center" crossAlignment="center">
 					<Badge
-						value={unreadMessagesCount}
+						value={unreadMessagesCount > 0 ? unreadMessagesCount : lastNewReaction}
 						backgroundColor={!roomMuted ? 'primary' : 'gray2'}
 						color={!roomMuted ? 'gray6' : 'gray0'}
 					/>
 				</Row>
 			) : null,
-		[unreadMessagesCount, roomMuted]
+		[unreadMessagesCount, lastNewReaction, roomMuted]
 	);
 
 	const openConversation = useCallback(() => goToRoomPage(roomId), [roomId, goToRoomPage]);
@@ -197,6 +201,7 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 			height="fit"
 			padding={{ all: '0.422rem' }}
 			$selected={isConversationSelected}
+			data-testid="list-item"
 		>
 			<Row>
 				{roomType === RoomType.GROUP ? (

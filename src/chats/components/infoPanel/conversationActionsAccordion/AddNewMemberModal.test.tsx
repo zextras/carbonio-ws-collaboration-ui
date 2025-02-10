@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { screen } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 
 import AddNewMemberModal from './AddNewMemberModal';
 import useStore from '../../../../store/Store';
@@ -14,6 +14,7 @@ import { createMockMember, createMockRoom } from '../../../../tests/createMock';
 import { mockSearchUsersByFeatureRequest } from '../../../../tests/mocks/SearchUsersByFeature';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
+import { ContactInfo } from '../../../../types/network/soap/searchUsersByFeatureRequest';
 import { RootStore } from '../../../../types/store/StoreTypes';
 
 const testRoom: RoomBe = createMockRoom({
@@ -24,9 +25,15 @@ const testRoom: RoomBe = createMockRoom({
 	members: [createMockMember({ userId: 'myId' })]
 });
 
+const user1: ContactInfo = {
+	email: 'user1@domain.com',
+	displayName: 'User One',
+	id: 'user1-id'
+};
+
 describe('Add new Member Modal', () => {
 	test('Everything should be rendered - checkbox selected', async () => {
-		mockSearchUsersByFeatureRequest.mockReturnValue([]);
+		mockSearchUsersByFeatureRequest.mockReturnValue([user1]);
 		const store: RootStore = useStore.getState();
 		store.addRoom(testRoom);
 		setup(
@@ -42,16 +49,16 @@ describe('Add new Member Modal', () => {
 						external: false
 					}
 				]}
-				contactsSelected={{}}
-				setContactSelected={jest.fn()}
+				contactsSelected={[]}
+				setContactsSelected={jest.fn()}
 				showHistory
 				setShowHistory={jest.fn()}
 				label={testRoom.name!}
 			/>
 		);
 
-		await screen.findByText('spinner');
-		await screen.findByTestId('list_creation_modal');
+		await screen.findByTestId('spinner');
+		await screen.findByTestId('list_contacts');
 
 		const title = screen.getByText(new RegExp(`Add new members to ${testRoom.name}`, 'i'));
 		expect(title).toBeInTheDocument();
@@ -62,8 +69,9 @@ describe('Add new Member Modal', () => {
 		const checkboxIcon2 = screen.getByTestId('icon: CheckmarkSquare');
 		expect(checkboxIcon2).toBeInTheDocument();
 	});
+
 	test('Everything should be rendered - checkbox not selected', async () => {
-		mockSearchUsersByFeatureRequest.mockReturnValue([]);
+		mockSearchUsersByFeatureRequest.mockReturnValue([user1]);
 		const store: RootStore = useStore.getState();
 		store.addRoom(testRoom);
 		setup(
@@ -79,21 +87,21 @@ describe('Add new Member Modal', () => {
 						external: false
 					}
 				]}
-				contactsSelected={{}}
-				setContactSelected={jest.fn()}
+				contactsSelected={[]}
+				setContactsSelected={jest.fn()}
 				showHistory={false}
 				setShowHistory={jest.fn()}
 				label={testRoom.name!}
 			/>
 		);
 
-		await screen.findByText('spinner');
-		await screen.findByTestId('list_creation_modal');
+		await screen.findByTestId('spinner');
+		await screen.findByTestId('list_contacts');
 
 		const title = screen.getByText(new RegExp(`Add new members to ${testRoom.name}`, 'i'));
 		expect(title).toBeInTheDocument();
 
-		const checkboxIcon = screen.getByTestId('icon: Square');
+		const checkboxIcon = within(screen.getByTestId('modal_footer')).getByTestId('icon: Square');
 		expect(checkboxIcon).toBeInTheDocument();
 	});
 });

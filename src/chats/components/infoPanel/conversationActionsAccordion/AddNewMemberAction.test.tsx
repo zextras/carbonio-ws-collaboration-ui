@@ -6,25 +6,29 @@
 
 import React from 'react';
 
-import { screen, waitFor, act, renderHook } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 
 import AddNewMemberAction from './AddNewMemberAction';
 import useStore from '../../../../store/Store';
-import { createMockRoom, createMockUser } from '../../../../tests/createMock';
-import { mockedAddRoomMemberRequest } from '../../../../tests/mocks/network';
+import {
+	createMockCapabilityList,
+	createMockRoom,
+	createMockUser
+} from '../../../../tests/createMock';
+import { RoomsApiToSpy, spyOnRoomsApi } from '../../../../tests/mocks/network';
 import { mockSearchUsersByFeatureRequest } from '../../../../tests/mocks/SearchUsersByFeature';
 import { setup } from '../../../../tests/test-utils';
 import { RoomType } from '../../../../types/network/models/roomBeTypes';
 import { ContactInfo } from '../../../../types/network/soap/searchUsersByFeatureRequest';
 import { User } from '../../../../types/store/UserTypes';
 
-const zimbraUser1: ContactInfo = {
+const user1: ContactInfo = {
 	email: 'user1@domain.com',
 	displayName: 'User One',
 	id: 'user1-id'
 };
 
-const zimbraUser2: ContactInfo = {
+const user2: ContactInfo = {
 	email: 'user2@domain.com',
 	displayName: 'User Two',
 	id: 'user2-id'
@@ -47,11 +51,16 @@ const mockedRoom = createMockRoom({
 	]
 });
 
+beforeEach(() => {
+	const store = useStore.getState();
+	store.addRoom(mockedRoom);
+	store.setLoginInfo(user1Info.id, user1Info.name);
+	store.setUserInfo(user2Info);
+	store.setCapabilities(createMockCapabilityList({ maxGroupMembers: 5 }));
+});
+
 describe('Add new member action', () => {
 	test('open/close modal and mark checkbox', async () => {
-		const store = useStore.getState();
-		store.addRoom(mockedRoom);
-
 		const { user } = setup(<AddNewMemberAction roomId={mockedRoom.id} />);
 
 		await user.click(screen.getByText(/Add new Members/i));
@@ -70,41 +79,31 @@ describe('Add new member action', () => {
 	});
 
 	test('Add new member', async () => {
-		const { result } = renderHook(() => useStore());
-		act(() => {
-			result.current.addRoom(mockedRoom);
-			result.current.setLoginInfo(user1Info.id, user1Info.name);
-			result.current.setUserInfo(user2Info);
-		});
-		mockSearchUsersByFeatureRequest
-			.mockReturnValueOnce([])
-			.mockReturnValueOnce([zimbraUser1, zimbraUser2]);
-
-		mockedAddRoomMemberRequest.mockReturnValue({
-			userId: 'user2-id',
-			owner: false
-		});
+		const spyOnAddRoomMember = spyOnRoomsApi(RoomsApiToSpy.ADD_ROOM_MEMBERS);
+		mockSearchUsersByFeatureRequest.mockReturnValueOnce([user1, user2]);
 		const { user } = setup(<AddNewMemberAction roomId={mockedRoom.id} />);
-
-		expect(result.current.rooms[mockedRoom.id].members?.length).toBe(1);
 
 		await user.click(screen.getByText(/Add new Members/i));
 		const addMemberModal = await screen.findByTestId('add_member_modal');
 		expect(addMemberModal).toBeInTheDocument();
 
-		const chipInput = await screen.findByTestId('chip_input_creation_modal');
-		await user.type(chipInput, zimbraUser2.displayName[0]);
+		const chipInput = await screen.findByTestId('chip_input_contact_selector');
+		await user.type(chipInput, user2.displayName[0]);
 
-		await screen.findByText('spinner');
-		const list = await screen.findByTestId('list_creation_modal');
-		expect(list).toBeVisible();
+		const list = await screen.findByTestId('list_contacts');
+		expect(list).toBeInTheDocument();
 
-		const checkboxIcon = screen.queryAllByTestId('icon: Square')[0];
-		await user.click(checkboxIcon);
+		const listUser = await within(list).findByText(user2.displayName);
+		await user.click(listUser);
+
+		const chipUser = await within(
+			await screen.findByTestId('chip_input_contact_selector')
+		).findAllByText(user2.displayName);
+		expect(chipUser[0]).toBeInTheDocument();
 
 		const addButton = await screen.findByTestId('add_new_member_button');
 		await user.click(addButton);
 
-		await waitFor(() => expect(mockedAddRoomMemberRequest).toHaveBeenCalled());
+		await waitFor(() => expect(spyOnAddRoomMember).toHaveBeenCalled());
 	});
 });

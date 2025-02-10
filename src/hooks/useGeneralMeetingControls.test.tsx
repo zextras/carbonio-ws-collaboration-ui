@@ -9,12 +9,12 @@ import { act, renderHook, waitFor, screen } from '@testing-library/react';
 import useGeneralMeetingControls from './useGeneralMeetingControls';
 import { PAGE_INFO_TYPE } from './useRouting';
 import useStore from '../store/Store';
-import { createMockMeeting } from '../tests/createMock';
-import { mockedGetMeetingByMeetingId } from '../tests/mocks/network';
+import { createMockMeeting, createMockParticipants } from '../tests/createMock';
+import { MeetingsApiToSpy, spyOnMeetingsApi } from '../tests/mocks/network';
 import { mockGoToInfoPage } from '../tests/mocks/useRouting';
 import { ProvidersWrapper } from '../tests/test-utils';
 
-const meeting = createMockMeeting({ participants: [{ userId: 'userId' }] });
+const meeting = createMockMeeting({ participants: [createMockParticipants({ userId: 'userId' })] });
 
 beforeEach(() => {
 	const store = useStore.getState();
@@ -26,7 +26,8 @@ beforeEach(() => {
 });
 describe('useGeneralMeetingControl hook', () => {
 	test('Show a snackbar when the WebSocket connection is restored and the user is still in the meeting', async () => {
-		mockedGetMeetingByMeetingId.mockReturnValueOnce(meeting);
+		const spyOnGetMeetingByMeetingId = spyOnMeetingsApi(MeetingsApiToSpy.GET_MEETING_BY_MEETING_ID);
+		spyOnGetMeetingByMeetingId.mockImplementation(() => Promise.resolve(meeting));
 		renderHook(() => useGeneralMeetingControls(meeting.id), {
 			wrapper: ProvidersWrapper
 		});
@@ -44,10 +45,13 @@ describe('useGeneralMeetingControl hook', () => {
 	});
 
 	test('Automatically close the meeting if the WebSocket connection is restored but the user is no longer in the meeting', async () => {
-		mockedGetMeetingByMeetingId.mockReturnValueOnce({
-			...meeting,
-			participants: []
-		});
+		const spyOnGetMeetingByMeetingId = spyOnMeetingsApi(MeetingsApiToSpy.GET_MEETING_BY_MEETING_ID);
+		spyOnGetMeetingByMeetingId.mockImplementation(() =>
+			Promise.resolve({
+				...meeting,
+				participants: []
+			})
+		);
 		renderHook(() => useGeneralMeetingControls(meeting.id), {
 			wrapper: ProvidersWrapper
 		});

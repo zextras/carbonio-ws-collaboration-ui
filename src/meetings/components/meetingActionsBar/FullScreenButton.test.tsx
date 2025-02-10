@@ -7,9 +7,9 @@ import React from 'react';
 
 import { screen, act, renderHook } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event';
+import * as ReactRouter from 'react-router';
 
 import FullScreenButton from './FullScreenButton';
-import { useParams } from '../../../../__mocks__/react-router';
 import useStore from '../../../store/Store';
 import {
 	createMockMeeting,
@@ -42,20 +42,11 @@ const room: RoomBe = createMockRoom({
 	members: [member1, member2, member3]
 });
 
-const user1Participant: MeetingParticipant = createMockParticipants({
-	userId: user1.id,
-	sessionId: 'sessionIdUser1'
-});
+const user1Participant: MeetingParticipant = createMockParticipants({ userId: user1.id });
 
-const user3Participant: MeetingParticipant = createMockParticipants({
-	userId: user3.id,
-	sessionId: 'sessionIdUser3'
-});
+const user3Participant: MeetingParticipant = createMockParticipants({ userId: user3.id });
 
-const user2Participant: MeetingParticipant = createMockParticipants({
-	userId: user2.id,
-	sessionId: 'sessionIdUser2'
-});
+const user2Participant: MeetingParticipant = createMockParticipants({ userId: user2.id });
 
 const meeting: MeetingBe = createMockMeeting({
 	roomId: room.id,
@@ -73,7 +64,8 @@ const storeSetupGroupMeeting = (): { user: UserEvent } => {
 		result.current.addMeeting(meeting);
 		result.current.meetingConnection(meeting.id, false, undefined, false, undefined);
 	});
-	useParams.mockReturnValue({ meetingId: meeting.id });
+	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
+	spyUseParams.mockReturnValue({ meetingId: meeting.id });
 	const { user } = setup(<FullScreenButton />);
 
 	return { user };

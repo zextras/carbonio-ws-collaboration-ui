@@ -13,6 +13,7 @@ import {
 	createMockTextMessage,
 	createMockUser
 } from '../../../tests/createMock';
+import { OperationType } from '../../../types/store/MessageTypes';
 import { dateToTimestamp } from '../../../utils/dateUtils';
 
 const sessionUser = createMockUser({ id: 'userId', name: 'User' });
@@ -26,7 +27,6 @@ const markedMessage = createMockTextMessage({
 	date: dateToTimestamp(new Date('2024-02-19T15:25:00.961+02:00'))
 });
 const myMarker = createMockMarker({
-	roomId: room.id,
 	from: sessionUser.id,
 	messageId: markedMessage.id
 });
@@ -47,7 +47,7 @@ describe('getLastUnreadMessage', () => {
 			const message = createMockConfigurationMessage({
 				id: 'roomCreation',
 				roomId: room.id,
-				ROOM_CREATION: 'roomCreation'
+				operation: OperationType.ROOM_CREATION
 			});
 			const store = useStore.getState();
 			store.newMessage(message);

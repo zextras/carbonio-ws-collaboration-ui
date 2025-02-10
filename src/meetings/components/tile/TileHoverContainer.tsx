@@ -11,6 +11,7 @@ import styled from 'styled-components';
 
 import useMuteForAll from '../../../hooks/useMuteForAll';
 import usePinnedTile from '../../../hooks/usePinnedTile';
+import { Z_INDEX_RANK } from '../../../types/generics';
 import MuteForAllModal from '../sidebar/ParticipantsAccordion/MuteForAllModal';
 
 export const HoverContainer = styled(Container)`
@@ -20,7 +21,7 @@ export const HoverContainer = styled(Container)`
 	opacity: 0;
 	position: absolute;
 	background-color: rgba(255, 255, 255, 0.7);
-	z-index: 1;
+	z-index: ${Z_INDEX_RANK.TILE_HOVER};
 	-webkit-transition: opacity 200ms linear 300ms;
 	-moz-transition: opacity 200ms linear 300ms;
 	-o-transition: opacity 200ms linear 300ms;
@@ -60,8 +61,8 @@ const TileHoverContainer: FC<tileHoverContainerProps> = ({
 	const { muteForAllHasToAppear, muteForAll } = useMuteForAll(meetingId, userId);
 
 	const { canUsePinFeature, isPinned, switchPinnedTile } = usePinnedTile(
-		meetingId || '',
-		userId || '',
+		meetingId ?? '',
+		userId ?? '',
 		isScreenShare
 	);
 

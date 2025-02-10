@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { createEvent, fireEvent, screen, waitFor, act } from '@testing-library/react';
+import { act, createEvent, fireEvent, screen, waitFor } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event';
 
 import ConversationFooter from './ConversationFooter';
@@ -22,14 +22,10 @@ import {
 	createMockUser
 } from '../../../../tests/createMock';
 import {
-	mockedSendChatMessageEdit,
-	mockedSendChatMessageReply,
-	mockedSendIsWriting,
-	mockedSendPaused
-} from '../../../../tests/mockedXmppClient';
-import {
-	mockedAddRoomAttachmentRequest,
-	mockedImageSizeRequest
+	AttachmentsApiToSpy,
+	RoomsApiToSpy,
+	spyOnAttachmentsApi,
+	spyOnRoomsApi
 } from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe } from '../../../../types/network/models/roomBeTypes';
@@ -334,6 +330,10 @@ describe('MessageComposer', () => {
 
 	test('User can reply to a message with a message and send it', async () => {
 		const store = useStore.getState();
+		const spySendChatMessageReply = jest.spyOn(
+			store.connections.xmppClient,
+			'sendChatMessageReply'
+		);
 		const textToSend = 'hi!';
 		store.addRoom(mockedRoom);
 		store.updateHistory(mockedRoom.id, [mockedMessage]);
@@ -353,11 +353,15 @@ describe('MessageComposer', () => {
 		await user.type(textArea, textToSend);
 		const sendButton = screen.getByTestId(iconNavigator2);
 		await user.click(sendButton);
-		await waitFor(() => expect(mockedSendChatMessageReply).toHaveBeenCalled());
+		await waitFor(() => expect(spySendChatMessageReply).toHaveBeenCalled());
 	});
 
 	test('User can edit a message and send it', async () => {
 		const store = useStore.getState();
+		const spySendChatMessageEdit = jest.spyOn(
+			useStore.getState().connections.xmppClient,
+			'sendChatMessageEdit'
+		);
 
 		store.addRoom(mockedRoom);
 		store.setLoginInfo('idPaolo', 'Paolo');
@@ -379,7 +383,7 @@ describe('MessageComposer', () => {
 		const sendButton = screen.getByTestId(iconNavigator2);
 		await user.click(sendButton);
 
-		await waitFor(() => expect(mockedSendChatMessageEdit).toHaveBeenCalled());
+		await waitFor(() => expect(spySendChatMessageEdit).toHaveBeenCalled());
 	});
 
 	test('User can edit a message and send it as empty to trigger delete modal message', async () => {
@@ -422,8 +426,9 @@ describe('MessageComposer - send message', () => {
 	});
 
 	test('Send a message with attachment - image', async () => {
-		mockedAddRoomAttachmentRequest.mockReturnValue('attachmentId');
-		mockedImageSizeRequest.mockReturnValue({ width: 10, height: 10 });
+		const spyOnAddRoomAttachment = spyOnRoomsApi(RoomsApiToSpy.ADD_ROOM_ATTACHMENT);
+		const spyOnGetImageSize = spyOnAttachmentsApi(AttachmentsApiToSpy.GET_IMAGE_SIZE);
+		spyOnGetImageSize.mockImplementation(() => Promise.resolve({ width: 10, height: 10 }));
 
 		const testImageFile = new File(['hello'], 'hello.png', { type: 'image/png' });
 		const { user } = storeSetupAdvanced();
@@ -437,13 +442,13 @@ describe('MessageComposer - send message', () => {
 		await user.click(sendButton);
 
 		const updatedStore = useStore.getState();
-		expect(mockedImageSizeRequest).toHaveBeenCalledTimes(1);
-		expect(mockedAddRoomAttachmentRequest).toHaveBeenCalledTimes(1);
+		expect(spyOnGetImageSize).toHaveBeenCalledTimes(1);
+		expect(spyOnAddRoomAttachment).toHaveBeenCalledTimes(1);
 		expect(updatedStore.activeConversations[mockedRoom.id].filesToAttach).toBeUndefined();
 	});
 
 	test('Send a message with attachment - pdf', async () => {
-		mockedAddRoomAttachmentRequest.mockReturnValue('attachmentId');
+		const spyOnAddRoomAttachment = spyOnRoomsApi(RoomsApiToSpy.ADD_ROOM_ATTACHMENT);
 		const testPdfFile = new File(['hello'], 'hello.pdf', { type: 'application/pdf' });
 		const { user } = storeSetupAdvanced();
 
@@ -456,12 +461,12 @@ describe('MessageComposer - send message', () => {
 		await user.click(sendButton);
 
 		const updatedStore = useStore.getState();
-		expect(mockedAddRoomAttachmentRequest).toHaveBeenCalledTimes(1);
+		expect(spyOnAddRoomAttachment).toHaveBeenCalledTimes(1);
 		expect(updatedStore.activeConversations[mockedRoom.id].filesToAttach).toBeUndefined();
 	});
 
 	test('Send a message with attachment - other extension', async () => {
-		mockedAddRoomAttachmentRequest.mockReturnValue('attachmentId');
+		const spyOnAddRoomAttachment = spyOnRoomsApi(RoomsApiToSpy.ADD_ROOM_ATTACHMENT);
 		const testFile = new File(['hello'], 'hello.xls', { type: 'application/ms-excel' });
 		const { user } = storeSetupAdvanced();
 
@@ -474,12 +479,11 @@ describe('MessageComposer - send message', () => {
 		await user.click(sendButton);
 
 		const updatedStore = useStore.getState();
-		expect(mockedAddRoomAttachmentRequest).toHaveBeenCalledTimes(1);
+		expect(spyOnAddRoomAttachment).toHaveBeenCalledTimes(1);
 		expect(updatedStore.activeConversations[mockedRoom.id].filesToAttach).toBeUndefined();
 	});
 
 	test("attachment selector shouldn't be present if the user is a guest", () => {
-		mockedAddRoomAttachmentRequest.mockReturnValue('attachmentId');
 		const store = useStore.getState();
 		store.addRoom(mockedRoomTemporary);
 		store.setLoginInfo(guestUser.id, guestUser.name, guestUser.type);
@@ -711,14 +715,21 @@ describe('MessageComposer - paste on textbox', () => {
 
 describe('MessageComposer - isWriting events', () => {
 	test('sendIsWriting is called immediately when user start writing', async () => {
+		const spySendIsWriting = jest.spyOn(
+			useStore.getState().connections.xmppClient,
+			'sendIsWriting'
+		);
 		const { user } = setup(<MessageComposer roomId={mockedRoom.id} />);
 		const composerTextArea = screen.getByRole('textbox');
-
 		await user.type(composerTextArea, 'Hi');
-		expect(mockedSendIsWriting).toBeCalledTimes(1);
+		expect(spySendIsWriting).toHaveBeenCalled();
 	});
 
 	test('sendIsWriting is called every 3 seconds', async () => {
+		const spySendIsWriting = jest.spyOn(
+			useStore.getState().connections.xmppClient,
+			'sendIsWriting'
+		);
 		const { user } = setup(<MessageComposer roomId={mockedRoom.id} />);
 		const composerTextArea = screen.getByRole('textbox');
 
@@ -732,28 +743,31 @@ describe('MessageComposer - isWriting events', () => {
 		await user.type(composerTextArea, 'How are you?');
 		jest.advanceTimersByTime(2000);
 		await user.type(composerTextArea, 'I am fine');
-		expect(mockedSendIsWriting).toHaveBeenCalledTimes(2);
+		expect(spySendIsWriting).toHaveBeenCalledTimes(2);
 		jest.advanceTimersByTime(1000);
-		expect(mockedSendIsWriting).toHaveBeenCalledTimes(3);
+		expect(spySendIsWriting).toHaveBeenCalledTimes(3);
 	});
 
 	test('sendStopWriting is called after 3.5 seconds after user stops writing', async () => {
+		const spySendPaused = jest.spyOn(useStore.getState().connections.xmppClient, 'sendPaused');
+
 		const { user } = setup(<MessageComposer roomId={mockedRoom.id} />);
 		const composerTextArea = screen.getByRole('textbox');
 
 		await user.type(composerTextArea, 'Hi');
 		jest.advanceTimersByTime(4000);
-		expect(mockedSendPaused).toHaveBeenCalledTimes(1);
+		expect(spySendPaused).toHaveBeenCalledTimes(1);
 	});
 
 	test('sendStopWriting is called immediately when user sends the message', async () => {
+		const spySendPaused = jest.spyOn(useStore.getState().connections.xmppClient, 'sendPaused');
 		const { user } = setup(<MessageComposer roomId={mockedRoom.id} />);
 		const composerTextArea = screen.getByRole('textbox');
 
 		await user.type(composerTextArea, 'Hi');
 		const sendButton = screen.getByTestId(iconNavigator2);
 		await user.click(sendButton);
-		expect(mockedSendPaused).toHaveBeenCalledTimes(1);
+		expect(spySendPaused).toHaveBeenCalledTimes(1);
 	});
 });
 

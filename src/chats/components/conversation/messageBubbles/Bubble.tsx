@@ -3,7 +3,6 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-/* eslint-disable no-nested-ternary */
 
 import React, { FC, useCallback, useEffect, useMemo, useRef } from 'react';
 
@@ -15,7 +14,7 @@ import {
 	useSnackbar
 } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import styled, { SimpleInterpolation } from 'styled-components';
+import styled from 'styled-components';
 
 import AttachmentView from './AttachmentView';
 import BubbleActions, { BubbleActionsWrapper } from './bubbleActions/BubbleActions';
@@ -47,6 +46,7 @@ type BubbleProps = {
 	nextMessageIsFromSameSender: boolean;
 	messageRef: React.RefObject<HTMLDivElement>;
 	messageListRef?: React.RefObject<HTMLDivElement | undefined>;
+	isPrevMessageDeleted?: boolean;
 };
 
 const ForwardContainer = styled(Container)<{
@@ -74,7 +74,7 @@ const BubbleContainer = styled(Container)<{
 	margin-top: 0.25rem;
 	margin-bottom: 0.25rem;
 	${({ $messageAttachment }): string | false => !$messageAttachment && 'width: fit-content;'};
-	${({ $isMyMessage }): SimpleInterpolation => $isMyMessage && 'margin-left: auto;'};
+	${({ $isMyMessage }): false | string => $isMyMessage && 'margin-left: auto;'};
 	box-shadow: 0 0 0.25rem rgba(166, 166, 166, 0.5);
 
 	&:hover {
@@ -104,7 +104,8 @@ const Bubble: FC<BubbleProps> = ({
 	prevMessageIsFromSameSender,
 	nextMessageIsFromSameSender,
 	messageRef,
-	messageListRef
+	messageListRef,
+	isPrevMessageDeleted = false
 }) => {
 	const [t] = useTranslation();
 	const maxNumberReached = t(
@@ -196,10 +197,16 @@ const Bubble: FC<BubbleProps> = ({
 		[forwardMessageList]
 	);
 
+	const showSenderName =
+		!isMyMessage &&
+		roomType !== RoomType.ONE_TO_ONE &&
+		(!prevMessageIsFromSameSender || isPrevMessageDeleted);
+
 	return (
 		<ForwardContainer
 			orientation="horizontal"
 			width="fill"
+			height="fit"
 			mainAlignment="space-between"
 			ref={forwardContainerRef}
 			$forwardIsActive={forwardIsActive}
@@ -226,7 +233,7 @@ const Bubble: FC<BubbleProps> = ({
 				{bubbleDropdownShouldBeVisible && (
 					<BubbleActions message={message} isMyMessage={isMyMessage} />
 				)}
-				{!isMyMessage && roomType !== RoomType.ONE_TO_ONE && !prevMessageIsFromSameSender && (
+				{showSenderName && (
 					<>
 						<BubbleHeader senderId={message.from} />
 						<Padding bottom="small" />

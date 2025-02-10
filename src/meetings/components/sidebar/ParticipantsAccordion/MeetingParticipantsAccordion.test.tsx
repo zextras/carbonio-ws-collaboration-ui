@@ -18,10 +18,7 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../../../tests/createMock';
-import {
-	mockedPromoteRoomMemberRequest,
-	mockedUpdateAudioStreamStatusRequest
-} from '../../../../tests/mocks/network';
+import {} from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 import { MeetingBe } from '../../../../types/network/models/meetingBeTypes';
 import { MemberBe, RoomBe } from '../../../../types/network/models/roomBeTypes';
@@ -33,28 +30,17 @@ import { RootStore } from '../../../../types/store/StoreTypes';
 
 const user1: UserBe = createMockUser({ id: 'user1Id', name: 'user 1' });
 const user2: UserBe = createMockUser({ id: 'user2Id', name: 'user 2' });
-const user3: UserBe = createMockUser({
-	id: 'user3Id',
-	name: 'user 3',
-	pictureUpdatedAt: '2022-08-25T17:24:28.961+02:00'
-});
+const user3: UserBe = createMockUser({ id: 'user3Id', name: 'user 3' });
 
 const member1: MemberBe = createMockMember({ userId: user1.id, owner: true });
 const member2: MemberBe = createMockMember({ userId: user2.id });
 const member3: MemberBe = createMockMember({ userId: user3.id, owner: true });
 
-const user1Participant: MeetingParticipant = createMockParticipants({
-	userId: user1.id,
-	sessionId: 'sessionIdUser1'
-});
-const user3Participant: MeetingParticipant = createMockParticipants({
-	userId: user3.id,
-	sessionId: 'sessionIdUser3'
-});
+const user1Participant: MeetingParticipant = createMockParticipants({ userId: user1.id });
+const user3Participant: MeetingParticipant = createMockParticipants({ userId: user3.id });
 const user2Participant: MeetingParticipant = createMockParticipants({
 	userId: user2.id,
-	sessionId: 'sessionIdUser2',
-	audioStreamOn: true
+	audioStreamEnabled: true
 });
 
 // setup of the store when I'm a moderator
@@ -144,8 +130,6 @@ describe("Meeting Participants Accordion - moderator's side", () => {
 	// 	expect(mutedIcon).toBeInTheDocument();
 	// });
 	test('promote moderator', async () => {
-		mockedPromoteRoomMemberRequest.mockReturnValueOnce('promoted');
-
 		const { user } = storeSetupParticipantModerator();
 
 		const promoteButton = screen.getByTestId('icon: CrownOutline');
@@ -157,6 +141,7 @@ describe("Meeting Participants Accordion - moderator's side", () => {
 		const button = await screen.findByTestId('icon: Crown');
 		expect(button).toBeInTheDocument();
 	});
+
 	test('Search one member inside list', async () => {
 		const { user } = storeSetupParticipantModerator();
 		const searchInput = screen.getByRole('textbox', { name: /Search participants/i });
@@ -164,6 +149,7 @@ describe("Meeting Participants Accordion - moderator's side", () => {
 		await user.type(searchInput, 'user 1');
 		expect(list.children).toHaveLength(1);
 	});
+
 	test('Search more members inside list', async () => {
 		const { user } = storeSetupParticipantModerator();
 		const searchInput = screen.getByRole('textbox', { name: /Search participants/i });
@@ -171,13 +157,16 @@ describe("Meeting Participants Accordion - moderator's side", () => {
 		await user.type(searchInput, 'user');
 		expect(list.children).toHaveLength(2);
 	});
+
 	test('Search a user that is not in the list', async () => {
 		const { user } = storeSetupParticipantModerator();
 		const searchInput = screen.getByRole('textbox', { name: /Search participants/i });
 		const list = await screen.findByTestId('meeting_participants_list');
 		await user.type(searchInput, 'user 4');
 
-		const placeholderText = await screen.findByText(/There are no items that match this search/i);
+		const placeholderText = await screen.findByText(
+			/Your search returned no results, try another keyword./i
+		);
 		expect(placeholderText).toBeInTheDocument();
 		expect(list).not.toBeInTheDocument();
 
@@ -187,7 +176,6 @@ describe("Meeting Participants Accordion - moderator's side", () => {
 	});
 
 	test('mute a member if you are a moderator', async () => {
-		mockedUpdateAudioStreamStatusRequest.mockReturnValueOnce('muted');
 		const { meeting, user, store } = storeSetupParticipantModerator();
 
 		act(() => {

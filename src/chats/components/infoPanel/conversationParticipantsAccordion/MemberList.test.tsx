@@ -11,7 +11,6 @@ import { screen, act } from '@testing-library/react';
 import MemberList from './MemberList';
 import useStore from '../../../../store/Store';
 import { createMockMember, createMockUser } from '../../../../tests/createMock';
-import { mockedGetUserPictureRequest } from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe } from '../../../../types/network/models/roomBeTypes';
 import { Member, RoomType } from '../../../../types/store/RoomTypes';
@@ -85,11 +84,6 @@ const room: RoomBe = {
 	]
 };
 
-const ImageBlob = {
-	size: 1234,
-	type: 'image/jpeg'
-};
-
 describe('Participants list', () => {
 	test('The participants list should be rendered as expected', async () => {
 		const store = useStore.getState();
@@ -98,7 +92,6 @@ describe('Participants list', () => {
 		store.setUserInfo(user2Be);
 		store.setUserInfo(user3Be);
 		setup(<MemberList roomId={room.id} />);
-		mockedGetUserPictureRequest.mockReturnValueOnce(ImageBlob);
 		const list = await screen.findByTestId('members_list');
 		expect(list).toBeInTheDocument();
 		expect(list.children).toHaveLength(3);
@@ -106,6 +99,7 @@ describe('Participants list', () => {
 		expect(screen.getByText(/User 2/i)).toBeInTheDocument();
 		expect(screen.getByText(/User 3/i)).toBeInTheDocument();
 	});
+
 	test('Adding new user inside list should not break the list', async () => {
 		const store = useStore.getState();
 		store.addRoom(room);
@@ -114,7 +108,6 @@ describe('Participants list', () => {
 		store.setUserInfo(user3Be);
 		store.setUserInfo(user4Be);
 		setup(<MemberList roomId={room.id} />);
-		// mockedGetUserPictureRequest.mockReturnValueOnce(ImageBlob);
 		const list = await screen.findByTestId('members_list');
 		expect(list).toBeInTheDocument();
 		expect(list.children).toHaveLength(3);
@@ -122,6 +115,7 @@ describe('Participants list', () => {
 		act(() => store.addRoomMember(room.id, user4MemberBe));
 		expect(list.children).toHaveLength(4);
 	});
+
 	test('remove user inside list should not break the list', async () => {
 		const store = useStore.getState();
 		store.addRoom(room);
@@ -130,7 +124,6 @@ describe('Participants list', () => {
 		store.setUserInfo(user3Be);
 		store.setUserInfo(user4Be);
 		setup(<MemberList roomId={room.id} />);
-		mockedGetUserPictureRequest.mockReturnValueOnce(ImageBlob);
 		const list = await screen.findByTestId('members_list');
 		expect(list).toBeInTheDocument();
 		expect(list.children).toHaveLength(3);
@@ -138,6 +131,7 @@ describe('Participants list', () => {
 		act(() => store.removeRoomMember(room.id, 'user3'));
 		expect(list.children).toHaveLength(2);
 	});
+
 	test('Search one member inside list', async () => {
 		const store = useStore.getState();
 		store.addRoom(room);
@@ -145,12 +139,12 @@ describe('Participants list', () => {
 		store.setUserInfo(user2Be);
 		store.setUserInfo(user3Be);
 		const { user } = setup(<MemberList roomId={room.id} />);
-		mockedGetUserPictureRequest.mockReturnValueOnce(ImageBlob);
 		const searchInput = screen.getByRole('textbox', { name: /Search members/i });
 		const list = await screen.findByTestId('members_list');
 		await user.type(searchInput, user1Be.name);
 		expect(list.children).toHaveLength(1);
 	});
+
 	test('Search more members inside list', async () => {
 		const store = useStore.getState();
 		store.addRoom(room);
@@ -158,12 +152,12 @@ describe('Participants list', () => {
 		store.setUserInfo(user2Be);
 		store.setUserInfo(user3Be);
 		const { user } = setup(<MemberList roomId={room.id} />);
-		mockedGetUserPictureRequest.mockReturnValueOnce(ImageBlob);
 		const searchInput = screen.getByRole('textbox', { name: /Search members/i });
 		const list = await screen.findByTestId('members_list');
 		await user.type(searchInput, 'user');
 		expect(list.children).toHaveLength(3);
 	});
+
 	test('Search a user that is not in the list', async () => {
 		const store = useStore.getState();
 		store.addRoom(room);
@@ -171,14 +165,15 @@ describe('Participants list', () => {
 		store.setUserInfo(user2Be);
 		store.setUserInfo(user3Be);
 		const { user } = setup(<MemberList roomId={room.id} />);
-		mockedGetUserPictureRequest.mockReturnValueOnce(ImageBlob);
 		const searchInput = screen.getByRole('textbox', { name: /Search members/i });
 		const searchIcon = screen.getByTestId('icon: Search');
 		expect(searchIcon).toBeInTheDocument();
 		const list = await screen.findByTestId('members_list');
 		await user.type(searchInput, 'user 4');
 
-		const placeholderText = await screen.findByText(/There are no items that match this search/i);
+		const placeholderText = await screen.findByText(
+			/Your search returned no results, try another keyword./i
+		);
 		expect(placeholderText).toBeInTheDocument();
 		expect(list).not.toBeInTheDocument();
 

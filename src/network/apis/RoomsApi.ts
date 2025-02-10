@@ -7,7 +7,6 @@
 import { pushHistory } from '@zextras/carbonio-shell-ui';
 import { v4 as uuidGenerator } from 'uuid';
 
-import BaseAPI from './BaseAPI';
 import { ROUTES } from '../../hooks/useRouting';
 import useStore from '../../store/Store';
 import { RequestType } from '../../types/network/apis/IBaseAPI';
@@ -42,11 +41,12 @@ import {
 } from '../../types/network/responses/roomsResponses';
 import { TextMessage } from '../../types/store/MessageTypes';
 import { dateToISODate } from '../../utils/dateUtils';
+import { fetchAPI, uploadFileFetchAPI } from '../../utils/FetchUtils';
 import { MeetingsApi } from '../index';
 import { getLastUnreadMessage } from '../xmpp/utility/getLastUnreadMessage';
 import HistoryAccumulator from '../xmpp/utility/HistoryAccumulator';
 
-class RoomsApi extends BaseAPI implements IRoomsApi {
+class RoomsApi implements IRoomsApi {
 	// Singleton design pattern
 	private static instance: RoomsApi;
 
@@ -65,36 +65,36 @@ class RoomsApi extends BaseAPI implements IRoomsApi {
 			if (settings) array.push('extraFields=settings');
 			params = `?${array.join('&')}`;
 		}
-		return this.fetchAPI(`rooms${params}`, RequestType.GET).then((resp: ListRoomsResponse) => {
+		return fetchAPI(`rooms${params}`, RequestType.GET).then((resp: ListRoomsResponse) => {
 			const { setRooms } = useStore.getState();
 			setRooms(resp);
 			return resp;
 		});
 	}
 
-	public addRoom(room: RoomCreationFields): Promise<AddRoomResponse> {
-		return this.fetchAPI('rooms', RequestType.POST, room).then((response: AddRoomResponse) => {
+	public async addRoom(room: RoomCreationFields): Promise<AddRoomResponse> {
+		return fetchAPI('rooms', RequestType.POST, room).then(async (response: AddRoomResponse) => {
 			// Create meeting for the created room
 			const meetingType =
 				room.type === RoomType.TEMPORARY ? MeetingType.SCHEDULED : MeetingType.PERMANENT;
-			MeetingsApi.createMeeting(response.id, meetingType, response.name ?? '');
+			await MeetingsApi.createMeeting(response.id, meetingType, response.name ?? '');
 			return response;
 		});
 	}
 
 	public getRoom(roomId: string): Promise<GetRoomResponse> {
-		return this.fetchAPI(`rooms/${roomId}`, RequestType.GET);
+		return fetchAPI(`rooms/${roomId}`, RequestType.GET);
 	}
 
 	public updateRoom(
 		roomId: string,
 		editableFields: RoomEditableFields
 	): Promise<UpdateRoomResponse> {
-		return this.fetchAPI(`rooms/${roomId}`, RequestType.PUT, editableFields);
+		return fetchAPI(`rooms/${roomId}`, RequestType.PUT, editableFields);
 	}
 
 	public deleteRoom(roomId: string): Promise<DeleteRoomResponse> {
-		return this.fetchAPI(`rooms/${roomId}`, RequestType.DELETE);
+		return fetchAPI(`rooms/${roomId}`, RequestType.DELETE);
 	}
 
 	public deleteRoomAndMeeting(roomId: string): Promise<DeleteRoomResponse> {
@@ -111,7 +111,7 @@ class RoomsApi extends BaseAPI implements IRoomsApi {
 		`${window.document.location.origin}/services/chats/rooms/${roomId}/picture`;
 
 	public getRoomPicture(roomId: string): Promise<GetRoomPictureResponse> {
-		return this.fetchAPI(`rooms/${roomId}/picture`, RequestType.GET);
+		return fetchAPI(`rooms/${roomId}/picture`, RequestType.GET);
 	}
 
 	public updateRoomPicture(roomId: string, file: File): Promise<UpdateRoomPictureResponse> {
@@ -120,7 +120,7 @@ class RoomsApi extends BaseAPI implements IRoomsApi {
 			if (sizeLimit && file.size > sizeLimit * 1000) {
 				reject(new Error('File too large'));
 			} else {
-				this.uploadFileFetchAPI(`rooms/${roomId}/picture`, RequestType.PUT, file)
+				uploadFileFetchAPI(`rooms/${roomId}/picture`, RequestType.PUT, file)
 					.then((resp: UpdateRoomPictureResponse) => resolve(resp))
 					.catch((error) => reject(new Error(error)));
 			}
@@ -128,42 +128,42 @@ class RoomsApi extends BaseAPI implements IRoomsApi {
 	}
 
 	public deleteRoomPicture(roomId: string): Promise<DeleteRoomPictureResponse> {
-		return this.fetchAPI(`rooms/${roomId}/picture`, RequestType.DELETE);
+		return fetchAPI(`rooms/${roomId}/picture`, RequestType.DELETE);
 	}
 
 	public muteRoomNotification(roomId: string): Promise<MuteRoomResponse> {
-		return this.fetchAPI(`rooms/${roomId}/mute`, RequestType.PUT);
+		return fetchAPI(`rooms/${roomId}/mute`, RequestType.PUT);
 	}
 
 	public unmuteRoomNotification(roomId: string): Promise<UnmuteRoomResponse> {
-		return this.fetchAPI(`rooms/${roomId}/mute`, RequestType.DELETE);
+		return fetchAPI(`rooms/${roomId}/mute`, RequestType.DELETE);
 	}
 
 	public clearRoomHistory(roomId: string): Promise<ClearRoomHistoryResponse> {
-		return this.fetchAPI(`rooms/${roomId}/clear`, RequestType.PUT);
+		return fetchAPI(`rooms/${roomId}/clear`, RequestType.PUT);
 	}
 
 	public getRoomMembers(roomId: string): Promise<GetRoomMembersResponse> {
-		return this.fetchAPI(`rooms/${roomId}/members`, RequestType.GET);
+		return fetchAPI(`rooms/${roomId}/members`, RequestType.GET);
 	}
 
 	public addRoomMembers(
 		roomId: string,
 		member: AddMemberFields[]
 	): Promise<AddRoomMembersResponse> {
-		return this.fetchAPI(`rooms/${roomId}/members`, RequestType.POST, member);
+		return fetchAPI(`rooms/${roomId}/members`, RequestType.POST, member);
 	}
 
 	public deleteRoomMember(roomId: string, userId: string): Promise<DeleteRoomMemberResponse> {
-		return this.fetchAPI(`rooms/${roomId}/members/${userId}`, RequestType.DELETE);
+		return fetchAPI(`rooms/${roomId}/members/${userId}`, RequestType.DELETE);
 	}
 
 	public promoteRoomMember(roomId: string, userId: string): Promise<PromoteRoomMemberResponse> {
-		return this.fetchAPI(`rooms/${roomId}/members/${userId}/owner`, RequestType.PUT);
+		return fetchAPI(`rooms/${roomId}/members/${userId}/owner`, RequestType.PUT);
 	}
 
 	public demotesRoomMember(roomId: string, userId: string): Promise<DemotesRoomMemberResponse> {
-		return this.fetchAPI(`rooms/${roomId}/members/${userId}/owner`, RequestType.DELETE);
+		return fetchAPI(`rooms/${roomId}/members/${userId}/owner`, RequestType.DELETE);
 	}
 
 	public getRoomAttachments(
@@ -178,7 +178,7 @@ class RoomsApi extends BaseAPI implements IRoomsApi {
 			if (pageFilter) array.push(`extraFields=${pageFilter}`);
 			params = `?${array.join('&')}`;
 		}
-		return this.fetchAPI(`rooms/${roomId}/attachments${params}`, RequestType.GET);
+		return fetchAPI(`rooms/${roomId}/attachments${params}`, RequestType.GET);
 	}
 
 	public addRoomAttachment(
@@ -224,7 +224,7 @@ class RoomsApi extends BaseAPI implements IRoomsApi {
 			}
 		});
 
-		return this.uploadFileFetchAPI(`rooms/${roomId}/attachments`, RequestType.POST, file, signal, {
+		return uploadFileFetchAPI(`rooms/${roomId}/attachments`, RequestType.POST, file, signal, {
 			description: optionalFields.description,
 			replyId: optionalFields.replyId,
 			messageId: uuid,
@@ -265,7 +265,7 @@ class RoomsApi extends BaseAPI implements IRoomsApi {
 			}));
 			return Promise.all(
 				roomsId.map((roomId) =>
-					this.fetchAPI(`rooms/${roomId}/forward`, RequestType.POST, messagesToForward)
+					fetchAPI(`rooms/${roomId}/forward`, RequestType.POST, messagesToForward)
 				)
 			);
 		});

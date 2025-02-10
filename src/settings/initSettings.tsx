@@ -5,8 +5,8 @@
  */
 import React, { lazy, Suspense, useEffect } from 'react';
 
-import { ModalManager } from '@zextras/carbonio-design-system';
-import { addSettingsView, Spinner } from '@zextras/carbonio-shell-ui';
+import { Container, ModalManager, Spinner } from '@zextras/carbonio-design-system';
+import { addSettingsView } from '@zextras/carbonio-shell-ui';
 
 import { CHATS_ROUTE, PRODUCT_NAME } from '../constants/appConstants';
 
@@ -15,7 +15,13 @@ const LazySettingsView = lazy(
 );
 
 const SettingsView = (): React.JSX.Element => (
-	<Suspense fallback={<Spinner />}>
+	<Suspense
+		fallback={
+			<Container>
+				<Spinner color={'primary'} />
+			</Container>
+		}
+	>
 		<ModalManager>
 			<LazySettingsView />
 		</ModalManager>

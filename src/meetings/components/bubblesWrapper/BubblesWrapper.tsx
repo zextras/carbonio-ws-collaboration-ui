@@ -11,13 +11,14 @@ import styled from 'styled-components';
 
 import MeetingBubble from './MeetingBubble';
 import useEventListener, { EventName, NewMessageEvent } from '../../../hooks/useEventListener';
+import { Z_INDEX_RANK } from '../../../types/generics';
 import { MessageType } from '../../../types/store/MessageTypes';
 
 const WrapperContainer = styled(Container)<{ $messageIdsList: string[] }>`
 	position: absolute;
 	top: 3.3125rem;
 	left: 4.25rem;
-	z-index: 3;
+	z-index: ${Z_INDEX_RANK.BUBBLE_WRAPPER};
 	width: ${({ $messageIdsList }): string => ($messageIdsList.length !== 0 ? '23.125rem' : '0')};
 `;
 

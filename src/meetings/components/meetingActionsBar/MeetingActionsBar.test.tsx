@@ -7,9 +7,9 @@
 import React from 'react';
 
 import { screen } from '@testing-library/react';
+import * as ReactRouter from 'react-router';
 
 import MeetingActionsBar from './MeetingActionsBar';
-import { useParams } from '../../../../__mocks__/react-router';
 import useStore from '../../../store/Store';
 import {
 	createMockCapabilityList,
@@ -18,7 +18,6 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../../tests/createMock';
-import { mockMediaDevicesResolve } from '../../../tests/mocks/global';
 import { setup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 import { MemberBe, RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
@@ -28,11 +27,7 @@ import { RootStore } from '../../../types/store/StoreTypes';
 
 const user1: UserBe = createMockUser({ id: 'user1Id', name: 'user 1' });
 const user2: UserBe = createMockUser({ id: 'user2Id', name: 'user 2' });
-const user3: UserBe = createMockUser({
-	id: 'user3Id',
-	name: 'user 3',
-	pictureUpdatedAt: '2022-08-25T17:24:28.961+02:00'
-});
+const user3: UserBe = createMockUser({ id: 'user3Id', name: 'user 3' });
 const member1: MemberBe = { userId: user1.id, owner: true };
 const member2: MemberBe = { userId: user2.id, owner: false };
 const member3: MemberBe = { userId: user3.id, owner: true };
@@ -44,18 +39,9 @@ const room: RoomBe = createMockRoom({
 	members: [member1, member2, member3]
 });
 
-const user1Participant: MeetingParticipant = createMockParticipants({
-	userId: user1.id,
-	sessionId: 'sessionIdUser1'
-});
-const user3Participant: MeetingParticipant = createMockParticipants({
-	userId: user3.id,
-	sessionId: 'sessionIdUser3'
-});
-const user2Participant: MeetingParticipant = createMockParticipants({
-	userId: user2.id,
-	sessionId: 'sessionIdUser2'
-});
+const user1Participant: MeetingParticipant = createMockParticipants({ userId: user1.id });
+const user3Participant: MeetingParticipant = createMockParticipants({ userId: user3.id });
+const user2Participant: MeetingParticipant = createMockParticipants({ userId: user2.id });
 const meeting: MeetingBe = createMockMeeting({
 	roomId: room.id,
 	participants: [user1Participant, user2Participant, user3Participant]
@@ -69,10 +55,6 @@ jest.mock('../../../hooks/useContainerDimensions', () => ({
 	default: (): { width: number } => mockUseContainerDimensions()
 }));
 
-beforeAll(() => {
-	mockMediaDevicesResolve();
-});
-
 beforeEach(() => {
 	const store: RootStore = useStore.getState();
 	store.setLoginInfo(user1.id, user1.name);
@@ -83,9 +65,11 @@ beforeEach(() => {
 	store.addMeeting(meeting);
 	store.startMeeting(meeting.id, '2024-08-25T17:24:28.961+02:00');
 	store.meetingConnection(meeting.id, false, undefined, false, undefined);
-	useParams.mockReturnValue({ meetingId: meeting.id });
+	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
+	spyUseParams.mockReturnValue({ meetingId: meeting.id });
 	store.setCapabilities(createMockCapabilityList());
 });
+
 describe('Meeting action bar', () => {
 	test('everything is rendered correctly', async () => {
 		setup(<MeetingActionsBar streamsWrapperRef={streamRef} />);

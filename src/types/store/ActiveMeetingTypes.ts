@@ -36,6 +36,7 @@ export type SidebarStatus = {
 	participantsAccordionIsOpened: boolean;
 	waitingListAccordionIsOpened: boolean;
 	recordingAccordionIsOpened: boolean;
+	visualEffectsAccordionIsOpened: boolean;
 };
 
 export enum MeetingViewType {
@@ -91,6 +92,18 @@ export type TileData = {
 export type PinnedTile = TileData & { previousViewType?: MeetingViewType };
 
 export type VirtualBackground = {
-	blur: boolean;
+	backgroundImage: VirtualBackgroundType;
 	updatedStream?: MediaStream;
 };
+
+export enum VirtualBackgroundType {
+	'NONE' = 'None',
+	'BLUR' = 'Blur',
+	'HOME' = 'Home',
+	'JAL_MAHAL' = 'JalMahal',
+	'LIVING_ROOM' = 'LivingRoom',
+	'MOUNTAINS' = 'Mountains',
+	'OFFICE' = 'Office',
+	'COWORKING' = 'Coworking',
+	'IVY' = 'Ivy'
+}

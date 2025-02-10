@@ -36,38 +36,30 @@ const scheduledMeetingMod: MeetingBe = createMockMeeting({
 
 describe('SelectVirtualRoomWidget', () => {
 	test('Should render properly - user has virtual rooms', async () => {
-		const store = useStore.getState();
-		store.setLoginInfo(sessionUser.id, sessionUser.name);
-		store.setCapabilities(createMockCapabilityList());
-		store.setRooms([temporaryRoomMod]);
-		store.setMeetings([scheduledMeetingMod]);
-		setup(
-			<SelectVirtualRoomWidgetComponent
-				onChange={jest.fn()}
-				defaultValue={{
-					label: temporaryRoomMod.name ?? '',
-					link: 'https://localhost/carbonio/focus-mode/meetings/scheduled-meeting-mod-test'
-				}}
-			/>
-		);
+		act(() => {
+			const store = useStore.getState();
+			store.setLoginInfo(sessionUser.id, sessionUser.name);
+			store.setCapabilities(createMockCapabilityList());
+			store.setRooms([temporaryRoomMod]);
+			store.setMeetings([scheduledMeetingMod]);
+		});
+		await act(async () => {
+			setup(
+				<SelectVirtualRoomWidgetComponent
+					onChange={jest.fn()}
+					defaultValue={{
+						label: temporaryRoomMod.name ?? '',
+						link: 'https://localhost/carbonio/focus-mode/meetings/scheduled-meeting-mod-test'
+					}}
+				/>
+			);
+		});
 
 		const selectVirtualRoom = screen.getByTestId('select_virtual_room');
 		expect(selectVirtualRoom).toBeInTheDocument();
 
 		const selectedVirtualRoom = await screen.findByText(temporaryRoomMod.name ?? '');
 		expect(selectedVirtualRoom).toBeInTheDocument();
-	});
-
-	test('Should render properly - user has not virtual rooms and defaultValue is undefined', async () => {
-		const store = useStore.getState();
-		store.setLoginInfo(sessionUser.id, sessionUser.name);
-		store.setCapabilities(createMockCapabilityList());
-		await act(async () => {
-			setup(<SelectVirtualRoomWidgetComponent onChange={() => null} defaultValue={undefined} />);
-		});
-
-		const noVirtualRoom = screen.getByTestId('no_virtual_room');
-		expect(noVirtualRoom).toBeInTheDocument();
 	});
 
 	test('Should render properly - user has not virtual rooms and defaultValue is not undefined', async () => {

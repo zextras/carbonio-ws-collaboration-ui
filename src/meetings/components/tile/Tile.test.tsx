@@ -5,7 +5,7 @@
  */
 import React from 'react';
 
-import { screen, waitFor, act } from '@testing-library/react';
+import { screen, act } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event';
 
 import Tile from './Tile';
@@ -17,11 +17,9 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../../tests/createMock';
-import { mockMediaDevicesResolve } from '../../../tests/mocks/global';
-import { mockedUpdateAudioStreamStatusRequest } from '../../../tests/mocks/network';
 import { setup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
-import { MemberBe, RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
+import { MemberBe, RoomBe } from '../../../types/network/models/roomBeTypes';
 import { UserBe } from '../../../types/network/models/userBeTypes';
 import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
 import { MeetingParticipant } from '../../../types/store/MeetingTypes';
@@ -32,35 +30,17 @@ const iconMicOffOutline = 'icon: MicOffOutline';
 
 const user1: UserBe = createMockUser({ id: 'user1Id', name: 'user 1' });
 const user2: UserBe = createMockUser({ id: 'user2Id', name: 'user 2' });
-const user3: UserBe = createMockUser({
-	id: 'user3Id',
-	name: 'user 3',
-	pictureUpdatedAt: '2022-08-25T17:24:28.961+02:00'
-});
+const user3: UserBe = createMockUser({ id: 'user3Id', name: 'user 3' });
 
 const member1: MemberBe = createMockMember({ userId: user1.id, owner: true });
 const member2: MemberBe = createMockMember({ userId: user2.id });
 const member3: MemberBe = createMockMember({ userId: user3.id, owner: true });
 
-const room: RoomBe = createMockRoom({
-	name: '',
-	description: '',
-	type: RoomType.GROUP,
-	members: [member1, member2, member3]
-});
+const room: RoomBe = createMockRoom({ members: [member1, member2, member3] });
 
-const user1Participant: MeetingParticipant = createMockParticipants({
-	userId: user1.id,
-	sessionId: 'sessionIdUser1'
-});
-const user3Participant: MeetingParticipant = createMockParticipants({
-	userId: user3.id,
-	sessionId: 'sessionIdUser3'
-});
-const user2Participant: MeetingParticipant = createMockParticipants({
-	userId: user2.id,
-	sessionId: 'sessionIdUser2'
-});
+const user1Participant: MeetingParticipant = createMockParticipants({ userId: user1.id });
+const user3Participant: MeetingParticipant = createMockParticipants({ userId: user3.id });
+const user2Participant: MeetingParticipant = createMockParticipants({ userId: user2.id });
 const meeting: MeetingBe = createMockMeeting({
 	roomId: room.id,
 	participants: [user1Participant, user2Participant, user3Participant]
@@ -184,10 +164,6 @@ const storeSetupTileAudioOnAndVideoOff = (): { user: UserEvent; store: RootStore
 	return { user, store };
 };
 
-beforeAll(() => {
-	mockMediaDevicesResolve();
-});
-
 describe('Tile test - enter meeting modal', () => {
 	test('my tile - everything is rendered correctly', () => {
 		storeSetupMyTileAudioOnVideoOff();
@@ -202,8 +178,8 @@ describe('Tile test - enter meeting modal', () => {
 	test('my tile - hover on tile', async () => {
 		const { user } = storeSetupMyTileAudioOnVideoOff();
 		const tile = screen.getByTestId('tile');
-		user.hover(tile);
-		await waitFor(() => expect(screen.queryByTestId('hover_container')).not.toBeInTheDocument());
+		await user.hover(tile);
+		expect(screen.queryByTestId('hover_container')).not.toBeInTheDocument();
 	});
 	test('user tile - audio on and video off', async () => {
 		storeSetupTileAudioOnAndVideoOff();
@@ -279,7 +255,6 @@ describe('Tile test - on meeting', () => {
 
 describe('Tile actions', () => {
 	test('mute for all appears and works if I am a moderator', async () => {
-		mockedUpdateAudioStreamStatusRequest.mockReturnValueOnce('muted');
 		storeBasicActiveMeetingSetup();
 		const store: RootStore = useStore.getState();
 		act(() => {
@@ -291,20 +266,18 @@ describe('Tile actions', () => {
 
 		const hoverContainer = screen.getByTestId('hover_container');
 
-		act(() => {
-			user.hover(hoverContainer);
-		});
+		await user.hover(hoverContainer);
 
 		const muteForAll = await screen.findByTestId(iconMicOffOutline);
 		expect(muteForAll).toBeVisible();
-		user.click(muteForAll);
+		await user.click(muteForAll);
 
 		const muteModal = await screen.findByTestId('mute_for_all_modal');
 		expect(muteModal).toBeInTheDocument();
 
 		const confirmButton = await screen.findByRole('button', { name: 'Mute for all' });
 
-		user.click(confirmButton);
+		await user.click(confirmButton);
 
 		// the only icon is the one that appears when a user is muted
 		expect(await screen.findAllByTestId(iconMicOffOutline)).toHaveLength(1);
@@ -318,9 +291,9 @@ describe('Tile actions', () => {
 		const { user } = setup(<Tile userId={user1.id} meetingId={meeting.id} />);
 
 		const hoverContainer = screen.getByTestId('hover_container');
-		user.hover(hoverContainer);
+		await user.hover(hoverContainer);
 
-		await waitFor(() => expect(screen.queryByTestId(iconMicOffOutline)).not.toBeInTheDocument());
+		expect(screen.queryByTestId(iconMicOffOutline)).not.toBeInTheDocument();
 	});
 
 	test('mute for all does not appear if I am not a moderator', async () => {
@@ -331,8 +304,8 @@ describe('Tile actions', () => {
 		const { user } = setup(<Tile userId={user1.id} meetingId={meeting.id} />);
 
 		const hoverContainer = screen.getByTestId('hover_container');
-		user.hover(hoverContainer);
+		await user.hover(hoverContainer);
 
-		await waitFor(() => expect(screen.queryByTestId(iconMicOffOutline)).not.toBeInTheDocument());
+		expect(screen.queryByTestId(iconMicOffOutline)).not.toBeInTheDocument();
 	});
 });

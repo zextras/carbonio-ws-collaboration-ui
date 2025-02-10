@@ -7,7 +7,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { Button, Container, Divider, Icon, Padding, Text } from '@zextras/carbonio-design-system';
-import { differenceWith, map, size } from 'lodash';
+import { debounce, differenceWith, map, size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -53,17 +53,21 @@ const useFilteredGal = (
 
 	const singleConversationsUserId = useStore(getSingleConversationsUserId);
 
-	const searchOnGal = useCallback((text: string) => {
-		if (text !== '') {
-			setRequestStatus('loading');
-			searchUsersByFeatureRequest(text)
-				.then((response: SearchUsersByFeatureSoapResponse) => {
-					setRequestStatus('success');
-					setFilteredGal(response);
-				})
-				.catch(() => setRequestStatus('error'));
-		}
-	}, []);
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	const searchOnGal = useCallback(
+		debounce((text: string) => {
+			if (text !== '') {
+				setRequestStatus('loading');
+				searchUsersByFeatureRequest(text)
+					.then((response: SearchUsersByFeatureSoapResponse) => {
+						setRequestStatus('success');
+						setFilteredGal(response);
+					})
+					.catch(() => setRequestStatus('error'));
+			}
+		}, 500),
+		[]
+	);
 
 	useEffect(() => {
 		searchOnGal(input);

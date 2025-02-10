@@ -6,23 +6,26 @@
 
 import { onComposingMessageStanza } from './composingMessageHandler';
 import useStore from '../../../store/Store';
-import { createMockRoom, createMockUser } from '../../../tests/createMock';
-import { xmppClient } from '../../../tests/mockedXmppClient';
+import { createMockMember, createMockRoom, createMockUser } from '../../../tests/createMock';
 import { composingStanza, pausedStanza } from '../../../tests/mocks/XMPPStanza';
 
 const user0 = createMockUser({ id: 'user0' });
-const mockedRoom = createMockRoom({ id: 'groupId', participants: [user0] });
+const mockedRoom = createMockRoom({
+	id: 'groupId',
+	members: [createMockMember({ userId: user0.id })]
+});
 
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo('myUserId', 'User');
 	store.addRoom(mockedRoom);
 });
+
 describe('XMPP composingMessageHandler', () => {
 	test('New composing message arrives', () => {
 		// A new composing message arrives
 		const messageXMPP = composingStanza(mockedRoom.id, user0.id);
-		onComposingMessageStanza.call(xmppClient, messageXMPP);
+		onComposingMessageStanza.call(useStore.getState().connections.xmppClient, messageXMPP);
 
 		// Check if information are stored correctly
 		const store = useStore.getState();
@@ -32,7 +35,7 @@ describe('XMPP composingMessageHandler', () => {
 	test('New paused message arrives', () => {
 		// A new composing message arrives
 		const messageXMPP = pausedStanza(mockedRoom.id, user0.id);
-		onComposingMessageStanza.call(xmppClient, messageXMPP);
+		onComposingMessageStanza.call(useStore.getState().connections.xmppClient, messageXMPP);
 
 		// Check if information are stored correctly
 		const store = useStore.getState();
@@ -42,7 +45,7 @@ describe('XMPP composingMessageHandler', () => {
 	test('New composing message arrives from me', () => {
 		// A new composing message arrives
 		const messageXMPP = composingStanza(mockedRoom.id, 'myUserId');
-		onComposingMessageStanza.call(xmppClient, messageXMPP);
+		onComposingMessageStanza.call(useStore.getState().connections.xmppClient, messageXMPP);
 
 		// Check if information are stored correctly
 		const store = useStore.getState();

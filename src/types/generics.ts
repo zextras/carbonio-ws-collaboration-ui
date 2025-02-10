@@ -15,8 +15,13 @@ export type Emoji = {
 };
 
 export enum Z_INDEX_RANK {
-	DATE_STICKY_LABEL = 3,
 	DROPDOWN_CXT = 2,
+	DATE_STICKY_LABEL = 3,
+	TILE_SHIMMER = 4,
+	TILE_VIDEO = 5,
+	TILE_INFO = 6,
+	TILE_HOVER = 8,
+	BUBBLE_WRAPPER = 9,
 	EMOJI_PICKER = 10
 }
 

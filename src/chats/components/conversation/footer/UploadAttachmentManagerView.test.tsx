@@ -20,7 +20,6 @@ import {
 	imageFile,
 	pdfFile
 } from '../../../../tests/createMock';
-import { mockedImageSizeRequest } from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe } from '../../../../types/network/models/roomBeTypes';
 import { FileToUpload } from '../../../../types/store/ActiveConversationTypes';
@@ -576,7 +575,6 @@ describe('Upload attachment view', () => {
 		expect(fileOld).toHaveStyle(borderColor);
 	});
 	test('Save description - input has text, file is selected and user press ENTER => description of the file will be saved, and message sent', async () => {
-		mockedImageSizeRequest.mockReturnValue({ width: 10, height: 10 });
 		const { user, store } = storeSetupAdvanced();
 		const fileOne = createMockFileToUpload({ hasFocus: true });
 		act(() => store.setFilesToAttach(mockedRoom.id, [fileOne]));
@@ -590,7 +588,6 @@ describe('Upload attachment view', () => {
 		expect(filesToAttachUpdated?.length).toBeUndefined();
 	});
 	test('Save description - input has text, file is selected and user click send button => description of the file will be saved, and message sent', async () => {
-		mockedImageSizeRequest.mockReturnValue({ width: 10, height: 10 });
 		const { user, store } = storeSetupAdvanced();
 		const fileOne = createMockFileToUpload({ hasFocus: true });
 		act(() => store.setFilesToAttach(mockedRoom.id, [fileOne]));

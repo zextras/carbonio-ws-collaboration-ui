@@ -18,42 +18,15 @@ const contactInfo: ContactInfo = {
 	id: '1234567890'
 };
 
-const mockIsOwner = (id: string): boolean => {
-	console.log(id);
-	return true;
-};
-const mockUpdateOwner = (id: string): void => {
-	console.log(id);
-};
-
 describe('List Participant', () => {
 	test('The email of participant list item is selectable', async () => {
-		setup(
-			<ListParticipant
-				item={contactInfo}
-				selected={false}
-				onClickCb={(): undefined => undefined}
-				isDisabled={false}
-				isOwner={mockIsOwner}
-				updateOwner={mockUpdateOwner}
-				canBeModerator
-			/>
-		);
+		setup(<ListParticipant item={contactInfo} selected={false} onClickCb={jest.fn()} />);
 		const contactEmail = screen.getByTestId(`${contactInfo.id}-emailSelectable`);
 		expect(contactEmail).toHaveStyle('user-select: text');
 	});
+
 	test('The email of participant list item must not be not selectable', async () => {
-		setup(
-			<ListParticipant
-				item={contactInfo}
-				selected={false}
-				onClickCb={(): undefined => undefined}
-				isDisabled={false}
-				isOwner={mockIsOwner}
-				updateOwner={mockUpdateOwner}
-				canBeModerator
-			/>
-		);
+		setup(<ListParticipant item={contactInfo} selected={false} onClickCb={jest.fn()} />);
 		const contactEmail = screen.getByTestId(`${contactInfo.id}-emailSelectable`);
 		expect(contactEmail).not.toHaveStyle('user-select: none');
 	});

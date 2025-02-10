@@ -37,6 +37,7 @@ export type RoomCreationFields =
 	| {
 			type: RoomType.TEMPORARY;
 			name: string;
+			members?: MemberBe[];
 	  };
 
 export type RoomEditableFields = {

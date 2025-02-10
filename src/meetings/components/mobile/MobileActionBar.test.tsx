@@ -6,16 +6,12 @@
 import React from 'react';
 
 import { act, screen } from '@testing-library/react';
+import * as ReactRouter from 'react-router';
 
 import MobileActionBar from './MobileActionBar';
-import { useParams } from '../../../../__mocks__/react-router';
 import useStore from '../../../store/Store';
 import { createMockMeeting } from '../../../tests/createMock';
-import { mockMediaDevicesResolve } from '../../../tests/mocks/global';
-import {
-	mockedLeaveMeetingRequest,
-	mockedUpdateAudioStreamStatusRequest
-} from '../../../tests/mocks/network';
+import { MeetingsApiToSpy, spyOnMeetingsApi } from '../../../tests/mocks/network';
 import { setup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
@@ -24,9 +20,10 @@ import { MobileMeetingView } from '../../views/mobile/MeetingSkeletonMobile';
 const mockMeeting: MeetingBe = createMockMeeting();
 
 beforeAll(() => {
-	useParams.mockReturnValue({ meetingId: mockMeeting.id });
-	mockMediaDevicesResolve();
+	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
+	spyUseParams.mockReturnValue({ meetingId: mockMeeting.id });
 });
+
 describe('MobileActionBar test', () => {
 	test('Set participants view', async () => {
 		const setView = jest.fn();
@@ -61,7 +58,7 @@ describe('MobileActionBar test', () => {
 	});
 
 	test('Leave meeting button', async () => {
-		mockedLeaveMeetingRequest.mockResolvedValueOnce({});
+		const spyOnLeaveMeeting = spyOnMeetingsApi(MeetingsApiToSpy.LEAVE_MEETING);
 		const { user } = setup(
 			<MobileActionBar
 				meetingId={mockMeeting.id}
@@ -73,11 +70,13 @@ describe('MobileActionBar test', () => {
 		expect(leaveButton).toBeInTheDocument();
 
 		await user.click(leaveButton);
-		expect(mockedLeaveMeetingRequest).toHaveBeenCalled();
+		expect(spyOnLeaveMeeting).toHaveBeenCalled();
 	});
 
 	test('Toggle audio stream', async () => {
-		mockedUpdateAudioStreamStatusRequest.mockResolvedValueOnce({});
+		const spyOnUpdateAudioStreamStatus = spyOnMeetingsApi(
+			MeetingsApiToSpy.UPDATE_AUDIO_STREAM_STATUS
+		);
 		const store = useStore.getState();
 		store.setLoginInfo('userId', 'User');
 		store.addMeeting(mockMeeting);
@@ -105,6 +104,6 @@ describe('MobileActionBar test', () => {
 		expect(audioButtonOn).toBeInTheDocument();
 
 		await user.click(audioButtonOn);
-		expect(mockedUpdateAudioStreamStatusRequest).toHaveBeenCalled();
+		expect(spyOnUpdateAudioStreamStatus).toHaveBeenCalled();
 	});
 });

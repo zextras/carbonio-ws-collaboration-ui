@@ -6,9 +6,9 @@
 import React from 'react';
 
 import { screen, act } from '@testing-library/react';
+import * as ReactRouter from 'react-router';
 
 import MeetingAccessPageMediaSection from './MeetingAccessPageMediaSection';
-import { useParams } from '../../../../__mocks__/react-router';
 import useStore from '../../../store/Store';
 import {
 	createMockMeeting,
@@ -16,11 +16,6 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../../tests/createMock';
-import {
-	mockedEnumerateDevices,
-	mockedGetUserMedia,
-	mockMediaDevicesReject
-} from '../../../tests/mocks/global';
 import { setup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 import { MemberBe, RoomBe } from '../../../types/network/models/roomBeTypes';
@@ -44,23 +39,13 @@ const groupRoom: RoomBe = createMockRoom({
 	userSettings: { muted: false }
 });
 
-const user1Participant: MeetingParticipant = createMockParticipants({
-	userId: 'user1',
-	sessionId: 'sessionIdUser1'
-});
+const user1Participant: MeetingParticipant = createMockParticipants({ userId: 'user1' });
 
-const user2Participant: MeetingParticipant = createMockParticipants({
-	userId: 'user2',
-	sessionId: 'sessionIdUser2'
-});
+const user2Participant: MeetingParticipant = createMockParticipants({ userId: 'user2' });
 
 const groupMeeting: MeetingBe = createMockMeeting({
 	roomId: groupRoom.id,
 	participants: [user1Participant, user2Participant]
-});
-
-beforeAll(() => {
-	mockMediaDevicesReject();
 });
 
 beforeEach(() => {
@@ -77,13 +62,13 @@ beforeEach(() => {
 		'ChatsMeetingSettings',
 		JSON.stringify({ EnableCamera: false, EnableMicrophone: false })
 	);
-	useParams.mockReturnValue({ meetingId: groupMeeting.id });
+	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
+	spyUseParams.mockReturnValue({ meetingId: groupMeeting.id });
 });
 
 describe('user not giving media permissions', () => {
 	test('user gives not the media permissions and tries to open webcam', async () => {
-		mockedEnumerateDevices.mockRejectedValue('error enumerateDevices');
-		mockedGetUserMedia.mockRejectedValue('error getUserMedia');
+		jest.spyOn(navigator.mediaDevices, 'getUserMedia').mockRejectedValue('error getUserMedia');
 
 		const err = jest.spyOn(console, 'error').mockImplementation();
 
@@ -110,8 +95,7 @@ describe('user not giving media permissions', () => {
 	});
 
 	test('user gives not the media permissions and tries to open microphone', async () => {
-		mockedEnumerateDevices.mockRejectedValue('error enumerateDevices');
-		mockedGetUserMedia.mockRejectedValue('error getUserMedia');
+		jest.spyOn(navigator.mediaDevices, 'getUserMedia').mockRejectedValue('error getUserMedia');
 
 		const err = jest.spyOn(console, 'error').mockImplementation();
 

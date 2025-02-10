@@ -6,12 +6,12 @@
 
 import React from 'react';
 
-import { screen, waitFor, act, renderHook } from '@testing-library/react';
+import { act, renderHook, screen } from '@testing-library/react';
 
 import LeaveConversationAction from './LeaveConversationAction';
 import useStore from '../../../../store/Store';
 import { createMockRoom, createMockUser } from '../../../../tests/createMock';
-import { mockedDeleteRoomMemberRequest } from '../../../../tests/mocks/network';
+import { RoomsApiToSpy, spyOnRoomsApi } from '../../../../tests/mocks/network';
 import { mockGoToMainPage } from '../../../../tests/mocks/useRouting';
 import { setup } from '../../../../tests/test-utils';
 import { RoomType } from '../../../../types/network/models/roomBeTypes';
@@ -23,7 +23,7 @@ const user2Info: User = createMockUser();
 
 const mockedRoom2 = createMockRoom({
 	id: 'roomId',
-	type: 'roomType',
+	type: RoomType.GROUP,
 	members: [
 		{
 			userId: user1Info.id,
@@ -71,19 +71,19 @@ describe('Leave conversation Action', () => {
 				iAmOneOfOwner={false}
 			/>
 		);
-		await user.click(screen.getByText(/Leave Room/i));
+		await user.click(screen.getByText(/Leave Group/i));
 		expect(screen.getByTestId('leave_modal')).toBeInTheDocument();
 
 		await user.click(screen.getByTestId('icon: Close'));
 		expect(screen.queryByTestId('leave_modal')).not.toBeInTheDocument();
 	});
 	test('leave conversation', async () => {
+		const spyOnDeleteRoomMember = spyOnRoomsApi(RoomsApiToSpy.DELETE_ROOM_MEMBER);
 		const { result } = renderHook(() => useStore());
 		act(() => {
 			result.current.setLoginInfo(user2Info.id, user2Info.name);
 			result.current.addRoom(mockedRoom);
 		});
-		mockedDeleteRoomMemberRequest.mockReturnValueOnce('you left the conversation');
 		mockGoToMainPage.mockReturnValue('main page');
 		const { user } = setup(
 			<LeaveConversationAction
@@ -98,7 +98,7 @@ describe('Leave conversation Action', () => {
 		await user.click(screen.getByText(/Leave Group/i));
 		const button = await screen.findByRole('button', { name: 'Leave' });
 		await user.click(button);
-		await waitFor(() => expect(mockedDeleteRoomMemberRequest).toHaveBeenCalled());
-		await waitFor(() => expect(mockGoToMainPage).toHaveBeenCalled());
+		expect(spyOnDeleteRoomMember).toHaveBeenCalled();
+		expect(mockGoToMainPage).toHaveBeenCalled();
 	});
 });

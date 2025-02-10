@@ -7,7 +7,6 @@
 import { onPingStanza, onPresenceStanza } from './presenceHandler';
 import useStore from '../../../store/Store';
 import { createMockUser } from '../../../tests/createMock';
-import { xmppClient } from '../../../tests/mockedXmppClient';
 import {
 	offlinePresenceStanza,
 	onlinePresenceStanza,
@@ -22,10 +21,14 @@ beforeEach(() => {
 	store.setLoginInfo(loggedUser.id, loggedUser.name);
 	store.setUserInfo(mockUser);
 });
+
 describe('XMPP presenceHandler', () => {
 	test('New online presence arrives', () => {
 		// A new online presence arrives
-		onPresenceStanza.call(xmppClient, onlinePresenceStanza(mockUser.id));
+		onPresenceStanza.call(
+			useStore.getState().connections.xmppClient,
+			onlinePresenceStanza(mockUser.id)
+		);
 
 		// Check if information are stored correctly
 		const store = useStore.getState();
@@ -34,8 +37,14 @@ describe('XMPP presenceHandler', () => {
 
 	test('User goes offline during the session', () => {
 		// A new offline presence arrives
-		onPresenceStanza.call(xmppClient, onlinePresenceStanza(mockUser.id));
-		onPresenceStanza.call(xmppClient, offlinePresenceStanza(mockUser.id));
+		onPresenceStanza.call(
+			useStore.getState().connections.xmppClient,
+			onlinePresenceStanza(mockUser.id)
+		);
+		onPresenceStanza.call(
+			useStore.getState().connections.xmppClient,
+			offlinePresenceStanza(mockUser.id)
+		);
 
 		// Check if information are stored correctly
 		const store = useStore.getState();
@@ -44,8 +53,14 @@ describe('XMPP presenceHandler', () => {
 
 	test('Logged user remains online if an offline presence arrives from another session', () => {
 		// A new offline presence arrives
-		onPresenceStanza.call(xmppClient, onlinePresenceStanza(loggedUser.id));
-		onPresenceStanza.call(xmppClient, offlinePresenceStanza(loggedUser.id));
+		onPresenceStanza.call(
+			useStore.getState().connections.xmppClient,
+			onlinePresenceStanza(loggedUser.id)
+		);
+		onPresenceStanza.call(
+			useStore.getState().connections.xmppClient,
+			offlinePresenceStanza(loggedUser.id)
+		);
 
 		// Check if information are stored correctly
 		const store = useStore.getState();
@@ -53,11 +68,12 @@ describe('XMPP presenceHandler', () => {
 	});
 
 	test('Send pong when a ping stanza arrives', () => {
+		const spyOnSendPong = jest.spyOn(useStore.getState().connections.xmppClient, 'sendPong');
 		// A new ping stanza arrives
 		const stanzaId = 'pingStanzaId';
-		onPingStanza.call(xmppClient, pingStanza(stanzaId));
+		onPingStanza.call(useStore.getState().connections.xmppClient, pingStanza(stanzaId));
 
 		// Check if pong is sent
-		expect(xmppClient.sendPong).toHaveBeenCalled();
+		expect(spyOnSendPong).toHaveBeenCalled();
 	});
 });

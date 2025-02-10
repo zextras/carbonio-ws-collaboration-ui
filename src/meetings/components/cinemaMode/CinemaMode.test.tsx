@@ -7,9 +7,9 @@ import React from 'react';
 
 import { screen, act, renderHook } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event';
+import * as ReactRouter from 'react-router';
 
 import CinemaMode from './CinemaMode';
-import { useParams } from '../../../../__mocks__/react-router';
 import useStore from '../../../store/Store';
 import {
 	createMockMeeting,
@@ -39,25 +39,13 @@ const groupRoom: RoomBe = createMockRoom({
 	userSettings: { muted: false }
 });
 
-const user1Participant: MeetingParticipant = createMockParticipants({
-	userId: user1.id,
-	sessionId: 'sessionIdUser1'
-});
+const user1Participant: MeetingParticipant = createMockParticipants({ userId: user1.id });
 
-const user2Participant: MeetingParticipant = createMockParticipants({
-	userId: user2.id,
-	sessionId: 'sessionIdUser2'
-});
+const user2Participant: MeetingParticipant = createMockParticipants({ userId: user2.id });
 
-const user3Participant: MeetingParticipant = createMockParticipants({
-	userId: user3.id,
-	sessionId: 'sessionIdUser3'
-});
+const user3Participant: MeetingParticipant = createMockParticipants({ userId: user3.id });
 
-const user4Participant: MeetingParticipant = createMockParticipants({
-	userId: user4.id,
-	sessionId: 'sessionIdUser4'
-});
+const user4Participant: MeetingParticipant = createMockParticipants({ userId: user4.id });
 
 const groupMeeting: MeetingBe = createMockMeeting({
 	roomId: groupRoom.id,
@@ -71,7 +59,8 @@ const setupBasicGroupMeeting = (): { user: UserEvent; store: RootStore } => {
 		result.current.addMeeting(groupMeeting);
 		result.current.meetingConnection(groupMeeting.id, false, undefined, false, undefined);
 	});
-	useParams.mockReturnValue({ meetingId: groupMeeting.id });
+	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
+	spyUseParams.mockReturnValue({ meetingId: groupMeeting.id });
 	localStorage.setItem('settings', JSON.stringify({ 'settings.appearance_setting.scaling': 100 }));
 	const { user } = setup(<CinemaMode />);
 	return { user, store: result.current };

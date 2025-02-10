@@ -45,7 +45,7 @@ const forwardedMyTextMessage: TextMessage = createMockTextMessage({
 	roomId: mockedRoom.id,
 	from: mySessionId,
 	date: Date.now() - 6000,
-	forwarded: { id: 'forwardedId', date: 1661441294393, text: 'Forwarded text!', from: 'userId2' }
+	forwarded: { id: 'forwardedId', date: 1661441294393, from: 'userId2', count: 1 }
 });
 
 const attachmentMyTextMessage: TextMessage = createMockTextMessage({
@@ -79,7 +79,7 @@ const forwardedTextMessage: TextMessage = createMockTextMessage({
 	roomId: mockedRoom.id,
 	from: mySessionId,
 	date: Date.now() - 6000,
-	forwarded: { id: 'forwardedId', date: 1661441294393, text: 'Forwarded text!' }
+	forwarded: { id: 'forwardedId', date: 1661441294393, from: 'userId2', count: 1 }
 });
 
 const attachmentTextMessage: TextMessage = createMockTextMessage({

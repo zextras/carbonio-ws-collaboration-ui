@@ -8,20 +8,21 @@ import React, { FC, useCallback, useMemo, useState } from 'react';
 import {
 	Button,
 	CreateSnackbarFn,
-	Modal,
+	Dropdown,
+	DropdownItem,
 	Row,
-	Text,
 	Tooltip,
 	useSnackbar
 } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import styled, { DefaultTheme } from 'styled-components';
+import styled from 'styled-components';
 
 import useRoomMeeting from '../../../../../hooks/useRoomMeeting';
 import { RoomsApi } from '../../../../../network';
-import { getRoomSelector } from '../../../../../store/selectors/RoomsSelectors';
 import { getUserId } from '../../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../../store/Store';
+import DeleteVirtualRoomModal from '../DeleteVirtualRoomModal';
+import EditVirtualRoomModal from './EditVirtualRoomModal';
 
 type ManageMeetingButtonsProps = {
 	roomId: string;
@@ -31,26 +32,8 @@ type ManageMeetingButtonsProps = {
 	meetingIsActive: boolean;
 };
 
-const CustomDeleteButton = styled(Button)<{ $isMyRoom: boolean | undefined }>`
-	${({
-		$isMyRoom
-	}: {
-		$isMyRoom: boolean | undefined;
-		theme: DefaultTheme;
-	}): string | undefined | false => !$isMyRoom && 'opacity: 0.5; cursor: default;'};
-	&:hover {
-		background-color: ${({ theme }): string => theme.palette.error.regular};
-		color: ${({ theme }): string => theme.palette.gray6.regular};
-	}
-`;
-
-const CustomMainButton = styled(Button)<{ isMyRoom: boolean | undefined }>`
-	${({
-		isMyRoom
-	}: {
-		isMyRoom: boolean | undefined;
-		theme: DefaultTheme;
-	}): string | undefined | false => !isMyRoom && 'opacity: 1;'};
+const JoinRoomButton = styled(Button)<{ $isMyRoom: boolean | undefined }>`
+	${({ $isMyRoom }): string | undefined | false => !$isMyRoom && 'opacity: 1;'};
 `;
 
 const ManageMeetingButtons: FC<ManageMeetingButtonsProps> = ({
@@ -61,51 +44,31 @@ const ManageMeetingButtons: FC<ManageMeetingButtonsProps> = ({
 	meetingIsActive
 }) => {
 	const [t] = useTranslation();
-	const deleteVirtualRoomTooltip = t('meeting.virtual.deleteTooltip', 'Delete Virtual Room');
-	const copyVirtualRoomTooltip = t('meeting.virtual.copyTooltip', "Copy Virtual Room's link");
-	const startMeeting = t('meeting.startMeeting', 'Start meeting');
-	const joinMeeting = t('meeting.joinMeeting', 'Join meeting');
-	const rejoinMeeting = t('meeting.rejoinMeeting', 'Rejoin meeting');
-	const closeLabel = t('action.close', 'Close');
-	const deleteVirtualRoomLabel = t('action.delete', 'Delete');
+	const roomActionsTooltip = t('tooltip.virtualActions', 'Room actions');
+	const copyVirtualRoomLabel = t('meeting.virtual.copyTooltip', "Copy Virtual Room's link");
+	const editVirtualRoomLabel = t('action.virtual.editRoom', 'Edit Virtual Room');
+	const deleteVirtualRoomLabel = t('meeting.virtual.deleteTooltip', 'Delete Virtual Room');
+	const startMeetingLabel = t('meeting.startMeeting', 'Start meeting');
+	const joinMeetingLabel = t('meeting.joinMeeting', 'Join meeting');
+	const rejoinMeetingLabel = t('meeting.rejoinMeeting', 'Rejoin meeting');
 	const leaveRoomTooltip = t('modal.leaveRoom', 'Leave Room');
 	const copyVirtualRoomLinkSnackbar = t(
 		'meeting.virtual.copyLinkSnackbar',
 		"Virtual Room's link copied"
 	);
-	const deleteVirtualRoomSnackbar = t(
-		'meeting.virtual.deleteSnackbar',
-		'Virtual Room deleted successfully'
-	);
-	const deleteVirtualRoomDescription = t(
-		'meeting.virtual.deleteModalDescription',
-		'You are deleting this Virtual Room, if it has active meetings, they will be stopped and no one will be able to access the Room anymore. Proceed?'
-	);
-	const errorSnackbar = t(
-		'settings.profile.errorGenericResponse',
-		'Something went wrong. Please retry'
-	);
 
 	const sessionId = useStore(getUserId);
-	const room = useStore((state) => getRoomSelector(state, roomId));
-	const modalTitle = t('meeting.virtual.deleteModalTitle', `Delete ${room.name} Virtual Room`, {
-		roomName: room.name
-	});
 
-	const [showModal, setShowModal] = useState(false);
+	const [showEditModal, setShowEditModal] = useState(false);
+	const [showDeleteModal, setShowDeleteModal] = useState(false);
+
 	const createSnackbar: CreateSnackbarFn = useSnackbar();
+
 	const { openMeeting, copyMeetingLink } = useRoomMeeting(roomId);
 
 	const leaveConversation = useCallback(() => {
-		if (sessionId) {
-			RoomsApi.deleteRoomMember(roomId, sessionId).then(() => {});
-		}
+		if (sessionId) RoomsApi.deleteRoomMember(roomId, sessionId);
 	}, [roomId, sessionId]);
-
-	const enterMeeting = useMemo(
-		() => (amIParticipating ? rejoinMeeting : joinMeeting),
-		[amIParticipating, joinMeeting, rejoinMeeting]
-	);
 
 	const handleCopyLink = useCallback(() => {
 		copyMeetingLink();
@@ -117,78 +80,97 @@ const ManageMeetingButtons: FC<ManageMeetingButtonsProps> = ({
 		});
 	}, [copyMeetingLink, createSnackbar, copyVirtualRoomLinkSnackbar]);
 
-	const enterRoomTooltip = useMemo(
-		() => (meetingIsActive ? enterMeeting : startMeeting),
-		[enterMeeting, meetingIsActive, startMeeting]
+	const enterRoomTooltip = useMemo(() => {
+		if (!meetingIsActive) return startMeetingLabel;
+		if (amIParticipating) return rejoinMeetingLabel;
+		return joinMeetingLabel;
+	}, [amIParticipating, joinMeetingLabel, meetingIsActive, rejoinMeetingLabel, startMeetingLabel]);
+
+	const handleEditModalOpening = useCallback(() => setShowEditModal((prevState) => !prevState), []);
+
+	const handleDeleteModalOpening = useCallback(
+		() => setShowDeleteModal((prevState) => !prevState),
+		[]
 	);
 
-	const handleDeleteRoom = useCallback(() => {
-		RoomsApi.deleteRoomAndMeeting(roomId)
-			.then(() => {
-				createSnackbar({
-					key: new Date().toLocaleString(),
-					severity: 'success',
-					label: deleteVirtualRoomSnackbar,
-					hideButton: true
-				});
-			})
-			.catch(() => {
-				createSnackbar({
-					key: new Date().toLocaleString(),
-					label: errorSnackbar,
-					hideButton: true
-				});
+	const items = useMemo((): Array<DropdownItem> => {
+		const actions = [];
+		actions.push({
+			id: 'copyLinkAction',
+			label: copyVirtualRoomLabel,
+			onClick: handleCopyLink,
+			disabled: !(amIParticipating || isMyRoom)
+		});
+		if (isMyRoom) {
+			actions.push({
+				id: 'editRoomAction',
+				label: editVirtualRoomLabel,
+				onClick: handleEditModalOpening
 			});
-	}, [createSnackbar, deleteVirtualRoomSnackbar, errorSnackbar, roomId]);
+			actions.push({
+				id: 'deleteRoomAction',
+				label: deleteVirtualRoomLabel,
+				onClick: handleDeleteModalOpening
+			});
+		}
+		return actions;
+	}, [
+		amIParticipating,
+		copyVirtualRoomLabel,
+		deleteVirtualRoomLabel,
+		editVirtualRoomLabel,
+		handleCopyLink,
+		handleDeleteModalOpening,
+		handleEditModalOpening,
+		isMyRoom
+	]);
 
-	const handleModalOpening = useCallback(() => setShowModal((prevState) => !prevState), []);
+	const meetingIcon = useMemo(() => {
+		if (!amIParticipating && !isMyRoom) return 'LogOut';
+		if (!meetingIsActive) return 'StartMeeting';
+		if (amIParticipating) return 'RejoinMeeting';
+		return 'JoinMeeting';
+	}, [amIParticipating, isMyRoom, meetingIsActive]);
 
 	return (
-		<>
-			<Row orientation="horizontal" gap="0.25rem">
-				{isMyRoom && (
-					<Tooltip label={deleteVirtualRoomTooltip}>
-						<CustomDeleteButton
-							type="ghost"
-							color="text"
-							icon="Trash2Outline"
-							onClick={handleModalOpening}
-							$isMyRoom={amIParticipating || isMyRoom}
-						/>
-					</Tooltip>
-				)}
-				<Tooltip label={copyVirtualRoomTooltip} disabled={!(amIParticipating || isMyRoom)}>
+		<Row orientation="horizontal" gap="0.25rem">
+			<Tooltip label={roomActionsTooltip} disabled={!isMyRoom && !amIParticipating} disablePortal>
+				<Dropdown items={items} placement="top-start" disablePortal>
 					<Button
+						icon="MoreVertical"
 						type="ghost"
-						color="text"
-						icon="Link2Outline"
-						onClick={handleCopyLink}
-						disabled={!(amIParticipating || isMyRoom)}
+						color="gray0"
+						onClick={(): void => undefined}
+						disabled={!isMyRoom && !amIParticipating}
 					/>
-				</Tooltip>
-				<Tooltip label={amIParticipating || isMyRoom ? enterRoomTooltip : leaveRoomTooltip}>
-					<CustomMainButton
-						color={amIParticipating || isMyRoom ? 'primary' : 'error'}
-						icon={amIParticipating || isMyRoom ? 'Video' : 'LogOut'}
-						onClick={amIParticipating || isMyRoom ? openMeeting : leaveConversation}
-						isMyRoom={amIParticipating || isMyRoom}
-					/>
-				</Tooltip>
-			</Row>
-			<Modal
-				title={modalTitle}
-				open={showModal}
-				onConfirm={handleDeleteRoom}
-				confirmLabel={deleteVirtualRoomLabel}
-				onClose={handleModalOpening}
-				showCloseIcon
-				ref={modalRef}
-				confirmColor="error"
-				closeIconTooltip={closeLabel}
-			>
-				<Text overflow="break-word">{deleteVirtualRoomDescription}</Text>
-			</Modal>
-		</>
+				</Dropdown>
+			</Tooltip>
+			<Tooltip label={amIParticipating || isMyRoom ? enterRoomTooltip : leaveRoomTooltip}>
+				<JoinRoomButton
+					color={amIParticipating || isMyRoom ? 'primary' : 'error'}
+					icon={meetingIcon}
+					onClick={amIParticipating || isMyRoom ? openMeeting : leaveConversation}
+					$isMyRoom={amIParticipating || isMyRoom}
+				/>
+			</Tooltip>
+			{showEditModal && (
+				<EditVirtualRoomModal
+					modalRef={modalRef}
+					showModal={showEditModal}
+					setShowModal={setShowEditModal}
+					roomId={roomId}
+				/>
+			)}
+			{showDeleteModal && (
+				<DeleteVirtualRoomModal
+					modalRef={modalRef}
+					showModal={showDeleteModal}
+					setShowModal={setShowDeleteModal}
+					handleModalOpening={handleDeleteModalOpening}
+					roomId={roomId}
+				/>
+			)}
+		</Row>
 	);
 };
 

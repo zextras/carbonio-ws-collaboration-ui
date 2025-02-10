@@ -8,7 +8,7 @@ import React, { ReactElement, RefObject, useCallback, useEffect, useRef, useStat
 
 import { Container } from '@zextras/carbonio-design-system';
 import { useParams } from 'react-router-dom';
-import styled, { FlattenSimpleInterpolation } from 'styled-components';
+import styled from 'styled-components';
 
 import CameraButton from './CameraButton';
 import FullScreenButton from './FullScreenButton';
@@ -24,9 +24,7 @@ const BarContainer = styled(Container)<{ $isHoovering: boolean }>`
 	position: absolute;
 	bottom: -1rem;
 	width: 100%;
-	transform: translateY(
-		${({ $isHoovering }): string | FlattenSimpleInterpolation => ($isHoovering ? '-1rem' : '5rem')}
-	);
+	transform: translateY(${({ $isHoovering }): string => ($isHoovering ? '-1rem' : '5rem')});
 	transition: transform 200ms linear;
 	z-index: 40;
 `;

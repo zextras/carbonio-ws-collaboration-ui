@@ -172,7 +172,7 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({
 				padding={{ vertical: 'extrasmall', left: 'large', right: 'medium' }}
 			>
 				<MeetingChatAccordionTitle roomId={roomId} />
-				<Container height="fit" width="30%" orientation="horizontal" mainAlignment="flex-end">
+				<Row>
 					{expandButtonShouldAppear && (
 						<Tooltip label={!chatFullExpanded ? extendChatLabel : minimizeChatLabel}>
 							<CustomMediumButton
@@ -196,7 +196,7 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({
 							/>
 						</Tooltip>
 					)}
-				</Container>
+				</Row>
 			</Container>
 			{isChatOpenOrFullExpanded && (
 				<WrapperMeetingChat

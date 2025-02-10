@@ -17,8 +17,6 @@ import { UserBe } from '../../types/network/models/userBeTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 import { NotificationsSettingsType } from '../../utils/localStorageUtils';
 
-const pictureUpdatedAtTime = '2022-08-25T17:24:28.961+02:00';
-
 const squareIcon = 'icon: Square';
 
 const userWithoutImage: UserBe = createMockUser({
@@ -34,8 +32,7 @@ const userWithImage: UserBe = createMockUser({
 	email: 'user1@domain.com',
 	name: 'User 1',
 	lastSeen: 1234567890,
-	statusMessage: "Hey there! I'm User 1",
-	pictureUpdatedAt: pictureUpdatedAtTime
+	statusMessage: "Hey there! I'm User 1"
 });
 
 const notificationsSettingsObject: NotificationsSettingsType = {

@@ -11,17 +11,18 @@ import { screen } from '@testing-library/react';
 import MeetingAccessMobilePage from './MeetingAccessMobilePage';
 import useStore from '../../../store/Store';
 import { createMockMeeting } from '../../../tests/createMock';
-import { mockedGetMeetingByMeetingId } from '../../../tests/mocks/network';
+import { MeetingsApiToSpy, spyOnMeetingsApi } from '../../../tests/mocks/network';
 import { setup } from '../../../tests/test-utils';
 import { MeetingType } from '../../../types/network/models/meetingBeTypes';
 
 describe('MeetingAccessMobilePage', () => {
 	test('Enter button for internal user with direct access', async () => {
+		const spyOnGetMeetingByMeetingId = spyOnMeetingsApi(MeetingsApiToSpy.GET_MEETING_BY_MEETING_ID);
+		spyOnGetMeetingByMeetingId.mockImplementation(() =>
+			Promise.resolve(createMockMeeting({ meetingType: MeetingType.PERMANENT }))
+		);
 		const store = useStore.getState();
 		store.setChatsBeStatus(true);
-		mockedGetMeetingByMeetingId.mockReturnValueOnce(
-			createMockMeeting({ meetingType: MeetingType.PERMANENT })
-		);
 
 		setup(<MeetingAccessMobilePage />);
 		const enterButton = await screen.findByRole('button', { name: /Enter/i });
@@ -29,12 +30,13 @@ describe('MeetingAccessMobilePage', () => {
 	});
 
 	test('Enter button is disabled when ws connection is down', async () => {
+		const spyOnGetMeetingByMeetingId = spyOnMeetingsApi(MeetingsApiToSpy.GET_MEETING_BY_MEETING_ID);
+		spyOnGetMeetingByMeetingId.mockImplementation(() =>
+			Promise.resolve(createMockMeeting({ meetingType: MeetingType.PERMANENT }))
+		);
 		const store = useStore.getState();
 		store.setChatsBeStatus(true);
 		store.setWebsocketStatus(false);
-		mockedGetMeetingByMeetingId.mockReturnValueOnce(
-			createMockMeeting({ meetingType: MeetingType.PERMANENT })
-		);
 
 		setup(<MeetingAccessMobilePage />);
 
@@ -43,11 +45,12 @@ describe('MeetingAccessMobilePage', () => {
 	});
 
 	test('Enter button for waiting user', async () => {
+		const spyOnGetMeetingByMeetingId = spyOnMeetingsApi(MeetingsApiToSpy.GET_MEETING_BY_MEETING_ID);
+		spyOnGetMeetingByMeetingId.mockImplementation(() =>
+			Promise.resolve(createMockMeeting({ meetingType: MeetingType.SCHEDULED }))
+		);
 		const store = useStore.getState();
 		store.setChatsBeStatus(true);
-		mockedGetMeetingByMeetingId.mockReturnValueOnce(
-			createMockMeeting({ meetingType: MeetingType.SCHEDULED })
-		);
 
 		setup(<MeetingAccessMobilePage />);
 		const enterButton = await screen.findByRole('button', { name: /Ready to participate/i });

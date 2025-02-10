@@ -14,12 +14,12 @@ import React, {
 	useState
 } from 'react';
 
-import { Container, Text } from '@zextras/carbonio-design-system';
+import { Button, Container, Text } from '@zextras/carbonio-design-system';
 import { map } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import CreateVirtualRoomButton from './CreateVirtualRoomButton';
+import CreateVirtualRoomModal from './CreateVirtualRoomModal';
 import VirtualRoomCard from './virtualRoomCard/VirtualRoomCard';
 import { getTemporaryRoomIdsOrderedByCreation } from '../../../../store/selectors/RoomsSelectors';
 import useStore from '../../../../store/Store';
@@ -52,6 +52,8 @@ const VirtualRoomsList: FC<virtualRoomsListProps> = ({ setListVisibility, parent
 		'meeting.virtual.emptyState',
 		'The Rooms you create will be shown here'
 	);
+
+	const createVirtualRoom = t('meeting.virtual.newRoom', 'Create new virtual room');
 
 	const virtualRoomList = useStore(getTemporaryRoomIdsOrderedByCreation);
 	const [showCreationModal, setShowCreationModal] = useState(false);
@@ -113,7 +115,8 @@ const VirtualRoomsList: FC<virtualRoomsListProps> = ({ setListVisibility, parent
 
 	return (
 		<CustomContainer background={'gray6'} height="fit" padding="0.5rem" gap="0.5rem" ref={popupRef}>
-			<CreateVirtualRoomButton
+			<Button label={createVirtualRoom} color="primary" width="fill" onClick={toggleModal} />
+			<CreateVirtualRoomModal
 				toggleModal={toggleModal}
 				showCreationModal={showCreationModal}
 				setShowCreationModal={setShowCreationModal}

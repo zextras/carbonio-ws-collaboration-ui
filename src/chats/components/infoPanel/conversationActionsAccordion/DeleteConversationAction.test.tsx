@@ -5,12 +5,11 @@
  */
 import React from 'react';
 
-import { screen, waitFor, act, renderHook } from '@testing-library/react';
+import { screen, act, renderHook } from '@testing-library/react';
 
 import DeleteConversationAction from './DeleteConversationAction';
 import useStore from '../../../../store/Store';
 import { createMockRoom, createMockUser } from '../../../../tests/createMock';
-import { mockedDeleteRoomRequest } from '../../../../tests/mocks/network';
 import { mockGoToMainPage } from '../../../../tests/mocks/useRouting';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe } from '../../../../types/network/models/roomBeTypes';
@@ -45,9 +44,7 @@ const testRoom: RoomBe = createMockRoom({
 
 const testRoom2: RoomBe = createMockRoom({
 	id: 'room-test',
-	name: 'A Group',
-	description: 'This is a beautiful description',
-	type: 'AAA',
+	type: RoomType.GROUP,
 	members: [
 		{
 			userId: user1Info.id,
@@ -74,20 +71,20 @@ describe('delete conversation action', () => {
 		const { user } = setup(
 			<DeleteConversationAction roomId={testRoom2.id} type={testRoom2.type} numberOfMembers={2} />
 		);
-		const deleteRoomLabel = screen.getByText(/Delete Room/i);
+		const deleteRoomLabel = screen.getByText(/Delete Group/i);
 		await user.click(deleteRoomLabel);
 		expect(screen.getByTestId('delete_modal')).toBeInTheDocument();
 
 		await user.click(screen.getByTestId('icon: Close'));
 		expect(screen.queryByTestId('leave_modal')).not.toBeInTheDocument();
 	});
+
 	test('delete conversation', async () => {
 		const { result } = renderHook(() => useStore());
 		act(() => {
 			result.current.setLoginInfo(user1Info.id, user1Info.name);
 			result.current.addRoom(testRoom);
 		});
-		mockedDeleteRoomRequest.mockReturnValueOnce('the conversation has been deleted');
 		mockGoToMainPage.mockReturnValueOnce('main page');
 		const { user } = setup(
 			<DeleteConversationAction roomId={testRoom.id} type={testRoom.type} numberOfMembers={2} />
@@ -101,6 +98,6 @@ describe('delete conversation action', () => {
 		const deleteButton = await screen.findByRole('button', { name: 'Delete' });
 
 		await user.click(deleteButton);
-		await waitFor(() => expect(mockGoToMainPage).toHaveBeenCalled());
+		expect(mockGoToMainPage).toHaveBeenCalled();
 	});
 });

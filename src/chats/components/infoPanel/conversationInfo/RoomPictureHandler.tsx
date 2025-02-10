@@ -9,7 +9,7 @@ import React, { FC, useCallback, useContext, useMemo } from 'react';
 import { Container, Padding, Text, useTheme } from '@zextras/carbonio-design-system';
 import { PreviewsManagerContext } from '@zextras/carbonio-ui-preview';
 import { useTranslation } from 'react-i18next';
-import styled, { css, FlattenSimpleInterpolation } from 'styled-components';
+import styled, { css } from 'styled-components';
 
 import { calculateAvatarColor } from '../../../../utils/styleUtils';
 
@@ -33,12 +33,13 @@ const BackgroundContainer = styled(Container)<{
 	border-radius: 0;
 	background-color: ${({ $color }): string | false => `${$color}`};
 	&:hover {
-		background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
-			${({ $color, $hasHoverGradient }): string | false => $hasHoverGradient && `${$color}`};
-		background: -webkit-linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
-			${({ $color, $hasHoverGradient }): string | false => $hasHoverGradient && `${$color}`};
-		background: -moz-linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
-			${({ $color, $hasHoverGradient }): string | false => $hasHoverGradient && `${$color}`};
+		${({ $hasHoverGradient, $color }): false | ReturnType<typeof css> =>
+			$hasHoverGradient &&
+			css`
+				background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), ${$color};
+				background: -webkit-linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), ${$color};
+				background: -moz-linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), ${$color};
+			`}
 		${HoverContainer} {
 			opacity: 1;
 		}
@@ -61,7 +62,7 @@ const PictureContainer = styled(Container)<{ $picture: string }>`
 	}
 
 	&:hover {
-		${({ $picture }): false | FlattenSimpleInterpolation => css`
+		${({ $picture }): ReturnType<typeof css> => css`
 			background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url(${$picture});
 			background-image: -webkit-linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
 				url(${$picture});

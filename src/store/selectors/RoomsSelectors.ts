@@ -88,12 +88,12 @@ export const getOwnershipOfTheRoom = (
 	return false;
 };
 
-export const getOwners = (state: RootStore, roomId: string): Member[] => {
-	const ownersList: Member[] = [];
+export const getOwners = (state: RootStore, roomId: string): string[] => {
+	const ownersList: string[] = [];
 	if (state.rooms[roomId]?.members != null) {
 		map(state.rooms[roomId]?.members, (member) => {
 			if (member.owner) {
-				ownersList.push(member);
+				ownersList.push(member.userId);
 			}
 		});
 	}
@@ -107,8 +107,8 @@ export const getNumberOfOwnersOfTheRoom = (state: RootStore, roomId: string): nu
 	return 0;
 };
 
-export const getRoomMembers = (state: RootStore, roomId: string): Member[] | undefined =>
-	state.rooms[roomId]?.members;
+export const getRoomMembers = (state: RootStore, roomId: string): Member[] =>
+	state.rooms[roomId]?.members ?? [];
 
 export const getNumbersOfRoomMembers = (state: RootStore, roomId: string): number =>
 	size(state.rooms[roomId]?.members);
