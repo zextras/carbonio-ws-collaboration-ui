@@ -15,6 +15,7 @@ import FullScreenButton from './FullScreenButton';
 import LeaveMeetingButton from './LeaveMeetingButton';
 import MeetingDuration from './MeetingDuration';
 import MicrophoneButton from './MicrophoneButton';
+import PictureInPictureButton from './PictureInPictureButton';
 import ScreenShareButton from './ScreenShareButton';
 import SwitchViewButton from './SwitchViewButton';
 import useContainerDimensions from '../../../hooks/useContainerDimensions';
@@ -200,6 +201,7 @@ const MeetingActionsBar = ({ streamsWrapperRef }: MeetingActionsProps): ReactEle
 				<ScreenShareButton />
 				<FullScreenButton />
 				<SwitchViewButton />
+				<PictureInPictureButton />
 				{compactMode && (
 					<>
 						<MeetingDuration meetingId={meetingId} />

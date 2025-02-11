@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { ReactElement, useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { ReactElement, useMemo, useRef } from 'react';
 
 import { Container } from '@zextras/carbonio-design-system';
 import { useParams } from 'react-router-dom';
@@ -74,23 +74,7 @@ const MeetingSkeleton = (): ReactElement => {
 		[canUseVirtualBackground, isUserGuest]
 	);
 
-	const { isSupported, requestPipWindow, pipWindow, closePipWindow } = usePiPWindow();
-
-	const handleVisibilityChange = useCallback(() => {
-		if (document.visibilityState === 'hidden' && isSupported) {
-			requestPipWindow(320, 331);
-		} else if (document.visibilityState === 'visible') {
-			closePipWindow();
-		}
-	}, [closePipWindow, isSupported, requestPipWindow]);
-
-	useEffect(() => {
-		document.addEventListener('visibilitychange', handleVisibilityChange);
-
-		return (): void => {
-			document.removeEventListener('visibilitychange', handleVisibilityChange);
-		};
-	}, [handleVisibilityChange]);
+	const { pipWindow } = usePiPWindow();
 
 	return (
 		<>

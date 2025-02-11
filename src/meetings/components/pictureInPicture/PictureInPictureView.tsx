@@ -3,9 +3,10 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { ReactElement, useCallback, useEffect, useState } from 'react';
 
 import { Button, Container, Icon, Padding, Text } from '@zextras/carbonio-design-system';
+import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -39,8 +40,17 @@ const CustomActionBar = styled(Container)`
 	border-radius: 0.5rem;
 `;
 
-const PictureInPictureView = () => {
+const CustomText = styled(Text)<{ $whoIsSpeaking: string | undefined }>`
+	${({ $whoIsSpeaking }): string | false => !$whoIsSpeaking && 'font-style: italic;'};
+	color: ${({ theme, $whoIsSpeaking }): string =>
+		!$whoIsSpeaking ? theme.palette.secondary.regular : theme.palette.gray6.regular};
+`;
+
+const PictureInPictureView = (): ReactElement => {
 	const { meetingId }: MeetingRoutesParams = useParams();
+	const [t] = useTranslation();
+
+	const noOneTalking = t('meeting.pip.noTalking', "Nobody's talking right now");
 
 	const myUserId = useStore(getUserId);
 	const meeting = useStore((store) => getMeetingByMeetingId(store, meetingId));
@@ -54,6 +64,10 @@ const PictureInPictureView = () => {
 	const bidirectionalAudioConn = useStore(
 		(store) => store.activeMeeting[meetingId]?.bidirectionalAudioConn
 	);
+
+	const isSpeakingLabel = t('meeting.pip.speaking', `${whoIsSpeaking} is speaking.`, {
+		speaker: whoIsSpeaking
+	});
 
 	const [isSpeaking, setIsSpeaking] = useState<string | boolean | undefined>(true);
 
@@ -119,19 +133,24 @@ const PictureInPictureView = () => {
 				<Text size="large" color="gray6">
 					{meeting?.name}
 				</Text>
-				<Container width="fit" height="fit" orientation="horizontal" crossAlignment="flex-start">
+				<Container width="fit" height="fit" orientation="horizontal">
 					{isSpeaking && (
 						<>
 							<Icon icon="VolumeUp" size="small" color="success" />
 							<Padding right="0.5rem" />
 						</>
 					)}
-					<Text size="small" color="gray6" weight="light" overflow="ellipsis">
-						{whoIsSpeaking ? `${whoIsSpeaking} is speaking.` : "Nobody's talking right now."}
-					</Text>
+					<CustomText
+						size="small"
+						weight="light"
+						overflow="ellipsis"
+						color="gray6"
+						$whoIsSpeaking={whoIsSpeaking}
+					>
+						{whoIsSpeaking ? isSpeakingLabel : noOneTalking}
+					</CustomText>
 				</Container>
 			</Container>
-
 			<Tile
 				userId={centralTile.userId}
 				meetingId={meetingId}

@@ -31,6 +31,20 @@ export const PiPProvider = ({ children }: PiPProviderProps): JSX.Element => {
 		}
 	}, [pipWindow]);
 
+	const handleClose = useCallback(() => {
+		setPipWindow(null);
+	}, []);
+
+	useEffect(() => {
+		if (!pipWindow) {
+			return (): void => {};
+		}
+
+		pipWindow.addEventListener('pagehide', handleClose);
+
+		return (): void => pipWindow.removeEventListener('pagehide', handleClose);
+	}, [handleClose, pipWindow]);
+
 	const styleSheet = useCallback((pip: Window) => {
 		[...document.styleSheets].forEach((styleSheet) => {
 			try {
