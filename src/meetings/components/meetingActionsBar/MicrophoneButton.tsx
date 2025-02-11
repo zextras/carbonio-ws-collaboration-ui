@@ -59,33 +59,30 @@ const MicrophoneButton = ({
 
 	const { permission, deviceList, noDevices } = useBrowserPermission('audio');
 
+	const onClickAudioItem = useCallback(
+		(audioItem: MediaDeviceInfo) => {
+			if (audioStatus) {
+				getAudioStream(true, true, audioItem.deviceId).then((stream) => {
+					bidirectionalAudioConn?.updateLocalStreamTrack(stream);
+					setSelectedDeviceId(meetingId, STREAM_TYPE.AUDIO, audioItem.deviceId);
+				});
+			} else {
+				setSelectedDeviceId(meetingId, STREAM_TYPE.AUDIO, audioItem.deviceId);
+			}
+		},
+		[audioStatus, bidirectionalAudioConn, meetingId, setSelectedDeviceId]
+	);
+
 	const mediaAudioList = useMemo(
 		() =>
 			map(deviceList, (audioItem: MediaDeviceInfo, i) => ({
 				id: `device-${i}`,
 				label: audioItem.label ? audioItem.label : unknownDeviceLabel,
-				onClick: (): void => {
-					if (audioStatus) {
-						getAudioStream(true, true, audioItem.deviceId).then((stream) => {
-							bidirectionalAudioConn?.updateLocalStreamTrack(stream);
-							setSelectedDeviceId(meetingId, STREAM_TYPE.AUDIO, audioItem.deviceId);
-						});
-					} else {
-						setSelectedDeviceId(meetingId, STREAM_TYPE.AUDIO, audioItem.deviceId);
-					}
-				},
+				onClick: (): void => onClickAudioItem(audioItem),
 				selected: audioItem.deviceId === selectedAudioDeviceId,
 				value: audioItem.deviceId
 			})),
-		[
-			deviceList,
-			unknownDeviceLabel,
-			selectedAudioDeviceId,
-			audioStatus,
-			bidirectionalAudioConn,
-			setSelectedDeviceId,
-			meetingId
-		]
+		[deviceList, unknownDeviceLabel, selectedAudioDeviceId, onClickAudioItem]
 	);
 
 	const toggleAudioStream = useCallback(
