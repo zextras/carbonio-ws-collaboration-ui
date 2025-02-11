@@ -22,6 +22,7 @@ import { calcGrid, maximiseRowsAndColumns, maximiseTileSize } from '../../../uti
 import { calcScaleDivisor } from '../../../utils/styleUtils';
 import { MeetingViewProps } from '../../views/MeetingSkeleton';
 import Tile from '../tile/Tile';
+import WhoIsSpeaking from '../whoIsSpeaking/WhoIsSpeaking';
 
 const GridContainer = styled(Container)`
 	position: relative;
@@ -146,6 +147,7 @@ const GridMode = ({ children }: MeetingViewProps): ReactElement => {
 
 	return (
 		<GridContainer data-testid="gridModeView" mainAlignment="space-between" ref={gridContainerRef}>
+			<WhoIsSpeaking />
 			{showPaginationButtons && (
 				<ButtonUpContainer width="fit" height="fit" mainAlignment="flex-end">
 					<Tooltip label={prevButton.disabled ? topLabel : scrollUpLabel} placement="left">
