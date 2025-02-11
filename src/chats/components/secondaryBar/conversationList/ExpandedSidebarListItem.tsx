@@ -201,6 +201,7 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 			height="fit"
 			padding={{ all: '0.422rem' }}
 			$selected={isConversationSelected}
+			data-testid="list-item"
 		>
 			<Row>
 				{roomType === RoomType.GROUP ? (

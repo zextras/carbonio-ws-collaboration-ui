@@ -133,7 +133,7 @@ const CameraButton = ({
 			setButtonStatus(false);
 			if (!videoStatus) {
 				if (!videoOutConn?.peerConn) {
-					videoOutConn?.startVideo(selectedVideoDeviceId).catch((e) => {
+					videoOutConn?.startVideo(selectedVideoDeviceId).catch(() => {
 						mediaPermissionSnackbar();
 						setButtonStatus(true);
 					});

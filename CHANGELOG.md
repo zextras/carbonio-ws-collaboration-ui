@@ -2,6 +2,34 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.9.14](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.9.13...v0.9.14) (2025-02-10)
+
+
+### Features
+
+* add moderator while creating virtual room ([#435](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/435)) ([9142345](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/91423451d1730a79757f32e463c9ab2f84fd5d9c))
+* add onClick action on reaction chip to switch or remove it ([#434](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/434)) ([165d148](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/165d148648032573b1671adb322b22c80a944f62))
+* add shimmer on loading inside tile ref: WSC-1594 ([#454](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/454)) ([f1071c0](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/f1071c05d69397456e7498332b0da93291910768))
+* added button for creating virtual room on integration refs: WSC-1704 ([#451](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/451)) ([408ef7f](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/408ef7f9694f542c837212beb4ae0550c9e9350d))
+* let user choose any reactions ref: WSC-1573 ([#436](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/436)) ([007c96c](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/007c96cd1fcb70127d32bab211661c454d061d4b))
+* notify the user of a new reaction ref: WSC-1679 ([#447](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/447)) ([319b5cc](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/319b5cc65dd62bbe0d5cfe58685163ccfbfabd95))
+* virtual backgrounds - backgrounds refs: WSC-1536 ([#440](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/440)) ([f014c9f](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/f014c9f5acba67b4d4ecaa6971c8d4a359fe91de))
+* virtual room management edit ref: WSC-1801 ([#457](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/457)) ([2597f49](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/2597f49d4dbfe28eeb0854ed90316b767f9a8684))
+* virtual rooms enhance active participants and other moderators ref: WSC-1810 ([#463](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/463)) ([aa7da8c](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/aa7da8cc602dc2a05640e8899e011a1396489a7c))
+* virtualized conversation list ref: WSC-1720 ([#466](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/466)) ([d4adf06](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/d4adf063c0b61215a771d44d4afab181540eceb4))
+
+
+### Bug Fixes
+
+* fix regression on virtual room creation refs: WSC-1808 ([#456](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/456)) ([a91da3d](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/a91da3ddca805e956509c94d136000aafe452ffe))
+* fixed how to display virtual background images refs: WSC-1805 ([#455](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/455)) ([329ecfe](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/329ecfe5c1a3b06763400fd4966ae1d3c9dad50f))
+* meeting chat title overflow ([#467](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/467)) ([ab02e54](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/ab02e54f0f6eae40be3cd231dfc915083c87cddb))
+* messages not remain fixed loading the history ref: WSC-1804 ([#462](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/462)) ([acb36df](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/acb36dfd4d261266652a7d2b7dfa8755c7868f6b))
+* missing output_format on PDF thumbnail preview API ([#474](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/474)) ([bb2b2e0](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/bb2b2e0ce6eda8e233444b372cb9ca53a8a290db))
+* sender name visible when previous message is a deleted message ([#438](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/438)) ([8a0eda5](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/8a0eda526f5883ea00ab1f4ffc3bf616cdc4dadd))
+* translations key for no match in the filters ([#453](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/453)) ([57f27f4](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/57f27f45fabbda77d046a807ff005ae69d2b9628))
+* update bubbles wrapper zindex to not be covered ([#464](https://github.com/zextras/carbonio-ws-collaboration-ui/issues/464)) ([9448a96](https://github.com/zextras/carbonio-ws-collaboration-ui/commit/9448a96e92594687df2af4c4c99a6d29f7c834e8))
+
 ### [0.9.13](https://github.com/zextras/carbonio-ws-collaboration-ui/compare/v0.9.12...v0.9.13) (2024-12-10)
 
 

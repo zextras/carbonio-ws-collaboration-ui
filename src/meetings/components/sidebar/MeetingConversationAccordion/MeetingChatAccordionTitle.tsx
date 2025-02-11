@@ -5,7 +5,7 @@
  */
 import React, { FC, useEffect, useState } from 'react';
 
-import { Container, Text } from '@zextras/carbonio-design-system';
+import { Row, Text } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -13,21 +13,18 @@ import { useIsWritingLabel } from '../../../../hooks/useIsWritingLabel';
 import { getRoomNameSelector } from '../../../../store/selectors/RoomsSelectors';
 import useStore from '../../../../store/Store';
 
-const IsWritingLabelText = styled(Text)<{
-	$isWritingIsVisible: boolean;
-}>`
-	opacity: 0;
-	transition: opacity 0.3s ease;
-	${({ $isWritingIsVisible }): string | false => $isWritingIsVisible && 'opacity: 1;'}
-`;
+const ChatLabelText = styled(Text)<{ $showEffect: boolean }>`
+	@keyframes fadeEffect {
+		0% {
+			opacity: 0.2;
+		}
+		100% {
+			opacity: 1;
+		}
+	}
 
-const ChatLabelText = styled(Text)<{
-	$isWritingIsVisible: boolean;
-}>`
-	position: absolute;
-	opacity: 1;
-	transition: opacity 0.3s ease;
-	${({ $isWritingIsVisible }): string | false => $isWritingIsVisible && 'opacity: 0;'}
+	${({ $showEffect }): string =>
+		$showEffect ? `animation: fadeEffect 0.4s ease-in;` : `animation: none;`}
 `;
 
 type MeetingChatAccordionTitleProps = {
@@ -41,37 +38,27 @@ const MeetingChatAccordionTitle: FC<MeetingChatAccordionTitleProps> = ({ roomId 
 	const roomName = useStore((store) => getRoomNameSelector(store, roomId));
 
 	const isWritingLabel = useIsWritingLabel(roomId, true);
-
-	const [isWritingIsDefined, setIsWritingIsDefined] = useState(false);
-	const [writingLabel, setWritingLabel] = useState('');
+	const [writingLabel, setWritingLabel] = useState<false | string>(false);
+	const [showEffect, setShowEffect] = useState(false);
 
 	useEffect(() => {
-		if (isWritingLabel === undefined) {
-			setIsWritingIsDefined(false);
-			setTimeout(() => setWritingLabel(''), 400);
-		} else {
-			setIsWritingIsDefined(true);
+		setShowEffect(true);
+		setTimeout(() => {
+			setShowEffect(false);
+		}, 400);
+		if (isWritingLabel) {
 			setWritingLabel(isWritingLabel);
+		} else {
+			setWritingLabel(false);
 		}
 	}, [isWritingLabel]);
 
 	return (
-		<Container width="70%" height="fit" crossAlignment="flex-start">
-			<ChatLabelText
-				overflow="ellipsis"
-				$isWritingIsVisible={isWritingIsDefined}
-				data-testid="chat_title"
-			>
-				{`${chatLabel} - ${roomName}`}
+		<Row takeAvailableSpace mainAlignment="flex-start">
+			<ChatLabelText overflow="ellipsis" $showEffect={showEffect}>
+				{!writingLabel ? `${chatLabel} - ${roomName}` : writingLabel}
 			</ChatLabelText>
-			<IsWritingLabelText
-				overflow="ellipsis"
-				$isWritingIsVisible={isWritingIsDefined}
-				data-testid="is_writing_title"
-			>
-				{writingLabel}
-			</IsWritingLabelText>
-		</Container>
+		</Row>
 	);
 };
 
