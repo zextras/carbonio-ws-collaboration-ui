@@ -16,10 +16,10 @@ import useEventListener, {
 } from './useEventListener';
 import useRouting, { PAGE_INFO_TYPE } from './useRouting';
 import { MeetingsApi } from '../network';
+import useTiles from './useTiles';
 import {
 	getMeetingActiveByMeetingId,
-	getMeetingParticipantsByMeetingId,
-	getTiles
+	getMeetingParticipantsByMeetingId
 } from '../store/selectors/MeetingSelectors';
 import useStore from '../store/Store';
 import { STREAM_TYPE } from '../types/store/ActiveMeetingTypes';
@@ -41,11 +41,12 @@ const useGeneralMeetingControls = (meetingId: string): void => {
 	const meetingParticipants: MeetingParticipantMap | undefined = useStore((store) =>
 		getMeetingParticipantsByMeetingId(store, meetingId)
 	);
-	const tiles = useStore((store) => getTiles(store, meetingId));
 	const setPinnedTile = useStore((store) => store.setPinnedTile);
 	const meetingConnection = useStore((store) => store.meetingConnection);
 	const meetingDisconnection = useStore((store) => store.meetingDisconnection);
 	const websocketNetworkStatus = useStore(({ connections }) => connections.status.websocket);
+
+	const tiles = useTiles(meetingId);
 
 	const { goToInfoPage, goToMeetingPage } = useRouting();
 

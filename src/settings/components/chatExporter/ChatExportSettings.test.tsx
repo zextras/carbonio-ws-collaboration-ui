@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { screen } from '@testing-library/react';
+import { act, screen } from '@testing-library/react';
 
 import ChatExportSettings from './ChatExportSettings';
 import useStore from '../../../store/Store';
@@ -39,7 +39,9 @@ describe('ChatExportSettings test', () => {
 	});
 
 	test('All rooms are listed', () => {
-		useStore.getState().setRooms([room, room1, room2, room3]);
+		act(() => {
+			useStore.getState().setRooms([room, room1, room2, room3]);
+		});
 		setup(<ChatExportSettings />);
 		expect(screen.getByText('Room')).toBeInTheDocument();
 		expect(screen.getByText('Room 1')).toBeInTheDocument();

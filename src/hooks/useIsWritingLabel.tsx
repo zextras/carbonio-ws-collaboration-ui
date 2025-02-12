@@ -4,13 +4,15 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { useMemo } from 'react';
+
 import { map, slice } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
-import { getRoomIsWritingList } from '../store/selectors/ActiveConversationsSelectors';
 import { getRoomTypeSelector } from '../store/selectors/RoomsSelectors';
 import useStore from '../store/Store';
 import { RoomType } from '../types/store/RoomTypes';
+import UserDataRetriever from '../utils/UserDataRetriever';
 
 export const useIsWritingLabel = (
 	roomId: string,
@@ -21,7 +23,21 @@ export const useIsWritingLabel = (
 	const areTypingLabel = t('status.areTyping', 'are typing...');
 
 	const roomType = useStore((store) => getRoomTypeSelector(store, roomId));
-	const writingListNames = useStore((state) => getRoomIsWritingList(state, roomId));
+	const isWritingList = useStore((state) => state.activeConversations[roomId]?.isWritingList);
+	const writingListNames = useMemo(() => {
+		const roomIsWritingList: string[] = [];
+		const store = useStore.getState();
+		if (isWritingList) {
+			roomIsWritingList.push(
+				...map(isWritingList, (userId) => {
+					UserDataRetriever.getAsyncUsername(userId);
+					return store.users[userId]?.name || store.users[userId]?.email || '';
+				})
+			);
+			return roomIsWritingList;
+		}
+		return [];
+	}, [isWritingList]);
 
 	if (writingListNames === undefined || writingListNames?.length === 0) return undefined;
 	if (writingListNames?.length === 1) {

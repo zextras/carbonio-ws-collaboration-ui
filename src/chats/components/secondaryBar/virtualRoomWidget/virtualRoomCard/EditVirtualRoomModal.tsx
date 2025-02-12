@@ -18,7 +18,7 @@ import { useTranslation } from 'react-i18next';
 
 import { RoomsApi } from '../../../../../network';
 import { getMeetingParticipants } from '../../../../../store/selectors/MeetingSelectors';
-import { getOwners, getRoomNameSelector } from '../../../../../store/selectors/RoomsSelectors';
+import { getRoomNameSelector, useOwners } from '../../../../../store/selectors/RoomsSelectors';
 import { getUserId } from '../../../../../store/selectors/SessionSelectors';
 import { getUserEmail, getUserName } from '../../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../../store/Store';
@@ -38,7 +38,7 @@ const EditVirtualRoomModal: FC<deleteVirtualRoomModalProps> = ({
 	roomId
 }) => {
 	const roomName = useStore((state) => getRoomNameSelector(state, roomId));
-	const owners = useStore((state) => getOwners(state, roomId));
+	const owners = useOwners(roomId);
 	const meetingParticipants = useStore((state) => getMeetingParticipants(state, roomId));
 
 	const [t] = useTranslation();

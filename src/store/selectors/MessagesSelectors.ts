@@ -16,23 +16,47 @@ import {
 } from '../../types/store/MessageTypes';
 import { RoomType } from '../../types/store/RoomTypes';
 import { RootStore } from '../../types/store/StoreTypes';
+import useStore from '../Store';
+
+export const useOrderedOneToOneAndGroupsInfoByLastMessage = (): FilteredConversation[] => {
+	const { rooms, messages } = useStore((store) => store);
+	const filteredRooms = filter(
+		rooms,
+		(room) => room.type === RoomType.GROUP || room.type === RoomType.ONE_TO_ONE
+	);
+	const listOfConvLastMessage: FilteredConversation[] = [];
+	forEach(filteredRooms, (room) => {
+		const lastMessage = messages[room.id] && messages[room.id][messages[room.id].length - 1];
+		listOfConvLastMessage.push({
+			roomId: room.id,
+			name: room.name ?? '',
+			roomType: room.type,
+			lastMessageTimestamp: lastMessage ? lastMessage.date : 0,
+			members: room.members ?? []
+		});
+	});
+	return orderBy(listOfConvLastMessage, ['lastMessageTimestamp'], ['desc']);
+};
+
+const FALLBACK_MESSAGE_SELECTOR: Message[] = [];
 
 export const getMessagesSelector = (store: RootStore, roomId: string): Message[] =>
-	store.messages[roomId] ? store.messages[roomId] : [];
+	store.messages[roomId] ? store.messages[roomId] : FALLBACK_MESSAGE_SELECTOR;
 
-export const getTextMessagesSelector = (store: RootStore, roomId: string): TextMessage[] =>
-	filter(
-		store.messages[roomId],
-		(message) => message.type === MessageType.TEXT_MSG
-	) as TextMessage[];
+const readableMessages: (TextMessage | ConfigurationMessage)[] = [];
 
 export const getReadableMessagesSelector = (
 	store: RootStore,
 	roomId: string
-): (TextMessage | ConfigurationMessage)[] =>
-	filter(store.messages[roomId], (message) =>
-		includes([MessageType.TEXT_MSG, MessageType.CONFIGURATION_MSG], message.type)
-	) as TextMessage[];
+): (TextMessage | ConfigurationMessage)[] => {
+	readableMessages.length = 0;
+	readableMessages.push(
+		...(filter(store.messages[roomId], (message) =>
+			includes([MessageType.TEXT_MSG, MessageType.CONFIGURATION_MSG], message.type)
+		) as TextMessage[])
+	);
+	return readableMessages;
+};
 
 export const getLastTextMessageIdSelector = (
 	store: RootStore,
@@ -61,14 +85,16 @@ export const getMessageSelector = (
 	messageId: string | undefined
 ): Message | undefined => find(store.messages[roomId], (message) => message.id === messageId);
 
-export const getRoomIdsOrderedLastMessage = (
+const listOfConvByLastMessage: {
+	roomId: string;
+	roomType: string;
+	lastMessageTimestamp: number;
+}[] = [];
+
+export const getRoomIdsWithLastMessage = (
 	store: RootStore
 ): { roomId: string; roomType: string; lastMessageTimestamp: number }[] => {
-	const listOfConvByLastMessage: {
-		roomId: string;
-		roomType: string;
-		lastMessageTimestamp: number;
-	}[] = [];
+	listOfConvByLastMessage.length = 0;
 	// check to remove and tell BE to improve because if a user is removed from a room
 	// the messages of this always came back and trigger error
 	forEach(store.rooms, (room) => {
@@ -80,31 +106,7 @@ export const getRoomIdsOrderedLastMessage = (
 			lastMessageTimestamp: lastMessage ? lastMessage.date : 0
 		});
 	});
-	return orderBy(listOfConvByLastMessage, ['lastMessageTimestamp'], ['desc']);
-};
-
-export const getOneToOneAndGroupsInfoOrderedByLastMessage = (
-	store: RootStore
-): FilteredConversation[] => {
-	const listOfConvByLastMessage: FilteredConversation[] = [];
-	// check to remove and tell BE to improve because if a user is removed from a room
-	// the messages of this always came back and trigger error
-	const filteredRooms = filter(
-		store.rooms,
-		(room) => room.type === RoomType.GROUP || room.type === RoomType.ONE_TO_ONE
-	);
-	forEach(filteredRooms, (room) => {
-		const lastMessage =
-			store.messages[room.id] && store.messages[room.id][store.messages[room.id].length - 1];
-		listOfConvByLastMessage.push({
-			roomId: room.id,
-			name: room.name || '',
-			roomType: room.type,
-			lastMessageTimestamp: lastMessage ? lastMessage.date : 0,
-			members: room.members || []
-		});
-	});
-	return orderBy(listOfConvByLastMessage, ['lastMessageTimestamp'], ['desc']);
+	return listOfConvByLastMessage;
 };
 
 export const roomIsEmpty = (store: RootStore, roomId: string): boolean =>

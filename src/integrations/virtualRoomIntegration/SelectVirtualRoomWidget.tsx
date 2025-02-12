@@ -24,7 +24,7 @@ import CreateVirtualRoomModal from '../../chats/components/secondaryBar/virtualR
 import DeleteVirtualRoomModal from '../../chats/components/secondaryBar/virtualRoomWidget/DeleteVirtualRoomModal';
 import { MeetingsApi } from '../../network';
 import { getRoomIdByMeetingId } from '../../store/selectors/MeetingSelectors';
-import { getVirtualRoomsList } from '../../store/selectors/RoomsSelectors';
+import { useVirtualRoomsList } from '../../store/selectors/RoomsSelectors';
 import useStore from '../../store/Store';
 import { Room } from '../../types/store/RoomTypes';
 import { createMeetingLinkFromOutside, getMeetingIdFromLink } from '../../utils/MeetingsUtils';
@@ -67,7 +67,7 @@ const SelectVirtualRoomWidget: FC<SelectVirtualRoomWidgetProps> = ({ onChange, d
 
 	const limitedAccessLabel = t('appointment.input.limitedOption', 'Limited access');
 
-	const virtualRoomIdsList = useStore(getVirtualRoomsList);
+	const virtualRoomIdsList = useVirtualRoomsList();
 
 	const [defaultRoom, setDefaultRoom] = useState<defaultType | undefined>(undefined);
 	const [defaultIsMyRoom, setDefaultIsMyRoom] = useState<boolean>(true);
