@@ -24,11 +24,14 @@ export const getEditAndDeleteFasteningSelector = (
 	return undefined;
 };
 
+const filteredReactions: MessageFastening[] = [];
+
 export const getReactionFastenings = (
 	state: RootStore,
 	roomId: string,
 	stanzaId: string
 ): MessageFastening[] => {
+	filteredReactions.length = 0;
 	const fastenings = state.fastenings?.[roomId]?.[stanzaId];
 	if (fastenings) {
 		const reactions = filter(
@@ -45,9 +48,12 @@ export const getReactionFastenings = (
 			},
 			{}
 		);
-		return filter(reactions, (_, index) => includes(Object.values(latestReactions), index));
+		filteredReactions.push(
+			...filter(reactions, (_, index) => includes(Object.values(latestReactions), index))
+		);
+		return filteredReactions;
 	}
-	return [];
+	return filteredReactions;
 };
 
 export const getMyLastReaction = (

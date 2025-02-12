@@ -122,8 +122,8 @@ describe('VirtualRoomCard', () => {
 		const actionsButtons = screen.getByTestId(moreVerticalIcon);
 		await user.click(actionsButtons);
 
-		const edit = screen.getByText(deleteVirtualRoomLabel);
-		await user.click(edit);
+		const deleteAct = screen.getByText(deleteVirtualRoomLabel);
+		await user.click(deleteAct);
 
 		expect(screen.getByText(`Delete "${ownerRoom.name}" Virtual Room`)).toBeInTheDocument();
 	});

@@ -9,16 +9,16 @@ import { useEffect, useMemo } from 'react';
 import { find, forEach, map } from 'lodash';
 
 import { FilteredConversation } from '../chats/components/secondaryBar/SecondaryBarView';
-import { getOneToOneAndGroupsInfoOrderedByLastMessage } from '../store/selectors/MessagesSelectors';
+import { useOrderedOneToOneAndGroupsInfoByLastMessage } from '../store/selectors/MessagesSelectors';
 import { getUserId } from '../store/selectors/SessionSelectors';
 import { getUsersSelector } from '../store/selectors/UsersSelectors';
 import useStore from '../store/Store';
 import UserDataRetriever from '../utils/UserDataRetriever';
 
 export const useFilterRoomsOnInput = (filteredInput: string): FilteredConversation[] => {
-	const roomsInfo = useStore<FilteredConversation[]>(getOneToOneAndGroupsInfoOrderedByLastMessage);
 	const sessionId = useStore(getUserId);
 	const users = useStore(getUsersSelector);
+	const roomsInfo = useOrderedOneToOneAndGroupsInfoByLastMessage();
 
 	// Fetch user data for each member of the rooms to let user filters by group members
 	useEffect(() => {
