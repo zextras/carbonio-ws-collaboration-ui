@@ -147,7 +147,7 @@ const GridMode = ({ children }: MeetingViewProps): ReactElement => {
 
 	return (
 		<GridContainer data-testid="gridModeView" mainAlignment="space-between" ref={gridContainerRef}>
-			<WhoIsSpeaking />
+			<WhoIsSpeaking visibleTiles={tilesToRender} />
 			{showPaginationButtons && (
 				<ButtonUpContainer width="fit" height="fit" mainAlignment="flex-end">
 					<Tooltip label={prevButton.disabled ? topLabel : scrollUpLabel} placement="left">

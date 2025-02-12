@@ -73,7 +73,7 @@ describe('Who is speaking', () => {
 	test('Talking user in central tile is not displayed if the central tile is his video', () => {
 		const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
 		spyUseParams.mockReturnValue({ meetingId: meeting.id });
-		setup(<WhoIsSpeaking centralTile={centralTileVideo} />);
+		setup(<WhoIsSpeaking visibleTiles={[centralTileVideo]} />);
 
 		expect(screen.getByText(user2.name)).toBeInTheDocument();
 		expect(screen.queryByText(user3.name)).not.toBeInTheDocument();
@@ -82,18 +82,8 @@ describe('Who is speaking', () => {
 	test('Talking user in central tile is displayed if the central tile is his screen', () => {
 		const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
 		spyUseParams.mockReturnValue({ meetingId: meeting.id });
-		setup(<WhoIsSpeaking centralTile={centralTileScreen} />);
+		setup(<WhoIsSpeaking visibleTiles={[centralTileScreen]} />);
 
-		expect(screen.getByText(user2.name)).toBeInTheDocument();
-		expect(screen.getByText(user3.name)).toBeInTheDocument();
-	});
-
-	test('Talking logged user is not displayed', () => {
-		const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
-		spyUseParams.mockReturnValue({ meetingId: meeting.id });
-		setup(<WhoIsSpeaking centralTile={centralTileScreen} />);
-
-		expect(screen.queryByText(user1.name)).not.toBeInTheDocument();
 		expect(screen.getByText(user2.name)).toBeInTheDocument();
 		expect(screen.getByText(user3.name)).toBeInTheDocument();
 	});

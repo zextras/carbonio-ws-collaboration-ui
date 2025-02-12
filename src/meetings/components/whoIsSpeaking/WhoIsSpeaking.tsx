@@ -6,7 +6,7 @@
 import React, { ReactElement, useMemo } from 'react';
 
 import { Container } from '@zextras/carbonio-design-system';
-import { forEach } from 'lodash';
+import { forEach, some } from 'lodash';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -16,34 +16,36 @@ import { getTalkingList } from '../../../store/selectors/ActiveMeetingSelectors'
 import useStore from '../../../store/Store';
 import { STREAM_TYPE, TileData } from '../../../types/store/ActiveMeetingTypes';
 
-const SpeakingListContainer = styled(Container)`
+const SpeakingListContainer = styled(Container)<{ $customStyle?: string }>`
 	position: absolute;
 	top: 1rem;
 	right: 1rem;
 	z-index: 40;
+	${({ $customStyle }): string => $customStyle ?? ''}
 `;
 
 type WhoIsSpeakingProps = {
-	centralTile?: TileData;
+	visibleTiles: TileData[];
+	customStyle?: string;
 };
 
-const WhoIsSpeaking = ({ centralTile }: WhoIsSpeakingProps): ReactElement | null => {
+const WhoIsSpeaking = ({ visibleTiles, customStyle }: WhoIsSpeakingProps): ReactElement | null => {
 	const { meetingId }: MeetingRoutesParams = useParams();
 	const talkingMap = useStore((store) => getTalkingList(store, meetingId));
-	const loggedUserId = useStore((store) => store.session.id);
 
 	const speakingList = useMemo(() => {
 		const list: ReactElement[] = [];
 		forEach(talkingMap, (talkingId) => {
-			if (
-				!(centralTile?.userId === talkingId && centralTile.type === STREAM_TYPE.VIDEO) &&
-				loggedUserId !== talkingId
-			) {
+			const talkingUserIsVisible = some(
+				visibleTiles,
+				(tile) => tile.userId === talkingId && tile.type === STREAM_TYPE.VIDEO
+			);
+			if (!talkingUserIsVisible) {
 				list.push(<SpeakingElement key={`${talkingId}-isTalking`} userId={talkingId} />);
 			}
 		});
 		return list;
-	}, [talkingMap, centralTile, loggedUserId]);
+	}, [talkingMap, visibleTiles]);
 
 	return (
 		<SpeakingListContainer
@@ -52,6 +54,7 @@ const WhoIsSpeaking = ({ centralTile }: WhoIsSpeakingProps): ReactElement | null
 			mainAlignment="flex-end"
 			crossAlignment="flex-end"
 			gap="0.5rem"
+			$customStyle={customStyle}
 		>
 			{speakingList}
 		</SpeakingListContainer>
