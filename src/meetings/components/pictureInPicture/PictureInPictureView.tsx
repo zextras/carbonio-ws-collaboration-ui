@@ -50,7 +50,7 @@ const PictureInPictureView = (): ReactElement => {
 	const { meetingId }: MeetingRoutesParams = useParams();
 	const [t] = useTranslation();
 
-	const noOneTalking = t('meeting.pip.noTalking', "Nobody's talking right now");
+	const noOneTalking = t('meeting.pip.noTalking', "Nobody's talking right now.");
 
 	const myUserId = useStore(getUserId);
 	const meeting = useStore((store) => getMeetingByMeetingId(store, meetingId));
@@ -129,11 +129,11 @@ const PictureInPictureView = (): ReactElement => {
 			mainAlignment="space-between"
 			crossAlignment="flex-start"
 		>
-			<Container width="fit" height="fit" gap="0.5rem" crossAlignment="flex-start">
+			<Container width="fill" height="fit" gap="0.5rem" crossAlignment="flex-start">
 				<Text size="large" color="gray6">
 					{meeting?.name}
 				</Text>
-				<Container width="fit" height="fit" orientation="horizontal">
+				<Container mainAlignment="flex-start" height="fit" orientation="horizontal">
 					{isSpeaking && (
 						<>
 							<Icon icon="VolumeUp" size="small" color="success" />

@@ -89,7 +89,7 @@ export const getNameOfFirstTalkingUser = (
 	store: RootStore,
 	meetingId: string
 ): string | undefined => {
-	const id = store.activeMeeting[meetingId].talkingUsers
+	const id = store.activeMeeting[meetingId]?.talkingUsers
 		? store.activeMeeting[meetingId]?.talkingUsers[0]
 		: undefined;
 	if (id) {
