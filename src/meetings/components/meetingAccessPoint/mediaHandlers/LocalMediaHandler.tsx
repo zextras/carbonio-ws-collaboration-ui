@@ -44,7 +44,6 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 	const enableMicLabel = t('meeting.interactions.enableMicrophone', 'Enable microphone');
 	const camDeviceLabel = t('meeting.interactions.camDevice', 'Camera device');
 	const micDeviceLabel = t('meeting.interactions.micDevice', 'Microphone device');
-	const understoodAction = t('action.understood', 'UNDERSTOOD');
 	const giveMediaPermissionSnackbar = t(
 		'meeting.interactions.browserPermission',
 		'Grant browser permissions to enable resources'
@@ -231,19 +230,38 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 		videoPermission
 	]);
 
+	const audioTooltip = useMemo(() => {
+		if (audioPermission !== 'granted') return giveMediaPermissionSnackbar;
+		return mediaDevicesEnabled.audio ? disableMicLabel : enableMicLabel;
+	}, [
+		audioPermission,
+		giveMediaPermissionSnackbar,
+		mediaDevicesEnabled.audio,
+		disableMicLabel,
+		enableMicLabel
+	]);
+
+	const videoTooltip = useMemo(() => {
+		if (videoPermission !== 'granted') return giveMediaPermissionSnackbar;
+		return mediaDevicesEnabled.video ? disableCamLabel : enableCamLabel;
+	}, [
+		videoPermission,
+		giveMediaPermissionSnackbar,
+		mediaDevicesEnabled.video,
+		disableCamLabel,
+		enableCamLabel
+	]);
+
 	return (
 		<Container height="fit" width="100%" gap="1rem">
 			<Container height="fit" orientation={'horizontal'} gap="1rem" crossAlignment="flex-start">
-				<Tooltip
-					placement="top"
-					label={mediaDevicesEnabled.video ? disableCamLabel : enableCamLabel}
-				>
+				<Tooltip placement="top" label={videoTooltip}>
 					<Button
 						icon={mediaDevicesEnabled.video ? 'Video' : 'VideoOff'}
 						size="extralarge"
 						backgroundColor={'primary'}
 						onClick={toggleVideo}
-						disabled={videoPermission === 'denied' || noVideoDevices}
+						disabled={videoPermission !== 'granted' || noVideoDevices}
 					/>
 				</Tooltip>
 				<Select
@@ -257,21 +275,18 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 					showCheckbox={false}
 					background={'text'}
 					disablePortal
-					disabled={videoPermission === 'denied' || noVideoDevices}
+					disabled={videoPermission !== 'granted' || noVideoDevices}
 				/>
 			</Container>
 			<Container height="fit" orientation={'horizontal'} gap="1rem" crossAlignment="flex-start">
-				<Tooltip
-					placement="top"
-					label={mediaDevicesEnabled.audio ? disableMicLabel : enableMicLabel}
-				>
+				<Tooltip placement="top" label={audioTooltip}>
 					<Button
 						icon={mediaDevicesEnabled.audio ? 'Mic' : 'MicOff'}
 						size="extralarge"
 						backgroundColor={'primary'}
 						onClick={toggleAudio}
 						data-testid={'turn_on_audio'}
-						disabled={audioPermission === 'denied' || noAudioDevices}
+						disabled={audioPermission !== 'granted' || noAudioDevices}
 					/>
 				</Tooltip>
 				<Select
@@ -285,7 +300,7 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 					showCheckbox={false}
 					background={'text'}
 					disablePortal
-					disabled={audioPermission === 'denied' || noAudioDevices}
+					disabled={audioPermission !== 'granted' || noAudioDevices}
 				/>
 			</Container>
 			{(audioPermission === 'denied' || videoPermission === 'denied') && (
@@ -294,7 +309,7 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 					disableAutoHide
 					severity="info"
 					label={giveMediaPermissionSnackbar}
-					actionLabel={understoodAction}
+					hideButton
 				/>
 			)}
 		</Container>

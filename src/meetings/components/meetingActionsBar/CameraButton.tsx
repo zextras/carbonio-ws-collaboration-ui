@@ -133,7 +133,7 @@ const CameraButton = ({
 	);
 
 	const tooltipLabel = useMemo(() => {
-		if (permission === 'denied') return giveMediaPermissionSnackbar;
+		if (permission !== 'granted') return giveMediaPermissionSnackbar;
 		if (!websocketNetworkStatus) return disableButtonLabel;
 		return videoStatus ? disableCamLabel : enableCamLabel;
 	}, [
@@ -153,7 +153,7 @@ const CameraButton = ({
 				setShowItems={setIsVideoListOpen}
 				onClick={toggleVideoStream}
 				items={mediaVideoList}
-				disabled={!buttonStatus || !websocketNetworkStatus || permission === 'denied' || noDevices}
+				disabled={!buttonStatus || !websocketNetworkStatus || permission !== 'granted' || noDevices}
 				data-testid="cameraButton"
 				icon={videoStatus ? 'Video' : 'VideoOff'}
 				listRef={videoDropdownRef}

@@ -114,14 +114,14 @@ const MicrophoneButton = ({
 	return (
 		<Tooltip
 			placement="top"
-			label={permission === 'denied' ? giveMediaPermissionSnackbar : tooltipLabel}
+			label={permission !== 'granted' ? giveMediaPermissionSnackbar : tooltipLabel}
 		>
 			<MultiActionButton
 				showItems={isAudioListOpen}
 				setShowItems={setIsAudioListOpen}
 				onClick={toggleAudioStream}
 				items={mediaAudioList}
-				disabled={!websocketNetworkStatus || permission === 'denied' || noDevices}
+				disabled={!websocketNetworkStatus || permission !== 'granted' || noDevices}
 				data-testid="microphone-button"
 				icon={audioStatus ? 'Mic' : 'MicOff'}
 				listRef={audioDropdownRef}
