@@ -13,8 +13,8 @@ const contentType = 'Content-Type';
 const applicationJson = 'application/json';
 
 const pdfThumbnailCases: Array<[string, Array<string | undefined>, string]> = [
-	['shape', [undefined, ImageShape.ROUNDED, undefined], '?shape=Rounded'],
-	['quality', [ImageQuality.HIGH, undefined, undefined], '?quality=High'],
+	['shape', [undefined, ImageShape.ROUNDED, undefined], '?shape=Rounded&output_format=Jpeg'],
+	['quality', [ImageQuality.HIGH, undefined, undefined], '?quality=High&output_format=Jpeg'],
 	['attachmentType', [undefined, undefined, AttachmentType.PDF], '?output_format=pdf']
 ];
 

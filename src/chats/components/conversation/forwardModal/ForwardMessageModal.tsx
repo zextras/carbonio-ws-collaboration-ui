@@ -35,6 +35,7 @@ import {
 	map,
 	mapValues,
 	omit,
+	orderBy,
 	remove,
 	size
 } from 'lodash';
@@ -44,7 +45,7 @@ import styled from 'styled-components';
 import ForwardMessageConversationChip from './ForwardMessageConversationChip';
 import ForwardMessageConversationListItem from './ForwardMessageConversationListItem';
 import { RoomsApi } from '../../../../network';
-import { getRoomIdsOrderedLastMessage } from '../../../../store/selectors/MessagesSelectors';
+import { getRoomIdsWithLastMessage } from '../../../../store/selectors/MessagesSelectors';
 import { getRoomNameSelector } from '../../../../store/selectors/RoomsSelectors';
 import useStore from '../../../../store/Store';
 import { TextMessage } from '../../../../types/store/MessageTypes';
@@ -73,7 +74,11 @@ const ForwardMessageModal: FunctionComponent<ForwardMessageModalProps> = ({
 	messagesToForward
 }): ReactElement => {
 	const roomName = useStore((state) => getRoomNameSelector(state, roomId));
-	const rooms = useStore(getRoomIdsOrderedLastMessage);
+	const roomsNotOrdered = useStore(getRoomIdsWithLastMessage);
+	const rooms = useMemo(
+		() => orderBy(roomsNotOrdered, ['lastMessageTimestamp'], ['desc']),
+		[roomsNotOrdered]
+	);
 
 	const [t] = useTranslation();
 	const modalTitle = t('modal.forward.title', `Forward message from ${roomName}`, {

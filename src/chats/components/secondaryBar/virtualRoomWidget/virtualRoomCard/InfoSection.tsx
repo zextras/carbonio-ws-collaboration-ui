@@ -11,7 +11,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import useAvatarUtilities from '../../../../../hooks/useAvatarUtilities';
-import { getOwners } from '../../../../../store/selectors/RoomsSelectors';
+import { useOwners } from '../../../../../store/selectors/RoomsSelectors';
 import { getUserId } from '../../../../../store/selectors/SessionSelectors';
 import { getUserName } from '../../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../../store/Store';
@@ -71,7 +71,7 @@ const InfoSection: FC<InfoSectionProps> = ({
 
 	const sessionId = useStore(getUserId);
 	const sessionName = useStore((store) => getUserName(store, sessionId ?? ''));
-	const moderatorsList = useStore((store) => getOwners(store, roomId));
+	const moderatorsList = useOwners(roomId);
 	const moderatorName = useStore((store) => getUserName(store, moderatorsList[0]));
 
 	const moderatorsTextRef = useRef(null);
