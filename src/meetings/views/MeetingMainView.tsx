@@ -6,8 +6,7 @@
 
 import React, { lazy, ReactElement, Suspense, useEffect } from 'react';
 
-import { createMemoryHistory } from 'history';
-import { Route, Router, Switch } from 'react-router-dom';
+import { MemoryRouter, Route, Routes } from 'react-router-dom';
 
 import ShimmerEntryMeetingView from './shimmers/ShimmerEntryMeetingView';
 import { MEETINGS_ROUTES, ROUTES } from '../../hooks/useRouting';
@@ -79,7 +78,6 @@ const MeetingAccessPageView = (): ReactElement => (
 );
 
 const MeetingMainView = (): ReactElement => {
-	const history = createMemoryHistory();
 	const setCustomLogo = useStore((store) => store.setCustomLogo);
 
 	useEffect(() => {
@@ -95,15 +93,15 @@ const MeetingMainView = (): ReactElement => {
 	}, [setCustomLogo]);
 
 	return (
-		<Router history={history}>
-			<Switch>
-				<Route exact path={ROUTES.MAIN} component={AccessPageView} />
-				<Route exact path={MEETINGS_ROUTES.MEETING} component={MeetingSkeleton} />
-				<Route exact path={MEETINGS_ROUTES.MEETING_ACCESS_PAGE} component={MeetingAccessPageView} />
-				<Route exact path={MEETINGS_ROUTES.EXTERNAL_LOGIN} component={MeetingExternalAccessPage} />
-				<Route exact path={MEETINGS_ROUTES.INFO} component={InfoPage} />
-			</Switch>
-		</Router>
+		<MemoryRouter>
+			<Routes>
+				<Route path={ROUTES.MAIN} element={<AccessPageView />} />
+				<Route path={MEETINGS_ROUTES.MEETING} element={<MeetingSkeleton />} />
+				<Route path={MEETINGS_ROUTES.MEETING_ACCESS_PAGE} element={<MeetingAccessPageView />} />
+				<Route path={MEETINGS_ROUTES.EXTERNAL_LOGIN} element={<MeetingExternalAccessPage />} />
+				<Route path={MEETINGS_ROUTES.INFO} element={<InfoPage />} />
+			</Routes>
+		</MemoryRouter>
 	);
 };
 

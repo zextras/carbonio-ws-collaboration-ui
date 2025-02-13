@@ -16,19 +16,19 @@ import useStore from '../../../store/Store';
 import { MeetingViewType } from '../../../types/store/ActiveMeetingTypes';
 
 const SwitchViewButton = (): ReactElement | null => {
-	const { meetingId }: MeetingRoutesParams = useParams();
+	const { meetingId } = useParams<MeetingRoutesParams>();
 
 	const [t] = useTranslation();
 	const gridViewLabel = t('meeting.interactions.gridView', 'Grid view');
 	const cinemaViewLabel = t('meeting.interactions.cinemaView', 'Cinema view');
 
-	const meetingViewSelected = useStore((store) => getMeetingViewSelected(store, meetingId));
+	const meetingViewSelected = useStore((store) => getMeetingViewSelected(store, meetingId!));
 	const setMeetingViewSelected = useStore((store) => store.setMeetingViewSelected);
-	const numberOfTiles = useStore((store) => getNumberOfTiles(store, meetingId));
+	const numberOfTiles = useStore((store) => getNumberOfTiles(store, meetingId!));
 
 	const switchMode = useCallback(() => {
 		setMeetingViewSelected(
-			meetingId,
+			meetingId!,
 			meetingViewSelected === MeetingViewType.GRID ? MeetingViewType.CINEMA : MeetingViewType.GRID
 		);
 	}, [meetingId, meetingViewSelected, setMeetingViewSelected]);

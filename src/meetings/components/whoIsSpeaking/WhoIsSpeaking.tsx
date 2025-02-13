@@ -31,9 +31,9 @@ type WhoIsSpeakingProps = {
 };
 
 const WhoIsSpeaking = ({ centralTile }: WhoIsSpeakingProps): ReactElement | null => {
-	const { meetingId }: MeetingRoutesParams = useParams();
-	const talkingMap = useStore((store) => getTalkingList(store, meetingId));
-	const carouselIsVisible = useStore((store) => getMeetingCarouselVisibility(store, meetingId));
+	const { meetingId } = useParams<MeetingRoutesParams>();
+	const talkingMap = useStore((store) => getTalkingList(store, meetingId!));
+	const carouselIsVisible = useStore((store) => getMeetingCarouselVisibility(store, meetingId!));
 
 	const speakingList = useMemo(() => {
 		const list: ReactElement[] = [];

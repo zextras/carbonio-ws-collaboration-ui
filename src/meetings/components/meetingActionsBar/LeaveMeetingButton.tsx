@@ -40,7 +40,7 @@ const LeaveMeetingButton = ({
 	const leaveMeetingButtonLabel = t('meeting.interactions.leaveConfirmation', 'Leave Meeting?');
 
 	const { goToInfoPage } = useRouting();
-	const { meetingId }: MeetingRoutesParams = useParams();
+	const { meetingId } = useParams<MeetingRoutesParams>();
 
 	const [active, setActive] = useState(false);
 	const [buttonLabel, setButtonLabel] = useState('');
@@ -57,7 +57,7 @@ const LeaveMeetingButton = ({
 	const leaveMeeting = useCallback(
 		(event: React.MouseEvent<HTMLButtonElement, MouseEvent> | KeyboardEvent) => {
 			event.stopPropagation();
-			MeetingsApi.leaveMeeting(meetingId).then(() => {
+			MeetingsApi.leaveMeeting(meetingId!).then(() => {
 				goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED);
 			});
 		},

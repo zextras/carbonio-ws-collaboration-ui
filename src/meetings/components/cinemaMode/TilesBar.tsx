@@ -47,7 +47,7 @@ type TilesBarProps = {
 };
 
 const TilesBar = ({ carouselTiles, centralTile }: TilesBarProps): ReactElement => {
-	const { meetingId }: MeetingRoutesParams = useParams();
+	const { meetingId } = useParams<MeetingRoutesParams>();
 
 	const [t] = useTranslation();
 	const scrollUpLabel = t('tooltip.scrollUp', 'Scroll up');
@@ -101,7 +101,7 @@ const TilesBar = ({ carouselTiles, centralTile }: TilesBarProps): ReactElement =
 				type: value.type
 			}));
 			subscriptions.push({ userId: centralTile.userId, type: centralTile.type });
-			setUpdateSubscription(meetingId, subscriptions);
+			setUpdateSubscription(meetingId!, subscriptions);
 		}
 	}, [tilesDataToRender, centralTile, meetingId, setUpdateSubscription]);
 

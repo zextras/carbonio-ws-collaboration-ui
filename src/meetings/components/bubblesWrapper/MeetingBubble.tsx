@@ -76,9 +76,9 @@ type MeetingBubbleProps = {
 };
 
 const MeetingBubble: FC<MeetingBubbleProps> = ({ messageId, handleBubbleRemove }) => {
-	const { meetingId }: MeetingRoutesParams = useParams();
+	const { meetingId } = useParams<MeetingRoutesParams>();
 
-	const roomId = useStore((store) => getRoomIdByMeetingId(store, meetingId));
+	const roomId = useStore((store) => getRoomIdByMeetingId(store, meetingId!));
 	const message = useStore((store) => getMessageSelector(store, roomId ?? '', messageId));
 	const roomType = useStore<RoomType>((store) => getRoomTypeSelector(store, roomId ?? ''));
 	const messageAttachment = useStore((store) => getMessageAttachment(store, message));
@@ -104,8 +104,8 @@ const MeetingBubble: FC<MeetingBubbleProps> = ({ messageId, handleBubbleRemove }
 	);
 
 	const onClickHandler = useCallback(() => {
-		setMeetingSidebarStatus(meetingId, true);
-		setMeetingChatVisibility(meetingId, MeetingChatVisibility.OPEN);
+		setMeetingSidebarStatus(meetingId!, true);
+		setMeetingChatVisibility(meetingId!, MeetingChatVisibility.OPEN);
 		if (!inputHasFocus) {
 			setInputHasFocus(roomId ?? '', true);
 		}

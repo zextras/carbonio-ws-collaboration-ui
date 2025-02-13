@@ -6,10 +6,11 @@
 
 import { useCallback } from 'react';
 
-import { pushHistory, replaceHistory } from '@zextras/carbonio-shell-ui';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import { CHATS_ROUTE } from '../constants/appConstants';
+
+// import { CHATS_ROUTE } from '../constants/appConstants';
 
 export enum ROUTES {
 	MAIN = '/',
@@ -43,7 +44,6 @@ export enum PAGE_INFO_TYPE {
 export type UseRoutingHook = {
 	goToMainPage: () => void;
 	goToRoomPage: (roomId: string) => void;
-	goToChatsPage: (param: string) => void;
 	goToMeetingPage: (meetingId: string) => void;
 	goToInfoPage: (infoType: PAGE_INFO_TYPE) => void;
 	goToExternalLoginPage: () => void;
@@ -51,30 +51,36 @@ export type UseRoutingHook = {
 };
 
 const useRouting = (): UseRoutingHook => {
-	const history = useHistory();
-	const route = useCallback((url: string): void => history.push(url), [history]);
-
-	// Chats routing
-	const goToMainPage = useCallback(() => replaceHistory(ROUTES.MAIN), []);
-
-	const goToRoomPage = useCallback(
-		(roomId: string) => pushHistory(ROUTES.ROOM.replace(':roomId', roomId)),
-		[]
+	const navigate = useNavigate();
+	const route = useCallback(
+		(url: string): void => {
+			navigate(url, { replace: false });
+		},
+		[navigate]
 	);
 
-	const goToChatsPage = useCallback(
-		(param: string) => replaceHistory({ path: `/${param}`, route: CHATS_ROUTE }),
-		[]
+	// Chats routing
+	const goToMainPage = useCallback(() => navigate(`/${CHATS_ROUTE}${ROUTES.MAIN}`), [navigate]);
+
+	const goToRoomPage = useCallback(
+		(roomId: string) => {
+			navigate(`/${CHATS_ROUTE}/${roomId}`, { replace: false });
+		},
+		[navigate]
 	);
 
 	// Meeting routing
 	const goToMeetingPage = useCallback(
-		(meetingId: string): void => route(MEETINGS_ROUTES.MEETING.replace(':meetingId', meetingId)),
-		[route]
+		(meetingId: string): void =>
+			navigate(`/focus-mode/${MEETINGS_ROUTES.MEETING.replace(':meetingId', meetingId)}`, {
+				replace: false
+			}),
+		[navigate]
 	);
 
 	const goToInfoPage = useCallback(
-		(infoType: PAGE_INFO_TYPE): void => route(MEETINGS_ROUTES.INFO.replace(':infoType', infoType)),
+		(infoType: PAGE_INFO_TYPE): void =>
+			route(`/focus-mode/${MEETINGS_ROUTES.INFO.replace(':infoType', infoType)}`),
 		[route]
 	);
 
@@ -91,7 +97,6 @@ const useRouting = (): UseRoutingHook => {
 	return {
 		goToMainPage,
 		goToRoomPage,
-		goToChatsPage,
 		goToMeetingPage,
 		goToInfoPage,
 		goToExternalLoginPage,

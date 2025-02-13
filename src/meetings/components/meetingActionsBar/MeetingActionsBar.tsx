@@ -47,7 +47,7 @@ type MeetingActionsProps = {
 };
 
 const MeetingActionsBar = ({ streamsWrapperRef }: MeetingActionsProps): ReactElement => {
-	const { meetingId }: MeetingRoutesParams = useParams();
+	const { meetingId } = useParams<MeetingRoutesParams>();
 
 	const [isHoovering, setIsHoovering] = useState<boolean>(false);
 	const [isHoverActions, setIsHoverActions] = useState<boolean>(false);

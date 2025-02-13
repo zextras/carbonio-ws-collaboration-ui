@@ -59,12 +59,12 @@ const CameraButton = ({
 		'There are connection problems, please try again later.'
 	);
 
-	const { meetingId }: MeetingRoutesParams = useParams();
+	const { meetingId } = useParams<MeetingRoutesParams>();
 	const myUserId = useStore(getUserId);
 
 	const videoStatus = useStore((store) => getParticipantVideoStatus(store, meetingId, myUserId));
-	const selectedVideoDeviceId = useStore((store) => getSelectedVideoDeviceId(store, meetingId));
-	const videoOutConn = useStore((store) => store.activeMeeting[meetingId]?.videoOutConn);
+	const selectedVideoDeviceId = useStore((store) => getSelectedVideoDeviceId(store, meetingId!));
+	const videoOutConn = useStore((store) => store.activeMeeting[meetingId!]?.videoOutConn);
 	const setSelectedDeviceId = useStore((store) => store.setSelectedDeviceId);
 	const setLocalStreams = useStore((store) => store.setLocalStreams);
 	const websocketNetworkStatus = useStore(({ connections }) => connections.status.websocket);
@@ -99,12 +99,12 @@ const CameraButton = ({
 					if (videoStatus) {
 						getVideoStream(videoItem.deviceId).then((stream) => {
 							videoOutConn?.updateLocalStreamTrack(stream).then(() => {
-								setLocalStreams(meetingId, STREAM_TYPE.VIDEO, stream);
-								setSelectedDeviceId(meetingId, STREAM_TYPE.VIDEO, videoItem.deviceId);
+								setLocalStreams(meetingId!, STREAM_TYPE.VIDEO, stream);
+								setSelectedDeviceId(meetingId!, STREAM_TYPE.VIDEO, videoItem.deviceId);
 							});
 						});
 					} else {
-						setSelectedDeviceId(meetingId, STREAM_TYPE.VIDEO, videoItem.deviceId);
+						setSelectedDeviceId(meetingId!, STREAM_TYPE.VIDEO, videoItem.deviceId);
 					}
 				},
 				icon: selectedVideoDeviceId === videoItem.deviceId ? 'AcceptanceMeeting' : undefined,
@@ -140,7 +140,7 @@ const CameraButton = ({
 						.then((stream) => {
 							videoOutConn
 								?.updateLocalStreamTrack(stream)
-								.then(() => MeetingsApi.updateMediaOffer(meetingId, STREAM_TYPE.VIDEO, true));
+								.then(() => MeetingsApi.updateMediaOffer(meetingId!, STREAM_TYPE.VIDEO, true));
 						})
 						.catch((e) => {
 							setButtonStatus(true);

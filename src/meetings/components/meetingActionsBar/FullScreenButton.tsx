@@ -20,9 +20,9 @@ const FullScreenButton = (): ReactElement => {
 	const disableFullScreenLabel = t('meeting.interactions.disableFullScreen', 'Disable full screen');
 	const enableFullScreenLabel = t('meeting.interactions.enableFullScreen', 'Enable full screen');
 
-	const { meetingId }: MeetingRoutesParams = useParams();
+	const { meetingId } = useParams<MeetingRoutesParams>();
 
-	const sidebarIsVisible: boolean = useStore((store) => getMeetingSidebarStatus(store, meetingId));
+	const sidebarIsVisible: boolean = useStore((store) => getMeetingSidebarStatus(store, meetingId!));
 	const setMeetingSidebarStatus = useStore((store) => store.setMeetingSidebarStatus);
 
 	const { isFullScreen, toggleFullScreen } = useFullScreen();
@@ -39,7 +39,7 @@ const FullScreenButton = (): ReactElement => {
 
 	const toggleFullScreenFn = useCallback((): void => {
 		if (sidebarIsVisible && !isFullScreen) {
-			setMeetingSidebarStatus(meetingId, false);
+			setMeetingSidebarStatus(meetingId!, false);
 		}
 		toggleFullScreen();
 	}, [sidebarIsVisible, isFullScreen, toggleFullScreen, setMeetingSidebarStatus, meetingId]);

@@ -58,7 +58,7 @@ const ChevronButton = styled(Button)`
 `;
 
 const GridMode = ({ children }: MeetingViewProps): ReactElement => {
-	const { meetingId }: MeetingRoutesParams = useParams();
+	const { meetingId } = useParams<MeetingRoutesParams>();
 
 	const [t] = useTranslation();
 	const scrollUpLabel = t('tooltip.scrollUp', 'Scroll up');
@@ -68,9 +68,9 @@ const GridMode = ({ children }: MeetingViewProps): ReactElement => {
 
 	const gridContainerRef = useRef<HTMLDivElement>(null);
 	const dimensions = useContainerDimensions(gridContainerRef);
-	const tilesData = useTiles(meetingId);
+	const tilesData = useTiles(meetingId!);
 
-	const numberOfTiles = useStore((store) => getNumberOfTiles(store, meetingId));
+	const numberOfTiles = useStore((store) => getNumberOfTiles(store, meetingId!));
 	const setUpdateSubscription = useStore((store) => store.setUpdateSubscription);
 
 	const { tileWidth, rows, columns, numberOfPages } = useMemo(() => {
@@ -141,7 +141,7 @@ const GridMode = ({ children }: MeetingViewProps): ReactElement => {
 				userId: value.userId,
 				type: value.type
 			}));
-			setUpdateSubscription(meetingId, subscriptions);
+			setUpdateSubscription(meetingId!, subscriptions);
 		}
 	}, [meetingId, setUpdateSubscription, tilesToRender]);
 

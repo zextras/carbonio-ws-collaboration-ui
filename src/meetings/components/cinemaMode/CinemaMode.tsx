@@ -53,9 +53,9 @@ const SidebarButton = styled(Button)`
 `;
 
 const CinemaMode = ({ children }: MeetingViewProps): ReactElement => {
-	const { meetingId }: MeetingRoutesParams = useParams();
+	const { meetingId } = useParams<MeetingRoutesParams>();
 
-	const carouselIsVisible = useStore((store) => getMeetingCarouselVisibility(store, meetingId));
+	const carouselIsVisible = useStore((store) => getMeetingCarouselVisibility(store, meetingId!));
 	const setIsCarouselVisible = useStore((store) => store.setIsCarouseVisible);
 	const setUpdateSubscription = useStore((store) => store.setUpdateSubscription);
 
@@ -71,7 +71,7 @@ const CinemaMode = ({ children }: MeetingViewProps): ReactElement => {
 
 	const cinemaModeRef = useRef<null | HTMLDivElement>(null);
 
-	const { centralTile, carouselTiles } = useTilesOrder(meetingId);
+	const { centralTile, carouselTiles } = useTilesOrder(meetingId!);
 	const cinemaModeDimensions = useContainerDimensions(cinemaModeRef);
 
 	const centralTileWidth = useMemo(() => {
@@ -85,13 +85,13 @@ const CinemaMode = ({ children }: MeetingViewProps): ReactElement => {
 	}, [cinemaModeDimensions]);
 
 	const toggleCarousel = useCallback(() => {
-		setIsCarouselVisible(meetingId, !carouselIsVisible);
+		setIsCarouselVisible(meetingId!, !carouselIsVisible);
 	}, [carouselIsVisible, meetingId, setIsCarouselVisible]);
 
 	useEffect(() => {
 		if (!carouselIsVisible) {
 			const subscription: Subscription = { userId: centralTile.userId, type: centralTile.type };
-			setUpdateSubscription(meetingId, [subscription]);
+			setUpdateSubscription(meetingId!, [subscription]);
 		}
 	}, [carouselIsVisible, centralTile, meetingId, setUpdateSubscription]);
 

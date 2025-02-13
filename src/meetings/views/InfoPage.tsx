@@ -39,7 +39,7 @@ const StarIcon = styled(Icon)`
 `;
 
 const InfoPage = (): ReactElement => {
-	const { infoType }: MeetingRoutesParams = useParams();
+	const { infoType } = useParams<MeetingRoutesParams>();
 
 	const { capture } = useTracker();
 

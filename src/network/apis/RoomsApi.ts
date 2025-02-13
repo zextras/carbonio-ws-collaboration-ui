@@ -4,10 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { pushHistory } from '@zextras/carbonio-shell-ui';
 import { v4 as uuidGenerator } from 'uuid';
 
-import { ROUTES } from '../../hooks/useRouting';
 import useStore from '../../store/Store';
 import { RequestType } from '../../types/network/apis/IBaseAPI';
 import IRoomsApi from '../../types/network/apis/IRoomsApi';
@@ -291,7 +289,8 @@ class RoomsApi implements IRoomsApi {
 			members: [{ userId, owner: true }]
 		}).then((response) => {
 			replacePlaceholderRoom(userId, response.id);
-			pushHistory(ROUTES.ROOM.replace(':roomId', response.id));
+			// TODO
+			// pushHistory(ROUTES.ROOM.replace(':roomId', response.id));
 			return response;
 		});
 	}

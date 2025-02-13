@@ -54,13 +54,13 @@ const MicrophoneButton = ({
 		'There are connection problems, please try again later.'
 	);
 
-	const { meetingId }: MeetingRoutesParams = useParams();
+	const { meetingId } = useParams<MeetingRoutesParams>();
 	const myUserId = useStore(getUserId);
 	const audioStatus = useStore((store) => getParticipantAudioStatus(store, meetingId, myUserId));
-	const selectedAudioDeviceId = useStore((store) => getSelectedAudioDeviceId(store, meetingId));
+	const selectedAudioDeviceId = useStore((store) => getSelectedAudioDeviceId(store, meetingId!));
 	const setSelectedDeviceId = useStore((store) => store.setSelectedDeviceId);
 	const bidirectionalAudioConn = useStore(
-		(store) => store.activeMeeting[meetingId]?.bidirectionalAudioConn
+		(store) => store.activeMeeting[meetingId!]?.bidirectionalAudioConn
 	);
 	const websocketNetworkStatus = useStore(({ connections }) => connections.status.websocket);
 
@@ -89,10 +89,10 @@ const MicrophoneButton = ({
 					if (audioStatus) {
 						getAudioStream(true, true, audioItem.deviceId).then((stream) => {
 							bidirectionalAudioConn?.updateLocalStreamTrack(stream);
-							setSelectedDeviceId(meetingId, STREAM_TYPE.AUDIO, audioItem.deviceId);
+							setSelectedDeviceId(meetingId!, STREAM_TYPE.AUDIO, audioItem.deviceId);
 						});
 					} else {
-						setSelectedDeviceId(meetingId, STREAM_TYPE.AUDIO, audioItem.deviceId);
+						setSelectedDeviceId(meetingId!, STREAM_TYPE.AUDIO, audioItem.deviceId);
 					}
 				},
 				selected: audioItem.deviceId === selectedAudioDeviceId,
@@ -115,7 +115,7 @@ const MicrophoneButton = ({
 				getAudioStream(true, true, selectedAudioDeviceId)
 					.then((stream) => {
 						bidirectionalAudioConn?.updateLocalStreamTrack(stream).then(() => {
-							MeetingsApi.updateAudioStreamStatus(meetingId, !audioStatus);
+							MeetingsApi.updateAudioStreamStatus(meetingId!, !audioStatus);
 						});
 					})
 					.catch((e) => {
@@ -124,7 +124,7 @@ const MicrophoneButton = ({
 					});
 			} else {
 				bidirectionalAudioConn?.closeRtpSenderTrack();
-				MeetingsApi.updateAudioStreamStatus(meetingId, !audioStatus);
+				MeetingsApi.updateAudioStreamStatus(meetingId!, !audioStatus);
 			}
 		},
 		[audioStatus, bidirectionalAudioConn, mediaPermissionSnackbar, meetingId, selectedAudioDeviceId]

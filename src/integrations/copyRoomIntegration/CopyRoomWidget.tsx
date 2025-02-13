@@ -15,12 +15,11 @@ import {
 	Tooltip,
 	useSnackbar
 } from '@zextras/carbonio-design-system';
-import { replaceHistory } from '@zextras/carbonio-shell-ui';
 import { filter, size } from 'lodash';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import { CHATS_ROUTE } from '../../constants/appConstants';
+// import { CHATS_ROUTE } from '../../constants/appConstants';
 import { RoomsApi } from '../../network';
 import { getDuplicatedRoom } from '../../store/selectors/RoomsSelectors';
 import useStore from '../../store/Store';
@@ -163,10 +162,11 @@ const CopyRoomWidget: FC<CopyRoomWidgetProps> = ({ name, members, topic, type })
 		if (!duplicatedRoom) {
 			setOpen(true);
 		} else {
-			replaceHistory({
-				path: `/${duplicatedRoom.id}`,
-				route: CHATS_ROUTE
-			});
+			// TODO
+			// replaceHistory({
+			// 	path: `/${duplicatedRoom.id}`,
+			// 	route: CHATS_ROUTE
+			// });
 		}
 	}, [duplicatedRoom]);
 
@@ -179,10 +179,11 @@ const CopyRoomWidget: FC<CopyRoomWidgetProps> = ({ name, members, topic, type })
 		})
 			.then((response) => {
 				setOpen(false);
-				replaceHistory({
-					path: `/${response.id}`,
-					route: CHATS_ROUTE
-				});
+				// TODO
+				// replaceHistory({
+				// 	path: `/${response.id}`,
+				// 	route: CHATS_ROUTE
+				// });
 			})
 			.catch(() => {
 				createSnackbar({

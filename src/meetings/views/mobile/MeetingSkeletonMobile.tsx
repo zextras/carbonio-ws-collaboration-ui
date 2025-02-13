@@ -34,15 +34,15 @@ const CustomContainer = styled(Container)`
 `;
 
 const MeetingSkeletonMobile = (): ReactElement => {
-	const { meetingId }: MeetingRoutesParams = useParams();
+	const { meetingId } = useParams<MeetingRoutesParams>();
 
 	const [view, setView] = useState<MobileMeetingView>(MobileMeetingView.TILES);
 
-	useGeneralMeetingControls(meetingId);
+	useGeneralMeetingControls(meetingId!);
 
 	const leaveMeeting = useCallback(() => {
 		const isLoggedUserExternal = useStore.getState().session.userType === UserType.GUEST;
-		MeetingsApi.leaveMeeting(meetingId);
+		MeetingsApi.leaveMeeting(meetingId!);
 		if (isLoggedUserExternal) {
 			BrowserUtils.clearAuthCookies();
 		}
@@ -57,14 +57,14 @@ const MeetingSkeletonMobile = (): ReactElement => {
 
 	return (
 		<Container background="gray0" padding={{ vertical: '4.4rem', horizontal: '1rem' }}>
-			<RecordingInfo meetingId={meetingId} />
+			<RecordingInfo meetingId={meetingId!} />
 			<Logo top="2rem" left="2rem" />
 			<CustomContainer>
-				{view === MobileMeetingView.TILES && <MobileTilesView meetingId={meetingId} />}
-				{view === MobileMeetingView.CHAT && <MobileConversation meetingId={meetingId} />}
-				{view === MobileMeetingView.PARTICIPANTS && <MobileParticipants meetingId={meetingId} />}
+				{view === MobileMeetingView.TILES && <MobileTilesView meetingId={meetingId!} />}
+				{view === MobileMeetingView.CHAT && <MobileConversation meetingId={meetingId!} />}
+				{view === MobileMeetingView.PARTICIPANTS && <MobileParticipants meetingId={meetingId!} />}
 			</CustomContainer>
-			<MobileActionBar meetingId={meetingId} view={view} setView={setView} />
+			<MobileActionBar meetingId={meetingId!} view={view} setView={setView} />
 		</Container>
 	);
 };

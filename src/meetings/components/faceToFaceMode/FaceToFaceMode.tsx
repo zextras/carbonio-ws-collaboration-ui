@@ -43,7 +43,7 @@ const CentralTile = styled(Container)`
 `;
 
 const FaceToFaceMode = ({ children }: MeetingViewProps): ReactElement => {
-	const { meetingId }: MeetingRoutesParams = useParams();
+	const { meetingId } = useParams<MeetingRoutesParams>();
 
 	const [t] = useTranslation();
 	const waitingParticipants = t(
@@ -51,7 +51,7 @@ const FaceToFaceMode = ({ children }: MeetingViewProps): ReactElement => {
 		'Waiting for participants to join...'
 	);
 
-	const centralTile = useStore((store) => getCentralTileData(store, meetingId));
+	const centralTile = useStore((store) => getCentralTileData(store, meetingId!));
 
 	const localId = useStore(getUserId);
 	const setUpdateSubscription = useStore((store) => store.setUpdateSubscription);
@@ -63,7 +63,7 @@ const FaceToFaceMode = ({ children }: MeetingViewProps): ReactElement => {
 	useEffect(() => {
 		if (centralTile) {
 			const subscription: Subscription = { userId: centralTile.userId, type: centralTile.type };
-			setUpdateSubscription(meetingId, [subscription]);
+			setUpdateSubscription(meetingId!, [subscription]);
 		}
 	}, [centralTile, meetingId, setUpdateSubscription]);
 

@@ -45,11 +45,11 @@ export type MeetingViewProps = {
 };
 
 const MeetingSkeleton = (): ReactElement => {
-	const { meetingId }: MeetingRoutesParams = useParams();
+	const { meetingId } = useParams<MeetingRoutesParams>();
 	const myUserId = useStore(getUserId);
 
-	const meetingViewSelected = useStore((store) => getMeetingViewSelected(store, meetingId));
-	const numberOfTiles = useStore((store) => getNumberOfTiles(store, meetingId));
+	const meetingViewSelected = useStore((store) => getMeetingViewSelected(store, meetingId!));
+	const numberOfTiles = useStore((store) => getNumberOfTiles(store, meetingId!));
 	const canUseVirtualBackground = useStore((store) =>
 		getCapability(store, CapabilityType.CAN_USE_VIRTUAL_BACKGROUND)
 	);
@@ -57,7 +57,7 @@ const MeetingSkeleton = (): ReactElement => {
 
 	const streamsWrapperRef = useRef<HTMLDivElement>(null);
 
-	useGeneralMeetingControls(meetingId);
+	useGeneralMeetingControls(meetingId!);
 
 	const ViewToDisplay = useMemo(() => {
 		if (numberOfTiles <= 2) {
@@ -81,7 +81,7 @@ const MeetingSkeleton = (): ReactElement => {
 				orientation="horizontal"
 				data-testid="meeting_view_container"
 			>
-				<RecordingInfo meetingId={meetingId} />
+				<RecordingInfo meetingId={meetingId!} />
 				<Logo />
 				<ViewToDisplay>
 					<MeetingActionsBar streamsWrapperRef={streamsWrapperRef} />

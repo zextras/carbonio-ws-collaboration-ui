@@ -24,11 +24,11 @@ const ScreenShareButton = (): ReactElement => {
 		'There are connection problems, please try again later.'
 	);
 
-	const { meetingId }: MeetingRoutesParams = useParams();
+	const { meetingId } = useParams<MeetingRoutesParams>();
 
 	const myUserId = useStore(getUserId);
 	const screenStatus = useStore((store) => getParticipantScreenStatus(store, meetingId, myUserId));
-	const screenOutConn = useStore((store) => store.activeMeeting[meetingId]?.screenOutConn);
+	const screenOutConn = useStore((store) => store.activeMeeting[meetingId!]?.screenOutConn);
 	const websocketNetworkStatus = useStore(({ connections }) => connections.status.websocket);
 
 	const toggleScreenStream = useCallback(() => {
