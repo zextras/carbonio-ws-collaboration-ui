@@ -52,7 +52,6 @@ describe('useGeneralMeetingControl hook', () => {
 				participants: []
 			})
 		);
-
 		renderHook(() => useGeneralMeetingControls(meeting.id), {
 			wrapper: ProvidersWrapper
 		});
