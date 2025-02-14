@@ -13,7 +13,6 @@ import { createMockMeeting } from '../../../tests/createMock';
 import { MeetingsApiToSpy, spyOnMeetingsApi } from '../../../tests/mocks/network';
 import { setup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
-import { PiPProvider } from '../pictureInPicture/PictureInPictureProvider';
 
 const mockMeeting: MeetingBe = createMockMeeting();
 
@@ -26,21 +25,13 @@ beforeEach(() => {
 
 describe('LeaveMeetingButton', () => {
 	test('Default button status: closed', () => {
-		setup(
-			<PiPProvider>
-				<LeaveMeetingButton isHoovering />
-			</PiPProvider>
-		);
+		setup(<LeaveMeetingButton isHoovering />);
 		const text = screen.queryByText(leaveMeetingButtonText);
 		expect(text).not.toBeInTheDocument();
 	});
 
 	test('User clicks the button once: it should be open', async () => {
-		const { user } = setup(
-			<PiPProvider>
-				<LeaveMeetingButton isHoovering />
-			</PiPProvider>
-		);
+		const { user } = setup(<LeaveMeetingButton isHoovering />);
 		const button = screen.getByRole('button');
 		await user.click(button);
 		const text = screen.getByText(leaveMeetingButtonText);
@@ -49,11 +40,7 @@ describe('LeaveMeetingButton', () => {
 
 	test('User clicks twice the button: leaveMeeting should be called', async () => {
 		const spyOnLeaveMeeting = spyOnMeetingsApi(MeetingsApiToSpy.LEAVE_MEETING);
-		const { user } = setup(
-			<PiPProvider>
-				<LeaveMeetingButton isHoovering />
-			</PiPProvider>
-		);
+		const { user } = setup(<LeaveMeetingButton isHoovering />);
 		const button = screen.getByRole('button');
 		await user.click(button);
 		await user.click(button);
@@ -62,11 +49,7 @@ describe('LeaveMeetingButton', () => {
 
 	test('User leaves the meeting directly if component has the oneClickLeave prop', async () => {
 		const spyOnLeaveMeeting = spyOnMeetingsApi(MeetingsApiToSpy.LEAVE_MEETING);
-		const { user } = setup(
-			<PiPProvider>
-				<LeaveMeetingButton isHoovering oneClickLeave />
-			</PiPProvider>
-		);
+		const { user } = setup(<LeaveMeetingButton isHoovering oneClickLeave />);
 		await user.click(screen.getByRole('button'));
 		expect(spyOnLeaveMeeting).toHaveBeenCalled();
 	});

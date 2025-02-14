@@ -30,7 +30,6 @@ import { STREAM_TYPE, VirtualBackgroundType } from '../../types/store/ActiveMeet
 import { MeetingParticipant } from '../../types/store/MeetingTypes';
 import { RoomType } from '../../types/store/RoomTypes';
 import { RootStore } from '../../types/store/StoreTypes';
-import { PiPProvider } from '../components/pictureInPicture/PictureInPictureProvider';
 
 const meetingActionBarLabel = 'meeting-action-bar';
 
@@ -77,11 +76,7 @@ const storeSetupGroupMeetingSkeleton = (): { user: UserEvent; store: RootStore }
 	store.setCapabilities(createMockCapabilityList());
 	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
 	spyUseParams.mockReturnValue({ meetingId: meeting.id });
-	const { user } = setup(
-		<PiPProvider>
-			<MeetingSkeleton />
-		</PiPProvider>
-	);
+	const { user } = setup(<MeetingSkeleton />);
 
 	return { user, store };
 };
@@ -190,11 +185,7 @@ describe('Grid mode meeting view', () => {
 
 describe('Meeting action bar interaction with skeleton', () => {
 	test('hover on different elements of the skeleton makes action bar appear and disappear', async () => {
-		const { user } = setup(
-			<PiPProvider>
-				<MeetingSkeleton />
-			</PiPProvider>
-		);
+		const { user } = setup(<MeetingSkeleton />);
 		const meetingActionBar = await screen.findByTestId('meeting-action-bar');
 		await waitFor(() => user.hover(screen.getByTestId('meeting_sidebar')));
 		expect(meetingActionBar).toHaveStyle('transform: translateY(5rem)');
