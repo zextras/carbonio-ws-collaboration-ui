@@ -4,15 +4,13 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { lazy, ReactElement, Suspense, useEffect } from 'react';
-
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import React, { lazy, ReactElement, Suspense, useContext, useEffect } from 'react';
 
 import ShimmerEntryMeetingView from './shimmers/ShimmerEntryMeetingView';
-import { MEETINGS_ROUTES, ROUTES } from '../../hooks/useRouting';
 import { MeetingsApi } from '../../network';
 import useStore from '../../store/Store';
 import { BrowserUtils } from '../../utils/BrowserUtils';
+import { MEETINGS_ROUTES, RouterContext, useRouterContextSetup } from '../contexts';
 
 const LazyAccessPageView = lazy(
 	() => import(/* webpackChunkName: "MeetingAccessPage" */ './AccessPage')
@@ -77,6 +75,24 @@ const MeetingAccessPageView = (): ReactElement => (
 	</Suspense>
 );
 
+const MeetingRouter = (): ReactElement => {
+	const { route } = useContext(RouterContext);
+	switch (route) {
+		case MEETINGS_ROUTES.MEETING:
+			return <MeetingSkeleton />;
+		case MEETINGS_ROUTES.INFO:
+			return <InfoPage />;
+		case MEETINGS_ROUTES.EXTERNAL_LOGIN:
+			return <MeetingExternalAccessPage />;
+		case MEETINGS_ROUTES.MEETING_ACCESS_PAGE:
+			return <MeetingAccessPageView />;
+		case MEETINGS_ROUTES.MAIN:
+			return <AccessPageView />;
+		default:
+			return <div> missing route</div>;
+	}
+};
+
 const MeetingMainView = (): ReactElement => {
 	const setCustomLogo = useStore((store) => store.setCustomLogo);
 
@@ -92,16 +108,11 @@ const MeetingMainView = (): ReactElement => {
 			});
 	}, [setCustomLogo]);
 
+	const routerContextSetup = useRouterContextSetup();
 	return (
-		<MemoryRouter>
-			<Routes>
-				<Route path={ROUTES.MAIN} element={<AccessPageView />} />
-				<Route path={MEETINGS_ROUTES.MEETING} element={<MeetingSkeleton />} />
-				<Route path={MEETINGS_ROUTES.MEETING_ACCESS_PAGE} element={<MeetingAccessPageView />} />
-				<Route path={MEETINGS_ROUTES.EXTERNAL_LOGIN} element={<MeetingExternalAccessPage />} />
-				<Route path={MEETINGS_ROUTES.INFO} element={<InfoPage />} />
-			</Routes>
-		</MemoryRouter>
+		<RouterContext.Provider value={routerContextSetup}>
+			<MeetingRouter />
+		</RouterContext.Provider>
 	);
 };
 

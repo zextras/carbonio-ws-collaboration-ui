@@ -17,6 +17,7 @@ import {
 } from '../../../tests/createMock';
 import { setup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
+import { MEETINGS_ROUTES, RouterContext } from '../../contexts';
 
 const meeting: MeetingBe = createMockMeeting({ roomId: createMockRoom().id });
 
@@ -51,7 +52,6 @@ describe('ScreenShare button', () => {
 	});
 
 	test('ScreenSharingOn icon when screenshare is enabled', async () => {
-		useParams.mockReturnValue({ meetingId: meeting.id });
 		const store = useStore.getState();
 		store.setWebsocketStatus(true);
 		store.setLoginInfo('userId', 'User', 'User');
@@ -61,7 +61,13 @@ describe('ScreenShare button', () => {
 				participants: [createMockParticipants({ userId: 'userId', screenStreamEnabled: true })]
 			})
 		);
-		setup(<ScreenShareButton />);
+		setup(
+			<RouterContext.Provider
+				value={{ meetingId: meeting.id, route: MEETINGS_ROUTES.MEETING, navigate: jest.fn() }}
+			>
+				<ScreenShareButton />
+			</RouterContext.Provider>
+		);
 		const enabledScreenShareIcon = await screen.findByTestId('icon: ScreenSharingOn');
 		expect(enabledScreenShareIcon).toBeVisible();
 	});

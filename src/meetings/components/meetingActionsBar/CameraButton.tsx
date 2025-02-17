@@ -8,6 +8,7 @@ import React, {
 	ReactElement,
 	SetStateAction,
 	useCallback,
+	useContext,
 	useEffect,
 	useMemo,
 	useState
@@ -21,10 +22,8 @@ import {
 } from '@zextras/carbonio-design-system';
 import { filter, map } from 'lodash';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
 
 import { MultiActionButton } from './MultiActionButton';
-import { MeetingRoutesParams } from '../../../hooks/useRouting';
 import MeetingsApi from '../../../network/apis/MeetingsApi';
 import { getSelectedVideoDeviceId } from '../../../store/selectors/ActiveMeetingSelectors';
 import { getParticipantVideoStatus } from '../../../store/selectors/MeetingSelectors';
@@ -32,6 +31,7 @@ import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
 import { getVideoStream } from '../../../utils/UserMediaManager';
+import { RouterContext } from '../../contexts';
 
 type CamButtonProps = {
 	videoDropdownRef: React.RefObject<HTMLDivElement>;
@@ -59,7 +59,7 @@ const CameraButton = ({
 		'There are connection problems, please try again later.'
 	);
 
-	const { meetingId } = useParams<MeetingRoutesParams>();
+	const { meetingId } = useContext(RouterContext);
 	const myUserId = useStore(getUserId);
 
 	const videoStatus = useStore((store) => getParticipantVideoStatus(store, meetingId, myUserId));

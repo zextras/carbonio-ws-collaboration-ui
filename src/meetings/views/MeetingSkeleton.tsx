@@ -4,14 +4,12 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { ReactElement, useMemo, useRef } from 'react';
+import React, { ReactElement, useContext, useMemo, useRef } from 'react';
 
 import { Container } from '@zextras/carbonio-design-system';
-import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import useGeneralMeetingControls from '../../hooks/useGeneralMeetingControls';
-import { MeetingRoutesParams } from '../../hooks/useRouting';
 import { getMeetingViewSelected } from '../../store/selectors/ActiveMeetingSelectors';
 import { getNumberOfTiles } from '../../store/selectors/MeetingSelectors';
 import { getCapability, getUserId } from '../../store/selectors/SessionSelectors';
@@ -27,6 +25,7 @@ import MeetingActionsBar from '../components/meetingActionsBar/MeetingActionsBar
 import RecordingInfo from '../components/RecordingInfo';
 import MeetingSidebar from '../components/sidebar/MeetingSidebar';
 import VirtualBackground from '../components/virtualBackground/VirtualBackground';
+import { RouterContext } from '../contexts';
 
 const SkeletonContainer = styled(Container)`
 	overflow: hidden;
@@ -45,7 +44,7 @@ export type MeetingViewProps = {
 };
 
 const MeetingSkeleton = (): ReactElement => {
-	const { meetingId } = useParams<MeetingRoutesParams>();
+	const { meetingId } = useContext(RouterContext);
 	const myUserId = useStore(getUserId);
 
 	const meetingViewSelected = useStore((store) => getMeetingViewSelected(store, meetingId!));

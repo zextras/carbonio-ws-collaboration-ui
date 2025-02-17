@@ -9,11 +9,11 @@ import { screen } from '@testing-library/react';
 import * as ReactRouter from 'react-router';
 
 import InfoPage from './InfoPage';
-import { PAGE_INFO_TYPE } from '../../hooks/useRouting';
 import useStore from '../../store/Store';
 import { createMockUser } from '../../tests/createMock';
 import { setup } from '../../tests/test-utils';
 import { UserType } from '../../types/store/UserTypes';
+import { PAGE_INFO_TYPE } from '../contexts';
 
 const pages = [
 	[PAGE_INFO_TYPE.ROOM_EMPTY, 'This Room is empty', 'Try later', 'It seems nobody is in this Room'],

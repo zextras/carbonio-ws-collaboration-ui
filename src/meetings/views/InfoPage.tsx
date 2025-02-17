@@ -3,21 +3,20 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import React, { ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { ReactElement, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 import { Container, Divider, Icon, Padding, Text } from '@zextras/carbonio-design-system';
 import { useTracker } from '@zextras/carbonio-shell-ui';
 import { map, range } from 'lodash';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { CHATS_APP_ID, TRACKER_EVENT } from '../../constants/appConstants';
 import useDarkReader from '../../hooks/useDarkReader';
-import { MeetingRoutesParams, PAGE_INFO_TYPE } from '../../hooks/useRouting';
 import { getIsLoggedUserExternal } from '../../store/selectors/SessionSelectors';
 import useStore from '../../store/Store';
 import { BrowserUtils } from '../../utils/BrowserUtils';
+import { PAGE_INFO_TYPE, RouterContext } from '../contexts';
 
 const Title = styled(Text)`
 	font-size: 1.6rem;
@@ -39,7 +38,7 @@ const StarIcon = styled(Icon)`
 `;
 
 const InfoPage = (): ReactElement => {
-	const { infoType } = useParams<MeetingRoutesParams>();
+	const { infoType } = useContext(RouterContext);
 
 	const { capture } = useTracker();
 

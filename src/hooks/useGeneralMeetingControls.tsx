@@ -14,7 +14,8 @@ import useEventListener, {
 	EventName,
 	MeetingWaitingParticipantClashedEvent
 } from './useEventListener';
-import useRouting, { PAGE_INFO_TYPE } from './useRouting';
+import useRouting from './useRouting';
+import { PAGE_INFO_TYPE } from '../meetings/contexts';
 import { MeetingsApi } from '../network';
 import useTiles from './useTiles';
 import {

@@ -3,20 +3,19 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import React, { ReactElement, useEffect, useMemo, useRef } from 'react';
+import React, { ReactElement, useContext, useEffect, useMemo, useRef } from 'react';
 
 import { Container, Text } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import useContainerDimensions from '../../../hooks/useContainerDimensions';
-import { MeetingRoutesParams } from '../../../hooks/useRouting';
 import { getCentralTileData } from '../../../store/selectors/MeetingSelectors';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { STREAM_TYPE, Subscription } from '../../../types/store/ActiveMeetingTypes';
 import { calcScaleDivisor } from '../../../utils/styleUtils';
+import { RouterContext } from '../../contexts';
 import { MeetingViewProps } from '../../views/MeetingSkeleton';
 import Tile from '../tile/Tile';
 
@@ -43,7 +42,7 @@ const CentralTile = styled(Container)`
 `;
 
 const FaceToFaceMode = ({ children }: MeetingViewProps): ReactElement => {
-	const { meetingId } = useParams<MeetingRoutesParams>();
+	const { meetingId } = useContext(RouterContext);
 
 	const [t] = useTranslation();
 	const waitingParticipants = t(

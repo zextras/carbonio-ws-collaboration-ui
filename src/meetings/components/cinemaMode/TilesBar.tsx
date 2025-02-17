@@ -4,19 +4,18 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { ReactElement, useEffect, useMemo, useRef } from 'react';
+import React, { ReactElement, useContext, useEffect, useMemo, useRef } from 'react';
 
 import { Button, Container, Tooltip } from '@zextras/carbonio-design-system';
 import { map, size } from 'lodash';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import useContainerDimensions from '../../../hooks/useContainerDimensions';
 import usePagination from '../../../hooks/usePagination';
-import { MeetingRoutesParams } from '../../../hooks/useRouting';
 import useStore from '../../../store/Store';
 import { STREAM_TYPE, TileData } from '../../../types/store/ActiveMeetingTypes';
+import { RouterContext } from '../../contexts';
 import Tile from '../tile/Tile';
 
 const TilesBarContainer = styled(Container)`
@@ -47,7 +46,7 @@ type TilesBarProps = {
 };
 
 const TilesBar = ({ carouselTiles, centralTile }: TilesBarProps): ReactElement => {
-	const { meetingId } = useParams<MeetingRoutesParams>();
+	const { meetingId } = useContext(RouterContext);
 
 	const [t] = useTranslation();
 	const scrollUpLabel = t('tooltip.scrollUp', 'Scroll up');

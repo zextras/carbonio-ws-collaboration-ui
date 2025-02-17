@@ -10,7 +10,6 @@ import { UserEvent } from '@testing-library/user-event';
 import * as ReactRouter from 'react-router';
 
 import MeetingSkeleton from './MeetingSkeleton';
-import { PAGE_INFO_TYPE } from '../../hooks/useRouting';
 import useStore from '../../store/Store';
 import {
 	createMockCapabilityList,
@@ -30,6 +29,7 @@ import { STREAM_TYPE, VirtualBackgroundType } from '../../types/store/ActiveMeet
 import { MeetingParticipant } from '../../types/store/MeetingTypes';
 import { RoomType } from '../../types/store/RoomTypes';
 import { RootStore } from '../../types/store/StoreTypes';
+import { PAGE_INFO_TYPE } from '../contexts';
 
 const meetingActionBarLabel = 'meeting-action-bar';
 

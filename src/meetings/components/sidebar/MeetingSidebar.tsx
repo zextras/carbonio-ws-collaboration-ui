@@ -4,19 +4,17 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { ReactElement, useCallback, useMemo } from 'react';
+import React, { ReactElement, useCallback, useContext, useMemo } from 'react';
 
 import { Button, Container, Tooltip } from '@zextras/carbonio-design-system';
 import { includes } from 'lodash';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import MeetingConversationAccordion from './MeetingConversationAccordion/MeetingConversationAccordion';
 import MeetingParticipantsAccordion from './ParticipantsAccordion/MeetingParticipantsAccordion';
 import RecordingAccordion from './recordingAccordion/RecordingAccordion';
 import WaitingListAccordion from './waitingListAccordion/WaitingListAccordion';
-import { MeetingRoutesParams } from '../../../hooks/useRouting';
 import {
 	getMeetingChatVisibility,
 	getMeetingSidebarStatus
@@ -34,6 +32,7 @@ import { CapabilityType } from '../../../types/store/SessionTypes';
 import BubblesWrapper from '../bubblesWrapper/BubblesWrapper';
 import VisualEffectsAccordion from './visualEffectsAccordion/VisualEffectsAccordion';
 import { getIsUserGuest } from '../../../store/selectors/UsersSelectors';
+import { RouterContext } from '../../contexts';
 
 const SidebarContainer = styled(Container)`
 	position: relative;
@@ -63,7 +62,7 @@ const AccordionContainer = styled(Container)`
 `;
 
 const MeetingSidebar = (): ReactElement => {
-	const { meetingId } = useParams<MeetingRoutesParams>();
+	const { meetingId } = useContext(RouterContext);
 
 	const [t] = useTranslation();
 	const collapseSidebarLabel = t('tooltip.collapseSidebar', 'Collapse sidebar');

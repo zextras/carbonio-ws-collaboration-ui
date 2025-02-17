@@ -4,21 +4,20 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { ReactElement, useRef, useMemo, useCallback, useEffect } from 'react';
+import React, { ReactElement, useRef, useMemo, useCallback, useEffect, useContext } from 'react';
 
 import { Button, Container, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import TilesBar from './TilesBar';
 import useContainerDimensions from '../../../hooks/useContainerDimensions';
-import { MeetingRoutesParams } from '../../../hooks/useRouting';
 import useTilesOrder from '../../../hooks/useTilesOrder';
 import { getMeetingCarouselVisibility } from '../../../store/selectors/ActiveMeetingSelectors';
 import useStore from '../../../store/Store';
 import { STREAM_TYPE, Subscription } from '../../../types/store/ActiveMeetingTypes';
 import { calcScaleDivisor } from '../../../utils/styleUtils';
+import { RouterContext } from '../../contexts';
 import { MeetingViewProps } from '../../views/MeetingSkeleton';
 import Tile from '../tile/Tile';
 import WhoIsSpeaking from '../whoIsSpeaking/WhoIsSpeaking';
@@ -53,7 +52,7 @@ const SidebarButton = styled(Button)`
 `;
 
 const CinemaMode = ({ children }: MeetingViewProps): ReactElement => {
-	const { meetingId } = useParams<MeetingRoutesParams>();
+	const { meetingId } = useContext(RouterContext);
 
 	const carouselIsVisible = useStore((store) => getMeetingCarouselVisibility(store, meetingId!));
 	const setIsCarouselVisible = useStore((store) => store.setIsCarouseVisible);

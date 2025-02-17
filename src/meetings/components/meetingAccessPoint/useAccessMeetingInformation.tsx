@@ -19,13 +19,14 @@ import { find } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 import { MEETINGS_PATH } from '../../../constants/appConstants';
-import useRouting, { PAGE_INFO_TYPE } from '../../../hooks/useRouting';
+import useRouting from '../../../hooks/useRouting';
 import { MeetingsApi } from '../../../network';
 import { getRoomIdFromMeeting } from '../../../store/selectors/MeetingSelectors';
 import { getRoomNameSelector, getRoomTypeSelector } from '../../../store/selectors/RoomsSelectors';
 import useStore from '../../../store/Store';
 import { MeetingType } from '../../../types/network/models/meetingBeTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
+import { PAGE_INFO_TYPE } from '../../contexts';
 
 type UseAccessMeetingInformationReturnType = {
 	meetingName: string;

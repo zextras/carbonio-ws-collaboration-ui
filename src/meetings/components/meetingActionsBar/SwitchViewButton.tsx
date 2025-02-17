@@ -3,20 +3,19 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import React, { ReactElement, useCallback } from 'react';
+import React, { ReactElement, useCallback, useContext } from 'react';
 
 import { Button, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
 
-import { MeetingRoutesParams } from '../../../hooks/useRouting';
 import { getMeetingViewSelected } from '../../../store/selectors/ActiveMeetingSelectors';
 import { getNumberOfTiles } from '../../../store/selectors/MeetingSelectors';
 import useStore from '../../../store/Store';
 import { MeetingViewType } from '../../../types/store/ActiveMeetingTypes';
+import { RouterContext } from '../../contexts';
 
 const SwitchViewButton = (): ReactElement | null => {
-	const { meetingId } = useParams<MeetingRoutesParams>();
+	const { meetingId } = useContext(RouterContext);
 
 	const [t] = useTranslation();
 	const gridViewLabel = t('meeting.interactions.gridView', 'Grid view');

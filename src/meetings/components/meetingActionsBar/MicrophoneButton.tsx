@@ -9,6 +9,7 @@ import React, {
 	ReactElement,
 	SetStateAction,
 	useCallback,
+	useContext,
 	useEffect,
 	useMemo,
 	useState
@@ -17,10 +18,8 @@ import React, {
 import { CreateSnackbarFn, Tooltip, useSnackbar } from '@zextras/carbonio-design-system';
 import { filter, map } from 'lodash';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
 
 import { MultiActionButton } from './MultiActionButton';
-import { MeetingRoutesParams } from '../../../hooks/useRouting';
 import { MeetingsApi } from '../../../network';
 import { getSelectedAudioDeviceId } from '../../../store/selectors/ActiveMeetingSelectors';
 import { getParticipantAudioStatus } from '../../../store/selectors/MeetingSelectors';
@@ -28,6 +27,7 @@ import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
 import { getAudioStream } from '../../../utils/UserMediaManager';
+import { RouterContext } from '../../contexts';
 
 type MicButtonProps = {
 	audioDropdownRef: React.RefObject<HTMLDivElement>;
@@ -54,7 +54,7 @@ const MicrophoneButton = ({
 		'There are connection problems, please try again later.'
 	);
 
-	const { meetingId } = useParams<MeetingRoutesParams>();
+	const { meetingId } = useContext(RouterContext);
 	const myUserId = useStore(getUserId);
 	const audioStatus = useStore((store) => getParticipantAudioStatus(store, meetingId, myUserId));
 	const selectedAudioDeviceId = useStore((store) => getSelectedAudioDeviceId(store, meetingId!));

@@ -8,12 +8,13 @@ import React, { Dispatch, ReactElement, SetStateAction, useCallback } from 'reac
 
 import { Button, Container } from '@zextras/carbonio-design-system';
 
-import useRouting, { PAGE_INFO_TYPE } from '../../../hooks/useRouting';
+import useRouting from '../../../hooks/useRouting';
 import { MeetingsApi } from '../../../network';
 import { getParticipantAudioStatus } from '../../../store/selectors/MeetingSelectors';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { getAudioStream } from '../../../utils/UserMediaManager';
+import { PAGE_INFO_TYPE } from '../../contexts';
 import { MobileMeetingView } from '../../views/mobile/MeetingSkeletonMobile';
 
 type MobileActionBarProps = {

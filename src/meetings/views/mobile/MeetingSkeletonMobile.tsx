@@ -4,14 +4,12 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { ReactElement, useCallback, useEffect, useState } from 'react';
+import React, { ReactElement, useCallback, useContext, useEffect, useState } from 'react';
 
 import { Container } from '@zextras/carbonio-design-system';
-import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import useGeneralMeetingControls from '../../../hooks/useGeneralMeetingControls';
-import { MeetingRoutesParams } from '../../../hooks/useRouting';
 import { MeetingsApi } from '../../../network';
 import useStore from '../../../store/Store';
 import { UserType } from '../../../types/store/UserTypes';
@@ -22,6 +20,7 @@ import MobileConversation from '../../components/mobile/MobileConversation';
 import MobileParticipants from '../../components/mobile/MobileParticipants';
 import MobileTilesView from '../../components/mobile/MobileTilesView';
 import RecordingInfo from '../../components/RecordingInfo';
+import { RouterContext } from '../../contexts';
 
 export enum MobileMeetingView {
 	TILES = 'tiles',
@@ -34,7 +33,7 @@ const CustomContainer = styled(Container)`
 `;
 
 const MeetingSkeletonMobile = (): ReactElement => {
-	const { meetingId } = useParams<MeetingRoutesParams>();
+	const { meetingId } = useContext(RouterContext);
 
 	const [view, setView] = useState<MobileMeetingView>(MobileMeetingView.TILES);
 

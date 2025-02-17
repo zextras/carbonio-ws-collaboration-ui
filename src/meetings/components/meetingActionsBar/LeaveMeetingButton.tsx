@@ -3,15 +3,15 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import React, { ReactElement, useCallback, useEffect, useState } from 'react';
+import React, { ReactElement, useCallback, useContext, useEffect, useState } from 'react';
 
 import { Button, Container, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
-import useRouting, { MeetingRoutesParams, PAGE_INFO_TYPE } from '../../../hooks/useRouting';
+import useRouting from '../../../hooks/useRouting';
 import { MeetingsApi } from '../../../network';
+import { PAGE_INFO_TYPE, RouterContext } from '../../contexts';
 
 const CustomContainer = styled(Container)`
 	> div > button > div {
@@ -40,7 +40,7 @@ const LeaveMeetingButton = ({
 	const leaveMeetingButtonLabel = t('meeting.interactions.leaveConfirmation', 'Leave Meeting?');
 
 	const { goToInfoPage } = useRouting();
-	const { meetingId } = useParams<MeetingRoutesParams>();
+	const { meetingId } = useContext(RouterContext);
 
 	const [active, setActive] = useState(false);
 	const [buttonLabel, setButtonLabel] = useState('');

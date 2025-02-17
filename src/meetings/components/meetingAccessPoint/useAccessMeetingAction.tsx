@@ -9,13 +9,14 @@ import { Dispatch, SetStateAction, useCallback, useEffect, useMemo } from 'react
 import { MEETINGS_PATH } from '../../../constants/appConstants';
 import useDarkReader from '../../../hooks/useDarkReader';
 import useEventListener, { EventName } from '../../../hooks/useEventListener';
-import useRouting, { PAGE_INFO_TYPE } from '../../../hooks/useRouting';
+import useRouting from '../../../hooks/useRouting';
 import { MeetingsApi } from '../../../network';
 import { getRoomIdFromMeeting } from '../../../store/selectors/MeetingSelectors';
 import { getIsLoggedUserExternal } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { BrowserUtils } from '../../../utils/BrowserUtils';
 import { freeMediaResources } from '../../../utils/MeetingsUtils';
+import { PAGE_INFO_TYPE } from '../../contexts';
 
 const useAccessMeetingAction = (
 	hasUserDirectAccess: boolean,
