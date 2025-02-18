@@ -7,6 +7,7 @@
 import React, { ReactElement, useRef, useMemo, useCallback, useEffect } from 'react';
 
 import { Button, Container, Tooltip } from '@zextras/carbonio-design-system';
+import { concat } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -98,7 +99,8 @@ const CinemaMode = ({ children }: MeetingViewProps): ReactElement => {
 	return (
 		<Container orientation="horizontal">
 			<CustomContainer ref={cinemaModeRef} padding={{ vertical: '3.25rem' }}>
-				<WhoIsSpeaking centralTile={centralTile} />
+				{!carouselIsVisible && <WhoIsSpeaking visibleTiles={[centralTile]} />}
+				<WhoIsSpeaking visibleTiles={concat(carouselTiles, centralTile)} />
 				<CinemaContainer data-testid="cinemaModeView" width={centralTileWidth} height="fit">
 					<Tile
 						userId={centralTile?.userId}
