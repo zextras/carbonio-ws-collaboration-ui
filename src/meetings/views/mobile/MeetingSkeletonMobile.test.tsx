@@ -7,24 +7,18 @@
 import React from 'react';
 
 import { screen } from '@testing-library/react';
-import * as ReactRouter from 'react-router';
 
 import MeetingSkeletonMobile from './MeetingSkeletonMobile';
 import useStore from '../../../store/Store';
 import { createMockMeeting, createMockRoom } from '../../../tests/createMock';
-import { setup } from '../../../tests/test-utils';
+import { contextSetup } from '../../../tests/test-utils';
 
 const room = createMockRoom({ meetingId: 'meetingId' });
 const meeting = createMockMeeting({ roomId: room.id });
 
-beforeEach(() => {
-	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
-	spyUseParams.mockReturnValue({ meetingId: 'meetingId' });
-});
-
 describe('MeetingSkeletonMobile test', () => {
 	test('Default view is tiles view', () => {
-		setup(<MeetingSkeletonMobile />);
+		contextSetup(<MeetingSkeletonMobile />, { meetingId: room.meetingId });
 		const view = screen.getByTestId('mobile_skeleton_view');
 		expect(view).toBeInTheDocument();
 	});
@@ -33,7 +27,7 @@ describe('MeetingSkeletonMobile test', () => {
 		const store = useStore.getState();
 		store.addRoom(room);
 		store.addMeeting(meeting);
-		const { user } = setup(<MeetingSkeletonMobile />);
+		const { user } = contextSetup(<MeetingSkeletonMobile />, { meetingId: room.meetingId });
 		const conversationButton = screen.getByTestId('icon: MessageCircle');
 		expect(conversationButton).toBeInTheDocument();
 
@@ -46,7 +40,7 @@ describe('MeetingSkeletonMobile test', () => {
 		const store = useStore.getState();
 		store.addRoom(room);
 		store.addMeeting(meeting);
-		const { user } = setup(<MeetingSkeletonMobile />);
+		const { user } = contextSetup(<MeetingSkeletonMobile />, { meetingId: room.meetingId });
 		const participantsButton = screen.getByTestId('icon: People');
 		expect(participantsButton).toBeInTheDocument();
 

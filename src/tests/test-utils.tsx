@@ -21,6 +21,7 @@ import { I18nextProvider } from 'react-i18next';
 
 import { customQueries } from './custom-queries';
 import I18nTestFactory from './i18n-test-factory';
+import { MEETINGS_ROUTES, PAGE_INFO_TYPE, RouterContext } from '../meetings/contexts';
 
 interface ProvidersWrapperProps {
 	children?: React.ReactNode;
@@ -87,3 +88,28 @@ export async function triggerObserver(observedElement: HTMLElement): Promise<voi
 		])
 	);
 }
+
+export const contextSetup = (
+	children: React.ReactElement,
+	{
+		meetingId,
+		infoType,
+		route = MEETINGS_ROUTES.MEETING
+	}: {
+		meetingId?: string;
+		infoType?: PAGE_INFO_TYPE;
+		route?: MEETINGS_ROUTES;
+	}
+): { user: ReturnType<(typeof userEvent)['setup']> } & ReturnType<typeof customRender> =>
+	setup(
+		<RouterContext.Provider
+			value={{
+				route,
+				meetingId,
+				infoType,
+				navigate: jest.fn()
+			}}
+		>
+			<ProvidersWrapper>{children}</ProvidersWrapper>
+		</RouterContext.Provider>
+	);

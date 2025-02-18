@@ -6,7 +6,6 @@
 import React from 'react';
 
 import { screen, act } from '@testing-library/react';
-import * as ReactRouter from 'react-router';
 
 import SwitchViewButton from './SwitchViewButton';
 import useStore from '../../../store/Store';
@@ -17,7 +16,7 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../../tests/createMock';
-import { setup } from '../../../tests/test-utils';
+import { contextSetup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 import { RoomBe } from '../../../types/network/models/roomBeTypes';
 import { MeetingViewType } from '../../../types/store/ActiveMeetingTypes';
@@ -48,13 +47,11 @@ beforeEach(() => {
 	store.addRoom(room);
 	store.addMeeting(meeting);
 	store.meetingConnection(meeting.id, false, undefined, false, undefined);
-	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
-	spyUseParams.mockReturnValue({ meetingId: meeting.id });
 });
 
 describe('SwitchViewButton tests', () => {
 	test('SwitchView button is not visible with one or two participants', async () => {
-		setup(<SwitchViewButton />);
+		contextSetup(<SwitchViewButton />, { meetingId: meeting.id });
 		expect(screen.queryByRole('button')).not.toBeInTheDocument();
 
 		// Add a second participant
@@ -65,7 +62,7 @@ describe('SwitchViewButton tests', () => {
 	});
 
 	test('SwitchView button becomes visible with at least three participants', async () => {
-		setup(<SwitchViewButton />);
+		contextSetup(<SwitchViewButton />, { meetingId: meeting.id });
 		const store = useStore.getState();
 		act(() => {
 			store.addParticipant(meeting.id, createMockParticipants({ userId: user2.id }));
@@ -81,7 +78,7 @@ describe('SwitchViewButton tests', () => {
 	});
 
 	test('SwitchView button toggles between grid and cinema view', async () => {
-		const { user } = setup(<SwitchViewButton />);
+		const { user } = contextSetup(<SwitchViewButton />, { meetingId: meeting.id });
 		const store = useStore.getState();
 		act(() => {
 			store.addParticipant(meeting.id, createMockParticipants({ userId: user2.id }));

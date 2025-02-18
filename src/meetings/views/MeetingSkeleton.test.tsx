@@ -7,7 +7,6 @@ import React from 'react';
 
 import { act, screen, waitFor } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event';
-import * as ReactRouter from 'react-router';
 
 import MeetingSkeleton from './MeetingSkeleton';
 import useStore from '../../store/Store';
@@ -29,7 +28,7 @@ import { STREAM_TYPE, VirtualBackgroundType } from '../../types/store/ActiveMeet
 import { MeetingParticipant } from '../../types/store/MeetingTypes';
 import { RoomType } from '../../types/store/RoomTypes';
 import { RootStore } from '../../types/store/StoreTypes';
-import { PAGE_INFO_TYPE } from '../contexts';
+import { MEETINGS_ROUTES, PAGE_INFO_TYPE, RouterContext } from '../contexts';
 
 const meetingActionBarLabel = 'meeting-action-bar';
 
@@ -74,9 +73,13 @@ const storeSetupGroupMeetingSkeleton = (): { user: UserEvent; store: RootStore }
 	store.meetingConnection(meeting.id, false, undefined, true, 'videoId');
 	store.setLocalStreams(meeting.id, STREAM_TYPE.VIDEO, new MediaStream());
 	store.setCapabilities(createMockCapabilityList());
-	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
-	spyUseParams.mockReturnValue({ meetingId: meeting.id });
-	const { user } = setup(<MeetingSkeleton />);
+	const { user } = setup(
+		<RouterContext.Provider
+			value={{ route: MEETINGS_ROUTES.MEETING, meetingId: meeting.id, navigate: jest.fn() }}
+		>
+			<MeetingSkeleton />
+		</RouterContext.Provider>
+	);
 
 	return { user, store };
 };

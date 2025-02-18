@@ -7,7 +7,6 @@ import React from 'react';
 
 import { screen, act } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event';
-import * as ReactRouter from 'react-router';
 
 import CameraButton from './CameraButton';
 import useStore from '../../../store/Store';
@@ -17,7 +16,7 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../../tests/createMock';
-import { setup } from '../../../tests/test-utils';
+import { contextSetup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 import { MemberBe, RoomBe } from '../../../types/network/models/roomBeTypes';
 import { UserBe } from '../../../types/network/models/userBeTypes';
@@ -52,14 +51,13 @@ const mockSetIsVideoListOpen = jest.fn();
 
 const defaultSetup = (): { user: UserEvent } => {
 	const refList = React.createRef<HTMLDivElement>();
-	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
-	spyUseParams.mockReturnValue({ meetingId: meeting.id });
-	const { user } = setup(
+	const { user } = contextSetup(
 		<CameraButton
 			videoDropdownRef={refList}
 			isVideoListOpen={false}
 			setIsVideoListOpen={mockSetIsVideoListOpen}
-		/>
+		/>,
+		{ meetingId: meeting.id }
 	);
 	return { user };
 };

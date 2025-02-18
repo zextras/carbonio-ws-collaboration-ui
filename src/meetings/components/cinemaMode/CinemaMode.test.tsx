@@ -6,7 +6,6 @@
 import React from 'react';
 
 import { screen, act } from '@testing-library/react';
-import * as ReactRouter from 'react-router';
 
 import CinemaMode from './CinemaMode';
 import useStore from '../../../store/Store';
@@ -17,7 +16,7 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../../tests/createMock';
-import { setup } from '../../../tests/test-utils';
+import { contextSetup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
 import { MeetingParticipant } from '../../../types/store/MeetingTypes';
@@ -58,10 +57,8 @@ const setupBasicGroupMeeting = (): void => {
 		store.addMeeting(groupMeeting);
 		store.meetingConnection(groupMeeting.id, false, undefined, false, undefined);
 	});
-	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
-	spyUseParams.mockReturnValue({ meetingId: groupMeeting.id });
 	localStorage.setItem('settings', JSON.stringify({ 'settings.appearance_setting.scaling': 100 }));
-	setup(<CinemaMode />);
+	contextSetup(<CinemaMode />, { meetingId: groupMeeting.id });
 };
 
 describe('CinemaMode', () => {

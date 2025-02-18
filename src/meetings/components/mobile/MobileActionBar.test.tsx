@@ -6,33 +6,28 @@
 import React from 'react';
 
 import { act, screen } from '@testing-library/react';
-import * as ReactRouter from 'react-router';
 
 import MobileActionBar from './MobileActionBar';
 import useStore from '../../../store/Store';
 import { createMockMeeting } from '../../../tests/createMock';
 import { MeetingsApiToSpy, spyOnMeetingsApi } from '../../../tests/mocks/network';
-import { setup } from '../../../tests/test-utils';
+import { contextSetup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
 import { MobileMeetingView } from '../../views/mobile/MeetingSkeletonMobile';
 
 const mockMeeting: MeetingBe = createMockMeeting();
 
-beforeAll(() => {
-	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
-	spyUseParams.mockReturnValue({ meetingId: mockMeeting.id });
-});
-
 describe('MobileActionBar test', () => {
 	test('Set participants view', async () => {
 		const setView = jest.fn();
-		const { user } = setup(
+		const { user } = contextSetup(
 			<MobileActionBar
 				meetingId={mockMeeting.id}
 				view={MobileMeetingView.TILES}
 				setView={setView}
-			/>
+			/>,
+			{ meetingId: mockMeeting.id }
 		);
 		const participantsButton = screen.getByTestId('icon: People');
 		expect(participantsButton).toBeInTheDocument();
@@ -43,12 +38,13 @@ describe('MobileActionBar test', () => {
 
 	test('Set conversation view', async () => {
 		const setView = jest.fn();
-		const { user } = setup(
+		const { user } = contextSetup(
 			<MobileActionBar
 				meetingId={mockMeeting.id}
 				view={MobileMeetingView.TILES}
 				setView={setView}
-			/>
+			/>,
+			{ meetingId: mockMeeting.id }
 		);
 		const conversationButton = screen.getByTestId('icon: MessageCircle');
 		expect(conversationButton).toBeInTheDocument();
@@ -59,12 +55,13 @@ describe('MobileActionBar test', () => {
 
 	test('Leave meeting button', async () => {
 		const spyOnLeaveMeeting = spyOnMeetingsApi(MeetingsApiToSpy.LEAVE_MEETING);
-		const { user } = setup(
+		const { user } = contextSetup(
 			<MobileActionBar
 				meetingId={mockMeeting.id}
 				view={MobileMeetingView.TILES}
 				setView={jest.fn()}
-			/>
+			/>,
+			{ meetingId: mockMeeting.id }
 		);
 		const leaveButton = screen.getByTestId('icon: LogOutOutline');
 		expect(leaveButton).toBeInTheDocument();
@@ -86,12 +83,13 @@ describe('MobileActionBar test', () => {
 			joinedAt: ''
 		});
 
-		const { user } = setup(
+		const { user } = contextSetup(
 			<MobileActionBar
 				meetingId={mockMeeting.id}
 				view={MobileMeetingView.TILES}
 				setView={jest.fn()}
-			/>
+			/>,
+			{ meetingId: mockMeeting.id }
 		);
 		const audioButtonOff = screen.getByTestId('icon: MicOff');
 		expect(audioButtonOff).toBeInTheDocument();

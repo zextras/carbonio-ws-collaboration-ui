@@ -19,7 +19,7 @@ import {
 	createMockTextMessage,
 	createMockUser
 } from '../../../tests/createMock';
-import { setup } from '../../../tests/test-utils';
+import { contextSetup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 import { MemberBe, RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
 import { UserBe } from '../../../types/network/models/userBeTypes';
@@ -74,7 +74,7 @@ const storeBasicActiveMeetingSetup = (): { user: UserEvent; store: RootStore } =
 	store.setMeetingSidebarStatus(meeting.id, false);
 	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
 	spyUseParams.mockReturnValue({ meetingId: meeting.id });
-	const { user } = setup(<BubblesWrapper />);
+	const { user } = contextSetup(<BubblesWrapper />, { meetingId: meeting.id });
 
 	return { store, user };
 };
