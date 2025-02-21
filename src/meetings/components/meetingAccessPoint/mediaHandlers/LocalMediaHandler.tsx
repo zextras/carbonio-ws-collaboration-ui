@@ -3,29 +3,13 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import React, {
-	Dispatch,
-	FC,
-	SetStateAction,
-	useCallback,
-	useEffect,
-	useMemo,
-	useState
-} from 'react';
+import React, { Dispatch, FC, SetStateAction, useCallback, useEffect, useMemo } from 'react';
 
-import {
-	Button,
-	Container,
-	CreateSnackbarFn,
-	Padding,
-	Select,
-	Tooltip,
-	useSnackbar
-} from '@zextras/carbonio-design-system';
-import { filter, find, map } from 'lodash';
+import { Button, Container, Select, Snackbar, Tooltip } from '@zextras/carbonio-design-system';
+import { find, map } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
-import { BrowserUtils } from '../../../../utils/BrowserUtils';
+import useBrowserPermission from '../../../../hooks/useMediaDevices';
 import { MeetingStorageType } from '../../../../utils/localStorageUtils';
 import { freeMediaResources } from '../../../../utils/MeetingsUtils';
 import { getAudioAndVideo } from '../../../../utils/UserMediaManager';
@@ -60,28 +44,23 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 	const enableMicLabel = t('meeting.interactions.enableMicrophone', 'Enable microphone');
 	const camDeviceLabel = t('meeting.interactions.camDevice', 'Camera device');
 	const micDeviceLabel = t('meeting.interactions.micDevice', 'Microphone device');
-	const understoodAction = t('action.understood', 'UNDERSTOOD');
 	const giveMediaPermissionSnackbar = t(
 		'meeting.interactions.browserPermission',
 		'Grant browser permissions to enable resources'
 	);
+	const unknownDeviceLabel = t('meeting.interactions.unknownDevice', 'Unknown device');
+	const noDevicesLabel = t('meeting.interactions.noDevices', 'No devices available');
 
-	const [audioMediaList, setAudioMediaList] = useState<[] | MediaDeviceInfo[]>([]);
-	const [videoMediaList, setVideoMediaList] = useState<[] | MediaDeviceInfo[]>([]);
-
-	const createSnackbar: CreateSnackbarFn = useSnackbar();
-
-	const mediaPermissionSnackbar = useCallback(
-		() =>
-			createSnackbar({
-				key: new Date().toLocaleString(),
-				severity: 'info',
-				label: giveMediaPermissionSnackbar,
-				actionLabel: understoodAction,
-				disableAutoHide: true
-			}),
-		[createSnackbar, giveMediaPermissionSnackbar, understoodAction]
-	);
+	const {
+		permission: audioPermission,
+		deviceList: audioMediaList,
+		noDevices: noAudioDevices
+	} = useBrowserPermission('audio');
+	const {
+		permission: videoPermission,
+		deviceList: videoMediaList,
+		noDevices: noVideoDevices
+	} = useBrowserPermission('video');
 
 	const toggleStreams = useCallback(
 		(audio: boolean, video: boolean, audioId: string | undefined, videoId: string | undefined) => {
@@ -104,7 +83,6 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 						setEnterButtonIsEnabled(true);
 					})
 					.catch((e): void => {
-						mediaPermissionSnackbar();
 						setEnterButtonIsEnabled(true);
 						console.error(e);
 					});
@@ -116,7 +94,6 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 			}
 		},
 		[
-			mediaPermissionSnackbar,
 			setEnterButtonIsEnabled,
 			setMediaDevicesEnabled,
 			setMeetingStorage,
@@ -130,20 +107,20 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 		() =>
 			map(videoMediaList, (videoItem: MediaDeviceInfo, i) => ({
 				id: `device-${i}`,
-				label: videoItem.label ? videoItem.label : `device-${i}`,
+				label: videoItem.label ? videoItem.label : unknownDeviceLabel,
 				value: videoItem.deviceId
 			})),
-		[videoMediaList]
+		[unknownDeviceLabel, videoMediaList]
 	);
 
 	const mediaAudioList: { id: string; label: string; value: string }[] = useMemo(
 		() =>
 			map(audioMediaList, (audioItem: MediaDeviceInfo, i) => ({
 				id: `device-${i}`,
-				label: audioItem.label ? audioItem.label : `device-${i}`,
+				label: audioItem.label ? audioItem.label : unknownDeviceLabel,
 				value: audioItem.deviceId
 			})),
-		[audioMediaList]
+		[audioMediaList, unknownDeviceLabel]
 	);
 
 	const onChangeVideoSource = useCallback(
@@ -190,26 +167,6 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 		[mediaAudioList, selectedDevicesId.audio]
 	);
 
-	const updateListOfDevices = useCallback(() => {
-		navigator.mediaDevices
-			.enumerateDevices()
-			.then((devices) => {
-				const audioInputs = filter(
-					devices,
-					(device: MediaDeviceInfo) => device.kind === 'audioinput' && device
-				) as MediaDeviceInfo[];
-				const videoInputs = filter(
-					devices,
-					(device: MediaDeviceInfo) => device.kind === 'videoinput' && device
-				) as MediaDeviceInfo[];
-				setAudioMediaList(audioInputs);
-				setVideoMediaList(videoInputs);
-			})
-			.catch((e) => {
-				console.log(e);
-			});
-	}, []);
-
 	const toggleVideo = useCallback(
 		(event: React.MouseEvent<HTMLButtonElement, MouseEvent> | KeyboardEvent) => {
 			event.stopPropagation();
@@ -239,44 +196,6 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 	);
 
 	useEffect(() => {
-		if (BrowserUtils.isFirefox()) {
-			navigator.mediaDevices
-				.enumerateDevices()
-				.then((list) => {
-					const firstAudioInputForPermissions = find(
-						list,
-						(device: MediaDeviceInfo) => device.kind === 'audioinput'
-					);
-					if (firstAudioInputForPermissions) {
-						getAudioAndVideo(
-							{ deviceId: { exact: firstAudioInputForPermissions.deviceId } },
-							mediaDevicesEnabled.video
-						)
-							.then((stream: MediaStream) => {
-								const tracks: MediaStreamTrack[] = stream.getTracks();
-								tracks.forEach((track) => track.stop());
-								updateListOfDevices();
-							})
-							.catch((e) => {
-								console.log(e);
-							});
-					}
-				})
-				.catch((e) => {
-					console.log(e);
-				});
-		} else {
-			updateListOfDevices();
-		}
-	}, [
-		createSnackbar,
-		giveMediaPermissionSnackbar,
-		mediaDevicesEnabled,
-		understoodAction,
-		updateListOfDevices
-	]);
-
-	useEffect(() => {
 		if (mediaDevicesEnabled.audio || mediaDevicesEnabled.video) {
 			getAudioAndVideo(mediaDevicesEnabled.audio, mediaDevicesEnabled.video).then((stream) => {
 				setStreamTrack(stream);
@@ -293,29 +212,60 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 	}, [mediaAudioList, selectedDevicesId, setSelectedDevicesId]);
 
 	useEffect(() => {
-		navigator.mediaDevices.addEventListener('devicechange', updateListOfDevices);
-		return (): void => {
-			navigator.mediaDevices.removeEventListener('devicechange', updateListOfDevices);
-		};
-	}, [updateListOfDevices]);
+		if (mediaDevicesEnabled.video && videoPermission === 'denied') {
+			toggleStreams(mediaDevicesEnabled.audio, false, selectedDevicesId.audio, undefined);
+		}
+		if (mediaDevicesEnabled.audio && audioPermission === 'denied') {
+			toggleStreams(false, mediaDevicesEnabled.video, undefined, selectedDevicesId.video);
+		}
+	}, [
+		audioPermission,
+		mediaDevicesEnabled.audio,
+		mediaDevicesEnabled.video,
+		noAudioDevices,
+		noVideoDevices,
+		selectedDevicesId.audio,
+		selectedDevicesId.video,
+		toggleStreams,
+		videoPermission
+	]);
+
+	const audioTooltip = useMemo(() => {
+		if (audioPermission !== 'granted') return giveMediaPermissionSnackbar;
+		return mediaDevicesEnabled.audio ? disableMicLabel : enableMicLabel;
+	}, [
+		audioPermission,
+		giveMediaPermissionSnackbar,
+		mediaDevicesEnabled.audio,
+		disableMicLabel,
+		enableMicLabel
+	]);
+
+	const videoTooltip = useMemo(() => {
+		if (videoPermission !== 'granted') return giveMediaPermissionSnackbar;
+		return mediaDevicesEnabled.video ? disableCamLabel : enableCamLabel;
+	}, [
+		videoPermission,
+		giveMediaPermissionSnackbar,
+		mediaDevicesEnabled.video,
+		disableCamLabel,
+		enableCamLabel
+	]);
 
 	return (
-		<Container height="fit" width="100%">
-			<Container height="fit" orientation={'horizontal'}>
-				<Tooltip
-					placement="top"
-					label={mediaDevicesEnabled.video ? disableCamLabel : enableCamLabel}
-				>
+		<Container height="fit" width="100%" gap="1rem">
+			<Container height="fit" orientation={'horizontal'} gap="1rem" crossAlignment="flex-start">
+				<Tooltip placement="top" label={videoTooltip}>
 					<Button
 						icon={mediaDevicesEnabled.video ? 'Video' : 'VideoOff'}
 						size="extralarge"
 						backgroundColor={'primary'}
 						onClick={toggleVideo}
+						disabled={videoPermission !== 'granted' || noVideoDevices}
 					/>
 				</Tooltip>
-				<Padding left="1rem" />
 				<Select
-					label={camDeviceLabel}
+					label={noVideoDevices ? noDevicesLabel : camDeviceLabel}
 					data-testid={'camera-select'}
 					items={mediaVideoList}
 					onChange={onChangeVideoSource}
@@ -325,25 +275,22 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 					showCheckbox={false}
 					background={'text'}
 					disablePortal
+					disabled={videoPermission !== 'granted' || noVideoDevices}
 				/>
 			</Container>
-			<Padding bottom="1rem" />
-			<Container height="fit" orientation={'horizontal'}>
-				<Tooltip
-					placement="top"
-					label={mediaDevicesEnabled.audio ? disableMicLabel : enableMicLabel}
-				>
+			<Container height="fit" orientation={'horizontal'} gap="1rem" crossAlignment="flex-start">
+				<Tooltip placement="top" label={audioTooltip}>
 					<Button
 						icon={mediaDevicesEnabled.audio ? 'Mic' : 'MicOff'}
 						size="extralarge"
 						backgroundColor={'primary'}
 						onClick={toggleAudio}
 						data-testid={'turn_on_audio'}
+						disabled={audioPermission !== 'granted' || noAudioDevices}
 					/>
 				</Tooltip>
-				<Padding left="1rem" />
 				<Select
-					label={micDeviceLabel}
+					label={noAudioDevices ? noDevicesLabel : micDeviceLabel}
 					data-testid={'audio-select'}
 					items={mediaAudioList}
 					onChange={onChangeAudioSource}
@@ -353,8 +300,18 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 					showCheckbox={false}
 					background={'text'}
 					disablePortal
+					disabled={audioPermission !== 'granted' || noAudioDevices}
 				/>
 			</Container>
+			{(audioPermission === 'denied' || videoPermission === 'denied') && (
+				<Snackbar
+					open={audioPermission === 'denied' || videoPermission === 'denied'}
+					disableAutoHide
+					severity="info"
+					label={giveMediaPermissionSnackbar}
+					hideButton
+				/>
+			)}
 		</Container>
 	);
 };

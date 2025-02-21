@@ -12,49 +12,50 @@ import WhoIsSpeaking from './WhoIsSpeaking';
 import useStore from '../../../store/Store';
 import {
 	createMockMeeting,
+	createMockMember,
 	createMockParticipants,
 	createMockRoom,
 	createMockUser
 } from '../../../tests/createMock';
 import { setup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
-import { MemberBe, RoomBe } from '../../../types/network/models/roomBeTypes';
+import { RoomBe } from '../../../types/network/models/roomBeTypes';
 import { UserBe } from '../../../types/network/models/userBeTypes';
-import { MeetingViewType, STREAM_TYPE, TileData } from '../../../types/store/ActiveMeetingTypes';
-import { MeetingParticipant } from '../../../types/store/MeetingTypes';
+import { STREAM_TYPE, TileData } from '../../../types/store/ActiveMeetingTypes';
 import { RootStore } from '../../../types/store/StoreTypes';
 
 const user1: UserBe = createMockUser({ id: 'user1Id', name: 'user 1' });
 const user2: UserBe = createMockUser({ id: 'user2Id', name: 'user 2' });
 const user3: UserBe = createMockUser({ id: 'user3Id', name: 'user 3' });
-const member1: MemberBe = { userId: user1.id, owner: true };
-const member2: MemberBe = { userId: user2.id, owner: false };
-const member3: MemberBe = { userId: user3.id, owner: true };
 
-const room: RoomBe = createMockRoom({ members: [member1, member2, member3] });
-
-const user1Participant: MeetingParticipant = createMockParticipants({ userId: user1.id });
-
-const user3Participant: MeetingParticipant = createMockParticipants({ userId: user3.id });
-
-const user2Participant: MeetingParticipant = createMockParticipants({ userId: user2.id });
+const room: RoomBe = createMockRoom({
+	members: [
+		createMockMember({ userId: user1.id }),
+		createMockMember({ userId: user2.id }),
+		createMockMember({ userId: user3.id })
+	]
+});
 
 const meeting: MeetingBe = createMockMeeting({
 	roomId: room.id,
-	participants: [user1Participant, user2Participant, user3Participant]
+	participants: [
+		createMockParticipants({ userId: user1.id }),
+		createMockParticipants({ userId: user3.id }),
+		createMockParticipants({ userId: user2.id })
+	]
 });
 
 const centralTileVideo: TileData = {
-	userId: user1.id,
+	userId: user3.id,
 	type: STREAM_TYPE.VIDEO
 };
 
 const centralTileScreen: TileData = {
-	userId: user1.id,
+	userId: user3.id,
 	type: STREAM_TYPE.SCREEN
 };
 
-const setupActiveMeeting = (): void => {
+beforeEach(() => {
 	const store: RootStore = useStore.getState();
 	store.setUserInfo(user1);
 	store.setUserInfo(user2);
@@ -63,32 +64,27 @@ const setupActiveMeeting = (): void => {
 	store.addRoom(room);
 	store.addMeeting(meeting);
 	store.meetingConnection(meeting.id, false, undefined, false, undefined);
-	store.setMeetingViewSelected(meeting.id, MeetingViewType.CINEMA);
-	store.setIsCarouseVisible(meeting.id, false);
 	store.setTalkingUser(meeting.id, user3.id, true);
 	store.setTalkingUser(meeting.id, user2.id, true);
 	store.setTalkingUser(meeting.id, user1.id, true);
-};
+});
 
 describe('Who is speaking', () => {
-	it('has to be rendered correctly - central tile is a video', () => {
+	test('Talking user in central tile is not displayed if the central tile is his video', () => {
 		const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
 		spyUseParams.mockReturnValue({ meetingId: meeting.id });
-		setupActiveMeeting();
-		setup(<WhoIsSpeaking centralTile={centralTileVideo} />);
+		setup(<WhoIsSpeaking visibleTiles={[centralTileVideo]} />);
 
-		expect(screen.getByText(user3.name)).toBeVisible();
-		expect(screen.getByText(user2.name)).toBeVisible();
+		expect(screen.getByText(user2.name)).toBeInTheDocument();
+		expect(screen.queryByText(user3.name)).not.toBeInTheDocument();
 	});
 
-	it('has to be rendered correctly - central tile is a screen', () => {
+	test('Talking user in central tile is displayed if the central tile is his screen', () => {
 		const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
 		spyUseParams.mockReturnValue({ meetingId: meeting.id });
-		setupActiveMeeting();
-		setup(<WhoIsSpeaking centralTile={centralTileScreen} />);
+		setup(<WhoIsSpeaking visibleTiles={[centralTileScreen]} />);
 
-		expect(screen.getByText(user1.name)).toBeVisible();
-		expect(screen.getByText(user3.name)).toBeVisible();
-		expect(screen.getByText(user2.name)).toBeVisible();
+		expect(screen.getByText(user2.name)).toBeInTheDocument();
+		expect(screen.getByText(user3.name)).toBeInTheDocument();
 	});
 });
