@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { screen } from '@testing-library/react';
+import { act, screen } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event';
 import * as ReactRouter from 'react-router';
 
@@ -83,8 +83,10 @@ const storeSetupGroupMeetingPip = (): { user: UserEvent; store: RootStore } => {
 };
 
 describe('PictureInPictureView', () => {
-	test('should render without crashing', () => {
-		storeSetupGroupMeetingPip();
+	test('should render without crashing', async () => {
+		await act(async () => {
+			storeSetupGroupMeetingPip();
+		});
 		expect(screen.getByText('user 2 is speaking.')).toBeInTheDocument();
 		const cameraButton = screen.getByTestId('icon: VideoOff');
 		expect(cameraButton).toBeInTheDocument();

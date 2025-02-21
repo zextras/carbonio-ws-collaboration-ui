@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
+import useMediaDevices from '../../../hooks/useMediaDevices';
 import { MeetingRoutesParams } from '../../../hooks/useRouting';
 import useTilesOrder from '../../../hooks/useTilesOrder';
 import MeetingsApi from '../../../network/apis/MeetingsApi';
@@ -64,6 +65,9 @@ const PictureInPictureView = (): ReactElement => {
 	const bidirectionalAudioConn = useStore(
 		(store) => store.activeMeeting[meetingId]?.bidirectionalAudioConn
 	);
+
+	const { permission: audioPermission } = useMediaDevices('audio');
+	const { permission: videoPermission } = useMediaDevices('video');
 
 	const isSpeakingLabel = t('meeting.pip.speaking', `${whoIsSpeaking} is speaking.`, {
 		speaker: whoIsSpeaking
@@ -168,10 +172,15 @@ const PictureInPictureView = (): ReactElement => {
 					<Button
 						onClick={toggleVideoStream}
 						icon={videoStatus ? 'Video' : 'VideoOff'}
-						disabled={!websocketNetworkStatus}
+						disabled={!websocketNetworkStatus || videoPermission !== 'granted'}
 						size={'large'}
 					/>
-					<Button onClick={toggleAudioStream} icon={audioStatus ? 'Mic' : 'MicOff'} size="large" />
+					<Button
+						onClick={toggleAudioStream}
+						icon={audioStatus ? 'Mic' : 'MicOff'}
+						disabled={!websocketNetworkStatus || audioPermission !== 'granted'}
+						size="large"
+					/>
 				</CustomActionBar>
 				<CustomActionBar
 					background={'text'}
