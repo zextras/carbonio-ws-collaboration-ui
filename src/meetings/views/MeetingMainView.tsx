@@ -14,6 +14,7 @@ import { MEETINGS_ROUTES, ROUTES } from '../../hooks/useRouting';
 import { MeetingsApi } from '../../network';
 import useStore from '../../store/Store';
 import { BrowserUtils } from '../../utils/BrowserUtils';
+import { PiPProvider } from '../components/pictureInPicture/PictureInPictureProvider';
 
 const LazyAccessPageView = lazy(
 	() => import(/* webpackChunkName: "MeetingAccessPage" */ './AccessPage')
@@ -56,7 +57,9 @@ const AccessPageView = (): ReactElement => (
 
 const MeetingSkeleton = (): ReactElement => (
 	<Suspense fallback={<ShimmerEntryMeetingView />}>
-		<LazyMeetingSkeleton />
+		<PiPProvider>
+			<LazyMeetingSkeleton />
+		</PiPProvider>
 	</Suspense>
 );
 
