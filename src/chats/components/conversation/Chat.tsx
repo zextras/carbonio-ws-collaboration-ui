@@ -116,7 +116,6 @@ const Chat = ({ roomId, setInfoPanelOpen }: ChatsProps): ReactElement => {
 
 	const demoteMemberHandler = useCallback(
 		(event: CustomEvent<MemberDemotedEvent['data']> | undefined) => {
-			console.log(event);
 			const roomName = event?.detail.roomId
 				? useStore.getState().rooms[event.detail.roomId]?.name
 				: '';

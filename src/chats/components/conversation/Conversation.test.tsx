@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { screen } from '@testing-library/react';
+import { act, screen } from '@testing-library/react';
 
 import Conversation from './Conversation';
 import { mockDarkReaderIsEnabled } from '../../../../__mocks__/darkreader';
@@ -38,12 +38,16 @@ const testRoom2: RoomBe = createMockRoom({
 	type: RoomType.GROUP,
 	members: [
 		createMockMember({ userId: 'user1', owner: true }),
-		createMockMember({ userId: 'user2' })
+		createMockMember({ userId: 'user2', owner: true })
 	],
 	userSettings: { muted: false }
 });
 
-const user1Info: User = createMockUser();
+const user1Info: User = createMockUser({
+	id: 'user1',
+	email: 'user1@domain.com',
+	name: 'User 1'
+});
 
 const user2Info: User = createMockUser({
 	id: 'user2',
@@ -129,5 +133,35 @@ describe('Conversation view', () => {
 		setup(<Conversation roomId={testRoom.id} />);
 		const ConversationWrapper = screen.getByTestId('ConversationWrapper');
 		expect(ConversationWrapper).toHaveStyle(`background-image: url('papyrus-dark.png')`);
+	});
+
+	test('Add moderator and check everything is shown correctly', async () => {
+		act(() => {
+			useStore.getState().addRoom(testRoom);
+			useStore.getState().setLoginInfo(user2Info.id, user2Info.email, user2Info.name);
+			useStore.getState().setUserInfo(user1Info);
+			useStore.getState().setUserInfo(user2Info);
+		});
+		const { user } = setup(<Conversation roomId={testRoom.id} />);
+		act(() => {
+			useStore.getState().promoteMemberToModerator(testRoom.id, user1Info.id);
+		});
+		const crownCounter = await screen.findAllByTestId('icon: Crown');
+		expect(crownCounter).toHaveLength(2);
+	});
+
+	test('Remove moderator and check everything is shown correctly', async () => {
+		act(() => {
+			useStore.getState().addRoom(testRoom2);
+			useStore.getState().setLoginInfo(user2Info.id, user2Info.email, user2Info.name);
+			useStore.getState().setUserInfo(user1Info);
+			useStore.getState().setUserInfo(user2Info);
+		});
+		const { user } = setup(<Conversation roomId={testRoom2.id} />);
+		act(() => {
+			useStore.getState().demoteMemberFromModerator(testRoom2.id, user1Info.id);
+		});
+		const crownCounter = await screen.findAllByTestId('icon: CrownOutline');
+		expect(crownCounter).toHaveLength(1);
 	});
 });
