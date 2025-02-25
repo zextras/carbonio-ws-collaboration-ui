@@ -29,9 +29,10 @@ export default function App(): React.JSX.Element {
 	const setXmppClient = useStore((state) => state.setXmppClient);
 	const setWebSocketClient = useStore((state) => state.setWebSocketClient);
 	const setChatsBeStatus = useStore((state) => state.setChatsBeStatus);
+	const setAttributes = useStore((state) => state.setAttributes);
 
 	const authenticated = useAuthenticated();
-	const { prefs } = useUserSettings();
+	const { prefs, attrs } = useUserSettings();
 
 	// STORE: init with user session main infos
 	useEffect(() => {
@@ -57,7 +58,6 @@ export default function App(): React.JSX.Element {
 
 			Promise.all([
 				SessionApi.getToken(),
-				SessionApi.getCapabilities(),
 				RoomsApi.listRooms(true, true),
 				MeetingsApi.listMeetings()
 			])
@@ -66,10 +66,11 @@ export default function App(): React.JSX.Element {
 					// Init xmppClient and webSocket after roomList request to avoid missing data (specially for the inbox request)
 					xmppClient.connect(resp[0].zmToken);
 					webSocket.connect();
+					setAttributes(attrs);
 				})
 				.catch(() => setChatsBeStatus(false));
 		}
-	}, [authenticated, setChatsBeStatus, setWebSocketClient, setXmppClient]);
+	}, [attrs, authenticated, setAttributes, setChatsBeStatus, setWebSocketClient, setXmppClient]);
 
 	initChats();
 	initMeetings();

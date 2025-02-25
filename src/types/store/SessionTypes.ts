@@ -14,7 +14,8 @@ export type Session = {
 	displayName?: string;
 	sessionId?: string;
 	userType?: UserType;
-	capabilities?: CapabilityList;
+	capabilities?: CapabilityList; // TODO remove
+	attributes?: AttributesList;
 	connections?: {
 		chats_be: boolean | undefined;
 		xmpp: boolean | undefined;
@@ -28,6 +29,22 @@ export type Session = {
 		exporter: IChatExporter;
 		status: ExportStatus;
 	};
+};
+
+export type AttributesList = {
+	privateChatCreation: boolean;
+	groupChatCreation: boolean;
+	maxGroupMembers: number;
+	messageDeleteTimeLimit: number;
+	messageEditTimeLimit: number;
+	maxRoomPictureSize: number;
+	attachmentUpload: boolean;
+	maxAttachmentSize: number;
+	showMessageReads: boolean;
+	showUsersPresence: boolean;
+	videoCallEnabled: boolean;
+	recordingEnabled: boolean;
+	virtualBackgroundEnabled: boolean;
 };
 
 export type CapabilityList = {

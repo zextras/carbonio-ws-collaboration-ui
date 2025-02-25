@@ -4,11 +4,10 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { GetCapabilitiesResponse, GetTokenResponse } from '../responses/sessionResponses';
+import { GetTokenResponse } from '../responses/sessionResponses';
 
 interface ISessionApi {
 	getToken(): Promise<GetTokenResponse>;
-	getCapabilities(): Promise<GetCapabilitiesResponse>;
 }
 
 export default ISessionApi;

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { CapabilityType, ExportStatus } from '../../types/store/SessionTypes';
+import { AttributesList, CapabilityType, ExportStatus } from '../../types/store/SessionTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 import { UserType } from '../../types/store/UserTypes';
 
@@ -17,6 +17,11 @@ export const getCapability = (
 	store: RootStore,
 	capabilityName: CapabilityType
 ): boolean | number | undefined => store.session.capabilities?.[capabilityName];
+
+export const getAttribute = (
+	store: RootStore,
+	attributeName: keyof AttributesList
+): boolean | number | string | undefined => store.session.attributes?.[attributeName];
 
 export const getUserId = (store: RootStore): string | undefined => store.session?.id;
 
