@@ -21,9 +21,8 @@ import { useIsWritingLabel } from '../../../hooks/useIsWritingLabel';
 import useMediaQueryCheck from '../../../hooks/useMediaQueryCheck';
 import ConversationHeaderMeetingButton from '../../../meetings/components/headerMeetingButton/ConversationHeaderMeetingButton';
 import { getIsPlaceholderRoom, getRoomNameSelector } from '../../../store/selectors/RoomsSelectors';
-import { getCapability } from '../../../store/selectors/SessionSelectors';
+import { getAttribute } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
-import { CapabilityType } from '../../../types/store/SessionTypes';
 
 type ConversationHeaderProps = {
 	roomId: string;
@@ -82,7 +81,7 @@ const ConversationHeader = ({
 	const [t] = useTranslation();
 	const infoTooltip = t('conversationInfo.info', 'Info');
 	const roomName = useStore((state) => getRoomNameSelector(state, roomId)) || '';
-	const canVideoCall = useStore((store) => getCapability(store, CapabilityType.CAN_VIDEO_CALL));
+	const videoCallEnabled = useStore((store) => getAttribute(store, 'videoCallEnabled'));
 	const isPlaceholderRoom = useStore((state) => getIsPlaceholderRoom(state, roomId));
 
 	const isWritingLabel = useIsWritingLabel(roomId);
@@ -131,7 +130,9 @@ const ConversationHeader = ({
 				</Container>
 			</Row>
 			<Container orientation="horizontal" width="fit" style={{ minWidth: 'fit-content' }}>
-				{canVideoCall && !isPlaceholderRoom && <ConversationHeaderMeetingButton roomId={roomId} />}
+				{videoCallEnabled && !isPlaceholderRoom && (
+					<ConversationHeaderMeetingButton roomId={roomId} />
+				)}
 				{!isDesktopView && (
 					<Tooltip label={infoTooltip}>
 						<Button

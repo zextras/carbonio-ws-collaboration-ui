@@ -11,7 +11,7 @@ import { act, renderHook, screen, waitFor } from '@testing-library/react';
 import ChatCreationModal from './ChatCreationModal';
 import useStore from '../../../store/Store';
 import {
-	createMockCapabilityList,
+	createMockAttributesList,
 	createMockMember,
 	createMockRoom
 } from '../../../tests/createMock';
@@ -93,7 +93,9 @@ describe('Chat Creation Modal', () => {
 	test('Create a group', async () => {
 		const spyOnAddRoom = spyOnRoomsApi(RoomsApiToSpy.ADD_ROOM);
 		const { result } = renderHook(() => useStore());
-		act(() => result.current.setCapabilities(createMockCapabilityList({ maxGroupMembers: 5 })));
+		act(() =>
+			result.current.setAttributes(createMockAttributesList({ carbonioWscMaxGroupMembers: '5' }))
+		);
 		const { user } = setup(<ChatCreationModal open onClose={jest.fn()} />);
 
 		mockSearchUsersByFeatureRequest.mockReturnValueOnce([user1, user2]);
@@ -126,7 +128,9 @@ describe('Chat Creation Modal', () => {
 	test('Error on creating a group displaying a snackbar', async () => {
 		const spyOnAddRoom = spyOnRoomsApi(RoomsApiToSpy.ADD_ROOM);
 		const { result } = renderHook(() => useStore());
-		act(() => result.current.setCapabilities(createMockCapabilityList({ maxGroupMembers: 5 })));
+		act(() =>
+			result.current.setAttributes(createMockAttributesList({ carbonioWscMaxGroupMembers: '5' }))
+		);
 		const { user } = setup(<ChatCreationModal open onClose={jest.fn()} />);
 
 		mockSearchUsersByFeatureRequest.mockReturnValueOnce([user1, user2]);
@@ -153,7 +157,9 @@ describe('Chat Creation Modal', () => {
 
 	test('title and topic fields are filled properly', async () => {
 		const { result } = renderHook(() => useStore());
-		act(() => result.current.setCapabilities(createMockCapabilityList({ maxGroupMembers: 5 })));
+		act(() =>
+			result.current.setAttributes(createMockAttributesList({ carbonioWscMaxGroupMembers: '5' }))
+		);
 		mockSearchUsersByFeatureRequest.mockReturnValueOnce([user1, user2]);
 		const { user } = setup(<ChatCreationModal open onClose={jest.fn()} />);
 
@@ -242,7 +248,9 @@ describe('Chat Creation Modal', () => {
 
 	test('Check creation disabled if user reach the limit available, and check list checkbox are disabled', async () => {
 		const { result } = renderHook(() => useStore());
-		act(() => result.current.setCapabilities(createMockCapabilityList({ maxGroupMembers: 3 })));
+		act(() =>
+			result.current.setAttributes(createMockAttributesList({ carbonioWscMaxGroupMembers: '3' }))
+		);
 		mockSearchUsersByFeatureRequest.mockReturnValueOnce([user1, user2, user3]);
 		const { user } = setup(<ChatCreationModal open onClose={jest.fn()} />);
 		const chipInput = await screen.findByTestId('chip_input_contact_selector');
@@ -263,7 +271,9 @@ describe('Chat Creation Modal', () => {
 
 	test('Check list checkbox are enabled when user can add other members', async () => {
 		const { result } = renderHook(() => useStore());
-		act(() => result.current.setCapabilities(createMockCapabilityList({ maxGroupMembers: 4 })));
+		act(() =>
+			result.current.setAttributes(createMockAttributesList({ carbonioWscMaxGroupMembers: '4' }))
+		);
 		mockSearchUsersByFeatureRequest.mockReturnValueOnce([user1, user2, user3]);
 		const { user } = setup(<ChatCreationModal open onClose={jest.fn()} />);
 		const chipInput = await screen.findByTestId('chip_input_contact_selector');
@@ -281,7 +291,9 @@ describe('Chat Creation Modal', () => {
 
 	test('User wants to add another user as a moderator', async () => {
 		const { result } = renderHook(() => useStore());
-		act(() => result.current.setCapabilities(createMockCapabilityList({ maxGroupMembers: 5 })));
+		act(() =>
+			result.current.setAttributes(createMockAttributesList({ carbonioWscMaxGroupMembers: '5' }))
+		);
 		const { user } = setup(<ChatCreationModal open onClose={jest.fn()} />);
 
 		mockSearchUsersByFeatureRequest.mockReturnValueOnce([user1, user2]);

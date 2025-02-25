@@ -116,7 +116,7 @@ class RoomsApi implements IRoomsApi {
 
 	public updateRoomPicture(roomId: string, file: File): Promise<UpdateRoomPictureResponse> {
 		return new Promise<UpdateRoomPictureResponse>((resolve, reject) => {
-			const sizeLimit = useStore.getState().session.capabilities?.maxRoomImageSizeInKb;
+			const sizeLimit = useStore.getState().session.attributes?.maxRoomPictureSize;
 			if (sizeLimit && file.size > sizeLimit * 1000) {
 				reject(new Error('File too large'));
 			} else {

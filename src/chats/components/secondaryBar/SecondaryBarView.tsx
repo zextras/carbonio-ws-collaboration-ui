@@ -16,10 +16,9 @@ import ConversationsFilter from './ConversationsFilter';
 import useFilteredGal from './galSeachList/useFilteredGal';
 import VirtualRoomsButton from './virtualRoomWidget/VirtualRoomsButton';
 import { useOrderedOneToOneAndGroupsInfoByLastMessage } from '../../../store/selectors/MessagesSelectors';
-import { getCapability } from '../../../store/selectors/SessionSelectors';
+import { getAttribute } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { Member } from '../../../types/store/RoomTypes';
-import { CapabilityType } from '../../../types/store/SessionTypes';
 import DefaultUserSidebarView from '../../views/DefaultUserSidebarView';
 import ShimmeringCollapsedListView from '../../views/shimmerViews/ShimmeringCollapsedListView';
 import ShimmeringExpandedListView from '../../views/shimmerViews/ShimmeringExpandedListView';
@@ -51,7 +50,7 @@ const SecondaryBarView: React.FC<SecondaryBarSingleGroupsViewProps> = ({ expande
 		'There are no users matching this search in your existing chats or in your company.'
 	);
 
-	const canVideoCall = useStore((store) => getCapability(store, CapabilityType.CAN_VIDEO_CALL));
+	const videoCallEnabled = useStore((store) => getAttribute(store, 'videoCallEnabled'));
 	const roomsIds = useOrderedOneToOneAndGroupsInfoByLastMessage();
 	const chatsBeNetworkStatus = useStore(({ connections }) => connections.status.chats_be);
 
@@ -103,7 +102,7 @@ const SecondaryBarView: React.FC<SecondaryBarSingleGroupsViewProps> = ({ expande
 							</>
 						)}
 					</ScrollContainer>
-					{canVideoCall && <VirtualRoomsButton expanded={expanded} />}
+					{videoCallEnabled && <VirtualRoomsButton expanded={expanded} />}
 				</Container>
 			) : (
 				<DefaultUserSidebarView />
@@ -111,7 +110,7 @@ const SecondaryBarView: React.FC<SecondaryBarSingleGroupsViewProps> = ({ expande
 		[
 			FilteredConversationList,
 			FilteredGal,
-			canVideoCall,
+			videoCallEnabled,
 			expanded,
 			filteredInput,
 			noResults,

@@ -11,7 +11,7 @@ import { screen } from '@testing-library/react';
 import Bubble from './Bubble';
 import useStore from '../../../../store/Store';
 import {
-	createMockCapabilityList,
+	createMockAttributesList,
 	createMockMember,
 	createMockRoom,
 	createMockTextMessage,
@@ -248,7 +248,9 @@ describe('Attachment footer', () => {
 		store.addRoom(mockedRoom);
 		store.newMessage(msg);
 		store.setLoginInfo(user1Be.id, user1Be.name);
-		store.setCapabilities(createMockCapabilityList({ canSeeMessageReads: cap }));
+		store.setAttributes(
+			createMockAttributesList({ carbonioWscShowMessageReads: cap ? 'TRUE' : 'FALSE' })
+		);
 		setup(
 			<Bubble
 				message={msg}
@@ -265,7 +267,7 @@ describe('Attachment footer', () => {
 		store.addRoom(mockedRoom);
 		store.newMessage(mockedTextMessageSentByMe);
 		store.setLoginInfo(user1Be.id, user1Be.name);
-		store.setCapabilities(createMockCapabilityList({ canSeeMessageReads: false }));
+		store.setAttributes(createMockAttributesList({ carbonioWscShowMessageReads: 'FALSE' }));
 		setup(
 			<Bubble
 				message={mockedTextMessageSentByMe}
@@ -281,7 +283,7 @@ describe('Attachment footer', () => {
 		store.addRoom(mockedRoom);
 		store.newMessage(mockedTextMessageUnread);
 		store.setLoginInfo(user1Be.id, user1Be.name);
-		store.setCapabilities(createMockCapabilityList({ canSeeMessageReads: false }));
+		store.setAttributes(createMockAttributesList({ carbonioWscShowMessageReads: 'FALSE' }));
 		setup(
 			<Bubble
 				message={mockedTextMessageUnread}

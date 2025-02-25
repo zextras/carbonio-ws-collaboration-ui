@@ -13,11 +13,10 @@ import styled from 'styled-components';
 import useAvatarUtilities from '../../hooks/useAvatarUtilities';
 import { getMeetingActive } from '../../store/selectors/MeetingSelectors';
 import { getRoomMembers, getRoomMutedSelector } from '../../store/selectors/RoomsSelectors';
-import { getCapability } from '../../store/selectors/SessionSelectors';
+import { getAttribute } from '../../store/selectors/SessionSelectors';
 import { getUserName, getUserOnline } from '../../store/selectors/UsersSelectors';
 import useStore from '../../store/Store';
 import { Member } from '../../types/store/RoomTypes';
-import { CapabilityType } from '../../types/store/SessionTypes';
 
 type UserAvatarProps = {
 	roomId: string;
@@ -81,9 +80,7 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ roomId, unreadCount, draftMessa
 	const userName: string = useStore((store) => getUserName(store, idAvailable));
 	const roomMuted = useStore((state) => getRoomMutedSelector(state, roomId));
 	const memberOnline: boolean = useStore((store) => getUserOnline(store, idAvailable));
-	const canSeeUsersPresence = useStore((store) =>
-		getCapability(store, CapabilityType.CAN_SEE_USERS_PRESENCE)
-	);
+	const showUsersPresence = useStore((store) => getAttribute(store, 'showUsersPresence'));
 	const isMeetingActive = useStore((store) => getMeetingActive(store, roomId));
 
 	const { avatarColor, avatarPicture, avatarIcon, isLoading } = useAvatarUtilities(
@@ -153,8 +150,8 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ roomId, unreadCount, draftMessa
 	]);
 
 	const canShowPresence = useMemo(
-		() => !unreadCount && canSeeUsersPresence,
-		[canSeeUsersPresence, unreadCount]
+		() => !unreadCount && showUsersPresence,
+		[showUsersPresence, unreadCount]
 	);
 
 	return (

@@ -12,7 +12,7 @@ import * as ReactRouter from 'react-router';
 import PictureInPictureButton from './PictureInPictureButton';
 import useStore from '../../../store/Store';
 import {
-	createMockCapabilityList,
+	createMockAttributesList,
 	createMockMeeting,
 	createMockParticipants,
 	createMockRoom,
@@ -75,7 +75,7 @@ const storeSetupGroupMeetingPip = (): { user: UserEvent; store: RootStore } => {
 	store.addMeeting(meeting);
 	store.meetingConnection(meeting.id, false, undefined, false, undefined);
 	store.setLocalStreams(meeting.id, STREAM_TYPE.VIDEO, new MediaStream());
-	store.setCapabilities(createMockCapabilityList());
+	store.setAttributes(createMockAttributesList());
 	store.setTalkingUser(meeting.id, user2.id, true);
 	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
 	spyUseParams.mockReturnValue({ meetingId: meeting.id });

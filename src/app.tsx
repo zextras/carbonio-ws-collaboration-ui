@@ -50,6 +50,7 @@ export default function App(): React.JSX.Element {
 	// NETWORKS: init XMPP and WebSocket clients
 	useEffect(() => {
 		if (authenticated) {
+			setAttributes(attrs);
 			// NETWORKS: init XMPP and WebSocket clients
 			const xmppClient = new XMPPClient();
 			setXmppClient(xmppClient);
@@ -66,7 +67,6 @@ export default function App(): React.JSX.Element {
 					// Init xmppClient and webSocket after roomList request to avoid missing data (specially for the inbox request)
 					xmppClient.connect(resp[0].zmToken);
 					webSocket.connect();
-					setAttributes(attrs);
 				})
 				.catch(() => setChatsBeStatus(false));
 		}

@@ -58,16 +58,16 @@ export const useSessionStoreSlice: StateCreator<SessionStoreSlice> = (
 				draft.session.attributes = {
 					privateChatCreation: attrs.carbonioWscPrivateChatCreation === 'TRUE',
 					groupChatCreation: attrs.carbonioWscGroupChatCreation === 'TRUE',
-					maxGroupMembers: attrs.carbonioWscMaxGroupMembers || 0,
+					maxGroupMembers: Number(attrs.carbonioWscMaxGroupMembers || 0),
 					messageDeleteTimeLimit: minutesToNumber(
 						(attrs.carbonioWscMessageDeleteTimeLimit as string) || '0m'
 					),
 					messageEditTimeLimit: minutesToNumber(
 						(attrs.carbonioWscMessageEditTimeLimit as string) || '0m'
 					),
-					maxRoomPictureSize: attrs.carbonioWscMaxRoomPictureSize || 0,
+					maxRoomPictureSize: Number(attrs.carbonioWscMaxRoomPictureSize || 0),
 					attachmentUpload: attrs.carbonioWscAttachmentUpload === 'TRUE',
-					maxAttachmentSize: attrs.carbonioWscMaxAttachmentSize || 0,
+					maxAttachmentSize: Number(attrs.carbonioWscMaxAttachmentSize || 0),
 					showMessageReads: attrs.carbonioWscShowMessageReads === 'TRUE',
 					showUsersPresence: attrs.carbonioWscShowUsersPresence === 'TRUE',
 					videoCallEnabled: attrs.carbonioWscVideoCallEnabled === 'TRUE',

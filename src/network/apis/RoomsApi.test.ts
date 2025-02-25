@@ -7,7 +7,7 @@
 import roomsApi from './RoomsApi';
 import useStore from '../../store/Store';
 import {
-	createMockCapabilityList,
+	createMockAttributesList,
 	createMockMeeting,
 	createMockRoom,
 	createMockTextMessage
@@ -144,7 +144,7 @@ describe('Rooms API', () => {
 	test('updateRoomPicture is called with a file too large', async () => {
 		// Set maxRoomImageSizeInKb to 512kb
 		const store = useStore.getState();
-		store.setCapabilities(createMockCapabilityList({ maxRoomImageSizeInKb: 512 }));
+		store.setAttributes(createMockAttributesList({ carbonioWscMaxRoomPictureSize: '512' }));
 		// Send updateRoomPicture request
 		const testFile = new File([], 'image.png', { type: 'image/png' });
 		Object.defineProperty(testFile, 'size', { value: 1024 * 1024 + 1 });

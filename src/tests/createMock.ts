@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { AccountSettingsAttrs } from '@zextras/carbonio-shell-ui/lib/types/account';
+
 import {
 	MeetingBe,
 	MeetingParticipantBe,
@@ -23,7 +25,6 @@ import {
 	TextMessage
 } from '../types/store/MessageTypes';
 import { RoomType } from '../types/store/RoomTypes';
-import { CapabilityList } from '../types/store/SessionTypes';
 import { User, UserType } from '../types/store/UserTypes';
 
 const timeStampString = '2022-08-25T17:24:28.961+02:00';
@@ -108,17 +109,22 @@ export const createMockMarker = (fields?: Partial<Marker>): Marker => ({
 	...fields
 });
 
-export const createMockCapabilityList = (fields?: Partial<CapabilityList>): CapabilityList => ({
-	canSeeMessageReads: true,
-	canSeeUsersPresence: true,
-	canVideoCall: true,
-	canVideoCallRecord: true,
-	canUseVirtualBackground: true,
-	editMessageTimeLimitInMinutes: 10,
-	deleteMessageTimeLimitInMinutes: 10,
-	maxGroupMembers: 128,
-	maxRoomImageSizeInKb: 512,
-	maxUserImageSizeInKb: 512,
+export const createMockAttributesList = (
+	fields?: Partial<AccountSettingsAttrs>
+): AccountSettingsAttrs => ({
+	carbonioWscAttachmentUpload: 'TRUE',
+	carbonioWscGroupChatCreation: 'TRUE',
+	carbonioWscMaxAttachmentSize: '1024',
+	carbonioWscMaxGroupMembers: '128',
+	carbonioWscMaxRoomPictureSize: '512',
+	carbonioWscMessageDeleteTimeLimit: '5m',
+	carbonioWscMessageEditTimeLimit: '5m',
+	carbonioWscPrivateChatCreation: 'FALSE',
+	carbonioWscRecordingEnabled: 'TRUE',
+	carbonioWscShowMessageReads: 'TRUE',
+	carbonioWscShowUsersPresence: 'TRUE',
+	carbonioWscVideoCallEnabled: 'TRUE',
+	carbonioWscVirtualBackgroundEnabled: 'TRUE',
 	...fields
 });
 

@@ -19,11 +19,10 @@ import { useTranslation } from 'react-i18next';
 import ChatCreationTitleInput from './ChatCreationTitleInput';
 import useRouting from '../../../hooks/useRouting';
 import { RoomsApi } from '../../../network';
-import { getCapability } from '../../../store/selectors/SessionSelectors';
+import { getAttribute } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { MemberBe, RoomType } from '../../../types/network/models/roomBeTypes';
 import { AddRoomResponse } from '../../../types/network/responses/roomsResponses';
-import { CapabilityType } from '../../../types/store/SessionTypes';
 import ContactsSelector, { ContactsSelected } from '../contactSelector/ContactsSelector';
 
 const ChatCreationModal = ({
@@ -55,8 +54,7 @@ const ChatCreationModal = ({
 	);
 
 	const setPlaceholderRoom = useStore((state) => state.setPlaceholderRoom);
-	const maxMembers =
-		(useStore((store) => getCapability(store, CapabilityType.MAX_GROUP_MEMBERS)) as number) ?? 0;
+	const maxMembers = useStore((store) => getAttribute(store, 'maxGroupMembers')) as number;
 
 	const [contactsSelected, setContactsSelected] = useState<ContactsSelected>([]);
 	const [title, setTitle] = useState<string>(titlePlaceholder);

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { AttributesList, CapabilityType, ExportStatus } from '../../types/store/SessionTypes';
+import { AttributesList, ExportStatus } from '../../types/store/SessionTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 import { UserType } from '../../types/store/UserTypes';
 
@@ -12,11 +12,6 @@ export const getSelectedConversation = (store: RootStore, roomId: string): boole
 	store.session.selectedRoomOneToOneGroup === roomId;
 
 export const getSidebarFilterHasFocus = (store: RootStore): boolean => store.session.filterHasFocus;
-
-export const getCapability = (
-	store: RootStore,
-	capabilityName: CapabilityType
-): boolean | number | undefined => store.session.capabilities?.[capabilityName];
 
 export const getAttribute = (
 	store: RootStore,

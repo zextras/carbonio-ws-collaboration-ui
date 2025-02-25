@@ -12,7 +12,7 @@ import * as ReactRouter from 'react-router';
 import MeetingSidebar from './MeetingSidebar';
 import useStore from '../../../store/Store';
 import {
-	createMockCapabilityList,
+	createMockAttributesList,
 	createMockMeeting,
 	createMockMember,
 	createMockParticipants,
@@ -96,7 +96,7 @@ const scheduledMeeting: MeetingBe = createMockMeeting({
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo(sessionUser.id, sessionUser.name);
-	store.setCapabilities(createMockCapabilityList({ canVideoCallRecord: true }));
+	store.setAttributes(createMockAttributesList({ carbonioWscRecordingEnabled: 'TRUE' }));
 	store.setRooms([oneToOneRoom, groupRoom, temporaryRoom, temporaryRoomMod]);
 	store.setMeetings([oneToOneMeeting, groupMeeting, scheduledMeeting, scheduledMeetingMod]);
 	store.meetingConnection(oneToOneMeeting.id, false, 'audioId', false, 'videoId');
@@ -163,7 +163,9 @@ describe('Meeting sidebar', () => {
 	test('Recording accordion is not visible with recording capability set to false', async () => {
 		const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
 		spyUseParams.mockReturnValue({ meetingId: oneToOneMeeting.id });
-		useStore.getState().setCapabilities(createMockCapabilityList({ canVideoCallRecord: false }));
+		useStore
+			.getState()
+			.setAttributes(createMockAttributesList({ carbonioWscRecordingEnabled: 'FALSE' }));
 		setup(<MeetingSidebar />);
 		const recordingAccordion = screen.queryByText(/Recording/);
 		expect(recordingAccordion).not.toBeInTheDocument();
@@ -195,7 +197,7 @@ describe('Meeting sidebar', () => {
 	test('when user select a virtual background, the one selected has green border', async () => {
 		const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
 		spyUseParams.mockReturnValue({ meetingId: oneToOneMeeting.id });
-		useStore.getState().setCapabilities(createMockCapabilityList());
+		useStore.getState().setAttributes(createMockAttributesList());
 		const { user } = setup(<MeetingSidebar />);
 		const t = screen.getAllByTestId('icon: ChevronDown');
 		await user.click(t[1]);

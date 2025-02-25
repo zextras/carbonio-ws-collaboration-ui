@@ -55,7 +55,7 @@ const ExternalGuestForm = (): ReactElement => {
 	const setWebSocketClient = useStore((state) => state.setWebSocketClient);
 	const setChatsBeStatus = useStore((state) => state.setChatsBeStatus);
 	const setLoginInfo = useStore((state) => state.setLoginInfo);
-	const setCapabilities = useStore((store) => store.setCapabilities);
+	const setAttributes = useStore((store) => store.setAttributes);
 
 	const createSnackbar: CreateSnackbarFn = useSnackbar();
 	const { goToMeetingAccessPage } = useRouting();
@@ -95,10 +95,10 @@ const ExternalGuestForm = (): ReactElement => {
 				xmppClient.connect(res.zmToken);
 				webSocket.connect();
 
-				setCapabilities({
-					canSeeMessageReads: true,
-					deleteMessageTimeLimitInMinutes: 10,
-					editMessageTimeLimitInMinutes: 10
+				setAttributes({
+					carbonioWscShowMessageReads: 'TRUE',
+					carbonioWscMessageDeleteTimeLimit: '10m',
+					carbonioWscMessageEditTimeLimit: '10m'
 				});
 
 				goToMeetingAccessPage();
@@ -111,7 +111,7 @@ const ExternalGuestForm = (): ReactElement => {
 	}, [
 		errorSnackbar,
 		goToMeetingAccessPage,
-		setCapabilities,
+		setAttributes,
 		setChatsBeStatus,
 		setLoginInfo,
 		setWebSocketClient,

@@ -12,7 +12,7 @@ import * as ReactRouter from 'react-router';
 import MeetingActionsBar from './MeetingActionsBar';
 import useStore from '../../../store/Store';
 import {
-	createMockCapabilityList,
+	createMockAttributesList,
 	createMockMeeting,
 	createMockParticipants,
 	createMockRoom,
@@ -67,7 +67,7 @@ beforeEach(() => {
 	store.meetingConnection(meeting.id, false, undefined, false, undefined);
 	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
 	spyUseParams.mockReturnValue({ meetingId: meeting.id });
-	store.setCapabilities(createMockCapabilityList());
+	store.setAttributes(createMockAttributesList());
 });
 
 describe('Meeting action bar', () => {

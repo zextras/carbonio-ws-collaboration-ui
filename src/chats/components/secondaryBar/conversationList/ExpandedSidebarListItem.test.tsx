@@ -12,7 +12,7 @@ import ExpandedSidebarListItem from './ExpandedSidebarListItem';
 import { onComposingMessageStanza } from '../../../../network/xmpp/handlers/composingMessageHandler';
 import useStore from '../../../../store/Store';
 import {
-	createMockCapabilityList,
+	createMockAttributesList,
 	createMockConfigurationMessage,
 	createMockMember,
 	createMockRoom,
@@ -165,14 +165,14 @@ beforeEach(() => {
 	store.setUserInfo(user4Be);
 	store.addRoom(mockedGroup);
 	store.addRoom(mockedOneToOne);
-	store.setCapabilities(createMockCapabilityList({ canSeeMessageReads: true }));
+	store.setAttributes(createMockAttributesList({ carbonioWscShowMessageReads: 'TRUE' }));
 });
 
 describe('Expanded sidebar list item', () => {
 	describe('Group List Item', () => {
 		test('User cannot see message reads - I sent a message but it is in pending state', async () => {
 			const store: RootStore = useStore.getState();
-			store.setCapabilities(createMockCapabilityList({ canSeeMessageReads: false }));
+			store.setAttributes(createMockAttributesList({ carbonioWscShowMessageReads: 'FALSE' }));
 			store.setPlaceholderMessage({
 				roomId: mockedTextMessageUnread.roomId,
 				id: mockedTextMessageUnread.id,
@@ -187,7 +187,7 @@ describe('Expanded sidebar list item', () => {
 
 		test('User cannot see message reads - I sent a message', async () => {
 			const store: RootStore = useStore.getState();
-			store.setCapabilities(createMockCapabilityList({ canSeeMessageReads: false }));
+			store.setAttributes(createMockAttributesList({ carbonioWscShowMessageReads: 'FALSE' }));
 			store.newMessage(mockedTextMessageUnread);
 			setup(<ExpandedSidebarListItem roomId={mockedGroup.id} />);
 			expect(screen.queryByTestId('icon: Checkmark')).not.toBeInTheDocument();
@@ -197,7 +197,7 @@ describe('Expanded sidebar list item', () => {
 
 		test('User cannot see message reads - I sent a message and someone read it', async () => {
 			const store: RootStore = useStore.getState();
-			store.setCapabilities(createMockCapabilityList({ canSeeMessageReads: false }));
+			store.setAttributes(createMockAttributesList({ carbonioWscShowMessageReads: 'FALSE' }));
 			store.newMessage(mockedTextMessageReadBySomeone);
 			setup(<ExpandedSidebarListItem roomId={mockedGroup.id} />);
 			expect(screen.queryByTestId(iconDoneAll)).not.toBeInTheDocument();
@@ -340,7 +340,7 @@ describe('Expanded sidebar list item', () => {
 
 		test('User cannot see message reads - I sent a message', async () => {
 			const store: RootStore = useStore.getState();
-			store.setCapabilities(createMockCapabilityList({ canSeeMessageReads: false }));
+			store.setAttributes(createMockAttributesList({ carbonioWscShowMessageReads: 'FALSE' }));
 			store.newMessage(mockedTextMessageSentByMeIntoOneToOne);
 			setup(<ExpandedSidebarListItem roomId={mockedOneToOne.id} />);
 			const messageDisplayed = screen.getByText(`${mockedTextMessageSentByMeIntoOneToOne.text}`);
