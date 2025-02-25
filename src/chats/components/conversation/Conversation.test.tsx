@@ -10,6 +10,7 @@ import { act, screen } from '@testing-library/react';
 
 import Conversation from './Conversation';
 import { mockDarkReaderIsEnabled } from '../../../../__mocks__/darkreader';
+import { wsEventsHandler } from '../../../network/websocket/wsEventsHandler';
 import useStore from '../../../store/Store';
 import { createMockMember, createMockRoom, createMockUser } from '../../../tests/createMock';
 import { RoomsApiToSpy, spyOnRoomsApi } from '../../../tests/mocks/network';
@@ -17,6 +18,11 @@ import { mockUseMediaQueryCheck } from '../../../tests/mocks/useMediaQueryCheck'
 import { mockGoToMainPage } from '../../../tests/mocks/useRouting';
 import { setup } from '../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
+import {
+	RoomOwnerDemotedEvent,
+	RoomOwnerPromotedEvent
+} from '../../../types/network/websocket/wsConversationEvents';
+import { WsEventType } from '../../../types/network/websocket/wsEvents';
 import { User } from '../../../types/store/UserTypes';
 
 const testRoom: RoomBe = createMockRoom({
@@ -138,30 +144,48 @@ describe('Conversation view', () => {
 	test('Add moderator and check everything is shown correctly', async () => {
 		act(() => {
 			useStore.getState().addRoom(testRoom);
-			useStore.getState().setLoginInfo(user2Info.id, user2Info.email, user2Info.name);
+			useStore.getState().setLoginInfo(user1Info.id, user1Info.email, user1Info.name);
 			useStore.getState().setUserInfo(user1Info);
 			useStore.getState().setUserInfo(user2Info);
 		});
-		const { user } = setup(<Conversation roomId={testRoom.id} />);
+		setup(<Conversation roomId={testRoom.id} />);
 		act(() => {
 			useStore.getState().promoteMemberToModerator(testRoom.id, user1Info.id);
+			wsEventsHandler({
+				type: WsEventType.ROOM_OWNER_PROMOTED,
+				sentDate: new Date().toISOString(),
+				roomId: testRoom.id,
+				userId: user1Info.id
+			} as RoomOwnerPromotedEvent);
 		});
 		const crownCounter = await screen.findAllByTestId('icon: Crown');
 		expect(crownCounter).toHaveLength(2);
+		const snackbar = await screen.findByText(
+			`Congratulations! You are now a moderator of ${testRoom.name} group.`
+		);
+		expect(snackbar).toBeInTheDocument();
 	});
 
 	test('Remove moderator and check everything is shown correctly', async () => {
 		act(() => {
 			useStore.getState().addRoom(testRoom2);
-			useStore.getState().setLoginInfo(user2Info.id, user2Info.email, user2Info.name);
+			useStore.getState().setLoginInfo(user1Info.id, user1Info.email, user1Info.name);
 			useStore.getState().setUserInfo(user1Info);
 			useStore.getState().setUserInfo(user2Info);
 		});
-		const { user } = setup(<Conversation roomId={testRoom2.id} />);
+		setup(<Conversation roomId={testRoom2.id} />);
 		act(() => {
 			useStore.getState().demoteMemberFromModerator(testRoom2.id, user1Info.id);
+			wsEventsHandler({
+				type: WsEventType.ROOM_OWNER_DEMOTED,
+				sentDate: new Date().toISOString(),
+				roomId: testRoom2.id,
+				userId: user1Info.id
+			} as RoomOwnerDemotedEvent);
 		});
-		const crownCounter = await screen.findAllByTestId('icon: CrownOutline');
-		expect(crownCounter).toHaveLength(1);
+		const snackbar = await screen.findByText(
+			`You are no longer a moderator of ${testRoom2.name} group.`
+		);
+		expect(snackbar).toBeInTheDocument();
 	});
 });

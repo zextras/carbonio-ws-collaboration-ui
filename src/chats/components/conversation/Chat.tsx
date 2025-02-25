@@ -104,7 +104,7 @@ const Chat = ({ roomId, setInfoPanelOpen }: ChatsProps): ReactElement => {
 				severity: 'info',
 				label: t(
 					'feedback.member.demotion',
-					`Congratulations! You are now a moderator of ${roomName} group`,
+					`Congratulations! You are now a moderator of ${roomName} group.`,
 					{ roomName }
 				),
 				hideButton: true,
