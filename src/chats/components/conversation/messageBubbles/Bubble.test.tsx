@@ -7,6 +7,7 @@
 import React from 'react';
 
 import { screen } from '@testing-library/react';
+import { now } from 'moment';
 
 import Bubble from './Bubble';
 import useStore from '../../../../store/Store';
@@ -26,6 +27,7 @@ import { TextMessage } from '../../../../types/store/MessageTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
 import { RootStore } from '../../../../types/store/StoreTypes';
 import { User, UserType } from '../../../../types/store/UserTypes';
+import { dateToTimestamp } from '../../../../utils/dateUtils';
 
 const iconDoneAll = 'icon: DoneAll';
 const iconArrowIosDownward = 'icon: ArrowIosDownward';
@@ -109,6 +111,7 @@ const mockedAttachmentMessageMb = createMockTextMessage({
 const mockedAttachmentMessageGb = createMockTextMessage({
 	roomId: mockedRoom.id,
 	from: user1Be.id,
+	date: dateToTimestamp(now()),
 	attachment: {
 		id: 'pngAttachmentId',
 		name: 'image.jpeg',
@@ -138,6 +141,7 @@ const mockedTextMessageSentByMe = createMockTextMessage({
 	id: 'idSimpleTextMessage',
 	roomId: mockedRoom.id,
 	read: MarkerStatus.READ,
+	date: dateToTimestamp(now()),
 	from: user1Be.id
 });
 
@@ -331,12 +335,15 @@ describe('Message header', () => {
 	});
 });
 
+beforeEach(() => {
+	const store: RootStore = useStore.getState();
+	store.setLoginInfo(user1Be.id, user1Be.name);
+	store.setAttributes(createMockAttributesList({ carbonioWscMessageDeleteTimeLimit: '5m' }));
+	store.addRoom(mockedTempRoom);
+	store.setUserInfo(user1Be);
+});
 describe('Actions', () => {
-	test('download an attachment', async () => {
-		const store: RootStore = useStore.getState();
-		store.setLoginInfo(user1Be.id, user1Be.name);
-		store.addRoom(mockedTempRoom);
-		store.setUserInfo(user1Be);
+	test('Download an attachment', async () => {
 		const { user } = setup(
 			<Bubble
 				message={mockedAttachmentMessageGb}
@@ -360,9 +367,6 @@ describe('Actions', () => {
 	test('Delete a message with attachment', async () => {
 		const spyOnDeleteAttachment = spyOnAttachmentsApi(AttachmentsApiToSpy.DELETE_ATTACHMENT);
 		const store: RootStore = useStore.getState();
-		store.setLoginInfo(user1Be.id, user1Be.name);
-		store.addRoom(mockedTempRoom);
-		store.setUserInfo(user1Be);
 		store.newMessage(mockedAttachmentMessageGb);
 		const { user } = setup(
 			<Bubble
@@ -387,9 +391,6 @@ describe('Actions', () => {
 			.mockImplementation(() => 'deleted');
 
 		const store: RootStore = useStore.getState();
-		store.setLoginInfo(user1Be.id, user1Be.name);
-		store.addRoom(mockedTempRoom);
-		store.setUserInfo(user1Be);
 		store.newMessage(mockedTextMessageSentByMe);
 		const { user } = setup(
 			<Bubble

@@ -34,7 +34,7 @@ const AddNewMemberAction: FC<AddNewMemberProps> = ({ roomId }) => {
 
 	const members: Member[] = useStore((state) => getRoomMembers(state, roomId));
 	const roomName: string = useStore((state) => getRoomNameSelector(state, roomId));
-	const maxMembers = useStore((store) => getAttribute(store, 'maxGroupMembers'));
+	const maxMembers = useStore((store) => getAttribute(store, 'maxGroupMembers')) as number;
 
 	const [contactsSelected, setContactsSelected] = useState<ContactsSelected>([]);
 	const [addNewMemberModalOpen, setAddNewMemberModalOpen] = useState<boolean>(false);
@@ -57,7 +57,7 @@ const AddNewMemberAction: FC<AddNewMemberProps> = ({ roomId }) => {
 		RoomsApi.addRoomMembers(roomId, members).then(() => closeModal());
 	}, [closeModal, contactsSelected, roomId, showHistory]);
 
-	const addMemberDisabled = useMemo(() => maxMembers === size(members), [maxMembers, members]);
+	const addMemberDisabled = useMemo(() => maxMembers <= size(members), [maxMembers, members]);
 
 	return (
 		<Container>
