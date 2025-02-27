@@ -252,6 +252,8 @@ describe('Rooms API', () => {
 	});
 
 	test('addRoomAttachment is called correctly', async () => {
+		const store = useStore.getState();
+		store.setAttributes(createMockAttributesList({ carbonioWscMaxAttachmentSize: '512' }));
 		const spyOnUploadFileFetchAPI = jest
 			.spyOn(FetchUtils, 'uploadFileFetchAPI')
 			.mockImplementation(() => Promise.resolve());

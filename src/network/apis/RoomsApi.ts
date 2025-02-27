@@ -224,17 +224,27 @@ class RoomsApi implements IRoomsApi {
 			}
 		});
 
-		return uploadFileFetchAPI(`rooms/${roomId}/attachments`, RequestType.POST, file, signal, {
-			description: optionalFields.description,
-			replyId: optionalFields.replyId,
-			messageId: uuid,
-			area: optionalFields.area
-		})
-			.then((resp: AddRoomAttachmentResponse) => resp)
-			.catch((error) => {
+		return new Promise<AddRoomAttachmentResponse>((resolve, reject) => {
+			const sizeLimit = useStore.getState().session.attributes?.maxAttachmentSize;
+			if (sizeLimit && file.size > sizeLimit * 1000) {
 				useStore.getState().removePlaceholderMessage(roomId, uuid);
-				return Promise.reject(new Error(error));
-			});
+				reject(new Error('File too large'));
+			} else {
+				uploadFileFetchAPI(`rooms/${roomId}/attachments`, RequestType.POST, file, signal, {
+					description: optionalFields.description,
+					replyId: optionalFields.replyId,
+					messageId: uuid,
+					area: optionalFields.area
+				})
+					.then((resp: AddRoomAttachmentResponse) => {
+						resolve(resp);
+					})
+					.catch((error) => {
+						useStore.getState().removePlaceholderMessage(roomId, uuid);
+						return Promise.reject(new Error(error));
+					});
+			}
+		});
 	}
 
 	public forwardMessages(
