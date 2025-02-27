@@ -21,7 +21,7 @@ export const searchUsersByFeatureRequest = (
 	soapFetch<SearchUsersByFeatureRequest, SearchUsersByFeatureResponse>('SearchUsersByFeature', {
 		_jsns: 'urn:zimbraAccount',
 		name: text,
-		feature: 'CHATS'
+		feature: 'WSC'
 	}).then((response: SearchUsersByFeatureResponse) => {
 		if (response.Fault?.Detail?.Error?.Code === 'service.UNKNOWN_DOCUMENT') {
 			return autoCompleteGalRequest(text);
