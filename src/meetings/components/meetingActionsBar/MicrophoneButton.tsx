@@ -18,7 +18,7 @@ import { map } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 import { MultiActionButton } from './MultiActionButton';
-import useBrowserPermission from '../../../hooks/useMediaDevices';
+import useMediaDevices from '../../../hooks/useMediaDevices';
 import { MeetingsApi } from '../../../network';
 import { getSelectedAudioDeviceId } from '../../../store/selectors/ActiveMeetingSelectors';
 import { getParticipantAudioStatus } from '../../../store/selectors/MeetingSelectors';
@@ -63,7 +63,7 @@ const MicrophoneButton = ({
 	);
 	const websocketNetworkStatus = useStore(({ connections }) => connections.status.websocket);
 
-	const { permission, deviceList, noDevices } = useBrowserPermission('audio');
+	const { permission, deviceList, noDevices } = useMediaDevices('audio');
 
 	const onClickAudioItem = useCallback(
 		(audioItem: MediaDeviceInfo) => {

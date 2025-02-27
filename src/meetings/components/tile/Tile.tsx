@@ -36,19 +36,24 @@ type TileProps = {
 	meetingId: string | undefined;
 	isScreenShare?: boolean;
 	modalProps?: modalTileProps;
+	isPip?: boolean;
 };
 
-const CustomTile = styled(Container)<{ $isTalking: boolean; $isHovering: boolean }>`
+const CustomTile = styled(Container)<{
+	$isTalking: boolean;
+	$isHovering: boolean;
+	$isPip: boolean;
+}>`
 	position: relative;
 	aspect-ratio: 16/9;
 	height: auto;
 	min-width: 9.375rem;
 	border-radius: 0.5rem;
-	${({ $isTalking, theme }): string | false =>
-		$isTalking && `outline: 0.125rem solid ${theme.palette.success.regular};`}
+	${({ $isTalking, $isPip, theme }): string | false =>
+		!$isPip && $isTalking && `outline: 0.125rem solid ${theme.palette.success.regular};`}
 	&:hover {
 		${HoverContainer} {
-			opacity: ${({ $isHovering }): number => ($isHovering ? 1 : 0)};
+			opacity: ${({ $isHovering, $isPip }): number => (!$isPip && $isHovering ? 1 : 0)};
 		}
 	}
 
@@ -77,7 +82,7 @@ const VideoEl = styled.video<{
 	${BrowserUtils.isMobile() && 'border-radius: 0;'}
 `;
 
-const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProps }) => {
+const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProps, isPip }) => {
 	const audioStatus = useStore((store) => getParticipantAudioStatus(store, meetingId, userId));
 	const videoStatus = useStore((store) => getParticipantVideoStatus(store, meetingId, userId));
 	const userIsTalking = useStore((store) => getUserIsTalking(store, meetingId ?? '', userId ?? ''));
@@ -115,8 +120,8 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 	}, [isScreenShare, modalProps, videoStatus]);
 
 	const showHoverContainer = useMemo(
-		() => !modalProps && (canUsePinFeature || muteForAllHasToAppear),
-		[canUsePinFeature, modalProps, muteForAllHasToAppear]
+		() => !modalProps && !isPip && (canUsePinFeature || muteForAllHasToAppear),
+		[canUsePinFeature, isPip, modalProps, muteForAllHasToAppear]
 	);
 
 	const handleHoverMouseMove = useCallback(() => {
@@ -167,6 +172,7 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 			$isTalking={userIsTalking && !isScreenShare}
 			ref={hoverRef}
 			$isHovering={isHoovering}
+			$isPip={!!isPip}
 		>
 			{showHoverContainer && (
 				<TileHoverContainer

@@ -14,6 +14,7 @@ import useEventListener, {
 	EventName,
 	MeetingWaitingParticipantClashedEvent
 } from './useEventListener';
+import usePiPWindow from './usePipWindow';
 import useRouting from './useRouting';
 import { PAGE_INFO_TYPE } from '../meetings/contexts';
 import { MeetingsApi } from '../network';
@@ -47,6 +48,7 @@ const useGeneralMeetingControls = (meetingId: string): void => {
 	const meetingDisconnection = useStore((store) => store.meetingDisconnection);
 	const websocketNetworkStatus = useStore(({ connections }) => connections.status.websocket);
 
+	const { closePipWindow } = usePiPWindow();
 	const tiles = useTiles(meetingId);
 
 	const { goToInfoPage, goToMeetingPage } = useRouting();
@@ -116,9 +118,10 @@ const useGeneralMeetingControls = (meetingId: string): void => {
 	const meetingParticipantClashedHandler = useCallback(
 		(event: CustomEvent<MeetingWaitingParticipantClashedEvent['data']> | undefined) => {
 			meetingDisconnection(event?.detail.meetingId ?? '');
+			closePipWindow();
 			goToInfoPage(PAGE_INFO_TYPE.ALREADY_ACTIVE_MEETING_SESSION);
 		},
-		[goToInfoPage, meetingDisconnection]
+		[closePipWindow, goToInfoPage, meetingDisconnection]
 	);
 	useEventListener(EventName.MEETING_PARTICIPANT_CLASHED, meetingParticipantClashedHandler);
 

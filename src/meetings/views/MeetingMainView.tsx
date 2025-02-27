@@ -10,6 +10,7 @@ import ShimmerEntryMeetingView from './shimmers/ShimmerEntryMeetingView';
 import { MeetingsApi } from '../../network';
 import useStore from '../../store/Store';
 import { BrowserUtils } from '../../utils/BrowserUtils';
+import { PiPProvider } from '../components/pictureInPicture/PictureInPictureProvider';
 import { MEETINGS_ROUTES, RouterContext, useRouterContextSetup } from '../contexts';
 
 const LazyAccessPageView = lazy(
@@ -53,7 +54,9 @@ const AccessPageView = (): ReactElement => (
 
 const MeetingSkeleton = (): ReactElement => (
 	<Suspense fallback={<ShimmerEntryMeetingView />}>
-		<LazyMeetingSkeleton />
+		<PiPProvider>
+			<LazyMeetingSkeleton />
+		</PiPProvider>
 	</Suspense>
 );
 

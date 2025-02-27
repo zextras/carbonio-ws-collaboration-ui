@@ -23,9 +23,7 @@ export const meetingLeftEventHandler = (event: MeetingLeftEvent): void => {
 		]);
 
 		// Send audio feedback to other participants session user leave
-		if (!isMyId(event.userId)) {
-			sendAudioFeedback(MeetingSoundFeedback.MEETING_LEAVE_NOTIFICATION);
-		}
+		sendAudioFeedback(MeetingSoundFeedback.MEETING_LEAVE_NOTIFICATION);
 
 		// if user is talking, delete his id from the isTalking array
 		state.setTalkingUser(event.meetingId, event.userId, false);

@@ -7,7 +7,7 @@
 import React, { ReactElement, useContext, useEffect, useMemo, useRef } from 'react';
 
 import { Button, Container, Tooltip } from '@zextras/carbonio-design-system';
-import { map, size } from 'lodash';
+import { concat, map, size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -17,6 +17,7 @@ import useStore from '../../../store/Store';
 import { STREAM_TYPE, TileData } from '../../../types/store/ActiveMeetingTypes';
 import { RouterContext } from '../../contexts';
 import Tile from '../tile/Tile';
+import WhoIsSpeaking from '../whoIsSpeaking/WhoIsSpeaking';
 
 const TilesBarContainer = styled(Container)`
 	padding: 3.25rem 1rem;
@@ -25,6 +26,12 @@ const TilesBarContainer = styled(Container)`
 
 const TileContainer = styled(Container)`
 	gap: 1rem;
+`;
+
+const WhoIsSpeakingCustom = styled(WhoIsSpeaking)`
+	position: absolute;
+	top: 0;
+	left: -13rem;
 `;
 
 const ButtonUpContainer = styled(Container)`
@@ -106,6 +113,10 @@ const TilesBar = ({ carouselTiles, centralTile }: TilesBarProps): ReactElement =
 
 	return (
 		<TilesBarContainer mainAlignment="space-between">
+			<WhoIsSpeaking
+				visibleTiles={concat(tilesDataToRender, centralTile)}
+				customStyle="left: -10rem"
+			/>
 			{showPaginationButtons && (
 				<ButtonUpContainer width="fill" height="fit">
 					<Tooltip label={prevButton.disabled ? topLabel : scrollUpLabel} placement="left">

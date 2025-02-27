@@ -6,58 +6,58 @@
 import React, { ReactElement, useContext, useMemo } from 'react';
 
 import { Container } from '@zextras/carbonio-design-system';
-import { map } from 'lodash';
+import { forEach, some } from 'lodash';
 import styled from 'styled-components';
 
 import SpeakingElement from './SpeakingElement';
-import {
-	getMeetingCarouselVisibility,
-	getTalkingList
-} from '../../../store/selectors/ActiveMeetingSelectors';
+import { getTalkingList } from '../../../store/selectors/ActiveMeetingSelectors';
 import useStore from '../../../store/Store';
 import { STREAM_TYPE, TileData } from '../../../types/store/ActiveMeetingTypes';
 import { RouterContext } from '../../contexts';
 
-const SpeakingListContainer = styled(Container)`
+const SpeakingListContainer = styled(Container)<{ $customStyle?: string }>`
 	position: absolute;
 	top: 1rem;
 	right: 1rem;
 	z-index: 40;
+	${({ $customStyle }): string => $customStyle ?? ''}
 `;
 
 type WhoIsSpeakingProps = {
-	centralTile: TileData;
+	visibleTiles: TileData[];
+	customStyle?: string;
 };
 
-const WhoIsSpeaking = ({ centralTile }: WhoIsSpeakingProps): ReactElement | null => {
+const WhoIsSpeaking = ({ visibleTiles, customStyle }: WhoIsSpeakingProps): ReactElement | null => {
 	const { meetingId } = useContext(RouterContext);
 	const talkingMap = useStore((store) => getTalkingList(store, meetingId!));
-	const carouselIsVisible = useStore((store) => getMeetingCarouselVisibility(store, meetingId!));
 
 	const speakingList = useMemo(() => {
 		const list: ReactElement[] = [];
-		map(talkingMap, (talkingId) => {
-			if (
-				centralTile.userId &&
-				!(centralTile.userId === talkingId && centralTile.type === STREAM_TYPE.VIDEO)
-			) {
+		forEach(talkingMap, (talkingId) => {
+			const talkingUserIsVisible = some(
+				visibleTiles,
+				(tile) => tile.userId === talkingId && tile.type === STREAM_TYPE.VIDEO
+			);
+			if (!talkingUserIsVisible) {
 				list.push(<SpeakingElement key={`${talkingId}-isTalking`} userId={talkingId} />);
 			}
 		});
 		return list;
-	}, [talkingMap, centralTile]);
+	}, [talkingMap, visibleTiles]);
 
-	return !carouselIsVisible ? (
+	return (
 		<SpeakingListContainer
 			height="fit"
 			width="fit"
 			mainAlignment="flex-end"
 			crossAlignment="flex-end"
 			gap="0.5rem"
+			$customStyle={customStyle}
 		>
 			{speakingList}
 		</SpeakingListContainer>
-	) : null;
+	);
 };
 
 export default WhoIsSpeaking;

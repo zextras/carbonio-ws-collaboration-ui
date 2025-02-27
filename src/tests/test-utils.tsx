@@ -21,6 +21,7 @@ import { I18nextProvider } from 'react-i18next';
 
 import { customQueries } from './custom-queries';
 import I18nTestFactory from './i18n-test-factory';
+import { PiPProvider } from '../meetings/components/pictureInPicture/PictureInPictureProvider';
 import { MEETINGS_ROUTES, PAGE_INFO_TYPE, RouterContext } from '../meetings/contexts';
 
 interface ProvidersWrapperProps {
@@ -37,7 +38,9 @@ export const ProvidersWrapper = ({ children }: ProvidersWrapperProps): JSX.Eleme
 		<I18nextProvider i18n={i18n}>
 			<ThemeProvider>
 				<ModalManager>
-					<SnackbarManager>{children}</SnackbarManager>
+					<PiPProvider>
+						<SnackbarManager>{children}</SnackbarManager>
+					</PiPProvider>
 				</ModalManager>
 			</ThemeProvider>
 		</I18nextProvider>

@@ -9,6 +9,7 @@ import { Button, Container, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
+import usePiPWindow from '../../../hooks/usePipWindow';
 import useRouting from '../../../hooks/useRouting';
 import { MeetingsApi } from '../../../network';
 import { PAGE_INFO_TYPE, RouterContext } from '../../contexts';
@@ -29,16 +30,19 @@ const CustomButton = styled(Button)<{ $active: boolean }>`
 type LeaveMeetingButtonProps = {
 	isHoovering: boolean;
 	oneClickLeave?: boolean;
+	isPip?: boolean;
 };
 
 const LeaveMeetingButton = ({
 	isHoovering,
-	oneClickLeave
+	oneClickLeave,
+	isPip
 }: LeaveMeetingButtonProps): ReactElement => {
 	const [t] = useTranslation();
 	const leaveMeetingLabel = t('meeting.interactions.leaveMeeting', 'Leave Meeting');
 	const leaveMeetingButtonLabel = t('meeting.interactions.leaveConfirmation', 'Leave Meeting?');
 
+	const { closePipWindow } = usePiPWindow();
 	const { goToInfoPage } = useRouting();
 	const { meetingId } = useContext(RouterContext);
 
@@ -59,9 +63,12 @@ const LeaveMeetingButton = ({
 			event.stopPropagation();
 			MeetingsApi.leaveMeeting(meetingId!).then(() => {
 				goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED);
+				if (isPip) {
+					closePipWindow();
+				}
 			});
 		},
-		[meetingId, goToInfoPage]
+		[meetingId, goToInfoPage, isPip, closePipWindow]
 	);
 
 	useEffect(() => {
