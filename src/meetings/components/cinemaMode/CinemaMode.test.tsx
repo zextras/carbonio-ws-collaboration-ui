@@ -5,8 +5,7 @@
  */
 import React from 'react';
 
-import { screen, act, renderHook } from '@testing-library/react';
-import { UserEvent } from '@testing-library/user-event';
+import { screen, act } from '@testing-library/react';
 import * as ReactRouter from 'react-router';
 
 import CinemaMode from './CinemaMode';
@@ -52,18 +51,17 @@ const groupMeeting: MeetingBe = createMockMeeting({
 	participants: [user1Participant, user2Participant, user3Participant, user4Participant]
 });
 
-const setupBasicGroupMeeting = (): { user: UserEvent; store: RootStore } => {
-	const { result } = renderHook(() => useStore());
+const setupBasicGroupMeeting = (): void => {
+	const store: RootStore = useStore.getState();
 	act(() => {
-		result.current.addRoom(groupRoom);
-		result.current.addMeeting(groupMeeting);
-		result.current.meetingConnection(groupMeeting.id, false, undefined, false, undefined);
+		store.addRoom(groupRoom);
+		store.addMeeting(groupMeeting);
+		store.meetingConnection(groupMeeting.id, false, undefined, false, undefined);
 	});
 	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
 	spyUseParams.mockReturnValue({ meetingId: groupMeeting.id });
 	localStorage.setItem('settings', JSON.stringify({ 'settings.appearance_setting.scaling': 100 }));
-	const { user } = setup(<CinemaMode />);
-	return { user, store: result.current };
+	setup(<CinemaMode />);
 };
 
 describe('CinemaMode', () => {

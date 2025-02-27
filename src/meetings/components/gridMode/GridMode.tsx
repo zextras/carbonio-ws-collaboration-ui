@@ -15,13 +15,15 @@ import styled from 'styled-components';
 import useContainerDimensions from '../../../hooks/useContainerDimensions';
 import usePagination from '../../../hooks/usePagination';
 import { MeetingRoutesParams } from '../../../hooks/useRouting';
-import { getNumberOfTiles, getTiles } from '../../../store/selectors/MeetingSelectors';
+import useTiles from '../../../hooks/useTiles';
+import { getNumberOfTiles } from '../../../store/selectors/MeetingSelectors';
 import useStore from '../../../store/Store';
-import { STREAM_TYPE, TileData } from '../../../types/store/ActiveMeetingTypes';
+import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
 import { calcGrid, maximiseRowsAndColumns, maximiseTileSize } from '../../../utils/MeetingsUtils';
 import { calcScaleDivisor } from '../../../utils/styleUtils';
 import { MeetingViewProps } from '../../views/MeetingSkeleton';
 import Tile from '../tile/Tile';
+import WhoIsSpeaking from '../whoIsSpeaking/WhoIsSpeaking';
 
 const GridContainer = styled(Container)`
 	position: relative;
@@ -67,8 +69,8 @@ const GridMode = ({ children }: MeetingViewProps): ReactElement => {
 
 	const gridContainerRef = useRef<HTMLDivElement>(null);
 	const dimensions = useContainerDimensions(gridContainerRef);
+	const tilesData = useTiles(meetingId);
 
-	const tilesData: TileData[] = useStore((store) => getTiles(store, meetingId));
 	const numberOfTiles = useStore((store) => getNumberOfTiles(store, meetingId));
 	const setUpdateSubscription = useStore((store) => store.setUpdateSubscription);
 
@@ -146,6 +148,7 @@ const GridMode = ({ children }: MeetingViewProps): ReactElement => {
 
 	return (
 		<GridContainer data-testid="gridModeView" mainAlignment="space-between" ref={gridContainerRef}>
+			<WhoIsSpeaking visibleTiles={tilesToRender} />
 			{showPaginationButtons && (
 				<ButtonUpContainer width="fit" height="fit" mainAlignment="flex-end">
 					<Tooltip label={prevButton.disabled ? topLabel : scrollUpLabel} placement="left">

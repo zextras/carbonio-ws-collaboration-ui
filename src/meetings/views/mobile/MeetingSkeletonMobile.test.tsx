@@ -13,6 +13,7 @@ import MeetingSkeletonMobile from './MeetingSkeletonMobile';
 import useStore from '../../../store/Store';
 import { createMockMeeting, createMockRoom } from '../../../tests/createMock';
 import { setup } from '../../../tests/test-utils';
+import { PiPProvider } from '../../components/pictureInPicture/PictureInPictureProvider';
 
 const room = createMockRoom({ meetingId: 'meetingId' });
 const meeting = createMockMeeting({ roomId: room.id });
@@ -24,7 +25,11 @@ beforeEach(() => {
 
 describe('MeetingSkeletonMobile test', () => {
 	test('Default view is tiles view', () => {
-		setup(<MeetingSkeletonMobile />);
+		setup(
+			<PiPProvider>
+				<MeetingSkeletonMobile />
+			</PiPProvider>
+		);
 		const view = screen.getByTestId('mobile_skeleton_view');
 		expect(view).toBeInTheDocument();
 	});
@@ -33,7 +38,11 @@ describe('MeetingSkeletonMobile test', () => {
 		const store = useStore.getState();
 		store.addRoom(room);
 		store.addMeeting(meeting);
-		const { user } = setup(<MeetingSkeletonMobile />);
+		const { user } = setup(
+			<PiPProvider>
+				<MeetingSkeletonMobile />
+			</PiPProvider>
+		);
 		const conversationButton = screen.getByTestId('icon: MessageCircle');
 		expect(conversationButton).toBeInTheDocument();
 
@@ -46,7 +55,11 @@ describe('MeetingSkeletonMobile test', () => {
 		const store = useStore.getState();
 		store.addRoom(room);
 		store.addMeeting(meeting);
-		const { user } = setup(<MeetingSkeletonMobile />);
+		const { user } = setup(
+			<PiPProvider>
+				<MeetingSkeletonMobile />
+			</PiPProvider>
+		);
 		const participantsButton = screen.getByTestId('icon: People');
 		expect(participantsButton).toBeInTheDocument();
 

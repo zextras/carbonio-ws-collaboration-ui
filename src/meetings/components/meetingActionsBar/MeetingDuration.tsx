@@ -20,9 +20,10 @@ const CustomContainer = styled(Container)`
 
 type MeetingDurationProps = {
 	meetingId: string | undefined;
+	isPip?: boolean;
 };
 
-const MeetingDuration = ({ meetingId }: MeetingDurationProps): ReactElement | null => {
+const MeetingDuration = ({ meetingId, isPip }: MeetingDurationProps): ReactElement | null => {
 	const [t] = useTranslation();
 	const meetingDurationLabel = t('meeting.durationTooltip', 'Meeting duration');
 
@@ -40,8 +41,8 @@ const MeetingDuration = ({ meetingId }: MeetingDurationProps): ReactElement | nu
 				gap="0.25rem"
 				data-testid="meeting_duration_component"
 			>
-				<Icon icon="ClockOutline" color="gray0" size="medium" />
-				<Text color="gray0" size="small">
+				<Icon icon="ClockOutline" color={isPip ? 'gray6' : 'gray0'} size="medium" />
+				<Text color={isPip ? 'gray6' : 'gray0'} size="small">
 					{timer}
 				</Text>
 			</CustomContainer>

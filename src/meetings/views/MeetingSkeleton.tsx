@@ -11,6 +11,7 @@ import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import useGeneralMeetingControls from '../../hooks/useGeneralMeetingControls';
+import usePiPWindow from '../../hooks/usePipWindow';
 import { MeetingRoutesParams } from '../../hooks/useRouting';
 import { getMeetingViewSelected } from '../../store/selectors/ActiveMeetingSelectors';
 import { getNumberOfTiles } from '../../store/selectors/MeetingSelectors';
@@ -24,6 +25,8 @@ import FaceToFaceMode from '../components/faceToFaceMode/FaceToFaceMode';
 import GridMode from '../components/gridMode/GridMode';
 import Logo from '../components/Logo';
 import MeetingActionsBar from '../components/meetingActionsBar/MeetingActionsBar';
+import { PiPWindow } from '../components/pictureInPicture/PictureInPictureProvider';
+import PictureInPictureView from '../components/pictureInPicture/PictureInPictureView';
 import RecordingInfo from '../components/RecordingInfo';
 import MeetingSidebar from '../components/sidebar/MeetingSidebar';
 import VirtualBackground from '../components/virtualBackground/VirtualBackground';
@@ -71,24 +74,35 @@ const MeetingSkeleton = (): ReactElement => {
 		[canUseVirtualBackground, isUserGuest]
 	);
 
+	const { pipWindow } = usePiPWindow();
+
 	return (
-		<SkeletonContainer orientation="horizontal" borderRadius="none">
-			<MeetingSidebar />
-			<ViewContainer
-				ref={streamsWrapperRef}
-				background={'gray0'}
-				crossAlignment="center"
-				orientation="horizontal"
-				data-testid="meeting_view_container"
-			>
-				<RecordingInfo meetingId={meetingId} />
-				<Logo />
-				<ViewToDisplay>
-					<MeetingActionsBar streamsWrapperRef={streamsWrapperRef} />
-				</ViewToDisplay>
-			</ViewContainer>
-			{isVirtualBackgroundVisible && <VirtualBackground meetingId={meetingId} />}
-		</SkeletonContainer>
+		<>
+			{pipWindow && (
+				<PiPWindow pipWindow={pipWindow}>
+					<PictureInPictureView />
+				</PiPWindow>
+			)}
+			{
+				<SkeletonContainer orientation="horizontal" borderRadius="none">
+					<MeetingSidebar />
+					<ViewContainer
+						ref={streamsWrapperRef}
+						background={'gray0'}
+						crossAlignment="center"
+						orientation="horizontal"
+						data-testid="meeting_view_container"
+					>
+						<RecordingInfo meetingId={meetingId} />
+						<Logo />
+						<ViewToDisplay>
+							<MeetingActionsBar streamsWrapperRef={streamsWrapperRef} />
+						</ViewToDisplay>
+					</ViewContainer>
+					{isVirtualBackgroundVisible && <VirtualBackground meetingId={meetingId} />}
+				</SkeletonContainer>
+			}
+		</>
 	);
 };
 

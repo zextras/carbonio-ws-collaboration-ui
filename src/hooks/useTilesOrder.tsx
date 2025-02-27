@@ -17,16 +17,17 @@ import {
 	size
 } from 'lodash';
 
+import useTiles from './useTiles';
 import { getPinnedTile, getTalkingList } from '../store/selectors/ActiveMeetingSelectors';
-import { getTiles } from '../store/selectors/MeetingSelectors';
 import useStore from '../store/Store';
 import { STREAM_TYPE, TileData } from '../types/store/ActiveMeetingTypes';
 import { orderSpeakingTiles } from '../utils/MeetingsUtils';
 
 const useTilesOrder = (meetingId: string): { centralTile: TileData; carouselTiles: TileData[] } => {
-	const tilesData: TileData[] = useStore((store) => getTiles(store, meetingId));
 	const pinnedTile: TileData | undefined = useStore((store) => getPinnedTile(store, meetingId));
 	const isTalkingList = useStore((store) => getTalkingList(store, meetingId));
+
+	const tilesData = useTiles(meetingId);
 
 	const [tiles, setTiles] = useState<TileData[]>(tilesData);
 

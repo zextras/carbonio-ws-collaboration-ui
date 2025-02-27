@@ -14,12 +14,13 @@ import useEventListener, {
 	EventName,
 	MeetingWaitingParticipantClashedEvent
 } from './useEventListener';
+import usePiPWindow from './usePipWindow';
 import useRouting, { PAGE_INFO_TYPE } from './useRouting';
 import { MeetingsApi } from '../network';
+import useTiles from './useTiles';
 import {
 	getMeetingActiveByMeetingId,
-	getMeetingParticipantsByMeetingId,
-	getTiles
+	getMeetingParticipantsByMeetingId
 } from '../store/selectors/MeetingSelectors';
 import useStore from '../store/Store';
 import { STREAM_TYPE } from '../types/store/ActiveMeetingTypes';
@@ -41,11 +42,13 @@ const useGeneralMeetingControls = (meetingId: string): void => {
 	const meetingParticipants: MeetingParticipantMap | undefined = useStore((store) =>
 		getMeetingParticipantsByMeetingId(store, meetingId)
 	);
-	const tiles = useStore((store) => getTiles(store, meetingId));
 	const setPinnedTile = useStore((store) => store.setPinnedTile);
 	const meetingConnection = useStore((store) => store.meetingConnection);
 	const meetingDisconnection = useStore((store) => store.meetingDisconnection);
 	const websocketNetworkStatus = useStore(({ connections }) => connections.status.websocket);
+
+	const { closePipWindow } = usePiPWindow();
+	const tiles = useTiles(meetingId);
 
 	const { goToInfoPage, goToMeetingPage } = useRouting();
 
@@ -114,9 +117,10 @@ const useGeneralMeetingControls = (meetingId: string): void => {
 	const meetingParticipantClashedHandler = useCallback(
 		(event: CustomEvent<MeetingWaitingParticipantClashedEvent['data']> | undefined) => {
 			meetingDisconnection(event?.detail.meetingId ?? '');
+			closePipWindow();
 			goToInfoPage(PAGE_INFO_TYPE.ALREADY_ACTIVE_MEETING_SESSION);
 		},
-		[goToInfoPage, meetingDisconnection]
+		[closePipWindow, goToInfoPage, meetingDisconnection]
 	);
 	useEventListener(EventName.MEETING_PARTICIPANT_CLASHED, meetingParticipantClashedHandler);
 

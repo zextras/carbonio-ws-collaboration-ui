@@ -17,6 +17,7 @@ import {
 	createMockUser
 } from '../../../../tests/createMock';
 import { RoomsApiToSpy, spyOnRoomsApi } from '../../../../tests/mocks/network';
+import { mockGoToRoomPage } from '../../../../tests/mocks/useRouting';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe } from '../../../../types/network/models/roomBeTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
@@ -281,5 +282,29 @@ describe('Forward Message Modal', () => {
 		await user.click(await screen.findByRole('button', { name: /Forward/i }));
 
 		expect(onClose).toHaveBeenCalledTimes(1);
+	});
+
+	test('forwarding to one room redirect to tht room', async () => {
+		const spyOnForwardMessage = spyOnRoomsApi(RoomsApiToSpy.FORWARD_MESSAGE);
+		spyOnForwardMessage.mockImplementation(() => Promise.resolve(testRoom));
+
+		const messageToForward = createMockTextMessage({ roomId: testRoom.id, from: sessionUser.id });
+
+		const onClose = jest.fn();
+		const { user } = setup(
+			<ForwardMessageModal
+				open
+				onClose={onClose}
+				roomId={testRoom.id}
+				messagesToForward={[messageToForward]}
+			/>
+		);
+
+		// Forward to Test Room
+		await user.type(await screen.findByTestId('chip_input_forward_modal'), chat2.name![0]);
+		await user.click(await screen.findByText(chat2.name!));
+		await user.click(await screen.findByRole('button', { name: /Forward/i }));
+
+		mockGoToRoomPage.mockReturnValue(`room of ${chat2.name}`);
 	});
 });

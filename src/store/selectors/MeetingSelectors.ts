@@ -4,12 +4,11 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { filter, find, forEach, reduce, size, sortBy } from 'lodash';
+import { filter, find, reduce, size } from 'lodash';
 
 import { STREAM_TYPE, TileData } from '../../types/store/ActiveMeetingTypes';
 import { Meeting, MeetingParticipantMap } from '../../types/store/MeetingTypes';
 import { RootStore } from '../../types/store/StoreTypes';
-import { dateToTimestamp } from '../../utils/dateUtils';
 
 export const getMeeting = (store: RootStore, roomId: string): Meeting | undefined =>
 	store.meetings[roomId];
@@ -20,14 +19,8 @@ export const getMeetingByMeetingId = (store: RootStore, meetingId: string): Meet
 export const getRoomIdByMeetingId = (store: RootStore, meetingId: string): string | undefined =>
 	find(store.meetings, (meeting) => meeting.id === meetingId)?.roomId;
 
-export const getMeetingExists = (store: RootStore, meetingId: string): boolean =>
-	!!find(store.meetings, (meeting) => meeting.id === meetingId);
-
 export const getRoomIdFromMeeting = (store: RootStore, meetingId: string): string | undefined =>
 	find(store.meetings, (meeting) => meeting.id === meetingId)?.roomId;
-
-export const getMeetingType = (store: RootStore, meetingId: string): string | undefined =>
-	find(store.meetings, (meeting) => meeting.id === meetingId)?.meetingType;
 
 export const getMeetingActive = (store: RootStore, roomId: string): boolean =>
 	store.meetings[roomId] && store.meetings[roomId].active;
@@ -35,10 +28,10 @@ export const getMeetingActive = (store: RootStore, roomId: string): boolean =>
 export const getMeetingActiveByMeetingId = (store: RootStore, meetingId: string): boolean =>
 	!!find(store.meetings, (meeting) => meeting.id === meetingId)?.active;
 
-export const getMeetingParticipants = (
-	store: RootStore,
-	roomId: string
-): MeetingParticipantMap | undefined => store.meetings[roomId]?.participants;
+const FALLBACK_EMPTY_PARTICIPANTS = {};
+
+export const getMeetingParticipants = (store: RootStore, roomId: string): MeetingParticipantMap =>
+	store.meetings[roomId] ? store.meetings[roomId].participants : FALLBACK_EMPTY_PARTICIPANTS;
 
 export const getMeetingParticipantsByMeetingId = (
 	store: RootStore,
@@ -99,55 +92,32 @@ export const getParticipantScreenStatus = (
 	return participant?.screenStreamOn ?? false;
 };
 
-export const getTiles = (store: RootStore, meetingId: string): TileData[] => {
-	const meeting = find(store.meetings, (meeting) => meeting.id === meetingId);
-	if (meeting) {
-		const tiles: TileData[] = [];
-		const sortedParticipants = sortBy(
-			meeting.participants,
-			(participant) => dateToTimestamp(participant.joinedAt),
-			['asc']
-		);
-		forEach(sortedParticipants, (participant) => {
-			tiles.push({
-				userId: participant.userId,
-				type: STREAM_TYPE.VIDEO,
-				creationDate: participant.joinedAt
-			});
-			if (participant.screenStreamOn) {
-				tiles.push({
-					userId: participant.userId,
-					type: STREAM_TYPE.SCREEN,
-					creationDate: participant.dateScreenOn
-				});
-			}
-		});
-		return tiles;
-	}
-	return [];
-};
+const centralTileData: TileData = <TileData>{};
 
 export const getCentralTileData = (store: RootStore, meetingId: string): TileData | undefined => {
+	Object.assign(centralTileData, {});
 	const meeting = find(store.meetings, (meeting) => meeting.id === meetingId);
 	const participant = find(
 		meeting?.participants,
 		(participant) => participant.userId !== store.session.id
 	);
 	if (participant) {
-		return {
+		Object.assign(centralTileData, {
 			userId: participant.userId,
 			type: STREAM_TYPE.VIDEO
-		};
+		});
+		return centralTileData;
 	}
 	const myScreenIsEnabled = find(
 		meeting?.participants,
 		(participant) => participant.userId === store.session.id && participant.screenStreamOn === true
 	);
 	if (myScreenIsEnabled) {
-		return {
+		Object.assign(centralTileData, {
 			userId: store.session.id!,
 			type: STREAM_TYPE.SCREEN
-		};
+		});
+		return centralTileData;
 	}
 	return undefined;
 };
@@ -164,12 +134,14 @@ export const getNumberOfTiles = (store: RootStore, meetingId: string): number =>
 	return 0;
 };
 
+const emptyList: string[] = [];
+
 export const getWaitingList = (store: RootStore, meetingId: string): string[] => {
 	const meeting = find(store.meetings, (meeting) => meeting.id === meetingId);
 	if (meeting) {
-		return meeting.waitingList || [];
+		return meeting.waitingList || emptyList;
 	}
-	return [];
+	return emptyList;
 };
 
 export const getWaitingListSizeForMyVirtualMeeting = (store: RootStore): number => {

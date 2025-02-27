@@ -120,6 +120,7 @@ beforeEach(() => {
 	store.addMeeting(meeting);
 	store.addMeeting(meeting2);
 });
+
 describe('User avatar', () => {
 	describe('Presence dot', () => {
 		test('User presence dot should be visible when canSeeUsersPresence capability is set to true', () => {
