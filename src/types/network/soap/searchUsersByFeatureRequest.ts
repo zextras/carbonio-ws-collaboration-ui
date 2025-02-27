@@ -7,7 +7,7 @@
 export type SearchUsersByFeatureRequest = {
 	_jsns: 'urn:zimbraAccount';
 	name: string;
-	feature: 'CHATS';
+	feature: 'WSC';
 };
 
 export type SearchUsersByFeatureResponse = {
