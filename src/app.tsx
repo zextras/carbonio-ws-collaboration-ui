@@ -39,8 +39,9 @@ export default function App(): React.JSX.Element {
 		const userAccount = getUserAccount();
 		if (authenticated && userAccount) {
 			setLoginInfo(userAccount.id, userAccount.name, userAccount.displayName, UserType.INTERNAL);
+			setAttributes(attrs);
 		}
-	}, [setLoginInfo, authenticated]);
+	}, [setLoginInfo, authenticated, setAttributes, attrs]);
 
 	// SET TIMEZONE and LOCALE
 	useEffect(() => {
@@ -50,7 +51,6 @@ export default function App(): React.JSX.Element {
 	// NETWORKS: init XMPP and WebSocket clients
 	useEffect(() => {
 		if (authenticated) {
-			setAttributes(attrs);
 			// NETWORKS: init XMPP and WebSocket clients
 			const xmppClient = new XMPPClient();
 			setXmppClient(xmppClient);

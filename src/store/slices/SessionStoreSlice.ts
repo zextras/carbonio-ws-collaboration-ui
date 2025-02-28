@@ -25,6 +25,7 @@ export const useSessionStoreSlice: StateCreator<SessionStoreSlice> = (
 		set(
 			produce((draft: RootStore) => {
 				draft.session = {
+					...draft.session,
 					id,
 					name,
 					displayName,
