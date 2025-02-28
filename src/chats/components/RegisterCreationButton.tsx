@@ -16,11 +16,16 @@ import { useTranslation } from 'react-i18next';
 
 import ChatCreationModal from './creationModal/ChatCreationModal';
 import { CHATS_APP_ID } from '../../constants/appConstants';
+import { getAttribute } from '../../store/selectors/SessionSelectors';
+import useStore from '../../store/Store';
 
 const RegisterCreationButton = (): ReactElement => {
 	const [t] = useTranslation();
 	const [newChatModal, setNewChatModal] = useState(false);
 	const createChatLabel = 'create-chat';
+
+	const privateChatCreation = useStore((store) => getAttribute(store, 'privateChatCreation'));
+	const groupChatCreation = useStore((store) => getAttribute(store, 'groupChatCreation'));
 
 	const newAction = useMemo(
 		(): NewAction => ({
@@ -35,13 +40,15 @@ const RegisterCreationButton = (): ReactElement => {
 	);
 
 	useEffect(() => {
-		registerActions<NewAction>({
-			id: createChatLabel,
-			type: ACTION_TYPES.NEW,
-			action: () => newAction
-		});
+		if (privateChatCreation || groupChatCreation) {
+			registerActions<NewAction>({
+				id: createChatLabel,
+				type: ACTION_TYPES.NEW,
+				action: () => newAction
+			});
+		}
 		return (): void => removeActions(createChatLabel);
-	}, [newAction, t]);
+	}, [groupChatCreation, newAction, privateChatCreation, t]);
 
 	return <ChatCreationModal open={newChatModal} onClose={(): void => setNewChatModal(false)} />;
 };

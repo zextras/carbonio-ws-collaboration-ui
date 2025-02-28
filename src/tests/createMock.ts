@@ -119,7 +119,7 @@ export const createMockAttributesList = (
 	carbonioWscMaxRoomPictureSize: '512',
 	carbonioWscMessageDeleteTimeLimit: '5m',
 	carbonioWscMessageEditTimeLimit: '5m',
-	carbonioWscPrivateChatCreation: 'FALSE',
+	carbonioWscPrivateChatCreation: 'TRUE',
 	carbonioWscRecordingEnabled: 'TRUE',
 	carbonioWscShowMessageReads: 'TRUE',
 	carbonioWscShowUsersPresence: 'TRUE',

@@ -53,6 +53,7 @@ const SecondaryBarView: React.FC<SecondaryBarSingleGroupsViewProps> = ({ expande
 	const videoCallEnabled = useStore((store) => getAttribute(store, 'videoCallEnabled'));
 	const roomsIds = useOrderedOneToOneAndGroupsInfoByLastMessage();
 	const chatsBeNetworkStatus = useStore(({ connections }) => connections.status.chats_be);
+	const privateChatCreation = useStore((store) => getAttribute(store, 'privateChatCreation'));
 
 	const [filteredInput, setFilteredInput] = useState('');
 
@@ -60,7 +61,10 @@ const SecondaryBarView: React.FC<SecondaryBarSingleGroupsViewProps> = ({ expande
 		filteredInput,
 		expanded
 	);
-	const { galResultSize, FilteredGal } = useFilteredGal(filteredInput, expanded);
+	const { galResultSize, FilteredGal } = useFilteredGal(
+		privateChatCreation ? filteredInput : '',
+		expanded
+	);
 
 	const ShimmeringListView = useMemo(
 		() => (expanded ? ShimmeringExpandedListView : ShimmeringCollapsedListView),
@@ -98,7 +102,7 @@ const SecondaryBarView: React.FC<SecondaryBarSingleGroupsViewProps> = ({ expande
 						) : (
 							<>
 								{FilteredConversationList}
-								{filteredInput !== '' && FilteredGal}
+								{filteredInput !== '' && !!privateChatCreation && FilteredGal}
 							</>
 						)}
 					</ScrollContainer>
@@ -108,14 +112,15 @@ const SecondaryBarView: React.FC<SecondaryBarSingleGroupsViewProps> = ({ expande
 				<DefaultUserSidebarView />
 			),
 		[
-			FilteredConversationList,
-			FilteredGal,
-			videoCallEnabled,
+			roomsIds,
 			expanded,
-			filteredInput,
 			noResults,
 			noResultsLabel,
-			roomsIds
+			FilteredConversationList,
+			filteredInput,
+			privateChatCreation,
+			FilteredGal,
+			videoCallEnabled
 		]
 	);
 

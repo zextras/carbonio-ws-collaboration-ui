@@ -13,7 +13,11 @@ import LeaveConversationListAction from './LeaveConversationListAction';
 import MemberComponentInfo from './MemberComponentInfo';
 import RemoveMemberListAction from './RemoveMemberListAction';
 import useStore from '../../../../store/Store';
-import { createMockRoom, createMockUser } from '../../../../tests/createMock';
+import {
+	createMockAttributesList,
+	createMockRoom,
+	createMockUser
+} from '../../../../tests/createMock';
 import { RoomsApiToSpy, spyOnRoomsApi } from '../../../../tests/mocks/network';
 import { mockGoToMainPage, mockGoToRoomPage } from '../../../../tests/mocks/useRouting';
 import { setup } from '../../../../tests/test-utils';
@@ -104,22 +108,25 @@ const mockedRoom2 = createMockRoom({
 	]
 });
 
+beforeEach(() => {
+	const store = useStore.getState();
+	store.setLoginInfo(user2Info.id, user2Info.name);
+	store.setUserInfo(user1Info);
+	store.addRoom(mockedOneToOne);
+	store.setAttributes(
+		createMockAttributesList({
+			carbonioWscPrivateChatCreation: 'TRUE'
+		})
+	);
+});
 describe('participants actions - go to private chat', () => {
 	test('existent chat', async () => {
-		const store = useStore.getState();
-		store.setLoginInfo(user2Info.id, user2Info.name);
-		store.addRoom(mockedOneToOne);
 		mockGoToRoomPage.mockReturnValue(`room of ${user1Info.name}`);
 		const { user } = setup(<GoToPrivateChatAction memberId={user1Info.id} />);
 		await user.click(screen.getByTestId('go_to_private_chat'));
 		expect(mockGoToRoomPage).toHaveBeenCalled();
 	});
 	test('non-existent chat', async () => {
-		const { result } = renderHook(() => useStore());
-		act(() => {
-			result.current.setLoginInfo(user2Info.id, user2Info.name);
-			result.current.setUserInfo(user1Info);
-		});
 		mockGoToRoomPage.mockReturnValue(`room of ${user1Info.name}`);
 		const { user } = setup(<GoToPrivateChatAction memberId={user1Info.id} />);
 		await user.click(screen.getByTestId('go_to_private_chat'));

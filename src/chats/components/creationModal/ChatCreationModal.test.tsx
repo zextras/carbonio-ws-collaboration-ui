@@ -46,6 +46,14 @@ const testRoom: RoomBe = createMockRoom({
 	members: [createMockMember({ userId: 'myId' }), createMockMember({ userId: user1.id })]
 });
 
+beforeEach(() => {
+	useStore.getState().setAttributes(
+		createMockAttributesList({
+			carbonioWscPrivateChatCreation: 'TRUE',
+			carbonioWscGroupChatCreation: 'TRUE'
+		})
+	);
+});
 describe('Chat Creation Modal', () => {
 	test('All elements are rendered', async () => {
 		mockSearchUsersByFeatureRequest.mockReturnValueOnce([user1]);

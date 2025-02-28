@@ -158,6 +158,7 @@ describe('Participant component info', () => {
 		test('The user is an owner and sees a normal user inside list', () => {
 			const store = useStore.getState();
 			store.setLoginInfo('user1', 'User 1');
+			store.setAttributes(createMockAttributesList({ carbonioWscPrivateChatCreation: 'TRUE' }));
 			store.addRoom(mockedRoom);
 			store.setUserInfo(user2Be);
 			setup(<MemberComponentInfo member={members[1]} roomId={mockedRoom.id} />);
@@ -177,6 +178,7 @@ describe('Participant component info', () => {
 		test('The user is an owner and sees another owner inside list', () => {
 			const store = useStore.getState();
 			store.setLoginInfo('user1', 'User 1');
+			store.setAttributes(createMockAttributesList({ carbonioWscPrivateChatCreation: 'TRUE' }));
 			store.addRoom(mockedRoom);
 			store.setUserInfo(user3Be);
 			setup(<MemberComponentInfo member={members[2]} roomId={mockedRoom.id} />);
@@ -198,6 +200,7 @@ describe('Participant component info', () => {
 		test('The user is not an owner and sees his element inside list', () => {
 			const store = useStore.getState();
 			store.setLoginInfo('user2', 'User 2');
+			store.setAttributes(createMockAttributesList({ carbonioWscPrivateChatCreation: 'TRUE' }));
 			store.addRoom(mockedRoom);
 			store.setUserInfo(user2Be);
 			setup(<MemberComponentInfo member={members[1]} roomId={mockedRoom.id} />);
@@ -211,6 +214,7 @@ describe('Participant component info', () => {
 		test('the user is not an owner and sees an owner inside list', () => {
 			const store = useStore.getState();
 			store.setLoginInfo('user2', 'User 2');
+			store.setAttributes(createMockAttributesList({ carbonioWscPrivateChatCreation: 'TRUE' }));
 			store.addRoom(mockedRoom);
 			store.setUserInfo(user1Be);
 			setup(<MemberComponentInfo member={members[0]} roomId={mockedRoom.id} />);
@@ -227,6 +231,7 @@ describe('Participant component info', () => {
 		test('The user is not an owner and sees a normal user inside list', () => {
 			const store = useStore.getState();
 			store.setLoginInfo('user2', 'User 2');
+			store.setAttributes(createMockAttributesList({ carbonioWscPrivateChatCreation: 'TRUE' }));
 			store.addRoom(mockedRoom);
 			store.setUserInfo(user4Be);
 			setup(<MemberComponentInfo member={members[3]} roomId={mockedRoom.id} />);
@@ -238,6 +243,7 @@ describe('Participant component info', () => {
 			expect(goToChatAction).toBeInTheDocument();
 		});
 	});
+
 	describe('Subtitle sentence with showUsersPresence capability set to true', () => {
 		test('Label should show Online', () => {
 			const store = useStore.getState();

@@ -57,7 +57,9 @@ export const useSessionStoreSlice: StateCreator<SessionStoreSlice> = (
 				const minutesToNumber = (time: string): number => Number(time.split('m')[0]);
 				draft.session.attributes = {
 					privateChatCreation: attrs.carbonioWscPrivateChatCreation === 'TRUE',
-					groupChatCreation: attrs.carbonioWscGroupChatCreation === 'TRUE',
+					groupChatCreation:
+						attrs.carbonioWscGroupChatCreation === 'TRUE' &&
+						Number(attrs.carbonioWscMaxGroupMembers || 0) > 2,
 					maxGroupMembers: Number(attrs.carbonioWscMaxGroupMembers || 0),
 					messageDeleteTimeLimit: minutesToNumber(
 						(attrs.carbonioWscMessageDeleteTimeLimit as string) || '0m'
