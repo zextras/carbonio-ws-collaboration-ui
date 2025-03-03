@@ -72,7 +72,7 @@ const GroupRoomPictureHandler: FC<RoomPictureProps> = ({ roomId }) => {
 	);
 	const imageSizeTooLargeSnackbar = t(
 		'settings.room.pictureSizeTooLarge',
-		`Something went wrong, remember that the maximum size for a Group’s avatar image is ${maxRoomImageSize}kb`,
+		`Something went wrong, remember that the maximum size for a Group’s avatar image is ${maxRoomImageSize}MB`,
 		{ size: maxRoomImageSize }
 	);
 	const errorDeleteImageSnackbar = t(

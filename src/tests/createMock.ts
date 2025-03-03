@@ -114,9 +114,9 @@ export const createMockAttributesList = (
 ): AccountSettingsAttrs => ({
 	carbonioWscAttachmentUpload: 'TRUE',
 	carbonioWscGroupChatCreation: 'TRUE',
-	carbonioWscMaxAttachmentSize: '1024',
-	carbonioWscMaxGroupMembers: '128',
-	carbonioWscMaxRoomPictureSize: '512',
+	carbonioWscMaxAttachmentSize: '2',
+	carbonioWscMaxGroupMembers: '32',
+	carbonioWscMaxRoomPictureSize: '2',
 	carbonioWscMessageDeleteTimeLimit: '5m',
 	carbonioWscMessageEditTimeLimit: '5m',
 	carbonioWscPrivateChatCreation: 'TRUE',

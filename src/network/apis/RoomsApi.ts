@@ -117,7 +117,7 @@ class RoomsApi implements IRoomsApi {
 	public updateRoomPicture(roomId: string, file: File): Promise<UpdateRoomPictureResponse> {
 		return new Promise<UpdateRoomPictureResponse>((resolve, reject) => {
 			const sizeLimit = useStore.getState().session.attributes?.maxRoomPictureSize;
-			if (sizeLimit && file.size > sizeLimit * 1000) {
+			if (sizeLimit && file.size > sizeLimit * 1024 * 1024) {
 				reject(new Error('File too large'));
 			} else {
 				uploadFileFetchAPI(`rooms/${roomId}/picture`, RequestType.PUT, file)
@@ -226,9 +226,9 @@ class RoomsApi implements IRoomsApi {
 
 		return new Promise<AddRoomAttachmentResponse>((resolve, reject) => {
 			const sizeLimit = useStore.getState().session.attributes?.maxAttachmentSize;
-			if (sizeLimit && file.size > sizeLimit * 1000) {
+			if (sizeLimit && file.size > sizeLimit * 1024 * 1024) {
 				useStore.getState().removePlaceholderMessage(roomId, uuid);
-				reject(new Error('File too large'));
+				reject(new Error('file_too_large'));
 			} else {
 				uploadFileFetchAPI(`rooms/${roomId}/attachments`, RequestType.POST, file, signal, {
 					description: optionalFields.description,
