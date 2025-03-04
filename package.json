@@ -1,6 +1,6 @@
 {
 	"name": "carbonio-ws-collaboration-ui",
-	"version": "0.9.14",
+	"version": "0.9.15",
 	"description": "Chats Module for Zextras Carbonio",
 	"main": "src/app.jsx",
 	"scripts": {
@@ -86,7 +86,7 @@
 		"name": "carbonio-ws-collaboration-ui",
 		"display": "Chats",
 		"priority": 404,
-		"attrKey": "carbonioFeatureChatsEnabled",
+		"attrKey": "carbonioFeatureWscEnabled",
 		"type": "carbonio",
 		"translations_repository": "git@github.com:Zextras/carbonio-ws-collaboration-ui-i18n.git"
 	},
