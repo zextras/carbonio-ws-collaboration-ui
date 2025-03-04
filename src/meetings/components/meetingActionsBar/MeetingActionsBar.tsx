@@ -16,6 +16,7 @@ import LeaveMeetingButton from './LeaveMeetingButton';
 import MeetingDuration from './MeetingDuration';
 import MicrophoneButton from './MicrophoneButton';
 import PictureInPictureButton from './PictureInPictureButton';
+import RaiseHandButton from './RaiseHandButton';
 import ScreenShareButton from './ScreenShareButton';
 import SwitchViewButton from './SwitchViewButton';
 import useContainerDimensions from '../../../hooks/useContainerDimensions';
@@ -199,6 +200,7 @@ const MeetingActionsBar = ({ streamsWrapperRef }: MeetingActionsProps): ReactEle
 					setIsAudioListOpen={setIsAudioListOpen}
 				/>
 				<ScreenShareButton />
+				<RaiseHandButton />
 				<FullScreenButton />
 				<SwitchViewButton />
 				<PictureInPictureButton />

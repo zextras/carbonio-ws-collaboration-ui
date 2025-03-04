@@ -69,7 +69,8 @@ export const useActiveMeetingSlice: StateCreator<ActiveMeetingSlice> = (
 					},
 					screenOutConn: new ScreenOutConnection(meetingId),
 					subscription: {},
-					talkingUsers: []
+					talkingUsers: [],
+					usersWithHandRaised: []
 				};
 			}),
 			false,
@@ -371,6 +372,26 @@ export const useActiveMeetingSlice: StateCreator<ActiveMeetingSlice> = (
 			}),
 			false,
 			'AM/SET_BACKGROUND_IMAGE'
+		);
+	},
+	setUserWithHandRaised: (meetingId: string, userId: string, isRaised: boolean): void => {
+		set(
+			produce((draft: RootStore) => {
+				if (isRaised) {
+					// If flag is true, add the ID to the array if it's not already present
+					if (!draft.activeMeeting[meetingId].usersWithHandRaised.includes(userId)) {
+						draft.activeMeeting[meetingId].usersWithHandRaised.push(userId);
+					}
+				} else {
+					// If flag is false, remove the ID from the array if it's present
+					const index = draft.activeMeeting[meetingId]?.usersWithHandRaised.indexOf(userId);
+					if (index !== -1) {
+						draft.activeMeeting[meetingId]?.usersWithHandRaised?.splice(index, 1);
+					}
+				}
+			}),
+			false,
+			'AM/SET_USER_WITH_HAND_RAISED'
 		);
 	}
 });

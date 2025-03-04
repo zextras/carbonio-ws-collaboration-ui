@@ -42,6 +42,8 @@ export type StartRecordingResponse = Response;
 
 export type StopRecordingResponse = Response;
 
+export type RaiseHandResponse = Response;
+
 export type CreateGuestAccountResponse = Response & {
 	id: string;
 	tokenId: string;

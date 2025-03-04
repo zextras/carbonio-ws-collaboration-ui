@@ -74,7 +74,7 @@ describe('Meeting action bar', () => {
 	test('everything is rendered correctly', async () => {
 		setup(<MeetingActionsBar streamsWrapperRef={streamRef} />);
 		const buttons = await screen.findAllByRole('button');
-		expect(buttons).toHaveLength(8);
+		expect(buttons).toHaveLength(9);
 	});
 
 	test('Meeting duration is displayed', async () => {
