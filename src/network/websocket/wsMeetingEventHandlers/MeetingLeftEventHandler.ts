@@ -27,5 +27,6 @@ export const meetingLeftEventHandler = (event: MeetingLeftEvent): void => {
 
 		// if user is talking, delete his id from the isTalking array
 		state.setTalkingUser(event.meetingId, event.userId, false);
+		state.setUserWithHandRaised(event.meetingId, event.userId, false);
 	}
 };

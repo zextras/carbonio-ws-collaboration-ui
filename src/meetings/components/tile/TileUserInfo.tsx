@@ -42,6 +42,7 @@ type tileUserInfoProps = {
 	videoStreamEnabled: boolean;
 	audioStreamEnabled: boolean;
 	isScreenShare: boolean | undefined;
+	isHandRaised: boolean;
 };
 
 const TileUserInfo: FC<tileUserInfoProps> = ({
@@ -49,7 +50,8 @@ const TileUserInfo: FC<tileUserInfoProps> = ({
 	userId,
 	videoStreamEnabled,
 	audioStreamEnabled,
-	isScreenShare
+	isScreenShare,
+	isHandRaised
 }) => {
 	const [t] = useTranslation();
 	const micOffLabel = t('meetings.interactions.yourMicIsDisabled', 'Your microphone is off');
@@ -130,6 +132,18 @@ const TileUserInfo: FC<tileUserInfoProps> = ({
 					{isUserGuest && <GuestUserLabel />}
 				</TextContainer>
 			</Row>
+			{isHandRaised && (
+				<Row
+					mainAlignment={'flex-end'}
+					crossAlignment={'flex-end'}
+					height="fill"
+					padding={{ right: '0.5rem', vertical: '0.5rem' }}
+				>
+					<CustomContainer background={'gray0'} height="fit" width="fit" padding="0.35rem">
+						<Icon icon="Hand" color="warning" />
+					</CustomContainer>
+				</Row>
+			)}
 		</InfoContainer>
 	);
 };

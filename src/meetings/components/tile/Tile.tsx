@@ -199,6 +199,7 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 				videoStreamEnabled={videoStreamEnabled}
 				audioStreamEnabled={audioStreamEnabled}
 				isScreenShare={isScreenShare}
+				isHandRaised={userHasHandRaised}
 			/>
 			<VideoEl
 				playsInline

@@ -11,14 +11,12 @@ import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import CameraButton from './CameraButton';
-import FullScreenButton from './FullScreenButton';
 import LeaveMeetingButton from './LeaveMeetingButton';
 import MeetingDuration from './MeetingDuration';
 import MicrophoneButton from './MicrophoneButton';
-import PictureInPictureButton from './PictureInPictureButton';
+import MoreActionsButton from './MoreActionsButton';
 import RaiseHandButton from './RaiseHandButton';
 import ScreenShareButton from './ScreenShareButton';
-import SwitchViewButton from './SwitchViewButton';
 import useContainerDimensions from '../../../hooks/useContainerDimensions';
 import { MeetingRoutesParams } from '../../../hooks/useRouting';
 
@@ -201,9 +199,7 @@ const MeetingActionsBar = ({ streamsWrapperRef }: MeetingActionsProps): ReactEle
 				/>
 				<ScreenShareButton />
 				<RaiseHandButton />
-				<FullScreenButton />
-				<SwitchViewButton />
-				<PictureInPictureButton />
+				<MoreActionsButton />
 				{compactMode && (
 					<>
 						<MeetingDuration meetingId={meetingId} />
