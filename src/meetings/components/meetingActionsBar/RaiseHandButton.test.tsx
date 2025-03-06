@@ -86,4 +86,21 @@ describe('Raise hand button', () => {
 
 		expect(spyOnRaiseHand).toHaveBeenCalled();
 	});
+
+	test('Icon button changes', async () => {
+		storeSetupGroupMeeting();
+
+		expect(screen.getByTestId('icon: HandOutline')).toBeInTheDocument();
+		expect(useStore.getState().activeMeeting[meeting.id].usersWithHandRaised).toStrictEqual([]);
+
+		act(() => {
+			useStore.getState().setUserWithHandRaised(meeting.id, user1.id, true);
+		});
+
+		expect(useStore.getState().activeMeeting[meeting.id].usersWithHandRaised).toStrictEqual([
+			user1.id
+		]);
+
+		expect(screen.getByTestId('icon: Hand')).toBeInTheDocument();
+	});
 });
