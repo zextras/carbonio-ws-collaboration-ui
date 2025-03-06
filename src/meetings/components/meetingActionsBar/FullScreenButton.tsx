@@ -11,8 +11,9 @@ import { useParams } from 'react-router-dom';
 
 import useFullScreen from '../../../hooks/useFullScreen';
 import { MeetingRoutesParams } from '../../../hooks/useRouting';
-import { getMeetingSidebarStatus } from '../../../store/selectors/ActiveMeetingSelectors';
+import { getMeetingViewSelected } from '../../../store/selectors/ActiveMeetingSelectors';
 import useStore from '../../../store/Store';
+import { MeetingViewType } from '../../../types/store/ActiveMeetingTypes';
 
 const FullScreenButton = (): ReactElement => {
 	const [t] = useTranslation();
@@ -22,8 +23,9 @@ const FullScreenButton = (): ReactElement => {
 
 	const { meetingId }: MeetingRoutesParams = useParams();
 
-	const sidebarIsVisible: boolean = useStore((store) => getMeetingSidebarStatus(store, meetingId));
+	const meetingView = useStore((store) => getMeetingViewSelected(store, meetingId));
 	const setMeetingSidebarStatus = useStore((store) => store.setMeetingSidebarStatus);
+	const setIsCarouselVisible = useStore((store) => store.setIsCarouseVisible);
 
 	const { isFullScreen, toggleFullScreen } = useFullScreen();
 
@@ -38,11 +40,21 @@ const FullScreenButton = (): ReactElement => {
 	);
 
 	const toggleFullScreenFn = useCallback((): void => {
-		if (sidebarIsVisible && !isFullScreen) {
+		if (!isFullScreen) {
 			setMeetingSidebarStatus(meetingId, false);
+			if (meetingView === MeetingViewType.CINEMA) {
+				setIsCarouselVisible(meetingId, false);
+			}
 		}
 		toggleFullScreen();
-	}, [sidebarIsVisible, isFullScreen, toggleFullScreen, setMeetingSidebarStatus, meetingId]);
+	}, [
+		isFullScreen,
+		toggleFullScreen,
+		setMeetingSidebarStatus,
+		meetingId,
+		meetingView,
+		setIsCarouselVisible
+	]);
 
 	useEffect(() => {
 		window.addEventListener('keydown', checkKeyPress, true);
