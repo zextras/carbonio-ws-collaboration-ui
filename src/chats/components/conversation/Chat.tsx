@@ -14,7 +14,8 @@ import React, {
 	useState
 } from 'react';
 
-import { Container } from '@zextras/carbonio-design-system';
+import { Container, CreateSnackbarFn, useSnackbar } from '@zextras/carbonio-design-system';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import ConversationHeader from './ConversationHeader';
@@ -22,6 +23,11 @@ import DropZoneView from './DropZoneView';
 import ConversationFooter from './footer/ConversationFooter';
 import MessagesList from './MessagesList';
 import { MEETINGS_PATH } from '../../../constants/appConstants';
+import useEventListener, {
+	EventName,
+	MemberDemotedEvent,
+	MemberPromotedEvent
+} from '../../../hooks/useEventListener';
 import useLoadFiles from '../../../hooks/useLoadFiles';
 import useMediaQueryCheck from '../../../hooks/useMediaQueryCheck';
 import { getReferenceMessage } from '../../../store/selectors/ActiveConversationsSelectors';
@@ -38,11 +44,14 @@ type ChatsProps = {
 };
 
 const Chat = ({ roomId, setInfoPanelOpen }: ChatsProps): ReactElement => {
+	const [t] = useTranslation();
 	const referenceMessage = useStore((store) => getReferenceMessage(store, roomId));
 
 	const [dropzoneEnabled, setDropzoneEnabled] = useState(false);
 
 	const isDesktopView = useMediaQueryCheck();
+
+	const createSnackbar: CreateSnackbarFn = useSnackbar();
 
 	const isInsideMeeting = useMemo(() => window.location.pathname.includes(MEETINGS_PATH), []);
 
@@ -84,6 +93,49 @@ const Chat = ({ roomId, setInfoPanelOpen }: ChatsProps): ReactElement => {
 	const handleOnDragStart = useCallback((ev: React.DragEvent<HTMLElement>) => {
 		ev.preventDefault();
 	}, []);
+
+	const promoteMemberHandler = useCallback(
+		(event: CustomEvent<MemberPromotedEvent['data']> | undefined) => {
+			const roomName = event?.detail.roomId
+				? useStore.getState().rooms[event.detail.roomId]?.name
+				: '';
+			createSnackbar({
+				key: new Date().toLocaleString(),
+				severity: 'info',
+				label: t(
+					'feedback.member.demotion',
+					`Congratulations! You are now a moderator of ${roomName} group.`,
+					{ roomName }
+				),
+				hideButton: true,
+				autoHideTimeout: 3000
+			});
+		},
+		[createSnackbar, t]
+	);
+
+	const demoteMemberHandler = useCallback(
+		(event: CustomEvent<MemberDemotedEvent['data']> | undefined) => {
+			const roomName = event?.detail.roomId
+				? useStore.getState().rooms[event.detail.roomId]?.name
+				: '';
+			createSnackbar({
+				key: new Date().toLocaleString(),
+				severity: 'info',
+				label: t(
+					'feedback.member.promotion',
+					`You are no longer a moderator of ${roomName} group.`,
+					{ roomName }
+				),
+				hideButton: true,
+				autoHideTimeout: 3000
+			});
+		},
+		[createSnackbar, t]
+	);
+
+	useEventListener(EventName.MEMBER_PROMOTED, promoteMemberHandler);
+	useEventListener(EventName.MEMBER_DEMOTED, demoteMemberHandler);
 
 	return (
 		<CustomContainer
