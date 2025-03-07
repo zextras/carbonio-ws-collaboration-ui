@@ -16,7 +16,7 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../../tests/createMock';
-import { contextSetup } from '../../../tests/test-utils';
+import { routerContextSetup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
 import { MeetingParticipant } from '../../../types/store/MeetingTypes';
@@ -58,7 +58,7 @@ const setupBasicGroupMeeting = (): void => {
 		store.meetingConnection(groupMeeting.id, false, undefined, false, undefined);
 	});
 	localStorage.setItem('settings', JSON.stringify({ 'settings.appearance_setting.scaling': 100 }));
-	contextSetup(<CinemaMode />, { meetingId: groupMeeting.id });
+	routerContextSetup(<CinemaMode />, { meetingId: groupMeeting.id });
 };
 
 describe('CinemaMode', () => {

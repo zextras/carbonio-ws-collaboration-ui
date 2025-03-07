@@ -16,7 +16,7 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../../tests/createMock';
-import { contextSetup } from '../../../tests/test-utils';
+import { routerContextSetup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 import { RoomBe } from '../../../types/network/models/roomBeTypes';
 import { UserBe } from '../../../types/network/models/userBeTypes';
@@ -69,15 +69,19 @@ beforeEach(() => {
 });
 
 describe('Who is speaking', () => {
-	it('Talking user in central tile is not displayed if the central tile is his video', () => {
-		contextSetup(<WhoIsSpeaking visibleTiles={[centralTileVideo]} />, { meetingId: meeting.id });
+	test('Talking user in central tile is not displayed if the central tile is his video', () => {
+		routerContextSetup(<WhoIsSpeaking visibleTiles={[centralTileVideo]} />, {
+			meetingId: meeting.id
+		});
 
 		expect(screen.getByText(user2.name)).toBeInTheDocument();
 		expect(screen.queryByText(user3.name)).not.toBeInTheDocument();
 	});
 
-	it('Talking user in central tile is displayed if the central tile is his screen', () => {
-		contextSetup(<WhoIsSpeaking visibleTiles={[centralTileScreen]} />, { meetingId: meeting.id });
+	test('Talking user in central tile is displayed if the central tile is his screen', () => {
+		routerContextSetup(<WhoIsSpeaking visibleTiles={[centralTileScreen]} />, {
+			meetingId: meeting.id
+		});
 
 		expect(screen.getByText(user2.name)).toBeInTheDocument();
 		expect(screen.getByText(user3.name)).toBeInTheDocument();

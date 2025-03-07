@@ -16,7 +16,7 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../../tests/createMock';
-import { contextSetup } from '../../../tests/test-utils';
+import { routerContextSetup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 import { MemberBe, RoomBe } from '../../../types/network/models/roomBeTypes';
 import { UserBe } from '../../../types/network/models/userBeTypes';
@@ -51,7 +51,7 @@ const mockSetIsVideoListOpen = jest.fn();
 
 const defaultSetup = (): { user: UserEvent } => {
 	const refList = React.createRef<HTMLDivElement>();
-	const { user } = contextSetup(
+	const { user } = routerContextSetup(
 		<CameraButton
 			videoDropdownRef={refList}
 			isVideoListOpen={false}

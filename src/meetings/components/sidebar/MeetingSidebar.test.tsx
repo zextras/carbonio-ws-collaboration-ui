@@ -18,7 +18,7 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../../tests/createMock';
-import { contextSetup } from '../../../tests/test-utils';
+import { routerContextSetup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
 import { VirtualBackgroundType } from '../../../types/store/ActiveMeetingTypes';
@@ -104,7 +104,7 @@ beforeEach(() => {
 
 describe('Meeting sidebar', () => {
 	test('OneToOne meeting has Recording and Chat accordions ', async () => {
-		contextSetup(<MeetingSidebar />, { meetingId: oneToOneMeeting.id });
+		routerContextSetup(<MeetingSidebar />, { meetingId: oneToOneMeeting.id });
 		const recordingAccordion = screen.queryAllByText(/Recording/);
 		const waitingListAccordion = screen.queryByText(/Waiting List/);
 		const participantsAccordion = screen.queryByTestId('MeetingParticipantsAccordion');
@@ -116,7 +116,7 @@ describe('Meeting sidebar', () => {
 	});
 
 	test('Group meeting has Recording, Participant and Chat accordions ', async () => {
-		contextSetup(<MeetingSidebar />, { meetingId: groupMeeting.id });
+		routerContextSetup(<MeetingSidebar />, { meetingId: groupMeeting.id });
 		const recordingAccordion = screen.queryAllByText(/Recording/);
 		const waitingListAccordion = screen.queryByText(/Waiting List/);
 		const participantsAccordion = screen.getByTestId('MeetingParticipantsAccordion');
@@ -128,7 +128,7 @@ describe('Meeting sidebar', () => {
 	});
 
 	test('Scheduled meeting moderator has Recording, WaitingList, Participant and Chat accordions ', async () => {
-		contextSetup(<MeetingSidebar />, { meetingId: scheduledMeetingMod.id });
+		routerContextSetup(<MeetingSidebar />, { meetingId: scheduledMeetingMod.id });
 		const recordingAccordion = screen.queryAllByText(/Recording/);
 		const waitingListAccordion = screen.queryByText(/Waiting list/);
 		const participantsAccordion = screen.getByTestId('MeetingParticipantsAccordion');
@@ -140,7 +140,7 @@ describe('Meeting sidebar', () => {
 	});
 
 	test('Scheduled meeting member has Participant and Chat accordions ', () => {
-		contextSetup(<MeetingSidebar />, { meetingId: scheduledMeeting.id });
+		routerContextSetup(<MeetingSidebar />, { meetingId: scheduledMeeting.id });
 		const recordingAccordion = screen.queryByText(/Recording/);
 		const waitingListAccordion = screen.queryByText(/Waiting List/);
 		const participantsAccordion = screen.getByTestId('MeetingParticipantsAccordion');
@@ -153,13 +153,13 @@ describe('Meeting sidebar', () => {
 
 	test('Recording accordion is not visible with recording capability set to false', async () => {
 		useStore.getState().setCapabilities(createMockCapabilityList({ canVideoCallRecord: false }));
-		contextSetup(<MeetingSidebar />, { meetingId: oneToOneMeeting.id });
+		routerContextSetup(<MeetingSidebar />, { meetingId: oneToOneMeeting.id });
 		const recordingAccordion = screen.queryByText(/Recording/);
 		expect(recordingAccordion).not.toBeInTheDocument();
 	});
 
 	test('toggle Sidebar', async () => {
-		const { user } = contextSetup(<MeetingSidebar />, { meetingId: oneToOneMeeting.id });
+		const { user } = routerContextSetup(<MeetingSidebar />, { meetingId: oneToOneMeeting.id });
 		const button = screen.getByTestId('icon: ChevronLeftOutline');
 		expect(button).toBeInTheDocument();
 		await user.click(button);
@@ -168,7 +168,7 @@ describe('Meeting sidebar', () => {
 	});
 
 	test('when user click the sidebar button, the sidebar closes', async () => {
-		const { user } = contextSetup(<MeetingSidebar />, { meetingId: oneToOneMeeting.id });
+		const { user } = routerContextSetup(<MeetingSidebar />, { meetingId: oneToOneMeeting.id });
 
 		const sidebarButton = screen.getByTestId('sidebar_button');
 		await user.click(sidebarButton);
@@ -179,7 +179,7 @@ describe('Meeting sidebar', () => {
 
 	test('when user select a virtual background, the one selected has green border', async () => {
 		useStore.getState().setCapabilities(createMockCapabilityList());
-		const { user } = contextSetup(<MeetingSidebar />, { meetingId: oneToOneMeeting.id });
+		const { user } = routerContextSetup(<MeetingSidebar />, { meetingId: oneToOneMeeting.id });
 
 		const t = screen.getAllByTestId('icon: ChevronDown');
 		await user.click(t[1]);

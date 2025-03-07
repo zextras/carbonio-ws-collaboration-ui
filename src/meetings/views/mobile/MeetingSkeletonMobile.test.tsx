@@ -11,7 +11,7 @@ import { screen } from '@testing-library/react';
 import MeetingSkeletonMobile from './MeetingSkeletonMobile';
 import useStore from '../../../store/Store';
 import { createMockMeeting, createMockRoom } from '../../../tests/createMock';
-import { contextSetup } from '../../../tests/test-utils';
+import { routerContextSetup } from '../../../tests/test-utils';
 import { PiPProvider } from '../../components/pictureInPicture/PictureInPictureProvider';
 
 const room = createMockRoom({ meetingId: 'meetingId' });
@@ -19,7 +19,7 @@ const meeting = createMockMeeting({ roomId: room.id });
 
 describe('MeetingSkeletonMobile test', () => {
 	test('Default view is tiles view', () => {
-		contextSetup(
+		routerContextSetup(
 			<PiPProvider>
 				<MeetingSkeletonMobile />
 			</PiPProvider>,
@@ -33,7 +33,7 @@ describe('MeetingSkeletonMobile test', () => {
 		const store = useStore.getState();
 		store.addRoom(room);
 		store.addMeeting(meeting);
-		const { user } = contextSetup(
+		const { user } = routerContextSetup(
 			<PiPProvider>
 				<MeetingSkeletonMobile />
 			</PiPProvider>,
@@ -51,7 +51,7 @@ describe('MeetingSkeletonMobile test', () => {
 		const store = useStore.getState();
 		store.addRoom(room);
 		store.addMeeting(meeting);
-		const { user } = contextSetup(
+		const { user } = routerContextSetup(
 			<PiPProvider>
 				<MeetingSkeletonMobile />
 			</PiPProvider>,

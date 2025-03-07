@@ -11,7 +11,7 @@ import MobileActionBar from './MobileActionBar';
 import useStore from '../../../store/Store';
 import { createMockMeeting } from '../../../tests/createMock';
 import { MeetingsApiToSpy, spyOnMeetingsApi } from '../../../tests/mocks/network';
-import { contextSetup } from '../../../tests/test-utils';
+import { routerContextSetup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
 import { MobileMeetingView } from '../../views/mobile/MeetingSkeletonMobile';
@@ -21,7 +21,7 @@ const mockMeeting: MeetingBe = createMockMeeting();
 describe('MobileActionBar test', () => {
 	test('Set participants view', async () => {
 		const setView = jest.fn();
-		const { user } = contextSetup(
+		const { user } = routerContextSetup(
 			<MobileActionBar
 				meetingId={mockMeeting.id}
 				view={MobileMeetingView.TILES}
@@ -38,7 +38,7 @@ describe('MobileActionBar test', () => {
 
 	test('Set conversation view', async () => {
 		const setView = jest.fn();
-		const { user } = contextSetup(
+		const { user } = routerContextSetup(
 			<MobileActionBar
 				meetingId={mockMeeting.id}
 				view={MobileMeetingView.TILES}
@@ -55,7 +55,7 @@ describe('MobileActionBar test', () => {
 
 	test('Leave meeting button', async () => {
 		const spyOnLeaveMeeting = spyOnMeetingsApi(MeetingsApiToSpy.LEAVE_MEETING);
-		const { user } = contextSetup(
+		const { user } = routerContextSetup(
 			<MobileActionBar
 				meetingId={mockMeeting.id}
 				view={MobileMeetingView.TILES}
@@ -83,7 +83,7 @@ describe('MobileActionBar test', () => {
 			joinedAt: ''
 		});
 
-		const { user } = contextSetup(
+		const { user } = routerContextSetup(
 			<MobileActionBar
 				meetingId={mockMeeting.id}
 				view={MobileMeetingView.TILES}

@@ -18,7 +18,7 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../../tests/createMock';
-import { contextSetup } from '../../../tests/test-utils';
+import { routerContextSetup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 import { MemberBe, RoomBe } from '../../../types/network/models/roomBeTypes';
 import { UserBe } from '../../../types/network/models/userBeTypes';
@@ -69,7 +69,7 @@ const storeSetupGroupMeetingPip = (): { user: UserEvent; store: RootStore } => {
 	store.setLocalStreams(meeting.id, STREAM_TYPE.VIDEO, new MediaStream());
 	store.setCapabilities(createMockCapabilityList());
 	store.setTalkingUser(meeting.id, user2.id, true);
-	const { user } = contextSetup(<PictureInPictureView />, { meetingId: meeting.id });
+	const { user } = routerContextSetup(<PictureInPictureView />, { meetingId: meeting.id });
 
 	return { user, store };
 };

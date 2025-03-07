@@ -92,7 +92,7 @@ export async function triggerObserver(observedElement: HTMLElement): Promise<voi
 	);
 }
 
-export const contextSetup = (
+export const routerContextSetup = (
 	children: React.ReactElement,
 	{
 		meetingId,

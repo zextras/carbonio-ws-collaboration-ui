@@ -15,9 +15,9 @@ import {
 	createMockParticipants,
 	createMockRoom
 } from '../../../tests/createMock';
-import { setup } from '../../../tests/test-utils';
+import { routerContextSetup, setup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
-import { MEETINGS_ROUTES, RouterContext } from '../../contexts/routerContext';
+import { MEETINGS_ROUTES } from '../../contexts/routerContext';
 
 const meeting: MeetingBe = createMockMeeting({ roomId: createMockRoom().id });
 
@@ -61,13 +61,10 @@ describe('ScreenShare button', () => {
 				participants: [createMockParticipants({ userId: 'userId', screenStreamEnabled: true })]
 			})
 		);
-		setup(
-			<RouterContext.Provider
-				value={{ meetingId: meeting.id, route: MEETINGS_ROUTES.MEETING, navigate: jest.fn() }}
-			>
-				<ScreenShareButton />
-			</RouterContext.Provider>
-		);
+		routerContextSetup(<ScreenShareButton />, {
+			meetingId: meeting.id,
+			route: MEETINGS_ROUTES.MEETING
+		});
 		const enabledScreenShareIcon = await screen.findByTestId('icon: ScreenSharingOn');
 		expect(enabledScreenShareIcon).toBeVisible();
 	});

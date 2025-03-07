@@ -19,7 +19,7 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../../../tests/createMock';
-import { contextSetup } from '../../../../tests/test-utils';
+import { routerContextSetup } from '../../../../tests/test-utils';
 import { MeetingBe } from '../../../../types/network/models/meetingBeTypes';
 import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
 import { MeetingParticipant } from '../../../../types/store/MeetingTypes';
@@ -72,7 +72,7 @@ const setupBasicGroup = (): { user: UserEvent; store: RootStore } => {
 		result.current.addMeeting(groupMeeting);
 		result.current.meetingConnection(groupMeeting.id, false, undefined, false, undefined);
 	});
-	const { user } = contextSetup(<MeetingSidebar />, { meetingId: groupMeeting.id });
+	const { user } = routerContextSetup(<MeetingSidebar />, { meetingId: groupMeeting.id });
 	return { user, store: result.current };
 };
 

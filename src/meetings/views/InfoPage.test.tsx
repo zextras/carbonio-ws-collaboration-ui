@@ -10,7 +10,7 @@ import { screen } from '@testing-library/react';
 import InfoPage from './InfoPage';
 import useStore from '../../store/Store';
 import { createMockUser } from '../../tests/createMock';
-import { contextSetup } from '../../tests/test-utils';
+import { routerContextSetup } from '../../tests/test-utils';
 import { UserType } from '../../types/store/UserTypes';
 import { PAGE_INFO_TYPE } from '../contexts/routerContext';
 
@@ -73,7 +73,7 @@ describe('Info page', () => {
 	test.each([...pages, ...pagesToCheckGuest])(
 		'Display %s info page',
 		async (type, title, central, desc) => {
-			contextSetup(<InfoPage />, { infoType: type as PAGE_INFO_TYPE });
+			routerContextSetup(<InfoPage />, { infoType: type as PAGE_INFO_TYPE });
 
 			expect(screen.getAllByText(new RegExp(title, 'i'))[0]).toBeVisible();
 			expect(screen.getByText(new RegExp(central, 'i'))).toBeVisible();
@@ -86,7 +86,7 @@ describe('Info page', () => {
 		const guestUser = createMockUser({ type: UserType.GUEST });
 		const store = useStore.getState();
 		store.setLoginInfo(guestUser.id, guestUser.name, guestUser.name, guestUser.type);
-		contextSetup(<InfoPage />, { infoType: type as PAGE_INFO_TYPE });
+		routerContextSetup(<InfoPage />, { infoType: type as PAGE_INFO_TYPE });
 
 		expect(document.cookie).toBe('');
 	});

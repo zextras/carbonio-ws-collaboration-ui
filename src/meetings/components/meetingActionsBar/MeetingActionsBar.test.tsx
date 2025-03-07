@@ -17,7 +17,7 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../../tests/createMock';
-import { contextSetup, setup } from '../../../tests/test-utils';
+import { routerContextSetup, setup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 import { MemberBe, RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
 import { UserBe } from '../../../types/network/models/userBeTypes';
@@ -69,25 +69,33 @@ beforeEach(() => {
 
 describe('Meeting action bar', () => {
 	test('everything is rendered correctly', async () => {
-		contextSetup(<MeetingActionsBar streamsWrapperRef={streamRef} />, { meetingId: meeting.id });
+		routerContextSetup(<MeetingActionsBar streamsWrapperRef={streamRef} />, {
+			meetingId: meeting.id
+		});
 		const buttons = await screen.findAllByRole('button');
 		expect(buttons).toHaveLength(8);
 	});
 
 	test('Meeting duration is displayed', async () => {
-		contextSetup(<MeetingActionsBar streamsWrapperRef={streamRef} />, { meetingId: meeting.id });
+		routerContextSetup(<MeetingActionsBar streamsWrapperRef={streamRef} />, {
+			meetingId: meeting.id
+		});
 		const meetingDuration = await screen.findByTestId('meeting_duration_component');
 		expect(meetingDuration).toBeInTheDocument();
 	});
 
 	test('MetingActionBar is not compact by default', async () => {
-		contextSetup(<MeetingActionsBar streamsWrapperRef={streamRef} />, { meetingId: meeting.id });
+		routerContextSetup(<MeetingActionsBar streamsWrapperRef={streamRef} />, {
+			meetingId: meeting.id
+		});
 		const meetingActionBar = await screen.findByTestId('meeting-action-bar');
 		expect(meetingActionBar).toHaveStyle('padding: 0px 3.25rem 0px 3.25rem');
 	});
 
 	test('Leave meeting button is shown in a separate wrapper by default', async () => {
-		contextSetup(<MeetingActionsBar streamsWrapperRef={streamRef} />, { meetingId: meeting.id });
+		routerContextSetup(<MeetingActionsBar streamsWrapperRef={streamRef} />, {
+			meetingId: meeting.id
+		});
 		const secondActionsWrapper = await screen.findByTestId('second_actions_wrapper');
 		expect(secondActionsWrapper).toBeInTheDocument();
 	});

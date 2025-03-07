@@ -16,7 +16,7 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../../tests/createMock';
-import { contextSetup } from '../../../tests/test-utils';
+import { routerContextSetup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 import { RoomBe } from '../../../types/network/models/roomBeTypes';
 import { MeetingViewType } from '../../../types/store/ActiveMeetingTypes';
@@ -51,7 +51,7 @@ beforeEach(() => {
 
 describe('SwitchViewButton tests', () => {
 	test('SwitchView button is not visible with one or two participants', async () => {
-		contextSetup(<SwitchViewButton />, { meetingId: meeting.id });
+		routerContextSetup(<SwitchViewButton />, { meetingId: meeting.id });
 		expect(screen.queryByRole('button')).not.toBeInTheDocument();
 
 		// Add a second participant
@@ -62,7 +62,7 @@ describe('SwitchViewButton tests', () => {
 	});
 
 	test('SwitchView button becomes visible with at least three participants', async () => {
-		contextSetup(<SwitchViewButton />, { meetingId: meeting.id });
+		routerContextSetup(<SwitchViewButton />, { meetingId: meeting.id });
 		const store = useStore.getState();
 		act(() => {
 			store.addParticipant(meeting.id, createMockParticipants({ userId: user2.id }));
@@ -78,7 +78,7 @@ describe('SwitchViewButton tests', () => {
 	});
 
 	test('SwitchView button toggles between grid and cinema view', async () => {
-		const { user } = contextSetup(<SwitchViewButton />, { meetingId: meeting.id });
+		const { user } = routerContextSetup(<SwitchViewButton />, { meetingId: meeting.id });
 		const store = useStore.getState();
 		act(() => {
 			store.addParticipant(meeting.id, createMockParticipants({ userId: user2.id }));
