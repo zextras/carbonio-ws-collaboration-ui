@@ -15,7 +15,7 @@ import { MeetingsApiToSpy, spyOnMeetingsApi } from '../../../tests/mocks/network
 import { mockGoToInfoPage } from '../../../tests/mocks/useRouting';
 import { ProvidersWrapper, setup } from '../../../tests/test-utils';
 import { MeetingType } from '../../../types/network/models/meetingBeTypes';
-import { PAGE_INFO_TYPE } from '../../contexts';
+import { PAGE_INFO_TYPE } from '../../contexts/routerContext';
 
 describe('useAccessMeetingAction tests', () => {
 	test('Render ShowMeetingAccessPage', async () => {

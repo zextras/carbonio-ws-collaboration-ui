@@ -26,7 +26,7 @@ import { getRoomNameSelector, getRoomTypeSelector } from '../../../store/selecto
 import useStore from '../../../store/Store';
 import { MeetingType } from '../../../types/network/models/meetingBeTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
-import { PAGE_INFO_TYPE } from '../../contexts';
+import { PAGE_INFO_TYPE } from '../../contexts/routerContext';
 
 type UseAccessMeetingInformationReturnType = {
 	meetingName: string;

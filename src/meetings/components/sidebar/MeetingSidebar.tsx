@@ -32,7 +32,7 @@ import { CapabilityType } from '../../../types/store/SessionTypes';
 import BubblesWrapper from '../bubblesWrapper/BubblesWrapper';
 import VisualEffectsAccordion from './visualEffectsAccordion/VisualEffectsAccordion';
 import { getIsUserGuest } from '../../../store/selectors/UsersSelectors';
-import { RouterContext } from '../../contexts';
+import { RouterContext } from '../../contexts/routerContext';
 
 const SidebarContainer = styled(Container)`
 	position: relative;

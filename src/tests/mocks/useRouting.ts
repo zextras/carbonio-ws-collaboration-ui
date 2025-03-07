@@ -3,7 +3,6 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import { useNavigate } from 'react-router-dom';
 
 import type * as useRoutingModule from '../../hooks/useRouting';
 
@@ -25,11 +24,4 @@ jest.mock<typeof useRoutingModule>('../../hooks/useRouting', () => ({
 		goToMeetingAccessPage: mockGoToMeetingAccessPage,
 		goToExternalLoginPage: mockGoToExternalLoginPage
 	})
-}));
-
-const mockedNavigate: jest.Mock = jest.fn();
-
-jest.mock('react-router-dom', () => ({
-	...jest.requireActual('react-router-dom'),
-	useNavigate: (): ReturnType<typeof useNavigate> => mockedNavigate
 }));

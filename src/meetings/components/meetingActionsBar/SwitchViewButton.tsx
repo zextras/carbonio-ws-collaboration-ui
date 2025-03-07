@@ -12,7 +12,7 @@ import { getMeetingViewSelected } from '../../../store/selectors/ActiveMeetingSe
 import { getNumberOfTiles } from '../../../store/selectors/MeetingSelectors';
 import useStore from '../../../store/Store';
 import { MeetingViewType } from '../../../types/store/ActiveMeetingTypes';
-import { RouterContext } from '../../contexts';
+import { RouterContext } from '../../contexts/routerContext';
 
 const SwitchViewButton = (): ReactElement | null => {
 	const { meetingId } = useContext(RouterContext);

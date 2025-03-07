@@ -14,7 +14,7 @@ import { getParticipantAudioStatus } from '../../../store/selectors/MeetingSelec
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { getAudioStream } from '../../../utils/UserMediaManager';
-import { PAGE_INFO_TYPE } from '../../contexts';
+import { PAGE_INFO_TYPE } from '../../contexts/routerContext';
 import { MobileMeetingView } from '../../views/mobile/MeetingSkeletonMobile';
 
 type MobileActionBarProps = {

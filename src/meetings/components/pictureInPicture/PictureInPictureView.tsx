@@ -26,7 +26,7 @@ import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
 import { getAudioStream, getVideoStream } from '../../../utils/UserMediaManager';
-import { RouterContext } from '../../contexts';
+import { RouterContext } from '../../contexts/routerContext';
 import LeaveMeetingButton from '../meetingActionsBar/LeaveMeetingButton';
 import MeetingDuration from '../meetingActionsBar/MeetingDuration';
 import Tile from '../tile/Tile';

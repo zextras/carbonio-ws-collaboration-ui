@@ -17,7 +17,7 @@ import {
 } from '../../../tests/createMock';
 import { setup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
-import { MEETINGS_ROUTES, RouterContext } from '../../contexts';
+import { MEETINGS_ROUTES, RouterContext } from '../../contexts/routerContext';
 
 const meeting: MeetingBe = createMockMeeting({ roomId: createMockRoom().id });
 

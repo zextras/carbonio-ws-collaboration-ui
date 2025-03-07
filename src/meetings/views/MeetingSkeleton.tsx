@@ -28,7 +28,7 @@ import PictureInPictureView from '../components/pictureInPicture/PictureInPictur
 import RecordingInfo from '../components/RecordingInfo';
 import MeetingSidebar from '../components/sidebar/MeetingSidebar';
 import VirtualBackground from '../components/virtualBackground/VirtualBackground';
-import { RouterContext } from '../contexts';
+import { RouterContext } from '../contexts/routerContext';
 
 const SkeletonContainer = styled(Container)`
 	overflow: hidden;

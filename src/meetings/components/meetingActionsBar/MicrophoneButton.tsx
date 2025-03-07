@@ -26,7 +26,7 @@ import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
 import { getAudioStream } from '../../../utils/UserMediaManager';
-import { RouterContext } from '../../contexts';
+import { RouterContext } from '../../contexts/routerContext';
 
 type MicButtonProps = {
 	audioDropdownRef: React.RefObject<HTMLDivElement>;

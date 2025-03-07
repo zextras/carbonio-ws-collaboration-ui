@@ -11,7 +11,7 @@ import { useTranslation } from 'react-i18next';
 import useFullScreen from '../../../hooks/useFullScreen';
 import { getMeetingSidebarStatus } from '../../../store/selectors/ActiveMeetingSelectors';
 import useStore from '../../../store/Store';
-import { RouterContext } from '../../contexts';
+import { RouterContext } from '../../contexts/routerContext';
 
 const FullScreenButton = (): ReactElement => {
 	const [t] = useTranslation();

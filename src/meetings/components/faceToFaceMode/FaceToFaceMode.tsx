@@ -15,7 +15,7 @@ import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { STREAM_TYPE, Subscription } from '../../../types/store/ActiveMeetingTypes';
 import { calcScaleDivisor } from '../../../utils/styleUtils';
-import { RouterContext } from '../../contexts';
+import { RouterContext } from '../../contexts/routerContext';
 import { MeetingViewProps } from '../../views/MeetingSkeleton';
 import Tile from '../tile/Tile';
 

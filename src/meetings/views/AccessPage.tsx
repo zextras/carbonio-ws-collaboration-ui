@@ -11,7 +11,7 @@ import ShimmerEntryMeetingView from './shimmers/ShimmerEntryMeetingView';
 import { MEETINGS_PATH } from '../../constants/appConstants';
 import useRouting from '../../hooks/useRouting';
 import { MeetingsApi } from '../../network';
-import { PAGE_INFO_TYPE } from '../contexts';
+import { PAGE_INFO_TYPE } from '../contexts/routerContext';
 
 const AccessPage = (): ReactElement => {
 	const meetingId = useMemo(() => document.location.pathname.split(MEETINGS_PATH)[1], []);

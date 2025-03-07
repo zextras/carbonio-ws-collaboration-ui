@@ -16,7 +16,7 @@ import useDarkReader from '../../hooks/useDarkReader';
 import { getIsLoggedUserExternal } from '../../store/selectors/SessionSelectors';
 import useStore from '../../store/Store';
 import { BrowserUtils } from '../../utils/BrowserUtils';
-import { PAGE_INFO_TYPE, RouterContext } from '../contexts';
+import { PAGE_INFO_TYPE, RouterContext } from '../contexts/routerContext';
 
 const Title = styled(Text)`
 	font-size: 1.6rem;

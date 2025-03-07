@@ -12,7 +12,7 @@ import styled from 'styled-components';
 import usePiPWindow from '../../../hooks/usePipWindow';
 import useRouting from '../../../hooks/useRouting';
 import { MeetingsApi } from '../../../network';
-import { PAGE_INFO_TYPE, RouterContext } from '../../contexts';
+import { PAGE_INFO_TYPE, RouterContext } from '../../contexts/routerContext';
 
 const CustomContainer = styled(Container)`
 	> div > button > div {

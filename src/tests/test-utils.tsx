@@ -22,7 +22,7 @@ import { I18nextProvider } from 'react-i18next';
 import { customQueries } from './custom-queries';
 import I18nTestFactory from './i18n-test-factory';
 import { PiPProvider } from '../meetings/components/pictureInPicture/PictureInPictureProvider';
-import { MEETINGS_ROUTES, PAGE_INFO_TYPE, RouterContext } from '../meetings/contexts';
+import { MEETINGS_ROUTES, PAGE_INFO_TYPE, RouterContext } from '../meetings/contexts/routerContext';
 
 interface ProvidersWrapperProps {
 	children?: React.ReactNode;

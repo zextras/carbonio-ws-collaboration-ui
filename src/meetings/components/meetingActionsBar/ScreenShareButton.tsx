@@ -11,7 +11,7 @@ import { useTranslation } from 'react-i18next';
 import { getParticipantScreenStatus } from '../../../store/selectors/MeetingSelectors';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
-import { RouterContext } from '../../contexts';
+import { RouterContext } from '../../contexts/routerContext';
 
 const ScreenShareButton = (): ReactElement => {
 	const [t] = useTranslation();

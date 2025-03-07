@@ -11,7 +11,7 @@ import { MeetingsApi } from '../../network';
 import useStore from '../../store/Store';
 import { BrowserUtils } from '../../utils/BrowserUtils';
 import { PiPProvider } from '../components/pictureInPicture/PictureInPictureProvider';
-import { MEETINGS_ROUTES, RouterContext, useRouterContextSetup } from '../contexts';
+import { MEETINGS_ROUTES, RouterContext, useRouterContextSetup } from '../contexts/routerContext';
 
 const LazyAccessPageView = lazy(
 	() => import(/* webpackChunkName: "MeetingAccessPage" */ './AccessPage')

@@ -9,7 +9,7 @@ import { useCallback, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { CHATS_ROUTE } from '../constants/appConstants';
-import { MEETINGS_ROUTES, PAGE_INFO_TYPE, RouterContext } from '../meetings/contexts';
+import { MEETINGS_ROUTES, PAGE_INFO_TYPE, RouterContext } from '../meetings/contexts/routerContext';
 
 export enum ROUTES {
 	MAIN = '/',

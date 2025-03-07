@@ -28,7 +28,7 @@ import { STREAM_TYPE, VirtualBackgroundType } from '../../types/store/ActiveMeet
 import { MeetingParticipant } from '../../types/store/MeetingTypes';
 import { RoomType } from '../../types/store/RoomTypes';
 import { RootStore } from '../../types/store/StoreTypes';
-import { MEETINGS_ROUTES, PAGE_INFO_TYPE, RouterContext } from '../contexts';
+import { MEETINGS_ROUTES, PAGE_INFO_TYPE, RouterContext } from '../contexts/routerContext';
 
 const meetingActionBarLabel = 'meeting-action-bar';
 

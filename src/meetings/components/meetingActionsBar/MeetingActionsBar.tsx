@@ -26,7 +26,7 @@ import PictureInPictureButton from './PictureInPictureButton';
 import ScreenShareButton from './ScreenShareButton';
 import SwitchViewButton from './SwitchViewButton';
 import useContainerDimensions from '../../../hooks/useContainerDimensions';
-import { RouterContext } from '../../contexts';
+import { RouterContext } from '../../contexts/routerContext';
 
 const BarContainer = styled(Container)<{ $isHoovering: boolean }>`
 	position: absolute;

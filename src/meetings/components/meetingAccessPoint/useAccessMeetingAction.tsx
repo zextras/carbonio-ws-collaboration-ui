@@ -16,7 +16,7 @@ import { getIsLoggedUserExternal } from '../../../store/selectors/SessionSelecto
 import useStore from '../../../store/Store';
 import { BrowserUtils } from '../../../utils/BrowserUtils';
 import { freeMediaResources } from '../../../utils/MeetingsUtils';
-import { PAGE_INFO_TYPE } from '../../contexts';
+import { PAGE_INFO_TYPE } from '../../contexts/routerContext';
 
 const useAccessMeetingAction = (
 	hasUserDirectAccess: boolean,

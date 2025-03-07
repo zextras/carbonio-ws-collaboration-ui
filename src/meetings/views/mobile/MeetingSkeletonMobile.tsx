@@ -20,7 +20,7 @@ import MobileConversation from '../../components/mobile/MobileConversation';
 import MobileParticipants from '../../components/mobile/MobileParticipants';
 import MobileTilesView from '../../components/mobile/MobileTilesView';
 import RecordingInfo from '../../components/RecordingInfo';
-import { RouterContext } from '../../contexts';
+import { RouterContext } from '../../contexts/routerContext';
 
 export enum MobileMeetingView {
 	TILES = 'tiles',

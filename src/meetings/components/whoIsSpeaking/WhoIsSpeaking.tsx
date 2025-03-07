@@ -13,7 +13,7 @@ import SpeakingElement from './SpeakingElement';
 import { getTalkingList } from '../../../store/selectors/ActiveMeetingSelectors';
 import useStore from '../../../store/Store';
 import { STREAM_TYPE, TileData } from '../../../types/store/ActiveMeetingTypes';
-import { RouterContext } from '../../contexts';
+import { RouterContext } from '../../contexts/routerContext';
 
 const SpeakingListContainer = styled(Container)<{ $customStyle?: string }>`
 	position: absolute;

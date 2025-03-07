@@ -27,7 +27,7 @@ import { MessageType } from '../../../types/store/MessageTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 import { getAttachmentInfo } from '../../../utils/attachmentUtils';
 import { parseUrlOnMessage } from '../../../utils/parseUrlOnMessage';
-import { RouterContext } from '../../contexts';
+import { RouterContext } from '../../contexts/routerContext';
 
 const BubbleContainer = styled(Container)<{
 	$messageAttachment: boolean;

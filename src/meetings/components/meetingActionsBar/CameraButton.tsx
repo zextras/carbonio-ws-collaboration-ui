@@ -27,7 +27,7 @@ import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
 import { getVideoStream } from '../../../utils/UserMediaManager';
-import { RouterContext } from '../../contexts';
+import { RouterContext } from '../../contexts/routerContext';
 
 type CamButtonProps = {
 	videoDropdownRef: React.RefObject<HTMLDivElement>;
