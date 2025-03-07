@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import React, { ReactElement, useCallback, useEffect } from 'react';
+import React, { ReactElement, useCallback, useEffect, useRef } from 'react';
 
 import { Button, CreateSnackbarFn, Tooltip, useSnackbar } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
@@ -56,13 +56,19 @@ const RaiseHandButton = (): ReactElement | null => {
 		}, 5000);
 	}, [autoDownSnackbar, createSnackbar, meetingId]);
 
+	const refTimeout = useRef<NodeJS.Timeout>();
+
 	useEffect(() => {
 		if (iHaveHandRaised && iAmTalking) {
-			setTimeout(() => {
+			refTimeout.current = setTimeout(() => {
 				if (iAmTalking) {
 					handleAutoHandDown();
 				}
 			}, 2000);
+		}
+		console.log(refTimeout.current, iAmTalking);
+		if (refTimeout.current !== undefined && !iAmTalking) {
+			clearTimeout(refTimeout.current);
 		}
 	}, [handleAutoHandDown, iAmTalking, iHaveHandRaised]);
 
