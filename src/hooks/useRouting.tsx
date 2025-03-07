@@ -4,46 +4,21 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { useCallback } from 'react';
+import { useCallback, useContext } from 'react';
 
-import { pushHistory, replaceHistory } from '@zextras/carbonio-shell-ui';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import { CHATS_ROUTE } from '../constants/appConstants';
+import { MEETINGS_ROUTES, PAGE_INFO_TYPE, RouterContext } from '../meetings/contexts/routerContext';
 
 export enum ROUTES {
 	MAIN = '/',
 	ROOM = '/:roomId'
 }
 
-export enum MEETINGS_ROUTES {
-	MEETING = '/meeting/:meetingId',
-	EXTERNAL_LOGIN = '/externalLogin',
-	MEETING_ACCESS_PAGE = '/meetingAccessPage',
-	INFO = '/infoPage/:infoType'
-}
-
-export type MeetingRoutesParams = {
-	meetingId: string;
-	infoType: PAGE_INFO_TYPE;
-};
-
-export enum PAGE_INFO_TYPE {
-	HANG_UP_PAGE = 'hang_up_page',
-	NEXT_TIME_PAGE = 'next_time_page',
-	ROOM_EMPTY = 'room_empty',
-	MEETING_ENDED = 'meeting_ended',
-	ALREADY_ACTIVE_MEETING_SESSION = 'already_active_meeting_session',
-	MEETING_NOT_FOUND = 'meeting_not_found',
-	UNAUTHENTICATED = 'unauthenticated',
-	INVALID_WAITING_ROOM = 'invalid_waiting_room',
-	GENERAL_ERROR = 'general_error'
-}
-
 export type UseRoutingHook = {
 	goToMainPage: () => void;
 	goToRoomPage: (roomId: string) => void;
-	goToChatsPage: (param: string) => void;
 	goToMeetingPage: (meetingId: string) => void;
 	goToInfoPage: (infoType: PAGE_INFO_TYPE) => void;
 	goToExternalLoginPage: () => void;
@@ -51,47 +26,43 @@ export type UseRoutingHook = {
 };
 
 const useRouting = (): UseRoutingHook => {
-	const history = useHistory();
-	const route = useCallback((url: string): void => history.push(url), [history]);
+	const { navigate: contextNavigate } = useContext(RouterContext);
+	const navigate = useNavigate();
 
 	// Chats routing
-	const goToMainPage = useCallback(() => replaceHistory(ROUTES.MAIN), []);
+	const goToMainPage = useCallback(() => navigate(`/${CHATS_ROUTE}${ROUTES.MAIN}`), [navigate]);
 
 	const goToRoomPage = useCallback(
-		(roomId: string) => pushHistory(ROUTES.ROOM.replace(':roomId', roomId)),
-		[]
-	);
-
-	const goToChatsPage = useCallback(
-		(param: string) => replaceHistory({ path: `/${param}`, route: CHATS_ROUTE }),
-		[]
+		(roomId: string) => {
+			navigate(`/${CHATS_ROUTE}/${roomId}`, { replace: false });
+		},
+		[navigate]
 	);
 
 	// Meeting routing
 	const goToMeetingPage = useCallback(
-		(meetingId: string): void => route(MEETINGS_ROUTES.MEETING.replace(':meetingId', meetingId)),
-		[route]
+		(meetingId: string): void => contextNavigate({ route: MEETINGS_ROUTES.MEETING, meetingId }),
+		[contextNavigate]
 	);
 
 	const goToInfoPage = useCallback(
-		(infoType: PAGE_INFO_TYPE): void => route(MEETINGS_ROUTES.INFO.replace(':infoType', infoType)),
-		[route]
+		(infoType: PAGE_INFO_TYPE): void => contextNavigate({ route: MEETINGS_ROUTES.INFO, infoType }),
+		[contextNavigate]
 	);
 
 	const goToExternalLoginPage = useCallback(
-		(): void => route(MEETINGS_ROUTES.EXTERNAL_LOGIN),
-		[route]
+		(): void => contextNavigate({ route: MEETINGS_ROUTES.EXTERNAL_LOGIN }),
+		[contextNavigate]
 	);
 
 	const goToMeetingAccessPage = useCallback(
-		(): void => route(MEETINGS_ROUTES.MEETING_ACCESS_PAGE),
-		[route]
+		(): void => contextNavigate({ route: MEETINGS_ROUTES.MEETING_ACCESS_PAGE }),
+		[contextNavigate]
 	);
 
 	return {
 		goToMainPage,
 		goToRoomPage,
-		goToChatsPage,
 		goToMeetingPage,
 		goToInfoPage,
 		goToExternalLoginPage,

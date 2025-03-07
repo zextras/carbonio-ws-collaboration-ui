@@ -3,10 +3,11 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import { getNotificationManager, replaceHistory } from '@zextras/carbonio-shell-ui';
+import { getNotificationManager } from '@zextras/carbonio-shell-ui';
 import { includes, isEmpty } from 'lodash';
 
 import { CHATS_ROUTE } from '../../../constants/appConstants';
+import { EventName, sendCustomEvent } from '../../../hooks/useEventListener';
 import useStore from '../../../store/Store';
 import { TextMessage } from '../../../types/store/MessageTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
@@ -55,9 +56,11 @@ const displayMessageBrowserNotification = async (message: TextMessage): Promise<
 			message: textMessage,
 			onClick: (): void => {
 				window.focus();
-				replaceHistory({
-					path: `/${message.roomId}`,
-					route: CHATS_ROUTE
+				sendCustomEvent({
+					name: EventName.ROUTE_REDIRECT,
+					data: {
+						path: `/${CHATS_ROUTE}/${message.roomId}`
+					}
 				});
 			}
 		});

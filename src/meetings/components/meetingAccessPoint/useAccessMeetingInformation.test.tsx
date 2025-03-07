@@ -9,13 +9,13 @@ import React from 'react';
 import { renderHook, screen, waitFor } from '@testing-library/react';
 
 import useAccessMeetingInformation from './useAccessMeetingInformation';
-import { PAGE_INFO_TYPE } from '../../../hooks/useRouting';
 import useStore from '../../../store/Store';
 import { createMockMeeting } from '../../../tests/createMock';
 import { MeetingsApiToSpy, spyOnMeetingsApi } from '../../../tests/mocks/network';
 import { mockGoToInfoPage } from '../../../tests/mocks/useRouting';
 import { ProvidersWrapper, setup } from '../../../tests/test-utils';
 import { MeetingType } from '../../../types/network/models/meetingBeTypes';
+import { PAGE_INFO_TYPE } from '../../contexts/routerContext';
 
 describe('useAccessMeetingAction tests', () => {
 	test('Render ShowMeetingAccessPage', async () => {

@@ -4,13 +4,15 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { lazy, Suspense, useEffect } from 'react';
+import React, { lazy, Suspense, useCallback, useEffect } from 'react';
 
 import { Container, ModalManager, Spinner } from '@zextras/carbonio-design-system';
 import { addRoute, SecondaryBarComponentProps } from '@zextras/carbonio-shell-ui';
+import { useNavigate } from 'react-router-dom';
 
 import ConnectionSnackbarManager from './components/ConnectionSnackbarManager';
 import { CHATS_ROUTE, PRODUCT_NAME } from '../constants/appConstants';
+import useEventListener, { EventName, RouteRedirectEvent } from '../hooks/useEventListener';
 import SecondaryBarView from './components/secondaryBar/SecondaryBarView';
 import ShimmeringConversationView from './views/shimmerViews/ShimmeringConversationView';
 import ShimmeringInfoPanelView from './views/shimmerViews/ShimmeringInfoPanelView';
@@ -48,6 +50,19 @@ const SecondaryBar = (props: SecondaryBarComponentProps): React.JSX.Element => (
 );
 
 export default function useChatsApp(): void {
+	const navigate = useNavigate();
+
+	const handleRedirectFromBrowserNotification = useCallback(
+		(event: CustomEvent<RouteRedirectEvent['data']> | undefined) => {
+			if (event?.detail.path) {
+				navigate(event.detail.path);
+			}
+		},
+		[navigate]
+	);
+
+	useEventListener(EventName.ROUTE_REDIRECT, handleRedirectFromBrowserNotification);
+
 	useEffect(() => {
 		addRoute({
 			route: CHATS_ROUTE,
