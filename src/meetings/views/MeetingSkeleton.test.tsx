@@ -7,10 +7,8 @@ import React from 'react';
 
 import { act, screen, waitFor } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event';
-import * as ReactRouter from 'react-router';
 
 import MeetingSkeleton from './MeetingSkeleton';
-import { PAGE_INFO_TYPE } from '../../hooks/useRouting';
 import useStore from '../../store/Store';
 import {
 	createMockCapabilityList,
@@ -22,7 +20,7 @@ import {
 import { MeetingsApiToSpy, spyOnMeetingsApi } from '../../tests/mocks/network';
 import { mockInitialize } from '../../tests/mocks/SelfieSegmentationManager';
 import { mockGoToInfoPage } from '../../tests/mocks/useRouting';
-import { setup } from '../../tests/test-utils';
+import { routerContextSetup, setup } from '../../tests/test-utils';
 import { MeetingBe } from '../../types/network/models/meetingBeTypes';
 import { MemberBe, RoomBe } from '../../types/network/models/roomBeTypes';
 import { UserBe } from '../../types/network/models/userBeTypes';
@@ -30,6 +28,7 @@ import { STREAM_TYPE, VirtualBackgroundType } from '../../types/store/ActiveMeet
 import { MeetingParticipant } from '../../types/store/MeetingTypes';
 import { RoomType } from '../../types/store/RoomTypes';
 import { RootStore } from '../../types/store/StoreTypes';
+import { MEETINGS_ROUTES, PAGE_INFO_TYPE } from '../contexts/routerContext';
 
 const meetingActionBarLabel = 'meeting-action-bar';
 
@@ -74,9 +73,10 @@ const storeSetupGroupMeetingSkeleton = (): { user: UserEvent; store: RootStore }
 	store.meetingConnection(meeting.id, false, undefined, true, 'videoId');
 	store.setLocalStreams(meeting.id, STREAM_TYPE.VIDEO, new MediaStream());
 	store.setCapabilities(createMockCapabilityList());
-	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
-	spyUseParams.mockReturnValue({ meetingId: meeting.id });
-	const { user } = setup(<MeetingSkeleton />);
+	const { user } = routerContextSetup(<MeetingSkeleton />, {
+		route: MEETINGS_ROUTES.MEETING,
+		meetingId: meeting.id
+	});
 
 	return { user, store };
 };

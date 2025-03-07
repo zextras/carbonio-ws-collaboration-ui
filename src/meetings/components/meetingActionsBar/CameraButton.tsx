@@ -8,6 +8,7 @@ import React, {
 	ReactElement,
 	SetStateAction,
 	useCallback,
+	useContext,
 	useEffect,
 	useMemo,
 	useState
@@ -16,11 +17,9 @@ import React, {
 import { DropdownItem, Tooltip } from '@zextras/carbonio-design-system';
 import { map } from 'lodash';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
 
 import { MultiActionButton } from './MultiActionButton';
 import useBrowserPermission from '../../../hooks/useMediaDevices';
-import { MeetingRoutesParams } from '../../../hooks/useRouting';
 import MeetingsApi from '../../../network/apis/MeetingsApi';
 import { getSelectedVideoDeviceId } from '../../../store/selectors/ActiveMeetingSelectors';
 import { getParticipantVideoStatus } from '../../../store/selectors/MeetingSelectors';
@@ -28,6 +27,7 @@ import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
 import { getVideoStream } from '../../../utils/UserMediaManager';
+import { RouterContext } from '../../contexts/routerContext';
 
 type CamButtonProps = {
 	videoDropdownRef: React.RefObject<HTMLDivElement>;
@@ -55,12 +55,12 @@ const CameraButton = ({
 	);
 	const unknownDeviceLabel = t('meeting.interactions.unknownDevice', 'Unknown device');
 
-	const { meetingId }: MeetingRoutesParams = useParams();
+	const { meetingId } = useContext(RouterContext);
 	const myUserId = useStore(getUserId);
 
 	const videoStatus = useStore((store) => getParticipantVideoStatus(store, meetingId, myUserId));
-	const selectedVideoDeviceId = useStore((store) => getSelectedVideoDeviceId(store, meetingId));
-	const videoOutConn = useStore((store) => store.activeMeeting[meetingId]?.videoOutConn);
+	const selectedVideoDeviceId = useStore((store) => getSelectedVideoDeviceId(store, meetingId!));
+	const videoOutConn = useStore((store) => store.activeMeeting[meetingId!]?.videoOutConn);
 	const setSelectedDeviceId = useStore((store) => store.setSelectedDeviceId);
 	const setLocalStreams = useStore((store) => store.setLocalStreams);
 	const websocketNetworkStatus = useStore(({ connections }) => connections.status.websocket);
@@ -78,12 +78,12 @@ const CameraButton = ({
 			if (videoStatus) {
 				getVideoStream(videoItem.deviceId).then((stream) => {
 					videoOutConn?.updateLocalStreamTrack(stream).then(() => {
-						setLocalStreams(meetingId, STREAM_TYPE.VIDEO, stream);
-						setSelectedDeviceId(meetingId, STREAM_TYPE.VIDEO, videoItem.deviceId);
+						setLocalStreams(meetingId!, STREAM_TYPE.VIDEO, stream);
+						setSelectedDeviceId(meetingId!, STREAM_TYPE.VIDEO, videoItem.deviceId);
 					});
 				});
 			} else {
-				setSelectedDeviceId(meetingId, STREAM_TYPE.VIDEO, videoItem.deviceId);
+				setSelectedDeviceId(meetingId!, STREAM_TYPE.VIDEO, videoItem.deviceId);
 			}
 		},
 		[meetingId, setLocalStreams, setSelectedDeviceId, videoOutConn, videoStatus]
@@ -118,7 +118,7 @@ const CameraButton = ({
 						.then((stream) => {
 							videoOutConn
 								?.updateLocalStreamTrack(stream)
-								.then(() => MeetingsApi.updateMediaOffer(meetingId, STREAM_TYPE.VIDEO, true));
+								.then(() => MeetingsApi.updateMediaOffer(meetingId!, STREAM_TYPE.VIDEO, true));
 						})
 						.catch((e) => {
 							setButtonStatus(true);

@@ -3,6 +3,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
+import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
 import useStore from '../../store/Store';
 import { GetMeetingResponse } from '../../types/network/responses/meetingsResponses';
 import { GetRoomResponse } from '../../types/network/responses/roomsResponses';
@@ -29,10 +30,22 @@ export const wsConversationEventsHandler = (event: WsEvent): void => {
 		}
 		case WsEventType.ROOM_OWNER_PROMOTED: {
 			state.promoteMemberToModerator(event.roomId, event.userId);
+			if (isMyId(event.userId)) {
+				sendCustomEvent({
+					name: EventName.MEMBER_PROMOTED,
+					data: event
+				});
+			}
 			break;
 		}
 		case WsEventType.ROOM_OWNER_DEMOTED: {
 			state.demoteMemberFromModerator(event.roomId, event.userId);
+			if (isMyId(event.userId)) {
+				sendCustomEvent({
+					name: EventName.MEMBER_DEMOTED,
+					data: event
+				});
+			}
 			break;
 		}
 		case WsEventType.ROOM_PICTURE_CHANGED: {

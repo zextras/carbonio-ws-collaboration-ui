@@ -65,7 +65,7 @@ const ChatCreationModal = ({
 
 	const createSnackbar: CreateSnackbarFn = useSnackbar();
 
-	const { goToChatsPage } = useRouting();
+	const { goToRoomPage } = useRouting();
 
 	const inputRef = useRef<HTMLInputElement>(null);
 
@@ -119,9 +119,9 @@ const ChatCreationModal = ({
 			const roomId = oneToOneChatExist?.id ?? `placeholder-${userId}`;
 			if (!oneToOneChatExist) setPlaceholderRoom(userId);
 			onModalClose();
-			goToChatsPage(roomId);
+			goToRoomPage(roomId);
 		},
-		[goToChatsPage, onModalClose, setPlaceholderRoom]
+		[goToRoomPage, onModalClose, setPlaceholderRoom]
 	);
 
 	const onCreateGroup = useCallback(
@@ -135,7 +135,7 @@ const ChatCreationModal = ({
 			})
 				.then((response: AddRoomResponse) => {
 					setIsPending(false);
-					goToChatsPage(response.id);
+					goToRoomPage(response.id);
 					onModalClose();
 				})
 				.catch(() => {
@@ -147,7 +147,7 @@ const ChatCreationModal = ({
 					});
 				});
 		},
-		[createSnackbar, errorSnackbar, goToChatsPage, onModalClose, title, topic]
+		[createSnackbar, errorSnackbar, goToRoomPage, onModalClose, title, topic]
 	);
 
 	const onCreate = useCallback(() => {
