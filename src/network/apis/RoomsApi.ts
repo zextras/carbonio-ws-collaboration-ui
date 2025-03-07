@@ -6,6 +6,8 @@
 
 import { v4 as uuidGenerator } from 'uuid';
 
+import { CHATS_ROUTE } from '../../constants/appConstants';
+import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
 import useStore from '../../store/Store';
 import { RequestType } from '../../types/network/apis/IBaseAPI';
 import IRoomsApi from '../../types/network/apis/IRoomsApi';
@@ -289,8 +291,12 @@ class RoomsApi implements IRoomsApi {
 			members: [{ userId, owner: true }]
 		}).then((response) => {
 			replacePlaceholderRoom(userId, response.id);
-			// TODO
-			// pushHistory(ROUTES.ROOM.replace(':roomId', response.id));
+			sendCustomEvent({
+				name: EventName.ROUTE_REDIRECT,
+				data: {
+					path: `/${CHATS_ROUTE}/${response.id}`
+				}
+			});
 			return response;
 		});
 	}

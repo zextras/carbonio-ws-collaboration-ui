@@ -39,7 +39,8 @@ export enum EventName {
 	MEETING_RECORDING_STARTED = 'meetingRecordingStarted',
 	MEETING_RECORDING_STOPPED = 'meetingRecordingStopped',
 	MEMBER_PROMOTED = 'memberPromoted',
-	MEMBER_DEMOTED = 'memberDemoted'
+	MEMBER_DEMOTED = 'memberDemoted',
+	ROUTE_REDIRECT = 'routeRedirect'
 }
 
 export type NewMessageEvent = {
@@ -112,6 +113,11 @@ export type MemberDemotedEvent = {
 	data: RoomOwnerDemotedEvent;
 };
 
+export type RouteRedirectEvent = {
+	name: EventName.ROUTE_REDIRECT;
+	data: { path: string };
+};
+
 type AppCustomEvent =
 	| NewMessageEvent
 	| IncomingMeetingEvent
@@ -126,7 +132,8 @@ type AppCustomEvent =
 	| RecordingStoppedEvent
 	| MeetingStoppedUseEvent
 	| MemberPromotedEvent
-	| MemberDemotedEvent;
+	| MemberDemotedEvent
+	| RouteRedirectEvent;
 
 export const sendCustomEvent = (event: AppCustomEvent): void => {
 	window.dispatchEvent(new CustomEvent(event.name, { detail: event.data }));

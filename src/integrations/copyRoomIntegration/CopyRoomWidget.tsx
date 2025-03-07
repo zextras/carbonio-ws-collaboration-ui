@@ -17,9 +17,10 @@ import {
 } from '@zextras/carbonio-design-system';
 import { filter, size } from 'lodash';
 import { Trans, useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
-// import { CHATS_ROUTE } from '../../constants/appConstants';
+import { CHATS_ROUTE } from '../../constants/appConstants';
 import { RoomsApi } from '../../network';
 import { getDuplicatedRoom } from '../../store/selectors/RoomsSelectors';
 import useStore from '../../store/Store';
@@ -38,13 +39,16 @@ const ItalicText = styled(Text)`
 
 const CopyRoomWidget: FC<CopyRoomWidgetProps> = ({ name, members, topic, type }) => {
 	const duplicatedRoom = useStore((store) => getDuplicatedRoom(store, name, members));
+	const navigate = useNavigate();
+	const createSnackbar: CreateSnackbarFn = useSnackbar();
+	const [t] = useTranslation();
+
+	const [open, setOpen] = useState(false);
 
 	const membersWithoutMe = useMemo(
 		() => filter(members, (member) => member.userId !== useStore.getState().session.id),
 		[members]
 	);
-
-	const [t] = useTranslation();
 
 	const widgetTitle = useMemo(() => {
 		if (type === 'group') {
@@ -154,21 +158,13 @@ const CopyRoomWidget: FC<CopyRoomWidgetProps> = ({ name, members, topic, type })
 		'There must be at least two members besides you.'
 	);
 
-	const createSnackbar: CreateSnackbarFn = useSnackbar();
-
-	const [open, setOpen] = useState(false);
-
 	const buttonAction = useCallback(() => {
 		if (!duplicatedRoom) {
 			setOpen(true);
 		} else {
-			// TODO
-			// replaceHistory({
-			// 	path: `/${duplicatedRoom.id}`,
-			// 	route: CHATS_ROUTE
-			// });
+			navigate(`/${CHATS_ROUTE}/${duplicatedRoom.id}`);
 		}
-	}, [duplicatedRoom]);
+	}, [duplicatedRoom, navigate]);
 
 	const onClickModalButton = useCallback(() => {
 		RoomsApi.addRoom({
@@ -179,11 +175,7 @@ const CopyRoomWidget: FC<CopyRoomWidgetProps> = ({ name, members, topic, type })
 		})
 			.then((response) => {
 				setOpen(false);
-				// TODO
-				// replaceHistory({
-				// 	path: `/${response.id}`,
-				// 	route: CHATS_ROUTE
-				// });
+				navigate(`/${CHATS_ROUTE}/${response.id}`);
 			})
 			.catch(() => {
 				createSnackbar({
@@ -192,7 +184,7 @@ const CopyRoomWidget: FC<CopyRoomWidgetProps> = ({ name, members, topic, type })
 					label: snackbarErrorLabel
 				});
 			});
-	}, [createSnackbar, membersWithoutMe, name, snackbarErrorLabel, topic]);
+	}, [createSnackbar, membersWithoutMe, name, navigate, snackbarErrorLabel, topic]);
 
 	return (
 		<Container crossAlignment="flex-start" gap="0.5rem">

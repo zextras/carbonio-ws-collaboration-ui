@@ -7,7 +7,8 @@ import { t, getNotificationManager } from '@zextras/carbonio-shell-ui';
 import { find } from 'lodash';
 
 import { displayChatNotification } from './displayMessageBrowserNotification';
-// import { CHATS_ROUTE } from '../../../constants/appConstants';
+import { CHATS_ROUTE } from '../../../constants/appConstants';
+import { EventName, sendCustomEvent } from '../../../hooks/useEventListener';
 import useStore from '../../../store/Store';
 import { MessageFastening, TextMessage } from '../../../types/store/MessageTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
@@ -47,11 +48,12 @@ const displayReactionBrowserNotification = async (message: MessageFastening): Pr
 			message: textMessage,
 			onClick: (): void => {
 				window.focus();
-				// TODO
-				// replaceHistory({
-				// 	path: `/${message.roomId}`,
-				// 	route: CHATS_ROUTE
-				// });
+				sendCustomEvent({
+					name: EventName.ROUTE_REDIRECT,
+					data: {
+						path: `/${CHATS_ROUTE}/${message.roomId}`
+					}
+				});
 			}
 		});
 	}
