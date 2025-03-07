@@ -25,7 +25,7 @@ const MoreActionsButton = (): ReactElement => {
 	const { meetingId }: MeetingRoutesParams = useParams();
 
 	const [t] = useTranslation();
-	const moreActionsLabel = t('', 'More actions');
+	const moreActionsLabel = t('tooltip.moreActions', 'More actions');
 	const enablePip = t('meeting.pip.trigger', 'Enable PiP');
 	const disablePip = t('meeting.pip.close', 'Disable PiP');
 	const gridViewLabel = t('meeting.interactions.gridView', 'Grid view');

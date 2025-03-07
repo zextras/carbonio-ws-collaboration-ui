@@ -21,10 +21,10 @@ import useStore from '../../../store/Store';
 const RaiseHandButton = (): ReactElement | null => {
 	const [t] = useTranslation();
 
-	const handUpTooltip = t('', 'Raise your hand');
-	const handDownTooltip = t('', 'Lower your hand');
+	const handUpTooltip = t('meeting.interactions.handUp', 'Raise your hand');
+	const handDownTooltip = t('meeting.interactions.handDown', 'Lower your hand');
 	const autoDownSnackbar = t(
-		'',
+		'meeting.snackbar.autoHandDown',
 		'It sounds like you’re saying something, so your hand will be lowered. '
 	);
 
