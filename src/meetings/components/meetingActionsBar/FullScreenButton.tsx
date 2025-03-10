@@ -3,17 +3,16 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import React, { ReactElement, useCallback, useEffect } from 'react';
+import React, { ReactElement, useCallback, useContext, useEffect } from 'react';
 
 import { Button, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
 
 import useFullScreen from '../../../hooks/useFullScreen';
-import { MeetingRoutesParams } from '../../../hooks/useRouting';
 import { getMeetingViewSelected } from '../../../store/selectors/ActiveMeetingSelectors';
 import useStore from '../../../store/Store';
 import { MeetingViewType } from '../../../types/store/ActiveMeetingTypes';
+import { RouterContext } from '../../contexts/routerContext';
 
 const FullScreenButton = (): ReactElement => {
 	const [t] = useTranslation();
@@ -21,9 +20,9 @@ const FullScreenButton = (): ReactElement => {
 	const disableFullScreenLabel = t('meeting.interactions.disableFullScreen', 'Disable full screen');
 	const enableFullScreenLabel = t('meeting.interactions.enableFullScreen', 'Enable full screen');
 
-	const { meetingId }: MeetingRoutesParams = useParams();
+	const { meetingId } = useContext(RouterContext);
 
-	const meetingView = useStore((store) => getMeetingViewSelected(store, meetingId));
+	const meetingView = useStore((store) => getMeetingViewSelected(store, meetingId!));
 	const setMeetingSidebarStatus = useStore((store) => store.setMeetingSidebarStatus);
 	const setIsCarouselVisible = useStore((store) => store.setIsCarouseVisible);
 
@@ -41,9 +40,9 @@ const FullScreenButton = (): ReactElement => {
 
 	const toggleFullScreenFn = useCallback((): void => {
 		if (!isFullScreen) {
-			setMeetingSidebarStatus(meetingId, false);
+			setMeetingSidebarStatus(meetingId!, false);
 			if (meetingView === MeetingViewType.CINEMA) {
-				setIsCarouselVisible(meetingId, false);
+				setIsCarouselVisible(meetingId!, false);
 			}
 		}
 		toggleFullScreen();

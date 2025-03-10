@@ -4,10 +4,17 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { ReactElement, RefObject, useCallback, useEffect, useRef, useState } from 'react';
+import React, {
+	ReactElement,
+	RefObject,
+	useCallback,
+	useContext,
+	useEffect,
+	useRef,
+	useState
+} from 'react';
 
 import { Container } from '@zextras/carbonio-design-system';
-import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import CameraButton from './CameraButton';
@@ -19,7 +26,7 @@ import PictureInPictureButton from './PictureInPictureButton';
 import ScreenShareButton from './ScreenShareButton';
 import SwitchViewButton from './SwitchViewButton';
 import useContainerDimensions from '../../../hooks/useContainerDimensions';
-import { MeetingRoutesParams } from '../../../hooks/useRouting';
+import { RouterContext } from '../../contexts/routerContext';
 
 const BarContainer = styled(Container)<{ $isHoovering: boolean }>`
 	position: absolute;
@@ -48,7 +55,7 @@ type MeetingActionsProps = {
 };
 
 const MeetingActionsBar = ({ streamsWrapperRef }: MeetingActionsProps): ReactElement => {
-	const { meetingId }: MeetingRoutesParams = useParams();
+	const { meetingId } = useContext(RouterContext);
 
 	const [isHoovering, setIsHoovering] = useState<boolean>(false);
 	const [isHoverActions, setIsHoverActions] = useState<boolean>(false);

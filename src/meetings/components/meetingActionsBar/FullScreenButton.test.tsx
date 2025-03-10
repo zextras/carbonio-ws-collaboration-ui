@@ -6,7 +6,6 @@
 import React from 'react';
 
 import { screen } from '@testing-library/react';
-import * as ReactRouter from 'react-router';
 
 import FullScreenButton from './FullScreenButton';
 import useStore from '../../../store/Store';
@@ -18,7 +17,7 @@ import {
 	createMockUser
 } from '../../../tests/createMock';
 import { requestFullscreen } from '../../../tests/mocks/global';
-import { setup } from '../../../tests/test-utils';
+import { routerContextSetup, setup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 import { RoomBe } from '../../../types/network/models/roomBeTypes';
 import { UserBe } from '../../../types/network/models/userBeTypes';
@@ -55,9 +54,6 @@ beforeEach(() => {
 	store.addRoom(room);
 	store.addMeeting(meeting);
 	store.meetingConnection(meeting.id, false, undefined, false, undefined);
-
-	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
-	spyUseParams.mockReturnValue({ meetingId: meeting.id });
 });
 describe('Meeting action bar - Fullscreen button interaction', () => {
 	test('Check full screen mode is set correctly', async () => {
@@ -72,7 +68,9 @@ describe('Meeting action bar - Fullscreen button interaction', () => {
 
 	test('When full screen mode is enabled in grid view, meeting sidebar will be closed ', async () => {
 		useStore.getState().setMeetingViewSelected(meeting.id, MeetingViewType.GRID);
-		const { user } = setup(<FullScreenButton />);
+		const { user } = routerContextSetup(<FullScreenButton />, {
+			meetingId: meeting.id
+		});
 		const fullScreenButton = await screen.findByTestId(fullScreenTestId);
 		await user.click(fullScreenButton);
 		const { sidebarIsOpened } = useStore.getState().activeMeeting[meeting.id].sidebarStatus;
@@ -81,7 +79,9 @@ describe('Meeting action bar - Fullscreen button interaction', () => {
 
 	test('When full screen mode is enabled in cinema view, meeting sidebar and carousel will be closed ', async () => {
 		useStore.getState().setMeetingViewSelected(meeting.id, MeetingViewType.CINEMA);
-		const { user } = setup(<FullScreenButton />);
+		const { user } = routerContextSetup(<FullScreenButton />, {
+			meetingId: meeting.id
+		});
 		const fullScreenButton = await screen.findByTestId(fullScreenTestId);
 		await user.click(fullScreenButton);
 		const { sidebarIsOpened } = useStore.getState().activeMeeting[meeting.id].sidebarStatus;

@@ -3,15 +3,13 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import React, { ReactElement, useCallback, useEffect, useState } from 'react';
+import React, { ReactElement, useCallback, useContext, useEffect, useState } from 'react';
 
 import { Button, Container, Icon, Padding, Text } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import useMediaDevices from '../../../hooks/useMediaDevices';
-import { MeetingRoutesParams } from '../../../hooks/useRouting';
 import useTilesOrder from '../../../hooks/useTilesOrder';
 import MeetingsApi from '../../../network/apis/MeetingsApi';
 import {
@@ -28,6 +26,7 @@ import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
 import { getAudioStream, getVideoStream } from '../../../utils/UserMediaManager';
+import { RouterContext } from '../../contexts/routerContext';
 import LeaveMeetingButton from '../meetingActionsBar/LeaveMeetingButton';
 import MeetingDuration from '../meetingActionsBar/MeetingDuration';
 import Tile from '../tile/Tile';
@@ -48,22 +47,22 @@ const CustomText = styled(Text)<{ $whoIsSpeaking: string | undefined }>`
 `;
 
 const PictureInPictureView = (): ReactElement => {
-	const { meetingId }: MeetingRoutesParams = useParams();
+	const { meetingId } = useContext(RouterContext);
 	const [t] = useTranslation();
 
 	const noOneTalking = t('meeting.pip.noTalking', "Nobody's talking right now.");
 
 	const myUserId = useStore(getUserId);
-	const meeting = useStore((store) => getMeetingByMeetingId(store, meetingId));
-	const whoIsSpeaking = useStore((store) => getNameOfFirstTalkingUser(store, meetingId));
-	const videoOutConn = useStore((store) => store.activeMeeting[meetingId]?.videoOutConn);
+	const meeting = useStore((store) => getMeetingByMeetingId(store, meetingId!));
+	const whoIsSpeaking = useStore((store) => getNameOfFirstTalkingUser(store, meetingId!));
+	const videoOutConn = useStore((store) => store.activeMeeting[meetingId!]?.videoOutConn);
 	const videoStatus = useStore((store) => getParticipantVideoStatus(store, meetingId, myUserId));
-	const selectedVideoDeviceId = useStore((store) => getSelectedVideoDeviceId(store, meetingId));
+	const selectedVideoDeviceId = useStore((store) => getSelectedVideoDeviceId(store, meetingId!));
 	const audioStatus = useStore((store) => getParticipantAudioStatus(store, meetingId, myUserId));
-	const selectedAudioDeviceId = useStore((store) => getSelectedAudioDeviceId(store, meetingId));
+	const selectedAudioDeviceId = useStore((store) => getSelectedAudioDeviceId(store, meetingId!));
 	const websocketNetworkStatus = useStore(({ connections }) => connections.status.websocket);
 	const bidirectionalAudioConn = useStore(
-		(store) => store.activeMeeting[meetingId]?.bidirectionalAudioConn
+		(store) => store.activeMeeting[meetingId!]?.bidirectionalAudioConn
 	);
 
 	const { permission: audioPermission } = useMediaDevices('audio');
@@ -86,7 +85,7 @@ const PictureInPictureView = (): ReactElement => {
 				getAudioStream(true, true, selectedAudioDeviceId)
 					.then((stream) => {
 						bidirectionalAudioConn?.updateLocalStreamTrack(stream).then(() => {
-							MeetingsApi.updateAudioStreamStatus(meetingId, !audioStatus);
+							MeetingsApi.updateAudioStreamStatus(meetingId!, !audioStatus);
 						});
 					})
 					.catch((e) => {
@@ -94,7 +93,7 @@ const PictureInPictureView = (): ReactElement => {
 					});
 			} else {
 				bidirectionalAudioConn?.closeRtpSenderTrack();
-				MeetingsApi.updateAudioStreamStatus(meetingId, !audioStatus);
+				MeetingsApi.updateAudioStreamStatus(meetingId!, !audioStatus);
 			}
 		},
 		[audioStatus, bidirectionalAudioConn, meetingId, selectedAudioDeviceId]
@@ -105,13 +104,13 @@ const PictureInPictureView = (): ReactElement => {
 			event.stopPropagation();
 			if (!videoStatus) {
 				if (!videoOutConn?.peerConn) {
-					videoOutConn?.startVideo(selectedVideoDeviceId).catch((e) => {});
+					videoOutConn?.startVideo(selectedVideoDeviceId).catch(() => {});
 				} else {
 					getVideoStream(selectedVideoDeviceId)
 						.then((stream) => {
 							videoOutConn
 								?.updateLocalStreamTrack(stream)
-								.then(() => MeetingsApi.updateMediaOffer(meetingId, STREAM_TYPE.VIDEO, true));
+								.then(() => MeetingsApi.updateMediaOffer(meetingId!, STREAM_TYPE.VIDEO, true));
 						})
 						.catch((e) => {
 							console.log(e);
@@ -124,7 +123,7 @@ const PictureInPictureView = (): ReactElement => {
 		[videoStatus, videoOutConn, selectedVideoDeviceId, meetingId]
 	);
 
-	const { centralTile } = useTilesOrder(meetingId);
+	const { centralTile } = useTilesOrder(meetingId!);
 
 	return (
 		<PipContainer

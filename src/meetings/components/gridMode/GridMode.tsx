@@ -4,23 +4,22 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { ReactElement, useEffect, useMemo, useRef } from 'react';
+import React, { ReactElement, useContext, useEffect, useMemo, useRef } from 'react';
 
 import { Button, Container, Tooltip } from '@zextras/carbonio-design-system';
 import { map, size } from 'lodash';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import useContainerDimensions from '../../../hooks/useContainerDimensions';
 import usePagination from '../../../hooks/usePagination';
-import { MeetingRoutesParams } from '../../../hooks/useRouting';
 import useTiles from '../../../hooks/useTiles';
 import { getNumberOfTiles } from '../../../store/selectors/MeetingSelectors';
 import useStore from '../../../store/Store';
 import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
 import { calcGrid, maximiseRowsAndColumns, maximiseTileSize } from '../../../utils/MeetingsUtils';
 import { calcScaleDivisor } from '../../../utils/styleUtils';
+import { RouterContext } from '../../contexts/routerContext';
 import { MeetingViewProps } from '../../views/MeetingSkeleton';
 import Tile from '../tile/Tile';
 import WhoIsSpeaking from '../whoIsSpeaking/WhoIsSpeaking';
@@ -59,7 +58,7 @@ const ChevronButton = styled(Button)`
 `;
 
 const GridMode = ({ children }: MeetingViewProps): ReactElement => {
-	const { meetingId }: MeetingRoutesParams = useParams();
+	const { meetingId } = useContext(RouterContext);
 
 	const [t] = useTranslation();
 	const scrollUpLabel = t('tooltip.scrollUp', 'Scroll up');
@@ -69,9 +68,9 @@ const GridMode = ({ children }: MeetingViewProps): ReactElement => {
 
 	const gridContainerRef = useRef<HTMLDivElement>(null);
 	const dimensions = useContainerDimensions(gridContainerRef);
-	const tilesData = useTiles(meetingId);
+	const tilesData = useTiles(meetingId!);
 
-	const numberOfTiles = useStore((store) => getNumberOfTiles(store, meetingId));
+	const numberOfTiles = useStore((store) => getNumberOfTiles(store, meetingId!));
 	const setUpdateSubscription = useStore((store) => store.setUpdateSubscription);
 
 	const { tileWidth, rows, columns, numberOfPages } = useMemo(() => {
@@ -142,7 +141,7 @@ const GridMode = ({ children }: MeetingViewProps): ReactElement => {
 				userId: value.userId,
 				type: value.type
 			}));
-			setUpdateSubscription(meetingId, subscriptions);
+			setUpdateSubscription(meetingId!, subscriptions);
 		}
 	}, [meetingId, setUpdateSubscription, tilesToRender]);
 

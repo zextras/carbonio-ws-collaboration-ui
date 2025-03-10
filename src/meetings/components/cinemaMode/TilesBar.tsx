@@ -4,19 +4,18 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { ReactElement, useEffect, useMemo, useRef } from 'react';
+import React, { ReactElement, useContext, useEffect, useMemo, useRef } from 'react';
 
 import { Button, Container, Tooltip } from '@zextras/carbonio-design-system';
 import { concat, map, size } from 'lodash';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import useContainerDimensions from '../../../hooks/useContainerDimensions';
 import usePagination from '../../../hooks/usePagination';
-import { MeetingRoutesParams } from '../../../hooks/useRouting';
 import useStore from '../../../store/Store';
 import { STREAM_TYPE, TileData } from '../../../types/store/ActiveMeetingTypes';
+import { RouterContext } from '../../contexts/routerContext';
 import Tile from '../tile/Tile';
 import WhoIsSpeaking from '../whoIsSpeaking/WhoIsSpeaking';
 
@@ -54,7 +53,7 @@ type TilesBarProps = {
 };
 
 const TilesBar = ({ carouselTiles, centralTile }: TilesBarProps): ReactElement => {
-	const { meetingId }: MeetingRoutesParams = useParams();
+	const { meetingId } = useContext(RouterContext);
 
 	const [t] = useTranslation();
 	const scrollUpLabel = t('tooltip.scrollUp', 'Scroll up');
@@ -108,7 +107,7 @@ const TilesBar = ({ carouselTiles, centralTile }: TilesBarProps): ReactElement =
 				type: value.type
 			}));
 			subscriptions.push({ userId: centralTile.userId, type: centralTile.type });
-			setUpdateSubscription(meetingId, subscriptions);
+			setUpdateSubscription(meetingId!, subscriptions);
 		}
 	}, [tilesDataToRender, centralTile, meetingId, setUpdateSubscription]);
 

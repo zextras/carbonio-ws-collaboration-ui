@@ -8,7 +8,6 @@ import React from 'react';
 
 import { screen, waitFor, act, renderHook } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event';
-import * as ReactRouter from 'react-router';
 
 import { mockDarkReaderIsEnabled } from '../../../../../__mocks__/darkreader';
 import useStore from '../../../../store/Store';
@@ -20,7 +19,7 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../../../tests/createMock';
-import { setup } from '../../../../tests/test-utils';
+import { routerContextSetup } from '../../../../tests/test-utils';
 import { MeetingBe } from '../../../../types/network/models/meetingBeTypes';
 import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
 import { MeetingParticipant } from '../../../../types/store/MeetingTypes';
@@ -73,9 +72,7 @@ const setupBasicGroup = (): { user: UserEvent; store: RootStore } => {
 		result.current.addMeeting(groupMeeting);
 		result.current.meetingConnection(groupMeeting.id, false, undefined, false, undefined);
 	});
-	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
-	spyUseParams.mockReturnValue({ meetingId: groupMeeting.id });
-	const { user } = setup(<MeetingSidebar />);
+	const { user } = routerContextSetup(<MeetingSidebar />, { meetingId: groupMeeting.id });
 	return { user, store: result.current };
 };
 
