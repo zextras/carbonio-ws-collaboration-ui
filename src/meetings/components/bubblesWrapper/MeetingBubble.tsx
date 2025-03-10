@@ -3,10 +3,9 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useRef, useState, useContext } from 'react';
 
 import { Container, Padding } from '@zextras/carbonio-design-system';
-import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import AttachmentView from '../../../chats/components/conversation/messageBubbles/AttachmentView';
@@ -15,7 +14,6 @@ import BubbleHeader from '../../../chats/components/conversation/messageBubbles/
 import ForwardInfo from '../../../chats/components/conversation/messageBubbles/ForwardInfo';
 import RepliedTextMessageSectionView from '../../../chats/components/conversation/messageBubbles/RepliedTextMessageSectionView';
 import TextContentBubble from '../../../chats/components/conversation/messageBubbles/TextContentBubble';
-import { MeetingRoutesParams } from '../../../hooks/useRouting';
 import { getInputHasFocus } from '../../../store/selectors/ActiveConversationsSelectors';
 import { getRoomIdByMeetingId } from '../../../store/selectors/MeetingSelectors';
 import {
@@ -29,6 +27,7 @@ import { MessageType } from '../../../types/store/MessageTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 import { getAttachmentInfo } from '../../../utils/attachmentUtils';
 import { parseUrlOnMessage } from '../../../utils/parseUrlOnMessage';
+import { RouterContext } from '../../contexts/routerContext';
 
 const BubbleContainer = styled(Container)<{
 	$messageAttachment: boolean;
@@ -76,9 +75,9 @@ type MeetingBubbleProps = {
 };
 
 const MeetingBubble: FC<MeetingBubbleProps> = ({ messageId, handleBubbleRemove }) => {
-	const { meetingId }: MeetingRoutesParams = useParams();
+	const { meetingId } = useContext(RouterContext);
 
-	const roomId = useStore((store) => getRoomIdByMeetingId(store, meetingId));
+	const roomId = useStore((store) => getRoomIdByMeetingId(store, meetingId!));
 	const message = useStore((store) => getMessageSelector(store, roomId ?? '', messageId));
 	const roomType = useStore<RoomType>((store) => getRoomTypeSelector(store, roomId ?? ''));
 	const messageAttachment = useStore((store) => getMessageAttachment(store, message));
@@ -104,8 +103,8 @@ const MeetingBubble: FC<MeetingBubbleProps> = ({ messageId, handleBubbleRemove }
 	);
 
 	const onClickHandler = useCallback(() => {
-		setMeetingSidebarStatus(meetingId, true);
-		setMeetingChatVisibility(meetingId, MeetingChatVisibility.OPEN);
+		setMeetingSidebarStatus(meetingId!, true);
+		setMeetingChatVisibility(meetingId!, MeetingChatVisibility.OPEN);
 		if (!inputHasFocus) {
 			setInputHasFocus(roomId ?? '', true);
 		}

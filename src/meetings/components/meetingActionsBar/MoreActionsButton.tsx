@@ -4,25 +4,21 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { ReactElement, useCallback, useEffect, useMemo } from 'react';
+import React, { ReactElement, useCallback, useContext, useEffect, useMemo } from 'react';
 
 import { Button, Dropdown, DropdownItem, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
 
 import useFullScreen from '../../../hooks/useFullScreen';
 import usePiPWindow from '../../../hooks/usePipWindow';
-import { MeetingRoutesParams } from '../../../hooks/useRouting';
-import {
-	getMeetingSidebarStatus,
-	getMeetingViewSelected
-} from '../../../store/selectors/ActiveMeetingSelectors';
+import { getMeetingViewSelected } from '../../../store/selectors/ActiveMeetingSelectors';
 import { getNumberOfTiles } from '../../../store/selectors/MeetingSelectors';
 import useStore from '../../../store/Store';
 import { MeetingViewType } from '../../../types/store/ActiveMeetingTypes';
+import { RouterContext } from '../../contexts/routerContext';
 
 const MoreActionsButton = (): ReactElement => {
-	const { meetingId }: MeetingRoutesParams = useParams();
+	const { meetingId } = useContext(RouterContext);
 
 	const [t] = useTranslation();
 	const moreActionsLabel = t('tooltip.moreActions', 'More actions');
@@ -33,11 +29,12 @@ const MoreActionsButton = (): ReactElement => {
 	const disableFullScreenLabel = t('meeting.interactions.disableFullScreen', 'Disable full screen');
 	const enableFullScreenLabel = t('meeting.interactions.enableFullScreen', 'Enable full screen');
 
-	const sidebarIsVisible: boolean = useStore((store) => getMeetingSidebarStatus(store, meetingId));
+	const meetingView = useStore((store) => getMeetingViewSelected(store, meetingId!));
 	const setMeetingSidebarStatus = useStore((store) => store.setMeetingSidebarStatus);
-	const meetingViewSelected = useStore((store) => getMeetingViewSelected(store, meetingId));
+	const meetingViewSelected = useStore((store) => getMeetingViewSelected(store, meetingId!));
 	const setMeetingViewSelected = useStore((store) => store.setMeetingViewSelected);
-	const numberOfTiles = useStore((store) => getNumberOfTiles(store, meetingId));
+	const numberOfTiles = useStore((store) => getNumberOfTiles(store, meetingId!));
+	const setIsCarouselVisible = useStore((store) => store.setIsCarouseVisible);
 
 	const { isSupported, requestPipWindow, pipWindow, closePipWindow } = usePiPWindow();
 	const { isFullScreen, toggleFullScreen } = useFullScreen();
@@ -52,7 +49,7 @@ const MoreActionsButton = (): ReactElement => {
 
 	const switchMode = useCallback(() => {
 		setMeetingViewSelected(
-			meetingId,
+			meetingId!,
 			meetingViewSelected === MeetingViewType.GRID ? MeetingViewType.CINEMA : MeetingViewType.GRID
 		);
 	}, [meetingId, meetingViewSelected, setMeetingViewSelected]);
@@ -68,11 +65,21 @@ const MoreActionsButton = (): ReactElement => {
 	);
 
 	const toggleFullScreenFn = useCallback((): void => {
-		if (sidebarIsVisible && !isFullScreen) {
-			setMeetingSidebarStatus(meetingId, false);
+		if (!isFullScreen) {
+			setMeetingSidebarStatus(meetingId!, false);
+			if (meetingView === MeetingViewType.CINEMA) {
+				setIsCarouselVisible(meetingId!, false);
+			}
 		}
 		toggleFullScreen();
-	}, [sidebarIsVisible, isFullScreen, toggleFullScreen, setMeetingSidebarStatus, meetingId]);
+	}, [
+		isFullScreen,
+		toggleFullScreen,
+		setMeetingSidebarStatus,
+		meetingId,
+		meetingView,
+		setIsCarouselVisible
+	]);
 
 	useEffect(() => {
 		window.addEventListener('keydown', checkKeyPress, true);

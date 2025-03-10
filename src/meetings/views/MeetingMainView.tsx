@@ -4,17 +4,14 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { lazy, ReactElement, Suspense, useEffect } from 'react';
-
-import { createMemoryHistory } from 'history';
-import { Route, Router, Switch } from 'react-router-dom';
+import React, { lazy, ReactElement, Suspense, useContext, useEffect } from 'react';
 
 import ShimmerEntryMeetingView from './shimmers/ShimmerEntryMeetingView';
-import { MEETINGS_ROUTES, ROUTES } from '../../hooks/useRouting';
 import { MeetingsApi } from '../../network';
 import useStore from '../../store/Store';
 import { BrowserUtils } from '../../utils/BrowserUtils';
 import { PiPProvider } from '../components/pictureInPicture/PictureInPictureProvider';
+import { MEETINGS_ROUTES, RouterContext, useRouterContextSetup } from '../contexts/routerContext';
 
 const LazyAccessPageView = lazy(
 	() => import(/* webpackChunkName: "MeetingAccessPage" */ './AccessPage')
@@ -81,8 +78,25 @@ const MeetingAccessPageView = (): ReactElement => (
 	</Suspense>
 );
 
+const MeetingRouter = (): ReactElement => {
+	const { route } = useContext(RouterContext);
+	switch (route) {
+		case MEETINGS_ROUTES.MEETING:
+			return <MeetingSkeleton />;
+		case MEETINGS_ROUTES.INFO:
+			return <InfoPage />;
+		case MEETINGS_ROUTES.EXTERNAL_LOGIN:
+			return <MeetingExternalAccessPage />;
+		case MEETINGS_ROUTES.MEETING_ACCESS_PAGE:
+			return <MeetingAccessPageView />;
+		case MEETINGS_ROUTES.MAIN:
+			return <AccessPageView />;
+		default:
+			return <div> missing route</div>;
+	}
+};
+
 const MeetingMainView = (): ReactElement => {
-	const history = createMemoryHistory();
 	const setCustomLogo = useStore((store) => store.setCustomLogo);
 
 	useEffect(() => {
@@ -97,16 +111,11 @@ const MeetingMainView = (): ReactElement => {
 			});
 	}, [setCustomLogo]);
 
+	const routerContextSetup = useRouterContextSetup();
 	return (
-		<Router history={history}>
-			<Switch>
-				<Route exact path={ROUTES.MAIN} component={AccessPageView} />
-				<Route exact path={MEETINGS_ROUTES.MEETING} component={MeetingSkeleton} />
-				<Route exact path={MEETINGS_ROUTES.MEETING_ACCESS_PAGE} component={MeetingAccessPageView} />
-				<Route exact path={MEETINGS_ROUTES.EXTERNAL_LOGIN} component={MeetingExternalAccessPage} />
-				<Route exact path={MEETINGS_ROUTES.INFO} component={InfoPage} />
-			</Switch>
-		</Router>
+		<RouterContext.Provider value={routerContextSetup}>
+			<MeetingRouter />
+		</RouterContext.Provider>
 	);
 };
 

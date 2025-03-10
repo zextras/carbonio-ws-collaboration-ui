@@ -26,7 +26,6 @@ const useMediaDevices = (
 			.enumerateDevices()
 			.then((devices) => {
 				const inputs = filter(devices, (device: MediaDeviceInfo) => device.kind === deviceKind);
-				console.log(devices);
 				setDeviceList(inputs);
 			})
 			.catch((e) => {
@@ -35,7 +34,6 @@ const useMediaDevices = (
 	}, [deviceType]);
 
 	useEffect(() => {
-		console.log('Permission:', permissionStatus);
 		if (permissionStatus === 'granted') {
 			updateDevices();
 		}

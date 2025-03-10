@@ -4,14 +4,12 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { ReactElement, useCallback, useEffect, useState } from 'react';
+import React, { ReactElement, useCallback, useContext, useEffect, useState } from 'react';
 
 import { Container } from '@zextras/carbonio-design-system';
-import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import useGeneralMeetingControls from '../../../hooks/useGeneralMeetingControls';
-import { MeetingRoutesParams } from '../../../hooks/useRouting';
 import { MeetingsApi } from '../../../network';
 import useStore from '../../../store/Store';
 import { UserType } from '../../../types/store/UserTypes';
@@ -22,6 +20,7 @@ import MobileConversation from '../../components/mobile/MobileConversation';
 import MobileParticipants from '../../components/mobile/MobileParticipants';
 import MobileTilesView from '../../components/mobile/MobileTilesView';
 import RecordingInfo from '../../components/RecordingInfo';
+import { RouterContext } from '../../contexts/routerContext';
 
 export enum MobileMeetingView {
 	TILES = 'tiles',
@@ -34,15 +33,15 @@ const CustomContainer = styled(Container)`
 `;
 
 const MeetingSkeletonMobile = (): ReactElement => {
-	const { meetingId }: MeetingRoutesParams = useParams();
+	const { meetingId } = useContext(RouterContext);
 
 	const [view, setView] = useState<MobileMeetingView>(MobileMeetingView.TILES);
 
-	useGeneralMeetingControls(meetingId);
+	useGeneralMeetingControls(meetingId!);
 
 	const leaveMeeting = useCallback(() => {
 		const isLoggedUserExternal = useStore.getState().session.userType === UserType.GUEST;
-		MeetingsApi.leaveMeeting(meetingId);
+		MeetingsApi.leaveMeeting(meetingId!);
 		if (isLoggedUserExternal) {
 			BrowserUtils.clearAuthCookies();
 		}
@@ -57,14 +56,14 @@ const MeetingSkeletonMobile = (): ReactElement => {
 
 	return (
 		<Container background="gray0" padding={{ vertical: '4.4rem', horizontal: '1rem' }}>
-			<RecordingInfo meetingId={meetingId} />
+			<RecordingInfo meetingId={meetingId!} />
 			<Logo top="2rem" left="2rem" />
 			<CustomContainer>
-				{view === MobileMeetingView.TILES && <MobileTilesView meetingId={meetingId} />}
-				{view === MobileMeetingView.CHAT && <MobileConversation meetingId={meetingId} />}
-				{view === MobileMeetingView.PARTICIPANTS && <MobileParticipants meetingId={meetingId} />}
+				{view === MobileMeetingView.TILES && <MobileTilesView meetingId={meetingId!} />}
+				{view === MobileMeetingView.CHAT && <MobileConversation meetingId={meetingId!} />}
+				{view === MobileMeetingView.PARTICIPANTS && <MobileParticipants meetingId={meetingId!} />}
 			</CustomContainer>
-			<MobileActionBar meetingId={meetingId} view={view} setView={setView} />
+			<MobileActionBar meetingId={meetingId!} view={view} setView={setView} />
 		</Container>
 	);
 };

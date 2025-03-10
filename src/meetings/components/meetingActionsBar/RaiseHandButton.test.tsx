@@ -18,7 +18,7 @@ import {
 	createMockUser
 } from '../../../tests/createMock';
 import { MeetingsApiToSpy, spyOnMeetingsApi } from '../../../tests/mocks/network';
-import { setup } from '../../../tests/test-utils';
+import { routerContextSetup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 import { MemberBe, RoomBe } from '../../../types/network/models/roomBeTypes';
 import { UserBe } from '../../../types/network/models/userBeTypes';
@@ -68,7 +68,7 @@ const storeSetupGroupMeeting = (): { user: UserEvent; store: RootStore } => {
 	});
 	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
 	spyUseParams.mockReturnValue({ meetingId: meeting.id });
-	const { user } = setup(<RaiseHandButton />);
+	const { user } = routerContextSetup(<RaiseHandButton />, { meetingId: meeting.id });
 
 	return { user, store };
 };

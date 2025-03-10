@@ -3,13 +3,11 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import React, { ReactElement, useCallback, useEffect, useRef } from 'react';
+import React, { ReactElement, useCallback, useContext, useEffect, useRef } from 'react';
 
 import { Button, CreateSnackbarFn, Tooltip, useSnackbar } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
 
-import { MeetingRoutesParams } from '../../../hooks/useRouting';
 import { MeetingsApi } from '../../../network';
 import {
 	getUserHasHandRaised,
@@ -17,6 +15,7 @@ import {
 } from '../../../store/selectors/ActiveMeetingSelectors';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
+import { RouterContext } from '../../contexts/routerContext';
 
 const RaiseHandButton = (): ReactElement | null => {
 	const [t] = useTranslation();
@@ -28,23 +27,23 @@ const RaiseHandButton = (): ReactElement | null => {
 		'It sounds like you’re saying something, so your hand will be lowered. '
 	);
 
-	const { meetingId }: MeetingRoutesParams = useParams();
+	const { meetingId } = useContext(RouterContext);
 	const sessionId = useStore(getUserId);
 
-	const iAmTalking = useStore((store) => getUserIsTalking(store, meetingId ?? '', sessionId ?? ''));
+	const iAmTalking = useStore((store) => getUserIsTalking(store, meetingId!, sessionId ?? ''));
 	const iHaveHandRaised = useStore((store) =>
-		getUserHasHandRaised(store, meetingId, sessionId ?? '')
+		getUserHasHandRaised(store, meetingId!, sessionId ?? '')
 	);
 
 	const createSnackbar: CreateSnackbarFn = useSnackbar();
 
 	const toggleRaiseHand = useCallback(() => {
-		MeetingsApi.raiseHand(meetingId, !iHaveHandRaised);
+		MeetingsApi.raiseHand(meetingId!, !iHaveHandRaised);
 	}, [iHaveHandRaised, meetingId]);
 
 	const handleAutoHandDown = useCallback(() => {
 		setTimeout(() => {
-			MeetingsApi.raiseHand(meetingId, false).then(() => {
+			MeetingsApi.raiseHand(meetingId!, false).then(() => {
 				createSnackbar({
 					key: new Date().toLocaleString(),
 					severity: 'info',
@@ -66,7 +65,6 @@ const RaiseHandButton = (): ReactElement | null => {
 				}
 			}, 2000);
 		}
-		console.log(refTimeout.current, iAmTalking);
 		if (refTimeout.current !== undefined && !iAmTalking) {
 			clearTimeout(refTimeout.current);
 		}

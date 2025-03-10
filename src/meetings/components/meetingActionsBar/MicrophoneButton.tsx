@@ -4,16 +4,21 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { Dispatch, ReactElement, SetStateAction, useCallback, useMemo } from 'react';
+import React, {
+	Dispatch,
+	ReactElement,
+	SetStateAction,
+	useCallback,
+	useContext,
+	useMemo
+} from 'react';
 
 import { Tooltip } from '@zextras/carbonio-design-system';
 import { map } from 'lodash';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
 
 import { MultiActionButton } from './MultiActionButton';
 import useMediaDevices from '../../../hooks/useMediaDevices';
-import { MeetingRoutesParams } from '../../../hooks/useRouting';
 import { MeetingsApi } from '../../../network';
 import { getSelectedAudioDeviceId } from '../../../store/selectors/ActiveMeetingSelectors';
 import { getParticipantAudioStatus } from '../../../store/selectors/MeetingSelectors';
@@ -21,6 +26,7 @@ import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
 import { getAudioStream } from '../../../utils/UserMediaManager';
+import { RouterContext } from '../../contexts/routerContext';
 
 type MicButtonProps = {
 	audioDropdownRef: React.RefObject<HTMLDivElement>;
@@ -47,13 +53,13 @@ const MicrophoneButton = ({
 	);
 	const unknownDeviceLabel = t('meeting.interactions.unknownDevice', 'Unknown device');
 
-	const { meetingId }: MeetingRoutesParams = useParams();
+	const { meetingId } = useContext(RouterContext);
 	const myUserId = useStore(getUserId);
 	const audioStatus = useStore((store) => getParticipantAudioStatus(store, meetingId, myUserId));
-	const selectedAudioDeviceId = useStore((store) => getSelectedAudioDeviceId(store, meetingId));
+	const selectedAudioDeviceId = useStore((store) => getSelectedAudioDeviceId(store, meetingId!));
 	const setSelectedDeviceId = useStore((store) => store.setSelectedDeviceId);
 	const bidirectionalAudioConn = useStore(
-		(store) => store.activeMeeting[meetingId]?.bidirectionalAudioConn
+		(store) => store.activeMeeting[meetingId!]?.bidirectionalAudioConn
 	);
 	const websocketNetworkStatus = useStore(({ connections }) => connections.status.websocket);
 
@@ -64,10 +70,10 @@ const MicrophoneButton = ({
 			if (audioStatus) {
 				getAudioStream(true, true, audioItem.deviceId).then((stream) => {
 					bidirectionalAudioConn?.updateLocalStreamTrack(stream);
-					setSelectedDeviceId(meetingId, STREAM_TYPE.AUDIO, audioItem.deviceId);
+					setSelectedDeviceId(meetingId!, STREAM_TYPE.AUDIO, audioItem.deviceId);
 				});
 			} else {
-				setSelectedDeviceId(meetingId, STREAM_TYPE.AUDIO, audioItem.deviceId);
+				setSelectedDeviceId(meetingId!, STREAM_TYPE.AUDIO, audioItem.deviceId);
 			}
 		},
 		[audioStatus, bidirectionalAudioConn, meetingId, setSelectedDeviceId]
@@ -92,7 +98,7 @@ const MicrophoneButton = ({
 				getAudioStream(true, true, selectedAudioDeviceId)
 					.then((stream) => {
 						bidirectionalAudioConn?.updateLocalStreamTrack(stream).then(() => {
-							MeetingsApi.updateAudioStreamStatus(meetingId, !audioStatus);
+							MeetingsApi.updateAudioStreamStatus(meetingId!, !audioStatus);
 						});
 					})
 					.catch((e) => {
@@ -100,7 +106,7 @@ const MicrophoneButton = ({
 					});
 			} else {
 				bidirectionalAudioConn?.closeRtpSenderTrack();
-				MeetingsApi.updateAudioStreamStatus(meetingId, !audioStatus);
+				MeetingsApi.updateAudioStreamStatus(meetingId!, !audioStatus);
 			}
 		},
 		[audioStatus, bidirectionalAudioConn, meetingId, selectedAudioDeviceId]
