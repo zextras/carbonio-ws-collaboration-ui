@@ -3,16 +3,16 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import React, { ReactElement, useCallback, useEffect, useState } from 'react';
+import React, { ReactElement, useCallback, useContext, useEffect, useState } from 'react';
 
 import { Button, Container, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import usePiPWindow from '../../../hooks/usePipWindow';
-import useRouting, { MeetingRoutesParams, PAGE_INFO_TYPE } from '../../../hooks/useRouting';
+import useRouting from '../../../hooks/useRouting';
 import { MeetingsApi } from '../../../network';
+import { PAGE_INFO_TYPE, RouterContext } from '../../contexts/routerContext';
 
 const CustomContainer = styled(Container)`
 	> div > button > div {
@@ -44,7 +44,7 @@ const LeaveMeetingButton = ({
 
 	const { closePipWindow } = usePiPWindow();
 	const { goToInfoPage } = useRouting();
-	const { meetingId }: MeetingRoutesParams = useParams();
+	const { meetingId } = useContext(RouterContext);
 
 	const [active, setActive] = useState(false);
 	const [buttonLabel, setButtonLabel] = useState('');
@@ -61,7 +61,7 @@ const LeaveMeetingButton = ({
 	const leaveMeeting = useCallback(
 		(event: React.MouseEvent<HTMLButtonElement, MouseEvent> | KeyboardEvent) => {
 			event.stopPropagation();
-			MeetingsApi.leaveMeeting(meetingId).then(() => {
+			MeetingsApi.leaveMeeting(meetingId!).then(() => {
 				goToInfoPage(PAGE_INFO_TYPE.MEETING_ENDED);
 				if (isPip) {
 					closePipWindow();

@@ -4,19 +4,17 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { ReactElement, useCallback, useMemo } from 'react';
+import React, { ReactElement, useCallback, useContext, useMemo } from 'react';
 
 import { Button, Container, Tooltip } from '@zextras/carbonio-design-system';
 import { includes } from 'lodash';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import MeetingConversationAccordion from './MeetingConversationAccordion/MeetingConversationAccordion';
 import MeetingParticipantsAccordion from './ParticipantsAccordion/MeetingParticipantsAccordion';
 import RecordingAccordion from './recordingAccordion/RecordingAccordion';
 import WaitingListAccordion from './waitingListAccordion/WaitingListAccordion';
-import { MeetingRoutesParams } from '../../../hooks/useRouting';
 import {
 	getMeetingChatVisibility,
 	getMeetingSidebarStatus
@@ -33,6 +31,7 @@ import { RoomType } from '../../../types/store/RoomTypes';
 import BubblesWrapper from '../bubblesWrapper/BubblesWrapper';
 import VisualEffectsAccordion from './visualEffectsAccordion/VisualEffectsAccordion';
 import { getIsUserGuest } from '../../../store/selectors/UsersSelectors';
+import { RouterContext } from '../../contexts/routerContext';
 
 const SidebarContainer = styled(Container)`
 	position: relative;
@@ -62,7 +61,7 @@ const AccordionContainer = styled(Container)`
 `;
 
 const MeetingSidebar = (): ReactElement => {
-	const { meetingId }: MeetingRoutesParams = useParams();
+	const { meetingId } = useContext(RouterContext);
 
 	const [t] = useTranslation();
 	const collapseSidebarLabel = t('tooltip.collapseSidebar', 'Collapse sidebar');
@@ -70,11 +69,11 @@ const MeetingSidebar = (): ReactElement => {
 
 	const myUserId = useStore(getUserId);
 
-	const roomId = useStore((store) => getRoomIdByMeetingId(store, meetingId));
+	const roomId = useStore((store) => getRoomIdByMeetingId(store, meetingId!));
 	const roomType = useStore((store) => getRoomTypeSelector(store, roomId ?? ''));
 	const amIModerator = useStore((store) => getOwnershipOfTheRoom(store, roomId ?? ''));
-	const meetingChatVisibility = useStore((store) => getMeetingChatVisibility(store, meetingId));
-	const sidebarIsVisible: boolean = useStore((store) => getMeetingSidebarStatus(store, meetingId));
+	const meetingChatVisibility = useStore((store) => getMeetingChatVisibility(store, meetingId!));
+	const sidebarIsVisible: boolean = useStore((store) => getMeetingSidebarStatus(store, meetingId!));
 	const setMeetingSidebarStatus = useStore((store) => store.setMeetingSidebarStatus);
 	const isUserGuest = useStore((store) => getIsUserGuest(store, myUserId ?? ''));
 	const recordingEnabled = useStore((store) => getAttribute(store, 'recordingEnabled'));
@@ -83,7 +82,7 @@ const MeetingSidebar = (): ReactElement => {
 	);
 
 	const toggleSidebar = useCallback(
-		() => setMeetingSidebarStatus(meetingId, !sidebarIsVisible),
+		() => setMeetingSidebarStatus(meetingId!, !sidebarIsVisible),
 		[setMeetingSidebarStatus, meetingId, sidebarIsVisible]
 	);
 
@@ -120,16 +119,16 @@ const MeetingSidebar = (): ReactElement => {
 				>
 					{meetingChatVisibility !== MeetingChatVisibility.EXPANDED && (
 						<AccordionContainer height="fit" mainAlignment="flex-start">
-							{showRecordingAccordion && <RecordingAccordion meetingId={meetingId} />}
-							{showWaitingListAccordion && <WaitingListAccordion meetingId={meetingId} />}
-							{showParticipantsAccordion && <MeetingParticipantsAccordion meetingId={meetingId} />}
+							{showRecordingAccordion && <RecordingAccordion meetingId={meetingId!} />}
+							{showWaitingListAccordion && <WaitingListAccordion meetingId={meetingId!} />}
+							{showParticipantsAccordion && <MeetingParticipantsAccordion meetingId={meetingId!} />}
 							{(virtualBackgroundEnabled || isUserGuest) && (
-								<VisualEffectsAccordion meetingId={meetingId} />
+								<VisualEffectsAccordion meetingId={meetingId!} />
 							)}
 						</AccordionContainer>
 					)}
 				</Container>
-				<MeetingConversationAccordion roomId={roomId ?? ''} meetingId={meetingId} />
+				<MeetingConversationAccordion roomId={roomId ?? ''} meetingId={meetingId!} />
 			</Container>
 			<ChangeSidebarStatusButton>
 				<Tooltip

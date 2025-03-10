@@ -6,10 +6,11 @@
 
 import React from 'react';
 
-import { screen } from '@testing-library/react';
+import { act, screen } from '@testing-library/react';
 
 import Conversation from './Conversation';
 import { mockDarkReaderIsEnabled } from '../../../../__mocks__/darkreader';
+import { wsEventsHandler } from '../../../network/websocket/wsEventsHandler';
 import useStore from '../../../store/Store';
 import { createMockMember, createMockRoom, createMockUser } from '../../../tests/createMock';
 import { RoomsApiToSpy, spyOnRoomsApi } from '../../../tests/mocks/network';
@@ -17,6 +18,11 @@ import { mockUseMediaQueryCheck } from '../../../tests/mocks/useMediaQueryCheck'
 import { mockGoToMainPage } from '../../../tests/mocks/useRouting';
 import { setup } from '../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
+import {
+	RoomOwnerDemotedEvent,
+	RoomOwnerPromotedEvent
+} from '../../../types/network/websocket/wsConversationEvents';
+import { WsEventType } from '../../../types/network/websocket/wsEvents';
 import { User } from '../../../types/store/UserTypes';
 
 const testRoom: RoomBe = createMockRoom({
@@ -38,12 +44,16 @@ const testRoom2: RoomBe = createMockRoom({
 	type: RoomType.GROUP,
 	members: [
 		createMockMember({ userId: 'user1', owner: true }),
-		createMockMember({ userId: 'user2' })
+		createMockMember({ userId: 'user2', owner: true })
 	],
 	userSettings: { muted: false }
 });
 
-const user1Info: User = createMockUser();
+const user1Info: User = createMockUser({
+	id: 'user1',
+	email: 'user1@domain.com',
+	name: 'User 1'
+});
 
 const user2Info: User = createMockUser({
 	id: 'user2',
@@ -129,5 +139,53 @@ describe('Conversation view', () => {
 		setup(<Conversation roomId={testRoom.id} />);
 		const ConversationWrapper = screen.getByTestId('ConversationWrapper');
 		expect(ConversationWrapper).toHaveStyle(`background-image: url('papyrus-dark.png')`);
+	});
+
+	test('Add moderator and check everything is shown correctly', async () => {
+		act(() => {
+			useStore.getState().addRoom(testRoom);
+			useStore.getState().setLoginInfo(user1Info.id, user1Info.email, user1Info.name);
+			useStore.getState().setUserInfo(user1Info);
+			useStore.getState().setUserInfo(user2Info);
+		});
+		setup(<Conversation roomId={testRoom.id} />);
+		act(() => {
+			useStore.getState().promoteMemberToModerator(testRoom.id, user1Info.id);
+			wsEventsHandler({
+				type: WsEventType.ROOM_OWNER_PROMOTED,
+				sentDate: new Date().toISOString(),
+				roomId: testRoom.id,
+				userId: user1Info.id
+			} as RoomOwnerPromotedEvent);
+		});
+		const crownCounter = await screen.findAllByTestId('icon: Crown');
+		expect(crownCounter).toHaveLength(2);
+		const snackbar = await screen.findByText(
+			`Congratulations! You are now a moderator of ${testRoom.name} group.`
+		);
+		expect(snackbar).toBeInTheDocument();
+	});
+
+	test('Remove moderator and check everything is shown correctly', async () => {
+		act(() => {
+			useStore.getState().addRoom(testRoom2);
+			useStore.getState().setLoginInfo(user1Info.id, user1Info.email, user1Info.name);
+			useStore.getState().setUserInfo(user1Info);
+			useStore.getState().setUserInfo(user2Info);
+		});
+		setup(<Conversation roomId={testRoom2.id} />);
+		act(() => {
+			useStore.getState().demoteMemberFromModerator(testRoom2.id, user1Info.id);
+			wsEventsHandler({
+				type: WsEventType.ROOM_OWNER_DEMOTED,
+				sentDate: new Date().toISOString(),
+				roomId: testRoom2.id,
+				userId: user1Info.id
+			} as RoomOwnerDemotedEvent);
+		});
+		const snackbar = await screen.findByText(
+			`You are no longer a moderator of ${testRoom2.name} group.`
+		);
+		expect(snackbar).toBeInTheDocument();
 	});
 });

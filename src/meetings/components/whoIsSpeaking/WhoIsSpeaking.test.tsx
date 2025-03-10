@@ -6,7 +6,6 @@
 import React from 'react';
 
 import { screen } from '@testing-library/react';
-import * as ReactRouter from 'react-router';
 
 import WhoIsSpeaking from './WhoIsSpeaking';
 import useStore from '../../../store/Store';
@@ -17,7 +16,7 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../../tests/createMock';
-import { setup } from '../../../tests/test-utils';
+import { routerContextSetup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 import { RoomBe } from '../../../types/network/models/roomBeTypes';
 import { UserBe } from '../../../types/network/models/userBeTypes';
@@ -71,18 +70,18 @@ beforeEach(() => {
 
 describe('Who is speaking', () => {
 	test('Talking user in central tile is not displayed if the central tile is his video', () => {
-		const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
-		spyUseParams.mockReturnValue({ meetingId: meeting.id });
-		setup(<WhoIsSpeaking visibleTiles={[centralTileVideo]} />);
+		routerContextSetup(<WhoIsSpeaking visibleTiles={[centralTileVideo]} />, {
+			meetingId: meeting.id
+		});
 
 		expect(screen.getByText(user2.name)).toBeInTheDocument();
 		expect(screen.queryByText(user3.name)).not.toBeInTheDocument();
 	});
 
 	test('Talking user in central tile is displayed if the central tile is his screen', () => {
-		const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
-		spyUseParams.mockReturnValue({ meetingId: meeting.id });
-		setup(<WhoIsSpeaking visibleTiles={[centralTileScreen]} />);
+		routerContextSetup(<WhoIsSpeaking visibleTiles={[centralTileScreen]} />, {
+			meetingId: meeting.id
+		});
 
 		expect(screen.getByText(user2.name)).toBeInTheDocument();
 		expect(screen.getByText(user3.name)).toBeInTheDocument();

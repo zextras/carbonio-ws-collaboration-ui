@@ -8,9 +8,7 @@ import React from 'react';
 
 import { act, screen } from '@testing-library/react';
 import { UserEvent } from '@testing-library/user-event';
-import * as ReactRouter from 'react-router';
 
-import { PiPProvider } from './PictureInPictureProvider';
 import PictureInPictureView from './PictureInPictureView';
 import useStore from '../../../store/Store';
 import {
@@ -20,7 +18,7 @@ import {
 	createMockRoom,
 	createMockUser
 } from '../../../tests/createMock';
-import { setup } from '../../../tests/test-utils';
+import { routerContextSetup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 import { MemberBe, RoomBe } from '../../../types/network/models/roomBeTypes';
 import { UserBe } from '../../../types/network/models/userBeTypes';
@@ -71,13 +69,7 @@ const storeSetupGroupMeetingPip = (): { user: UserEvent; store: RootStore } => {
 	store.setLocalStreams(meeting.id, STREAM_TYPE.VIDEO, new MediaStream());
 	store.setAttributes(createMockAttributesList());
 	store.setTalkingUser(meeting.id, user2.id, true);
-	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
-	spyUseParams.mockReturnValue({ meetingId: meeting.id });
-	const { user } = setup(
-		<PiPProvider>
-			<PictureInPictureView />
-		</PiPProvider>
-	);
+	const { user } = routerContextSetup(<PictureInPictureView />, { meetingId: meeting.id });
 
 	return { user, store };
 };

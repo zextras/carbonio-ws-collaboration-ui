@@ -7,6 +7,10 @@
 import { useEffect, useRef } from 'react';
 
 import {
+	RoomOwnerDemotedEvent,
+	RoomOwnerPromotedEvent
+} from '../types/network/websocket/wsConversationEvents';
+import {
 	MeetingAudioStreamChangedEvent,
 	MeetingJoinedEvent,
 	MeetingParticipantClashedEvent,
@@ -33,7 +37,10 @@ export enum EventName {
 	MEETING_WAITING_PARTICIPANT_CLASHED = 'meetingWaitingParticipantClashed',
 	MEETING_STOPPED = 'meetingStopped',
 	MEETING_RECORDING_STARTED = 'meetingRecordingStarted',
-	MEETING_RECORDING_STOPPED = 'meetingRecordingStopped'
+	MEETING_RECORDING_STOPPED = 'meetingRecordingStopped',
+	MEMBER_PROMOTED = 'memberPromoted',
+	MEMBER_DEMOTED = 'memberDemoted',
+	ROUTE_REDIRECT = 'routeRedirect'
 }
 
 export type NewMessageEvent = {
@@ -96,6 +103,21 @@ export type RecordingStoppedEvent = {
 	data: MeetingRecordingStoppedEvent;
 };
 
+export type MemberPromotedEvent = {
+	name: EventName.MEMBER_PROMOTED;
+	data: RoomOwnerPromotedEvent;
+};
+
+export type MemberDemotedEvent = {
+	name: EventName.MEMBER_DEMOTED;
+	data: RoomOwnerDemotedEvent;
+};
+
+export type RouteRedirectEvent = {
+	name: EventName.ROUTE_REDIRECT;
+	data: { path: string };
+};
+
 type AppCustomEvent =
 	| NewMessageEvent
 	| IncomingMeetingEvent
@@ -108,7 +130,10 @@ type AppCustomEvent =
 	| MeetingWaitingParticipantClashedEvent
 	| RecordingStartedEvent
 	| RecordingStoppedEvent
-	| MeetingStoppedUseEvent;
+	| MeetingStoppedUseEvent
+	| MemberPromotedEvent
+	| MemberDemotedEvent
+	| RouteRedirectEvent;
 
 export const sendCustomEvent = (event: AppCustomEvent): void => {
 	window.dispatchEvent(new CustomEvent(event.name, { detail: event.data }));

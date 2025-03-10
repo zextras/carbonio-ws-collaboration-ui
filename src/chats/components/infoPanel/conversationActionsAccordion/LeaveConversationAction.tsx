@@ -44,9 +44,7 @@ const LeaveConversationAction: FC<LeaveProps> = ({ roomId, type, iAmOneOfOwner }
 
 	const leaveConversation = useCallback(() => {
 		if (sessionId) {
-			RoomsApi.deleteRoomMember(roomId, sessionId).then(() => {
-				goToMainPage();
-			});
+			RoomsApi.deleteRoomMember(roomId, sessionId).then(goToMainPage);
 		}
 	}, [goToMainPage, roomId, sessionId]);
 

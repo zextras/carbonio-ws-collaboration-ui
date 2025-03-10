@@ -4,15 +4,13 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { ReactElement, useMemo, useRef } from 'react';
+import React, { ReactElement, useContext, useMemo, useRef } from 'react';
 
 import { Container } from '@zextras/carbonio-design-system';
-import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import useGeneralMeetingControls from '../../hooks/useGeneralMeetingControls';
 import usePiPWindow from '../../hooks/usePipWindow';
-import { MeetingRoutesParams } from '../../hooks/useRouting';
 import { getMeetingViewSelected } from '../../store/selectors/ActiveMeetingSelectors';
 import { getNumberOfTiles } from '../../store/selectors/MeetingSelectors';
 import { getAttribute, getUserId } from '../../store/selectors/SessionSelectors';
@@ -29,6 +27,7 @@ import PictureInPictureView from '../components/pictureInPicture/PictureInPictur
 import RecordingInfo from '../components/RecordingInfo';
 import MeetingSidebar from '../components/sidebar/MeetingSidebar';
 import VirtualBackground from '../components/virtualBackground/VirtualBackground';
+import { RouterContext } from '../contexts/routerContext';
 
 const SkeletonContainer = styled(Container)`
 	overflow: hidden;
@@ -47,11 +46,11 @@ export type MeetingViewProps = {
 };
 
 const MeetingSkeleton = (): ReactElement => {
-	const { meetingId }: MeetingRoutesParams = useParams();
+	const { meetingId } = useContext(RouterContext);
 	const myUserId = useStore(getUserId);
 
-	const meetingViewSelected = useStore((store) => getMeetingViewSelected(store, meetingId));
-	const numberOfTiles = useStore((store) => getNumberOfTiles(store, meetingId));
+	const meetingViewSelected = useStore((store) => getMeetingViewSelected(store, meetingId!));
+	const numberOfTiles = useStore((store) => getNumberOfTiles(store, meetingId!));
 	const virtualBackgroundEnabled = useStore((store) =>
 		getAttribute(store, 'virtualBackgroundEnabled')
 	);
@@ -59,7 +58,7 @@ const MeetingSkeleton = (): ReactElement => {
 
 	const streamsWrapperRef = useRef<HTMLDivElement>(null);
 
-	useGeneralMeetingControls(meetingId);
+	useGeneralMeetingControls(meetingId!);
 
 	const ViewToDisplay = useMemo(() => {
 		if (numberOfTiles <= 2) {
@@ -92,7 +91,7 @@ const MeetingSkeleton = (): ReactElement => {
 						orientation="horizontal"
 						data-testid="meeting_view_container"
 					>
-						<RecordingInfo meetingId={meetingId} />
+						<RecordingInfo meetingId={meetingId!} />
 						<Logo />
 						<ViewToDisplay>
 							<MeetingActionsBar streamsWrapperRef={streamsWrapperRef} />

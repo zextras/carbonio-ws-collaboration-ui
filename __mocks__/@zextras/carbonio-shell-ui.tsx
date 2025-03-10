@@ -6,7 +6,7 @@
 import React from 'react';
 
 import * as Shell from '@zextras/carbonio-shell-ui';
-import { createMemoryHistory } from 'history';
+import { AnyFunction } from '@zextras/carbonio-shell-ui/lib/utils/typeUtils';
 
 import {
 	filesSelectFilesAction,
@@ -16,8 +16,6 @@ import {
 	getNode,
 	getNodeAvailable
 } from './carbonio-files-ui';
-
-const history = createMemoryHistory();
 
 export const USER_SETTINGS: Shell.AccountSettings = {
 	attrs: {},
@@ -49,22 +47,6 @@ export const NOTIFICATION_MANAGER = {
 	playSound: jest.fn()
 };
 
-function pushHistoryMock(location: Shell.HistoryParams): void {
-	if (typeof location === 'string') {
-		history.push(location);
-	} else {
-		history.push(location.path);
-	}
-}
-
-function replaceHistoryMock(location: Shell.HistoryParams): void {
-	if (typeof location === 'string') {
-		history.replace(location);
-	} else {
-		history.replace(location.path);
-	}
-}
-
 export const useAuthenticated: typeof Shell.useAuthenticated = (): boolean => false;
 
 export const useUserSettings: typeof Shell.useUserSettings = () => USER_SETTINGS;
@@ -78,13 +60,9 @@ export const getNotificationManager: typeof Shell.getNotificationManager = () =>
 
 export const SettingsHeader: typeof Shell.SettingsHeader = () => <div>settings header</div>;
 
-export const pushHistory: typeof Shell.pushHistory = pushHistoryMock;
-
-export const replaceHistory: typeof Shell.replaceHistory = replaceHistoryMock;
-
 export const t = (key: string, value: string): string => value;
 
-export const useIntegratedFunction: typeof Shell.useIntegratedFunction = (id) => {
+export const useIntegratedFunction: typeof Shell.useIntegratedFunction<AnyFunction> = (id) => {
 	switch (id) {
 		case 'get-node':
 			return [getNode, getNodeAvailable];
