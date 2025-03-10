@@ -148,6 +148,39 @@ describe('Meeting action bar - More actions button interactions', () => {
 		expect(mockRequestFullscreen).toHaveBeenCalledTimes(1);
 	});
 
+	test('When full screen mode is enabled in grid view, meeting sidebar will be closed ', async () => {
+		useStore.getState().setMeetingViewSelected(meeting.id, MeetingViewType.GRID);
+		const { user } = storeSetupGroupMeeting();
+
+		const moreActions = await screen.findByTestId(moreActionsTestId);
+		await user.click(moreActions);
+
+		const fullScreen = await screen.findByText(/Enable full screen/i);
+		await user.click(fullScreen);
+		const { sidebarIsOpened } = useStore.getState().activeMeeting[meeting.id].sidebarStatus;
+		expect(sidebarIsOpened).toBe(false);
+	});
+
+	test('When full screen mode is enabled in cinema view, meeting sidebar and carousel will be closed ', async () => {
+		useStore.getState().setMeetingViewSelected(meeting.id, MeetingViewType.CINEMA);
+		const { user } = storeSetupGroupMeeting();
+
+		const moreActions = await screen.findByTestId(moreActionsTestId);
+		await user.click(moreActions);
+
+		const switchButton = await screen.findByText(/Cinema view/i);
+		await user.click(switchButton);
+
+		await user.click(moreActions);
+
+		const fullScreen = await screen.findByText(/Enable full screen/i);
+		await user.click(fullScreen);
+		const { sidebarIsOpened } = useStore.getState().activeMeeting[meeting.id].sidebarStatus;
+		expect(sidebarIsOpened).toBe(false);
+		const { isCarouselVisible } = useStore.getState().activeMeeting[meeting.id];
+		expect(isCarouselVisible).toBe(false);
+	});
+
 	test('SwitchView button is not visible with one or two participants', async () => {
 		const { user } = storeSetupGroupMeetingWithOnePerson();
 
