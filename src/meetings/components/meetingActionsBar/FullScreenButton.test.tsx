@@ -5,80 +5,88 @@
  */
 import React from 'react';
 
-import { screen, act, renderHook } from '@testing-library/react';
-import { UserEvent } from '@testing-library/user-event';
-import * as ReactRouter from 'react-router';
+import { screen } from '@testing-library/react';
 
 import FullScreenButton from './FullScreenButton';
 import useStore from '../../../store/Store';
 import {
 	createMockMeeting,
+	createMockMember,
 	createMockParticipants,
 	createMockRoom,
 	createMockUser
 } from '../../../tests/createMock';
 import { requestFullscreen } from '../../../tests/mocks/global';
-import { setup } from '../../../tests/test-utils';
+import { routerContextSetup, setup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
-import { MemberBe, RoomBe } from '../../../types/network/models/roomBeTypes';
+import { RoomBe } from '../../../types/network/models/roomBeTypes';
 import { UserBe } from '../../../types/network/models/userBeTypes';
-import { MeetingParticipant } from '../../../types/store/MeetingTypes';
+import { MeetingViewType } from '../../../types/store/ActiveMeetingTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 
 const user1: UserBe = createMockUser({ id: 'user1Id', name: 'user 1' });
 const user2: UserBe = createMockUser({ id: 'user2Id', name: 'user 2' });
-const user3: UserBe = createMockUser({
-	id: 'user3Id',
-	name: 'user 3'
-});
-const member1: MemberBe = { userId: user1.id, owner: true };
-const member2: MemberBe = { userId: user2.id, owner: false };
-const member3: MemberBe = { userId: user3.id, owner: true };
+const user3: UserBe = createMockUser({ id: 'user3Id', name: 'user 3' });
 
 const room: RoomBe = createMockRoom({
-	name: '',
-	description: '',
 	type: RoomType.GROUP,
-	members: [member1, member2, member3]
+	members: [
+		createMockMember({ userId: user1.id, owner: true }),
+		createMockMember({ userId: user3.id }),
+		createMockMember({ userId: user2.id })
+	]
 });
-
-const user1Participant: MeetingParticipant = createMockParticipants({ userId: user1.id });
-
-const user3Participant: MeetingParticipant = createMockParticipants({ userId: user3.id });
-
-const user2Participant: MeetingParticipant = createMockParticipants({ userId: user2.id });
 
 const meeting: MeetingBe = createMockMeeting({
 	roomId: room.id,
-	participants: [user1Participant, user2Participant, user3Participant]
+	participants: [
+		createMockParticipants({ userId: user1.id }),
+		createMockParticipants({ userId: user3.id }),
+		createMockParticipants({ userId: user2.id })
+	]
 });
 
-const storeSetupGroupMeeting = (): { user: UserEvent } => {
-	const { result } = renderHook(() => useStore());
-	act(() => {
-		result.current.setUserInfo(user1);
-		result.current.setUserInfo(user2);
-		result.current.setUserInfo(user3);
-		result.current.setLoginInfo(user1.id, user1.name);
-		result.current.addRoom(room);
-		result.current.addMeeting(meeting);
-		result.current.meetingConnection(meeting.id, false, undefined, false, undefined);
-	});
-	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
-	spyUseParams.mockReturnValue({ meetingId: meeting.id });
-	const { user } = setup(<FullScreenButton />);
+const fullScreenTestId = 'fullscreen-button';
 
-	return { user };
-};
-
+beforeEach(() => {
+	const store = useStore.getState();
+	store.setLoginInfo(user1.id, user1.name);
+	store.addRoom(room);
+	store.addMeeting(meeting);
+	store.meetingConnection(meeting.id, false, undefined, false, undefined);
+});
 describe('Meeting action bar - Fullscreen button interaction', () => {
 	test('Check full screen mode is set correctly', async () => {
 		const mockRequestFullscreen = jest
 			.spyOn(document.documentElement, 'requestFullscreen')
 			.mockImplementation(requestFullscreen);
-		const { user } = storeSetupGroupMeeting();
-		const fullScreenButton = await screen.findByTestId('fullscreen-button');
+		const { user } = setup(<FullScreenButton />);
+		const fullScreenButton = await screen.findByTestId(fullScreenTestId);
 		await user.click(fullScreenButton);
 		expect(mockRequestFullscreen).toHaveBeenCalledTimes(1);
+	});
+
+	test('When full screen mode is enabled in grid view, meeting sidebar will be closed ', async () => {
+		useStore.getState().setMeetingViewSelected(meeting.id, MeetingViewType.GRID);
+		const { user } = routerContextSetup(<FullScreenButton />, {
+			meetingId: meeting.id
+		});
+		const fullScreenButton = await screen.findByTestId(fullScreenTestId);
+		await user.click(fullScreenButton);
+		const { sidebarIsOpened } = useStore.getState().activeMeeting[meeting.id].sidebarStatus;
+		expect(sidebarIsOpened).toBe(false);
+	});
+
+	test('When full screen mode is enabled in cinema view, meeting sidebar and carousel will be closed ', async () => {
+		useStore.getState().setMeetingViewSelected(meeting.id, MeetingViewType.CINEMA);
+		const { user } = routerContextSetup(<FullScreenButton />, {
+			meetingId: meeting.id
+		});
+		const fullScreenButton = await screen.findByTestId(fullScreenTestId);
+		await user.click(fullScreenButton);
+		const { sidebarIsOpened } = useStore.getState().activeMeeting[meeting.id].sidebarStatus;
+		expect(sidebarIsOpened).toBe(false);
+		const { isCarouselVisible } = useStore.getState().activeMeeting[meeting.id];
+		expect(isCarouselVisible).toBe(false);
 	});
 });

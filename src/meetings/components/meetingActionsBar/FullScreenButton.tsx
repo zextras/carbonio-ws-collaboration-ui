@@ -9,8 +9,9 @@ import { Button, Tooltip } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
 import useFullScreen from '../../../hooks/useFullScreen';
-import { getMeetingSidebarStatus } from '../../../store/selectors/ActiveMeetingSelectors';
+import { getMeetingViewSelected } from '../../../store/selectors/ActiveMeetingSelectors';
 import useStore from '../../../store/Store';
+import { MeetingViewType } from '../../../types/store/ActiveMeetingTypes';
 import { RouterContext } from '../../contexts/routerContext';
 
 const FullScreenButton = (): ReactElement => {
@@ -21,8 +22,9 @@ const FullScreenButton = (): ReactElement => {
 
 	const { meetingId } = useContext(RouterContext);
 
-	const sidebarIsVisible: boolean = useStore((store) => getMeetingSidebarStatus(store, meetingId!));
+	const meetingView = useStore((store) => getMeetingViewSelected(store, meetingId!));
 	const setMeetingSidebarStatus = useStore((store) => store.setMeetingSidebarStatus);
+	const setIsCarouselVisible = useStore((store) => store.setIsCarouseVisible);
 
 	const { isFullScreen, toggleFullScreen } = useFullScreen();
 
@@ -37,11 +39,21 @@ const FullScreenButton = (): ReactElement => {
 	);
 
 	const toggleFullScreenFn = useCallback((): void => {
-		if (sidebarIsVisible && !isFullScreen) {
+		if (!isFullScreen) {
 			setMeetingSidebarStatus(meetingId!, false);
+			if (meetingView === MeetingViewType.CINEMA) {
+				setIsCarouselVisible(meetingId!, false);
+			}
 		}
 		toggleFullScreen();
-	}, [sidebarIsVisible, isFullScreen, toggleFullScreen, setMeetingSidebarStatus, meetingId]);
+	}, [
+		isFullScreen,
+		toggleFullScreen,
+		setMeetingSidebarStatus,
+		meetingId,
+		meetingView,
+		setIsCarouselVisible
+	]);
 
 	useEffect(() => {
 		window.addEventListener('keydown', checkKeyPress, true);
