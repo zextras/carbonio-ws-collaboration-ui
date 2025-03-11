@@ -18,13 +18,12 @@ import { Container } from '@zextras/carbonio-design-system';
 import styled from 'styled-components';
 
 import CameraButton from './CameraButton';
-import FullScreenButton from './FullScreenButton';
 import LeaveMeetingButton from './LeaveMeetingButton';
 import MeetingDuration from './MeetingDuration';
 import MicrophoneButton from './MicrophoneButton';
-import PictureInPictureButton from './PictureInPictureButton';
+import MoreActionsButton from './MoreActionsButton';
+import RaiseHandButton from './RaiseHandButton';
 import ScreenShareButton from './ScreenShareButton';
-import SwitchViewButton from './SwitchViewButton';
 import useContainerDimensions from '../../../hooks/useContainerDimensions';
 import { RouterContext } from '../../contexts/routerContext';
 
@@ -206,9 +205,8 @@ const MeetingActionsBar = ({ streamsWrapperRef }: MeetingActionsProps): ReactEle
 					setIsAudioListOpen={setIsAudioListOpen}
 				/>
 				<ScreenShareButton />
-				<FullScreenButton />
-				<SwitchViewButton />
-				<PictureInPictureButton />
+				<RaiseHandButton />
+				<MoreActionsButton />
 				{compactMode && (
 					<>
 						<MeetingDuration meetingId={meetingId} />

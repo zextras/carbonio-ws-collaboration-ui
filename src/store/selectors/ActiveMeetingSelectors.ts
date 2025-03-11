@@ -111,3 +111,11 @@ export const getBackgroundImage = (store: RootStore, meetingId: string): Virtual
 
 export const getUpdatedStream = (store: RootStore, meetingId: string): MediaStream | undefined =>
 	store.activeMeeting[meetingId]?.virtualBackground?.updatedStream;
+
+export const getUserHasHandRaised = (
+	store: RootStore,
+	meetingId: string,
+	userId: string
+): boolean =>
+	find(store.activeMeeting[meetingId]?.usersWithHandRaised, (user) => user === userId) !==
+	undefined;
