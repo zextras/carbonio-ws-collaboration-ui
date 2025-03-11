@@ -218,6 +218,7 @@ export type ActiveMeetingSlice = {
 	setBackgroundStream: (meetingId: string, stream: MediaStream) => void;
 	removeBackgroundStream: (meetingId: string) => void;
 	setBackgroundImage: (meetingId: string, image: VirtualBackgroundType) => void;
+	setUserWithHandRaised: (meetingId: string, userId: string, isRaised: boolean) => void;
 };
 
 export type RootStore = UsersStoreSlice &

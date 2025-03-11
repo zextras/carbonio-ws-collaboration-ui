@@ -14,7 +14,11 @@ import TileHoverContainer, { HoverContainer } from './TileHoverContainer';
 import TileUserInfo from './TileUserInfo';
 import useMuteForAll from '../../../hooks/useMuteForAll';
 import usePinnedTile from '../../../hooks/usePinnedTile';
-import { getUserIsTalking, getStream } from '../../../store/selectors/ActiveMeetingSelectors';
+import {
+	getUserIsTalking,
+	getStream,
+	getUserHasHandRaised
+} from '../../../store/selectors/ActiveMeetingSelectors';
 import {
 	getParticipantAudioStatus,
 	getParticipantVideoStatus
@@ -43,6 +47,7 @@ const CustomTile = styled(Container)<{
 	$isTalking: boolean;
 	$isHovering: boolean;
 	$isPip: boolean;
+	$isHandRaised: boolean;
 }>`
 	position: relative;
 	aspect-ratio: 16/9;
@@ -51,6 +56,8 @@ const CustomTile = styled(Container)<{
 	border-radius: 0.5rem;
 	${({ $isTalking, $isPip, theme }): string | false =>
 		!$isPip && $isTalking && `outline: 0.125rem solid ${theme.palette.success.regular};`}
+	${({ $isHandRaised, $isPip, theme }): string | false =>
+		!$isPip && $isHandRaised && `outline: 0.125rem solid ${theme.palette.warning.regular};`}
 	&:hover {
 		${HoverContainer} {
 			opacity: ${({ $isHovering, $isPip }): number => (!$isPip && $isHovering ? 1 : 0)};
@@ -86,6 +93,9 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 	const audioStatus = useStore((store) => getParticipantAudioStatus(store, meetingId, userId));
 	const videoStatus = useStore((store) => getParticipantVideoStatus(store, meetingId, userId));
 	const userIsTalking = useStore((store) => getUserIsTalking(store, meetingId ?? '', userId ?? ''));
+	const userHasHandRaised = useStore((store) =>
+		getUserHasHandRaised(store, meetingId ?? '', userId ?? '')
+	);
 	const videoStream = useStore((store) =>
 		getStream(
 			store,
@@ -173,6 +183,7 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 			ref={hoverRef}
 			$isHovering={isHoovering}
 			$isPip={!!isPip}
+			$isHandRaised={userHasHandRaised}
 		>
 			{showHoverContainer && (
 				<TileHoverContainer
@@ -188,6 +199,7 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 				videoStreamEnabled={videoStreamEnabled}
 				audioStreamEnabled={audioStreamEnabled}
 				isScreenShare={isScreenShare}
+				isHandRaised={userHasHandRaised}
 			/>
 			<VideoEl
 				playsInline

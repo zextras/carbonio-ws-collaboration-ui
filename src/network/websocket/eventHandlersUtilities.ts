@@ -54,7 +54,8 @@ export const getEventArea = (eventType: WsEventType): EventArea | undefined => {
 		case WsEventType.MEETING_USER_REJECTED:
 		case WsEventType.MEETING_WAITING_PARTICIPANT_CLASHED:
 		case WsEventType.MEETING_RECORDING_STARTED:
-		case WsEventType.MEETING_RECORDING_STOPPED: {
+		case WsEventType.MEETING_RECORDING_STOPPED:
+		case WsEventType.MEETING_PARTICIPANT_HAND_RAISED: {
 			return EventArea.MEETING;
 		}
 		default: {

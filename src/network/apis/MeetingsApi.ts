@@ -28,6 +28,7 @@ import {
 	LeaveMeetingResponse,
 	ListMeetingsResponse,
 	LoginV3ConfigResponse,
+	RaiseHandResponse,
 	StartMeetingResponse,
 	StartRecordingResponse,
 	StopMeetingResponse,
@@ -283,6 +284,10 @@ class MeetingsApi implements IMeetingsApi {
 			name: recordingName,
 			folderId
 		});
+	}
+
+	public raiseHand(meetingId: string, value: boolean): Promise<RaiseHandResponse> {
+		return fetchAPI(`meetings/${meetingId}/hand`, RequestType.PUT, { raised: value });
 	}
 
 	public authLogin(): Promise<LoginV3ConfigResponse> {

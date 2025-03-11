@@ -251,6 +251,21 @@ describe('Tile test - on meeting', () => {
 		expect(screen.queryByTestId(iconVideoOffOutline)).not.toBeInTheDocument();
 		expect(screen.getByTestId('icon: ScreenSharingOnOutline')).toBeInTheDocument();
 	});
+
+	test('Hand raised', async () => {
+		storeBasicActiveMeetingSetup();
+		setup(<Tile userId={user1.id} meetingId={meeting.id} isScreenShare />);
+
+		act(() => {
+			useStore.getState().setUserWithHandRaised(meeting.id, user1.id, true);
+		});
+
+		const tile = screen.getByTestId('tile');
+		expect(tile).toHaveStyle('outline: 0.125rem solid #ffc107;');
+
+		const hand = await screen.findByTestId('icon: Hand');
+		expect(hand).toBeInTheDocument();
+	});
 });
 
 describe('Tile actions', () => {
