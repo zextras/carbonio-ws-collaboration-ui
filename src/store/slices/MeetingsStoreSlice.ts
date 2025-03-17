@@ -20,7 +20,7 @@ export const useMeetingsStoreSlice: StateCreator<
 	[['zustand/devtools', never]],
 	[],
 	MeetingsSlice
-> = (set) => ({
+> = (set, get) => ({
 	meetings: {},
 	setMeetings: (meetings: MeetingBe[]): void => {
 		set(
@@ -179,14 +179,14 @@ export const useMeetingsStoreSlice: StateCreator<
 	changeStreamStatus: (
 		meetingId: string,
 		userId: string,
-		stream: STREAM_TYPE,
+		streamType: STREAM_TYPE,
 		status: boolean
 	): void => {
 		set(
 			produce((draft: RootStore) => {
 				const meeting = find(draft.meetings, (meeting) => meeting.id === meetingId);
 				if (meeting) {
-					switch (stream) {
+					switch (streamType) {
 						case STREAM_TYPE.AUDIO:
 							draft.meetings[meeting.roomId].participants[userId].audioStreamOn = status;
 							break;
@@ -207,6 +207,10 @@ export const useMeetingsStoreSlice: StateCreator<
 			false,
 			'MEETINGS/CHANGE_STREAM_STATUS'
 		);
+		// Auto pin new screen share
+		if (streamType === STREAM_TYPE.SCREEN && status) {
+			get().setPinnedTile(meetingId, { userId, type: streamType });
+		}
 	},
 	setWaitingList: (meetingId: string, waitingList: string[]): void => {
 		set(

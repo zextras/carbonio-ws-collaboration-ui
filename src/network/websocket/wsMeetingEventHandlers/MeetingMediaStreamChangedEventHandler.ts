@@ -28,11 +28,6 @@ export const meetingMediaStreamChangedEventHandler = (
 
 	state.changeStreamStatus(event.meetingId, event.userId, mediaType, event.active);
 
-	// Auto pin new screen share
-	if (mediaType === STREAM_TYPE.SCREEN && event.active) {
-		state.setPinnedTile(event.meetingId, { userId: event.userId, type: mediaType });
-	}
-
 	// Send audio feedback of session user screen sharing
 	if (isMeetingActive(event.meetingId) && mediaType === STREAM_TYPE.SCREEN) {
 		sendAudioFeedback(MeetingSoundFeedback.MEETING_SCREENSHARE_NOTIFICATION);

@@ -31,6 +31,20 @@ const useTilesOrder = (meetingId: string): { centralTile: TileData; carouselTile
 
 	const [tiles, setTiles] = useState<TileData[]>(tilesData);
 
+	// Add/remove tiles when tilesData changes
+	useEffect(() => {
+		if (size(tilesData) > size(tiles)) {
+			setTiles((tiles) => {
+				const newTiles = differenceWith(tilesData, tiles, isEqual);
+				return [...tiles, ...newTiles];
+			});
+		}
+
+		if (size(tilesData) < size(tiles)) {
+			setTiles((tiles) => intersectionWith(tiles, tilesData, isEqual));
+		}
+	}, [tilesData, tiles]);
+
 	// Swap new pinned tile with the first tile
 	useEffect(() => {
 		if (pinnedTile) {
@@ -48,20 +62,6 @@ const useTilesOrder = (meetingId: string): { centralTile: TileData; carouselTile
 			});
 		}
 	}, [pinnedTile]);
-
-	// Add/remove tiles when tilesData changes
-	useEffect(() => {
-		if (size(tilesData) > size(tiles)) {
-			setTiles((tiles) => {
-				const newTiles = differenceWith(tilesData, tiles, isEqual);
-				return [...tiles, ...newTiles];
-			});
-		}
-
-		if (size(tilesData) < size(tiles)) {
-			setTiles((tiles) => intersectionWith(tiles, tilesData, isEqual));
-		}
-	}, [tilesData, tiles]);
 
 	const checkIfIsStillTalking = useCallback(
 		(prevFirstIsTalking: string) => {
