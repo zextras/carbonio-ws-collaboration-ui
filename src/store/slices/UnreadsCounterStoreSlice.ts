@@ -13,9 +13,12 @@ import { Message, MessageType } from '../../types/store/MessageTypes';
 import { RootStore, UnreadsCounterSlice } from '../../types/store/StoreTypes';
 import { isBefore } from '../../utils/dateUtils';
 
-export const useUnreadsCountStoreSlice: StateCreator<UnreadsCounterSlice> = (
-	set: (...any: any) => void
-) => ({
+export const useUnreadsCountStoreSlice: StateCreator<
+	RootStore,
+	[['zustand/devtools', never]],
+	[],
+	UnreadsCounterSlice
+> = (set) => ({
 	unreads: {},
 	addUnreadCount: (roomId: string, counter: number): void => {
 		set(

@@ -15,7 +15,12 @@ import { MeetingParticipant, MeetingParticipantMap } from '../../types/store/Mee
 import { MeetingsSlice, RootStore } from '../../types/store/StoreTypes';
 import { dateToISODate } from '../../utils/dateUtils';
 
-export const useMeetingsStoreSlice: StateCreator<MeetingsSlice> = (set: (...any: any) => void) => ({
+export const useMeetingsStoreSlice: StateCreator<
+	RootStore,
+	[['zustand/devtools', never]],
+	[],
+	MeetingsSlice
+> = (set) => ({
 	meetings: {},
 	setMeetings: (meetings: MeetingBe[]): void => {
 		set(

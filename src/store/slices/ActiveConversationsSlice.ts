@@ -19,9 +19,12 @@ import {
 import { ActiveConversationsSlice, RootStore } from '../../types/store/StoreTypes';
 import { isBefore } from '../../utils/dateUtils';
 
-export const useActiveConversationsSlice: StateCreator<ActiveConversationsSlice> = (
-	set: (...any: any) => void
-) => ({
+export const useActiveConversationsSlice: StateCreator<
+	RootStore,
+	[['zustand/devtools', never]],
+	[],
+	ActiveConversationsSlice
+> = (set) => ({
 	activeConversations: {},
 	setInputHasFocus: (roomId: string, hasFocus: boolean): void => {
 		set(
@@ -66,8 +69,8 @@ export const useActiveConversationsSlice: StateCreator<ActiveConversationsSlice>
 
 				// If a user stops writing remove it from the list
 				if (!writingStatus && isUserYetInWritingList) {
-					remove(draft.activeConversations[roomId].isWritingList!, (id) => id === userId);
-					if (draft.activeConversations[roomId].isWritingList!.length === 0) {
+					remove(draft.activeConversations[roomId].isWritingList, (id) => id === userId);
+					if (draft.activeConversations[roomId].isWritingList.length === 0) {
 						delete draft.activeConversations[roomId].isWritingList;
 					}
 				}

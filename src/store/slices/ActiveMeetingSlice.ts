@@ -23,9 +23,12 @@ import {
 } from '../../types/store/ActiveMeetingTypes';
 import { ActiveMeetingSlice, RootStore } from '../../types/store/StoreTypes';
 
-export const useActiveMeetingSlice: StateCreator<ActiveMeetingSlice> = (
-	set: (...any: any) => void
-) => ({
+export const useActiveMeetingSlice: StateCreator<
+	RootStore,
+	[['zustand/devtools', never]],
+	[],
+	ActiveMeetingSlice
+> = (set) => ({
 	activeMeeting: {},
 	meetingConnection: (
 		meetingId: string,

@@ -16,8 +16,6 @@ import initIntegrations from './integrations/initIntegrations';
 import MeetingNotificationHandler from './meetings/components/MeetingNotificationsHandler';
 import initMeetings from './meetings/initMeetings';
 import { MeetingsApi, RoomsApi, SessionApi } from './network';
-import { WebSocketClient } from './network/websocket/WebSocketClient';
-import XMPPClient from './network/xmpp/XMPPClient';
 import WaitingListSnackbar from './settings/components/WaitingListSnackbar';
 import initSettings from './settings/initSettings';
 import useStore from './store/Store';
@@ -26,8 +24,6 @@ import { setDateDefault } from './utils/dateUtils';
 
 export default function App(): React.JSX.Element {
 	const setLoginInfo = useStore((state) => state.setLoginInfo);
-	const setXmppClient = useStore((state) => state.setXmppClient);
-	const setWebSocketClient = useStore((state) => state.setWebSocketClient);
 	const setChatsBeStatus = useStore((state) => state.setChatsBeStatus);
 
 	const authenticated = useAuthenticated();
@@ -49,12 +45,6 @@ export default function App(): React.JSX.Element {
 	// NETWORKS: init XMPP and WebSocket clients
 	useEffect(() => {
 		if (authenticated) {
-			// NETWORKS: init XMPP and WebSocket clients
-			const xmppClient = new XMPPClient();
-			setXmppClient(xmppClient);
-			const webSocket = new WebSocketClient();
-			setWebSocketClient(webSocket);
-
 			Promise.all([
 				SessionApi.getToken(),
 				SessionApi.getCapabilities(),
@@ -64,12 +54,13 @@ export default function App(): React.JSX.Element {
 				.then((resp) => {
 					setChatsBeStatus(true);
 					// Init xmppClient and webSocket after roomList request to avoid missing data (specially for the inbox request)
+					const { xmppClient, wsClient } = useStore.getState().connections;
 					xmppClient.connect(resp[0].zmToken);
-					webSocket.connect();
+					wsClient.connect();
 				})
 				.catch(() => setChatsBeStatus(false));
 		}
-	}, [authenticated, setChatsBeStatus, setWebSocketClient, setXmppClient]);
+	}, [authenticated, setChatsBeStatus]);
 
 	initChats();
 	initMeetings();

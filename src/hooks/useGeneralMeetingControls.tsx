@@ -86,7 +86,6 @@ const useGeneralMeetingControls = (meetingId: string): void => {
 			(tile) => tile.userId === pinnedTile?.userId && tile.type === pinnedTile?.type
 		);
 		if (pinnedTile) {
-			const { setPinnedTile } = useStore.getState();
 			// Remove pin in face to face mode || Remove pin video if participant left
 			if (size(tiles) < 3 || (isDisappeared && pinnedTile?.type === STREAM_TYPE.VIDEO)) {
 				setPinnedTile(meetingId, undefined);
@@ -97,7 +96,7 @@ const useGeneralMeetingControls = (meetingId: string): void => {
 				setPinnedTile(meetingId, screenToPin);
 			}
 		}
-	}, [tiles, meetingId]);
+	}, [tiles, meetingId, setPinnedTile]);
 
 	// Pin screen share tile if I join a meeting with it (to do only once after join)
 	useEffect(() => {
