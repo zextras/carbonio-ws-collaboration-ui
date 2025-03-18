@@ -85,8 +85,11 @@ describe('Sidebar interactions', () => {
 	test('Enable full screen and sidebar must be closed', async () => {
 		const { user } = storeSetupGroupMeetingSkeleton();
 		await waitFor(() => user.hover(screen.getByTestId(meetingActionBarLabel)));
-		const fullScreenButton = await screen.findByTestId('fullscreen-button');
-		await user.click(fullScreenButton);
+		const moreActions = await screen.findByTestId('more-actions');
+		await user.click(moreActions);
+
+		const fullScreen = await screen.findByText(/Enable full screen/i);
+		await user.click(fullScreen);
 
 		const meetingSidebar = screen.queryByTestId('meeting_sidebar');
 		expect(meetingSidebar).toHaveStyle('width: 0');

@@ -25,6 +25,7 @@ export type ActiveMeeting = {
 	pinnedTile?: PinnedTile;
 	virtualBackground: VirtualBackground;
 	talkingUsers: string[];
+	usersWithHandRaised: string[];
 };
 
 export type ActiveMeetingMap = {

@@ -57,7 +57,8 @@ export const meetingEvents = [
 	WsEventType.MEETING_USER_REJECTED,
 	WsEventType.MEETING_WAITING_PARTICIPANT_CLASHED,
 	WsEventType.MEETING_RECORDING_STARTED,
-	WsEventType.MEETING_RECORDING_STOPPED
+	WsEventType.MEETING_RECORDING_STOPPED,
+	WsEventType.MEETING_PARTICIPANT_HAND_RAISED
 ];
 
 describe('eventHandlersUtilities tests', () => {

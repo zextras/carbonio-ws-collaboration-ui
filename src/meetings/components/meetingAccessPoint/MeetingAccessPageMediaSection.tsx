@@ -287,7 +287,9 @@ const MeetingAccessPageMediaSection: FC<AccessMeetingPageMediaSectionProps> = ({
 			<Container mainAlignment="flex-start" crossAlignment="flex-start" gap="1rem">
 				<Container mainAlignment="center" crossAlignment="center" gap="2rem">
 					<AlignWrapper height="fit">
-						<Text size="large">{howToJoinMeeting}</Text>
+						<Text size="large" overflow="break-word">
+							{howToJoinMeeting}
+						</Text>
 						<Padding bottom="0.25rem" />
 						<Text>{setInputDevicesLabel}</Text>
 					</AlignWrapper>

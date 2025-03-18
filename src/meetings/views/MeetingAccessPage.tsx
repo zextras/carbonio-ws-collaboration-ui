@@ -21,6 +21,10 @@ const CustomContainer = styled(Container)`
 	bottom: 3rem;
 `;
 
+const CustomTextContainer = styled(Container)`
+	text-align: center;
+`;
+
 const MeetingAccessPage = (): ReactElement => {
 	const [t] = useTranslation();
 	const leave = t('action.leave', 'Leave');
@@ -93,13 +97,13 @@ const MeetingAccessPage = (): ReactElement => {
 
 	return (
 		<ShowMeetingAccessPage>
-			<Container>
+			<Container maxWidth="45%">
 				<Container mainAlignment="center" crossAlignment="center" gap="1.5rem">
-					<Container height="fit" width="fit">
-						<Text size="extralarge" weight="bold">
+					<CustomTextContainer height="fit" width="fit">
+						<Text size="extralarge" weight="bold" overflow="break-word">
 							{accessTitle}
 						</Text>
-					</Container>
+					</CustomTextContainer>
 					<MeetingAccessPageMediaSection
 						streamTrack={streamTrack}
 						setStreamTrack={setStreamTrack}

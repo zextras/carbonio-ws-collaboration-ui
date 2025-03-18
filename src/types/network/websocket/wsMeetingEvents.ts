@@ -27,7 +27,8 @@ export type WsMeetingEvent =
 	| MeetingUserRejectedEvent
 	| MeetingWaitingParticipantClashed
 	| MeetingRecordingStartedEvent
-	| MeetingRecordingStoppedEvent;
+	| MeetingRecordingStoppedEvent
+	| MeetingParticipantHandRaisedEvent;
 
 type BasicMeetingEvent = {
 	sentDate: string;
@@ -140,4 +141,10 @@ export type MeetingRecordingStartedEvent = BasicMeetingEvent & {
 export type MeetingRecordingStoppedEvent = BasicMeetingEvent & {
 	type: WsEventType.MEETING_RECORDING_STOPPED;
 	userId: string;
+};
+
+export type MeetingParticipantHandRaisedEvent = BasicMeetingEvent & {
+	type: WsEventType.MEETING_PARTICIPANT_HAND_RAISED;
+	userId: string;
+	raised: boolean;
 };

@@ -50,7 +50,8 @@ export enum MeetingsApiToSpy {
 	STOP_RECORDING = 'stopRecording',
 	ACCEPT_WAITING_USER = 'acceptWaitingUser',
 	AUTH_LOGIN = 'authLogin',
-	CREATE_GUEST_ACCOUNT = 'createGuestAccount'
+	CREATE_GUEST_ACCOUNT = 'createGuestAccount',
+	RAISE_HAND = 'raiseHand'
 }
 
 export const spyOnAttachmentsApi: (apiToSpy: AttachmentsApiToSpy) => jest.SpyInstance = (
