@@ -15,6 +15,7 @@ import MessageComposer from './MessageComposer';
 import UploadAttachmentManagerView from './UploadAttachmentManagerView';
 import useStore from '../../../../store/Store';
 import {
+	createMockAttributesList,
 	createMockFile,
 	createMockMember,
 	createMockRoom,
@@ -88,6 +89,7 @@ const storeSetupAdvanced = (): { user: UserEvent; store: RootStore } => {
 const storeSetupGroup = (): { user: UserEvent; store: RootStore } => {
 	const store = useStore.getState();
 	store.setLoginInfo('idPaolo', 'Paolo');
+	store.setAttributes(createMockAttributesList({ carbonioWscMessageEditTimeLimit: '5m' }));
 	store.addRoom(mockedRoom);
 	store.newMessage(mockedMessage);
 	const { user } = setup(
@@ -796,7 +798,6 @@ describe('MessageComposer - draft message', () => {
 
 	test('ArrowUp triggers edit when last message is sent by me', async () => {
 		const { user } = storeSetupGroup();
-
 		await user.keyboard('{ArrowUp}');
 
 		const composerTextArea = screen.getByRole('textbox');

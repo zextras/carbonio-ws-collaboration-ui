@@ -14,11 +14,10 @@ import ActionComponent from './ActionComponent';
 import AddNewMemberModal from './AddNewMemberModal';
 import { RoomsApi } from '../../../../network';
 import { getRoomMembers, getRoomNameSelector } from '../../../../store/selectors/RoomsSelectors';
-import { getCapability } from '../../../../store/selectors/SessionSelectors';
+import { getAttribute } from '../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../store/Store';
 import { AddMemberFields } from '../../../../types/network/models/roomBeTypes';
 import { Member } from '../../../../types/store/RoomTypes';
-import { CapabilityType } from '../../../../types/store/SessionTypes';
 import { ContactsSelected } from '../../contactSelector/ContactsSelector';
 
 type AddNewMemberProps = {
@@ -35,7 +34,7 @@ const AddNewMemberAction: FC<AddNewMemberProps> = ({ roomId }) => {
 
 	const members: Member[] = useStore((state) => getRoomMembers(state, roomId));
 	const roomName: string = useStore((state) => getRoomNameSelector(state, roomId));
-	const maxMembers = useStore((store) => getCapability(store, CapabilityType.MAX_GROUP_MEMBERS));
+	const maxMembers = useStore((store) => getAttribute(store, 'maxGroupMembers')) as number;
 
 	const [contactsSelected, setContactsSelected] = useState<ContactsSelected>([]);
 	const [addNewMemberModalOpen, setAddNewMemberModalOpen] = useState<boolean>(false);
@@ -58,7 +57,7 @@ const AddNewMemberAction: FC<AddNewMemberProps> = ({ roomId }) => {
 		RoomsApi.addRoomMembers(roomId, members).then(() => closeModal());
 	}, [closeModal, contactsSelected, roomId, showHistory]);
 
-	const addMemberDisabled = useMemo(() => maxMembers === size(members), [maxMembers, members]);
+	const addMemberDisabled = useMemo(() => maxMembers <= size(members), [maxMembers, members]);
 
 	return (
 		<Container>

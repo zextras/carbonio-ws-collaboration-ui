@@ -9,7 +9,7 @@ import { screen } from '@testing-library/react';
 
 import VirtualRoomsButton from './VirtualRoomsButton';
 import useStore from '../../../../store/Store';
-import { createMockCapabilityList, createMockUser } from '../../../../tests/createMock';
+import { createMockAttributesList, createMockUser } from '../../../../tests/createMock';
 import { RoomsApiToSpy, spyOnRoomsApi } from '../../../../tests/mocks/network';
 import { mockSearchUsersByFeatureRequest } from '../../../../tests/mocks/SearchUsersByFeature';
 import { setup } from '../../../../tests/test-utils';
@@ -22,7 +22,7 @@ beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo(sessionUser.id, sessionUser.name);
 	store.setUserInfo(user1);
-	store.setCapabilities(createMockCapabilityList({ canVideoCall: true }));
+	store.setAttributes(createMockAttributesList({ carbonioWscVideoCallEnabled: 'TRUE' }));
 });
 
 describe('VirtualRoomsButton', () => {

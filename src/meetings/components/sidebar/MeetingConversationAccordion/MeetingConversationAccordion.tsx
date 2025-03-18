@@ -20,12 +20,11 @@ import {
 	getRoomMutedSelector,
 	getRoomTypeSelector
 } from '../../../../store/selectors/RoomsSelectors';
-import { getCapability } from '../../../../store/selectors/SessionSelectors';
+import { getAttribute } from '../../../../store/selectors/SessionSelectors';
 import { getRoomUnreadsSelector } from '../../../../store/selectors/UnreadsCounterSelectors';
 import useStore from '../../../../store/Store';
 import { MeetingChatVisibility } from '../../../../types/store/ActiveMeetingTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
-import { CapabilityType } from '../../../../types/store/SessionTypes';
 
 type MeetingConversationAccordionProps = {
 	roomId: string;
@@ -74,9 +73,7 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({
 	const meetingChatVisibility = useStore((store) => getMeetingChatVisibility(store, meetingId));
 	const setMeetingChatVisibility = useStore((store) => store.setMeetingChatVisibility);
 	const roomType = useStore((store) => getRoomTypeSelector(store, roomId ?? ''));
-	const canVideoRecordMeeting = useStore((store) =>
-		getCapability(store, CapabilityType.CAN_VIDEO_CALL_RECORD)
-	);
+	const recordingEnabled = useStore((store) => getAttribute(store, 'recordingEnabled'));
 
 	const { darkReaderStatus } = useDarkReader();
 
@@ -128,20 +125,20 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({
 	);
 
 	const expandButtonShouldAppear = useMemo(() => {
-		if (canVideoRecordMeeting) return isChatOpenOrFullExpanded;
+		if (recordingEnabled) return isChatOpenOrFullExpanded;
 		return roomType === RoomType.ONE_TO_ONE ? false : isChatOpenOrFullExpanded;
-	}, [canVideoRecordMeeting, isChatOpenOrFullExpanded, roomType]);
+	}, [recordingEnabled, isChatOpenOrFullExpanded, roomType]);
 
 	const chatChevronShouldAppear = useMemo(() => {
-		if (canVideoRecordMeeting) return true;
+		if (recordingEnabled) return true;
 		return roomType !== RoomType.ONE_TO_ONE;
-	}, [canVideoRecordMeeting, roomType]);
+	}, [recordingEnabled, roomType]);
 
 	useEffect(() => {
-		if (roomType === RoomType.ONE_TO_ONE && !canVideoRecordMeeting) {
+		if (roomType === RoomType.ONE_TO_ONE && !recordingEnabled) {
 			setMeetingChatVisibility(meetingId, MeetingChatVisibility.EXPANDED);
 		}
-	}, [canVideoRecordMeeting, meetingId, roomType, setMeetingChatVisibility]);
+	}, [recordingEnabled, meetingId, roomType, setMeetingChatVisibility]);
 
 	const minHeight = useMemo(() => {
 		if (chatFullExpanded) return '100%';

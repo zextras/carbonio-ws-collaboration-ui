@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import useRouting from '../../../../hooks/useRouting';
+import { getAttribute } from '../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../store/Store';
 import { RoomType } from '../../../../types/store/RoomTypes';
 
@@ -37,6 +38,7 @@ const GoToPrivateChatAction: FC<GoToPrivateChatProps> = ({ memberId, isParticipa
 	const goToPrivateChatLabel: string = t('tooltip.goToPrivateChat', 'Go to private chat');
 
 	const setPlaceholderRoom = useStore((state) => state.setPlaceholderRoom);
+	const privateChatCreation = useStore((store) => getAttribute(store, 'privateChatCreation'));
 
 	const { goToRoomPage } = useRouting();
 
@@ -52,6 +54,7 @@ const GoToPrivateChatAction: FC<GoToPrivateChatProps> = ({ memberId, isParticipa
 		goToRoomPage(roomId);
 	}, [goToRoomPage, memberId, setPlaceholderRoom]);
 
+	if (!privateChatCreation) return null;
 	return (
 		<Tooltip label={goToPrivateChatLabel}>
 			<CustomButton

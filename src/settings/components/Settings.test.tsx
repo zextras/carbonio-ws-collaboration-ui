@@ -11,7 +11,7 @@ import { screen, waitFor, act } from '@testing-library/react';
 import NotificationsSettings from './NotificationsSettings';
 import Settings from './Settings';
 import useStore from '../../store/Store';
-import { createMockCapabilityList, createMockUser } from '../../tests/createMock';
+import { createMockAttributesList, createMockUser } from '../../tests/createMock';
 import { setup } from '../../tests/test-utils';
 import { UserBe } from '../../types/network/models/userBeTypes';
 import { RootStore } from '../../types/store/StoreTypes';
@@ -197,7 +197,7 @@ describe('Settings view', () => {
 			const store: RootStore = useStore.getState();
 			store.setUserInfo(userWithoutImage);
 			store.setLoginInfo(userWithoutImage.id, userWithoutImage.name, userWithoutImage.name);
-			store.setCapabilities(createMockCapabilityList({ canVideoCallRecord: false }));
+			store.setAttributes(createMockAttributesList({ carbonioWscVideoCallEnabled: 'FALSE' }));
 			const { user } = setup(<Settings />);
 
 			const micCheckbox = screen.getByTestId('microphone_checkbox');
@@ -218,7 +218,7 @@ describe('Settings view', () => {
 			const store: RootStore = useStore.getState();
 			store.setUserInfo(userWithoutImage);
 			store.setLoginInfo(userWithoutImage.id, userWithoutImage.name, userWithoutImage.name);
-			store.setCapabilities(createMockCapabilityList());
+			store.setAttributes(createMockAttributesList());
 			setup(<Settings />);
 
 			const recordingContainer = screen.getByTestId('recording_settings_container');
@@ -228,7 +228,7 @@ describe('Settings view', () => {
 			const store: RootStore = useStore.getState();
 			store.setUserInfo(userWithoutImage);
 			store.setLoginInfo(userWithoutImage.id, userWithoutImage.name, userWithoutImage.name);
-			store.setCapabilities(createMockCapabilityList({ canVideoCallRecord: false }));
+			store.setAttributes(createMockAttributesList({ carbonioWscRecordingEnabled: 'FALSE' }));
 			setup(<Settings />);
 
 			const recordingContainer = screen.queryByTestId('recording_settings_container');
@@ -239,7 +239,7 @@ describe('Settings view', () => {
 			const store: RootStore = useStore.getState();
 			store.setUserInfo(userWithoutImage);
 			store.setLoginInfo(userWithoutImage.id, userWithoutImage.name, userWithoutImage.name);
-			store.setCapabilities(createMockCapabilityList());
+			store.setAttributes(createMockAttributesList());
 			localStorage.setItem(
 				'ChatsRecordingSettings',
 				JSON.stringify({ name: 'prova', id: 'provaId' })

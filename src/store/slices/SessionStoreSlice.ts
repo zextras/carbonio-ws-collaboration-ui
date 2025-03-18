@@ -5,11 +5,12 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { AccountSettingsAttrs } from '@zextras/carbonio-shell-ui/lib/types/account';
 import { produce } from 'immer';
 import { StateCreator } from 'zustand';
 
 import ChatExporter from '../../settings/components/chatExporter/ChatExporter';
-import { CapabilityList, ExportStatus } from '../../types/store/SessionTypes';
+import { AttributesList, ExportStatus } from '../../types/store/SessionTypes';
 import { RootStore, SessionStoreSlice } from '../../types/store/StoreTypes';
 import { UserType } from '../../types/store/UserTypes';
 import UserDataRetriever from '../../utils/UserDataRetriever';
@@ -24,6 +25,7 @@ export const useSessionStoreSlice: StateCreator<SessionStoreSlice> = (
 		set(
 			produce((draft: RootStore) => {
 				draft.session = {
+					...draft.session,
 					id,
 					name,
 					displayName,
@@ -50,13 +52,34 @@ export const useSessionStoreSlice: StateCreator<SessionStoreSlice> = (
 			'SESSION/SESSION_ID'
 		);
 	},
-	setCapabilities: (capabilities: CapabilityList): void => {
+	setAttributes: (attrs: AccountSettingsAttrs): void => {
 		set(
 			produce((draft: RootStore) => {
-				draft.session.capabilities = capabilities;
+				const minutesToNumber = (time: string): number => Number(time.split('m')[0]);
+				draft.session.attributes = {
+					privateChatCreation: attrs.carbonioWscPrivateChatCreation === 'TRUE',
+					groupChatCreation:
+						attrs.carbonioWscGroupChatCreation === 'TRUE' &&
+						Number(attrs.carbonioWscMaxGroupMembers || 0) > 2,
+					maxGroupMembers: Number(attrs.carbonioWscMaxGroupMembers || 0),
+					messageDeleteTimeLimit: minutesToNumber(
+						(attrs.carbonioWscMessageDeleteTimeLimit as string) || '0m'
+					),
+					messageEditTimeLimit: minutesToNumber(
+						(attrs.carbonioWscMessageEditTimeLimit as string) || '0m'
+					),
+					maxRoomPictureSize: Number(attrs.carbonioWscMaxRoomPictureSize || 0),
+					attachmentUpload: attrs.carbonioWscAttachmentUpload === 'TRUE',
+					maxAttachmentSize: Number(attrs.carbonioWscMaxAttachmentSize || 0),
+					showMessageReads: attrs.carbonioWscShowMessageReads === 'TRUE',
+					showUsersPresence: attrs.carbonioWscShowUsersPresence === 'TRUE',
+					videoCallEnabled: attrs.carbonioWscVideoCallEnabled === 'TRUE',
+					recordingEnabled: attrs.carbonioWscRecordingEnabled === 'TRUE',
+					virtualBackgroundEnabled: attrs.carbonioWscVirtualBackgroundEnabled === 'TRUE'
+				} as AttributesList;
 			}),
 			false,
-			'SESSION/SET_CAPABILITIES'
+			'SESSION/SET_ATTRS'
 		);
 	},
 	setSelectedRoomOneToOneGroup: (roomId: string): void => {

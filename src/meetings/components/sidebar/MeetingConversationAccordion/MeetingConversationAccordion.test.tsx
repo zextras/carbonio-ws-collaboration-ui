@@ -12,7 +12,7 @@ import { UserEvent } from '@testing-library/user-event';
 import { mockDarkReaderIsEnabled } from '../../../../../__mocks__/darkreader';
 import useStore from '../../../../store/Store';
 import {
-	createMockCapabilityList,
+	createMockAttributesList,
 	createMockMeeting,
 	createMockMember,
 	createMockParticipants,
@@ -65,7 +65,7 @@ const groupMeeting: MeetingBe = createMockMeeting({
 const setupBasicGroup = (): { user: UserEvent; store: RootStore } => {
 	const { result } = renderHook(() => useStore());
 	act(() => {
-		result.current.setCapabilities(createMockCapabilityList({ canVideoCallRecord: true }));
+		result.current.setAttributes(createMockAttributesList({ carbonioWscVideoCallEnabled: 'TRUE' }));
 		result.current.setLoginInfo(mockUser1.id, mockUser1.name);
 		result.current.setUserInfo(mockUser2);
 		result.current.addRoom(groupRoom);

@@ -5,8 +5,6 @@
  */
 
 import sessionApi from './SessionApi';
-import useStore from '../../store/Store';
-import { createMockCapabilityList } from '../../tests/createMock';
 import { spyOnFetch } from '../../tests/jest-env-setup';
 
 describe('Session API', () => {
@@ -17,20 +15,5 @@ describe('Session API', () => {
 		// Check if fetch is called with the correct parameters
 		expect(spyOnFetch).toHaveBeenCalledTimes(1);
 		expect(spyOnFetch).toHaveBeenCalledWith(`auth/token`, 'GET');
-	});
-
-	test('getCapabilities is called correctly', async () => {
-		// Send getCapabilities request
-		const capabilityList = createMockCapabilityList();
-		spyOnFetch.mockResolvedValue(capabilityList);
-		await sessionApi.getCapabilities();
-
-		// Check if fetch is called with the correct parameters
-		expect(spyOnFetch).toHaveBeenCalledTimes(1);
-		expect(spyOnFetch).toHaveBeenCalledWith(`users/capabilities`, 'GET');
-
-		// Check if store is correctly updated
-		const store = useStore.getState();
-		expect(store.session.capabilities).toEqual(capabilityList);
 	});
 });

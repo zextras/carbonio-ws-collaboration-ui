@@ -24,11 +24,10 @@ import {
 	getOwnershipOfTheRoom,
 	getRoomTypeSelector
 } from '../../../store/selectors/RoomsSelectors';
-import { getCapability, getUserId } from '../../../store/selectors/SessionSelectors';
+import { getAttribute, getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { MeetingChatVisibility } from '../../../types/store/ActiveMeetingTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
-import { CapabilityType } from '../../../types/store/SessionTypes';
 import BubblesWrapper from '../bubblesWrapper/BubblesWrapper';
 import VisualEffectsAccordion from './visualEffectsAccordion/VisualEffectsAccordion';
 import { getIsUserGuest } from '../../../store/selectors/UsersSelectors';
@@ -77,11 +76,9 @@ const MeetingSidebar = (): ReactElement => {
 	const sidebarIsVisible: boolean = useStore((store) => getMeetingSidebarStatus(store, meetingId!));
 	const setMeetingSidebarStatus = useStore((store) => store.setMeetingSidebarStatus);
 	const isUserGuest = useStore((store) => getIsUserGuest(store, myUserId ?? ''));
-	const canVideoCallRecord = useStore((store) =>
-		getCapability(store, CapabilityType.CAN_VIDEO_CALL_RECORD)
-	);
-	const canUseVirtualBackground = useStore((store) =>
-		getCapability(store, CapabilityType.CAN_USE_VIRTUAL_BACKGROUND)
+	const recordingEnabled = useStore((store) => getAttribute(store, 'recordingEnabled'));
+	const virtualBackgroundEnabled = useStore((store) =>
+		getAttribute(store, 'virtualBackgroundEnabled')
 	);
 
 	const toggleSidebar = useCallback(
@@ -90,8 +87,8 @@ const MeetingSidebar = (): ReactElement => {
 	);
 
 	const showRecordingAccordion = useMemo(
-		() => canVideoCallRecord && amIModerator,
-		[amIModerator, canVideoCallRecord]
+		() => recordingEnabled && amIModerator,
+		[amIModerator, recordingEnabled]
 	);
 
 	const showWaitingListAccordion = useMemo(
@@ -125,7 +122,7 @@ const MeetingSidebar = (): ReactElement => {
 							{showRecordingAccordion && <RecordingAccordion meetingId={meetingId!} />}
 							{showWaitingListAccordion && <WaitingListAccordion meetingId={meetingId!} />}
 							{showParticipantsAccordion && <MeetingParticipantsAccordion meetingId={meetingId!} />}
-							{(canUseVirtualBackground || isUserGuest) && (
+							{(virtualBackgroundEnabled || isUserGuest) && (
 								<VisualEffectsAccordion meetingId={meetingId!} />
 							)}
 						</AccordionContainer>

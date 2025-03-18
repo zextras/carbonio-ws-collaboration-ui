@@ -25,7 +25,7 @@ import {
 	getRoomTypeSelector
 } from '../../../../store/selectors/RoomsSelectors';
 import {
-	getCapability,
+	getAttribute,
 	getSelectedConversation
 } from '../../../../store/selectors/SessionSelectors';
 import { getRoomUnreadsSelector } from '../../../../store/selectors/UnreadsCounterSelectors';
@@ -34,7 +34,6 @@ import useStore from '../../../../store/Store';
 import { MarkerStatus } from '../../../../types/store/MarkersTypes';
 import { Message, MessageType } from '../../../../types/store/MessageTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
-import { CapabilityType } from '../../../../types/store/SessionTypes';
 import GroupAvatar from '../../GroupAvatar';
 import UserAvatar from '../../UserAvatar';
 
@@ -76,9 +75,7 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 	);
 	const roomMuted = useStore((state) => getRoomMutedSelector(state, roomId));
 	const draftMessage = useStore((store) => getDraftMessage(store, roomId));
-	const canSeeMessageReads = useStore((store) =>
-		getCapability(store, CapabilityType.CAN_SEE_MESSAGE_READS)
-	);
+	const canSeeMessageReads = useStore((store) => getAttribute(store, 'showMessageReads'));
 
 	const isWritingLabel = useIsWritingLabel(roomId, true);
 

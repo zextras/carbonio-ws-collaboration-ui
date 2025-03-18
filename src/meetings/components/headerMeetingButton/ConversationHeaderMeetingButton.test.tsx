@@ -12,6 +12,7 @@ import { UserEvent } from '@testing-library/user-event';
 import ConversationHeaderMeetingButton from './ConversationHeaderMeetingButton';
 import useStore from '../../../store/Store';
 import {
+	createMockAttributesList,
 	createMockMeeting,
 	createMockMember,
 	createMockParticipants,
@@ -90,6 +91,11 @@ const storeSetupGroupMeeting = (): { user: UserEvent; store: RootStore } => {
 	store.setUserInfo(user2);
 	store.setLoginInfo(user1.id, user1.name);
 	store.addRoom(room);
+	store.setAttributes(
+		createMockAttributesList({
+			carbonioWscPrivateChatCreation: 'TRUE'
+		})
+	);
 	mockGoToRoomPage.mockReturnValue(`room of ${user2.name}`);
 	const user1Participant: MeetingParticipant = createMockParticipants({ userId: user1.id });
 	const user2Participant: MeetingParticipant = createMockParticipants({ userId: user2.id });
@@ -124,6 +130,11 @@ const storeSetupGroupMeetingWithoutMe = (): { user: UserEvent; store: RootStore 
 	store.setUserInfo(user3);
 	store.setLoginInfo(user1.id, user1.name);
 	store.addRoom(room);
+	store.setAttributes(
+		createMockAttributesList({
+			carbonioWscPrivateChatCreation: 'TRUE'
+		})
+	);
 	const user3Participant: MeetingParticipant = createMockParticipants({ userId: user3.id });
 	const user2Participant: MeetingParticipant = createMockParticipants({ userId: user2.id });
 	const meeting: MeetingBe = createMockMeeting({

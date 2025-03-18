@@ -43,7 +43,7 @@ import {
 } from '../../../../store/selectors/ActiveConversationsSelectors';
 import { getXmppClient } from '../../../../store/selectors/ConnectionSelector';
 import { getLastMessageIdSelector } from '../../../../store/selectors/MessagesSelectors';
-import { getCapability, getUserId } from '../../../../store/selectors/SessionSelectors';
+import { getAttribute, getUserId } from '../../../../store/selectors/SessionSelectors';
 import { getIsUserGuest } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
 import { AddRoomAttachmentResponse } from '../../../../types/network/responses/roomsResponses';
@@ -53,7 +53,6 @@ import {
 	ReferenceMessage
 } from '../../../../types/store/ActiveConversationTypes';
 import { Message, MessageType, TextMessage } from '../../../../types/store/MessageTypes';
-import { CapabilityType } from '../../../../types/store/SessionTypes';
 import { isAttachmentImage } from '../../../../utils/attachmentUtils';
 import { BrowserUtils } from '../../../../utils/BrowserUtils';
 import { canPerformAction } from '../../../../utils/MessageActionsUtils';
@@ -90,6 +89,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 	const uploadingLabel = t('tooltip.uploading', 'Uploading');
 	const uploadAbortedLabel = t('attachments.uploadAborted', 'Upload has been interrupted');
 	const stopUploadLabel = t('attachments.stopUpload', 'Stop upload');
+	const actionLabel = t('action.understood', 'Understood');
 
 	const myUserId = useStore(getUserId);
 	const isUserGuest = useStore((store) => getIsUserGuest(store, myUserId ?? ''));
@@ -103,11 +103,18 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 	const lastMessageId: string | undefined = useStore((state) =>
 		getLastMessageIdSelector(state, roomId)
 	);
-	const editMessageTimeLimitInMinutes = useStore((store) =>
-		getCapability(store, CapabilityType.EDIT_MESSAGE_TIME_LIMIT)
+	const messageEditTimeLimit = useStore((store) =>
+		getAttribute(store, 'messageEditTimeLimit')
 	) as number;
 	const lastMessageOfRoom: Message | undefined = useMessage(roomId, lastMessageId ?? '');
 	const setReferenceMessage = useStore((store) => store.setReferenceMessage);
+	const maxAttachmentSize = useStore((store) => getAttribute(store, 'maxAttachmentSize'));
+
+	const fileSizeTooLargeLabel = t(
+		'attachments.upload.tooLarge',
+		`Upload failed: The file exceeds the maximum file size of ${maxAttachmentSize}MB.`,
+		{ size: maxAttachmentSize }
+	);
 
 	const completeReferenceMessage = useMessage(roomId, referenceMessage?.messageId ?? '');
 
@@ -162,9 +169,9 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 		checkMaxLengthAndSetMessage(messageInputRef.current?.value ?? '');
 	}, [filesToUploadArray?.length, checkMaxLengthAndSetMessage]);
 
-	const errorHandler = (reason: DOMException, fileName: string): void => {
+	const errorHandler = (reason: Error, fileName: string): void => {
 		if (reason.name !== 'AbortError') {
-			const errorString = t(
+			const errorLabel = t(
 				'attachments.errorUploadingFile',
 				`Something went wrong uploading ${fileName}`,
 				{ file: fileName }
@@ -172,8 +179,8 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 			createSnackbar({
 				key: new Date().toLocaleString(),
 				severity: 'error',
-				label: errorString,
-				actionLabel: 'UNDERSTOOD',
+				label: reason.message === 'file_too_large' ? fileSizeTooLargeLabel : errorLabel,
+				actionLabel,
 				disableAutoHide: true
 			});
 		}
@@ -360,7 +367,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 				canPerformAction(
 					lastMessageOfRoom,
 					lastMessageOfRoom.from === myUserId,
-					editMessageTimeLimitInMinutes,
+					messageEditTimeLimit,
 					messageActionType.EDIT
 				)
 			) {
@@ -376,7 +383,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 			}
 		},
 		[
-			editMessageTimeLimitInMinutes,
+			messageEditTimeLimit,
 			lastMessageOfRoom,
 			myUserId,
 			setDraftMessage,

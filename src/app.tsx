@@ -29,17 +29,19 @@ export default function App(): React.JSX.Element {
 	const setXmppClient = useStore((state) => state.setXmppClient);
 	const setWebSocketClient = useStore((state) => state.setWebSocketClient);
 	const setChatsBeStatus = useStore((state) => state.setChatsBeStatus);
+	const setAttributes = useStore((state) => state.setAttributes);
 
 	const authenticated = useAuthenticated();
-	const { prefs } = useUserSettings();
+	const { prefs, attrs } = useUserSettings();
 
 	// STORE: init with user session main infos
 	useEffect(() => {
 		const userAccount = getUserAccount();
 		if (authenticated && userAccount) {
 			setLoginInfo(userAccount.id, userAccount.name, userAccount.displayName, UserType.INTERNAL);
+			setAttributes(attrs);
 		}
-	}, [setLoginInfo, authenticated]);
+	}, [setLoginInfo, authenticated, setAttributes, attrs]);
 
 	// SET TIMEZONE and LOCALE
 	useEffect(() => {
@@ -57,7 +59,6 @@ export default function App(): React.JSX.Element {
 
 			Promise.all([
 				SessionApi.getToken(),
-				SessionApi.getCapabilities(),
 				RoomsApi.listRooms(true, true),
 				MeetingsApi.listMeetings()
 			])
@@ -69,7 +70,7 @@ export default function App(): React.JSX.Element {
 				})
 				.catch(() => setChatsBeStatus(false));
 		}
-	}, [authenticated, setChatsBeStatus, setWebSocketClient, setXmppClient]);
+	}, [attrs, authenticated, setAttributes, setChatsBeStatus, setWebSocketClient, setXmppClient]);
 
 	initChats();
 	initMeetings();
