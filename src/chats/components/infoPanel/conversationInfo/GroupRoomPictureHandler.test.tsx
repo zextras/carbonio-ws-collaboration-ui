@@ -11,7 +11,7 @@ import { screen } from '@testing-library/react';
 import GroupRoomPictureHandler from './GroupRoomPictureHandler';
 import useStore from '../../../../store/Store';
 import {
-	createMockCapabilityList,
+	createMockAttributesList,
 	createMockMember,
 	createMockRoom,
 	createMockUser
@@ -127,7 +127,7 @@ describe('Room Picture Handler - groups', () => {
 		store.setUserInfo(user1Info);
 		store.setUserInfo(user2Info);
 		store.setLoginInfo(user1Info.id, user1Info.name);
-		store.setCapabilities(createMockCapabilityList({ maxRoomImageSizeInKb: 1 }));
+		store.setAttributes(createMockAttributesList({ carbonioWscMaxRoomPictureSize: '1' }));
 		const { user } = setup(<GroupRoomPictureHandler roomId={testRoom2.id} />);
 
 		const pictureContainer = await screen.findByTestId('picture_container');

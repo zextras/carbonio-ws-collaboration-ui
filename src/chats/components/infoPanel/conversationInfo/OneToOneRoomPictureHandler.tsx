@@ -12,14 +12,13 @@ import styled from 'styled-components';
 
 import RoomPictureHandler from './RoomPictureHandler';
 import useAvatarUtilities from '../../../../hooks/useAvatarUtilities';
-import { getCapability } from '../../../../store/selectors/SessionSelectors';
+import { getAttribute } from '../../../../store/selectors/SessionSelectors';
 import {
 	getUserLastActivity,
 	getUserName,
 	getUserOnline
 } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
-import { CapabilityType } from '../../../../types/store/SessionTypes';
 import { getCalendarTime } from '../../../../utils/dateUtils';
 
 type RoomPictureProps = {
@@ -42,9 +41,7 @@ const CustomText = styled(Text)<{ $hasPicture: boolean }>`
 `;
 
 const OneToOneRoomPictureHandler: FC<RoomPictureProps> = ({ memberId }) => {
-	const canSeeUsersPresence = useStore((store) =>
-		getCapability(store, CapabilityType.CAN_SEE_USERS_PRESENCE)
-	);
+	const showUsersPresence = useStore((store) => getAttribute(store, 'showUsersPresence'));
 
 	const [t] = useTranslation();
 	const userOnlineLabel: string = t('status.online', 'Online');
@@ -71,7 +68,7 @@ const OneToOneRoomPictureHandler: FC<RoomPictureProps> = ({ memberId }) => {
 	}, [memberOnline, memberLastActivity, userOnlineLabel, lastSeenLabel, userOfflineLabel]);
 
 	const description = useMemo(() => {
-		if (canSeeUsersPresence) {
+		if (showUsersPresence) {
 			return (
 				<Container orientation="horizontal" mainAlignment="flex-start" height="fit">
 					{memberOnline && <Presence data-testid="user_presence_dot" />}
@@ -83,7 +80,7 @@ const OneToOneRoomPictureHandler: FC<RoomPictureProps> = ({ memberId }) => {
 			);
 		}
 		return null;
-	}, [avatarPicture, canSeeUsersPresence, memberOnline, presenceLabel]);
+	}, [avatarPicture, showUsersPresence, memberOnline, presenceLabel]);
 
 	return (
 		<RoomPictureHandler

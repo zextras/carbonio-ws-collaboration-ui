@@ -25,12 +25,11 @@ import {
 	getReferenceMessage
 } from '../../../../../store/selectors/ActiveConversationsSelectors';
 import { getXmppClient } from '../../../../../store/selectors/ConnectionSelector';
-import { getCapability, getUserId } from '../../../../../store/selectors/SessionSelectors';
+import { getAttribute, getUserId } from '../../../../../store/selectors/SessionSelectors';
 import { getIsUserGuest } from '../../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../../store/Store';
 import { messageActionType } from '../../../../../types/store/ActiveConversationTypes';
 import { TextMessage } from '../../../../../types/store/MessageTypes';
-import { CapabilityType } from '../../../../../types/store/SessionTypes';
 import { isPreviewSupported } from '../../../../../utils/attachmentUtils';
 import { canPerformAction } from '../../../../../utils/MessageActionsUtils';
 
@@ -57,11 +56,11 @@ const useBubbleContextualMenuDropDown = (
 
 	const sessionId: string | undefined = useStore((store) => getUserId(store));
 	const isUserGuest = useStore((store) => getIsUserGuest(store, sessionId ?? ''));
-	const deleteMessageTimeLimitInMinutes = useStore((store) =>
-		getCapability(store, CapabilityType.DELETE_MESSAGE_TIME_LIMIT)
+	const messageDeleteTimeLimit = useStore((store) =>
+		getAttribute(store, 'messageDeleteTimeLimit')
 	) as number;
-	const editMessageTimeLimitInMinutes = useStore((store) =>
-		getCapability(store, CapabilityType.EDIT_MESSAGE_TIME_LIMIT)
+	const messageEditTimeLimit = useStore((store) =>
+		getAttribute(store, 'messageEditTimeLimit')
 	) as number;
 	const referenceMessage = useStore((store) => getReferenceMessage(store, message.roomId));
 	const setReferenceMessage = useStore((store) => store.setReferenceMessage);
@@ -155,16 +154,15 @@ const useBubbleContextualMenuDropDown = (
 	);
 
 	const canBeEdited = useMemo(
-		() =>
-			canPerformAction(message, isMyMessage, editMessageTimeLimitInMinutes, messageActionType.EDIT),
-		[editMessageTimeLimitInMinutes, isMyMessage, message]
+		() => canPerformAction(message, isMyMessage, messageEditTimeLimit, messageActionType.EDIT),
+		[messageEditTimeLimit, isMyMessage, message]
 	);
 
 	const canBeDeleted = useMemo(
 		() =>
-			canPerformAction(message, isMyMessage, deleteMessageTimeLimitInMinutes) &&
+			canPerformAction(message, isMyMessage, messageDeleteTimeLimit) &&
 			referenceMessage?.messageId !== message.id,
-		[deleteMessageTimeLimitInMinutes, isMyMessage, message, referenceMessage]
+		[messageDeleteTimeLimit, isMyMessage, message, referenceMessage]
 	);
 
 	const canBePreviewed = useMemo(

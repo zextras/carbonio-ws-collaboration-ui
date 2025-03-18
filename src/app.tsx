@@ -25,17 +25,19 @@ import { setDateDefault } from './utils/dateUtils';
 export default function App(): React.JSX.Element {
 	const setLoginInfo = useStore((state) => state.setLoginInfo);
 	const setChatsBeStatus = useStore((state) => state.setChatsBeStatus);
+	const setAttributes = useStore((state) => state.setAttributes);
 
 	const authenticated = useAuthenticated();
-	const { prefs } = useUserSettings();
+	const { prefs, attrs } = useUserSettings();
 
 	// STORE: init with user session main infos
 	useEffect(() => {
 		const userAccount = getUserAccount();
 		if (authenticated && userAccount) {
 			setLoginInfo(userAccount.id, userAccount.name, userAccount.displayName, UserType.INTERNAL);
+			setAttributes(attrs);
 		}
-	}, [setLoginInfo, authenticated]);
+	}, [setLoginInfo, authenticated, setAttributes, attrs]);
 
 	// SET TIMEZONE and LOCALE
 	useEffect(() => {
@@ -47,7 +49,6 @@ export default function App(): React.JSX.Element {
 		if (authenticated) {
 			Promise.all([
 				SessionApi.getToken(),
-				SessionApi.getCapabilities(),
 				RoomsApi.listRooms(true, true),
 				MeetingsApi.listMeetings()
 			])

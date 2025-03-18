@@ -26,6 +26,7 @@ import {
 	getRoomNameSelector,
 	getRoomTypeSelector
 } from '../../../../store/selectors/RoomsSelectors';
+import { getAttribute } from '../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../store/Store';
 import { RoomType } from '../../../../types/store/RoomTypes';
 
@@ -61,6 +62,7 @@ const AttachmentSelector: React.FC<AttachmentSelectorProps> = ({ roomId }) => {
 	const roomType = useStore((store) => getRoomTypeSelector(store, roomId));
 	const setInputHasFocus = useStore((store) => store.setInputHasFocus);
 	const filesToUploadArray = useStore((store) => getFilesToUploadArray(store, roomId));
+	const attachmentUpload = useStore((store) => getAttribute(store, 'attachmentUpload'));
 
 	const [filesSelectFilesAction, filesSelectFilesActionAvailable] =
 		useIntegratedFunction('select-nodes');
@@ -142,35 +144,40 @@ const AttachmentSelector: React.FC<AttachmentSelectorProps> = ({ roomId }) => {
 		filesSelectFilesAction(actionTarget);
 	}, [actionTarget, filesSelectFilesAction]);
 
-	const items: DropdownItem[] = useMemo(
-		() => [
-			{
+	const items: DropdownItem[] = useMemo(() => {
+		const items: DropdownItem[] = [];
+		if (functionCheck && filesSelectFilesActionAvailable) {
+			items.push({
 				id: 'item1',
 				icon: 'Link2',
 				label: attachLinkLabel,
 				keepOpen: false,
 				disabled: !functionCheck || !filesSelectFilesActionAvailable,
 				onClick: handleClickPublicLink
-			},
-			{
+			});
+		}
+		if (attachmentUpload) {
+			items.push({
 				id: 'item2',
 				icon: 'MonitorOutline',
 				label: addLocalLabel,
 				keepOpen: false,
 				disabled: false,
 				onClick: handleClickAttachment
-			}
-		],
-		[
-			addLocalLabel,
-			attachLinkLabel,
-			filesSelectFilesActionAvailable,
-			functionCheck,
-			handleClickAttachment,
-			handleClickPublicLink
-		]
-	);
+			});
+		}
+		return items;
+	}, [
+		addLocalLabel,
+		attachLinkLabel,
+		attachmentUpload,
+		filesSelectFilesActionAvailable,
+		functionCheck,
+		handleClickAttachment,
+		handleClickPublicLink
+	]);
 
+	if ((!functionCheck || !filesSelectFilesActionAvailable) && !attachmentUpload) return null;
 	return (
 		<Container width="fit" height="fit">
 			<Tooltip label={uploadAttachmentTooltip} placement="top">

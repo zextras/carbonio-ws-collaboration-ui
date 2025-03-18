@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { AccountSettingsAttrs } from '@zextras/carbonio-shell-ui/lib/types/account';
+
 import { ActiveConversationsMap, FileToUpload, messageActionType } from './ActiveConversationTypes';
 import {
 	ActiveMeetingMap,
@@ -28,7 +30,7 @@ import {
 	TextMessage
 } from './MessageTypes';
 import { RoomsMap } from './RoomTypes';
-import { CapabilityList, ExportStatus, Session } from './SessionTypes';
+import { ExportStatus, Session } from './SessionTypes';
 import { UnreadsMap } from './UnreadsCounterTypes';
 import { UsersMap, UserType } from './UserTypes';
 import { MeetingBe } from '../network/models/meetingBeTypes';
@@ -90,7 +92,7 @@ export type SessionStoreSlice = {
 	setFilterHasFocus: (hasFocus: boolean) => void;
 	setLoginInfo: (id: string, name: string, displayName?: string, userType?: UserType) => void;
 	setSessionId: (sessionId: string) => void;
-	setCapabilities: (capabilities: CapabilityList) => void;
+	setAttributes: (attrs: AccountSettingsAttrs) => void;
 	setSelectedRoomOneToOneGroup: (id: string) => void;
 	setCustomLogo: (logo: string | false) => void;
 	setChatExporting: (roomId?: string) => void;

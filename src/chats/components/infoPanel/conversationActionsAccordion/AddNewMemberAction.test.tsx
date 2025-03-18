@@ -11,7 +11,7 @@ import { screen, waitFor, within } from '@testing-library/react';
 import AddNewMemberAction from './AddNewMemberAction';
 import useStore from '../../../../store/Store';
 import {
-	createMockCapabilityList,
+	createMockAttributesList,
 	createMockRoom,
 	createMockUser
 } from '../../../../tests/createMock';
@@ -56,7 +56,7 @@ beforeEach(() => {
 	store.addRoom(mockedRoom);
 	store.setLoginInfo(user1Info.id, user1Info.name);
 	store.setUserInfo(user2Info);
-	store.setCapabilities(createMockCapabilityList({ maxGroupMembers: 5 }));
+	store.setAttributes(createMockAttributesList({ carbonioWscMaxGroupMembers: '5' }));
 });
 
 describe('Add new member action', () => {

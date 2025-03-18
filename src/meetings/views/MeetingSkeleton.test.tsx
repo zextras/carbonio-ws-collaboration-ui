@@ -11,7 +11,7 @@ import { UserEvent } from '@testing-library/user-event';
 import MeetingSkeleton from './MeetingSkeleton';
 import useStore from '../../store/Store';
 import {
-	createMockCapabilityList,
+	createMockAttributesList,
 	createMockMeeting,
 	createMockParticipants,
 	createMockRoom,
@@ -72,7 +72,7 @@ const storeSetupGroupMeetingSkeleton = (): { user: UserEvent; store: RootStore }
 	store.addMeeting(meeting);
 	store.meetingConnection(meeting.id, false, undefined, true, 'videoId');
 	store.setLocalStreams(meeting.id, STREAM_TYPE.VIDEO, new MediaStream());
-	store.setCapabilities(createMockCapabilityList());
+	store.setAttributes(createMockAttributesList());
 	const { user } = routerContextSetup(<MeetingSkeleton />, {
 		route: MEETINGS_ROUTES.MEETING,
 		meetingId: meeting.id

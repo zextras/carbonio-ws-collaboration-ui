@@ -11,7 +11,7 @@ import { act } from '@testing-library/react';
 import { ActionsAccordion } from './ActionsAccordion';
 import useStore from '../../../../store/Store';
 import {
-	createMockCapabilityList,
+	createMockAttributesList,
 	createMockMember,
 	createMockRoom,
 	createMockTextMessage,
@@ -48,6 +48,13 @@ const user3Be: UserBe = createMockUser({
 	statusMessage: "Hey there! I'm User 3"
 });
 
+beforeEach(() => {
+	const store = useStore.getState();
+	store.setUserInfo(user1Be);
+	store.setUserInfo(user2Be);
+	store.setUserInfo(user3Be);
+	store.setLoginInfo(user1Be.id, user1Be.name);
+});
 describe('Actions Accordion', () => {
 	test('A owner of a group should see the correct actions - More than one owner', () => {
 		const room: RoomBe = createMockRoom({
@@ -62,10 +69,6 @@ describe('Actions Accordion', () => {
 		const store = useStore.getState();
 		store.addRoom(room);
 		store.newMessage(message);
-		store.setUserInfo(user1Be);
-		store.setUserInfo(user2Be);
-		store.setUserInfo(user3Be);
-		store.setLoginInfo(user1Be.id, user1Be.name);
 
 		setup(<ActionsAccordion roomId={room.id} />);
 		expect(screen.getByText(/Mute Notifications/i)).toBeInTheDocument();
@@ -83,9 +86,6 @@ describe('Actions Accordion', () => {
 		});
 		const store = useStore.getState();
 		store.addRoom(room);
-		store.setUserInfo(user1Be);
-		store.setUserInfo(user2Be);
-		store.setLoginInfo(user1Be.id, user1Be.name);
 		setup(<ActionsAccordion roomId={room.id} />);
 		expect(screen.getByText(/Mute Notifications/i)).toBeInTheDocument();
 		expect(screen.queryByText(/Add New Members/i)).not.toBeInTheDocument();
@@ -105,10 +105,6 @@ describe('Actions Accordion', () => {
 		});
 		const store = useStore.getState();
 		store.addRoom(room);
-		store.setUserInfo(user1Be);
-		store.setUserInfo(user2Be);
-		store.setUserInfo(user3Be);
-		store.setLoginInfo(user1Be.id, user1Be.name);
 		setup(<ActionsAccordion roomId={room.id} />);
 		expect(screen.getByText(/Mute Notifications/i)).toBeInTheDocument();
 		expect(screen.getByText(/Add New Members/i)).toBeInTheDocument();
@@ -122,10 +118,6 @@ describe('Actions Accordion', () => {
 		const message = createMockTextMessage({ roomId: room.id });
 		const store = useStore.getState();
 		store.addRoom(room);
-		store.setUserInfo(user1Be);
-		store.setUserInfo(user2Be);
-		store.setUserInfo(user3Be);
-		store.setLoginInfo(user1Be.id, user1Be.name);
 
 		setup(<ActionsAccordion roomId={room.id} />);
 		expect(screen.queryByText(/Clear History/i)).not.toBeInTheDocument();
@@ -189,11 +181,7 @@ describe('Actions Accordion', () => {
 		});
 		const store = useStore.getState();
 		store.addRoom(room);
-		store.setUserInfo(user1Be);
-		store.setUserInfo(user2Be);
-		store.setUserInfo(user3Be);
-		store.setLoginInfo(user1Be.id, user1Be.name);
-		store.setCapabilities(createMockCapabilityList({ maxGroupMembers: 3 }));
+		store.setAttributes(createMockAttributesList({ carbonioWscMaxGroupMembers: '3' }));
 
 		setup(<ActionsAccordion roomId={room.id} />);
 		const addNewMemberActionButton = screen.getByRoleWithIcon('button', {
@@ -213,11 +201,7 @@ describe('Actions Accordion', () => {
 		});
 		const store = useStore.getState();
 		store.addRoom(room);
-		store.setUserInfo(user1Be);
-		store.setUserInfo(user2Be);
-		store.setUserInfo(user3Be);
-		store.setLoginInfo(user1Be.id, user1Be.name);
-		store.setCapabilities(createMockCapabilityList({ maxGroupMembers: 5 }));
+		store.setAttributes(createMockAttributesList({ carbonioWscMaxGroupMembers: '5' }));
 
 		setup(<ActionsAccordion roomId={room.id} />);
 		const addNewMemberAction = screen.getByTestId('addNewMemberAction');

@@ -11,7 +11,7 @@ import { noop } from 'lodash';
 
 import CreateVirtualRoomModal from './CreateVirtualRoomModal';
 import useStore from '../../../../store/Store';
-import { createMockCapabilityList, createMockUser } from '../../../../tests/createMock';
+import { createMockAttributesList, createMockUser } from '../../../../tests/createMock';
 import { RoomsApiToSpy, spyOnRoomsApi } from '../../../../tests/mocks/network';
 import { mockSearchUsersByFeatureRequest } from '../../../../tests/mocks/SearchUsersByFeature';
 import { setup } from '../../../../tests/test-utils';
@@ -44,7 +44,7 @@ beforeEach(() => {
 	store.setLoginInfo(sessionUser.id, sessionUser.name);
 	store.setUserInfo(user1);
 	store.setUserInfo(user2);
-	store.setCapabilities(createMockCapabilityList());
+	store.setAttributes(createMockAttributesList());
 });
 
 describe('VirtualRoomsModal', () => {

@@ -10,7 +10,7 @@ import { act, screen } from '@testing-library/react';
 import DeleteVirtualRoomModal from './DeleteVirtualRoomModal';
 import useStore from '../../../../store/Store';
 import {
-	createMockCapabilityList,
+	createMockAttributesList,
 	createMockMeeting,
 	createMockMember,
 	createMockRoom,
@@ -41,7 +41,7 @@ describe('SelectVirtualRoomWidget', () => {
 		act(() => {
 			const store = useStore.getState();
 			store.setLoginInfo(sessionUser.id, sessionUser.name);
-			store.setCapabilities(createMockCapabilityList());
+			store.setAttributes(createMockAttributesList());
 			store.setRooms([temporaryRoomMod]);
 			store.setMeetings([scheduledMeetingMod]);
 		});

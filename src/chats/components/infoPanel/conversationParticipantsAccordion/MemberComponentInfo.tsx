@@ -20,7 +20,7 @@ import styled from 'styled-components';
 
 import MemberComponentActions from './MemberComponentActions';
 import useAvatarUtilities from '../../../../hooks/useAvatarUtilities';
-import { getCapability } from '../../../../store/selectors/SessionSelectors';
+import { getAttribute } from '../../../../store/selectors/SessionSelectors';
 import {
 	getUserLastActivity,
 	getUserName,
@@ -28,7 +28,6 @@ import {
 } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
 import { Member } from '../../../../types/store/RoomTypes';
-import { CapabilityType } from '../../../../types/store/SessionTypes';
 import { getCalendarTime } from '../../../../utils/dateUtils';
 
 type ParticipantsInfoProps = {
@@ -60,9 +59,7 @@ const MemberComponentInfo: FC<ParticipantsInfoProps> = ({ member, roomId }) => {
 		getUserLastActivity(store, member.userId)
 	);
 	const memberOnline: boolean = useStore((store) => getUserOnline(store, member.userId));
-	const canSeeUsersPresence = useStore((store) =>
-		getCapability(store, CapabilityType.CAN_SEE_USERS_PRESENCE)
-	);
+	const canSeeUsersPresence = useStore((store) => getAttribute(store, 'showUsersPresence'));
 
 	const { avatarPicture, avatarIcon, avatarColor, isLoading } = useAvatarUtilities(member.userId);
 

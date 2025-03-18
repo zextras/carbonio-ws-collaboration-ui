@@ -10,7 +10,7 @@ import { act, screen } from '@testing-library/react';
 import SelectVirtualRoomWidgetComponent from './SelectVirtualRoomWidget';
 import useStore from '../../store/Store';
 import {
-	createMockCapabilityList,
+	createMockAttributesList,
 	createMockMeeting,
 	createMockMember,
 	createMockRoom,
@@ -39,7 +39,7 @@ describe('SelectVirtualRoomWidget', () => {
 		act(() => {
 			const store = useStore.getState();
 			store.setLoginInfo(sessionUser.id, sessionUser.name);
-			store.setCapabilities(createMockCapabilityList());
+			store.setAttributes(createMockAttributesList());
 			store.setRooms([temporaryRoomMod]);
 			store.setMeetings([scheduledMeetingMod]);
 		});
@@ -65,7 +65,7 @@ describe('SelectVirtualRoomWidget', () => {
 	test('Should render properly - user has not virtual rooms and defaultValue is not undefined', async () => {
 		const store = useStore.getState();
 		store.setLoginInfo(sessionUser.id, sessionUser.name);
-		store.setCapabilities(createMockCapabilityList());
+		store.setAttributes(createMockAttributesList());
 		await act(async () => {
 			setup(
 				<SelectVirtualRoomWidgetComponent
