@@ -70,6 +70,7 @@ const CustomTile = styled(Container)<{
 const CustomShimmer = styled(Shimmer.Logo)`
 	position: absolute;
 	z-index: ${Z_INDEX_RANK.TILE_SHIMMER};
+	animation-duration: 3s;
 `;
 
 const CustomContainer = styled(Container)`
