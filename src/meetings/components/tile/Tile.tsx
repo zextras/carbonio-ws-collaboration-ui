@@ -146,7 +146,7 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 
 	useEffect(() => {
 		if (streamRef?.current) {
-			if (videoStream && (videoStatus || isScreenShare)) {
+			if (videoStream?.active && (videoStatus || isScreenShare)) {
 				streamRef.current.srcObject = videoStream;
 			} else {
 				streamRef.current.srcObject = null;
