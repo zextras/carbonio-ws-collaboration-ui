@@ -37,9 +37,12 @@ import { MessagesStoreSlice, RootStore } from '../../types/store/StoreTypes';
 import { calcReads } from '../../utils/calcReads';
 import { datesAreFromTheSameDay, isBefore, isStrictlyBefore } from '../../utils/dateUtils';
 
-export const useMessagesStoreSlice: StateCreator<MessagesStoreSlice> = (
-	set: (...any: any) => void
-) => ({
+export const useMessagesStoreSlice: StateCreator<
+	RootStore,
+	[['zustand/devtools', never]],
+	[],
+	MessagesStoreSlice
+> = (set) => ({
 	messages: {},
 	newMessage: (message: Message): void => {
 		set(

@@ -6,8 +6,6 @@
 
 import { act, renderHook } from '@testing-library/react';
 
-import { WebSocketClient } from '../../network/websocket/WebSocketClient';
-import XMPPClient from '../../network/xmpp/XMPPClient';
 import {
 	createMockMarker,
 	createMockRoom,
@@ -19,9 +17,6 @@ import useStore from '../Store';
 describe('Connections slice', () => {
 	test('XmppClient', () => {
 		const { result } = renderHook(() => useStore());
-		const xmpp = new XMPPClient();
-		act(() => result.current.setXmppClient(xmpp));
-		expect(result.current.connections.xmppClient).toBe(xmpp);
 
 		act(() => result.current.setXmppStatus(true));
 		expect(result.current.connections.status.xmpp).toBe(true);
@@ -32,9 +27,6 @@ describe('Connections slice', () => {
 
 	test('WobSocketClient', () => {
 		const { result } = renderHook(() => useStore());
-		const ws = new WebSocketClient();
-		act(() => result.current.setWebSocketClient(ws));
-		expect(result.current.connections.wsClient).toBe(ws);
 
 		act(() => result.current.setWebsocketStatus(true));
 		expect(result.current.connections.status.websocket).toBe(true);

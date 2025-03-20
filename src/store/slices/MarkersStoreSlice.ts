@@ -11,9 +11,12 @@ import { StateCreator } from 'zustand';
 import { Marker } from '../../types/store/MarkersTypes';
 import { MarkersStoreSlice, RootStore } from '../../types/store/StoreTypes';
 
-export const useMarkersStoreSlice: StateCreator<MarkersStoreSlice> = (
-	set: (...any: any) => void
-) => ({
+export const useMarkersStoreSlice: StateCreator<
+	RootStore,
+	[['zustand/devtools', never]],
+	[],
+	MarkersStoreSlice
+> = (set) => ({
 	markers: {},
 	updateMarkers: (roomId: string, markers: Marker[]): void => {
 		set(

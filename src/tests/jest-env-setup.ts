@@ -9,8 +9,6 @@ import '@testing-library/jest-dom';
 import { act, configure } from '@testing-library/react';
 import failOnConsole from 'jest-fail-on-console';
 
-import XMPPClient from '../network/xmpp/XMPPClient';
-import useStore from '../store/Store';
 import * as FetchUtils from '../utils/FetchUtils';
 import {
 	intersectionObserverMockDisconnect,
@@ -36,7 +34,6 @@ failOnConsole({
 });
 
 beforeEach(() => {
-	useStore.getState().setXmppClient(new XMPPClient());
 	spyOnFetch = jest.spyOn(FetchUtils, 'fetchAPI');
 	spyOnFetch.mockImplementation(() => Promise.resolve(true));
 

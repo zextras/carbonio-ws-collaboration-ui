@@ -15,9 +15,12 @@ import { RootStore, SessionStoreSlice } from '../../types/store/StoreTypes';
 import { UserType } from '../../types/store/UserTypes';
 import UserDataRetriever from '../../utils/UserDataRetriever';
 
-export const useSessionStoreSlice: StateCreator<SessionStoreSlice> = (
-	set: (...any: any) => void
-) => ({
+export const useSessionStoreSlice: StateCreator<
+	RootStore,
+	[['zustand/devtools', never]],
+	[],
+	SessionStoreSlice
+> = (set) => ({
 	session: {
 		filterHasFocus: false
 	},

@@ -36,8 +36,6 @@ import { UsersMap, UserType } from './UserTypes';
 import { MeetingBe } from '../network/models/meetingBeTypes';
 import { MemberBe, RoomBe } from '../network/models/roomBeTypes';
 import { UserBe } from '../network/models/userBeTypes';
-import IWebSocketClient from '../network/websocket/IWebSocketClient';
-import IXMPPClient from '../network/xmpp/IXMPPClient';
 
 export type UsersStoreSlice = {
 	users: UsersMap;
@@ -139,8 +137,6 @@ export type ActiveConversationsSlice = {
 
 export type ConnectionsStoreSlice = {
 	connections: Connections;
-	setXmppClient: (xmppClient: IXMPPClient) => void;
-	setWebSocketClient: (wsClient: IWebSocketClient) => void;
 	setChatsBeStatus: (status: boolean) => void;
 	setXmppStatus: (status: boolean) => void;
 	setWebsocketStatus: (status: boolean) => void;

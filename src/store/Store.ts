@@ -22,18 +22,18 @@ import { RootStore } from '../types/store/StoreTypes';
 
 const useStore = create<RootStore>()(
 	devtools(
-		(...set) => ({
-			...useUsersStoreSlice(...set),
-			...useRoomsStoreSlice(...set),
-			...useMessagesStoreSlice(...set),
-			...useSessionStoreSlice(...set),
-			...useMarkersStoreSlice(...set),
-			...useActiveConversationsSlice(...set),
-			...useConnectionsStoreSlice(...set),
-			...useUnreadsCountStoreSlice(...set),
-			...useFasteningMessagesSlice(...set),
-			...useMeetingsStoreSlice(...set),
-			...useActiveMeetingSlice(...set)
+		(set, get, api): RootStore => ({
+			...useUsersStoreSlice(set, get, api),
+			...useRoomsStoreSlice(set, get, api),
+			...useMessagesStoreSlice(set, get, api),
+			...useSessionStoreSlice(set, get, api),
+			...useMarkersStoreSlice(set, get, api),
+			...useActiveConversationsSlice(set, get, api),
+			...useConnectionsStoreSlice(set, get, api),
+			...useUnreadsCountStoreSlice(set, get, api),
+			...useFasteningMessagesSlice(set, get, api),
+			...useMeetingsStoreSlice(set, get, api),
+			...useActiveMeetingSlice(set, get, api)
 		}),
 		{ name: 'carbonio-ws-collaboration-ui' }
 	)

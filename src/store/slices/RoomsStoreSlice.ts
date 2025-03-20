@@ -15,7 +15,12 @@ import { RoomType } from '../../types/store/RoomTypes';
 import { RoomsStoreSlice, RootStore } from '../../types/store/StoreTypes';
 import { dateToISODate, isBefore } from '../../utils/dateUtils';
 
-export const useRoomsStoreSlice: StateCreator<RoomsStoreSlice> = (set: (...any: any) => void) => ({
+export const useRoomsStoreSlice: StateCreator<
+	RootStore,
+	[['zustand/devtools', never]],
+	[],
+	RoomsStoreSlice
+> = (set) => ({
 	rooms: {},
 	setRooms: (roomsBe: RoomBe[]): void => {
 		set(
@@ -156,7 +161,7 @@ export const useRoomsStoreSlice: StateCreator<RoomsStoreSlice> = (set: (...any: 
 		set(
 			produce((draft: RootStore) => {
 				if (draft.rooms[id].members == null) draft.rooms[id].members = [];
-				draft.rooms[id].members!.push(member);
+				draft.rooms[id].members.push(member);
 			}),
 			false,
 			'ROOMS/ADD_ROOM_MEMBER'
@@ -170,7 +175,7 @@ export const useRoomsStoreSlice: StateCreator<RoomsStoreSlice> = (set: (...any: 
 					userId &&
 					find(draft.rooms[id].members, { userId })
 				) {
-					remove(draft.rooms[id].members!, { userId });
+					remove(draft.rooms[id].members, { userId });
 				}
 			}),
 			false,

@@ -18,8 +18,6 @@ import styled from 'styled-components';
 
 import useRouting from '../../../hooks/useRouting';
 import { MeetingsApi } from '../../../network';
-import { WebSocketClient } from '../../../network/websocket/WebSocketClient';
-import XMPPClient from '../../../network/xmpp/XMPPClient';
 import useStore from '../../../store/Store';
 import { UserType } from '../../../types/store/UserTypes';
 import { BrowserUtils } from '../../../utils/BrowserUtils';
@@ -51,8 +49,6 @@ const ExternalGuestForm = (): ReactElement => {
 		'Something went Wrong. Please Retry'
 	);
 
-	const setXmppClient = useStore((state) => state.setXmppClient);
-	const setWebSocketClient = useStore((state) => state.setWebSocketClient);
 	const setChatsBeStatus = useStore((state) => state.setChatsBeStatus);
 	const setLoginInfo = useStore((state) => state.setLoginInfo);
 	const setAttributes = useStore((store) => store.setAttributes);
@@ -85,15 +81,10 @@ const ExternalGuestForm = (): ReactElement => {
 				document.cookie = `ZX_AUTH_TOKEN=${res.zxToken}; path=/`;
 				setLoginInfo(res.id, userName, userName, UserType.GUEST);
 
-				// NETWORKS: init XMPP and WebSocket clients
-				const xmppClient = new XMPPClient();
-				setXmppClient(xmppClient);
-				const webSocket = new WebSocketClient();
-				setWebSocketClient(webSocket);
-
 				setChatsBeStatus(true);
+				const { xmppClient, wsClient } = useStore.getState().connections;
 				xmppClient.connect(res.zmToken);
-				webSocket.connect();
+				wsClient.connect();
 
 				setAttributes({
 					carbonioWscShowMessageReads: 'TRUE',
@@ -114,8 +105,6 @@ const ExternalGuestForm = (): ReactElement => {
 		setAttributes,
 		setChatsBeStatus,
 		setLoginInfo,
-		setWebSocketClient,
-		setXmppClient,
 		userName
 	]);
 

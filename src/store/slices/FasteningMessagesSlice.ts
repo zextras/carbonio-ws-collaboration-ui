@@ -12,9 +12,12 @@ import { StateCreator } from 'zustand';
 import { MessageFastening } from '../../types/store/MessageTypes';
 import { RootStore, FasteningMessagesSlice } from '../../types/store/StoreTypes';
 
-export const useFasteningMessagesSlice: StateCreator<FasteningMessagesSlice> = (
-	set: (...any: any) => void
-) => ({
+export const useFasteningMessagesSlice: StateCreator<
+	RootStore,
+	[['zustand/devtools', never]],
+	[],
+	FasteningMessagesSlice
+> = (set) => ({
 	fastenings: {},
 	addFastening: (fastening: MessageFastening): void => {
 		set(
