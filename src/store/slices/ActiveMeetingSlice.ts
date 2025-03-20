@@ -299,6 +299,9 @@ export const useActiveMeetingSlice: StateCreator<ActiveMeetingSlice> = (
 				draft.activeMeeting[meetingId]?.videoScreenIn?.subscriptionManager?.removeSubscription(
 					subToRemove
 				);
+				delete draft.activeMeeting[meetingId]?.subscription[
+					`${subToRemove.userId}-${subToRemove.type}`
+				];
 			}),
 			false,
 			'AM/REMOVE_SUB'
@@ -338,6 +341,7 @@ export const useActiveMeetingSlice: StateCreator<ActiveMeetingSlice> = (
 					streamType
 				);
 				draft.activeMeeting[meetingId]?.videoScreenIn?.removeStream(subIdToDelete, streamType);
+				delete draft.activeMeeting[meetingId]?.subscription[`${subIdToDelete}-${streamType}`];
 			}),
 			false,
 			'AM/DELETE_SUB'
