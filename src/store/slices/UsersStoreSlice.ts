@@ -12,7 +12,12 @@ import { UserBe } from '../../types/network/models/userBeTypes';
 import { RootStore, UsersStoreSlice } from '../../types/store/StoreTypes';
 import { UserType } from '../../types/store/UserTypes';
 
-export const useUsersStoreSlice: StateCreator<UsersStoreSlice> = (set: (...any: any) => void) => ({
+export const useUsersStoreSlice: StateCreator<
+	RootStore,
+	[['zustand/devtools', never]],
+	[],
+	UsersStoreSlice
+> = (set) => ({
 	users: {},
 	setUserInfo: (user: UserBe): void => {
 		set(

@@ -18,10 +18,9 @@ import { Button, Checkbox, Container, Modal, Tooltip } from '@zextras/carbonio-d
 import { size } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
-import { getCapability } from '../../../../store/selectors/SessionSelectors';
+import { getAttribute } from '../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../store/Store';
 import { Member } from '../../../../types/store/RoomTypes';
-import { CapabilityType } from '../../../../types/store/SessionTypes';
 import ContactsSelector, { ContactsSelected } from '../../contactSelector/ContactsSelector';
 
 type AddNewMemberProps = {
@@ -59,8 +58,7 @@ const AddNewMemberModal: FC<AddNewMemberProps> = ({
 	const addNewMemberButtonLabel = t('action.addNewMembers', 'Add new members');
 	const closeLabel = t('action.close', 'Close');
 
-	const maxMembers =
-		(useStore((store) => getCapability(store, CapabilityType.MAX_GROUP_MEMBERS)) as number) ?? 0;
+	const maxMembers = useStore((store) => getAttribute(store, 'maxGroupMembers')) as number;
 
 	const inputRef = useRef<HTMLInputElement>(null);
 

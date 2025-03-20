@@ -19,11 +19,10 @@ import { useTranslation } from 'react-i18next';
 import ChatCreationTitleInput from './ChatCreationTitleInput';
 import useRouting from '../../../hooks/useRouting';
 import { RoomsApi } from '../../../network';
-import { getCapability } from '../../../store/selectors/SessionSelectors';
+import { getAttribute } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { MemberBe, RoomType } from '../../../types/network/models/roomBeTypes';
 import { AddRoomResponse } from '../../../types/network/responses/roomsResponses';
-import { CapabilityType } from '../../../types/store/SessionTypes';
 import ContactsSelector, { ContactsSelected } from '../contactSelector/ContactsSelector';
 
 const ChatCreationModal = ({
@@ -55,8 +54,9 @@ const ChatCreationModal = ({
 	);
 
 	const setPlaceholderRoom = useStore((state) => state.setPlaceholderRoom);
-	const maxMembers =
-		(useStore((store) => getCapability(store, CapabilityType.MAX_GROUP_MEMBERS)) as number) ?? 0;
+	const privateChatCreation = useStore((store) => getAttribute(store, 'privateChatCreation'));
+	const groupChatCreation = useStore((store) => getAttribute(store, 'groupChatCreation'));
+	const maxMembers = useStore((store) => getAttribute(store, 'maxGroupMembers')) as number;
 
 	const [contactsSelected, setContactsSelected] = useState<ContactsSelected>([]);
 	const [title, setTitle] = useState<string>(titlePlaceholder);
@@ -76,8 +76,9 @@ const ChatCreationModal = ({
 	}, [open]);
 
 	const chatType = useMemo(
-		() => (size(contactsSelected) > 1 ? RoomType.GROUP : RoomType.ONE_TO_ONE),
-		[contactsSelected]
+		() =>
+			size(contactsSelected) > 1 || !privateChatCreation ? RoomType.GROUP : RoomType.ONE_TO_ONE,
+		[contactsSelected, privateChatCreation]
 	);
 
 	const modalTitle = useMemo(
@@ -98,7 +99,7 @@ const ChatCreationModal = ({
 		if (chatType === RoomType.ONE_TO_ONE) {
 			return size(contactsSelected) === 0;
 		}
-		return titleError || topicError;
+		return size(contactsSelected) < 2 || titleError || topicError;
 	}, [chatType, titleError, topicError, contactsSelected]);
 
 	const onModalClose = useCallback(() => {
@@ -177,6 +178,12 @@ const ChatCreationModal = ({
 		errorLabelDisabled
 	]);
 
+	const maxSelectionNumber = useMemo(() => {
+		if (chatType === RoomType.GROUP) return maxMembers - 1;
+		if (!groupChatCreation) return 1;
+		return undefined;
+	}, [chatType, groupChatCreation, maxMembers]);
+
 	return (
 		<Modal
 			open={open}
@@ -197,21 +204,25 @@ const ChatCreationModal = ({
 			<ContactsSelector
 				contactsSelected={contactsSelected}
 				setContactSelected={setContactsSelected}
-				maxSelectionNumber={size(contactsSelected) > 1 ? maxMembers - 1 : undefined}
+				maxSelectionNumber={maxSelectionNumber}
 				canSelectOwnership={size(contactsSelected) > 1}
 				customInputRef={inputRef}
 			/>
-			<Padding bottom="large" />
-			<Text color="gray1">{listTextLabel}</Text>
-			{chatType === RoomType.GROUP && (
-				<ChatCreationTitleInput
-					title={title}
-					setTitle={setTitle}
-					setTopic={setTopic}
-					topic={topic}
-					titleError={titleError}
-					topicError={topicError}
-				/>
+			{groupChatCreation && (
+				<>
+					<Padding bottom="large" />
+					<Text color="gray1">{listTextLabel}</Text>
+					{chatType === RoomType.GROUP && (
+						<ChatCreationTitleInput
+							title={title}
+							setTitle={setTitle}
+							setTopic={setTopic}
+							topic={topic}
+							titleError={titleError}
+							topicError={topicError}
+						/>
+					)}
+				</>
 			)}
 		</Modal>
 	);

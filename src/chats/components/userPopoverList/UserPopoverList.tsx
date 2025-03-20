@@ -44,10 +44,10 @@ const UserPopoverList: FC<UserPopoverListProps> = ({
 	const handleScroll = useCallback(
 		(event: Event) => {
 			if (open && !ref.current?.contains(event.target as Node)) {
-				setOpen(false);
+				anchorEl.current?.click();
 			}
 		},
-		[open, ref]
+		[anchorEl, open, ref]
 	);
 
 	useEffect(() => {

@@ -11,7 +11,7 @@ import { screen, act } from '@testing-library/react';
 import ConversationHeader from './ConversationHeader';
 import useStore from '../../../store/Store';
 import {
-	createMockCapabilityList,
+	createMockAttributesList,
 	createMockMember,
 	createMockRoom,
 	createMockUser
@@ -86,21 +86,21 @@ describe('Conversation header test', () => {
 
 	test('Meeting button is displayed when canVideoCall capability is set to true', async () => {
 		const store: RootStore = useStore.getState();
-		store.setCapabilities(createMockCapabilityList({ canVideoCall: true }));
+		store.setAttributes(createMockAttributesList({ carbonioWscVideoCallEnabled: 'TRUE' }));
 		setup(<ConversationHeader roomId={mockedRoom.id} setInfoPanelOpen={jest.fn()} />);
 		expect(screen.getByTestId('ConversationHeaderMeetingButton')).toBeInTheDocument();
 	});
 
 	test("Meeting button isn't displayed when canVideoCall capability is set to false", async () => {
 		const store: RootStore = useStore.getState();
-		store.setCapabilities(createMockCapabilityList({ canVideoCall: false }));
+		store.setAttributes(createMockAttributesList({ carbonioWscVideoCallEnabled: 'FALSE' }));
 		setup(<ConversationHeader roomId={mockedRoom.id} setInfoPanelOpen={jest.fn()} />);
 		expect(screen.queryByTestId('ConversationHeaderMeetingButton')).not.toBeInTheDocument();
 	});
 
 	test("Meeting button isn't displayed when the room is a placeholder", async () => {
 		const store: RootStore = useStore.getState();
-		store.setCapabilities(createMockCapabilityList({ canVideoCall: true }));
+		store.setAttributes(createMockAttributesList({ carbonioWscVideoCallEnabled: 'TRUE' }));
 		setup(
 			<ConversationHeader roomId={`placeholder-${mockPaoloUser.id}`} setInfoPanelOpen={jest.fn()} />
 		);

@@ -6,7 +6,17 @@
 import * as uuid from 'uuid';
 
 import UserDataRetriever from './UserDataRetriever';
+import useStore from '../store/Store';
 import { spyOnFetch } from '../tests/jest-env-setup';
+import { spyOnUsersApi, UsersApiToSpy } from '../tests/mocks/network';
+import { UserType } from '../types/store/UserTypes';
+
+const user1 = {
+	id: 'user1-id',
+	email: 'user1-email',
+	name: 'User Uno',
+	type: UserType.INTERNAL
+};
 
 describe('UserDataRetriever tests', () => {
 	test('getDebouncedUser is correctly used with few users', async () => {
@@ -57,5 +67,20 @@ describe('UserDataRetriever tests', () => {
 		jest.runAllTimers();
 
 		expect(spyOnFetch).toHaveBeenCalledTimes(1);
+	});
+
+	test('If the name is in the store, getAsyncUsername return it', async () => {
+		const spyOnGetUser = spyOnUsersApi(UsersApiToSpy.GET_USER);
+		useStore.getState().setUserInfo(user1);
+		const name = await UserDataRetriever.getAsyncUsername(user1.id);
+		expect(name).toEqual(user1.name);
+		expect(spyOnGetUser).not.toHaveBeenCalled();
+	});
+
+	test('If the name is not in the store, getAsyncUsername request it', async () => {
+		const spyOnGetUser = spyOnUsersApi(UsersApiToSpy.GET_USER).mockResolvedValueOnce(user1);
+		const name = await UserDataRetriever.getAsyncUsername(user1.id);
+		expect(name).toEqual(user1.name);
+		expect(spyOnGetUser).toHaveBeenCalled();
 	});
 });

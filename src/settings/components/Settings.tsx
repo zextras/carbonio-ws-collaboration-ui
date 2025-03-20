@@ -16,9 +16,8 @@ import MeetingSettings from './MeetingSettings';
 import NotificationsSettings from './NotificationsSettings';
 import RecordingSettings from './RecordingSettings';
 import useLocalStorage from '../../hooks/useLocalStorage';
-import { getCapability } from '../../store/selectors/SessionSelectors';
+import { getAttribute } from '../../store/selectors/SessionSelectors';
 import useStore from '../../store/Store';
-import { CapabilityType } from '../../types/store/SessionTypes';
 import {
 	LOCAL_STORAGE_NAMES,
 	MeetingRecordingType,
@@ -31,9 +30,7 @@ const Settings: FC = () => {
 	const settingsTitle = t('settings.title', 'Chats settings');
 	const saveSettingsSnackbar = t('settings.save', 'Edits saved correctly');
 
-	const canRecordVideo = useStore((store) =>
-		getCapability(store, CapabilityType.CAN_VIDEO_CALL_RECORD)
-	);
+	const recordingEnabled = useStore((store) => getAttribute(store, 'recordingEnabled'));
 
 	const createSnackbar: CreateSnackbarFn = useSnackbar();
 
@@ -179,7 +176,7 @@ const Settings: FC = () => {
 					meetingMediaDefaults={meetingMediaDefaults}
 					setMeetingMediaDefaults={setMeetingMediaDefaults}
 				/>
-				{canRecordVideo && (
+				{recordingEnabled && (
 					<RecordingSettings
 						recordingDefaults={recordingDefaults}
 						setRecordingDefaults={setRecordingDefaults}

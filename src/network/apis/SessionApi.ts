@@ -4,13 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import useStore from '../../store/Store';
 import { RequestType } from '../../types/network/apis/IBaseAPI';
 import ISessionApi from '../../types/network/apis/ISessionApi';
-import {
-	GetCapabilitiesResponse,
-	GetTokenResponse
-} from '../../types/network/responses/sessionResponses';
+import { GetTokenResponse } from '../../types/network/responses/sessionResponses';
 import { fetchAPI } from '../../utils/FetchUtils';
 
 class SessionApi implements ISessionApi {
@@ -26,14 +22,6 @@ class SessionApi implements ISessionApi {
 
 	public getToken(): Promise<GetTokenResponse> {
 		return fetchAPI(`auth/token`, RequestType.GET);
-	}
-
-	public getCapabilities(): Promise<GetCapabilitiesResponse> {
-		return fetchAPI(`users/capabilities`, RequestType.GET).then((resp: GetCapabilitiesResponse) => {
-			const { setCapabilities } = useStore.getState();
-			setCapabilities(resp);
-			return resp;
-		});
 	}
 }
 

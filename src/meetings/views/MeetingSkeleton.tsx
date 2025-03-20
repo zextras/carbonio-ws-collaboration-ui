@@ -13,11 +13,10 @@ import useGeneralMeetingControls from '../../hooks/useGeneralMeetingControls';
 import usePiPWindow from '../../hooks/usePipWindow';
 import { getMeetingViewSelected } from '../../store/selectors/ActiveMeetingSelectors';
 import { getNumberOfTiles } from '../../store/selectors/MeetingSelectors';
-import { getCapability, getUserId } from '../../store/selectors/SessionSelectors';
+import { getAttribute, getUserId } from '../../store/selectors/SessionSelectors';
 import { getIsUserGuest } from '../../store/selectors/UsersSelectors';
 import useStore from '../../store/Store';
 import { MeetingViewType } from '../../types/store/ActiveMeetingTypes';
-import { CapabilityType } from '../../types/store/SessionTypes';
 import CinemaMode from '../components/cinemaMode/CinemaMode';
 import FaceToFaceMode from '../components/faceToFaceMode/FaceToFaceMode';
 import GridMode from '../components/gridMode/GridMode';
@@ -52,8 +51,8 @@ const MeetingSkeleton = (): ReactElement => {
 
 	const meetingViewSelected = useStore((store) => getMeetingViewSelected(store, meetingId!));
 	const numberOfTiles = useStore((store) => getNumberOfTiles(store, meetingId!));
-	const canUseVirtualBackground = useStore((store) =>
-		getCapability(store, CapabilityType.CAN_USE_VIRTUAL_BACKGROUND)
+	const virtualBackgroundEnabled = useStore((store) =>
+		getAttribute(store, 'virtualBackgroundEnabled')
 	);
 	const isUserGuest = useStore((store) => getIsUserGuest(store, myUserId ?? ''));
 
@@ -69,8 +68,8 @@ const MeetingSkeleton = (): ReactElement => {
 	}, [meetingViewSelected, numberOfTiles]);
 
 	const isVirtualBackgroundVisible = useMemo(
-		() => canUseVirtualBackground ?? isUserGuest,
-		[canUseVirtualBackground, isUserGuest]
+		() => virtualBackgroundEnabled ?? isUserGuest,
+		[virtualBackgroundEnabled, isUserGuest]
 	);
 
 	const { pipWindow } = usePiPWindow();

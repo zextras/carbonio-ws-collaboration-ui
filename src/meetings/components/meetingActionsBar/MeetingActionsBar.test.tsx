@@ -11,7 +11,7 @@ import { screen } from '@testing-library/react';
 import MeetingActionsBar from './MeetingActionsBar';
 import useStore from '../../../store/Store';
 import {
-	createMockCapabilityList,
+	createMockAttributesList,
 	createMockMeeting,
 	createMockParticipants,
 	createMockRoom,
@@ -64,7 +64,7 @@ beforeEach(() => {
 	store.addMeeting(meeting);
 	store.startMeeting(meeting.id, '2024-08-25T17:24:28.961+02:00');
 	store.meetingConnection(meeting.id, false, undefined, false, undefined);
-	store.setCapabilities(createMockCapabilityList());
+	store.setAttributes(createMockAttributesList());
 });
 
 describe('Meeting action bar', () => {

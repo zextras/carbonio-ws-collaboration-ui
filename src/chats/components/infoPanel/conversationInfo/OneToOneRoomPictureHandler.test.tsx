@@ -11,7 +11,7 @@ import { act, screen } from '@testing-library/react';
 import OneToOneRoomPictureHandler from './OneToOneRoomPictureHandler';
 import useStore from '../../../../store/Store';
 import {
-	createMockCapabilityList,
+	createMockAttributesList,
 	createMockMember,
 	createMockRoom,
 	createMockUser
@@ -37,7 +37,7 @@ describe('Room Picture Handler - one_to_one', () => {
 		store.setUserInfo(user1Info);
 		store.setUserInfo(user2Info);
 		store.setLoginInfo(user1Info.id, user1Info.name);
-		store.setCapabilities(createMockCapabilityList({ canSeeUsersPresence: true }));
+		store.setAttributes(createMockAttributesList({ carbonioWscShowUsersPresence: 'TRUE' }));
 		act(() => store.setUserLastActivity(user2Info.id, 1642818617000));
 		setup(<OneToOneRoomPictureHandler memberId={user2Info.id} />);
 
@@ -50,7 +50,7 @@ describe('Room Picture Handler - one_to_one', () => {
 		store.setUserInfo(user1Info);
 		store.setUserInfo(user2Info);
 		store.setLoginInfo(user1Info.id, user1Info.name);
-		store.setCapabilities(createMockCapabilityList({ canSeeUsersPresence: true }));
+		store.setAttributes(createMockAttributesList({ carbonioWscShowUsersPresence: 'TRUE' }));
 		act(() => store.setUserPresence(user2Info.id, true));
 		setup(<OneToOneRoomPictureHandler memberId={user2Info.id} />);
 

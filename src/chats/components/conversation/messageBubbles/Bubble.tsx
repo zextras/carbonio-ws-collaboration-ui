@@ -31,12 +31,11 @@ import {
 } from '../../../../store/selectors/ActiveConversationsSelectors';
 import { getMessageAttachment } from '../../../../store/selectors/MessagesSelectors';
 import { getRoomTypeSelector } from '../../../../store/selectors/RoomsSelectors';
-import { getCapability } from '../../../../store/selectors/SessionSelectors';
+import { getAttribute } from '../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../store/Store';
 import { MarkerStatus } from '../../../../types/store/MarkersTypes';
 import { TextMessage } from '../../../../types/store/MessageTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
-import { CapabilityType } from '../../../../types/store/SessionTypes';
 import { getAttachmentInfo } from '../../../../utils/attachmentUtils';
 import { parseUrlOnMessage } from '../../../../utils/parseUrlOnMessage';
 
@@ -127,9 +126,7 @@ const Bubble: FC<BubbleProps> = ({
 	const messageInForwardList: boolean = useStore((store) =>
 		isMessageInForwardList(store, message.roomId, message)
 	);
-	const canSeeMessageReads = useStore((store) =>
-		getCapability(store, CapabilityType.CAN_SEE_MESSAGE_READS)
-	);
+	const showMessageReads = useStore((store) => getAttribute(store, 'showMessageReads')) as boolean;
 
 	const forwardContainerRef = useRef<HTMLDivElement>(null);
 
@@ -267,7 +264,7 @@ const Bubble: FC<BubbleProps> = ({
 					isEdited={message?.edited}
 					messageExtension={extension}
 					messageSize={size}
-					canSeeMessageReads={canSeeMessageReads}
+					canSeeMessageReads={showMessageReads}
 					showReactions={!messageAttachment}
 					roomId={message.roomId}
 					stanzaId={message.stanzaId}

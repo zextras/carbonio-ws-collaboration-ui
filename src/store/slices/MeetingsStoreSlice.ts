@@ -15,7 +15,12 @@ import { MeetingParticipant, MeetingParticipantMap } from '../../types/store/Mee
 import { MeetingsSlice, RootStore } from '../../types/store/StoreTypes';
 import { dateToISODate } from '../../utils/dateUtils';
 
-export const useMeetingsStoreSlice: StateCreator<MeetingsSlice> = (set: (...any: any) => void) => ({
+export const useMeetingsStoreSlice: StateCreator<
+	RootStore,
+	[['zustand/devtools', never]],
+	[],
+	MeetingsSlice
+> = (set, get) => ({
 	meetings: {},
 	setMeetings: (meetings: MeetingBe[]): void => {
 		set(
@@ -174,14 +179,14 @@ export const useMeetingsStoreSlice: StateCreator<MeetingsSlice> = (set: (...any:
 	changeStreamStatus: (
 		meetingId: string,
 		userId: string,
-		stream: STREAM_TYPE,
+		streamType: STREAM_TYPE,
 		status: boolean
 	): void => {
 		set(
 			produce((draft: RootStore) => {
 				const meeting = find(draft.meetings, (meeting) => meeting.id === meetingId);
 				if (meeting) {
-					switch (stream) {
+					switch (streamType) {
 						case STREAM_TYPE.AUDIO:
 							draft.meetings[meeting.roomId].participants[userId].audioStreamOn = status;
 							break;
@@ -202,6 +207,10 @@ export const useMeetingsStoreSlice: StateCreator<MeetingsSlice> = (set: (...any:
 			false,
 			'MEETINGS/CHANGE_STREAM_STATUS'
 		);
+		// Auto pin new screen share
+		if (streamType === STREAM_TYPE.SCREEN && status) {
+			get().setPinnedTile(meetingId, { userId, type: streamType });
+		}
 	},
 	setWaitingList: (meetingId: string, waitingList: string[]): void => {
 		set(

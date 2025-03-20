@@ -11,7 +11,7 @@ import { act, screen } from '@testing-library/react';
 import MeetingSidebar from './MeetingSidebar';
 import useStore from '../../../store/Store';
 import {
-	createMockCapabilityList,
+	createMockAttributesList,
 	createMockMeeting,
 	createMockMember,
 	createMockParticipants,
@@ -95,7 +95,7 @@ const scheduledMeeting: MeetingBe = createMockMeeting({
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo(sessionUser.id, sessionUser.name);
-	store.setCapabilities(createMockCapabilityList({ canVideoCallRecord: true }));
+	store.setAttributes(createMockAttributesList({ carbonioWscRecordingEnabled: 'TRUE' }));
 	store.setRooms([oneToOneRoom, groupRoom, temporaryRoom, temporaryRoomMod]);
 	store.setMeetings([oneToOneMeeting, groupMeeting, scheduledMeeting, scheduledMeetingMod]);
 	store.meetingConnection(oneToOneMeeting.id, false, 'audioId', false, 'videoId');
@@ -152,7 +152,9 @@ describe('Meeting sidebar', () => {
 	});
 
 	test('Recording accordion is not visible with recording capability set to false', async () => {
-		useStore.getState().setCapabilities(createMockCapabilityList({ canVideoCallRecord: false }));
+		useStore
+			.getState()
+			.setAttributes(createMockAttributesList({ carbonioWscRecordingEnabled: 'FALSE' }));
 		routerContextSetup(<MeetingSidebar />, { meetingId: oneToOneMeeting.id });
 		const recordingAccordion = screen.queryByText(/Recording/);
 		expect(recordingAccordion).not.toBeInTheDocument();
@@ -178,7 +180,7 @@ describe('Meeting sidebar', () => {
 	});
 
 	test('when user select a virtual background, the one selected has green border', async () => {
-		useStore.getState().setCapabilities(createMockCapabilityList());
+		useStore.getState().setAttributes(createMockAttributesList());
 		const { user } = routerContextSetup(<MeetingSidebar />, { meetingId: oneToOneMeeting.id });
 
 		const t = screen.getAllByTestId('icon: ChevronDown');

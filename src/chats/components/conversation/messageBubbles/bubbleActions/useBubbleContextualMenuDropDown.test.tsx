@@ -9,7 +9,7 @@ import { screen, renderHook } from '@testing-library/react';
 import useBubbleContextualMenuDropDown from './useBubbleContextualMenuDropDown';
 import useStore from '../../../../../store/Store';
 import {
-	createMockCapabilityList,
+	createMockAttributesList,
 	createMockRoom,
 	createMockTextMessage
 } from '../../../../../tests/createMock';
@@ -100,7 +100,7 @@ beforeEach(() => {
 	const store: RootStore = useStore.getState();
 	store.setSessionId(mySessionId);
 	store.addRoom(mockedRoom);
-	store.setCapabilities(createMockCapabilityList());
+	store.setAttributes(createMockAttributesList());
 });
 
 describe('Bubble Contextual Menu - other user messages', () => {
