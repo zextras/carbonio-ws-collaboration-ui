@@ -97,14 +97,14 @@ export const useSessionStoreSlice: StateCreator<
 			'SESSION/SET_CUSTOM_LOGO'
 		);
 	},
-	setChatExporting: (roomId?: string): void => {
+	setChatExporting: (roomId?: string, status = ExportStatus.EXPORTING): void => {
 		set(
 			produce((draft: RootStore) => {
 				if (roomId) {
 					draft.session.chatExporting = {
 						roomId,
-						exporter: new ChatExporter(roomId),
-						status: ExportStatus.EXPORTING
+						exporter: draft.session.chatExporting?.exporter || new ChatExporter(roomId),
+						status
 					};
 				} else {
 					delete draft.session.chatExporting;
@@ -112,17 +112,6 @@ export const useSessionStoreSlice: StateCreator<
 			}),
 			false,
 			'SESSION/SET_CHAT_EXPORTING'
-		);
-	},
-	setChatExportStatus: (status: ExportStatus): void => {
-		set(
-			produce((draft: RootStore) => {
-				if (draft.session.chatExporting) {
-					draft.session.chatExporting.status = status;
-				}
-			}),
-			false,
-			'SESSION/SET_CHAT_EXPORTING_STATUS'
 		);
 	}
 });

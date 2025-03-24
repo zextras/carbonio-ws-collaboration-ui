@@ -16,8 +16,7 @@ export type SessionStoreSlice = {
 	setQueueId: (queueId: string) => void;
 	setSelectedRoom: (roomId?: string) => void;
 	setCustomLogo: (logo: string | false) => void;
-	setChatExporting: (roomId?: string) => void;
-	setChatExportStatus: (status: ExportStatus) => void;
+	setChatExporting: (roomId?: string, status?: ExportStatus) => void;
 };
 
 export type Session = {

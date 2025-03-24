@@ -15,15 +15,16 @@ import { formatDate } from '../../../utils/dateUtils';
 
 export interface IChatExporter {
 	addMessageToFullHistory(message: Message): void;
-	handleFullHistoryResponse(isHistoryComplete: boolean): void;
+	continueExporting(): void;
+	exportHistory(): void;
 }
 
 class ChatExporter implements IChatExporter {
-	private roomId: string;
+	readonly roomId: string;
 
-	private fullHistory: Message[] = [];
+	readonly fullHistory: Message[] = [];
 
-	private xmppClient: IXMPPClient = useStore.getState().connections.xmppClient;
+	readonly xmppClient: IXMPPClient = useStore.getState().connections.xmppClient;
 
 	constructor(roomId: string) {
 		this.roomId = roomId;
@@ -34,23 +35,19 @@ class ChatExporter implements IChatExporter {
 		this.fullHistory.push(message);
 	}
 
-	public handleFullHistoryResponse(isHistoryComplete: boolean): void {
-		if (isHistoryComplete) {
-			this.exportHistory();
-		} else {
-			const from = last(this.fullHistory)?.date ?? 0;
-			this.xmppClient.requestFullHistory(this.roomId, from);
-		}
+	public continueExporting(): void {
+		const from = last(this.fullHistory)?.date ?? 0;
+		this.xmppClient.requestFullHistory(this.roomId, from);
 	}
 
-	private exportHistory(): void {
+	public exportHistory(): void {
 		let content = '';
 		forEach(this.fullHistory, (message) => {
 			if (message.type === MessageType.TEXT_MSG) {
 				content += this.messageFormatter(message);
 			}
 		});
-		useStore.getState().setChatExportStatus(ExportStatus.DOWNLOADING);
+		useStore.getState().setChatExporting(this.roomId, ExportStatus.DOWNLOADING);
 
 		// Create and download the file
 		const blob = new Blob([content], { type: 'text/plain' });
