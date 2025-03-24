@@ -110,16 +110,17 @@ const GridMode = ({ children }: MeetingViewProps): ReactElement => {
 			for (let column = 0; column < columns; column += 1) {
 				const tileIndex = row * columns + column;
 				if (tileIndex < size(tilesToRender) && tilesToRender[tileIndex]) {
+					const tile = tilesToRender[tileIndex];
 					rowTiles.push(
 						<Container
 							width={`${tileWidth / calcScaleDivisor()}rem`}
 							height="fit"
-							key={`tile-${tileIndex}-container`}
+							key={`tileContainer-${tile.userId}-${tile.type}`}
 						>
 							<Tile
 								userId={tilesToRender[tileIndex].userId}
 								meetingId={meetingId}
-								key={`tile-${tileIndex}`}
+								key={`tile-${tile.userId}-${tile.type}`}
 								isScreenShare={tilesToRender[tileIndex].type === STREAM_TYPE.SCREEN}
 							/>
 						</Container>

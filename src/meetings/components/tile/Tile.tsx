@@ -70,6 +70,7 @@ const CustomTile = styled(Container)<{
 const CustomShimmer = styled(Shimmer.Logo)`
 	position: absolute;
 	z-index: ${Z_INDEX_RANK.TILE_SHIMMER};
+	animation-duration: 3s;
 `;
 
 const CustomContainer = styled(Container)`
@@ -106,6 +107,7 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 	);
 
 	const [isHoovering, setIsHoovering] = useState<boolean>(false);
+	const [isStreamLoading, setIsStreamLoading] = useState<boolean>(true);
 
 	const streamRef = useRef<null | HTMLVideoElement>(null);
 	const hoverRef = useRef<HTMLDivElement>(null);
@@ -145,7 +147,7 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 
 	useEffect(() => {
 		if (streamRef?.current) {
-			if (videoStream && (videoStatus || isScreenShare)) {
+			if (videoStream?.active && (videoStatus || isScreenShare)) {
 				streamRef.current.srcObject = videoStream;
 			} else {
 				streamRef.current.srcObject = null;
@@ -208,13 +210,14 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 				controls={false}
 				ref={modalProps ? modalProps.streamRef : streamRef}
 				$isScreenShare={!!isScreenShare}
+				onLoadedData={() => setIsStreamLoading(false)}
 			/>
 			{!videoStreamEnabled && (
 				<CustomContainer data-testid="avatar_box" height="fit">
 					<TileAvatarComponent userId={userId} />
 				</CustomContainer>
 			)}
-			{videoStreamEnabled && <CustomShimmer width="100%" height="100%" />}
+			{videoStreamEnabled && isStreamLoading && <CustomShimmer width="100%" height="100%" />}
 		</CustomTile>
 	);
 };
