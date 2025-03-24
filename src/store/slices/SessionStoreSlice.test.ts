@@ -160,7 +160,7 @@ describe('SessionStoreSlice tests', () => {
 			const { result } = renderHook(() => useStore());
 			act(() => {
 				result.current.setChatExporting(roomId);
-				result.current.setChatExporting(roomId, ExportStatus.DOWNLOADING);
+				result.current.setChatExportStatus(ExportStatus.DOWNLOADING);
 			});
 			expect(result.current.session.chatExporting).toStrictEqual({
 				roomId,

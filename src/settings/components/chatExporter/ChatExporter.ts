@@ -47,7 +47,7 @@ class ChatExporter implements IChatExporter {
 				content += this.messageFormatter(message);
 			}
 		});
-		useStore.getState().setChatExporting(this.roomId, ExportStatus.DOWNLOADING);
+		useStore.getState().setChatExportStatus(ExportStatus.DOWNLOADING);
 
 		// Create and download the file
 		const blob = new Blob([content], { type: 'text/plain' });

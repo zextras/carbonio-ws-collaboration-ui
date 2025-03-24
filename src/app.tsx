@@ -24,8 +24,8 @@ import { setDateDefault } from './utils/dateUtils';
 
 export default function App(): React.JSX.Element {
 	const setLoginInfo = useStore((state) => state.setLoginInfo);
-	const setChatsBeStatus = useStore((state) => state.setChatsBeStatus);
 	const setAttributes = useStore((state) => state.setAttributes);
+	const setChatsBeStatus = useStore((state) => state.setChatsBeStatus);
 
 	const authenticated = useAuthenticated();
 	const { prefs, attrs } = useUserSettings();
