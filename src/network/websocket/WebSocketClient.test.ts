@@ -73,7 +73,7 @@ describe('WebSocketClient', () => {
 		wsClient.connect();
 		const message = { type: WsEventType.INITIALIZATION, queueId: 'queueId' };
 		wsClient._onMessage({ data: JSON.stringify(message) } as MessageEvent);
-		expect(useStore.getState().session.sessionId).toBe('queueId');
+		expect(useStore.getState().session.queueId).toBe('queueId');
 	});
 
 	test('retryReconnection is called with exponential backoff', () => {

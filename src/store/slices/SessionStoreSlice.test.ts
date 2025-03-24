@@ -38,13 +38,14 @@ describe('SessionStoreSlice tests', () => {
 			id: 'id',
 			name: 'name',
 			displayName: 'displayName',
-			userType: UserType.INTERNAL,
-			connections: {
-				chats_be: undefined,
-				xmpp: undefined,
-				websocket: undefined
-			}
+			userType: UserType.INTERNAL
 		});
+	});
+
+	test('Set queueId', () => {
+		const testQueueId = 'test-queueId';
+		useStore.getState().setQueueId(testQueueId);
+		expect(useStore.getState().session.queueId).toBe(testQueueId);
 	});
 
 	test('Set initial selected room', () => {

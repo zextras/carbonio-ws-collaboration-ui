@@ -30,12 +30,7 @@ export const useSessionStoreSlice: StateCreator<
 					id,
 					name,
 					displayName,
-					userType: userType ?? UserType.INTERNAL,
-					connections: {
-						chats_be: undefined,
-						xmpp: undefined,
-						websocket: undefined
-					}
+					userType: userType ?? UserType.INTERNAL
 				};
 				UserDataRetriever.getDebouncedUser(id, true);
 			}),
@@ -43,13 +38,13 @@ export const useSessionStoreSlice: StateCreator<
 			'SESSION/LOGIN_INFO'
 		);
 	},
-	setSessionId: (sessionId: string): void => {
+	setQueueId: (queueId: string): void => {
 		set(
 			produce((draft: RootStore) => {
-				draft.session.sessionId = sessionId;
+				draft.session.queueId = queueId;
 			}),
 			false,
-			'SESSION/SESSION_ID'
+			'SESSION/QUEUE_ID'
 		);
 	},
 	setAttributes: (attrs: AccountSettingsAttrs): void => {

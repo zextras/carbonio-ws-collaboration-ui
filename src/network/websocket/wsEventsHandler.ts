@@ -17,7 +17,7 @@ export function wsEventsHandler(event: WsEvent): void {
 	switch (getEventArea(event.type)) {
 		case EventArea.GENERAL: {
 			if (event.type === WsEventType.INITIALIZATION) {
-				state.setSessionId(event.queueId);
+				state.setQueueId(event.queueId);
 			}
 			break;
 		}

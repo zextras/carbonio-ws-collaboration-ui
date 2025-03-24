@@ -12,7 +12,7 @@ import { IChatExporter } from '../../settings/components/chatExporter/ChatExport
 export type SessionStoreSlice = {
 	session: Session;
 	setLoginInfo: (id: string, name: string, displayName?: string, userType?: UserType) => void;
-	setSessionId: (sessionId: string) => void;
+	setQueueId: (queueId: string) => void;
 	setAttributes: (attrs: AccountSettingsAttrs) => void;
 	setSelectedRoomOneToOneGroup: (id: string) => void;
 	setCustomLogo: (logo: string | false) => void;
@@ -25,14 +25,9 @@ export type Session = {
 	email?: string;
 	name?: string;
 	displayName?: string;
-	sessionId?: string;
+	queueId?: string;
 	userType?: UserType;
 	attributes?: AttributesList;
-	connections?: {
-		chats_be: boolean | undefined;
-		xmpp: boolean | undefined;
-		websocket: boolean | undefined;
-	};
 	selectedRoomOneToOneGroup?: string;
 	customLogo?: string | false;
 	chatExporting?: {
