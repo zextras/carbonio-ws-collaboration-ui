@@ -22,11 +22,8 @@ const groupRoom: RoomBe = createMockRoom({
 
 describe('SessionStoreSlice tests', () => {
 	test('loginInfo', () => {
-		const { result } = renderHook(() => useStore());
-		act(() => {
-			result.current.setLoginInfo('id', 'name', 'displayName');
-		});
-		expect(result.current.session).toStrictEqual({
+		useStore.getState().setLoginInfo('id', 'name', 'displayName');
+		expect(useStore.getState().session).toStrictEqual({
 			id: 'id',
 			name: 'name',
 			displayName: 'displayName',
@@ -38,6 +35,75 @@ describe('SessionStoreSlice tests', () => {
 		const testQueueId = 'test-queueId';
 		useStore.getState().setQueueId(testQueueId);
 		expect(useStore.getState().session.queueId).toBe(testQueueId);
+	});
+
+	describe('attributes', () => {
+		test('Set boolean attributes to true', () => {
+			useStore.getState().setAttributes({
+				carbonioWscPrivateChatCreation: 'TRUE',
+				carbonioWscAttachmentUpload: 'TRUE',
+				carbonioWscShowMessageReads: 'TRUE',
+				carbonioWscShowUsersPresence: 'TRUE',
+				carbonioWscVideoCallEnabled: 'TRUE',
+				carbonioWscRecordingEnabled: 'TRUE',
+				carbonioWscVirtualBackgroundEnabled: 'TRUE'
+			});
+
+			const { attributes } = useStore.getState().session;
+			expect(attributes?.privateChatCreation).toBe(true);
+			expect(attributes?.attachmentUpload).toBe(true);
+			expect(attributes?.showMessageReads).toBe(true);
+			expect(attributes?.showUsersPresence).toBe(true);
+			expect(attributes?.videoCallEnabled).toBe(true);
+			expect(attributes?.recordingEnabled).toBe(true);
+			expect(attributes?.virtualBackgroundEnabled).toBe(true);
+		});
+
+		test('Set boolean attributes to false', () => {
+			useStore.getState().setAttributes({
+				carbonioWscPrivateChatCreation: 'FALSE',
+				carbonioWscAttachmentUpload: 'FALSE',
+				carbonioWscShowMessageReads: 'FALSE',
+				carbonioWscShowUsersPresence: 'FALSE',
+				carbonioWscVideoCallEnabled: 'FALSE',
+				carbonioWscRecordingEnabled: 'FALSE',
+				carbonioWscVirtualBackgroundEnabled: 'FALSE'
+			});
+
+			const { attributes } = useStore.getState().session;
+			expect(attributes?.privateChatCreation).toBe(false);
+			expect(attributes?.attachmentUpload).toBe(false);
+			expect(attributes?.showMessageReads).toBe(false);
+			expect(attributes?.showUsersPresence).toBe(false);
+			expect(attributes?.videoCallEnabled).toBe(false);
+			expect(attributes?.recordingEnabled).toBe(false);
+			expect(attributes?.virtualBackgroundEnabled).toBe(false);
+		});
+
+		test('Set number attributes', () => {
+			useStore.getState().setAttributes({
+				carbonioWscMaxGroupMembers: '32',
+				carbonioWscMaxAttachmentSize: '2',
+				carbonioWscMaxRoomPictureSize: '2',
+				carbonioWscMessageDeleteTimeLimit: '5m',
+				carbonioWscMessageEditTimeLimit: '5m'
+			});
+
+			const { attributes } = useStore.getState().session;
+			expect(attributes?.maxGroupMembers).toBe(32);
+			expect(attributes?.maxAttachmentSize).toBe(2);
+			expect(attributes?.maxRoomPictureSize).toBe(2);
+			expect(attributes?.messageDeleteTimeLimit).toBe(5);
+			expect(attributes?.messageEditTimeLimit).toBe(5);
+		});
+
+		test('groupChatCreation is set to false is maxGroupMembers is <= 2', () => {
+			useStore.getState().setAttributes({
+				carbonioWscGroupChatCreation: 'TRUE',
+				carbonioWscMaxGroupMembers: '2'
+			});
+			expect(useStore.getState().session.attributes?.groupChatCreation).toBe(false);
+		});
 	});
 
 	describe('selectedRoom', () => {
