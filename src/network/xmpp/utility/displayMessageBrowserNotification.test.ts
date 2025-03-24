@@ -15,7 +15,7 @@ import {
 } from '../../../tests/createMock';
 
 const room = createMockRoom();
-const loggedUser = createMockUser({ id: 'loggeduserId', name: 'Logged User' });
+const loggedUser = createMockUser({ id: 'loggedUserId', name: 'Logged User' });
 const user = createMockUser({ id: 'userId', name: 'User' });
 
 beforeEach(() => {
@@ -40,7 +40,7 @@ describe('Test display message browser notification', () => {
 
 	test('Avoid sending desktop notification on conversation with focused input', async () => {
 		const store = useStore.getState();
-		store.setSelectedRoomOneToOneGroup(room.id);
+		store.setSelectedRoom(room.id);
 		store.setInputHasFocus(room.id, true);
 
 		const newMessage = createMockTextMessage({ roomId: room.id, from: user.id });

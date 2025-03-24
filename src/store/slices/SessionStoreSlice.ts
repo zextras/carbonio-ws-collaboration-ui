@@ -38,15 +38,6 @@ export const useSessionStoreSlice: StateCreator<
 			'SESSION/LOGIN_INFO'
 		);
 	},
-	setQueueId: (queueId: string): void => {
-		set(
-			produce((draft: RootStore) => {
-				draft.session.queueId = queueId;
-			}),
-			false,
-			'SESSION/QUEUE_ID'
-		);
-	},
 	setAttributes: (attrs: AccountSettingsAttrs): void => {
 		set(
 			produce((draft: RootStore) => {
@@ -77,15 +68,24 @@ export const useSessionStoreSlice: StateCreator<
 			'SESSION/SET_ATTRS'
 		);
 	},
-	setSelectedRoomOneToOneGroup: (roomId: string): void => {
+	setQueueId: (queueId: string): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (draft.session.selectedRoomOneToOneGroup !== roomId) {
-					draft.session.selectedRoomOneToOneGroup = roomId;
+				draft.session.queueId = queueId;
+			}),
+			false,
+			'SESSION/QUEUE_ID'
+		);
+	},
+	setSelectedRoom: (roomId?: string): void => {
+		set(
+			produce((draft: RootStore) => {
+				if (draft.session.selectedRoom !== roomId) {
+					draft.session.selectedRoom = roomId;
 				}
 			}),
 			false,
-			'SESSION/SET_SELECTED_ROOM_ONE_TO_ONE_GROUP'
+			'SESSION/SET_SELECTED_ROOM'
 		);
 	},
 	setCustomLogo: (logo: string | false): void => {

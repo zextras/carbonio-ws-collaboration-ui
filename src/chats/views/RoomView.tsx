@@ -24,13 +24,13 @@ const RoomView = (): ReactElement => {
 		[params]
 	);
 
-	const setSelectedRoomOneToOneGroup = useStore((state) => state.setSelectedRoomOneToOneGroup);
+	const setSelectedRoom = useStore((state) => state.setSelectedRoom);
 	const roomType = useStore((store) => getRoomTypeSelector(store, selectedRoomId));
 
-	// Keep selectedRoomOneToOneGroup update
+	// Keep selectedRoom update
 	useEffect(() => {
-		setSelectedRoomOneToOneGroup(selectedRoomId);
-	}, [selectedRoomId, setSelectedRoomOneToOneGroup]);
+		setSelectedRoom(selectedRoomId);
+	}, [selectedRoomId, setSelectedRoom]);
 
 	if (!roomType) {
 		return (

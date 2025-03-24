@@ -12,9 +12,9 @@ import { IChatExporter } from '../../settings/components/chatExporter/ChatExport
 export type SessionStoreSlice = {
 	session: Session;
 	setLoginInfo: (id: string, name: string, displayName?: string, userType?: UserType) => void;
-	setQueueId: (queueId: string) => void;
 	setAttributes: (attrs: AccountSettingsAttrs) => void;
-	setSelectedRoomOneToOneGroup: (id: string) => void;
+	setQueueId: (queueId: string) => void;
+	setSelectedRoom: (roomId?: string) => void;
 	setCustomLogo: (logo: string | false) => void;
 	setChatExporting: (roomId?: string) => void;
 	setChatExportStatus: (status: ExportStatus) => void;
@@ -28,7 +28,7 @@ export type Session = {
 	queueId?: string;
 	userType?: UserType;
 	attributes?: AttributesList;
-	selectedRoomOneToOneGroup?: string;
+	selectedRoom?: string;
 	customLogo?: string | false;
 	chatExporting?: {
 		roomId: string;

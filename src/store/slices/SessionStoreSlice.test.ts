@@ -49,20 +49,23 @@ describe('SessionStoreSlice tests', () => {
 	});
 
 	test('Set initial selected room', () => {
-		const { result } = renderHook(() => useStore());
-		act(() => {
-			result.current.setSelectedRoomOneToOneGroup(roomId);
-		});
-		expect(result.current.session.selectedRoomOneToOneGroup).toBe(roomId);
+		useStore.getState().setSelectedRoom(roomId);
+		expect(useStore.getState().session.selectedRoom).toBe(roomId);
+	});
+
+	test('Remove selected room', () => {
+		useStore.setState({ session: { selectedRoom: roomId } });
+		useStore.getState().setSelectedRoom(undefined);
+		expect(useStore.getState().session.selectedRoom).toBeUndefined();
 	});
 
 	test('Replace selected room', () => {
 		const { result } = renderHook(() => useStore());
 		act(() => {
-			result.current.setSelectedRoomOneToOneGroup('oldRoomId');
-			result.current.setSelectedRoomOneToOneGroup(roomId);
+			result.current.setSelectedRoom('oldRoomId');
+			result.current.setSelectedRoom(roomId);
 		});
-		expect(result.current.session.selectedRoomOneToOneGroup).toBe('roomId');
+		expect(result.current.session.selectedRoom).toBe('roomId');
 	});
 
 	describe('Export chat', () => {
