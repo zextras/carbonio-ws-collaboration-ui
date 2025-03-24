@@ -4,8 +4,21 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { AccountSettingsAttrs } from '@zextras/carbonio-shell-ui/lib/types/account';
+
 import { UserType } from './UserTypes';
 import { IChatExporter } from '../../settings/components/chatExporter/ChatExporter';
+
+export type SessionStoreSlice = {
+	session: Session;
+	setLoginInfo: (id: string, name: string, displayName?: string, userType?: UserType) => void;
+	setSessionId: (sessionId: string) => void;
+	setAttributes: (attrs: AccountSettingsAttrs) => void;
+	setSelectedRoomOneToOneGroup: (id: string) => void;
+	setCustomLogo: (logo: string | false) => void;
+	setChatExporting: (roomId?: string) => void;
+	setChatExportStatus: (status: ExportStatus) => void;
+};
 
 export type Session = {
 	id?: string;
@@ -21,7 +34,6 @@ export type Session = {
 		websocket: boolean | undefined;
 	};
 	selectedRoomOneToOneGroup?: string;
-	filterHasFocus: boolean;
 	customLogo?: string | false;
 	chatExporting?: {
 		roomId: string;

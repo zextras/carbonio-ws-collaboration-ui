@@ -43,8 +43,7 @@ describe('SessionStoreSlice tests', () => {
 				chats_be: undefined,
 				xmpp: undefined,
 				websocket: undefined
-			},
-			filterHasFocus: false
+			}
 		});
 	});
 

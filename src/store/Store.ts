@@ -23,10 +23,10 @@ import { RootStore } from '../types/store/StoreTypes';
 const useStore = create<RootStore>()(
 	devtools(
 		(set, get, api): RootStore => ({
+			...useSessionStoreSlice(set, get, api),
 			...useUsersStoreSlice(set, get, api),
 			...useRoomsStoreSlice(set, get, api),
 			...useMessagesStoreSlice(set, get, api),
-			...useSessionStoreSlice(set, get, api),
 			...useMarkersStoreSlice(set, get, api),
 			...useActiveConversationsSlice(set, get, api),
 			...useConnectionsStoreSlice(set, get, api),

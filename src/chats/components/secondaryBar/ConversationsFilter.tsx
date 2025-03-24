@@ -19,9 +19,6 @@ import { Container, Input, Tooltip, Button } from '@zextras/carbonio-design-syst
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import { getSidebarFilterHasFocus } from '../../../store/selectors/SessionSelectors';
-import useStore from '../../../store/Store';
-
 const FilterContainer = styled(Container)`
 	height: fit-content;
 	position: sticky;
@@ -48,8 +45,7 @@ const ConversationsFilter: FC<ConversationsFilterProps> = ({ expanded, setFilter
 	const filterTooltip = t('conversationFilter.filterTooltip', 'Filter list');
 	const closeTooltip = t('conversationFilter.closeTooltip', 'Close filter');
 
-	const filterHasFocus = useStore((store) => getSidebarFilterHasFocus(store));
-	const setFilterHasFocus = useStore((store) => store.setFilterHasFocus);
+	const [filterHasFocus, setFilterHasFocus] = useState(false);
 
 	const [searchInput, setSearchInput] = useState('');
 
@@ -111,7 +107,6 @@ const ConversationsFilter: FC<ConversationsFilterProps> = ({ expanded, setFilter
 						data-testid="filter_input"
 						inputRef={filterInputRef}
 						height="2.938rem"
-						backgroundColor="gray5"
 						borderColor="gray3"
 						label={filterLabel}
 						value={searchInput}
@@ -128,7 +123,7 @@ const ConversationsFilter: FC<ConversationsFilterProps> = ({ expanded, setFilter
 							icon="FunnelOutline"
 							size="large"
 							onClick={handleInputFocus}
-							color="gray5"
+							color="text"
 						/>
 					</Tooltip>
 				</CustomFunnelContainer>
