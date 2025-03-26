@@ -68,19 +68,27 @@ describe('XMPPClient', () => {
 		});
 	});
 
-	test('requestHistory is called for an known room', () => {
-		useStore.getState().addRoom(createMockRoom({ id: 'room-test' }));
+	test('requestHistory is called for a known room', () => {
+		const room = createMockRoom({ id: 'room-test' });
+		useStore.getState().addRoom(createMockRoom({ id: room.id }));
 		const xmppClient = new XMPPClient();
 		const spyOnXmppSend = jest.spyOn(xmppClient.xmppConnection, 'send');
-		xmppClient.requestHistory('room-test', dateToTimestamp('2024-03-12'), 10);
+		xmppClient.requestHistory(room.id, dateToTimestamp('2024-03-12'), 10);
+		xmppClient.requestHistoryBetweenTwoMessage(room.id, 'messageId1', 'messageId2');
+		xmppClient.requestMessageSubjectOfReply(room.id, 'messageId1', 'messageId2');
+		xmppClient.requestFullHistory(room.id);
 
-		expect(spyOnXmppSend).toHaveBeenCalledTimes(1);
+		expect(spyOnXmppSend).toHaveBeenCalledTimes(4);
 	});
 
 	test('requestHistory is not called for an unknown room', () => {
+		const room = createMockRoom({ id: 'room-test' });
 		const xmppClient = new XMPPClient();
 		const spyOnXmppSend = jest.spyOn(xmppClient.xmppConnection, 'send');
-		xmppClient.requestHistory('room-test', dateToTimestamp('2024-03-12'), 10);
+		xmppClient.requestHistory(room.id, dateToTimestamp('2024-03-12'), 10);
+		xmppClient.requestHistoryBetweenTwoMessage(room.id, 'messageId1', 'messageId2');
+		xmppClient.requestMessageSubjectOfReply(room.id, 'messageId1', 'messageId2');
+		xmppClient.requestFullHistory(room.id);
 
 		expect(spyOnXmppSend).toHaveBeenCalledTimes(0);
 	});
