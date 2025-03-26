@@ -34,6 +34,13 @@ describe('RoomView', () => {
 		expect(screen.queryByTestId('ConversationWrapper-roomId')).not.toBeInTheDocument();
 	});
 
+	test('roomId param is not setted', () => {
+		const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
+		spyUseParams.mockReturnValue({ roomId: undefined });
+		setup(<RoomView />);
+		expect(screen.queryByTestId('ConversationWrapper-roomId')).not.toBeInTheDocument();
+	});
+
 	test('roomId param is set as selectedRoomId', () => {
 		const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
 		spyUseParams.mockReturnValue({ roomId: room.id });
