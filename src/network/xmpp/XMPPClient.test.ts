@@ -8,9 +8,11 @@ import { onGetLastActivityResponse } from './handlers/lastActivityHandler';
 import { onGetRosterResponse } from './handlers/rosterHandler';
 import XMPPClient from './XMPPClient';
 import { XMPPRequestType } from './XMPPConnection';
+import useStore from '../../store/Store';
 import { createMockRoom } from '../../tests/createMock';
 import { RoomsApiToSpy, spyOnRoomsApi } from '../../tests/mocks/network';
 import { pingStanza } from '../../tests/mocks/XMPPStanza';
+import { dateToTimestamp } from '../../utils/dateUtils';
 
 describe('XMPPClient', () => {
 	test('connect is called with the correct params', () => {
@@ -64,6 +66,23 @@ describe('XMPPClient', () => {
 			elem: expect.any(Object),
 			callback: onGetLastActivityResponse
 		});
+	});
+
+	test('requestHistory is called for an known room', () => {
+		useStore.getState().addRoom(createMockRoom({ id: 'room-test' }));
+		const xmppClient = new XMPPClient();
+		const spyOnXmppSend = jest.spyOn(xmppClient.xmppConnection, 'send');
+		xmppClient.requestHistory('room-test', dateToTimestamp('2024-03-12'), 10);
+
+		expect(spyOnXmppSend).toHaveBeenCalledTimes(1);
+	});
+
+	test('requestHistory is not called for an unknown room', () => {
+		const xmppClient = new XMPPClient();
+		const spyOnXmppSend = jest.spyOn(xmppClient.xmppConnection, 'send');
+		xmppClient.requestHistory('room-test', dateToTimestamp('2024-03-12'), 10);
+
+		expect(spyOnXmppSend).toHaveBeenCalledTimes(0);
 	});
 
 	test('sendChatMessage should send a message', () => {
