@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { filter, find, reduce, size } from 'lodash';
+import { filter, find, reduce, size, some } from 'lodash';
 
+import { MeetingType } from '../../types/network/models/meetingBeTypes';
 import { STREAM_TYPE, TileData } from '../../types/store/ActiveMeetingTypes';
 import { Meeting, MeetingParticipantMap } from '../../types/store/MeetingTypes';
 import { RootStore } from '../../types/store/StoreTypes';
@@ -27,6 +28,12 @@ export const getMeetingActive = (store: RootStore, roomId: string): boolean =>
 
 export const getMeetingActiveByMeetingId = (store: RootStore, meetingId: string): boolean =>
 	!!find(store.meetings, (meeting) => meeting.id === meetingId)?.active;
+
+export const getIfThereAreActiveVirtualRooms = (store: RootStore): boolean =>
+	some(
+		store.meetings,
+		(meeting) => meeting.meetingType === MeetingType.SCHEDULED && meeting.active
+	);
 
 const FALLBACK_EMPTY_PARTICIPANTS = {};
 

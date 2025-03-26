@@ -9,20 +9,28 @@ import { screen } from '@testing-library/react';
 
 import VirtualRoomsButton from './VirtualRoomsButton';
 import useStore from '../../../../store/Store';
-import { createMockAttributesList, createMockUser } from '../../../../tests/createMock';
+import {
+	createMockAttributesList,
+	createMockMeeting,
+	createMockUser
+} from '../../../../tests/createMock';
 import { RoomsApiToSpy, spyOnRoomsApi } from '../../../../tests/mocks/network';
 import { mockSearchUsersByFeatureRequest } from '../../../../tests/mocks/SearchUsersByFeature';
 import { setup } from '../../../../tests/test-utils';
+import { MeetingType } from '../../../../types/network/models/meetingBeTypes';
 
 const sessionUser = createMockUser({ id: 'sessionId', name: 'Session User' });
 
 const user1 = createMockUser({ id: 'user1', name: 'User 1' });
+
+const virtualRoom = createMockMeeting({ meetingType: MeetingType.SCHEDULED });
 
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo(sessionUser.id, sessionUser.name);
 	store.setUserInfo(user1);
 	store.setAttributes(createMockAttributesList({ carbonioWscVideoCallEnabled: 'TRUE' }));
+	store.setMeetings([virtualRoom]);
 });
 
 describe('VirtualRoomsButton', () => {
@@ -52,5 +60,13 @@ describe('VirtualRoomsButton', () => {
 
 		await user.click(createRoomButton);
 		expect(spyOnAddRoom).toHaveBeenCalled();
+	});
+
+	test('ongoing meeting in virtual room', async () => {
+		setup(<VirtualRoomsButton expanded />);
+
+		// check if there's a video icon inside the button
+		const button = screen.getByTestId('icon: Video');
+		expect(button).toBeInTheDocument();
 	});
 });
