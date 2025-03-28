@@ -23,16 +23,14 @@ const userWithoutImage: UserBe = createMockUser({
 	id: 'user1',
 	email: 'user1@domain.com',
 	name: 'User 1',
-	lastSeen: 1234567890,
-	statusMessage: "Hey there! I'm User 1"
+	lastSeen: 1234567890
 });
 
 const userWithImage: UserBe = createMockUser({
 	id: 'user1',
 	email: 'user1@domain.com',
 	name: 'User 1',
-	lastSeen: 1234567890,
-	statusMessage: "Hey there! I'm User 1"
+	lastSeen: 1234567890
 });
 
 const notificationsSettingsObject: NotificationsSettingsType = {

@@ -35,11 +35,6 @@ export const getUserEmail = (store: RootStore, id: string): string | undefined =
 	return store.users[id]?.email;
 };
 
-export const getUserStatusMessage = (store: RootStore, id: string): string | undefined => {
-	UserDataRetriever.getDebouncedUser(id);
-	return store.users[id]?.statusMessage;
-};
-
 export const getIsUserGuest = (store: RootStore, id: string): boolean | undefined => {
 	UserDataRetriever.getDebouncedUser(id);
 	return store.users[id]?.type === UserType.GUEST;

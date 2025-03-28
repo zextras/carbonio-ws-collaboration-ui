@@ -36,16 +36,14 @@ const user1Be: User = createMockUser({
 	id: 'user1',
 	email: 'user1@domain.com',
 	name: 'User1',
-	lastSeen: 1234567890,
-	statusMessage: "Hey there! I'm User 1"
+	lastSeen: 1234567890
 });
 
 const user2Be: User = createMockUser({
 	id: 'user2',
 	email: 'user2@domain.com',
 	name: 'User2',
-	lastSeen: 1234567890,
-	statusMessage: "Hey there! I'm User 2"
+	lastSeen: 1234567890
 });
 
 const mockMember1 = createMockMember({ userId: user1Be.id, owner: true });

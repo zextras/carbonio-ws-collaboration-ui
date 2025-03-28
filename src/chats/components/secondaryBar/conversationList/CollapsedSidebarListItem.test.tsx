@@ -22,8 +22,7 @@ const user2Be: User = createMockUser({
 	id: 'user2Id',
 	email: 'user2@domain.com',
 	name: 'User2',
-	lastSeen: 1234567890,
-	statusMessage: "Hey there! I'm User 2"
+	lastSeen: 1234567890
 });
 
 const user1Be: User = createMockUser();

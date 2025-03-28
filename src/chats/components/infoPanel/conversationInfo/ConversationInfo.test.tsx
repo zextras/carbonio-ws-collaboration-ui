@@ -21,8 +21,7 @@ const user1Be: UserBe = createMockUser({
 	id: 'user1',
 	email: 'user1@domain.com',
 	name: 'User 1',
-	lastSeen: 1234567890,
-	statusMessage: "Hey there! I'm User 1"
+	lastSeen: 1234567890
 });
 
 const room = {
@@ -89,11 +88,6 @@ describe('Conversation info Details', () => {
 		setup(<ConversationInfoDetails roomId={OneToOneRoom.id} roomType={RoomType.ONE_TO_ONE} />);
 		expect(screen.getAllByText(user1Be.name)).toHaveLength(1);
 		expect(screen.getByText(user1Be.email)).toBeInTheDocument();
-		if (user1Be.statusMessage != null) {
-			expect(screen.getByText(user1Be.statusMessage)).toBeInTheDocument();
-		}
-		act(() => store.setUserStatusMessage(user1Be.id, 'new status message'));
-		expect(screen.getByText(/new status message/i)).toBeInTheDocument();
 	});
 });
 

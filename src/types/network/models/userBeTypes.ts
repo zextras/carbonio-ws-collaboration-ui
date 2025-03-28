@@ -12,5 +12,4 @@ export type UserBe = {
 	name: string;
 	type: UserType;
 	lastSeen?: number;
-	statusMessage?: string;
 };
