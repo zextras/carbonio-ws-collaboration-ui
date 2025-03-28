@@ -49,7 +49,7 @@ const sdpOffer = 'spdOfferMock';
 beforeEach(() => {
 	const store: RootStore = useStore.getState();
 	store.setLoginInfo(userId, 'User');
-	store.setSessionId('queueId');
+	store.setQueueId('queueId');
 	store.addRoom(roomMock);
 });
 
@@ -401,7 +401,7 @@ describe('Meetings API', () => {
 	test('leaveWaitingRoom is called correctly for guest user', async () => {
 		document.cookie = `ZM_AUTH_TOKEN=123456789`;
 		useStore.getState().setLoginInfo(userId, guestUser.email, guestUser.name, guestUser.type);
-		useStore.getState().setSessionId('queueId');
+		useStore.getState().setQueueId('queueId');
 		await meetingsApi.leaveWaitingRoom(meetingMock.id);
 
 		expect(spyOnFetch).toHaveBeenCalledWith(

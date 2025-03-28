@@ -21,8 +21,7 @@ export const displayChatNotification = (roomId: string): boolean => {
 	const isMeetingTab = !isEmpty(store.activeMeeting);
 	const isOneToOneGroupMessage = includes([RoomType.ONE_TO_ONE, RoomType.GROUP], room?.type);
 	const inputIsFocused =
-		store.session.selectedRoomOneToOneGroup === roomId &&
-		store.activeConversations[roomId].inputHasFocus;
+		store.session.selectedRoom === roomId && store.activeConversations[roomId].inputHasFocus;
 	const chatsNotificationsSettingsEnabled = getLocalStorageItem(
 		LOCAL_STORAGE_NAMES.NOTIFICATIONS
 	)?.DesktopNotifications;

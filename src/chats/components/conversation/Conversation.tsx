@@ -36,7 +36,7 @@ const Conversation = ({ roomId }: ConversationProps): ReactElement => {
 
 	return (
 		<ConversationWrapper
-			data-testid="ConversationWrapper"
+			data-testid={`ConversationWrapper-${roomId}`}
 			mainAlignment="flex-start"
 			orientation="horizontal"
 			$darkModeActive={darkReaderStatus}

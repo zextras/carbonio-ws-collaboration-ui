@@ -122,14 +122,14 @@ describe('Conversation view', () => {
 	test('Display conversation view with darkMode disabled', async () => {
 		mockDarkReaderIsEnabled.mockReturnValueOnce(false);
 		setup(<Conversation roomId={testRoom.id} />);
-		const ConversationWrapper = screen.getByTestId('ConversationWrapper');
+		const ConversationWrapper = screen.getByTestId(`ConversationWrapper-${testRoom.id}`);
 		expect(ConversationWrapper).toHaveStyle(`background-image: url('papyrus.png')`);
 	});
 
 	test('Display conversation view with darkMode enabled', async () => {
 		mockDarkReaderIsEnabled.mockReturnValueOnce(true);
 		setup(<Conversation roomId={testRoom.id} />);
-		const ConversationWrapper = screen.getByTestId('ConversationWrapper');
+		const ConversationWrapper = screen.getByTestId(`ConversationWrapper-${testRoom.id}`);
 		expect(ConversationWrapper).toHaveStyle(`background-image: url('papyrus-dark.png')`);
 	});
 

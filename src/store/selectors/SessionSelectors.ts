@@ -9,9 +9,7 @@ import { RootStore } from '../../types/store/StoreTypes';
 import { UserType } from '../../types/store/UserTypes';
 
 export const getSelectedConversation = (store: RootStore, roomId: string): boolean =>
-	store.session.selectedRoomOneToOneGroup === roomId;
-
-export const getSidebarFilterHasFocus = (store: RootStore): boolean => store.session.filterHasFocus;
+	store.session.selectedRoom === roomId;
 
 export const getAttribute = (
 	store: RootStore,

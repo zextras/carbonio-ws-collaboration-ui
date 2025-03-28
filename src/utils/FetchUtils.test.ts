@@ -37,8 +37,7 @@ describe('FetchUtils', () => {
 	test('test fetchApi is called correctly', async () => {
 		spyOnFetch.mockRestore();
 		act(() => {
-			const store = useStore.getState();
-			store.setSessionId('idUser1');
+			useStore.getState().setQueueId('idUser1');
 		});
 
 		// Set appropriate headers
@@ -69,7 +68,7 @@ describe('FetchUtils', () => {
 	test('test uploadFileFetchAPI is called correctly', async () => {
 		act(() => {
 			const store = useStore.getState();
-			store.setSessionId('idUser1');
+			store.setQueueId('idUser1');
 		});
 		const testImageFile = new File([], 'hello.png', { type: 'image/png' });
 
