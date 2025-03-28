@@ -28,9 +28,9 @@ export const fetchAPI = (
 	headers.append('Content-Type', 'application/json');
 
 	// Add sessionId to headers only id it is already defined
-	const { sessionId } = useStore.getState().session;
-	if (sessionId) {
-		headers.append('queue-id', sessionId);
+	const { queueId } = useStore.getState().session;
+	if (queueId) {
+		headers.append('queue-id', queueId);
 	}
 
 	return fetch(URL, {
@@ -74,9 +74,9 @@ export const uploadFileFetchAPI = (
 			}
 
 			// Add sessionId to headers only if it is already defined
-			const { sessionId } = useStore.getState().session;
-			if (sessionId) {
-				headers.append('session-id', sessionId);
+			const { queueId } = useStore.getState().session;
+			if (queueId) {
+				headers.append('session-id', queueId);
 			}
 			fetch(BASE_PATH + endpoint, {
 				method: requestType,

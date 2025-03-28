@@ -10,8 +10,8 @@ import { produce } from 'immer';
 import { StateCreator } from 'zustand';
 
 import ChatExporter from '../../settings/components/chatExporter/ChatExporter';
-import { AttributesList, ExportStatus } from '../../types/store/SessionTypes';
-import { RootStore, SessionStoreSlice } from '../../types/store/StoreTypes';
+import { AttributesList, ExportStatus, SessionStoreSlice } from '../../types/store/SessionTypes';
+import { RootStore } from '../../types/store/StoreTypes';
 import { UserType } from '../../types/store/UserTypes';
 import UserDataRetriever from '../../utils/UserDataRetriever';
 
@@ -21,9 +21,7 @@ export const useSessionStoreSlice: StateCreator<
 	[],
 	SessionStoreSlice
 > = (set) => ({
-	session: {
-		filterHasFocus: false
-	},
+	session: {},
 	setLoginInfo: (id: string, name: string, displayName?: string, userType?: UserType): void => {
 		set(
 			produce((draft: RootStore) => {
@@ -32,27 +30,12 @@ export const useSessionStoreSlice: StateCreator<
 					id,
 					name,
 					displayName,
-					userType: userType ?? UserType.INTERNAL,
-					connections: {
-						chats_be: undefined,
-						xmpp: undefined,
-						websocket: undefined
-					},
-					filterHasFocus: draft.session.filterHasFocus
+					userType: userType ?? UserType.INTERNAL
 				};
 				UserDataRetriever.getDebouncedUser(id, true);
 			}),
 			false,
 			'SESSION/LOGIN_INFO'
-		);
-	},
-	setSessionId: (sessionId: string): void => {
-		set(
-			produce((draft: RootStore) => {
-				draft.session.sessionId = sessionId;
-			}),
-			false,
-			'SESSION/SESSION_ID'
 		);
 	},
 	setAttributes: (attrs: AccountSettingsAttrs): void => {
@@ -85,24 +68,24 @@ export const useSessionStoreSlice: StateCreator<
 			'SESSION/SET_ATTRS'
 		);
 	},
-	setSelectedRoomOneToOneGroup: (roomId: string): void => {
+	setQueueId: (queueId: string): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (draft.session.selectedRoomOneToOneGroup !== roomId) {
-					draft.session.selectedRoomOneToOneGroup = roomId;
+				draft.session.queueId = queueId;
+			}),
+			false,
+			'SESSION/QUEUE_ID'
+		);
+	},
+	setSelectedRoom: (roomId?: string): void => {
+		set(
+			produce((draft: RootStore) => {
+				if (draft.session.selectedRoom !== roomId) {
+					draft.session.selectedRoom = roomId;
 				}
 			}),
 			false,
-			'SESSION/SET_SELECTED_ROOM_ONE_TO_ONE_GROUP'
-		);
-	},
-	setFilterHasFocus: (hasFocus: boolean): void => {
-		set(
-			produce((draft: RootStore) => {
-				draft.session.filterHasFocus = hasFocus;
-			}),
-			false,
-			'SESSION/SET_FILTER_FOCUS'
+			'SESSION/SET_SELECTED_ROOM'
 		);
 	},
 	setCustomLogo: (logo: string | false): void => {

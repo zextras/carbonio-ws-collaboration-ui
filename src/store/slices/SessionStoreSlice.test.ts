@@ -7,65 +7,134 @@
 import { act, renderHook } from '@testing-library/react';
 
 import ChatExporter from '../../settings/components/chatExporter/ChatExporter';
-import { createMockMember, createMockRoom } from '../../tests/createMock';
+import { createMockRoom } from '../../tests/createMock';
 import { RoomBe, RoomType } from '../../types/network/models/roomBeTypes';
 import { ExportStatus } from '../../types/store/SessionTypes';
 import { UserType } from '../../types/store/UserTypes';
 import useStore from '../Store';
 
 const roomId = 'roomId';
+
 const groupRoom: RoomBe = createMockRoom({
 	id: roomId,
-	name: '',
-	description: 'A description',
-	type: RoomType.GROUP,
-	members: [createMockMember({ userId: 'myId' })],
-	userSettings: { muted: false }
-});
-
-beforeEach(() => {
-	const store = useStore.getState();
-	store.addRoom(groupRoom);
+	type: RoomType.GROUP
 });
 
 describe('SessionStoreSlice tests', () => {
-	test('Set login info', () => {
-		const { result } = renderHook(() => useStore());
-		act(() => {
-			result.current.setLoginInfo('id', 'name', 'displayName');
-		});
-		expect(result.current.session).toStrictEqual({
+	test('loginInfo', () => {
+		useStore.getState().setLoginInfo('id', 'name', 'displayName');
+		expect(useStore.getState().session).toStrictEqual({
 			id: 'id',
 			name: 'name',
 			displayName: 'displayName',
-			userType: UserType.INTERNAL,
-			connections: {
-				chats_be: undefined,
-				xmpp: undefined,
-				websocket: undefined
-			},
-			filterHasFocus: false
+			userType: UserType.INTERNAL
 		});
 	});
 
-	test('Set initial selected room', () => {
-		const { result } = renderHook(() => useStore());
-		act(() => {
-			result.current.setSelectedRoomOneToOneGroup(roomId);
-		});
-		expect(result.current.session.selectedRoomOneToOneGroup).toBe(roomId);
+	test('queueId', () => {
+		const testQueueId = 'test-queueId';
+		useStore.getState().setQueueId(testQueueId);
+		expect(useStore.getState().session.queueId).toBe(testQueueId);
 	});
 
-	test('Replace selected room', () => {
-		const { result } = renderHook(() => useStore());
-		act(() => {
-			result.current.setSelectedRoomOneToOneGroup('oldRoomId');
-			result.current.setSelectedRoomOneToOneGroup(roomId);
+	describe('attributes', () => {
+		test('Set boolean attributes to true', () => {
+			useStore.getState().setAttributes({
+				carbonioWscPrivateChatCreation: 'TRUE',
+				carbonioWscAttachmentUpload: 'TRUE',
+				carbonioWscShowMessageReads: 'TRUE',
+				carbonioWscShowUsersPresence: 'TRUE',
+				carbonioWscVideoCallEnabled: 'TRUE',
+				carbonioWscRecordingEnabled: 'TRUE',
+				carbonioWscVirtualBackgroundEnabled: 'TRUE'
+			});
+
+			const { attributes } = useStore.getState().session;
+			expect(attributes?.privateChatCreation).toBe(true);
+			expect(attributes?.attachmentUpload).toBe(true);
+			expect(attributes?.showMessageReads).toBe(true);
+			expect(attributes?.showUsersPresence).toBe(true);
+			expect(attributes?.videoCallEnabled).toBe(true);
+			expect(attributes?.recordingEnabled).toBe(true);
+			expect(attributes?.virtualBackgroundEnabled).toBe(true);
 		});
-		expect(result.current.session.selectedRoomOneToOneGroup).toBe('roomId');
+
+		test('Set boolean attributes to false', () => {
+			useStore.getState().setAttributes({
+				carbonioWscPrivateChatCreation: 'FALSE',
+				carbonioWscAttachmentUpload: 'FALSE',
+				carbonioWscShowMessageReads: 'FALSE',
+				carbonioWscShowUsersPresence: 'FALSE',
+				carbonioWscVideoCallEnabled: 'FALSE',
+				carbonioWscRecordingEnabled: 'FALSE',
+				carbonioWscVirtualBackgroundEnabled: 'FALSE'
+			});
+
+			const { attributes } = useStore.getState().session;
+			expect(attributes?.privateChatCreation).toBe(false);
+			expect(attributes?.attachmentUpload).toBe(false);
+			expect(attributes?.showMessageReads).toBe(false);
+			expect(attributes?.showUsersPresence).toBe(false);
+			expect(attributes?.videoCallEnabled).toBe(false);
+			expect(attributes?.recordingEnabled).toBe(false);
+			expect(attributes?.virtualBackgroundEnabled).toBe(false);
+		});
+
+		test('Set number attributes', () => {
+			useStore.getState().setAttributes({
+				carbonioWscMaxGroupMembers: '32',
+				carbonioWscMaxAttachmentSize: '2',
+				carbonioWscMaxRoomPictureSize: '2',
+				carbonioWscMessageDeleteTimeLimit: '5m',
+				carbonioWscMessageEditTimeLimit: '5m'
+			});
+
+			const { attributes } = useStore.getState().session;
+			expect(attributes?.maxGroupMembers).toBe(32);
+			expect(attributes?.maxAttachmentSize).toBe(2);
+			expect(attributes?.maxRoomPictureSize).toBe(2);
+			expect(attributes?.messageDeleteTimeLimit).toBe(5);
+			expect(attributes?.messageEditTimeLimit).toBe(5);
+		});
+
+		test('groupChatCreation is set to false is maxGroupMembers is <= 2', () => {
+			useStore.getState().setAttributes({
+				carbonioWscGroupChatCreation: 'TRUE',
+				carbonioWscMaxGroupMembers: '2'
+			});
+			expect(useStore.getState().session.attributes?.groupChatCreation).toBe(false);
+		});
 	});
 
-	describe('Export chat', () => {
+	describe('selectedRoom', () => {
+		test('Set initial selected room', () => {
+			useStore.getState().setSelectedRoom(roomId);
+			expect(useStore.getState().session.selectedRoom).toBe(roomId);
+		});
+
+		test('Change selected room', () => {
+			useStore.setState({ session: { selectedRoom: 'selectedRoom1' } });
+			useStore.getState().setSelectedRoom('selectedRoom2');
+			expect(useStore.getState().session.selectedRoom).toBe('selectedRoom2');
+		});
+
+		test('Remove selected room', () => {
+			useStore.setState({ session: { selectedRoom: roomId } });
+			useStore.getState().setSelectedRoom(undefined);
+			expect(useStore.getState().session.selectedRoom).toBeUndefined();
+		});
+	});
+
+	test('customLogo', () => {
+		const logo = 'customLogo';
+		useStore.getState().setCustomLogo(logo);
+		expect(useStore.getState().session.customLogo).toBe(logo);
+	});
+
+	beforeEach(() => {
+		useStore.getState().addRoom(groupRoom);
+	});
+	describe('chatExporting', () => {
 		test('Start chat export', () => {
 			const { result } = renderHook(() => useStore());
 			act(() => {
@@ -87,7 +156,7 @@ describe('SessionStoreSlice tests', () => {
 			expect(result.current.session.chatExporting).toBeUndefined();
 		});
 
-		test('Set chat export status', () => {
+		test('Change chat export status', () => {
 			const { result } = renderHook(() => useStore());
 			act(() => {
 				result.current.setChatExporting(roomId);

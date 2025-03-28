@@ -5,22 +5,18 @@
  */
 import ChatExporter from './ChatExporter';
 import useStore from '../../../store/Store';
-import { createMockMember, createMockRoom, createMockTextMessage } from '../../../tests/createMock';
-import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
+import { createMockRoom, createMockTextMessage } from '../../../tests/createMock';
+import { RoomType } from '../../../types/network/models/roomBeTypes';
 
 const roomId = 'roomId';
-const groupRoom: RoomBe = createMockRoom({
+
+const groupRoom = createMockRoom({
 	id: roomId,
-	name: '',
-	description: 'A description',
-	type: RoomType.GROUP,
-	members: [createMockMember({ userId: 'myId' })],
-	userSettings: { muted: false }
+	type: RoomType.GROUP
 });
 
 beforeEach(() => {
-	const store = useStore.getState();
-	store.addRoom(groupRoom);
+	useStore.getState().addRoom(groupRoom);
 });
 
 describe('ChatExporter tests', () => {
@@ -43,7 +39,7 @@ describe('ChatExporter tests', () => {
 		const message = createMockTextMessage({ date: Date.now() });
 
 		chatExporter.addMessageToFullHistory(message);
-		chatExporter.handleFullHistoryResponse(false);
+		chatExporter.continueExporting();
 
 		expect(spyOnRequestFullHistory).toHaveBeenCalledWith(roomId, message.date);
 	});
@@ -63,7 +59,7 @@ describe('ChatExporter tests', () => {
 		document.body.removeChild = jest.fn();
 		URL.createObjectURL = jest.fn().mockReturnValue('blob:url');
 
-		chatExporter.handleFullHistoryResponse(true);
+		chatExporter.exportHistory();
 
 		expect(document.body.appendChild).toHaveBeenCalled();
 		expect(document.body.removeChild).toHaveBeenCalled();
