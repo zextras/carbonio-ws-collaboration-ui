@@ -21,7 +21,7 @@ const user1 = createMockUser({ id: 'user1', name: 'User 1' });
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo(sessionUser.id, sessionUser.name);
-	store.setUserInfo(user1);
+	store.setUserInfo([user1]);
 	store.setAttributes(createMockAttributesList({ carbonioWscVideoCallEnabled: 'TRUE' }));
 });
 

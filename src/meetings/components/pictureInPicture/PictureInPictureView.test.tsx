@@ -50,8 +50,6 @@ const user2Participant: MeetingParticipant = createMockParticipants({ userId: us
 
 const user3Participant: MeetingParticipant = createMockParticipants({ userId: user3.id });
 
-const user4Participant: MeetingParticipant = createMockParticipants({ userId: user4.id });
-
 const meeting: MeetingBe = createMockMeeting({
 	roomId: room.id,
 	participants: [user1Participant, user2Participant, user3Participant]
@@ -59,9 +57,7 @@ const meeting: MeetingBe = createMockMeeting({
 
 const storeSetupGroupMeetingPip = (): { user: UserEvent; store: RootStore } => {
 	const store = useStore.getState();
-	store.setUserInfo(user1);
-	store.setUserInfo(user2);
-	store.setUserInfo(user3);
+	store.setUserInfo([user1, user2, user3]);
 	store.setLoginInfo(user1.id, user1.name);
 	store.addRoom(room);
 	store.addMeeting(meeting);

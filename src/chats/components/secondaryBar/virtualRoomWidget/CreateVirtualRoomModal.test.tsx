@@ -42,8 +42,7 @@ const contactUser2: ContactInfo = {
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo(sessionUser.id, sessionUser.name);
-	store.setUserInfo(user1);
-	store.setUserInfo(user2);
+	store.setUserInfo([user1, user2]);
 	store.setAttributes(createMockAttributesList());
 });
 

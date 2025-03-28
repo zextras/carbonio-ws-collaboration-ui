@@ -8,7 +8,7 @@ import { UserBe } from '../network/models/userBeTypes';
 
 export type UsersStoreSlice = {
 	users: UsersMap;
-	setUserInfo: (user: UserBe) => void;
+	setUserInfo: (users: UserBe[]) => void;
 	setUserPresence: (id: string, presence: boolean) => void;
 	setUserLastActivity: (id: string, date: number) => void;
 	setAnonymousUser: (id: string) => void;

@@ -298,12 +298,15 @@ describe('Attachment footer', () => {
 	});
 });
 
+beforeEach(() => {
+	const store: RootStore = useStore.getState();
+	store.setLoginInfo(user1Be.id, user1Be.name);
+	store.addRoom(mockedTempRoom);
+	store.setUserInfo([guestUser, user1Be]);
+});
+
 describe('Message header', () => {
 	test('Sender is guest user', async () => {
-		const store: RootStore = useStore.getState();
-		store.setLoginInfo(user1Be.id, user1Be.name);
-		store.addRoom(mockedTempRoom);
-		store.setUserInfo(guestUser);
 		setup(
 			<Bubble
 				message={mockedMsgFromGuest}
@@ -316,10 +319,6 @@ describe('Message header', () => {
 		expect(guestLabel).toBeInTheDocument();
 	});
 	test('Sender is internal user', async () => {
-		const store: RootStore = useStore.getState();
-		store.setLoginInfo(user1Be.id, user1Be.name);
-		store.addRoom(mockedTempRoom);
-		store.setUserInfo(user1Be);
 		setup(
 			<Bubble
 				message={mockedTextMessageSentByMe}
@@ -338,7 +337,7 @@ beforeEach(() => {
 	store.setLoginInfo(user1Be.id, user1Be.name);
 	store.setAttributes(createMockAttributesList({ carbonioWscMessageDeleteTimeLimit: '5m' }));
 	store.addRoom(mockedTempRoom);
-	store.setUserInfo(user1Be);
+	store.setUserInfo([user1Be]);
 });
 describe('Actions', () => {
 	test('Download an attachment', async () => {

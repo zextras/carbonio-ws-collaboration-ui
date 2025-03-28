@@ -61,11 +61,16 @@ const user2Info: User = createMockUser({
 	name: 'User 2'
 });
 
+beforeEach(() => {
+	const store = useStore.getState();
+	store.setLoginInfo(user1Info.id, user1Info.email, user1Info.name);
+	store.setUserInfo([user2Info]);
+	store.setRooms([testRoom, testRoom2]);
+});
+
 describe('Conversation view', () => {
 	test('Display conversation view on small screen and toggle info panel', async () => {
 		mockUseMediaQueryCheck.mockReturnValueOnce(true);
-		const store = useStore.getState();
-		store.addRoom(testRoom);
 		const { user } = setup(<Conversation roomId={testRoom.id} />);
 		const conversationCollapsedView = screen.getByTestId('conversationCollapsedView');
 		expect(conversationCollapsedView).toBeInTheDocument();
@@ -83,10 +88,6 @@ describe('Conversation view', () => {
 
 	test('Display info panel and check data are visible', async () => {
 		mockUseMediaQueryCheck.mockReturnValueOnce(true);
-		const store = useStore.getState();
-		store.addRoom(testRoom);
-		store.setLoginInfo(user1Info.id, user1Info.email, user1Info.name);
-		store.setUserInfo(user2Info);
 		const { user } = setup(<Conversation roomId={testRoom.id} />);
 		const conversationCollapsedView = screen.getByTestId('conversationCollapsedView');
 		expect(conversationCollapsedView).toBeInTheDocument();
@@ -106,11 +107,6 @@ describe('Conversation view', () => {
 	test('Leave a group and check everything is shown correctly', async () => {
 		const spyOnDeleteRoomMember = spyOnRoomsApi(RoomsApiToSpy.DELETE_ROOM_MEMBER);
 		mockUseMediaQueryCheck.mockReturnValue(true);
-		const store = useStore.getState();
-		store.addRoom(testRoom);
-		store.addRoom(testRoom2);
-		store.setLoginInfo(user1Info.id, user1Info.email, user1Info.name);
-		store.setUserInfo(user2Info);
 		mockGoToMainPage.mockReturnValueOnce('main page');
 		const { user } = setup(<Conversation roomId={testRoom.id} />);
 		expect(screen.getByText(/Leave Group/i)).toBeInTheDocument();
@@ -125,8 +121,6 @@ describe('Conversation view', () => {
 
 	test('Display conversation view with darkMode disabled', async () => {
 		mockDarkReaderIsEnabled.mockReturnValueOnce(false);
-		const store = useStore.getState();
-		store.addRoom(testRoom);
 		setup(<Conversation roomId={testRoom.id} />);
 		const ConversationWrapper = screen.getByTestId('ConversationWrapper');
 		expect(ConversationWrapper).toHaveStyle(`background-image: url('papyrus.png')`);
@@ -134,20 +128,12 @@ describe('Conversation view', () => {
 
 	test('Display conversation view with darkMode enabled', async () => {
 		mockDarkReaderIsEnabled.mockReturnValueOnce(true);
-		const store = useStore.getState();
-		store.addRoom(testRoom);
 		setup(<Conversation roomId={testRoom.id} />);
 		const ConversationWrapper = screen.getByTestId('ConversationWrapper');
 		expect(ConversationWrapper).toHaveStyle(`background-image: url('papyrus-dark.png')`);
 	});
 
 	test('Add moderator and check everything is shown correctly', async () => {
-		act(() => {
-			useStore.getState().addRoom(testRoom);
-			useStore.getState().setLoginInfo(user1Info.id, user1Info.email, user1Info.name);
-			useStore.getState().setUserInfo(user1Info);
-			useStore.getState().setUserInfo(user2Info);
-		});
 		setup(<Conversation roomId={testRoom.id} />);
 		act(() => {
 			useStore.getState().promoteMemberToModerator(testRoom.id, user1Info.id);
@@ -167,12 +153,6 @@ describe('Conversation view', () => {
 	});
 
 	test('Remove moderator and check everything is shown correctly', async () => {
-		act(() => {
-			useStore.getState().addRoom(testRoom2);
-			useStore.getState().setLoginInfo(user1Info.id, user1Info.email, user1Info.name);
-			useStore.getState().setUserInfo(user1Info);
-			useStore.getState().setUserInfo(user2Info);
-		});
 		setup(<Conversation roomId={testRoom2.id} />);
 		act(() => {
 			useStore.getState().demoteMemberFromModerator(testRoom2.id, user1Info.id);

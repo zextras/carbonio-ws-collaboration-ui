@@ -19,7 +19,7 @@ const guestUser = createMockUser({ id: 'guestUserId', type: UserType.GUEST });
 
 beforeEach(() => {
 	const store = useStore.getState();
-	store.setUserInfo(user1);
+	store.setUserInfo([user1]);
 });
 
 describe('WaitingUser tests', () => {
@@ -63,7 +63,7 @@ describe('WaitingUser tests', () => {
 		setup(<WaitingUser meetingId="meetingId" userId={guestUser.id} />);
 		act(() => {
 			const store = useStore.getState();
-			store.setUserInfo(guestUser);
+			store.setUserInfo([guestUser]);
 		});
 
 		const guestLabel = await screen.findByText('Guest');

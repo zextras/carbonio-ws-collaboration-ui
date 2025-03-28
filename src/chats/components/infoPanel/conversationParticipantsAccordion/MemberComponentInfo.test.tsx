@@ -117,13 +117,17 @@ const mockedRoomOneOwner = createMockRoom({
 	members: membersWithOneOwner
 });
 
+beforeEach(() => {
+	const store = useStore.getState();
+	store.setLoginInfo(user1Info.id, user1Info.name);
+	store.addRoom(mockedRoomOneOwner);
+	store.setUserInfo([user1Be, user2Be, user3Be, user4Be]);
+	store.addRoom(mockedRoom);
+});
+
 describe('Participant component info', () => {
 	describe('User is an owner', () => {
 		test('The user is the only owner and sees his element inside list', () => {
-			const store = useStore.getState();
-			store.setLoginInfo('user1', 'User 1');
-			store.addRoom(mockedRoomOneOwner);
-			store.setUserInfo(user1Be);
 			setup(<MemberComponentInfo member={members[0]} roomId={mockedRoomOneOwner.id} />);
 
 			const iAmOwnerAction = screen.getByTestId(iconCrown);
@@ -135,10 +139,6 @@ describe('Participant component info', () => {
 			expect(logoutAction).toBeEnabled();
 		});
 		test('The user is an owner and sees his element inside list', () => {
-			const store = useStore.getState();
-			store.setLoginInfo('user1', 'User 1');
-			store.addRoom(mockedRoom);
-			store.setUserInfo(user1Be);
 			setup(<MemberComponentInfo member={members[0]} roomId={mockedRoom.id} />);
 
 			const participantName = screen.getByText(/User 1/i);
@@ -152,11 +152,9 @@ describe('Participant component info', () => {
 			expect(logoutAction).toBeInTheDocument();
 		});
 		test('The user is an owner and sees a normal user inside list', () => {
-			const store = useStore.getState();
-			store.setLoginInfo('user1', 'User 1');
-			store.setAttributes(createMockAttributesList({ carbonioWscPrivateChatCreation: 'TRUE' }));
-			store.addRoom(mockedRoom);
-			store.setUserInfo(user2Be);
+			useStore
+				.getState()
+				.setAttributes(createMockAttributesList({ carbonioWscPrivateChatCreation: 'TRUE' }));
 			setup(<MemberComponentInfo member={members[1]} roomId={mockedRoom.id} />);
 
 			const participantName = screen.getByText(/User 2/i);
@@ -172,11 +170,10 @@ describe('Participant component info', () => {
 			expect(deleteUserAction).toBeInTheDocument();
 		});
 		test('The user is an owner and sees another owner inside list', () => {
-			const store = useStore.getState();
-			store.setLoginInfo('user1', 'User 1');
-			store.setAttributes(createMockAttributesList({ carbonioWscPrivateChatCreation: 'TRUE' }));
-			store.addRoom(mockedRoom);
-			store.setUserInfo(user3Be);
+			useStore
+				.getState()
+				.setAttributes(createMockAttributesList({ carbonioWscPrivateChatCreation: 'TRUE' }));
+
 			setup(<MemberComponentInfo member={members[2]} roomId={mockedRoom.id} />);
 
 			const participantName = screen.getByText(/User 3/i);
@@ -192,13 +189,12 @@ describe('Participant component info', () => {
 			expect(deleteUserAction).toBeInTheDocument();
 		});
 	});
+
 	describe("User isn't an owner", () => {
 		test('The user is not an owner and sees his element inside list', () => {
 			const store = useStore.getState();
 			store.setLoginInfo('user2', 'User 2');
 			store.setAttributes(createMockAttributesList({ carbonioWscPrivateChatCreation: 'TRUE' }));
-			store.addRoom(mockedRoom);
-			store.setUserInfo(user2Be);
 			setup(<MemberComponentInfo member={members[1]} roomId={mockedRoom.id} />);
 
 			const participantName = screen.getByText(/User 2/i);
@@ -211,8 +207,6 @@ describe('Participant component info', () => {
 			const store = useStore.getState();
 			store.setLoginInfo('user2', 'User 2');
 			store.setAttributes(createMockAttributesList({ carbonioWscPrivateChatCreation: 'TRUE' }));
-			store.addRoom(mockedRoom);
-			store.setUserInfo(user1Be);
 			setup(<MemberComponentInfo member={members[0]} roomId={mockedRoom.id} />);
 
 			const participantName = screen.getByText(/User 1/i);
@@ -228,8 +222,6 @@ describe('Participant component info', () => {
 			const store = useStore.getState();
 			store.setLoginInfo('user2', 'User 2');
 			store.setAttributes(createMockAttributesList({ carbonioWscPrivateChatCreation: 'TRUE' }));
-			store.addRoom(mockedRoom);
-			store.setUserInfo(user4Be);
 			setup(<MemberComponentInfo member={members[3]} roomId={mockedRoom.id} />);
 
 			const participantName = screen.getByText(/User 4/i);
@@ -243,10 +235,6 @@ describe('Participant component info', () => {
 	describe('Subtitle sentence with showUsersPresence capability set to true', () => {
 		test('Label should show Online', () => {
 			const store = useStore.getState();
-			store.setLoginInfo('user1', 'User 1');
-			store.addRoom(mockedRoom);
-			store.setUserInfo(user1Info);
-			store.setUserInfo(user2Info);
 			store.setAttributes(createMockAttributesList({ carbonioWscShowUsersPresence: 'TRUE' }));
 			act(() => store.setUserPresence('user1', true));
 			setup(<MemberComponentInfo member={members[0]} roomId={mockedRoom.id} />);
@@ -255,10 +243,6 @@ describe('Participant component info', () => {
 		});
 		test('Label should show Offline', () => {
 			const store = useStore.getState();
-			store.setLoginInfo('user1', 'User 1');
-			store.addRoom(mockedRoom);
-			store.setUserInfo(user1Info);
-			store.setUserInfo(user2Info);
 			store.setAttributes(createMockAttributesList({ carbonioWscShowUsersPresence: 'TRUE' }));
 			act(() => store.setUserPresence('user1', false));
 			setup(<MemberComponentInfo member={members[1]} roomId={mockedRoom.id} />);
@@ -270,10 +254,6 @@ describe('Participant component info', () => {
 
 		test('Label should show "Last seen" phrase if last_activity is present', () => {
 			const store = useStore.getState();
-			store.setLoginInfo('user1', 'User 1');
-			store.addRoom(mockedRoom);
-			store.setUserInfo(user1Info);
-			store.setUserInfo(user2Info);
 			store.setAttributes(createMockAttributesList({ carbonioWscShowUsersPresence: 'TRUE' }));
 			act(() => store.setUserLastActivity('user2', 1642818617000));
 			setup(<MemberComponentInfo member={members[1]} roomId={mockedRoom.id} />);
@@ -285,10 +265,6 @@ describe('Participant component info', () => {
 	describe('Subtitle sentence with showUsersPresence capability set to false', () => {
 		test('Label should not show Online', () => {
 			const store = useStore.getState();
-			store.setLoginInfo('user1', 'User 1');
-			store.addRoom(mockedRoom);
-			store.setUserInfo(user1Info);
-			store.setUserInfo(user2Info);
 			store.setAttributes(createMockAttributesList({ carbonioWscShowUsersPresence: 'FALSE' }));
 			act(() => store.setUserPresence('user1', true));
 			setup(<MemberComponentInfo member={members[0]} roomId={mockedRoom.id} />);
@@ -298,10 +274,6 @@ describe('Participant component info', () => {
 
 		test('Label should not show Offline', () => {
 			const store = useStore.getState();
-			store.setLoginInfo('user1', 'User 1');
-			store.addRoom(mockedRoom);
-			store.setUserInfo(user1Info);
-			store.setUserInfo(user2Info);
 			store.setAttributes(createMockAttributesList({ carbonioWscShowUsersPresence: 'FALSE' }));
 			act(() => store.setUserPresence('user1', false));
 			setup(<MemberComponentInfo member={members[0]} roomId={mockedRoom.id} />);
@@ -310,10 +282,6 @@ describe('Participant component info', () => {
 
 		test('Label should not show "Last seen" phrase if last_activity is present', () => {
 			const store = useStore.getState();
-			store.setLoginInfo('user1', 'User 1');
-			store.addRoom(mockedRoom);
-			store.setUserInfo(user1Info);
-			store.setUserInfo(user2Info);
 			store.setAttributes(createMockAttributesList({ carbonioWscShowUsersPresence: 'FALSE' }));
 			act(() => store.setUserLastActivity('user2', 1642818617000));
 			setup(<MemberComponentInfo member={members[1]} roomId={mockedRoom.id} />);

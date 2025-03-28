@@ -52,8 +52,7 @@ const storeSetupOneToOneMeeting = (): { store: RootStore } => {
 		type: RoomType.ONE_TO_ONE,
 		members: [createMockMember({ userId: user1.id }), createMockMember({ userId: user2.id })]
 	});
-	store.setUserInfo(user1);
-	store.setUserInfo(user2);
+	store.setUserInfo([user1, user2]);
 	store.setLoginInfo(user1.id, user1.name);
 	store.addRoom(room);
 	const user1Participant: MeetingParticipant = createMockParticipants({ userId: user1.id });
@@ -87,8 +86,7 @@ const storeSetupGroupMeeting = (): { user: UserEvent; store: RootStore } => {
 		type: RoomType.GROUP,
 		members: [createMockMember({ userId: user1.id }), createMockMember({ userId: user2.id })]
 	});
-	store.setUserInfo(user1);
-	store.setUserInfo(user2);
+	store.setUserInfo([user1, user2]);
 	store.setLoginInfo(user1.id, user1.name);
 	store.addRoom(room);
 	store.setAttributes(
@@ -125,9 +123,7 @@ const storeSetupGroupMeetingWithoutMe = (): { user: UserEvent; store: RootStore 
 			createMockMember({ userId: user3.id })
 		]
 	});
-	store.setUserInfo(user1);
-	store.setUserInfo(user2);
-	store.setUserInfo(user3);
+	store.setUserInfo([user1, user2, user3]);
 	store.setLoginInfo(user1.id, user1.name);
 	store.addRoom(room);
 	store.setAttributes(

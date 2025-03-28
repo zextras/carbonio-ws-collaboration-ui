@@ -40,7 +40,6 @@ const room: RoomBe = createMockRoom({
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo(sessionUser.id, sessionUser.name);
-	store.setUserInfo(sessionUser);
 	store.addRoom(room);
 });
 

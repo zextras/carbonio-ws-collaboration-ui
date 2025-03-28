@@ -40,10 +40,8 @@ const groupRoom = createMockRoom({
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo(loggedUser.id, loggedUser.name);
-	store.setUserInfo(loggedUser);
-	store.setUserInfo(otherUser);
-	store.addRoom(singleRoom);
-	store.addRoom(groupRoom);
+	store.setUserInfo([loggedUser, otherUser]);
+	store.setRooms([singleRoom, groupRoom]);
 });
 describe('ChatItem test', () => {
 	test('1-to-1 ChatItem displays user name', () => {

@@ -83,9 +83,7 @@ const attachmentTextMessage = createMockTextMessage({
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo(loggedUser.id, loggedUser.name);
-	store.setUserInfo(loggedUser);
-	store.setUserInfo(user1);
-	store.setUserInfo(forwardedUser);
+	store.setUserInfo([loggedUser, user1, forwardedUser]);
 	store.addRoom(mockedRoom);
 });
 describe('Message reference displayed', () => {

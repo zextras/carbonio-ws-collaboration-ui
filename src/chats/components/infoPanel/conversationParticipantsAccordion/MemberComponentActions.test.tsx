@@ -111,7 +111,7 @@ const mockedRoom2 = createMockRoom({
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo(user2Info.id, user2Info.name);
-	store.setUserInfo(user1Info);
+	store.setUserInfo([user1Info]);
 	store.addRoom(mockedOneToOne);
 	store.setAttributes(
 		createMockAttributesList({
@@ -232,7 +232,7 @@ describe('participants actions - promote/demote member', () => {
 		const { result } = renderHook(() => useStore());
 		act(() => {
 			result.current.setLoginInfo(user1Info.id, user1Info.name);
-			result.current.setUserInfo(user2Info);
+			result.current.setUserInfo([user2Info]);
 			result.current.addRoom(mockedRoom);
 		});
 
@@ -253,7 +253,7 @@ describe('participants actions - promote/demote member', () => {
 		const { result } = renderHook(() => useStore());
 		act(() => {
 			result.current.setLoginInfo(user1Info.id, user1Info.name);
-			result.current.setUserInfo(user3Info);
+			result.current.setUserInfo([user3Info]);
 			result.current.addRoom(mockedRoom);
 		});
 
@@ -283,7 +283,7 @@ describe('participants actions - delete user', () => {
 	test('open/close modal', async () => {
 		const store = useStore.getState();
 		store.setLoginInfo(user1Info.id, user1Info.name);
-		store.setUserInfo(user2Info);
+		store.setUserInfo([user2Info]);
 		store.addRoom(mockedRoom);
 		const { user } = setup(
 			<RemoveMemberListAction roomId={mockedRoom.id} memberId={user2Info.id} />
@@ -301,7 +301,7 @@ describe('participants actions - delete user', () => {
 		const { result } = renderHook(() => useStore());
 		act(() => {
 			result.current.setLoginInfo(user1Info.id, user1Info.name);
-			result.current.setUserInfo(user2Info);
+			result.current.setUserInfo([user2Info]);
 			result.current.addRoom(mockedRoom);
 		});
 

@@ -63,10 +63,7 @@ const room: RoomBe = createMockRoom({
 beforeEach(() => {
 	const store = useStore.getState();
 	store.addRoom(room);
-	store.setUserInfo(user1Be);
-	store.setUserInfo(user2Be);
-	store.setUserInfo(user3Be);
-	store.setUserInfo(user4Be);
+	store.setUserInfo([user1Be, user2Be, user3Be, user4Be]);
 });
 
 describe('Participants list', () => {
@@ -103,9 +100,7 @@ describe('Participants list', () => {
 	test('Search one member inside list', async () => {
 		const store = useStore.getState();
 		store.addRoom(room);
-		store.setUserInfo(user1Be);
-		store.setUserInfo(user2Be);
-		store.setUserInfo(user3Be);
+		store.setUserInfo([user1Be, user2Be, user3Be]);
 		const { user } = setup(<MemberList roomId={room.id} />);
 		const searchInput = screen.getByRole('textbox', { name: /Search members/i });
 		const list = await screen.findByTestId('members_list');

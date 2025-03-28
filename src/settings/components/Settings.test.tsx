@@ -19,14 +19,7 @@ import { NotificationsSettingsType } from '../../utils/localStorageUtils';
 
 const squareIcon = 'icon: Square';
 
-const userWithoutImage: UserBe = createMockUser({
-	id: 'user1',
-	email: 'user1@domain.com',
-	name: 'User 1',
-	lastSeen: 1234567890
-});
-
-const userWithImage: UserBe = createMockUser({
+const user1: UserBe = createMockUser({
 	id: 'user1',
 	email: 'user1@domain.com',
 	name: 'User 1',
@@ -49,12 +42,14 @@ const notificationsSettingsObjectFalse: NotificationsSettingsType = {
 
 const dataTestid = 'data-testid';
 
+beforeEach(() => {
+	const store: RootStore = useStore.getState();
+	store.setUserInfo([user1]);
+	store.setLoginInfo(user1.id, user1.name, user1.name);
+});
 describe('Settings view', () => {
 	describe('Notifications Settings', () => {
 		test('desktop notification checkbox active', async () => {
-			const store: RootStore = useStore.getState();
-			store.setUserInfo(userWithImage);
-			store.setLoginInfo(userWithImage.id, userWithImage.name, userWithImage.name);
 			setup(
 				<NotificationsSettings
 					updatedNotificationsSettings={notificationsSettingsObject}
@@ -66,9 +61,6 @@ describe('Settings view', () => {
 		});
 
 		test('desktop notification checkbox not active', async () => {
-			const store: RootStore = useStore.getState();
-			store.setUserInfo(userWithImage);
-			store.setLoginInfo(userWithImage.id, userWithImage.name, userWithImage.name);
 			setup(
 				<NotificationsSettings
 					updatedNotificationsSettings={notificationsSettingsObjectFalse}
@@ -80,9 +72,6 @@ describe('Settings view', () => {
 		});
 
 		test('desktop notification sounds switch active', async () => {
-			const store: RootStore = useStore.getState();
-			store.setUserInfo(userWithImage);
-			store.setLoginInfo(userWithImage.id, userWithImage.name, userWithImage.name);
 			setup(
 				<NotificationsSettings
 					updatedNotificationsSettings={notificationsSettingsObject}
@@ -95,9 +84,6 @@ describe('Settings view', () => {
 		});
 
 		test('desktop notification sounds switch not active', async () => {
-			const store: RootStore = useStore.getState();
-			store.setUserInfo(userWithImage);
-			store.setLoginInfo(userWithImage.id, userWithImage.name, userWithImage.name);
 			setup(
 				<NotificationsSettings
 					updatedNotificationsSettings={notificationsSettingsObjectFalse}
@@ -110,9 +96,6 @@ describe('Settings view', () => {
 		});
 
 		test('waiting room access notifications active', async () => {
-			const store: RootStore = useStore.getState();
-			store.setUserInfo(userWithImage);
-			store.setLoginInfo(userWithImage.id, userWithImage.name, userWithImage.name);
 			setup(
 				<NotificationsSettings
 					updatedNotificationsSettings={notificationsSettingsObject}
@@ -125,9 +108,6 @@ describe('Settings view', () => {
 		});
 
 		test('waiting room access notifications not active', async () => {
-			const store: RootStore = useStore.getState();
-			store.setUserInfo(userWithImage);
-			store.setLoginInfo(userWithImage.id, userWithImage.name, userWithImage.name);
 			setup(
 				<NotificationsSettings
 					updatedNotificationsSettings={notificationsSettingsObjectFalse}
@@ -140,9 +120,6 @@ describe('Settings view', () => {
 		});
 
 		test('waiting room access notifications sounds active', async () => {
-			const store: RootStore = useStore.getState();
-			store.setUserInfo(userWithImage);
-			store.setLoginInfo(userWithImage.id, userWithImage.name, userWithImage.name);
 			setup(
 				<NotificationsSettings
 					updatedNotificationsSettings={notificationsSettingsObject}
@@ -155,9 +132,6 @@ describe('Settings view', () => {
 		});
 
 		test('waiting room access notifications sounds not active', async () => {
-			const store: RootStore = useStore.getState();
-			store.setUserInfo(userWithImage);
-			store.setLoginInfo(userWithImage.id, userWithImage.name, userWithImage.name);
 			setup(
 				<NotificationsSettings
 					updatedNotificationsSettings={notificationsSettingsObjectFalse}
@@ -172,9 +146,6 @@ describe('Settings view', () => {
 
 	describe('Meeting settings', () => {
 		test('Meeting section checkboxes', () => {
-			const store: RootStore = useStore.getState();
-			store.setUserInfo(userWithoutImage);
-			store.setLoginInfo(userWithoutImage.id, userWithoutImage.name, userWithoutImage.name);
 			setup(<Settings />);
 
 			const meetingContainer = screen.getByTestId('meeting_settings_container');
@@ -193,8 +164,6 @@ describe('Settings view', () => {
 				);
 			});
 			const store: RootStore = useStore.getState();
-			store.setUserInfo(userWithoutImage);
-			store.setLoginInfo(userWithoutImage.id, userWithoutImage.name, userWithoutImage.name);
 			store.setAttributes(createMockAttributesList({ carbonioWscVideoCallEnabled: 'FALSE' }));
 			const { user } = setup(<Settings />);
 
@@ -214,8 +183,6 @@ describe('Settings view', () => {
 	describe('Recording settings', () => {
 		test('Recording enabled', () => {
 			const store: RootStore = useStore.getState();
-			store.setUserInfo(userWithoutImage);
-			store.setLoginInfo(userWithoutImage.id, userWithoutImage.name, userWithoutImage.name);
 			store.setAttributes(createMockAttributesList());
 			setup(<Settings />);
 
@@ -224,8 +191,6 @@ describe('Settings view', () => {
 		});
 		test('Meeting section with recording disabled', () => {
 			const store: RootStore = useStore.getState();
-			store.setUserInfo(userWithoutImage);
-			store.setLoginInfo(userWithoutImage.id, userWithoutImage.name, userWithoutImage.name);
 			store.setAttributes(createMockAttributesList({ carbonioWscRecordingEnabled: 'FALSE' }));
 			setup(<Settings />);
 
@@ -235,8 +200,6 @@ describe('Settings view', () => {
 
 		test('Reset recording folder', async () => {
 			const store: RootStore = useStore.getState();
-			store.setUserInfo(userWithoutImage);
-			store.setLoginInfo(userWithoutImage.id, userWithoutImage.name, userWithoutImage.name);
 			store.setAttributes(createMockAttributesList());
 			localStorage.setItem(
 				'ChatsRecordingSettings',

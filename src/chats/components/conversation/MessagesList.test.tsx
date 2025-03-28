@@ -355,7 +355,7 @@ describe('render list of messages with history loader visible for first time ope
 		const { result } = renderHook(() => useStore());
 		act(() => {
 			result.current.addRoom(room);
-			result.current.setUserInfo(user2Be);
+			result.current.setUserInfo([user2Be]);
 			result.current.setLoginInfo(user1Be.id, user1Be.name);
 			result.current.setHistoryIsFullyLoaded(room.id);
 			result.current.updateHistory(room.id, [mockedConfigurationMessage]);
@@ -376,7 +376,7 @@ describe('render list of messages with history loader visible for first time ope
 		const { result } = renderHook(() => useStore());
 		act(() => {
 			result.current.addRoom(room);
-			result.current.setUserInfo(user4Be);
+			result.current.setUserInfo([user4Be]);
 			result.current.setHistoryIsFullyLoaded(room.id);
 			result.current.updateHistory(room.id, [mockedAddMemberMessage]);
 			result.current.addCreateRoomMessage(room.id);
@@ -396,7 +396,7 @@ describe('render list of messages with history loader visible for first time ope
 		const { result } = renderHook(() => useStore());
 		act(() => {
 			result.current.addRoom(room);
-			result.current.setUserInfo(user3Be);
+			result.current.setUserInfo([user3Be]);
 			result.current.setHistoryIsFullyLoaded(room.id);
 			result.current.updateHistory(room.id, [mockedRemoveMemberMessage]);
 			result.current.addCreateRoomMessage(room.id);
@@ -455,9 +455,7 @@ describe('Display group of messages', () => {
 		const { result } = renderHook(() => useStore());
 		act(() => {
 			result.current.setLoginInfo('userId', 'User');
-			result.current.setUserInfo(userA);
-			result.current.setUserInfo(userB);
-			result.current.setUserInfo(userC);
+			result.current.setUserInfo([userA, userB, userC]);
 			result.current.addRoom(mockedRoom);
 		});
 
@@ -488,9 +486,7 @@ describe('Display group of messages', () => {
 		const { result } = renderHook(() => useStore());
 		act(() => {
 			result.current.setLoginInfo('userId', 'User');
-			result.current.setUserInfo(userA);
-			result.current.setUserInfo(userB);
-			result.current.setUserInfo(userC);
+			result.current.setUserInfo([userA, userB, userC]);
 			result.current.addRoom(mockedRoom);
 		});
 

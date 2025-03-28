@@ -30,28 +30,24 @@ const testRoom: RoomBe = createMockRoom({
 	members: [createMockMember({ userId: user1Info.id }), createMockMember({ userId: user2Info.id })]
 });
 
+beforeEach(() => {
+	const store: RootStore = useStore.getState();
+	store.setLoginInfo(user1Info.id, user1Info.name);
+	store.setUserInfo([user1Info, user2Info]);
+	store.addRoom(testRoom);
+	store.setAttributes(createMockAttributesList({ carbonioWscShowUsersPresence: 'TRUE' }));
+});
+
 describe('Room Picture Handler - one_to_one', () => {
 	test('label should show "Last seen" phrase if last_activity is present', () => {
-		const store: RootStore = useStore.getState();
-		store.addRoom(testRoom);
-		store.setUserInfo(user1Info);
-		store.setUserInfo(user2Info);
-		store.setLoginInfo(user1Info.id, user1Info.name);
-		store.setAttributes(createMockAttributesList({ carbonioWscShowUsersPresence: 'TRUE' }));
-		act(() => store.setUserLastActivity(user2Info.id, 1642818617000));
+		act(() => useStore.getState().setUserLastActivity(user2Info.id, 1642818617000));
 		setup(<OneToOneRoomPictureHandler memberId={user2Info.id} />);
 
 		// last activity is 2022/01/22 at 03:30:17
 		expect(screen.getByText(/Last seen 01\/22\/2022/i)).toBeInTheDocument();
 	});
 	test('label should show "Online"', () => {
-		const store: RootStore = useStore.getState();
-		store.addRoom(testRoom);
-		store.setUserInfo(user1Info);
-		store.setUserInfo(user2Info);
-		store.setLoginInfo(user1Info.id, user1Info.name);
-		store.setAttributes(createMockAttributesList({ carbonioWscShowUsersPresence: 'TRUE' }));
-		act(() => store.setUserPresence(user2Info.id, true));
+		act(() => useStore.getState().setUserPresence(user2Info.id, true));
 		setup(<OneToOneRoomPictureHandler memberId={user2Info.id} />);
 
 		expect(screen.getByTestId('user_presence_dot')).toBeInTheDocument();

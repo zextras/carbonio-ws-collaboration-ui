@@ -157,9 +157,7 @@ const mockedAttachmentMessage = createMockTextMessage({
 beforeEach(() => {
 	const store: RootStore = useStore.getState();
 	store.setLoginInfo(user1Be.id, user1Be.name);
-	store.setUserInfo(user1Be);
-	store.setUserInfo(user2Be);
-	store.setUserInfo(user4Be);
+	store.setUserInfo([user1Be, user2Be, user4Be]);
 	store.addRoom(mockedGroup);
 	store.addRoom(mockedOneToOne);
 	store.setAttributes(createMockAttributesList({ carbonioWscShowMessageReads: 'TRUE' }));
@@ -305,7 +303,7 @@ describe('Expanded sidebar list item', () => {
 				const composingMessage = composingStanza(mockedGroup.id, user4Be.id);
 				onComposingMessageStanza.call(useStore.getState().connections.xmppClient, composingMessage);
 			});
-			expect(screen.getByText(`${user4Be.name} is typing...`));
+			expect(screen.getByText(`${user4Be.name} is typing...`)).toBeInTheDocument();
 			jest.advanceTimersByTime(3000);
 			act(() => {
 				const stopWritingMessage = pausedStanza(mockedGroup.id, user4Be.id);
@@ -381,7 +379,7 @@ describe('Expanded sidebar list item', () => {
 				const composingMessage = composingStanza(mockedOneToOne.id, user2Be.id);
 				onComposingMessageStanza.call(useStore.getState().connections.xmppClient, composingMessage);
 			});
-			expect(screen.getByText(`${user2Be.name} is typing...`));
+			expect(screen.getByText(`${user2Be.name} is typing...`)).toBeInTheDocument();
 			jest.advanceTimersByTime(3000);
 			act(() => {
 				const stopWritingMessage = pausedStanza(mockedOneToOne.id, user2Be.id);

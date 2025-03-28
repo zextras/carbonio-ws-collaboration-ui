@@ -69,15 +69,12 @@ const meetingWithOnePerson: MeetingBe = createMockMeeting({
 
 const storeSetupGroupMeeting = (): { user: UserEvent; store: RootStore } => {
 	const store = useStore.getState();
-	act(() => {
-		store.setUserInfo(user1);
-		store.setUserInfo(user2);
-		store.setUserInfo(user3);
-		store.setLoginInfo(user1.id, user1.name);
-		store.addRoom(room);
-		store.addMeeting(meeting);
-		store.meetingConnection(meeting.id, false, undefined, false, undefined);
-	});
+	store.setUserInfo([user1, user2, user3]);
+	store.setLoginInfo(user1.id, user1.name);
+	store.addRoom(room);
+	store.addMeeting(meeting);
+	store.meetingConnection(meeting.id, false, undefined, false, undefined);
+
 	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
 	spyUseParams.mockReturnValue({ meetingId: meeting.id });
 	const { user } = routerContextSetup(<MoreActionsButton />, { meetingId: meeting.id });
@@ -88,7 +85,7 @@ const storeSetupGroupMeeting = (): { user: UserEvent; store: RootStore } => {
 const storeSetupGroupMeetingWithOnePerson = (): { user: UserEvent } => {
 	const { result } = renderHook(() => useStore());
 	act(() => {
-		result.current.setUserInfo(user1);
+		result.current.setUserInfo([user1]);
 		result.current.setLoginInfo(user1.id, user1.name);
 		result.current.addRoom(room);
 		result.current.addMeeting(meetingWithOnePerson);
@@ -110,9 +107,7 @@ const customPiPContextValue = {
 
 const storeSetupGroupMeetingPip = (): { user: UserEvent; store: RootStore } => {
 	const store = useStore.getState();
-	store.setUserInfo(user1);
-	store.setUserInfo(user2);
-	store.setUserInfo(user3);
+	store.setUserInfo([user1, user2, user3]);
 	store.setLoginInfo(user1.id, user1.name);
 	store.addRoom(room);
 	store.addMeeting(meeting);

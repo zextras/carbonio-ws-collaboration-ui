@@ -61,8 +61,7 @@ const ComplexComponent = (): ReactElement => {
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo(sessionUser.id, sessionUser.email);
-	store.setUserInfo(user1);
-	store.setUserInfo(user2);
+	store.setUserInfo([user1, user2]);
 	store.newMessage(textMessage);
 	store.updateMarkers(room.id, [user1Marker]);
 });

@@ -84,7 +84,7 @@ describe('Conversation info Details', () => {
 	test('user info should appear as expected', async () => {
 		const store = useStore.getState();
 		store.addRoom(OneToOneRoom);
-		store.setUserInfo(user1Be);
+		store.setUserInfo([user1Be]);
 		setup(<ConversationInfoDetails roomId={OneToOneRoom.id} roomType={RoomType.ONE_TO_ONE} />);
 		expect(screen.getAllByText(user1Be.name)).toHaveLength(1);
 		expect(screen.getByText(user1Be.email)).toBeInTheDocument();
@@ -95,7 +95,7 @@ describe('Conversation Info', () => {
 	test('user info should appear as expected', async () => {
 		const store = useStore.getState();
 		store.addRoom(OneToOneRoom);
-		store.setUserInfo(user1Be);
+		store.setUserInfo([user1Be]);
 		setup(
 			<ConversationInfo
 				roomId={OneToOneRoom.id}
