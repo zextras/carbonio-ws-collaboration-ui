@@ -58,7 +58,7 @@ export const useConnectionsStoreSlice: StateCreator<
 					draft.users[user.id] = {
 						...draft.users[user.id],
 						online: undefined,
-						last_activity: undefined
+						lastActivity: undefined
 					};
 				});
 				draft.messages = {};

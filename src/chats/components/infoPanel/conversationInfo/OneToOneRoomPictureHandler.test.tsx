@@ -39,7 +39,7 @@ beforeEach(() => {
 });
 
 describe('Room Picture Handler - one_to_one', () => {
-	test('label should show "Last seen" phrase if last_activity is present', () => {
+	test('label should show "Last seen" phrase if lastActivity is present', () => {
 		act(() => useStore.getState().setUserLastActivity(user2Info.id, 1642818617000));
 		setup(<OneToOneRoomPictureHandler memberId={user2Info.id} />);
 

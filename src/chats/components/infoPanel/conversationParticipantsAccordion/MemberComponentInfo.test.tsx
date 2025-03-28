@@ -12,72 +12,17 @@ import MemberComponentInfo from './MemberComponentInfo';
 import useStore from '../../../../store/Store';
 import {
 	createMockAttributesList,
+	createMockMember,
 	createMockRoom,
 	createMockUser
 } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
 import { RoomType } from '../../../../types/network/models/roomBeTypes';
 import { UserBe } from '../../../../types/network/models/userBeTypes';
-import { User } from '../../../../types/store/UserTypes';
 
 const iconCrown = 'icon: Crown';
 const iconLogOut = 'icon: LogOut';
 const iconMessageCircleOutline = 'icon: MessageCircleOutline';
-
-const user1Info: User = createMockUser({
-	id: 'user1',
-	email: 'user1@domain.com',
-	name: 'User 1'
-});
-
-const user2Info: User = createMockUser({
-	id: 'user2',
-	email: 'user2@domain.com',
-	name: 'User 2',
-	last_activity: 1642818965849
-});
-
-const members = [
-	{
-		userId: 'user1',
-		owner: true,
-		temporary: false,
-		external: false
-	},
-	{
-		userId: 'user2',
-		owner: false,
-		temporary: false,
-		external: false
-	},
-	{
-		userId: 'user3',
-		owner: true,
-		temporary: false,
-		external: false
-	},
-	{
-		userId: 'user4',
-		owner: false,
-		temporary: false,
-		external: false
-	}
-];
-
-const membersWithOneOwner = [
-	{
-		userId: 'user1',
-		owner: true,
-		temporary: false,
-		external: false
-	},
-	{
-		userId: 'user4',
-		owner: false,
-		temporary: false,
-		external: false
-	}
-];
 
 const user1Be: UserBe = createMockUser({
 	id: 'user1',
@@ -107,6 +52,18 @@ const user4Be: UserBe = createMockUser({
 	lastSeen: 1234567890
 });
 
+const members = [
+	createMockMember({ userId: user1Be.id, owner: true }),
+	createMockMember({ userId: user2Be.id }),
+	createMockMember({ userId: user3Be.id, owner: true }),
+	createMockMember({ userId: user4Be.id })
+];
+
+const membersWithOneOwner = [
+	createMockMember({ userId: user1Be.id, owner: true }),
+	createMockMember({ userId: user4Be.id })
+];
+
 const mockedRoom = createMockRoom({
 	type: RoomType.GROUP,
 	members
@@ -119,7 +76,7 @@ const mockedRoomOneOwner = createMockRoom({
 
 beforeEach(() => {
 	const store = useStore.getState();
-	store.setLoginInfo(user1Info.id, user1Info.name);
+	store.setLoginInfo(user1Be.id, user1Be.name);
 	store.addRoom(mockedRoomOneOwner);
 	store.setUserInfo([user1Be, user2Be, user3Be, user4Be]);
 	store.addRoom(mockedRoom);
@@ -252,7 +209,7 @@ describe('Participant component info', () => {
 			).toBeInTheDocument();
 		});
 
-		test('Label should show "Last seen" phrase if last_activity is present', () => {
+		test('Label should show "Last seen" phrase if lastActivity is present', () => {
 			const store = useStore.getState();
 			store.setAttributes(createMockAttributesList({ carbonioWscShowUsersPresence: 'TRUE' }));
 			act(() => store.setUserLastActivity('user2', 1642818617000));
@@ -280,7 +237,7 @@ describe('Participant component info', () => {
 			expect(screen.queryByText(/Offline/i)).not.toBeInTheDocument();
 		});
 
-		test('Label should not show "Last seen" phrase if last_activity is present', () => {
+		test('Label should not show "Last seen" phrase if lastActivity is present', () => {
 			const store = useStore.getState();
 			store.setAttributes(createMockAttributesList({ carbonioWscShowUsersPresence: 'FALSE' }));
 			act(() => store.setUserLastActivity('user2', 1642818617000));

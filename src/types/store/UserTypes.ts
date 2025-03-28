@@ -21,7 +21,7 @@ export type User = {
 	type: UserType;
 	lastSeen?: number;
 	online?: boolean;
-	last_activity?: number;
+	lastActivity?: number;
 };
 
 export type UsersMap = {

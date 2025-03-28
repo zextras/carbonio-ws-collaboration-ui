@@ -55,7 +55,7 @@ export const useUsersStoreSlice: StateCreator<
 			produce((draft: RootStore) => {
 				draft.users[id] = {
 					...draft.users[id],
-					last_activity: date
+					lastActivity: date
 				};
 			}),
 			false,
