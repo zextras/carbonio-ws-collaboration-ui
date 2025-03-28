@@ -36,22 +36,19 @@ const iconDoneAll = 'icon: DoneAll';
 const user2Be: User = createMockUser({
 	id: 'user2Id',
 	email: 'user2@domain.com',
-	name: 'User2',
-	lastSeen: 1234567890
+	name: 'User2'
 });
 
 const user1Be: User = createMockUser({
 	id: 'user1Id',
 	email: 'user1@domain.com',
-	name: 'User1',
-	lastSeen: 1234567890
+	name: 'User1'
 });
 
 const user4Be: User = createMockUser({
 	id: 'user4Id',
 	email: 'user4@domain.com',
-	name: 'User4',
-	lastSeen: 1234567890
+	name: 'User4'
 });
 
 const mockedGroup: RoomBe = createMockRoom({

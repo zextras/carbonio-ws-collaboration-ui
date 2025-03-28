@@ -27,29 +27,25 @@ const iconMessageCircleOutline = 'icon: MessageCircleOutline';
 const user1Be: UserBe = createMockUser({
 	id: 'user1',
 	email: 'user1@domain.com',
-	name: 'User 1',
-	lastSeen: 1234567890
+	name: 'User 1'
 });
 
 const user2Be: UserBe = createMockUser({
 	id: 'user2',
 	email: 'user2@domain.com',
-	name: 'User 2',
-	lastSeen: 1234567890
+	name: 'User 2'
 });
 
 const user3Be: UserBe = createMockUser({
 	id: 'user3',
 	email: 'user3@domain.com',
-	name: 'User 3',
-	lastSeen: 1234567890
+	name: 'User 3'
 });
 
 const user4Be: UserBe = createMockUser({
 	id: 'user4',
 	email: 'user4@domain.com',
-	name: 'User 4',
-	lastSeen: 1234567890
+	name: 'User 4'
 });
 
 const members = [

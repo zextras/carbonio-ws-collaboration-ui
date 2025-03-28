@@ -29,8 +29,7 @@ export const useUsersStoreSlice: StateCreator<
 						id: user.id,
 						email: user.email,
 						name: user.name,
-						type: user.type ?? UserType.INTERNAL,
-						lastSeen: user.lastSeen
+						type: user.type ?? UserType.INTERNAL
 					};
 				});
 			}),

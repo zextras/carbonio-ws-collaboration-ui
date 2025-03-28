@@ -27,22 +27,19 @@ const helloString = 'Hello guys!';
 const user1Be = createMockUser({
 	id: 'user1Id',
 	email: 'user1@domain.com',
-	name: 'User1',
-	lastSeen: 1234567890
+	name: 'User1'
 });
 
 const user2Be = createMockUser({
 	id: 'user2Id',
 	email: 'user2@domain.com',
-	name: 'User2',
-	lastSeen: 1234567890
+	name: 'User2'
 });
 
 const user3Be = createMockUser({
 	id: 'user3Id',
 	email: 'user3@domain.com',
-	name: 'User3',
-	lastSeen: 1234567890
+	name: 'User3'
 });
 
 const mockedGroup1: RoomBe = createMockRoom({

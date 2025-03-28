@@ -19,7 +19,6 @@ export type User = {
 	email: string;
 	name: string;
 	type: UserType;
-	lastSeen?: number;
 	online?: boolean;
 	lastActivity?: number;
 };

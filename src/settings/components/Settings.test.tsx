@@ -22,8 +22,7 @@ const squareIcon = 'icon: Square';
 const user1: UserBe = createMockUser({
 	id: 'user1',
 	email: 'user1@domain.com',
-	name: 'User 1',
-	lastSeen: 1234567890
+	name: 'User 1'
 });
 
 const notificationsSettingsObject: NotificationsSettingsType = {

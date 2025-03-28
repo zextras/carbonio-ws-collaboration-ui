@@ -35,15 +35,13 @@ const iconArrowIosDownward = 'icon: ArrowIosDownward';
 const user1Be: User = createMockUser({
 	id: 'user1',
 	email: 'user1@domain.com',
-	name: 'User1',
-	lastSeen: 1234567890
+	name: 'User1'
 });
 
 const user2Be: User = createMockUser({
 	id: 'user2',
 	email: 'user2@domain.com',
-	name: 'User2',
-	lastSeen: 1234567890
+	name: 'User2'
 });
 
 const mockMember1 = createMockMember({ userId: user1Be.id, owner: true });

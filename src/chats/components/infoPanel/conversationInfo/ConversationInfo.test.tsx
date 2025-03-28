@@ -11,7 +11,7 @@ import { act, screen } from '@testing-library/react';
 import ConversationInfo from './ConversationInfo';
 import ConversationInfoDetails from './ConversationInfoDetails';
 import useStore from '../../../../store/Store';
-import { createMockUser } from '../../../../tests/createMock';
+import { createMockMember, createMockRoom, createMockUser } from '../../../../tests/createMock';
 import { mockUseMediaQueryCheck } from '../../../../tests/mocks/useMediaQueryCheck';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
@@ -20,63 +20,33 @@ import { UserBe } from '../../../../types/network/models/userBeTypes';
 const user1Be: UserBe = createMockUser({
 	id: 'user1',
 	email: 'user1@domain.com',
-	name: 'User 1',
-	lastSeen: 1234567890
+	name: 'User 1'
 });
 
-const room = {
+const room: RoomBe = createMockRoom({
 	id: 'Room-Id',
 	name: 'Room Name',
 	description: 'This is the description of the group',
 	type: RoomType.GROUP,
-	createdAt: '1234567',
-	updatedAt: '12345678',
-	pictureUpdatedAt: '123456789',
 	members: [
-		{
-			userId: 'user1',
-			owner: true,
-			temporary: false,
-			external: false
-		},
-		{
-			userId: 'user2',
-			owner: false,
-			temporary: false,
-			external: false
-		},
-		{
-			userId: 'user3',
-			owner: false,
-			temporary: false,
-			external: false
-		}
+		createMockMember({ userId: user1Be.id, owner: true }),
+		createMockMember({ userId: 'user2' }),
+		createMockMember({ userId: 'user3' })
 	]
-};
+});
 
-const OneToOneRoom: RoomBe = {
+const OneToOneRoom: RoomBe = createMockRoom({
 	id: 'One-To-One-Room-Id',
-	name: ' ',
-	description: '',
 	type: RoomType.ONE_TO_ONE,
-	createdAt: '1234567',
-	updatedAt: '12345678',
-	members: [
-		{
-			userId: 'user1',
-			owner: true,
-			temporary: false,
-			external: false
-		}
-	]
-};
+	members: [createMockMember({ userId: user1Be.id, owner: true })]
+});
 
 describe('Conversation info Details', () => {
 	test('group info should appear as expected', async () => {
 		const store = useStore.getState();
 		store.addRoom(room);
 		setup(<ConversationInfoDetails roomId={room.id} roomType="group" />);
-		expect(screen.getByText(room.description)).toBeInTheDocument();
+		expect(screen.getByText(room.description!)).toBeInTheDocument();
 		act(() => store.setRoomDescription(room.id, 'new description'));
 		expect(screen.getByText(/new description/i)).toBeInTheDocument();
 	});
@@ -112,13 +82,15 @@ describe('Conversation Info', () => {
 		setup(
 			<ConversationInfo roomId={room.id} roomType={RoomType.GROUP} setInfoPanelOpen={jest.fn()} />
 		);
-		expect(screen.getByText(room.name)).toBeInTheDocument();
+		expect(screen.getByText(room.name!)).toBeInTheDocument();
 	});
 
 	test('infoPanel take all space', async () => {
 		const store = useStore.getState();
 		store.addRoom(room);
-		setup(<ConversationInfo roomId={room.id} roomType="group" setInfoPanelOpen={jest.fn()} />);
+		setup(
+			<ConversationInfo roomId={room.id} roomType={RoomType.GROUP} setInfoPanelOpen={jest.fn()} />
+		);
 		const messagesIcon = screen.getByTestId('icon: MessageCircleOutline');
 		expect(messagesIcon).toBeInTheDocument();
 	});
@@ -127,7 +99,9 @@ describe('Conversation Info', () => {
 		mockUseMediaQueryCheck.mockReturnValueOnce(true);
 		const store = useStore.getState();
 		store.addRoom(room);
-		setup(<ConversationInfo roomId={room.id} roomType="group" setInfoPanelOpen={jest.fn()} />);
+		setup(
+			<ConversationInfo roomId={room.id} roomType={RoomType.GROUP} setInfoPanelOpen={jest.fn()} />
+		);
 		expect(screen.queryByTestId('icon: MessageCircleOutline')).toBeNull();
 	});
 });

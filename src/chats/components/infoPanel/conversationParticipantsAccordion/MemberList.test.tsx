@@ -19,36 +19,28 @@ import { User } from '../../../../types/store/UserTypes';
 const user1Be: User = createMockUser({
 	id: 'user1',
 	email: 'user1@domain.com',
-	name: 'User 1',
-	lastSeen: 1234567890
+	name: 'User 1'
 });
 
 const user2Be: User = createMockUser({
 	id: 'user2',
 	email: 'user2@domain.com',
-	name: 'User 2',
-	lastSeen: 1234567890
+	name: 'User 2'
 });
 
 const user3Be: User = createMockUser({
 	id: 'user3',
 	email: 'user3@domain.com',
-	name: 'User 3',
-	lastSeen: 1234567890
+	name: 'User 3'
 });
 
 const user4Be: User = createMockUser({
 	id: 'user4',
 	email: 'user4@domain.com',
-	name: 'User 4',
-	lastSeen: 1642818617000
+	name: 'User 4'
 });
 
-const user4MemberBe: Member = createMockMember({
-	userId: 'user4',
-	temporary: false,
-	external: false
-});
+const user4MemberBe: Member = createMockMember({ userId: 'user4' });
 
 const room: RoomBe = createMockRoom({
 	id: 'Room-Id',

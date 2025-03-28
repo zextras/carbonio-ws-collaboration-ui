@@ -21,8 +21,7 @@ const backgroundColor = 'background-color: #cfd5dc';
 const user2Be: User = createMockUser({
 	id: 'user2Id',
 	email: 'user2@domain.com',
-	name: 'User2',
-	lastSeen: 1234567890
+	name: 'User2'
 });
 
 const user1Be: User = createMockUser();

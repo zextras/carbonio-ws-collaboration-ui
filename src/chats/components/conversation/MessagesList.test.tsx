@@ -42,29 +42,25 @@ const userC = createMockUser({ id: 'userC', name: 'userC' });
 const user2Be: User = createMockUser({
 	id: 'user2',
 	email: 'user2@domain.com',
-	name: 'User2',
-	lastSeen: 1234567890
+	name: 'User2'
 });
 
 const user3Be: User = createMockUser({
 	id: 'user3',
 	email: 'user3@domain.com',
-	name: 'User3',
-	lastSeen: 1234567890
+	name: 'User3'
 });
 
 const user1Be: User = createMockUser({
 	id: 'user1',
 	email: 'user1@domain.com',
-	name: 'User1',
-	lastSeen: 1234567890
+	name: 'User1'
 });
 
 const user4Be: User = createMockUser({
 	id: 'user4',
 	email: 'user4@domain.com',
-	name: 'User4',
-	lastSeen: 1234567890
+	name: 'User4'
 });
 
 const room: RoomBe = {
