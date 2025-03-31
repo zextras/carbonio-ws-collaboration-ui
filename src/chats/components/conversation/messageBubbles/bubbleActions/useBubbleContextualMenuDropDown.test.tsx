@@ -98,7 +98,6 @@ const messageTypes: Array<[string, TextMessage]> = [
 
 beforeEach(() => {
 	const store: RootStore = useStore.getState();
-	store.setSessionId(mySessionId);
 	store.addRoom(mockedRoom);
 	store.setAttributes(createMockAttributesList());
 });

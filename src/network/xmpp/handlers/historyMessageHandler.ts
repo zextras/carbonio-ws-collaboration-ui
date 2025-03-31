@@ -178,6 +178,10 @@ export function onLoadFullHistory(stanza: Element): void {
 
 	if (chatExporting?.roomId === roomId) {
 		const isHistoryComplete = getRequiredTagElement(stanza, 'fin').getAttribute('complete');
-		chatExporting.exporter.handleFullHistoryResponse(!!isHistoryComplete);
+		if (isHistoryComplete) {
+			chatExporting.exporter.exportHistory();
+		} else {
+			chatExporting.exporter.continueExporting();
+		}
 	}
 }

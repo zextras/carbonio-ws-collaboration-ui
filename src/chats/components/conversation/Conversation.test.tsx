@@ -128,7 +128,7 @@ describe('Conversation view', () => {
 		const store = useStore.getState();
 		store.addRoom(testRoom);
 		setup(<Conversation roomId={testRoom.id} />);
-		const ConversationWrapper = screen.getByTestId('ConversationWrapper');
+		const ConversationWrapper = screen.getByTestId(`ConversationWrapper-${testRoom.id}`);
 		expect(ConversationWrapper).toHaveStyle(`background-image: url('papyrus.png')`);
 	});
 
@@ -137,7 +137,7 @@ describe('Conversation view', () => {
 		const store = useStore.getState();
 		store.addRoom(testRoom);
 		setup(<Conversation roomId={testRoom.id} />);
-		const ConversationWrapper = screen.getByTestId('ConversationWrapper');
+		const ConversationWrapper = screen.getByTestId(`ConversationWrapper-${testRoom.id}`);
 		expect(ConversationWrapper).toHaveStyle(`background-image: url('papyrus-dark.png')`);
 	});
 
