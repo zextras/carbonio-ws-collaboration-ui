@@ -29,7 +29,7 @@ export const useUsersStoreSlice: StateCreator<
 						id: user.id,
 						email: user.email,
 						name: user.name,
-						type: user.type ?? UserType.INTERNAL
+						type: user.type
 					};
 				});
 			}),
@@ -49,7 +49,7 @@ export const useUsersStoreSlice: StateCreator<
 			'USERS/SET_PRESENCE'
 		);
 	},
-	setUserLastActivity: (id: string, date: number): void => {
+	setUserLastActivity: (id: string, date?: number): void => {
 		set(
 			produce((draft: RootStore) => {
 				draft.users[id] = {
