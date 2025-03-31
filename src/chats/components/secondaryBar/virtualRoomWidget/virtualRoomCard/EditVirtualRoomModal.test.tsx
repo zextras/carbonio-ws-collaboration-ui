@@ -125,8 +125,7 @@ describe('EditVirtualRoomModal test', () => {
 		const store = useStore.getState();
 		store.addParticipant(meeting.id, createMockParticipants({ userId: member1.id }));
 		store.addParticipant(meeting.id, createMockParticipants({ userId: user2.id }));
-		const spyOnPromoteRoomMember = spyOnRoomsApi(RoomsApiToSpy.PROMOTE_ROOM_MEMBER);
-		const spyOnDemoteRoomMember = spyOnRoomsApi(RoomsApiToSpy.DEMOTE_ROOM_MEMBER);
+		const spyUpdateOwners = spyOnRoomsApi(RoomsApiToSpy.UPDATE_ROOM_OWNERS);
 		const { user } = setup(
 			<EditVirtualRoomModal
 				showModal
@@ -147,7 +146,6 @@ describe('EditVirtualRoomModal test', () => {
 		await user.click(listUser2);
 
 		await user.click(screen.getByRole('button', { name: 'Edit' }));
-		expect(spyOnPromoteRoomMember).toHaveBeenCalled();
-		expect(spyOnDemoteRoomMember).toHaveBeenCalled();
+		expect(spyUpdateOwners).toHaveBeenCalled();
 	});
 });
