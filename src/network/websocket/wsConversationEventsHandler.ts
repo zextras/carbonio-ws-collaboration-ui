@@ -21,7 +21,7 @@ export const wsConversationEventsHandler = (event: WsEvent): void => {
 			break;
 		}
 		case WsEventType.ROOM_UPDATED: {
-			state.setRoomNameAndDescription(event.roomId, event.name, event.description);
+			state.editRoom(event.roomId, { name: event.name, description: event.description });
 			break;
 		}
 		case WsEventType.ROOM_DELETED: {
@@ -49,11 +49,11 @@ export const wsConversationEventsHandler = (event: WsEvent): void => {
 			break;
 		}
 		case WsEventType.ROOM_PICTURE_CHANGED: {
-			state.setRoomPictureUpdated(event.roomId, event.updatedAt);
+			state.editRoom(event.roomId, { pictureUpdatedAt: event.updatedAt });
 			break;
 		}
 		case WsEventType.ROOM_PICTURE_DELETED: {
-			state.setRoomPictureDeleted(event.roomId);
+			state.editRoom(event.roomId, { pictureUpdatedAt: undefined });
 			break;
 		}
 		case WsEventType.ROOM_MEMBER_ADDED: {

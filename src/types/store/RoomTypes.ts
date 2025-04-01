@@ -11,13 +11,7 @@ export type RoomsStoreSlice = {
 	setRooms: (rooms: RoomBe[]) => void;
 	addRoom: (room: RoomBe) => void;
 	deleteRoom: (id: string) => void;
-	setRoomName: (id: string, newName: string) => void;
-	setRoomDescription: (id: string, newDescription: string) => void;
-	setRoomNameAndDescription: (
-		id: string,
-		newName: string | undefined,
-		newDescription: string | undefined
-	) => void;
+	editRoom: (roomId: string, room: Partial<Room>) => void;
 	setRoomMuted: (id: string) => void;
 	setRoomUnmuted: (id: string) => void;
 	addRoomMember: (id: string, member: MemberBe) => void;
@@ -25,8 +19,6 @@ export type RoomsStoreSlice = {
 	promoteMemberToModerator: (id: string, userId: string) => void;
 	demoteMemberFromModerator: (id: string, userId: string) => void;
 	setClearedAt: (roomId: string, clearedAt: string) => void;
-	setRoomPictureUpdated: (id: string, date: string) => void;
-	setRoomPictureDeleted: (id: string) => void;
 	setPlaceholderRoom: (userId: string) => void;
 	replacePlaceholderRoom: (userId: string, newRoomId: string) => void;
 };

@@ -11,7 +11,7 @@ import { StateCreator } from 'zustand';
 
 import { MemberBe, RoomBe } from '../../types/network/models/roomBeTypes';
 import { MessageType } from '../../types/store/MessageTypes';
-import { RoomsStoreSlice, RoomType } from '../../types/store/RoomTypes';
+import { Room, RoomsStoreSlice, RoomType } from '../../types/store/RoomTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 import { dateToISODate, isBefore } from '../../utils/dateUtils';
 
@@ -86,45 +86,18 @@ export const useRoomsStoreSlice: StateCreator<
 			'ROOMS/DELETE_ROOM'
 		);
 	},
-	setRoomName: (id: string, newName: string): void => {
+	editRoom: (roomId: string, updates: Partial<Room>): void => {
 		set(
 			produce((draft: RootStore) => {
-				draft.rooms[id] = {
-					...draft.rooms[id],
-					name: newName
-				};
+				if (draft.rooms[roomId]) {
+					draft.rooms[roomId] = {
+						...draft.rooms[roomId],
+						...updates
+					};
+				}
 			}),
 			false,
-			'ROOMS/CHANGE_NAME'
-		);
-	},
-	setRoomDescription: (id: string, newDescription: string): void => {
-		set(
-			produce((draft: RootStore) => {
-				draft.rooms[id] = {
-					...draft.rooms[id],
-					description: newDescription
-				};
-			}),
-			false,
-			'ROOMS/CHANGE_DESCRIPTION'
-		);
-	},
-	setRoomNameAndDescription: (
-		id: string,
-		newName: string | undefined,
-		newDescription: string | undefined
-	): void => {
-		set(
-			produce((draft: RootStore) => {
-				draft.rooms[id] = {
-					...draft.rooms[id],
-					name: newName ?? '',
-					description: newDescription ?? ''
-				};
-			}),
-			false,
-			'ROOMS/CHANGE_NAME_DESCRIPTION'
+			'ROOMS/EDIT_ROOM_PROPERTIES'
 		);
 	},
 	setRoomMuted: (id: string): void => {
@@ -221,30 +194,6 @@ export const useRoomsStoreSlice: StateCreator<
 			}),
 			false,
 			'ROOMS/SET_CLEARED_AT'
-		);
-	},
-	setRoomPictureUpdated: (id: string, date: string): void => {
-		set(
-			produce((draft: RootStore) => {
-				draft.rooms[id] = {
-					...draft.rooms[id],
-					pictureUpdatedAt: date
-				};
-			}),
-			false,
-			'ROOMS/ROOM_PICTURE_CHANGED'
-		);
-	},
-	setRoomPictureDeleted: (id: string): void => {
-		set(
-			produce((draft: RootStore) => {
-				draft.rooms[id] = {
-					...draft.rooms[id],
-					pictureUpdatedAt: undefined
-				};
-			}),
-			false,
-			'ROOMS/ROOM_PICTURE_DELETED'
 		);
 	},
 	setPlaceholderRoom: (userId: string): void => {

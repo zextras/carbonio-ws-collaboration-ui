@@ -78,7 +78,7 @@ describe('Conversation info Details', () => {
 		store.addRoom(room);
 		setup(<ConversationInfoDetails roomId={room.id} roomType="group" />);
 		expect(screen.getByText(room.description)).toBeInTheDocument();
-		act(() => store.setRoomDescription(room.id, 'new description'));
+		act(() => store.editRoom(room.id, { description: 'new description' }));
 		expect(screen.getByText(/new description/i)).toBeInTheDocument();
 	});
 
