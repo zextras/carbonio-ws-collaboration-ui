@@ -86,11 +86,11 @@ export const wsConversationEventsHandler = (event: WsEvent): void => {
 			break;
 		}
 		case WsEventType.ROOM_MUTED: {
-			state.setRoomMuted(event.roomId);
+			state.setRoomMuteStatus(event.roomId, true);
 			break;
 		}
 		case WsEventType.ROOM_UNMUTED: {
-			state.setRoomUnmuted(event.roomId);
+			state.setRoomMuteStatus(event.roomId, false);
 			break;
 		}
 		case WsEventType.ROOM_HISTORY_CLEARED: {

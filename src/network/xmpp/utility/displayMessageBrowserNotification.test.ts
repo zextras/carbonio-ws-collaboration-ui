@@ -51,7 +51,7 @@ describe('Test display message browser notification', () => {
 
 	test('Avoid sending desktop notification on muted conversation', async () => {
 		const store = useStore.getState();
-		store.setRoomMuted(room.id);
+		store.setRoomMuteStatus(room.id, true);
 
 		const newMessage = createMockTextMessage({ roomId: room.id });
 		await displayMessageBrowserNotification(newMessage);

@@ -60,7 +60,7 @@ describe('Collapsed sidebar list item', () => {
 		store.setLoginInfo(user1Be.id, user1Be.name);
 		store.setUserInfo(user1Be);
 		store.incrementUnreadCount(mockedGroup.id);
-		store.setRoomMuted(mockedGroup.id);
+		store.setRoomMuteStatus(mockedGroup.id, true);
 		setup(<CollapsedSidebarListItem roomId={mockedGroup.id} />);
 		const unreadBadge = screen.getByTestId('unreads_counter');
 		expect(unreadBadge).toBeVisible();
@@ -74,7 +74,7 @@ describe('Collapsed sidebar list item', () => {
 		store.setLoginInfo(user1Be.id, user1Be.name);
 		store.setUserInfo(user1Be);
 		store.incrementUnreadCount(mockedGroup.id);
-		store.setRoomMuted(mockedGroup.id);
+		store.setRoomMuteStatus(mockedGroup.id, true);
 		store.setDraftMessage(mockedGroup.id, false, 'hi everyone!');
 		setup(<CollapsedSidebarListItem roomId={mockedGroup.id} />);
 		const unreadBadge = screen.getByTestId('unreads_counter');
@@ -100,7 +100,7 @@ describe('Collapsed sidebar list item', () => {
 		store.setLoginInfo(user1Be.id, user1Be.name);
 		store.setUserInfo(user2Be);
 		store.incrementUnreadCount(mockedOneToOne.id);
-		store.setRoomMuted(mockedOneToOne.id);
+		store.setRoomMuteStatus(mockedOneToOne.id, true);
 		setup(<CollapsedSidebarListItem roomId={mockedOneToOne.id} />);
 		const unreadBadge = screen.getByTestId('unreads_counter');
 		expect(unreadBadge).toBeVisible();
@@ -114,7 +114,7 @@ describe('Collapsed sidebar list item', () => {
 		store.setLoginInfo(user1Be.id, user1Be.name);
 		store.setUserInfo(user2Be);
 		store.incrementUnreadCount(mockedOneToOne.id);
-		store.setRoomMuted(mockedOneToOne.id);
+		store.setRoomMuteStatus(mockedOneToOne.id, true);
 		store.setDraftMessage(mockedOneToOne.id, false, 'hi everyone!');
 		setup(<CollapsedSidebarListItem roomId={mockedOneToOne.id} />);
 		const unreadBadge = screen.getByTestId('unreads_counter');

@@ -100,32 +100,18 @@ export const useRoomsStoreSlice: StateCreator<
 			'ROOMS/EDIT_ROOM_PROPERTIES'
 		);
 	},
-	setRoomMuted: (id: string): void => {
+	setRoomMuteStatus: (roomId: string, muted: boolean): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (draft.rooms[id]) {
-					draft.rooms[id].userSettings = {
-						...draft.rooms[id].userSettings,
-						muted: true
+				if (draft.rooms[roomId]) {
+					draft.rooms[roomId].userSettings = {
+						...draft.rooms[roomId].userSettings,
+						muted
 					};
 				}
 			}),
 			false,
-			'ROOMS/MUTE_ROOM'
-		);
-	},
-	setRoomUnmuted: (id: string): void => {
-		set(
-			produce((draft: RootStore) => {
-				if (draft.rooms[id]) {
-					draft.rooms[id].userSettings = {
-						...draft.rooms[id].userSettings,
-						muted: false
-					};
-				}
-			}),
-			false,
-			'ROOMS/UNMUTE_ROOM'
+			'ROOMS/SET_ROOM_MUTE_STATUS'
 		);
 	},
 	addRoomMember: (id: string, member: MemberBe): void => {
