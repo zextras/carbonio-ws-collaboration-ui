@@ -150,7 +150,7 @@ describe('Conversation view', () => {
 		});
 		setup(<Conversation roomId={testRoom.id} />);
 		act(() => {
-			useStore.getState().promoteMemberToModerator(testRoom.id, user1Info.id);
+			useStore.getState().setMemberModeratorStatus(testRoom.id, user1Info.id, true);
 			wsEventsHandler({
 				type: WsEventType.ROOM_OWNER_PROMOTED,
 				sentDate: new Date().toISOString(),
@@ -175,7 +175,7 @@ describe('Conversation view', () => {
 		});
 		setup(<Conversation roomId={testRoom2.id} />);
 		act(() => {
-			useStore.getState().demoteMemberFromModerator(testRoom2.id, user1Info.id);
+			useStore.getState().setMemberModeratorStatus(testRoom2.id, user1Info.id, false);
 			wsEventsHandler({
 				type: WsEventType.ROOM_OWNER_DEMOTED,
 				sentDate: new Date().toISOString(),

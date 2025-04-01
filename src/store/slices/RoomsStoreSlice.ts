@@ -6,7 +6,7 @@
  */
 
 import { produce } from 'immer';
-import { filter, find, findIndex, forEach, size, some } from 'lodash';
+import { filter, find, forEach, size, some } from 'lodash';
 import { StateCreator } from 'zustand';
 
 import { MemberBe, RoomBe } from '../../types/network/models/roomBeTypes';
@@ -106,9 +106,10 @@ export const useRoomsStoreSlice: StateCreator<
 	setRoomMuteStatus: (roomId: string, muted: boolean): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (draft.rooms[roomId]) {
-					draft.rooms[roomId].userSettings = {
-						...draft.rooms[roomId].userSettings,
+				const room = draft.rooms[roomId];
+				if (room) {
+					room.userSettings = {
+						...room.userSettings,
 						muted
 					};
 				}
@@ -120,13 +121,11 @@ export const useRoomsStoreSlice: StateCreator<
 	addRoomMember: (roomId: string, member: MemberBe): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (draft.rooms[roomId]) {
-					const alreadyExists = some(
-						draft.rooms[roomId].members,
-						(m) => m.userId === member.userId
-					);
+				const room = draft.rooms[roomId];
+				if (room) {
+					const alreadyExists = some(room.members, (m) => m.userId === member.userId);
 					if (!alreadyExists) {
-						draft.rooms[roomId].members.push(member);
+						room.members.push(member);
 					}
 				}
 			}),
@@ -137,43 +136,28 @@ export const useRoomsStoreSlice: StateCreator<
 	removeRoomMember: (roomId: string, memberId: string | undefined): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (draft.rooms[roomId]) {
-					draft.rooms[roomId].members = filter(
-						draft.rooms[roomId].members,
-						(member) => member.userId !== memberId
-					);
+				const room = draft.rooms[roomId];
+				if (room) {
+					room.members = filter(room.members, (member) => member.userId !== memberId);
 				}
 			}),
 			false,
 			'ROOMS/REMOVE_ROOM_MEMBER'
 		);
 	},
-	promoteMemberToModerator: (id: string, userId: string): void => {
+	setMemberModeratorStatus: (roomId: string, userId: string, isModerator: boolean): void => {
 		set(
 			produce((draft: RootStore) => {
-				const memberToPromote = find(draft.rooms[id]?.members, { userId });
-				if (memberToPromote) {
-					memberToPromote.owner = true;
-					const index = findIndex(draft.rooms[id].members, { userId });
-					draft.rooms[id].members!.splice(index, 1, memberToPromote);
+				const room = draft.rooms[roomId];
+				if (room) {
+					const member = find(room.members, (member) => member.userId === userId);
+					if (member) {
+						member.owner = isModerator;
+					}
 				}
 			}),
 			false,
-			'ROOMS/PROMOTE_ROOM_MEMBER'
-		);
-	},
-	demoteMemberFromModerator: (id: string, userId: string): void => {
-		set(
-			produce((draft: RootStore) => {
-				const memberToDemote = find(draft.rooms[id]?.members, { userId });
-				if (memberToDemote) {
-					memberToDemote.owner = false;
-					const index = findIndex(draft.rooms[id].members, { userId });
-					draft.rooms[id].members!.splice(index, 1, memberToDemote);
-				}
-			}),
-			false,
-			'ROOMS/DEMOTE_ROOM_MEMBER'
+			'ROOMS/SET_MEMBER_MODERATOR_STATUS'
 		);
 	},
 	setClearedAt: (roomId: string, clearedAt: string): void => {

@@ -29,7 +29,7 @@ export const wsConversationEventsHandler = (event: WsEvent): void => {
 			break;
 		}
 		case WsEventType.ROOM_OWNER_PROMOTED: {
-			state.promoteMemberToModerator(event.roomId, event.userId);
+			state.setMemberModeratorStatus(event.roomId, event.userId, true);
 			if (isMyId(event.userId)) {
 				sendCustomEvent({
 					name: EventName.MEMBER_PROMOTED,
@@ -39,7 +39,7 @@ export const wsConversationEventsHandler = (event: WsEvent): void => {
 			break;
 		}
 		case WsEventType.ROOM_OWNER_DEMOTED: {
-			state.demoteMemberFromModerator(event.roomId, event.userId);
+			state.setMemberModeratorStatus(event.roomId, event.userId, false);
 			if (isMyId(event.userId)) {
 				sendCustomEvent({
 					name: EventName.MEMBER_DEMOTED,
