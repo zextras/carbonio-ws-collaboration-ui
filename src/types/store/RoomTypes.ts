@@ -13,10 +13,10 @@ export type RoomsStoreSlice = {
 	removeRoom: (roomId: string) => void;
 	editRoom: (roomId: string, room: Partial<Room>) => void;
 	setRoomMuteStatus: (roomId: string, muted: boolean) => void;
-	addRoomMember: (id: string, member: MemberBe) => void;
-	removeRoomMember: (id: string, userId: string | undefined) => void;
-	promoteMemberToModerator: (id: string, userId: string) => void;
-	demoteMemberFromModerator: (id: string, userId: string) => void;
+	addRoomMember: (roomId: string, member: MemberBe) => void;
+	removeRoomMember: (roomId: string, memberId: string | undefined) => void;
+	promoteMemberToModerator: (roomId: string, userId: string) => void;
+	demoteMemberFromModerator: (roomId: string, userId: string) => void;
 	setClearedAt: (roomId: string, clearedAt: string) => void;
 	setPlaceholderRoom: (userId: string) => void;
 	replacePlaceholderRoom: (userId: string, newRoomId: string) => void;
@@ -30,7 +30,7 @@ export type Room = {
 	createdAt: string;
 	updatedAt: string;
 	pictureUpdatedAt?: string;
-	members?: Member[];
+	members: Member[];
 	userSettings?: RoomUserSettings;
 	meetingId?: string;
 	placeholder?: boolean;

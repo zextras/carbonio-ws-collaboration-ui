@@ -6,7 +6,7 @@
  */
 
 import { produce } from 'immer';
-import { filter, find, findIndex, forEach, remove, size } from 'lodash';
+import { filter, find, findIndex, forEach, size, some } from 'lodash';
 import { StateCreator } from 'zustand';
 
 import { MemberBe, RoomBe } from '../../types/network/models/roomBeTypes';
@@ -34,7 +34,7 @@ export const useRoomsStoreSlice: StateCreator<
 						createdAt: roomBe.createdAt,
 						updatedAt: roomBe.updatedAt,
 						pictureUpdatedAt: roomBe.pictureUpdatedAt,
-						members: roomBe.members,
+						members: roomBe.members ?? [],
 						userSettings: roomBe.userSettings,
 						meetingId: roomBe.meetingId || draft.rooms[roomBe.id]?.meetingId
 					};
@@ -65,7 +65,7 @@ export const useRoomsStoreSlice: StateCreator<
 					createdAt: roomBe.createdAt,
 					updatedAt: roomBe.createdAt,
 					pictureUpdatedAt: roomBe.pictureUpdatedAt,
-					members: roomBe.members,
+					members: roomBe.members ?? [],
 					userSettings: roomBe.userSettings,
 					meetingId: draft.rooms[roomBe.id]?.meetingId ?? roomBe.meetingId
 				};
@@ -117,25 +117,31 @@ export const useRoomsStoreSlice: StateCreator<
 			'ROOMS/SET_ROOM_MUTE_STATUS'
 		);
 	},
-	addRoomMember: (id: string, member: MemberBe): void => {
+	addRoomMember: (roomId: string, member: MemberBe): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (draft.rooms[id].members == null) draft.rooms[id].members = [];
-				draft.rooms[id].members.push(member);
+				if (draft.rooms[roomId]) {
+					const alreadyExists = some(
+						draft.rooms[roomId].members,
+						(m) => m.userId === member.userId
+					);
+					if (!alreadyExists) {
+						draft.rooms[roomId].members.push(member);
+					}
+				}
 			}),
 			false,
 			'ROOMS/ADD_ROOM_MEMBER'
 		);
 	},
-	removeRoomMember: (id: string, userId: string | undefined): void => {
+	removeRoomMember: (roomId: string, memberId: string | undefined): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (
-					draft.rooms[id].members != null &&
-					userId &&
-					find(draft.rooms[id].members, { userId })
-				) {
-					remove(draft.rooms[id].members, { userId });
+				if (draft.rooms[roomId]) {
+					draft.rooms[roomId].members = filter(
+						draft.rooms[roomId].members,
+						(member) => member.userId !== memberId
+					);
 				}
 			}),
 			false,
