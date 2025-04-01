@@ -74,16 +74,19 @@ export const useRoomsStoreSlice: StateCreator<
 			'ROOMS/ADD_ROOM'
 		);
 	},
-	deleteRoom: (id: string): void => {
+	removeRoom: (roomId: string): void => {
 		set(
 			produce((draft: RootStore) => {
-				delete draft.messages[id];
-				delete draft.markers[id];
-				delete draft.activeConversations[id];
-				delete draft.rooms[id];
+				delete draft.rooms[roomId];
+				delete draft.activeConversations[roomId];
+				delete draft.meetings[roomId];
+				delete draft.messages[roomId];
+				delete draft.fastenings[roomId];
+				delete draft.markers[roomId];
+				delete draft.unreads[roomId];
 			}),
 			false,
-			'ROOMS/DELETE_ROOM'
+			'ROOMS/REMOVE_ROOM'
 		);
 	},
 	editRoom: (roomId: string, updates: Partial<Room>): void => {

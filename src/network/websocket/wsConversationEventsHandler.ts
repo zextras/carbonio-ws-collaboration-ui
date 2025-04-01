@@ -25,7 +25,7 @@ export const wsConversationEventsHandler = (event: WsEvent): void => {
 			break;
 		}
 		case WsEventType.ROOM_DELETED: {
-			state.deleteRoom(event.roomId);
+			state.removeRoom(event.roomId);
 			break;
 		}
 		case WsEventType.ROOM_OWNER_PROMOTED: {
@@ -79,7 +79,7 @@ export const wsConversationEventsHandler = (event: WsEvent): void => {
 				if (state.meetings[event.roomId]) {
 					state.deleteMeeting(state.meetings[event.roomId].id);
 				}
-				state.deleteRoom(event.roomId);
+				state.removeRoom(event.roomId);
 			} else {
 				state.removeRoomMember(event.roomId, event.userId);
 			}

@@ -10,7 +10,7 @@ export type RoomsStoreSlice = {
 	rooms: RoomsMap;
 	setRooms: (rooms: RoomBe[]) => void;
 	addRoom: (room: RoomBe) => void;
-	deleteRoom: (id: string) => void;
+	removeRoom: (roomId: string) => void;
 	editRoom: (roomId: string, room: Partial<Room>) => void;
 	setRoomMuteStatus: (roomId: string, muted: boolean) => void;
 	addRoomMember: (id: string, member: MemberBe) => void;
