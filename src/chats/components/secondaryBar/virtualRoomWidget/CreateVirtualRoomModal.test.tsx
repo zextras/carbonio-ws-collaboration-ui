@@ -65,7 +65,7 @@ describe('VirtualRoomsModal', () => {
 
 		await user.type(textArea, 'a{backspace}');
 
-		const createRoomButton = screen.getByRole('button', { name: 'create' });
+		const createRoomButton = screen.getByRole('button', { name: 'Create' });
 		expect(createRoomButton).toBeDisabled();
 	});
 
@@ -86,7 +86,7 @@ describe('VirtualRoomsModal', () => {
 			'Lorem dolo ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'
 		);
 
-		const createRoomButton = screen.getByRole('button', { name: 'create' });
+		const createRoomButton = screen.getByRole('button', { name: 'Create' });
 		expect(createRoomButton).toBeDisabled();
 	});
 
@@ -114,7 +114,7 @@ describe('VirtualRoomsModal', () => {
 		await user.click(chipContactOne);
 		await user.click(chipContactTwo);
 
-		const createRoomButton = screen.getByRole('button', { name: 'create' });
+		const createRoomButton = screen.getByRole('button', { name: 'Create' });
 		expect(createRoomButton).toBeEnabled();
 
 		await user.click(createRoomButton);
@@ -154,7 +154,7 @@ describe('VirtualRoomsModal', () => {
 		// removing chip
 		await user.click(chipContactOne);
 
-		const createRoomButton = screen.getByRole('button', { name: 'create' });
+		const createRoomButton = screen.getByRole('button', { name: 'Create' });
 		expect(createRoomButton).toBeEnabled();
 
 		await user.click(createRoomButton);
@@ -186,7 +186,7 @@ describe('VirtualRoomsModal', () => {
 		const chipContactOne = await screen.findByText('User One');
 		await user.click(chipContactOne);
 
-		const createRoomButton = screen.getByRole('button', { name: 'create' });
+		const createRoomButton = screen.getByRole('button', { name: 'Create' });
 		expect(createRoomButton).toBeEnabled();
 
 		await user.click(createRoomButton);
@@ -214,7 +214,7 @@ describe('VirtualRoomsModal', () => {
 		);
 		expect(noResults).toBeInTheDocument();
 
-		const createRoomButton = screen.getByRole('button', { name: 'create' });
+		const createRoomButton = screen.getByRole('button', { name: 'Create' });
 		expect(createRoomButton).toBeDisabled();
 	});
 
@@ -237,7 +237,7 @@ describe('VirtualRoomsModal', () => {
 		);
 		expect(noMatch).toBeInTheDocument();
 
-		const createRoomButton = screen.getByRole('button', { name: 'create' });
+		const createRoomButton = screen.getByRole('button', { name: 'Create' });
 		expect(createRoomButton).toBeDisabled();
 	});
 });

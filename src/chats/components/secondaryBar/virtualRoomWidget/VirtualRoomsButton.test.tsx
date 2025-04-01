@@ -55,7 +55,7 @@ describe('VirtualRoomsButton', () => {
 
 		await user.type(textArea, 'test');
 
-		const createRoomButton = screen.getByRole('button', { name: 'create' });
+		const createRoomButton = screen.getByRole('button', { name: 'Create' });
 		expect(createRoomButton).toBeEnabled();
 
 		await user.click(createRoomButton);
