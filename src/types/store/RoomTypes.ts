@@ -16,7 +16,7 @@ export type RoomsStoreSlice = {
 	addRoomMember: (roomId: string, member: MemberBe) => void;
 	removeRoomMember: (roomId: string, memberId: string | undefined) => void;
 	setMemberModeratorStatus: (roomId: string, memberId: string, isModerator: boolean) => void;
-	setClearedAt: (roomId: string, clearedAt: string) => void;
+	clearConversation: (roomId: string, clearedAt: string) => void;
 	setPlaceholderRoom: (userId: string) => void;
 	replacePlaceholderRoom: (userId: string, newRoomId: string) => void;
 };

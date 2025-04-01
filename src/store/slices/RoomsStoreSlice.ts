@@ -160,19 +160,23 @@ export const useRoomsStoreSlice: StateCreator<
 			'ROOMS/SET_MEMBER_MODERATOR_STATUS'
 		);
 	},
-	setClearedAt: (roomId: string, clearedAt: string): void => {
+	clearConversation: (roomId: string, clearedAt: string): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (draft.rooms[roomId]) {
-					draft.rooms[roomId].userSettings = {
-						...draft.rooms[roomId].userSettings,
+				const room = draft.rooms[roomId];
+				if (room) {
+					room.userSettings = {
+						...room.userSettings,
 						clearedAt
 					};
-					draft.messages[roomId] = [];
+					delete draft.messages[roomId];
+					delete draft.fastenings[roomId];
+					delete draft.markers[roomId];
+					delete draft.unreads[roomId];
 				}
 			}),
 			false,
-			'ROOMS/SET_CLEARED_AT'
+			'ROOMS/CLEAR_CONVERSATION'
 		);
 	},
 	setPlaceholderRoom: (userId: string): void => {

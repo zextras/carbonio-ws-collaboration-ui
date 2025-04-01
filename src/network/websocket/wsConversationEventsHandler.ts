@@ -94,7 +94,7 @@ export const wsConversationEventsHandler = (event: WsEvent): void => {
 			break;
 		}
 		case WsEventType.ROOM_HISTORY_CLEARED: {
-			state.setClearedAt(event.roomId, event.clearedAt);
+			state.clearConversation(event.roomId, event.clearedAt);
 			break;
 		}
 		default: {
