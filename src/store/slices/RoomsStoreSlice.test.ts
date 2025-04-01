@@ -52,15 +52,13 @@ describe('RoomsStoreSlice tests', () => {
 			const { result } = renderHook(() => useStore());
 			act(() => {
 				result.current.setPlaceholderRoom(user1.id);
-				result.current.replacePlaceholderRoom(user1.id, room1.id);
+				result.current.removePlaceholderRoom(user1.id);
 			});
 
 			const placeholderRoomId = `placeholder-${user1.id}`;
 			expect(result.current.rooms[placeholderRoomId]).toBeUndefined();
 			expect(result.current.activeConversations[placeholderRoomId]).toBeUndefined();
 			expect(result.current.messages[placeholderRoomId]).toBeUndefined();
-
-			expect(result.current.rooms[room1.id]).toBeDefined();
 		});
 	});
 });

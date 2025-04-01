@@ -286,7 +286,7 @@ class RoomsApi implements IRoomsApi {
 		text: string,
 		file?: File
 	): Promise<AddRoomResponse> {
-		const { setPlaceholderMessage, replacePlaceholderRoom } = useStore.getState();
+		const { setPlaceholderMessage, removePlaceholderRoom } = useStore.getState();
 		setPlaceholderMessage({
 			roomId: `placeholder-${userId}`,
 			id: uuidGenerator(),
@@ -300,7 +300,7 @@ class RoomsApi implements IRoomsApi {
 			type: RoomType.ONE_TO_ONE,
 			members: [{ userId, owner: true }]
 		}).then((response) => {
-			replacePlaceholderRoom(userId, response.id);
+			removePlaceholderRoom(userId);
 			sendCustomEvent({
 				name: EventName.ROUTE_REDIRECT,
 				data: {

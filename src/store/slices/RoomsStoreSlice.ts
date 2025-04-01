@@ -182,6 +182,7 @@ export const useRoomsStoreSlice: StateCreator<
 	setPlaceholderRoom: (userId: string): void => {
 		set(
 			produce((draft: RootStore) => {
+				const now = Date.now();
 				const roomId = `placeholder-${userId}`;
 				draft.rooms[roomId] = {
 					id: roomId,
@@ -193,19 +194,17 @@ export const useRoomsStoreSlice: StateCreator<
 							owner: true
 						}
 					],
-					createdAt: dateToISODate(Date.now()),
-					updatedAt: dateToISODate(Date.now())
+					createdAt: dateToISODate(now),
+					updatedAt: dateToISODate(now)
 				};
-
 				draft.activeConversations[roomId] = {
 					isHistoryFullyLoaded: true
 				};
-
 				draft.messages[roomId] = [
 					{
 						type: MessageType.DATE_MSG,
-						date: Date.now(),
-						id: `date-${Date.now()}`,
+						date: now,
+						id: `date-${now}`,
 						roomId
 					}
 				];
@@ -214,17 +213,16 @@ export const useRoomsStoreSlice: StateCreator<
 			'ROOMS/SET_PLACEHOLDER_ROOM'
 		);
 	},
-	replacePlaceholderRoom: (userId: string, newRoomId: string): void => {
+	removePlaceholderRoom: (userId: string): void => {
 		set(
 			produce((draft: RootStore) => {
 				const placeholderRoomId = `placeholder-${userId}`;
-				draft.rooms[newRoomId] = draft.rooms[placeholderRoomId];
 				delete draft.rooms[placeholderRoomId];
-				delete draft.messages[placeholderRoomId];
 				delete draft.activeConversations[placeholderRoomId];
+				delete draft.messages[placeholderRoomId];
 			}),
 			false,
-			'ROOMS/CREATE_AND_REPLACE_PLACEHOLDER_ROOM'
+			'ROOMS/REMOVE_PLACEHOLDER_ROOM'
 		);
 	}
 });
