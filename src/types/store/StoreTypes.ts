@@ -27,12 +27,11 @@ import {
 	PlaceholderFields,
 	TextMessage
 } from './MessageTypes';
-import { RoomsMap } from './RoomTypes';
+import { RoomsStoreSlice } from './RoomTypes';
 import { SessionStoreSlice } from './SessionTypes';
 import { UnreadsMap } from './UnreadsCounterTypes';
 import { UsersMap } from './UserTypes';
 import { MeetingBe } from '../network/models/meetingBeTypes';
-import { MemberBe, RoomBe } from '../network/models/roomBeTypes';
 import { UserBe } from '../network/models/userBeTypes';
 
 export type UsersStoreSlice = {
@@ -42,31 +41,6 @@ export type UsersStoreSlice = {
 	setUserLastActivity: (id: string, date: number) => void;
 	setUserStatusMessage: (id: string, statusMsg: string) => void;
 	setAnonymousUser: (id: string) => void;
-};
-
-export type RoomsStoreSlice = {
-	rooms: RoomsMap;
-	setRooms: (rooms: RoomBe[]) => void;
-	addRoom: (room: RoomBe) => void;
-	deleteRoom: (id: string) => void;
-	setRoomName: (id: string, newName: string) => void;
-	setRoomDescription: (id: string, newDescription: string) => void;
-	setRoomNameAndDescription: (
-		id: string,
-		newName: string | undefined,
-		newDescription: string | undefined
-	) => void;
-	setRoomMuted: (id: string) => void;
-	setRoomUnmuted: (id: string) => void;
-	addRoomMember: (id: string, member: MemberBe) => void;
-	removeRoomMember: (id: string, userId: string | undefined) => void;
-	promoteMemberToModerator: (id: string, userId: string) => void;
-	demoteMemberFromModerator: (id: string, userId: string) => void;
-	setClearedAt: (roomId: string, clearedAt: string) => void;
-	setRoomPictureUpdated: (id: string, date: string) => void;
-	setRoomPictureDeleted: (id: string) => void;
-	setPlaceholderRoom: (userId: string) => void;
-	replacePlaceholderRoom: (userId: string, newRoomId: string) => void;
 };
 
 export type MessagesStoreSlice = {

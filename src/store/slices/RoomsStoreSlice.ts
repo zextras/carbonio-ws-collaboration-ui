@@ -6,13 +6,13 @@
  */
 
 import { produce } from 'immer';
-import { find, findIndex, forEach, remove } from 'lodash';
+import { filter, find, findIndex, forEach, remove, size } from 'lodash';
 import { StateCreator } from 'zustand';
 
 import { MemberBe, RoomBe } from '../../types/network/models/roomBeTypes';
 import { MessageType } from '../../types/store/MessageTypes';
-import { RoomType } from '../../types/store/RoomTypes';
-import { RoomsStoreSlice, RootStore } from '../../types/store/StoreTypes';
+import { RoomsStoreSlice, RoomType } from '../../types/store/RoomTypes';
+import { RootStore } from '../../types/store/StoreTypes';
 import { dateToISODate, isBefore } from '../../utils/dateUtils';
 
 export const useRoomsStoreSlice: StateCreator<
@@ -32,23 +32,21 @@ export const useRoomsStoreSlice: StateCreator<
 						description: roomBe.description,
 						type: roomBe.type,
 						createdAt: roomBe.createdAt,
-						updatedAt: roomBe.createdAt,
+						updatedAt: roomBe.updatedAt,
 						pictureUpdatedAt: roomBe.pictureUpdatedAt,
 						members: roomBe.members,
 						userSettings: roomBe.userSettings,
-						meetingId: roomBe.meetingId
+						meetingId: roomBe.meetingId || draft.rooms[roomBe.id]?.meetingId
 					};
 
-					// Delete stored messages that have a date previous clearedAt date
-					if (roomBe.userSettings?.clearedAt != null) {
-						forEach(draft.messages[roomBe.id], (message) => {
-							if (
-								roomBe.userSettings?.clearedAt &&
-								isBefore(message.date, roomBe.userSettings.clearedAt)
-							) {
-								remove(draft.messages[roomBe.id], (mes) => mes.id === message.id);
-							}
-						});
+					// Remove messages sent before the clearedAt timestamp
+					const clearedAt = roomBe.userSettings?.clearedAt;
+					const messages = draft.messages[roomBe.id];
+					if (clearedAt && size(messages) > 0) {
+						draft.messages[roomBe.id] = filter(
+							messages,
+							(message) => !isBefore(message.date, clearedAt)
+						);
 					}
 				});
 			}),
