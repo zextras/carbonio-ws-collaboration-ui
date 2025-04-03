@@ -489,7 +489,7 @@ describe('MessageComposer - send message', () => {
 		const store = useStore.getState();
 		store.addRoom(mockedRoomTemporary);
 		store.setLoginInfo(guestUser.id, guestUser.name, guestUser.type);
-		store.setUserInfo(guestUser);
+		store.setUserInfo([guestUser]);
 		setup(<MessageComposer roomId={mockedRoom.id} />);
 
 		expect(screen.queryByTestId(iconAttach)).not.toBeInTheDocument();

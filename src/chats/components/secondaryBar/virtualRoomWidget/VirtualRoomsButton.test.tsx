@@ -28,7 +28,7 @@ const virtualRoom = createMockMeeting({ meetingType: MeetingType.SCHEDULED });
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo(sessionUser.id, sessionUser.name);
-	store.setUserInfo(user1);
+	store.setUserInfo([user1]);
 	store.setAttributes(createMockAttributesList({ carbonioWscVideoCallEnabled: 'TRUE' }));
 	store.setMeetings([virtualRoom]);
 });

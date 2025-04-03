@@ -52,8 +52,7 @@ describe('clear history action', () => {
 		act(() => {
 			result.current.addRoom(mockedRoom);
 			result.current.setLoginInfo(user1Info.id, user1Info.name);
-			result.current.setUserInfo(user1Info);
-			result.current.setUserInfo(user2Info);
+			result.current.setUserInfo([user1Info, user2Info]);
 			result.current.newMessage(message);
 		});
 

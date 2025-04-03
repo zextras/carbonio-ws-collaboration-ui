@@ -55,7 +55,7 @@ beforeEach(() => {
 	const store = useStore.getState();
 	store.addRoom(mockedRoom);
 	store.setLoginInfo(user1Info.id, user1Info.name);
-	store.setUserInfo(user2Info);
+	store.setUserInfo([user2Info]);
 	store.setAttributes(createMockAttributesList({ carbonioWscMaxGroupMembers: '5' }));
 });
 

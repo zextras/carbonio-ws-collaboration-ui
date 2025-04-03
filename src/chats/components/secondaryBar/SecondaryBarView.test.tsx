@@ -27,25 +27,19 @@ const helloString = 'Hello guys!';
 const user1Be = createMockUser({
 	id: 'user1Id',
 	email: 'user1@domain.com',
-	name: 'User1',
-	lastSeen: 1234567890,
-	statusMessage: "Hey there! I'm User 1"
+	name: 'User1'
 });
 
 const user2Be = createMockUser({
 	id: 'user2Id',
 	email: 'user2@domain.com',
-	name: 'User2',
-	lastSeen: 1234567890,
-	statusMessage: "Hey there! I'm User 2"
+	name: 'User2'
 });
 
 const user3Be = createMockUser({
 	id: 'user3Id',
 	email: 'user3@domain.com',
-	name: 'User3',
-	lastSeen: 1234567890,
-	statusMessage: "Hey there! I'm User 3"
+	name: 'User3'
 });
 
 const mockedGroup1: RoomBe = createMockRoom({
@@ -114,9 +108,7 @@ beforeEach(() => {
 	store.setChatsBeStatus(true);
 	store.setLoginInfo(user1Be.id, user1Be.name);
 	store.setRooms([mockedGroup1, mockedOneToOne1, mockedGroup2, mockedOneToOne2]);
-	store.setUserInfo(user1Be);
-	store.setUserInfo(user2Be);
-	store.setUserInfo(user3Be);
+	store.setUserInfo([user1Be, user2Be, user3Be]);
 	store.newMessage(mkdTextMsgUser3Group1);
 	store.newMessage(mkdTextMsgUser1OneToOne);
 	store.newMessage(mkdTextMsgUser2OneToOne);

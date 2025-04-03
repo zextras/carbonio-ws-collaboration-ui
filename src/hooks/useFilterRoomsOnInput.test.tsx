@@ -33,10 +33,9 @@ const single2 = createMockRoom({
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo('sessionId', 'User Name');
-	store.setUserInfo(user1);
-	store.setUserInfo(user2);
-	store.setUserInfo(user3);
+	store.setUserInfo([user1, user2, user3]);
 });
+
 describe('Test useFilterRoomsOnInput custom hook', () => {
 	test('Rooms list is empty with no filters', () => {
 		const { result } = renderHook(() => useFilterRoomsOnInput(''));

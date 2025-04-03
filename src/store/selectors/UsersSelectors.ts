@@ -26,18 +26,13 @@ export const getUserName = (store: RootStore, id: string): string => {
 };
 
 export const getUserLastActivity = (store: RootStore, id: string): number | undefined =>
-	store.users[id]?.last_activity;
+	store.users[id]?.lastActivity;
 
 export const getUserOnline = (store: RootStore, id: string): boolean => !!store.users[id]?.online;
 
 export const getUserEmail = (store: RootStore, id: string): string | undefined => {
 	UserDataRetriever.getDebouncedUser(id);
 	return store.users[id]?.email;
-};
-
-export const getUserStatusMessage = (store: RootStore, id: string): string | undefined => {
-	UserDataRetriever.getDebouncedUser(id);
-	return store.users[id]?.statusMessage;
 };
 
 export const getIsUserGuest = (store: RootStore, id: string): boolean | undefined => {

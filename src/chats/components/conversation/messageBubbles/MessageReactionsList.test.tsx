@@ -71,10 +71,7 @@ const reactionChipTestId = 'reaction-chip';
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo(loggedUser.id, loggedUser.name);
-	store.setUserInfo(loggedUser);
-	store.setUserInfo(user1);
-	store.setUserInfo(user2);
-	store.setUserInfo(user3);
+	store.setUserInfo([loggedUser, user1, user2, user3]);
 	store.addRoom(room);
 	store.newMessage(simpleTextMessage);
 });

@@ -11,6 +11,4 @@ export type UserBe = {
 	email: string;
 	name: string;
 	type: UserType;
-	lastSeen?: number;
-	statusMessage?: string;
 };
