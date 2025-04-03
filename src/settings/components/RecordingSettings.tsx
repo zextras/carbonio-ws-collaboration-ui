@@ -39,6 +39,8 @@ const RecordingSettings: FC<RecordingSettingsProps> = ({
 	const destinationFolderLabel = t('settings.recording.inputLabel', 'Destination folder');
 	const browseLabel = t('settings.recording.browseAction', 'Browse');
 	const resetLabel = t('settings.recording.resetAction', 'Reset');
+	const dialogTitle = t('settings.recording.dialog.title', 'Select Folder');
+	const saveAction = t('action.save', 'Save');
 
 	const [filesSelectFilesAction, filesSelectFilesActionAvailable] =
 		useIntegratedFunction('select-nodes');
@@ -55,16 +57,16 @@ const RecordingSettings: FC<RecordingSettingsProps> = ({
 
 	const handleBrowse = useCallback(() => {
 		const actionTarget = {
-			title: 'Select folder',
+			title: dialogTitle,
 			confirmAction,
-			confirmLabel: 'Save',
+			confirmLabel: saveAction,
 			allowFiles: false,
 			allowFolders: true,
 			canCreateFolder: true
 		};
 
 		filesSelectFilesAction(actionTarget);
-	}, [confirmAction, filesSelectFilesAction]);
+	}, [confirmAction, dialogTitle, filesSelectFilesAction, saveAction]);
 
 	const handleReset = useCallback(() => {
 		setRecordingDefaults({ name: 'Home', id: 'LOCAL_ROOT' });

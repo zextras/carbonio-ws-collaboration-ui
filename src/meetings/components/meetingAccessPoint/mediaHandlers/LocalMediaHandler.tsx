@@ -42,8 +42,8 @@ const LocalMediaHandler: FC<LocalMediaHandlerProps> = ({
 	const enableCamLabel = t('meeting.interactions.enableCamera', 'Enable camera');
 	const disableMicLabel = t('meeting.interactions.disableMicrophone', 'Disable microphone');
 	const enableMicLabel = t('meeting.interactions.enableMicrophone', 'Enable microphone');
-	const camDeviceLabel = t('meeting.interactions.camDevice', 'Camera device');
-	const micDeviceLabel = t('meeting.interactions.micDevice', 'Microphone device');
+	const camDeviceLabel = t('interactions.camDevice', 'Camera device');
+	const micDeviceLabel = t('interactions.micDevice', 'Microphone device');
 	const giveMediaPermissionSnackbar = t(
 		'meeting.interactions.browserPermission',
 		'Grant browser permissions to enable resources'
