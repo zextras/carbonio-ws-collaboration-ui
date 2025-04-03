@@ -46,11 +46,8 @@ const oneToOneRoom = createMockRoom({
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo(loggedUser.id, loggedUser.name);
-	store.setUserInfo(loggedUser);
-	store.setUserInfo(user1);
-	store.setUserInfo(user2);
-	store.addRoom(groupRoom);
-	store.addRoom(oneToOneRoom);
+	store.setUserInfo([loggedUser, user1, user2]);
+	store.setRooms([groupRoom, oneToOneRoom]);
 });
 describe('useConfigurationMessageLabel', () => {
 	describe('Change room name and topic labels', () => {

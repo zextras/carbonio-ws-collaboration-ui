@@ -67,8 +67,7 @@ const meetingForWaitingRoom: MeetingBe = createMockMeeting({
 const setupGroupForAccessPage = (): { user: UserEvent; store: RootStore } => {
 	const { result } = renderHook(() => useStore());
 	act(() => {
-		result.current.setUserInfo(user1);
-		result.current.setUserInfo(user2);
+		result.current.setUserInfo([user1, user2, user3]);
 		result.current.setLoginInfo(user3.id, user3.name);
 		result.current.addRoom(groupRoom);
 		result.current.addMeeting(groupMeeting);
@@ -85,8 +84,7 @@ const setupGroupForAccessPage = (): { user: UserEvent; store: RootStore } => {
 const setupAccessPage = (): { user: UserEvent; store: RootStore } => {
 	const { result } = renderHook(() => useStore());
 	act(() => {
-		result.current.setUserInfo(user3);
-		result.current.setUserInfo(user2);
+		result.current.setUserInfo([user2, user3]);
 		result.current.setLoginInfo(user2.id, user2.name);
 		result.current.addRoom(groupForWaitingRoom);
 		result.current.addMeeting(meetingForWaitingRoom);

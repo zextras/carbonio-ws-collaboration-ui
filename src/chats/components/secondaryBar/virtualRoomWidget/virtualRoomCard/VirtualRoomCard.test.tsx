@@ -59,8 +59,7 @@ const memberMeeting = createMockMeeting({
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo(sessionUser.id, sessionUser.name);
-	store.setUserInfo(sessionUser);
-	store.setUserInfo(userOne);
+	store.setUserInfo([sessionUser, userOne]);
 	store.addRoom(ownerRoom);
 	store.addMeeting(ownerMeeting);
 	store.addRoom(ownersRoom);

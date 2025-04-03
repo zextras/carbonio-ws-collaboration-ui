@@ -42,33 +42,25 @@ const userC = createMockUser({ id: 'userC', name: 'userC' });
 const user2Be: User = createMockUser({
 	id: 'user2',
 	email: 'user2@domain.com',
-	name: 'User2',
-	lastSeen: 1234567890,
-	statusMessage: "Hey there! I'm User 2"
+	name: 'User2'
 });
 
 const user3Be: User = createMockUser({
 	id: 'user3',
 	email: 'user3@domain.com',
-	name: 'User3',
-	lastSeen: 1234567890,
-	statusMessage: "Hey there! I'm User 3"
+	name: 'User3'
 });
 
 const user1Be: User = createMockUser({
 	id: 'user1',
 	email: 'user1@domain.com',
-	name: 'User1',
-	lastSeen: 1234567890,
-	statusMessage: "Hey there! I'm User 1"
+	name: 'User1'
 });
 
 const user4Be: User = createMockUser({
 	id: 'user4',
 	email: 'user4@domain.com',
-	name: 'User4',
-	lastSeen: 1234567890,
-	statusMessage: "Hey there! I'm User 4"
+	name: 'User4'
 });
 
 const room: RoomBe = {
@@ -359,7 +351,7 @@ describe('render list of messages with history loader visible for first time ope
 		const { result } = renderHook(() => useStore());
 		act(() => {
 			result.current.addRoom(room);
-			result.current.setUserInfo(user2Be);
+			result.current.setUserInfo([user2Be]);
 			result.current.setLoginInfo(user1Be.id, user1Be.name);
 			result.current.setHistoryIsFullyLoaded(room.id);
 			result.current.updateHistory(room.id, [mockedConfigurationMessage]);
@@ -380,7 +372,7 @@ describe('render list of messages with history loader visible for first time ope
 		const { result } = renderHook(() => useStore());
 		act(() => {
 			result.current.addRoom(room);
-			result.current.setUserInfo(user4Be);
+			result.current.setUserInfo([user4Be]);
 			result.current.setHistoryIsFullyLoaded(room.id);
 			result.current.updateHistory(room.id, [mockedAddMemberMessage]);
 			result.current.addCreateRoomMessage(room.id);
@@ -400,7 +392,7 @@ describe('render list of messages with history loader visible for first time ope
 		const { result } = renderHook(() => useStore());
 		act(() => {
 			result.current.addRoom(room);
-			result.current.setUserInfo(user3Be);
+			result.current.setUserInfo([user3Be]);
 			result.current.setHistoryIsFullyLoaded(room.id);
 			result.current.updateHistory(room.id, [mockedRemoveMemberMessage]);
 			result.current.addCreateRoomMessage(room.id);
@@ -459,9 +451,7 @@ describe('Display group of messages', () => {
 		const { result } = renderHook(() => useStore());
 		act(() => {
 			result.current.setLoginInfo('userId', 'User');
-			result.current.setUserInfo(userA);
-			result.current.setUserInfo(userB);
-			result.current.setUserInfo(userC);
+			result.current.setUserInfo([userA, userB, userC]);
 			result.current.addRoom(mockedRoom);
 		});
 
@@ -492,9 +482,7 @@ describe('Display group of messages', () => {
 		const { result } = renderHook(() => useStore());
 		act(() => {
 			result.current.setLoginInfo('userId', 'User');
-			result.current.setUserInfo(userA);
-			result.current.setUserInfo(userB);
-			result.current.setUserInfo(userC);
+			result.current.setUserInfo([userA, userB, userC]);
 			result.current.addRoom(mockedRoom);
 		});
 

@@ -68,8 +68,7 @@ describe('Edit conversation action', () => {
 		const { result } = renderHook(() => useStore());
 		act(() => {
 			result.current.setLoginInfo(user1Info.id, user1Info.name);
-			result.current.setUserInfo(user1Info);
-			result.current.setUserInfo(user2Info);
+			result.current.setUserInfo([user1Info, user2Info]);
 			result.current.addRoom(testRoom2);
 		});
 

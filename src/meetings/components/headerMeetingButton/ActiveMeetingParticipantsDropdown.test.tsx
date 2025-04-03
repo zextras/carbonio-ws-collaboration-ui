@@ -50,9 +50,7 @@ const meeting: MeetingBe = createMockMeeting({
 beforeEach(() => {
 	const store: RootStore = useStore.getState();
 	store.setLoginInfo(user1.id, user1.name);
-	store.setUserInfo(user1);
-	store.setUserInfo(user2);
-	store.setUserInfo(user3);
+	store.setUserInfo([user1, user2, user3]);
 	store.addRoom(room);
 	store.addMeeting(meeting);
 	store.startMeeting(meeting.id, '2024-08-25T17:24:28.961+02:00');

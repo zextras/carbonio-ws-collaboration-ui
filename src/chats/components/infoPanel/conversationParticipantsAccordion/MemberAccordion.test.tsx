@@ -58,8 +58,7 @@ describe('Participants accordion', () => {
 
 		const store = useStore.getState();
 		store.addRoom(room);
-		store.setUserInfo(user1Be);
-		store.setUserInfo(user2Be);
+		store.setUserInfo([user1Be, user2Be]);
 		setup(<MemberAccordion roomId={room.id} />);
 		const titleIsPlural = screen.getByText(/2 members/i);
 		expect(titleIsPlural).toBeInTheDocument();
@@ -79,7 +78,7 @@ describe('Participants accordion', () => {
 
 		const store = useStore.getState();
 		store.addRoom(room);
-		store.setUserInfo(user1Be);
+		store.setUserInfo([user1Be]);
 		setup(<MemberAccordion roomId={room.id} />);
 		const titleIsSingular = screen.getByText(/One member/i);
 		expect(titleIsSingular).toBeInTheDocument();

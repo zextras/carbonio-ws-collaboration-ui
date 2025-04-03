@@ -15,11 +15,7 @@ import {
 	getRoomDescriptionSelector,
 	getRoomMembers
 } from '../../../../store/selectors/RoomsSelectors';
-import {
-	getUserEmail,
-	getUserName,
-	getUserStatusMessage
-} from '../../../../store/selectors/UsersSelectors';
+import { getUserEmail, getUserName } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
 import { Member, RoomType } from '../../../../types/store/RoomTypes';
 
@@ -37,7 +33,6 @@ const ConversationInfoDetails: FC<ConversationInfoDetailsProps> = ({ roomId, roo
 	const nameLabel = t('conversationInfo.name', 'Name');
 	const emailLabel = t('conversationInfo.email', 'Email');
 	const topicLabel = t('conversationInfo.topic', 'Topic');
-	const statusLabel = t('conversationInfo.status', 'Status');
 
 	const sessionId: string | undefined = useStore((store) => store.session.id);
 	const roomMembers: Member[] | undefined = useStore((state) => getRoomMembers(state, roomId));
@@ -57,9 +52,6 @@ const ConversationInfoDetails: FC<ConversationInfoDetailsProps> = ({ roomId, roo
 		getRoomDescriptionSelector(state, roomId)
 	);
 
-	const userStatusMessage: string | undefined = useStore((state) =>
-		getUserStatusMessage(state, memberId)
-	);
 	const userEmail = useStore((state) => getUserEmail(state, memberId));
 
 	if (roomType === RoomType.ONE_TO_ONE)
@@ -80,13 +72,6 @@ const ConversationInfoDetails: FC<ConversationInfoDetailsProps> = ({ roomId, roo
 							/>
 						)}
 						<ConversationInfoDetailsElement label={memberName} icon="AtOutline" type={nameLabel} />
-						{userStatusMessage && (
-							<ConversationInfoDetailsElement
-								label={userStatusMessage}
-								icon="InfoOutline"
-								type={statusLabel}
-							/>
-						)}
 					</>
 				)}
 			</CustomContainer>
