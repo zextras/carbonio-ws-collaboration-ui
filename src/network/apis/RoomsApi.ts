@@ -36,6 +36,7 @@ import {
 	MuteRoomResponse,
 	PromoteRoomMemberResponse,
 	UnmuteRoomResponse,
+	UpdateRoomOwnersResponse,
 	UpdateRoomPictureResponse,
 	UpdateRoomResponse
 } from '../../types/network/responses/roomsResponses';
@@ -164,6 +165,10 @@ class RoomsApi implements IRoomsApi {
 
 	public demotesRoomMember(roomId: string, userId: string): Promise<DemotesRoomMemberResponse> {
 		return fetchAPI(`rooms/${roomId}/members/${userId}/owner`, RequestType.DELETE);
+	}
+
+	public updateRoomOwners(roomId: string, userIds: string[]): Promise<UpdateRoomOwnersResponse> {
+		return fetchAPI(`rooms/${roomId}/members/owners`, RequestType.PUT, { Members: userIds });
 	}
 
 	public getRoomAttachments(
