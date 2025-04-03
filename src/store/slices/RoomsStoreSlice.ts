@@ -36,7 +36,7 @@ export const useRoomsStoreSlice: StateCreator<
 						pictureUpdatedAt: roomBe.pictureUpdatedAt,
 						members: roomBe.members ?? [],
 						userSettings: roomBe.userSettings,
-						meetingId: roomBe.meetingId || draft.rooms[roomBe.id]?.meetingId
+						meetingId: roomBe.meetingId ?? draft.rooms[roomBe.id]?.meetingId
 					};
 
 					// Remove messages sent before the clearedAt timestamp
