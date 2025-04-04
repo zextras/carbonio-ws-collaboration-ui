@@ -44,7 +44,7 @@ beforeEach(() => {
 	const store: RootStore = useStore.getState();
 	store.setLoginInfo(user1Be.id, user1Be.name);
 	store.setUserInfo([user1Be, user2Be]);
-	store.setRooms([mockedOneToOne, mockedGroup]);
+	store.addRooms([mockedOneToOne, mockedGroup]);
 });
 
 describe('Collapsed sidebar list item', () => {

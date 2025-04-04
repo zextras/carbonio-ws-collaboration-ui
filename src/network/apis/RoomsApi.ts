@@ -67,8 +67,8 @@ class RoomsApi implements IRoomsApi {
 			params = `?${array.join('&')}`;
 		}
 		return fetchAPI(`rooms${params}`, RequestType.GET).then((resp: ListRoomsResponse) => {
-			const { setRooms } = useStore.getState();
-			setRooms(resp);
+			const { addRooms } = useStore.getState();
+			addRooms(resp);
 			return resp;
 		});
 	}

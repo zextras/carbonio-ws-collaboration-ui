@@ -43,7 +43,7 @@ const groupRoom1 = createMockRoom({
 describe('RoomsStoreSlice tests', () => {
 	describe('Add rooms', () => {
 		test('Room is added to the store', () => {
-			useStore.getState().setRooms([singleRoom1]);
+			useStore.getState().addRooms([singleRoom1]);
 			expect(useStore.getState().rooms[singleRoom1.id]).toEqual(
 				expect.objectContaining({
 					id: singleRoom1.id,
@@ -59,8 +59,8 @@ describe('RoomsStoreSlice tests', () => {
 		});
 
 		test('If an already present room is added, meetingId data is maintained ', () => {
-			useStore.getState().setRooms([{ ...groupRoom1, meetingId: 'newMeetingId' }]);
-			useStore.getState().setRooms([groupRoom1]);
+			useStore.getState().addRooms([{ ...groupRoom1, meetingId: 'newMeetingId' }]);
+			useStore.getState().addRooms([groupRoom1]);
 			expect(useStore.getState().rooms[groupRoom1.id]).toEqual(
 				expect.objectContaining({
 					meetingId: 'newMeetingId'
@@ -88,7 +88,7 @@ describe('RoomsStoreSlice tests', () => {
 			expect(size(useStore.getState().messages[groupRoom1.id])).toEqual(2);
 			useStore
 				.getState()
-				.setRooms([
+				.addRooms([
 					{ ...groupRoom1, userSettings: { clearedAt: '2023-01-21T00:00:00Z', muted: false } }
 				]);
 			expect(size(useStore.getState().messages[groupRoom1.id])).toEqual(1);
@@ -96,7 +96,7 @@ describe('RoomsStoreSlice tests', () => {
 	});
 
 	test('Room is removed from the store', () => {
-		useStore.getState().setRooms([singleRoom1]);
+		useStore.getState().addRooms([singleRoom1]);
 		useStore.getState().removeRoom(singleRoom1.id);
 		expect(useStore.getState().rooms[singleRoom1.id]).toBeUndefined();
 	});
@@ -108,13 +108,13 @@ describe('RoomsStoreSlice tests', () => {
 		});
 
 		test('Mute status is set tot true', () => {
-			useStore.getState().setRooms([groupRoom1]);
+			useStore.getState().addRooms([groupRoom1]);
 			useStore.getState().setRoomMuteStatus(groupRoom1.id, true);
 			expect(useStore.getState().rooms[groupRoom1.id].userSettings?.muted).toBe(true);
 		});
 
 		test('Mute status is set to false', () => {
-			useStore.getState().setRooms([groupRoom1]);
+			useStore.getState().addRooms([groupRoom1]);
 			useStore.getState().setRoomMuteStatus(groupRoom1.id, false);
 			expect(useStore.getState().rooms[groupRoom1.id].userSettings?.muted).toBe(false);
 		});
@@ -122,14 +122,14 @@ describe('RoomsStoreSlice tests', () => {
 
 	describe('Members', () => {
 		test('Member is added to the room', () => {
-			useStore.getState().setRooms([groupRoom1]);
+			useStore.getState().addRooms([groupRoom1]);
 			const newMember = createMockMember({ userId: 'user5', owner: false });
 			useStore.getState().addRoomMember(groupRoom1.id, newMember);
 			expect(useStore.getState().rooms[groupRoom1.id].members).toContainEqual(newMember);
 		});
 
 		test('Member is removed from the room', () => {
-			useStore.getState().setRooms([groupRoom1]);
+			useStore.getState().addRooms([groupRoom1]);
 			useStore.getState().removeRoomMember(groupRoom1.id, user2.id);
 			expect(useStore.getState().rooms[groupRoom1.id].members).not.toContainEqual(
 				expect.objectContaining({ userId: user2.id })
@@ -137,7 +137,7 @@ describe('RoomsStoreSlice tests', () => {
 		});
 
 		test('Member is promoted to room moderator', () => {
-			useStore.getState().setRooms([groupRoom1]);
+			useStore.getState().addRooms([groupRoom1]);
 			useStore.getState().setMemberModeratorStatus(groupRoom1.id, user2.id, true);
 			expect(useStore.getState().rooms[groupRoom1.id].members).toContainEqual(
 				expect.objectContaining({ userId: user2.id, owner: true })
@@ -145,7 +145,7 @@ describe('RoomsStoreSlice tests', () => {
 		});
 
 		test('Room moderator is demoted', () => {
-			useStore.getState().setRooms([groupRoom1]);
+			useStore.getState().addRooms([groupRoom1]);
 			useStore.getState().setMemberModeratorStatus(groupRoom1.id, user1.id, false);
 			expect(useStore.getState().rooms[groupRoom1.id].members).toContainEqual(
 				expect.objectContaining({ userId: user1.id, owner: false })
@@ -155,7 +155,7 @@ describe('RoomsStoreSlice tests', () => {
 
 	describe('Edit room', () => {
 		test('Room is edited', () => {
-			useStore.getState().setRooms([groupRoom1]);
+			useStore.getState().addRooms([groupRoom1]);
 			const updatedRoom = {
 				name: 'Updated Room Name',
 				description: 'Updated Room Description'
@@ -183,7 +183,7 @@ describe('RoomsStoreSlice tests', () => {
 
 	test('clearConversation deletes all room data', () => {
 		const now = new Date();
-		useStore.getState().setRooms([singleRoom1]);
+		useStore.getState().addRooms([singleRoom1]);
 		useStore.getState().clearConversation(singleRoom1.id, now.toISOString());
 		expect(useStore.getState().rooms[singleRoom1.id].userSettings?.clearedAt).toBe(
 			now.toISOString()

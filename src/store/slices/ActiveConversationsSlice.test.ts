@@ -25,7 +25,7 @@ const sessionUser = createMockUser({ id: 'sessionUserId', name: 'sessionUserName
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo(sessionUser.id, sessionUser.name);
-	store.addRoom(mockedRoom);
+	store.addRooms([mockedRoom]);
 	store.addRoomMember(mockedRoom.id, mockedUser0);
 	store.addRoomMember(mockedRoom.id, mockedUser1);
 });

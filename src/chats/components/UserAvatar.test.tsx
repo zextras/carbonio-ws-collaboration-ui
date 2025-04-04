@@ -110,7 +110,7 @@ beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo(user1Info.id, user1Info.name);
 	store.setUserInfo([user1Info, user2Info, user3Info]);
-	store.setRooms([
+	store.addRooms([
 		room,
 		roomWithPicture,
 		singleConversationWithUnloadUser,

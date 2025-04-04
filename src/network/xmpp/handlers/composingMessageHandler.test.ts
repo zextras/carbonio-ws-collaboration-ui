@@ -18,7 +18,7 @@ const mockedRoom = createMockRoom({
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo('myUserId', 'User');
-	store.addRoom(mockedRoom);
+	store.addRooms([mockedRoom]);
 });
 
 describe('XMPP composingMessageHandler', () => {

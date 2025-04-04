@@ -22,7 +22,7 @@ beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo(loggedUser.id, loggedUser.name);
 	store.setUserInfo([user]);
-	store.addRoom(room);
+	store.addRooms([room]);
 });
 describe('Test display message browser notification', () => {
 	test('Send desktop notification on new message', async () => {

@@ -22,7 +22,7 @@ export const useRoomsStoreSlice: StateCreator<
 	RoomsStoreSlice
 > = (set) => ({
 	rooms: {},
-	setRooms: (roomsBe: RoomBe[]): void => {
+	addRooms: (roomsBe: RoomBe[]): void => {
 		set(
 			produce((draft: RootStore) => {
 				forEach(roomsBe, (roomBe) => {
@@ -51,27 +51,7 @@ export const useRoomsStoreSlice: StateCreator<
 				});
 			}),
 			false,
-			'ROOMS/SET_ROOMS'
-		);
-	},
-	addRoom: (roomBe: RoomBe): void => {
-		set(
-			produce((draft: RootStore) => {
-				draft.rooms[roomBe.id] = {
-					id: roomBe.id,
-					name: roomBe.name ?? '',
-					description: roomBe.description ?? '',
-					type: roomBe.type,
-					createdAt: roomBe.createdAt,
-					updatedAt: roomBe.createdAt,
-					pictureUpdatedAt: roomBe.pictureUpdatedAt,
-					members: roomBe.members ?? [],
-					userSettings: roomBe.userSettings,
-					meetingId: draft.rooms[roomBe.id]?.meetingId ?? roomBe.meetingId
-				};
-			}),
-			false,
-			'ROOMS/ADD_ROOM'
+			'ROOMS/ADD_ROOMS'
 		);
 	},
 	removeRoom: (roomId: string): void => {

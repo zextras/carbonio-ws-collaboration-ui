@@ -93,7 +93,7 @@ describe('useFirstUnreadMessage with text messages', () => {
 	beforeEach(() => {
 		const store = useStore.getState();
 		store.setLoginInfo(myUserId, 'User');
-		store.addRoom(room);
+		store.addRooms([room]);
 		store.updateHistory(room.id, textHistory);
 	});
 	test('User has never read a message', () => {
@@ -153,7 +153,7 @@ describe('useFirstUnreadMessage with all types of messages', () => {
 	beforeEach(() => {
 		const store = useStore.getState();
 		store.setLoginInfo(myUserId, 'User');
-		store.addRoom(room);
+		store.addRooms([room]);
 		store.updateHistory(room.id, complexHistory);
 	});
 	test('User has never read a message', () => {

@@ -33,7 +33,7 @@ import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
 
 describe('wsMeetingEventsHandler', () => {
 	test('MEETING_CREATED event is handled', () => {
-		useStore.getState().addRoom(createMockRoom({ id: 'roomId' }));
+		useStore.getState().addRooms([createMockRoom({ id: 'roomId' })]);
 		const event: MeetingCreatedEvent = {
 			type: WsEventType.MEETING_CREATED,
 			meetingId: '123',
@@ -74,7 +74,7 @@ describe('wsMeetingEventsHandler', () => {
 
 	test('MEETING_DELETED event is handled', () => {
 		const store = useStore.getState();
-		store.addRoom(createMockRoom({ id: 'roomId' }));
+		store.addRooms([createMockRoom({ id: 'roomId' })]);
 		store.addMeeting(createMockMeeting({ id: 'meetingId', roomId: 'roomId' }));
 		const event: MeetingDeletedEvent = {
 			type: WsEventType.MEETING_DELETED,

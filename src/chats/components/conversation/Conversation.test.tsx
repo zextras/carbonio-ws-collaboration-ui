@@ -65,7 +65,7 @@ beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo(user1Info.id, user1Info.email, user1Info.name);
 	store.setUserInfo([user2Info]);
-	store.setRooms([testRoom, testRoom2]);
+	store.addRooms([testRoom, testRoom2]);
 });
 
 describe('Conversation view', () => {

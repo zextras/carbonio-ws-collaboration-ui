@@ -46,7 +46,7 @@ const groupMeeting: MeetingBe = createMockMeeting({
 const setupBasicGroupMeeting = (): { user: UserEvent; store: RootStore } => {
 	const { result } = renderHook(() => useStore());
 	act(() => {
-		result.current.addRoom(groupRoom);
+		result.current.addRooms([groupRoom]);
 		result.current.addMeeting(groupMeeting);
 		result.current.meetingConnection(groupMeeting.id, false, undefined, false, undefined);
 	});

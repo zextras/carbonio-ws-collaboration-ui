@@ -50,7 +50,7 @@ beforeEach(() => {
 	const store: RootStore = useStore.getState();
 	store.setLoginInfo(userId, 'User');
 	store.setQueueId('queueId');
-	store.addRoom(roomMock);
+	store.addRooms([roomMock]);
 });
 
 describe('Meetings API', () => {
@@ -193,7 +193,7 @@ describe('Meetings API', () => {
 	});
 
 	test('enterMeeting is called correctly when the meeting instance is not yet created', async () => {
-		useStore.getState().addRoom(roomWithoutMeetingMock);
+		useStore.getState().addRooms([roomWithoutMeetingMock]);
 		spyOnFetch.mockResolvedValueOnce(scheduledMeetingMock);
 
 		await meetingsApi.enterMeeting(
@@ -284,7 +284,7 @@ describe('Meetings API', () => {
 			members: [createMockMember({ userId })]
 		});
 		const store = useStore.getState();
-		store.addRoom(temporaryRoom);
+		store.addRooms([temporaryRoom]);
 
 		await meetingsApi.leaveMeeting(meetingMock.id);
 
@@ -301,7 +301,7 @@ describe('Meetings API', () => {
 			members: [createMockMember({ userId, owner: true })]
 		});
 		const store = useStore.getState();
-		store.addRoom(temporaryRoom);
+		store.addRooms([temporaryRoom]);
 
 		await meetingsApi.leaveMeeting(meetingMock.id);
 

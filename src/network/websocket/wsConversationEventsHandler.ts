@@ -16,7 +16,9 @@ export const wsConversationEventsHandler = (event: WsEvent): void => {
 
 	switch (event.type) {
 		case WsEventType.ROOM_CREATED: {
-			RoomsApi.getRoom(event.roomId).then((response: GetRoomResponse) => state.addRoom(response));
+			RoomsApi.getRoom(event.roomId).then((response: GetRoomResponse) =>
+				state.addRooms([response])
+			);
 			state.connections.xmppClient.setOnline();
 			break;
 		}
@@ -59,7 +61,7 @@ export const wsConversationEventsHandler = (event: WsEvent): void => {
 		case WsEventType.ROOM_MEMBER_ADDED: {
 			if (isMyId(event.userId)) {
 				RoomsApi.getRoom(event.roomId).then((response: GetRoomResponse) => {
-					state.addRoom(response);
+					state.addRooms([response]);
 					if (response.meetingId) {
 						MeetingsApi.getMeeting(response.id).then((meetingResponse: GetMeetingResponse) =>
 							state.addMeeting(meetingResponse)
