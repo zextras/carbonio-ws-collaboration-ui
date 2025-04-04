@@ -34,4 +34,5 @@ export type MeetingParticipant = {
 	screenStreamOn?: boolean;
 	joinedAt: string;
 	dateScreenOn?: string;
+	handRaisedAt?: string;
 };
