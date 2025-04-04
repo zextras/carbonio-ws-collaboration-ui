@@ -27,34 +27,27 @@ const iconChevronDown = 'icon: ChevronDown';
 const user1Be: UserBe = createMockUser({
 	id: 'user1',
 	email: 'user1@domain.com',
-	name: 'User 1',
-	lastSeen: 1234567890,
-	statusMessage: "Hey there! I'm User 1"
+	name: 'User 1'
 });
 
 const user2Be: UserBe = createMockUser({
 	id: 'user2',
 	email: 'user2@domain.com',
-	name: 'User 2',
-	lastSeen: 1234567890,
-	statusMessage: "Hey there! I'm User 2"
+	name: 'User 2'
 });
 
 const user3Be: UserBe = createMockUser({
 	id: 'user3',
 	email: 'user3@domain.com',
-	name: 'User 3',
-	lastSeen: 1234567890,
-	statusMessage: "Hey there! I'm User 3"
+	name: 'User 3'
 });
 
 beforeEach(() => {
 	const store = useStore.getState();
-	store.setUserInfo(user1Be);
-	store.setUserInfo(user2Be);
-	store.setUserInfo(user3Be);
+	store.setUserInfo([user1Be, user2Be, user3Be]);
 	store.setLoginInfo(user1Be.id, user1Be.name);
 });
+
 describe('Actions Accordion', () => {
 	test('A owner of a group should see the correct actions - More than one owner', () => {
 		const room: RoomBe = createMockRoom({

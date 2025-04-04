@@ -51,9 +51,7 @@ const streamRef = React.createRef<HTMLVideoElement | null>();
 const storeBasicActiveMeetingSetup = (): void => {
 	const store: RootStore = useStore.getState();
 	store.setLoginInfo(user1.id, user1.name);
-	store.setUserInfo(user1);
-	store.setUserInfo(user2);
-	store.setUserInfo(user3);
+	store.setUserInfo([user1, user2, user3]);
 	store.addRoom(room);
 	store.addMeeting(meeting);
 	store.meetingConnection(meeting.id, true, undefined, false, undefined);
@@ -62,9 +60,7 @@ const storeBasicActiveMeetingSetup = (): void => {
 const notModeratorActiveMeetingSetup = (): void => {
 	const store: RootStore = useStore.getState();
 	store.setLoginInfo(user2.id, user2.name);
-	store.setUserInfo(user1);
-	store.setUserInfo(user2);
-	store.setUserInfo(user3);
+	store.setUserInfo([user1, user2, user3]);
 	store.addRoom(room);
 	store.addMeeting(meeting);
 	store.meetingConnection(meeting.id, true, undefined, false, undefined);
@@ -72,9 +68,7 @@ const notModeratorActiveMeetingSetup = (): void => {
 
 const storeSetupMyTileAudioOnVideoOff = (): { user: UserEvent; store: RootStore } => {
 	const store: RootStore = useStore.getState();
-	store.setUserInfo(user1);
-	store.setUserInfo(user2);
-	store.setUserInfo(user3);
+	store.setUserInfo([user1, user2, user3]);
 	store.setLoginInfo(user1.id, user1.name);
 	store.addRoom(room);
 	store.addMeeting(meeting);
@@ -95,9 +89,7 @@ const storeSetupMyTileAudioOnVideoOff = (): { user: UserEvent; store: RootStore 
 
 const storeSetupTileAudioOffAndVideoOn = (): { user: UserEvent; store: RootStore } => {
 	const store: RootStore = useStore.getState();
-	store.setUserInfo(user1);
-	store.setUserInfo(user2);
-	store.setUserInfo(user3);
+	store.setUserInfo([user1, user2, user3]);
 	store.setLoginInfo(user1.id, user1.name);
 	store.addRoom(room);
 	store.addMeeting(meeting);
@@ -118,9 +110,7 @@ const storeSetupTileAudioOffAndVideoOn = (): { user: UserEvent; store: RootStore
 
 const setupActiveMeeting = (): void => {
 	const store: RootStore = useStore.getState();
-	store.setUserInfo(user1);
-	store.setUserInfo(user2);
-	store.setUserInfo(user3);
+	store.setUserInfo([user1, user2, user3]);
 	store.setLoginInfo(user1.id, user1.name);
 	store.addRoom(room);
 	store.addMeeting(meeting);
@@ -143,9 +133,7 @@ const setupActiveMeeting = (): void => {
 
 const storeSetupTileAudioOnAndVideoOff = (): { user: UserEvent; store: RootStore } => {
 	const store: RootStore = useStore.getState();
-	store.setUserInfo(user1);
-	store.setUserInfo(user2);
-	store.setUserInfo(user3);
+	store.setUserInfo([user1, user2, user3]);
 	store.setLoginInfo(user1.id, user1.name);
 	store.addRoom(room);
 	store.addMeeting(meeting);

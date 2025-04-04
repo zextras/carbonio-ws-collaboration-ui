@@ -21,7 +21,7 @@ const user = createMockUser({ id: 'userId', name: 'User' });
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo(loggedUser.id, loggedUser.name);
-	store.setUserInfo(user);
+	store.setUserInfo([user]);
 	store.addRoom(room);
 });
 describe('Test display message browser notification', () => {

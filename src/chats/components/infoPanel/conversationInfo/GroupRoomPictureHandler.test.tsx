@@ -40,7 +40,7 @@ const testRoom: RoomBe = createMockRoom({
 });
 
 const testRoom2: RoomBe = createMockRoom({
-	id: 'room-test',
+	id: 'room-test2',
 	name: 'A Group',
 	description: 'This is a beautiful description',
 	pictureUpdatedAt: pictureUpdatedAtTime,
@@ -51,13 +51,15 @@ const testRoom2: RoomBe = createMockRoom({
 	]
 });
 
+beforeEach(() => {
+	const store: RootStore = useStore.getState();
+	store.setLoginInfo(user1Info.id, user1Info.name);
+	store.setUserInfo([user1Info, user2Info]);
+	store.setRooms([testRoom, testRoom2]);
+});
+
 describe('Room Picture Handler - groups', () => {
 	test('everything should be rendered - no image', async () => {
-		const store: RootStore = useStore.getState();
-		store.addRoom(testRoom);
-		store.setUserInfo(user1Info);
-		store.setUserInfo(user2Info);
-		store.setLoginInfo(user1Info.id, user1Info.name);
 		const { user } = setup(<GroupRoomPictureHandler roomId={testRoom.id} />);
 
 		const backgroundContainer = screen.getByTestId('background_container');
@@ -72,11 +74,6 @@ describe('Room Picture Handler - groups', () => {
 		expect(updateButton).toBeInTheDocument();
 	});
 	test('everything should be rendered - with image', async () => {
-		const store: RootStore = useStore.getState();
-		store.addRoom(testRoom2);
-		store.setUserInfo(user1Info);
-		store.setUserInfo(user2Info);
-		store.setLoginInfo(user1Info.id, user1Info.name);
 		const { user } = setup(<GroupRoomPictureHandler roomId={testRoom2.id} />);
 
 		const pictureContainer = screen.getByTestId('picture_container');
@@ -96,11 +93,6 @@ describe('Room Picture Handler - groups', () => {
 		const spyOnUpdateRoomPicture = spyOnRoomsApi(RoomsApiToSpy.UPDATE_ROOM_PICTURE);
 		const testImageFile = new File(['hello'], 'hello.png', { type: 'image/png' });
 
-		const store: RootStore = useStore.getState();
-		store.addRoom(testRoom);
-		store.setUserInfo(user1Info);
-		store.setUserInfo(user2Info);
-		store.setLoginInfo(user1Info.id, user1Info.name);
 		const { user } = setup(<GroupRoomPictureHandler roomId={testRoom.id} />);
 
 		const backgroundContainer = screen.getByTestId('background_container');
@@ -123,10 +115,6 @@ describe('Room Picture Handler - groups', () => {
 		const testImageFile = new File([new ArrayBuffer(3000)], 'hello.png', { type: 'image/png' });
 
 		const store: RootStore = useStore.getState();
-		store.addRoom(testRoom2);
-		store.setUserInfo(user1Info);
-		store.setUserInfo(user2Info);
-		store.setLoginInfo(user1Info.id, user1Info.name);
 		store.setAttributes(createMockAttributesList({ carbonioWscMaxRoomPictureSize: '1' }));
 		const { user } = setup(<GroupRoomPictureHandler roomId={testRoom2.id} />);
 
@@ -144,11 +132,6 @@ describe('Room Picture Handler - groups', () => {
 
 	test('delete an image', async () => {
 		const spyOnDeleteRoomPicture = spyOnRoomsApi(RoomsApiToSpy.DELETE_ROOM_PICTURE);
-		const store: RootStore = useStore.getState();
-		store.addRoom(testRoom2);
-		store.setUserInfo(user1Info);
-		store.setUserInfo(user2Info);
-		store.setLoginInfo(user1Info.id, user1Info.name);
 
 		const { user } = setup(<GroupRoomPictureHandler roomId={testRoom2.id} />);
 
@@ -171,13 +154,8 @@ describe('Room Picture Handler - groups', () => {
 	test('delete an image fails ', async () => {
 		const spyOnDeleteRoomPicture = spyOnRoomsApi(RoomsApiToSpy.DELETE_ROOM_PICTURE);
 		spyOnDeleteRoomPicture.mockRejectedValue(false);
-		const store: RootStore = useStore.getState();
-		store.addRoom(testRoom2);
-		store.setUserInfo(user1Info);
-		store.setUserInfo(user2Info);
-		store.setLoginInfo(user1Info.id, user1Info.name);
 
-		const { user } = setup(<GroupRoomPictureHandler roomId={testRoom.id} />);
+		const { user } = setup(<GroupRoomPictureHandler roomId={testRoom2.id} />);
 
 		const pictureContainer = await screen.findByTestId('picture_container');
 		expect(pictureContainer).toBeInTheDocument();

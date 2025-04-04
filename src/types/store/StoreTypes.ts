@@ -30,18 +30,8 @@ import {
 import { RoomsStoreSlice } from './RoomTypes';
 import { SessionStoreSlice } from './SessionTypes';
 import { UnreadsMap } from './UnreadsCounterTypes';
-import { UsersMap } from './UserTypes';
+import { UsersStoreSlice } from './UserTypes';
 import { MeetingBe } from '../network/models/meetingBeTypes';
-import { UserBe } from '../network/models/userBeTypes';
-
-export type UsersStoreSlice = {
-	users: UsersMap;
-	setUserInfo: (user: UserBe) => void;
-	setUserPresence: (id: string, presence: boolean) => void;
-	setUserLastActivity: (id: string, date: number) => void;
-	setUserStatusMessage: (id: string, statusMsg: string) => void;
-	setAnonymousUser: (id: string) => void;
-};
 
 export type MessagesStoreSlice = {
 	messages: MessageMap;

@@ -71,7 +71,7 @@ describe('UserDataRetriever tests', () => {
 
 	test('If the name is in the store, getAsyncUsername return it', async () => {
 		const spyOnGetUser = spyOnUsersApi(UsersApiToSpy.GET_USER);
-		useStore.getState().setUserInfo(user1);
+		useStore.getState().setUserInfo([user1]);
 		const name = await UserDataRetriever.getAsyncUsername(user1.id);
 		expect(name).toEqual(user1.name);
 		expect(spyOnGetUser).not.toHaveBeenCalled();

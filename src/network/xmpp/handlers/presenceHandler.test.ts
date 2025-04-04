@@ -19,7 +19,7 @@ const mockUser = createMockUser({ id: 'userId-mock', name: 'User Mock' });
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo(loggedUser.id, loggedUser.name);
-	store.setUserInfo(mockUser);
+	store.setUserInfo([mockUser]);
 });
 
 describe('XMPP presenceHandler', () => {

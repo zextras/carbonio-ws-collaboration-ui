@@ -58,7 +58,7 @@ describe('Connections slice', () => {
 		// API effects to store
 		act(() => {
 			result.current.setLoginInfo('userId', 'User');
-			result.current.setUserInfo(user);
+			result.current.setUserInfo([user]);
 			result.current.setRooms([room1, room2]);
 		});
 
@@ -67,7 +67,7 @@ describe('Connections slice', () => {
 		// XMPP effects to store
 		act(() => {
 			result.current.setLoginInfo('userId', 'User');
-			result.current.setUserInfo(user);
+			result.current.setUserInfo([user]);
 			result.current.newInboxMessage(message1);
 			result.current.updateHistory(room1.id, [message1]);
 			result.current.updateHistory(room2.id, [message2]);

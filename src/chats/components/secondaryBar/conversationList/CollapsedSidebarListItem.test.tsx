@@ -21,9 +21,7 @@ const backgroundColor = 'background-color: #cfd5dc';
 const user2Be: User = createMockUser({
 	id: 'user2Id',
 	email: 'user2@domain.com',
-	name: 'User2',
-	lastSeen: 1234567890,
-	statusMessage: "Hey there! I'm User 2"
+	name: 'User2'
 });
 
 const user1Be: User = createMockUser();
@@ -42,23 +40,25 @@ const mockedOneToOne: RoomBe = createMockRoom({
 	members: [createMockMember({ userId: user1Be.id }), createMockMember({ userId: user2Be.id })]
 });
 
+beforeEach(() => {
+	const store: RootStore = useStore.getState();
+	store.setLoginInfo(user1Be.id, user1Be.name);
+	store.setUserInfo([user1Be, user2Be]);
+	store.setRooms([mockedOneToOne, mockedGroup]);
+});
+
 describe('Collapsed sidebar list item', () => {
 	test('Group - There is a new message', async () => {
 		const store: RootStore = useStore.getState();
-		store.addRoom(mockedGroup);
-		store.setLoginInfo(user1Be.id, user1Be.name);
-		store.setUserInfo(user1Be);
 		store.incrementUnreadCount(mockedGroup.id);
 		setup(<CollapsedSidebarListItem roomId={mockedGroup.id} />);
 		const unreadBadge = screen.getByTestId('unreads_counter');
 		expect(unreadBadge).toBeInTheDocument();
 		expect(unreadBadge).toHaveStyle('background-color: #2b73d2');
 	});
+
 	test('Group - There is a new message and notifications are muted', async () => {
 		const store: RootStore = useStore.getState();
-		store.addRoom(mockedGroup);
-		store.setLoginInfo(user1Be.id, user1Be.name);
-		store.setUserInfo(user1Be);
 		store.incrementUnreadCount(mockedGroup.id);
 		store.setRoomMuteStatus(mockedGroup.id, true);
 		setup(<CollapsedSidebarListItem roomId={mockedGroup.id} />);
@@ -68,11 +68,9 @@ describe('Collapsed sidebar list item', () => {
 		const avatarWithNotificationMuted = screen.getByTestId('icon: BellOff');
 		expect(avatarWithNotificationMuted).toBeVisible();
 	});
+
 	test('Group - There is a new message and also a draft', async () => {
 		const store: RootStore = useStore.getState();
-		store.addRoom(mockedGroup);
-		store.setLoginInfo(user1Be.id, user1Be.name);
-		store.setUserInfo(user1Be);
 		store.incrementUnreadCount(mockedGroup.id);
 		store.setRoomMuteStatus(mockedGroup.id, true);
 		store.setDraftMessage(mockedGroup.id, false, 'hi everyone!');
@@ -83,22 +81,18 @@ describe('Collapsed sidebar list item', () => {
 		const avatarWithWithDraft = screen.getByTestId('icon: Edit2');
 		expect(avatarWithWithDraft).toBeVisible();
 	});
+
 	test('One to one - There is a new message', async () => {
 		const store: RootStore = useStore.getState();
-		store.addRoom(mockedOneToOne);
-		store.setLoginInfo(user1Be.id, user1Be.name);
-		store.setUserInfo(user2Be);
 		store.incrementUnreadCount(mockedOneToOne.id);
 		setup(<CollapsedSidebarListItem roomId={mockedOneToOne.id} />);
 		const unreadBadge = screen.getByTestId('unreads_counter');
 		expect(unreadBadge).toBeInTheDocument();
 		expect(unreadBadge).toHaveStyle('background-color: #2b73d2');
 	});
+
 	test('One to one - There is a new message and notifications are muted', async () => {
 		const store: RootStore = useStore.getState();
-		store.addRoom(mockedOneToOne);
-		store.setLoginInfo(user1Be.id, user1Be.name);
-		store.setUserInfo(user2Be);
 		store.incrementUnreadCount(mockedOneToOne.id);
 		store.setRoomMuteStatus(mockedOneToOne.id, true);
 		setup(<CollapsedSidebarListItem roomId={mockedOneToOne.id} />);
@@ -108,11 +102,9 @@ describe('Collapsed sidebar list item', () => {
 		const avatarWithNotificationMuted = screen.getByTestId('icon: BellOff');
 		expect(avatarWithNotificationMuted).toBeVisible();
 	});
+
 	test('One to one - There is a new message and also a draft', async () => {
 		const store: RootStore = useStore.getState();
-		store.addRoom(mockedOneToOne);
-		store.setLoginInfo(user1Be.id, user1Be.name);
-		store.setUserInfo(user2Be);
 		store.incrementUnreadCount(mockedOneToOne.id);
 		store.setRoomMuteStatus(mockedOneToOne.id, true);
 		store.setDraftMessage(mockedOneToOne.id, false, 'hi everyone!');

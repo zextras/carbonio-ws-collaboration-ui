@@ -44,6 +44,7 @@ const CreateVirtualRoomModal: FC<CreateVirtualRoomModalProps> = ({
 	const [t] = useTranslation();
 
 	const closeLabel = t('action.close', 'Close');
+	const createLabel = t('action.create', 'Create');
 	const createTooltip = t('meeting.virtual.createTooltip', 'Create new Virtual Room');
 	const virtualRoomNameInput = t('meeting.virtual.creationInput', 'Virtual Room’s name');
 	const invalidNameString = t('meeting.virtual.invalidNameTooltip', 'Invalid name');
@@ -145,7 +146,7 @@ const CreateVirtualRoomModal: FC<CreateVirtualRoomModalProps> = ({
 			title={createTooltip}
 			confirmColor="primary"
 			onConfirm={handleCreateButtonClick}
-			confirmLabel="create"
+			confirmLabel={createLabel}
 			confirmDisabled={!canCreateVirtualRoom}
 			confirmTooltip={createVirtualRoomTooltip}
 			showCloseIcon

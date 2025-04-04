@@ -109,14 +109,14 @@ const meeting2: MeetingBe = createMockMeeting({
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo(user1Info.id, user1Info.name);
-	store.setUserInfo(user1Info);
-	store.setUserInfo(user2Info);
-	store.setUserInfo(user3Info);
-	store.addRoom(room);
-	store.addRoom(roomWithPicture);
-	store.addRoom(singleConversationWithUnloadUser);
-	store.addRoom(roomMuted);
-	store.addRoom(roomMutedWithMeeting);
+	store.setUserInfo([user1Info, user2Info, user3Info]);
+	store.setRooms([
+		room,
+		roomWithPicture,
+		singleConversationWithUnloadUser,
+		roomMuted,
+		roomMutedWithMeeting
+	]);
 	store.addMeeting(meeting);
 	store.addMeeting(meeting2);
 });
