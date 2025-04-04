@@ -6,7 +6,7 @@
 
 import React, { Dispatch, FC, SetStateAction, useCallback } from 'react';
 
-import { Checkbox, Container, Text, Switch } from '@zextras/carbonio-design-system';
+import { Checkbox, Switch, FormSubSection } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
 import SettingsCard from './SettingsCard';
@@ -79,13 +79,7 @@ const NotificationsSettings: FC<NotificationsSettingsProps> = ({
 
 	return (
 		<SettingsCard title={sectionTitle} description={sectionDescription}>
-			<Container
-				mainAlignment="flex-start"
-				crossAlignment="flex-start"
-				gap="1rem"
-				data-testid="notification_container"
-			>
-				<Text overflow="break-word">{generalTitle}</Text>
+			<FormSubSection label={generalTitle} data-testid="notification_container">
 				<Checkbox
 					defaultChecked={updatedNotificationsSettings.DesktopNotifications}
 					value={updatedNotificationsSettings.DesktopNotifications}
@@ -101,7 +95,8 @@ const NotificationsSettings: FC<NotificationsSettingsProps> = ({
 					label={notificationsSwitchLabel}
 					data-testid="desktop_notifications_sounds_switch"
 				/>
-				<Text overflow="break-word">{waitingRoomTitle}</Text>
+			</FormSubSection>
+			<FormSubSection label={waitingRoomTitle}>
 				<Checkbox
 					defaultChecked={updatedNotificationsSettings.WaitingRoomAccessNotifications}
 					value={updatedNotificationsSettings.WaitingRoomAccessNotifications}
@@ -117,7 +112,7 @@ const NotificationsSettings: FC<NotificationsSettingsProps> = ({
 					label={waitingRoomSwitchLabel}
 					data-testid="waiting_room_access_sounds_switch"
 				/>
-			</Container>
+			</FormSubSection>
 		</SettingsCard>
 	);
 };
