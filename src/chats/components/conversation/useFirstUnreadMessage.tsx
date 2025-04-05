@@ -9,11 +9,11 @@ import { filter, findIndex, size, slice } from 'lodash';
 
 import {
 	getMyLastMarkerOfRoom,
-	getRoomHasMarkers
-} from '../../../store/selectors/MarkersSelectors';
-import { getReadableMessagesSelector } from '../../../store/selectors/MessagesSelectors';
+	getRoomHasMarkers,
+	getReadableMessagesSelector,
+	getRoomUnreadsSelector
+} from '../../../store/selectors/ChatDataSelectors';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
-import { getRoomUnreadsSelector } from '../../../store/selectors/UnreadsCounterSelectors';
 import useStore from '../../../store/Store';
 
 const useFirstUnreadMessage = (roomId: string): string | undefined => {

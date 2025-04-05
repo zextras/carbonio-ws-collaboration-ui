@@ -10,9 +10,11 @@ import { Container, Modal, Text } from '@zextras/carbonio-design-system';
 import { useTranslation } from 'react-i18next';
 
 import { RoomsApi } from '../../../../network';
+import {
+	getLastTextMessageIdSelector,
+	getRoomUnreadsSelector
+} from '../../../../store/selectors/ChatDataSelectors';
 import { getXmppClient } from '../../../../store/selectors/ConnectionSelector';
-import { getLastTextMessageIdSelector } from '../../../../store/selectors/MessagesSelectors';
-import { getRoomUnreadsSelector } from '../../../../store/selectors/UnreadsCounterSelectors';
 import useStore from '../../../../store/Store';
 
 type ClearHistoryModalProps = {

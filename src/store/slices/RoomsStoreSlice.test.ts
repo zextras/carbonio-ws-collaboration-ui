@@ -41,7 +41,7 @@ describe('RoomsStoreSlice tests', () => {
 				})
 			);
 
-			expect(result.current.messages[placeholderRoomId][0]).toEqual(
+			expect(result.current.chatData[placeholderRoomId].messages[0]).toEqual(
 				expect.objectContaining({
 					type: MessageType.DATE_MSG
 				})
@@ -58,7 +58,7 @@ describe('RoomsStoreSlice tests', () => {
 			const placeholderRoomId = `placeholder-${user1.id}`;
 			expect(result.current.rooms[placeholderRoomId]).toBeUndefined();
 			expect(result.current.activeConversations[placeholderRoomId]).toBeUndefined();
-			expect(result.current.messages[placeholderRoomId]).toBeUndefined();
+			expect(result.current.chatData[placeholderRoomId]?.messages).toBeUndefined();
 
 			expect(result.current.rooms[room1.id]).toBeDefined();
 		});

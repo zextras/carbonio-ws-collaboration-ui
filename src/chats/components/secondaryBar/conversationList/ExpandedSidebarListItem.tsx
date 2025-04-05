@@ -18,7 +18,10 @@ import {
 	getDraftMessage,
 	getLastNewReaction
 } from '../../../../store/selectors/ActiveConversationsSelectors';
-import { getLastMessageIdSelector } from '../../../../store/selectors/MessagesSelectors';
+import {
+	getLastMessageIdSelector,
+	getRoomUnreadsSelector
+} from '../../../../store/selectors/ChatDataSelectors';
 import {
 	getRoomMutedSelector,
 	getRoomNameSelector,
@@ -28,7 +31,6 @@ import {
 	getAttribute,
 	getSelectedConversation
 } from '../../../../store/selectors/SessionSelectors';
-import { getRoomUnreadsSelector } from '../../../../store/selectors/UnreadsCounterSelectors';
 import { getUserName } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
 import { MarkerStatus } from '../../../../types/store/MarkersTypes';

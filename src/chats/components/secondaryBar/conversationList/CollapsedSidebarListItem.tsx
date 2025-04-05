@@ -11,12 +11,12 @@ import styled from 'styled-components';
 
 import useRouting from '../../../../hooks/useRouting';
 import { getDraftMessage } from '../../../../store/selectors/ActiveConversationsSelectors';
+import { getRoomUnreadsSelector } from '../../../../store/selectors/ChatDataSelectors';
 import {
 	getRoomNameSelector,
 	getRoomTypeSelector
 } from '../../../../store/selectors/RoomsSelectors';
 import { getSelectedConversation } from '../../../../store/selectors/SessionSelectors';
-import { getRoomUnreadsSelector } from '../../../../store/selectors/UnreadsCounterSelectors';
 import useStore from '../../../../store/Store';
 import { RoomType } from '../../../../types/store/RoomTypes';
 import GroupAvatar from '../../GroupAvatar';

@@ -15,21 +15,12 @@ import {
 	TileData,
 	VirtualBackgroundType
 } from './ActiveMeetingTypes';
+import { ChatDataStoreSlice } from './ChatDataTypes';
 import { Connections } from './ConnectionsTypes';
-import { FasteningsMap } from './FasteningMessagesTypes';
-import { Marker, MarkersMap } from './MarkersTypes';
 import { MeetingParticipant, MeetingsMap } from './MeetingTypes';
-import {
-	AttachmentMessageType,
-	Message,
-	MessageFastening,
-	MessageMap,
-	PlaceholderFields,
-	TextMessage
-} from './MessageTypes';
+import { AttachmentMessageType, Message, TextMessage } from './MessageTypes';
 import { RoomsMap } from './RoomTypes';
 import { SessionStoreSlice } from './SessionTypes';
-import { UnreadsMap } from './UnreadsCounterTypes';
 import { UsersStoreSlice } from './UserTypes';
 import { MeetingBe } from '../network/models/meetingBeTypes';
 import { MemberBe, RoomBe } from '../network/models/roomBeTypes';
@@ -57,27 +48,6 @@ export type RoomsStoreSlice = {
 	setRoomPictureDeleted: (id: string) => void;
 	setPlaceholderRoom: (userId: string) => void;
 	replacePlaceholderRoom: (userId: string, newRoomId: string) => void;
-};
-
-export type MessagesStoreSlice = {
-	messages: MessageMap;
-	newMessage: (message: Message) => void;
-	newInboxMessage: (message: Message) => void;
-	updateHistory: (roomId: string, messageArray: Message[]) => void;
-	addCreateRoomMessage: (roomId: string) => void;
-	updateUnreadMessages: (roomId: string) => void;
-	setRepliedMessage: (
-		roomId: string,
-		replyMessageId: string,
-		messageSubjectOfReply: TextMessage
-	) => void;
-	setPlaceholderMessage: (fields: PlaceholderFields) => void;
-	removePlaceholderMessage: (roomId: string, messageId: string) => void;
-};
-
-export type MarkersStoreSlice = {
-	markers: MarkersMap;
-	updateMarkers: (roomId: string, markers: Marker[]) => void;
 };
 
 export type ActiveConversationsSlice = {
@@ -117,18 +87,6 @@ export type ConnectionsStoreSlice = {
 	setXmppStatus: (status: boolean) => void;
 	setWebsocketStatus: (status: boolean) => void;
 	resetXmppData: () => void;
-};
-
-export type UnreadsCounterSlice = {
-	unreads: UnreadsMap;
-	addUnreadCount: (roomId: string, counter: number) => void;
-	incrementUnreadCount: (roomId: string) => void;
-	updateUnreadCount: (roomId: string) => void;
-};
-
-export type FasteningMessagesSlice = {
-	fastenings: FasteningsMap;
-	addFastening: (fasteningMessage: MessageFastening) => void;
 };
 
 export type MeetingsSlice = {
@@ -197,12 +155,9 @@ export type ActiveMeetingSlice = {
 
 export type RootStore = UsersStoreSlice &
 	RoomsStoreSlice &
-	MessagesStoreSlice &
 	SessionStoreSlice &
-	MarkersStoreSlice &
 	ActiveConversationsSlice &
+	ChatDataStoreSlice &
 	ConnectionsStoreSlice &
-	UnreadsCounterSlice &
-	FasteningMessagesSlice &
 	MeetingsSlice &
 	ActiveMeetingSlice;

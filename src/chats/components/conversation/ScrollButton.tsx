@@ -12,9 +12,9 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import useEventListener, { EventName, NewMessageEvent } from '../../../hooks/useEventListener';
+import { getRoomUnreadsSelector } from '../../../store/selectors/ChatDataSelectors';
 import { getRoomMutedSelector } from '../../../store/selectors/RoomsSelectors';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
-import { getRoomUnreadsSelector } from '../../../store/selectors/UnreadsCounterSelectors';
 import useStore from '../../../store/Store';
 import { MessageType } from '../../../types/store/MessageTypes';
 

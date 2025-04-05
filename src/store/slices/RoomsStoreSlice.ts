@@ -41,12 +41,12 @@ export const useRoomsStoreSlice: StateCreator<
 
 					// Delete stored messages that have a date previous clearedAt date
 					if (roomBe.userSettings?.clearedAt != null) {
-						forEach(draft.messages[roomBe.id], (message) => {
+						forEach(draft.chatData[roomBe.id]?.messages, (message) => {
 							if (
 								roomBe.userSettings?.clearedAt &&
 								isBefore(message.date, roomBe.userSettings.clearedAt)
 							) {
-								remove(draft.messages[roomBe.id], (mes) => mes.id === message.id);
+								remove(draft.chatData[roomBe.id].messages, (mes) => mes.id === message.id);
 							}
 						});
 					}
@@ -79,8 +79,7 @@ export const useRoomsStoreSlice: StateCreator<
 	deleteRoom: (id: string): void => {
 		set(
 			produce((draft: RootStore) => {
-				delete draft.messages[id];
-				delete draft.markers[id];
+				delete draft.chatData[id];
 				delete draft.activeConversations[id];
 				delete draft.rooms[id];
 			}),
@@ -218,7 +217,7 @@ export const useRoomsStoreSlice: StateCreator<
 						...draft.rooms[roomId].userSettings,
 						clearedAt
 					};
-					draft.messages[roomId] = [];
+					draft.chatData[roomId].messages = [];
 				}
 			}),
 			false,
@@ -271,14 +270,17 @@ export const useRoomsStoreSlice: StateCreator<
 					isHistoryFullyLoaded: true
 				};
 
-				draft.messages[roomId] = [
-					{
-						type: MessageType.DATE_MSG,
-						date: Date.now(),
-						id: `date-${Date.now()}`,
-						roomId
-					}
-				];
+				draft.chatData[roomId] = {
+					...draft.chatData[roomId],
+					messages: [
+						{
+							type: MessageType.DATE_MSG,
+							date: Date.now(),
+							id: `date-${Date.now()}`,
+							roomId
+						}
+					]
+				};
 			}),
 			false,
 			'ROOMS/SET_PLACEHOLDER_ROOM'
@@ -290,7 +292,7 @@ export const useRoomsStoreSlice: StateCreator<
 				const placeholderRoomId = `placeholder-${userId}`;
 				draft.rooms[newRoomId] = draft.rooms[placeholderRoomId];
 				delete draft.rooms[placeholderRoomId];
-				delete draft.messages[placeholderRoomId];
+				delete draft.chatData[placeholderRoomId];
 				delete draft.activeConversations[placeholderRoomId];
 			}),
 			false,

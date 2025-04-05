@@ -16,12 +16,12 @@ import papyrus from '../../../../chats/assets/papyrus.png';
 import Chat from '../../../../chats/components/conversation/Chat';
 import useDarkReader from '../../../../hooks/useDarkReader';
 import { getMeetingChatVisibility } from '../../../../store/selectors/ActiveMeetingSelectors';
+import { getRoomUnreadsSelector } from '../../../../store/selectors/ChatDataSelectors';
 import {
 	getRoomMutedSelector,
 	getRoomTypeSelector
 } from '../../../../store/selectors/RoomsSelectors';
 import { getAttribute } from '../../../../store/selectors/SessionSelectors';
-import { getRoomUnreadsSelector } from '../../../../store/selectors/UnreadsCounterSelectors';
 import useStore from '../../../../store/Store';
 import { MeetingChatVisibility } from '../../../../types/store/ActiveMeetingTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';

@@ -14,8 +14,8 @@ import { Member } from '../types/store/RoomTypes';
 
 export function calcReads(messageDate: number, roomId: string): MarkerStatus {
 	const store = useStore.getState();
-	const roomMessages: Message[] = store.messages[roomId];
-	const roomMarkers: RoomMarkers = store.markers[roomId];
+	const roomMessages: Message[] = store.chatData[roomId]?.messages;
+	const roomMarkers: RoomMarkers = store.chatData[roomId]?.markers;
 	const members: Member[] | undefined = store.rooms[roomId]?.members || [];
 	const sessionId = store.session.id;
 

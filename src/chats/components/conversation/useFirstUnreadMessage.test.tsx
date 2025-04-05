@@ -100,10 +100,10 @@ describe('useFirstUnreadMessage with text messages', () => {
 		// Update unread
 		useStore.getState().updateUnreadCount(room.id);
 		// Check number unread
-		expect(useStore.getState().unreads[room.id]).toBe(size(textHistory));
+		expect(useStore.getState().chatData[room.id].unread).toBe(size(textHistory));
 		const { result } = renderHook(() => useFirstUnreadMessage(room.id));
-		// the reference should be the firs text message arrived
-		expect(result.current).toBeUndefined();
+		// the reference should be the first text message arrived
+		expect(result.current).toBe(textHistory[0].id);
 	});
 
 	test('User some messages', () => {
@@ -113,7 +113,7 @@ describe('useFirstUnreadMessage with text messages', () => {
 		useStore.getState().updateUnreadMessages(room.id);
 		useStore.getState().updateUnreadCount(room.id);
 		// Check number unread
-		expect(useStore.getState().unreads[room.id]).toBe(2);
+		expect(useStore.getState().chatData[room.id].unread).toBe(2);
 		// Check customHook result
 		const { result } = renderHook(() => useFirstUnreadMessage(room.id));
 		expect(result.current).toBe('messageId4');
@@ -129,7 +129,7 @@ describe('useFirstUnreadMessage with text messages', () => {
 		useStore.getState().updateUnreadMessages(room.id);
 		useStore.getState().updateUnreadCount(room.id);
 		// Check number unread
-		expect(useStore.getState().unreads[room.id]).toBe(0);
+		expect(useStore.getState().chatData[room.id].unread).toBe(0);
 		// Check customHook result
 		const { result } = renderHook(() => useFirstUnreadMessage(room.id));
 		expect(result.current).toBe('noUnread');
@@ -142,7 +142,7 @@ describe('useFirstUnreadMessage with text messages', () => {
 		useStore.getState().updateUnreadMessages(room.id);
 		useStore.getState().updateUnreadCount(room.id);
 		// Check number unread
-		expect(useStore.getState().unreads[room.id]).toBe(3);
+		expect(useStore.getState().chatData[room.id].unread).toBe(3);
 		// Check customHook result
 		const { result } = renderHook(() => useFirstUnreadMessage(room.id));
 		expect(result.current).toBe('messageId3');
@@ -160,9 +160,9 @@ describe('useFirstUnreadMessage with all types of messages', () => {
 		// Update unread
 		useStore.getState().updateUnreadCount(room.id);
 		// Check number unread
-		expect(useStore.getState().unreads[room.id]).toBe(4);
+		expect(useStore.getState().chatData[room.id].unread).toBe(4);
 		const { result } = renderHook(() => useFirstUnreadMessage(room.id));
-		expect(result.current).toBeUndefined();
+		expect(result.current).toBe(complexHistory[0].id);
 	});
 
 	test('User last read is his message and after there is a deleted message', () => {
@@ -172,7 +172,7 @@ describe('useFirstUnreadMessage with all types of messages', () => {
 		useStore.getState().updateUnreadMessages(room.id);
 		useStore.getState().updateUnreadCount(room.id);
 		// Check number unread
-		expect(useStore.getState().unreads[room.id]).toBe(3);
+		expect(useStore.getState().chatData[room.id].unread).toBe(3);
 		// Check customHook result, deleted is set as message to read
 		const { result } = renderHook(() => useFirstUnreadMessage(room.id));
 		expect(result.current).toBe('messageId2');
@@ -188,7 +188,7 @@ describe('useFirstUnreadMessage with all types of messages', () => {
 		useStore.getState().updateUnreadMessages(room.id);
 		useStore.getState().updateUnreadCount(room.id);
 		// Check number unread
-		expect(useStore.getState().unreads[room.id]).toBe(0);
+		expect(useStore.getState().chatData[room.id].unread).toBe(0);
 		// Check customHook result
 		const { result } = renderHook(() => useFirstUnreadMessage(room.id));
 		expect(result.current).toBe('noUnread');
@@ -201,7 +201,7 @@ describe('useFirstUnreadMessage with all types of messages', () => {
 		useStore.getState().updateUnreadMessages(room.id);
 		useStore.getState().updateUnreadCount(room.id);
 		// Check number unread
-		expect(useStore.getState().unreads[room.id]).toBe(1);
+		expect(useStore.getState().chatData[room.id].unread).toBe(1);
 		// Check customHook result
 		const { result } = renderHook(() => useFirstUnreadMessage(room.id));
 		expect(result.current).toBe('messageId4');

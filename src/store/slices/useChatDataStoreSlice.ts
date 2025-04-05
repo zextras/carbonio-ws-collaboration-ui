@@ -8,6 +8,7 @@
 import { produce } from 'immer';
 import {
 	concat,
+	filter,
 	find,
 	findIndex,
 	first,
@@ -22,10 +23,13 @@ import {
 import { StateCreator } from 'zustand';
 
 import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
-import { MarkerStatus } from '../../types/store/MarkersTypes';
+import { isMyId } from '../../network/websocket/eventHandlersUtilities';
+import { ChatDataStoreSlice } from '../../types/store/ChatDataTypes';
+import { Marker, MarkerStatus } from '../../types/store/MarkersTypes';
 import {
 	ConfigurationMessage,
 	Message,
+	MessageFastening,
 	MessageList,
 	MessageType,
 	OperationType,
@@ -33,27 +37,38 @@ import {
 	TextMessage
 } from '../../types/store/MessageTypes';
 import { RoomType } from '../../types/store/RoomTypes';
-import { MessagesStoreSlice, RootStore } from '../../types/store/StoreTypes';
+import { RootStore } from '../../types/store/StoreTypes';
 import { calcReads } from '../../utils/calcReads';
 import { datesAreFromTheSameDay, isBefore, isStrictlyBefore } from '../../utils/dateUtils';
 
-export const useMessagesStoreSlice: StateCreator<
+const initChatData = (store: RootStore, roomId: string): void => {
+	if (!store.chatData[roomId]) {
+		store.chatData[roomId] = {
+			messages: [],
+			fastenings: {},
+			markers: {},
+			unread: 0
+		};
+	}
+};
+
+export const useChatDataStoreSlice: StateCreator<
 	RootStore,
 	[['zustand/devtools', never]],
 	[],
-	MessagesStoreSlice
+	ChatDataStoreSlice
 > = (set) => ({
-	messages: {},
+	chatData: {},
+
 	newMessage: (message: Message): void => {
 		set(
 			produce((draft: RootStore) => {
-				// Initialize messages list if it does not exist
-				if (!draft.messages[message.roomId]) draft.messages[message.roomId] = [];
+				initChatData(draft, message.roomId);
 
 				// Add date message if the new message has a different date than the previous one
-				const lastMessageDate = last(draft.messages[message.roomId])?.date ?? 0;
+				const lastMessageDate = last(draft.chatData[message.roomId].messages)?.date ?? 0;
 				if (!datesAreFromTheSameDay(lastMessageDate, message.date)) {
-					draft.messages[message.roomId].push({
+					draft.chatData[message.roomId].messages.push({
 						id: `dateMessage${message.date - 2}`,
 						roomId: message.roomId,
 						date: message.date - 2,
@@ -62,17 +77,17 @@ export const useMessagesStoreSlice: StateCreator<
 				}
 
 				// Add message to the end of list or replace a placeholder message
-				const placeholderMessageIndex = findIndex(draft.messages[message.roomId], {
+				const placeholderMessageIndex = findIndex(draft.chatData[message.roomId].messages, {
 					id: message.id
 				});
 				if (placeholderMessageIndex !== -1) {
 					const newMessage = {
-						...draft.messages[message.roomId][placeholderMessageIndex],
+						...draft.chatData[message.roomId].messages[placeholderMessageIndex],
 						...message
 					};
-					draft.messages[message.roomId].splice(placeholderMessageIndex, 1, newMessage);
+					draft.chatData[message.roomId].messages.splice(placeholderMessageIndex, 1, newMessage);
 				} else {
-					draft.messages[message.roomId].push(message);
+					draft.chatData[message.roomId].messages.push(message);
 				}
 			}),
 			false,
@@ -82,23 +97,21 @@ export const useMessagesStoreSlice: StateCreator<
 	newInboxMessage: (message: Message): void => {
 		set(
 			produce((draft: RootStore) => {
-				// Initialize messages list if it does not exist
-				if (!draft.messages[message.roomId]) draft.messages[message.roomId] = [];
-
+				initChatData(draft, message.roomId);
 				// Avoid adding the same message if a history request had already added the same message
-				const alreadyExists = find(draft.messages[message.roomId], { id: message.id });
+				const alreadyExists = find(draft.chatData[message.roomId].messages, { id: message.id });
 				if (!alreadyExists) {
 					// Avoid setting a last message dated before clearAt
 					const roomHistoryIsBeenCleared = draft.rooms[message.roomId]?.userSettings?.clearedAt;
 					if (!roomHistoryIsBeenCleared || isBefore(roomHistoryIsBeenCleared, message.date)) {
 						// Add always a date message before the inbox message
-						draft.messages[message.roomId].push({
+						draft.chatData[message.roomId].messages.push({
 							id: `dateMessage${message.date - 2}`,
 							roomId: message.roomId,
 							date: message.date - 2,
 							type: MessageType.DATE_MSG
 						});
-						draft.messages[message.roomId].push(message);
+						draft.chatData[message.roomId].messages.push(message);
 					}
 				}
 			}),
@@ -109,8 +122,7 @@ export const useMessagesStoreSlice: StateCreator<
 	updateHistory: (roomId: string, messageArray: Message[]): void => {
 		set(
 			produce((draft: RootStore) => {
-				// Initialize messages list if it does not exist
-				if (!draft.messages[roomId]) draft.messages[roomId] = [];
+				initChatData(draft, roomId);
 
 				// Be sure that array with the new history messages will be processed in the correct date order
 				const orderedMessageArray = orderBy(messageArray, ['date'], ['asc']);
@@ -119,8 +131,8 @@ export const useMessagesStoreSlice: StateCreator<
 				forEach(orderedMessageArray, (historyMessage: Message, index) => {
 					// Process only new messages (i.e. messages dated before the last message of the current history)
 					if (
-						!draft.messages[roomId][0] ||
-						isStrictlyBefore(historyMessage.date, draft.messages[roomId][0].date)
+						!draft.chatData[roomId].messages[0] ||
+						isStrictlyBefore(historyMessage.date, draft.chatData[roomId].messages[0].date)
 					) {
 						// Add date message if the new message has a different date than the previous one
 						const prevMessageDate = orderedMessageArray[index - 1]?.date || 0;
@@ -138,20 +150,23 @@ export const useMessagesStoreSlice: StateCreator<
 
 				if (size(historyWithDates) > 0) {
 					// Remove old first date message if the last message of the new history has the same date
-					const oldFirstMessage = draft.messages[roomId][0];
+					const oldFirstMessage = draft.chatData[roomId].messages[0];
 					const lastRequestedMessageDate = last(historyWithDates)?.date ?? 0;
 					if (
 						oldFirstMessage?.type === MessageType.DATE_MSG &&
 						datesAreFromTheSameDay(oldFirstMessage.date, lastRequestedMessageDate)
 					) {
-						remove(draft.messages[roomId], (message) => message.id === oldFirstMessage.id);
+						remove(draft.chatData[roomId].messages, (message) => message.id === oldFirstMessage.id);
 					}
 
-					draft.messages[roomId] = concat(historyWithDates, draft.messages[roomId]);
+					draft.chatData[roomId].messages = concat(
+						historyWithDates,
+						draft.chatData[roomId].messages
+					);
 
 					// We must check for duplicates because inbox message has
 					// a different date than the same message in history.
-					draft.messages[roomId] = uniqBy(draft.messages[roomId], 'id');
+					draft.chatData[roomId].messages = uniqBy(draft.chatData[roomId].messages, 'id');
 				}
 			}),
 			false,
@@ -161,9 +176,9 @@ export const useMessagesStoreSlice: StateCreator<
 	addCreateRoomMessage: (roomId: string): void => {
 		set(
 			produce((draft: RootStore) => {
-				const firstMessageDate = first(draft.messages[roomId])?.date;
+				const firstMessageDate = first(draft.chatData[roomId].messages)?.date;
 				const creationMessage = find(
-					draft.messages[roomId],
+					draft.chatData[roomId].messages,
 					(message) =>
 						message.type === MessageType.CONFIGURATION_MSG &&
 						message.operation === OperationType.ROOM_CREATION
@@ -186,7 +201,7 @@ export const useMessagesStoreSlice: StateCreator<
 						from: '',
 						read: MarkerStatus.READ
 					};
-					draft.messages[roomId].splice(1, 0, creationMsg);
+					draft.chatData[roomId].messages.splice(1, 0, creationMsg);
 				}
 			}),
 			false,
@@ -196,22 +211,27 @@ export const useMessagesStoreSlice: StateCreator<
 	updateUnreadMessages: (roomId: string): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (!draft.messages[roomId]) draft.messages[roomId] = [];
+				initChatData(draft, roomId);
 
-				draft.messages[roomId] = map(draft.messages[roomId], (message: Message) => {
-					// Updating text and configuration messages which are not read yet
-					const readable =
-						message.type === MessageType.TEXT_MSG || message.type === MessageType.CONFIGURATION_MSG;
+				draft.chatData[roomId].messages = map(
+					draft.chatData[roomId].messages,
+					(message: Message) => {
+						// Updating text and configuration messages which are not read yet
+						const readable =
+							message.type === MessageType.TEXT_MSG ||
+							message.type === MessageType.CONFIGURATION_MSG;
 
-					if (
-						readable &&
-						(message.read === MarkerStatus.UNREAD || message.read === MarkerStatus.READ_BY_SOMEONE)
-					) {
-						message.read = calcReads(message.date, roomId);
+						if (
+							readable &&
+							(message.read === MarkerStatus.UNREAD ||
+								message.read === MarkerStatus.READ_BY_SOMEONE)
+						) {
+							message.read = calcReads(message.date, roomId);
+						}
+
+						return message;
 					}
-
-					return message;
-				});
+				);
 			}),
 			false,
 			'MESSAGES/UPDATE_UNREAD_MESSAGES'
@@ -226,7 +246,7 @@ export const useMessagesStoreSlice: StateCreator<
 			produce((draft: RootStore) => {
 				// Message to add the replyMessage prop
 				const messageWithAResponse = find(
-					draft.messages[roomId],
+					draft.chatData[roomId].messages,
 					(message) => message.id === replyMessageId
 				) as TextMessage;
 				if (messageWithAResponse) {
@@ -260,14 +280,12 @@ export const useMessagesStoreSlice: StateCreator<
 					attachment,
 					forwarded
 				};
-
-				// Initialize messages list if it does not exist
-				if (!draft.messages[roomId]) draft.messages[roomId] = [];
+				initChatData(draft, roomId);
 
 				// Add date message if the new message has a different date than the previous one
-				const lastMessageDate = last(draft.messages[roomId])?.date ?? 0;
+				const lastMessageDate = last(draft.chatData[roomId].messages)?.date ?? 0;
 				if (!datesAreFromTheSameDay(lastMessageDate, placeholderMessage.date)) {
-					draft.messages[roomId].push({
+					draft.chatData[roomId].messages.push({
 						id: `dateMessage${placeholderMessage.date - 2}`,
 						roomId,
 						date: placeholderMessage.date - 2,
@@ -279,7 +297,7 @@ export const useMessagesStoreSlice: StateCreator<
 				const messageSubjectOfReplyId = placeholderMessage.replyTo;
 				if (messageSubjectOfReplyId) {
 					const messageSubjectOfReply = find(
-						draft.messages[roomId],
+						draft.chatData[roomId].messages,
 						(message) =>
 							message.type === MessageType.TEXT_MSG && message.stanzaId === messageSubjectOfReplyId
 					) as TextMessage;
@@ -289,7 +307,7 @@ export const useMessagesStoreSlice: StateCreator<
 				}
 
 				// Add message to the end of list or replace a placeholder message
-				draft.messages[roomId].push(placeholderMessage);
+				draft.chatData[roomId].messages.push(placeholderMessage);
 
 				sendCustomEvent({ name: EventName.NEW_MESSAGE, data: placeholderMessage });
 			}),
@@ -300,15 +318,118 @@ export const useMessagesStoreSlice: StateCreator<
 	removePlaceholderMessage: (roomId: string, messageId: string): void => {
 		set(
 			produce((draft: RootStore) => {
-				remove(draft.messages[roomId], (message) => message.id === messageId);
+				remove(draft.chatData[roomId].messages, (message) => message.id === messageId);
 				if (
-					draft.messages[roomId][draft.messages[roomId].length - 1].type === MessageType.DATE_MSG
+					draft.chatData[roomId].messages[draft.chatData[roomId].messages.length - 1].type ===
+					MessageType.DATE_MSG
 				) {
-					draft.messages[roomId].pop();
+					draft.chatData[roomId].messages.pop();
 				}
 			}),
 			false,
 			'MESSAGES/REMOVE_PLACEHOLDER_MESSAGE'
+		);
+	},
+
+	addFastening: (fastening: MessageFastening): void => {
+		set(
+			produce((draft: RootStore) => {
+				// Create the fastenings object if it doesn't exist
+				initChatData(draft, fastening.roomId);
+				if (!draft.chatData[fastening.roomId].fastenings[fastening.originalStanzaId]) {
+					draft.chatData[fastening.roomId].fastenings[fastening.originalStanzaId] = [];
+				}
+
+				// Add fastening to the array only if it doesn't already exist
+				if (
+					!find(
+						draft.chatData[fastening.roomId].fastenings[fastening.originalStanzaId],
+						(f: MessageFastening) => f.id === fastening.id
+					)
+				) {
+					draft.chatData[fastening.roomId].fastenings[fastening.originalStanzaId].push(fastening);
+					draft.chatData[fastening.roomId].fastenings[fastening.originalStanzaId] = orderBy(
+						draft.chatData[fastening.roomId].fastenings[fastening.originalStanzaId],
+						['date']
+					);
+				}
+			}),
+			false,
+			'FASTENINGS/ADD_FASTENING'
+		);
+	},
+
+	updateMarkers: (roomId: string, markers: Marker[]): void => {
+		set(
+			produce((draft: RootStore) => {
+				initChatData(draft, roomId);
+				forEach(markers, (marker: Marker) => {
+					// Set new marker only when it's a new marker, or it is more recent than other
+					const oldMarker = draft.chatData[roomId].markers[marker.from];
+					if (!oldMarker || oldMarker.markerDate < marker.markerDate) {
+						draft.chatData[roomId].markers[marker.from] = marker;
+					}
+				});
+			}),
+			false,
+			'MARKERS/UPDATE_MARKER'
+		);
+	},
+
+	addUnreadCount: (roomId: string, counter: number): void => {
+		set(
+			produce((draft: RootStore) => {
+				initChatData(draft, roomId);
+				const actualCounter = draft.chatData[roomId].unread || 0;
+				draft.chatData[roomId].unread = actualCounter + counter;
+			}),
+			false,
+			'UNREADS/ADD_UNREAD'
+		);
+	},
+	incrementUnreadCount: (roomId: string): void => {
+		set(
+			produce((draft: RootStore) => {
+				initChatData(draft, roomId);
+				const actualCounter = draft.chatData[roomId].unread || 0;
+				draft.chatData[roomId].unread = actualCounter + 1;
+			}),
+			false,
+			'UNREADS/INCREMENT_UNREAD'
+		);
+	},
+	updateUnreadCount: (roomId: string): void => {
+		set(
+			produce((draft: RootStore) => {
+				initChatData(draft, roomId);
+				const { messages } = draft.chatData[roomId];
+				const lastMarker =
+					draft.chatData[roomId].markers &&
+					draft.session.id !== undefined &&
+					draft.chatData[roomId].markers[draft.session.id];
+				const lastMarkedMessage = find(
+					messages,
+					(message: Message) => lastMarker && message.id === lastMarker.messageId
+				);
+				const isConfigurationMessage = (type: MessageType): boolean =>
+					type === MessageType.CONFIGURATION_MSG;
+				const isTextMessageFromOther = (message: Message): boolean =>
+					message.type === MessageType.TEXT_MSG && !isMyId(message.from);
+				const isAfterLastMarker = (date: number): boolean => {
+					if (!lastMarker) return true;
+					const dateToCompare = lastMarkedMessage ? lastMarkedMessage.date : lastMarker.markerDate;
+					return !isBefore(date, dateToCompare);
+				};
+				const unreadByMe = filter(
+					messages,
+					(message) =>
+						(isConfigurationMessage(message.type) || isTextMessageFromOther(message)) &&
+						isAfterLastMarker(message.date)
+				);
+				draft.chatData[roomId].unread = size(unreadByMe);
+			}),
+			false,
+			'UNREADS/UPDATE_UNREAD'
 		);
 	}
 });

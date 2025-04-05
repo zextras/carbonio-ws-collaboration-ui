@@ -6,8 +6,8 @@
 
 import { useMemo } from 'react';
 
-import { getEditAndDeleteFasteningSelector } from '../store/selectors/FasteningsSelectors';
-import { getMessageSelector } from '../store/selectors/MessagesSelectors';
+import { getEditAndDeleteFasteningSelector } from '../store/selectors/ChatDataSelectors';
+import { getMessageSelector } from '../store/selectors/ChatDataSelectors';
 import useStore from '../store/Store';
 import {
 	FasteningAction,

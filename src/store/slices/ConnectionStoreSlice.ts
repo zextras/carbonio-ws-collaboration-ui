@@ -61,11 +61,8 @@ export const useConnectionsStoreSlice: StateCreator<
 						lastActivity: undefined
 					};
 				});
-				draft.messages = {};
-				draft.markers = {};
-				draft.fastenings = {};
+				draft.chatData = {};
 				draft.activeConversations = {};
-				draft.unreads = {};
 			}),
 			false,
 			'CONNECTIONS/RESET_XMPP_DATA'

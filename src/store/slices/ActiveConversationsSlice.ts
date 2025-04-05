@@ -400,7 +400,7 @@ export const useActiveConversationsSlice: StateCreator<
 				// Ignore reactions to messages that are not mine
 				if (
 					!find(
-						draft.messages[roomId],
+						draft.chatData[roomId].messages,
 						(message) =>
 							message.type === MessageType.TEXT_MSG &&
 							message.stanzaId === stanzaId &&
@@ -414,7 +414,7 @@ export const useActiveConversationsSlice: StateCreator<
 
 				if (reaction === '') {
 					const reactionToRemove = find(
-						reverse(draft.fastenings[roomId]?.[stanzaId]),
+						reverse(draft.chatData[roomId]?.fastenings?.[stanzaId]),
 						(fastening) =>
 							fastening.action === 'reaction' && fastening.from === from && fastening.value !== ''
 					);

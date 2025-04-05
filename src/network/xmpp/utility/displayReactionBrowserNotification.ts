@@ -20,7 +20,7 @@ const displayReactionBrowserNotification = async (message: MessageFastening): Pr
 	const room = store.rooms[message.roomId];
 
 	const refToMyMessage = !!find(
-		store.messages[message.roomId],
+		store.chatData[message.roomId].messages,
 		(msg: TextMessage) => msg.stanzaId === message.originalStanzaId && msg.from === store.session.id
 	);
 

@@ -10,18 +10,21 @@ import { Message, MessageType } from '../../../types/store/MessageTypes';
 import { isBefore } from '../../../utils/dateUtils';
 
 export function getLastUnreadMessage(roomId: string): string | undefined {
-	const { session, messages, markers } = useStore.getState();
+	const { session, chatData } = useStore.getState();
 	const lastMessage = last(
-		messages[roomId]?.filter(
+		chatData[roomId]?.messages.filter(
 			(message) =>
 				message.type === MessageType.CONFIGURATION_MSG ||
 				(message.type === MessageType.TEXT_MSG && message.from !== session.id)
 		)
 	);
 	if (lastMessage) {
-		const myMarker = markers[roomId]?.[session.id!]?.messageId;
+		const myMarker = chatData[roomId]?.markers[session.id!]?.messageId;
 		if (myMarker) {
-			const myMarkedMessage = find(messages[roomId], (message: Message) => message.id === myMarker);
+			const myMarkedMessage = find(
+				chatData[roomId].messages,
+				(message: Message) => message.id === myMarker
+			);
 			if (myMarkedMessage && !isBefore(lastMessage.date, myMarkedMessage?.date)) {
 				return lastMessage.id;
 			}

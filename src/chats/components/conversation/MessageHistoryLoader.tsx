@@ -84,11 +84,11 @@ const MessageHistoryLoader = ({
 	const handleHistoryLoader = useCallback(
 		debounce(() => {
 			const store = useStore.getState();
-			const roomMessages = store.messages[roomId];
+			const roomMessages = store.chatData[roomId].messages;
 			const lastMamMessage = store.activeConversations[roomId]?.lastMamMessage;
 			const date = lastMamMessage?.date ?? first(roomMessages)?.date ?? now();
 			if (!historyLoadedDisabled) {
-				xmppClient.requestHistory(roomId, date, 50, store.unreads[roomId]);
+				xmppClient.requestHistory(roomId, date, 50, store.chatData[roomId].unread);
 				setHistoryLoadDisabled(roomId, true);
 			}
 		}, 500),

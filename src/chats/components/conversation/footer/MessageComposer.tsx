@@ -41,8 +41,8 @@ import {
 	getFilesToUploadArray,
 	getReferenceMessage
 } from '../../../../store/selectors/ActiveConversationsSelectors';
+import { getLastMessageIdSelector } from '../../../../store/selectors/ChatDataSelectors';
 import { getXmppClient } from '../../../../store/selectors/ConnectionSelector';
-import { getLastMessageIdSelector } from '../../../../store/selectors/MessagesSelectors';
 import { getAttribute, getUserId } from '../../../../store/selectors/SessionSelectors';
 import { getIsUserGuest } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';

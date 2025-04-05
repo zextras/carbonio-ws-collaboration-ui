@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next';
 
 import { ConfigurationMessageLabel } from '../../../hooks/useConfigurationMessageLabel';
 import useMessage from '../../../hooks/useMessage';
-import { getLastMessageIdSelector } from '../../../store/selectors/MessagesSelectors';
+import { getLastMessageIdSelector } from '../../../store/selectors/ChatDataSelectors';
 import {
 	getRoomNameSelector,
 	getRoomTypeSelector,

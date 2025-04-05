@@ -10,7 +10,7 @@ import { Container } from '@zextras/carbonio-design-system';
 import { forEach, map, reverse } from 'lodash';
 
 import ReactionChip from './ReactionChip';
-import { getReactionFastenings } from '../../../../store/selectors/FasteningsSelectors';
+import { getReactionFastenings } from '../../../../store/selectors/ChatDataSelectors';
 import useStore from '../../../../store/Store';
 
 type BubbleReactionsProps = {

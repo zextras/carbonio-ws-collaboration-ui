@@ -29,7 +29,7 @@ import {
 	isMessageInForwardList,
 	maxForwardLimitNotReached
 } from '../../../../store/selectors/ActiveConversationsSelectors';
-import { getMessageAttachment } from '../../../../store/selectors/MessagesSelectors';
+import { getMessageAttachment } from '../../../../store/selectors/ChatDataSelectors';
 import { getRoomTypeSelector } from '../../../../store/selectors/RoomsSelectors';
 import { getAttribute } from '../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../store/Store';

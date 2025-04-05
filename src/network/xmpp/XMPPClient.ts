@@ -392,7 +392,7 @@ class XMPPClient implements IXMPPClient {
 	// Send confirmation that I read a certain message
 	readMessage(roomId: string, messageId: string): void {
 		const message = find(
-			useStore.getState().messages[roomId],
+			useStore.getState().chatData[roomId].messages,
 			(message) => message.id === messageId
 		);
 		if (message) {

@@ -15,7 +15,7 @@ import useFilteredConversationList from './conversationList/useFilteredConversat
 import ConversationsFilter from './ConversationsFilter';
 import useFilteredGal from './galSeachList/useFilteredGal';
 import VirtualRoomsButton from './virtualRoomWidget/VirtualRoomsButton';
-import { useOrderedOneToOneAndGroupsInfoByLastMessage } from '../../../store/selectors/MessagesSelectors';
+import { useOrderedOneToOneAndGroupsInfoByLastMessage } from '../../../store/selectors/ChatDataSelectors';
 import { getAttribute } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { Member } from '../../../types/store/RoomTypes';

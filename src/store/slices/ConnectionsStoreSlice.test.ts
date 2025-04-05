@@ -81,9 +81,6 @@ describe('Connections slice', () => {
 		expect(result.current.rooms).toEqual(initialStore.rooms);
 		expect(result.current.users[user.id].online).toBeUndefined();
 		expect(result.current.rooms).toEqual(initialStore.rooms);
-		expect(result.current.messages).toEqual(initialStore.messages);
-		expect(result.current.markers).toEqual(initialStore.markers);
-		expect(result.current.unreads).toEqual(initialStore.unreads);
-		expect(result.current.fastenings).toEqual(initialStore.fastenings);
+		expect(result.current.chatData).toEqual(initialStore.chatData);
 	});
 });

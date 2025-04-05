@@ -21,9 +21,11 @@ import {
 	getIdMessageWhereScrollIsStopped,
 	getInputHasFocus
 } from '../../../store/selectors/ActiveConversationsSelectors';
+import {
+	getMessagesSelector,
+	getMyLastMarkerOfRoom
+} from '../../../store/selectors/ChatDataSelectors';
 import { getXmppClient } from '../../../store/selectors/ConnectionSelector';
-import { getMyLastMarkerOfRoom } from '../../../store/selectors/MarkersSelectors';
-import { getMessagesSelector } from '../../../store/selectors/MessagesSelectors';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { Message, MessageType } from '../../../types/store/MessageTypes';
@@ -160,11 +162,11 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 	useEffect(() => {
 		const store = useStore.getState();
 		const actualPosition = store.activeConversations[roomId]?.scrollPositionMessageId;
-		const lastMsg = last(store.messages[roomId])?.id;
+		const lastMsg = last(store.chatData[roomId]?.messages)?.id;
 		if (
-			store.unreads[roomId] > 0 ||
+			store.chatData[roomId]?.unread > 0 ||
 			!actualPosition ||
-			(lastMsg === actualPosition && store.unreads[roomId] === 0)
+			(lastMsg === actualPosition && store.chatData[roomId].unread === 0)
 		) {
 			scrollToEnd(MessagesListWrapperRef);
 		} else {

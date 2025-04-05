@@ -12,8 +12,8 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import CustomReactionPicker from './CustomReactionPicker';
+import { getMyLastReaction } from '../../../../../store/selectors/ChatDataSelectors';
 import { getXmppClient } from '../../../../../store/selectors/ConnectionSelector';
-import { getMyLastReaction } from '../../../../../store/selectors/FasteningsSelectors';
 import useStore from '../../../../../store/Store';
 import { TextMessage } from '../../../../../types/store/MessageTypes';
 

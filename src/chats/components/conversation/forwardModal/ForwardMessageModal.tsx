@@ -46,7 +46,7 @@ import ForwardMessageConversationChip from './ForwardMessageConversationChip';
 import ForwardMessageConversationListItem from './ForwardMessageConversationListItem';
 import useRouting from '../../../../hooks/useRouting';
 import { RoomsApi } from '../../../../network';
-import { getRoomIdsWithLastMessage } from '../../../../store/selectors/MessagesSelectors';
+import { getRoomIdsWithLastMessage } from '../../../../store/selectors/ChatDataSelectors';
 import { getRoomNameSelector } from '../../../../store/selectors/RoomsSelectors';
 import useStore from '../../../../store/Store';
 import { TextMessage } from '../../../../types/store/MessageTypes';
