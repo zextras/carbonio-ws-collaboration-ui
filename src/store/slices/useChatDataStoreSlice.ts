@@ -27,6 +27,8 @@ import { isMyId } from '../../network/websocket/eventHandlersUtilities';
 import {
 	ChatDataStoreSlice,
 	ConfigurationMessage,
+	Marker,
+	MarkerStatus,
 	Message,
 	MessageFastening,
 	MessageType,
@@ -34,13 +36,12 @@ import {
 	PlaceholderFields,
 	TextMessage
 } from '../../types/store/ChatDataTypes';
-import { Marker, MarkerStatus } from '../../types/store/ChatDataTypes';
 import { RoomType } from '../../types/store/RoomTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 import { calcReads } from '../../utils/calcReads';
 import { datesAreFromTheSameDay, isBefore, isStrictlyBefore } from '../../utils/dateUtils';
 
-const initChatData = (store: RootStore, roomId: string): void => {
+const initRoomChatData = (store: RootStore, roomId: string): void => {
 	if (!store.chatData[roomId]) {
 		store.chatData[roomId] = {
 			messages: [],
@@ -62,7 +63,7 @@ export const useChatDataStoreSlice: StateCreator<
 	newMessage: (message: Message): void => {
 		set(
 			produce((draft: RootStore) => {
-				initChatData(draft, message.roomId);
+				initRoomChatData(draft, message.roomId);
 
 				// Add date message if the new message has a different date than the previous one
 				const lastMessageDate = last(draft.chatData[message.roomId].messages)?.date ?? 0;
@@ -96,7 +97,7 @@ export const useChatDataStoreSlice: StateCreator<
 	newInboxMessage: (message: Message): void => {
 		set(
 			produce((draft: RootStore) => {
-				initChatData(draft, message.roomId);
+				initRoomChatData(draft, message.roomId);
 				// Avoid adding the same message if a history request had already added the same message
 				const alreadyExists = find(draft.chatData[message.roomId].messages, { id: message.id });
 				if (!alreadyExists) {
@@ -121,7 +122,7 @@ export const useChatDataStoreSlice: StateCreator<
 	updateHistory: (roomId: string, messageArray: Message[]): void => {
 		set(
 			produce((draft: RootStore) => {
-				initChatData(draft, roomId);
+				initRoomChatData(draft, roomId);
 
 				// Be sure that array with the new history messages will be processed in the correct date order
 				const orderedMessageArray = orderBy(messageArray, ['date'], ['asc']);
@@ -210,7 +211,7 @@ export const useChatDataStoreSlice: StateCreator<
 	updateUnreadMessages: (roomId: string): void => {
 		set(
 			produce((draft: RootStore) => {
-				initChatData(draft, roomId);
+				initRoomChatData(draft, roomId);
 
 				draft.chatData[roomId].messages = map(
 					draft.chatData[roomId].messages,
@@ -279,7 +280,7 @@ export const useChatDataStoreSlice: StateCreator<
 					attachment,
 					forwarded
 				};
-				initChatData(draft, roomId);
+				initRoomChatData(draft, roomId);
 
 				// Add date message if the new message has a different date than the previous one
 				const lastMessageDate = last(draft.chatData[roomId].messages)?.date ?? 0;
@@ -334,7 +335,7 @@ export const useChatDataStoreSlice: StateCreator<
 		set(
 			produce((draft: RootStore) => {
 				// Create the fastenings object if it doesn't exist
-				initChatData(draft, fastening.roomId);
+				initRoomChatData(draft, fastening.roomId);
 				if (!draft.chatData[fastening.roomId].fastenings[fastening.originalStanzaId]) {
 					draft.chatData[fastening.roomId].fastenings[fastening.originalStanzaId] = [];
 				}
@@ -361,7 +362,7 @@ export const useChatDataStoreSlice: StateCreator<
 	updateMarkers: (roomId: string, markers: Marker[]): void => {
 		set(
 			produce((draft: RootStore) => {
-				initChatData(draft, roomId);
+				initRoomChatData(draft, roomId);
 				forEach(markers, (marker: Marker) => {
 					// Set new marker only when it's a new marker, or it is more recent than other
 					const oldMarker = draft.chatData[roomId].markers[marker.from];
@@ -378,7 +379,7 @@ export const useChatDataStoreSlice: StateCreator<
 	addUnreadCount: (roomId: string, counter: number): void => {
 		set(
 			produce((draft: RootStore) => {
-				initChatData(draft, roomId);
+				initRoomChatData(draft, roomId);
 				const actualCounter = draft.chatData[roomId].unread || 0;
 				draft.chatData[roomId].unread = actualCounter + counter;
 			}),
@@ -386,21 +387,10 @@ export const useChatDataStoreSlice: StateCreator<
 			'UNREADS/ADD_UNREAD'
 		);
 	},
-	incrementUnreadCount: (roomId: string): void => {
-		set(
-			produce((draft: RootStore) => {
-				initChatData(draft, roomId);
-				const actualCounter = draft.chatData[roomId].unread || 0;
-				draft.chatData[roomId].unread = actualCounter + 1;
-			}),
-			false,
-			'UNREADS/INCREMENT_UNREAD'
-		);
-	},
 	updateUnreadCount: (roomId: string): void => {
 		set(
 			produce((draft: RootStore) => {
-				initChatData(draft, roomId);
+				initRoomChatData(draft, roomId);
 				const { messages } = draft.chatData[roomId];
 				const lastMarker =
 					draft.chatData[roomId].markers &&

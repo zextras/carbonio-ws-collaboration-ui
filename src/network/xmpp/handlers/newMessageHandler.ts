@@ -28,7 +28,7 @@ export function onNewMessageStanza(message: Element): true {
 
 			if (newMessage.from !== sessionId) {
 				sendCustomEvent({ name: EventName.NEW_MESSAGE, data: newMessage });
-				store.incrementUnreadCount(newMessage.roomId);
+				store.addUnreadCount(newMessage.roomId, 1);
 				displayMessageBrowserNotification(newMessage);
 			}
 
@@ -47,7 +47,7 @@ export function onNewMessageStanza(message: Element): true {
 			store.newMessage(newMessage);
 			if (newMessage.from !== sessionId) {
 				sendCustomEvent({ name: EventName.NEW_MESSAGE, data: newMessage });
-				store.incrementUnreadCount(newMessage.roomId);
+				store.addUnreadCount(newMessage.roomId, 1);
 			}
 			break;
 		}

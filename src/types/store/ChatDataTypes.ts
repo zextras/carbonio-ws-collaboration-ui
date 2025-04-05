@@ -25,7 +25,6 @@ export type ChatDataStoreSlice = {
 	updateMarkers: (roomId: string, markers: Marker[]) => void;
 
 	addUnreadCount: (roomId: string, counter: number) => void;
-	incrementUnreadCount: (roomId: string) => void;
 	updateUnreadCount: (roomId: string) => void;
 };
 
