@@ -16,7 +16,7 @@ import { getRoomUnreadsSelector } from '../../../store/selectors/ChatDataSelecto
 import { getRoomMutedSelector } from '../../../store/selectors/RoomsSelectors';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
-import { MessageType } from '../../../types/store/MessageTypes';
+import { MessageType } from '../../../types/store/ChatDataTypes';
 
 type ScrollButtonProps = {
 	roomId: string;

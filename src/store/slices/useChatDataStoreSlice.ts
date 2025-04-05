@@ -24,18 +24,17 @@ import { StateCreator } from 'zustand';
 
 import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
 import { isMyId } from '../../network/websocket/eventHandlersUtilities';
-import { ChatDataStoreSlice } from '../../types/store/ChatDataTypes';
-import { Marker, MarkerStatus } from '../../types/store/MarkersTypes';
 import {
+	ChatDataStoreSlice,
 	ConfigurationMessage,
 	Message,
 	MessageFastening,
-	MessageList,
 	MessageType,
 	OperationType,
 	PlaceholderFields,
 	TextMessage
-} from '../../types/store/MessageTypes';
+} from '../../types/store/ChatDataTypes';
+import { Marker, MarkerStatus } from '../../types/store/ChatDataTypes';
 import { RoomType } from '../../types/store/RoomTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 import { calcReads } from '../../utils/calcReads';
@@ -127,7 +126,7 @@ export const useChatDataStoreSlice: StateCreator<
 				// Be sure that array with the new history messages will be processed in the correct date order
 				const orderedMessageArray = orderBy(messageArray, ['date'], ['asc']);
 
-				const historyWithDates: MessageList = [];
+				const historyWithDates: Message[] = [];
 				forEach(orderedMessageArray, (historyMessage: Message, index) => {
 					// Process only new messages (i.e. messages dated before the last message of the current history)
 					if (

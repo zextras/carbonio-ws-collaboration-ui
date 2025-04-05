@@ -21,14 +21,14 @@ import {
 import { mockedScrollToEnd, mockedScrollToMessage } from '../../../tests/mocks/scrollUtils';
 import { setup } from '../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
-import { MarkerStatus } from '../../../types/store/MarkersTypes';
+import { MarkerStatus } from '../../../types/store/ChatDataTypes';
 import {
 	ConfigurationMessage,
 	FasteningAction,
 	MessageType,
 	OperationType,
 	TextMessage
-} from '../../../types/store/MessageTypes';
+} from '../../../types/store/ChatDataTypes';
 import { RootStore } from '../../../types/store/StoreTypes';
 import { User } from '../../../types/store/UserTypes';
 

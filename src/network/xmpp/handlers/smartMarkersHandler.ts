@@ -7,7 +7,7 @@ import { map } from 'lodash';
 import { Strophe } from 'strophe.js';
 
 import useStore from '../../../store/Store';
-import { Marker, MarkerType } from '../../../types/store/MarkersTypes';
+import { Marker } from '../../../types/store/ChatDataTypes';
 import { now } from '../../../utils/dateUtils';
 import { getId, getResource } from '../utility/decodeJid';
 import { decodeMarker } from '../utility/decodeMarker';
@@ -39,7 +39,7 @@ export function onDisplayedMessageStanza(message: Element): true {
 				from: getId(getResource(from)),
 				messageId,
 				markerDate: now(),
-				type: MarkerType.DISPLAYED
+				type: 'displayed'
 			};
 			const store = useStore.getState();
 			store.updateMarkers(roomId, [displayedMessage]);

@@ -24,9 +24,8 @@ import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 import { MemberBe, RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
 import { UserBe } from '../../../types/network/models/userBeTypes';
 import { MeetingChatVisibility } from '../../../types/store/ActiveMeetingTypes';
-import { MarkerStatus } from '../../../types/store/MarkersTypes';
+import { MarkerStatus, MessageType } from '../../../types/store/ChatDataTypes';
 import { MeetingParticipant } from '../../../types/store/MeetingTypes';
-import { MessageType } from '../../../types/store/MessageTypes';
 import { RootStore } from '../../../types/store/StoreTypes';
 
 const user1: UserBe = createMockUser({ id: 'user1Id', name: 'user 1' });

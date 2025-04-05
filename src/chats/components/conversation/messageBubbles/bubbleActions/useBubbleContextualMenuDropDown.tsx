@@ -29,7 +29,7 @@ import { getAttribute, getUserId } from '../../../../../store/selectors/SessionS
 import { getIsUserGuest } from '../../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../../store/Store';
 import { messageActionType } from '../../../../../types/store/ActiveConversationTypes';
-import { TextMessage } from '../../../../../types/store/MessageTypes';
+import { TextMessage } from '../../../../../types/store/ChatDataTypes';
 import { isPreviewSupported } from '../../../../../utils/attachmentUtils';
 import { canPerformAction } from '../../../../../utils/MessageActionsUtils';
 

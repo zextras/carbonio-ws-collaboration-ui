@@ -11,7 +11,7 @@ import { useTranslation } from 'react-i18next';
 import { getMessagesSelector, getMarkers } from '../../../../../store/selectors/ChatDataSelectors';
 import { getUserId } from '../../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../../store/Store';
-import { MessageType } from '../../../../../types/store/MessageTypes';
+import { MessageType } from '../../../../../types/store/ChatDataTypes';
 import { isBefore } from '../../../../../utils/dateUtils';
 import UserPopoverList from '../../../userPopoverList/UserPopoverList';
 

@@ -18,7 +18,7 @@ import {
 	createMockUser
 } from '../../../tests/createMock';
 import { setup } from '../../../tests/test-utils';
-import { OperationType } from '../../../types/store/MessageTypes';
+import { OperationType } from '../../../types/store/ChatDataTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 
 const loggedUser = createMockUser({ id: 'logged-user', name: 'Logged User' });

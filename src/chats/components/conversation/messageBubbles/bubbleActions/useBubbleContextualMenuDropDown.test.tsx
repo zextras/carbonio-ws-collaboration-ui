@@ -16,7 +16,7 @@ import {
 import { ProvidersWrapper, setup } from '../../../../../tests/test-utils';
 import { RoomBe } from '../../../../../types/network/models/roomBeTypes';
 import { messageActionType } from '../../../../../types/store/ActiveConversationTypes';
-import { TextMessage } from '../../../../../types/store/MessageTypes';
+import { TextMessage } from '../../../../../types/store/ChatDataTypes';
 import { RoomType } from '../../../../../types/store/RoomTypes';
 import { RootStore } from '../../../../../types/store/StoreTypes';
 

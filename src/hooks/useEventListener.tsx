@@ -23,7 +23,7 @@ import {
 	MeetingWaitingParticipantClashed,
 	MeetingWaitingParticipantJoinedEvent
 } from '../types/network/websocket/wsMeetingEvents';
-import { Message } from '../types/store/MessageTypes';
+import { Message } from '../types/store/ChatDataTypes';
 
 export enum EventName {
 	NEW_MESSAGE = 'newMessage',

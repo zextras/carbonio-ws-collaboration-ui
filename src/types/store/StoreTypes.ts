@@ -15,10 +15,9 @@ import {
 	TileData,
 	VirtualBackgroundType
 } from './ActiveMeetingTypes';
-import { ChatDataStoreSlice } from './ChatDataTypes';
+import { AttachmentMessageType, ChatDataStoreSlice, Message, TextMessage } from './ChatDataTypes';
 import { Connections } from './ConnectionsTypes';
 import { MeetingParticipant, MeetingsMap } from './MeetingTypes';
-import { AttachmentMessageType, Message, TextMessage } from './MessageTypes';
 import { RoomsMap } from './RoomTypes';
 import { SessionStoreSlice } from './SessionTypes';
 import { UsersStoreSlice } from './UserTypes';

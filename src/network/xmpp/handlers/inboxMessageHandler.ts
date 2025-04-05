@@ -5,7 +5,7 @@
  */
 
 import useStore from '../../../store/Store';
-import { MessageType } from '../../../types/store/MessageTypes';
+import { MessageType } from '../../../types/store/ChatDataTypes';
 import { dateToTimestamp, now } from '../../../utils/dateUtils';
 import { getRequiredAttribute, getRequiredTagElement } from '../utility/decodeStanza';
 import { decodeXMPPMessageStanza } from '../utility/decodeXMPPMessageStanza';

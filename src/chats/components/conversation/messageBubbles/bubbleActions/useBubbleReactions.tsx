@@ -15,7 +15,7 @@ import CustomReactionPicker from './CustomReactionPicker';
 import { getMyLastReaction } from '../../../../../store/selectors/ChatDataSelectors';
 import { getXmppClient } from '../../../../../store/selectors/ConnectionSelector';
 import useStore from '../../../../../store/Store';
-import { TextMessage } from '../../../../../types/store/MessageTypes';
+import { TextMessage } from '../../../../../types/store/ChatDataTypes';
 
 export enum ReactionType {
 	'THUMBS_UP' = '\uD83D\uDC4D',

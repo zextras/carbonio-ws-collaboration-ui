@@ -10,7 +10,7 @@ import { find, findIndex, forEach, remove } from 'lodash';
 import { StateCreator } from 'zustand';
 
 import { MemberBe, RoomBe } from '../../types/network/models/roomBeTypes';
-import { MessageType } from '../../types/store/MessageTypes';
+import { MessageType } from '../../types/store/ChatDataTypes';
 import { RoomType } from '../../types/store/RoomTypes';
 import { RoomsStoreSlice, RootStore } from '../../types/store/StoreTypes';
 import { dateToISODate, isBefore } from '../../utils/dateUtils';

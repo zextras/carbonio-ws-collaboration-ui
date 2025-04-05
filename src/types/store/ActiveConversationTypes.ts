@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { AttachmentMessageType, Message, TextMessage } from './MessageTypes';
+import { AttachmentMessageType, Message, TextMessage } from './ChatDataTypes';
 
 export type ActiveConversation = {
 	draftMessage?: string;

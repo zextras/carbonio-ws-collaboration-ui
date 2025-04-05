@@ -52,7 +52,7 @@ import {
 	messageActionType,
 	ReferenceMessage
 } from '../../../../types/store/ActiveConversationTypes';
-import { Message, MessageType, TextMessage } from '../../../../types/store/MessageTypes';
+import { Message, MessageType, TextMessage } from '../../../../types/store/ChatDataTypes';
 import { isAttachmentImage } from '../../../../utils/attachmentUtils';
 import { BrowserUtils } from '../../../../utils/BrowserUtils';
 import { canPerformAction } from '../../../../utils/MessageActionsUtils';

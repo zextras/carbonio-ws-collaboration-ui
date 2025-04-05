@@ -49,7 +49,7 @@ import { RoomsApi } from '../../../../network';
 import { getRoomIdsWithLastMessage } from '../../../../store/selectors/ChatDataSelectors';
 import { getRoomNameSelector } from '../../../../store/selectors/RoomsSelectors';
 import useStore from '../../../../store/Store';
-import { TextMessage } from '../../../../types/store/MessageTypes';
+import { TextMessage } from '../../../../types/store/ChatDataTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
 
 const CustomContainer = styled(Container)`

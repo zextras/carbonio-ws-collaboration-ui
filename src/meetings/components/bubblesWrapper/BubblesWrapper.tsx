@@ -12,7 +12,7 @@ import styled from 'styled-components';
 import MeetingBubble from './MeetingBubble';
 import useEventListener, { EventName, NewMessageEvent } from '../../../hooks/useEventListener';
 import { Z_INDEX_RANK } from '../../../types/generics';
-import { MessageType } from '../../../types/store/MessageTypes';
+import { MessageType } from '../../../types/store/ChatDataTypes';
 
 const WrapperContainer = styled(Container)<{ $messageIdsList: string[] }>`
 	position: absolute;

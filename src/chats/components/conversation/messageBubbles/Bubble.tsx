@@ -33,8 +33,8 @@ import { getMessageAttachment } from '../../../../store/selectors/ChatDataSelect
 import { getRoomTypeSelector } from '../../../../store/selectors/RoomsSelectors';
 import { getAttribute } from '../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../store/Store';
-import { MarkerStatus } from '../../../../types/store/MarkersTypes';
-import { TextMessage } from '../../../../types/store/MessageTypes';
+import { MarkerStatus } from '../../../../types/store/ChatDataTypes';
+import { TextMessage } from '../../../../types/store/ChatDataTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
 import { getAttachmentInfo } from '../../../../utils/attachmentUtils';
 import { parseUrlOnMessage } from '../../../../utils/parseUrlOnMessage';

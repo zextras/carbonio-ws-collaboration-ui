@@ -31,7 +31,7 @@ import {
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe } from '../../../../types/network/models/roomBeTypes';
 import { FileToUpload, messageActionType } from '../../../../types/store/ActiveConversationTypes';
-import { Message } from '../../../../types/store/MessageTypes';
+import { Message } from '../../../../types/store/ChatDataTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
 import { RootStore } from '../../../../types/store/StoreTypes';
 import { User, UserType } from '../../../../types/store/UserTypes';

@@ -19,7 +19,7 @@ import {
 import { getExportedChat, getUserId } from '../../../store/selectors/SessionSelectors';
 import { getUserName } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
-import { Message, MessageType } from '../../../types/store/MessageTypes';
+import { Message, MessageType } from '../../../types/store/ChatDataTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 
 type ChatItemProps = {

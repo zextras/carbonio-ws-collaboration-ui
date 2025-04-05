@@ -10,7 +10,7 @@ import { displayChatNotification } from './displayMessageBrowserNotification';
 import { CHATS_ROUTE } from '../../../constants/appConstants';
 import { EventName, sendCustomEvent } from '../../../hooks/useEventListener';
 import useStore from '../../../store/Store';
-import { MessageFastening, TextMessage } from '../../../types/store/MessageTypes';
+import { MessageFastening, TextMessage } from '../../../types/store/ChatDataTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 import { getLocalStorageItem, LOCAL_STORAGE_NAMES } from '../../../utils/localStorageUtils';
 import UserDataRetriever from '../../../utils/UserDataRetriever';

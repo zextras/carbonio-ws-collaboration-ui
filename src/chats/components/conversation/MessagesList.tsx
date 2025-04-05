@@ -28,7 +28,7 @@ import {
 import { getXmppClient } from '../../../store/selectors/ConnectionSelector';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
-import { Message, MessageType } from '../../../types/store/MessageTypes';
+import { Message, MessageType } from '../../../types/store/ChatDataTypes';
 import { formatDate, isBefore } from '../../../utils/dateUtils';
 import { scrollToEnd, scrollToMessage } from '../../../utils/scrollUtils';
 

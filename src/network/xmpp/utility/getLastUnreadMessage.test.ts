@@ -13,7 +13,7 @@ import {
 	createMockTextMessage,
 	createMockUser
 } from '../../../tests/createMock';
-import { OperationType } from '../../../types/store/MessageTypes';
+import { OperationType } from '../../../types/store/ChatDataTypes';
 import { dateToTimestamp } from '../../../utils/dateUtils';
 
 const sessionUser = createMockUser({ id: 'userId', name: 'User' });

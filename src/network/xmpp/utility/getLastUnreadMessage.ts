@@ -6,7 +6,7 @@
 import { find, last } from 'lodash';
 
 import useStore from '../../../store/Store';
-import { Message, MessageType } from '../../../types/store/MessageTypes';
+import { Message, MessageType } from '../../../types/store/ChatDataTypes';
 import { isBefore } from '../../../utils/dateUtils';
 
 export function getLastUnreadMessage(roomId: string): string | undefined {

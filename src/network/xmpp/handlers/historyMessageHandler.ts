@@ -8,7 +8,7 @@ import { filter, forEach, size, unionBy } from 'lodash';
 import { Strophe } from 'strophe.js';
 
 import useStore from '../../../store/Store';
-import { MessageType, TextMessage } from '../../../types/store/MessageTypes';
+import { MessageType, TextMessage } from '../../../types/store/ChatDataTypes';
 import { RootStore } from '../../../types/store/StoreTypes';
 import { dateToTimestamp } from '../../../utils/dateUtils';
 import { xmppDebug } from '../../../utils/debug';

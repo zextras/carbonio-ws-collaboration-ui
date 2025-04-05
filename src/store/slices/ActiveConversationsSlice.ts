@@ -15,7 +15,7 @@ import {
 	Message,
 	MessageType,
 	TextMessage
-} from '../../types/store/MessageTypes';
+} from '../../types/store/ChatDataTypes';
 import { ActiveConversationsSlice, RootStore } from '../../types/store/StoreTypes';
 import { isBefore } from '../../utils/dateUtils';
 

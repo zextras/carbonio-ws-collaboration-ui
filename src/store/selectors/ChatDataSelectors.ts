@@ -6,16 +6,16 @@
 import { filter, find, forEach, includes, last, map, orderBy, reduce, size } from 'lodash';
 
 import { FilteredConversation } from '../../chats/components/secondaryBar/SecondaryBarView';
-import { Marker, RoomMarkers } from '../../types/store/MarkersTypes';
 import {
 	AttachmentMessageType,
 	ConfigurationMessage,
 	FasteningAction,
+	Marker,
 	Message,
 	MessageFastening,
 	MessageType,
 	TextMessage
-} from '../../types/store/MessageTypes';
+} from '../../types/store/ChatDataTypes';
 import { RoomType } from '../../types/store/RoomTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 import useStore from '../Store';
@@ -205,7 +205,7 @@ export const getMyLastMarkerOfRoom = (store: RootStore, roomId: string): Marker 
 export const getRoomHasMarkers = (store: RootStore, roomId: string): boolean =>
 	!!store.chatData[roomId]?.markers;
 
-export const getMarkers = (store: RootStore, roomId: string): RoomMarkers =>
+export const getMarkers = (store: RootStore, roomId: string): { [userId: string]: Marker } =>
 	store.chatData[roomId]?.markers;
 
 export const getTotalUnreadCountSelector = (store: RootStore): number => {

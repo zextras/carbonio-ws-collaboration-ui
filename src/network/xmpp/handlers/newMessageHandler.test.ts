@@ -15,7 +15,7 @@ import {
 	MessageFastening,
 	MessageType,
 	TextMessage
-} from '../../../types/store/MessageTypes';
+} from '../../../types/store/ChatDataTypes';
 
 const createXMPPTextMessage = (textMessage: TextMessage): Element => {
 	const parser = new DOMParser();

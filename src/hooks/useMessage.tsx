@@ -15,7 +15,7 @@ import {
 	MessageFastening,
 	MessageType,
 	TextMessage
-} from '../types/store/MessageTypes';
+} from '../types/store/ChatDataTypes';
 
 const useMessage = (roomId: string, messageId: string): Message | undefined => {
 	const message = useStore<Message | undefined>((store) =>

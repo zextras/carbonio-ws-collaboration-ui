@@ -8,7 +8,7 @@
 import { filter, find, includes, last, map } from 'lodash';
 
 import { FileToUpload, ReferenceMessage } from '../../types/store/ActiveConversationTypes';
-import { TextMessage } from '../../types/store/MessageTypes';
+import { TextMessage } from '../../types/store/ChatDataTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 
 export const getReferenceMessage = (

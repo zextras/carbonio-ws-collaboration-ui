@@ -10,7 +10,7 @@ import { Text } from '@zextras/carbonio-design-system';
 
 import { CustomMessage } from './MessageFactory';
 import { useConfigurationMessageLabel } from '../../../../hooks/useConfigurationMessageLabel';
-import { ConfigurationMessage } from '../../../../types/store/MessageTypes';
+import { ConfigurationMessage } from '../../../../types/store/ChatDataTypes';
 
 type ConfigurationMsgProps = {
 	message: ConfigurationMessage;

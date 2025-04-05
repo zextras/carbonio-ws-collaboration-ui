@@ -7,7 +7,7 @@
 import { act, renderHook } from '@testing-library/react';
 
 import { createMockMember, createMockRoom, createMockUser } from '../../tests/createMock';
-import { MessageType } from '../../types/store/MessageTypes';
+import { MessageType } from '../../types/store/ChatDataTypes';
 import { RoomType } from '../../types/store/RoomTypes';
 import useStore from '../Store';
 

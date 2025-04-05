@@ -12,7 +12,7 @@ import styled from 'styled-components';
 
 import usePreview from '../../../../hooks/usePreview';
 import { AttachmentsApi } from '../../../../network';
-import { AttachmentMessageType } from '../../../../types/store/MessageTypes';
+import { AttachmentMessageType } from '../../../../types/store/ChatDataTypes';
 import { getThumbnailURL, isPreviewSupported } from '../../../../utils/attachmentUtils';
 
 const HoverContainer = styled(Container)<{ $isGenericFile: boolean }>`
