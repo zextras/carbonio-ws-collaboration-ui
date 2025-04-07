@@ -87,10 +87,6 @@
 		"display": "Chats",
 		"priority": 404,
 		"attrKey": "carbonioFeatureWscEnabled",
-		"type": "carbonio",
-		"translations_repository": "git@github.com:Zextras/carbonio-ws-collaboration-ui-i18n.git"
-	},
-	"config": {
-		"translations_repository": "git@github.com:Zextras/carbonio-ws-collaboration-ui-i18n.git"
+		"type": "carbonio"
 	}
 }

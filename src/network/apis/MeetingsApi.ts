@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { find } from 'lodash';
+import { chain, find } from 'lodash';
 
 import useStore from '../../store/Store';
 import { RequestType } from '../../types/network/apis/IBaseAPI';
@@ -41,6 +41,7 @@ import { STREAM_TYPE, Subscription } from '../../types/store/ActiveMeetingTypes'
 import { RoomType } from '../../types/store/RoomTypes';
 import { UserType } from '../../types/store/UserTypes';
 import { BrowserUtils } from '../../utils/BrowserUtils';
+import { dateToTimestamp } from '../../utils/dateUtils';
 import { fetchAPI } from '../../utils/FetchUtils';
 import { RoomsApi } from '../index';
 
@@ -119,6 +120,14 @@ class MeetingsApi implements IMeetingsApi {
 						);
 						if (iAmOwner) this.getWaitingList(meetingId);
 					}
+					// order hand raised if there's any
+					chain(meeting.participants)
+						.filter((p) => p.handRaisedAt !== undefined)
+						.sortBy((p) => dateToTimestamp(new Date(p.handRaisedAt ?? new Date())))
+						.each((participant) => {
+							useStore.getState().setUserWithHandRaised(meetingId, participant.userId, true);
+						})
+						.value();
 					return resp;
 				});
 			}
@@ -140,7 +149,7 @@ class MeetingsApi implements IMeetingsApi {
 				this.joinMeeting(meeting.id, settings, devicesId).then(() => meeting.id)
 			);
 		}
-		const roomName = useStore.getState().rooms[roomId]?.name || '';
+		const roomName = useStore.getState().rooms[roomId]?.name ?? '';
 		return this.createMeeting(roomId, MeetingType.PERMANENT, roomName).then((response) =>
 			this.startMeeting(response.id).then(() =>
 				this.joinMeeting(response.id, settings, devicesId).then(() => response.id)
@@ -161,7 +170,7 @@ class MeetingsApi implements IMeetingsApi {
 
 				// Leave temporary room when a member leaves the scheduled meeting
 				if (room?.type === RoomType.TEMPORARY && iAmNotOwner) {
-					RoomsApi.deleteRoomMember(room.id, useStore.getState().session.id || '');
+					RoomsApi.deleteRoomMember(room.id, useStore.getState().session.id ?? '');
 				}
 				if (isExternal) {
 					BrowserUtils.clearAuthCookies();
@@ -294,7 +303,7 @@ class MeetingsApi implements IMeetingsApi {
 		return fetch('/zx/login/v3/config', { method: RequestType.GET })
 			.then((resp) => {
 				if (resp.ok) return resp;
-				return Promise.reject(resp);
+				return Promise.reject(new Error(`${resp.status}`));
 			})
 			.then((resp) => resp.json())
 			.catch((err: Error) => Promise.reject(err));
@@ -309,7 +318,7 @@ class MeetingsApi implements IMeetingsApi {
 		})
 			.then((resp) => {
 				if (resp.ok) return resp;
-				return Promise.reject(resp);
+				return Promise.reject(new Error(`${resp.status}`));
 			})
 			.then((res) => res.text())
 			.then((res) => JSON.parse(res))
