@@ -65,9 +65,7 @@ const message = createMockTextMessage({
 const storeBasicActiveMeetingSetup = (): { user: UserEvent; store: RootStore } => {
 	const store: RootStore = useStore.getState();
 	store.setLoginInfo(user1.id, user1.name);
-	store.setUserInfo(user1);
-	store.setUserInfo(user2);
-	store.setUserInfo(user3);
+	store.setUserInfo([user1, user2, user3]);
 	store.addRoom(room);
 	store.addMeeting(meeting);
 	store.meetingConnection(meeting.id, false, undefined, false, undefined);

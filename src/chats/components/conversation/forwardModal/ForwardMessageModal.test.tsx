@@ -43,7 +43,7 @@ const chat3: RoomBe = createMockRoom({ id: 'chat3', name: 'Chat 3', type: RoomTy
 beforeEach(() => {
 	const store: RootStore = useStore.getState();
 	store.setLoginInfo(sessionUser.id, sessionUser.name);
-	store.setUserInfo(user1);
+	store.setUserInfo([user1]);
 	store.addRoom(testRoom);
 	store.addRoom(chat);
 	store.addRoom(chat2);

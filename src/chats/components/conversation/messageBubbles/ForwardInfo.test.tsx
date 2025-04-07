@@ -27,7 +27,7 @@ const forwardedInfo = {
 
 beforeEach(() => {
 	const store: RootStore = useStore.getState();
-	store.setUserInfo(forwardedUser);
+	store.setUserInfo([forwardedUser]);
 });
 describe('Forward Info', () => {
 	test('ForwardInfo contains original sender name', () => {

@@ -6,11 +6,12 @@
  */
 
 import { produce } from 'immer';
+import { forEach } from 'lodash';
 import { StateCreator } from 'zustand';
 
 import { UserBe } from '../../types/network/models/userBeTypes';
-import { RootStore, UsersStoreSlice } from '../../types/store/StoreTypes';
-import { UserType } from '../../types/store/UserTypes';
+import { RootStore } from '../../types/store/StoreTypes';
+import { UsersStoreSlice, UserType } from '../../types/store/UserTypes';
 
 export const useUsersStoreSlice: StateCreator<
 	RootStore,
@@ -19,18 +20,18 @@ export const useUsersStoreSlice: StateCreator<
 	UsersStoreSlice
 > = (set) => ({
 	users: {},
-	setUserInfo: (user: UserBe): void => {
+	setUserInfo: (users: UserBe[]): void => {
 		set(
 			produce((draft: RootStore) => {
-				draft.users[user.id] = {
-					...draft.users[user.id],
-					id: user.id,
-					email: user.email,
-					name: user.name,
-					type: user.type ?? UserType.INTERNAL,
-					lastSeen: user.lastSeen,
-					statusMessage: user.statusMessage
-				};
+				forEach(users, (user) => {
+					draft.users[user.id] = {
+						...draft.users[user.id],
+						id: user.id,
+						email: user.email,
+						name: user.name,
+						type: user.type
+					};
+				});
 			}),
 			false,
 			'USERS/SET_USER_INFO'
@@ -48,28 +49,16 @@ export const useUsersStoreSlice: StateCreator<
 			'USERS/SET_PRESENCE'
 		);
 	},
-	setUserLastActivity: (id: string, date: number): void => {
+	setUserLastActivity: (id: string, date?: number): void => {
 		set(
 			produce((draft: RootStore) => {
 				draft.users[id] = {
 					...draft.users[id],
-					last_activity: date
+					lastActivity: date
 				};
 			}),
 			false,
 			'USERS/SET_LAST_ACTIVITY'
-		);
-	},
-	setUserStatusMessage: (id: string, statusMsg: string): void => {
-		set(
-			produce((draft: RootStore) => {
-				draft.users[id] = {
-					...draft.users[id],
-					statusMessage: statusMsg
-				};
-			}),
-			false,
-			'USERS/SET_STATUS_MESSAGE'
 		);
 	},
 	setAnonymousUser: (id: string): void => {

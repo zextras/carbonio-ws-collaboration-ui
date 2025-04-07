@@ -41,6 +41,8 @@ export type PromoteRoomMemberResponse = Response;
 
 export type DemotesRoomMemberResponse = Response;
 
+export type UpdateRoomOwnersResponse = Response;
+
 export type GetRoomAttachmentsResponse = {
 	attachments: Attachment[];
 };
