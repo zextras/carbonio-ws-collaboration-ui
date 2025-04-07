@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { act, renderHook, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 
 import MuteConversationAction from './MuteConversationAction';
 import useStore from '../../../../store/Store';
@@ -25,7 +25,7 @@ const testRoom: RoomBe = createMockRoom({
 });
 
 const testRoom2: RoomBe = createMockRoom({
-	id: 'room-test',
+	id: 'room-test-2',
 	name: '',
 	description: 'A description',
 	type: RoomType.GROUP,
@@ -33,16 +33,18 @@ const testRoom2: RoomBe = createMockRoom({
 	userSettings: { muted: true }
 });
 
+beforeEach(() => {
+	const store = useStore.getState();
+	store.addRooms([testRoom, testRoom2]);
+});
 describe('Mute/Unmute Conversation', () => {
 	test('Label should be "Mute notifications" in groups', async () => {
-		useStore.getState().addRoom(testRoom);
 		setup(<MuteConversationAction roomId={testRoom.id} />);
 		const titleIsPresent = screen.getByText(/Mute notifications/i);
 		expect(titleIsPresent).toBeInTheDocument();
 	});
 
 	test('Label should be "Activate notifications" in groups', async () => {
-		useStore.getState().addRoom(testRoom2);
 		setup(<MuteConversationAction roomId={testRoom2.id} />);
 		const titleIsPresent = screen.getByText(/Activate notifications/i);
 		expect(titleIsPresent).toBeInTheDocument();
@@ -50,8 +52,6 @@ describe('Mute/Unmute Conversation', () => {
 
 	test('mute notifications', async () => {
 		const spyOnMuteRoomNotification = spyOnRoomsApi(RoomsApiToSpy.MUTE_ROOM_NOTIFICATION);
-		const { result } = renderHook(() => useStore());
-		act(() => result.current.addRoom(testRoom));
 		const { user } = setup(<MuteConversationAction roomId={testRoom.id} />);
 
 		const muteAction = await screen.findByText(/Mute notifications/i);
@@ -64,8 +64,6 @@ describe('Mute/Unmute Conversation', () => {
 
 	test('unmute notifications', async () => {
 		const spyOnUnmuteRoomNotification = spyOnRoomsApi(RoomsApiToSpy.UNMUTE_ROOM_NOTIFICATION);
-		const { result } = renderHook(() => useStore());
-		act(() => result.current.addRoom(testRoom2));
 		const { user } = setup(<MuteConversationAction roomId={testRoom2.id} />);
 
 		const unmuteAction = screen.getByText(/Activate notifications/i);
@@ -77,8 +75,6 @@ describe('Mute/Unmute Conversation', () => {
 	});
 
 	test('undo mute', async () => {
-		const { result } = renderHook(() => useStore());
-		act(() => result.current.addRoom(testRoom));
 		const { user } = setup(<MuteConversationAction roomId={testRoom.id} />);
 
 		const mute = screen.getByText(/Mute notifications/i);
@@ -89,12 +85,10 @@ describe('Mute/Unmute Conversation', () => {
 		const snackbar = await screen.findByText(/Notifications muted for this chat/i);
 		expect(snackbar).toBeVisible();
 		await user.click(screen.getByText(/UNDO/i));
-		expect(result.current.rooms[testRoom.id].userSettings?.muted).toBe(false);
+		expect(useStore.getState().rooms[testRoom.id].userSettings?.muted).toBe(false);
 	});
 
 	test('undo unmute', async () => {
-		const { result } = renderHook(() => useStore());
-		act(() => result.current.addRoom(testRoom2));
 		const { user } = setup(<MuteConversationAction roomId={testRoom2.id} />);
 
 		const unmuteAction = screen.getByText(/Activate notifications/i);
@@ -102,6 +96,6 @@ describe('Mute/Unmute Conversation', () => {
 		const snackbar = await screen.findByText(/Notifications activated for this chat/i);
 		expect(snackbar).toBeVisible();
 		await user.click(screen.getByText(/UNDO/i));
-		expect(result.current.rooms[testRoom.id].userSettings?.muted).toBe(true);
+		expect(useStore.getState().rooms[testRoom2.id].userSettings?.muted).toBe(true);
 	});
 });

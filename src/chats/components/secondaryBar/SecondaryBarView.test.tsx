@@ -107,7 +107,7 @@ beforeEach(() => {
 	const store: RootStore = useStore.getState();
 	store.setChatsBeStatus(true);
 	store.setLoginInfo(user1Be.id, user1Be.name);
-	store.setRooms([mockedGroup1, mockedOneToOne1, mockedGroup2, mockedOneToOne2]);
+	store.addRooms([mockedGroup1, mockedOneToOne1, mockedGroup2, mockedOneToOne2]);
 	store.setUserInfo([user1Be, user2Be, user3Be]);
 	store.newMessage(mkdTextMsgUser3Group1);
 	store.newMessage(mkdTextMsgUser1OneToOne);
@@ -228,7 +228,7 @@ describe('SecondaryBar tests', () => {
 		test('First render displays only 10 list element', async () => {
 			useStore
 				.getState()
-				.setRooms([
+				.addRooms([
 					createMockRoom({ id: '1' }),
 					createMockRoom({ id: '2' }),
 					createMockRoom({ id: '3' }),

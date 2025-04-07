@@ -30,7 +30,7 @@ const event: MeetingAudioStreamChangedEvent = {
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo('sessionUserId', 'User');
-	store.addRoom(room);
+	store.addRooms([room]);
 	store.addMeeting(meeting);
 	store.addParticipant(meeting.id, createMockParticipants({ userId: 'sessionUserId' }));
 	store.addParticipant(meeting.id, createMockParticipants({ userId: event.userId }));

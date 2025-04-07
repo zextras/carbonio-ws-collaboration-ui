@@ -6,11 +6,11 @@
 
 import React from 'react';
 
-import { act, renderHook, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 
 import LeaveConversationAction from './LeaveConversationAction';
 import useStore from '../../../../store/Store';
-import { createMockRoom, createMockUser } from '../../../../tests/createMock';
+import { createMockMember, createMockRoom, createMockUser } from '../../../../tests/createMock';
 import { RoomsApiToSpy, spyOnRoomsApi } from '../../../../tests/mocks/network';
 import { mockGoToMainPage } from '../../../../tests/mocks/useRouting';
 import { setup } from '../../../../tests/test-utils';
@@ -21,53 +21,27 @@ const user1Info: User = createMockUser();
 
 const user2Info: User = createMockUser();
 
-const mockedRoom2 = createMockRoom({
-	id: 'roomId',
-	type: RoomType.GROUP,
-	members: [
-		{
-			userId: user1Info.id,
-			owner: true,
-			temporary: false,
-			external: false
-		},
-		{
-			userId: user2Info.id,
-			owner: false,
-			temporary: false,
-			external: false
-		}
-	]
-});
-
 const mockedRoom = createMockRoom({
 	id: 'roomId',
 	type: RoomType.GROUP,
 	members: [
-		{
-			userId: user1Info.id,
-			owner: true,
-			temporary: false,
-			external: false
-		},
-		{
-			userId: user2Info.id,
-			owner: false,
-			temporary: false,
-			external: false
-		}
+		createMockMember({ userId: user1Info.id, owner: true }),
+		createMockMember({ userId: user2Info.id })
 	]
+});
+
+beforeEach(() => {
+	const store = useStore.getState();
+	store.setLoginInfo(user2Info.id, user2Info.name);
+	store.addRooms([mockedRoom]);
 });
 
 describe('Leave conversation Action', () => {
 	test('leave conversation - open and close modal', async () => {
-		const store = useStore.getState();
-		store.setLoginInfo(user2Info.id, user2Info.name);
-		store.addRoom(mockedRoom2);
 		const { user } = setup(
 			<LeaveConversationAction
-				type={mockedRoom2.type}
-				roomId={mockedRoom2.id}
+				type={mockedRoom.type}
+				roomId={mockedRoom.id}
 				iAmOneOfOwner={false}
 			/>
 		);
@@ -77,13 +51,9 @@ describe('Leave conversation Action', () => {
 		await user.click(screen.getByTestId('icon: Close'));
 		expect(screen.queryByTestId('leave_modal')).not.toBeInTheDocument();
 	});
+
 	test('leave conversation', async () => {
 		const spyOnDeleteRoomMember = spyOnRoomsApi(RoomsApiToSpy.DELETE_ROOM_MEMBER);
-		const { result } = renderHook(() => useStore());
-		act(() => {
-			result.current.setLoginInfo(user2Info.id, user2Info.name);
-			result.current.addRoom(mockedRoom);
-		});
 		mockGoToMainPage.mockReturnValue('main page');
 		const { user } = setup(
 			<LeaveConversationAction
@@ -93,7 +63,7 @@ describe('Leave conversation Action', () => {
 			/>
 		);
 
-		expect(result.current.rooms[mockedRoom.id].members?.length).toBe(2);
+		expect(useStore.getState().rooms[mockedRoom.id].members?.length).toBe(2);
 
 		await user.click(screen.getByText(/Leave Group/i));
 		const button = await screen.findByRole('button', { name: 'Leave' });

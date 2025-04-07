@@ -73,9 +73,8 @@ const mockedRoomOneOwner = createMockRoom({
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo(user1Be.id, user1Be.name);
-	store.addRoom(mockedRoomOneOwner);
+	store.addRooms([mockedRoomOneOwner, mockedRoom]);
 	store.setUserInfo([user1Be, user2Be, user3Be, user4Be]);
-	store.addRoom(mockedRoom);
 });
 
 describe('Participant component info', () => {

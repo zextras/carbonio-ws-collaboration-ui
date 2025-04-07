@@ -17,7 +17,7 @@ import { setup } from '../../tests/test-utils';
 const room = createMockRoom({ id: 'test-room-1' });
 
 beforeEach(() => {
-	useStore.getState().addRoom(createMockRoom(room));
+	useStore.getState().addRooms([room]);
 });
 describe('RoomView', () => {
 	test('roomId param correspond to a room stored in the store', () => {

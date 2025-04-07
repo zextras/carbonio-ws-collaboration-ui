@@ -53,7 +53,7 @@ const groupMeeting: MeetingBe = createMockMeeting({
 const setupBasicGroupMeeting = (): void => {
 	const store: RootStore = useStore.getState();
 	act(() => {
-		store.addRoom(groupRoom);
+		store.addRooms([groupRoom]);
 		store.addMeeting(groupMeeting);
 		store.meetingConnection(groupMeeting.id, false, undefined, false, undefined);
 	});

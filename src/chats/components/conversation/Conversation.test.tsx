@@ -65,7 +65,7 @@ beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo(user1Info.id, user1Info.email, user1Info.name);
 	store.setUserInfo([user2Info]);
-	store.setRooms([testRoom, testRoom2]);
+	store.addRooms([testRoom, testRoom2]);
 });
 
 describe('Conversation view', () => {
@@ -136,7 +136,7 @@ describe('Conversation view', () => {
 	test('Add moderator and check everything is shown correctly', async () => {
 		setup(<Conversation roomId={testRoom.id} />);
 		act(() => {
-			useStore.getState().promoteMemberToModerator(testRoom.id, user1Info.id);
+			useStore.getState().setMemberModeratorStatus(testRoom.id, user1Info.id, true);
 			wsEventsHandler({
 				type: WsEventType.ROOM_OWNER_PROMOTED,
 				sentDate: new Date().toISOString(),
@@ -155,7 +155,7 @@ describe('Conversation view', () => {
 	test('Remove moderator and check everything is shown correctly', async () => {
 		setup(<Conversation roomId={testRoom2.id} />);
 		act(() => {
-			useStore.getState().demoteMemberFromModerator(testRoom2.id, user1Info.id);
+			useStore.getState().setMemberModeratorStatus(testRoom2.id, user1Info.id, false);
 			wsEventsHandler({
 				type: WsEventType.ROOM_OWNER_DEMOTED,
 				sentDate: new Date().toISOString(),

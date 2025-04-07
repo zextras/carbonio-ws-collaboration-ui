@@ -132,7 +132,7 @@ describe('SessionStoreSlice tests', () => {
 	});
 
 	beforeEach(() => {
-		useStore.getState().addRoom(groupRoom);
+		useStore.getState().addRooms([groupRoom]);
 	});
 	describe('chatExporting', () => {
 		test('Start chat export', () => {

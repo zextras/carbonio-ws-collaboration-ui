@@ -44,10 +44,7 @@ beforeEach(() => {
 	const store: RootStore = useStore.getState();
 	store.setLoginInfo(sessionUser.id, sessionUser.name);
 	store.setUserInfo([user1]);
-	store.addRoom(testRoom);
-	store.addRoom(chat);
-	store.addRoom(chat2);
-	store.addRoom(chat3);
+	store.addRooms([testRoom, chat, chat2, chat3]);
 });
 
 describe('Forward Message Modal', () => {

@@ -67,8 +67,8 @@ class RoomsApi implements IRoomsApi {
 			params = `?${array.join('&')}`;
 		}
 		return fetchAPI(`rooms${params}`, RequestType.GET).then((resp: ListRoomsResponse) => {
-			const { setRooms } = useStore.getState();
-			setRooms(resp);
+			const { addRooms } = useStore.getState();
+			addRooms(resp);
 			return resp;
 		});
 	}
@@ -291,7 +291,7 @@ class RoomsApi implements IRoomsApi {
 		text: string,
 		file?: File
 	): Promise<AddRoomResponse> {
-		const { setPlaceholderMessage, replacePlaceholderRoom } = useStore.getState();
+		const { setPlaceholderMessage, removePlaceholderRoom } = useStore.getState();
 		setPlaceholderMessage({
 			roomId: `placeholder-${userId}`,
 			id: uuidGenerator(),
@@ -305,7 +305,7 @@ class RoomsApi implements IRoomsApi {
 			type: RoomType.ONE_TO_ONE,
 			members: [{ userId, owner: true }]
 		}).then((response) => {
-			replacePlaceholderRoom(userId, response.id);
+			removePlaceholderRoom(userId);
 			sendCustomEvent({
 				name: EventName.ROUTE_REDIRECT,
 				data: {

@@ -23,7 +23,7 @@ const meeting: MeetingBe = createMockMeeting({
 
 beforeEach(() => {
 	const store: RootStore = useStore.getState();
-	store.addRoom(room);
+	store.addRooms([room]);
 	store.addMeeting(meeting);
 	store.startMeeting(meeting.id, '2024-08-25T17:24:28.961+02:00');
 });

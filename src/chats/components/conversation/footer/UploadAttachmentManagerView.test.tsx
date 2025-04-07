@@ -51,7 +51,6 @@ const pdfToUpload: FileToUpload = createMockFileToUpload({
 
 const storeSetupBasic = (file: FileToUpload): UserEvent => {
 	const store = useStore.getState();
-	store.addRoom(mockedRoom);
 	store.setFilesToAttach(mockedRoom.id, [file]);
 	const { user } = setup(<UploadAttachmentManagerView roomId={mockedRoom.id} />);
 	return user;
@@ -59,7 +58,6 @@ const storeSetupBasic = (file: FileToUpload): UserEvent => {
 
 const storeSetupAdvanced = (): { user: UserEvent; store: RootStore } => {
 	const store = useStore.getState();
-	store.addRoom(mockedRoom);
 	const { user } = setup(
 		<>
 			<UploadAttachmentManagerView roomId={mockedRoom.id} />
@@ -68,6 +66,11 @@ const storeSetupAdvanced = (): { user: UserEvent; store: RootStore } => {
 	);
 	return { user, store };
 };
+
+beforeEach(() => {
+	const store = useStore.getState();
+	store.addRooms([mockedRoom]);
+});
 
 describe('Upload attachment view', () => {
 	test('Test if upload manager is displayed when a file is added to be uploaded', async () => {
@@ -182,8 +185,6 @@ describe('Upload attachment view', () => {
 		expect(composerText).toBeInTheDocument();
 	});
 	test('input has text in it and user decides to upload one file with drag&drop => files is shown as selected, the text in the input is set as description of the file and the input has focus', async () => {
-		const store = useStore.getState();
-		store.addRoom(mockedRoom);
 		const { user } = setup(<Chat roomId={mockedRoom.id} setInfoPanelOpen={jest.fn()} />);
 		const inputText = genericDescription;
 		const composerTextArea = screen.getByRole('textbox');
@@ -421,8 +422,6 @@ describe('Upload attachment view', () => {
 		expect(filesToAttachUpdated?.length).toBeUndefined();
 	});
 	test('input has text in it and user decides to upload more file with drag&drop => first file is shown as selected, the text in the input is set as description of the file and the input has focus', async () => {
-		const store = useStore.getState();
-		store.addRoom(mockedRoom);
 		const { user } = setup(<Chat roomId={mockedRoom.id} setInfoPanelOpen={jest.fn()} />);
 		const inputText = genericDescription;
 		const composerTextArea = screen.getByRole('textbox');
@@ -457,7 +456,6 @@ describe('Upload attachment view', () => {
 	});
 	test('a file is selected with the description set in the input, user add a new file with drag&drop => new file is added but the focus remains to the previous selected and description stay in the input', async () => {
 		const store = useStore.getState();
-		store.addRoom(mockedRoom);
 		const { user } = setup(<Chat roomId={mockedRoom.id} setInfoPanelOpen={jest.fn()} />);
 		const inputText = genericDescription;
 		const fileOne = createMockFileToUpload({
@@ -485,7 +483,6 @@ describe('Upload attachment view', () => {
 	});
 	test('a file is selected with the description set in the input, user add more files with drag&drop => new files are added but the focus remains to the previous selected and description stay in the input', async () => {
 		const store = useStore.getState();
-		store.addRoom(mockedRoom);
 		const { user } = setup(<Chat roomId={mockedRoom.id} setInfoPanelOpen={jest.fn()} />);
 		const inputText = genericDescription;
 		const fileOne = createMockFileToUpload({

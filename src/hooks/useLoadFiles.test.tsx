@@ -29,7 +29,7 @@ const setInputWithTextContent = (textContent: string): void => {
 
 beforeEach(() => {
 	const store = useStore.getState();
-	store.addRoom(room);
+	store.addRooms([room]);
 	store.setInputHasFocus(room.id, true);
 	document.body.innerHTML = '';
 });
