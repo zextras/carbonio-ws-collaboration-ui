@@ -11,6 +11,7 @@ import audioOff from '../meetings/assets/AudioOFF.mp3';
 import audioOn from '../meetings/assets/AudioON.mp3';
 import meetingIn from '../meetings/assets/MeetingIN.mp3';
 import meetingOut from '../meetings/assets/MeetingOUT.mp3';
+import raiseHandSound from '../meetings/assets/raiseHand.mp3';
 import screenshareOn from '../meetings/assets/ScreenShareON.mp3';
 import waitingUserSound from '../meetings/assets/waitingUserOnQueue.mp3';
 import { STREAM_TYPE, TileData } from '../types/store/ActiveMeetingTypes';
@@ -21,7 +22,8 @@ export enum MeetingSoundFeedback {
 	MEETING_SCREENSHARE_NOTIFICATION = 'meetingScreenshareNotification',
 	MEETING_AUDIO_ON = 'meetingAudioOn',
 	MEETING_AUDIO_OFF = 'meetingAudioOff',
-	NEW_WAITING_USER = 'newWaitingUser'
+	NEW_WAITING_USER = 'newWaitingUser',
+	NEW_HAND_RAISED = 'newHandRaised'
 }
 
 export const sendAudioFeedback = (type: MeetingSoundFeedback): Promise<void> | undefined => {
@@ -43,6 +45,9 @@ export const sendAudioFeedback = (type: MeetingSoundFeedback): Promise<void> | u
 		}
 		case MeetingSoundFeedback.NEW_WAITING_USER: {
 			return new Audio(waitingUserSound).play();
+		}
+		case MeetingSoundFeedback.NEW_HAND_RAISED: {
+			return new Audio(raiseHandSound).play();
 		}
 		default:
 			return undefined;

@@ -137,7 +137,7 @@ const TileUserInfo: FC<tileUserInfoProps> = ({
 						{isUserGuest && <GuestUserLabel />}
 					</TextContainer>
 				</Row>
-				{isHandRaised && (
+				{isHandRaised && !isScreenShare && (
 					<CustomContainer
 						background={'gray0'}
 						height="fit"
