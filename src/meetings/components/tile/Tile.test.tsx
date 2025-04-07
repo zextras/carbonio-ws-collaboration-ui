@@ -221,7 +221,7 @@ describe('Tile test - on meeting', () => {
 	test('Hand raised', async () => {
 		const store = useStore.getState();
 		store.meetingConnection(meeting.id, true, undefined, false, undefined);
-		setup(<Tile userId={user1.id} meetingId={meeting.id} isScreenShare />);
+		setup(<Tile userId={user1.id} meetingId={meeting.id} />);
 
 		act(() => {
 			useStore.getState().setUserWithHandRaised(meeting.id, user1.id, true);

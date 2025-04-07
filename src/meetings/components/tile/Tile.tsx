@@ -185,7 +185,7 @@ const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProp
 			ref={hoverRef}
 			$isHovering={isHoovering}
 			$isPip={!!isPip}
-			$isHandRaised={userHasHandRaised}
+			$isHandRaised={userHasHandRaised && !isScreenShare}
 		>
 			{showHoverContainer && (
 				<TileHoverContainer
