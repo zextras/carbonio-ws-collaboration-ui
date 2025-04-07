@@ -5,6 +5,7 @@
  */
 import useStore from '../../../store/Store';
 import { MeetingParticipantHandRaisedEvent } from '../../../types/network/websocket/wsMeetingEvents';
+import { MeetingSoundFeedback, sendAudioFeedback } from '../../../utils/MeetingsUtils';
 import { isMeetingActive } from '../eventHandlersUtilities';
 
 export const meetingParticipantHandRaisedHandler = (
@@ -13,5 +14,8 @@ export const meetingParticipantHandRaisedHandler = (
 	const state = useStore.getState();
 	if (isMeetingActive(event.meetingId)) {
 		state.setUserWithHandRaised(event.meetingId, event.userId, event.raised);
+		if (event.raised) {
+			sendAudioFeedback(MeetingSoundFeedback.NEW_HAND_RAISED);
+		}
 	}
 };

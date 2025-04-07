@@ -119,3 +119,9 @@ export const getUserHasHandRaised = (
 ): boolean =>
 	find(store.activeMeeting[meetingId]?.usersWithHandRaised, (user) => user === userId) !==
 	undefined;
+
+// 0 means that the user is not found in the array
+export const getUserHandRank = (store: RootStore, meetingId: string, userId: string): number => {
+	const index = store.activeMeeting[meetingId]?.usersWithHandRaised.indexOf(userId);
+	return index >= 0 ? index + 1 : 0;
+};
