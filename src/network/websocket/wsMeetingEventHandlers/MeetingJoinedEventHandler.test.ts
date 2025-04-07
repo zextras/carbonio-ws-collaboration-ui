@@ -29,9 +29,8 @@ const event: MeetingJoinedEvent = {
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo('sessionUserId', 'User');
-	store.addRoom(room);
+	store.addRooms([room, groupRoom]);
 	store.addMeeting(meeting);
-	store.addRoom(groupRoom);
 	store.addMeeting(groupMeeting);
 });
 describe('meetingJoinedEventHandler tests', () => {

@@ -29,7 +29,7 @@ const meeting = createMockMeeting({
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setUserInfo([user, user0]);
-	store.addRoom(room);
+	store.addRooms([room]);
 	store.addMeeting(meeting);
 });
 

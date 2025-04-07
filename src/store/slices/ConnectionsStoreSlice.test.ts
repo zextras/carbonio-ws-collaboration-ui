@@ -59,7 +59,7 @@ describe('Connections slice', () => {
 		act(() => {
 			result.current.setLoginInfo('userId', 'User');
 			result.current.setUserInfo([user]);
-			result.current.setRooms([room1, room2]);
+			result.current.addRooms([room1, room2]);
 		});
 
 		const initialStore = useStore.getState();

@@ -63,7 +63,7 @@ const testRoom2: RoomBe = createMockRoom({
 
 beforeEach(() => {
 	const store: RootStore = useStore.getState();
-	store.addRoom(testRoom2);
+	store.addRooms([testRoom2]);
 	store.setLoginInfo(user1Info.id, user1Info.name);
 	store.setUserInfo([user1Info, user2Info]);
 });

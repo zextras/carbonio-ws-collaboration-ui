@@ -44,7 +44,7 @@ beforeEach(() => {
 	const store: RootStore = useStore.getState();
 	store.setLoginInfo(user1Be.id, user1Be.name);
 	store.setUserInfo([user1Be, user2Be]);
-	store.setRooms([mockedOneToOne, mockedGroup]);
+	store.addRooms([mockedOneToOne, mockedGroup]);
 });
 
 describe('Collapsed sidebar list item', () => {
@@ -60,7 +60,7 @@ describe('Collapsed sidebar list item', () => {
 	test('Group - There is a new message and notifications are muted', async () => {
 		const store: RootStore = useStore.getState();
 		store.addUnreadCount(mockedGroup.id, 1);
-		store.setRoomMuted(mockedGroup.id);
+		store.setRoomMuteStatus(mockedGroup.id, true);
 		setup(<CollapsedSidebarListItem roomId={mockedGroup.id} />);
 		const unreadBadge = screen.getByTestId('unreads_counter');
 		expect(unreadBadge).toBeVisible();
@@ -72,7 +72,7 @@ describe('Collapsed sidebar list item', () => {
 	test('Group - There is a new message and also a draft', async () => {
 		const store: RootStore = useStore.getState();
 		store.addUnreadCount(mockedGroup.id, 1);
-		store.setRoomMuted(mockedGroup.id);
+		store.setRoomMuteStatus(mockedGroup.id, true);
 		store.setDraftMessage(mockedGroup.id, false, 'hi everyone!');
 		setup(<CollapsedSidebarListItem roomId={mockedGroup.id} />);
 		const unreadBadge = screen.getByTestId('unreads_counter');
@@ -94,7 +94,7 @@ describe('Collapsed sidebar list item', () => {
 	test('One to one - There is a new message and notifications are muted', async () => {
 		const store: RootStore = useStore.getState();
 		store.addUnreadCount(mockedOneToOne.id, 1);
-		store.setRoomMuted(mockedOneToOne.id);
+		store.setRoomMuteStatus(mockedOneToOne.id, true);
 		setup(<CollapsedSidebarListItem roomId={mockedOneToOne.id} />);
 		const unreadBadge = screen.getByTestId('unreads_counter');
 		expect(unreadBadge).toBeVisible();
@@ -106,7 +106,7 @@ describe('Collapsed sidebar list item', () => {
 	test('One to one - There is a new message and also a draft', async () => {
 		const store: RootStore = useStore.getState();
 		store.addUnreadCount(mockedOneToOne.id, 1);
-		store.setRoomMuted(mockedOneToOne.id);
+		store.setRoomMuteStatus(mockedOneToOne.id, true);
 		store.setDraftMessage(mockedOneToOne.id, false, 'hi everyone!');
 		setup(<CollapsedSidebarListItem roomId={mockedOneToOne.id} />);
 		const unreadBadge = screen.getByTestId('unreads_counter');

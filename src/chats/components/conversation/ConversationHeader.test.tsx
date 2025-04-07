@@ -67,7 +67,7 @@ const mockedRoom: RoomBe = createMockRoom({
 
 beforeEach(() => {
 	const store: RootStore = useStore.getState();
-	store.addRoom(mockedRoom);
+	store.addRooms([mockedRoom]);
 	store.setPlaceholderRoom(mockPaoloUser.id);
 });
 describe('Conversation header test', () => {
@@ -112,7 +112,7 @@ beforeEach(() => {
 	const store: RootStore = useStore.getState();
 	store.setLoginInfo(mockPaoloUser.id, mockPaoloUser.name);
 	store.setUserInfo([mockRobertoUser, mockLucaUser, mockGianniUser, mockQuintoUser]);
-	store.addRoom(mockedRoom);
+	store.addRooms([mockedRoom]);
 });
 describe('isWriting functionality', () => {
 	test('is writing appears when someone is writing and disappear if not', async () => {

@@ -35,7 +35,7 @@ const event: MeetingWaitingParticipantJoinedEvent = {
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo('myUserId', 'User');
-	store.addRoom(room);
+	store.addRooms([room]);
 	store.addMeeting(meeting);
 	store.addParticipant(meeting.id, createMockParticipants({ userId: 'myUserId' }));
 });

@@ -60,12 +60,8 @@ beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo(sessionUser.id, sessionUser.name);
 	store.setUserInfo([sessionUser, userOne]);
-	store.addRoom(ownerRoom);
-	store.addMeeting(ownerMeeting);
-	store.addRoom(ownersRoom);
-	store.addMeeting(ownersMeeting);
-	store.addRoom(memberRoom);
-	store.addMeeting(memberMeeting);
+	store.addRooms([ownerRoom, ownersRoom, memberRoom]);
+	store.setMeetings([ownerMeeting, ownersMeeting, memberMeeting]);
 });
 
 describe('VirtualRoomCard', () => {

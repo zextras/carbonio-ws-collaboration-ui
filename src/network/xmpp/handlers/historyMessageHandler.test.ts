@@ -51,8 +51,9 @@ describe('onHistoryMessageStanza', () => {
 });
 
 beforeEach(() => {
-	useStore.getState().addRoom(room);
+	useStore.getState().addRooms([room]);
 });
+
 describe('onRequestHistory', () => {
 	test('End request history stanza indicates MAM request is incomplete', () => {
 		HistoryAccumulator.addMessageToHistory(room.id, textMessage);

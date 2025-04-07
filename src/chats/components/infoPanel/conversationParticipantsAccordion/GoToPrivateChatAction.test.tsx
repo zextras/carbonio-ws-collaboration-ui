@@ -61,7 +61,7 @@ describe('GoToPrivateChatAction tests', () => {
 	});
 
 	test('User click the "Go to private chat" and chat already exists', async () => {
-		useStore.getState().addRoom(room);
+		useStore.getState().addRooms([room]);
 		const { user } = setup(<GoToPrivateChatAction memberId={user1.id} />);
 		const button = screen.getByRole('button');
 		await user.click(button);

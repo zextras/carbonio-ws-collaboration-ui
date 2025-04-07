@@ -48,30 +48,8 @@ const meeting: MeetingBe = createMockMeeting({
 
 const streamRef = React.createRef<HTMLVideoElement | null>();
 
-const storeBasicActiveMeetingSetup = (): void => {
-	const store: RootStore = useStore.getState();
-	store.setLoginInfo(user1.id, user1.name);
-	store.setUserInfo([user1, user2, user3]);
-	store.addRoom(room);
-	store.addMeeting(meeting);
-	store.meetingConnection(meeting.id, true, undefined, false, undefined);
-};
-
-const notModeratorActiveMeetingSetup = (): void => {
-	const store: RootStore = useStore.getState();
-	store.setLoginInfo(user2.id, user2.name);
-	store.setUserInfo([user1, user2, user3]);
-	store.addRoom(room);
-	store.addMeeting(meeting);
-	store.meetingConnection(meeting.id, true, undefined, false, undefined);
-};
-
 const storeSetupMyTileAudioOnVideoOff = (): { user: UserEvent; store: RootStore } => {
 	const store: RootStore = useStore.getState();
-	store.setUserInfo([user1, user2, user3]);
-	store.setLoginInfo(user1.id, user1.name);
-	store.addRoom(room);
-	store.addMeeting(meeting);
 	const { user } = setup(
 		<Tile
 			userId={user1.id}
@@ -89,10 +67,6 @@ const storeSetupMyTileAudioOnVideoOff = (): { user: UserEvent; store: RootStore 
 
 const storeSetupTileAudioOffAndVideoOn = (): { user: UserEvent; store: RootStore } => {
 	const store: RootStore = useStore.getState();
-	store.setUserInfo([user1, user2, user3]);
-	store.setLoginInfo(user1.id, user1.name);
-	store.addRoom(room);
-	store.addMeeting(meeting);
 	const { user } = setup(
 		<Tile
 			userId={user2.id}
@@ -110,10 +84,6 @@ const storeSetupTileAudioOffAndVideoOn = (): { user: UserEvent; store: RootStore
 
 const setupActiveMeeting = (): void => {
 	const store: RootStore = useStore.getState();
-	store.setUserInfo([user1, user2, user3]);
-	store.setLoginInfo(user1.id, user1.name);
-	store.addRoom(room);
-	store.addMeeting(meeting);
 	store.meetingConnection(meeting.id, true, 'audioId', false, undefined);
 	store.setTalkingUser(meeting.id, user3.id, true);
 
@@ -133,10 +103,6 @@ const setupActiveMeeting = (): void => {
 
 const storeSetupTileAudioOnAndVideoOff = (): { user: UserEvent; store: RootStore } => {
 	const store: RootStore = useStore.getState();
-	store.setUserInfo([user1, user2, user3]);
-	store.setLoginInfo(user1.id, user1.name);
-	store.addRoom(room);
-	store.addMeeting(meeting);
 	const { user } = setup(
 		<Tile
 			userId={user3.id}
@@ -151,6 +117,14 @@ const storeSetupTileAudioOnAndVideoOff = (): { user: UserEvent; store: RootStore
 	);
 	return { user, store };
 };
+
+beforeEach(() => {
+	const store: RootStore = useStore.getState();
+	store.setUserInfo([user1, user2, user3]);
+	store.setLoginInfo(user1.id, user1.name);
+	store.addRooms([room]);
+	store.addMeeting(meeting);
+});
 
 describe('Tile test - enter meeting modal', () => {
 	test('my tile - everything is rendered correctly', () => {
@@ -189,15 +163,16 @@ describe('Tile test - enter meeting modal', () => {
 
 describe('Tile test - on meeting', () => {
 	test('My tile - audio and video off ', async () => {
-		storeBasicActiveMeetingSetup();
+		const store = useStore.getState();
+		store.meetingConnection(meeting.id, true, undefined, false, undefined);
 		setup(<Tile userId={user1.id} meetingId={meeting.id} />);
 		expect(screen.getByTestId(iconMicOffOutline)).toBeInTheDocument();
 		expect(screen.getByTestId(iconVideoOffOutline)).toBeInTheDocument();
 	});
 
 	test('My tile - audio and video on ', async () => {
-		storeBasicActiveMeetingSetup();
 		const store: RootStore = useStore.getState();
+		store.meetingConnection(meeting.id, true, undefined, false, undefined);
 		store.changeStreamStatus(meeting.id, user1.id, STREAM_TYPE.AUDIO, true);
 		store.changeStreamStatus(meeting.id, user1.id, STREAM_TYPE.VIDEO, true);
 		setup(<Tile userId={user1.id} meetingId={meeting.id} />);
@@ -206,7 +181,8 @@ describe('Tile test - on meeting', () => {
 	});
 
 	test('My tile - screen share on', async () => {
-		storeBasicActiveMeetingSetup();
+		const store = useStore.getState();
+		store.meetingConnection(meeting.id, true, undefined, false, undefined);
 		setup(<Tile userId={user1.id} meetingId={meeting.id} isScreenShare />);
 		expect(screen.queryByTestId(iconMicOffOutline)).not.toBeInTheDocument();
 		expect(screen.queryByTestId(iconVideoOffOutline)).not.toBeInTheDocument();
@@ -214,15 +190,16 @@ describe('Tile test - on meeting', () => {
 	});
 
 	test('User tile - audio and video off ', async () => {
-		storeBasicActiveMeetingSetup();
+		const store = useStore.getState();
+		store.meetingConnection(meeting.id, true, undefined, false, undefined);
 		setup(<Tile userId={user2.id} meetingId={meeting.id} />);
 		expect(screen.getByTestId(iconMicOffOutline)).toBeInTheDocument();
 		expect(screen.getByTestId(iconVideoOffOutline)).toBeInTheDocument();
 	});
 
 	test('User tile - audio and video on ', async () => {
-		storeBasicActiveMeetingSetup();
-		const store: RootStore = useStore.getState();
+		const store = useStore.getState();
+		store.meetingConnection(meeting.id, true, undefined, false, undefined);
 		store.changeStreamStatus(meeting.id, user2.id, STREAM_TYPE.AUDIO, true);
 		store.changeStreamStatus(meeting.id, user2.id, STREAM_TYPE.VIDEO, true);
 		setup(<Tile userId={user2.id} meetingId={meeting.id} />);
@@ -233,7 +210,8 @@ describe('Tile test - on meeting', () => {
 	});
 
 	test('User tile - screen share on', async () => {
-		storeBasicActiveMeetingSetup();
+		const store = useStore.getState();
+		store.meetingConnection(meeting.id, true, undefined, false, undefined);
 		setup(<Tile userId={user1.id} meetingId={meeting.id} isScreenShare />);
 		expect(screen.queryByTestId(iconMicOffOutline)).not.toBeInTheDocument();
 		expect(screen.queryByTestId(iconVideoOffOutline)).not.toBeInTheDocument();
@@ -241,7 +219,8 @@ describe('Tile test - on meeting', () => {
 	});
 
 	test('Hand raised', async () => {
-		storeBasicActiveMeetingSetup();
+		const store = useStore.getState();
+		store.meetingConnection(meeting.id, true, undefined, false, undefined);
 		setup(<Tile userId={user1.id} meetingId={meeting.id} />);
 
 		act(() => {
@@ -258,12 +237,10 @@ describe('Tile test - on meeting', () => {
 
 describe('Tile actions', () => {
 	test('mute for all appears and works if I am a moderator', async () => {
-		storeBasicActiveMeetingSetup();
-		const store: RootStore = useStore.getState();
-		act(() => {
-			store.changeStreamStatus(meeting.id, user2.id, STREAM_TYPE.AUDIO, true);
-			store.changeStreamStatus(meeting.id, user2.id, STREAM_TYPE.VIDEO, true);
-		});
+		const store = useStore.getState();
+		store.meetingConnection(meeting.id, true, undefined, false, undefined);
+		store.changeStreamStatus(meeting.id, user2.id, STREAM_TYPE.AUDIO, true);
+		store.changeStreamStatus(meeting.id, user2.id, STREAM_TYPE.VIDEO, true);
 
 		const { user } = setup(<Tile userId={user2.id} meetingId={meeting.id} />);
 
@@ -287,8 +264,8 @@ describe('Tile actions', () => {
 	});
 
 	test('mute for all does not appear if it is my tile', async () => {
-		storeBasicActiveMeetingSetup();
-		const store: RootStore = useStore.getState();
+		const store = useStore.getState();
+		store.meetingConnection(meeting.id, true, undefined, false, undefined);
 		store.changeStreamStatus(meeting.id, user1.id, STREAM_TYPE.AUDIO, true);
 		store.changeStreamStatus(meeting.id, user1.id, STREAM_TYPE.VIDEO, true);
 		const { user } = setup(<Tile userId={user1.id} meetingId={meeting.id} />);
@@ -300,8 +277,8 @@ describe('Tile actions', () => {
 	});
 
 	test('mute for all does not appear if I am not a moderator', async () => {
-		notModeratorActiveMeetingSetup();
-		const store: RootStore = useStore.getState();
+		const store = useStore.getState();
+		store.meetingConnection(meeting.id, true, undefined, false, undefined);
 		store.changeStreamStatus(meeting.id, user1.id, STREAM_TYPE.AUDIO, true);
 		store.changeStreamStatus(meeting.id, user1.id, STREAM_TYPE.VIDEO, true);
 		const { user } = setup(<Tile userId={user1.id} meetingId={meeting.id} />);

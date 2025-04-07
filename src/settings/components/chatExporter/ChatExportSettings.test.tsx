@@ -40,7 +40,7 @@ describe('ChatExportSettings test', () => {
 
 	test('All rooms are listed', () => {
 		act(() => {
-			useStore.getState().setRooms([room, room1, room2, room3]);
+			useStore.getState().addRooms([room, room1, room2, room3]);
 		});
 		setup(<ChatExportSettings />);
 		expect(screen.getByText('Room')).toBeInTheDocument();
@@ -50,7 +50,7 @@ describe('ChatExportSettings test', () => {
 	});
 
 	test('Display only filtered rooms', async () => {
-		useStore.getState().setRooms([room, room1, room2, room3]);
+		useStore.getState().addRooms([room, room1, room2, room3]);
 		const { user } = setup(<ChatExportSettings />);
 		const input = screen.getByPlaceholderText(filterList);
 		await user.type(input, '12');
@@ -61,7 +61,7 @@ describe('ChatExportSettings test', () => {
 	});
 
 	test('Select chat to export by clicking on it', async () => {
-		useStore.getState().setRooms([room, room1, room2, room3]);
+		useStore.getState().addRooms([room, room1, room2, room3]);
 		const { user } = setup(<ChatExportSettings />);
 		await user.click(screen.getByText(room.name!));
 		const button = screen.getByRole('button');
@@ -69,7 +69,7 @@ describe('ChatExportSettings test', () => {
 	});
 
 	test('Deselect chat when user starts typing', async () => {
-		useStore.getState().setRooms([room, room1, room2, room3]);
+		useStore.getState().addRooms([room, room1, room2, room3]);
 		const { user } = setup(<ChatExportSettings />);
 		await user.click(screen.getByText(room.name!));
 		const input = screen.getByPlaceholderText(filterList);
@@ -79,7 +79,7 @@ describe('ChatExportSettings test', () => {
 	});
 
 	test('No filtered chat', async () => {
-		useStore.getState().setRooms([room, room1, room2, room3]);
+		useStore.getState().addRooms([room, room1, room2, room3]);
 		const { user } = setup(<ChatExportSettings />);
 		const input = screen.getByPlaceholderText(filterList);
 		await user.type(input, 'Test test test');
@@ -87,7 +87,7 @@ describe('ChatExportSettings test', () => {
 	});
 
 	test('Export chat', async () => {
-		useStore.getState().setRooms([room, room1, room2, room3]);
+		useStore.getState().addRooms([room, room1, room2, room3]);
 		const { user } = setup(<ChatExportSettings />);
 		await user.click(screen.getByText(room.name!));
 		const button = screen.getByRole('button');

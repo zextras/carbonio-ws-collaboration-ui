@@ -72,7 +72,7 @@ beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo(loggedUser.id, loggedUser.name);
 	store.setUserInfo([loggedUser, user1, user2, user3]);
-	store.addRoom(room);
+	store.addRooms([room]);
 	store.newMessage(simpleTextMessage);
 });
 

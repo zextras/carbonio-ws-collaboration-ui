@@ -16,7 +16,7 @@ const groupRoom = createMockRoom({
 });
 
 beforeEach(() => {
-	useStore.getState().addRoom(groupRoom);
+	useStore.getState().addRooms([groupRoom]);
 });
 
 describe('ChatExporter tests', () => {

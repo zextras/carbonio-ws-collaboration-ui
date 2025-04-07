@@ -83,7 +83,7 @@ beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo(loggedUser.id, loggedUser.name);
 	store.setUserInfo([loggedUser, user1, forwardedUser]);
-	store.addRoom(mockedRoom);
+	store.addRooms([mockedRoom]);
 });
 describe('Message reference displayed', () => {
 	test('Display the reference message of another user in a reply action of user', async () => {

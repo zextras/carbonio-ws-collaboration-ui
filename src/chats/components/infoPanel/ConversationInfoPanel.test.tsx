@@ -32,8 +32,7 @@ const user1 = createMockUser({ id: 'user1Id', name: 'User 1' });
 
 beforeEach(() => {
 	const store = useStore.getState();
-	store.addRoom(groupRoom);
-	store.addRoom(oneToOneRoom);
+	store.addRooms([oneToOneRoom, groupRoom]);
 	store.setPlaceholderRoom(user1.id);
 });
 
