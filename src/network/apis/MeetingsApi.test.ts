@@ -509,4 +509,12 @@ describe('Meetings API', () => {
 
 		expect(spyOnCreateGuestAccount).toHaveBeenCalledWith('userName');
 	});
+
+	test('user raise hand', async () => {
+		const spyOnRaiseHand = spyOnMeetingsApi(MeetingsApiToSpy.RAISE_HAND);
+		ongoingMeetingSetup();
+
+		await meetingsApi.raiseHand(meetingMock.id, true);
+		expect(spyOnRaiseHand).toHaveBeenCalled();
+	});
 });
