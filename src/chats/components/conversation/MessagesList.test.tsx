@@ -419,7 +419,7 @@ describe('Scroll position', () => {
 		const store = useStore.getState();
 		store.updateHistory(room.id, messages);
 		store.setIdMessageWhereScrollIsStopped(room.id, messages[0].id);
-		store.addUnreadCount(room.id, 1);
+		store.incrementUnreadCount(room.id, 1);
 		setup(<MessagesList roomId={room.id} />);
 		expect(mockedScrollToEnd).toHaveBeenCalled();
 	});

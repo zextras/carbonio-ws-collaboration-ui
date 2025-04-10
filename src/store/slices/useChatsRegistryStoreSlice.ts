@@ -321,41 +321,30 @@ export const useChatsRegistryStoreSlice: StateCreator<
 	addFastening: (fastening: MessageFastening): void => {
 		set(
 			produce((draft: RootStore) => {
-				// Create the fastenings object if it doesn't exist
-				initRoomChatsRegistry(draft, fastening.roomId);
-				if (!draft.chatsRegistry[fastening.roomId].fastenings[fastening.originalStanzaId]) {
-					draft.chatsRegistry[fastening.roomId].fastenings[fastening.originalStanzaId] = [];
+				const { fastenings } = initRoomChatsRegistry(draft, fastening.roomId);
+				if (!fastenings[fastening.originalStanzaId]) {
+					fastenings[fastening.originalStanzaId] = [];
 				}
-
+				const messageFastening = fastenings[fastening.originalStanzaId];
+				const alreadyExists = find(messageFastening, (f) => f.id === fastening.id);
 				// Add fastening to the array only if it doesn't already exist
-				if (
-					!find(
-						draft.chatsRegistry[fastening.roomId].fastenings[fastening.originalStanzaId],
-						(f: MessageFastening) => f.id === fastening.id
-					)
-				) {
-					draft.chatsRegistry[fastening.roomId].fastenings[fastening.originalStanzaId].push(
-						fastening
-					);
-					draft.chatsRegistry[fastening.roomId].fastenings[fastening.originalStanzaId] = orderBy(
-						draft.chatsRegistry[fastening.roomId].fastenings[fastening.originalStanzaId],
-						['date']
-					);
+				if (!alreadyExists) {
+					messageFastening.push(fastening);
+					fastenings[fastening.originalStanzaId] = orderBy(messageFastening, ['date']);
 				}
 			}),
 			false,
-			'FASTENINGS/ADD_FASTENING'
+			'CHAT/ADD_FASTENING'
 		);
 	},
-	addUnreadCount: (roomId: string, counter: number): void => {
+	incrementUnreadCount: (roomId: string, counter: number): void => {
 		set(
 			produce((draft: RootStore) => {
-				initRoomChatsRegistry(draft, roomId);
-				const actualCounter = draft.chatsRegistry[roomId].unread || 0;
-				draft.chatsRegistry[roomId].unread = actualCounter + counter;
+				const { unread } = initRoomChatsRegistry(draft, roomId);
+				draft.chatsRegistry[roomId].unread = unread + counter;
 			}),
 			false,
-			'UNREADS/ADD_UNREAD'
+			'CHAT/INCREMENT_UNREAD'
 		);
 	}
 });

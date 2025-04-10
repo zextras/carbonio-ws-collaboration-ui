@@ -19,7 +19,7 @@ export type ChatsRegistryStoreSlice = {
 	setPlaceholderMessage: (fields: PlaceholderFields) => void;
 	removePlaceholderMessage: (roomId: string, messageId: string) => void;
 	addFastening: (fasteningMessage: MessageFastening) => void;
-	addUnreadCount: (roomId: string, counter: number) => void;
+	incrementUnreadCount: (roomId: string, counter: number) => void;
 };
 
 export type ChatRegistry = {

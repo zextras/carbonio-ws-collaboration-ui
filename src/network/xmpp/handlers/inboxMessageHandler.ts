@@ -26,7 +26,10 @@ export function onInboxMessageStanza(message: Element): true {
 		const unreadMessagesOfSingleConversation = getRequiredAttribute(result, 'unread');
 		const store = useStore.getState();
 		const { xmppClient } = store.connections;
-		store.addUnreadCount(inboxMessage.roomId, parseInt(unreadMessagesOfSingleConversation, 10));
+		store.incrementUnreadCount(
+			inboxMessage.roomId,
+			parseInt(unreadMessagesOfSingleConversation, 10)
+		);
 
 		switch (inboxMessage.type) {
 			case MessageType.TEXT_MSG:
