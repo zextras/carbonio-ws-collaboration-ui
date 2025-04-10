@@ -71,8 +71,8 @@ describe('Connections slice', () => {
 			result.current.newInboxMessage(message1);
 			result.current.updateHistory(room1.id, [message1]);
 			result.current.updateHistory(room2.id, [message2]);
-			result.current.updateMarkers(room1.id, [marker1]);
-			result.current.updateMarkers(room2.id, [marker2]);
+			result.current.updateReadStatus(room1.id, [marker1]);
+			result.current.updateReadStatus(room2.id, [marker2]);
 		});
 
 		act(() => result.current.resetXmppData());

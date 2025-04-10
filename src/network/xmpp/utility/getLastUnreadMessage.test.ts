@@ -124,7 +124,7 @@ describe('getLastUnreadMessage', () => {
 			});
 			const store = useStore.getState();
 			store.updateHistory(room.id, [message1, markedMessage]);
-			store.updateMarkers(room.id, [myMarker]);
+			store.updateReadStatus(room.id, [myMarker]);
 
 			expect(getLastUnreadMessage(room.id)).toBe(undefined);
 		});
@@ -144,7 +144,7 @@ describe('getLastUnreadMessage', () => {
 			});
 			const store = useStore.getState();
 			store.updateHistory(room.id, [message1, markedMessage, message2]);
-			store.updateMarkers(room.id, [myMarker]);
+			store.updateReadStatus(room.id, [myMarker]);
 
 			expect(getLastUnreadMessage(room.id)).toBe(message2.id);
 		});

@@ -98,7 +98,7 @@ describe('useFirstUnreadMessage with text messages', () => {
 	});
 	test('User has never read a message', () => {
 		// Update unread
-		useStore.getState().updateUnreadCount(room.id);
+		useStore.getState().updateReadStatus(room.id, []);
 		// Check number unread
 		expect(useStore.getState().chatsRegistry[room.id].unread).toBe(size(textHistory));
 		const { result } = renderHook(() => useFirstUnreadMessage(room.id));
@@ -109,9 +109,7 @@ describe('useFirstUnreadMessage with text messages', () => {
 	test('User some messages', () => {
 		// Mark last message as read
 		const myLastMarker = createMockMarker({ from: myUserId, messageId: 'messageId3' });
-		useStore.getState().updateMarkers(room.id, [myLastMarker]);
-		useStore.getState().updateUnreadMessages(room.id);
-		useStore.getState().updateUnreadCount(room.id);
+		useStore.getState().updateReadStatus(room.id, [myLastMarker]);
 		// Check number unread
 		expect(useStore.getState().chatsRegistry[room.id].unread).toBe(2);
 		// Check customHook result
@@ -125,9 +123,7 @@ describe('useFirstUnreadMessage with text messages', () => {
 			from: myUserId,
 			messageId: last(textHistory)?.id || ''
 		});
-		useStore.getState().updateMarkers(room.id, [myLastMarker]);
-		useStore.getState().updateUnreadMessages(room.id);
-		useStore.getState().updateUnreadCount(room.id);
+		useStore.getState().updateReadStatus(room.id, [myLastMarker]);
 		// Check number unread
 		expect(useStore.getState().chatsRegistry[room.id].unread).toBe(0);
 		// Check customHook result
@@ -138,9 +134,7 @@ describe('useFirstUnreadMessage with text messages', () => {
 	test('Reading a message after first access', () => {
 		// Mark last message as read
 		const myLastMarker = createMockMarker({ from: myUserId, messageId: 'messageId2' });
-		useStore.getState().updateMarkers(room.id, [myLastMarker]);
-		useStore.getState().updateUnreadMessages(room.id);
-		useStore.getState().updateUnreadCount(room.id);
+		useStore.getState().updateReadStatus(room.id, [myLastMarker]);
 		// Check number unread
 		expect(useStore.getState().chatsRegistry[room.id].unread).toBe(3);
 		// Check customHook result
@@ -158,7 +152,7 @@ describe('useFirstUnreadMessage with all types of messages', () => {
 	});
 	test('User has never read a message', () => {
 		// Update unread
-		useStore.getState().updateUnreadCount(room.id);
+		useStore.getState().updateReadStatus(room.id, []);
 		// Check number unread
 		expect(useStore.getState().chatsRegistry[room.id].unread).toBe(4);
 		const { result } = renderHook(() => useFirstUnreadMessage(room.id));
@@ -168,9 +162,7 @@ describe('useFirstUnreadMessage with all types of messages', () => {
 	test('User last read is his message and after there is a deleted message', () => {
 		// Mark last message as read
 		const myLastMarker = createMockMarker({ from: myUserId, messageId: 'messageId1' });
-		useStore.getState().updateMarkers(room.id, [myLastMarker]);
-		useStore.getState().updateUnreadMessages(room.id);
-		useStore.getState().updateUnreadCount(room.id);
+		useStore.getState().updateReadStatus(room.id, [myLastMarker]);
 		// Check number unread
 		expect(useStore.getState().chatsRegistry[room.id].unread).toBe(3);
 		// Check customHook result, deleted is set as message to read
@@ -184,9 +176,7 @@ describe('useFirstUnreadMessage with all types of messages', () => {
 			from: myUserId,
 			messageId: last(complexHistory)?.id || ''
 		});
-		useStore.getState().updateMarkers(room.id, [myLastMarker]);
-		useStore.getState().updateUnreadMessages(room.id);
-		useStore.getState().updateUnreadCount(room.id);
+		useStore.getState().updateReadStatus(room.id, [myLastMarker]);
 		// Check number unread
 		expect(useStore.getState().chatsRegistry[room.id].unread).toBe(0);
 		// Check customHook result
@@ -197,9 +187,7 @@ describe('useFirstUnreadMessage with all types of messages', () => {
 	test('Reading a message before a configuration message', () => {
 		// Mark last message as read
 		const myLastMarker = createMockMarker({ from: myUserId, messageId: 'messageId3' });
-		useStore.getState().updateMarkers(room.id, [myLastMarker]);
-		useStore.getState().updateUnreadMessages(room.id);
-		useStore.getState().updateUnreadCount(room.id);
+		useStore.getState().updateReadStatus(room.id, [myLastMarker]);
 		// Check number unread
 		expect(useStore.getState().chatsRegistry[room.id].unread).toBe(1);
 		// Check customHook result

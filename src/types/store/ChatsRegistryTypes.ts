@@ -6,12 +6,11 @@
 
 export type ChatsRegistryStoreSlice = {
 	chatsRegistry: { [roomId: string]: ChatRegistry };
-
 	newMessage: (message: Message) => void;
 	newInboxMessage: (message: Message) => void;
 	updateHistory: (roomId: string, messageArray: Message[]) => void;
 	addCreateRoomMessage: (roomId: string) => void;
-	updateUnreadMessages: (roomId: string) => void;
+	updateReadStatus: (roomId: string, newMarkers: Marker[]) => void;
 	setRepliedMessage: (
 		roomId: string,
 		replyMessageId: string,
@@ -19,13 +18,8 @@ export type ChatsRegistryStoreSlice = {
 	) => void;
 	setPlaceholderMessage: (fields: PlaceholderFields) => void;
 	removePlaceholderMessage: (roomId: string, messageId: string) => void;
-
 	addFastening: (fasteningMessage: MessageFastening) => void;
-
-	updateMarkers: (roomId: string, markers: Marker[]) => void;
-
 	addUnreadCount: (roomId: string, counter: number) => void;
-	updateUnreadCount: (roomId: string) => void;
 };
 
 export type ChatRegistry = {

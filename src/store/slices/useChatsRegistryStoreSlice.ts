@@ -6,19 +6,7 @@
  */
 
 import { produce } from 'immer';
-import {
-	concat,
-	filter,
-	find,
-	forEach,
-	last,
-	map,
-	orderBy,
-	remove,
-	size,
-	some,
-	uniqBy
-} from 'lodash';
+import { concat, find, forEach, last, map, orderBy, remove, size, some, uniqBy } from 'lodash';
 import { StateCreator } from 'zustand';
 
 import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
@@ -192,33 +180,49 @@ export const useChatsRegistryStoreSlice: StateCreator<
 			'MESSAGES/CREATE_ROOM_MESSAGE'
 		);
 	},
-	updateUnreadMessages: (roomId: string): void => {
+	updateReadStatus: (roomId: string, newMarkers: Marker[]): void => {
 		set(
 			produce((draft: RootStore) => {
-				initRoomChatsRegistry(draft, roomId);
+				const { messages, markers } = initRoomChatsRegistry(draft, roomId);
 
-				draft.chatsRegistry[roomId].messages = map(
-					draft.chatsRegistry[roomId].messages,
-					(message: Message) => {
-						// Updating text and configuration messages which are not read yet
-						const readable =
-							message.type === MessageType.TEXT_MSG ||
-							message.type === MessageType.CONFIGURATION_MSG;
-
-						if (
-							readable &&
-							(message.read === MarkerStatus.UNREAD ||
-								message.read === MarkerStatus.READ_BY_SOMEONE)
-						) {
-							message.read = calcReads(message.date, roomId);
-						}
-
-						return message;
+				// Set a member marker only when it's a new marker, or it is more recent than other
+				forEach(newMarkers, (marker) => {
+					const existing = markers[marker.from];
+					if (!existing || isBefore(existing.markerDate, marker.markerDate)) {
+						markers[marker.from] = marker;
 					}
-				);
+				});
+
+				// Update messages' read status of TEXT and CONFIGURATION messages
+				draft.chatsRegistry[roomId].messages = map(messages, (msg) => {
+					if (
+						(msg.type === MessageType.TEXT_MSG || msg.type === MessageType.CONFIGURATION_MSG) &&
+						(msg.read === MarkerStatus.UNREAD || msg.read === MarkerStatus.READ_BY_SOMEONE)
+					) {
+						msg.read = calcReads(msg.date, roomId);
+					}
+					return msg;
+				});
+
+				// Recalculate unread count
+				const myId = draft.session.id;
+				const myMarker = myId ? draft.chatsRegistry[roomId].markers[myId] : undefined;
+				const lastMarkedDate = myMarker
+					? (find(messages, { id: myMarker.messageId })?.date ?? myMarker.markerDate)
+					: undefined;
+
+				const unreadMessages = messages.filter((msg) => {
+					const isConfigOrFromOthers =
+						msg.type === MessageType.CONFIGURATION_MSG ||
+						(msg.type === MessageType.TEXT_MSG && !isMyId(msg.from));
+					const isAfterMarker = !lastMarkedDate || msg.date > lastMarkedDate;
+					return isConfigOrFromOthers && isAfterMarker;
+				});
+
+				draft.chatsRegistry[roomId].unread = unreadMessages.length;
 			}),
 			false,
-			'MESSAGES/UPDATE_UNREAD_MESSAGES'
+			'CHAT/UPDATE_READ_STATUS'
 		);
 	},
 	setRepliedMessage: (
@@ -314,7 +318,6 @@ export const useChatsRegistryStoreSlice: StateCreator<
 			'MESSAGES/REMOVE_PLACEHOLDER_MESSAGE'
 		);
 	},
-
 	addFastening: (fastening: MessageFastening): void => {
 		set(
 			produce((draft: RootStore) => {
@@ -344,24 +347,6 @@ export const useChatsRegistryStoreSlice: StateCreator<
 			'FASTENINGS/ADD_FASTENING'
 		);
 	},
-
-	updateMarkers: (roomId: string, markers: Marker[]): void => {
-		set(
-			produce((draft: RootStore) => {
-				initRoomChatsRegistry(draft, roomId);
-				forEach(markers, (marker: Marker) => {
-					// Set new marker only when it's a new marker, or it is more recent than other
-					const oldMarker = draft.chatsRegistry[roomId].markers[marker.from];
-					if (!oldMarker || oldMarker.markerDate < marker.markerDate) {
-						draft.chatsRegistry[roomId].markers[marker.from] = marker;
-					}
-				});
-			}),
-			false,
-			'MARKERS/UPDATE_MARKER'
-		);
-	},
-
 	addUnreadCount: (roomId: string, counter: number): void => {
 		set(
 			produce((draft: RootStore) => {
@@ -371,40 +356,6 @@ export const useChatsRegistryStoreSlice: StateCreator<
 			}),
 			false,
 			'UNREADS/ADD_UNREAD'
-		);
-	},
-	updateUnreadCount: (roomId: string): void => {
-		set(
-			produce((draft: RootStore) => {
-				initRoomChatsRegistry(draft, roomId);
-				const { messages } = draft.chatsRegistry[roomId];
-				const lastMarker =
-					draft.chatsRegistry[roomId].markers &&
-					draft.session.id !== undefined &&
-					draft.chatsRegistry[roomId].markers[draft.session.id];
-				const lastMarkedMessage = find(
-					messages,
-					(message: Message) => lastMarker && message.id === lastMarker.messageId
-				);
-				const isConfigurationMessage = (type: MessageType): boolean =>
-					type === MessageType.CONFIGURATION_MSG;
-				const isTextMessageFromOther = (message: Message): boolean =>
-					message.type === MessageType.TEXT_MSG && !isMyId(message.from);
-				const isAfterLastMarker = (date: number): boolean => {
-					if (!lastMarker) return true;
-					const dateToCompare = lastMarkedMessage ? lastMarkedMessage.date : lastMarker.markerDate;
-					return !isBefore(date, dateToCompare);
-				};
-				const unreadByMe = filter(
-					messages,
-					(message) =>
-						(isConfigurationMessage(message.type) || isTextMessageFromOther(message)) &&
-						isAfterLastMarker(message.date)
-				);
-				draft.chatsRegistry[roomId].unread = size(unreadByMe);
-			}),
-			false,
-			'UNREADS/UPDATE_UNREAD'
 		);
 	}
 });

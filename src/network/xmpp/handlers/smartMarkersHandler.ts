@@ -21,9 +21,7 @@ export function onSmartMarkers(stanza: Element): true {
 			decodeMarker(marker)
 		);
 		const store = useStore.getState();
-		store.updateMarkers(roomId, markers);
-		store.updateUnreadMessages(roomId);
-		store.updateUnreadCount(roomId);
+		store.updateReadStatus(roomId, markers);
 	}
 	return true;
 }
@@ -42,12 +40,7 @@ export function onDisplayedMessageStanza(message: Element): true {
 				type: 'displayed'
 			};
 			const store = useStore.getState();
-			store.updateMarkers(roomId, [displayedMessage]);
-			store.updateUnreadMessages(roomId);
-			// Update unread counter
-			if (getId(getResource(from)) === store.session.id) {
-				store.updateUnreadCount(roomId);
-			}
+			store.updateReadStatus(roomId, [displayedMessage]);
 		}
 	}
 	return true;
