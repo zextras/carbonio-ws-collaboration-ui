@@ -24,6 +24,7 @@ import { StateCreator } from 'zustand';
 import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
 import { isMyId } from '../../network/websocket/eventHandlersUtilities';
 import {
+	ChatRegistry,
 	ChatsRegistryStoreSlice,
 	ConfigurationMessage,
 	Marker,
@@ -38,9 +39,9 @@ import {
 import { RoomType } from '../../types/store/RoomTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 import { calcReads } from '../../utils/calcReads';
-import { datesAreFromTheSameDay, isBefore, isStrictlyBefore } from '../../utils/dateUtils';
+import { datesAreFromTheSameDay, isBefore, isStrictlyBefore, now } from '../../utils/dateUtils';
 
-const initRoomChatsRegistry = (store: RootStore, roomId: string): void => {
+const initRoomChatsRegistry = (store: RootStore, roomId: string): ChatRegistry => {
 	if (!store.chatsRegistry[roomId]) {
 		store.chatsRegistry[roomId] = {
 			messages: [],
@@ -49,13 +50,14 @@ const initRoomChatsRegistry = (store: RootStore, roomId: string): void => {
 			unread: 0
 		};
 	}
+	return store.chatsRegistry[roomId];
 };
 
 const addDateMessage = (messages: Message[], messageDate: number, roomId: string): void => {
 	const lastDate = last(messages)?.date ?? 0;
 	if (!datesAreFromTheSameDay(lastDate, messageDate)) {
 		messages.push({
-			id: `dateMessage${messageDate - 2}`,
+			id: `dateMessage-${messageDate - 2}`,
 			roomId,
 			date: messageDate - 2,
 			type: MessageType.DATE_MSG
@@ -73,13 +75,11 @@ export const useChatsRegistryStoreSlice: StateCreator<
 	newMessage: (message: Message): void => {
 		set(
 			produce((draft: RootStore) => {
-				initRoomChatsRegistry(draft, message.roomId);
-
-				const messages = draft.chatsRegistry[message.roomId]?.messages;
-				const existing = find(messages, { id: message.id });
+				const { messages } = initRoomChatsRegistry(draft, message.roomId);
+				const alreadyExists = find(messages, { id: message.id });
 				// Replace message if it already exists (placeholder message)
-				if (existing) {
-					Object.assign(existing, message);
+				if (alreadyExists) {
+					Object.assign(alreadyExists, message);
 				} else {
 					addDateMessage(messages, message.date, message.roomId);
 					messages.push(message);
@@ -92,9 +92,7 @@ export const useChatsRegistryStoreSlice: StateCreator<
 	newInboxMessage: (message: Message): void => {
 		set(
 			produce((draft: RootStore) => {
-				initRoomChatsRegistry(draft, message.roomId);
-
-				const messages = draft.chatsRegistry[message.roomId]?.messages;
+				const { messages } = initRoomChatsRegistry(draft, message.roomId);
 				const alreadyExists = find(messages, { id: message.id });
 				const clearedAt = draft.rooms[message.roomId]?.userSettings?.clearedAt;
 				// Add message only if it doesn't already exist and the history is not cleared
@@ -110,53 +108,43 @@ export const useChatsRegistryStoreSlice: StateCreator<
 	updateHistory: (roomId: string, messageArray: Message[]): void => {
 		set(
 			produce((draft: RootStore) => {
-				initRoomChatsRegistry(draft, roomId);
+				const { messages } = initRoomChatsRegistry(draft, roomId);
 
-				// Be sure that array with the new history messages will be processed in the correct date order
-				const orderedMessageArray = orderBy(messageArray, ['date'], ['asc']);
+				// Process only new messages in ascending order
+				const newMessages = orderBy(messageArray, ['date'], ['asc']).filter((msg) =>
+					isStrictlyBefore(msg.date, messages[0]?.date || now())
+				);
 
-				const historyWithDates: Message[] = [];
-				forEach(orderedMessageArray, (historyMessage: Message, index) => {
-					// Process only new messages (i.e. messages dated before the last message of the current history)
-					if (
-						!draft.chatsRegistry[roomId].messages[0] ||
-						isStrictlyBefore(historyMessage.date, draft.chatsRegistry[roomId].messages[0].date)
-					) {
-						// Add date message if the new message has a different date than the previous one
-						const prevMessageDate = orderedMessageArray[index - 1]?.date || 0;
-						if (!datesAreFromTheSameDay(prevMessageDate, historyMessage.date)) {
-							historyWithDates.push({
-								id: `dateMessage${historyMessage.date - 2}`,
+				if (size(newMessages) > 0) {
+					// Add date between messages of different days
+					const newMessagesWithDates = newMessages.reduce<Message[]>((acc, message, index) => {
+						const prevDate = newMessages[index - 1]?.date ?? 0;
+						if (!datesAreFromTheSameDay(prevDate, message.date)) {
+							acc.push({
+								id: `dateMessage-${message.date - 2}`,
 								roomId,
-								date: historyMessage.date - 2,
+								date: message.date - 2,
 								type: MessageType.DATE_MSG
 							});
 						}
-						historyWithDates.push(historyMessage);
-					}
-				});
+						acc.push(message);
+						return acc;
+					}, []);
 
-				if (size(historyWithDates) > 0) {
 					// Remove old first date message if the last message of the new history has the same date
-					const oldFirstMessage = draft.chatsRegistry[roomId].messages[0];
-					const lastRequestedMessageDate = last(historyWithDates)?.date ?? 0;
 					if (
-						oldFirstMessage?.type === MessageType.DATE_MSG &&
-						datesAreFromTheSameDay(oldFirstMessage.date, lastRequestedMessageDate)
+						messages[0]?.type === MessageType.DATE_MSG &&
+						datesAreFromTheSameDay(messages[0].date, last(newMessagesWithDates)?.date ?? 0)
 					) {
-						remove(
-							draft.chatsRegistry[roomId].messages,
-							(message) => message.id === oldFirstMessage.id
-						);
+						remove(messages, (message) => message.id === messages[0].id);
 					}
 
 					draft.chatsRegistry[roomId].messages = concat(
-						historyWithDates,
+						newMessagesWithDates,
 						draft.chatsRegistry[roomId].messages
 					);
 
-					// We must check for duplicates because inbox message has
-					// a different date than the same message in history.
+					// Check for duplicates and remove them (inbox can contain duplicates for date differentiation)
 					draft.chatsRegistry[roomId].messages = uniqBy(draft.chatsRegistry[roomId].messages, 'id');
 				}
 			}),
