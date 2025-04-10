@@ -10,7 +10,7 @@ import { filter, find, forEach, size, some } from 'lodash';
 import { StateCreator } from 'zustand';
 
 import { MemberBe, RoomBe } from '../../types/network/models/roomBeTypes';
-import { MessageType } from '../../types/store/ChatDataTypes';
+import { MessageType } from '../../types/store/ChatsRegistryTypes';
 import { Room, RoomsStoreSlice, RoomType } from '../../types/store/RoomTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 import { dateToISODate, isBefore } from '../../utils/dateUtils';
@@ -41,9 +41,9 @@ export const useRoomsStoreSlice: StateCreator<
 
 					// Remove messages sent before the clearedAt timestamp
 					const clearedAt = roomBe.userSettings?.clearedAt;
-					const messages = draft.chatData[roomBe.id]?.messages;
+					const messages = draft.chatsRegistry[roomBe.id]?.messages;
 					if (clearedAt && size(messages) > 0) {
-						draft.chatData[roomBe.id].messages = filter(
+						draft.chatsRegistry[roomBe.id].messages = filter(
 							messages,
 							(message) => !isBefore(message.date, clearedAt)
 						);
@@ -60,7 +60,7 @@ export const useRoomsStoreSlice: StateCreator<
 				delete draft.rooms[roomId];
 				delete draft.activeConversations[roomId];
 				delete draft.meetings[roomId];
-				delete draft.chatData[roomId];
+				delete draft.chatsRegistry[roomId];
 			}),
 			false,
 			'ROOMS/REMOVE_ROOM'
@@ -146,7 +146,7 @@ export const useRoomsStoreSlice: StateCreator<
 						...room.userSettings,
 						clearedAt
 					};
-					delete draft.chatData[roomId];
+					delete draft.chatsRegistry[roomId];
 				}
 			}),
 			false,
@@ -174,7 +174,7 @@ export const useRoomsStoreSlice: StateCreator<
 				draft.activeConversations[roomId] = {
 					isHistoryFullyLoaded: true
 				};
-				draft.chatData[roomId] = {
+				draft.chatsRegistry[roomId] = {
 					messages: [
 						{
 							type: MessageType.DATE_MSG,
@@ -198,7 +198,7 @@ export const useRoomsStoreSlice: StateCreator<
 				const placeholderRoomId = `placeholder-${userId}`;
 				delete draft.rooms[placeholderRoomId];
 				delete draft.activeConversations[placeholderRoomId];
-				delete draft.chatData[placeholderRoomId];
+				delete draft.chatsRegistry[placeholderRoomId];
 			}),
 			false,
 			'ROOMS/REMOVE_PLACEHOLDER_ROOM'

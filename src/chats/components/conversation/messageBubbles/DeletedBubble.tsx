@@ -11,7 +11,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import useStore from '../../../../store/Store';
-import { TextMessage } from '../../../../types/store/ChatDataTypes';
+import { TextMessage } from '../../../../types/store/ChatsRegistryTypes';
 import { formatDate } from '../../../../utils/dateUtils';
 
 type DeletedBubbleProps = {

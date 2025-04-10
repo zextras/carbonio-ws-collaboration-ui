@@ -13,7 +13,7 @@ import { getRoomNameSelector, getRoomTypeSelector } from '../store/selectors/Roo
 import { getUserId } from '../store/selectors/SessionSelectors';
 import { getIsAnonymousUser, getUserName } from '../store/selectors/UsersSelectors';
 import useStore from '../store/Store';
-import { ConfigurationMessage, OperationType } from '../types/store/ChatDataTypes';
+import { ConfigurationMessage, OperationType } from '../types/store/ChatsRegistryTypes';
 import { RoomType } from '../types/store/RoomTypes';
 
 export const useConfigurationMessageLabel = (

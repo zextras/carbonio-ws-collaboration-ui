@@ -15,7 +15,12 @@ import {
 	TileData,
 	VirtualBackgroundType
 } from './ActiveMeetingTypes';
-import { AttachmentMessageType, ChatDataStoreSlice, Message, TextMessage } from './ChatDataTypes';
+import {
+	AttachmentMessageType,
+	ChatsRegistryStoreSlice,
+	Message,
+	TextMessage
+} from './ChatsRegistryTypes';
 import { Connections } from './ConnectionsTypes';
 import { MeetingParticipant, MeetingsMap } from './MeetingTypes';
 import { RoomsStoreSlice } from './RoomTypes';
@@ -130,7 +135,7 @@ export type RootStore = UsersStoreSlice &
 	RoomsStoreSlice &
 	SessionStoreSlice &
 	ActiveConversationsSlice &
-	ChatDataStoreSlice &
+	ChatsRegistryStoreSlice &
 	ConnectionsStoreSlice &
 	MeetingsSlice &
 	ActiveMeetingSlice;

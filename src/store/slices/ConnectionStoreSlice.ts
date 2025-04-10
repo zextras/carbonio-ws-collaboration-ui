@@ -61,7 +61,7 @@ export const useConnectionsStoreSlice: StateCreator<
 						lastActivity: undefined
 					};
 				});
-				draft.chatData = {};
+				draft.chatsRegistry = {};
 				draft.activeConversations = {};
 			}),
 			false,

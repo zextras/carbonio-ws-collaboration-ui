@@ -5,7 +5,7 @@
  */
 
 import { messageActionType } from '../types/store/ActiveConversationTypes';
-import { Message, MessageType } from '../types/store/ChatDataTypes';
+import { Message, MessageType } from '../types/store/ChatsRegistryTypes';
 
 export const canPerformAction = (
 	message: Message,

@@ -24,7 +24,7 @@ import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 import { MemberBe, RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
 import { UserBe } from '../../../types/network/models/userBeTypes';
 import { MeetingChatVisibility } from '../../../types/store/ActiveMeetingTypes';
-import { MarkerStatus, MessageType } from '../../../types/store/ChatDataTypes';
+import { MarkerStatus, MessageType } from '../../../types/store/ChatsRegistryTypes';
 import { MeetingParticipant } from '../../../types/store/MeetingTypes';
 import { RootStore } from '../../../types/store/StoreTypes';
 

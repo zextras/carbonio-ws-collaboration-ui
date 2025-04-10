@@ -41,7 +41,7 @@ import {
 	getFilesToUploadArray,
 	getReferenceMessage
 } from '../../../../store/selectors/ActiveConversationsSelectors';
-import { getLastMessageIdSelector } from '../../../../store/selectors/ChatDataSelectors';
+import { getLastMessageIdSelector } from '../../../../store/selectors/ChatsRegistrySelectors';
 import { getXmppClient } from '../../../../store/selectors/ConnectionSelector';
 import { getAttribute, getUserId } from '../../../../store/selectors/SessionSelectors';
 import { getIsUserGuest } from '../../../../store/selectors/UsersSelectors';
@@ -52,7 +52,7 @@ import {
 	messageActionType,
 	ReferenceMessage
 } from '../../../../types/store/ActiveConversationTypes';
-import { Message, MessageType, TextMessage } from '../../../../types/store/ChatDataTypes';
+import { Message, MessageType, TextMessage } from '../../../../types/store/ChatsRegistryTypes';
 import { isAttachmentImage } from '../../../../utils/attachmentUtils';
 import { BrowserUtils } from '../../../../utils/BrowserUtils';
 import { canPerformAction } from '../../../../utils/MessageActionsUtils';

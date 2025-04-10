@@ -12,7 +12,7 @@ import {
 	getRoomHasMarkers,
 	getReadableMessagesSelector,
 	getRoomUnreadsSelector
-} from '../../../store/selectors/ChatDataSelectors';
+} from '../../../store/selectors/ChatsRegistrySelectors';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 

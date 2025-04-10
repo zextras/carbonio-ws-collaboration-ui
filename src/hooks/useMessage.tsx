@@ -6,8 +6,8 @@
 
 import { useMemo } from 'react';
 
-import { getEditAndDeleteFasteningSelector } from '../store/selectors/ChatDataSelectors';
-import { getMessageSelector } from '../store/selectors/ChatDataSelectors';
+import { getEditAndDeleteFasteningSelector } from '../store/selectors/ChatsRegistrySelectors';
+import { getMessageSelector } from '../store/selectors/ChatsRegistrySelectors';
 import useStore from '../store/Store';
 import {
 	FasteningAction,
@@ -15,7 +15,7 @@ import {
 	MessageFastening,
 	MessageType,
 	TextMessage
-} from '../types/store/ChatDataTypes';
+} from '../types/store/ChatsRegistryTypes';
 
 const useMessage = (roomId: string, messageId: string): Message | undefined => {
 	const message = useStore<Message | undefined>((store) =>

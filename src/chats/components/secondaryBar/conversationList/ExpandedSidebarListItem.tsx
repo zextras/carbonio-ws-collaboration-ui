@@ -21,7 +21,7 @@ import {
 import {
 	getLastMessageIdSelector,
 	getRoomUnreadsSelector
-} from '../../../../store/selectors/ChatDataSelectors';
+} from '../../../../store/selectors/ChatsRegistrySelectors';
 import {
 	getRoomMutedSelector,
 	getRoomNameSelector,
@@ -33,8 +33,8 @@ import {
 } from '../../../../store/selectors/SessionSelectors';
 import { getUserName } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
-import { MarkerStatus } from '../../../../types/store/ChatDataTypes';
-import { Message, MessageType } from '../../../../types/store/ChatDataTypes';
+import { MarkerStatus } from '../../../../types/store/ChatsRegistryTypes';
+import { Message, MessageType } from '../../../../types/store/ChatsRegistryTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
 import GroupAvatar from '../../GroupAvatar';
 import UserAvatar from '../../UserAvatar';

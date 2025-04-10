@@ -6,7 +6,7 @@
 
 import { orderBy } from 'lodash';
 
-import { Message, TextMessage } from '../../../types/store/ChatDataTypes';
+import { Message, TextMessage } from '../../../types/store/ChatsRegistryTypes';
 
 class HistoryAccumulator {
 	// Singleton design pattern

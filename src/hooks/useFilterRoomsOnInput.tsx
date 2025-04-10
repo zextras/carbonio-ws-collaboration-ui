@@ -9,7 +9,7 @@ import { useEffect, useMemo } from 'react';
 import { find, forEach, map } from 'lodash';
 
 import { FilteredConversation } from '../chats/components/secondaryBar/SecondaryBarView';
-import { useOrderedOneToOneAndGroupsInfoByLastMessage } from '../store/selectors/ChatDataSelectors';
+import { useOrderedOneToOneAndGroupsInfoByLastMessage } from '../store/selectors/ChatsRegistrySelectors';
 import { getUserId } from '../store/selectors/SessionSelectors';
 import { getUsersSelector } from '../store/selectors/UsersSelectors';
 import useStore from '../store/Store';

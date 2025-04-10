@@ -15,7 +15,7 @@ import ConfigurationBubble from './ConfigurationBubble';
 import DateBubble from './DateBubble';
 import DeletedBubble from './DeletedBubble';
 import useMessage from '../../../../hooks/useMessage';
-import { MessageType } from '../../../../types/store/ChatDataTypes';
+import { MessageType } from '../../../../types/store/ChatsRegistryTypes';
 
 type MessageProps = {
 	messageId: string;

@@ -19,7 +19,7 @@ import {
 	messageActionType,
 	ReferenceMessage
 } from '../../../../types/store/ActiveConversationTypes';
-import { TextMessage } from '../../../../types/store/ChatDataTypes';
+import { TextMessage } from '../../../../types/store/ChatsRegistryTypes';
 import { getThumbnailURL } from '../../../../utils/attachmentUtils';
 
 const BorderContainer = styled(Container)<{

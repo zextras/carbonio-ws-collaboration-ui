@@ -11,7 +11,7 @@ import styled from 'styled-components';
 
 import useRouting from '../../../../hooks/useRouting';
 import { getDraftMessage } from '../../../../store/selectors/ActiveConversationsSelectors';
-import { getRoomUnreadsSelector } from '../../../../store/selectors/ChatDataSelectors';
+import { getRoomUnreadsSelector } from '../../../../store/selectors/ChatsRegistrySelectors';
 import {
 	getRoomNameSelector,
 	getRoomTypeSelector

@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-export type ChatDataStoreSlice = {
-	chatData: { [roomId: string]: ChatData };
+export type ChatsRegistryStoreSlice = {
+	chatsRegistry: { [roomId: string]: ChatRegistry };
 
 	newMessage: (message: Message) => void;
 	newInboxMessage: (message: Message) => void;
@@ -28,7 +28,7 @@ export type ChatDataStoreSlice = {
 	updateUnreadCount: (roomId: string) => void;
 };
 
-export type ChatData = {
+export type ChatRegistry = {
 	messages: Message[];
 	fastenings: { [stanzaId: string]: MessageFastening[] };
 	markers: { [userId: string]: Marker };

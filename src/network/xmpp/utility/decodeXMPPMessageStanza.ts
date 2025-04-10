@@ -22,7 +22,7 @@ import {
 	MessageType,
 	OperationType,
 	TextMessage
-} from '../../../types/store/ChatDataTypes';
+} from '../../../types/store/ChatsRegistryTypes';
 import { calcReads } from '../../../utils/calcReads';
 import { dateToTimestamp, now } from '../../../utils/dateUtils';
 import { unicodeToChar } from '../../../utils/textUtils';

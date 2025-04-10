@@ -8,7 +8,7 @@ import { filter, forEach, size, unionBy } from 'lodash';
 import { Strophe } from 'strophe.js';
 
 import useStore from '../../../store/Store';
-import { MessageType, TextMessage } from '../../../types/store/ChatDataTypes';
+import { MessageType, TextMessage } from '../../../types/store/ChatsRegistryTypes';
 import { RootStore } from '../../../types/store/StoreTypes';
 import { dateToTimestamp } from '../../../utils/dateUtils';
 import { xmppDebug } from '../../../utils/debug';
@@ -132,7 +132,7 @@ export function onRequestHistory(stanza: Element, unread?: number): void {
 	// If unread are more than loaded text messages, request history again
 	// Do this check here to load history only when user opens conversation
 	if (size(storeMessages) > 0 && unread && unread > 0) {
-		const textMessages = filter(unionBy(storeMessages, store.chatData[roomId].messages, 'id'));
+		const textMessages = filter(unionBy(storeMessages, store.chatsRegistry[roomId].messages, 'id'));
 		const unreadNotLoaded = unread - size(textMessages);
 		if (unreadNotLoaded > 0) {
 			// Request 5 more messages to avoid a new history request when user scrolls to the first new message

@@ -28,7 +28,7 @@ import {
 	MessageType,
 	OperationType,
 	TextMessage
-} from '../../../types/store/ChatDataTypes';
+} from '../../../types/store/ChatsRegistryTypes';
 import { RootStore } from '../../../types/store/StoreTypes';
 import { User } from '../../../types/store/UserTypes';
 
@@ -159,7 +159,7 @@ describe('render list of messages with history loader visible for first time ope
 			store.updateHistory(room.id, messages);
 			store.addCreateRoomMessage(room.id);
 		});
-		expect(useStore.getState().chatData[room.id].messages).toHaveLength(6);
+		expect(useStore.getState().chatsRegistry[room.id].messages).toHaveLength(6);
 		expect(screen.getByText(new RegExp(`${room.name} created`, 'i'))).toBeInTheDocument();
 		const message = screen.getByTestId(`Bubble-${messages[0].id}`);
 		expect(message).toBeVisible();

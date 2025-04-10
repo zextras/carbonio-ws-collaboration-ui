@@ -24,7 +24,7 @@ import {
 	MessageType,
 	OperationType,
 	TextMessage
-} from '../types/store/ChatDataTypes';
+} from '../types/store/ChatsRegistryTypes';
 import { RoomType } from '../types/store/RoomTypes';
 import { User, UserType } from '../types/store/UserTypes';
 

@@ -12,7 +12,7 @@ import {
 	createMockTextMessage,
 	createMockUser
 } from '../../tests/createMock';
-import { MessageType } from '../../types/store/ChatDataTypes';
+import { MessageType } from '../../types/store/ChatsRegistryTypes';
 import { RoomType } from '../../types/store/RoomTypes';
 import { dateToTimestamp } from '../../utils/dateUtils';
 import useStore from '../Store';
@@ -70,7 +70,7 @@ describe('RoomsStoreSlice tests', () => {
 
 		test('If a room is added with clearedAt, messages before that date are removed', () => {
 			useStore.setState({
-				chatData: {
+				chatsRegistry: {
 					[groupRoom1.id]: {
 						messages: [
 							createMockTextMessage({
@@ -90,13 +90,13 @@ describe('RoomsStoreSlice tests', () => {
 					}
 				}
 			});
-			expect(size(useStore.getState().chatData[groupRoom1.id].messages)).toEqual(2);
+			expect(size(useStore.getState().chatsRegistry[groupRoom1.id].messages)).toEqual(2);
 			useStore
 				.getState()
 				.addRooms([
 					{ ...groupRoom1, userSettings: { clearedAt: '2023-01-21T00:00:00Z', muted: false } }
 				]);
-			expect(size(useStore.getState().chatData[groupRoom1.id].messages)).toEqual(1);
+			expect(size(useStore.getState().chatsRegistry[groupRoom1.id].messages)).toEqual(1);
 		});
 	});
 
@@ -193,7 +193,7 @@ describe('RoomsStoreSlice tests', () => {
 		expect(useStore.getState().rooms[singleRoom1.id].userSettings?.clearedAt).toBe(
 			now.toISOString()
 		);
-		expect(useStore.getState().chatData[singleRoom1.id]).toBeUndefined();
+		expect(useStore.getState().chatsRegistry[singleRoom1.id]).toBeUndefined();
 		expect(useStore.getState().activeConversations[singleRoom1.id]).toBeUndefined();
 	});
 
@@ -211,7 +211,7 @@ describe('RoomsStoreSlice tests', () => {
 				})
 			);
 			expect(store.activeConversations[placeholderRoomId].isHistoryFullyLoaded).toBeTruthy();
-			expect(store.chatData[placeholderRoomId].messages[0].type).toBe(MessageType.DATE_MSG);
+			expect(store.chatsRegistry[placeholderRoomId].messages[0].type).toBe(MessageType.DATE_MSG);
 		});
 
 		test('Placeholder room and all relative data are been removed', () => {
@@ -222,7 +222,7 @@ describe('RoomsStoreSlice tests', () => {
 			const store = useStore.getState();
 			expect(store.rooms[placeholderRoomId]).toBeUndefined();
 			expect(store.activeConversations[placeholderRoomId]).toBeUndefined();
-			expect(store.chatData[placeholderRoomId]).toBeUndefined();
+			expect(store.chatsRegistry[placeholderRoomId]).toBeUndefined();
 		});
 	});
 });

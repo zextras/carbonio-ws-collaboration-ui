@@ -7,7 +7,7 @@
 
 import { dateToTimestamp } from '../../../utils/dateUtils';
 import { getId } from './decodeJid';
-import { Marker } from '../../../types/store/ChatDataTypes';
+import { Marker } from '../../../types/store/ChatsRegistryTypes';
 import { getRequiredAttribute } from './decodeStanza';
 
 export function decodeMarker(markerStanza: Element): Marker {

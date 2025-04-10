@@ -17,7 +17,7 @@ import { AttachmentsApi } from '../../../../network';
 import { getUserName } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
 import { AttachmentType } from '../../../../types/network/apis/IAttachmentsApi';
-import { AttachmentMessageType } from '../../../../types/store/ChatDataTypes';
+import { AttachmentMessageType } from '../../../../types/store/ChatsRegistryTypes';
 import { getAttachmentExtension, getThumbnailURL } from '../../../../utils/attachmentUtils';
 import { calculateAvatarColor } from '../../../../utils/styleUtils';
 

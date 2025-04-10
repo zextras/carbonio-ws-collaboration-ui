@@ -13,7 +13,7 @@ import {
 	createMockTextMessage,
 	createMockUser
 } from '../../../tests/createMock';
-import { FasteningAction } from '../../../types/store/ChatDataTypes';
+import { FasteningAction } from '../../../types/store/ChatsRegistryTypes';
 
 const loggedUser = createMockUser({ id: 'loggeduserId', name: 'Logged User' });
 const user = createMockUser({ id: 'userId', name: 'User' });

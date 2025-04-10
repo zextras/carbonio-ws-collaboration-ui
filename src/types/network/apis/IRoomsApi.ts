@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { TextMessage } from '../../store/ChatDataTypes';
+import { TextMessage } from '../../store/ChatsRegistryTypes';
 import { AddMemberFields, RoomCreationFields, RoomEditableFields } from '../models/roomBeTypes';
 import {
 	AddRoomAttachmentResponse,

@@ -13,7 +13,7 @@ import { useConnectionsStoreSlice } from './slices/ConnectionStoreSlice';
 import { useMeetingsStoreSlice } from './slices/MeetingsStoreSlice';
 import { useRoomsStoreSlice } from './slices/RoomsStoreSlice';
 import { useSessionStoreSlice } from './slices/SessionStoreSlice';
-import { useChatDataStoreSlice } from './slices/useChatDataStoreSlice';
+import { useChatsRegistryStoreSlice } from './slices/useChatsRegistryStoreSlice';
 import { useUsersStoreSlice } from './slices/UsersStoreSlice';
 import { RootStore } from '../types/store/StoreTypes';
 
@@ -24,7 +24,7 @@ const useStore = create<RootStore>()(
 			...useUsersStoreSlice(set, get, api),
 			...useRoomsStoreSlice(set, get, api),
 			...useActiveConversationsSlice(set, get, api),
-			...useChatDataStoreSlice(set, get, api),
+			...useChatsRegistryStoreSlice(set, get, api),
 			...useConnectionsStoreSlice(set, get, api),
 			...useMeetingsStoreSlice(set, get, api),
 			...useActiveMeetingSlice(set, get, api)

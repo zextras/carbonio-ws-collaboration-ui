@@ -11,7 +11,7 @@ import { screen } from '@testing-library/react';
 import AttachmentSmallView from './AttachmentSmallView';
 import { AttachmentsApiToSpy, spyOnAttachmentsApi } from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
-import { AttachmentMessageType } from '../../../../types/store/ChatDataTypes';
+import { AttachmentMessageType } from '../../../../types/store/ChatsRegistryTypes';
 
 describe('Attachment Small view', () => {
 	test('Download generic file', async () => {

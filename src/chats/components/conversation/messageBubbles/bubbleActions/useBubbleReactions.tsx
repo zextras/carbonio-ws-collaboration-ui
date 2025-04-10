@@ -12,10 +12,10 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import CustomReactionPicker from './CustomReactionPicker';
-import { getMyLastReaction } from '../../../../../store/selectors/ChatDataSelectors';
+import { getMyLastReaction } from '../../../../../store/selectors/ChatsRegistrySelectors';
 import { getXmppClient } from '../../../../../store/selectors/ConnectionSelector';
 import useStore from '../../../../../store/Store';
-import { TextMessage } from '../../../../../types/store/ChatDataTypes';
+import { TextMessage } from '../../../../../types/store/ChatsRegistryTypes';
 
 export enum ReactionType {
 	'THUMBS_UP' = '\uD83D\uDC4D',

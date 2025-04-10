@@ -18,12 +18,12 @@ import { getInputHasFocus } from '../../../store/selectors/ActiveConversationsSe
 import {
 	getMessageAttachment,
 	getMessageSelector
-} from '../../../store/selectors/ChatDataSelectors';
+} from '../../../store/selectors/ChatsRegistrySelectors';
 import { getRoomIdByMeetingId } from '../../../store/selectors/MeetingSelectors';
 import { getRoomTypeSelector } from '../../../store/selectors/RoomsSelectors';
 import useStore from '../../../store/Store';
 import { MeetingChatVisibility } from '../../../types/store/ActiveMeetingTypes';
-import { MessageType } from '../../../types/store/ChatDataTypes';
+import { MessageType } from '../../../types/store/ChatsRegistryTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 import { getAttachmentInfo } from '../../../utils/attachmentUtils';
 import { parseUrlOnMessage } from '../../../utils/parseUrlOnMessage';

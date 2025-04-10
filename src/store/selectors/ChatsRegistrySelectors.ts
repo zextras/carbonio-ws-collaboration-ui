@@ -15,20 +15,20 @@ import {
 	MessageFastening,
 	MessageType,
 	TextMessage
-} from '../../types/store/ChatDataTypes';
+} from '../../types/store/ChatsRegistryTypes';
 import { RoomType } from '../../types/store/RoomTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 import useStore from '../Store';
 
 export const useOrderedOneToOneAndGroupsInfoByLastMessage = (): FilteredConversation[] => {
-	const { rooms, chatData } = useStore((store) => store);
+	const { rooms, chatsRegistry } = useStore((store) => store);
 	const filteredRooms = filter(
 		rooms,
 		(room) => room.type === RoomType.GROUP || room.type === RoomType.ONE_TO_ONE
 	);
 	const listOfConvLastMessage: FilteredConversation[] = [];
 	forEach(filteredRooms, (room) => {
-		const messages = chatData[room.id]?.messages;
+		const messages = chatsRegistry[room.id]?.messages;
 		const lastMessage = messages && messages[messages.length - 1];
 		listOfConvLastMessage.push({
 			roomId: room.id,
@@ -44,7 +44,9 @@ export const useOrderedOneToOneAndGroupsInfoByLastMessage = (): FilteredConversa
 const FALLBACK_MESSAGE_SELECTOR: Message[] = [];
 
 export const getMessagesSelector = (store: RootStore, roomId: string): Message[] =>
-	store.chatData[roomId]?.messages ? store.chatData[roomId]?.messages : FALLBACK_MESSAGE_SELECTOR;
+	store.chatsRegistry[roomId]?.messages
+		? store.chatsRegistry[roomId]?.messages
+		: FALLBACK_MESSAGE_SELECTOR;
 
 const readableMessages: (TextMessage | ConfigurationMessage)[] = [];
 
@@ -54,7 +56,7 @@ export const getReadableMessagesSelector = (
 ): (TextMessage | ConfigurationMessage)[] => {
 	readableMessages.length = 0;
 	readableMessages.push(
-		...(filter(store.chatData[roomId]?.messages, (message) =>
+		...(filter(store.chatsRegistry[roomId]?.messages, (message) =>
 			includes([MessageType.TEXT_MSG, MessageType.CONFIGURATION_MSG], message.type)
 		) as TextMessage[])
 	);
@@ -66,7 +68,7 @@ export const getLastTextMessageIdSelector = (
 	roomId: string
 ): string | undefined => {
 	const textMessages = filter(
-		store.chatData[roomId]?.messages,
+		store.chatsRegistry[roomId]?.messages,
 		(message) => message.type === MessageType.TEXT_MSG
 	);
 	if (textMessages && textMessages[textMessages.length - 1]) {
@@ -76,7 +78,7 @@ export const getLastTextMessageIdSelector = (
 };
 
 export const getLastMessageIdSelector = (store: RootStore, roomId: string): string | undefined => {
-	const messages = store.chatData[roomId]?.messages;
+	const messages = store.chatsRegistry[roomId]?.messages;
 	if (messages?.[messages.length - 1]) {
 		return messages[messages.length - 1].id;
 	}
@@ -88,7 +90,7 @@ export const getMessageSelector = (
 	roomId: string,
 	messageId: string | undefined
 ): Message | undefined =>
-	find(store.chatData[roomId]?.messages, (message) => message.id === messageId);
+	find(store.chatsRegistry[roomId]?.messages, (message) => message.id === messageId);
 
 const listOfConvByLastMessage: {
 	roomId: string;
@@ -103,7 +105,7 @@ export const getRoomIdsWithLastMessage = (
 	// check to remove and tell BE to improve because if a user is removed from a room
 	// the messages of this always came back and trigger error
 	forEach(store.rooms, (room) => {
-		const messages = store.chatData[room.id]?.messages;
+		const messages = store.chatsRegistry[room.id]?.messages;
 		const lastMessage = messages?.[messages.length - 1];
 		listOfConvByLastMessage.push({
 			roomId: room.id,
@@ -115,7 +117,7 @@ export const getRoomIdsWithLastMessage = (
 };
 
 export const roomIsEmpty = (store: RootStore, roomId: string): boolean =>
-	size(store.chatData[roomId]?.messages) === 0;
+	size(store.chatsRegistry[roomId]?.messages) === 0;
 
 export const getMessageAttachment = (
 	store: RootStore,
@@ -123,7 +125,7 @@ export const getMessageAttachment = (
 ): AttachmentMessageType | undefined => {
 	if (message?.type === MessageType.TEXT_MSG) {
 		const textMessage = find(
-			store.chatData[message.roomId]?.messages,
+			store.chatsRegistry[message.roomId]?.messages,
 			(mex) => mex.id === message.id
 		) as TextMessage;
 		return textMessage?.attachment;
@@ -136,8 +138,8 @@ export const getEditAndDeleteFasteningSelector = (
 	roomId: string,
 	stanzaId: string
 ): MessageFastening | undefined => {
-	if (state.chatData[roomId]?.fastenings?.[stanzaId]) {
-		const editAndDeleteFastenings = state.chatData[roomId]?.fastenings?.[stanzaId].filter(
+	if (state.chatsRegistry[roomId]?.fastenings?.[stanzaId]) {
+		const editAndDeleteFastenings = state.chatsRegistry[roomId]?.fastenings?.[stanzaId].filter(
 			(fastening) =>
 				fastening.action === FasteningAction.EDIT || fastening.action === FasteningAction.DELETE
 		);
@@ -154,7 +156,7 @@ export const getReactionFastenings = (
 	stanzaId: string
 ): MessageFastening[] => {
 	filteredReactions.length = 0;
-	const fastenings = state.chatData[roomId]?.fastenings?.[stanzaId];
+	const fastenings = state.chatsRegistry[roomId]?.fastenings?.[stanzaId];
 	if (fastenings) {
 		const reactions = filter(
 			fastenings,
@@ -183,7 +185,7 @@ export const getMyLastReaction = (
 	roomId: string,
 	stanzaId: string
 ): string | undefined => {
-	const fastenings = state.chatData[roomId]?.fastenings?.[stanzaId];
+	const fastenings = state.chatsRegistry[roomId]?.fastenings?.[stanzaId];
 	if (fastenings) {
 		const myReactions = filter(
 			fastenings,
@@ -196,22 +198,22 @@ export const getMyLastReaction = (
 };
 
 export const getMyLastMarkerOfRoom = (store: RootStore, roomId: string): Marker | null => {
-	if (store.session.id && store.chatData[roomId]?.markers[store.session.id]) {
-		return store.chatData[roomId]?.markers[store.session.id];
+	if (store.session.id && store.chatsRegistry[roomId]?.markers[store.session.id]) {
+		return store.chatsRegistry[roomId]?.markers[store.session.id];
 	}
 	return null;
 };
 
 export const getRoomHasMarkers = (store: RootStore, roomId: string): boolean =>
-	!!store.chatData[roomId]?.markers;
+	!!store.chatsRegistry[roomId]?.markers;
 
 export const getMarkers = (store: RootStore, roomId: string): { [userId: string]: Marker } =>
-	store.chatData[roomId]?.markers;
+	store.chatsRegistry[roomId]?.markers;
 
 export const getTotalUnreadCountSelector = (store: RootStore): number => {
 	const sum = (amount: number, n: number): number => amount + n;
 	return reduce(
-		map(store.chatData, ({ unread }, key) => {
+		map(store.chatsRegistry, ({ unread }, key) => {
 			const room = store.rooms[key];
 			if (!!room && !room.userSettings?.muted && room.type !== 'temporary') {
 				return unread;
@@ -224,4 +226,4 @@ export const getTotalUnreadCountSelector = (store: RootStore): number => {
 };
 
 export const getRoomUnreadsSelector = (store: RootStore, roomId: string): number =>
-	store.chatData[roomId]?.unread || 0;
+	store.chatsRegistry[roomId]?.unread || 0;

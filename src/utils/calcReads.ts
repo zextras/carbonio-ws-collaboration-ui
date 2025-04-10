@@ -8,13 +8,13 @@ import { find, forEach, size } from 'lodash';
 
 import { isBefore } from './dateUtils';
 import useStore from '../store/Store';
-import { Marker, MarkerStatus, Message, TextMessage } from '../types/store/ChatDataTypes';
+import { Marker, MarkerStatus, Message, TextMessage } from '../types/store/ChatsRegistryTypes';
 import { Member } from '../types/store/RoomTypes';
 
 export function calcReads(messageDate: number, roomId: string): MarkerStatus {
 	const store = useStore.getState();
-	const roomMessages: Message[] = store.chatData[roomId]?.messages;
-	const roomMarkers = store.chatData[roomId]?.markers;
+	const roomMessages: Message[] = store.chatsRegistry[roomId]?.messages;
+	const roomMarkers = store.chatsRegistry[roomId]?.markers;
 	const members: Member[] | undefined = store.rooms[roomId]?.members || [];
 	const sessionId = store.session.id;
 

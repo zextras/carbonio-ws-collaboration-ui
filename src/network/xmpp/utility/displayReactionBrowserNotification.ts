@@ -10,7 +10,7 @@ import { displayChatNotification } from './displayMessageBrowserNotification';
 import { CHATS_ROUTE } from '../../../constants/appConstants';
 import { EventName, sendCustomEvent } from '../../../hooks/useEventListener';
 import useStore from '../../../store/Store';
-import { MessageFastening, TextMessage } from '../../../types/store/ChatDataTypes';
+import { MessageFastening, TextMessage } from '../../../types/store/ChatsRegistryTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 import { getLocalStorageItem, LOCAL_STORAGE_NAMES } from '../../../utils/localStorageUtils';
 import UserDataRetriever from '../../../utils/UserDataRetriever';
@@ -20,7 +20,7 @@ const displayReactionBrowserNotification = async (message: MessageFastening): Pr
 	const room = store.rooms[message.roomId];
 
 	const refToMyMessage = !!find(
-		store.chatData[message.roomId].messages,
+		store.chatsRegistry[message.roomId].messages,
 		(msg: TextMessage) => msg.stanzaId === message.originalStanzaId && msg.from === store.session.id
 	);
 

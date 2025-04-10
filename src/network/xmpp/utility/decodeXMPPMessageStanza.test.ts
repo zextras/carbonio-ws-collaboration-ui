@@ -6,7 +6,11 @@
 
 import { decodeXMPPMessageStanza } from './decodeXMPPMessageStanza';
 import { reactionMessageStanza } from '../../../tests/mocks/XMPPStanza';
-import { MessageFastening, MessageType, TextMessage } from '../../../types/store/ChatDataTypes';
+import {
+	MessageFastening,
+	MessageType,
+	TextMessage
+} from '../../../types/store/ChatsRegistryTypes';
 import { retractedMessage } from '../xmppMessageExamples';
 
 const applicationXml = 'application/xml';

@@ -13,7 +13,7 @@ import { RoomsApi } from '../../../../network';
 import {
 	getLastTextMessageIdSelector,
 	getRoomUnreadsSelector
-} from '../../../../store/selectors/ChatDataSelectors';
+} from '../../../../store/selectors/ChatsRegistrySelectors';
 import { getXmppClient } from '../../../../store/selectors/ConnectionSelector';
 import useStore from '../../../../store/Store';
 

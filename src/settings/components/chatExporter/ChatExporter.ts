@@ -9,7 +9,7 @@ import { forEach, last } from 'lodash';
 import { getRoomNameSelector } from '../../../store/selectors/RoomsSelectors';
 import useStore from '../../../store/Store';
 import IXMPPClient from '../../../types/network/xmpp/IXMPPClient';
-import { Message, MessageType, TextMessage } from '../../../types/store/ChatDataTypes';
+import { Message, MessageType, TextMessage } from '../../../types/store/ChatsRegistryTypes';
 import { ExportStatus } from '../../../types/store/SessionTypes';
 import { formatDate } from '../../../utils/dateUtils';
 

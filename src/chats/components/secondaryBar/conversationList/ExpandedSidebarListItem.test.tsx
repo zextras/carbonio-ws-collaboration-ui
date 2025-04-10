@@ -22,12 +22,12 @@ import {
 import { composingStanza, pausedStanza } from '../../../../tests/mocks/XMPPStanza';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
-import { MarkerStatus } from '../../../../types/store/ChatDataTypes';
+import { MarkerStatus } from '../../../../types/store/ChatsRegistryTypes';
 import {
 	ConfigurationMessage,
 	MessageType,
 	OperationType
-} from '../../../../types/store/ChatDataTypes';
+} from '../../../../types/store/ChatsRegistryTypes';
 import { RootStore } from '../../../../types/store/StoreTypes';
 import { User } from '../../../../types/store/UserTypes';
 

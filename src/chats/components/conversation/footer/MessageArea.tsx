@@ -109,7 +109,7 @@ const MessageArea: React.FC<MessageAreaPros> = ({
 
 	// Focus input when roomId changes: but if there are unread messages wait to calculate the first unread message
 	useEffect(() => {
-		const unread = useStore.getState().chatData[roomId]?.unread;
+		const unread = useStore.getState().chatsRegistry[roomId]?.unread;
 		if (!unread || unread === 0 || firstNewMessage) {
 			textareaRef.current?.focus();
 		}

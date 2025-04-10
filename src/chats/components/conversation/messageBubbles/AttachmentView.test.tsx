@@ -12,7 +12,7 @@ import AttachmentView from './AttachmentView';
 import { AttachmentsApiToSpy, spyOnAttachmentsApi } from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
 import { AttachmentType } from '../../../../types/network/apis/IAttachmentsApi';
-import { AttachmentMessageType } from '../../../../types/store/ChatDataTypes';
+import { AttachmentMessageType } from '../../../../types/store/ChatsRegistryTypes';
 
 const attachmentCases = [
 	[AttachmentType.GIF, 'image', AttachmentType.GIF],

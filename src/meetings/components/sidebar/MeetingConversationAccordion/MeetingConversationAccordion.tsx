@@ -16,7 +16,7 @@ import papyrus from '../../../../chats/assets/papyrus.png';
 import Chat from '../../../../chats/components/conversation/Chat';
 import useDarkReader from '../../../../hooks/useDarkReader';
 import { getMeetingChatVisibility } from '../../../../store/selectors/ActiveMeetingSelectors';
-import { getRoomUnreadsSelector } from '../../../../store/selectors/ChatDataSelectors';
+import { getRoomUnreadsSelector } from '../../../../store/selectors/ChatsRegistrySelectors';
 import {
 	getRoomMutedSelector,
 	getRoomTypeSelector

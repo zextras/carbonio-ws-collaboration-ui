@@ -24,11 +24,11 @@ import {
 import {
 	getMessagesSelector,
 	getMyLastMarkerOfRoom
-} from '../../../store/selectors/ChatDataSelectors';
+} from '../../../store/selectors/ChatsRegistrySelectors';
 import { getXmppClient } from '../../../store/selectors/ConnectionSelector';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
-import { Message, MessageType } from '../../../types/store/ChatDataTypes';
+import { Message, MessageType } from '../../../types/store/ChatsRegistryTypes';
 import { formatDate, isBefore } from '../../../utils/dateUtils';
 import { scrollToEnd, scrollToMessage } from '../../../utils/scrollUtils';
 
@@ -162,11 +162,11 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 	useEffect(() => {
 		const store = useStore.getState();
 		const actualPosition = store.activeConversations[roomId]?.scrollPositionMessageId;
-		const lastMsg = last(store.chatData[roomId]?.messages)?.id;
+		const lastMsg = last(store.chatsRegistry[roomId]?.messages)?.id;
 		if (
-			store.chatData[roomId]?.unread > 0 ||
+			store.chatsRegistry[roomId]?.unread > 0 ||
 			!actualPosition ||
-			(lastMsg === actualPosition && store.chatData[roomId].unread === 0)
+			(lastMsg === actualPosition && store.chatsRegistry[roomId].unread === 0)
 		) {
 			scrollToEnd(MessagesListWrapperRef);
 		} else {

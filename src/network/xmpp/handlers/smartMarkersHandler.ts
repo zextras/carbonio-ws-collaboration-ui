@@ -7,7 +7,7 @@ import { map } from 'lodash';
 import { Strophe } from 'strophe.js';
 
 import useStore from '../../../store/Store';
-import { Marker } from '../../../types/store/ChatDataTypes';
+import { Marker } from '../../../types/store/ChatsRegistryTypes';
 import { now } from '../../../utils/dateUtils';
 import { getId, getResource } from '../utility/decodeJid';
 import { decodeMarker } from '../utility/decodeMarker';

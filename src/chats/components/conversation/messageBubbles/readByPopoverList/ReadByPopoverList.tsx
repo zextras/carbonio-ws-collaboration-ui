@@ -8,10 +8,13 @@ import React, { ReactElement, useMemo } from 'react';
 import { find, forEach } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
-import { getMessagesSelector, getMarkers } from '../../../../../store/selectors/ChatDataSelectors';
+import {
+	getMessagesSelector,
+	getMarkers
+} from '../../../../../store/selectors/ChatsRegistrySelectors';
 import { getUserId } from '../../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../../store/Store';
-import { MessageType } from '../../../../../types/store/ChatDataTypes';
+import { MessageType } from '../../../../../types/store/ChatsRegistryTypes';
 import { isBefore } from '../../../../../utils/dateUtils';
 import UserPopoverList from '../../../userPopoverList/UserPopoverList';
 
