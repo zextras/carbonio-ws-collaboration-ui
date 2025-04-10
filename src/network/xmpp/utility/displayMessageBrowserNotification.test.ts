@@ -4,15 +4,12 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import * as shell from '@zextras/carbonio-shell-ui';
+
 import displayMessageBrowserNotification from './displayMessageBrowserNotification';
 import { mockNotify } from '../../../../__mocks__/@zextras/carbonio-shell-ui';
 import useStore from '../../../store/Store';
-import {
-	createMockMeeting,
-	createMockRoom,
-	createMockTextMessage,
-	createMockUser
-} from '../../../tests/createMock';
+import { createMockRoom, createMockTextMessage, createMockUser } from '../../../tests/createMock';
 
 const room = createMockRoom();
 const loggedUser = createMockUser({ id: 'loggedUserId', name: 'Logged User' });
@@ -60,12 +57,7 @@ describe('Test display message browser notification', () => {
 	});
 
 	test('Avoid sending desktop notification on meeting tab', async () => {
-		const room = createMockRoom();
-		const store = useStore.getState();
-		const meeting = createMockMeeting({ roomId: room.id });
-		store.addMeeting(meeting);
-		store.meetingConnection(meeting.id, false, undefined, false, undefined);
-
+		jest.mocked(shell).IS_FOCUS_MODE = true;
 		const newMessage = createMockTextMessage({ roomId: room.id, from: user.id });
 		await displayMessageBrowserNotification(newMessage);
 
