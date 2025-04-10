@@ -10,13 +10,13 @@ import {
 	concat,
 	filter,
 	find,
-	first,
 	forEach,
 	last,
 	map,
 	orderBy,
 	remove,
 	size,
+	some,
 	uniqBy
 } from 'lodash';
 import { StateCreator } from 'zustand';
@@ -27,6 +27,7 @@ import {
 	ChatRegistry,
 	ChatsRegistryStoreSlice,
 	ConfigurationMessage,
+	DateMessage,
 	Marker,
 	MarkerStatus,
 	Message,
@@ -125,7 +126,7 @@ export const useChatsRegistryStoreSlice: StateCreator<
 								roomId,
 								date: message.date - 2,
 								type: MessageType.DATE_MSG
-							});
+							} as DateMessage);
 						}
 						acc.push(message);
 						return acc;
@@ -149,29 +150,33 @@ export const useChatsRegistryStoreSlice: StateCreator<
 				}
 			}),
 			false,
-			'MESSAGES/UPDATE_HISTORY'
+			'CHAT/UPDATE_HISTORY'
 		);
 	},
 	addCreateRoomMessage: (roomId: string): void => {
 		set(
 			produce((draft: RootStore) => {
-				const firstMessageDate = first(draft.chatsRegistry[roomId].messages)?.date;
-				const creationMessage = find(
-					draft.chatsRegistry[roomId].messages,
+				const { messages } = draft.chatsRegistry[roomId];
+				const room = draft.rooms[roomId];
+
+				const alreadyHasCreationMsg = some(
+					messages,
 					(message) =>
 						message.type === MessageType.CONFIGURATION_MSG &&
 						message.operation === OperationType.ROOM_CREATION
 				);
-				const historyIsBeenCleared = !!draft.rooms[roomId].userSettings?.clearedAt;
+				const isHistoryCleared = Boolean(room.userSettings?.clearedAt);
+				const firstMessageDate = messages[0]?.date;
+
 				// Add creation message only if the room is a non-empty group without the history cleared
 				if (
-					draft.rooms[roomId].type === RoomType.GROUP &&
+					room.type === RoomType.GROUP &&
 					firstMessageDate &&
-					!creationMessage &&
-					!historyIsBeenCleared
+					!alreadyHasCreationMsg &&
+					!isHistoryCleared
 				) {
 					const creationMsg: ConfigurationMessage = {
-						id: `creationMessage${firstMessageDate + 1}`,
+						id: `creationMessage-${firstMessageDate + 1}`,
 						roomId,
 						date: firstMessageDate + 1,
 						type: MessageType.CONFIGURATION_MSG,
