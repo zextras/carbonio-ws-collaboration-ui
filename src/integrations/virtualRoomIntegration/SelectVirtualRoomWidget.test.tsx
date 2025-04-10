@@ -40,7 +40,7 @@ describe('SelectVirtualRoomWidget', () => {
 			const store = useStore.getState();
 			store.setLoginInfo(sessionUser.id, sessionUser.name);
 			store.setAttributes(createMockAttributesList());
-			store.setRooms([temporaryRoomMod]);
+			store.addRooms([temporaryRoomMod]);
 			store.setMeetings([scheduledMeetingMod]);
 		});
 		await act(async () => {

@@ -96,7 +96,7 @@ beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo(sessionUser.id, sessionUser.name);
 	store.setAttributes(createMockAttributesList({ carbonioWscRecordingEnabled: 'TRUE' }));
-	store.setRooms([oneToOneRoom, groupRoom, temporaryRoom, temporaryRoomMod]);
+	store.addRooms([oneToOneRoom, groupRoom, temporaryRoom, temporaryRoomMod]);
 	store.setMeetings([oneToOneMeeting, groupMeeting, scheduledMeeting, scheduledMeetingMod]);
 	store.meetingConnection(oneToOneMeeting.id, false, 'audioId', false, 'videoId');
 	store.setWaitingList(scheduledMeetingMod.id, [user1.id]);

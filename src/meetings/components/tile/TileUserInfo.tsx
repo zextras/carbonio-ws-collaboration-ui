@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import usePinnedTile from '../../../hooks/usePinnedTile';
+import { getUserHandRank } from '../../../store/selectors/ActiveMeetingSelectors';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import { getIsUserGuest, getUserName } from '../../../store/selectors/UsersSelectors';
 import useStore from '../../../store/Store';
@@ -59,6 +60,7 @@ const TileUserInfo: FC<tileUserInfoProps> = ({
 	const userName = useStore((store) => getUserName(store, userId ?? ''));
 	const isSessionTile = useStore(getUserId) === userId;
 	const isUserGuest = useStore((store) => getIsUserGuest(store, userId ?? ''));
+	const userHandRank = useStore((store) => getUserHandRank(store, meetingId ?? '', userId ?? ''));
 
 	const { canUsePinFeature, isPinned } = usePinnedTile(
 		meetingId ?? '',
@@ -135,9 +137,16 @@ const TileUserInfo: FC<tileUserInfoProps> = ({
 						{isUserGuest && <GuestUserLabel />}
 					</TextContainer>
 				</Row>
-				{isHandRaised && (
-					<CustomContainer background={'gray0'} height="fit" width="fit" padding="0.35rem">
+				{isHandRaised && !isScreenShare && (
+					<CustomContainer
+						background={'gray0'}
+						height="fit"
+						width="fit"
+						padding="0.35rem"
+						gap="0.25rem"
+					>
 						<Icon icon="Hand" color="warning" />
+						<Text color={'gray6'}>{userHandRank}</Text>
 					</CustomContainer>
 				)}
 			</Row>

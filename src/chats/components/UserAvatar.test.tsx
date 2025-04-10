@@ -110,7 +110,7 @@ beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo(user1Info.id, user1Info.name);
 	store.setUserInfo([user1Info, user2Info, user3Info]);
-	store.setRooms([
+	store.addRooms([
 		room,
 		roomWithPicture,
 		singleConversationWithUnloadUser,
@@ -180,7 +180,7 @@ describe('User avatar', () => {
 		test('Check if the conversation has notifications disabled and user is online', () => {
 			const store = useStore.getState();
 			store.setUserPresence('user2', true);
-			store.setRoomMuted(room.id);
+			store.setRoomMuteStatus(room.id, true);
 			store.setAttributes(createMockAttributesList({ carbonioWscShowUsersPresence: 'TRUE' }));
 			setup(<UserAvatar roomId={room.id} draftMessage={false} />);
 			const iconOff = screen.getByTestId(iconBellOff);
@@ -191,7 +191,7 @@ describe('User avatar', () => {
 		});
 		test('Check if the conversation has notifications disabled and user is offline', () => {
 			const store = useStore.getState();
-			store.setRoomMuted(room.id);
+			store.setRoomMuteStatus(room.id, true);
 			store.setAttributes(createMockAttributesList({ carbonioWscShowUsersPresence: 'TRUE' }));
 			setup(<UserAvatar roomId={room.id} draftMessage={false} />);
 			const iconOff = screen.getByTestId(iconBellOff);

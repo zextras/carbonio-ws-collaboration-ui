@@ -4,63 +4,220 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { act, renderHook } from '@testing-library/react';
+import { size } from 'lodash';
 
-import { createMockMember, createMockRoom, createMockUser } from '../../tests/createMock';
+import {
+	createMockMember,
+	createMockRoom,
+	createMockTextMessage,
+	createMockUser
+} from '../../tests/createMock';
 import { MessageType } from '../../types/store/MessageTypes';
 import { RoomType } from '../../types/store/RoomTypes';
+import { dateToTimestamp } from '../../utils/dateUtils';
 import useStore from '../Store';
 
 const user1 = createMockUser({ id: 'user1' });
+const user2 = createMockUser({ id: 'user2' });
+const user3 = createMockUser({ id: 'user3' });
 
-const room1 = createMockRoom({
+const singleRoom1 = createMockRoom({
 	id: 'room1-id',
 	type: RoomType.ONE_TO_ONE,
-	members: [createMockMember({ userId: user1.id })]
+	members: [
+		createMockMember({ userId: user1.id, owner: true }),
+		createMockMember({ userId: user2.id, owner: true })
+	]
+});
+
+const groupRoom1 = createMockRoom({
+	id: 'group-room-1-id',
+	type: RoomType.GROUP,
+	members: [
+		createMockMember({ userId: user1.id, owner: true }),
+		createMockMember({ userId: user2.id }),
+		createMockMember({ userId: user3.id })
+	]
 });
 
 describe('RoomsStoreSlice tests', () => {
-	describe('Placeholder room', () => {
-		test('Placeholder message is added to the room', () => {
-			const { result } = renderHook(() => useStore());
-			act(() => {
-				result.current.setPlaceholderRoom(user1.id);
-			});
-
-			const placeholderRoomId = `placeholder-${user1.id}`;
-			expect(result.current.rooms[placeholderRoomId]).toEqual(
+	describe('Add rooms', () => {
+		test('Room is added to the store', () => {
+			useStore.getState().addRooms([singleRoom1]);
+			expect(useStore.getState().rooms[singleRoom1.id]).toEqual(
 				expect.objectContaining({
-					id: `placeholder-${user1.id}`,
-					type: RoomType.ONE_TO_ONE
-				})
-			);
-
-			expect(result.current.activeConversations[placeholderRoomId]).toEqual(
-				expect.objectContaining({
-					isHistoryFullyLoaded: true
-				})
-			);
-
-			expect(result.current.messages[placeholderRoomId][0]).toEqual(
-				expect.objectContaining({
-					type: MessageType.DATE_MSG
+					id: singleRoom1.id,
+					name: singleRoom1.name,
+					description: singleRoom1.description,
+					type: singleRoom1.type,
+					createdAt: singleRoom1.createdAt,
+					updatedAt: singleRoom1.updatedAt,
+					pictureUpdatedAt: singleRoom1.pictureUpdatedAt,
+					members: singleRoom1.members
 				})
 			);
 		});
 
-		test('Placeholder message is removed from the room', () => {
-			const { result } = renderHook(() => useStore());
-			act(() => {
-				result.current.setPlaceholderRoom(user1.id);
-				result.current.replacePlaceholderRoom(user1.id, room1.id);
+		test('If an already present room is added, meetingId data is maintained ', () => {
+			useStore.getState().addRooms([{ ...groupRoom1, meetingId: 'newMeetingId' }]);
+			useStore.getState().addRooms([groupRoom1]);
+			expect(useStore.getState().rooms[groupRoom1.id]).toEqual(
+				expect.objectContaining({
+					meetingId: 'newMeetingId'
+				})
+			);
+		});
+
+		test('If a room is added with clearedAt, messages before that date are removed', () => {
+			useStore.setState({
+				messages: {
+					[groupRoom1.id]: [
+						createMockTextMessage({
+							id: 'message1',
+							roomId: groupRoom1.id,
+							date: dateToTimestamp('2023-01-20T00:00:00Z')
+						}),
+						createMockTextMessage({
+							id: 'message2',
+							roomId: groupRoom1.id,
+							date: dateToTimestamp('2023-01-22T00:00:00Z')
+						})
+					]
+				}
 			});
+			expect(size(useStore.getState().messages[groupRoom1.id])).toEqual(2);
+			useStore
+				.getState()
+				.addRooms([
+					{ ...groupRoom1, userSettings: { clearedAt: '2023-01-21T00:00:00Z', muted: false } }
+				]);
+			expect(size(useStore.getState().messages[groupRoom1.id])).toEqual(1);
+		});
+	});
+
+	test('Room is removed from the store', () => {
+		useStore.getState().addRooms([singleRoom1]);
+		useStore.getState().removeRoom(singleRoom1.id);
+		expect(useStore.getState().rooms[singleRoom1.id]).toBeUndefined();
+	});
+
+	describe('Mute status', () => {
+		test('Mute status is set only when the room is present in the store', () => {
+			useStore.getState().setRoomMuteStatus(groupRoom1.id, true);
+			expect(useStore.getState().rooms[groupRoom1.id]).toBeUndefined();
+		});
+
+		test('Mute status is set tot true', () => {
+			useStore.getState().addRooms([groupRoom1]);
+			useStore.getState().setRoomMuteStatus(groupRoom1.id, true);
+			expect(useStore.getState().rooms[groupRoom1.id].userSettings?.muted).toBe(true);
+		});
+
+		test('Mute status is set to false', () => {
+			useStore.getState().addRooms([groupRoom1]);
+			useStore.getState().setRoomMuteStatus(groupRoom1.id, false);
+			expect(useStore.getState().rooms[groupRoom1.id].userSettings?.muted).toBe(false);
+		});
+	});
+
+	describe('Members', () => {
+		test('Member is added to the room', () => {
+			useStore.getState().addRooms([groupRoom1]);
+			const newMember = createMockMember({ userId: 'user5', owner: false });
+			useStore.getState().addRoomMember(groupRoom1.id, newMember);
+			expect(useStore.getState().rooms[groupRoom1.id].members).toContainEqual(newMember);
+		});
+
+		test('Member is removed from the room', () => {
+			useStore.getState().addRooms([groupRoom1]);
+			useStore.getState().removeRoomMember(groupRoom1.id, user2.id);
+			expect(useStore.getState().rooms[groupRoom1.id].members).not.toContainEqual(
+				expect.objectContaining({ userId: user2.id })
+			);
+		});
+
+		test('Member is promoted to room moderator', () => {
+			useStore.getState().addRooms([groupRoom1]);
+			useStore.getState().setMemberModeratorStatus(groupRoom1.id, user2.id, true);
+			expect(useStore.getState().rooms[groupRoom1.id].members).toContainEqual(
+				expect.objectContaining({ userId: user2.id, owner: true })
+			);
+		});
+
+		test('Room moderator is demoted', () => {
+			useStore.getState().addRooms([groupRoom1]);
+			useStore.getState().setMemberModeratorStatus(groupRoom1.id, user1.id, false);
+			expect(useStore.getState().rooms[groupRoom1.id].members).toContainEqual(
+				expect.objectContaining({ userId: user1.id, owner: false })
+			);
+		});
+	});
+
+	describe('Edit room', () => {
+		test('Room is edited', () => {
+			useStore.getState().addRooms([groupRoom1]);
+			const updatedRoom = {
+				name: 'Updated Room Name',
+				description: 'Updated Room Description'
+			};
+			useStore.getState().editRoom(groupRoom1.id, {
+				name: updatedRoom.name,
+				description: updatedRoom.description
+			});
+			expect(useStore.getState().rooms[groupRoom1.id]).toEqual(
+				expect.objectContaining({
+					name: updatedRoom.name,
+					description: updatedRoom.description
+				})
+			);
+		});
+
+		test('Room edit is ignored if room is not present in the store', () => {
+			useStore.getState().editRoom(groupRoom1.id, {
+				name: 'Updated Room Name',
+				description: 'Updated Room Description'
+			});
+			expect(useStore.getState().rooms[groupRoom1.id]).toBeUndefined();
+		});
+	});
+
+	test('clearConversation deletes all room data', () => {
+		const now = new Date();
+		useStore.getState().addRooms([singleRoom1]);
+		useStore.getState().clearConversation(singleRoom1.id, now.toISOString());
+		expect(useStore.getState().rooms[singleRoom1.id].userSettings?.clearedAt).toBe(
+			now.toISOString()
+		);
+		expect(useStore.getState().messages[singleRoom1.id]).toBeUndefined();
+		expect(useStore.getState().activeConversations[singleRoom1.id]).toBeUndefined();
+	});
+
+	describe('Placeholder room', () => {
+		test('Placeholder room and all necessary data are been stored correctly', () => {
+			useStore.getState().setPlaceholderRoom(user1.id);
 
 			const placeholderRoomId = `placeholder-${user1.id}`;
-			expect(result.current.rooms[placeholderRoomId]).toBeUndefined();
-			expect(result.current.activeConversations[placeholderRoomId]).toBeUndefined();
-			expect(result.current.messages[placeholderRoomId]).toBeUndefined();
+			const store = useStore.getState();
+			expect(store.rooms[placeholderRoomId]).toEqual(
+				expect.objectContaining({
+					id: `placeholder-${user1.id}`,
+					placeholder: true,
+					type: RoomType.ONE_TO_ONE
+				})
+			);
+			expect(store.activeConversations[placeholderRoomId].isHistoryFullyLoaded).toBeTruthy();
+			expect(store.messages[placeholderRoomId][0].type).toBe(MessageType.DATE_MSG);
+		});
 
-			expect(result.current.rooms[room1.id]).toBeDefined();
+		test('Placeholder room and all relative data are been removed', () => {
+			useStore.getState().setPlaceholderRoom(user1.id);
+			useStore.getState().removePlaceholderRoom(user1.id);
+
+			const placeholderRoomId = `placeholder-${user1.id}`;
+			const store = useStore.getState();
+			expect(store.rooms[placeholderRoomId]).toBeUndefined();
+			expect(store.activeConversations[placeholderRoomId]).toBeUndefined();
+			expect(store.messages[placeholderRoomId]).toBeUndefined();
 		});
 	});
 });

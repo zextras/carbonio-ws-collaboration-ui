@@ -15,7 +15,6 @@ import { mockSearchUsersByFeatureRequest } from '../../../../tests/mocks/SearchU
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
 import { ContactInfo } from '../../../../types/network/soap/searchUsersByFeatureRequest';
-import { RootStore } from '../../../../types/store/StoreTypes';
 
 const testRoom: RoomBe = createMockRoom({
 	id: 'room-test',
@@ -31,11 +30,14 @@ const user1: ContactInfo = {
 	id: 'user1-id'
 };
 
+beforeEach(() => {
+	const store = useStore.getState();
+	store.addRooms([testRoom]);
+});
+
 describe('Add new Member Modal', () => {
 	test('Everything should be rendered - checkbox selected', async () => {
 		mockSearchUsersByFeatureRequest.mockReturnValue([user1]);
-		const store: RootStore = useStore.getState();
-		store.addRoom(testRoom);
 		setup(
 			<AddNewMemberModal
 				addNewMemberModalOpen
@@ -72,8 +74,6 @@ describe('Add new Member Modal', () => {
 
 	test('Everything should be rendered - checkbox not selected', async () => {
 		mockSearchUsersByFeatureRequest.mockReturnValue([user1]);
-		const store: RootStore = useStore.getState();
-		store.addRoom(testRoom);
 		setup(
 			<AddNewMemberModal
 				addNewMemberModalOpen

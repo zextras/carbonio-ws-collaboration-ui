@@ -95,9 +95,8 @@ describe('eventHandlersUtilities tests', () => {
 
 	beforeEach(() => {
 		const store = useStore.getState();
-		store.addRoom(room);
+		store.addRooms([room, activeRoom]);
 		store.addMeeting(meeting);
-		store.addRoom(activeRoom);
 		store.addMeeting(activeMeeting);
 		store.meetingConnection(activeMeeting.id, false, undefined, false, undefined);
 	});

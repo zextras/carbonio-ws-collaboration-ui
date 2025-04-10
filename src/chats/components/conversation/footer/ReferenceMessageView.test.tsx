@@ -43,11 +43,14 @@ const mockedMessage = createMockTextMessage({
 	read: MarkerStatus.UNREAD
 });
 
+beforeEach(() => {
+	const store: RootStore = useStore.getState();
+	store.addRooms([mockedRoom]);
+	store.newMessage(mockedMessage);
+});
+
 describe('Reply to a message by opening the contextual menu', () => {
 	test('Display the contextual menu of a message', async () => {
-		const store: RootStore = useStore.getState();
-		store.addRoom(mockedRoom);
-		store.newMessage(mockedMessage);
 		const { user } = setup(<MessagesList roomId={mockedRoom.id} />);
 		const messageBubble = screen.getByTestId(`Bubble-${mockedMessage.id}`);
 		expect(messageBubble).toBeVisible();
@@ -57,8 +60,6 @@ describe('Reply to a message by opening the contextual menu', () => {
 	});
 	test('Display of reference message shows correctly', () => {
 		const store: RootStore = useStore.getState();
-		store.addRoom(mockedRoom);
-		store.newMessage(mockedMessage);
 		store.setReferenceMessage(
 			mockedRoom.id,
 			mockedMessage.id,
@@ -74,8 +75,6 @@ describe('Reply to a message by opening the contextual menu', () => {
 	});
 	test('Close reference message', async () => {
 		const store: RootStore = useStore.getState();
-		store.addRoom(mockedRoom);
-		store.newMessage(mockedMessage);
 		store.setReferenceMessage(
 			mockedRoom.id,
 			mockedMessage.id,

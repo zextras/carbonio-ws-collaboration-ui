@@ -4,13 +4,12 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { meetingParticipantClashedEventHandler } from './MeetingParticipantClashedEventHandler';
-import { EventName } from '../../../hooks/useEventListener';
+import { meetingParticipantHandRaisedHandler } from './MeetingParticipantHandRaisedHandler';
 import useStore from '../../../store/Store';
 import { createMockMeeting, createMockRoom } from '../../../tests/createMock';
 import { MeetingType } from '../../../types/network/models/meetingBeTypes';
 import { WsEventType } from '../../../types/network/websocket/wsEvents';
-import { MeetingParticipantClashedEvent } from '../../../types/network/websocket/wsMeetingEvents';
+import { MeetingParticipantHandRaisedEvent } from '../../../types/network/websocket/wsMeetingEvents';
 import { RoomType } from '../../../types/store/RoomTypes';
 
 const room = createMockRoom({
@@ -19,10 +18,13 @@ const room = createMockRoom({
 });
 const meeting = createMockMeeting({ roomId: room.id, meetingType: MeetingType.SCHEDULED });
 
-const event: MeetingParticipantClashedEvent = {
-	type: WsEventType.MEETING_PARTICIPANT_CLASHED,
+const event: MeetingParticipantHandRaisedEvent = {
+	type: WsEventType.MEETING_PARTICIPANT_HAND_RAISED,
 	sentDate: '2022-01-01T00:00:00.000Z',
-	meetingId: meeting.id
+	meetingId: meeting.id,
+	userId: 'myUserId',
+	raised: true,
+	handRaisedAt: '2022-01-01T00:00:00.000Z'
 };
 
 beforeEach(() => {
@@ -34,16 +36,9 @@ beforeEach(() => {
 describe('MeetingParticipantClashedEventHandler tests', () => {
 	test('A custom event is sent if the user is the active meeting', () => {
 		useStore.getState().meetingConnection(meeting.id, false, undefined, false, undefined);
-		const dispatchEvent = jest.spyOn(window, 'dispatchEvent');
-		meetingParticipantClashedEventHandler(event);
-		expect(dispatchEvent).toHaveBeenCalledWith(
-			new CustomEvent(EventName.MEETING_PARTICIPANT_CLASHED, { detail: event })
-		);
-	});
-
-	test('A custom event is not sent if the user is not inside meeting', () => {
-		const dispatchEvent = jest.spyOn(window, 'dispatchEvent');
-		meetingParticipantClashedEventHandler(event);
-		expect(dispatchEvent).not.toHaveBeenCalled();
+		meetingParticipantHandRaisedHandler(event);
+		expect(useStore.getState().activeMeeting[meeting.id].usersWithHandRaised).toStrictEqual([
+			'myUserId'
+		]);
 	});
 });

@@ -4,6 +4,22 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
+import { MemberBe, RoomBe } from '../network/models/roomBeTypes';
+
+export type RoomsStoreSlice = {
+	rooms: RoomsMap;
+	addRooms: (rooms: RoomBe[]) => void;
+	removeRoom: (roomId: string) => void;
+	editRoom: (roomId: string, room: Partial<Room>) => void;
+	setRoomMuteStatus: (roomId: string, muted: boolean) => void;
+	addRoomMember: (roomId: string, member: MemberBe) => void;
+	removeRoomMember: (roomId: string, memberId: string | undefined) => void;
+	setMemberModeratorStatus: (roomId: string, memberId: string, isModerator: boolean) => void;
+	clearConversation: (roomId: string, clearedAt: string) => void;
+	setPlaceholderRoom: (userId: string) => void;
+	removePlaceholderRoom: (userId: string) => void;
+};
+
 export type Room = {
 	id: string;
 	name?: string;
@@ -12,7 +28,7 @@ export type Room = {
 	createdAt: string;
 	updatedAt: string;
 	pictureUpdatedAt?: string;
-	members?: Member[];
+	members: Member[];
 	userSettings?: RoomUserSettings;
 	meetingId?: string;
 	placeholder?: boolean;
@@ -37,7 +53,7 @@ export type RoomUserSettings = {
 };
 
 export type RoomsMap = {
-	[id: string]: Room;
+	[roomId: string]: Room;
 };
 
 export type ConversationProps = {

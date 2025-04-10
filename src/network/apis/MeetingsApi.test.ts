@@ -11,6 +11,7 @@ import useStore from '../../store/Store';
 import {
 	createMockMeeting,
 	createMockMember,
+	createMockParticipants,
 	createMockRoom,
 	createMockUser
 } from '../../tests/createMock';
@@ -22,6 +23,7 @@ import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
 import { RoomType } from '../../types/store/RoomTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 import { User, UserType } from '../../types/store/UserTypes';
+import { dateToISODate } from '../../utils/dateUtils';
 
 const meetingMock = createMockMeeting();
 const meetingNotActiveMock = createMockMeeting({ active: false });
@@ -50,7 +52,7 @@ beforeEach(() => {
 	const store: RootStore = useStore.getState();
 	store.setLoginInfo(userId, 'User');
 	store.setQueueId('queueId');
-	store.addRoom(roomMock);
+	store.addRooms([roomMock]);
 });
 
 describe('Meetings API', () => {
@@ -193,7 +195,7 @@ describe('Meetings API', () => {
 	});
 
 	test('enterMeeting is called correctly when the meeting instance is not yet created', async () => {
-		useStore.getState().addRoom(roomWithoutMeetingMock);
+		useStore.getState().addRooms([roomWithoutMeetingMock]);
 		spyOnFetch.mockResolvedValueOnce(scheduledMeetingMock);
 
 		await meetingsApi.enterMeeting(
@@ -284,7 +286,7 @@ describe('Meetings API', () => {
 			members: [createMockMember({ userId })]
 		});
 		const store = useStore.getState();
-		store.addRoom(temporaryRoom);
+		store.addRooms([temporaryRoom]);
 
 		await meetingsApi.leaveMeeting(meetingMock.id);
 
@@ -301,7 +303,7 @@ describe('Meetings API', () => {
 			members: [createMockMember({ userId, owner: true })]
 		});
 		const store = useStore.getState();
-		store.addRoom(temporaryRoom);
+		store.addRooms([temporaryRoom]);
 
 		await meetingsApi.leaveMeeting(meetingMock.id);
 
@@ -508,5 +510,48 @@ describe('Meetings API', () => {
 		await meetingsApi.createGuestAccount('userName');
 
 		expect(spyOnCreateGuestAccount).toHaveBeenCalledWith('userName');
+	});
+
+	test('user raise hand', async () => {
+		const spyOnRaiseHand = spyOnMeetingsApi(MeetingsApiToSpy.RAISE_HAND);
+		ongoingMeetingSetup();
+
+		await meetingsApi.raiseHand(meetingMock.id, true);
+		expect(spyOnRaiseHand).toHaveBeenCalled();
+	});
+
+	test('User joins a meeting where some participants have raised their hands', async () => {
+		spyOnFetch.mockResolvedValueOnce({ status: 'ACCEPTED' });
+		const meeting = createMockMeeting({
+			participants: [
+				createMockParticipants({ userId: 'user1' }),
+				createMockParticipants({
+					userId: 'user2',
+					handRaisedAt: dateToISODate('2023-01-01T00:10:02.000Z')
+				}),
+				createMockParticipants({
+					userId: 'user3',
+					handRaisedAt: dateToISODate('2023-01-01T00:10:03.000Z')
+				}),
+				createMockParticipants({
+					userId: 'user4',
+					handRaisedAt: dateToISODate('2023-01-01T00:10:01.000Z')
+				})
+			]
+		});
+		spyOnFetch.mockResolvedValueOnce(meeting);
+		await meetingsApi.joinMeeting(
+			meetingMock.id,
+			{ audioStreamEnabled: false, videoStreamEnabled: false },
+			{}
+		);
+		expect(spyOnFetch).toHaveBeenCalledWith(`meetings/${meetingMock.id}/join`, RequestType.POST, {
+			audioStreamEnabled: false,
+			videoStreamEnabled: false
+		});
+		const store = useStore.getState();
+		expect(store.activeMeeting[meeting.id].usersWithHandRaised[0]).toBe('user4');
+		expect(store.activeMeeting[meeting.id].usersWithHandRaised[1]).toBe('user2');
+		expect(store.activeMeeting[meeting.id].usersWithHandRaised[2]).toBe('user3');
 	});
 });

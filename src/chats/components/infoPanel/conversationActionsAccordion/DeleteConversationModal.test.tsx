@@ -19,7 +19,6 @@ import {
 import { setup } from '../../../../tests/test-utils';
 import { MeetingBe } from '../../../../types/network/models/meetingBeTypes';
 import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
-import { RootStore } from '../../../../types/store/StoreTypes';
 
 const memberOne = createMockMember({ userId: 'myId' });
 const memberTwo = createMockMember({ userId: 'userTwo' });
@@ -42,10 +41,14 @@ const testMeeting: MeetingBe = createMockMeeting({
 	]
 });
 
+beforeEach(() => {
+	const store = useStore.getState();
+	store.addRooms([testRoom]);
+	store.addMeeting(testMeeting);
+});
+
 describe('Delete Conversation Modal', () => {
 	test('all elements should be rendered - one member', () => {
-		const store: RootStore = useStore.getState();
-		store.addRoom(testRoom);
 		setup(
 			<DeleteConversationModal
 				deleteConversationModalOpen
@@ -60,8 +63,6 @@ describe('Delete Conversation Modal', () => {
 		expect(title).toBeInTheDocument();
 	});
 	test('all elements should be rendered - more members', () => {
-		const store: RootStore = useStore.getState();
-		store.addRoom(testRoom);
 		setup(
 			<DeleteConversationModal
 				deleteConversationModalOpen
@@ -76,9 +77,6 @@ describe('Delete Conversation Modal', () => {
 		expect(title).toBeInTheDocument();
 	});
 	test('Display alert for ongoing meeting when user open modal to delete the group', () => {
-		const store: RootStore = useStore.getState();
-		store.addRoom(testRoom);
-		store.addMeeting(testMeeting);
 		setup(
 			<DeleteConversationModal
 				deleteConversationModalOpen
@@ -93,9 +91,6 @@ describe('Delete Conversation Modal', () => {
 		expect(title).toBeInTheDocument();
 	});
 	test('Display alert for ongoing meeting when user open modal to delete the group', () => {
-		const store: RootStore = useStore.getState();
-		store.addRoom(testRoom);
-		store.addMeeting(testMeeting);
 		setup(
 			<DeleteConversationModal
 				deleteConversationModalOpen

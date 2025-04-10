@@ -68,7 +68,7 @@ const setupBasicGroup = (): { user: UserEvent; store: RootStore } => {
 		result.current.setAttributes(createMockAttributesList({ carbonioWscVideoCallEnabled: 'TRUE' }));
 		result.current.setLoginInfo(mockUser1.id, mockUser1.name);
 		result.current.setUserInfo([mockUser2]);
-		result.current.addRoom(groupRoom);
+		result.current.addRooms([groupRoom]);
 		result.current.addMeeting(groupMeeting);
 		result.current.meetingConnection(groupMeeting.id, false, undefined, false, undefined);
 	});

@@ -27,7 +27,7 @@ const event: MeetingSDPOfferedEvent = {
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo('myUserId', 'User');
-	store.addRoom(room);
+	store.addRooms([room]);
 	store.addMeeting(meeting);
 });
 describe('meetingSDPOfferedEventHandler tests', () => {

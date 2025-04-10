@@ -29,9 +29,8 @@ const event: MeetingStartedEvent = {
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo('myUserId', 'myusername');
-	store.addRoom(oneToOneRoom);
+	store.addRooms([oneToOneRoom, groupRoom]);
 	store.addMeeting(oneToOneMeeting);
-	store.addRoom(groupRoom);
 	store.addMeeting(groupMeeting);
 });
 describe('MeetingStartedEventHandler tests', () => {

@@ -25,7 +25,7 @@ const event: MeetingParticipantSubscribedEvent = {
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo('myUserId', 'User');
-	store.addRoom(room);
+	store.addRooms([room]);
 	store.addMeeting(meeting);
 });
 describe('meetingParticipantSubscribedEventHandler tests', () => {

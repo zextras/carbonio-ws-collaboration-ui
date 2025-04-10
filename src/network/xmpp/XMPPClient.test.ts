@@ -70,7 +70,7 @@ describe('XMPPClient', () => {
 
 	test('requestHistory is called for a known room', () => {
 		const room = createMockRoom({ id: 'room-test' });
-		useStore.getState().addRoom(createMockRoom({ id: room.id }));
+		useStore.getState().addRooms([createMockRoom({ id: room.id })]);
 		const xmppClient = new XMPPClient();
 		const spyOnXmppSend = jest.spyOn(xmppClient.xmppConnection, 'send');
 		xmppClient.requestHistory(room.id, dateToTimestamp('2024-03-12'), 10);

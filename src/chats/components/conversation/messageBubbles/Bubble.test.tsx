@@ -164,10 +164,13 @@ const mockedTextMessagePending = createMockTextMessage({
 	text: 'This is a message'
 });
 
+beforeEach(() => {
+	const store: RootStore = useStore.getState();
+	store.addRooms([mockedRoom]);
+});
+
 describe('Message bubble component visualization', () => {
 	test('Display replied text message', () => {
-		const store: RootStore = useStore.getState();
-		store.addRoom(mockedRoom);
 		setup(
 			<Bubble
 				message={mockedRepliedTextMessage}
@@ -183,7 +186,6 @@ describe('Message bubble component visualization', () => {
 	});
 	test('Display image', () => {
 		const store: RootStore = useStore.getState();
-		store.addRoom(mockedRoom);
 		store.newMessage(mockedAttachmentMessageKb);
 		setup(
 			<Bubble
@@ -196,8 +198,6 @@ describe('Message bubble component visualization', () => {
 		expect(screen.getByTestId('attachmentImg')).toBeInTheDocument();
 	});
 	test('Hover on image reply', async () => {
-		const store: RootStore = useStore.getState();
-		store.addRoom(mockedRoom);
 		const { user } = setup(
 			<Bubble
 				message={mockedRepliedTextMessageWithAttachment}
@@ -230,7 +230,6 @@ const readsMessages: Array<[string, TextMessage, boolean, string]> = [
 describe('Attachment footer', () => {
 	test.each(sizeFormatMessages)('Display size in %s', async (format, msg, evaluate) => {
 		const store: RootStore = useStore.getState();
-		store.addRoom(mockedRoom);
 		store.newMessage(msg);
 		setup(
 			<Bubble
@@ -245,7 +244,6 @@ describe('Attachment footer', () => {
 	});
 	test.each(readsMessages)('Display message sent from me, %s', (format, msg, cap, iconToCheck) => {
 		const store: RootStore = useStore.getState();
-		store.addRoom(mockedRoom);
 		store.newMessage(msg);
 		store.setLoginInfo(user1Be.id, user1Be.name);
 		store.setAttributes(
@@ -264,7 +262,6 @@ describe('Attachment footer', () => {
 	});
 	test('Display reads for a message sent from me, me - user cannot see reads', () => {
 		const store: RootStore = useStore.getState();
-		store.addRoom(mockedRoom);
 		store.newMessage(mockedTextMessageSentByMe);
 		store.setLoginInfo(user1Be.id, user1Be.name);
 		store.setAttributes(createMockAttributesList({ carbonioWscShowMessageReads: 'FALSE' }));
@@ -280,7 +277,6 @@ describe('Attachment footer', () => {
 	});
 	test('Display unread message sent from me - user cannot see reads', () => {
 		const store: RootStore = useStore.getState();
-		store.addRoom(mockedRoom);
 		store.newMessage(mockedTextMessageUnread);
 		store.setLoginInfo(user1Be.id, user1Be.name);
 		store.setAttributes(createMockAttributesList({ carbonioWscShowMessageReads: 'FALSE' }));
@@ -299,7 +295,6 @@ describe('Attachment footer', () => {
 beforeEach(() => {
 	const store: RootStore = useStore.getState();
 	store.setLoginInfo(user1Be.id, user1Be.name);
-	store.addRoom(mockedTempRoom);
 	store.setUserInfo([guestUser, user1Be]);
 });
 
@@ -334,7 +329,7 @@ beforeEach(() => {
 	const store: RootStore = useStore.getState();
 	store.setLoginInfo(user1Be.id, user1Be.name);
 	store.setAttributes(createMockAttributesList({ carbonioWscMessageDeleteTimeLimit: '5m' }));
-	store.addRoom(mockedTempRoom);
+	store.addRooms([mockedTempRoom]);
 	store.setUserInfo([user1Be]);
 });
 describe('Actions', () => {

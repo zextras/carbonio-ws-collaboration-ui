@@ -34,7 +34,7 @@ const myMarker = createMockMarker({
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo(sessionUser.id, sessionUser.name);
-	store.addRoom(room);
+	store.addRooms([room]);
 });
 describe('getLastUnreadMessage', () => {
 	describe('Session user has never read any message in the conversation', () => {

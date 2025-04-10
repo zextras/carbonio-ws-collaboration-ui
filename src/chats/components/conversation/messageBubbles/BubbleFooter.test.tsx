@@ -101,7 +101,7 @@ describe('BubbleFooter test', () => {
 
 	test('On my read message, I can see the read by dropdown on group messages', async () => {
 		const room = createMockRoom({ id: 'roomId', type: RoomType.GROUP });
-		useStore.getState().addRoom(room);
+		useStore.getState().addRooms([room]);
 		const { user } = setup(
 			<BubbleFooter
 				date={Date.now()}
@@ -119,7 +119,7 @@ describe('BubbleFooter test', () => {
 
 	test('On my read message, I cannot see the read by dropdown on one-to-one messages', async () => {
 		const room = createMockRoom({ id: 'roomId', type: RoomType.ONE_TO_ONE });
-		useStore.getState().addRoom(room);
+		useStore.getState().addRooms([room]);
 		const { user } = setup(
 			<BubbleFooter
 				date={Date.now()}
