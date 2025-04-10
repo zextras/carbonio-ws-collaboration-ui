@@ -63,9 +63,9 @@
 	"dependencies": {
 		"@emoji-mart/data": "1.2.1",
 		"@mediapipe/selfie_segmentation": "^0.1.1632777926",
-		"@zextras/carbonio-design-system": "file:../carbonio-design-system/zextras-carbonio-design-system-0.0.0-semantically-released.tgz",
-		"@zextras/carbonio-shell-ui": "file:../carbonio-shell-ui/zextras-carbonio-shell-ui-10.0.0.tgz",
-		"@zextras/carbonio-ui-preview": "file:../carbonio-ui-preview/zextras-carbonio-ui-preview-0.0.0-semantically-released.tgz",
+		"@zextras/carbonio-design-system": "^10.0.0",
+		"@zextras/carbonio-shell-ui": "devel",
+		"@zextras/carbonio-ui-preview": "^3.2.0",
 		"emoji-mart": "5.6.0",
 		"identity-obj-proxy": "^3.0.0",
 		"immer": "^10.0.3",
