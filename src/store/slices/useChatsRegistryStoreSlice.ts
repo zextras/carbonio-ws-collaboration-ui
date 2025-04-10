@@ -232,9 +232,9 @@ export const useChatsRegistryStoreSlice: StateCreator<
 	): void => {
 		set(
 			produce((draft: RootStore) => {
-				// Message to add the replyMessage prop
+				const { messages } = initRoomChatsRegistry(draft, roomId);
 				const messageWithAResponse = find(
-					draft.chatsRegistry[roomId].messages,
+					messages,
 					(message) => message.id === replyMessageId
 				) as TextMessage;
 				if (messageWithAResponse) {
@@ -242,7 +242,7 @@ export const useChatsRegistryStoreSlice: StateCreator<
 				}
 			}),
 			false,
-			'MESSAGES/SET_REPLIED_MESSAGE'
+			'CHAT/SET_REPLIED_MESSAGE'
 		);
 	},
 	setPlaceholderMessage: ({
@@ -255,6 +255,8 @@ export const useChatsRegistryStoreSlice: StateCreator<
 	}: PlaceholderFields): void => {
 		set(
 			produce((draft: RootStore) => {
+				const { messages } = initRoomChatsRegistry(draft, roomId);
+
 				const placeholderMessage: TextMessage = {
 					id,
 					stanzaId: `placeholder_${id}`,
@@ -268,26 +270,17 @@ export const useChatsRegistryStoreSlice: StateCreator<
 					attachment,
 					forwarded
 				};
-				initRoomChatsRegistry(draft, roomId);
 
 				// Add date message if the new message has a different date than the previous one
-				const lastMessageDate = last(draft.chatsRegistry[roomId].messages)?.date ?? 0;
-				if (!datesAreFromTheSameDay(lastMessageDate, placeholderMessage.date)) {
-					draft.chatsRegistry[roomId].messages.push({
-						id: `dateMessage${placeholderMessage.date - 2}`,
-						roomId,
-						date: placeholderMessage.date - 2,
-						type: MessageType.DATE_MSG
-					});
-				}
+				addDateMessage(messages, placeholderMessage.date, roomId);
 
-				// Request message subject of reply
-				const messageSubjectOfReplyId = placeholderMessage.replyTo;
-				if (messageSubjectOfReplyId) {
+				// If the placeholder message is a reply, find the message to reply to
+				if (placeholderMessage.replyTo) {
 					const messageSubjectOfReply = find(
-						draft.chatsRegistry[roomId].messages,
+						messages,
 						(message) =>
-							message.type === MessageType.TEXT_MSG && message.stanzaId === messageSubjectOfReplyId
+							message.type === MessageType.TEXT_MSG &&
+							message.stanzaId === placeholderMessage.replyTo
 					) as TextMessage;
 					if (messageSubjectOfReply) {
 						placeholderMessage.repliedMessage = messageSubjectOfReply;
@@ -300,22 +293,20 @@ export const useChatsRegistryStoreSlice: StateCreator<
 				sendCustomEvent({ name: EventName.NEW_MESSAGE, data: placeholderMessage });
 			}),
 			false,
-			'MESSAGES/SET_PLACEHOLDER_MESSAGE'
+			'CHAT/SET_PLACEHOLDER_MESSAGE'
 		);
 	},
 	removePlaceholderMessage: (roomId: string, messageId: string): void => {
 		set(
 			produce((draft: RootStore) => {
-				remove(draft.chatsRegistry[roomId].messages, (message) => message.id === messageId);
-				if (
-					draft.chatsRegistry[roomId].messages[draft.chatsRegistry[roomId].messages.length - 1]
-						.type === MessageType.DATE_MSG
-				) {
+				const { messages } = initRoomChatsRegistry(draft, roomId);
+				remove(messages, (message) => message.id === messageId);
+				if (last(messages)?.type === MessageType.DATE_MSG) {
 					draft.chatsRegistry[roomId].messages.pop();
 				}
 			}),
 			false,
-			'MESSAGES/REMOVE_PLACEHOLDER_MESSAGE'
+			'CHATS/REMOVE_PLACEHOLDER_MESSAGE'
 		);
 	},
 	addFastening: (fastening: MessageFastening): void => {
