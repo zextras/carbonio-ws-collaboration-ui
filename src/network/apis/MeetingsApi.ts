@@ -295,8 +295,15 @@ class MeetingsApi implements IMeetingsApi {
 		});
 	}
 
-	public raiseHand(meetingId: string, value: boolean): Promise<RaiseHandResponse> {
-		return fetchAPI(`meetings/${meetingId}/hand`, RequestType.PUT, { raised: value });
+	public raiseHand(
+		meetingId: string,
+		value: boolean,
+		userToModerate?: string
+	): Promise<RaiseHandResponse> {
+		return fetchAPI(`meetings/${meetingId}/hand`, RequestType.PUT, {
+			raised: value,
+			userToModerate
+		});
 	}
 
 	public authLogin(): Promise<LoginV3ConfigResponse> {

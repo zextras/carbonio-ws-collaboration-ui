@@ -147,5 +147,6 @@ export type MeetingParticipantHandRaisedEvent = BasicMeetingEvent & {
 	type: WsEventType.MEETING_PARTICIPANT_HAND_RAISED;
 	userId: string;
 	raised: boolean;
-	handRaisedAt: string;
+	moderatorId?: string;
+	handRaisedAt?: string;
 };

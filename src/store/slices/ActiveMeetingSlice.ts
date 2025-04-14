@@ -46,7 +46,8 @@ export const useActiveMeetingSlice: StateCreator<
 						participantsAccordionIsOpened: false,
 						waitingListAccordionIsOpened: true,
 						recordingAccordionIsOpened: false,
-						visualEffectsAccordionIsOpened: false
+						visualEffectsAccordionIsOpened: false,
+						raiseHandAccordionStatusIsOpened: true
 					},
 					chatVisibility: MeetingChatVisibility.OPEN,
 					meetingViewSelected: MeetingViewType.GRID,
@@ -146,6 +147,17 @@ export const useActiveMeetingSlice: StateCreator<
 			}),
 			false,
 			'AM/SET_VISUAL_EFFECTS_ACCORDION_STATUS'
+		);
+	},
+	setRaiseHandAccordionStatus: (meetingId: string, status: boolean): void => {
+		set(
+			produce((draft: RootStore) => {
+				if (draft.activeMeeting[meetingId]) {
+					draft.activeMeeting[meetingId].sidebarStatus.raiseHandAccordionStatusIsOpened = status;
+				}
+			}),
+			false,
+			'AM/SET_RAISE_HAND_ACCORDION_STATUS'
 		);
 	},
 	setMeetingChatVisibility: (meetingId: string, visibilityStatus: MeetingChatVisibility): void => {

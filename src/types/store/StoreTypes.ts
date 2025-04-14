@@ -163,6 +163,7 @@ export type ActiveMeetingSlice = {
 	setRecordingAccordionStatus: (roomId: string, status: boolean) => void;
 	setMeetingParticipantsAccordionStatus: (roomId: string, status: boolean) => void;
 	setVisualEffectsAccordionStatus: (meetingId: string, status: boolean) => void;
+	setRaiseHandAccordionStatus: (meetingId: string, status: boolean) => void;
 	setMeetingChatVisibility: (meetingId: string, visibilityStatus: MeetingChatVisibility) => void;
 	setMeetingViewSelected: (meetingId: string, viewType: MeetingViewType) => void;
 	meetingConnection: (

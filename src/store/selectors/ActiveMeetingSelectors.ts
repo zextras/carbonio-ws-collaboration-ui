@@ -33,6 +33,9 @@ export const getRecordingAccordionStatus = (store: RootStore, meetingId: string)
 export const getVisualEffectsAccordionStatus = (store: RootStore, meetingId: string): boolean =>
 	store.activeMeeting[meetingId]?.sidebarStatus.visualEffectsAccordionIsOpened;
 
+export const getRaiseHandAccordionStatus = (store: RootStore, meetingId: string): boolean =>
+	store.activeMeeting[meetingId]?.sidebarStatus.raiseHandAccordionStatusIsOpened;
+
 export const getMeetingChatVisibility = (
 	store: RootStore,
 	meetingId: string
@@ -125,3 +128,6 @@ export const getUserHandRank = (store: RootStore, meetingId: string, userId: str
 	const index = store.activeMeeting[meetingId]?.usersWithHandRaised.indexOf(userId);
 	return index >= 0 ? index + 1 : 0;
 };
+
+export const getHandRaisedList = (store: RootStore, meetingId: string): string[] | undefined =>
+	store.activeMeeting[meetingId]?.usersWithHandRaised;

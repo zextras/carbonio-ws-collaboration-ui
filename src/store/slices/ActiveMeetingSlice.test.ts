@@ -28,7 +28,8 @@ describe('Active Meeting Slice', () => {
 			participantsAccordionIsOpened: false,
 			waitingListAccordionIsOpened: true,
 			visualEffectsAccordionIsOpened: false,
-			recordingAccordionIsOpened: false
+			recordingAccordionIsOpened: false,
+			raiseHandAccordionStatusIsOpened: true
 		});
 		expect(result.current.activeMeeting[meetingId].chatVisibility).toBe(MeetingChatVisibility.OPEN);
 		act(() => result.current.meetingDisconnection(meetingId));
