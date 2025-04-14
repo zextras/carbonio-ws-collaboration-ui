@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next';
 import { RoomsApi } from '../../../../network';
 import {
 	getLastTextMessageIdSelector,
-	getRoomUnreadsSelector
+	getRoomUnreadSelector
 } from '../../../../store/selectors/ChatsRegistrySelectors';
 import { getXmppClient } from '../../../../store/selectors/ConnectionSelector';
 import useStore from '../../../../store/Store';
@@ -40,7 +40,7 @@ const ClearHistoryModal: FC<ClearHistoryModalProps> = ({
 	const closeLabel = t('action.close', 'Close');
 
 	const xmppClient = useStore(getXmppClient);
-	const unreadMessagesCount = useStore((store) => getRoomUnreadsSelector(store, roomId));
+	const unreadMessagesCount = useStore((store) => getRoomUnreadSelector(store, roomId));
 	const lastTextMessageId: string | undefined = useStore((state) =>
 		getLastTextMessageIdSelector(state, roomId)
 	);

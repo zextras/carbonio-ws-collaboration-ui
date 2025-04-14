@@ -11,13 +11,13 @@ import {
 	getMyLastMarkerOfRoom,
 	getRoomHasMarkers,
 	getReadableMessagesSelector,
-	getRoomUnreadsSelector
+	getRoomUnreadSelector
 } from '../../../store/selectors/ChatsRegistrySelectors';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 
 const useFirstUnreadMessage = (roomId: string): string | undefined => {
-	const unreadCount = useStore((store) => getRoomUnreadsSelector(store, roomId));
+	const unreadCount = useStore((store) => getRoomUnreadSelector(store, roomId));
 	const myUserId = useStore(getUserId);
 	const messages = useStore((store) => getReadableMessagesSelector(store, roomId));
 	const hasConversationMarkers = useStore((store) => getRoomHasMarkers(store, roomId));

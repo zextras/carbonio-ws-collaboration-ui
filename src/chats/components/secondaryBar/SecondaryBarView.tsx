@@ -15,7 +15,7 @@ import useFilteredConversationList from './conversationList/useFilteredConversat
 import ConversationsFilter from './ConversationsFilter';
 import useFilteredGal from './galSeachList/useFilteredGal';
 import VirtualRoomsButton from './virtualRoomWidget/VirtualRoomsButton';
-import { useOrderedOneToOneAndGroupsInfoByLastMessage } from '../../../store/selectors/ChatsRegistrySelectors';
+import { useOrderedRoomsInfoByLastMessage } from '../../../store/selectors/chatsRegistrySelectors/useOrderedRoomsInfoByLastMessage';
 import { getAttribute } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
 import { Member } from '../../../types/store/RoomTypes';
@@ -51,7 +51,7 @@ const SecondaryBarView: React.FC<SecondaryBarSingleGroupsViewProps> = ({ expande
 	);
 
 	const videoCallEnabled = useStore((store) => getAttribute(store, 'videoCallEnabled'));
-	const roomsIds = useOrderedOneToOneAndGroupsInfoByLastMessage();
+	const roomsIds = useOrderedRoomsInfoByLastMessage();
 	const chatsBeNetworkStatus = useStore(({ connections }) => connections.status.chats_be);
 	const privateChatCreation = useStore((store) => getAttribute(store, 'privateChatCreation'));
 

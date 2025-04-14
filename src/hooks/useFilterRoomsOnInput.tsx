@@ -9,7 +9,7 @@ import { useEffect, useMemo } from 'react';
 import { find, forEach, map } from 'lodash';
 
 import { FilteredConversation } from '../chats/components/secondaryBar/SecondaryBarView';
-import { useOrderedOneToOneAndGroupsInfoByLastMessage } from '../store/selectors/ChatsRegistrySelectors';
+import { useOrderedRoomsInfoByLastMessage } from '../store/selectors/chatsRegistrySelectors/useOrderedRoomsInfoByLastMessage';
 import { getUserId } from '../store/selectors/SessionSelectors';
 import { getUsersSelector } from '../store/selectors/UsersSelectors';
 import useStore from '../store/Store';
@@ -18,7 +18,7 @@ import UserDataRetriever from '../utils/UserDataRetriever';
 export const useFilterRoomsOnInput = (filteredInput: string): FilteredConversation[] => {
 	const sessionId = useStore(getUserId);
 	const users = useStore(getUsersSelector);
-	const roomsInfo = useOrderedOneToOneAndGroupsInfoByLastMessage();
+	const roomsInfo = useOrderedRoomsInfoByLastMessage();
 
 	// Fetch user data for each member of the rooms to let user filters by group members
 	useEffect(() => {

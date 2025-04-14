@@ -20,7 +20,7 @@ import {
 } from '../../../../store/selectors/ActiveConversationsSelectors';
 import {
 	getLastMessageIdSelector,
-	getRoomUnreadsSelector
+	getRoomUnreadSelector
 } from '../../../../store/selectors/ChatsRegistrySelectors';
 import {
 	getRoomMutedSelector,
@@ -65,7 +65,7 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 		getLastMessageIdSelector(state, roomId)
 	);
 	const lastMessageOfRoom: Message | undefined = useMessage(roomId, lastMessageId ?? '');
-	const unreadMessagesCount = useStore((store) => getRoomUnreadsSelector(store, roomId));
+	const unreadMessagesCount = useStore((store) => getRoomUnreadSelector(store, roomId));
 	const lastNewReaction = useStore((store) => getLastNewReaction(store, roomId));
 	const roomType = useStore((state) => getRoomTypeSelector(state, roomId));
 	const roomName = useStore((state) => getRoomNameSelector(state, roomId));

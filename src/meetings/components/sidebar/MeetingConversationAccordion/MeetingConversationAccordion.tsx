@@ -16,7 +16,7 @@ import papyrus from '../../../../chats/assets/papyrus.png';
 import Chat from '../../../../chats/components/conversation/Chat';
 import useDarkReader from '../../../../hooks/useDarkReader';
 import { getMeetingChatVisibility } from '../../../../store/selectors/ActiveMeetingSelectors';
-import { getRoomUnreadsSelector } from '../../../../store/selectors/ChatsRegistrySelectors';
+import { getRoomUnreadSelector } from '../../../../store/selectors/ChatsRegistrySelectors';
 import {
 	getRoomMutedSelector,
 	getRoomTypeSelector
@@ -68,7 +68,7 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({
 	const expandChatLabel = t('meeting.expandChat', 'Expand chat');
 	const collapseChatLabel = t('meeting.collapseChat', 'Collapse chat');
 
-	const unreadMessagesCount = useStore((store) => getRoomUnreadsSelector(store, roomId || ''));
+	const unreadMessagesCount = useStore((store) => getRoomUnreadSelector(store, roomId || ''));
 	const roomMuted = useStore((state) => getRoomMutedSelector(state, roomId));
 	const meetingChatVisibility = useStore((store) => getMeetingChatVisibility(store, meetingId));
 	const setMeetingChatVisibility = useStore((store) => store.setMeetingChatVisibility);

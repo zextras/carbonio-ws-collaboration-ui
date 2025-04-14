@@ -3,9 +3,8 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import { filter, find, forEach, includes, last, map, orderBy, reduce, size } from 'lodash';
+import { filter, find, forEach, includes, last, map, reduce, size } from 'lodash';
 
-import { FilteredConversation } from '../../chats/components/secondaryBar/SecondaryBarView';
 import {
 	AttachmentMessageType,
 	ConfigurationMessage,
@@ -16,30 +15,7 @@ import {
 	MessageType,
 	TextMessage
 } from '../../types/store/ChatsRegistryTypes';
-import { RoomType } from '../../types/store/RoomTypes';
 import { RootStore } from '../../types/store/StoreTypes';
-import useStore from '../Store';
-
-export const useOrderedOneToOneAndGroupsInfoByLastMessage = (): FilteredConversation[] => {
-	const { rooms, chatsRegistry } = useStore((store) => store);
-	const filteredRooms = filter(
-		rooms,
-		(room) => room.type === RoomType.GROUP || room.type === RoomType.ONE_TO_ONE
-	);
-	const listOfConvLastMessage: FilteredConversation[] = [];
-	forEach(filteredRooms, (room) => {
-		const messages = chatsRegistry[room.id]?.messages;
-		const lastMessage = messages && messages[messages.length - 1];
-		listOfConvLastMessage.push({
-			roomId: room.id,
-			name: room.name ?? '',
-			roomType: room.type,
-			lastMessageTimestamp: lastMessage ? lastMessage.date : 0,
-			members: room.members ?? []
-		});
-	});
-	return orderBy(listOfConvLastMessage, ['lastMessageTimestamp'], ['desc']);
-};
 
 const FALLBACK_MESSAGE_SELECTOR: Message[] = [];
 
@@ -148,38 +124,6 @@ export const getEditAndDeleteFasteningSelector = (
 	return undefined;
 };
 
-const filteredReactions: MessageFastening[] = [];
-
-export const getReactionFastenings = (
-	state: RootStore,
-	roomId: string,
-	stanzaId: string
-): MessageFastening[] => {
-	filteredReactions.length = 0;
-	const fastenings = state.chatsRegistry[roomId]?.fastenings?.[stanzaId];
-	if (fastenings) {
-		const reactions = filter(
-			fastenings,
-			(fastening) => fastening.action === FasteningAction.REACTION
-		);
-		const latestReactions = reduce(
-			reactions,
-			(acc: { [from: string]: number }, fastening: MessageFastening, index: number) => {
-				if (!acc[fastening.from] || reactions[acc[fastening.from]].date < fastening.date) {
-					acc[fastening.from] = index;
-				}
-				return acc;
-			},
-			{}
-		);
-		filteredReactions.push(
-			...filter(reactions, (_, index) => includes(Object.values(latestReactions), index))
-		);
-		return filteredReactions;
-	}
-	return filteredReactions;
-};
-
 export const getMyLastReaction = (
 	state: RootStore,
 	roomId: string,
@@ -225,5 +169,5 @@ export const getTotalUnreadCountSelector = (store: RootStore): number => {
 	);
 };
 
-export const getRoomUnreadsSelector = (store: RootStore, roomId: string): number =>
+export const getRoomUnreadSelector = (store: RootStore, roomId: string): number =>
 	store.chatsRegistry[roomId]?.unread || 0;

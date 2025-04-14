@@ -11,7 +11,7 @@ import styled from 'styled-components';
 
 import useRouting from '../../../../hooks/useRouting';
 import { getDraftMessage } from '../../../../store/selectors/ActiveConversationsSelectors';
-import { getRoomUnreadsSelector } from '../../../../store/selectors/ChatsRegistrySelectors';
+import { getRoomUnreadSelector } from '../../../../store/selectors/ChatsRegistrySelectors';
 import {
 	getRoomNameSelector,
 	getRoomTypeSelector
@@ -40,7 +40,7 @@ const CollapsedSidebarListItem: React.FC<SidebarListItemProps> = ({ roomId }) =>
 	const roomType = useStore((state) => getRoomTypeSelector(state, roomId));
 	const roomName = useStore((state) => getRoomNameSelector(state, roomId)) || '';
 	const isConversationSelected = useStore((state) => getSelectedConversation(state, roomId));
-	const unreadMessagesCount = useStore((store) => getRoomUnreadsSelector(store, roomId));
+	const unreadMessagesCount = useStore((store) => getRoomUnreadSelector(store, roomId));
 	const draftMessage = useStore((store) => getDraftMessage(store, roomId));
 
 	const openConversation = useCallback(() => goToRoomPage(roomId), [goToRoomPage, roomId]);
