@@ -199,7 +199,7 @@ export const useChatsRegistryStoreSlice: StateCreator<
 						(msg.type === MessageType.TEXT_MSG || msg.type === MessageType.CONFIGURATION_MSG) &&
 						(msg.read === MarkerStatus.UNREAD || msg.read === MarkerStatus.READ_BY_SOMEONE)
 					) {
-						msg.read = calcReads(msg.date, roomId);
+						msg.read = calcReads(msg.date, roomId, markers);
 					}
 					return msg;
 				});

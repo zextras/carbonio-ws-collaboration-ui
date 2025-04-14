@@ -11,10 +11,14 @@ import useStore from '../store/Store';
 import { Marker, MarkerStatus, Message, TextMessage } from '../types/store/ChatsRegistryTypes';
 import { Member } from '../types/store/RoomTypes';
 
-export function calcReads(messageDate: number, roomId: string): MarkerStatus {
+export function calcReads(
+	messageDate: number,
+	roomId: string,
+	markers?: { [userId: string]: Marker }
+): MarkerStatus {
 	const store = useStore.getState();
 	const roomMessages: Message[] = store.chatsRegistry[roomId]?.messages;
-	const roomMarkers = store.chatsRegistry[roomId]?.markers;
+	const roomMarkers = markers || store.chatsRegistry[roomId]?.markers;
 	const members: Member[] | undefined = store.rooms[roomId]?.members || [];
 	const sessionId = store.session.id;
 
