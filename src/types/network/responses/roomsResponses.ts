@@ -31,7 +31,7 @@ export type ClearRoomHistoryResponse = {
 	clearedAt: string;
 };
 
-export type GetRoomMembersResponse = ''; // TODO
+export type GetRoomMembersResponse = MemberBe[];
 
 export type AddRoomMembersResponse = MemberBe;
 
