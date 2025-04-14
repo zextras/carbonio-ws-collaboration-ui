@@ -10,7 +10,6 @@ export type ChatsRegistryStoreSlice = {
 	newInboxMessage: (message: Message) => void;
 	updateHistory: (roomId: string, messageArray: Message[]) => void;
 	addCreateRoomMessage: (roomId: string) => void;
-	updateReadStatus: (roomId: string, newMarkers: Marker[]) => void;
 	setRepliedMessage: (
 		roomId: string,
 		replyMessageId: string,
@@ -19,6 +18,7 @@ export type ChatsRegistryStoreSlice = {
 	setPlaceholderMessage: (fields: PlaceholderFields) => void;
 	removePlaceholderMessage: (roomId: string, messageId: string) => void;
 	addFastening: (fasteningMessage: MessageFastening) => void;
+	updateReadStatus: (roomId: string, newMarkers: Marker[]) => void;
 	incrementUnreadCount: (roomId: string, counter: number) => void;
 };
 

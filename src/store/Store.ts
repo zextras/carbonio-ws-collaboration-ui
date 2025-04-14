@@ -9,11 +9,11 @@ import { devtools } from 'zustand/middleware';
 
 import { useActiveConversationsSlice } from './slices/ActiveConversationsSlice';
 import { useActiveMeetingSlice } from './slices/ActiveMeetingSlice';
+import { useChatsRegistryStoreSlice } from './slices/ChatsRegistryStoreSlice';
 import { useConnectionsStoreSlice } from './slices/ConnectionStoreSlice';
 import { useMeetingsStoreSlice } from './slices/MeetingsStoreSlice';
 import { useRoomsStoreSlice } from './slices/RoomsStoreSlice';
 import { useSessionStoreSlice } from './slices/SessionStoreSlice';
-import { useChatsRegistryStoreSlice } from './slices/useChatsRegistryStoreSlice';
 import { useUsersStoreSlice } from './slices/UsersStoreSlice';
 import { RootStore } from '../types/store/StoreTypes';
 
