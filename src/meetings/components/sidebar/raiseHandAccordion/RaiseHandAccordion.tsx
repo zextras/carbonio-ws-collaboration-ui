@@ -117,6 +117,31 @@ const RaiseHandAccordion: FC<RaiseHandAccordionProps> = ({ meetingId }) => {
 		});
 	}, [meetingId, raiseHandList]);
 
+	const lowerButtonComponent = useMemo(
+		() => (
+			<Container padding={{ vertical: 'large', right: 'small' }} gap="0.5rem">
+				<Button
+					label={lowerAllHandLabel}
+					backgroundColor="secondary"
+					width="fill"
+					onClick={lowerAllHands}
+				/>
+			</Container>
+		),
+		[lowerAllHandLabel, lowerAllHands]
+	);
+
+	const raiseHandUserComponent = useMemo(
+		() => (
+			<Container padding={{ vertical: 'large', right: 'small' }} gap="0.5rem">
+				{map(raiseHandList, (userId) => (
+					<RaiseHandUser meetingId={meetingId} userId={userId} key={userId} />
+				))}
+			</Container>
+		),
+		[meetingId, raiseHandList]
+	);
+
 	const items = useMemo(() => {
 		const waitingListContainer: AccordionItemType[] = [];
 		if (amIModerator) {
@@ -124,29 +149,14 @@ const RaiseHandAccordion: FC<RaiseHandAccordionProps> = ({ meetingId }) => {
 				id: 'lowerAllHands',
 				disableHover: true,
 				background: 'text',
-				CustomComponent: () => (
-					<Container padding={{ vertical: 'large', right: 'small' }} gap="0.5rem">
-						<Button
-							label={lowerAllHandLabel}
-							backgroundColor="secondary"
-							width="fill"
-							onClick={lowerAllHands}
-						/>
-					</Container>
-				)
+				CustomComponent: () => lowerButtonComponent
 			});
 		}
 		waitingListContainer.push({
 			id: 'raiseHandContainer',
 			disableHover: true,
 			background: 'text',
-			CustomComponent: () => (
-				<Container padding={{ vertical: 'large', right: 'small' }} gap="0.5rem">
-					{map(raiseHandList, (userId) => (
-						<RaiseHandUser meetingId={meetingId} userId={userId} key={userId} />
-					))}
-				</Container>
-			)
+			CustomComponent: () => raiseHandUserComponent
 		});
 		return [
 			{
@@ -162,10 +172,8 @@ const RaiseHandAccordion: FC<RaiseHandAccordionProps> = ({ meetingId }) => {
 		accordionStatus,
 		accordionTitle,
 		amIModerator,
-		lowerAllHandLabel,
-		lowerAllHands,
-		meetingId,
-		raiseHandList,
+		lowerButtonComponent,
+		raiseHandUserComponent,
 		toggleAccordionStatus
 	]);
 
