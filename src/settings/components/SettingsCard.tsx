@@ -5,7 +5,7 @@
  */
 import React, { FC } from 'react';
 
-import { Container, Divider, Padding, Text } from '@zextras/carbonio-design-system';
+import { Container, FormSection, FormSubSection, Text } from '@zextras/carbonio-design-system';
 
 type SettingsCardProps = {
 	title: string;
@@ -15,32 +15,25 @@ type SettingsCardProps = {
 };
 
 const SettingsCard: FC<SettingsCardProps> = ({ title, description, subDescription, children }) => (
-	<Container
-		background={'gray6'}
-		padding={{ horizontal: 'medium', bottom: 'medium' }}
-		crossAlignment="flex-start"
-		gap="1rem"
-	>
-		<Padding top="large">
-			<Text weight="bold">{title}</Text>
-		</Padding>
-		<Divider color="gray2" />
+	<FormSection label={title}>
 		{(description || subDescription) && (
-			<Container gap="0.5rem" crossAlignment="flex-start">
-				{description && (
-					<Text overflow="break-word" size="small">
-						{description}
-					</Text>
-				)}
-				{subDescription && (
-					<Text overflow="break-word" size="small" color="gray1" italic>
-						{subDescription}
-					</Text>
-				)}
-			</Container>
+			<FormSubSection>
+				<Container gap="0.5rem" crossAlignment="flex-start">
+					{description && (
+						<Text overflow="break-word" size="small">
+							{description}
+						</Text>
+					)}
+					{subDescription && (
+						<Text overflow="break-word" size="small" color="gray1" italic>
+							{subDescription}
+						</Text>
+					)}
+				</Container>
+			</FormSubSection>
 		)}
 		{children}
-	</Container>
+	</FormSection>
 );
 
 export default SettingsCard;
