@@ -18,6 +18,13 @@ import {
 } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
 
+const room = createMockRoom();
+
+beforeEach(() => {
+	const store = useStore.getState();
+	store.addRooms([room]);
+});
+
 describe('Message Factory', () => {
 	test("Message isn't in the store", () => {
 		const message = createMockTextMessage();
@@ -37,10 +44,8 @@ describe('Message Factory', () => {
 	});
 
 	test('Render TextMessage', () => {
-		const room = createMockRoom();
 		const message = createMockTextMessage({ roomId: room.id });
 		const store = useStore.getState();
-		store.addRoom(room);
 		store.newMessage(message);
 		setup(
 			<MessageFactory
@@ -58,10 +63,8 @@ describe('Message Factory', () => {
 	});
 
 	test('Render unread TextMessage', () => {
-		const room = createMockRoom();
 		const message = createMockTextMessage({ roomId: room.id });
 		const store = useStore.getState();
-		store.addRoom(room);
 		store.newMessage(message);
 		setup(
 			<MessageFactory
@@ -81,10 +84,8 @@ describe('Message Factory', () => {
 	});
 
 	test('Render DeletedMessage', () => {
-		const room = createMockRoom();
 		const message = createMockTextMessage({ roomId: room.id, deleted: true });
 		const store = useStore.getState();
-		store.addRoom(room);
 		store.newMessage(message);
 		setup(
 			<MessageFactory
@@ -102,10 +103,8 @@ describe('Message Factory', () => {
 	});
 
 	test('Render unread DeletedMessage', () => {
-		const room = createMockRoom();
 		const message = createMockTextMessage({ roomId: room.id, deleted: true });
 		const store = useStore.getState();
-		store.addRoom(room);
 		store.newMessage(message);
 		setup(
 			<MessageFactory
@@ -125,10 +124,8 @@ describe('Message Factory', () => {
 	});
 
 	test('Render ConfigurationMessage', () => {
-		const room = createMockRoom();
 		const message = createMockConfigurationMessage({ roomId: room.id });
 		const store = useStore.getState();
-		store.addRoom(room);
 		store.newMessage(message);
 		setup(
 			<MessageFactory
@@ -148,10 +145,8 @@ describe('Message Factory', () => {
 	});
 
 	test('Render DateMessage', () => {
-		const room = createMockRoom();
 		const message = createMockDateMessage({ roomId: room.id });
 		const store = useStore.getState();
-		store.addRoom(room);
 		store.newMessage(message);
 		setup(
 			<MessageFactory

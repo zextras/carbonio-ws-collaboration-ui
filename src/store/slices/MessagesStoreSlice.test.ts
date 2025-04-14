@@ -158,7 +158,7 @@ describe('Test messages slice - newInboxMessage', () => {
 		});
 		const { result } = renderHook(() => useStore());
 		act(() => {
-			result.current.addRoom(room);
+			result.current.addRooms([room]);
 			result.current.newInboxMessage(inboxMessage);
 		});
 
@@ -179,7 +179,7 @@ describe('Test messages slice - newInboxMessage', () => {
 		});
 		const { result } = renderHook(() => useStore());
 		act(() => {
-			result.current.addRoom(room);
+			result.current.addRooms([room]);
 			result.current.newInboxMessage(inboxMessage);
 		});
 
@@ -344,7 +344,7 @@ describe('Test message slice - addCreateRoomMessage', () => {
 		const { result } = renderHook(() => useStore());
 
 		act(() => {
-			result.current.addRoom(room);
+			result.current.addRooms([room]);
 			result.current.updateHistory(room.id, [message0, message1]);
 			result.current.addCreateRoomMessage(room.id);
 		});
@@ -363,7 +363,7 @@ describe('Test message slice - addCreateRoomMessage', () => {
 		const { result } = renderHook(() => useStore());
 
 		act(() => {
-			result.current.addRoom(room);
+			result.current.addRooms([room]);
 			result.current.updateHistory(room.id, [message0, message1]);
 			result.current.addCreateRoomMessage(room.id);
 		});
@@ -384,7 +384,7 @@ describe('Test message slice - addCreateRoomMessage', () => {
 		const { result } = renderHook(() => useStore());
 
 		act(() => {
-			result.current.addRoom(room);
+			result.current.addRooms([room]);
 			result.current.updateHistory(room.id, [message0, message1]);
 			result.current.addCreateRoomMessage(room.id);
 		});
@@ -439,7 +439,7 @@ describe('Test message slice - updateUnreadMessages', () => {
 
 	test('Tests updateUnreadMessages', () => {
 		const { result } = renderHook(() => useStore());
-		act(() => result.current.addRoom(room));
+		act(() => result.current.addRooms([room]));
 		// Message list: [DATE, MESSAGE0, DATE, MESSAGE1]
 		act(() => result.current.updateHistory(room.id, [message0, message1]));
 

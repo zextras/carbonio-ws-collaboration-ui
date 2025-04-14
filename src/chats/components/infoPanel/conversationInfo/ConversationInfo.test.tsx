@@ -35,27 +35,28 @@ const room: RoomBe = createMockRoom({
 	]
 });
 
-const OneToOneRoom: RoomBe = createMockRoom({
+const oneToOneRoom: RoomBe = createMockRoom({
 	id: 'One-To-One-Room-Id',
 	type: RoomType.ONE_TO_ONE,
 	members: [createMockMember({ userId: user1Be.id, owner: true })]
 });
 
+beforeEach(() => {
+	const store = useStore.getState();
+	store.setUserInfo([user1Be]);
+	store.addRooms([room, oneToOneRoom]);
+});
+
 describe('Conversation info Details', () => {
 	test('group info should appear as expected', async () => {
-		const store = useStore.getState();
-		store.addRoom(room);
 		setup(<ConversationInfoDetails roomId={room.id} roomType="group" />);
 		expect(screen.getByText(room.description!)).toBeInTheDocument();
-		act(() => store.setRoomDescription(room.id, 'new description'));
+		act(() => useStore.getState().editRoom(room.id, { description: 'new description' }));
 		expect(screen.getByText(/new description/i)).toBeInTheDocument();
 	});
 
 	test('user info should appear as expected', async () => {
-		const store = useStore.getState();
-		store.addRoom(OneToOneRoom);
-		store.setUserInfo([user1Be]);
-		setup(<ConversationInfoDetails roomId={OneToOneRoom.id} roomType={RoomType.ONE_TO_ONE} />);
+		setup(<ConversationInfoDetails roomId={oneToOneRoom.id} roomType={RoomType.ONE_TO_ONE} />);
 		expect(screen.getAllByText(user1Be.name)).toHaveLength(1);
 		expect(screen.getByText(user1Be.email)).toBeInTheDocument();
 	});
@@ -63,12 +64,9 @@ describe('Conversation info Details', () => {
 
 describe('Conversation Info', () => {
 	test('user info should appear as expected', async () => {
-		const store = useStore.getState();
-		store.addRoom(OneToOneRoom);
-		store.setUserInfo([user1Be]);
 		setup(
 			<ConversationInfo
-				roomId={OneToOneRoom.id}
+				roomId={oneToOneRoom.id}
 				roomType={RoomType.ONE_TO_ONE}
 				setInfoPanelOpen={jest.fn()}
 			/>
@@ -77,8 +75,6 @@ describe('Conversation Info', () => {
 	});
 
 	test('group info should appear as expected', async () => {
-		const store = useStore.getState();
-		store.addRoom(room);
 		setup(
 			<ConversationInfo roomId={room.id} roomType={RoomType.GROUP} setInfoPanelOpen={jest.fn()} />
 		);
@@ -86,8 +82,6 @@ describe('Conversation Info', () => {
 	});
 
 	test('infoPanel take all space', async () => {
-		const store = useStore.getState();
-		store.addRoom(room);
 		setup(
 			<ConversationInfo roomId={room.id} roomType={RoomType.GROUP} setInfoPanelOpen={jest.fn()} />
 		);
@@ -97,8 +91,6 @@ describe('Conversation Info', () => {
 
 	test('infoPanel does not take all space', async () => {
 		mockUseMediaQueryCheck.mockReturnValueOnce(true);
-		const store = useStore.getState();
-		store.addRoom(room);
 		setup(
 			<ConversationInfo roomId={room.id} roomType={RoomType.GROUP} setInfoPanelOpen={jest.fn()} />
 		);

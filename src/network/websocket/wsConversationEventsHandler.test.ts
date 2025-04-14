@@ -40,7 +40,7 @@ const room: RoomBe = createMockRoom({
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo(sessionUser.id, sessionUser.name);
-	store.addRoom(room);
+	store.addRooms([room]);
 });
 
 describe('wsConversationEventHandler tests', () => {

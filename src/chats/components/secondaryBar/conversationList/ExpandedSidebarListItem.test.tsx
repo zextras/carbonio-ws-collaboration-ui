@@ -155,8 +155,7 @@ beforeEach(() => {
 	const store: RootStore = useStore.getState();
 	store.setLoginInfo(user1Be.id, user1Be.name);
 	store.setUserInfo([user1Be, user2Be, user4Be]);
-	store.addRoom(mockedGroup);
-	store.addRoom(mockedOneToOne);
+	store.addRooms([mockedGroup, mockedOneToOne]);
 	store.setAttributes(createMockAttributesList({ carbonioWscShowMessageReads: 'TRUE' }));
 });
 
@@ -199,7 +198,6 @@ describe('Expanded sidebar list item', () => {
 
 		test('I sent a message but it is in pending state', async () => {
 			const store: RootStore = useStore.getState();
-			store.addRoom(mockedGroup);
 			store.setPlaceholderMessage({
 				roomId: mockedTextMessageUnread.roomId,
 				id: mockedTextMessageUnread.id,

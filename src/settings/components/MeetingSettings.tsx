@@ -46,20 +46,27 @@ const MeetingSettings: FC<MeetingSettingsProps> = ({
 	return (
 		<SettingsCard title={meetingSectionLabel} description={meetingSectionDescription}>
 			<Container crossAlignment="flex-start" gap="1rem" data-testid="meeting_settings_container">
-				<Checkbox
-					defaultChecked={meetingMediaDefaults.EnableMicrophone}
-					value={meetingMediaDefaults.EnableMicrophone}
-					onClick={setMicrophoneEnabled}
-					label={enableMicLabel}
-					data-testid="microphone_checkbox"
-				/>
-				<Checkbox
-					defaultChecked={meetingMediaDefaults.EnableCamera}
-					value={meetingMediaDefaults.EnableCamera}
-					onClick={setCameraEnabled}
-					label={enableCamLabel}
-					data-testid="camera_checkbox"
-				/>
+				<Container
+					gap={'0.5rem'}
+					mainAlignment={'flex-start'}
+					crossAlignment={'flex-start'}
+					height={'fit'}
+				>
+					<Checkbox
+						defaultChecked={meetingMediaDefaults.EnableMicrophone}
+						value={meetingMediaDefaults.EnableMicrophone}
+						onClick={setMicrophoneEnabled}
+						label={enableMicLabel}
+						data-testid="microphone_checkbox"
+					/>
+					<Checkbox
+						defaultChecked={meetingMediaDefaults.EnableCamera}
+						value={meetingMediaDefaults.EnableCamera}
+						onClick={setCameraEnabled}
+						label={enableCamLabel}
+						data-testid="camera_checkbox"
+					/>
+				</Container>
 			</Container>
 		</SettingsCard>
 	);

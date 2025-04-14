@@ -25,10 +25,7 @@ const roomMuted = createMockRoom({
 
 beforeEach(() => {
 	const store = useStore.getState();
-	store.addRoom(singleRoom);
-	store.addRoom(groupRoom);
-	store.addRoom(temporaryRoom);
-	store.addRoom(roomMuted);
+	store.addRooms([singleRoom, groupRoom, temporaryRoom, roomMuted]);
 });
 
 describe('CounterBadgeUpdater tests', () => {

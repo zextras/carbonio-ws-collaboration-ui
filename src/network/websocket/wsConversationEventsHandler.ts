@@ -16,20 +16,22 @@ export const wsConversationEventsHandler = (event: WsEvent): void => {
 
 	switch (event.type) {
 		case WsEventType.ROOM_CREATED: {
-			RoomsApi.getRoom(event.roomId).then((response: GetRoomResponse) => state.addRoom(response));
+			RoomsApi.getRoom(event.roomId).then((response: GetRoomResponse) =>
+				state.addRooms([response])
+			);
 			state.connections.xmppClient.setOnline();
 			break;
 		}
 		case WsEventType.ROOM_UPDATED: {
-			state.setRoomNameAndDescription(event.roomId, event.name, event.description);
+			state.editRoom(event.roomId, { name: event.name, description: event.description });
 			break;
 		}
 		case WsEventType.ROOM_DELETED: {
-			state.deleteRoom(event.roomId);
+			state.removeRoom(event.roomId);
 			break;
 		}
 		case WsEventType.ROOM_OWNER_PROMOTED: {
-			state.promoteMemberToModerator(event.roomId, event.userId);
+			state.setMemberModeratorStatus(event.roomId, event.userId, true);
 			if (isMyId(event.userId)) {
 				sendCustomEvent({
 					name: EventName.MEMBER_PROMOTED,
@@ -39,7 +41,7 @@ export const wsConversationEventsHandler = (event: WsEvent): void => {
 			break;
 		}
 		case WsEventType.ROOM_OWNER_DEMOTED: {
-			state.demoteMemberFromModerator(event.roomId, event.userId);
+			state.setMemberModeratorStatus(event.roomId, event.userId, false);
 			if (isMyId(event.userId)) {
 				sendCustomEvent({
 					name: EventName.MEMBER_DEMOTED,
@@ -49,17 +51,17 @@ export const wsConversationEventsHandler = (event: WsEvent): void => {
 			break;
 		}
 		case WsEventType.ROOM_PICTURE_CHANGED: {
-			state.setRoomPictureUpdated(event.roomId, event.updatedAt);
+			state.editRoom(event.roomId, { pictureUpdatedAt: event.updatedAt });
 			break;
 		}
 		case WsEventType.ROOM_PICTURE_DELETED: {
-			state.setRoomPictureDeleted(event.roomId);
+			state.editRoom(event.roomId, { pictureUpdatedAt: undefined });
 			break;
 		}
 		case WsEventType.ROOM_MEMBER_ADDED: {
 			if (isMyId(event.userId)) {
 				RoomsApi.getRoom(event.roomId).then((response: GetRoomResponse) => {
-					state.addRoom(response);
+					state.addRooms([response]);
 					if (response.meetingId) {
 						MeetingsApi.getMeeting(response.id).then((meetingResponse: GetMeetingResponse) =>
 							state.addMeeting(meetingResponse)
@@ -79,22 +81,22 @@ export const wsConversationEventsHandler = (event: WsEvent): void => {
 				if (state.meetings[event.roomId]) {
 					state.deleteMeeting(state.meetings[event.roomId].id);
 				}
-				state.deleteRoom(event.roomId);
+				state.removeRoom(event.roomId);
 			} else {
 				state.removeRoomMember(event.roomId, event.userId);
 			}
 			break;
 		}
 		case WsEventType.ROOM_MUTED: {
-			state.setRoomMuted(event.roomId);
+			state.setRoomMuteStatus(event.roomId, true);
 			break;
 		}
 		case WsEventType.ROOM_UNMUTED: {
-			state.setRoomUnmuted(event.roomId);
+			state.setRoomMuteStatus(event.roomId, false);
 			break;
 		}
 		case WsEventType.ROOM_HISTORY_CLEARED: {
-			state.setClearedAt(event.roomId, event.clearedAt);
+			state.clearConversation(event.roomId, event.clearedAt);
 			break;
 		}
 		default: {

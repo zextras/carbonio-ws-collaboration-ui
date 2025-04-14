@@ -76,7 +76,6 @@ const otherMockedMessage: Message = createMockTextMessage({
 
 const storeSetupAdvanced = (): { user: UserEvent; store: RootStore } => {
 	const store = useStore.getState();
-	store.addRoom(mockedRoom);
 	const { user } = setup(
 		<>
 			<UploadAttachmentManagerView roomId={mockedRoom.id} />
@@ -88,9 +87,7 @@ const storeSetupAdvanced = (): { user: UserEvent; store: RootStore } => {
 
 const storeSetupGroup = (): { user: UserEvent; store: RootStore } => {
 	const store = useStore.getState();
-	store.setLoginInfo('idPaolo', 'Paolo');
 	store.setAttributes(createMockAttributesList({ carbonioWscMessageEditTimeLimit: '5m' }));
-	store.addRoom(mockedRoom);
 	store.newMessage(mockedMessage);
 	const { user } = setup(
 		<>
@@ -106,6 +103,12 @@ const luigiPicture = createMockFile({ name: 'Luigi', options: { type: 'image/png
 const peachPicture = createMockFile({ name: 'Peach', options: { type: 'image/png' } });
 
 const draftMessage = 'I am a draft message';
+
+beforeEach(() => {
+	const store = useStore.getState();
+	store.setLoginInfo('idPaolo', 'Paolo');
+	store.addRooms([mockedRoom]);
+});
 
 describe('MessageComposer', () => {
 	test('Open/close emoji picker by hovering it', async () => {
@@ -311,7 +314,6 @@ describe('MessageComposer', () => {
 
 	test('User can reply to a message attaching a file', async () => {
 		const store = useStore.getState();
-
 		// Set reply message
 		store.setReferenceMessage(
 			mockedRoom.id,
@@ -337,7 +339,6 @@ describe('MessageComposer', () => {
 			'sendChatMessageReply'
 		);
 		const textToSend = 'hi!';
-		store.addRoom(mockedRoom);
 		store.updateHistory(mockedRoom.id, [mockedMessage]);
 
 		// Set reply message
@@ -359,14 +360,11 @@ describe('MessageComposer', () => {
 	});
 
 	test('User can edit a message and send it', async () => {
-		const store = useStore.getState();
 		const spySendChatMessageEdit = jest.spyOn(
 			useStore.getState().connections.xmppClient,
 			'sendChatMessageEdit'
 		);
-
-		store.addRoom(mockedRoom);
-		store.setLoginInfo('idPaolo', 'Paolo');
+		const store = useStore.getState();
 		store.updateHistory(mockedRoom.id, [mockedMessage]);
 
 		// Set reply message
@@ -390,9 +388,6 @@ describe('MessageComposer', () => {
 
 	test('User can edit a message and send it as empty to trigger delete modal message', async () => {
 		const store = useStore.getState();
-
-		store.addRoom(mockedRoom);
-		store.setLoginInfo('idPaolo', 'Paolo');
 		store.updateHistory(mockedRoom.id, [mockedMessage]);
 
 		// Set reply message
@@ -487,7 +482,7 @@ describe('MessageComposer - send message', () => {
 
 	test("attachment selector shouldn't be present if the user is a guest", () => {
 		const store = useStore.getState();
-		store.addRoom(mockedRoomTemporary);
+		store.addRooms([mockedRoomTemporary]);
 		store.setLoginInfo(guestUser.id, guestUser.name, guestUser.type);
 		store.setUserInfo([guestUser]);
 		setup(<MessageComposer roomId={mockedRoom.id} />);
@@ -776,7 +771,6 @@ describe('MessageComposer - isWriting events', () => {
 describe('MessageComposer - draft message', () => {
 	test('The composer should have the draft message in the text area on opening the conversation', () => {
 		const store = useStore.getState();
-		store.addRoom(mockedRoom);
 		store.setDraftMessage(mockedRoom.id, false, draftMessage);
 
 		setup(<MessageComposer roomId={mockedRoom.id} />);
@@ -787,7 +781,6 @@ describe('MessageComposer - draft message', () => {
 
 	test('The cursor position is in the end of the draft message on opening the conversation', () => {
 		const store = useStore.getState();
-		store.addRoom(mockedRoom);
 		store.setDraftMessage(mockedRoom.id, false, draftMessage);
 
 		setup(<MessageComposer roomId={mockedRoom.id} />);
@@ -829,7 +822,6 @@ describe('MessageComposer - draft message', () => {
 describe('forward footer', () => {
 	test('adding a message to the forward list triggers the footer', async () => {
 		const store = useStore.getState();
-		store.addRoom(mockedRoom);
 		store.newMessage(mockedMessage);
 
 		setup(<ConversationFooter roomId={mockedRoom.id} />);
@@ -844,7 +836,6 @@ describe('forward footer', () => {
 
 	test('adding more than a message to the forward list triggers the footer with the updated label', async () => {
 		const store = useStore.getState();
-		store.addRoom(mockedRoom);
 		store.newMessage(mockedMessage);
 		store.newMessage(otherMockedMessage);
 		store.setForwardMessageList(mockedRoom.id, mockedMessage);
@@ -860,7 +851,6 @@ describe('forward footer', () => {
 
 	test('clicking the exit button restore the normal composer', async () => {
 		const store = useStore.getState();
-		store.addRoom(mockedRoom);
 		store.newMessage(mockedMessage);
 		store.newMessage(otherMockedMessage);
 		store.setForwardMessageList(mockedRoom.id, mockedMessage);

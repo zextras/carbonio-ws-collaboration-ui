@@ -71,7 +71,7 @@ const storeSetupGroupMeeting = (): { user: UserEvent; store: RootStore } => {
 	const store = useStore.getState();
 	store.setUserInfo([user1, user2, user3]);
 	store.setLoginInfo(user1.id, user1.name);
-	store.addRoom(room);
+	store.addRooms([room]);
 	store.addMeeting(meeting);
 	store.meetingConnection(meeting.id, false, undefined, false, undefined);
 
@@ -87,7 +87,7 @@ const storeSetupGroupMeetingWithOnePerson = (): { user: UserEvent } => {
 	act(() => {
 		result.current.setUserInfo([user1]);
 		result.current.setLoginInfo(user1.id, user1.name);
-		result.current.addRoom(room);
+		result.current.addRooms([room]);
 		result.current.addMeeting(meetingWithOnePerson);
 		result.current.meetingConnection(meetingWithOnePerson.id, false, undefined, false, undefined);
 	});
@@ -109,7 +109,7 @@ const storeSetupGroupMeetingPip = (): { user: UserEvent; store: RootStore } => {
 	const store = useStore.getState();
 	store.setUserInfo([user1, user2, user3]);
 	store.setLoginInfo(user1.id, user1.name);
-	store.addRoom(room);
+	store.addRooms([room]);
 	store.addMeeting(meeting);
 	store.meetingConnection(meeting.id, false, undefined, false, undefined);
 	store.setLocalStreams(meeting.id, STREAM_TYPE.VIDEO, new MediaStream());

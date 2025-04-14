@@ -27,7 +27,7 @@ describe('Leave Conversation', () => {
 		const leaveConversationMock = jest.fn();
 		const closeModalMock = jest.fn();
 
-		useStore.getState().addRoom(room);
+		useStore.getState().addRooms([room]);
 		setup(
 			<LeaveConversationModal
 				leaveConversation={leaveConversationMock}

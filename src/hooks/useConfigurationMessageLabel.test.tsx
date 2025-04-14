@@ -47,7 +47,7 @@ beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo(loggedUser.id, loggedUser.name);
 	store.setUserInfo([loggedUser, user1, user2]);
-	store.setRooms([groupRoom, oneToOneRoom]);
+	store.addRooms([groupRoom, oneToOneRoom]);
 });
 describe('useConfigurationMessageLabel', () => {
 	describe('Change room name and topic labels', () => {

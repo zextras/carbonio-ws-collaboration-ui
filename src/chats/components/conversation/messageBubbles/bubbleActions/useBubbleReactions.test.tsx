@@ -40,7 +40,7 @@ const iconTestId = 'icon: SmileOutline';
 beforeEach(() => {
 	const store: RootStore = useStore.getState();
 	store.setLoginInfo(sessionUser.id, sessionUser.name);
-	store.addRoom(room);
+	store.addRooms([room]);
 	store.newMessage(simpleTextMessage);
 });
 

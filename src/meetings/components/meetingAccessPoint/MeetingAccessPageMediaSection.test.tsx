@@ -52,7 +52,7 @@ beforeEach(() => {
 	const store = useStore.getState();
 	store.setUserInfo([user1, user2]);
 	store.setLoginInfo(user1.id, user1.name);
-	store.addRoom(groupRoom);
+	store.addRooms([groupRoom]);
 	store.addMeeting(groupMeeting);
 	store.setChatsBeStatus(true);
 	store.setWebsocketStatus(true);

@@ -34,7 +34,7 @@ beforeEach(() => {
 	const store: RootStore = useStore.getState();
 	store.setLoginInfo(user1Info.id, user1Info.name);
 	store.setUserInfo([user1Info, user2Info]);
-	store.addRoom(testRoom);
+	store.addRooms([testRoom]);
 	store.setAttributes(createMockAttributesList({ carbonioWscShowUsersPresence: 'TRUE' }));
 });
 
