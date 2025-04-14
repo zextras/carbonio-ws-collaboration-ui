@@ -56,7 +56,7 @@ const WaitingUser: FC<WaitingUserProps> = ({ meetingId, userId }) => {
 		}
 	);
 
-	const isUserGuest = useStore((store) => getIsUserGuest(store, userId));
+	const isGuest = useStore((store) => getIsUserGuest(store, userId));
 	const userHandRank = useStore((store) => getUserHandRank(store, meetingId, userId ?? ''));
 	const myUserId = useStore(getUserId);
 	const roomId = useStore((store) => getRoomIdByMeetingId(store, meetingId));
@@ -82,30 +82,36 @@ const WaitingUser: FC<WaitingUserProps> = ({ meetingId, userId }) => {
 		return '';
 	}, [amIModerator, lowerMyHandTooltip, lowerUserHandTooltip, myUserId, userId]);
 
-	return (
-		<CustomContainer data-testid="waitingUser" orientation="horizontal" width="fill">
-			{isLoading ? (
+	const avatar = useMemo(
+		() =>
+			isLoading ? (
 				<Shimmer.Avatar />
 			) : (
 				<CustomAvatar
 					label={memberName}
 					shape="round"
-					picture={avatarPicture}
 					icon={avatarIcon}
 					background={avatarColor}
+					picture={avatarPicture}
 				/>
-			)}
+			),
+		[avatarColor, avatarIcon, avatarPicture, isLoading, memberName]
+	);
+
+	return (
+		<CustomContainer data-testid="waitingUser" orientation="horizontal" width="fill">
+			{avatar}
 			<Row takeAvailableSpace wrap="nowrap" height="100%">
 				<Container crossAlignment="flex-start" padding={{ horizontal: 'small' }}>
 					<Container orientation={'horizontal'} mainAlignment="flex-start" gap={'0.25rem'}>
 						<Text size="small" overflow="ellipsis">
 							{memberName}
 						</Text>
-						{isUserGuest && <GuestUserLabel />}
+						{isGuest && <GuestUserLabel />}
 					</Container>
 				</Container>
 			</Row>
-			<Container orientation="horizontal" width="fit" gap="0.5rem">
+			<Row orientation="horizontal" width="fit" gap="0.5rem">
 				<Tooltip label={tooltipSelector} disabled={!canLowerHand} placement="top">
 					<Button
 						iconPlacement="left"
@@ -116,7 +122,7 @@ const WaitingUser: FC<WaitingUserProps> = ({ meetingId, userId }) => {
 						onClick={lowerHand}
 					/>
 				</Tooltip>
-			</Container>
+			</Row>
 		</CustomContainer>
 	);
 };
