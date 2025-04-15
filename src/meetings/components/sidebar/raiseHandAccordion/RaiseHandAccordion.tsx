@@ -74,6 +74,7 @@ const RaiseHandAccordion: FC<RaiseHandAccordionProps> = ({ meetingId }) => {
 			const isMyHandLoweredByModerator =
 				!event?.detail.raised &&
 				event?.detail.userId === myUserId &&
+				event?.detail.moderatorId !== undefined &&
 				event?.detail.moderatorId !== myUserId;
 			const shouldModeratorCloseSnackbar = !event?.detail.raised && amIModerator;
 
@@ -143,16 +144,16 @@ const RaiseHandAccordion: FC<RaiseHandAccordionProps> = ({ meetingId }) => {
 	);
 
 	const items = useMemo(() => {
-		const waitingListContainer: AccordionItemType[] = [];
+		const raiseHandContainer: AccordionItemType[] = [];
 		if (amIModerator) {
-			waitingListContainer.push({
+			raiseHandContainer.push({
 				id: 'lowerAllHands',
 				disableHover: true,
 				background: 'text',
 				CustomComponent: () => lowerButtonComponent
 			});
 		}
-		waitingListContainer.push({
+		raiseHandContainer.push({
 			id: 'raiseHandContainer',
 			disableHover: true,
 			background: 'text',
@@ -163,7 +164,7 @@ const RaiseHandAccordion: FC<RaiseHandAccordionProps> = ({ meetingId }) => {
 				id: 'raiseHandAccordion',
 				label: accordionTitle,
 				open: accordionStatus,
-				items: waitingListContainer,
+				items: raiseHandContainer,
 				onOpen: toggleAccordionStatus,
 				onClose: toggleAccordionStatus
 			} as AccordionItemType

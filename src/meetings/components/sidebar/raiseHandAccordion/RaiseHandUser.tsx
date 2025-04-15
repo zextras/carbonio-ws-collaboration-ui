@@ -37,12 +37,12 @@ const CustomAvatar = styled(Avatar)`
 	min-height: 2rem;
 `;
 
-type WaitingUserProps = {
+type RaiseHandUserProps = {
 	meetingId: string;
 	userId: string;
 };
 
-const WaitingUser: FC<WaitingUserProps> = ({ meetingId, userId }) => {
+const RaiseHandUser: FC<RaiseHandUserProps> = ({ meetingId, userId }) => {
 	const [t] = useTranslation();
 
 	const lowerMyHandTooltip = t('meeting.sidebar.tooltip.lowerYourHand', 'Lower your hand');
@@ -127,4 +127,4 @@ const WaitingUser: FC<WaitingUserProps> = ({ meetingId, userId }) => {
 	);
 };
 
-export default WaitingUser;
+export default RaiseHandUser;

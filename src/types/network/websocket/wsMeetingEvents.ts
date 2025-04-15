@@ -28,7 +28,8 @@ export type WsMeetingEvent =
 	| MeetingWaitingParticipantClashed
 	| MeetingRecordingStartedEvent
 	| MeetingRecordingStoppedEvent
-	| MeetingParticipantHandRaisedEvent;
+	| MeetingParticipantHandRaisedEvent
+	| MeetingParticipantHandRaisedListEvent;
 
 type BasicMeetingEvent = {
 	sentDate: string;
@@ -149,4 +150,9 @@ export type MeetingParticipantHandRaisedEvent = BasicMeetingEvent & {
 	raised: boolean;
 	moderatorId?: string;
 	handRaisedAt?: string;
+};
+
+export type MeetingParticipantHandRaisedListEvent = BasicMeetingEvent & {
+	type: WsEventType.MEETING_PARTICIPANT_HAND_RAISED_LIST;
+	participants: string[];
 };

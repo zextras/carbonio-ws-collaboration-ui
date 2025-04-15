@@ -38,8 +38,8 @@ const RaiseHandButton = (): ReactElement | null => {
 	const createSnackbar: CreateSnackbarFn = useSnackbar();
 
 	const toggleRaiseHand = useCallback(() => {
-		MeetingsApi.raiseHand(meetingId!, !iHaveHandRaised, sessionId);
-	}, [iHaveHandRaised, meetingId, sessionId]);
+		MeetingsApi.raiseHand(meetingId!, !iHaveHandRaised);
+	}, [iHaveHandRaised, meetingId]);
 
 	const handleAutoHandDown = useCallback(() => {
 		setTimeout(() => {
