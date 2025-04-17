@@ -123,6 +123,10 @@ export const wsMeetingEventsHandler = (event: WsEvent): void => {
 			meetingParticipantHandRaisedHandler(event);
 			break;
 		}
+		case WsEventType.MEETING_PARTICIPANT_HAND_RAISED_LIST: {
+			// event for mobile apps
+			break;
+		}
 		default: {
 			console.error(`Unhandled meeting event type: ${event.type}`);
 		}
