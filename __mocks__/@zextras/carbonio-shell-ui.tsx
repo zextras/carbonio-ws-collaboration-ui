@@ -47,6 +47,8 @@ export const NOTIFICATION_MANAGER = {
 	playSound: jest.fn()
 };
 
+export const IS_FOCUS_MODE = false;
+
 export const useAuthenticated: typeof Shell.useAuthenticated = (): boolean => false;
 
 export const useUserSettings: typeof Shell.useUserSettings = () => USER_SETTINGS;
