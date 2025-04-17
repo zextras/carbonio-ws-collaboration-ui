@@ -45,7 +45,7 @@ type RaiseHandUserProps = {
 const RaiseHandUser: FC<RaiseHandUserProps> = ({ meetingId, userId }) => {
 	const [t] = useTranslation();
 
-	const lowerMyHandTooltip = t('meeting.sidebar.tooltip.lowerYourHand', 'Lower your hand');
+	const lowerMyHandTooltip = t('meeting.interactions.handDown', 'Lower your hand');
 
 	const memberName: string = useStore((store) => getUserName(store, userId));
 	const lowerUserHandTooltip = t(

@@ -4,15 +4,15 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { FC, useCallback, useMemo, useRef } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 
 import {
 	Accordion,
 	AccordionItemType,
 	Button,
-	CloseSnackbarFn,
 	Container,
 	CreateSnackbarFn,
+	Snackbar,
 	useSnackbar
 } from '@zextras/carbonio-design-system';
 import { map, size } from 'lodash';
@@ -49,7 +49,7 @@ const RaiseHandAccordion: FC<RaiseHandAccordionProps> = ({ meetingId }) => {
 
 	const okLabel = t('action.ok', 'Ok');
 	const lowerAllHandLabel = t('meeting.sidebar.lowerAllHands', 'Lower all raised hand');
-	const someoneRaisedHandLabel = t('meeting.snackbar.someoneRaisedHand', 'someone raised his hand');
+	const someoneRaisedHandLabel = t('meeting.snackbar.someoneRaisedHand', 'Someone raised his hand');
 	const handLoweredLabel = t(
 		'meeting.snackbar.handLoweredByModerator',
 		'A moderator lowered your hand'
@@ -64,29 +64,23 @@ const RaiseHandAccordion: FC<RaiseHandAccordionProps> = ({ meetingId }) => {
 	const roomId = useStore((store) => getRoomIdByMeetingId(store, meetingId));
 	const amIModerator = useStore((store) => getOwnershipOfTheRoom(store, roomId ?? ''));
 
+	const [someoneRaisedHandSnackbar, setSomeoneRaisedHandSnackbar] = useState(false);
+
 	const createSnackbar: CreateSnackbarFn = useSnackbar();
-	const closeSnackbarRef = useRef<CloseSnackbarFn | null>(null);
+
+	useEffect(() => {
+		if (size(raiseHandList) === 0) {
+			setSomeoneRaisedHandSnackbar(false);
+		}
+	}, [raiseHandList]);
 
 	const handleRaiseHandEvent = useCallback(
 		(event: CustomEvent<MeetingParticipantRaiseHandEvent['data']> | undefined) => {
-			const isSomeoneElseRaising =
-				event?.detail.raised && amIModerator && event?.detail.userId !== myUserId;
-			const isMyHandLoweredByModerator =
-				!event?.detail.raised &&
-				event?.detail.userId === myUserId &&
-				event?.detail.moderatorId !== undefined &&
-				event?.detail.moderatorId !== myUserId;
-			const shouldModeratorCloseSnackbar = !event?.detail.raised && amIModerator;
+			const { raised, userId, moderatorId } = event?.detail ?? {};
+			const isSomeoneElseRaising = raised && amIModerator && userId !== myUserId;
+			const isMyHandLoweredByModerator = !raised && userId === myUserId && moderatorId;
 
-			if (isSomeoneElseRaising) {
-				closeSnackbarRef.current = createSnackbar({
-					key: new Date().toLocaleString(),
-					severity: 'info',
-					label: someoneRaisedHandLabel,
-					actionLabel: okLabel,
-					disableAutoHide: true
-				});
-			}
+			if (isSomeoneElseRaising) setSomeoneRaisedHandSnackbar(true);
 
 			if (isMyHandLoweredByModerator) {
 				createSnackbar({
@@ -97,12 +91,8 @@ const RaiseHandAccordion: FC<RaiseHandAccordionProps> = ({ meetingId }) => {
 					autoHideTimeout: 3000
 				});
 			}
-
-			if (shouldModeratorCloseSnackbar && closeSnackbarRef.current) {
-				closeSnackbarRef.current();
-			}
 		},
-		[amIModerator, createSnackbar, handLoweredLabel, myUserId, okLabel, someoneRaisedHandLabel]
+		[amIModerator, createSnackbar, handLoweredLabel, myUserId]
 	);
 
 	useEventListener(EventName.MEETING_PARTICIPANT_RAISE_HAND, handleRaiseHandEvent);
@@ -114,9 +104,10 @@ const RaiseHandAccordion: FC<RaiseHandAccordionProps> = ({ meetingId }) => {
 
 	const lowerAllHands = useCallback(() => {
 		map(raiseHandList, (userWithHandRaised) => {
-			MeetingsApi.raiseHand(meetingId, false, userWithHandRaised);
+			const userId = userWithHandRaised !== myUserId ? userWithHandRaised : undefined;
+			MeetingsApi.raiseHand(meetingId, false, userId);
 		});
-	}, [meetingId, raiseHandList]);
+	}, [meetingId, myUserId, raiseHandList]);
 
 	const lowerButtonComponent = useMemo(
 		() => (
@@ -179,7 +170,19 @@ const RaiseHandAccordion: FC<RaiseHandAccordionProps> = ({ meetingId }) => {
 	]);
 
 	if (size(raiseHandList) === 0) return null;
-	return <CustomAccordion items={items} borderRadius="none" background={'gray0'} />;
+	return (
+		<>
+			<CustomAccordion items={items} borderRadius="none" background={'gray0'} />
+			<Snackbar
+				open={someoneRaisedHandSnackbar}
+				onClose={(): void => setSomeoneRaisedHandSnackbar(false)}
+				actionLabel={okLabel}
+				disableAutoHide
+				severity="info"
+				label={someoneRaisedHandLabel}
+			/>
+		</>
+	);
 };
 
 export default RaiseHandAccordion;

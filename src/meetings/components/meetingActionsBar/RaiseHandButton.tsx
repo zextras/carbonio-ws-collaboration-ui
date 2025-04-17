@@ -43,7 +43,7 @@ const RaiseHandButton = (): ReactElement | null => {
 
 	const handleAutoHandDown = useCallback(() => {
 		setTimeout(() => {
-			MeetingsApi.raiseHand(meetingId!, false, sessionId).then(() => {
+			MeetingsApi.raiseHand(meetingId!, false).then(() => {
 				createSnackbar({
 					key: new Date().toLocaleString(),
 					severity: 'info',
@@ -53,7 +53,7 @@ const RaiseHandButton = (): ReactElement | null => {
 				});
 			});
 		}, 5000);
-	}, [autoDownSnackbar, createSnackbar, meetingId, sessionId]);
+	}, [autoDownSnackbar, createSnackbar, meetingId]);
 
 	const refTimeout = useRef<NodeJS.Timeout>();
 
