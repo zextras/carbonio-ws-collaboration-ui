@@ -57,6 +57,7 @@ const CustomText = styled(Text)`
 const SelectVirtualRoomWidget: FC<SelectVirtualRoomWidgetProps> = ({ onChange, defaultValue }) => {
 	const [t] = useTranslation();
 
+	const virtualRoomLabel = t('appointment.input.label', 'Virtual Room');
 	const deleteVirtualRoomTooltip = t('meeting.virtual.deleteTooltip', 'Delete Virtual Room');
 	const createVirtualRoom = t('meeting.virtual.newRoom', 'Create new virtual room');
 	const noVirtualRoomLabel = t('appointment.input.defaultValue', 'No Virtual Room selected');
@@ -223,7 +224,7 @@ const SelectVirtualRoomWidget: FC<SelectVirtualRoomWidgetProps> = ({ onChange, d
 			<Container orientation="horizontal" mainAlignment="flex-start" gap="0.5rem">
 				<Row takeAvailableSpace>
 					<Select
-						label="Virtual Room"
+						label={virtualRoomLabel}
 						selection={selection}
 						items={items}
 						onChange={onChangeVirtualRoom}
