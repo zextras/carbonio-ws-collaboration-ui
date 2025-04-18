@@ -100,7 +100,7 @@ const BubbleFooter: FC<BubbleFooterProps> = ({
 	);
 
 	const messageExtensionSizeLabel = useMemo(
-		() => `${messageExtension} • ${messageSize}`,
+		() => `${messageExtension?.toUpperCase()} • ${messageSize}`,
 		[messageExtension, messageSize]
 	);
 

@@ -36,7 +36,7 @@ import useStore from '../../../../store/Store';
 import { MarkerStatus } from '../../../../types/store/MarkersTypes';
 import { TextMessage } from '../../../../types/store/MessageTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
-import { getAttachmentInfo } from '../../../../utils/attachmentUtils';
+import { getAttachmentExtension, getAttachmentSize } from '../../../../utils/attachmentUtils';
 import { parseUrlOnMessage } from '../../../../utils/parseUrlOnMessage';
 
 type BubbleProps = {
@@ -132,10 +132,8 @@ const Bubble: FC<BubbleProps> = ({
 
 	const createSnackbar: CreateSnackbarFn = useSnackbar();
 
-	const { extension, size } = getAttachmentInfo(
-		messageAttachment?.mimeType,
-		messageAttachment?.size
-	);
+	const extension = getAttachmentExtension(messageAttachment?.mimeType);
+	const size = getAttachmentSize(messageAttachment?.size);
 
 	const handleAddForwardMessage = useCallback(() => {
 		if (messageInForwardList) {

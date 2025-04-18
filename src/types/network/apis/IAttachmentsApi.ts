@@ -72,10 +72,11 @@ export enum ImageQuality {
 }
 
 export enum AttachmentType {
-	JPEG = 'Jpeg',
-	PNG = 'Png',
-	GIF = 'Gif',
-	WEBP = 'Webp',
+	JPEG = 'jpeg',
+	PNG = 'png',
+	GIF = 'gif',
+	SVG = 'svg',
+	WEBP = 'webp',
 	PDF = 'pdf',
 	DOCX = 'docx',
 	PPTX = 'pptx',

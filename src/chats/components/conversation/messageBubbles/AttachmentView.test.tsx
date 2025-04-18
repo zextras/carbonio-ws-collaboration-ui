@@ -7,37 +7,13 @@
 import React from 'react';
 
 import { fireEvent, screen } from '@testing-library/react';
+import { filter } from 'lodash';
 
 import AttachmentView from './AttachmentView';
 import { AttachmentsApiToSpy, spyOnAttachmentsApi } from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
-import { AttachmentType } from '../../../../types/network/apis/IAttachmentsApi';
 import { AttachmentMessageType } from '../../../../types/store/MessageTypes';
-
-const attachmentCases = [
-	[AttachmentType.GIF, 'image', AttachmentType.GIF],
-	[AttachmentType.PNG, 'image', AttachmentType.PNG],
-	[AttachmentType.JPEG, 'image', AttachmentType.JPEG],
-	[AttachmentType.WEBP, 'image', AttachmentType.WEBP],
-	// [AttachmentType.PDF, 'application', AttachmentType.PDF], // TODO FIX TEST FOR PDF ENTRY
-	[
-		AttachmentType.DOCX,
-		'application',
-		'vnd.openxmlformats-officedocument.wordprocessingml.document'
-	],
-	[
-		AttachmentType.PPTX,
-		'application',
-		'vnd.openxmlformats-officedocument.presentationml.presentation'
-	],
-	[AttachmentType.XLSX, 'application', 'vnd.openxmlformats-officedocument.spreadsheetml.sheet'],
-	[AttachmentType.ODP, 'application', 'vnd.oasis.opendocument.presentation'],
-	[AttachmentType.ODS, 'application', 'vnd.oasis.opendocument.spreadsheet'],
-	[AttachmentType.ODT, 'application', 'vnd.oasis.opendocument.text'],
-	[AttachmentType.MPKG, 'application', 'vnd.apple.installer+xml'],
-	[AttachmentType.PPT, 'application', 'vnd.ms-powerpoint'],
-	[AttachmentType.XLS, 'application', 'vnd.ms-excel']
-];
+import { extensionsSupported } from '../../../../utils/attachmentUtils';
 
 const fileIcon = 'icon: FileTextOutline';
 
@@ -126,21 +102,32 @@ describe('Attachment view', () => {
 		expect(genericIcon).toBeVisible();
 	});
 
-	test.each(attachmentCases)('display %s extension', (ext, type, mimetype) => {
+	test.each(extensionsSupported)('Display %s extension', ({ extension, mimeType }) => {
 		const genericAttachment: AttachmentMessageType = {
 			id: 'genericAttachmentId',
-			name: `generic.${ext}`,
-			mimeType: `${type}/${mimetype}`,
+			name: `generic.${extension}`,
+			mimeType,
 			size: 21412
 		};
 		setup(<AttachmentView attachment={genericAttachment} from={'from'} />);
-		const genericIcon = screen.getByTestId(fileIcon);
-		expect(genericIcon).toBeVisible();
 		const fileName = screen.getByText(genericAttachment.name);
 		expect(fileName).toBeVisible();
-		const match = new RegExp(`${ext}`, 'i');
+		const match = new RegExp(`${extension}`, 'i');
+		const extensionLabel = screen.getByText(match);
+		expect(extensionLabel).toBeInTheDocument();
+	});
 
-		const extension = screen.getByText(match);
-		expect(extension).toBeInTheDocument();
+	const previewExtensionsSupported = filter(extensionsSupported, (ext) => !!ext.preview);
+	test.each(previewExtensionsSupported)('Display %s preview', ({ extension, mimeType }) => {
+		const genericAttachment: AttachmentMessageType = {
+			id: 'genericAttachmentId',
+			name: `generic.${extension}`,
+			mimeType,
+			size: 21412
+		};
+		setup(<AttachmentView attachment={genericAttachment} from={'from'} />);
+		const previewContainer = screen.getByTestId('preview-container');
+
+		expect(previewContainer).toBeVisible();
 	});
 });
