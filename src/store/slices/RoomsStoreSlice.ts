@@ -10,7 +10,7 @@ import { filter, find, forEach, size, some } from 'lodash';
 import { StateCreator } from 'zustand';
 
 import { MemberBe, RoomBe } from '../../types/network/models/roomBeTypes';
-import { MessageType } from '../../types/store/MessageTypes';
+import { MessageType } from '../../types/store/ChatsRegistryTypes';
 import { Room, RoomsStoreSlice, RoomType } from '../../types/store/RoomTypes';
 import { RootStore } from '../../types/store/StoreTypes';
 import { dateToISODate, isBefore } from '../../utils/dateUtils';
@@ -41,9 +41,9 @@ export const useRoomsStoreSlice: StateCreator<
 
 					// Remove messages sent before the clearedAt timestamp
 					const clearedAt = roomBe.userSettings?.clearedAt;
-					const messages = draft.messages[roomBe.id];
+					const messages = draft.chatsRegistry[roomBe.id]?.messages;
 					if (clearedAt && size(messages) > 0) {
-						draft.messages[roomBe.id] = filter(
+						draft.chatsRegistry[roomBe.id].messages = filter(
 							messages,
 							(message) => !isBefore(message.date, clearedAt)
 						);
@@ -60,10 +60,7 @@ export const useRoomsStoreSlice: StateCreator<
 				delete draft.rooms[roomId];
 				delete draft.activeConversations[roomId];
 				delete draft.meetings[roomId];
-				delete draft.messages[roomId];
-				delete draft.fastenings[roomId];
-				delete draft.markers[roomId];
-				delete draft.unreads[roomId];
+				delete draft.chatsRegistry[roomId];
 			}),
 			false,
 			'ROOMS/REMOVE_ROOM'
@@ -149,10 +146,7 @@ export const useRoomsStoreSlice: StateCreator<
 						...room.userSettings,
 						clearedAt
 					};
-					delete draft.messages[roomId];
-					delete draft.fastenings[roomId];
-					delete draft.markers[roomId];
-					delete draft.unreads[roomId];
+					delete draft.chatsRegistry[roomId];
 				}
 			}),
 			false,
@@ -180,14 +174,19 @@ export const useRoomsStoreSlice: StateCreator<
 				draft.activeConversations[roomId] = {
 					isHistoryFullyLoaded: true
 				};
-				draft.messages[roomId] = [
-					{
-						type: MessageType.DATE_MSG,
-						date: now,
-						id: `date-${now}`,
-						roomId
-					}
-				];
+				draft.chatsRegistry[roomId] = {
+					messages: [
+						{
+							type: MessageType.DATE_MSG,
+							date: now,
+							id: `date-${now}`,
+							roomId
+						}
+					],
+					fastenings: {},
+					markers: {},
+					unread: 0
+				};
 			}),
 			false,
 			'ROOMS/SET_PLACEHOLDER_ROOM'
@@ -199,7 +198,7 @@ export const useRoomsStoreSlice: StateCreator<
 				const placeholderRoomId = `placeholder-${userId}`;
 				delete draft.rooms[placeholderRoomId];
 				delete draft.activeConversations[placeholderRoomId];
-				delete draft.messages[placeholderRoomId];
+				delete draft.chatsRegistry[placeholderRoomId];
 			}),
 			false,
 			'ROOMS/REMOVE_PLACEHOLDER_ROOM'

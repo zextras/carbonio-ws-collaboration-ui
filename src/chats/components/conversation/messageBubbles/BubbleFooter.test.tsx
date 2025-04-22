@@ -13,7 +13,7 @@ import useStore from '../../../../store/Store';
 import { createMockRoom } from '../../../../tests/createMock';
 import { setup } from '../../../../tests/test-utils';
 import { RoomType } from '../../../../types/network/models/roomBeTypes';
-import { MarkerStatus } from '../../../../types/store/MarkersTypes';
+import { MarkerStatus } from '../../../../types/store/ChatsRegistryTypes';
 
 const iconDoneAll = 'icon: DoneAll';
 const colorGray = 'color: gray';

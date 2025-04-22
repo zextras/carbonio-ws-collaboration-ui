@@ -39,7 +39,7 @@ describe('onHistoryMessageStanza', () => {
 				MamRequestType.HISTORY
 			)
 		);
-		expect(useStore.getState().fastenings.roomId.originalStanzaId).toHaveLength(1);
+		expect(useStore.getState().chatsRegistry.roomId.fastenings.originalStanzaId).toHaveLength(1);
 	});
 
 	test('Handle replied history message stanza', () => {

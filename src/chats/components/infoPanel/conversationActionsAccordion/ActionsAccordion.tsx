@@ -17,7 +17,7 @@ import EditConversationAction from './EditConversationAction';
 import LeaveConversationAction from './LeaveConversationAction';
 import MuteConversationAction from './MuteConversationAction';
 import { getActionsAccordionStatus } from '../../../../store/selectors/ActiveConversationsSelectors';
-import { roomIsEmpty } from '../../../../store/selectors/MessagesSelectors';
+import { roomIsEmpty } from '../../../../store/selectors/ChatsRegistrySelectors';
 import {
 	getOwnershipOfTheRoom,
 	getNumberOfOwnersOfTheRoom,

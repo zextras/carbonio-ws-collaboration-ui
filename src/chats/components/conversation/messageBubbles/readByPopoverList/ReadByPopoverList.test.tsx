@@ -63,7 +63,7 @@ beforeEach(() => {
 	store.setLoginInfo(sessionUser.id, sessionUser.email);
 	store.setUserInfo([user1, user2]);
 	store.newMessage(textMessage);
-	store.updateMarkers(room.id, [user1Marker]);
+	store.updateReadStatus(room.id, [user1Marker]);
 });
 describe('ReadByPopoverList test', () => {
 	test('Display updating reading user list', async () => {
@@ -71,13 +71,13 @@ describe('ReadByPopoverList test', () => {
 		await user.click(screen.getByTestId('clickableDiv'));
 		expect(screen.getByText('User 1')).toBeInTheDocument();
 		act(() => {
-			useStore.getState().updateMarkers(room.id, [user2Marker]);
+			useStore.getState().updateReadStatus(room.id, [user2Marker]);
 		});
 		expect(screen.getByText('User 2')).toBeInTheDocument();
 	});
 
 	test('Display all reading except sessionUser', async () => {
-		useStore.getState().updateMarkers(room.id, [sessionUserMarker]);
+		useStore.getState().updateReadStatus(room.id, [sessionUserMarker]);
 		const { user } = setup(<ComplexComponent />);
 		await user.click(screen.getByTestId('clickableDiv'));
 		expect(screen.getByText('User 1')).toBeInTheDocument();

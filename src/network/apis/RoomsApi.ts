@@ -40,7 +40,7 @@ import {
 	UpdateRoomPictureResponse,
 	UpdateRoomResponse
 } from '../../types/network/responses/roomsResponses';
-import { TextMessage } from '../../types/store/MessageTypes';
+import { TextMessage } from '../../types/store/ChatsRegistryTypes';
 import { dateToISODate } from '../../utils/dateUtils';
 import { fetchAPI, uploadFileFetchAPI } from '../../utils/FetchUtils';
 import { MeetingsApi } from '../index';

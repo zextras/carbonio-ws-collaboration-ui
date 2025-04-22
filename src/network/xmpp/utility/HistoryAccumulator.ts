@@ -6,7 +6,7 @@
 
 import { orderBy } from 'lodash';
 
-import { Message, MessageList, MessageMap, TextMessage } from '../../../types/store/MessageTypes';
+import { Message, TextMessage } from '../../../types/store/ChatsRegistryTypes';
 
 class HistoryAccumulator {
 	// Singleton design pattern
@@ -19,7 +19,7 @@ class HistoryAccumulator {
 		return HistoryAccumulator.instance;
 	}
 
-	private histories: MessageMap;
+	private histories: { [id: string]: Message[] };
 
 	private repliedMessages: { [id: string]: Message };
 
@@ -36,7 +36,7 @@ class HistoryAccumulator {
 		this.histories[roomId].push(message);
 	}
 
-	public returnHistory(roomId: string): MessageList {
+	public returnHistory(roomId: string): Message[] {
 		const history = this.histories[roomId] || [];
 		delete this.histories[roomId];
 		return orderBy(history, ['date'], ['asc']);

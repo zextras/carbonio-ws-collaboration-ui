@@ -10,7 +10,7 @@ import { PreviewsManagerContext } from '@zextras/carbonio-ui-preview';
 import { useTranslation } from 'react-i18next';
 
 import { AttachmentsApi } from '../network';
-import { AttachmentMessageType } from '../types/store/MessageTypes';
+import { AttachmentMessageType } from '../types/store/ChatsRegistryTypes';
 import { getAttachmentInfo, getAttachmentType, getAttachmentURL } from '../utils/attachmentUtils';
 
 export type UsePreviewHook = {

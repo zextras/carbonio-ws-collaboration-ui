@@ -21,14 +21,14 @@ import {
 import { mockedScrollToEnd, mockedScrollToMessage } from '../../../tests/mocks/scrollUtils';
 import { setup } from '../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../types/network/models/roomBeTypes';
-import { MarkerStatus } from '../../../types/store/MarkersTypes';
 import {
 	ConfigurationMessage,
 	FasteningAction,
+	MarkerStatus,
 	MessageType,
 	OperationType,
 	TextMessage
-} from '../../../types/store/MessageTypes';
+} from '../../../types/store/ChatsRegistryTypes';
 import { RootStore } from '../../../types/store/StoreTypes';
 import { User } from '../../../types/store/UserTypes';
 
@@ -159,7 +159,7 @@ describe('render list of messages with history loader visible for first time ope
 			store.updateHistory(room.id, messages);
 			store.addCreateRoomMessage(room.id);
 		});
-		expect(useStore.getState().messages[room.id]).toHaveLength(6);
+		expect(useStore.getState().chatsRegistry[room.id].messages).toHaveLength(6);
 		expect(screen.getByText(new RegExp(`${room.name} created`, 'i'))).toBeInTheDocument();
 		const message = screen.getByTestId(`Bubble-${messages[0].id}`);
 		expect(message).toBeVisible();
@@ -419,7 +419,7 @@ describe('Scroll position', () => {
 		const store = useStore.getState();
 		store.updateHistory(room.id, messages);
 		store.setIdMessageWhereScrollIsStopped(room.id, messages[0].id);
-		store.addUnreadCount(room.id, 1);
+		store.incrementUnreadCount(room.id, 1);
 		setup(<MessagesList roomId={room.id} />);
 		expect(mockedScrollToEnd).toHaveBeenCalled();
 	});

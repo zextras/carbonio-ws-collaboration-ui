@@ -6,22 +6,25 @@
 import { find, last } from 'lodash';
 
 import useStore from '../../../store/Store';
-import { Message, MessageType } from '../../../types/store/MessageTypes';
+import { Message, MessageType } from '../../../types/store/ChatsRegistryTypes';
 import { isBefore } from '../../../utils/dateUtils';
 
 export function getLastUnreadMessage(roomId: string): string | undefined {
-	const { session, messages, markers } = useStore.getState();
+	const { session, chatsRegistry } = useStore.getState();
 	const lastMessage = last(
-		messages[roomId]?.filter(
+		chatsRegistry[roomId]?.messages.filter(
 			(message) =>
 				message.type === MessageType.CONFIGURATION_MSG ||
 				(message.type === MessageType.TEXT_MSG && message.from !== session.id)
 		)
 	);
 	if (lastMessage) {
-		const myMarker = markers[roomId]?.[session.id!]?.messageId;
+		const myMarker = chatsRegistry[roomId]?.markers[session.id!]?.messageId;
 		if (myMarker) {
-			const myMarkedMessage = find(messages[roomId], (message: Message) => message.id === myMarker);
+			const myMarkedMessage = find(
+				chatsRegistry[roomId].messages,
+				(message: Message) => message.id === myMarker
+			);
 			if (myMarkedMessage && !isBefore(lastMessage.date, myMarkedMessage?.date)) {
 				return lastMessage.id;
 			}
