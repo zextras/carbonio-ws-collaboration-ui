@@ -6,18 +6,30 @@
  */
 
 import { produce } from 'immer';
-import { find, findIndex, forEach, orderBy, remove, reverse } from 'lodash';
+import { find, findIndex, forEach, includes, orderBy, remove, reverse } from 'lodash';
 import { StateCreator } from 'zustand';
 
-import { FileToUpload, messageActionType } from '../../types/store/ActiveConversationTypes';
+import {
+	ActiveConversation,
+	ActiveConversationsSlice,
+	FileToUpload,
+	messageActionType
+} from '../../types/store/ActiveConversationTypes';
 import {
 	AttachmentMessageType,
 	Message,
 	MessageType,
 	TextMessage
 } from '../../types/store/ChatsRegistryTypes';
-import { ActiveConversationsSlice, RootStore } from '../../types/store/StoreTypes';
+import { RootStore } from '../../types/store/StoreTypes';
 import { isBefore } from '../../utils/dateUtils';
+
+const initActiveConversation = (draft: RootStore, roomId: string): ActiveConversation => {
+	if (!draft.activeConversations[roomId]) {
+		draft.activeConversations[roomId] = {};
+	}
+	return draft.activeConversations[roomId];
+};
 
 export const useActiveConversationsSlice: StateCreator<
 	RootStore,
@@ -29,17 +41,12 @@ export const useActiveConversationsSlice: StateCreator<
 	setInputHasFocus: (roomId: string, hasFocus: boolean): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (draft.activeConversations[roomId]) {
-					draft.activeConversations[roomId].inputHasFocus = hasFocus;
-				} else {
-					draft.activeConversations[roomId] = {
-						inputHasFocus: hasFocus
-					};
-				}
+				const conversation = initActiveConversation(draft, roomId);
+				conversation.inputHasFocus = hasFocus;
 
 				// Remove newReactions
-				if (hasFocus && draft.activeConversations[roomId].newReactions) {
-					delete draft.activeConversations[roomId].newReactions;
+				if (hasFocus && conversation.newReactions) {
+					delete conversation.newReactions;
 				}
 			}),
 			false,
@@ -49,30 +56,19 @@ export const useActiveConversationsSlice: StateCreator<
 	setIsWriting: (roomId: string, userId: string, writingStatus: boolean): void => {
 		set(
 			produce((draft: RootStore) => {
-				// Handle the case when the conversation is not yet in the activeConversations map
-				if (!draft.activeConversations[roomId]) draft.activeConversations[roomId] = {};
-				if (!draft.activeConversations[roomId].isWritingList)
-					draft.activeConversations[roomId].isWritingList = [];
+				const conversation = initActiveConversation(draft, roomId);
+				if (!conversation.isWritingList) conversation.isWritingList = [];
 
-				const isUserYetInWritingList = find(
-					draft.activeConversations[roomId].isWritingList,
-					(id) => id === userId
-				);
+				const alreadyWriting = includes(conversation.isWritingList, userId);
 
-				// If a new user starts writing add it to the list
-				if (writingStatus && !isUserYetInWritingList) {
-					draft.activeConversations[roomId].isWritingList = [
-						...(draft.activeConversations[roomId].isWritingList || []),
-						userId
-					];
+				// If a new user starts writing, add him to the list
+				if (writingStatus && !alreadyWriting) {
+					conversation.isWritingList.push(userId);
 				}
 
-				// If a user stops writing remove it from the list
-				if (!writingStatus && isUserYetInWritingList) {
-					remove(draft.activeConversations[roomId].isWritingList, (id) => id === userId);
-					if (draft.activeConversations[roomId].isWritingList.length === 0) {
-						delete draft.activeConversations[roomId].isWritingList;
-					}
+				// If a user stops writing, remove him from the list
+				if (!writingStatus && alreadyWriting) {
+					remove(conversation.isWritingList, (id) => id === userId);
 				}
 			}),
 			false,
@@ -81,80 +77,52 @@ export const useActiveConversationsSlice: StateCreator<
 	},
 	setReferenceMessage: (
 		roomId: string,
-		referenceMessageId: string,
-		senderId: string,
-		stanzaId: string,
-		actionType: messageActionType,
-		attachment?: AttachmentMessageType
+		reference: {
+			messageId: string;
+			senderId: string;
+			stanzaId: string;
+			actionType: messageActionType;
+			attachment?: AttachmentMessageType;
+		}
 	): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (draft.activeConversations[roomId]) {
-					draft.activeConversations[roomId].referenceMessage = {
-						roomId,
-						messageId: referenceMessageId,
-						senderId,
-						stanzaId,
-						actionType,
-						attachment
-					};
-				} else {
-					draft.activeConversations[roomId] = {
-						referenceMessage: {
-							roomId,
-							messageId: referenceMessageId,
-							senderId,
-							stanzaId,
-							actionType,
-							attachment
-						}
-					};
-				}
+				const conversation = initActiveConversation(draft, roomId);
+				conversation.referenceMessage = {
+					roomId,
+					...reference
+				};
 			}),
 			false,
-			'AC/SET_REFERENCE_MESSAGE_VIEW'
+			'AC/SET_REFERENCE_MESSAGE'
 		);
 	},
 	unsetReferenceMessage: (roomId: string): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (draft.activeConversations[roomId]) {
-					delete draft.activeConversations[roomId].referenceMessage;
-				}
+				const conversation = initActiveConversation(draft, roomId);
+				delete conversation.referenceMessage;
 			}),
 			false,
-			'AC/REMOVE_REFERENCE_MESSAGE_VIEW'
+			'AC/REMOVE_REFERENCE_MESSAGE'
 		);
 	},
-	setIdMessageWhereScrollIsStopped: (roomId: string, messageId: string): void => {
+	setScrollPosition: (roomId: string, messageId: string): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (draft.activeConversations[roomId]) {
-					draft.activeConversations[roomId].scrollPositionMessageId = messageId;
-				} else {
-					draft.activeConversations[roomId] = {
-						scrollPositionMessageId: messageId
-					};
-				}
+				const conversation = initActiveConversation(draft, roomId);
+				conversation.scrollPositionMessageId = messageId;
 			}),
 			false,
 			'AC/SET_SCROLL_POSITION'
 		);
 	},
-	setDraftMessage: (roomId: string, sent: boolean, message?: string): void => {
+	setDraftMessage: (roomId: string, message?: string): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (sent) {
-					if (draft.activeConversations[roomId]) {
-						delete draft.activeConversations[roomId].draftMessage;
-					}
-				} else if (draft.activeConversations[roomId]) {
-					draft.activeConversations[roomId].draftMessage = message;
-				} else {
-					draft.activeConversations[roomId] = {
-						draftMessage: message
-					};
-				}
+				const conversation = initActiveConversation(draft, roomId);
+				if (message) conversation.draftMessage = message;
+				else delete conversation.draftMessage;
 			}),
 			false,
 			'AC/SET_DRAFT_MESSAGE'

@@ -35,6 +35,7 @@ import { Message } from '../../../../types/store/ChatsRegistryTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
 import { RootStore } from '../../../../types/store/StoreTypes';
 import { User, UserType } from '../../../../types/store/UserTypes';
+import { now } from '../../../../utils/dateUtils';
 
 const iconNavigator2 = 'icon: Navigation2';
 const borderColor = 'border-color: #8bc34a';
@@ -64,7 +65,7 @@ const mockedRoomTemporary: RoomBe = createMockRoom({
 const mockedMessage: Message = createMockTextMessage({
 	from: 'idPaolo',
 	roomId: mockedRoom.id,
-	date: Date.now()
+	date: now() - 1
 });
 
 const otherMockedMessage: Message = createMockTextMessage({
@@ -315,13 +316,12 @@ describe('MessageComposer', () => {
 	test('User can reply to a message attaching a file', async () => {
 		const store = useStore.getState();
 		// Set reply message
-		store.setReferenceMessage(
-			mockedRoom.id,
-			'messageId',
-			'senderId',
-			'stanzaId',
-			messageActionType.REPLY
-		);
+		store.setReferenceMessage(mockedRoom.id, {
+			messageId: 'messageId',
+			senderId: 'senderId',
+			stanzaId: 'stanzaId',
+			actionType: messageActionType.REPLY
+		});
 
 		setup(<MessageComposer roomId={mockedRoom.id} />);
 
@@ -342,14 +342,12 @@ describe('MessageComposer', () => {
 		store.updateHistory(mockedRoom.id, [mockedMessage]);
 
 		// Set reply message
-		store.setReferenceMessage(
-			mockedRoom.id,
-			mockedMessage.id,
-			mockedMessage.from,
-			mockedMessage.stanzaId,
-			messageActionType.REPLY
-		);
-
+		store.setReferenceMessage(mockedRoom.id, {
+			messageId: mockedMessage.id,
+			senderId: mockedMessage.from,
+			stanzaId: mockedMessage.stanzaId,
+			actionType: messageActionType.REPLY
+		});
 		const { user } = setup(<MessageComposer roomId={mockedRoom.id} />);
 
 		const textArea = screen.getByRole('textbox');
@@ -368,13 +366,12 @@ describe('MessageComposer', () => {
 		store.updateHistory(mockedRoom.id, [mockedMessage]);
 
 		// Set reply message
-		store.setReferenceMessage(
-			mockedRoom.id,
-			mockedMessage.id,
-			mockedMessage.from,
-			mockedMessage.stanzaId,
-			messageActionType.EDIT
-		);
+		store.setReferenceMessage(mockedRoom.id, {
+			messageId: mockedMessage.id,
+			senderId: mockedMessage.from,
+			stanzaId: mockedMessage.stanzaId,
+			actionType: messageActionType.EDIT
+		});
 
 		const { user } = setup(<MessageComposer roomId={mockedRoom.id} />);
 
@@ -391,13 +388,12 @@ describe('MessageComposer', () => {
 		store.updateHistory(mockedRoom.id, [mockedMessage]);
 
 		// Set reply message
-		store.setReferenceMessage(
-			mockedRoom.id,
-			mockedMessage.id,
-			mockedMessage.from,
-			mockedMessage.stanzaId,
-			messageActionType.EDIT
-		);
+		store.setReferenceMessage(mockedRoom.id, {
+			messageId: mockedMessage.id,
+			senderId: mockedMessage.from,
+			stanzaId: mockedMessage.stanzaId,
+			actionType: messageActionType.EDIT
+		});
 
 		const { user } = setup(<MessageComposer roomId={mockedRoom.id} />);
 
@@ -771,7 +767,7 @@ describe('MessageComposer - isWriting events', () => {
 describe('MessageComposer - draft message', () => {
 	test('The composer should have the draft message in the text area on opening the conversation', () => {
 		const store = useStore.getState();
-		store.setDraftMessage(mockedRoom.id, false, draftMessage);
+		store.setDraftMessage(mockedRoom.id, draftMessage);
 
 		setup(<MessageComposer roomId={mockedRoom.id} />);
 
@@ -781,7 +777,7 @@ describe('MessageComposer - draft message', () => {
 
 	test('The cursor position is in the end of the draft message on opening the conversation', () => {
 		const store = useStore.getState();
-		store.setDraftMessage(mockedRoom.id, false, draftMessage);
+		store.setDraftMessage(mockedRoom.id, draftMessage);
 
 		setup(<MessageComposer roomId={mockedRoom.id} />);
 

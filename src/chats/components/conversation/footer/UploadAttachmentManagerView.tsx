@@ -140,7 +140,7 @@ const UploadAttachmentManagerView: React.FC<UploadAttachmentManagerViewProps> = 
 				}
 			});
 			if (fileIdActuallyFocused !== fileId) {
-				setDraftMessage(roomId, false, description);
+				setDraftMessage(roomId, description);
 			}
 			setFileFocusedToModify(roomId, fileId, true);
 			setInputHasFocus(roomId, true);
@@ -162,13 +162,13 @@ const UploadAttachmentManagerView: React.FC<UploadAttachmentManagerViewProps> = 
 			ev.stopPropagation();
 			if (filesToUploadArray && filesToUploadArray.length === 1) {
 				unsetFilesToAttach(roomId);
-				setDraftMessage(roomId, true);
+				setDraftMessage(roomId);
 			} else {
 				// if the file I'm removing is the selected one with text on input, clean the input and remove the file
 				if (draftMessage) {
 					forEach(filesToUploadArray, (file) => {
 						if (file.hasFocus && file.fileId === fileId) {
-							setDraftMessage(roomId, true);
+							setDraftMessage(roomId);
 						}
 					});
 				}
@@ -294,7 +294,7 @@ const UploadAttachmentManagerView: React.FC<UploadAttachmentManagerViewProps> = 
 
 	const closeUploadAttachmentManagerView = useCallback(() => {
 		unsetFilesToAttach(roomId);
-		setDraftMessage(roomId, true);
+		setDraftMessage(roomId);
 	}, [roomId, unsetFilesToAttach, setDraftMessage]);
 
 	const loadFiles = useUploadFile(roomId);

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { ActiveConversationsMap, FileToUpload, messageActionType } from './ActiveConversationTypes';
+import { ActiveConversationsSlice } from './ActiveConversationTypes';
 import {
 	ActiveMeetingMap,
 	MeetingChatVisibility,
@@ -15,57 +15,13 @@ import {
 	TileData,
 	VirtualBackgroundType
 } from './ActiveMeetingTypes';
-import {
-	AttachmentMessageType,
-	ChatsRegistryStoreSlice,
-	Message,
-	TextMessage
-} from './ChatsRegistryTypes';
-import { Connections } from './ConnectionsTypes';
+import { ChatsRegistryStoreSlice } from './ChatsRegistryTypes';
+import { ConnectionsStoreSlice } from './ConnectionsTypes';
 import { MeetingParticipant, MeetingsMap } from './MeetingTypes';
 import { RoomsStoreSlice } from './RoomTypes';
 import { SessionStoreSlice } from './SessionTypes';
 import { UsersStoreSlice } from './UserTypes';
 import { MeetingBe } from '../network/models/meetingBeTypes';
-
-export type ActiveConversationsSlice = {
-	activeConversations: ActiveConversationsMap;
-	setDraftMessage: (roomId: string, sent: boolean, message?: string) => void;
-	setIdMessageWhereScrollIsStopped: (roomId: string, messageId: string) => void;
-	setInputHasFocus: (roomId: string, hasFocus: boolean) => void;
-	setIsWriting: (roomId: string, userId: string, writingStatus: boolean) => void;
-	setReferenceMessage: (
-		roomId: string,
-		referenceMessageId: string,
-		senderId: string,
-		stanzaId: string,
-		actionType: messageActionType,
-		attachment?: AttachmentMessageType
-	) => void;
-	unsetReferenceMessage: (roomId: string) => void;
-	setLastMamMessage: (message: Message) => void;
-	setHistoryIsFullyLoaded: (roomId: string) => void;
-	setHistoryLoadDisabled: (roomId: string, status: boolean) => void;
-	setActionsAccordionStatus: (roomId: string, status: boolean) => void;
-	setParticipantsAccordionStatus: (roomId: string, status: boolean) => void;
-	setFilesToAttach: (roomId: string, files: FileToUpload[]) => void;
-	setFileFocusedToModify: (roomId: string, fileTempId: string, active: boolean) => void;
-	addDescriptionToFileToAttach: (roomId: string, fileTempId: string, description: string) => void;
-	removeDescriptionToFileToAttach: (roomId: string, fileTempId: string) => void;
-	removeFileToAttach: (roomId: string, fileTempId: string) => void;
-	unsetFilesToAttach: (roomId: string) => void;
-	setForwardMessageList: (roomId: string, message: TextMessage) => void;
-	unsetForwardMessageList: (roomId: string, message?: TextMessage) => void;
-	setNewReaction: (roomId: string, stanzaId: string, reaction: string, from: string) => void;
-};
-
-export type ConnectionsStoreSlice = {
-	connections: Connections;
-	setChatsBeStatus: (status: boolean) => void;
-	setXmppStatus: (status: boolean) => void;
-	setWebsocketStatus: (status: boolean) => void;
-	resetXmppData: () => void;
-};
 
 export type MeetingsSlice = {
 	meetings: MeetingsMap;

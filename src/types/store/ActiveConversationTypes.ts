@@ -6,6 +6,39 @@
 
 import { AttachmentMessageType, Message, TextMessage } from './ChatsRegistryTypes';
 
+export type ActiveConversationsSlice = {
+	activeConversations: ActiveConversationsMap;
+	setScrollPosition: (roomId: string, messageId: string) => void;
+	setInputHasFocus: (roomId: string, hasFocus: boolean) => void;
+	setIsWriting: (roomId: string, userId: string, writingStatus: boolean) => void;
+	setReferenceMessage: (
+		roomId: string,
+		reference: {
+			messageId: string;
+			senderId: string;
+			stanzaId: string;
+			actionType: messageActionType;
+			attachment?: AttachmentMessageType;
+		}
+	) => void;
+	setDraftMessage: (roomId: string, message?: string) => void;
+	unsetReferenceMessage: (roomId: string) => void;
+	setLastMamMessage: (message: Message) => void;
+	setHistoryIsFullyLoaded: (roomId: string) => void;
+	setHistoryLoadDisabled: (roomId: string, status: boolean) => void;
+	setActionsAccordionStatus: (roomId: string, status: boolean) => void;
+	setParticipantsAccordionStatus: (roomId: string, status: boolean) => void;
+	setFilesToAttach: (roomId: string, files: FileToUpload[]) => void;
+	setFileFocusedToModify: (roomId: string, fileTempId: string, active: boolean) => void;
+	addDescriptionToFileToAttach: (roomId: string, fileTempId: string, description: string) => void;
+	removeDescriptionToFileToAttach: (roomId: string, fileTempId: string) => void;
+	removeFileToAttach: (roomId: string, fileTempId: string) => void;
+	unsetFilesToAttach: (roomId: string) => void;
+	setForwardMessageList: (roomId: string, message: TextMessage) => void;
+	unsetForwardMessageList: (roomId: string, message?: TextMessage) => void;
+	setNewReaction: (roomId: string, stanzaId: string, reaction: string, from: string) => void;
+};
+
 export type ActiveConversation = {
 	draftMessage?: string;
 	scrollPositionMessageId?: string;
