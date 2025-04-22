@@ -93,7 +93,7 @@ interface IMeetingsApi {
 		recordingName: string,
 		folderId: string
 	): Promise<StopRecordingResponse>;
-	raiseHand(meetingId: string, value: boolean): Promise<RaiseHandResponse>;
+	raiseHand(meetingId: string, value: boolean, userToModerate?: string): Promise<RaiseHandResponse>;
 	createGuestAccount(name: string): Promise<CreateGuestAccountResponse>;
 	authLogin(): Promise<LoginV3ConfigResponse>;
 }
