@@ -48,7 +48,7 @@ export type ActiveConversation = {
 	inputHasFocus?: boolean;
 	isWritingList?: string[];
 	referenceMessage?: ReferenceMessage;
-	infoPanelStatus?: InfoPanelStatus;
+	infoPanelStatus: InfoPanelStatus;
 	filesToAttach?: FileToUpload[];
 	forwardMessageList?: TextMessage[];
 	newReactions?: NewReaction[];
