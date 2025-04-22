@@ -5,7 +5,7 @@
  */
 import { AttachmentsApi } from '../network';
 import { AttachmentType, ImageQuality, ImageShape } from '../types/network/apis/IAttachmentsApi';
-import { AttachmentMessageType } from '../types/store/MessageTypes';
+import { AttachmentMessageType } from '../types/store/ChatsRegistryTypes';
 
 export const extensionsSupported = [
 	{

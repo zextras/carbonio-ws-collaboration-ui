@@ -17,7 +17,7 @@ import {
 } from '../../../../../tests/createMock';
 import { ProvidersWrapper, setup } from '../../../../../tests/test-utils';
 import { RoomBe } from '../../../../../types/network/models/roomBeTypes';
-import { FasteningAction, TextMessage } from '../../../../../types/store/MessageTypes';
+import { FasteningAction, TextMessage } from '../../../../../types/store/ChatsRegistryTypes';
 import { RootStore } from '../../../../../types/store/StoreTypes';
 
 const sessionUser = createMockUser({ id: 'sesssionId', name: 'sessionName' });

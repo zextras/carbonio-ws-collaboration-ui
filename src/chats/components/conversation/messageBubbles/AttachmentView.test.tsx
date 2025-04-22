@@ -12,7 +12,7 @@ import { filter } from 'lodash';
 import AttachmentView from './AttachmentView';
 import { AttachmentsApiToSpy, spyOnAttachmentsApi } from '../../../../tests/mocks/network';
 import { setup } from '../../../../tests/test-utils';
-import { AttachmentMessageType } from '../../../../types/store/MessageTypes';
+import { AttachmentMessageType } from '../../../../types/store/ChatsRegistryTypes';
 import { extensionsSupported } from '../../../../utils/attachmentUtils';
 
 const fileIcon = 'icon: FileTextOutline';

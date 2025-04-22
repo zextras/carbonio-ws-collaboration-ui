@@ -15,44 +15,18 @@ import {
 	TileData,
 	VirtualBackgroundType
 } from './ActiveMeetingTypes';
-import { Connections } from './ConnectionsTypes';
-import { FasteningsMap } from './FasteningMessagesTypes';
-import { Marker, MarkersMap } from './MarkersTypes';
-import { MeetingParticipant, MeetingsMap } from './MeetingTypes';
 import {
 	AttachmentMessageType,
+	ChatsRegistryStoreSlice,
 	Message,
-	MessageFastening,
-	MessageMap,
-	PlaceholderFields,
 	TextMessage
-} from './MessageTypes';
+} from './ChatsRegistryTypes';
+import { Connections } from './ConnectionsTypes';
+import { MeetingParticipant, MeetingsMap } from './MeetingTypes';
 import { RoomsStoreSlice } from './RoomTypes';
 import { SessionStoreSlice } from './SessionTypes';
-import { UnreadsMap } from './UnreadsCounterTypes';
 import { UsersStoreSlice } from './UserTypes';
 import { MeetingBe } from '../network/models/meetingBeTypes';
-
-export type MessagesStoreSlice = {
-	messages: MessageMap;
-	newMessage: (message: Message) => void;
-	newInboxMessage: (message: Message) => void;
-	updateHistory: (roomId: string, messageArray: Message[]) => void;
-	addCreateRoomMessage: (roomId: string) => void;
-	updateUnreadMessages: (roomId: string) => void;
-	setRepliedMessage: (
-		roomId: string,
-		replyMessageId: string,
-		messageSubjectOfReply: TextMessage
-	) => void;
-	setPlaceholderMessage: (fields: PlaceholderFields) => void;
-	removePlaceholderMessage: (roomId: string, messageId: string) => void;
-};
-
-export type MarkersStoreSlice = {
-	markers: MarkersMap;
-	updateMarkers: (roomId: string, markers: Marker[]) => void;
-};
 
 export type ActiveConversationsSlice = {
 	activeConversations: ActiveConversationsMap;
@@ -93,18 +67,6 @@ export type ConnectionsStoreSlice = {
 	resetXmppData: () => void;
 };
 
-export type UnreadsCounterSlice = {
-	unreads: UnreadsMap;
-	addUnreadCount: (roomId: string, counter: number) => void;
-	incrementUnreadCount: (roomId: string) => void;
-	updateUnreadCount: (roomId: string) => void;
-};
-
-export type FasteningMessagesSlice = {
-	fastenings: FasteningsMap;
-	addFastening: (fasteningMessage: MessageFastening) => void;
-};
-
 export type MeetingsSlice = {
 	meetings: MeetingsMap;
 	setMeetings: (meetings: MeetingBe[]) => void;
@@ -137,6 +99,7 @@ export type ActiveMeetingSlice = {
 	setRecordingAccordionStatus: (roomId: string, status: boolean) => void;
 	setMeetingParticipantsAccordionStatus: (roomId: string, status: boolean) => void;
 	setVisualEffectsAccordionStatus: (meetingId: string, status: boolean) => void;
+	setRaiseHandAccordionStatus: (meetingId: string, status: boolean) => void;
 	setMeetingChatVisibility: (meetingId: string, visibilityStatus: MeetingChatVisibility) => void;
 	setMeetingViewSelected: (meetingId: string, viewType: MeetingViewType) => void;
 	meetingConnection: (
@@ -171,12 +134,9 @@ export type ActiveMeetingSlice = {
 
 export type RootStore = UsersStoreSlice &
 	RoomsStoreSlice &
-	MessagesStoreSlice &
 	SessionStoreSlice &
-	MarkersStoreSlice &
 	ActiveConversationsSlice &
+	ChatsRegistryStoreSlice &
 	ConnectionsStoreSlice &
-	UnreadsCounterSlice &
-	FasteningMessagesSlice &
 	MeetingsSlice &
 	ActiveMeetingSlice;

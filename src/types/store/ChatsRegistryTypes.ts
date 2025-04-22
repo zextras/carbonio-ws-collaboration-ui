@@ -1,16 +1,33 @@
 /*
- * SPDX-FileCopyrightText: 2022 Zextras <https://www.zextras.com>
+ * SPDX-FileCopyrightText: 2025 Zextras <https://www.zextras.com>
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { MarkerStatus } from './MarkersTypes';
-
-export type MessageMap = {
-	[id: string]: MessageList;
+export type ChatsRegistryStoreSlice = {
+	chatsRegistry: { [roomId: string]: ChatRegistry };
+	newMessage: (message: Message) => void;
+	newInboxMessage: (message: Message) => void;
+	updateHistory: (roomId: string, messageArray: Message[]) => void;
+	addCreateRoomMessage: (roomId: string) => void;
+	setRepliedMessage: (
+		roomId: string,
+		replyMessageId: string,
+		messageSubjectOfReply: TextMessage
+	) => void;
+	setPlaceholderMessage: (fields: PlaceholderFields) => void;
+	removePlaceholderMessage: (roomId: string, messageId: string) => void;
+	addFastening: (fasteningMessage: MessageFastening) => void;
+	updateReadStatus: (roomId: string, newMarkers: Marker[]) => void;
+	incrementUnreadCount: (roomId: string, counter: number) => void;
 };
 
-export type MessageList = Message[];
+export type ChatRegistry = {
+	messages: Message[];
+	fastenings: { [stanzaId: string]: MessageFastening[] };
+	markers: { [userId: string]: Marker };
+	unread: number;
+};
 
 export type Message = TextMessage | ConfigurationMessage | DateMessage | MessageFastening;
 
@@ -52,6 +69,13 @@ export enum OperationType {
 	ROOM_CREATION = 'roomCreation'
 }
 
+export enum MarkerStatus {
+	READ = 'read',
+	READ_BY_SOMEONE = 'read_by_someone',
+	UNREAD = 'unread',
+	PENDING = 'pending'
+}
+
 export type DateMessage = BasicMessage & {
 	type: MessageType.DATE_MSG;
 };
@@ -72,7 +96,6 @@ export enum FasteningAction {
 
 export enum MessageType {
 	TEXT_MSG = 'text',
-	AFFILIATION_MSG = 'affiliation',
 	CONFIGURATION_MSG = 'configuration',
 	DATE_MSG = 'date',
 	FASTENING = 'fastening'
@@ -100,4 +123,11 @@ export type PlaceholderFields = {
 	replyTo?: string;
 	forwarded?: ForwardedInfo;
 	attachment?: AttachmentMessageType;
+};
+
+export type Marker = {
+	from: string;
+	messageId: string;
+	markerDate: number;
+	type: 'displayed';
 };

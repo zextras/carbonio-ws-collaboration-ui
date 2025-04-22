@@ -9,14 +9,11 @@ import { devtools } from 'zustand/middleware';
 
 import { useActiveConversationsSlice } from './slices/ActiveConversationsSlice';
 import { useActiveMeetingSlice } from './slices/ActiveMeetingSlice';
+import { useChatsRegistryStoreSlice } from './slices/ChatsRegistryStoreSlice';
 import { useConnectionsStoreSlice } from './slices/ConnectionStoreSlice';
-import { useFasteningMessagesSlice } from './slices/FasteningMessagesSlice';
-import { useMarkersStoreSlice } from './slices/MarkersStoreSlice';
 import { useMeetingsStoreSlice } from './slices/MeetingsStoreSlice';
-import { useMessagesStoreSlice } from './slices/MessagesStoreSlice';
 import { useRoomsStoreSlice } from './slices/RoomsStoreSlice';
 import { useSessionStoreSlice } from './slices/SessionStoreSlice';
-import { useUnreadsCountStoreSlice } from './slices/UnreadsCounterStoreSlice';
 import { useUsersStoreSlice } from './slices/UsersStoreSlice';
 import { RootStore } from '../types/store/StoreTypes';
 
@@ -26,12 +23,9 @@ const useStore = create<RootStore>()(
 			...useSessionStoreSlice(set, get, api),
 			...useUsersStoreSlice(set, get, api),
 			...useRoomsStoreSlice(set, get, api),
-			...useMessagesStoreSlice(set, get, api),
-			...useMarkersStoreSlice(set, get, api),
 			...useActiveConversationsSlice(set, get, api),
+			...useChatsRegistryStoreSlice(set, get, api),
 			...useConnectionsStoreSlice(set, get, api),
-			...useUnreadsCountStoreSlice(set, get, api),
-			...useFasteningMessagesSlice(set, get, api),
 			...useMeetingsStoreSlice(set, get, api),
 			...useActiveMeetingSlice(set, get, api)
 		}),

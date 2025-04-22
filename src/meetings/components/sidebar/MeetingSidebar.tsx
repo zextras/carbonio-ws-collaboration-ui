@@ -13,6 +13,7 @@ import styled from 'styled-components';
 
 import MeetingConversationAccordion from './MeetingConversationAccordion/MeetingConversationAccordion';
 import MeetingParticipantsAccordion from './ParticipantsAccordion/MeetingParticipantsAccordion';
+import RaiseHandAccordion from './raiseHandAccordion/RaiseHandAccordion';
 import RecordingAccordion from './recordingAccordion/RecordingAccordion';
 import WaitingListAccordion from './waitingListAccordion/WaitingListAccordion';
 import {
@@ -122,6 +123,7 @@ const MeetingSidebar = (): ReactElement => {
 							{showRecordingAccordion && <RecordingAccordion meetingId={meetingId!} />}
 							{showWaitingListAccordion && <WaitingListAccordion meetingId={meetingId!} />}
 							{showParticipantsAccordion && <MeetingParticipantsAccordion meetingId={meetingId!} />}
+							{<RaiseHandAccordion meetingId={meetingId!} />}
 							{(virtualBackgroundEnabled || isUserGuest) && (
 								<VisualEffectsAccordion meetingId={meetingId!} />
 							)}

@@ -15,7 +15,7 @@ import usePreview from '../../../../hooks/usePreview';
 import { AttachmentsApi } from '../../../../network';
 import { getUserName } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
-import { AttachmentMessageType } from '../../../../types/store/MessageTypes';
+import { AttachmentMessageType } from '../../../../types/store/ChatsRegistryTypes';
 import {
 	getAttachmentDimensions,
 	getAttachmentThumbnailURL
@@ -65,16 +65,15 @@ const PreviewErrorContainer = styled(Container)<{
 	$imgHeight: number;
 	$maxWidth: number;
 }>`
-	${({ $imgWidth, $maxWidth }): string | false =>
-		$imgWidth === 0
-			? `width: ${$maxWidth * 0.063}rem;`
-			: $maxWidth === 0
-				? 'width: 100%'
-				: `width: min(${$imgWidth * 0.063}rem, ${$maxWidth * 0.063}rem);`};
-	${({ $imgWidth, $imgHeight }): string | false =>
-		$imgWidth !== 0
-			? `aspect-ratio: ${$imgWidth * 0.063}/${$imgHeight * 0.063};`
-			: 'aspect-ratio: 1;'};
+	${({ $imgWidth, $maxWidth }): string => {
+		if ($imgWidth === 0) return `width: ${$maxWidth * 0.063}rem;`;
+		if ($maxWidth === 0) return 'width: 100%';
+		return `width: min(${$imgWidth * 0.063}rem, ${$maxWidth * 0.063}rem);`;
+	}};
+	${({ $imgWidth, $imgHeight }): string => {
+		if ($imgWidth === 0) return 'aspect-ratio: 1;';
+		return `aspect-ratio: ${$imgWidth * 0.063}/${$imgHeight * 0.063};`;
+	}};
 	max-height: 37.5rem;
 `;
 

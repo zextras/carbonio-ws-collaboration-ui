@@ -71,8 +71,8 @@ describe('Connections slice', () => {
 			result.current.newInboxMessage(message1);
 			result.current.updateHistory(room1.id, [message1]);
 			result.current.updateHistory(room2.id, [message2]);
-			result.current.updateMarkers(room1.id, [marker1]);
-			result.current.updateMarkers(room2.id, [marker2]);
+			result.current.updateReadStatus(room1.id, [marker1]);
+			result.current.updateReadStatus(room2.id, [marker2]);
 		});
 
 		act(() => result.current.resetXmppData());
@@ -81,9 +81,6 @@ describe('Connections slice', () => {
 		expect(result.current.rooms).toEqual(initialStore.rooms);
 		expect(result.current.users[user.id].online).toBeUndefined();
 		expect(result.current.rooms).toEqual(initialStore.rooms);
-		expect(result.current.messages).toEqual(initialStore.messages);
-		expect(result.current.markers).toEqual(initialStore.markers);
-		expect(result.current.unreads).toEqual(initialStore.unreads);
-		expect(result.current.fastenings).toEqual(initialStore.fastenings);
+		expect(result.current.chatsRegistry).toEqual(initialStore.chatsRegistry);
 	});
 });

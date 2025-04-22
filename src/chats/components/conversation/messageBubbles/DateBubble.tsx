@@ -11,7 +11,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import { Z_INDEX_RANK } from '../../../../types/generics';
-import { DateMessage } from '../../../../types/store/MessageTypes';
+import { DateMessage } from '../../../../types/store/ChatsRegistryTypes';
 import { dateString } from '../../../../utils/dateUtils';
 
 type DateMsgProps = {

@@ -13,7 +13,7 @@ import {
 	createMockTextMessage,
 	createMockUser
 } from '../../../tests/createMock';
-import { OperationType } from '../../../types/store/MessageTypes';
+import { OperationType } from '../../../types/store/ChatsRegistryTypes';
 import { dateToTimestamp } from '../../../utils/dateUtils';
 
 const sessionUser = createMockUser({ id: 'userId', name: 'User' });
@@ -124,7 +124,7 @@ describe('getLastUnreadMessage', () => {
 			});
 			const store = useStore.getState();
 			store.updateHistory(room.id, [message1, markedMessage]);
-			store.updateMarkers(room.id, [myMarker]);
+			store.updateReadStatus(room.id, [myMarker]);
 
 			expect(getLastUnreadMessage(room.id)).toBe(undefined);
 		});
@@ -144,7 +144,7 @@ describe('getLastUnreadMessage', () => {
 			});
 			const store = useStore.getState();
 			store.updateHistory(room.id, [message1, markedMessage, message2]);
-			store.updateMarkers(room.id, [myMarker]);
+			store.updateReadStatus(room.id, [myMarker]);
 
 			expect(getLastUnreadMessage(room.id)).toBe(message2.id);
 		});

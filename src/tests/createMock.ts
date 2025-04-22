@@ -14,16 +14,17 @@ import {
 import { MemberBe, RoomBe } from '../types/network/models/roomBeTypes';
 import { UserBe } from '../types/network/models/userBeTypes';
 import { FileToUpload } from '../types/store/ActiveConversationTypes';
-import { Marker, MarkerStatus, MarkerType } from '../types/store/MarkersTypes';
 import {
 	ConfigurationMessage,
 	DateMessage,
 	FasteningAction,
+	Marker,
+	MarkerStatus,
 	MessageFastening,
 	MessageType,
 	OperationType,
 	TextMessage
-} from '../types/store/MessageTypes';
+} from '../types/store/ChatsRegistryTypes';
 import { RoomType } from '../types/store/RoomTypes';
 import { User, UserType } from '../types/store/UserTypes';
 
@@ -105,7 +106,7 @@ export const createMockMarker = (fields?: Partial<Marker>): Marker => ({
 	from: 'from',
 	messageId: 'messageId',
 	markerDate: 1662541394393,
-	type: MarkerType.DISPLAYED,
+	type: 'displayed',
 	...fields
 });
 

@@ -9,7 +9,7 @@ import { includes } from 'lodash';
 import { CHATS_ROUTE } from '../../../constants/appConstants';
 import { EventName, sendCustomEvent } from '../../../hooks/useEventListener';
 import useStore from '../../../store/Store';
-import { TextMessage } from '../../../types/store/MessageTypes';
+import { TextMessage } from '../../../types/store/ChatsRegistryTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 import { getLocalStorageItem, LOCAL_STORAGE_NAMES } from '../../../utils/localStorageUtils';
 import UserDataRetriever from '../../../utils/UserDataRetriever';

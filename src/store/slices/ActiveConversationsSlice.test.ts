@@ -11,7 +11,7 @@ import {
 	createMockTextMessage,
 	createMockUser
 } from '../../tests/createMock';
-import { FasteningAction } from '../../types/store/MessageTypes';
+import { FasteningAction } from '../../types/store/ChatsRegistryTypes';
 import { dateToTimestamp } from '../../utils/dateUtils';
 import useStore from '../Store';
 

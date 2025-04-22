@@ -15,15 +15,15 @@ import ForwardInfo from '../../../chats/components/conversation/messageBubbles/F
 import RepliedTextMessageSectionView from '../../../chats/components/conversation/messageBubbles/RepliedTextMessageSectionView';
 import TextContentBubble from '../../../chats/components/conversation/messageBubbles/TextContentBubble';
 import { getInputHasFocus } from '../../../store/selectors/ActiveConversationsSelectors';
-import { getRoomIdByMeetingId } from '../../../store/selectors/MeetingSelectors';
 import {
 	getMessageAttachment,
 	getMessageSelector
-} from '../../../store/selectors/MessagesSelectors';
+} from '../../../store/selectors/ChatsRegistrySelectors';
+import { getRoomIdByMeetingId } from '../../../store/selectors/MeetingSelectors';
 import { getRoomTypeSelector } from '../../../store/selectors/RoomsSelectors';
 import useStore from '../../../store/Store';
 import { MeetingChatVisibility } from '../../../types/store/ActiveMeetingTypes';
-import { MessageType } from '../../../types/store/MessageTypes';
+import { MessageType } from '../../../types/store/ChatsRegistryTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 import { getAttachmentExtension, getAttachmentSize } from '../../../utils/attachmentUtils';
 import { parseUrlOnMessage } from '../../../utils/parseUrlOnMessage';

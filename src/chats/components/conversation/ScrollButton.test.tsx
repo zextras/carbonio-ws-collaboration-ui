@@ -31,7 +31,7 @@ describe('ScrollButton', () => {
 	});
 
 	test('Display sScrollButton with 1 unread message', async () => {
-		useStore.getState().incrementUnreadCount(room.id);
+		useStore.getState().incrementUnreadCount(room.id, 1);
 		setup(<ScrollButton roomId={room.id} onClickCb={jest.fn()} />);
 
 		const scrollButton = screen.getByTestId('scrollButton');

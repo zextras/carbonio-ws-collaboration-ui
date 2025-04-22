@@ -29,12 +29,11 @@ import {
 	isMessageInForwardList,
 	maxForwardLimitNotReached
 } from '../../../../store/selectors/ActiveConversationsSelectors';
-import { getMessageAttachment } from '../../../../store/selectors/MessagesSelectors';
+import { getMessageAttachment } from '../../../../store/selectors/ChatsRegistrySelectors';
 import { getRoomTypeSelector } from '../../../../store/selectors/RoomsSelectors';
 import { getAttribute } from '../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../store/Store';
-import { MarkerStatus } from '../../../../types/store/MarkersTypes';
-import { TextMessage } from '../../../../types/store/MessageTypes';
+import { MarkerStatus, TextMessage } from '../../../../types/store/ChatsRegistryTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
 import { getAttachmentExtension, getAttachmentSize } from '../../../../utils/attachmentUtils';
 import { parseUrlOnMessage } from '../../../../utils/parseUrlOnMessage';

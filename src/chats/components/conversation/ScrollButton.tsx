@@ -12,11 +12,11 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import useEventListener, { EventName, NewMessageEvent } from '../../../hooks/useEventListener';
+import { getRoomUnreadSelector } from '../../../store/selectors/ChatsRegistrySelectors';
 import { getRoomMutedSelector } from '../../../store/selectors/RoomsSelectors';
 import { getUserId } from '../../../store/selectors/SessionSelectors';
-import { getRoomUnreadsSelector } from '../../../store/selectors/UnreadsCounterSelectors';
 import useStore from '../../../store/Store';
-import { MessageType } from '../../../types/store/MessageTypes';
+import { MessageType } from '../../../types/store/ChatsRegistryTypes';
 
 type ScrollButtonProps = {
 	roomId: string;
@@ -40,7 +40,7 @@ export const ScrollBadge = styled(Badge)`
 `;
 
 const ScrollButton = ({ roomId, onClickCb }: ScrollButtonProps): ReactElement => {
-	const unreadCount = useStore((store) => getRoomUnreadsSelector(store, roomId));
+	const unreadCount = useStore((store) => getRoomUnreadSelector(store, roomId));
 	const roomMuted = useStore((state) => getRoomMutedSelector(state, roomId));
 	const myUserId = useStore(getUserId);
 

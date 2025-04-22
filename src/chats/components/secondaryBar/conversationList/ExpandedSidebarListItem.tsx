@@ -18,7 +18,10 @@ import {
 	getDraftMessage,
 	getLastNewReaction
 } from '../../../../store/selectors/ActiveConversationsSelectors';
-import { getLastMessageIdSelector } from '../../../../store/selectors/MessagesSelectors';
+import {
+	getLastMessageIdSelector,
+	getRoomUnreadSelector
+} from '../../../../store/selectors/ChatsRegistrySelectors';
 import {
 	getRoomMutedSelector,
 	getRoomNameSelector,
@@ -28,11 +31,9 @@ import {
 	getAttribute,
 	getSelectedConversation
 } from '../../../../store/selectors/SessionSelectors';
-import { getRoomUnreadsSelector } from '../../../../store/selectors/UnreadsCounterSelectors';
 import { getUserName } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
-import { MarkerStatus } from '../../../../types/store/MarkersTypes';
-import { Message, MessageType } from '../../../../types/store/MessageTypes';
+import { MarkerStatus, Message, MessageType } from '../../../../types/store/ChatsRegistryTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
 import GroupAvatar from '../../GroupAvatar';
 import UserAvatar from '../../UserAvatar';
@@ -63,7 +64,7 @@ const ExpandedSidebarListItem: React.FC<ExpandedSidebarListItemProps> = ({ roomI
 		getLastMessageIdSelector(state, roomId)
 	);
 	const lastMessageOfRoom: Message | undefined = useMessage(roomId, lastMessageId ?? '');
-	const unreadMessagesCount = useStore((store) => getRoomUnreadsSelector(store, roomId));
+	const unreadMessagesCount = useStore((store) => getRoomUnreadSelector(store, roomId));
 	const lastNewReaction = useStore((store) => getLastNewReaction(store, roomId));
 	const roomType = useStore((state) => getRoomTypeSelector(state, roomId));
 	const roomName = useStore((state) => getRoomNameSelector(state, roomId));

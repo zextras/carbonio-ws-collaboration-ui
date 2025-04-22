@@ -6,7 +6,7 @@
 
 import { EventName, sendCustomEvent } from '../../../hooks/useEventListener';
 import useStore from '../../../store/Store';
-import { FasteningAction, MessageType } from '../../../types/store/MessageTypes';
+import { FasteningAction, MessageType } from '../../../types/store/ChatsRegistryTypes';
 import { getTagElement } from '../utility/decodeStanza';
 import { decodeXMPPMessageStanza } from '../utility/decodeXMPPMessageStanza';
 import displayMessageBrowserNotification from '../utility/displayMessageBrowserNotification';
@@ -28,7 +28,7 @@ export function onNewMessageStanza(message: Element): true {
 
 			if (newMessage.from !== sessionId) {
 				sendCustomEvent({ name: EventName.NEW_MESSAGE, data: newMessage });
-				store.incrementUnreadCount(newMessage.roomId);
+				store.incrementUnreadCount(newMessage.roomId, 1);
 				displayMessageBrowserNotification(newMessage);
 			}
 
@@ -47,7 +47,7 @@ export function onNewMessageStanza(message: Element): true {
 			store.newMessage(newMessage);
 			if (newMessage.from !== sessionId) {
 				sendCustomEvent({ name: EventName.NEW_MESSAGE, data: newMessage });
-				store.incrementUnreadCount(newMessage.roomId);
+				store.incrementUnreadCount(newMessage.roomId, 1);
 			}
 			break;
 		}
