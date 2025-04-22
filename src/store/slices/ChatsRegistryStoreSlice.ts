@@ -177,7 +177,7 @@ export const useChatsRegistryStoreSlice: StateCreator<
 				}
 			}),
 			false,
-			'MESSAGES/CREATE_ROOM_MESSAGE'
+			'CHAT/CREATE_ROOM_MESSAGE'
 		);
 	},
 	setRepliedMessage: (
@@ -261,7 +261,7 @@ export const useChatsRegistryStoreSlice: StateCreator<
 				}
 			}),
 			false,
-			'CHATS/REMOVE_PLACEHOLDER_MESSAGE'
+			'CHAT/REMOVE_PLACEHOLDER_MESSAGE'
 		);
 	},
 	addFastening: (fastening: MessageFastening): void => {
