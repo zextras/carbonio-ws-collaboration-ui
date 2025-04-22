@@ -146,14 +146,12 @@ export const canDisplayPreviewOnLoad = (attachmentType: string): boolean => {
 	return type[0] === 'image';
 };
 
-// return if the attachment is an image or not
 export const isAttachmentImage = (attachmentType: string): boolean => {
 	const type = attachmentType.split('/');
 	if (type[0]) return type[0] === 'image';
 	return false;
 };
 
-// get attachment type, it's necessary for the previewer
 export const getAttachmentType = (attachmentType: string): 'pdf' | 'image' => {
 	if (!isAttachmentImage(attachmentType)) {
 		return 'pdf';
@@ -169,9 +167,11 @@ export const getApplicationIcon = (mimeType: string): string => {
 			return 'FilePresentationOutline';
 		case 'rft':
 		case 'zip':
+		case 'x-zip':
 			return 'FileZipOutline';
 		case 'excel':
 		case 'x-excel':
+		case 'vnd.ms-excel':
 			return 'FileCalcOutline';
 		default:
 			return 'FileAppOutline';
