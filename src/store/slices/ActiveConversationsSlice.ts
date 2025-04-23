@@ -43,6 +43,16 @@ export const useActiveConversationsSlice: StateCreator<
 	ActiveConversationsSlice
 > = (set) => ({
 	activeConversations: {},
+	setScrollPosition: (roomId: string, messageId: string): void => {
+		set(
+			produce((draft: RootStore) => {
+				const conversation = initActiveConversation(draft, roomId);
+				conversation.scrollPositionMessageId = messageId;
+			}),
+			false,
+			'AC/SET_SCROLL_POSITION'
+		);
+	},
 	setInputHasFocus: (roomId: string, hasFocus: boolean): void => {
 		set(
 			produce((draft: RootStore) => {
@@ -109,17 +119,7 @@ export const useActiveConversationsSlice: StateCreator<
 				delete conversation.referenceMessage;
 			}),
 			false,
-			'AC/REMOVE_REFERENCE_MESSAGE'
-		);
-	},
-	setScrollPosition: (roomId: string, messageId: string): void => {
-		set(
-			produce((draft: RootStore) => {
-				const conversation = initActiveConversation(draft, roomId);
-				conversation.scrollPositionMessageId = messageId;
-			}),
-			false,
-			'AC/SET_SCROLL_POSITION'
+			'AC/UNSET_REFERENCE_MESSAGE'
 		);
 	},
 	setDraftMessage: (roomId: string, message?: string): void => {
@@ -186,7 +186,7 @@ export const useActiveConversationsSlice: StateCreator<
 			'AC/SET_PARTICIPANTS_ACCORDION_STATUS'
 		);
 	},
-	setFilesToAttach: (roomId: string, files: FileToUpload[]): void => {
+	addFilesToAttach: (roomId: string, files: FileToUpload[]): void => {
 		set(
 			produce((draft: RootStore) => {
 				const conversation = initActiveConversation(draft, roomId);
@@ -194,63 +194,22 @@ export const useActiveConversationsSlice: StateCreator<
 				conversation.filesToAttach = concat(conversation.filesToAttach, files);
 			}),
 			false,
-			'AC/SET_FILES_TO_ATTACH'
+			'AC/ADD_FILES_TO_ATTACH'
 		);
 	},
-	setFileFocusedToModify: (roomId: string, fileTempId: string, active: boolean): void => {
-		set(
-			produce((draft: RootStore) => {
-				const { filesToAttach } = initActiveConversation(draft, roomId);
-				if (filesToAttach) {
-					filesToAttach.forEach((file) => {
-						file.hasFocus = file.fileId === fileTempId ? active : false;
-					});
-				}
-			}),
-			false,
-			'AC/SET_FILE_TO_MODIFY'
-		);
-	},
-	addDescriptionToFileToAttach: (roomId: string, fileTempId: string, description: string): void => {
-		set(
-			produce((draft: RootStore) => {
-				const { filesToAttach } = initActiveConversation(draft, roomId);
-				if (filesToAttach) {
-					const fileToAttach = find(filesToAttach, (file) => file.fileId === fileTempId);
-					if (fileToAttach) {
-						fileToAttach.description = description;
-						fileToAttach.hasFocus = false;
-					}
-				}
-			}),
-			false,
-			'AC/ADD_DESC_FILE_TO_ATTACH'
-		);
-	},
-	removeDescriptionToFileToAttach: (roomId: string, fileTempId: string): void => {
-		set(
-			produce((draft: RootStore) => {
-				const { filesToAttach } = initActiveConversation(draft, roomId);
-				if (filesToAttach) {
-					const fileToAttach = find(filesToAttach, (file) => file.fileId === fileTempId);
-					if (fileToAttach) {
-						fileToAttach.description = '';
-					}
-				}
-			}),
-			false,
-			'AC/REMOVE_DESC_FILE_TO_ATTACH'
-		);
-	},
-	removeFileToAttach: (roomId: string, fileTempId: string): void => {
+	removeFilesToAttach: (roomId: string, fileId?: string): void => {
 		set(
 			produce((draft: RootStore) => {
 				const conversation = initActiveConversation(draft, roomId);
 				if (!conversation.filesToAttach) return;
+				if (!fileId) {
+					delete conversation.filesToAttach;
+					return;
+				}
 
 				const indexFileToRemove = findIndex(
 					conversation.filesToAttach,
-					(file) => file.fileId === fileTempId
+					(file) => file.fileId === fileId
 				);
 				if (indexFileToRemove !== -1) {
 					// Determine next file to focus
@@ -266,20 +225,40 @@ export const useActiveConversationsSlice: StateCreator<
 						delete conversation.draftMessage;
 					}
 				}
-				remove(conversation.filesToAttach, (file) => file.fileId === fileTempId);
+				remove(conversation.filesToAttach, (file) => file.fileId === fileId);
 			}),
 			false,
 			'AC/REMOVE_FILE_TO_ATTACH'
 		);
 	},
-	unsetFilesToAttach: (roomId: string): void => {
+	setFileFocus: (roomId: string, fileId: string, active: boolean): void => {
 		set(
 			produce((draft: RootStore) => {
-				const conversation = initActiveConversation(draft, roomId);
-				delete conversation.filesToAttach;
+				const { filesToAttach } = initActiveConversation(draft, roomId);
+				if (filesToAttach) {
+					filesToAttach.forEach((file) => {
+						file.hasFocus = file.fileId === fileId ? active : false;
+					});
+				}
 			}),
 			false,
-			'AC/UNSET_FILES_TO_ATTACH'
+			'AC/SET_FILE_FOCUS'
+		);
+	},
+	setFileDescription: (roomId: string, fileId: string, description?: string): void => {
+		set(
+			produce((draft: RootStore) => {
+				const { filesToAttach } = initActiveConversation(draft, roomId);
+				if (filesToAttach) {
+					const fileToAttach = find(filesToAttach, (file) => file.fileId === fileId);
+					if (fileToAttach) {
+						fileToAttach.description = description ?? '';
+						fileToAttach.hasFocus = false;
+					}
+				}
+			}),
+			false,
+			'AC/SET_FILE_DESCRIPTION'
 		);
 	},
 	setForwardMessageList: (roomId: string, message: TextMessage): void => {

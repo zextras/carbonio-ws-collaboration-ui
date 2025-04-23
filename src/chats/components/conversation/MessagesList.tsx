@@ -97,7 +97,11 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	const debouncedSetterScrollPosition = useCallback(
 		debounce((refId) => {
-			setScrollPosition(roomId, refId);
+			const oldScrollPosition =
+				useStore.getState().activeConversations[roomId]?.scrollPositionMessageId;
+			if (oldScrollPosition !== refId) {
+				setScrollPosition(roomId, refId);
+			}
 			readMessage(refId);
 		}, 150),
 		[setScrollPosition, readMessage, roomId]

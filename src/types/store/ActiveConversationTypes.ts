@@ -21,19 +21,17 @@ export type ActiveConversationsSlice = {
 			attachment?: AttachmentMessageType;
 		}
 	) => void;
-	setDraftMessage: (roomId: string, message?: string) => void;
 	unsetReferenceMessage: (roomId: string) => void;
+	setDraftMessage: (roomId: string, message?: string) => void;
 	setLastMamMessage: (message: Message) => void;
 	setHistoryIsFullyLoaded: (roomId: string) => void;
 	setHistoryLoadDisabled: (roomId: string, status: boolean) => void;
 	setActionsAccordionStatus: (roomId: string, status: boolean) => void;
 	setParticipantsAccordionStatus: (roomId: string, status: boolean) => void;
-	setFilesToAttach: (roomId: string, files: FileToUpload[]) => void;
-	setFileFocusedToModify: (roomId: string, fileTempId: string, active: boolean) => void;
-	addDescriptionToFileToAttach: (roomId: string, fileTempId: string, description: string) => void;
-	removeDescriptionToFileToAttach: (roomId: string, fileTempId: string) => void;
-	removeFileToAttach: (roomId: string, fileTempId: string) => void;
-	unsetFilesToAttach: (roomId: string) => void;
+	addFilesToAttach: (roomId: string, files: FileToUpload[]) => void;
+	removeFilesToAttach: (roomId: string, fileId?: string) => void;
+	setFileFocus: (roomId: string, fileId: string, active: boolean) => void;
+	setFileDescription: (roomId: string, fileId: string, description?: string) => void;
 	setForwardMessageList: (roomId: string, message: TextMessage) => void;
 	unsetForwardMessageList: (roomId: string, message?: TextMessage) => void;
 	setNewReaction: (roomId: string, stanzaId: string, reaction: string, from: string) => void;

@@ -98,7 +98,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 	const unsetReferenceMessage = useStore((store) => store.unsetReferenceMessage);
 	const setInputHasFocus = useStore((store) => store.setInputHasFocus);
 	const setDraftMessage = useStore((store) => store.setDraftMessage);
-	const unsetFilesToAttach = useStore((store) => store.unsetFilesToAttach);
+	const removeFilesToAttach = useStore((store) => store.removeFilesToAttach);
 	const filesToUploadArray = useStore((store) => getFilesToUploadArray(store, roomId));
 	const lastMessageId: string | undefined = useStore((state) =>
 		getLastMessageIdSelector(state, roomId)
@@ -314,14 +314,14 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 			);
 
 			// Clean input composer
-			unsetFilesToAttach(roomId);
+			removeFilesToAttach(roomId);
 			setDraftMessage(roomId);
 			setTextMessage('');
 			if (referenceMessage) unsetReferenceMessage(roomId);
 
 			uploadFilesInOrder
 				.then(() => {
-					unsetFilesToAttach(roomId);
+					removeFilesToAttach(roomId);
 					setIsUploading(false);
 				})
 				.catch((error) => console.log(error));
@@ -465,10 +465,10 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 			// clean the composer section and remove all file uploading if user
 			// is uploading files and then decide to edit a message
 			if (filesToUploadArray && referenceMessage.actionType === messageActionType.EDIT) {
-				unsetFilesToAttach(roomId);
+				removeFilesToAttach(roomId);
 			}
 		}
-	}, [referenceMessage, filesToUploadArray, unsetFilesToAttach, roomId]);
+	}, [referenceMessage, filesToUploadArray, removeFilesToAttach, roomId]);
 
 	useEffect(() => {
 		checkMaxLengthAndSetMessage(messageInputRef.current?.value ?? '');

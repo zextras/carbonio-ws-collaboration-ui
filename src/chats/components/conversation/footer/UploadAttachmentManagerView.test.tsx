@@ -51,7 +51,7 @@ const pdfToUpload: FileToUpload = createMockFileToUpload({
 
 const storeSetupBasic = (file: FileToUpload): UserEvent => {
 	const store = useStore.getState();
-	store.setFilesToAttach(mockedRoom.id, [file]);
+	store.addFilesToAttach(mockedRoom.id, [file]);
 	const { user } = setup(<UploadAttachmentManagerView roomId={mockedRoom.id} />);
 	return user;
 };
@@ -217,7 +217,7 @@ describe('Upload attachment view', () => {
 			description: '',
 			hasFocus: true
 		};
-		act(() => store.setFilesToAttach(mockedRoom.id, [fileToUpload]));
+		act(() => store.addFilesToAttach(mockedRoom.id, [fileToUpload]));
 		const inputText = genericDescription;
 		const composerTextArea = screen.getByRole('textbox');
 		await user.type(composerTextArea, inputText);
@@ -254,7 +254,7 @@ describe('Upload attachment view', () => {
 			description: '',
 			hasFocus: true
 		};
-		act(() => store.setFilesToAttach(mockedRoom.id, [fileToUpload]));
+		act(() => store.addFilesToAttach(mockedRoom.id, [fileToUpload]));
 		const inputText = genericDescription;
 		const composerTextArea = screen.getByRole('textbox');
 		await user.type(composerTextArea, inputText);
@@ -297,7 +297,7 @@ describe('Upload attachment view', () => {
 			description: '',
 			hasFocus: true
 		};
-		act(() => store.setFilesToAttach(mockedRoom.id, [fileToUpload]));
+		act(() => store.addFilesToAttach(mockedRoom.id, [fileToUpload]));
 		const inputText = genericDescription;
 		const composerTextArea = screen.getByRole('textbox');
 		await user.type(composerTextArea, inputText);
@@ -319,7 +319,7 @@ describe('Upload attachment view', () => {
 	test('there is a file with description in the attachmentViewManager and user close the widget => the widget will become closed and the input get cleared and the file removed', async () => {
 		const { user, store } = storeSetupAdvanced();
 		const fileOne = createMockFileToUpload({ hasFocus: true });
-		act(() => store.setFilesToAttach(mockedRoom.id, [fileOne]));
+		act(() => store.addFilesToAttach(mockedRoom.id, [fileOne]));
 		const inputText = genericDescription;
 		const composerTextArea = screen.getByRole('textbox');
 		await user.type(composerTextArea, inputText);
@@ -344,7 +344,7 @@ describe('Upload attachment view', () => {
 			fileId: 'fileThree',
 			file: createMockFile({ name: 'there!', options: { type: 'image/png' } })
 		});
-		act(() => store.setFilesToAttach(mockedRoom.id, [fileOne, fileTwo, fileThree]));
+		act(() => store.addFilesToAttach(mockedRoom.id, [fileOne, fileTwo, fileThree]));
 		const inputText = genericDescription;
 		const titleCounter = screen.queryByText('Add 3 attachments');
 		expect(titleCounter).toBeInTheDocument();
@@ -375,7 +375,7 @@ describe('Upload attachment view', () => {
 			fileId: 'fileTwo',
 			file: createMockFile({ name: 'Hello', options: { type: 'image/png' } })
 		});
-		act(() => store.setFilesToAttach(mockedRoom.id, [fileOne, fileTwo]));
+		act(() => store.addFilesToAttach(mockedRoom.id, [fileOne, fileTwo]));
 		const inputText = genericDescription;
 		const composerTextArea = screen.getByRole('textbox');
 		await user.type(composerTextArea, inputText);
@@ -407,7 +407,7 @@ describe('Upload attachment view', () => {
 			fileId: 'fileThree',
 			file: createMockFile({ name: 'there!' })
 		});
-		act(() => store.setFilesToAttach(mockedRoom.id, [fileOne, fileTwo, fileThree]));
+		act(() => store.addFilesToAttach(mockedRoom.id, [fileOne, fileTwo, fileThree]));
 		const inputText = genericDescription;
 		const composerTextArea = screen.getByRole('textbox');
 		await user.type(composerTextArea, inputText);
@@ -463,7 +463,7 @@ describe('Upload attachment view', () => {
 			hasFocus: true,
 			file: createMockFile({ name: 'Hello', options: { type: 'image/png' } })
 		});
-		act(() => store.setFilesToAttach(mockedRoom.id, [fileOne]));
+		act(() => store.addFilesToAttach(mockedRoom.id, [fileOne]));
 		const composerTextArea = screen.getByRole('textbox');
 		await user.type(composerTextArea, inputText);
 		const titleCounter = screen.queryByText(add1Attachment);
@@ -490,7 +490,7 @@ describe('Upload attachment view', () => {
 			hasFocus: true,
 			file: createMockFile({ name: 'sunrise', options: { type: 'image/png' } })
 		});
-		act(() => store.setFilesToAttach(mockedRoom.id, [fileOne]));
+		act(() => store.addFilesToAttach(mockedRoom.id, [fileOne]));
 		const titleCounter = screen.queryByText(add1Attachment);
 		expect(titleCounter).toBeInTheDocument();
 		const composerTextArea = screen.getByRole('textbox');
@@ -528,7 +528,7 @@ describe('Upload attachment view', () => {
 			fileId: 'fileTwo',
 			file: createMockFile({ name: 'Hello', options: { type: 'image/png' } })
 		});
-		act(() => store.setFilesToAttach(mockedRoom.id, [fileOne, fileTwo]));
+		act(() => store.addFilesToAttach(mockedRoom.id, [fileOne, fileTwo]));
 		const inputText = 'description fileOne';
 		const composerTextArea = screen.getByRole('textbox');
 		await user.type(composerTextArea, inputText);
@@ -550,7 +550,7 @@ describe('Upload attachment view', () => {
 	test('Keep description - input has text, file is selected and user add new file from picker => description of the file will be kept in the input and the old file will stay focused', async () => {
 		const { user, store } = storeSetupAdvanced();
 		const fileOne = createMockFileToUpload({ hasFocus: true });
-		act(() => store.setFilesToAttach(mockedRoom.id, [fileOne]));
+		act(() => store.addFilesToAttach(mockedRoom.id, [fileOne]));
 		const inputText = 'description fileOne';
 		const composerTextArea = screen.getByRole('textbox');
 		await user.type(composerTextArea, inputText);
@@ -574,7 +574,7 @@ describe('Upload attachment view', () => {
 	test('Save description - input has text, file is selected and user press ENTER => description of the file will be saved, and message sent', async () => {
 		const { user, store } = storeSetupAdvanced();
 		const fileOne = createMockFileToUpload({ hasFocus: true });
-		act(() => store.setFilesToAttach(mockedRoom.id, [fileOne]));
+		act(() => store.addFilesToAttach(mockedRoom.id, [fileOne]));
 		const inputText = 'description fileOne{enter}';
 		const composerTextArea = screen.getByRole('textbox');
 		await user.type(composerTextArea, inputText);
@@ -587,7 +587,7 @@ describe('Upload attachment view', () => {
 	test('Save description - input has text, file is selected and user click send button => description of the file will be saved, and message sent', async () => {
 		const { user, store } = storeSetupAdvanced();
 		const fileOne = createMockFileToUpload({ hasFocus: true });
-		act(() => store.setFilesToAttach(mockedRoom.id, [fileOne]));
+		act(() => store.addFilesToAttach(mockedRoom.id, [fileOne]));
 		const sendButton = screen.getByTestId('icon: Navigation2');
 		expect(sendButton).not.toBeDisabled();
 		await user.click(sendButton);
@@ -600,7 +600,7 @@ describe('Upload attachment view', () => {
 	test('Remove description - file is selected and so the input has the description and user clean the input manually => description will be removed', async () => {
 		const { user, store } = storeSetupAdvanced();
 		const fileOne = createMockFileToUpload({ hasFocus: true });
-		act(() => store.setFilesToAttach(mockedRoom.id, [fileOne]));
+		act(() => store.addFilesToAttach(mockedRoom.id, [fileOne]));
 		const inputText = 'hello';
 		const composerTextArea = screen.getByRole('textbox');
 		await user.type(composerTextArea, inputText);
