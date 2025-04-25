@@ -302,7 +302,7 @@ export const useActiveConversationsSlice: StateCreator<
 				// Ignore reactions to messages that are not mine
 				if (
 					!find(
-						draft.chatsRegistry[roomId].messages,
+						draft.chatsRegistry[roomId]?.messages,
 						(message) =>
 							message.type === MessageType.TEXT_MSG &&
 							message.stanzaId === stanzaId &&

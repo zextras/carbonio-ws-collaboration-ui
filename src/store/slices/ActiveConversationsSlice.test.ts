@@ -11,117 +11,280 @@ import {
 	createMockTextMessage,
 	createMockUser
 } from '../../tests/createMock';
+import { messageActionType } from '../../types/store/ActiveConversationTypes';
 import { FasteningAction } from '../../types/store/ChatsRegistryTypes';
 import { dateToTimestamp } from '../../utils/dateUtils';
 import useStore from '../Store';
 
-const mockedRoom = createMockRoom();
+const sessionUser = createMockUser({ id: 'sessionUserId', name: 'sessionUserName' });
 
 const mockedUser0 = createMockMember({ userId: 'user0' });
 const mockedUser1 = createMockMember({ userId: 'user1' });
 
-const sessionUser = createMockUser({ id: 'sessionUserId', name: 'sessionUserName' });
+const mockedRoom = createMockRoom({
+	members: [createMockMember({ userId: sessionUser.id }), mockedUser0, mockedUser1]
+});
 
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo(sessionUser.id, sessionUser.name);
 	store.addRooms([mockedRoom]);
-	store.addRoomMember(mockedRoom.id, mockedUser0);
-	store.addRoomMember(mockedRoom.id, mockedUser1);
 });
 
 describe('Active conversations slice', () => {
-	test('User starts to write', () => {
-		useStore.getState().setIsWriting(mockedRoom.id, mockedUser0.userId, true);
-		const writingList = useStore.getState().activeConversations[mockedRoom.id].isWritingList;
-		expect(writingList?.length).toBe(1);
-		expect(writingList?.[0]).toBe(mockedUser0.userId);
-
-		// User stops and start to write again
-		useStore.getState().setIsWriting(mockedRoom.id, mockedUser1.userId, false);
-		useStore.getState().setIsWriting(mockedRoom.id, mockedUser0.userId, true);
-		const writingList2 = useStore.getState().activeConversations[mockedRoom.id].isWritingList;
-		expect(writingList2?.length).toBe(1);
-		expect(writingList2?.[0]).toBe(mockedUser0.userId);
+	test('setScrollPosition', () => {
+		useStore.getState().setScrollPosition(mockedRoom.id, 'messageId');
+		expect(useStore.getState().activeConversations[mockedRoom.id].scrollPositionMessageId).toBe(
+			'messageId'
+		);
 	});
 
-	test('More that one user start to write', () => {
-		// Two users start to write
-		useStore.getState().setIsWriting(mockedRoom.id, mockedUser0.userId, true);
-		useStore.getState().setIsWriting(mockedRoom.id, mockedUser1.userId, true);
-		const writingList = useStore.getState().activeConversations[mockedRoom.id].isWritingList;
-		expect(writingList?.length).toBe(2);
+	describe('inputHasFocus', () => {
+		test('setInputHasFocus', () => {
+			useStore.getState().setInputHasFocus(mockedRoom.id, true);
+			expect(useStore.getState().activeConversations[mockedRoom.id].inputHasFocus).toBe(true);
+		});
 
-		// User0 stops and start to write again
-		useStore.getState().setIsWriting(mockedRoom.id, mockedUser0.userId, false);
-		const writingList2 = useStore.getState().activeConversations[mockedRoom.id].isWritingList;
-		expect(writingList2?.length).toBe(1);
+		test('setInputHasFocus to false', () => {
+			useStore.getState().setInputHasFocus(mockedRoom.id, false);
+			expect(useStore.getState().activeConversations[mockedRoom.id].inputHasFocus).toBe(false);
+		});
 
-		// User0 starts to write again
-		useStore.getState().setIsWriting(mockedRoom.id, mockedUser0.userId, true);
-		const writingList3 = useStore.getState().activeConversations[mockedRoom.id].isWritingList;
-		expect(writingList3?.length).toBe(2);
+		test('remove new reaction when input has focus', () => {
+			const message = createMockTextMessage({
+				roomId: mockedRoom.id,
+				from: sessionUser.id
+			});
+			const store = useStore.getState();
+			store.newMessage(message);
+			useStore.getState().setNewReaction(mockedRoom.id, message.stanzaId, '👍', mockedUser0.userId);
+			expect(useStore.getState().activeConversations[mockedRoom.id].newReactions).toHaveLength(1);
+			useStore.getState().setInputHasFocus(mockedRoom.id, true);
+			expect(useStore.getState().activeConversations[mockedRoom.id].newReactions).toBeUndefined();
+		});
 	});
 
-	test('User continue to write', () => {
-		useStore.getState().setIsWriting(mockedRoom.id, mockedUser0.userId, true);
-		setTimeout(() => {
+	describe('isWritingList', () => {
+		test('User starts to write', () => {
 			useStore.getState().setIsWriting(mockedRoom.id, mockedUser0.userId, true);
-			expect(useStore.getState().activeConversations[mockedRoom.id].isWritingList?.length).toBe(1);
-		}, 1000);
+			const writingList = useStore.getState().activeConversations[mockedRoom.id].isWritingList;
+			expect(writingList?.length).toBe(1);
+			expect(writingList?.[0]).toBe(mockedUser0.userId);
+
+			// User stops and start to write again
+			useStore.getState().setIsWriting(mockedRoom.id, mockedUser1.userId, false);
+			useStore.getState().setIsWriting(mockedRoom.id, mockedUser0.userId, true);
+			const writingList2 = useStore.getState().activeConversations[mockedRoom.id].isWritingList;
+			expect(writingList2?.length).toBe(1);
+			expect(writingList2?.[0]).toBe(mockedUser0.userId);
+		});
+
+		test('More that one user start to write', () => {
+			// Two users start to write
+			useStore.getState().setIsWriting(mockedRoom.id, mockedUser0.userId, true);
+			useStore.getState().setIsWriting(mockedRoom.id, mockedUser1.userId, true);
+			const writingList = useStore.getState().activeConversations[mockedRoom.id].isWritingList;
+			expect(writingList?.length).toBe(2);
+
+			// User0 stops and start to write again
+			useStore.getState().setIsWriting(mockedRoom.id, mockedUser0.userId, false);
+			const writingList2 = useStore.getState().activeConversations[mockedRoom.id].isWritingList;
+			expect(writingList2?.length).toBe(1);
+
+			// User0 starts to write again
+			useStore.getState().setIsWriting(mockedRoom.id, mockedUser0.userId, true);
+			const writingList3 = useStore.getState().activeConversations[mockedRoom.id].isWritingList;
+			expect(writingList3?.length).toBe(2);
+		});
+
+		test('User continue to write', () => {
+			useStore.getState().setIsWriting(mockedRoom.id, mockedUser0.userId, true);
+			setTimeout(() => {
+				useStore.getState().setIsWriting(mockedRoom.id, mockedUser0.userId, true);
+				expect(useStore.getState().activeConversations[mockedRoom.id].isWritingList?.length).toBe(
+					1
+				);
+			}, 1000);
+		});
+
+		test('Receive a stop after user stopped to write', () => {
+			useStore.getState().setIsWriting(mockedRoom.id, mockedUser0.userId, true);
+			useStore.getState().setIsWriting(mockedRoom.id, mockedUser0.userId, false);
+			useStore.getState().setIsWriting(mockedRoom.id, mockedUser0.userId, false);
+			expect(useStore.getState().activeConversations[mockedRoom.id].isWritingList?.length).toBe(0);
+		});
 	});
 
-	test('Receive a stop after user stopped to write', () => {
-		useStore.getState().setIsWriting(mockedRoom.id, mockedUser0.userId, true);
-		useStore.getState().setIsWriting(mockedRoom.id, mockedUser0.userId, false);
-		useStore.getState().setIsWriting(mockedRoom.id, mockedUser0.userId, false);
-		expect(useStore.getState().activeConversations[mockedRoom.id].isWritingList?.length).toBe(0);
+	describe('referenceMessages', () => {
+		test('Set reference message', () => {
+			const message = createMockTextMessage({
+				roomId: mockedRoom.id,
+				from: sessionUser.id
+			});
+			const reference = {
+				messageId: message.id,
+				senderId: sessionUser.id,
+				stanzaId: message.stanzaId,
+				actionType: messageActionType.REPLY
+			};
+			useStore.getState().setReferenceMessage(mockedRoom.id, reference);
+			expect(useStore.getState().activeConversations[mockedRoom.id].referenceMessage).toStrictEqual(
+				{
+					roomId: mockedRoom.id,
+					...reference
+				}
+			);
+		});
+
+		test('Unset reference message', () => {
+			const message = createMockTextMessage({
+				roomId: mockedRoom.id,
+				from: sessionUser.id
+			});
+			const reference = {
+				messageId: message.id,
+				senderId: sessionUser.id,
+				stanzaId: message.stanzaId,
+				actionType: messageActionType.REPLY
+			};
+			useStore.getState().setReferenceMessage(mockedRoom.id, reference);
+			useStore.getState().unsetReferenceMessage(mockedRoom.id);
+			expect(
+				useStore.getState().activeConversations[mockedRoom.id].referenceMessage
+			).toBeUndefined();
+		});
 	});
 
-	test('Set last received MAM message when it is the first message', () => {
-		const message = createMockTextMessage({
-			id: 'message0',
-			roomId: mockedRoom.id,
-			date: dateToTimestamp('2022-01-01T00:00:00Z')
+	describe('draftMessage', () => {
+		test('Set draft message', () => {
+			const message = 'Draft message';
+			useStore.getState().setDraftMessage(mockedRoom.id, message);
+			expect(useStore.getState().activeConversations[mockedRoom.id].draftMessage).toBe(message);
 		});
-		useStore.getState().setLastMamMessage(message);
-		expect(useStore.getState().activeConversations[mockedRoom.id].lastMamMessage).toBe(message);
+
+		test('Unset draft message', () => {
+			const message = 'Draft message';
+			useStore.getState().setDraftMessage(mockedRoom.id, message);
+			useStore.getState().setDraftMessage(mockedRoom.id);
+			expect(useStore.getState().activeConversations[mockedRoom.id].draftMessage).toBeUndefined();
+		});
 	});
 
-	test('Replace last received MAM message', () => {
-		const message0 = createMockTextMessage({
-			id: 'message0',
-			roomId: mockedRoom.id,
-			date: dateToTimestamp('2022-01-01T10:00:00Z')
+	describe('lastMamMessage', () => {
+		test('Set last received MAM message when it is the first message', () => {
+			const message = createMockTextMessage({
+				id: 'message0',
+				roomId: mockedRoom.id,
+				date: dateToTimestamp('2022-01-01T00:00:00Z')
+			});
+			useStore.getState().setLastMamMessage(message);
+			expect(useStore.getState().activeConversations[mockedRoom.id].lastMamMessage).toBe(message);
 		});
-		const message1 = createMockTextMessage({
-			id: 'message1',
-			roomId: mockedRoom.id,
-			date: dateToTimestamp('2022-01-01T11:00:01Z')
+
+		test('Replace last received MAM message', () => {
+			const message0 = createMockTextMessage({
+				id: 'message0',
+				roomId: mockedRoom.id,
+				date: dateToTimestamp('2022-01-01T10:00:00Z')
+			});
+			const message1 = createMockTextMessage({
+				id: 'message1',
+				roomId: mockedRoom.id,
+				date: dateToTimestamp('2022-01-01T11:00:01Z')
+			});
+			useStore.getState().setLastMamMessage(message1);
+			useStore.getState().setLastMamMessage(message0);
+			expect(useStore.getState().activeConversations[mockedRoom.id].lastMamMessage).toStrictEqual(
+				message0
+			);
 		});
-		useStore.getState().setLastMamMessage(message1);
-		useStore.getState().setLastMamMessage(message0);
-		expect(useStore.getState().activeConversations[mockedRoom.id].lastMamMessage).toStrictEqual(
-			message0
-		);
+
+		test('Last received MAM message is not replaced when it is older', () => {
+			const message0 = createMockTextMessage({
+				id: 'message0',
+				roomId: mockedRoom.id,
+				date: dateToTimestamp('2022-01-01T10:00:00Z')
+			});
+			const message1 = createMockTextMessage({
+				id: 'message1',
+				roomId: mockedRoom.id,
+				date: dateToTimestamp('2022-01-02T10:00:01Z')
+			});
+			useStore.getState().setLastMamMessage(message0);
+			useStore.getState().setLastMamMessage(message1);
+			expect(useStore.getState().activeConversations[mockedRoom.id].lastMamMessage).toStrictEqual(
+				message0
+			);
+		});
 	});
 
-	test('Last received MAM message is not replaced when it is older', () => {
-		const message0 = createMockTextMessage({
-			id: 'message0',
-			roomId: mockedRoom.id,
-			date: dateToTimestamp('2022-01-01T10:00:00Z')
+	describe('infoPanelStatus', () => {
+		test('Set actions accordion status to true', () => {
+			useStore.getState().setActionsAccordionStatus(mockedRoom.id, true);
+			expect(
+				useStore.getState().activeConversations[mockedRoom.id].infoPanelStatus
+					.actionsAccordionIsOpened
+			).toBe(true);
 		});
-		const message1 = createMockTextMessage({
-			id: 'message1',
-			roomId: mockedRoom.id,
-			date: dateToTimestamp('2022-01-02T10:00:01Z')
+
+		test('Set actions accordion status to false', () => {
+			useStore.getState().setActionsAccordionStatus(mockedRoom.id, true);
+			useStore.getState().setActionsAccordionStatus(mockedRoom.id, false);
+			expect(
+				useStore.getState().activeConversations[mockedRoom.id].infoPanelStatus
+					.actionsAccordionIsOpened
+			).toBe(false);
 		});
-		useStore.getState().setLastMamMessage(message0);
-		useStore.getState().setLastMamMessage(message1);
-		expect(useStore.getState().activeConversations[mockedRoom.id].lastMamMessage).toStrictEqual(
-			message0
-		);
+
+		test('Set participants accordion status to true', () => {
+			useStore.getState().setParticipantsAccordionStatus(mockedRoom.id, true);
+			expect(
+				useStore.getState().activeConversations[mockedRoom.id].infoPanelStatus
+					.participantsAccordionIsOpened
+			).toBe(true);
+		});
+
+		test('Set participants accordion status to false', () => {
+			useStore.getState().setParticipantsAccordionStatus(mockedRoom.id, true);
+			useStore.getState().setParticipantsAccordionStatus(mockedRoom.id, false);
+			expect(
+				useStore.getState().activeConversations[mockedRoom.id].infoPanelStatus
+					.participantsAccordionIsOpened
+			).toBe(false);
+		});
+	});
+
+	describe('filesToAttach', () => {
+		test('Add files to attach', () => {
+			const file = new File([''], 'file.txt');
+			const files = [
+				{
+					file,
+					fileId: 'fileId',
+					hasFocus: true,
+					description: '',
+					localUrl: URL.createObjectURL(file)
+				}
+			];
+			useStore.getState().addFilesToAttach(mockedRoom.id, files);
+			expect(useStore.getState().activeConversations[mockedRoom.id].filesToAttach).toEqual(files);
+		});
+
+		test('Remove files to attach', () => {
+			const file = new File([''], 'file.txt');
+			const files = [
+				{
+					file,
+					fileId: 'fileId',
+					hasFocus: true,
+					description: '',
+					localUrl: URL.createObjectURL(file)
+				}
+			];
+			useStore.getState().addFilesToAttach(mockedRoom.id, files);
+			useStore.getState().removeFilesToAttach(mockedRoom.id, 'fileId');
+			expect(useStore.getState().activeConversations[mockedRoom.id].filesToAttach).toEqual([]);
+		});
 	});
 
 	describe('New reactions', () => {
