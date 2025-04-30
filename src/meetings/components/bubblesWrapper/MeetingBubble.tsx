@@ -25,7 +25,7 @@ import useStore from '../../../store/Store';
 import { MeetingChatVisibility } from '../../../types/store/ActiveMeetingTypes';
 import { MessageType } from '../../../types/store/ChatsRegistryTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
-import { getAttachmentInfo } from '../../../utils/attachmentUtils';
+import { getAttachmentExtension, getAttachmentSize } from '../../../utils/attachmentUtils';
 import { parseUrlOnMessage } from '../../../utils/parseUrlOnMessage';
 import { RouterContext } from '../../contexts/routerContext';
 
@@ -92,10 +92,8 @@ const MeetingBubble: FC<MeetingBubbleProps> = ({ messageId, handleBubbleRemove }
 	const hoverRef = useRef<HTMLDivElement>(null);
 	const timer = useRef<NodeJS.Timeout>();
 
-	const { extension, size } = getAttachmentInfo(
-		messageAttachment?.mimeType,
-		messageAttachment?.size
-	);
+	const extension = getAttachmentExtension(messageAttachment?.mimeType);
+	const size = getAttachmentSize(messageAttachment?.size);
 
 	const messageFormatted = useMemo(
 		() => message?.type === MessageType.TEXT_MSG && parseUrlOnMessage(message.text),
