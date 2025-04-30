@@ -13,15 +13,15 @@ const contentType = 'Content-Type';
 const applicationJson = 'application/json';
 
 const pdfThumbnailCases: Array<[string, Array<string | undefined>, string]> = [
-	['shape', [undefined, ImageShape.ROUNDED, undefined], '?shape=Rounded&output_format=Jpeg'],
-	['quality', [ImageQuality.HIGH, undefined, undefined], '?quality=High&output_format=Jpeg'],
+	['shape', [undefined, ImageShape.ROUNDED, undefined], '?shape=Rounded&output_format=jpeg'],
+	['quality', [ImageQuality.HIGH, undefined, undefined], '?quality=High&output_format=jpeg'],
 	['attachmentType', [undefined, undefined, AttachmentType.PDF], '?output_format=pdf']
 ];
 
 const imagePreviewCases: Array<[string, Array<string | undefined>, string]> = [
-	['normal', [ImageQuality.LOW, AttachmentType.PNG], '?quality=Low&output_format=Png'],
+	['normal', [ImageQuality.LOW, AttachmentType.PNG], '?quality=Low&output_format=png'],
 	['quality', [ImageQuality.HIGH, undefined], '?quality=High'],
-	['attachmentType', [undefined, AttachmentType.PNG], '?output_format=Png']
+	['attachmentType', [undefined, AttachmentType.PNG], '?output_format=png']
 ];
 
 const pdfPreviewURLCases: Array<[string, Array<number | undefined>, string]> = [
@@ -90,7 +90,7 @@ describe('Attachments API', () => {
 		);
 
 		expect(spyOnFetch).toHaveBeenCalledWith(
-			'preview/image/fileId/0x0/thumbnail/?quality=High&output_format=Jpeg&shape=Rounded',
+			'preview/image/fileId/0x0/thumbnail/?quality=High&output_format=jpeg&shape=Rounded',
 			RequestType.GET
 		);
 	});
@@ -120,7 +120,7 @@ describe('Attachments API', () => {
 		);
 
 		expect(spyOnFetch).toHaveBeenCalledWith(
-			'preview/pdf/fileId/0x0/thumbnail/?shape=Rectangular&quality=Lowest&output_format=Png',
+			'preview/pdf/fileId/0x0/thumbnail/?shape=Rectangular&quality=Lowest&output_format=png',
 			RequestType.GET
 		);
 	});

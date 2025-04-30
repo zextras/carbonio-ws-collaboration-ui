@@ -13,7 +13,7 @@ import styled from 'styled-components';
 import usePreview from '../../../../hooks/usePreview';
 import { AttachmentsApi } from '../../../../network';
 import { AttachmentMessageType } from '../../../../types/store/ChatsRegistryTypes';
-import { getThumbnailURL, isPreviewSupported } from '../../../../utils/attachmentUtils';
+import { getAttachmentThumbnailURL, isPreviewSupported } from '../../../../utils/attachmentUtils';
 
 const HoverContainer = styled(Container)<{ $isGenericFile: boolean }>`
 	z-index: 1;
@@ -64,7 +64,7 @@ const AttachmentSmallView: FC<AttachmentSmallViewProps> = ({ attachment }) => {
 	const { onPreviewClick } = usePreview(attachment);
 
 	const previewURL = useMemo(
-		() => getThumbnailURL(attachment.id, attachment.mimeType),
+		() => getAttachmentThumbnailURL(attachment.id, attachment.mimeType),
 		[attachment]
 	);
 

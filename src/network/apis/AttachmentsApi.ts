@@ -143,7 +143,7 @@ class AttachmentsApi implements IAttachmentsApi {
 		area: string,
 		quality?: string,
 		shape?: string,
-		format = 'Jpeg'
+		format = 'jpeg'
 	): Promise<GetPdfThumbnailResponse> {
 		let params = '';
 		if (shape || quality || format) {
@@ -161,7 +161,7 @@ class AttachmentsApi implements IAttachmentsApi {
 		area: string,
 		quality?: string,
 		shape?: string,
-		format = 'Jpeg'
+		format = 'jpeg'
 	): string => {
 		let params = '';
 		if (shape || quality || format) {
@@ -189,7 +189,7 @@ class AttachmentsApi implements IAttachmentsApi {
 
 				img.src = url;
 			} catch (err) {
-				reject(err);
+				reject(new Error());
 			}
 		});
 	}

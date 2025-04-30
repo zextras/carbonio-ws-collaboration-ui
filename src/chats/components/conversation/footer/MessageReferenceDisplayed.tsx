@@ -20,7 +20,7 @@ import {
 	ReferenceMessage
 } from '../../../../types/store/ActiveConversationTypes';
 import { TextMessage } from '../../../../types/store/ChatsRegistryTypes';
-import { getThumbnailURL } from '../../../../utils/attachmentUtils';
+import { getAttachmentThumbnailURL } from '../../../../utils/attachmentUtils';
 
 const BorderContainer = styled(Container)<{
 	$customBorderColor: string;
@@ -96,7 +96,10 @@ const MessageReferenceDisplayed: React.FC<MessageReferenceDisplayedProps> = ({
 
 	const previewURL = useMemo(() => {
 		if (referenceMessage.attachment) {
-			return getThumbnailURL(referenceMessage.attachment.id, referenceMessage.attachment.mimeType);
+			return getAttachmentThumbnailURL(
+				referenceMessage.attachment.id,
+				referenceMessage.attachment.mimeType
+			);
 		}
 		return undefined;
 	}, [referenceMessage]);
