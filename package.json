@@ -78,7 +78,7 @@
 		"react-i18next": "12.3.1",
 		"react-router-dom": "6.28.1",
 		"strophe.js": "1.6.2",
-		"styled-components": "^6.1.16",
+		"styled-components": "^6.1.17",
 		"uuid": "10.0.0",
 		"zustand": "^5.0.3"
 	},
