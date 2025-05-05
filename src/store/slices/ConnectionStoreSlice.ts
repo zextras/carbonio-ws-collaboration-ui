@@ -11,7 +11,8 @@ import { StateCreator } from 'zustand';
 
 import { WebSocketClient } from '../../network/websocket/WebSocketClient';
 import XMPPClient from '../../network/xmpp/XMPPClient';
-import { ConnectionsStoreSlice, RootStore } from '../../types/store/StoreTypes';
+import { ConnectionsStoreSlice } from '../../types/store/ConnectionsTypes';
+import { RootStore } from '../../types/store/StoreTypes';
 
 export const useConnectionsStoreSlice: StateCreator<
 	RootStore,

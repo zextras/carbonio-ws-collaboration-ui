@@ -56,9 +56,7 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 	const roomMessages = useStore((store) => getMessagesSelector(store, roomId));
 	const actualScrollPosition = useStore((store) => getIdMessageWhereScrollIsStopped(store, roomId));
 	const hasMoreMessageToLoad = useStore((store) => getHistoryIsFullyLoaded(store, roomId));
-	const setIdMessageWhereScrollIsStopped = useStore(
-		(store) => store.setIdMessageWhereScrollIsStopped
-	);
+	const setScrollPosition = useStore((store) => store.setScrollPosition);
 	const setInputHasFocus = useStore((store) => store.setInputHasFocus);
 	const myUserId = useStore(getUserId);
 	const myLastMarker = useStore((store) => getMyLastMarkerOfRoom(store, roomId));
@@ -99,10 +97,14 @@ const MessagesList = ({ roomId }: ConversationProps): ReactElement => {
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	const debouncedSetterScrollPosition = useCallback(
 		debounce((refId) => {
-			setIdMessageWhereScrollIsStopped(roomId, refId);
+			const oldScrollPosition =
+				useStore.getState().activeConversations[roomId]?.scrollPositionMessageId;
+			if (oldScrollPosition !== refId) {
+				setScrollPosition(roomId, refId);
+			}
 			readMessage(refId);
 		}, 150),
-		[setIdMessageWhereScrollIsStopped, readMessage, roomId]
+		[setScrollPosition, readMessage, roomId]
 	);
 
 	const intersectionObserverCallback = useCallback(

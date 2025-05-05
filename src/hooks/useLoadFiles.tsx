@@ -30,7 +30,7 @@ const useLoadFiles = (roomId: string, clearInput?: () => void): ((files: FileLis
 	const confirmLabel = t('conversation.longCaption.modal.action', 'Attach anyway');
 
 	const filesToUploadArray = useStore((store) => getFilesToUploadArray(store, roomId));
-	const setFilesToAttach = useStore((store) => store.setFilesToAttach);
+	const addFilesToAttach = useStore((store) => store.addFilesToAttach);
 	const setInputHasFocus = useStore((store) => store.setInputHasFocus);
 
 	const { createModal, closeModal } = useModal();
@@ -44,10 +44,10 @@ const useLoadFiles = (roomId: string, clearInput?: () => void): ((files: FileLis
 				description: '',
 				localUrl: URL.createObjectURL(file)
 			}));
-			setFilesToAttach(roomId, listOfFiles);
+			addFilesToAttach(roomId, listOfFiles);
 			setInputHasFocus(roomId, true);
 		},
-		[filesToUploadArray, roomId, setFilesToAttach, setInputHasFocus]
+		[filesToUploadArray, roomId, addFilesToAttach, setInputHasFocus]
 	);
 
 	return useCallback(

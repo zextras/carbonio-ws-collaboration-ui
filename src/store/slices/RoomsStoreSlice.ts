@@ -172,6 +172,7 @@ export const useRoomsStoreSlice: StateCreator<
 					updatedAt: dateToISODate(now)
 				};
 				draft.activeConversations[roomId] = {
+					...draft.activeConversations[roomId],
 					isHistoryFullyLoaded: true
 				};
 				draft.chatsRegistry[roomId] = {

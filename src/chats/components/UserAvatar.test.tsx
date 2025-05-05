@@ -236,21 +236,21 @@ describe('User avatar', () => {
 	describe('Draft message', () => {
 		test('Check if there is the draft message and notifications enabled', () => {
 			const store = useStore.getState();
-			store.setDraftMessage(room.id, false, hiString);
+			store.setDraftMessage(room.id, hiString);
 			setup(<UserAvatar roomId={room.id} draftMessage />);
 			const userAvatarWithDraft = screen.getByTestId('icon: Edit2');
 			expect(userAvatarWithDraft).toBeVisible();
 		});
 		test('Check if there is the draft message and notifications disabled', () => {
 			const store = useStore.getState();
-			store.setDraftMessage(room.id, false, hiString);
+			store.setDraftMessage(room.id, hiString);
 			setup(<UserAvatar roomId={room.id} draftMessage />);
 			const userAvatarWithDraft = screen.getByTestId('icon: Edit2');
 			expect(userAvatarWithDraft).toBeVisible();
 		});
 		test('Check if there is the draft message and there is an ongoing meeting', () => {
 			const store = useStore.getState();
-			store.setDraftMessage(room.id, false, hiString);
+			store.setDraftMessage(room.id, hiString);
 			setup(<UserAvatar roomId={roomWithMeeting.id} draftMessage />);
 			const userAvatarWithDraft = screen.getByTestId('icon: Video');
 			expect(userAvatarWithDraft).toBeVisible();
