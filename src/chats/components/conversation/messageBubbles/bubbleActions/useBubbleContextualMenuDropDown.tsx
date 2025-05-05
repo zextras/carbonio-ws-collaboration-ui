@@ -83,7 +83,7 @@ const useBubbleContextualMenuDropDown = (
 	const onDropdownClose = useCallback(() => setDropdownActive(false), [setDropdownActive]);
 
 	const setForwardModeOn = useCallback(() => {
-		setDraftMessage(message.roomId, false, '');
+		setDraftMessage(message.roomId);
 		unsetReferenceMessage(message.roomId);
 		setForwardList(message.roomId, message);
 	}, [message, setDraftMessage, setForwardList, unsetReferenceMessage]);
@@ -100,15 +100,14 @@ const useBubbleContextualMenuDropDown = (
 	}, [createSnackbar, message.text, successfulCopySnackbar]);
 
 	const editMessageAction = useCallback(() => {
-		setDraftMessage(message.roomId, false, message.text);
-		setReferenceMessage(
-			message.roomId,
-			message.id,
-			message.from,
-			message.stanzaId,
-			messageActionType.EDIT,
-			message.attachment
-		);
+		setDraftMessage(message.roomId, message.text);
+		setReferenceMessage(message.roomId, {
+			messageId: message.id,
+			senderId: message.from,
+			stanzaId: message.stanzaId,
+			actionType: messageActionType.EDIT,
+			attachment: message.attachment
+		});
 	}, [message, setDraftMessage, setReferenceMessage]);
 
 	const deleteMessageAction = useCallback(() => {
@@ -136,16 +135,15 @@ const useBubbleContextualMenuDropDown = (
 
 	const replyMessageAction = useCallback(() => {
 		if (referenceMessage?.actionType === messageActionType.EDIT) {
-			setDraftMessage(message.roomId, false, '');
+			setDraftMessage(message.roomId);
 		}
-		setReferenceMessage(
-			message.roomId,
-			message.id,
-			message.from,
-			message.stanzaId,
-			messageActionType.REPLY,
-			message.attachment
-		);
+		setReferenceMessage(message.roomId, {
+			messageId: message.id,
+			senderId: message.from,
+			stanzaId: message.stanzaId,
+			actionType: messageActionType.REPLY,
+			attachment: message.attachment
+		});
 	}, [message, referenceMessage?.actionType, setDraftMessage, setReferenceMessage]);
 
 	const forwardHasToAppear = useMemo(
