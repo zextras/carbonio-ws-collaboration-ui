@@ -6,18 +6,35 @@
  */
 
 import { produce } from 'immer';
-import { find, findIndex, forEach, orderBy, remove, reverse } from 'lodash';
+import { concat, find, findIndex, includes, orderBy, remove, reverse, size } from 'lodash';
 import { StateCreator } from 'zustand';
 
-import { FileToUpload, messageActionType } from '../../types/store/ActiveConversationTypes';
+import {
+	ActiveConversation,
+	ActiveConversationsSlice,
+	FileToUpload,
+	messageActionType
+} from '../../types/store/ActiveConversationTypes';
 import {
 	AttachmentMessageType,
 	Message,
 	MessageType,
 	TextMessage
 } from '../../types/store/ChatsRegistryTypes';
-import { ActiveConversationsSlice, RootStore } from '../../types/store/StoreTypes';
+import { RootStore } from '../../types/store/StoreTypes';
 import { isBefore } from '../../utils/dateUtils';
+
+const initActiveConversation = (draft: RootStore, roomId: string): ActiveConversation => {
+	if (!draft.activeConversations[roomId]) {
+		draft.activeConversations[roomId] = {
+			infoPanelStatus: {
+				actionsAccordionIsOpened: true,
+				participantsAccordionIsOpened: true
+			}
+		};
+	}
+	return draft.activeConversations[roomId];
+};
 
 export const useActiveConversationsSlice: StateCreator<
 	RootStore,
@@ -26,20 +43,25 @@ export const useActiveConversationsSlice: StateCreator<
 	ActiveConversationsSlice
 > = (set) => ({
 	activeConversations: {},
+	setScrollPosition: (roomId: string, messageId: string): void => {
+		set(
+			produce((draft: RootStore) => {
+				const conversation = initActiveConversation(draft, roomId);
+				conversation.scrollPositionMessageId = messageId;
+			}),
+			false,
+			'AC/SET_SCROLL_POSITION'
+		);
+	},
 	setInputHasFocus: (roomId: string, hasFocus: boolean): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (draft.activeConversations[roomId]) {
-					draft.activeConversations[roomId].inputHasFocus = hasFocus;
-				} else {
-					draft.activeConversations[roomId] = {
-						inputHasFocus: hasFocus
-					};
-				}
+				const conversation = initActiveConversation(draft, roomId);
+				conversation.inputHasFocus = hasFocus;
 
 				// Remove newReactions
-				if (hasFocus && draft.activeConversations[roomId].newReactions) {
-					delete draft.activeConversations[roomId].newReactions;
+				if (hasFocus && conversation.newReactions) {
+					delete conversation.newReactions;
 				}
 			}),
 			false,
@@ -49,30 +71,19 @@ export const useActiveConversationsSlice: StateCreator<
 	setIsWriting: (roomId: string, userId: string, writingStatus: boolean): void => {
 		set(
 			produce((draft: RootStore) => {
-				// Handle the case when the conversation is not yet in the activeConversations map
-				if (!draft.activeConversations[roomId]) draft.activeConversations[roomId] = {};
-				if (!draft.activeConversations[roomId].isWritingList)
-					draft.activeConversations[roomId].isWritingList = [];
+				const conversation = initActiveConversation(draft, roomId);
+				if (!conversation.isWritingList) conversation.isWritingList = [];
 
-				const isUserYetInWritingList = find(
-					draft.activeConversations[roomId].isWritingList,
-					(id) => id === userId
-				);
+				const alreadyWriting = includes(conversation.isWritingList, userId);
 
-				// If a new user starts writing add it to the list
-				if (writingStatus && !isUserYetInWritingList) {
-					draft.activeConversations[roomId].isWritingList = [
-						...(draft.activeConversations[roomId].isWritingList || []),
-						userId
-					];
+				// If a new user starts writing, add him to the list
+				if (writingStatus && !alreadyWriting) {
+					conversation.isWritingList.push(userId);
 				}
 
-				// If a user stops writing remove it from the list
-				if (!writingStatus && isUserYetInWritingList) {
-					remove(draft.activeConversations[roomId].isWritingList, (id) => id === userId);
-					if (draft.activeConversations[roomId].isWritingList.length === 0) {
-						delete draft.activeConversations[roomId].isWritingList;
-					}
+				// If a user stops writing, remove him from the list
+				if (!writingStatus && alreadyWriting) {
+					remove(conversation.isWritingList, (id) => id === userId);
 				}
 			}),
 			false,
@@ -81,80 +92,42 @@ export const useActiveConversationsSlice: StateCreator<
 	},
 	setReferenceMessage: (
 		roomId: string,
-		referenceMessageId: string,
-		senderId: string,
-		stanzaId: string,
-		actionType: messageActionType,
-		attachment?: AttachmentMessageType
+		reference: {
+			messageId: string;
+			senderId: string;
+			stanzaId: string;
+			actionType: messageActionType;
+			attachment?: AttachmentMessageType;
+		}
 	): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (draft.activeConversations[roomId]) {
-					draft.activeConversations[roomId].referenceMessage = {
-						roomId,
-						messageId: referenceMessageId,
-						senderId,
-						stanzaId,
-						actionType,
-						attachment
-					};
-				} else {
-					draft.activeConversations[roomId] = {
-						referenceMessage: {
-							roomId,
-							messageId: referenceMessageId,
-							senderId,
-							stanzaId,
-							actionType,
-							attachment
-						}
-					};
-				}
+				const conversation = initActiveConversation(draft, roomId);
+				conversation.referenceMessage = {
+					roomId,
+					...reference
+				};
 			}),
 			false,
-			'AC/SET_REFERENCE_MESSAGE_VIEW'
+			'AC/SET_REFERENCE_MESSAGE'
 		);
 	},
 	unsetReferenceMessage: (roomId: string): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (draft.activeConversations[roomId]) {
-					delete draft.activeConversations[roomId].referenceMessage;
-				}
+				const conversation = initActiveConversation(draft, roomId);
+				delete conversation.referenceMessage;
 			}),
 			false,
-			'AC/REMOVE_REFERENCE_MESSAGE_VIEW'
+			'AC/UNSET_REFERENCE_MESSAGE'
 		);
 	},
-	setIdMessageWhereScrollIsStopped: (roomId: string, messageId: string): void => {
+	setDraftMessage: (roomId: string, message?: string): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (draft.activeConversations[roomId]) {
-					draft.activeConversations[roomId].scrollPositionMessageId = messageId;
-				} else {
-					draft.activeConversations[roomId] = {
-						scrollPositionMessageId: messageId
-					};
-				}
-			}),
-			false,
-			'AC/SET_SCROLL_POSITION'
-		);
-	},
-	setDraftMessage: (roomId: string, sent: boolean, message?: string): void => {
-		set(
-			produce((draft: RootStore) => {
-				if (sent) {
-					if (draft.activeConversations[roomId]) {
-						delete draft.activeConversations[roomId].draftMessage;
-					}
-				} else if (draft.activeConversations[roomId]) {
-					draft.activeConversations[roomId].draftMessage = message;
-				} else {
-					draft.activeConversations[roomId] = {
-						draftMessage: message
-					};
-				}
+				const conversation = initActiveConversation(draft, roomId);
+				if (message) conversation.draftMessage = message;
+				else delete conversation.draftMessage;
 			}),
 			false,
 			'AC/SET_DRAFT_MESSAGE'
@@ -163,28 +136,21 @@ export const useActiveConversationsSlice: StateCreator<
 	setLastMamMessage: (message: Message): void => {
 		set(
 			produce((draft: RootStore) => {
-				const lastMamDate = draft.activeConversations[message.roomId]?.lastMamMessage?.date;
+				const conversation = initActiveConversation(draft, message.roomId);
+				const lastMamDate = conversation.lastMamMessage?.date;
 				if (!lastMamDate || isBefore(message.date, lastMamDate)) {
-					draft.activeConversations[message.roomId] = {
-						...draft.activeConversations[message.roomId],
-						lastMamMessage: message
-					};
+					conversation.lastMamMessage = message;
 				}
 			}),
 			false,
-			'AC/SET_LAST_MAM_MESSAGE_ID'
+			'AC/SET_LAST_MAM_MESSAGE'
 		);
 	},
 	setHistoryIsFullyLoaded: (roomId: string): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (draft.activeConversations[roomId]) {
-					draft.activeConversations[roomId].isHistoryFullyLoaded = true;
-				} else {
-					draft.activeConversations[roomId] = {
-						isHistoryFullyLoaded: true
-					};
-				}
+				const conversation = initActiveConversation(draft, roomId);
+				conversation.isHistoryFullyLoaded = true;
 			}),
 			false,
 			'AC/SET_HISTORY_FULLY_LOADED'
@@ -193,13 +159,8 @@ export const useActiveConversationsSlice: StateCreator<
 	setHistoryLoadDisabled: (roomId: string, status: boolean): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (draft.activeConversations[roomId]) {
-					draft.activeConversations[roomId].isHistoryLoadDisabled = status;
-				} else {
-					draft.activeConversations[roomId] = {
-						isHistoryLoadDisabled: status
-					};
-				}
+				const conversation = initActiveConversation(draft, roomId);
+				conversation.isHistoryLoadDisabled = status;
 			}),
 			false,
 			'AC/SET_HISTORY_LOAD_DISABLED'
@@ -208,14 +169,8 @@ export const useActiveConversationsSlice: StateCreator<
 	setActionsAccordionStatus: (roomId: string, status: boolean): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (!draft.activeConversations[roomId]) draft.activeConversations[roomId] = {};
-				if (!draft.activeConversations[roomId].infoPanelStatus) {
-					draft.activeConversations[roomId].infoPanelStatus = {
-						actionsAccordionIsOpened: true,
-						participantsAccordionIsOpened: true
-					};
-				}
-				draft.activeConversations[roomId].infoPanelStatus!.actionsAccordionIsOpened = status;
+				const conversation = initActiveConversation(draft, roomId);
+				conversation.infoPanelStatus.actionsAccordionIsOpened = status;
 			}),
 			false,
 			'AC/SET_ACTIONS_ACCORDION_STATUS'
@@ -224,149 +179,100 @@ export const useActiveConversationsSlice: StateCreator<
 	setParticipantsAccordionStatus: (roomId: string, status: boolean): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (!draft.activeConversations[roomId]) draft.activeConversations[roomId] = {};
-				if (!draft.activeConversations[roomId].infoPanelStatus) {
-					draft.activeConversations[roomId].infoPanelStatus = {
-						actionsAccordionIsOpened: true,
-						participantsAccordionIsOpened: true
-					};
-				}
-				draft.activeConversations[roomId].infoPanelStatus!.participantsAccordionIsOpened = status;
+				const conversation = initActiveConversation(draft, roomId);
+				conversation.infoPanelStatus.participantsAccordionIsOpened = status;
 			}),
 			false,
 			'AC/SET_PARTICIPANTS_ACCORDION_STATUS'
 		);
 	},
-	setFilesToAttach: (roomId: string, files: FileToUpload[]): void => {
+	addFilesToAttach: (roomId: string, files: FileToUpload[]): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (!draft.activeConversations[roomId]) draft.activeConversations[roomId] = {};
-				if (!draft.activeConversations[roomId].filesToAttach) {
-					draft.activeConversations[roomId].filesToAttach = files;
-				} else {
-					draft.activeConversations[roomId].filesToAttach = [
-						...draft.activeConversations[roomId].filesToAttach!,
-						...files
-					];
-				}
+				const conversation = initActiveConversation(draft, roomId);
+				if (!conversation.filesToAttach) conversation.filesToAttach = [];
+				conversation.filesToAttach = concat(conversation.filesToAttach, files);
 			}),
 			false,
-			'AC/SET_FILES_TO_ATTACH'
+			'AC/ADD_FILES_TO_ATTACH'
 		);
 	},
-	setFileFocusedToModify: (roomId: string, fileTempId: string, active: boolean): void => {
+	removeFilesToAttach: (roomId: string, fileId?: string): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (draft.activeConversations[roomId].filesToAttach) {
-					forEach(draft.activeConversations[roomId].filesToAttach, (file) => {
-						if (file.fileId === fileTempId) {
-							file.hasFocus = active;
-						} else {
-							file.hasFocus = false;
+				const conversation = initActiveConversation(draft, roomId);
+				if (!conversation.filesToAttach) return;
+				if (!fileId) {
+					delete conversation.filesToAttach;
+					return;
+				}
+
+				const indexFileToRemove = findIndex(
+					conversation.filesToAttach,
+					(file) => file.fileId === fileId
+				);
+				if (indexFileToRemove !== -1) {
+					// Determine next file to focus
+					const nextFile =
+						conversation.filesToAttach[indexFileToRemove + 1] ||
+						conversation.filesToAttach[indexFileToRemove - 1];
+					if (nextFile) {
+						nextFile.hasFocus = true;
+						if (nextFile.description) {
+							conversation.draftMessage = nextFile.description;
 						}
-					});
-				}
-			}),
-			false,
-			'AC/SET_FILE_FOCUSED'
-		);
-	},
-	addDescriptionToFileToAttach: (roomId: string, fileTempId: string, description: string): void => {
-		set(
-			produce((draft: RootStore) => {
-				if (draft.activeConversations[roomId].filesToAttach) {
-					forEach(draft.activeConversations[roomId].filesToAttach, (file) => {
-						if (file.fileId === fileTempId) {
-							file.description = description;
-							file.hasFocus = false;
-						}
-					});
-				}
-			}),
-			false,
-			'AC/ADD_DESC_FILE_TO_ATTACH'
-		);
-	},
-	removeDescriptionToFileToAttach: (roomId: string, fileTempId: string): void => {
-		set(
-			produce((draft: RootStore) => {
-				if (draft.activeConversations[roomId].filesToAttach) {
-					forEach(draft.activeConversations[roomId].filesToAttach, (file) => {
-						if (file.fileId === fileTempId) file.description = '';
-					});
-				}
-			}),
-			false,
-			'AC/REMOVE_DESC_FILE_TO_ATTACH'
-		);
-	},
-	removeFileToAttach: (roomId: string, fileTempId: string): void => {
-		set(
-			produce((draft: RootStore) => {
-				if (draft.activeConversations[roomId].filesToAttach) {
-					// We set as active a different file only if the one we are removing is the selected one.
-					// Before remove the file, we set as selected the one who comes after if present, otherwise the previous one
-					const fileToRemoveIsSelected = find(
-						draft.activeConversations[roomId].filesToAttach,
-						(file) => file.fileId === fileTempId && file.hasFocus
-					);
-
-					if (fileToRemoveIsSelected) {
-						const fileToRemoveIdx = findIndex(draft.activeConversations[roomId].filesToAttach, [
-							'fileId',
-							fileTempId
-						]);
-
-						forEach(draft.activeConversations[roomId].filesToAttach, (file) => {
-							file.hasFocus = false;
-						});
-
-						const { filesToAttach } = draft.activeConversations[roomId];
-
-						const fileIdxToUse =
-							(filesToAttach![fileToRemoveIdx + 1] && fileToRemoveIdx + 1) ||
-							(filesToAttach![fileToRemoveIdx - 1] && fileToRemoveIdx - 1);
-
-						draft.activeConversations[roomId].filesToAttach![fileIdxToUse].hasFocus = true;
-						if (draft.activeConversations[roomId].filesToAttach![fileIdxToUse].description) {
-							draft.activeConversations[roomId].draftMessage =
-								draft.activeConversations[roomId].filesToAttach![fileIdxToUse].description;
-						}
+					} else {
+						delete conversation.draftMessage;
 					}
-
-					remove(
-						draft.activeConversations[roomId].filesToAttach!,
-						(file) => file.fileId === fileTempId
-					);
 				}
+				remove(conversation.filesToAttach, (file) => file.fileId === fileId);
 			}),
 			false,
 			'AC/REMOVE_FILE_TO_ATTACH'
 		);
 	},
-	unsetFilesToAttach: (roomId: string): void => {
+	setFileFocus: (roomId: string, fileId: string, active: boolean): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (draft.activeConversations[roomId]) {
-					delete draft.activeConversations[roomId].filesToAttach;
+				const { filesToAttach } = initActiveConversation(draft, roomId);
+				if (filesToAttach) {
+					filesToAttach.forEach((file) => {
+						file.hasFocus = file.fileId === fileId ? active : false;
+					});
 				}
 			}),
 			false,
-			'AC/UNSET_FILES_TO_ATTACH'
+			'AC/SET_FILE_FOCUS'
+		);
+	},
+	setFileDescription: (roomId: string, fileId: string, description?: string): void => {
+		set(
+			produce((draft: RootStore) => {
+				const { filesToAttach } = initActiveConversation(draft, roomId);
+				if (filesToAttach) {
+					const fileToAttach = find(filesToAttach, (file) => file.fileId === fileId);
+					if (fileToAttach) {
+						fileToAttach.description = description ?? '';
+						fileToAttach.hasFocus = false;
+					}
+				}
+			}),
+			false,
+			'AC/SET_FILE_DESCRIPTION'
 		);
 	},
 	setForwardMessageList: (roomId: string, message: TextMessage): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (!draft.activeConversations[roomId]) draft.activeConversations[roomId] = {};
-				if (draft.activeConversations[roomId].forwardMessageList) {
-					draft.activeConversations[roomId].forwardMessageList = orderBy(
-						[...draft.activeConversations[roomId].forwardMessageList!, message],
+				const conversation = initActiveConversation(draft, roomId);
+				if (conversation.forwardMessageList) {
+					conversation.forwardMessageList = orderBy(
+						[...conversation.forwardMessageList, message],
 						['date'],
 						['asc']
 					);
 				} else {
-					draft.activeConversations[roomId].forwardMessageList = [message];
+					conversation.forwardMessageList = [message];
 				}
 			}),
 			false,
@@ -376,17 +282,13 @@ export const useActiveConversationsSlice: StateCreator<
 	unsetForwardMessageList: (roomId: string, message?: TextMessage): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (draft.activeConversations[roomId].forwardMessageList) {
+				const conversation = initActiveConversation(draft, roomId);
+				if (conversation.forwardMessageList) {
 					if (message) {
-						remove(
-							draft.activeConversations[roomId].forwardMessageList!,
-							(element) => element.id === message.id
-						);
-						if (draft.activeConversations[roomId].forwardMessageList?.length === 0) {
-							delete draft.activeConversations[roomId].forwardMessageList;
-						}
-					} else {
-						delete draft.activeConversations[roomId].forwardMessageList;
+						remove(conversation.forwardMessageList, (element) => element.id === message.id);
+					}
+					if (!message || size(conversation.forwardMessageList) === 0) {
+						delete conversation.forwardMessageList;
 					}
 				}
 			}),
@@ -400,7 +302,7 @@ export const useActiveConversationsSlice: StateCreator<
 				// Ignore reactions to messages that are not mine
 				if (
 					!find(
-						draft.chatsRegistry[roomId].messages,
+						draft.chatsRegistry[roomId]?.messages,
 						(message) =>
 							message.type === MessageType.TEXT_MSG &&
 							message.stanzaId === stanzaId &&
@@ -409,8 +311,8 @@ export const useActiveConversationsSlice: StateCreator<
 				)
 					return;
 
-				if (!draft.activeConversations[roomId]) draft.activeConversations[roomId] = {};
-				const reactions = draft.activeConversations[roomId].newReactions || [];
+				const conversation = initActiveConversation(draft, roomId);
+				const reactions = conversation.newReactions || [];
 
 				if (reaction === '') {
 					const reactionToRemove = find(
@@ -431,7 +333,7 @@ export const useActiveConversationsSlice: StateCreator<
 						reaction
 					});
 				}
-				draft.activeConversations[roomId].newReactions = reactions;
+				conversation.newReactions = reactions;
 			}),
 			false,
 			'AC/SET_NEW_REACTION'

@@ -88,7 +88,7 @@ describe('Group avatar', () => {
 
 	test('Check if there is the draft message and notifications enabled', async () => {
 		const store = useStore.getState();
-		store.setDraftMessage(room.id, false, hiEveryone);
+		store.setDraftMessage(room.id, hiEveryone);
 		setup(<GroupAvatar roomId={room.id} draftMessage />);
 		const userAvatarWithDraft = screen.getByTestId('icon: Edit2');
 		expect(userAvatarWithDraft).toBeVisible();
@@ -96,7 +96,7 @@ describe('Group avatar', () => {
 
 	test('Check if there is the draft message and notifications disabled', async () => {
 		const store = useStore.getState();
-		store.setDraftMessage(roomMuted.id, false, hiEveryone);
+		store.setDraftMessage(roomMuted.id, hiEveryone);
 		setup(<GroupAvatar roomId={roomMuted.id} draftMessage />);
 		const userAvatarWithDraft = screen.getByTestId('icon: Edit2');
 		expect(userAvatarWithDraft).toBeVisible();
@@ -116,7 +116,7 @@ describe('Group avatar', () => {
 
 	test('Check if there is an ongoing meeting in a room with a draft message', async () => {
 		const store = useStore.getState();
-		store.setDraftMessage(roomWithMeeting.id, false, hiEveryone);
+		store.setDraftMessage(roomWithMeeting.id, hiEveryone);
 		setup(<GroupAvatar roomId={roomWithMeeting.id} draftMessage />);
 		const userAvatarWithMeeting = screen.getByTestId(iconVideo);
 		expect(userAvatarWithMeeting).toBeVisible();

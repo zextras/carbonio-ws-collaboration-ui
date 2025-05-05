@@ -252,7 +252,7 @@ describe('Expanded sidebar list item', () => {
 		test('Check if there is the draft message', async () => {
 			const store: RootStore = useStore.getState();
 			store.newMessage(mockedTextMessageRead);
-			store.setDraftMessage(mockedGroup.id, false, 'hi everyone!');
+			store.setDraftMessage(mockedGroup.id, 'hi everyone!');
 			setup(<ExpandedSidebarListItem roomId={mockedGroup.id} />);
 			const IconWithDraft = screen.getByTestId('icon: Edit2');
 			expect(IconWithDraft).toBeVisible();
@@ -349,7 +349,7 @@ describe('Expanded sidebar list item', () => {
 		test('Check if there is the draft message', async () => {
 			const store: RootStore = useStore.getState();
 			store.newMessage(mockedTextMessageSentByOther);
-			store.setDraftMessage(mockedOneToOne.id, false, 'hi everyone!');
+			store.setDraftMessage(mockedOneToOne.id, 'hi everyone!');
 			setup(<ExpandedSidebarListItem roomId={mockedOneToOne.id} />);
 			const IconWithDraft = screen.getByTestId('icon: Edit2');
 			expect(IconWithDraft).toBeVisible();

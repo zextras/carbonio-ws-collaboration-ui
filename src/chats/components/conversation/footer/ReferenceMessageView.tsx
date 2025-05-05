@@ -27,7 +27,7 @@ const ReferenceMessageView: React.FC<ReferenceMessageViewProps> = ({ roomId }) =
 
 	const closeReferenceView = useCallback(() => {
 		if (referenceMessage?.actionType === messageActionType.EDIT) {
-			setDraftMessage(roomId, true);
+			setDraftMessage(roomId);
 		}
 		unsetReferenceMessage(roomId);
 	}, [roomId, unsetReferenceMessage, referenceMessage, setDraftMessage]);

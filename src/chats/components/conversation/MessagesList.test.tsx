@@ -409,7 +409,7 @@ describe('Scroll position', () => {
 	test('Opening an already opened conversation sets scroll to the previous position', () => {
 		const store = useStore.getState();
 		store.updateHistory(room.id, messages);
-		store.setIdMessageWhereScrollIsStopped(room.id, messages[0].id);
+		store.setScrollPosition(room.id, messages[0].id);
 		setup(<MessagesList roomId={room.id} />);
 		expect(mockedScrollToMessage).toHaveBeenCalled();
 		expect(mockedScrollToMessage).toHaveBeenCalledWith(messages[0].id);
@@ -418,7 +418,7 @@ describe('Scroll position', () => {
 	test('Opening an already opened conversation with unread messages sets scroll to the bottom', () => {
 		const store = useStore.getState();
 		store.updateHistory(room.id, messages);
-		store.setIdMessageWhereScrollIsStopped(room.id, messages[0].id);
+		store.setScrollPosition(room.id, messages[0].id);
 		store.incrementUnreadCount(room.id, 1);
 		setup(<MessagesList roomId={room.id} />);
 		expect(mockedScrollToEnd).toHaveBeenCalled();
