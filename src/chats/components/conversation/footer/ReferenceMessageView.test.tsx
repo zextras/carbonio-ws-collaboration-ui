@@ -60,13 +60,12 @@ describe('Reply to a message by opening the contextual menu', () => {
 	});
 	test('Display of reference message shows correctly', () => {
 		const store: RootStore = useStore.getState();
-		store.setReferenceMessage(
-			mockedRoom.id,
-			mockedMessage.id,
-			mockedMessage.from,
-			mockedMessage.stanzaId,
-			messageActionType.REPLY
-		);
+		store.setReferenceMessage(mockedRoom.id, {
+			messageId: mockedMessage.id,
+			senderId: mockedMessage.from,
+			stanzaId: mockedMessage.stanzaId,
+			actionType: messageActionType.REPLY
+		});
 		setup(<ReferenceMessageView roomId={mockedRoom.id} />);
 		const referenceMessage = screen.getByTestId('reference_message');
 		expect(referenceMessage).toBeInTheDocument();
@@ -75,13 +74,12 @@ describe('Reply to a message by opening the contextual menu', () => {
 	});
 	test('Close reference message', async () => {
 		const store: RootStore = useStore.getState();
-		store.setReferenceMessage(
-			mockedRoom.id,
-			mockedMessage.id,
-			mockedMessage.from,
-			mockedMessage.stanzaId,
-			messageActionType.REPLY
-		);
+		store.setReferenceMessage(mockedRoom.id, {
+			messageId: mockedMessage.id,
+			senderId: mockedMessage.from,
+			stanzaId: mockedMessage.stanzaId,
+			actionType: messageActionType.REPLY
+		});
 		const { user } = setup(<ReferenceMessageView roomId={mockedRoom.id} />);
 		const referenceMessage = screen.getByTestId('reference_message');
 		expect(referenceMessage).toBeInTheDocument();

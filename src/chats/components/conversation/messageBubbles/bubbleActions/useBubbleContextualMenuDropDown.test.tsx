@@ -155,15 +155,14 @@ describe('Bubble Contextual Menu - other user messages', () => {
 	test('Reply a message after starting an edit should reset the input', async () => {
 		const store: RootStore = useStore.getState();
 		store.newMessage(simpleTextMessage);
-		store.setDraftMessage(simpleTextMessage.roomId, false, simpleTextMessage.text);
-		store.setReferenceMessage(
-			simpleTextMessage.roomId,
-			simpleTextMessage.id,
-			simpleTextMessage.from,
-			simpleTextMessage.stanzaId,
-			messageActionType.EDIT,
-			simpleTextMessage.attachment
-		);
+		store.setDraftMessage(simpleTextMessage.roomId, simpleTextMessage.text);
+		store.setReferenceMessage(simpleTextMessage.roomId, {
+			messageId: simpleTextMessage.id,
+			senderId: simpleTextMessage.from,
+			stanzaId: simpleTextMessage.stanzaId,
+			actionType: messageActionType.EDIT,
+			attachment: simpleTextMessage.attachment
+		});
 
 		const { result } = renderHook(() => useBubbleContextualMenuDropDown(simpleTextMessage, false), {
 			wrapper: ProvidersWrapper
@@ -177,7 +176,7 @@ describe('Bubble Contextual Menu - other user messages', () => {
 		await user.click(replyAction);
 
 		const { draftMessage } = useStore.getState().activeConversations[simpleTextMessage.roomId];
-		expect(draftMessage).toBe('');
+		expect(draftMessage).toBeUndefined();
 	});
 });
 
@@ -221,15 +220,14 @@ describe('Bubble Contextual Menu - my messages', () => {
 	test('if that message is being edited, the delete for all action should not be present', async () => {
 		const store: RootStore = useStore.getState();
 		store.newMessage(simpleTextMessage);
-		store.setDraftMessage(simpleTextMessage.roomId, false, simpleTextMessage.text);
-		store.setReferenceMessage(
-			simpleTextMessage.roomId,
-			simpleTextMessage.id,
-			simpleTextMessage.from,
-			simpleTextMessage.stanzaId,
-			messageActionType.EDIT,
-			simpleTextMessage.attachment
-		);
+		store.setDraftMessage(simpleTextMessage.roomId, simpleTextMessage.text);
+		store.setReferenceMessage(simpleTextMessage.roomId, {
+			messageId: simpleTextMessage.id,
+			senderId: simpleTextMessage.from,
+			stanzaId: simpleTextMessage.stanzaId,
+			actionType: messageActionType.EDIT,
+			attachment: simpleTextMessage.attachment
+		});
 
 		const { result } = renderHook(() => useBubbleContextualMenuDropDown(simpleTextMessage, true), {
 			wrapper: ProvidersWrapper
@@ -244,15 +242,14 @@ describe('Bubble Contextual Menu - my messages', () => {
 	test('if that message is being replied, the delete action should not be present', async () => {
 		const store: RootStore = useStore.getState();
 		store.newMessage(simpleTextMessage);
-		store.setDraftMessage(simpleTextMessage.roomId, false, simpleTextMessage.text);
-		store.setReferenceMessage(
-			simpleTextMessage.roomId,
-			simpleTextMessage.id,
-			simpleTextMessage.from,
-			simpleTextMessage.stanzaId,
-			messageActionType.REPLY,
-			simpleTextMessage.attachment
-		);
+		store.setDraftMessage(simpleTextMessage.roomId, simpleTextMessage.text);
+		store.setReferenceMessage(simpleTextMessage.roomId, {
+			messageId: simpleTextMessage.id,
+			senderId: simpleTextMessage.from,
+			stanzaId: simpleTextMessage.stanzaId,
+			actionType: messageActionType.REPLY,
+			attachment: simpleTextMessage.attachment
+		});
 
 		const { result } = renderHook(() => useBubbleContextualMenuDropDown(simpleTextMessage, true), {
 			wrapper: ProvidersWrapper

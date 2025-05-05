@@ -98,7 +98,7 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 	const unsetReferenceMessage = useStore((store) => store.unsetReferenceMessage);
 	const setInputHasFocus = useStore((store) => store.setInputHasFocus);
 	const setDraftMessage = useStore((store) => store.setDraftMessage);
-	const unsetFilesToAttach = useStore((store) => store.unsetFilesToAttach);
+	const removeFilesToAttach = useStore((store) => store.removeFilesToAttach);
 	const filesToUploadArray = useStore((store) => getFilesToUploadArray(store, roomId));
 	const lastMessageId: string | undefined = useStore((state) =>
 		getLastMessageIdSelector(state, roomId)
@@ -314,24 +314,24 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 			);
 
 			// Clean input composer
-			unsetFilesToAttach(roomId);
-			setDraftMessage(roomId, true);
+			removeFilesToAttach(roomId);
+			setDraftMessage(roomId);
 			setTextMessage('');
 			if (referenceMessage) unsetReferenceMessage(roomId);
 
 			uploadFilesInOrder
 				.then(() => {
-					unsetFilesToAttach(roomId);
+					removeFilesToAttach(roomId);
 					setIsUploading(false);
 				})
 				.catch((error) => console.log(error));
 		} else if (referenceMessage && completeReferenceMessage?.type === MessageType.TEXT_MSG) {
 			actionToPerformBasedOnType(referenceMessage, message, completeReferenceMessage);
-			setDraftMessage(roomId, true);
+			setDraftMessage(roomId);
 			setTextMessage('');
 		} else {
 			xmppClient.sendChatMessage(roomId, message);
-			setDraftMessage(roomId, true);
+			setDraftMessage(roomId);
 			setTextMessage('');
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -371,15 +371,14 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 					messageActionType.EDIT
 				)
 			) {
-				setDraftMessage(lastMessageOfRoom.roomId, false, lastMessageOfRoom.text);
-				setReferenceMessage(
-					lastMessageOfRoom.roomId,
-					lastMessageOfRoom.id,
-					lastMessageOfRoom.from,
-					lastMessageOfRoom.stanzaId,
-					messageActionType.EDIT,
-					lastMessageOfRoom.attachment
-				);
+				setDraftMessage(lastMessageOfRoom.roomId, lastMessageOfRoom.text);
+				setReferenceMessage(lastMessageOfRoom.roomId, {
+					messageId: lastMessageOfRoom.id,
+					senderId: lastMessageOfRoom.from,
+					stanzaId: lastMessageOfRoom.stanzaId,
+					actionType: messageActionType.EDIT,
+					attachment: lastMessageOfRoom.attachment
+				});
 			}
 		},
 		[
@@ -407,9 +406,9 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 
 	const handleOnBlur = useCallback(() => {
 		if (size(textMessage) > 0) {
-			setDraftMessage(roomId, false, textMessage);
+			setDraftMessage(roomId, textMessage);
 		} else {
-			setDraftMessage(roomId, true);
+			setDraftMessage(roomId);
 		}
 		setInputHasFocus(roomId, false);
 	}, [textMessage, setInputHasFocus, roomId, setDraftMessage]);
@@ -466,10 +465,10 @@ const MessageComposer: React.FC<ConversationMessageComposerProps> = ({ roomId })
 			// clean the composer section and remove all file uploading if user
 			// is uploading files and then decide to edit a message
 			if (filesToUploadArray && referenceMessage.actionType === messageActionType.EDIT) {
-				unsetFilesToAttach(roomId);
+				removeFilesToAttach(roomId);
 			}
 		}
-	}, [referenceMessage, filesToUploadArray, unsetFilesToAttach, roomId]);
+	}, [referenceMessage, filesToUploadArray, removeFilesToAttach, roomId]);
 
 	useEffect(() => {
 		checkMaxLengthAndSetMessage(messageInputRef.current?.value ?? '');

@@ -7,6 +7,14 @@
 import IWebSocketClient from '../network/websocket/IWebSocketClient';
 import IXMPPClient from '../network/xmpp/IXMPPClient';
 
+export type ConnectionsStoreSlice = {
+	connections: Connections;
+	setChatsBeStatus: (status: boolean) => void;
+	setXmppStatus: (status: boolean) => void;
+	setWebsocketStatus: (status: boolean) => void;
+	resetXmppData: () => void;
+};
+
 export type Connections = {
 	xmppClient: IXMPPClient;
 	wsClient: IWebSocketClient;
