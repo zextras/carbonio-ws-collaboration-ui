@@ -37,18 +37,23 @@ const DefaultUserSidebarView: React.FC<DefaultUserSidebarViewProps> = ({
 	return (
 		<>
 			<Container mainAlignment="center" crossAlignment="center">
-				<Container height="fit">
-					<Text weight="bold" overflow="break-word" size="large" color="gray1">
-						{emptyListTitle}
-					</Text>
-				</Container>
-				<Padding bottom="small" />
-				<Container height="fit" padding={{ left: 'large', right: 'large' }}>
-					<CustomText overflow="break-word" size="small" color="gray1">
-						{emptyListDescription}
-					</CustomText>
-				</Container>
+				{expanded && (
+					<>
+						<Container height="fit">
+							<Text weight="bold" overflow="break-word" size="large" color="gray1">
+								{emptyListTitle}
+							</Text>
+						</Container>
+						<Padding bottom="small" />
+						<Container height="fit" padding={{ left: 'large', right: 'large' }}>
+							<CustomText overflow="break-word" size="small" color="gray1">
+								{emptyListDescription}
+							</CustomText>
+						</Container>
+					</>
+				)}
 			</Container>
+
 			{videoCallEnabled && <VirtualRoomsButton expanded={expanded} />}
 		</>
 	);
