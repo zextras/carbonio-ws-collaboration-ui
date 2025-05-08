@@ -33,8 +33,8 @@ describe('MeetingStoppedEventHandler tests', () => {
 	test('Meeting stopped information are saved into store', () => {
 		meetingStoppedEventHandler(event);
 		const store = useStore.getState();
-		expect(store.meetings[oneToOneMeeting.roomId].active).toBeFalsy();
-		expect(store.meetings[oneToOneMeeting.roomId].startedAt).toBeUndefined();
+		expect(store.meetings[oneToOneMeeting.id].active).toBeFalsy();
+		expect(store.meetings[oneToOneMeeting.id].startedAt).toBeUndefined();
 	});
 
 	test('Removed meeting notification is sent if the meeting is from one-to-one room', () => {

@@ -36,8 +36,8 @@ describe('MeetingStartedEventHandler tests', () => {
 	test('Meeting starting information are saved into store', () => {
 		meetingStartedEventHandler(event);
 		const store = useStore.getState();
-		expect(store.meetings[oneToOneMeeting.roomId].active).toBeTruthy();
-		expect(store.meetings[oneToOneMeeting.roomId].startedAt).toBe(event.startedAt);
+		expect(store.meetings[oneToOneMeeting.id].active).toBeTruthy();
+		expect(store.meetings[oneToOneMeeting.id].startedAt).toBe(event.startedAt);
 	});
 
 	test('Incoming meeting notification is sent if the meeting is from one-to-one room and started by the other user', () => {

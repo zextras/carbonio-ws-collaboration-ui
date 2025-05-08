@@ -35,8 +35,8 @@ beforeEach(() => {
 describe('meetingJoinedEventHandler tests', () => {
 	test('Joined participant information are added into store', () => {
 		meetingJoinedEventHandler(event);
-		const meeting = useStore.getState().meetings[room.id];
-		expect(meeting.participants[event.userId]).toBeDefined();
+		const meet = useStore.getState().meetings[meeting.id];
+		expect(meet.participants[event.userId]).toBeDefined();
 	});
 
 	test('A custom event is sent if the joined user is the session user and the room is a one-to-one', () => {

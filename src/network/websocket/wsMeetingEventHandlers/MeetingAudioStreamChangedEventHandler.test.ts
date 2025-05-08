@@ -38,8 +38,8 @@ beforeEach(() => {
 describe('meetingAudioStreamChangedEventHandler tests', () => {
 	test('New audio participant information are changes into store', () => {
 		meetingAudioStreamChangedEventHandler(event);
-		const meeting = useStore.getState().meetings[room.id];
-		expect(meeting.participants[event.userId].audioStreamOn).toBe(event.active);
+		const meet = useStore.getState().meetings[meeting.id];
+		expect(meet.participants[event.userId].audioStreamOn).toBe(event.active);
 	});
 
 	test('Audio feedback is not sent when event user is not the session user', () => {

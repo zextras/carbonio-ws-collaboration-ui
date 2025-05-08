@@ -41,7 +41,7 @@ describe('wsMeetingEventsHandler', () => {
 			sentDate: '2024-05-30T12:34:56Z'
 		};
 		wsMeetingEventsHandler(event);
-		expect(useStore.getState().meetings[event.roomId]).toBeDefined();
+		expect(useStore.getState().meetings[event.meetingId]).toBeDefined();
 	});
 
 	test('MEETING_STARTED event is handled', () => {

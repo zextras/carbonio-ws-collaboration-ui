@@ -6,6 +6,7 @@
 
 import { chain, find } from 'lodash';
 
+import { getMeetingByRoomId } from '../../store/selectors/MeetingSelectors';
 import useStore from '../../store/Store';
 import { RequestType } from '../../types/network/apis/IBaseAPI';
 import IMeetingsApi from '../../types/network/apis/IMeetingsApi';
@@ -140,7 +141,7 @@ class MeetingsApi implements IMeetingsApi {
 		settings: JoinSettings,
 		devicesId: { audioDevice?: string; videoDevice?: string }
 	): Promise<string> {
-		const meeting = useStore.getState().meetings[roomId];
+		const meeting = getMeetingByRoomId(useStore.getState(), roomId);
 		if (meeting) {
 			if (meeting.active) {
 				return this.joinMeeting(meeting.id, settings, devicesId).then(() => meeting.id);

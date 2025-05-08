@@ -18,7 +18,7 @@ import {
 	getSelectedVideoDeviceId
 } from '../../../store/selectors/ActiveMeetingSelectors';
 import {
-	getMeetingByMeetingId,
+	getMeeting,
 	getParticipantAudioStatus,
 	getParticipantVideoStatus
 } from '../../../store/selectors/MeetingSelectors';
@@ -53,7 +53,7 @@ const PictureInPictureView = (): ReactElement => {
 	const noOneTalking = t('meeting.pip.noTalking', "Nobody's talking right now.");
 
 	const myUserId = useStore(getUserId);
-	const meeting = useStore((store) => getMeetingByMeetingId(store, meetingId!));
+	const meeting = useStore((store) => getMeeting(store, meetingId!));
 	const whoIsSpeaking = useStore((store) => getNameOfFirstTalkingUser(store, meetingId!));
 	const videoOutConn = useStore((store) => store.activeMeeting[meetingId!]?.videoOutConn);
 	const videoStatus = useStore((store) => getParticipantVideoStatus(store, meetingId, myUserId));

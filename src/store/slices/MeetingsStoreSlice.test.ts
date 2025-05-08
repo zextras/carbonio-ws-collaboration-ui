@@ -59,7 +59,7 @@ describe('Test components slice', () => {
 
 		// Check store data
 		expect(size(result.current.meetings)).toBe(3);
-		const meeting0 = result.current.meetings[mockMeeting0.roomId];
+		const meeting0 = result.current.meetings[mockMeeting0.id];
 		expect(meeting0).not.toBeNull();
 		expect(meeting0.id).toBe(mockMeeting0.id);
 		expect(meeting0.roomId).toBe(mockMeeting0.roomId);
@@ -68,7 +68,7 @@ describe('Test components slice', () => {
 		expect(meeting0.active).toBeTruthy();
 		expect(meeting0.startedAt).toBe(mockMeeting0.startedAt);
 
-		const meeting1 = result.current.meetings[mockMeeting1.roomId];
+		const meeting1 = result.current.meetings[mockMeeting1.id];
 		expect(meeting1.active).toBeFalsy();
 		expect(meeting1.startedAt).toBeUndefined();
 	});
@@ -78,7 +78,7 @@ describe('Test components slice', () => {
 		act(() => result.current.addMeetings([mockMeeting0]));
 
 		// Check store data
-		const meeting0 = result.current.meetings[mockMeeting0.roomId];
+		const meeting0 = result.current.meetings[mockMeeting0.id];
 		expect(meeting0).not.toBeNull();
 		expect(meeting0.id).toBe(mockMeeting0.id);
 		expect(meeting0.roomId).toBe(mockMeeting0.roomId);
@@ -109,7 +109,7 @@ describe('Test components slice', () => {
 		});
 
 		// Check store data
-		const meeting1 = result.current.meetings[mockMeeting1.roomId];
+		const meeting1 = result.current.meetings[mockMeeting1.id];
 		expect(meeting1.active).toBeTruthy();
 		expect(meeting1.startedAt).toBe('2022-08-25T18:25:29.961+02:00');
 	});
@@ -122,7 +122,7 @@ describe('Test components slice', () => {
 		});
 
 		// Check store data
-		const meeting0 = result.current.meetings[mockMeeting0.roomId];
+		const meeting0 = result.current.meetings[mockMeeting0.id];
 		expect(meeting0.active).toBeFalsy();
 		expect(meeting0.startedAt).toBeUndefined();
 	});
@@ -136,7 +136,7 @@ describe('Test components slice', () => {
 			});
 
 			// Check store data
-			const { waitingList } = result.current.meetings[temporaryRoom.id];
+			const { waitingList } = result.current.meetings[scheduleMeeting.id];
 			expect(waitingList).not.toBeNull();
 			expect(size(waitingList)).toBe(2);
 			expect(waitingList).toContain('userId0');
@@ -152,7 +152,7 @@ describe('Test components slice', () => {
 			});
 
 			// Check store data
-			const { waitingList } = result.current.meetings[temporaryRoom.id];
+			const { waitingList } = result.current.meetings[scheduleMeeting.id];
 			expect(waitingList).not.toBeNull();
 			expect(size(waitingList)).toBe(2);
 			expect(waitingList).not.toContain('userId0');
@@ -169,7 +169,7 @@ describe('Test components slice', () => {
 			});
 
 			// Check store data
-			const { waitingList } = result.current.meetings[temporaryRoom.id];
+			const { waitingList } = result.current.meetings[scheduleMeeting.id];
 			expect(waitingList).not.toBeNull();
 			expect(size(waitingList)).toBe(1);
 			expect(waitingList).toContain('userId0');
@@ -183,7 +183,7 @@ describe('Test components slice', () => {
 				result.current.addUserToWaitingList(scheduleMeeting.id, 'userId0');
 			});
 
-			const { waitingList } = result.current.meetings[temporaryRoom.id];
+			const { waitingList } = result.current.meetings[scheduleMeeting.id];
 			expect(waitingList).not.toBeNull();
 			expect(size(waitingList)).toBe(2);
 			expect(waitingList).toContain('userId0');
@@ -198,7 +198,7 @@ describe('Test components slice', () => {
 				result.current.removeUserFromWaitingList(scheduleMeeting.id, 'userId0');
 			});
 
-			const { waitingList } = result.current.meetings[temporaryRoom.id];
+			const { waitingList } = result.current.meetings[scheduleMeeting.id];
 			expect(waitingList).not.toBeNull();
 			expect(size(waitingList)).toBe(1);
 			expect(waitingList).toContain('userId1');
@@ -213,7 +213,7 @@ describe('Test components slice', () => {
 				result.current.removeUserFromWaitingList(scheduleMeeting.id, 'userId2');
 			});
 
-			const { waitingList } = result.current.meetings[temporaryRoom.id];
+			const { waitingList } = result.current.meetings[scheduleMeeting.id];
 			expect(waitingList).not.toBeNull();
 			expect(size(waitingList)).toBe(2);
 			expect(waitingList).toContain('userId0');
@@ -234,7 +234,7 @@ describe('Test components slice', () => {
 				);
 			});
 
-			const { recStartedAt, recUserId } = result.current.meetings[scheduleMeeting.roomId];
+			const { recStartedAt, recUserId } = result.current.meetings[scheduleMeeting.id];
 			expect(recStartedAt).toBe('2022-08-25T18:24:28.961+02:00');
 			expect(recUserId).toBe('userId0');
 		});
@@ -246,7 +246,7 @@ describe('Test components slice', () => {
 				result.current.stopRecording(scheduleMeeting.id);
 			});
 
-			const { recStartedAt, recUserId } = result.current.meetings[scheduleMeeting.roomId];
+			const { recStartedAt, recUserId } = result.current.meetings[scheduleMeeting.id];
 			expect(recStartedAt).toBeUndefined();
 			expect(recUserId).toBeUndefined();
 		});

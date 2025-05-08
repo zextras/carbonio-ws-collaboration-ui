@@ -64,9 +64,8 @@ describe('Meetings API', () => {
 		// Check if store is correctly updated
 		const store = useStore.getState();
 		expect(size(store.meetings)).toEqual(2);
-		expect(store.meetings[meetingMock.roomId].id).toEqual(meetingMock.id);
-		expect(store.meetings[meetingMock.roomId].id).toEqual(meetingMock.id);
-		expect(size(store.meetings[meetingMock.roomId].participants)).toEqual(
+		expect(store.meetings[meetingMock.id]).toBeDefined();
+		expect(size(store.meetings[meetingMock.id].participants)).toEqual(
 			size(meetingMock.participants)
 		);
 	});

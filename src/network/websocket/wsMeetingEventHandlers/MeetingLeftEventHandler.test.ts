@@ -37,8 +37,8 @@ beforeEach(() => {
 describe('meetingLeftEventHandler tests', () => {
 	test('Left participant information are removed from store', () => {
 		meetingLeftEventHandler(event);
-		const meeting = useStore.getState().meetings[room.id];
-		expect(meeting.participants[event.userId]).toBeUndefined();
+		const meet = useStore.getState().meetings[meeting.id];
+		expect(meet.participants[event.userId]).toBeUndefined();
 	});
 
 	test('Left participant video subscription is been removed', () => {

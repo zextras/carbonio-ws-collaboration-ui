@@ -7,15 +7,13 @@ import { useMemo } from 'react';
 
 import { forEach, sortBy } from 'lodash';
 
-import { getMeetingParticipantsByMeetingId } from '../store/selectors/MeetingSelectors';
+import { getMeetingParticipants } from '../store/selectors/MeetingSelectors';
 import useStore from '../store/Store';
 import { STREAM_TYPE, TileData } from '../types/store/ActiveMeetingTypes';
 import { dateToTimestamp } from '../utils/dateUtils';
 
 const useTiles = (meetingId: string): TileData[] => {
-	const meetingParticipants = useStore((store) =>
-		getMeetingParticipantsByMeetingId(store, meetingId)
-	);
+	const meetingParticipants = useStore((store) => getMeetingParticipants(store, meetingId));
 
 	return useMemo(() => {
 		const tiles: TileData[] = [];

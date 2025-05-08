@@ -40,8 +40,8 @@ beforeEach(() => {
 describe('meetingMediaStreamChangedEventHandler tests', () => {
 	test('New stream status information are saved into store', () => {
 		meetingMediaStreamChangedEventHandler(event);
-		const meeting = useStore.getState().meetings[room.id];
-		expect(meeting.participants[event.userId].videoStreamOn).toBe(event.active);
+		const meet = useStore.getState().meetings[meeting.id];
+		expect(meet.participants[event.userId].videoStreamOn).toBe(event.active);
 	});
 
 	test('Screen share is pinned when active', () => {

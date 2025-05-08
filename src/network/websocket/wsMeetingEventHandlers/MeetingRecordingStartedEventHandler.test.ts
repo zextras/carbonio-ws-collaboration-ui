@@ -36,8 +36,8 @@ describe('MeetingRecordingStartedEventHandler tests', () => {
 	test('Meeting starting information are saved into store', () => {
 		meetingRecordingStartedEventHandler(event);
 		const state = useStore.getState();
-		expect(state.meetings[room.id].recStartedAt).toBe(event.sentDate);
-		expect(state.meetings[room.id].recUserId).toBe(event.userId);
+		expect(state.meetings[meeting.id].recStartedAt).toBe(event.sentDate);
+		expect(state.meetings[meeting.id].recUserId).toBe(event.userId);
 	});
 
 	test('A custom event is sent if the user is inside meeting', () => {

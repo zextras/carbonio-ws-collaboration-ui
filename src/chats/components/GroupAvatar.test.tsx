@@ -55,11 +55,13 @@ const roomMutedWithMeeting = createMockRoom({
 });
 
 const meeting: MeetingBe = createMockMeeting({
+	id: 'meetingId',
 	roomId: roomWithMeeting.id,
 	participants: meetingParticipants
 });
 
 const meetingMuted: MeetingBe = createMockMeeting({
+	id: 'meetingMutedId',
 	roomId: roomMutedWithMeeting.id,
 	participants: meetingParticipants
 });
