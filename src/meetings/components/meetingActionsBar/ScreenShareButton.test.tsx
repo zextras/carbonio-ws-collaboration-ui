@@ -40,12 +40,12 @@ describe('ScreenShare button', () => {
 		const store = useStore.getState();
 		store.setWebsocketStatus(true);
 		store.setLoginInfo('userId', 'User', 'User');
-		store.addMeeting(
+		store.addMeetings([
 			createMockMeeting({
 				id: meeting.id,
 				participants: [createMockParticipants({ userId: 'userId', screenStreamEnabled: false })]
 			})
-		);
+		]);
 		setup(<ScreenShareButton />);
 		const disabledScreenShareIcon = await screen.findByTestId('icon: ScreenSharingOff');
 		expect(disabledScreenShareIcon).toBeVisible();
@@ -55,12 +55,12 @@ describe('ScreenShare button', () => {
 		const store = useStore.getState();
 		store.setWebsocketStatus(true);
 		store.setLoginInfo('userId', 'User', 'User');
-		store.addMeeting(
+		store.addMeetings([
 			createMockMeeting({
 				id: meeting.id,
 				participants: [createMockParticipants({ userId: 'userId', screenStreamEnabled: true })]
 			})
-		);
+		]);
 		routerContextSetup(<ScreenShareButton />, {
 			meetingId: meeting.id,
 			route: MEETINGS_ROUTES.MEETING

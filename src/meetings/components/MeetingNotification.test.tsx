@@ -26,7 +26,7 @@ beforeEach(() => {
 	const store = useStore.getState();
 	store.setUserInfo([user]);
 	store.addRooms([room]);
-	store.addMeeting(meeting);
+	store.addMeetings([meeting]);
 });
 
 describe('MeetingNotification', () => {

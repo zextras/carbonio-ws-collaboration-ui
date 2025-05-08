@@ -58,8 +58,8 @@ class MeetingsApi implements IMeetingsApi {
 
 	public listMeetings(): Promise<ListMeetingsResponse> {
 		return fetchAPI(`meetings`, RequestType.GET).then((resp: ListMeetingsResponse) => {
-			const { setMeetings } = useStore.getState();
-			setMeetings(resp);
+			const { addMeetings } = useStore.getState();
+			addMeetings(resp);
 			return resp;
 		});
 	}
@@ -85,8 +85,8 @@ class MeetingsApi implements IMeetingsApi {
 
 	public getMeetingByMeetingId(meetingId: string): Promise<GetMeetingResponse> {
 		return fetchAPI(`meetings/${meetingId}`, RequestType.GET).then((resp: GetMeetingResponse) => {
-			const { addMeeting } = useStore.getState();
-			addMeeting(resp);
+			const { addMeetings } = useStore.getState();
+			addMeetings([resp]);
 			return resp;
 		});
 	}

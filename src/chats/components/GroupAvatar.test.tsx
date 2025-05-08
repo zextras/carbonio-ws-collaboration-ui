@@ -67,8 +67,7 @@ const meetingMuted: MeetingBe = createMockMeeting({
 beforeEach(() => {
 	const store = useStore.getState();
 	store.addRooms([room, roomMuted, roomWithMeeting, roomMutedWithMeeting]);
-	store.addMeeting(meeting);
-	store.addMeeting(meetingMuted);
+	store.addMeetings([meeting, meetingMuted]);
 });
 
 describe('Group avatar', () => {

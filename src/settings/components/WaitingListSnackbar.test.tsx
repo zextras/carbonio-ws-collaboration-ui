@@ -30,7 +30,7 @@ beforeEach(() => {
 	const store = useStore.getState();
 	store.setUserInfo([user, user0]);
 	store.addRooms([room]);
-	store.addMeeting(meeting);
+	store.addMeetings([meeting]);
 });
 
 describe('WaitingListSnackbar', () => {

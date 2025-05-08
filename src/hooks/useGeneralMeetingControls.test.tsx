@@ -21,7 +21,7 @@ beforeEach(() => {
 	store.setLoginInfo('userId', 'User');
 	store.setChatsBeStatus(true);
 	store.setWebsocketStatus(true);
-	store.addMeeting(meeting);
+	store.addMeetings([meeting]);
 	store.meetingConnection(meeting.id, false, undefined, false, undefined);
 });
 describe('useGeneralMeetingControl hook', () => {

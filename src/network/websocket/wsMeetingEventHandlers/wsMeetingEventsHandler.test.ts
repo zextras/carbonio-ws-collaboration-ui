@@ -75,7 +75,7 @@ describe('wsMeetingEventsHandler', () => {
 	test('MEETING_DELETED event is handled', () => {
 		const store = useStore.getState();
 		store.addRooms([createMockRoom({ id: 'roomId' })]);
-		store.addMeeting(createMockMeeting({ id: 'meetingId', roomId: 'roomId' }));
+		store.addMeetings([createMockMeeting({ id: 'meetingId', roomId: 'roomId' })]);
 		const event: MeetingDeletedEvent = {
 			type: WsEventType.MEETING_DELETED,
 			meetingId: 'meetingId',

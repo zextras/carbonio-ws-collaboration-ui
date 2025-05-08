@@ -15,6 +15,18 @@ import { MeetingParticipant, MeetingParticipantMap } from '../../types/store/Mee
 import { MeetingsSlice, RootStore } from '../../types/store/StoreTypes';
 import { dateToISODate } from '../../utils/dateUtils';
 
+const mapParticipants = (participants: MeetingParticipantBe[]): MeetingParticipantMap =>
+	participants.reduce((acc: MeetingParticipantMap, participant: MeetingParticipantBe) => {
+		acc[participant.userId] = {
+			userId: participant.userId,
+			audioStreamOn: participant.audioStreamEnabled || false,
+			videoStreamOn: participant.videoStreamEnabled || false,
+			screenStreamOn: participant.screenStreamEnabled || false,
+			joinedAt: participant.joinedAt
+		};
+		return acc;
+	}, {});
+
 export const useMeetingsStoreSlice: StateCreator<
 	RootStore,
 	[['zustand/devtools', never]],
@@ -22,31 +34,16 @@ export const useMeetingsStoreSlice: StateCreator<
 	MeetingsSlice
 > = (set, get) => ({
 	meetings: {},
-	setMeetings: (meetings: MeetingBe[]): void => {
+	addMeetings: (meetings: MeetingBe[]): void => {
 		set(
 			produce((draft: RootStore) => {
 				forEach(meetings, (meeting) => {
-					// Create a map of participants instead of an array
-					const participantsMap: MeetingParticipantMap = meeting.participants.reduce(
-						(acc: MeetingParticipantMap, participant: MeetingParticipantBe) => {
-							acc[participant.userId] = {
-								userId: participant.userId,
-								audioStreamOn: participant.audioStreamEnabled || false,
-								videoStreamOn: participant.videoStreamEnabled || false,
-								screenStreamOn: participant.screenStreamEnabled || false,
-								joinedAt: participant.joinedAt
-							};
-							return acc;
-						},
-						{}
-					);
-
 					draft.meetings[meeting.roomId] = {
 						id: meeting.id,
 						name: meeting.name,
 						roomId: meeting.roomId,
 						active: meeting.active,
-						participants: participantsMap,
+						participants: mapParticipants(meeting.participants),
 						createdAt: meeting.createdAt,
 						meetingType: meeting.meetingType,
 						startedAt: meeting.startedAt,
@@ -62,48 +59,7 @@ export const useMeetingsStoreSlice: StateCreator<
 				});
 			}),
 			false,
-			'MEETINGS/SET_MEETINGS'
-		);
-	},
-	addMeeting: (meeting: MeetingBe): void => {
-		set(
-			produce((draft: RootStore) => {
-				// Create a map of participants instead of an array
-				const participantsMap: MeetingParticipantMap = meeting.participants.reduce(
-					(acc: MeetingParticipantMap, participant: MeetingParticipantBe) => {
-						acc[participant.userId] = {
-							userId: participant.userId,
-							audioStreamOn: participant.audioStreamEnabled || false,
-							videoStreamOn: participant.videoStreamEnabled || false,
-							screenStreamOn: participant.screenStreamEnabled || false,
-							joinedAt: participant.joinedAt
-						};
-						return acc;
-					},
-					{}
-				);
-				draft.meetings[meeting.roomId] = {
-					...draft.meetings[meeting.roomId],
-					id: meeting.id,
-					name: meeting.name,
-					roomId: meeting.roomId,
-					active: meeting.active,
-					participants: participantsMap,
-					createdAt: meeting.createdAt,
-					meetingType: meeting.meetingType,
-					startedAt: meeting.startedAt,
-					recStartedAt: meeting.recStartedAt,
-					recUserId: meeting.recUserId
-				};
-
-				// Set meetingId on room data
-				draft.rooms[meeting.roomId] = {
-					...draft.rooms[meeting.roomId],
-					meetingId: meeting.id
-				};
-			}),
-			false,
-			'MEETINGS/ADD'
+			'MEETINGS/ADD_MEETINGS'
 		);
 	},
 	deleteMeeting: (meetingId: string): void => {

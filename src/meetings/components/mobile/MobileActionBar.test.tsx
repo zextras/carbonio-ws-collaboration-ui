@@ -76,7 +76,7 @@ describe('MobileActionBar test', () => {
 		);
 		const store = useStore.getState();
 		store.setLoginInfo('userId', 'User');
-		store.addMeeting(mockMeeting);
+		store.addMeetings([mockMeeting]);
 		store.addParticipant(mockMeeting.id, {
 			userId: 'userId',
 			audioStreamOn: false,

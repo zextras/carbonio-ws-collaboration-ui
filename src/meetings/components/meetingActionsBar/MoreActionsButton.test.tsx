@@ -72,7 +72,7 @@ const storeSetupGroupMeeting = (): { user: UserEvent; store: RootStore } => {
 	store.setUserInfo([user1, user2, user3]);
 	store.setLoginInfo(user1.id, user1.name);
 	store.addRooms([room]);
-	store.addMeeting(meeting);
+	store.addMeetings([meeting]);
 	store.meetingConnection(meeting.id, false, undefined, false, undefined);
 
 	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
@@ -88,7 +88,7 @@ const storeSetupGroupMeetingWithOnePerson = (): { user: UserEvent } => {
 		result.current.setUserInfo([user1]);
 		result.current.setLoginInfo(user1.id, user1.name);
 		result.current.addRooms([room]);
-		result.current.addMeeting(meetingWithOnePerson);
+		result.current.addMeetings([meetingWithOnePerson]);
 		result.current.meetingConnection(meetingWithOnePerson.id, false, undefined, false, undefined);
 	});
 	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
@@ -110,7 +110,7 @@ const storeSetupGroupMeetingPip = (): { user: UserEvent; store: RootStore } => {
 	store.setUserInfo([user1, user2, user3]);
 	store.setLoginInfo(user1.id, user1.name);
 	store.addRooms([room]);
-	store.addMeeting(meeting);
+	store.addMeetings([meeting]);
 	store.meetingConnection(meeting.id, false, undefined, false, undefined);
 	store.setLocalStreams(meeting.id, STREAM_TYPE.VIDEO, new MediaStream());
 	store.setAttributes(createMockAttributesList());

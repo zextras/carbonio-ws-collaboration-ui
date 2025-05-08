@@ -30,7 +30,7 @@ beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo('myUserId', 'User');
 	store.addRooms([room]);
-	store.addMeeting(meeting);
+	store.addMeetings([meeting]);
 });
 describe('MeetingRecordingStartedEventHandler tests', () => {
 	test('Meeting starting information are saved into store', () => {

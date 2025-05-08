@@ -64,7 +64,7 @@ export const wsConversationEventsHandler = (event: WsEvent): void => {
 					state.addRooms([response]);
 					if (response.meetingId) {
 						MeetingsApi.getMeeting(response.id).then((meetingResponse: GetMeetingResponse) =>
-							state.addMeeting(meetingResponse)
+							state.addMeetings([meetingResponse])
 						);
 					}
 				});

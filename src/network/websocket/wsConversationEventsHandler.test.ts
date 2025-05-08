@@ -62,7 +62,7 @@ describe('wsConversationEventHandler tests', () => {
 	});
 
 	test('ROOM_MEMBER_REMOVED: session user is removed from a room with an ongoing meeting', async () => {
-		useStore.getState().addMeeting(meeting);
+		useStore.getState().addMeetings([meeting]);
 		wsEventsHandler({
 			type: WsEventType.ROOM_MEMBER_REMOVED,
 			sentDate: '2023-01-01T00:00:00.000Z',

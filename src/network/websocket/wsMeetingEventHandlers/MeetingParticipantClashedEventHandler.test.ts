@@ -29,7 +29,7 @@ beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo('myUserId', 'User');
 	store.addRooms([room]);
-	store.addMeeting(meeting);
+	store.addMeetings([meeting]);
 });
 describe('MeetingParticipantClashedEventHandler tests', () => {
 	test('A custom event is sent if the user is the active meeting', () => {

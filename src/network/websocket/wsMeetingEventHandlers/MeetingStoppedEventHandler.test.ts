@@ -27,8 +27,7 @@ beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo('myUserId', 'myusername');
 	store.addRooms([oneToOneRoom, groupRoom]);
-	store.addMeeting(oneToOneMeeting);
-	store.addMeeting(groupMeeting);
+	store.addMeetings([oneToOneMeeting, groupMeeting]);
 });
 describe('MeetingStoppedEventHandler tests', () => {
 	test('Meeting stopped information are saved into store', () => {

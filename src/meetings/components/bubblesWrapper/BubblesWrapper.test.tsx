@@ -66,7 +66,7 @@ const storeBasicActiveMeetingSetup = (): { user: UserEvent; store: RootStore } =
 	store.setLoginInfo(user1.id, user1.name);
 	store.setUserInfo([user1, user2, user3]);
 	store.addRooms([room]);
-	store.addMeeting(meeting);
+	store.addMeetings([meeting]);
 	store.meetingConnection(meeting.id, false, undefined, false, undefined);
 	store.setMeetingSidebarStatus(meeting.id, false);
 	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');

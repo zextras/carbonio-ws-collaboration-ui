@@ -55,7 +55,7 @@ beforeEach(() => {
 describe('Test components slice', () => {
 	test('setMeetings setter', () => {
 		const { result } = renderHook(() => useStore());
-		act(() => result.current.setMeetings([mockMeeting0, mockMeeting1, mockMeeting2]));
+		act(() => result.current.addMeetings([mockMeeting0, mockMeeting1, mockMeeting2]));
 
 		// Check store data
 		expect(size(result.current.meetings)).toBe(3);
@@ -75,7 +75,7 @@ describe('Test components slice', () => {
 
 	test('addMeeting setter', () => {
 		const { result } = renderHook(() => useStore());
-		act(() => result.current.addMeeting(mockMeeting0));
+		act(() => result.current.addMeetings([mockMeeting0]));
 
 		// Check store data
 		const meeting0 = result.current.meetings[mockMeeting0.roomId];
@@ -91,10 +91,10 @@ describe('Test components slice', () => {
 	test('Combination of set components, add components, and remove components setters', () => {
 		const { result } = renderHook(() => useStore());
 
-		act(() => result.current.setMeetings([mockMeeting0, mockMeeting1]));
+		act(() => result.current.addMeetings([mockMeeting0, mockMeeting1]));
 		expect(size(result.current.meetings)).toBe(2);
 
-		act(() => result.current.addMeeting(mockMeeting2));
+		act(() => result.current.addMeetings([mockMeeting2]));
 		expect(size(result.current.meetings)).toBe(3);
 
 		act(() => result.current.deleteMeeting(mockMeeting1.id));
@@ -104,7 +104,7 @@ describe('Test components slice', () => {
 	test('Start a meeting', () => {
 		const { result } = renderHook(() => useStore());
 		act(() => {
-			result.current.addMeeting(mockMeeting1);
+			result.current.addMeetings([mockMeeting1]);
 			result.current.startMeeting(mockMeeting1.id, '2022-08-25T18:25:29.961+02:00');
 		});
 
@@ -117,7 +117,7 @@ describe('Test components slice', () => {
 	test('Stop a meeting', () => {
 		const { result } = renderHook(() => useStore());
 		act(() => {
-			result.current.addMeeting(mockMeeting0);
+			result.current.addMeetings([mockMeeting0]);
 			result.current.stopMeeting(mockMeeting0.id);
 		});
 
@@ -131,7 +131,7 @@ describe('Test components slice', () => {
 		test('Set a waiting list from scratch', () => {
 			const { result } = renderHook(() => useStore());
 			act(() => {
-				result.current.addMeeting(scheduleMeeting);
+				result.current.addMeetings([scheduleMeeting]);
 				result.current.setWaitingList(scheduleMeeting.id, ['userId0', 'userId1']);
 			});
 
@@ -146,7 +146,7 @@ describe('Test components slice', () => {
 		test('Replace existing waiting list', () => {
 			const { result } = renderHook(() => useStore());
 			act(() => {
-				result.current.addMeeting(scheduleMeeting);
+				result.current.addMeetings([scheduleMeeting]);
 				result.current.setWaitingList(scheduleMeeting.id, ['userId0', 'userId1']);
 				result.current.setWaitingList(scheduleMeeting.id, ['userId2', 'userId3']);
 			});
@@ -164,7 +164,7 @@ describe('Test components slice', () => {
 		test('Add a user to an empty waiting list in which the user is not present', () => {
 			const { result } = renderHook(() => useStore());
 			act(() => {
-				result.current.addMeeting(scheduleMeeting);
+				result.current.addMeetings([scheduleMeeting]);
 				result.current.addUserToWaitingList(scheduleMeeting.id, 'userId0');
 			});
 
@@ -178,7 +178,7 @@ describe('Test components slice', () => {
 		test('Add a user to a waiting list in which the user is already present', () => {
 			const { result } = renderHook(() => useStore());
 			act(() => {
-				result.current.addMeeting(scheduleMeeting);
+				result.current.addMeetings([scheduleMeeting]);
 				result.current.setWaitingList(scheduleMeeting.id, ['userId0', 'userId1']);
 				result.current.addUserToWaitingList(scheduleMeeting.id, 'userId0');
 			});
@@ -193,7 +193,7 @@ describe('Test components slice', () => {
 		test('Remove a user from a waiting list in which the user is present', () => {
 			const { result } = renderHook(() => useStore());
 			act(() => {
-				result.current.addMeeting(scheduleMeeting);
+				result.current.addMeetings([scheduleMeeting]);
 				result.current.setWaitingList(scheduleMeeting.id, ['userId0', 'userId1']);
 				result.current.removeUserFromWaitingList(scheduleMeeting.id, 'userId0');
 			});
@@ -208,7 +208,7 @@ describe('Test components slice', () => {
 		test('Remove a user from a waiting list in which the user is not present', () => {
 			const { result } = renderHook(() => useStore());
 			act(() => {
-				result.current.addMeeting(scheduleMeeting);
+				result.current.addMeetings([scheduleMeeting]);
 				result.current.setWaitingList(scheduleMeeting.id, ['userId0', 'userId1']);
 				result.current.removeUserFromWaitingList(scheduleMeeting.id, 'userId2');
 			});
@@ -226,7 +226,7 @@ describe('Test components slice', () => {
 		test('Start a new recording', () => {
 			const { result } = renderHook(() => useStore());
 			act(() => {
-				result.current.addMeeting(scheduleMeeting);
+				result.current.addMeetings([scheduleMeeting]);
 				result.current.startRecording(
 					scheduleMeeting.id,
 					'2022-08-25T18:24:28.961+02:00',
@@ -242,7 +242,7 @@ describe('Test components slice', () => {
 		test('Stop an ongoing recording', () => {
 			const { result } = renderHook(() => useStore());
 			act(() => {
-				result.current.addMeeting(scheduleMeeting);
+				result.current.addMeetings([scheduleMeeting]);
 				result.current.stopRecording(scheduleMeeting.id);
 			});
 

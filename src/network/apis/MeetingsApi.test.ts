@@ -37,7 +37,7 @@ const userId = 'userId';
 
 const ongoingMeetingSetup = (): void => {
 	const store = useStore.getState();
-	store.addMeeting(meetingMock);
+	store.addMeetings([meetingMock]);
 	store.addParticipant(meetingMock.id, {
 		userId: 'userId',
 		audioStreamOn: false,
@@ -152,7 +152,7 @@ describe('Meetings API', () => {
 	});
 
 	test('enterMeeting is called correctly when a meeting is already present and active', async () => {
-		useStore.getState().addMeeting(meetingMock);
+		useStore.getState().addMeetings([meetingMock]);
 		await meetingsApi.enterMeeting(
 			meetingMock.roomId,
 			{
@@ -169,7 +169,7 @@ describe('Meetings API', () => {
 	});
 
 	test('enterMeeting is called correctly when a meeting is already present but not active', async () => {
-		useStore.getState().addMeeting(meetingNotActiveMock);
+		useStore.getState().addMeetings([meetingNotActiveMock]);
 		await meetingsApi.enterMeeting(
 			meetingNotActiveMock.roomId,
 			{

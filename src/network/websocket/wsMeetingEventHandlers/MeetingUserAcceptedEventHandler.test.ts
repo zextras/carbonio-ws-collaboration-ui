@@ -28,7 +28,7 @@ beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo('myUserId', 'User');
 	store.addRooms([room]);
-	store.addMeeting(meeting);
+	store.addMeetings([meeting]);
 	store.addUserToWaitingList(meeting.id, 'acceptedId');
 });
 describe('MeetingUserAcceptedEventHandler tests', () => {

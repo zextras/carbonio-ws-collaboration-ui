@@ -36,7 +36,7 @@ beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo('myUserId', 'User');
 	store.addRooms([room]);
-	store.addMeeting(meeting);
+	store.addMeetings([meeting]);
 	store.addParticipant(meeting.id, createMockParticipants({ userId: 'myUserId' }));
 });
 describe('MeetingWaitingParticipantJoinedEventHandler tests', () => {

@@ -25,8 +25,7 @@ import { MeetingBe } from '../network/models/meetingBeTypes';
 
 export type MeetingsSlice = {
 	meetings: MeetingsMap;
-	setMeetings: (meetings: MeetingBe[]) => void;
-	addMeeting: (meeting: MeetingBe) => void;
+	addMeetings: (meetings: MeetingBe[]) => void;
 	deleteMeeting: (meetingId: string) => void;
 	startMeeting: (meetingId: string, startedAt: string) => void;
 	stopMeeting: (meetingId: string) => void;

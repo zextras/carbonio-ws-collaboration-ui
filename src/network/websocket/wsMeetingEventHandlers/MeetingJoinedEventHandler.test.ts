@@ -30,8 +30,7 @@ beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo('sessionUserId', 'User');
 	store.addRooms([room, groupRoom]);
-	store.addMeeting(meeting);
-	store.addMeeting(groupMeeting);
+	store.addMeetings([meeting, groupMeeting]);
 });
 describe('meetingJoinedEventHandler tests', () => {
 	test('Joined participant information are added into store', () => {

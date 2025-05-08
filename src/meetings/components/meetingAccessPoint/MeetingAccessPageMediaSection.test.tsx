@@ -53,7 +53,7 @@ beforeEach(() => {
 	store.setUserInfo([user1, user2]);
 	store.setLoginInfo(user1.id, user1.name);
 	store.addRooms([groupRoom]);
-	store.addMeeting(groupMeeting);
+	store.addMeetings([groupMeeting]);
 	store.setChatsBeStatus(true);
 	store.setWebsocketStatus(true);
 	store.meetingConnection(groupMeeting.id, false, undefined, false, undefined);

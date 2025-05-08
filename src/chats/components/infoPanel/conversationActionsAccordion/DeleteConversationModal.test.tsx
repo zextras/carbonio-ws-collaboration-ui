@@ -44,7 +44,7 @@ const testMeeting: MeetingBe = createMockMeeting({
 beforeEach(() => {
 	const store = useStore.getState();
 	store.addRooms([testRoom]);
-	store.addMeeting(testMeeting);
+	store.addMeetings([testMeeting]);
 });
 
 describe('Delete Conversation Modal', () => {

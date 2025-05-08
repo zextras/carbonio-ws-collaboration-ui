@@ -30,7 +30,7 @@ beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo('myUserId', 'User');
 	store.addRooms([room]);
-	store.addMeeting(meeting);
+	store.addMeetings([meeting]);
 	store.meetingConnection(meeting.id, false, undefined, false, undefined);
 	store.addParticipant(meeting.id, createMockParticipants({ userId: event.userId }));
 });
