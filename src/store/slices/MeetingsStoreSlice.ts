@@ -6,7 +6,7 @@
 /* eslint-disable no-param-reassign */
 
 import { produce } from 'immer';
-import { forEach, includes } from 'lodash';
+import { forEach, includes, remove } from 'lodash';
 import { StateCreator } from 'zustand';
 
 import { MeetingBe, MeetingParticipantBe } from '../../types/network/models/meetingBeTypes';
@@ -104,7 +104,6 @@ export const useMeetingsStoreSlice: StateCreator<
 	addParticipant: (meetingId: string, participant: MeetingParticipant): void => {
 		set(
 			produce((draft: RootStore) => {
-				// Add participant only if components exists and sessionId isn't already on components
 				const meeting = draft.meetings[meetingId];
 				if (meeting) {
 					meeting.participants[participant.userId] = {
@@ -123,7 +122,6 @@ export const useMeetingsStoreSlice: StateCreator<
 	removeParticipant: (meetingId: string, userId: string): void => {
 		set(
 			produce((draft: RootStore) => {
-				// Add participant only if components exists and sessionId isn't already on components
 				const meeting = draft.meetings[meetingId];
 				if (meeting) {
 					delete meeting.participants[userId];
@@ -152,9 +150,9 @@ export const useMeetingsStoreSlice: StateCreator<
 							break;
 						case STREAM_TYPE.SCREEN:
 							meeting.participants[userId].screenStreamOn = status;
-							meeting.participants[userId].dateScreenOn = status
-								? dateToISODate(Date.now())
-								: undefined;
+							if (status) {
+								meeting.participants[userId].dateScreenOn = dateToISODate(Date.now());
+							}
 							break;
 						default:
 							break;
@@ -178,7 +176,7 @@ export const useMeetingsStoreSlice: StateCreator<
 				}
 			}),
 			false,
-			'AM/SET_WAITING_LIST'
+			'MEETINGS/SET_WAITING_LIST'
 		);
 	},
 	addUserToWaitingList: (meetingId: string, userId: string): void => {
@@ -191,7 +189,7 @@ export const useMeetingsStoreSlice: StateCreator<
 				}
 			}),
 			false,
-			'AM/ADD_TO_WAITING_LIST'
+			'MEETINGS/ADD_TO_WAITING_LIST'
 		);
 	},
 	removeUserFromWaitingList: (meetingId: string, userId: string): void => {
@@ -199,14 +197,11 @@ export const useMeetingsStoreSlice: StateCreator<
 			produce((draft: RootStore) => {
 				const meeting = draft.meetings[meetingId];
 				if (meeting) {
-					const index = meeting.waitingList?.indexOf(userId);
-					if (index !== undefined && index !== -1) {
-						meeting.waitingList?.splice(index, 1);
-					}
+					remove(meeting.waitingList || [], (user) => user === userId);
 				}
 			}),
 			false,
-			'AM/REMOVE_FROM_WAITING_LIST'
+			'MEETINGS/REMOVE_FROM_WAITING_LIST'
 		);
 	},
 	startRecording: (
@@ -223,7 +218,7 @@ export const useMeetingsStoreSlice: StateCreator<
 				}
 			}),
 			false,
-			'AM/START_RECORDING'
+			'MEETINGS/START_RECORDING'
 		);
 	},
 	stopRecording: (meetingId: string): void => {
@@ -236,7 +231,7 @@ export const useMeetingsStoreSlice: StateCreator<
 				}
 			}),
 			false,
-			'AM/STOP_RECORDING'
+			'MEETINGS/STOP_RECORDING'
 		);
 	}
 });
