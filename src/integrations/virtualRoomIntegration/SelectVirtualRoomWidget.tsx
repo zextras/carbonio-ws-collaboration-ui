@@ -13,19 +13,15 @@ import {
 	SingleSelectionOnChange,
 	Icon,
 	Button,
-	Row,
-	Tooltip
+	Row
 } from '@zextras/carbonio-design-system';
 import { find, map } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import CreateVirtualRoomModal from '../../chats/components/secondaryBar/virtualRoomWidget/CreateVirtualRoomModal';
-import DeleteVirtualRoomModal from '../../chats/components/secondaryBar/virtualRoomWidget/DeleteVirtualRoomModal';
 import { MeetingsApi } from '../../network';
-import { getRoomIdByMeetingId } from '../../store/selectors/MeetingSelectors';
 import { useVirtualRoomsList } from '../../store/selectors/RoomsSelectors';
-import useStore from '../../store/Store';
 import { Room } from '../../types/store/RoomTypes';
 import { createMeetingLinkFromOutside, getMeetingIdFromLink } from '../../utils/MeetingsUtils';
 
@@ -58,9 +54,12 @@ const SelectVirtualRoomWidget: FC<SelectVirtualRoomWidgetProps> = ({ onChange, d
 	const [t] = useTranslation();
 
 	const virtualRoomLabel = t('appointment.input.label', 'Virtual Room');
-	const deleteVirtualRoomTooltip = t('meeting.virtual.deleteTooltip', 'Delete Virtual Room');
 	const createVirtualRoom = t('meeting.virtual.newRoom', 'Create new virtual room');
 	const noVirtualRoomLabel = t('appointment.input.defaultValue', 'No Virtual Room selected');
+	const manageVirtualRoomLabel = t(
+		'appointment.virtual.managementHint',
+		'You can edit or delete your Virtual Rooms in the Chat module.'
+	);
 	const notMyRoomLabel = t(
 		'appointment.input.caption',
 		'Be aware that you are not the owner of this Virtual Room, or it no longer exists.'
@@ -74,21 +73,11 @@ const SelectVirtualRoomWidget: FC<SelectVirtualRoomWidgetProps> = ({ onChange, d
 	const [defaultIsMyRoom, setDefaultIsMyRoom] = useState<boolean>(true);
 	const [selectedItem, setSelectedItem] = useState<SelectItem<valueItem> | undefined>(undefined);
 	const [showCreationModal, setShowCreationModal] = useState(false);
-	const [showDeleteModal, setShowDeleteModal] = useState(false);
-
-	const selectedRoomId = useStore((store) =>
-		getRoomIdByMeetingId(store, getMeetingIdFromLink(defaultValue?.link ?? ''))
-	);
 
 	const createModalRef = useRef<HTMLDivElement>(null);
-	const deleteModalRef = useRef<HTMLDivElement>(null);
 
 	const toggleModal = useCallback(() => {
 		setShowCreationModal((prevState) => !prevState);
-	}, []);
-
-	const handleDeleteModalOpening = useCallback(() => {
-		setShowDeleteModal((prevState) => !prevState);
 	}, []);
 
 	const items: SelectItem<valueItem>[] = useMemo(() => {
@@ -161,6 +150,20 @@ const SelectVirtualRoomWidget: FC<SelectVirtualRoomWidgetProps> = ({ onChange, d
 				</CustomContainer>
 			)
 		});
+		roomList.push({
+			label: manageVirtualRoomLabel,
+			value: {
+				id: 'manage_virtual_room',
+				label: manageVirtualRoomLabel
+			},
+			customComponent: (
+				<CustomContainer crossAlignment="center" orientation="horizontal">
+					<CustomText size="small" color="secondary">
+						{manageVirtualRoomLabel}
+					</CustomText>
+				</CustomContainer>
+			)
+		});
 		return roomList;
 	}, [
 		createVirtualRoom,
@@ -168,6 +171,7 @@ const SelectVirtualRoomWidget: FC<SelectVirtualRoomWidgetProps> = ({ onChange, d
 		defaultRoom?.label,
 		defaultRoom?.link,
 		limitedAccessLabel,
+		manageVirtualRoomLabel,
 		noVirtualRoomLabel,
 		toggleModal,
 		virtualRoomIdsList
@@ -231,19 +235,6 @@ const SelectVirtualRoomWidget: FC<SelectVirtualRoomWidgetProps> = ({ onChange, d
 						data-testid="select_virtual_room"
 					/>
 				</Row>
-				{selectionIsMyRoom && (
-					<Row width="fit">
-						<Tooltip label={deleteVirtualRoomTooltip}>
-							<Button
-								type="outlined"
-								color="error"
-								icon="Trash2Outline"
-								size="large"
-								onClick={handleDeleteModalOpening}
-							/>
-						</Tooltip>
-					</Row>
-				)}
 			</Container>
 			{alertHasToAppear && (
 				<CustomContainer orientation="horizontal" mainAlignment="flex-start" gap="0.25rem">
@@ -259,16 +250,6 @@ const SelectVirtualRoomWidget: FC<SelectVirtualRoomWidgetProps> = ({ onChange, d
 					showCreationModal={showCreationModal}
 					setShowCreationModal={setShowCreationModal}
 					createModalRef={createModalRef}
-					onChangeVirtualRoom={onChangeVirtualRoom}
-				/>
-			)}
-			{showDeleteModal && (
-				<DeleteVirtualRoomModal
-					showModal={showDeleteModal}
-					setShowModal={setShowDeleteModal}
-					handleModalOpening={handleDeleteModalOpening}
-					modalRef={deleteModalRef}
-					roomId={selectedRoomId ?? ''}
 					onChangeVirtualRoom={onChangeVirtualRoom}
 				/>
 			)}
