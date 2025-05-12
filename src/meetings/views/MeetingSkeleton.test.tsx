@@ -18,7 +18,6 @@ import {
 	createMockUser
 } from '../../tests/createMock';
 import { MeetingsApiToSpy, spyOnMeetingsApi } from '../../tests/mocks/network';
-import { mockInitialize } from '../../tests/mocks/SelfieSegmentationManager';
 import { mockGoToInfoPage } from '../../tests/mocks/useRouting';
 import { routerContextSetup, setup } from '../../tests/test-utils';
 import { MeetingBe } from '../../types/network/models/meetingBeTypes';
@@ -28,6 +27,7 @@ import { STREAM_TYPE, VirtualBackgroundType } from '../../types/store/ActiveMeet
 import { MeetingParticipant } from '../../types/store/MeetingTypes';
 import { RoomType } from '../../types/store/RoomTypes';
 import { RootStore } from '../../types/store/StoreTypes';
+import SelfieSegmentationManager from '../components/virtualBackground/SelfieSegmentationManager';
 import { MEETINGS_ROUTES, PAGE_INFO_TYPE } from '../contexts/routerContext';
 
 const meetingActionBarLabel = 'meeting-action-bar';
@@ -197,9 +197,12 @@ describe('Meeting action bar interaction with skeleton', () => {
 
 describe('Virtual Background setup', () => {
 	test('turn on and off blur', async () => {
+		const mockInitialize = jest
+			.spyOn(SelfieSegmentationManager.prototype, 'initialize')
+			.mockImplementation(() => Promise.resolve());
+
 		HTMLCanvasElement.prototype.captureStream = jest.fn().mockReturnValue(new MediaStream());
 
-		mockInitialize.mockReturnValue('initialized');
 		const { store } = storeSetupGroupMeetingSkeleton();
 		expect(store.activeMeeting[meeting.id]).not.toBeDefined();
 
