@@ -75,7 +75,7 @@ describe('Raise hand button', () => {
 
 		const { user } = storeSetupGroupMeeting();
 
-		expect(useStore.getState().activeMeeting[meeting.id].usersWithHandRaised).toStrictEqual([]);
+		expect(useStore.getState().activeMeeting?.usersWithHandRaised).toStrictEqual([]);
 
 		const handButton = await screen.findByTestId('icon: HandOutline');
 		await user.click(handButton);
@@ -87,15 +87,13 @@ describe('Raise hand button', () => {
 		storeSetupGroupMeeting();
 
 		expect(screen.getByTestId('icon: HandOutline')).toBeInTheDocument();
-		expect(useStore.getState().activeMeeting[meeting.id].usersWithHandRaised).toStrictEqual([]);
+		expect(useStore.getState().activeMeeting?.usersWithHandRaised).toStrictEqual([]);
 
 		act(() => {
 			useStore.getState().setUserWithHandRaised(meeting.id, user1.id, true);
 		});
 
-		expect(useStore.getState().activeMeeting[meeting.id].usersWithHandRaised).toStrictEqual([
-			user1.id
-		]);
+		expect(useStore.getState().activeMeeting?.usersWithHandRaised).toStrictEqual([user1.id]);
 
 		expect(screen.getByTestId('icon: Hand')).toBeInTheDocument();
 	});

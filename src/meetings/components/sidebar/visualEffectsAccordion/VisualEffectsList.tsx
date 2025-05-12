@@ -48,7 +48,7 @@ const ListContainer = styled(Container)`
 const VisualEffectsList: FC<VisualEffectCardsProps> = ({ meetingId }) => {
 	const [t] = useTranslation();
 	const setBackgroundImage = useStore((store) => store.setBackgroundImage);
-	const backgroundSelected = useStore((store) => getBackgroundImage(store, meetingId));
+	const backgroundSelected = useStore(getBackgroundImage);
 
 	const { virtualBackgroundImages } = useVirtualBackground();
 

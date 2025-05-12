@@ -152,7 +152,7 @@ describe('Meeting action bar - More actions button interactions', () => {
 
 		const fullScreen = await screen.findByText(/Enable full screen/i);
 		await user.click(fullScreen);
-		const { sidebarIsOpened } = useStore.getState().activeMeeting[meeting.id].sidebarStatus;
+		const sidebarIsOpened = useStore.getState().activeMeeting?.sidebarStatus.sidebarIsOpened;
 		expect(sidebarIsOpened).toBe(false);
 	});
 
@@ -170,9 +170,9 @@ describe('Meeting action bar - More actions button interactions', () => {
 
 		const fullScreen = await screen.findByText(/Enable full screen/i);
 		await user.click(fullScreen);
-		const { sidebarIsOpened } = useStore.getState().activeMeeting[meeting.id].sidebarStatus;
+		const sidebarIsOpened = useStore.getState().activeMeeting?.sidebarStatus.sidebarIsOpened;
 		expect(sidebarIsOpened).toBe(false);
-		const { isCarouselVisible } = useStore.getState().activeMeeting[meeting.id];
+		const isCarouselVisible = useStore.getState().activeMeeting?.isCarouselVisible;
 		expect(isCarouselVisible).toBe(false);
 	});
 
@@ -204,9 +204,7 @@ describe('Meeting action bar - More actions button interactions', () => {
 	test('SwitchView button toggles between grid and cinema view', async () => {
 		const { user } = storeSetupGroupMeeting();
 
-		expect(useStore.getState().activeMeeting[meeting.id].meetingViewSelected).toBe(
-			MeetingViewType.GRID
-		);
+		expect(useStore.getState().activeMeeting?.meetingViewSelected).toBe(MeetingViewType.GRID);
 
 		const moreActions = await screen.findByTestId(moreActionsTestId);
 		await user.click(moreActions);
@@ -214,9 +212,7 @@ describe('Meeting action bar - More actions button interactions', () => {
 		const switchButton = await screen.findByText(/Cinema view/i);
 		await user.click(switchButton);
 
-		expect(useStore.getState().activeMeeting[meeting.id].meetingViewSelected).toBe(
-			MeetingViewType.CINEMA
-		);
+		expect(useStore.getState().activeMeeting?.meetingViewSelected).toBe(MeetingViewType.CINEMA);
 	});
 
 	test('user toggle pip', async () => {

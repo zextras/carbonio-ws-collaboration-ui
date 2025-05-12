@@ -11,12 +11,52 @@ import {
 	IVideoOutConnection
 } from '../network/webRTC/webRTC';
 
+export type ActiveMeetingSlice = {
+	activeMeeting: ActiveMeeting | undefined;
+	setWaitingListAccordionStatus: (roomId: string, status: boolean) => void;
+	setRecordingAccordionStatus: (roomId: string, status: boolean) => void;
+	setMeetingParticipantsAccordionStatus: (roomId: string, status: boolean) => void;
+	setVisualEffectsAccordionStatus: (meetingId: string, status: boolean) => void;
+	setRaiseHandAccordionStatus: (meetingId: string, status: boolean) => void;
+	setMeetingChatVisibility: (meetingId: string, visibilityStatus: MeetingChatVisibility) => void;
+	setMeetingViewSelected: (meetingId: string, viewType: MeetingViewType) => void;
+	meetingConnection: (
+		meetingId: string,
+		audioStreamEnabled: boolean,
+		selectedAudioDeviceId: string | undefined,
+		videoStreamEnabled: boolean,
+		selectedVideoDeviceId: string | undefined
+	) => void;
+	meetingDisconnection: (meetingId: string) => void;
+	setLocalStreams: (meetingId: string, streamType: STREAM_TYPE, stream: MediaStream) => void;
+	removeLocalStreams: (meetingId: string, streamType: STREAM_TYPE) => void;
+	setMeetingSidebarStatus: (meetingId: string, status: boolean) => void;
+	setSelectedDeviceId: (meetingId: string, streamType: STREAM_TYPE, deviceId: string) => void;
+	setSubscribedTracks: (meetingId: string, streams: StreamsSubscriptionMap) => void;
+	setIsCarouseVisible: (meetingId: string, status: boolean) => void;
+	setPinnedTile: (meetingId: string, tile: TileData | undefined) => void;
+	setTalkingUser: (meetingId: string, userId: string, isTalking: boolean) => void;
+	setRemoveSubscription: (meetingId: string, subToRemove: Subscription) => void;
+	setAddSubscription: (meetingId: string, subToAdd: Subscription) => void;
+	setUpdateSubscription: (meetingId: string, subsToRequest: Subscription[]) => void;
+	setDeleteSubscription: (
+		meetingId: string,
+		subIdToDelete: string,
+		streamType: STREAM_TYPE[]
+	) => void;
+	setBackgroundStream: (meetingId: string, stream: MediaStream) => void;
+	removeBackgroundStream: (meetingId: string) => void;
+	setBackgroundImage: (meetingId: string, image: VirtualBackgroundType) => void;
+	setUserWithHandRaised: (meetingId: string, userId: string, isRaised: boolean) => void;
+};
+
 export type ActiveMeeting = {
-	bidirectionalAudioConn?: IBidirectionalConnectionAudioInOut;
-	videoScreenIn?: IVideoScreenInConnection;
-	videoOutConn?: IVideoOutConnection;
-	screenOutConn?: IScreenOutConnection;
-	localStreams?: LocalStreams;
+	meetingId: string;
+	bidirectionalAudioConn: IBidirectionalConnectionAudioInOut;
+	videoScreenIn: IVideoScreenInConnection;
+	videoOutConn: IVideoOutConnection;
+	screenOutConn: IScreenOutConnection;
+	localStreams: LocalStreams;
 	subscription: StreamsSubscriptionMap;
 	sidebarStatus: SidebarStatus;
 	chatVisibility: MeetingChatVisibility;
@@ -26,10 +66,6 @@ export type ActiveMeeting = {
 	virtualBackground: VirtualBackground;
 	talkingUsers: string[];
 	usersWithHandRaised: string[];
-};
-
-export type ActiveMeetingMap = {
-	[roomId: string]: ActiveMeeting;
 };
 
 export type SidebarStatus = {

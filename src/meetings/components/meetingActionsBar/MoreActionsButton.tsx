@@ -29,9 +29,9 @@ const MoreActionsButton = (): ReactElement => {
 	const disableFullScreenLabel = t('meeting.interactions.disableFullScreen', 'Disable full screen');
 	const enableFullScreenLabel = t('meeting.interactions.enableFullScreen', 'Enable full screen');
 
-	const meetingView = useStore((store) => getMeetingViewSelected(store, meetingId!));
+	const meetingView = useStore(getMeetingViewSelected);
 	const setMeetingSidebarStatus = useStore((store) => store.setMeetingSidebarStatus);
-	const meetingViewSelected = useStore((store) => getMeetingViewSelected(store, meetingId!));
+	const meetingViewSelected = useStore(getMeetingViewSelected);
 	const setMeetingViewSelected = useStore((store) => store.setMeetingViewSelected);
 	const numberOfTiles = useStore((store) => getNumberOfTiles(store, meetingId!));
 	const setIsCarouselVisible = useStore((store) => store.setIsCarouseVisible);

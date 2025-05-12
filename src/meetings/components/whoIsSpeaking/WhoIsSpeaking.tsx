@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import React, { ReactElement, useContext, useMemo } from 'react';
+import React, { ReactElement, useMemo } from 'react';
 
 import { Container } from '@zextras/carbonio-design-system';
 import { forEach, some } from 'lodash';
@@ -13,7 +13,6 @@ import SpeakingElement from './SpeakingElement';
 import { getTalkingList } from '../../../store/selectors/ActiveMeetingSelectors';
 import useStore from '../../../store/Store';
 import { STREAM_TYPE, TileData } from '../../../types/store/ActiveMeetingTypes';
-import { RouterContext } from '../../contexts/routerContext';
 
 const SpeakingListContainer = styled(Container)<{ $customStyle?: string }>`
 	position: absolute;
@@ -28,9 +27,8 @@ type WhoIsSpeakingProps = {
 	customStyle?: string;
 };
 
-const WhoIsSpeaking = ({ visibleTiles, customStyle }: WhoIsSpeakingProps): ReactElement | null => {
-	const { meetingId } = useContext(RouterContext);
-	const talkingMap = useStore((store) => getTalkingList(store, meetingId!));
+const WhoIsSpeaking = ({ visibleTiles, customStyle }: WhoIsSpeakingProps): ReactElement => {
+	const talkingMap = useStore(getTalkingList);
 
 	const speakingList = useMemo(() => {
 		const list: ReactElement[] = [];

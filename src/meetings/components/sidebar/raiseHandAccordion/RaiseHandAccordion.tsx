@@ -45,7 +45,7 @@ type RaiseHandAccordionProps = {
 
 const RaiseHandAccordion: FC<RaiseHandAccordionProps> = ({ meetingId }) => {
 	const [t] = useTranslation();
-	const raiseHandList = useStore((store) => getHandRaisedList(store, meetingId));
+	const raiseHandList = useStore(getHandRaisedList);
 
 	const okLabel = t('action.ok', 'Ok');
 	const lowerAllHandLabel = t('meeting.sidebar.lowerAllHands', 'Lower all raised hand');
@@ -58,7 +58,7 @@ const RaiseHandAccordion: FC<RaiseHandAccordionProps> = ({ meetingId }) => {
 		numberOfHandRaised: raiseHandList?.length
 	});
 
-	const accordionStatus = useStore((state) => getRaiseHandAccordionStatus(state, meetingId));
+	const accordionStatus = useStore(getRaiseHandAccordionStatus);
 	const setRaiseHandAccordionStatus = useStore((state) => state.setRaiseHandAccordionStatus);
 	const myUserId = useStore(getUserId);
 	const roomId = useStore((store) => getRoomIdByMeetingId(store, meetingId));

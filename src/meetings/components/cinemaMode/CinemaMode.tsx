@@ -55,7 +55,7 @@ const SidebarButton = styled(Button)`
 const CinemaMode = ({ children }: MeetingViewProps): ReactElement => {
 	const { meetingId } = useContext(RouterContext);
 
-	const carouselIsVisible = useStore((store) => getMeetingCarouselVisibility(store, meetingId!));
+	const carouselIsVisible = useStore(getMeetingCarouselVisibility);
 	const setIsCarouselVisible = useStore((store) => store.setIsCarouseVisible);
 	const setUpdateSubscription = useStore((store) => store.setUpdateSubscription);
 

@@ -56,11 +56,9 @@ const MicrophoneButton = ({
 	const { meetingId } = useContext(RouterContext);
 	const myUserId = useStore(getUserId);
 	const audioStatus = useStore((store) => getParticipantAudioStatus(store, meetingId, myUserId));
-	const selectedAudioDeviceId = useStore((store) => getSelectedAudioDeviceId(store, meetingId!));
+	const selectedAudioDeviceId = useStore(getSelectedAudioDeviceId);
 	const setSelectedDeviceId = useStore((store) => store.setSelectedDeviceId);
-	const bidirectionalAudioConn = useStore(
-		(store) => store.activeMeeting[meetingId!]?.bidirectionalAudioConn
-	);
+	const bidirectionalAudioConn = useStore((store) => store.activeMeeting?.bidirectionalAudioConn);
 	const websocketNetworkStatus = useStore(({ connections }) => connections.status.websocket);
 
 	const { permission, deviceList, noDevices } = useMediaDevices('audio');

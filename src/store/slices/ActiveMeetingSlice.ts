@@ -13,6 +13,7 @@ import ScreenOutConnection from '../../network/webRTC/ScreenOutConnection';
 import VideoOutConnection from '../../network/webRTC/VideoOutConnection';
 import VideoScreenInConnection from '../../network/webRTC/VideoScreenInConnection';
 import {
+	ActiveMeetingSlice,
 	MeetingChatVisibility,
 	MeetingViewType,
 	STREAM_TYPE,
@@ -21,7 +22,10 @@ import {
 	TileData,
 	VirtualBackgroundType
 } from '../../types/store/ActiveMeetingTypes';
-import { ActiveMeetingSlice, RootStore } from '../../types/store/StoreTypes';
+import { RootStore } from '../../types/store/StoreTypes';
+
+const isCurrentMeeting = (store: RootStore, meetingId: string): boolean =>
+	meetingId === store.activeMeeting?.meetingId;
 
 export const useActiveMeetingSlice: StateCreator<
 	RootStore,
@@ -29,7 +33,7 @@ export const useActiveMeetingSlice: StateCreator<
 	[],
 	ActiveMeetingSlice
 > = (set) => ({
-	activeMeeting: {},
+	activeMeeting: undefined,
 	meetingConnection: (
 		meetingId: string,
 		audioStreamEnabled: boolean,
@@ -39,7 +43,8 @@ export const useActiveMeetingSlice: StateCreator<
 	): void => {
 		set(
 			produce((draft: RootStore) => {
-				draft.activeMeeting[meetingId] = {
+				draft.activeMeeting = {
+					meetingId,
 					// Default graphic values
 					sidebarStatus: {
 						sidebarIsOpened: true,
@@ -84,11 +89,12 @@ export const useActiveMeetingSlice: StateCreator<
 	meetingDisconnection: (meetingId: string): void => {
 		set(
 			produce((draft: RootStore) => {
-				draft.activeMeeting[meetingId]?.bidirectionalAudioConn?.closePeerConnection();
-				draft.activeMeeting[meetingId]?.videoScreenIn?.closePeerConnection();
-				draft.activeMeeting[meetingId]?.videoOutConn?.closePeerConnection();
-				draft.activeMeeting[meetingId]?.screenOutConn?.closePeerConnection();
-				delete draft.activeMeeting[meetingId];
+				if (!isCurrentMeeting(draft, meetingId) || !draft.activeMeeting) return;
+				draft.activeMeeting.bidirectionalAudioConn?.closePeerConnection();
+				draft.activeMeeting.videoScreenIn?.closePeerConnection();
+				draft.activeMeeting.videoOutConn?.closePeerConnection();
+				draft.activeMeeting.screenOutConn?.closePeerConnection();
+				draft.activeMeeting = undefined;
 			}),
 			false,
 			'AM/MEETING_DISCONNECTION'
@@ -97,9 +103,8 @@ export const useActiveMeetingSlice: StateCreator<
 	setMeetingSidebarStatus: (meetingId: string, status: boolean): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (draft.activeMeeting[meetingId]) {
-					draft.activeMeeting[meetingId].sidebarStatus.sidebarIsOpened = status;
-				}
+				if (!isCurrentMeeting(draft, meetingId) || !draft.activeMeeting) return;
+				draft.activeMeeting.sidebarStatus.sidebarIsOpened = status;
 			}),
 			false,
 			'AM/SET_MEETING_SIDEBAR_STATUS'
@@ -108,9 +113,8 @@ export const useActiveMeetingSlice: StateCreator<
 	setWaitingListAccordionStatus: (meetingId: string, status: boolean): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (draft.activeMeeting[meetingId]) {
-					draft.activeMeeting[meetingId].sidebarStatus.waitingListAccordionIsOpened = status;
-				}
+				if (!isCurrentMeeting(draft, meetingId) || !draft.activeMeeting) return;
+				draft.activeMeeting.sidebarStatus.waitingListAccordionIsOpened = status;
 			}),
 			false,
 			'AM/SET_WAITING_LIST_ACCORDION_STATUS'
@@ -119,9 +123,8 @@ export const useActiveMeetingSlice: StateCreator<
 	setRecordingAccordionStatus: (meetingId: string, status: boolean): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (draft.activeMeeting[meetingId]) {
-					draft.activeMeeting[meetingId].sidebarStatus.recordingAccordionIsOpened = status;
-				}
+				if (!isCurrentMeeting(draft, meetingId) || !draft.activeMeeting) return;
+				draft.activeMeeting.sidebarStatus.recordingAccordionIsOpened = status;
 			}),
 			false,
 			'AM/SET_RECORDING_ACCORDION_STATUS'
@@ -130,9 +133,8 @@ export const useActiveMeetingSlice: StateCreator<
 	setMeetingParticipantsAccordionStatus: (meetingId: string, status: boolean): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (draft.activeMeeting[meetingId]) {
-					draft.activeMeeting[meetingId].sidebarStatus.participantsAccordionIsOpened = status;
-				}
+				if (!isCurrentMeeting(draft, meetingId) || !draft.activeMeeting) return;
+				draft.activeMeeting.sidebarStatus.participantsAccordionIsOpened = status;
 			}),
 			false,
 			'AM/SET_MEETING_PARTICIPANTS_ACCORDION_STATUS'
@@ -141,9 +143,8 @@ export const useActiveMeetingSlice: StateCreator<
 	setVisualEffectsAccordionStatus: (meetingId: string, status: boolean): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (draft.activeMeeting[meetingId]) {
-					draft.activeMeeting[meetingId].sidebarStatus.visualEffectsAccordionIsOpened = status;
-				}
+				if (!isCurrentMeeting(draft, meetingId) || !draft.activeMeeting) return;
+				draft.activeMeeting.sidebarStatus.visualEffectsAccordionIsOpened = status;
 			}),
 			false,
 			'AM/SET_VISUAL_EFFECTS_ACCORDION_STATUS'
@@ -152,9 +153,8 @@ export const useActiveMeetingSlice: StateCreator<
 	setRaiseHandAccordionStatus: (meetingId: string, status: boolean): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (draft.activeMeeting[meetingId]) {
-					draft.activeMeeting[meetingId].sidebarStatus.raiseHandAccordionStatusIsOpened = status;
-				}
+				if (!isCurrentMeeting(draft, meetingId) || !draft.activeMeeting) return;
+				draft.activeMeeting.sidebarStatus.raiseHandAccordionStatusIsOpened = status;
 			}),
 			false,
 			'AM/SET_RAISE_HAND_ACCORDION_STATUS'
@@ -163,9 +163,8 @@ export const useActiveMeetingSlice: StateCreator<
 	setMeetingChatVisibility: (meetingId: string, visibilityStatus: MeetingChatVisibility): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (draft.activeMeeting[meetingId]) {
-					draft.activeMeeting[meetingId].chatVisibility = visibilityStatus;
-				}
+				if (!isCurrentMeeting(draft, meetingId) || !draft.activeMeeting) return;
+				draft.activeMeeting.chatVisibility = visibilityStatus;
 			}),
 			false,
 			'AM/SET_CHAT_VIEW'
@@ -174,13 +173,12 @@ export const useActiveMeetingSlice: StateCreator<
 	setMeetingViewSelected: (meetingId: string, viewType: MeetingViewType): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (draft.activeMeeting[meetingId]) {
-					draft.activeMeeting[meetingId].meetingViewSelected = viewType;
+				if (!isCurrentMeeting(draft, meetingId) || !draft.activeMeeting) return;
+				draft.activeMeeting.meetingViewSelected = viewType;
 
-					// Unset pin when switching to grid view
-					if (viewType === MeetingViewType.GRID) {
-						draft.activeMeeting[meetingId].pinnedTile = undefined;
-					}
+				// Unset pin when switching to grid view
+				if (viewType === MeetingViewType.GRID) {
+					draft.activeMeeting.pinnedTile = undefined;
 				}
 			}),
 			false,
@@ -190,8 +188,9 @@ export const useActiveMeetingSlice: StateCreator<
 	setLocalStreams: (meetingId: string, streamType: STREAM_TYPE, stream: MediaStream): void => {
 		set(
 			produce((draft: RootStore) => {
-				draft.activeMeeting[meetingId].localStreams = {
-					...draft.activeMeeting[meetingId].localStreams,
+				if (!isCurrentMeeting(draft, meetingId) || !draft.activeMeeting) return;
+				draft.activeMeeting.localStreams = {
+					...draft.activeMeeting.localStreams,
 					[streamType]: stream
 				};
 			}),
@@ -202,12 +201,13 @@ export const useActiveMeetingSlice: StateCreator<
 	removeLocalStreams: (meetingId: string, streamType: STREAM_TYPE): void => {
 		set(
 			produce((draft: RootStore) => {
+				if (!isCurrentMeeting(draft, meetingId) || !draft.activeMeeting) return;
 				if (streamType === STREAM_TYPE.VIDEO || streamType === STREAM_TYPE.SCREEN) {
-					draft.activeMeeting[meetingId]?.localStreams?.[streamType]
+					draft.activeMeeting?.localStreams?.[streamType]
 						?.getTracks()
 						.forEach((track) => track.stop());
 				}
-				delete draft.activeMeeting[meetingId].localStreams![streamType];
+				delete draft.activeMeeting.localStreams![streamType];
 			}),
 			false,
 			'AM/SET_LOCAL_STREAM'
@@ -216,21 +216,22 @@ export const useActiveMeetingSlice: StateCreator<
 	setSelectedDeviceId: (meetingId: string, streamType: STREAM_TYPE, deviceId: string): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (!draft.activeMeeting[meetingId]?.localStreams) {
+				if (!isCurrentMeeting(draft, meetingId) || !draft.activeMeeting) return;
+				if (!draft.activeMeeting?.localStreams) {
 					if (streamType === STREAM_TYPE.AUDIO) {
-						draft.activeMeeting[meetingId].localStreams = {
-							...draft.activeMeeting[meetingId].localStreams,
+						draft.activeMeeting.localStreams = {
+							...draft.activeMeeting.localStreams,
 							selectedAudioDeviceId: deviceId
 						};
 					} else {
-						draft.activeMeeting[meetingId].localStreams = {
-							...draft.activeMeeting[meetingId].localStreams,
+						draft.activeMeeting.localStreams = {
+							...draft.activeMeeting.localStreams,
 							selectedVideoDeviceId: deviceId
 						};
 					}
 				} else {
-					draft.activeMeeting[meetingId].localStreams = {
-						...draft.activeMeeting[meetingId].localStreams,
+					draft.activeMeeting.localStreams = {
+						...draft.activeMeeting.localStreams,
 						[streamType === STREAM_TYPE.AUDIO ? 'selectedAudioDeviceId' : 'selectedVideoDeviceId']:
 							deviceId
 					};
@@ -243,7 +244,8 @@ export const useActiveMeetingSlice: StateCreator<
 	setSubscribedTracks: (meetingId: string, streams: StreamsSubscriptionMap): void => {
 		set(
 			produce((draft: RootStore) => {
-				draft.activeMeeting[meetingId].subscription = streams;
+				if (!isCurrentMeeting(draft, meetingId) || !draft.activeMeeting) return;
+				draft.activeMeeting.subscription = streams;
 			}),
 			false,
 			'AM/SET_SUBSCRIPTION'
@@ -252,16 +254,17 @@ export const useActiveMeetingSlice: StateCreator<
 	setTalkingUser: (meetingId: string, userId: string, isTalking: boolean): void => {
 		set(
 			produce((draft: RootStore) => {
+				if (!isCurrentMeeting(draft, meetingId) || !draft.activeMeeting) return;
 				if (isTalking) {
 					// If flag is true, add the ID to the array if it's not already present
-					if (!draft.activeMeeting[meetingId].talkingUsers.includes(userId)) {
-						draft.activeMeeting[meetingId].talkingUsers.push(userId);
+					if (!draft.activeMeeting.talkingUsers.includes(userId)) {
+						draft.activeMeeting.talkingUsers.push(userId);
 					}
 				} else {
 					// If flag is false, remove the ID from the array if it's present
-					const index = draft.activeMeeting[meetingId]?.talkingUsers.indexOf(userId);
+					const index = draft.activeMeeting.talkingUsers.indexOf(userId);
 					if (index !== -1) {
-						draft.activeMeeting[meetingId]?.talkingUsers?.splice(index, 1);
+						draft.activeMeeting.talkingUsers?.splice(index, 1);
 					}
 				}
 			}),
@@ -272,9 +275,8 @@ export const useActiveMeetingSlice: StateCreator<
 	setIsCarouseVisible: (meetingId: string, status: boolean): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (draft.activeMeeting[meetingId]) {
-					draft.activeMeeting[meetingId].isCarouselVisible = status;
-				}
+				if (!isCurrentMeeting(draft, meetingId) || !draft.activeMeeting) return;
+				draft.activeMeeting.isCarouselVisible = status;
 			}),
 			false,
 			'AM/SET_MEETING_CAROUSEL_VISIBILITY'
@@ -283,25 +285,24 @@ export const useActiveMeetingSlice: StateCreator<
 	setPinnedTile: (meetingId: string, tile: TileData | undefined): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (draft.activeMeeting[meetingId]) {
-					// Switch back to the previous view
-					const previousViewType = draft.activeMeeting[meetingId].pinnedTile?.previousViewType;
-					if (previousViewType) {
-						draft.activeMeeting[meetingId].meetingViewSelected = previousViewType;
-					}
+				if (!isCurrentMeeting(draft, meetingId) || !draft.activeMeeting) return;
+				// Switch back to the previous view
+				const previousViewType = draft.activeMeeting.pinnedTile?.previousViewType;
+				if (previousViewType) {
+					draft.activeMeeting.meetingViewSelected = previousViewType;
+				}
 
-					draft.activeMeeting[meetingId].pinnedTile = tile;
+				draft.activeMeeting.pinnedTile = tile;
 
-					// Pin a tile from GRID view the view to switch to CINEMA and set previousViewType to GRID
-					if (tile && draft.activeMeeting[meetingId].meetingViewSelected === MeetingViewType.GRID) {
-						// Set the view to switch to CINEMA
-						draft.activeMeeting[meetingId].meetingViewSelected = MeetingViewType.CINEMA;
-						// Set the previous view to GRID to switch back to it when unpinning
-						draft.activeMeeting[meetingId].pinnedTile = {
-							...tile,
-							previousViewType: MeetingViewType.GRID
-						};
-					}
+				// Pin a tile from GRID view the view to switch to CINEMA and set previousViewType to GRID
+				if (tile && draft.activeMeeting.meetingViewSelected === MeetingViewType.GRID) {
+					// Set the view to switch to CINEMA
+					draft.activeMeeting.meetingViewSelected = MeetingViewType.CINEMA;
+					// Set the previous view to GRID to switch back to it when unpinning
+					draft.activeMeeting.pinnedTile = {
+						...tile,
+						previousViewType: MeetingViewType.GRID
+					};
 				}
 			}),
 			false,
@@ -311,12 +312,9 @@ export const useActiveMeetingSlice: StateCreator<
 	setRemoveSubscription: (meetingId: string, subToRemove: Subscription): void => {
 		set(
 			produce((draft: RootStore) => {
-				draft.activeMeeting[meetingId]?.videoScreenIn?.subscriptionManager?.removeSubscription(
-					subToRemove
-				);
-				delete draft.activeMeeting[meetingId]?.subscription[
-					`${subToRemove.userId}-${subToRemove.type}`
-				];
+				if (!isCurrentMeeting(draft, meetingId) || !draft.activeMeeting) return;
+				draft.activeMeeting.videoScreenIn?.subscriptionManager?.removeSubscription(subToRemove);
+				delete draft.activeMeeting.subscription[`${subToRemove.userId}-${subToRemove.type}`];
 			}),
 			false,
 			'AM/REMOVE_SUB'
@@ -325,9 +323,8 @@ export const useActiveMeetingSlice: StateCreator<
 	setAddSubscription: (meetingId: string, subToAdd: Subscription): void => {
 		set(
 			produce((draft: RootStore) => {
-				draft.activeMeeting[meetingId]?.videoScreenIn?.subscriptionManager?.addSubscription(
-					subToAdd
-				);
+				if (!isCurrentMeeting(draft, meetingId) || !draft.activeMeeting) return;
+				draft.activeMeeting.videoScreenIn?.subscriptionManager?.addSubscription(subToAdd);
 			}),
 			false,
 			'AM/ADD_SUB'
@@ -336,9 +333,8 @@ export const useActiveMeetingSlice: StateCreator<
 	setUpdateSubscription: (meetingId: string, subsToRequest: Subscription[]): void => {
 		set(
 			produce((draft: RootStore) => {
-				draft.activeMeeting[meetingId]?.videoScreenIn?.subscriptionManager?.updateSubscription(
-					subsToRequest
-				);
+				if (!isCurrentMeeting(draft, meetingId) || !draft.activeMeeting) return;
+				draft.activeMeeting.videoScreenIn?.subscriptionManager?.updateSubscription(subsToRequest);
 			}),
 			false,
 			'AM/UPDATE_SUB'
@@ -351,12 +347,13 @@ export const useActiveMeetingSlice: StateCreator<
 	): void => {
 		set(
 			produce((draft: RootStore) => {
-				draft.activeMeeting[meetingId]?.videoScreenIn?.subscriptionManager?.deleteSubscription(
+				if (!isCurrentMeeting(draft, meetingId) || !draft.activeMeeting) return;
+				draft.activeMeeting.videoScreenIn?.subscriptionManager?.deleteSubscription(
 					subIdToDelete,
 					streamType
 				);
-				draft.activeMeeting[meetingId]?.videoScreenIn?.removeStream(subIdToDelete, streamType);
-				delete draft.activeMeeting[meetingId]?.subscription[`${subIdToDelete}-${streamType}`];
+				draft.activeMeeting.videoScreenIn?.removeStream(subIdToDelete, streamType);
+				delete draft.activeMeeting.subscription[`${subIdToDelete}-${streamType}`];
 			}),
 			false,
 			'AM/DELETE_SUB'
@@ -365,9 +362,8 @@ export const useActiveMeetingSlice: StateCreator<
 	setBackgroundStream: (meetingId: string, stream: MediaStream): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (draft.activeMeeting[meetingId]) {
-					draft.activeMeeting[meetingId].virtualBackground.updatedStream = stream;
-				}
+				if (!isCurrentMeeting(draft, meetingId) || !draft.activeMeeting) return;
+				draft.activeMeeting.virtualBackground.updatedStream = stream;
 			}),
 			false,
 			'AM/SET_BACKGROUND_STREAM'
@@ -376,7 +372,8 @@ export const useActiveMeetingSlice: StateCreator<
 	removeBackgroundStream: (meetingId: string): void => {
 		set(
 			produce((draft: RootStore) => {
-				delete draft.activeMeeting[meetingId].virtualBackground.updatedStream;
+				if (!isCurrentMeeting(draft, meetingId) || !draft.activeMeeting) return;
+				delete draft.activeMeeting.virtualBackground.updatedStream;
 			}),
 			false,
 			'AM/REMOVE_BACKGROUND_STREAM'
@@ -385,9 +382,8 @@ export const useActiveMeetingSlice: StateCreator<
 	setBackgroundImage: (meetingId: string, image: VirtualBackgroundType): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (draft.activeMeeting[meetingId]) {
-					draft.activeMeeting[meetingId].virtualBackground.backgroundImage = image;
-				}
+				if (!isCurrentMeeting(draft, meetingId) || !draft.activeMeeting) return;
+				draft.activeMeeting.virtualBackground.backgroundImage = image;
 			}),
 			false,
 			'AM/SET_BACKGROUND_IMAGE'
@@ -396,16 +392,17 @@ export const useActiveMeetingSlice: StateCreator<
 	setUserWithHandRaised: (meetingId: string, userId: string, isRaised: boolean): void => {
 		set(
 			produce((draft: RootStore) => {
-				const usersWithHandRaised = draft.activeMeeting[meetingId]?.usersWithHandRaised;
+				if (!isCurrentMeeting(draft, meetingId) || !draft.activeMeeting) return;
+				const { usersWithHandRaised } = draft.activeMeeting;
 				if (!usersWithHandRaised) return;
 
 				if (isRaised) {
 					// If flag is true, add the ID to the array if it's not already present
-					if (!draft.activeMeeting[meetingId].usersWithHandRaised.includes(userId)) {
-						draft.activeMeeting[meetingId].usersWithHandRaised.push(userId);
+					if (!draft.activeMeeting.usersWithHandRaised.includes(userId)) {
+						draft.activeMeeting.usersWithHandRaised.push(userId);
 					}
 				} else {
-					draft.activeMeeting[meetingId].usersWithHandRaised = usersWithHandRaised.filter(
+					draft.activeMeeting.usersWithHandRaised = usersWithHandRaised.filter(
 						(id) => id !== userId
 					);
 				}

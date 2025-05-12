@@ -27,7 +27,7 @@ const ScreenShareButton = (): ReactElement => {
 
 	const myUserId = useStore(getUserId);
 	const screenStatus = useStore((store) => getParticipantScreenStatus(store, meetingId, myUserId));
-	const screenOutConn = useStore((store) => store.activeMeeting[meetingId!]?.screenOutConn);
+	const screenOutConn = useStore((store) => store.activeMeeting?.screenOutConn);
 	const websocketNetworkStatus = useStore(({ connections }) => connections.status.websocket);
 
 	const toggleScreenStream = useCallback(() => {

@@ -11,16 +11,15 @@ import { isMeetingActive } from '../eventHandlersUtilities';
 export const meetingSDPAnsweredEventHandler = (event: MeetingSDPAnsweredEvent): void => {
 	const state = useStore.getState();
 	if (isMeetingActive(event.meetingId)) {
-		const mediaType = event.mediaType.toLowerCase() as STREAM_TYPE;
-		const activeMeeting = state.activeMeeting[event.meetingId];
+		const mediaType = event.mediaType?.toLowerCase() as STREAM_TYPE;
 		if (mediaType === STREAM_TYPE.VIDEO) {
-			activeMeeting.videoOutConn?.handleRemoteAnswer({
+			state.activeMeeting?.videoOutConn?.handleRemoteAnswer({
 				sdp: event.sdp,
 				type: 'answer'
 			});
 		}
 		if (mediaType === STREAM_TYPE.SCREEN) {
-			activeMeeting.screenOutConn?.handleRemoteAnswer({
+			state.activeMeeting?.screenOutConn?.handleRemoteAnswer({
 				sdp: event.sdp,
 				type: 'answer'
 			});

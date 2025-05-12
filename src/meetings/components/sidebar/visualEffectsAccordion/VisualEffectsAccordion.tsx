@@ -27,7 +27,7 @@ const VisualEffectsAccordion: FC<VisualEffectsAccordionProps> = ({ meetingId }) 
 	const [t] = useTranslation();
 	const accordionLabel = t('meeting.visualEffects.title', 'Visual Effects');
 
-	const accordionStatus = useStore((state) => getVisualEffectsAccordionStatus(state, meetingId));
+	const accordionStatus = useStore(getVisualEffectsAccordionStatus);
 	const setVisualEffectsAccordionStatus = useStore(
 		(state) => state.setVisualEffectsAccordionStatus
 	);

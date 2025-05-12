@@ -5,6 +5,7 @@
  */
 
 import { meetingLeftEventHandler } from './MeetingLeftEventHandler';
+import { getActiveMeeting } from '../../../store/selectors/ActiveMeetingSelectors';
 import useStore from '../../../store/Store';
 import {
 	createMockMeeting,
@@ -42,8 +43,8 @@ describe('meetingLeftEventHandler tests', () => {
 	});
 
 	test('Left participant video subscription is been removed', () => {
-		const activeMeeting = useStore.getState().activeMeeting[meeting.id];
-		const subscriptionManager = activeMeeting.videoScreenIn?.subscriptionManager;
+		const activeMeeting = getActiveMeeting(useStore.getState(), meeting.id);
+		const subscriptionManager = activeMeeting?.videoScreenIn?.subscriptionManager;
 		const deleteSub = jest.spyOn(subscriptionManager as SubscriptionsManager, 'deleteSubscription');
 		meetingLeftEventHandler(event);
 		expect(deleteSub).toHaveBeenCalled();
@@ -67,6 +68,6 @@ describe('meetingLeftEventHandler tests', () => {
 		const store = useStore.getState();
 		store.setTalkingUser(meeting.id, event.userId, true);
 		meetingLeftEventHandler(event);
-		expect(store.activeMeeting[meeting.id].talkingUsers).not.toContain(event.userId);
+		expect(store.activeMeeting?.talkingUsers).not.toContain(event.userId);
 	});
 });

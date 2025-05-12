@@ -5,6 +5,7 @@
  */
 
 import { meetingAudioAnsweredEventHandler } from './MeetingAudioAnsweredEventHandler';
+import { getActiveMeeting } from '../../../store/selectors/ActiveMeetingSelectors';
 import useStore from '../../../store/Store';
 import { createMockMeeting, createMockRoom } from '../../../tests/createMock';
 import { IBidirectionalConnectionAudioInOut } from '../../../types/network/webRTC/webRTC';
@@ -32,7 +33,7 @@ describe('meetingAudioAnsweredEventHandler tests', () => {
 	test('handleRemoteAnswer is been called when the meeting is active', () => {
 		const store = useStore.getState();
 		store.meetingConnection(meeting.id, false, undefined, false, undefined);
-		const { bidirectionalAudioConn } = useStore.getState().activeMeeting[meeting.id];
+		const bidirectionalAudioConn = useStore.getState().activeMeeting?.bidirectionalAudioConn;
 		const handleRemoteAnswer = jest.spyOn(
 			bidirectionalAudioConn as IBidirectionalConnectionAudioInOut,
 			'handleRemoteAnswer'
@@ -45,7 +46,7 @@ describe('meetingAudioAnsweredEventHandler tests', () => {
 		const store = useStore.getState();
 		store.meetingConnection(meeting.id, false, undefined, false, undefined);
 		store.meetingDisconnection(meeting.id);
-		const activeMeeting = useStore.getState().activeMeeting[meeting.id];
+		const activeMeeting = getActiveMeeting(useStore.getState(), meeting.id);
 		meetingAudioAnsweredEventHandler(event);
 		expect(activeMeeting).toBeUndefined();
 	});

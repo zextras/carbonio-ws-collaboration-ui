@@ -30,8 +30,7 @@ export const meetingAudioStreamChangedEventHandler = (
 
 			// Mute the tile if someone performed this state on me
 			if (!event.active && !!event.moderatorId) {
-				const activeMeeting = state.activeMeeting[event.meetingId];
-				activeMeeting.bidirectionalAudioConn?.closeRtpSenderTrack();
+				state.activeMeeting?.bidirectionalAudioConn?.closeRtpSenderTrack();
 				// Custom event to show snackbar
 				sendCustomEvent({ name: EventName.MEMBER_MUTED, data: event });
 			}

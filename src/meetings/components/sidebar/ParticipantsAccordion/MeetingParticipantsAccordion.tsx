@@ -39,9 +39,7 @@ const MeetingParticipantsAccordion: FC<MeetingParticipantsAccordionProps> = ({ m
 		count: numberOfParticipants ?? 0
 	});
 
-	const accordionStatus: boolean = useStore((state) =>
-		getMeetingParticipantsAccordionStatus(state, meetingId)
-	);
+	const accordionStatus = useStore(getMeetingParticipantsAccordionStatus);
 	const setParticipantsAccordionStatus = useStore(
 		(state) => state.setMeetingParticipantsAccordionStatus
 	);

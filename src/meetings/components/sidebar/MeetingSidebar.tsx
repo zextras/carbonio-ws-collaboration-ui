@@ -73,8 +73,8 @@ const MeetingSidebar = (): ReactElement => {
 	const roomId = useStore((store) => getRoomIdByMeetingId(store, meetingId!));
 	const roomType = useStore((store) => getRoomTypeSelector(store, roomId ?? ''));
 	const amIModerator = useStore((store) => getOwnershipOfTheRoom(store, roomId ?? ''));
-	const meetingChatVisibility = useStore((store) => getMeetingChatVisibility(store, meetingId!));
-	const sidebarIsVisible: boolean = useStore((store) => getMeetingSidebarStatus(store, meetingId!));
+	const meetingChatVisibility = useStore(getMeetingChatVisibility);
+	const sidebarIsVisible: boolean = useStore(getMeetingSidebarStatus);
 	const setMeetingSidebarStatus = useStore((store) => store.setMeetingSidebarStatus);
 	const isUserGuest = useStore((store) => getIsUserGuest(store, myUserId ?? ''));
 	const recordingEnabled = useStore((store) => getAttribute(store, 'recordingEnabled'));

@@ -21,7 +21,7 @@ const usePinnedTile = (
 	userId: string,
 	isScreenShare = false
 ): usePinnedTileReturn => {
-	const pinnedTile: TileData | undefined = useStore((store) => getPinnedTile(store, meetingId));
+	const pinnedTile: TileData | undefined = useStore(getPinnedTile);
 	const setPinnedTile = useStore((store) => store.setPinnedTile);
 	const numberOfTiles = useStore((store) => getNumberOfTiles(store, meetingId));
 

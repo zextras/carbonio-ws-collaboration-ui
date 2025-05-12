@@ -30,7 +30,7 @@ const WaitingListAccordion: FC<WaitingListAccordionProps> = ({ meetingId }) => {
 	const accordionTitle = t('meeting.sidebar.waitingList', 'Waiting list');
 
 	const waitingList = useStore((store) => getWaitingList(store, meetingId));
-	const accordionStatus = useStore((state) => getWaitingListAccordionStatus(state, meetingId));
+	const accordionStatus = useStore(getWaitingListAccordionStatus);
 	const setParticipantsAccordionStatus = useStore((state) => state.setWaitingListAccordionStatus);
 
 	const toggleAccordionStatus = useCallback(

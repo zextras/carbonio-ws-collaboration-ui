@@ -80,7 +80,7 @@ const useGeneralMeetingControls = (meetingId: string): void => {
 
 	// Handle pinned tile disappearance
 	useEffect(() => {
-		const pinnedTile = useStore.getState().activeMeeting[meetingId]?.pinnedTile;
+		const pinnedTile = useStore.getState().activeMeeting?.pinnedTile;
 		const isDisappeared = !find(
 			tiles,
 			(tile) => tile.userId === pinnedTile?.userId && tile.type === pinnedTile?.type

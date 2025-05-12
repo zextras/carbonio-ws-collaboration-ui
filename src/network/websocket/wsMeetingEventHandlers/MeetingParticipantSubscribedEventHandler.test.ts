@@ -32,7 +32,7 @@ describe('meetingParticipantSubscribedEventHandler tests', () => {
 	test('handleParticipantsSubscribed is been called when the meeting is active', () => {
 		const store = useStore.getState();
 		store.meetingConnection(meeting.id, false, undefined, false, undefined);
-		const { videoScreenIn } = useStore.getState().activeMeeting[meeting.id];
+		const videoScreenIn = useStore.getState().activeMeeting?.videoScreenIn;
 		const handleParticipantsSubscribed = jest.spyOn(
 			videoScreenIn as IVideoScreenInConnection,
 			'handleParticipantsSubscribed'
@@ -45,8 +45,8 @@ describe('meetingParticipantSubscribedEventHandler tests', () => {
 		const store = useStore.getState();
 		store.meetingConnection(meeting.id, false, undefined, false, undefined);
 		store.meetingDisconnection(meeting.id);
-		const activeMeeting = useStore.getState().activeMeeting[meeting.id];
+		const meetingId = useStore.getState().activeMeeting?.meetingId;
 		meetingParticipantSubscribedEventHandler(event);
-		expect(activeMeeting).toBeUndefined();
+		expect(meetingId).toBeUndefined();
 	});
 });

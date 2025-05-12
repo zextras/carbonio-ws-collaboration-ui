@@ -70,7 +70,7 @@ const MeetingConversationAccordion: FC<MeetingConversationAccordionProps> = ({
 
 	const unreadMessagesCount = useStore((store) => getRoomUnreadSelector(store, roomId || ''));
 	const roomMuted = useStore((state) => getRoomMutedSelector(state, roomId));
-	const meetingChatVisibility = useStore((store) => getMeetingChatVisibility(store, meetingId));
+	const meetingChatVisibility = useStore(getMeetingChatVisibility);
 	const setMeetingChatVisibility = useStore((store) => store.setMeetingChatVisibility);
 	const roomType = useStore((store) => getRoomTypeSelector(store, roomId ?? ''));
 	const recordingEnabled = useStore((store) => getAttribute(store, 'recordingEnabled'));

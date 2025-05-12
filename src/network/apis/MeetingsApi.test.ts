@@ -121,7 +121,7 @@ describe('Meetings API', () => {
 		expect(spyOnFetch).toHaveBeenCalledWith(`meetings/${meetingMock.id}`, RequestType.GET);
 		// Check if store is correctly updated
 		const store = useStore.getState();
-		expect(store.activeMeeting[meetingMock.id]).toBeDefined();
+		expect(store.activeMeeting).toBeDefined();
 	});
 
 	test('joinMeeting is called correctly for a scheduled meeting', async () => {
@@ -148,7 +148,7 @@ describe('Meetings API', () => {
 		expect(spyOnFetch).toHaveBeenCalledWith(`meetings/${scheduledMeetingMock.id}`, RequestType.GET);
 		// Check if store is correctly updated
 		const store = useStore.getState();
-		expect(store.activeMeeting[scheduledMeetingMock.id]).toBeDefined();
+		expect(store.activeMeeting).toBeDefined();
 	});
 
 	test('enterMeeting is called correctly when a meeting is already present and active', async () => {
@@ -237,7 +237,7 @@ describe('Meetings API', () => {
 		expect(spyOnFetch).toHaveBeenCalledWith(`meetings/${meetingMock.id}/leave`, RequestType.POST);
 		// Check if store is correctly updated
 		const store = useStore.getState();
-		expect(store.activeMeeting[meetingMock.id]).not.toBeDefined();
+		expect(store.activeMeeting).not.toBeDefined();
 		expect(document.cookie).toBe('');
 	});
 
@@ -249,7 +249,7 @@ describe('Meetings API', () => {
 		expect(spyOnFetch).toHaveBeenCalledWith(`meetings/${meetingMock.id}/leave`, RequestType.POST);
 		// Check if store is correctly updated
 		const store = useStore.getState();
-		expect(store.activeMeeting[meetingMock.id]).not.toBeDefined();
+		expect(store.activeMeeting).not.toBeDefined();
 		expect(document.cookie).toBe('ZM_AUTH_TOKEN=123456789; ZX_AUTH_TOKEN=123456789');
 	});
 
@@ -261,7 +261,7 @@ describe('Meetings API', () => {
 		expect(spyOnFetch).toHaveBeenCalledWith(`meetings/${meetingMock.id}/leave`, RequestType.POST);
 		// Check if store is correctly updated
 		const store = useStore.getState();
-		expect(store.activeMeeting[meetingMock.id]).not.toBeDefined();
+		expect(store.activeMeeting).not.toBeDefined();
 		expect(document.cookie).toBe('ZM_AUTH_TOKEN=123456789; ZX_AUTH_TOKEN=123456789');
 	});
 
@@ -275,7 +275,7 @@ describe('Meetings API', () => {
 		expect(spyOnFetch).toHaveBeenCalledWith(`meetings/${meetingMock.id}/leave`, RequestType.POST);
 		// Check if store is correctly updated
 		const store = useStore.getState();
-		expect(store.activeMeeting[meetingMock.id]).not.toBeDefined();
+		expect(store.activeMeeting).not.toBeDefined();
 		expect(document.cookie).toBe('');
 	});
 
@@ -550,8 +550,8 @@ describe('Meetings API', () => {
 			videoStreamEnabled: false
 		});
 		const store = useStore.getState();
-		expect(store.activeMeeting[meeting.id].usersWithHandRaised[0]).toBe('user4');
-		expect(store.activeMeeting[meeting.id].usersWithHandRaised[1]).toBe('user2');
-		expect(store.activeMeeting[meeting.id].usersWithHandRaised[2]).toBe('user3');
+		expect(store.activeMeeting?.usersWithHandRaised[0]).toBe('user4');
+		expect(store.activeMeeting?.usersWithHandRaised[1]).toBe('user2');
+		expect(store.activeMeeting?.usersWithHandRaised[2]).toBe('user3');
 	});
 });

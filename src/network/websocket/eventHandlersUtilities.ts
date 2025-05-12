@@ -68,7 +68,7 @@ export const getEventArea = (eventType: WsEventType): EventArea | undefined => {
 export const isMyId = (userId: string): boolean => userId === getUserId(useStore.getState());
 
 export const isMeetingActive = (meetingId: string): boolean =>
-	useStore.getState().activeMeeting[meetingId] !== undefined;
+	useStore.getState().activeMeeting?.meetingId === meetingId;
 
 export const inThisMeetingTab = (meetingId: string): boolean =>
 	window.location.pathname.includes(`${MEETINGS_PATH}${meetingId}`);

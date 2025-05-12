@@ -30,7 +30,7 @@ describe('meetingParticipantTalkingEventHandler tests', () => {
 	test('Talking user information are saved only the meeting is active', () => {
 		useStore.getState().meetingConnection(meeting.id, false, undefined, false, undefined);
 		meetingParticipantTalkingEventHandler(event);
-		expect(useStore.getState().activeMeeting[meeting.id].talkingUsers).toContain('userId');
+		expect(useStore.getState().activeMeeting?.talkingUsers).toContain('userId');
 	});
 
 	test('Talking user information are not  saved if the meeting is inactive', () => {
@@ -38,6 +38,6 @@ describe('meetingParticipantTalkingEventHandler tests', () => {
 		state.meetingConnection(meeting.id, false, undefined, false, undefined);
 		state.meetingDisconnection(meeting.id);
 		meetingParticipantTalkingEventHandler(event);
-		expect(useStore.getState().activeMeeting[meeting.id]).toBeUndefined();
+		expect(useStore.getState().activeMeeting).toBeUndefined();
 	});
 });

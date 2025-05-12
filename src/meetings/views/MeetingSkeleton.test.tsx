@@ -201,7 +201,7 @@ describe('Virtual Background setup', () => {
 
 		mockInitialize.mockReturnValue('initialized');
 		const { store } = storeSetupGroupMeetingSkeleton();
-		expect(store.activeMeeting[meeting.id]).not.toBeDefined();
+		expect(store.activeMeeting).not.toBeDefined();
 
 		// turn on blur
 		act(() => {
@@ -210,7 +210,7 @@ describe('Virtual Background setup', () => {
 
 		await waitFor(() => {
 			const updatedStore = useStore.getState();
-			expect(updatedStore.activeMeeting[meeting.id].virtualBackground.updatedStream).toBeDefined();
+			expect(updatedStore.activeMeeting?.virtualBackground.updatedStream).toBeDefined();
 		});
 		expect(mockInitialize).toHaveBeenCalled();
 
@@ -219,8 +219,6 @@ describe('Virtual Background setup', () => {
 			store.setBackgroundImage(meeting.id, VirtualBackgroundType.NONE);
 		});
 		const updatedStore2 = useStore.getState();
-		expect(
-			updatedStore2.activeMeeting[meeting.id].virtualBackground.updatedStream
-		).not.toBeDefined();
+		expect(updatedStore2.activeMeeting?.virtualBackground.updatedStream).not.toBeDefined();
 	});
 });

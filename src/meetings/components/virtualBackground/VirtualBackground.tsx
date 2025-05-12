@@ -41,11 +41,11 @@ const VideoEl = styled.video`
 const VirtualBackground = ({ meetingId }: VirtualBackgroundProps): ReactElement => {
 	const canvasRefs = useRef<HTMLCanvasElement | null>(null);
 	const setBackgroundStream = useStore((store) => store.setBackgroundStream);
-	const videoOutConn = useStore((store) => store.activeMeeting[meetingId ?? '']?.videoOutConn);
-	const updatedStream = useStore((store) => getUpdatedStream(store, meetingId ?? ''));
+	const videoOutConn = useStore((store) => store.activeMeeting?.videoOutConn);
+	const updatedStream = useStore(getUpdatedStream);
 	const removeBackgroundStream = useStore((store) => store.removeBackgroundStream);
-	const myVideoStream = useStore((store) => getLocalStreamVideo(store, meetingId ?? ''));
-	const backgroundImageSelected = useStore((store) => getBackgroundImage(store, meetingId ?? ''));
+	const myVideoStream = useStore(getLocalStreamVideo);
+	const backgroundImageSelected = useStore(getBackgroundImage);
 
 	const worker: Worker = useMemo(() => new Worker(getWorkerUrl()), []);
 

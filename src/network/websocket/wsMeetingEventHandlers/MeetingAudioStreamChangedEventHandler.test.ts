@@ -5,6 +5,7 @@
  */
 
 import { meetingAudioStreamChangedEventHandler } from './MeetingAudioStreamChangedEventHandler';
+import { getActiveMeeting } from '../../../store/selectors/ActiveMeetingSelectors';
 import useStore from '../../../store/Store';
 import {
 	createMockMeeting,
@@ -75,9 +76,9 @@ describe('meetingAudioStreamChangedEventHandler tests', () => {
 		event.moderatorId = 'moderatorId';
 		const store = useStore.getState();
 		store.meetingConnection(meeting.id, false, undefined, false, undefined);
-		const activeMeeting = useStore.getState().activeMeeting[meeting.id];
+		const activeMeeting = getActiveMeeting(useStore.getState(), meeting.id);
 		const closeRtpSender = jest.spyOn(
-			activeMeeting.bidirectionalAudioConn as BidirectionalConnectionAudioInOut,
+			activeMeeting!.bidirectionalAudioConn as BidirectionalConnectionAudioInOut,
 			'closeRtpSenderTrack'
 		);
 		meetingAudioStreamChangedEventHandler(event);

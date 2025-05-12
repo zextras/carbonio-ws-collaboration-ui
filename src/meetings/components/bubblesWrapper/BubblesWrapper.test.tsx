@@ -108,7 +108,7 @@ describe('BubblesWrapper', () => {
 		await waitFor(() => user.click(messageBubble));
 
 		const updatedStore = useStore.getState();
-		expect(updatedStore.activeMeeting[meeting.id].sidebarStatus.sidebarIsOpened).toBeTruthy();
-		expect(updatedStore.activeMeeting[meeting.id].chatVisibility).toBe(MeetingChatVisibility.OPEN);
+		expect(updatedStore.activeMeeting?.sidebarStatus.sidebarIsOpened).toBeTruthy();
+		expect(updatedStore.activeMeeting?.chatVisibility).toBe(MeetingChatVisibility.OPEN);
 	});
 });

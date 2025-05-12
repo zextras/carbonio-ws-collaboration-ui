@@ -72,7 +72,7 @@ const RecordingAccordion: FC<RecordingAccordionProps> = ({ meetingId }) => {
 	);
 
 	const recordingTimestamp = useStore((state) => getMeetingRecordingTimestamp(state, meetingId));
-	const accordionStatus = useStore((state) => getRecordingAccordionStatus(state, meetingId));
+	const accordionStatus = useStore(getRecordingAccordionStatus);
 	const setAccordionStatus = useStore((state) => state.setRecordingAccordionStatus);
 
 	const createSnackbar: CreateSnackbarFn = useSnackbar();
