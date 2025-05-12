@@ -55,7 +55,7 @@ const setupBasicGroupMeeting = (): void => {
 	act(() => {
 		store.addRooms([groupRoom]);
 		store.addMeeting(groupMeeting);
-		store.meetingConnection(groupMeeting.id, false, undefined, false, undefined);
+		store.meetingConnection(groupMeeting.id);
 	});
 	localStorage.setItem('settings', JSON.stringify({ 'settings.appearance_setting.scaling': 100 }));
 	routerContextSetup(<CinemaMode />, { meetingId: groupMeeting.id });

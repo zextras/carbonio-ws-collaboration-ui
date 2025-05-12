@@ -35,7 +35,7 @@ beforeEach(() => {
 	store.setLoginInfo('myUserId', 'User');
 	store.addRooms([room]);
 	store.addMeeting(meeting);
-	store.meetingConnection(meeting.id, false, undefined, false, undefined);
+	store.meetingConnection(meeting.id);
 	store.addParticipant(meeting.id, createMockParticipants({ userId: event.userId }));
 });
 describe('meetingMediaStreamChangedEventHandler tests', () => {

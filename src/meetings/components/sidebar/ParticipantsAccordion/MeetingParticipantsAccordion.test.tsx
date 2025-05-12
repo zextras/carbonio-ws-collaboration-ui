@@ -88,7 +88,7 @@ const storeSetupParticipantModerator = (): {
 		participants: [user1Participant, user2Participant]
 	});
 	store.addMeeting(meeting);
-	store.meetingConnection(meeting.id, false, undefined, false, undefined);
+	store.meetingConnection(meeting.id);
 
 	const { user } = setup(<MeetingParticipantsList meetingId={meeting.id} />);
 	return { meeting, user, store };

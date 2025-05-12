@@ -44,7 +44,6 @@ const useGeneralMeetingControls = (meetingId: string): void => {
 		getMeetingParticipantsByMeetingId(store, meetingId)
 	);
 	const setPinnedTile = useStore((store) => store.setPinnedTile);
-	const meetingConnection = useStore((store) => store.meetingConnection);
 	const meetingDisconnection = useStore((store) => store.meetingDisconnection);
 	const websocketNetworkStatus = useStore(({ connections }) => connections.status.websocket);
 
@@ -164,7 +163,6 @@ const useGeneralMeetingControls = (meetingId: string): void => {
 		createSnackbar,
 		goToInfoPage,
 		goToMeetingPage,
-		meetingConnection,
 		meetingDisconnection,
 		meetingId,
 		websocketNetworkStatus

@@ -49,10 +49,9 @@ const MoreActionsButton = (): ReactElement => {
 
 	const switchMode = useCallback(() => {
 		setMeetingViewSelected(
-			meetingId!,
 			meetingViewSelected === MeetingViewType.GRID ? MeetingViewType.CINEMA : MeetingViewType.GRID
 		);
-	}, [meetingId, meetingViewSelected, setMeetingViewSelected]);
+	}, [meetingViewSelected, setMeetingViewSelected]);
 
 	const checkKeyPress = useCallback(
 		(e: KeyboardEvent): void => {

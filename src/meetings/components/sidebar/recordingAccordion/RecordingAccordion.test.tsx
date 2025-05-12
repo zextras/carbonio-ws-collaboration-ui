@@ -42,7 +42,7 @@ beforeEach(() => {
 	store.setLoginInfo(user1.id, 'user1');
 	store.addRooms([room]);
 	store.addMeeting(meeting);
-	store.meetingConnection(meeting.id, false, undefined, false, undefined);
+	store.meetingConnection(meeting.id);
 });
 
 describe('RecordingAccordion tests', () => {

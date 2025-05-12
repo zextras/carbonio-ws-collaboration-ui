@@ -106,10 +106,8 @@ class MeetingsApi implements IMeetingsApi {
 					.getState()
 					.meetingConnection(
 						meetingId,
-						settings.audioStreamEnabled,
-						devicesId.audioDevice,
-						settings.videoStreamEnabled,
-						devicesId.videoDevice
+						{ enabled: settings.audioStreamEnabled, deviceId: devicesId.audioDevice },
+						{ enabled: settings.videoStreamEnabled, deviceId: devicesId.videoDevice }
 					);
 				return this.getMeetingByMeetingId(meetingId).then((meeting) => {
 					if (meeting.meetingType === MeetingType.SCHEDULED) {

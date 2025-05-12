@@ -20,7 +20,7 @@ const meetingId = 'meetingId';
 describe('Active Meeting Slice', () => {
 	test('Add and remove active meeting', () => {
 		const { result } = renderHook(() => useStore());
-		act(() => result.current.meetingConnection(meetingId, false, undefined, false, undefined));
+		act(() => result.current.meetingConnection(meetingId));
 
 		// Check store data
 		expect(size(result.current.activeMeeting)).toBeDefined();
@@ -38,12 +38,12 @@ describe('Active Meeting Slice', () => {
 	});
 	test('Meeting default view is GRID', () => {
 		const { result } = renderHook(() => useStore());
-		act(() => result.current.meetingConnection(meetingId, false, undefined, false, undefined));
+		act(() => result.current.meetingConnection(meetingId));
 		expect(result.current.activeMeeting?.meetingViewSelected).toBe(MeetingViewType.GRID);
 	});
 	test('Change sidebar status', () => {
 		const { result } = renderHook(() => useStore());
-		act(() => result.current.meetingConnection(meetingId, false, undefined, false, undefined));
+		act(() => result.current.meetingConnection(meetingId));
 
 		act(() => result.current.setMeetingSidebarStatus(MeetingAccordionType.GENERAL, false));
 		expect(result.current.activeMeeting?.sidebarStatus[MeetingAccordionType.GENERAL]).toBeFalsy();
@@ -54,7 +54,7 @@ describe('Active Meeting Slice', () => {
 
 	test('Change participants accordion status', () => {
 		const { result } = renderHook(() => useStore());
-		act(() => result.current.meetingConnection(meetingId, false, undefined, false, undefined));
+		act(() => result.current.meetingConnection(meetingId));
 
 		act(() => result.current.setMeetingSidebarStatus(MeetingAccordionType.PARTICIPANTS, false));
 		expect(
@@ -69,7 +69,7 @@ describe('Active Meeting Slice', () => {
 
 	test('Change waiting list accordion status', () => {
 		const { result } = renderHook(() => useStore());
-		act(() => result.current.meetingConnection(meetingId, false, undefined, false, undefined));
+		act(() => result.current.meetingConnection(meetingId));
 
 		act(() => result.current.setMeetingSidebarStatus(MeetingAccordionType.WAITING_LIST, false));
 		expect(
@@ -84,7 +84,7 @@ describe('Active Meeting Slice', () => {
 
 	test('Change recording accordion status', () => {
 		const { result } = renderHook(() => useStore());
-		act(() => result.current.meetingConnection(meetingId, false, undefined, false, undefined));
+		act(() => result.current.meetingConnection(meetingId));
 
 		act(() => result.current.setMeetingSidebarStatus(MeetingAccordionType.RECORDING, false));
 		expect(result.current.activeMeeting?.sidebarStatus[MeetingAccordionType.RECORDING]).toBeFalsy();
@@ -97,20 +97,20 @@ describe('Active Meeting Slice', () => {
 
 	test('Change chat visibility ', () => {
 		const { result } = renderHook(() => useStore());
-		act(() => result.current.meetingConnection(meetingId, false, undefined, false, undefined));
+		act(() => result.current.meetingConnection(meetingId));
 
-		act(() => result.current.setMeetingChatVisibility(meetingId, MeetingChatVisibility.CLOSED));
+		act(() => result.current.setMeetingChatVisibility(MeetingChatVisibility.CLOSED));
 		expect(result.current.activeMeeting?.chatVisibility).toBe(MeetingChatVisibility.CLOSED);
 
-		act(() => result.current.setMeetingChatVisibility(meetingId, MeetingChatVisibility.OPEN));
+		act(() => result.current.setMeetingChatVisibility(MeetingChatVisibility.OPEN));
 		expect(result.current.activeMeeting?.chatVisibility).toBe(MeetingChatVisibility.OPEN);
 
-		act(() => result.current.setMeetingChatVisibility(meetingId, MeetingChatVisibility.EXPANDED));
+		act(() => result.current.setMeetingChatVisibility(MeetingChatVisibility.EXPANDED));
 		expect(result.current.activeMeeting?.chatVisibility).toBe(MeetingChatVisibility.EXPANDED);
 	});
 	test('Change background status', () => {
 		const { result } = renderHook(() => useStore());
-		act(() => result.current.meetingConnection(meetingId, false, undefined, false, undefined));
+		act(() => result.current.meetingConnection(meetingId));
 
 		act(() => result.current.setBackgroundImage(meetingId, VirtualBackgroundType.COWORKING));
 		expect(result.current.activeMeeting?.virtualBackground.backgroundImage).toBe(
@@ -127,7 +127,7 @@ describe('Active Meeting Slice', () => {
 		const streamMedia = new MediaStream();
 
 		const { result } = renderHook(() => useStore());
-		act(() => result.current.meetingConnection(meetingId, false, undefined, false, undefined));
+		act(() => result.current.meetingConnection(meetingId));
 
 		act(() => result.current.setBackgroundStream(meetingId, streamMedia));
 		expect(result.current.activeMeeting?.virtualBackground.updatedStream).toBe(streamMedia);

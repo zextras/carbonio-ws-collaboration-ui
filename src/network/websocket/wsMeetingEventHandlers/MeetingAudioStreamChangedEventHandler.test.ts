@@ -46,13 +46,13 @@ describe('meetingAudioStreamChangedEventHandler tests', () => {
 	test('Audio feedback is not sent when event user is not the session user', () => {
 		event.userId = 'userId';
 		const store = useStore.getState();
-		store.meetingConnection(meeting.id, false, undefined, false, undefined);
+		store.meetingConnection(meeting.id);
 		meetingAudioStreamChangedEventHandler(event);
 		expect(mockPlayAudio).not.toHaveBeenCalled();
 	});
 
 	test('Audio feedback is sent when session user is inside meeting and he changes his audio', () => {
-		useStore.getState().meetingConnection(meeting.id, false, undefined, false, undefined);
+		useStore.getState().meetingConnection(meeting.id);
 		event.userId = 'sessionUserId';
 		meetingAudioStreamChangedEventHandler(event);
 		expect(mockPlayAudio).toHaveBeenCalled();
@@ -64,7 +64,7 @@ describe('meetingAudioStreamChangedEventHandler tests', () => {
 	test('Audio feedback is not sent outside active meeting', () => {
 		event.userId = 'sessionUserId';
 		const store = useStore.getState();
-		store.meetingConnection(meeting.id, false, undefined, false, undefined);
+		store.meetingConnection(meeting.id);
 		store.meetingDisconnection(meeting.id);
 		meetingAudioStreamChangedEventHandler(event);
 		expect(mockPlayAudio).not.toHaveBeenCalled();
@@ -75,7 +75,7 @@ describe('meetingAudioStreamChangedEventHandler tests', () => {
 		event.active = false;
 		event.moderatorId = 'moderatorId';
 		const store = useStore.getState();
-		store.meetingConnection(meeting.id, false, undefined, false, undefined);
+		store.meetingConnection(meeting.id);
 		const activeMeeting = getActiveMeeting(useStore.getState(), meeting.id);
 		const closeRtpSender = jest.spyOn(
 			activeMeeting!.bidirectionalAudioConn as BidirectionalConnectionAudioInOut,

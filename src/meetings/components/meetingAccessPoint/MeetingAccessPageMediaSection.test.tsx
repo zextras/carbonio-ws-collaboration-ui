@@ -56,7 +56,7 @@ beforeEach(() => {
 	store.addMeeting(groupMeeting);
 	store.setChatsBeStatus(true);
 	store.setWebsocketStatus(true);
-	store.meetingConnection(groupMeeting.id, false, undefined, false, undefined);
+	store.meetingConnection(groupMeeting.id);
 	localStorage.setItem(
 		'ChatsMeetingSettings',
 		JSON.stringify({ EnableCamera: false, EnableMicrophone: false })

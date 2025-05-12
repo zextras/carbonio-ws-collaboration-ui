@@ -105,18 +105,11 @@ const MeetingBubble: FC<MeetingBubbleProps> = ({ messageId, handleBubbleRemove }
 
 	const onClickHandler = useCallback(() => {
 		setMeetingSidebarStatus(MeetingAccordionType.GENERAL, true);
-		setMeetingChatVisibility(meetingId!, MeetingChatVisibility.OPEN);
+		setMeetingChatVisibility(MeetingChatVisibility.OPEN);
 		if (!inputHasFocus) {
 			setInputHasFocus(roomId ?? '', true);
 		}
-	}, [
-		inputHasFocus,
-		meetingId,
-		roomId,
-		setInputHasFocus,
-		setMeetingChatVisibility,
-		setMeetingSidebarStatus
-	]);
+	}, [inputHasFocus, roomId, setInputHasFocus, setMeetingChatVisibility, setMeetingSidebarStatus]);
 
 	const handleHoverMouse = useCallback(() => {
 		clearTimeout(timer.current);

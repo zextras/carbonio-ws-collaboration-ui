@@ -34,7 +34,7 @@ beforeEach(() => {
 describe('meetingSDPAnsweredEventHandler tests', () => {
 	test('handleRemoteAnswer is not been called when the meeting is not active', () => {
 		const store = useStore.getState();
-		store.meetingConnection(meeting.id, false, undefined, false, undefined);
+		store.meetingConnection(meeting.id);
 		store.meetingDisconnection(meeting.id);
 		const activeMeeting = getActiveMeeting(useStore.getState(), meeting.id);
 		meetingSDPAnsweredEventHandler(event);
@@ -44,7 +44,7 @@ describe('meetingSDPAnsweredEventHandler tests', () => {
 	test('videoIn handleRemoteAnswer is been called when the stream is a video', () => {
 		event.mediaType = STREAM_TYPE.VIDEO;
 		const store = useStore.getState();
-		store.meetingConnection(meeting.id, false, undefined, false, undefined);
+		store.meetingConnection(meeting.id);
 		const videoOutConn = useStore.getState().activeMeeting?.videoOutConn;
 		const handleRemoteAnswer = jest.spyOn(
 			videoOutConn as IVideoOutConnection,
@@ -57,7 +57,7 @@ describe('meetingSDPAnsweredEventHandler tests', () => {
 	test('screenOut handleRemoteAnswer is been called when the stream is a screen', () => {
 		event.mediaType = STREAM_TYPE.SCREEN;
 		const store = useStore.getState();
-		store.meetingConnection(meeting.id, false, undefined, false, undefined);
+		store.meetingConnection(meeting.id);
 		const screenOutConn = useStore.getState().activeMeeting?.screenOutConn;
 		const handleRemoteAnswer = jest.spyOn(
 			screenOutConn as IScreenOutConnection,

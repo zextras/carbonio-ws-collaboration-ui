@@ -37,10 +37,14 @@ export const useActiveMeetingSlice: StateCreator<
 	activeMeeting: undefined,
 	meetingConnection: (
 		meetingId: string,
-		audioStreamEnabled: boolean,
-		selectedAudioDeviceId: string | undefined,
-		videoStreamEnabled: boolean,
-		selectedVideoDeviceId?: string | undefined
+		audioStream?: {
+			enabled: boolean;
+			selectedDeviceId?: string;
+		},
+		videoStream?: {
+			enabled: boolean;
+			selectedDeviceId?: string;
+		}
 	): void => {
 		set(
 			produce((draft: RootStore) => {
@@ -60,19 +64,19 @@ export const useActiveMeetingSlice: StateCreator<
 					isCarouselVisible: true,
 					// Peer connections
 					localStreams: {
-						selectedAudioDeviceId,
-						selectedVideoDeviceId
+						selectedAudioDeviceId: audioStream?.selectedDeviceId,
+						selectedVideoDeviceId: videoStream?.selectedDeviceId
 					},
 					bidirectionalAudioConn: new BidirectionalConnectionAudioInOut(
 						meetingId,
-						audioStreamEnabled,
-						selectedAudioDeviceId
+						audioStream?.enabled || false,
+						audioStream?.selectedDeviceId
 					),
 					videoScreenIn: new VideoScreenInConnection(meetingId),
 					videoOutConn: new VideoOutConnection(
 						meetingId,
-						videoStreamEnabled,
-						selectedVideoDeviceId
+						videoStream?.enabled || false,
+						videoStream?.selectedDeviceId
 					),
 					virtualBackground: {
 						backgroundImage: VirtualBackgroundType.NONE
@@ -101,41 +105,6 @@ export const useActiveMeetingSlice: StateCreator<
 			'AM/MEETING_DISCONNECTION'
 		);
 	},
-	setMeetingSidebarStatus: (accordionType: MeetingAccordionType, status: boolean): void => {
-		set(
-			produce((draft: RootStore) => {
-				if (!draft.activeMeeting) return;
-				draft.activeMeeting.sidebarStatus[accordionType] = status;
-			}),
-			false,
-			'AM/SET_MEETING_SIDEBAR_STATUS'
-		);
-	},
-	setMeetingChatVisibility: (meetingId: string, visibilityStatus: MeetingChatVisibility): void => {
-		set(
-			produce((draft: RootStore) => {
-				if (!isCurrentMeeting(draft, meetingId) || !draft.activeMeeting) return;
-				draft.activeMeeting.chatVisibility = visibilityStatus;
-			}),
-			false,
-			'AM/SET_CHAT_VIEW'
-		);
-	},
-	setMeetingViewSelected: (meetingId: string, viewType: MeetingViewType): void => {
-		set(
-			produce((draft: RootStore) => {
-				if (!isCurrentMeeting(draft, meetingId) || !draft.activeMeeting) return;
-				draft.activeMeeting.meetingViewSelected = viewType;
-
-				// Unset pin when switching to grid view
-				if (viewType === MeetingViewType.GRID) {
-					draft.activeMeeting.pinnedTile = undefined;
-				}
-			}),
-			false,
-			'AM/SET_VIEW_TYPE'
-		);
-	},
 	setLocalStreams: (meetingId: string, streamType: STREAM_TYPE, stream: MediaStream): void => {
 		set(
 			produce((draft: RootStore) => {
@@ -162,6 +131,41 @@ export const useActiveMeetingSlice: StateCreator<
 			}),
 			false,
 			'AM/SET_LOCAL_STREAM'
+		);
+	},
+	setMeetingSidebarStatus: (accordionType: MeetingAccordionType, status: boolean): void => {
+		set(
+			produce((draft: RootStore) => {
+				if (!draft.activeMeeting) return;
+				draft.activeMeeting.sidebarStatus[accordionType] = status;
+			}),
+			false,
+			'AM/SET_MEETING_SIDEBAR_STATUS'
+		);
+	},
+	setMeetingChatVisibility: (visibilityStatus: MeetingChatVisibility): void => {
+		set(
+			produce((draft: RootStore) => {
+				if (!draft.activeMeeting) return;
+				draft.activeMeeting.chatVisibility = visibilityStatus;
+			}),
+			false,
+			'AM/SET_CHAT_VIEW'
+		);
+	},
+	setMeetingViewSelected: (viewType: MeetingViewType): void => {
+		set(
+			produce((draft: RootStore) => {
+				if (!draft.activeMeeting) return;
+				draft.activeMeeting.meetingViewSelected = viewType;
+
+				// Unset pin when switching to grid view
+				if (viewType === MeetingViewType.GRID) {
+					draft.activeMeeting.pinnedTile = undefined;
+				}
+			}),
+			false,
+			'AM/SET_VIEW_TYPE'
 		);
 	},
 	setSelectedDeviceId: (meetingId: string, streamType: STREAM_TYPE, deviceId: string): void => {

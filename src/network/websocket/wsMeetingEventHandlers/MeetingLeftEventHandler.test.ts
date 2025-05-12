@@ -32,7 +32,7 @@ beforeEach(() => {
 	store.setLoginInfo('myUserId', 'User');
 	store.addRooms([room]);
 	store.addMeeting(meeting);
-	store.meetingConnection(meeting.id, false, undefined, false, undefined);
+	store.meetingConnection(meeting.id);
 	store.addParticipant(meeting.id, createMockParticipants({ userId: event.userId }));
 });
 describe('meetingLeftEventHandler tests', () => {
@@ -51,14 +51,14 @@ describe('meetingLeftEventHandler tests', () => {
 	});
 
 	test('Audio feedback is sent when session user is inside meeting', () => {
-		useStore.getState().meetingConnection(meeting.id, false, undefined, false, undefined);
+		useStore.getState().meetingConnection(meeting.id);
 		meetingLeftEventHandler(event);
 		expect(mockPlayAudio).toHaveBeenCalled();
 	});
 
 	test('Audio feedback is not sent outside active meeting', () => {
 		const store = useStore.getState();
-		store.meetingConnection(meeting.id, false, undefined, false, undefined);
+		store.meetingConnection(meeting.id);
 		store.meetingDisconnection(meeting.id);
 		meetingLeftEventHandler(event);
 		expect(mockPlayAudio).not.toHaveBeenCalled();

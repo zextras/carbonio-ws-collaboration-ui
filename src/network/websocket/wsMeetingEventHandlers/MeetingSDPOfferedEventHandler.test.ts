@@ -34,7 +34,7 @@ beforeEach(() => {
 describe('meetingSDPOfferedEventHandler tests', () => {
 	test('handleRemoteOffer is been called when the meeting is active', () => {
 		const store = useStore.getState();
-		store.meetingConnection(meeting.id, false, undefined, false, undefined);
+		store.meetingConnection(meeting.id);
 		const videoScreenIn = useStore.getState().activeMeeting?.videoScreenIn;
 		const handleRemoteOffer = jest.spyOn(
 			videoScreenIn as IVideoScreenInConnection,
@@ -46,7 +46,7 @@ describe('meetingSDPOfferedEventHandler tests', () => {
 
 	test('handleRemoteOffer is not been called when the meeting is not active', () => {
 		const store = useStore.getState();
-		store.meetingConnection(meeting.id, false, undefined, false, undefined);
+		store.meetingConnection(meeting.id);
 		store.meetingDisconnection(meeting.id);
 		const activeMeeting = getActiveMeeting(useStore.getState(), meeting.id);
 		meetingSDPOfferedEventHandler(event);

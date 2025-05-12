@@ -22,8 +22,8 @@ import {
 import { composingStanza, pausedStanza } from '../../../../tests/mocks/XMPPStanza';
 import { setup } from '../../../../tests/test-utils';
 import { RoomBe, RoomType } from '../../../../types/network/models/roomBeTypes';
-import { MarkerStatus } from '../../../../types/store/ChatsRegistryTypes';
 import {
+	MarkerStatus,
 	ConfigurationMessage,
 	MessageType,
 	OperationType

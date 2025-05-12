@@ -70,7 +70,7 @@ const setupBasicGroup = (): { user: UserEvent; store: RootStore } => {
 		result.current.setUserInfo([mockUser2]);
 		result.current.addRooms([groupRoom]);
 		result.current.addMeeting(groupMeeting);
-		result.current.meetingConnection(groupMeeting.id, false, undefined, false, undefined);
+		result.current.meetingConnection(groupMeeting.id);
 	});
 	const { user } = routerContextSetup(<MeetingSidebar />, { meetingId: groupMeeting.id });
 	return { user, store: result.current };

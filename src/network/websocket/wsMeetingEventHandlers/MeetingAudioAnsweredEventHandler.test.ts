@@ -32,7 +32,7 @@ beforeEach(() => {
 describe('meetingAudioAnsweredEventHandler tests', () => {
 	test('handleRemoteAnswer is been called when the meeting is active', () => {
 		const store = useStore.getState();
-		store.meetingConnection(meeting.id, false, undefined, false, undefined);
+		store.meetingConnection(meeting.id);
 		const bidirectionalAudioConn = useStore.getState().activeMeeting?.bidirectionalAudioConn;
 		const handleRemoteAnswer = jest.spyOn(
 			bidirectionalAudioConn as IBidirectionalConnectionAudioInOut,
@@ -44,7 +44,7 @@ describe('meetingAudioAnsweredEventHandler tests', () => {
 
 	test('handleRemoteAnswer is not been called when the meeting is not active', () => {
 		const store = useStore.getState();
-		store.meetingConnection(meeting.id, false, undefined, false, undefined);
+		store.meetingConnection(meeting.id);
 		store.meetingDisconnection(meeting.id);
 		const activeMeeting = getActiveMeeting(useStore.getState(), meeting.id);
 		meetingAudioAnsweredEventHandler(event);

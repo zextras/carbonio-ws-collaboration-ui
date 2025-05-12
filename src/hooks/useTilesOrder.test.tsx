@@ -27,7 +27,7 @@ beforeEach(() => {
 	store.setLoginInfo('0', 'User');
 	store.addRooms([room]);
 	store.addMeeting(meeting);
-	store.meetingConnection(meeting.id, false, undefined, false, undefined);
+	store.meetingConnection(meeting.id);
 });
 
 describe('useTilesOrder custom hook - ordered by joined time', () => {

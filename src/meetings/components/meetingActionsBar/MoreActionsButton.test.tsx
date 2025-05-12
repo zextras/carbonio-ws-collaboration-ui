@@ -77,7 +77,7 @@ const storeSetupGroupMeeting = (): { user: UserEvent; store: RootStore } => {
 	store.setLoginInfo(user1.id, user1.name);
 	store.addRooms([room]);
 	store.addMeeting(meeting);
-	store.meetingConnection(meeting.id, false, undefined, false, undefined);
+	store.meetingConnection(meeting.id);
 
 	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
 	spyUseParams.mockReturnValue({ meetingId: meeting.id });
@@ -93,7 +93,7 @@ const storeSetupGroupMeetingWithOnePerson = (): { user: UserEvent } => {
 		result.current.setLoginInfo(user1.id, user1.name);
 		result.current.addRooms([room]);
 		result.current.addMeeting(meetingWithOnePerson);
-		result.current.meetingConnection(meetingWithOnePerson.id, false, undefined, false, undefined);
+		result.current.meetingConnection(meetingWithOnePerson.id);
 	});
 	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
 	spyUseParams.mockReturnValue({ meetingId: meetingWithOnePerson.id });
@@ -115,7 +115,7 @@ const storeSetupGroupMeetingPip = (): { user: UserEvent; store: RootStore } => {
 	store.setLoginInfo(user1.id, user1.name);
 	store.addRooms([room]);
 	store.addMeeting(meeting);
-	store.meetingConnection(meeting.id, false, undefined, false, undefined);
+	store.meetingConnection(meeting.id);
 	store.setLocalStreams(meeting.id, STREAM_TYPE.VIDEO, new MediaStream());
 	store.setAttributes(createMockAttributesList());
 	store.setTalkingUser(meeting.id, user2.id, true);
@@ -148,7 +148,7 @@ describe('Meeting action bar - More actions button interactions', () => {
 	});
 
 	test('When full screen mode is enabled in grid view, meeting sidebar will be closed ', async () => {
-		useStore.getState().setMeetingViewSelected(meeting.id, MeetingViewType.GRID);
+		useStore.getState().setMeetingViewSelected(MeetingViewType.GRID);
 		const { user } = storeSetupGroupMeeting();
 
 		const moreActions = await screen.findByTestId(moreActionsTestId);
@@ -162,7 +162,7 @@ describe('Meeting action bar - More actions button interactions', () => {
 	});
 
 	test('When full screen mode is enabled in cinema view, meeting sidebar and carousel will be closed ', async () => {
-		useStore.getState().setMeetingViewSelected(meeting.id, MeetingViewType.CINEMA);
+		useStore.getState().setMeetingViewSelected(MeetingViewType.CINEMA);
 		const { user } = storeSetupGroupMeeting();
 
 		const moreActions = await screen.findByTestId(moreActionsTestId);

@@ -47,7 +47,7 @@ beforeEach(() => {
 	store.setUserInfo([user1, user2]);
 	store.addRooms([room]);
 	store.addMeeting(meeting);
-	store.meetingConnection(meeting.id, false, undefined, false, undefined);
+	store.meetingConnection(meeting.id);
 	store.setMeetingSidebarStatus(MeetingAccordionType.RAISE_HAND, true); // default open
 });
 

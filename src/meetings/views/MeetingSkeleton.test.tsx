@@ -68,7 +68,7 @@ const storeSetupGroupMeetingSkeleton = (): { user: UserEvent; store: RootStore }
 	store.setLoginInfo(user1.id, user1.name);
 	store.addRooms([room]);
 	store.addMeeting(meeting);
-	store.meetingConnection(meeting.id, false, undefined, true, 'videoId');
+	store.meetingConnection(meeting.id, { enabled: false }, { enabled: true, deviceId: 'videoId' });
 	store.setLocalStreams(meeting.id, STREAM_TYPE.VIDEO, new MediaStream());
 	store.setAttributes(createMockAttributesList());
 	const { user } = routerContextSetup(<MeetingSkeleton />, {

@@ -13,18 +13,22 @@ import {
 
 export type ActiveMeetingSlice = {
 	activeMeeting: ActiveMeeting | undefined;
-	setMeetingChatVisibility: (meetingId: string, visibilityStatus: MeetingChatVisibility) => void;
-	setMeetingViewSelected: (meetingId: string, viewType: MeetingViewType) => void;
 	meetingConnection: (
 		meetingId: string,
-		audioStreamEnabled: boolean,
-		selectedAudioDeviceId: string | undefined,
-		videoStreamEnabled: boolean,
-		selectedVideoDeviceId: string | undefined
+		audioStream?: {
+			enabled: boolean;
+			deviceId?: string;
+		},
+		videoStream?: {
+			enabled: boolean;
+			deviceId?: string;
+		}
 	) => void;
 	meetingDisconnection: (meetingId: string) => void;
 	setLocalStreams: (meetingId: string, streamType: STREAM_TYPE, stream: MediaStream) => void;
 	removeLocalStreams: (meetingId: string, streamType: STREAM_TYPE) => void;
+	setMeetingChatVisibility: (visibilityStatus: MeetingChatVisibility) => void;
+	setMeetingViewSelected: (viewType: MeetingViewType) => void;
 	setMeetingSidebarStatus: (sidebarType: MeetingAccordionType, status: boolean) => void;
 	setSelectedDeviceId: (meetingId: string, streamType: STREAM_TYPE, deviceId: string) => void;
 	setSubscribedTracks: (meetingId: string, streams: StreamsSubscriptionMap) => void;
