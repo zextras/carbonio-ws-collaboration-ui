@@ -15,6 +15,7 @@ import VideoScreenInConnection from '../../network/webRTC/VideoScreenInConnectio
 import {
 	ActiveMeetingSlice,
 	MeetingChatVisibility,
+	MeetingAccordionType,
 	MeetingViewType,
 	STREAM_TYPE,
 	StreamsSubscriptionMap,
@@ -47,12 +48,12 @@ export const useActiveMeetingSlice: StateCreator<
 					meetingId,
 					// Default graphic values
 					sidebarStatus: {
-						sidebarIsOpened: true,
-						participantsAccordionIsOpened: false,
-						waitingListAccordionIsOpened: true,
-						recordingAccordionIsOpened: false,
-						visualEffectsAccordionIsOpened: false,
-						raiseHandAccordionStatusIsOpened: true
+						[MeetingAccordionType.GENERAL]: true,
+						[MeetingAccordionType.PARTICIPANTS]: false,
+						[MeetingAccordionType.WAITING_LIST]: true,
+						[MeetingAccordionType.RECORDING]: false,
+						[MeetingAccordionType.VISUAL_EFFECTS]: false,
+						[MeetingAccordionType.RAISE_HAND]: true
 					},
 					chatVisibility: MeetingChatVisibility.OPEN,
 					meetingViewSelected: MeetingViewType.GRID,
@@ -100,64 +101,14 @@ export const useActiveMeetingSlice: StateCreator<
 			'AM/MEETING_DISCONNECTION'
 		);
 	},
-	setMeetingSidebarStatus: (meetingId: string, status: boolean): void => {
+	setMeetingSidebarStatus: (accordionType: MeetingAccordionType, status: boolean): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (!isCurrentMeeting(draft, meetingId) || !draft.activeMeeting) return;
-				draft.activeMeeting.sidebarStatus.sidebarIsOpened = status;
+				if (!draft.activeMeeting) return;
+				draft.activeMeeting.sidebarStatus[accordionType] = status;
 			}),
 			false,
 			'AM/SET_MEETING_SIDEBAR_STATUS'
-		);
-	},
-	setWaitingListAccordionStatus: (meetingId: string, status: boolean): void => {
-		set(
-			produce((draft: RootStore) => {
-				if (!isCurrentMeeting(draft, meetingId) || !draft.activeMeeting) return;
-				draft.activeMeeting.sidebarStatus.waitingListAccordionIsOpened = status;
-			}),
-			false,
-			'AM/SET_WAITING_LIST_ACCORDION_STATUS'
-		);
-	},
-	setRecordingAccordionStatus: (meetingId: string, status: boolean): void => {
-		set(
-			produce((draft: RootStore) => {
-				if (!isCurrentMeeting(draft, meetingId) || !draft.activeMeeting) return;
-				draft.activeMeeting.sidebarStatus.recordingAccordionIsOpened = status;
-			}),
-			false,
-			'AM/SET_RECORDING_ACCORDION_STATUS'
-		);
-	},
-	setMeetingParticipantsAccordionStatus: (meetingId: string, status: boolean): void => {
-		set(
-			produce((draft: RootStore) => {
-				if (!isCurrentMeeting(draft, meetingId) || !draft.activeMeeting) return;
-				draft.activeMeeting.sidebarStatus.participantsAccordionIsOpened = status;
-			}),
-			false,
-			'AM/SET_MEETING_PARTICIPANTS_ACCORDION_STATUS'
-		);
-	},
-	setVisualEffectsAccordionStatus: (meetingId: string, status: boolean): void => {
-		set(
-			produce((draft: RootStore) => {
-				if (!isCurrentMeeting(draft, meetingId) || !draft.activeMeeting) return;
-				draft.activeMeeting.sidebarStatus.visualEffectsAccordionIsOpened = status;
-			}),
-			false,
-			'AM/SET_VISUAL_EFFECTS_ACCORDION_STATUS'
-		);
-	},
-	setRaiseHandAccordionStatus: (meetingId: string, status: boolean): void => {
-		set(
-			produce((draft: RootStore) => {
-				if (!isCurrentMeeting(draft, meetingId) || !draft.activeMeeting) return;
-				draft.activeMeeting.sidebarStatus.raiseHandAccordionStatusIsOpened = status;
-			}),
-			false,
-			'AM/SET_RAISE_HAND_ACCORDION_STATUS'
 		);
 	},
 	setMeetingChatVisibility: (meetingId: string, visibilityStatus: MeetingChatVisibility): void => {

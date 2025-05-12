@@ -27,7 +27,10 @@ import {
 } from '../../../store/selectors/RoomsSelectors';
 import { getAttribute, getUserId } from '../../../store/selectors/SessionSelectors';
 import useStore from '../../../store/Store';
-import { MeetingChatVisibility } from '../../../types/store/ActiveMeetingTypes';
+import {
+	MeetingAccordionType,
+	MeetingChatVisibility
+} from '../../../types/store/ActiveMeetingTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 import BubblesWrapper from '../bubblesWrapper/BubblesWrapper';
 import VisualEffectsAccordion from './visualEffectsAccordion/VisualEffectsAccordion';
@@ -83,8 +86,8 @@ const MeetingSidebar = (): ReactElement => {
 	);
 
 	const toggleSidebar = useCallback(
-		() => setMeetingSidebarStatus(meetingId!, !sidebarIsVisible),
-		[setMeetingSidebarStatus, meetingId, sidebarIsVisible]
+		() => setMeetingSidebarStatus(MeetingAccordionType.GENERAL, !sidebarIsVisible),
+		[setMeetingSidebarStatus, sidebarIsVisible]
 	);
 
 	const showRecordingAccordion = useMemo(

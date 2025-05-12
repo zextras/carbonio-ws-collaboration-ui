@@ -14,6 +14,7 @@ import MeetingParticipantsList from './MeetingParticipantsList';
 import { getMeetingParticipantsAccordionStatus } from '../../../../store/selectors/ActiveMeetingSelectors';
 import { getNumberOfMeetingParticipantsByMeetingId } from '../../../../store/selectors/MeetingSelectors';
 import useStore from '../../../../store/Store';
+import { MeetingAccordionType } from '../../../../types/store/ActiveMeetingTypes';
 
 const CustomAccordion = styled(Accordion)`
 	-webkit-user-select: none;
@@ -40,13 +41,11 @@ const MeetingParticipantsAccordion: FC<MeetingParticipantsAccordionProps> = ({ m
 	});
 
 	const accordionStatus = useStore(getMeetingParticipantsAccordionStatus);
-	const setParticipantsAccordionStatus = useStore(
-		(state) => state.setMeetingParticipantsAccordionStatus
-	);
+	const setMeetingSidebarStatus = useStore((state) => state.setMeetingSidebarStatus);
 
 	const toggleAccordionStatus = useCallback(
-		() => setParticipantsAccordionStatus(meetingId, !accordionStatus),
-		[accordionStatus, meetingId, setParticipantsAccordionStatus]
+		() => setMeetingSidebarStatus(MeetingAccordionType.PARTICIPANTS, !accordionStatus),
+		[accordionStatus, setMeetingSidebarStatus]
 	);
 
 	const infoDetails = useMemo<AccordionItemType[]>(() => {

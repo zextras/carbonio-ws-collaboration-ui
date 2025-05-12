@@ -14,7 +14,7 @@ import usePiPWindow from '../../../hooks/usePipWindow';
 import { getMeetingViewSelected } from '../../../store/selectors/ActiveMeetingSelectors';
 import { getNumberOfTiles } from '../../../store/selectors/MeetingSelectors';
 import useStore from '../../../store/Store';
-import { MeetingViewType } from '../../../types/store/ActiveMeetingTypes';
+import { MeetingAccordionType, MeetingViewType } from '../../../types/store/ActiveMeetingTypes';
 import { RouterContext } from '../../contexts/routerContext';
 
 const MoreActionsButton = (): ReactElement => {
@@ -66,7 +66,7 @@ const MoreActionsButton = (): ReactElement => {
 
 	const toggleFullScreenFn = useCallback((): void => {
 		if (!isFullScreen) {
-			setMeetingSidebarStatus(meetingId!, false);
+			setMeetingSidebarStatus(MeetingAccordionType.GENERAL, false);
 			if (meetingView === MeetingViewType.CINEMA) {
 				setIsCarouselVisible(meetingId!, false);
 			}

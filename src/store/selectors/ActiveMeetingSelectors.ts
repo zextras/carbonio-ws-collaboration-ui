@@ -8,6 +8,7 @@ import { find } from 'lodash';
 
 import {
 	ActiveMeeting,
+	MeetingAccordionType,
 	MeetingChatVisibility,
 	MeetingViewType,
 	STREAM_TYPE,
@@ -25,22 +26,22 @@ export const getActiveMeeting = (
 };
 
 export const getMeetingSidebarStatus = (store: RootStore): boolean =>
-	!!store.activeMeeting?.sidebarStatus.sidebarIsOpened;
+	!!store.activeMeeting?.sidebarStatus[MeetingAccordionType.GENERAL];
 
 export const getMeetingParticipantsAccordionStatus = (store: RootStore): boolean =>
-	!!store.activeMeeting?.sidebarStatus.participantsAccordionIsOpened;
+	!!store.activeMeeting?.sidebarStatus[MeetingAccordionType.PARTICIPANTS];
 
 export const getWaitingListAccordionStatus = (store: RootStore): boolean =>
-	!!store.activeMeeting?.sidebarStatus.waitingListAccordionIsOpened;
+	!!store.activeMeeting?.sidebarStatus[MeetingAccordionType.WAITING_LIST];
 
 export const getRecordingAccordionStatus = (store: RootStore): boolean =>
-	!!store.activeMeeting?.sidebarStatus.recordingAccordionIsOpened;
+	!!store.activeMeeting?.sidebarStatus[MeetingAccordionType.RECORDING];
 
 export const getVisualEffectsAccordionStatus = (store: RootStore): boolean =>
-	!!store.activeMeeting?.sidebarStatus.visualEffectsAccordionIsOpened;
+	!!store.activeMeeting?.sidebarStatus[MeetingAccordionType.VISUAL_EFFECTS];
 
 export const getRaiseHandAccordionStatus = (store: RootStore): boolean =>
-	!!store.activeMeeting?.sidebarStatus.raiseHandAccordionStatusIsOpened;
+	!!store.activeMeeting?.sidebarStatus[MeetingAccordionType.RAISE_HAND];
 
 export const getMeetingChatVisibility = (store: RootStore): MeetingChatVisibility =>
 	store.activeMeeting?.chatVisibility ?? MeetingChatVisibility.CLOSED;

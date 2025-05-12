@@ -28,6 +28,7 @@ import { MeetingsApi } from '../../../../network';
 import { getRecordingAccordionStatus } from '../../../../store/selectors/ActiveMeetingSelectors';
 import { getMeetingRecordingTimestamp } from '../../../../store/selectors/MeetingSelectors';
 import useStore from '../../../../store/Store';
+import { MeetingAccordionType } from '../../../../types/store/ActiveMeetingTypes';
 
 const CustomAccordion = styled(Accordion)`
 	-webkit-user-select: none;
@@ -73,7 +74,7 @@ const RecordingAccordion: FC<RecordingAccordionProps> = ({ meetingId }) => {
 
 	const recordingTimestamp = useStore((state) => getMeetingRecordingTimestamp(state, meetingId));
 	const accordionStatus = useStore(getRecordingAccordionStatus);
-	const setAccordionStatus = useStore((state) => state.setRecordingAccordionStatus);
+	const setMeetingSidebarStatus = useStore((state) => state.setMeetingSidebarStatus);
 
 	const createSnackbar: CreateSnackbarFn = useSnackbar();
 
@@ -84,8 +85,8 @@ const RecordingAccordion: FC<RecordingAccordionProps> = ({ meetingId }) => {
 	const closeModal = useCallback(() => setIsStopRecordingModalOpen(false), []);
 
 	const toggleAccordionStatus = useCallback(
-		() => setAccordionStatus(meetingId, !accordionStatus),
-		[accordionStatus, meetingId, setAccordionStatus]
+		() => setMeetingSidebarStatus(MeetingAccordionType.RECORDING, !accordionStatus),
+		[accordionStatus, setMeetingSidebarStatus]
 	);
 
 	const startRecording = useCallback(() => {

@@ -13,11 +13,6 @@ import {
 
 export type ActiveMeetingSlice = {
 	activeMeeting: ActiveMeeting | undefined;
-	setWaitingListAccordionStatus: (roomId: string, status: boolean) => void;
-	setRecordingAccordionStatus: (roomId: string, status: boolean) => void;
-	setMeetingParticipantsAccordionStatus: (roomId: string, status: boolean) => void;
-	setVisualEffectsAccordionStatus: (meetingId: string, status: boolean) => void;
-	setRaiseHandAccordionStatus: (meetingId: string, status: boolean) => void;
 	setMeetingChatVisibility: (meetingId: string, visibilityStatus: MeetingChatVisibility) => void;
 	setMeetingViewSelected: (meetingId: string, viewType: MeetingViewType) => void;
 	meetingConnection: (
@@ -30,7 +25,7 @@ export type ActiveMeetingSlice = {
 	meetingDisconnection: (meetingId: string) => void;
 	setLocalStreams: (meetingId: string, streamType: STREAM_TYPE, stream: MediaStream) => void;
 	removeLocalStreams: (meetingId: string, streamType: STREAM_TYPE) => void;
-	setMeetingSidebarStatus: (meetingId: string, status: boolean) => void;
+	setMeetingSidebarStatus: (sidebarType: MeetingAccordionType, status: boolean) => void;
 	setSelectedDeviceId: (meetingId: string, streamType: STREAM_TYPE, deviceId: string) => void;
 	setSubscribedTracks: (meetingId: string, streams: StreamsSubscriptionMap) => void;
 	setIsCarouseVisible: (meetingId: string, status: boolean) => void;
@@ -68,13 +63,22 @@ export type ActiveMeeting = {
 	usersWithHandRaised: string[];
 };
 
+export enum MeetingAccordionType {
+	GENERAL = 'general',
+	PARTICIPANTS = 'participants',
+	WAITING_LIST = 'waitingList',
+	RECORDING = 'recording',
+	VISUAL_EFFECTS = 'visualEffects',
+	RAISE_HAND = 'raiseHand'
+}
+
 export type SidebarStatus = {
-	sidebarIsOpened: boolean;
-	participantsAccordionIsOpened: boolean;
-	waitingListAccordionIsOpened: boolean;
-	recordingAccordionIsOpened: boolean;
-	visualEffectsAccordionIsOpened: boolean;
-	raiseHandAccordionStatusIsOpened: boolean;
+	[MeetingAccordionType.GENERAL]: boolean;
+	[MeetingAccordionType.PARTICIPANTS]: boolean;
+	[MeetingAccordionType.WAITING_LIST]: boolean;
+	[MeetingAccordionType.RECORDING]: boolean;
+	[MeetingAccordionType.VISUAL_EFFECTS]: boolean;
+	[MeetingAccordionType.RAISE_HAND]: boolean;
 };
 
 export enum MeetingViewType {

@@ -8,6 +8,7 @@ import { act, renderHook } from '@testing-library/react';
 import { size } from 'lodash';
 
 import {
+	MeetingAccordionType,
 	MeetingChatVisibility,
 	MeetingViewType,
 	VirtualBackgroundType
@@ -24,12 +25,12 @@ describe('Active Meeting Slice', () => {
 		// Check store data
 		expect(size(result.current.activeMeeting)).toBeDefined();
 		expect(result.current.activeMeeting?.sidebarStatus).toStrictEqual({
-			sidebarIsOpened: true,
-			participantsAccordionIsOpened: false,
-			waitingListAccordionIsOpened: true,
-			visualEffectsAccordionIsOpened: false,
-			recordingAccordionIsOpened: false,
-			raiseHandAccordionStatusIsOpened: true
+			[MeetingAccordionType.GENERAL]: true,
+			[MeetingAccordionType.PARTICIPANTS]: false,
+			[MeetingAccordionType.WAITING_LIST]: true,
+			[MeetingAccordionType.VISUAL_EFFECTS]: false,
+			[MeetingAccordionType.RECORDING]: false,
+			[MeetingAccordionType.RAISE_HAND]: true
 		});
 		expect(result.current.activeMeeting?.chatVisibility).toBe(MeetingChatVisibility.OPEN);
 		act(() => result.current.meetingDisconnection(meetingId));
@@ -44,44 +45,54 @@ describe('Active Meeting Slice', () => {
 		const { result } = renderHook(() => useStore());
 		act(() => result.current.meetingConnection(meetingId, false, undefined, false, undefined));
 
-		act(() => result.current.setMeetingSidebarStatus(meetingId, false));
-		expect(result.current.activeMeeting?.sidebarStatus.sidebarIsOpened).toBeFalsy();
+		act(() => result.current.setMeetingSidebarStatus(MeetingAccordionType.GENERAL, false));
+		expect(result.current.activeMeeting?.sidebarStatus[MeetingAccordionType.GENERAL]).toBeFalsy();
 
-		act(() => result.current.setMeetingSidebarStatus(meetingId, true));
-		expect(result.current.activeMeeting?.sidebarStatus.sidebarIsOpened).toBeTruthy();
+		act(() => result.current.setMeetingSidebarStatus(MeetingAccordionType.GENERAL, true));
+		expect(result.current.activeMeeting?.sidebarStatus[MeetingAccordionType.GENERAL]).toBeTruthy();
 	});
 
 	test('Change participants accordion status', () => {
 		const { result } = renderHook(() => useStore());
 		act(() => result.current.meetingConnection(meetingId, false, undefined, false, undefined));
 
-		act(() => result.current.setMeetingParticipantsAccordionStatus(meetingId, false));
-		expect(result.current.activeMeeting?.sidebarStatus.participantsAccordionIsOpened).toBeFalsy();
+		act(() => result.current.setMeetingSidebarStatus(MeetingAccordionType.PARTICIPANTS, false));
+		expect(
+			result.current.activeMeeting?.sidebarStatus[MeetingAccordionType.PARTICIPANTS]
+		).toBeFalsy();
 
-		act(() => result.current.setMeetingParticipantsAccordionStatus(meetingId, true));
-		expect(result.current.activeMeeting?.sidebarStatus.participantsAccordionIsOpened).toBeTruthy();
+		act(() => result.current.setMeetingSidebarStatus(MeetingAccordionType.PARTICIPANTS, true));
+		expect(
+			result.current.activeMeeting?.sidebarStatus[MeetingAccordionType.PARTICIPANTS]
+		).toBeTruthy();
 	});
 
 	test('Change waiting list accordion status', () => {
 		const { result } = renderHook(() => useStore());
 		act(() => result.current.meetingConnection(meetingId, false, undefined, false, undefined));
 
-		act(() => result.current.setWaitingListAccordionStatus(meetingId, false));
-		expect(result.current.activeMeeting?.sidebarStatus.waitingListAccordionIsOpened).toBeFalsy();
+		act(() => result.current.setMeetingSidebarStatus(MeetingAccordionType.WAITING_LIST, false));
+		expect(
+			result.current.activeMeeting?.sidebarStatus[MeetingAccordionType.WAITING_LIST]
+		).toBeFalsy();
 
-		act(() => result.current.setWaitingListAccordionStatus(meetingId, true));
-		expect(result.current.activeMeeting?.sidebarStatus.waitingListAccordionIsOpened).toBeTruthy();
+		act(() => result.current.setMeetingSidebarStatus(MeetingAccordionType.WAITING_LIST, true));
+		expect(
+			result.current.activeMeeting?.sidebarStatus[MeetingAccordionType.WAITING_LIST]
+		).toBeTruthy();
 	});
 
 	test('Change recording accordion status', () => {
 		const { result } = renderHook(() => useStore());
 		act(() => result.current.meetingConnection(meetingId, false, undefined, false, undefined));
 
-		act(() => result.current.setRecordingAccordionStatus(meetingId, false));
-		expect(result.current.activeMeeting?.sidebarStatus.recordingAccordionIsOpened).toBeFalsy();
+		act(() => result.current.setMeetingSidebarStatus(MeetingAccordionType.RECORDING, false));
+		expect(result.current.activeMeeting?.sidebarStatus[MeetingAccordionType.RECORDING]).toBeFalsy();
 
-		act(() => result.current.setRecordingAccordionStatus(meetingId, true));
-		expect(result.current.activeMeeting?.sidebarStatus.recordingAccordionIsOpened).toBeTruthy();
+		act(() => result.current.setMeetingSidebarStatus(MeetingAccordionType.RECORDING, true));
+		expect(
+			result.current.activeMeeting?.sidebarStatus[MeetingAccordionType.RECORDING]
+		).toBeTruthy();
 	});
 
 	test('Change chat visibility ', () => {

@@ -23,7 +23,11 @@ import { routerContextSetup, setup } from '../../../tests/test-utils';
 import { MeetingBe } from '../../../types/network/models/meetingBeTypes';
 import { MemberBe, RoomBe } from '../../../types/network/models/roomBeTypes';
 import { UserBe } from '../../../types/network/models/userBeTypes';
-import { MeetingViewType, STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
+import {
+	MeetingAccordionType,
+	MeetingViewType,
+	STREAM_TYPE
+} from '../../../types/store/ActiveMeetingTypes';
 import { MeetingParticipant } from '../../../types/store/MeetingTypes';
 import { RoomType } from '../../../types/store/RoomTypes';
 import { RootStore } from '../../../types/store/StoreTypes';
@@ -152,7 +156,8 @@ describe('Meeting action bar - More actions button interactions', () => {
 
 		const fullScreen = await screen.findByText(/Enable full screen/i);
 		await user.click(fullScreen);
-		const sidebarIsOpened = useStore.getState().activeMeeting?.sidebarStatus.sidebarIsOpened;
+		const sidebarIsOpened =
+			useStore.getState().activeMeeting?.sidebarStatus[MeetingAccordionType.GENERAL];
 		expect(sidebarIsOpened).toBe(false);
 	});
 
@@ -170,7 +175,8 @@ describe('Meeting action bar - More actions button interactions', () => {
 
 		const fullScreen = await screen.findByText(/Enable full screen/i);
 		await user.click(fullScreen);
-		const sidebarIsOpened = useStore.getState().activeMeeting?.sidebarStatus.sidebarIsOpened;
+		const sidebarIsOpened =
+			useStore.getState().activeMeeting?.sidebarStatus[MeetingAccordionType.GENERAL];
 		expect(sidebarIsOpened).toBe(false);
 		const isCarouselVisible = useStore.getState().activeMeeting?.isCarouselVisible;
 		expect(isCarouselVisible).toBe(false);

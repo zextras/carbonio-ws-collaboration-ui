@@ -15,6 +15,7 @@ import WaitingUser from './WaitingUser';
 import { getWaitingListAccordionStatus } from '../../../../store/selectors/ActiveMeetingSelectors';
 import { getWaitingList } from '../../../../store/selectors/MeetingSelectors';
 import useStore from '../../../../store/Store';
+import { MeetingAccordionType } from '../../../../types/store/ActiveMeetingTypes';
 
 const CustomAccordion = styled(Accordion)`
 	-webkit-user-select: none;
@@ -31,11 +32,11 @@ const WaitingListAccordion: FC<WaitingListAccordionProps> = ({ meetingId }) => {
 
 	const waitingList = useStore((store) => getWaitingList(store, meetingId));
 	const accordionStatus = useStore(getWaitingListAccordionStatus);
-	const setParticipantsAccordionStatus = useStore((state) => state.setWaitingListAccordionStatus);
+	const setMeetingSidebarStatus = useStore((state) => state.setMeetingSidebarStatus);
 
 	const toggleAccordionStatus = useCallback(
-		() => setParticipantsAccordionStatus(meetingId, !accordionStatus),
-		[accordionStatus, meetingId, setParticipantsAccordionStatus]
+		() => setMeetingSidebarStatus(MeetingAccordionType.WAITING_LIST, !accordionStatus),
+		[accordionStatus, setMeetingSidebarStatus]
 	);
 
 	const items = useMemo(() => {

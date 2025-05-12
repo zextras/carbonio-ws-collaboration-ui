@@ -22,6 +22,7 @@ import { setup } from '../../../../tests/test-utils';
 import { MeetingBe, MeetingType } from '../../../../types/network/models/meetingBeTypes';
 import { RoomBe } from '../../../../types/network/models/roomBeTypes';
 import { WsEventType } from '../../../../types/network/websocket/wsEvents';
+import { MeetingAccordionType } from '../../../../types/store/ActiveMeetingTypes';
 import { RoomType } from '../../../../types/store/RoomTypes';
 
 const user1 = createMockUser({ id: 'user1', name: 'user1' });
@@ -47,7 +48,7 @@ beforeEach(() => {
 	store.addRooms([room]);
 	store.addMeeting(meeting);
 	store.meetingConnection(meeting.id, false, undefined, false, undefined);
-	store.setRaiseHandAccordionStatus(meeting.id, true); // default open
+	store.setMeetingSidebarStatus(MeetingAccordionType.RAISE_HAND, true); // default open
 });
 
 describe('RaiseHandAccordion', () => {
