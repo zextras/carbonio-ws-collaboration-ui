@@ -13,7 +13,7 @@ import styled from 'styled-components';
 
 import ParticipantElement from './ParticipantElement';
 import {
-	getMeetingParticipants,
+	getMeetingParticipantsByRoomId,
 	getNumberOfMeetingParticipants
 } from '../../../store/selectors/MeetingSelectors';
 import { getMeetingIdFromRoom } from '../../../store/selectors/RoomsSelectors';
@@ -49,7 +49,7 @@ const ActiveMeetingParticipantsDropdown = ({
 
 	const numberOfParticipants = useStore((store) => getNumberOfMeetingParticipants(store, roomId));
 	const meetingParticipants: MeetingParticipantMap | undefined = useStore((store) =>
-		getMeetingParticipants(store, roomId)
+		getMeetingParticipantsByRoomId(store, roomId)
 	);
 	const meetingId = useStore((store) => getMeetingIdFromRoom(store, roomId));
 

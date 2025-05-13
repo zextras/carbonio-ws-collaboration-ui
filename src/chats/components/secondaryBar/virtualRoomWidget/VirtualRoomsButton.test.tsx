@@ -30,7 +30,7 @@ beforeEach(() => {
 	store.setLoginInfo(sessionUser.id, sessionUser.name);
 	store.setUserInfo([user1]);
 	store.setAttributes(createMockAttributesList({ carbonioWscVideoCallEnabled: 'TRUE' }));
-	store.setMeetings([virtualRoom]);
+	store.addMeetings([virtualRoom]);
 });
 
 describe('VirtualRoomsButton', () => {

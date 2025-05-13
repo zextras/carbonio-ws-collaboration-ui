@@ -28,7 +28,7 @@ beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo('myUserId', 'User');
 	store.addRooms([room]);
-	store.addMeeting(meeting);
+	store.addMeetings([meeting]);
 });
 describe('meetingSDPAnsweredEventHandler tests', () => {
 	test('handleRemoteAnswer is not been called when the meeting is not active', () => {

@@ -8,6 +8,7 @@ import { waitFor } from '@testing-library/react';
 
 import { wsConversationEventsHandler } from './wsConversationEventsHandler';
 import { wsEventsHandler } from './wsEventsHandler';
+import { getMeetingByRoomId } from '../../store/selectors/MeetingSelectors';
 import useStore from '../../store/Store';
 import { createMockMeeting, createMockRoom, createMockUser } from '../../tests/createMock';
 import {
@@ -57,12 +58,13 @@ describe('wsConversationEventHandler tests', () => {
 			sentDate: '2023-01-01T00:00:00.000Z'
 		} as RoomMemberAddedEvent);
 		await waitFor(() => {
-			expect(useStore.getState().meetings[room.id]).toBeDefined();
+			const meeting = getMeetingByRoomId(useStore.getState(), room.id);
+			expect(meeting).toBeDefined();
 		});
 	});
 
 	test('ROOM_MEMBER_REMOVED: session user is removed from a room with an ongoing meeting', async () => {
-		useStore.getState().addMeeting(meeting);
+		useStore.getState().addMeetings([meeting]);
 		wsEventsHandler({
 			type: WsEventType.ROOM_MEMBER_REMOVED,
 			sentDate: '2023-01-01T00:00:00.000Z',
@@ -70,7 +72,8 @@ describe('wsConversationEventHandler tests', () => {
 			userId: sessionUser.id
 		} as RoomMemberRemovedEvent);
 		await waitFor(() => {
-			expect(useStore.getState().meetings[room.id]).toBeUndefined();
+			const meeting = getMeetingByRoomId(useStore.getState(), room.id);
+			expect(meeting).toBeUndefined();
 		});
 	});
 });

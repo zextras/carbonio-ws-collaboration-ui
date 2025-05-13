@@ -28,13 +28,13 @@ beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo('myUserId', 'User');
 	store.addRooms([room]);
-	store.addMeeting(meeting);
+	store.addMeetings([meeting]);
 	store.addUserToWaitingList(meeting.id, 'acceptedId');
 });
 describe('MeetingUserAcceptedEventHandler tests', () => {
 	test('Accepted user is removed from the waiting list', () => {
 		meetingUserAcceptedEventHandler(event);
-		expect(useStore.getState().meetings[room.id].waitingList).not.toContain('acceptedId');
+		expect(useStore.getState().meetings[meeting.id].waitingList).not.toContain('acceptedId');
 	});
 
 	test('Do not send user accepted custom event if another user is accepted', () => {

@@ -32,7 +32,7 @@ describe('MeetingSkeletonMobile test', () => {
 	test('Conversation view', async () => {
 		const store = useStore.getState();
 		store.addRooms([room]);
-		store.addMeeting(meeting);
+		store.addMeetings([meeting]);
 		const { user } = routerContextSetup(
 			<PiPProvider>
 				<MeetingSkeletonMobile />
@@ -50,7 +50,7 @@ describe('MeetingSkeletonMobile test', () => {
 	test('Participants view', async () => {
 		const store = useStore.getState();
 		store.addRooms([room]);
-		store.addMeeting(meeting);
+		store.addMeetings([meeting]);
 		const { user } = routerContextSetup(
 			<PiPProvider>
 				<MeetingSkeletonMobile />

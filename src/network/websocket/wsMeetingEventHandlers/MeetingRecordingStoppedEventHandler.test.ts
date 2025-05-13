@@ -30,14 +30,14 @@ beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo('myUserId', 'User');
 	store.addRooms([room]);
-	store.addMeeting(meeting);
+	store.addMeetings([meeting]);
 });
 describe('MeetingRecordingStoppedEventHandler tests', () => {
 	test('Meeting starting information are reset into store', () => {
 		meetingRecordingStoppedEventHandler(event);
 		const state = useStore.getState();
-		expect(state.meetings[room.id].recStartedAt).toBeUndefined();
-		expect(state.meetings[room.id].recUserId).toBeUndefined();
+		expect(state.meetings[meeting.id].recStartedAt).toBeUndefined();
+		expect(state.meetings[meeting.id].recUserId).toBeUndefined();
 	});
 
 	test('A custom event is sent if the session user is inside meeting', () => {

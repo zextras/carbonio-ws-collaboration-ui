@@ -37,7 +37,7 @@ const userId = 'userId';
 
 const ongoingMeetingSetup = (): void => {
 	const store = useStore.getState();
-	store.addMeeting(meetingMock);
+	store.addMeetings([meetingMock]);
 	store.addParticipant(meetingMock.id, {
 		userId: 'userId',
 		audioStreamOn: false,
@@ -64,9 +64,8 @@ describe('Meetings API', () => {
 		// Check if store is correctly updated
 		const store = useStore.getState();
 		expect(size(store.meetings)).toEqual(2);
-		expect(store.meetings[meetingMock.roomId].id).toEqual(meetingMock.id);
-		expect(store.meetings[meetingMock.roomId].id).toEqual(meetingMock.id);
-		expect(size(store.meetings[meetingMock.roomId].participants)).toEqual(
+		expect(store.meetings[meetingMock.id]).toBeDefined();
+		expect(size(store.meetings[meetingMock.id].participants)).toEqual(
 			size(meetingMock.participants)
 		);
 	});
@@ -152,7 +151,7 @@ describe('Meetings API', () => {
 	});
 
 	test('enterMeeting is called correctly when a meeting is already present and active', async () => {
-		useStore.getState().addMeeting(meetingMock);
+		useStore.getState().addMeetings([meetingMock]);
 		await meetingsApi.enterMeeting(
 			meetingMock.roomId,
 			{
@@ -169,7 +168,7 @@ describe('Meetings API', () => {
 	});
 
 	test('enterMeeting is called correctly when a meeting is already present but not active', async () => {
-		useStore.getState().addMeeting(meetingNotActiveMock);
+		useStore.getState().addMeetings([meetingNotActiveMock]);
 		await meetingsApi.enterMeeting(
 			meetingNotActiveMock.roomId,
 			{

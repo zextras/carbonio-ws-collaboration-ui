@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { act, renderHook } from '@testing-library/react';
 import { size } from 'lodash';
 
 import { createMockMeeting, createMockParticipants, createMockRoom } from '../../tests/createMock';
+import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
 import useStore from '../Store';
 
 const mockParticipant0 = createMockParticipants({
@@ -22,9 +22,12 @@ const mockParticipant1 = createMockParticipants({
 	videoStreamEnabled: true
 });
 
+const room1 = createMockRoom({ id: 'roomId1' });
+const temporaryRoom = createMockRoom({ id: 'temporaryRoomId' });
+
 const mockMeeting0 = createMockMeeting({
 	id: 'meetingId0',
-	roomId: 'roomId0',
+	roomId: room1.id,
 	participants: [mockParticipant0, mockParticipant1],
 	createdAt: '2022-08-25T17:24:28.961+02:00',
 	active: true,
@@ -43,100 +46,131 @@ const mockMeeting2 = createMockMeeting({
 	participants: [mockParticipant1],
 	createdAt: '2022-08-27T19:34:28.961+02:00'
 });
-
-const temporaryRoom = createMockRoom();
-const scheduleMeeting = createMockMeeting({ roomId: temporaryRoom.id });
+const scheduleMeeting = createMockMeeting({ id: 'scheduledMeetingId', roomId: temporaryRoom.id });
 
 beforeEach(() => {
 	const store = useStore.getState();
 	store.addRooms([temporaryRoom]);
 });
 
-describe('Test components slice', () => {
-	test('setMeetings setter', () => {
-		const { result } = renderHook(() => useStore());
-		act(() => result.current.setMeetings([mockMeeting0, mockMeeting1, mockMeeting2]));
+describe('MeetingStoreSlice tests', () => {
+	describe('Meeting lifecycle', () => {
+		test('Add a meeting', () => {
+			useStore.getState().addRooms([]);
+			useStore.getState().addMeetings([mockMeeting0]);
 
-		// Check store data
-		expect(size(result.current.meetings)).toBe(3);
-		const meeting0 = result.current.meetings[mockMeeting0.roomId];
-		expect(meeting0).not.toBeNull();
-		expect(meeting0.id).toBe(mockMeeting0.id);
-		expect(meeting0.roomId).toBe(mockMeeting0.roomId);
-		expect(size(meeting0.participants)).toBe(size(mockMeeting0.participants));
-		expect(meeting0.createdAt).toBe(mockMeeting0.createdAt);
-		expect(meeting0.active).toBeTruthy();
-		expect(meeting0.startedAt).toBe(mockMeeting0.startedAt);
+			// Check store data
+			const store = useStore.getState();
+			const meeting0 = store.meetings[mockMeeting0.id];
+			expect(meeting0).not.toBeNull();
+			expect(meeting0.id).toBe(mockMeeting0.id);
+			expect(meeting0.roomId).toBe(mockMeeting0.roomId);
+			expect(size(meeting0.participants)).toBe(size(mockMeeting0.participants));
+			expect(meeting0.createdAt).toBe(mockMeeting0.createdAt);
+			expect(meeting0.active).toBeTruthy();
+			expect(meeting0.startedAt).toBe(mockMeeting0.startedAt);
 
-		const meeting1 = result.current.meetings[mockMeeting1.roomId];
-		expect(meeting1.active).toBeFalsy();
-		expect(meeting1.startedAt).toBeUndefined();
-	});
-
-	test('addMeeting setter', () => {
-		const { result } = renderHook(() => useStore());
-		act(() => result.current.addMeeting(mockMeeting0));
-
-		// Check store data
-		const meeting0 = result.current.meetings[mockMeeting0.roomId];
-		expect(meeting0).not.toBeNull();
-		expect(meeting0.id).toBe(mockMeeting0.id);
-		expect(meeting0.roomId).toBe(mockMeeting0.roomId);
-		expect(size(meeting0.participants)).toBe(size(mockMeeting0.participants));
-		expect(meeting0.createdAt).toBe(mockMeeting0.createdAt);
-		expect(meeting0.active).toBeTruthy();
-		expect(meeting0.startedAt).toBe(mockMeeting0.startedAt);
-	});
-
-	test('Combination of set components, add components, and remove components setters', () => {
-		const { result } = renderHook(() => useStore());
-
-		act(() => result.current.setMeetings([mockMeeting0, mockMeeting1]));
-		expect(size(result.current.meetings)).toBe(2);
-
-		act(() => result.current.addMeeting(mockMeeting2));
-		expect(size(result.current.meetings)).toBe(3);
-
-		act(() => result.current.deleteMeeting(mockMeeting1.id));
-		expect(size(result.current.meetings)).toBe(2);
-	});
-
-	test('Start a meeting', () => {
-		const { result } = renderHook(() => useStore());
-		act(() => {
-			result.current.addMeeting(mockMeeting1);
-			result.current.startMeeting(mockMeeting1.id, '2022-08-25T18:25:29.961+02:00');
+			// Check room data
+			expect(store.rooms[mockMeeting0.roomId].meetingId).toBe(mockMeeting0.id);
 		});
 
-		// Check store data
-		const meeting1 = result.current.meetings[mockMeeting1.roomId];
-		expect(meeting1.active).toBeTruthy();
-		expect(meeting1.startedAt).toBe('2022-08-25T18:25:29.961+02:00');
-	});
+		test('Add multiple meetings', () => {
+			useStore.getState().addMeetings([mockMeeting0, mockMeeting1, mockMeeting2]);
 
-	test('Stop a meeting', () => {
-		const { result } = renderHook(() => useStore());
-		act(() => {
-			result.current.addMeeting(mockMeeting0);
-			result.current.stopMeeting(mockMeeting0.id);
+			// Check store data
+			const store = useStore.getState();
+			expect(size(store.meetings)).toBe(3);
+			const meeting0 = store.meetings[mockMeeting0.id];
+			expect(meeting0).not.toBeNull();
+			expect(meeting0.id).toBe(mockMeeting0.id);
+			expect(meeting0.roomId).toBe(mockMeeting0.roomId);
+			const meeting1 = store.meetings[mockMeeting1.id];
+			expect(meeting1.active).toBeFalsy();
+			expect(meeting1.startedAt).toBeUndefined();
 		});
 
-		// Check store data
-		const meeting0 = result.current.meetings[mockMeeting0.roomId];
-		expect(meeting0.active).toBeFalsy();
-		expect(meeting0.startedAt).toBeUndefined();
+		test('Remove meeting', () => {
+			useStore.getState().addMeetings([mockMeeting0, mockMeeting1]);
+			useStore.getState().deleteMeeting(mockMeeting0.id);
+
+			// Check store data
+			const store = useStore.getState();
+			expect(size(store.meetings)).toBe(1);
+			expect(store.meetings[mockMeeting0.id]).toBeFalsy();
+		});
+	});
+
+	describe('Meeting active status', () => {
+		test('Set a meeting as active', () => {
+			useStore.getState().addMeetings([mockMeeting0]);
+			useStore.getState().startMeeting(mockMeeting0.id, '2023-08-25T18:25:29.961+02:00');
+
+			// Check store data
+			const meeting0 = useStore.getState().meetings[mockMeeting0.id];
+			expect(meeting0.active).toBeTruthy();
+			expect(meeting0.startedAt).toBe('2023-08-25T18:25:29.961+02:00');
+		});
+
+		test('Set a meeting as disactive', () => {
+			useStore.getState().addMeetings([mockMeeting0]);
+			useStore.getState().startMeeting(mockMeeting0.id, '2022-08-25T18:25:29.961+02:00');
+			useStore.getState().stopMeeting(mockMeeting0.id);
+
+			// Check store data
+			const meeting0 = useStore.getState().meetings[mockMeeting0.id];
+			expect(meeting0.active).toBeFalsy();
+			expect(meeting0.startedAt).toBeUndefined();
+		});
+	});
+
+	describe('Meeting participants', () => {
+		test('Add a participant', () => {
+			useStore.getState().addMeetings([mockMeeting1]);
+			useStore.getState().addParticipant(mockMeeting1.id, mockParticipant1);
+
+			// Check store data
+			const { participants } = useStore.getState().meetings[mockMeeting1.id];
+			expect(size(participants)).toBe(2);
+			expect(participants[mockParticipant1.userId]).toBeDefined();
+		});
+
+		test('Remove a participant', () => {
+			useStore.getState().addMeetings([mockMeeting0]);
+			useStore.getState().removeParticipant(mockMeeting0.id, mockParticipant1.userId);
+
+			// Check store data
+			const { participants } = useStore.getState().meetings[mockMeeting0.id];
+			expect(size(participants)).toBe(1);
+			expect(participants[mockParticipant1.userId]).toBeUndefined();
+		});
+
+		test('Update participant stream status', () => {
+			useStore.getState().addMeetings([mockMeeting0]);
+			useStore
+				.getState()
+				.changeStreamStatus(mockMeeting0.id, mockParticipant1.userId, STREAM_TYPE.AUDIO, true);
+			useStore
+				.getState()
+				.changeStreamStatus(mockMeeting0.id, mockParticipant1.userId, STREAM_TYPE.VIDEO, false);
+			useStore
+				.getState()
+				.changeStreamStatus(mockMeeting0.id, mockParticipant1.userId, STREAM_TYPE.SCREEN, true);
+
+			// Check store data
+			const { participants } = useStore.getState().meetings[mockMeeting0.id];
+			expect(participants[mockParticipant1.userId].audioStreamOn).toBeTruthy();
+			expect(participants[mockParticipant1.userId].videoStreamOn).toBeFalsy();
+			expect(participants[mockParticipant1.userId].screenStreamOn).toBeTruthy();
+		});
 	});
 
 	describe('Waiting List', () => {
 		test('Set a waiting list from scratch', () => {
-			const { result } = renderHook(() => useStore());
-			act(() => {
-				result.current.addMeeting(scheduleMeeting);
-				result.current.setWaitingList(scheduleMeeting.id, ['userId0', 'userId1']);
-			});
+			useStore.getState().addMeetings([scheduleMeeting]);
+			useStore.getState().setWaitingList(scheduleMeeting.id, ['userId0', 'userId1']);
 
 			// Check store data
-			const { waitingList } = result.current.meetings[temporaryRoom.id];
+			const { waitingList } = useStore.getState().meetings[scheduleMeeting.id];
 			expect(waitingList).not.toBeNull();
 			expect(size(waitingList)).toBe(2);
 			expect(waitingList).toContain('userId0');
@@ -144,15 +178,12 @@ describe('Test components slice', () => {
 		});
 
 		test('Replace existing waiting list', () => {
-			const { result } = renderHook(() => useStore());
-			act(() => {
-				result.current.addMeeting(scheduleMeeting);
-				result.current.setWaitingList(scheduleMeeting.id, ['userId0', 'userId1']);
-				result.current.setWaitingList(scheduleMeeting.id, ['userId2', 'userId3']);
-			});
+			useStore.getState().addMeetings([scheduleMeeting]);
+			useStore.getState().setWaitingList(scheduleMeeting.id, ['userId0', 'userId1']);
+			useStore.getState().setWaitingList(scheduleMeeting.id, ['userId2', 'userId3']);
 
 			// Check store data
-			const { waitingList } = result.current.meetings[temporaryRoom.id];
+			const { waitingList } = useStore.getState().meetings[scheduleMeeting.id];
 			expect(waitingList).not.toBeNull();
 			expect(size(waitingList)).toBe(2);
 			expect(waitingList).not.toContain('userId0');
@@ -162,28 +193,22 @@ describe('Test components slice', () => {
 		});
 
 		test('Add a user to an empty waiting list in which the user is not present', () => {
-			const { result } = renderHook(() => useStore());
-			act(() => {
-				result.current.addMeeting(scheduleMeeting);
-				result.current.addUserToWaitingList(scheduleMeeting.id, 'userId0');
-			});
+			useStore.getState().addMeetings([scheduleMeeting]);
+			useStore.getState().addUserToWaitingList(scheduleMeeting.id, 'userId0');
 
 			// Check store data
-			const { waitingList } = result.current.meetings[temporaryRoom.id];
+			const { waitingList } = useStore.getState().meetings[scheduleMeeting.id];
 			expect(waitingList).not.toBeNull();
 			expect(size(waitingList)).toBe(1);
 			expect(waitingList).toContain('userId0');
 		});
 
 		test('Add a user to a waiting list in which the user is already present', () => {
-			const { result } = renderHook(() => useStore());
-			act(() => {
-				result.current.addMeeting(scheduleMeeting);
-				result.current.setWaitingList(scheduleMeeting.id, ['userId0', 'userId1']);
-				result.current.addUserToWaitingList(scheduleMeeting.id, 'userId0');
-			});
+			useStore.getState().addMeetings([scheduleMeeting]);
+			useStore.getState().setWaitingList(scheduleMeeting.id, ['userId0', 'userId1']);
+			useStore.getState().addUserToWaitingList(scheduleMeeting.id, 'userId0');
 
-			const { waitingList } = result.current.meetings[temporaryRoom.id];
+			const { waitingList } = useStore.getState().meetings[scheduleMeeting.id];
 			expect(waitingList).not.toBeNull();
 			expect(size(waitingList)).toBe(2);
 			expect(waitingList).toContain('userId0');
@@ -191,14 +216,11 @@ describe('Test components slice', () => {
 		});
 
 		test('Remove a user from a waiting list in which the user is present', () => {
-			const { result } = renderHook(() => useStore());
-			act(() => {
-				result.current.addMeeting(scheduleMeeting);
-				result.current.setWaitingList(scheduleMeeting.id, ['userId0', 'userId1']);
-				result.current.removeUserFromWaitingList(scheduleMeeting.id, 'userId0');
-			});
+			useStore.getState().addMeetings([scheduleMeeting]);
+			useStore.getState().setWaitingList(scheduleMeeting.id, ['userId0', 'userId1']);
+			useStore.getState().removeUserFromWaitingList(scheduleMeeting.id, 'userId0');
 
-			const { waitingList } = result.current.meetings[temporaryRoom.id];
+			const { waitingList } = useStore.getState().meetings[scheduleMeeting.id];
 			expect(waitingList).not.toBeNull();
 			expect(size(waitingList)).toBe(1);
 			expect(waitingList).toContain('userId1');
@@ -206,14 +228,11 @@ describe('Test components slice', () => {
 		});
 
 		test('Remove a user from a waiting list in which the user is not present', () => {
-			const { result } = renderHook(() => useStore());
-			act(() => {
-				result.current.addMeeting(scheduleMeeting);
-				result.current.setWaitingList(scheduleMeeting.id, ['userId0', 'userId1']);
-				result.current.removeUserFromWaitingList(scheduleMeeting.id, 'userId2');
-			});
+			useStore.getState().addMeetings([scheduleMeeting]);
+			useStore.getState().setWaitingList(scheduleMeeting.id, ['userId0', 'userId1']);
+			useStore.getState().removeUserFromWaitingList(scheduleMeeting.id, 'userId2');
 
-			const { waitingList } = result.current.meetings[temporaryRoom.id];
+			const { waitingList } = useStore.getState().meetings[scheduleMeeting.id];
 			expect(waitingList).not.toBeNull();
 			expect(size(waitingList)).toBe(2);
 			expect(waitingList).toContain('userId0');
@@ -224,29 +243,21 @@ describe('Test components slice', () => {
 
 	describe('Recording', () => {
 		test('Start a new recording', () => {
-			const { result } = renderHook(() => useStore());
-			act(() => {
-				result.current.addMeeting(scheduleMeeting);
-				result.current.startRecording(
-					scheduleMeeting.id,
-					'2022-08-25T18:24:28.961+02:00',
-					'userId0'
-				);
-			});
+			useStore.getState().addMeetings([scheduleMeeting]);
+			useStore
+				.getState()
+				.startRecording(scheduleMeeting.id, '2022-08-25T18:24:28.961+02:00', 'userId0');
 
-			const { recStartedAt, recUserId } = result.current.meetings[scheduleMeeting.roomId];
+			const { recStartedAt, recUserId } = useStore.getState().meetings[scheduleMeeting.id];
 			expect(recStartedAt).toBe('2022-08-25T18:24:28.961+02:00');
 			expect(recUserId).toBe('userId0');
 		});
 
 		test('Stop an ongoing recording', () => {
-			const { result } = renderHook(() => useStore());
-			act(() => {
-				result.current.addMeeting(scheduleMeeting);
-				result.current.stopRecording(scheduleMeeting.id);
-			});
+			useStore.getState().addMeetings([scheduleMeeting]);
+			useStore.getState().stopRecording(scheduleMeeting.id);
 
-			const { recStartedAt, recUserId } = result.current.meetings[scheduleMeeting.roomId];
+			const { recStartedAt, recUserId } = useStore.getState().meetings[scheduleMeeting.id];
 			expect(recStartedAt).toBeUndefined();
 			expect(recUserId).toBeUndefined();
 		});

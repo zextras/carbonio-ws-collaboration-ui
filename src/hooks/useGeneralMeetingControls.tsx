@@ -21,7 +21,7 @@ import { MeetingsApi } from '../network';
 import useTiles from './useTiles';
 import {
 	getMeetingActiveByMeetingId,
-	getMeetingParticipantsByMeetingId
+	getMeetingParticipants
 } from '../store/selectors/MeetingSelectors';
 import useStore from '../store/Store';
 import { STREAM_TYPE } from '../types/store/ActiveMeetingTypes';
@@ -41,7 +41,7 @@ const useGeneralMeetingControls = (meetingId: string): void => {
 
 	const isMeetingActive = useStore((store) => getMeetingActiveByMeetingId(store, meetingId));
 	const meetingParticipants: MeetingParticipantMap | undefined = useStore((store) =>
-		getMeetingParticipantsByMeetingId(store, meetingId)
+		getMeetingParticipants(store, meetingId)
 	);
 	const setPinnedTile = useStore((store) => store.setPinnedTile);
 	const meetingConnection = useStore((store) => store.meetingConnection);

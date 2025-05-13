@@ -6,14 +6,30 @@
 /* eslint-disable no-param-reassign */
 
 import { produce } from 'immer';
-import { find, forEach, includes } from 'lodash';
+import { forEach, includes, remove } from 'lodash';
 import { StateCreator } from 'zustand';
 
 import { MeetingBe, MeetingParticipantBe } from '../../types/network/models/meetingBeTypes';
 import { STREAM_TYPE } from '../../types/store/ActiveMeetingTypes';
-import { MeetingParticipant, MeetingParticipantMap } from '../../types/store/MeetingTypes';
-import { MeetingsSlice, RootStore } from '../../types/store/StoreTypes';
+import {
+	MeetingParticipant,
+	MeetingParticipantMap,
+	MeetingsSlice
+} from '../../types/store/MeetingTypes';
+import { RootStore } from '../../types/store/StoreTypes';
 import { dateToISODate } from '../../utils/dateUtils';
+
+const mapParticipants = (participants: MeetingParticipantBe[]): MeetingParticipantMap =>
+	participants.reduce((acc: MeetingParticipantMap, participant: MeetingParticipantBe) => {
+		acc[participant.userId] = {
+			userId: participant.userId,
+			audioStreamOn: participant.audioStreamEnabled || false,
+			videoStreamOn: participant.videoStreamEnabled || false,
+			screenStreamOn: participant.screenStreamEnabled || false,
+			joinedAt: participant.joinedAt
+		};
+		return acc;
+	}, {});
 
 export const useMeetingsStoreSlice: StateCreator<
 	RootStore,
@@ -22,31 +38,16 @@ export const useMeetingsStoreSlice: StateCreator<
 	MeetingsSlice
 > = (set, get) => ({
 	meetings: {},
-	setMeetings: (meetings: MeetingBe[]): void => {
+	addMeetings: (meetings: MeetingBe[]): void => {
 		set(
 			produce((draft: RootStore) => {
 				forEach(meetings, (meeting) => {
-					// Create a map of participants instead of an array
-					const participantsMap: MeetingParticipantMap = meeting.participants.reduce(
-						(acc: MeetingParticipantMap, participant: MeetingParticipantBe) => {
-							acc[participant.userId] = {
-								userId: participant.userId,
-								audioStreamOn: participant.audioStreamEnabled || false,
-								videoStreamOn: participant.videoStreamEnabled || false,
-								screenStreamOn: participant.screenStreamEnabled || false,
-								joinedAt: participant.joinedAt
-							};
-							return acc;
-						},
-						{}
-					);
-
-					draft.meetings[meeting.roomId] = {
+					draft.meetings[meeting.id] = {
 						id: meeting.id,
 						name: meeting.name,
 						roomId: meeting.roomId,
 						active: meeting.active,
-						participants: participantsMap,
+						participants: mapParticipants(meeting.participants),
 						createdAt: meeting.createdAt,
 						meetingType: meeting.meetingType,
 						startedAt: meeting.startedAt,
@@ -62,57 +63,13 @@ export const useMeetingsStoreSlice: StateCreator<
 				});
 			}),
 			false,
-			'MEETINGS/SET_MEETINGS'
-		);
-	},
-	addMeeting: (meeting: MeetingBe): void => {
-		set(
-			produce((draft: RootStore) => {
-				// Create a map of participants instead of an array
-				const participantsMap: MeetingParticipantMap = meeting.participants.reduce(
-					(acc: MeetingParticipantMap, participant: MeetingParticipantBe) => {
-						acc[participant.userId] = {
-							userId: participant.userId,
-							audioStreamOn: participant.audioStreamEnabled || false,
-							videoStreamOn: participant.videoStreamEnabled || false,
-							screenStreamOn: participant.screenStreamEnabled || false,
-							joinedAt: participant.joinedAt
-						};
-						return acc;
-					},
-					{}
-				);
-				draft.meetings[meeting.roomId] = {
-					...draft.meetings[meeting.roomId],
-					id: meeting.id,
-					name: meeting.name,
-					roomId: meeting.roomId,
-					active: meeting.active,
-					participants: participantsMap,
-					createdAt: meeting.createdAt,
-					meetingType: meeting.meetingType,
-					startedAt: meeting.startedAt,
-					recStartedAt: meeting.recStartedAt,
-					recUserId: meeting.recUserId
-				};
-
-				// Set meetingId on room data
-				draft.rooms[meeting.roomId] = {
-					...draft.rooms[meeting.roomId],
-					meetingId: meeting.id
-				};
-			}),
-			false,
-			'MEETINGS/ADD'
+			'MEETINGS/ADD_MEETINGS'
 		);
 	},
 	deleteMeeting: (meetingId: string): void => {
 		set(
 			produce((draft: RootStore) => {
-				const meeting = find(draft.meetings, (meeting) => meeting.id === meetingId);
-				if (meeting) {
-					delete draft.meetings[meeting.roomId];
-				}
+				delete draft.meetings[meetingId];
 			}),
 			false,
 			'MEETINGS/DELETE'
@@ -121,10 +78,10 @@ export const useMeetingsStoreSlice: StateCreator<
 	startMeeting: (meetingId: string, startedAt: string): void => {
 		set(
 			produce((draft: RootStore) => {
-				const meeting = find(draft.meetings, (meeting) => meeting.id === meetingId);
+				const meeting = draft.meetings[meetingId];
 				if (meeting) {
-					draft.meetings[meeting.roomId].active = true;
-					draft.meetings[meeting.roomId].startedAt = startedAt;
+					meeting.active = true;
+					meeting.startedAt = startedAt;
 				}
 			}),
 			false,
@@ -134,10 +91,10 @@ export const useMeetingsStoreSlice: StateCreator<
 	stopMeeting: (meetingId: string): void => {
 		set(
 			produce((draft: RootStore) => {
-				const meeting = find(draft.meetings, (meeting) => meeting.id === meetingId);
+				const meeting = draft.meetings[meetingId];
 				if (meeting) {
-					draft.meetings[meeting.roomId].active = false;
-					draft.meetings[meeting.roomId].startedAt = undefined;
+					meeting.active = false;
+					meeting.startedAt = undefined;
 				}
 			}),
 			false,
@@ -147,8 +104,7 @@ export const useMeetingsStoreSlice: StateCreator<
 	addParticipant: (meetingId: string, participant: MeetingParticipant): void => {
 		set(
 			produce((draft: RootStore) => {
-				// Add participant only if components exists and sessionId isn't already on components
-				const meeting = find(draft.meetings, (meeting) => meeting.id === meetingId);
+				const meeting = draft.meetings[meetingId];
 				if (meeting) {
 					meeting.participants[participant.userId] = {
 						userId: participant.userId,
@@ -166,10 +122,9 @@ export const useMeetingsStoreSlice: StateCreator<
 	removeParticipant: (meetingId: string, userId: string): void => {
 		set(
 			produce((draft: RootStore) => {
-				// Add participant only if components exists and sessionId isn't already on components
-				const meeting = find(draft.meetings, (meeting) => meeting.id === meetingId);
+				const meeting = draft.meetings[meetingId];
 				if (meeting) {
-					delete draft.meetings[meeting.roomId].participants[userId];
+					delete meeting.participants[userId];
 				}
 			}),
 			false,
@@ -184,20 +139,20 @@ export const useMeetingsStoreSlice: StateCreator<
 	): void => {
 		set(
 			produce((draft: RootStore) => {
-				const meeting = find(draft.meetings, (meeting) => meeting.id === meetingId);
+				const meeting = draft.meetings[meetingId];
 				if (meeting) {
 					switch (streamType) {
 						case STREAM_TYPE.AUDIO:
-							draft.meetings[meeting.roomId].participants[userId].audioStreamOn = status;
+							meeting.participants[userId].audioStreamOn = status;
 							break;
 						case STREAM_TYPE.VIDEO:
-							draft.meetings[meeting.roomId].participants[userId].videoStreamOn = status;
+							meeting.participants[userId].videoStreamOn = status;
 							break;
 						case STREAM_TYPE.SCREEN:
-							draft.meetings[meeting.roomId].participants[userId].screenStreamOn = status;
-							draft.meetings[meeting.roomId].participants[userId].dateScreenOn = status
-								? dateToISODate(Date.now())
-								: undefined;
+							meeting.participants[userId].screenStreamOn = status;
+							if (status) {
+								meeting.participants[userId].dateScreenOn = dateToISODate(Date.now());
+							}
 							break;
 						default:
 							break;
@@ -215,41 +170,38 @@ export const useMeetingsStoreSlice: StateCreator<
 	setWaitingList: (meetingId: string, waitingList: string[]): void => {
 		set(
 			produce((draft: RootStore) => {
-				const meeting = find(draft.meetings, (meeting) => meeting.id === meetingId);
+				const meeting = draft.meetings[meetingId];
 				if (meeting) {
-					draft.meetings[meeting.roomId].waitingList = waitingList;
+					meeting.waitingList = waitingList;
 				}
 			}),
 			false,
-			'AM/SET_WAITING_LIST'
+			'MEETINGS/SET_WAITING_LIST'
 		);
 	},
 	addUserToWaitingList: (meetingId: string, userId: string): void => {
 		set(
 			produce((draft: RootStore) => {
-				const meeting = find(draft.meetings, (meeting) => meeting.id === meetingId);
+				const meeting = draft.meetings[meetingId];
+				meeting.waitingList ??= [];
 				if (meeting && !includes(meeting.waitingList, userId)) {
-					if (!meeting.waitingList) draft.meetings[meeting.roomId].waitingList = [];
-					draft.meetings[meeting.roomId].waitingList?.push(userId);
+					draft.meetings[meeting.id].waitingList?.push(userId);
 				}
 			}),
 			false,
-			'AM/ADD_USER_TO_WAITING_LIST'
+			'MEETINGS/ADD_TO_WAITING_LIST'
 		);
 	},
 	removeUserFromWaitingList: (meetingId: string, userId: string): void => {
 		set(
 			produce((draft: RootStore) => {
-				const meeting = find(draft.meetings, (meeting) => meeting.id === meetingId);
+				const meeting = draft.meetings[meetingId];
 				if (meeting) {
-					const index = draft.meetings[meeting.roomId].waitingList?.indexOf(userId);
-					if (index !== undefined && index !== -1) {
-						draft.meetings[meeting.roomId].waitingList?.splice(index, 1);
-					}
+					remove(meeting.waitingList || [], (user) => user === userId);
 				}
 			}),
 			false,
-			'AM/REMOVE_USER_FROM_WAITING_LIST'
+			'MEETINGS/REMOVE_FROM_WAITING_LIST'
 		);
 	},
 	startRecording: (
@@ -259,27 +211,27 @@ export const useMeetingsStoreSlice: StateCreator<
 	): void => {
 		set(
 			produce((draft: RootStore) => {
-				const meeting = find(draft.meetings, (meeting) => meeting.id === meetingId);
+				const meeting = draft.meetings[meetingId];
 				if (meeting) {
-					draft.meetings[meeting.roomId].recStartedAt = startRecordingTimestamp;
-					draft.meetings[meeting.roomId].recUserId = startRecordingUserId;
+					meeting.recStartedAt = startRecordingTimestamp;
+					meeting.recUserId = startRecordingUserId;
 				}
 			}),
 			false,
-			'AM/START_RECORDING'
+			'MEETINGS/START_RECORDING'
 		);
 	},
 	stopRecording: (meetingId: string): void => {
 		set(
 			produce((draft: RootStore) => {
-				const meeting = find(draft.meetings, (meeting) => meeting.id === meetingId);
+				const meeting = draft.meetings[meetingId];
 				if (meeting) {
-					draft.meetings[meeting.roomId].recStartedAt = undefined;
-					draft.meetings[meeting.roomId].recUserId = undefined;
+					meeting.recStartedAt = undefined;
+					meeting.recUserId = undefined;
 				}
 			}),
 			false,
-			'AM/STOP_RECORDING'
+			'MEETINGS/STOP_RECORDING'
 		);
 	}
 });

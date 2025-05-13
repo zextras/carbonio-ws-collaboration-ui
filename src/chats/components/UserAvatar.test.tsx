@@ -117,8 +117,7 @@ beforeEach(() => {
 		roomMuted,
 		roomMutedWithMeeting
 	]);
-	store.addMeeting(meeting);
-	store.addMeeting(meeting2);
+	store.addMeetings([meeting, meeting2]);
 });
 
 describe('User avatar', () => {
