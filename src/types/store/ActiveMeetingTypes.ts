@@ -27,13 +27,13 @@ export type ActiveMeetingSlice = {
 	meetingDisconnection: (meetingId: string) => void;
 	setLocalStreams: (meetingId: string, streamType: STREAM_TYPE, stream: MediaStream) => void;
 	removeLocalStreams: (meetingId: string, streamType: STREAM_TYPE) => void;
-	setMeetingChatVisibility: (visibilityStatus: MeetingChatVisibility) => void;
-	setMeetingViewSelected: (viewType: MeetingViewType) => void;
-	setMeetingSidebarStatus: (sidebarType: MeetingAccordionType, status: boolean) => void;
 	setSelectedDeviceId: (meetingId: string, streamType: STREAM_TYPE, deviceId: string) => void;
 	setSubscribedTracks: (meetingId: string, streams: StreamsSubscriptionMap) => void;
-	setIsCarouseVisible: (meetingId: string, status: boolean) => void;
-	setPinnedTile: (meetingId: string, tile: TileData | undefined) => void;
+	setMeetingSidebarStatus: (sidebarType: MeetingAccordionType, status: boolean) => void;
+	setMeetingChatVisibility: (visibilityStatus: MeetingChatVisibility) => void;
+	setMeetingViewSelected: (viewType: MeetingViewType) => void;
+	setIsCarouseVisible: (status: boolean) => void;
+	setPinnedTile: (tile: TileData | undefined) => void;
 	setTalkingUser: (meetingId: string, userId: string, isTalking: boolean) => void;
 	setRemoveSubscription: (meetingId: string, subToRemove: Subscription) => void;
 	setAddSubscription: (meetingId: string, subToAdd: Subscription) => void;
@@ -61,10 +61,10 @@ export type ActiveMeeting = {
 	chatVisibility: MeetingChatVisibility;
 	meetingViewSelected: MeetingViewType;
 	isCarouselVisible: boolean;
-	pinnedTile?: PinnedTile;
 	virtualBackground: VirtualBackground;
 	talkingUsers: string[];
 	usersWithHandRaised: string[];
+	pinnedTile?: PinnedTile;
 };
 
 export enum MeetingAccordionType {

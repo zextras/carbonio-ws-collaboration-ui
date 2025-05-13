@@ -87,15 +87,15 @@ const useGeneralMeetingControls = (meetingId: string): void => {
 		if (pinnedTile) {
 			// Remove pin in face to face mode || Remove pin video if participant left
 			if (size(tiles) < 3 || (isDisappeared && pinnedTile?.type === STREAM_TYPE.VIDEO)) {
-				setPinnedTile(meetingId, undefined);
+				setPinnedTile(undefined);
 			} else if (isDisappeared && pinnedTile?.type === STREAM_TYPE.SCREEN) {
 				// Remove pin screen if participant left or stopped sharing replacing with another screen
 				const allScreenShare = filter(tiles, (tile) => tile.type === STREAM_TYPE.SCREEN);
 				const screenToPin = maxBy(allScreenShare, (tile) => tile.creationDate);
-				setPinnedTile(meetingId, screenToPin);
+				setPinnedTile(screenToPin);
 			}
 		}
-	}, [tiles, meetingId, setPinnedTile]);
+	}, [tiles, setPinnedTile]);
 
 	// Pin screen share tile if I join a meeting with it (to do only once after join)
 	useEffect(() => {
@@ -104,13 +104,13 @@ const useGeneralMeetingControls = (meetingId: string): void => {
 			(user) => user.screenStreamOn === true
 		);
 		if (screenShareParticipant) {
-			setPinnedTile(meetingId, {
+			setPinnedTile({
 				userId: screenShareParticipant.userId,
 				type: STREAM_TYPE.SCREEN
 			});
 		}
 		// eslint-disable-next-line
-	}, [meetingId, setPinnedTile]);
+	}, [setPinnedTile]);
 
 	// Disconnect user if he joins the meeting with other session
 	const meetingParticipantClashedHandler = useCallback(

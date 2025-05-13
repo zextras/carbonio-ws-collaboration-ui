@@ -67,18 +67,11 @@ const MoreActionsButton = (): ReactElement => {
 		if (!isFullScreen) {
 			setMeetingSidebarStatus(MeetingAccordionType.GENERAL, false);
 			if (meetingView === MeetingViewType.CINEMA) {
-				setIsCarouselVisible(meetingId!, false);
+				setIsCarouselVisible(false);
 			}
 		}
 		toggleFullScreen();
-	}, [
-		isFullScreen,
-		toggleFullScreen,
-		setMeetingSidebarStatus,
-		meetingId,
-		meetingView,
-		setIsCarouselVisible
-	]);
+	}, [isFullScreen, toggleFullScreen, setMeetingSidebarStatus, meetingView, setIsCarouselVisible]);
 
 	useEffect(() => {
 		window.addEventListener('keydown', checkKeyPress, true);

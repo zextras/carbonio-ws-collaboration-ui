@@ -6,6 +6,7 @@
  */
 
 import { produce } from 'immer';
+import { remove } from 'lodash';
 import { StateCreator } from 'zustand';
 
 import BidirectionalConnectionAudioInOut from '../../network/webRTC/BidirectionalConnectionAudioInOut';
@@ -50,6 +51,24 @@ export const useActiveMeetingSlice: StateCreator<
 			produce((draft: RootStore) => {
 				draft.activeMeeting = {
 					meetingId,
+					// Peer connections and streams
+					bidirectionalAudioConn: new BidirectionalConnectionAudioInOut(
+						meetingId,
+						audioStream?.enabled || false,
+						audioStream?.selectedDeviceId
+					),
+					videoScreenIn: new VideoScreenInConnection(meetingId),
+					videoOutConn: new VideoOutConnection(
+						meetingId,
+						videoStream?.enabled || false,
+						videoStream?.selectedDeviceId
+					),
+					screenOutConn: new ScreenOutConnection(meetingId),
+					localStreams: {
+						selectedAudioDeviceId: audioStream?.selectedDeviceId,
+						selectedVideoDeviceId: videoStream?.selectedDeviceId
+					},
+					subscription: {},
 					// Default graphic values
 					sidebarStatus: {
 						[MeetingAccordionType.GENERAL]: true,
@@ -62,27 +81,9 @@ export const useActiveMeetingSlice: StateCreator<
 					chatVisibility: MeetingChatVisibility.OPEN,
 					meetingViewSelected: MeetingViewType.GRID,
 					isCarouselVisible: true,
-					// Peer connections
-					localStreams: {
-						selectedAudioDeviceId: audioStream?.selectedDeviceId,
-						selectedVideoDeviceId: videoStream?.selectedDeviceId
-					},
-					bidirectionalAudioConn: new BidirectionalConnectionAudioInOut(
-						meetingId,
-						audioStream?.enabled || false,
-						audioStream?.selectedDeviceId
-					),
-					videoScreenIn: new VideoScreenInConnection(meetingId),
-					videoOutConn: new VideoOutConnection(
-						meetingId,
-						videoStream?.enabled || false,
-						videoStream?.selectedDeviceId
-					),
 					virtualBackground: {
 						backgroundImage: VirtualBackgroundType.NONE
 					},
-					screenOutConn: new ScreenOutConnection(meetingId),
-					subscription: {},
 					talkingUsers: [],
 					usersWithHandRaised: []
 				};
@@ -109,10 +110,7 @@ export const useActiveMeetingSlice: StateCreator<
 		set(
 			produce((draft: RootStore) => {
 				if (!isCurrentMeeting(draft, meetingId) || !draft.activeMeeting) return;
-				draft.activeMeeting.localStreams = {
-					...draft.activeMeeting.localStreams,
-					[streamType]: stream
-				};
+				draft.activeMeeting.localStreams[streamType] = stream;
 			}),
 			false,
 			'AM/SET_LOCAL_STREAM'
@@ -122,15 +120,38 @@ export const useActiveMeetingSlice: StateCreator<
 		set(
 			produce((draft: RootStore) => {
 				if (!isCurrentMeeting(draft, meetingId) || !draft.activeMeeting) return;
+
 				if (streamType === STREAM_TYPE.VIDEO || streamType === STREAM_TYPE.SCREEN) {
-					draft.activeMeeting?.localStreams?.[streamType]
-						?.getTracks()
-						.forEach((track) => track.stop());
+					const stream = draft.activeMeeting.localStreams[streamType];
+					stream?.getTracks().forEach((track) => track.stop());
 				}
-				delete draft.activeMeeting.localStreams![streamType];
+				delete draft.activeMeeting.localStreams[streamType];
 			}),
 			false,
 			'AM/SET_LOCAL_STREAM'
+		);
+	},
+	setSelectedDeviceId: (meetingId: string, streamType: STREAM_TYPE, deviceId: string): void => {
+		set(
+			produce((draft: RootStore) => {
+				if (!isCurrentMeeting(draft, meetingId) || !draft.activeMeeting) return;
+
+				const key =
+					streamType === STREAM_TYPE.AUDIO ? 'selectedAudioDeviceId' : 'selectedVideoDeviceId';
+				draft.activeMeeting.localStreams[key] = deviceId;
+			}),
+			false,
+			'AM/SET_SELECTED_DEVICE_ID'
+		);
+	},
+	setSubscribedTracks: (meetingId: string, streams: StreamsSubscriptionMap): void => {
+		set(
+			produce((draft: RootStore) => {
+				if (!isCurrentMeeting(draft, meetingId) || !draft.activeMeeting) return;
+				draft.activeMeeting.subscription = streams;
+			}),
+			false,
+			'AM/SET_SUBSCRIPTION'
 		);
 	},
 	setMeetingSidebarStatus: (accordionType: MeetingAccordionType, status: boolean): void => {
@@ -168,79 +189,20 @@ export const useActiveMeetingSlice: StateCreator<
 			'AM/SET_VIEW_TYPE'
 		);
 	},
-	setSelectedDeviceId: (meetingId: string, streamType: STREAM_TYPE, deviceId: string): void => {
+	setIsCarouseVisible: (status: boolean): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (!isCurrentMeeting(draft, meetingId) || !draft.activeMeeting) return;
-				if (!draft.activeMeeting?.localStreams) {
-					if (streamType === STREAM_TYPE.AUDIO) {
-						draft.activeMeeting.localStreams = {
-							...draft.activeMeeting.localStreams,
-							selectedAudioDeviceId: deviceId
-						};
-					} else {
-						draft.activeMeeting.localStreams = {
-							...draft.activeMeeting.localStreams,
-							selectedVideoDeviceId: deviceId
-						};
-					}
-				} else {
-					draft.activeMeeting.localStreams = {
-						...draft.activeMeeting.localStreams,
-						[streamType === STREAM_TYPE.AUDIO ? 'selectedAudioDeviceId' : 'selectedVideoDeviceId']:
-							deviceId
-					};
-				}
-			}),
-			false,
-			'AM/SET_SELECTED_DEVICE_ID'
-		);
-	},
-	setSubscribedTracks: (meetingId: string, streams: StreamsSubscriptionMap): void => {
-		set(
-			produce((draft: RootStore) => {
-				if (!isCurrentMeeting(draft, meetingId) || !draft.activeMeeting) return;
-				draft.activeMeeting.subscription = streams;
-			}),
-			false,
-			'AM/SET_SUBSCRIPTION'
-		);
-	},
-	setTalkingUser: (meetingId: string, userId: string, isTalking: boolean): void => {
-		set(
-			produce((draft: RootStore) => {
-				if (!isCurrentMeeting(draft, meetingId) || !draft.activeMeeting) return;
-				if (isTalking) {
-					// If flag is true, add the ID to the array if it's not already present
-					if (!draft.activeMeeting.talkingUsers.includes(userId)) {
-						draft.activeMeeting.talkingUsers.push(userId);
-					}
-				} else {
-					// If flag is false, remove the ID from the array if it's present
-					const index = draft.activeMeeting.talkingUsers.indexOf(userId);
-					if (index !== -1) {
-						draft.activeMeeting.talkingUsers?.splice(index, 1);
-					}
-				}
-			}),
-			false,
-			'AM/SET_IS_TALKING'
-		);
-	},
-	setIsCarouseVisible: (meetingId: string, status: boolean): void => {
-		set(
-			produce((draft: RootStore) => {
-				if (!isCurrentMeeting(draft, meetingId) || !draft.activeMeeting) return;
+				if (!draft.activeMeeting) return;
 				draft.activeMeeting.isCarouselVisible = status;
 			}),
 			false,
 			'AM/SET_MEETING_CAROUSEL_VISIBILITY'
 		);
 	},
-	setPinnedTile: (meetingId: string, tile: TileData | undefined): void => {
+	setPinnedTile: (tile: TileData | undefined): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (!isCurrentMeeting(draft, meetingId) || !draft.activeMeeting) return;
+				if (!draft.activeMeeting) return;
 				// Switch back to the previous view
 				const previousViewType = draft.activeMeeting.pinnedTile?.previousViewType;
 				if (previousViewType) {
@@ -262,6 +224,24 @@ export const useActiveMeetingSlice: StateCreator<
 			}),
 			false,
 			'AM/SET_PINNED_TILE'
+		);
+	},
+	setTalkingUser: (meetingId: string, userId: string, isTalking: boolean): void => {
+		set(
+			produce((draft: RootStore) => {
+				if (!isCurrentMeeting(draft, meetingId) || !draft.activeMeeting) return;
+
+				const { talkingUsers } = draft.activeMeeting;
+				if (isTalking) {
+					if (!talkingUsers.includes(userId)) {
+						talkingUsers.push(userId);
+					}
+				} else {
+					remove(talkingUsers, (id) => id === userId);
+				}
+			}),
+			false,
+			'AM/SET_IS_TALKING'
 		);
 	},
 	setRemoveSubscription: (meetingId: string, subToRemove: Subscription): void => {

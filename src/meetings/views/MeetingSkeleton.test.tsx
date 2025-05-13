@@ -135,9 +135,7 @@ describe('Grid mode meeting view', () => {
 	test('Toggle pin video and switch to cinema mode', async () => {
 		storeSetupGroupMeetingSkeleton();
 		await waitFor(() => {
-			act(() =>
-				useStore.getState().setPinnedTile(meeting.id, { userId: user3.id, type: STREAM_TYPE.VIDEO })
-			);
+			act(() => useStore.getState().setPinnedTile({ userId: user3.id, type: STREAM_TYPE.VIDEO }));
 		});
 		const cinemaModeView = await screen.findByTestId('cinemaModeView');
 		expect(cinemaModeView).toBeInTheDocument();
@@ -149,7 +147,7 @@ describe('Grid mode meeting view', () => {
 
 		await waitFor(() => {
 			act(() => {
-				store.setPinnedTile(meeting.id, { userId: user2.id, type: STREAM_TYPE.VIDEO });
+				store.setPinnedTile({ userId: user2.id, type: STREAM_TYPE.VIDEO });
 				store.removeParticipant(meeting.id, user3.id);
 			});
 		});
@@ -166,7 +164,7 @@ describe('Grid mode meeting view', () => {
 			act(() => {
 				store.addParticipant(meeting.id, user4Participant);
 				store.changeStreamStatus(meeting.id, user3.id, STREAM_TYPE.SCREEN, true);
-				store.setPinnedTile(meeting.id, { userId: user3.id, type: STREAM_TYPE.SCREEN });
+				store.setPinnedTile({ userId: user3.id, type: STREAM_TYPE.SCREEN });
 			});
 		});
 

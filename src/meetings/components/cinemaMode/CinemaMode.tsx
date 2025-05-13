@@ -85,8 +85,8 @@ const CinemaMode = ({ children }: MeetingViewProps): ReactElement => {
 	}, [cinemaModeDimensions]);
 
 	const toggleCarousel = useCallback(() => {
-		setIsCarouselVisible(meetingId!, !carouselIsVisible);
-	}, [carouselIsVisible, meetingId, setIsCarouselVisible]);
+		setIsCarouselVisible(!carouselIsVisible);
+	}, [carouselIsVisible, setIsCarouselVisible]);
 
 	useEffect(() => {
 		if (!carouselIsVisible) {

@@ -38,8 +38,8 @@ const usePinnedTile = (
 		const tileData = !isPinned
 			? { userId, type: isScreenShare ? STREAM_TYPE.SCREEN : STREAM_TYPE.VIDEO }
 			: undefined;
-		setPinnedTile(meetingId, tileData);
-	}, [isPinned, isScreenShare, meetingId, setPinnedTile, userId]);
+		setPinnedTile(tileData);
+	}, [isPinned, isScreenShare, setPinnedTile, userId]);
 
 	const canUsePinFeature = useMemo(() => numberOfTiles > 2, [numberOfTiles]);
 

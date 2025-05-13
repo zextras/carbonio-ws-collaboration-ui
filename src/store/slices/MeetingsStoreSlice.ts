@@ -209,7 +209,7 @@ export const useMeetingsStoreSlice: StateCreator<
 		);
 		// Auto pin new screen share
 		if (streamType === STREAM_TYPE.SCREEN && status) {
-			get().setPinnedTile(meetingId, { userId, type: streamType });
+			get().setPinnedTile({ userId, type: streamType });
 		}
 	},
 	setWaitingList: (meetingId: string, waitingList: string[]): void => {
