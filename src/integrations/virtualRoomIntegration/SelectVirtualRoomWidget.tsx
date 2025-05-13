@@ -158,7 +158,11 @@ const SelectVirtualRoomWidget: FC<SelectVirtualRoomWidgetProps> = ({ onChange, d
 			},
 			disabled: true,
 			customComponent: (
-				<CustomContainer crossAlignment="center" orientation="horizontal">
+				<CustomContainer
+					crossAlignment="center"
+					orientation="horizontal"
+					padding={{ bottom: '0.5rem' }}
+				>
 					<CustomText size="small" color="secondary">
 						{manageVirtualRoomLabel}
 					</CustomText>
