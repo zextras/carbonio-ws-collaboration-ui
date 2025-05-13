@@ -134,6 +134,7 @@ describe('Conversation view', () => {
 	});
 
 	test('Add moderator and check everything is shown correctly', async () => {
+		mockUseMediaQueryCheck.mockReturnValue(true);
 		setup(<Conversation roomId={testRoom.id} />);
 		act(() => {
 			useStore.getState().setMemberModeratorStatus(testRoom.id, user1Info.id, true);

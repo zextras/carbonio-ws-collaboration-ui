@@ -23,13 +23,12 @@ const mockPipWindow = {
 	}
 };
 
-const requestWindowMock = jest.fn(() => Promise.resolve(mockPipWindow));
-(window as any).documentPictureInPicture = {
-	requestWindow: requestWindowMock
-};
-
 describe('PiPContext', () => {
 	test('pipWindow request', async () => {
+		const requestWindowMock = jest.fn(() => Promise.resolve(mockPipWindow));
+		(window as any).documentPictureInPicture = {
+			requestWindow: requestWindowMock
+		};
 		const Consumer = (): React.JSX.Element => {
 			const { requestPipWindow, pipWindow } = React.useContext(PiPContext)!;
 			React.useEffect(() => {

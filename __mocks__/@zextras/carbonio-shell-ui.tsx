@@ -12,9 +12,7 @@ import {
 	filesSelectFilesAction,
 	filesSelectFilesActionAvailable,
 	functionCheck,
-	getLink,
-	getNode,
-	getNodeAvailable
+	getLink
 } from './carbonio-files-ui';
 
 export const USER_SETTINGS: Shell.AccountSettings = {
@@ -66,8 +64,6 @@ export const t = (key: string, value: string): string => value;
 
 export const useIntegratedFunction: typeof Shell.useIntegratedFunction<AnyFunction> = (id) => {
 	switch (id) {
-		case 'get-node':
-			return [getNode, getNodeAvailable];
 		case 'select-nodes':
 			return [filesSelectFilesAction, filesSelectFilesActionAvailable];
 		case 'get-link':

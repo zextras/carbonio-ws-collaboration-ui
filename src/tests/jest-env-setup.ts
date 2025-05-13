@@ -13,7 +13,6 @@ import * as FetchUtils from '../utils/FetchUtils';
 import {
 	intersectionObserverMockDisconnect,
 	intersectionObserverMockObserve,
-	mockedDevicesList,
 	mockPlayAudio
 } from './mocks/global';
 
@@ -34,6 +33,55 @@ failOnConsole({
 });
 
 beforeEach(() => {
+	const mockedDevicesList = jest.fn(() => [
+		{
+			deviceId: 'audioDefault',
+			kind: 'audioinput',
+			label: 'Audio Default',
+			groupId: 'default'
+		},
+		{
+			deviceId: 'audioDevice1',
+			kind: 'audioinput',
+			label: 'Audio Device 1',
+			groupId: 'device1'
+		},
+		{
+			deviceId: 'audioDevice2',
+			kind: 'audioinput',
+			label: 'Audio Device 2',
+			groupId: 'device2'
+		},
+		{
+			deviceId: 'videoDefault',
+			kind: 'videoinput',
+			label: 'Video Default',
+			groupId: 'default'
+		},
+		{
+			deviceId: 'videoDevice 1',
+			kind: 'videoinput',
+			label: 'Video Device 1',
+			groupId: 'device1'
+		},
+		{
+			deviceId: 'videoDevice 2',
+			kind: 'videoinput',
+			label: 'Video Device 2',
+			groupId: 'device2'
+		}
+	]);
+
+	Object.defineProperty(window, 'RTCPeerConnection', {
+		writable: true,
+		value: jest.fn(() => ({
+			addTrack: jest.fn(),
+			createAnswer: jest.fn(() => Promise.resolve({ sdp: '', type: 'answer' })),
+			setRemoteDescription: jest.fn(() => Promise.resolve()),
+			setLocalDescription: jest.fn(() => Promise.resolve())
+		}))
+	});
+
 	spyOnFetch = jest.spyOn(FetchUtils, 'fetchAPI');
 	spyOnFetch.mockImplementation(() => Promise.resolve(true));
 
