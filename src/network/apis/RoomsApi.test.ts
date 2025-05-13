@@ -99,7 +99,7 @@ describe('Rooms API', () => {
 	test('deleteRoomAndMeeting with an associated meeting is called correctly', async () => {
 		const room = createMockRoom();
 		const meeting = createMockMeeting({ roomId: room.id });
-		useStore.getState().addMeeting(meeting);
+		useStore.getState().addMeetings([meeting]);
 		// Send deleteRoom request
 		await roomsApi.deleteRoomAndMeeting(room.id);
 

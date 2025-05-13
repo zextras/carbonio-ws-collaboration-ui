@@ -68,7 +68,7 @@ beforeEach(() => {
 	store.setUserInfo([user1, user2]);
 	store.setLoginInfo(user1.id, user1.name);
 	store.addRooms([room]);
-	store.addMeeting(meeting);
+	store.addMeetings([meeting]);
 	store.meetingConnection(meeting.id);
 });
 describe('Camera button - permission denied', () => {

@@ -24,7 +24,7 @@ beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo('myUserId', 'User');
 	store.addRooms([room]);
-	store.addMeeting(meeting);
+	store.addMeetings([meeting]);
 });
 describe('meetingParticipantTalkingEventHandler tests', () => {
 	test('Talking user information are saved only the meeting is active', () => {

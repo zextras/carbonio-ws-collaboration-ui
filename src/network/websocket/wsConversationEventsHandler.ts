@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 import { EventName, sendCustomEvent } from '../../hooks/useEventListener';
+import { getMeetingIdFromRoom } from '../../store/selectors/RoomsSelectors';
 import useStore from '../../store/Store';
 import { GetMeetingResponse } from '../../types/network/responses/meetingsResponses';
 import { GetRoomResponse } from '../../types/network/responses/roomsResponses';
@@ -64,7 +65,7 @@ export const wsConversationEventsHandler = (event: WsEvent): void => {
 					state.addRooms([response]);
 					if (response.meetingId) {
 						MeetingsApi.getMeeting(response.id).then((meetingResponse: GetMeetingResponse) =>
-							state.addMeeting(meetingResponse)
+							state.addMeetings([meetingResponse])
 						);
 					}
 				});
@@ -78,8 +79,9 @@ export const wsConversationEventsHandler = (event: WsEvent): void => {
 		}
 		case WsEventType.ROOM_MEMBER_REMOVED: {
 			if (isMyId(event.userId)) {
-				if (state.meetings[event.roomId]) {
-					state.deleteMeeting(state.meetings[event.roomId].id);
+				const meetingId = getMeetingIdFromRoom(useStore.getState(), event.roomId);
+				if (meetingId) {
+					state.deleteMeeting(meetingId);
 				}
 				state.removeRoom(event.roomId);
 			} else {

@@ -26,7 +26,7 @@ beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo('0', 'User');
 	store.addRooms([room]);
-	store.addMeeting(meeting);
+	store.addMeetings([meeting]);
 	store.meetingConnection(meeting.id);
 });
 

@@ -84,7 +84,7 @@ const MessageHistoryLoader = ({
 	const handleHistoryLoader = useCallback(
 		debounce(() => {
 			const store = useStore.getState();
-			const roomMessages = store.chatsRegistry[roomId].messages;
+			const roomMessages = store.chatsRegistry[roomId]?.messages;
 			const lastMamMessage = store.activeConversations[roomId]?.lastMamMessage;
 			const date = lastMamMessage?.date ?? first(roomMessages)?.date ?? now();
 			if (!historyLoadedDisabled) {

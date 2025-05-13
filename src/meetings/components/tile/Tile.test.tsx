@@ -123,7 +123,7 @@ beforeEach(() => {
 	store.setUserInfo([user1, user2, user3]);
 	store.setLoginInfo(user1.id, user1.name);
 	store.addRooms([room]);
-	store.addMeeting(meeting);
+	store.addMeetings([meeting]);
 });
 
 describe('Tile test - enter meeting modal', () => {

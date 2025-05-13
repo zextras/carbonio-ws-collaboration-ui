@@ -40,7 +40,7 @@ const addIncomingMeetingNotification = (room: RoomBe, meeting: MeetingBe): void 
 	const store = useStore.getState();
 	act(() => {
 		store.addRooms([room]);
-		store.addMeeting(meeting);
+		store.addMeetings([meeting]);
 		sendCustomEvent({ name: EventName.INCOMING_MEETING, data: event });
 	});
 };

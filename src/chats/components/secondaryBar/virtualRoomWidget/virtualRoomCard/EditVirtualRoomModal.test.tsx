@@ -47,7 +47,7 @@ const meeting = createMockMeeting({ roomId: virtualRoom.id });
 beforeEach(() => {
 	const store = useStore.getState();
 	store.addRooms([virtualRoom]);
-	store.addMeeting(meeting);
+	store.addMeetings([meeting]);
 	store.setUserInfo([member1]);
 	mockSearchUsersByFeatureRequest.mockResolvedValueOnce([user1, user2]);
 });

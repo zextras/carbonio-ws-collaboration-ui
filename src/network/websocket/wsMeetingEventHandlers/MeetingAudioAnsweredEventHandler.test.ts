@@ -27,7 +27,7 @@ beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo('myUserId', 'User');
 	store.addRooms([room]);
-	store.addMeeting(meeting);
+	store.addMeetings([meeting]);
 });
 describe('meetingAudioAnsweredEventHandler tests', () => {
 	test('handleRemoteAnswer is been called when the meeting is active', () => {

@@ -11,7 +11,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import useAvatarUtilities from '../../../../../hooks/useAvatarUtilities';
-import { getMeetingParticipants } from '../../../../../store/selectors/MeetingSelectors';
+import { getMeetingParticipantsByRoomId } from '../../../../../store/selectors/MeetingSelectors';
 import { getUserName } from '../../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../../store/Store';
 import UserPopoverList from '../../../userPopoverList/UserPopoverList';
@@ -77,7 +77,7 @@ const ParticipantsSection: FC<ParticipantsSectionProp> = ({
 	);
 	const activeParticipantsLabel = t('meeting.virtual.participants.widget', 'Active participants:');
 
-	const meetingParticipants = useStore((store) => getMeetingParticipants(store, roomId));
+	const meetingParticipants = useStore((store) => getMeetingParticipantsByRoomId(store, roomId));
 
 	const firstParticipantId = useMemo(() => {
 		if (meetingParticipants && Object.keys(meetingParticipants).length > 0) {

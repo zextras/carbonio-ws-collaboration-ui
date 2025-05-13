@@ -11,7 +11,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import SearchUserAction from '../../../../chats/components/infoPanel/conversationParticipantsAccordion/SearchUserAction';
-import { getMeetingParticipantsByMeetingId } from '../../../../store/selectors/MeetingSelectors';
+import { getMeetingParticipants } from '../../../../store/selectors/MeetingSelectors';
 import { getUsersSelector } from '../../../../store/selectors/UsersSelectors';
 import useStore from '../../../../store/Store';
 import { MeetingParticipant, MeetingParticipantMap } from '../../../../types/store/MeetingTypes';
@@ -37,7 +37,7 @@ const MeetingParticipantsList: FC<ParticipantsListProps> = ({ meetingId }) => {
 		'Your search returned no results, try another keyword.'
 	);
 	const meetingParticipants: MeetingParticipantMap | undefined = useStore((store) =>
-		getMeetingParticipantsByMeetingId(store, meetingId)
+		getMeetingParticipants(store, meetingId)
 	);
 	const users: UsersMap = useStore(getUsersSelector);
 	const [filteredContactList, setFilteredContactList] = useState<MeetingParticipant[] | undefined>(

@@ -96,8 +96,7 @@ describe('eventHandlersUtilities tests', () => {
 	beforeEach(() => {
 		const store = useStore.getState();
 		store.addRooms([room, activeRoom]);
-		store.addMeeting(meeting);
-		store.addMeeting(activeMeeting);
+		store.addMeetings([meeting, activeMeeting]);
 		store.meetingConnection(activeMeeting.id);
 	});
 	describe('isMeetingActive tests', () => {
