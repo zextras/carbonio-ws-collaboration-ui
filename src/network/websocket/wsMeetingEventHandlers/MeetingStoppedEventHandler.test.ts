@@ -30,6 +30,7 @@ beforeEach(() => {
 	store.addMeeting(oneToOneMeeting);
 	store.addMeeting(groupMeeting);
 });
+
 describe('MeetingStoppedEventHandler tests', () => {
 	test('Meeting stopped information are saved into store', () => {
 		meetingStoppedEventHandler(event);
