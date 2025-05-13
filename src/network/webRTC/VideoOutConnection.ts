@@ -41,7 +41,7 @@ export default class VideoOutConnection implements IVideoOutConnection {
 			getVideoStream(selectedVideoDeviceId)
 				.then((stream) => {
 					this.updateLocalStreamTrack(stream);
-					useStore.getState().setLocalStreams(this.meetingId, STREAM_TYPE.VIDEO, stream);
+					useStore.getState().setLocalStreams(STREAM_TYPE.VIDEO, stream);
 					resolve();
 				})
 				.catch((err) => {
@@ -116,8 +116,8 @@ export default class VideoOutConnection implements IVideoOutConnection {
 	}
 
 	public closePeerConnection(): void {
-		useStore.getState().removeLocalStreams(this.meetingId, STREAM_TYPE.VIDEO);
-		useStore.getState().removeBackgroundStream(this.meetingId);
+		useStore.getState().removeLocalStreams(STREAM_TYPE.VIDEO);
+		useStore.getState().removeBackgroundStream();
 		this.rtpSender?.track?.stop();
 		this.peerConn?.close();
 		this.rtpSender = null;

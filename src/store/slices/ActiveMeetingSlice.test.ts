@@ -112,12 +112,12 @@ describe('Active Meeting Slice', () => {
 		const { result } = renderHook(() => useStore());
 		act(() => result.current.meetingConnection(meetingId));
 
-		act(() => result.current.setBackgroundImage(meetingId, VirtualBackgroundType.COWORKING));
+		act(() => result.current.setBackgroundImage(VirtualBackgroundType.COWORKING));
 		expect(result.current.activeMeeting?.virtualBackground.backgroundImage).toBe(
 			VirtualBackgroundType.COWORKING
 		);
 
-		act(() => result.current.setBackgroundImage(meetingId, VirtualBackgroundType.NONE));
+		act(() => result.current.setBackgroundImage(VirtualBackgroundType.NONE));
 		expect(result.current.activeMeeting?.virtualBackground.backgroundImage).toBe(
 			VirtualBackgroundType.NONE
 		);
@@ -129,7 +129,7 @@ describe('Active Meeting Slice', () => {
 		const { result } = renderHook(() => useStore());
 		act(() => result.current.meetingConnection(meetingId));
 
-		act(() => result.current.setBackgroundStream(meetingId, streamMedia));
+		act(() => result.current.setBackgroundStream(streamMedia));
 		expect(result.current.activeMeeting?.virtualBackground.updatedStream).toBe(streamMedia);
 	});
 });

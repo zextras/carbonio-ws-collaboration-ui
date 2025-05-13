@@ -90,7 +90,7 @@ describe('Raise hand button', () => {
 		expect(useStore.getState().activeMeeting?.usersWithHandRaised).toStrictEqual([]);
 
 		act(() => {
-			useStore.getState().setUserWithHandRaised(meeting.id, user1.id, true);
+			useStore.getState().setUserWithHandRaised(user1.id, true);
 		});
 
 		expect(useStore.getState().activeMeeting?.usersWithHandRaised).toStrictEqual([user1.id]);

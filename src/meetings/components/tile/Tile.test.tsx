@@ -85,7 +85,7 @@ const storeSetupTileAudioOffAndVideoOn = (): { user: UserEvent; store: RootStore
 const setupActiveMeeting = (): void => {
 	const store: RootStore = useStore.getState();
 	store.meetingConnection(meeting.id, { enabled: true, deviceId: 'audioId' });
-	store.setTalkingUser(meeting.id, user3.id, true);
+	store.setTalkingUser(user3.id, true);
 
 	setup(
 		<Tile
@@ -224,7 +224,7 @@ describe('Tile test - on meeting', () => {
 		setup(<Tile userId={user1.id} meetingId={meeting.id} />);
 
 		act(() => {
-			useStore.getState().setUserWithHandRaised(meeting.id, user1.id, true);
+			useStore.getState().setUserWithHandRaised(user1.id, true);
 		});
 
 		const tile = screen.getByTestId('tile');

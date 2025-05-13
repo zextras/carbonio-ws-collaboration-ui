@@ -14,7 +14,7 @@ export const meetingParticipantHandRaisedHandler = (
 ): void => {
 	const state = useStore.getState();
 	if (isMeetingActive(event.meetingId)) {
-		state.setUserWithHandRaised(event.meetingId, event.userId, event.raised);
+		state.setUserWithHandRaised(event.userId, event.raised);
 		sendCustomEvent({ name: EventName.MEETING_PARTICIPANT_RAISE_HAND, data: event });
 		if (event.raised) {
 			sendAudioFeedback(MeetingSoundFeedback.NEW_HAND_RAISED);

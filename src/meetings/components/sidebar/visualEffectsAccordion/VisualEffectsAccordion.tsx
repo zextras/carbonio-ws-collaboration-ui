@@ -20,11 +20,7 @@ const CustomAccordion = styled(Accordion)`
 	user-select: none;
 `;
 
-type VisualEffectsAccordionProps = {
-	meetingId: string;
-};
-
-const VisualEffectsAccordion: FC<VisualEffectsAccordionProps> = ({ meetingId }) => {
+const VisualEffectsAccordion: FC = () => {
 	const [t] = useTranslation();
 	const accordionLabel = t('meeting.visualEffects.title', 'Visual Effects');
 
@@ -36,7 +32,7 @@ const VisualEffectsAccordion: FC<VisualEffectsAccordionProps> = ({ meetingId }) 
 		[accordionStatus, setMeetingSidebarStatus]
 	);
 
-	const list = useMemo(() => <VisualEffectsList meetingId={meetingId} />, [meetingId]);
+	const list = useMemo(() => <VisualEffectsList />, []);
 
 	const items = useMemo<AccordionItemType[]>(() => {
 		const arrayOfActions: AccordionItemType[] = [

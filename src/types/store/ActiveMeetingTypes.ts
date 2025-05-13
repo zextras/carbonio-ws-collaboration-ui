@@ -25,16 +25,16 @@ export type ActiveMeetingSlice = {
 		}
 	) => void;
 	meetingDisconnection: (meetingId: string) => void;
-	setLocalStreams: (meetingId: string, streamType: STREAM_TYPE, stream: MediaStream) => void;
-	removeLocalStreams: (meetingId: string, streamType: STREAM_TYPE) => void;
-	setSelectedDeviceId: (meetingId: string, streamType: STREAM_TYPE, deviceId: string) => void;
+	setLocalStreams: (streamType: STREAM_TYPE, stream: MediaStream) => void;
+	removeLocalStreams: (streamType: STREAM_TYPE) => void;
+	setSelectedDeviceId: (streamType: STREAM_TYPE, deviceId: string) => void;
 	setSubscribedTracks: (meetingId: string, streams: StreamsSubscriptionMap) => void;
 	setMeetingSidebarStatus: (sidebarType: MeetingAccordionType, status: boolean) => void;
 	setMeetingChatVisibility: (visibilityStatus: MeetingChatVisibility) => void;
 	setMeetingViewSelected: (viewType: MeetingViewType) => void;
 	setIsCarouseVisible: (status: boolean) => void;
 	setPinnedTile: (tile: TileData | undefined) => void;
-	setTalkingUser: (meetingId: string, userId: string, isTalking: boolean) => void;
+	setTalkingUser: (userId: string, isTalking: boolean) => void;
 	setRemoveSubscription: (meetingId: string, subToRemove: Subscription) => void;
 	setAddSubscription: (meetingId: string, subToAdd: Subscription) => void;
 	setUpdateSubscription: (meetingId: string, subsToRequest: Subscription[]) => void;
@@ -43,10 +43,10 @@ export type ActiveMeetingSlice = {
 		subIdToDelete: string,
 		streamType: STREAM_TYPE[]
 	) => void;
-	setBackgroundStream: (meetingId: string, stream: MediaStream) => void;
-	removeBackgroundStream: (meetingId: string) => void;
-	setBackgroundImage: (meetingId: string, image: VirtualBackgroundType) => void;
-	setUserWithHandRaised: (meetingId: string, userId: string, isRaised: boolean) => void;
+	setBackgroundStream: (stream: MediaStream) => void;
+	removeBackgroundStream: () => void;
+	setBackgroundImage: (image: VirtualBackgroundType) => void;
+	setUserWithHandRaised: (userId: string, isRaised: boolean) => void;
 };
 
 export type ActiveMeeting = {

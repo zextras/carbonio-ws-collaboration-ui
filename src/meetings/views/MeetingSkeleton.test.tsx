@@ -69,7 +69,7 @@ const storeSetupGroupMeetingSkeleton = (): { user: UserEvent; store: RootStore }
 	store.addRooms([room]);
 	store.addMeetings([meeting]);
 	store.meetingConnection(meeting.id, { enabled: false }, { enabled: true, deviceId: 'videoId' });
-	store.setLocalStreams(meeting.id, STREAM_TYPE.VIDEO, new MediaStream());
+	store.setLocalStreams(STREAM_TYPE.VIDEO, new MediaStream());
 	store.setAttributes(createMockAttributesList());
 	const { user } = routerContextSetup(<MeetingSkeleton />, {
 		route: MEETINGS_ROUTES.MEETING,
@@ -206,7 +206,7 @@ describe('Virtual Background setup', () => {
 
 		// turn on blur
 		act(() => {
-			store.setBackgroundImage(meeting.id, VirtualBackgroundType.BLUR);
+			store.setBackgroundImage(VirtualBackgroundType.BLUR);
 		});
 
 		await waitFor(() => {
@@ -217,7 +217,7 @@ describe('Virtual Background setup', () => {
 
 		// turn off blur
 		act(() => {
-			store.setBackgroundImage(meeting.id, VirtualBackgroundType.NONE);
+			store.setBackgroundImage(VirtualBackgroundType.NONE);
 		});
 		const updatedStore2 = useStore.getState();
 		expect(updatedStore2.activeMeeting?.virtualBackground.updatedStream).not.toBeDefined();

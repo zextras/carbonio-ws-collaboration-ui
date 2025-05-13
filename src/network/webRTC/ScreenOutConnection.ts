@@ -80,7 +80,7 @@ export default class ScreenOutConnection implements IScreenOutConnection {
 
 		getScreenStream().then((stream) => {
 			this.updateLocalStreamTrack(stream);
-			useStore.getState().setLocalStreams(this.meetingId, STREAM_TYPE.SCREEN, stream);
+			useStore.getState().setLocalStreams(STREAM_TYPE.SCREEN, stream);
 		});
 	}
 
@@ -96,7 +96,7 @@ export default class ScreenOutConnection implements IScreenOutConnection {
 	}
 
 	public closePeerConnection(): void {
-		useStore.getState().removeLocalStreams(this.meetingId, STREAM_TYPE.SCREEN);
+		useStore.getState().removeLocalStreams(STREAM_TYPE.SCREEN);
 		this.rtpSender?.track?.stop();
 		this.peerConn?.close();
 		this.peerConn = null;

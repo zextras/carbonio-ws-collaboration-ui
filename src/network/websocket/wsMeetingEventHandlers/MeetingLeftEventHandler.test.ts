@@ -66,7 +66,7 @@ describe('meetingLeftEventHandler tests', () => {
 
 	test('Left participant is removed from talking users', () => {
 		const store = useStore.getState();
-		store.setTalkingUser(meeting.id, event.userId, true);
+		store.setTalkingUser(event.userId, true);
 		meetingLeftEventHandler(event);
 		expect(store.activeMeeting?.talkingUsers).not.toContain(event.userId);
 	});

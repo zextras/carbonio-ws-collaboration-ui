@@ -124,7 +124,7 @@ class MeetingsApi implements IMeetingsApi {
 						.filter((p) => p.handRaisedAt !== undefined)
 						.sortBy((p) => dateToTimestamp(new Date(p.handRaisedAt ?? new Date())))
 						.each((participant) => {
-							useStore.getState().setUserWithHandRaised(meetingId, participant.userId, true);
+							useStore.getState().setUserWithHandRaised(participant.userId, true);
 						})
 						.value();
 					return resp;

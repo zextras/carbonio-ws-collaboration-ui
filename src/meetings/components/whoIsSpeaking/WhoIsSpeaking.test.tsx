@@ -61,9 +61,9 @@ beforeEach(() => {
 	store.addRooms([room]);
 	store.addMeetings([meeting]);
 	store.meetingConnection(meeting.id);
-	store.setTalkingUser(meeting.id, user3.id, true);
-	store.setTalkingUser(meeting.id, user2.id, true);
-	store.setTalkingUser(meeting.id, user1.id, true);
+	store.setTalkingUser(user3.id, true);
+	store.setTalkingUser(user2.id, true);
+	store.setTalkingUser(user1.id, true);
 });
 
 describe('Who is speaking', () => {

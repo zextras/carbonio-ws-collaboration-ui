@@ -127,9 +127,7 @@ const MeetingSidebar = (): ReactElement => {
 							{showWaitingListAccordion && <WaitingListAccordion meetingId={meetingId!} />}
 							{showParticipantsAccordion && <MeetingParticipantsAccordion meetingId={meetingId!} />}
 							{<RaiseHandAccordion meetingId={meetingId!} />}
-							{(virtualBackgroundEnabled || isUserGuest) && (
-								<VisualEffectsAccordion meetingId={meetingId!} />
-							)}
+							{(virtualBackgroundEnabled || isUserGuest) && <VisualEffectsAccordion />}
 						</AccordionContainer>
 					)}
 				</Container>

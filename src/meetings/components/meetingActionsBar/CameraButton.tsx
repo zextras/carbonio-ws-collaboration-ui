@@ -78,15 +78,15 @@ const CameraButton = ({
 			if (videoStatus) {
 				getVideoStream(videoItem.deviceId).then((stream) => {
 					videoOutConn?.updateLocalStreamTrack(stream).then(() => {
-						setLocalStreams(meetingId!, STREAM_TYPE.VIDEO, stream);
-						setSelectedDeviceId(meetingId!, STREAM_TYPE.VIDEO, videoItem.deviceId);
+						setLocalStreams(STREAM_TYPE.VIDEO, stream);
+						setSelectedDeviceId(STREAM_TYPE.VIDEO, videoItem.deviceId);
 					});
 				});
 			} else {
-				setSelectedDeviceId(meetingId!, STREAM_TYPE.VIDEO, videoItem.deviceId);
+				setSelectedDeviceId(STREAM_TYPE.VIDEO, videoItem.deviceId);
 			}
 		},
-		[meetingId, setLocalStreams, setSelectedDeviceId, videoOutConn, videoStatus]
+		[setLocalStreams, setSelectedDeviceId, videoOutConn, videoStatus]
 	);
 
 	const mediaVideoList: DropdownItem[] = useMemo(

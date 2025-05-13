@@ -19,7 +19,7 @@ export const meetingAudioStreamChangedEventHandler = (
 	if (isMeetingActive(event.meetingId)) {
 		// If user is talking, delete his id from the isTalking array
 		if (!event.active) {
-			state.setTalkingUser(event.meetingId, event.userId, false);
+			state.setTalkingUser(event.userId, false);
 		}
 
 		if (isMyId(event.userId)) {

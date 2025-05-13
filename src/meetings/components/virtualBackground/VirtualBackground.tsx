@@ -104,7 +104,7 @@ const VirtualBackground = ({ meetingId }: VirtualBackgroundProps): ReactElement 
 				if (canvasRefs?.current) {
 					const canvasStream = canvasRefs.current.captureStream();
 					videoOutConn?.updateLocalStreamTrack(canvasStream, true).then(() => {
-						setBackgroundStream(meetingId ?? '', canvasStream);
+						setBackgroundStream(canvasStream);
 					});
 				}
 			});
@@ -128,7 +128,7 @@ const VirtualBackground = ({ meetingId }: VirtualBackgroundProps): ReactElement 
 
 	useEffect(() => {
 		if (backgroundImageSelected === VirtualBackgroundType.NONE && updatedStream !== undefined) {
-			removeBackgroundStream(meetingId ?? '');
+			removeBackgroundStream();
 			if (myVideoStream) {
 				videoOutConn?.updateLocalStreamTrack(myVideoStream);
 			}

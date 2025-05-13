@@ -54,7 +54,7 @@ export default class BidirectionalConnectionAudioInOut
 			if (audioStreamEnabled) {
 				getAudioStream(true, true, selectedAudioDeviceId).then((stream) => {
 					this.updateLocalStreamTrack(stream).then();
-					useStore.getState().setLocalStreams(this.meetingId, STREAM_TYPE.AUDIO, stream);
+					useStore.getState().setLocalStreams(STREAM_TYPE.AUDIO, stream);
 				});
 			}
 		});

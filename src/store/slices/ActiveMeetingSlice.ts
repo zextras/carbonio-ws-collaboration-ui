@@ -106,20 +106,20 @@ export const useActiveMeetingSlice: StateCreator<
 			'AM/MEETING_DISCONNECTION'
 		);
 	},
-	setLocalStreams: (meetingId: string, streamType: STREAM_TYPE, stream: MediaStream): void => {
+	setLocalStreams: (streamType: STREAM_TYPE, stream: MediaStream): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (!isCurrentMeeting(draft, meetingId) || !draft.activeMeeting) return;
+				if (!draft.activeMeeting) return;
 				draft.activeMeeting.localStreams[streamType] = stream;
 			}),
 			false,
 			'AM/SET_LOCAL_STREAM'
 		);
 	},
-	removeLocalStreams: (meetingId: string, streamType: STREAM_TYPE): void => {
+	removeLocalStreams: (streamType: STREAM_TYPE): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (!isCurrentMeeting(draft, meetingId) || !draft.activeMeeting) return;
+				if (!draft.activeMeeting) return;
 
 				if (streamType === STREAM_TYPE.VIDEO || streamType === STREAM_TYPE.SCREEN) {
 					const stream = draft.activeMeeting.localStreams[streamType];
@@ -131,10 +131,10 @@ export const useActiveMeetingSlice: StateCreator<
 			'AM/SET_LOCAL_STREAM'
 		);
 	},
-	setSelectedDeviceId: (meetingId: string, streamType: STREAM_TYPE, deviceId: string): void => {
+	setSelectedDeviceId: (streamType: STREAM_TYPE, deviceId: string): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (!isCurrentMeeting(draft, meetingId) || !draft.activeMeeting) return;
+				if (!draft.activeMeeting) return;
 
 				const key =
 					streamType === STREAM_TYPE.AUDIO ? 'selectedAudioDeviceId' : 'selectedVideoDeviceId';
@@ -226,10 +226,10 @@ export const useActiveMeetingSlice: StateCreator<
 			'AM/SET_PINNED_TILE'
 		);
 	},
-	setTalkingUser: (meetingId: string, userId: string, isTalking: boolean): void => {
+	setTalkingUser: (userId: string, isTalking: boolean): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (!isCurrentMeeting(draft, meetingId) || !draft.activeMeeting) return;
+				if (!draft.activeMeeting) return;
 
 				const { talkingUsers } = draft.activeMeeting;
 				if (isTalking) {
@@ -294,40 +294,40 @@ export const useActiveMeetingSlice: StateCreator<
 			'AM/DELETE_SUB'
 		);
 	},
-	setBackgroundStream: (meetingId: string, stream: MediaStream): void => {
+	setBackgroundStream: (stream: MediaStream): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (!isCurrentMeeting(draft, meetingId) || !draft.activeMeeting) return;
+				if (!draft.activeMeeting) return;
 				draft.activeMeeting.virtualBackground.updatedStream = stream;
 			}),
 			false,
 			'AM/SET_BACKGROUND_STREAM'
 		);
 	},
-	removeBackgroundStream: (meetingId: string): void => {
+	removeBackgroundStream: (): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (!isCurrentMeeting(draft, meetingId) || !draft.activeMeeting) return;
+				if (!draft.activeMeeting) return;
 				delete draft.activeMeeting.virtualBackground.updatedStream;
 			}),
 			false,
 			'AM/REMOVE_BACKGROUND_STREAM'
 		);
 	},
-	setBackgroundImage: (meetingId: string, image: VirtualBackgroundType): void => {
+	setBackgroundImage: (image: VirtualBackgroundType): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (!isCurrentMeeting(draft, meetingId) || !draft.activeMeeting) return;
+				if (!draft.activeMeeting) return;
 				draft.activeMeeting.virtualBackground.backgroundImage = image;
 			}),
 			false,
 			'AM/SET_BACKGROUND_IMAGE'
 		);
 	},
-	setUserWithHandRaised: (meetingId: string, userId: string, isRaised: boolean): void => {
+	setUserWithHandRaised: (userId: string, isRaised: boolean): void => {
 		set(
 			produce((draft: RootStore) => {
-				if (!isCurrentMeeting(draft, meetingId) || !draft.activeMeeting) return;
+				if (!draft.activeMeeting) return;
 				const { usersWithHandRaised } = draft.activeMeeting;
 				if (!usersWithHandRaised) return;
 
