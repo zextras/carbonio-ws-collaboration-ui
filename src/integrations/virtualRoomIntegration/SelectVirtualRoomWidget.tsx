@@ -126,8 +126,8 @@ const SelectVirtualRoomWidget: FC<SelectVirtualRoomWidgetProps> = ({ onChange, d
 					link: createMeetingLinkFromOutside(room.meetingId)
 				},
 				customComponent: (
-					<CustomContainer width="fit" mainAlignment="flex-start" orientation="horizontal">
-						<Text>{room.name ?? ''}</Text>
+					<CustomContainer mainAlignment="flex-start" orientation="horizontal">
+						<Text overflow="ellipsis">{room.name ?? ''}</Text>
 					</CustomContainer>
 				)
 			}))
@@ -156,6 +156,7 @@ const SelectVirtualRoomWidget: FC<SelectVirtualRoomWidgetProps> = ({ onChange, d
 				id: 'manage_virtual_room',
 				label: manageVirtualRoomLabel
 			},
+			disabled: true,
 			customComponent: (
 				<CustomContainer crossAlignment="center" orientation="horizontal">
 					<CustomText size="small" color="secondary">
