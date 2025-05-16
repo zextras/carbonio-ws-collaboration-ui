@@ -63,7 +63,7 @@ beforeEach(() => {
 	store.addRooms([room]);
 	store.addMeetings([meeting]);
 	store.startMeeting(meeting.id, '2024-08-25T17:24:28.961+02:00');
-	store.meetingConnection(meeting.id, false, undefined, false, undefined);
+	store.meetingConnection(meeting.id);
 	store.setAttributes(createMockAttributesList());
 });
 

@@ -24,8 +24,8 @@ import { STREAM_TYPE, TileData } from '../types/store/ActiveMeetingTypes';
 import { orderSpeakingTiles } from '../utils/MeetingsUtils';
 
 const useTilesOrder = (meetingId: string): { centralTile: TileData; carouselTiles: TileData[] } => {
-	const pinnedTile: TileData | undefined = useStore((store) => getPinnedTile(store, meetingId));
-	const isTalkingList = useStore((store) => getTalkingList(store, meetingId));
+	const pinnedTile: TileData | undefined = useStore(getPinnedTile);
+	const isTalkingList = useStore(getTalkingList);
 
 	const tilesData = useTiles(meetingId);
 
@@ -65,7 +65,7 @@ const useTilesOrder = (meetingId: string): { centralTile: TileData; carouselTile
 
 	const checkIfIsStillTalking = useCallback(
 		(prevFirstIsTalking: string) => {
-			const isTalkingUsers = useStore.getState().activeMeeting[meetingId].talkingUsers;
+			const isTalkingUsers = useStore.getState().activeMeeting?.talkingUsers || [];
 			if (
 				first(isTalkingUsers) === prevFirstIsTalking &&
 				(!pinnedTile ||
@@ -75,7 +75,7 @@ const useTilesOrder = (meetingId: string): { centralTile: TileData; carouselTile
 				setTiles((tiles) => orderSpeakingTiles(tiles, prevFirstIsTalking, !!pinnedTile));
 			}
 		},
-		[meetingId, pinnedTile]
+		[pinnedTile]
 	);
 
 	// swap tiles handler based on who is talking

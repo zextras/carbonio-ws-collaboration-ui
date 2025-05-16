@@ -66,14 +66,14 @@ describe('meetingJoinedEventHandler tests', () => {
 	test('Audio feedback is sent when session user is inside meeting', () => {
 		event.userId = 'anotherUserId';
 		event.meetingId = meeting.id;
-		useStore.getState().meetingConnection(meeting.id, false, undefined, false, undefined);
+		useStore.getState().meetingConnection(meeting.id);
 		meetingJoinedEventHandler(event);
 		expect(mockPlayAudio).toHaveBeenCalled();
 	});
 
 	test('Audio feedback is not sent outside active meeting', () => {
 		const store = useStore.getState();
-		store.meetingConnection(meeting.id, false, undefined, false, undefined);
+		store.meetingConnection(meeting.id);
 		store.meetingDisconnection(meeting.id);
 		meetingJoinedEventHandler(event);
 		expect(mockPlayAudio).not.toHaveBeenCalled();

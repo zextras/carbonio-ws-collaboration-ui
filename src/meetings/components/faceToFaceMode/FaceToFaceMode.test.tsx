@@ -48,7 +48,7 @@ const setupBasicGroupMeeting = (): { user: UserEvent; store: RootStore } => {
 	act(() => {
 		result.current.addRooms([groupRoom]);
 		result.current.addMeetings([groupMeeting]);
-		result.current.meetingConnection(groupMeeting.id, false, undefined, false, undefined);
+		result.current.meetingConnection(groupMeeting.id);
 	});
 	const spyUseParams = jest.spyOn(ReactRouter, 'useParams');
 	spyUseParams.mockReturnValue({ meetingId: groupMeeting.id });

@@ -116,7 +116,7 @@ describe('wsMeetingEventsHandler', () => {
 	});
 
 	test('MEETING_SDP_ANSWERED event is handled', () => {
-		const event = { type: WsEventType.MEETING_SDP_ANSWERED };
+		const event = { type: WsEventType.MEETING_SDP_ANSWERED, mediaType: STREAM_TYPE.SCREEN };
 		const handler = jest.spyOn(MeetingSDPAnsweredEventHandler, 'meetingSDPAnsweredEventHandler');
 		wsMeetingEventsHandler(event as WsEvent);
 		expect(handler).toHaveBeenCalledWith(event);

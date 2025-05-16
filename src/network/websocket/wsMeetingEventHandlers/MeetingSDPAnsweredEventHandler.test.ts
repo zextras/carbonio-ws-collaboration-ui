@@ -5,6 +5,7 @@
  */
 
 import { meetingSDPAnsweredEventHandler } from './MeetingSDPAnsweredEventHandler';
+import { getActiveMeeting } from '../../../store/selectors/ActiveMeetingSelectors';
 import useStore from '../../../store/Store';
 import { createMockMeeting, createMockRoom } from '../../../tests/createMock';
 import { IScreenOutConnection, IVideoOutConnection } from '../../../types/network/webRTC/webRTC';
@@ -33,9 +34,9 @@ beforeEach(() => {
 describe('meetingSDPAnsweredEventHandler tests', () => {
 	test('handleRemoteAnswer is not been called when the meeting is not active', () => {
 		const store = useStore.getState();
-		store.meetingConnection(meeting.id, false, undefined, false, undefined);
+		store.meetingConnection(meeting.id);
 		store.meetingDisconnection(meeting.id);
-		const activeMeeting = useStore.getState().activeMeeting[meeting.id];
+		const activeMeeting = getActiveMeeting(useStore.getState(), meeting.id);
 		meetingSDPAnsweredEventHandler(event);
 		expect(activeMeeting).toBeUndefined();
 	});
@@ -43,8 +44,8 @@ describe('meetingSDPAnsweredEventHandler tests', () => {
 	test('videoIn handleRemoteAnswer is been called when the stream is a video', () => {
 		event.mediaType = STREAM_TYPE.VIDEO;
 		const store = useStore.getState();
-		store.meetingConnection(meeting.id, false, undefined, false, undefined);
-		const { videoOutConn } = useStore.getState().activeMeeting[meeting.id];
+		store.meetingConnection(meeting.id);
+		const videoOutConn = useStore.getState().activeMeeting?.videoOutConn;
 		const handleRemoteAnswer = jest.spyOn(
 			videoOutConn as IVideoOutConnection,
 			'handleRemoteAnswer'
@@ -56,8 +57,8 @@ describe('meetingSDPAnsweredEventHandler tests', () => {
 	test('screenOut handleRemoteAnswer is been called when the stream is a screen', () => {
 		event.mediaType = STREAM_TYPE.SCREEN;
 		const store = useStore.getState();
-		store.meetingConnection(meeting.id, false, undefined, false, undefined);
-		const { screenOutConn } = useStore.getState().activeMeeting[meeting.id];
+		store.meetingConnection(meeting.id);
+		const screenOutConn = useStore.getState().activeMeeting?.screenOutConn;
 		const handleRemoteAnswer = jest.spyOn(
 			screenOutConn as IScreenOutConnection,
 			'handleRemoteAnswer'

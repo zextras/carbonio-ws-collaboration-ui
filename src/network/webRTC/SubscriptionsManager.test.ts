@@ -90,7 +90,7 @@ beforeEach(() => {
 		store.setLoginInfo(user1Info.id, user1Info.email, user1Info.name);
 		store.addRooms([groupRoom]);
 		store.addMeetings([groupMeeting]);
-		store.meetingConnection(groupMeeting.id, false, undefined, false, undefined);
+		store.meetingConnection(groupMeeting.id);
 	});
 });
 

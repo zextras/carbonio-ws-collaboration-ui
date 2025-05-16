@@ -5,6 +5,7 @@
  */
 
 import { meetingLeftEventHandler } from './MeetingLeftEventHandler';
+import { getActiveMeeting } from '../../../store/selectors/ActiveMeetingSelectors';
 import useStore from '../../../store/Store';
 import {
 	createMockMeeting,
@@ -31,7 +32,7 @@ beforeEach(() => {
 	store.setLoginInfo('myUserId', 'User');
 	store.addRooms([room]);
 	store.addMeetings([meeting]);
-	store.meetingConnection(meeting.id, false, undefined, false, undefined);
+	store.meetingConnection(meeting.id);
 	store.addParticipant(meeting.id, createMockParticipants({ userId: event.userId }));
 });
 describe('meetingLeftEventHandler tests', () => {
@@ -42,22 +43,22 @@ describe('meetingLeftEventHandler tests', () => {
 	});
 
 	test('Left participant video subscription is been removed', () => {
-		const activeMeeting = useStore.getState().activeMeeting[meeting.id];
-		const subscriptionManager = activeMeeting.videoScreenIn?.subscriptionManager;
+		const activeMeeting = getActiveMeeting(useStore.getState(), meeting.id);
+		const subscriptionManager = activeMeeting?.videoScreenIn?.subscriptionManager;
 		const deleteSub = jest.spyOn(subscriptionManager as SubscriptionsManager, 'deleteSubscription');
 		meetingLeftEventHandler(event);
 		expect(deleteSub).toHaveBeenCalled();
 	});
 
 	test('Audio feedback is sent when session user is inside meeting', () => {
-		useStore.getState().meetingConnection(meeting.id, false, undefined, false, undefined);
+		useStore.getState().meetingConnection(meeting.id);
 		meetingLeftEventHandler(event);
 		expect(mockPlayAudio).toHaveBeenCalled();
 	});
 
 	test('Audio feedback is not sent outside active meeting', () => {
 		const store = useStore.getState();
-		store.meetingConnection(meeting.id, false, undefined, false, undefined);
+		store.meetingConnection(meeting.id);
 		store.meetingDisconnection(meeting.id);
 		meetingLeftEventHandler(event);
 		expect(mockPlayAudio).not.toHaveBeenCalled();
@@ -65,8 +66,8 @@ describe('meetingLeftEventHandler tests', () => {
 
 	test('Left participant is removed from talking users', () => {
 		const store = useStore.getState();
-		store.setTalkingUser(meeting.id, event.userId, true);
+		store.setTalkingUser(event.userId, true);
 		meetingLeftEventHandler(event);
-		expect(store.activeMeeting[meeting.id].talkingUsers).not.toContain(event.userId);
+		expect(store.activeMeeting?.talkingUsers).not.toContain(event.userId);
 	});
 });

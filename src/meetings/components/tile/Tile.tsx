@@ -93,10 +93,8 @@ const VideoEl = styled.video<{
 const Tile: React.FC<TileProps> = ({ userId, meetingId, isScreenShare, modalProps, isPip }) => {
 	const audioStatus = useStore((store) => getParticipantAudioStatus(store, meetingId, userId));
 	const videoStatus = useStore((store) => getParticipantVideoStatus(store, meetingId, userId));
-	const userIsTalking = useStore((store) => getUserIsTalking(store, meetingId ?? '', userId ?? ''));
-	const userHasHandRaised = useStore((store) =>
-		getUserHasHandRaised(store, meetingId ?? '', userId ?? '')
-	);
+	const userIsTalking = useStore((store) => getUserIsTalking(store, userId ?? ''));
+	const userHasHandRaised = useStore((store) => getUserHasHandRaised(store, userId ?? ''));
 	const videoStream = useStore((store) =>
 		getStream(
 			store,

@@ -13,31 +13,26 @@ import styled from 'styled-components';
 import VisualEffectsList from './VisualEffectsList';
 import { getVisualEffectsAccordionStatus } from '../../../../store/selectors/ActiveMeetingSelectors';
 import useStore from '../../../../store/Store';
+import { MeetingAccordionType } from '../../../../types/store/ActiveMeetingTypes';
 
 const CustomAccordion = styled(Accordion)`
 	-webkit-user-select: none;
 	user-select: none;
 `;
 
-type VisualEffectsAccordionProps = {
-	meetingId: string;
-};
-
-const VisualEffectsAccordion: FC<VisualEffectsAccordionProps> = ({ meetingId }) => {
+const VisualEffectsAccordion: FC = () => {
 	const [t] = useTranslation();
 	const accordionLabel = t('meeting.visualEffects.title', 'Visual Effects');
 
-	const accordionStatus = useStore((state) => getVisualEffectsAccordionStatus(state, meetingId));
-	const setVisualEffectsAccordionStatus = useStore(
-		(state) => state.setVisualEffectsAccordionStatus
-	);
+	const accordionStatus = useStore(getVisualEffectsAccordionStatus);
+	const setMeetingSidebarStatus = useStore((state) => state.setMeetingSidebarStatus);
 
 	const toggleAccordionStatus = useCallback(
-		() => setVisualEffectsAccordionStatus(meetingId, !accordionStatus),
-		[accordionStatus, meetingId, setVisualEffectsAccordionStatus]
+		() => setMeetingSidebarStatus(MeetingAccordionType.VISUAL_EFFECTS, !accordionStatus),
+		[accordionStatus, setMeetingSidebarStatus]
 	);
 
-	const list = useMemo(() => <VisualEffectsList meetingId={meetingId} />, [meetingId]);
+	const list = useMemo(() => <VisualEffectsList />, []);
 
 	const items = useMemo<AccordionItemType[]>(() => {
 		const arrayOfActions: AccordionItemType[] = [

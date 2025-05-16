@@ -54,7 +54,7 @@ describe('MeetingStoppedEventHandler tests', () => {
 	});
 
 	test('Meeting stopped notification is sent if the meeting is active', () => {
-		useStore.getState().meetingConnection(groupMeeting.id, false, undefined, false, undefined);
+		useStore.getState().meetingConnection(groupMeeting.id);
 		event.meetingId = groupMeeting.id;
 		const dispatchEvent = jest.spyOn(window, 'dispatchEvent');
 		meetingStoppedEventHandler(event);

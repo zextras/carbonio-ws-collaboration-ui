@@ -60,7 +60,7 @@ const TileUserInfo: FC<tileUserInfoProps> = ({
 	const userName = useStore((store) => getUserName(store, userId ?? ''));
 	const isSessionTile = useStore(getUserId) === userId;
 	const isUserGuest = useStore((store) => getIsUserGuest(store, userId ?? ''));
-	const userHandRank = useStore((store) => getUserHandRank(store, meetingId ?? '', userId ?? ''));
+	const userHandRank = useStore((store) => getUserHandRank(store, userId ?? ''));
 
 	const { canUsePinFeature, isPinned } = usePinnedTile(
 		meetingId ?? '',

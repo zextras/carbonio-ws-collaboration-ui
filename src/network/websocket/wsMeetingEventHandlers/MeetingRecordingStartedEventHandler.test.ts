@@ -41,7 +41,7 @@ describe('MeetingRecordingStartedEventHandler tests', () => {
 	});
 
 	test('A custom event is sent if the user is inside meeting', () => {
-		useStore.getState().meetingConnection(meeting.id, false, undefined, false, undefined);
+		useStore.getState().meetingConnection(meeting.id);
 		const dispatchEvent = jest.spyOn(window, 'dispatchEvent');
 		meetingRecordingStartedEventHandler(event);
 		expect(dispatchEvent).toHaveBeenCalledWith(

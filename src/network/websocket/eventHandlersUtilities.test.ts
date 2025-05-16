@@ -97,7 +97,7 @@ describe('eventHandlersUtilities tests', () => {
 		const store = useStore.getState();
 		store.addRooms([room, activeRoom]);
 		store.addMeetings([meeting, activeMeeting]);
-		store.meetingConnection(activeMeeting.id, false, undefined, false, undefined);
+		store.meetingConnection(activeMeeting.id);
 	});
 	describe('isMeetingActive tests', () => {
 		test('isMeetingActive returns false if the user never connected to it', () => {
@@ -110,7 +110,7 @@ describe('eventHandlersUtilities tests', () => {
 
 		test('isMeetingActive returns false if the connected and disconnected from it', () => {
 			const store = useStore.getState();
-			store.meetingConnection(meeting.id, false, undefined, false, undefined);
+			store.meetingConnection(meeting.id);
 			store.meetingDisconnection(meeting.id);
 			expect(isMeetingActive('nonExistentMeeting')).toBe(false);
 		});

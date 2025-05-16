@@ -57,7 +57,7 @@ const RaiseHandUser: FC<RaiseHandUserProps> = ({ meetingId, userId }) => {
 	);
 
 	const isGuest = useStore((store) => getIsUserGuest(store, userId));
-	const userHandRank = useStore((store) => getUserHandRank(store, meetingId, userId ?? ''));
+	const userHandRank = useStore((store) => getUserHandRank(store, userId ?? ''));
 	const myUserId = useStore(getUserId);
 	const roomId = useStore((store) => getRoomIdByMeetingId(store, meetingId));
 	const amIModerator = useStore((store) => getOwnershipOfTheRoom(store, roomId ?? ''));

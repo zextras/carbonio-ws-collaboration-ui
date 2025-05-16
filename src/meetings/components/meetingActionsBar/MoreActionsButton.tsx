@@ -14,7 +14,7 @@ import usePiPWindow from '../../../hooks/usePipWindow';
 import { getMeetingViewSelected } from '../../../store/selectors/ActiveMeetingSelectors';
 import { getNumberOfTiles } from '../../../store/selectors/MeetingSelectors';
 import useStore from '../../../store/Store';
-import { MeetingViewType } from '../../../types/store/ActiveMeetingTypes';
+import { MeetingAccordionType, MeetingViewType } from '../../../types/store/ActiveMeetingTypes';
 import { RouterContext } from '../../contexts/routerContext';
 
 const MoreActionsButton = (): ReactElement => {
@@ -29,9 +29,9 @@ const MoreActionsButton = (): ReactElement => {
 	const disableFullScreenLabel = t('meeting.interactions.disableFullScreen', 'Disable full screen');
 	const enableFullScreenLabel = t('meeting.interactions.enableFullScreen', 'Enable full screen');
 
-	const meetingView = useStore((store) => getMeetingViewSelected(store, meetingId!));
+	const meetingView = useStore(getMeetingViewSelected);
 	const setMeetingSidebarStatus = useStore((store) => store.setMeetingSidebarStatus);
-	const meetingViewSelected = useStore((store) => getMeetingViewSelected(store, meetingId!));
+	const meetingViewSelected = useStore(getMeetingViewSelected);
 	const setMeetingViewSelected = useStore((store) => store.setMeetingViewSelected);
 	const numberOfTiles = useStore((store) => getNumberOfTiles(store, meetingId!));
 	const setIsCarouselVisible = useStore((store) => store.setIsCarouseVisible);
@@ -49,10 +49,9 @@ const MoreActionsButton = (): ReactElement => {
 
 	const switchMode = useCallback(() => {
 		setMeetingViewSelected(
-			meetingId!,
 			meetingViewSelected === MeetingViewType.GRID ? MeetingViewType.CINEMA : MeetingViewType.GRID
 		);
-	}, [meetingId, meetingViewSelected, setMeetingViewSelected]);
+	}, [meetingViewSelected, setMeetingViewSelected]);
 
 	const checkKeyPress = useCallback(
 		(e: KeyboardEvent): void => {
@@ -66,20 +65,13 @@ const MoreActionsButton = (): ReactElement => {
 
 	const toggleFullScreenFn = useCallback((): void => {
 		if (!isFullScreen) {
-			setMeetingSidebarStatus(meetingId!, false);
+			setMeetingSidebarStatus(MeetingAccordionType.GENERAL, false);
 			if (meetingView === MeetingViewType.CINEMA) {
-				setIsCarouselVisible(meetingId!, false);
+				setIsCarouselVisible(false);
 			}
 		}
 		toggleFullScreen();
-	}, [
-		isFullScreen,
-		toggleFullScreen,
-		setMeetingSidebarStatus,
-		meetingId,
-		meetingView,
-		setIsCarouselVisible
-	]);
+	}, [isFullScreen, toggleFullScreen, setMeetingSidebarStatus, meetingView, setIsCarouselVisible]);
 
 	useEffect(() => {
 		window.addEventListener('keydown', checkKeyPress, true);

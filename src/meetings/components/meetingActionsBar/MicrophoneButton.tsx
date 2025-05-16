@@ -56,11 +56,9 @@ const MicrophoneButton = ({
 	const { meetingId } = useContext(RouterContext);
 	const myUserId = useStore(getUserId);
 	const audioStatus = useStore((store) => getParticipantAudioStatus(store, meetingId, myUserId));
-	const selectedAudioDeviceId = useStore((store) => getSelectedAudioDeviceId(store, meetingId!));
+	const selectedAudioDeviceId = useStore(getSelectedAudioDeviceId);
 	const setSelectedDeviceId = useStore((store) => store.setSelectedDeviceId);
-	const bidirectionalAudioConn = useStore(
-		(store) => store.activeMeeting[meetingId!]?.bidirectionalAudioConn
-	);
+	const bidirectionalAudioConn = useStore((store) => store.activeMeeting?.bidirectionalAudioConn);
 	const websocketNetworkStatus = useStore(({ connections }) => connections.status.websocket);
 
 	const { permission, deviceList, noDevices } = useMediaDevices('audio');
@@ -70,13 +68,13 @@ const MicrophoneButton = ({
 			if (audioStatus) {
 				getAudioStream(true, true, audioItem.deviceId).then((stream) => {
 					bidirectionalAudioConn?.updateLocalStreamTrack(stream);
-					setSelectedDeviceId(meetingId!, STREAM_TYPE.AUDIO, audioItem.deviceId);
+					setSelectedDeviceId(STREAM_TYPE.AUDIO, audioItem.deviceId);
 				});
 			} else {
-				setSelectedDeviceId(meetingId!, STREAM_TYPE.AUDIO, audioItem.deviceId);
+				setSelectedDeviceId(STREAM_TYPE.AUDIO, audioItem.deviceId);
 			}
 		},
-		[audioStatus, bidirectionalAudioConn, meetingId, setSelectedDeviceId]
+		[audioStatus, bidirectionalAudioConn, setSelectedDeviceId]
 	);
 
 	const mediaAudioList = useMemo(

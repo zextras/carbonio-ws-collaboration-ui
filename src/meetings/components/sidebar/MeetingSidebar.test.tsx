@@ -98,7 +98,7 @@ beforeEach(() => {
 	store.setAttributes(createMockAttributesList({ carbonioWscRecordingEnabled: 'TRUE' }));
 	store.addRooms([oneToOneRoom, groupRoom, temporaryRoom, temporaryRoomMod]);
 	store.addMeetings([oneToOneMeeting, groupMeeting, scheduledMeeting, scheduledMeetingMod]);
-	store.meetingConnection(oneToOneMeeting.id, false, 'audioId', false, 'videoId');
+	store.meetingConnection(oneToOneMeeting.id);
 	store.setWaitingList(scheduledMeetingMod.id, [user1.id]);
 });
 
@@ -189,7 +189,7 @@ describe('Meeting sidebar', () => {
 		expect(screen.getByTestId(VirtualBackgroundType.NONE)).toBeVisible();
 
 		act(() => {
-			useStore.getState().setBackgroundImage(oneToOneMeeting.id, VirtualBackgroundType.LIVING_ROOM);
+			useStore.getState().setBackgroundImage(VirtualBackgroundType.LIVING_ROOM);
 		});
 
 		const styles = getComputedStyle(screen.getByTestId(VirtualBackgroundType.LIVING_ROOM));
@@ -197,7 +197,7 @@ describe('Meeting sidebar', () => {
 		expect(styles.outline).toBe('2px solid #639030');
 
 		act(() => {
-			useStore.getState().setBackgroundImage(oneToOneMeeting.id, VirtualBackgroundType.BLUR);
+			useStore.getState().setBackgroundImage(VirtualBackgroundType.BLUR);
 		});
 
 		expect(screen.getByTestId(VirtualBackgroundType.LIVING_ROOM)).not.toHaveStyle(

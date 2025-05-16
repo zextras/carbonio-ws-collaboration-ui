@@ -30,10 +30,8 @@ const RaiseHandButton = (): ReactElement | null => {
 	const { meetingId } = useContext(RouterContext);
 	const sessionId = useStore(getUserId);
 
-	const iAmTalking = useStore((store) => getUserIsTalking(store, meetingId!, sessionId ?? ''));
-	const iHaveHandRaised = useStore((store) =>
-		getUserHasHandRaised(store, meetingId!, sessionId ?? '')
-	);
+	const iAmTalking = useStore((store) => getUserIsTalking(store, sessionId ?? ''));
+	const iHaveHandRaised = useStore((store) => getUserHasHandRaised(store, sessionId ?? ''));
 
 	const createSnackbar: CreateSnackbarFn = useSnackbar();
 

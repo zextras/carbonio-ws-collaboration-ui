@@ -33,6 +33,7 @@ import { getRoomIdByMeetingId } from '../../../../store/selectors/MeetingSelecto
 import { getOwnershipOfTheRoom } from '../../../../store/selectors/RoomsSelectors';
 import { getUserId } from '../../../../store/selectors/SessionSelectors';
 import useStore from '../../../../store/Store';
+import { MeetingAccordionType } from '../../../../types/store/ActiveMeetingTypes';
 
 const CustomAccordion = styled(Accordion)`
 	-webkit-user-select: none;
@@ -45,7 +46,7 @@ type RaiseHandAccordionProps = {
 
 const RaiseHandAccordion: FC<RaiseHandAccordionProps> = ({ meetingId }) => {
 	const [t] = useTranslation();
-	const raiseHandList = useStore((store) => getHandRaisedList(store, meetingId));
+	const raiseHandList = useStore(getHandRaisedList);
 
 	const okLabel = t('action.ok', 'Ok');
 	const lowerAllHandLabel = t('meeting.sidebar.lowerAllHands', 'Lower all raised hand');
@@ -58,8 +59,8 @@ const RaiseHandAccordion: FC<RaiseHandAccordionProps> = ({ meetingId }) => {
 		numberOfHandRaised: raiseHandList?.length
 	});
 
-	const accordionStatus = useStore((state) => getRaiseHandAccordionStatus(state, meetingId));
-	const setRaiseHandAccordionStatus = useStore((state) => state.setRaiseHandAccordionStatus);
+	const accordionStatus = useStore(getRaiseHandAccordionStatus);
+	const setMeetingSidebarStatus = useStore((state) => state.setMeetingSidebarStatus);
 	const myUserId = useStore(getUserId);
 	const roomId = useStore((store) => getRoomIdByMeetingId(store, meetingId));
 	const amIModerator = useStore((store) => getOwnershipOfTheRoom(store, roomId ?? ''));
@@ -98,8 +99,8 @@ const RaiseHandAccordion: FC<RaiseHandAccordionProps> = ({ meetingId }) => {
 	useEventListener(EventName.MEETING_PARTICIPANT_RAISE_HAND, handleRaiseHandEvent);
 
 	const toggleAccordionStatus = useCallback(
-		() => setRaiseHandAccordionStatus(meetingId, !accordionStatus),
-		[accordionStatus, meetingId, setRaiseHandAccordionStatus]
+		() => setMeetingSidebarStatus(MeetingAccordionType.RAISE_HAND, !accordionStatus),
+		[accordionStatus, setMeetingSidebarStatus]
 	);
 
 	const lowerAllHands = useCallback(() => {

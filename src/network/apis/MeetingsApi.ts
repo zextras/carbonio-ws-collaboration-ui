@@ -107,10 +107,8 @@ class MeetingsApi implements IMeetingsApi {
 					.getState()
 					.meetingConnection(
 						meetingId,
-						settings.audioStreamEnabled,
-						devicesId.audioDevice,
-						settings.videoStreamEnabled,
-						devicesId.videoDevice
+						{ enabled: settings.audioStreamEnabled, deviceId: devicesId.audioDevice },
+						{ enabled: settings.videoStreamEnabled, deviceId: devicesId.videoDevice }
 					);
 				return this.getMeetingByMeetingId(meetingId).then((meeting) => {
 					if (meeting.meetingType === MeetingType.SCHEDULED) {
@@ -126,7 +124,7 @@ class MeetingsApi implements IMeetingsApi {
 						.filter((p) => p.handRaisedAt !== undefined)
 						.sortBy((p) => dateToTimestamp(new Date(p.handRaisedAt ?? new Date())))
 						.each((participant) => {
-							useStore.getState().setUserWithHandRaised(meetingId, participant.userId, true);
+							useStore.getState().setUserWithHandRaised(participant.userId, true);
 						})
 						.value();
 					return resp;
