@@ -67,7 +67,7 @@ const PictureInPictureView = (): ReactElement => {
 	const { permission: videoPermission } = useMediaDevices('video');
 
 	const isSpeakingLabel = t('meeting.pip.speaking', `${whoIsSpeaking} is speaking.`, {
-		speaker: whoIsSpeaking
+		userName: whoIsSpeaking
 	});
 
 	const [isSpeaking, setIsSpeaking] = useState<string | boolean | undefined>(true);
