@@ -26,6 +26,8 @@ const displayWaitingListNotification = (meetingId: string): void => {
 		LOCAL_STORAGE_NAMES.NOTIFICATIONS
 	);
 
+	const meeting = find(store.meetings, (meeting) => meeting.id === meetingId);
+
 	if (iAmOwner) {
 		getNotificationManager().notify({
 			showPopup: ChatsNotificationsSettings.WaitingRoomAccessNotifications,
@@ -45,7 +47,9 @@ const displayWaitingListNotification = (meetingId: string): void => {
 	}
 	if (
 		ChatsNotificationsSettings.WaitingRoomAccessNotifications &&
-		ChatsNotificationsSettings.WaitingRoomAccessNotificationsSounds
+		ChatsNotificationsSettings.WaitingRoomAccessNotificationsSounds &&
+		meeting?.participants &&
+		Object.keys(meeting?.participants).length < 20
 	) {
 		sendAudioFeedback(MeetingSoundFeedback.NEW_WAITING_USER);
 	}

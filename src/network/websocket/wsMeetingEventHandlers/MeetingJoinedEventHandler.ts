@@ -34,7 +34,12 @@ export const meetingJoinedEventHandler = (event: MeetingJoinedEvent): void => {
 	}
 
 	// Send audio feedback to other participants session user join
-	if (isMeetingActive(event.meetingId) && !isMyId(event.userId)) {
+	if (
+		isMeetingActive(event.meetingId) &&
+		!isMyId(event.userId) &&
+		meeting?.participants &&
+		Object.keys(meeting?.participants).length < 9
+	) {
 		sendAudioFeedback(MeetingSoundFeedback.MEETING_JOIN_NOTIFICATION);
 	}
 };

@@ -3,6 +3,9 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
+
+import { find } from 'lodash';
+
 import useStore from '../../../store/Store';
 import { MeetingLeftEvent } from '../../../types/network/websocket/wsMeetingEvents';
 import { STREAM_TYPE } from '../../../types/store/ActiveMeetingTypes';
@@ -11,6 +14,7 @@ import { isMeetingActive, isMyId } from '../eventHandlersUtilities';
 
 export const meetingLeftEventHandler = (event: MeetingLeftEvent): void => {
 	const state = useStore.getState();
+
 	if (!isMyId(event.userId) || !isMeetingActive(event.meetingId)) {
 		state.removeParticipant(event.meetingId, event.userId);
 	}
@@ -23,8 +27,11 @@ export const meetingLeftEventHandler = (event: MeetingLeftEvent): void => {
 		]);
 
 		// Send audio feedback to other participants session user leave
-		sendAudioFeedback(MeetingSoundFeedback.MEETING_LEAVE_NOTIFICATION);
+		const meeting = find(state.meetings, (meeting) => meeting.id === event.meetingId);
 
+		if (meeting?.participants && Object.keys(meeting?.participants).length <= 9) {
+			sendAudioFeedback(MeetingSoundFeedback.MEETING_LEAVE_NOTIFICATION);
+		}
 		// if user is talking, delete his id from the isTalking array
 		state.setTalkingUser(event.meetingId, event.userId, false);
 		state.setUserWithHandRaised(event.meetingId, event.userId, false);

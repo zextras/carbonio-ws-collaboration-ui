@@ -14,11 +14,31 @@ import {
 import { mockPlayAudio } from '../../../tests/mocks/global';
 import { WsEventType } from '../../../types/network/websocket/wsEvents';
 import { MeetingLeftEvent } from '../../../types/network/websocket/wsMeetingEvents';
+import { RoomType } from '../../../types/store/RoomTypes';
 import SubscriptionsManager from '../../webRTC/SubscriptionsManager';
 
 const room = createMockRoom();
 const meeting = createMockMeeting({ roomId: room.id });
 
+const room2 = createMockRoom({ id: 'groupWith10Participants', type: RoomType.GROUP });
+const meetingWith12Participants = createMockMeeting({
+	id: 'meetingWith12Participants',
+	roomId: room2.id,
+	participants: [
+		createMockParticipants({ userId: 'user1' }),
+		createMockParticipants({ userId: 'user2' }),
+		createMockParticipants({ userId: 'user3' }),
+		createMockParticipants({ userId: 'user4' }),
+		createMockParticipants({ userId: 'user5' }),
+		createMockParticipants({ userId: 'user6' }),
+		createMockParticipants({ userId: 'user7' }),
+		createMockParticipants({ userId: 'user8' }),
+		createMockParticipants({ userId: 'user9' }),
+		createMockParticipants({ userId: 'user10' }),
+		createMockParticipants({ userId: 'user11' }),
+		createMockParticipants({ userId: 'user12' })
+	]
+});
 const event: MeetingLeftEvent = {
 	type: WsEventType.MEETING_LEFT,
 	sentDate: '2022-01-01T00:00:00.000Z',
@@ -26,13 +46,26 @@ const event: MeetingLeftEvent = {
 	userId: 'userId'
 };
 
+const event2: MeetingLeftEvent = {
+	type: WsEventType.MEETING_LEFT,
+	sentDate: '2022-01-01T00:00:00.000Z',
+	meetingId: meetingWith12Participants.id,
+	userId: 'sessionUserId'
+};
+
 beforeEach(() => {
 	const store = useStore.getState();
 	store.setLoginInfo('myUserId', 'User');
-	store.addRooms([room]);
+	store.addRooms([room, room2]);
 	store.addMeeting(meeting);
+	store.addMeeting(meetingWith12Participants);
 	store.meetingConnection(meeting.id, false, undefined, false, undefined);
 	store.addParticipant(meeting.id, createMockParticipants({ userId: event.userId }));
+	store.meetingConnection(meetingWith12Participants.id, false, undefined, false, undefined);
+	store.addParticipant(
+		meetingWith12Participants.id,
+		createMockParticipants({ userId: event2.userId })
+	);
 });
 describe('meetingLeftEventHandler tests', () => {
 	test('Left participant information are removed from store', () => {
@@ -53,6 +86,14 @@ describe('meetingLeftEventHandler tests', () => {
 		useStore.getState().meetingConnection(meeting.id, false, undefined, false, undefined);
 		meetingLeftEventHandler(event);
 		expect(mockPlayAudio).toHaveBeenCalled();
+	});
+
+	test('Audio feedback is not sent when participants are more than 10', () => {
+		useStore
+			.getState()
+			.meetingConnection(meetingWith12Participants.id, false, undefined, false, undefined);
+		meetingLeftEventHandler(event2);
+		expect(mockPlayAudio).not.toHaveBeenCalled();
 	});
 
 	test('Audio feedback is not sent outside active meeting', () => {
